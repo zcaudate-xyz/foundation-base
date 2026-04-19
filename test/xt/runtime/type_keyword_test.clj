@@ -1,21 +1,21 @@
 (ns xt.runtime.type-keyword-test
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
    :require [[xt.runtime.type-keyword :as kw]
              [xt.runtime.interface-common :as tc]
-             [xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]]})
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-repl :as repl]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.runtime.type-keyword :as kw]
              [xt.runtime.interface-common :as tc]
-             [xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]]})
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -78,7 +78,41 @@
   => [true false false false])
 
 ^{:refer xt.runtime.type-keyword/keyword-create :added "4.0"}
-(fact "creates a keyword")
+(fact "creates a keyword"
+  ^:hidden
+
+  (!.js
+   (var out (kw/keyword-create "hello" "world"))
+   [(. out ["::"])
+    (tc/get-name out)
+    (tc/get-namespace out)
+    (kw/keyword-show out)])
+  => ["keyword" "world" "hello" ":hello/world"]
+
+  (!.lua
+   (var out (kw/keyword-create "hello" "world"))
+   [(. out ["::"])
+    (tc/get-name out)
+    (tc/get-namespace out)
+    (kw/keyword-show out)])
+  => ["keyword" "world" "hello" ":hello/world"])
 
 ^{:refer xt.runtime.type-keyword/keyword :added "4.0"}
-(fact "creates the keyword or pulls it from cache")
+(fact "creates the keyword or pulls it from cache"
+  ^:hidden
+
+  (!.js
+   (var k0 (kw/keyword "hello" "world"))
+   (var k1 (kw/keyword "hello" "world"))
+   (var k2 (kw/keyword "hello" "other"))
+   [(== k0 k1)
+    (== k0 k2)])
+  => [true false]
+
+  (!.lua
+   (var k0 (kw/keyword "hello" "world"))
+   (var k1 (kw/keyword "hello" "world"))
+   (var k2 (kw/keyword "hello" "other"))
+   [(== k0 k1)
+    (== k0 k2)])
+  => [true false])

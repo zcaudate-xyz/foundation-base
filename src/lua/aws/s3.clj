@@ -2,10 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :lua
-  {:require [[lua.aws.common :as common]
-             [lua.nginx :as n]
-             [xt.lang.base-lib :as k]
-             [xt.lang.util-xml :as xml]]})
+  {:require [[lua.aws.common :as common] [lua.nginx :as n] [xt.lang.common-lib :as k] [xt.lang.util-xml :as xml] [xt.lang.common-spec :as xt]]})
 
 (defn.lua policy-public-read-only
   "creates bucket read only policy"
@@ -14,7 +11,7 @@
   (return
    {"Statement"
     [{"Effect" "Allow",
-      "Resource" [(k/cat "arn:aws:s3:::" bucket "/*")],
+      "Resource" [(xt/x:cat "arn:aws:s3:::" bucket "/*")],
       "Principal" {"AWS" ["*"]},
       "Action" ["s3:GetObject"]}],
     "Version" "2012-10-17"}))
@@ -63,8 +60,8 @@
   [aws bucket policy opts]
   (return
    (-/s3-request {:method "PUT"
-                  :route (k/cat bucket "?policy")
-                  :body  (k/json-encode policy)}
+                  :route (xt/x:cat bucket "?policy")
+                  :body  (xt/x:json-encode policy)}
                  aws opts)))
 
 (defn.lua list-objects-process
@@ -74,10 +71,10 @@
   (var #{status body} res)
   (when (== status 200)
     (var result (k/get-in body ["ListBucketResult"]))
-    (var arr (:? (k/arr? result)
+    (var arr (:? (k/is-array? result)
                  (k/arr-keep result (k/key-fn "Contents"))
                  (k/arrayify (k/get-in result ["Contents"]))))
-    (:= (. res body) (k/arr-map arr (k/key-fn "Key"))))
+    (:= (. res body) (xtd/arr-map arr (k/key-fn "Key"))))
   (return res))
 
 (defn.lua list-objects
@@ -97,7 +94,7 @@
   [aws bucket key data opts]
   (return
    (-/s3-request {:method "PUT"
-                  :route (k/cat bucket "/" key)
+                  :route (xt/x:cat bucket "/" key)
                   :body  data}
                  aws opts)))
 
@@ -107,7 +104,7 @@
   [aws bucket key opts]
   (return
    (-/s3-request {:method "HEAD"
-                  :route (k/cat bucket "/" key)}
+                  :route (xt/x:cat bucket "/" key)}
                  aws opts)))
 
 (defn.lua get-object
@@ -116,7 +113,7 @@
   [aws bucket key opts]
   (return
    (-/s3-request {:method "GET"
-                  :route (k/cat bucket "/" key)}
+                  :route (xt/x:cat bucket "/" key)}
                  aws opts)))
 
 (defn.lua delete-object
@@ -125,7 +122,7 @@
   [aws bucket key opts]
   (return
    (-/s3-request {:method "DELETE"
-                  :route (k/cat bucket "/" key)}
+                  :route (xt/x:cat bucket "/" key)}
                  aws opts)))
 
 (defn.lua delete-all-objects
@@ -138,7 +135,7 @@
         (k/arr-append
          [{:tag "Quiet"
            :children [true]}]
-         (k/arr-map all-keys
+         (xtd/arr-map all-keys
                     (fn:> [key]
                       {:tag "Object"
                        :children [{:tag "Key"
@@ -146,7 +143,7 @@
   (var data (xml/to-string node))
   (return
    (-/s3-request {:method "post"
-                  :route (k/cat bucket "?delete")
+                  :route (xt/x:cat bucket "?delete")
                   :body  data
                   :headers {"content-md5" (n/encode-base64 (common/get-md5 data))}}
                  aws
@@ -158,8 +155,7 @@
   [aws bucket opts]
   (var m (-/list-objects aws bucket opts))
   (when (== 200 (. m status))
-    (when (k/not-empty? (. m body))
+    (when (xtd/not-empty? (. m body))
       (-/delete-all-objects aws bucket (. m body) opts))
     (return (-/delete-bucket aws bucket opts)))
   (return m))
-

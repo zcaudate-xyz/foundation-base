@@ -5,7 +5,8 @@
 (l/script- :js
   {:runtime :basic
    :require [[js.cell.service.db-stream :as db-stream]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-lib :as k]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -35,10 +36,10 @@
                 {"topic" ["orders" "acct-1"]
                  "on-event" "patch"}
                 {}))
-   [(k/get-key stream "target")
-    (k/get-key stream "topic")
-    (k/get-key stream "on_event")
-    (k/is-function? (k/get-key stream "subscribe"))])
+   [(xt/x:get-key stream "target")
+    (xt/x:get-key stream "topic")
+    (xt/x:get-key stream "on_event")
+    (k/is-function? (xt/x:get-key stream "subscribe"))])
   => ["supabase-main"
       ["orders" "acct-1"]
       "patch"
@@ -69,8 +70,8 @@
                      (fn [payload] (return payload))
                      {}))
    [ok
-    (k/get-key handle "id")
-    (k/is-function? (k/get-key handle "detach_fn"))])
+    (xt/x:get-key handle "id")
+    (k/is-function? (xt/x:get-key handle "detach_fn"))])
   => [true "sub-1" true])
 
 ^{:refer js.cell.service.db-stream/unsubscribe-stream :added "4.1"}
@@ -135,7 +136,7 @@
                        (:= captured update)
                        (return update))))
    [ok
-    (k/get-key handle "key")
+    (xt/x:get-key handle "key")
     captured])
   => [true
       "supabase-main::[\"orders\",\"acct-1\"]::orders/live::orders"

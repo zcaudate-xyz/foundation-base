@@ -2,8 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :suppress true :as k]
-             [js.core :as j]]})
+  {:require [[xt.lang.common-spec :as xt]]})
 
 (defn.js fetch-call
   "completes a http call with options
@@ -19,9 +18,13 @@
   {:added "4.0"}
   [url options]
   (var as-ret (. options ["as"]))
-  (var p (fetch url options))
+  (var fetch-mod (eval "require('node-fetch')"))
+  (var fetch-fn (or globalThis.fetch
+                    (. fetch-mod ["default"])
+                    fetch-mod))
+  (var p (fetch-fn url options))
 
-  (cond (k/nil? as-ret)
+  (cond (xt/x:nil? as-ret)
         (return p)
 
         (== as-ret "json")
@@ -44,7 +47,14 @@
   {:added "4.0"}
   [url
    opts]
-  (var es (new EventSource url opts))
+  (var es-mod (eval "require('eventsource')"))
+  (var es-global globalThis.EventSource)
+  (var EventSourceCtor (or (. es-global ["EventSource"])
+                           es-global
+                           (. es-mod ["EventSource"])
+                           (. es-mod ["default"])
+                           es-mod))
+  (var es (new EventSourceCtor url opts))
   (var #{on-open
          on-message
          on-close} opts)
@@ -134,5 +144,3 @@
 (defabstract.xt ws-close [conn])
 
 (defabstract.xt ws-send [conn text])
-
-

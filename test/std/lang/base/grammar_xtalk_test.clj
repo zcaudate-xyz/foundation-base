@@ -1,8 +1,9 @@
 (ns std.lang.base.grammar-xtalk-test
   (:require [clojure.string :as str]
-            [std.lang.base.grammar-xtalk :refer :all])
+            [std.lang.base.grammar-xtalk :as xtalk :refer :all]
+            [xtgen.lang :as xtgen])
   (:use code.test))
-
+;
 ^{:refer std.lang.base.grammar-xtalk/tf-throw :added "4.0"}
 (fact "wrapper for throw transform"
   (tf-throw '(x:throw "error"))
@@ -290,14 +291,14 @@
   (tf-second-last '(x:second-last arr))
   => '(x:get-idx arr (+ (x:len arr) (x:offset -2))))
 
-^{:refer std.lang.base.grammar-xtalk/tf-lt-string :added "4.1"}
+^{:refer std.lang.base.grammar-xtalk/tf-str-lt :added "4.1"}
 (fact "checks string ordering ascending"
-  (tf-lt-string '(x:lt-string a b))
+  (tf-str-lt '(x:str-lt a b))
   => '(x:arr-str-comp a b))
 
-^{:refer std.lang.base.grammar-xtalk/tf-gt-string :added "4.1"}
+^{:refer std.lang.base.grammar-xtalk/tf-str-gt :added "4.1"}
 (fact "checks string ordering descending"
-  (tf-gt-string '(x:gt-string a b))
+  (tf-str-gt '(x:str-gt a b))
   => '(x:arr-str-comp b a))
 
 (fact "all xtalk grammar map entries expose op-spec contracts"
@@ -311,5 +312,44 @@
   => [])
 
 
+(fact "generator-backed fragment spec emits the expected form"
+  (xtalk/xtgen.fragment-spec
+   {:symbol  '[x:arr-push]
+    :op-spec {:type '[:fn [:xt/arr :xt/any] :xt/self]}})
+  => '(defspec.xt x:arr-push
+        [:fn [:xt/arr :xt/any] :xt/self]))
+
+(fact "common-lib generator emits def$.xt aliases"
+  (xtgen/generate-common-lib
+   {:symbol  '[x:arr-push]
+    :op-spec {:arglists '([arr val])}})
+  => '(def$.xt arr-push x:arr-push))
+
+(fact "generator-backed fragment fn emits macro wrapper"
+  (let [form (xtalk/xtgen.fragment-fn
+              {:symbol  '[x:arr-push]
+               :op-spec {:arglists '([arr val])}})]
+    [(first form)
+     (second form)
+     (nth form 2)
+     (nth form 3)])
+  => '[defmacro.xt
+       x:arr-push
+       ([arr val])
+       (x:arr-push arr val)])
+
 ^{:refer std.lang.base.grammar-xtalk/tmpl-fragment-fn :added "4.1"}
+(fact "compatibility wrapper delegates to xtgen fragment fn"
+  (let [entry {:symbol  '[x:arr-push]
+               :op-spec {:arglists '([arr val])}}]
+    (tmpl-fragment-fn entry))
+  => (xtalk/xtgen.fragment-fn
+      {:symbol  '[x:arr-push]
+       :op-spec {:arglists '([arr val])}}))
+
+
+^{:refer std.lang.base.grammar-xtalk/tf-lt-string :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/tf-gt-string :added "4.1"}
 (fact "TODO")

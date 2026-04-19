@@ -1,15 +1,15 @@
 (ns js.lib.ua-parser-test
   (:require [clojure.string]
             [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
    :require [[js.lib.ua-parser :as ua]
              [js.core :as j]
-             [xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]]})
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup    [(l/rt:restart)

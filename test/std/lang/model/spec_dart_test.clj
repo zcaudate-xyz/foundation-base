@@ -9,13 +9,13 @@
   => "var greeting = \"hello\""
 
   (l/emit-as :dart ['(defn hello [name] (return (x:cat "hi " name)))])
-  => "hello(name) {\n  return \"hi \" + name\n}"
+  => "hello(name) {\n  return \"hi \" + name;\n}"
 
   (l/emit-as :dart ['(new Person name)])
   => "new Person(name)"
 
   (l/emit-as :dart ['(for [(var i := 0) (< i 3) (:++ i)] (print i))])
-  => "for(var i = 0; i < 3; ++i){\n  print(i)\n}"
+  => "for(var i = 0; i < 3; ++i){\n  print(i);\n}"
 
   (l/emit-as :dart ['{:name "hello" :count 2}])
   => "{\"name\":\"hello\",\"count\":2}")
@@ -81,9 +81,50 @@
                                {:success (return ok)
                                 :error   (return err)}))
   => '(call (fn [err ok]
-              (if err
+              (if (not= err nil)
                 (return err)
                 (return ok))))
+
+  (spec-dart/tf-for-return '(for:return [[ok err] (x:return-run runner)]
+                               {:success (return ok)
+                                :error   (return err)}))
+  => '(do
+        (var ok nil)
+        (var err nil)
+        (try
+          (runner
+           (fn [value]
+             (:= ok value)
+             (:= err nil))
+           (fn [value]
+             (:= ok nil)
+             (:= err value)))
+          (if err
+            (return err)
+            (return ok))
+          (catch err
+            (return err))))
+
+  (spec-dart/tf-for-return '(for:return [[ok err] (x:return-run runner)]
+                               {:success ok
+                                :error   err
+                                :final   true}))
+  => '(do
+        (var ok nil)
+        (var err nil)
+        (try
+          (runner
+           (fn [value]
+             (:= ok value)
+             (:= err nil))
+           (fn [value]
+             (:= ok nil)
+             (:= err value)))
+          (if err
+            (return err)
+            (return ok))
+          (catch err
+            (return err)))))
 
   (spec-dart/tf-for-try '(for:try [[ok err] (call)]
                             {:success (return ok)
@@ -104,38 +145,136 @@
         (catchError (fn [err]
                       (return err)))
         (whenComplete (fn []
-                        (return true)))))
+                        (return true))))
 
 (fact "for:* emission for dart"
   (l/emit-as :dart ['(for:object [[k v] obj]
                        [k v])])
-  => "for(var entry in obj.entries){\n  var k = entry.key\n  var v = entry.value\n  [k,v]\n}"
+  => "for(var entry in obj.entries){\n  var k = entry.key;\n  var v = entry.value;\n  [k,v];\n}"
 
   (l/emit-as :dart ['(for:array [[i e] arr]
                        [i e])])
-  => "for(var i = 0; i < arr.length; ++i){\n  var e = arr[i]\n  [i,e]\n}"
+  => "for(var i = 0; i < arr.length; ++i){\n  var e = arr[i];\n  [i,e];\n}"
 
   (l/emit-as :dart ['(for:async [[ok err] (call)]
                        {:success (return ok)
                         :error   (return err)
                         :finally (return true)})])
-  => "Future(() {\n  return call()\n}).then((ok) {\n  return ok\n}).catchError((err) {\n  return err\n}).whenComplete(() {\n  return true\n})")
+  => "Future(() {\n  return call();\n}).then((ok) {\n  return ok;\n}).catchError((err) {\n  return err;\n}).whenComplete(() {\n  return true;\n})")
 
 
 ^{:refer std.lang.model.spec-dart/tf-for-object :added "4.1"}
-(fact "TODO")
+(fact "transforms for:object loops"
+  (spec-dart/tf-for-object '(for:object [[k _] obj]
+                             k))
+  => '(for [(var k) :in (. obj keys)]
+        k))
 
 ^{:refer std.lang.model.spec-dart/tf-for-array :added "4.1"}
-(fact "TODO")
+(fact "transforms for:array loops"
+  (spec-dart/tf-for-array '(for:array [[i e] arr]
+                            [i e]))
+  => '(for [(var i := 0) (< i (. arr length)) (:++ i)]
+        (var e (. arr [i]))
+        [i e]))
 
 ^{:refer std.lang.model.spec-dart/tf-for-iter :added "4.1"}
-(fact "TODO")
+(fact "transforms for:iter loops"
+  (spec-dart/tf-for-iter '(for:iter [e iter]
+                           e))
+  => '(for [(var e) :in iter]
+        e))
 
 ^{:refer std.lang.model.spec-dart/tf-for-return :added "4.1"}
-(fact "TODO")
+(fact "transforms for:return callbacks"
+  (spec-dart/tf-for-return '(for:return [[ok err] (call (x:callback))]
+                               {:success (return ok)
+                                :error   (return err)}))
+  => '(call (fn [err ok]
+              (if (not= err nil)
+                (return err)
+                (return ok)))))
 
 ^{:refer std.lang.model.spec-dart/tf-for-try :added "4.1"}
-(fact "TODO")
+(fact "transforms for:try blocks"
+  (spec-dart/tf-for-try '(for:try [[ok err] (call)]
+                            {:success (return ok)
+                             :error   (return err)}))
+  => '(try
+        (var ok := (call))
+        (return ok)
+        (catch err (return err))))
 
 ^{:refer std.lang.model.spec-dart/tf-for-async :added "4.1"}
-(fact "TODO")
+(fact "transforms for:async chains"
+  (spec-dart/tf-for-async '(for:async [[ok err] (call)]
+                              {:success (return ok)
+                               :error   (return err)
+                               :finally (return true)}))
+  => '(. (Future (fn []
+                   (return (call))))
+        (then (fn [ok]
+                (return ok)))
+        (catchError (fn [err]
+                      (return err)))
+        (whenComplete (fn []
+                        (return true))))
+
+  (spec-dart/tf-for-async '(for:async [[ok err] (x:return-run runner)]
+                              {:success (return ok)
+                               :error   (return err)
+                               :finally (return true)}))
+  => '(. (do
+           (var completer (new Completer))
+           (try
+             (runner
+              (fn [ok]
+                (. completer (complete ok)))
+              (fn [err]
+                (. completer (completeError err))))
+             (catch err
+               (. completer (completeError err))))
+           (. completer future))
+        (then (fn [ok]
+                (return ok)))
+        (catchError (fn [err]
+                      (return err)))
+        (whenComplete (fn []
+                        (return true)))))
+
+^{:refer std.lang.model.spec-dart/dart-var :added "4.1"}
+(fact "transforms var destructuring for dart"
+
+  (let [[op init a b] (spec-dart/dart-var '(var [a b] expr))]
+    [op
+     (and (= 'var* (first init)) (= 'expr (last init)))
+     (= a (list 'var* 'a := (list '. (second init) [0])))
+     (= b (list 'var* 'b := (list '. (second init) [1])))])
+  => ['do* true true true]
+
+  (spec-dart/dart-var '(var #{id} data-obj))
+  => '(do* (var* id := (. data-obj ["id"])))
+
+  (let [result (spec-dart/dart-var '(var #{name args} v))]
+    [(first result) (count result)])
+  => ['do* 3]
+
+  (spec-dart/dart-var '(var x 42))
+  => '(var* x := 42)
+
+  (spec-dart/dart-var '(var entry))
+  => '(var* entry))
+
+(fact "dart var destructuring emission"
+
+  (l/emit-as :dart ['(var [a b] expr)])
+  => (fn [s]
+       (and (string? s)
+            (clojure.string/includes? s "var a = ")
+            (clojure.string/includes? s "var b = ")))
+
+  (l/emit-as :dart ['(var #{id} data_obj)])
+  => "var id = data_obj[\"id\"]"
+
+  (l/emit-as :dart ['(var x 42)])
+  => "var x = 42")

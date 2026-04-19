@@ -6,26 +6,46 @@
             [std.lib.os :as os]
             [std.lib.signal :as signal]))
 
+(defn result-function
+  "returns the preferred function identifier for a result.
+
+   Uses explicit `:refer` first, then the consolidated `:function` field,
+   which may itself come from explicit metadata or form inference."
+  {:added "4.1"}
+  [result]
+  (or (-> result :meta :refer)
+      (-> result :meta :function)))
+
+(defn result-name
+  "returns the preferred display name for a result.
+
+   Uses `:refer`, then inferred `:function`, then `:desc`, then `:id`."
+  {:added "4.1"}
+  [result]
+  (some-> (or (result-function result)
+              (-> result :meta :desc)
+              (-> result :meta :id))
+          str))
+
 (defn summarise-verify
   "extract the comparison into a valid format"
   {:added "3.0"}
   ([result]
    #_(env/prfn :VERIFY result)
-   {:status    (cond (and (= :success (-> result :status))
-                          (= true (-> result :data)))
-                     :success
+    {:status    (cond (and (= :success (-> result :status))
+                           (= true (-> result :data)))
+                      :success
 
                      (= :timeout (-> result :actual :status))
                      :timeout
 
-                     :else
-                     :failed)
-    :path     (-> result :meta :path)
-    :name     (str (or (-> result :meta :refer)
-                       (-> result :meta :desc)
-                       (-> result :meta :id)))
-    :ns       (-> result :meta :ns)
-    :line     (-> result :meta :line)
+                      :else
+                      :failed)
+     :path     (-> result :meta :path)
+     :name     (result-name result)
+     :function (-> result :meta :function)
+     :ns       (-> result :meta :ns)
+     :line     (-> result :meta :line)
     :desc     (-> result :meta :desc)
     :form     (-> result :actual :form)
     :check    (-> result :checker :form)
@@ -39,13 +59,12 @@
   {:added "3.0"}
   ([result]
    #_(env/prfn :EVAL result)
-   {:status   (-> result :status)
-    :path     (-> result :meta :path)
-    :name     (str (or (-> result :meta :refer)
-                       (-> result :meta :desc)
-                       (-> result :meta :id)))
-    :ns       (-> result :meta :ns)
-    :line     (-> result :meta :line)
+    {:status   (-> result :status)
+     :path     (-> result :meta :path)
+     :name     (result-name result)
+     :function (-> result :meta :function)
+     :ns       (-> result :meta :ns)
+     :line     (-> result :meta :line)
     :desc     (-> result :meta :desc)
     :form     (-> result :form)
     :original (-> result :original)

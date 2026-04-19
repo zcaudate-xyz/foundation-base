@@ -302,9 +302,12 @@
     +nil-type+
 
     (keyword? form)
-    (if (contains? +primitive-types+ form)
+    (if (= :xt/self form)
+      (or (:self ctx)
+          +unknown-type+)
+      (if (contains? +primitive-types+ form)
       (primitive-type form)
-      {:kind :keyword :name form})
+      {:kind :keyword :name form}))
 
     (symbol? form)
     {:kind :named :name (resolve-type-symbol form ctx)}

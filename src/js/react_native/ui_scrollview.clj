@@ -8,11 +8,12 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:type :webpage :path "dev/notify"}}
-   :require [[js.core :as j]
-             [js.react :as r]
-             [js.react-native :as n]
-             [js.react-native.animate :as a]
-             [xt.lang.base-lib :as k]]})
+    :require [[js.core :as j]
+              [js.react :as r]
+              [js.react-native :as n]
+              [js.react-native.animate :as a]
+              [xt.lang.common-lib :as k]
+              [xt.lang.common-math :as math]]})
 
 (defn.js ScrollViewImpl
   "creates a non global enhanced scrollview"
@@ -75,10 +76,10 @@
                        (. nativeEvent layout height))))
         :onScroll (fn [#{nativeEvent}]
                     (a/setValue contentOffset
-                                (- (k/clamp 0
-                                            (* visibleDiff visibleHeight)
-                                            (* (. nativeEvent contentOffset y)
-                                               visibleRatio))
+                                (- (math/clamp 0
+                                             (* visibleDiff visibleHeight)
+                                             (* (. nativeEvent contentOffset y)
+                                                visibleRatio))
                                    contentMargin)))
         :scrollEventThrottle 16
         #_(:.. rprops)]}

@@ -1,6 +1,6 @@
 (ns js.react-native.animate-test
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script :js
@@ -11,11 +11,12 @@
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
    :require [[js.core :as j]
-             [js.react :as r :include [:fn]]
-             [js.react-native :as n :include [:fn]]
-             [js.react-native.animate :as a]
-             [xt.lang.event-animate :as event-animate]
-             [xt.lang.base-lib :as k]]
+              [js.react :as r :include [:fn]]
+              [js.react-native :as n :include [:fn]]
+              [js.react-native.animate :as a]
+              [xt.lang.event-animate :as event-animate]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-lib :as k]]
    })
 
 ^{:refer js.react-native.animate/val :added "4.0" :unchecked true}
@@ -711,7 +712,7 @@
                            :style {:padding 5
                                    :width 100
                                    :textAlign "right"}}]]] 
-[:% n/Text (k/json-encode progress)])))))
+[:% n/Text (xt/x:json-encode progress)])))))
 
 ^{:refer js.react-native.animate/useLinearIndicator :added "4.0" :unchecked true}
 (fact "uses the linear indicator"
@@ -776,7 +777,7 @@
                           :style {:padding 5
                                   :width 100
                                   :textAlign "right"}}]] 
-[:% n/Text (k/json-encode progress)])))))
+[:% n/Text (xt/x:json-encode progress)])))))
 
 ^{:refer js.react-native.animate/useIndexIndicator :added "4.0" :unchecked true}
 (fact "creates a index indicator from state"
@@ -923,7 +924,7 @@
                           :style {:padding 5
                                   :width 100
                                   :textAlign "right"}}]] 
-[:% n/Text (k/json-encode progress)])))))
+[:% n/Text (xt/x:json-encode progress)])))))
 
 ^{:refer js.react-native.animate/usePosition :added "4.0" :unchecked true}
 (fact "constructs position indicator for slider and pan"
@@ -979,7 +980,7 @@
                         :style {:padding 5
                                 :width 100
                                 :textAlign "right"}}]] 
-[:% n/Text (k/json-encode #{value position})]))))
+[:% n/Text (xt/x:json-encode #{value position})]))))
 
 ^{:refer js.react-native.animate/useRange :added "4.0" :unchecked true}
 (fact "constructs lower and upper bound indicator for range"
@@ -1069,7 +1070,7 @@
                         :style {:padding 5
                                 :width 100
                                 :textAlign "right"}}]] 
-[:% n/Text (k/json-encode #{upper lower})]))))
+[:% n/Text (xt/x:json-encode #{upper lower})]))))
 
 ^{:refer js.react-native.animate/useShowing :added "4.0" :unchecked true}
 (fact "constructs a function that removes"
@@ -1118,7 +1119,7 @@
                         :style {:padding 5
                                 :width 100
                                 :textAlign "right"}}]] 
-[:% n/Text (k/json-encode #{visible showing})])))
+[:% n/Text (xt/x:json-encode #{visible showing})])))
 
   )
 

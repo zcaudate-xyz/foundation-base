@@ -67,14 +67,14 @@
   "returns the line of the test"
   {:added "3.0"}
   ([key results]
-   (let [items (or (get-in results [:data key])
-                   (get results key)
-                   (get-in (meta results) [:data key]))]
-     (->> (mapv (fn [result]
-                  (let [refer (-> result :meta :refer)
-                        line (-> result :meta :line)]
-                    [line (if refer (-> refer name symbol))]))
-                items)))))
+    (let [items (or (get-in results [:data key])
+                    (get results key)
+                    (get-in (meta results) [:data key]))]
+      (->> (mapv (fn [result]
+                   (let [function-sym (listener/result-function result)
+                         line (-> result :meta :line)]
+                     [line (if function-sym (-> function-sym name symbol))]))
+                 items)))))
 
 (defn summarise
   "creates a summary of given results"

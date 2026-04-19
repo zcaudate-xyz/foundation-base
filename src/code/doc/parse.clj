@@ -1,5 +1,6 @@
 (ns code.doc.parse
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.string :as str]
             [code.doc.parse.check :as checks]
             [code.query :as query]
@@ -363,43 +364,134 @@
   [line]
   (if (>= (count-indentation line) 4)
     nil
-    (let [trimmed (str/trim line)]
+    (let [trimmed (str/trim line)
+          [_ marker title tag] (re-matches #"^(#{1,4})\s+(.*?)(?:\s+\{#([^}]+)\})?$" trimmed)]
       (cond
-        (str/starts-with? trimmed "# ")   {:type :chapter :title (subs trimmed 2)}
-        (str/starts-with? trimmed "## ")  {:type :section :title (subs trimmed 3)}
-        (str/starts-with? trimmed "### ") {:type :subsection :title (subs trimmed 4)}
-        (str/starts-with? trimmed "#### ") {:type :subsubsection :title (subs trimmed 5)}
+        marker
+        (cond-> {:type (case (count marker)
+                         1 :chapter
+                         2 :section
+                         3 :subsection
+                         4 :subsubsection)
+                 :title title}
+          tag (assoc :tag tag))
+
         :else nil))))
+
+(defn parse-frontmatter
+  "parses edn frontmatter wrapped by `---` markers"
+  {:added "4.1"}
+  [lines]
+  (if (= "---" (some-> lines first str/trim))
+    (let [[frontmatter remaining] (split-with #(not= "---" (str/trim %))
+                                              (rest lines))]
+      (if (and (seq remaining) (seq frontmatter))
+        [{:type :article}
+         (-> (str/join "\n" frontmatter)
+             edn/read-string
+             (assoc :type :article))
+         (rest remaining)]
+        [nil nil lines]))
+    [nil nil lines]))
+
+(defn directive-line?
+  "checks if a markdown line is an embedded code.doc directive"
+  {:added "4.1"}
+  [line]
+  (let [trimmed (str/trim line)]
+    (and (str/starts-with? trimmed "[[")
+         (str/ends-with? trimmed "]]"))))
+
+(defn parse-markdown-directive
+  "parses an embedded directive line inside markdown"
+  {:added "4.1"}
+  [line]
+  (parse-single (nav/parse-string (str/trim line))))
+
+(defn markdown-paragraph
+  "creates a markdown paragraph element"
+  {:added "4.1"}
+  [lines]
+  (when (seq lines)
+    {:type :paragraph
+     :text (str/join "\n" lines)}))
+
+(defn markdown-code-block
+  "creates a markdown fenced code block element"
+  {:added "4.1"}
+  [lang lines]
+  {:type :block
+   :indentation 0
+   :lang (when (seq lang) lang)
+   :code (str/join "\n" lines)})
 
 (defn parse-markdown
   "parses markdown content into code.doc elements"
   {:added "3.0"}
   [content]
-  (let [lines (str/split-lines content)]
+  (let [lines (str/split-lines content)
+        [frontmatter article-meta lines] (parse-frontmatter lines)]
     (loop [remaining lines
            current-block []
-           output []
-           in-code-block? false]
-      (if (empty? remaining)
-        (if (seq current-block)
-          (conj output {:type :paragraph :text (str/join "\n" current-block)})
-          output)
+           output (cond-> []
+                    frontmatter (conj article-meta))
+           code-state nil]
+      (cond
+        (empty? remaining)
+        (cond-> output
+          code-state (conj (markdown-code-block (:lang code-state)
+                                                (:lines code-state)))
+          (seq current-block) (conj (markdown-paragraph current-block)))
+
+        code-state
         (let [line (first remaining)
+              trimmed (str/trim line)]
+          (if (str/starts-with? trimmed (:fence code-state))
+            (recur (rest remaining)
+                   current-block
+                   (conj output (markdown-code-block (:lang code-state)
+                                                     (:lines code-state)))
+                   nil)
+            (recur (rest remaining)
+                   current-block
+                   output
+                   (update code-state :lines conj line))))
+
+        :else
+        (let [line    (first remaining)
               trimmed (str/trim line)
-              code-fence? (or (str/starts-with? trimmed "```") (str/starts-with? trimmed "~~~"))
-              new-in-code-block? (if code-fence? (not in-code-block?) in-code-block?)
-              header (if new-in-code-block? nil (parse-header line))]
-          (if header
+              header  (parse-header line)
+              fence   (when-let [[_ marker lang] (re-matches #"^(```|~~~)\s*([^`\s~]*)\s*$" trimmed)]
+                        {:fence marker :lang lang})]
+          (cond
+            fence
             (recur (rest remaining)
                    []
                    (cond-> output
-                     (seq current-block) (conj {:type :paragraph :text (str/join "\n" current-block)})
+                     (seq current-block) (conj (markdown-paragraph current-block)))
+                   (assoc fence :lines []))
+
+            header
+            (recur (rest remaining)
+                   []
+                   (cond-> output
+                     (seq current-block) (conj (markdown-paragraph current-block))
                      true (conj header))
-                   false)
+                   nil)
+
+            (directive-line? line)
+            (recur (rest remaining)
+                   []
+                   (cond-> output
+                     (seq current-block) (conj (markdown-paragraph current-block))
+                     true (conj (parse-markdown-directive line)))
+                   nil)
+
+            :else
             (recur (rest remaining)
                    (conj current-block line)
                    output
-                   new-in-code-block?)))))))
+                   nil)))))))
 
 (defn parse-file
   "parses the entire file"

@@ -83,8 +83,8 @@
 (fact "get-macro returns macro defs when present"
   (do
     (clear-registry!)
-    (analyze-and-register! 'xt.lang.base-macro)
-    (true? (get-in (get-macro 'xt.lang.base-macro/add) [:body-meta :macro])))
+    (analyze-and-register! 'xt.lang.common-spec)
+    (true? (get-in (get-macro 'xt.lang.common-spec/x:add) [:body-meta :macro])))
   => true)
 
 ^{:refer std.lang.typed.xtalk/get-value :added "4.1"}
@@ -114,7 +114,7 @@
 (fact "lists macros through facade"
   (do
     (clear-registry!)
-    (analyze-and-register! 'xt.lang.base-macro)
+    (analyze-and-register! 'xt.lang.common-spec)
     (pos? (count (list-macros))))
   => true)
 
@@ -168,4 +168,9 @@
 
 
 ^{:refer std.lang.typed.xtalk/analyze-file-raw :added "4.1"}
-(fact "TODO")
+(fact "delegates file-raw analysis to xtalk-parse"
+  (let [result (analyze-file-raw "test/std/lang/model/spec_xtalk_typed_fixture.clj")]
+    [(map? result)
+     (contains? result :specs)
+     (contains? result :functions)])
+  => [true true true])

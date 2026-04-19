@@ -5,7 +5,9 @@
   (:refer-clojure :exclude [delay sequence loop val derive]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-spec :as xt]
              [js.core :as j]
              [js.react :as r]
              [js.react-native :as n]
@@ -101,7 +103,7 @@
   {:added "4.0"}
   [x]
   (return (and (not= nil x)
-               (k/obj? (. x ["_listeners"]))
+               (k/is-object? (. x ["_listeners"]))
                #_(== (. x
                       ["constructor"]
                       ["name"])
@@ -136,19 +138,19 @@
   [elem props]
   (cond (and elem
              elem.setNativeProps
-             (k/fn? elem.setNativeProps))
+             (k/is-function? elem.setNativeProps))
         (try (elem.setNativeProps props)
              (catch e))
         
         (== "web" (. n/Platform OS))
-        (k/for:object [[k0 v0] props]
+        (xt/for:object [[k0 v0] props]
           (when (props.hasOwnProperty k0)
             (cond (and (== k0 "style")
                        (== "object" (typeof v0)))
                   (:= elem.style
-                      (k/arr-foldl [elem.style v0]
-                                   k/obj-assign
-                                   {}))
+                      (xtd/arr-foldl [elem.style v0]
+                                     xtd/obj-assign
+                                     {}))
                   
                   (and (== k0 "text")
                        (or (== "INPUT" elem.tagName)
@@ -450,4 +452,3 @@
                          (when onComplete (onComplete 1)))))))
   (return [(or visible showing)
            vindicator]))
-

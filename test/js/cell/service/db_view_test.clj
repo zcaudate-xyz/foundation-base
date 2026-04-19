@@ -5,7 +5,8 @@
 (l/script- :js
   {:runtime :basic
    :require [[js.cell.service.db-view :as db-view]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-lib :as k]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -65,7 +66,7 @@
   ^:hidden
 
   (!.js
-   (k/obj-keys (db-view/get-views (@! +db+))))
+   (xtd/obj-keys (db-view/get-views (@! +db+))))
   => ["Order"])
 
 ^{:refer js.cell.service.db-view/get-schema :added "4.1"}
@@ -73,7 +74,7 @@
   ^:hidden
 
   (!.js
-   (k/obj-keys (db-view/get-schema (@! +db+))))
+   (xtd/obj-keys (db-view/get-schema (@! +db+))))
   => ["Order" "Account" "Profile"])
 
 ^{:refer js.cell.service.db-view/view-query-return-entry :added "4.1"}

@@ -5,8 +5,9 @@
 (l/script- :js
   {:runtime :basic
    :require [[js.cell.service.db-sync :as db-sync]
-             [xt.db :as xdb]
-             [xt.lang.base-lib :as k]]})
+              [xt.db :as xdb]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-lib :as k]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -72,7 +73,7 @@
 
   (!.js
    (var desc (@! +db+))
-   (var schema (k/get-key desc "schema"))
+   (var schema (xt/x:get-key desc "schema"))
    (var local-db (xdb/db-create {"::" "db.cache"}
                                 schema
                                 (@! +lookup+)
@@ -127,7 +128,7 @@
 
   (!.js
    (var desc (@! +db+))
-   (var schema (k/get-key desc "schema"))
+   (var schema (xt/x:get-key desc "schema"))
    (var local-db (xdb/db-create {"::" "db.cache"}
                                 schema
                                 (@! +lookup+)

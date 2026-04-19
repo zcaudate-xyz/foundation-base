@@ -10,7 +10,7 @@
 ;;
 
 (l/script- :js
-  {:require [[xt.lang.base-lib :as k]]})
+  {:require [[xt.lang.common-lib :as k]]})
 
 (fact "js runtime"
   ^:hidden
@@ -39,7 +39,7 @@
 ;;
 
 (l/script- :lua
-  {:require [[xt.lang.base-lib :as k]]})
+  {:require [[xt.lang.common-lib :as k]]})
 
 (fact "lua runtime"
   ^:hidden
@@ -69,7 +69,7 @@
 ;;
 
 (l/script- :python
-  {:require [[xt.lang.base-lib :as k]]})
+  {:require [[xt.lang.common-lib :as k]]})
 
 
 (fact "python runtime"
@@ -99,7 +99,7 @@
 ;;
 
 (l/script- :r
-  {:require [[xt.lang.base-lib :as k]]})
+  {:require [[xt.lang.common-lib :as k]]})
 
 (fact "r runtime"
   ^:hidden
@@ -130,7 +130,7 @@
 ;;
 
 (l/script+ [:env1 :python]
-  {:require [[xt.lang.base-lib :as k]]})
+  {:require [[xt.lang.common-lib :as k]]})
 
 
 (l/! [:env1]
@@ -139,7 +139,7 @@
 
 
 (l/script+ [:env2 :js]
-  {:require [[xt.lang.base-lib :as k]]})
+  {:require [[xt.lang.common-lib :as k]]})
 
 (l/! [:env2]
   (fn [] (return (+ 1 2 3))))

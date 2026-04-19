@@ -4,8 +4,8 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [js.cell.runtime.env-webworker :as env-webworker]]})
+   :require [[xt.lang.common-spec :as xt]
+              [js.cell.runtime.env-webworker :as env-webworker]]})
 
 (fact:global
  {:setup [(l/rt:restart)
@@ -22,8 +22,8 @@
                 :addEventListener (fn [event listener capture]
                                     (worker.listeners.push listener))})
    (env-webworker/init-worker worker)
-   (return {"listeners" (k/len worker.listeners)
-            "message" (k/first messages)}))
+   (return {"listeners" (xt/x:len worker.listeners)
+            "message" (xt/x:first messages)}))
   => (contains-in {"listeners" 1
                    "message" {"signal" "@worker/::INIT"
                               "body" {"done" true}}}))
@@ -40,8 +40,8 @@
                                     (worker.listeners.push listener))})
    (:= (!:G self) worker)
    (env-webworker/runtime-init)
-   (var out {"listeners" (k/len worker.listeners)
-             "message" (k/first messages)})
+   (var out {"listeners" (xt/x:len worker.listeners)
+             "message" (xt/x:first messages)})
    (:= (!:G self) previous-self)
    (return out))
   => (contains-in {"listeners" 1

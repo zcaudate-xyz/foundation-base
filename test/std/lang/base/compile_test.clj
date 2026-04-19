@@ -10,8 +10,8 @@
              [std.lang.model.spec-js.ts :as ts]
              [std.make :as make]
              [std.make.compile :as compile]
-             [xt.lang.base-iter :as it]
-             [xt.lang.base-lib :as k])
+             [xt.lang.common-iter :as it]
+             [xt.lang.common-lib :as k])
   (:use code.test))
 
 (defn artifact-producer-fixture
@@ -28,7 +28,7 @@
                      :root   ".build"
                      :target "src"
                      :file   "pkg/file.lua"
-                     :main   xt.lang.base-lib/gcd
+                     :main   xt.lang.common-lib/gcd
                      :layout :flat
                      :entry {:label true}}))
   => [".build/src/pkg/file.lua"
@@ -65,7 +65,7 @@
       :root   ".build"
       :target "src"
       :file   "pkg/file.js"
-      :main   'xt.lang.base-lib
+      :main   'xt.lang.common-lib
       :layout :flat
       :entry {:label true}
       :emit  {:artifacts [#'ts/module-dts-artifact]}}))

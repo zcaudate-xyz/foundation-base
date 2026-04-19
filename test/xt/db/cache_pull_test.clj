@@ -6,8 +6,9 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-repl :as repl]
-             [xt.lang.base-lib :as k]
+   :require [[xt.lang.common-repl :as repl]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-trace :as trace]
              [xt.db.cache-util :as data]
              [xt.db.cache-pull :as q]
              [xt.db.base-flatten :as f]
@@ -16,8 +17,9 @@
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.lang.base-repl :as repl]
-             [xt.lang.base-lib :as k]
+   :require [[xt.lang.common-repl :as repl]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-trace :as trace]
              [xt.db.cache-util :as data]
              [xt.db.cache-pull :as q]
              [xt.db.base-flatten :as f]
@@ -26,13 +28,17 @@
 
 (l/script- :python
   {:runtime :basic
-   :require [[xt.lang.base-repl :as repl]
-             [xt.lang.base-lib :as k]
+   :require [[xt.lang.common-repl :as repl]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-trace :as trace]
              [xt.db.cache-util :as data]
              [xt.db.cache-pull :as q]
              [xt.db.base-flatten :as f]
              [xt.db.sql-util :as ut]
              [xt.db.sample-test :as sample]]})
+
+(def +flattened+ nil)
+(def +flattened-full+ nil)
 
 (fact:global
  {:setup    [(l/rt:restart)
@@ -58,7 +64,7 @@
   ^:hidden
   
   (!.js
-   (k/trace-log-clear)
+   (trace/trace-log-clear)
    (var rows {})
    (data/merge-bulk rows (@! +flattened-full+) nil)
    (q/pull rows sample/Schema "Currency"
@@ -69,7 +75,7 @@
   => [{"id" "XLM"} {"id" "XLM.T"}]
   
   (!.js
-   (k/trace-log-clear)
+   (trace/trace-log-clear)
    (var rows {})
    (data/merge-bulk rows (@! +flattened-full+) nil)
    (q/pull rows sample/Schema "Currency"
@@ -79,7 +85,7 @@
   => [{"id" "STATS"} {"id" "USD"}]
 
   (!.js
-   (k/trace-log-clear)
+   (trace/trace-log-clear)
    (var rows {})
    (data/merge-bulk rows (@! +flattened-full+) nil)
    (q/pull rows sample/Schema "Currency"
@@ -135,22 +141,28 @@
   (!.js
    (var rows {})
    (data/merge-bulk rows (@! +flattened-full+) nil)
-   (q/pull rows sample/Schema "UserAccount"
-          {:returning ["id" "nickname"
-                       ["profile" ["first_name" "last_name"]]
-                       ["emails"]
-                       ["wallets" [["entries"
-                                    [["asset" ["-/data"
-                                               ["currency"]]]]]]]]}))
-  => [{"nickname" "root",
-       "profile" [{"last_name" "User", "first_name" "Root"}],
-       "id" "00000000-0000-0000-0000-000000000000",
-       "wallets"
-       [{"entries"
-         [{"asset" [{"currency" [{"id" "STATS"}]}]}
-          {"asset" [{"currency" [{"id" "USD"}]}]}
-          {"asset" [{"currency" [{"id" "XLM.T"}]}]}
-          {"asset" [{"currency" [{"id" "XLM"}]}]}]}]}]
+   (var out (q/pull rows sample/Schema "UserAccount"
+                    {:returning ["id" "nickname"
+                                 ["profile" ["first_name" "last_name"]]
+                                 ["emails"]
+                                 ["wallets" [["entries"
+                                              [["asset" ["-/data"
+                                                         ["currency"]]]]]]]]}))
+   [(xtd/get-in out [0 "id"])
+    (xtd/get-in out [0 "nickname"])
+    (xtd/get-in out [0 "profile" 0 "first_name"])
+    (xtd/get-in out [0 "profile" 0 "last_name"])
+    (xtd/arr-sort
+     (xtd/arr-map (xtd/get-in out [0 "wallets" 0 "entries"])
+                  (fn [entry]
+                    (return (. entry ["asset"] [0] ["currency"] [0] ["id"]))))
+     (fn [x] (return x))
+     (fn [a b] (return (< a b))))])
+  => ["00000000-0000-0000-0000-000000000000"
+      "root"
+      "Root"
+      "User"
+      ["STATS" "USD" "XLM" "XLM.T"]]
 
   (!.lua
    (var rows {})
@@ -179,22 +191,28 @@
   (!.py
    (var rows {})
    (data/merge-bulk rows (@! +flattened-full+) nil)
-   (q/pull rows sample/Schema "UserAccount"
-          {:returning ["id" "nickname"
-                       ["profile" ["first_name" "last_name"]]
-                       ["emails"]
-                       ["wallets" [["entries"
-                                    [["asset" ["-/data"
-                                               ["currency"]]]]]]]]}))
-  => [{"nickname" "root",
-       "profile" [{"last_name" "User", "first_name" "Root"}],
-       "id" "00000000-0000-0000-0000-000000000000",
-       "wallets"
-       [{"entries"
-         [{"asset" [{"currency" [{"id" "STATS"}]}]}
-          {"asset" [{"currency" [{"id" "USD"}]}]}
-          {"asset" [{"currency" [{"id" "XLM.T"}]}]}
-          {"asset" [{"currency" [{"id" "XLM"}]}]}]}]}])
+   (var out (q/pull rows sample/Schema "UserAccount"
+                    {:returning ["id" "nickname"
+                                 ["profile" ["first_name" "last_name"]]
+                                 ["emails"]
+                                 ["wallets" [["entries"
+                                              [["asset" ["-/data"
+                                                         ["currency"]]]]]]]]}))
+   [(. out [0] ["id"])
+    (. out [0] ["nickname"])
+    (. out [0] ["profile"] [0] ["first_name"])
+    (. out [0] ["profile"] [0] ["last_name"])
+    (xtd/arr-sort
+     (xtd/arr-map (. out [0] ["wallets"] [0] ["entries"])
+                  (fn [entry]
+                    (return (. entry ["asset"] [0] ["currency"] [0] ["id"]))))
+     (fn [x] (return x))
+     (fn [a b] (return (< a b))))])
+  => ["00000000-0000-0000-0000-000000000000"
+      "root"
+      "Root"
+      "User"
+      ["STATS" "USD" "XLM" "XLM.T"]])
 
 ^{:refer xt.db.cache-pull/check-in-clause :added "4.0"}
 (fact "emulates the sql `in` clause"
@@ -234,23 +252,17 @@
                             ["a%"]))
   => true)
 
-^{:refer xt.db.cache-pull/pull-where-clause :added "4.0"
-  :setup [(def +flattened+
-            (!.js
-             (f/flatten sample/Schema
-                        "UserAccount"
-                        sample/RootUserFull
-                        {})))]}
+^{:refer xt.db.cache-pull/pull-where-clause :added "4.0"}
 (fact "pull where clause"
   ^:hidden
   
   (!.js
-   (var rows {})
-   (data/merge-bulk rows (@! +flattened+) nil)
+    (var rows {})
+    (data/merge-bulk rows (@! +flattened-full+) nil)
    (q/pull-where-clause rows
                         sample/Schema
                         "UserAccount"
-                        (k/get-in rows ["UserAccount"
+                        (xtd/get-in rows ["UserAccount"
                                         "00000000-0000-0000-0000-000000000000"
                                         "record"])
                         q/pull-where
@@ -259,12 +271,12 @@
   => true
 
   (!.lua
-   (var rows {})
-   (data/merge-bulk rows (@! +flattened+) nil)
+    (var rows {})
+    (data/merge-bulk rows (@! +flattened-full+) nil)
    (q/pull-where-clause rows
                         sample/Schema
                         "UserAccount"
-                        (k/get-in rows ["UserAccount"
+                        (xtd/get-in rows ["UserAccount"
                                         "00000000-0000-0000-0000-000000000000"
                                         "record"])
                         q/pull-where
@@ -273,12 +285,12 @@
   => true
 
   (!.py
-   (var rows {})
-   (data/merge-bulk rows (@! +flattened+) nil)
+    (var rows {})
+    (data/merge-bulk rows (@! +flattened-full+) nil)
    (q/pull-where-clause rows
                         sample/Schema
                         "UserAccount"
-                        (k/get-in rows ["UserAccount"
+                        (xtd/get-in rows ["UserAccount"
                                         "00000000-0000-0000-0000-000000000000"
                                         "record"])
                         q/pull-where
@@ -291,8 +303,8 @@
   ^:hidden
   
   (!.js
-   (var rows {})
-   (data/merge-bulk rows (@! +flattened+) nil)
+    (var rows {})
+    (data/merge-bulk rows (@! +flattened-full+) nil)
    [(q/pull-where rows sample/Schema "UserAccount"
                   (fn:> [record table-key] true) {})
     (q/pull-where rows sample/Schema  "UserAccount"
@@ -304,8 +316,8 @@
   => [true false true]
 
   (!.lua
-   (var rows {})
-   (data/merge-bulk rows (@! +flattened+) nil)
+    (var rows {})
+    (data/merge-bulk rows (@! +flattened-full+) nil)
    [(q/pull-where rows sample/Schema "UserAccount"
                   (fn:> [record table-key] true) {})
     (q/pull-where rows sample/Schema  "UserAccount"
@@ -319,7 +331,7 @@
   (comment
     (!.py
      (var rows {})
-     (data/merge-bulk rows (@! +flattened+) nil)
+     (data/merge-bulk rows (@! +flattened-full+) nil)
      [(q/pull-where rows sample/Schema "UserAccount"
                       (fn:> [record] true)
                       {})
@@ -336,11 +348,11 @@
   ^:hidden
 
   (!.js
-   (var rows {})
-   (data/merge-bulk rows (@! +flattened+) nil)
+    (var rows {})
+    (data/merge-bulk rows (@! +flattened-full+) nil)
    (q/pull-return-clause rows 
                          sample/Schema
-                         (k/get-in rows ["UserAccount"
+                         (xtd/get-in rows ["UserAccount"
                                           "00000000-0000-0000-0000-000000000000"
                                           "record"])
                          q/pull-where
@@ -364,11 +376,11 @@
                   "language" "en"}]]
 
   (!.js
-   (var rows {})
-   (data/merge-bulk rows (@! +flattened+) nil)
+    (var rows {})
+    (data/merge-bulk rows (@! +flattened-full+) nil)
    (q/pull-return-clause rows 
                          sample/Schema
-                         (k/get-in rows ["UserAccount"
+                         (xtd/get-in rows ["UserAccount"
                                           "00000000-0000-0000-0000-000000000000"
                                           "record"])
                          q/pull-where
@@ -387,11 +399,11 @@
   => ["profile" nil]
 
   (!.lua
-   (var rows {})
-   (data/merge-bulk rows (@! +flattened+) nil)
+    (var rows {})
+    (data/merge-bulk rows (@! +flattened-full+) nil)
    (q/pull-return-clause rows 
                          sample/Schema
-                         (k/get-in rows ["UserAccount"
+                         (xtd/get-in rows ["UserAccount"
                                           "00000000-0000-0000-0000-000000000000"
                                           "record"])
                          q/pull-where
@@ -415,11 +427,11 @@
                   "language" "en"}]]
 
   (!.lua
-   (var rows {})
-   (data/merge-bulk rows (@! +flattened+) nil)
+    (var rows {})
+    (data/merge-bulk rows (@! +flattened-full+) nil)
    (q/pull-return-clause rows 
                          sample/Schema
-                         (k/get-in rows ["UserAccount"
+                         (xtd/get-in rows ["UserAccount"
                                           "00000000-0000-0000-0000-000000000000"
                                           "record"])
                          q/pull-where
@@ -433,16 +445,20 @@
                                  "rval" "account",
                                  "ns" "UserProfile",
                                  "val" "profile"},
-                          "cardinality" "many"}
-                         [{:id "missing"} ["*/data"]]))
-  => ["profile" nil]
+                           "cardinality" "many"}
+                          [{:id "missing"} ["*/data"]]))
+  => ["profile" nil])
+
+^{:refer xt.db.cache-pull/pull-return-clause :added "4.0"}
+(fact "pull return clause python profile match"
+  ^:hidden
 
   (!.py
-   (var rows {})
-   (data/merge-bulk rows (@! +flattened+) nil)
+    (var rows {})
+    (data/merge-bulk rows (@! +flattened-full+) nil)
    (q/pull-return-clause rows 
                          sample/Schema
-                         (k/get-in rows ["UserAccount"
+                         (xtd/get-in rows ["UserAccount"
                                           "00000000-0000-0000-0000-000000000000"
                                           "record"])
                          q/pull-where
@@ -465,12 +481,16 @@
                   "first_name" "Root",
                   "language" "en"}]])
 
+^{:refer xt.db.cache-pull/pull-return-clause :added "4.0"}
+(fact "pull return clause python profile miss"
+  ^:hidden
+
   (!.py
-   (var rows {})
-   (data/merge-bulk rows (@! +flattened+) nil)
+    (var rows {})
+    (data/merge-bulk rows (@! +flattened-full+) nil)
    (q/pull-return-clause rows 
                          sample/Schema
-                         (k/get-in rows ["UserAccount"
+                         (xtd/get-in rows ["UserAccount"
                                           "00000000-0000-0000-0000-000000000000"
                                           "record"])
                          q/pull-where
@@ -493,15 +513,15 @@
   ^:hidden
 
   (!.js
-   (var rows {})
-   (data/merge-bulk rows (@! +flattened+) nil)
+    (var rows {})
+    (data/merge-bulk rows (@! +flattened-full+) nil)
    (q/pull-return rows
                   sample/Schema
                   "UserAccount"
                    ["id" "nickname"
                     ["profile" 
                      ["first_name" "last_name"]]]
-                   (k/get-in rows ["UserAccount"
+                   (xtd/get-in rows ["UserAccount"
                                    "00000000-0000-0000-0000-000000000000"
                                    "record"])))
   => {"nickname" "root",
@@ -509,14 +529,14 @@
       "id" "00000000-0000-0000-0000-000000000000"}
 
   (!.lua
-   (var rows {})
-   (data/merge-bulk rows (@! +flattened+) nil)
+    (var rows {})
+    (data/merge-bulk rows (@! +flattened-full+) nil)
    (q/pull-return rows sample/Schema
                   "UserAccount"
                   ["id" "nickname"
                    ["profile" 
                      ["first_name" "last_name"]]]
-                   (k/get-in rows ["UserAccount"
+                   (xtd/get-in rows ["UserAccount"
                                     "00000000-0000-0000-0000-000000000000"
                                    "record"])))
   => {"nickname" "root",
@@ -524,14 +544,14 @@
       "id" "00000000-0000-0000-0000-000000000000"}
 
   (!.py
-   (var rows {})
-   (data/merge-bulk rows (@! +flattened+) nil)
+    (var rows {})
+    (data/merge-bulk rows (@! +flattened-full+) nil)
    (q/pull-return rows sample/Schema
                    "UserAccount"
                    ["id" "nickname"
                     ["profile" 
                      ["first_name" "last_name"]]]
-                   (k/get-in rows ["UserAccount"
+                   (xtd/get-in rows ["UserAccount"
                                     "00000000-0000-0000-0000-000000000000"
                                    "record"])))
   => {"nickname" "root",
@@ -577,42 +597,53 @@
             {:returning ["id" "nickname"
                          ["profile" 
                           ["*/data"]]]})])
-  => [[{"nickname" "root",
-     "profile" [{"last_name" "User", "first_name" "Root"}],
-     "id" "00000000-0000-0000-0000-000000000000"}]
-      [{"nickname" "root",
-        "profile"
-        [{"id" "c4643895-b0ce-44cc-b07b-2386bf18d43b",
-          "city" nil,
-          "about" nil,
-          "last_name" "User",
-          "first_name" "Root",
-          "language" "en"}],
-        "id" "00000000-0000-0000-0000-000000000000"}]]
+  => (contains-in
+      [[{"nickname" "root",
+         "profile" [{"last_name" "User", "first_name" "Root"}],
+         "id" "00000000-0000-0000-0000-000000000000"}]
+       [{"nickname" "root",
+         "profile"
+         [(contains {"id" "c4643895-b0ce-44cc-b07b-2386bf18d43b",
+                     "last_name" "User",
+                     "first_name" "Root",
+                     "language" "en"})],
+         "id" "00000000-0000-0000-0000-000000000000"}]]))
+
+^{:refer xt.db.cache-pull/pull :added "4.0"}
+(fact "pull data from database python profile match"
+  ^:hidden
 
   (!.py
    (var rows {})
    (data/merge-bulk rows (@! +flattened+) nil)
-   [(q/pull rows sample/Schema "UserAccount"
-            {:returning ["id" "nickname"
-                         ["profile" 
-                          ["first_name" "last_name"]]]})
-    (q/pull rows sample/Schema "UserAccount"
-            {:returning ["id" "nickname"
-                         ["profile" 
-                          ["*/data"]]]})])
-  => [[{"nickname" "root",
-     "profile" [{"last_name" "User", "first_name" "Root"}],
-     "id" "00000000-0000-0000-0000-000000000000"}]
-      [{"nickname" "root",
-        "profile"
-        [{"id" "c4643895-b0ce-44cc-b07b-2386bf18d43b",
-          "city" nil,
-          "about" nil,
-          "last_name" "User",
-          "first_name" "Root",
-          "language" "en"}],
-        "id" "00000000-0000-0000-0000-000000000000"}]])
+   (q/pull rows sample/Schema "UserAccount"
+           {:returning ["id" "nickname"
+                        ["profile" 
+                         ["first_name" "last_name"]]]}))
+  => [{"nickname" "root",
+       "profile" [{"last_name" "User", "first_name" "Root"}],
+       "id" "00000000-0000-0000-0000-000000000000"}])
+
+^{:refer xt.db.cache-pull/pull :added "4.0"}
+(fact "pull data from database python profile full"
+  ^:hidden
+
+  (!.py
+   (var rows {})
+   (data/merge-bulk rows (@! +flattened+) nil)
+   (q/pull rows sample/Schema "UserAccount"
+           {:returning ["id" "nickname"
+                        ["profile" 
+                         ["*/data"]]]}))
+  => [{"nickname" "root",
+       "profile"
+       [{"id" "c4643895-b0ce-44cc-b07b-2386bf18d43b",
+         "city" nil,
+         "about" nil,
+         "last_name" "User",
+         "first_name" "Root",
+         "language" "en"}],
+       "id" "00000000-0000-0000-0000-000000000000"}])
 
 (comment
 

@@ -2,11 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :as k]
-             [js.core :as j]
-             [js.react :as r]
-             [js.blessed :as b]
-             [js.blessed.ui-style :as ui-style]]})
+  {:require [[xt.lang.common-data :as xtd] [js.core :as j] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style] [xt.lang.common-spec :as xt]]})
 
 (defn.js ^{:static/lint-globals '#{process}}
   copyClipboard
@@ -34,10 +30,10 @@
   ([props]
    (let [#{input color onClick} props
          [clicked setClicked] (r/local false)
-         bprops (k/obj-assign-nested
-                 {:shrink true
-                  :content (:? clicked "  OK  " " COPY ")
-                  :mouse true
+         bprops (xtd/obj-assign-nested
+                  {:shrink true
+                   :content (:? clicked "  OK  " " COPY ")
+                   :mouse true
                   :disabled clicked
                   :onClick (fn []
                              (-/copyClipboard
@@ -97,7 +93,7 @@
       (:= setMessage (fn:>))
       (:.. rprops)]}]
   (:= message (:? (or (not message)
-                      (== 0 (k/len message))) (or show "") message))
+                      (== 0 (xt/x:len message))) (or show "") message))
   (var bprops (j/assign
                {:mouse true
                 :height 1
@@ -109,4 +105,4 @@
                                  :bg "black"}}
                 :content message}
                rprops))
-  (return (:? (k/is-empty? message) nil [:button #{...bprops}])))
+  (return (:? (xtd/is-empty? message) nil [:button #{...bprops}])))

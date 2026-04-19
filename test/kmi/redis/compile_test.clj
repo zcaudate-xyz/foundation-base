@@ -39,7 +39,7 @@
   ^:hidden
 
   (to:array ['<RETURN>])
-  => '[(unpack (xt.lang.base-lib/to-flat <RETURN>))]
+  => '[(unpack (xt.lang.common-data/to-flat <RETURN>))]
 
   (to:array [[:hello :world]])
   => '[(unpack ["hello" "world"])])
@@ -121,7 +121,7 @@
 
   (compile type/<SPEC>
            '[:GET [] [:active]])
-  => '(xt.lang.base-lib/arr-map (kmi.redis/scan-level "active") kmi.redis/key-export))
+  => '(xt.lang.common-data/arr-map (kmi.redis/scan-level "active") kmi.redis/key-export))
 
 ^{:refer kmi.redis.compile/get-vals-key :added "3.0"}
 (fact "export input keys"
@@ -129,7 +129,7 @@
 
   (compile type/<SPEC>
            '[:GET [] [:active] ["ask" "bid"]])
-  => '(xt.lang.base-lib/arr-map ["ask" "bid"] (fn [_k] (return (kmi.redis/key-export (cat "active" ":" _k))))))
+  => '(xt.lang.common-data/arr-map ["ask" "bid"] (fn [_k] (return (kmi.redis/key-export (cat "active" ":" _k))))))
 
 ^{:refer kmi.redis.compile/get-command :added "3.0"}
 (fact "command for get")
@@ -185,7 +185,7 @@
   (compile type/<SPEC>
            '[:DEL ["test"] [:unfilled] ["a" "b"]])
   => '(redis.call "DEL"
-                  (unpack (xt.lang.base-lib/arr-map
+                  (unpack (xt.lang.common-data/arr-map
                            ["a" "b"]
                            (fn [_k]
                              (return (kmi.redis/key-export (cat "test" ":" "unfilled" ":" _k))))))))
@@ -220,7 +220,7 @@
   (compile type/<SPEC>
            '[:SET ["test"] [:unfilled :ask] {10 100}])
   => '(redis.call "HMSET" (cat "test" ":" "unfilled" ":" "ask")
-                  (unpack (xt.lang.base-lib/to-flat {10 100}))))
+                  (unpack (xt.lang.common-data/to-flat {10 100}))))
 
 ^{:refer kmi.redis.compile/set-entry-command :added "3.0"}
 (fact "command for set entry"

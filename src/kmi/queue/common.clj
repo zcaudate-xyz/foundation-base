@@ -2,8 +2,10 @@
   (:require [std.lang :as l]))
 
 (l/script :lua
-  {:require [[xt.lang.base-lib :as k]
-             [kmi.redis :as r]]
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-string :as str]
+              [kmi.redis :as r]]
    :static {:lang/lint-globals #{redis}}})
 
 ;;
@@ -33,7 +35,7 @@
    (local k-space   (cat key ":_"))
    (local k-pattern (cat k-space ":[^\\:]+$"))
    (local k-partitions (r/scan-regex k-pattern (cat k-space ":*")))
-   (k/for:array [[i pfull]  k-partitions]
+   (xt/for:array [[i pfull]  k-partitions]
      (local p (. pfull (sub (+ (len key) 4))))
      (f key p acc))
    (return acc)))
@@ -76,14 +78,14 @@
   "creates a mq key fragment"
   {:added "3.0"}
   ([key partition ...]
-   (return (k/join ":" [key "_" partition ...]))))
+   (return (str/join ":" [key "_" partition ...]))))
 
 (defn.lua mq-index
   "converts id to an index"
   {:added "3.0"}
   ([id partition default]
    (return
-    (:? id (k/to-number (. id (sub (+ 2 (len partition))))) default))))
+    (:? id (xt/x:to-number (. id (sub (+ 2 (len partition))))) default))))
 
 (defn.lua ^{:rt/redis {}}
   mq-common-group-exists
@@ -231,9 +233,9 @@
   {:added "3.0"}
   ([key group]
    (return (-> (-/mq-map-key key -/mq-common-group-pending group)
-               (k/arr-filter (fn [arr]
-                                 (var p (. arr [2]))
-                                 (return (and p (< 0 (len p))))))))))
+                (xtd/arr-filter (fn [arr]
+                                  (var p (. arr [2]))
+                                  (return (and p (< 0 (len p))))))))))
 
 (defn.lua ^{:rt/redis {}
             :rt/db {:in  [:text]
@@ -336,4 +338,4 @@
        "group_exists_all"      -/mq-common-group-exists-all
        "group_not_exists_all"  -/mq-common-group-not-exists-all
        "group_remove_all"      -/mq-common-group-remove-all}
-      (k/obj-assign -/mq-common-table)))
+      (xtd/obj-assign -/mq-common-table)))

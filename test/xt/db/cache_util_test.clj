@@ -1,28 +1,31 @@
 (ns xt.db.cache-util-test
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-repl :as repl]
-             [xt.lang.base-lib :as k]
+   :require [[xt.lang.common-repl :as repl]
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
              [xt.db.cache-util :as data]
              [xt.db.base-flatten :as f]
              [xt.db.sample-test :as sample]]})
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.lang.base-repl :as repl]
-             [xt.lang.base-lib :as k]
+   :require [[xt.lang.common-repl :as repl]
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
              [xt.db.cache-util :as data]
              [xt.db.base-flatten :as f]
              [xt.db.sample-test :as sample]]})
 
 (l/script- :python
   {:runtime :basic
-   :require [[xt.lang.base-repl :as repl]
-             [xt.lang.base-lib :as k]
+   :require [[xt.lang.common-repl :as repl]
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
              [xt.db.cache-util :as data]
              [xt.db.base-flatten :as f]
              [xt.db.sample-test :as sample]]})
@@ -37,6 +40,12 @@
                 (f/flatten sample/Schema
                            "UserAccount"
                            sample/RootUser
+                           {})))
+             (def +flattened-full+
+               (!.js
+                (f/flatten sample/Schema
+                           "UserAccount"
+                           sample/RootUserFull
                            {})))]
   :teardown [(l/rt:stop)]})
 
@@ -94,8 +103,8 @@
    (-> (data/swap-if-entry rows
                            "UserAccount" "00000000-0000-0000-0000-000000000000"
                            (fn [record]
-                             (return (k/set-in record ["data" "foo"] "hello"))))
-       (k/get-in ["record" "data" "foo"])))
+                             (return (xtd/set-in record ["data" "foo"] "hello"))))
+        (xtd/get-in ["record" "data" "foo"])))
   => "hello"
 
   (!.lua
@@ -104,8 +113,8 @@
    (-> (data/swap-if-entry rows
                            "UserAccount" "00000000-0000-0000-0000-000000000000"
                            (fn [record]
-                             (return (k/set-in record ["data" "foo"] "hello"))))
-       (k/get-in ["record" "data" "foo"])))
+                             (return (xtd/set-in record ["data" "foo"] "hello"))))
+        (xtd/get-in ["record" "data" "foo"])))
   => "hello"
 
   (!.py
@@ -114,8 +123,8 @@
    (-> (data/swap-if-entry rows
                            "UserAccount" "00000000-0000-0000-0000-000000000000"
                            (fn [record]
-                             (return (k/set-in record ["data" "foo"] "hello"))))
-       (k/get-in ["record" "data" "foo"])))
+                             (return (xtd/set-in record ["data" "foo"] "hello"))))
+        (xtd/get-in ["record" "data" "foo"])))
   => "hello")
 
 ^{:refer xt.db.cache-util/merge-single :added "4.0"}
@@ -191,9 +200,141 @@
                                      sample/RootUser
                                      {})
                      nil)
-    (data/get-ids rows "UserAccount")])
+   (data/get-ids rows "UserAccount")])
   => (contains-in
       [map? ["00000000-0000-0000-0000-000000000000"]]))
+
+^{:refer xt.db.cache-util/merge-bulk :added "4.0"
+  :setup [(def +full-core+
+            (!.js
+             (f/flatten sample/Schema
+                        "UserAccount"
+                        (xtd/obj-omit sample/RootUserFull
+                                      ["notification" "organisations" "wallets"
+                                       "emails" "portfolios" "identities" "profile"])
+                        {})))
+          (def +full-contact+
+            (!.js
+             (f/flatten sample/Schema
+                        "UserAccount"
+                        (xtd/obj-omit sample/RootUserFull
+                                      ["notification" "organisations" "wallets"
+                                       "portfolios" "identities"])
+                        {})))
+          (def +full-org-notify+
+            (!.js
+             (f/flatten sample/Schema
+                        "UserAccount"
+                        (xtd/obj-omit sample/RootUserFull
+                                      ["wallets" "portfolios" "identities"])
+                        {})))
+          (def +full-wallets+
+            (!.js
+             (f/flatten sample/Schema
+                        "UserAccount"
+                        (xtd/obj-omit sample/RootUserFull
+                                      ["notification" "organisations" "emails"
+                                       "portfolios" "identities" "profile"])
+                        {})))
+          (def +full-no-wallets+
+            (!.js
+             (f/flatten sample/Schema
+                        "UserAccount"
+                        (xtd/obj-omit sample/RootUserFull
+                                      ["wallets"])
+                        {})))]}
+(fact "merges the full cache fixture step by step in python"
+  ^:hidden
+
+  (!.py
+   (var rows {})
+   (data/merge-bulk rows (@! +full-core+) nil))
+  => map?
+
+  (!.py
+   (var rows {})
+   (data/merge-bulk rows (@! +full-contact+) nil))
+  => map?
+
+  (!.py
+   (var rows {})
+   (data/merge-bulk rows (@! +full-org-notify+) nil))
+  => map?
+
+  (!.py
+   (var rows {})
+   (data/merge-bulk rows (@! +full-wallets+) nil))
+  => map?
+
+  (!.py
+   (var rows {})
+   (data/merge-bulk rows (@! +full-no-wallets+) nil))
+  => map?)
+
+^{:refer xt.db.cache-util/merge-bulk :added "4.0"
+  :setup [(def +full-core+
+            (!.js
+             (f/flatten sample/Schema
+                        "UserAccount"
+                        (xtd/obj-omit sample/RootUserFull
+                                      ["notification" "organisations" "wallets"
+                                       "emails" "portfolios" "identities" "profile"])
+                        {})))
+          (def +full-contact+
+            (!.js
+             (f/flatten sample/Schema
+                        "UserAccount"
+                        (xtd/obj-omit sample/RootUserFull
+                                      ["notification" "organisations" "wallets"
+                                       "portfolios" "identities"])
+                        {})))
+          (def +full-org-notify+
+            (!.js
+             (f/flatten sample/Schema
+                        "UserAccount"
+                        (xtd/obj-omit sample/RootUserFull
+                                      ["wallets" "portfolios" "identities"])
+                        {})))
+          (def +full-wallets+
+            (!.js
+             (f/flatten sample/Schema
+                        "UserAccount"
+                        (xtd/obj-omit sample/RootUserFull
+                                      ["notification" "organisations" "emails"
+                                       "portfolios" "identities" "profile"])
+                        {})))
+          (def +full-no-wallets+
+            (!.js
+             (f/flatten sample/Schema
+                        "UserAccount"
+                        (xtd/obj-omit sample/RootUserFull
+                                      ["wallets"])
+                        {})))]}
+(fact "merges the combined full cache fixture in python"
+  ^:hidden
+
+  (!.py
+   (var rows {})
+   (data/merge-bulk rows (@! +flattened-full+) nil))
+  => map?
+
+  (!.py
+   (var rows {})
+   (data/merge-bulk rows (@! +full-core+) nil)
+   (data/merge-bulk rows (@! +full-contact+) nil))
+  => map?
+
+  (!.py
+   (var rows {})
+   (data/merge-bulk rows (@! +full-contact+) nil)
+   (data/merge-bulk rows (@! +full-org-notify+) nil))
+  => map?
+
+  (!.py
+   (var rows {})
+   (data/merge-bulk rows (@! +full-no-wallets+) nil)
+   (data/merge-bulk rows (@! +full-wallets+) nil))
+  => map?)
 
 ^{:refer xt.db.cache-util/get-ids :added "4.0"}
 (fact "get ids for table-key")
@@ -229,8 +370,8 @@
    (data/merge-bulk rows (@! +flattened+) nil)
    (var changed (-> (data/get-entry rows  "UserAccount" "00000000-0000-0000-0000-000000000000")
                     (. ["record"])
-                    (k/clone-nested)
-                    (k/set-in ["data" "nickname"] "hello")))
+                    (xtd/clone-nested)
+                    (xtd/set-in ["data" "nickname"] "hello")))
    
    (data/get-changed-single rows
                             "UserAccount" "00000000-0000-0000-0000-000000000000"
@@ -242,8 +383,8 @@
    (data/merge-bulk rows (@! +flattened+) nil)
    (var changed (-> (data/get-entry rows  "UserAccount" "00000000-0000-0000-0000-000000000000")
                     (. ["record"])
-                    (k/clone-nested)
-                    (k/set-in ["data" "nickname"] "hello")))
+                    (xtd/clone-nested)
+                    (xtd/set-in ["data" "nickname"] "hello")))
    
    (data/get-changed-single rows
                             "UserAccount" "00000000-0000-0000-0000-000000000000"
@@ -255,8 +396,8 @@
    (data/merge-bulk rows (@! +flattened+) nil)
    (var changed (-> (data/get-entry rows  "UserAccount" "00000000-0000-0000-0000-000000000000")
                     (. ["record"])
-                    (k/clone-nested)
-                    (k/set-in ["data" "nickname"] "hello")))
+                    (xtd/clone-nested)
+                    (xtd/set-in ["data" "nickname"] "hello")))
    
    (data/get-changed-single rows
                             "UserAccount" "00000000-0000-0000-0000-000000000000"
@@ -272,8 +413,8 @@
    (data/merge-bulk rows (@! +flattened+) nil)
    (var changed (-> (data/get-entry rows  "UserAccount" "00000000-0000-0000-0000-000000000000")
                     (. ["record"])
-                    (k/clone-nested)
-                    (k/set-in ["data" "nickname"] "hello")))
+                    (xtd/clone-nested)
+                    (xtd/set-in ["data" "nickname"] "hello")))
    (data/has-changed-single rows "UserAccount" "00000000-0000-0000-0000-000000000000"
                             changed))
   => true
@@ -283,8 +424,8 @@
    (data/merge-bulk rows (@! +flattened+) nil)
    (var changed (-> (data/get-entry rows  "UserAccount" "00000000-0000-0000-0000-000000000000")
                     (. ["record"])
-                    (k/clone-nested)
-                    (k/set-in ["data" "nickname"] "hello")))
+                    (xtd/clone-nested)
+                    (xtd/set-in ["data" "nickname"] "hello")))
    (data/has-changed-single rows "UserAccount" "00000000-0000-0000-0000-000000000000"
                             changed))
   => true
@@ -294,8 +435,8 @@
    (data/merge-bulk rows (@! +flattened+) nil)
    (var changed (-> (data/get-entry rows  "UserAccount" "00000000-0000-0000-0000-000000000000")
                     (. ["record"])
-                    (k/clone-nested)
-                    (k/set-in ["data" "nickname"] "hello")))
+                    (xtd/clone-nested)
+                    (xtd/set-in ["data" "nickname"] "hello")))
    (data/has-changed-single rows "UserAccount" "00000000-0000-0000-0000-000000000000"
                             changed))
   => true)
@@ -403,7 +544,7 @@
             (!.js
              (f/flatten sample/Schema
                         "UserAccount"
-                        (k/obj-omit sample/RootUser ["emails" "profile"])
+                        (xtd/obj-omit sample/RootUser ["emails" "profile"])
                         {})))
           
           (def +profile+

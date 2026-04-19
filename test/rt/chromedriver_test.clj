@@ -3,17 +3,17 @@
   (:require [rt.chromedriver :as chromedriver]
             [std.lang :as l]
             [std.lib :as h]
-            [xt.lang.base-lib :as k]
-            [xt.lang.base-repl :as repl]
+            [xt.lang.common-lib :as k]
+            [xt.lang.common-repl :as repl]
             [js.cell.kernel :as cl]
             [js.cell.kernel.base-link-local :as base-link-local]
             [js.cell.runtime.link :as runtime-link]))
 
 (l/script :js
   {:runtime :chromedriver.instance
-   :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
-             [xt.lang.base-runtime :as rt]
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-repl :as repl]
+             [xt.lang.common-runtime :as rt]
              [js.cell.kernel :as cl]
              [js.cell.kernel.base-link-local :as base-link-local]
              [js.cell.runtime.link :as runtime-link]]})

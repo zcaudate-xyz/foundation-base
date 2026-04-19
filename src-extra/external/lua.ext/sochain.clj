@@ -3,7 +3,7 @@
             [std.lang :as l]))
 
 (l/script :lua
-  {:require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-lib :as k]
              [xt.lang.event-log :as event-log]
              [lua.nginx :as n]
              [lua.nginx.task :as t]

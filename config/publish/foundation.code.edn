@@ -1,0 +1,32 @@
+{:theme  "foundation"
+ :output "public/foundation-code"
+ :pages  {index
+          {:base  "home.html"
+           :input "src-doc/documentation/main_index.clj"
+           :title "foundation-code"
+           :subtitle "static docs for serious libraries"}
+
+          getting-started
+          {:input "src-doc/documentation/foundation_code_getting_started.md"
+           :title "Getting Started"
+           :subtitle "bootstrap a site, a page, and a publish flow"}
+
+          architecture
+          {:input "src-doc/documentation/foundation_code_architecture.clj"
+           :title "Architecture"
+           :subtitle "how parse, collect, link, and render fit together"}
+
+          guides
+          {:input "src-doc/documentation/foundation_code_guides.clj"
+           :title "Guides"
+           :subtitle "authoring patterns for landing pages and references"}
+
+          reference
+          {:input "src-doc/documentation/foundation_code_reference.clj"
+           :title "Reference"
+           :subtitle "the high-value entry points in code.doc"}
+
+          code-doc
+          {:input "src-doc/documentation/code_doc.clj"
+           :title "code.doc"
+           :subtitle "compiler, themes, and authoring primitives"}}}

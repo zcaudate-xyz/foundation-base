@@ -11,7 +11,9 @@
                 :name "java.lang.String"}))
 
 ^{:refer jvm.reflect/print-hierarchy :added "3.0"}
-(fact "helper function to `.%>`")
+(fact "helper function to `.%>`"
+  (print-hierarchy [String [Object #{}]])
+  => string?)
 
 ^{:refer jvm.reflect/.%> :added "3.0"}
 (fact "Lists the class and interface hierarchy for the class"
@@ -28,14 +30,17 @@
 ^{:refer jvm.reflect/.& :added "3.0"}
 (fact "pretty prints  the data representation of a value"
 
-  (.& {:a 1 :b 2 :c 3}))
+  (.& {:a 1 :b 2 :c 3})
+  => (contains {:a 1 :b 2 :c 3}))
 
 ^{:refer jvm.reflect/query-printed :added "3.0"}
 (fact "prints the output on the result to display"
 
   (query-printed "CLASS" query/query-class String [#"^c" :name])
+  => (contains ["charAt"])
 
-  (query-printed "CLASS" query/query-class String [#"^c"]))
+  (query-printed "CLASS" query/query-class String [#"^c"])
+  => seq?)
 
 ^{:refer jvm.reflect/.? :added "3.0"}
 (fact "queries the java view of the class declaration"
@@ -52,12 +57,14 @@
 ^{:refer jvm.reflect/.?> :added "3.0"}
 (fact "queries the the class hierarchy"
 
-  (.?> String  #"^to"))
+  (.?> String  #"^to" :name)
+  => (contains ["toString"]))
 
 ^{:refer jvm.reflect/.?* :added "3.0"}
 (fact "queries the the class hierarchy"
 
-  (.?* String  #"^to"))
+  (.?* String  #"^to" :name)
+  => (contains ["toString"]))
 
 ^{:refer jvm.reflect/.* :added "3.0"}
 (fact "lists what methods could be applied to a particular instance"

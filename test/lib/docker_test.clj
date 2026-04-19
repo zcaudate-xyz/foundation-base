@@ -6,10 +6,31 @@
   (:use code.test))
 
 ^{:refer lib.docker/start-runtime :added "4.0"}
-(fact "starts a runtime with attached container")
+(fact "starts a runtime with attached container"
+  (with-redefs [docker/start-ryuk (fn [] :ryuk)
+                docker/start-reaped (fn [container]
+                                      {:container-ip "127.0.0.1"
+                                       :container-id "cid"
+                                       :container container})
+                docker/start-container (fn [container]
+                                         {:container-ip "127.0.0.1"
+                                          :container-id "cid"
+                                          :container container})]
+    (docker/start-runtime {:lang :clj :tag :app :module :core}
+                          {:suffix "dev"}))
+  => (contains {:host "127.0.0.1"
+                :container (contains {:id "app-dev"
+                                      :container-id "cid"
+                                      :labels {"rt/lang" "clj"
+                                               "rt/module" "core"}})}))
 
 ^{:refer lib.docker/stop-runtime :added "4.0"}
-(fact "stops a runtime with attached container")
+(fact "stops a runtime with attached container"
+  (let [stopped (atom nil)]
+    (with-redefs [docker/stop-container (fn [container] (reset! stopped container))]
+      [(docker/stop-runtime {:id :rt} {:id "cid"})
+       @stopped]))
+  => [{:id :rt} {:id "cid"}])
 
 (comment
 
@@ -71,7 +92,7 @@
 (comment
   
   (require '[std.lang :as l])
-  (require '[xt.lang.base-notify :as notify])
+  (require '[xt.lang.common-notify :as notify])
   (require 'rt.redis)
   (require 'rt.postgres)
   (common/start-container
@@ -91,15 +112,15 @@
               :container {:image  "tahto/kmi.all:v6.2.1"
                           :ports  [6379]
                           :cmd    ["redis-server" "--protected-mode" "no"]}}
-     :require [[xt.lang.base-repl :as repl]
-               [xt.lang.base-lib :as k]
+     :require [[xt.lang.common-repl :as repl]
+               [xt.lang.common-lib :as k]
                [kmi.redis :as r]]})
   
   (std.lang/script :lua
     {:runtime :basic
      :config {:container {:image  "tahto/kmi.all:v6.2.1"}}
-     :require [[xt.lang.base-repl :as repl]
-               [xt.lang.base-lib :as k]
+     :require [[xt.lang.common-repl :as repl]
+               [xt.lang.common-lib :as k]
                [kmi.redis :as r]]})
   
   
@@ -202,14 +223,14 @@
   (std.lang/script :python
     {:runtime :basic
      :config {:container {:image  "tahto/kmi.all:v6.2.1"}}
-     :require [[xt.lang.base-repl :as repl]
-               [xt.lang.base-lib :as k]]})
+     :require [[xt.lang.common-repl :as repl]
+               [xt.lang.common-lib :as k]]})
   
   (std.lang/script :python
     {:runtime :websocket
      :config {:container {:image  "tahto/kmi.all:v6.2.1"}}
-     :require [[xt.lang.base-repl :as repl]
-               [xt.lang.base-lib :as k]]})
+     :require [[xt.lang.common-repl :as repl]
+               [xt.lang.common-lib :as k]]})
   
   
   (notify/wait-on
@@ -219,36 +240,36 @@
   (std.lang/script :lua
     {:runtime :basic
      :config {:container {:image  "tahto/kmi.all:v6.2.1"}}
-     :require [[xt.lang.base-repl :as repl]
-               [xt.lang.base-lib :as k]]})
+     :require [[xt.lang.common-repl :as repl]
+               [xt.lang.common-lib :as k]]})
   
   (std.lang/script :lua
     {:runtime :basic
      :config {:container {:image  "tahto/kmi.all:v6.2.1"}}
-     :require [[xt.lang.base-repl :as repl]
-               [xt.lang.base-lib :as k]]})
+     :require [[xt.lang.common-repl :as repl]
+               [xt.lang.common-lib :as k]]})
 
   (std.lang/script :lua
     {:runtime :basic
      :config {:program :resty
               :container {:image  "tahto/kmi.all:v6.2.1"}}
-     :require [[xt.lang.base-repl :as repl]
-               [xt.lang.base-lib :as k]]})
+     :require [[xt.lang.common-repl :as repl]
+               [xt.lang.common-lib :as k]]})
 
   
   (std.lang/script :js
     {:runtime :basic
      :config {:container {:image  "tahto/kmi.ui:16"
                           :remove false}}
-     :require [[xt.lang.base-repl :as repl]
-               [xt.lang.base-lib :as k]]})
+     :require [[xt.lang.common-repl :as repl]
+               [xt.lang.common-lib :as k]]})
   
   (std.lang/script :js
     {:runtime :websocket
      :config {:container {:image  "tahto/kmi.ui:16"
                           :remove false}}
-     :require [[xt.lang.base-repl :as repl]
-               [xt.lang.base-lib :as k]]})
+     :require [[xt.lang.common-repl :as repl]
+               [xt.lang.common-lib :as k]]})
   
   (!.js
    (+ 1 2 3))
@@ -259,8 +280,8 @@
   (std.lang/script :js
     {:config {:container {:image  "tahto/kmi.ui:16.1"
                           :remove false}}
-     :require [[xt.lang.base-repl :as repl]
-               [xt.lang.base-lib :as k]]})
+     :require [[xt.lang.common-repl :as repl]
+               [xt.lang.common-lib :as k]]})
   
   (lib.docker/start-container
    (assoc rt.basic.type-container/*container*
@@ -287,8 +308,8 @@
               :container {:image  "tahto/kmi.infra:v5.0.1"
                           :ports  [6379]
                           :cmd    ["redis-server" "--protected-mode" "no"]}}
-     :require [[xt.lang.base-repl :as repl]
-               [xt.lang.base-lib :as k]]})
+     :require [[xt.lang.common-repl :as repl]
+               [xt.lang.common-lib :as k]]})
   
   (std.lang/script :js
     {:runtime :basic
@@ -297,8 +318,8 @@
                   :container {:image  "tahto/kmi.infra:v5.0.1"
                               :ports  [6379]
                               :cmd    ["redis-server" "--protected-mode" "no"]}}
-     :require [[xt.lang.base-repl :as repl]
-               [xt.lang.base-lib :as k]]})
+     :require [[xt.lang.common-repl :as repl]
+               [xt.lang.common-lib :as k]]})
   
   (!.js (+ 1 2 3))
   
@@ -309,10 +330,10 @@
               :container {:image  "tahto/kmi.infra:v5.0.1"
                           :ports  [6379]
                           :cmd    ["redis-server" "--protected-mode" "no"]}}
-     :require [[xt.lang.base-repl :as repl]
-               [xt.lang.base-lib :as k]]})
+     :require [[xt.lang.common-repl :as repl]
+               [xt.lang.common-lib :as k]]})
   
-  (require '[xt.lang.base-notify :as notify])
+  (require '[xt.lang.common-notify :as notify])
   
   (std.lang/script :lua
     {:runtime :redis.client
@@ -320,8 +341,8 @@
               :container {:image  "tahto/kmi.infra:v5.0.1"
                           :ports  [6379]
                           :cmd    ["redis-server" "--protected-mode" "no"]}}
-     :require [[xt.lang.base-repl :as repl]
-               [xt.lang.base-lib :as k]]})
+     :require [[xt.lang.common-repl :as repl]
+               [xt.lang.common-lib :as k]]})
   
   (std.lang/script :lua
     {;:runtime :redis.client

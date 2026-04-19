@@ -256,32 +256,32 @@
    (template/$ (. ~lu (delete ~obj)))))
 
 (def +js-lu+
-  {:x-lu-create      {:emit :unit :default '(new WeakMap)}
+  {:x-lu-create      {:emit :unit :default '(new Map)}
    :x-lu-get         {:macro #'js-tf-x-lu-get :emit :macro}
    :x-lu-set         {:macro #'js-tf-x-lu-set :emit :macro}
    :x-lu-del         {:macro #'js-tf-x-lu-del :emit :macro}})
 
 (defn js-tf-x-obj-keys
   [[_ obj]]
-  (list 'return (list 'Object.keys obj)))
+  (list 'Object.keys obj))
 
 (defn js-tf-x-obj-vals
   [[_ obj]]
-  (list 'return (list 'Object.values obj)))
+  (list 'Object.values obj))
 
 (defn js-tf-x-obj-pairs
   "converts map to array"
   {:added "4.0"}
   ([[_ m]]
-   (list 'return (list 'Object.entries m))))
+   (list 'Object.entries m)))
 
 (defn js-tf-x-obj-clone
   [[_ m]]
-  (list 'return (list 'Object.assign {} m)))
+  (list 'Object.assign {} m))
 
 (defn js-tf-x-obj-assign
   [[_ obj m]]
-  (list 'return (list 'Object.assign obj m)))
+  (list 'Object.assign obj m))
 
 (def +js-obj+
   {:x-obj-keys      {:macro #'js-tf-x-obj-keys    :emit :macro  :type :template}
@@ -338,7 +338,7 @@
                                          (~key-fn b))
                                         -1 1)))))))
 
-(defn js-tf-x-arr-str-comp
+(defn js-tf-x-str-comp
   [[_ a b]]
   (list '> 0 (list '. a (list 'localeCompare b))))
 
@@ -353,7 +353,7 @@
    :x-arr-remove      {:macro #'js-tf-x-arr-remove     :emit :macro   :type :template}
    :x-arr-insert      {:macro #'js-tf-x-arr-insert     :emit :macro   :type :template}
    :x-arr-sort        {:macro #'js-tf-x-arr-sort       :emit :macro}
-   :x-arr-str-comp    {:macro #'js-tf-x-arr-str-comp   :emit :macro}})
+   :x-str-comp        {:macro #'js-tf-x-str-comp       :emit :macro}})
 
 ;;
 ;; STRING
@@ -374,6 +374,14 @@
 (defn js-tf-x-str-index-of
   ([[_ s tok]]
    (list '. s (list 'indexOf tok))))
+
+(defn js-tf-x-str-format
+  ([[_ fmt values]]
+   (template/$ (. ~fmt
+                   (replace (new RegExp "\\{(\\d+)\\}" "g")
+                            (fn [match idx]
+                              (return (or (. ~values [(Number idx)])
+                                          match))))))))
 
 (defn js-tf-x-str-substring
   ([[_ s start & args]]
@@ -408,10 +416,11 @@
    (list '. s (list 'trimRight))))
 
 (def +js-str+
-  {:x-str-char        {:macro #'js-tf-x-str-char       :emit :macro}
-   :x-str-split       {:macro #'js-tf-x-str-split      :emit :macro}
-   :x-str-join        {:macro #'js-tf-x-str-join       :emit :macro}
-   :x-str-index-of    {:macro #'js-tf-x-str-index-of   :emit :macro}
+   {:x-str-char        {:macro #'js-tf-x-str-char       :emit :macro}
+    :x-str-format      {:macro #'js-tf-x-str-format     :emit :macro}
+    :x-str-split       {:macro #'js-tf-x-str-split      :emit :macro}
+    :x-str-join        {:macro #'js-tf-x-str-join       :emit :macro}
+    :x-str-index-of    {:macro #'js-tf-x-str-index-of   :emit :macro}
    :x-str-substring   {:macro #'js-tf-x-str-substring  :emit :macro}
    :x-str-to-upper    {:macro #'js-tf-x-str-to-upper   :emit :macro}
    :x-str-to-lower    {:macro #'js-tf-x-str-to-lower   :emit :macro}
@@ -685,7 +694,7 @@
           (var #{path scheme} (or ~opts {}))
           (fetch (+ (or scheme "http") "://" ~host ":" ~port "/" (or path ""))
                  {:method "POST"
-                  :body (xt.lang.base-repl/return-encode ~value ~id ~key)})
+                  :body (xt.lang.common-repl/return-encode ~value ~id ~key)})
           (return ["async"])
           (catch e (return ["unable to connect"]))))))
 

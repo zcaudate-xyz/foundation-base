@@ -2,7 +2,8 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.lang.event-common :as event-common]]})
 
 (defn.xt new-log-latest
@@ -12,7 +13,7 @@
   (return
    (event-common/blank-container
     "event.log-latest"
-    (k/obj-assign
+    (xt/x:obj-assign
      {:last      nil
       :cache     {}
       :interval  30000
@@ -23,37 +24,42 @@
   "clears the cache given a time point"
   {:added "4.0"}
   [log t]
-  (:= t (or t (k/now-ms)))
+  (when (xt/x:nil? t)
+    (:= t (xt/x:now-ms)))
   (var #{last interval cache} log)
   (var out [])
-  (when (and last (>= interval (- t last)))
+  (when (and (xt/x:not-nil? last)
+             (>= interval (- t last)))
     (return out))
-  (k/set-key log "last" t)
-  (k/for:object [[k entry] cache]
-    (when (< interval (- t (. entry t)))
-      (k/del-key cache k)
-      (x:arr-push out k)))
-  (return out))
+  (xt/x:set-key log "last" t)
+   (xt/for:array [k (xt/x:obj-keys cache)]
+     (var entry (xt/x:get-key cache k))
+      (when (< interval (- t (. entry ["t"])))
+        (xt/x:del-key cache k)
+        (xt/x:arr-push out k)))
+   (return
+    (xtd/arr-sort out
+                  (fn [x] (return x))
+                  xt/x:str-lt)))
 
 (defn.xt queue-latest
   "queues the latest time to log"
   {:added "4.0"}
   [log key latest]
   (var #{cache} log)
-  (var entry (k/get-key cache key))
-  (var t (k/now-ms))
-  (cond (k/nil? entry)
-        (do (k/set-key cache key {:t t
-                                  :latest latest})
-            (-/clear-cache log t)
-            (return true))
+  (var entry (xt/x:get-key cache key))
+  (var t (xt/x:now-ms))
+  (cond (xt/x:nil? entry)
+         (do (xt/x:set-key cache key {:t t
+                                   :latest latest})
+             (-/clear-cache log t)
+             (return true))
 
-        (< (. entry latest) latest)
-        (do (k/set-key cache key {:t t
-                                  :latest latest})
-            (-/clear-cache log t)
-            (return true))
+         (< (. entry ["latest"]) latest)
+         (do (xt/x:set-key cache key {:t t
+                                   :latest latest})
+             (-/clear-cache log t)
+             (return true))
         
         :else
         (return false)))
-

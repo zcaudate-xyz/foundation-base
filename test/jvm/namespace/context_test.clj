@@ -1,5 +1,6 @@
 (ns jvm.namespace.context-test
-  (:require [jvm.namespace.context :refer :all])
+  (:require [jvm.namespace.context :refer :all]
+            [std.lib.deps :as deps])
   (:use code.test))
 
 ^{:refer jvm.namespace.context/resolve-ns :added "3.0"}
@@ -19,7 +20,12 @@
        ns-context ns-vars reeval resolve-ns])
 
 ^{:refer jvm.namespace.context/ns-context :added "3.0"}
-(fact "gets the namespace context")
+(fact "gets the namespace context"
+  (ns-context)
+  => jvm.namespace.context.NamespaceContext)
 
 ^{:refer jvm.namespace.context/reeval :added "3.0"}
-(fact "reevals all dependents of a namespace")
+(fact "reevals all dependents of a namespace"
+  (with-redefs [deps/dependents-refresh (fn [_ ns] [:refreshed ns])]
+    (reeval 'jvm.namespace.context))
+  => [:refreshed 'jvm.namespace.context])

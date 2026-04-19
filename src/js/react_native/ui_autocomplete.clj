@@ -3,12 +3,7 @@
   (:use code.test))
 
 (l/script :js
-  {:require [[js.core :as j]
-             [js.react :as r]
-             [js.react-native :as n]
-             [js.react-native.ui-tooltip :as ui-tooltip]
-             [js.react.ext-view :as ext-view]
-             [xt.lang.base-lib :as k]]})
+  {:require [[js.core :as j] [js.react :as r] [js.react-native :as n] [js.react-native.ui-tooltip :as ui-tooltip] [js.react.ext-view :as ext-view] [xt.lang.common-lib :as k] [xt.lang.common-data :as xtd]]})
 
 (defn.js AutocompleteModal
   "creates the autocomplete modal display"
@@ -36,11 +31,11 @@
      :arrow {:placement "none"}}
     [:% n/View
      {:style [{:width (. dims width)}
-              (:.. (k/arrayify styleContainer))]}
+              (:.. (j/arrayify styleContainer))]}
      (:? isBusy
          (r/% componentBusy rprops)
 
-         (k/is-empty? entries)
+         (xtd/is-empty? entries)
          (r/% componentEmpty rprops)
 
          :else
@@ -61,10 +56,9 @@
   (var refInput (r/ref))
   (r/watch [sourceInput isBusy]
     (when (and (not isBusy)
-               (not (k/eq-nested sourceInput (. refInput current))))
+               (not (xtd/eq-nested sourceInput (. refInput current))))
       (ext-view/refresh-args sourceView sourceInput)
       (r/curr:set refInput sourceInput)))
   (return
    (r/% -/AutocompleteModal
         (j/assign #{entries isBusy} rprops))))
-

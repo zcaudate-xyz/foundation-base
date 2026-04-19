@@ -2,12 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :as k]
-             [js.core :as j]
-             [js.lib.valtio :as v]
-             [js.react :as r]
-             [js.blessed :as b]
-             [js.blessed.ui-style :as ui-style]]})
+  {:require [[xt.lang.common-data :as xtd] [js.core :as j] [js.lib.valtio :as v] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style] [xt.lang.common-spec :as xt]]})
 
 ;;
 ;;
@@ -70,7 +65,7 @@
          grid (r/ref {})
          _    (r/run []
                 (let [curr (r/curr grid)
-                      width (k/get-key curr "width")]
+                      width (xt/x:get-key curr "width")]
                   (if (and curr
                            (not= width full))
                     (setFull width))))
@@ -81,14 +76,14 @@
                 :scrollbar {:style {:bg (or color "gray")
                                     :fg (or color "gray")}
                             :track true}}
-         bprops (k/obj-assign-nested (ui-style/getLayout props) bopts)]
+         bprops (xtd/obj-assign-nested (ui-style/getLayout props) bopts)]
      (return [:box #{(:.. bprops)}
               #_[:box {:bottom 0
                      :height 1
                      :content (j/inspect dims)}]
               [:box {:ref grid
                      :style {:bg bg}
-                     :height (-> (k/len items)
+                     :height (-> (xt/x:len items)
                                  (/ row-count)
                                  (j/ceil)
                                  (* height))

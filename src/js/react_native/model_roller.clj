@@ -9,7 +9,9 @@
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
    :require [[js.core :as j]
-             [xt.lang.base-lib :as k]]})
+              [xt.lang.common-lib :as k]
+              [xt.lang.common-math :as math]
+              [xt.lang.common-spec :as xt]]})
 
 ;;
 ;; ROLLER
@@ -50,7 +52,7 @@
   (var UNIT     (* 2 (/ j/PI divisions)))
   (var HALF_PI  (/ j/PI 2))
   (return (fn [offset]
-            (var raw     (k/mod-pos offset divisions))
+            (var raw     (math/mod-pos offset divisions))
             (var theta   (* raw UNIT))
             (var visible (or (< (j/abs theta) HALF_PI)
                              (> (j/abs theta) (* 3 HALF_PI))))
@@ -69,7 +71,7 @@
    roller-index
    center]
   (var shifted      (- roller-index center))
-  (var shifted-mod  (k/mod-pos shifted divisions))
+  (var shifted-mod  (math/mod-pos shifted divisions))
   (var shifted-norm (:? (< shifted-mod (/ divisions 2))
                         shifted-mod
                         (- shifted-mod divisions)))
@@ -82,12 +84,12 @@
    roller-index
    input-raw
    input-total]
-  (var input-index    (k/mod-pos input-raw input-total))
-  (var center         (k/mod-pos input-raw divisions))
+  (var input-index    (math/mod-pos input-raw input-total))
+  (var center         (math/mod-pos input-raw divisions))
   (var shifted-norm   (-/roller-shifted-norm divisions roller-index center))
-  (var shifted-index  (k/mod-pos (+ input-index
-                                    shifted-norm)
-                                 input-total))
+  (var shifted-index  (math/mod-pos (+ input-index
+                                     shifted-norm)
+                                  input-total))
   #_(console.log #{input-raw
                  input-total
                  roller-index
@@ -104,13 +106,12 @@
    divisions
    input-raw
    input-total]
-  (k/for:array [[i ind] ind-array]
+  (xt/for:array [[i ind] ind-array]
     (var shifted (-/roller-shifted-index
-                  divisions
+                   divisions
                   i
                   input-raw
                   input-total))
     (when (not= shifted ind._value)
       (. ind (setValue shifted))))
   (return true))
-

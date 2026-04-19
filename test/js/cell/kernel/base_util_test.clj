@@ -4,7 +4,8 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-spec :as xt]
              [js.core :as j]
              [js.cell.kernel.base-util :as base-util]]})
 
@@ -32,7 +33,7 @@
   (!.js (base-util/rand-id "test-" 8))
   => string?
   
-  (!.js (k/len (base-util/rand-id "" 10)))
+  (!.js (xt/x:len (base-util/rand-id "" 10)))
   => 10
   
   (!.js (k/is-string? (base-util/rand-id "prefix-" 6)))

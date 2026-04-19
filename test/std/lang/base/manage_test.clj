@@ -7,7 +7,7 @@
              [std.lang.base.library :as lib]
              [std.lang.base.library-snapshot :as snap]
              [std.lang.base.manage :refer :all]
-             [xt.lang.base-lib :as k])
+             [xt.lang.common-lib :as k])
   (:use code.test))
 
 (def +library+

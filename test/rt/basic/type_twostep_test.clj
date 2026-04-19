@@ -103,3 +103,13 @@
   (with-redefs [p/rt-twostep:create (fn [m] m)]
     (p/rt-twostep {:a 1}))
   => {:a 1})
+
+
+^{:refer rt.basic.type-twostep/local-exec-available? :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.basic.type-twostep/sh-exec-docker :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.basic.type-twostep/sh-exec-portable :added "4.1"}
+(fact "TODO")

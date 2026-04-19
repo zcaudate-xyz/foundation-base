@@ -3,10 +3,10 @@
 
 (def settings
   {:engine    "winterfell"
-   :resource  "theme/bolton"
+   :resource  "assets/code.doc/theme/bolton"
    :copy      ["assets"]
    :render    {:article       "render-article"
-               :outline       "render-outline"
+                :outline       "render-outline"
                :top-level     "render-top-level"}
    :manifest  ["article.html"
                "home.html"

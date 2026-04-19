@@ -1,9 +1,9 @@
 (ns xt.lang.event-common
-  (:require [std.lang :as l]
-            [std.lang.typed.xtalk :refer [defspec.xt]]))
+  (:require [std.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]})
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]]})
 
 (defspec.xt EventPayload
   :xt/any)
@@ -43,6 +43,9 @@
         [:xt/maybe EventListenerMeta]
         [:xt/maybe [:fn [:xt/any] :xt/bool]]]
        EventListenerEntry])
+
+(defspec.xt arrayify-path
+  [:fn [:xt/any] [:xt/array :xt/any]])
 
 (defspec.xt clear-listeners
   [:fn [EventContainer] EventListenerMap])
@@ -93,11 +96,43 @@
 (defspec.xt trigger-keyed-listeners
   [:fn [EventContainer :xt/str [:xt/maybe EventPayload]] [:xt/array :xt/str]])
 
+(defn.xt task-pending?
+  "extracts an async notification task from a callback return value"
+  {:added "4.1"}
+  [value]
+  (when (and (xt/x:is-object? value)
+             (== "notify.task"
+                 (xt/x:get-key value "::")))
+    (return (xt/x:get-key value "task")))
+  (return nil))
+
+(defn.xt task-await
+  "unwraps an async notification task where present"
+  {:added "4.1"}
+  [value]
+  (var task (-/task-pending? value))
+  (when (xt/x:not-nil? task)
+    (return task))
+  (return value))
+
+(defn.xt task-return
+  "maps an async task back to a stable return value"
+  {:added "4.1"}
+  [result value]
+  (var task (-/task-pending? result))
+  (var output value)
+  (when (xt/x:not-nil? task)
+    (:= output
+        (xt/x:future-then task
+                          (fn [_]
+                            (return value)))))
+  (return output))
+
 (defn.xt blank-container
   "creates a blank container"
   {:added "4.0"}
   [type-name opts]
-  (var container (k/obj-assign
+  (var container (xt/x:obj-assign
                   {"::" type-name
                    :listeners {}}
                   opts))
@@ -107,11 +142,12 @@
   "makes a container"
   {:added "4.0"}
   [initial type-name opts]
-  (var initialFn (:? (k/fn? initial)
-                     initial
-                     (fn:> initial)))
+  (var initialFn initial)
+  (when (not (xt/x:is-function? initialFn))
+    (:= initialFn
+        (fn [] (return initial))))
   (var data   (initialFn))
-  (var container (k/obj-assign
+  (var container (xt/x:obj-assign
                   {"::" type-name
                    :data data
                    :initial initialFn
@@ -125,18 +161,30 @@
   [listener-id listener-type callback meta pred]
   (return
    {:callback callback
-          :meta (k/obj-assign
-                 {:listener/id   listener-id
-                  :listener/type listener-type}
-                 meta)
-          :pred pred}))
+    :pred pred
+           :meta (xt/x:obj-assign
+                  {:listener/id   listener-id
+                   :listener/type listener-type}
+                  meta)}))
+
+(defn.xt arrayify-path
+  "normalizes event path-like inputs, treating empty objects as empty arrays"
+  {:added "4.1"}
+  [x]
+  (when (xt/x:is-array? x)
+    (return x))
+  (when (or (xt/x:nil? x)
+            (and (xt/x:is-object? x)
+                 (xtd/is-empty? x)))
+    (return []))
+  (return [x]))
 
 (defn.xt clear-listeners
   "clears all listeners"
   {:added "4.0"}
   [container]
   (var #{listeners} container)
-  (k/set-key container "listeners" {})
+  (xt/x:set-key container "listeners" {})
   (return listeners))
 
 (defn.xt add-listener
@@ -145,7 +193,7 @@
   [container listener-id listener-type callback meta pred]
   (var #{listeners} container)
   (var entry (-/make-listener-entry listener-id listener-type callback meta pred))
-  (k/set-key listeners listener-id entry)
+  (xt/x:set-key listeners listener-id entry)
   (return entry))
 
 (defn.xt remove-listener
@@ -153,8 +201,8 @@
   {:added "4.0"}
   [container listener-id]
   (var #{listeners} container)
-  (var entry (k/get-key listeners listener-id))
-  (k/del-key listeners listener-id)
+  (var entry (xt/x:get-key listeners listener-id))
+  (xt/x:del-key listeners listener-id)
   (return entry))
 
 (defn.xt list-listeners
@@ -162,7 +210,10 @@
   {:added "4.0"}
   [container]
   (var #{listeners} container)
-  (return (k/obj-keys listeners)))
+  (return
+   (xtd/arr-sort (xt/x:obj-keys listeners)
+                 (fn [x] (return x))
+                 xt/x:str-lt)))
 
 (defn.xt list-listener-types
   "lists listeners by their type"
@@ -170,14 +221,14 @@
   [container]
   (var #{listeners} container)
   (var out {})
-  (k/for:object [[id entry] listeners]
-    (var #{meta} entry)
-    (var t   (k/get-key meta "listener/type"))
-    (var arr (k/get-key out t))
-    (when (k/nil? arr)
+  (xt/for:object [[id listener-entry] listeners]
+    (var #{meta} listener-entry)
+    (var t   (xt/x:get-key meta "listener/type"))
+    (var arr (xt/x:get-key out t))
+    (when (xt/x:nil? arr)
       (:= arr [])
-      (k/set-key out t arr))
-    (x:arr-push arr id))
+      (xt/x:set-key out t arr))
+    (xt/x:arr-push arr id))
   (return out))
 
 (defn.xt trigger-entry
@@ -185,26 +236,42 @@
   {:added "4.0"}
   [entry event]
   (var #{callback meta pred} entry)
-  (when (or (k/nil? pred)
-            (pred event))
-    (var nmeta (k/obj-assign (or (k/get-key event "meta")
-                                 {})
-                             meta))
-    (callback (k/obj-assign
-               (k/obj-clone event)
-               {:meta nmeta}))))
+  (var allowed true)
+  (when (xt/x:not-nil? pred)
+    (var result (pred event))
+    (:= allowed (and (xt/x:not-nil? result)
+                     (not= false result))))
+  (when allowed
+    (var event-meta (xt/x:get-key event "meta"))
+    (when (xt/x:nil? event-meta)
+      (:= event-meta {}))
+    (var nmeta (xt/x:obj-assign event-meta
+                                meta))
+    (return (callback (xt/x:obj-assign
+                       (xt/x:obj-clone event)
+                       {:meta nmeta}))))
+  (return nil))
 
 (defn.xt trigger-listeners
   "triggers listeners given event"
   {:added "4.0"}
   [container event]
-  (:= event (or event {}))
+  (when (xt/x:nil? event)
+    (:= event {}))
   (var #{listeners} container)
   (var triggered [])
-  (k/for:object [[id entry] listeners]
-    (-/trigger-entry entry event)
-    (x:arr-push triggered id))
-  (return triggered))
+  (var pending nil)
+  (xt/for:object [[id entry] listeners]
+    (var result (-/trigger-entry entry event))
+    (var task (-/task-pending? result))
+    (when (xt/x:not-nil? task)
+      (when (xt/x:nil? pending)
+        (:= pending task)))
+    (xt/x:arr-push triggered id))
+  (if (xt/x:nil? pending)
+    (return triggered)
+    (return {"::" "notify.task"
+             "task" pending})))
 
 
 ;;
@@ -217,11 +284,11 @@
   [container key listener-id listener-type callback meta pred]
   (var #{listeners} container)
   (var entry (-/make-listener-entry listener-id listener-type callback meta pred))
-  (var group (k/get-key listeners key))
-  (when (k/nil? group)
+  (var group (xt/x:get-key listeners key))
+  (when (xt/x:nil? group)
     (:= group {})
-    (k/set-key listeners key group))
-  (k/set-key group listener-id entry)
+    (xt/x:set-key listeners key group))
+  (xt/x:set-key group listener-id entry)
   (return entry))
 
 (defn.xt remove-keyed-listener
@@ -229,13 +296,13 @@
   {:added "4.0"}
   [container key listener-id]
   (var #{listeners} container)
-  (var group (k/get-key listeners key))
-  (when (k/nil? group)
+  (var group (xt/x:get-key listeners key))
+  (when (xt/x:nil? group)
     (return nil))
-  (var entry (k/get-key group listener-id))
-  (k/del-key group listener-id)
-  (when (k/is-empty? group)
-    (k/del-key listeners key))
+  (var entry (xt/x:get-key group listener-id))
+  (xt/x:del-key group listener-id)
+  (when (xtd/obj-empty? group)
+    (xt/x:del-key listeners key))
   (return entry))
 
 (defn.xt list-keyed-listeners
@@ -243,10 +310,13 @@
   {:added "4.0"}
   [container key]
   (var #{listeners} container)
-  (var group (k/get-key listeners key))
-  (when (k/nil? group)
+  (var group (xt/x:get-key listeners key))
+  (when (xt/x:nil? group)
     (return []))
-  (return (k/obj-keys group)))
+  (return
+   (xtd/arr-sort (xt/x:obj-keys group)
+                 (fn [x] (return x))
+                 xt/x:str-lt)))
 
 (defn.xt all-keyed-listeners
   "lists all listeners"
@@ -254,21 +324,32 @@
   [container]
   (var #{listeners} container)
   (return
-   (k/arr-juxt (k/obj-keys listeners)
-               k/identity
-               (fn [key]
-                 (return (-/list-keyed-listeners container key))))))
+   (xtd/arr-juxt (xtd/arr-sort (xt/x:obj-keys listeners)
+                               (fn [x] (return x))
+                               xt/x:str-lt)
+                 (fn [x] (return x))
+                 (fn [key]
+                    (return (-/list-keyed-listeners container key))))))
 
 (defn.xt trigger-keyed-listeners
   "triggers listeners under a key"
   {:added "4.0"}
   [container key event]
-  (:= event (or event {}))
+  (when (xt/x:nil? event)
+    (:= event {}))
   (var #{listeners} container)
-  (var group (k/get-key listeners key))
+  (var group (xt/x:get-key listeners key))
   (var triggered [])
-  (when (k/not-nil? group)
-    (k/for:object [[id entry] group]
-      (-/trigger-entry entry event)
-      (x:arr-push triggered id)))
-  (return triggered))
+  (var pending nil)
+  (when (xt/x:not-nil? group)
+    (xt/for:object [[id entry] group]
+      (var result (-/trigger-entry entry event))
+      (var task (-/task-pending? result))
+      (when (xt/x:not-nil? task)
+        (when (xt/x:nil? pending)
+          (:= pending task)))
+      (xt/x:arr-push triggered id)))
+  (if (xt/x:nil? pending)
+    (return triggered)
+    (return {"::" "notify.task"
+             "task" pending})))

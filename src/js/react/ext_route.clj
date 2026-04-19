@@ -2,10 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :as k]
-             [xt.lang.event-route :as event-route]
-             [js.react :as r]
-             [js.core :as j]]})
+  {:require [[xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd] [xt.lang.event-route :as event-route] [js.react :as r] [js.core :as j]]})
 
 (defn.js makeRoute
   "makes a react compatible route"
@@ -17,7 +14,7 @@
   "listens for changes on the route tree"
   {:added "4.0"}
   [route]
-  (var getFn (r/const (fn:> (k/clone-nested (. route ["tree"])))))
+  (var getFn (r/const (fn:> (xtd/clone-nested (. route ["tree"])))))
   (var [tree changeTree] (r/local getFn))
   (r/init []
     (var listener-id (j/randomId 4))
@@ -75,7 +72,7 @@
        (r/const (fn [segment]
                   (return (event-route/set-segment route (r/curr pathRef) segment)))))
   (r/init []
-    (when (and (k/nil? segment)
+    (when (and (xt/x:nil? segment)
                defaultSegment)
       (setSegment defaultSegment)))
   (return [(or segment  defaultSegment)
@@ -100,15 +97,15 @@
   "getter and setter for route param"
   {:added "4.0"}
   [route param defaultVal defaultFn]
-  (:= defaultFn (or defaultFn k/identity))
+  (:= defaultFn (or defaultFn (fn:> [x] x)))
   (var paramRef (r/useFollowRef param))
   (var value    (defaultFn (-/listenRouteParam route param)))
   (var setValue
        (r/const
-        (fn [value]
-          (return (event-route/set-param route (r/curr paramRef) value)))))
+         (fn [value]
+           (return (event-route/set-param route (r/curr paramRef) value)))))
   (r/init []
-    (when (and (k/nil? value)
+    (when (and (xt/x:nil? value)
                defaultVal)
       (setValue defaultVal)))
   (return [(or value defaultVal)
@@ -124,4 +121,3 @@
         (fn [flag]
           (:? flag (setValue flagVal) (setValue nil)))])
   (return [flag setFlag]))
-

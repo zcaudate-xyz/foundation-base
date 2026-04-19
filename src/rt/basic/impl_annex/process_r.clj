@@ -7,17 +7,17 @@
             [std.lang.base.impl :as impl]
             [std.lang.base.runtime :as rt]
             [std.lang.model-annex.spec-r :as spec]
-            [xt.lang.base-repl :as k]))
+            [xt.lang.common-repl :as k]))
 
 (def +program-init+
   (common/put-program-options
    :r   {:default  {:oneshot      :rlang
                     :basic        :rlang
                     :interactive  :rlang}
-         :env      {:rlang     {:exec    "r"
-                                :output  {}
-                                :flags   {:oneshot ["-s" "-e"]
-                                          :basic ["-s" "-e"]
+         :env      {:rlang     {:exec    "R"
+                                 :output  {}
+                                 :flags   {:oneshot ["-s" "-e"]
+                                           :basic ["-s" "-e"]
                                           :interactive ["-i"]
                                           :json ["rjsonlite" :instal]}}}}))
 
@@ -67,7 +67,9 @@
       [host port opts]
       (while true
         (while true
-          (var conn  := (socketConnection :port port :blocking true))
+          (var conn  := (socketConnection :host host
+                                          :port port
+                                          :blocking true))
           (tryCatch
            (block
             (while true
@@ -102,11 +104,13 @@
   (common/set-context-options
    [:r :basic :default]
    {:bootstrap #'default-basic-client
-    :main  {}
-    :emit  {:body  {:transform #'rt/return-transform}}
-    :json :full
-    :encode :json
-    :timeout 2000}))
+     :main  {}
+     :container {:image "foundation-base/rt-basic-r:latest"}
+     :container-backup true
+     :emit  {:body  {:transform #'rt/return-transform}}
+     :json :full
+     :encode :json
+     :timeout 2000}))
 
 (def +r-basic+
   [(rt/install-type!

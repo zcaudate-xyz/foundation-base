@@ -110,8 +110,17 @@
    :x-ws-send         {:macro #'lua-tf-x-ws-send         :emit :macro}
    :x-ws-close        {:macro #'lua-tf-x-ws-close        :emit :macro}})
 
+(defn lua-tf-x-notify-socket
+  ([[_ host port value id key connect-fn encode-fn]]
+   (template/$ (do* (local '[ok conn] (unpack (~connect-fn ~host ~port {})))
+                    (if (not ok)
+                      (return ["unable to connect"]))
+                    (. conn (send (~encode-fn ~value ~id ~key)))
+                    (. conn (close))
+                    (return ["async"])))))
+
 (def +lua-notify+
-  {})
+  {:x-notify-socket  {:macro #'lua-tf-x-notify-socket    :emit :macro}})
 
 (defn lua-tf-x-client-basic
   ([[_ host port connect-fn eval-fn]]

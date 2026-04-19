@@ -267,6 +267,15 @@
        :fields [{:name "id" :type {:kind :primitive :name :xt/str} :optional? false}
                 {:name "tags" :type {:kind :array :item {:kind :primitive :name :xt/str}} :optional? false}]})
 
+(fact "normalizes xt self from context"
+  (normalize-type :xt/self
+                  {:ns 'sample.route
+                   :aliases {}
+                   :self {:kind :array
+                          :item {:kind :primitive :name :xt/str}}})
+  => '{:kind :array
+       :item {:kind :primitive :name :xt/str}})
+
 ^{:refer std.lang.typed.xtalk-common/normalize-return-meta :added "4.1"}
 (fact "normalizes wrapped return metadata"
   (normalize-return-meta '[[:xt/maybe User]] {:ns 'sample.route :aliases {}})

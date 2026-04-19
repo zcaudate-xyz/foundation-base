@@ -6,7 +6,7 @@
             [std.string.wrap]))
 
 (l/script :js
-  {:require [[js.cell.kernel.base-link :as link]]})
+  {:require [[js.cell.kernel.base-link :as link] [xt.lang.common-spec :as xt]]})
 
 
 (defspec.xt trigger

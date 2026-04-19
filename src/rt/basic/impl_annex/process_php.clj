@@ -6,15 +6,15 @@
             [std.lang.base.impl :as impl]
             [std.lang.base.runtime :as rt]
             [std.lang.model-annex.spec-php :as spec]
-            [xt.lang.base-repl :as k]))
+            [xt.lang.common-repl :as k]))
 
 (def +php-init+
   (common/put-program-options
    :php  {:default  {:oneshot    :php
-                     :basic      :php}
-          :env      {:php    {:exec   "php"
-                              :flags  {:oneshot   ["-r"]
-                                       :basic     ["-r"]}}}}))
+                      :basic      :php}
+           :env      {:php    {:exec   "php"
+                                :flags  {:oneshot   ["-r"]
+                                        :basic     ["-r"]}}}}))
 
 ;;
 ;; ONESHOT
@@ -79,15 +79,17 @@
 ;;
 
 (def +client-basic+
-  '[(defn client-basic
-      [host port opts]
-      (let [conn (fsockopen host port)]
-         (while (not (feof conn))
-               (let [line (fgets conn)
-                     input (json_decode line)
-                     out   (return-eval input)]
-                (if input
-                    (fwrite conn (concat out "\n")))))))])
+  [(list 'defn 'client-basic
+         ['host 'port 'opts]
+         (list 'let ['conn '(fsockopen host port)]
+               (list 'while '(not (feof conn))
+                     (list 'let ['line '(fgets conn)
+                                 'input '(json_decode line)]
+                           (list 'cond
+                                 '(== line "<PING>\n")
+                                 (list ':-)
+                                 'input
+                                 (list ':- "fwrite($conn, return_eval($input) . \"\\n\");"))))))])
 
 (def ^{:arglists '([port & [{:keys [host]}]])}
   default-basic-client
@@ -110,7 +112,9 @@
 
 (def +default-basic-config+
   {:bootstrap #'default-basic-client
-    :main   {}
+   :main   {}
+   :container {:image "foundation-base/rt-basic-php:latest"}
+   :container-backup true
    :emit   {:body  {:transform #'default-basic-body-transform}
             :lang/format :global}
    :json   :full

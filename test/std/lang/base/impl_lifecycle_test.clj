@@ -9,7 +9,7 @@
              [std.lang.base.impl :as impl]
              [std.lang.base.impl-lifecycle :refer :all]
              [std.lang.base.library :as lib]
-             [xt.lang.base-lib :as k])
+             [xt.lang.common-lib :as k])
   (:use code.test))
 
 (def +library+
@@ -22,7 +22,7 @@
       (require '[js.blessed.ui-core] :reload)
       (require '[js.blessed.frame-status] :reload)
       (require '[js.blessed.frame-console] :reload)
-      (require '[xt.lang.base-lib] :reload))
+      (require '[xt.lang.common-lib] :reload))
     lib))
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-prep :added "4.0"}
@@ -36,7 +36,7 @@
       sort)
   => '(:code :direct :native :setup :teardown)
 
-  (:direct (second (emit-module-prep 'xt.lang.base-lib
+  (:direct (second (emit-module-prep 'xt.lang.common-lib
                                    {:lang :lua
                                     :emit {:compile {:type :graph
                                                      :root-ns 'lua}}})))
@@ -54,7 +54,7 @@
                                       :emit {:compile {:type :graph
                                                        :base    'js
                                                        :root-ns 'js.blessed.ui-core}}})))
-  => '#{js.blessed.ui-style xt.lang.base-lib js.react})
+  => '#{js.blessed.ui-style xt.lang.common-lib js.react})
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-setup-concat :added "4.0"}
 (fact "joins setup raw into individual blocks"
@@ -97,7 +97,7 @@
       '[js.blessed.ui-core
         js.blessed.ui-style
         js.react
-        xt.lang.base-lib]
+        xt.lang.common-lib]
       'js
       {})
      (l/get-module
@@ -119,7 +119,7 @@
                               '[js.blessed.ui-core
                                 js.blessed.ui-style
                                 js.react
-                                xt.lang.base-lib]
+                                xt.lang.common-lib]
                               'js
                               {})}}}
    (emit-module-prep
@@ -141,7 +141,7 @@
                               '[js.blessed.ui-core
                                 js.blessed.ui-style
                                 js.react
-                                xt.lang.base-lib]
+                                xt.lang.common-lib]
                               'js
                               {})}}}
    (emit-module-prep
@@ -183,7 +183,7 @@
 ^{:refer std.lang.base.impl-lifecycle/emit-module-teardown-concat :added "4.0"}
 (fact "joins teardown raw into individual blocks"
 
-  (-> (emit-module-teardown-raw 'xt.lang.base-lib
+  (-> (emit-module-teardown-raw 'xt.lang.common-lib
                                 {:lang :lua})
       (emit-module-teardown-concat))
   => coll?)
@@ -191,26 +191,26 @@
 ^{:refer std.lang.base.impl-lifecycle/emit-module-teardown-join :added "4.0"}
 (fact "joins teardown raw into code"
 
-  (-> (emit-module-teardown-raw 'xt.lang.base-lib
+  (-> (emit-module-teardown-raw 'xt.lang.common-lib
                                 {:lang :lua})
       (emit-module-teardown-join))
   => string?)
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-teardown-raw :added "4.0"}
 (fact "creates module teardown map of array strings"
-  (emit-module-teardown-raw 'xt.lang.base-lib {:lang :lua})
+  (emit-module-teardown-raw 'xt.lang.common-lib {:lang :lua})
   => map?)
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-teardown :added "4.0"}
 (fact "creates the teardown script"
   ^:hidden
   
-  (emit-module-teardown 'xt.lang.base-lib
+  (emit-module-teardown 'xt.lang.common-lib
                         {:lang :lua
                          :layout :full})
   => string?
   
-  (emit-module-teardown 'xt.lang.base-lib
+  (emit-module-teardown 'xt.lang.common-lib
                         {:lang :lua
                          :layout :full
                          :emit {:code {:suppress true}}})

@@ -51,7 +51,7 @@
 (defn module-entries
   "gets all module entries
  
-   (w/module-entries :xtalk 'xt.lang.base-lib identity)
+   (w/module-entries :xtalk 'xt.lang.common-lib identity)
    => coll?"
   {:added "4.0"}
   [lang ns pred]
@@ -154,7 +154,7 @@
   "emits and prints out the module
  
    (std.print/with-out-str
-     (w/print-module (l/rt 'xt.lang.base-lib :xtalk)))
+     (w/print-module (l/rt 'xt.lang.common-lib :xtalk)))
    => string?"
   {:added "4.0"}
   ([]

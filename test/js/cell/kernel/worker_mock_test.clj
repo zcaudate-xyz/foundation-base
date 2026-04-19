@@ -1,12 +1,13 @@
 (ns js.cell.kernel.worker-mock-test
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-repl :as repl]
              [js.core :as j]
              [js.cell.kernel.worker-mock :as worker-mock]]})
 
@@ -49,11 +50,11 @@
                 (fn [msg] (messages.push msg))
                 {}
                 true))
-   (k/get-key worker "::"))
+   (xt/x:get-key worker "::"))
   => "worker.mock"
   
   ;; Check that worker has postMessage function
   (!.js
    (var worker (worker-mock/create-worker k/identity {} true))
-   (k/is-function? (k/get-key worker "postMessage")))
+   (k/is-function? (xt/x:get-key worker "postMessage")))
   => true)

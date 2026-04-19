@@ -1,15 +1,16 @@
 (ns js.cell.kernel.base-link-test
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-              [xt.lang.base-repl :as repl]
-              [js.core :as j]
-              [js.cell.kernel.base-link :as base-link]
-              [js.cell.kernel.base-link-local :as base-link-local]
+   :require [[xt.lang.common-lib :as k]
+              [xt.lang.common-spec :as xt]
+               [xt.lang.common-repl :as repl]
+               [js.core :as j]
+               [js.cell.kernel.base-link :as base-link]
+               [js.cell.kernel.base-link-local :as base-link-local]
               [js.cell.kernel.worker-mock :as worker-mock]]})
 
 (fact:global
@@ -88,7 +89,7 @@
   ^:hidden
   
   (!.js
-   (k/get-key
+   (xt/x:get-key
     (base-link/link-create-worker
      {:create-fn
       (fn:> [listener]
@@ -103,7 +104,7 @@
   ^:hidden
   
   (!.js
-   (k/get-key (-/make-link) "::"))
+   (xt/x:get-key (-/make-link) "::"))
   => "cell.link"
   
   (notify/wait-on :js

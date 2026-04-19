@@ -3,7 +3,7 @@
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]})
+  {:require [[xt.lang.common-lib :as k]]})
 
 (defspec.xt User
   [:xt/record
@@ -18,7 +18,7 @@
 
 (defn.xt find-user
   [users id]
-  (return (k/get-key users id)))
+  (return (xt/x:get-key users id)))
 
 (defn.xt ^{:- [User]}
   wrong-user-name

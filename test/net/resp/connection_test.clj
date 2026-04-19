@@ -98,10 +98,14 @@
     => "PONG"))
 
 ^{:refer net.resp.connection/connection:value :added "3.0"}
-(fact "writes a string value to the connection")
+(fact "writes a string value to the connection"
+  connection:value
+  => fn?)
 
 ^{:refer net.resp.connection/connection:throw :added "3.0"}
-(fact "writes an exception to the connection")
+(fact "writes an exception to the connection"
+  connection:throw
+  => fn?)
 
 ^{:refer net.resp.connection/connection:close :added "3.0"}
 (fact "closes the connection"
@@ -145,7 +149,14 @@
   => ["PONG" "1" "2" "3"])
 
 ^{:refer net.resp.connection/connection:process-bulk :added "3.0"}
-(fact "processes the returned responses")
+(fact "processes the returned responses"
+  (connection:process-bulk nil
+                           [(with-meta ["PING"] {:format :string})
+                            (with-meta ["DATA"] {:format :edn :deserialize true})]
+                           [(.getBytes "PONG")
+                            [(.getBytes "{:a 1}")]]
+                           nil)
+  => ["PONG" '({:a 1})])
 
 ^{:refer net.resp.connection/connection:transact-start :added "3.0"}
 (fact "command to start transaction"
@@ -162,7 +173,12 @@
   => ["EXEC"])
 
 ^{:refer net.resp.connection/connection:transact-combine :added "3.0"}
-(fact "not valid for rdp protocol")
+(fact "not valid for rdp protocol"
+  (try
+    (connection:transact-combine nil [])
+    (catch Throwable t
+      (.getMessage t)))
+  => "Transaction cannot be combined")
 
 ^{:refer net.resp.connection/connection:info :added "3.0"}
 (fact "outputs connection info"
@@ -227,10 +243,11 @@
   => map?)
 
 ^{:refer net.resp.connection/test:connection :added "3.0"}
-(comment "creates a test connection"
-  
-  (test:connection)
-  => connection?)
+(fact "creates a test connection"
+  (with-redefs [test:config (constantly {:host "127.0.0.1" :port 17001})
+                connection (fn [opts] opts)]
+    (test:connection {:db 1}))
+  => {:host "127.0.0.1" :port 17001 :db 1})
 
 ^{:refer net.resp.connection/with-test:connection :added "3.0"
   :style/indent 1}

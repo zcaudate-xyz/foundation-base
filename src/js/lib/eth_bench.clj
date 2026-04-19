@@ -1,12 +1,9 @@
 (ns js.lib.eth-bench
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify]))
+            [xt.lang.common-notify :as notify]))
 
 (l/script :js
-  {:require [[js.lib.eth-lib :as eth-lib]
-             [js.lib.eth-solc :as eth-solc]
-             [xt.lang.base-lib :as k]
-             [js.core :as j]]})
+  {:require [[js.lib.eth-lib :as eth-lib] [js.lib.eth-solc :as eth-solc] [xt.lang.common-lib :as k] [js.core :as j] [xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd]]})
 
 (defn.js send-wei
   "sends currency for bench"
@@ -21,15 +18,17 @@
   [url private-key abi bytecode init-args overrides]
   (var signer (eth-lib/get-signer url private-key))
   (return (. (eth-lib/contract-deploy signer abi bytecode init-args overrides)
-             (then (fn:> [contract]
-                     {:status true
-                      :size (j/toFixed (/ (k/len bytecode) 2 1024)
-                                       3)
-                      :contractAddress (. contract address)}))
+              (then (fn:> [contract]
+                      (var address (or (xt/x:get-key contract "contractAddress")
+                                       (xt/x:get-key contract "target")))
+                      {:status true
+                        :size (j/toFixed (/ (xt/x:len bytecode) 2 1024)
+                                         3)
+                        :contractAddress address}))
 
-             (catch (fn:> [err]
-                      {:status false
-                       :data err})))))
+              (catch (fn:> [err]
+                        {:status false
+                         :data err})))))
 
 (defn.js contract-run
   "runs the contract given address and arguments"
@@ -39,13 +38,13 @@
   (return (. (eth-lib/contract-run signer address abi fn-name args overrides)
              (then (fn [res]
                      (return
-                      (:? (and (k/obj? res)
+                      (:? (and (k/is-object? res)
                                (. res wait))
                           (. res (wait))
                           res))))
              (then (fn [res]
                      (return
-                      (k/walk res
+                      (xtd/tree-walk res
                               (fn [o]
                                 (cond  (== "BigNumber"
                                            (k/type-native o))

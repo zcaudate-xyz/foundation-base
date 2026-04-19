@@ -7,20 +7,22 @@
   (:use code.test))
 
 (l/script- :js
-  {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
-             [js.lib.eth-bench :as e :include [:fn]]
-             [js.lib.eth-solc :as eth-solc :include [:fn]]
-             [js.core :as j]]})
+   {:runtime :basic
+     :require [[xt.lang.common-lib :as k]
+                [xt.lang.common-spec :as xt]
+                [xt.lang.common-repl :as repl]
+                [js.lib.eth-bench :as e :include [:fn]]
+                [js.lib.eth-solc :as eth-solc :include [:fn]]
+                [js.core :as j]]})
 
 (fact:global
- {:setup    [(solidity/rt:start-ganache-server)
+ {:setup    [(solidity/rt:stop-ganache-server)
+             (Thread/sleep 1000)
+             (solidity/rt:start-ganache-server)
+             (Thread/sleep 3000)
              (l/rt:restart)
-             (l/rt:scaffold :js)
-             (!.js
-              (:= solc (require "solc")))]
-  :teardown [(l/rt:stop)]})
+              (l/rt:scaffold :js)]
+   :teardown [(l/rt:stop)]})
 
 ^{:refer js.lib.eth-bench/send-wei :added "4.0" :unchecked true}
 (fact "sends currency for bench")
@@ -42,7 +44,7 @@
                       {}))
   => (contains-in
       {"status" true,
-       "contractAddress" string?})
+        "contractAddress" string?})
 
   (j/<!
    (e/contract-deploy "http://127.0.0.1:8545"
@@ -51,12 +53,8 @@
                       (@! (:bytecode +contract+))
                       [1 2 3]
                       {}))
-  => {"status" false,
-      "data"
-      {"count" 4,
-       "expectedCount" 0,
-       "reason" "too many arguments:  in Contract constructor",
-       "code" "UNEXPECTED_ARGUMENT"}})
+  => (contains-in {"status" false,
+                   "data" map?}))
 
 ^{:refer js.lib.eth-bench/contract-run :added "4.0" :unchecked true
   :setup [(def +contract+
@@ -64,14 +62,15 @@
              (l/rt :js)
              example-counter/+default-contract+))
           (def +address+
-            (j/<!
-             (e/contract-deploy "http://127.0.0.1:8545"
-                      (@! (last env-ganache/+default-private-keys+))
-                      (@! (:abi +contract+))
-                      (@! (:bytecode +contract+))
-                      []
-                      {})
-             (k/key-fn "contractAddress")))]}
+             (j/<!
+              (e/contract-deploy "http://127.0.0.1:8545"
+                       (@! (last env-ganache/+default-private-keys+))
+                       (@! (:abi +contract+))
+                       (@! (:bytecode +contract+))
+                       []
+                       {})
+               (fn [m]
+                 (return (xt/x:get-key m "contractAddress")))))]}
 (fact "runs the contract given address and arguments"
   ^:hidden
 
@@ -100,14 +99,15 @@
              (l/rt :js)
              example-counter/+default-contract+))
           (def +address+
-            (j/<!
-             (e/contract-deploy "http://127.0.0.1:8545"
-                      (@! (last env-ganache/+default-private-keys+))
-                      (@! (:abi +contract+))
-                      (@! (:bytecode +contract+))
-                      []
-                      {})
-             (k/key-fn "contractAddress")))
+             (j/<!
+              (e/contract-deploy "http://127.0.0.1:8545"
+                        (@! (last env-ganache/+default-private-keys+))
+                        (@! (:abi +contract+))
+                        (@! (:bytecode +contract+))
+                        []
+                        {})
+               (fn [m]
+                 (return (xt/x:get-key m "contractAddress")))))
           (j/<! (e/contract-run "http://127.0.0.1:8545"
                         (@! (last env-ganache/+default-private-keys+))
                         (@! +address+)

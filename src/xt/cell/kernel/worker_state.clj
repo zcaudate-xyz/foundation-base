@@ -4,9 +4,10 @@
 
 (l/script :xtalk
   {:require [[xt.cell.kernel.base-util :as util]
-             [xt.lang.base-task :as task]
-             [xt.lang.base-runtime :as rt :with [defvar.xt]]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-task :as task]
+             [xt.lang.common-runtime :as rt :with [defvar.xt]]
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]]})
 
 
 (defspec.xt WORKER_STATE
@@ -116,7 +117,7 @@
   {:added "4.0"}
   [actions worker]
   (cond worker
-        (do (k/set-key worker "actions" actions)
+        (do (xt/x:set-key worker "actions" actions)
             (return worker))
         
         :else
@@ -126,10 +127,10 @@
   "posts a message through a worker-like transport"
   {:added "4.0"}
   [worker body]
-  (var post-fn (or (k/get-key worker "post_message")
-                   (k/get-key worker "postMessage")))
-  (when (not (k/is-function? post-fn))
-    (k/err "ERR - worker transport cannot post messages"))
+  (var post-fn (or (xt/x:get-key worker "post_message")
+                   (xt/x:get-key worker "postMessage")))
+  (when (not (xt/x:is-function? post-fn))
+    (xt/x:err "ERR - worker transport cannot post messages"))
   (return (post-fn body)))
 
 (defn.xt fn-self
@@ -160,7 +161,7 @@
   (return
    (task/task-from-async
     (fn [resolve reject]
-      (x:with-delay
+      (xt/x:with-delay
        (fn []
          (resolve (-/fn-trigger worker op signal status body)))
        ms)))))
@@ -169,7 +170,7 @@
   "helper to set the state and emit event"
   {:added "4.0"}
   [worker state set-fn suppress]
-  (cond (k/get-key state "final")
+  (cond (xt/x:get-key state "final")
         (throw "Worker State is Final.")
         
         :else
@@ -187,7 +188,7 @@
   (return (-/fn-set-state worker
                           (-/WORKER_STATE)
                           (fn [state]
-                            (k/set-key state "final" true))
+                            (xt/x:set-key state "final" true))
                           suppress)))
 
 (defn.xt ^{:cell/action "@worker/get-final-status"
@@ -207,7 +208,7 @@
   (return (-/fn-set-state worker
                           (-/WORKER_STATE)
                           (fn [state]
-                            (k/set-key state "eval" status))
+                            (xt/x:set-key state "eval" status))
                           suppress)))
 
 (defn.xt ^{:cell/action "@worker/get-eval-status"
@@ -224,7 +225,7 @@
   "gets the actions list"
   {:added "4.0"}
   []
-  (return (k/obj-keys (-/WORKER_ACTIONS))))
+  (return (xtd/obj-keys (-/WORKER_ACTIONS))))
 
 (defn.xt ^{:cell/action "@worker/get-action-entry"
            :cell/static true}
@@ -241,7 +242,7 @@
   "pings the worker"
   {:added "4.0"}
   []
-  (return ["pong" (k/now-ms)]))
+  (return ["pong" (xt/x:now-ms)]))
 
 (defn.xt ^{:cell/action "@worker/ping.async"
            :cell/static true
@@ -253,7 +254,7 @@
   (return
    (task/task-from-async
     (fn [resolve reject]
-      (x:with-delay
+      (xt/x:with-delay
        (fn []
          (resolve (-/fn-ping)))
        ms)))))
@@ -264,7 +265,7 @@
   "echos the first arg"
   {:added "4.0"}
   [arg]
-  (return [arg (k/now-ms)]))
+  (return [arg (xt/x:now-ms)]))
 
 (defn.xt ^{:cell/action "@worker/echo.async"
            :cell/static true
@@ -276,7 +277,7 @@
   (return
    (task/task-from-async
     (fn [resolve reject]
-      (x:with-delay
+      (xt/x:with-delay
        (fn []
          (resolve (-/fn-echo arg)))
        ms)))))
@@ -287,7 +288,7 @@
   "throws an error"
   {:added "4.0"}
   []
-  (throw ["error" (k/now-ms)]))
+  (throw ["error" (xt/x:now-ms)]))
 
 (defn.xt ^{:cell/action "@worker/error.async"
            :cell/static true
@@ -299,7 +300,7 @@
   (return
    (task/task-from-async
     (fn [resolve reject]
-      (x:with-delay
+      (xt/x:with-delay
        (fn []
          (try
            (-/fn-error)

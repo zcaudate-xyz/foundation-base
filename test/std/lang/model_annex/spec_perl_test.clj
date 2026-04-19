@@ -113,4 +113,6 @@
 
 
 ^{:refer std.lang.model-annex.spec-perl/perl-eval :added "4.1"}
-(fact "TODO")
+(fact "emits a Perl eval block"
+  (l/emit-as :perl '[(eval (do (print "hello")))])
+  => "eval {\nprint(\"hello\");\n}")

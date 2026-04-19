@@ -3,7 +3,8 @@
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.lang.event-common :as event-common]]})
 
 (defspec.xt RoutePath
@@ -144,23 +145,27 @@
   "creates interim from url"
   {:added "4.0"}
   [url]
-  (var arr (k/split (k/cat "/" url) "?"))
-  (var body (k/first arr))
+  (var arr (xt/x:str-split (xt/x:cat "/" url) "?"))
+  (var body (xt/x:first arr))
   (var search nil)
-  (when (< 1 (k/len arr))
-    (:= search (k/second arr)))
-  (var path (-> (k/split body "/")
-                (k/arr-filter k/not-empty?)))
+  (when (< 1 (xt/x:len arr))
+    (:= search (xt/x:second arr)))
+  (var path (-> (xt/x:str-split body "/")
+                (xt/x:arr-filter (fn [x]
+                                   (return (< 0 (xt/x:len x)))))))
   (var params {})
-  (when search
-    (k/for:array [pair (k/split search "&")]
-                 (var [key val] (k/split pair "="))
-                 (k/set-key params key val)))
-  (cond (k/is-empty? params)
+  (when (xt/x:not-nil? search)
+     (xt/for:array [pair (xt/x:str-split search "&")]
+                   (when (< 0 (xt/x:len pair))
+                     (var parts (xt/x:str-split pair "="))
+                     (var key   (xt/x:first parts))
+                     (var val   (xt/x:second parts))
+                     (xt/x:set-key params key val))))
+  (cond (xtd/obj-empty? params)
         (return {:path path :params {}})
 
         :else
-        (return {:path path :params {(k/json-encode path) params}})))
+        (return {:path path :params {(xt/x:json-encode path) params}})))
 
 (defn.xt interim-to-url
   "creates url from interim"
@@ -168,15 +173,17 @@
   [interim]
   (var #{path params} interim)
   (var param-arr [])
-  (k/for:object [[key val] (or (k/get-key params (k/json-encode path))
-                               {})]
-    (when val
-      (x:arr-push param-arr (k/cat key "=" val))))
+  (var scoped-params (xt/x:get-key params (xt/x:json-encode path)))
+  (when (xt/x:nil? scoped-params)
+    (:= scoped-params {}))
+  (xt/for:object [[key val] scoped-params]
+    (when (xt/x:not-nil? val)
+      (xt/x:arr-push param-arr (xt/x:cat key "=" val))))
   (return
-   (k/cat (k/arr-join path "/")
-          (:? (k/not-empty? param-arr)
-              (k/cat "?" (k/arr-join param-arr "&"))
-              ""))))
+   (xt/x:cat (xt/x:str-join "/" path)
+           (:? (xtd/arr-not-empty? param-arr)
+               (xt/x:cat "?" (xt/x:str-join "&" param-arr))
+               ""))))
 
 (defn.xt path-to-tree
   "turns a path to tree"
@@ -184,11 +191,11 @@
   [path terminate]
   (var out {})
   (var arr [])
-  (k/for:array [[i v] path]
-    (k/set-key out (k/json-encode arr) v)
-    (x:arr-push arr v))
+  (xt/for:array [[i v] path]
+    (xt/x:set-key out (xt/x:json-encode arr) v)
+    (xt/x:arr-push arr v))
   (when terminate
-    (k/set-key out (k/json-encode arr) nil))
+    (xt/x:set-key out (xt/x:json-encode arr) nil))
   (return out))
 
 (defn.xt interim-to-tree
@@ -197,7 +204,7 @@
   [interim terminate]
   (var #{path params} interim)
   (var tree (-/path-to-tree path terminate))
-  (k/set-key tree "params" params)
+  (xt/x:set-key tree "params" params)
   (return tree))
 
 (defn.xt path-from-tree
@@ -205,10 +212,10 @@
   {:added "4.0"}
   [tree]
   (var path [])
-  (var v    (k/get-key tree (k/json-encode path)))
-  (while (k/not-empty? v)
-    (x:arr-push path v)
-    (:= v (k/get-key tree (k/json-encode path))))
+  (var v    (xt/x:get-key tree (xt/x:json-encode path)))
+  (while (xtd/arr-not-empty? v)
+    (xt/x:arr-push path v)
+    (:= v (xt/x:get-key tree (xt/x:json-encode path))))
   (return path))
 
 (defn.xt path-params-from-tree
@@ -216,10 +223,13 @@
   {:added "4.0"}
   [tree path]
   (return
-   (or (-> tree
-           (k/get-key "params")
-           (k/get-key (k/json-encode path)))
-       {})))
+   (:? (xt/x:nil? (-> tree
+                      (xt/x:get-key "params")
+                      (xt/x:get-key (xt/x:json-encode path))))
+       {}
+       (-> tree
+           (xt/x:get-key "params")
+           (xt/x:get-key (xt/x:json-encode path))))))
 
 (defn.xt interim-from-tree
   "converts interim from tree"
@@ -227,23 +237,27 @@
   [tree]
   (var #{params} tree)
   (var path (-/path-from-tree tree))
+  (when (xt/x:nil? params)
+    (:= params {}))
   (return {:path path
-           :params (or params {})}))
+           :params params}))
 
 (defn.xt changed-params-raw
   "checks for changed params"
   {:added "4.0"}
   [pparams nparams]
-  (:= pparams (or pparams {}))
-  (:= nparams (or nparams {}))
+  (when (xt/x:nil? pparams)
+    (:= pparams {}))
+  (when (xt/x:nil? nparams)
+    (:= nparams {}))
   (var diff-fn
        (fn [m other]
          (var out {})
-         (k/for:object [[k v] m]
-           (when (not= v (k/get-key other k))
-             (k/set-key out k true)))
+         (xt/for:object [[k v] m]
+           (when (not= v (xt/x:get-key other k))
+             (xt/x:set-key out k true)))
          (return out)))
-  (return (k/obj-assign
+  (return (xt/x:obj-assign
            (diff-fn pparams nparams)
            (diff-fn nparams pparams))))
 
@@ -251,8 +265,11 @@
   "gets diff between params"
   {:added "4.0"}
   [ptree ntree path]
-  (var pparams (-/path-params-from-tree ptree (or path [])))
-  (var nparams (-/path-params-from-tree ntree (or path [])))
+  (var path* path)
+  (when (xt/x:nil? path*)
+    (:= path* []))
+  (var pparams (-/path-params-from-tree ptree path*))
+  (var nparams (-/path-params-from-tree ntree path*))
   (return (-/changed-params-raw pparams nparams)))
 
 (defn.xt changed-path-raw
@@ -261,15 +278,19 @@
   [ppath npath]
   (var all {})
   (var arr [])
+  (var i 0)
   (var changed false)
   
-  (k/for:array [[i v] npath]
-    (var pv (k/get-idx ppath i))
+  (xt/for:array [v npath]
+    (var pv nil)
+    (when (< i (xt/x:len ppath))
+      (:= pv (xt/x:get-idx ppath (xt/x:offset i))))
     (when (not= pv v)
       (:= changed true))
     (when changed
-      (k/set-key all (k/json-encode arr) true))
-    (x:arr-push arr v))
+      (xt/x:set-key all (xt/x:json-encode arr) true))
+    (xt/x:arr-push arr v)
+    (:= i (+ i 1)))
   (return all))
 
 (defn.xt changed-path
@@ -292,16 +313,18 @@
   {:added "4.0"}
   [route path]
   (var #{tree} route)
-  (var pkey (k/json-encode path))
-  (return (k/get-key tree pkey)))
+  (:= path (event-common/arrayify-path path))
+  (var pkey (xt/x:json-encode path))
+  (return (xt/x:get-key tree pkey)))
 
 (defn.xt get-param
   "gets the param value"
   {:added "4.0"}
   [route param path]
   (var #{tree} route)
-  (:= path (or path (-/path-from-tree tree)))
-  (return (k/get-key (-/path-params-from-tree tree path)
+  (:= path (:? (xt/x:nil? path) (-/path-from-tree tree) path))
+  (:= path (event-common/arrayify-path path))
+  (return (xt/x:get-key (-/path-params-from-tree tree path)
                      param)))
 
 (defn.xt get-all-params
@@ -309,7 +332,8 @@
   {:added "4.0"}
   [route path]
   (var #{tree} route)
-  (:= path (or path (-/path-from-tree tree)))
+  (:= path (:? (xt/x:nil? path) (-/path-from-tree tree) path))
+  (:= path (event-common/arrayify-path path))
   (return (-/path-params-from-tree tree path)))
 
 
@@ -321,7 +345,7 @@
   "makes a route"
   {:added "4.0"}
   [initial]
-  (var input   (:? (k/fn? initial) (initial) initial))
+  (var input   (:? (xt/x:is-function? initial) (initial) initial))
   (var interim (-/interim-from-url input))
   (var tree    (-/interim-to-tree interim false))
   (return
@@ -345,16 +369,17 @@
   "adds a path listener"
   {:added "4.0"}
   [route path listener-id callback meta]
-  (var pkey (k/json-encode path))
+  (:= path (event-common/arrayify-path path))
+  (var pkey (xt/x:json-encode path))
   (return
    (event-common/add-listener
     route listener-id "route.path"
     callback
-    (k/obj-assign
+    (xt/x:obj-assign
      {:route/path path}
      meta)
     (fn [event]
-      (return (k/get-key (. event ["path"])
+      (return (xt/x:get-key (. event ["path"])
                          pkey))))))
 
 (defn.xt add-param-listener
@@ -365,31 +390,34 @@
    (event-common/add-listener
     route listener-id "route.param"
     callback
-    (k/obj-assign
+    (xt/x:obj-assign
      {:route/param param}
      meta)
     (fn [event]
-      (return (k/get-key (. event ["params"])
+      (return (xt/x:get-key (. event ["params"])
                          param))))))
 
 (defn.xt add-full-listener
   "adds a full listener"
   {:added "4.0"}
   [route path param listener-id callback meta]
-  (var pkey (k/json-encode path))
+  (:= path (event-common/arrayify-path path))
+  (var pkey (xt/x:json-encode path))
   (return
    (event-common/add-listener
     route listener-id "route.full"
     callback
-    (k/obj-assign
-     {:route/path  path
-      :route/param param}
-     meta)
-    (fn [event]
-      (return (and (k/get-key (. event ["path"])
-                              pkey)
-                   (k/get-key (. event ["params"])
-                              param)))))))
+     (xt/x:obj-assign
+      {:route/path  path
+       :route/param param}
+      meta)
+     (fn [event]
+       (return (and (== true
+                        (xt/x:get-key (. event ["path"])
+                                       pkey))
+                    (xt/x:not-nil?
+                     (xt/x:get-key (. event ["params"])
+                                   param))))))))
 
 (def.xt ^{:arglists '([route listener-id])}
   remove-listener
@@ -405,130 +433,152 @@
   [route url terminate]
   (var #{tree listeners} route)
   (var ninterim (-/interim-from-url url))
-  (var ninterim-params (k/get-key ninterim "params"))
-  (var all-params (k/get-key tree "params"))
+  (var ninterim-params (xt/x:get-key ninterim "params"))
+  (var all-params (xt/x:get-key tree "params"))
   
   ^CHANGES
   (var ppath   (-/path-from-tree tree))
-  (var npath   (k/get-key ninterim "path"))
-  (var pkey    (k/json-encode npath))
+  (var npath   (xt/x:get-key ninterim "path"))
+  (var pkey    (xt/x:json-encode npath))
   
-  (var pparams (k/get-key all-params pkey))
-  (var nparams (k/get-key ninterim-params pkey))
+  (var pparams (xt/x:get-key all-params pkey))
+  (var nparams (xt/x:get-key ninterim-params pkey))
+  (when (xt/x:nil? nparams)
+    (:= nparams {}))
 
   (var dpath   (-/changed-path-raw ppath npath))
   (var dparams (-/changed-params-raw pparams nparams))
   
   ^MERGE
-  (k/obj-assign tree (-/path-to-tree npath terminate))
-  (cond (k/is-empty? nparams)
-        (k/del-key all-params pkey)
+  (xt/x:obj-assign tree (-/path-to-tree npath terminate))
+  (cond (xtd/obj-empty? nparams)
+        (when (xt/x:has-key? all-params pkey)
+          (xt/x:del-key all-params pkey))
         
         :else
-        (k/set-key all-params pkey nparams))
+        (xt/x:set-key all-params pkey nparams))
 
   (var #{history} route)
-  (k/arr-pushl history url 50)
+  (xtd/arr-pushl history url 50)
   (return
-   (event-common/trigger-listeners
-    route
-    {:type "route.url"
-     :params dparams
-     :path   dpath})))
+   (event-common/task-await
+    (event-common/trigger-listeners
+     route
+     {:type "route.url"
+      :params dparams
+      :path   dpath}))))
 
 (defn.xt set-path
   "sets the path and param"
   {:added "4.0"}
   [route path params]
   (var #{tree} route)
-  (var all-params (k/get-key tree "params"))
+  (var all-params (xt/x:get-key tree "params"))
 
   ^CHANGES
   (var ppath    (-/path-from-tree tree))
-  (var npath    (or path ppath))
-  (var pkey    (k/json-encode npath))
+  (var npath    path)
+  (when (xt/x:nil? npath)
+    (:= npath ppath))
+  (:= npath (event-common/arrayify-path npath))
+  (var pkey    (xt/x:json-encode npath))
   
-  (var pparams  (k/get-key all-params pkey))
-  (var nparams  (or params pparams))
+  (var pparams  (xt/x:get-key all-params pkey))
+  (var nparams  params)
+  (when (xt/x:nil? nparams)
+    (:= nparams pparams))
+  (when (xt/x:nil? nparams)
+    (:= nparams {}))
 
   (var dpath   (-/changed-path-raw ppath npath))
   (var dparams (-/changed-params-raw pparams nparams))
 
   ^MERGE
-  (k/obj-assign tree (-/path-to-tree npath true))
-  (cond (k/is-empty? nparams)
-        (k/del-key all-params pkey)
+  (xt/x:obj-assign tree (-/path-to-tree npath true))
+  (cond (xtd/obj-empty? nparams)
+        (when (xt/x:has-key? all-params pkey)
+          (xt/x:del-key all-params pkey))
         
         :else
-        (k/set-key all-params pkey nparams))
+        (xt/x:set-key all-params pkey nparams))
 
   (var #{history} route)
-  (k/arr-pushl history (-/get-url route) 50)
+  (xtd/arr-pushl history (-/get-url route) 50)
   (return
-   (event-common/trigger-listeners
-    route
-    {:type "route.path"
-     :params dparams
-     :path   dpath})))
+   (event-common/task-await
+    (event-common/trigger-listeners
+     route
+     {:type "route.path"
+      :params dparams
+       :path   dpath}))))
 
 (defn.xt set-segment
   "sets the current segment"
   {:added "4.0"}
   [route path value]
   (var #{tree} route)
-  (var pkey   (k/json-encode path))
-  (var pvalue (k/get-key tree pkey))
-  (k/set-key tree pkey value)
+  (:= path (event-common/arrayify-path path))
+  (var pkey   (xt/x:json-encode path))
+  (var pvalue (xt/x:get-key tree pkey))
+  (xt/x:set-key tree pkey value)
   
   (var #{history} route)
-  (k/arr-pushl history (-/get-url route) 50)
+  (xtd/arr-pushl history (-/get-url route) 50)
   (return
-   (event-common/trigger-listeners
-    route
-    {:type "route.path"
-     :params {}
-     :path   {pkey true}})))
+   (event-common/task-await
+    (event-common/trigger-listeners
+     route
+     {:type "route.path"
+      :params {}
+      :path   {pkey true}}))))
 
 (defn.xt set-param
   "sets a param in a route"
   {:added "4.0"}
   [route param value path]
   (var #{tree} route)
-  (:= path  (or path (-/path-from-tree tree)))
-  (var pkey (k/json-encode path))
-  (var all-params (k/get-key tree "params"))
-  (var pparams (or (k/get-key all-params pkey) {}))
-  (var pvalue  (k/get-key pparams param))
+  (when (xt/x:nil? path)
+    (:= path (-/path-from-tree tree)))
+  (:= path (event-common/arrayify-path path))
+  (var pkey (xt/x:json-encode path))
+  (var all-params (xt/x:get-key tree "params"))
+  (var pparams (xt/x:get-key all-params pkey))
+  (when (xt/x:nil? pparams)
+    (:= pparams {}))
+  (var pvalue  (xt/x:get-key pparams param))
   (cond (not= pvalue value)
-        (do (cond (k/nil? value)
-                  (k/del-key pparams param)
-
-                  :else
-                  (k/set-key pparams param value))
-
-            (cond (k/is-empty? pparams)
-                  (k/del-key all-params pkey)
+        (do (cond (xt/x:nil? value)
+                  (xt/x:del-key pparams param)
                   
                   :else
-                  (k/set-key all-params pkey pparams))
+                  (xt/x:set-key pparams param value))
 
-            (var #{history} route)
-            (k/arr-pushl history (-/get-url route) 50)
-            (return
-             (event-common/trigger-listeners
-              route
-              {:type "route.params"
-               :params {param true}
-               :path   {}})))
+             (cond (xtd/obj-empty? pparams)
+                  (when (xt/x:has-key? all-params pkey)
+                    (xt/x:del-key all-params pkey))
+                  
+                  :else
+                  (xt/x:set-key all-params pkey pparams))
 
-        :else
-        (return [])))
+             (var #{history} route)
+             (xtd/arr-pushl history (-/get-url route) 50)
+             (return
+              (event-common/task-await
+               (event-common/trigger-listeners
+                route
+                {:type "route.params"
+                 :params {param true}
+                 :path   {}}))))
+
+         :else
+         (return [])))
 
 (defn.xt reset-route
   "resets the route, clearing all params"
   {:added "4.0"}
   [route url]
-  (k/set-key route "history" [])
-  (k/set-key route "tree"
-             (-/interim-to-tree (-/interim-from-url (or url "")) true))
-  (-/set-url route (or url "") true))
+  (xt/x:set-key route "history" [])
+  (var url* (:? (xt/x:nil? url) "" url))
+  (xt/x:set-key route "tree"
+             (-/interim-to-tree (-/interim-from-url url*) true))
+  (-/set-url route url* true))

@@ -88,12 +88,28 @@
 (defn tf-for-return
   "transform for `for:return`"
   {:added "4.0"}
-  [[_ [[res err] statement] {:keys [success error]}]]
-  (template/$ (tryCatch
-        (block
-         (var ~res ~statement)
-         ~success)
-        :error (fn [~err] ~error))))
+  [[_ [[res err] statement] {:keys [success error final]}]]
+  (if (and (seq? statement)
+           (= 'x:return-run (first statement)))
+    (let [[_ runner] statement]
+      (template/$ (block
+                   (var ~res nil)
+                   (tryCatch
+                    (block
+                     (~runner
+                      (fn [value]
+                        (:= ~res value))
+                      (fn [value]
+                        (stop value)))
+                     ~(if final (list 'return success) success))
+                    :error (fn [~err]
+                             ~(if final (list 'return error) error))))))
+    (template/$ (tryCatch
+                 (block
+                  (var ~res ~statement)
+                  ~(if final (list 'return success) success))
+                 :error (fn [~err]
+                          ~(if final (list 'return error) error))))))
 
 (defn- r-token-boolean
   [bool]
@@ -161,7 +177,7 @@
                  :boolean   {:as #'r-token-boolean}
                  :string    {:quote :single}
                  :symbol    {}}
-        :data   {:vector    {:start "list(" :end ")" :space ""}
+        :data   {:vector    {:start "c(" :end ")" :space ""}
                  :map       {:start "list(" :end ")" :space ""}
                  :map-entry {:start ""  :end ""  :space "" :assign "=" :keyword :symbol}}
         :define {:def       {:raw ""}

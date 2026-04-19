@@ -4,14 +4,7 @@
   (:refer-clojure :exclude [use val proxy]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :as k]
-             [js.core :as j]]
-   :import [["valtio/vanilla" :as [* ValtioCore]]
-            ["valtio/utils" :as [* ValtioUtils]]
-            ["valtio" :as [* Valtio]]
-            ["valtio" :as [* Valtio]]
-            ["valtio/vanilla" :as [* ValtioCore]]
-            ["valtio/utils" :as [* ValtioUtils]]]})
+  {:import [["valtio/vanilla" :as [* ValtioCore]] ["valtio/utils" :as [* ValtioUtils]] ["valtio" :as [* Valtio]] ["valtio" :as [* Valtio]] ["valtio/vanilla" :as [* ValtioCore]] ["valtio/utils" :as [* ValtioUtils]]] :require [[xt.lang.common-lib :as k] [xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd] [js.core :as j]]})
 
 ;;
 ;; valtio
@@ -44,13 +37,13 @@
   [m]
   (var out (-/proxy))
   (var val-fn (fn []
-                (return (:? (k/fn? m)
+                (return (:? (xt/x:is-function? m)
                             (m)
-                            (k/clone-nested m)))))
+                            (xtd/clone-nested m)))))
   (var __reset__ (fn []
-                   (k/for:object [[k _] out]
-                     (k/del-key out k))
-                   (j/assign out (val-fn))))
+                   (xt/for:object [[k _] out]
+                     (xt/x:del-key out k))
+                    (j/assign out (val-fn))))
   (j/defineProperty out "__reset__"
     {:value __reset__
      :writable false})
@@ -62,10 +55,10 @@
   {:added "4.0"}
   [pobj m]
   (var #{__reset__} pobj)
-  (if (k/fn? __reset__)
+  (if (xt/x:is-function? __reset__)
     (__reset__)
-    (k/for:object [[k _] pobj]
-      (k/del-key pobj k)))
+    (xt/for:object [[k _] pobj]
+      (xt/x:del-key pobj k)))
   (return (j/assign pobj m)))
 
 (defn.js useVal
@@ -73,13 +66,13 @@
   {:added "4.0"}
   ([pobj f := k/identity]
    (let [snap      (-/useSnapshot pobj)]
-     (return (:?  (k/fn? f)
-                  (f snap)
-                  
-                  (k/arr? f)
-                  (. f (reduce (fn [acc k]
-                                 (return (. acc [k])))
-                               snap))
+     (return (:?  (xt/x:is-function? f)
+                   (f snap)
+                   
+                   (xt/x:is-array? f)
+                   (. f (reduce (fn [acc k]
+                                  (return (. acc [k])))
+                                snap))
                   
                   :else snap)))))
 
@@ -110,14 +103,14 @@
   {:added "4.0"}
   ([pobj]
    (let [getFn   (fn []
-                   (return (k/obj-omit (-/useSnapshot pobj)
-                                       ["__reset__"])))
+                   (return (xtd/obj-omit (-/useSnapshot pobj)
+                                        ["__reset__"])))
          setFn   (fn [m]
                    (return (j/assign pobj m)))
-         resetFn (fn [m]
-                   (k/for:object [[k _] pobj]
-                     (k/del-key pobj k))
-                   (j/assign pobj m))]
+          resetFn (fn [m]
+                    (xt/for:object [[k _] pobj]
+                      (xt/x:del-key pobj k))
+                    (j/assign pobj m))]
      (return [getFn setFn resetFn pobj]))))
 
 (defn.js getFieldAccessors
@@ -133,9 +126,9 @@
                      (k/swap-key pobj field)
                      (k/aset pobj field
                              (k/obj-assign
-                              (k/get-key (:? initFn (initFn) {})
-                                         field)
-                              extra)))]
+                              (xt/x:get-key (:? initFn (initFn) {})
+                                          field)
+                               extra)))]
      (return [getFVal setFVal resetFVal pobj]))))
 
 (defn.js useProxy
@@ -197,7 +190,7 @@
   (:= initial (or initial (fn:> {})))
   (var [getFn setFn setData] (-/getAccessors pobj))
   (var data (getFn))
-  (var getKey (fn:> [key] (k/get-key data key)))
+  (var getKey (fn:> [key] (xt/x:get-key data key)))
   (var setKey (fn:> [key value] (setFn {key value})))
   (var toggleKey (fn [key]
                    (return (fn []

@@ -2,10 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :as k]
-             [xt.lang.event-form :as event-form]
-             [js.react :as r]
-             [js.core :as j]]})
+  {:require [[xt.lang.common-lib :as k] [xt.lang.event-form :as event-form] [js.react :as r] [js.core :as j] [xt.lang.common-data :as xtd] [xt.lang.common-spec :as xt]]})
 
 ;;
 ;; No Validation
@@ -17,9 +14,9 @@
   [initial keys]
   (var initialRef (r/useFollowRef initial))
   (return (r/const (event-form/make-form
-                    (fn:> (k/obj-pick ((r/curr initialRef))
+                    (fn:> (xtd/obj-pick ((r/curr initialRef))
                                       keys))
-                    (k/arr-juxt keys
+                    (xtd/arr-juxt keys
                                 k/identity
                                 (fn:> []))))))
 
@@ -30,13 +27,13 @@
   (var getData (fn []
                  (var data (dataFn (:.. dataArgs)))
                  (var out {})
-                 (k/for:array [k dataKeys]
-                   (x:set-key out k (x:get-key data k)))
-                 (return out)))
+                  (xt/for:array [k dataKeys]
+                    (xt/x:set-key out k (xt/x:get-key data k)))
+                  (return out)))
   (var form (-/makeFree getData dataKeys))
-  (var isChanged (fn:> (k/not-empty?
-                        (k/obj-diff (event-form/get-data form)
-                                    (getData)))))
+  (var isChanged (fn:> (xtd/not-empty?
+                        (xtd/obj-difference (event-form/get-data form)
+                                            (getData)))))
   (return #{form isChanged}))
 
 ;;
@@ -51,11 +48,11 @@
   (cond (== true print)
         (return true)
 
-        (k/obj? print)
-        (do (k/for:object [[key v] print]
+        (xt/x:is-object? print)
+        (do (xt/for:object [[key v] print]
               (var term (. meta [key]))
-              (when (k/is-empty? (k/arr-intersection (j/arrayify v)
-                                                     (j/arrayify term)))
+              (when (xtd/is-empty? (xtd/arr-intersection (j/arrayify v)
+                                                        (j/arrayify term)))
                 (return false)))
             (return true)))
   (return false))
@@ -113,9 +110,9 @@
                          
                          :else
                          (do (var nstatus (getStatus nresult))
-                             (when (not (k/eq-nested nstatus (r/curr statusRef)))
-                               (setResult nresult)
-                               (r/curr:set statusRef nstatus))))))))
+                              (when (not (xtd/eq-nested nstatus (r/curr statusRef)))
+                                (setResult nresult)
+                                (r/curr:set statusRef nstatus))))))))
      meta)
     (return
      (fn []
@@ -140,16 +137,16 @@
   "listens to multiple fields"
   {:added "4.0"}
   [form fields meta]
-  (var getData   (fn:> (k/arr-juxt fields
+  (var getData   (fn:> (xtd/arr-juxt fields
                                    k/identity
                                    (fn:> [field] (event-form/get-field form field)))))
-  (var getResult (fn:> (k/arr-juxt fields
-                                   k/identity
-                                   (fn:> [field] (event-form/get-field-result form field)))))
+  (var getResult (fn:> (xtd/arr-juxt fields
+                                    k/identity
+                                    (fn:> [field] (event-form/get-field-result form field)))))
   (var getStatus (fn [result]
-                   (return (k/obj-map result -/getFieldStatus))))
+                    (return (xtd/obj-map result -/getFieldStatus))))
   (var getPassed (fn [result]
-                   (return (k/arr-every (k/obj-vals result) -/getFieldPassed))))
+                    (return (xtd/arr-every (xtd/obj-vals result) -/getFieldPassed))))
   (return (-/useListener form fields
                          #{getData
                            getResult
@@ -163,9 +160,9 @@
   "uses data from multiple fields in form"
   {:added "4.0"}
   [form fields meta]
-  (var getData   (fn:> (k/arr-juxt fields
-                                   k/identity
-                                   (fn:> [field] (event-form/get-field form field)))))
+  (var getData   (fn:> (xtd/arr-juxt fields
+                                    k/identity
+                                    (fn:> [field] (event-form/get-field form field)))))
   (return (-/useListener form fields
                          #{getData
                            {:dataField "data"}}
@@ -224,7 +221,7 @@
   (var getResult (fn:> (j/assign {} (event-form/get-result form))))
   (var getStatus (fn [result]
                    (var #{fields} result)
-                   (return (k/obj-map fields -/getFieldStatus))))
+                    (return (xtd/obj-map fields -/getFieldStatus))))
   (var getPassed (fn:> [result] (event-form/check-all-passed {:result result})))
   (return (-/useListener form fields
                          #{getData
@@ -258,7 +255,7 @@
   (var getResult (fn:> (j/assign {} (event-form/get-result form))))
   (var getStatus (fn [result]
                    (var #{fields} result)
-                   (return (k/obj-map fields -/getFieldStatus))))
+                    (return (xtd/obj-map fields -/getFieldStatus))))
   (var getPassed (fn:> [result] (event-form/check-all-passed {:result result})))
   (return (. (-/useListener form fields
                             #{getResult
@@ -285,24 +282,24 @@
   (var #{data} (-/listenFields form fields meta))
   (var validateFields
        (fn []
-         (k/for:array [field fields]
-           (var fdata (event-form/get-field form field))
-           (when (or explicit
-                     (k/is-boolean? fdata)
-                     (k/is-number? fdata)
-                     (k/not-empty? fdata))
-             (event-form/validate-field form field)))))
+         (xt/for:array [field fields]
+            (var fdata (event-form/get-field form field))
+            (when (or explicit
+                      (k/is-boolean? fdata)
+                      (k/is-number? fdata)
+                      (xtd/not-empty? fdata))
+              (event-form/validate-field form field)))))
   (var onActionReset
        (fn []
          (setResult nil)
          (when (not keep)
-           (k/for:array [field fields]
-             (event-form/reset-field-data form field)))
-         (j/future-delayed [100]
-           (k/for:array [field fields]
-             (event-form/reset-field-validator form field))
-           (when (isMounted)
-             (setClearing true)))))
+            (xt/for:array [field fields]
+              (event-form/reset-field-data form field)))
+          (j/future-delayed [100]
+            (xt/for:array [field fields]
+              (event-form/reset-field-validator form field))
+            (when (isMounted)
+              (setClearing true)))))
   (var onActionCheck
        (fn:>
         (and (onCheck)
@@ -345,13 +342,13 @@
   
   (var validateFilled
        (fn []
-         (k/for:array [vkey (k/obj-keys (. form validators))]
-           (var v (k/get-key data vkey))
-           (when (and (not (k/is-boolean? v))
-                      (not (k/is-number? v))
-                      (k/not-empty? v))
-             (event-form/validate-all form)
-             (return)))))
+          (xt/for:array [vkey (xtd/obj-keys (. form validators))]
+            (var v (xt/x:get-key data vkey))
+            (when (and (not (k/is-boolean? v))
+                       (not (k/is-number? v))
+                       (xtd/not-empty? v))
+              (event-form/validate-all form)
+              (return)))))
   (r/init []
     (if explicit
       (event-form/validate-all form)
@@ -365,4 +362,3 @@
       (setClearing false)))
   (return #{onActionReset
             onActionCheck}))
-

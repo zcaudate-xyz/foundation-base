@@ -38,27 +38,32 @@
   [[_ & args]]
   (cond
     (empty? args)
-    (list (intrinsic-sym "const-fn") nil)
+    '(fn [& _args]
+       (return nil))
 
     (vector? (first args))
     (list* 'fn (first args) (rest args))
 
-     :else
-     (list (intrinsic-sym "const-fn") (first args))))
+    :else
+    (list 'fn '[& _args]
+          (list 'return (first args)))))
 
 (declare lower-form)
 
 (def +wrapper-targets+
-  {'xt.lang.base-lib/nil? 'x:nil?
-   'xt.lang.base-lib/cat 'x:cat
-   'xt.lang.base-lib/json-encode 'x:json-encode
-   'xt.lang.base-lib/split 'x:str-split
-   'xt.lang.base-lib/fn? 'x:is-function?})
+  {'xt.lang.common-lib/nil? 'x:nil?
+    'xt.lang.common-lib/cat 'x:cat
+    'xt.lang.common-lib/json-decode 'x:json-decode
+    'xt.lang.common-lib/json-encode 'x:json-encode
+    'xt.lang.common-lib/split 'x:str-split
+    'xt.lang.common-lib/fn? 'x:is-function?
+    'xt.lang.common-lib/arr? 'x:is-array?
+    'xt.lang.common-lib/obj? 'x:is-object?})
 
 (def +intrinsic-targets+
-  {'xt.lang.base-lib/arrayify "arrayify"
-   'xt.lang.base-lib/not-empty? "not-empty?"
-   'xt.lang.base-lib/is-empty? "is-empty?"
+  {'xt.lang.common-lib/arrayify "arrayify"
+   'xt.lang.common-lib/not-empty? "not-empty?"
+   'xt.lang.common-lib/is-empty? "is-empty?"
    'xt.lang.event-common/make-container "make-container"
    'xt.lang.event-common/blank-container "blank-container"})
 
@@ -92,19 +97,22 @@
       (= op' 'fn:>)
       (lower-fn-shorthand (cons op' args'))
 
-      (= op' 'xt.lang.base-lib/get-key)
+      (= canonical-op 'x:get-key)
       (lower-defaulted-target 'x:get-key args')
 
-      (= op' 'xt.lang.base-lib/get-in)
+      (or (= op' 'xt.lang.common-lib/get-in)
+          (= canonical-op 'x:get-path))
       (lower-defaulted-target 'x:get-path args')
 
-      (= op' 'xt.lang.base-lib/arr-join)
+      (= op' 'xt.lang.common-lib/arr-join)
       (list 'x:str-join (second args') (first args'))
 
-      (= op' 'xt.lang.base-lib/first)
+      (or (= op' 'xt.lang.common-lib/first)
+          (= canonical-op 'x:first))
       (lower-offset-index args' 0)
 
-      (= op' 'xt.lang.base-lib/second)
+      (or (= op' 'xt.lang.common-lib/second)
+          (= canonical-op 'x:second))
       (lower-offset-index args' 1)
 
       (contains? +wrapper-targets+ op')

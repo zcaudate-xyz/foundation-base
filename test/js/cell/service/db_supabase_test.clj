@@ -5,7 +5,7 @@
 (l/script- :js
   {:runtime :basic
    :require [[js.cell.service.db-supabase :as db-supabase]
-             [xt.lang.base-lib :as k]]})
+              [xt.lang.common-data :as xtd]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -54,9 +54,9 @@
   ^:hidden
 
   (!.js
-   (var db (k/obj-assign (@! +db+)
-                         {"execute" (fn [compiled _]
-                                      (return [true compiled]))}))
+   (var db (xtd/obj-assign (@! +db+)
+                          {"execute" (fn [compiled _]
+                                       (return [true compiled]))}))
    [(db-supabase/supabase-capable? db)
     (db-supabase/supabase-capable? (@! +db+))])
   => [true false])
@@ -168,9 +168,9 @@
   ^:hidden
 
   (!.js
-   (var db (k/obj-assign (@! +db+)
-                         {"execute" (fn [compiled _]
-                                      (return [true compiled]))}))
+   (var db (xtd/obj-assign (@! +db+)
+                          {"execute" (fn [compiled _]
+                                       (return [true compiled]))}))
    (db-supabase/run-supabase-query
     db
     {:table "Order"

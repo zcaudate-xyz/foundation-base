@@ -2,13 +2,13 @@
   (:require [clojure.string]
             [rt.basic.type-common :as common]
             [std.fs :as fs]
+            [std.lib.os :as os]
             [std.json :as json]
             [std.lang.base.pointer :as ptr]
             [std.lang.base.runtime :as default]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
             [std.lib.impl :as impl]
-            [std.lib.os :as os]
             [std.protocol.context :as protocol.context]))
 
 (defn sh-exec
@@ -87,10 +87,144 @@
         (if stderr
           (trim (.getMessage t))
           (throw t)))
+       (finally
+         (doseq [path [tmp-file (str tmp-exec)]]
+           (try (fs/delete path)
+                (catch Throwable _)))))))
+
+(defn local-exec-available?
+  "checks if the resolved twostep executable exists locally"
+  {:added "4.1"}
+  [exec]
+  (let [cmd (cond (vector? exec) (first exec)
+                  (string? exec) exec
+                  :else nil)]
+    (boolean
+     (and cmd
+          (common/program-exists? cmd)))))
+
+(defn sh-exec-docker
+  "executes the compile and run process inside a Docker container"
+  {:added "4.1"}
+  [input-args input-body {:keys [trim
+                                 stderr
+                                 raw
+                                 root
+                                 extension
+                                 output-flag
+                                 container]
+                          :as opts
+                          :or {trim clojure.string/trim-newline}}]
+  (let [{:keys [image flags environment exec run-args workdir]
+         :or {workdir "/work"}} (or container
+                                   (f/error "Container config required"
+                                            {:opts opts}))
+        tmp-exec      (java.io.File/createTempFile "tmp" "")
+        tmp-file      (str tmp-exec
+                           "."
+                           (or extension
+                               (f/error "Requires File Extension"
+                                        opts)))
+        root-dir      (str (or root (fs/parent tmp-file)))
+        exec-name     (str (fs/file-name (str tmp-exec)))
+        file-name     (str (fs/file-name tmp-file))
+        container-exec (or exec input-args)
+        compile-args  (if output-flag
+                        (vec (concat container-exec
+                                     [output-flag exec-name file-name]))
+                        (conj (vec container-exec) file-name))
+        run-args      (or run-args
+                          [(str "./" exec-name)])
+        docker-run!   (fn [args]
+                        (let [env-args (mapcat (fn [[k v]]
+                                                 ["-e" (str k "=" v)])
+                                               environment)
+                              docker-args (vec (concat ["docker" "run" "--rm"
+                                                        "-v" (str root-dir ":" workdir)
+                                                        "-w" workdir]
+                                                       flags
+                                                       env-args
+                                                       [image]
+                                                       args))
+                              proc (os/sh {:wait false
+                                           :output false
+                                           :args docker-args})]
+                          (os/sh-wait proc)
+                          (os/sh-output proc)))
+        raw-output    (fn [{:keys [exit out err]}]
+                        (let [out-lines (->> (clojure.string/split-lines (trim out))
+                                             (remove empty?)
+                                             seq)
+                              err-lines (->> (clojure.string/split-lines (trim err))
+                                             (remove empty?)
+                                             seq)]
+                          [exit (or out-lines err-lines [])]))
+        stderr-output (fn [{:keys [out err]}]
+                        (trim (or (not-empty err)
+                                  out
+                                  "")))]
+    (try
+      (spit tmp-file input-body)
+      ;; Some containerized toolchains cannot replace the pre-created tempfile
+      ;; path, so remove the placeholder before compiling to that output name.
+      (try (fs/delete (str tmp-exec))
+           (catch Throwable _))
+      (let [compile-ret (docker-run! compile-args)]
+        (cond raw
+              (if (zero? (:exit compile-ret))
+                (raw-output (docker-run! run-args))
+                (raw-output compile-ret))
+
+              (not (zero? (:exit compile-ret)))
+              (if stderr
+                (stderr-output compile-ret)
+                (f/error "Twostep docker compile failed"
+                         {:args compile-args
+                          :root root-dir
+                          :file tmp-file
+                          :exec (str tmp-exec)
+                          :image image
+                          :result compile-ret}))
+
+              :else
+              (let [run-ret (docker-run! run-args)]
+                (if (zero? (:exit run-ret))
+                  (trim (:out run-ret))
+                  (if stderr
+                    (stderr-output run-ret)
+                    (f/error "Twostep docker execution failed"
+                             {:args run-args
+                              :root root-dir
+                              :file tmp-file
+                              :exec (str tmp-exec)
+                              :image image
+                              :result run-ret}))))))
+      (catch Throwable t
+        (if stderr
+          (trim (.getMessage t))
+          (throw t)))
       (finally
         (doseq [path [tmp-file (str tmp-exec)]]
           (try (fs/delete path)
                (catch Throwable _)))))))
+
+(defn sh-exec-portable
+  "uses local twostep execution when the compiler is available, otherwise falls
+   back to Docker when configured"
+  {:added "4.1"}
+  [input-args input-body {:keys [container
+                                 container-backup
+                                 force-container]
+                          :as opts}]
+  (let [use-container? (or force-container
+                           (and container
+                                (if (contains? opts :container-backup)
+                                  container-backup
+                                  true)
+                                (not (local-exec-available? input-args))))]
+    (if use-container?
+      (sh-exec-docker input-args input-body opts)
+      (sh-exec input-args input-body opts))))
 
 (defn raw-eval-twostep
   "evaluates the twostep evaluation"

@@ -29,7 +29,16 @@
                 :duration 0}))
 
 ^{:refer std.concurrent.pool/resource-string :added "3.0"}
-(fact "returns a string describing the resource")
+(fact "returns a string describing the resource"
+  (boolean
+   (re-find #"^#res"
+            (binding [*current* 10]
+              (resource-string {:create-time 0
+                                :update-time 0
+                                :busy 0.0
+                                :used 0
+                                :status :idle}))))
+  => true)
 
 ^{:refer std.concurrent.pool/pool-resource :added "3.0"}
 (fact "creates a pool resource"
@@ -53,14 +62,27 @@
   => (contains [string? '<RESOURCE>]))
 
 ^{:refer std.concurrent.pool/dispose-fn :added "3.0"}
-(fact "helper function for `dispose` and `cleanup`")
+(fact "helper function for `dispose` and `cleanup`"
+  (dispose-fn {:idle {"hello" {:create-time 0
+                               :busy 0.0
+                               :object :resource}}
+               :stats {:total-time 0.0
+                       :busy-time 0.0
+                       :dispose 0}}
+              "hello"
+              (fn [_] :stopped))
+  => (contains-in {:idle {}
+                   :stats {:dispose 1}}))
 
 ^{:refer std.concurrent.pool/pool:dispose :added "3.0"}
 (fact "disposes an idle object"
   ^:hidden
 
   (component/with [|pool| (create-pool)]
-    (pool:dispose |pool| (first (keys (pool:resources:idle |pool|))))))
+    (let [id (first (keys (pool:resources:idle |pool|)))]
+      (pool:dispose |pool| id)
+      (contains? (pool:resources:idle |pool|) id)))
+  => false)
 
 ^{:refer std.concurrent.pool/pool:dispose-over :added "3.0"}
 (fact "disposes if idle and busy are over size limit"
@@ -96,8 +118,8 @@
     (doseq [id -ids-]
       (pool:release |pool| id))
 
-    (count (pool:resources:idle |pool|))
-    => 8
+    (count (pool:resources:busy |pool|))
+    => 0
 
     (pool:cleanup |pool|)
 
@@ -110,7 +132,8 @@
   
   (pool-handler {:state (atom {:running true})
                  :cleanup (fn [])
-                 :poll 100}))
+                 :poll 100})
+  => fn?)
 
 ^{:refer std.concurrent.pool/pool:started? :added "3.0"}
 (fact "checks if pool has started"
@@ -200,13 +223,17 @@
 (fact "creates an initial pool"
   ^:hidden
   
-  (pool:create {:size 5
-                :max 8
-                :keep-alive 10000
-                :poll 20000
-                :resource {:create (fn [] '<RESOURCE>)
-                           :initial 0.3
-                           :thread-local true}}))
+  (let [pool (pool:create {:size 5
+                           :max 8
+                           :keep-alive 10000
+                           :poll 20000
+                           :resource {:create (fn [] '<RESOURCE>)
+                                      :initial 0.3
+                                      :thread-local true}})]
+    [(pool? pool)
+     (f/atom? (:state pool))
+     (-> pool :resource :thread-local)])
+  => [true true true])
 
 ^{:refer std.concurrent.pool/pool :added "3.0"}
 (fact "creates and starts the pool"

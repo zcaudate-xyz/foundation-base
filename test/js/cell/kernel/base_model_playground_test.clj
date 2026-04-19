@@ -1,19 +1,37 @@
 (ns js.cell.kernel.base-model-playground-test
   (:require [js.cell.playground :as browser]
-            [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+             [std.lang :as l]
+             [xt.lang.common-notify :as notify])
   (:use code.test))
+
+(def ^:private +tiny-worker-path+
+  (str (System/getProperty "user.dir") "/node_modules/tiny-worker/lib/index.js"))
+
+(defmacro playground-worker-url
+  []
+  `{:create-fn
+    (fn [listener]
+      (var Worker (require ~+tiny-worker-path+))
+      (var worker (new Worker
+                       (fn []
+                         (eval (@! (browser/play-worker true))))))
+      (. worker (addEventListener
+                 "message"
+                 (fn [e]
+                   (listener e.data))
+                 false))
+      (return worker))})
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
-             [xt.lang.base-runtime :as rt :with [defvar.js]]
-             [js.core :as j]
-             [js.cell.kernel.base-link-local :as base-link-local]
-             [js.cell.kernel.base-model :as base-model]
-             [js.cell.kernel.base-impl :as base-impl]]
-   :import [["tiny-worker" :as Worker]]})
+   :require [[xt.lang.common-lib :as k]
+               [xt.lang.common-data :as xtd]
+               [xt.lang.common-repl :as repl]
+                [xt.lang.common-runtime :as rt :with [defvar.js]]
+                [js.core :as j]
+                [js.cell.kernel.base-link-local :as base-link-local]
+               [js.cell.kernel.base-model :as base-model]
+               [js.cell.kernel.base-impl :as base-impl]]})
 
 (fact:global
  {:setup    [(do (l/rt:restart :js)
@@ -25,11 +43,27 @@
   []
   (return nil))
 
+(defn.js make-worker-url
+  []
+  (return
+   {:create-fn
+    (fn [listener]
+      (var Worker (require (+ (. process ["env"] ["PWD"])
+                              "/node_modules/tiny-worker/lib/index.js")))
+      (var worker (new Worker
+                       (fn []
+                         (eval (@! (browser/play-worker true))))))
+      (. worker (addEventListener
+                 "message"
+                 (fn [e]
+                   (listener e.data))
+                 false))
+      (return worker))}))
+
 (defn.js reset-cell
   []
   (var cell (base-impl/new-cell
-             (fn []
-               (eval (@! (browser/play-worker true))))))
+             (-/make-worker-url)))
   (-/CELL-reset cell)
   (return cell))
 
@@ -89,7 +123,7 @@
 (fact "updates view input against the playground worker"
   ^:hidden
 
-  (j/<! (k/first
+  (j/<! (xtd/first
          (base-model/view-set-input
           (-/CELL) "hello" "ping" {:data ["bar"]})))
   => (contains-in

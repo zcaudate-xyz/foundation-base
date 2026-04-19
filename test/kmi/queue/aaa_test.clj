@@ -10,7 +10,7 @@
   {:runtime :redis.client
    :config {:port 17003
             :bench true}
-   :require [[xt.lang.base-lib :as k :include [:fn]]
+   :require [[xt.lang.common-lib :as k :include [:fn]]
              [kmi.redis :as r]]})
 
 (fact:global

@@ -3,9 +3,10 @@
 
 (l/script :lua
   {:runtime :redis
-   :require [[xt.lang.base-lib :as k]
-             [kmi.redis :as r]
-             [kmi.queue.common :as q]]
+   :require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+              [kmi.redis :as r]
+              [kmi.queue.common :as q]]
    :static {:lang/lint-globals #{redis}}})
 
 ;;
@@ -107,7 +108,7 @@
                                     (- idx-1 c-offset))])
    (local items (r/call "LRANGE" k-queue c-start c-finish))
    (return
-    (:? (< 0 (len items)) [(k/to-number idx-0) items] nil))))
+    (:? (< 0 (len items)) [(xt/x:to-number idx-0) items] nil))))
 
 (defn.lua ^{:rt/redis {}} mq-list-queue-get
   "gets the first item in the list
@@ -151,9 +152,9 @@
                         (- (+ start count) 1)))
 
    (local '[keys n] '[{} 0])
-   (k/for:object [[k v] items]
-     (:= n (+ n 1))
-     (:= (. keys [n]) (cat partition "-" (- (+ k counter) 1))))
+    (xt/for:object [[k v] items]
+      (:= n (+ n 1))
+      (:= (. keys [n]) (cat partition "-" (- (+ k counter) 1))))
 
    (if (< 0 (len keys))
      (do (r/call "SADD" k-pending (unpack keys))
@@ -235,7 +236,7 @@
        "group_init_all"     -/mq-list-group-init-all
        "group_outdated_all" -/mq-list-group-outdated-all
        "group_waiting_all"  -/mq-list-group-waiting-all}
-      (k/obj-assign q/mq-base-table)))
+      (xtd/obj-assign q/mq-base-table)))
 
 (def.lua mq-list-table-get
   {"read_group"         -/mq-list-read
@@ -243,6 +244,4 @@
    "read_release"       -/mq-list-read-release
    "queue_items"        -/mq-list-queue-items
    "queue_get"          -/mq-list-queue-get})
-
-
 

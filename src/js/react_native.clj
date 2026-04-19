@@ -3,24 +3,8 @@
             [std.lib.foundation :as f]))
 
 (l/script :js
-  {:require [[js.core :as j]
-             [js.react :as r]
-             [js.react.helper-portal :as helper-portal]
-             [xt.lang.base-lib :as k]]
-   :import [["react-native" :as [* ReactNative]]
-            ["react-native-video" :as RNVideo]
-            ["react-native-gesture-handler" :as [* RNGestureHandler]]
-            ["@react-navigation/bottom-tabs" :as [* RNNavTabs]]
-            ["react-native" :as [* ReactNative]]
-            ["react-native-localize" :as [* RNLocalize]]
-            ["@react-navigation/drawer" :as [* RNNavDrawer]]
-            ["expo-linear-gradient" :as [* ExpoLinearGradient]]
-            ["react-native-svg" :as [* RNSvg]]
-            ["@react-navigation/stack" :as [* RNNavStack]]
-            ["react-native-error-boundary" :as RNErrorBoundary]
-            ["react-native-safe-area-context" :as [* RNSafeArea]]
-            ["@react-navigation/native" :as [* RNNav]]
-            ["react-native-vector-icons/MaterialCommunityIcons" :as RNIcon]]})
+  {:import [["react-native" :as [* ReactNative]] ["react-native-video" :as RNVideo] ["react-native-gesture-handler" :as [* RNGestureHandler]] ["@react-navigation/bottom-tabs" :as [* RNNavTabs]] ["react-native" :as [* ReactNative]] ["react-native-localize" :as [* RNLocalize]] ["@react-navigation/drawer" :as [* RNNavDrawer]] ["expo-linear-gradient" :as [* ExpoLinearGradient]] ["react-native-svg" :as [* RNSvg]] ["@react-navigation/stack" :as [* RNNavStack]] ["react-native-error-boundary" :as RNErrorBoundary] ["react-native-safe-area-context" :as [* RNSafeArea]] ["@react-navigation/native" :as [* RNNav]] ["react-native-vector-icons/MaterialCommunityIcons" :as RNIcon]]
+   :require [[js.core :as j] [js.react :as r] [js.react.helper-portal :as helper-portal] [xt.lang.common-lib :as k] [xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-string :as str] [xt.lang.common-trace :as trace]]})
 
 (comment
   :icon     {:material   []
@@ -476,10 +460,10 @@
   [e]
   (var s (or (JSON.stringify e nil 2)
              ""))
-  (var arr (k/split s "\n"))
-  (return (+ (-> (k/arr-slice arr 1 (- (k/len arr) 1))
-                 (k/arr-map (fn:> [l] (k/substring l 2)))
-                 (k/arr-join "\n" )))))
+  (var arr (str/split s "\n"))
+  (return (+ (-> (xtd/arr-slice arr 1 (- (xt/x:len arr) 1))
+                  (xtd/arr-map (fn:> [l] (str/substring l 2)))
+                  (str/join "\n" )))))
 
 (defn.js format-entry
   "formats an entry"
@@ -487,8 +471,8 @@
   [e]
   (var out (-/format-obj e))
   (return (-> out
-              (k/replace "\"" "")
-              (k/replace "," ""))))
+              (str/replace "\"" "")
+              (str/replace "," ""))))
 
 (defn.js measure
   "measures the element"
@@ -505,7 +489,7 @@
                   (var out #{fx fy width height px py})
                   (f out)
                   (resolve out))))
-            (do (k/LOG! "NOT MEASURED" elem)
+            (do (trace/LOG! "NOT MEASURED" elem)
                 (resolve {:fx 0 :fy 0 :width 0 :height 0 :px 0 :py 0})))))))
 
 (defn.js measureRef
@@ -768,7 +752,7 @@
                  :onPress (fn []
                             (setInternal i)
                             (if setIndex (setIndex i))
-                            (if onChange (onChange (k/get-key items i))))}
+                            (if onChange (onChange (. items [i]))))}
                 [:% -/Text {:key item
                             :style [(j/assign {:color  "#888"
                                                :padding 2}
@@ -872,7 +856,7 @@
        (setInternal index)))
    (return
     [:% -/FlatList
-     {:data  (k/arr-map items format)
+     {:data  (xtd/arr-map items format)
       :keyExtractor k/identity
       :renderItem (fn [e]
                     (var #{item} e)
@@ -1033,7 +1017,7 @@
          :setValues setValues
          :format (fn:> [s] (+ \" \" s \" \"))}] 
  [:% n/Caption
-        {:text (k/json-encode #{values})
+        {:text (xt/x:json-encode #{values})
          :style {:marginTop 10}}])))"
   {:added "4.0"}
   ([#{[data
@@ -1063,14 +1047,14 @@
       (:= root tree)
       (:= parents [])
       levels]}]
-  (when (k/is-empty? levels)
+  (when (xtd/is-empty? levels)
     (return [:% -/Text "NO DATA"]))
   (var [level (:.. more)] levels)
   (var #{type} level)
   (var Pane (:? (== type "list")
                 -/ListPane
                 -/TabsPane))
-  (var isFinal (== 1 (k/len levels)))
+  (var isFinal (== 1 (xt/x:len levels)))
   (when isFinal
     (return [:% Pane #{[tree
                         root
@@ -1172,7 +1156,7 @@
     (j/map columns
            (fn [[label key f]]
              (:= f (or f k/identity))
-             (var val (k/get-key entry key))
+             (var val (xt/x:get-key entry key))
              (var output (f val entry))
              (return
               [:% -/View
@@ -1365,14 +1349,14 @@
   (var contentRef (r/ref))
   (var getLayouts
        (fn []
-         (var contentElem (or (k/get-in contentRef
-                                        ["current"
-                                         "children"
-                                         0])
-                              (k/get-in contentRef
-                                        ["current"
-                                         "_children"
-                                         0])))
+         (var contentElem (or (xtd/get-in contentRef
+                                         ["current"
+                                          "children"
+                                          0])
+                              (xtd/get-in contentRef
+                                         ["current"
+                                          "_children"
+                                          0])))
          
          (when (and contentElem sinkRef)
            (. (j/onAll

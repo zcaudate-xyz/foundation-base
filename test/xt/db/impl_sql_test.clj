@@ -1,16 +1,18 @@
 (ns xt.db.impl-sql-test
   (:require [std.lang :as l]
             [std.string.prose :as prose]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.impl-sql :as impl-sql]
-             [xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
-             [xt.sys.conn-dbsql :as dbsql]
-             [xt.db.base-flatten :as f]
+              [xt.lang.common-lib :as k]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-string :as str]
+              [xt.lang.common-repl :as repl]
+              [xt.sys.conn-dbsql :as dbsql]
+              [xt.db.base-flatten :as f]
              [xt.db.sql-util :as ut]
              [xt.db.sql-raw :as raw]
              [xt.db.sql-manage :as manage]
@@ -21,25 +23,22 @@
 (defn bootstrap-js
   []
   (notify/wait-on [:js 2000]
-    (var initSql (require "sql.js"))
-    (-> (initSql)
-        (. (then (fn [SQL]
-                   (:= (!:G SQL) SQL)
-                   (:= (!:G INSTANCE) (js-sqlite/set-methods
-                                       (new SQL.Database)))
-                   (dbsql/query-sync INSTANCE
-                                     (k/join "\n\n"
-                                             (manage/table-create-all
-                                              sample/Schema
-                                              sample/SchemaLookup
-                                              (ut/sqlite-opts nil))))
-                   (dbsql/query-sync INSTANCE
-                                     (raw/raw-insert "Currency"
-                                                     ["id" "type" "symbol" "native" "decimal"
-                                                      "name" "plural" "description"]
-                                                     (@! sample/+currency+)
-                                                     (ut/sqlite-opts nil)))
-                   (repl/notify true)))))))
+    (dbsql/connect {:constructor js-sqlite/connect-constructor}
+                   {:success (fn [conn]
+                               (:= (!:G INSTANCE) conn)
+                               (dbsql/query-sync INSTANCE
+                                                 (str/join "\n\n"
+                                                           (manage/table-create-all
+                                                            sample/Schema
+                                                            sample/SchemaLookup
+                                                            (ut/sqlite-opts nil))))
+                               (dbsql/query-sync INSTANCE
+                                                 (raw/raw-insert "Currency"
+                                                                 ["id" "type" "symbol" "native" "decimal"
+                                                                  "name" "plural" "description"]
+                                                                 (@! sample/+currency+)
+                                                                 (ut/sqlite-opts nil)))
+                               (repl/notify true))})))
 
 (fact:global
  {:setup    [(l/rt:restart)
@@ -56,11 +55,13 @@
    [(dbsql/query INSTANCE
                  "SELECT 1;"
                  nil)
-    (k/sort
-     (k/obj-keys
-      (f/flatten-bulk sample/Schema
-                      {"UserAccount"
-                       [sample/RootUser]})))])
+     (xtd/arr-sort
+       (xtd/obj-keys
+        (f/flatten-bulk sample/Schema
+                        {"UserAccount"
+                         [sample/RootUser]}))
+       k/identity
+       k/lt)])
   => [1 ["UserAccount" "UserProfile"]])
 
 ^{:refer xt.db.impl-sql/sql-gen-delete :added "4.0"}
@@ -79,13 +80,15 @@
 
 ^{:refer xt.db.impl-sql/sql-process-event-remove :added "4.0"
   :setup [(!.js
-           (k/sort (impl-sql/sql-process-event-sync
-                    INSTANCE
-                    "add"
-                    {"UserAccount" [sample/RootUser]}
-                    sample/Schema
-                    sample/SchemaLookup
-                    (ut/sqlite-opts nil))))]}
+           (xtd/arr-sort (impl-sql/sql-process-event-sync
+                          INSTANCE
+                          "add"
+                          {"UserAccount" [sample/RootUser]}
+                          sample/Schema
+                          sample/SchemaLookup
+                          (ut/sqlite-opts nil))
+                         k/identity
+                         k/lt))]}
 (fact "removes data from database"
   ^:hidden
 

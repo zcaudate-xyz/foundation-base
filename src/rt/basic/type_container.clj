@@ -32,19 +32,31 @@
   "starts a container"
   {:added "4.0"}
   [lang config port rt]
-  (let [[program process exec] (oneshot/rt-oneshot-setup
-                                lang
-                                (:program config)
-                                (:process config)
-                                (:exec config)
-                                (:runtime rt))
-        config    (merge config
-                        process
-                        {:lang lang
-                         :program program
-                         :exec exec
-                         :runtime (:runtime rt)})]
-    (start-container-process lang config port rt)))
+  (let [base-program (or (:program config) (:program rt))
+         base-process (or (:process config) (:process rt))
+         container-exec (or (get-in config [:container :exec])
+                            (:exec config))
+         base-exec    (or container-exec
+                          (:exec rt))
+         [program process exec] (oneshot/rt-oneshot-setup
+                                 lang
+                                 base-program
+                                 base-process
+                                 base-exec
+                                 (:runtime rt))
+         bootstrap (or (:bootstrap config) (:bootstrap process))
+         config    (merge process
+                         (:container process)
+                         config
+                         (:container config)
+                         {:lang      lang
+                          :program   program
+                          :exec      (or (get-in config [:container :exec])
+                                         (:exec config)
+                                         exec)
+                          :runtime   (:runtime rt)
+                          :bootstrap bootstrap})]
+     (start-container-process lang config port rt)))
 
 (defn stop-container
   "stops a container"

@@ -5,10 +5,10 @@
 
 (def settings
   {:engine    "winterfell"
-   :resource  "theme/mormont"
+   :resource  "assets/code.doc/theme/mormont"
    :copy      ["assets"]
    :render    {:article       "render-article"
-               :navigation    "render-navigation"
+                :navigation    "render-navigation"
                :top-level     "render-top-level"}
    :defaults  {:template         "article.html"
                :icon             "favicon"

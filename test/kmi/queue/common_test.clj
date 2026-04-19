@@ -8,8 +8,7 @@
   {:runtime :redis.client
    :config {:port 17003
             :bench true}
-   :require [[xt.lang.base-lib :as k :include [:fn]]
-             [kmi.redis :as r]
+   :require [[kmi.redis :as r]
              [kmi.queue.common :as mq]
              [kmi.queue.list :as list]]})
 
@@ -44,7 +43,7 @@
   ^:hidden
 
   (-> (!.lua
-       (mq/mq-map-key "test:list" k/identity))
+       (mq/mq-map-key "test:list" (fn [x] (return x))))
       (sort))
   => '(["p1" "test:list"]
        ["p2" "test:list"]

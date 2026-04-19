@@ -61,8 +61,10 @@
               (let [root (str (fs/create-tmpdir))
                     _    (spit (str root "/index.html") +index+)
                     port (network/port:check-available 0)
-                    process (os/sh "http-server" "-p" (str port) {:root root
-                                                                 :wait false})
+                    process (os/sh "python3" "-m" "http.server" (str port)
+                                   "--bind" "127.0.0.1"
+                                   {:root root
+                                    :wait false})
                     _ (network/wait-for-port "localhost" port)]
                 {:root root
                  :port port

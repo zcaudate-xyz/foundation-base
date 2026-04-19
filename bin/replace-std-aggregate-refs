@@ -20,4 +20,4 @@ get_classpath() {
 }
 
 cd "$PROJECT_ROOT"
-java -cp "$(get_classpath)" clojure.main scripts/replace_std_aggregate_refs.clj "$@"
+java -cp "$(get_classpath)" clojure.main src-training/scripts/replace_std_aggregate_refs.clj "$@"

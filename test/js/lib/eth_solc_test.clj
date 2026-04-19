@@ -6,17 +6,18 @@
   (:use code.test))
 
 (l/script- :js
-  {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
-             [js.lib.eth-solc :as eth-solc :include [:fn]]
-             [js.core :as j]]})
+   {:runtime :basic
+     :require [[xt.lang.common-lib :as k]
+               [xt.lang.common-data :as xtd]
+               [xt.lang.common-repl :as repl]
+               [js.lib.eth-solc :as eth-solc :include [:fn]]
+               [js.core :as j]]})
 
 (fact:global
  {:setup    [(s/rt:stop-ganache-server)
              (Thread/sleep 1000)
              (s/rt:start-ganache-server)
-             (Thread/sleep 500)
+             (Thread/sleep 3000)
              (l/rt:restart)
              (l/rt:scaffold :js)]
   :teardown [(l/rt:stop)]})
@@ -47,7 +48,7 @@
   ^:hidden
 
   (!.js
-   (k/obj-keys
+   (xtd/obj-keys
     (eth-solc/contract-compile
      (eth-solc/contract-wrap-body
       (@! (prose/|
@@ -59,7 +60,7 @@
   => ["contracts" "sources"]
   
   (!.js
-   (k/obj-keys
+   (xtd/obj-keys
     (eth-solc/contract-compile
      (eth-solc/contract-wrap-body
       "function test___WRONG() {\n  return \"HELLO WORLD\";\n}"

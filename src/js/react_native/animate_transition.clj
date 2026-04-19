@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :suppress true :as k]
+  {:require [[xt.lang.common-lib :suppress true :as k]
              [js.core :as j]
              [js.react-native.animate :as a]]})
 

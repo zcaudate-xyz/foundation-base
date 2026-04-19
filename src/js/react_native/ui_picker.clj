@@ -2,16 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :as k]
-             [js.core :as j]
-             [js.react :as r]
-             [js.react-native :as n]
-             [js.react-native.animate :as a]
-             [js.react-native.physical-base :as physical-base]
-             [js.react-native.physical-edit :as physical-edit]
-             [js.react-native.helper-roller :as helper-roller]
-             [js.react-native.helper-theme :as helper-theme]
-             [js.react-native.helper-theme-default :as helper-theme-default]]})
+  {:require [[xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.common-math :as math] [js.core :as j] [js.react :as r] [js.react-native :as n] [js.react-native.animate :as a] [js.react-native.physical-base :as physical-base] [js.react-native.physical-edit :as physical-edit] [js.react-native.helper-roller :as helper-roller] [js.react-native.helper-theme :as helper-theme] [js.react-native.helper-theme-default :as helper-theme-default]]})
 
 (defn.js pickerTheme
   "creates the picker theme"
@@ -82,8 +73,8 @@
                 :height 30}
                styleStatic
                (:.. (j/arrayify style))]]}
-    (j/map (k/arr-range divisions)
-           (fn:> [index i]
+     (j/map (xtd/arr-range divisions)
+            (fn:> [index i]
              [:% physical-base/Text
               {:key i
                :indicators {:offset offset
@@ -102,7 +93,7 @@
                  (return
                   {:text (format (. items [value]) value)
                    :style {:opacity (:? visible
-                                        (k/mix -2 1 scale)
+                                        (math/mix -2 1 scale)
                                         0)
                            :zIndex (* 10 scale)
                            :transform [{:translateY (* -2 translate)}]}}))}]))]))
@@ -166,8 +157,8 @@
        :transformations transformFn
        (:.. (j/assign touchable
                       panHandlers))]}
-    (j/map (k/arr-range divisions)
-           (fn:> [index i]
+     (j/map (xtd/arr-range divisions)
+            (fn:> [index i]
              [:% physical-base/Text
               {:key i
                :indicators {:offset offset
@@ -190,8 +181,7 @@
                  (return
                   {:text (format (. items [value]) value)
                    :style {:opacity (:? visible
-                                        (k/mix -2 1 scale)
+                                        (math/mix -2 1 scale)
                                         0)
                            :zIndex (* 10 scale)
                            :transform [{:translateY (* -2 translate)}]}}))}]))]))
-

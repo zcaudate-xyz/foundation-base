@@ -96,7 +96,7 @@
                   x:str-ends-with}
        :profiles #{:xtalk-common
                    :xtalk-functional}
-       :polyfill-modules #{xt.lang.base-lib
+       :polyfill-modules #{xt.lang.common-lib
                            xt.lang.common-data
                            xt.lang.common-string}}
 

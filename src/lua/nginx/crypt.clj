@@ -3,9 +3,7 @@
   (:refer-clojure :exclude [print flush time re-find]))
 
 (l/script :lua
-  {:require [[xt.lang.base-lib :suppress true :as k]
-             [lua.core :as u]]
-   :import [["crypt.core" :as ngxcryptcore]]})
+  {:import [["crypt.core" :as ngxcryptcore]] :require [[xt.lang.common-lib :suppress true :as k] [lua.core :as u] [xt.lang.common-spec :as xt]]})
 
 (def.lua CHARS "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
 
@@ -30,8 +28,8 @@
   (var #{prefix
          max-salt} (. -/METHODS [method]))
   (var output "")
-  (while (< (k/len output) max-salt)
+  (while (< (xt/x:len output) max-salt)
     (var i (u/random 1 64))
-    (:= output (k/cat output (u/substring -/CHARS i i))))
-  (return (k/cat prefix output)))
+    (:= output (xt/x:cat output (u/substring -/CHARS i i))))
+  (return (xt/x:cat prefix output)))
 

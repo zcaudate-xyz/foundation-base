@@ -11,10 +11,10 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.react :as r :include [:fn]]
-             [js.react-native :as n :include [:fn]]
-             [xt.lang.base-lib :as k]]
-   })
+    :require [[js.react :as r :include [:fn]]
+              [js.react-native :as n :include [:fn]]
+              [xt.lang.common-spec :as xt]]
+    })
 
 ^{:refer js.react/useRefresh :adopt true :added "4.0" :unchecked true}
 (fact "performs refresh function"
@@ -413,7 +413,7 @@
            view}  (r/useTree {:tree {:a {:b {:c 1}}
                                      :x {:y {:z 2}}}
                               :targetFn  (fn [tree branch _parents _root]
-                                           (return (k/get-key tree branch)))
+                                           (return (xt/x:get-key tree branch)))
                               :displayFn (fn [target branch parents root]
                                            (return
                                             [:% n/TextDisplay

@@ -2,27 +2,25 @@
   (:require [lib.redis.bench :as bench]
             [std.lang :as l]
             [std.lib.security :as security]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :lua
   {:runtime :basic
    :config  {:program :resty}
    :require [[xt.sys.conn-redis :as redis]
-             [xt.lang.base-lib :as k]
              [lua.nginx.driver-redis :as lua-driver]
-             [xt.lang.base-repl :as repl]]})
+             [xt.lang.common-repl :as repl]]})
 
 (l/script- :js
   {:runtime :basic
    :require [[xt.sys.conn-redis :as redis]
-             [xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
+             [xt.lang.common-repl :as repl]
              [js.lib.driver-redis :as js-driver]]})
 
 (l/script- :xtalk
   {:require [[xt.sys.conn-redis :as redis]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-lib :as k]]})
 
 (fact:global
  {:setup    [(bench/start-redis-array [17001])

@@ -3,7 +3,7 @@
             [lib.redis.script :as script]
             [rt.redis.eval-basic :refer :all]
             [std.lang :as l]
-            [xt.lang.base-lib :as k])
+            [xt.lang.common-lib :as k])
   (:use code.test))
 
 (l/script- :lua
@@ -41,5 +41,5 @@
   (with-redefs [redis-raw-eval (fn [_ _] [2 3 4 5 6])]
     (redis-invoke-ptr-basic
      (l/rt :lua)
-     k/arr-map [[1 2 3 4 5] k/inc]))
+     xtd/arr-map [[1 2 3 4 5] k/inc]))
   => [2 3 4 5 6])

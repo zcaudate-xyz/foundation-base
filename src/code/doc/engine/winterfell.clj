@@ -54,7 +54,94 @@
 
 (defmethod page-element :paragraph
   ([{:keys [text]}]
-   [:div (util/basic-html-unescape (util/markup text))]))
+    [:div (util/basic-html-unescape (util/markup text))]))
+
+(defmethod page-element :hero
+  ([{:keys [title subtitle lead actions badges]}]
+   (into
+    [:section {:class "hero"}]
+    (concat
+     (when (seq badges)
+       [(into
+         [:div {:class "hero-badges"}]
+         (map (fn [badge]
+                [:span {:class "badge badge-hero"} badge])
+              badges))])
+     [[:div {:class "hero-copy"}
+       [:h1 title]
+       (when subtitle [:p {:class "hero-subtitle"} subtitle])
+       (when lead [:div {:class "hero-lead"}
+                   (util/basic-html-unescape (util/markup lead))])]]
+     (when (seq actions)
+       [(into
+         [:div {:class "hero-actions"}]
+         (map (fn [{:keys [href label variant]}]
+                [:a {:class (str "hero-action"
+                                 (when variant
+                                   (str " hero-action-" (name variant))))
+                     :href href}
+                 label])
+              actions))])))))
+
+(defmethod page-element :callout
+  ([{:keys [tone title content]}]
+   [:aside {:class (str "callout"
+                        (when tone
+                          (str " callout-" (name tone))))}
+    (when title [:h4 title])
+    (when content
+      [:div (util/basic-html-unescape (util/markup content))])]))
+
+(defmethod page-element :card-grid
+  ([{:keys [title lead items]}]
+   (into
+    [:section {:class "card-grid-shell"}]
+    (concat
+     [(when title [:div {:class "card-grid-heading"} [:h3 title]])
+      (when lead [:div {:class "card-grid-lead"}
+                  (util/basic-html-unescape (util/markup lead))])]
+     [(into
+       [:div {:class "card-grid"}]
+       (map (fn [{:keys [title text href meta]}]
+              [:article {:class "card"}
+               (when meta [:span {:class "card-meta"} meta])
+               [:h4 title]
+               [:div {:class "card-text"}
+                (util/basic-html-unescape (util/markup text))]
+               (when href
+                 [:a {:href href} "Learn more"])])
+            items))]))))
+
+(defmethod page-element :quote
+  ([{:keys [text author source]}]
+   [:blockquote {:class "doc-quote"}
+    [:p text]
+    (when (or author source)
+      [:footer
+       (str author
+            (when (and author source) " · ")
+            source)])]))
+
+(defmethod page-element :badge
+  ([{:keys [label tone]}]
+   [:span {:class (str "badge"
+                       (when tone
+                         (str " badge-" (name tone))))}
+    label]))
+
+(defmethod page-element :demo
+  ([{:keys [title content code lang]}]
+   [:section {:class "demo-block"}
+    (when title [:h4 title])
+    (when content
+      [:div {:class "demo-copy"}
+       (util/basic-html-unescape (util/markup content))])
+    (when code
+      [:pre
+       [:code {:class (or lang "clojure")}
+        (-> code
+            util/basic-html-escape
+            clojure.string/trim)]])]))
 
 (defmethod page-element :image
   ([{:keys [tag number title] :as elem}]

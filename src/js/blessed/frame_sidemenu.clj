@@ -2,14 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :as k]
-             [js.core :as j]
-             [js.react :as r]
-             [js.blessed :as b]
-             [js.blessed.ui-style :as ui-style]
-             [js.blessed.ui-group :as ui-group]
-             [js.blessed.ui-core :as ui-core]
-             [js.lib.chalk :as chalk]]})
+  {:require [[xt.lang.common-lib :as k] [js.core :as j] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style] [js.blessed.ui-group :as ui-group] [js.blessed.ui-core :as ui-core] [js.lib.chalk :as chalk] [xt.lang.common-spec :as xt]]})
 
 (defn.js SideButton
   "creates a primary frame-sidebutton button"
@@ -74,7 +67,7 @@
                                    sel (j/filter entries
                                                   (fn:> [e] (== e.index i)))]
                                
-                               (when (and sel (< 0 (k/len sel)))
+                               (when (and sel (< 0 (xt/x:len sel)))
                                  (setIndex i))))))
          (return (fn []
                    (. (r/curr box) (free))))))
@@ -109,7 +102,7 @@
            [:box {:left 1
                   :right 1
                   :style {:bg "black"}
-                  :top (+ 4 (* 2 (k/len items)))}
+                  :top (+ 4 (* 2 (xt/x:len items)))}
             [:% MenuContent]])
        (:? MenuFooter
            [:box

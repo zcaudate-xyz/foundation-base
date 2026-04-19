@@ -7,10 +7,11 @@
   {:runtime :redis.client
    :config {:port 17003
             :bench true}
-   :require [[xt.lang.base-lib :as k]
-             [kmi.redis :as r]
-             [kmi.queue.common :as mq]
-             [kmi.queue.stream :as stream]]})
+   :require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+              [kmi.redis :as r]
+              [kmi.queue.common :as mq]
+              [kmi.queue.stream :as stream]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -393,7 +394,7 @@
   ^:hidden
 
   (!.lua
-   (k/json-decode
+   (xt/x:json-decode
     (stream/mq-stream-broadcast-multi
      "test:stream"
      (cjson.encode [["p1" "hello1"]
@@ -438,6 +439,6 @@
                  "__USER__:_:00000000-0000-0000-0000-000000000000"
                  "+" "-" "COUNT" "2"))
   (-/mq-stream-group-create k-queue group
-                            (k/first (:I (or (k/second k-last)))))
+                            (xtd/first (:I (or (xtd/second k-last)))))
   
   )

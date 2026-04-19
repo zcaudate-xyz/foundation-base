@@ -1,13 +1,12 @@
 (ns xt.sys.cache-queue-test
   (:require [rt.nginx.config :as config]
+            [xt.lang.common-notify :as notify]
             [std.lang :as l])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-notify :as notify]
-             [xt.lang.base-repl :as repl]
+   :require [[xt.lang.common-repl :as repl]
              [xt.sys.cache-queue :as queue]
              [xt.sys.cache-common :as cache]]})
 
@@ -25,26 +24,25 @@
 
 (l/script- :lua
   {:runtime :basic
-   :config  {:exec ["resty" "--http-conf" (create-resty-params) "-e"]
-             #_#_
-             :container {:group "test"
-                         :image "python"
+   :config  {:exec ["resty" "--http-conf" "client_body_buffer_size 1m;\nvariables_hash_max_size 2048;\nvariables_hash_bucket_size 128;\nlua_shared_dict GLOBAL 20k;\nlua_shared_dict WS_DEBUG 20k;\nlua_shared_dict ES_DEBUG 20k;" "-e"]
+               #_#_
+               :container {:group "test"
+                           :image "python"
                          :runtime :basic
                          :exec ["python" "-c"]
                          #_#_:bootstrap (fn [port opts]
                                           "1+1")}}
-   :require [[xt.lang.base-lib :as k]
-             [xt.sys.cache-queue :as queue]
+   :require [[xt.sys.cache-queue :as queue]
              [xt.sys.cache-common :as cache]]})
 
 (fact:global
- {:setup    [(l/rt:restart)
-             (notify/wait-on [:js 5000]
-               (:= (!:G window)  (require "window"))
-               (:= (!:G LocalStorage)  (. (require "node-localstorage")
-                                          LocalStorage))
-               (:= window.localStorage (new LocalStorage "./test-scratch/localstorage"))
-               (repl/notify true))]
+  {:setup    [(l/rt:restart)
+              (notify/wait-on [:js 5000]
+                (:= (!:G window)  {})
+                (:= (!:G LocalStorage)  (. (require "node-localstorage")
+                                           LocalStorage))
+                (:= window.localStorage (new LocalStorage "./test-scratch/localstorage"))
+                (repl/notify true))]
   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.sys.cache-queue/INDEX-KEY :added "4.0"}

@@ -3,7 +3,8 @@
   (:refer-clojure :exclude [flush get set]))
 
 (l/script :xtalk
-  {:require  [[xt.lang.base-lib :as k]]})
+  {:require  [[xt.lang.common-spec :as xt]
+              [xt.lang.common-data :as xtd]]})
 
 ;;
 ;; cache encode
@@ -56,8 +57,8 @@
   "gets the cache map"
   {:added "4.0"}
   [cache]
-  (return (k/arr-juxt (-/list-keys cache)
-                      k/identity
+  (return (xtd/arr-juxt (-/list-keys cache)
+                      (fn [x] (return x))
                       (fn:> [key] (-/get cache key)))))
 
 (defmacro.xt meta-key
@@ -74,14 +75,14 @@
   (var mkey (-/meta-key type))
   (var mstr (-/get g mkey))
 
-  (cond (k/nil? mstr)
+  (cond (xt/x:nil? mstr)
         (return {})
 
         (== "null" mstr)
         (return {})
 
         :else
-        (return (k/json-decode mstr))))
+        (return (xt/x:json-decode mstr))))
 
 (defn.xt meta-update
   "updates the meta map"
@@ -91,7 +92,7 @@
   (var mprev (-/meta-get type))
   (var mcurr (f mprev))
   (var mkey (-/meta-key type))
-  (-/set g mkey (k/json-encode mcurr))
+  (-/set g mkey (xt/x:json-encode mcurr))
   (return mcurr))
 
 (defn.xt meta-assoc
@@ -100,7 +101,9 @@
   [type key item]
   (return (-/meta-update
            type
-           (fn:> [prev] (k/step-set-key prev key item)))))
+           (fn:> [prev]
+             (xt/x:set-key prev key item)
+             (return prev)))))
 
 (defn.xt meta-dissoc
   "dissocs a key from the meta"
@@ -108,5 +111,6 @@
   [type key]
   (return (-/meta-update
            type
-           (fn:> [prev] (k/step-del-key prev key)))))
-
+           (fn:> [prev]
+             (xt/x:del-key prev key)
+             (return prev)))))

@@ -6,9 +6,9 @@
 
 (def runtime-template-forms
   (read-string
-   "[(ns xt.lang.base-lib-js-test
+   "[(ns xt.lang.common-lib-js-test
        (:require [std.lang :as l]
-                 [xt.lang.base-lib :as k])
+                 [xt.lang.common-lib :as k])
        (:use code.test))
       (l/script- :js {:runtime :basic})
       (fact \"identity function\"
@@ -34,7 +34,7 @@
 (fact "templating a common js runtime suite to dart keeps the twostep runtime"
   (let [out-forms (scaffold/template-runtime-test-forms runtime-template-forms :js :dart)
         out (scaffold/render-top-level-forms out-forms)]
-    [(= 'xt.lang.base-lib-dt-test
+    [(= 'xt.lang.common-lib-dt-test
         (second (first out-forms)))
      (str/includes? out "(l/script- :dart {:runtime :twostep})")
      (str/includes? out "!.dt")

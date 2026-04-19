@@ -2,15 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:runtime :websocket
-   :config {:id :play/web-main
-            :bench false
-            :emit {:native {:suppress true}
-                   :lang/jsx false}
-            :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react-native.helper-color :as c]
-             [xt.lang.base-lib :as k]]})
+  {:config {:bench false :emit {:native {:suppress true} :lang/jsx false} :id :play/web-main :notify {:host "test.statstrade.io"}} :require [[js.core :as j] [js.react-native.helper-color :as c] [xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.common-spec :as xt]] :runtime :websocket})
 
 ;;
 ;; Pairs
@@ -63,13 +55,13 @@
   (var __fns  (:? (k/nil? stageMap)
                   -/StageMap
                   (j/assign {} -/StageMap stageMap)))
-  (var lu (k/get-key -/ThemeLookup type))
-  (var colorInit (k/get-key theme (k/get-key lu initial)))
-  (return (k/arr-foldl stages
-                       (fn [colorOut stageKey]
-                         (var tf   (k/get-key __fns stageKey))
-                         (var val  (k/get-key indValues stageKey))
-                         (var colorStage  (k/get-key theme (k/get-key lu stageKey)))
+  (var lu (xt/x:get-key -/ThemeLookup type))
+  (var colorInit (xt/x:get-key theme (xt/x:get-key lu initial)))
+  (return (xtd/arr-foldl stages
+                        (fn [colorOut stageKey]
+                         (var tf   (xt/x:get-key __fns stageKey))
+                         (var val  (xt/x:get-key indValues stageKey))
+                         (var colorStage  (xt/x:get-key theme (xt/x:get-key lu stageKey)))
                          (return (c/interpolate
                                   [colorOut
                                    colorStage]
@@ -81,11 +73,11 @@
   {:added "4.0"}
   [arr]
   (var out {:style []})
-  (k/for:array [e arr]
+  (xt/for:array [e arr]
     (var #{[style
             (:.. rprops)]} (or e {}))
-    (k/for:array [s (j/arrayify style)]
-      (x:arr-push out.style s))
+    (xt/for:array [s (j/arrayify style)]
+      (xt/x:arr-push out.style s))
     (j/assign out rprops))
   (return out))
 
@@ -95,13 +87,13 @@
   [#{[theme
       themePipeline
       (:= transformations {})]}]
-  (var bgCustom (or (k/get-key transformations "bg")
+  (var bgCustom (or (xt/x:get-key transformations "bg")
                     (fn:>)))
-  (var fgCustom (or (k/get-key transformations "fg")
+  (var fgCustom (or (xt/x:get-key transformations "fg")
                     (fn:>)))
-  (when (not (and (k/fn? bgCustom)
-                  (k/fn? fgCustom)))
-    (k/err "Themed transformations require functions."))
+  (when (not (and (k/is-function? bgCustom)
+                  (k/is-function? fgCustom)))
+    (xt/x:err "Themed transformations require functions."))
   (var #{bg fg} themePipeline)
   (var bgInitial  (. bg ["initial"]))
   (var bgStages   (. bg ["stages"]))
@@ -131,11 +123,11 @@
       (:= transformations {})]}
    type
    colorKeys]
-  (var custom (or (k/get-key transformations type)
+  (var custom (or (xt/x:get-key transformations type)
                   (fn:>)))
-  (when (not (k/fn? custom))
-    (k/err "Themed transformations require functions."))
-  (var pipe     (k/get-key themePipeline type))
+  (when (not (k/is-function? custom))
+    (xt/x:err "Themed transformations require functions."))
+  (var pipe     (xt/x:get-key themePipeline type))
   (var initial  (. pipe ["initial"]))
   (var stages   (. pipe ["stages"]))
   (var stageMap (. pipe ["values"]))
@@ -143,8 +135,8 @@
             (var customProps (custom indValues chord))
             (var color (c/toHSL (-/transformColor indValues theme type initial stages stageMap)))
             (var style {})
-            (k/for:array [key colorKeys]
-              (k/set-key style key color))
+            (xt/for:array [key colorKeys]
+              (xt/x:set-key style key color))
             (return (-/mergeProps [customProps
                                    {:style style}])))))
 
@@ -162,7 +154,7 @@
                        #{disabled
                          highlighted}
                        more))
-  (var indValues (k/obj-map chord indFn))
+  (var indValues (xtd/obj-map chord indFn))
   (return (. (transformFn indValues chord)
              ["style"])))
 
@@ -183,4 +175,3 @@
   (var transformFn (-/createSingleTransformations props type colorKeys))
   (var styleStatic (-/combinedStatic props {} transformFn))
   (return [styleStatic transformFn]))
-

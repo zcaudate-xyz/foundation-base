@@ -7,7 +7,26 @@
             [std.lang.base.impl :as impl]
             [std.lang.base.runtime :as rt]
             [std.lang.interface.type-notify :as notify]
-            [xt.lang.base-repl :as k]))
+            [xt.lang.common-repl :as k]))
+
+(defn node-path
+  "Builds a NODE_PATH that keeps temp-file Node executions resolving project-local modules."
+  {:added "4.1"}
+  []
+  (let [root     (or (System/getenv "PWD")
+                     (System/getProperty "user.dir"))
+        local    (str root "/node_modules")
+        existing (System/getenv "NODE_PATH")]
+    (->> [local existing]
+         (remove clojure.string/blank?)
+         distinct
+         (clojure.string/join java.io.File/pathSeparator))))
+
+(def +node-shell-env+
+  (let [path (node-path)]
+    (cond-> {}
+      (not (clojure.string/blank? path))
+      (assoc "NODE_PATH" path))))
 
 (def +program-init+
   (common/put-program-options
@@ -15,10 +34,12 @@
                     :basic      :nodejs
                     :websocket  :nodejs}
          :env      {:nodejs    {:exec   "node"
-                                :flags  {:oneshot   ["-e"]
-                                         :basic     ["-e"]
-                                         :websocket ["-e"]
-                                         :interactive ["-i"]
+                                :env    +node-shell-env+
+                                :bench  {:shell {:env +node-shell-env+}}
+                                 :flags  {:oneshot   ["-e"]
+                                          :basic     ["-e"]
+                                          :websocket ["-e"]
+                                          :interactive ["-i"]
                                          :json ["JSON" :builtin]
                                          :bench {:websocket ["ws" :install]}}}
                     :qjs       {:exec   "qjs"
@@ -76,7 +97,9 @@
   '[(:- :import net :from "'net'")
     (:- :import rl :from "'readline'")
     (:- :import #{createRequire} :from "'module'")
-    (var require (createRequire (. import.meta url)))
+    (var require (createRequire (+ (or (. process env ["PWD"])
+                                       (. process (cwd)))
+                                   "/package.json")))
     (defn client-basic
       [host port opts]
       (let [conn (new net.Socket)
@@ -136,7 +159,9 @@
 
 (def +client-ws+
   '[(:- :import #{createRequire} :from "'module'")
-    (var require (createRequire (. import.meta url)))
+    (var require (createRequire (+ (or (. process env ["PWD"])
+                                       (. process (cwd)))
+                                   "/package.json")))
     (defn client-ws
       [host port opts]
       (let [WS     (or (. globalThis ["WebSocket"])

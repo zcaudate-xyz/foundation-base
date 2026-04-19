@@ -3,8 +3,9 @@
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]
-             [xt.lang.base-task :as task]
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-task :as task]
              [xt.lang.event-common :as event-common]
              [xt.cell.kernel.base-link :as link]
              [xt.cell.kernel.base-util :as util]]})
@@ -88,16 +89,16 @@
   (var init-state
        (task/task-from-async
         (fn [resolve reject]
-          (k/obj-assign init {:resolve resolve
-                              :reject reject}))))
-  (k/set-key init "current" init-state)
+          (xtd/obj-assign init {:resolve resolve
+                                :reject reject}))))
+  (xt/x:set-key init "current" init-state)
   (return init))
 
 (defn.xt new-cell
   "makes the core link"
   {:added "0.1" :adopt true}
   [worker-url]
-  (var link    (:? (and (k/obj? worker-url)
+  (var link    (:? (and (xt/x:is-object? worker-url)
                         (not (. worker-url ["create_fn"])))
                    worker-url
                    (link/link-create worker-url)))
@@ -115,25 +116,25 @@
     {:id        (. link ["id"])
      :link      link
      :models    {}
-     :init      (k/get-key init "current")})))
+     :init      (xt/x:get-key init "current")})))
 
 (defn.xt list-models
   "lists all models"
   {:added "0.1"}
   [cell]
     (var #{models} cell)
-    (return (k/obj-keys models)))
+    (return (xtd/obj-keys models)))
 
 (defn.xt call
   "conducts a call, either for a link or cell"
   {:added "4.0"}
   [client event]
-  (var t (k/get-key client "::"))
+  (var t (xt/x:get-key client "::"))
   (cond (== t "cell.link")
         (return (link/call client event))
         
         (== t "cell")
-        (return (link/call (k/get-key client "link") event))))
+        (return (link/call (xt/x:get-key client "link") event))))
 
 ;;
 ;; ACCESS
@@ -144,15 +145,15 @@
   {:added "4.0"}
   [cell model-id]
   (var #{models} cell)
-  (return (k/get-key models model-id)))
+  (return (xt/x:get-key models model-id)))
 
 (defn.xt model-ensure
   "throws an error if model is not present"
   {:added "4.0"}
   [cell model-id]
   (var model (-/model-get cell model-id))
-  (when (k/nil? model)
-    (k/err (k/cat "ERR - Page not found - " model-id)))
+  (when (xt/x:nil? model)
+    (xt/x:err (xt/x:cat "ERR - Page not found - " model-id)))
   (return model))
 
 (defn.xt list-views
@@ -161,7 +162,7 @@
   [cell model-id]
   (var model (-/model-ensure cell model-id))
   (var #{views} model)
-  (return (k/obj-keys views)))
+  (return (xtd/obj-keys views)))
 
 (defn.xt view-ensure
   "gets the view"
@@ -169,9 +170,9 @@
   [cell model-id view-id]
   (var model (-/model-ensure cell model-id))
   (var #{views} model)
-  (var view  (k/get-key views view-id))
-  (when (k/nil? view)
-    (k/err (k/cat "ERR - Model not found - " view-id)))
+  (var view  (xt/x:get-key views view-id))
+  (when (xt/x:nil? view)
+    (xt/x:err (xt/x:cat "ERR - Model not found - " view-id)))
   (return [model view]))
 
 (defn.xt view-access
@@ -179,14 +180,14 @@
   {:added "4.0"}
   [cell model-id view-id f args]
   (var model (-/model-get cell model-id))
-  (when (k/nil? model)
+  (when (xt/x:nil? model)
     (return nil))
   
   (var #{views} model)
-  (var view  (k/get-key views view-id))
-  (when (k/nil? view)
+  (var view  (xt/x:get-key views view-id))
+  (when (xt/x:nil? view)
     (return nil))
-  (return (f view (k/unpack args))))
+  (return (f view (xt/x:unpack args))))
 
 ;;
 ;; LISTENER
@@ -200,7 +201,7 @@
   "add listener to cell"
   {:added "4.0"}
   [cell path listener-id f meta pred]
-  (var view-key (k/json-encode path))
+  (var view-key (xt/x:json-encode path))
   (return
    (event-common/add-keyed-listener
     cell view-key listener-id "cell" f meta pred)))
@@ -209,7 +210,7 @@
   "remove listeners from cell"
   {:added "4.0"}
   [cell path listener-id]
-  (var view-key (k/json-encode path))
+  (var view-key (xt/x:json-encode path))
   (return
    (event-common/remove-keyed-listener
     cell view-key listener-id)))
@@ -218,7 +219,7 @@
   "lists listeners in a cell path"
   {:added "4.0"}
   [cell path]
-  (var view-key (k/json-encode path))
+  (var view-key (xt/x:json-encode path))
   (return
    (event-common/list-keyed-listeners cell view-key)))
 
@@ -228,17 +229,17 @@
   [cell]
   (var #{listeners} cell)
   (var out {})
-  (k/for:object [[view-key callbacks] listeners]
-    (k/set-in out
-              (k/json-decode view-key)
-              (k/obj-keys callbacks)))
+  (xt/for:object [[view-key callbacks] listeners]
+    (xtd/set-in out
+              (xt/x:json-decode view-key)
+              (xtd/obj-keys callbacks)))
   (return out))
 
 (defn.xt trigger-listeners
   "triggers listeners"
   {:added "4.0"}
   [cell path event]
-  (var view-key (k/json-encode path))
+  (var view-key (xt/x:json-encode path))
   (return
    (event-common/trigger-keyed-listeners
-    cell view-key (k/obj-assign {:path path} event))))
+    cell view-key (xtd/obj-assign {:path path} event))))

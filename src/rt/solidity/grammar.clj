@@ -299,7 +299,7 @@
   "emit statement"
   {:added "4.0"}
   [[_ form] grammar mopts]
-  (str "emit " (emit-common/*emit-fn* form grammar mopts) ";"))
+  (str "emit " (emit-common/*emit-fn* form grammar mopts)))
 
 (def +features+
   (-> (grammar/build :include [:builtin

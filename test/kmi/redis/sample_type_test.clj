@@ -10,7 +10,7 @@
   => "kmi.redis.scan_sub('test' .. ':' .. 'unfilled')"
 
   (type/> [:GET ["test"] [:unfilled]])
-  => "xt.lang.base_lib.arr_map(\n  kmi.redis.scan_level('test' .. ':' .. 'unfilled'),\n  kmi.redis.key_export\n)")
+  => "xt.lang.common_data.arr_map(\n  kmi.redis.scan_level('test' .. ':' .. 'unfilled'),\n  kmi.redis.key_export\n)")
 
 ^{:refer kmi.redis.sample-type/P> :added "4.0"}
 (fact "shortcut for data access")

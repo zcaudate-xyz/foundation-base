@@ -1,15 +1,15 @@
 (ns lua.ext.sochain-test
   (:require [std.json :as json]
             [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :lua
   {:runtime :basic
    :config {:program :resty}
-   :require [[xt.lang.base-lib :as k]
+   :require [[xt.lang.common-lib :as k]
              [xt.lang.event-log :as event-log]
-             [xt.lang.base-repl :as repl]
+             [xt.lang.common-repl :as repl]
              [lua.nginx :as n]
              [lua.nginx.task :as t]
              [lua.nginx.http-client :as http]

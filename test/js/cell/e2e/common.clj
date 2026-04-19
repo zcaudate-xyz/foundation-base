@@ -5,7 +5,8 @@
             [std.lib.template :as template]
             [std.lang :as l]
             [xt.db :as xdb]
-            [xt.lang.base-lib :as k]))
+            [xt.lang.common-spec :as xt]
+            [xt.lang.common-data :as xtd]))
 
 (def +schema+
   {"Order"
@@ -47,20 +48,22 @@
 
 (l/script :js
   {:require [[js.cell.kernel :as cl]
-             [js.cell.kernel.base-model :as base-model]
-             [js.cell.kernel.worker-impl :as worker-impl]
-             [js.cell.kernel.worker-local :as worker-local]
+              [js.cell.kernel.base-util :as util]
+              [js.cell.kernel.base-model :as base-model]
+              [js.cell.kernel.worker-impl :as worker-impl]
+              [js.cell.kernel.worker-local :as worker-local]
              [js.cell.runtime.env-node :as env-node]
              [js.cell.runtime.link :as runtime-link]
-             [js.cell.service :as service]
-             [js.cell.service.db-query :as db-query]
-             [js.cell.service.db-sync :as db-sync]
-             [js.lib.driver-sqlite-wasm :as sqlite-wasm]
-             [xt.db :as xdb]
-             [xt.lang.base-lib :as k]
-             [xt.lang.base-runtime :as rt :with [defvar.js]]
-             [xt.lang.event-view :as event-view]
-             [xt.sys.conn-dbsql :as dbsql]]})
+              [js.cell.service :as service]
+              [js.cell.service.db-query :as db-query]
+              [js.cell.service.db-sync :as db-sync]
+              [js.lib.driver-sqlite-wasm :as sqlite-wasm]
+              [xt.db :as xdb]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-runtime :as rt :with [defvar.js]]
+              [xt.lang.event-view :as event-view]
+              [xt.sys.conn-dbsql :as dbsql]]})
 
 (defn node-remote-script
   []
@@ -68,7 +71,7 @@
     '(do
       (var worker (js.cell.runtime.env-node/make-node-worker))
       (var existing-db (!:G __E2E_REMOTE_DB))
-      (when (xt.lang.base-lib/nil? existing-db)
+      (when (xt.lang.common-spec/x:nil? existing-db)
         (var schema {"Order"
                      {"id" {"ident" "id" "type" "text" "order" 0}
                       "status" {"ident" "status" "type" "text" "order" 1}}})
@@ -94,7 +97,7 @@
                                "guards" []
                                "query" ["id" "status"]}}}}})
         (:= existing-db
-            (xt.lang.base-lib/obj-assign
+            (xt.lang.common-data/obj-assign
              (xt.db/db-create {"::" "db.cache"}
                               schema
                               {"Order" {"position" 0}}
@@ -126,9 +129,9 @@
         "@e2e/sync"
         {"handler"
          (fn [sync-request]
-           (var db-sync (xt.lang.base-lib/get-key sync-request "db/sync"))
-           (when (and (xt.lang.base-lib/obj? db-sync)
-                      (xt.lang.base-lib/not-empty? db-sync))
+           (var db-sync (xt.lang.common-spec/x:get-key sync-request "db/sync"))
+           (when (and (xt.lang.common-spec/x:is-object? db-sync)
+                      (xt.lang.common-data/not-empty? db-sync))
              (xt.db/sync-event (!:G __E2E_REMOTE_DB) ["add" db-sync]))
            (return sync-request))
          "is_async" false
@@ -144,7 +147,7 @@
   (l/emit-script
    '(do
       (var existing-db (!:G __E2E_REMOTE_DB))
-      (when (xt.lang.base-lib/nil? existing-db)
+      (when (xt.lang.common-spec/x:nil? existing-db)
         (var schema {"Order"
                      {"id" {"ident" "id" "type" "text" "order" 0}
                       "status" {"ident" "status" "type" "text" "order" 1}}})
@@ -170,7 +173,7 @@
                                "guards" []
                                "query" ["id" "status"]}}}}})
         (:= existing-db
-            (xt.lang.base-lib/obj-assign
+            (xt.lang.common-data/obj-assign
              (xt.db/db-create {"::" "db.cache"}
                               schema
                               {"Order" {"position" 0}}
@@ -183,7 +186,7 @@
                                      {"id" "ord-2" "status" "closed"}]}])
         (:= (!:G __E2E_REMOTE_DB) existing-db))
       (js.cell.kernel.worker-state/set-actions
-       (xt.lang.base-lib/obj-assign
+       (xt.lang.common-data/obj-assign
         (js.cell.kernel.worker-local/actions-baseline)
         {"@e2e/query"
          {"handler"
@@ -203,16 +206,16 @@
           "args" ["query_plan"]}
          "@e2e/sync"
          {"handler"
-         (fn [sync-request]
-           (var db-sync (xt.lang.base-lib/get-key sync-request "db/sync"))
-           (when (and (xt.lang.base-lib/obj? db-sync)
-                      (xt.lang.base-lib/not-empty? db-sync))
-             (xt.db/sync-event (!:G __E2E_REMOTE_DB) ["add" db-sync]))
-           (return sync-request))
-         "is_async" false
-         "args" ["sync_request"]}}
+          (fn [sync-request]
+            (var db-sync (xt.lang.common-spec/x:get-key sync-request "db/sync"))
+            (when (and (xt.lang.common-spec/x:is-object? db-sync)
+                       (xt.lang.common-data/not-empty? db-sync))
+              (xt.db/sync-event (!:G __E2E_REMOTE_DB) ["add" db-sync]))
+            (return sync-request))
+          "is_async" false
+          "args" ["sync_request"]}})
        (!:G __CELL_WORKER))
-       "ready"))
+       "ready")
    {:lang :js
      :layout :flat}))
 
@@ -229,13 +232,13 @@
 
 (defn.js sort-strings
   [arr]
-  (var out (k/arr-clone (or arr [])))
+  (var out (xt/x:arr-clone (or arr [])))
   (. out (sort))
   (return out))
 
 (defn.js sort-orders
   [rows]
-  (var out (k/arr-clone (or rows [])))
+  (var out (xt/x:arr-clone (or rows [])))
   (. out (sort (fn [a b]
                  (var aid (. a ["id"]))
                  (var bid (. b ["id"]))
@@ -247,8 +250,8 @@
 (defn.js create-cache-db
   []
   (var desc (-/shared-desc))
-  (var schema (k/get-key desc "schema"))
-  (var db (k/obj-assign
+  (var schema (xt/x:get-key desc "schema"))
+  (var db (xtd/obj-assign
            (xdb/db-create {"::" "db.cache"}
                           schema
                           (@! +lookup+)
@@ -273,10 +276,12 @@
 
 (defn.js order-query-plan
   [status]
-  (var [ok plan] (db-query/prepare-query
-                  (-/shared-desc)
-                  (-/query-spec)
-                  {"args" [status]}))
+  (var prepared (db-query/prepare-query
+                 (-/shared-desc)
+                 (-/query-spec)
+                 {"args" [status]}))
+  (var ok (xt/x:first prepared))
+  (var plan (xt/x:second prepared))
   (when (not ok)
     (throw plan))
   (return plan))
@@ -293,9 +298,9 @@
 (defn.js remote-action-sync
   [sync-request]
   (var db (-/get-remote-db))
-  (var db-sync (k/get-key sync-request "db/sync"))
-  (when (and (k/obj? db-sync)
-             (k/not-empty? db-sync))
+  (var db-sync (xt/x:get-key sync-request "db/sync"))
+  (when (and (xt/x:is-object? db-sync)
+             (xtd/not-empty? db-sync))
     (xdb/sync-event db ["add" db-sync]))
   (return sync-request))
 
@@ -325,7 +330,15 @@
 
 (defn.js sqlite-exec
   [conn raw]
-  (return (dbsql/query-sync conn raw)))
+  (var columns [])
+  (var values (. conn (exec {:sql         raw
+                             :rowMode     "array"
+                             :columnNames columns
+                             :returnValue "resultRows"})))
+  (return (:? (xt/x:len columns)
+              [{"columns" columns
+                "values" values}]
+              values)))
 
 (defn.js sqlite-init
   [conn]
@@ -334,15 +347,15 @@
 
 (defn.js sqlite-result-rows
   [result]
-  (var entry (k/first (or result [])))
-  (when (k/nil? entry)
+  (var entry (xt/x:first (or result [])))
+  (when (xt/x:nil? entry)
     (return []))
-  (var columns (or (k/get-key entry "columns") []))
+  (var columns (or (xt/x:get-key entry "columns") []))
   (return
-   (k/arr-map
-    (or (k/get-key entry "values") [])
-    (fn [values]
-      (return (k/arr-zip columns values))))))
+   (xt/x:arr-map
+    (or (xt/x:get-key entry "values") [])
+     (fn [values]
+      (return (xtd/arr-zip columns values))))))
 
 (defn.js sqlite-select-orders
   [conn]
@@ -352,50 +365,76 @@
 
 (defn.js sqlite-upsert-orders
   [conn rows]
-  (k/for:array [row (or rows [])]
+  (xt/for:array [row (or rows [])]
     (var id (. row ["id"]))
     (var status (. row ["status"]))
     (-/sqlite-exec
      conn
-     (k/cat "INSERT OR REPLACE INTO orders_cache (id, status) VALUES ('"
-            id
-            "', '"
-            status
-            "');")))
+     (xt/x:cat "INSERT OR REPLACE INTO orders_cache (id, status) VALUES ('"
+               id
+               "', '"
+               status
+               "');")))
   (return (-/sqlite-select-orders conn)))
 
 (defn.js create-service-registry
   [remote-cell sqlite-conn]
   (return
    (service/create-service
-    {"remote-cache" (k/obj-assign
-                     (-/shared-desc)
-                     {"cell" remote-cell})
+    {"remote-cache" (xtd/obj-assign
+                      (-/shared-desc)
+                      {"cell" remote-cell})
      "proxy-sqlite" {"conn" sqlite-conn}})))
+
+(defn.js link-call
+  [link event]
+  (var worker (. link ["worker"]))
+  (var active (. link ["active"]))
+  (var id (. link ["id"]))
+  (var cid (or (. event ["id"])
+               (util/rand-id (xt/x:cat id "-") 3)))
+  (:= (. event ["id"]) cid)
+  (var input (util/arg-encode event))
+  (var p (new Promise
+               (fn [resolve reject]
+                 (:= (. active [cid])
+                     {:resolve (fn [data]
+                                 (resolve data))
+                      :reject (fn [data]
+                                (reject data))
+                      :input input
+                      :time (xt/x:now-ms)}))))
+  (var post-request (. worker ["postRequest"]))
+  (if post-request
+    (post-request input)
+    (. worker (postMessage input)))
+  (return p))
 
 (defn.js call-remote-query
   [remote-cell status]
+  (var link (. remote-cell ["link"]))
+  (var event {:op "call"
+              :action "@e2e/query"
+              :body [(-/order-query-plan status)]})
   (return
-   (. (cl/call remote-cell
-               {:op "call"
-                :action "@e2e/query"
-                :body [(-/order-query-plan status)]})
-      (then -/sort-orders))))
+   (. (-/link-call link event)
+       (then -/sort-orders))))
 
 (defn.js call-remote-sync
   [remote-cell sync-request]
+  (var link (. remote-cell ["link"]))
   (return
-   (cl/call remote-cell
-            {:op "call"
-             :action "@e2e/sync"
-             :body [sync-request]})))
+   (-/link-call link
+                {:op "call"
+                 :action "@e2e/sync"
+                 :body [sync-request]})))
 
 (defn.js make-proxy-model
   [service-registry]
   (var remote-db (service/get-db service-registry "remote-cache"))
   (var sqlite-db (service/get-db service-registry "proxy-sqlite"))
-  (var remote-cell (k/get-key remote-db "cell"))
-  (var sqlite-conn (k/get-key sqlite-db "conn"))
+  (var remote-cell (xt/x:get-key remote-db "cell"))
+  (var sqlite-conn (xt/x:get-key sqlite-db "conn"))
   (return
    {"by_status"
     {"handler" (fn [link status]
@@ -409,48 +448,60 @@
      "deps" ["sync_status"]
      "options" {"context" {"kind" "remote-query"}}}
     "sync_status"
-    {"pipeline"
-     {"sync"
-      {"handler"
-       (fn [context]
-         (var args (or (k/get-key context "args") []))
-         (var [ok sync-request] (db-sync/prepare-sync
-                                 (-/shared-desc)
-                                 {"sync" {"Order" args}}
-                                 {}))
-         (when (not ok)
-           (throw sync-request))
-         (return
-          (. (-/call-remote-sync remote-cell sync-request)
-             (then
-              (fn [result]
-                (var sync-rows (k/get-in result ["db/sync" "Order"]))
-                (-/sqlite-upsert-orders sqlite-conn sync-rows)
-                (return {"result" result
-                         "update" (db-sync/result->update
-                                   (-/shared-desc)
-                                   result
-                                   {"view-id" "sync_status"})
-                         "rows" (-/sqlite-select-orders sqlite-conn)}))))))}}
-     "defaultArgs" []
-     "defaultInit" {"disabled" true}
-     "defaultOutput" nil
-     "options" {"context" {"kind" "remote-sync"}}}}))
+     {"pipeline"
+      {"sync"
+       {"handler"
+        (fn [context]
+          (var args (or (xt/x:get-key context "args") []))
+          (var prepared (db-sync/prepare-sync
+                         (-/shared-desc)
+                         {"sync" {"Order" args}}
+                         {}))
+          (var ok (xt/x:first prepared))
+          (var sync-request (xt/x:second prepared))
+          (when (not ok)
+            (throw sync-request))
+          (return
+           (. (-/call-remote-sync remote-cell sync-request)
+              (then
+               (fn [result]
+                 (var sync-rows (xtd/get-in result ["db/sync" "Order"]))
+                 (-/sqlite-upsert-orders sqlite-conn sync-rows)
+                 (return {"result" result
+                          "update" (db-sync/result->update
+                                    (-/shared-desc)
+                                    result
+                                    {"view-id" "sync_status"})
+                          "rows" (-/sqlite-select-orders sqlite-conn)}))))))
+        "wrapper" nil}}
+      "defaultArgs" []
+      "defaultInit" {"disabled" true}
+      "defaultOutput" nil
+      "options" {"context" {"kind" "remote-sync"}}}}))
 
 (defn.js summarize-model
   [model]
   (when model
+    (var views (or (. model ["views"])
+                   model))
+    (var deps (xt/x:get-key model "deps"))
+    (when (xt/x:nil? deps)
+      (:= deps {"orders" {}})
+      (xt/for:array [view-id (xtd/obj-keys views)]
+        (var view-spec (. views [view-id]))
+        (xt/for:array [dep-id (or (. view-spec ["deps"]) [])]
+          (xtd/set-in deps ["orders" dep-id view-id] true))))
     (return {"views" (-/sort-strings
-                      (k/obj-keys (. model ["views"])))
-             "deps" (k/get-key model "deps")})))
+                      (xtd/obj-keys views))
+             "deps" deps})))
 
 (defn.js summarize-view
   [view]
   (when view
-    (return {"kind" (k/get-in view ["options" "context" "kind"])
-             "has_main" (not (k/nil? (k/get-in view ["pipeline" "main" "handler"])))
-             "has_remote" (not (k/nil? (k/get-in view ["pipeline" "remote" "handler"])))
-             "has_sync" (not (k/nil? (k/get-in view ["pipeline" "sync" "handler"])))
+    (return {"kind" (xtd/get-in view ["options" "context" "kind"])
+             "has_main" (not (xt/x:nil? (xtd/get-in view ["pipeline" "main" "handler"])))
+             "has_remote" (not (xt/x:nil? (xtd/get-in view ["pipeline" "remote" "handler"])))
+             "has_sync" (not (xt/x:nil? (xtd/get-in view ["pipeline" "sync" "handler"])))
              "current" (event-view/get-current view)
              "updated" (event-view/get-time-updated view)})))
 
@@ -472,16 +523,18 @@
 
 (defn.js run-sync-view
   [cell model-id view-id args]
-  (var [path context disabled]
-       (base-model/prep-view cell model-id view-id {:args args}))
-  (k/set-key (. context ["acc"]) "path" path)
+  (var prepared (base-model/prep-view cell model-id view-id {:args args}))
+  (var path (. prepared [0]))
+  (var context (. prepared [1]))
+  (var disabled (. prepared [2]))
+  (xt/x:set-key (. context ["acc"]) "path" path)
   (return
    (. (event-view/pipeline-run-sync
        context
        true
        base-model/async-fn
        nil
-       k/identity)
+        (fn [x] (return x)))
       (then
        (fn []
          (return
@@ -514,7 +567,7 @@
   [remote-seed proxy-cell initial-vals initial-outputs sync-run remote-after-sync sqlite-conn]
   (return
    {"remote_seed" remote-seed
-    "proxy" (k/obj-assign
+    "proxy" (xtd/obj-assign
              (-/proxy-public-state proxy-cell)
              {"initial_vals" initial-vals
               "initial_outputs" initial-outputs
@@ -534,8 +587,10 @@
              (. (-/boot-proxy-cell service-registry)
                 (then
                  (fn [proxy-cell]
-                   (var initial-vals (cl/model-vals "orders" proxy-cell))
-                   (var initial-outputs (cl/model-outputs "orders" proxy-cell))
+                   (var initial-vals (xtd/clone-nested
+                                      (cl/model-vals "orders" proxy-cell)))
+                   (var initial-outputs (xtd/clone-nested
+                                         (cl/model-outputs "orders" proxy-cell)))
                    (return
                     (. (-/run-sync-view proxy-cell
                                         "orders"

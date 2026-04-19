@@ -6,6 +6,6 @@
 ;;
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]
-             [xt.lang.base-runtime :as rt]]})
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-runtime :as rt]]})
 

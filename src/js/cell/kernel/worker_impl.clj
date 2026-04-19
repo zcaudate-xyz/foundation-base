@@ -3,11 +3,7 @@
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :js
-  {:require [[js.core :as j]
-             [xt.lang.base-repl :as repl]
-             [xt.lang.base-lib :as k]
-             [js.cell.kernel.base-util :as util]
-             [js.cell.kernel.worker-state :as worker-state]]})
+  {:require [[js.core :as j] [xt.lang.common-spec :as xt] [xt.lang.common-trace :as trace] [xt.lang.common-repl :as repl] [js.cell.kernel.base-util :as util] [js.cell.kernel.worker-state :as worker-state]]})
 
 (defspec.xt worker-handle-async
   [:fn [:xt/any [:fn [js.cell.kernel.spec/AnyList] :xt/any]
@@ -51,8 +47,8 @@
                       (j/postMessage worker (util/resp-ok op id (util/arg-encode ret)))))
              (catch (fn [ret]
                       (when (. ret ["stack"])
-                        (k/TRACE! (. ret ["stack"]) "ERR"))
-                      
+                        (trace/TRACE! (. ret ["stack"]) "ERR"))
+                       
                       (j/postMessage worker (util/resp-error op id ret)))))))
 
 (defn.js worker-process-eval
@@ -60,7 +56,7 @@
   (var #{op id body action} input)
   (when (== false (. (worker-state/get-state worker)
                      ["eval"]))
-    (j/postMessage worker (util/resp-error op id (k/cat "Not enabled - EVAL"))))
+    (j/postMessage worker (util/resp-error op id "Not enabled - EVAL")))
   (var out (repl/return-eval body))
   (var f (:? (. input ["async"])
              j/identity
@@ -73,7 +69,7 @@
   (var action-entry  (. (worker-state/get-actions worker)
                         [action]))
   (when (== nil action-entry)
-    (return (j/postMessage worker (util/resp-error op id (k/cat "action not found - " action)))))
+    (return (j/postMessage worker (util/resp-error op id (xt/x:cat "action not found - " action)))))
             
   (var action-async  (. action-entry ["is_async"]))
   (var action-fn     (. action-entry ["handler"]))
@@ -111,11 +107,11 @@
   "initiates the worker actions"
   {:added "4.0"}
   [worker input-fn]
-  (:= input-fn (or input-fn k/identity))
+  (:= input-fn (or input-fn j/identity))
   (. worker (addEventListener
              "message"
              (fn [e]
-               (cond (k/is-string? e.data)
+               (cond (xt/x:is-string? e.data)
                      (-/worker-process worker
                                        (input-fn
                                         {:op "eval"

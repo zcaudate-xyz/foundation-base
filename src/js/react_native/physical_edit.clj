@@ -2,18 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:runtime :websocket
-   :config {:id :play/web-main
-            :bench false
-            :emit {:native {:suppress true}
-                   :lang/jsx false}
-            :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react :as r]
-             [js.react-native :as n]
-             [js.react-native.animate :as a]
-             [js.react-native.physical-base :as physical-base]
-             [xt.lang.base-lib :as k]]})
+  {:config {:bench false :emit {:native {:suppress true} :lang/jsx false} :id :play/web-main :notify {:host "test.statstrade.io"}} :require [[js.core :as j] [js.react :as r] [js.react-native :as n] [js.react-native.animate :as a] [js.react-native.physical-base :as physical-base] [xt.lang.common-lib :as k] [xt.lang.common-spec :as xt]] :runtime :websocket})
 
 (defn.js createPan
   "creates a PanResponder"
@@ -39,27 +28,27 @@
                          :onPanResponderGrant
                          (fn []
                            (when (not (r/curr disabledRef))
-                             (k/for:object [[dk ind] pan]
-                               (a/setOffset ind ind._value))))
+                              (xt/for:object [[dk ind] pan]
+                                (a/setOffset ind ind._value))))
                          :onPanResponderMove
                          (fn [e state]
                            (when (not (r/curr disabledRef))
                              (cond absolute
-                                   (k/for:object [[dk ind] pan]
-                                     (var dv (k/get-key state dk))
-                                     (a/setValue ind (+ ind._offset dv)))
+                                    (xt/for:object [[dk ind] pan]
+                                      (var dv (xt/x:get-key state dk))
+                                      (a/setValue ind (+ ind._offset dv)))
                                    
                                    :else
-                                   (k/for:object [[dk ind] pan]
-                                     (var dv (k/get-key state dk))
-                                     (a/setValue ind dv)))))
+                                    (xt/for:object [[dk ind] pan]
+                                      (var dv (xt/x:get-key state dk))
+                                      (a/setValue ind dv)))))
                          :onPanResponderRelease
                          (fn []
                            (when setPressing (setPressing false))
                            (when onPressOut (onPressOut))
                            (when (not absolute)
-                             (k/for:object [[dk ind] pan]
-                               (a/flattenOffset ind))))}
+                              (xt/for:object [[dk ind] pan]
+                                (a/flattenOffset ind))))}
                         rprops)))))
 
 (defn.js usePanTouchable
@@ -96,7 +85,6 @@
                                      absolute
                                      (:.. rprops)]})))
   (return #{touchable panHandlers}))
-
 
 
 

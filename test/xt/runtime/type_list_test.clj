@@ -1,6 +1,6 @@
 (ns xt.runtime.type-list-test
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
@@ -8,18 +8,18 @@
    :require [[xt.runtime.type-list :as t]
              [xt.runtime.interface-common :as ic]
              [xt.runtime.interface-collection :as coll]
-             [xt.lang.base-lib :as k]
-             [xt.lang.base-iter :as it]
-             [xt.lang.base-repl :as repl]]})
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-iter :as it]
+             [xt.lang.common-repl :as repl]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.runtime.type-list :as t]
              [xt.runtime.interface-common :as ic]
              [xt.runtime.interface-collection :as coll]
-             [xt.lang.base-lib :as k]
-             [xt.lang.base-iter :as it]
-             [xt.lang.base-repl :as repl]]})
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-iter :as it]
+             [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -108,7 +108,22 @@
   => 3)
 
 ^{:refer xt.runtime.type-list/list-new :added "4.0"}
-(fact "creates a new list")
+(fact "creates a new list"
+  ^:hidden
+
+  (!.js
+   (var out (t/list-new 1 t/EMPTY_LIST nil))
+   [(. out ["::"])
+    (. out _head)
+    (t/list-to-array out)])
+  => ["list" 1 [1]]
+
+  (!.lua
+   (var out (t/list-new 1 t/EMPTY_LIST nil))
+   [(. out ["::"])
+    (. out _head)
+    (t/list-to-array out)])
+  => ["list" 1 [1]])
 
 ^{:refer xt.runtime.type-list/list-push :added "4.0"}
 (fact "pushs onto the front of the list"

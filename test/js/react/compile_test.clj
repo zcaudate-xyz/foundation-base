@@ -99,27 +99,26 @@
   ^:hidden
 
   (compile/compile-full
-   
-   '{:var/html-code   ""
-     :var/dsl-code    {:%/args  [""]}
-     
-     :var/history     {:%/fn   useLocalHistory
-                       :%/args ["task.translate-html"]}
-     :var/history-idx 0
-     :var/data        {:errored false
-                       :warning false}
-     :var/combined    {:%  (+ :var/dsl-code
-                              :var/html-code)}}
-   [:ui/button
-    {:name :var/html-code}
-    [:a]]
-   
-   {:ui/button [:ui/container
-                [:ui/text
-                 {:name :props/name}
-                 :props/children]]
-    :ui/container [:div {:class ["p-8"]}]
-    :ui/text      [:p]})
+    {:states {:var/html-code   ""
+              :var/dsl-code    {:%/args  [""]}
+              :var/history     {:%/fn   'useLocalHistory
+                                :%/args ["task.translate-html"]}
+              :var/history-idx 0
+              :var/data        {:errored false
+                                :warning false}
+              :var/combined    '{:%  (+ :var/dsl-code
+                                        :var/html-code)}}
+     :actions {}
+     :triggers []
+     :layout [:ui/button
+              {:name :var/html-code}
+             [:a]]
+    :components {:ui/button [:ui/container
+                             [:ui/text
+                              {:name :props/name}
+                              :props/children]]
+                 :ui/container [:div {:class ["p-8"]}]
+                 :ui/text      [:p]}})
   => '(do (var [data setData]
                (React.useState {:errored false
                                 :warning false}))

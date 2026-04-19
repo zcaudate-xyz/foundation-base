@@ -9,13 +9,15 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react :as r]
-             [js.react-native :as n :include [:fn]]
-             [js.react-native.animate :as a]
-             [js.react-native.physical-base :as physical-base]
-             [js.react-native.model-roller :as model-roller]
-             [xt.lang.base-lib :as k]]})
+    :require [[js.core :as j]
+              [js.react :as r]
+              [js.react-native :as n :include [:fn]]
+              [js.react-native.animate :as a]
+              [js.react-native.physical-base :as physical-base]
+              [js.react-native.model-roller :as model-roller]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-math :as math]]})
 
 ^{:refer js.react-native.physical-carosel/DigitCaroselManual
   :adopt true
@@ -30,11 +32,11 @@
 
   (defn.js DigitCaroselManualDemo
     []
-    (var values  (r/const (k/arr-map (k/arr-range -/DIVISIONS)
+    (var values  (r/const (xtd/arr-map (xtd/arr-range -/DIVISIONS)
                                      (fn:> [i] (new a/Value i)))))
-    (var lu      (r/const (k/arr-juxt values
-                                      (fn:> [v] (+ "index" v._value))
-                                      k/identity)))
+    (var lu      (r/const (xtd/arr-juxt values
+                                       (fn:> [v] (+ "index" v._value))
+                                       (fn:> [v] v))))
     (var [offset0 setOffset0] (r/local 0))
     (var ioffset0   (a/useIndexIndicator offset0
                                          {:default {:duration 800}}
@@ -44,7 +46,7 @@
                                               values
                                               -/DIVISIONS
                                               offset0
-                                              (k/len -/DIGITS))))))
+                                              (xt/x:len -/DIGITS))))))
     (var modelFn (r/const (model-roller/roller-model -/DIVISIONS 10)))
     
     (return
@@ -56,7 +58,7 @@
                  :height 200
                  :backgroundColor "white"
                  :overflow "hidden"}}
-        (j/map (k/arr-range -/DIVISIONS)
+        (j/map (xtd/arr-range -/DIVISIONS)
                (fn:> [index i]
                  [:% physical-base/Box
                   {:key i
@@ -108,8 +110,8 @@
                                :zIndex (* 10 scale)
                                :transform
                                [#_{:scale scale}
-                                {:translateX (* 8
-                                                (k/sign translate)
+                                 {:translateX (* 8
+                                                (math/sign translate)
                                                 translate translate)}
                                 #_{:translateY (* 0.5 (j/abs translate))}]}}))}]))]] 
       [:% n/Row

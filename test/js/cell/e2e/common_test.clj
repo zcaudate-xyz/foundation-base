@@ -4,15 +4,16 @@
             [js.cell.runtime.emit :as emit]
             [std.lang :as l]
             [std.lib.template :as template]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
    :require [[js.core :as j]
-             [xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
-             [xt.lang.base-runtime :as rt :with [defvar.js]]
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-repl :as repl]
+             [xt.lang.common-runtime :as rt :with [defvar.js]]
              [xt.lang.event-view :as event-view]
              [js.cell.kernel :as cl]
              [js.cell.e2e.common :as common]
@@ -32,13 +33,16 @@
    '[(js.cell.e2e.common/remote-runtime-init)]
    :flat))
 
+(def +remote-worker-setup-eval+
+  (common/remote-worker-setup-eval))
+
 (defmacro with-node-remote
   [script & body]
   (template/$
     (notify/wait-on :js
       (var remote-cell
            (cl/make-cell
-            (runtime-link/make-node-link ~script {})))
+            (runtime-link/make-node-link (@! ~script) {})))
       (. (. remote-cell ["init"])
          (then (fn []
                  (do ~@body)))))))
@@ -49,7 +53,7 @@
     (notify/wait-on :js
       (var remote-cell
            (cl/make-cell
-            (runtime-link/make-node-link ~script {})))
+            (runtime-link/make-node-link (@! ~script) {})))
       (. (. remote-cell ["init"])
          (then
           (fn []
@@ -72,11 +76,11 @@
 ^{:refer js.cell.e2e.common/remote-worker-setup-eval :added "4.1"}
 (fact "installs the e2e worker actions through eval"
   ^:hidden
-  (with-node-remote (emit/node-script)
+  (with-node-remote +node-script+
     (. (. (cl/call remote-cell
                    {:op "eval"
                     :id "setup-1"
-                    :body ~(common/remote-worker-setup-eval)})
+                    :body (@! +remote-worker-setup-eval+)})
           (then (fn [status]
                   (. (common/call-remote-query remote-cell "open")
                      (then (fn [rows]
@@ -153,8 +157,8 @@
   ^:hidden
   (!.js
    (var db (common/create-cache-db))
-   {"schema" (k/obj-keys (k/get-key db "schema"))
-    "views" (k/obj-keys (k/get-key db "views"))
+   {"schema" (xtd/obj-keys (xt/x:get-key db "schema"))
+    "views" (xtd/obj-keys (xt/x:get-key db "views"))
     "open" (common/remote-action-query
             (common/order-query-plan "open"))})
   => {"schema" ["Order"]
@@ -169,7 +173,7 @@
    (var db (common/get-remote-db))
    {"initial" nil
     "cached?" (== db (common/REMOTE_DB))
-    "has_schema" (k/obj? (k/get-key db "schema"))})
+    "has_schema" (xt/x:is-object? (xt/x:get-key db "schema"))})
   => {"initial" nil
       "cached?" true
       "has_schema" true})
@@ -181,8 +185,8 @@
    (common/REMOTE_DB-reset nil)
    (var first (common/get-remote-db))
    (var second (common/get-remote-db))
-   [(k/obj? first)
-    (== first second)])
+   [(xt/x:is-object? first)
+     (== first second)])
   => [true true])
 
 ^{:refer js.cell.e2e.common/order-query-plan :added "4.1"}
@@ -225,9 +229,9 @@
   ^:hidden
   (!.js
    (var actions (common/remote-actions))
-   {"names" (common/sort-strings (k/obj-keys actions))
-    "query_args" (k/get-in actions ["@e2e/query" "args"])
-    "sync_args" (k/get-in actions ["@e2e/sync" "args"])})
+   {"names" (common/sort-strings (xtd/obj-keys actions))
+    "query_args" (xtd/get-in actions ["@e2e/query" "args"])
+    "sync_args" (xtd/get-in actions ["@e2e/sync" "args"])})
   => {"names" ["@e2e/query" "@e2e/sync"]
       "query_args" ["query_plan"]
       "sync_args" ["sync_request"]})
@@ -260,7 +264,7 @@
      {:success (fn [conn]
                  (repl/notify
                   (common/sort-strings
-                   (k/obj-keys conn))))
+                   (xtd/obj-keys conn))))
       :error (fn [err]
                (repl/notify {"error" err}))}))
   => (contains ["::disconnect" "::query" "::query_sync"]))
@@ -355,10 +359,10 @@
          {"id" "remote"}
          {"id" "sqlite"}))
    {"names" (common/sort-strings
-             (k/obj-keys (service/get-dbs registry)))
-    "remote" (k/get-in (service/get-db registry "remote-cache")
+             (xtd/obj-keys (service/get-dbs registry)))
+    "remote" (xtd/get-in (service/get-db registry "remote-cache")
                        ["cell" "id"])
-    "sqlite" (k/get-in (service/get-db registry "proxy-sqlite")
+    "sqlite" (xtd/get-in (service/get-db registry "proxy-sqlite")
                        ["conn" "id"])})
   => {"names" ["proxy-sqlite" "remote-cache"]
       "remote" "remote"
@@ -401,11 +405,11 @@
          (common/create-service-registry
           {"id" "remote"}
           {"id" "sqlite"})))
-   {"views" (common/sort-strings (k/obj-keys model))
-    "deps" (k/get-in model ["by_status" "deps"])
-    "sync_init" (k/get-in model ["sync_status" "defaultInit"])
-    "query_kind" (k/get-in model ["by_status" "options" "context" "kind"])
-    "sync_kind" (k/get-in model ["sync_status" "options" "context" "kind"])})
+   {"views" (common/sort-strings (xtd/obj-keys model))
+    "deps" (xtd/get-in model ["by_status" "deps"])
+    "sync_init" (xtd/get-in model ["sync_status" "defaultInit"])
+    "query_kind" (xtd/get-in model ["by_status" "options" "context" "kind"])
+    "sync_kind" (xtd/get-in model ["sync_status" "options" "context" "kind"])})
   => {"views" ["by_status" "sync_status"]
       "deps" ["sync_status"]
       "sync_init" {"disabled" true}
@@ -471,8 +475,8 @@
                       [{"id" "ord-2" "status" "open"}])
                      (then (fn [acc]
                              (repl/notify
-                              {"sync" (k/get-key acc "sync")
-                               "sqlite" (common/sqlite-select-orders sqlite-conn)})))))))
+                              {"sync" (xt/x:get-key acc "sync")
+                                "sqlite" (common/sqlite-select-orders sqlite-conn)})))))))
        (catch (fn [err]
                 (repl/notify {"error" err})))))
   => (contains-in

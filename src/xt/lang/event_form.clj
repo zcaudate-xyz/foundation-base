@@ -1,9 +1,9 @@
 (ns xt.lang.event-form
-  (:require [std.lang :as l]
-            [std.lang.typed.xtalk :refer [defspec.xt]]))
+  (:require [std.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.lang.event-common :as event-common]
              [xt.lang.util-validate :as validate]]})
 
@@ -126,8 +126,8 @@
   "checks that event needs to be processed"
   {:added "4.0"}
   [event fields]
-  (k/for:array [field fields]
-    (k/for:array [evfield (. event ["fields"])]
+  (xt/for:array [field fields]
+    (xt/for:array [evfield (. event ["fields"])]
       (when (== evfield field)
         (return true))))
   (return false))
@@ -136,11 +136,11 @@
   "adds listener to a form"
   {:added "4.0"}
   [form listener-id fields callback meta]
-  (:= fields (k/arrayify fields))
+  (:= fields (event-common/arrayify-path fields))
   (return
    (event-common/add-listener
     form listener-id "form" callback
-    (k/obj-assign
+    (xt/x:obj-assign
      {:form/fields fields}
      meta)
     (fn [event]
@@ -159,29 +159,31 @@
   {:added "4.0"}
   [form event-type]
   (var #{validators} form)
-  (var fields (k/obj-keys validators))
+  (var fields (xt/x:obj-keys validators))
   (return
-   (event-common/trigger-listeners
-    form
-    {:type   event-type
-     :fields fields})))
+   (event-common/task-await
+    (event-common/trigger-listeners
+     form
+     {:type   event-type
+      :fields fields}))))
 
 (defn.xt trigger-field
   "triggers the callback"
   {:added "4.0"}
   [form fields event-type]
   (return
-   (event-common/trigger-listeners
-    form
-    {:type   event-type
-     :fields (k/arrayify fields)})))
+   (event-common/task-await
+    (event-common/trigger-listeners
+     form
+     {:type   event-type
+      :fields (event-common/arrayify-path fields)}))))
 
 (defn.xt set-field
   "sets the field"
   {:added "4.0"}
   [form field value]
   (var #{data} form)
-  (k/set-key data field value)
+  (xt/x:set-key data field value)
   (return (-/trigger-field form field "form.data")))
 
 (defn.xt get-field
@@ -189,7 +191,7 @@
   {:added "4.0"}
   [form field]
   (var #{data} form)
-  (return (k/get-key data field)))
+  (return (xt/x:get-key data field)))
 
 (defn.xt toggle-field
   "toggles the field"
@@ -212,7 +214,7 @@
   "gets the validation result"
   {:added "4.0"}
   [form]
-  (return (k/get-key form "result")))
+  (return (xt/x:get-key form "result")))
 
 (defn.xt get-field-result
   "gets the validation status"
@@ -220,21 +222,21 @@
   [form field]
   (var #{result} form)
   (var #{fields} result)
-  (return (k/get-key fields field)))
+  (return (xt/x:get-key fields field)))
 
 (defn.xt get-data
   "gets the data"
   {:added "4.0"}
   [form]
-  (return (k/get-key form "data")))
+  (return (xt/x:get-key form "data")))
 
 (defn.xt set-data
   "sets the data directly"
   {:added "4.0"}
   [form m]
   (var #{data} form)
-  (k/obj-assign data m)
-  (var fields (k/obj-keys m))
+  (xt/x:obj-assign data m)
+  (var fields (xt/x:obj-keys m))
   (return (-/trigger-field form fields "form.data")))
 
 (defn.xt reset-all-data
@@ -243,7 +245,7 @@
   [form]
   (var #{initial} form)
   (var data (initial))
-  (k/set-key form "data" data)
+  (xt/x:set-key form "data" data)
   (return (-/trigger-all form "form.data")))
 
 (defn.xt reset-field-data
@@ -251,8 +253,8 @@
   {:added "4.0"}
   [form field]
   (var #{initial data} form)
-  (var value (k/get-key (initial) field))
-  (k/set-key data field value)
+  (var value (xt/x:get-key (initial) field))
+  (xt/x:set-key data field value)
   (return (-/trigger-field form field "form.data")))
 
 (defn.xt validate-all
@@ -262,17 +264,21 @@
   (var #{validators
          data
          result} form)
+  (var hook-status-fn
+       (fn [field status]
+         (when hook-fn
+           (hook-fn field status))))
+  (var complete-validation-fn
+        (fn [passed res]
+          (-/trigger-all form "form.validation")
+          (when complete-fn
+            (complete-fn passed res))))
   (return
    (validate/validate-all data
                           validators
                           result
-                          (fn [field status]
-                            (when hook-fn
-                              (hook-fn field status)))
-                          (fn [res]
-                            (-/trigger-all form "form.validation")
-                            (when complete-fn
-                              (complete-fn res))))))
+                          hook-status-fn
+                          complete-validation-fn)))
 
 (defn.xt validate-field
   "validates form field"
@@ -281,23 +287,25 @@
   (var #{validators
          data
          result} form)
+  (var complete-field-fn
+       (fn [passed status]
+         (-/trigger-field form field "form.validation")
+         (when complete-fn
+           (complete-fn passed status))))
   (return
    (validate/validate-field data
                             field
                             validators
                             result
                             hook-fn
-                            (fn [passed status]
-                              (-/trigger-field form field "form.validation")
-                              (when complete-fn
-                                (complete-fn passed status))))))
+                            complete-field-fn)))
 
 (defn.xt reset-field-validator
   "reset field validators"
   {:added "4.0"}
   [form field]
   (var #{result} form)
-  (k/set-key result field {:status "pending"})
+  (xt/x:set-key result field {:status "pending"})
   (-/trigger-field form field "form.validation")
   (return result))
 
@@ -306,7 +314,7 @@
   {:added "4.0"}
   [form]
   (var #{validators result} form)
-  (k/set-key form "result" (validate/create-result validators))
+  (xt/x:set-key form "result" (validate/create-result validators))
   (-/trigger-all form "form.validation")
   (return result))
 
@@ -323,7 +331,7 @@
   [form field]
   (var #{result} form)
   (var #{fields} result)
-  (return (== "ok" (k/get-in fields [field "status"]))))
+  (return (== "ok" (xtd/get-in fields [field "status"]))))
 
 (defn.xt check-field-errored
   "checks that field has passed"
@@ -331,7 +339,7 @@
   [form field]
   (var #{result} form)
   (var #{fields} result)
-  (return (== "errored" (k/get-in fields [field "status"]))))
+  (return (== "errored" (xtd/get-in fields [field "status"]))))
 
 (defn.xt check-all-passed
   "checks that all fields have passed"
@@ -339,8 +347,8 @@
   [form]
   (var #{result} form)
   (var #{fields} result)
-  (k/for:object [[_ v] fields]
-    (when (not= "ok" (k/get-key v "status"))
+  (xt/for:object [[_ v] fields]
+    (when (not= "ok" (xt/x:get-key v "status"))
       (return false)))
   (return true))
 
@@ -350,16 +358,7 @@
   [form]
   (var #{result} form)
   (var #{fields} result)
-  (k/for:object [[_ v] fields]
-    (when (== "errored" (k/get-key v "status"))
+  (xt/for:object [[_ v] fields]
+    (when (== "errored" (xt/x:get-key v "status"))
       (return true)))
   (return false))
-
-
-(comment
-  
-  (require '[std.lang.typed.xtalk :as typed]
-           '[std.lang.typed.xtalk-analysis :as ta])
-  
-  (typed/check-namespace 'xt.lang.event-form)
-  )

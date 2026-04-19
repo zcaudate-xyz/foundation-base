@@ -1,7 +1,7 @@
 (ns xt.db.sql-manage-test
   (:require [std.lang :as l]
             [std.string.prose :as prose]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
@@ -9,19 +9,25 @@
    :require [[xt.db.base-schema :as sch]
              [xt.db.base-flatten :as f]
              [xt.db.cache-util :as cache-util]
-             [xt.db.sql-raw :as raw]
-             [xt.db.sql-graph :as graph]
-             [xt.db.sql-util :as ut]
-             [xt.db.sql-manage :as manage]
-             [xt.db.sql-table :as table]
-             [xt.db.sample-test :as sample]
-             [xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]]})
+              [xt.db.sql-raw :as raw]
+              [xt.db.sql-graph :as graph]
+              [xt.db.sql-util :as ut]
+              [xt.db.sql-manage :as manage]
+              [xt.db.sql-table :as table]
+              [xt.db.sample-test :as sample]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-string :as str]
+              [xt.lang.common-repl :as repl]
+              [xt.sys.conn-dbsql :as dbsql]
+              [js.lib.driver-sqlite :as js-sqlite]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.db.base-schema :as sch]
-             [xt.lang.base-lib :as k]
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-string :as str]
              [xt.db.sql-util :as ut]
              [xt.db.sql-manage :as manage]
              [xt.db.sample-test :as sample]]})
@@ -29,7 +35,9 @@
 (l/script- :python
   {:runtime :basic
    :require [[xt.db.base-schema :as sch]
-             [xt.lang.base-lib :as k]
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-string :as str]
              [xt.db.sql-util :as ut]
              [xt.db.sql-manage :as manage]
              [xt.db.sample-test :as sample]]})
@@ -42,40 +50,39 @@
   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.sql-manage/table-create.sqlite :adopt true :added "4.0"}
-(fact "workflow for sql.js"
+(fact "workflow for sqlite-wasm"
   
   (notify/wait-on :js
-   (var initSql (require "sql.js"))
-   (-> (initSql)
-       (. (then (fn [res]
-                  (:= (!:G SQL) res)
-                  (:= (!:G DB) (new SQL.Database))
-                  (repl/notify true))))))
+   (dbsql/connect {:constructor js-sqlite/connect-constructor}
+                  {:success (fn [conn]
+                              (:= (!:G DB) conn)
+                              (repl/notify true))}))
   => true
   
   (!.js
-   (DB.run (k/join "\n\n"
-                   (manage/table-create-all
-                    sample/Schema
-                    sample/SchemaLookup
-                    (ut/sqlite-opts nil))))
-   (DB.run
-    (raw/raw-insert "Currency"
-                    ["id" "type" "symbol" "native" "decimal" "name" "plural" "description"]
-                    (@! sample/+currency+)
-                    (ut/sqlite-opts nil)))
-   (DB.run
-    (k/join "\n\n"
-            (table/table-insert sample/Schema
-                              sample/SchemaLookup
-                              "UserAccount"
-                              [sample/RootUserFull]
-                              (ut/sqlite-opts nil))))
+   (dbsql/query-sync DB
+                     (str/join "\n\n"
+                               (manage/table-create-all
+                                sample/Schema
+                                sample/SchemaLookup
+                                (ut/sqlite-opts nil))))
+   (dbsql/query-sync DB
+                     (raw/raw-insert "Currency"
+                                     ["id" "type" "symbol" "native" "decimal" "name" "plural" "description"]
+                                     (@! sample/+currency+)
+                                     (ut/sqlite-opts nil)))
+   (dbsql/query-sync DB
+                     (str/join "\n\n"
+                               (table/table-insert sample/Schema
+                                                   sample/SchemaLookup
+                                                   "UserAccount"
+                                                   [sample/RootUserFull]
+                                                   (ut/sqlite-opts nil))))
    true)
   => true
   
   (!.js
-    (DB.exec "SELECT name FROM sqlite_schema where type='table'"))
+    (dbsql/query-sync DB "SELECT name FROM sqlite_schema where type='table'"))
   => [{"values"
        [["UserAccount"]
         ["UserProfile"]
@@ -93,7 +100,7 @@
        "columns" ["name"]}]
   
   (!.js
-   (DB.exec "pragma table_info('Currency')"))
+   (dbsql/query-sync DB "pragma table_info('Currency')"))
   => [{"columns" ["cid" "name" "type" "notnull" "dflt_value" "pk"],
        "values" [[0 "id" "TEXT" 0 nil 1]
                  [1 "type" "TEXT" 0 nil 0]
@@ -105,15 +112,14 @@
                  [7 "description" "TEXT" 0 nil 0]]}]
   
   (set (!.js
-        (-> (DB.exec
-             (graph/select sample/Schema
-                           ["Asset"
-                            ["id"
-                             ["currency"
-                              ["id"]]]]
-                           (ut/sqlite-opts nil)))
-            (. [0] ["values"] [0] [0])
-            k/json-decode)))
+        (-> (dbsql/query-sync DB
+                              (graph/select sample/Schema
+                                            ["Asset"
+                                             ["id"
+                                              ["currency"
+                                               ["id"]]]]
+                                            (ut/sqlite-opts nil)))
+            xt/x:json-decode)))
   => #{{"currency" [{"id" "XLM"}],
         "id" "222de282-ca29-4d04-81dd-86ec3f9189cf"}
        {"currency" [{"id" "XLM.T"}],
@@ -124,21 +130,20 @@
         "id" "9e576e3e-c73e-4d18-92b4-f975c1bed3d4"}}
   
   (!.js
-   (-> (DB.exec
-        (graph/select sample/Schema
-                      ["UserAccount"
-                       ["*/data"
-                        ["profile"]
-                        ["wallets"
-                         ["*/data"
-                          ["entries"
-                           ["*/data"
-                            ["asset"
-                           ["*/data"
-                            ["currency"]]]]]]]]]
-                      (ut/sqlite-opts nil)))
-       (. [0] ["values"] [0] [0])
-       k/json-decode))
+   (-> (dbsql/query-sync DB
+                         (graph/select sample/Schema
+                                       ["UserAccount"
+                                        ["*/data"
+                                         ["profile"]
+                                         ["wallets"
+                                          ["*/data"
+                                           ["entries"
+                                            ["*/data"
+                                             ["asset"
+                                              ["*/data"
+                                               ["currency"]]]]]]]]]
+                                       (ut/sqlite-opts nil)))
+       xt/x:json-decode))
   => [{"is_official" 0,
        "nickname" "root",
        "profile"
@@ -214,11 +219,11 @@
   
   (!.js
    [(manage/table-create-column sample/Schema
-                                (k/get-in sample/Schema
+                                (xtd/get-in sample/Schema
                                           ["Currency" "id"])
                                 (ut/sqlite-opts nil))
     (manage/table-create-column sample/Schema
-                                (k/get-in sample/Schema
+                                (xtd/get-in sample/Schema
                                           ["Currency" "id"])
                                 (ut/postgres-opts sample/SchemaLookup))])
   => ["\"id\" text PRIMARY KEY"
@@ -226,11 +231,11 @@
 
   (!.lua
    [(manage/table-create-column sample/Schema
-                                (k/get-in sample/Schema
+                                (xtd/get-in sample/Schema
                                           ["Currency" "id"])
                                 (ut/sqlite-opts nil))
     (manage/table-create-column sample/Schema
-                                (k/get-in sample/Schema
+                                (xtd/get-in sample/Schema
                                           ["Currency" "id"])
                                 (ut/postgres-opts sample/SchemaLookup))])
   => ["\"id\" text PRIMARY KEY"
@@ -238,11 +243,11 @@
 
   (!.py
    [(manage/table-create-column sample/Schema
-                                (k/get-in sample/Schema
+                                (xtd/get-in sample/Schema
                                           ["Currency" "id"])
                                 (ut/sqlite-opts nil))
     (manage/table-create-column sample/Schema
-                                (k/get-in sample/Schema
+                                (xtd/get-in sample/Schema
                                           ["Currency" "id"])
                                 (ut/postgres-opts sample/SchemaLookup))])
   => ["\"id\" text PRIMARY KEY"
@@ -251,11 +256,11 @@
   
   (!.js
    [(manage/table-create-column sample/Schema
-                                (k/get-in sample/Schema
+                                (xtd/get-in sample/Schema
                                           ["UserProfile" "account"])
                                 (ut/sqlite-opts nil))
     (manage/table-create-column sample/Schema
-                                (k/get-in sample/Schema
+                                (xtd/get-in sample/Schema
                                           ["UserProfile" "account"])
                                 (ut/postgres-opts sample/SchemaLookup))])
   => ["\"account_id\" text REFERENCES \"UserAccount\""
@@ -264,11 +269,11 @@
 
   (!.lua
    [(manage/table-create-column sample/Schema
-                                (k/get-in sample/Schema
+                                (xtd/get-in sample/Schema
                                           ["UserProfile" "account"])
                                 (ut/sqlite-opts nil))
     (manage/table-create-column sample/Schema
-                                (k/get-in sample/Schema
+                                (xtd/get-in sample/Schema
                                           ["UserProfile" "account"])
                                 (ut/postgres-opts sample/SchemaLookup))])
   => ["\"account_id\" text REFERENCES \"UserAccount\""
@@ -278,11 +283,11 @@
 
   (!.py
    [(manage/table-create-column sample/Schema
-                                (k/get-in sample/Schema
+                                (xtd/get-in sample/Schema
                                           ["UserProfile" "account"])
                                 (ut/sqlite-opts nil))
     (manage/table-create-column sample/Schema
-                                (k/get-in sample/Schema
+                                (xtd/get-in sample/Schema
                                           ["UserProfile" "account"])
                                 (ut/postgres-opts sample/SchemaLookup))])
   => ["\"account_id\" text REFERENCES \"UserAccount\""

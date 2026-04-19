@@ -2,18 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:runtime :websocket
-   :config {:id :play/web-main
-            :bench false
-            :emit {:native {:suppress true}
-                   :lang/jsx false}
-            :notify {:host "test.statstrade.io"}}
-   :require [[xt.lang.base-lib :as k]
-             [js.core :as j]
-             [js.react :as r]
-             [js.react-native :as n]
-             [js.react-native.animate :as a]
-             [js.react-native.helper-theme-default :as helper-theme-default]]})
+  {:config {:bench false :emit {:native {:suppress true} :lang/jsx false} :id :play/web-main :notify {:host "test.statstrade.io"}} :require [[xt.lang.common-lib :as k] [js.core :as j] [js.react :as r] [js.react-native :as n] [js.react-native.animate :as a] [js.react-native.helper-theme-default :as helper-theme-default] [xt.lang.common-data :as xtd] [xt.lang.common-spec :as xt]] :runtime :websocket})
 
 (defn.js Tag
   "listens to a single indicator to set ref"
@@ -71,7 +60,7 @@
             (:= size "md")
             (:= transformations {})
             (:.. rprops)]} props
-         ostyles (:? (k/arr? style) style [style])
+         ostyles (:? (k/is-array? style) style [style])
          sstyle  (or (. helper-theme-default/FontSize [size])
                      {:fontSize size})
          refChord   (r/useFollowRef chord)
@@ -85,14 +74,14 @@
                      (:.. (-/transformInner indicators chord inner -/transformProps))])
      (return (j/assign
               {(:? (or allowRef
-                       (not (k/fn? component)))
+                       (not (k/is-function? component)))
                    "ref"
                    "refLink") refLink
                :style [sstyle
                        (:.. ostyles)]}
               rprops
-              (:? (k/not-empty? tchildren)
-                  {:children tchildren}))))))
+               (:? (xtd/not-empty? tchildren)
+                   {:children tchildren}))))))
 
 (defn.js transformInnerFn
   "transforms inner props"
@@ -178,7 +167,7 @@
   {:added "4.0"}
   [#{[value
       (:= indicatorParams {})]}]
-  (var [emptying setEmptying]  (r/local (k/is-empty? value)))
+  (var [emptying setEmptying]  (r/local (xtd/is-empty? value)))
   (var eindicator      (a/useBinaryIndicator emptying
                                              (or (. indicatorParams ["emptying"])
                                                  {:default {:duration 200}})))
@@ -226,7 +215,7 @@
   (var allIndicators {})
   (var allChord {})
   (var out {})
-  (k/for:array [e chords]
+  (xt/for:array [e chords]
     (var #{[indicators
             chord
             (:.. rprops)]} e)
@@ -367,7 +356,7 @@
     [:<>
      [:% n/Pressable
       #{[:disabled disabled
-         :style (k/arrayify style)
+         :style (j/arrayify style)
          :onPressIn  (fn [e] (setPressing true)
                        (if onPressIn (onPressIn e)))
          :onPressOut (fn [e] (setPressing false)
@@ -477,7 +466,7 @@
      (when (not= value (r/curr valueRef))
        (r/curr:set valueRef value)
        (if onChangeText (onChangeText value))
-       (setEmptying (k/is-empty? value))))
+       (setEmptying (xtd/is-empty? value))))
    (return
     [:% -/Box
      #{[:refLink refLink
@@ -495,7 +484,7 @@
                   :onBlur       (fn [e] (setFocusing false)
                                   (if onBlur (onBlur e)))
                   :onChangeText (fn [v]
-                                  (setEmptying (k/is-empty? v))
+                                  (setEmptying (xtd/is-empty? v))
                                   (r/curr:set valueRef v)
                                   (if onChangeText (onChangeText v)))
                   :value  value}
@@ -503,4 +492,3 @@
                 (:.. inner)]
         :addons addons
         (:.. (j/assign inputable containerProps))]}])))
-

@@ -2,15 +2,15 @@
   (:require [js.cell.runtime.emit :as emit]
             [std.lang :as l]
             [std.lib.template :as template]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
-             [js.cell.kernel :as cl]
-             [js.cell.runtime.env-node :as env-node]
+   :require [[xt.lang.common-spec :as xt]
+              [xt.lang.common-repl :as repl]
+              [js.cell.kernel :as cl]
+              [js.cell.runtime.env-node :as env-node]
              [js.cell.runtime.env-webworker :as env-webworker]
              [js.cell.runtime.env-sharedworker :as env-sharedworker]
              [js.cell.runtime.link :as runtime-link]]})
@@ -40,9 +40,9 @@
                 :addEventListener (fn [event listener capture]
                                     (worker.listeners.push listener))})
    (env-node/init-worker worker)
-   (return {"listeners" (k/len worker.listeners)
-            "message" (k/first messages)
-            "has-setup-service" (k/not-nil? (. worker.actions ["@cell/setup-service"]))}))
+   (return {"listeners" (xt/x:len worker.listeners)
+            "message" (xt/x:first messages)
+            "has-setup-service" (xt/x:not-nil? (. worker.actions ["@cell/setup-service"]))}))
   => (contains-in {"listeners" 1
                    "has-setup-service" true
                    "message" {"signal" "@worker/::INIT"
@@ -64,9 +64,9 @@
                 :addEventListener (fn [event listener capture]
                                     (worker.listeners.push listener))})
    (env-webworker/init-worker worker)
-   (return {"listeners" (k/len worker.listeners)
-            "message" (k/first messages)
-            "has-setup-service" (k/not-nil? (. worker.actions ["@cell/setup-service"]))}))
+   (return {"listeners" (xt/x:len worker.listeners)
+            "message" (xt/x:first messages)
+            "has-setup-service" (xt/x:not-nil? (. worker.actions ["@cell/setup-service"]))}))
   => (contains-in {"listeners" 1
                    "has-setup-service" true
                    "message" {"signal" "@worker/::INIT"
@@ -84,8 +84,8 @@
                                     (worker.listeners.push listener))})
    (:= (!:G self) worker)
    (env-webworker/runtime-init)
-   (var out {"listeners" (k/len worker.listeners)
-             "message" (k/first messages)})
+   (var out {"listeners" (xt/x:len worker.listeners)
+             "message" (xt/x:first messages)})
    (:= (!:G self) previous-self)
    (return out))
   => (contains-in {"listeners" 1
@@ -103,9 +103,9 @@
                                   (port.listeners.push listener))
               :start (fn [] true)})
    (env-sharedworker/init-port port)
-   (return {"listeners" (k/len port.listeners)
-            "message" (k/first messages)
-            "has-setup-service" (k/not-nil? (. port.actions ["@cell/setup-service"]))}))
+   (return {"listeners" (xt/x:len port.listeners)
+            "message" (xt/x:first messages)
+            "has-setup-service" (xt/x:not-nil? (. port.actions ["@cell/setup-service"]))}))
   => (contains-in {"listeners" 1
                    "has-setup-service" true
                    "message" {"signal" "@worker/::INIT"
@@ -127,9 +127,9 @@
    (:= (!:G self) worker)
    (env-sharedworker/runtime-init)
    ((. worker ["onconnect"]) {"ports" [port]})
-   (var out {"listeners" (k/len port.listeners)
-             "starts" (k/len starts)
-             "message" (k/first messages)})
+   (var out {"listeners" (xt/x:len port.listeners)
+             "starts" (xt/x:len starts)
+             "message" (xt/x:first messages)})
    (:= (!:G self) previous-self)
    (return out))
   => (contains-in {"listeners" 1

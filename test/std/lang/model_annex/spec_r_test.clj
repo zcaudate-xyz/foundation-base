@@ -6,19 +6,19 @@
 
 (fact "Preliminary Checks"
   (l/emit-as :R '[[1 2 3 4]])
-  => "[1,2,3,4]"
+  => "c(1,2,3,4)"
 
   (l/emit-as :R '[(+ 1 2 3)])
   => "1 + 2 + 3"
 
   (l/emit-as :R '[(paste "hello" "world" :sep " ")])
-  => "paste(\"hello\",\"world\",sep=\" \")"
+  => "paste('hello','world',sep=' ')"
 
   (l/emit-as :R '[{:a {:b 3}}])
-  => "{\"a\":{\"b\":3}}"
+  => "list(a=list(b=3))"
 
   (l/emit-as :R '[(. ["a" "b" "c"] [2])])
-  => "[\"a\",\"b\",\"c\"][2]"
+  => "c('a','b','c')[[2]]"
 )
 
 ^{:refer std.lang.model-annex.spec-r/tf-defn :added "3.0"}
@@ -59,4 +59,19 @@
   (tf-for-return '(for:return [[ok err] (call)]
                               {:success ok
                                :error err}))
-  => '(tryCatch (block (var ok (call)) ok) :error (fn [err] err)))
+  => '(tryCatch (block (var ok (call)) ok) :error (fn [err] err))
+
+  (tf-for-return '(for:return [[ok err] (x:return-run runner)]
+                              {:success ok
+                               :error err}))
+  => '(block
+        (var ok nil)
+        (tryCatch
+         (block
+          (runner
+           (fn [value]
+             (:= ok value))
+           (fn [value]
+             (stop value)))
+          ok)
+         :error (fn [err] err))))

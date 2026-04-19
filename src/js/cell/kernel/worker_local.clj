@@ -3,15 +3,11 @@
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :js
-  {:require [[js.core :as j]
-             [js.cell.kernel.base-util :as util]
-             [js.cell.kernel.worker-state :as state]
-             [xt.lang.base-runtime :as rt :with [defvar.js]]
-             [xt.lang.base-lib :as k]]})
+  {:require [[js.core :as j] [js.cell.kernel.base-util :as util] [js.cell.kernel.worker-state :as state] [xt.lang.common-spec :as xt] [xt.lang.common-runtime :as rt :with [defvar.js]]]})
 
 
 (defspec.xt actions-baseline
-  [:fn [] js.cell.kernel.spec/WorkerActionMap])
+  [:fn [[:xt/maybe :xt/any]] js.cell.kernel.spec/WorkerActionMap])
 
 (defspec.xt actions-init
   [:fn [js.cell.kernel.spec/WorkerActionMap :xt/any] :xt/any])
@@ -19,40 +15,39 @@
 (defn.js actions-baseline
   "returns the base actions"
   {:added "4.0"}
-  []
+  [worker]
+  (var bind-handler (fn [f]
+                      (return (:? worker
+                                  (state/fn-bind worker f)
+                                  (state/fn-self f)))))
   ;; (@! (cons 'tab +baselines+))
   (return
    (tab
-    ["@worker/trigger"
-     {:handler
-      (js.cell.kernel.worker-state/fn-self
-       js.cell.kernel.worker-state/fn-trigger),
-      :is-async false,
-      :args ["op" "signal" "status" "body"]}]
-    ["@worker/trigger-async"
-     {:handler
-      (js.cell.kernel.worker-state/fn-self
-       js.cell.kernel.worker-state/fn-trigger-async),
-      :is-async true,
-      :args ["op" "signal" "status" "body" "ms"]}]
-    ["@worker/set-final-status"
-     {:handler
-      (js.cell.kernel.worker-state/fn-self
-       js.cell.kernel.worker-state/fn-set-final-status),
-      :is-async false,
-      :args ["suppress"]}]
-    ["@worker/get-final-status"
-     {:handler
-      (js.cell.kernel.worker-state/fn-self
-       js.cell.kernel.worker-state/fn-get-final-status),
-      :is-async false,
-      :args []}]
-    ["@worker/set-eval-status"
-     {:handler
-      (js.cell.kernel.worker-state/fn-self
-       js.cell.kernel.worker-state/fn-set-eval-status),
-      :is-async false,
-      :args ["status" "suppress"]}]
+     ["@worker/trigger"
+      {:handler
+       (bind-handler js.cell.kernel.worker-state/fn-trigger),
+       :is-async false,
+       :args ["op" "signal" "status" "body"]}]
+     ["@worker/trigger-async"
+      {:handler
+       (bind-handler js.cell.kernel.worker-state/fn-trigger-async),
+       :is-async true,
+       :args ["op" "signal" "status" "body" "ms"]}]
+     ["@worker/set-final-status"
+      {:handler
+       (bind-handler js.cell.kernel.worker-state/fn-set-final-status),
+       :is-async false,
+       :args ["suppress"]}]
+     ["@worker/get-final-status"
+      {:handler
+       (bind-handler js.cell.kernel.worker-state/fn-get-final-status),
+       :is-async false,
+       :args []}]
+     ["@worker/set-eval-status"
+      {:handler
+       (bind-handler js.cell.kernel.worker-state/fn-set-eval-status),
+       :is-async false,
+       :args ["status" "suppress"]}]
     ["@worker/get-eval-status"
      {:handler js.cell.kernel.worker-state/fn-get-eval-status,
       :is-async false,
@@ -95,9 +90,9 @@
   {:added "4.0"}
   [actions worker]
   (return
-   (state/set-actions (k/obj-assign (-/actions-baseline)
-                                    actions)
-                      worker)))
+   (state/set-actions (xt/x:obj-assign (-/actions-baseline worker)
+                                       (or actions {}))
+                       worker)))
 
 ;;
 ;; Generation Template

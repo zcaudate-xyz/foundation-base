@@ -73,36 +73,38 @@
 (defn lua-tf-x-future-then
   [[_ task on-ok]]
   (template/$
-   (if (== "ok" (. ~task ["state"]))
-     (do* (local out {:state "pending"
+   ((fn []
+      (local out ~task)
+      (if (== "ok" (. ~task ["state"]))
+        (do* (:= out {:state "pending"
                       :value nil
                       :error nil})
-          (local [ok v] (pcall (fn []
-                                 (return (~on-ok (. ~task ["value"]))))))
-          (if ok
-            (do (:= (. out ["state"]) "ok")
-                (:= (. out ["value"]) v))
-            (do (:= (. out ["state"]) "error")
-                (:= (. out ["error"]) v)))
-          (return out))
-     (return ~task))))
+             (local [ok v] (pcall (fn []
+                                    (return (~on-ok (. ~task ["value"]))))))
+             (if ok
+               (do (:= (. out ["state"]) "ok")
+                   (:= (. out ["value"]) v))
+               (do (:= (. out ["state"]) "error")
+                   (:= (. out ["error"]) v)))))
+      (return out)))))
 
 (defn lua-tf-x-future-catch
   [[_ task on-err]]
   (template/$
-   (if (== "error" (. ~task ["state"]))
-     (do* (local out {:state "pending"
+   ((fn []
+      (local out ~task)
+      (if (== "error" (. ~task ["state"]))
+        (do* (:= out {:state "pending"
                       :value nil
                       :error nil})
-          (local [ok v] (pcall (fn []
-                                 (return (~on-err (. ~task ["error"]))))))
-          (if ok
-            (do (:= (. out ["state"]) "ok")
-                (:= (. out ["value"]) v))
-            (do (:= (. out ["state"]) "error")
-                (:= (. out ["error"]) v)))
-          (return out))
-     (return ~task))))
+             (local [ok v] (pcall (fn []
+                                    (return (~on-err (. ~task ["error"]))))))
+             (if ok
+               (do (:= (. out ["state"]) "ok")
+                   (:= (. out ["value"]) v))
+               (do (:= (. out ["state"]) "error")
+                   (:= (. out ["error"]) v)))))
+      (return out)))))
 
 (defn lua-tf-x-future-finally
   [[_ task on-done]]
@@ -220,8 +222,13 @@
 ;; MATH
 ;;
 
-(defn lua-tf-x-m-quot  [[_ num denom]] (list 'math.floor
-                                             (list '/ num denom)))
+(defn lua-tf-x-m-mod
+  [[_ num denom]]
+  (list 'mod num denom))
+
+(defn lua-tf-x-m-quot
+  [[_ num denom]]
+  (list 'math.floor (list '/ num denom)))
 
 (def +lua-math+
   {:x-m-abs           {:emit :alias :raw 'math.abs}
@@ -237,7 +244,7 @@
    :x-m-log10         {:emit :alias :raw 'math.log10}
    :x-m-max           {:emit :alias :raw 'math.max}
    :x-m-min           {:emit :alias :raw 'math.min}
-   :x-m-mod           {:emit :alias :raw 'math.mod}
+   :x-m-mod           {:macro #'lua-tf-x-m-mod,      :emit :macro}
    :x-m-pow           {:emit :alias :raw 'math.pow}
    :x-m-quot          {:macro #'lua-tf-x-m-quot,     :emit :macro}
    :x-m-sin           {:emit :alias :raw 'math.sin}
@@ -416,7 +423,7 @@
    :x-arr-pop-first   {:macro #'lua-tf-x-arr-pop-first  :emit :macro}
    :x-arr-insert      {:macro #'lua-tf-x-arr-insert     :emit :macro}
    :x-arr-sort        {:macro #'lua-tf-x-arr-sort       :emit :macro}
-   :x-arr-str-comp    {:emit :alias :raw '<}})
+   :x-str-comp        {:emit :alias :raw '<}})
 
 ;;
 ;; STRING
@@ -441,6 +448,15 @@
   ([[_ s tok]]
    (list 'or (list 'string.find s tok) -1)))
 
+(defn lua-tf-x-str-format
+  ([[_ fmt values]]
+   (template/$ (string.gsub ~fmt
+                            "{(%d+)}"
+                            (fn [idx]
+                              (return (or (. ~values [(+ (tonumber idx)
+                                                         1)])
+                                          idx)))))))
+
 (defn lua-tf-x-str-to-fixed
   ([[_ num digits]]
    (list 'string.format (list 'cat "%." digits "f")  num)))
@@ -462,10 +478,11 @@
    (list 'string.gsub s "^(%s*.-)%s*$" "%1")))
 
 (def +lua-str+
-  {:x-str-char       {:emit :alias :raw 'string.byte}
-   :x-str-split      {:macro #'lua-tf-x-str-split      :emit :macro}
-   :x-str-join       {:macro #'lua-tf-x-str-join       :emit :macro}
-   :x-str-index-of   {:macro #'lua-tf-x-str-index-of   :emit :macro}
+   {:x-str-char       {:emit :alias :raw 'string.byte}
+    :x-str-format     {:macro #'lua-tf-x-str-format     :emit :macro}
+    :x-str-split      {:macro #'lua-tf-x-str-split      :emit :macro}
+    :x-str-join       {:macro #'lua-tf-x-str-join       :emit :macro}
+    :x-str-index-of   {:macro #'lua-tf-x-str-index-of   :emit :macro}
    :x-str-substring  {:emit :alias :raw 'string.sub}
    :x-str-to-upper   {:emit :alias :raw 'string.upper}
    :x-str-to-lower   {:emit :alias :raw 'string.lower}
@@ -693,14 +710,27 @@
 (defn lua-tf-x-with-delay
   ([[_ thunk ms]]
    (list 'return (list 'ngx.thread.spawn (list 'fn []
-                                              (list 'ngx.sleep (list '/ ms 1000))
-                                              (list 'var 'f := thunk)
-                                              (list 'return (list 'f)))))))
+                                               (list 'ngx.sleep (list '/ ms 1000))
+                                               (list 'var 'f := thunk)
+                                               (list 'return (list 'f)))))))
+
+(defn lua-tf-x-start-interval
+  ([[_ thunk ms]]
+   (template/$ (return {:active true
+                        :ms ~ms
+                        :thunk ~thunk}))))
+
+(defn lua-tf-x-stop-interval
+  ([[_ instance]]
+   (template/$ (do (:= (. ~instance ["active"]) false)
+                   (return ~instance)))))
 
 (def +lua-thread+
-  {:x-thread-spawn   {:macro #'lua-tf-x-thread-spawn  :emit :macro}
-   :x-thread-join    {:macro #'lua-tf-x-thread-join   :emit :macro}
-   :x-with-delay     {:macro #'lua-tf-x-with-delay    :emit :macro}})
+   {:x-thread-spawn   {:macro #'lua-tf-x-thread-spawn  :emit :macro}
+    :x-thread-join    {:macro #'lua-tf-x-thread-join   :emit :macro}
+    :x-with-delay     {:macro #'lua-tf-x-with-delay    :emit :macro}
+    :x-start-interval {:macro #'lua-tf-x-start-interval :emit :macro}
+    :x-stop-interval  {:macro #'lua-tf-x-stop-interval  :emit :macro}})
 
 ;;
 ;; BASE 64

@@ -2,7 +2,8 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-lib :as k]
+             [xt.lang.common-math :as math]
              [js.core :as j]
              [js.react :as r]
              [js.react-native :as n]
@@ -54,10 +55,10 @@
     (a/addListener position
                    (fn []
                      (var #{_value _offset} position)
-                     (var nValue (k/clamp
-                                  min max
-                                  (- (r/curr valueRef)
-                                     (* (j/round (/ _value (or stride 8)))
+                      (var nValue (math/clamp
+                                   min max
+                                   (- (r/curr valueRef)
+                                      (* (j/round (/ _value (or stride 8)))
                                         (or step 1)))))
                      
                      (when (not= nValue (r/curr prevRef))
@@ -170,7 +171,7 @@
                                 "-45deg")}]}}
         [:% n/Icon
          {:name "resize-full-screen"
-          :style {:color (k/get-in styleStatic [0 "color"]) 
+          :style {:color (xtd/get-in styleStatic [0 "color"]) 
                   :paddingLeft 5}
           :size 15}]])
   
@@ -209,4 +210,3 @@
                    {:style {:flex 1}}]
                   iconElem
                   ]]}]))
-

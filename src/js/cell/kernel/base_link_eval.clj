@@ -4,11 +4,10 @@
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
             [std.lib.walk :as walk]
-            [xt.lang.base-notify :as notify]))
+            [xt.lang.common-notify :as notify]))
 
 (l/script :js
-  {:require [[js.cell.kernel.base-link :as link]
-             [xt.lang.base-repl :as repl]]})
+  {:require [[js.cell.kernel.base-link :as link] [xt.lang.common-repl :as repl] [xt.lang.common-spec :as xt]]})
 
 
 (defspec.xt post-eval
@@ -37,7 +36,7 @@
                          
                          :else
                          ["eval" (list '@! (list 'std.lang/with:input (list '!.js body)))])]
-    (list 'xt.lang.base-notify/wait-on [:js timeout]
+    (list 'xt.lang.common-notify/wait-on [:js timeout]
           (list '. worker (list 'postMessage (merge {:op op
                                                      :id id
                                                      :body input}
@@ -107,10 +106,9 @@
         id    (or id (str "eval-" (rand-int 10000000)))
         body  (async-post-transform body id)
         input (list '@! (list 'std.lang/with:input (list '!.js body)))]  
-    (list 'xt.lang.base-notify/wait-on [:js timeout]
+    (list 'xt.lang.common-notify/wait-on [:js timeout]
           (list '. (list 'js.cell.kernel.base-link/call link {:op "eval"
                                                               :id id
                                                               :async async
                                                               :body input})
-                (list 'then '(xt.lang.base-repl/>notify))))))
-
+                (list 'then '(xt.lang.common-repl/>notify))))))

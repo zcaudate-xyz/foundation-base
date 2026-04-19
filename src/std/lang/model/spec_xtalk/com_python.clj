@@ -4,16 +4,36 @@
 (defn python-tf-x-return-encode
   ([[_ out id key]]
    (template/$ (do (:- :import json)
-            (try
-              (return (json.dumps {:id  ~id
-                                   :key ~key
-                                   :type  "data"
-                                   :value  ~out}))
-              (catch Exception
-                  (return (json.dumps {:id ~id
-                                       :key ~key
-                                       :type  "raw"
-                                       :value (str ~out)}))))))))
+             (fn sanitize [value]
+               (cond (callable value)
+                     (return nil)
+
+                     (isinstance value '(dict))
+                     (do (var out {})
+                         (for:object [[k v] value]
+                           (when (not (callable v))
+                             (:= (. out [k]) (sanitize v))))
+                         (return out))
+
+                     (isinstance value '(list tuple))
+                     (do (var out [])
+                         (for:array [v value]
+                           (when (not (callable v))
+                             (. out (append (sanitize v)))))
+                         (return out))
+
+                     :else
+                     (return value)))
+             (try
+               (return (json.dumps {:id  ~id
+                                    :key ~key
+                                    :type  "data"
+                                    :value  (sanitize ~out)}))
+               (catch Exception
+                   (return (json.dumps {:id ~id
+                                        :key ~key
+                                        :type  "raw"
+                                        :value (str ~out)}))))))))
 
 (defn python-tf-x-return-wrap
   ([[_ f encode-fn]]
@@ -81,8 +101,21 @@
    :x-ws-send         {:macro #'python-tf-x-ws-send         :emit :macro}
    :x-ws-close        {:macro #'python-tf-x-ws-close        :emit :macro}})
 
+(defn python-tf-x-notify-socket
+  ([[_ host port value id key connect-fn encode-fn]]
+   (template/$ (do (try
+                     (:= '[ok conn] (~connect-fn ~host ~port {}))
+                     (if (not ok)
+                       (return ["unable to connect"]))
+                     (. conn (sendall (. (~encode-fn ~value ~id ~key)
+                                         (encode))))
+                     (. conn (close))
+                     (return ["async"])
+                     (catch Exception
+                         (return ["unable to connect"])))))))
+
 (def +python-notify+
-  {})
+  {:x-notify-socket  {:macro #'python-tf-x-notify-socket    :emit :macro}})
 
 (defn python-tf-x-client-basic
   ([[_ host port connect-fn eval-fn]]

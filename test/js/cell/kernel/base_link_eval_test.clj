@@ -5,7 +5,7 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
+   :require [[xt.lang.common-lib :as k]
              [js.core :as j]
              [js.cell.kernel.base-link-eval :as base-link-eval]]})
 
@@ -20,7 +20,7 @@
   
   (let [out (macroexpand-1 '(base-link-eval/wait-post worker (repl/notify true)))]
     (first out)
-    => 'xt.lang.base-notify/wait-on
+    => 'xt.lang.common-notify/wait-on
     
     (-> out last first)
     => '.)
@@ -61,7 +61,7 @@
                                true
                                "eval-2"))]
     (first out)
-    => 'xt.lang.base-notify/wait-on
+    => 'xt.lang.common-notify/wait-on
     
     (-> out last first)
     => '.)

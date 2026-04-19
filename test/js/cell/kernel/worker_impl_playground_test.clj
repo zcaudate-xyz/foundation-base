@@ -1,21 +1,23 @@
 (ns js.cell.kernel.worker-impl-playground-test
   (:require [js.cell.playground :as browser]
             [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
+
+(def ^:private +tiny-worker-path+
+  (str (System/getProperty "user.dir") "/node_modules/tiny-worker/lib/index.js"))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
-             [xt.lang.base-runtime :as rt]
-             [js.cell.kernel.worker-impl :as worker-impl]
-             [js.cell.kernel.worker-local :as worker-local]
-             [js.cell.kernel.worker-mock :as worker-mock]
-             [js.cell.kernel.base-link :as base-link]
-             [js.cell.kernel.base-link-local :as base-link-local]
-             [js.core :as j]]
-   :import [["tiny-worker" :as Worker]]})
+   :require [[xt.lang.common-lib :as k]
+              [xt.lang.common-repl :as repl]
+              [xt.lang.common-runtime :as rt]
+              [js.cell.kernel.worker-impl :as worker-impl]
+              [js.cell.kernel.worker-local :as worker-local]
+              [js.cell.kernel.worker-mock :as worker-mock]
+              [js.cell.kernel.base-link :as base-link]
+              [js.cell.kernel.base-link-local :as base-link-local]
+              [js.core :as j]]})
 
 (fact:global
  {:setup     [(l/rt:restart)
@@ -27,15 +29,17 @@
   ^:hidden
   
   (notify/wait-on :js
-    (var worker (new Worker
-                     (fn []
-                       (eval (@! (browser/play-script
-                                  '[(addEventListener
-                                     "message"
-                                     (fn [e]
-                                       (. self (postMessage e.data)))
-                                     false)]
-                                  true))))))
+    (var Worker (require (@! +tiny-worker-path+)))
+    (var worker
+         (new Worker
+              (fn []
+                (eval (@! (browser/play-script
+                           '[(addEventListener
+                              "message"
+                              (fn [e]
+                                (. self (postMessage e.data)))
+                              false)]
+                           true))))))
     (. worker (addEventListener
                "message"
                (fn [e]
@@ -45,15 +49,17 @@
   => "hello"
 
   (notify/wait-on :js
-    (var worker (new Worker
-                     (fn []
-                       (eval (@! (browser/play-script
-                                  '[(addEventListener
-                                     "message"
-                                     (fn [e]
-                                       (. self (postMessage ((eval e.data) "hello"))))
-                                     false)]
-                                  true))))))
+    (var Worker (require (@! +tiny-worker-path+)))
+    (var worker
+         (new Worker
+              (fn []
+                (eval (@! (browser/play-script
+                           '[(addEventListener
+                              "message"
+                              (fn [e]
+                                (. self (postMessage ((eval e.data) "hello"))))
+                              false)]
+                           true))))))
     (. worker (addEventListener
                "message"
                (fn [e]
@@ -64,8 +70,18 @@
 
   (notify/wait-on :js
     (var l (base-link/link-create
-            (fn []
-              (eval (@! (browser/play-worker true))))))
+            {:create-fn
+             (fn [listener]
+               (var Worker (require (@! +tiny-worker-path+)))
+               (var worker (new Worker
+                                (fn []
+                                  (eval (@! (browser/play-worker true))))))
+               (. worker (addEventListener
+                          "message"
+                          (fn [e]
+                            (listener e.data))
+                          false))
+               (return worker))}))
     (j/notify (base-link-local/ping l)))
   => (contains ["pong"])
   
@@ -83,15 +99,17 @@
   ^:hidden
   
   (notify/wait-on :js
-    (var worker (new Worker
-                     (fn []
-                       (eval (@! (browser/play-script
-                                  '[(addEventListener
-                                     "message"
-                                     (fn [e]
-                                       (postMessage e.data))
-                                     false)]
-                                  true))))))
+    (var Worker (require (@! +tiny-worker-path+)))
+    (var worker
+         (new Worker
+              (fn []
+                (eval (@! (browser/play-script
+                           '[(addEventListener
+                              "message"
+                              (fn [e]
+                                (postMessage e.data))
+                              false)]
+                           true))))))
     (. worker (addEventListener
           "message"
           (fn [e]
@@ -111,15 +129,17 @@
   
   (notify/wait-on :js
     (worker-local/actions-init {})
-    (var worker (new Worker
-                     (fn []
-                       (eval (@! (browser/play-script
-                                  '[(addEventListener
-                                     "message"
-                                     (fn [e]
-                                       (postMessage e.data))
-                                     false)]
-                                  true))))))
+    (var Worker (require (@! +tiny-worker-path+)))
+    (var worker
+         (new Worker
+              (fn []
+                (eval (@! (browser/play-script
+                           '[(addEventListener
+                              "message"
+                              (fn [e]
+                                (postMessage e.data))
+                              false)]
+                           true))))))
     (. worker (addEventListener
           "message"
           (fn [e]
@@ -135,15 +155,17 @@
 
   (notify/wait-on :js
     (worker-local/actions-init {})
-    (var worker (new Worker
-                     (fn []
-                       (eval (@! (browser/play-script
-                                  '[(addEventListener
-                                     "message"
-                                     (fn [e]
-                                       (postMessage e.data))
-                                     false)]
-                                  true))))))
+    (var Worker (require (@! +tiny-worker-path+)))
+    (var worker
+         (new Worker
+              (fn []
+                (eval (@! (browser/play-script
+                           '[(addEventListener
+                              "message"
+                              (fn [e]
+                                (postMessage e.data))
+                              false)]
+                           true))))))
     (. worker (addEventListener
           "message"
           (fn [e]
@@ -157,15 +179,17 @@
 
   (notify/wait-on :js
     (worker-local/actions-init {})
-    (var worker (new Worker
-                     (fn []
-                       (eval (@! (browser/play-script
-                                  '[(addEventListener
-                                     "message"
-                                     (fn [e]
-                                       (postMessage e.data))
-                                     false)]
-                                  true))))))
+    (var Worker (require (@! +tiny-worker-path+)))
+    (var worker
+         (new Worker
+              (fn []
+                (eval (@! (browser/play-script
+                           '[(addEventListener
+                              "message"
+                              (fn [e]
+                                (postMessage e.data))
+                              false)]
+                           true))))))
     (. worker (addEventListener
                "message"
                (fn [e]
@@ -182,15 +206,17 @@
   ^:hidden
   
   (!.js
-   (var worker (new Worker
-                    (fn []
-                      (eval (@! (browser/play-script
-                                 '[(addEventListener
-                                    "message"
-                                    (fn [e]
-                                      (postMessage e.data))
-                                    false)]
-                                 true))))))
+   (var Worker (require (@! +tiny-worker-path+)))
+   (var worker
+        (new Worker
+             (fn []
+               (eval (@! (browser/play-script
+                          '[(addEventListener
+                             "message"
+                             (fn [e]
+                               (postMessage e.data))
+                             false)]
+                          true))))))
    (worker-impl/worker-init worker))
   => true)
 
@@ -199,15 +225,17 @@
   ^:hidden
 
   (notify/wait-on :js
-    (var worker (new Worker
-                     (fn []
-                       (eval (@! (browser/play-script
-                                  '[(addEventListener
-                                     "message"
-                                     (fn [e]
-                                       (postMessage e.data))
-                                     false)]
-                                  true))))))
+    (var Worker (require (@! +tiny-worker-path+)))
+    (var worker
+         (new Worker
+              (fn []
+                (eval (@! (browser/play-script
+                           '[(addEventListener
+                              "message"
+                              (fn [e]
+                                (postMessage e.data))
+                              false)]
+                           true))))))
     (. worker (addEventListener
                "message"
                (fn [e]

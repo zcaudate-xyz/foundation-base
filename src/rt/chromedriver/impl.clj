@@ -14,7 +14,7 @@
             [rt.basic.impl.process-js :as js]
             [rt.chromedriver.connection :as conn]
             [rt.chromedriver.util :as util]
-            [xt.lang.base-repl :as k]))
+            [xt.lang.common-repl :as k]))
 
 (def ^:dynamic *chrome*
   (or (System/getenv "CHROME")

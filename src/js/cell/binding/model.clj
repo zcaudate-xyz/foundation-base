@@ -2,19 +2,14 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[js.cell.binding.trigger :as binding-trigger]
-             [js.cell.service.db-query :as db-query]
-             [js.cell.service.db-remote :as db-remote]
-             [js.cell.service.db-supabase :as db-supabase]
-             [js.cell.service.db-sync :as db-sync]
-             [xt.lang.base-lib :as k]]})
+  {:require [[js.cell.binding.trigger :as binding-trigger] [js.cell.service.db-query :as db-query] [js.cell.service.db-remote :as db-remote] [js.cell.service.db-supabase :as db-supabase] [js.cell.service.db-sync :as db-sync] [xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd]]})
 
 (defn.js unwrap-result
   "unwraps a service-layer [ok result] tuple"
   {:added "4.0"}
   [[ok result]]
   (when (not ok)
-    (k/throw result))
+    (xt/x:throw result))
   (return result))
 
 (defn.js make-view-context
@@ -24,21 +19,21 @@
   (return {"args" args
            "db" db
            "link" link
-           "model-id" (k/get-key prepared "model_id")
-           "view-id" (k/get-key prepared "view_id")}))
+           "model-id" (xt/x:get-key prepared "model_id")
+           "view-id" (xt/x:get-key prepared "view_id")}))
 
 (defn.js compile-main-handler
   "compiles the local query handler"
   {:added "4.0"}
   [prepared]
-  (var query (k/get-key prepared "query"))
-  (when (k/nil? query)
+  (var query (xt/x:get-key prepared "query"))
+  (when (xt/x:nil? query)
     (return nil))
-  (var target (k/get-key query "target"))
-  (when (and (k/not-nil? target)
+  (var target (xt/x:get-key query "target"))
+  (when (and (xt/x:not-nil? target)
              (not= target "local"))
     (return nil))
-  (var db (k/get-key query "db"))
+  (var db (xt/x:get-key query "db"))
   (return
    (fn [link ...args]
      (return (-/unwrap-result
@@ -50,13 +45,13 @@
   "compiles the remote query handler"
   {:added "4.0"}
   [prepared]
-  (var query (k/get-key prepared "query"))
-  (var remote (k/get-key prepared "remote"))
-  (when (k/nil? query)
+  (var query (xt/x:get-key prepared "query"))
+  (var remote (xt/x:get-key prepared "remote"))
+  (when (xt/x:nil? query)
     (return nil))
-  (var target (k/get-key query "target"))
+  (var target (xt/x:get-key query "target"))
   (cond (== target "supabase")
-        (do (var db (k/get-key query "db"))
+        (do (var db (xt/x:get-key query "db"))
             (return
              (fn [link ...args]
                (return (-/unwrap-result
@@ -66,8 +61,8 @@
                          (-/make-view-context prepared db link args)))))))
 
         remote
-        (do (var remote-db (or (k/get-key remote "db")
-                               (k/get-key query "db")))
+        (do (var remote-db (or (xt/x:get-key remote "db")
+                               (xt/x:get-key query "db")))
             (return
              (fn [link ...args]
                (return (-/unwrap-result
@@ -84,14 +79,14 @@
   "compiles the sync pipeline section"
   {:added "4.0"}
   [prepared]
-  (var sync (k/get-key prepared "sync"))
-  (when (k/nil? sync)
+  (var sync (xt/x:get-key prepared "sync"))
+  (when (xt/x:nil? sync)
     (return nil))
-  (var remote (k/get-key prepared "remote"))
+  (var remote (xt/x:get-key prepared "remote"))
   (var handler nil)
   (if remote
-    (do (var remote-db (or (k/get-key remote "db")
-                           (k/get-key sync "db")))
+    (do (var remote-db (or (xt/x:get-key remote "db")
+                           (xt/x:get-key sync "db")))
         (:= handler
             (fn [link ...args]
               (return (-/unwrap-result
@@ -100,7 +95,7 @@
                         remote
                         sync
                         (-/make-view-context prepared remote-db link args)))))))
-    (do (var db (k/get-key sync "db"))
+    (do (var db (xt/x:get-key sync "db"))
         (:= handler
             (fn [link ...args]
               (return (-/unwrap-result
@@ -116,22 +111,23 @@
   [prepared]
   (var hooks (binding-trigger/compile-view-hooks prepared))
   (var options
-       (k/obj-assign-nested
-        {"context" {"modelId" (k/get-key prepared "model_id")
-                     "viewId" (k/get-key prepared "view_id")
-                     "resolve" (k/get-key prepared "resolve")
-                     "stream" (k/get-key prepared "stream")}}
-        (or (k/get-key prepared "options") {})
-        (or (k/get-key hooks "options") {})))
+       (xtd/obj-assign-nested
+        (xtd/obj-assign-nested
+         {"context" {"modelId" (xt/x:get-key prepared "model_id")
+                      "viewId" (xt/x:get-key prepared "view_id")
+                      "resolve" (xt/x:get-key prepared "resolve")
+                      "stream" (xt/x:get-key prepared "stream")}}
+         (or (xt/x:get-key prepared "options") {}))
+        (or (xt/x:get-key hooks "options") {})))
   (return {"handler" (-/compile-main-handler prepared)
            "remoteHandler" (-/compile-remote-handler prepared)
            "pipeline" (-/compile-sync-pipeline prepared)
-           "defaultArgs" (k/get-key prepared "default_args")
-           "defaultOutput" (k/get-key prepared "default_output")
-           "defaultProcess" (k/get-key prepared "default_process")
-           "defaultInit" (k/get-key prepared "default_init")
-           "trigger" (or (k/get-key hooks "trigger")
-                         (k/get-key prepared "trigger"))
+           "defaultArgs" (xt/x:get-key prepared "default_args")
+           "defaultOutput" (xt/x:get-key prepared "default_output")
+           "defaultProcess" (xt/x:get-key prepared "default_process")
+           "defaultInit" (xt/x:get-key prepared "default_init")
+           "trigger" (or (xt/x:get-key hooks "trigger")
+                         (xt/x:get-key prepared "trigger"))
            "options" options
-           "deps" (or (k/get-key hooks "deps")
-                      (k/get-key prepared "deps"))}))
+           "deps" (or (xt/x:get-key hooks "deps")
+                      (xt/x:get-key prepared "deps"))}))

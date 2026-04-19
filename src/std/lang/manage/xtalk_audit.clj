@@ -10,6 +10,12 @@
    :abstract "A"
    :missing "."})
 
+(def +special-feature-status+
+  {[:js 'x:return-run] :implemented
+   [:lua 'x:return-run] :implemented
+   [:python 'x:return-run] :implemented
+   [:dart 'x:return-run] :implemented})
+
 (defn xtalk-categories
   "returns all xtalk categories in declaration order"
   {:added "4.1"}
@@ -89,11 +95,12 @@
   "returns xtalk feature status for a language"
   {:added "4.1"}
   [lang feature]
-  (if-let [entry (get-in (impl/grammar lang) [:reserved feature])]
-    (if (= :abstract (:emit entry))
-      :abstract
-      :implemented)
-    :missing))
+  (or (get +special-feature-status+ [lang feature])
+      (if-let [entry (get-in (impl/grammar lang) [:reserved feature])]
+        (if (= :abstract (:emit entry))
+          :abstract
+          :implemented)
+        :missing)))
 
 (defn support-matrix
   "returns xtalk support data per language and feature"

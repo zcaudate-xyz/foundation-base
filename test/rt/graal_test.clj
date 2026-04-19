@@ -8,7 +8,7 @@
 
 (l/script- :js
   {:runtime :graal
-   :require [[xt.lang.base-lib :as k]]})
+   :require [[xt.lang.common-lib :as k]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -120,4 +120,13 @@
 
 
 ^{:refer rt.graal/unwrap :added "4.1"}
-(fact "TODO")
+(fact "unwraps polyglot values to Clojure primitives"
+  ^:hidden
+
+  (let [ctx (make-raw {:lang :js})]
+    [(unwrap (.eval ^Context ctx "js" "\"hello\""))
+     (unwrap (.eval ^Context ctx "js" "42"))
+     (unwrap (.eval ^Context ctx "js" "3.14"))
+     (unwrap (.eval ^Context ctx "js" "true"))
+     (unwrap (.eval ^Context ctx "js" "null"))])
+  => ["hello" 42 3.14 true nil])

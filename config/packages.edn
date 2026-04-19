@@ -4,6 +4,11 @@
             [code.ai.server :complete]]
   :dependencies [org.hugoduncan/mcp-clj-server]}
 
+ xyz.zcaudate/code.mcp
+ {:description "java-sdk MCP wrappers and RAG scaffolding"
+  :include [[code.mcp :complete]]
+  :dependencies [io.modelcontextprotocol.sdk/mcp]}
+
  xyz.zcaudate/code.dev
  {:description "generate documentation from code"
   :include [[code.dev :complete]]}

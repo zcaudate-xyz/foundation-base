@@ -116,10 +116,11 @@
   => 'hara/hara)
 
 ^{:refer jvm.artifact/artifact-path :added "3.0"}
-(comment "converts an artifact in any format to the path representation"
-
+(fact "converts an artifact in any format to the path representation"
+ 
   (artifact-path '[hara/hara "2.4.0"])
-  => "<.m2>/hara/hara/2.4.0/hara-2.4.0.jar")
+  => (str base/*local-repo*
+          "/hara/hara/2.4.0/hara-2.4.0.jar"))
 
 ^{:refer jvm.artifact/artifact-coord :added "3.0"}
 (fact "converts an artifact in any format to the coord representation"

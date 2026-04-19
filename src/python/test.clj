@@ -5,7 +5,7 @@
 (l/script :python
   {:runtime :remote-port
    :config {:port 12678}
-   :require [[xt.lang.base-lib :as k]]})
+   :require [[xt.lang.common-lib :as k]]})
 
 (comment
   (into {} (l/rt :python))
@@ -13,7 +13,7 @@
    (+ 1 2 3))
   
   (!.py
-   (k/arr-map [1 2 3 4]
+   (xtd/arr-map [1 2 3 4]
               k/inc))
   (require 'std.concurrent.print)
   (./create-tests)

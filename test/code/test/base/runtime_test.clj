@@ -251,4 +251,20 @@
 
 
 ^{:refer code.test.base.runtime/eval-in-ns :added "4.1"}
-(fact "TODO")
+(fact "evaluates forms in the current or provided namespace"
+  ^:hidden
+  
+  (let [ns-sym (symbol (str "code.test.base.runtime-sandbox-" (gensym)))
+        sandbox (or (find-ns ns-sym)
+                    (create-ns ns-sym))
+        result (try
+                 (rt/eval-in-ns sandbox '(do (def answer 42)
+                                             [(clojure.core/boolean
+                                               (clojure.core/resolve 'answer))
+                                              answer]))
+                 (finally
+                   (remove-ns ns-sym)))]
+    [(rt/eval-in-ns nil '(+ 1 2))
+     (first result)
+     (second result)])
+  => [3 true 42])

@@ -9,17 +9,187 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react-native.helper-color :as c]
-             [js.react :as r]
-             [js.react-native :as n :include [:fn]]
-             [js.react-native.animate :as a]
-             [js.react-native.physical-base :as physical-base]
-             [js.react-native.model-roller :as model-roller]
-             [js.react-native.ui-button :as ui-button]
-             [js.react-native.ui-input :as ui-input]
-             [xt.lang.base-lib :as k]]
-   })
+    :require [[js.core :as j]
+              [js.react-native.helper-color :as c]
+              [js.react :as r]
+              [js.react-native :as n :include [:fn]]
+              [js.react-native.animate :as a]
+              [js.react-native.physical-base :as physical-base]
+              [js.react-native.model-roller :as model-roller]
+              [js.react-native.ui-button :as ui-button]
+              [js.react-native.ui-input :as ui-input]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-math :as math]
+              [xt.lang.common-lib :as k]]
+    })
+
+(defn.js placeHolderBottom
+  [placeholder]
+  (return [{:component n/Text
+            :key "placeholder"
+            :style {:position "absolute"
+                    :fontSize 20
+                    :top 0
+                    :zIndex -100
+                    :opacity 0}
+            :children [placeholder]
+            :transformations
+            (fn [#{emptying
+                   focusing}]
+              (var active (j/max (- 1 emptying)
+                                 focusing))
+              (return {:style {:opacity 1
+                               :fontSize   (math/mix 20 12 active)
+                               :fontWeight (math/mix 400 800 active)
+                               :textShadowColor "black"
+                               :color (c/toHSL (c/interpolate
+                                                ["#999" "#555"]
+                                                active))
+                               :transform [{:translateY (math/mix 15 60 active)}
+                                           {:translateX (math/mix 10 -5 active)}]}}))}]))
+
+(defn.js useLoginForm
+  []
+  (var [login setLogin] (r/local ""))
+  (var [password setPassword] (r/local ""))
+  (var [step setStep] (r/local 0))
+  (var [waiting setWaiting] (r/local (fn:> false)))
+  (return #{login setLogin
+            password setPassword
+            waiting setWaiting
+            step setStep}))
+
+(defn.js LoginFormReset
+  [#{login setLogin
+     password setPassword
+     waiting setWaiting
+     onSubmit}]
+  (return [:% n/Row
+           {:style {:justifyContent "center"
+                    :alignItems "center"}}
+           [:% ui-button/Button
+            {:text "RESET"
+             :onPress onSubmit
+             :theme {:fgNormal "#333"
+                     :bgNormal "#ccc"
+                     :bgDisabled "#ccc"
+                     :bgHovered "#555"}
+             :styleText {:paddingTop 10
+                         :fontSize 13
+                         :fontWeight "600"
+                         :borderRadius 3
+                         :flex 1
+                         :width 100
+                         :height 35
+                         :textAlign "center"}
+             :style {:width 100
+                     :height 35
+                     :margin 10
+                     :alignItems "center"
+                     :justifyContent "center"}}]]))
+
+(defn.js LoginForm
+  [#{login setLogin
+     waiting
+     onSubmit
+     submitDisabled
+     inputDisabled}]
+  (return [:% n/View
+           [:% n/Row
+            [:% ui-input/Input
+             {:disabled inputDisabled
+              :selectionColor "white"
+              :theme {:bgNormal "#ccc"
+                      :bgHovered "#555"}
+              :value login
+              :onChangeText setLogin
+              :style {:height 50
+                      :paddingLeft 8
+                      :fontSize 20}
+              :styleContainer {:flex 1
+                               :borderRadius 10
+                               :height 50
+                               :zIndex 100}
+              :inner (-/placeHolderBottom "Enter your Username or Email")}]]
+           [:% n/Row
+            [:% ui-button/Button
+             {:text (:? waiting
+                        [:% n/ActivityIndicator
+                         {:style {:top -3}
+                          :color "#555"}]
+                        "NEXT")
+              :onPress onSubmit
+              :theme {:fgNormal "#444"
+                      :bgNormal "palegreen"
+                      :fgDisabled "#ddd"
+                      :bgDisabled "#fff"
+                      :bgHovered "#555"}
+              :styleText {:paddingTop 10
+                          :fontSize 13
+                          :fontWeight "600"
+                          :borderRadius 3
+                          :flex 1
+                          :width 100
+                          :height 35
+                          :textAlign "center"}
+              :style {:right 0
+                      :width 100
+                      :height 35
+                      :margin 10
+                      :alignItems "center"
+                      :justifyContent "center"}
+              :disabled submitDisabled}]]]))
+
+(defn.js PasswordForm
+  [#{password setPassword
+     waiting
+     onSubmit
+     submitDisabled
+     inputDisabled}]
+  (return [:% n/View
+           [:% n/Row
+            [:% ui-input/Input
+             {:disabled inputDisabled
+              :selectionColor "white"
+              :theme {:bgNormal "#ddd"
+                      :bgHovered "#555"}
+              :value password
+              :onChangeText setPassword
+              :style {:height 50
+                      :paddingLeft 8
+                      :fontSize 20}
+              :styleContainer {:flex 1
+                               :borderRadius 10
+                               :height 50
+                               :zIndex 100}
+              :inner (-/placeHolderBottom "Enter your Password")}]]
+           [:% n/Row
+            {:style {:flexDirection "row-reverse"}}
+            [:% ui-button/Button
+             {:text (:? waiting
+                        [:% n/ActivityIndicator
+                         {:style {:top -3}
+                          :color "#555"}]
+                        "SUBMIT")
+              :onPress onSubmit
+              :theme {:fgNormal "#333"
+                      :bgNormal "palegreen"
+                      :bgDisabled "#ccc"
+                      :bgHovered "#555"}
+              :styleText {:paddingTop 10
+                          :fontSize 13
+                          :fontWeight "600"
+                          :borderRadius 3
+                          :flex 1
+                          :width 100
+                          :height 35
+                          :textAlign "center"}
+              :style {:width 100
+                      :height 35
+                      :margin 10
+                      :alignItems "center"
+                      :justifyContent "center"}
+              :disabled submitDisabled}]]]))
 
 ^{:refer js.react-native.ui-form/LoginFormWalkthrough
   :adopt true
@@ -43,15 +213,15 @@
                 (var active (j/max (- 1 emptying)
                                    focusing))
                 (return {:style {:opacity 1
-                                 :fontSize   (k/mix 20  12  active)
-                                 :fontWeight (k/mix 400 800 active)
+                                 :fontSize   (math/mix 20  12  active)
+                                 :fontWeight (math/mix 400 800 active)
                                  :textShadowColor "black"
                                  :color (c/toHSL (c/interpolate
                                                   ["#999" "#555"]
                                                   active))
                                  :transform
-                                 [{:translateY (k/mix 15 60 active)}
-                                  {:translateX (k/mix 10 -5  active)}]}}))}]))
+                                 [{:translateY (math/mix 15 60 active)}
+                                  {:translateX (math/mix 10 -5  active)}]}}))}]))
   
   (defn.js useLoginForm
     []
@@ -241,13 +411,13 @@
         (:? (== step 0)
             [:% -/LoginForm
              #{[:onSubmit submitLogin
-                :submitDisabled (k/is-empty? login)
+                :submitDisabled (xtd/is-empty? login)
                 :inputDisabled  waiting
                 (:.. form)]}]
             (== step 1)
             [:% -/PasswordForm
              #{[:onSubmit submitPassword
-                :submitDisabled (k/is-empty? password)
+                :submitDisabled (xtd/is-empty? password)
                 :inputDisabled  waiting
                 (:.. form)]}]
             :else
@@ -324,7 +494,7 @@
                   visible} (modelFn v))
            (return
             {:style {:opacity (:? visible
-                                  (k/mix -2 1 scale)
+                                  (math/mix -2 1 scale)
                                   0)
                      :zIndex (* 100 scale)
                      :transform
@@ -355,7 +525,7 @@
                        #{[:key session
                           :onSubmit submitLogin
                           :submitDisabled (or (not= step 0)
-                                              (k/is-empty? login))
+                                              (xtd/is-empty? login))
                           :inputDisabled  (or (not= step 0)
                                               waiting)
                           (:.. form)]}]]
@@ -370,7 +540,7 @@
                        #{[:key session
                           :onSubmit submitPassword
                           :submitDisabled (or (not= step 1)
-                                              (k/is-empty? password))
+                                              (xtd/is-empty? password))
                           :inputDisabled  (or (not= step 1)
                                               waiting)
                           (:.. form)]}]]

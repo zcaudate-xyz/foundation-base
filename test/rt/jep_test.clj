@@ -9,7 +9,7 @@
 (l/script- :python
   {:runtime :jep
    :config {}
-   :require [[xt.lang.base-lib :as k]]
+   :require [[xt.lang.common-lib :as k]]
    :emit {:cache true}})
 
 (fact:global

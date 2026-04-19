@@ -3,7 +3,8 @@
 
 (l/script :xtalk
   {:require [[xt.cell.service.db-view :as db-view]
-             [xt.lang.base-lib :as k]
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.db :as xdb]
              [xt.db.base-check :as check]
              [xt.db.cache-view :as cache-view]]
@@ -13,41 +14,41 @@
   "checks that the db descriptor can prepare queries"
   {:added "4.0"}
   [db]
-  (return (and (k/obj? db)
-               (k/has-key? db "schema")
-               (k/has-key? db "views"))))
+  (return (and (xt/x:is-object? db)
+               (xt/x:has-key? db "schema")
+               (xt/x:has-key? db "views"))))
 
 (defn.xt view-local-transform
   "gets rid of `__deleted__` on view queries"
   {:added "4.0"}
   [view-entry]
-  (when (k/nil? view-entry)
+  (when (xt/x:nil? view-entry)
     (return nil))
   (var #{view} view-entry)
-  (var tview (k/walk view
+  (var tview (xtd/tree-walk view
                      (fn [res]
-                       (return (:? (k/arr? res)
-                                   (k/arr-filter res
+                       (return (:? (xt/x:is-array? res)
+                                   (xt/x:arr-filter res
                                                  (fn [e]
                                                    (return (not= e "__deleted__"))))
                                    res)))
                      (fn [res]
-                       (when (and (k/not-nil? res)
-                                  (k/obj? res)
-                                  (k/has-key? res "__deleted__"))
-                         (k/del-key res "__deleted__"))
+                       (when (and (xt/x:not-nil? res)
+                                  (xt/x:is-object? res)
+                                  (xt/x:has-key? res "__deleted__"))
+                         (xt/x:del-key res "__deleted__"))
                        (return res))))
-  (return (k/obj-assign (k/obj-clone view-entry)
-                        {:view tview})))
+  (return (xtd/obj-assign (xtd/obj-clone view-entry)
+                          {:view tview})))
 
 (defn.xt query-check
   "checks query arguments against the entry input"
   {:added "4.0"}
   [entry args drop-first]
-  (var targs (k/get-key entry "input"))
+  (var targs (xt/x:get-key entry "input"))
   (when drop-first
-    (:= targs [(k/unpack targs)])
-    (x:arr-pop-first targs))
+    (:= targs [(xt/x:unpack targs)])
+    (xt/x:arr-pop-first targs))
   (var [l-ok l-err] (check/check-args-length args targs))
   (when (not l-ok)
     (return [l-ok l-err]))
@@ -115,8 +116,8 @@
     (return [false {:status "error"
                     :tag "net/return-method-not-found"
                     :data {:input return-method}}]))
-  (cond (and (k/not-nil? select-entry)
-             (k/not-nil? return-entry))
+  (cond (and (xt/x:not-nil? select-entry)
+             (xt/x:not-nil? return-entry))
         (do (var [s-ok s-err] (-/query-check select-entry select-args false))
             (when (not s-ok)
               (return [s-ok s-err]))
@@ -131,7 +132,7 @@
                            return-args
                            return-omit)]))
 
-        (k/not-nil? select-entry)
+        (xt/x:not-nil? select-entry)
         (do (var [s-ok s-err] (-/query-check select-entry select-args false))
             (when (not s-ok)
               (return [s-ok s-err]))
@@ -140,8 +141,8 @@
                            select-entry
                            select-args)]))
 
-        (k/not-nil? return-id)
-        (do (var rargs [return-id (k/unpack return-args)])
+        (xt/x:not-nil? return-id)
+        (do (var rargs [return-id (xt/x:unpack return-args)])
             (var [r-ok r-err] (-/query-check return-entry rargs false))
             (when (not r-ok)
               (return [r-ok r-err]))
@@ -151,7 +152,7 @@
                            return-id
                            return-args)]))
 
-        (k/not-nil? return-bulk)
+        (xt/x:not-nil? return-bulk)
         (do (var [r-ok r-err] (-/query-check return-entry return-args true))
             (when (not r-ok)
               (return [r-ok r-err]))
@@ -168,8 +169,8 @@
   "executes a prepared db query"
   {:added "4.0"}
   [db query-plan view-context]
-  (var local-db (k/get-key view-context "db"))
-  (when (k/nil? local-db)
+  (var local-db (xt/x:get-key view-context "db"))
+  (when (xt/x:nil? local-db)
     (return [false {:status "error"
                     :tag "db/local-db-not-provided"}]))
   (return [true (xdb/db-pull-sync local-db

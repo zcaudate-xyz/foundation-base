@@ -36,7 +36,10 @@
   ^:hidden
   
   (executive/retrieve-line :passed {:passed [{:meta {:line 1 :refer 'test}}]})
-  => [[1 'test]])
+  => [[1 'test]]
+
+  (executive/retrieve-line :passed {:passed [{:meta {:line 2 :function 'xtgen/generate-common-lib}}]})
+  => [[2 'generate-common-lib]])
 
 ^{:refer code.test.base.executive/summarise :added "3.0"}
 (fact "creates a summary of given results"

@@ -3,8 +3,7 @@
   (:refer-clojure :exclude [keyword]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]
-             [xt.lang.base-runtime :as rt :with [defvar.xt]]
+  {:require [[xt.lang.common-spec :as xt]
              [xt.runtime.interface-common :as interface-common]
              [xt.runtime.interface-spec :as spec]
              [xt.runtime.common-hash :as common-hash]]})
@@ -17,24 +16,31 @@
   {:added "4.0"}
   [sym]
   (var #{_ns _name} sym)
+  (var sname (:? (xt/x:nil? _ns)
+                 _name
+                 (xt/x:cat _ns "/" _name)))
   (return
-   (-> (k/get-key common-hash/SEED "keyword")
-       (k/bit-xor (common-hash/hash-string
-                   (k/sym-full _ns _name))))))
+   (-> (xt/x:get-key common-hash/SEED "keyword")
+       (xt/x:bit-xor (common-hash/hash-string
+                     sname)))))
 
 (defn.xt keyword-show
   "shows the keyword"
   {:added "4.0"}
   [sym]
   (var #{_ns _name} sym)
+  (var sname (:? (xt/x:nil? _ns)
+                 _name
+                 (xt/x:cat _ns "/" _name)))
   (return
-   (k/cat ":" (k/sym-full _ns _name))))
+   (xt/x:cat ":" sname)))
 
 (defn.xt keyword-eq
   "gets keyword equality"
   {:added "4.0"}
   [sym o]
-  (return (and (== "keyword" (k/type-class o))
+  (var oclass (common-hash/native-class o))
+  (return (and (== "keyword" oclass)
                (== (. sym _ns)   (. o _ns))
                (== (. sym _name) (. o _name)))))
 
@@ -48,8 +54,8 @@
 
 (def.xt KEYWORD_PROTOTYPE
   (-> -/KEYWORD_SPEC
-      (k/proto-spec)
-      (k/proto-create)))
+      (spec/proto-spec)
+      (spec/proto-create)))
 
 (defn.xt keyword-create
   "creates a keyword"
@@ -58,19 +64,19 @@
   (var sym {"::" "keyword"
             :_ns   ns
             :_name name})
-  (k/set-proto sym -/KEYWORD_PROTOTYPE)
-  (return sym))
+  (return (spec/runtime-attach sym -/KEYWORD_PROTOTYPE)))
 
 (defn.xt keyword
   "creates the keyword or pulls it from cache"
   {:added "4.0"}
   [ns name]
   (var lu -/KEYWORD_LOOKUP)
-  (var key (k/sym-full ns name))
-  (var out (k/get-key lu key))
-  (when (k/nil? out)
+  (var key (:? (xt/x:nil? ns)
+               name
+               (xt/x:cat ns "/" name)))
+  (var out (xt/x:get-key lu key))
+  (when (xt/x:nil? out)
     (var sym (-/keyword-create ns name))
-    (k/set-key lu key sym)
+    (xt/x:set-key lu key sym)
     (return sym))
   (return out))
-

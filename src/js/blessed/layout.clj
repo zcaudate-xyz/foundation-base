@@ -2,10 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :as k]
-             [js.core :as j]
-             [js.react :as r]
-             [js.lib.chalk :as chalk]]})
+  {:require [[xt.lang.common-lib :as k] [xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd] [js.core :as j] [js.react :as r] [js.lib.chalk :as chalk]]})
 
 (def.js primaryNormal
   {:hover {:fg "black"
@@ -69,11 +66,11 @@
   "layout for menu entry"
   {:added "4.0"}
   ([items]
-   (let [entries (j/filter items (fn:> [e] (:? (k/arr? e.hidden) (not (e.hidden)) (not e.hidden))))
-         lens     (j/map entries (fn:> [e] (k/len e.label)))
+   (let [entries (j/filter items (fn:> [e] (:? (k/is-array? e.hidden) (not (e.hidden)) (not e.hidden))))
+         lens     (j/map entries (fn:> [e] (xt/x:len e.label)))
          lefts    (j/reduce lens
                             (fn [acc l]
-                               (j/push acc (+ (k/last acc) l 8))
+                               (j/push acc (+ (xtd/last acc) l 8))
                                (return acc))
                              [0])]
      (return (j/map entries (fn [e i]
@@ -87,11 +84,11 @@
   "layout for toggle entry"
   {:added "4.0"}
   ([items]
-   (let [entries (j/filter items (fn:> [e] (:? (k/fn? e.hidden) (not (e.hidden)) (not e.hidden))))
+   (let [entries (j/filter items (fn:> [e] (:? (k/is-function? e.hidden) (not (e.hidden)) (not e.hidden))))
          lens     (j/map entries (fn:> [e] (:? (== e.type "separator") 1 3)))
          lefts    (j/reduce lens
                              (fn [acc l]
-                               (j/push acc (+ (k/last acc) l))
+                               (j/push acc (+ (xtd/last acc) l))
                                (return acc))
                              [0])]
      (return (j/map entries (fn [e i]
@@ -116,7 +113,7 @@
                                      (j/filter 
                                       (fn [e]
                                         (return (== e.index key.name))))
-                                     (k/first))]
+                                      (xtd/first))]
                            (when e
                              (setRoute e.route))))))
      (return (fn []
@@ -224,8 +221,8 @@
                                    sel (j/filter entries
                                                   (fn:> [e] (== e.index i)))]
                                
-                               (when (and sel (< 0 (k/len sel)))
-                                 (setIndex i))))))
+                                (when (and sel (< 0 (xt/x:len sel)))
+                                  (setIndex i))))))
          (return (fn []
                    (. (r/curr box) (free))))))
      (return
@@ -255,7 +252,7 @@
               :shrink true
               :width "100%"
               :content (chalk/inverse (chalk/yellow (+ " " (j/toUpperCase label) " ")))}]
-       (:? MenuContent [:box {:left 1 :right 1 :style {:bg "black"} :top (+ 4 (* 2 (k/len items)))} [:% MenuContent]])
+        (:? MenuContent [:box {:left 1 :right 1 :style {:bg "black"} :top (+ 4 (* 2 (xt/x:len items)))} [:% MenuContent]])
        (:? MenuFooter [:box {:bottom 0 :height 2 :right 0 :style {:bg "black"}} [:% MenuFooter]])]))))
 
 (defn.js LayoutHeaderBlock
@@ -345,7 +342,7 @@
       autoClear
       (:.. rprops)]}]
   (let [#{content type} status
-        width  (j/min [(:? content (k/len content) 0)
+        width  (j/min [(:? content (xt/x:len content) 0)
                         50])
         clearFn (fn:> (setStatus {:content ""
                                 :type "info"}))]
@@ -409,10 +406,10 @@
                                :type "info"
                                :show false
                                :layout {}}))
-                 :style (k/set-in (k/clone-nested style)
-                                  ["hover"]
-                                  {:bg "white"
-                                   :fg "grey"})
+                 :style (xtd/set-in (xtd/clone-nested style)
+                                   ["hover"]
+                                   {:bg "white"
+                                    :fg "grey"})
                  :content " x "}]]))))
 
 (defn.js LayoutHeader

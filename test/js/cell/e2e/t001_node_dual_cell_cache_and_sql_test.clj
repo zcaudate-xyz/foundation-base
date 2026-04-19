@@ -3,12 +3,12 @@
             [js.cell.runtime.emit :as emit]
             [std.lang :as l]
             [std.lib.template :as template]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-repl :as repl]
+   :require [[xt.lang.common-repl :as repl]
              [js.cell.kernel :as cl]
              [js.cell.e2e.common :as common]
              [js.cell.runtime.link :as runtime-link]]})
@@ -20,14 +20,13 @@
 
 (defmacro node-dual-cell-scenario
   []
-  (let [node-script (common/node-remote-script)]
-    (template/$
-      (notify/wait-on :js
-        (var remote-cell
-             (cl/make-cell
-               (runtime-link/make-node-link ~node-script {})))
-        (. (. remote-cell ["init"])
-           (then
+  )
+
+
+(comment
+
+  #_(. (. (. remote-cell ["init"])
+            (then
              (fn []
                (common/connect-sqlite
                 {:success
@@ -36,12 +35,33 @@
                          (then (fn [result]
                                  (repl/notify result))))
                       (catch (fn [err]
-                               (repl/notify {"error" err})))))}))))))))
+                               (repl/notify {"error" err})))))
+                 :error
+                 (fn [err]
+                   (repl/notify {"error" err}))}))))
+         (catch (fn [err]
+                  (repl/notify {"error" err})))))
 
 ^{:refer js.cell.e2e.common/run-scenario :added "4.1"}
 (fact "runs a Node dual-cell cache/sqlite-wasm scenario"
   ^:hidden
-  (node-dual-cell-scenario)
+
+  (notify/wait-on :js
+    (var remote-cell
+         (cl/make-cell
+           (runtime-link/make-node-link (@! (common/node-remote-script)) {})))
+    (. (. remote-cell ["init"])
+       (then
+        (fn []
+          (common/connect-sqlite
+            {:success (fn [sqlite-conn]
+                        (. (common/run-scenario remote-cell sqlite-conn)
+                           (then (repl/>notify))))
+             :error (fn [err]
+                      (repl/notify {"error" err}))})))
+       (catch (fn [err]
+                (repl/notify {"error" err})))))
+  
   => (contains-in
       {"remote_seed" [{"id" "ord-1"
                        "status" "open"}]

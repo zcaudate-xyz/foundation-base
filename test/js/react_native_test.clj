@@ -9,21 +9,23 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react :as r]
-             [js.react-native :as n :include [:fn]]
-             [xt.lang.base-lib :as k]]
-   })
+    :require [[js.core :as j]
+              [js.react :as r]
+              [js.react-native :as n :include [:fn]]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-lib :as k]
+              [xt.lang.common-data :as xtd]]
+    })
 
 (defn.js nest-tree
   [obj prefix]
-  (return (k/walk obj
+  (return (xtd/tree-walk obj
                   k/identity
                   (fn [x]
-                    (when  (k/obj? x)
+                    (when  (xt/x:is-object? x)
                       (var out {})
-                      (k/for:object [[k v] x]
-                        (k/set-key out (+ prefix k) v))
+                      (xt/for:object [[k v] x]
+                        (xt/x:set-key out (+ prefix k) v))
                       (return out))
                     (return x)))))
 
@@ -287,7 +289,7 @@
         :index index
         :format (fn:> [s] (+ " " s " "))}] 
 [:% n/Caption
-       {:text (k/json-encode #{index})
+       {:text (xt/x:json-encode #{index})
         :style {:marginTop 10}}]))))
 
 ^{:refer js.react-native/Tabs :added "0.1"}
@@ -306,7 +308,7 @@
         :setValue setValue
         :format (fn:> [s] (+ " " s " "))}] 
 [:% n/Caption
-       {:text (k/json-encode #{value})
+       {:text (xt/x:json-encode #{value})
         :style {:marginTop 10}}]))))
 
 ^{:refer js.react-native/TabsPane :added "0.1"}
@@ -329,7 +331,7 @@
         :tabsFormat (fn:> [s] (+ " " (j/toUpperCase s) " "))
         :formatFn k/identity}] 
 [:% n/Caption
-       {:text (k/json-encode #{initial})
+       {:text (xt/x:json-encode #{initial})
         :style {:marginTop 10}}]))))
 
 ^{:refer js.react-native/ListIndexed :added "0.1"}
@@ -349,7 +351,7 @@
         :index index
         :format (fn:> [s] (+ " " s " "))}] 
 [:% n/Caption
-       {:text (k/json-encode #{index})
+       {:text (xt/x:json-encode #{index})
         :style {:marginTop 10}}]))))
 
 ^{:refer js.react-native/List :added "0.1"}
@@ -368,7 +370,7 @@
         :setValue setValue
         :format (fn:> [s] (+ " " s " "))}] 
 [:% n/Caption
-       {:text (k/json-encode #{value})
+       {:text (xt/x:json-encode #{value})
         :style {:marginTop 10}}]))))
 
 ^{:refer js.react-native/ListPane :added "0.1"}
@@ -392,7 +394,7 @@
         :listFormat j/toUpperCase
         :formatFn k/identity}] 
 [:% n/Caption
-       {:text (k/json-encode #{initial})
+       {:text (xt/x:json-encode #{initial})
         :style {:marginTop 10}}]))))
 
 ^{:refer js.react-native/TabsMultiIndexed :added "4.0" :unchecked true}
@@ -418,7 +420,7 @@
         :indices indices
         :format (fn:> [s] (+ " " s " "))}] 
 [:% n/Caption
-       {:text (k/json-encode #{indices})
+       {:text (xt/x:json-encode #{indices})
         :style {:marginTop 10}}]))))
 
 ^{:refer js.react-native/TabsMulti :added "4.0" :unchecked true}
@@ -436,7 +438,7 @@
         :setValues setValues
         :format (fn:> [s] (+ " " s " "))}] 
 [:% n/Caption
-       {:text (k/json-encode #{values})
+       {:text (xt/x:json-encode #{values})
         :style {:marginTop 10}}]))))
 
 ^{:refer js.react-native/TreePane :added "0.1"}
@@ -462,27 +464,27 @@
                   :setInitial setInitial
                   :listWidth 30
                   :listFormat j/toUpperCase
-                  :formatFn k/json-encode}
+                  :formatFn xt/x:json-encode}
                  {:type "tabs"
                   :initial l1
                   :setInitial setL1
                   :listWidth 30
                   :tabsFormat j/toUpperCase
-                  :formatFn k/json-encode}
+                  :formatFn xt/x:json-encode}
                  {:type "list"
                   :listWidth 30
                   :initial l2
                   :setInitial setL2
                   :listFormat j/toUpperCase
-                  :formatFn k/json-encode}
+                  :formatFn xt/x:json-encode}
                  {:type "tabs"
                   :listWidth 30
                   :initial l3
                   :setInitial setL3
                   :tabsFormat j/toUpperCase
-                  :formatFn k/json-encode}]}] 
+                  :formatFn xt/x:json-encode}]}] 
 [:% n/Caption
-       {:text (k/json-encode #{initial l1 l2 l3})
+       {:text (xt/x:json-encode #{initial l1 l2 l3})
         :style {:marginTop 10}}]))))
 
 ^{:refer js.react-native/displayTarget :added "4.0" :unchecked true}

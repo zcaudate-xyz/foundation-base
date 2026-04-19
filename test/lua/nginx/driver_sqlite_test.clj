@@ -6,7 +6,7 @@
 (l/script- :lua
   {:runtime :basic
    :config {:program :resty}
-   :require [[xt.lang.base-lib :as k]
+   :require [[xt.lang.common-lib :as k]
              [lua.nginx.driver-sqlite :as lua-sqlite]
              [xt.sys.conn-dbsql :as driver]]})
 

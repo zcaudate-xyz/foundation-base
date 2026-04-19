@@ -2,16 +2,30 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]})
+  {:require [[xt.lang.common-spec :as xt]]})
+
+(defn.xt wrap-callback
+  [callbacks key]
+  (when (xt/x:nil? callbacks)
+    (:= callbacks {}))
+  (var result-fn
+       (fn [result]
+          (var f (xt/x:get-key callbacks key))
+         (if (xt/x:not-nil? f)
+           (return (f result))
+           (return result))))
+  (return result-fn))
 
 (defn.xt connect
   "connects to a database"
   {:added "4.0"}
   [m cb]
-  (var #{constructor} m)
-  (var success-fn (k/wrap-callback cb "success"))
-  (var error-fn   (k/wrap-callback cb "error"))
-  (k/for:return [[conn err] (constructor m (x:callback))]
+  (when (xt/x:nil? m)
+    (:= m {}))
+  (var constructor (xt/x:get-key m "constructor"))
+  (var success-fn (-/wrap-callback cb "success"))
+  (var error-fn   (-/wrap-callback cb "error"))
+  (xt/for:return [[conn err] (constructor m (xt/x:callback))]
     {:success (return (success-fn conn))
      :error   (return (error-fn err))
      :final   true}))
@@ -20,10 +34,10 @@
   "disconnects form database"
   {:added "4.0"}
   [conn cb]
-  (var disconnect-fn (k/get-key conn "::disconnect"))
-  (var success-fn (k/wrap-callback cb "success"))
-  (var error-fn   (k/wrap-callback cb "error"))
-  (k/for:return [[res err] (disconnect-fn (x:callback))]
+  (var disconnect-fn (xt/x:get-key conn "::disconnect"))
+  (var success-fn (-/wrap-callback cb "success"))
+  (var error-fn   (-/wrap-callback cb "error"))
+  (xt/for:return [[res err] (disconnect-fn (xt/x:callback))]
     {:success (return (success-fn res))
      :error   (return (error-fn err))
      :final   true}))
@@ -32,17 +46,17 @@
   "calls query without the wrapper"
   {:added "4.0"}
   [conn raw]
-  (var query-fn (k/get-key conn "::query"))
+  (var query-fn (xt/x:get-key conn "::query"))
   (return (query-fn raw)))
 
 (defn.xt query
   "sends a query"
   {:added "4.0"}
   [conn raw cb]
-  (var query-fn (k/get-key conn "::query"))
-  (var success-fn (k/wrap-callback cb "success"))
-  (var error-fn   (k/wrap-callback cb "error"))
-  (k/for:return [[res err] (query-fn raw (x:callback))]
+  (var query-fn (xt/x:get-key conn "::query"))
+  (var success-fn (-/wrap-callback cb "success"))
+  (var error-fn   (-/wrap-callback cb "error"))
+  (xt/for:return [[res err] (query-fn raw (xt/x:callback))]
     {:success (return (success-fn res))
      :error   (return (error-fn err))
      :final   true}))
@@ -51,7 +65,7 @@
   "sends a synchronous query"
   {:added "4.0"}
   [conn raw]
-  (var query-fn (or (k/get-key conn "::query_sync")
-                    (k/get-key conn "::query")))
+  (var query-fn (xt/x:get-key conn "::query_sync"))
+  (when (xt/x:nil? query-fn)
+    (:= query-fn (xt/x:get-key conn "::query")))
   (return (query-fn raw)))
-

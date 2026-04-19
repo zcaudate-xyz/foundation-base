@@ -1,33 +1,46 @@
 (ns xt.sys.cache-throttle-test
-  (:require [rt.nginx.config :as config]
+  (:require [rt.nginx.script :as script]
+            [xt.lang.common-notify :as notify]
             [std.lang :as l])
   (:use code.test))
 
+(defn create-resty-params
+  "creates default resty params"
+  {:added "4.0"}
+  ([]
+   (script/write [[:client-body-buffer-size "1m"]
+                  [:variables-hash-max-size 2048]
+                  [:variables-hash-bucket-size 128]
+                  [:lua-shared-dict [:GLOBAL "20k"]]
+                  [:lua-shared-dict [:WS_DEBUG "20k"]]
+                  [:lua-shared-dict [:ES_DEBUG "20k"]]])))
+
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-notify :as notify]
-             [xt.lang.base-repl :as repl]
-             [xt.sys.cache-throttle :as throttle]
-             [xt.sys.cache-common :as cache]
-             [js.core :as j]]})
+   :require [[xt.lang.common-data :as xtd]
+             [xt.lang.common-lib :as k]
+              [xt.lang.common-repl :as repl]
+              [xt.sys.cache-throttle :as throttle]
+              [xt.sys.cache-common :as cache]
+              [js.core :as j]]})
 
 (l/script- :lua
   {:runtime :basic
-   :config  {:exec ["resty" "--http-conf" (config/create-resty-params) "-e"]}
-   :require [[xt.lang.base-lib :as k]
-             [xt.sys.cache-throttle :as throttle]
-             [xt.sys.cache-common :as cache]
-             [lua.nginx :as n]]})
+    :config  {:exec ["resty" "--http-conf" "client_body_buffer_size 1m;\nvariables_hash_max_size 2048;\nvariables_hash_bucket_size 128;\nlua_shared_dict GLOBAL 20k;\nlua_shared_dict WS_DEBUG 20k;\nlua_shared_dict ES_DEBUG 20k;" "-e"]}
+   :require [[xt.lang.common-data :as xtd]
+             [xt.lang.common-lib :as k]
+              [xt.sys.cache-throttle :as throttle]
+              [xt.sys.cache-common :as cache]
+              [lua.nginx :as n]]})
 
 (fact:global
- {:setup    [(l/rt:restart)
-             (notify/wait-on [:js 5000]
-               (:= (!:G window)  (require "window"))
-               (:= (!:G LocalStorage)  (. (require "node-localstorage")
-                                          LocalStorage))
-               (:= window.localStorage (new LocalStorage "./test-scratch/localstorage"))
-               (repl/notify true))]
+  {:setup    [(l/rt:restart)
+              (notify/wait-on [:js 5000]
+                (:= (!:G window)  {})
+                (:= (!:G LocalStorage)  (. (require "node-localstorage")
+                                           LocalStorage))
+                (:= window.localStorage (new LocalStorage "./test-scratch/localstorage"))
+                (repl/notify true))]
   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.sys.cache-throttle/throttle-key :added "0.1"}
@@ -53,13 +66,13 @@
   ^:hidden
 
   (set (!.js
-        (k/obj-keys (throttle/throttle-create "SYNC_FRAME"
+        (xtd/obj-keys (throttle/throttle-create "SYNC_FRAME"
                                               (fn [])
                                               nil))))
   => #{"handler" "tag" "now_fn"}
   
   (set (!.lua
-        (k/obj-keys (throttle/throttle-create "SYNC_FRAME"
+        (xtd/obj-keys (throttle/throttle-create "SYNC_FRAME"
                                               (fn [])
                                               nil))))
   => #{"handler" "tag" "now_fn"})
@@ -109,4 +122,3 @@
     (k/nil? (throttle/throttle-run THT "default"))
     (k/nil? (throttle/throttle-run THT "default"))])
   => [false true true])
-

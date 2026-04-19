@@ -4,8 +4,8 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [js.cell.runtime.env-sharedworker :as env-sharedworker]]})
+   :require [[xt.lang.common-spec :as xt]
+              [js.cell.runtime.env-sharedworker :as env-sharedworker]]})
 
 (fact:global
  {:setup [(l/rt:restart)
@@ -23,8 +23,8 @@
                                   (port.listeners.push listener))
               :start (fn [] true)})
    (env-sharedworker/init-port port)
-   (return {"listeners" (k/len port.listeners)
-            "message" (k/first messages)}))
+   (return {"listeners" (xt/x:len port.listeners)
+            "message" (xt/x:first messages)}))
   => (contains-in {"listeners" 1
                    "message" {"signal" "@worker/::INIT"
                               "body" {"done" true}}}))
@@ -45,9 +45,9 @@
    (:= (!:G self) worker)
    (env-sharedworker/runtime-init)
    ((. worker ["onconnect"]) {"ports" [port]})
-   (var out {"listeners" (k/len port.listeners)
-             "starts" (k/len starts)
-             "message" (k/first messages)})
+   (var out {"listeners" (xt/x:len port.listeners)
+             "starts" (xt/x:len starts)
+             "message" (xt/x:first messages)})
    (:= (!:G self) previous-self)
    (return out))
   => (contains-in {"listeners" 1

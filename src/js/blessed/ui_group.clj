@@ -2,11 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :as k]
-             [js.core :as j]
-             [js.react :as r]
-             [js.blessed :as b]
-             [js.blessed.ui-style :as ui-style]]})
+  {:require [[xt.lang.common-lib :as k] [xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd] [js.core :as j] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style]]})
 
 (defn.js useTree
   "wrapper for `js.react/useTree`"
@@ -40,11 +36,11 @@
   [items layout height format]
   (var lefts
        (:? (== layout "vertical")
-           (j/fill (Array (k/len items))
+           (j/fill (Array (xt/x:len items))
                    0)
            (-> items
                (j/reduce (fn [acc item]
-                           (let [prev (k/last acc)
+                           (let [prev (xtd/last acc)
                                  curr (+ prev
                                          1
                                          (. (format item) ["length"]))]
@@ -56,7 +52,7 @@
          (j/map items
                 (fn:> [e i]
                   (* i (or height 1))))
-         (j/fill (Array (k/len items))
+         (j/fill (Array (xt/x:len items))
                  0)))
   (return [lefts tops]))
 
@@ -82,7 +78,7 @@
                                 :style (:? (. indices [i]) (ui-style/styleSmall color) ui-style/styleInvertDisabled)
                                 :left  (. lefts [i])
                                 :top   (. tops [i])
-                                :width (k/len text)
+                                :width (xt/x:len text)
                                 :height height
                                 :shrink true
                                 :mouse true
@@ -150,14 +146,14 @@
                                              ui-style/styleInvertDisabled)
                                   :left  (. lefts [i])
                                   :top   (. tops [i])
-                                  :width (k/len text)
+                                  :width (xt/x:len text)
                                   :height (or height 1)
                                   :shrink true
                                   :mouse true
                                   :onClick (fn []
                                               (setInternal i)
                                               (if setIndex (setIndex i))
-                                              (if onChange (onChange (k/get-key items i))))
+                                              (if onChange (onChange (. items [i]))))
                                   :content text}])))]))))
 
 (defn.js Tabs
@@ -304,16 +300,16 @@
        (when init
          (. (r/curr proxy)
             (on "action" handler))))
-     (return [:box #{(:.. tprops)}
-              [:list {:ref proxy
-                      :height height
-                      :interactive true
-                      :mouse true
-                      :scrollable true
-                      :keys true
-                      :inputOnFocus true
-                      :items (k/arr-map items format)
-                      :style (ui-style/styleListView color)}]]))))
+      (return [:box #{(:.. tprops)}
+               [:list {:ref proxy
+                       :height height
+                       :interactive true
+                       :mouse true
+                       :scrollable true
+                       :keys true
+                       :inputOnFocus true
+                       :items (xtd/arr-map items format)
+                       :style (ui-style/styleListView color)}]]))))
 
 (defn.js List
   "Constructs a List"
@@ -378,7 +374,7 @@
       #{[:width width
          :layout "vertical"
          :color color
-         :value (or branch (k/first branches))
+         :value (or branch (xtd/first branches))
          :setValue (fn [k]
                      (setBranch k))
          :data branches
@@ -396,7 +392,7 @@
       levels
       (:.. rprops)]}]
   (var tprops (ui-style/getTopProps rprops true))
-  (when (k/is-empty? levels)
+  (when (xtd/is-empty? levels)
     (return [:box "NO DATA"]))
   (var [level (:.. more)] levels)
   (var #{type} level)
@@ -412,7 +408,7 @@
 
                 :else
                 -/ListPane))
-  (var isFinal (== 1 (k/len levels)))
+  (var isFinal (== 1 (xt/x:len levels)))
   (when isFinal
     (return [:% Pane #{[tree
                         root

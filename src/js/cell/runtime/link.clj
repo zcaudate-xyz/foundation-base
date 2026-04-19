@@ -6,10 +6,7 @@
             [std.lang :as l]))
 
 (l/script :js
-  {:require [[js.core :as j]
-             [xt.lang.base-lib :as k]
-             [js.cell.kernel.worker-local :as worker-local]
-             [js.cell.kernel.worker-mock :as worker-mock]]})
+  {:require [[js.core :as j] [xt.lang.common-spec :as xt] [js.cell.kernel.worker-local :as worker-local] [js.cell.kernel.worker-mock :as worker-mock]]})
 
 (defn.js make-mock-link
   "creates a kernel worker-url object backed by the mock worker"
@@ -17,7 +14,7 @@
   [opts]
   (var config (or opts {}))
   (var #{actions suppress} config)
-  (var resolved-actions (or actions (worker-local/actions-baseline)))
+  (var resolved-actions actions)
   (return {:create-fn (fn [listener]
                         (return (worker-mock/create-worker listener
                                                            resolved-actions
@@ -28,8 +25,8 @@
   {:added "4.0"}
   [script opts]
   (var config (or opts {}))
-  (var eval-flag (k/get-key config "eval"))
-  (var eval-mode (:? (k/nil? eval-flag) true eval-flag))
+  (var eval-flag (xt/x:get-key config "eval"))
+  (var eval-mode (:? (xt/x:nil? eval-flag) true eval-flag))
   (var #{Worker} (require "worker_threads"))
   (return {:create-fn (fn [listener]
                         (var worker (new Worker script
@@ -45,7 +42,7 @@
   "resolves a script function or value"
   {:added "4.0"}
   [script]
-  (return (:? (k/fn? script)
+  (return (:? (xt/x:is-function? script)
               (script)
               script)))
 
@@ -101,7 +98,7 @@
   "dispatches to a runtime-specific worker link helper"
   {:added "4.0"}
   [runtime script opts]
-  (var runtime-name (k/to-string runtime))
+  (var runtime-name (xt/x:to-string runtime))
   (cond (== runtime-name "mock")
         (return (-/make-mock-link opts))
 
@@ -115,4 +112,4 @@
         (return (-/make-sharedworker-link script))
 
         :else
-        (throw (k/cat "Unknown js.cell.runtime.link runtime: " runtime))))
+        (throw (xt/x:cat "Unknown js.cell.runtime.link runtime: " runtime))))

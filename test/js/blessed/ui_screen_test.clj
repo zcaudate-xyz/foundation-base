@@ -8,11 +8,11 @@
    :require  [[js.react :as r :include [:fn]]
               [js.core :as j :include [:node :util]]
               [js.lib.valtio :as v]
-              [js.blessed.ui-screen :as ui-screen]
-              [js.blessed.ui-core :as ui-core]
-              [js.blessed :as b :include [:fn]]
-              [js.lib.chalk :as chk]
-              [xt.lang.base-lib :as k]]
+               [js.blessed.ui-screen :as ui-screen]
+               [js.blessed.ui-core :as ui-core]
+               [js.blessed :as b :include [:fn]]
+               [js.lib.chalk :as chk]
+               [xt.lang.common-data :as xtd]]
    :export  [MODULE]})
 
 (fact:global
@@ -71,8 +71,8 @@
       [:box {:top 2}]
       [:% ui-screen/GridLayout
        {:top 1
-        :items (j/map (k/arr-range 20)
-                      (fn:> [i]
+         :items (j/map (xtd/arr-range 20)
+                       (fn:> [i]
                         [:box
                          {:top 1
                           :bottom 1

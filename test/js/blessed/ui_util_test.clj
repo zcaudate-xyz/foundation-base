@@ -12,7 +12,7 @@
               [js.blessed.ui-util :as ui-util]
               [js.blessed :as b :include [:fn]]
               [js.lib.chalk :as chk]
-              [xt.lang.base-lib :as k]]
+              [xt.lang.common-lib :as k]]
    :export  [MODULE]})
 
 (fact:global

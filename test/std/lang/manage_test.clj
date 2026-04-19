@@ -146,6 +146,31 @@
   (task/task? manage/support-matrix)
   => true)
 
+^{:refer std.lang.manage/runtime-template-matrix :added "4.1"}
+(fact "runtime-template-matrix reports scaffold status for selected templates"
+  (let [{:keys [templates languages status summary lang-summary scaffold-summary]}
+        (manage/runtime-template-matrix {:nss '[xt.lang.common-iter-test
+                                               xt.lang.common-string-test
+                                               xt.lang.common-spec-test]
+                                         :langs [:js :lua :python :dart]})]
+    [(= (set templates)
+        #{'xt.lang.common-iter-test
+          'xt.lang.common-string-test
+          'xt.lang.common-spec-test})
+     (= languages [:dart :js :lua :python])
+     (= #{:ready}
+        (set (for [source-ns templates
+                   lang languages]
+               (get-in status [source-ns lang :status]))))
+     (= (set (keys summary))
+        (set templates))
+     (= {:full 2 :partial 1 :stub 1 :unwritten 0 :unsupported 0 :scaffold-error 0 :diagnose-error 0}
+        (get summary 'xt.lang.common-iter-test))
+     (= {:full 0 :partial 2 :stub 1 :unwritten 0 :unsupported 0 :scaffold-error 0 :diagnose-error 0}
+        (get lang-summary :python))
+     (= 4 (get-in scaffold-summary ['xt.lang.common-spec-test :ready]))])
+  => [true true true true true true true])
+
 ^{:refer std.lang.manage/missing-by-language :added "4.1"}
 (fact "missing-by-language task is available"
   (task/task? manage/missing-by-language)
@@ -183,7 +208,11 @@
 
 
 ^{:refer std.lang.manage/compile-runtime-bulk :added "4.1"}
-(fact "TODO")
+(fact "compile-runtime-bulk is a task for compiling runtime EDN suites"
+  (task/task? manage/compile-runtime-bulk)
+  => true)
 
 ^{:refer std.lang.manage/-main :added "4.1"}
-(fact "TODO")
+(fact "main entry point lists available tasks when called with no args"
+  (string? (with-out-str (manage/-main)))
+  => true)

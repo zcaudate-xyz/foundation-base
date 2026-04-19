@@ -138,9 +138,10 @@
                                        nil))
                         {:status "disconnected"})]
     (if-let [relay (get-relay record)]
-      (try (let [{:keys [output]}  @(cc/send relay
+      (try (let [line ((:write encode) body)
+                 {output :output}  @(cc/send relay
                                              {:op :line
-                                              :line ((:write encode) body)
+                                              :line line
                                               :timeout (or timeout 1000)})
                  _ (cc/send relay {:op :clean})]
              (if output

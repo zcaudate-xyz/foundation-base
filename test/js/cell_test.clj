@@ -2,12 +2,12 @@
   (:require [std.lang :as l]
             [js.cell.runtime.emit :as emit]
             [std.lib.template :as template]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-repl :as repl]
+   :require [[xt.lang.common-repl :as repl]
              [js.cell :as cl]
              [js.cell.runtime.link :as runtime-link]]})
 
@@ -56,3 +56,40 @@
   => {"service" {"dbs" {"main" {"kind" "cache"
                                 "id" "main"}}}
       "bindings" {"orders" {"views" {"all" {"type" "select"}}}}})
+
+
+^{:refer js.cell/SERVICE :added "4.1"}
+(fact "TODO")
+
+^{:refer js.cell/BINDINGS :added "4.1"}
+(fact "TODO")
+
+^{:refer js.cell/fn-setup-service :added "4.1"}
+(fact "TODO")
+
+^{:refer js.cell/fn-get-service :added "4.1"}
+(fact "TODO")
+
+^{:refer js.cell/fn-setup-bindings :added "4.1"}
+(fact "TODO")
+
+^{:refer js.cell/fn-get-bindings :added "4.1"}
+(fact "TODO")
+
+^{:refer js.cell/actions-cell :added "4.1"}
+(fact "TODO")
+
+^{:refer js.cell/actions-baseline :added "4.1"}
+(fact "TODO")
+
+^{:refer js.cell/actions-init :added "4.1"}
+(fact "TODO")
+
+^{:refer js.cell/get-service :added "4.1"}
+(fact "TODO")
+
+^{:refer js.cell/setup-bindings :added "4.1"}
+(fact "TODO")
+
+^{:refer js.cell/get-bindings :added "4.1"}
+(fact "TODO")

@@ -12,7 +12,7 @@
             :notify {:host "test.statstrade.io"}}
    :require [[js.react :as r :include [:fn]]
              [js.react-native :as n :include [:fn]]
-             [xt.lang.base-lib :as k]
+             [xt.lang.common-lib :as k]
              [js.core :as j]
              [js.react-native.ui-button :as ui-button]]
    :static {:import/async #{js.react-native.ui-button}}

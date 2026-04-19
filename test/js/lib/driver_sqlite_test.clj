@@ -1,13 +1,13 @@
 (ns js.lib.driver-sqlite-test
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
    :require [[xt.sys.conn-dbsql :as dbsql]
-             [xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-repl :as repl]
              [js.lib.driver-sqlite :as js-sqlite]]})
 
 (fact:global
@@ -24,10 +24,9 @@
 (fact "creates a instance once SQL is loaded")
 
 ^{:refer js.lib.driver-sqlite/connect-constructor :added "4.0" :unchecked true}
-(fact "connects to an embeded sqlite file"
+(fact "connects to an embedded sqlite file"
 
   (notify/wait-on :js
-    (:= (!:G initSqlJs) (require "sql.js"))
     (dbsql/connect {:constructor js-sqlite/connect-constructor}
                    {:success (fn [conn]
                                (dbsql/query conn "SELECT 1;"

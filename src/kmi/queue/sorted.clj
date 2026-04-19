@@ -3,9 +3,10 @@
 
 (l/script :lua
   {:runtime :redis
-   :require [[xt.lang.base-lib :as k]
-             [kmi.redis :as r]
-             [kmi.queue.common :as q]]
+   :require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+              [kmi.redis :as r]
+              [kmi.queue.common :as q]]
    :static {:lang/lint-globals #{redis}}})
 
 ;;
@@ -48,10 +49,10 @@
                            (q/mq-index finish partition "+inf")])
    (return (-> (r/call "ZRANGEBYSCORE"
                        k-queue idx-0 idx-1 "WITHSCORES" "LIMIT" 0 count)
-               (k/from-flat (fn [out k v]
-		               (table.insert out [(cat partition "-" v) k])
-			       (return out))
-                            [])))))
+               (xtd/from-flat (fn [out k v]
+ 		               (table.insert out [(cat partition "-" v) k])
+ 			       (return out))
+                             [])))))
 
 (defn.lua ^{:rt/redis {}} mq-sorted-queue-get
   "gets the queue element"
@@ -132,9 +133,9 @@
                         "WITHSCORES", "LIMIT", 0, count))
 
    (local '[res keys] '[[] []])
-   (k/for:index [i [1 (/ (len items) 2)]]
-     (local idx (. items [(* i 2)]))
-     (local key (cat partition "-" idx))
+    (xt/for:index [i [1 (/ (len items) 2)]]
+      (local idx (. items [(* i 2)]))
+      (local key (cat partition "-" idx))
      (:= (. res [i]) [key, (. items [(- (* i 2) 1)])])
      (:= (. keys [i]) key))
 
@@ -208,7 +209,7 @@
        "group_init_all"     -/mq-sorted-group-init-all
        "group_outdated_all" -/mq-sorted-group-outdated-all
        "group_waiting_all"  -/mq-sorted-group-waiting-all}
-      (k/obj-assign q/mq-base-table)))
+      (xtd/obj-assign q/mq-base-table)))
 
 (def.lua mq-sorted-table-get
   {"read_group"         -/mq-sorted-read
@@ -270,4 +271,4 @@
   (->> {"read_group"         -/mq-sequential-read
         "read_hold"          -/mq-sequential-read-hold
         "read_release"       -/mq-sequential-read-release}
-       (k/obj-assign -/mq-sorted-table-get)))
+       (xtd/obj-assign -/mq-sorted-table-get)))

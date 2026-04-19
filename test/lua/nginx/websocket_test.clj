@@ -9,9 +9,10 @@
 (l/script- :lua
   {:runtime :nginx.instance
    :require [[lua.nginx :as n]
-             [lua.nginx.websocket :as ws]
-             [xt.lang.base-lib :as k]
-             [xt.sys.cache-common :as cache]]})
+              [lua.nginx.websocket :as ws]
+              [xt.lang.common-lib :as k]
+              [xt.lang.common-data :as xtd]
+              [xt.sys.cache-common :as cache]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -198,7 +199,7 @@
                                       0)
                               (return [uid]))
                      :main (fn [conn uid vars]
-                             (local uid (k/first vars))
+                             (local uid (xtd/first vars))
                              (local num (cache/incr (cache/cache :GLOBAL)
                                                  (cat "__COUNTER__:" uid)
                                                  1))
@@ -247,7 +248,7 @@
                               (return [uid]))
                      :main (fn [conn uid vars data]
                              (ws/send-text conn (cjson.encode
-                                                 [(k/first vars) data])))}
+                                                 [(xtd/first vars) data])))}
                     {}
                     {}
                     {})))

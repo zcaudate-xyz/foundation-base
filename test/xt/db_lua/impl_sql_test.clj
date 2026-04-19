@@ -1,15 +1,17 @@
 (ns xt.db-lua.impl-sql-test
   (:require [std.lang :as l]
             [std.string.prose :as prose]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :lua
   {:runtime :basic
    :config {:program :resty}
    :require [[xt.db.impl-sql :as impl-sql]
-             [xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-string :as str]
+             [xt.lang.common-repl :as repl]
              [xt.sys.conn-dbsql :as dbsql]
              [xt.db.base-flatten :as f]
              [xt.db.sql-util :as ut]
@@ -26,7 +28,7 @@
    (:= (!:G INSTANCE) (dbsql/connect {:constructor lua-sqlite/connect-constructor
                                       :memory true}))
    (dbsql/query-sync INSTANCE
-                     (k/join "\n\n"
+                     (str/join "\n\n"
                              (manage/table-create-all
                               sample/Schema
                               sample/SchemaLookup
@@ -54,22 +56,26 @@
    [(dbsql/query INSTANCE
                  "SELECT 1;"
                  nil)
-    (k/sort
-     (k/obj-keys
-      (f/flatten-bulk sample/Schema
-                      {"UserAccount"
-                       [sample/RootUser]})))])
+     (xtd/arr-sort
+       (xtd/obj-keys
+        (f/flatten-bulk sample/Schema
+                        {"UserAccount"
+                         [sample/RootUser]}))
+       k/identity
+       k/lt)])
   => [1 ["UserAccount" "UserProfile"]])
 
 ^{:refer xt.db.impl-sql/sql-process-event-remove.lua :adopt true :added "4.0"
   :setup [(!.lua
-           (k/sort (impl-sql/sql-process-event-sync
-                    INSTANCE
-                    "add"
-                    {"UserAccount" [sample/RootUser]}
-                    sample/Schema
-                    sample/SchemaLookup
-                    (ut/sqlite-opts nil))))]}
+           (xtd/arr-sort (impl-sql/sql-process-event-sync
+                          INSTANCE
+                          "add"
+                          {"UserAccount" [sample/RootUser]}
+                          sample/Schema
+                          sample/SchemaLookup
+                          (ut/sqlite-opts nil))
+                         k/identity
+                         k/lt))]}
 (fact "removes data from database"
   ^:hidden
 
@@ -133,13 +139,15 @@
 
 ^{:refer xt.db.impl-sql/sql-process-event-remove :added "4.0"
   :setup [(!.lua
-           (k/sort (impl-sql/sql-process-event-sync
-                    INSTANCE
-                    "add"
-                    {"UserAccount" [sample/RootUser]}
-                    sample/Schema
-                    sample/SchemaLookup
-                    (ut/sqlite-opts nil))))]}
+           (xtd/arr-sort (impl-sql/sql-process-event-sync
+                          INSTANCE
+                          "add"
+                          {"UserAccount" [sample/RootUser]}
+                          sample/Schema
+                          sample/SchemaLookup
+                          (ut/sqlite-opts nil))
+                         k/identity
+                         k/lt))]}
 (fact "removes data from database"
   ^:hidden
 

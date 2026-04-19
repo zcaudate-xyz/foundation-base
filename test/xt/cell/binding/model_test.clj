@@ -5,9 +5,11 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.cell.binding :as binding]
-             [xt.cell.binding.model :as binding-model]
-             [xt.db :as xdb]
-             [xt.lang.base-lib :as k]]})
+              [xt.cell.binding.model :as binding-model]
+              [xt.db :as xdb]
+              [xt.lang.common-lib :as k]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-data :as xtd]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -78,7 +80,7 @@
   (!.js
    (var schema (@! +schema+))
    (var views (@! +views+))
-   (var local-db (k/obj-assign
+   (var local-db (xtd/obj-assign
                   (xdb/db-create {"::" "db.cache"} schema (@! +lookup+) nil)
                   {"schema" schema
                    "views" views}))
@@ -142,7 +144,7 @@
   (!.js
    (var schema (@! +schema+))
    (var views (@! +views+))
-   (var local-db (k/obj-assign
+   (var local-db (xtd/obj-assign
                   (xdb/db-create {"::" "db.cache"} schema (@! +lookup+) nil)
                   {"schema" schema
                    "views" views}))
@@ -155,8 +157,8 @@
                                 "sync" {"Order" [{"id" "ord-1"
                                                   "status" "open"}]}}}))
    (var pipeline (binding-model/compile-sync-pipeline prepared))
-   [ok
-    ((k/get-in pipeline ["sync" "handler"]) {"id" "link-1"})])
+    [ok
+     ((xtd/get-in pipeline ["sync" "handler"]) {"id" "link-1"})])
   => [true
       {"result" {"db/sync" {"Order" [{"id" "ord-1"
                                       "status" "open"}]}}
@@ -170,7 +172,7 @@
   (!.js
    (var schema (@! +schema+))
    (var views (@! +views+))
-   (var local-db (k/obj-assign
+   (var local-db (xtd/obj-assign
                   (xdb/db-create {"::" "db.cache"} schema (@! +lookup+) nil)
                   {"schema" schema
                    "views" views}))
@@ -186,11 +188,11 @@
                         "deps" [["accounts" "current"]]
                         "resolve" {"policy" "replace"}}))
    (var spec (binding-model/compile-view-spec prepared))
-   [ok
-    (k/is-function? (k/get-key spec "handler"))
-    (k/get-key spec "deps")
-    (k/get-in spec ["options" "context" "modelId"])
-    (k/get-in spec ["options" "context" "resolve"])])
+    [ok
+     (k/is-function? (xt/x:get-key spec "handler"))
+     (xt/x:get-key spec "deps")
+     (xtd/get-in spec ["options" "context" "modelId"])
+     (xtd/get-in spec ["options" "context" "resolve"])])
   => [true
       true
       [["accounts" "current"]]

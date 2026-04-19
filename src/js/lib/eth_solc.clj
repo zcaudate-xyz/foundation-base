@@ -1,28 +1,34 @@
 (ns js.lib.eth-solc
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:refer-clojure :exclude [compile]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :as k]
-             [js.core :as j]]
-   :import [["solc" :as solc]
-            ["solc" :as solc]]})
+  {:require [[js.core :as j]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-string :as str]]})
 
-(def$.js compile solc.compile)
+(defn.js compile
+  [input]
+  (var root (or (. process env ["PWD"])
+                (. process (cwd))))
+  (var solc (or (!:G solc)
+                (require (+ root "/node_modules/solc"))))
+  (:= (!:G solc) solc)
+  (return (. solc (compile input))))
 
 (defn.js contract-wrap-body
   "wraps the body in a contract"
   {:added "4.0"}
   [code name prefix]
   (return
-   (k/arr-join ["// SPDX-License-Identifier: GPL-3.0"
-                "pragma solidity >=0.7.0 <0.9.0;"
-                (or prefix "")
-                (+ "contract " name " {")
-                code
-                "}"]
-               "\n")))
+   (str/join "\n"
+             ["// SPDX-License-Identifier: GPL-3.0"
+              "pragma solidity >=0.7.0 <0.9.0;"
+              (or prefix "")
+              (+ "contract " name " {")
+              code
+              "}"])))
 
 (defn.js contract-compile
   "compiles a single contract"
@@ -36,6 +42,4 @@
         {:outputSelection
          {"*" {"*" ["*"]}}}})
   (return
-   (k/json-decode (-/compile (k/json-encode input)))))
-
-
+   (xt/x:json-decode (-/compile (xt/x:json-encode input)))))

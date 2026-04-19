@@ -1,9 +1,7 @@
 (ns xt.lang.override.custom-lua
   (:require [std.lang :as l]))
 
-(l/script :lua
-  xt.lang
-  {:require [[xt.lang :as k]]})
+(l/script :lua xt.lang)
 
 (defmacro.lua ^{:static/override true}
   pad-left

@@ -3,12 +3,12 @@
   (:require [net.http :as http]
             [std.json :as json]
             [std.lang :as l]
-            [xt.lang.base-notify :as notify]))
+            [xt.lang.common-notify :as notify]))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-repl :as repl]
-             [xt.lang.base-lib :as k]
+   :require [[xt.lang.common-repl :as repl]
+             [xt.lang.common-string :as str]
              [xt.db.sample-test :as sample]
              [xt.db.sql-util :as ut]
              [xt.db.sql-raw :as raw]
@@ -21,21 +21,16 @@
 (defn reset-js
   []
   (notify/wait-on [:js 2000]
-    (var initSql (require "sql.js"))
-    (-> (initSql)
-        (. (then (fn [SQL]
-                   (:= (!:G SQL) SQL)
-                   (:= (!:G DB) (js-sqlite/set-methods
-                                 (new SQL.Database)))
-                   (repl/notify DB)))))))
+    (dbsql/connect {:constructor js-sqlite/connect-constructor}
+                   {:success (fn [conn]
+                               (:= (!:G DB) conn)
+                               (repl/notify DB))})))
 
 (fact:global
- {:setup    [(l/rt:restart)
-             (!.js
-              (:= (!:G initSqlJs) (require "sql.js")))
-             (l/rt:scaffold :js)
-             (reset-js)]
-  :teardown [(l/rt:stop)]})
+  {:setup    [(l/rt:restart)
+              (l/rt:scaffold :js)
+              (reset-js)]
+   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.sql-sqlite/CANARY :adopt true :added "4.0"}
 (fact "connects to an embedded sqlite file"
@@ -61,11 +56,11 @@
   
   (notify/wait-on :js
     (dbsql/query DB
-                 (k/join "\n\n"
-                         (manage/table-create-all
-                          sample/Schema
-                          sample/SchemaLookup
-                          (ut/sqlite-opts nil)))
+                 (str/join "\n\n"
+                          (manage/table-create-all
+                           sample/Schema
+                           sample/SchemaLookup
+                           (ut/sqlite-opts nil)))
                  {:success (fn [_]
                              (repl/notify true))}))
   => true)
@@ -76,12 +71,12 @@
 
   (notify/wait-on :js
     (dbsql/query DB
-                 (k/join "\n\n"
-                         (table/table-upsert sample/Schema
-                                             sample/SchemaLookup
-                                             "Currency"
-                                             @sample/+currency+
-                                             (ut/sqlite-opts nil)))
+                 (str/join "\n\n"
+                          (table/table-upsert sample/Schema
+                                              sample/SchemaLookup
+                                              "Currency"
+                                              @sample/+currency+
+                                              (ut/sqlite-opts nil)))
                  {:success (fn [result]
                              (repl/notify result))}))
   => vector?)

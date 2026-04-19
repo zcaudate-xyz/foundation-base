@@ -2,17 +2,18 @@
   (:use code.test)
   (:require [rt.postgres :as pg]
             [std.lang :as l]
-            [xt.lang.base-notify :as notify]))
+            [xt.lang.common-notify :as notify]))
 
 (l/script- :postgres
   {:runtime :jdbc.client
    :config  {:dbname "test-scratch"}
    :require [[rt.postgres.test.scratch-v1 :as scratch]]})
 
+^{:xtalk/template true}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
+   :require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-repl :as repl]
              [xt.db.sql-call :as call]
              [xt.sys.conn-dbsql :as driver]
              [js.lib.driver-postgres :as js-postgres]]})
@@ -28,15 +29,18 @@
   ^:hidden
   
   (!.js
-   (call/decode-return (k/json-encode
+   (call/decode-return (xt/x:json-encode
                         {:status "ok"
-                         :data 1})))
+                         :data 1})
+                        nil))
   => 1
 
+  ^{:lang-exceptions {:dart {:skip true}}}
   (!.js
-   (call/decode-return (k/json-encode
-                        {:status "error"
-                         :data "NOT VALID"})))
+   (call/decode-return (xt/x:json-encode
+                         {:status "error"
+                         :data "NOT VALID"})
+                        nil))
   => (throws))
 
 ^{:refer xt.db.sql-call/call-format-input :added "4.0"}
@@ -60,7 +64,11 @@
     [1 2]))
   => "SELECT \"scratch\".divf('1', '2');")
 
-^{:refer xt.db.sql-call/call-raw :added "4.0"}
+^{:refer xt.db.sql-call/call-raw
+  :added "4.0"
+  :lang-exceptions {:lua {:skip true}
+                    :python {:skip true}
+                    :dart {:skip true}}}
 (fact "calls a database function"
   ^:hidden
   
@@ -76,7 +84,11 @@
                           (then (repl/>notify))))}))
   => "30")
 
-^{:refer xt.db.sql-call/call-api :added "4.0"}
+^{:refer xt.db.sql-call/call-api
+  :added "4.0"
+  :lang-exceptions {:lua {:skip true}
+                    :python {:skip true}
+                    :dart {:skip true}}}
 (fact "results an api style result"
   ^:hidden
   

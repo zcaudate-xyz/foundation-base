@@ -3,7 +3,10 @@
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]})
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-string :as str]
+             [xt.lang.common-trace :as trace]]})
 
 
 (defspec.xt EV_INIT :xt/str)
@@ -57,8 +60,8 @@
   "prepares a rand-id"
   {:added "4.0"}
   [prefix n]
-  (return (k/cat (or prefix "")
-                 (k/str-rand n))))
+  (return (xt/x:cat (or prefix "")
+                    (str/str-rand n))))
 
 (defn.xt check-event
   "checks that trigger matches signal and event"
@@ -66,50 +69,50 @@
   [pred signal event ctx]
   (var check false)
   (try
-    (var t (:? (k/nil? pred)
+    (var t (:? (xt/x:nil? pred)
                true
 
-               (k/is-boolean? pred)
+               (xt/x:is-boolean? pred)
                pred
                
-               (k/fn? pred)
+               (xt/x:is-function? pred)
                (pred signal ctx)
                
-               (k/obj? pred)
-               (k/get-key pred signal)
+               (xt/x:is-object? pred)
+               (xt/x:get-key pred signal)
                
                :else
                (== signal pred)))
     (:= check (or (== true t)
-                  (and (k/fn? t) (t event ctx))
+                  (and (xt/x:is-function? t) (t event ctx))
                   false))
-    (catch err (k/LOG! {:stack   (. err ["stack"])
-                        :message (. err ["message"])})))
+    (catch err (trace/LOG! {:stack   (. err ["stack"])
+                            :message (. err ["message"])})))
   (return check))
 
 (defn.xt arg-encode
   "encodes functions in data tree"
   {:added "4.0"}
   [arg]
-  (return (k/walk arg
+  (return (xtd/tree-walk arg
                   (fn [x]
-                    (if (k/fn? x)
-                      (return ["fn" (k/to-string x)])
+                    (if (xt/x:is-function? x)
+                      (return ["fn" (xt/x:to-string x)])
                       (return x)))
-                  k/identity)))
+                  (fn [x] (return x)))))
 
 (defn.xt arg-decode
   "decodes function in data tree"
   {:added "4.0"}
   [arg]
-  (return (k/walk arg
+  (return (xtd/tree-walk arg
                   (fn [x]
-                    (if (and (k/arr? x)
-                             (== 2 (k/len x))
-                             (== "fn" (k/first x)))
-                      (return (k/eval (+ "(" (k/second x) ")")))
+                    (if (and (xt/x:is-array? x)
+                             (== 2 (xt/x:len x))
+                             (== "fn" (xt/x:first x)))
+                      (return (xt/x:eval (+ "(" (xt/x:second x) ")")))
                       (return x)))
-                  k/identity)))
+                  (fn [x] (return x)))))
 
 
 ;;
@@ -120,11 +123,11 @@
   "constructs a protocol frame"
   {:added "4.0"}
   [op id body meta extra]
-  (return (k/obj-assign {:op op
-                         :id id
-                         :body body
-                         :meta (or meta {})}
-                        (or extra {}))))
+  (return (xtd/obj-assign {:op op
+                           :id id
+                           :body body
+                           :meta (or meta {})}
+                          (or extra {}))))
 
 (defn.xt req-call
   "constructs a call request"

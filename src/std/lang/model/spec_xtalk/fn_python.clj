@@ -95,36 +95,36 @@
 (defn python-tf-x-future-then
   [[_ task on-ok]]
   (template/$
-   (if (== "ok" (. ~task (get "status")))
-     (do (var out {"status" "pending"
-                   "value" nil
-                   "error" nil})
-         (var v nil)
-         (try (:= v (~on-ok (. ~task (get "value"))))
-              (:= (. out ["status"]) "ok")
-              (:= (. out ["value"]) v)
-              (catch [Exception :as e]
-                  (:= (. out ["status"]) "error")
-                  (:= (. out ["error"]) e)))
-         (return out))
-     (return ~task))))
+   (do (var out ~task)
+       (if (== "ok" (. ~task (get "status")))
+         (do (:= out {"status" "pending"
+                      "value" nil
+                      "error" nil})
+             (var v nil)
+             (try (:= v (~on-ok (. ~task (get "value"))))
+                  (:= (. out ["status"]) "ok")
+                  (:= (. out ["value"]) v)
+                  (catch [Exception :as e]
+                      (:= (. out ["status"]) "error")
+                      (:= (. out ["error"]) e)))))
+       (return out))))
 
 (defn python-tf-x-future-catch
   [[_ task on-err]]
   (template/$
-   (if (== "error" (. ~task (get "status")))
-     (do (var out {"status" "pending"
-                   "value" nil
-                   "error" nil})
-         (var v nil)
-         (try (:= v (~on-err (. ~task (get "error"))))
-              (:= (. out ["status"]) "ok")
-              (:= (. out ["value"]) v)
-              (catch [Exception :as e]
-                  (:= (. out ["status"]) "error")
-                  (:= (. out ["error"]) e)))
-         (return out))
-     (return ~task))))
+   (do (var out ~task)
+       (if (== "error" (. ~task (get "status")))
+         (do (:= out {"status" "pending"
+                      "value" nil
+                      "error" nil})
+             (var v nil)
+             (try (:= v (~on-err (. ~task (get "error"))))
+                  (:= (. out ["status"]) "ok")
+                  (:= (. out ["value"]) v)
+                  (catch [Exception :as e]
+                      (:= (. out ["status"]) "error")
+                      (:= (. out ["error"]) e)))))
+       (return out))))
 
 (defn python-tf-x-future-finally
   [[_ task on-done]]
@@ -191,8 +191,41 @@
    :x-future-finally   {:macro #'python-tf-x-future-finally  :emit :macro}
    :x-future-cancel    {:macro #'python-tf-x-future-cancel   :emit :macro}
    :x-future-status    {:macro #'python-tf-x-future-status   :emit :macro}
-   :x-future-await     {:macro #'python-tf-x-future-await    :emit :macro}
-   :x-future-from-async {:macro #'python-tf-x-future-from-async :emit :macro}})
+    :x-future-await     {:macro #'python-tf-x-future-await    :emit :macro}
+    :x-future-from-async {:macro #'python-tf-x-future-from-async :emit :macro}})
+
+;;
+;; PROTO
+;;
+
+(defn python-tf-x-proto-create
+  [[_ m]]
+  m)
+
+(defn python-tf-x-proto-get
+  [[_ obj _]]
+  (template/$ (. ~obj (get "__proto__"))))
+
+(defn python-tf-x-proto-set
+  [[_ obj prototype _]]
+  (template/$
+   (do (:= (. ~obj ["__proto__"]) ~prototype)
+       (for:object [[k f] ~prototype]
+         (if (callable f)
+           (:= (. ~obj [k]) (. (__import__ "types") (MethodType f ~obj)))
+           (:= (. ~obj [k]) f)))
+       (return ~obj))))
+
+(defn python-tf-x-proto-tostring
+  [[_ _]]
+  '"__str__")
+
+(def +python-proto+
+  {:x-this           {:emit :unit :default 'self}
+   :x-proto-create   {:macro #'python-tf-x-proto-create   :emit :macro}
+   :x-proto-get      {:macro #'python-tf-x-proto-get      :emit :macro}
+   :x-proto-set      {:macro #'python-tf-x-proto-set      :emit :macro}
+   :x-proto-tostring {:macro #'python-tf-x-proto-tostring :emit :macro}})
 
 
 ;;
@@ -336,8 +369,7 @@
   "converts map to array"
   {:added "4.0"}
   ([[_]]
-   '(. (__import__ "weakref")
-       (WeakKeyDictionary))))
+   '{}))
 
 (defn python-tf-x-lu-eq
   "converts map to array"
@@ -364,10 +396,10 @@
    (template/$ (del (. ~lu [(id ~obj)])))))
 
 (def +python-lu+
-  {;;:x-lu-create      {:macro #'python-tf-x-lu-create  :emit :macro}
-   :x-lu-eq          {:macro #'python-tf-x-lu-eq  :emit :macro}
-   :x-lu-get         {:macro #'python-tf-x-lu-get :emit :macro}
-   :x-lu-set         {:macro #'python-tf-x-lu-set :emit :macro}
+  {:x-lu-create      {:macro #'python-tf-x-lu-create  :emit :macro}
+    :x-lu-eq          {:macro #'python-tf-x-lu-eq  :emit :macro}
+    :x-lu-get         {:macro #'python-tf-x-lu-get :emit :macro}
+    :x-lu-set         {:macro #'python-tf-x-lu-set :emit :macro}
    :x-lu-del         {:macro #'python-tf-x-lu-del :emit :macro}})
 
 ;;
@@ -376,21 +408,21 @@
 
 (defn python-tf-x-obj-keys
   [[_ obj]]
-  (list 'return (list 'list (list '. obj '(keys)))))
+  (list 'list (list '. obj '(keys))))
 
 (defn python-tf-x-obj-vals
   [[_ obj]]
-  (list 'return (list 'list (list '. obj '(values)))))
+  (list 'list (list '. obj '(values))))
 
 (defn python-tf-x-obj-pairs
   "converts map to array"
   {:added "4.0"}
   ([[_ obj]]
-   (list 'return (list 'list (list '. obj '(items))))))
+   (list 'list (list '. obj '(items)))))
 
 (defn python-tf-x-obj-clone
   [[_ obj]]
-  (list 'return (list '. obj '(copy))))
+  (list '. obj '(copy)))
 
 (def +python-obj+
   {:x-obj-keys    {:macro #'python-tf-x-obj-keys   :emit :macro}
@@ -408,7 +440,8 @@
 
   (defn python-tf-x-arr-slice
     [[_ arr start end]]
-    (list '. arr [(list :to start end)]))
+    (list '. arr [(list :to (list '- start (list 'x:offset))
+                         end)]))
 
 
 
@@ -436,18 +469,22 @@
   [[_ arr idx e]]
   (list '. arr (list 'insert idx e)))
 
+(defn python-tf-x-arr-remove
+  [[_ arr idx]]
+  (list '. arr (list 'pop idx)))
+
 (defn python-tf-x-arr-sort
   [[_ arr key-fn compare-fn]]
   (list '. arr (list 'sort :key #_key-fn
                      (template/$ (. (__import__ "functools")
-                             (cmp_to_key
-                              (fn:> [a b]
-                                    (:? (~compare-fn
-                                         (~key-fn a)
-                                         (~key-fn b))
-                                        -1 1))))))))
+                              (cmp_to_key
+                               (fn:> [a b]
+                                     (:? (~compare-fn
+                                          (~key-fn a)
+                                          (~key-fn b))
+                                         -1 1))))))))
 
-(defn python-tf-x-arr-str-comp
+(defn python-tf-x-str-comp
   [[_ a b]]
   (list '< a b))
 
@@ -460,8 +497,9 @@
    :x-arr-push-first  {:macro #'python-tf-x-arr-push-first :emit :macro}
    :x-arr-pop-first   {:macro #'python-tf-x-arr-pop-first  :emit :macro}
    :x-arr-insert      {:macro #'python-tf-x-arr-insert     :emit :macro}
+   :x-arr-remove      {:macro #'python-tf-x-arr-remove     :emit :macro}
    :x-arr-sort        {:macro #'python-tf-x-arr-sort       :emit :macro}
-   :x-arr-str-comp    {:macro #'python-tf-x-arr-str-comp   :emit :macro}})
+   :x-str-comp        {:macro #'python-tf-x-str-comp       :emit :macro}})
 
 
 ;;
@@ -470,7 +508,7 @@
 
 (defn python-tf-x-str-char
   ([[_ s i]]
-   (list 'ord (list '. s [i]))))
+   (list 'ord (list '. s [(list '- i (list 'x:offset))]))))
 
 (defn python-tf-x-str-split
   ([[_ s tok]]
@@ -481,12 +519,19 @@
    (list '. s (list 'join arr))))
 
 (defn python-tf-x-str-index-of
-  ([[_ s tok]]
-   (list '. s (list 'find tok))))
+  ([[_ s tok & [start]]]
+   (list '+ (list '. s (list 'find tok (or start 0)))
+         (list 'x:offset))))
+
+(defn python-tf-x-str-to-fixed
+  [[_ num digits]]
+  (list '. (list 'x:cat "{:." (list 'str digits) "f}")
+        (list 'format num)))
 
 (defn python-tf-x-str-substring
   ([[_ s start & [end]]]
-   (template/$ (. ~s [~(list :to start (or end \0))]))))
+   (template/$ (. ~s [~(list :to (list '- start (list 'x:offset))
+                             (or end \0))]))))
 
 (defn python-tf-x-str-to-upper
   ([[_ s]]
@@ -500,15 +545,31 @@
   ([[_ s tok replacement]]
    (list '. s (list 'replace tok replacement))))
 
+(defn python-tf-x-str-trim
+  ([[_ s]]
+   (list '. s '(strip))))
+
+(defn python-tf-x-str-trim-left
+  ([[_ s]]
+   (list '. s '(lstrip))))
+
+(defn python-tf-x-str-trim-right
+  ([[_ s]]
+   (list '. s '(rstrip))))
+
 (def +python-str+
   {:x-str-char       {:macro #'python-tf-x-str-char      :emit :macro}
    :x-str-split      {:macro #'python-tf-x-str-split      :emit :macro}
    :x-str-join       {:macro #'python-tf-x-str-join       :emit :macro}
    :x-str-index-of   {:macro #'python-tf-x-str-index-of   :emit :macro}
+   :x-str-to-fixed   {:macro #'python-tf-x-str-to-fixed   :emit :macro}
    :x-str-substring  {:macro #'python-tf-x-str-substring  :emit :macro}
    :x-str-to-upper   {:macro #'python-tf-x-str-to-upper      :emit :macro}
    :x-str-to-lower   {:macro #'python-tf-x-str-to-lower      :emit :macro}
-   :x-str-replace    {:macro #'python-tf-x-str-replace    :emit :macro}})
+   :x-str-replace    {:macro #'python-tf-x-str-replace    :emit :macro}
+   :x-str-trim       {:macro #'python-tf-x-str-trim       :emit :macro}
+   :x-str-trim-left  {:macro #'python-tf-x-str-trim-left  :emit :macro}
+   :x-str-trim-right {:macro #'python-tf-x-str-trim-right :emit :macro}})
 
 ;;
 ;; JSON
@@ -645,6 +706,99 @@
    :x-iter-native?        {:macro #'python-tf-x-iter-native?        :emit :macro}})
 
 ;;
+;; CACHE
+;;
+
+(defn python-cache-name
+  [cache]
+  (or cache "__GLOBAL__"))
+
+(defn python-global-cache-root
+  []
+  (list '. '(globals) ["__xtalk_cache__"]))
+
+(defn python-global-cache-bucket
+  [cache]
+  (list '. (python-global-cache-root) [(python-cache-name cache)]))
+
+(defn python-tf-x-cache
+  ([[_ name]]
+   (template/$ (do (var g (globals))
+                   (if (not (. g (get "__xtalk_cache__")))
+                     (:= (. g ["__xtalk_cache__"]) {}))
+                   (if (not (. (. g ["__xtalk_cache__"]) (get ~name)))
+                     (:= (. (. g ["__xtalk_cache__"]) [~name]) {}))
+                   (return ~name)))))
+
+(defn python-tf-x-cache-list
+  ([[_ cache]]
+   (template/$ (do (var g (globals))
+                   (if (not (. g (get "__xtalk_cache__")))
+                     (:= (. g ["__xtalk_cache__"]) {}))
+                   (if (not (. (. g ["__xtalk_cache__"]) (get ~(python-cache-name cache))))
+                     (:= (. (. g ["__xtalk_cache__"]) [~(python-cache-name cache)]) {}))
+                   (return (list (. ~(python-global-cache-bucket cache) (keys))))))))
+
+(defn python-tf-x-cache-flush
+  ([[_ cache]]
+   (template/$ (do (var g (globals))
+                   (if (not (. g (get "__xtalk_cache__")))
+                     (:= (. g ["__xtalk_cache__"]) {}))
+                   (:= (. (. g ["__xtalk_cache__"]) [~(python-cache-name cache)]) {})
+                   (return ~(python-global-cache-bucket cache))))))
+
+(defn python-tf-x-cache-get
+  ([[_ cache key]]
+   (template/$ (do (var g (globals))
+                   (if (not (. g (get "__xtalk_cache__")))
+                     (:= (. g ["__xtalk_cache__"]) {}))
+                   (if (not (. (. g ["__xtalk_cache__"]) (get ~(python-cache-name cache))))
+                     (:= (. (. g ["__xtalk_cache__"]) [~(python-cache-name cache)]) {}))
+                   (return (. ~(python-global-cache-bucket cache) (get ~key)))))))
+
+(defn python-tf-x-cache-set
+  ([[_ cache key val]]
+   (template/$ (do (var g (globals))
+                   (if (not (. g (get "__xtalk_cache__")))
+                     (:= (. g ["__xtalk_cache__"]) {}))
+                   (if (not (. (. g ["__xtalk_cache__"]) (get ~(python-cache-name cache))))
+                     (:= (. (. g ["__xtalk_cache__"]) [~(python-cache-name cache)]) {}))
+                   (:= (. ~(python-global-cache-bucket cache) [~key]) ~val)
+                   (return ~val)))))
+
+(defn python-tf-x-cache-del
+  ([[_ cache key]]
+   (template/$ (do (var g (globals))
+                   (if (not (. g (get "__xtalk_cache__")))
+                     (:= (. g ["__xtalk_cache__"]) {}))
+                   (if (not (. (. g ["__xtalk_cache__"]) (get ~(python-cache-name cache))))
+                     (:= (. (. g ["__xtalk_cache__"]) [~(python-cache-name cache)]) {}))
+                   (. ~(python-global-cache-bucket cache) (pop ~key nil))
+                   (return true)))))
+
+(defn python-tf-x-cache-incr
+  ([[_ cache key amount]]
+   (template/$ (do (var g (globals))
+                   (if (not (. g (get "__xtalk_cache__")))
+                     (:= (. g ["__xtalk_cache__"]) {}))
+                   (if (not (. (. g ["__xtalk_cache__"]) (get ~(python-cache-name cache))))
+                     (:= (. (. g ["__xtalk_cache__"]) [~(python-cache-name cache)]) {}))
+                   (var prev (or (. ~(python-global-cache-bucket cache) (get ~key))
+                                 0))
+                   (var curr (+ prev ~amount))
+                   (:= (. ~(python-global-cache-bucket cache) [~key]) curr)
+                   (return curr)))))
+
+(def +python-cache+
+  {:x-cache                 {:macro #'python-tf-x-cache        :emit :macro}
+   :x-cache-list            {:macro #'python-tf-x-cache-list   :emit :macro}
+   :x-cache-flush           {:macro #'python-tf-x-cache-flush  :emit :macro}
+   :x-cache-get             {:macro #'python-tf-x-cache-get    :emit :macro}
+   :x-cache-set             {:macro #'python-tf-x-cache-set    :emit :macro}
+   :x-cache-del             {:macro #'python-tf-x-cache-del    :emit :macro}
+   :x-cache-incr            {:macro #'python-tf-x-cache-incr   :emit :macro}})
+
+;;
 ;; ASYNC
 ;;
 
@@ -657,10 +811,11 @@
 (defn python-tf-x-thread-spawn
   ([[_ thunk]]
    (with-meta
-     (template/$ (do (var threading  (__import__ "threading"))
-              (var thread := (threading.Thread :target ~thunk))
-              (. thread (start))))
-     {:assign/template 'thread})))
+      (template/$ (do (var threading  (__import__ "threading"))
+               (var thread := (threading.Thread :target ~thunk))
+               (. thread (start))
+               (return thread)))
+      {:assign/template 'thread})))
 
 (defn python-tf-x-thread-join
   ([[_ thread]]
@@ -668,11 +823,12 @@
 
 (defn python-tf-x-with-delay
   ([[_ thunk ms]]
-   (template/$ (x:thread-spawn
-         (fn []
-           (return [(. (__import__ "time")
-                       (sleep (/ ~ms 1000)))
-                    ('(~thunk))]))))))
+   (template/$ (do (fn delay_target []
+                     (. (__import__ "time")
+                        (sleep (/ ~ms 1000)))
+                     (var f := ~thunk)
+                     (return (f)))
+                   (x:thread-spawn delay_target)))))
 
 (def +python-thread+
   {:x-thread-spawn   {:macro #'python-tf-x-thread-spawn  :emit :macro   :type :template}
@@ -715,6 +871,7 @@
 
 (def +python+
   (merge +python-core+
+         +python-proto+
          +python-global+
          +python-custom+
          +python-math+
@@ -727,6 +884,7 @@
          +python-return+
          +python-socket+
          +python-iter+
+         +python-cache+
          +python-thread+
          +python-file+
          +python-b64+))

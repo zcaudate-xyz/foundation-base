@@ -2,8 +2,8 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-runtime :as rt :with [defvar.xt]]
-             [xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-runtime :as rt :with [defvar.xt]]
+             [xt.lang.common-spec :as xt]
              [xt.cell.kernel :as kernel]
              [xt.cell.kernel.base-link-local :as base-link-local]
              [xt.cell.kernel.worker-local :as worker-local]
@@ -29,7 +29,7 @@
   "stores the current worker service registry"
   {:added "4.0"}
   [service]
-  (x:global-set __CELL_SERVICE service)
+  (xt/x:global-set __CELL_SERVICE service)
   (return (!:G __CELL_SERVICE)))
 
 (defn.xt ^{:cell/action "@cell/get-service"
@@ -38,7 +38,7 @@
   "gets the current worker service registry"
   {:added "4.0"}
   []
-  (return (:? (x:global-has? __CELL_SERVICE)
+  (return (:? (xt/x:global-has? __CELL_SERVICE)
               (!:G __CELL_SERVICE)
               nil)))
 
@@ -48,7 +48,7 @@
   "stores the current worker bindings registry"
   {:added "4.0"}
   [bindings]
-  (x:global-set __CELL_BINDINGS bindings)
+  (xt/x:global-set __CELL_BINDINGS bindings)
   (return (!:G __CELL_BINDINGS)))
 
 (defn.xt ^{:cell/action "@cell/get-bindings"
@@ -57,7 +57,7 @@
   "gets the current worker bindings registry"
   {:added "4.0"}
   []
-  (return (:? (x:global-has? __CELL_BINDINGS)
+  (return (:? (xt/x:global-has? __CELL_BINDINGS)
               (!:G __CELL_BINDINGS)
               {})))
 
@@ -88,14 +88,14 @@
   "returns worker baseline actions with js.cell setup helpers"
   {:added "4.0"}
   []
-  (return (k/obj-assign (worker-local/actions-baseline)
+  (return (xt/x:obj-assign (worker-local/actions-baseline)
                         (-/actions-cell))))
 
 (defn.xt actions-init
   "initialises worker baseline actions with js.cell setup helpers"
   {:added "4.0"}
   [actions worker]
-  (return (worker-local/actions-init (k/obj-assign (-/actions-cell)
+  (return (worker-local/actions-init (xt/x:obj-assign (-/actions-cell)
                                                    (or actions {}))
                                      worker)))
 

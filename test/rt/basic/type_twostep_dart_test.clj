@@ -34,7 +34,7 @@
          (-/add-20 10))
      
       (!.dt
-        (+ 3 (lib/len "hello")))]
+        (+ 3 (xt/x:len "hello")))]
     :dart-unavailable)
   => (any [6 16 36 30 8]
           :dart-unavailable))

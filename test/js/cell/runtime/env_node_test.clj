@@ -2,15 +2,15 @@
   (:require [js.cell.runtime.emit :as emit]
             [std.lang :as l]
             [std.lib.template :as template]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
-             [js.cell.kernel :as cl]
-             [js.cell.runtime.env-node :as env-node]
+   :require [[xt.lang.common-spec :as xt]
+              [xt.lang.common-repl :as repl]
+              [js.cell.kernel :as cl]
+              [js.cell.runtime.env-node :as env-node]
              [js.cell.runtime.link :as runtime-link]]})
 
 (fact:global
@@ -32,7 +32,7 @@
 (fact "creates a Node worker adapter"
   ^:hidden
   (!.js
-   (k/obj-keys (env-node/make-node-worker)))
+   (xt/x:obj-keys (env-node/make-node-worker)))
   => (contains ["postMessage" "addEventListener"]))
 
 ^{:refer js.cell.runtime.env-node/init-worker :added "4.1"}
@@ -45,8 +45,8 @@
                 :addEventListener (fn [event listener capture]
                                     (worker.listeners.push listener))})
    (env-node/init-worker worker)
-   (return {"listeners" (k/len worker.listeners)
-            "message" (k/first messages)}))
+   (return {"listeners" (xt/x:len worker.listeners)
+            "message" (xt/x:first messages)}))
   => (contains-in {"listeners" 1
                    "message" {"signal" "@worker/::INIT"
                               "body" {"done" true}}}))

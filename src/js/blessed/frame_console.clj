@@ -2,14 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :as k]
-             [js.core :as j]
-             [js.lib.valtio :as v]
-             [js.react :as r]
-             [js.blessed :as b]
-             [js.blessed.ui-style :as ui-style]
-             [js.blessed.ui-group :as ui-group]
-             [js.blessed.ui-core :as ui-core]]})
+  {:require [[xt.lang.common-lib :as k] [js.core :as j] [js.lib.valtio :as v] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style] [js.blessed.ui-group :as ui-group] [js.blessed.ui-core :as ui-core] [xt.lang.common-data :as xtd] [xt.lang.common-spec :as xt] [xt.lang.common-sort-by :as xtsb]]})
 
 (defn.js ConsoleMain
   "creates a primary frame-console button"
@@ -22,9 +15,9 @@
       (:= setShow (fn:>))
       (:= screens [])
       (:.. rprops)]}]
-  (var data (k/sort (k/obj-keys screens)))
-  (var target (or (k/get-key screens current)
-                  (k/get-key screens (k/first data))))
+  (var data (xtsb/sort-by (xtd/obj-keys screens) [k/identity]))
+  (var target (or (xt/x:get-key screens current)
+                  (xt/x:get-key screens (xtd/first data))))
   (return [:box {:height height
                  :bg "black"}
            [:% ui-core/SmallButton
@@ -73,4 +66,3 @@
   (return
    (:? show [:box #{[height (:.. rprops)]}
              [:% -/ConsoleMain #{current height screens setCurrent setHeight setShow show}]])))
-

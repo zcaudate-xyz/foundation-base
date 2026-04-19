@@ -3,9 +3,7 @@
             [xt.sys.conn-dbsql :as dbsql]))
 
 (l/script :lua
-  {:require [[xt.lang.base-lib :as k]
-             [xt.lang.base-runtime :as rt]]
-   :import [["pgmoon" :as ngxpg]]})
+  {:import [["pgmoon" :as ngxpg]] :require [[xt.lang.common-lib :as k] [xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-runtime :as rt]]})
 
 (defn.lua default-env
   "gets the default env"
@@ -23,7 +21,7 @@
   "sets the default env"
   {:added "4.0"}
   [m]
-  (var env (k/obj-assign (k/obj-clone (-/default-env)) m))
+  (var env (xtd/obj-assign (xtd/obj-clone (-/default-env)) m))
   (rt/xt-config-set "lua.nginx.driver-postgres" env)
   (return env))
 
@@ -82,11 +80,11 @@
    
    (local #{detail} fields)
 
-   (pcall (fn []
-            (k/set-key output "query" query)
-            (if detail
-              (k/obj-assign output (cjson.decode detail)))))
-   (return output)))
+    (pcall (fn []
+             (xt/x:set-key output "query" query)
+             (if detail
+               (xtd/obj-assign output (cjson.decode detail)))))
+    (return output)))
 
 (defn.lua raw-query
   "creates a raw-query"
@@ -97,18 +95,18 @@
   
   (when (not= 1 err)
     (return false err))
-  (:= ret (:? (k/arr? ret) (k/first ret) ret))
+  (:= ret (:? (k/is-array? ret) (xtd/first ret) ret))
   (local val (:? (k/is-boolean? ret)
                  ret
-                 (k/obj-first-val (or ret {}))))
+                 (xtd/obj-first-val (or ret {}))))
   (return val))
 
 (defn.lua connect-constructor
   "connects to postgres"
   {:added "4.0"}
   [m]
-  (local env (k/obj-assign (k/obj-clone (-/default-env))
-                           m))
+  (local env (xtd/obj-assign (xtd/obj-clone (-/default-env))
+                            m))
   (local conn (ngxpg.new env))
   (local opts {})
   (:= (. conn
@@ -132,7 +130,7 @@
         (return (. conn (disconnect)))))
   (:= (. conn ["::query"])
       (fn [query]
-        (k/set-key opts "query" query)
+        (xt/x:set-key opts "query" query)
         (return (-/raw-query conn query))))
   (return conn))
 

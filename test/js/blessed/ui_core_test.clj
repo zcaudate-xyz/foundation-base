@@ -3,14 +3,7 @@
   (:use code.test))
 
 (l/script :js
-  {:require  [[js.react :as r :include [:fn]]
-              [js.core :as j :include [:node :util]]
-              [js.lib.valtio :as v]
-              [js.blessed.ui-core :as ui-core]
-              [js.blessed :as b :include [:fn]]
-              [js.lib.chalk :as chk]
-              [xt.lang.base-lib :as k]]
-   :export  [MODULE]})
+  {:export [MODULE] :require [[js.react :as r :include [:fn]] [js.core :as j :include [:node :util]] [js.lib.valtio :as v] [js.blessed.ui-core :as ui-core] [js.blessed :as b :include [:fn]] [js.lib.chalk :as chk] [xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.common-string :as str]]})
 
 (defn.js boolText
   "gets the text for true or false"
@@ -350,18 +343,18 @@
 (fact "Displays text as content"
   ^:hidden
   
-  (defn.js TextDisplayDemo
-    []
-    (var content (r/const
-                  (k/join "\n"
-                          (k/arr-repeat
-                           (k/join " "
-                                   (k/arr-repeat "ABC"
-                                                 10))
-                           10))))
-    (return
-     [:% ui-core/Enclosed
-      {:label "ui-core/TextDisplay"}
+   (defn.js TextDisplayDemo
+     []
+     (var content (r/const
+                  (str/join "\n"
+                            (xtd/arr-repeat
+                             (str/join " "
+                                       (xtd/arr-repeat "ABC"
+                                                       10))
+                             10))))
+     (return
+      [:% ui-core/Enclosed
+       {:label "ui-core/TextDisplay"}
       [:% ui-core/TextDisplay
        {:top 2
         :height 3

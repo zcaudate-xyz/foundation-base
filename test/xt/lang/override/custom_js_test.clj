@@ -7,8 +7,7 @@
   {:runtime :oneshot
    :config  {:program :nodejs}
    :layout :full
-   :require [[xt.lang :as k]
-             [xt.lang.base-lib :as lib :include [:fn]]]})
+   :require [[xt.lang :as k]]})
 
 ^{:refer xt.lang.override.custom-js/pad-left :added "4.0"}
 (fact "override for pad left"
@@ -42,8 +41,12 @@
   ^:hidden
   
   (!.js
-   [(k/arr-every [1 2 3] lib/odd?)
-    (k/arr-every [1 3] lib/odd?)])
+   [(k/arr-every [1 2 3] (fn [e]
+                           (return (or (== e 1)
+                                       (== e 3)))))
+     (k/arr-every [1 3] (fn [e]
+                          (return (or (== e 1)
+                                      (== e 3)))))])
   => [false true])
 
 ^{:refer xt.lang.override.custom-js/arr-some :added "4.0"}
@@ -51,8 +54,10 @@
   ^:hidden
   
   (!.js
-   [(k/arr-some [1 2 3] lib/even?)
-    (k/arr-some [1 3] lib/even?)])
+   [(k/arr-some [1 2 3] (fn [e]
+                          (return (== e 2))))
+     (k/arr-some [1 3] (fn [e]
+                         (return (== e 2))))])
   => [true false])
 
 ^{:refer xt.lang.override.custom-js/arr-foldl :added "4.0"}
@@ -60,7 +65,10 @@
   ^:hidden
   
   (!.js
-   (k/arr-foldl [1 2 3 4 5] lib/add 0))
+   (k/arr-foldl [1 2 3 4 5]
+                (fn [acc e]
+                  (return (+ acc e)))
+                0))
   => 15)
 
 ^{:refer xt.lang.override.custom-js/arr-foldr :added "4.0"}
@@ -68,7 +76,9 @@
   ^:hidden
   
   (!.js
-   (k/arr-foldr [1 2 3 4 5] lib/step-push []))
+   (k/arr-foldr [1 2 3 4 5]
+                (fn [acc e]
+                  (x:arr-push acc e)
+                  (return acc))
+                []))
   => [5 4 3 2 1])
-
-

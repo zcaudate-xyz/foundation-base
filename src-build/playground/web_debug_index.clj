@@ -16,8 +16,8 @@
              [js.react-native :as n :include [:fn]]
              [js.react.helper-data :as helper]
              [js.lib.rn-expo :as x :include [:lib]]
-             [xt.lang.base-lib :as k]
-             [xt.lang.base-client :as client]
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-client :as client]
              [xt.lang.event-box :as base-box]]
    :static {:export MODULE}})
 

@@ -3,8 +3,8 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]
-             [xt.lang.base-iter :as it]
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-iter :as it]
              [xt.runtime.common-hash :as common-hash]
              [xt.runtime.interface-common :as interface-common]]})
 
@@ -70,14 +70,16 @@
   [coll]
   (var s    (-/start-string coll))
   (var sep  (-/sep-string coll))
-  (it/for:iter [e (. coll (to-iter))]
-    
-    (:= s (k/cat s
-                 (interface-common/show e)
-                 sep)))
-  (return (k/cat (k/substring s 0 (- (k/len s)
-                                     (k/len sep)))
-                 (-/end-string coll))))
+  (if (== 0 (-/coll-size coll))
+    (return (xt/x:cat s
+                      (-/end-string coll)))
+    (do (xt/for:iter [e (. coll (to-iter))]
+          (:= s (xt/x:cat s
+                          (interface-common/show e)
+                          sep)))
+        (return (xt/x:cat (xt/x:str-substring s 0 (- (xt/x:len s)
+                                                     (xt/x:len sep)))
+                          (-/end-string coll))))))
 
 (defn.xt coll-into-iter
   "TODO"
@@ -98,7 +100,7 @@
   [coll arr]
   (var mutable (interface-common/is-mutable? coll))
   (var ncoll
-       (k/arr-foldl arr
+       (xt/x:arr-foldl arr
                     interface-common/push-mutable
                     (interface-common/to-mutable coll)))
   (if mutable
@@ -109,11 +111,13 @@
   "TODO"
   {:added "4.0"}
   [o1 o2]
-  )
+  (return
+   (it/iter-eq (. o1 (to-iter))
+               (. o2 (to-iter))
+               interface-common/eq)))
 
 
 (def.xt IColl
   ["start_string"
    "end_string"
    "sep_string"])
-

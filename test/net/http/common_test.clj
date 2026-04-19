@@ -21,4 +21,6 @@
   => {:a 1})
 
 ^{:refer net.http.common/-create-server :added "0.5"}
-(fact "multimethod entrypoint for server construction")
+(fact "multimethod entrypoint for server construction"
+  -create-server
+  => clojure.lang.MultiFn)

@@ -1,25 +1,27 @@
 (ns js.lib.rn-async-storage-test
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
    :require [[js.lib.rn-async-storage :as store]
              [js.core :as j]
-             [xt.lang.base-repl :as repl]]})
+             [xt.lang.common-repl :as repl]]})
 
 (fact:global
- {:setup    [(l/rt:restart)
-             (l/rt:scaffold :js)
-             (notify/wait-on :js
-               (:= (!:G window)  (require "window"))
-               (:= LocalStorage  (. (require "node-localstorage")
-                                    LocalStorage))
-               (j/assign (!:G window)
-                         {:localStorage (new LocalStorage ".localstorage")})
-               (repl/notify true))]
-  :teardown [(l/rt:stop)]})
+  {:setup    [(l/rt:restart)
+              (l/rt:scaffold :js)
+              (notify/wait-on :js
+                (:= (!:G window)  (require "window"))
+                (var LocalStorageCtor
+                     (. (require "node-localstorage")
+                        LocalStorage))
+                (j/assign (!:G window)
+                          {:localStorage (new LocalStorageCtor
+                                             ".localstorage")})
+                (repl/notify true))]
+   :teardown [(l/rt:stop)]})
 
 
 ^{:refer js.lib.rn-async-storage/getJSON :added "4.0" :unchecked true

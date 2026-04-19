@@ -1,26 +1,40 @@
 (ns xt.lang.event-route-test
   (:require [std.json :as json]
             [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-spec :as xt]
              [xt.lang.event-route :as route]
-             [xt.lang.base-repl :as repl]]})
+             [xt.lang.common-repl :as repl]]})
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-spec :as xt]
              [xt.lang.event-route :as route]
-             [xt.lang.base-repl :as repl]]})
+             [xt.lang.common-repl :as repl]]})
 
 (l/script- :python
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
+    :require [[xt.lang.common-lib :as k]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.event-route :as route]
+              [xt.lang.common-repl :as repl]]})
+
+(l/script- :dart
+  {:runtime :twostep
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-spec :as xt]
              [xt.lang.event-route :as route]
-             [xt.lang.base-repl :as repl]]})
+             [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -49,10 +63,15 @@
       {"params" {"{}" {"id" "1"}}, "path" {}}
       {"params" {}, "path" ["hello"]}]
   
+  ^{:lang-exceptions
+    {:dart {:expect [{"params" {"[\"hello\",\"world\"]" {"id" "1", "type" "name"}},
+                      "path" ["hello" "world"]}
+                     {"params" {"[]" {"id" "1"}}, "path" []}
+                     {"params" {}, "path" ["hello"]}]}}}
   (!.py
-   [(route/interim-from-url "hello/world?id=1&type=name")
-    (route/interim-from-url "?id=1")
-    (route/interim-from-url "hello?")])
+    [(route/interim-from-url "hello/world?id=1&type=name")
+     (route/interim-from-url "?id=1")
+     (route/interim-from-url "hello?")])
   => [{"params" {"[\"hello\", \"world\"]" {"id" "1", "type" "name"}},
        "path" ["hello" "world"]}
       {"params" {"[]" {"id" "1"}}, "path" []}
@@ -67,21 +86,21 @@
   ^:hidden
   
   (!.js
-   [(route/interim-to-url {"params" {(k/json-encode ["hello" "world"])
+   [(route/interim-to-url {"params" {(xt/x:json-encode ["hello" "world"])
                                      {"id" "1", "type" "name"}}, "path" ["hello" "world"]})
     (route/interim-to-url {"params" {"[]" {"id" "1"}}, "path" []})
     (route/interim-to-url {"params" {}, "path" ["hello"]})])
   => ["hello/world?id=1&type=name" "?id=1" "hello"]
 
   (!.lua
-   [(route/interim-to-url {"params" {(k/json-encode ["hello" "world"])
+   [(route/interim-to-url {"params" {(xt/x:json-encode ["hello" "world"])
                                      {"type" "name"}}, "path" ["hello" "world"]})
     (route/interim-to-url {"params" {"{}" {"id" "1"}}, "path" []})
     (route/interim-to-url {"params" {}, "path" ["hello"]})])
   => ["hello/world?type=name" "?id=1" "hello"]
 
   (!.py
-   [(route/interim-to-url {"params" {(k/json-encode ["hello" "world"])
+   [(route/interim-to-url {"params" {(xt/x:json-encode ["hello" "world"])
                                      {"id" "1", "type" "name"}}, "path" ["hello" "world"]})
     (route/interim-to-url {"params" {"[]" {"id" "1"}}, "path" []})
     (route/interim-to-url {"params" {}, "path" ["hello"]})])
@@ -91,6 +110,8 @@
 (fact "turns a path to tree"
   ^:hidden
   
+  ^{:lang-exceptions
+    {:dart {:form (route/path-to-tree ["hello" "world"] false)}}}
   (!.js
    (route/path-to-tree ["hello" "world"]))
   => {"[]" "hello", "[\"hello\"]" "world"}
@@ -115,6 +136,21 @@
 (fact "converts interim to tree"
   ^:hidden
   
+  ^{:lang-exceptions
+    {:dart
+     {:form [(route/interim-to-tree
+              {"params" {"[]" {"id" "1", "type" "name"}}, "path" ["hello" "world"]}
+              false)
+             (route/interim-to-tree
+              {"params" {"[]" {"id" "1", "type" "name"}}, "path" ["hello" "world"]}
+              true)]
+      :expect [{"params" {"[]" {"id" "1", "type" "name"}},
+                "[]" "hello",
+                "[\"hello\"]" "world"}
+               {"params" {"[]" {"id" "1", "type" "name"}},
+                "[]" "hello",
+                "[\"hello\",\"world\"]" nil,
+                "[\"hello\"]" "world"}]}}}
   (!.js
    [(route/interim-to-tree
      {"params" {"[]" {"id" "1", "type" "name"}}, "path" ["hello" "world"]})
@@ -136,10 +172,18 @@
        "{}" "hello",
        "[\"hello\"]" "world"}]
   
+  ^{:lang-exceptions
+    {:dart {:expect [{"params" {"[]" {"id" "1", "type" "name"}},
+                      "[]" "hello",
+                      "[\"hello\"]" "world"}
+                     {"params" {"[]" {"id" "1", "type" "name"}},
+                      "[]" "hello",
+                      "[\"hello\",\"world\"]" nil,
+                      "[\"hello\"]" "world"}]}}}
   (!.py
-   [(route/interim-to-tree
-     {"params" {"[]" {"id" "1", "type" "name"}}, "path" ["hello" "world"]}
-     false)
+    [(route/interim-to-tree
+      {"params" {"[]" {"id" "1", "type" "name"}}, "path" ["hello" "world"]}
+      false)
     (route/interim-to-tree
      {"params" {"[]" {"id" "1", "type" "name"}}, "path" ["hello" "world"]}
      true)])
@@ -224,6 +268,14 @@
 (fact "gets diff between params"
   ^:hidden
   
+  ^{:lang-exceptions
+    {:dart
+     {:form [(route/changed-params {:params {"[]" {"id" "1", "type" "name"}}}
+                                   {:params {"[]" {"id" "1", "type" "hello"}}}
+                                   [])
+             (route/changed-params {:params {"[]" {"id" "1", "type" "name"}}}
+                                   {:params {"[]" {"type" "hello"}}}
+                                   [])]}}}
   (!.js
    [(route/changed-params {:params {"[]" {"id" "1", "type" "name"}}}
                           {:params {"[]" {"id" "1", "type" "hello"}}})
@@ -372,9 +424,14 @@
 (fact "gets the param value"
   ^:hidden
   
+  ^{:lang-exceptions
+    {:dart
+     {:form (route/get-param (route/make-route "hello?auth=sign_in")
+                             "auth"
+                             nil)}}}
   (!.js
    (route/get-param (route/make-route "hello?auth=sign_in")
-                    "auth"))
+                     "auth"))
   => "sign_in"
 
   (!.lua
@@ -436,19 +493,29 @@
 (fact "adds a url listener"
   ^:hidden
   
+  ^{:lang-exceptions
+    {:dart
+     {:form (do
+              (var r (route/make-route "hello"))
+              (xtd/tree-get-data (route/add-url-listener r "a1" (fn:>) nil)))}}}
   (!.js
    (var r (route/make-route "hello"))
-   (k/get-data (route/add-url-listener r "a1" (fn:>))))
+   (xtd/tree-get-data (route/add-url-listener r "a1" (fn:>))))
   => +out+
 
+  ^{:lang-exceptions
+    {:dart
+     {:form (do
+              (var r (route/make-route "hello"))
+              (xtd/tree-get-data (route/add-url-listener r "a1" (fn:>) nil)))}}}
   (!.js
    (var r (route/make-route "hello"))
-   (k/get-data (route/add-url-listener r "a1" (fn:>))))
+   (xtd/tree-get-data (route/add-url-listener r "a1" (fn:>))))
   => +out+
 
   (!.py
    (var r (route/make-route "hello"))
-   (k/get-data (route/add-url-listener r "a1" (fn:>) nil)))
+   (xtd/tree-get-data (route/add-url-listener r "a1" (fn:>) nil)))
   => +out+)
 
 ^{:refer xt.lang.event-route/add-path-listener :added "4.0"
@@ -462,19 +529,39 @@
 (fact "adds a path listener"
   ^:hidden
   
+  ^{:lang-exceptions
+    {:lua {:expect {"callback" "<function>",
+                    "pred" "<function>",
+                    "meta" {"listener/id" "a1",
+                            "route/path" {},
+                            "listener/type" "route.path"}}}
+     :dart {:form (do
+                     (var r (route/make-route "hello"))
+                     (xtd/tree-get-data
+                      (route/add-path-listener r [] "a1" (fn:>) nil)))}}}
   (!.js
    (var r (route/make-route "hello"))
-   (k/get-data (route/add-path-listener r [] "a1" (fn:>))))
+   (xtd/tree-get-data (route/add-path-listener r [] "a1" (fn:>))))
   => +out+
 
+  ^{:lang-exceptions
+    {:lua {:expect {"callback" "<function>",
+                    "pred" "<function>",
+                    "meta" {"listener/id" "a1",
+                            "route/path" {},
+                            "listener/type" "route.path"}}}
+     :dart {:form (do
+                     (var r (route/make-route "hello"))
+                     (xtd/tree-get-data
+                      (route/add-path-listener r [] "a1" (fn:>) nil)))}}}
   (!.js
    (var r (route/make-route "hello"))
-   (k/get-data (route/add-path-listener r [] "a1" (fn:>))))
+   (xtd/tree-get-data (route/add-path-listener r [] "a1" (fn:>))))
   => +out+
 
   (!.py
    (var r (route/make-route "hello"))
-   (k/get-data (route/add-path-listener r [] "a1" (fn:>) nil)))
+   (xtd/tree-get-data (route/add-path-listener r [] "a1" (fn:>) nil)))
   => +out+)
 
 ^{:refer xt.lang.event-route/add-param-listener :added "4.0"
@@ -488,19 +575,25 @@
 (fact "adds a param listener"
   ^:hidden
 
+  ^{:lang-exceptions
+    {:dart
+     {:form (do
+              (var r (route/make-route "hello"))
+              (xtd/tree-get-data
+               (route/add-param-listener r "auth" "a1" (fn:>) nil)))}}}
   (!.js
    (var r (route/make-route "hello"))
-   (k/get-data (route/add-param-listener r "auth" "a1" (fn:>))))
+   (xtd/tree-get-data (route/add-param-listener r "auth" "a1" (fn:>))))
   => +out+
 
   (!.lua
    (var r (route/make-route "hello"))
-   (k/get-data (route/add-param-listener r "auth" "a1" (fn:>))))
+   (xtd/tree-get-data (route/add-param-listener r "auth" "a1" (fn:>))))
   => +out+
 
   (!.py
    (var r (route/make-route "hello"))
-   (k/get-data (route/add-param-listener r "auth" "a1" (fn:>) nil)))
+   (xtd/tree-get-data (route/add-param-listener r "auth" "a1" (fn:>) nil)))
   => +out+)
 
 ^{:refer xt.lang.event-route/add-full-listener :added "4.0"
@@ -515,19 +608,25 @@
 (fact "adds a full listener"
   ^:hidden
   
+  ^{:lang-exceptions
+    {:dart
+     {:form (do
+              (var r (route/make-route "hello"))
+              (xtd/tree-get-data
+               (route/add-full-listener r ["hello"] "auth" "a1" (fn:>) nil)))}}}
   (!.js
    (var r (route/make-route "hello"))
-   (k/get-data (route/add-full-listener r ["hello"] "auth" "a1" (fn:>))))
+   (xtd/tree-get-data (route/add-full-listener r ["hello"] "auth" "a1" (fn:>))))
   => +out+
 
   (!.lua
    (var r (route/make-route "hello"))
-   (k/get-data (route/add-full-listener r ["hello"] "auth" "a1" (fn:>))))
+   (xtd/tree-get-data (route/add-full-listener r ["hello"] "auth" "a1" (fn:>))))
   => +out+
 
   (!.py
    (var r (route/make-route "hello"))
-   (k/get-data (route/add-full-listener r ["hello"] "auth" "a1" (fn:>) nil)))
+   (xtd/tree-get-data (route/add-full-listener r ["hello"] "auth" "a1" (fn:>) nil)))
   => +out+)
 
 ^{:refer xt.lang.event-route/set-url :added "4.0"
@@ -542,11 +641,39 @@
 (fact "sets the url for a route"
   ^:hidden
     
-  [(notify/wait-on :js
-     (var r (route/make-route "hello"))
-     (route/add-path-listener r ["hello"] "a1"
-                              (repl/>notify))
-     (route/set-url r "hello/world"))]
+  ^{:lang-exceptions
+    {:dart
+     {:form [(notify/wait-on-call
+              2000
+              (fn []
+                (!.dt
+                 (var r (route/make-route "hello"))
+                 (route/add-path-listener
+                  r ["hello"] "a1"
+                  (fn [val]
+                    (return {"::" "notify.task"
+                             "task" (repl/notify-socket
+                                     "127.0.0.1"
+                                     (@! (:socket-port (l/default-notify)))
+                                     val
+                                     (@! notify/*override-id*)
+                                     nil
+                                     {})}))
+                  nil)
+                 (route/set-url r "hello/world" nil))))]
+      :expect [{"params" {},
+                "path" {"[\"hello\"]" true},
+                "type" "route.url",
+                "meta"
+                {"listener/id" "a1",
+                 "route/path" ["hello"],
+                 "listener/type" "route.path"}}]}}}
+  [
+   (notify/wait-on :js
+        (var r (route/make-route "hello"))
+        (route/add-path-listener r ["hello"] "a1"
+                                 (repl/>notify))
+       (route/set-url r "hello/world"))]
   [{"params" {},
     "path" {"[\"hello\"]" true},
     "type" "route.url",
@@ -555,6 +682,7 @@
      "route/path" ["hello"],
      "listener/type" "route.path"}}]
   
+  ^{:lang-exceptions {:dart {:skip true}}}
   (notify/wait-on :lua
     (var r (route/make-route "hello"))
     (route/add-path-listener r ["hello"] "a1"
@@ -574,15 +702,41 @@
 (fact "sets the path and param"
   ^:hidden
   
-  [(notify/wait-on :js
+   ^{:lang-exceptions
+      {:dart
+       {:form [(notify/wait-on-call
+                2000
+                (fn []
+                  (!.dt
+                   (var r (route/make-route "hello"))
+                   (route/add-path-listener
+                    r ["hello"] "a1"
+                    (fn [val]
+                      (return {"::" "notify.task"
+                               "task" (repl/notify-socket
+                                       "127.0.0.1"
+                                       (@! (:socket-port (l/default-notify)))
+                                       val
+                                       (@! notify/*override-id*)
+                                       nil
+                                       {})}))
+                    nil)
+                   (route/set-path r ["hello" "world"] nil))))
+               (!.dt
+                (var r (route/make-route "hello"))
+                (route/set-path r ["hello" "world"] nil)
+                [(route/get-url r) r])]}
+      }} 
+   [
+     (notify/wait-on :js
+         (var r (route/make-route "hello"))
+         (route/add-path-listener r ["hello"] "a1"
+                                  (repl/>notify))
+        (route/set-path r ["hello" "world"] nil))
+    (!.js
      (var r (route/make-route "hello"))
-     (route/add-path-listener r ["hello"] "a1"
-                              (repl/>notify))
-     (route/set-path r ["hello" "world"]))
-   (!.js
-    (var r (route/make-route "hello"))
-    (route/set-path r ["hello" "world"])
-    [(route/get-url r) r])]
+     (route/set-path r ["hello" "world"] nil)
+     [(route/get-url r) r])]
   => [+out+
       ["hello/world"
        {"::" "event.route",
@@ -594,12 +748,32 @@
         "history" ["hello/world"],
         "listeners" {}}]]
 
-  (notify/wait-on :lua
-    (var r (route/make-route "hello"))
+   (notify/wait-on :lua
+     (var r (route/make-route "hello"))
     (route/add-path-listener r ["hello"] "a1"
                              (repl/>notify))
-    (route/set-path r ["hello" "world"]))
-  => +out+)
+    (route/set-path r ["hello" "world"] nil))
+  => +out+
+
+   [(notify/wait-on :python
+       (var r (route/make-route "hello"))
+       (route/add-path-listener r ["hello"] "a1"
+                                (repl/>notify))
+       (route/set-path r ["hello" "world"] nil))
+    (!.py
+     (var r (route/make-route "hello"))
+     (route/set-path r ["hello" "world"] nil)
+     [(route/get-url r) r])]
+  => [+out+
+      ["hello/world"
+       {"::" "event.route",
+        "tree"
+        {"params" {},
+         "[]" "hello",
+         "[\"hello\", \"world\"]" nil,
+         "[\"hello\"]" "world"},
+        "history" ["hello/world"],
+        "listeners" {}}]])
 
 ^{:refer xt.lang.event-route/set-segment :added "4.0"
   :setup [(def +out+
@@ -613,11 +787,37 @@
 (fact "sets the current segment"
   ^:hidden
   
-  [(notify/wait-on :js
-     (var r (route/make-route "hello"))
-     (route/add-path-listener r ["hello"] "a1"
-                              (repl/>notify))
-     (route/set-segment r ["hello"] "world"))
+  ^{:lang-exceptions
+    {:dart
+     {:form [(notify/wait-on-call
+              2000
+              (fn []
+                (!.dt
+                 (var r (route/make-route "hello"))
+                 (route/add-path-listener
+                  r ["hello"] "a1"
+                  (fn [val]
+                    (return {"::" "notify.task"
+                             "task" (repl/notify-socket
+                                     "127.0.0.1"
+                                     (@! (:socket-port (l/default-notify)))
+                                     val
+                                     (@! notify/*override-id*)
+                                     nil
+                                     {})}))
+                  nil)
+                 (route/set-segment r ["hello"] "world"))))
+             (!.dt
+              (var r (route/make-route "hello"))
+              (route/set-segment r ["hello"] "world")
+              [(route/get-url r) r])]}
+    }}
+  [
+   (notify/wait-on :js
+        (var r (route/make-route "hello"))
+        (route/add-path-listener r ["hello"] "a1"
+                                 (repl/>notify))
+       (route/set-segment r ["hello"] "world"))
    (!.js
     (var r (route/make-route "hello"))
     (route/set-segment r ["hello"] "world")
@@ -648,15 +848,41 @@
 (fact "sets a param in a route"
   ^:hidden
   
-  [(notify/wait-on :js
+   ^{:lang-exceptions
+      {:dart
+       {:form [(notify/wait-on-call
+                2000
+                (fn []
+                  (!.dt
+                   (var r (route/make-route "hello?auth=sign_in"))
+                   (route/add-param-listener
+                    r "auth" "a1"
+                    (fn [val]
+                      (return {"::" "notify.task"
+                               "task" (repl/notify-socket
+                                       "127.0.0.1"
+                                       (@! (:socket-port (l/default-notify)))
+                                       val
+                                       (@! notify/*override-id*)
+                                       nil
+                                       {})}))
+                    nil)
+                   (route/set-param r "auth" "register" nil))))
+               (!.dt
+                (var r (route/make-route "hello?auth=sign_in"))
+                (route/set-param r "auth" "register" nil)
+                [(route/get-url r) r])]}
+      }}
+   [
+     (notify/wait-on :js
+         (var r (route/make-route "hello?auth=sign_in"))
+         (route/add-param-listener r "auth" "a1"
+                                  (repl/>notify))
+       (route/set-param r "auth" "register" nil))
+    (!.js
      (var r (route/make-route "hello?auth=sign_in"))
-     (route/add-param-listener r "auth" "a1"
-                               (repl/>notify))
-     (route/set-param r "auth" "register"))
-   (!.js
-    (var r (route/make-route "hello?auth=sign_in"))
-    (route/set-param r "auth" "register")
-    [(route/get-url r) r])]
+     (route/set-param r "auth" "register" nil)
+     [(route/get-url r) r])]
   => [+out+
       ["hello?auth=register"
        {"::" "event.route",
@@ -666,16 +892,16 @@
         "listeners" {}}]] 
 
 
-  (!.js
-   (var r (route/make-route "hello?auth=sign_in"))
-   (route/set-param r "auth" nil)
-   (route/get-url r))
-  
-  (notify/wait-on :lua
+   (!.js
     (var r (route/make-route "hello?auth=sign_in"))
-    (route/add-param-listener r "auth"  "a1"
-                              (repl/>notify))
-    (route/set-param r "auth" "register"))
+    (route/set-param r "auth" nil nil)
+    (route/get-url r))
+  
+   (notify/wait-on :lua
+     (var r (route/make-route "hello?auth=sign_in"))
+     (route/add-param-listener r "auth"  "a1"
+                               (repl/>notify))
+     (route/set-param r "auth" "register" nil))
   => +out+)
 
 ^{:refer xt.lang.event-route/reset-route :added "4.0"}

@@ -9,7 +9,9 @@
     :section :subsection :subsubsection
     :image :paragraph :code
     :equation :citation
-    :html :api :manage})
+    :html :api :manage
+    :hero :callout :card-grid
+    :quote :demo :badge})
 
 (defn wrap-meta
   "helper function for navigating `^:meta` tags

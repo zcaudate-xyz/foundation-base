@@ -159,8 +159,8 @@
 
 (defn fn:init-args
   "creates init args
- 
-   (fn:init-args '[x] '(inc x) [])
+  
+    (fn:init-args '[x] '(inc x) [])
    => '[\"\" {} ([x] (inc x))]"
   {:added "3.0"}
   [doc? attr? more]
@@ -169,14 +169,39 @@
                            (if (nil? attr?)
                              ["" doc? more]
                              ["" doc? (cons attr? more)]))
-        [attr more] (if (map? attr?)
-                      [attr? more]
-                      [{} (cons attr? more)])]
-    [doc attr more]))
+         [attr more] (if (map? attr?)
+                       [attr? more]
+                       [{} (cons attr? more)])]
+     [doc attr more]))
+
+(defn fn:call-body
+  "creates callable args while preserving multi-arity bodies
+
+    (fn:call-body '[x] '(inc x) [])
+    => '[\"\" {} ([x] (inc x))]
+
+    (fn:call-body '([x] (inc x)) '([x y] (+ x y)) [])
+    => '[\"\" {} (([x] (inc x)) ([x y] (+ x y)))]"
+  {:added "4.1"}
+  [doc? attr? more]
+  (let [[doc attr body] (fn:init-args doc? attr? more)
+        body (cond (vector? (first body))
+                   body
+
+                   (and (seq? (first body))
+                        (vector? (ffirst body)))
+                   (if (next body)
+                     body
+                     (first body))
+
+                   :else
+                   (throw (ex-info "Invalid callable body"
+                                   {:body body})))]
+    [doc attr body]))
 
 (defn fn:create-args
   "creates args for the body
- 
+  
    (fn:create-args '[[x] (inc x) nil nil])
    => '(\"\" {} [x] (inc x))"
   {:added "3.0"}

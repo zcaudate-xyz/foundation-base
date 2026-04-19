@@ -2,13 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:runtime :websocket
-   :config {:id :play/web-main
-            :bench false
-            :emit {:native {:suppress true}
-                   :lang/jsx false}
-            :notify {:host "test.statstrade.io"}}
-   :require [[xt.lang.base-lib :as k]]})
+  {:config {:bench false :emit {:native {:suppress true} :lang/jsx false} :id :play/web-main :notify {:host "test.statstrade.io"}} :require [[xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.common-spec :as xt] [xt.lang.common-string :as str]] :runtime :websocket})
 
 (def.js POSITION
   {"top"    {:opposite "bottom"
@@ -24,19 +18,19 @@
   "gets the opposite position"
   {:added "4.0"}
   [position]
-  (return (k/get-in -/POSITION [position "opposite"])))
+  (return (xtd/get-in -/POSITION [position "opposite"])))
 
 (defn.js triangleBaseStyle
   "constructs a style for triangle"
   {:added "4.0"}
   [color point baseLength baseHeight]
   (var #{opposite
-         sides} (k/get-key -/POSITION point))
+         sides} (xt/x:get-key -/POSITION point))
   (var [s0 s1] sides)
-  (var Point    (k/capitalize point))
-  (var Opposite (k/capitalize opposite))
-  (var S0 (k/capitalize s0))
-  (var S1 (k/capitalize s1))
+  (var Point    (str/capitalize point))
+  (var Opposite (str/capitalize opposite))
+  (var S0 (str/capitalize s0))
+  (var S1 (str/capitalize s1))
   (return
    {(+ "border" Point "Width") 0
     (+ "border" Opposite "Width") baseHeight 
@@ -46,4 +40,3 @@
     (+ "border" Opposite "Color") color
     (+ "border" S0 "Color") "transparent"
     (+ "border" S1 "Color") "transparent"}))
-

@@ -14,7 +14,7 @@
             [std.lib.resource :as resource]
             [std.protocol.component :as protocol.component]
             [std.protocol.context :as protocol.context]
-            [xt.lang.base-repl :as k])
+            [xt.lang.common-repl :as k])
   (:import (jep SharedInterpreter Interpreter) (jep.python PyObject PyCallable)))
 
 (defonce ^:dynamic *interpreters* (atom #{}))
@@ -237,4 +237,3 @@
  {:type :hara/rt.jep
   :config {:lang :python :layout :full}
   :instance {:create rt-jep:create}})
-

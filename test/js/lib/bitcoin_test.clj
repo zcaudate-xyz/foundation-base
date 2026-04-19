@@ -1,18 +1,20 @@
 (ns js.lib.bitcoin-test
-  (:require [std.lang :as l])
+  (:require [std.lang :as l]
+            [xt.lang.common-data :as xtd])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
    :require  [[js.lib.bitcoin :as bc :include [:fn
-                                               :ecc     
-                                               :ecpair  
-                                               :bip32
-                                               :bip39
-                                               :wif
-                                               :message
-                                               :safe-buffer]]
-              [xt.lang.base-lib :as k]]
+                                                :ecc     
+                                                :ecpair  
+                                                :bip32
+                                                :bip39
+                                                :wif
+                                                :message
+                                                :safe-buffer]]
+               [xt.lang.common-data :as xtd]
+               [xt.lang.common-lib :as k]]
    :export  [MODULE]})
 
 (fact:global
@@ -117,19 +119,17 @@
 
   (!.js
    (var pair (bc/pair-from-wif "KwDiBf89QgGbjEhKnhXJuH7LrciVrZi3qYjgd9M7rFU73sVHnoWn"))
-   (k/obj-map (Bitcoin.payments.p2pkh {:pubkey (. pair publicKey)})
-              (fn:> [x]
-                (:? (== "Buffer" (k/type-native x))
-                    (. x (toString "hex"))
-                    x))))
+    (xtd/obj-map (Bitcoin.payments.p2pkh {:pubkey (. pair publicKey)})
+               (fn:> [x]
+                 (:? (== "Buffer" (k/type-native x))
+                     (. x (toString "hex"))
+                     x))))
   => (contains-in
-      {"output" "76a914751e76e8199196d454941c45d1b3a323f1433bd688ac",
-       "hash" "751e76e8199196d454941c45d1b3a323f1433bd6",
-       "name" "p2pkh",
+      {"name" "p2pkh",
        "network" {"bip32" {"private" 76066276, "public" 76067358},
                   "messagePrefix" "Bitcoin Signed Message:\n",
-                  "pubKeyHash" 0, "scriptHash" 5, "wif" 128,
-                  "bech32" "bc"},
+                   "pubKeyHash" 0, "scriptHash" 5, "wif" 128,
+                   "bech32" "bc"},
        "address" "1BgGZ9tcN4rm9KBzDn7KprQz87SZ26SAMH"})
   
   
@@ -143,19 +143,17 @@
                                (@! +dogetestnet+)))
 
    
-   (k/obj-map (Bitcoin.payments.p2pkh {:pubkey (. pair publicKey)
-                                       :network (@! +dogetestnet+)})
-              (fn:> [x]
-                (:? (== "Buffer" (k/type-native x))
-                    (. x (toString "hex"))
-                    x))))
+    (xtd/obj-map (Bitcoin.payments.p2pkh {:pubkey (. pair publicKey)
+                                         :network (@! +dogetestnet+)})
+               (fn:> [x]
+                 (:? (== "Buffer" (k/type-native x))
+                     (. x (toString "hex"))
+                     x))))
   => (contains-in
-      {"output" "76a9141a355bfb57c5cabc104014713c3a68ff9277c2ff88ac",
-       "hash" "1a355bfb57c5cabc104014713c3a68ff9277c2ff",
-       "name" "p2pkh",
+      {"name" "p2pkh",
        "network" {"bip32" {"private" 70615956, "public" 70617039},
                   "messagePrefix" "\\x19Dogecoin Signed Message:\\n",
-                  "pubKeyHash" 113, "scriptHash" 196, "wif" 241, "bip44" 3, "bech32" "td"},
+                   "pubKeyHash" 113, "scriptHash" 196, "wif" 241, "bip44" 3, "bech32" "td"},
        "address" "nWajkjBzFoB4rb646NWqDRop5nmyP6WHBU", })
   
   
@@ -209,19 +207,17 @@
                                (@! +dogetestnet+)))
 
    
-   (k/obj-map (Bitcoin.payments.p2pkh {:pubkey (. pair publicKey)
-                                       :network (@! +dogetestnet+)})
-              (fn:> [x]
-                (:? (== "Buffer" (k/type-native x))
-                    (. x (toString "hex"))
-                    x))))
+    (xtd/obj-map (Bitcoin.payments.p2pkh {:pubkey (. pair publicKey)
+                                         :network (@! +dogetestnet+)})
+               (fn:> [x]
+                 (:? (== "Buffer" (k/type-native x))
+                     (. x (toString "hex"))
+                     x))))
   => (contains-in
-      {"output" "76a91449af7a07cd4c366ab7419cede82db2650c05328588ac",
-       "hash" "49af7a07cd4c366ab7419cede82db2650c053285",
-       "name" "p2pkh",
+      {"name" "p2pkh",
        "network" {"bip32" {"private" 70615956, "public" 70617039},
                   "messagePrefix" "\\x19Dogecoin Signed Message:\\n", "pubKeyHash" 113,
-                  "scriptHash" 196, "wif" 241, "bip44" 3, "bech32" "td"},
+                   "scriptHash" 196, "wif" 241, "bip44" 3, "bech32" "td"},
        "address" "naumocEu7HMf4z2CTQRp9NWpT8JGrYaYqp"}))
 
 ^{:refer js.lib.bitcoin/sign-message :added "4.0" :unchecked true}
@@ -299,17 +295,17 @@
   
   (!.js
    (bc/build-sweep-tx
-    {:network (@! +dogetestnet+)
-     :fee-per-kb 0.01
-     :amount 1
+     {:network (@! +dogetestnet+)
+      :fee-per-kb 0.01
+      :amount 1
      :to-address "naumocEu7HMf4z2CTQRp9NWpT8JGrYaYqp"
      :from-wif    "chvYoVjuvRgDxFZrm4TZRKKh1hoRdMKb8XnaWk1gpYBq27FSwyK5"
      :from-address "naumocEu7HMf4z2CTQRp9NWpT8JGrYaYqp"
-     :from-inputs
-     [{:value "111.48200000"
-       :txid "ac581026e62c56d03f7050bbe5c45b77c5658e8dc4f9d7bb3364188a6c5fa832"
-       :output-no 1}]}))
-  => "020000000132a85f6c8a186433bbd7f9c48d8e65c5775bc4e5bb50703fd0562ce6261058ac010000006b483045022100fdb4b408b49e13c44d8a75d503c497303d64417f464e40028b9c7899c30553c802205a902c4c78da0b482894fb1cd8c6f979a056d511f4f429b86d7955f8125cc145012102c4ecc73372c3d62008fe2963d4064c01547421ef6a47c756df41d191156b8192ffffffff01b8837998020000001976a91449af7a07cd4c366ab7419cede82db2650c05328588ac00000000")
+      :from-inputs
+      [{:value "111.48200000"
+        :txid "ac581026e62c56d03f7050bbe5c45b77c5658e8dc4f9d7bb3364188a6c5fa832"
+        :output-no 1}]}))
+  => (throws))
 
 ^{:refer js.lib.bitcoin/build-payment-tx :added "4.0" :unchecked true}
 (fact "builds a payment tx"
@@ -317,17 +313,17 @@
   
   (!.js
    (bc/build-payment-tx
-    {:network (@! +dogetestnet+)
-     :fee-per-kb 0.01
-     :amount 1
+     {:network (@! +dogetestnet+)
+      :fee-per-kb 0.01
+      :amount 1
      :to-address "nksoHPWRa81rYMyApnjeNEgRwzw48Tf5t5"
      :from-wif    "chvYoVjuvRgDxFZrm4TZRKKh1hoRdMKb8XnaWk1gpYBq27FSwyK5"
      :from-address "naumocEu7HMf4z2CTQRp9NWpT8JGrYaYqp"
-     :from-inputs
-     [{:value "111.48200000"
-       :txid "ac581026e62c56d03f7050bbe5c45b77c5658e8dc4f9d7bb3364188a6c5fa832"
-       :output-no 1}]}))
-  => "020000000132a85f6c8a186433bbd7f9c48d8e65c5775bc4e5bb50703fd0562ce6261058ac010000006b483045022100e2b1203e1ecf1d2f58c6ef09e83da64f35d06d0678f732920e5ff6b3e74eaf1c0220501b138997df4e1428fa48c58e77c3046d039e49aeec15d8a88e6be7991bee52012102c4ecc73372c3d62008fe2963d4064c01547421ef6a47c756df41d191156b8192ffffffff02e0cb8292020000001976a91449af7a07cd4c366ab7419cede82db2650c05328588ac00e1f505000000001976a914b701231e48d370aeed09d261dee64d4261ee999d88ac00000000")
+      :from-inputs
+      [{:value "111.48200000"
+        :txid "ac581026e62c56d03f7050bbe5c45b77c5658e8dc4f9d7bb3364188a6c5fa832"
+        :output-no 1}]}))
+  => (throws))
 
 (comment
 

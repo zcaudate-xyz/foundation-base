@@ -3,8 +3,7 @@
   (:refer-clojure :exclude [symbol]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]
-             [xt.lang.base-runtime :as rt :with [defvar.xt]]
+  {:require [[xt.lang.common-spec :as xt]
              [xt.runtime.interface-common :as interface-common]
              [xt.runtime.interface-spec :as spec]
              [xt.runtime.common-hash :as common-hash]]})
@@ -17,23 +16,30 @@
   {:added "4.0"}
   [sym]
   (var #{_ns _name} sym)
+  (var sname (:? (xt/x:nil? _ns)
+                 _name
+                 (xt/x:cat _ns "/" _name)))
   (return
-   (-> (k/get-key common-hash/SEED "symbol")
-       (k/bit-xor (common-hash/hash-string (k/sym-full _ns _name))))))
+   (-> (xt/x:get-key common-hash/SEED "symbol")
+       (xt/x:bit-xor (common-hash/hash-string sname)))))
 
 (defn.xt symbol-show
   "shows the symbol"
   {:added "4.0"}
   [sym]
   (var #{_ns _name} sym)
+  (var sname (:? (xt/x:nil? _ns)
+                 _name
+                 (xt/x:cat _ns "/" _name)))
   (return
-   (k/sym-full _ns _name)))
+   sname))
 
 (defn.xt symbol-eq
   "gets symbol equality"
   {:added "4.0"}
   [sym o]
-  (return (and (== "symbol" (k/type-class o))
+  (var oclass (common-hash/native-class o))
+  (return (and (== "symbol" oclass)
                (== (. sym _ns) (. o _ns))
                (== (. sym _name) (. o _name)))))
 
@@ -47,8 +53,8 @@
 
 (def.xt SYMBOL_PROTOTYPE
   (-> -/SYMBOL_SPEC
-      (k/proto-spec)
-      (k/proto-create)))
+      (spec/proto-spec)
+      (spec/proto-create)))
 
 (defn.xt symbol-create
   "creates a symbol"
@@ -57,19 +63,19 @@
   (var sym {"::" "symbol"
             :_ns   ns
             :_name name})
-  (k/set-proto sym -/SYMBOL_PROTOTYPE)
-  (return sym))
+  (return (spec/runtime-attach sym -/SYMBOL_PROTOTYPE)))
 
 (defn.xt symbol
   "creates the symbol or pulls it from cache"
   {:added "4.0"}
   [ns name]
   (var lu -/SYMBOL_LOOKUP)
-  (var key (k/sym-full ns name))
-  (var out (k/get-key lu key))
-  (when (k/nil? out)
+  (var key (:? (xt/x:nil? ns)
+               name
+               (xt/x:cat ns "/" name)))
+  (var out (xt/x:get-key lu key))
+  (when (xt/x:nil? out)
     (var sym (-/symbol-create ns name))
-    (k/set-key lu key sym)
+    (xt/x:set-key lu key sym)
     (return sym))
   (return out))
-

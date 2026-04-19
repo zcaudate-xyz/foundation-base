@@ -1,58 +1,58 @@
 (ns std.lang.model-annex.spec-haskell-test
-  (:require [std.lang :as l]
-            [std.lang.base.script :as script]
+  (:require [std.lang.base.impl :as impl]
             [std.lang.model-annex.spec-haskell :as spec-haskell])
   (:use code.test))
-
-(l/script- :haskell
-  {:config {:book spec-haskell/+book+}})
-
-(!.hs
-  [1 2 4])
 
 ^{:refer std.lang.model-annex.spec-haskell/CANARY :adopt true :added "4.1"}
 (fact "basic emit"
 
-  (l/emit-script '(defn hello [x] x) {:lang :haskell})
+  (impl/emit-script '(defn hello [x] x) {:lang :haskell})
   => "hello x = x"
 
-  (l/emit-as :haskell ['(let [x 1 y 2] (+ x y))])
-  => "let\n  x = 1\n  y = 2\nin x + y"
+  (impl/emit-as :haskell ['(letrec [fib (fn [n]
+                                          (match n
+                                            0 0
+                                            1 1
+                                            k (+ (fib (- k 1))
+                                                 (fib (- k 2)))))]
+                             (fib x))])
+  => "let\n  fib = \\ n -> case n of\n    0 -> 0\n    1 -> 1\n    k -> fib (k - 1) + fib (k - 2)\nin fib x"
 
-  (l/emit-as :haskell ['(if true 1 2)])
+  (impl/emit-as :haskell ['(if true 1 2)])
   => "if true then 1 else 2"
 
-  (l/emit-as :haskell ['(case x
-                          1 "one"
-                          2 "two")])
-  => "case x of\n  1 -> \"one\"\n  2 -> \"two\""
+  (impl/emit-as :haskell ['(match x
+                             0 "zero"
+                             n [:when (> n 0) "positive"]
+                             _ "other")])
+  => "case x of\n  0 -> \"zero\"\n  n | n > 0 -> \"positive\"\n  _ -> \"other\""
 
-  (l/emit-as :haskell ['(fn [x] (+ x 1))])
+  (impl/emit-as :haskell ['(fn [x] (+ x 1))])
   => "\\ x -> x + 1"
 
-  (l/emit-as :haskell ['(cons 1 [2 3])])
+  (impl/emit-as :haskell ['(cons 1 [2 3])])
   => "1 : [2,3]"
 
-  (l/emit-as :haskell ['(concat [1] [2])])
+  (impl/emit-as :haskell ['(concat [1] [2])])
   => "[1] ++ [2]"
 
-  (l/emit-as :haskell ['(do (print "a") (print "b"))])
+  (impl/emit-as :haskell ['(do (print "a") (print "b"))])
   => "do\n  print \"a\"\n  print \"b\""
 
-  (l/emit-as :haskell ['[1 2 3]])
+  (impl/emit-as :haskell ['[1 2 3]])
   => "[1,2,3]")
 
 (fact "types emit"
-  (l/emit-as :haskell ['[:> List Int]])
+  (impl/emit-as :haskell ['[:> List Int]])
   => "List Int"
 
-  (l/emit-as :haskell ['[:> Map String Int]])
+  (impl/emit-as :haskell ['[:> Map String Int]])
   => "Map String Int")
 
 ^{:refer std.lang.model-annex.spec-haskell/haskell-typesystem :added "4.1"}
 (fact "defn with type hint"
 
-  (l/emit-script '(defn ^Int add [^Int x ^Int y] (+ x y)) {:lang :haskell})
+  (impl/emit-script '(defn ^Int add [^Int x ^Int y] (+ x y)) {:lang :haskell})
   => "add :: Int -> Int -> Int\nadd x y = x + y")
 
 
@@ -69,13 +69,16 @@
 ^{:refer std.lang.model-annex.spec-haskell/tf-defn :added "4.1"}
 (fact "TODO")
 
-^{:refer std.lang.model-annex.spec-haskell/tf-case :added "4.1"}
+^{:refer std.lang.model-annex.spec-haskell/parse-match-clauses :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-haskell/tf-match :added "4.1"}
 (fact "TODO")
 
 ^{:refer std.lang.model-annex.spec-haskell/tf-if :added "4.1"}
 (fact "TODO")
 
-^{:refer std.lang.model-annex.spec-haskell/tf-let :added "4.1"}
+^{:refer std.lang.model-annex.spec-haskell/tf-letrec :added "4.1"}
 (fact "TODO")
 
 ^{:refer std.lang.model-annex.spec-haskell/tf-lambda :added "4.1"}
@@ -85,4 +88,8 @@
 (fact "TODO")
 
 ^{:refer std.lang.model-annex.spec-haskell/haskell-args :added "4.1"}
+(fact "TODO")
+
+
+^{:refer std.lang.model-annex.spec-haskell/haskell-invoke :added "4.1"}
 (fact "TODO")

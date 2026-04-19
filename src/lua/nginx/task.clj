@@ -2,9 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :lua
-  {:require [[xt.lang.base-lib :as k]
-             [xt.sys.cache-common :as cache]
-             [lua.nginx :as n]]})
+  {:require [[xt.lang.common-lib :as k] [xt.sys.cache-common :as cache] [lua.nginx :as n] [xt.lang.common-data :as xtd] [xt.lang.common-spec :as xt]]})
 
 ;;
 ;; tasks are instantiated via a loop
@@ -30,7 +28,7 @@
   [gid metadata setup]
   (var meta (cache/meta-get "task"))
   
-  (if (k/get-key meta gid)
+  (if (xt/x:get-key meta gid)
     (return false)
     (do
       (n/log n/ALERT (cat "\nREGISTERED TASK [" gid "]"))
@@ -47,7 +45,7 @@
   [gid teardown]
   (var meta (cache/meta-get "task"))
   
-  (if (not (k/get-key meta gid))
+  (if (not (xt/x:get-key meta gid))
     (return false))
 
   (var instances (. meta [gid] ["instances"]))
@@ -65,7 +63,7 @@
   [gid uid instdata]
   (var meta (cache/meta-get "task"))
 
-  (if (not (k/get-key meta gid))
+  (if (not (xt/x:get-key meta gid))
     (error "NO META FOUND"))
 
   (if (. meta [gid] ["instances"] [uid])
@@ -82,7 +80,7 @@
   
   (cache/meta-assoc "task"
                     gid
-                    (k/get-key meta gid)
+                    (xt/x:get-key meta gid)
                     instdata)
   (return true))
 
@@ -92,7 +90,7 @@
   [gid uid]
   (var meta (cache/meta-get "task"))
   
-  (if (not (k/get-key meta gid))
+  (if (not (xt/x:get-key meta gid))
     (error "NO META FOUND"))
 
   (when (. meta [gid] ["instances"] [uid])
@@ -103,7 +101,7 @@
         nil)
     (cache/meta-assoc "task"
                   gid
-                  (k/get-key meta gid)))
+                  (xt/x:get-key meta gid)))
   (return true))
 
 (defn.lua task-meta
@@ -112,17 +110,17 @@
   [gid]
   (var meta (cache/meta-get "task"))
   
-  (if (not (k/get-key meta gid))
+  (if (not (xt/x:get-key meta gid))
     (return {})
     #_(error "NO META FOUND"))
 
-  (return (k/get-key meta gid)))
+  (return (xt/x:get-key meta gid)))
 
 (defn.lua task-list
   "lists all running tasks"
   {:added "4.0"}
   [gid]
-  (return (k/obj-keys
+  (return (xtd/obj-keys
            (. (-/task-meta gid)
               ["instances"]))))
 
@@ -180,7 +178,7 @@
   (var uid (n/uuid))
   (var meta (-/task-meta gid))
   (when (or (k/nil? (. meta max))
-            (< (k/len (k/obj-keys (or (. meta instances) {})))
+            (< (xt/x:len (xtd/obj-keys (or (. meta instances) {})))
                (. meta max)))
     (n/start-task (fn []
                     (n/log n/ALERT (cat "\nSTARTING TASK [" gid "] - " uid))

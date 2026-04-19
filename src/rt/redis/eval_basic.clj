@@ -10,7 +10,7 @@
             [std.lang.base.runtime :as default]
             [std.lib.env :as env]
             [std.lib.foundation :as f]
-            [xt.lang.base-repl :as k]))
+            [xt.lang.common-repl :as k]))
 
 (def ^:dynamic *runtime-opts* {})
 
@@ -98,6 +98,5 @@
             :body {:transform #'redis-body-transform}}
      :json :full
      :layout layout})))
-
 
 

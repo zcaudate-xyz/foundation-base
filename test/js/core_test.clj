@@ -1,13 +1,13 @@
 (ns js.core-test
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
    :require [[js.core :as j]
-             [xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]]})
+             [xt.lang.common-trace :as trace]
+             [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -150,11 +150,11 @@
   
   (!.js
    (j/STACKTRACE! "hello")
-   (k/trace-last))
+   (trace/trace-last))
   => string?)
 
 ^{:refer js.core/LOG! :added "4.0" :unchecked true}
-(fact "like `xt.lang.base-lib/LOG!` but also for promises")
+(fact "like `xt.lang.common-lib/LOG!` but also for promises")
 
 ^{:refer js.core/<! :added "4.0" :unchecked true}
 (fact "shortcut for notify/wait-on"
@@ -194,4 +194,4 @@
   (!.js
    (j/parseFloat "xoeko"))
   (!.js
-   (k/last "hello.")))
+   (xtd/last "hello.")))

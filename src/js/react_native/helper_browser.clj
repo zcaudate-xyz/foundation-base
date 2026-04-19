@@ -2,7 +2,8 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-lib :as k]
+             [xt.lang.common-string :as str]
              [xt.lang.event-route :as event-route]
              [js.react :as r]
              [js.react-native :as n]
@@ -22,7 +23,7 @@
   []
   (var hash (-/getHash))
   (return (:? hash
-              (k/substring hash
+              (str/substring hash
                            2)
               "")))
 
@@ -57,5 +58,4 @@
   (var route (event-route/make-route (-/getHashRoute)))
   (event-route/set-param route key value path)
   (:= window.location.hash (+ "/" (event-route/get-url route))))
-
 

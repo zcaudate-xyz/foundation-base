@@ -47,7 +47,18 @@
         [@*counter* @*output*])))
 
 ^{:refer std.dispatch.hub/process-hub :added "3.0"}
-(fact "activates on debounce submit hit")
+(fact "activates on debounce submit hit"
+  (let [state (atom [])
+        h     (cc/hub:new [1 2 3])]
+    (process-hub {:handler (fn [_ entries]
+                             (swap! state conj entries))
+                  :options {:hub {:max-batch 2}
+                            :counter false}
+                  :runtime {:counter (hooks/counter)}}
+                 :a
+                 h)
+    @state)
+  => [[1 2] [3]])
 
 ^{:refer std.dispatch.hub/put-hub :added "3.0"}
 (fact "puts an entry into the group hubs"
@@ -108,7 +119,10 @@
   ^:hidden
   
   (def -d- (doto (create-dispatch +test-config+) (start-dispatch)))
-  (submit-dispatch -d- {:group :a :val 1})
+  (-> (submit-dispatch -d- {:group :a :val 1})
+      (nth 2)
+      pos?)
+  => true
   (stop-dispatch -d-))
 
 ^{:refer std.dispatch.hub/info-dispatch :added "3.0"}
@@ -127,8 +141,7 @@
   (->> (test-scaffold +test-config+ 20 5 5)
        second
        (map :id)
-       (sort)
-       (rest))
+       (sort))
   => (range 0 25))
 
 (comment

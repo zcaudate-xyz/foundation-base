@@ -11,15 +11,18 @@
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
    :require [[js.core :as j]
-             [js.react :as r :include [:fn]]
-             [js.react-native :as n :include [:fn]]
-             [js.cell :as cl]
-             [js.cell.kernel.worker-impl :as base-internal]
-             [js.cell.impl-common :as impl-common]
-             [js.cell.link-fn :as link-fn]
-             [js.react.ext-cell :as cr]
-             [xt.lang.base-lib :as k]
-             ]
+              [js.react :as r :include [:fn]]
+              [js.react-native :as n :include [:fn]]
+              [js.cell :as cl]
+              [js.cell.kernel.worker-mock :as worker-mock]
+               [js.cell.kernel.base-impl :as impl-common]
+              [js.cell.kernel.base-link-local :as link-fn]
+               [js.react.ext-cell :as cr]
+               [xt.lang.common-data :as xtd]
+               [xt.lang.common-sort-by :as xtsb]
+               [xt.lang.common-spec :as xt]
+              [xt.lang.common-lib :as k]
+              ]
    })
 
 ^{:refer js.react-native.ext-cell-test/SimpleCell :adopt true :added "0.1"}
@@ -30,7 +33,7 @@
    (var cell (impl-common/new-cell
               {:create-fn
                (fn:> [listener]
-                     (base-internal/mock-init listener {}))}))
+                     (worker-mock/create-worker listener {} true))}))
    (cl/view-get-output ["basic" "ping"] cell))
   
   (defn.js SimpleCellDemo
@@ -38,7 +41,7 @@
     (var cell (r/const (impl-common/new-cell
                         {:create-fn
                          (fn:> [listener]
-                               (base-internal/mock-init listener {}))})))
+                               (worker-mock/create-worker listener {} true))})))
     (cr/listenCellOutput ["basic" "ping"]
                          ["pending" "disabled"]
                          {}
@@ -63,7 +66,7 @@
         {:title "Trigger"
          :onPress (fn:> (cl/view-refresh ["basic" "ping"] cell))}]] 
 [:% n/Caption
-       {:text (k/json-encode {:count (getCount)
+       {:text (xt/x:json-encode {:count (getCount)
                             :data (cl/get-val ["basic" "ping"]
                                               []
                                               cell)})
@@ -81,7 +84,7 @@
     (var cell (r/const (impl-common/new-cell
                         {:create-fn
                          (fn:> [listener]
-                               (base-internal/mock-init listener {}))})))
+                               (worker-mock/create-worker listener {} true))})))
     (cr/listenCellOutput ["basic0" "ping0"]
                          ["output"]
                          {}
@@ -141,10 +144,10 @@
                   :setInitial setL0
                   :listWidth 100
                   :listFormat j/toUpperCase
-                  :formatFn k/json-encode
+                  :formatFn xt/x:json-encode
                   :branchesFn
                   (fn:> [cell]
-                    (k/sort (cl/list-models cell)))
+                    (xtsb/sort-by (cl/list-models cell) [k/identity]))
                   :targetFn
                   (fn [cell model]
                     (return (cl/get-model model cell)))}
@@ -153,12 +156,12 @@
                   :setInitial setL1
                   :listWidth 100
                   :listFormat j/toUpperCase
-                  :formatFn k/json-encode
+                  :formatFn xt/x:json-encode
                   :branchesFn 
                   (fn [model parents cell]
-                    (when (and (k/first parents)
-                               (cl/get-model (k/first parents) cell))
-                      (return (cl/list-views (k/first parents) cell)))
+                    (when (and (xtd/first parents)
+                               (cl/get-model (xtd/first parents) cell))
+                      (return (cl/list-views (xtd/first parents) cell)))
                     (return []))
                   :targetFn
                   (fn [model modelKey parents cell]
@@ -187,7 +190,7 @@
        {:tree  {}
         :levels []}] 
 [:% n/Caption
-       {:text (k/json-encode #{initial})
+       {:text (xt/x:json-encode #{initial})
         :style {:marginTop 10}}])))
   
   

@@ -3,15 +3,16 @@
             [js.cell.runtime.emit :as emit]
             [std.lang :as l]
             [std.lib.template :as template]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
-             [js.cell.kernel :as cl]
-             [js.cell.runtime.link :as runtime-link]]})
+   :require [[xt.lang.common-spec :as xt]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-repl :as repl]
+              [js.cell.kernel :as cl]
+              [js.cell.runtime.link :as runtime-link]]})
 
 (fact:global
  {:setup [(l/rt:restart)
@@ -35,7 +36,7 @@
     (var worker ((. (runtime-link/make-mock-link {})
                     ["create_fn"])
                  (fn [data] data)))
-    (return (k/obj-keys worker)))
+    (return (xt/x:obj-keys worker)))
   => (contains ["::" "listeners"
                 "postMessage" "postRequest"]))
 
@@ -88,10 +89,10 @@
                                         (listeners.push listener))})))
    (var link (runtime-link/make-webworker-link "worker-script"))
    (var worker ((. link ["create_fn"]) (fn [data] (messages.push data))))
-   ((k/first listeners) {"data" "hello"})
+    ((xt/x:first listeners) {"data" "hello"})
    (var out {"messages" messages
              "revoked" revoked
-             "keys" (k/obj-keys worker)})
+              "keys" (xt/x:obj-keys worker)})
    (:= (!:G Worker) previous-worker)
    (:= (!:G URL) previous-url)
    (return out))
@@ -119,11 +120,11 @@
          (return {"port" port})))
    (var link (runtime-link/make-sharedworker-link "worker-script"))
    (var worker ((. link ["create_fn"]) (fn [data] (messages.push data))))
-   ((k/first listeners) {"data" "world"})
+    ((xt/x:first listeners) {"data" "world"})
    (var out {"messages" messages
              "revoked" revoked
-             "starts" (k/len starts)
-             "keys" (k/obj-keys worker)})
+              "starts" (xt/x:len starts)
+              "keys" (xt/x:obj-keys worker)})
    (:= (!:G SharedWorker) previous-shared)
    (:= (!:G URL) previous-url)
    (return out))
@@ -136,7 +137,7 @@
   ^:hidden
 
   (!.js
-    (k/obj-keys (runtime-link/make-link "mock" nil {})))
+    (xt/x:obj-keys (runtime-link/make-link "mock" nil {})))
   => (contains ["create_fn"])
 
   (!.js

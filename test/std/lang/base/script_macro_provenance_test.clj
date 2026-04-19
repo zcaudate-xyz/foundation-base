@@ -15,7 +15,7 @@
   (let [xlib (lib/library {})]
     (lib/add-book! xlib (assoc xtalk/+book+ :modules {}))
     (lib/add-module! xlib (module/book-module {:lang :xtalk
-                                               :id 'xt.lang.base-lib}))
+                                               :id 'xt.lang.common-lib}))
     [xlib
      ['defn (get-in (lib/get-book xlib :xtalk)
                     [:grammar :reserved 'defn])]]))
@@ -48,7 +48,7 @@
                          'fail-type-native
                          '[obj]
                          (list 'return bad-call))
-                   {:module 'xt.lang.base-lib
+                   {:module 'xt.lang.common-lib
                     :line 320})]
     (impl/with:library [xlib]
       (let [fn-var (macro/intern-top-level-fn
@@ -67,8 +67,8 @@
           (last (:stack out))]])))
   => '[{:phase :emit/form
         :subsystem :std.lang.base.emit-top-level/emit-form
-        :module xt.lang.base-lib
-        :entry xt.lang.base-lib/fail-type-native
+        :module xt.lang.common-lib
+        :entry xt.lang.common-lib/fail-type-native
         :line 320
         :form (x:type-native obj)}
        [[:emit/form :std.lang.base.emit-top-level/emit-form]
@@ -90,7 +90,7 @@
                           '(var out := [])
                           loop-form
                           '(return out))
-                    {:module 'xt.lang.base-lib
+                    {:module 'xt.lang.common-lib
                      :line 340})]
     (impl/with:library [xlib]
       (let [fn-var (macro/intern-top-level-fn
@@ -109,8 +109,8 @@
           (last (:stack out))]])))
   => '[{:phase :emit/form
         :subsystem :std.lang.base.emit-top-level/emit-form
-        :module xt.lang.base-lib
-        :entry xt.lang.base-lib/fail-arr-push
+        :module xt.lang.common-lib
+        :entry xt.lang.common-lib/fail-arr-push
         :line 340
         :form (x:arr-push out (f e))}
        [[:emit/form :std.lang.base.emit-top-level/emit-form]

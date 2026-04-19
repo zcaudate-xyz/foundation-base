@@ -188,10 +188,53 @@
 (fact "parses markdown into sections"
   (parse-markdown "# Chapter\nText\n## Section\nMore text")
   => (contains [{:type :chapter :title "Chapter"}
-                {:type :paragraph :text "Text"}
-                {:type :section :title "Section"}
-                {:type :paragraph :text "More text"}]))
+                 {:type :paragraph :text "Text"}
+                 {:type :section :title "Section"}
+                 {:type :paragraph :text "More text"}]))
 
 
 ^{:refer code.doc.parse/parse-header :added "4.1"}
-(fact "TODO")
+(fact "parses heading ids"
+  (parse-header "## Section {#section-id}")
+  => {:type :section :title "Section" :tag "section-id"})
+
+^{:refer code.doc.parse/parse-frontmatter :added "4.1"}
+(fact "parses edn frontmatter"
+  (parse-frontmatter ["---" "{:title \"Hello\"}" "---" "# Heading"])
+  => [{:type :article}
+      {:type :article :title "Hello"}
+      ["# Heading"]])
+
+^{:refer code.doc.parse/parse-markdown-directive :added "4.1"}
+(fact "parses embedded markdown directives"
+  (parse-markdown-directive "[[:callout {:tone :info :title \"Hello\" :content \"World\"}]]")
+  => {:type :callout :tone :info :title "Hello" :content "World"})
+
+^{:refer code.doc.parse/directive-line? :added "4.1"}
+(fact "detects embedded markdown directives"
+  (directive-line? "[[:callout {:tone :info}]]")
+  => true
+
+  (directive-line? "plain text")
+  => false)
+
+^{:refer code.doc.parse/markdown-paragraph :added "4.1"}
+(fact "creates markdown paragraph elements"
+  (markdown-paragraph ["Hello" "" "World"])
+  => {:type :paragraph :text "Hello\n\nWorld"})
+
+^{:refer code.doc.parse/markdown-code-block :added "4.1"}
+(fact "creates fenced code block elements"
+  (markdown-code-block "clojure" ["(+ 1 1)"])
+  => {:type :block :indentation 0 :lang "clojure" :code "(+ 1 1)"})
+
+^{:refer code.doc.parse/parse-markdown :added "4.1"}
+(fact "parses frontmatter, directives, and fenced code blocks"
+  (parse-markdown (str "---\n{:title \"Hello\"}\n---\n"
+                      "# Heading {#heading}\n"
+                      "[[:callout {:tone :success :title \"Nice\" :content \"Yep\"}]]\n"
+                      "```clojure\n(+ 1 1)\n```"))
+  => [{:type :article :title "Hello"}
+      {:type :chapter :title "Heading" :tag "heading"}
+      {:type :callout :tone :success :title "Nice" :content "Yep"}
+      {:type :block :indentation 0 :lang "clojure" :code "(+ 1 1)"}])

@@ -3,7 +3,7 @@
             [std.lib.env :as env]
             [std.lib.foundation :as f]
             [std.lib.template :as template]
-            [xt.lang.base-repl :as repl])
+            [xt.lang.common-repl :as repl])
   (:refer-clojure :exclude [print flush time re-find]))
 
 (l/script :lua

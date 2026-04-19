@@ -10,12 +10,13 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react-native.helper-color :as c]
-             [js.react :as r]
-             [js.react-native :as n :include [:fn]]
-             [js.react-native.ui-input :as ui-input]
-             [xt.lang.base-lib :as k]]
+    :require [[js.core :as j]
+              [js.react-native.helper-color :as c]
+              [xt.lang.common-math :as math]
+              [js.react :as r]
+              [js.react-native :as n :include [:fn]]
+              [js.react-native.ui-input :as ui-input]
+              [xt.lang.common-lib :as k]]
    })
 
 ^{:refer js.react-native.ui-form-basic/LoginForm
@@ -27,14 +28,14 @@
  (defn.js toTop
     [v]
    (return
-    [{:translateY (k/mix 13 -20 v)}
-     {:translateX (k/mix 10 -5 v)}]))
+    [{:translateY (math/mix 13 -20 v)}
+     {:translateX (math/mix 10 -5 v)}]))
   
   (defn.js toRight
     [v]
     (return
-     [{:translateX (k/mix 10 -5 v)}
-      {:translateY (k/mix 13 -20 v)}]))
+     [{:translateX (math/mix 10 -5 v)}
+      {:translateY (math/mix 13 -20 v)}]))
   
   (defn.js LoginFormDemo
     []
@@ -105,8 +106,8 @@
   (defn.js toTop
     [v]
    (return
-    [{:translateY (k/mix 13 -20 v)}
-     {:translateX (k/mix 10 -5 v)}]))
+    [{:translateY (math/mix 13 -20 v)}
+     {:translateX (math/mix 10 -5 v)}]))
   
   (defn.js LoginFormTopDemo
     []
@@ -145,14 +146,13 @@
                      (var active (j/max (- 1 emptying)
                                         focusing))
                      (return {:style {:opacity 1
-                                      :fontSize   (k/mix 20  14 (- 1 emptying))
-                                      :fontWeight (k/mix 400 800 (- 1 emptying))
+                                      :fontSize   (math/mix 20  14 (- 1 emptying))
+                                      :fontWeight (math/mix 400 800 (- 1 emptying))
                                       :color (c/toHSL (c/interpolate
                                                        ["#999" "#555e" ]
                                                        (- 1 emptying)))
-                                      :transform
-                                      (-/toTop (- 1 emptying)
-                                               #_active)}}))}]}]] 
+                                       :transform [{:translateY (math/mix 13 -20 (- 1 emptying))}
+                                                   {:translateX (math/mix 10 -5 (- 1 emptying))}]}}))}]}]] 
 [:% n/Caption
        {:text (n/format-entry #{login})
         :style {:marginTop 10}}]))))
@@ -263,12 +263,11 @@
                      (var active (j/max (- 1 emptying)
                                         focusing))
                      (return {:style {:opacity 1
-                                      :fontSize   (k/mix 20  14 (- 1 emptying))
-                                      :fontWeight (k/mix 400 800 (- 1 emptying))
+                                      :fontSize   (math/mix 20  14 (- 1 emptying))
+                                      :fontWeight (math/mix 400 800 (- 1 emptying))
                                       :color (c/toHSL (c/interpolate
                                                        ["#999" "#555e" ]
                                                        (- 1 emptying)))
                                       :transform
                                       (-/toTop (- 1 emptying)
                                                #_active)}}))}]}]])
-

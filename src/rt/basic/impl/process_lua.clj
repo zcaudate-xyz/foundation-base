@@ -1,19 +1,50 @@
 (ns rt.basic.impl.process-lua
   (:require [clojure.string]
-            [rt.basic.type-basic :as basic]
-            [rt.basic.type-common :as common]
-            [rt.basic.type-oneshot :as oneshot]
-            [rt.basic.type-websocket :as websocket]
-            [std.lang.base.impl :as impl]
-            [std.lang.base.runtime :as rt]
-            [std.lang.model.spec-lua :as spec]
-            [std.lib.env :as env]
-            [std.lib.os :as os]
-            [xt.lang.base-repl :as k]))
+             [rt.basic.type-basic :as basic]
+             [rt.basic.type-common :as common]
+             [rt.basic.type-oneshot :as oneshot]
+             [rt.basic.type-websocket :as websocket]
+             [std.lang.base.impl :as impl]
+             [std.lang.base.runtime :as rt]
+             [std.lang.model.spec-lua :as spec]
+             [std.lib.collection :as collection]
+             [std.lib.env :as env]
+             [std.lib.os :as os]
+             [xt.lang.common-repl :as k]))
 
 ;;
 ;; PROGRAM
 ;;
+
+(defn- lua-local-rocks-env
+  "adds the user-local luarocks tree to Lua module lookup when present."
+  {:added "4.1"}
+  []
+  (let [home  (System/getenv "HOME")
+        share (some-> home (str "/.luarocks/share/lua/5.1"))
+        lib   (some-> home (str "/.luarocks/lib/lua/5.1"))
+        share-paths (cond-> []
+                      (and share (.exists (java.io.File. share)))
+                      (into [(str share "/?.lua")
+                             (str share "/?/init.lua")]))
+        lib-paths   (cond-> []
+                      (and lib (.exists (java.io.File. lib)))
+                      (conj (str lib "/?.so")))]
+    (cond-> {}
+      (seq share-paths)
+      (assoc "LUA_PATH" (str (clojure.string/join ";" share-paths)
+                             ";"
+                             (or (System/getenv "LUA_PATH")
+                                 ";;")))
+      (seq lib-paths)
+      (assoc "LUA_CPATH" (str (clojure.string/join ";" lib-paths)
+                              ";"
+                              (or (System/getenv "LUA_CPATH")
+                                  ";;"))))))
+
+(def +lua-local-rocks-shell+
+  (when-let [env (not-empty (lua-local-rocks-env))]
+    {:env env}))
 
 (def +program-init+
   (common/put-program-options
@@ -21,24 +52,28 @@
 	             :basic          :luajit
 	             :websocket      :resty}
           :env      {:lua       {:exec   "lua"
+                                 :shell  +lua-local-rocks-shell+
 	                         :flags  {:oneshot ["-e"]
                                           :basic   ["-e"]
                                           :interactive ["-i"]
 	                                  :json ["cjson" :install]
                                           :bench {:basic     ["luasocket" :install]}}}
 	             :luajit    {:exec   "luajit"
+                                 :shell  +lua-local-rocks-shell+
 	                         :flags   {:oneshot ["-e"]
                                            :basic   ["-e"]
                                            :interactive  ["-i"]
 	                                   :json ["cjson" :install]
                                            :bench {:basic     ["luasocket" :install]}}}
                      :torch     {:exec   "th"
+                                 :shell  +lua-local-rocks-shell+
 	                         :flags   {:oneshot ["-e"]
                                            :basic   ["-e"]
                                            :interactive  ["-i"]
 	                                   :json ["cjson" :install]
                                            :bench {:basic     ["luasocket" :install]}}}
 	             :resty     {:exec   "resty"
+                                 :shell  +lua-local-rocks-shell+
 	                         :flags   {:oneshot   ["-e"]
                                            :basic     ["-e"]
                                            :websocket ["-e"]
@@ -51,6 +86,45 @@
 ;; ONESHOT
 ;; 
 
+(defn default-body-wrap
+  "wraps body forms in a local helper so inline defs remain callable within
+   the same Lua eval scope."
+  {:added "4.1"}
+  [forms]
+  (let [forms (rt/return-format forms '#{:- := var local def defn break throw})]
+    (list 'do
+          (apply list 'defn (with-meta 'OUT-FN
+                              {:inner true})
+                 []
+                 forms)
+          (list 'return (list 'OUT-FN)))))
+
+(defn normalize-forms
+  "normalizes runtime input into a flat sequence of Lua statements."
+  {:added "4.1"}
+  [input {:keys [bulk]}]
+  (let [forms (if bulk input [input])]
+    (if (and (= 1 (count forms))
+             (collection/form? (first forms))
+             (= 'do (ffirst forms)))
+      (rest (first forms))
+      forms)))
+
+(defn mark-inline-defs
+  "marks inline `defn` forms as inner so Lua emits local helper definitions."
+  {:added "4.1"}
+  [forms]
+  (map (fn [form]
+         (if (and (collection/form? form)
+                  (= 'defn (first form))
+                  (symbol? (second form)))
+           (apply list 'defn
+                  (with-meta (second form)
+                    (assoc (meta (second form)) :inner true))
+                  (drop 2 form))
+           form))
+       forms))
+
 (defn default-body-transform
   "transform code for return
  
@@ -61,10 +135,9 @@
    => '(do 1 2 (return 3))"
   {:added "4.0"}
   [input mopts]
-  (rt/return-transform
-   input mopts
-   {:wrap-fn (fn [forms]
-               (apply list 'do forms))}))
+  (-> (normalize-forms input mopts)
+      (mark-inline-defs)
+      (default-body-wrap)))
 
 (def ^{:arglists '([body])}
   default-oneshot-wrap

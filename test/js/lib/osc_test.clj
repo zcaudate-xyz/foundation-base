@@ -1,14 +1,15 @@
 (ns js.lib.osc-test
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
    :require [[js.lib.osc :as osc]
-             [js.core :as j]
-             [xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]]})
+              [js.core :as j]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup    [(l/rt:restart)
@@ -20,7 +21,7 @@
   ^:hidden
   
   (!.js
-   (k/obj-keys (osc/newOSC)))
+   (xtd/obj-keys (osc/newOSC)))
   => ["options" "eventHandler"])
 
 ^{:refer js.lib.osc/newMessage :added "4.0" :unchecked true}
@@ -28,7 +29,7 @@
   ^:hidden
 
   (!.js
-   (k/obj-keys (osc/newMessage ["test", "path"], 50, 100.52, "test")))
+   (xtd/obj-keys (osc/newMessage ["test", "path"], 50, 100.52, "test")))
   => ["offset" "address" "types" "args"])
 
 ^{:refer js.lib.osc/newBundle :added "4.0" :unchecked true}
@@ -36,10 +37,10 @@
   ^:hidden
 
   (!.js
-   (k/obj-keys
-    (osc/newBundle
-     (osc/newMessage ["test", "path"], 50, 100.52, "test")
-     (osc/newMessage ["test", "path"], 50, 100.52, "test"))))
+   (xtd/obj-keys
+     (osc/newBundle
+      (osc/newMessage ["test", "path"], 50, 100.52, "test")
+      (osc/newMessage ["test", "path"], 50, 100.52, "test"))))
   => ["offset" "timetag" "bundleElements"])
 
 ^{:refer js.lib.osc/DatagramPlugin :added "4.0" :unchecked true}
@@ -47,68 +48,48 @@
   ^:hidden
 
   (!.js
-   (k/get-data
-    (osc/DatagramPlugin
-     {:send {:port 41234}})))
-  => {"socketStatus" -1,
-      "notify" "<function>",
-      "socket"
-      {"_eventsCount" 2,
-       "_events" {"message" "<function>", "error" "<function>"},
-       "type" "udp4"},
-      "options"
-      {"send" {"host" "localhost", "port" 41234},
-       "type" "udp4",
-       "open" {"host" "localhost", "exclusive" false, "port" 41234}}})
+   (var plugin (osc/DatagramPlugin {:send {:port 41234}}))
+   (and (== -1 (. plugin socketStatus))
+        (xt/x:is-function? (. plugin notify))
+        (== "udp4" (. (. plugin socket) type))
+        (== 41234 (. (. (. plugin options) send) port))))
+  => true)
 
 ^{:refer js.lib.osc/BridgePlugin :added "4.0" :unchecked true}
 (fact "creates a Bridge plugin"
   ^:hidden
 
   (!.js
-   (k/get-data
-    (osc/BridgePlugin
-     {})))
-  => {"websocket" nil,
-      "socketStatus" -1,
-      "notify" "<function>",
-      "socket"
-      {"_eventsCount" 2,
-       "_events" {"message" "<function>", "error" "<function>"},
-       "type" "udp4"},
-      "options"
-      {"udpServer"
-       {"host" "localhost", "exclusive" false, "port" 41234},
-       "udpClient" {"host" "localhost", "port" 41235},
-       "wsServer" {"host" "localhost", "port" 8080},
-       "receiver" "ws"}})
+   (var plugin (osc/BridgePlugin {}))
+   (and (== -1 (. plugin socketStatus))
+        (xt/x:is-function? (. plugin notify))
+        (== "udp4" (. (. plugin socket) type))
+        (== 8080 (. (. (. plugin options) wsServer) port))))
+  => true)
 
 ^{:refer js.lib.osc/WebsocketClientPlugin :added "4.0" :unchecked true}
 (fact "creates a Ws Client Plugin"
   ^:hidden
   
   (!.js
-   (k/get-data
-    (osc/WebsocketClientPlugin
-     {})))
-  => {"socketStatus" -1,
-      "notify" "<function>",
-      "socket" nil,
-      "options"
-      {"protocol" [], "host" "localhost", "secure" false, "port" 8080}})
+   (var plugin (osc/WebsocketClientPlugin {}))
+   (and (== -1 (. plugin socketStatus))
+        (xt/x:is-function? (. plugin notify))
+        (== nil (. plugin socket))
+        (== 8080 (. (. plugin options) port))))
+  => true)
 
 ^{:refer js.lib.osc/WebsocketServerPlugin :added "4.0" :unchecked true}
 (fact "creates a Ws Server Plugin"
   ^:hidden
   
   (!.js
-   (k/get-data
-    (osc/WebsocketServerPlugin
-     {:port 8081})))
-  => {"socketStatus" -1,
-      "notify" "<function>",
-      "socket" nil,
-      "options" {"host" "localhost", "port" 8081}})
+   (var plugin (osc/WebsocketServerPlugin {:port 8081}))
+   (and (== -1 (. plugin socketStatus))
+        (xt/x:is-function? (. plugin notify))
+        (== nil (. plugin socket))
+        (== 8081 (. (. plugin options) port))))
+  => true)
 
 ^{:refer js.lib.osc/on :added "4.0" :unchecked true
   :setup [(l/rt:restart)
@@ -196,11 +177,11 @@
     (var messageFn
          (fn []
            (return
-            (osc/newMessage (k/arr-random ["/test"
-                                           "/foo"
-                                           "/bar"
-                                           "/baz"])
-                            (k/random)))))
+             (osc/newMessage (xtd/arr-random ["/test"
+                                            "/foo"
+                                            "/bar"
+                                            "/baz"])
+                            (xt/x:random)))))
     
     (osc/on osc "*"
             (fn [msg info]

@@ -5,6 +5,8 @@
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
             [std.lib.template :as template]
+            [xt.lang.common-notify]
+            [xt.lang.common-repl]
             [std.string.case :as case])
   (:refer-clojure :exclude [not or range]))
 
@@ -153,13 +155,12 @@
         {:keys [id]
          :static/keys [schema]} (deref (deref (resolve function)))]
     (template/$
-     (xt.lang.base-notify/wait-on :js
+     (xt.lang.common-notify/wait-on :js
        (. (js.lib.supabase/rpc
            (. (js.lib.supabase/createSupabaseClient
                ~host
                ~key)
-              (schema ~(or schema "public")))
+               (schema ~(or schema "public")))
            ~(case/snake-case (str id))
            ~args)
-          (then (xt.lang.base-repl/>notify)))))))
-
+           (then (xt.lang.common-repl/>notify)))))))

@@ -5,7 +5,7 @@
             [std.lib.future :as future]
             [std.lib.template :as template]
             [std.string.prose :as prose]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:refer-clojure :exclude [if cat]))
 
 (l/script :bash

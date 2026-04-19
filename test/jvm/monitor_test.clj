@@ -52,7 +52,10 @@
 ^{:refer jvm.monitor/memory-pool-bean :added "3.0"}
 (fact "gives information about the memory pool"
 
-  (object/to-map (first (memory-pool-bean))))
+  (object/to-map (first (memory-pool-bean)))
+  => (contains {:name string?
+                :type string?
+                :usage map?}))
 
 ^{:refer jvm.monitor/os-bean :added "3.0"}
 (fact "gives information about the operating system"
@@ -65,14 +68,20 @@
                 :version string?}))
 
 ^{:refer jvm.monitor/runtime-bean :added "3.0"}
-(comment "gives information about the system runtime"
+(fact "gives information about the system runtime"
 
-  (object/to-map (runtime-bean)))
+  (object/to-map (runtime-bean))
+  => (contains {:name string?
+                :vm-name string?
+                :spec-version string?}))
 
 ^{:refer jvm.monitor/thread-bean :added "3.0"}
 (fact "gives information about the current thread executor"
 
-  (object/to-map (thread-bean)))
+  (object/to-map (thread-bean))
+  => (contains {:thread-count number?
+                :peak-thread-count number?
+                :daemon-thread-count number?}))
 
 ^{:refer jvm.monitor/jvm :added "3.0"}
 (fact "Access to all `java.lang.management.ManagementFactory` MXBean methods"

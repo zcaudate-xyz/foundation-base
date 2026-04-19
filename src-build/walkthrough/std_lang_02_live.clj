@@ -11,7 +11,7 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]]})
+   :require [[xt.lang.common-lib :as k]]})
 
 (fact "js runtime"
   ^:hidden
@@ -57,7 +57,7 @@
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]]})
+   :require [[xt.lang.common-lib :as k]]})
 
 (fact "lua runtime"
   ^:hidden
@@ -91,7 +91,7 @@
 
 (l/script- :python
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]]})
+   :require [[xt.lang.common-lib :as k]]})
 
 (fact "python runtime"
   ^:hidden
@@ -124,7 +124,7 @@
 
 (l/script- :r
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]]})
+   :require [[xt.lang.common-lib :as k]]})
 
 (fact "r runtime"
   ^:hidden

@@ -3,8 +3,9 @@
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]
-             [xt.lang.base-task :as task]
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-trace :as trace]
+             [xt.lang.common-task :as task]
              [xt.cell.kernel.worker-local :as worker-local]
              [xt.cell.kernel.worker-impl :as worker-impl]]})
 
@@ -27,7 +28,7 @@
   {:added "4.0"}
   [mock message]
   (try 
-    (cond (k/is-string? message)
+    (cond (xt/x:is-string? message)
           (worker-impl/worker-process mock
                                       {:op "eval"
                                        :id nil
@@ -35,13 +36,13 @@
           
           :else
           (worker-impl/worker-process mock message))
-    (catch e (k/TRACE! (. e ["stack"]) "SEND.ERROR"))))
+    (catch e (trace/TRACE! (. e ["stack"]) "SEND.ERROR"))))
 
 (defn.xt mock-worker
   "creates a new mock worker
  
    (!.js
-    (internal/new-mock k/identity))
+    (internal/new-mock (fn [x] (return x))))
    => {\"::\" \"worker.mock\", \"listeners\" [nil]}"
   {:added "4.0"}
   [listener]
@@ -49,15 +50,15 @@
                :listeners [listener]})
   (var postMessage (fn [event]
                      (var #{listeners} worker)
-                     (k/for:array [listener listeners]
+                     (xt/for:array [listener listeners]
                        (listener event))))
   (var postRequest (fn [request]
                       (return
                        (task/task-run
                         (fn []
-                          (return (-/mock-worker-send worker request))))))
-  (k/set-key worker "postMessage" postMessage)
-  (k/set-key worker "postRequest" postRequest)
+                          (return (-/mock-worker-send worker request)))))))
+  (xt/x:set-key worker "postMessage" postMessage)
+  (xt/x:set-key worker "postRequest" postRequest)
   (return worker))
 
 (defn.xt create-worker

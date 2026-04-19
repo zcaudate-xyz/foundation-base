@@ -61,7 +61,11 @@
 
          [:erlang :oneshot]            'rt.basic.impl-annex.process-erlang
          [:erlang :basic]              'rt.basic.impl-annex.process-erlang
-
+ 
+         [:haskell :twostep]           'rt.basic.impl-annex.process-haskell
+         [:lean    :twostep]           'rt.basic.impl-annex.process-lean
+         [:ocaml   :twostep]           'rt.basic.impl-annex.process-ocaml
+ 
          [:rust   :twostep]            'rt.basic.impl-annex.process-rust
          
          [:c      :jocl]               'rt.jocl
@@ -126,6 +130,12 @@
                                         :book '+book+
                                         :parent :xtalk}
          [:haskell  :default]          {:ns 'std.lang.model-annex.spec-haskell
+                                        :book '+book+
+                                        :parent :xtalk}
+         [:lean     :default]          {:ns 'std.lang.model-annex.spec-lean
+                                        :book '+book+
+                                        :parent :xtalk}
+         [:ocaml    :default]          {:ns 'std.lang.model-annex.spec-ocaml
                                         :book '+book+
                                         :parent :xtalk}
          [:jq       :default]          {:ns 'std.lang.model-annex.spec-jq

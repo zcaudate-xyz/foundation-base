@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [rt.postgres :as pg]
             [std.lang :as l]
-            [xt.lang.base-notify :as notify]))
+            [xt.lang.common-notify :as notify]))
 
 (l/script- :postgres
   {:runtime :jdbc.client
@@ -12,7 +12,7 @@
 (l/script- :lua
   {:runtime :basic
    :config  {:program :resty}
-   :require [[xt.lang.base-lib :as k]
+   :require [[xt.lang.common-spec :as xt]
              [xt.db.sql-call :as call]
              [xt.sys.conn-dbsql :as driver]
              [lua.nginx.driver-postgres :as lua-postgres]]})
@@ -28,13 +28,13 @@
   ^:hidden
   
   (!.lua
-   (call/decode-return (k/json-encode
+   (call/decode-return (xt/x:json-encode
                         {:status "ok"
                          :data 1})))
   => 1
 
   (!.lua
-   (call/decode-return (k/json-encode
+   (call/decode-return (xt/x:json-encode
                         {:status "error"
                          :data "NOT VALID"})))
   => (throws))
@@ -75,7 +75,7 @@
   (!.lua
    (var conn (driver/connect {:constructor lua-postgres/connect-constructor
                               :database "test-scratch"}))
-   (k/json-decode
+   (xt/x:json-decode
     (call/call-raw conn
                    (@! (pg/bind-function scratch/addf))
                    [10 20])))
@@ -88,7 +88,7 @@
   (!.lua
    (var conn (driver/connect {:constructor lua-postgres/connect-constructor
                               :database "test-scratch"}))
-   (k/json-decode
+   (xt/x:json-decode
     (call/call-api conn
                    (@! (pg/bind-function scratch/addf))
                    [10 20])))

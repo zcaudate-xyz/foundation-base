@@ -1,9 +1,7 @@
 (ns xt.lang.override.custom-js
   (:require [std.lang :as l]))
 
-(l/script :js
-  xt.lang
-  {:require [[xt.lang :as k]]})
+(l/script :js xt.lang)
 
 (defmacro.js ^{:static/override true}
   pad-left

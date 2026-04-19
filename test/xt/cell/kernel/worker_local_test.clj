@@ -4,10 +4,11 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [js.core :as j]
-             [xt.cell.kernel.worker-state :as worker-state]
-             [xt.cell.kernel.worker-local :as worker-local]]})
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-spec :as xt]
+              [js.core :as j]
+              [xt.cell.kernel.worker-state :as worker-state]
+              [xt.cell.kernel.worker-local :as worker-local]]})
 
 (fact:global
  {:setup     [(l/rt:restart)
@@ -22,17 +23,17 @@
   => map?
   
   ;; Check that @worker/ping action exists with correct structure
-  (!.js (k/get-key (worker-local/actions-baseline) "@worker/ping"))
+  (!.js (xt/x:get-key (worker-local/actions-baseline) "@worker/ping"))
   => (contains {"is_async" false
                 "args" []})
   
   ;; Check that @worker/echo action exists
-  (!.js (k/get-key (worker-local/actions-baseline) "@worker/echo"))
+  (!.js (xt/x:get-key (worker-local/actions-baseline) "@worker/echo"))
   => (contains {"is_async" false
                 "args" ["arg"]})
   
   ;; Check that @worker/ping.async action exists and is async
-  (!.js (k/get-key (worker-local/actions-baseline) "@worker/ping.async"))
+  (!.js (xt/x:get-key (worker-local/actions-baseline) "@worker/ping.async"))
   => (contains {"is_async" true
                 "args" ["ms"]}))
 
@@ -44,13 +45,13 @@
   (!.js
    (worker-local/actions-init {"@custom/action" {}} nil)
    ;; Check that baseline actions are registered
-   (k/has-key? (worker-state/WORKER_ACTIONS) "@worker/ping"))
+   (xt/x:has-key? (worker-state/WORKER_ACTIONS) "@worker/ping"))
   => true
   
   ;; Check that custom action is also registered
   (!.js
    (worker-local/actions-init {"@custom/action" {"handler" k/identity}} nil)
-   (k/has-key? (worker-state/WORKER_ACTIONS) "@custom/action"))
+   (xt/x:has-key? (worker-state/WORKER_ACTIONS) "@custom/action"))
   => true)
 
 ^{:refer xt.cell.kernel.worker-local/tmpl-baseline-action :added "4.0" :unchecked true}

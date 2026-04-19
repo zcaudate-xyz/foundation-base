@@ -7,7 +7,8 @@
              [xt.db.base-scope :as scope]
              [xt.db.impl-cache :as impl-cache]
              [xt.db.impl-sql :as impl-sql]
-             [xt.lang.base-lib :as k]
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.lang.util-throttle :as th]
              [xt.sys.conn-dbsql :as conn-dbsql]]})
 
@@ -35,7 +36,7 @@
   (var dbtype (-/get-dbtype db))
   (var #{instance} db)
   (var [tag data as-input] event)
-  (var event-fn (k/get-in -/IMPL [dbtype tag]))
+  (var event-fn (xtd/get-in -/IMPL [dbtype tag]))
   (var input-tag (:? as-input "input" tag))
   (return (event-fn instance input-tag data schema lookup opts)))
 
@@ -44,13 +45,13 @@
   {:added "4.0"}
   [db triggers tables]
   (var out [])
-  (k/for:object [[id trigger] triggers]
+  (xt/for:object [[id trigger] triggers]
     (var #{listen callback} trigger)
-    (var update? (k/arr-some listen (fn [key] (return (k/has-key? tables key)))))
+    (var update? (xt/x:arr-some listen (fn [key] (return (xt/x:has-key? tables key)))))
     (when update?
-      (x:arr-push out id)
-      (if (k/get-key trigger "async")
-        (k/for:async [[ok err] (callback db trigger)]
+      (xt/x:arr-push out id)
+      (if (xt/x:get-key trigger "async")
+        (xt/for:async [[ok err] (callback db trigger)]
           {:success (return ok)
            :error   (return err)})
         (callback db trigger))))
@@ -61,7 +62,7 @@
   {:added "4.0"}
   [db id trigger]
   (var #{triggers} db)
-  (k/set-key triggers id trigger)
+  (xt/x:set-key triggers id trigger)
   (return id))
 
 (defn.xt remove-trigger
@@ -69,8 +70,8 @@
   {:added "4.0"}
   [db id]
   (var #{triggers} db)
-  (var curr (k/get-key triggers id))
-  (k/del-key triggers id)
+  (var curr (xt/x:get-key triggers id))
+  (xt/x:del-key triggers id)
   (return curr))
 
 (defn.xt db-trigger
@@ -86,8 +87,8 @@
   {:added "4.0"}
   [m schema lookup opts]
   (var dbtype (-/get-dbtype m))
-  (var create-fn (k/get-in -/IMPL [dbtype "create"]))
-  (var instance (or (k/get-key m "instance")
+  (var create-fn (xtd/get-in -/IMPL [dbtype "create"]))
+  (var instance (or (xt/x:get-key m "instance")
                     (create-fn m)))
   (var db      {"::" dbtype
                 :instance instance
@@ -97,19 +98,19 @@
   (var handler  (fn [_]
                   (var #{events
                          triggers} db)
-                  (k/set-key db "events" [])
-                  (var tables (-> (k/arr-mapcat
+                  (xt/x:set-key db "events" [])
+                  (var tables (-> (xtd/arr-mapcat
                                    events
                                    (fn [e]
                                      (return (-/process-event db e schema lookup opts))))
-                                  (k/arr-lookup)))
+                                  (xtd/arr-lookup)))
                   (return (-/process-triggers db triggers tables))))
   (var throttle (th/throttle-create handler nil))
   (var sync-handler (fn [e]
                       (return (-/process-event db e schema lookup opts))))
-  (k/set-key db "throttle" throttle)
-  (k/set-key db "handler" handler)
-  (k/set-key db "sync_handler" sync-handler)
+  (xt/x:set-key db "throttle" throttle)
+  (xt/x:set-key db "handler" handler)
+  (xt/x:set-key db "sync_handler" sync-handler)
   (return db))
 
 (defn.xt queue-event
@@ -117,7 +118,7 @@
   {:added "4.0"}
   [db event]
   (var #{throttle events} db)
-  (x:arr-push events event)
+  (xt/x:arr-push events event)
   (return (th/throttle-run throttle "main")))
 
 (defn.xt sync-event
@@ -126,12 +127,12 @@
   [db event]
   (var #{sync-handler instance triggers} db)
   (var output (sync-handler event))
-  (cond (or (k/is-string? output)
-            (k/nil? output))
+  (cond (or (xt/x:is-string? output)
+            (xt/x:nil? output))
         (return output)
         
         :else
-        (do (var tables (k/arr-lookup output))
+        (do (var tables (xtd/arr-lookup output))
             (return [(-/process-triggers db triggers tables)
                      tables]))))
 
@@ -185,9 +186,9 @@
   "adds a view trigger to the db"
   {:added "4.0"}
   [db id schema view view-fn]
-  (var view-rec (k/get-key view "view"))
+  (var view-rec (xt/x:get-key view "view"))
   (var #{table query} view-rec)
-  (var listen (k/obj-keys (scope/get-linked-tables schema
+  (var listen (xt/x:obj-keys (scope/get-linked-tables schema
                                                    table
                                                    query)))
   (var callback
