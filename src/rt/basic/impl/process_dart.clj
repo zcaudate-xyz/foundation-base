@@ -348,30 +348,31 @@
   (let [forms (if (symbol? (first forms))
                 [forms]
                 forms)
+        out-sym (gensym "out_")
         statement-op? '#{:- := var return break throw
-                         do do* if for while try
-                         for:index for:array for:object for:iter
-                         xt/for:index xt/for:array xt/for:object xt/for:iter}
+                          do do* if for while try
+                          for:return for:try for:async
+                          for:index for:array for:object for:iter
+                          xt/for:return xt/for:try xt/for:async
+                          xt/for:index xt/for:array xt/for:object xt/for:iter}
+        await-sync-form (fn [form]
+                          (list 'await
+                                (list 'Future.sync
+                                      (list 'fn '[]
+                                            (list 'return form)))))
         await-form (fn [form]
                      (if (and (seq? form)
-                              (statement-op? (first form)))
-                       form
-                       (list 'await form)))
-        out-json (list ':?
-                       (list '== 'out nil)
-                       (list 'jsonEncode 'out)
-                       (list ':?
-                             (list '== (list '. (list '. 'out 'runtimeType) (list 'toString))
-                                   "String")
-                             'out
-                             (list 'jsonEncode 'out)))
+                               (statement-op? (first form)))
+                        form
+                        (await-sync-form form)))
+        out-json (list 'jsonEncode out-sym)
         body  (concat '[do]
                       (map await-form (butlast forms))
-                      [(list 'var 'out (list 'await (last forms)))
+                      [(list 'var out-sym (await-sync-form (last forms)))
                        (list 'print out-json)])]
     `(:- "Future<void> main() async {\n "
-         ~body
-          "\n}")))
+          ~body
+           "\n}")))
 
 (defn- dart-exec
   "Resolves a user-local Dart SDK binary before falling back to PATH."

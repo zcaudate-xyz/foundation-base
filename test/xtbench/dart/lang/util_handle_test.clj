@@ -19,17 +19,27 @@
 (fact
  "plugin timing"
  ^{:hidden true}
- (!.dt (handle/plugin-timing {}))
+ (!.dt
+  (xtd/tree-get-spec (handle/plugin-timing {})))
  =>
- {"output" {}, "name" "timing"})
+ {"on_setup" "function",
+  "output" {},
+  "on_reset" "function",
+  "name" "string",
+  "on_teardown" "function"})
 
 ^{:refer xt.lang.util-handle/plugin-counts, :added "4.0"}
 (fact
  "plugin counts"
  ^{:hidden true}
- (!.dt (handle/plugin-counts {}))
+ (!.dt
+  (xtd/tree-get-spec (handle/plugin-counts {})))
  =>
- {"output" {"success" 0, "error" 0}, "name" "counts"})
+ {"output" {"success" "number", "error" "number"},
+  "on_error" "function",
+  "on_reset" "function",
+  "name" "string",
+  "on_success" "function"})
 
 ^{:refer xt.lang.util-handle/to-handle-callback, :added "4.0"}
 (fact

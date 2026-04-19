@@ -39,7 +39,7 @@
                body)
 
         :else
-        (let [entry 'entry]
+        (let [entry (gensym "entry_")]
           (apply list 'for [(list 'var entry) :in (list '. m 'entries)]
                  (concat [(list 'var k (list '. entry 'key))
                           (list 'var v (list '. entry 'value))]

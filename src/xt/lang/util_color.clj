@@ -349,7 +349,7 @@
   "converts a named color to hsl"
   {:added "4.0"}
   [s]
-  (return (-/rgb->hsl (-/named->rgb s))))
+  (return (-/rgb->hsl (-/named->rgb s) nil)))
 
 (defn.xt named->hex
   "converts a named color to hex"
@@ -361,5 +361,4 @@
   "converts a hex to hsl"
   {:added "4.0"}
   [s]
-  (return (-/rgb->hsl (-/hex->rgb s))))
-
+  (return (-/rgb->hsl (-/hex->rgb s) nil)))

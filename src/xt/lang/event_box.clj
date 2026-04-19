@@ -142,7 +142,7 @@
   (var #{data} box)
   (var ppath (xt/x:arr-slice path 0 (- (xt/x:len path) 1)))
   (var parent (xtd/get-in data ppath))
-  (when parent
+  (when (xt/x:not-nil? parent)
     (var val (xt/x:get-key parent (xt/x:last path)))
     (xt/x:del-key parent (xt/x:last path))
     (return (xt/x:not-nil? val)))

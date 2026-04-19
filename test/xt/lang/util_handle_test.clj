@@ -39,7 +39,6 @@
   (!.js
    (handle/plugin-timing {}))
   => {"output" {}, "name" "timing"}
-  
   (!.lua
    (xtd/tree-get-spec (handle/plugin-timing {})))
   => {"on_setup" "function", "output" {}, "on_reset" "function", "name" "string", "on_teardown" "function"})
@@ -69,7 +68,6 @@
                                :error   "B"
                                :finally "C"}))
   => {"on_error" "B", "on_teardown" "C", "on_success" "A"}
-
   (!.lua
    (handle/to-handle-callback {:success "A"
                                :error   "B"

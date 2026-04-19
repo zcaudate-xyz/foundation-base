@@ -44,11 +44,26 @@
 (fact
  "adds a listener to box"
  ^{:hidden true}
- (notify/wait-on
-  :dart
-  (var b (box/make-box (fn:> {:a {:b 2}})))
-  (box/add-listener b "abc" ["a"] (repl/>notify) nil)
-  (box/set-data b ["a" "b"] 3))
+ (notify/wait-on-call
+  2000
+  (fn []
+    (!.dt
+     (var b (box/make-box (fn:> {:a {:b 2}})))
+     (box/add-listener
+      b
+      "abc"
+      ["a"]
+      (fn [val]
+        (return
+         (repl/notify-socket
+          "127.0.0.1"
+          (@! (:socket-port (l/default-notify)))
+          val
+          (@! notify/*override-id*)
+          nil
+          {})))
+      nil)
+     (box/set-data b ["a" "b"] 3))))
  =>
  {"path" ["a" "b"],
   "value" 3,
@@ -72,7 +87,7 @@
  ^{:hidden true}
  (!.dt
   (var b (box/make-box (fn:> {:a {:b 2}})))
-  [(box/set-data b "c" 3) (box/get-data b)])
+  [(box/set-data b "c" 3) (box/get-data b [])])
  =>
  [[] {"a" {"b" 2}, "c" 3}])
 
@@ -82,7 +97,7 @@
  ^{:hidden true}
  (!.dt
   (var b (box/make-box (fn:> {:a {:b 2}})))
-  [(box/del-data-raw b ["a" "b"]) (box/get-data b)])
+  [(box/del-data-raw b ["a" "b"]) (box/get-data b [])])
  =>
  [true {"a" {}}])
 
@@ -92,7 +107,7 @@
  ^{:hidden true}
  (!.dt
   (var b (box/make-box (fn:> {:a {:b 2}})))
-  [(box/del-data b ["a" "b"]) (box/get-data b)])
+  [(box/del-data b ["a" "b"]) (box/get-data b [])])
  =>
  [[] {"a" {}}])
 
@@ -103,7 +118,7 @@
  (!.dt
   (var b (box/make-box (fn:> {:a 1, :b 2})))
   (box/merge-data b [] {:c 3, :d 4})
-  (box/get-data b))
+  (box/get-data b []))
  =>
  {"d" 4, "a" 1, "b" 2, "c" 3})
 
@@ -114,6 +129,6 @@
  (!.dt
   (var b (box/make-box (fn:> {:a []})))
   (box/append-data b ["a"] {:title "Hello", :body "World"})
-  (box/get-data b))
+  (box/get-data b []))
  =>
  {"a" [{"body" "World", "title" "Hello"}]})

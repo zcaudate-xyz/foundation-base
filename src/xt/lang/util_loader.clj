@@ -37,12 +37,12 @@
                    (get-fn)))
     (var check (:? (xt/x:is-function? check-fn)
                    (check-fn curr)))
-    (when (== true check)
+  (when (== true check)
       (return curr)))
 
   (when (xt/x:is-function? args)
-    (:= args args))
-  (return (load-fn args)))
+    (:= args (args)))
+  (return (load-fn (xt/x:unpack (or args [])))))
 
 (defn.xt task-unload
   "unloads a task"
@@ -187,4 +187,3 @@
            (hook-fn id unloaded)
            (return [id unloaded]))))
   (return (xt/x:arr-keep rorder unload-task)))
-

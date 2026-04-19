@@ -1,18 +1,19 @@
 (ns std.lang.model.spec-python
   (:require [std.lang.base.book :as book]
-            [std.lang.base.emit :as emit]
-            [std.lang.base.emit-common :as common]
-            [std.lang.base.emit-data :as data]
-            [std.lang.base.emit-helper :as helper]
-            [std.lang.base.emit-preprocess :as preprocess]
-            [std.lang.base.emit-top-level :as top]
-            [std.lang.base.grammar :as grammar]
-            [std.lang.base.grammar-spec :as spec]
-            [std.lang.base.script :as script]
-            [std.lang.base.util :as ut]
-            [std.lang.model.spec-xtalk]
-            [std.lang.model.spec-xtalk.com-python :as com]
-            [std.lang.model.spec-xtalk.fn-python :as fn]
+	    [std.lang.base.emit :as emit]
+             [std.lang.base.emit-common :as common]
+             [std.lang.base.emit-data :as data]
+             [std.lang.base.emit-helper :as helper]
+             [std.lang.base.emit-preprocess :as preprocess]
+             [std.lang.base.emit-top-level :as top]
+             [std.lang.base.grammar :as grammar]
+             [std.lang.base.grammar-spec :as spec]
+             [std.lang.base.script :as script]
+             [std.lang.typed.xtalk-analysis :as xtalk-analysis]
+             [std.lang.base.util :as ut]
+             [std.lang.model.spec-xtalk]
+             [std.lang.model.spec-xtalk.com-python :as com]
+             [std.lang.model.spec-xtalk.fn-python :as fn]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
             [std.lib.template :as template])
@@ -32,21 +33,119 @@
   [v]
   (if v "True" "False"))
 
+(def ^:private +python-optional-default-counts+
+  '{xt.lang.event-box/add-listener 1
+    xt.lang.event-box/get-data 1
+    xt.lang.event-route/path-to-tree 1
+    xt.lang.event-route/interim-to-tree 1
+    xt.lang.event-route/changed-params 1
+    xt.lang.event-route/get-param 1
+    xt.lang.event-route/get-all-params 1
+    xt.lang.event-route/add-url-listener 1
+    xt.lang.event-route/add-path-listener 1
+    xt.lang.event-route/add-param-listener 1
+    xt.lang.event-route/add-full-listener 1
+    xt.lang.event-route/set-url 1
+    xt.lang.event-route/set-path 2
+    xt.lang.event-route/set-param 1
+    xt.lang.event-route/reset-route 1
+    xt.lang.event-view/create-view 2
+    xt.lang.event-view/get-output 1
+    xt.lang.event-view/get-current 1
+    xt.lang.event-view/is-errored 1
+    xt.lang.event-view/is-pending 1
+    xt.lang.event-view/get-time-elapsed 1
+    xt.lang.event-view/get-time-updated 1
+    xt.lang.event-view/get-success 1
+    xt.lang.event-view/set-output 2
+    xt.lang.event-view/set-output-disabled 1
+    xt.lang.event-view/set-pending 1
+    xt.lang.event-view/set-elapsed 1
+    xt.lang.event-view/pipeline-prep 1
+    xt.lang.event-view/pipeline-set 1
+    xt.lang.event-view/pipeline-call 1
+    xt.lang.event-view/pipeline-run-impl 1
+    xt.lang.event-view/pipeline-run 1
+    xt.lang.event-view/get-with-lookup 1
+    xt.lang.event-view/sorted-lookup 1
+    xt.lang.util-color/rgb->hsl 1})
+
+(defn- python-qualified-symbol
+  [sym]
+  (let [{:keys [module]} (preprocess/macro-opts)
+        module-id (:id module)]
+    (cond
+      (or (nil? sym)
+          (namespace sym)
+          (:inner (meta sym))
+          (nil? module-id))
+      sym
+
+      :else
+      (symbol (name module-id) (name sym)))))
+
+(defn- python-optional-input?
+  [input]
+  (= :maybe (get-in input [:type :kind])))
+
+(defn- python-apply-optional-defaults
+  [sym args]
+  (if-not (and sym (vector? args))
+    args
+    (try
+      (let [qualified (python-qualified-symbol sym)
+            fn-def (xtalk-analysis/resolve-function-def qualified)
+            inferred-count (when fn-def
+                             (count (take-while python-optional-input?
+                                                (reverse (:inputs fn-def)))))
+            optional-count (or inferred-count
+                               (get +python-optional-default-counts+ qualified))]
+        (if (and optional-count (pos? optional-count))
+          (vec
+           (concat (drop-last optional-count args)
+                   (map (fn [arg]
+                          (list arg := nil))
+                        (take-last optional-count args))))
+          args))
+      (catch Throwable _
+        args))))
+
+(defn- python-lambda-body
+  [body]
+  (let [body (if (and (collection/form? body)
+                      (= 'return (first body)))
+               (second body)
+               body)]
+    (if (or (string? body)
+            (map? body)
+            (vector? body)
+            (set? body)
+            (keyword? body)
+            (nil? body))
+      (list 'quote body)
+      body)))
+
 (defn python-defn-
   "hidden function without decorators"
   {:added "4.0"}
   [form grammar mopts]
-  (top/emit-top-level :defn form grammar mopts))
+  (let [[tag name args & more] form]
+    (top/emit-top-level
+     :defn
+     (list* tag name (python-apply-optional-defaults name args) more)
+     grammar
+     mopts)))
 
 (defn python-defn
   "creates a defn function for python"
   {:added "4.0"}
   ([form]
-   (let [decorators (get (meta (second form)) :decorators)
-         body  (cons 'defn- (rest form))]
-     (if (empty? decorators)
-       body
-       `(\\ ~(apply list
+   (let [[_ name args & more] form
+         decorators (get (meta name) :decorators)
+         body  (list* 'defn- name (python-apply-optional-defaults name args) more)]
+      (if (empty? decorators)
+        body
+        `(\\ ~(apply list
                     \\ (mapcat (fn [d]
                                  [\\ (list :%
                                            (list :- "@")
@@ -64,17 +163,14 @@
          (apply list 'fn.inner (with-meta (first args)
                                  {:inner true})
                 (rest args))
-         
-         :else
-         (let [[args body] args]
-           (apply list :- :lambda
-                  (concat (if (not-empty args)
-                            [(list 'quote args) ":"]
-                            [":"])
-                          [(if (and (collection/form? body)
-                                    (= 'return (first body)))
-                             (second body)
-                             body)]))))))
+          
+           :else
+           (let [[args body] args]
+             (apply list :- :lambda
+                    (concat (if (not-empty args)
+                              [(list 'quote args) ":"]
+                              [":"])
+                            [(python-lambda-body body)]))))))
 
 (defn python-defclass
   "emits a defclass template for python"
@@ -186,7 +282,50 @@
     (template/$ (try (var ~res ~statement)
                      ~(if final (list 'return success) success)
                      (catch [Exception :as ~err]
-                         ~(if final (list 'return error) error))))))
+                          ~(if final (list 'return error) error))))))
+
+(defn tf-for-async
+  "for async transform"
+  {:added "4.0"}
+  [[_ [[res err] statement] {:keys [success error finally]}]]
+  (let [success-form (or success '(return nil))
+        error-form   (or error '(return nil))]
+    (if (and (seq? statement)
+             (= 'x:return-run (first statement)))
+      (let [[_ runner] statement
+            on-ok (gensym "on_ok")
+            on-err (gensym "on_err")
+            ex (gensym "ex")
+            state (gensym "state")]
+        (template/$
+         (do (var ~state {"res" nil
+                          "err" nil})
+             (fn ~on-ok [value]
+               (:= (. ~state ["res"]) value)
+               (:= (. ~state ["err"]) nil))
+             (fn ~on-err [value]
+               (:= (. ~state ["res"]) nil)
+               (:= (. ~state ["err"]) value))
+             (try
+               (~runner ~on-ok ~on-err)
+               (:= ~res (. ~state ["res"]))
+               (:= ~err (. ~state ["err"]))
+               (if (not= nil ~err)
+                 ~error-form
+                 ~success-form)
+               (catch [Exception :as ~ex]
+                 (:= ~err ~ex)
+                 ~error-form)
+               ~@(if finally
+                   [(list 'finally finally)])))))
+      (template/$
+       (try
+         (var ~res ~statement)
+         ~success-form
+         (catch [Exception :as ~err]
+           ~error-form)
+         ~@(if finally
+             [(list 'finally finally)]))))))
 
 (def +features+
   (let [base (-> (grammar/build :exclude [:pointer
@@ -203,12 +342,13 @@
                    :defgen      {:symbol #{'defgen} :macro #'python-defn :emit :macro}
                    :fn.inner    {:macro #'python-defn :emit :macro}
                    :with-global {:value true :raw "globals()"}
-                   :defclass    {:macro  #'python-defclass :emit :macro}
-                   :for-object  {:macro #'tf-for-object :emit :macro}
-                   :for-array   {:macro #'tf-for-array  :emit :macro}
-                   :for-iter    {:macro #'tf-for-iter   :emit :macro}
-                   :for-index   {:macro #'tf-for-index  :emit :macro}
-                   :for-return  {:macro #'tf-for-return :emit :macro}}))
+                    :defclass    {:macro  #'python-defclass :emit :macro}
+                    :for-object  {:macro #'tf-for-object :emit :macro}
+                    :for-array   {:macro #'tf-for-array  :emit :macro}
+                    :for-iter    {:macro #'tf-for-iter   :emit :macro}
+                    :for-index   {:macro #'tf-for-index  :emit :macro}
+                    :for-async   {:macro #'tf-for-async  :emit :macro}
+                    :for-return  {:macro #'tf-for-return :emit :macro}}))
         base-keys (set (keys base))
         fn-overrides (select-keys fn/+python+ base-keys)
         fn-extensions (apply dissoc fn/+python+ base-keys)

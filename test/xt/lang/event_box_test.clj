@@ -124,6 +124,28 @@
        "listener/type" "box"},
       "data" {"a" {"b" 3}}}
 
+  ^{:lang-exceptions
+    {:dart
+     {:form (notify/wait-on-call
+             2000
+             (fn []
+               (!.dt
+                (var b (box/make-box (fn:> {:a {:b 2}})))
+                (box/add-listener
+                 b
+                 "abc"
+                 ["a"]
+                 (fn [val]
+                   (return
+                    (repl/notify-socket
+                     "127.0.0.1"
+                     (@! (:socket-port (l/default-notify)))
+                     val
+                     (@! notify/*override-id*)
+                     nil
+                     {})))
+                 nil)
+                (box/set-data b ["a" "b"] 3))))}}}
   (notify/wait-on :python
     (var b (box/make-box (fn:> {:a {:b 2}})))
     (box/add-listener b
@@ -158,8 +180,8 @@
 
   (!.js
    (var b (box/make-box (fn:> {:a {:b 2}})))
-   [(box/set-data b "c" 3)
-    (box/get-data b)])
+    [(box/set-data b "c" 3)
+     (box/get-data b [])])
   => [[] {"a" {"b" 2}, "c" 3}])
 
 ^{:refer xt.lang.event-box/del-data-raw :added "4.0"}
@@ -168,8 +190,8 @@
   
   (!.js
    (var b (box/make-box (fn:> {:a {:b 2}})))
-   [(box/del-data-raw b ["a" "b"])
-    (box/get-data b)])
+    [(box/del-data-raw b ["a" "b"])
+     (box/get-data b [])])
   => [true {"a" {}}])
 
 ^{:refer xt.lang.event-box/del-data :added "4.0"}
@@ -178,8 +200,8 @@
   
   (!.js
    (var b (box/make-box (fn:> {:a {:b 2}})))
-   [(box/del-data b ["a" "b"])
-    (box/get-data b)])
+    [(box/del-data b ["a" "b"])
+     (box/get-data b [])])
   => [[] {"a" {}}])
 
 ^{:refer xt.lang.event-box/reset-data :added "4.0"}
@@ -188,10 +210,10 @@
 
   (!.js
    (var b (box/make-box (fn:> {:a {:b 2}})))
-   [(box/set-data b 3 "c")
-    (box/get-data b)
-    (box/reset-data b)
-    (box/get-data b)])
+    [(box/set-data b 3 "c")
+     (box/get-data b [])
+     (box/reset-data b)
+     (box/get-data b [])])
   [[] {"a" {"b" 2}, "c" 3}
    [] {"a" {"b" 2}}])
 
@@ -202,13 +224,13 @@
   (!.js
    (var b (box/make-box (fn:> {:a 1 :b 2})))
    (box/merge-data b [] {:c 3 :d 4})
-   (box/get-data b))
+   (box/get-data b []))
   => {"d" 4, "a" 1, "b" 2, "c" 3}
 
   (!.lua
    (var b (box/make-box (fn:> {:a 1 :b 2})))
    (box/merge-data b [] {:c 3 :d 4})
-   (box/get-data b))
+   (box/get-data b []))
   => {"d" 4, "a" 1, "b" 2, "c" 3})
 
 ^{:refer xt.lang.event-box/append-data :added "4.0"}
@@ -219,5 +241,5 @@
    (var b (box/make-box (fn:> {:a []})))
    (box/append-data b ["a"] {:title "Hello"
                              :body "World"})
-   (box/get-data b))
+   (box/get-data b []))
   => {"a" [{"body" "World", "title" "Hello"}]})
