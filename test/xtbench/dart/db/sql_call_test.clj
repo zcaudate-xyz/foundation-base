@@ -12,6 +12,7 @@
   :config {:dbname "test-scratch"},
   :require [[rt.postgres.test.scratch-v1 :as scratch]]})
 
+^#:xtalk{:template true}
 (l/script-
  :dart
  {:runtime :twostep,

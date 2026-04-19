@@ -159,16 +159,17 @@
 (def template-forms-with-helper-runtime
   (read-string
    "[(ns xtbench.js.sample.sql-call-test
-          (:require [std.lang :as l])
-          (:use code.test))
-       (l/script- :postgres {:runtime :jdbc.client
-                             :config {:dbname \"test-scratch\"}})
-       (l/script- :js {:runtime :basic})
-       (fact:global {:setup [(l/rt:restart)]})
-        (fact \"placeholder\"
-          ^:hidden
-          (!.js 1)
-          => 1)]"))
+           (:require [std.lang :as l])
+           (:use code.test))
+        (l/script- :postgres {:runtime :jdbc.client
+                              :config {:dbname \"test-scratch\"}})
+        ^{:xtalk/template true}
+        (l/script- :js {:runtime :basic})
+        (fact:global {:setup [(l/rt:restart)]})
+         (fact \"placeholder\"
+           ^:hidden
+           (!.js 1)
+           => 1)]"))
 
 (def js-sqlite-template-forms
   (read-string
@@ -498,8 +499,16 @@
   (single-runtime-template-lang runtime-template-forms)
   => :js
 
+  (single-runtime-template-lang template-forms-with-helper-runtime)
+  => :js
+
   (single-runtime-template-lang runtime-test-forms)
   => nil)
+
+^{:refer std.lang.manage.xtalk-scaffold/infer-runtime-lang :added "4.1"}
+(fact "prefers explicitly marked template scripts over helper runtimes"
+  (infer-runtime-lang template-forms-with-helper-runtime)
+  => :js)
 
 ^{:refer std.lang.manage.xtalk-scaffold/runtime-suffixed-test-ns? :added "4.1"}
 (fact "detects runtime suffixed test namespaces"

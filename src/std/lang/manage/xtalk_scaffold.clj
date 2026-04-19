@@ -730,18 +730,31 @@
   [fact-form lang]
   (let [[fact title & body] fact-form
         lang (normalize-runtime-lang lang)
+        fact-exception (get (form-language-exceptions fact-form) lang)
         updated-body
         (loop [xs body
                out []]
           (if (empty? xs)
             out
-             (let [[expr arrow expect & more] xs]
-               (if (= '=> arrow)
-                 (let [exception (template-language-exception expr lang)
-                       updated-expr (apply-template-language-exception-expr expr lang)
-                       updated-expect (if (contains? exception :expect)
-                                        (:expect exception)
-                                        expect)
+              (let [[expr arrow expect & more] xs]
+                (if (= '=> arrow)
+                  (let [expr-exception (template-language-exception expr lang)
+                        exception (merge fact-exception expr-exception)
+                        updated-expr (cond
+                                       (true? (:skip exception))
+                                       nil
+
+                                       (contains? exception :form)
+                                       (let [replacement (:form exception)]
+                                         (if (runtime-dispatch-form? expr)
+                                           (with-meta (list (first expr) replacement) (meta expr))
+                                           replacement))
+
+                                       :else
+                                       expr)
+                        updated-expect (if (contains? exception :expect)
+                                         (:expect exception)
+                                         expect)
                        updated-expect (normalize-runtime-expect updated-expect lang)]
                    (recur more
                           (cond-> out
@@ -980,16 +993,19 @@
       (str (fs/path (fs/parent input-path)
                     (str (fs/ns->file target-test-ns) ".clj"))))))
 
+(declare single-runtime-template-lang)
+
 (defn infer-runtime-lang
   [forms]
-  (let [expanded (mapcat expand-top-level-form forms)]
-    (some (fn [form]
-            (when (script-form? form)
-              (let [[_ lang] form]
-                (some (fn [[k {:keys [script]}]]
-                        (when (= lang script) k))
-                        +runtime-lang-config+))))
-           expanded)))
+  (or (single-runtime-template-lang forms)
+      (let [expanded (mapcat expand-top-level-form forms)]
+        (some (fn [form]
+                (when (script-form? form)
+                  (let [[_ lang] form]
+                    (some (fn [[k {:keys [script]}]]
+                            (when (= lang script) k))
+                          +runtime-lang-config+))))
+               expanded))))
 
 (defn script-form-lang
   [form]
@@ -1000,6 +1016,10 @@
                 k))
             +runtime-lang-config+))))
 
+(defn template-script-form?
+  [form]
+  (true? (:xtalk/template (meta form))))
+
 (defn runtime-script-forms
   [forms]
   (let [expanded (mapcat expand-top-level-form forms)]
@@ -1007,8 +1027,16 @@
               (if-let [lang (script-form-lang form)]
                 (assoc acc lang form)
                 acc))
-            {}
-            expanded)))
+             {}
+             expanded)))
+
+(defn template-runtime-script-forms
+  [forms]
+  (let [script-forms (runtime-script-forms forms)]
+    (into {}
+          (filter (fn [[_ form]]
+                    (template-script-form? form)))
+          script-forms)))
 
 (defn require-entry-alias
   [entry]
@@ -1044,9 +1072,18 @@
 
 (defn single-runtime-template-lang
   [forms]
-  (let [langs (runtime-script-langs forms)]
-    (when (= 1 (count langs))
-      (first langs))))
+  (let [template-script-forms (template-runtime-script-forms forms)
+        template-langs (->> template-script-forms keys vec)]
+    (cond (= 1 (count template-langs))
+          (first template-langs)
+
+          (seq template-langs)
+          nil
+
+          :else
+          (let [langs (runtime-script-langs forms)]
+            (when (= 1 (count langs))
+              (first langs))))))
 
 (defn runtime-suffixed-test-ns?
   [test-ns]

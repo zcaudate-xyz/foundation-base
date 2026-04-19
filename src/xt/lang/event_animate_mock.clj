@@ -47,13 +47,13 @@
   "creates a transition from params"
   {:added "4.0"}
   ([indicator tparams transition tf]
-   (var [prev curr] transition)
-    (var callback-fn
+    (var [prev curr] transition)
+     (var callback-fn
          (fn [callback]
-           (-/set-value indicator (tf curr))
-           (when callback
-             (callback nil))))
-    (return callback-fn)))
+            (-/set-value indicator (tf curr))
+            (when (xt/x:not-nil? callback)
+              (callback nil))))
+     (return callback-fn)))
 
 (def.xt MOCK
   {:create-val        -/new-observed

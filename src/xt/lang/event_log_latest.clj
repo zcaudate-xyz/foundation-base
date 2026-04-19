@@ -24,10 +24,12 @@
   "clears the cache given a time point"
   {:added "4.0"}
   [log t]
-  (:= t (or t (xt/x:now-ms)))
+  (when (xt/x:nil? t)
+    (:= t (xt/x:now-ms)))
   (var #{last interval cache} log)
   (var out [])
-  (when (and last (>= interval (- t last)))
+  (when (and (xt/x:not-nil? last)
+             (>= interval (- t last)))
     (return out))
   (xt/x:set-key log "last" t)
    (xt/for:array [k (xt/x:obj-keys cache)]

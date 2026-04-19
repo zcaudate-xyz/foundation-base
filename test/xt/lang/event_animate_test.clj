@@ -315,10 +315,15 @@
 (fact "makes a binary indicator"
   ^:hidden
   
-  ^{:lang-exceptions {:lua {:skip true}}}
+  ^{:lang-exceptions {:lua {:skip true}
+                      :dart {:expect [0
+                                      {"running" false, "queued" [], "animation" nil}
+                                      1
+                                      {"running" false, "queued" [], "animation" nil}
+                                      0]}}}
   (!.js
    (var progress-fn (fn [_] (return nil)))
-    (var t (base-animate/make-binary-indicator
+     (var t (base-animate/make-binary-indicator
             mock/MOCK
             false
             {}
@@ -358,9 +363,14 @@
 (fact  "makes a linear indicator"
   ^:hidden
   
+  ^{:lang-exceptions {:dart {:expect [1
+                                      {"running" false, "queued" [], "animation" nil}
+                                      3
+                                      {"running" false, "queued" [], "animation" nil}
+                                      8]}}}
   (!.js
-    (var prev {:current 1})
-    (var set-prev
+     (var prev {:current 1})
+     (var set-prev
          (fn [v]
            (:= (. prev ["current"])
                v)))
@@ -438,9 +448,14 @@
 (fact "makes a circular indicator"
   ^:hidden
   
+  ^{:lang-exceptions {:dart {:expect [1
+                                      {"running" false, "queued" [], "animation" nil}
+                                      1
+                                      {"running" false, "queued" [], "animation" nil}
+                                      -13]}}}
   (!.js
-    (var prev {:current 1})
-    (var set-prev
+     (var prev {:current 1})
+     (var set-prev
          (fn [v]
            (:= (. prev ["current"])
                v)))
