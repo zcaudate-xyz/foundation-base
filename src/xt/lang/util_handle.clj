@@ -8,9 +8,11 @@
 (defn.xt incr-fn
   []
   (var i -1)
-  (return (fn []
-            (:= i (+ i 1))
-            (return (xt/x:cat "id-" (xt/x:to-string i))))))
+  (var next-id-fn
+       (fn []
+         (:= i (+ i 1))
+         (return (xt/x:cat "id-" (xt/x:to-string i)))))
+  (return next-id-fn))
 
 (defn.xt plugin-timing
   "plugin timing"

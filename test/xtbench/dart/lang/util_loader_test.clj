@@ -142,6 +142,7 @@
 ^{:refer xt.lang.util-loader/load-tasks-single, :added "4.0"}
 (fact
  "loads a single task"
+ ^{:hidden true}
  (notify/wait-on
   :dart
   (var

@@ -192,9 +192,14 @@
    async-fn
    (fn
     [handler-fn context cb]
-    (return (cb.success (handler-fn context)))))
-  (view/pipeline-run context disabled async-fn (fn:>) (fn:>))
-  context.acc)
+    (return ((. cb ["success"]) (handler-fn context)))))
+  (view/pipeline-run
+   context
+   disabled
+   async-fn
+   (fn [acc tag])
+   (fn [acc]))
+  (. context ["acc"]))
  =>
  {"::" "view.run",
   "pre" [false],
@@ -218,9 +223,14 @@
    async-fn
    (fn
     [handler-fn context cb]
-    (return (cb.success (handler-fn context)))))
-  (view/pipeline-run-remote context true async-fn (fn:>) (fn:>))
-  context.acc)
+    (return ((. cb ["success"]) (handler-fn context)))))
+  (view/pipeline-run-remote
+   context
+   true
+   async-fn
+   (fn [acc tag])
+   (fn [acc]))
+  (. context ["acc"]))
  =>
  {"::" "view.run",
   "pre" [false],
@@ -241,9 +251,14 @@
    async-fn
    (fn
     [handler-fn context cb]
-    (return (cb.success (handler-fn context)))))
-  (view/pipeline-run-sync context true async-fn (fn:>) (fn:>))
-  context.acc)
+    (return ((. cb ["success"]) (handler-fn context)))))
+  (view/pipeline-run-sync
+   context
+   true
+   async-fn
+   (fn [acc tag])
+   (fn [acc]))
+  (. context ["acc"]))
  =>
  {"::" "view.run",
   "pre" [false],

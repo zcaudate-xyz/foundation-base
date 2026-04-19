@@ -54,26 +54,26 @@
   
   (notify/wait-on :js
     (var out [])
-    (var throttle (throttle/throttle-create
-                   (fn [i]
-                     (return (new Promise
-                                  (fn [resolve reject]
-                                    (setTimeout (fn []
-                                                  (x:arr-push out i)
-                                                  (resolve (repl/notify out)))
-                                                100)))))
-                   nil))
+    (var handler
+         (fn [i]
+           (return (new Promise
+                        (fn [resolve reject]
+                          (setTimeout (fn []
+                                        (x:arr-push out i)
+                                        (resolve (repl/notify out)))
+                                      100))))))
+    (var throttle (throttle/throttle-create handler nil))
     (throttle/throttle-run-async throttle 1))
   => [1]
   
   (notify/wait-on :lua
     (var out [])
-    (var throttle (throttle/throttle-create
-                   (fn [i]
-                     (ngx.sleep 0.1)
-                     (x:arr-push out i)
-                     (repl/notify out))
-                   nil))
+    (var handler
+         (fn [i]
+           (ngx.sleep 0.1)
+           (x:arr-push out i)
+           (repl/notify out)))
+    (var throttle (throttle/throttle-create handler nil))
     (throttle/throttle-run-async throttle 1))
   => [1])
 
@@ -87,15 +87,15 @@
 
   (notify/wait-on :js
     (:= (!:G OUT) [])
-    (var throttle (throttle/throttle-create
-                   (fn [i]
-                     (return (new Promise
-                                  (fn [resolve reject]
-                                    (setTimeout (fn []
-                                                  (x:arr-push (!:G OUT) i)
-                                                  (resolve (repl/notify (!:G OUT))))
-                                                100)))))
-                   nil))
+    (var handler
+         (fn [i]
+           (return (new Promise
+                        (fn [resolve reject]
+                          (setTimeout (fn []
+                                        (x:arr-push (!:G OUT) i)
+                                        (resolve (repl/notify (!:G OUT))))
+                                      100))))))
+    (var throttle (throttle/throttle-create handler nil))
     (throttle/throttle-run throttle 1)
     (throttle/throttle-run throttle 1)
     (throttle/throttle-run throttle 1)
@@ -113,12 +113,12 @@
   (notify/wait-on :lua
     (:= (!:G OUT) [])
     (var throttle)
-    (:= throttle (throttle/throttle-create
-                  (fn [i]
-                    (ngx.sleep 0.1)
-                    (x:arr-push (!:G OUT) i)
-                    (repl/notify (!:G OUT)))
-                  nil))
+    (var handler
+         (fn [i]
+           (ngx.sleep 0.1)
+           (x:arr-push (!:G OUT) i)
+           (repl/notify (!:G OUT))))
+    (:= throttle (throttle/throttle-create handler nil))
     (throttle/throttle-run throttle 1)
     (throttle/throttle-run throttle 1)
     (throttle/throttle-run throttle 1)
@@ -137,16 +137,17 @@
   ^:hidden
 
   (notify/wait-on :js
-    (var throttle (throttle/throttle-create
-                   (fn [i]
-                      (return (new Promise
-                                   (fn [resolve reject]
-                                     (setTimeout (fn []
-                                                   (resolve (repl/notify
-                                                             [(throttle/throttle-active throttle)
-                                                              (throttle/throttle-waiting throttle)])))
-                                                 (:? (== i 1) 100 300))))))
-                   nil))
+    (var throttle)
+    (var handler
+         (fn [i]
+           (return (new Promise
+                        (fn [resolve reject]
+                          (setTimeout (fn []
+                                        (resolve (repl/notify
+                                                  [(throttle/throttle-active throttle)
+                                                   (throttle/throttle-waiting throttle)])))
+                                      (:? (== i 1) 100 300)))))))
+    (:= throttle (throttle/throttle-create handler nil))
     (throttle/throttle-run throttle 1)
     (throttle/throttle-run throttle 1)
     (throttle/throttle-run throttle 1)
@@ -158,12 +159,12 @@
 
   (notify/wait-on :lua
     (var throttle)
-    (:= throttle (throttle/throttle-create
-                  (fn [i]
-                    (ngx.sleep 0.1)
-                    (repl/notify [(throttle/throttle-active throttle)
-                                  (throttle/throttle-waiting throttle)]))
-                  nil))
+    (var handler
+         (fn [i]
+           (ngx.sleep 0.1)
+           (repl/notify [(throttle/throttle-active throttle)
+                         (throttle/throttle-waiting throttle)])))
+    (:= throttle (throttle/throttle-create handler nil))
     (throttle/throttle-run throttle 1)
     (throttle/throttle-run throttle 1)
     (throttle/throttle-run throttle 1)

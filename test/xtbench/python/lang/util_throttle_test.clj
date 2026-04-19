@@ -33,19 +33,18 @@
   :python
   (var out [])
   (var
-   throttle
-   (throttle/throttle-create
-    (fn
-     [i]
-     (return
-      (new
-       Promise
-       (fn
-        [resolve reject]
-        (setTimeout
-         (fn [] (x:arr-push out i) (resolve (repl/notify out)))
-         100)))))
-    nil))
+   handler
+   (fn
+    [i]
+    (return
+     (new
+      Promise
+      (fn
+       [resolve reject]
+       (setTimeout
+        (fn [] (x:arr-push out i) (resolve (repl/notify out)))
+        100))))))
+  (var throttle (throttle/throttle-create handler nil))
   (throttle/throttle-run-async throttle 1))
  =>
  [1])
@@ -58,22 +57,21 @@
   :python
   (:= (!:G OUT) [])
   (var
-   throttle
-   (throttle/throttle-create
-    (fn
-     [i]
-     (return
-      (new
-       Promise
-       (fn
-        [resolve reject]
-        (setTimeout
-         (fn
-          []
-          (x:arr-push (!:G OUT) i)
-          (resolve (repl/notify (!:G OUT))))
-         100)))))
-    nil))
+   handler
+   (fn
+    [i]
+    (return
+     (new
+      Promise
+      (fn
+       [resolve reject]
+       (setTimeout
+        (fn
+         []
+         (x:arr-push (!:G OUT) i)
+         (resolve (repl/notify (!:G OUT))))
+        100))))))
+  (var throttle (throttle/throttle-create handler nil))
   (throttle/throttle-run throttle 1)
   (throttle/throttle-run throttle 1)
   (throttle/throttle-run throttle 1)
@@ -90,25 +88,25 @@
  ^{:hidden true}
  (notify/wait-on
   :python
+  #'throttle
   (var
-   throttle
-   (throttle/throttle-create
-    (fn
-     [i]
-     (return
-      (new
-       Promise
-       (fn
-        [resolve reject]
-        (setTimeout
-         (fn
-          []
-          (resolve
-           (repl/notify
-            [(throttle/throttle-active throttle)
-             (throttle/throttle-waiting throttle)])))
-         (:? (== i 1) 100 300))))))
-    nil))
+   handler
+   (fn
+    [i]
+    (return
+     (new
+      Promise
+      (fn
+       [resolve reject]
+       (setTimeout
+        (fn
+         []
+         (resolve
+          (repl/notify
+           [(throttle/throttle-active throttle)
+            (throttle/throttle-waiting throttle)])))
+        (:? (== i 1) 100 300)))))))
+  (:= throttle (throttle/throttle-create handler nil))
   (throttle/throttle-run throttle 1)
   (throttle/throttle-run throttle 1)
   (throttle/throttle-run throttle 1)

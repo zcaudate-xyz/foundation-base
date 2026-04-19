@@ -27,7 +27,7 @@
    (route/interim-from-url "?id=1")
    (route/interim-from-url "hello?")])
  =>
- [{"params" {"[\"hello\", \"world\"]" {"id" "1", "type" "name"}},
+ [{"params" {"[\"hello\",\"world\"]" {"id" "1", "type" "name"}},
    "path" ["hello" "world"]}
   {"params" {"[]" {"id" "1"}}, "path" []}
   {"params" {}, "path" ["hello"]}])
@@ -91,7 +91,7 @@
    "[\"hello\"]" "world"}
   {"params" {"[]" {"id" "1", "type" "name"}},
    "[]" "hello",
-   "[\"hello\", \"world\"]" nil,
+   "[\"hello\",\"world\"]" nil,
    "[\"hello\"]" "world"}])
 
 ^{:refer xt.lang.event-route/path-from-tree, :added "4.0"}
@@ -356,10 +356,10 @@
    :dart
    (var r (route/make-route "hello"))
    (route/add-path-listener r ["hello"] "a1" (repl/>notify))
-   (route/set-path r ["hello" "world"]))
+   (route/set-path r ["hello" "world"] nil))
   (!.dt
    (var r (route/make-route "hello"))
-   (route/set-path r ["hello" "world"])
+   (route/set-path r ["hello" "world"] nil)
    [(route/get-url r) r])]
  =>
  [+out+
@@ -421,17 +421,17 @@
  "sets a param in a route"
  (!.dt
   (var r (route/make-route "hello?auth=sign_in"))
-  (route/set-param r "auth" nil)
+  (route/set-param r "auth" nil nil)
   (route/get-url r))
  ^{:hidden true}
  [(notify/wait-on
    :dart
    (var r (route/make-route "hello?auth=sign_in"))
    (route/add-param-listener r "auth" "a1" (repl/>notify))
-   (route/set-param r "auth" "register"))
+   (route/set-param r "auth" "register" nil))
   (!.dt
    (var r (route/make-route "hello?auth=sign_in"))
-   (route/set-param r "auth" "register")
+   (route/set-param r "auth" "register" nil)
    [(route/get-url r) r])]
  =>
  [+out+

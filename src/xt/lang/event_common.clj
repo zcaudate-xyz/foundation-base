@@ -203,8 +203,12 @@
   {:added "4.0"}
   [entry event]
   (var #{callback meta pred} entry)
-  (when (or (xt/x:nil? pred)
-            (pred event))
+  (var allowed true)
+  (when (xt/x:not-nil? pred)
+    (var result (pred event))
+    (:= allowed (and (xt/x:not-nil? result)
+                     (not= false result))))
+  (when allowed
     (var event-meta (xt/x:get-key event "meta"))
     (var nmeta (xt/x:obj-assign (:? (xt/x:nil? event-meta)
                                     {}

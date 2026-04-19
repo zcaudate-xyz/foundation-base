@@ -274,7 +274,9 @@
   (var changed false)
   
   (xt/for:array [[i v] npath]
-    (var pv (xt/x:get-idx ppath i))
+    (var pv (:? (< i (xt/x:len ppath))
+                (xt/x:get-idx ppath i)
+                nil))
     (when (not= pv v)
       (:= changed true))
     (when changed
@@ -401,10 +403,12 @@
       :route/param param}
      meta)
     (fn [event]
-      (return (and (xt/x:get-key (. event ["path"])
-                              pkey)
-                   (xt/x:get-key (. event ["params"])
-                              param)))))))
+      (var path-match (xt/x:get-key (. event ["path"])
+                                    pkey))
+      (var param-match (xt/x:get-key (. event ["params"])
+                                     param))
+      (return (and (== true path-match)
+                   (xt/x:not-nil? param-match)))))))
 
 (def.xt ^{:arglists '([route listener-id])}
   remove-listener

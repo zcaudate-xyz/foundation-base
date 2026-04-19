@@ -169,9 +169,11 @@
   "wraps handler for context args"
   {:added "4.0"}
   [handler]
-  (return (fn [context]
-            (var args (:? (xt/x:nil? (. context ["args"])) [] (. context ["args"])))
-            (return (xt/x:apply handler args)))))
+  (var wrapped-fn
+       (fn [context]
+         (var args (:? (xt/x:nil? (. context ["args"])) [] (. context ["args"])))
+         (return (xt/x:apply handler args))))
+  (return wrapped-fn))
 
 (defn.xt check-disabled
   "checks that view is disabled"
@@ -208,6 +210,16 @@
     default-process
     options]
   (var identity-fn (fn [x] (return x)))
+  (var default-args-fn
+       (:? (xt/x:is-function? default-args)
+           default-args
+           (fn []
+             (return default-args))))
+  (var default-output-fn
+       (:? (xt/x:is-function? default-output)
+           default-output
+           (fn []
+             (return default-output))))
   (var entry {:pipeline  (xtd/obj-assign-nested
                           {:main    {:handler main-handler
                                      :wrapper -/wrap-args}
@@ -218,30 +230,30 @@
                            :check-args  -/parse-args    
                            :check-disabled -/check-disabled}
                           pipeline)
-              :options    (:? (xt/x:nil? options) {} options)
-              :input  {:current nil
-                       :updated nil
-                       :default (:? (xt/x:is-function? default-args) default-args (fn:> default-args))}
-              :output {:type "output"
-                       :current nil
-                       :updated nil
-                       :elapsed nil
-                       :process (:? (xt/x:nil? default-process) identity-fn default-process)
-                       :default (:? (xt/x:is-function? default-output) default-output (fn:> default-output))}})
+               :options    (:? (xt/x:nil? options) {} options)
+               :input  {:current nil
+                        :updated nil
+                        :default default-args-fn}
+               :output {:type "output"
+                        :current nil
+                        :updated nil
+                        :elapsed nil
+                        :process (:? (xt/x:nil? default-process) identity-fn default-process)
+                        :default default-output-fn}})
   (when (xtd/get-in pipeline ["remote"])
-    (xt/x:set-key entry "remote" {:type "remote"
-                               :current nil
-                               :updated nil
-                               :elapsed nil
-                                :process (:? (xt/x:nil? default-process) identity-fn default-process)
-                               :default (:? (xt/x:is-function? default-output) default-output (fn:> default-output))}))
+     (xt/x:set-key entry "remote" {:type "remote"
+                                :current nil
+                                :updated nil
+                                :elapsed nil
+                                 :process (:? (xt/x:nil? default-process) identity-fn default-process)
+                                :default default-output-fn}))
   (when (xtd/get-in pipeline ["sync"])
-    (xt/x:set-key entry "sync" {:type "sync"
-                               :current nil
-                               :updated nil
-                               :elapsed nil
-                                :process (:? (xt/x:nil? default-process) identity-fn default-process)
-                               :default (:? (xt/x:is-function? default-output) default-output (fn:> default-output))}))
+     (xt/x:set-key entry "sync" {:type "sync"
+                                :current nil
+                                :updated nil
+                                :elapsed nil
+                                 :process (:? (xt/x:nil? default-process) identity-fn default-process)
+                                :default default-output-fn}))
   (return
    (event-common/blank-container
     "event.view"
@@ -380,7 +392,7 @@
      (return (process ((. output ["default"]))))
      (return (:? (xt/x:nil? (. output ["current"]))
                  (process ((. output ["default"])))
-                 (. output ["current"])))))))
+                 (. output ["current"]))))))
 
 (defn.xt set-input
   "sets the input"
