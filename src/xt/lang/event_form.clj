@@ -161,20 +161,22 @@
   (var #{validators} form)
   (var fields (xt/x:obj-keys validators))
   (return
-   (event-common/trigger-listeners
-    form
-    {:type   event-type
-     :fields fields})))
+   (event-common/task-await
+    (event-common/trigger-listeners
+     form
+     {:type   event-type
+      :fields fields}))))
 
 (defn.xt trigger-field
   "triggers the callback"
   {:added "4.0"}
   [form fields event-type]
   (return
-   (event-common/trigger-listeners
-    form
-    {:type   event-type
-     :fields (event-common/arrayify-path fields)})))
+   (event-common/task-await
+    (event-common/trigger-listeners
+     form
+     {:type   event-type
+      :fields (event-common/arrayify-path fields)}))))
 
 (defn.xt set-field
   "sets the field"

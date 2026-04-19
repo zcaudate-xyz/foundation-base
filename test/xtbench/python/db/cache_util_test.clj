@@ -20,10 +20,10 @@
    (l/rt:scaffold :python)
    (def
     +flattened+
-    (!.js (f/flatten sample/Schema "UserAccount" sample/RootUser {})))
+    (!.py (f/flatten sample/Schema "UserAccount" sample/RootUser {})))
    (def
     +flattened-full+
-    (!.js
+    (!.py
      (f/flatten sample/Schema "UserAccount" sample/RootUserFull {})))],
   :teardown [(l/rt:stop)]})
 
@@ -114,7 +114,7 @@
   :setup
   [(def
     +full-core+
-    (!.js
+    (!.py
      (f/flatten
       sample/Schema
       "UserAccount"
@@ -130,7 +130,7 @@
       {})))
    (def
     +full-contact+
-    (!.js
+    (!.py
      (f/flatten
       sample/Schema
       "UserAccount"
@@ -144,7 +144,7 @@
       {})))
    (def
     +full-org-notify+
-    (!.js
+    (!.py
      (f/flatten
       sample/Schema
       "UserAccount"
@@ -154,7 +154,7 @@
       {})))
    (def
     +full-wallets+
-    (!.js
+    (!.py
      (f/flatten
       sample/Schema
       "UserAccount"
@@ -169,7 +169,7 @@
       {})))
    (def
     +full-no-wallets+
-    (!.js
+    (!.py
      (f/flatten
       sample/Schema
       "UserAccount"
@@ -199,7 +199,7 @@
   :setup
   [(def
     +full-core+
-    (!.js
+    (!.py
      (f/flatten
       sample/Schema
       "UserAccount"
@@ -215,7 +215,7 @@
       {})))
    (def
     +full-contact+
-    (!.js
+    (!.py
      (f/flatten
       sample/Schema
       "UserAccount"
@@ -229,7 +229,7 @@
       {})))
    (def
     +full-org-notify+
-    (!.js
+    (!.py
      (f/flatten
       sample/Schema
       "UserAccount"
@@ -239,7 +239,7 @@
       {})))
    (def
     +full-wallets+
-    (!.js
+    (!.py
      (f/flatten
       sample/Schema
       "UserAccount"
@@ -254,7 +254,7 @@
       {})))
    (def
     +full-no-wallets+
-    (!.js
+    (!.py
      (f/flatten
       sample/Schema
       "UserAccount"
@@ -401,7 +401,7 @@
   :setup
   [(def
     +account+
-    (!.js
+    (!.py
      (f/flatten
       sample/Schema
       "UserAccount"
@@ -410,7 +410,7 @@
    (def
     +profile+
     (dissoc
-     (!.js (f/flatten sample/Schema "UserAccount" sample/RootUser {}))
+     (!.py (f/flatten sample/Schema "UserAccount" sample/RootUser {}))
      "UserAccount"))]}
 (fact
  "adds single link"

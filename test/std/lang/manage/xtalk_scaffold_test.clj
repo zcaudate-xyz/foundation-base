@@ -190,7 +190,36 @@
         => [nil nil]
         [(notify/captured :lua)
          (:id (l/rt :lua))]
-        => [nil nil])]"))
+         => [nil nil])]"))
+
+(def metadata-setup-runtime-forms
+  (read-string
+   "[(ns xt.sample.cache-meta-test
+        (:require [std.lang :as l])
+        (:use code.test))
+      (l/script- :js {:runtime :basic})
+      (l/script- :lua {:runtime :basic})
+      ^{:refer xt.sample.cache-meta/setup :added \"4.1\"
+        :setup [(def +account+ (!.js {:id 1}))]}
+      (fact \"retargets metadata setup\"
+        ^:hidden
+        (!.js +account+)
+        => {:id 1}
+        (!.lua +account+)
+        => {:id 1})]"))
+
+(def alias-gated-runtime-forms
+  (read-string
+   "[(ns xt.sample.alias-gated-test
+        (:require [std.lang :as l])
+        (:use code.test))
+      (l/script- :js {:runtime :basic
+                      :require [[xt.lang.common-repl :as repl]]})
+      (l/script- :lua {:runtime :basic})
+      (fact \"js-only helper\"
+        ^:hidden
+        (!.js (repl/notify 1))
+        => 1)]"))
 
 (def lua-specific-template-forms
   (read-string
@@ -558,6 +587,21 @@
      (str/includes? lua-out "(notify/wait-on :lua)")
      (not (str/includes? lua-out "(notify/wait-on :js)"))])
   => [true true true true true true true true])
+
+^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-test-forms :added "4.1"}
+(fact "retargets metadata setup forms in split output"
+  (let [{:keys [by-lang]} (separate-runtime-test-forms metadata-setup-runtime-forms [:js :lua])
+        lua-out (render-top-level-forms (get by-lang :lua))]
+    [(str/includes? lua-out ":setup [(def +account+ (!.lua {:id 1}))]")
+     (not (str/includes? lua-out ":setup [(def +account+ (!.js {:id 1}))]"))])
+  => [true true])
+
+^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-test-forms :added "4.1"}
+(fact "does not synthesize split output when target runtime lacks required aliases"
+  (let [{:keys [by-lang]} (separate-runtime-test-forms alias-gated-runtime-forms [:js :lua])]
+    [(contains? by-lang :js)
+     (contains? by-lang :lua)])
+  => [true false])
 
 ^{:refer std.lang.manage.xtalk-scaffold/classify-split-form :added "4.1"}
 (fact "classifies split-relevant forms"

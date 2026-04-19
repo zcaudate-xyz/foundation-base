@@ -195,15 +195,17 @@
             notify-id   (or notify/*override-id*
                             (f/error "No ID for Notify"))]
         (template/$
-         (fn [val]
-            (return
-             (xt.lang.common-repl/notify-socket
-              "127.0.0.1"
-              ~socket-port
-              ~value-expr
-              ~notify-id
-              nil
-              {})))))
+          (fn [val]
+            (var task
+                 (xt.lang.common-repl/notify-socket
+                  "127.0.0.1"
+                  ~socket-port
+                  ~value-expr
+                  ~notify-id
+                  nil
+                  {}))
+            (return {"::" "notify.task"
+                     "task" task}))))
       (let [notify-id (or notify/*override-id*
                           (f/error "No ID for Notify"))
             notify-expr (notify-form notify-id value-expr nil)]

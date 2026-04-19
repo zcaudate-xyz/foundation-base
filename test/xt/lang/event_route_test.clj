@@ -571,11 +571,31 @@
 (fact "sets the url for a route"
   ^:hidden
     
-  [(notify/wait-on :js
-      (var r (route/make-route "hello"))
-      (route/add-path-listener r ["hello"] "a1"
-                               (repl/>notify))
-      (route/set-url r "hello/world"))]
+  [^{:lang-exceptions
+     {:dart
+      {:form (notify/wait-on-call
+              2000
+              (fn []
+                (!.dt
+                 (var r (route/make-route "hello"))
+                 (route/add-path-listener
+                  r ["hello"] "a1"
+                  (fn [val]
+                    (return
+                     (repl/notify-socket
+                      "127.0.0.1"
+                      (@! (:socket-port (l/default-notify)))
+                      val
+                      (@! notify/*override-id*)
+                      nil
+                      {})))
+                  nil)
+                 (route/set-url r "hello/world" nil))))}}}
+   (notify/wait-on :js
+       (var r (route/make-route "hello"))
+       (route/add-path-listener r ["hello"] "a1"
+                                (repl/>notify))
+       (route/set-url r "hello/world"))]
   [{"params" {},
     "path" {"[\"hello\"]" true},
     "type" "route.url",
@@ -603,11 +623,31 @@
 (fact "sets the path and param"
   ^:hidden
   
-   [(notify/wait-on :js
-       (var r (route/make-route "hello"))
-       (route/add-path-listener r ["hello"] "a1"
-                                (repl/>notify))
-       (route/set-path r ["hello" "world"] nil))
+   [^{:lang-exceptions
+      {:dart
+       {:form (notify/wait-on-call
+               2000
+               (fn []
+                 (!.dt
+                  (var r (route/make-route "hello"))
+                  (route/add-path-listener
+                   r ["hello"] "a1"
+                   (fn [val]
+                     (return
+                      (repl/notify-socket
+                       "127.0.0.1"
+                       (@! (:socket-port (l/default-notify)))
+                       val
+                       (@! notify/*override-id*)
+                       nil
+                       {})))
+                   nil)
+                  (route/set-path r ["hello" "world"] nil))))}}}
+    (notify/wait-on :js
+        (var r (route/make-route "hello"))
+        (route/add-path-listener r ["hello"] "a1"
+                                 (repl/>notify))
+        (route/set-path r ["hello" "world"] nil))
     (!.js
      (var r (route/make-route "hello"))
      (route/set-path r ["hello" "world"] nil)
@@ -662,11 +702,31 @@
 (fact "sets the current segment"
   ^:hidden
   
-  [(notify/wait-on :js
-      (var r (route/make-route "hello"))
-      (route/add-path-listener r ["hello"] "a1"
-                               (repl/>notify))
-      (route/set-segment r ["hello"] "world"))
+  [^{:lang-exceptions
+     {:dart
+      {:form (notify/wait-on-call
+              2000
+              (fn []
+                (!.dt
+                 (var r (route/make-route "hello"))
+                 (route/add-path-listener
+                  r ["hello"] "a1"
+                  (fn [val]
+                    (return
+                     (repl/notify-socket
+                      "127.0.0.1"
+                      (@! (:socket-port (l/default-notify)))
+                      val
+                      (@! notify/*override-id*)
+                      nil
+                      {})))
+                  nil)
+                 (route/set-segment r ["hello"] "world"))))}}}
+   (notify/wait-on :js
+       (var r (route/make-route "hello"))
+       (route/add-path-listener r ["hello"] "a1"
+                                (repl/>notify))
+       (route/set-segment r ["hello"] "world"))
    (!.js
     (var r (route/make-route "hello"))
     (route/set-segment r ["hello"] "world")
@@ -697,11 +757,31 @@
 (fact "sets a param in a route"
   ^:hidden
   
-   [(notify/wait-on :js
-       (var r (route/make-route "hello?auth=sign_in"))
-       (route/add-param-listener r "auth" "a1"
-                                 (repl/>notify))
-      (route/set-param r "auth" "register" nil))
+   [^{:lang-exceptions
+      {:dart
+       {:form (notify/wait-on-call
+               2000
+               (fn []
+                 (!.dt
+                  (var r (route/make-route "hello?auth=sign_in"))
+                  (route/add-param-listener
+                   r "auth" "a1"
+                   (fn [val]
+                     (return
+                      (repl/notify-socket
+                       "127.0.0.1"
+                       (@! (:socket-port (l/default-notify)))
+                       val
+                       (@! notify/*override-id*)
+                       nil
+                       {})))
+                   nil)
+                  (route/set-param r "auth" "register" nil))))}}}
+    (notify/wait-on :js
+        (var r (route/make-route "hello?auth=sign_in"))
+        (route/add-param-listener r "auth" "a1"
+                                  (repl/>notify))
+       (route/set-param r "auth" "register" nil))
     (!.js
      (var r (route/make-route "hello?auth=sign_in"))
      (route/set-param r "auth" "register" nil)

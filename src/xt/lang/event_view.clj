@@ -171,7 +171,9 @@
   [handler]
   (var wrapped-fn
        (fn [context]
-         (var args (:? (xt/x:nil? (. context ["args"])) [] (. context ["args"])))
+         (var args (. context ["args"]))
+         (when (xt/x:nil? args)
+           (:= args []))
          (return (xt/x:apply handler args))))
   (return wrapped-fn))
 
@@ -180,13 +182,13 @@
   {:added "4.0"}
   [context]
   (var #{input} context)
-  (return (:? (xt/x:nil? input)
-              true
-              (xt/x:nil?  (xt/x:get-key input "data"))
-              true
-              (== true (xt/x:get-key input "disabled"))
-              true
-              :else false)))
+  (when (xt/x:nil? input)
+    (return true))
+  (when (xt/x:nil? (xt/x:get-key input "data"))
+    (return true))
+  (when (== true (xt/x:get-key input "disabled"))
+    (return true))
+  (return false))
 
 (defn.xt parse-args
   "parses args from context"
@@ -207,16 +209,21 @@
   (var identity-fn (fn [x] (return x)))
   (when (xt/x:nil? options)
     (:= options {}))
-  (var default-args-fn
-       (:? (xt/x:is-function? default-args)
-           default-args
-           (fn []
-             (return default-args))))
-  (var default-output-fn
-       (:? (xt/x:is-function? default-output)
-           default-output
-           (fn []
-             (return default-output))))
+  (var default-args-fn default-args)
+  (when (not (xt/x:is-function? default-args-fn))
+    (var args-value default-args-fn)
+    (:= default-args-fn
+        (fn []
+          (return args-value))))
+  (var default-output-fn default-output)
+  (when (not (xt/x:is-function? default-output-fn))
+    (var output-value default-output-fn)
+    (:= default-output-fn
+        (fn []
+          (return output-value))))
+  (var process-fn default-process)
+  (when (xt/x:nil? process-fn)
+    (:= process-fn identity-fn))
   (var entry {:pipeline  (xtd/obj-assign-nested
                           {:main    {:handler main-handler
                                      :wrapper -/wrap-args}
@@ -228,29 +235,29 @@
                             :check-disabled -/check-disabled}
                            pipeline)
                 :options    options
-                :input  {:current nil
+                 :input  {:current nil
+                          :updated nil
+                          :default default-args-fn}
+                :output {:type "output"
+                         :current nil
                          :updated nil
-                         :default default-args-fn}
-               :output {:type "output"
-                        :current nil
-                        :updated nil
-                        :elapsed nil
-                        :process (:? (xt/x:nil? default-process) identity-fn default-process)
-                        :default default-output-fn}})
+                         :elapsed nil
+                         :process process-fn
+                         :default default-output-fn}})
   (when (xtd/get-in pipeline ["remote"])
      (xt/x:set-key entry "remote" {:type "remote"
-                                :current nil
-                                :updated nil
-                                :elapsed nil
-                                 :process (:? (xt/x:nil? default-process) identity-fn default-process)
-                                :default default-output-fn}))
+                                 :current nil
+                                 :updated nil
+                                 :elapsed nil
+                                  :process process-fn
+                                 :default default-output-fn}))
   (when (xtd/get-in pipeline ["sync"])
      (xt/x:set-key entry "sync" {:type "sync"
-                                :current nil
-                                :updated nil
-                                :elapsed nil
-                                 :process (:? (xt/x:nil? default-process) identity-fn default-process)
-                                :default default-output-fn}))
+                                 :current nil
+                                 :updated nil
+                                 :elapsed nil
+                                  :process process-fn
+                                 :default default-output-fn}))
   (return
    (event-common/blank-container
     "event.view"
@@ -322,13 +329,17 @@
   "gets the view output record"
   {:added "4.0"}
   [view dest-key]
-  (return (. view [(:? (xt/x:nil? dest-key) "output" dest-key)])))
+  (when (xt/x:nil? dest-key)
+    (:= dest-key "output"))
+  (return (. view [dest-key])))
 
 (defn.xt get-current
   "gets the current view output"
   {:added "4.0"}
   [view dest-key]
-  (return (xtd/get-in view [(:? (xt/x:nil? dest-key) "output" dest-key)
+  (when (xt/x:nil? dest-key)
+    (:= dest-key "output"))
+  (return (xtd/get-in view [dest-key
                             "current"])))
 
 (defn.xt is-disabled
@@ -344,41 +355,52 @@
   "checks that output is errored"
   {:added "4.0"}
   [view dest-key]
-  (return (== true (xtd/get-in view [(:? (xt/x:nil? dest-key) "output" dest-key)
+  (when (xt/x:nil? dest-key)
+    (:= dest-key "output"))
+  (return (== true (xtd/get-in view [dest-key
                                      "errored"]))))
 
 (defn.xt is-pending
   "checks that output is pending"
   {:added "4.0"}
   [view dest-key]
-  (return (== true (xtd/get-in view [(:? (xt/x:nil? dest-key) "output" dest-key)
+  (when (xt/x:nil? dest-key)
+    (:= dest-key "output"))
+  (return (== true (xtd/get-in view [dest-key
                                      "pending"]))))
 
 (defn.xt get-time-elapsed
   "gets time elapsed of output"
   {:added "4.0"}
   [view dest-key]
-  (return (xtd/get-in view [(:? (xt/x:nil? dest-key) "output" dest-key)
+  (when (xt/x:nil? dest-key)
+    (:= dest-key "output"))
+  (return (xtd/get-in view [dest-key
                             "elapsed"])))
 
 (defn.xt get-time-updated
   "gets time updated of output"
   {:added "4.0"}
   [view dest-key]
-  (return (xtd/get-in view [(:? (xt/x:nil? dest-key) "output" dest-key)
+  (when (xt/x:nil? dest-key)
+    (:= dest-key "output"))
+  (return (xtd/get-in view [dest-key
                             "updated"])))
 
 (defn.xt get-success
   "gets either the current or default value if errored"
   {:added "4.0"}
   [view dest-key]
-  (var output (. view [(:? (xt/x:nil? dest-key) "output" dest-key)]))
+  (when (xt/x:nil? dest-key)
+    (:= dest-key "output"))
+  (var output (. view [dest-key]))
   (var #{process} output)
   (if (== true (. output ["errored"]))
     (return (process ((. output ["default"]))))
-    (return (:? (xt/x:nil? (. output ["current"]))
-                (process ((. output ["default"])))
-                (. output ["current"])))))
+    (do (var current (. output ["current"]))
+        (when (xt/x:nil? current)
+          (:= current (process ((. output ["default"])))))
+        (return current))))
 
 (defn.xt set-input
   "sets the input"
@@ -395,7 +417,9 @@
   "sets the output"
   {:added "4.0"}
   [view current errored tag dest-key meta]
-  (var output (. view [(:? (xt/x:nil? dest-key) "output" dest-key)]))
+  (when (xt/x:nil? dest-key)
+    (:= dest-key "output"))
+  (var output (. view [dest-key]))
   (var #{options
          callback} view)
   (var #{accumulate} options)
@@ -422,7 +446,9 @@
   "sets the output disabled flag"
   {:added "4.0"}
   [view value dest-key]
-  (var output (. view [(:? (xt/x:nil? dest-key) "output" dest-key)]))
+  (when (xt/x:nil? dest-key)
+    (:= dest-key "output"))
+  (var output (. view [dest-key]))
   (var #{callback} view)
   (if value
     (xt/x:set-key output "disabled" value)
@@ -435,7 +461,9 @@
   "sets the output pending time"
   {:added "4.0"}
   [view value dest-key]
-  (var output (. view [(:? (xt/x:nil? dest-key) "output" dest-key)]))
+  (when (xt/x:nil? dest-key)
+    (:= dest-key "output"))
+  (var output (. view [dest-key]))
   (if value
     (xt/x:set-key output "pending" value)
     (when (xt/x:has-key? output "pending")
@@ -447,7 +475,9 @@
   "sets the output elapsed time"
   {:added "4.0"}
   [view value dest-key]
-  (var output (. view [(:? (xt/x:nil? dest-key) "output" dest-key)]))
+  (when (xt/x:nil? dest-key)
+    (:= dest-key "output"))
+  (var output (. view [dest-key]))
   (if (xt/x:is-number? value)
     (xt/x:set-key output "elapsed" value)
     (when (xt/x:has-key? output "elapsed")
@@ -478,10 +508,10 @@
   (var context  (xt/x:obj-assign (-/view-context view)
                               opts))
   (var disabled (check-disabled context))
-  (var args (or (xt/x:get-key context "args")
-                (:? (not disabled)
-                    (check-args context)
-                    nil)))
+  (var args (xt/x:get-key context "args"))
+  (when (xt/x:nil? args)
+    (when (not disabled)
+      (:= args (check-args context))))
   (when (xt/x:nil? args)
     (:= disabled true))
   
@@ -502,24 +532,24 @@
   (var process (xtd/get-in view [(or dest-key "output")
                                "process"]))
   (var record (xt/x:get-key acc tag))
-  (var update? (:? (< 0 (xt/x:len record))
-                   (. record [0])
-                   nil))
-  (var current (:? (< 1 (xt/x:len record))
-                   (. record [1])
-                   nil))
-  (var errored (:? (< 2 (xt/x:len record))
-                   (. record [2])
-                   nil))
+  (var update? nil)
+  (when (< 0 (xt/x:len record))
+    (:= update? (. record [0])))
+  (var current nil)
+  (when (< 1 (xt/x:len record))
+    (:= current (. record [1])))
+  (var errored nil)
+  (when (< 2 (xt/x:len record))
+    (:= errored (. record [2])))
   (when (xt/x:nil? current)
     (:= current ((xtd/get-in view [(or dest-key
                                       "output")
                                   "default"]))))
   
   (when update?
-    (var output (:? errored
-                    current
-                    (process current)))
+    (var output current)
+    (when (not errored)
+      (:= output (process current)))
     (-/set-output view
                   output
                   errored
@@ -551,12 +581,15 @@
   (var result-fn   (fn [res]
                      (:= (. acc [tag]) [true res])
                      (return (hook-fn acc tag))))
-  (var [handler-fn
-        success-fn] (:? (and (not disabled)
-                             (xt/x:is-function? handler)
-                             (or (xt/x:nil? guard)
-                                 (xt/x:get-key skip-guard tag)
-                                 (guard context acc))) [(wrapper handler) result-fn] [(fn [_] (return nil)) skipped-fn]))
+  (var handler-fn (fn [_] (return nil)))
+  (var success-fn skipped-fn)
+  (when (and (not disabled)
+             (xt/x:is-function? handler)
+             (or (xt/x:nil? guard)
+                 (xt/x:get-key skip-guard tag)
+                 (guard context acc)))
+    (:= handler-fn (wrapper handler))
+    (:= success-fn result-fn))
   (return
    (async-fn handler-fn context
              {:success success-fn
@@ -592,9 +625,9 @@
   [context disabled async-fn hook-fn complete-fn dest-key]
   (var #{view acc} context)
   (:= dest-key (or dest-key "output"))
-  (var dest-tag (:? (== dest-key "output")
-                    "main"
-                    dest-key))
+  (var dest-tag dest-key)
+  (when (== dest-key "output")
+    (:= dest-tag "main"))
   (var output (. view [dest-key]))
   (var started (xt/x:now-ms))
   (when (xt/x:has-key? output "elapsed")
@@ -694,7 +727,8 @@
   (var #{sort-fn
          key-fn
          val-fn} opts)
-  (:= results (:? sort-fn (sort-fn results) results))
+  (when sort-fn
+    (:= results (sort-fn results)))
   (:= key-fn (or key-fn
                  (fn [e]
                    (return (xt/x:get-key e "id")))))

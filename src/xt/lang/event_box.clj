@@ -128,11 +128,12 @@
   (:= path (event-common/arrayify-path path))
   (-/set-data-raw box path value)
   (return
-   (event-common/trigger-listeners
-    box
-    {:path path
-     :value value
-     :data data})))
+   (event-common/task-await
+    (event-common/trigger-listeners
+     box
+     {:path path
+      :value value
+      :data data}))))
 
 (defn.xt del-data-raw
   "removes the data in the box"
@@ -156,11 +157,12 @@
   (var #{data} box)
   (when (-/del-data-raw box path)
     (return
-     (event-common/trigger-listeners
-      box
-      {:path path
-       :value nil
-       :data data}))))
+     (event-common/task-await
+      (event-common/trigger-listeners
+       box
+       {:path path
+        :value nil
+        :data data})))))
 
 (defn.xt reset-data
   "resets the data in the box"

@@ -461,11 +461,12 @@
   (var #{history} route)
   (xtd/arr-pushl history url 50)
   (return
-   (event-common/trigger-listeners
-    route
-    {:type "route.url"
-     :params dparams
-     :path   dpath})))
+   (event-common/task-await
+    (event-common/trigger-listeners
+     route
+     {:type "route.url"
+      :params dparams
+      :path   dpath}))))
 
 (defn.xt set-path
   "sets the path and param"
@@ -504,11 +505,12 @@
   (var #{history} route)
   (xtd/arr-pushl history (-/get-url route) 50)
   (return
-   (event-common/trigger-listeners
-    route
-    {:type "route.path"
-     :params dparams
-      :path   dpath})))
+   (event-common/task-await
+    (event-common/trigger-listeners
+     route
+     {:type "route.path"
+      :params dparams
+       :path   dpath}))))
 
 (defn.xt set-segment
   "sets the current segment"
@@ -523,11 +525,12 @@
   (var #{history} route)
   (xtd/arr-pushl history (-/get-url route) 50)
   (return
-   (event-common/trigger-listeners
-    route
-    {:type "route.path"
-     :params {}
-     :path   {pkey true}})))
+   (event-common/task-await
+    (event-common/trigger-listeners
+     route
+     {:type "route.path"
+      :params {}
+      :path   {pkey true}}))))
 
 (defn.xt set-param
   "sets a param in a route"
@@ -557,14 +560,15 @@
                   :else
                   (xt/x:set-key all-params pkey pparams))
 
-            (var #{history} route)
-            (xtd/arr-pushl history (-/get-url route) 50)
-            (return
-             (event-common/trigger-listeners
-              route
-              {:type "route.params"
-               :params {param true}
-               :path   {}})))
+             (var #{history} route)
+             (xtd/arr-pushl history (-/get-url route) 50)
+             (return
+              (event-common/task-await
+               (event-common/trigger-listeners
+                route
+                {:type "route.params"
+                 :params {param true}
+                 :path   {}}))))
 
          :else
          (return [])))

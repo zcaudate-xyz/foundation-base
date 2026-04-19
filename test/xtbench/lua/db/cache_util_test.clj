@@ -20,10 +20,10 @@
    (l/rt:scaffold :lua)
    (def
     +flattened+
-    (!.js (f/flatten sample/Schema "UserAccount" sample/RootUser {})))
+    (!.lua (f/flatten sample/Schema "UserAccount" sample/RootUser {})))
    (def
     +flattened-full+
-    (!.js
+    (!.lua
      (f/flatten sample/Schema "UserAccount" sample/RootUserFull {})))],
   :teardown [(l/rt:stop)]})
 
@@ -114,7 +114,7 @@
   :setup
   [(def
     +full-core+
-    (!.js
+    (!.lua
      (f/flatten
       sample/Schema
       "UserAccount"
@@ -130,7 +130,7 @@
       {})))
    (def
     +full-contact+
-    (!.js
+    (!.lua
      (f/flatten
       sample/Schema
       "UserAccount"
@@ -144,7 +144,7 @@
       {})))
    (def
     +full-org-notify+
-    (!.js
+    (!.lua
      (f/flatten
       sample/Schema
       "UserAccount"
@@ -154,7 +154,7 @@
       {})))
    (def
     +full-wallets+
-    (!.js
+    (!.lua
      (f/flatten
       sample/Schema
       "UserAccount"
@@ -169,7 +169,7 @@
       {})))
    (def
     +full-no-wallets+
-    (!.js
+    (!.lua
      (f/flatten
       sample/Schema
       "UserAccount"
@@ -203,7 +203,7 @@
   :setup
   [(def
     +full-core+
-    (!.js
+    (!.lua
      (f/flatten
       sample/Schema
       "UserAccount"
@@ -219,7 +219,7 @@
       {})))
    (def
     +full-contact+
-    (!.js
+    (!.lua
      (f/flatten
       sample/Schema
       "UserAccount"
@@ -233,7 +233,7 @@
       {})))
    (def
     +full-org-notify+
-    (!.js
+    (!.lua
      (f/flatten
       sample/Schema
       "UserAccount"
@@ -243,7 +243,7 @@
       {})))
    (def
     +full-wallets+
-    (!.js
+    (!.lua
      (f/flatten
       sample/Schema
       "UserAccount"
@@ -258,7 +258,7 @@
       {})))
    (def
     +full-no-wallets+
-    (!.js
+    (!.lua
      (f/flatten
       sample/Schema
       "UserAccount"
@@ -415,7 +415,7 @@
   :setup
   [(def
     +account+
-    (!.js
+    (!.lua
      (f/flatten
       sample/Schema
       "UserAccount"
@@ -424,7 +424,7 @@
    (def
     +profile+
     (dissoc
-     (!.js (f/flatten sample/Schema "UserAccount" sample/RootUser {}))
+     (!.lua (f/flatten sample/Schema "UserAccount" sample/RootUser {}))
      "UserAccount"))]}
 (fact
  "adds single link"

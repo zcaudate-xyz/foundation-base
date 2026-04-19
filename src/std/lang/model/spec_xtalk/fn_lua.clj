@@ -73,36 +73,38 @@
 (defn lua-tf-x-future-then
   [[_ task on-ok]]
   (template/$
-   (if (== "ok" (. ~task ["state"]))
-     (do* (local out {:state "pending"
+   ((fn []
+      (local out ~task)
+      (if (== "ok" (. ~task ["state"]))
+        (do* (:= out {:state "pending"
                       :value nil
                       :error nil})
-          (local [ok v] (pcall (fn []
-                                 (return (~on-ok (. ~task ["value"]))))))
-          (if ok
-            (do (:= (. out ["state"]) "ok")
-                (:= (. out ["value"]) v))
-            (do (:= (. out ["state"]) "error")
-                (:= (. out ["error"]) v)))
-          (return out))
-     (return ~task))))
+             (local [ok v] (pcall (fn []
+                                    (return (~on-ok (. ~task ["value"]))))))
+             (if ok
+               (do (:= (. out ["state"]) "ok")
+                   (:= (. out ["value"]) v))
+               (do (:= (. out ["state"]) "error")
+                   (:= (. out ["error"]) v)))))
+      (return out)))))
 
 (defn lua-tf-x-future-catch
   [[_ task on-err]]
   (template/$
-   (if (== "error" (. ~task ["state"]))
-     (do* (local out {:state "pending"
+   ((fn []
+      (local out ~task)
+      (if (== "error" (. ~task ["state"]))
+        (do* (:= out {:state "pending"
                       :value nil
                       :error nil})
-          (local [ok v] (pcall (fn []
-                                 (return (~on-err (. ~task ["error"]))))))
-          (if ok
-            (do (:= (. out ["state"]) "ok")
-                (:= (. out ["value"]) v))
-            (do (:= (. out ["state"]) "error")
-                (:= (. out ["error"]) v)))
-          (return out))
-     (return ~task))))
+             (local [ok v] (pcall (fn []
+                                    (return (~on-err (. ~task ["error"]))))))
+             (if ok
+               (do (:= (. out ["state"]) "ok")
+                   (:= (. out ["value"]) v))
+               (do (:= (. out ["state"]) "error")
+                   (:= (. out ["error"]) v)))))
+      (return out)))))
 
 (defn lua-tf-x-future-finally
   [[_ task on-done]]

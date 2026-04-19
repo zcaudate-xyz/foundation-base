@@ -95,36 +95,36 @@
 (defn python-tf-x-future-then
   [[_ task on-ok]]
   (template/$
-   (if (== "ok" (. ~task (get "status")))
-     (do (var out {"status" "pending"
-                   "value" nil
-                   "error" nil})
-         (var v nil)
-         (try (:= v (~on-ok (. ~task (get "value"))))
-              (:= (. out ["status"]) "ok")
-              (:= (. out ["value"]) v)
-              (catch [Exception :as e]
-                  (:= (. out ["status"]) "error")
-                  (:= (. out ["error"]) e)))
-         (return out))
-     (return ~task))))
+   (do (var out ~task)
+       (if (== "ok" (. ~task (get "status")))
+         (do (:= out {"status" "pending"
+                      "value" nil
+                      "error" nil})
+             (var v nil)
+             (try (:= v (~on-ok (. ~task (get "value"))))
+                  (:= (. out ["status"]) "ok")
+                  (:= (. out ["value"]) v)
+                  (catch [Exception :as e]
+                      (:= (. out ["status"]) "error")
+                      (:= (. out ["error"]) e)))))
+       (return out))))
 
 (defn python-tf-x-future-catch
   [[_ task on-err]]
   (template/$
-   (if (== "error" (. ~task (get "status")))
-     (do (var out {"status" "pending"
-                   "value" nil
-                   "error" nil})
-         (var v nil)
-         (try (:= v (~on-err (. ~task (get "error"))))
-              (:= (. out ["status"]) "ok")
-              (:= (. out ["value"]) v)
-              (catch [Exception :as e]
-                  (:= (. out ["status"]) "error")
-                  (:= (. out ["error"]) e)))
-         (return out))
-     (return ~task))))
+   (do (var out ~task)
+       (if (== "error" (. ~task (get "status")))
+         (do (:= out {"status" "pending"
+                      "value" nil
+                      "error" nil})
+             (var v nil)
+             (try (:= v (~on-err (. ~task (get "error"))))
+                  (:= (. out ["status"]) "ok")
+                  (:= (. out ["value"]) v)
+                  (catch [Exception :as e]
+                      (:= (. out ["status"]) "error")
+                      (:= (. out ["error"]) e)))))
+       (return out))))
 
 (defn python-tf-x-future-finally
   [[_ task on-done]]

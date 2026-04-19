@@ -191,6 +191,32 @@
 (fact "adds listener to a form"
   ^:hidden
   
+  ^{:lang-exceptions
+    {:dart
+     {:form (notify/wait-on-call
+             2000
+             (fn []
+               (!.dt
+                (var f (form/make-form
+                        (fn:> {:login ""})
+                        {:login [["is-required"
+                                  {:message "Required field."
+                                   :check  (fn [v rec]
+                                             (return (and (k/not-nil? v)
+                                                          (< 0 (xt/x:len v)))))}]]}))
+                (form/add-listener
+                 f "abc" ["login"]
+                 (fn [val]
+                   (return
+                    (repl/notify-socket
+                     "127.0.0.1"
+                     (@! (:socket-port (l/default-notify)))
+                     val
+                     (@! notify/*override-id*)
+                     nil
+                     {})))
+                 nil)
+                (form/set-field f "login" "test00001"))))}}}
   (notify/wait-on :js
     (var f (form/make-form
      (fn:> {:login ""})
@@ -238,6 +264,32 @@
 (fact "triggers all fields"
   ^:hidden
   
+  ^{:lang-exceptions
+    {:dart
+     {:form (notify/wait-on-call
+             2000
+             (fn []
+               (!.dt
+                (var f (form/make-form
+                        (fn:> {:login ""})
+                        {:login [["is-required"
+                                  {:message "Required field."
+                                   :check  (fn [v rec]
+                                             (return (and (k/not-nil? v)
+                                                          (< 0 (xt/x:len v)))))}]]}))
+                (form/add-listener
+                 f "abc" ["login"]
+                 (fn [val]
+                   (return
+                    (repl/notify-socket
+                     "127.0.0.1"
+                     (@! (:socket-port (l/default-notify)))
+                     val
+                     (@! notify/*override-id*)
+                     nil
+                     {})))
+                 nil)
+                (form/trigger-all f "form.data"))))}}}
   (notify/wait-on :js
     (var f (form/make-form
      (fn:> {:login ""})
@@ -285,6 +337,32 @@
 (fact "triggers the callback"
   ^:hidden
   
+  ^{:lang-exceptions
+    {:dart
+     {:form (notify/wait-on-call
+             2000
+             (fn []
+               (!.dt
+                (var f (form/make-form
+                        (fn:> {:login ""})
+                        {:login [["is-required"
+                                  {:message "Required field."
+                                   :check  (fn [v rec]
+                                             (return (and (k/not-nil? v)
+                                                          (< 0 (xt/x:len v)))))}]]}))
+                (form/add-listener
+                 f "abc" ["login"]
+                 (fn [val]
+                   (return
+                    (repl/notify-socket
+                     "127.0.0.1"
+                     (@! (:socket-port (l/default-notify)))
+                     val
+                     (@! notify/*override-id*)
+                     nil
+                     {})))
+                 nil)
+                (form/trigger-field f "login" "form.data"))))}}}
   (notify/wait-on :js
     (var f (form/make-form
      (fn:> {:login ""})

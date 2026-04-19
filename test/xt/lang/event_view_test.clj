@@ -384,6 +384,31 @@
 (fact "sets the input"
   ^:hidden
   
+  ^{:lang-exceptions
+    {:dart
+     {:form (notify/wait-on-call
+             2000
+             (fn []
+               (!.dt
+                (var v (view/create-view
+                        (fn:> [x] {:value x})
+                        {}
+                        [3]
+                        {:value 0}))
+                (view/add-listener
+                 v "a1"
+                 (fn [res]
+                   (return
+                    (repl/notify-socket
+                     "127.0.0.1"
+                     (@! (:socket-port (l/default-notify)))
+                     (xtd/tree-get-data res)
+                     (@! notify/*override-id*)
+                     nil
+                     {})))
+                 nil
+                 nil)
+                (view/set-input v 1))))}}}
   (notify/wait-on :js
     (var v (view/create-view
     (fn:> [x] {:value x})
@@ -415,6 +440,31 @@
 (fact "sets the output"
   ^:hidden
   
+  ^{:lang-exceptions
+    {:dart
+     {:form (notify/wait-on-call
+             2000
+             (fn []
+               (!.dt
+                (var v (view/create-view
+                        (fn:> [x] {:value x})
+                        {}
+                        [3]
+                        {:value 0}))
+                (view/add-listener
+                 v "a1"
+                 (fn [res]
+                   (return
+                    (repl/notify-socket
+                     "127.0.0.1"
+                     (@! (:socket-port (l/default-notify)))
+                     (xtd/tree-get-data res)
+                     (@! notify/*override-id*)
+                     nil
+                     {})))
+                 nil
+                 nil)
+                (view/set-output v 1 nil nil nil nil))))}}}
   (notify/wait-on :js
     (var v (view/create-view
     (fn:> [x] {:value x})

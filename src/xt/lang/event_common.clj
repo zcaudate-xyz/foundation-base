@@ -97,23 +97,36 @@
   [:fn [EventContainer :xt/str [:xt/maybe EventPayload]] [:xt/array :xt/str]])
 
 (defn.xt task-pending?
-  "checks if a callback return value is an async task"
+  "extracts an async notification task from a callback return value"
   {:added "4.1"}
   [value]
-  (return
-   (and (xt/x:not-nil? value)
-        (xt/x:is-function? (. value ["then"])))))
+  (when (and (xt/x:is-object? value)
+             (== "notify.task"
+                 (xt/x:get-key value "::")))
+    (return (xt/x:get-key value "task")))
+  (return nil))
+
+(defn.xt task-await
+  "unwraps an async notification task where present"
+  {:added "4.1"}
+  [value]
+  (var task (-/task-pending? value))
+  (when (xt/x:not-nil? task)
+    (return task))
+  (return value))
 
 (defn.xt task-return
   "maps an async task back to a stable return value"
   {:added "4.1"}
-  [task value]
-  (when (-/task-pending? task)
-    (return
-     (xt/x:future-then task
-                       (fn [_]
-                         (return value)))))
-  (return value))
+  [result value]
+  (var task (-/task-pending? result))
+  (var output value)
+  (when (xt/x:not-nil? task)
+    (:= output
+        (xt/x:future-then task
+                          (fn [_]
+                            (return value)))))
+  (return output))
 
 (defn.xt blank-container
   "creates a blank container"
@@ -129,9 +142,10 @@
   "makes a container"
   {:added "4.0"}
   [initial type-name opts]
-  (var initialFn (:? (xt/x:is-function? initial)
-                     initial
-                     (fn [] (return initial))))
+  (var initialFn initial)
+  (when (not (xt/x:is-function? initialFn))
+    (:= initialFn
+        (fn [] (return initial))))
   (var data   (initialFn))
   (var container (xt/x:obj-assign
                   {"::" type-name
@@ -229,9 +243,9 @@
                      (not= false result))))
   (when allowed
     (var event-meta (xt/x:get-key event "meta"))
-    (var nmeta (xt/x:obj-assign (:? (xt/x:nil? event-meta)
-                                    {}
-                                    event-meta)
+    (when (xt/x:nil? event-meta)
+      (:= event-meta {}))
+    (var nmeta (xt/x:obj-assign event-meta
                                 meta))
     (return (callback (xt/x:obj-assign
                        (xt/x:obj-clone event)
@@ -242,21 +256,22 @@
   "triggers listeners given event"
   {:added "4.0"}
   [container event]
-  (:= event (:? (xt/x:nil? event)
-                {}
-                event))
+  (when (xt/x:nil? event)
+    (:= event {}))
   (var #{listeners} container)
   (var triggered [])
   (var pending nil)
   (xt/for:object [[id entry] listeners]
     (var result (-/trigger-entry entry event))
-    (when (-/task-pending? result)
+    (var task (-/task-pending? result))
+    (when (xt/x:not-nil? task)
       (when (xt/x:nil? pending)
-        (:= pending result)))
+        (:= pending task)))
     (xt/x:arr-push triggered id))
   (if (xt/x:nil? pending)
     (return triggered)
-    (return pending)))
+    (return {"::" "notify.task"
+             "task" pending})))
 
 
 ;;
@@ -320,9 +335,8 @@
   "triggers listeners under a key"
   {:added "4.0"}
   [container key event]
-  (:= event (:? (xt/x:nil? event)
-               {}
-               event))
+  (when (xt/x:nil? event)
+    (:= event {}))
   (var #{listeners} container)
   (var group (xt/x:get-key listeners key))
   (var triggered [])
@@ -330,10 +344,12 @@
   (when (xt/x:not-nil? group)
     (xt/for:object [[id entry] group]
       (var result (-/trigger-entry entry event))
-      (when (-/task-pending? result)
+      (var task (-/task-pending? result))
+      (when (xt/x:not-nil? task)
         (when (xt/x:nil? pending)
-          (:= pending result)))
+          (:= pending task)))
       (xt/x:arr-push triggered id)))
   (if (xt/x:nil? pending)
     (return triggered)
-    (return pending)))
+    (return {"::" "notify.task"
+             "task" pending})))
