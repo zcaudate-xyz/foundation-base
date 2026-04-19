@@ -68,11 +68,13 @@
     xt.lang.event-view/pipeline-prep 1
     xt.lang.event-view/pipeline-set 1
     xt.lang.event-view/pipeline-call 1
-    xt.lang.event-view/pipeline-run-impl 1
-    xt.lang.event-view/pipeline-run 1
-    xt.lang.event-view/get-with-lookup 1
-    xt.lang.event-view/sorted-lookup 1
-    xt.lang.util-color/rgb->hsl 1})
+     xt.lang.event-view/pipeline-run-impl 1
+     xt.lang.event-view/pipeline-run 1
+     xt.lang.event-view/get-with-lookup 1
+     xt.lang.event-view/sorted-lookup 1
+     xt.lang.util-throttle/throttle-run-async 1
+     xt.lang.util-throttle/throttle-run 1
+     xt.lang.util-color/rgb->hsl 1})
 
 (defn- python-qualified-symbol
   [sym]
@@ -296,43 +298,49 @@
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error finally]}]]
   (let [success-form (or success '(return nil))
-        error-form   (or error '(return nil))]
+        error-form   (or error '(return nil))
+        runner       (gensym "runner")]
     (if (and (seq? statement)
              (= 'x:return-run (first statement)))
       (let [[_ runner] statement
             on-ok (gensym "on_ok")
             on-err (gensym "on_err")
             ex (gensym "ex")
-            state (gensym "state")]
+            state (gensym "state")
+            thunk (gensym "runner")]
         (template/$
-         (do (var ~state {"res" nil
-                          "err" nil})
-             (fn ~on-ok [value]
-               (:= (. ~state ["res"]) value)
-               (:= (. ~state ["err"]) nil))
-             (fn ~on-err [value]
-               (:= (. ~state ["res"]) nil)
-               (:= (. ~state ["err"]) value))
+         (do (fn ~thunk []
+               (var ~state {"res" nil
+                            "err" nil})
+               (fn ~on-ok [value]
+                 (:= (. ~state ["res"]) value)
+                 (:= (. ~state ["err"]) nil))
+               (fn ~on-err [value]
+                 (:= (. ~state ["res"]) nil)
+                 (:= (. ~state ["err"]) value))
+               (try
+                 (~runner ~on-ok ~on-err)
+                 (:= ~res (. ~state ["res"]))
+                 (:= ~err (. ~state ["err"]))
+                 (if (not= nil ~err)
+                   ~error-form
+                   ~success-form)
+                 (catch [Exception :as ~ex]
+                   (:= ~err ~ex)
+                   ~error-form)
+                 ~@(if finally
+                     [(list 'finally finally)])))
+             (x:thread-spawn ~thunk))))
+      (template/$
+       (do (fn ~runner []
              (try
-               (~runner ~on-ok ~on-err)
-               (:= ~res (. ~state ["res"]))
-               (:= ~err (. ~state ["err"]))
-               (if (not= nil ~err)
-                 ~error-form
-                 ~success-form)
-               (catch [Exception :as ~ex]
-                 (:= ~err ~ex)
+               (var ~res ~statement)
+               ~success-form
+               (catch [Exception :as ~err]
                  ~error-form)
                ~@(if finally
-                   [(list 'finally finally)])))))
-      (template/$
-       (try
-         (var ~res ~statement)
-         ~success-form
-         (catch [Exception :as ~err]
-           ~error-form)
-         ~@(if finally
-             [(list 'finally finally)]))))))
+                   [(list 'finally finally)])))
+           (x:thread-spawn ~runner))))))
 
 (def +features+
   (let [base (-> (grammar/build :exclude [:pointer

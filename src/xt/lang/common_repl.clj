@@ -138,7 +138,15 @@
         [rt-id port lang protocol host opts] (notify/notify-ceremony
                                               (-> (l/macro-opts)
                                                   :emit
-                                                  :runtime))]
+                                                  :runtime))
+        key (when (not (and (= lang :dart)
+                            (not (#{"print" "capture"} notify-id))))
+              [(f/strn rt-id) (merge {:column column
+                                      :line line
+                                      :namespace (or namespace
+                                                     (str (.getName *ns*)))
+                                      :id id}
+                                     meta)])]
     (list (case protocol
             :socket `-/notify-socket
             :http   `-/notify-http)
@@ -146,12 +154,7 @@
           port
           value
           notify-id
-          [(f/strn rt-id) (merge {:column column
-                                  :line line
-                                  :namespace (or namespace
-                                                 (str (.getName *ns*)))
-                                  :id id}
-                                 meta)]
+          key
           opts)))
 
 (defmacro.xt ^{:standalone true}
@@ -183,17 +186,42 @@
   "creates a callback function"
   {:added "4.0"}
   [& [f]]
-  (template/$ (fn [val]
-                (return (xt.lang.common-repl/notify ~(if f
-                                                       (list f 'val)
-                                                       'val))))))
+  (let [lang (-> (l/macro-opts) :emit :runtime :lang)
+        value-expr (if f
+                     (list f 'val)
+                     'val)]
+    (if (= lang :dart)
+      (let [socket-port (:socket-port (l/default-notify))
+            notify-id   (or notify/*override-id*
+                            (f/error "No ID for Notify"))]
+        (template/$
+         (fn [val]
+           (var task
+                (xt.lang.common-repl/notify-socket
+                 "127.0.0.1"
+                 ~socket-port
+                 ~value-expr
+                 ~notify-id
+                 nil
+                 {}))
+           (return {"::" "notify.task"
+                    "task" task}))))
+      (let [notify-id (or notify/*override-id*
+                          (f/error "No ID for Notify"))
+            notify-expr (notify-form notify-id value-expr nil)]
+        (template/$ (fn [val]
+                      (return ~notify-expr)))))))
 
 (defmacro.xt ^{:standalone true}
   <!
   "creates a callback map"
   {:added "4.0"}
   []
-  ''({:success (fn [val]
-                 (return (xt.lang.common-repl/notify val)))
-      :error   (fn [err]
-                 (return (xt.lang.common-repl/notify err)))}))
+  (let [notify-id (or notify/*override-id*
+                      (f/error "No ID for Notify"))
+        success-expr (notify-form notify-id 'val nil)
+        error-expr   (notify-form notify-id 'err nil)]
+    (template/$ {:success (fn [val]
+                            (return ~success-expr))
+                 :error   (fn [err]
+                            (return ~error-expr))})))

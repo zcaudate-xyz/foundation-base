@@ -143,41 +143,13 @@
 ^{:refer xt.lang.common-repl/notify, :added "4.0"}
 (fact
  "sends a message to the notify server"
- (notify/wait-on-call
-  2000
-  (fn
-   []
-   (!.dt
-    (k/notify-socket
-     "127.0.0.1"
-     (@! (:socket-port (l/default-notify)))
-     1
-     (@! notify/*override-id*)
-     nil
-     {}))))
+ (notify/wait-on-call 2000 (fn [] (!.dt (k/notify 1))))
  =>
  1)
 
 ^{:refer xt.lang.common-repl/<!, :added "4.0"}
 (fact
  "creates a callback map"
- (notify/wait-on-call
-  2000
-  (fn
-   []
-   (!.dt
-    ((.
-      {"success"
-       (fn
-        [val]
-        (k/notify-socket
-         "127.0.0.1"
-         (@! (:socket-port (l/default-notify)))
-         val
-         (@! notify/*override-id*)
-         nil
-         {}))}
-      ["success"])
-     1))))
+ (notify/wait-on-call 2000 (fn [] (!.dt ((. (k/<!) ["success"]) 1))))
  =>
  1)

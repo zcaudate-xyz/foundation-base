@@ -96,6 +96,16 @@
 (defspec.xt trigger-keyed-listeners
   [:fn [EventContainer :xt/str [:xt/maybe EventPayload]] [:xt/array :xt/str]])
 
+(defn.xt notify-task
+  "extracts an async notification task from a callback return value"
+  {:added "4.1"}
+  [value]
+  (when (and (xt/x:is-object? value)
+             (== "notify.task"
+                 (xt/x:get-key value "::")))
+    (return (xt/x:get-key value "task")))
+  (return nil))
+
 (defn.xt blank-container
   "creates a blank container"
   {:added "4.0"}
@@ -228,10 +238,22 @@
                 event))
   (var #{listeners} container)
   (var triggered [])
+  (var pending nil)
   (xt/for:object [[id entry] listeners]
-    (-/trigger-entry entry event)
+    (var out (-/trigger-entry entry event))
+    (var task (-/notify-task out))
+    (when (xt/x:not-nil? task)
+      (:= pending (:? (xt/x:nil? pending)
+                      task
+                      (xt/x:future-then pending
+                                        (fn [_]
+                                          (return task))))))
     (xt/x:arr-push triggered id))
-  (return triggered))
+  (return (:? (xt/x:nil? pending)
+              triggered
+              (xt/x:future-then pending
+                                (fn [_]
+                                  (return triggered))))))
 
 
 ;;
@@ -301,8 +323,20 @@
   (var #{listeners} container)
   (var group (xt/x:get-key listeners key))
   (var triggered [])
+  (var pending nil)
   (when (xt/x:not-nil? group)
     (xt/for:object [[id entry] group]
-      (-/trigger-entry entry event)
+      (var out (-/trigger-entry entry event))
+      (var task (-/notify-task out))
+      (when (xt/x:not-nil? task)
+        (:= pending (:? (xt/x:nil? pending)
+                        task
+                        (xt/x:future-then pending
+                                          (fn [_]
+                                            (return task))))))
       (xt/x:arr-push triggered id)))
-  (return triggered))
+  (return (:? (xt/x:nil? pending)
+              triggered
+              (xt/x:future-then pending
+                                (fn [_]
+                                  (return triggered))))))

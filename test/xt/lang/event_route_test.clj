@@ -572,10 +572,10 @@
   ^:hidden
     
   [(notify/wait-on :js
-     (var r (route/make-route "hello"))
-     (route/add-path-listener r ["hello"] "a1"
-                              (repl/>notify))
-     (route/set-url r "hello/world"))]
+      (var r (route/make-route "hello"))
+      (route/add-path-listener r ["hello"] "a1"
+                               (repl/>notify))
+      (route/set-url r "hello/world"))]
   [{"params" {},
     "path" {"[\"hello\"]" true},
     "type" "route.url",
@@ -604,10 +604,10 @@
   ^:hidden
   
    [(notify/wait-on :js
-      (var r (route/make-route "hello"))
-      (route/add-path-listener r ["hello"] "a1"
-                               (repl/>notify))
-      (route/set-path r ["hello" "world"] nil))
+       (var r (route/make-route "hello"))
+       (route/add-path-listener r ["hello"] "a1"
+                                (repl/>notify))
+       (route/set-path r ["hello" "world"] nil))
     (!.js
      (var r (route/make-route "hello"))
      (route/set-path r ["hello" "world"] nil)
@@ -643,10 +643,10 @@
   ^:hidden
   
   [(notify/wait-on :js
-     (var r (route/make-route "hello"))
-     (route/add-path-listener r ["hello"] "a1"
-                              (repl/>notify))
-     (route/set-segment r ["hello"] "world"))
+      (var r (route/make-route "hello"))
+      (route/add-path-listener r ["hello"] "a1"
+                               (repl/>notify))
+      (route/set-segment r ["hello"] "world"))
    (!.js
     (var r (route/make-route "hello"))
     (route/set-segment r ["hello"] "world")
@@ -678,9 +678,9 @@
   ^:hidden
   
    [(notify/wait-on :js
-      (var r (route/make-route "hello?auth=sign_in"))
-      (route/add-param-listener r "auth" "a1"
-                                (repl/>notify))
+       (var r (route/make-route "hello?auth=sign_in"))
+       (route/add-param-listener r "auth" "a1"
+                                 (repl/>notify))
       (route/set-param r "auth" "register" nil))
     (!.js
      (var r (route/make-route "hello?auth=sign_in"))

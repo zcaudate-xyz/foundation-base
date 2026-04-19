@@ -390,20 +390,14 @@
   (notify/wait-on :lua
     (k/notify 1))
   => 1
-  
+
   ^{:lang-exceptions
     {:dart
      {:form (notify/wait-on-call
              2000
              (fn []
                (!.dt
-                (k/notify-socket
-                 "127.0.0.1"
-                 (@! (:socket-port (l/default-notify)))
-                 1
-                 (@! notify/*override-id*)
-                 nil
-                 {}))))}}}
+                (k/notify 1))))}}}
   (notify/wait-on :python
     (k/notify 1))
   => 1)
@@ -424,23 +418,15 @@
    ((. (k/<!)
        ["success"]) 1))
   => 1
- 
+
   ^{:lang-exceptions
     {:dart
      {:form (notify/wait-on-call
              2000
              (fn []
                (!.dt
-                ((.
-                  {"success" (fn [val]
-                               (k/notify-socket
-                                "127.0.0.1"
-                                (@! (:socket-port (l/default-notify)))
-                                val
-                                (@! notify/*override-id*)
-                                nil
-                                {}))}
-                  ["success"]) 1))))}}}
+                ((. (k/<!)
+                    ["success"]) 1))))}}}
   (notify/wait-on :python
    ((. (k/<!)
        ["success"]) 1))

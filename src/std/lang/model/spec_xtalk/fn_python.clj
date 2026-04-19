@@ -811,10 +811,11 @@
 (defn python-tf-x-thread-spawn
   ([[_ thunk]]
    (with-meta
-     (template/$ (do (var threading  (__import__ "threading"))
-              (var thread := (threading.Thread :target ~thunk))
-              (. thread (start))))
-     {:assign/template 'thread})))
+      (template/$ (do (var threading  (__import__ "threading"))
+               (var thread := (threading.Thread :target ~thunk))
+               (. thread (start))
+               (return thread)))
+      {:assign/template 'thread})))
 
 (defn python-tf-x-thread-join
   ([[_ thread]]
@@ -822,11 +823,12 @@
 
 (defn python-tf-x-with-delay
   ([[_ thunk ms]]
-   (template/$ (x:thread-spawn
-         (fn []
-           (return [(. (__import__ "time")
-                       (sleep (/ ~ms 1000)))
-                    ('(~thunk))]))))))
+   (template/$ (do (fn delay_target []
+                     (. (__import__ "time")
+                        (sleep (/ ~ms 1000)))
+                     (var f := ~thunk)
+                     (return (f)))
+                   (x:thread-spawn delay_target)))))
 
 (def +python-thread+
   {:x-thread-spawn   {:macro #'python-tf-x-thread-spawn  :emit :macro   :type :template}

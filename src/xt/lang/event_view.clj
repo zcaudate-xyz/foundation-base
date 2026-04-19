@@ -198,18 +198,15 @@
 (defn.xt create-view
   "creates a view"
   {:added "4.0"}
-  ([main-handler
-    pipeline
-    default-args
-    default-output]
-   (return (-/create-view main-handler pipeline default-args default-output nil nil)))
-  ([main-handler
-    pipeline
-    default-args
-    default-output
-    default-process
-    options]
+  [main-handler
+   pipeline
+   default-args
+   default-output
+   default-process
+   options]
   (var identity-fn (fn [x] (return x)))
+  (when (xt/x:nil? options)
+    (:= options {}))
   (var default-args-fn
        (:? (xt/x:is-function? default-args)
            default-args
@@ -226,14 +223,14 @@
                            :remote  {:wrapper -/wrap-args
                                      #_#_:guard (fn:> false)}
                            :sync    {:wrapper -/wrap-args
-                                     #_#_:guard (fn:> false)}
-                           :check-args  -/parse-args    
-                           :check-disabled -/check-disabled}
-                          pipeline)
-               :options    (:? (xt/x:nil? options) {} options)
-               :input  {:current nil
-                        :updated nil
-                        :default default-args-fn}
+                                      #_#_:guard (fn:> false)}
+                            :check-args  -/parse-args    
+                            :check-disabled -/check-disabled}
+                           pipeline)
+                :options    options
+                :input  {:current nil
+                         :updated nil
+                         :default default-args-fn}
                :output {:type "output"
                         :current nil
                         :updated nil
@@ -257,7 +254,7 @@
   (return
    (event-common/blank-container
     "event.view"
-    entry))))
+    entry)))
 
 (defn.xt view-context
   "gets the view-context"
@@ -265,10 +262,13 @@
   [view]
   (var #{pipeline options} view)
   (var #{input} view)
+  (var context-opts (xt/x:get-key options "context"))
+  (when (xt/x:nil? context-opts)
+    (:= context-opts {}))
   (var context  (xt/x:obj-assign
                  {:view  view
-                  :input (. input ["current"])}
-                 (xt/x:get-key options "context")))
+                   :input (. input ["current"])}
+                 context-opts))
   (return context))
 
 (defn.xt add-listener
@@ -321,19 +321,15 @@
 (defn.xt get-output
   "gets the view output record"
   {:added "4.0"}
-  ([view]
-   (return (-/get-output view nil)))
-  ([view dest-key]
-   (return (. view [(:? (xt/x:nil? dest-key) "output" dest-key)]))))
+  [view dest-key]
+  (return (. view [(:? (xt/x:nil? dest-key) "output" dest-key)])))
 
 (defn.xt get-current
   "gets the current view output"
   {:added "4.0"}
-  ([view]
-   (return (-/get-current view nil)))
-  ([view dest-key]
-   (return (xtd/get-in view [(:? (xt/x:nil? dest-key) "output" dest-key)
-                             "current"]))))
+  [view dest-key]
+  (return (xtd/get-in view [(:? (xt/x:nil? dest-key) "output" dest-key)
+                            "current"])))
 
 (defn.xt is-disabled
   "checks that the view is disabled"
@@ -347,52 +343,42 @@
 (defn.xt is-errored
   "checks that output is errored"
   {:added "4.0"}
-  ([view]
-   (return (-/is-errored view nil)))
-  ([view dest-key]
-   (return (== true (xtd/get-in view [(:? (xt/x:nil? dest-key) "output" dest-key)
-                                      "errored"])))))
+  [view dest-key]
+  (return (== true (xtd/get-in view [(:? (xt/x:nil? dest-key) "output" dest-key)
+                                     "errored"]))))
 
 (defn.xt is-pending
   "checks that output is pending"
   {:added "4.0"}
-  ([view]
-   (return (-/is-pending view nil)))
-  ([view dest-key]
-   (return (== true (xtd/get-in view [(:? (xt/x:nil? dest-key) "output" dest-key)
-                                      "pending"])))))
+  [view dest-key]
+  (return (== true (xtd/get-in view [(:? (xt/x:nil? dest-key) "output" dest-key)
+                                     "pending"]))))
 
 (defn.xt get-time-elapsed
   "gets time elapsed of output"
   {:added "4.0"}
-  ([view]
-   (return (-/get-time-elapsed view nil)))
-  ([view dest-key]
-   (return (xtd/get-in view [(:? (xt/x:nil? dest-key) "output" dest-key)
-                             "elapsed"]))))
+  [view dest-key]
+  (return (xtd/get-in view [(:? (xt/x:nil? dest-key) "output" dest-key)
+                            "elapsed"])))
 
 (defn.xt get-time-updated
   "gets time updated of output"
   {:added "4.0"}
-  ([view]
-   (return (-/get-time-updated view nil)))
-  ([view dest-key]
-   (return (xtd/get-in view [(:? (xt/x:nil? dest-key) "output" dest-key)
-                             "updated"]))))
+  [view dest-key]
+  (return (xtd/get-in view [(:? (xt/x:nil? dest-key) "output" dest-key)
+                            "updated"])))
 
 (defn.xt get-success
   "gets either the current or default value if errored"
   {:added "4.0"}
-  ([view]
-   (return (-/get-success view nil)))
-  ([view dest-key]
-   (var output (. view [(:? (xt/x:nil? dest-key) "output" dest-key)]))
-   (var #{process} output)
-   (if (== true (. output ["errored"]))
-     (return (process ((. output ["default"]))))
-     (return (:? (xt/x:nil? (. output ["current"]))
-                 (process ((. output ["default"])))
-                 (. output ["current"]))))))
+  [view dest-key]
+  (var output (. view [(:? (xt/x:nil? dest-key) "output" dest-key)]))
+  (var #{process} output)
+  (if (== true (. output ["errored"]))
+    (return (process ((. output ["default"]))))
+    (return (:? (xt/x:nil? (. output ["current"]))
+                (process ((. output ["default"])))
+                (. output ["current"])))))
 
 (defn.xt set-input
   "sets the input"

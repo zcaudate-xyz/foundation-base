@@ -274,9 +274,9 @@
   (var changed false)
   
   (xt/for:array [[i v] npath]
-    (var pv (:? (< i (xt/x:len ppath))
-                (xt/x:get-idx ppath i)
-                nil))
+    (var pv nil)
+    (when (< i (xt/x:len ppath))
+      (:= pv (xt/x:get-idx ppath i)))
     (when (not= pv v)
       (:= changed true))
     (when changed
@@ -398,17 +398,17 @@
    (event-common/add-listener
     route listener-id "route.full"
     callback
-    (xt/x:obj-assign
-     {:route/path  path
-      :route/param param}
-     meta)
-    (fn [event]
-      (var path-match (xt/x:get-key (. event ["path"])
-                                    pkey))
-      (var param-match (xt/x:get-key (. event ["params"])
-                                     param))
-      (return (and (== true path-match)
-                   (xt/x:not-nil? param-match)))))))
+     (xt/x:obj-assign
+      {:route/path  path
+       :route/param param}
+      meta)
+     (fn [event]
+       (return (and (== true
+                        (xt/x:get-key (. event ["path"])
+                                       pkey))
+                    (xt/x:not-nil?
+                     (xt/x:get-key (. event ["params"])
+                                   param))))))))
 
 (def.xt ^{:arglists '([route listener-id])}
   remove-listener

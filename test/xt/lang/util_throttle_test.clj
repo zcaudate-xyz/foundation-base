@@ -56,12 +56,14 @@
     (var out [])
     (var handler
          (fn [i]
-           (return (new Promise
-                        (fn [resolve reject]
-                          (setTimeout (fn []
-                                        (x:arr-push out i)
-                                        (resolve (repl/notify out)))
-                                      100))))))
+           (var promise-fn
+                (fn [resolve reject]
+                  (var timeout-fn
+                       (fn []
+                         (x:arr-push out i)
+                         (resolve (repl/notify out))))
+                  (setTimeout timeout-fn 100)))
+           (return (new Promise promise-fn))))
     (var throttle (throttle/throttle-create handler nil))
     (throttle/throttle-run-async throttle 1))
   => [1]
@@ -75,6 +77,21 @@
            (repl/notify out)))
     (var throttle (throttle/throttle-create handler nil))
     (throttle/throttle-run-async throttle 1))
+  => [1]
+  
+  (!.py
+   (:= (!:G THROTTLE_OUT) [])
+   (var handler
+        (fn [i]
+          (var delayed-fn
+               (fn []
+                 (x:arr-push (!:G THROTTLE_OUT) i)))
+          (xt/x:with-delay delayed-fn 100)))
+   (var throttle (throttle/throttle-create handler nil))
+   (throttle/throttle-run-async throttle 1 nil))
+  
+  (do (Thread/sleep 200)
+      (!.py (!:G THROTTLE_OUT)))
   => [1])
 
 ^{:refer xt.lang.util-throttle/throttle-run :added "4.0"}
@@ -89,12 +106,14 @@
     (:= (!:G OUT) [])
     (var handler
          (fn [i]
-           (return (new Promise
-                        (fn [resolve reject]
-                          (setTimeout (fn []
-                                        (x:arr-push (!:G OUT) i)
-                                        (resolve (repl/notify (!:G OUT))))
-                                      100))))))
+           (var promise-fn
+                (fn [resolve reject]
+                  (var timeout-fn
+                       (fn []
+                         (x:arr-push (!:G OUT) i)
+                         (resolve (repl/notify (!:G OUT)))))
+                  (setTimeout timeout-fn 100)))
+           (return (new Promise promise-fn))))
     (var throttle (throttle/throttle-create handler nil))
     (throttle/throttle-run throttle 1)
     (throttle/throttle-run throttle 1)
@@ -127,6 +146,28 @@
   
   (do (Thread/sleep 500)
       (!.lua (!:G OUT)))
+  => [1 1]
+
+  (!.py
+   (:= (!:G THROTTLE_OUT) [])
+   (var handler
+        (fn [i]
+          (var delayed-fn
+               (fn []
+                 (x:arr-push (!:G THROTTLE_OUT) i)))
+          (xt/x:with-delay delayed-fn 100)))
+   (var throttle (throttle/throttle-create handler nil))
+   (throttle/throttle-run throttle 1 nil)
+   (throttle/throttle-run throttle 1 nil)
+   (throttle/throttle-run throttle 1 nil)
+   (throttle/throttle-run throttle 1 nil))
+  
+  (do (Thread/sleep 120)
+      (!.py (!:G THROTTLE_OUT)))
+  => [1 1]
+
+  (do (Thread/sleep 500)
+      (!.py (!:G THROTTLE_OUT)))
   => [1 1])
 
 ^{:refer xt.lang.util-throttle/throttle-waiting :added "4.0"}
@@ -140,13 +181,15 @@
     (var throttle)
     (var handler
          (fn [i]
-           (return (new Promise
-                        (fn [resolve reject]
-                          (setTimeout (fn []
-                                        (resolve (repl/notify
-                                                  [(throttle/throttle-active throttle)
-                                                   (throttle/throttle-waiting throttle)])))
-                                      (:? (== i 1) 100 300)))))))
+           (var promise-fn
+                (fn [resolve reject]
+                  (var timeout-fn
+                       (fn []
+                         (resolve (repl/notify
+                                   [(throttle/throttle-active throttle)
+                                    (throttle/throttle-waiting throttle)]))))
+                  (setTimeout timeout-fn (:? (== i 1) 100 300))))
+           (return (new Promise promise-fn))))
     (:= throttle (throttle/throttle-create handler nil))
     (throttle/throttle-run throttle 1)
     (throttle/throttle-run throttle 1)
@@ -171,7 +214,31 @@
     (throttle/throttle-run throttle 2)
     (throttle/throttle-run throttle 3))
   => [[1 2 3]
-      [1 2 3]])
+      [1 2 3]]
+
+  (!.py
+   (var throttle)
+   (var handler
+        (fn [i]
+          (var delayed-fn
+               (fn [] nil))
+          (xt/x:with-delay delayed-fn (:? (== i 1) 100 300))))
+   (:= throttle (throttle/throttle-create handler nil))
+   (:= (!:G THROTTLE_STATE) throttle)
+   (throttle/throttle-run throttle 1 nil)
+   (throttle/throttle-run throttle 1 nil)
+   (throttle/throttle-run throttle 1 nil)
+   (throttle/throttle-run throttle 2 nil)
+   (throttle/throttle-run throttle 3 nil))
+  
+  (do (Thread/sleep 50)
+      (let [state (!.py [(throttle/throttle-active (!:G THROTTLE_STATE))
+                         (throttle/throttle-waiting (!:G THROTTLE_STATE))])]
+        (and (vector? state)
+             (= 2 (count state))
+             (= (first state) (second state))
+             (every? vector? state))))
+  => true)
 
 ^{:refer xt.lang.util-throttle/throttle-queued :added "4.0"}
 (fact "gets all the queued ids")
