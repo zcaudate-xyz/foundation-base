@@ -468,11 +468,21 @@
 (fact "adds a path listener"
   ^:hidden
   
+  ^{:lang-exceptions {:lua {:expect {"callback" "<function>",
+                                     "pred" "<function>",
+                                     "meta" {"listener/id" "a1",
+                                             "route/path" {},
+                                             "listener/type" "route.path"}}}}}
   (!.js
    (var r (route/make-route "hello"))
    (xtd/tree-get-data (route/add-path-listener r [] "a1" (fn:>))))
   => +out+
 
+  ^{:lang-exceptions {:lua {:expect {"callback" "<function>",
+                                     "pred" "<function>",
+                                     "meta" {"listener/id" "a1",
+                                             "route/path" {},
+                                             "listener/type" "route.path"}}}}}
   (!.js
    (var r (route/make-route "hello"))
    (xtd/tree-get-data (route/add-path-listener r [] "a1" (fn:>))))

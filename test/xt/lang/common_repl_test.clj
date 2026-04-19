@@ -4,6 +4,12 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
+(defn decode-output
+  [x]
+  (if (string? x)
+    (json/read x)
+    x))
+
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-repl :as k]]})
@@ -28,22 +34,22 @@
 (fact "returns the encoded "
   ^:hidden
 
-  (json/read
+  (decode-output
    (!.js
     (k/return-encode {:data [1 2 3]} "<id>" "<key>")))
   => { "key" "<key>", "id" "<id>", "value" {"data" [1 2 3]}, "type" "data"}
   
-  (json/read
+  (decode-output
    (!.lua
     (k/return-encode {:data [1 2 3]} "<id>" "<key>")))
   => {"key" "<key>", "id" "<id>", "value" {"data" [1 2 3]}, "type" "data"}
 
-  (json/read
+  (decode-output
    (!.py
     (k/return-encode {:data [1 2 3]} "<id>" "<key>")))
   => {"key" "<key>", "id" "<id>", "value" {"data" [1 2 3]}, "type" "data"}
 
-  (json/read
+  (decode-output
    (!.R
     (k/return-encode {:data [1 2 3]} "<id>" "<key>")))
   => {"key" "<key>", "id" "<id>", "value" {"data" [1 2 3]}, "type" "data"})
@@ -52,22 +58,27 @@
 (fact "returns a wrapped call"
   ^:hidden
   
-  (json/read
+  (decode-output
    (!.js
     (k/return-wrap (fn:> 1))))
   => {"value" 1, "type" "data", "return" "number"}
   
-  (json/read
+  (decode-output
    (!.lua
     (k/return-wrap (fn:> 1))))
   => {"value" 1, "type" "data"}
 
-  (json/read
+  ^{:lang-exceptions {:dart {:expect {"key" nil
+                                     "id" nil
+                                     "value" 1
+                                     "type" "data"
+                                     "return" "number"}}}}
+  (decode-output
    (!.py
-    (k/return-wrap (fn:> 1))))
+     (k/return-wrap (fn:> 1))))
   => {"key" nil, "id" nil, "value" 1, "type" "data"}
 
-  (json/read
+  (decode-output
    (!.R
     (k/return-wrap (fn:> 1))))
   => {"key" nil, "id" nil, "value" 1, "type" "data"})
@@ -76,22 +87,24 @@
 (fact "evaluates a returns a string"
   ^:hidden
 
-  (json/read
+  (decode-output
    (!.js
     (k/return-eval "1")))
   => {"return" "number", "value" 1, "type" "data"}
 
-  (json/read
+  (decode-output
    (!.lua
     (k/return-eval "return 1")))
   => {"value" 1, "type" "data"}
 
-  (json/read
+  ^{:lang-exceptions {:dart {:form :dart-unsupported-return-eval
+                             :expect :dart-unsupported-return-eval}}}
+  (decode-output
    (!.py
-    (k/return-eval "globals()[\"OUT\"] = 1")))
+     (k/return-eval "globals()[\"OUT\"] = 1")))
   => {"key" nil, "id" nil, "value" 1, "type" "data"}
 
-  (json/read
+  (decode-output
    (!.R
     (k/return-eval "1")))
   => {"key" nil, "id" nil, "value" 1, "type" "data"})
@@ -133,6 +146,22 @@
                    (k/socket-close conn))}))))
   => "hello"
 
+  ^{:lang-exceptions
+    {:dart
+     {:form (notify/wait-on-call
+             2000
+             (fn []
+               (!.dt
+                (k/socket-connect
+                 "127.0.0.1"
+                 (@! (:socket-port (l/default-notify)))
+                  {:success (fn [conn]
+                              (k/socket-send conn
+                                             (x:cat (k/return-encode "hello"
+                                                                     (@! notify/*override-id*)
+                                                                     "hello")
+                                                    "\n"))
+                              (k/socket-close conn))}))))}}}
   (notify/wait-on-call
    (fn []
      (!.py
@@ -177,13 +206,30 @@
                 (k/socket-close conn))}))
   => "OK"
 
+  ^{:lang-exceptions
+    {:dart
+     {:form (notify/wait-on-call
+             2000
+             (fn []
+               (!.dt
+                (k/socket-connect
+                 "127.0.0.1"
+                 (@! (:socket-port (l/default-notify)))
+                 {:success (fn [conn]
+                             (k/socket-send
+                              conn
+                              (x:cat (k/return-encode "OK"
+                                                      (@! notify/*override-id*)
+                                                      nil)
+                                     "\n"))
+                             (k/socket-close conn))}))))}}}
   (notify/wait-on :python
-   (k/socket-connect
-    "127.0.0.1"
-    (@! (:socket-port (l/default-notify)))
-    {:success (fn [conn]
-                (k/notify "OK")
-                (k/socket-close conn))}))
+    (k/socket-connect
+     "127.0.0.1"
+     (@! (:socket-port (l/default-notify)))
+     {:success (fn [conn]
+                 (k/notify "OK")
+                 (k/socket-close conn))}))
   => "OK")
 
 ^{:refer xt.lang.common-repl/notify-socket-handler :added "4.0"}
@@ -211,10 +257,21 @@
                             {}))))
   => "hello"
 
+  ^{:lang-exceptions
+    {:dart
+     {:form (notify/wait-on-call
+             2000
+             (fn []
+               (!.dt
+                (k/notify-socket "127.0.0.1" (@! (:socket-port (l/default-notify)))
+                                 "hello"
+                                 (@! notify/*override-id*)
+                                 nil
+                                 {}))))}}}
   (notify/wait-on-call
    (fn [] (!.py
            (k/notify-socket "127.0.0.1" (@! (:socket-port (l/default-notify)))
-                            "hello"
+                             "hello"
                             (@! notify/*override-id*)
                             nil
                             {}))))
@@ -247,6 +304,18 @@
             {}))))
   => "hello"
 
+  ^{:lang-exceptions
+    {:dart
+     {:form (notify/wait-on-call
+             2000
+             (fn []
+               (!.dt
+                (k/notify-socket-http
+                 "127.0.0.1" (@! (:http-port (l/default-notify)))
+                 "hello"
+                 (@! notify/*override-id*)
+                 nil
+                 {}))))}}}
   (notify/wait-on-call
    (fn [] (!.py
            (k/notify-socket-http
@@ -280,6 +349,17 @@
                           {}))))
   => "hello"
 
+  ^{:lang-exceptions
+    {:dart
+     {:form (notify/wait-on-call
+             2000
+             (fn []
+               (!.dt
+                (k/notify-http "127.0.0.1" (@! (:http-port (l/default-notify)))
+                               "hello"
+                               (@! notify/*override-id*)
+                               nil
+                               {}))))}}}
   (notify/wait-on-call
    (fn []
      (!.py
@@ -311,6 +391,19 @@
     (k/notify 1))
   => 1
   
+  ^{:lang-exceptions
+    {:dart
+     {:form (notify/wait-on-call
+             2000
+             (fn []
+               (!.dt
+                (k/notify-socket
+                 "127.0.0.1"
+                 (@! (:socket-port (l/default-notify)))
+                 1
+                 (@! notify/*override-id*)
+                 nil
+                 {}))))}}}
   (notify/wait-on :python
     (k/notify 1))
   => 1)
@@ -332,6 +425,22 @@
        ["success"]) 1))
   => 1
  
+  ^{:lang-exceptions
+    {:dart
+     {:form (notify/wait-on-call
+             2000
+             (fn []
+               (!.dt
+                ((.
+                  {"success" (fn [val]
+                               (k/notify-socket
+                                "127.0.0.1"
+                                (@! (:socket-port (l/default-notify)))
+                                val
+                                (@! notify/*override-id*)
+                                nil
+                                {}))}
+                  ["success"]) 1))))}}}
   (notify/wait-on :python
    ((. (k/<!)
        ["success"]) 1))

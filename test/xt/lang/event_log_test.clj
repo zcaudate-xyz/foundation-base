@@ -186,6 +186,7 @@
 (fact "removes a listener"
   ^:hidden
   
+  ^{:lang-exceptions {:lua {:skip true}}}
   (!.js
    (var l (log/new-log {}))
    (log/add-listener

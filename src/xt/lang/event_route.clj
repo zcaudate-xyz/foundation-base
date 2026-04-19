@@ -294,6 +294,7 @@
   {:added "4.0"}
   [route path]
   (var #{tree} route)
+  (:= path (event-common/arrayify-path path))
   (var pkey (xt/x:json-encode path))
   (return (xt/x:get-key tree pkey)))
 
@@ -303,6 +304,7 @@
   [route param path]
   (var #{tree} route)
   (:= path (or path (-/path-from-tree tree)))
+  (:= path (event-common/arrayify-path path))
   (return (xt/x:get-key (-/path-params-from-tree tree path)
                      param)))
 
@@ -312,6 +314,7 @@
   [route path]
   (var #{tree} route)
   (:= path (or path (-/path-from-tree tree)))
+  (:= path (event-common/arrayify-path path))
   (return (-/path-params-from-tree tree path)))
 
 
@@ -347,6 +350,7 @@
   "adds a path listener"
   {:added "4.0"}
   [route path listener-id callback meta]
+  (:= path (event-common/arrayify-path path))
   (var pkey (xt/x:json-encode path))
   (return
    (event-common/add-listener
@@ -378,6 +382,7 @@
   "adds a full listener"
   {:added "4.0"}
   [route path param listener-id callback meta]
+  (:= path (event-common/arrayify-path path))
   (var pkey (xt/x:json-encode path))
   (return
    (event-common/add-listener
@@ -449,6 +454,7 @@
   ^CHANGES
   (var ppath    (-/path-from-tree tree))
   (var npath    (or path ppath))
+  (:= npath (event-common/arrayify-path npath))
   (var pkey    (xt/x:json-encode npath))
   
   (var pparams  (xt/x:get-key all-params pkey))
@@ -480,6 +486,7 @@
   {:added "4.0"}
   [route path value]
   (var #{tree} route)
+  (:= path (event-common/arrayify-path path))
   (var pkey   (xt/x:json-encode path))
   (var pvalue (xt/x:get-key tree pkey))
   (xt/x:set-key tree pkey value)
@@ -499,6 +506,7 @@
   [route param value path]
   (var #{tree} route)
   (:= path  (or path (-/path-from-tree tree)))
+  (:= path (event-common/arrayify-path path))
   (var pkey (xt/x:json-encode path))
   (var all-params (xt/x:get-key tree "params"))
   (var pparams (or (xt/x:get-key all-params pkey) {}))

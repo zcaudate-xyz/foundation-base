@@ -79,6 +79,22 @@
       "listeners" {},
       "data" "number"})
 
+^{:refer xt.lang.event-common/arrayify-path :added "4.1"}
+(fact "normalizes event path inputs"
+  ^:hidden
+
+  (!.js [(event/arrayify-path nil)
+         (event/arrayify-path [])
+         (event/arrayify-path {})
+         (event/arrayify-path "a")])
+  => [[] [] [] ["a"]]
+
+  (!.lua [(event/arrayify-path nil)
+          (event/arrayify-path [])
+          (event/arrayify-path {})
+          (event/arrayify-path "a")])
+  => [{} {} {} ["a"]])
+
 ^{:refer xt.lang.event-common/make-listener-entry :added "4.0"
   :setup [(def +out+
             (contains-in
@@ -156,16 +172,43 @@
        "listener/type" "custom"},
       "data" "hello"}
 
+  ^{:lang-exceptions
+    {:dart
+     {:form (notify/wait-on-call
+             2000
+             (fn []
+               (!.dt
+                (var c (event/make-container
+                        (fn:> 1)
+                        "custom.container"
+                        {:info {:name "hello"}}))
+                (var entry
+                     (event/add-listener
+                      c
+                      "abc"
+                      "custom"
+                      (fn [val]
+                        (return
+                         (repl/notify-socket
+                          "127.0.0.1"
+                          (@! (:socket-port (l/default-notify)))
+                          val
+                          (@! notify/*override-id*)
+                          nil
+                          {})))
+                      {:custom/label "hello"}
+                      nil))
+                (event/trigger-entry entry {:data "hello"}))))}}}
   (notify/wait-on :python
-    (var c (event/make-container
-           (fn:> 1)
-           "custom.container"
-           {:info {:name "hello"}}))
-    (event/add-listener c "abc" "custom"
-                            (repl/>notify)
-                            {:custom/label "hello"}
-                            nil)
-    (event/trigger-listeners c {:data "hello"}))
+   (var c (event/make-container
+          (fn:> 1)
+          "custom.container"
+          {:info {:name "hello"}}))
+   (event/add-listener c "abc" "custom"
+                           (repl/>notify)
+                           {:custom/label "hello"}
+                           nil)
+   (event/trigger-listeners c {:data "hello"}))
   => {"meta"
       {"listener/id" "abc",
        "custom/label" "hello",
@@ -368,14 +411,35 @@
     (event/trigger-entry entry {}))
   => {"meta" {"listener/id" "abc", "listener/type" "custom"}}
 
+  ^{:lang-exceptions
+    {:dart
+     {:form (notify/wait-on-call
+             2000
+             (fn []
+               (!.dt
+                (var entry (event/make-listener-entry
+                            "abc"
+                            "custom"
+                            (fn [val]
+                              (return
+                               (repl/notify-socket
+                                "127.0.0.1"
+                                (@! (:socket-port (l/default-notify)))
+                                val
+                                (@! notify/*override-id*)
+                                nil
+                                {})))
+                            nil
+                            nil))
+                 (event/trigger-entry entry {}))))}}}
   (notify/wait-on :python
-    (var entry (event/make-listener-entry
-                "abc"
-                "custom"
-                (repl/>notify)
-                nil
-                nil))
-    (event/trigger-entry entry {}))
+   (var entry (event/make-listener-entry
+               "abc"
+               "custom"
+               (repl/>notify)
+               nil
+               nil))
+   (event/trigger-entry entry {}))
   => {"meta" {"listener/id" "abc", "listener/type" "custom"}})
 
 ^{:refer xt.lang.event-common/trigger-listeners :added "4.0"}
@@ -417,17 +481,45 @@
        "listener/type" "custom"},
       "data" "hello"}
 
+  ^{:lang-exceptions
+    {:dart
+     {:form (notify/wait-on-call
+             2000
+             (fn []
+               (!.dt
+                (var c (event/make-container
+                        (fn:> 1)
+                        "custom.container"
+                        {:info {:name "hello"}}))
+                (var entry
+                     (event/add-keyed-listener
+                      c
+                      "key/common"
+                      "abc"
+                      "custom"
+                      (fn [val]
+                        (return
+                         (repl/notify-socket
+                          "127.0.0.1"
+                          (@! (:socket-port (l/default-notify)))
+                          val
+                          (@! notify/*override-id*)
+                          nil
+                          {})))
+                      {:custom/label "hello"}
+                      nil))
+                (event/trigger-entry entry {:data "hello"}))))}}}
   (notify/wait-on :python
-    (var c (event/make-container
-            (fn:> 1)
-            "custom.container"
-            {:info {:name "hello"}}))
-    (event/add-keyed-listener c "key/common"
-                            "abc" "custom"
-                            (repl/>notify)
-                            {:custom/label "hello"}
-                            nil)
-    (event/trigger-keyed-listeners c "key/common" {:data "hello"}))
+   (var c (event/make-container
+           (fn:> 1)
+           "custom.container"
+           {:info {:name "hello"}}))
+   (event/add-keyed-listener c "key/common"
+                           "abc" "custom"
+                           (repl/>notify)
+                           {:custom/label "hello"}
+                           nil)
+   (event/trigger-keyed-listeners c "key/common" {:data "hello"}))
   => {"meta"
       {"listener/id" "abc",
        "custom/label" "hello",

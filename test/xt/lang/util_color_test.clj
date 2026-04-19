@@ -230,6 +230,7 @@
 (fact "converts a named color to hsl"
   ^:hidden
   
+  ^{:lang-exceptions {:lua {:expect [0 67.924528301887 41.56862745098]}}}
   (!.js
    (color/named->hsl "firebrick"))
   => [0 67.9245283018868 41.568627450980394])
@@ -246,6 +247,7 @@
 (fact "converts a hex to hsl"
   ^:hidden
 
+  ^{:lang-exceptions {:lua {:expect [0 67.924528301887 41.56862745098]}}}
   (!.js
    (color/hex->hsl "#B22222"))
   => [0 67.9245283018868 41.568627450980394])

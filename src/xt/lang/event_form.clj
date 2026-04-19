@@ -136,7 +136,7 @@
   "adds listener to a form"
   {:added "4.0"}
   [form listener-id fields callback meta]
-  (:= fields (xtd/arrayify fields))
+  (:= fields (event-common/arrayify-path fields))
   (return
    (event-common/add-listener
     form listener-id "form" callback
@@ -174,7 +174,7 @@
    (event-common/trigger-listeners
     form
     {:type   event-type
-     :fields (xtd/arrayify fields)})))
+     :fields (event-common/arrayify-path fields)})))
 
 (defn.xt set-field
   "sets the field"

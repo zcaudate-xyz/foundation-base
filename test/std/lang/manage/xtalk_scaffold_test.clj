@@ -111,15 +111,32 @@
 (def lua-empty-vector-runtime-forms
   (read-string
    "[(ns xt.sample.lua-empty-vector-test
+         (:require [std.lang :as l])
+         (:use code.test))
+       (l/script- :js {:runtime :basic})
+       (l/script- :lua {:runtime :basic})
+       (fact \"normalizes lua empty vectors\"
+         (!.js {:queued []})
+         => {\"queued\" []}
+         (!.lua {:queued []})
+         => {\"queued\" []})]"))
+
+(def lua-nil-map-runtime-forms
+  (read-string
+   "[(ns xt.sample.lua-nil-map-test
         (:require [std.lang :as l])
         (:use code.test))
       (l/script- :js {:runtime :basic})
       (l/script- :lua {:runtime :basic})
-      (fact \"normalizes lua empty vectors\"
-        (!.js {:queued []})
-        => {\"queued\" []}
-        (!.lua {:queued []})
-        => {\"queued\" []})]"))
+      (fact \"normalizes lua nil map entries\"
+        (!.js {:meta {\"listener/id\" \"b2\"}
+               :pred nil})
+        => {\"meta\" {\"listener/id\" \"b2\"}
+            \"pred\" nil}
+        (!.lua {:meta {\"listener/id\" \"b2\"}
+                :pred nil})
+        => {\"meta\" {\"listener/id\" \"b2\"}
+            \"pred\" nil})]"))
 
 (def split-runtime-reference-forms
   (read-string
@@ -604,6 +621,24 @@
                           :path)
             lua-output (slurp lua-path)]
         (boolean (re-find #"\{\"queued\"\s+\{\}\}" lua-output)))))
+  => true)
+
+^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-tests :added "4.1"}
+(fact "separate-runtime-tests drops nil-valued lua map entries from expectations"
+  (with-temp-runtime-suite-file
+    lua-nil-map-runtime-forms
+    (fn [path]
+      (let [{:keys [outputs]}
+            (separate-runtime-tests nil {:input-path path
+                                         :langs [:lua]
+                                         :write true})
+            lua-path (->> outputs
+                          (filter #(= :lua (:lang %)))
+                          first
+                          :path)
+            lua-output (slurp lua-path)]
+        (and (str/includes? lua-output "{\"meta\" {\"listener/id\" \"b2\"}}")
+             (not (str/includes? lua-output "\"pred\" nil"))))))
   => true)
 
 ^{:refer std.lang.manage.xtalk-scaffold/scaffold-runtime-template :added "4.1"}

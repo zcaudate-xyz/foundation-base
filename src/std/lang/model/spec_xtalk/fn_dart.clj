@@ -492,12 +492,12 @@
   [[_ f encode-fn]]
   (list 'try
         (list 'var 'out (list f))
-        (list 'return (list encode-fn 'out))
+        (list 'return (list encode-fn 'out nil nil))
         (list 'catch 'e
               (list 'return
                     (list 'json.encode
                           '{:type "error"
-                            :value {:message e.message :stack e.stack}})))))
+                            :value {:message (. e (toString))}})))))
 
 (defn dart-tf-x-return-eval
   [[_ s wrap-fn]]
@@ -559,6 +559,40 @@
     {:x-uri-encode     {:macro #'dart-tf-x-uri-encode      :emit :macro}
      :x-uri-decode     {:macro #'dart-tf-x-uri-decode      :emit :macro}})
 
+(defn dart-tf-x-notify-http
+  [[_ host port value id key opts]]
+  (template/$
+   (do (:- "import 'dart:io';")
+        (var resolved-opts (:? (xt/x:nil? ~opts) {} ~opts))
+        (var #{path} resolved-opts)
+        (var output (xt.lang.common-repl/return-encode ~value ~id ~key))
+        (var endpoint (:? (xt/x:nil? path) "/" path))
+        (var envelope (xt/x:cat "POST "
+                                endpoint
+                                " HTTP/1.0\r\n"
+                                "Host: "
+                                ~host
+                                ":"
+                                (xt/x:to-string ~port)
+                                "\r\n"
+                                "Content-Length: "
+                                (xt/x:to-string (xt/x:len output))
+                                "\r\n"
+                                "\r\n"
+                                output))
+        (return (. (Socket.connect ~host ~port)
+                   (then (fn [conn]
+                           (. conn (write envelope))
+                           (return (. (. conn (flush))
+                                      (then (fn [_]
+                                              (. conn (destroy))
+                                              (return nil)))))))
+                   (catchError (fn [e]
+                                 (return ["unable to connect"]))))))))
+
+(def +dart-special+
+  {:x-notify-http {:macro #'dart-tf-x-notify-http :emit :macro :type :template}})
+
 (defn dart-tf-x-slurp
   [[_ filename]]
   (list 'throw '"slurp not implemented in Dart"))
@@ -588,4 +622,5 @@
          +dart-thread+
          +dart-b64+
          +dart-uri+
+         +dart-special+
          +dart-file+))

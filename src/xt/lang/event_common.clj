@@ -44,6 +44,9 @@
         [:xt/maybe [:fn [:xt/any] :xt/bool]]]
        EventListenerEntry])
 
+(defspec.xt arrayify-path
+  [:fn [:xt/any] [:xt/array :xt/any]])
+
 (defspec.xt clear-listeners
   [:fn [EventContainer] EventListenerMap])
 
@@ -131,6 +134,18 @@
                    :listener/type listener-type}
                   meta)}))
 
+(defn.xt arrayify-path
+  "normalizes event path-like inputs, treating empty objects as empty arrays"
+  {:added "4.1"}
+  [x]
+  (when (xt/x:is-array? x)
+    (return x))
+  (when (or (xt/x:nil? x)
+            (and (xt/x:is-object? x)
+                 (xtd/is-empty? x)))
+    (return []))
+  (return [x]))
+
 (defn.xt clear-listeners
   "clears all listeners"
   {:added "4.0"}
@@ -162,7 +177,10 @@
   {:added "4.0"}
   [container]
   (var #{listeners} container)
-  (return (xt/x:obj-keys listeners)))
+  (return
+   (xtd/arr-sort (xt/x:obj-keys listeners)
+                 (fn [x] (return x))
+                 xt/x:str-lt)))
 
 (defn.xt list-listener-types
   "lists listeners by their type"
@@ -251,7 +269,10 @@
   (var group (xt/x:get-key listeners key))
   (when (xt/x:nil? group)
     (return []))
-  (return (xt/x:obj-keys group)))
+  (return
+   (xtd/arr-sort (xt/x:obj-keys group)
+                 (fn [x] (return x))
+                 xt/x:str-lt)))
 
 (defn.xt all-keyed-listeners
   "lists all listeners"
@@ -259,10 +280,12 @@
   [container]
   (var #{listeners} container)
   (return
-   (xtd/arr-juxt (xt/x:obj-keys listeners)
+   (xtd/arr-juxt (xtd/arr-sort (xt/x:obj-keys listeners)
+                               (fn [x] (return x))
+                               xt/x:str-lt)
                  (fn [x] (return x))
                  (fn [key]
-                   (return (-/list-keyed-listeners container key))))))
+                    (return (-/list-keyed-listeners container key))))))
 
 (defn.xt trigger-keyed-listeners
   "triggers listeners under a key"

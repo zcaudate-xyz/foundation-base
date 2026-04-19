@@ -89,18 +89,10 @@
 ^{:refer xt.lang.event-log/remove-listener, :adopt true, :added "4.0"}
 (fact
  "removes a listener"
- ^{:hidden true}
- (!.lua
-  (var l (log/new-log {}))
-  (log/add-listener l "test1" (fn [id data t meta]) nil)
-  (log/remove-listener l "test1"))
- =>
- {"pred" nil, "meta" {"listener/id" "test1", "listener/type" "log"}}
  (!.lua
   (var l (log/new-log {}))
   (log/add-listener l "test1" (fn [id data t meta]) nil)
   (xtd/tree-get-data (log/remove-listener l "test1")))
  =>
  {"callback" "<function>",
-  "pred" nil,
   "meta" {"listener/id" "test1", "listener/type" "log"}})

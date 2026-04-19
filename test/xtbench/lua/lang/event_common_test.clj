@@ -42,6 +42,18 @@
   "listeners" {},
   "data" "number"})
 
+^{:refer xt.lang.event-common/arrayify-path, :added "4.1"}
+(fact
+ "normalizes event path inputs"
+ ^{:hidden true}
+ (!.lua
+  [(event/arrayify-path nil)
+   (event/arrayify-path [])
+   (event/arrayify-path {})
+   (event/arrayify-path "a")])
+ =>
+ [{} {} {} ["a"]])
+
 ^{:refer xt.lang.event-common/make-listener-entry,
   :added "4.0",
   :setup
@@ -204,6 +216,5 @@
    (event/list-keyed-listeners c "key/common")])
  =>
  [{"callback" "<function>",
-   "pred" nil,
    "meta" {"listener/id" "b2", "listener/type" "custom"}}
   ["a1" "c3"]])

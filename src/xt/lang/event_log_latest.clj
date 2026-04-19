@@ -3,6 +3,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.lang.event-common :as event-common]]})
 
 (defn.xt new-log-latest
@@ -29,11 +30,14 @@
   (when (and last (>= interval (- t last)))
     (return out))
   (xt/x:set-key log "last" t)
-  (xt/for:object [[k entry] cache]
-    (when (< interval (- t (. entry t)))
-      (xt/x:del-key cache k)
-      (xt/x:arr-push out k)))
-  (return out))
+   (xt/for:object [[k entry] cache]
+     (when (< interval (- t (. entry t)))
+       (xt/x:del-key cache k)
+       (xt/x:arr-push out k)))
+   (return
+    (xtd/arr-sort out
+                  (fn [x] (return x))
+                  xt/x:str-lt)))
 
 (defn.xt queue-latest
   "queues the latest time to log"
@@ -56,4 +60,3 @@
         
         :else
         (return false)))
-

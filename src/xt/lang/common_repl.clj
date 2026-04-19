@@ -102,8 +102,10 @@
   "helper function for `notify-socket-http`"
   {:added "4.0"}
   [conn host port opts output]
-  (var #{path} (or opts {}))
-  (var envelope (xt/x:cat "POST " (or path "/") " HTTP/1.0\r\n"
+  (var resolved-opts (:? (xt/x:nil? opts) {} opts))
+  (var #{path} resolved-opts)
+  (var endpoint (:? (xt/x:nil? path) "/" path))
+  (var envelope (xt/x:cat "POST " endpoint " HTTP/1.0\r\n"
                        "Host: " host ":"  (xt/x:to-string port) "\r\n"
                        "Content-Length: " (xt/x:to-string (xt/x:len output)) "\r\n"
                        "\r\n"

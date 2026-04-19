@@ -709,15 +709,18 @@
       (vector? form)
       (vec (map #(normalize-runtime-expect % lang) form))
 
-      (set? form)
-      (into #{} (map #(normalize-runtime-expect % lang) form))
+       (set? form)
+       (into #{} (map #(normalize-runtime-expect % lang) form))
 
-      (map? form)
-      (into (empty form)
-            (map (fn [[k v]]
-                   [(normalize-runtime-expect k lang)
-                    (normalize-runtime-expect v lang)]))
-            form)
+       (map? form)
+       (into (empty form)
+             (keep (fn [[k v]]
+                     (let [nv (normalize-runtime-expect v lang)]
+                       (when-not (and (= :lua lang)
+                                      (nil? nv))
+                         [(normalize-runtime-expect k lang)
+                          nv]))))
+             form)
 
       :else
       form)))

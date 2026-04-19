@@ -646,24 +646,35 @@
   (var #{sort-fn
          key-fn
          val-fn} opts)
-  (return {:results (:? sort-fn (sort-fn results) results)
+  (:= results (:? sort-fn (sort-fn results) results))
+  (:= key-fn (or key-fn
+                 (fn [e]
+                   (return (xt/x:get-key e "id")))))
+  (:= val-fn (or val-fn
+                 (fn [x]
+                   (return x))))
+  (return {:results results
            :lookup (xtd/arr-juxt (or results [])
-                                 (or key-fn (fn [e] (return (xt/x:get-key e "id"))))
-                                 (or val-fn (fn [x] (return x))))}))
+                                 key-fn
+                                 val-fn)}))
 
 (defn.xt sorted-lookup
   "sorted lookup for region data"
   {:added "0.1"}
   [key]
+  (var sort-key (or key "name"))
   (return
    (fn [results]
      (return
       (-/get-with-lookup
        results
-       {:sort-fn (fn:> [arr]
-                   (xt/x:arr-sort arr
-                                  (fn [e] (xt/x:get-key e (or key "name")))
-                                  xt/x:lt))})))))
+       {:sort-fn
+        (fn [arr]
+          (return
+           (xtd/arr-sort arr
+                         (fn [e]
+                           (return (xt/x:get-key e sort-key)))
+                         xt/x:lt)))})))))
 
 (defn.xt group-by-lookup
   "creates group-by lookup"

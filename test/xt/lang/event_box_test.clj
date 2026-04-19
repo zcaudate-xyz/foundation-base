@@ -203,6 +203,12 @@
    (var b (box/make-box (fn:> {:a 1 :b 2})))
    (box/merge-data b [] {:c 3 :d 4})
    (box/get-data b))
+  => {"d" 4, "a" 1, "b" 2, "c" 3}
+
+  (!.lua
+   (var b (box/make-box (fn:> {:a 1 :b 2})))
+   (box/merge-data b [] {:c 3 :d 4})
+   (box/get-data b))
   => {"d" 4, "a" 1, "b" 2, "c" 3})
 
 ^{:refer xt.lang.event-box/append-data :added "4.0"}

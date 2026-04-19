@@ -10,13 +10,16 @@
  :js
  {:runtime :basic, :require [[xt.lang.common-repl :as k]]})
 
+(defn decode-output [x] (if (string? x) (json/read x) x))
+
 (fact:global {:setup [(l/rt:restart)], :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.common-repl/return-encode, :added "4.0"}
 (fact
  "returns the encoded "
  ^{:hidden true}
- (json/read (!.js (k/return-encode {:data [1 2 3]} "<id>" "<key>")))
+ (decode-output
+  (!.js (k/return-encode {:data [1 2 3]} "<id>" "<key>")))
  =>
  {"key" "<key>", "id" "<id>", "value" {"data" [1 2 3]}, "type" "data"})
 
@@ -24,7 +27,7 @@
 (fact
  "returns a wrapped call"
  ^{:hidden true}
- (json/read (!.js (k/return-wrap (fn:> 1))))
+ (decode-output (!.js (k/return-wrap (fn:> 1))))
  =>
  {"value" 1, "type" "data", "return" "number"})
 
@@ -32,7 +35,7 @@
 (fact
  "evaluates a returns a string"
  ^{:hidden true}
- (json/read (!.js (k/return-eval "1")))
+ (decode-output (!.js (k/return-eval "1")))
  =>
  {"return" "number", "value" 1, "type" "data"})
 
