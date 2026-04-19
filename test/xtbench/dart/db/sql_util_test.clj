@@ -85,8 +85,8 @@
   "'1.235'"
   "'100000000000000000'"
   "'hel''lo'"
-  "'{\"a\": 1}'"
-  "'{\"a\": \"he''llo\"}'"])
+  "'{\"a\":1}'"
+  "'{\"a\":\"he''llo\"}'"])
 
 ^{:refer xt.db.sql-util/encode-sql-arg, :added "4.0"}
 (fact
@@ -280,7 +280,7 @@
     {})
    (ut/encode-query-segment "data" {:a 1} k/identity {})])
  =>
- (assoc +out+ 4 "data = '{\"a\": 1}'"))
+ +out+)
 
 ^{:refer xt.db.sql-util/encode-query-string, :added "4.0"}
 (fact
@@ -296,7 +296,7 @@
  =>
  [""
   "WHERE \"SCHEMA\".name = 'hello'"
-  "WHERE data = '{\"a\": 1}' AND name = 'hello'"])
+  "WHERE data = '{\"a\":1}' AND name = 'hello'"])
 
 ^{:refer xt.db.sql-util/LIMIT, :added "4.0"}
 (fact

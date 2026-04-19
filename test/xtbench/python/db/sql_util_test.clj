@@ -184,7 +184,7 @@
    {:strict true, :values {:replace ut/SQLITE_FN}}
    ut/encode-loop-fn))
  =>
- "(SELECT key from json_each('{\"a\":1}'))"
+ "(SELECT key from json_each('{\"a\": 1}'))"
  (!.py
   (ut/encode-sql-fn
    {"::" "sql/fn", :name "jsonb_build_object", :args ["a" {:a 1}]}
@@ -192,7 +192,7 @@
    {:strict true, :values {:replace ut/SQLITE_FN}}
    ut/encode-loop-fn))
  =>
- "json_object(a, '{\"a\":1}')")
+ "json_object(a, '{\"a\": 1}')")
 
 ^{:refer xt.db.sql-util/encode-sql-select, :added "4.0"}
 (fact

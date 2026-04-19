@@ -25,6 +25,14 @@
 
 (l/script- :python
   {:runtime :basic
+    :require [[xt.lang.common-lib :as k]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-repl :as repl]
+              [xt.lang.event-form :as form]]})
+
+(l/script- :dart
+  {:runtime :twostep
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-spec :as xt]

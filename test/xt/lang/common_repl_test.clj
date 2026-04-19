@@ -20,6 +20,10 @@
 
 (l/script- :python
   {:runtime :basic
+    :require [[xt.lang.common-repl :as k]]})
+
+(l/script- :dart
+  {:runtime :twostep
    :require [[xt.lang.common-repl :as k]]})
 
 (l/script- :r

@@ -23,6 +23,13 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.common-lib :as k]]})
 
+(l/script- :dart
+  {:runtime :twostep
+   :require [[xt.db.sql-util :as ut]
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-lib :as k]]})
+
 (fact:global
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
@@ -144,7 +151,16 @@
     (ut/encode-value "hel'lo")
     (ut/encode-value {:a 1})
     (ut/encode-value {:a "he'llo"})])
-  => ["NULL" "'1.235'" "'100000000000000000'" "'hel''lo'" "'{\"a\": 1}'" "'{\"a\": \"he''llo\"}'"])
+  => ["NULL" "'1.235'" "'100000000000000000'" "'hel''lo'" "'{\"a\": 1}'" "'{\"a\": \"he''llo\"}'"]
+
+  (!.dt
+   [(ut/encode-value nil)
+    (ut/encode-value 1.235)
+    (ut/encode-value 100000000000000000)
+    (ut/encode-value "hel'lo")
+    (ut/encode-value {:a 1})
+    (ut/encode-value {:a "he'llo"})])
+  => ["NULL" "'1.235'" "'100000000000000000'" "'hel''lo'" "'{\"a\":1}'" "'{\"a\":\"he''llo\"}'"])
 
 ^{:refer xt.db.sql-util/encode-sql-arg :added "4.0"}
 (fact "encodes an sql arg (for functions)"
@@ -355,7 +371,47 @@
                      ut/encode-loop-fn))
   => "(SELECT key from json_each('{\"a\":1}'))"
 
+  (!.py
+   (ut/encode-sql-fn {"::" "sql/fn"
+                      :name "jsonb_object_keys"
+                      :args [{:a 1}]}
+                     ut/default-quote-fn
+                     {:strict true
+                      :values {:replace ut/SQLITE_FN}}
+                     ut/encode-loop-fn))
+  => "(SELECT key from json_each('{\"a\": 1}'))"
+
+  (!.dt
+   (ut/encode-sql-fn {"::" "sql/fn"
+                      :name "jsonb_object_keys"
+                      :args [{:a 1}]}
+                     ut/default-quote-fn
+                     {:strict true
+                      :values {:replace ut/SQLITE_FN}}
+                     ut/encode-loop-fn))
+  => "(SELECT key from json_each('{\"a\":1}'))"
+
   (!.js
+   (ut/encode-sql-fn {"::" "sql/fn"
+                      :name "jsonb_build_object"
+                      :args ["a" {:a 1}]}
+                     ut/default-quote-fn
+                     {:strict true
+                      :values {:replace ut/SQLITE_FN}}
+                     ut/encode-loop-fn))
+  => "json_object(a, '{\"a\":1}')"
+
+  (!.py
+   (ut/encode-sql-fn {"::" "sql/fn"
+                      :name "jsonb_build_object"
+                      :args ["a" {:a 1}]}
+                     ut/default-quote-fn
+                     {:strict true
+                      :values {:replace ut/SQLITE_FN}}
+                     ut/encode-loop-fn))
+  => "json_object(a, '{\"a\": 1}')"
+
+  (!.dt
    (ut/encode-sql-fn {"::" "sql/fn"
                       :name "jsonb_build_object"
                       :args ["a" {:a 1}]}
@@ -512,7 +568,19 @@
                                                         :name "+"
                                                         :args [1 2 3]}]}] k/identity {})
     (ut/encode-query-segment "data" {:a 1} k/identity {})])
-  => (assoc +out+ 4 "data = '{\"a\": 1}'"))
+  => (assoc +out+ 4 "data = '{\"a\": 1}'")
+
+  (!.dt
+   [(ut/encode-query-segment "name" "hello" k/identity {})
+    (ut/encode-query-segment "name" ["neq" "hell'o"] k/identity {})
+    (ut/encode-query-segment "name" ["in" [["hello" "hello"]]] k/identity {})
+    (ut/encode-query-segment "name" ["neq" {"::" "sql/fn"
+                                            :name "+"
+                                            :args ["k" {"::" "sql/fn"
+                                                        :name "+"
+                                                        :args [1 2 3]}]}] k/identity {})
+    (ut/encode-query-segment "data" {:a 1} k/identity {})])
+  => +out+)
 
 ^{:refer xt.db.sql-util/encode-query-single-string :added "4.0"}
 (fact "helper for encode-query-string")
@@ -553,9 +621,21 @@
                             :name "hello"}
                            "WHERE"
                            {})])
-  => [""
+  => ["" 
       "WHERE \"SCHEMA\".name = 'hello'"
-      "WHERE data = '{\"a\": 1}' AND name = 'hello'"])
+      "WHERE data = '{\"a\": 1}' AND name = 'hello'"]
+
+  (!.dt
+   [(ut/encode-query-string {} "WHERE" {})
+    (ut/encode-query-string {:name "hello"} "WHERE"
+                            {:column-fn (fn:> [col] (xt/x:cat "\"SCHEMA\"." col))})
+    (ut/encode-query-string {:data {:a 1}
+                             :name "hello"}
+                            "WHERE"
+                            {})])
+  => ["" 
+      "WHERE \"SCHEMA\".name = 'hello'"
+      "WHERE data = '{\"a\":1}' AND name = 'hello'"])
 
 ^{:refer xt.db.sql-util/LIMIT :added "4.0"}
 (fact "creates a LIMIT keyword"

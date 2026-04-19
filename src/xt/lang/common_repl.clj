@@ -217,11 +217,23 @@
   "creates a callback map"
   {:added "4.0"}
   []
-  (let [notify-id (or notify/*override-id*
+  (let [lang (-> (l/macro-opts) :emit :runtime :lang)
+        notify-id (or notify/*override-id*
                       (f/error "No ID for Notify"))
         success-expr (notify-form notify-id 'val nil)
         error-expr   (notify-form notify-id 'err nil)]
-    (template/$ {:success (fn [val]
-                            (return ~success-expr))
-                 :error   (fn [err]
-                            (return ~error-expr))})))
+    (if (= lang :lua)
+      (template/$
+        ((fn []
+           (var callbacks {})
+           (:= (. callbacks ["success"])
+               (fn [val]
+                 (return ~success-expr)))
+           (:= (. callbacks ["error"])
+               (fn [err]
+                 (return ~error-expr)))
+           (return callbacks))))
+      (template/$ {:success (fn [val]
+                              (return ~success-expr))
+                   :error   (fn [err]
+                              (return ~error-expr))}))))

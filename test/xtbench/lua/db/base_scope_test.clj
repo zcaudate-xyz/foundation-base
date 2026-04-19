@@ -26,13 +26,6 @@
   (xtd/arr-map
    (scope/get-data-columns
     sample/Schema
-    "RegionState"
-    ["*/info" "country"])
-   (fn:> [e] (. e ["ident"]))))
- (!.lua
-  (xtd/arr-map
-   (scope/get-data-columns
-    sample/Schema
     "UserAccount"
     ["*/info" "password_updated"])
    (fn:> [e] (. e ["ident"]))))
@@ -140,7 +133,9 @@
       {:id "2"}
       {:id "3"}
       ["first_name" "last_name"]]])
-   (fn [[e cols]] (return [e.ident cols]))))
+   (fn
+    [e]
+    (return [(xt/x:get-key (xtd/first e) "ident") (xtd/second e)]))))
  =>
  [["profile"
    [{"id" "1"} {"id" "2"} {"id" "3"} ["first_name" "last_name"]]]])

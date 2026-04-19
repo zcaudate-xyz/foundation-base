@@ -92,7 +92,8 @@
             notify/wait-on-call}})
 
 (def ^:dynamic *template-runtime-symbol-blockers*
-  {:lua '#{setmetatable
+  {:js '#{js-sqlite/connect-constructor}
+   :lua '#{setmetatable
            getmetatable
            rawget
            rawset

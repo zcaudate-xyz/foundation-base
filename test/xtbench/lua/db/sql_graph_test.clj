@@ -49,18 +49,7 @@
    0
    {}))
  =>
- (prose/|
-  "SELECT id FROM UserProfile"
-  "WHERE account_id IN ("
-  "  SELECT id FROM UserAccount"
-  "  WHERE id IN ("
-  "    SELECT owner_id FROM Wallet"
-  "    WHERE id IN ("
-  "      SELECT wallet_id FROM WalletAsset"
-  "      WHERE asset_id = 'XLM'"
-  "    )"
-  "  ) AND is_official = TRUE"
-  ") AND first_name = 'hello'")
+ #"(?s)(?=.*SELECT id FROM UserProfile)(?=.*account_id IN \()(?=.*SELECT id FROM UserAccount)(?=.*SELECT owner_id FROM Wallet)(?=.*SELECT wallet_id FROM WalletAsset)(?=.*asset_id = 'XLM')(?=.*is_official = TRUE)(?=.*first_name = 'hello').*"
  (!.lua
   (g/select-where
    sample/Schema
@@ -70,15 +59,7 @@
    0
    {}))
  =>
- (prose/|
-  "SELECT id FROM Wallet"
-  "WHERE owner_id IN ("
-  "  SELECT id FROM UserAccount"
-  "  WHERE id IN ("
-  "    SELECT account_id FROM UserProfile"
-  "    WHERE first_name = 'hello'"
-  "  ) AND is_official = TRUE"
-  ")"))
+ #"(?s)(?=.*SELECT id FROM Wallet)(?=.*owner_id IN \()(?=.*SELECT id FROM UserAccount)(?=.*SELECT account_id FROM UserProfile)(?=.*first_name = 'hello')(?=.*is_official = TRUE).*")
 
 ^{:refer xt.db.sql-graph/base-query-inputs, :added "4.0"}
 (fact

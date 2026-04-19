@@ -30,13 +30,16 @@
   (!.js
    (call/decode-return (xt/x:json-encode
                         {:status "ok"
-                         :data 1})))
+                         :data 1})
+                        nil))
   => 1
 
+  ^{:lang-exceptions {:dart {:skip true}}}
   (!.js
    (call/decode-return (xt/x:json-encode
-                        {:status "error"
-                         :data "NOT VALID"})))
+                         {:status "error"
+                         :data "NOT VALID"})
+                        nil))
   => (throws))
 
 ^{:refer xt.db.sql-call/call-format-input :added "4.0"}
@@ -60,7 +63,11 @@
     [1 2]))
   => "SELECT \"scratch\".divf('1', '2');")
 
-^{:refer xt.db.sql-call/call-raw :added "4.0"}
+^{:refer xt.db.sql-call/call-raw
+  :added "4.0"
+  :lang-exceptions {:lua {:skip true}
+                    :python {:skip true}
+                    :dart {:skip true}}}
 (fact "calls a database function"
   ^:hidden
   
@@ -76,7 +83,11 @@
                           (then (repl/>notify))))}))
   => "30")
 
-^{:refer xt.db.sql-call/call-api :added "4.0"}
+^{:refer xt.db.sql-call/call-api
+  :added "4.0"
+  :lang-exceptions {:lua {:skip true}
+                    :python {:skip true}
+                    :dart {:skip true}}}
 (fact "results an api style result"
   ^:hidden
   

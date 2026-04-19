@@ -30,12 +30,14 @@
 (fact
  "decodes the return value"
  ^{:hidden true}
- (!.js (call/decode-return (xt/x:json-encode {:status "ok", :data 1})))
+ (!.js
+  (call/decode-return (xt/x:json-encode {:status "ok", :data 1}) nil))
  =>
  1
  (!.js
   (call/decode-return
-   (xt/x:json-encode {:status "error", :data "NOT VALID"})))
+   (xt/x:json-encode {:status "error", :data "NOT VALID"})
+   nil))
  =>
  (throws))
 

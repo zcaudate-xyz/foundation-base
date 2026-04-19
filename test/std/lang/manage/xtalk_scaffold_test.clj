@@ -159,15 +159,30 @@
 (def template-forms-with-helper-runtime
   (read-string
    "[(ns xtbench.js.sample.sql-call-test
-         (:require [std.lang :as l])
-         (:use code.test))
+          (:require [std.lang :as l])
+          (:use code.test))
        (l/script- :postgres {:runtime :jdbc.client
                              :config {:dbname \"test-scratch\"}})
        (l/script- :js {:runtime :basic})
        (fact:global {:setup [(l/rt:restart)]})
-       (fact \"placeholder\"
-         ^:hidden
-         (!.js 1)
+        (fact \"placeholder\"
+          ^:hidden
+          (!.js 1)
+          => 1)]"))
+
+(def js-sqlite-template-forms
+  (read-string
+   "[(ns xtbench.js.sample.sql-sqlite-test
+         (:require [std.lang :as l]
+                   [xt.lang.common-notify :as notify])
+         (:use code.test))
+       (l/script- :js {:runtime :basic
+                       :require [[xt.sys.conn-dbsql :as dbsql]
+                                 [js.lib.driver-sqlite :as js-sqlite]]})
+       (fact \"sqlite helper\"
+         (notify/wait-on :js
+           (dbsql/connect {:constructor js-sqlite/connect-constructor}
+                          {:success (fn [conn] conn)}))
          => 1)]"))
 
 (def split-runtime-reference-forms
@@ -497,11 +512,14 @@
 ^{:refer std.lang.manage.xtalk-scaffold/runtime-template-supported? :added "4.1"}
 (fact "blocks twostep suite generation for runtime-coupled templates"
   [(runtime-template-supported? canonical-runtime-template-forms :dart)
-     (runtime-template-supported? blocked-runtime-template-forms :dart)
-     (runtime-template-supported? runtime-test-forms :dart)
-     (runtime-template-supported? lua-specific-template-forms :lua)
-     (runtime-template-supported? lua-specific-template-forms :js)]
-  => [true true false true false])
+      (runtime-template-supported? blocked-runtime-template-forms :dart)
+      (runtime-template-supported? runtime-test-forms :dart)
+      (runtime-template-supported? lua-specific-template-forms :lua)
+      (runtime-template-supported? lua-specific-template-forms :js)
+      (runtime-template-supported? js-sqlite-template-forms :lua)
+      (runtime-template-supported? js-sqlite-template-forms :python)
+      (runtime-template-supported? js-sqlite-template-forms :dart)]
+  => [true true false true false false false false])
 
 ^{:refer std.lang.manage.xtalk-scaffold/replace-runtime-symbol :added "4.1"}
 (fact "replaces runtime dispatch symbol"

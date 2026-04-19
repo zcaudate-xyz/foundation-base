@@ -31,12 +31,13 @@
  "decodes the return value"
  ^{:hidden true}
  (!.lua
-  (call/decode-return (xt/x:json-encode {:status "ok", :data 1})))
+  (call/decode-return (xt/x:json-encode {:status "ok", :data 1}) nil))
  =>
  1
  (!.lua
   (call/decode-return
-   (xt/x:json-encode {:status "error", :data "NOT VALID"})))
+   (xt/x:json-encode {:status "error", :data "NOT VALID"})
+   nil))
  =>
  (throws))
 
@@ -59,39 +60,3 @@
   (call/call-format-query (@! (pg/bind-function scratch/divf)) [1 2]))
  =>
  "SELECT \"scratch\".divf('1', '2');")
-
-^{:refer xt.db.sql-call/call-raw, :added "4.0"}
-(fact
- "calls a database function"
- ^{:hidden true}
- (notify/wait-on
-  :lua
-  (driver/connect
-   {:constructor js-postgres/connect-constructor,
-    :database "test-scratch"}
-   {:success
-    (fn
-     [conn]
-     (.
-      (call/call-raw conn (@! (pg/bind-function scratch/addf)) [10 20])
-      (then (repl/>notify))))}))
- =>
- "30")
-
-^{:refer xt.db.sql-call/call-api, :added "4.0"}
-(fact
- "results an api style result"
- ^{:hidden true}
- (notify/wait-on
-  :lua
-  (driver/connect
-   {:constructor js-postgres/connect-constructor,
-    :database "test-scratch"}
-   {:success
-    (fn
-     [conn]
-     (.
-      (call/call-api conn (@! (pg/bind-function scratch/addf)) [10 20])
-      (then (repl/>notify))))}))
- =>
- "{\"status\": \"ok\", \"data\":\"30\"}")

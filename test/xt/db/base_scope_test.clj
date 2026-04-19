@@ -221,14 +221,44 @@
 
   (!.js
    (xtd/arr-map (scope/get-link-columns sample/Schema
-                                      "UserAccount"
-                                      [["profile"
-                                        {:id "1"}
-                                        {:id "2"}
-                                        {:id "3"}
-                                        ["first_name"
-                                         "last_name"]]])
-              (fn [[e cols]] (return [e.ident cols]))))
+                                       "UserAccount"
+                                       [["profile"
+                                         {:id "1"}
+                                         {:id "2"}
+                                         {:id "3"}
+                                         ["first_name"
+                                          "last_name"]]])
+               (fn [[e cols]] (return [e.ident cols]))))
+  => [["profile" [{"id" "1"} {"id" "2"} {"id" "3"} ["first_name" "last_name"]]]]
+
+  (!.lua
+   (xtd/arr-map (scope/get-link-columns sample/Schema
+                                       "UserAccount"
+                                       [["profile"
+                                         {:id "1"}
+                                         {:id "2"}
+                                         {:id "3"}
+                                         ["first_name"
+                                          "last_name"]]])
+               (fn [e]
+                 (return [(xt/x:get-key (xtd/first e)
+                                        "ident")
+                          (xtd/second e)]))))
+  => [["profile" [{"id" "1"} {"id" "2"} {"id" "3"} ["first_name" "last_name"]]]]
+
+  (!.py
+   (xtd/arr-map (scope/get-link-columns sample/Schema
+                                       "UserAccount"
+                                       [["profile"
+                                         {:id "1"}
+                                         {:id "2"}
+                                         {:id "3"}
+                                         ["first_name"
+                                          "last_name"]]])
+               (fn [e]
+                 (return [(xt/x:get-key (xtd/first e)
+                                        "ident")
+                          (xtd/second e)]))))
   => [["profile" [{"id" "1"} {"id" "2"} {"id" "3"} ["first_name" "last_name"]]]])
 
 ^{:refer xt.db.base-scope/merge-queries :added "4.0"}
