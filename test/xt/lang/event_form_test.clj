@@ -632,7 +632,8 @@
                                        (< 0 (xt/x:len v)))))}]]}))
     (form/validate-all f
                        (fn [field status] (return nil))
-                       (repl/>notify)))
+                       (fn [passed _]
+                         (repl/notify passed))))
   => false)
 
 ^{:refer xt.lang.event-form/validate-field :added "4.0"

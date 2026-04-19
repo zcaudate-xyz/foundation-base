@@ -187,25 +187,23 @@
   {:added "4.0"}
   [& [f]]
   (let [lang (-> (l/macro-opts) :emit :runtime :lang)
-        value-expr (if f
-                     (list f 'val)
-                     'val)]
+         value-expr (if f
+                      (list f 'val)
+                      'val)]
     (if (= lang :dart)
       (let [socket-port (:socket-port (l/default-notify))
             notify-id   (or notify/*override-id*
                             (f/error "No ID for Notify"))]
         (template/$
          (fn [val]
-           (var task
-                (xt.lang.common-repl/notify-socket
-                 "127.0.0.1"
-                 ~socket-port
-                 ~value-expr
-                 ~notify-id
-                 nil
-                 {}))
-           (return {"::" "notify.task"
-                    "task" task}))))
+            (return
+             (xt.lang.common-repl/notify-socket
+              "127.0.0.1"
+              ~socket-port
+              ~value-expr
+              ~notify-id
+              nil
+              {})))))
       (let [notify-id (or notify/*override-id*
                           (f/error "No ID for Notify"))
             notify-expr (notify-form notify-id value-expr nil)]

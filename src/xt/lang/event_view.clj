@@ -388,8 +388,8 @@
          callback} view)
   (xt/x:obj-assign input {:current current
                        :updated (xt/x:now-ms)})
-  (-/trigger-listeners view "view.input" input)
-  (return input))
+  (var task (-/trigger-listeners view "view.input" input))
+  (return (event-common/task-return task input)))
 
 (defn.xt set-output
   "sets the output"
@@ -415,8 +415,8 @@
 
         :else
         (xt/x:set-key output "current" current))
-  (-/trigger-listeners view "view.output" output)
-  (return current))
+  (var task (-/trigger-listeners view "view.output" output))
+  (return (event-common/task-return task current)))
 
 (defn.xt set-output-disabled
   "sets the output disabled flag"
@@ -428,8 +428,8 @@
     (xt/x:set-key output "disabled" value)
     (when (xt/x:has-key? output "disabled")
       (xt/x:del-key output "disabled")))
-  (-/trigger-listeners view "view.disabled" value)
-  (return output))
+  (var task (-/trigger-listeners view "view.disabled" value))
+  (return (event-common/task-return task output)))
 
 (defn.xt set-pending
   "sets the output pending time"
@@ -440,8 +440,8 @@
     (xt/x:set-key output "pending" value)
     (when (xt/x:has-key? output "pending")
       (xt/x:del-key output "pending")))
-  (-/trigger-listeners view "view.pending" value)
-  (return output))
+  (var task (-/trigger-listeners view "view.pending" value))
+  (return (event-common/task-return task output)))
 
 (defn.xt set-elapsed
   "sets the output elapsed time"
@@ -452,8 +452,8 @@
     (xt/x:set-key output "elapsed" value)
     (when (xt/x:has-key? output "elapsed")
       (xt/x:del-key output "elapsed")))
-  (-/trigger-listeners view "view.elapsed" value)
-  (return output))
+  (var task (-/trigger-listeners view "view.elapsed" value))
+  (return (event-common/task-return task output)))
 
 (defn.xt init-view
   "initialises view"

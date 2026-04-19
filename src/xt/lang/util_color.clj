@@ -205,9 +205,10 @@
   "hex to rgb val"
   {:added "4.0"}
   [s]
-  (return (:? (xt/x:nil? (xt/x:get-key -/HEX (xts/to-uppercase s)))
-              0
-              (xt/x:get-key -/HEX (xts/to-uppercase s)))))
+  (var out (xt/x:get-key -/HEX (xts/to-uppercase s)))
+  (when (xt/x:nil? out)
+    (:= out 0))
+  (return out))
 
 (defn.xt n->hex
   "converts an rgb to hex"
@@ -296,7 +297,9 @@
   (var value (xtm/max r g b))
   (var whiteness (xtm/min r g b))
   (var delta (- value whiteness))
-  (var h (-/rgb->hue r g b value delta (:? (xt/x:nil? fallback) 0 fallback)))
+  (when (xt/x:nil? fallback)
+    (:= fallback 0))
+  (var h (-/rgb->hue r g b value delta fallback))
   (var l (/ (* 100
                (+ value whiteness) 0.5)
             255))

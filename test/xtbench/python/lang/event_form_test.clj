@@ -378,7 +378,7 @@
   (form/validate-all
    f
    (fn [field status] (return nil))
-   (repl/>notify)))
+   (fn [passed _] (repl/notify passed))))
  =>
  false)
 

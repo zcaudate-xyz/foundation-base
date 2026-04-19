@@ -73,10 +73,6 @@
 ^{:refer xt.db.sql-util/encode-value, :added "4.0"}
 (fact
  "encodes a value to sql"
- ^{:hidden true}
- (!.dt (xt/x:json-encode 100000000000000000))
- (!.dt (xt/x:json-encode 100000000000000000))
- (!.dt (string.format "%0.f" 100000000000000000))
  (!.dt
   [(ut/encode-value nil)
    (ut/encode-value 1.235)

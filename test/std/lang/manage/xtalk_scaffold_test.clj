@@ -124,7 +124,7 @@
 (def lua-nil-map-runtime-forms
   (read-string
    "[(ns xt.sample.lua-nil-map-test
-        (:require [std.lang :as l])
+         (:require [std.lang :as l])
         (:use code.test))
       (l/script- :js {:runtime :basic})
       (l/script- :lua {:runtime :basic})
@@ -135,8 +135,40 @@
             \"pred\" nil}
         (!.lua {:meta {\"listener/id\" \"b2\"}
                 :pred nil})
-        => {\"meta\" {\"listener/id\" \"b2\"}
-            \"pred\" nil})]"))
+         => {\"meta\" {\"listener/id\" \"b2\"}
+             \"pred\" nil})]"))
+
+(def foreign-prefix-runtime-forms
+  (read-string
+   "[(ns xt.sample.sql-util-test
+         (:require [std.lang :as l]
+                   [xt.lang.common-spec :as xt]
+                   [xt.db.sql-util :as ut])
+         (:use code.test))
+       (l/script- :js {:runtime :basic})
+       (l/script- :lua {:runtime :basic})
+       (fact \"encodes a value to sql\"
+         ^:hidden
+         (!.js (xt/x:json-encode 100000000000000000))
+         (!.lua (string.format \"%0.f\" 100000000000000000))
+         (!.js (ut/encode-value 100000000000000000))
+         => \"'100000000000000000'\"
+         (!.lua (ut/encode-value 100000000000000000))
+         => \"'100000000000000000'\") ]"))
+
+(def template-forms-with-helper-runtime
+  (read-string
+   "[(ns xtbench.js.sample.sql-call-test
+         (:require [std.lang :as l])
+         (:use code.test))
+       (l/script- :postgres {:runtime :jdbc.client
+                             :config {:dbname \"test-scratch\"}})
+       (l/script- :js {:runtime :basic})
+       (fact:global {:setup [(l/rt:restart)]})
+       (fact \"placeholder\"
+         ^:hidden
+         (!.js 1)
+         => 1)]"))
 
 (def split-runtime-reference-forms
   (read-string
@@ -481,8 +513,8 @@
 (fact "retargets host-side runtime references in template output"
   (let [out (render-top-level-forms
              (template-runtime-test-forms blocked-runtime-template-forms :js :lua))]
-    [(str/includes? out "(notify/wait-on :lua)")
-     (not (str/includes? out "(notify/wait-on :js)"))])
+    [(str/includes? out "(notify/wait-on :lua ")
+     (not (str/includes? out "(notify/wait-on :js "))])
   => [true true])
 
 ^{:refer std.lang.manage.xtalk-scaffold/split-fact-form :added "4.1"}
@@ -641,6 +673,30 @@
              (not (str/includes? lua-output "\"pred\" nil"))))))
   => true)
 
+^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-tests :added "4.1"}
+(fact "separate-runtime-tests keeps foreign runtime prefixes out of other language outputs"
+  (with-temp-runtime-suite-file
+    foreign-prefix-runtime-forms
+    (fn [path]
+      (let [{:keys [outputs]}
+            (separate-runtime-tests nil {:input-path path
+                                         :langs [:js :lua]
+                                         :write true})
+            js-output (->> outputs
+                           (filter #(= :js (:lang %)))
+                           first
+                           :path
+                           slurp)
+            lua-output (->> outputs
+                            (filter #(= :lua (:lang %)))
+                            first
+                            :path
+                            slurp)]
+        [(not (str/includes? js-output "string.format"))
+         (= 1 (count (re-seq #"xt/x:json-encode 100000000000000000" js-output)))
+         (str/includes? lua-output "string.format")])))
+  => [true true true])
+
 ^{:refer std.lang.manage.xtalk-scaffold/scaffold-runtime-template :added "4.1"}
 (fact "scaffold-runtime-template is callable"
   (fn? scaffold-runtime-template)
@@ -665,8 +721,21 @@
        xtbench.lua.sample.base-lib-test
        :js
        :lua
-       false
-       false])
+        false
+        false])
+
+^{:refer std.lang.manage.xtalk-scaffold/scaffold-runtime-template :added "4.1"}
+(fact "scaffold-runtime-template preserves helper runtime configs on non-target scripts"
+  (with-temp-runtime-suite-file
+    template-forms-with-helper-runtime
+    (fn [path]
+      (let [{:keys [content]}
+            (scaffold-runtime-template nil {:input-path path
+                                            :output-path (str path ".out")
+                                            :lang :js})]
+        [(str/includes? content "(l/script-\n :postgres\n {:runtime :jdbc.client")
+         (str/includes? content "(l/script-\n :js\n {:runtime :basic") ])))
+  => [true true])
 
 ^{:refer std.lang.manage.xtalk-scaffold/scaffold-runtime-template :added "4.1"}
 (fact "scaffold-runtime-template supports namespace patterns for batch generation"
@@ -1121,5 +1190,9 @@
 
 ^{:refer std.lang.manage.xtalk-scaffold/transform-script-runtime :added "4.1"}
 (fact "updates script runtime options for the target language"
-  (transform-script-runtime '(l/script- :js {:runtime :basic :layout :flat}) :dart)
-  => '(l/script- :js {:runtime :twostep :layout :flat}))
+  [(transform-script-runtime '(l/script- :js {:runtime :basic :layout :flat}) :js)
+   (transform-script-runtime '(l/script- :js {:runtime :basic :layout :flat}) :dart)
+   (transform-script-runtime '(l/script- :dart {:runtime :basic :layout :flat}) :dart)]
+  => '[(l/script- :js {:runtime :basic :layout :flat})
+       (l/script- :js {:runtime :basic :layout :flat})
+       (l/script- :dart {:runtime :twostep :layout :flat})])

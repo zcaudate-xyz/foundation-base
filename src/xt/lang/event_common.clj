@@ -96,15 +96,24 @@
 (defspec.xt trigger-keyed-listeners
   [:fn [EventContainer :xt/str [:xt/maybe EventPayload]] [:xt/array :xt/str]])
 
-(defn.xt notify-task
-  "extracts an async notification task from a callback return value"
+(defn.xt task-pending?
+  "checks if a callback return value is an async task"
   {:added "4.1"}
   [value]
-  (when (and (xt/x:is-object? value)
-             (== "notify.task"
-                 (xt/x:get-key value "::")))
-    (return (xt/x:get-key value "task")))
-  (return nil))
+  (return
+   (and (xt/x:not-nil? value)
+        (xt/x:is-function? (. value ["then"])))))
+
+(defn.xt task-return
+  "maps an async task back to a stable return value"
+  {:added "4.1"}
+  [task value]
+  (when (-/task-pending? task)
+    (return
+     (xt/x:future-then task
+                       (fn [_]
+                         (return value)))))
+  (return value))
 
 (defn.xt blank-container
   "creates a blank container"
@@ -238,10 +247,16 @@
                 event))
   (var #{listeners} container)
   (var triggered [])
+  (var pending nil)
   (xt/for:object [[id entry] listeners]
-    (-/trigger-entry entry event)
+    (var result (-/trigger-entry entry event))
+    (when (-/task-pending? result)
+      (when (xt/x:nil? pending)
+        (:= pending result)))
     (xt/x:arr-push triggered id))
-  (return triggered))
+  (if (xt/x:nil? pending)
+    (return triggered)
+    (return pending)))
 
 
 ;;
@@ -306,13 +321,19 @@
   {:added "4.0"}
   [container key event]
   (:= event (:? (xt/x:nil? event)
-                {}
-                event))
+               {}
+               event))
   (var #{listeners} container)
   (var group (xt/x:get-key listeners key))
   (var triggered [])
+  (var pending nil)
   (when (xt/x:not-nil? group)
     (xt/for:object [[id entry] group]
-      (-/trigger-entry entry event)
+      (var result (-/trigger-entry entry event))
+      (when (-/task-pending? result)
+        (when (xt/x:nil? pending)
+          (:= pending result)))
       (xt/x:arr-push triggered id)))
-  (return triggered))
+  (if (xt/x:nil? pending)
+    (return triggered)
+    (return pending)))

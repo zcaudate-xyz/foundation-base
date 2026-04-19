@@ -73,8 +73,6 @@
 ^{:refer xt.db.sql-util/encode-value, :added "4.0"}
 (fact
  "encodes a value to sql"
- ^{:hidden true}
- (!.lua (xt/x:json-encode 100000000000000000))
  (!.lua (xt/x:json-encode 100000000000000000))
  (!.lua (string.format "%0.f" 100000000000000000))
  (!.lua

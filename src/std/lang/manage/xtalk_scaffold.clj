@@ -1363,7 +1363,8 @@
 
 (defn transform-script-runtime
   [form lang]
-  (if (script-form? form)
+  (if (and (script-form? form)
+           (= (runtime-script-lang lang) (second form)))
     (let [[script-fn script opts & more] form
           opts (if (map? opts)
                  (assoc opts :runtime (runtime-type lang))
@@ -1503,6 +1504,21 @@
 (defn split-fact-form
   [fact-form langs]
   (let [[fact-sym title & body] fact-form]
+    (letfn [(generated-prefix-form [form lang]
+              (let [dispatch-langs (runtime-dispatch-langs form)
+                    lang (normalize-runtime-lang lang)]
+                (cond
+                  (empty? dispatch-langs)
+                  (retarget-generated-form form lang)
+
+                  (not (runtime-dispatch-form? form))
+                  (retarget-generated-form form lang)
+
+                  (= [lang] dispatch-langs)
+                  (retarget-generated-form form lang)
+
+                  :else
+                  nil)))]
     (if (empty? body)
       {:shared fact-form
        :runtime? false
@@ -1533,18 +1549,18 @@
             :runtime? runtime?
              :langs (into {}
                          (keep (fn [[lang clauses]]
-                                 (when (seq clauses)
-                                   (let [generated (with-meta
-                                                     (apply list
-                                                            fact-sym
-                                                            title
-                                                            (concat (map #(retarget-generated-form % lang) prefix)
-                                                                    (attach-leading-meta
-                                                                     (map #(retarget-generated-form % lang) clauses)
-                                                                     leading-meta)))
-                                                     (meta fact-form))]
-                                     [lang (apply-template-language-exceptions-fact generated lang)]))))
-                         by-lang)})
+                                  (when (seq clauses)
+                                    (let [generated (with-meta
+                                                      (apply list
+                                                             fact-sym
+                                                             title
+                                                             (concat (keep #(generated-prefix-form % lang) prefix)
+                                                                     (attach-leading-meta
+                                                                      (map #(retarget-generated-form % lang) clauses)
+                                                                      leading-meta)))
+                                                      (meta fact-form))]
+                                      [lang (apply-template-language-exceptions-fact generated lang)]))))
+                          by-lang)})
           (let [[expr arrow expect & more] xs]
             (if (= '=> arrow)
               (if-let [lang (runtime-expr-lang expr)]
@@ -1565,9 +1581,9 @@
                      (cond-> prefix
                        (not (commented-form? expr))
                        (conj expr))
-                     shared
-                     leading-meta
-                     by-lang))))))))
+                      shared
+                      leading-meta
+                      by-lang)))))))))
 
 (defn separate-runtime-test-forms
   [forms langs]

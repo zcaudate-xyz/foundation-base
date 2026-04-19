@@ -75,8 +75,6 @@
  "encodes a value to sql"
  ^{:hidden true}
  (!.js (xt/x:json-encode 100000000000000000))
- (!.js (xt/x:json-encode 100000000000000000))
- (!.js (string.format "%0.f" 100000000000000000))
  (!.js
   [(ut/encode-value nil)
    (ut/encode-value 1.235)
