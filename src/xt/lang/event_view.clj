@@ -64,7 +64,7 @@
   [:fn [ViewHandler
         ViewPipeline
         :xt/any
-        :xt/any
+        [:xt/maybe :xt/any]
         [:xt/maybe [:fn [:xt/any] :xt/any]]
         [:xt/maybe [:xt/dict :xt/str :xt/any]]]
        EventView])
@@ -114,7 +114,7 @@
   [:fn [EventView [:xt/dict :xt/str :xt/any]] ViewInput])
 
 (defspec.xt set-output
-  [:fn [EventView :xt/any :xt/any :xt/str [:xt/maybe :xt/str] [:xt/maybe [:xt/dict :xt/str :xt/any]]] :xt/any])
+  [:fn [EventView :xt/any :xt/any [:xt/maybe :xt/str] [:xt/maybe :xt/str] [:xt/maybe [:xt/dict :xt/str :xt/any]]] :xt/any])
 
 (defspec.xt set-output-disabled
   [:fn [EventView :xt/any [:xt/maybe :xt/str]] ViewOutput])
@@ -170,17 +170,21 @@
   {:added "4.0"}
   [handler]
   (return (fn [context]
-            (return (handler (xt/x:unpack (. context ["args"])))))))
+            (var args (:? (xt/x:nil? (. context ["args"])) [] (. context ["args"])))
+            (return (xt/x:apply handler args)))))
 
 (defn.xt check-disabled
   "checks that view is disabled"
   {:added "4.0"}
   [context]
   (var #{input} context)
-  (return (or (xt/x:nil? input)
+  (return (:? (xt/x:nil? input)
+              true
               (xt/x:nil?  (xt/x:get-key input "data"))
-              (xt/x:get-key input "disabled")
-              false)))
+              true
+              (== true (xt/x:get-key input "disabled"))
+              true
+              :else false)))
 
 (defn.xt parse-args
   "parses args from context"
@@ -192,12 +196,17 @@
 (defn.xt create-view
   "creates a view"
   {:added "4.0"}
-  [main-handler
-   pipeline
-   default-args
-   default-output
-   default-process
-   options]
+  ([main-handler
+    pipeline
+    default-args
+    default-output]
+   (return (-/create-view main-handler pipeline default-args default-output nil nil)))
+  ([main-handler
+    pipeline
+    default-args
+    default-output
+    default-process
+    options]
   (var identity-fn (fn [x] (return x)))
   (var entry {:pipeline  (xtd/obj-assign-nested
                           {:main    {:handler main-handler
@@ -209,7 +218,7 @@
                            :check-args  -/parse-args    
                            :check-disabled -/check-disabled}
                           pipeline)
-              :options    (or options {})
+              :options    (:? (xt/x:nil? options) {} options)
               :input  {:current nil
                        :updated nil
                        :default (:? (xt/x:is-function? default-args) default-args (fn:> default-args))}
@@ -217,26 +226,26 @@
                        :current nil
                        :updated nil
                        :elapsed nil
-                       :process (or default-process identity-fn)
+                       :process (:? (xt/x:nil? default-process) identity-fn default-process)
                        :default (:? (xt/x:is-function? default-output) default-output (fn:> default-output))}})
   (when (xtd/get-in pipeline ["remote"])
     (xt/x:set-key entry "remote" {:type "remote"
                                :current nil
                                :updated nil
                                :elapsed nil
-                               :process (or default-process identity-fn)
+                                :process (:? (xt/x:nil? default-process) identity-fn default-process)
                                :default (:? (xt/x:is-function? default-output) default-output (fn:> default-output))}))
   (when (xtd/get-in pipeline ["sync"])
     (xt/x:set-key entry "sync" {:type "sync"
                                :current nil
                                :updated nil
                                :elapsed nil
-                               :process (or default-process identity-fn)
+                                :process (:? (xt/x:nil? default-process) identity-fn default-process)
                                :default (:? (xt/x:is-function? default-output) default-output (fn:> default-output))}))
   (return
    (event-common/blank-container
     "event.view"
-    entry)))
+    entry))))
 
 (defn.xt view-context
   "gets the view-context"
@@ -300,15 +309,19 @@
 (defn.xt get-output
   "gets the view output record"
   {:added "4.0"}
-  [view dest-key]
-  (return (. view [(or dest-key "output")])))
+  ([view]
+   (return (-/get-output view nil)))
+  ([view dest-key]
+   (return (. view [(:? (xt/x:nil? dest-key) "output" dest-key)]))))
 
 (defn.xt get-current
   "gets the current view output"
   {:added "4.0"}
-  [view dest-key]
-  (return (xtd/get-in view [(or dest-key "output")
-                          "current"])))
+  ([view]
+   (return (-/get-current view nil)))
+  ([view dest-key]
+   (return (xtd/get-in view [(:? (xt/x:nil? dest-key) "output" dest-key)
+                             "current"]))))
 
 (defn.xt is-disabled
   "checks that the view is disabled"
@@ -322,41 +335,52 @@
 (defn.xt is-errored
   "checks that output is errored"
   {:added "4.0"}
-  [view dest-key]
-  (return (== true (xtd/get-in view [(or dest-key "output")
-                                     "errored"]))))
+  ([view]
+   (return (-/is-errored view nil)))
+  ([view dest-key]
+   (return (== true (xtd/get-in view [(:? (xt/x:nil? dest-key) "output" dest-key)
+                                      "errored"])))))
 
 (defn.xt is-pending
   "checks that output is pending"
   {:added "4.0"}
-  [view dest-key]
-  (return (== true (xtd/get-in view [(or dest-key "output")
-                                   "pending"]))))
+  ([view]
+   (return (-/is-pending view nil)))
+  ([view dest-key]
+   (return (== true (xtd/get-in view [(:? (xt/x:nil? dest-key) "output" dest-key)
+                                      "pending"])))))
 
 (defn.xt get-time-elapsed
   "gets time elapsed of output"
   {:added "4.0"}
-  [view dest-key]
-  (return (xtd/get-in view [(or dest-key "output")
-                          "elapsed"])))
+  ([view]
+   (return (-/get-time-elapsed view nil)))
+  ([view dest-key]
+   (return (xtd/get-in view [(:? (xt/x:nil? dest-key) "output" dest-key)
+                             "elapsed"]))))
 
 (defn.xt get-time-updated
   "gets time updated of output"
   {:added "4.0"}
-  [view dest-key]
-  (return (xtd/get-in view [(or dest-key "output")
-                          "updated"])))
+  ([view]
+   (return (-/get-time-updated view nil)))
+  ([view dest-key]
+   (return (xtd/get-in view [(:? (xt/x:nil? dest-key) "output" dest-key)
+                             "updated"]))))
 
 (defn.xt get-success
   "gets either the current or default value if errored"
   {:added "4.0"}
-  [view dest-key]
-  (var output (. view [(or dest-key "output")]))
-  (var #{process} output)
-  (if (== true (. output ["errored"]))
-    (return (process ((. output ["default"]))))
-    (return (or (. output ["current"])
-                (process ((. output ["default"])))))))
+  ([view]
+   (return (-/get-success view nil)))
+  ([view dest-key]
+   (var output (. view [(:? (xt/x:nil? dest-key) "output" dest-key)]))
+   (var #{process} output)
+   (if (== true (. output ["errored"]))
+     (return (process ((. output ["default"]))))
+     (return (:? (xt/x:nil? (. output ["current"]))
+                 (process ((. output ["default"])))
+                 (. output ["current"])))))))
 
 (defn.xt set-input
   "sets the input"
@@ -373,13 +397,14 @@
   "sets the output"
   {:added "4.0"}
   [view current errored tag dest-key meta]
-  (var output (. view [(or dest-key "output")]))
+  (var output (. view [(:? (xt/x:nil? dest-key) "output" dest-key)]))
   (var #{options
          callback} view)
   (var #{accumulate} options)
   (if errored
     (xt/x:set-key output "errored" true)
-    (xt/x:del-key output "errored"))
+    (when (xt/x:has-key? output "errored")
+      (xt/x:del-key output "errored")))
   (xt/x:set-key output "updated" (xt/x:now-ms))
   (xt/x:set-key output "tag" tag)
   
@@ -399,11 +424,12 @@
   "sets the output disabled flag"
   {:added "4.0"}
   [view value dest-key]
-  (var output (. view [(or dest-key "output")]))
+  (var output (. view [(:? (xt/x:nil? dest-key) "output" dest-key)]))
   (var #{callback} view)
   (if value
     (xt/x:set-key output "disabled" value)
-    (xt/x:del-key output "disabled"))
+    (when (xt/x:has-key? output "disabled")
+      (xt/x:del-key output "disabled")))
   (-/trigger-listeners view "view.disabled" value)
   (return output))
 
@@ -411,10 +437,11 @@
   "sets the output pending time"
   {:added "4.0"}
   [view value dest-key]
-  (var output (. view [(or dest-key "output")]))
+  (var output (. view [(:? (xt/x:nil? dest-key) "output" dest-key)]))
   (if value
     (xt/x:set-key output "pending" value)
-    (xt/x:del-key output "pending"))
+    (when (xt/x:has-key? output "pending")
+      (xt/x:del-key output "pending")))
   (-/trigger-listeners view "view.pending" value)
   (return output))
 
@@ -422,10 +449,11 @@
   "sets the output elapsed time"
   {:added "4.0"}
   [view value dest-key]
-  (var output (. view [(or dest-key "output")]))
+  (var output (. view [(:? (xt/x:nil? dest-key) "output" dest-key)]))
   (if (xt/x:is-number? value)
     (xt/x:set-key output "elapsed" value)
-    (xt/x:del-key output "elapsed"))
+    (when (xt/x:has-key? output "elapsed")
+      (xt/x:del-key output "elapsed")))
   (-/trigger-listeners view "view.elapsed" value)
   (return output))
 
@@ -475,11 +503,20 @@
   (var #{cell view} context)
   (var process (xtd/get-in view [(or dest-key "output")
                                "process"]))
-  (var [update? current errored] (xt/x:get-key acc tag))
+  (var record (xt/x:get-key acc tag))
+  (var update? (:? (< 0 (xt/x:len record))
+                   (. record [0])
+                   nil))
+  (var current (:? (< 1 (xt/x:len record))
+                   (. record [1])
+                   nil))
+  (var errored (:? (< 2 (xt/x:len record))
+                   (. record [2])
+                   nil))
   (when (xt/x:nil? current)
     (:= current ((xtd/get-in view [(or dest-key
-                                     "output")
-                                 "default"]))))
+                                      "output")
+                                  "default"]))))
   
   (when update?
     (var output (:? errored
@@ -490,7 +527,7 @@
                   errored
                   tag
                   dest-key
-                  (. context meta)))
+                  (xt/x:get-key context "meta")))
   (return acc))
 
 (defn.xt pipeline-call
@@ -521,7 +558,7 @@
                              (xt/x:is-function? handler)
                              (or (xt/x:nil? guard)
                                  (xt/x:get-key skip-guard tag)
-                                 (guard context acc))) [(wrapper handler) result-fn] [(fn:>) skipped-fn]))
+                                 (guard context acc))) [(wrapper handler) result-fn] [(fn [_] (return nil)) skipped-fn]))
   (return
    (async-fn handler-fn context
              {:success success-fn
@@ -532,19 +569,21 @@
   {:added "4.0"}
   [context stages index async-fn hook-fn complete-fn skip-guard]
   (cond (< index (xt/x:offset (xt/x:len stages)))
-        (return
-         (-/pipeline-call
-          context
-          (. stages [index])
-          false
-          async-fn
-          (fn [acc tag]
-            (when hook-fn
-              (hook-fn acc tag))
+        (do (var next-hook
+                 (fn [acc tag]
+                   (when hook-fn
+                     (hook-fn acc tag))
+                   (return
+                    (-/pipeline-run-impl
+                     context stages (xt/x:inc index) async-fn hook-fn complete-fn skip-guard))))
             (return
-             (-/pipeline-run-impl
-              context stages (xt/x:inc index) async-fn hook-fn complete-fn skip-guard)))
-          skip-guard))
+             (-/pipeline-call
+              context
+              (. stages [index])
+              false
+              async-fn
+              next-hook
+              skip-guard)))
         
         :else
         (return (complete-fn context))))
@@ -560,21 +599,36 @@
                     dest-key))
   (var output (. view [dest-key]))
   (var started (xt/x:now-ms))
-  (xt/x:del-key output "elapsed")
+  (when (xt/x:has-key? output "elapsed")
+    (xt/x:del-key output "elapsed"))
   (cond disabled
-        (do (-/set-output-disabled view true dest-key)
+        (do (var disabled-hook
+                 (fn [acc tag]
+                   (when hook-fn
+                     (hook-fn acc tag))
+                   (when complete-fn
+                     (complete-fn acc))))
+            (-/set-output-disabled view true dest-key)
             (return (-/pipeline-call context
                                      dest-tag
                                      true
                                      async-fn
-                                     (fn [acc tag]
-                                       (when hook-fn
-                                         (hook-fn acc tag))
-                                       (when complete-fn
-                                         (complete-fn acc))))))
+                                     disabled-hook)))
         
         :else
-        (do (when (xt/x:get-key output "disabled")
+        (do (var run-hook
+                 (fn [acc tag]
+                   (when hook-fn
+                     (hook-fn acc tag))
+                   (when (== tag dest-tag)
+                     (-/pipeline-set context tag acc dest-key))))
+            (var run-complete
+                 (fn [acc]
+                   (when complete-fn
+                     (complete-fn acc))
+                   (-/set-elapsed view (- (xt/x:now-ms) started) dest-key)
+                   (-/set-pending view false dest-key)))
+            (when (xt/x:get-key output "disabled")
               (-/set-output-disabled view false dest-key))
             (-/set-pending view true dest-key)
             (return
@@ -583,16 +637,8 @@
                                            "post"]
                                   (xt/x:offset 0)
                                   async-fn
-                                  (fn [acc tag]
-                                    (when hook-fn
-                                      (hook-fn acc tag))
-                                    (when (== tag dest-tag)
-                                      (-/pipeline-set context tag acc dest-key)))
-                                  (fn [acc]
-                                    (when complete-fn
-                                      (complete-fn acc))
-                                    (-/set-elapsed view (- (xt/x:now-ms) started) dest-key)
-                                    (-/set-pending view false dest-key)))))))
+                                  run-hook
+                                  run-complete)))))
 
 (defn.xt pipeline-run-force
   "runs the pipeline via sync or remote paths"
@@ -600,6 +646,20 @@
   [context save-output async-fn hook-fn complete-fn dest-key]
   (var #{acc view} context)
   (var started (xt/x:now-ms))
+  (var force-hook
+       (fn [acc tag]
+         (when hook-fn
+           (hook-fn acc tag))
+         (when (== tag dest-key)
+           (-/pipeline-set context tag acc dest-key)
+           (when save-output
+             (-/pipeline-set context tag acc "output")))))
+  (var force-complete
+       (fn [acc]
+         (when complete-fn
+           (complete-fn acc))
+         (-/set-elapsed view (- (xt/x:now-ms) started) dest-key)
+         (-/set-pending view false dest-key)))
   (-/set-pending view true dest-key)
   (return
    (-/pipeline-run-impl context ["pre"
@@ -607,18 +667,8 @@
                                  "post"]
                         (xt/x:offset 0)
                         async-fn
-                        (fn [acc tag]
-                          (when hook-fn
-                            (hook-fn acc tag))
-                          (when (== tag dest-key)
-                            (-/pipeline-set context tag acc dest-key)
-                            (when save-output
-                              (-/pipeline-set context tag acc "output"))))
-                        (fn [acc]
-                          (when complete-fn
-                            (complete-fn acc))
-                          (-/set-elapsed view (- (xt/x:now-ms) started) dest-key)
-                          (-/set-pending view false dest-key)))))
+                        force-hook
+                        force-complete)))
   
 (defn.xt pipeline-run-remote
   "runs the remote pipeline"

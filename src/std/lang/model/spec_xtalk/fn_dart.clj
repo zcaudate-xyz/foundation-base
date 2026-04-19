@@ -513,11 +513,17 @@
 
 (defn dart-tf-x-with-delay
   [[_ ms value]]
-  (list 'Future.delayed (list 'Duration :milliseconds ms) (list 'fn '[] value)))
+  (template/$
+   (Future.delayed
+    (:- "Duration(milliseconds: " ~ms ")")
+    (fn [] (return ~value)))))
 
 (defn dart-tf-x-start-interval
   [[_ ms f]]
-  (list 'Timer.periodic (list 'Duration :milliseconds ms) (list 'fn '[timer] (list f))))
+  (template/$
+   (Timer.periodic
+    (:- "Duration(milliseconds: " ~ms ")")
+    (fn [timer] (~f)))))
 
 (defn dart-tf-x-stop-interval
   [[_ timer]]

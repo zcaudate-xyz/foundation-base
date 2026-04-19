@@ -177,13 +177,16 @@
     (var etext (xt/x:get-key e "text"))
     (var etag (xt/x:get-key e "tag"))
     (var eparams (xt/x:get-key e "params"))
-    (when etext
+    (when (xt/x:not-nil? etext)
       (xt/x:arr-push (xt/x:get-key current "children") etext))
-    (cond (xt/x:get-key e "empty")
-          (xt/x:arr-push (xt/x:get-key current "children") {:tag etag
-                                                            :params eparams})
+    (cond (== true (xt/x:get-key e "empty"))
+          (do (var enode {:tag etag})
+              (when (and (xt/x:not-nil? eparams)
+                         (xtd/obj-not-empty? eparams))
+                (xt/x:set-key enode "params" eparams))
+              (xt/x:arr-push (xt/x:get-key current "children") enode))
           
-          (not (xt/x:get-key e "close"))
+          (not= true (xt/x:get-key e "close"))
           (do (var ncurrent {"::/__type__" "xml"
                              :parent current
                              :tag etag

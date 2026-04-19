@@ -82,7 +82,12 @@
    (view/create-view (fn:> [x] {:value x}) {} [3] {:value 0})))
  =>
  {"output"
-  {"process" "<function>", "type" "output", "default" "<function>"},
+  {"elapsed" nil,
+   "process" "<function>",
+   "current" nil,
+   "type" "output",
+   "updated" nil,
+   "default" "<function>"},
   "::" "event.view",
   "pipeline"
   {"remote" {"wrapper" "<function>"},
@@ -90,7 +95,7 @@
    "check_args" "<function>",
    "main" {"handler" "<function>", "wrapper" "<function>"},
    "sync" {"wrapper" "<function>"}},
-  "input" {"default" "<function>"},
+  "input" {"current" nil, "updated" nil, "default" "<function>"},
   "options" {},
   "listeners" {}})
 
@@ -184,9 +189,14 @@
    async-fn
    (fn
     [handler-fn context cb]
-    (return (cb.success (handler-fn context)))))
-  (view/pipeline-run context disabled async-fn (fn:>) (fn:>))
-  context.acc)
+    (return ((. cb ["success"]) (handler-fn context)))))
+  (view/pipeline-run
+   context
+   disabled
+   async-fn
+   (fn [acc tag])
+   (fn [acc]))
+  (. context ["acc"]))
  =>
  {"::" "view.run",
   "pre" [false],
@@ -210,9 +220,14 @@
    async-fn
    (fn
     [handler-fn context cb]
-    (return (cb.success (handler-fn context)))))
-  (view/pipeline-run-remote context true async-fn (fn:>) (fn:>))
-  context.acc)
+    (return ((. cb ["success"]) (handler-fn context)))))
+  (view/pipeline-run-remote
+   context
+   true
+   async-fn
+   (fn [acc tag])
+   (fn [acc]))
+  (. context ["acc"]))
  =>
  {"::" "view.run",
   "pre" [false],
@@ -233,9 +248,14 @@
    async-fn
    (fn
     [handler-fn context cb]
-    (return (cb.success (handler-fn context)))))
-  (view/pipeline-run-sync context true async-fn (fn:>) (fn:>))
-  context.acc)
+    (return ((. cb ["success"]) (handler-fn context)))))
+  (view/pipeline-run-sync
+   context
+   true
+   async-fn
+   (fn [acc tag])
+   (fn [acc]))
+  (. context ["acc"]))
  =>
  {"::" "view.run",
   "pre" [false],

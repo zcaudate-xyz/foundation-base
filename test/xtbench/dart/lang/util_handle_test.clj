@@ -54,22 +54,23 @@
 (fact
  "creates a new handle"
  ^{:hidden true}
- (notify/wait-on
-  :dart
+ (!.dt
   (var
    T
    (handle/new-handle
     (fn [] (return 1))
     [handle/plugin-counts handle/plugin-timing]
     {:delay 100}))
-  (var
-   result
-   (handle/run-handle
-    T
-    []
-    {:on-teardown (fn [] (repl/notify result))})))
+  (var result (handle/run-handle T [] nil))
+  (var receipt (xt/x:first result))
+  (var proc (xt/x:second result))
+  (xt/for:async
+   [[ret err] proc]
+   {:success (return [receipt ret])
+    :error (xt/x:throw err)}))
  =>
  (contains-in
   [{"id" "id-0",
     "counts" {"success" 1, "error" 0},
-    "timing" {"start" number?, "end" number?}}]))
+    "timing" {"start" number?, "end" number?}}
+   1]))

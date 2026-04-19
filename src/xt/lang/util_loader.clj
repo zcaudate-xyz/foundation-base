@@ -42,7 +42,8 @@
 
   (when (xt/x:is-function? args)
     (:= args (args)))
-  (return (load-fn (xt/x:unpack (or args [])))))
+  (:= args (:? (xt/x:nil? args) [] args))
+  (return (xt/x:apply load-fn args)))
 
 (defn.xt task-unload
   "unloads a task"
@@ -116,7 +117,7 @@
   (var #{tasks loading completed} loader)
   (var out [])
   (xt/for:object [[id task] tasks]
-    (when (not (xt/x:get-key completed id))
+    (when (not= true (xt/x:get-key completed id))
       (xt/x:arr-push out id)))
   (return out))
 
@@ -127,11 +128,11 @@
   (var #{tasks loading completed} loader)
   (var out [])
   (xt/for:object [[id task] tasks]
-    (when (and (not (xt/x:get-key loading id))
-               (not (xt/x:get-key completed id))
+    (when (and (not= true (xt/x:get-key loading id))
+               (not= true (xt/x:get-key completed id))
                (xt/x:arr-every (xt/x:get-key task "deps")
-                            (fn [id]
-                              (return (xt/x:get-key completed id)))))
+                             (fn [id]
+                               (return (== true (xt/x:get-key completed id))))))
       (xt/x:arr-push out id)))
   (return out))
 
@@ -145,14 +146,14 @@
   (return (xt/for:async [[res err] (-/task-load task)]
             {:success (do (xt/x:del-key loading id)
                           (xt/x:set-key completed id true)
-                          (when hook-fn (hook-fn id true))
-                          (when loop-fn
+                          (when (xt/x:not-nil? hook-fn) (hook-fn id true))
+                          (when (xt/x:not-nil? loop-fn)
                             (return (loop-fn loader hook-fn complete-fn))))
-             :error   (do (xt/x:del-key loading id)
-                          (xt/x:set-key loader "errored" id)
-                          (when hook-fn     (hook-fn id false))
-                          (when complete-fn (complete-fn err))
-                          (return nil))})))
+              :error   (do (xt/x:del-key loading id)
+                           (xt/x:set-key loader "errored" id)
+                           (when (xt/x:not-nil? hook-fn)     (hook-fn id false))
+                           (when (xt/x:not-nil? complete-fn) (complete-fn err))
+                           (return nil))})))
 
 (defn.xt load-tasks
   "load tasks"
@@ -169,7 +170,7 @@
 
   (var incomplete (-/list-incomplete loader))
   (when (== 0 (xt/x:len incomplete))
-    (when complete-fn (complete-fn true))
+    (when (xt/x:not-nil? complete-fn) (complete-fn true))
     (return)))
 
 (defn.xt unload-tasks
@@ -180,7 +181,7 @@
   (var rorder (xt/x:arr-reverse order))
   (var unload-task
        (fn [id]
-         (when (xt/x:get-key completed id)
+         (when (== true (xt/x:get-key completed id))
            (xt/x:del-key completed id)
            (var task (xt/x:get-key tasks id))
            (var unloaded (-/task-unload task))

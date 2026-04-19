@@ -229,6 +229,31 @@
        "sync" {"wrapper" "<function>"}},
       "input" {"default" "<function>"},
       "options" {},
+      "listeners" {}}
+
+  (!.py
+   (xtd/tree-get-data
+    (view/create-view
+     (fn:> [x] {:value x})
+     {}
+     [3]
+     {:value 0})))
+  => {"output"
+      {"elapsed" nil,
+       "process" "<function>",
+       "current" nil,
+       "type" "output",
+       "updated" nil,
+       "default" "<function>"},
+      "::" "event.view",
+      "pipeline"
+      {"remote" {"wrapper" "<function>"},
+       "check_disabled" "<function>",
+       "check_args" "<function>",
+       "main" {"handler" "<function>", "wrapper" "<function>"},
+       "sync" {"wrapper" "<function>"}},
+      "input" {"current" nil, "updated" nil, "default" "<function>"},
+      "options" {},
       "listeners" {}})
 
 ^{:refer xt.lang.event-view/view-context :added "4.0"}
@@ -482,13 +507,13 @@
    (var [context disabled] (view/pipeline-prep v))
    (var async-fn
         (fn [handler-fn context cb]
-          (return (cb.success (handler-fn context)))))
+          (return ((. cb ["success"]) (handler-fn context)))))
    (view/pipeline-run context
                       disabled
                       async-fn
-                      (fn:>)
-                      (fn:>))
-   context.acc)
+                      (fn [acc tag])
+                      (fn [acc]))
+   (. context ["acc"]))
   => {"::" "view.run"
       "pre" [false],
       "main" [true {"value" 3}]
@@ -537,13 +562,13 @@
    (var [context disabled] (view/pipeline-prep v))
    (var async-fn
         (fn [handler-fn context cb]
-          (return (cb.success (handler-fn context)))))
+          (return ((. cb ["success"]) (handler-fn context)))))
    (view/pipeline-run-remote context
                              true
                              async-fn
-                             (fn:>)
-                             (fn:>))
-   context.acc)
+                             (fn [acc tag])
+                             (fn [acc]))
+   (. context ["acc"]))
   => {"::" "view.run"
       "pre" [false]
       "remote" [true {"value" 3}],
@@ -589,13 +614,13 @@
    (var [context disabled] (view/pipeline-prep v))
    (var async-fn
         (fn [handler-fn context cb]
-          (return (cb.success (handler-fn context)))))
+          (return ((. cb ["success"]) (handler-fn context)))))
    (view/pipeline-run-sync context
-                             true
-                             async-fn
-                             (fn:>)
-                             (fn:>))
-   context.acc)
+                              true
+                              async-fn
+                              (fn [acc tag])
+                              (fn [acc]))
+   (. context ["acc"]))
   => {"::" "view.run"
       "pre" [false]
       "sync" [true {"value" 3}],

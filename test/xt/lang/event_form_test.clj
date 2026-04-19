@@ -606,7 +606,7 @@
                 :check  (fn [v rec]
                           (return (and (k/not-nil? v)
                                        (< 0 (xt/x:len v)))))}]]}))
-    (form/validate-all f k/identity
+    (form/validate-all f (fn [field status] (return nil))
                        (repl/>notify)))
   => false
 
@@ -618,9 +618,28 @@
                 :check  (fn [v rec]
                           (return (and (k/not-nil? v)
                                        (< 0 (xt/x:len v)))))}]]}))
-    (form/validate-all f k/identity
+    (form/validate-all f (fn [field status] (return nil))
                        (repl/>notify)))
-  => false)
+  => false
+
+  (notify/wait-on :python
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/validate-all f
+                       (fn [field status] (return nil))
+                       (repl/>notify)))
+  => {"::" "validation.result",
+      "status" "errored",
+      "fields"
+      {"login" {"message" "Required field.",
+                 "id" "is-required",
+                 "status" "errored",
+                 "data" ""}}})
 
 ^{:refer xt.lang.event-form/validate-field :added "4.0"
   :setup [(def +out+
@@ -642,7 +661,7 @@
                           (return (and (k/not-nil? v)
                                        (< 0 (xt/x:len v)))))}]]}))
     (form/add-listener f "a1"  ["login"] (repl/>notify) nil)
-   (form/validate-field f "login" k/identity))
+    (form/validate-field f "login" (fn [field status] (return nil)) nil))
   => +out+
 
   (notify/wait-on :lua
@@ -654,7 +673,7 @@
                           (return (and (k/not-nil? v)
                                        (< 0 (xt/x:len v)))))}]]}))
     (form/add-listener f "a1"  ["login"] (repl/>notify) nil)
-   (form/validate-field f "login" k/identity))
+    (form/validate-field f "login" (fn [field status] (return nil)) nil))
   => +out+)
 
 ^{:refer xt.lang.event-form/reset-field-validator :added "4.0"
@@ -761,9 +780,9 @@
                           (return (and (k/not-nil? v)
                                        (< 0 (xt/x:len v)))))}]]}))
     (form/add-listener f "a1" ["login"]
-                       (fn []
-                         (repl/notify (form/check-field-passed f "login"))))
-    (form/validate-all f))
+                       (fn [_]
+                          (repl/notify (form/check-field-passed f "login"))))
+    (form/validate-all f nil nil))
   => false
 
   (notify/wait-on :lua
@@ -775,9 +794,9 @@
                           (return (and (k/not-nil? v)
                                        (< 0 (xt/x:len v)))))}]]}))
     (form/add-listener f "a1" ["login"]
-                       (fn []
-                         (repl/notify (form/check-field-passed f "login"))))
-    (form/validate-all f))
+                       (fn [_]
+                          (repl/notify (form/check-field-passed f "login"))))
+    (form/validate-all f nil nil))
   => false)
 
 ^{:refer xt.lang.event-form/check-field-errored :added "4.0"}
@@ -793,9 +812,9 @@
                           (return (and (k/not-nil? v)
                                        (< 0 (xt/x:len v)))))}]]}))
     (form/add-listener f "a1" ["login"]
-                       (fn []
-                         (repl/notify (form/check-field-errored f "login"))))
-    (form/validate-all f))
+                       (fn [_]
+                          (repl/notify (form/check-field-errored f "login"))))
+    (form/validate-all f nil nil))
   => true
 
   (notify/wait-on :lua
@@ -807,9 +826,9 @@
                           (return (and (k/not-nil? v)
                                        (< 0 (xt/x:len v)))))}]]}))
     (form/add-listener f "a1" ["login"]
-                       (fn []
-                         (repl/notify (form/check-field-errored f "login"))))
-    (form/validate-all f))
+                       (fn [_]
+                          (repl/notify (form/check-field-errored f "login"))))
+    (form/validate-all f nil nil))
   => true)
 
 ^{:refer xt.lang.event-form/check-all-passed :added "4.0"}
@@ -825,9 +844,9 @@
                           (return (and (k/not-nil? v)
                                        (< 0 (xt/x:len v)))))}]]}))
     (form/add-listener f "a1" ["login"]
-                       (fn []
-                         (repl/notify (form/check-all-passed f))))
-    (form/validate-all f))
+                       (fn [_]
+                          (repl/notify (form/check-all-passed f))))
+    (form/validate-all f nil nil))
   => false
 
   (notify/wait-on :lua
@@ -839,9 +858,9 @@
                           (return (and (k/not-nil? v)
                                        (< 0 (xt/x:len v)))))}]]}))
     (form/add-listener f "a1" ["login"]
-                       (fn []
-                         (repl/notify (form/check-all-passed f))))
-    (form/validate-all f))
+                       (fn [_]
+                          (repl/notify (form/check-all-passed f))))
+    (form/validate-all f nil nil))
   => false)
 
 ^{:refer xt.lang.event-form/check-any-errored :added "4.0"}
@@ -857,9 +876,9 @@
                           (return (and (k/not-nil? v)
                                        (< 0 (xt/x:len v)))))}]]}))
     (form/add-listener f "a1" ["login"]
-                       (fn []
-                         (repl/notify (form/check-any-errored f))))
-   (form/validate-all f))
+                       (fn [_]
+                          (repl/notify (form/check-any-errored f))))
+   (form/validate-all f nil nil))
   => true
 
   (notify/wait-on :lua
@@ -871,7 +890,7 @@
                           (return (and (k/not-nil? v)
                                        (< 0 (xt/x:len v)))))}]]}))
     (form/add-listener f "a1" ["login"]
-                       (fn []
-                         (repl/notify (form/check-any-errored f))))
-   (form/validate-all f))
+                       (fn [_]
+                          (repl/notify (form/check-any-errored f))))
+   (form/validate-all f nil nil))
   => true)

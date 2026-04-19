@@ -30,10 +30,11 @@
   (when (and last (>= interval (- t last)))
     (return out))
   (xt/x:set-key log "last" t)
-   (xt/for:object [[k entry] cache]
-     (when (< interval (- t (. entry t)))
-       (xt/x:del-key cache k)
-       (xt/x:arr-push out k)))
+   (xt/for:array [k (xt/x:obj-keys cache)]
+     (var entry (xt/x:get-key cache k))
+      (when (< interval (- t (. entry ["t"])))
+        (xt/x:del-key cache k)
+        (xt/x:arr-push out k)))
    (return
     (xtd/arr-sort out
                   (fn [x] (return x))
@@ -47,16 +48,16 @@
   (var entry (xt/x:get-key cache key))
   (var t (xt/x:now-ms))
   (cond (xt/x:nil? entry)
-        (do (xt/x:set-key cache key {:t t
-                                  :latest latest})
-            (-/clear-cache log t)
-            (return true))
+         (do (xt/x:set-key cache key {:t t
+                                   :latest latest})
+             (-/clear-cache log t)
+             (return true))
 
-        (< (. entry latest) latest)
-        (do (xt/x:set-key cache key {:t t
-                                  :latest latest})
-            (-/clear-cache log t)
-            (return true))
+         (< (. entry ["latest"]) latest)
+         (do (xt/x:set-key cache key {:t t
+                                   :latest latest})
+             (-/clear-cache log t)
+             (return true))
         
         :else
         (return false)))

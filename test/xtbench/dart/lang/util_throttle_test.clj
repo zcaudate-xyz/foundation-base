@@ -29,24 +29,16 @@
 (fact
  "runs an async throttle"
  ^{:hidden true}
- (notify/wait-on
-  :dart
+ (!.dt
   (var out [])
   (var
    throttle
    (throttle/throttle-create
     (fn
      [i]
-     (return
-      (new
-       Promise
-       (fn
-        [resolve reject]
-        (setTimeout
-         (fn [] (x:arr-push out i) (resolve (repl/notify out)))
-         100)))))
+     (return (xt/x:with-delay 100 (do (x:arr-push out i) out))))
     nil))
-  (throttle/throttle-run-async throttle 1))
+  (throttle/throttle-run-async throttle 1 nil))
  =>
  [1])
 
@@ -54,33 +46,36 @@
 (fact
  "throttles a function so that it only runs a single thread"
  ^{:hidden true}
- (notify/wait-on
-  :dart
-  (:= (!:G OUT) [])
+ (!.dt
+  (var out [])
   (var
    throttle
    (throttle/throttle-create
     (fn
      [i]
-     (return
-      (new
-       Promise
-       (fn
-        [resolve reject]
-        (setTimeout
-         (fn
-          []
-          (x:arr-push (!:G OUT) i)
-          (resolve (repl/notify (!:G OUT))))
-         100)))))
+     (return (xt/x:with-delay 100 (do (x:arr-push out i) out))))
     nil))
-  (throttle/throttle-run throttle 1)
-  (throttle/throttle-run throttle 1)
-  (throttle/throttle-run throttle 1)
-  (throttle/throttle-run throttle 1))
+  (throttle/throttle-run throttle 1 nil)
+  (throttle/throttle-run throttle 1 nil)
+  (throttle/throttle-run throttle 1 nil)
+  (throttle/throttle-run throttle 1 nil)
+  (xt/x:with-delay 150 out))
  =>
  [1]
- (do (Thread/sleep 500) (!.dt (!:G OUT)))
+ (!.dt
+  (var out [])
+  (var
+   throttle
+   (throttle/throttle-create
+    (fn
+     [i]
+     (return (xt/x:with-delay 100 (do (x:arr-push out i) out))))
+    nil))
+  (throttle/throttle-run throttle 1 nil)
+  (throttle/throttle-run throttle 1 nil)
+  (throttle/throttle-run throttle 1 nil)
+  (throttle/throttle-run throttle 1 nil)
+  (xt/x:with-delay 500 out))
  =>
  [1 1])
 
@@ -88,31 +83,20 @@
 (fact
  "gets the active ids in a throttle"
  ^{:hidden true}
- (notify/wait-on
-  :dart
+ (!.dt
   (var
    throttle
    (throttle/throttle-create
     (fn
      [i]
-     (return
-      (new
-       Promise
-       (fn
-        [resolve reject]
-        (setTimeout
-         (fn
-          []
-          (resolve
-           (repl/notify
-            [(throttle/throttle-active throttle)
-             (throttle/throttle-waiting throttle)])))
-         100)))))
+     (return (xt/x:with-delay 100 i)))
     nil))
-  (throttle/throttle-run throttle 1)
-  (throttle/throttle-run throttle 1)
-  (throttle/throttle-run throttle 1)
-  (throttle/throttle-run throttle 2)
-  (throttle/throttle-run throttle 3))
+  (throttle/throttle-run throttle 1 nil)
+  (throttle/throttle-run throttle 1 nil)
+  (throttle/throttle-run throttle 1 nil)
+  (throttle/throttle-run throttle 2 nil)
+  (throttle/throttle-run throttle 3 nil)
+  (xt/x:with-delay 50 [(throttle/throttle-active throttle)
+                       (throttle/throttle-waiting throttle)]))
  =>
- [["1" "2" "3"] ["1" "2" "3"]])
+ [[1 2 3] [1 2 3]])

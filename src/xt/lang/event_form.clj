@@ -262,17 +262,21 @@
   (var #{validators
          data
          result} form)
+  (var hook-status-fn
+       (fn [field status]
+         (when hook-fn
+           (hook-fn field status))))
+  (var complete-validation-fn
+       (fn [passed res]
+         (-/trigger-all form "form.validation")
+         (when complete-fn
+           (complete-fn res))))
   (return
    (validate/validate-all data
                           validators
                           result
-                          (fn [field status]
-                            (when hook-fn
-                              (hook-fn field status)))
-                          (fn [res]
-                            (-/trigger-all form "form.validation")
-                            (when complete-fn
-                              (complete-fn res))))))
+                          hook-status-fn
+                          complete-validation-fn)))
 
 (defn.xt validate-field
   "validates form field"
@@ -281,16 +285,18 @@
   (var #{validators
          data
          result} form)
+  (var complete-field-fn
+       (fn [passed status]
+         (-/trigger-field form field "form.validation")
+         (when complete-fn
+           (complete-fn passed status))))
   (return
    (validate/validate-field data
                             field
                             validators
                             result
                             hook-fn
-                            (fn [passed status]
-                              (-/trigger-field form field "form.validation")
-                              (when complete-fn
-                                (complete-fn passed status))))))
+                            complete-field-fn)))
 
 (defn.xt reset-field-validator
   "reset field validators"

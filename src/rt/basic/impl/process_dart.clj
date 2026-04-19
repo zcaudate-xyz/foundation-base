@@ -63,10 +63,11 @@
                                         ;; the var declaration needs its semicolon here
                                          (and closing-brace?
                                               in-assign?
+                                              (zero? next-paren)
                                               (not opening-brace?)
                                               (not= (first closed-stack) :assignment))
-                                         (if (str/ends-with? trimmed ";")
-                                           line
+                                          (if (str/ends-with? trimmed ";")
+                                            line
                                            (str line ";"))
 
                                         ;; closing brace of a function/control block

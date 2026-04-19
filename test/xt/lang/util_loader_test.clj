@@ -127,6 +127,40 @@
 (fact "creates a new loader"
   ^:hidden
   
+  ^{:lang-exceptions
+    {:dart
+     {:form (do (var loader
+                      (loader/new-loader
+                       [(loader/new-task "A" [] [] {:load-fn (fn [] (return "A"))})
+                        (loader/new-task "B" ["A"] [] {:load-fn (fn [] (return "B"))})
+                        (loader/new-task "C" ["B"] [] {:load-fn (fn [] (return "C"))})]))
+                {"tasks"
+                 {"C" {"args" (. loader ["tasks"] ["C"] ["args"])
+                       "id" (. loader ["tasks"] ["C"] ["id"])
+                       "deps" (. loader ["tasks"] ["C"] ["deps"])
+                       "::" (. loader ["tasks"] ["C"] ["::"])}
+                  "B" {"args" (. loader ["tasks"] ["B"] ["args"])
+                       "id" (. loader ["tasks"] ["B"] ["id"])
+                       "deps" (. loader ["tasks"] ["B"] ["deps"])
+                       "::" (. loader ["tasks"] ["B"] ["::"])}
+                  "A" {"args" (. loader ["tasks"] ["A"] ["args"])
+                       "id" (. loader ["tasks"] ["A"] ["id"])
+                       "deps" (. loader ["tasks"] ["A"] ["deps"])
+                       "::" (. loader ["tasks"] ["A"] ["::"])}}
+                 "errored" (. loader ["errored"])
+                 "completed" (. loader ["completed"])
+                 "loading" (. loader ["loading"])
+                 "order" (. loader ["order"])
+                 "::" (. loader ["::"])})
+      :expect {"tasks"
+               {"C" {"args" [], "id" "C", "deps" ["B"], "::" "loader.task"},
+                "B" {"args" [], "id" "B", "deps" ["A"], "::" "loader.task"},
+                "A" {"args" [], "id" "A", "deps" [], "::" "loader.task"}},
+               "errored" nil,
+               "completed" {},
+               "loading" {},
+               "order" ["A" "B" "C"],
+               "::" "loader"}}}}
   (!.js
    (loader/new-loader [(loader/new-task
                         "A" [] []
@@ -237,6 +271,18 @@
 (fact "loads a single task"
   ^:hidden
 
+  ^{:lang-exceptions
+    {:dart
+     {:form (notify/wait-on :dart
+              (var loader (loader/new-loader [(loader/new-task
+                                               "A" [] []
+                                               {:load-fn (fn []
+                                                           (return "A"))})]))
+              (loader/load-tasks-single loader "A"
+                                        (fn [id done]
+                                          (repl/notify [id done]))
+                                        nil
+                                        nil))}}}
   (notify/wait-on :js
     (var loader (loader/new-loader [(loader/new-task
                                      "A" [] []
@@ -248,6 +294,19 @@
   => ["A" true]
 
 
+  ^{:lang-exceptions
+    {:dart
+     {:form (notify/wait-on :dart
+              (var loader (loader/new-loader [(loader/new-task
+                                               "A" [] []
+                                               {:get-fn  (fn:> "B")
+                                                :check-fn (fn:> [res] (== "B" res))
+                                                :load-fn (fn:> "A")})]))
+              (loader/load-tasks-single loader "A"
+                                        (fn [id done]
+                                          (repl/notify [id done]))
+                                        nil
+                                        nil))}}}
   (notify/wait-on :js
     (var loader (loader/new-loader [(loader/new-task
                                      "A" [] []

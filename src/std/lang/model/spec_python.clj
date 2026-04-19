@@ -44,12 +44,16 @@
     xt.lang.event-route/add-url-listener 1
     xt.lang.event-route/add-path-listener 1
     xt.lang.event-route/add-param-listener 1
-    xt.lang.event-route/add-full-listener 1
-    xt.lang.event-route/set-url 1
-    xt.lang.event-route/set-path 2
-    xt.lang.event-route/set-param 1
-    xt.lang.event-route/reset-route 1
-    xt.lang.event-view/create-view 2
+     xt.lang.event-route/add-full-listener 1
+     xt.lang.event-route/set-url 1
+     xt.lang.event-route/set-path 2
+     xt.lang.event-route/set-param 1
+     xt.lang.event-route/reset-route 1
+     xt.lang.event-animate/make-linear-indicator 1
+     xt.lang.event-animate/make-circular-indicator 1
+     xt.lang.event-form/validate-all 2
+     xt.lang.event-form/validate-field 1
+     xt.lang.event-view/create-view 3
     xt.lang.event-view/get-output 1
     xt.lang.event-view/get-current 1
     xt.lang.event-view/is-errored 1
@@ -57,7 +61,7 @@
     xt.lang.event-view/get-time-elapsed 1
     xt.lang.event-view/get-time-updated 1
     xt.lang.event-view/get-success 1
-    xt.lang.event-view/set-output 2
+    xt.lang.event-view/set-output 3
     xt.lang.event-view/set-output-disabled 1
     xt.lang.event-view/set-pending 1
     xt.lang.event-view/set-elapsed 1
@@ -101,11 +105,14 @@
             optional-count (or inferred-count
                                (get +python-optional-default-counts+ qualified))]
         (if (and optional-count (pos? optional-count))
-          (vec
-           (concat (drop-last optional-count args)
-                   (map (fn [arg]
-                          (list arg := nil))
-                        (take-last optional-count args))))
+          (let [optional-args (take-last optional-count args)]
+            (if (not (neg? (collection/index-at #{:=} args)))
+              args
+              (vec
+               (concat (drop-last optional-count args)
+                       (mapcat (fn [arg]
+                                 [arg := nil])
+                               optional-args)))))
           args))
       (catch Throwable _
         args))))

@@ -39,23 +39,28 @@
   (xt/x:set-key obs "value" v)
   (-/notify-listeners obs))
 
+(defn.xt set-props
+  [elem props]
+  (xt/x:set-key elem "props" props))
+
 (defn.xt mock-transition
   "creates a transition from params"
   {:added "4.0"}
   ([indicator tparams transition tf]
    (var [prev curr] transition)
-   (return (fn [callback]
-             (-/set-value indicator (tf curr))
-             (when callback
-               (callback))))))
+    (var callback-fn
+         (fn [callback]
+           (-/set-value indicator (tf curr))
+           (when callback
+             (callback nil))))
+    (return callback-fn)))
 
 (def.xt MOCK
   {:create-val        -/new-observed
    :add-listener      -/add-listener
    :get-value         -/get-value
    :set-value         -/set-value
-   :set-props         (fn [elem props] (xt/x:set-key elem "props" props))
+   :set-props         -/set-props
    :is-animated       -/is-observed
    :create-transition -/mock-transition
    :stop-transition   (fn [])})
-

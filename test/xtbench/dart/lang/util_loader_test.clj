@@ -82,10 +82,34 @@
  "creates a new loader"
  ^{:hidden true}
  (!.dt
-  (loader/new-loader
-   [(loader/new-task "A" [] [] {:load-fn (fn [] (return "A"))})
-    (loader/new-task "B" ["A"] [] {:load-fn (fn [] (return "B"))})
-    (loader/new-task "C" ["B"] [] {:load-fn (fn [] (return "C"))})]))
+  (do
+   (var
+    loader
+    (loader/new-loader
+     [(loader/new-task "A" [] [] {:load-fn (fn [] (return "A"))})
+      (loader/new-task "B" ["A"] [] {:load-fn (fn [] (return "B"))})
+      (loader/new-task "C" ["B"] [] {:load-fn (fn [] (return "C"))})]))
+   {"tasks"
+    {"C"
+     {"args" (. loader ["tasks"] ["C"] ["args"]),
+      "id" (. loader ["tasks"] ["C"] ["id"]),
+      "deps" (. loader ["tasks"] ["C"] ["deps"]),
+      "::" (. loader ["tasks"] ["C"] ["::"])},
+     "B"
+     {"args" (. loader ["tasks"] ["B"] ["args"]),
+      "id" (. loader ["tasks"] ["B"] ["id"]),
+      "deps" (. loader ["tasks"] ["B"] ["deps"]),
+      "::" (. loader ["tasks"] ["B"] ["::"])},
+     "A"
+     {"args" (. loader ["tasks"] ["A"] ["args"]),
+      "id" (. loader ["tasks"] ["A"] ["id"]),
+      "deps" (. loader ["tasks"] ["A"] ["deps"]),
+      "::" (. loader ["tasks"] ["A"] ["::"])}},
+    "errored" (. loader ["errored"]),
+    "completed" (. loader ["completed"]),
+    "loading" (. loader ["loading"]),
+    "order" (. loader ["order"]),
+    "::" (. loader ["::"])}))
  =>
  {"tasks"
   {"C" {"args" [], "id" "C", "deps" ["B"], "::" "loader.task"},
@@ -118,7 +142,6 @@
 ^{:refer xt.lang.util-loader/load-tasks-single, :added "4.0"}
 (fact
  "loads a single task"
- ^{:hidden true}
  (notify/wait-on
   :dart
   (var
@@ -128,7 +151,9 @@
   (loader/load-tasks-single
    loader
    "A"
-   (fn [id done] (repl/notify [id done]))))
+   (fn [id done] (repl/notify [id done]))
+   nil
+   nil))
  =>
  ["A" true]
  (notify/wait-on
@@ -146,6 +171,8 @@
   (loader/load-tasks-single
    loader
    "A"
-   (fn [id done] (repl/notify [id done]))))
+   (fn [id done] (repl/notify [id done]))
+   nil
+   nil))
  =>
  ["A" true])

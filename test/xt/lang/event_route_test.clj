@@ -590,15 +590,28 @@
 (fact "sets the path and param"
   ^:hidden
   
-  [(notify/wait-on :js
+   [^{:lang-exceptions
+      {:dart
+       {:form (notify/wait-on :dart
+                (var r (route/make-route "hello"))
+                (route/add-path-listener r ["hello"] "a1"
+                                         (repl/>notify))
+                (route/set-path r ["hello" "world"] nil))}}}
+     (notify/wait-on :js
+      (var r (route/make-route "hello"))
+      (route/add-path-listener r ["hello"] "a1"
+                               (repl/>notify))
+      (route/set-path r ["hello" "world"]))
+    ^{:lang-exceptions
+      {:dart
+       {:form (!.dt
+                (var r (route/make-route "hello"))
+                (route/set-path r ["hello" "world"] nil)
+                [(route/get-url r) r])}}}
+    (!.js
      (var r (route/make-route "hello"))
-     (route/add-path-listener r ["hello"] "a1"
-                              (repl/>notify))
-     (route/set-path r ["hello" "world"]))
-   (!.js
-    (var r (route/make-route "hello"))
-    (route/set-path r ["hello" "world"])
-    [(route/get-url r) r])]
+     (route/set-path r ["hello" "world"])
+     [(route/get-url r) r])]
   => [+out+
       ["hello/world"
        {"::" "event.route",
@@ -664,15 +677,28 @@
 (fact "sets a param in a route"
   ^:hidden
   
-  [(notify/wait-on :js
+   [^{:lang-exceptions
+      {:dart
+       {:form (notify/wait-on :dart
+                (var r (route/make-route "hello?auth=sign_in"))
+                (route/add-param-listener r "auth" "a1"
+                                          (repl/>notify))
+                (route/set-param r "auth" "register" nil))}}}
+     (notify/wait-on :js
+      (var r (route/make-route "hello?auth=sign_in"))
+      (route/add-param-listener r "auth" "a1"
+                                (repl/>notify))
+      (route/set-param r "auth" "register"))
+    ^{:lang-exceptions
+      {:dart
+       {:form (!.dt
+                (var r (route/make-route "hello?auth=sign_in"))
+                (route/set-param r "auth" "register" nil)
+                [(route/get-url r) r])}}}
+    (!.js
      (var r (route/make-route "hello?auth=sign_in"))
-     (route/add-param-listener r "auth" "a1"
-                               (repl/>notify))
-     (route/set-param r "auth" "register"))
-   (!.js
-    (var r (route/make-route "hello?auth=sign_in"))
-    (route/set-param r "auth" "register")
-    [(route/get-url r) r])]
+     (route/set-param r "auth" "register")
+     [(route/get-url r) r])]
   => [+out+
       ["hello?auth=register"
        {"::" "event.route",
