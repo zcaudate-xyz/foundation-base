@@ -119,34 +119,34 @@
                          (xt/x:not-nil? output))
                 (xt/x:set-key receipt name output)))))
   (var call-fn
-       (fn []
-          (return (xt/for:async [[ret err] (xt/x:apply handler args)]
-                     {:success (do
-                                  (xt/for:array [cb tcbs]
-                                    (var on_success (xt/x:get-key cb "on_success"))
-                                    (when (xt/x:not-nil? on_success)
-                                      (on_success ret)))
-                                  (teardown-fn)
-                                  (return ret))
-                      :error   (do
-                                  (xt/for:array [cb tcbs]
-                                    (var on_error (xt/x:get-key cb "on_error"))
-                                    (when (xt/x:not-nil? on_error)
-                                      (on_error err)))
-                                  (teardown-fn)
-                                  (xt/x:throw err))}))))
+        (fn []
+           (xt/for:async [[ret err] (xt/x:apply handler args)]
+             {:success (do
+                          (xt/for:array [cb tcbs]
+                            (var on_success (xt/x:get-key cb "on_success"))
+                            (when (xt/x:not-nil? on_success)
+                              (on_success ret)))
+                          (teardown-fn)
+                          (return ret))
+              :error   (do
+                          (xt/for:array [cb tcbs]
+                            (var on_error (xt/x:get-key cb "on_error"))
+                            (when (xt/x:not-nil? on_error)
+                              (on_error err)))
+                          (teardown-fn)
+                          (xt/x:throw err))})))
   (var run-fn
-       (fn []
-            (xt/for:array [cb tcbs]
-              (var on_setup (xt/x:get-key cb "on_setup"))
-               (when (xt/x:not-nil? on_setup)
-                 (on_setup args)))
-            (if (< 0 (:? (xt/x:nil? delay) 0 delay))
-              (return
-               (xt/for:async [[_ err] (xt/x:with-delay delay nil)]
-                 {:success (return (call-fn))
-                  :error   (xt/x:throw err)}))
-              (return (call-fn)))))
+        (fn []
+             (xt/for:array [cb tcbs]
+               (var on_setup (xt/x:get-key cb "on_setup"))
+                (when (xt/x:not-nil? on_setup)
+                  (on_setup args)))
+             (if (< 0 (:? (xt/x:nil? delay) 0 delay))
+               (do (var delayed-run-fn
+                        (fn []
+                          (return (call-fn))))
+                   (xt/x:with-delay delayed-run-fn delay))
+                (return (call-fn)))))
   (var proc (:? (xt/x:not-nil? wrap-fn)
                 (wrap-fn run-fn args receipt handle)
                 (run-fn)))

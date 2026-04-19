@@ -47,6 +47,14 @@
   => "lambda : 1"
 
   (l/emit-as
+   :python '[(fn [x] (return [x x]))])
+  => "lambda x : [x,x]"
+
+  (l/emit-as
+   :python '[(fn [x] (return {:value x}))])
+  => "lambda x : {\"value\":x}"
+
+  (l/emit-as
    :python '[(fn hello [] (return 1))])
   => "def hello():\n  return 1")
 

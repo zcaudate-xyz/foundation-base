@@ -12,7 +12,9 @@
    [xt.db.sample-test :as sample]
    [xt.db.sql-util :as ut]]})
 
-(fact:global {:setup [(l/rt:restart) (l/rt:scaffold :python)], :teardown [(l/rt:stop)]})
+(fact:global
+ {:setup [(l/rt:restart) (l/rt:scaffold :python)],
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.base-schema/list-tables, :added "4.0"}
 (fact
@@ -24,7 +26,12 @@
  +tables+)
 
 ^{:refer xt.db.base-schema/get-cached-schema, :added "4.0"}
-(fact "get lookup" ^{:hidden true} (!.py (sch/get-cached-schema sample/Schema)) => map?)
+(fact
+ "get lookup"
+ ^{:hidden true}
+ (!.py (sch/get-cached-schema sample/Schema))
+ =>
+ map?)
 
 ^{:refer xt.db.base-schema/create-data-keys, :added "4.0"}
 (fact
@@ -32,7 +39,14 @@
  ^{:hidden true}
  (!.py (sch/create-data-keys sample/Schema "Currency"))
  =>
- ["id" "type" "symbol" "native" "decimal" "name" "plural" "description"])
+ ["id"
+  "type"
+  "symbol"
+  "native"
+  "decimal"
+  "name"
+  "plural"
+  "description"])
 
 ^{:refer xt.db.base-schema/create-ref-keys, :added "4.0"}
 (fact
@@ -48,7 +62,12 @@
  ^{:hidden true}
  (set (!.py (sch/create-rev-keys sample/Schema "UserAccount")))
  =>
- #{"organisations" "profile" "privileges" "organisation_accesses" "wallets" "notification"})
+ #{"organisations"
+   "profile"
+   "privileges"
+   "organisation_accesses"
+   "wallets"
+   "notification"})
 
 ^{:refer xt.db.base-schema/create-all-keys,
   :added "4.0",
@@ -56,7 +75,12 @@
   [(def
     +all-wallet+
     {"table"
-     [{"ident" "id", "primary" true, "scope" "id", "order" 0, "type" "uuid", "cardinality" "one"}
+     [{"ident" "id",
+       "primary" true,
+       "scope" "id",
+       "order" 0,
+       "type" "uuid",
+       "cardinality" "one"}
       {"ident" "slug",
        "scope" "data",
        "order" 1,
@@ -100,7 +124,12 @@
   [(def
     +all-org+
     {"table"
-     [{"ident" "id", "primary" true, "scope" "id", "order" 0, "type" "uuid", "cardinality" "one"}
+     [{"ident" "id",
+       "primary" true,
+       "scope" "id",
+       "order" 0,
+       "type" "uuid",
+       "cardinality" "one"}
       {"ident" "name",
        "unique" true,
        "scope" "data",
@@ -114,8 +143,16 @@
        "required" true,
        "type" "text",
        "cardinality" "one"}
-      {"ident" "description", "scope" "data", "order" 3, "type" "text", "cardinality" "one"}
-      {"ident" "tags", "scope" "data", "order" 4, "type" "array", "cardinality" "one"}
+      {"ident" "description",
+       "scope" "data",
+       "order" 3,
+       "type" "text",
+       "cardinality" "one"}
+      {"ident" "tags",
+       "scope" "data",
+       "order" 4,
+       "type" "array",
+       "cardinality" "one"}
       {"ident" "owner",
        "scope" "ref",
        "order" 5,
@@ -183,7 +220,12 @@
  ^{:hidden true}
  (set (!.py (sch/rev-keys sample/Schema "UserAccount")))
  =>
- #{"organisations" "profile" "privileges" "organisation_accesses" "wallets" "notification"})
+ #{"organisations"
+   "profile"
+   "privileges"
+   "organisation_accesses"
+   "wallets"
+   "notification"})
 
 ^{:refer xt.db.base-schema/table-columns,
   :added "4.0",
@@ -245,14 +287,18 @@
  "coerces output given schema and type functions"
  ^{:hidden true}
  (!.py
-  [(sch/table-coerce sample/Schema "UserAccount" {:is-super 1} {:boolean ut/sqlite-to-boolean})
+  [(sch/table-coerce
+    sample/Schema
+    "UserAccount"
+    {:is-super 1}
+    {:boolean ut/sqlite-to-boolean})
    (sch/table-coerce
     sample/Schema
     "UserAccount"
     {:is-super 1, :organisations [{:name "hello"}]}
     {:boolean ut/sqlite-to-boolean})])
  =>
- [{"is_super" true} {"organisations" [{"name" "hello"}], "is_super" true}])
+ [{"is_super" true}
+  {"organisations" [{"name" "hello"}], "is_super" true}])
 
 (comment (./import) (./create-tests))
-

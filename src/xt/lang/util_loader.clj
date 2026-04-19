@@ -143,17 +143,17 @@
   (var #{tasks loading completed} loader)
   (var task (xt/x:get-key tasks id))
   (xt/x:set-key loading id true)
-  (return (xt/for:async [[res err] (-/task-load task)]
-            {:success (do (xt/x:del-key loading id)
-                          (xt/x:set-key completed id true)
-                          (when (xt/x:not-nil? hook-fn) (hook-fn id true))
-                          (when (xt/x:not-nil? loop-fn)
-                            (return (loop-fn loader hook-fn complete-fn))))
-              :error   (do (xt/x:del-key loading id)
-                           (xt/x:set-key loader "errored" id)
-                           (when (xt/x:not-nil? hook-fn)     (hook-fn id false))
-                           (when (xt/x:not-nil? complete-fn) (complete-fn err))
-                           (return nil))})))
+  (xt/for:async [[res err] (-/task-load task)]
+    {:success (do (xt/x:del-key loading id)
+                  (xt/x:set-key completed id true)
+                  (when (xt/x:not-nil? hook-fn) (hook-fn id true))
+                  (when (xt/x:not-nil? loop-fn)
+                    (return (loop-fn loader hook-fn complete-fn))))
+     :error   (do (xt/x:del-key loading id)
+                  (xt/x:set-key loader "errored" id)
+                  (when (xt/x:not-nil? hook-fn)     (hook-fn id false))
+                  (when (xt/x:not-nil? complete-fn) (complete-fn err))
+                  (return nil))}))
 
 (defn.xt load-tasks
   "load tasks"

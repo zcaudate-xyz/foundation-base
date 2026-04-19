@@ -72,6 +72,7 @@
      xt.lang.event-view/pipeline-run 1
      xt.lang.event-view/get-with-lookup 1
      xt.lang.event-view/sorted-lookup 1
+     xt.lang.util-loader/load-tasks-single 3
      xt.lang.util-throttle/throttle-run-async 1
      xt.lang.util-throttle/throttle-run 1
      xt.lang.util-color/rgb->hsl 1})
@@ -104,7 +105,9 @@
             inferred-count (when fn-def
                              (count (take-while python-optional-input?
                                                 (reverse (:inputs fn-def)))))
-            optional-count (or inferred-count
+            optional-count (or (when (and inferred-count
+                                          (pos? inferred-count))
+                                 inferred-count)
                                (get +python-optional-default-counts+ qualified))]
         (if (and optional-count (pos? optional-count))
           (let [optional-args (take-last optional-count args)]
@@ -126,9 +129,6 @@
                (second body)
                body)]
     (if (or (string? body)
-            (map? body)
-            (vector? body)
-            (set? body)
             (keyword? body)
             (nil? body))
       (list 'quote body)

@@ -625,10 +625,30 @@
 
    (notify/wait-on :lua
      (var r (route/make-route "hello"))
-     (route/add-path-listener r ["hello"] "a1"
-                              (repl/>notify))
-     (route/set-path r ["hello" "world"] nil))
-  => +out+)
+    (route/add-path-listener r ["hello"] "a1"
+                             (repl/>notify))
+    (route/set-path r ["hello" "world"] nil))
+  => +out+
+
+   [(notify/wait-on :python
+       (var r (route/make-route "hello"))
+       (route/add-path-listener r ["hello"] "a1"
+                                (repl/>notify))
+       (route/set-path r ["hello" "world"] nil))
+    (!.py
+     (var r (route/make-route "hello"))
+     (route/set-path r ["hello" "world"] nil)
+     [(route/get-url r) r])]
+  => [+out+
+      ["hello/world"
+       {"::" "event.route",
+        "tree"
+        {"params" {},
+         "[]" "hello",
+         "[\"hello\", \"world\"]" nil,
+         "[\"hello\"]" "world"},
+        "history" ["hello/world"],
+        "listeners" {}}]])
 
 ^{:refer xt.lang.event-route/set-segment :added "4.0"
   :setup [(def +out+

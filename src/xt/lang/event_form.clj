@@ -267,10 +267,10 @@
          (when hook-fn
            (hook-fn field status))))
   (var complete-validation-fn
-       (fn [passed res]
-         (-/trigger-all form "form.validation")
-         (when complete-fn
-           (complete-fn res))))
+        (fn [passed res]
+          (-/trigger-all form "form.validation")
+          (when complete-fn
+            (complete-fn passed res))))
   (return
    (validate/validate-all data
                           validators

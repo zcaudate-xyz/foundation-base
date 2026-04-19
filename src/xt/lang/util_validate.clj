@@ -97,17 +97,17 @@
           (when (== "errored" (xt/x:get-key result "status"))
             (when (xt/x:not-nil? complete-fn) (complete-fn false result))
            (return))
-         (when (xt/x:arr-every (xt/x:obj-vals (xt/x:get-key result "fields"))
-                            (fn [e]
-                              (return (== (xt/x:get-key e "status") "ok"))))
-           (xt/x:set-key result "status" "ok")
-           (when (xt/x:not-nil? complete-fn) (complete-fn true result))
-           (return))))
-  (return (xt/x:arr-map fields
-                     (fn [field]
-                       (return (-/validate-field
-                                form field validators result
-                                hook-fn complete-check-fn))))))
+          (when (xt/x:arr-every (xt/x:obj-vals (xt/x:get-key result "fields"))
+                             (fn [e]
+                               (return (== (xt/x:get-key e "status") "ok"))))
+            (xt/x:set-key result "status" "ok")
+            (when (xt/x:not-nil? complete-fn) (complete-fn true result))
+            (return))))
+  (xt/for:array [field fields]
+    (-/validate-field
+     form field validators result
+     hook-fn complete-check-fn))
+  (return true))
 
 (defn.xt create-result
   "creates a result datastructure"

@@ -238,22 +238,10 @@
                 event))
   (var #{listeners} container)
   (var triggered [])
-  (var pending nil)
   (xt/for:object [[id entry] listeners]
-    (var out (-/trigger-entry entry event))
-    (var task (-/notify-task out))
-    (when (xt/x:not-nil? task)
-      (:= pending (:? (xt/x:nil? pending)
-                      task
-                      (xt/x:future-then pending
-                                        (fn [_]
-                                          (return task))))))
+    (-/trigger-entry entry event)
     (xt/x:arr-push triggered id))
-  (return (:? (xt/x:nil? pending)
-              triggered
-              (xt/x:future-then pending
-                                (fn [_]
-                                  (return triggered))))))
+  (return triggered))
 
 
 ;;
@@ -323,20 +311,8 @@
   (var #{listeners} container)
   (var group (xt/x:get-key listeners key))
   (var triggered [])
-  (var pending nil)
   (when (xt/x:not-nil? group)
     (xt/for:object [[id entry] group]
-      (var out (-/trigger-entry entry event))
-      (var task (-/notify-task out))
-      (when (xt/x:not-nil? task)
-        (:= pending (:? (xt/x:nil? pending)
-                        task
-                        (xt/x:future-then pending
-                                          (fn [_]
-                                            (return task))))))
+      (-/trigger-entry entry event)
       (xt/x:arr-push triggered id)))
-  (return (:? (xt/x:nil? pending)
-              triggered
-              (xt/x:future-then pending
-                                (fn [_]
-                                  (return triggered))))))
+  (return triggered))

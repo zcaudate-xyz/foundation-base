@@ -375,7 +375,10 @@
         (fn
          [v rec]
          (return (and (k/not-nil? v) (< 0 (xt/x:len v)))))}]]}))
-  (form/validate-all f k/identity (repl/>notify)))
+  (form/validate-all
+   f
+   (fn [field status] (return nil))
+   (repl/>notify)))
  =>
  false)
 
@@ -407,7 +410,7 @@
          [v rec]
          (return (and (k/not-nil? v) (< 0 (xt/x:len v)))))}]]}))
   (form/add-listener f "a1" ["login"] (repl/>notify) nil)
-  (form/validate-field f "login" k/identity))
+  (form/validate-field f "login" (fn [field status] (return nil)) nil))
  =>
  +out+)
 
@@ -523,8 +526,8 @@
    f
    "a1"
    ["login"]
-   (fn [] (repl/notify (form/check-field-passed f "login"))))
-  (form/validate-all f))
+   (fn [_] (repl/notify (form/check-field-passed f "login"))))
+  (form/validate-all f nil nil))
  =>
  false)
 
@@ -549,8 +552,8 @@
    f
    "a1"
    ["login"]
-   (fn [] (repl/notify (form/check-field-errored f "login"))))
-  (form/validate-all f))
+   (fn [_] (repl/notify (form/check-field-errored f "login"))))
+  (form/validate-all f nil nil))
  =>
  true)
 
@@ -575,8 +578,8 @@
    f
    "a1"
    ["login"]
-   (fn [] (repl/notify (form/check-all-passed f))))
-  (form/validate-all f))
+   (fn [_] (repl/notify (form/check-all-passed f))))
+  (form/validate-all f nil nil))
  =>
  false)
 
@@ -601,7 +604,7 @@
    f
    "a1"
    ["login"]
-   (fn [] (repl/notify (form/check-any-errored f))))
-  (form/validate-all f))
+   (fn [_] (repl/notify (form/check-any-errored f))))
+  (form/validate-all f nil nil))
  =>
  true)

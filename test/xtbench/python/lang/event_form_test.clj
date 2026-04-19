@@ -380,14 +380,7 @@
    (fn [field status] (return nil))
    (repl/>notify)))
  =>
- {"::" "validation.result",
-  "status" "errored",
-  "fields"
-  {"login"
-   {"message" "Required field.",
-    "id" "is-required",
-    "status" "errored",
-    "data" ""}}})
+ false)
 
 ^{:refer xt.lang.event-form/validate-field,
   :added "4.0",
