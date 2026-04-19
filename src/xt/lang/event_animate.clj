@@ -35,7 +35,8 @@
    ref
    ind
    f]
-  (:= f (:? (xt/x:nil? f) (fn [_] (return {})) f))
+  (when (xt/x:nil? f)
+    (:= f (fn [_] (return {}))))
   (var #{add-listener
          set-props
          get-value} impl)
@@ -55,7 +56,8 @@
    ref
    arr
    f]
-  (:= f (:? (xt/x:nil? f) (fn [_] (return {})) f))
+  (when (xt/x:nil? f)
+    (:= f (fn [_] (return {}))))
   (var #{add-listener
          set-props
          get-value} impl)
@@ -77,8 +79,10 @@
    m
    parent
    all]
-  (:= parent (:? (xt/x:nil? parent) [] parent))
-  (:= all (:? (xt/x:nil? all) [] all))
+  (when (xt/x:nil? parent)
+    (:= parent []))
+  (when (xt/x:nil? all)
+    (:= all []))
   (var #{is-animated} impl)
   (xt/for:object [[k x] m]
     (cond (is-animated x)
@@ -125,16 +129,17 @@
   "listens to a map of indicators"
   {:added "4.0"}
   [impl ref m f]
-  (:= f (:? (xt/x:nil? f) (fn [_] (return {})) f))
+  (when (xt/x:nil? f)
+    (:= f (fn [_] (return {}))))
   (var #{add-listener
          set-props} impl)
   (var paths      (-/get-map-paths impl m))
-  (var animated   (xtd/arr-keep paths
-                                (fn [entry]
-                                  (var indicator (xt/x:last entry))
-                                  (when (and (xt/x:not-nil? indicator)
-                                             (not= false indicator))
-                                    (return indicator)))))
+  (var animated   [])
+  (xt/for:array [entry paths]
+    (var indicator (xt/x:last entry))
+    (when (and (xt/x:not-nil? indicator)
+               (not= false indicator))
+      (xt/x:arr-push animated indicator)))
   (var trigger-fn
        (fn [_]
           (var input (-/get-map-input impl paths))
@@ -268,12 +273,12 @@
   {:added "4.0"}
   [impl type animate-fn progressing progress-fn]
   (var callback-fn
-       (:? (== type "chained-one")
-           (fn []
-             (return (-/animate-chained-one impl progressing progress-fn)))
-           :else
-           (fn []
-             (return (-/animate-chained-all impl progressing progress-fn)))))
+       (fn []
+         (return (-/animate-chained-all impl progressing progress-fn))))
+  (when (== type "chained-one")
+    (:= callback-fn
+        (fn []
+          (return (-/animate-chained-one impl progressing progress-fn)))))
   (var #{running queued} progressing)
   (cond (not running)
          (do (var anim (animate-fn callback-fn))
@@ -318,7 +323,10 @@
     (:= tparams {}))
   (var #{create-val
          create-transition} impl)
-  (var indicator    (create-val (:? initial 1 0)))
+  (var initial-value 0)
+  (when initial
+    (:= initial-value 1))
+  (var indicator    (create-val initial-value))
   (var identity-fn  (fn [x] (return x)))
   (var zero-fn      (create-transition indicator
                                        tparams

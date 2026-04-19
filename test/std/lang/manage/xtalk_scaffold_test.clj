@@ -64,8 +64,8 @@
 (def runtime-template-forms
   (read-string
    "[(ns xtbench.js.sample.base-lib-test
-         (:require [std.lang :as l]
-                   [xt.lang.common-lib :as k])
+          (:require [std.lang :as l]
+                    [xt.lang.common-lib :as k])
          (:use code.test))
        (l/script- :js {:runtime :basic})
       (fact:global {:setup [(l/rt:restart)]})
@@ -74,9 +74,23 @@
         ^:hidden
         (!.js (k/identity 1))
         => 1)
-       (fact \"wrapped runtime form\"
-        (set (!.js (k/example)))
-        => #{1})]"))
+        (fact \"wrapped runtime form\"
+         (set (!.js (k/example)))
+         => #{1})]"))
+
+(def runtime-template-forms-with-setup
+  (read-string
+   "[(ns xtbench.js.sample.base-view-test
+         (:require [std.lang :as l]
+                   [xt.db.base-view :as v])
+         (:use code.test))
+       (l/script- :js {:runtime :basic})
+       (fact:global {:setup [(l/rt:restart)
+                             (l/rt:scaffold :js)]})
+       (def +views+ (!.js (v/example)))
+       (fact \"baseline\"
+         (!.js (v/example))
+         => +views+)]"))
 
 (def canonical-runtime-template-forms
   (read-string
@@ -573,6 +587,14 @@
      (not (str/includes? out "(notify/wait-on :js "))])
   => [true true])
 
+^{:refer std.lang.manage.xtalk-scaffold/template-runtime-test-forms :added "4.1"}
+(fact "normalizes fact:global setup in template output"
+  (let [lua-out (render-top-level-forms
+                 (template-runtime-test-forms runtime-template-forms-with-setup :js :lua))]
+    [(not (str/includes? lua-out "(l/rt:scaffold"))
+     (str/includes? lua-out "(def +views+ (!.lua (v/example)))")])
+  => [true true])
+
 ^{:refer std.lang.manage.xtalk-scaffold/split-fact-form :added "4.1"}
 (fact "splits a mixed runtime fact form"
   (let [{:keys [shared langs]} (split-fact-form '(fact "x" (!.js (k/a)) => 1 (!.lua (k/a)) => 1) [:js :lua])]
@@ -1057,14 +1079,12 @@
       (let [sources (xtlang-runtime-suite-sources {:root root
                                                    :input-root "test/xt/lang"
                                                    :lang :dart})
-            source  (first sources)]
-         [(= 1 (count sources))
-          (= 'xt.sample.base-lib-test (:ns source))
-         (= :lua (:from-lang source))
-         (= :dart (:lang source))
-         (= :twostep (:runtime-type source))
-         (= :batched (:check-mode source))])))
-  => [true true true true true true])
+            summary (mapv (juxt :ns :from-lang :lang :runtime-type :check-mode) sources)]
+         [(= 2 (count sources))
+          (= '[[xt.sample.base-lib-test :lua :dart :twostep :batched]
+               [xt.sample.common-notify-test :js :dart :twostep :batched]]
+             summary)])))
+  => [true true])
 
 ^{:refer std.lang.manage.xtalk-scaffold/compile-xtlang-runtime-bulk-suites :added "4.1"}
 (fact "exports and compiles eligible xt.lang templates into dart bulk payloads"
@@ -1076,17 +1096,17 @@
              (compile-xtlang-runtime-bulk-suites nil {:root root
                                                       :input-root "test/xt/lang"
                                                       :lang :dart})
+             summary (mapv (juxt :ns :from-lang :suite-count :bulk-count :runtime-type :check-mode)
+                           outputs)
              output (first outputs)]
         [(= :dart lang)
-         (= 1 count)
-         (= :lua (:from-lang output))
-         (= 2 (:suite-count output))
-         (= 2 (:bulk-count output))
-         (= :twostep (:runtime-type output))
-         (= :batched (:check-mode output))
+         (= 2 count)
+         (= '[[xt.sample.base-lib-test :lua 2 2 :twostep :batched]
+              [xt.sample.common-notify-test :js 1 1 :twostep :batched]]
+            summary)
          (str/ends-with? (:suite-path output) "_suite.edn")
          (str/ends-with? (:bulk-path output) "-dt-bulk.edn")])))
-  => [true true true true true true true true true])
+  => [true true true true true])
 
 
 ^{:refer std.lang.manage.xtalk-scaffold/runtime-type :added "4.1"}

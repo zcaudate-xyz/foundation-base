@@ -43,6 +43,21 @@
 (fact "lists all listeners"
   ^:hidden
   
+  ^{:lang-exceptions
+    {:dart
+     {:form (!.dt
+              (var v (view/create-view
+                      (fn:> [x] {:value x})
+                      {}
+                      [3]
+                      {:value 0}
+                      nil
+                      nil))
+              (view/add-listener v "a1" (fn:>) nil nil)
+              (view/add-listener v "b2" (fn:>) nil nil)
+              (view/add-listener v "c3" (fn:>) nil nil)
+              (view/list-listeners v))
+      :expect ["a1" "b2" "c3"]}}}
   (set (!.js
         (var v (view/create-view
                 (fn:> [x] (j/future-delayed [100]
@@ -72,6 +87,31 @@
 (fact "runs the pipeline"
   ^:hidden
   
+  ^{:lang-exceptions
+    {:dart
+     {:form (notify/wait-on :dart
+              (var v (view/create-view
+                      nil
+                      {:remote {:handler (fn:> [x] (throw "ERRORED"))}}
+                      [3]
+                      ["BLAH"]
+                      xtd/first
+                      nil))
+              (view/init-view v)
+              (var [context disabled] (view/pipeline-prep v))
+              (var async-fn
+                   (fn [handler-fn context cb]
+                     (return (. (new Promise
+                                     (fn [resolve reject]
+                                       (resolve (handler-fn context))))
+                                (then (. cb ["success"]))
+                                (catch (. cb ["error"]))))))
+              (. (view/pipeline-run-remote context
+                                           true
+                                           async-fn
+                                           (fn:>)
+                                           k/identity)
+                 (then (fn:> (repl/notify context.acc)))))}}}
   (notify/wait-on :js
     (var v (view/create-view
             nil
@@ -101,6 +141,31 @@
       "pre" [false],
       "::" "view.run"}
   
+  ^{:lang-exceptions
+    {:dart
+     {:form (notify/wait-on :dart
+              (var v (view/create-view
+                      nil
+                      {:remote {:handler (fn:> [x] (return nil))}}
+                      [3]
+                      ["BLAH"]
+                      xtd/first
+                      nil))
+              (view/init-view v)
+              (var [context disabled] (view/pipeline-prep v))
+              (var async-fn
+                   (fn [handler-fn context cb]
+                     (return (. (new Promise
+                                     (fn [resolve reject]
+                                       (resolve (handler-fn context))))
+                                (then (. cb ["success"]))
+                                (catch (. cb ["error"]))))))
+              (. (view/pipeline-run-remote context
+                                           true
+                                           async-fn
+                                           (fn:>)
+                                           k/identity)
+                 (then (fn:> (repl/notify (view/get-output v))))))}}}
   (notify/wait-on :js
     (var v (view/create-view
             nil
@@ -191,6 +256,16 @@
 (fact "creates a view"
   ^:hidden
   
+  ^{:lang-exceptions
+    {:dart
+      {:form (xtd/tree-get-data
+              (view/create-view
+               (fn:> [x] {:value x})
+               {}
+               [3]
+               {:value 0}
+               nil
+               nil))}}}
   (!.js
    (xtd/tree-get-data
     (view/create-view
@@ -267,6 +342,19 @@
 (fact "gets the view-context"
   ^:hidden
   
+  ^{:lang-exceptions
+    {:dart
+      {:form (do
+              (var v (view/create-view
+                      (fn:> [x] {:value x})
+                      {}
+                      [3]
+                      {:value 0}
+                      nil
+                      nil))
+              (view/init-view v)
+              (xtd/obj-keys (view/view-context v)))
+      :expect #{"input" "view"}}}}
   (!.js
    (var v (view/create-view
            (fn:> [x] (j/future-delayed [100]
@@ -292,6 +380,18 @@
 (fact "adds a listener to the view"
   ^:hidden
   
+  ^{:lang-exceptions
+    {:dart
+      {:form (notify/wait-on :dart
+              (var v (view/create-view
+                      (fn:> [x] {:value x})
+                      {}
+                      [3]
+                      {:value 0}
+                      nil
+                      nil))
+              (view/add-listener v "a1" (repl/>notify) nil nil)
+              (view/trigger-listeners v "output" {:value 0}))}}}
   (notify/wait-on :js
     (var v (view/create-view
             (fn:> [x] (j/future-delayed [100]
@@ -320,9 +420,21 @@
 (fact "gets the view input record"
   ^:hidden
   
+  ^{:lang-exceptions
+    {:dart
+     {:form (!.dt
+              (var v (view/create-view
+                      (fn:> [x] {:value x})
+                      {}
+                      [3]
+                      {:value 0}
+                      nil
+                      nil))
+              (view/init-view v)
+              (view/get-input v))}}}
   (!.js
    (var v (view/create-view
-    (fn:> [x] {:value x})
+     (fn:> [x] {:value x})
     {}
     [3]
     {:value 0}))
@@ -345,9 +457,21 @@
 (fact "gets the view output record"
   ^:hidden
   
+  ^{:lang-exceptions
+    {:dart
+     {:form (!.dt
+              (var v (view/create-view
+                      (fn:> [x] {:value x})
+                      {}
+                      [3]
+                      {:value 0}
+                      nil
+                      nil))
+              (view/init-view v)
+              (view/get-output v nil))}}}
   (!.js
    (var v (view/create-view
-    (fn:> [x] {:value x})
+     (fn:> [x] {:value x})
     {}
     [3]
     {:value 0}))
@@ -401,7 +525,9 @@
                         (fn:> [x] {:value x})
                         {}
                         [3]
-                        {:value 0}))
+                        {:value 0}
+                        nil
+                        nil))
                 (view/add-listener
                  v "a1"
                  (fn [res]
@@ -457,7 +583,9 @@
                         (fn:> [x] {:value x})
                         {}
                         [3]
-                        {:value 0}))
+                        {:value 0}
+                        nil
+                        nil))
                 (view/add-listener
                  v "a1"
                  (fn [res]
@@ -527,6 +655,32 @@
 (fact "runs the pipeline"
   ^:hidden
   
+  ^{:lang-exceptions
+    {:dart
+      {:form (notify/wait-on :dart
+              (var v (view/create-view
+                      (fn:> [x] (return {:value x}))
+                      {}
+                      [3]
+                      {}
+                      nil
+                      nil))
+              (view/init-view v)
+              (var [context disabled] (view/pipeline-prep v))
+              (var async-fn
+                   (fn [handler-fn context cb]
+                     (return (. (new Promise
+                                     (fn [resolve reject]
+                                       (resolve (handler-fn context))))
+                                (then (. cb ["success"]))
+                                (catch (. cb ["error"]))))))
+              (. (view/pipeline-run context
+                                    disabled
+                                    async-fn
+                                    (fn:>)
+                                    k/identity
+                                    nil)
+                  (then (fn:> (repl/notify context.acc)))))}}}
   (notify/wait-on :js
     (var v (view/create-view
             (fn:> [x] (j/future-delayed [100]
@@ -583,6 +737,31 @@
 (fact "runs the remote pipeline"
   ^:hidden
   
+  ^{:lang-exceptions
+    {:dart
+      {:form (notify/wait-on :dart
+              (var v (view/create-view
+                      nil
+                      {:remote {:handler (fn:> [x] (return {:value x}))}}
+                      [3]
+                      nil
+                      nil
+                      nil))
+              (view/init-view v)
+              (var [context disabled] (view/pipeline-prep v))
+              (var async-fn
+                   (fn [handler-fn context cb]
+                     (return (. (new Promise
+                                     (fn [resolve reject]
+                                       (resolve (handler-fn context))))
+                                (then (. cb ["success"]))
+                                (catch (. cb ["error"]))))))
+              (. (view/pipeline-run-remote context
+                                           true
+                                           async-fn
+                                           (fn:>)
+                                           k/identity)
+                 (then (fn:> (repl/notify context.acc)))))}}}
   (notify/wait-on :js
     (var v (view/create-view
             nil
@@ -635,6 +814,31 @@
 (fact "runs the sync pipeline"
   ^:hidden
   
+  ^{:lang-exceptions
+    {:dart
+      {:form (notify/wait-on :dart
+              (var v (view/create-view
+                      nil
+                      {:sync {:handler (fn:> [x] (return {:value x}))}}
+                      [3]
+                      nil
+                      nil
+                      nil))
+              (view/init-view v)
+              (var [context disabled] (view/pipeline-prep v))
+              (var async-fn
+                   (fn [handler-fn context cb]
+                     (return (. (new Promise
+                                     (fn [resolve reject]
+                                       (resolve (handler-fn context))))
+                                (then (. cb ["success"]))
+                                (catch (. cb ["error"]))))))
+              (. (view/pipeline-run-sync context
+                                         true
+                                         async-fn
+                                         (fn:>)
+                                         k/identity)
+                 (then (fn:> (repl/notify context.acc)))))}}}
   (notify/wait-on :js
     (var v (view/create-view
             nil
@@ -691,7 +895,8 @@
    (view/get-with-lookup
     [{:id "A"}
      {:id "B"}
-     {:id "C"}]))
+     {:id "C"}]
+    nil))
   => {"results" [{"id" "A"} {"id" "B"} {"id" "C"}],
       "lookup" {"C" {"id" "C"}, "B" {"id" "B"}, "A" {"id" "A"}}}
 
@@ -699,7 +904,8 @@
    (view/get-with-lookup
     [{:id "A"}
      {:id "B"}
-     {:id "C"}]))
+     {:id "C"}]
+    nil))
   => {"results" [{"id" "A"} {"id" "B"} {"id" "C"}],
       "lookup" {"C" {"id" "C"}, "B" {"id" "B"}, "A" {"id" "A"}}})
 

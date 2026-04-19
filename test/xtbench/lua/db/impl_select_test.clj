@@ -28,6 +28,5 @@
    [xt.db.sample-scratch-test :as sample-scratch]]})
 
 (fact:global
- {:setup
-  [(l/rt:restart) (l/rt:setup-to :postgres) (l/rt:scaffold :js)],
+ {:setup [(l/rt:restart) (l/rt:setup-to :postgres)],
   :teardown [(l/rt:stop)]})

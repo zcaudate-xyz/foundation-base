@@ -731,35 +731,43 @@
   (let [[fact title & body] fact-form
         lang (normalize-runtime-lang lang)
         fact-exception (get (form-language-exceptions fact-form) lang)
+        apply-exception
+        (fn [expr]
+          (let [expr-exception (template-language-exception expr lang)
+                exception (merge fact-exception expr-exception)]
+            (cond
+              (true? (:skip exception))
+              nil
+
+              (contains? exception :form)
+              (let [replacement (:form exception)]
+                (if (runtime-dispatch-form? expr)
+                  (with-meta (list (first expr) replacement) (meta expr))
+                  replacement))
+
+               :else
+               expr)))
         updated-body
         (loop [xs body
                out []]
           (if (empty? xs)
             out
-              (let [[expr arrow expect & more] xs]
-                (if (= '=> arrow)
-                  (let [expr-exception (template-language-exception expr lang)
-                        exception (merge fact-exception expr-exception)
-                        updated-expr (cond
-                                       (true? (:skip exception))
-                                       nil
-
-                                       (contains? exception :form)
-                                       (let [replacement (:form exception)]
-                                         (if (runtime-dispatch-form? expr)
-                                           (with-meta (list (first expr) replacement) (meta expr))
-                                           replacement))
-
-                                       :else
-                                       expr)
-                        updated-expect (if (contains? exception :expect)
-                                         (:expect exception)
-                                         expect)
-                       updated-expect (normalize-runtime-expect updated-expect lang)]
-                   (recur more
-                          (cond-> out
-                            updated-expr (conj updated-expr '=> updated-expect))))
-                 (recur (rest xs) (conj out (first xs)))))))]
+            (let [[expr arrow expect & more] xs]
+              (if (= '=> arrow)
+                (let [expr-exception (template-language-exception expr lang)
+                      exception (merge fact-exception expr-exception)
+                      updated-expr (apply-exception expr)
+                      updated-expect (if (contains? exception :expect)
+                                       (:expect exception)
+                                       expect)
+                      updated-expect (normalize-runtime-expect updated-expect lang)]
+                  (recur more
+                         (cond-> out
+                           updated-expr (conj updated-expr '=> updated-expect))))
+                (let [updated-expr (apply-exception expr)]
+                  (recur (rest xs)
+                         (cond-> out
+                           updated-expr (conj updated-expr))))))))]
     (with-meta (apply list fact title updated-body)
       (meta fact-form))))
 
@@ -1598,26 +1606,28 @@
          target-ns-str (str target-ns)]
      (->> forms
           (remove #(form-skipped-for-lang? % to-lang))
-          (mapv (fn [form]
-                  (cond (fact-form? form)
+           (mapv (fn [form]
+                   (cond (fact-form? form)
+                         (-> form
+                             (apply-template-language-exceptions-fact to-lang)
+                             (transform-script-form from-script to-script)
+                             (transform-script-runtime to-lang)
+                             (replace-runtime-symbol from-dispatch to-dispatch)
+                             (retarget-runtime-references to-lang)
+                             (replace-string-value source-ns-str target-ns-str)
+                             (retarget-generated-form to-lang))
+
+                         (and (seq? form) (= 'ns (first form)))
+                         (replace-ns-name form target-ns)
+
+                         :else
                         (-> form
-                            (apply-template-language-exceptions-fact to-lang)
                             (transform-script-form from-script to-script)
                             (transform-script-runtime to-lang)
                             (replace-runtime-symbol from-dispatch to-dispatch)
                             (retarget-runtime-references to-lang)
-                            (replace-string-value source-ns-str target-ns-str))
-
-                        (and (seq? form) (= 'ns (first form)))
-                        (replace-ns-name form target-ns)
-
-                        :else
-                       (-> form
-                           (transform-script-form from-script to-script)
-                           (transform-script-runtime to-lang)
-                           (replace-runtime-symbol from-dispatch to-dispatch)
-                           (retarget-runtime-references to-lang)
-                           (replace-string-value source-ns-str target-ns-str))))))))
+                            (replace-string-value source-ns-str target-ns-str)
+                            (retarget-generated-form to-lang))))))))
 
 (defn split-fact-form
   [fact-form langs & [script-aliases]]

@@ -1,5 +1,5 @@
 (ns
- xtbench.python.db.impl-select-test
+ xtbench.js.db.impl-select-test
  (:require [std.lang :as l] [xt.lang.common-notify :as notify])
  (:use code.test))
 
@@ -12,7 +12,7 @@
 
 ^#:xtalk{:template true}
 (l/script-
- :python
+ :js
  {:runtime :basic,
   :require
   [[xt.db.base-schema :as sch]
@@ -28,5 +28,6 @@
    [xt.db.sample-scratch-test :as sample-scratch]]})
 
 (fact:global
- {:setup [(l/rt:restart) (l/rt:setup-to :postgres)],
+ {:setup
+  [(l/rt:restart) (l/rt:setup-to :postgres) (l/rt:scaffold :js)],
   :teardown [(l/rt:stop)]})

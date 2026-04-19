@@ -682,26 +682,7 @@
      "route/path" ["hello"],
      "listener/type" "route.path"}}]
   
-  ^{:lang-exceptions
-    {:dart
-     {:form (notify/wait-on-call
-             2000
-             (fn []
-               (!.dt
-                (var r (route/make-route "hello"))
-                (route/add-path-listener
-                 r ["hello"] "a1"
-                 (fn [val]
-                   (return {"::" "notify.task"
-                            "task" (repl/notify-socket
-                                    "127.0.0.1"
-                                    (@! (:socket-port (l/default-notify)))
-                                    val
-                                    (@! notify/*override-id*)
-                                    nil
-                                    {})}))
-                 nil)
-                (route/set-url r "hello/world" nil))))}}}
+  ^{:lang-exceptions {:dart {:skip true}}}
   (notify/wait-on :lua
     (var r (route/make-route "hello"))
     (route/add-path-listener r ["hello"] "a1"

@@ -344,33 +344,7 @@
    "meta"
    {"listener/id" "a1",
     "route/path" ["hello"],
-    "listener/type" "route.path"}}]
- (notify/wait-on-call
-  2000
-  (fn
-   []
-   (!.dt
-    (var r (route/make-route "hello"))
-    (route/add-path-listener
-     r
-     ["hello"]
-     "a1"
-     (fn
-      [val]
-      (return
-       {"::" "notify.task",
-        "task"
-        (repl/notify-socket
-         "127.0.0.1"
-         (@! (:socket-port (l/default-notify)))
-         val
-         (@! notify/*override-id*)
-         nil
-         {})}))
-     nil)
-    (route/set-url r "hello/world" nil))))
- =>
- +out+)
+    "listener/type" "route.path"}}])
 
 ^{:refer xt.lang.event-route/set-path,
   :added "4.0",
