@@ -233,51 +233,101 @@
                            (meta-block?
                              [zloc]
                              (= :meta (block/block-tag (nav/block zloc))))
-                           (meta-nav
-                             [zloc]
-                             (when (meta-block? zloc)
-                               (nav/down zloc)))
-                           (body-nav
-                             [zloc]
-                             (if (meta-block? zloc)
-                               (-> zloc nav/down nav/right)
-                               zloc))
-                           (purge-meta
-                             [m]
-                             (let [setup    (some->> (:setup m)
-                                                     (remove purge-target?)
-                                                     vec
-                                                     not-empty)
-                                   teardown (some->> (:teardown m)
-                                                     (remove purge-target?)
-                                                     vec
-                                                     not-empty)]
-                               (cond-> (dissoc m :setup :teardown)
-                                 setup    (assoc :setup setup)
-                                 teardown (assoc :teardown teardown))))
-                           (check-arrow?
-                             [form]
-                             (and (symbol? form)
-                                  (boolean (re-find #"=>" (name form)))))
-                           (purge-body
-                             [body]
-                             (loop [body body
-                                    out  []]
-                               (cond (empty? body)
-                                     out
+                            (meta-nav
+                              [zloc]
+                              (when (meta-block? zloc)
+                                (nav/down zloc)))
+                            (body-nav
+                              [zloc]
+                              (if (meta-block? zloc)
+                                (-> zloc nav/down nav/right)
+                                zloc))
+                            (check-arrow?
+                              [form]
+                              (and (symbol? form)
+                                   (boolean (re-find #"=>" (name form)))))
+                            (normalize-container-nav
+                              [zloc pred]
+                              (cond (nil? zloc)
+                                    zloc
 
-                                     (and (<= 3 (count body))
-                                          (check-arrow? (second body))
-                                          (purge-target? (first body)))
-                                     (recur (drop 3 body) out)
+                                    (pred (nav/value zloc))
+                                    zloc
 
-                                     :else
-                                     (recur (rest body)
-                                            (conj out (first body))))))
-                           (script-form?
-                             [form script-heads]
-                             (and (seq? form)
-                                  (contains? script-heads (first form))))
+                                    :else
+                                    (nav/up zloc)))
+                            (purge-vector-nav
+                              [vnav]
+                              (loop [state-nav vnav
+                                     current   (nav/down vnav)]
+                                (cond (nil? current)
+                                      (normalize-container-nav state-nav vector?)
+
+                                      (purge-target? (nav/value current))
+                                      (let [updated (nav/delete current)
+                                            updated (if (nil? (nav/value updated))
+                                                      (nav/tighten updated)
+                                                      updated)]
+                                        (recur updated updated))
+
+                                      :else
+                                      (recur state-nav (nav/right current)))))
+                            (purge-meta-nav
+                              [mnav]
+                              (loop [state-nav mnav
+                                     current   (nav/down mnav)]
+                                (cond (nil? current)
+                                      (normalize-container-nav state-nav map?)
+
+                                      :else
+                                      (let [key   (nav/value current)
+                                            vnav  (nav/right current)]
+                                        (cond (not (#{:setup :teardown} key))
+                                              (recur state-nav
+                                                     (some-> vnav nav/right))
+
+                                              (nil? vnav)
+                                              (recur state-nav nil)
+
+                                              :else
+                                              (let [updated-vnav (purge-vector-nav vnav)]
+                                                (if (empty? (nav/value updated-vnav))
+                                                  (let [updated (-> updated-vnav
+                                                                    nav/delete-left
+                                                                    nav/delete)
+                                                        updated (if (nil? (nav/value updated))
+                                                                  (nav/tighten updated)
+                                                                  updated)]
+                                                    (recur updated updated))
+                                                  (recur updated-vnav
+                                                         (some-> updated-vnav
+                                                                 nav/right)))))))))
+                            (purge-body-nav
+                              [bnav]
+                              (loop [state-nav bnav
+                                     current   (nav/down bnav)]
+                                (cond (nil? current)
+                                      (normalize-container-nav state-nav
+                                                               #(and (seq? %)
+                                                                     (= 'fact (first %))))
+
+                                      (and (purge-target? (nav/value current))
+                                           (some-> current nav/right nav/value check-arrow?))
+                                      (let [updated (-> current
+                                                        nav/delete-right
+                                                        nav/delete-right
+                                                        nav/delete)
+                                            updated (if (nil? (nav/value updated))
+                                                      (nav/tighten updated)
+                                                      updated)]
+                                        (recur updated updated))
+
+                                      :else
+                                      (recur state-nav (nav/right current)))))
+                            (script-form?
+                              [form script-heads]
+                              (and (seq? form)
+                                   (contains? script-heads (first form))))
                            (purge-string
                              [text]
                              (let [root         (nav/parse-root text)
@@ -298,16 +348,20 @@
                                                (let [updated (nav/delete current)]
                                                  (recur updated updated))
 
-                                               (and (seq? form)
-                                                    (= 'fact (first form)))
-                                               (let [current (if-let [mnav (meta-nav current)]
-                                                               (nav/up (nav/replace mnav (purge-meta (nav/value mnav))))
-                                                               current)
-                                                     bnav    (body-nav current)
-                                                     updated (if (meta-block? current)
-                                                               (nav/up (nav/replace bnav (apply list (first form) (purge-body (rest form)))))
-                                                               (nav/replace bnav (apply list (first form) (purge-body (rest form)))))]
-                                                 (recur updated (nav/right updated)))
+                                                (and (seq? form)
+                                                     (= 'fact (first form)))
+                                                (let [current (if-let [mnav (meta-nav current)]
+                                                                (-> mnav
+                                                                    purge-meta-nav
+                                                                    nav/up)
+                                                                current)
+                                                      bnav    (body-nav current)
+                                                      updated (if (meta-block? current)
+                                                                (-> bnav
+                                                                    purge-body-nav
+                                                                    nav/up)
+                                                                (purge-body-nav bnav))]
+                                                  (recur updated (nav/right updated)))
 
                                                :else
                                                (recur current (nav/right current))))))))]

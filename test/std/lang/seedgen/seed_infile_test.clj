@@ -111,16 +111,18 @@
                                         "  :setup [(!.js (+ 1 2 3))]}\n"
                                         "(fact \"TODO\")\n")))]
     (try
-      (write-sample!)
-      (seed-infile/seedgen-removelang 'sample.purge-test {:lang :all :write true} lookup project)
-      [(seed-infile/seedgen-list 'sample.purge-test {} lookup nil)
-       (-> (common/seedgen-fact-forms path)
-           (get 'xt.lang.common-spec/example.A)
-           common/seedgen-coverage-langs
-           set)]
-      (finally
-        (.delete tmp))))
-  => [[] #{:js}]
+       (write-sample!)
+       (seed-infile/seedgen-removelang 'sample.purge-test {:lang :all :write true} lookup project)
+       [(seed-infile/seedgen-list 'sample.purge-test {} lookup nil)
+        (-> (common/seedgen-fact-forms path)
+            (get 'xt.lang.common-spec/example.A)
+            common/seedgen-coverage-langs
+            set)
+        (slurp path)]
+       (finally
+         (.delete tmp))))
+  => [[] #{:js}
+      "(ns sample.purge-test\n  (:use code.test)\n  (:require [std.lang :as l]))\n\n^{:seedgen/root {:all true}}\n(l/script- :js {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example.A :added \"4.1\"\n  :setup [(!.js (+ 1 2 3))]}\n(fact \"runtime specific branches\"\n  (!.js (+ 1 2 3))\n  => 6)\n\n^{:refer xt.lang.common-spec/example.B :added \"4.1\"\n  :setup [(!.js (+ 1 2 3))]}\n(fact \"TODO\")\n"]
 
   (let [tmp (java.io.File/createTempFile "seedgen-removelang" ".clj")
         path (.getAbsolutePath tmp)
@@ -147,16 +149,18 @@
                                         "  (!.python (+ 1 2 3))\n"
                                         "  => 6)\n")))]
     (try
-      (write-sample!)
-      (seed-infile/seedgen-removelang 'sample.purge-test {:lang :lua :write true} lookup project)
-      [(seed-infile/seedgen-list 'sample.purge-test {} lookup nil)
-       (-> (common/seedgen-fact-forms path)
-           (get 'xt.lang.common-spec/example.A)
-           common/seedgen-coverage-langs
-           set)]
-      (finally
-        (.delete tmp))))
-  => [[:python] #{:js :python}]
+       (write-sample!)
+       (seed-infile/seedgen-removelang 'sample.purge-test {:lang :lua :write true} lookup project)
+       [(seed-infile/seedgen-list 'sample.purge-test {} lookup nil)
+        (-> (common/seedgen-fact-forms path)
+            (get 'xt.lang.common-spec/example.A)
+            common/seedgen-coverage-langs
+            set)
+        (slurp path)]
+       (finally
+         (.delete tmp))))
+  => [[:python] #{:js :python}
+      "(ns sample.purge-test\n  (:use code.test)\n  (:require [std.lang :as l]))\n\n^{:seedgen/root {:all true}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example.A :added \"4.1\"\n  :setup [(!.js (+ 1 2 3))\n          (!.python (+ 1 2 3))]}\n(fact \"runtime specific branches\"\n  (!.js (+ 1 2 3))\n  => 6\n\n  (!.python (+ 1 2 3))\n  => 6)\n"] 
 
   (let [tmp (java.io.File/createTempFile "seedgen-removelang" ".clj")
         path (.getAbsolutePath tmp)
