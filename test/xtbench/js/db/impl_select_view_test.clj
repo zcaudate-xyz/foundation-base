@@ -1,21 +1,16 @@
 (ns
  xtbench.js.db.impl-select-view-test
+ (:use code.test)
  (:require
   [std.lang :as l]
   [std.string.prose :as prose]
-  [xt.lang.common-notify :as notify])
- (:use code.test))
+  [xt.lang.common-notify :as notify]))
 
 (l/script-
  :js
  {:runtime :basic,
   :require
-  [[xt.db.base-schema :as sch]
-   [xt.lang.common-lib :as k]
-   [xt.db.sql-util :as ut]
-   [xt.db.sql-graph :as graph]
-   [xt.db.sql-view :as view]
-   [xt.db.sql-manage :as manage]
+  [[xt.db.sql-view :as view]
    [xt.db.sample-scratch-test :as sample-scratch]
    [xt.sys.conn-dbsql :as dbsql]
    [js.lib.driver-postgres :as js-postgres]
@@ -23,13 +18,13 @@
 
 (defn
  bootstrap-js
- []
- (notify/wait-on
+
+  ([] (notify/wait-on
   [:js 5000]
   (dbsql/connect
    {:constructor js-postgres/connect-constructor,
     :database "test-scratch"}
-   {:success (fn [conn] (:= (!:G CONN) conn) (repl/notify true))})))
+   {:success (fn [conn] (:= (!:G CONN) conn) (repl/notify true))}))))
 
 (fact:global
  {:setup [(l/rt:restart) (l/rt:scaffold :js) (bootstrap-js)],

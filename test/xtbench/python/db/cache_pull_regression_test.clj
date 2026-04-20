@@ -1,7 +1,7 @@
 (ns
  xtbench.python.db.cache-pull-regression-test
- (:require [std.lang :as l])
- (:use code.test))
+ (:use code.test)
+ (:require [std.lang :as l]))
 
 (l/script-
  :python
@@ -74,8 +74,6 @@
  "pull-return-clause missing-profile path does not reproduce in minimal isolation"
  ^{:hidden true}
  (!.py
-  (:- :import traceback)
-  #'err
   (try
    (var rows {})
    (data/merge-bulk rows (@! +flattened-full+) nil)
@@ -100,8 +98,7 @@
      "cardinality" "many"}
     [{:id "missing"} ["*/data"]])
    (return "NO_ERROR")
-   (catch Exception (:= err (. traceback (format-exc)))))
-  (return (or err "NO_ERROR")))
+   (catch Exception (return "ERROR"))))
  =>
  "NO_ERROR")
 
@@ -124,8 +121,6 @@
  "running the successful profile clause before the missing-profile clause stays valid"
  ^{:hidden true}
  (!.py
-  (:- :import traceback)
-  #'err
   (try
    (var rows {})
    (data/merge-bulk rows (@! +flattened-full+) nil)
@@ -170,8 +165,7 @@
      "cardinality" "many"}
     [{:id "missing"} ["*/data"]])
    (return "NO_ERROR")
-   (catch Exception (:= err (. traceback (format-exc)))))
-  (return (or err "NO_ERROR")))
+   (catch Exception (return "ERROR"))))
  =>
  "NO_ERROR")
 

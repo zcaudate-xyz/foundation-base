@@ -657,10 +657,21 @@
 
 (defn js-tf-x-with-delay
   ([[_ thunk ms]]
-   (template/$ (setTimeout (fn []
-                      (new Promise (fn [resolve reject]
-                                     (resolve (~thunk)))))
-                    ~ms))))
+   (template/$
+    (new Promise
+     (fn [resolve reject]
+       (var cb {:resolve resolve
+                :reject reject})
+       (setTimeout
+        (fn []
+          (. (new Promise
+                  (fn [inner-resolve inner-reject]
+                    (inner-resolve (~thunk))))
+             (then (fn [value]
+                     ((. cb ["resolve"]) value)))
+             (catch (fn [err]
+                      ((. cb ["reject"]) err)))))
+        ~ms))))))
 
 (defn js-tf-x-start-interval
   ([[_ thunk ms]]

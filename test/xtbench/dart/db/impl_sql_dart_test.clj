@@ -1,7 +1,7 @@
 (ns
  xtbench.dart.db.impl-sql-dart-test
- (:require [rt.basic.type-common :as common] [std.lang :as l])
- (:use code.test))
+ (:use code.test)
+ (:require [rt.basic.type-common :as common] [std.lang :as l]))
 
 (l/script-
  :dart

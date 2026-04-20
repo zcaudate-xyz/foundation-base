@@ -197,8 +197,27 @@
        (fact \"sqlite helper\"
          (notify/wait-on :js
            (dbsql/connect {:constructor js-sqlite/connect-constructor}
-                          {:success (fn [conn] conn)}))
-         => 1)]"))
+                           {:success (fn [conn] conn)}))
+          => 1)]"))
+
+(def template-forms-with-skippable-helper
+  (read-string
+   "[(ns xtbench.js.sample.impl-select-test
+         (:require [std.lang :as l])
+         (:use code.test))
+      ^{:xtalk/template true}
+      (l/script- :js {:runtime :basic
+                      :require [[xt.lang.common-lib :as k]
+                                [xt.sys.conn-dbsql :as dbsql]
+                                [js.lib.driver-postgres :as js-postgres]]})
+      (defn ^{:lang-exceptions {:python {:skip true}}}
+        bootstrap-js
+        []
+        (!.js (dbsql/connect {:constructor js-postgres/connect-constructor} {})))
+      (fact \"portable helper-free query\"
+        ^:hidden
+        (!.js (k/identity 1))
+        => 1)]"))
 
 (def split-runtime-reference-forms
   (read-string
@@ -495,6 +514,22 @@
                   "/test/xtbench/js/sample/base_lib_test.clj")
   => true)
 
+^{:refer std.lang.manage.xtalk-scaffold/derived-test-file-path :added "4.1"}
+(fact "uses canonical xtbench paths for generated suites"
+  (str/ends-with? (derived-test-file-path {:root "." :test-paths ["test"]}
+                                          "test/xt/db/base_scope_test.clj"
+                                          'xt.db.base-scope-test
+                                          'xtbench.dart.db.base-scope-test)
+                  "/test/xtbench/dart/db/base_scope_test.clj")
+  => true
+
+  (str/ends-with? (derived-test-file-path {:root "." :test-paths ["test"]}
+                                          "test/xt/db/base_scope_test.clj"
+                                          'xt.db.base-scope-test
+                                          'xt.db.base-scope-test)
+                  "/test/xt/db/base_scope_test.clj")
+  => true)
+
 ^{:refer std.lang.manage.xtalk-scaffold/infer-runtime-lang :added "4.1"}
 (fact "infers runtime language from forms"
   (infer-runtime-lang '((l/script- :js {:runtime :basic})))
@@ -595,6 +630,17 @@
      (str/includes? lua-out "(def +views+ (!.lua (v/example)))")])
   => [true true])
 
+^{:refer std.lang.manage.xtalk-scaffold/template-runtime-test-forms :added "4.1"}
+(fact "drops skipped named helpers and their script requires in template output"
+  (let [py-out (render-top-level-forms
+                (template-runtime-test-forms template-forms-with-skippable-helper :js :python))]
+    [(str/includes? py-out "(l/script-\n :python")
+     (str/includes? py-out "[xt.lang.common-lib :as k]")
+     (not (str/includes? py-out "js.lib.driver-postgres"))
+     (not (str/includes? py-out "xt.sys.conn-dbsql"))
+     (not (str/includes? py-out "bootstrap-js"))])
+  => [true true true true true])
+
 ^{:refer std.lang.manage.xtalk-scaffold/split-fact-form :added "4.1"}
 (fact "splits a mixed runtime fact form"
   (let [{:keys [shared langs]} (split-fact-form '(fact "x" (!.js (k/a)) => 1 (!.lua (k/a)) => 1) [:js :lua])]
@@ -651,6 +697,19 @@
     [(contains? by-lang :js)
      (contains? by-lang :lua)])
   => [true false])
+
+^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-test-forms :added "4.1"}
+(fact "synthesizes real base_scope facts for dart via fallback script aliases"
+  (let [forms (read-top-level-forms "test/xt/db/base_scope_test.clj")
+        {:keys [by-lang]} (separate-runtime-test-forms forms [:js :lua :python :dart])
+        dt-forms (get by-lang :dart)
+        dt-out (render-top-level-forms dt-forms)]
+    [(pos? (count (filter fact-form? dt-forms)))
+     (str/includes? dt-out "xtbench.dart.db.base-scope-test")
+     (str/includes? dt-out "!.dt")
+     (not (str/includes? dt-out "!.js"))
+     (str/includes? dt-out "xt.db.base-scope/get-tree")])
+  => [true true true true true])
 
 ^{:refer std.lang.manage.xtalk-scaffold/classify-split-form :added "4.1"}
 (fact "classifies split-relevant forms"

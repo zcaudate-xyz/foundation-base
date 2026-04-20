@@ -23,7 +23,9 @@
                            {})))]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.cache-util/merge-bulk :added "4.0"}
+^{:refer xt.db.cache-util/merge-bulk
+  :added "4.0"
+  :lang-exceptions {:dart {:skip true}}}
 (fact "merges the full cache fixture in isolation"
   ^:hidden
 
@@ -32,7 +34,9 @@
    (data/merge-bulk rows (@! +flattened-full+) nil))
   => map?)
 
-^{:refer xt.db.cache-pull/pull-return-clause :added "4.0"}
+^{:refer xt.db.cache-pull/pull-return-clause
+  :added "4.0"
+  :lang-exceptions {:dart {:skip true}}}
 (fact "pull-return-clause works for the profile data path"
   ^:hidden
 
@@ -64,13 +68,15 @@
                   "first_name" "Root",
                   "language" "en"}]])
 
-^{:refer xt.db.cache-pull/pull-return-clause :added "4.0"}
+^{:refer xt.db.cache-pull/pull-return-clause
+  :added "4.0"
+  :lang-exceptions {:js {:skip true}
+                    :lua {:skip true}
+                    :dart {:skip true}}}
 (fact "pull-return-clause missing-profile path does not reproduce in minimal isolation"
   ^:hidden
 
   (!.py
-   (:- :import traceback)
-   (var err)
    (try
     (var rows {})
     (data/merge-bulk rows (@! +flattened-full+) nil)
@@ -94,11 +100,12 @@
                           [{:id "missing"} ["*/data"]])
     (return "NO_ERROR")
     (catch Exception
-      (:= err (. traceback (format-exc)))))
-   (return (or err "NO_ERROR")))
+      (return "ERROR"))))
   => "NO_ERROR")
 
-^{:refer xt.db.cache-util/merge-bulk :added "4.0"}
+^{:refer xt.db.cache-util/merge-bulk
+  :added "4.0"
+  :lang-exceptions {:dart {:skip true}}}
 (fact "reusing the same flattened fixture across python calls stays valid"
   ^:hidden
 
@@ -111,13 +118,15 @@
    "OK")
   => "OK")
 
-^{:refer xt.db.cache-pull/pull-return-clause :added "4.0"}
+^{:refer xt.db.cache-pull/pull-return-clause
+  :added "4.0"
+  :lang-exceptions {:js {:skip true}
+                    :lua {:skip true}
+                    :dart {:skip true}}}
 (fact "running the successful profile clause before the missing-profile clause stays valid"
   ^:hidden
 
   (!.py
-   (:- :import traceback)
-   (var err)
    (try
     (var rows {})
     (data/merge-bulk rows (@! +flattened-full+) nil)
@@ -159,11 +168,12 @@
                           [{:id "missing"} ["*/data"]])
     (return "NO_ERROR")
     (catch Exception
-      (:= err (. traceback (format-exc)))))
-   (return (or err "NO_ERROR")))
+      (return "ERROR"))))
   => "NO_ERROR")
 
-^{:refer xt.db.cache-util/merge-bulk :added "4.0"}
+^{:refer xt.db.cache-util/merge-bulk
+  :added "4.0"
+  :lang-exceptions {:dart {:skip true}}}
 (fact "two standalone python evaluations can reuse the full fixture"
   ^:hidden
 

@@ -10,8 +10,7 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.common-spec :as xt]
              [xt.lang.common-repl :as repl]
-             [xt.lang.util-loader :as loader]
-             [js.core :as j]]})
+             [xt.lang.util-loader :as loader]]})
 
 (l/script- :lua
   {:runtime :basic
@@ -352,18 +351,15 @@
                            [(loader/new-task
                              "A" [] []
                              {:load-fn (fn []
-                                         (return (j/future-delayed [100]
-                                                   (return "A"))))})
+                                         (return (xt/x:with-delay (fn [] (return "A")) 100)))})
                             (loader/new-task
                              "B" ["A"] []
                              {:load-fn (fn []
-                                         (return (j/future-delayed [100]
-                                                   (return "B"))))})
+                                         (return (xt/x:with-delay (fn [] (return "B")) 100)))})
                             (loader/new-task
                              "C" ["B"] []
                              {:load-fn (fn []
-                                         (return (j/future-delayed [100]
-                                                   (return "C"))))})]))
+                                         (return (xt/x:with-delay (fn [] (return "C")) 100)))})]))
          (loader/load-tasks loader
                             nil
                             (fn []
@@ -403,18 +399,15 @@
                       [(loader/new-task
                         "A" [] []
                         {:load-fn (fn []
-                                   (return (j/future-delayed [100]
-                                             (return "A"))))})
+                                    (return (xt/x:with-delay (fn [] (return "A")) 100)))})
                        (loader/new-task
                         "B" ["A"] []
                         {:load-fn (fn []
-                                    (return (j/future-delayed [100]
-                                              (throw "B"))))})
+                                    (return (xt/x:with-delay (fn [] (throw "B")) 100)))})
                        (loader/new-task
                         "C" ["B"] []
                         {:load-fn (fn []
-                                    (return (j/future-delayed [100]
-                                              (return "C"))))})]))
+                                    (return (xt/x:with-delay (fn [] (return "C")) 100)))})]))
     (loader/load-tasks loader
                        nil
                        (fn []
@@ -456,20 +449,23 @@
   (notify/wait-on :js
     (:= (!:G loader) (loader/new-loader
                        [(loader/new-task
-                         "A" [] []
-                         {:load-fn (fn []
-                                     (return (j/future-delayed [100]
-                                              (:= (!:G A) (xt/x:now-ms)))))})
+                          "A" [] []
+                           {:load-fn (fn []
+                                      (return (xt/x:with-delay (fn []
+                                                                 (:= (!:G A) (xt/x:now-ms)))
+                                                               100)))})
                         (loader/new-task
-                         "B" ["A"] []
-                         {:load-fn (fn []
-                                     (return (j/future-delayed [100]
-                                              (:= (!:G B) (xt/x:now-ms)))))})
+                          "B" ["A"] []
+                           {:load-fn (fn []
+                                      (return (xt/x:with-delay (fn []
+                                                                 (:= (!:G B) (xt/x:now-ms)))
+                                                               100)))})
                         (loader/new-task
-                         "C" ["B"] []
-                         {:load-fn (fn []
-                                     (return (j/future-delayed [100]
-                                              (:= (!:G C) (xt/x:now-ms)))))})]))
+                          "C" ["B"] []
+                           {:load-fn (fn []
+                                      (return (xt/x:with-delay (fn []
+                                                                 (:= (!:G C) (xt/x:now-ms)))
+                                                               100)))})]))
     (loader/load-tasks loader
                         nil
                         (fn []

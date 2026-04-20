@@ -1,23 +1,16 @@
 (ns
  xtbench.dart.db.cache-view-test
+ (:use code.test)
  (:require
   [rt.postgres :as pg]
   [std.lang :as l]
   [xt.db.sample-data-test :as data]
-  [xt.db.sample-user-test :as user])
- (:use code.test))
+  [xt.db.sample-user-test :as user]))
 
 (l/script-
  :dart
  {:runtime :twostep,
-  :require
-  [[xt.db.cache-view :as v]
-   [xt.db.sql-util :as ut]
-   [xt.db.sql-raw :as raw]
-   [xt.lang.common-lib :as k]
-   [xt.db.base-schema :as sch]
-   [xt.db.base-scope :as scope]
-   [xt.db.sample-test :as sample]]})
+  :require [[xt.db.cache-view :as v] [xt.db.sample-test :as sample]]})
 
 (fact:global {:setup [(l/rt:restart)], :teardown [(l/rt:stop)]})
 
@@ -30,7 +23,8 @@
    sample/Schema
    "Currency"
    [{:id "USD"} {:id "AUD"}]
-   ["*/data"]))
+   ["*/data"]
+   []))
  =>
  ["Currency" {"id" "USD"} {"id" "AUD"} ["*/data"]])
 
@@ -40,7 +34,7 @@
 (fact
  "creates a select tree"
  ^{:hidden true}
- (!.dt (v/tree-select sample/Schema (@! +select+) {}))
+ (!.dt (v/tree-select sample/Schema (@! +select+)))
  =>
  ["Currency" {"type" "fiat"} ["id"]])
 
@@ -50,15 +44,13 @@
 (fact
  "creates a return tree"
  ^{:hidden true}
- (!.dt (v/tree-return sample/Schema (@! +return+) {} {} {}))
+ (!.dt (v/tree-return sample/Schema (@! +return+) {}))
  =>
  ["Currency" ["*/data"]]
  (!.dt
   (v/tree-return
    sample/Schema
    (@! (pg/bind-view user/user-account-info))
-   {}
-   {}
    {}))
  =>
  ["UserAccount" [["profile" ["*/standard"]] "nickname" "id"]])
@@ -67,8 +59,7 @@
 (fact
  "creates a combined tree"
  ^{:hidden true}
- (!.dt
-  (v/tree-combined sample/Schema (@! +select+) (@! +return+) {} {}))
+ (!.dt (v/tree-combined sample/Schema (@! +select+) (@! +return+) []))
  =>
  ["Currency" {"type" "fiat"} ["*/data"]]
  (!.dt
@@ -76,8 +67,7 @@
    sample/Schema
    (@! (pg/bind-view user/user-account-by-organisation))
    (@! (pg/bind-view user/user-account-info))
-   {}
-   {}))
+   []))
  =>
  ["UserAccount"
   {"organisation_accesses" {"organisation" "{{i_organisation_id}}"}}
@@ -108,7 +98,8 @@
   (v/query-return
    sample/Schema
    (@! (pg/bind-view user/user-account-info))
-   "USER-0"))
+   "USER-0"
+   []))
  =>
  ["UserAccount"
   {"id" "USER-0"}
@@ -122,7 +113,8 @@
   (v/query-return-bulk
    sample/Schema
    (@! (pg/bind-view user/user-account-info))
-   ["USER-0"]))
+   ["USER-0"]
+   []))
  =>
  ["UserAccount"
   {"id" ["in" [["USER-0"]]]}
@@ -138,6 +130,7 @@
    (@! (pg/bind-view user/user-account-by-organisation))
    ["ORG-1"]
    (@! (pg/bind-view user/user-account-info))
+   []
    []))
  =>
  ["UserAccount"

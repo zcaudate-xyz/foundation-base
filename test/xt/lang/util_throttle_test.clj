@@ -51,7 +51,6 @@
 ^{:refer xt.lang.util-throttle/throttle-run-async :added "4.0"}
 (fact "runs an async throttle"
   ^:hidden
-  
   (notify/wait-on :js
     (var out [])
     (var handler
@@ -87,8 +86,8 @@
                (fn []
                  (x:arr-push (!:G THROTTLE_OUT) i)))
           (xt/x:with-delay delayed-fn 100)))
-   (var throttle (throttle/throttle-create handler nil))
-   (throttle/throttle-run-async throttle 1 nil))
+    (var throttle (throttle/throttle-create handler nil))
+    (throttle/throttle-run-async throttle 1 nil))
   
   (do (Thread/sleep 200)
       (!.py (!:G THROTTLE_OUT)))
@@ -97,7 +96,6 @@
 ^{:refer xt.lang.util-throttle/throttle-run :added "4.0"}
 (fact "throttles a function so that it only runs a single thread"
   ^:hidden
-  
   ;;
   ;; JS
   ;;
@@ -156,8 +154,8 @@
                (fn []
                  (x:arr-push (!:G THROTTLE_OUT) i)))
           (xt/x:with-delay delayed-fn 100)))
-   (var throttle (throttle/throttle-create handler nil))
-   (throttle/throttle-run throttle 1 nil)
+    (var throttle (throttle/throttle-create handler nil))
+    (throttle/throttle-run throttle 1 nil)
    (throttle/throttle-run throttle 1 nil)
    (throttle/throttle-run throttle 1 nil)
    (throttle/throttle-run throttle 1 nil))
@@ -176,7 +174,6 @@
 ^{:refer xt.lang.util-throttle/throttle-active :added "4.0"}
 (fact "gets the active ids in a throttle"
   ^:hidden
-
   (notify/wait-on :js
     (var throttle)
     (var handler
@@ -223,8 +220,8 @@
           (var delayed-fn
                (fn [] nil))
           (xt/x:with-delay delayed-fn (:? (== i 1) 100 300))))
-   (:= throttle (throttle/throttle-create handler nil))
-   (:= (!:G THROTTLE_STATE) throttle)
+    (:= throttle (throttle/throttle-create handler nil))
+    (:= (!:G THROTTLE_STATE) throttle)
    (throttle/throttle-run throttle 1 nil)
    (throttle/throttle-run throttle 1 nil)
    (throttle/throttle-run throttle 1 nil)

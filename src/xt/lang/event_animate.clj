@@ -134,12 +134,13 @@
   (var #{add-listener
          set-props} impl)
   (var paths      (-/get-map-paths impl m))
-  (var animated   [])
-  (xt/for:array [entry paths]
-    (var indicator (xt/x:last entry))
-    (when (and (xt/x:not-nil? indicator)
-               (not= false indicator))
-      (xt/x:arr-push animated indicator)))
+  (var keep-indicator
+       (fn [entry]
+         (var indicator (xt/x:last entry))
+         (when (and (xt/x:not-nil? indicator)
+                    (not= false indicator))
+           (return indicator))))
+  (var animated   (xtd/arr-keep paths keep-indicator))
   (var trigger-fn
        (fn [_]
           (var input (-/get-map-input impl paths))

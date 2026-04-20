@@ -1,7 +1,7 @@
 (ns
  xtbench.python.lang.common-data-test
- (:require [std.lang :as l])
- (:use code.test))
+ (:use code.test)
+ (:require [std.lang :as l]))
 
 (l/script-
  :python

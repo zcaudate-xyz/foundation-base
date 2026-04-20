@@ -331,7 +331,12 @@
      :x-cache-del             {:macro #'dart-tf-x-cache-del       :emit :macro}
      :x-cache-incr            {:macro #'dart-tf-x-cache-incr      :emit :macro}})
 
-(defn dart-tf-x-future-run [[_ thunk]] (list 'Future thunk))
+(defn dart-tf-x-future-run
+  [[_ thunk]]
+  (template/$
+   (Future
+    (fn []
+      (return (~thunk))))))
 (defn dart-tf-x-future-then [[_ task on-ok]] (list '. task (list 'then on-ok)))
 (defn dart-tf-x-future-catch [[_ task on-err]] (list '. task (list 'catchError on-err)))
 (defn dart-tf-x-future-finally [[_ task on-done]] (list '. task (list 'whenComplete on-done)))
@@ -512,11 +517,11 @@
   (list 'throw '"Thread join not implemented in Dart"))
 
 (defn dart-tf-x-with-delay
-  [[_ ms value]]
+  [[_ thunk ms]]
   (template/$
    (Future.delayed
     (:- "Duration(milliseconds: " ~ms ")")
-    (fn [] (return ~value)))))
+    (fn [] (return (~thunk))))))
 
 (defn dart-tf-x-start-interval
   [[_ ms f]]

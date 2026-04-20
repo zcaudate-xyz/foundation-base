@@ -1,15 +1,15 @@
 (ns
  xtbench.js.lang.util-http-test
+ (:use code.test)
  (:require
   [net.http :as nhttp]
   [org.httpkit.server :as server]
   [rt.nginx :as nginx]
+  [std.lang :as l]
   [std.lib.component :as component]
   [std.lib.network :as network]
   [std.lib.os :as os]
-  [std.lang :as l]
-  [xt.lang.common-notify :as notify])
- (:use code.test))
+  [xt.lang.common-notify :as notify]))
 
 (l/script-
  :js

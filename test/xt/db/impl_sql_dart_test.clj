@@ -17,6 +17,9 @@
 (def CANARY-DART
   (common/program-exists? "dart"))
 
+^{:lang-exceptions {:js {:skip true}
+                    :python {:skip true}
+                    :lua {:skip true}}}
 (fact "runs a minimal xt.db sqlite flow on Dart"
   (if CANARY-DART
     [(!.dt

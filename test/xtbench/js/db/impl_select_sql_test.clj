@@ -1,15 +1,13 @@
 (ns
  xtbench.js.db.impl-select-sql-test
- (:require [std.lang :as l] [xt.lang.common-notify :as notify])
- (:use code.test))
+ (:use code.test)
+ (:require [std.lang :as l] [xt.lang.common-notify :as notify]))
 
 (l/script-
  :js
  {:runtime :basic,
   :require
-  [[xt.db.base-schema :as sch]
-   [xt.lang.common-lib :as k]
-   [xt.db.sql-util :as ut]
+  [[xt.db.sql-util :as ut]
    [xt.db.sql-graph :as graph]
    [xt.db.sql-raw :as raw]
    [xt.db.sql-manage :as manage]
@@ -20,13 +18,13 @@
 
 (defn
  bootstrap-js
- []
- (notify/wait-on
+
+  ([] (notify/wait-on
   [:js 5000]
   (dbsql/connect
    {:constructor js-postgres/connect-constructor,
     :database "test-scratch"}
-   {:success (fn [conn] (:= (!:G CONN) conn) (repl/notify true))})))
+   {:success (fn [conn] (:= (!:G CONN) conn) (repl/notify true))}))))
 
 (fact:global
  {:setup
@@ -87,17 +85,19 @@
 
 ^{:refer xt.db.impl-select-sql-test/QUERY, :adopt true, :added "4.0"}
 (fact
- "runs select queries"
+ "builds select queries"
  ^{:hidden true}
- (notify/wait-on
-  :js
-  (repl/notify
-   (graph/select
-    sample-scratch/Schema
-    ["Entry" ["name" (ut/LIMIT 1)]]
-    (ut/postgres-opts {"Entry" {"schema" "scratch"}}))))
+ (graph/select
+  sample-scratch/Schema
+  ["Entry" ["name" (ut/LIMIT 1)]]
+  (ut/postgres-opts {"Entry" {"schema" "scratch"}}))
  =>
- string?
+ string?)
+
+^{:refer xt.db.impl-select-sql-test/QUERY, :adopt true, :added "4.0"}
+(fact
+ "runs select queries against scratch db"
+ ^{:hidden true}
  (notify/wait-on
   :js
   (dbsql/query

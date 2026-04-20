@@ -1379,7 +1379,7 @@
 
 ^{:refer xt.lang.common-spec/x:with-delay :added "4.1"}
 (fact "expands and emits a delayed lua computation"
-  (emits-lua? '(x:with-delay 100 value) #"sleep")
+  (emits-lua? '(x:with-delay thunk 100) #"sleep")
   => true)
 
 ^{:refer xt.lang.common-spec/x:start-interval :added "4.1"}

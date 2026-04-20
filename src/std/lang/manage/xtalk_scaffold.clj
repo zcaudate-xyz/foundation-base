@@ -381,10 +381,15 @@
 
 (defn form-language-exceptions
   [form]
-  (let [m (meta form)]
-    (or (:lang-exceptions m)
-        (:exceptions m)
-        {})))
+  (let [m (meta form)
+        secondary (when (seq? form) (second form))
+        secondary-meta (when (instance? clojure.lang.IMeta secondary)
+                         (meta secondary))]
+    (merge-language-exceptions
+     (:lang-exceptions m)
+     (:exceptions m)
+     (:lang-exceptions secondary-meta)
+     (:exceptions secondary-meta))))
 
 (defn form-skipped-for-lang?
   [form lang]
@@ -671,6 +676,12 @@
   (and (seq? form)
        (contains? +runtime-dispatch-map+ (str (first form)))))
 
+(defn contains-runtime-dispatch-form?
+  [form]
+  (boolean
+   (some runtime-dispatch-form?
+         (tree-seq coll? seq form))))
+
 (defn template-language-exception
   [expr lang]
   (let [lang (normalize-runtime-lang lang)]
@@ -689,11 +700,14 @@
       (contains? exception :form)
       (let [replacement (:form exception)]
         (if (runtime-dispatch-form? expr)
-          (with-meta (list (first expr) replacement) (meta expr))
+          (if (or (runtime-dispatch-form? replacement)
+                  (contains-runtime-dispatch-form? replacement))
+            replacement
+            (with-meta (list (first expr) replacement) (meta expr)))
           replacement))
 
        :else
-       expr)))
+        expr)))
 
 (defn normalize-runtime-expect
   [form lang]
@@ -742,7 +756,10 @@
               (contains? exception :form)
               (let [replacement (:form exception)]
                 (if (runtime-dispatch-form? expr)
-                  (with-meta (list (first expr) replacement) (meta expr))
+                  (if (or (runtime-dispatch-form? replacement)
+                          (contains-runtime-dispatch-form? replacement))
+                    replacement
+                    (with-meta (list (first expr) replacement) (meta expr)))
                   replacement))
 
                :else
@@ -986,22 +1003,29 @@
 
 (defn test-file-path
   [project test-ns]
-  (or (project/get-path test-ns project)
-      (str (fs/path (:root project)
-                    (or (first (:test-paths project))
-                        "test")
-                    (str (fs/ns->file test-ns) ".clj")))))
+  (let [canonical-path (str (fs/path (:root project)
+                                     (or (first (:test-paths project))
+                                         "test")
+                                     (str (fs/ns->file test-ns) ".clj")))]
+    (if (runtime-bench-ns? test-ns)
+      canonical-path
+      (or (project/get-path test-ns project)
+          canonical-path))))
+
+(declare single-runtime-template-lang)
 
 (defn derived-test-file-path
   [project input-path source-test-ns target-test-ns]
   (let [project-path (test-file-path project target-test-ns)
-        source-project-path (test-file-path project source-test-ns)]
-    (if (= input-path source-project-path)
-      project-path
-      (str (fs/path (fs/parent input-path)
-                    (str (fs/ns->file target-test-ns) ".clj"))))))
-
-(declare single-runtime-template-lang)
+         source-project-path (test-file-path project source-test-ns)
+         input-path (str (fs/path input-path))]
+    (if (= source-test-ns target-test-ns)
+      input-path
+      (if (or (= input-path source-project-path)
+            (runtime-bench-ns? target-test-ns))
+        project-path
+        (str (fs/path (fs/parent input-path)
+                      (str (fs/ns->file target-test-ns) ".clj")))))))
 
 (defn infer-runtime-lang
   [forms]
@@ -1396,8 +1420,14 @@
         known-script-aliases (into #{}
                                    (mapcat identity)
                                    (vals script-aliases))
-        target-aliases (get script-aliases
-                           (normalize-runtime-lang target-lang)
+        target-lang (normalize-runtime-lang target-lang)
+        target-aliases (or (get script-aliases target-lang)
+                           (some (fn [source-lang]
+                                   (let [source-lang (normalize-runtime-lang source-lang)
+                                         aliases (get script-aliases source-lang)]
+                                     (when (some? aliases)
+                                       aliases)))
+                                 (get *split-runtime-clause-preference* target-lang))
                            #{})
         clause-script-aliases
         (fn collect-aliases [form]
@@ -1476,6 +1506,42 @@
           opts (if (map? opts)
                  (assoc opts :runtime (runtime-type lang))
                  opts)]
+      (with-meta
+        (apply list script-fn script opts more)
+        (meta form)))
+    form))
+
+(defn referenced-script-aliases
+  [forms]
+  (into #{}
+        (keep (fn [entry]
+                (when (symbol? entry)
+                  (some-> (namespace entry) symbol))))
+        (tree-seq coll? seq forms)))
+
+(defn require-alias
+  [req]
+  (when (vector? req)
+    (loop [[x & more] (rest req)]
+      (cond (nil? x) nil
+            (= :as x) (first more)
+            :else (recur more)))))
+
+(defn prune-script-requires
+  [form aliases]
+  (if (and (script-form? form)
+           (map? (nth form 2 nil)))
+    (let [[script-fn script opts & more] form
+          requires (:require opts)
+          filtered (when (vector? requires)
+                     (vec (filter (fn [req]
+                                    (if-let [alias (require-alias req)]
+                                      (contains? aliases alias)
+                                      true))
+                                  requires)))
+          opts (cond-> opts
+                 (vector? requires)
+                 (assoc :require filtered))]
       (with-meta
         (apply list script-fn script opts more)
         (meta form)))
@@ -1599,35 +1665,38 @@
         from-script (runtime-script-lang from-lang)
         to-script (runtime-script-lang to-lang)
         from-dispatch (runtime-dispatch-symbol from-lang)
-         to-dispatch (runtime-dispatch-symbol to-lang)
-         source-ns (source-test-ns-from-forms forms)
-         target-ns (template-runtime-test-ns source-ns from-lang to-lang)
-         source-ns-str (str source-ns)
-         target-ns-str (str target-ns)]
-     (->> forms
-          (remove #(form-skipped-for-lang? % to-lang))
-           (mapv (fn [form]
-                   (cond (fact-form? form)
-                         (-> form
-                             (apply-template-language-exceptions-fact to-lang)
-                             (transform-script-form from-script to-script)
-                             (transform-script-runtime to-lang)
-                             (replace-runtime-symbol from-dispatch to-dispatch)
-                             (retarget-runtime-references to-lang)
-                             (replace-string-value source-ns-str target-ns-str)
-                             (retarget-generated-form to-lang))
+        to-dispatch (runtime-dispatch-symbol to-lang)
+        source-ns (source-test-ns-from-forms forms)
+        target-ns (template-runtime-test-ns source-ns from-lang to-lang)
+        source-ns-str (str source-ns)
+        target-ns-str (str target-ns)
+        out-forms
+        (->> forms
+             (remove #(form-skipped-for-lang? % to-lang))
+             (mapv (fn [form]
+                     (cond (fact-form? form)
+                           (-> form
+                               (apply-template-language-exceptions-fact to-lang)
+                               (transform-script-form from-script to-script)
+                               (transform-script-runtime to-lang)
+                               (replace-runtime-symbol from-dispatch to-dispatch)
+                               (retarget-runtime-references to-lang)
+                               (replace-string-value source-ns-str target-ns-str)
+                               (retarget-generated-form to-lang))
 
-                         (and (seq? form) (= 'ns (first form)))
-                         (replace-ns-name form target-ns)
+                           (and (seq? form) (= 'ns (first form)))
+                           (replace-ns-name form target-ns)
 
-                         :else
-                        (-> form
-                            (transform-script-form from-script to-script)
-                            (transform-script-runtime to-lang)
-                            (replace-runtime-symbol from-dispatch to-dispatch)
-                            (retarget-runtime-references to-lang)
-                            (replace-string-value source-ns-str target-ns-str)
-                            (retarget-generated-form to-lang))))))))
+                           :else
+                           (-> form
+                               (transform-script-form from-script to-script)
+                               (transform-script-runtime to-lang)
+                               (replace-runtime-symbol from-dispatch to-dispatch)
+                               (retarget-runtime-references to-lang)
+                               (replace-string-value source-ns-str target-ns-str)
+                               (retarget-generated-form to-lang))))))
+        aliases (referenced-script-aliases (remove script-form? out-forms))]
+    (mapv #(prune-script-requires % aliases) out-forms)))
 
 (defn split-fact-form
   [fact-form langs & [script-aliases]]

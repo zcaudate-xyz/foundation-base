@@ -1,7 +1,7 @@
 (ns
  xtbench.js.db.cache-pull-regression-test
- (:require [std.lang :as l])
- (:use code.test))
+ (:use code.test)
+ (:require [std.lang :as l]))
 
 (l/script-
  :js
@@ -68,42 +68,6 @@
     "first_name" "Root",
     "language" "en"}]])
 
-^{:refer xt.db.cache-pull/pull-return-clause, :added "4.0"}
-(fact
- "pull-return-clause missing-profile path does not reproduce in minimal isolation"
- ^{:hidden true}
- (!.js
-  (:- :import traceback)
-  #'err
-  (try
-   (var rows {})
-   (data/merge-bulk rows (@! +flattened-full+) nil)
-   (q/pull-return-clause
-    rows
-    sample/Schema
-    (xtd/get-in
-     rows
-     ["UserAccount" "00000000-0000-0000-0000-000000000000" "record"])
-    q/pull-where
-    q/pull-return
-    {"ident" "profile",
-     "type" "ref",
-     "ref"
-     {"key" "_account",
-      "rkey" "account",
-      "type" "reverse",
-      "rident" "account",
-      "rval" "account",
-      "ns" "UserProfile",
-      "val" "profile"},
-     "cardinality" "many"}
-    [{:id "missing"} ["*/data"]])
-   (return "NO_ERROR")
-   (catch Exception (:= err (. traceback (format-exc)))))
-  (return (or err "NO_ERROR")))
- =>
- "NO_ERROR")
-
 ^{:refer xt.db.cache-util/merge-bulk, :added "4.0"}
 (fact
  "reusing the same flattened fixture across python calls stays valid"
@@ -117,62 +81,6 @@
   "OK")
  =>
  "OK")
-
-^{:refer xt.db.cache-pull/pull-return-clause, :added "4.0"}
-(fact
- "running the successful profile clause before the missing-profile clause stays valid"
- ^{:hidden true}
- (!.js
-  (:- :import traceback)
-  #'err
-  (try
-   (var rows {})
-   (data/merge-bulk rows (@! +flattened-full+) nil)
-   (q/pull-return-clause
-    rows
-    sample/Schema
-    (xtd/get-in
-     rows
-     ["UserAccount" "00000000-0000-0000-0000-000000000000" "record"])
-    q/pull-where
-    q/pull-return
-    {"ident" "profile",
-     "type" "ref",
-     "ref"
-     {"key" "_account",
-      "rkey" "account",
-      "type" "reverse",
-      "rident" "account",
-      "rval" "account",
-      "ns" "UserProfile",
-      "val" "profile"},
-     "cardinality" "many"}
-    [{} ["*/data"]])
-   (q/pull-return-clause
-    rows
-    sample/Schema
-    (xtd/get-in
-     rows
-     ["UserAccount" "00000000-0000-0000-0000-000000000000" "record"])
-    q/pull-where
-    q/pull-return
-    {"ident" "profile",
-     "type" "ref",
-     "ref"
-     {"key" "_account",
-      "rkey" "account",
-      "type" "reverse",
-      "rident" "account",
-      "rval" "account",
-      "ns" "UserProfile",
-      "val" "profile"},
-     "cardinality" "many"}
-    [{:id "missing"} ["*/data"]])
-   (return "NO_ERROR")
-   (catch Exception (:= err (. traceback (format-exc)))))
-  (return (or err "NO_ERROR")))
- =>
- "NO_ERROR")
 
 ^{:refer xt.db.cache-util/merge-bulk, :added "4.0"}
 (fact

@@ -15,21 +15,19 @@
    [xt.lang.common-string :as str]
    [xt.db.sample-test :as sample]
    [xt.db.sql-util :as ut]
-   [xt.db.sql-raw :as raw]
    [xt.db.sql-manage :as manage]
    [xt.db.sql-table :as table]
-   [xt.db :as xdb]
    [xt.sys.conn-dbsql :as dbsql]
    [js.lib.driver-sqlite :as js-sqlite]]})
 
 (defn
  reset-js
- []
- (notify/wait-on
+
+  ([] (notify/wait-on
   [:js 2000]
   (dbsql/connect
    {:constructor js-sqlite/connect-constructor}
-   {:success (fn [conn] (:= (!:G DB) conn) (repl/notify DB))})))
+   {:success (fn [conn] (:= (!:G DB) conn) (repl/notify DB))}))))
 
 (fact:global
  {:setup [(l/rt:restart) (l/rt:scaffold :js) (reset-js)],

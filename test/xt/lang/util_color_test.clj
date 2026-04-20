@@ -8,8 +8,7 @@
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-repl :as repl]
-             [xt.lang.util-color :as color]
-             [js.core :as j]]})
+             [xt.lang.util-color :as color]]})
 
 (l/script- :lua
   {:runtime :basic

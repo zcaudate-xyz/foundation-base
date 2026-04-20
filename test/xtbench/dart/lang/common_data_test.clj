@@ -1,7 +1,7 @@
 (ns
  xtbench.dart.lang.common-data-test
- (:require [std.lang :as l])
- (:use code.test))
+ (:use code.test)
+ (:require [std.lang :as l]))
 
 (l/script-
  :dart

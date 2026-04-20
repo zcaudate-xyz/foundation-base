@@ -9,12 +9,7 @@
 
 (l/script-
  :dart
- {:runtime :twostep,
-  :require
-  [[xt.lang.common-spec :as xt]
-   [xt.lang.common-data :as xtd]
-   [xt.lang.common-repl :as repl]
-   [xt.lang.common-string :as xts]]})
+ {:runtime :twostep, :require [[xt.lang.common-spec :as xt]]})
 
 (fact:global {:setup [(l/rt:restart)], :teardown [(l/rt:stop)]})
 
@@ -671,7 +666,7 @@
  (let
   [text (slurp "test/xt/lang/common_spec_test.clj")]
   (mapv
-   (fn* [p1__12177#] (boolean (re-find (re-pattern p1__12177#) text)))
+   (fn* [p1__12382#] (boolean (re-find (re-pattern p1__12382#) text)))
    ["\\[xt\\.lang\\.common-spec :as xt\\]"
     "\\[xt\\.lang\\.common-data :as xtd\\]"
     "\\[xt\\.lang\\.common-repl :as repl\\]"
@@ -1456,7 +1451,7 @@
 ^{:refer xt.lang.common-spec/x:with-delay, :added "4.1"}
 (fact
  "expands and emits a delayed lua computation"
- (emits-lua? '(x:with-delay 100 value) #"sleep")
+ (emits-lua? '(x:with-delay thunk 100) #"sleep")
  =>
  true)
 

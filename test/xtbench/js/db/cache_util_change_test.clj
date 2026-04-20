@@ -1,17 +1,13 @@
 (ns
  xtbench.js.db.cache-util-change-test
- (:require [std.lang :as l] [xt.lang.common-notify :as notify])
- (:use code.test))
+ (:use code.test)
+ (:require [std.lang :as l] [xt.lang.common-notify :as notify]))
 
 (l/script-
  :js
  {:runtime :basic,
   :require
-  [[xt.lang.common-repl :as repl]
-   [xt.lang.common-data :as xtd]
-   [xt.db.cache-util :as data]
-   [xt.db.base-flatten :as f]
-   [xt.db.sample-test :as sample]]})
+  [[xt.db.cache-util :as data] [xt.db.sample-test :as sample]]})
 
 (fact:global
  {:setup [(l/rt:restart) (l/rt:scaffold :js)], :teardown [(l/rt:stop)]})

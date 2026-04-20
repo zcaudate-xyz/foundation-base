@@ -1,10 +1,10 @@
 (ns
  xtbench.js.db.impl-sql-test
+ (:use code.test)
  (:require
   [std.lang :as l]
   [std.string.prose :as prose]
-  [xt.lang.common-notify :as notify])
- (:use code.test))
+  [xt.lang.common-notify :as notify]))
 
 (l/script-
  :js
@@ -20,14 +20,13 @@
    [xt.db.sql-util :as ut]
    [xt.db.sql-raw :as raw]
    [xt.db.sql-manage :as manage]
-   [xt.db.sql-table :as table]
    [xt.db.sample-test :as sample]
    [js.lib.driver-sqlite :as js-sqlite]]})
 
 (defn
  bootstrap-js
- []
- (notify/wait-on
+
+  ([] (notify/wait-on
   [:js 2000]
   (dbsql/connect
    {:constructor js-sqlite/connect-constructor}
@@ -57,7 +56,7 @@
         "description"]
        (@! sample/+currency+)
        (ut/sqlite-opts nil)))
-     (repl/notify true))})))
+     (repl/notify true))}))))
 
 (fact:global
  {:setup [(l/rt:restart) (do (l/rt:scaffold :js) true) (bootstrap-js)],

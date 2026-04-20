@@ -20,8 +20,8 @@
 
 (defn
  bootstrap-js
- []
- (notify/wait-on
+
+  ([] (notify/wait-on
   [:js 2000]
   (dbsql/connect
    {:constructor js-sqlite/connect-constructor}
@@ -45,7 +45,7 @@
          sample/SchemaLookup
          (ut/sqlite-opts nil))))
       (repl/notify true)
-      (catch e (repl/notify e))))})))
+      (catch e (repl/notify e))))}))))
 
 (def
  +usd-snake+
