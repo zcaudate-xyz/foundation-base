@@ -1,20 +1,20 @@
 (ns std.lang.seedgen.form-parse
   (:require [code.framework :as base]
-            [code.framework.common :as framework.common]
-            [code.project :as project]
-            [std.block.base :as block]
-            [std.block.navigate :as nav]
-            [std.lang.seedgen.common-util :as common]
-            [std.lib.result :as res]
-            [std.task :as task]))
+             [code.framework.common :as framework.common]
+             [code.project :as project]
+             [std.block.navigate :as nav]
+             [std.lang.seedgen.common-util :as common]
+             [std.lang.seedgen.form-common :as form-common]
+             [std.lib.result :as res]
+             [std.task :as task]))
 
-(defn empty-classification
+(defn class-empty
   []
   {:root []
    :derived []
    :scaffold []})
 
-(defn explicit-class
+(defn class-explicit
   [form]
   (let [m (meta form)]
     (cond
@@ -22,16 +22,16 @@
       (:seedgen/derived m) :derived
       (:seedgen/scaffold m) :scaffold)))
 
-(defn script-form?
+(defn form-script?
   [script-heads form]
   (and (seq? form)
        (contains? script-heads (first form))))
 
-(defn form-class
+(defn class-form
   [root-lang script-heads form]
-  (or (explicit-class form)
+  (or (class-explicit form)
       (cond
-        (script-form? script-heads form)
+        (form-script? script-heads form)
         (if (= root-lang (common/seedgen-normalize-runtime-lang (second form)))
           :root
           :derived)
@@ -39,71 +39,22 @@
         :else
         (let [langs (common/seedgen-runtime-dispatch-langs form)]
           (cond
-            (empty? langs) :scaffold
-            (and root-lang
-                 (= #{root-lang} (set langs))) :root
-            :else :derived)))))
+             (empty? langs) :scaffold
+             (and root-lang
+                  (= #{root-lang} (set langs))) :root
+             :else :derived)))))
 
-(defn meta-block?
-  [zloc]
-  (= :meta (block/block-tag (nav/block zloc))))
-
-(defn meta-nav
-  [zloc]
-  (when (meta-block? zloc)
-    (nav/down zloc)))
-
-(defn body-nav
-  [zloc]
-  (if (meta-block? zloc)
-    (-> zloc nav/down nav/right)
-    zloc))
-
-(defn top-level-navs
-  [root]
-  (loop [current (nav/down root)
-         out     []]
-    (if (nil? current)
-      out
-      (recur (nav/right current) (conj out current)))))
-
-(defn nav-entry
-  [zloc]
-  {:form (nav/block zloc)
-   :line (nav/line-info zloc)})
-
-(defn map-value-nav
-  [map-nav target-key]
-  (loop [current (some-> map-nav nav/down)]
-    (cond
-      (nil? current)
-      nil
-
-      (= target-key (nav/value current))
-      (nav/right current)
-
-      :else
-      (recur (some-> current nav/right nav/right)))))
-
-(defn vector-item-navs
-  [vector-nav]
-  (loop [current (some-> vector-nav nav/down)
-         out     []]
-    (if (nil? current)
-      out
-      (recur (nav/right current) (conj out current)))))
-
-(defn classify-navs
+(defn class-navs
   [root-lang script-heads navs]
   (reduce (fn [out zloc]
             (update out
-                    (form-class root-lang script-heads (nav/value zloc))
+                    (class-form root-lang script-heads (nav/value zloc))
                     conj
-                    (nav-entry zloc)))
-          (empty-classification)
+                    (form-common/nav-entry zloc)))
+          (class-empty)
           navs))
 
-(defn merge-classifications
+(defn class-merge
   [a b]
   (merge-with into a b))
 
@@ -112,11 +63,11 @@
   (and (symbol? form)
        (boolean (re-find #"=>" (name form)))))
 
-(defn classify-checks
+(defn check-classify
   [root-lang script-heads fact-nav]
-  (let [fact-nav (body-nav fact-nav)]
+  (let [fact-nav (form-common/nav-body fact-nav)]
     (loop [current (some-> fact-nav nav/down nav/right)
-           out     (empty-classification)]
+           out     (class-empty)]
       (cond
         (nil? current)
         out
@@ -128,94 +79,94 @@
         (let [arrow      (nav/right current)
               expected   (some-> arrow nav/right)
               expr-value (nav/value current)
-              entry      (cond-> (nav-entry current)
+              entry      (cond-> (form-common/nav-entry current)
                            (and arrow expected (check-arrow? (nav/value arrow)))
-                           (assoc :check (nav-entry arrow)
-                                  :expected (nav-entry expected)
+                           (assoc :check (form-common/nav-entry arrow)
+                                  :expected (form-common/nav-entry expected)
                                   :langs (common/seedgen-runtime-dispatch-langs expr-value)))
               next-nav   (if (and arrow expected (check-arrow? (nav/value arrow)))
                            (nav/right expected)
-                           (nav/right current))]
+                            (nav/right current))]
           (recur next-nav
                  (update out
-                         (form-class root-lang script-heads expr-value)
+                         (class-form root-lang script-heads expr-value)
                          conj
                          entry)))))))
 
-(defn fact-meta-classification
+(defn fact-classify-meta
   [root-lang script-heads fact-nav]
-  (let [mnav      (meta-nav fact-nav)
-        setup-nav (some-> mnav (map-value-nav :setup))
-        tear-nav  (some-> mnav (map-value-nav :teardown))]
-    {:fact-setup (classify-navs root-lang script-heads (vector-item-navs setup-nav))
-     :fact-teardown (classify-navs root-lang script-heads (vector-item-navs tear-nav))}))
+  (let [mnav      (form-common/nav-meta fact-nav)
+        setup-nav (some-> mnav (form-common/nav-map-value :setup))
+        tear-nav  (some-> mnav (form-common/nav-map-value :teardown))]
+    {:fact-setup (class-navs root-lang script-heads (form-common/nav-vector-items setup-nav))
+     :fact-teardown (class-navs root-lang script-heads (form-common/nav-vector-items tear-nav))}))
 
-(defn fact-config-map-nav
+(defn fact-config-nav
   [fact-nav]
-  (some-> fact-nav body-nav nav/down nav/right))
+  (some-> fact-nav form-common/nav-body nav/down nav/right))
 
-(defn globals-context
+(defn global-context
   [forms top-navs]
   (let [ns-form          (first forms)
-        script-heads     (common/seedgen-script-heads ns-form)
-        root-script-nav  (some (fn [zloc]
-                                 (let [form (nav/value zloc)]
-                                   (when (and (script-form? script-heads form)
-                                              (= :root (explicit-class form)))
-                                     zloc)))
-                               top-navs)
+         script-heads     (common/seedgen-script-heads ns-form)
+         root-script-nav  (some (fn [zloc]
+                                  (let [form (nav/value zloc)]
+                                    (when (and (form-script? script-heads form)
+                                               (= :root (class-explicit form)))
+                                      zloc)))
+                                top-navs)
         root-script-form (some-> root-script-nav nav/value)
         root-lang        (some-> root-script-form second common/seedgen-normalize-runtime-lang)
         derived-script-navs
         (->> top-navs
-             (filter (fn [zloc]
-                       (let [form (nav/value zloc)]
-                         (and (script-form? script-heads form)
-                              (not= (nav/line-info zloc)
-                                    (some-> root-script-nav nav/line-info))))))
-             vec)
+              (filter (fn [zloc]
+                        (let [form (nav/value zloc)]
+                          (and (form-script? script-heads form)
+                               (not= (nav/line-info zloc)
+                                     (some-> root-script-nav nav/line-info))))))
+              vec)
         global-fact-navs (->> top-navs
                               (filter (fn [zloc]
-                                        (= 'fact:global (first (nav/value (body-nav zloc))))))
+                                        (= 'fact:global (first (nav/value (form-common/nav-body zloc))))))
                               vec)
         global-top-navs  (->> top-navs
                               (remove (fn [zloc]
-                                        (let [form (nav/value (body-nav zloc))]
+                                        (let [form (nav/value (form-common/nav-body zloc))]
                                           (or (some #{zloc} (concat [root-script-nav] derived-script-navs))
                                               (some #{zloc} global-fact-navs)
                                               (and (seq? form)
                                                    (#{'ns 'fact 'comment} (first form)))))))
                               vec)
         global-facts     (reduce (fn [out zloc]
-                                   (let [mnav (fact-config-map-nav zloc)
-                                         setup (classify-navs root-lang
+                                   (let [mnav (fact-config-nav zloc)
+                                         setup (class-navs root-lang
+                                                           script-heads
+                                                           (form-common/nav-vector-items
+                                                            (some-> mnav (form-common/nav-map-value :setup))))
+                                         teardown (class-navs root-lang
                                                               script-heads
-                                                              (vector-item-navs
-                                                               (some-> mnav (map-value-nav :setup))))
-                                         teardown (classify-navs root-lang
-                                                                 script-heads
-                                                                 (vector-item-navs
-                                                                  (some-> mnav (map-value-nav :teardown))))]
+                                                              (form-common/nav-vector-items
+                                                               (some-> mnav (form-common/nav-map-value :teardown))))]
                                      (-> out
-                                         (update :global-fact-setup merge-classifications setup)
-                                         (update :global-fact-teardown merge-classifications teardown))))
-                                 {:global-fact-setup (empty-classification)
-                                  :global-fact-teardown (empty-classification)}
+                                         (update :global-fact-setup class-merge setup)
+                                         (update :global-fact-teardown class-merge teardown))))
+                                 {:global-fact-setup (class-empty)
+                                  :global-fact-teardown (class-empty)}
                                  global-fact-navs)]
     {:lang {:root root-lang
             :derived (mapv #(-> % nav/value second common/seedgen-normalize-runtime-lang)
                            derived-script-navs)}
-     :global-script {:root (some-> root-script-nav nav-entry)
-                     :derived (mapv nav-entry derived-script-navs)}
+     :global-script {:root (some-> root-script-nav form-common/nav-entry)
+                     :derived (mapv form-common/nav-entry derived-script-navs)}
      :global-fact-setup (:global-fact-setup global-facts)
      :global-fact-teardown (:global-fact-teardown global-facts)
-     :global-top (classify-navs root-lang script-heads global-top-navs)}))
+     :global-top (class-navs root-lang script-heads global-top-navs)}))
 
-(defn enrich-entry
+(defn entry-enrich
   [root-lang script-heads fact-nav entry]
   (merge entry
-         (fact-meta-classification root-lang script-heads fact-nav)
-         {:checks (classify-checks root-lang script-heads fact-nav)}))
+         (fact-classify-meta root-lang script-heads fact-nav)
+         {:checks (check-classify root-lang script-heads fact-nav)}))
 
 (defn seedgen-readforms
   "returns parsed seedgen metadata and analyse output under :entries"
@@ -229,41 +180,41 @@
                     :data :no-test-file})
 
        :else
-       (let [analysis (base/analyse-file [:test test-file])]
-         (if (res/result? analysis)
-           analysis
-           (let [text      (slurp test-file)
-                 root      (nav/parse-root text)
-                 forms     (mapv nav/value (top-level-navs root))
-                 top-navs  (top-level-navs root)
-                 globals   (globals-context forms top-navs)
-                 root-lang (get-in globals [:lang :root])
-                 script-heads (common/seedgen-script-heads (first forms))
-                 fact-navs (->> top-navs
-                                (keep (fn [zloc]
-                                        (let [form (nav/value zloc)
-                                              refer (:refer (meta form))]
-                                          (when (and refer
-                                                     (= 'fact (first (nav/value (body-nav zloc)))))
-                                            [refer zloc]))))
-                                (into {}))
-                 entries   (framework.common/entry
+        (let [analysis (base/analyse-file [:test test-file])]
+          (if (res/result? analysis)
+            analysis
+            (let [text      (slurp test-file)
+                  root      (nav/parse-root text)
+                  top-navs  (form-common/nav-top-levels root)
+                  forms     (mapv nav/value top-navs)
+                  globals   (global-context forms top-navs)
+                  root-lang (get-in globals [:lang :root])
+                  script-heads (common/seedgen-script-heads (first forms))
+                  fact-navs (->> top-navs
+                                 (keep (fn [zloc]
+                                         (let [form (nav/value zloc)
+                                               refer (:refer (meta form))]
+                                           (when (and refer
+                                                      (= 'fact (first (nav/value (form-common/nav-body zloc)))))
+                                             [refer zloc]))))
+                                 (into {}))
+                  entries   (framework.common/entry
                             (reduce-kv (fn [out nsp vars]
                                          (assoc out
                                                 nsp
                                                 (reduce-kv (fn [m v entry]
-                                                             (let [fact-nav (get fact-navs
-                                                                                 (symbol (str nsp) (str v)))]
-                                                               (assoc m
-                                                                      v
-                                                                      (if fact-nav
-                                                                        (enrich-entry root-lang
-                                                                                      script-heads
-                                                                                      fact-nav
-                                                                                      entry)
-                                                                        entry))))
-                                                           {}
-                                                           vars)))
+                                                              (let [fact-nav (get fact-navs
+                                                                                  (symbol (str nsp) (str v)))]
+                                                                (assoc m
+                                                                       v
+                                                                       (if fact-nav
+                                                                         (entry-enrich root-lang
+                                                                                       script-heads
+                                                                                       fact-nav
+                                                                                       entry)
+                                                                         entry))))
+                                                            {}
+                                                            vars)))
                                        {}
                                        analysis))]
              {:globals globals

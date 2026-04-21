@@ -32,3 +32,22 @@
                 :items number?
                 :results number?
                 :total number?}))
+
+
+^{:refer std.lang.seedgen/seedgen-list :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.seedgen/seedgen-benchlist :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.seedgen/seedgen-removelang :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.seedgen/seedgen-addlang :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.seedgen/seedgen-benchadd :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.seedgen/seedgen-benchremove :added "4.1"}
+(fact "TODO")

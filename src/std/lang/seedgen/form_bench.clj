@@ -1,46 +1,18 @@
 (ns std.lang.seedgen.form-bench
-  (:require [clojure.set :as set]
-            [clojure.string :as str]
-            [code.framework :as base]
-            [code.project :as project]
-            [std.fs :as fs]
-            [std.block.base :as block]
-            [std.block.navigate :as nav]
-            [std.lang.seedgen.common-util :as common]
-            [std.lang.seedgen.form-parse :as readforms]
-            [std.lang.manage.xtalk-scaffold :as scaffold]
-            [std.lib.result :as res]
-            [std.task :as task]))
+  (:require [clojure.string :as str]
+             [code.framework :as base]
+             [code.project :as project]
+             [std.fs :as fs]
+             [std.lang.seedgen.form-common :as form-common]
+             [std.lang.seedgen.form-parse :as readforms]
+             [std.lang.manage.xtalk-scaffold :as scaffold]
+             [std.lib.result :as res]
+             [std.task :as task]))
 
 (def ^:private +seedgen-bench-default-rename+
   '{xt [xtbench :lang]})
 
-(defn- normalize-target-langs
-  [lang default-langs]
-  (let [target-langs (cond
-                       (= :all lang)
-                       default-langs
-
-                       (keyword? lang)
-                       [lang]
-
-                       (vector? lang)
-                       lang
-
-                       (seq? lang)
-                       (vec lang)
-
-                       (nil? lang)
-                       default-langs
-
-                       :else
-                       [lang])]
-    (->> target-langs
-         (map common/seedgen-normalize-runtime-lang)
-         distinct
-         vec)))
-
-(defn- rename-part->segments
+(defn- bench-rename-part->segments
   [part lang]
   (cond
     (= :lang part)
@@ -56,12 +28,12 @@
     [part]
 
     (vector? part)
-    (mapcat #(rename-part->segments % lang) part)
+    (mapcat #(bench-rename-part->segments % lang) part)
 
     :else
     [(str part)]))
 
-(defn- seedgen-bench-ns
+(defn- bench-target-ns
   [test-ns lang rename]
   (let [rename (merge +seedgen-bench-default-rename+
                       (or rename {}))
@@ -69,19 +41,19 @@
     (->> segments
          (mapcat (fn [segment]
                    (if-let [replacement (get rename (symbol segment))]
-                     (rename-part->segments replacement lang)
+                     (bench-rename-part->segments replacement lang)
                      [segment])))
          (str/join ".")
          symbol)))
 
-(defn- seedgen-bench-path
+(defn- bench-target-path
   [project target-ns]
   (str (fs/path (:root project)
                 (or (first (:test-paths project))
                     "test")
                 (str (fs/ns->file target-ns) ".clj"))))
 
-(defn- resolve-bench-targets
+(defn- bench-resolve-targets
   [ns params lookup project]
   (let [test-ns   (project/test-ns ns)
         test-file (lookup test-ns)
@@ -106,18 +78,18 @@
                        :data :no-seedgen-root})
 
           :else
-          (let [target-langs    (normalize-target-langs (:lang params) available-langs)
+          (let [target-langs    (form-common/target-normalize-langs (:lang params) available-langs)
                 unsupported     (->> target-langs
                                      (remove (set available-langs))
                                      distinct
                                      vec)
                 target-entries  (mapv (fn [lang]
-                                        (let [target-ns (seedgen-bench-ns test-ns
-                                                                          lang
-                                                                          (:rename params))]
+                                        (let [target-ns (bench-target-ns test-ns
+                                                                         lang
+                                                                         (:rename params))]
                                           {:lang lang
                                            :ns target-ns
-                                           :path (seedgen-bench-path proj target-ns)}))
+                                            :path (bench-target-path proj target-ns)}))
                                       target-langs)]
             (if (seq unsupported)
               (res/result {:status :error
@@ -131,7 +103,7 @@
                :target-langs target-langs
                :targets target-entries})))))))
 
-(defn- render-bench-targets
+(defn- bench-render-targets
   [test-file targets]
   (let [forms   (scaffold/read-top-level-forms test-file)
         split   (scaffold/separate-runtime-test-forms forms (mapv :lang targets))
@@ -157,27 +129,10 @@
         xtbench.python.sample.train-001-test]"
   {:added "4.1"}
   ([ns params lookup project]
-   (let [test-ns     (project/test-ns ns)
-          test-file   (lookup test-ns)
-          params      (task/single-function-print params)]
-
-     (cond
-       (nil? test-file)
-       (res/result {:status :error
-                    :data :no-test-file})
-
-       :else
-       (let [root-lang     (first (common/seedgen-root-langs test-file true))
-             derived-langs (common/seedgen-root-langs test-file false)
-             default-langs (vec (concat (when root-lang [root-lang]) derived-langs))]
-         (cond
-           (nil? root-lang)
-           (res/result {:status :error
-                        :data :no-seedgen-root})
-
-           :else
-           (->> (normalize-target-langs (:lang params) default-langs)
-                (mapv #(seedgen-bench-ns test-ns % (:rename params))))))))))
+   (let [resolved (bench-resolve-targets ns params lookup project)]
+     (if (res/result? resolved)
+       resolved
+       (->> resolved :targets (mapv :ns))))))
 
 (comment
 
@@ -201,14 +156,14 @@
   "creates or updates bench files for the requested seedgen runtimes"
   {:added "4.1"}
   ([ns params lookup project]
-   (let [resolved (resolve-bench-targets ns params lookup project)]
+   (let [resolved (bench-resolve-targets ns params lookup project)]
      (if (res/result? resolved)
        resolved
-       (let [{:keys [project params test-file targets]} resolved
-             rendered (render-bench-targets test-file targets)
-             write?   (boolean (:write params))
-             lookup'  (reduce (fn [m {:keys [ns path]}]
-                                (assoc m ns path))
+        (let [{:keys [project params test-file targets]} resolved
+              rendered (bench-render-targets test-file targets)
+              write?   (boolean (:write params))
+              lookup'  (reduce (fn [m {:keys [ns path]}]
+                                 (assoc m ns path))
                               lookup
                               rendered)]
          {:outputs
@@ -250,10 +205,10 @@
   "removes bench files for the requested seedgen runtimes"
   {:added "4.1"}
   ([ns params lookup project]
-   (let [resolved (resolve-bench-targets ns params lookup project)]
+   (let [resolved (bench-resolve-targets ns params lookup project)]
      (if (res/result? resolved)
        resolved
-       (let [{:keys [params project targets]} resolved
+        (let [{:keys [params project targets]} resolved
              root (:root project)
              write? (boolean (:write params))]
          {:outputs

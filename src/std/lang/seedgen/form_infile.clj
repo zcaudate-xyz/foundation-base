@@ -1,86 +1,24 @@
 (ns std.lang.seedgen.form-infile
   (:require [clojure.string :as str]
-            [code.framework :as base]
-            [code.project :as project]
-            [std.block.base :as block]
-            [std.block.navigate :as nav]
-            [std.lang.seedgen.common-util :as common]
-            [std.lang.seedgen.form-parse :as readforms]
-            [std.lib.result :as res]
-            [std.task :as task]))
+             [code.framework :as base]
+             [code.project :as project]
+             [std.block.base :as block]
+             [std.block.navigate :as nav]
+             [std.lang.seedgen.common-util :as common]
+             [std.lang.seedgen.form-common :as form-common]
+             [std.lang.seedgen.form-parse :as readforms]
+             [std.lib.result :as res]
+             [std.task :as task]))
 
-(defn- normalize-target-langs
-  [lang]
-  (let [target-lang (cond (= :all lang)
-                          :all
-
-                          (keyword? lang)
-                          [lang]
-
-                          (vector? lang)
-                          lang
-
-                          (seq? lang)
-                          (vec lang)
-
-                          (nil? lang)
-                          nil
-
-                          :else
-                          [lang])]
-    (cond (= :all target-lang)
-          :all
-
-          (nil? target-lang)
-          nil
-
-          :else
-          (->> target-lang
-               (map common/seedgen-normalize-runtime-lang)
-               distinct
-               vec))))
-
-(defn- line-key
-  [{:keys [row col end-row end-col]}]
-  [row col end-row end-col])
-
-(defn- item-form
-  [item]
-  (:form item))
-
-(defn- item-line
-  [item]
-  (:line item))
-
-(defn- item-string
-  [item]
-  (some-> item item-form block/block-string))
-
-(defn- item-value
-  [item]
-  (some-> item item-form block/block-value))
-
-(defn- item-lang
-  [item]
-  (some-> item item-value common/seedgen-dispatch-lang))
-
-(defn- sort-items
-  [items]
-  (sort-by (comp line-key item-line) items))
-
-(defn- parse-first-block
-  [s]
-  (some-> s nav/parse-root nav/down nav/block))
-
-(defn- unwrap-meta-string
+(defn- string-unwrap-meta
   [s]
   (let [root    (nav/parse-root s)
         current (nav/down root)]
-    (if (readforms/meta-block? current)
+    (if (form-common/nav-meta-block? current)
       (-> current nav/down nav/right nav/block block/block-string)
       s)))
 
-(defn- replace-script-lang-string
+(defn- string-replace-script-lang
   [script-str lang]
   (let [root       (nav/parse-root script-str)
         script-nav (nav/down root)
@@ -91,7 +29,7 @@
           nav/root-string)
       script-str)))
 
-(defn- replace-dispatch-lang-string
+(defn- string-replace-dispatch-lang
   [expr-str lang]
   (let [root     (nav/parse-root expr-str)
         expr-nav (nav/down root)
@@ -102,14 +40,14 @@
           nav/root-string)
       expr-str)))
 
-(defn- indent-lines
+(defn- string-indent-lines
   [prefix s]
   (str prefix
        (str/replace s "\n" (str "\n" prefix))))
 
 (defn- render-clause-snippet
   [indent expr-str expected-str]
-  (str (indent-lines indent expr-str)
+  (str (string-indent-lines indent expr-str)
        "\n"
        indent
        "=> "
@@ -130,7 +68,7 @@
       :else
       (str "[" (first items)
            "\n"
-           (str/join "\n" (map #(indent-lines prefix %) (rest items)))
+           (str/join "\n" (map #(string-indent-lines prefix %) (rest items)))
            "]"))))
 
 (defn- render-meta-string
@@ -195,42 +133,27 @@
   (assoc (:meta entry)
          :refer (symbol (str (:ns entry)) (str (:var entry)))))
 
-(defn- classify-lang-items
-  [classification]
-  (->> classification
-       vals
-       (mapcat identity)
-       sort-items))
-
-(defn- runtime-item-map
-  [classification]
-  (->> (classify-lang-items classification)
-       (keep (fn [item]
-               (when-let [lang (item-lang item)]
-                 [lang item])))
-       (into {})))
-
 (defn- fact-original-body-string
   [original-string]
-  (unwrap-meta-string original-string))
+  (string-unwrap-meta original-string))
 
 (defn- entry-check-langs
   [entry]
   (->> (:checks entry)
-       classify-lang-items
-       (keep item-lang)
+       form-common/item-classify-langs
+       (keep form-common/item-lang)
        distinct
        vec))
 
-(defn- root-script-meta-langs
+(defn- root-meta-langs
   [output]
   (some-> output
           (get-in [:globals :global-script :root])
-          item-value
+          form-common/item-value
           meta
           :seedgen/root
           :langs
-          normalize-target-langs))
+          form-common/target-normalize-langs))
 
 (defn- render-fact-string-add
   [entry root-lang ordered-extra-langs target-set original-string]
@@ -238,21 +161,21 @@
     (if (nil? root-check)
       original-string
       (let [final-langs     (vec (cons root-lang ordered-extra-langs))
-            check-items     (runtime-item-map (:checks entry))
-            setup-items     (runtime-item-map (:fact-setup entry))
-            teardown-items  (runtime-item-map (:fact-teardown entry))
-            root-check-expr (item-string root-check)
-            root-check-exp  (some-> root-check :expected item-string)
-            root-setup      (some-> (get setup-items root-lang) item-string)
-            root-teardown   (some-> (get teardown-items root-lang) item-string)
+            check-items     (form-common/item-runtime-map (:checks entry))
+            setup-items     (form-common/item-runtime-map (:fact-setup entry))
+            teardown-items  (form-common/item-runtime-map (:fact-teardown entry))
+            root-check-expr (form-common/item-string root-check)
+            root-check-exp  (some-> root-check :expected form-common/item-string)
+            root-setup      (some-> (get setup-items root-lang) form-common/item-string)
+            root-teardown   (some-> (get teardown-items root-lang) form-common/item-string)
             indent          "  "
             clause-snippets (mapv (fn [lang]
                                     (if-let [item (get check-items lang)]
                                       (render-clause-snippet indent
-                                                             (item-string item)
-                                                             (some-> item :expected item-string))
+                                                             (form-common/item-string item)
+                                                             (some-> item :expected form-common/item-string))
                                       (render-clause-snippet indent
-                                                             (replace-dispatch-lang-string
+                                                             (string-replace-dispatch-lang
                                                               root-check-expr
                                                               lang)
                                                              root-check-exp)))
@@ -261,17 +184,17 @@
                               (render-vector-string
                                :setup
                                (mapv (fn [lang]
-                                       (or (some-> (get setup-items lang) item-string)
+                                       (or (some-> (get setup-items lang) form-common/item-string)
                                            (when (contains? target-set lang)
-                                             (replace-dispatch-lang-string root-setup lang))))
+                                             (string-replace-dispatch-lang root-setup lang))))
                                      final-langs)))
             teardown-render (when root-teardown
                               (render-vector-string
                                :teardown
                                (mapv (fn [lang]
-                                       (or (some-> (get teardown-items lang) item-string)
+                                       (or (some-> (get teardown-items lang) form-common/item-string)
                                            (when (contains? target-set lang)
-                                             (replace-dispatch-lang-string root-teardown lang))))
+                                             (string-replace-dispatch-lang root-teardown lang))))
                                      final-langs)))
             meta-string     (render-meta-string (cond-> (entry-meta entry)
                                                   setup-render (assoc :setup [])
@@ -289,19 +212,19 @@
 (defn- render-fact-string-remove
   [entry target-set original-string]
   (let [keep-setup     (->> (:fact-setup entry)
-                            classify-lang-items
-                            (remove #(contains? target-set (item-lang %)))
+                            form-common/item-classify-langs
+                            (remove #(contains? target-set (form-common/item-lang %)))
                             vec)
         keep-teardown  (->> (:fact-teardown entry)
-                            classify-lang-items
-                            (remove #(contains? target-set (item-lang %)))
+                            form-common/item-classify-langs
+                            (remove #(contains? target-set (form-common/item-lang %)))
                             vec)
         keep-checks    (->> (:checks entry)
-                            classify-lang-items
-                            (remove #(contains? target-set (item-lang %)))
+                            form-common/item-classify-langs
+                            (remove #(contains? target-set (form-common/item-lang %)))
                             vec)
-        setup-render   (render-vector-string :setup (mapv item-string keep-setup))
-        teardown-render (render-vector-string :teardown (mapv item-string keep-teardown))
+        setup-render   (render-vector-string :setup (mapv form-common/item-string keep-setup))
+        teardown-render (render-vector-string :teardown (mapv form-common/item-string keep-teardown))
         meta-string    (render-meta-string (cond-> (entry-meta entry)
                                              setup-render (assoc :setup [])
                                              teardown-render (assoc :teardown []))
@@ -313,11 +236,11 @@
                               (str/join "\n\n"
                                         (map (fn [item]
                                                (render-clause-snippet "  "
-                                                                      (item-string item)
-                                                                      (some-> item :expected item-string)))
+                                                                      (form-common/item-string item)
+                                                                      (some-> item :expected form-common/item-string)))
                                              keep-checks))
                               ")")
-                         (fact-original-body-string original-string))]
+                          (fact-original-body-string original-string))]
     (if meta-string
       (str meta-string "\n" fact-body)
       fact-body)))
@@ -325,61 +248,61 @@
 (defn- render-global-fact-remove
   [output target-set original-string]
   (let [keep-setup     (->> (get-in output [:globals :global-fact-setup])
-                            classify-lang-items
-                            (remove #(contains? target-set (item-lang %)))
+                            form-common/item-classify-langs
+                            (remove #(contains? target-set (form-common/item-lang %)))
                             vec)
         keep-teardown  (->> (get-in output [:globals :global-fact-teardown])
-                            classify-lang-items
-                            (remove #(contains? target-set (item-lang %)))
+                            form-common/item-classify-langs
+                            (remove #(contains? target-set (form-common/item-lang %)))
                             vec)
-        setup-render   (render-vector-string :setup (mapv item-string keep-setup))
-        teardown-render (render-vector-string :teardown (mapv item-string keep-teardown))]
+        setup-render   (render-vector-string :setup (mapv form-common/item-string keep-setup))
+        teardown-render (render-vector-string :teardown (mapv form-common/item-string keep-teardown))]
     (str "(fact:global\n "
          (render-map-string {:setup setup-render
                              :teardown teardown-render})
          ")")))
 
-(defn- update-root-script-string
+(defn- root-update-script-string
   [output]
   (let [root-entry  (get-in output [:globals :global-script :root])
-        root-form   (some-> root-entry item-value)
-        current-str (item-string root-entry)
-        known-langs (->> (concat (or (root-script-meta-langs output) [])
+        root-form   (some-> root-entry form-common/item-value)
+        current-str (form-common/item-string root-entry)
+        known-langs (->> (concat (or (root-meta-langs output) [])
                                  (get-in output [:globals :lang :derived]))
-                         distinct
-                         vec)]
+                        distinct
+                        vec)]
     (if (empty? known-langs)
       current-str
-      (str "^{:seedgen/root "
-           (pr-str (assoc (:seedgen/root (meta root-form))
-                          :langs known-langs))
-           "}\n"
-           (unwrap-meta-string current-str)))))
+       (str "^{:seedgen/root "
+            (pr-str (assoc (:seedgen/root (meta root-form))
+                           :langs known-langs))
+            "}\n"
+            (string-unwrap-meta current-str)))))
 
-(defn- script-string-map
+(defn- root-script-string-map
   [output]
   (->> (get-in output [:globals :global-script :derived])
        (keep (fn [item]
-               (let [lang (some-> item item-value second common/seedgen-normalize-runtime-lang)]
+               (let [lang (some-> item form-common/item-value second common/seedgen-normalize-runtime-lang)]
                  (when lang
-                   [lang (item-string item)]))))
+                   [lang (form-common/item-string item)]))))
        (into {})))
 
 (defn- root-script-body-string
   [output]
   (some-> output
           (get-in [:globals :global-script :root])
-          item-string
-          unwrap-meta-string))
+          form-common/item-string
+          string-unwrap-meta))
 
 (defn- render-top-level-add
   [output text target-lang]
   (let [root-entry       (get-in output [:globals :global-script :root])
         root-lang        (get-in output [:globals :lang :root])
-        stored-langs     (or (root-script-meta-langs output) target-lang [])
+        stored-langs     (or (root-meta-langs output) target-lang [])
         current-langs    (set (get-in output [:globals :lang :derived]))
         target-set       (set (or target-lang stored-langs []))
-        existing-scripts (script-string-map output)
+        existing-scripts (root-script-string-map output)
         fact-entries     (->> (get output :entries)
                               vals
                               (mapcat vals))
@@ -387,26 +310,26 @@
                                (map (fn [entry]
                                       [(symbol (str (:ns entry)) (str (:var entry))) entry]))
                                fact-entries)
-        root-script-line (some-> root-entry item-line line-key)
+        root-script-line (some-> root-entry form-common/item-line form-common/item-line-key)
         derived-lines    (->> (get-in output [:globals :global-script :derived])
-                              (map item-line)
-                              (map line-key)
+                              (map form-common/item-line)
+                              (map form-common/item-line-key)
                               set)
         ordered-scripts  (->> stored-langs
                               (filter #(or (contains? current-langs %)
                                            (contains? target-set %)))
                               vec)
         add-script-strs  (mapv #(or (get existing-scripts %)
-                                    (replace-script-lang-string
+                                    (string-replace-script-lang
                                      (root-script-body-string output)
                                      %))
                                ordered-scripts)
         root            (nav/parse-root text)
-        top-navs        (readforms/top-level-navs root)]
+        top-navs        (form-common/nav-top-levels root)]
     (str (str/join
           "\n\n"
           (mapcat (fn [zloc]
-                    (let [line     (line-key (nav/line-info zloc))
+                    (let [line     (form-common/item-line-key (nav/line-info zloc))
                           current  (block/block-string (nav/block zloc))
                           form     (nav/value zloc)
                           refer    (:refer (meta form))]
@@ -418,7 +341,7 @@
                         []
 
                         (and (seq? form)
-                             (= 'fact (first (nav/value (readforms/body-nav zloc))))
+                             (= 'fact (first (nav/value (form-common/nav-body zloc))))
                              refer
                              (contains? fact-by-refer refer))
                         [(render-fact-string-add (get fact-by-refer refer)
@@ -448,29 +371,29 @@
                                (map (fn [entry]
                                       [(symbol (str (:ns entry)) (str (:var entry))) entry]))
                                fact-entries)
-        root-script-line (some-> root-entry item-line line-key)
+        root-script-line (some-> root-entry form-common/item-line form-common/item-line-key)
         derived-line->lang
         (->> (get-in output [:globals :global-script :derived])
              (keep (fn [item]
-                     (let [lang (some-> item item-value second common/seedgen-normalize-runtime-lang)]
+                     (let [lang (some-> item form-common/item-value second common/seedgen-normalize-runtime-lang)]
                        (when lang
-                         [(line-key (item-line item)) lang]))))
+                         [(form-common/item-line-key (form-common/item-line item)) lang]))))
              (into {}))
         root            (nav/parse-root text)
-        top-navs        (readforms/top-level-navs root)]
+        top-navs        (form-common/nav-top-levels root)]
     (str (str/join
           "\n\n"
           (mapcat (fn [zloc]
-                    (let [line    (line-key (nav/line-info zloc))
+                    (let [line    (form-common/item-line-key (nav/line-info zloc))
                           current (block/block-string (nav/block zloc))
-                          body    (readforms/body-nav zloc)
+                          body    (form-common/nav-body zloc)
                           form    (nav/value zloc)
                           refer   (:refer (meta form))
                           head    (when (seq? (nav/value body))
                                     (first (nav/value body)))]
                       (cond
                         (= line root-script-line)
-                        [(update-root-script-string output)]
+                        [(root-update-script-string output)]
 
                         (contains? derived-line->lang line)
                         (if (contains? target-set (get derived-line->lang line))
@@ -504,13 +427,13 @@
                     :data :no-test-file})
 
        :else
-       (let [output      (readforms/seedgen-readforms ns {} lookup project)
-             root-lang   (get-in output [:globals :lang :root])
-             stored-langs (or (root-script-meta-langs output)
-                              [])
-             target-lang (or (normalize-target-langs (:lang params))
-                             stored-langs
-                             [])]
+        (let [output      (readforms/seedgen-readforms ns {} lookup project)
+              root-lang   (get-in output [:globals :lang :root])
+              stored-langs (or (root-meta-langs output)
+                               [])
+              target-lang (or (form-common/target-normalize-langs (:lang params))
+                              stored-langs
+                              [])]
          (cond
            (res/result? output)
            output
@@ -545,11 +468,11 @@
                     :data :no-test-file})
 
        :else
-       (let [output      (readforms/seedgen-readforms ns {} lookup project)
-             root-lang   (get-in output [:globals :lang :root])
-             purge-langs (get-in output [:globals :lang :derived])
-             target-lang (or (normalize-target-langs (:lang params))
-                             :all)
+        (let [output      (readforms/seedgen-readforms ns {} lookup project)
+              root-lang   (get-in output [:globals :lang :root])
+              purge-langs (get-in output [:globals :lang :derived])
+              target-lang (or (form-common/target-normalize-langs (:lang params))
+                              :all)
              target-lang (if (= :all target-lang)
                            purge-langs
                            target-lang)]
