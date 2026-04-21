@@ -64,51 +64,32 @@
 (fact "supports final returns through for:return"
 
   (!.js
-      (xt/return-run [resolve reject]
-        (resolve "OK")))
-  
-  (!.js
-    (defn add
-      []
-      (xt/for:return [[ok err] (xt/return-run [resolve reject]
-                                 (resolve "OK"))]
-        {:success ok
-         :error err
-         :final true})
-      (return "MISS"))
-    (add))
-  => "OK"
-  
-  (!.js
-    (defn add
-      []
-      (xt/for:return [[ok err] (xt/return-run [resolve reject]
-                                 (resolve "OK"))]
-        {:success ok
-         :error err
-         :final true})
-      (return "MISS"))
-    (add))
-  => "OK")
+    (xt/return-run [resolve reject]
+      (resolve "OK")))
+  ;; only inside for:async and for:return
+  => (throws))
 
 ^{:refer xt.lang.common-spec/for:return :added "4.1"}
 (fact "dispatches success and error branches"
   
-  [(!.js
-     (var out nil)
-     (xt/for:return [[ok err] (xt/return-run [resolve reject]
-                                (resolve "OK"))]
-       {:success (:= out ok)
-        :error   (:= out err)})
-     out)
-   (!.js
-     (var out nil)
-     (xt/for:return [[ok err] (xt/return-run [resolve reject]
-                                (reject "ERR"))]
-       {:success (:= out ok)
-        :error (:= out err)})
-     out)]
-  => ["OK" "ERR"])
+  (!.js
+    (var out nil)
+    (xt/for:return [[ok err] (xt/return-run [resolve reject]
+                               (resolve "OK"))]
+      {:success (:= out ok)
+       :error   (:= out err)})
+    out)
+  => "OK"
+  
+  (!.js
+    (var out nil)
+    (xt/for:return [[ok err] (xt/return-run [resolve reject]
+                               (reject "ERR"))]
+      {:success (:= out ok)
+       :error (:= out err)})
+    out)
+  => "ERR"
+  => ["OK" ])
 
 ^{:refer xt.lang.common-spec/for:try :added "4.1"}
 (fact "expands to the canonical try form"
