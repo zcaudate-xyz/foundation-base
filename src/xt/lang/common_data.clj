@@ -179,12 +179,23 @@
    (return out)))
 
 (defn.xt arr-assign
-  "appends to the end of an array"
+  "others to the end of an array"
   {:added "4.0"}
-  ([arr append]
-   (xt/for:array [e append]
+  ([arr other]
+   (xt/for:array [e other]
      (xt/x:arr-push arr e))
    (return arr)))
+
+(defn.xt arr-concat
+  "others to the end of an array"
+  {:added "4.0"}
+  ([arr other]
+   (var out [])
+   (xt/for:array [e arr]
+     (xt/x:arr-push out e))
+   (xt/for:array [e other]
+     (xt/x:arr-push out e))
+   (return out)))
 
 (defn.xt arr-slice
   "slices an array"
@@ -195,8 +206,9 @@
    (if (xt/x:is-number? finish)
      (:= finish-idx finish)
      (:= finish-idx (xt/x:len arr)))
-   (xt/for:index [i [(xt/x:offset start) finish-idx]]
-      (xt/x:arr-push out (xt/x:get-idx arr i)))
+   (xt/for:index [i [(xt/x:offset start)
+                     (xt/x:offset finish-idx)]]
+     (xt/x:arr-push out (xt/x:get-idx arr i)))
    (return out)))
 
 (defn.xt arr-rslice
@@ -204,7 +216,8 @@
   {:added "4.0"}
   ([arr start finish]
    (var out [])
-   (xt/for:index [i [(xt/x:offset start) finish]]
+   (xt/for:index [i [(xt/x:offset start)
+                     (xt/x:offset finish)]]
      (xt/x:arr-push-first out (xt/x:get-idx arr i)))
    (return out)))
 

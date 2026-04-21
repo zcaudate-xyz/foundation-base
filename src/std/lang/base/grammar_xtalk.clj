@@ -589,6 +589,9 @@
                 :arglists '([arr])}}
    {:op :x-arr-assign     :symbol #{'x:arr-assign}      :emit :hard-link :raw 'xt.lang.common-data/arr-assign
     :op-spec   {:type [:fn [[:xt/array :xt/any] [:xt/array :xt/any]] [:xt/array :xt/any]]
+                :arglists '([arr other])}}
+   {:op :x-arr-concat     :symbol #{'x:arr-concat}      :emit :hard-link :raw 'xt.lang.common-data/arr-concat
+    :op-spec   {:type [:fn [[:xt/array :xt/any] [:xt/array :xt/any]] [:xt/array :xt/any]]
                 :arglists '([arr other])}}])
 
 (def +xt-common-print+
