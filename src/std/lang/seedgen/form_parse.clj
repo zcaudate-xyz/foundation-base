@@ -271,7 +271,7 @@
 
 (comment
   (code.project/in-context
-   (std.lang.seedgen.form-parse/seedgen-readforms <sample>
-                                                      {}))
+   (std.lang.seedgen.form-parse/seedgen-readforms 'xt.sample.train-002-test
+                                                  {}))
   => '{:globals {}
        :entries {xt.lang.common-spec/example.B {:status ... }}})

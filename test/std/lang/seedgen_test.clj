@@ -13,6 +13,15 @@
                 :results number?
                 :total number?}))
 
+^{:refer std.lang.seedgen/seedgen-readforms :added "4.1"}
+(fact "returns summary information for public seedgen readforms analysis"
+  (seedgen-readforms '[xt.sample.train-002] {:return :summary})
+  => (contains {:errors 0
+                :warnings 0
+                :items 1
+                :results 1
+                :total number?}))
+
 ^{:refer std.lang.seedgen/seedgen-incomplete :added "4.1"}
 (fact "returns summary information for incomplete seedgen tasks"
   (seedgen-incomplete '[xt.sample] {:print {:result true :summary true}})
