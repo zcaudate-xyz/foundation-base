@@ -108,23 +108,3 @@
    (std.lang.seedgen.seed-infile/seedgen-incomplete <sample>
                                                     {}))
   => '{xt.lang.common-spec/example.B {:status ...}})
-
-
-(defn seedgen-readforms
-  ([ns params lookup project]
-   (let [test-ns   (project/test-ns ns)
-         test-file (lookup test-ns)
-         params    (task/single-function-print params)]
-     (cond (nil? test-file)
-           (res/result {:status :error
-                        :data :no-test-file})
-
-           :else
-           (let [analysis (base/analyse-file [:test test-file])]
-             analysis)))))
-
-(comment
-  (code.project/in-context
-   (std.lang.seedgen.seed-infile/seedgen-readforms <sample>
-                                                  {}))
-  => '{xt.lang.common-spec/example.B {:status ... }})

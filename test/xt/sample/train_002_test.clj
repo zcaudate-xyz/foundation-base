@@ -58,7 +58,7 @@
 ;;
 ;; seedgen-readforms should be able to parse and classify this file to be able to add more information to the existing code.framework/analyse datastructure 
 ;;
-;; - split out the fact form innto :seedgen/root and :seedgen/derived testcases
+;; - split out the fact form into :seedgen/root and :seedgen/derived testcases
 ;; - fact:global level setup and teardown need special treatment to identity seedgen/root and seedgen/scaffold
 ;; - fact level setup and teardown need special treatment to identity seedgen/root and seedgen/scaffold
 ;; - toplevel forms need special treatment to identity seedgen/root and seedgen/scaffold
@@ -66,7 +66,16 @@
 ;;
 ;;
 ;;
-;;
+;;  the skeleton of the return should be:
+;;  {:globals {:lang {:root :js :derived [:lua]}
+;;             :global-script {:root (l/script- :js) :derived [(l/scsript- ..)]}
+;;             :global-fact-setup {:root [...] :scaffold [...] :derived [...]
+;;             :global-fact-teardown {:root [...] :scaffold [...] :derived [...]
+;;             :global-top  {:root [...] :scaffold [...] :derived [...]}}
+;;             :entries {<ns> {<var> {... :checks {:root [...] :scaffold [...] :derived [...] }} (analyse )
 ;;
 ;;
 ;; any that in not  without l/script-  ^{:seedgen/scaffold  {:all true}} by default unless  
+;;
+;;  
+;;
