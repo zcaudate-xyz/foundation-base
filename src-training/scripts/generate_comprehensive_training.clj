@@ -223,18 +223,18 @@
    {:id 13
     :category "array"
     :concept "Array appending"
-    :intent "Concatenate two arrays using k/arr-concat"
+    :intent "Concatenate two arrays using k/arr-assign"
     :xtalk-module (str "(ns my.module\n"
                         "  (:require [std.lang :as l]))\n\n"
                         "(l/script :js\n"
                         "  {:require [[xt.lang.base-lib :as k]]})\n\n"
                         "(defn.js combine\n"
                         "  [arr1 arr2]\n"
-                        "  (return (k/arr-concat arr1 arr2)))")
-    :xtalk "(k/arr-concat arr1 arr2)"
+                        "  (return (k/arr-assign arr1 arr2)))")
+    :xtalk "(k/arr-assign arr1 arr2)"
     :js "k.arr_append(arr1, arr2)"
     :python "k.arr_append(arr1, arr2)"
-    :context "k/arr-concat concatenates two arrays. Use instead of Array.prototype.concat or list concatenation."}
+    :context "k/arr-assign concatenates two arrays. Use instead of Array.prototype.concat or list concatenation."}
    
    {:id 14
     :category "array"

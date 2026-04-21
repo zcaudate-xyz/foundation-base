@@ -541,10 +541,10 @@
  =>
  [2 4 6])
 
-^{:refer xt.lang.common-spec/x:arr-concat, :added "4.1"}
+^{:refer xt.lang.common-spec/x:arr-assign, :added "4.1"}
 (fact
  "appends one array to another"
- (!.dt (xt/x:arr-concat [1 2] [3 4]))
+ (!.dt (xt/x:arr-assign [1 2] [3 4]))
  =>
  [1 2 3 4])
 

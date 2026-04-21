@@ -157,10 +157,10 @@
  =>
  [1 2])
 
-^{:refer xt.lang.common-data/arr-concat, :added "4.1"}
+^{:refer xt.lang.common-data/arr-assign, :added "4.1"}
 (fact
  "appends to the end of an array"
- (!.js (xtd/arr-concat [1 2] [3 4]))
+ (!.js (xtd/arr-assign [1 2] [3 4]))
  =>
  [1 2 3 4])
 

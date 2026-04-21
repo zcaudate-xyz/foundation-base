@@ -104,9 +104,9 @@
    
    {:id 12
     :category "array"
-    :function "arr-concat"
+    :function "arr-assign"
     :intent "Append two arrays"
-    :xtalk "(k/arr-concat [1 2] [3 4])"
+    :xtalk "(k/arr-assign [1 2] [3 4])"
     :js "k.arr_append([1,2], [3,4]);"
     :python "k.arr_append([1, 2], [3, 4])"}
    

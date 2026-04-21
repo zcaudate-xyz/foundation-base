@@ -50,7 +50,7 @@
    [{:name 'arr-map :args '[arr f] :spec '[:fn [AnyArray UnaryFn] AnyArray] :doc "Maps function over array"}
     {:name 'arr-filter :args '[arr pred] :spec '[:fn [AnyArray Predicate] AnyArray] :doc "Filters array by predicate"}
     {:name 'arr-slice :args '[arr start end] :spec '[:fn [AnyArray :xt/num :xt/num] AnyArray] :doc "Extracts slice of array"}
-    {:name 'arr-concat :args '[arr1 arr2] :spec '[:fn [AnyArray AnyArray] AnyArray] :doc "Appends two arrays"}
+    {:name 'arr-assign :args '[arr1 arr2] :spec '[:fn [AnyArray AnyArray] AnyArray] :doc "Appends two arrays"}
     {:name 'arr-clone :args '[arr] :spec '[:fn [AnyArray] AnyArray] :doc "Clones an array"}
     {:name 'arr-every :args '[arr pred] :spec '[:fn [AnyArray Predicate] :xt/bool] :doc "Tests if all elements satisfy predicate"}
     {:name 'arr-some :args '[arr pred] :spec '[:fn [AnyArray Predicate] :xt/bool] :doc "Tests if any element satisfies predicate"}

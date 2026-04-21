@@ -587,9 +587,9 @@
    {:op :x-arr-reverse     :symbol #{'x:arr-reverse}      :emit :hard-link :raw 'xt.lang.common-data/arr-reverse
     :op-spec   {:type [:fn [[:xt/array :xt/any]] [:xt/array :xt/any]]
                 :arglists '([arr])}}
-   {:op :x-arr-concat     :symbol #{'x:arr-concat}      :emit :hard-link :raw 'xt.lang.common-data/arr-concat
+   {:op :x-arr-assign     :symbol #{'x:arr-assign}      :emit :hard-link :raw 'xt.lang.common-data/arr-assign
     :op-spec   {:type [:fn [[:xt/array :xt/any] [:xt/array :xt/any]] [:xt/array :xt/any]]
-                :arglists '([arr1 arr2])}}])
+                :arglists '([arr other])}}])
 
 (def +xt-common-print+
   [{:op :x-print          :symbol #{'x:print}           :emit :abstract

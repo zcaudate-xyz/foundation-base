@@ -594,10 +594,10 @@
     (xt/x:arr-map [1 2 3] (fn [e] (return (* e 2)))))
   => [2 4 6])
 
-^{:refer xt.lang.common-spec/x:arr-concat :added "4.1"}
+^{:refer xt.lang.common-spec/x:arr-assign :added "4.1"}
 (fact "appends one array to another"
   (!.js
-    (xt/x:arr-concat [1 2] [3 4]))
+    (xt/x:arr-assign [1 2] [3 4]))
   => [1 2 3 4])
 
 ^{:refer xt.lang.common-spec/x:arr-filter :added "4.1"}

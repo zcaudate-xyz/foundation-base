@@ -34,7 +34,7 @@
 (def +xtalk-fns+
   "xt.lang.base-lib functions"
   ['k/clamp 'k/abs 'k/mix 'k/sign 'k/round
-   'k/arr-map 'k/arr-filter 'k/arr-clone 'k/arr-concat
+   'k/arr-map 'k/arr-filter 'k/arr-clone 'k/arr-assign
    'k/obj-keys 'k/obj-vals 'k/obj-pick 'k/obj-omit
    'k/starts-with? 'k/ends-with? 'k/capitalize
    'k/fn? 'k/arr? 'k/obj?])

@@ -178,11 +178,11 @@
      (xt/x:arr-push out e))
    (return out)))
 
-(defn.xt arr-concat
+(defn.xt arr-assign
   "appends to the end of an array"
   {:added "4.0"}
-  ([arr other]
-   (xt/for:array [e other]
+  ([arr append]
+   (xt/for:array [e append]
      (xt/x:arr-push arr e))
    (return arr)))
 

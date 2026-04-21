@@ -75,7 +75,7 @@
   {:added "4.0"}
   [loader tasks]
   (var prev (xt/x:get-key loader "tasks"))
-  (var all  (xt/x:arr-concat (xt/x:obj-vals prev)
+  (var all  (xt/x:arr-assign (xt/x:obj-vals prev)
                           tasks))
   (var deps (xt/x:arr-map all
                           (fn [e]
