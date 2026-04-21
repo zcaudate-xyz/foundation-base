@@ -138,7 +138,7 @@
   => "\n\n    hello   ")
 
 ^{:refer std.string.common/escape :added "3.0"}
-(fact "uses a map to replace chars" ^:hidden
+(fact "uses a map to replace chars"
 
   (escape "1 < 2 as HTML, & s."
           {\< "&lt;", \> "&gt;", \& "&amp;"})

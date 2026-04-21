@@ -19,7 +19,6 @@
 
 ^{:refer xt.cell.kernel.worker-impl/post-message :added "4.1"}
 (fact "posts a response via a worker-like transport"
-  ^:hidden
 
   (!.js
    (var messages [])
@@ -30,7 +29,6 @@
 
 ^{:refer xt.cell.kernel.worker-impl/worker-handle-async :added "4.1"}
 (fact "handles async tasks"
-  ^:hidden
 
   (notify/wait-on :js
     (var worker {:postMessage (fn [msg] (repl/notify msg))})
@@ -49,7 +47,6 @@
 
 ^{:refer xt.cell.kernel.worker-impl/worker-process-eval :added "4.1"}
 (fact "processes eval requests"
-  ^:hidden
 
   (!.js
    (var messages [])
@@ -65,7 +62,6 @@
 
 ^{:refer xt.cell.kernel.worker-impl/worker-process-action :added "4.1"}
 (fact "processes action requests"
-  ^:hidden
 
   ;; Test with a registered action
   (!.js
@@ -99,7 +95,6 @@
 
 ^{:refer xt.cell.kernel.worker-impl/worker-process :added "4.1"}
 (fact "processes various types of actions"
-  ^:hidden
 
   ;; Test eval operation
   (!.js
@@ -137,7 +132,6 @@
 
 ^{:refer xt.cell.kernel.worker-impl/worker-init :added "4.1"}
 (fact "initiates the worker actions"
-  ^:hidden
 
   (!.js
    (var worker {:listeners []
@@ -157,7 +151,6 @@
 
 ^{:refer xt.cell.kernel.worker-impl/worker-init-signal :added "4.1"}
 (fact "posts an init message"
-  ^:hidden
 
   (!.js
    (var messages [])

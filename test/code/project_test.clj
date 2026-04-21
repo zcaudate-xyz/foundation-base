@@ -53,8 +53,7 @@
 ^{:refer code.project/get-path :added "4.0"
   :setup [(reset! code.project.common/*lookup* {})]}
 (fact "gets the path given the `ns`"
-  ^:hidden
-  
+
   (get-path (env/ns-sym))
   => "test/code/project_test.clj")
 

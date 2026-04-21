@@ -25,7 +25,7 @@
 ^{:refer std.timeseries.range/parse-range-expr :added "3.0"}
 (fact "parsing a range expression"
 
-  (parse-range-expr [:20s 0.8] {:unit :ms}) ^:hidden
+  (parse-range-expr [:20s 0.8] {:unit :ms})
   => {:type :to, :start [:time 20000], :end [:ratio 0.8]}
 
   (parse-range-expr [0 :for :1m] {:unit :ms})
@@ -79,7 +79,7 @@
   (select-range [1 2 3 4 5]
                 {:type :for :start [:array 1] :end [:array 3]}
                 {:order :asc :key identity})
-  => [2 3 4] ^:hidden
+  => [2 3 4]
 
   (select-range [1 2 3 4 5]
                 {:type :for :start [:time 1] :end [:time 3]}
@@ -102,7 +102,7 @@
   (process-filter  [1 2 3 4 5 6 7 8]
                    even?
                    {})
-  => [2 4 6 8] ^:hidden
+  => [2 4 6 8]
 
   (process-filter  [{:id 1 :val 1}
                     {:id 2 :val 2}

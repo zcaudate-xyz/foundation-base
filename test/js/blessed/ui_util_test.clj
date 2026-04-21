@@ -25,8 +25,7 @@
 
 ^{:refer js.blessed.ui-util/say :added "4.0" :unchecked true}
 (fact "helper function to say something"
-  ^:hidden
-  
+
   (defn.js SayDemo
     []
     (let [[val setVal] (r/local "Hello World")]
@@ -44,7 +43,6 @@
 
 ^{:refer js.blessed.ui-util/CopyButton :added "4.0" :unchecked true}
 (fact "provides a Copy Button"
-  ^:hidden
 
   (defn.js CopyClipboardDemo
     []
@@ -73,8 +71,7 @@
 
 ^{:refer js.blessed.ui-util/ErrorLine :added "4.0" :unchecked true}
 (fact "provides an error line"
-  ^:hidden
-  
+
   (defn.js ErrorLineDemo
     []
     (var [val setVal] (r/local "Copied Text"))
@@ -90,8 +87,7 @@
 
 ^{:refer js.blessed.ui-util/StatusLine :added "4.0" :unchecked true}
 (fact "provides a status line"
-  ^:hidden
-  
+
   (defn.js StatusLineDemo
     []
     (var [val setVal] (r/local "Copied Text"))
@@ -102,5 +98,5 @@
        {:top 2
         :left 0
         :message "HELLO WORLD"}]]))
-  
+
   )

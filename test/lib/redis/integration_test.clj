@@ -21,7 +21,6 @@
                :teardown r/client:stop}}})
 
 (fact "creates a redis client and pings"
-  ^:hidden
   (cc/req (component/start (r/client-create {:id "localhost"
                                      :port 17001}))
           ["PING"]))

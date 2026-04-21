@@ -18,10 +18,10 @@
 
   (base/block-info (-parse (reader/create ":a")))
   => {:type :token, :tag :keyword, :string ":a", :height 0, :width 2}
-  
+
   (base/block-info (-parse (reader/create "\"\\\\n\"")))
   => {:type :token, :tag :string, :string "\"\\\\n\"", :height 0, :width 5}
-  
+
   (base/block-info (-parse (reader/create "\"\\n\"")))
   => {:type :token, :tag :string, :string "\"\\n\"", :height 0, :width 4}
 
@@ -37,7 +37,7 @@
 
   (base/block-info (-parse (reader/create (slurp "test-data/std.block/cases/003-newlines-printed.example"))))
   => {:type :token, :tag :string, :string "\"\\n\"", :height 0, :width 4}
-  
+
   (base/block-info (-parse (reader/create (slurp "test-data/std.block/cases/004-newline-with.example"))))
   => {:type :token, :tag :string, :string "\"\\n\n\"", :height 1, :width 1})
 
@@ -86,7 +86,7 @@
   => (keyword ":hello"))
 
 ^{:refer std.block.parse/parse-reader :added "3.0"}
-(fact "reads a :char block from the reader" ^:hidden
+(fact "reads a :char block from the reader"
 
   (-> (reader/create "\\c")
       (parse-reader)
@@ -95,13 +95,13 @@
 
 ^{:refer std.block.parse/read-string-data :added "3.0"}
 (fact "reads string data from the reader"
-  
+
   (read-string-data (reader/create "\"hello\""))
   => "hello"
-  
+
   (read-string-data (reader/create "\"\\\"hello\\\"\""))
   => "\\\"hello\\\""
-  
+
   (read-string-data (reader/create (slurp "test-data/std.block/cases/001-newlines.example")))
   => (throws)
 
@@ -110,7 +110,7 @@
 
   (read-string-data (reader/create (slurp "test-data/std.block/cases/003-newlines-printed.example")))
   => "\\n"
-  
+
   (read-string-data (reader/create (slurp "test-data/std.block/cases/004-newline-with.example")))
   => "\\n\n")
 
@@ -253,7 +253,7 @@
 
   (-> (parse-hash (reader/create  "#(+ 1 2)"))
       (base/block-value))
-  => '(fn* [] (+ 1 2)) ^:hidden
+  => '(fn* [] (+ 1 2))
 
   (-> (parse-hash (reader/create  "#\"hello\""))
       (base/block-value))
@@ -302,7 +302,7 @@
 
 ^{:refer std.block.parse/parse-first :added "4.0"}
 (fact "gets the first element in root"
-  
+
   (str (parse-first "a b c"))
   => "a")
 

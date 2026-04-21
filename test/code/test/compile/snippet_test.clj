@@ -5,14 +5,12 @@
 
 ^{:refer code.test.compile.snippet/fact-setup :added "3.0"}
 (fact "creates a setup hook"
-  ^:hidden
 
   (fact-setup '{:setup [(prn (+ a b))]})
   => '(clojure.core/fn [] (prn (+ a b))))
 
 ^{:refer code.test.compile.snippet/fact-teardown :added "3.0"}
 (fact "creates a teardown hook"
-  ^:hidden
 
   (fact-teardown '{:teardown [(prn "goodbye")]})
   => '(clojure.core/fn [] (prn "goodbye")))
@@ -21,7 +19,7 @@
 (fact "creates the setup/teardown wrapper"
 
   (fact-wrap-ceremony '{:setup [(prn 1 2 3)]
-                        :teardown (prn "goodbye")}) ^:hidden
+                        :teardown (prn "goodbye")})
   => (clojure.core/fn [thunk]
        (clojure.core/fn []
          (clojure.core/let [_ [(prn 1 2 3)]

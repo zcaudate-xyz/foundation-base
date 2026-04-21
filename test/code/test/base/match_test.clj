@@ -4,8 +4,7 @@
 
 ^{:refer code.test.base.match/match-base :added "3.0"}
 (fact "determines whether a term matches with a filter"
-  ^:hidden
-  
+
   (match-base {:unit #{:web}}
               {:unit #{:web}}
               false)
@@ -19,8 +18,7 @@
 
 ^{:refer code.test.base.match/match-include :added "3.0"}
 (fact "determines whether inclusion is a match"
-  ^:hidden
-  
+
   (match-include {:unit #{:web}}
                  {:unit #{:web}})
   => true
@@ -32,8 +30,7 @@
 
 ^{:refer code.test.base.match/match-exclude :added "3.0"}
 (fact "determines whether exclusion is a match"
-  ^:hidden
-  
+
   (match-exclude {:unit #{:web}}
                  {:unit #{:web}})
   => true
@@ -44,8 +41,7 @@
 
 ^{:refer code.test.base.match/match-options :added "3.0"}
 (fact "determines whether a set of options can match"
-  ^:hidden
-  
+
   (match-options {:unit #{:web}
                   :refer 'user/foo}
                  {:include [{:tags #{:web}}]

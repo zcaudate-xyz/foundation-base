@@ -85,7 +85,6 @@
 
 ^{:refer script.sql.expr/for-upsert :added "0.1"}
 (fact "generate upsert command"
-  ^:hidden
 
   (for-upsert :user {:id "a" :account "12345"} {})
   => (any
@@ -106,7 +105,6 @@
 
 ^{:refer script.sql.expr/for-upsert-multi :added "0.1"}
 (fact "generate upsert-multi command"
-  ^:hidden
 
   (for-upsert-multi :user [:id :account]
                     [["a" "12345"]
@@ -124,7 +122,6 @@
 
 ^{:refer script.sql.expr/for-cas :added "3.0"}
 (fact "generates cas command"
-  ^:hidden
 
   (for-cas :account
            {:id "id0" :name "hello"}

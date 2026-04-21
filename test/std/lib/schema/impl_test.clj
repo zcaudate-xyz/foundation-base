@@ -4,8 +4,7 @@
 
 ^{:refer std.lib.schema.impl/simplify :added "3.0"}
 (fact "helper function for easier display of spirit schema"
-  ^:hidden
-  
+
   (simplify {:account/name  [{:type :long}]
              :account/email [{:type :string
                               :cardinality :many}]
@@ -17,8 +16,7 @@
 
 ^{:refer std.lib.schema.impl/create-lookup :added "3.0"}
 (fact "lookup from flat schema mainly for reverse refs"
-  ^:hidden
-  
+
   (create-lookup
    {:account/name   [{}]
     :account/email  [{}]
@@ -33,8 +31,7 @@
 
 ^{:refer std.lib.schema.impl/create-flat-schema :added "3.0"}
 (fact "creates a flat schema from an input map"
-  ^:hidden
-  
+
   (create-flat-schema {:account {:email [{:type    :ref
                                           :ref     {:ns  :email}}]}})
   => {:email/accounts [{:ident :email/accounts
@@ -60,8 +57,7 @@
 
 ^{:refer std.lib.schema.impl/vec->map :added "3.0"}
 (fact "turns a vec schema to a map"
-  ^:hidden
-  
+
   (vec->map [:account [:id    {:type :long}
                        :name  {:type :text}]])
   => {:account {:id [{:type :long, :order 0}],
@@ -69,8 +65,7 @@
 
 ^{:refer std.lib.schema.impl/schema-map :added "3.0"}
 (fact "creates a schema from a map"
-  ^:hidden
-  
+
   (-> (schema-map {:account/name   [{}]
                    :account/email  [{:ident   :account/email
                                      :type    :ref
@@ -82,8 +77,7 @@
 
 ^{:refer std.lib.schema.impl/schema :added "3.0"}
 (fact "creates an extended schema for use by spirit"
-  ^:hidden
-  
+
   (-> (schema [:account [:name  {}
                          :email {:type :ref :ref {:ns :email}}]])
       :flat
@@ -94,8 +88,7 @@
 
 ^{:refer std.lib.schema.impl/schema? :added "3.0"}
 (fact "checks if object is a schema"
-  ^:hidden
-  
+
   (schema? (schema {:user/email [{}]}))
   => true)
 

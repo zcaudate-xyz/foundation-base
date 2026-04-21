@@ -25,8 +25,7 @@
 
 ^{:refer xt.runtime.type-vector-node/impl-mask :added "4.0"}
 (fact "masks an integer value"
-  ^:hidden
-  
+
   (!.js
    [(node/impl-mask -1)
     (node/impl-mask 5)
@@ -41,8 +40,7 @@
 
 ^{:refer xt.runtime.type-vector-node/impl-offset :added "4.0"}
 (fact "gets the tail off"
-  ^:hidden
-  
+
   (!.js
    [(node/impl-offset 0)
     (node/impl-offset 3)
@@ -61,8 +59,7 @@
 
 ^{:refer xt.runtime.type-vector-node/node-create :added "4.0"}
 (fact "creates a new node"
-  ^:hidden
-  
+
   (!.js
    (node/node-create 1 [1 2 3 4]))
   => {"edit_id" 1 "children" [1 2 3 4] "::" "vector.node"}
@@ -73,13 +70,12 @@
 
 ^{:refer xt.runtime.type-vector-node/node-clone :added "4.0"}
 (fact "clones the node"
-  ^:hidden
-  
+
   (!.js
    (node/node-clone
     (node/node-create 1 [1 2 3 4])))
   => {"edit_id" 1 "children" [1 2 3 4] "::" "vector.node"}
-  
+
   (!.lua
    (node/node-clone
     (node/node-create 1 [1 2 3 4])))
@@ -87,8 +83,7 @@
 
 ^{:refer xt.runtime.type-vector-node/node-editable-root :added "4.0"}
 (fact "creates an editable root"
-  ^:hidden
-  
+
   (!.js
    (node/node-editable-root
     (node/node-create 1 [1 2 3 4])))
@@ -99,8 +94,7 @@
 
 ^{:refer xt.runtime.type-vector-node/node-editable :added "4.0"}
 (fact  "creates an editable node"
-  ^:hidden
-  
+
   (!.js
    (var node (node/node-create 1 [1 2 3 4]))
    (== node (node/node-editable
@@ -117,8 +111,7 @@
 
 ^{:refer xt.runtime.type-vector-node/ensure-editable :added "4.0"}
 (fact "ensures that the node is editable"
-  ^:hidden
-  
+
   (!.js
    (node/ensure-editable
     (node/node-create nil [1 2 3])))
@@ -131,8 +124,7 @@
 
 ^{:refer xt.runtime.type-vector-node/ensure-persistent :added "4.0"}
 (fact "ensures that the node is not editable"
-  ^:hidden
-  
+
   (!.js
    (node/ensure-persistent (node/node-create 1 [])))
   => {"children" [], "::" "vector.node"}
@@ -143,7 +135,6 @@
 
 ^{:refer xt.runtime.type-vector-node/node-array-for :added "4.0"}
 (fact "gets the node array"
-  ^:hidden
 
   (!.js
    (var root (node/node-create nil [(node/node-create nil [1 2 3 4])]))
@@ -161,8 +152,7 @@
 
 ^{:refer xt.runtime.type-vector-node/node-new-path :added "4.0"}
 (fact "new path"
-  ^:hidden
-  
+
   (!.js
    (node/node-new-path nil 5 (node/node-create nil [1 2 3])))
   => {"children"
@@ -181,7 +171,6 @@
 
 ^{:refer xt.runtime.type-vector-node/node-push-tail :added "4.0"}
 (fact "pushes an element onto node"
-  ^:hidden
 
   (!.js
    (node/node-push-tail nil 32 5 node/EMPTY_VECTOR_NODE (node/node-create nil [1 2 3]) false))
@@ -199,7 +188,6 @@
 
 ^{:refer xt.runtime.type-vector-node/node-pop-tail :added "4.0"}
 (fact "pops the last element off node"
-  ^:hidden
 
   (!.js
    (var out (node/node-pop-tail nil 33 5 (node/node-create nil [(node/node-create nil [1 2 3])]) false))
@@ -215,7 +203,6 @@
 
 ^{:refer xt.runtime.type-vector-node/node-assoc :added "4.0"}
 (fact "associates a given node without mutating the original"
-  ^:hidden
 
   (!.js
    (var root (node/node-create nil [1 2 3]))

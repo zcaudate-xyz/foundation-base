@@ -19,8 +19,7 @@
 
 ^{:refer lua.nginx.driver-redis/connect-constructor :added "4.0"}
 (fact "creates a xt.sys compatible constructor"
-  ^:hidden
-  
+
   (!.lua
    (var conn (redis/connect {:constructor lua-driver/connect-constructor
                              :port 17001}

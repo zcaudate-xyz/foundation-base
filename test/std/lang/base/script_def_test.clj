@@ -5,8 +5,7 @@
 
 ^{:refer  std.lang.base.script-def/tmpl-entry :added "4.0"}
 (fact "forms for various argument types"
-  ^:hidden
-  
+
   (f/with:template-meta {:type :fragment
                          :tag "js"}
     (tmpl-entry '[createObject create]))
@@ -21,20 +20,19 @@
 
 ^{:refer  std.lang.base.script-def/tmpl-macro :added "4.0"}
 (fact "forms for various argument types"
-  ^:hidden
 
   (f/with:template-meta {:tag "js"}
     (tmpl-macro '[length [arr]  {:property true
                                  :tag "js"}]))
   => '(defmacro.js length
         ([obj] (clojure.core/list (quote .) obj (quote length))))
-  
+
   (f/with:template-meta '{:tag "js"
                           :subtree [auth]}
     (tmpl-macro '[length [arr]  {:property true
                                  }]))
   => '(defmacro.js length ([obj] (clojure.core/list (quote .) obj (quote auth) (quote length))))
-  
+
   (f/with:template-meta {:tag "js"}
     (tmpl-macro '[forEach [f]]))
   => '(defmacro.js forEach
@@ -49,7 +47,7 @@
           (quote .)
           obj
           (clojure.core/apply clojure.core/list (quote concat) arr arrs))))
-  
+
   (f/with:template-meta {:tag "js"}
     (tmpl-macro '[includes   [val] {:optional [startIdx]}]))
   => '(defmacro.js includes
@@ -59,7 +57,7 @@
           (clojure.core/apply
            clojure.core/list (quote includes) val
            (clojure.core/vec (clojure.core/take (clojure.core/count oargs) [startIdx]))))))
-  
+
   (f/with:template-meta {:tag "js"}
     (tmpl-macro '[splice [start] {:optional [count e]
                                   :vargs es}]))

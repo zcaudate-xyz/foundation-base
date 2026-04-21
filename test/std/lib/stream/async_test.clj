@@ -10,12 +10,12 @@
 
 ^{:refer std.lib.stream.async/blocking? :added "3.0"}
 (fact "checks that object implements `IBLocking`"
-  
+
   (blocking? (q/queue))
   => true)
 
 ^{:refer std.lib.stream.async/take-element :added "3.0"}
-(fact "takes an element from a queue" ^:hidden
+(fact "takes an element from a queue"
 
   (def |q| (q/queue:fixed 1))
 
@@ -29,7 +29,7 @@
 (fact "checks if object implements `IStage`"
 
   (stage? (f/completed 1))
-  => true ^:hidden
+  => true
 
   (stage? (mono {}))
   => true)
@@ -42,8 +42,7 @@
 
 ^{:refer std.lib.stream.async/stage-realize :added "3.0"}
 (fact "returns the unwrapped result"
-   ^:hidden
-  
+
   (stage-realize (f/future (Thread/sleep 10) 1))
   => 1
 
@@ -57,7 +56,7 @@
   => true)
 
 ^{:refer std.lib.stream.async/blocking-seq :added "3.0"}
-(fact "constructs a blocking seq" ^:hidden
+(fact "constructs a blocking seq"
 
   (def -q- (q/queue))
 
@@ -87,7 +86,7 @@
 (fact "checks if all linked futures are realized"
 
   (realized? (f/completed (f/completed 1)))
-  => true ^:hidden
+  => true
 
   (realized? (f/completed (f/incomplete)))
   => false)
@@ -135,7 +134,7 @@
   => (contains [number? 2]))
 
 ^{:refer std.lib.stream.async/wrap-collectors :added "3.0"}
-(fact "wrap collectors given async function" ^:hidden
+(fact "wrap collectors given async function"
 
   (def -a- (atom {}))
 
@@ -154,7 +153,7 @@
 (fact "chains monos together"
 
   @(process-mono (mono) inc 1 {})
-  => 2 ^:hidden
+  => 2
 
   @(process-mono (mono)
                  inc
@@ -164,7 +163,7 @@
   => 2)
 
 ^{:refer std.lib.stream.async/i:step :added "3.0"}
-(fact "constructs a step transducer" ^:hidden
+(fact "constructs a step transducer"
 
   ((i:step inc) (range 3))
   => (all (contains [mono? mono? mono?])
@@ -197,7 +196,7 @@
   => (contains [true 4 anything]))
 
 ^{:refer std.lib.stream.async/i:guard :added "3.0"}
-(fact "constructs a guard transducer" ^:hidden
+(fact "constructs a guard transducer"
 
   (def -accept- (flux))
   (def -reject- (flux))
@@ -240,17 +239,16 @@
 
 ^{:refer std.lib.stream.async/flux :added "3.0"}
 (fact "constructs a flux"
-  ^:hidden
-  
+
   (flux)
-  
+
   (def -f- (s/*> (range 10)
                  (flux)))
-  
+
   (def -s- (s/*> -f-
                  (i:step inc)
                  (s/<*>)))
-  
+
   (mapv deref (take 10 -s-))
   => '(1 2 3 4 5 6 7 8 9 10)
 
@@ -262,7 +260,7 @@
                                               {:path [:time :C]
                                                :wrap wrap-time}]}))
                  (flux "hello")))
-  
+
   @(:data (first (s/produce -g-)))
   => (contains-in
       {:time {:A number?, :B number?, :C number?},

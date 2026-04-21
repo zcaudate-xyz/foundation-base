@@ -17,7 +17,6 @@
 
 ^{:refer xt.cell.kernel.worker-mock/mock-worker-send :added "4.1"}
 (fact "processes eval strings and request frames through the mock worker"
-  ^:hidden
 
   (notify/wait-on :js
     (var worker
@@ -48,7 +47,6 @@
 
 ^{:refer xt.cell.kernel.worker-mock/mock-worker :added "4.1"}
 (fact "creates a worker-like transport with listener and request APIs"
-  ^:hidden
 
   (!.js
    (var worker (worker-mock/mock-worker (fn:> [event] event)))
@@ -72,7 +70,6 @@
 
 ^{:refer xt.cell.kernel.worker-mock/create-worker :added "4.1"}
 (fact "initializes actions and optionally emits the init signal"
-  ^:hidden
 
   (!.js
    (var worker

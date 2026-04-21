@@ -23,7 +23,7 @@
   => true)
 
 ^{:refer std.lib.component.track/track-entry? :added "3.0"}
-(fact "checks if object is a tracking entry" ^:hidden
+(fact "checks if object is a tracking entry"
 
   (track-entry? (map->TrackEntry {}))
   => true)
@@ -41,7 +41,7 @@
   => anything)
 
 ^{:refer std.lib.component.track/tracked? :added "3.0"}
-(fact "checks if object has been tracked" ^:hidden
+(fact "checks if object has been tracked"
 
   (-> (Store.)
       (track)
@@ -49,7 +49,7 @@
   => true)
 
 ^{:refer std.lib.component.track/untrack :added "3.0"}
-(fact "untracks a given object" ^:hidden
+(fact "untracks a given object"
 
   (-> (doto (Store.)
         (track)
@@ -68,7 +68,7 @@
   :teardown (tracked:last [] :untrack)}
 (fact "adds an action"
 
-  (tracked:action:add :println println) ^:hidden
+  (tracked:action:add :println println)
 
   (with-out-str
     (tracked:last [:test :store] :println))
@@ -114,7 +114,7 @@
   => (any map? number?))
 
 ^{:refer std.lib.component.track/tracked:locate :added "3.0"}
-(fact "locates given entries with tag" ^:hidden
+(fact "locates given entries with tag"
 
   (track:with-metadata [{:tag :executor}]
                        (track (Store.)))
@@ -137,7 +137,7 @@
 ^{:refer std.lib.component.track/track:with-metadata :added "3.0"
   :style/indent 1
   :teardown [(untrack-all [:test :store])]}
-(fact "applies additional metadata to the tracking object" ^:hidden
+(fact "applies additional metadata to the tracking object"
 
   (track:with-metadata [{:tag :default}]
                        (track (Store.)))

@@ -38,8 +38,7 @@
 
 ^{:refer xt.lang.event-box/make-box :added "4.0"}
 (fact "creates a box"
-  ^:hidden
-  
+
   (!.js
    (box/make-box (fn:> {:a 1})))
   => {"::" "event.box", "listeners" {}, "data" {"a" 1}}
@@ -47,21 +46,20 @@
   (!.lua
    (xtd/tree-get-data (box/make-box (fn:> {:a 1}))))
   => {"::" "event.box",
-      "initial" "<function>", 
+      "initial" "<function>",
       "listeners" {},
       "data" {"a" 1}}
 
   (!.py
    (xtd/tree-get-data (box/make-box (fn:> {:a 1}))))
   => {"::" "event.box",
-      "initial" "<function>", 
+      "initial" "<function>",
       "listeners" {},
       "data" {"a" 1}})
 
 ^{:refer xt.lang.event-box/check-event :added "4.0"}
 (fact "checks that event matches path predicate"
-  ^:hidden
-  
+
   (!.js
    [(box/check-event {:path ["a" "b"]}
                      [])
@@ -73,7 +71,7 @@
                      ["a" "b" "c"])])
   => [true true false false]
 
-  
+
   (!.lua
    [(box/check-event {:path ["a" "b"]}
                      [])
@@ -85,7 +83,7 @@
                      ["a" "b" "c"])])
   => [true true false false]
 
-  
+
   (!.py
    [(box/check-event {:path ["a" "b"]}
                      [])
@@ -99,8 +97,7 @@
 
 ^{:refer xt.lang.event-box/add-listener :added "4.0"}
 (fact "adds a listener to box"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var b (box/make-box (fn:> {:a {:b 2}})))
     (box/add-listener b
@@ -174,7 +171,6 @@
 
 ^{:refer xt.lang.event-box/set-data-raw :added "4.0"}
 (fact "sets the data in the box"
-  ^:hidden
 
   (!.js
    (var b (box/make-box (fn:> {:a {:b 2}})))
@@ -183,7 +179,6 @@
 
 ^{:refer xt.lang.event-box/set-data :added "4.0"}
 (fact "sets data with a trigger"
-  ^:hidden
 
   (!.js
    (var b (box/make-box (fn:> {:a {:b 2}})))
@@ -193,8 +188,7 @@
 
 ^{:refer xt.lang.event-box/del-data-raw :added "4.0"}
 (fact "removes the data in the box"
-  ^:hidden
-  
+
   (!.js
    (var b (box/make-box (fn:> {:a {:b 2}})))
     [(box/del-data-raw b ["a" "b"])
@@ -203,8 +197,7 @@
 
 ^{:refer xt.lang.event-box/del-data :added "4.0"}
 (fact "removes data with trigger"
-  ^:hidden
-  
+
   (!.js
    (var b (box/make-box (fn:> {:a {:b 2}})))
     [(box/del-data b ["a" "b"])
@@ -213,7 +206,6 @@
 
 ^{:refer xt.lang.event-box/reset-data :added "4.0"}
 (fact "resets the data in the box"
-  ^:hidden
 
   (!.js
    (var b (box/make-box (fn:> {:a {:b 2}})))
@@ -226,7 +218,6 @@
 
 ^{:refer xt.lang.event-box/merge-data :added "4.0"}
 (fact "merges the data in the box"
-  ^:hidden
 
   (!.js
    (var b (box/make-box (fn:> {:a 1 :b 2})))
@@ -242,7 +233,6 @@
 
 ^{:refer xt.lang.event-box/append-data :added "4.0"}
 (fact "merges the data in the box"
-  ^:hidden
 
   (!.js
    (var b (box/make-box (fn:> {:a []})))

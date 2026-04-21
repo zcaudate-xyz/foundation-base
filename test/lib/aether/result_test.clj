@@ -26,7 +26,7 @@
                     [[b "1.1"]
                      [[c "1.1"]
                       [d "1.1"]]]])
-      (with-out-str)) ^:hidden
+      (with-out-str))
   => string?)
 
 ^{:refer lib.aether.result/dependency-graph :added "3.0"}

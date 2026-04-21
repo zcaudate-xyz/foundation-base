@@ -17,7 +17,6 @@
 
 ^{:refer js.cell.runtime.emit/node-script :added "4.0"}
 (fact "emits the Node worker bootstrap script"
-  ^:hidden
   (str/includes? (emit/node-script) "worker_threads")
   => true
   (str/includes? (emit/node-script) "parentPort")
@@ -25,7 +24,6 @@
 
 ^{:refer js.cell.runtime.link/make-link :added "4.0"}
 (fact "creates a mock worker"
-  ^:hidden
   (!.js
    (var worker ((. (runtime-link/make-link "mock" nil {})
                    ["create-fn"])

@@ -5,15 +5,13 @@
 
 ^{:refer std.lib.env/ns-sym :added "3.0"}
 (fact "returns the namespace symbol"
-  ^:hidden
-  
+
   (ns-sym)
   => 'std.lib.env-test)
 
 ^{:refer std.lib.env/ns-get :added "3.0"}
 (fact "gets a symbol in the current namespace"
-  ^:hidden
-  
+
   (ns-get 'std.lib.env "ns-get")
   => fn?)
 
@@ -24,21 +22,18 @@
 
 ^{:refer std.lib.env/dev? :added "3.0"}
 (fact "checks if current environment is dev"
-  ^:hidden
-  
+
   (dev?)
   => boolean?)
 
 ^{:refer std.lib.env/sys:resource :added "3.0"}
 (fact "finds a resource on class path"
-  ^:hidden
-  
+
   (sys:resource "std/lib.clj")
   => java.net.URL)
 
 ^{:refer std.lib.env/sys:resource-cached :added "4.0"}
 (fact "caches the operation on a resource call"
-  ^:hidden
 
   (sys:resource-cached (atom {})
                        "scratch.clj"
@@ -47,27 +42,23 @@
 
 ^{:refer std.lib.env/sys:resource-content :added "3.0"}
 (fact "reads the content"
-  ^:hidden
-  
+
   (sys:resource-content "scratch.clj")
   => string?)
 
 ^{:refer std.lib.env/sys:ns-url :added "4.0"}
 (fact "gets the url for ns"
-  ^:hidden
-  
+
   (sys:ns-url 'std.lib.env)
   => java.net.URL)
 
 ^{:refer std.lib.env/sys:ns-file :added "4.0"}
 (fact "gets the file for ns"
-  ^:hidden
   (sys:ns-file 'std.lib.env)
   => string?)
 
 ^{:refer std.lib.env/sys:ns-dir :added "4.0"}
 (fact "gets the dir for ns"
-  ^:hidden
   (sys:ns-dir 'std.lib.env)
   => string?)
 
@@ -180,8 +171,7 @@
 
 ^{:refer std.lib.env/match-filter :added "4.0"}
 (fact "matches given a range of filters"
-  ^:hidden
-  
+
   (match-filter #"ello" 'hello)
   => true
 

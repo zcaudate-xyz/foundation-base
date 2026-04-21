@@ -5,22 +5,19 @@
 
 ^{:refer rt.postgres.base.grammar.form-defpartition/pg-partition-name :added "4.1"}
 (fact "constructs partition name"
-  ^:hidden
-  
+
   (form-defpartition/pg-partition-name "table" "val" ["stack"])
   => "table__stack__val")
 
 ^{:refer rt.postgres.base.grammar.form-defpartition/pg-partition-def :added "4.1"}
 (fact "recursive definition for partition"
-  ^:hidden
-  
+
   (form-defpartition/pg-partition-def 'parent "base" {:use :col :in ["a"]} [] [])
   => '([:create-table :if-not-exists #{"base__a"} :partition-of #{"parent"} :for :values :in (quote ("a"))]))
 
 
 ^{:refer rt.postgres.base.grammar.form-defpartition/pg-defpartition :added "4.1"}
 (fact "defpartition block"
-  ^:hidden
 
   (form-defpartition/pg-defpartition '(defpartition part [parent] [{:use :col :in ["a"]}]))
   => '(do [:create-table :if-not-exists #{"parent__a"} :partition-of #{"parent"} :for :values :in (quote ("a"))])
@@ -31,20 +28,20 @@
             [:create-table :if-not-exists #{"p2__a"} :partition-of #{"p2"} :for :values :in (quote ("a"))]))
 
   (fact "defpartition handles multiple parents with nested partitions"
-    (form-defpartition/pg-defpartition '(defpartition part [p1 p2] 
+    (form-defpartition/pg-defpartition '(defpartition part [p1 p2]
                                           [{:use :c1 :in ["v1"]}
                                            {:use :c2 :in ["v2"]}]))
     => '(do [:create-table :if-not-exists #{"p1__v1"} :partition-of #{"p1"} :for :values :in (quote ("v1")) :partition-by :list (quote (c2))]
             [:create-table :if-not-exists #{"p1__v1__v2"} :partition-of #{"p1__v1"} :for :values :in (quote ("v2"))]
             [:create-table :if-not-exists #{"p2__v1"} :partition-of #{"p2"} :for :values :in (quote ("v1")) :partition-by :list (quote (c2))]
             [:create-table :if-not-exists #{"p2__v1__v2"} :partition-of #{"p2__v1"} :for :values :in (quote ("v2"))]))
-  
+
   (fact "defpartition handles default partition"
     (form-defpartition/pg-defpartition '(defpartition part [p1] [{:default true}]))
     => '(do [:create-table :if-not-exists #{"p1__$DEFAULT"} :partition-of #{"p1"} :default]))
 
   (fact "defpartition handles nested partitions and schemas"
-    (form-defpartition/pg-defpartition 
+    (form-defpartition/pg-defpartition
      '(defpartition RevPartitionBase
         [szn_type/Rev]
         [{:use :class :schema "szn_type" :in ["Default"]}

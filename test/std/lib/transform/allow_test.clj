@@ -26,7 +26,6 @@
                     :pipeline {:allow {:account {:name :checked}}}}
                    *wrappers*)
   => {:account {:name "Chris"}}
-  ^:hidden
   (graph/normalise {:account {:name "Chris"
                               :age 10}}
                    {:schema (schema/schema examples/account-name-age-sex)

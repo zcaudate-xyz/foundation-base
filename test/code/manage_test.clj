@@ -21,9 +21,9 @@
 (fact "returns the list of vars in a namespace"
 
   (vars 'code.manage)
-  
+
   (vars 'code.manage {:sorted false})
-  
+
   (vars '#{code.manage} {:return #{:errors :summary}})
   => (contains-in {:errors any
                    :summary {:errors 0
@@ -142,15 +142,13 @@
 
 ^{:refer code.manage/locate-code :added "3.0"}
 (fact "locates code base upon query"
-  ^:hidden
-  
+
   (locate-code '[code.manage]
                {:query '[ns | {:first :import}]}))
 
 ^{:refer code.manage/locate-test :added "4.0"}
 (fact "locates test based upon query"
-  ^:hidden
-  
+
   (locate-test '[code.manage]
                {:query '[ns | {:first :import}]}))
 
@@ -195,8 +193,7 @@
 
 ^{:refer code.manage/refactor-code :added "3.0"}
 (comment "refactors code based on given `:edits`"
-  ^:hidden
-  
+
   (refactor-code '[code.manage]
                  {:edits []}))
 
@@ -211,23 +208,21 @@
 
 ^{:refer code.manage/find-usages :added "3.0"}
 (fact "find usages of a var"
-  ^:hidden
-  
+
   (find-usages '[code.manage]
                {:var 'code.framework/analyse})
   => map?)
 
 ^{:refer code.manage/extract :added "4.0"}
 (fact "returns the list of vars in a namespace"
-  
+
   (extract 'code.manage)
   => string?)
 
 
 ^{:refer code.manage/require-file :added "4.0"}
 (fact "requires the file and returns public vars"
-  ^:hidden
-  
+
   (require-file 'code.manage)
   => (contains ['analyse 'extract 'vars] :in-any-order :gaps-ok))
 
@@ -248,7 +243,6 @@
 ^{:refer code.manage/-main :added "4.0"
   :timeout 1000}
 (fact "main entry point for code.manage"
-  ^:hidden
 
   (env/with-out-str
     (code.manage/-main))

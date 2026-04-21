@@ -82,10 +82,9 @@
   :adopt true
   :added "4.0" :unchecked true}
 (fact "creates a set of edit points"
-  ^:hidden
 
   (def.js DIVISIONS 7)
-  
+
   (def.js DIGITS
     ["0" "1" "2" "3" "4" "5" "6" "7" "8" "9"])
 
@@ -114,8 +113,8 @@
        offset0
        (xt/x:len -/DIGITS)))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.model-roller/DigitRollerManual"} 
+     (n/EnclosedCode
+{:label "js.react-native.model-roller/DigitRollerManual"}
 [:% n/Row
        [:% n/View
         {:style {:height 80
@@ -164,10 +163,9 @@
   :adopt true
   :added "4.0" :unchecked true}
 (fact "creates a set of edit points"
-  ^:hidden
 
   (def.js DIVISIONS_PAN 10)
-  
+
   (def.js DIGITS
     ["0" "1" "2" "3" "4" "5" "6" "7" "8" "9"])
 
@@ -195,12 +193,12 @@
     (r/watch [position0]
       (setPosition1 (j/floor (/ position0 10))))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.model-roller/DigitRollerPan"} 
+     (n/EnclosedCode
+{:label "js.react-native.model-roller/DigitRollerPan"}
 [:% n/Row
        [:% physical-base/Box
         {:indicators {:offset0 offset0
-                      :offset1 offset1} 
+                      :offset1 offset1}
          :style {:height 80
                  :width 80
                  :backgroundColor "black"}
@@ -225,7 +223,7 @@
                                                    -/DIVISIONS
                                                    DIGITS_ARRAY))))]}]
        [:% physical-base/Box
-        {:indicators #{position} 
+        {:indicators #{position}
          :style [{:justifyContent "end"
                   :alignItems "center"
                   :height 200
@@ -243,22 +241,22 @@
                     (fn [v]
                       (return {:style {:transform
                                        [{:translateY v}]}}))}}
-                  
+
                   responder.panHandlers)]}]
        [:% n/Fill]
        [:% physical-base/Tag
         {:indicator position}]
        ])))
-  
-  
-  
+
+
+
   )
 
 (comment
   (defn.js CreatePanVelocityDemo
     []
     (let [axis       "horizontal"
-          
+
           rotation   (a/val 0)
           speed      (r/ref 0)
           size 40
@@ -278,8 +276,8 @@
         (return (fn []
                   (j/clearInterval interval))))
       (return
-       (n/EnclosedCode 
-{:label "js.react-native.physical-edit/createPanVelocity"} 
+       (n/EnclosedCode
+{:label "js.react-native.physical-edit/createPanVelocity"}
 [:% n/Row
          [:% physical-base/Box
           {:indicators #{rotation}
@@ -313,7 +311,7 @@
                                                             "translateX"
                                                             "translateY")
                                                         v}]}}))}}
-                      
+
                       responder.panHandlers)]]}]
          [:% physical-base/Tag
           {:indicator position}]]))))

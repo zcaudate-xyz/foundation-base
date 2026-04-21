@@ -14,26 +14,25 @@
                      :columns [{:align :right :length 10}
                                {:align :center :length 10}
                                {:align :left :length 10}]})
-      (env/with-out-str)) ^:hidden
+      (env/with-out-str))
   => "[1m        id   name   value     [0m\n\n")
 
 ^{:refer std.print.base.report/print-title :added "3.0" :tags #{:print}}
 (fact "prints the title"
 
   (-> (print-title "Hello World")
-      (env/with-out-str)) ^:hidden
+      (env/with-out-str))
   => "[1m\n-----------\nHello World\n-----------[0m\n")
 
 ^{:refer std.print.base.report/print-subtitle :added "3.0"}
 (fact "prints the subtitle"
 
   (-> (print-subtitle "Hello Again")
-      (env/with-out-str)) ^:hidden
+      (env/with-out-str))
   => "[1mHello Again[0m\n")
 
 ^{:refer std.print.base.report/print-row :added "3.0" :tags #{:print}}
 (fact "prints a row to output"
-  ^:hidden
 
   (-> (print-row ["hello" :world (res/result {:data [:a :b :c :d :e :f]
                                               :status :info})]
@@ -51,14 +50,14 @@
   (-> (print-column [[:id.a {:data 100}] [:id.b {:data 200}]]
                     :data
                     #{})
-      (env/with-out-str)) ^:hidden
+      (env/with-out-str))
   => string?)
 
 ^{:refer std.print.base.report/print-summary :added "3.0" :tags #{:print}}
 (fact "outputs the summary of results"
 
   (-> (print-summary {:count 6 :files 2})
-      (env/with-out-str)) ^:hidden
+      (env/with-out-str))
   ;; SUMMARY {:count 6, :files 2}
   => "[1mSUMMARY {:count 6, :files 2}[0m\n")
 

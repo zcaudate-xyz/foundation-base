@@ -6,22 +6,19 @@
 
 ^{:refer std.lang.model.spec-js/emit-html :added "4.0"}
 (fact "emits html"
-  ^:hidden
-  
+
   (emit-html [:hello] +grammar+ {})
   => "<hello></hello>")
 
 ^{:refer std.lang.model.spec-js/js-regex :added "4.0"}
 (fact "outputs the js regex"
-  ^:hidden
-  
+
   (js-regex #"abc")
   => "/abc/")
 
 ^{:refer std.lang.model.spec-js/js-map-key :added "4.0"}
 (fact "emits a map key"
-  ^:hidden
-  
+
   (js-map-key 'hello +grammar+ {})
   => "[hello]"
 
@@ -36,8 +33,7 @@
 
 ^{:refer std.lang.model.spec-js/js-vector :added "4.0"}
 (fact "emits a js vector"
-  ^:hidden
-  
+
   (js-vector [1 2 3 4] +grammar+ {})
   => "[1,2,3,4]"
 
@@ -46,7 +42,6 @@
 
 ^{:refer std.lang.model.spec-js/js-map :added "4.0"}
 (fact "emits a js map"
-  ^:hidden
 
   (js-map {:hello-world "hello"} +grammar+ {})
   => "{\"hello_world\":\"hello\"}"
@@ -57,11 +52,10 @@
 
 ^{:refer std.lang.model.spec-js/js-set :added "4.0"}
 (fact "emits a js set"
-  ^:hidden
 
   (js-set '#{...x y {:a 1 :b 2}} +grammar+ {})
   => "{...x,y,\"a\":1,\"b\":2}"
-  
+
   (js-set '#{...x y {a 1 :b 2}} +grammar+ {})
   => "{...x,y,[a]:1,\"b\":2}"
 
@@ -70,21 +64,20 @@
 
 ^{:refer std.lang.model.spec-js/js-defclass :added "4.0"}
 (fact "creates a defclass function"
-  ^:hidden
-  
+
   (std.lang/emit-as
    :js [(js-defclass '(defclass.js Try
                         [:- React.Component]
-                        
+
                         ^{:- [:static]}
                         (fn getDerivedStateFromError [error]
                           (return #{error {:hasError true}}))
-                        
+
                         (fn constructor []
                           (:= (. this state)
                               {:hasError false
                                :error nil}))
-                        
+
                         (fn render []
                           (if (. this state hasError)
                             (return (. this props fallback))
@@ -110,15 +103,13 @@
 
 ^{:refer std.lang.model.spec-js/tf-var-let :added "4.0"}
 (fact "outputs the let keyword"
-  ^:hidden
-  
+
   (tf-var-let '(var a 1))
   => '(var* :let a := 1))
 
 ^{:refer std.lang.model.spec-js/tf-var-const :added "4.0"}
 (fact "outputs the const keyword"
-  ^:hidden
-  
+
   (tf-var-const '(const a 1))
   => '(var* :const a := 1))
 
@@ -143,15 +134,14 @@
 
 ^{:refer std.lang.model.spec-js/tf-for-iter :added "4.0"}
 (fact "custom for:iter code"
-  
+
   (tf-for-iter '(for:iter [e iter]
                           e))
   => '(for [(var* :let e) :of (% iter)] e))
 
 ^{:refer std.lang.model.spec-js/tf-for-return :added "4.0"}
 (fact "for return transform"
-  ^:hidden
-  
+
   (tf-for-return '(for:return [[ok err] (call (x:callback))]
                               {:success (return ok)
                                :error   (return err)}))
@@ -203,7 +193,6 @@
 
 ^{:refer std.lang.model.spec-js/tf-for-try :added "4.0"}
 (fact "for try transform"
-  ^:hidden
 
   (tf-for-try '(for:try [[ok err] (call (x:callback))]
                         {:success (return ok)
@@ -214,7 +203,6 @@
 
 ^{:refer std.lang.model.spec-js/tf-for-async :added "4.0"}
 (fact  "for async transform"
-  ^:hidden
 
   (tf-for-async '(for:async [[ok err] (call (x:callback))]
                             {:success (return ok)

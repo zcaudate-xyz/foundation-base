@@ -51,7 +51,6 @@
 
 ^{:refer js.cell.service.db-supabase/supabase-capable? :added "4.1"}
 (fact "checks whether a descriptor can execute compiled Supabase queries"
-  ^:hidden
 
   (!.js
    (var db (xtd/obj-assign (@! +db+)
@@ -63,7 +62,6 @@
 
 ^{:refer js.cell.service.db-supabase/compile-select-item :added "4.1"}
 (fact "compiles individual return entries to Supabase select syntax"
-  ^:hidden
 
   (!.js
    [(db-supabase/compile-select-item "status")
@@ -73,7 +71,6 @@
 
 ^{:refer js.cell.service.db-supabase/compile-select :added "4.1"}
 (fact "compiles a full return vector to Supabase select syntax"
-  ^:hidden
 
   (!.js
    (db-supabase/compile-select
@@ -83,7 +80,6 @@
 
 ^{:refer js.cell.service.db-supabase/compile-filters-into :added "4.1"}
 (fact "compiles nested where clauses into Supabase filter descriptors"
-  ^:hidden
 
   (!.js
    (db-supabase/compile-filters-into
@@ -100,7 +96,6 @@
 
 ^{:refer js.cell.service.db-supabase/compile-query :added "4.1"}
 (fact "compiles a prepared query plan into a Supabase request"
-  ^:hidden
 
   (!.js
    (db-supabase/compile-query
@@ -118,7 +113,6 @@
 
 ^{:refer js.cell.service.db-supabase/execute-query :added "4.1"}
 (fact "executes a compiled query via the injected executor"
-  ^:hidden
 
   (!.js
    (db-supabase/execute-query
@@ -138,7 +132,6 @@
 
 ^{:refer js.cell.service.db-supabase/map-supabase-error :added "4.1"}
 (fact "maps execution errors into the local error contract"
-  ^:hidden
 
   (!.js
    [(db-supabase/map-supabase-error
@@ -165,7 +158,6 @@
 
 ^{:refer js.cell.service.db-supabase/run-supabase-query :added "4.1"}
 (fact "prepares, compiles, and executes a Supabase query"
-  ^:hidden
 
   (!.js
    (var db (xtd/obj-assign (@! +db+)

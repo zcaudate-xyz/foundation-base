@@ -26,8 +26,7 @@
 
 ^{:refer lib.postgres.connection/conn-create :added "4.0"}
 (fact "creates a pooled connection"
-  ^:hidden
-  
+
   (try (conn/conn-create {:dbname "test"})
        (catch Throwable t t))
   => (any java.sql.SQLException
@@ -42,14 +41,12 @@
 
 ^{:refer lib.postgres.connection/conn-close :added "4.0"}
 (fact "closes a connection"
-  ^:hidden
-  
+
   (conn/conn-close (mock-pooled-conn)) => nil)
 
 ^{:refer lib.postgres.connection/conn-execute :added "4.0"}
 (fact "executes a command"
-  ^:hidden
-  
+
   (with-redefs [conn/conn-create (constantly (mock-pooled-conn))]
     (let [pool (conn/conn-create {:dbname "test"})]
       (conn/conn-execute pool "select 1;" (constantly [{:?column? 1}]))))
@@ -57,15 +54,13 @@
 
 ^{:refer lib.postgres.connection/notify-listener :added "4.0"}
 (fact "creates a notification listener"
-  ^:hidden
-  
+
   (conn/notify-listener {})
   => (partial instance? com.impossibl.postgres.api.jdbc.PGNotificationListener))
 
 ^{:refer lib.postgres.connection/notify-create :added "4.0"}
 (fact "creates a notify channel"
-  ^:hidden
-  
+
   (try (conn/notify-create {:dbname "test"} {:channel "ch"})
        (catch Throwable t t))
   => (contains-in

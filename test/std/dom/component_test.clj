@@ -67,7 +67,7 @@
                 :template fn?}))
 
 ^{:refer std.dom.component/component-install :added "3.0"}
-(fact "installs component given template and mixins"^:hidden
+(fact "installs component given template and mixins"
 
   (component-install :mock/box-static
                      :static
@@ -84,7 +84,7 @@
                                      :class :static}]))
 
 ^{:refer std.dom.component/defcomp :added "3.0"}
-(fact "defines a component"^:hidden
+(fact "defines a component"
 
   (defcomp :mock/box-local
     [:local {:initial {:title "TITLE"
@@ -93,7 +93,7 @@
      (base/dom-compile
       [:mock/pane {:class :box}
        [:mock/label (:title (local/local :title))]
-       [:mock/label (:contents (local/local :contents))]])))^:hidden
+       [:mock/label (:contents (local/local :contents))]])))
   => (contains-in [:mock/box-local
                    {:initial {:title "TITLE",
                               :contents "CONTENTS"},
@@ -107,7 +107,7 @@
 
 ^{:refer std.dom.component/dom-render-component :added "3.0"}
 (fact "component dom element rendering function"
-  
+
   (-> (base/dom-compile [:mock/pane-static
                          [:mock/box-static {:title "a" :content "A"}]
                          [:mock/box-static {:title "b" :content "B"}]])
@@ -118,7 +118,7 @@
       [:+ :mock/box-static {:title "b", :content "B"}]])
 
 ^{:refer std.dom.component/child-components :added "3.0"}
-(fact "collects child components of component tree"^:hidden
+(fact "collects child components of component tree"
 
   (->> (base/dom-compile
         [:mock/pane-static
@@ -131,8 +131,8 @@
   => [[:+ :mock/box-static {:title "a", :content "A"}]])
 
 ^{:refer std.dom.component/dom-remove-component :added "3.0"}
-(fact "removes rendered component from dom"^:hidden
-  
+(fact "removes rendered component from dom"
+
   (-> (base/dom-compile [:mock/box-local])
       (dom-render-component)
       (dom-remove-component)
@@ -140,19 +140,19 @@
   => [:+ :mock/box-local])
 
 ^{:refer std.dom.component/dom-ops-component :added "3.0"}
-(fact "constructs transform operations for component dom"^:hidden
+(fact "constructs transform operations for component dom"
 
   (dom-ops-component :mock/box-static {} {})
   => []
 
   (dom-ops-component :mock/box-static {} {:a 1})
   => (contains-in [[:refresh base/dom?]])
-  
+
   (dom-ops-component :mock/box-local {} {})
   => [])
 
 ^{:refer std.dom.component/dom-apply-component :added "3.0"}
-(fact "applies operations to component dom"^:hidden
+(fact "applies operations to component dom"
 
   (-> (base/dom-compile [:mock/box-static])
       (impl/dom-render)
@@ -163,7 +163,7 @@
   => [:+ :mock/box-static {:a 1}])
 
 ^{:refer std.dom.component/dom-replace-component :added "3.0"}
-(fact "default replace operation for components"^:hidden
+(fact "default replace operation for components"
 
   (-> (base/dom-compile [:mock/box-static])
       (impl/dom-render)
@@ -183,9 +183,9 @@
 
 (comment
   (def -choose- (atom :s1))
-  
+
   (def -s1- (atom {:title "s1" :contents "S1"}))
-  
+
   (def -s2- (atom {:title "s2" :contents "S2"}))
 
   (def -dom- (-> (impl/dom-compile [:mock/pane-react {:choose -choose-
@@ -193,18 +193,18 @@
                                                       :s2 -s2-}])
                  (impl/dom-render)))
 
-  
+
   (reset! -choose- :s1)
   (impl/dom-elem -dom-))
 
 (comment
-  
+
   (doto (base/dom-compile [:mock/box-local])
     (impl/dom-render)
     (-> :shadow prn)
     (-> :cache :local/state (reset! {:title "title" :contents "contents"}))
     (-> :shadow prn))
-  
+
   (-> (impl/dom-compile [:mock/pane-static
                          [:mock/pane-static
                           [:mock/label "hello"]
@@ -215,7 +215,7 @@
       [:mock/pane {:class :pane}
        [:mock/label "hello"]
        [:mock/label "world"]]]
-  
+
   (-> (impl/dom-compile [:mock/pane-static
                          [:mock/pane-static
                           [:mock/pane-static
@@ -228,18 +228,18 @@
        [:mock/pane {:class :pane}
         [:mock/label "hello"]
         [:mock/label "world"]]]]
-  
-  (-> 
+
+  (->
    (impl/dom-render)
       :shadow)
 
-  
-  
+
+
   (meta/elem-meta :mock/box-local)
-  
-  
+
+
   (dom-component? (impl/dom-compile [:mock/pane-static]))
-  
+
   (meta/elem-meta (:tag (impl/dom-compile [:mock/pane-static])))
   => {:template fn?,
       :tag :mock/pane-static,

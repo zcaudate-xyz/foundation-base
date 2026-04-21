@@ -131,7 +131,6 @@
   :adopt true
   :added "4.0" :unchecked true}
 (fact "creates a set of edit points"
-  ^:hidden
 
   (def.js DATES
     ["1989" "1990" "1991" "1992" "1993" "1994" "1995" "1996" "1997" "1998"])
@@ -140,8 +139,8 @@
     []
     (var modelFn (model-roller/roller-model 10 30))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.physical-play/DigitRollerStatic"} 
+     (n/EnclosedCode
+{:label "js.react-native.physical-play/DigitRollerStatic"}
 [:% n/Row
        [:% n/View
         {:style {:height 80
@@ -171,16 +170,15 @@
   :adopt true
   :added "4.0" :unchecked true}
 (fact "creates a set of edit points"
-  ^:hidden
 
   (def.js DIVISIONS 6)
-  
+
   (def.js DIGITS
     ["0" "1" "2" "3" "4" "5" "6" "7" "8" "9"])
-  
+
   (def.js HOURS
     ["0" "1" "2" "3" "4" "5" "0" "1" "2" "3" "4" "5"])
-  
+
   (defn.js DigitRollerSingleDemo
     []
     (var [position0 setPosition0] (r/local 9))
@@ -189,14 +187,14 @@
 
     (var modelFn (r/const (model-roller/roller-model -/DIVISIONS 20)))
     (var DIGITS_ARRAY (r/const (-/make-values -/DIGITS -/DIVISIONS)))
-  
+
     (var HOURS_ARRAY (r/const (-/make-values -/HOURS -/DIVISIONS)))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.physical-play/DigitRollerSingle"} 
+     (n/EnclosedCode
+{:label "js.react-native.physical-play/DigitRollerSingle"}
 [:% n/Row
        [:% physical-base/Box
-        {:indicators {:offset0 offset0} 
+        {:indicators {:offset0 offset0}
          :style {:height 80
                  :width 80
                  :backgroundColor "black"}
@@ -222,7 +220,7 @@
 
   (defn.js DigitRollerDoubleDemo
     []
-    
+
     (var [position0 setPosition0] (r/local 99))
     (var offset0   (a/useIndexIndicator position0
                                         {:default {:duration 200}}))
@@ -231,17 +229,17 @@
                                         {:default {:duration 200}}))
     (var modelFn (r/const (model-roller/roller-model -/DIVISIONS 20)))
     (var DIGITS_ARRAY (r/const (-/make-values -/DIGITS -/DIVISIONS)))
-  
+
     (var HOURS_ARRAY (r/const (-/make-values -/HOURS -/DIVISIONS)))
     (r/watch [position0]
       (setPosition1 (j/floor (/ position0 10))))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.physical-play/DigitRollerDouble"} 
+     (n/EnclosedCode
+{:label "js.react-native.physical-play/DigitRollerDouble"}
 [:% n/Row
        [:% physical-base/Box
         {:indicators {:offset0 offset0
-                      :offset1 offset1} 
+                      :offset1 offset1}
          :style {:height 80
                  :width 80
                  :backgroundColor "black"}
@@ -279,23 +277,22 @@
   :adopt true
   :added "4.0" :unchecked true}
 (fact "creates a set of edit points"
-  ^:hidden
 
   (def.js CLOCK_DIVISIONS 10)
-  
+
   (defn.js DigitClockDemo
     []
     (var [seconds0 setSeconds0] (r/local (j/floor (/ (xt/x:now-ms) 1000))))
     (var iseconds0  (a/useIndexIndicator seconds0
                                         {:default {:duration 100}}))
-    
+
     (var [seconds1 setSeconds1] (r/local  (j/floor (/ seconds0 10))))
     (var iseconds1   (a/useIndexIndicator seconds1
                                           {:default {:duration 100}}))
     (var [minutes0 setMinutes0] (r/local (j/floor (/ (xt/x:now-ms) 1000))))
     (var iminutes0  (a/useIndexIndicator minutes0
                                         {:default {:duration 100}}))
-    
+
     (var [minutes1 setMinutes1] (r/local  (j/floor (/ minutes0 10))))
     (var iminutes1   (a/useIndexIndicator minutes1
                                           {:default {:duration 100}}))
@@ -304,10 +301,10 @@
                                                (when (not= seconds0 now)
                                                  (setSeconds0 now)))
                                              200))
-    
+
     (var hexFn  (r/const (model-roller/roller-model 6 20)))
     (var modelFn (r/const (model-roller/roller-model -/CLOCK_DIVISIONS 20)))
-    
+
     (var DIGITS_ARRAY (r/const (-/make-values -/DIGITS -/CLOCK_DIVISIONS)))
     (r/watch [seconds0]
       (setSeconds1 (j/floor (/ seconds0 10))))
@@ -316,12 +313,12 @@
     (r/watch [minutes0]
       (setMinutes1 (j/floor (/ seconds0 600))))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.physical-play/DigitClock"} 
+     (n/EnclosedCode
+{:label "js.react-native.physical-play/DigitClock"}
 [:% n/Row
        [:% n/View
         [:% physical-base/Box
-         {:indicators {:minutes1 iminutes1} 
+         {:indicators {:minutes1 iminutes1}
           :style {:height 40
                   :width 20
                   :backgroundColor "black"}
@@ -338,7 +335,7 @@
                                                     ))))]}]]
        [:% n/View
         [:% physical-base/Box
-         {:indicators {:minutes0 iminutes0} 
+         {:indicators {:minutes0 iminutes0}
           :style {:height 40
                   :width 20
                   :backgroundColor "black"}
@@ -358,7 +355,7 @@
                  }}]
        [:% n/View
         [:% physical-base/Box
-         {:indicators {:seconds1 iseconds1} 
+         {:indicators {:seconds1 iseconds1}
           :style {:height 40
                   :width 20
                   :backgroundColor "black"}
@@ -375,7 +372,7 @@
                                                     ))))]}]]
        [:% n/View
         [:% physical-base/Box
-         {:indicators {:seconds0 iseconds0} 
+         {:indicators {:seconds0 iseconds0}
           :style {:height 40
                   :width 20
                   :backgroundColor "black"}
@@ -388,14 +385,14 @@
                                                     {:top 10
                                                      :left 2}
                                                     -/CLOCK_DIVISIONS
-                                                    DIGITS_ARRAY))))]}]]] 
+                                                    DIGITS_ARRAY))))]}]]]
 [:% n/View
        [:% n/Button
         {:title "CLOCK"
-         :onPress (fn:> (setActive (not active)))}]] 
-[:% n/Text seconds0] 
+         :onPress (fn:> (setActive (not active)))}]]
+[:% n/Text seconds0]
 [:% n/Fill])))
 
-  
-  
+
+
   )

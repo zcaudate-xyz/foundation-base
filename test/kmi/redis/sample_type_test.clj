@@ -4,8 +4,7 @@
 
 ^{:refer kmi.redis.sample-type/> :added "4.0"}
 (fact "shortcut for data access"
-  ^:hidden
-  
+
   (type/> [:KEYS ["test"] [:unfilled]])
   => "kmi.redis.scan_sub('test' .. ':' .. 'unfilled')"
 

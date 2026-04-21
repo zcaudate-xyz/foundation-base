@@ -19,8 +19,7 @@
 
 ^{:refer rt.postgres.runtime.graph-base/where-pair-ref :added "4.0"}
 (fact "constructs the where ref pair"
-  ^:hidden
-  
+
   ;; FORWARD
   (base/where-pair-ref [:cache "cache-001"]
                        base/where-fn
@@ -39,8 +38,7 @@
 
 ^{:refer rt.postgres.runtime.graph-base/where-pair-fn :added "4.0"}
 (fact "constructs the where pair"
-  ^:hidden
-  
+
   (base/where-pair-fn [:id "hello"]
                       base/where-fn
                       (get-in -sch- [:Task])
@@ -63,26 +61,25 @@
 
 ^{:refer rt.postgres.runtime.graph-base/where-fn :added "4.0"}
 (fact "constructs where clause"
-  ^:hidden
-  
+
   (base/where-fn (get-in -sch- [:Task])
                  {:cache "cache-001"}
                  (last (impl/prep-table 'scratch/Task true (l/rt:macro-opts :postgres))))
   => '{:cache [:eq "cache-001"]}
-  
+
 
   (base/where-fn (get-in -sch- [:TaskCache])
                  {:tasks "tasks-001"}
                  (last (impl/prep-table 'scratch/TaskCache true (l/rt:macro-opts :postgres))))
   => '{:id [:in [:select (--- [#{"cache_id"}]) :from rt.postgres.test.scratch-v1/Task
                  \\ :where {"id" [:eq "tasks-001"]}]]}
-  
+
   (base/where-fn (get-in -sch- [:TaskCache])
                  #{[:tasks "tasks-001"]}
                  (last (impl/prep-table 'scratch/TaskCache true (l/rt:macro-opts :postgres))))
   => '#{[:id [:in [:select (--- [#{"cache_id"}]) :from rt.postgres.test.scratch-v1/Task
                    \\ :where {"id" [:eq "tasks-001"]}]]]}
-  
+
   (base/where-fn (get-in -sch- [:TaskCache])
                  {:tasks "tasks-001"
                   :id "hello"}
@@ -90,7 +87,7 @@
   => '#{[:id [:in [:select (--- [#{"cache_id"}]) :from rt.postgres.test.scratch-v1/Task
                   \\ :where {"id" [:eq "tasks-001"]}]]
          :id [:eq "hello"]]}
-  
+
   (base/where-fn (get-in -sch- [:TaskCache])
                  #{[:tasks "tasks-001"
                     :id "hello"]}
@@ -115,13 +112,12 @@
 
 ^{:refer rt.postgres.runtime.graph-base/id-where-fn :added "4.0"}
 (fact "constructs id-fn"
-  ^:hidden
-  
+
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (base/id-where-fn 'scratch/TaskCache
                 {:where {:tasks "tasks-001"}}))
   => '[{:id [:in [:select (--- [#{"cache_id"}]) :from rt.postgres.test.scratch-v1/Task \\ :where {"id" [:eq "tasks-001"]}]]}]
-  
+
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (base/id-where-fn 'scratch/Task
                       {:where {:cache "tasks-001"}}))
@@ -129,8 +125,7 @@
 
 ^{:refer rt.postgres.runtime.graph-base/id-fn :added "4.0"}
 (fact "constructs id-fn"
-  ^:hidden
-  
+
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (base/id-fn 'scratch/TaskCache
                 {:where {:tasks "tasks-001"}}))
@@ -141,8 +136,7 @@
 
 ^{:refer rt.postgres.runtime.graph-base/count-fn :added "4.0"}
 (fact "constructs count-fn"
-  ^:hidden
-  
+
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (base/count-fn 'scratch/TaskCache
                    {:where {:tasks "tasks-001"}}))
@@ -156,8 +150,7 @@
 
 ^{:refer rt.postgres.runtime.graph-base/select-fn-raw :added "4.0"}
 (fact "constructs a select fn with prep"
-  ^:hidden
-  
+
   (base/select-fn-raw
    (impl/prep-table 'scratch/TaskCache true (l/rt:macro-opts :postgres))
    {:where {:tasks "tasks-001"}})
@@ -171,8 +164,7 @@
 
 ^{:refer rt.postgres.runtime.graph-base/select-fn :added "4.0"}
 (fact "constructs a select fn"
-  ^:hidden
-  
+
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (base/select-fn 'scratch/TaskCache
                     {:where {:tasks "tasks-001"}}))
@@ -186,8 +178,7 @@
 
 ^{:refer rt.postgres.runtime.graph-base/delete-fn :added "4.0"}
 (fact "constructs a delete fn"
-  ^:hidden
-  
+
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (base/delete-fn 'scratch/TaskCache
                     {:where {:tasks "tasks-001"}}))
@@ -200,8 +191,7 @@
 
 ^{:refer rt.postgres.runtime.graph-base/update-fn :added "4.0"}
 (fact "constructs an update fn"
-  ^:hidden
-  
+
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (base/update-fn 'scratch/TaskCache
                     {:set {:time-created 0}
@@ -220,7 +210,6 @@
 
 ^{:refer rt.postgres.runtime.graph-base/modify-fn :added "4.0"}
 (fact "constructs an modify fn"
-  ^:hidden 
 
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (base/modify-fn 'scratch/TaskCache

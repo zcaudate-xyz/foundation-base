@@ -195,7 +195,6 @@
   :adopt true
   :added "0.1"}
 (fact  "creates a slim switch box"
-  ^:hidden
 
   (defn.js placeHolderBottom
     [placeholder]
@@ -222,7 +221,7 @@
                                  :transform
                                  [{:translateY (math/mix 15 60 active)}
                                   {:translateX (math/mix 10 -5  active)}]}}))}]))
-  
+
   (defn.js useLoginForm
     []
     (var [login setLogin]       (r/local ""))
@@ -233,7 +232,7 @@
               password setPassword
               waiting setWaiting
               step setStep}))
-  
+
   (defn.js LoginFormReset
     [#{login setLogin
        password setPassword
@@ -262,7 +261,7 @@
                         :margin 10
                         :alignItems "center"
                         :justifyContent "center"}}]]))
-  
+
   (defn.js LoginForm
     [#{login setLogin
        waiting
@@ -272,7 +271,7 @@
     (return [:% n/View
              [:% n/Row
               [:% ui-input/Input
-               {:disabled inputDisabled 
+               {:disabled inputDisabled
                 :selectionColor "white"
                 :theme {:bgNormal "#ccc"
                         :bgHovered "#555"}
@@ -281,7 +280,7 @@
                 :style {:height 50
                         :paddingLeft 8
                         :fontSize 20}
-                
+
                 :styleContainer {:flex 1
                                  :borderRadius 10
                                  :height 50
@@ -316,7 +315,7 @@
                         :alignItems "center"
                         :justifyContent "center"}
                 :disabled submitDisabled}]]]))
-  
+
   (defn.js PasswordForm
     [#{password setPassword
        waiting
@@ -326,7 +325,7 @@
     (return [:% n/View
              [:% n/Row
               [:% ui-input/Input
-               {:disabled inputDisabled 
+               {:disabled inputDisabled
                 :selectionColor "white"
                 :theme {:bgNormal "#ddd"
                         :bgHovered "#555"}
@@ -335,7 +334,7 @@
                 :style {:height 50
                         :paddingLeft 8
                         :fontSize 20}
-                
+
                 :styleContainer {:flex 1
                                  :borderRadius 10
                                  :height 50
@@ -396,8 +395,8 @@
            (setPassword "")
            (setStep 0)))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-form-walkthrough-test/LoginFormWalkthroughCarosel"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-form-walkthrough-test/LoginFormWalkthroughCarosel"}
 [:% n/View
        {:style {:justifyContent "center"
                 :alignItems "center"}}
@@ -423,7 +422,7 @@
             :else
             [:% -/LoginFormReset
              #{[:onSubmit submitReset
-                (:.. form)]}])]] 
+                (:.. form)]}])]]
 [:% n/Row
        [:% n/Button
         {:title "WAITING"
@@ -431,7 +430,7 @@
        [:% n/Text " "]
        [:% n/Button
         {:title "STEP"
-         :onPress (fn:> (setStep (mod (+ 1 step) 3)))}]] 
+         :onPress (fn:> (setStep (mod (+ 1 step) 3)))}]]
 [:% n/Caption
        {:text (n/format-entry #{login
                                 step
@@ -445,8 +444,7 @@
   :adopt true
   :added "0.1"}
 (fact "adding a carosel stepper"
-  ^:hidden
-  
+
   (defn.js LoginFormWalkthroughStepperDemo
     []
     (var form (-/useLoginForm))
@@ -460,7 +458,7 @@
                      {:default {:type "timing"
                                 :duration 500
                                 :easing a/linear}}
-                     
+
                      "chainedAll"
                      nil
                      nil
@@ -500,8 +498,8 @@
                      :transform
                      [{:translateX (* -30 translate)}]}})))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-form-walkthrough-test/LoginFormStepper"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-form-walkthrough-test/LoginFormStepper"}
 [:% n/View
        {:style {:justifyContent "center"
                 :alignItems "center"}}
@@ -556,7 +554,7 @@
                           (:.. form)]}]]
            :transformations
            {:offset (fn [offset]
-                      (return (offsetFn offset 2)))}}]]]] 
+                      (return (offsetFn offset 2)))}}]]]]
 [:% n/Row
        [:% n/Button
         {:title "WAITING"
@@ -564,17 +562,17 @@
        [:% n/Text " "]
        [:% n/Button
         {:title "STEP"
-         :onPress (fn:> (setStep (mod (+ step 1) 3)))}]] 
+         :onPress (fn:> (setStep (mod (+ step 1) 3)))}]]
 [:% n/Caption
        {:text (n/format-entry #{login
                                 step
                                 waiting
                                 password})
         :style {:marginTop 10}}])))
-  
+
 
   (def.js MODULE
     (do (:# (!:uuid))
         (!:module)))
-  
+
   )

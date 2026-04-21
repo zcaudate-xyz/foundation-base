@@ -25,7 +25,7 @@
   => any?)
 
 ^{:refer std.lib.system.array/stop-array :added "3.0"}
-(fact "stops an array of components" ^:hidden
+(fact "stops an array of components"
 
   (-> (start-array [(map->Database nil) (map->Database nil)])
       (stop-array))

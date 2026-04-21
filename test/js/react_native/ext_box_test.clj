@@ -19,8 +19,7 @@
 
 ^{:refer js.react.ext-box/useBox :adopt true :added "4.0" :unchecked true}
 (fact "uses an async entry"
-  ^:hidden
-  
+
   (defn.js UseBoxDemo
     []
     (var box (ext-box/createBox
@@ -28,8 +27,8 @@
     (var getCount (r/useGetCount))
     (var [value setValue] (ext-box/useBox box ["account"]))
     (return
-     (n/EnclosedCode 
-      {:label "js.react.ext-box/useBox"} 
+     (n/EnclosedCode
+      {:label "js.react.ext-box/useBox"}
       [:% n/Row
        [:% n/TextInput
         {:value value
@@ -56,11 +55,11 @@
                          ["account"]
                          (event-box/get-data
                           box
-                          ["account"])))}]] 
+                          ["account"])))}]]
       [:% n/TextDisplay
        {:content (n/format-entry {:data (event-box/get-data box)
                                   :value value
                                   :counter (getCount)})}])))
-  
+
   )
-  
+

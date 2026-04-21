@@ -25,8 +25,7 @@
 
 ^{:refer xt.db.sql-call/decode-return :added "4.0"}
 (fact "decodes the return value"
-  ^:hidden
-  
+
   (!.lua
    (call/decode-return (xt/x:json-encode
                         {:status "ok"
@@ -41,8 +40,7 @@
 
 ^{:refer xt.db.sql-call/call-format-input :added "4.0"}
 (fact "formats the inputs"
-  ^:hidden
-  
+
   (!.lua
    (call/call-format-input {:input [{:type "numeric"}
                                     {:type "jsonb"}]}
@@ -52,14 +50,13 @@
 
 ^{:refer xt.db.sql-call/call-format-query :added "4.0"}
 (fact "formats a query"
-  ^:hidden
-  
+
   (!.lua
    (call/call-format-query
     (@! (pg/bind-function scratch/divf))
     [1 2]))
   => "SELECT \"scratch\".divf('1', '2');"
-  
+
   (!.lua
    (var conn (driver/connect {:constructor lua-postgres/connect-constructor
                               :database "test-scratch"}))
@@ -70,8 +67,7 @@
 
 ^{:refer xt.db.sql-call/call-raw :added "4.0"}
 (fact "calls a database function"
-  ^:hidden
-  
+
   (!.lua
    (var conn (driver/connect {:constructor lua-postgres/connect-constructor
                               :database "test-scratch"}))
@@ -83,8 +79,7 @@
 
 ^{:refer xt.db.sql-call/call-api :added "4.0"}
 (fact "results an api style result"
-  ^:hidden
-  
+
   (!.lua
    (var conn (driver/connect {:constructor lua-postgres/connect-constructor
                               :database "test-scratch"}))

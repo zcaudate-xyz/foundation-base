@@ -26,8 +26,7 @@
 
 ^{:refer xt.db.sql-call/decode-return :added "4.0"}
 (fact "decodes the return value"
-  ^:hidden
-  
+
   (!.js
    (call/decode-return (xt/x:json-encode
                         {:status "ok"
@@ -45,8 +44,7 @@
 
 ^{:refer xt.db.sql-call/call-format-input :added "4.0"}
 (fact "formats the inputs"
-  ^:hidden
-  
+
   (!.js
    (call/call-format-input {:input [{:type "numeric"}
                                     {:type "jsonb"}]}
@@ -56,8 +54,7 @@
 
 ^{:refer xt.db.sql-call/call-format-query :added "4.0"}
 (fact "formats a query"
-  ^:hidden
-  
+
   (!.js
    (call/call-format-query
     (@! (pg/bind-function scratch/divf))
@@ -70,8 +67,7 @@
                     :python {:skip true}
                     :dart {:skip true}}}
 (fact "calls a database function"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (driver/connect {:constructor js-postgres/connect-constructor
                      :database "test-scratch"}
@@ -90,8 +86,7 @@
                     :python {:skip true}
                     :dart {:skip true}}}
 (fact "results an api style result"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (driver/connect {:constructor js-postgres/connect-constructor
                      :database "test-scratch"}

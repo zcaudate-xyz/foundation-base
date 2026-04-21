@@ -49,16 +49,14 @@
 
 ^{:refer std.lang.base.runtime/default-tags-ptr :added "4.0"}
 (fact "runtime default args"
-  ^:hidden
-  
+
   (rt/default-tags-ptr {:runtime :hello}
                        +ptr+)
   => '[:hello L.core/add :fragment])
 
 ^{:refer std.lang.base.runtime/default-deref-ptr :added "4.0"}
 (fact "runtime default deref"
-  ^:hidden
-  
+
   (rt/default-deref-ptr {:runtime :hello
                          :library +library-ext+}
                         +ptr+)
@@ -70,8 +68,7 @@
 
 ^{:refer std.lang.base.runtime/default-invoke-ptr :added "4.0"}
 (fact "runtime default invoke"
-  ^:hidden
-  
+
   (rt/default-invoke-ptr {:runtime :hello
                           :library +library-ext+}
                          +ptr+
@@ -84,8 +81,7 @@
 
 ^{:refer std.lang.base.runtime/default-display-ptr :added "4.0"}
 (fact "runtime default display"
-  ^:hidden
-  
+
   (rt/default-display-ptr {:runtime :hello
                            :library +library-ext+}
                           +ptr+)
@@ -97,8 +93,7 @@
 
 ^{:refer std.lang.base.runtime/rt-default :added "4.0"}
 (fact "creates a lang runtime"
-  ^:hidden
-  
+
   (rt/rt-default {:lang :lua})
   => rt/rt-default?)
 
@@ -123,29 +118,25 @@
 
 ^{:refer std.lang.base.runtime/return-format-simple :added "4.0"}
 (fact "format forms for return"
-  ^:hidden
-  
+
   (rt/return-format-simple [1 2 3])
   => '(1 2 (return 3)))
 
 ^{:refer std.lang.base.runtime/return-format :added "4.0"}
 (fact "standard format for return"
-  ^:hidden
-  
+
   (rt/return-format '[1 2 (:= x 3)])
   => '(1 2 (:= x 3)))
 
 ^{:refer std.lang.base.runtime/return-wrap-invoke :added "4.0"}
 (fact "wraps forms to be invoked"
-  ^:hidden
-  
+
   (rt/return-wrap-invoke '[1 2 (:= x 3)])
   => '((quote ((fn [] 1 2 (:= x 3))))))
 
 ^{:refer std.lang.base.runtime/return-transform :added "4.0"}
 (fact "standard return transform"
-  ^:hidden
-  
+
   (rt/return-transform '[1 2 (:= x 3)] {})
   => '((quote ((fn [] (return [1 2 (:= x 3)])))))
 
@@ -154,7 +145,6 @@
 
 ^{:refer std.lang.base.runtime/default-invoke-script :added "4.0"}
 (fact "default invoke script call used by most runtimes"
-  ^:hidden
 
   (rt/default-invoke-script {:runtime :hello
                              :library +library-ext+}
@@ -166,8 +156,7 @@
 
 ^{:refer std.lang.base.runtime/default-lifecycle-prep :added "4.0"}
 (fact "prepares mopts for lifecycle"
-  ^:hidden
-  
+
   (rt/default-lifecycle-prep {:library +library-ext+
                               :lang :lua
                               :module 'L.core})
@@ -208,8 +197,7 @@
 
 ^{:refer std.lang.base.runtime/default-lifecycle-fn :added "4.0"}
 (fact "constructs a lifecycle fn"
-  ^:hidden
-  
+
   ((rt/default-lifecycle-fn deps/has-module-form)
    {:library +library-ext+
     :lang :lua
@@ -232,8 +220,7 @@
 
 ^{:refer std.lang.base.runtime/default-setup-module-emit :added "4.0"}
 (fact "emits the string for the module"
-  ^:hidden
-  
+
   (rt/default-setup-module-emit
    (rt/map->RuntimeDefault
     {:library +library-ext+
@@ -246,8 +233,7 @@
 
 ^{:refer std.lang.base.runtime/default-setup-module-basic :added "4.0"}
 (fact "basic setup module action"
-  ^:hidden
-  
+
   (rt/default-setup-module-basic
    (rt/map->RuntimeDefault
     {:library +library-ext+
@@ -259,8 +245,7 @@
 
 ^{:refer std.lang.base.runtime/default-teardown-module-basic :added "4.0"}
 (fact "basic teardown module action"
-  ^:hidden
-  
+
   (rt/default-teardown-module-basic
    (rt/map->RuntimeDefault
     {:library +library-ext+
@@ -294,8 +279,7 @@
 
 ^{:refer std.lang.base.runtime/multistage-invoke :added "4.0"}
 (fact "invokes a multistage pipeline given deps function"
-  ^:hidden
-  
+
   (rt/multistage-invoke
    (rt/map->RuntimeDefault
     {:library +library-ext+
@@ -310,8 +294,7 @@
 
 ^{:refer std.lang.base.runtime/multistage-setup-for :added "4.0"}
 (fact "setup for a given namespace"
-  ^:hidden
-  
+
   (rt/multistage-setup-for
    (rt/map->RuntimeDefault
     {:library +library-ext+
@@ -323,8 +306,7 @@
 
 ^{:refer std.lang.base.runtime/multistage-setup-to :added "4.0"}
 (fact "setup to a given namespcase"
-  ^:hidden
-  
+
   (rt/multistage-setup-to
    (rt/map->RuntimeDefault
     {:library +library-ext+
@@ -336,8 +318,7 @@
 
 ^{:refer std.lang.base.runtime/multistage-teardown-for :added "4.0"}
 (fact "teardown for a given namespace"
-  ^:hidden
-  
+
   (rt/multistage-teardown-for
    (rt/map->RuntimeDefault
     {:library +library-ext+
@@ -349,8 +330,7 @@
 
 ^{:refer std.lang.base.runtime/multistage-teardown-at :added "4.0"}
 (fact "teardown all dependents including this"
-  ^:hidden
-  
+
   (rt/multistage-teardown-at
    (rt/map->RuntimeDefault
     {:library +library-ext+
@@ -362,8 +342,7 @@
 
 ^{:refer std.lang.base.runtime/multistage-teardown-to :added "4.0"}
 (fact "teardown all dependents upto this"
-  ^:hidden
-  
+
   (rt/multistage-teardown-to
    (rt/map->RuntimeDefault
     {:library +library-ext+
@@ -372,7 +351,7 @@
      :layout :full})
    'L.util)
   => []
-  
+
   (rt/multistage-teardown-to
    (rt/map->RuntimeDefault
     {:library +library-ext+

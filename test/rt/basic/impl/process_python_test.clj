@@ -19,22 +19,20 @@
 
   (!.py (+ 1 2 3 4))
   => 10
-  
+
   (l/! [:py.0]
     (+ 1 2 3 4))
   => 10)
 
 ^{:refer rt.basic.impl.process-python/default-oneshot-wrap :adopt true :added "4.0"}
 (fact "creates the ws client connect code"
-  ^:hidden
-  
+
   (default-oneshot-wrap 1)
   => string?)
 
 ^{:refer rt.basic.impl.process-python/default-body-wrap :added "4.0"}
 (fact "creates the scaffolding for the runtime eval to work"
-  ^:hidden
-  
+
   (default-body-wrap ['(+ 1 2 3)])
   => '(do (defn OUT-FN
             []
@@ -48,8 +46,7 @@
 
 ^{:refer rt.basic.impl.process-python/default-body-transform :added "4.0"}
 (fact "standard python transforms"
-  ^:hidden
-  
+
   (default-body-transform '[1 2 3] {})
   => '(do (defn OUT-FN
             []
@@ -59,8 +56,8 @@
               (return [1 2 3])
               (catch Exception (:= err (. traceback (format-exc)))))
             (throw (Exception err)))
-          (:= (. (globals) ["OUT"]) (OUT-FN)))  
-  
+          (:= (. (globals) ["OUT"]) (OUT-FN)))
+
   (default-body-transform '[1 2 3] {:bulk true})
   => '(do (defn OUT-FN
             []

@@ -36,7 +36,6 @@
 
 ^{:refer std.fs/get-namespace :added "4.0"}
 (fact "gets the namespace given forms"
-  ^:hidden
-  
+
   (get-namespace '[(ns hello)])
   => 'hello)

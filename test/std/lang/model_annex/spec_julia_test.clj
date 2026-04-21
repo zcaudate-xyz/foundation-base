@@ -9,7 +9,6 @@
 
 ^{:refer std.lang.model-annex.spec-julia/tf-local :added "4.0"}
 (fact "a more flexible `var` replacement"
-  ^:hidden
 
   (tf-local '(local a 1))
   => '(var* :local a := 1)
@@ -19,7 +18,6 @@
 
 ^{:refer std.lang.model-annex.spec-julia/julia-map-key :added "3.0"}
 (fact "custom julia map key"
-  ^:hidden
 
   (julia-map-key 123 +grammar+ {})
   => "123"
@@ -36,7 +34,6 @@
 
 ^{:refer std.lang.model-annex.spec-julia/tf-for-iter :added "4.0"}
 (fact  "for iter transform"
-  ^:hidden
 
   (tf-for-iter '(for:iter [e iter]
                           e))
@@ -44,7 +41,6 @@
 
 ^{:refer std.lang.model-annex.spec-julia/tf-for-index :added "4.0"}
 (fact "for index transform"
-  ^:hidden
 
   (tf-for-index '(for:index [i [0 2 10]]
                             i))
@@ -62,21 +58,18 @@
 
 ^{:refer std.lang.model-annex.spec-julia/tf-dict :added "4.0"}
 (fact "dict transform"
-  ^:hidden
 
   (tf-dict '(dict :a 1 :b 2))
   => '(Dict (=> "a" 1) (=> "b" 2)))
 
 ^{:refer std.lang.model-annex.spec-julia/tf-push! :added "4.0"}
 (fact "push! transform to avoid sanitization"
-  ^:hidden
 
   (tf-push! '(push! arr 1))
   => '(:% "push!(" arr ", " 1 ")"))
 
 ^{:refer std.lang.model-annex.spec-julia/julia-module-export :added "4.0"}
 (fact "outputs the julia module export form"
-  ^:hidden
 
   (julia-module-export 'kmi.common {:root-ns 'kmi.hello})
   => nil

@@ -18,8 +18,7 @@
 
 ^{:refer js.react-native.helper-theme/transformColor :added "4.0" :unchecked true}
 (fact "transforms a color given a set of indicators, the type and pipeline"
-  ^:hidden
-  
+
   (!.js
    (helper-theme/transformColor
     {:hovering 0.5
@@ -32,7 +31,7 @@
     ["hovering"]
     {}))
   => [60 50 75]
-  
+
   (!.js
    (helper-theme/transformColor
     {:hovering 0.5
@@ -63,8 +62,7 @@
 
 ^{:refer js.react-native.helper-theme/mergeProps :added "4.0" :unchecked true}
 (fact "merges the transformed props"
-  ^:hidden
-  
+
   (!.js
    (helper-theme/mergeProps [{:style {:fontSize 10}}
                              {:style {:opacity 0.1}
@@ -75,8 +73,7 @@
 
 ^{:refer js.react-native.helper-theme/createCombinedTransformations :added "4.0" :unchecked true}
 (fact "creates a combined transformations function"
-  ^:hidden
-  
+
   (!.js
    (var indicators {:pressing  0.1
                     :hovering  0.1
@@ -95,7 +92,7 @@
                     :bgDisabled      "#ccc"
                     :bgHighlighted   "yellow"
                     :bgActive        "#555"
-                    
+
                     :fgNormal        "#333"
                     :fgHovered       0.2
                     :fgPressed       "#ccc"
@@ -123,7 +120,7 @@
              :fg (fn [#{hovering
                         pressing}]
                    (return {:style {:fontWeight (+ 10 (* 5 pressing))}}))}}))
-   
+
    (f indicators chord))
   => {"style"
       [{"opacity" 0.1}
@@ -134,8 +131,7 @@
 
 ^{:refer js.react-native.helper-theme/createSingleTransformations :added "4.0" :unchecked true}
 (fact "creates the transformation for split `fg`/`bg` controls"
-  ^:hidden
-  
+
   (!.js
    (var indicators {:pressing  0.1
                     :hovering  0.1
@@ -154,7 +150,7 @@
                     :bgDisabled      "#ccc"
                     :bgHighlighted   "yellow"
                     :bgActive        "#555"
-                    
+
                     :fgNormal        "#333"
                     :fgHovered       0.2
                     :fgPressed       "#ccc"
@@ -190,8 +186,7 @@
 
 ^{:refer js.react-native.helper-theme/combinedStatic :added "4.0" :unchecked true}
 (fact "creates a static style from transform function"
-  ^:hidden
-  
+
   (!.js
    (var f (helper-theme/createSingleTransformations
            {:theme {:bgNormal      "#f4f4f4"
@@ -200,7 +195,7 @@
                     :bgDisabled      "#ccc"
                     :bgHighlighted   "yellow"
                     :bgActive        "#555"
-                    
+
                     :fgNormal        "#333"
                     :fgHovered       0.2
                     :fgPressed       "#ccc"
@@ -239,8 +234,7 @@
 
 ^{:refer js.react-native.helper-theme/prepThemeCombined :added "4.0" :unchecked true}
 (fact "prepares the combined theme"
-  ^:hidden
-  
+
   (!.js
    (var indicators {:pressing  0.1
                     :hovering  0.1
@@ -261,7 +255,7 @@
                      :bgDisabled      "#ccc"
                      :bgHighlighted   "yellow"
                      :bgActive        "#555"
-                    
+
                      :fgNormal        "#333"
                      :fgHovered       0.2
                      :fgPressed       "#ccc"
@@ -307,8 +301,7 @@
 
 ^{:refer js.react-native.helper-theme/prepThemeSingle :added "4.0" :unchecked true}
 (fact "prepares the static style and dynamic transform function"
-  ^:hidden
-  
+
   (!.js
    (var indicators {:pressing  0.1
                     :hovering  0.1
@@ -329,7 +322,7 @@
                      :bgDisabled      "#ccc"
                      :bgHighlighted   "yellow"
                      :bgActive        "#555"
-                    
+
                      :fgNormal        "#333"
                      :fgHovered       0.2
                      :fgPressed       "#ccc"

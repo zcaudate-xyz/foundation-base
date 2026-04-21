@@ -108,8 +108,7 @@
 
 ^{:refer js.blessed.ui-group/EnumMultiIndexed :added "4.0" :unchecked true}
 (fact "Constructs EnumMultiIndexed"
-  ^:hidden
-  
+
   (defn.js EnumMultiIndexedDemo
     []
     (var [indices setIndices] (r/local [false true false]))
@@ -129,8 +128,7 @@
 
 ^{:refer js.blessed.ui-group/EnumMulti :added "4.0" :unchecked true}
 (fact  "Constructs EnumMultiIndexed"
-  ^:hidden
-  
+
   (defn.js EnumMultiDemo
     []
     (var [values setValues] (r/local ["USD"]))
@@ -150,8 +148,7 @@
 
 ^{:refer js.blessed.ui-group/TabsView :added "4.0" :unchecked true}
 (fact "Constructs Tabs"
-  ^:hidden
-  
+
   (defn.js TabsViewDemo
     []
     (var [index setIndex] (r/local 0))
@@ -170,8 +167,7 @@
 
 ^{:refer js.blessed.ui-group/Tabs :added "4.0" :unchecked true}
 (fact "Construct Tabs"
-  ^:hidden
-  
+
   (defn.js TabsDemo
     []
     (var [value setValue] (r/local "XLM"))
@@ -192,8 +188,7 @@
 
 ^{:refer js.blessed.ui-group/TabsVPane :added "4.0" :unchecked true}
 (fact "constructs a tabs pane"
-  ^:hidden
-  
+
   (defn.js TabsVPaneDemo
     []
     (var [initial setInitial] (r/local "a"))
@@ -217,7 +212,6 @@
 
 ^{:refer js.blessed.ui-group/TabsHPane :added "4.0" :unchecked true}
 (fact "Constructs a List"
-  ^:hidden
 
   (defn.js TabsHPaneDemo
     []
@@ -251,8 +245,7 @@
 
 ^{:refer js.blessed.ui-group/ListView :added "4.0" :unchecked true}
 (fact "Constructs a ListView"
-  ^:hidden
-  
+
   (defn.js ListViewDemo
     []
     (var [index setIndex] (r/local 0))
@@ -276,8 +269,7 @@
 
 ^{:refer js.blessed.ui-group/List :added "4.0" :unchecked true}
 (fact "Constructs a List"
-  ^:hidden
-  
+
   (defn.js ListDemo
     []
     (var [value setValue] (r/local "XLM"))
@@ -298,7 +290,6 @@
 
 ^{:refer js.blessed.ui-group/ListPane :added "4.0" :unchecked true}
 (fact "Constructs a List"
-  ^:hidden
 
   (defn.js ListPaneDemo
     []
@@ -332,8 +323,7 @@
 
 ^{:refer js.blessed.ui-group/TreePane :added "4.0" :unchecked true}
 (fact "constructs a tree pane"
-  ^:hidden
-  
+
   (defn.js TreePaneDemo
     []
     (var [initial setInitial] (r/local "a"))

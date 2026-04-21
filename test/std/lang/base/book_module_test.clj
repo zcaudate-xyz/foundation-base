@@ -12,13 +12,11 @@
 
 ^{:refer std.lang.base.book-module/book-module? :added "4.0"}
 (fact "checks of object is a book module"
-  ^:hidden
   (book-module? (book-module {:lang :lua :id 'L.core})) => true)
 
 ^{:refer std.lang.base.book-module/book-module :added "4.0"}
 (fact "creates a book module"
-  ^:hidden
-  
+
   (book-module {:id 'L.core
                 :lang :lua
                 :link '{- L.core}
@@ -31,8 +29,7 @@
 
 ^{:refer std.lang.base.book-module/module-deps-code :added "4.0"}
 (fact "gets the code link dependencies"
-  ^:hidden
-  
+
   (-> (book-module {:id 'L.nginx
                     :lang :lua
                     :link '{-  L.nginx
@@ -45,7 +42,7 @@
       (module-deps-code))
   => '#{}
 
-  
+
   (impl/with:library [+library+]
     (module-deps-code
      (l/get-module
@@ -56,8 +53,7 @@
 
 ^{:refer std.lang.base.book-module/module-deps-native :added "4.0"}
 (fact "gets the native link dependencies"
-  ^:hidden
-  
+
   (impl/with:library [+library+]
     (module-deps-native
      (std.lang/get-module
@@ -68,8 +64,7 @@
 
 ^{:refer std.lang.base.book-module/module-deps-fragment :added "4.0"}
 (fact "gets all fragments that have beeen used in js.react"
-  ^:hidden
-  
+
   (impl/with:library [+library+]
     (module-deps-fragment
      (std.lang/get-module
@@ -114,7 +109,6 @@
 
 ^{:refer std.lang.base.book-module/module-entries :added "4.0"}
 (fact "creates an export entry for a module"
-  ^:hidden
 
   (impl/with:library [+library+]
     (module-entries

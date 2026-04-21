@@ -157,7 +157,7 @@
 
 ^{:refer std.concurrent.request/req :added "3.0"
    :adopt true}
-(fact "execution in bulked or normal mode" ^:hidden
+(fact "execution in bulked or normal mode"
 
   (test-harness
     (cc/req |conn| ["ECHO" "OK"])
@@ -231,7 +231,7 @@
 
 
   (test-harness
-    ;; Bulk in Transaction    
+    ;; Bulk in Transaction
     (->> (cc/transact |conn|
            (fn []
              (cc/bulk |conn|

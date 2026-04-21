@@ -36,13 +36,12 @@
 
 ^{:refer xt.lang.common-repl/return-encode :added "4.0"}
 (fact "returns the encoded "
-  ^:hidden
 
   (decode-output
    (!.js
     (k/return-encode {:data [1 2 3]} "<id>" "<key>")))
   => { "key" "<key>", "id" "<id>", "value" {"data" [1 2 3]}, "type" "data"}
-  
+
   (decode-output
    (!.lua
     (k/return-encode {:data [1 2 3]} "<id>" "<key>")))
@@ -60,13 +59,12 @@
 
 ^{:refer xt.lang.common-repl/return-wrap :added "4.0"}
 (fact "returns a wrapped call"
-  ^:hidden
-  
+
   (decode-output
    (!.js
     (k/return-wrap (fn:> 1))))
   => {"value" 1, "type" "data", "return" "number"}
-  
+
   (decode-output
    (!.lua
     (k/return-wrap (fn:> 1))))
@@ -89,7 +87,6 @@
 
 ^{:refer xt.lang.common-repl/return-eval :added "4.0"}
 (fact "evaluates a returns a string"
-  ^:hidden
 
   (decode-output
    (!.js
@@ -118,8 +115,7 @@
 
 ^{:refer xt.lang.common-repl/socket-send :added "4.0"}
 (fact "sends a message via the socket"
-  ^:hidden
-  
+
   (notify/wait-on-call
    (fn []
      (!.lua
@@ -134,7 +130,7 @@
                                          "\n"))
                    (k/socket-close conn))}))))
   => "hello"
-  
+
   (notify/wait-on-call
    (fn []
      (!.js
@@ -190,7 +186,6 @@
 ^{:refer xt.lang.common-repl/socket-connect :added "4.0"
   :setup [(l/rt:restart)]}
 (fact "connects a a socket to port"
-  ^:hidden
 
   (notify/wait-on :js
     (k/socket-connect
@@ -241,8 +236,7 @@
 
 ^{:refer xt.lang.common-repl/notify-socket :added "4.0"}
 (fact "notifies the socket of a value"
-  ^:hidden
-  
+
   (notify/wait-on-call
    (fn [] (!.js
            (k/notify-socket "127.0.0.1" (@! (:socket-port (l/default-notify)))
@@ -286,8 +280,7 @@
 
 ^{:refer xt.lang.common-repl/notify-socket-http :added "4.0"}
 (fact "using the base socket implementation to notify on http protocol"
-  ^:hidden
-  
+
   (notify/wait-on-call
    (fn [] (!.js
            (k/notify-socket-http
@@ -297,7 +290,7 @@
             nil
             {}))))
   => "hello"
-  
+
   (notify/wait-on-call
    (fn [] (!.lua
            (k/notify-socket-http
@@ -332,7 +325,6 @@
 
 ^{:refer xt.lang.common-repl/notify-http :added "4.0"}
 (fact "call a http notify function."
-  ^:hidden
 
   (notify/wait-on-call
    (fn [] (!.js
@@ -385,7 +377,6 @@
 
 ^{:refer xt.lang.common-repl/notify :added "4.0"}
 (fact "sends a message to the notify server"
-  ^:hidden
 
   (notify/wait-on :js
     (k/notify 1))
@@ -411,13 +402,12 @@
 
 ^{:refer xt.lang.common-repl/<! :added "4.0"}
 (fact "creates a callback map"
-  ^:hidden
-  
+
   (notify/wait-on :js
     ((. (k/<!)
        ["success"]) 1))
   => 1
-  
+
   (notify/wait-on :lua
    ((. (k/<!)
        ["success"]) 1))

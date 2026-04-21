@@ -29,10 +29,9 @@
 
 ^{:refer std.lang.base.library/wait-apply :added "4.0"}
 (fact "get the library state when task queue is empty"
-  ^:hidden
-  
+
   (snap/snapshot? (lib/wait-apply +library+ identity))
-  
+
   (lib/wait-apply +library+
                    snap/get-book :lua)
   => b/book?
@@ -43,8 +42,7 @@
 
 ^{:refer std.lang.base.library/wait-mutate! :added "4.0"}
 (fact "mutates library once task queue is empty"
-  ^:hidden
-  
+
   (-> +library+
       (doto (lib/wait-mutate! snap/delete-module :x 'x.core))
       (lib/wait-apply snap/get-book :x)
@@ -58,15 +56,13 @@
 
 ^{:refer std.lang.base.library/get-snapshot :added "4.0"}
 (fact "gets the current snapshot for the library"
-  ^:hidden
-  
+
   (lib/get-snapshot +library+)
   => snap/snapshot?)
 
 ^{:refer std.lang.base.library/get-book :added "4.0"}
 (fact "gets a book from library"
-  ^:hidden
-  
+
   (lib/get-book +library+ :x)
   => b/book?)
 
@@ -75,21 +71,19 @@
 
   (b/list-entries (lib/get-book-raw +library+ :redis))
   => empty?
-  
+
   (b/list-entries (lib/get-book +library+ :redis))
   => coll?)
 
 ^{:refer std.lang.base.library/get-module :added "4.0"}
 (fact "gets a module from library"
-  ^:hidden
 
   (lib/get-module +library+ :x 'x.core)
   => module/book-module?)
 
 ^{:refer std.lang.base.library/get-entry :added "4.0"}
 (fact "gets an entry from library"
-  ^:hidden
-  
+
   (lib/get-entry +library+ '{:lang :lua
                               :module L.core
                               :section :fragment
@@ -98,8 +92,7 @@
 
 ^{:refer std.lang.base.library/add-book! :added "4.0"}
 (fact "adds a book to the library"
-  ^:hidden
-  
+
   (lib/add-book! +library+
                  (b/book (b/book {:lang :js
                                   :parent  :x
@@ -120,24 +113,21 @@
 
 ^{:refer std.lang.base.library/reset-all! :added "4.0"}
 (fact "resets the library"
-  ^:hidden
-  
+
   (lib/reset-all! +library+
                   (lib/reset-all! +library+))
   => snap/snapshot?)
 
 ^{:refer std.lang.base.library/list-modules :added "4.0"}
 (fact "lists all modules"
-  ^:hidden
-  
+
   (lib/list-modules +library+ :lua)
   => (contains ['L.core 'x.core]
                :in-any-order :gaps-ok))
 
 ^{:refer std.lang.base.library/list-entries :added "4.0"}
 (fact "lists entries"
-  ^:hidden
-  
+
   (lib/list-entries +library+ :lua)
   => '(L.core/identity-fn)
 
@@ -152,7 +142,7 @@
                                                    :link {r L.redis
                                                           u L.core}}))
   => coll?
-  
+
   (lib/delete-module! +library+ :redis 'L.redis.hello )
   => coll?)
 
@@ -166,22 +156,19 @@
 
 ^{:refer std.lang.base.library/library-string :added "4.0"}
 (fact "returns the library string"
-  ^:hidden
-  
+
   (lib/library-string +library+)
   => string?)
 
 ^{:refer std.lang.base.library/library? :added "4.0"}
 (fact "checks if object is a library"
-  ^:hidden
-  
+
   (lib/library? +library+)
   => true)
 
 ^{:refer std.lang.base.library/library:create :added "4.0"}
 (fact "creates a new library"
-  ^:hidden
-  
+
   (lib/library:create {})
   => lib/library?)
 
@@ -191,7 +178,6 @@
 
 ^{:refer std.lang.base.library/add-entry! :added "4.0"}
 (fact "adds the entry with the bulk dispatcher"
-  ^:hidden
 
   (comment
     (lib/delete-entry! +library+ {:lang :lua
@@ -215,8 +201,7 @@
                                         :module 'L.core
                                         :id 'add-fn})]}
 (fact "adds an entry synchronously"
-  ^:hidden
-  
+
   (lib/add-entry-single!
    +library+
    (b/book-entry {:lang :lua
@@ -235,8 +220,7 @@
 ^{:refer std.lang.base.library/install-module! :added "4.0"
   :setup [(lib/delete-module! +library+  :lua 'L.util)]}
 (fact "installs a module to library"
-  ^:hidden
-  
+
   (lib/install-module! +library+
                        :lua 'L.util
                        {})
@@ -245,14 +229,13 @@
 ^{:refer std.lang.base.library/install-book! :added "4.0"
   :setup [(lib/delete-book! +library+ :redis)]}
 (fact "installs a book to library"
-  ^:hidden
-  
+
   (lib/install-book! +library+ prep/+book-redis-empty+)
   => coll?
 
   (:parent (lib/get-book-raw +library+ :redis))
   => :lua
-  
+
   (:parent prep/+book-redis-empty+)
   => :lua)
 
@@ -267,14 +250,13 @@
 
   ^{:refer std.lang.base.library/create-dispatch :added "4.0"}
   (fact "creates the dispatch for adding entries in bulk"
-    ^:hidden
 
     (comment
-      
+
       (lib/create-dispatch (atom (snap/snapshot {}))
                            (atom {}))
       => map?)))
-  
+
 
   (./import
    )
@@ -284,12 +266,12 @@
                  )
   (def +lib+
     (library {}))
-  
+
   (atom/swap-return! (:instance +lib+)
     (fn [snapshot]
       [nil (snap/add-book snapshot
                           std.lang.base.emit-prep-lua-test/+book-min+)]))
-  
+
   ((:dispatch +lib+) (entry/create-fragment
                       '(def$ G G)
                       {:lang :lua
@@ -303,9 +285,9 @@
                                     {:lang :lua
                                      :namespace 'L.core
                                      :module 'L.core})])))
-  
-  
-  
+
+
+
   (do (dotimes [i 100]
         (set-entry +lib+ (entry/create-fragment
                           '(def$ G G)
@@ -319,7 +301,7 @@
                              :module 'L.core}))
           first
           ))
-  
-  
-  
+
+
+
   )

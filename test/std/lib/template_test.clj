@@ -29,7 +29,7 @@
   (let [x 1]
     (binding [*locals* (template:locals)]
       (replace-unquotes '(+ ~x ~@(list x 1 2 3)))))
-  => '(+ 1 1 1 2 3) ^:hidden
+  => '(+ 1 1 1 2 3)
 
   (let [f (fn [& args] (apply + args))
         y (f 1)]

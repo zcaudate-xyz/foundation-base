@@ -12,8 +12,8 @@
 (fact "parses a qualifier from string input"
 
   (parse-qualifier "" "") => 6
-  
-  (parse-qualifier "alpha" "") => 0 ^:hidden
+
+  (parse-qualifier "alpha" "") => 0
 
   (parse-qualifier "beta" "") => 1
 
@@ -30,7 +30,7 @@
       :incremental 0,
       :qualifier 0,
       :release "alpha",
-      :build "build.123"} ^:hidden
+      :build "build.123"}
 
   (parse "9.1-901.jdbc4")
   => {:major 9,

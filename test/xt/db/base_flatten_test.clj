@@ -32,8 +32,7 @@
 
 ^{:refer xt.db.base-flatten/flatten-get-links :added "4.0"}
 (fact "flatten links"
-  ^:hidden
-  
+
   (!.js
     (f/flatten-get-links {:currencies [{:id "hello"}]}))
   => {"currencies" {"hello" true}}
@@ -48,8 +47,7 @@
 
 ^{:refer xt.db.base-flatten/flatten-merge :added "4.0"}
 (fact "flatten data"
-  ^:hidden
-  
+
   (!.js
    (f/flatten-merge {}
                     {:id "hello"}
@@ -82,7 +80,6 @@
 
 ^{:refer xt.db.base-flatten/flatten-node :added "4.0"}
 (fact "flatten node"
-  ^:hidden
 
   (set (!.js
            (var out (f/flatten-node sample/Schema
@@ -129,7 +126,6 @@
                             "password_updated" number?
                             "is_super" true}}}))]}
 (fact "flatten node example for user account"
-  ^:hidden
 
   (!.js
    (-> (f/flatten-node sample/Schema
@@ -147,8 +143,8 @@
                        {}
                        {})
        (xt/x:get-key "table_map")))
-  
-  
+
+
   => +table-map-account+
 
   (!.py
@@ -178,7 +174,6 @@
              "ref_obj" {"account" ["hello"]},
              "rev_obj" {}})]}
 (fact "flatten node example for user account"
-  ^:hidden
 
   (!.js
    (f/flatten-node sample/Schema
@@ -237,7 +232,6 @@
                {"id" "ec088f52-310b-491b-a034-d4efc222fd00",
                 "name" "root"}}}})]}
 (fact "flatten linked for schema"
-  ^:hidden
 
   (!.js
    (f/flatten-linked sample/Schema
@@ -427,8 +421,7 @@
                 {"assets" {"9e576e3e-c73e-4d18-92b4-f975c1bed3d4" true}},
                 "data" {"id" "USD"}}}}))]}
 (fact "flatten data for schema"
-  ^:hidden
-  
+
   (!.js
    (f/flatten-obj sample/Schema
                   "UserAccount"
@@ -455,8 +448,7 @@
 
 ^{:refer xt.db.base-flatten/flatten :added "4.0"}
 (fact "flattens data schema"
-  ^:hidden
-  
+
   (!.js
    (f/flatten sample/Schema
               "UserAccount"
@@ -480,7 +472,6 @@
 
 ^{:refer xt.db.base-flatten/flatten-bulk :added "4.0"}
 (fact "flattens bulk data"
-  ^:hidden
 
   (!.js
    (f/flatten-bulk
@@ -506,4 +497,4 @@
   )
 
 
- 
+

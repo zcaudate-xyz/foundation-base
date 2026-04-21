@@ -18,8 +18,7 @@
 
 ^{:refer std.lang.model.spec-js.jsx/jsx-standardise-params :added "4.0"}
 (fact "converts back to a :className a :class"
-  ^:hidden
-  
+
   (jsx-standardise-params {:class ["hello" "world"]})
   => {:className "hello world"})
 
@@ -31,7 +30,7 @@
 
 ^{:refer std.lang.model.spec-js.jsx/emit-jsx-map-params :added "4.0"}
 (fact "emits jsx map params"
-  
+
   (emit-jsx-map-params '{:a (+ 1 2 3) :b "abc"}
                        js/+grammar+
                        {})
@@ -52,7 +51,7 @@
 
 ^{:refer std.lang.model.spec-js.jsx/emit-jsx-params :added "4.0"}
 (fact "emits jsx params"
-  
+
   (emit-jsx-params {:a 1 :b 2}
                    js/+grammar+
                    {})
@@ -68,7 +67,7 @@
 
 ^{:refer std.lang.model.spec-js.jsx/emit-jsx-raw :added "4.0"}
 (fact "emits the jsx transform"
-  
+
   (emit-jsx-raw [:div {:className 'a}
                  [:p '(hello 1 2 3)]]
                 js/+grammar+

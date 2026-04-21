@@ -17,15 +17,14 @@
 
 ^{:refer rt.postgres.runtime.graph-insert/insert-walk-ids :added "4.0"}
 (fact "inserts walk ids to the entries"
-  ^:hidden
-  
+
   (let [output (volatile! #{})]
     (walk/postwalk
      (fn [x]
        (if (not-empty (meta x))
          (vswap! output conj (meta x)))
        x)
-     (insert/insert-walk-ids 
+     (insert/insert-walk-ids
       '{:TaskCache
         {:id "hello",
          :tasks
@@ -43,10 +42,9 @@
 
 ^{:refer rt.postgres.runtime.graph-insert/insert-generate-graph-tree :added "4.0"}
 (fact "generates a graph tree from nodes"
-  ^:hidden
-  
+
   (insert/insert-generate-graph-tree
-   (insert/insert-walk-ids 
+   (insert/insert-walk-ids
     '{:TaskCache
       {:id "hello",
        :tasks
@@ -69,11 +67,10 @@
 
 ^{:refer rt.postgres.runtime.graph-insert/insert-associate-graph-data :added "4.0"}
 (fact "associate nodes wit h graph data"
-  ^:hidden
-  
+
   (apply insert/insert-associate-graph-data
    (insert/insert-generate-graph-tree
-    (insert/insert-walk-ids 
+    (insert/insert-walk-ids
      '{:TaskCache
        {:id "hello",
         :tasks
@@ -88,8 +85,7 @@
 
 ^{:refer rt.postgres.runtime.graph-insert/insert-gen-sql :added "4.0"}
 (fact "generates sql given graph"
-  ^:hidden
-  
+
   (insert/insert-gen-sql
    '{:TaskCache
      {:id "hello",
@@ -106,8 +102,7 @@
 
 ^{:refer rt.postgres.runtime.graph-insert/insert-fn-raw :added "4.0"}
 (fact "constructs insert form with prep"
-  ^:hidden
-  
+
   (insert/insert-fn-raw
    (impl/prep-table 'scratch/TaskCache true (l/rt:macro-opts :postgres))
    {:id "hello"}
@@ -116,8 +111,7 @@
 
 ^{:refer rt.postgres.runtime.graph-insert/insert-fn :added "4.0"}
 (fact "constructs insert form"
-  ^:hidden
-  
+
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (insert/insert-fn 'scratch/TaskCache
                       {:id "hello"
@@ -127,11 +121,10 @@
                                 :status "pending"}]}
                       {:track 'o-op}))
   => collection/form?)
-    
+
 
 ^{:refer rt.postgres.runtime.graph-insert/insert-fn.assign :adopt true :added "4.0"}
 (fact "constructs insert form with assignment"
-  ^:hidden
 
   ((-> (l/with:macro-opts [(l/rt:macro-opts :postgres)]
          (insert/insert-fn 'scratch/TaskCache

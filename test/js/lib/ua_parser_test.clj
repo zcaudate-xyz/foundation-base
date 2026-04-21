@@ -18,7 +18,6 @@
 
 ^{:refer js.lib.ua-parser/parseString :added "4.0" :unchecked true}
 (fact "gets information from the user agent on browser"
-  ^:hidden
 
   (!.js
    (ua/parseString

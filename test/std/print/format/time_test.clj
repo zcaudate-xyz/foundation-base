@@ -5,14 +5,14 @@
 ^{:refer std.print.format.time/t:time :added "3.0"}
 (fact "only returns the time (not day) of an instant"
 
-  (t:time (System/currentTimeMillis)) ^:hidden
+  (t:time (System/currentTimeMillis))
   ;; "01:21:10.336"
   => string?)
 
 ^{:refer std.print.format.time/t:ms :added "3.0"}
 (fact "converts an ms time into readable"
 
-  (t:ms 1000) ^:hidden
+  (t:ms 1000)
   => "1.0s"
 
   (t:ms 10000000)
@@ -21,13 +21,13 @@
 ^{:refer std.print.format.time/t:ns :added "3.0"}
 (fact "creates humanised time for nanoseconds"
 
-  (t:ns 10000 3) ^:hidden
+  (t:ns 10000 3)
   => "10.0us")
 
 ^{:refer std.print.format.time/t:text :added "3.0"}
 (fact "formats ns to string"
 
-  (t:text 1) ^:hidden
+  (t:text 1)
   => "1ns"
 
   (t:text 100000000000000)
@@ -36,7 +36,7 @@
 ^{:refer std.print.format.time/t:style :added "3.0"}
 (fact "sets the color for a time"
 
-  (t:style 10000) ^:hidden
+  (t:style 10000)
   => [:normal :cyan]
 
   (t:style 100000000)
@@ -45,7 +45,7 @@
 ^{:refer std.print.format.time/t :added "3.0"}
 (fact "formats ns to string"
 
-  (t 1) ^:hidden
+  (t 1)
   => "[22;36m1ns[0m"
 
   (t 100000000000000)

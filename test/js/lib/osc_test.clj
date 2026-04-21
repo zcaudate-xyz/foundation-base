@@ -18,15 +18,13 @@
 
 ^{:refer js.lib.osc/newOSC :added "4.0" :unchecked true}
 (fact "creates a new OSC instance"
-  ^:hidden
-  
+
   (!.js
    (xtd/obj-keys (osc/newOSC)))
   => ["options" "eventHandler"])
 
 ^{:refer js.lib.osc/newMessage :added "4.0" :unchecked true}
 (fact "creates a new OSC Message"
-  ^:hidden
 
   (!.js
    (xtd/obj-keys (osc/newMessage ["test", "path"], 50, 100.52, "test")))
@@ -34,7 +32,6 @@
 
 ^{:refer js.lib.osc/newBundle :added "4.0" :unchecked true}
 (fact "creates a new OSC Bundle"
-  ^:hidden
 
   (!.js
    (xtd/obj-keys
@@ -45,7 +42,6 @@
 
 ^{:refer js.lib.osc/DatagramPlugin :added "4.0" :unchecked true}
 (fact "creates a Datagram plugin"
-  ^:hidden
 
   (!.js
    (var plugin (osc/DatagramPlugin {:send {:port 41234}}))
@@ -57,7 +53,6 @@
 
 ^{:refer js.lib.osc/BridgePlugin :added "4.0" :unchecked true}
 (fact "creates a Bridge plugin"
-  ^:hidden
 
   (!.js
    (var plugin (osc/BridgePlugin {}))
@@ -69,8 +64,7 @@
 
 ^{:refer js.lib.osc/WebsocketClientPlugin :added "4.0" :unchecked true}
 (fact "creates a Ws Client Plugin"
-  ^:hidden
-  
+
   (!.js
    (var plugin (osc/WebsocketClientPlugin {}))
    (and (== -1 (. plugin socketStatus))
@@ -81,8 +75,7 @@
 
 ^{:refer js.lib.osc/WebsocketServerPlugin :added "4.0" :unchecked true}
 (fact "creates a Ws Server Plugin"
-  ^:hidden
-  
+
   (!.js
    (var plugin (osc/WebsocketServerPlugin {:port 8081}))
    (and (== -1 (. plugin socketStatus))
@@ -97,24 +90,23 @@
   :teardown [(l/rt:restart)
              (l/rt:scaffold :js)]}
 (fact "adds an event listener to the osc server"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var osc (osc/newOSC
               {:plugin (osc/DatagramPlugin
                         {:send {:port 41234}})}))
-    
+
     (osc/on osc "*"
             (fn [msg info]
-              (repl/notify 
+              (repl/notify
                {:msg  msg
                 :info info})))
-    
+
     (osc/on osc "open"
             (fn []
               (osc/send osc (osc/newMessage "/test" 12.221, "hello")
                         {:host "127.0.0.1" :port 41234})))
-    
+
     (osc/open osc {}))
   => (contains-in
       {"msg" {"offset" 24,
@@ -135,17 +127,16 @@
   :teardown [(l/rt:restart)
              (l/rt:scaffold :js)]}
 (fact "binds a server to a port"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var osc (osc/newOSC
               {:plugin (osc/DatagramPlugin
                         {:send {:port 41234}})}))
-    
+
     (osc/on osc "*"
             (fn [msg info]
               (osc/close osc)))
-    
+
     (osc/on osc "open"
             (fn []
               (osc/send osc (osc/newMessage "/test" 12.221, "hello")
@@ -156,7 +147,7 @@
             (fn []
               (repl/notify
                (osc/status osc))))
-    
+
     (osc/open osc {})))
 
 ^{:refer js.lib.osc/status :added "4.0" :unchecked true}
@@ -168,8 +159,7 @@
   :teardown [(l/rt:restart)
              (l/rt:scaffold :js)]}
 (fact "closes the osc"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var osc (osc/newOSC
               {:plugin (osc/DatagramPlugin
@@ -182,12 +172,12 @@
                                             "/bar"
                                             "/baz"])
                             (xt/x:random)))))
-    
+
     (osc/on osc "*"
             (fn [msg info]
               (repl/notify
                {:msg msg :info info})))
-    
+
     (osc/on osc "open"
             (fn []
 
@@ -201,8 +191,8 @@
                         {:host "127.0.0.1" :port 41234})))
 
 
-    
-    
+
+
     (osc/open osc {}))
   => (contains-in
       {"msg"

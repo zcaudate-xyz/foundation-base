@@ -6,8 +6,7 @@
 
 ^{:refer std.contract.type/check :added "3.0"}
 (fact "checks that data fits the spec"
-  ^:hidden
-  
+
   (t/check (s/to-schema
             {:a number?})
            {:a 2})
@@ -24,7 +23,7 @@
              {:a number?}))
            {:b 1})
   => (throws)
-  
+
   (t/check (s/to-schema
             {:a 1})
            {:a 2})
@@ -32,7 +31,6 @@
 
 ^{:refer std.contract.type/common-spec-invoke :added "3.0"}
 (fact "invokes the common spec"
-  ^:hidden
 
   (t/common-spec-invoke
    (t/common-spec {:a 1})
@@ -46,7 +44,6 @@
 
 ^{:refer std.contract.type/common-spec-string :added "3.0"}
 (fact "displays the common spec"
-  ^:hidden
 
   (t/common-spec-string
    (t/common-spec {:a 1}))
@@ -54,16 +51,14 @@
 
 ^{:refer std.contract.type/combine :added "3.0"}
 (fact "combines spec schemas (usually maps)"
-  ^:hidden
-  
+
   (mc/form (t/combine {:a 1}
                       [{:b 2}]))
   => [:map [:a [:= 1]] [:b [:= 2]]])
 
 ^{:refer std.contract.type/common-spec :added "3.0"}
 (fact "creates a common spec"
-  ^:hidden
-  
+
   (mc/form
    (s/to-schema (t/common-spec {:a 1}
                                {:b 2})))
@@ -71,8 +66,7 @@
 
 ^{:refer std.contract.type/defspec :added "3.0"}
 (fact "macro for defining a spec"
-  ^:hidden
-  
+
   (macroexpand-1
    '(t/defspec <hello>
       {:a 1}))
@@ -80,8 +74,7 @@
 
 ^{:refer std.contract.type/multi-spec-invoke :added "3.0"}
 (fact "invokes the multi spec"
-  ^:hidden
-  
+
   (t/multi-spec-invoke
    (t/multi-spec :type
                  [[:raw {:data [:or :string]}]])
@@ -103,8 +96,7 @@
 
 ^{:refer std.contract.type/multi-spec-string :added "3.0"}
 (fact "displays the multi spec"
-  ^:hidden
-  
+
   (t/multi-spec-string
    (t/multi-spec :type
                  [[:raw {:data [:or :string]}]]))
@@ -112,8 +104,7 @@
 
 ^{:refer std.contract.type/multi-gen-final :added "3.0"}
 (fact "generates the final schema for a multispec"
-  ^:hidden
-  
+
   (mc/form
    (t/multi-gen-final :type
                       [[:raw (s/to-schema {:data [:or :string]})]]))
@@ -121,8 +112,7 @@
 
 ^{:refer std.contract.type/multi-spec-add :added "3.0"}
 (fact "adds additional types to the multi spec"
-  ^:hidden
-  
+
   (t/multi-spec-add
    (t/multi-spec :type
                  [])
@@ -138,8 +128,7 @@
 
 ^{:refer std.contract.type/multi-spec-remove :added "3.0"}
 (fact "removes additional types from the multi spec"
-  ^:hidden
-  
+
   (t/multi-spec-remove
    (t/multi-spec :type
                  [[:raw {:data [:or :string]}]])
@@ -155,7 +144,6 @@
 
 ^{:refer std.contract.type/multi-spec :added "3.0"}
 (fact "creates a multi spec"
-  ^:hidden
 
   (mc/form
    (s/to-schema
@@ -165,7 +153,6 @@
 
 ^{:refer std.contract.type/defmultispec :added "3.0"}
 (fact "macro for defining a multispec"
-  ^:hidden
 
   (macroexpand-1
    '(t/defmultispec <hello> :type
@@ -176,10 +163,9 @@
 
 ^{:refer std.contract.type/defcase :added "3.0"}
 (fact "adds an additional case to the multispec"
-  ^:hidden
-  
+
   (macroexpand-1
-   '(t/defcase <hello> 
+   '(t/defcase <hello>
       :raw {:data [:or :string]}))
   => '(do (std.contract.type/multi-spec-add
            <hello>
@@ -188,7 +174,6 @@
 
 ^{:refer std.contract.type/spec? :added "3.0"}
 (fact "checks that object is of type spec"
-  ^:hidden
 
   (t/spec? (t/multi-spec :type
                          [[:raw (s/to-schema {:data [:or :string]})]]))
@@ -196,7 +181,6 @@
 
 ^{:refer std.contract.type/valid? :added "3.0"}
 (fact "checks that data is valid"
-  ^:hidden
 
   (t/valid? (t/multi-spec :type
                          [[:raw (s/to-schema {:data [:or :string]})]])

@@ -23,7 +23,7 @@
                         "UserAccount"
                         (xtd/obj-omit sample/RootUser ["emails" "profile"])
                         {})))
-          
+
           (def +profile+
             (dissoc (!.js
                      (f/flatten sample/Schema
@@ -32,8 +32,7 @@
                                 {}))
                     "UserAccount"))]}
 (fact "adds single link"
-  ^:hidden
-  
+
   (!.js
    (var rows {})
    (data/merge-bulk rows (@! +profile+) nil)

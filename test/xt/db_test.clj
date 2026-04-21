@@ -54,7 +54,6 @@
 
 ^{:refer xt.db/process-event :added "4.0"}
 (fact "processes an event"
-  ^:hidden
 
   (!.js
    [(xtd/arr-sort (impl/process-event
@@ -79,7 +78,6 @@
 ^{:refer xt.db/process-triggers :added "4.0"
   :setup [(bootstrap-js)]}
 (fact "process triggers"
-  ^:hidden
 
   [(notify/wait-on :js
      (impl/remove-trigger DBSQL "test")
@@ -112,7 +110,6 @@
 ^{:refer xt.db/add-trigger :added "4.0"
   :setup [(bootstrap-js)]}
 (fact "adds a trigger to db"
-  ^:hidden
 
   [(notify/wait-on :js
      (impl/add-trigger DBSQL "test" {:id "test"
@@ -147,7 +144,6 @@
 
 ^{:refer xt.db/db-exec-sync :added "4.0"}
 (fact "runs a raw statement"
-  ^:hidden
 
   (!.js
    (impl/db-exec-sync DBSQL "Select 1;"))
@@ -173,7 +169,6 @@
                "password_updated" number?
                "is_super" 1}]))]}
 (fact "runs a pull statement"
-  ^:hidden
 
   [(set (!.js
          (impl/sync-event

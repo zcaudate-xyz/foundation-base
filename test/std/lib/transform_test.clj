@@ -16,7 +16,6 @@
              {:schema (schema/schema examples/account-orders-items-image)}
              {:normalise [wrap-plus]})
   => {:account {:orders {:+ {:account {:user "Chris"}}}}}
-  ^:hidden
   (normalise {:account {:orders {:+ {:account {:user "Chris"}}}}}
              {:schema (schema/schema examples/account-orders-items-image)}
              {})
@@ -117,7 +116,7 @@
   (resolve 'normalise-wrappers) => var?)
 
 ^{:refer std.lib.transform/normalise-base :added "3.0"}
-(fact "base normalise function" ^:hidden
+(fact "base normalise function"
 
   (normalise-base {:account {:name "Chris"
                              :age 10}}

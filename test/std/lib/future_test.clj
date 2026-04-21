@@ -4,13 +4,13 @@
   (:refer-clojure :exclude [future future? catch]))
 
 ^{:refer std.lib.future/completed :added "3.0"}
-(fact "creates a completed stage" ^:hidden
+(fact "creates a completed stage"
 
   @(completed 1)
   => 1)
 
 ^{:refer std.lib.future/failed :added "3.0"}
-(fact "creates a failed stage" ^:hidden
+(fact "creates a failed stage"
 
   @(failed (ex-info "" {}))
   => (throws))
@@ -28,7 +28,7 @@
   => true)
 
 ^{:refer std.lib.future/future:fn :added "3.0"}
-(fact "creates a future with :init/future props" ^:hidden
+(fact "creates a future with :init/future props"
 
   (.get (f/future:fn (fn [] 1)))
   => (contains {:fn fn?}))
@@ -48,7 +48,7 @@
 
   @(-> (f/future:call (fn [] (Thread/sleep 100)))
        (f/future:timeout 10 :ok))
-  => :ok ^:hidden
+  => :ok
 
   @(-> (f/future:call (fn [] (Thread/sleep 100)))
        (f/future:timeout 10))
@@ -74,28 +74,28 @@
   => any?)
 
 ^{:refer std.lib.future/future:now :added "3.0"}
-(fact "gets the value of a future at the current moment" ^:hidden
+(fact "gets the value of a future at the current moment"
 
   (-> (f/future:run (fn [] (Thread/sleep 100)))
       (f/future:now :invalid))
   => :invalid)
 
 ^{:refer std.lib.future/future:value :added "3.0"}
-(fact "gets the value of a future" ^:hidden
+(fact "gets the value of a future"
 
   (-> (f/future:run (fn [] 1))
       (f/future:value))
   => 1)
 
 ^{:refer std.lib.future/future:exception :added "3.0"}
-(fact "accesses the exception in the future" ^:hidden
+(fact "accesses the exception in the future"
 
   (-> (f/future:run (fn [] (throw (ex-info "ERROR" {}))))
       (f/future:exception))
   => Throwable)
 
 ^{:refer std.lib.future/future:cancel :added "3.0"}
-(fact "cancels the execution of the future" ^:hidden
+(fact "cancels the execution of the future"
 
   @(-> (f/future:run (fn [] (Thread/sleep 100)))
        (f/future:cancel))
@@ -108,7 +108,7 @@
   => true)
 
 ^{:refer std.lib.future/future:cancelled? :added "3.0"}
-(fact "checks if future has been cancelled" ^:hidden
+(fact "checks if future has been cancelled"
 
   (-> (f/future:run (fn [] (Thread/sleep 100)))
       (f/future:cancel)
@@ -116,7 +116,7 @@
   => true)
 
 ^{:refer std.lib.future/future:exception? :added "3.0"}
-(fact "checks if future raised an exception" ^:hidden
+(fact "checks if future raised an exception"
 
   (-> (f/future:run (fn [] (throw (ex-info "Error" {}))))
       (f/future:wait)
@@ -128,7 +128,7 @@
   => (throws))
 
 ^{:refer std.lib.future/future:timeout? :added "3.0"}
-(fact "checks if future errored due to timeout" ^:hidden
+(fact "checks if future errored due to timeout"
 
   (-> (f/future:run (fn [] (Thread/sleep 100)))
       (f/future:timeout 10)
@@ -137,7 +137,7 @@
   => true)
 
 ^{:refer std.lib.future/future:success? :added "3.0"}
-(fact "checks that future is successful" ^:hidden
+(fact "checks that future is successful"
 
   (-> (f/future:run (fn [] (Thread/sleep 100)))
       (f/future:wait)
@@ -156,7 +156,7 @@
   => true)
 
 ^{:refer std.lib.future/future:complete? :added "3.0"}
-(fact "checks that future has successfully completed" ^:hidden
+(fact "checks that future has successfully completed"
 
   (-> (f/future:run (fn [] (throw (ex-info "Error" {}))))
       (f/future:wait)
@@ -167,7 +167,7 @@
   => true)
 
 ^{:refer std.lib.future/future:force :added "3.0"}
-(fact "forces a value or exception as completed future" ^:hidden
+(fact "forces a value or exception as completed future"
 
   (-> (f/future:run (fn [] (Thread/sleep 1000)))
       (f/future:force 10)
@@ -192,7 +192,7 @@
   => 10)
 
 ^{:refer std.lib.future/future:dependents :added "3.0"}
-(fact "returns number of steps waiting on current result" ^:hidden
+(fact "returns number of steps waiting on current result"
 
   (-> (doto (f/future:run (fn [] (Thread/sleep 1000)))
         (on:complete (fn [e] e))
@@ -201,13 +201,13 @@
   => 2)
 
 ^{:refer std.lib.future/future:lift :added "3.0"}
-(fact "creates a future from a value" ^:hidden
+(fact "creates a future from a value"
 
   (f/future? (f/future:lift (Object.)))
   => true)
 
 ^{:refer std.lib.future/on:complete :added "3.0"}
-(fact "process both the value and exception" ^:hidden
+(fact "process both the value and exception"
 
   @(-> (f/future 1)
        (on:complete (fn [val _] (throw (ex-info "Error" {:val (inc val)}))))
@@ -216,7 +216,7 @@
   => 4)
 
 ^{:refer std.lib.future/on:timeout :added "3.0"}
-(fact "processes a function on timeout" ^:hidden
+(fact "processes a function on timeout"
 
   (-> (f/future (Thread/sleep 100))
       (f/future:timeout 10)
@@ -231,7 +231,7 @@
   => (throws))
 
 ^{:refer std.lib.future/on:cancel :added "3.0"}
-(fact "processes a function on cancel" ^:hidden
+(fact "processes a function on cancel"
 
   @(-> (f/future {:timeout 10} (Thread/sleep 100))
        (f/future:cancel)
@@ -244,7 +244,7 @@
   => (throws))
 
 ^{:refer std.lib.future/on:exception :added "3.0"}
-(fact "process a function on exception" ^:hidden
+(fact "process a function on exception"
 
   @(-> (f/future {:timeout 10} (Thread/sleep 100))
        (f/future:cancel)
@@ -262,7 +262,7 @@
   => :exception)
 
 ^{:refer std.lib.future/on:success :added "3.0"}
-(fact "processes another step given successful operation" ^:hidden
+(fact "processes another step given successful operation"
 
   @(-> (f/future 1)
        (on:success inc)
@@ -271,7 +271,7 @@
   => 4)
 
 ^{:refer std.lib.future/on:all :added "3.0"}
-(fact "calls a function when all futures are complete" ^:hidden
+(fact "calls a function when all futures are complete"
 
   @(on:all [(f/future 1)
             (f/future 2)
@@ -280,7 +280,7 @@
   => 6)
 
 ^{:refer std.lib.future/on:any :added "3.0"}
-(fact "calls a function when any future is completed" ^:hidden
+(fact "calls a function when any future is completed"
 
   @(on:any [(f/future (Thread/sleep 500) 1)
             (f/future (Thread/sleep 500) 2)
@@ -296,7 +296,7 @@
   => 1)
 
 ^{:refer std.lib.future/then :added "3.0" :style/indent 1}
-(fact "shortcut for :on/success and :on/complete" ^:hidden
+(fact "shortcut for :on/success and :on/complete"
 
   @(-> (f/future (+ 1 2 3))
        (then [a] (+ a 1 2 3)))
@@ -312,7 +312,7 @@
   => nil)
 
 ^{:refer std.lib.future/catch :added "3.0"  :style/indent 1}
-(fact "shortcut for :on/exception" ^:hidden
+(fact "shortcut for :on/exception"
 
   @(-> (f/future (+ 2 3))
        (f/catch [e] e))

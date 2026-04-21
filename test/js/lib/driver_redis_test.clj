@@ -20,7 +20,6 @@
 
 ^{:refer js.lib.driver-redis/connect-constructor :added "4.0" :unchecked true}
 (fact "creates a connection"
-  ^:hidden
 
   (notify/wait-on :js
     (redis/connect {:constructor js-driver/connect-constructor
@@ -29,7 +28,7 @@
                                (redis/exec conn "ping" []
                                            (repl/<!)))}))
   => "PONG"
-  
+
   (notify/wait-on :js
     (redis/connect {:constructor js-driver/connect-constructor
                     :port 17001}

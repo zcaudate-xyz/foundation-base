@@ -74,7 +74,7 @@
   => false)
 
 ^{:refer std.concurrent.bus/bus:send :added "3.0"}
-(fact "sends a message to the given thread" ^:hidden
+(fact "sends a message to the given thread"
 
   (bus:with-temp bus
                  (bus:send bus (bus:get-id bus)
@@ -143,7 +143,7 @@
                                            1000 :timeout)]
                    (Thread/sleep 100)
                    (deref (bus:send bus id {:value 1}) 1000 :timeout)))
-  => (contains {:value 2, :id string?}) ^:hidden
+  => (contains {:value 2, :id string?})
 
   (bus:with-temp bus
                  (let [{:keys [id stopped]} (deref (bus:open bus (fn [m]
@@ -174,7 +174,7 @@
                    1]))
 
 ^{:refer std.concurrent.bus/bus:close-all :added "3.0"}
-(fact "stops all thread loops" ^:hidden
+(fact "stops all thread loops"
 
   (bus:with-temp bus
                  (let [_ @(bus:open bus (fn [m]
@@ -192,7 +192,7 @@
   => 1)
 
 ^{:refer std.concurrent.bus/bus:kill :added "3.0"}
-(fact "bus:closes all bus:opened loops" ^:hidden
+(fact "bus:closes all bus:opened loops"
 
   (bus:with-temp bus
                  (let [{:keys [id stopped]} @(bus:open bus (fn [m]
@@ -208,7 +208,7 @@
                    1]))
 
 ^{:refer std.concurrent.bus/bus:kill-all :added "3.0"}
-(fact "stops all thread loops" ^:hidden
+(fact "stops all thread loops"
 
   (bus:with-temp bus
                  (let [_ @(bus:open bus (fn [m]

@@ -13,7 +13,7 @@
   => :<query>)
 
 ^{:refer lib.lucene.impl.query/parse-form-seq :added "3.0"}
-(fact "parses a sequential form" ^:hidden
+(fact "parses a sequential form"
 
   (parse-form-seq [{:id "hello"} {:id "world"}]
                   {:analyzer -analyzer-
@@ -23,7 +23,7 @@
   => org.apache.lucene.search.BooleanQuery)
 
 ^{:refer lib.lucene.impl.query/parse-form-set :added "3.0"}
-(fact "parses a set form" ^:hidden
+(fact "parses a set form"
 
   (parse-form-set #{{:id "hello"} {:id "world"}}
                   {:analyzer -analyzer-
@@ -33,7 +33,7 @@
   => org.apache.lucene.search.BooleanQuery)
 
 ^{:refer lib.lucene.impl.query/parse-form-map :added "3.0"}
-(fact "parses a map form" ^:hidden
+(fact "parses a map form"
 
   (parse-form-map {:id "hello" :dta "world"}
                   {:analyzer -analyzer-
@@ -50,7 +50,7 @@
   => org.apache.lucene.search.TermQuery)
 
 ^{:refer lib.lucene.impl.query/parse-form-string :added "3.0"}
-(fact "parses a string" ^:hidden
+(fact "parses a string"
 
   (parse-form-string "hello"
                      {:builder (QueryBuilder. -analyzer-)

@@ -47,7 +47,6 @@
 
 ^{:refer xt.sys.cache-queue/INDEX-KEY :added "4.0"}
 (fact "gets the index key"
-  ^:hidden
 
   (!.js
    (queue/INDEX-KEY "main"))
@@ -59,8 +58,7 @@
 
 ^{:refer xt.sys.cache-queue/GROUPCOUNT-KEY :added "4.0"}
 (fact "gets the groupcount key"
-  ^:hidden
-  
+
   (!.js (queue/GROUPCOUNT-KEY "main"))
   => "main:__groupcount__"
 
@@ -69,8 +67,7 @@
 
 ^{:refer xt.sys.cache-queue/GROUP-KEY :added "4.0"}
 (fact "gets the group key"
-  ^:hidden
-  
+
   (!.js (queue/GROUP-KEY "main" "g0"))
   => "main:__group__:g0"
 
@@ -79,8 +76,7 @@
 
 ^{:refer xt.sys.cache-queue/BUFFER-KEY :added "4.0"}
 (fact "gets the buffer key"
-  ^:hidden
-  
+
   (!.js (queue/BUFFER-KEY "main" 0))
   => "main:__buffer__:0"
 
@@ -89,7 +85,6 @@
 
 ^{:refer xt.sys.cache-queue/queue-meta :added "4.0"}
 (fact "gets the meta "
-  ^:hidden
 
   (!.js  (var cache (cache/cache :GLOBAL))
          (cache/flush cache)
@@ -101,14 +96,14 @@
          (queue/group-setup cache
                       "main"
                       "g1")
-         
+
          [(queue/queue-meta cache)
           (queue/queue-groupcount cache "main")])
   => [{"main" {"size" 5}} 2]
-  
+
   (!.lua (cache/cache :GLOBAL))
   => (comp not nil?)
-  
+
   (!.lua (var cache (cache/cache :GLOBAL))
          (cache/flush cache)
          (queue/create-queue cache
@@ -119,7 +114,7 @@
          (queue/group-setup cache
                             "main"
                             "g1")
-         
+
          [(queue/queue-meta cache)
           (queue/queue-groupcount cache "main")])
   => [{"main" {"size" 5}} 2])
@@ -132,8 +127,7 @@
 
 ^{:refer xt.sys.cache-queue/buffer-get-index :added "4.0"}
 (fact "gets the index in the buffer"
-  ^:hidden
-  
+
   (!.js
    (var cache (cache/cache :GLOBAL))
    (cache/flush cache)
@@ -144,7 +138,7 @@
     (queue/push-item cache "main" "hello" 5)
     (queue/buffer-get-index cache "main")])
   => [4 0 1 2 2]
-  
+
   (!.lua
    (var cache (cache/cache :GLOBAL))
    (cache/flush cache)
@@ -170,8 +164,7 @@
 
 ^{:refer xt.sys.cache-queue/create-queue :added "4.0"}
 (fact "creates a queue "
-  ^:hidden
-  
+
   (!.js
    (var cache (cache/cache :GLOBAL))
    (cache/flush cache)
@@ -190,8 +183,7 @@
 
 ^{:refer xt.sys.cache-queue/list-queues :added "4.0"}
 (fact "lists all queues"
-  ^:hidden
-  
+
   (set (!.js
         (var cache (cache/cache :GLOBAL))
         (cache/flush cache)
@@ -210,8 +202,7 @@
 
 ^{:refer xt.sys.cache-queue/list-queue-groups :added "4.0"}
 (fact "lists all queue groups"
-  ^:hidden
-  
+
   (!.js
    (var cache (cache/cache :GLOBAL))
    (cache/flush cache)
@@ -238,8 +229,7 @@
 
 ^{:refer xt.sys.cache-queue/purge-queue :added "4.0"}
 (fact "removes all groups and items in a queue"
-  ^:hidden
-  
+
   (!.js
    (var cache (cache/cache :GLOBAL))
    (cache/flush cache)
@@ -266,8 +256,7 @@
 
 ^{:refer xt.sys.cache-queue/reset-queue :added "4.0"}
 (fact "resets a group's index"
-  ^:hidden
-  
+
   (!.js
    (var cache (cache/cache :GLOBAL))
    (cache/flush cache)
@@ -300,8 +289,7 @@
 
 ^{:refer xt.sys.cache-queue/has-queue :added "4.0"}
 (fact "checks that queue exists"
-  ^:hidden
-  
+
   (!.js
    (var cache (cache/cache :GLOBAL))
    (cache/flush cache)
@@ -320,8 +308,7 @@
 
 ^{:refer xt.sys.cache-queue/has-group :added "4.0"}
 (fact "checks that group exists"
-  ^:hidden
-  
+
   (!.js
    (var cache (cache/cache :GLOBAL))
    (cache/flush cache)
@@ -342,8 +329,7 @@
 
 ^{:refer xt.sys.cache-queue/push-item :added "4.0"}
 (fact "pushes an item into the queue"
-  ^:hidden
-  
+
   (!.js
    (var cache (cache/cache :GLOBAL))
    (cache/flush cache)
@@ -378,8 +364,7 @@
 
 ^{:refer xt.sys.cache-queue/push-items :added "4.0"}
 (fact "pushes items into the queue"
-  ^:hidden
-  
+
   (!.js
    (var cache (cache/cache :GLOBAL))
    (cache/flush cache)
@@ -414,7 +399,6 @@
 
 ^{:refer xt.sys.cache-queue/group-setup :added "4.0"}
 (fact "setup a group"
-  ^:hidden
 
   (!.js
    (var cache (cache/cache :GLOBAL))
@@ -442,15 +426,14 @@
 
 ^{:refer xt.sys.cache-queue/queue-default :added "4.0"}
 (fact "pushes a queue, if not there creates a queue and default group"
-  ^:hidden
-  
+
   (!.js
    (var cache (cache/cache :GLOBAL))
    (cache/flush cache)
    (queue/queue-default cache "main" "a" 10)
    (queue/group-read cache "main" "default" 5))
   => [1 ["a"] 0]
-  
+
   (!.lua
    (var cache (cache/cache :GLOBAL))
    (cache/flush cache)

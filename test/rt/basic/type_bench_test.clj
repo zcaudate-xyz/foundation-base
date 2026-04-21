@@ -18,7 +18,6 @@
 
 ^{:refer rt.basic.type-bench/create-bench-process :added "4.0"}
 (fact "creates the bench process"
-  ^:hidden
   (let [port (network/port:check-available 0)
         p (create-bench-process
            :python port
@@ -32,8 +31,7 @@
 
 ^{:refer rt.basic.type-bench/start-bench-process :added "4.0"}
 (fact "starts a bench process"
-  ^:hidden
-  
+
   (start-bench-process :python
                        {:exec ["echo"]
                         :bootstrap (fn [port opts] "hello")}

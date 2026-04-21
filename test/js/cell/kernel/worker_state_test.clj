@@ -59,35 +59,32 @@
 
 ^{:refer js.cell.kernel.worker-state/get-state :added "4.0"}
 (fact "gets cell state"
-  ^:hidden
-  
+
   (worker-state/get-state nil)
   => {"eval" true}
-  
+
   (!.js (worker-state/get-state {}))
   => {"eval" true})
 
 ^{:refer js.cell.kernel.worker-state/get-actions :added "4.0"}
 (fact "gets cell actions"
-  ^:hidden
-  
+
   (worker-state/get-actions nil)
   => map?
-  
+
   (!.js (worker-state/get-actions {"actions" {"@test/action" {}}}))
   => {"@test/action" {}})
 
 ^{:refer js.cell.kernel.worker-state/set-actions :added "4.0"}
 (fact "initiates the base actions"
-  ^:hidden
-  
+
   ;; Test setting actions on a worker
   (!.js
    (var worker {})
    (worker-state/set-actions {"@test/action" {}} worker)
    (xt/x:get-key worker "actions"))
   => {"@test/action" {}}
-  
+
   ;; Test resetting global actions
   (!.js
    (worker-state/set-actions {"@global/action" {}} nil)
@@ -96,17 +93,15 @@
 
 ^{:refer js.cell.kernel.worker-state/fn-self :added "4.0"}
 (fact "applies arguments along with `self`"
-  ^:hidden
-  
-  (set 
+
+  (set
    (eval-worker ((js.cell.kernel.worker-state/fn-self
                   xt.lang.common-data/obj-keys))))
   => #{"onerror" "close" "postMessage" "addEventListener" "onmessage"})
 
 ^{:refer js.cell.kernel.worker-state/fn-trigger :added "4.0"}
 (fact "triggers an event"
-  ^:hidden
-  
+
   (eval-worker (js.cell.kernel.worker-state/fn-trigger
                 self
                 "stream"
@@ -118,8 +113,7 @@
 
 ^{:refer js.cell.kernel.worker-state/fn-trigger-async :added "4.0"}
 (fact "triggers an event after a delay"
-  ^:hidden
-  
+
   (eval-worker (js.cell.kernel.worker-state/fn-trigger-async
                 self
                 "stream"
@@ -132,7 +126,6 @@
 
 ^{:refer js.cell.kernel.worker-state/fn-set-state :added "4.0"}
 (fact "helper to set the state and emit event"
-  ^:hidden
 
   (eval-worker (js.cell.kernel.worker-state/fn-set-state
                 self
@@ -140,7 +133,7 @@
                 (fn [])
                 true))
   => {"eval" true}
-  
+
   (eval-worker (js.cell.kernel.worker-state/fn-set-state
                 self
                 (js.cell.kernel.worker-state/WORKER_STATE)
@@ -153,12 +146,11 @@
 
 ^{:refer js.cell.kernel.worker-state/fn-set-final-status :added "4.0"}
 (fact "sets the worker state to final"
-  ^:hidden
-  
+
   (eval-worker (js.cell.kernel.worker-state/fn-set-final-status
                 self true))
   => {"eval" true, "final" true}
-  
+
   (eval-worker (js.cell.kernel.worker-state/fn-set-final-status
                 self)
                nil true)
@@ -169,12 +161,11 @@
 
 ^{:refer js.cell.kernel.worker-state/fn-get-final-status :added "4.0"}
 (fact "gets the final status"
-  ^:hidden
 
   (eval-worker (js.cell.kernel.worker-state/fn-get-final-status
                 self))
   => nil
-  
+
   (eval-worker (do:> (js.cell.kernel.worker-state/fn-set-final-status
                       self true)
                      (return (js.cell.kernel.worker-state/fn-get-final-status
@@ -183,12 +174,11 @@
 
 ^{:refer js.cell.kernel.worker-state/fn-set-eval-status :added "4.0"}
 (fact "sets the eval status"
-  ^:hidden
-  
+
   (eval-worker (js.cell.kernel.worker-state/fn-set-eval-status
                 self true true))
   => {"eval" true}
-  
+
   (eval-worker (js.cell.kernel.worker-state/fn-set-eval-status
                 self)
                nil true true)
@@ -196,12 +186,11 @@
 
 ^{:refer js.cell.kernel.worker-state/fn-get-eval-status :added "4.0"}
 (fact "gets the eval status"
-  ^:hidden
-  
+
   (eval-worker (js.cell.kernel.worker-state/fn-get-eval-status
                 self))
   => true
-  
+
   (eval-worker (do:> (js.cell.kernel.worker-state/fn-set-eval-status
                       self false true)
                      (return (js.cell.kernel.worker-state/fn-get-eval-status
@@ -210,68 +199,61 @@
 
 ^{:refer js.cell.kernel.worker-state/fn-get-action-list :added "4.0"}
 (fact "gets the actions list"
-  ^:hidden
 
   (worker-state/fn-get-action-list)
   => vector?
-  
+
   (eval-worker (js.cell.kernel.worker-state/fn-get-action-list))
   => vector?)
 
 ^{:refer js.cell.kernel.worker-state/fn-get-action-entry :added "4.0"}
 (fact  "gets a action entry"
-  ^:hidden
 
   (worker-state/fn-get-action-entry "hello")
   => nil
-  
+
   (eval-worker (js.cell.kernel.worker-state/fn-get-action-entry "hello"))
   => nil)
 
 ^{:refer js.cell.kernel.worker-state/fn-ping :added "4.0"}
 (fact "pings the worker"
-  ^:hidden
-  
+
   (worker-state/fn-ping)
   => (contains ["pong" integer?])
-  
+
   (eval-worker (js.cell.kernel.worker-state/fn-ping))
   => (contains ["pong" integer?]))
 
 ^{:refer js.cell.kernel.worker-state/fn-ping-async :added "4.0"}
 (fact "pings after a delay"
-  ^:hidden
 
   (j/<! (worker-state/fn-ping-async 100))
   => (contains ["pong" integer?])
-  
+
   (eval-worker (js.cell.kernel.worker-state/fn-ping-async 100))
   => (contains ["pong" integer?]))
 
 ^{:refer js.cell.kernel.worker-state/fn-echo :added "4.0"}
 (fact  "echos the first arg"
-  ^:hidden
-  
+
   (worker-state/fn-echo "hello")
   => (contains ["hello" integer?])
-  
+
   (eval-worker (js.cell.kernel.worker-state/fn-echo "hello"))
   => (contains ["hello" integer?]))
 
 ^{:refer js.cell.kernel.worker-state/fn-echo-async :added "4.0"}
 (fact "echos the first arg after delay"
-  ^:hidden
 
   (j/<! (worker-state/fn-echo-async "hello" 100))
   => (contains ["hello" integer?])
-  
+
   (eval-worker (js.cell.kernel.worker-state/fn-echo-async "hello" 100))
   => (contains ["hello" integer?]))
 
 ^{:refer js.cell.kernel.worker-state/fn-error :added "4.0"}
 (fact "throws an error"
-  ^:hidden
-  
+
   (worker-state/fn-error)
   => (throws)
 
@@ -280,12 +262,11 @@
 
 ^{:refer js.cell.kernel.worker-state/fn-error-async :added "4.0"}
 (fact  "throws an error after delay"
-  ^:hidden
-  
+
    (j/<! (. (worker-state/fn-error-async)
             (catch j/identity)))
   => (contains ["error"])
-  
+
   (eval-worker (js.cell.kernel.worker-state/fn-error)
                300)
   => :timeout)

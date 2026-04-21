@@ -19,8 +19,7 @@
 
 ^{:refer js.react.ext-log/listenLogLatest :adopt true :added "4.0" :unchecked true}
 (fact "uses an async entry"
-  ^:hidden
-  
+
   (defn.js ListenLogLatestDemo
     []
     (var log    (ext-log/makeLog {}))
@@ -34,16 +33,16 @@
     (r/init []
       (queueEntry))
     (return
-     (n/EnclosedCode 
-{:label "js.react.ext-log/listenLogLatest"} 
+     (n/EnclosedCode
+{:label "js.react.ext-log/listenLogLatest"}
 [:% n/Row
        [:% n/Button
         {:title "QUEUE"
-         :onPress queueEntry}]] 
+         :onPress queueEntry}]]
 [:% n/TextDisplay
         {:content (n/format-entry {:latest latest
                                    :count (event-log/get-count log)
                                    :tail (event-log/get-tail log 5)})}])))
-  
-  
+
+
   )

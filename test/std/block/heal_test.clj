@@ -5,23 +5,21 @@
 
 ^{:refer std.block.heal/print-rainbow :added "4.1"}
 (fact "prints the content with rainbow parens"
-  ^:hidden
-  
+
   (env/with-out-str
     (print-rainbow "(+ 12 3)"))
   => "[34m([0m+ 12 3[34m)[0m")
 
 ^{:refer std.block.heal/rainbow :added "4.1"}
 (fact "formats the content with rainbow parens"
-  ^:hidden
-  
+
   (rainbow "(+ 12 3)")
   => "[34m([0m+ 12 3[34m)[0m")
 
 
 (comment
 
-  
+
 
 (ns std.block.heal-test
   (:use code.test)
@@ -31,7 +29,6 @@
 
 ^{:refer code.heal/heal-code-single :added "4.0"}
 (fact "helper function for heal-code"
-  ^:hidden
 
   (code.project/in-context
    (heal/heal-code-single {}))
@@ -88,24 +85,24 @@
                  "]"))
            (env/p f :SUCCESS)
            (catch Throwable t
-             
+
              (env/p f :FAILED))))))
 
 
 (comment
   heal-filenames
   heal-namespaces
-  
+
   (heal/heal-directory "hello")
-  
-  
+
+
   (heal-code '[indigo.client.app.components]
              {:write true})
-  
-  
+
+
   (heal-code '[indigo.client.app.components])
   (heal-code '[indigo.client.app.components.canvas])
-  
+
   (project/get-path 'indigo.client.app.components.theme-editor
                     (project/project))
   (std.fs/ns->file 'indigo.client.app.theme-editor)

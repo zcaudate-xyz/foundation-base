@@ -36,7 +36,6 @@
 
 ^{:refer xt.db.sql-util/encode-query-string.more :adopt true :added "4.0"}
 (fact "encodes a query segment"
-  ^:hidden
 
   (!.js
    (ut/encode-query-string [{:name "hello"}
@@ -47,7 +46,6 @@
 
 ^{:refer xt.db.sql-util/sqlite-json-values :added "4.0"}
 (fact "select values from json"
-  ^:hidden
 
   (!.js
    (ut/sqlite-json-values "'[1,2,3,4]'"))
@@ -62,8 +60,7 @@
 
 ^{:refer xt.db.sql-util/encode-bool :added "4.0"}
 (fact "encodes a boolean to sql"
-  ^:hidden
-  
+
   (!.js
    [(ut/encode-bool true)
     (ut/encode-bool false)])
@@ -81,8 +78,7 @@
 
 ^{:refer xt.db.sql-util/encode-number :added "4.0"}
 (fact "encodes a number (for lua dates)"
-  ^:hidden
-  
+
   (!.js
    [(ut/encode-number 100000000000)])
   => ["'100000000000'"]
@@ -93,8 +89,7 @@
 
 ^{:refer xt.db.sql-util/encode-operator :added "4.0"}
 (fact "encodes an operator to sql"
-  ^:hidden
-  
+
   (!.js
    [(ut/encode-operator "eq")
     (ut/encode-operator "lte")
@@ -118,14 +113,13 @@
 
 ^{:refer xt.db.sql-util/encode-value :added "4.0"}
 (fact "encodes a value to sql"
-  ^:hidden
 
   (!.js (xt/x:json-encode 100000000000000000))
   (!.lua (xt/x:json-encode 100000000000000000))
-  
+
   (!.lua
    (string.format "%0.f" 100000000000000000))
-  
+
   (!.js
    [(ut/encode-value nil)
     (ut/encode-value 1.235)
@@ -143,7 +137,7 @@
     (ut/encode-value {:a 1})
     (ut/encode-value {:a "he'llo"})])
   => ["NULL" "'1.235'" "'100000000000000000'" "'hel''lo'" "'{\"a\":1}'" "'{\"a\":\"he''llo\"}'"]
-  
+
   (!.py
    [(ut/encode-value nil)
     (ut/encode-value 1.235)
@@ -164,8 +158,7 @@
 
 ^{:refer xt.db.sql-util/encode-sql-arg :added "4.0"}
 (fact "encodes an sql arg (for functions)"
-  ^:hidden
-  
+
   (!.js
    (ut/encode-sql-arg {"::" "sql/arg"
                        :name "hello"}
@@ -192,8 +185,7 @@
 
 ^{:refer xt.db.sql-util/encode-sql-column :added "4.0"}
 (fact "encodes a sql column"
-  ^:hidden
-  
+
   (!.js
    (ut/encode-sql-column {"::" "sql/column"
                           :name "hello"}
@@ -220,8 +212,7 @@
 
 ^{:refer xt.db.sql-util/encode-sql-tuple :added "4.0"}
 (fact "encodes a sql tuple"
-  ^:hidden
-  
+
   (!.js
    (ut/encode-sql-tuple {"::" "sql/tuple"
                          :args [1 2 3]}
@@ -248,8 +239,7 @@
 
 ^{:refer xt.db.sql-util/encode-sql-table :added "4.0"}
 (fact "encodes an sql table"
-  ^:hidden
-  
+
   (!.js
    (ut/encode-sql-table {"::" "sql/table"
                          :name "hello"
@@ -279,8 +269,7 @@
 
 ^{:refer xt.db.sql-util/encode-sql-cast :added "4.0"}
 (fact "encodes an sql cast"
-  ^:hidden
-  
+
   (!.js
    [(ut/encode-sql-cast {"::" "sql/cast"
                          :args ["k" {"::" "sql/table"
@@ -334,7 +323,6 @@
 
 ^{:refer xt.db.sql-util/encode-sql-keyword :added "4.0"}
 (fact "encodes an sql keyword"
-  ^:hidden
 
   (!.js
    (ut/encode-sql-keyword {:name "hello"}
@@ -359,7 +347,6 @@
 
 ^{:refer xt.db.sql-util/encode-sql-fn :added "4.0"}
 (fact "encodes an sql function"
-  ^:hidden
 
   (!.js
    (ut/encode-sql-fn {"::" "sql/fn"
@@ -423,8 +410,7 @@
 
 ^{:refer xt.db.sql-util/encode-sql-select :added "4.0"}
 (fact "encodes an sql select statement"
-  ^:hidden
-  
+
   (!.js
    (ut/encode-sql-select {"::" "sql/select"
                           :args ["*" "from" {"::" "sql/fn"
@@ -476,8 +462,7 @@
                                  :name "jsonb_each"
                                  :args ["'[1,2,3]'" true]}]}])]}
 (fact "encodes an sql value"
-  ^:hidden
-  
+
   (!.js
    (xtd/arr-map
     (@! +inputs+)
@@ -531,9 +516,8 @@
              "name != (k + ('1' + '2' + '3'))"
              "data = '{\"a\":1}'"])]}
 (fact "encodes a query segment"
-  ^:hidden
-  
-  
+
+
   (!.js
    [(ut/encode-query-segment "name" "hello" k/identity {})
     (ut/encode-query-segment "name" ["neq" "hell'o"] k/identity {})
@@ -545,7 +529,7 @@
                                                         :args [1 2 3]}]}] k/identity {})
     (ut/encode-query-segment "data" {:a 1} k/identity {})])
   => +out+
-  
+
   (!.lua
    [(ut/encode-query-segment "name" "hello" k/identity {})
     (ut/encode-query-segment "name" ["neq" "hell'o"] k/identity {})
@@ -587,8 +571,7 @@
 
 ^{:refer xt.db.sql-util/encode-query-string :added "4.0"}
 (fact "encodes a query string"
-  ^:hidden
-  
+
   (!.js
    [(ut/encode-query-string {} "WHERE" {})
     (ut/encode-query-string {:name "hello"} "WHERE"
@@ -597,7 +580,7 @@
                              :name "hello"}
                            "WHERE"
                            {})])
-  
+
   => [""
       "WHERE \"SCHEMA\".name = 'hello'"
       "WHERE data = '{\"a\":1}' AND name = 'hello'"]
@@ -621,7 +604,7 @@
                             :name "hello"}
                            "WHERE"
                            {})])
-  => ["" 
+  => [""
       "WHERE \"SCHEMA\".name = 'hello'"
       "WHERE data = '{\"a\": 1}' AND name = 'hello'"]
 
@@ -633,14 +616,13 @@
                              :name "hello"}
                             "WHERE"
                             {})])
-  => ["" 
+  => [""
       "WHERE \"SCHEMA\".name = 'hello'"
       "WHERE data = '{\"a\":1}' AND name = 'hello'"])
 
 ^{:refer xt.db.sql-util/LIMIT :added "4.0"}
 (fact "creates a LIMIT keyword"
-  ^:hidden
-  
+
   (!.js
    (ut/encode-sql-keyword (ut/LIMIT 10)
                           ut/default-quote-fn
@@ -667,8 +649,7 @@
 
 ^{:refer xt.db.sql-util/OFFSET :added "4.0"}
 (fact "creates a OFFSET keyword"
-  ^:hidden
-  
+
   (!.js
    (ut/encode-sql-keyword (ut/OFFSET 10)
                           ut/default-quote-fn
@@ -695,8 +676,7 @@
 
 ^{:refer xt.db.sql-util/ORDER-BY :added "4.0"}
 (fact "creates an ORDER BY keyword"
-  ^:hidden
-  
+
   (!.js
    (ut/encode-sql-keyword (ut/ORDER-BY ["name"])
                           ut/default-quote-fn
@@ -723,8 +703,7 @@
 
 ^{:refer xt.db.sql-util/ORDER-SORT :added "4.0"}
 (fact "creates an ORDER BY keyword"
-  ^:hidden
-  
+
   (!.js
    (ut/encode-sql-keyword (ut/ORDER-SORT "desc")
                           ut/default-quote-fn
@@ -751,8 +730,7 @@
 
 ^{:refer xt.db.sql-util/default-quote-fn :added "4.0"}
 (fact "wraps a column in double quotes"
-  ^:hidden
-  
+
   (!.js
    (ut/default-quote-fn "hello"))
   => "\"hello\""
@@ -767,7 +745,6 @@
 
 ^{:refer xt.db.sql-util/default-return-format-fn :added "4.0"}
 (fact "default return format-fn"
-  ^:hidden
 
   (!.js
    (ut/default-return-format-fn
@@ -793,8 +770,7 @@
 
 ^{:refer xt.db.sql-util/default-table-fn :added "4.0"}
 (fact "wraps a table in schema"
-  ^:hidden
-  
+
   (!.js
    (ut/default-table-fn "hello" {:hello {:schema "test.schema"}}))
   => "\"test.schema\".\"hello\""
@@ -809,8 +785,7 @@
 
 ^{:refer xt.db.sql-util/postgres-wrapper-fn :added "4.0"}
 (fact "wraps a call for postgres"
-  ^:hidden
-  
+
   (!.js
    (ut/postgres-wrapper-fn "SELECT * FROM <TABLE>" 2))
   => "WITH j_ret AS (\n  SELECT * FROM <TABLE>\n) SELECT jsonb_agg(j_ret) FROM j_ret"
@@ -825,16 +800,15 @@
 
 ^{:refer xt.db.sql-util/postgres-opts :added "4.0"}
 (fact "constructs postgres options"
-  ^:hidden
-  
+
   (!.js
    (ut/postgres-opts {}))
   => map?
-  
+
   (!.lua
    (ut/postgres-opts {}))
   => any?
-  
+
   (!.py
    (ut/postgres-opts {}))
   => any?)
@@ -844,8 +818,7 @@
 
 ^{:refer xt.db.sql-util/sqlite-to-boolean :added "4.0"}
 (fact "coerces 1 to true and 0 to false"
-  ^:hidden
-  
+
   (!.js
    [(ut/sqlite-to-boolean 0)
     (ut/sqlite-to-boolean 1)])
@@ -863,16 +836,15 @@
 
 ^{:refer xt.db.sql-util/sqlite-opts :added "4.0"}
 (fact "constructs sqlite options"
-  ^:hidden
-  
+
   (!.js
    (ut/sqlite-opts {}))
   => map?
-  
+
   (!.lua
    (ut/sqlite-opts {}))
   => any?
-  
+
   (!.py
    (ut/sqlite-opts {}))
   => any?)

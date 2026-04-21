@@ -36,8 +36,7 @@
 
 ^{:refer xt.lang.util-loader/new-task :added "4.0"}
 (fact "creates a new task"
-  ^:hidden
-  
+
   (set
    (!.js
     (xt/x:obj-keys
@@ -58,8 +57,7 @@
 
 ^{:refer xt.lang.util-loader/task-load :added "4.0"}
 (fact "loads a task"
-  ^:hidden
-  
+
   (!.js
    (loader/task-load
     (loader/new-task
@@ -96,8 +94,7 @@
 
 ^{:refer xt.lang.util-loader/task-unload :added "4.0"}
 (fact "unloads a task"
-  ^:hidden
-  
+
   (!.lua
    (loader/task-unload
     (loader/new-task
@@ -124,8 +121,7 @@
 
 ^{:refer xt.lang.util-loader/new-loader :added "4.0"}
 (fact "creates a new loader"
-  ^:hidden
-  
+
   (!.js
    (do (var loader
             (loader/new-loader [(loader/new-task
@@ -167,7 +163,7 @@
       "loading" {},
       "order" ["A" "B" "C"],
       "::" "loader"}
-  
+
   (!.lua
    (xtd/tree-get-spec
     (loader/new-loader [(loader/new-task
@@ -214,8 +210,7 @@
 
 ^{:refer xt.lang.util-loader/list-incomplete :added "4.0"}
 (fact "lists incomplete tasks"
-  ^:hidden
-  
+
   (set (!.js
         (loader/list-incomplete
          (loader/new-loader [(loader/new-task
@@ -253,7 +248,6 @@
 
 ^{:refer xt.lang.util-loader/load-tasks-single :added "4.0"}
 (fact "loads a single task"
-  ^:hidden
 
   (notify/wait-on :js
     (var loader (loader/new-loader [(loader/new-task
@@ -281,7 +275,7 @@
                               nil))
   => ["A" true]
 
-  
+
   (notify/wait-on :lua
     (var loader (loader/new-loader [(loader/new-task
                                      "A" [] []
@@ -296,10 +290,9 @@
 
 ^{:refer xt.lang.util-loader/load-tasks :added "4.0"}
 (fact "load tasks"
-  ^:hidden
-  
+
   ;; NO SLEEP
-  
+
   (set
    (notify/wait-on :js
      (var loader (loader/new-loader [(loader/new-task
@@ -320,8 +313,8 @@
                           (repl/notify
                            (loader/list-completed loader))))))
   => #{"C" "B" "A"}
-  
-  (set 
+
+  (set
    (notify/wait-on :lua
      (var loader (loader/new-loader [(loader/new-task
                                       "A" [] []
@@ -342,9 +335,9 @@
                            (loader/list-completed loader))))))
   => #{"C" "B" "A"}
 
-  
+
   ;; WITH SLEEP
-  
+
   (set
    (notify/wait-on :js
          (:= (!:G loader) (loader/new-loader
@@ -366,7 +359,7 @@
                               (repl/notify
                                (loader/list-completed loader))))))
   => #{"C" "B" "A"}
-  
+
   (set
    (notify/wait-on :lua
      (:= (!:G loader) (loader/new-loader
@@ -391,9 +384,9 @@
                               (repl/notify
                                (loader/list-completed loader))))))
   => #{"C" "B" "A"}
-  
+
   ;; WITH ERROR
-  
+
   (notify/wait-on :js
     (:= (!:G loader) (loader/new-loader
                       [(loader/new-task
@@ -444,8 +437,7 @@
 
 ^{:refer xt.lang.util-loader/load-tasks.global :adopt true :added "4.0"}
 (fact "load tasks"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (:= (!:G loader) (loader/new-loader
                        [(loader/new-task

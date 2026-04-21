@@ -21,16 +21,15 @@
   :adopt true
   :added "0.1"}
 (fact "creates a slim checkbox"
-  ^:hidden
-  
+
   (defn.js CheckBoxSimpleDemo
     []
     (var [first setFirst]   (r/local true))
     (var [highlighted setHighlighted]   (r/local true))
     (var [disabled setDisabled]   (r/local false))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-check-box/CheckBoxSimple"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-check-box/CheckBoxSimple"}
 [:% n/Row
        {:style {:alignItems "center"
                 #_#_:margin 3}}
@@ -43,7 +42,7 @@
        [:% ui-check-box/CheckBox
         {:highlighted highlighted
          :disabled disabled
-         
+
          :theme {:fgActive   "limegreen"
                  :fgHovered  0.9
                  :bgActive   "green"
@@ -55,7 +54,7 @@
          :addons [(physical-addon/tagAll
                    {:style {:paddingHorizontal 20
                             :height 80
-                            :flex 1}})]}]] 
+                            :flex 1}})]}]]
 [:% n/Row
        [:% n/Button
         {:title "H"
@@ -70,8 +69,7 @@
 
 ^{:refer js.react-native.ui-check-box/CheckBox :added "0.1"}
 (fact "creates a slim checkbox"
-  ^:hidden
-  
+
   (defn.js CheckBoxDemo
     []
     (var [first setFirst]   (r/local true))
@@ -79,8 +77,8 @@
     (var [highlighted setHighlighted] (r/local true))
     (var [errored setErrored] (r/local true))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-check-box/CheckBox"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-check-box/CheckBox"}
 [:% n/Row
        {:style {:alignItems "center"
                 #_#_:margin 3}}
@@ -106,14 +104,14 @@
          :selected second
          :setSelected setSecond
          :outlined true}]
-       
+
        [:% n/Padding {:style {:width 10}}]
        [:% ui-check-box/CheckBox
         {:disabled true
          :selected false
          :outlined true}]
        [:% n/Padding {:style {:width 10}}]
-       
+
        [:% ui-check-box/CheckBox
         {:highlighted highlighted
          :setSelected setHighlighted
@@ -128,6 +126,6 @@
                  :bgHighlighted "red"}
          :outlined true}]])))
 
-  
-  
+
+
   )

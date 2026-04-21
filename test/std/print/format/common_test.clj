@@ -37,7 +37,7 @@
   => "hello     ")
 
 ^{:refer std.print.format.common/indent :added "3.0"}
-(fact "format lines with indent" ^:hidden
+(fact "format lines with indent"
 
   (indent ["hello"] 3)
   => ["   hello"])
@@ -48,7 +48,7 @@
   => ["          " "          "])
 
 ^{:refer std.print.format.common/border :added "3.0"}
-(fact "formats a border around given lines" ^:hidden
+(fact "formats a border around given lines"
 
   (border ["HELLO"])
   => ["┌-----┐"

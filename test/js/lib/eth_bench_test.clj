@@ -33,7 +33,6 @@
              (l/rt :js)
              example-counter/+default-contract+))]}
 (fact "deploys the contract"
-  ^:hidden
 
   (j/<!
    (e/contract-deploy "http://127.0.0.1:8545"
@@ -72,7 +71,6 @@
                (fn [m]
                  (return (xt/x:get-key m "contractAddress")))))]}
 (fact "runs the contract given address and arguments"
-  ^:hidden
 
   (j/<! (e/contract-run "http://127.0.0.1:8545"
                         (@! (last env-ganache/+default-private-keys+))
@@ -116,8 +114,7 @@
                         []
                         nil))]}
 (fact "gets all past events"
-  ^:hidden
-  
+
   (j/<! (e/get-past-events "http://127.0.0.1:8545"
                            (@! +address+)
                            (@! (:abi +contract+))

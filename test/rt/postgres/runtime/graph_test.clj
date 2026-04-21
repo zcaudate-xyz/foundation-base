@@ -18,38 +18,33 @@
 
 ^{:refer rt.postgres.runtime.graph/g:id :added "4.0"}
 (fact "gets only id"
-  ^:hidden
-  
+
   (pg/g:id scratch/Task
     {:where {}})
   => string?)
 
 ^{:refer rt.postgres.runtime.graph/g:count :added "4.0"}
 (fact "gets only count"
-  ^:hidden
-  
+
   (pg/g:count scratch/Task)
   => string?)
 
 ^{:refer rt.postgres.runtime.graph/g:select :added "4.0"}
 (fact "returns matching entries"
-  ^:hidden
-  
+
   (pg/g:select scratch/Task)
   => string?)
 
 ^{:refer rt.postgres.runtime.graph/g:get :added "4.0"}
 (fact "gets a single entry"
-  ^:hidden
-  
+
   (pg/g:get scratch/Task
     {:where {}})
   => string?)
 
 ^{:refer rt.postgres.runtime.graph/g:update :added "4.0"}
 (fact "constructs the update form"
-  ^:hidden
-  
+
   (pg/g:update scratch/Task
     {:set {:name "name"}
      :where {:id (str (f/uuid-nil))}
@@ -58,7 +53,6 @@
 
 ^{:refer rt.postgres.runtime.graph/g:modify :added "4.0"}
 (fact  "constructs the modify form"
-  ^:hidden
 
   (binding [rt.postgres.base.grammar.form-let/*input-syms* (volatile! #{'o-op})]
     (pg/g:modify scratch/Task
@@ -69,15 +63,13 @@
 
 ^{:refer rt.postgres.runtime.graph/g:delete :added "4.0"}
 (fact  "constructs the delete form"
-  ^:hidden
 
   (pg/g:delete scratch/Task)
   => string?)
 
 ^{:refer rt.postgres.runtime.graph/g:insert :added "4.0"}
 (fact "constructs an insert form"
-  ^:hidden
-  
+
   (binding [rt.postgres.base.grammar.form-let/*input-syms* (volatile! #{'o-op})]
     (pg/g:insert scratch/Task
       {:name "name"
@@ -88,33 +80,30 @@
 
 ^{:refer rt.postgres.runtime.graph/q :added "4.0"}
 (fact "constructs a query form"
-  ^:hidden
-  
+
   (pg/q scratch/Task)
   => string?)
 
 ^{:refer rt.postgres.runtime.graph/q:get :added "4.0"}
 (fact "constructs a single query form"
-  ^:hidden
-  
+
   (pg/q:get scratch/Task)
   => string?)
 
 ^{:refer rt.postgres.runtime.graph/view :added "4.0"}
 (fact "constructs a view form"
-  ^:hidden
 
   (view/defret.pg ^{:- [scratch/Task]}
     task-basic
     [:uuid i-task-id]
     #{:*/data})
-  
+
   (view/defsel.pg ^{:- [scratch/Task]
                   :scope #{:public}
                     :args [:name i-name]}
     task-by-name
     {:name i-name})
-  
+
   (pg/view
       [-/task-basic]
       [-/task-by-name "hello"]

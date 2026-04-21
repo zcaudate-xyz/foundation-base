@@ -27,7 +27,6 @@
 
 ^{:refer js.react-native.ext-cell-test/SimpleCell :adopt true :added "0.1"}
 (fact "creates a  Tree Pane"
-  ^:hidden
 
   (!.js
    (var cell (impl-common/new-cell
@@ -35,7 +34,7 @@
                (fn:> [listener]
                      (worker-mock/create-worker listener {} true))}))
    (cl/view-get-output ["basic" "ping"] cell))
-  
+
   (defn.js SimpleCellDemo
     []
     (var cell (r/const (impl-common/new-cell
@@ -47,7 +46,7 @@
                          {}
                          cell)
     (var getCount (r/useGetCount))
-    
+
     (r/init []
       (cl/add-model "basic"
                     {:ping  {:handler link-fn/ping
@@ -55,8 +54,8 @@
                              :defaultOutput {:output "NOT AVAILABLE"}}}
                     cell))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ext-cell-test/SimpleCell"} 
+     (n/EnclosedCode
+{:label "js.react-native.ext-cell-test/SimpleCell"}
 [:% n/Row
        [:% n/Button
         {:title "Print"
@@ -64,7 +63,7 @@
        [:% n/Text " "]
        [:% n/Button
         {:title "Trigger"
-         :onPress (fn:> (cl/view-refresh ["basic" "ping"] cell))}]] 
+         :onPress (fn:> (cl/view-refresh ["basic" "ping"] cell))}]]
 [:% n/Caption
        {:text (xt/x:json-encode {:count (getCount)
                             :data (cl/get-val ["basic" "ping"]
@@ -74,8 +73,7 @@
 
 ^{:refer js.react-native.ext-cell-test/SimpleCellViews :adopt true :added "0.1"}
 (fact "creates a  Tree Pane"
-  ^:hidden
-  
+
   (defn.js SimpleCellViewsDemo
     []
     (var [l0 setL0] (r/local "basic0"))
@@ -101,7 +99,7 @@
                          ["output"]
                          {}
                          cell)
-    
+
     (r/init []
       (cl/add-model "basic0"
                        {:ping0  {:handler link-fn/ping
@@ -135,8 +133,8 @@
                                         cell)))
                    600)
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ext-cell-test/SimpleCellViews"} 
+     (n/EnclosedCode
+{:label "js.react-native.ext-cell-test/SimpleCellViews"}
 [:% n/TreePane
        {:tree  cell
         :levels [{:type "list"
@@ -157,7 +155,7 @@
                   :listWidth 100
                   :listFormat j/toUpperCase
                   :formatFn xt/x:json-encode
-                  :branchesFn 
+                  :branchesFn
                   (fn [model parents cell]
                     (when (and (xtd/first parents)
                                (cl/get-model (xtd/first parents) cell))
@@ -168,7 +166,7 @@
                     (return (cl/get-val [(:.. (j/arrayify parents))
                                          modelKey]
                                         []
-                                        cell)))}]}] 
+                                        cell)))}]}]
 [:% n/Caption
        {:text (n/format-entry
                #{[:count (getCount)
@@ -178,21 +176,20 @@
 
 ^{:refer js.react-native.ext-cell-test/listen-current :adopt true :added "0.1"}
 (fact "creates a  Tree Pane"
-  ^:hidden
-  
+
   (defn.js ListenCurrentDemo
     []
     (var [initial setInitial] (r/local "a"))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ext-cell-test/listen-current"} 
+     (n/EnclosedCode
+{:label "js.react-native.ext-cell-test/listen-current"}
 [:% n/TreePane
        {:tree  {}
-        :levels []}] 
+        :levels []}]
 [:% n/Caption
        {:text (xt/x:json-encode #{initial})
         :style {:marginTop 10}}])))
-  
-  
-  
+
+
+
   )

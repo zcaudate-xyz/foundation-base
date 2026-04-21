@@ -21,7 +21,7 @@
   => [{:a 1, :b 2} '([hello] [there])])
 
 ^{:refer std.lib.impl/split-single :added "3.0"}
-(fact "splits out a given entry" ^:hidden
+(fact "splits out a given entry"
 
   (split-single '[ITest
                   :include [-test]
@@ -79,7 +79,7 @@
   => '([cache val] (test/val cache val)))
 
 ^{:refer std.lib.impl/template-signatures :added "3.0"}
-(fact "finds template signatures for a protocol" ^:hidden
+(fact "finds template signatures for a protocol"
 
   (defprotocol IHello
     (^:notify -hi [cache] [cache a0] [cache a0 a1])
@@ -100,7 +100,7 @@
         :arglist [cache keys]}))
 
 ^{:refer std.lib.impl/template-transform :added "3.0"}
-(fact "transforms all functions" ^:hidden
+(fact "transforms all functions"
 
   (template-transform
    (filter #(-> % :name (= '-delete))
@@ -130,7 +130,7 @@
                 (template-signatures 'ITest) {} {})
   => '([-val ([obj] (val obj))]
        [-val ([obj k] (val obj k))]
-       [-get ([obj] (get obj))]) ^:hidden
+       [-get ([obj] (get obj))])
 
   (template-gen protocol-fns [:default]
                 (template-signatures 'ITest {:prefix "hi-"})
@@ -155,7 +155,7 @@
   => (contains {:body-output-fn fn?}))
 
 ^{:refer std.lib.impl/dimpl-template-fn :added "3.0"}
-(fact "helper function for defimpl" ^:hidden
+(fact "helper function for defimpl"
 
   (dimpl-template-fn '([-val ([obj] (val obj))]
                        [-val ([obj k] (val obj k))]
@@ -204,8 +204,7 @@
 
 ^{:refer std.lib.impl/dimpl-form :added "3.0"}
 (fact "helper for `defimpl`"
-  ^:hidden
-  
+
   (dimpl-form 'Test '[]
               '[:prefix "common/"
                 :suffix "-test"
@@ -220,8 +219,7 @@
 
 ^{:refer std.lib.impl/defimpl :added "3.0"}
 (fact "creates a high level `deftype` or `defrecord` interface"
-  ^:hidden
-  
+
   (macroexpand-1
    '(defimpl Test []))
   => '[(defrecord Test [])])
@@ -252,8 +250,7 @@
 
 ^{:refer std.lib.impl/eimpl-form :added "3.0"}
 (fact "creates the extend-impl form"
-  ^:hidden
-  
+
   (eimpl-form
    'clojure.lang.Atom
    '[:prefix "common/"
@@ -266,8 +263,7 @@
 
 ^{:refer std.lib.impl/extend-impl :added "3.0" :style/indent 1}
 (fact "extends a class with the protocols"
-  ^:hidden
-  
+
   (extend-impl String [:prefix "string/"])
   => vector?)
 
@@ -310,7 +306,7 @@
   => '((clojure.core/defn val-outer
          ([obj] (inner-val obj))
          ([obj k] (inner-val obj k)))
-       (clojure.core/defn get-outer ([obj] (inner-get obj)))) ^:hidden
+       (clojure.core/defn get-outer ([obj] (inner-get obj))))
 
   (dimpl-template-protocol {:prefix "test/"
                             :suffix "-hello"
@@ -318,7 +314,7 @@
   => '(std.protocol.dispatch/IDispatch
        (-submit [dispatch entry] (test/submit-hello dispatch entry))
        (-bulk? [dispatch] (test/bulk?-hello dispatch)))
-  
+
   (dimpl-template-interface {:prefix "test/"
                              :suffix "-hello"
                              :interface 'clojure.lang.IFn

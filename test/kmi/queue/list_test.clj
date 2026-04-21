@@ -26,7 +26,6 @@
 ^{:refer kmi.queue.list/mq-list-group-init-uninitialised.init :added "3.0"
   :setup [(reset-l)] :adopt true}
 (fact "initiates uninitialised groups"
-  ^:hidden
 
   (-> (list/mq-list-group-init-uninitialised "test:list" "default" "earliest")
       sort)
@@ -35,7 +34,6 @@
 ^{:refer kmi.queue.list/mq-list-group-set-latest :added "3.0"
   :setup [(reset-l)]}
 (fact "sets the group to latest"
-  ^:hidden
 
   (list/mq-list-group-set-latest "test:list:_:p1:__group__"
                                  "p1"
@@ -46,7 +44,6 @@
 ^{:refer kmi.queue.list/mq-list-queue-params :added "3.0"
   :setup [(reset-l)]}
 (fact "gets the list queue params"
-  ^:hidden
 
   (!.lua
    [(list/mq-list-queue-params "test:list" "p1")])
@@ -57,7 +54,6 @@
 ^{:refer kmi.queue.list/mq-list-group-init :added "3.0"
   :setup [(reset-l)]}
 (fact "initiates the list queue"
-  ^:hidden
 
   (list/mq-list-group-init "test:list" "p1" "default" "current")
   => 2
@@ -71,7 +67,6 @@
 ^{:refer kmi.queue.list/mq-list-group-waiting :added "3.0"
   :setup [(reset-l)]}
 (fact "indicates if there are unprocessed entries"
-  ^:hidden
 
   (list/mq-list-group-waiting "test:list" "p1" "default")
   => 2)
@@ -79,7 +74,6 @@
 ^{:refer kmi.queue.list/mq-list-group-outdated :added "3.0"
   :setup [(reset-l)]}
 (fact "indicates if there are waiting entries"
-  ^:hidden
 
   (list/mq-list-group-outdated "test:list" "p1" "default")
   => true)
@@ -87,7 +81,6 @@
 ^{:refer kmi.queue.list/mq-list-queue-length :added "3.0"
   :setup [(reset-l)]}
 (fact "gets list queue length"
-  ^:hidden
 
   (list/mq-list-queue-length "test:list" "p1")
   => 2)
@@ -95,7 +88,6 @@
 ^{:refer kmi.queue.list/mq-list-queue-earliest :added "3.0"
   :setup [(reset-l)]}
 (fact "gets list queue earliest"
-  ^:hidden
 
   (list/mq-list-queue-earliest "test:list" "p1")
   => 0)
@@ -103,7 +95,6 @@
 ^{:refer kmi.queue.list/mq-list-queue-latest :added "3.0"
   :setup [(reset-l)]}
 (fact "gets list queue latest"
-  ^:hidden
 
   (list/mq-list-queue-latest "test:list" "p1")
   => 2)
@@ -111,7 +102,6 @@
 ^{:refer kmi.queue.list/mq-list-queue-items :added "3.0"
   :setup [(reset-l)]}
 (fact "grabs the list items"
-  ^:hidden
 
   (list/mq-list-queue-items "test:list" "p1"
                          "p1-0" "p1-100" 100)
@@ -127,7 +117,6 @@
 ^{:refer kmi.queue.list/mq-list-queue-trim :added "3.0"
   :setup [(reset-l)]}
 (fact "trims the list to a given size"
-  ^:hidden
 
   (!.lua
    (r/call "RPUSH" "test:list:_:p1" 3 4 5 6 7 8 9))
@@ -142,7 +131,6 @@
 ^{:refer kmi.queue.list/mq-list-read :added "3.0"
   :setup [(reset-l)]}
 (fact "read elements from a list"
-  ^:hidden
 
   (list/mq-list-read "test:list" "p1" "default" "default" 1)
   => ["0" ["1"]])
@@ -150,7 +138,6 @@
 ^{:refer kmi.queue.list/mq-list-read-hold :added "3.0"
   :setup [(reset-l)]}
 (fact "mq-read-hold on list"
-  ^:hidden
 
   (list/mq-list-read-hold "test:list" "p1" "default" "default" 1 1)
   => ["0" ["1"]]
@@ -162,7 +149,6 @@
 ^{:refer kmi.queue.list/mq-list-read-release :added "3.0"
   :setup [(reset-l)]}
 (fact "mq-read-release on list"
-  ^:hidden
 
   (list/mq-list-read-hold "test:list" "p1" "default" "default" 1 1)
   => ["0" ["1"]]
@@ -189,7 +175,6 @@
 ^{:refer kmi.queue.list/mq-list-group-init-uninitialised :added "3.0"
   :setup [(reset-l)]}
 (fact "initiates uninitialised groups"
-  ^:hidden
 
   (-> (list/mq-list-group-init-uninitialised "test:list" "default")
       sort)
@@ -198,7 +183,6 @@
 ^{:refer kmi.queue.list/mq-list-queue-length-all :added "3.0"
   :setup [(reset-l)]}
 (fact "returns all lengths in the queue"
-  ^:hidden
 
   (sort (list/mq-list-queue-length-all "test:list"))
   => [["p1" 2] ["p2" 2] ["p3" 2]])
@@ -206,7 +190,6 @@
 ^{:refer kmi.queue.list/mq-list-group-init-all :added "3.0"
   :setup [(reset-l)]}
 (fact "initiates all groups"
-  ^:hidden
 
   (-> (list/mq-list-group-init-all "test:list" "default" "current")
       sort)
@@ -227,7 +210,6 @@
 ^{:refer kmi.queue.list/mq-list-group-outdated-all :added "3.0"
   :setup [(reset-l)]}
 (fact "returns all outdated partitions on a queue"
-  ^:hidden
 
   (-> (list/mq-list-group-outdated-all "test:list" "default")
       sort)
@@ -241,7 +223,6 @@
 ^{:refer kmi.queue.list/mq-list-group-waiting-all :added "3.0"
   :setup [(reset-l)]}
 (fact "returns all partitions having waiting items on a queue"
-  ^:hidden
 
   (-> (list/mq-list-group-waiting-all "test:list" "default")
       sort)
@@ -254,8 +235,7 @@
 
 ^{:refer kmi.queue.list/mq-list-write :added "4.0"}
 (fact "writes a given value to list"
-  ^:hidden
-  
+
   (list/mq-list-write "test:list" "p10" "hello")
   => integer?
 

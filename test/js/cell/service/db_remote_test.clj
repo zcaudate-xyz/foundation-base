@@ -52,7 +52,6 @@
 
 ^{:refer js.cell.service.db-remote/remote-capable? :added "4.1"}
 (fact "checks whether a descriptor can dispatch remote requests"
-  ^:hidden
 
   (!.js
     (var db (xtd/obj-assign (@! +db+)
@@ -64,7 +63,6 @@
 
 ^{:refer js.cell.service.db-remote/normalize-remote :added "4.1"}
 (fact "normalizes remote dispatch helpers from db and remote spec"
-  ^:hidden
 
   (!.js
     (var db (xtd/obj-assign (@! +db+)
@@ -83,7 +81,6 @@
 
 ^{:refer js.cell.service.db-remote/build-request :added "4.1"}
 (fact "builds a remote request envelope around a prepared operation"
-  ^:hidden
 
   (!.js
     (var db (xtd/obj-assign (@! +db+)
@@ -109,7 +106,6 @@
 
 ^{:refer js.cell.service.db-remote/dispatch-request :added "4.1"}
 (fact "dispatches a remote request through the configured dispatcher"
-  ^:hidden
 
   (!.js
    (db-remote/dispatch-request
@@ -124,7 +120,6 @@
 
 ^{:refer js.cell.service.db-remote/decode-response :added "4.1"}
 (fact "decodes remote responses when a decoder is provided"
-  ^:hidden
 
   (!.js
    [(db-remote/decode-response
@@ -144,7 +139,6 @@
 
 ^{:refer js.cell.service.db-remote/map-remote-error :added "4.1"}
 (fact "maps remote errors into the local error contract"
-  ^:hidden
 
   (!.js
    [(db-remote/map-remote-error
@@ -171,7 +165,6 @@
 
 ^{:refer js.cell.service.db-remote/run-remote-query :added "4.1"}
 (fact "prepares and dispatches a remote query"
-  ^:hidden
 
   (!.js
     (var db (xtd/obj-assign (@! +db+)
@@ -201,7 +194,6 @@
 
 ^{:refer js.cell.service.db-remote/run-remote-sync :added "4.1"}
 (fact "prepares and dispatches a remote sync request"
-  ^:hidden
 
   (!.js
     (var db (xtd/obj-assign (@! +db+)

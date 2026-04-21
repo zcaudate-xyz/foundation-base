@@ -18,15 +18,13 @@
 
 ^{:refer std.lang.base.workspace/sym-entry :added "4.0"}
 (fact "gets the entry using a symbol"
-  ^:hidden
-  
+
   (w/sym-entry :xtalk `cl/noop)
   => map?)
 
 ^{:refer std.lang.base.workspace/sym-pointer :added "4.0"}
 (fact "converts to a pointer map"
-  ^:hidden
-  
+
   (w/sym-pointer :xtalk `cl/noop)
   => '{:lang :xtalk
        :module xt.lang.common-lib,
@@ -41,23 +39,20 @@
 
 ^{:refer std.lang.base.workspace/emit-ptr :added "4.0"}
 (fact "emits the poiner as a string"
-  ^:hidden
-  
+
   (w/emit-ptr cl/noop)
   => string?)
 
 ^{:refer std.lang.base.workspace/ptr-clip :added "4.0"}
 (comment "copies pointer text to clipboard"
-  ^:hidden
-  
+
   (do (w/ptr-clip cl/noop)
       (os/paste))
   => string?)
 
 ^{:refer std.lang.base.workspace/ptr-print :added "4.0"}
 (fact "copies pointer text to clipboard"
-  ^:hidden
-  
+
   (-> (w/ptr-print cl/noop)
        (env/with-out-str))
   => string?)
@@ -80,18 +75,16 @@
 
 ^{:refer std.lang.base.workspace/rt-resolve :added "4.0"}
 (fact "resolves an rt given keyword"
-  ^:hidden
-  
+
   (w/rt-resolve :xtalk)
   => map?
-  
+
   (w/rt-resolve (w/rt-resolve :xtalk))
   => map?)
 
 ^{:refer std.lang.base.workspace/emit-module :added "4.0"}
 (fact "emits the entire module"
-  ^:hidden
-  
+
   (w/emit-module (l/rt 'std.lang.base.workspace-test :xtalk))
   => string?)
 
@@ -104,8 +97,7 @@
 
 ^{:refer std.lang.base.workspace/rt:module :added "4.0"}
 (fact "gets the book module for a runtime"
-  ^:hidden
-  
+
   (w/rt:module (l/rt 'xt.lang.common-lib :xtalk))
   => map?)
 

@@ -74,22 +74,19 @@
 
 ^{:refer std.lang.base.pointer/get-entry :added "4.0"}
 (fact "gets the library entry given pointer"
-  ^:hidden
-  
+
   (get-entry +ptr+)
   => book/book-entry?)
 
 ^{:refer std.lang.base.pointer/ptr-tag :added "4.0"}
 (fact "creates a tag for the pointer"
-  ^:hidden
-  
+
   (ptr-tag +ptr+ :lib)
   => '[:lib L.core/add :fragment])
 
 ^{:refer std.lang.base.pointer/ptr-deref :added "4.0"}
 (fact "gets the entry or the free pointer data"
-  ^:hidden
-  
+
   (ptr-deref +ptr+)
   => book/book-entry?
 
@@ -98,12 +95,11 @@
 
 ^{:refer std.lang.base.pointer/ptr-display :added "4.0"}
 (fact "emits the display string for pointer"
-  ^:hidden
-  
+
   (ptr-display +ptr+ {})
   "(fn:> [x y] (+ x y))"
 
-  
+
   (ptr-display (ut/lang-pointer :lua
                                 {:module 'L.core
                                  :id 'identity-fn
@@ -114,32 +110,28 @@
 
 ^{:refer std.lang.base.pointer/ptr-invoke-meta :added "4.0"}
 (fact "prepares the meta for a pointer"
-  ^:hidden
-  
+
   (ptr-invoke-meta +ptr+ {})
   => map?)
 
 ^{:refer std.lang.base.pointer/rt-macro-opts :added "4.0"}
 (fact "creates the default macro-opts for a runtime"
-  ^:hidden
-  
+
   (rt-macro-opts :lua)
   => map?)
 
 ^{:refer std.lang.base.pointer/ptr-invoke-string :added "4.0"}
 (fact "emits the invoke string"
-  ^:hidden
-  
+
   (ptr-invoke-string +ptr+ [1 2] {:layout :full})
   => "1 + 2")
 
 ^{:refer std.lang.base.pointer/ptr-invoke-script :added "4.0"}
 (fact "emits a script with dependencies"
-  ^:hidden
-  
+
   (ptr-invoke-script +ptr+ [1 2] {:layout :full})
   => "1 + 2"
- 
+
   (ptr-invoke-script (ut/lang-pointer :lua
                                       {:module 'L.core
                                        :id 'identity-fn
@@ -165,8 +157,7 @@
 
 ^{:refer std.lang.base.pointer/ptr-output :added "4.0"}
 (fact "output types for embedded return values"
-  ^:hidden
-  
+
   (ptr-output "[1,2,3]"
               false)
   => "[1,2,3]"
@@ -174,7 +165,7 @@
   (ptr-output (f/wrapped "[1,2,3]")
               :string)
   => [1 2 3]
-  
+
   (ptr-output "[1,2,3]"
               true)
   => [1 2 3]

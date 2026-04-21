@@ -107,7 +107,6 @@
 
  ^{:refer xt.runtime.interface-spec/runtime-attach :added "4.1"}
  (fact "attaches runtime dispatch entries directly to managed objects"
-   ^:hidden
 
    (!.js
    (var protocol (spec/proto-create
@@ -138,7 +137,6 @@
 
 ^{:refer xt.runtime.interface-spec/proto-create :added "4.1"}
 (fact "creates a prototype object suitable for runtime dispatch"
-  ^:hidden
 
   (!.js
    (var proto (spec/proto-create
@@ -161,7 +159,6 @@
 
 ^{:refer xt.runtime.interface-spec/proto-spec :added "4.1"}
 (fact "merges protocol entries into a validated spec map"
-  ^:hidden
 
   (!.js
    (spec/proto-spec

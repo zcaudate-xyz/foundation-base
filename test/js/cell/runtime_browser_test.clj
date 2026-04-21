@@ -77,20 +77,17 @@
 
 ^{:refer js.cell.runtime.emit/webworker-script :added "4.0"}
 (fact "emits a WebWorker bootstrap script"
-  ^:hidden
 
   (str/includes? (emit/webworker-script) "self")
   => true)
 
 ^{:refer js.cell.runtime.emit/sharedworker-script :added "4.0"}
 (fact "emits a SharedWorker bootstrap script"
-  ^:hidden
   (str/includes? (emit/sharedworker-script) "onconnect")
   => true)
 
 ^{:refer js.cell.runtime.browser/make-webworker-cell :added "4.0"}
 (fact "boots the kernel in a browser WebWorker"
-  ^:hidden
   (if +chromium-available+
     (webworker-cell-check)
     :skip)
@@ -100,7 +97,6 @@
 
 ^{:refer js.cell.runtime.browser/make-sharedworker-cell :added "4.0"}
 (fact "boots the kernel in a browser SharedWorker"
-  ^:hidden
   (if +chromium-available+
     (sharedworker-cell-check)
     :skip)

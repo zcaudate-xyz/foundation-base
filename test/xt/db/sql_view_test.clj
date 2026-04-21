@@ -54,15 +54,14 @@
               "links" [],
               "data" ["id"]}])]}
 (fact "provides a view select query"
-  ^:hidden
-  
+
   (!.js
    (v/tree-select sample/Schema
                   (@! +select+)
                   {}
                   {}))
   => +tree+
-  
+
   (!.lua
    (v/tree-select sample/Schema
                   (@! +select+)
@@ -87,16 +86,15 @@
               "links" [],
               "data" ["id" "name" "title" "description" "tags"]}])]}
 (fact "provides a view return query"
-  ^:hidden
-  
+
   (!.js
    (v/tree-return sample/Schema
                   (@! +return+)
                   {"id" "{{RETURN}}"}
                   {}
-                  {})) 
+                  {}))
   => +tree+
-  
+
 
   (!.lua
    (v/tree-return sample/Schema
@@ -125,7 +123,6 @@
 	               "data" ["id"]}]
 	             "SELECT id FROM Organisation"]) ]}
 (fact "provides a view select query"
-  ^:hidden
 
 
   (!.js
@@ -183,8 +180,7 @@
               "links" [],
               "data" ["id" "name"]}])]}
 (fact "creates a tree base"
-  ^:hidden
-  
+
   (!.js
    (v/tree-base sample/Schema
                 "RegionCountry"
@@ -194,7 +190,7 @@
                  (ut/LIMIT 20)
                  (ut/ORDER-BY ["name"])]
                 {}))
-  
+
   => +out+
 
   (!.lua
@@ -230,12 +226,11 @@
               "::" "sql/keyword",
               "name" "LIMIT"}])]}
 (fact "creates a control array"
-  ^:hidden
-  
+
   (!.js
    (v/tree-control-array {:limit 20
                           :order-by ["name"]}))
-  
+
   => +out+
 
   (!.lua
@@ -246,7 +241,7 @@
   (!.py
    (v/tree-control-array {:limit 20
                           :order-by ["name"]}))
-  => +out+)  
+  => +out+)
 
 ^{:refer xt.db.sql-view/tree-base :added "4.0"
   :setup [(def +out+
@@ -265,8 +260,7 @@
                "plural"
                "description"]}])]}
 (fact "creates a tree base"
-  ^:hidden
-  
+
   (!.js
    (v/tree-base sample/Schema
                 "Currency"
@@ -314,15 +308,14 @@
               "links" [],
               "data" []}])]}
 (fact "provides a view count query"
-  ^:hidden
-  
+
   (!.js
    (v/tree-count sample/Schema
                   (@! +count+)
                   {}
                   {}))
   => +tree+
-  
+
   (!.lua
    (v/tree-count sample/Schema
                   (@! +count+)
@@ -354,17 +347,16 @@
               "links" [],
               "data" ["id"]}])]}
 (fact "provides a view select query"
-  ^:hidden
-  
+
   (!.js
    (v/tree-select sample/Schema
                   (@! +select+)
                   {}
                   {}))
-  
-  
+
+
   => +tree+
-  
+
   (!.lua
    (v/tree-select sample/Schema
                   (@! +select+)
@@ -397,8 +389,7 @@
                "plural"
                "description"]}])]}
 (fact "provides a view return query"
-  ^:hidden
-  
+
   (!.js
    (v/tree-return sample/Schema
                   (@! +return+)
@@ -406,7 +397,7 @@
                   {}
                   {}))
   => +tree+
-  
+
   (!.lua
    (v/tree-return sample/Schema
                   (@! +return+)
@@ -450,8 +441,7 @@
                   "data" ["id" "role"]}]]],
               "data" ["id" "name" "title" "description" "tags"]}])]}
 (fact "provides a view return query"
-  ^:hidden
-  
+
   (!.js
    (v/tree-combined sample/Schema
                    (@! +select+)
@@ -460,7 +450,7 @@
                    {}
                    {}))
   => +tree+
-  
+
 
   (!.lua
    (v/tree-combined sample/Schema
@@ -488,8 +478,7 @@
               "links" [],
               "data" ["id"]}])]}
 (fact "fills out the tree for a given input"
-  ^:hidden
-  
+
   (!.js
    (var entry (@! (pg/bind-view user/organisation-all-as-member)))
    (var tree  (v/tree-select sample/Schema entry {} {}))
@@ -520,8 +509,7 @@
                "data" ["id"]}]
              "SELECT id FROM Currency\n  WHERE type = 'crypto'"])]}
 (fact "provides a view select query"
-  ^:hidden
-  
+
   (!.js
    [(v/query-select sample/Schema
                     (@! +select+)
@@ -551,7 +539,7 @@
        "where" [{"type" "crypto"}],
        "links" [],
        "data" ["id"]}]
-  
+
   (!.lua
    [(v/query-select sample/Schema
                     (@! +select+)
@@ -589,8 +577,7 @@
                "data" []}]
              "SELECT count(*) FROM Currency\n  WHERE type = 'crypto'"])]}
 (fact "provides the count statement"
-  ^:hidden
-  
+
   (!.js
    [(v/query-count sample/Schema
                    (@! +select+)
@@ -641,8 +628,7 @@
                "data" ["id" "description"]}]
              "SELECT id, description FROM Currency\n  WHERE id = 'STATS'"])]}
 (fact "provides a view return query"
-  ^:hidden
-  
+
   (!.js
    [(v/query-return sample/Schema
                     (@! +return+)
@@ -657,7 +643,7 @@
                     {}
                     false)])
   => +out+
-  
+
   (!.lua
    [(v/query-return sample/Schema
                     (@! +return+)
@@ -690,7 +676,6 @@
 
 ^{:refer xt.db.sql-view/query-return-bulk :added "4.0"}
 (fact "creates a bulk return statement"
-  ^:hidden
 
   (!.js
    (v/query-return-bulk sample/Schema
@@ -700,7 +685,7 @@
                         {}
                         false))
   => "SELECT id, description FROM Currency\n  WHERE id in ('STATS', 'USD')"
-  
+
   (!.lua
    (v/query-return-bulk sample/Schema
                         (@! +return+)
@@ -709,8 +694,8 @@
                         {}
                         false))
   => "SELECT id, description FROM Currency\n  WHERE id in ('STATS', 'USD')"
-  
-  
+
+
   (!.py
    (v/query-return-bulk sample/Schema
                         (@! +return+)
@@ -733,7 +718,6 @@
                "data" ["id" "description"]}]
              "SELECT id, description FROM Currency\n  WHERE type = 'crypto'"])]}
 (fact "provides a view combine query"
-  ^:hidden
 
   (!.js
    [(v/query-combined sample/Schema

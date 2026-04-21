@@ -27,7 +27,6 @@
   :added "4.0"
   :lang-exceptions {:dart {:skip true}}}
 (fact "merges the full cache fixture in isolation"
-  ^:hidden
 
   (!.py
    (var rows {})
@@ -38,7 +37,6 @@
   :added "4.0"
   :lang-exceptions {:dart {:skip true}}}
 (fact "pull-return-clause works for the profile data path"
-  ^:hidden
 
   (!.py
    (var rows {})
@@ -74,7 +72,6 @@
                     :lua {:skip true}
                     :dart {:skip true}}}
 (fact "pull-return-clause missing-profile path does not reproduce in minimal isolation"
-  ^:hidden
 
   (!.py
    (try
@@ -107,7 +104,6 @@
   :added "4.0"
   :lang-exceptions {:dart {:skip true}}}
 (fact "reusing the same flattened fixture across python calls stays valid"
-  ^:hidden
 
   (!.py
    (var rows-a {})
@@ -124,7 +120,6 @@
                     :lua {:skip true}
                     :dart {:skip true}}}
 (fact "running the successful profile clause before the missing-profile clause stays valid"
-  ^:hidden
 
   (!.py
    (try
@@ -175,7 +170,6 @@
   :added "4.0"
   :lang-exceptions {:dart {:skip true}}}
 (fact "two standalone python evaluations can reuse the full fixture"
-  ^:hidden
 
   (!.py
    (var rows {})

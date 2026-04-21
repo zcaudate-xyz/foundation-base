@@ -23,8 +23,7 @@
 
 ^{:refer xt.runtime.type-syntax/syntax-wrap :added "4.0"}
 (fact "wraps a function to use syntax"
-  ^:hidden
-  
+
   (!.js
    ((syn/syntax-wrap k/identity)
     {:_value 1}))
@@ -37,7 +36,6 @@
 
 ^{:refer xt.runtime.type-syntax/syntax-create :added "4.0"}
 (fact "creates a syntax"
-  ^:hidden
 
   (!.js
    (var out (syn/syntax-create [1 2 3] "hello"))
@@ -55,8 +53,7 @@
 
 ^{:refer xt.runtime.type-syntax/get-metadata :added "4.0"}
 (fact "gets metadata"
-  ^:hidden
-  
+
   (!.lua
    [(syn/get-metadata nil)
     (syn/get-metadata
@@ -72,7 +69,6 @@
 
 ^{:refer xt.runtime.type-syntax/syntax :added "4.0"}
 (fact "creates or unwraps syntax values"
-  ^:hidden
 
   (!.js
    (var wrapped (syn/syntax 1 "hello"))

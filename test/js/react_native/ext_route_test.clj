@@ -18,8 +18,7 @@
 
 ^{:refer js.react.ext-route/useRouteSegment :adopt true :added "4.0" :unchecked true}
 (fact "uses an async entry"
-  ^:hidden
-  
+
   (defn.js UseRouteSegmentDemo
     []
     (var route (ext-route/makeRoute "account/user"))
@@ -28,8 +27,8 @@
     (var [value setValue] (ext-route/useRouteSegment route ["account"]))
     (var getCount (r/useGetCount))
     (return
-     (n/EnclosedCode 
-      {:label "js.react.ext-route/useRouteSegment"} 
+     (n/EnclosedCode
+      {:label "js.react.ext-route/useRouteSegment"}
       [:% n/Row
        [:% n/TextInput
         {:value value
@@ -54,7 +53,7 @@
          :onPress (fn:> (event-route/set-path
                          route ["account"]))}]
        [:% n/Text " "]
-       ] 
+       ]
       [:% n/TextDisplay
        {:content (n/format-entry {:url url
                                   :tree tree

@@ -6,8 +6,7 @@
 
 ^{:refer std.block.heal.indent/flag-close-heavy-function :added "4.0"}
 (fact "flags a function if at a different index"
-  ^:hidden
-  
+
   (indent/flag-close-heavy-function
    {:correct? true, :index 2, :pair-id 1, :type :open, :style :paren, :line 4, :col 3, :depth 0, :char "("}
    {:depth 0 :col 1 :index 0})
@@ -23,8 +22,7 @@
                " "
                "  (this))"])))]}
 (fact "flags when there is open delimiter of the same depth with extra indentation"
-  ^:hidden
-  
+
   (indent/flag-close-heavy-single
    *dlma*
    (get *dlma* 0))
@@ -32,19 +30,18 @@
 
 ^{:refer std.block.heal.indent/flag-close-heavy :added "4.0"}
 (fact "finds open delimiters that have closed too early"
-  ^:hidden
-  
+
   (indent/flag-close-heavy
    (parse/parse "
 (fact )
- 
+
   (this))"))
   => [[0 [{:correct? true, :index 2, :pair-id 1, :type :open, :style :paren, :line 4, :col 3, :depth 0, :char "("}]]]
-  
+
   (indent/flag-close-heavy
    (parse/parse "
 (fact ))
- 
+
   (this))"))
   => [[0 [{:correct? true, :index 2, :pair-id 1, :type :open, :style :paren, :line 4, :col 3, :depth -1, :char "("}]]])
 
@@ -53,7 +50,6 @@
             (parse/pair-delimiters
              (parse/parse-delimiters (slurp "test-data/std.block.heal/cases/004_shorten.block"))))]}
 (fact "flags the delimiter if there are any discrepancies"
-  ^:hidden
 
   (indent/flag-open-heavy-single
    *dlm4*
@@ -72,23 +68,21 @@
    (it
  (this))")))]}
 (fact "finds previous index discrepancies given indent layout"
-  ^:hidden
-  
+
   (indent/flag-open-heavy-single
    *dlm1*
    (parse/make-delimiter-line-lu *dlm1*)
    (get *dlm1* 3))
   => [{:correct? true, :index 2, :pair-id 1, :type :open, :style :paren, :line 4, :col 4, :depth 2, :char "("}
       {:char "(", :line 3, :col 2, :type :open, :style :paren, :depth 1, :correct? false, :index 1}]
-  
-  
+
+
   (def ^:dynamic *dlm4*
     (parse/pair-delimiters
      (parse/parse-delimiters (slurp "test-data/std.block.heal/cases/002_complex.block")))))
 
 ^{:refer std.block.heal.indent/flag-open-heavy-raw :added "4.0"}
 (fact "finds all discrepancies given some code"
-  ^:hidden
 
   (def ^:dynamic *dlmx*
     (parse/pair-delimiters
@@ -115,7 +109,7 @@
   => [[3 [{:char "[", :line 4, :col 3, :type :open, :style :square, :depth 2, :correct? false, :index 2}
           {:char "[", :line 3, :col 2, :type :open, :style :square, :depth 1, :correct? false, :index 1}
           {:char "[", :line 2, :col 1, :type :open, :style :square, :depth 0, :correct? false, :index 0}]]]
-  
+
   (def ^:dynamic *dlm0*
     (parse/pair-delimiters
      (parse/parse-delimiters "
@@ -123,7 +117,7 @@
  (do
    (it)
  (this))")))
-  
+
   (indent/flag-open-heavy-raw
    *dlm0*
    (parse/make-delimiter-line-lu *dlm0*))
@@ -144,7 +138,7 @@
       (parse/make-delimiter-line-lu *dlm0a*))
   => [[6 [{:correct? true, :index 1, :pair-id 3, :type :open, :style :paren, :line 3, :col 2, :depth 1, :char "("}]]
       [4 [{:correct? true, :index 1, :pair-id 3, :type :open, :style :paren, :line 3, :col 2, :depth 1, :char "("}]]]
-  
+
   (def ^:dynamic *dlm1*
     (parse/pair-delimiters
      (parse/parse-delimiters "
@@ -152,34 +146,34 @@
  (do
    (it
  (this))")))
-  
+
   (indent/flag-open-heavy-raw
    *dlm1*
    (parse/make-delimiter-line-lu *dlm1*))
   => [[3 [{:correct? true, :index 2, :pair-id 1, :type :open, :style :paren, :line 4, :col 4, :depth 2, :char "("}
           {:char "(", :line 3, :col 2, :type :open, :style :paren, :depth 1, :correct? false, :index 1}]]]
-  
+
   (def ^:dynamic *dlm2*
     (parse/pair-delimiters
     (parse/parse-delimiters "
-[:h 
+[:h
  [
   [
    [
     [
      []]]
  []")))
-  
+
   (indent/flag-open-heavy-raw
    *dlm2*
    (parse/make-delimiter-line-lu *dlm2*))
   => [[9 [{:char "[", :line 4, :col 3, :type :open, :style :square, :depth 2, :correct? false, :index 2}
           {:char "[", :line 3, :col 2, :type :open, :style :square, :depth 1, :correct? false, :index 1}]]]
-  
+
   (def ^:dynamic *dlm3*
     (parse/pair-delimiters
      (parse/parse-delimiters (slurp "test-data/std.block.heal/cases/001_basic.block"))))
-  
+
   (indent/flag-open-heavy-raw
    *dlm3*
    (parse/make-delimiter-line-lu *dlm3*))
@@ -188,7 +182,7 @@
   (def ^:dynamic *dlm4*
     (parse/pair-delimiters
      (parse/parse-delimiters (slurp "test-data/std.block.heal/cases/002_complex.block"))))
-  
+
   (indent/flag-open-heavy-raw
    *dlm4*
    (parse/make-delimiter-line-lu *dlm4*))
@@ -196,8 +190,7 @@
 
 ^{:refer std.block.heal.indent/flagged-candidates-merge-common :added "4.0"}
 (fact "merges all common"
-  ^:hidden
-  
+
   (indent/flagged-candidates-merge-common
    (indent/flag-open-heavy-raw
     *dlm4*
@@ -206,8 +199,7 @@
 
 ^{:refer std.block.heal.indent/flagged-candidates-filter-run :added "4.0"}
 (fact "cuts off all potentially difficult locations"
-  ^:hidden
-  
+
   (indent/flagged-candidates-filter-run
    (indent/flag-open-heavy-raw
     *dlm4*
@@ -217,7 +209,6 @@
 
 ^{:refer std.block.heal.indent/flagged-candidates-invert-lookup :added "4.0"}
 (fact "inverts a lookup"
-  ^:hidden
 
   (indent/flagged-candidates-invert-lookup
    (indent/flag-open-heavy-raw
@@ -227,8 +218,7 @@
 
 ^{:refer std.block.heal.indent/flag-open-heavy :added "4.0"}
 (fact "combines discrepancies that are the same"
-  ^:hidden
-  
+
   (def ^:dynamic *dlm0a*
     (parse/pair-delimiters
      (parse/parse-delimiters "
@@ -237,27 +227,27 @@
    (it)
  (this)
  (this))")))
-  
+
   (indent/flag-open-heavy *dlm0a*)
   => [[4 [{:correct? true, :index 1, :pair-id 3, :type :open, :style :paren, :line 3, :col 2, :depth 1, :char "("}]]]
 
   (def ^:dynamic *dlm4*
     (parse/pair-delimiters
      (parse/parse-delimiters (slurp "test-data/std.block.heal/cases/002_complex.block"))))
-  
+
   (count
    (indent/flag-open-heavy-raw
     *dlm4*
     (parse/make-delimiter-line-lu *dlm4*)))
   => 22
-  
+
   (first
    (indent/flag-open-heavy
     *dlm4*))
   => '[177 ({:char "[", :line 59, :col 13, :type :open, :style :square, :depth 10, :correct? false, :index 140}
             {:correct? true, :index 136, :pair-id 64, :type :open, :style :square, :line 57, :col 13, :depth 10, :char "["}
             {:char "[", :line 56, :col 12, :type :open, :style :square, :depth 9, :correct? false, :index 133})]
-  
+
   (count
    (second
     (last
@@ -270,7 +260,7 @@
        (indent/flag-open-heavy
         *dlm4*))
   => '(3 1 5 19 3 2 1 6 1 6 1 153 4)
-  
+
   (first (last
           (indent/flag-open-heavy
            *dlm4*)))
@@ -283,8 +273,7 @@
 
 ^{:refer std.block.heal.indent/find-indent-last-close :added "4.0"}
 (fact "finds the last close delimiter"
-  ^:hidden
-  
+
   (indent/find-indent-last-close
    (parse/pair-delimiters
     (parse/parse-delimiters "
@@ -304,11 +293,11 @@
    (it
  (this))"))
    3 2) => nil
-  
+
   (indent/find-indent-last-close
    (parse/pair-delimiters
     (parse/parse-delimiters "
-[:h 
+[:h
  [[[[[]
     ]]
  []"))
@@ -332,8 +321,7 @@
   :setup [(def ^:dynamic *dlm4*
             (parse/parse (slurp "test-data/std.block.heal/cases/002_complex.block")))]}
 (fact "builds a list of edits to be made to a "
-  ^:hidden
-  
+
   (indent/build-insert-edits
    *dlm4*
    (indent/flagged-candidates-filter-run
@@ -344,7 +332,7 @@
        {:action :insert, :line 276, :col 96, :new-char "]"}
    {:action :insert, :line 338, :col 90, :new-char "]"}
        {:action :insert, :line 396, :col 234, :new-char "]"})
-  
+
 
 
   (def sample-do "
@@ -354,7 +342,7 @@
 
   (this)
   (this))")
-  
+
   (indent/build-insert-edits
    (parse/parse sample-do)
    (indent/flagged-candidates-filter-run
@@ -365,12 +353,11 @@
 
 ^{:refer std.block.heal.indent/build-remove-edits :added "4.0"}
 (fact "builds a list of remove edits"
-  ^:hidden
-  
+
   (def +sample+ "(((
 (fact)
   (hello))")
-  
+
   (indent/build-remove-edits
    (parse/parse +sample+)
    (indent/flag-close-heavy
@@ -401,11 +388,11 @@
        (indent/flag-open-heavy
         *dlm4*))
   *dlm4*
-  
+
   (def ^:dynamic *dlm4*
     (parse/pair-delimiters
      (parse/parse-delimiters (slurp "test-data/std.block.heal/cases/004_shorten.block"))))
-  
+
   (first
    (second
     (last
@@ -414,11 +401,11 @@
   (def ^:dynamic *dlm4*
     (parse/pair-delimiters
      (parse/parse-delimiters )))
-  
 
 
-  
-  
+
+
+
   (first
    (indent/flag-open-heavy
     *dlm4*))
@@ -426,7 +413,7 @@
 
   (get *dlm4* 177)
   => {:correct? true, :index 177, :pair-id 83, :type :open, :style :square, :line 72, :col 12, :depth 11, :char "["}
-  
+
   (= (indent/find-indent-last-close
       *dlm4*
       (get *dlm4* 140)

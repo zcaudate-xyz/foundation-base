@@ -21,13 +21,12 @@
   :adopt true
   :added "4.0" :unchecked true}
 (fact "creates a PanResponder"
-  ^:hidden
-  
+
   (defn.js GridDemo
     []
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.physical-layout/Grid"} 
+     (n/EnclosedCode
+{:label "js.react-native.physical-layout/Grid"}
 [:% n/View
        {:style {:flexDirection "row"
                 :flexWrap "wrap"
@@ -57,8 +56,7 @@
   :adopt true
   :added "4.0" :unchecked true}
 (fact "creates a set of edit points"
-  ^:hidden
-  
+
   (defn.js FlexWrapDemo
     []
     (let [[active setActive]  (r/local 1)
@@ -68,8 +66,8 @@
                              :duration 200
                              :easing a/linear}})]
       (return
-       (n/EnclosedCode 
-{:label "js.react-native.physical-layout/FlexWrap"} 
+       (n/EnclosedCode
+{:label "js.react-native.physical-layout/FlexWrap"}
 [:% n/Row
          [:% n/Button
           {:title "PUSH"
@@ -78,7 +76,7 @@
          [:% physical-base/Tag
           {:indicator ind}]]))))
 
-  
-  
+
+
   )
 

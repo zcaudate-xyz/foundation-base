@@ -30,14 +30,12 @@
 
 ^{:refer js.cell.runtime.env-node/make-node-worker :added "4.1"}
 (fact "creates a Node worker adapter"
-  ^:hidden
   (!.js
    (xt/x:obj-keys (env-node/make-node-worker)))
   => (contains ["postMessage" "addEventListener"]))
 
 ^{:refer js.cell.runtime.env-node/init-worker :added "4.1"}
 (fact "boots a Node worker adapter"
-  ^:hidden
   (!.js
    (var messages [])
    (var worker {:listeners []
@@ -53,6 +51,5 @@
 
 ^{:refer js.cell.runtime.env-node/runtime-init :added "4.1"}
 (fact "boots js.cell inside a Node worker thread"
-  ^:hidden
   (node-runtime-init-check)
   => [])

@@ -17,8 +17,7 @@
 
 ^{:refer std.lang.base.emit-helper/pr-single :added "3.0"}
 (fact "prints a single quoted string"
-  ^:hidden
-  
+
   (pr-single "hello")
   => "'hello'"
 
@@ -30,7 +29,6 @@
 
 ^{:refer std.lang.base.emit-helper/get-option :added "3.0"}
 (fact "gets either the path option or the default one"
-  ^:hidden
 
   (get-option helper/+default+ [:block :for] :sep)
   => ","
@@ -40,8 +38,7 @@
 
 ^{:refer std.lang.base.emit-helper/get-options :added "3.0"}
 (fact "gets the path option merged with defaults"
-  ^:hidden
-  
+
   (get-options helper/+default+ [:data :map])
   => {:statement ";",
       :sep ",",
@@ -81,7 +78,6 @@
 
 ^{:refer std.lang.base.emit-helper/emit-typed-args :added "3.0"}
 (fact "create types args from declarationns"
-  ^:hidden
 
   (emit-typed-args '(:int i := 9, :const :int j := 10)
                    +grammar+)
@@ -106,15 +102,13 @@
 
 ^{:refer std.lang.base.emit-helper/emit-symbol-full :added "4.0"}
 (fact "emits a full symbol"
-  ^:hidden
 
   (emit-symbol-full 'hello 'ns +grammar+)
   => "ns____hello")
 
 ^{:refer std.lang.base.emit-helper/emit-type-record :added "4.0"}
 (fact "formats to standard"
-  ^:hidden
-  
+
   (emit-type-record {:modifiers [:int]
                      :symbol "a"})
   => {:symbol "a", :type "int"})

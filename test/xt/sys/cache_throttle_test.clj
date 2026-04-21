@@ -45,8 +45,7 @@
 
 ^{:refer xt.sys.cache-throttle/throttle-key :added "0.1"}
 (fact "creates the throttle key"
-  ^:hidden
-  
+
   (!.js
    (throttle/throttle-key (throttle/throttle-create "SYNC_FRAME"
                                               (fn [])
@@ -63,14 +62,13 @@
 
 ^{:refer xt.sys.cache-throttle/throttle-create :added "0.1"}
 (fact "creates a throttle"
-  ^:hidden
 
   (set (!.js
         (xtd/obj-keys (throttle/throttle-create "SYNC_FRAME"
                                               (fn [])
                                               nil))))
   => #{"handler" "tag" "now_fn"}
-  
+
   (set (!.lua
         (xtd/obj-keys (throttle/throttle-create "SYNC_FRAME"
                                               (fn [])
@@ -79,8 +77,7 @@
 
 ^{:refer xt.sys.cache-throttle/throttle-run-async :added "0.1"}
 (fact "runs a throttle"
-  ^:hidden
-  
+
   (notify/wait-on :js
    (:= (!:G THT) (throttle/throttle-create "SYNC_FRAME"
                                            (fn []
@@ -100,8 +97,7 @@
 
 ^{:refer xt.sys.cache-throttle/throttle-run :added "0.1"}
 (fact "runs a throttle"
-  ^:hidden
-  
+
   (!.lua
    (:= (!:G THT) (throttle/throttle-create "SYNC_FRAME"
                                         (fn []

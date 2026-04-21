@@ -20,8 +20,7 @@
   ;; :setup [(assert (= 10 (!.py (+ 1 2 3 4))))]
   }
 (fact "gets or creates a runtime bus for thread isolation"
-  ^:hidden
-  
+
   (jep/jep-bus)
   => cc/bus?)
 
@@ -49,7 +48,6 @@
                   (f/suppress (jep/close-interpreter itp)))
                 @jep/*interpreters*)]}
 (fact "executes script on the interpreter"
-  ^:hidden
 
   (jep:temp-interpreter itp
                         (eval-exec-interpreter itp "a = 1\nb = 2")
@@ -117,8 +115,7 @@
 
 ^{:refer rt.jep/invoke-ptr-jep :added "4.0"}
 (fact "invokes a pointer in the runtime"
-  ^:hidden
-  
+
   (invoke-ptr-jep (l/rt :python)
                   k/add
                   [1 2])

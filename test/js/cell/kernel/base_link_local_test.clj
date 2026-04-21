@@ -29,8 +29,7 @@
 
 ^{:refer js.cell.kernel.base-link-local/trigger :added "4.0"}
 (fact "performs trigger call"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var link
          (-/make-link
@@ -52,8 +51,7 @@
 
 ^{:refer js.cell.kernel.base-link-local/trigger-async :added "4.0"}
 (fact "performs trigger-async call"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var link
          (-/make-link
@@ -76,8 +74,7 @@
 
 ^{:refer js.cell.kernel.base-link-local/set-final-status :added "4.0"}
 (fact "performs set-final-status call"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var link
          (-/make-link
@@ -92,8 +89,7 @@
 
 ^{:refer js.cell.kernel.base-link-local/get-final-status :added "4.0"}
 (fact "performs get-final-status call"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var link
          (-/make-link
@@ -108,8 +104,7 @@
 
 ^{:refer js.cell.kernel.base-link-local/set-eval-status :added "4.0"}
 (fact "performs set-eval-status call"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var link
          (-/make-link
@@ -124,8 +119,7 @@
 
 ^{:refer js.cell.kernel.base-link-local/get-eval-status :added "4.0"}
 (fact "performs get-eval-status call"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var link
          (-/make-link
@@ -140,8 +134,7 @@
 
 ^{:refer js.cell.kernel.base-link-local/get-action-list :added "4.0"}
 (fact "performs get-action-list call"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var link
          (-/make-link
@@ -162,8 +155,7 @@
 
 ^{:refer js.cell.kernel.base-link-local/get-action-entry :added "4.0"}
 (fact "performs get-action-entry call"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var link
          (-/make-link
@@ -178,8 +170,7 @@
 
 ^{:refer js.cell.kernel.base-link-local/ping :added "4.0"}
 (fact "performs ping call"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var link
          (-/make-link
@@ -194,8 +185,7 @@
 
 ^{:refer js.cell.kernel.base-link-local/ping-async :added "4.0"}
 (fact "performs ping-async call"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var link
          (-/make-link
@@ -211,8 +201,7 @@
 
 ^{:refer js.cell.kernel.base-link-local/echo :added "4.0"}
 (fact "performs echo call"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var link
          (-/make-link
@@ -227,8 +216,7 @@
 
 ^{:refer js.cell.kernel.base-link-local/echo-async :added "4.0"}
 (fact "performs echo-async call"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var link
          (-/make-link
@@ -244,8 +232,7 @@
 
 ^{:refer js.cell.kernel.base-link-local/error :added "4.0"}
 (fact "performs error call"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var link
          (-/make-link
@@ -265,8 +252,7 @@
 
 ^{:refer js.cell.kernel.base-link-local/error-async :added "4.0"}
 (fact "performs error-async call"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var link
          (-/make-link
@@ -287,8 +273,7 @@
 
 ^{:refer js.cell.kernel.base-link-local/tmpl-link-action :added "4.0"}
 (fact "performs a template"
-  ^:hidden
-  
+
   (base-link-local/tmpl-link-action
    '[trigger js.cell.kernel.worker-state/fn-trigger])
   => (contains '(defn.js trigger)))

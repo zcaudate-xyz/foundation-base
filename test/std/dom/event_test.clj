@@ -14,8 +14,7 @@
 
 ^{:refer std.dom.event/event-params :added "3.0"}
 (fact "converts input into event params"
-  ^:hidden
-  
+
   (event-params :hello)
   => {:id :hello}
 
@@ -27,10 +26,10 @@
 
   (def -parent- (doto (dom/dom-create :mock/pane)
                   (dom/dom-attach :parent-handler)))
-  
+
   (def -child-  (doto (dom/dom-create :mock/pane)
                   (mut/mutable:set :parent -parent-)))
-  
+
   (event-handler -child-)
   => :parent-handler)
 

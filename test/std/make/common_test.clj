@@ -24,7 +24,6 @@
 
 ^{:refer std.make.common/with:triggers :added "4.0"}
 (fact "purges triggers"
-  ^:hidden
 
   (def +triggers+ (atom {:a 1}))
   (common/with:triggers [+triggers+]
@@ -33,7 +32,6 @@
 
 ^{:refer std.make.common/triggers-purge :added "4.0"}
 (fact "purges triggers"
-  ^:hidden
 
   (def +triggers+ (atom {:a 1}))
   (common/with:triggers [+triggers+]
@@ -43,7 +41,6 @@
 
 ^{:refer std.make.common/triggers-set :added "4.0"}
 (fact "sets a trigger"
-  ^:hidden
 
   (common/with:triggers
    [+triggers+]
@@ -53,8 +50,7 @@
 
 ^{:refer std.make.common/triggers-clear :added "4.0"}
 (fact "clears a trigger"
-  ^:hidden
-  
+
   (common/with:triggers
    [+triggers+]
    (common/triggers-clear +demo-config+))
@@ -66,8 +62,7 @@
            (common/triggers-set +demo-config+
                                 ["hello"]))]}
 (fact "gets a trigger"
-  ^:hidden
-  
+
   (common/with:triggers
    [+triggers+]
    (common/triggers-get +demo-config+))
@@ -75,7 +70,6 @@
 
 ^{:refer std.make.common/triggers-list :added "4.0"}
 (fact "lists all trigers"
-  ^:hidden
 
   (common/with:triggers
    [+triggers+]
@@ -97,23 +91,20 @@
 
 ^{:refer std.make.common/make-config? :added "4.0"}
 (fact "checks that object is a `make` config"
-  ^:hidden
 
   (common/make-config? +demo-config+)
   => true)
 
 ^{:refer std.make.common/get-config-tag :added "4.0"}
 (fact "gets the tag for a config"
-  ^:hidden
-  
+
   (common/get-config-tag +demo-config+)
   => "test.demo-make")
 
 
 ^{:refer std.make.common/make-config-map :added "4.0"}
 (fact "creates a make-config map"
-  ^:hidden
-  
+
   (common/make-config-map
    {:tag "test.demo-make",
     :container
@@ -146,8 +137,7 @@
 
 ^{:refer std.make.common/make-config :added "4.0"}
 (fact "function to create a `make` config"
-  ^:hidden
-  
+
   (common/make-config
    {:tag "test.demo-make",
     :container
@@ -176,8 +166,7 @@
 
 ^{:refer std.make.common/make-run :added "4.0"}
 (fact "runs the `make` executable"
-  ^:hidden
-  
+
   (compile/compile +demo-config+)
   (common/with:internal-shell
    (common/make-run +demo-config+ :dev))
@@ -186,8 +175,7 @@
 
 ^{:refer std.make.common/make-run-internal :added "4.0"}
 (fact "runs the make executable internal"
-  ^:hidden
-  
+
   (compile/compile +demo-config+)
   (common/make-run-internal +demo-config+
                             :dev
@@ -201,29 +189,26 @@
 
 ^{:refer std.make.common/make-dir-setup :added "4.0"}
 (fact "sets up the `make` directory"
-  ^:hidden
-  
+
   (str (common/make-dir-setup
         +demo-config+))
   => (common/make-dir +demo-config+))
 
 ^{:refer std.make.common/make-dir-exists? :added "4.0"}
 (fact "checks that the `make` directory exists"
-  ^:hidden
 
   (str (common/make-dir-setup +demo-config+))
   => string?
-  
+
   (common/make-dir-exists? +demo-config+)
   => true)
 
 ^{:refer std.make.common/make-dir-teardown :added "4.0"}
 (fact "deletes the the `make` directory"
-  ^:hidden
 
   (common/make-dir-teardown +demo-config+)
   => (contains-in [boolean?])
-  
+
   (common/make-dir-exists? +demo-config+)
   => false)
 

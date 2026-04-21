@@ -14,7 +14,6 @@
 
 ^{:refer rt.postgres.base.grammar.form-deftype/pg-deftype-enum-col :added "4.0"}
 (fact "creates the enum column"
-  ^:hidden
 
   (with-redefs [common/pg-linked-token (fn [& _] '(:enum))]
     (pg-deftype-enum-col [:col :attr] {} {}))
@@ -30,7 +29,6 @@
 
 ^{:refer rt.postgres.base.grammar.form-deftype/pg-deftype-ref-current :added "4.0"}
 (fact "creates the ref entry for "
-  ^:hidden
 
   (pg-deftype-ref-current :col {:current {:id "id" :schema "schema" :type :uuid}} {})
   => '["col_id" [:uuid] [((. #{"schema"} #{"id"}) #{"id"})]])
@@ -44,7 +42,6 @@
 
 ^{:refer rt.postgres.base.grammar.form-deftype/pg-deftype-col-sql :added "4.0"}
 (fact "formats the sql on deftype"
-  ^:hidden
 
   (pg-deftype-col-sql [] {:cascade true :default 1})
   => [:on-delete-cascade :default 1]
@@ -54,7 +51,6 @@
 
 ^{:refer rt.postgres.base.grammar.form-deftype/pg-deftype-col-fn :added "4.0"}
 (fact "formats the column on deftype"
-  ^:hidden
 
   (with-redefs [common/pg-type-alias (fn [x] x)]
     (pg-deftype-col-fn [:col {:type :uuid :primary true}] {:schema-primary {}}))
@@ -86,21 +82,18 @@
 
 ^{:refer rt.postgres.base.grammar.form-deftype/pg-deftype-uniques :added "4.0"}
 (fact "collect unique keys on deftype"
-  ^:hidden
 
   (pg-deftype-uniques [[:col {:type :text :sql {:unique true}}]])
   => '[(% [:unique (quote (#{"col"}))])])
 
 ^{:refer rt.postgres.base.grammar.form-deftype/pg-deftype-indexes :added "4.0"}
 (fact "create index statements"
-  ^:hidden
 
   (pg-deftype-indexes [[:col {:type :text :sql {:index true}}]] "table")
   => '[(% [:create-index :on "table" (quote (#{"col"}))])])
 
 ^{:refer rt.postgres.base.grammar.form-deftype/pg-deftype :added "4.0"}
 (fact "creates a deftype statement"
-  ^:hidden
 
   (with-redefs [common/pg-full-token (fn [s sch] (str sch "." s))]
     (pg-deftype '(deftype ^{:static/schema "s"} t [] {})))
@@ -149,7 +142,6 @@
 
 ^{:refer rt.postgres.base.grammar.form-deftype/pg-deftype-partition :added "4.1"}
 (fact "creates partition by statement"
-  ^:hidden
 
   (pg-deftype-partition {:partition-by [:range :abc-def]}
                                           [[:abc-def {:type :time}]])
@@ -192,7 +184,6 @@
 
 ^{:refer rt.postgres.base.grammar.form-deftype/pg-deftype-foreign-groups :added "4.1"}
 (fact "collects foreign key groups"
-  ^:hidden
 
   (pg-deftype-foreign-groups
    [[:u {:type :ref :ref {:group :g1 :ns :user :link {:id :user}}}]
@@ -207,7 +198,6 @@
 
 ^{:refer rt.postgres.base.grammar.form-deftype/pg-deftype-gen-constraint :added "4.1"}
 (fact "generates a foreign key constraint"
-  ^:hidden
 
   (pg-deftype-gen-constraint
    'mytable
@@ -247,7 +237,6 @@
 
 ^{:refer rt.postgres.base.grammar.form-deftype/pg-deftype-format :added "4.0"}
 (fact "formats an input form"
-  ^:hidden
 
   (pg-deftype-format '(deftype t [:a {:type :int}] {}))
   => vector?

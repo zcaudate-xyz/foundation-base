@@ -25,7 +25,6 @@
 
 ^{:refer rt.chromedriver-test/browser-eval :added "4.0"}
 (fact "chromedriver evaluates !.js expressions"
-  ^:hidden
 
   (!.js (+ 1 2 3))
   => 6)
@@ -34,11 +33,10 @@
   :setup [(def +browser+ (chromedriver/browser {:port 19222}))]
   :teardown [(h/stop +browser+)]}
 (fact "goto a given page"
-  ^:hidden
-  
+
   (chromedriver/goto "https://www.baidu.com/" 4000 +browser+)
   => (contains-in {"targetInfo" {"attached" true, "url" "https://www.baidu.com/"}})
-  
+
   @(chromedriver/evaluate +browser+ "1+1")
   => {"value" 2, "type" "number", "description" "2"}
 

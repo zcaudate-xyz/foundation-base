@@ -21,8 +21,7 @@
 
 ^{:refer rt.postgres.runtime.impl-main/t-select-raw :added "4.0"}
 (fact "contructs an select form with prep"
-  ^:hidden
-  
+
   (main/t-select-raw (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))
                      {})
   => '[:with j-ret :as
@@ -94,13 +93,12 @@
 
 ^{:refer rt.postgres.runtime.impl-main/t-select :added "4.0"}
 (fact "contructs an select form with prep"
-  ^:hidden
-  
+
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (main/t-select 'scratch/Task
                    {:as :raw}))
   => '[:select * :from rt.postgres.test.scratch-v1/Task]
-  
+
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (main/t-select 'scratch/Task
                    {:as :record}))
@@ -116,8 +114,7 @@
 
 ^{:refer rt.postgres.runtime.impl-main/t-id-raw :added "4.0"}
 (fact  "contructs an id form with prep"
-  ^:hidden
-  
+
   (main/t-id-raw (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))
                  {})
   => '[:select (--- [#{"id"}]) :from rt.postgres.test.scratch-v1/Task
@@ -125,8 +122,7 @@
 
 ^{:refer rt.postgres.runtime.impl-main/t-id :added "4.0"}
 (fact "contructs an id form"
-  ^:hidden
-  
+
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (main/t-id 'scratch/Task
                {}))
@@ -135,16 +131,14 @@
 
 ^{:refer rt.postgres.runtime.impl-main/t-count-raw :added "4.0"}
 (fact "constructs a count form with prep"
-  ^:hidden
-  
+
   (main/t-count-raw (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))
                     {})
   => '[:select (count *) :from rt.postgres.test.scratch-v1/Task])
 
 ^{:refer rt.postgres.runtime.impl-main/t-count :added "4.0"}
 (fact "create count statement"
-  ^:hidden
-  
+
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (main/t-count 'scratch/Task
                   {}))
@@ -152,16 +146,14 @@
 
 ^{:refer rt.postgres.runtime.impl-main/t-exists-raw :added "4.0"}
 (fact "constructs a exists form with prep"
-  ^:hidden
-  
+
   (main/t-exists-raw (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))
                     {})
   => '[:select (exists [:select 1 :from rt.postgres.test.scratch-v1/Task])])
 
 ^{:refer rt.postgres.runtime.impl-main/t-exists :added "4.0"}
 (fact "create exists statement"
-  ^:hidden
-  
+
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (main/t-exists 'scratch/Task
                   {}))
@@ -169,7 +161,6 @@
 
 ^{:refer rt.postgres.runtime.impl-main/t-delete-raw :added "4.0"}
 (fact  "contructs a delete form with prep"
-  ^:hidden
 
   (main/t-delete-raw (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))
                      {})
@@ -187,8 +178,7 @@
 
 ^{:refer rt.postgres.runtime.impl-main/t-delete :added "4.0"}
 (fact  "contructs an delete form"
-  ^:hidden
-  
+
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (main/t-delete 'scratch/Task
                    {}))
@@ -207,8 +197,7 @@
 
 ^{:refer rt.postgres.runtime.impl-main/t-fields-raw :added "4.0"}
 (fact "returns the raw fields"
-  ^:hidden
-  
+
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (main/t-fields 'scratch/Task
                    {}))
@@ -216,8 +205,7 @@
 
 ^{:refer rt.postgres.runtime.impl-main/t-fields :added "4.0"}
 (fact "returns fields"
-  ^:hidden
-  
+
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (main/t-fields 'scratch/Task
                    {}))

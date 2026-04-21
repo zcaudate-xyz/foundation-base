@@ -15,7 +15,6 @@
   :setup [(def +rt+ (impl/browser:create {:lang :js}))]
   :teardown (bench/stop-bench-process (:port +rt+))}
 (fact "starts the browser bench"
-  ^:hidden
 
   (impl/start-browser-bench +rt+)
   => (contains {:type :bench/basic}))
@@ -27,7 +26,6 @@
   :setup [(def +rt+ (impl/browser:create {:lang :js}))]
   :teardown [(h/stop +rt+)]}
 (fact "starts the browser bench and connection"
-  ^:hidden
   (impl/start-browser +rt+)
   => +rt+)
 
@@ -36,13 +34,11 @@
 
 ^{:refer rt.chromedriver.impl/raw-eval-browser :added "4.0"}
 (fact "evaluates the browser"
-  ^:hidden
   (impl/raw-eval-browser @+browser+ "1 + 1")
   => 2)
 
 ^{:refer rt.chromedriver.impl/invoke-ptr-browser :added "4.0"}
 (fact "invokes the browser pointer"
-  ^:hidden
   (impl/invoke-ptr-browser @+browser+
                            identity
                            [1])
@@ -56,8 +52,7 @@
 
 ^{:refer rt.chromedriver.impl/wrap-browser-state :added "4.0"}
 (fact "wrapper for the browser"
-  ^:hidden
-  
+
   @((impl/wrap-browser-state util/target-info)
     @+browser+)
   => (contains-in {"targetInfo" {"attached" true, "url" string?}}))

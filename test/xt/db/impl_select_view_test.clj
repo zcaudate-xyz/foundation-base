@@ -45,7 +45,7 @@
                     :python {:skip true}
                     :dart {:skip true}}}
 (fact "CONNECTED"
-  
+
   (notify/wait-on :js
     (dbsql/query CONN "SELECT 1;" (repl/<!)))
   => (any nil 1 [{"?column?" 1}]))
@@ -56,7 +56,6 @@
                     :python {:skip true}
                     :dart {:skip true}}}
 (fact "queries views"
-  ^:hidden
 
   (view/query-select sample-scratch/Schema
                      {:view {:table "Entry"
@@ -68,7 +67,7 @@
                      {}
                      true)
   => ["Entry" {"custom" [], "where" [{"name" "A-1"}], "links" [], "data" ["id"]}]
-  
+
   (view/query-select sample-scratch/Schema
                      {:view {:table "Entry"
                              :type "select"

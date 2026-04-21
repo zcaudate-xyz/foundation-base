@@ -6,7 +6,7 @@
 ^{:refer std.protocol.invoke/-invoke-intern :added "3.0"}
 (fact "extendable function for loading invoke form constructors"
 
-  (-invoke-intern :fn '-hello- nil '([x] x)) ^:hidden
+  (-invoke-intern :fn '-hello- nil '([x] x))
   => '(def -hello- (clojure.core/fn -hello- [x] x)))
 
 ^{:refer std.protocol.invoke/-invoke-package :added "3.0"}

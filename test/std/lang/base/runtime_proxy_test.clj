@@ -7,8 +7,7 @@
 
 ^{:refer std.lang.base.runtime-proxy/proxy-get-rt :added "4.0"}
 (fact "gets the redirected runtime"
-  ^:hidden
-  
+
   (p/proxy-get-rt
    'std.lang
    :js)
@@ -16,8 +15,7 @@
 
 ^{:refer std.lang.base.runtime-proxy/proxy-raw-eval :added "4.0"}
 (fact "evaluates the raw string"
-  ^:hidden
-  
+
   (p/proxy-raw-eval
    {:redirect 'std.lang
     :lang :js}
@@ -30,8 +28,7 @@
 
 ^{:refer std.lang.base.runtime-proxy/proxy-tags-ptr :added "4.0"}
 (fact "gets the ptr tags"
-  ^:hidden
-  
+
   (p/proxy-tags-ptr
    {:redirect 'std.lang
     :lang :js}

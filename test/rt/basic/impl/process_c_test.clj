@@ -35,11 +35,10 @@
 
 ^{:refer rt.basic.impl.process-c-test/CANARY-TCC :guard true :adopt true :added "4.0"}
 (fact "EVALUATE tcc in c"
-  ^:hidden
-  
+
   (str (!.c (printf "hello world")))
   => "\nhello world"
-  
+
   [(-/add 1 2)
    (!.c
      (-/add 1 2))]
@@ -66,8 +65,7 @@
 
 ^{:refer rt.basic.impl.process-c/get-format-string :added "4.0"}
 (fact "gets the format string given entry"
-  ^:hidden
-  
+
   (get-format-string @hello)
   => "\"%s\""
 
@@ -76,8 +74,7 @@
 
 ^{:refer rt.basic.impl.process-c/transform-form-format :added "4.0"}
 (fact "formats the form"
-  ^:hidden
-  
+
   (transform-form-format `-/add
                          {:emit {:input {:pointer -/add
                                          :args [1 2]}}})
@@ -85,7 +82,6 @@
 
 ^{:refer rt.basic.impl.process-c/transform-form :added "4.0"}
 (fact "transforms the form for tcc output"
-  ^:hidden
-  
+
   (transform-form '[(printf "hello world")] {})
   => '(:- "#include <stdio.h>\nint main(){\n " (do (printf "hello world")) "\nreturn 0;\n}"))

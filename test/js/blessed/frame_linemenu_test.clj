@@ -13,8 +13,7 @@
 
 ^{:refer js.blessed.frame-linemenu/LineButton :added "4.0" :unchecked true}
 (fact "creates a line frame-linemenu button"
-  ^:hidden
-  
+
   (defn.js LineButtonDemo
     []
     (let [[route setRoute] (r/local "file")]
@@ -41,8 +40,7 @@
 
 ^{:refer js.blessed.frame-linemenu/LineMenu :added "4.0" :unchecked true}
 (fact "creates a line menu"
-  ^:hidden
-  
+
   (defn.js LineMenuDemo
     []
     (var [route setRoute] (r/local "file"))
@@ -60,5 +58,5 @@
         #{route
           setRoute
           {:entries entries}}]]]))
-  
+
   )

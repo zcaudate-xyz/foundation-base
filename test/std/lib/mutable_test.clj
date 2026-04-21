@@ -9,7 +9,7 @@
 (fact "allows definition of a mutable datastructure"
 
   (def -h- (Hello. "dog" 1))
-  
+
   (get -h- :name) => "dog")
 
 ^{:refer std.lib.mutable/mutable:fields :added "3.0"}
@@ -30,7 +30,7 @@
 
   (-> (Hello. "cat" nil)
       (mutable:set-new :name "dog"))
-  => (throws)^:hidden
+  => (throws)
 
   (-> (Hello. nil nil)
       (mutable:set-new :name "dog")

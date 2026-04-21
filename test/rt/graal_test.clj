@@ -20,14 +20,14 @@
   (!.js
    (k/add 1 2))
   => 3
-  
+
   (!.js (+ 1 2 3))
   => 6
-  
+
   (!.js (+ "1" "2"))
   => "12"
 
-  
+
   (k/add 9 3)
   => 12
 
@@ -121,7 +121,6 @@
 
 ^{:refer rt.graal/unwrap :added "4.1"}
 (fact "unwraps polyglot values to Clojure primitives"
-  ^:hidden
 
   (let [ctx (make-raw {:lang :js})]
     [(unwrap (.eval ^Context ctx "js" "\"hello\""))

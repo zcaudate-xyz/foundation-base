@@ -13,14 +13,13 @@
 
 ^{:refer std.lang.base.library-snapshot/get-deps :added "4.0"}
 (fact "gets a dependency chain"
-  ^:hidden
-  
+
   (snap/get-deps prep/+snap+ :lua)
   => #{:x}
 
   (snap/get-deps prep/+snap+ :x)
   => #{}
-  
+
   (deps/deps-ordered prep/+snap+ [:redis])
   => '(:x :lua :redis)
 
@@ -29,29 +28,25 @@
 
 ^{:refer std.lang.base.library-snapshot/snapshot-string :added "4.0"}
 (fact "gets the snapshot string"
-  ^:hidden
-  
+
   (snap/snapshot-string prep/+snap+)
   => "#lib.snapshot [:lua :redis :x]")
 
 ^{:refer std.lang.base.library-snapshot/snapshot? :added "4.0"}
 (fact "checks if object is a snapshot"
-  ^:hidden
-  
+
   (snap/snapshot? prep/+snap+)
   => true)
 
 ^{:refer std.lang.base.library-snapshot/snapshot :added "4.0"}
 (fact "creates a snapshot"
-  ^:hidden
-  
+
   (snap/snapshot {})
   => snap/snapshot?)
 
 ^{:refer std.lang.base.library-snapshot/snapshot-reset :added "4.0"}
 (fact "resets a snapshot to it's blanked modules"
-  ^:hidden
-  
+
   (-> (snap/snapshot-reset prep/+snap+)
       (get-in [:lua :book :modules]))
   => {}
@@ -62,26 +57,24 @@
 
 ^{:refer std.lang.base.library-snapshot/snapshot-merge :added "4.0"}
 (fact "a rough merge of only the modules from the child to the parent"
-  ^:hidden
-  
+
   (snap/snapshot-merge nil prep/+snap+)
   => map?
-  
+
   (snap/snapshot-merge prep/+snap+ nil)
   => map?
-  
+
   (snap/snapshot-merge prep/+snap+ prep/+snap+)
   => map?)
 
 ^{:refer std.lang.base.library-snapshot/get-book-raw :added "4.0"}
 (fact "gets the raw book"
-  ^:hidden
-  
+
   (-> (snap/get-book-raw prep/+snap+ :lua)
       :modules
       keys)
   => '(L.core)
-  
+
   (-> (snap/get-book-raw prep/+snap+ :redis)
       :modules
       keys)
@@ -89,8 +82,7 @@
 
 ^{:refer std.lang.base.library-snapshot/get-book :added "4.0"}
 (fact "gets the merged book for a given language"
-  ^:hidden
-  
+
   (-> (snap/get-book prep/+snap+ :redis)
       :modules
       keys
@@ -99,8 +91,7 @@
 
 ^{:refer std.lang.base.library-snapshot/add-book :added "4.0"}
 (fact "adds a book to a snapshot"
-  ^:hidden
-  
+
   (-> (snap/add-book (snap/snapshot {})
                      prep/+book-x+)
       (keys))
@@ -108,8 +99,7 @@
 
 ^{:refer std.lang.base.library-snapshot/set-module :added "4.0"}
 (fact "sets a module in the snapshot"
-  ^:hidden
-  
+
   (-> (snap/set-module prep/+snap+
                        (m/book-module '{:lang :redis
                                         :id L.redis
@@ -122,8 +112,7 @@
 
 ^{:refer std.lang.base.library-snapshot/delete-module :added "4.0"}
 (fact "deletes a module in the snapshot"
-  ^:hidden
-  
+
   (-> (snap/delete-module prep/+snap+
                           :lua 'L.core)
       second
@@ -141,15 +130,13 @@
 
 ^{:refer std.lang.base.library-snapshot/list-modules :added "4.0"}
 (fact "list modules for a snapshot"
-  ^:hidden
-  
+
   (set (snap/list-modules prep/+snap+ :lua))
   => '#{L.core x.core})
 
 ^{:refer std.lang.base.library-snapshot/list-entries :added "4.0"}
 (fact "lists entries for a snapshot"
-  ^:hidden
-  
+
   (set (snap/list-entries prep/+snap+ :lua))
   => '#{x.core/identity-fn L.core/identity-fn}
 
@@ -161,8 +148,7 @@
 
 ^{:refer std.lang.base.library-snapshot/set-entry :added "4.0"}
 (fact "sets an entry in the snapshot"
-  ^:hidden
-  
+
   (-> (snap/set-entry prep/+snap+
                       (entry/create-code-base
                        '(defn sub-fn
@@ -199,8 +185,7 @@
                                                          u L.core}}))
                 second))]}
 (fact "sets an entry in the snapshot"
-  ^:hidden
-  
+
   (-> (snap/set-entries +snap-mixed+
                         [(entry/create-code-base
                           '(defn redis-g
@@ -230,8 +215,7 @@
 
 ^{:refer std.lang.base.library-snapshot/delete-entry :added "4.0"}
 (fact "deletes an entry from the snapshot"
-  ^:hidden
-  
+
   (-> prep/+snap+
       (snap/delete-entry {:lang :lua
                           :section :code
@@ -247,8 +231,7 @@
 
 ^{:refer std.lang.base.library-snapshot/delete-entries :added "4.0"}
 (fact "delete entries from the snapshot"
-  ^:hidden
-  
+
   (-> prep/+snap+
       (snap/delete-entries [{:lang :lua
                              :section :code
@@ -270,13 +253,12 @@
 
 ^{:refer std.lang.base.library-snapshot/install-module :added "4.0"}
 (fact "adds an new module or update fields if exists"
-  ^:hidden
-  
+
   (snap/install-module prep/+snap+
                        :lua 'L.util
                        {})
   => vector?
-  
+
   (snap/install-module prep/+snap+
                        :lua 'L.core
                        '{:import [["hello" :as hello]
@@ -290,8 +272,7 @@
 
 ^{:refer std.lang.base.library-snapshot/install-book :added "4.0"}
 (fact "adds a new book or updates grammar if exists"
-  ^:hidden
-  
+
   (snap/install-book prep/+snap+
                      (b/book {:lang :hello
                               :meta (meta/book-meta {})

@@ -4,8 +4,7 @@
 
 ^{:refer std.lib.atom/update-diff :added "4.0"}
 (fact "updates a diff in a sub nesting"
-  ^:hidden
-  
+
   (update-diff {:a {:b {:c 1}}}
                [:a]
                atom-put-fn [:b] {:d 4} )
@@ -15,8 +14,7 @@
 ^{:refer std.lib.atom/swap-return! :added "3.0"
   :style/indent 1}
 (fact "returns output and new state of atom"
-  ^:hidden
-  
+
   (swap-return! (atom {})
                 (fn [m]
                   [true (assoc m :a 1)])
@@ -25,24 +23,21 @@
 
 ^{:refer std.lib.atom/atom:keys :added "3.0"}
 (fact "lists the nested keys of an atom"
-  ^:hidden
-  
+
   (atom:keys (atom {:a {:b 1 :c 2}})
              [:a])
   => [:b :c])
 
 ^{:refer std.lib.atom/atom:get :added "3.0"}
 (fact "gets all the nested keys within an atom"
-  ^:hidden
-  
+
   (atom:get (atom {:a {:b 1 :c 2}})
             [:a :c])
   => 2)
 
 ^{:refer std.lib.atom/atom:mget :added "3.0"}
 (fact "gets all the nested keys within an atom"
-  ^:hidden
-  
+
   (atom:mget (atom {:a {:b 1 :c 2}})
              [[:a :b]
               [:a :c]])
@@ -50,8 +45,7 @@
 
 ^{:refer std.lib.atom/atom-put-fn :added "4.0"}
 (fact "constructs the output and next state for a put operation"
-  ^:hidden
-  
+
   (atom-put-fn {:a {:b 1 :c 2}}
                []
                {:a {:d 3}})
@@ -61,8 +55,7 @@
 
 ^{:refer std.lib.atom/atom:put :added "3.0"}
 (fact "puts an entry into the atom"
-  ^:hidden
-  
+
   (atom:put (atom {:a {:b 1 :c 2}})
             []
             {:a {:d 3}})
@@ -80,8 +73,7 @@
 
 ^{:refer std.lib.atom/atom-set-fn :added "4.0"}
 (fact "constructs the output and next state for a set operation"
-  ^:hidden
-  
+
   (atom-set-fn {:a {:b 1 :c 2}}
                [[[:a :b] 3]
                 [[:a :d] 5]])
@@ -91,14 +83,13 @@
 
 ^{:refer std.lib.atom/atom:set :added "3.0"}
 (fact "sets the entries given a set of inputs"
-  ^:hidden
-  
+
   (atom:set (atom {:a {:b 1 :c 2}})
             [:a :b] 3
             [:a :d] 5)
   => '([[:a :b] 1 3]
        [[:a :d] nil 5])
-  
+
   (-> (atom:set (atom {:a {:b 1 :c 2}})
                 [:a :b] 3
                 [:a :d] 5)
@@ -107,8 +98,7 @@
 
 ^{:refer std.lib.atom/atom-set-keys-fn :added "4.0"}
 (fact "constructs the output and next state for a set-keys operation"
-  ^:hidden
-  
+
   (atom-set-fn {:a {:d 1 :b 1 :c {:a 1}}}
                [[[:a]
                  {:b 4 :c {:b 2}}]])
@@ -119,8 +109,7 @@
 
 ^{:refer std.lib.atom/atom:set-keys :added "3.0"}
 (fact "sets the entries given a set of inputs"
-  ^:hidden
-  
+
   (-> (atom:set-keys (atom {:a {:d 1 :b 1 :c {:a 1}}})
                      [:a]
                     {:b 4 :c {:b 2}})
@@ -129,7 +118,6 @@
 
 ^{:refer std.lib.atom/atom:set-changed :added "3.0"}
 (fact "figure out what has changed in set"
-  ^:hidden
   (->> (atom:set (atom {:a {:b 1 :c 2}})
                  [:a] {:b 3 :d 4})
        (atom:set-changed))
@@ -137,7 +125,6 @@
 
 ^{:refer std.lib.atom/atom:put-changed :added "3.0"}
 (fact "figure out what has changed in put operation"
-  ^:hidden
 
   (->> (atom:put (atom {:a {:b 1 :c 2}})
                  []
@@ -147,8 +134,7 @@
 
 ^{:refer std.lib.atom/atom-swap-fn :added "4.0"}
 (fact "constructs the output and next state for a swap operation"
-  ^:hidden
-  
+
   (atom-swap-fn {:a {:b 1 :c 2}}
                 [[[:a :b] inc]
                  [[:a :c] dec]])
@@ -158,8 +144,7 @@
 
 ^{:refer std.lib.atom/atom:swap :added "3.0"}
 (fact "swaps entries atomically given function"
-  ^:hidden
-  
+
   (atom:swap (atom {:a {:b 1 :c 2}})
     [:a :b] inc
     [:a :c] dec)
@@ -167,7 +152,6 @@
 
 ^{:refer std.lib.atom/atom-delete-fn :added "4.0"}
 (fact "constructs the output and next state for a delete operation"
-  ^:hidden
 
   (atom-delete-fn {:a {:b 1 :c 2}}
                   [[:a :b]
@@ -177,8 +161,7 @@
 
 ^{:refer std.lib.atom/atom:delete :added "3.0"}
 (fact "deletes individual enties from path"
-  ^:hidden
-  
+
   (atom:delete (atom {:a {:b 1 :c 2}})
                [:a :b]
                [:a :c])
@@ -186,15 +169,13 @@
 
 ^{:refer std.lib.atom/atom:clear :added "3.0"}
 (fact "clears the previous entry"
-  ^:hidden
-  
+
   (atom:clear (atom {:a {:b 1 :c 2}})
               [:a :b])
   => 1)
 
 ^{:refer std.lib.atom/atom-batch-fn :added "4.0"}
 (fact "constructs the output and next state for a batch operation"
-  ^:hidden
 
   (atom-batch-fn {:a {:b 1 :c 2}}
                  [[:set  [:a :b] 3]
@@ -209,8 +190,7 @@
 
 ^{:refer std.lib.atom/atom:batch :added "3.0"}
 (fact "performs a batched operation given keys"
-  ^:hidden
-  
+
   (def -atm- (atom {:a {:b 1 :c 2}}))
 
   (atom:batch -atm-
@@ -230,7 +210,6 @@
 
 ^{:refer std.lib.atom/atom:cursor :added "3.0"}
 (fact "adds a cursor to the atom to swap on any change"
-  ^:hidden
 
   (let [a  (atom {:a {:b 1}})
         ca (atom:cursor a [:a :b])]
@@ -241,7 +220,6 @@
 
 ^{:refer std.lib.atom/atom:derived :added "3.0"}
 (fact "constructs an atom derived from other atoms"
-  ^:hidden
 
   (let  [a (atom 1)
          b (atom 10)

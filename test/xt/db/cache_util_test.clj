@@ -51,7 +51,6 @@
 
 ^{:refer xt.db.cache-util/has-entry :added "4.0"}
 (fact "checks if entry exists"
-  ^:hidden
 
   (!.js
    (var rows {})
@@ -73,7 +72,6 @@
 
 ^{:refer xt.db.cache-util/get-entry :added "4.0"}
 (fact "gets entry by id"
-  ^:hidden
 
   (!.js
    (var rows {})
@@ -95,8 +93,7 @@
 
 ^{:refer xt.db.cache-util/swap-if-entry :added "4.0"}
 (fact "modifies entry if exists"
-  ^:hidden
-  
+
   (!.js
    (var rows {})
    (data/merge-bulk rows (@! +flattened+) nil)
@@ -129,7 +126,6 @@
 
 ^{:refer xt.db.cache-util/merge-single :added "4.0"}
 (fact "merges a single entry"
-  ^:hidden
 
   (!.js
    (data/merge-single {}
@@ -169,7 +165,6 @@
 
 ^{:refer xt.db.cache-util/merge-bulk :added "4.0"}
 (fact "merges flattened data into the database"
-  ^:hidden
 
   (!.js
    (var rows {})
@@ -181,7 +176,7 @@
     (data/get-ids rows "UserAccount")])
   => (contains-in
       [map? ["00000000-0000-0000-0000-000000000000"]])
-  
+
   (!.lua
    (var rows {})
    [(data/merge-bulk rows (f/flatten sample/Schema
@@ -192,7 +187,7 @@
     (data/get-ids rows "UserAccount")])
   => (contains-in
       [map? ["00000000-0000-0000-0000-000000000000"]])
-  
+
   (!.py
    (var rows {})
    [(data/merge-bulk rows (f/flatten sample/Schema
@@ -244,7 +239,6 @@
                                       ["wallets"])
                         {})))]}
 (fact "merges the full cache fixture step by step in python"
-  ^:hidden
 
   (!.py
    (var rows {})
@@ -311,7 +305,6 @@
                                       ["wallets"])
                         {})))]}
 (fact "merges the combined full cache fixture in python"
-  ^:hidden
 
   (!.py
    (var rows {})
@@ -341,7 +334,6 @@
 
 ^{:refer xt.db.cache-util/all-records :added "4.0"}
 (fact "returns all records"
-  ^:hidden
 
   (!.js
    (var rows {})
@@ -363,7 +355,6 @@
 
 ^{:refer xt.db.cache-util/get-changed-single :added "4.0"}
 (fact "gets changed record"
-  ^:hidden
 
   (!.js
    (var rows {})
@@ -372,7 +363,7 @@
                     (. ["record"])
                     (xtd/clone-nested)
                     (xtd/set-in ["data" "nickname"] "hello")))
-   
+
    (data/get-changed-single rows
                             "UserAccount" "00000000-0000-0000-0000-000000000000"
                             changed))
@@ -385,7 +376,7 @@
                     (. ["record"])
                     (xtd/clone-nested)
                     (xtd/set-in ["data" "nickname"] "hello")))
-   
+
    (data/get-changed-single rows
                             "UserAccount" "00000000-0000-0000-0000-000000000000"
                             changed))
@@ -398,7 +389,7 @@
                     (. ["record"])
                     (xtd/clone-nested)
                     (xtd/set-in ["data" "nickname"] "hello")))
-   
+
    (data/get-changed-single rows
                             "UserAccount" "00000000-0000-0000-0000-000000000000"
                             changed))
@@ -406,8 +397,7 @@
 
 ^{:refer xt.db.cache-util/has-changed-single :added "4.0"}
 (fact "checks if record has changed"
-  ^:hidden
-  
+
   (!.js
    (var rows {})
    (data/merge-bulk rows (@! +flattened+) nil)
@@ -450,11 +440,10 @@
              "inverse_key" "UserProfile",
              "inverse_field" "account"})]}
 (fact "find link attributes"
-  ^:hidden
-  
+
   (!.js (data/get-link-attrs sample/Schema "UserAccount" "profile"))
   => +attrs+
-  
+
   (!.lua (data/get-link-attrs sample/Schema "UserAccount" "profile"))
   => +attrs+
 
@@ -466,7 +455,6 @@
 
 ^{:refer xt.db.cache-util/remove-single-link :added "4.0"}
 (fact "removes single link"
-  ^:hidden
 
   (!.js
    (var rows {})
@@ -503,7 +491,6 @@
 
 ^{:refer xt.db.cache-util/remove-single :added "4.0"}
 (fact "removes a single entry"
-  ^:hidden
 
   (!.js
    (var rows {})
@@ -523,7 +510,7 @@
                        "00000000-0000-0000-0000-000000000000"))
   => vector?
 
-  
+
   (!.py
    (var rows {})
    (data/merge-bulk rows (@! +flattened+) nil)
@@ -546,7 +533,7 @@
                         "UserAccount"
                         (xtd/obj-omit sample/RootUser ["emails" "profile"])
                         {})))
-          
+
           (def +profile+
             (dissoc (!.js
                      (f/flatten sample/Schema
@@ -555,8 +542,7 @@
                                 {}))
                     "UserAccount"))]}
 (fact "adds single link"
-  ^:hidden
-  
+
   (!.js
    (var rows {})
    (data/merge-bulk rows (@! +account+) nil)

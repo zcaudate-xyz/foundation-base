@@ -20,7 +20,6 @@
   :adopt true
   :added "4.0" :unchecked true}
 (fact  "creates a slim switch box"
-  ^:hidden
 
   (defn.js ToggleSwitchSimpleDemo
     []
@@ -28,8 +27,8 @@
     (var [highlighted setHighlighted] (r/local false))
     (var [disabled setDisabled] (r/local false))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-toggle-switch/ToggleSwitchSimple"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-toggle-switch/ToggleSwitchSimple"}
 [:% n/Row
        {:style {:alignItems "center"}}
        [:% n/Text
@@ -51,7 +50,7 @@
          :addons [(physical-addon/tagAll
                    {:style {:paddingHorizontal 20
                             :height 80
-                            :flex 1}})]}]] 
+                            :flex 1}})]}]]
 [:% n/Row
        [:% n/Button
         {:title "H"
@@ -59,7 +58,7 @@
        [:% n/Text " "]
        [:% n/Button
         {:title "D"
-         :onPress (fn:> (setDisabled (not disabled)))}]] 
+         :onPress (fn:> (setDisabled (not disabled)))}]]
 [:% n/Caption
        {:text (n/format-obj #{first})
         :style {:marginTop 10}}]))))
@@ -68,7 +67,6 @@
   :adopt true
   :added "4.0" :unchecked true}
 (fact  "creates a slim switch box"
-  ^:hidden
 
   (defn.js ToggleSwitchSquareDemo
     []
@@ -76,8 +74,8 @@
     (var [highlighted setHighlighted] (r/local false))
     (var [disabled setDisabled] (r/local false))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-toggle-switch/ToggleSwitchSquare"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-toggle-switch/ToggleSwitchSquare"}
 [:% n/Row
        {:style {:alignItems "center"}}
        [:% n/Text
@@ -101,7 +99,7 @@
          :axisStyle {:borderRadius 0}
          :size 40
          :transformations
-         {:knob 
+         {:knob
           {:fg (fn:> [#{active}]
                  {:style {:transform [{:translateX (* active 40)}
                                       {:rotateZ (+ (* active 90) "deg")}]}})}}
@@ -109,7 +107,7 @@
          :addons [(physical-addon/tagAll
                    {:style {:paddingHorizontal 20
                             :height 80
-                            :flex 1}})]}]] 
+                            :flex 1}})]}]]
 [:% n/Row
        [:% n/Button
         {:title "H"
@@ -117,7 +115,7 @@
        [:% n/Text " "]
        [:% n/Button
         {:title "D"
-         :onPress (fn:> (setDisabled (not disabled)))}]] 
+         :onPress (fn:> (setDisabled (not disabled)))}]]
 [:% n/Caption
        {:text (n/format-obj #{first})
         :style {:marginTop 10}}]))))
@@ -127,7 +125,6 @@
 
 ^{:refer js.react-native.ui-toggle-switch/ToggleSwitch :added "4.0" :unchecked true}
 (fact  "creates a toggle switch box"
-  ^:hidden
 
   (defn.js SwitchBoxDemo
     []
@@ -136,8 +133,8 @@
     (var [highlighted setHighlighted] (r/local true))
     (var [errored setErrored] (r/local true))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-toggle-switch/ToggleSwitch"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-toggle-switch/ToggleSwitch"}
 [:% n/Row
        {:style {:alignItems "center"
                 #_#_:margin 3}}
@@ -169,8 +166,8 @@
         {:disabled true
          :highlighted highlighted
          :setSelected setHighlighted
-         :selected highlighted}]] 
-[:% n/Padding {:style {:height 20}}] 
+         :selected highlighted}]]
+[:% n/Padding {:style {:height 20}}]
 [:% n/Row
        {:style {:alignItems "center"
                 #_#_:margin 3}}
@@ -198,6 +195,6 @@
                      :marginVertical 0}}]
        [:% n/Padding {:style {:width 20}}]])))
 
-  
+
 
   )

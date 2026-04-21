@@ -18,8 +18,7 @@
 
 ^{:refer rt.postgres.runtime.graph-view/primary-key :added "4.0"}
 (fact "gets the primary key of a schema"
-  ^:hidden
-  
+
   (view/primary-key 'scratch/Task)
   => :uuid
 
@@ -28,8 +27,7 @@
 
 ^{:refer rt.postgres.runtime.graph-view/lead-symbol :added "4.0"}
 (fact "gets the lead symbol"
-  ^:hidden
-  
+
   (view/lead-symbol '[:uuid i-account-id])
   => 'i-account-id)
 
@@ -38,19 +36,18 @@
 
 ^{:refer rt.postgres.runtime.graph-view/defsel.pg :added "4.0"}
 (fact "creates a select function"
-  ^:hidden
-  
+
   ;;
   ;; GENERAL-ACCESS
   ;;
-  
+
   (view/defsel.pg ^{:- [scratch/Task]
                     :scope #{:public}
                     :args [:name i-name]}
     task-by-name
     {:name i-name})
   => #'rt.postgres.runtime.graph-view-test/task-by-name
-  
+
   (:static/view @rt.postgres.runtime.graph-view-test/task-by-name)
   => '{:args [:name i-name],
       :table rt.postgres.test.scratch-v1/Task,
@@ -68,8 +65,7 @@
 
 ^{:refer rt.postgres.runtime.graph-view/defret.pg :added "4.0"}
 (fact "creates a returns function"
-  ^:hidden
-  
+
   (view/defret.pg ^{:- [scratch/Task]}
     task-basic
     [:uuid i-task-id]
@@ -89,7 +85,6 @@
 
 ^{:refer rt.postgres.runtime.graph-view/view-fn :added "4.0"}
 (fact "constructs a view function"
-  ^:hidden
 
   (view/view-fn '[-/task-basic]
                 '[-/task-by-name "hello"]
@@ -101,7 +96,6 @@
 
 ^{:refer rt.postgres.runtime.graph-view/view :added "4.0"}
 (fact "view macro"
-  ^:hidden
 
   (macroexpand-1
    '(view/view

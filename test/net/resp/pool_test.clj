@@ -19,18 +19,16 @@
          :port 4457}))
 
 ^{:refer net.resp.pool/pool :added "3.0"}
-(fact "creates the connection pool" ^:hidden
-  ^:hidden
-  
+(fact "creates the connection pool"
+
   (pool {:tag "test.pool"
          :path [:test :pool]
          :port 4455})
   => cc/pool?)
 
 ^{:refer net.resp.pool/pool:apply :added "3.0"}
-(fact "applys a function to connection arguments" ^:hidden
-  ^:hidden
-  
+(fact "applys a function to connection arguments"
+
   (component/with-lifecycle [|node| {:start  (create-node)
                              :stop   node/stop-node}]
     (component/with [|pool| (create-pool)]
@@ -38,7 +36,7 @@
       => "PONG")))
 
 ^{:refer net.resp.pool/wrap-pool :added "3.0"}
-(fact "wraps a function taking pool" ^:hidden
+(fact "wraps a function taking pool"
 
   (component/with [|pool| (create-pool)]
     ((wrap-pool (fn [pool]
@@ -48,8 +46,7 @@
 
 ^{:refer net.resp.pool/wrap-connection :added "3.0"}
 (fact "wraps a function taking pool resource"
-   ^:hidden
-  
+
   (component/with-lifecycle [|node| {:start  (create-node)
                              :stop   node/stop-node}]
     (component/with [|pool| (create-pool)]

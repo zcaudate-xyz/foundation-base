@@ -26,13 +26,12 @@
 ^{:refer std.image.base.model/model-inv-table :added "3.0"}
 (fact "creates a inverse access table for setting data within an image"
 
-  ;; channel 0, 0th index = (i1>>3)<<11 + (i2>>2)<<6 + i3>>3 
+  ;; channel 0, 0th index = (i1>>3)<<11 + (i2>>2)<<6 + i3>>3
   (model-inv-table (model :ushort-565-rgb))
   => {0 {0 {1 [11 5],
             2 [5 6],
             3 [0 5]}}}
 
-  ^:hidden
   ;; channel 0, 0th index = i3, 1st index = i2, 2nd index = i1
   (model-inv-table (model :3-byte-bgr))
   => {0 {2 {1 nil},

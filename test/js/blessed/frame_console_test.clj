@@ -12,8 +12,7 @@
 
 ^{:refer js.blessed.frame-console/ConsoleMain :added "4.0" :unchecked true}
 (fact "creates a primary frame-console button"
-  ^:hidden
-  
+
   (defn.js ConsoleMainDemo
     []
     (var [current setCurrent] (r/local))
@@ -29,8 +28,7 @@
 
 ^{:refer js.blessed.frame-console/Console :added "4.0" :unchecked true}
 (fact "creates a primary frame-console button"
-  ^:hidden
-  
+
   (defn.js ConsoleDemo
     []
     (var [show setShow] (r/local true))

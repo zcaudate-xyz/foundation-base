@@ -8,8 +8,7 @@
 
 ^{:refer rt.chromedriver.spec/list-domains :added "4.0"}
 (fact "lists all domains"
-  ^:hidden
-  
+
   (count (spec/list-domains))
   => 54
 
@@ -21,8 +20,7 @@
 
 ^{:refer rt.chromedriver.spec/get-domain-raw :added "4.0"}
 (fact "gets the raw domain"
-  ^:hidden
-  
+
   (spec/get-domain-raw "Console")
   => (contains {"clearMessages" map?
                 "disable" map?
@@ -30,8 +28,7 @@
 
 ^{:refer rt.chromedriver.spec/list-methods :added "4.0"}
 (fact "lists all spec methods"
-  ^:hidden
-  
+
   (let [methods (set (spec/list-methods "Runtime"))]
     (boolean (and (methods "evaluate")
                   (methods "getProperties")
@@ -46,7 +43,6 @@
 
 ^{:refer rt.chromedriver.spec/get-method :added "4.0"}
 (fact "gets the method"
-  ^:hidden
 
   (-> (spec/get-method "Page" "captureScreenshot")
       (update "parameters"

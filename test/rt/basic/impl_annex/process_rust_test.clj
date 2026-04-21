@@ -23,7 +23,6 @@
 
 ^{:refer rt.basic.impl-annex.process-rust/transform-form :added "4.0"}
 (fact "transforms the rust form"
-  ^:hidden
 
   (transform-form '[(+ 1 2 3)]
                   (l/rt :rust)
@@ -32,7 +31,6 @@
 
 ^{:refer rt.basic.impl-annex.process-rust-test/CANARY-RUSTC :guard true :adopt true :added "4.0"}
 (fact "evaluates rust code through the twostep runtime"
-  ^:hidden
 
    (!.rs
     (+ 1 2 3))
@@ -40,7 +38,6 @@
 
 ^{:refer rt.basic.impl-annex.process-rust-test/CANARY-RUSTC :guard true :adopt true :added "4.0"}
 (fact "twostep evaluates direct pointer calls in the script environment"
-  ^:hidden
 
   [(-/add1 10)
    (-/twice-add1 10)

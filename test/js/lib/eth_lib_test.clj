@@ -29,7 +29,6 @@
 
 ^{:refer js.lib.eth-lib/to-bignum-pow10 :added "4.0" :unchecked true}
 (fact "number with base 10 exponent"
-  ^:hidden
 
   (!.js
    (. (e/to-bignum-pow10 10)
@@ -38,8 +37,7 @@
 
 ^{:refer js.lib.eth-lib/bn-mul :added "4.0" :unchecked true}
 (fact "multiplies two bignums together"
-  ^:hidden
-  
+
   (!.js
    (. (e/bn-mul "100000000000000001"
                 "10000" 10)
@@ -48,8 +46,7 @@
 
 ^{:refer js.lib.eth-lib/bn-div :added "4.0" :unchecked true}
 (fact "divides two bignums together"
-  ^:hidden
-  
+
   (!.js
    (. (e/bn-div "100000000000000001"
                 "10000" 10)
@@ -58,19 +55,17 @@
 
 ^{:refer js.lib.eth-lib/to-number :added "4.0" :unchecked true}
 (fact "converts the bignum to a number"
-  ^:hidden
 
   (!.js
    (e/to-number "1000000001"))
   => 1000000001
-  
+
   (!.js
    (e/to-number "100000000000000001"))
   => (throws))
 
 ^{:refer js.lib.eth-lib/to-number-string :added "4.0" :unchecked true}
 (fact "converts the bignum to a number string"
-  ^:hidden
 
   (!.js
    (e/to-number-string "100000000000000001"))
@@ -78,7 +73,6 @@
 
 ^{:refer js.lib.eth-lib/new-rpc-provider :added "4.0" :unchecked true}
 (fact "creates a new rpc provider"
-  ^:hidden
 
   (j/<!
    (e/getBlockNumber
@@ -90,8 +84,7 @@
 
 ^{:refer js.lib.eth-lib/new-wallet :added "4.0" :unchecked true}
 (fact "creates a new wallet"
-  ^:hidden
-  
+
   (j/<!
    (e/getAddress
     (e/new-wallet
@@ -101,7 +94,6 @@
 
 ^{:refer js.lib.eth-lib/new-wallet-from-mnemonic :added "4.0" :unchecked true}
 (fact "creates new wallet from mnemonic"
-  ^:hidden
 
   (j/<!
    (e/getAddress
@@ -115,8 +107,7 @@
              (l/rt :js)
              example-counter/+default-contract+))]}
 (fact "creates a new contract"
-  ^:hidden
-  
+
   (set
    (j/<!
      (xtd/obj-keys
@@ -132,8 +123,7 @@
              (l/rt :js)
              example-counter/+default-contract+))]}
 (fact "creates a new contract factory"
-  ^:hidden
-  
+
   (j/<!
    (xtd/obj-keys
     (e/new-contract-factory
@@ -145,8 +135,7 @@
 
 ^{:refer js.lib.eth-lib/get-signer :added "4.0" :unchecked true}
 (fact "gets a signer given url and private key"
-  ^:hidden
-  
+
   (j/<!
    (xtd/obj-keys
     (e/get-signer "http://127.0.0.1:8545"
@@ -155,7 +144,6 @@
 
 ^{:refer js.lib.eth-lib/get-signer-address :added "4.0" :unchecked true}
 (fact "gets signer address given url and private key"
-  ^:hidden
 
   (j/<!
    (e/get-signer-address "http://127.0.0.1:8545"
@@ -164,8 +152,7 @@
 
 ^{:refer js.lib.eth-lib/send-wei :added "4.0" :unchecked true}
 (fact "gets wei to account"
-  ^:hidden
-  
+
   (j/<!
    (e/send-wei (e/get-signer "http://127.0.0.1:8545"
                              (@! (last env-ganache/+default-private-keys+)))
@@ -183,7 +170,7 @@
                   (@! (first env-ganache/+default-addresses+)))
     j/toString))
   => integer?
-  
+
   (bigint
    (j/<!
     (e/getBalance (e/new-rpc-provider "http://127.0.0.1:8545")
@@ -197,8 +184,7 @@
              (l/rt :js)
              example-counter/+default-contract+))]}
 (fact "deploys the contract"
-  ^:hidden
-  
+
    (j/<!
     (e/contract-deploy (e/get-signer "http://127.0.0.1:8545"
                                      (@! (last env-ganache/+default-private-keys+)))
@@ -226,8 +212,7 @@
                (fn [m]
                  (return (xt/x:get-key m "target")))))]}
 (fact "runs the contract"
-  ^:hidden
-  
+
   (j/<! (e/contract-run (e/get-signer "http://127.0.0.1:8545"
                                       (@! (last env-ganache/+default-private-keys+)))
                         (@! +address+)
@@ -262,7 +247,6 @@
                (fn [m]
                  (return (xt/x:get-key m "target")))))]}
 (fact "subscribes to events"
-  ^:hidden
 
   (notify/wait-on [:js 5000]
     (. (e/getBlockNumber (e/new-rpc-provider  "http://127.0.0.1:8545"))
@@ -306,7 +290,6 @@
                (fn [m]
                  (return (xt/x:get-key m "target")))))]}
 (fact "subscribes to single event"
-  ^:hidden
 
   (!.js
    (do (var unsub
@@ -343,12 +326,12 @@
   (!.js
    (:= (!:G P)
        ))
-  
+
   (!.js (. P (getSigner)))
-  
+
   (j/<! (e/getBlockNumber P))
-  
-  
+
+
   (!.js
    (xtd/obj-keys (. ethers ethers)))
 

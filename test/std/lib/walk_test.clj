@@ -48,8 +48,7 @@
 
 ^{:refer std.lib.walk/walk:find :added "4.0"}
 (fact "recursively walks to find all matching forms"
-  ^:hidden
-  
+
   (walk:find (fn [x]
                (and (vector? x)
                     (even? (first x))))
@@ -59,8 +58,7 @@
 
 ^{:refer std.lib.walk/walk:keep :added "4.0"}
 (fact "recursively walks and keeps all processed forms"
-  ^:hidden
-  
+
   (walk:keep (fn [x]
                (if (odd? x)
                  (+ 10 x)))

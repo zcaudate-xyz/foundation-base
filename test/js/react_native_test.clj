@@ -115,20 +115,18 @@
 
 ^{:refer js.react-native/Enclosed :added "0.1"}
 (fact "creates a enclosed section with label"
-  ^:hidden
-  
+
   (defn.js EnclosedDemo
     []
     (return
-     (n/EnclosedCode 
-      {:label "js.react-native/Enclosed"} 
+     (n/EnclosedCode
+      {:label "js.react-native/Enclosed"}
       [:% n/Row
        [:% n/Text "HELLO"]]))))
 
 ^{:refer js.react-native/EnclosedCodeContainer :added "4.0" :unchecked true}
 (fact "creates a enclosed section with label"
-  ^:hidden
-  
+
   (defn.js EnclosedCodeContainerDemo
     []
     (return
@@ -140,8 +138,7 @@
 
 ^{:refer js.react-native/EnclosedCode :added "4.0" :unchecked true}
 (fact "creates an enclosed code section"
-  ^:hidden
-  
+
   (defn.js EnclosedCodeDemo
     []
     (return
@@ -153,17 +150,16 @@
 
 ^{:refer js.react-native/Row :added "0.1"}
 (fact "constructs a row"
-  ^:hidden
-  
+
   (defn.js RowDemo
     []
     (return
-     (n/EnclosedCode 
-      {:label "js.react-native/Row"} 
+     (n/EnclosedCode
+      {:label "js.react-native/Row"}
       [:% n/Row
        {:style {:backgroundColor "orange"}}
        [:% n/Text "HELLO"]
-       [:% n/Text "WORLD"]] 
+       [:% n/Text "WORLD"]]
       [:% n/Row
        {:style {:backgroundColor "blue"}}
        [:% n/Text "HELLO"]
@@ -171,13 +167,12 @@
 
 ^{:refer js.react-native/Fill :added "0.1"}
 (fact "fills space"
-  ^:hidden
-  
+
   (defn.js FillDemo
     []
     (return
-     (n/EnclosedCode 
-{:label "js.react-native/Fill"} 
+     (n/EnclosedCode
+{:label "js.react-native/Fill"}
 [:% n/Row
        {:style {:backgroundColor "orange"}}
        [:% n/Text "HELLO"]
@@ -186,78 +181,72 @@
 
 ^{:refer js.react-native/H1 :added "0.1"}
 (fact "creates an H1 element"
-  ^:hidden
-  
+
   (defn.js H1Demo
     []
     (return
-     (n/EnclosedCode 
-{:label "js.react-native/H1"} 
+     (n/EnclosedCode
+{:label "js.react-native/H1"}
 [:% n/Row
        {:style {:backgroundColor "orange"}}
        [:% n/H1 {:text "HELLO WORLD"}]]))))
 
 ^{:refer js.react-native/H2 :added "0.1"}
 (fact "creates an H2 element"
-  ^:hidden
-  
+
   (defn.js H2Demo
     []
     (return
-     (n/EnclosedCode 
-{:label "js.react-native/H2"} 
+     (n/EnclosedCode
+{:label "js.react-native/H2"}
 [:% n/Row
        {:style {:backgroundColor "orange"}}
        [:% n/H2 {:text "HELLO WORLD"}]]))))
 
 ^{:refer js.react-native/H3 :added "0.1"}
 (fact "creates an H3 element"
-  ^:hidden
-  
+
   (defn.js H3Demo
     []
     (return
-     (n/EnclosedCode 
-{:label "js.react-native/H3"} 
+     (n/EnclosedCode
+{:label "js.react-native/H3"}
 [:% n/Row
        {:style {:backgroundColor "orange"}}
        [:% n/H3 {:text "HELLO WORLD"}]]))))
 
 ^{:refer js.react-native/H4 :added "0.1"}
 (fact "creates an H4 element"
-  ^:hidden
-  
+
   (defn.js H4Demo
     []
     (return
-     (n/EnclosedCode 
-{:label "js.react-native/H4"} 
+     (n/EnclosedCode
+{:label "js.react-native/H4"}
 [:% n/Row
        {:style {:backgroundColor "orange"}}
        [:% n/H4 {:text "HELLO WORLD"}]]))))
 
 ^{:refer js.react-native/H5 :added "0.1"}
 (fact "creates an H5 element"
-  ^:hidden
-  
+
   (defn.js H5Demo
     []
     (return
-     (n/EnclosedCode 
-{:label "js.react-native/H5"} 
+     (n/EnclosedCode
+{:label "js.react-native/H5"}
 [:% n/Row
        {:style {:backgroundColor "orange"}}
        [:% n/H5 {:text "HELLO WORLD"}]]))))
 
 ^{:refer js.react-native/Caption :added "0.1"}
 (fact "creates an Caption element"
-  ^:hidden
-  
+
   (defn.js CaptionDemo
     []
     (return
-     (n/EnclosedCode 
-{:label "js.react-native/Caption"} 
+     (n/EnclosedCode
+{:label "js.react-native/Caption"}
 [:% n/Row
        {:style {:backgroundColor "orange"}}
        [:% n/Caption {:text "HELLO WORLD"}]]))))
@@ -267,8 +256,7 @@
 
 ^{:refer js.react-native/TabsIndexed :added "0.1"}
 (fact "creates an enum tabs view"
-  ^:hidden
-  
+
   (defn.js TabsIndexedDemo
     []
     (var [index setIndex] (r/local 3))
@@ -278,8 +266,8 @@
                         :color "white"
                         :padding 2})
     (return
-     (n/EnclosedCode 
-{:label "js.react-native/TabsIndexed"} 
+     (n/EnclosedCode
+{:label "js.react-native/TabsIndexed"}
 [:% n/TabsIndexed
        {:items ["A" "B" "C" "D"]
         :checkIndex (fn:> true)
@@ -287,40 +275,38 @@
         :styleNormal   styleNormal
         :styleSelected styleSelected
         :index index
-        :format (fn:> [s] (+ " " s " "))}] 
+        :format (fn:> [s] (+ " " s " "))}]
 [:% n/Caption
        {:text (xt/x:json-encode #{index})
         :style {:marginTop 10}}]))))
 
 ^{:refer js.react-native/Tabs :added "0.1"}
 (fact "creates an enum data view"
-  ^:hidden
-  
+
   (defn.js TabsDemo
     []
     (var [value setValue] (r/local "A"))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native/Tabs"} 
+     (n/EnclosedCode
+{:label "js.react-native/Tabs"}
 [:% n/Tabs
        {:data ["A" "B" "C" "D"]
         :value value
         :setValue setValue
-        :format (fn:> [s] (+ " " s " "))}] 
+        :format (fn:> [s] (+ " " s " "))}]
 [:% n/Caption
        {:text (xt/x:json-encode #{value})
         :style {:marginTop 10}}]))))
 
 ^{:refer js.react-native/TabsPane :added "0.1"}
 (fact "creates a  Tabs Pane"
-  ^:hidden
-  
+
   (defn.js TabsPaneDemo
     []
     (var [initial setInitial] (r/local "a"))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native/TabsPane"} 
+     (n/EnclosedCode
+{:label "js.react-native/TabsPane"}
 [:% n/TabsPane
        {:tree  {:a "1"
                 :b "2"
@@ -329,60 +315,57 @@
         :initial initial
         :setInitial setInitial
         :tabsFormat (fn:> [s] (+ " " (j/toUpperCase s) " "))
-        :formatFn k/identity}] 
+        :formatFn k/identity}]
 [:% n/Caption
        {:text (xt/x:json-encode #{initial})
         :style {:marginTop 10}}]))))
 
 ^{:refer js.react-native/ListIndexed :added "0.1"}
 (fact "creates a list view"
-  ^:hidden
-  
+
   (defn.js ListIndexedDemo
     []
     (var [index setIndex] (r/local 3))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native/ListIndexed"} 
+     (n/EnclosedCode
+{:label "js.react-native/ListIndexed"}
 [:% n/ListIndexed
        {:items ["A" "B" "C" "D"]
         :checkIndex (fn:> true)
         :setIndex   setIndex
         :index index
-        :format (fn:> [s] (+ " " s " "))}] 
+        :format (fn:> [s] (+ " " s " "))}]
 [:% n/Caption
        {:text (xt/x:json-encode #{index})
         :style {:marginTop 10}}]))))
 
 ^{:refer js.react-native/List :added "0.1"}
 (fact "creates a list"
-  ^:hidden
-  
+
   (defn.js ListDemo
     []
     (var [value setValue] (r/local "A"))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native/List"} 
+     (n/EnclosedCode
+{:label "js.react-native/List"}
 [:% n/List
        {:data ["A" "B" "C" "D"]
         :value value
         :setValue setValue
-        :format (fn:> [s] (+ " " s " "))}] 
+        :format (fn:> [s] (+ " " s " "))}]
 [:% n/Caption
        {:text (xt/x:json-encode #{value})
         :style {:marginTop 10}}]))))
 
 ^{:refer js.react-native/ListPane :added "0.1"}
 (fact "creates a  List Pane"
-  ^:hidden
-  
+
   (defn.js ListPaneDemo
     []
     (var [initial setInitial] (r/local "a"))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native/ListPane"} 
+     (n/EnclosedCode
+{:label "js.react-native/ListPane"}
 [:% n/ListPane
        {:tree  {:a "1"
                 :b "2"
@@ -392,15 +375,14 @@
         :setInitial setInitial
         :listWidth 30
         :listFormat j/toUpperCase
-        :formatFn k/identity}] 
+        :formatFn k/identity}]
 [:% n/Caption
        {:text (xt/x:json-encode #{initial})
         :style {:marginTop 10}}]))))
 
 ^{:refer js.react-native/TabsMultiIndexed :added "4.0" :unchecked true}
 (fact "creates a multi tab select indexed"
-  ^:hidden
-  
+
   (defn.js TabsMultiIndexedDemo
     []
     (var [indices setIndices] (r/local [true false false true]))
@@ -410,41 +392,40 @@
                         :color "white"
                         :padding 2})
     (return
-     (n/EnclosedCode 
-{:label "js.react-native/TabsMultiIndexed"} 
+     (n/EnclosedCode
+{:label "js.react-native/TabsMultiIndexed"}
 [:% n/TabsMultiIndexed
        {:items ["A" "B" "C" "D"]
         :setIndices   setIndices
         :styleNormal   styleNormal
         :styleSelected styleSelected
         :indices indices
-        :format (fn:> [s] (+ " " s " "))}] 
+        :format (fn:> [s] (+ " " s " "))}]
 [:% n/Caption
        {:text (xt/x:json-encode #{indices})
         :style {:marginTop 10}}]))))
 
 ^{:refer js.react-native/TabsMulti :added "4.0" :unchecked true}
 (fact "creates a multi tab select"
-  
+
   (defn.js TabsMultiDemo
     []
     (var [values setValues] (r/local ["A" "C"]))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native/TabsMulti"} 
+     (n/EnclosedCode
+{:label "js.react-native/TabsMulti"}
 [:% n/TabsMulti
        {:data ["A" "B" "C" "D"]
         :values values
         :setValues setValues
-        :format (fn:> [s] (+ " " s " "))}] 
+        :format (fn:> [s] (+ " " s " "))}]
 [:% n/Caption
        {:text (xt/x:json-encode #{values})
         :style {:marginTop 10}}]))))
 
 ^{:refer js.react-native/TreePane :added "0.1"}
 (fact "creates a  Tree Pane"
-  ^:hidden
-  
+
   (defn.js TreePaneDemo
     []
     (var [initial setInitial] (r/local "a"))
@@ -452,8 +433,8 @@
     (var [l2 setL2] (r/local))
     (var [l3 setL3] (r/local))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native/TreePane"} 
+     (n/EnclosedCode
+{:label "js.react-native/TreePane"}
 [:% n/TreePane
        {:tree  {:x (-/nest-tree -/TREEDATA "x")
                 :y (-/nest-tree -/TREEDATA "y")
@@ -482,7 +463,7 @@
                   :initial l3
                   :setInitial setL3
                   :tabsFormat j/toUpperCase
-                  :formatFn xt/x:json-encode}]}] 
+                  :formatFn xt/x:json-encode}]}]
 [:% n/Caption
        {:text (xt/x:json-encode #{initial l1 l2 l3})
         :style {:marginTop 10}}]))))
@@ -492,13 +473,12 @@
 
 ^{:refer js.react-native/BaseIndicator :added "4.0" :unchecked true}
 (fact "displays a base indicator"
-  ^:hidden
-  
+
   (defn.js BaseIndicatorDemo
     []
     (return
-     (n/EnclosedCode 
-{:label "js.react-native/BaseIndicator"} 
+     (n/EnclosedCode
+{:label "js.react-native/BaseIndicator"}
 [:% n/BaseIndicator
        {:color "black"
         :label "TEST"
@@ -506,14 +486,13 @@
 
 ^{:refer js.react-native/ToggleIndicator :added "4.0" :unchecked true}
 (fact "displays a toggle indicator"
-  ^:hidden
-  
+
   (defn.js ToggleIndicatorDemo
     []
     (var [active setActive] (r/local true))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native/ToggleIndicator"} 
+     (n/EnclosedCode
+{:label "js.react-native/ToggleIndicator"}
 [:% n/ToggleIndicator
        {:active active
         :onPress (fn:> (setActive (not active)))
@@ -521,14 +500,13 @@
 
 ^{:refer js.react-native/RecordList :added "4.0" :unchecked true}
 (fact "displays a record list"
-  ^:hidden
-  
+
   (defn.js RecordListDemo
     []
     (var [active setActive] (r/local true))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native/RecordList"} 
+     (n/EnclosedCode
+{:label "js.react-native/RecordList"}
 [:% n/RecordList
        {:entry {:first "John"
                 :last  "Smith"}
@@ -537,14 +515,13 @@
 
 ^{:refer js.react-native/TextDisplay :added "4.0" :unchecked true}
 (fact "displays a slab of text"
-  ^:hidden
 
   (defn.js TextDisplayDemo
     []
     (var [active setActive] (r/local true))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native/TextDisplay"} 
+     (n/EnclosedCode
+{:label "js.react-native/TextDisplay"}
 [:% n/TextDisplay
        {:content "ABC"}]))))
 
@@ -571,7 +548,6 @@
 
 ^{:refer js.react-native/Portal :added "4.0" :unchecked true}
 (fact "constructs a portal"
-  ^:hidden
 
   (defn.js PortalView
     []
@@ -594,12 +570,12 @@
         [:% n/Text
          {:style {:color "white"}}
          (+ "HELLO - " code)]]]]))
-  
+
   (defn.js PortalDemo
     []
     (return
-     (n/EnclosedCode 
-{:label "js.react-native/Portal"} 
+     (n/EnclosedCode
+{:label "js.react-native/Portal"}
 [:% n/PortalProvider
        [:% n/Row
         [:% n/View
@@ -630,8 +606,7 @@
 
 ^{:refer js.react-native/usePortalLayouts :added "4.0" :unchecked true}
 (fact "gets measurements of elements in a portal"
-  ^:hidden
-  
+
   (defn.js UsePortalLayoutsView
     [#{offset setOffset
        layouts setLayouts}]
@@ -643,7 +618,7 @@
                                             setLayouts))
     (r/watch [offset]
       (getLayouts))
-    
+
     (return
      [:% n/View
       {:style {:marginTop 10}}
@@ -657,16 +632,16 @@
          [:% n/Text
           {:style {:color "green"}}
           (n/format-entry #{offset})]]]]]))
-  
+
   (defn.js UsePortalLayoutsDemo
     []
     (var [offset setOffset] (r/local (j/floor
                                       (* 100 (j/random 100)))))
-    
+
     (var [layouts setLayouts] (r/local {}))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native/usePortalLayouts"} 
+     (n/EnclosedCode
+{:label "js.react-native/usePortalLayouts"}
 [:% n/PortalProvider
        [:% n/Row
         [:% n/Row
@@ -690,7 +665,7 @@
               layouts setLayouts}]]]]
         [:% n/TextDisplay
          {:content (n/format-entry #{layouts offset})}]]])))
-  
+
   (def.js MODULE
     (do (:# (!:uuid))
         (!:module))))

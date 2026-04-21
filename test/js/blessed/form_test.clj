@@ -24,8 +24,7 @@
 
 ^{:refer js.blessed.form/Spinner :added "4.0" :unchecked true}
 (fact "Constructs a Spinner"
-  ^:hidden
-  
+
   (defn.js SpinnerDemo
     []
     (var form  (ext-form/makeForm (fn:> {:age 10})
@@ -53,8 +52,7 @@
 
 ^{:refer js.blessed.form/NumberGridBox :added "4.0" :unchecked true}
   (fact "Constructs a NumberGridBox"
-    ^:hidden
-    
+
     (defn.js NumberGridBoxDemo
       []
       (var form  (ext-form/makeForm (fn:> {:age 10})
@@ -83,8 +81,7 @@
 
 ^{:refer js.blessed.form/Dropdown :added "4.0" :unchecked true}
 (fact "Constructs a Dropdown"
-    ^:hidden
-    
+
     (defn.js DropdownDemo
       []
       (var form  (ext-form/makeForm (fn:> {:currency "STATS"})
@@ -108,8 +105,7 @@
 
 ^{:refer js.blessed.form/EnumBox :added "4.0" :unchecked true}
 (fact "Constructs a EnumBox"
-  ^:hidden
-  
+
   (defn.js EnumBoxDemo
     []
     (var form  (ext-form/makeForm (fn:> {:currency "STATS"})
@@ -133,8 +129,7 @@
 
 ^{:refer js.blessed.form/EnumMulti :added "4.0" :unchecked true}
 (fact "Constructs a EnumMulti"
-  ^:hidden
-    
+
   (defn.js EnumMultiDemo
     []
     (var form  (ext-form/makeForm (fn:> {:currency ["USD"]})
@@ -159,8 +154,7 @@
 
 ^{:refer js.blessed.form/Tabs :added "4.0" :unchecked true}
 (fact "Constructs a Tabs"
-    ^:hidden
-    
+
     (defn.js TabsDemo
       []
       (var form  (ext-form/makeForm
@@ -186,8 +180,7 @@
 
 ^{:refer js.blessed.form/TextBox :added "4.0" :unchecked true}
 (fact "Constructs a TextBox"
-  ^:hidden
-  
+
   (defn.js TextBoxDemo
     []
     (var form (ext-form/makeForm
@@ -230,7 +223,6 @@
 
 ^{:refer js.blessed.form/ToggleSwitch :added "4.0" :unchecked true}
 (fact "Constructs a ToggleSwitch"
-  ^:hidden
 
   (defn.js ToggleSwitch
     []
@@ -259,7 +251,6 @@
 
 ^{:refer js.blessed.form/ToggleButton :added "4.0" :unchecked true}
 (fact "Constructs a ToggleButton"
-  ^:hidden
 
   (defn.js ToggleButton
     []
@@ -289,8 +280,7 @@
 
 ^{:refer js.blessed.form/TimePicker :added "4.0" :unchecked true}
 (fact "Constructs a TimePicker"
-  ^:hidden
-  
+
   (defn.js TimePickerDemo
     []
     (var form (ext-form/makeForm
@@ -322,8 +312,7 @@
 
 ^{:refer js.blessed.form/DatePicker :added "4.0" :unchecked true}
 (fact "Constructs a DatePicker"
-  ^:hidden
-  
+
   (defn.js DatePickerDemo
     []
     (var form (ext-form/makeForm
@@ -360,15 +349,14 @@
 
 ^{:refer js.blessed.form/DurationPicker :added "4.0" :unchecked true}
 (fact "Constructs a DurationPicker"
-  ^:hidden
-  
+
   (defn.js DurationPickerDemo
     []
     (var form (ext-form/makeForm
-               (fn:> {:from-now-day    2   
+               (fn:> {:from-now-day    2
                       :from-now-hour   2
                       :from-now-minute 5})
-               {:from-now-day    []   
+               {:from-now-day    []
                 :from-now-hour   []
                 :from-now-minute []}))
     (var data (ext-form/listenFormData form))

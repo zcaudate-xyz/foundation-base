@@ -49,7 +49,7 @@
 (fact "adds ticket to the board"
 
   (submit-ticket {} ["a" "b"] "t1")
-  => {"a" ["t1"], "b" ["t1"]} ^:hidden
+  => {"a" ["t1"], "b" ["t1"]}
 
   (-> {}
       (submit-ticket ["a"] "t0")
@@ -63,7 +63,7 @@
 
   (-> -ex-
       (submit-board {:id "a"} "t0"))
-  => (contains ["t0" ["a"] future/future?]) ^:hidden
+  => (contains ["t0" ["a"] future/future?])
 
   (update @(:board (:runtime -ex-)) :submitted seq)
   => (contains {:lookup {"t0" {:id "a"}},
@@ -85,7 +85,7 @@
               (poll-board "a")))
 
   (clear-board -ex- "a" "t0")
-  => {:group "a", :dependent #{"a"}} ^:hidden
+  => {:group "a", :dependent #{"a"}}
 
   (update @(:board (:runtime -ex-)) :submitted seq)
   => {:queues {}, :lookup {}, :busy {}, :dependent {} :submitted nil :return {}})

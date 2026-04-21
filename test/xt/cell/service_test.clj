@@ -12,7 +12,6 @@
 
 ^{:refer xt.cell.service/service? :added "4.1"}
 (fact "checks whether a value is a service registry"
-  ^:hidden
 
   (!.js
    [(service/service? {"dbs" {}})
@@ -21,7 +20,6 @@
 
 ^{:refer xt.cell.service/create-service :added "4.1"}
 (fact "creates a service registry"
-  ^:hidden
 
   (!.js
    (service/create-service
@@ -30,7 +28,6 @@
 
 ^{:refer xt.cell.service/get-dbs :added "4.1"}
 (fact "gets all registered dbs"
-  ^:hidden
 
   (!.js
    (service/get-dbs
@@ -39,7 +36,6 @@
 
 ^{:refer xt.cell.service/get-db :added "4.1"}
 (fact "gets a named db from the registry"
-  ^:hidden
 
   (!.js
    (service/get-db
@@ -49,7 +45,6 @@
 
 ^{:refer xt.cell.service/assoc-db :added "4.1"}
 (fact "associates a db into the registry"
-  ^:hidden
 
   (!.js
    (service/assoc-db
@@ -61,7 +56,6 @@
 
 ^{:refer xt.cell.service/resolve-db :added "4.1"}
 (fact "resolves db references from descriptors and context"
-  ^:hidden
 
   (!.js
    [(service/resolve-db

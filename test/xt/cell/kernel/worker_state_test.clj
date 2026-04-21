@@ -30,7 +30,6 @@
 
 ^{:refer xt.cell.kernel.worker-state/get-state :added "4.1"}
 (fact "gets cell state"
-  ^:hidden
 
   (!.js (worker-state/get-state nil))
   => {"eval" true}
@@ -40,7 +39,6 @@
 
 ^{:refer xt.cell.kernel.worker-state/get-actions :added "4.1"}
 (fact "gets cell actions"
-  ^:hidden
 
   (!.js (worker-state/get-actions nil))
   => map?
@@ -50,7 +48,6 @@
 
 ^{:refer xt.cell.kernel.worker-state/set-actions :added "4.1"}
 (fact "initiates the base actions"
-  ^:hidden
 
   (!.js
    (var worker {})
@@ -65,7 +62,6 @@
 
 ^{:refer xt.cell.kernel.worker-state/post-message :added "4.1"}
 (fact "posts a message through a worker-like transport"
-  ^:hidden
 
   (!.js
    (var messages [])
@@ -76,7 +72,6 @@
 
 ^{:refer xt.cell.kernel.worker-state/fn-self :added "4.1"}
 (fact "applies arguments along with `self`"
-  ^:hidden
 
   (!.js
    (k/is-function? (worker-state/fn-self k/identity)))
@@ -84,7 +79,6 @@
 
 ^{:refer xt.cell.kernel.worker-state/fn-trigger :added "4.1"}
 (fact "triggers an event"
-  ^:hidden
 
   (!.js
    (var messages [])
@@ -95,7 +89,6 @@
 
 ^{:refer xt.cell.kernel.worker-state/fn-trigger-async :added "4.1"}
 (fact "triggers an event after a delay"
-  ^:hidden
 
   (!.js
    (var worker {:postMessage (fn [msg] msg)})
@@ -104,7 +97,6 @@
 
 ^{:refer xt.cell.kernel.worker-state/fn-set-state :added "4.1"}
 (fact "helper to set the state and emit event"
-  ^:hidden
 
   (!.js
    (worker-state/fn-set-state {} (worker-state/WORKER_STATE) (fn []) true))
@@ -123,7 +115,6 @@
 ^{:refer xt.cell.kernel.worker-state/fn-set-final-status :added "4.1"
   :setup [(fact:global :setup)]}
 (fact "sets the worker state to final"
-  ^:hidden
 
   (!.js
    (worker-state/fn-set-final-status {} true))
@@ -132,7 +123,6 @@
 ^{:refer xt.cell.kernel.worker-state/fn-get-final-status :added "4.1"
   :setup [(fact:global :setup)]}
 (fact "gets the final status"
-  ^:hidden
 
   (!.js
    (worker-state/fn-get-final-status {}))
@@ -146,7 +136,6 @@
 ^{:refer xt.cell.kernel.worker-state/fn-set-eval-status :added "4.1"
   :setup [(fact:global :setup)]}
 (fact "enables eval"
-  ^:hidden
 
   (!.js
    (worker-state/fn-set-eval-status {} true true))
@@ -165,7 +154,6 @@
 ^{:refer xt.cell.kernel.worker-state/fn-get-eval-status :added "4.1"
   :setup [(fact:global :setup)]}
 (fact "gets the eval status"
-  ^:hidden
 
   (!.js
    (worker-state/fn-get-eval-status))
@@ -179,7 +167,6 @@
 
 ^{:refer xt.cell.kernel.worker-state/fn-get-action-list :added "4.1"}
 (fact "gets the actions list"
-  ^:hidden
 
   (!.js
    (worker-state/fn-get-action-list))
@@ -187,7 +174,6 @@
 
 ^{:refer xt.cell.kernel.worker-state/fn-get-action-entry :added "4.1"}
 (fact "gets a action entry"
-  ^:hidden
 
   (!.js
    (worker-state/fn-get-action-entry "hello"))
@@ -195,7 +181,6 @@
 
 ^{:refer xt.cell.kernel.worker-state/fn-ping :added "4.1"}
 (fact "pings the worker"
-  ^:hidden
 
   (!.js
    (worker-state/fn-ping))
@@ -203,7 +188,6 @@
 
 ^{:refer xt.cell.kernel.worker-state/fn-ping-async :added "4.1"}
 (fact "pings after a delay"
-  ^:hidden
 
   (!.js
    (k/is-object? (worker-state/fn-ping-async 50)))
@@ -211,7 +195,6 @@
 
 ^{:refer xt.cell.kernel.worker-state/fn-echo :added "4.1"}
 (fact "echos the first arg"
-  ^:hidden
 
   (!.js
    (worker-state/fn-echo "hello"))
@@ -219,7 +202,6 @@
 
 ^{:refer xt.cell.kernel.worker-state/fn-echo-async :added "4.1"}
 (fact "echos the first arg after delay"
-  ^:hidden
 
   (!.js
    (k/is-object? (worker-state/fn-echo-async "hello" 50)))
@@ -227,7 +209,6 @@
 
 ^{:refer xt.cell.kernel.worker-state/fn-error :added "4.1"}
 (fact "throws an error"
-  ^:hidden
 
   (!.js
    (worker-state/fn-error))
@@ -235,7 +216,6 @@
 
 ^{:refer xt.cell.kernel.worker-state/fn-error-async :added "4.1"}
 (fact "throws an error after delay"
-  ^:hidden
 
   (!.js
    (k/is-object? (worker-state/fn-error-async 50)))

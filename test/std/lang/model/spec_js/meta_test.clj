@@ -8,8 +8,7 @@
 
 ^{:refer std.lang.model.spec-js.meta/js-module-import :added "4.0"}
 (fact "outputs the js module import from"
-  ^:hidden
-  
+
   (js-module-import 'react '{:as React} {})
   => '(:- :import (quote [React]) :from "'react'")
 
@@ -21,7 +20,7 @@
    :js [(js-module-import 'react '{:as [:* React]
                                    :refer [hello world]} {})])
   => "import * as React,{hello,world} from 'react'"
-  
+
   (js-module-import 'react '{:as [:* React]
                              :refer [hello world]} {:emit {:lang/format :commonjs}})
   => '(const React := (require "react"))
@@ -32,8 +31,7 @@
 
 ^{:refer std.lang.model.spec-js.meta/js-module-export :added "4.0"}
 (fact "outputs the js module export form"
-  ^:hidden
-  
+
   (js-module-export '{} {:emit {:lang/export true}})
   => '(:- :export :default (tab))
 
@@ -42,8 +40,7 @@
 
 ^{:refer std.lang.model.spec-js.meta/js-module-link :added "4.0"}
 (fact "gets the relative js based module"
-  ^:hidden
-  
+
   (js-module-link 'kmi.common {:base 'kmi.hello})
   => "./common"
 

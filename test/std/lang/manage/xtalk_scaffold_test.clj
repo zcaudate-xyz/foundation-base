@@ -27,7 +27,6 @@
         (l/script- :lua {:runtime :basic}))
       (fact:global {:setup [(l/rt:restart)]})
       (fact \"identity function\"
-        ^:hidden
         (!.js (k/identity 1))
         => 1
         (!.lua (k/identity 1))
@@ -71,7 +70,6 @@
       (fact:global {:setup [(l/rt:restart)]})
       ^{:refer xt.lang.common-lib/identity :added \"4.0\"}
       (fact \"identity function\"
-        ^:hidden
         (!.js (k/identity 1))
         => 1)
         (fact \"wrapped runtime form\"
@@ -102,7 +100,6 @@
       (fact:global {:setup [(l/rt:restart)]})
       ^{:refer xt.lang.common-lib/identity :added \"4.1\"}
       (fact \"identity function\"
-        ^:hidden
         (!.lua (k/identity 1))
         => 1)
       (fact \"wrapped runtime form\"
@@ -162,7 +159,6 @@
        (l/script- :js {:runtime :basic})
        (l/script- :lua {:runtime :basic})
        (fact \"encodes a value to sql\"
-         ^:hidden
          (!.js (xt/x:json-encode 100000000000000000))
          (!.lua (string.format \"%0.f\" 100000000000000000))
          (!.js (ut/encode-value 100000000000000000))
@@ -181,7 +177,6 @@
         (l/script- :js {:runtime :basic})
         (fact:global {:setup [(l/rt:restart)]})
          (fact \"placeholder\"
-           ^:hidden
            (!.js 1)
            => 1)]"))
 
@@ -215,7 +210,6 @@
         []
         (!.js (dbsql/connect {:constructor js-postgres/connect-constructor} {})))
       (fact \"portable helper-free query\"
-        ^:hidden
         (!.js (k/identity 1))
         => 1)]"))
 
@@ -251,7 +245,6 @@
       ^{:refer xt.sample.cache-meta/setup :added \"4.1\"
         :setup [(def +account+ (!.js {:id 1}))]}
       (fact \"retargets metadata setup\"
-        ^:hidden
         (!.js +account+)
         => {:id 1}
         (!.lua +account+)
@@ -266,7 +259,6 @@
                       :require [[xt.lang.common-repl :as repl]]})
       (l/script- :lua {:runtime :basic})
       (fact \"js-only helper\"
-        ^:hidden
         (!.js (repl/notify 1))
         => 1)]"))
 
@@ -914,13 +906,13 @@
 ^{:refer std.lang.manage.xtalk-scaffold/scaffold-runtime-template :added "4.1"}
 (fact "scaffold-runtime-template preserves source formatting"
   (with-temp-runtime-source-file
-    "(ns xtbench.js.sample.base-lib-test\n  (:require [std.lang :as l]\n            [xt.lang.common-lib :as k])\n  (:use code.test))\n\n(l/script- :js {:runtime :basic})\n\n(fact:global {:setup [(l/rt:restart)]})\n\n^{:refer xt.lang.common-lib/identity :added \"4.0\"}\n(fact \"identity function\"\n  ^:hidden\n  (!.js (k/identity 1))\n  => 1)\n"
+    "(ns xtbench.js.sample.base-lib-test\n  (:require [std.lang :as l]\n            [xt.lang.common-lib :as k])\n  (:use code.test))\n\n(l/script- :js {:runtime :basic})\n\n(fact:global {:setup [(l/rt:restart)]})\n\n^{:refer xt.lang.common-lib/identity :added \"4.0\"}\n(fact \"identity function\"\n\n  (!.js (k/identity 1))\n  => 1)\n"
     (fn [path]
       (let [{:keys [content]}
             (scaffold-runtime-template nil {:input-path path
                                             :output-path (str path ".out")
                                             :lang :lua})]
-        [(str/includes? content "(fact \"identity function\"\n  ^:hidden\n  (!.lua (k/identity 1))\n  => 1)")
+        [(str/includes? content "(fact \"identity function\"\n\n  (!.lua (k/identity 1))\n  => 1)")
          (str/includes? content "(l/script- :lua {:runtime :basic})")
          (not (str/includes? content "(fact \"identity function\" (!.lua"))])))
   => [true true true])

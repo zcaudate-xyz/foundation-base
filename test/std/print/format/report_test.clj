@@ -41,7 +41,7 @@
   => [["     hello" "          "]
       ["  :world  " "          "]
       ["[:a :b :c " " :d]      "]]
-  
+
   (lines:row ["hello" :world (res/result {:data [:a :b :c :d :e :f]
                                           :status :info})]
              {:padding 0
@@ -64,12 +64,12 @@
                   :spacing 1
                   :columns [{:align :right :length 10}
                             {:align :center :length 10}
-                            {:align :left :length 10}]}) ^:hidden
+                            {:align :left :length 10}]})
   => "[1m        id   name   value     [0m")
 
 ^{:refer std.print.format.report/report:row :added "3.0" :tags #{:print}}
 (fact "prints a row to output"
-  
+
   (report:row ["hello" :world (res/result {:data [:a :b :c :d :e :f]
                                            :status :info})]
               {:padding 0
@@ -82,13 +82,13 @@
 ^{:refer std.print.format.report/report:title :added "3.0" :tags #{:print}}
 (fact "prints the title"
 
-  (report:title "Hello World") ^:hidden
+  (report:title "Hello World")
   => "[1m\n-----------\nHello World\n-----------[0m")
 
 ^{:refer std.print.format.report/report:bold :added "3.0"}
 (fact "prints the subtitle"
 
-  (report:bold "Hello Again") ^:hidden
+  (report:bold "Hello Again")
   => "[1mHello Again[0m")
 
 ^{:refer std.print.format.report/report:column :added "3.0"}
@@ -96,5 +96,5 @@
 
   (report:column [[:id.a {:data 100}] [:id.b {:data 200}]]
                  :data
-                 #{}) ^:hidden
+                 #{})
   => string?)

@@ -18,37 +18,32 @@
 
 ^{:refer lua.aws.common/get-sha256 :added "4.0"}
 (fact "gets the sha 256 cipher"
-  ^:hidden
-  
+
   (!.lua
    (n/to-hex (common/get-sha256 "")))
   => "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
 
 ^{:refer lua.aws.common/get-md5 :added "4.0"}
 (fact "gets the sha 256 cipher"
-  ^:hidden
-  
+
   (!.lua
    (n/to-hex (common/get-md5 "")))
   => "d41d8cd98f00b204e9800998ecf8427e")
 
 ^{:refer lua.aws.common/get-date-short :added "4.0"}
 (fact "gets short amz date given ms"
-  ^:hidden
-  
+
   (common/get-date-short 0)
   => "19700101")
 
 ^{:refer lua.aws.common/get-date-long :added "4.0"}
 (fact "gets long amz date given ms"
-  ^:hidden
-  
+
   (common/get-date-long 0)
   => "19700101T000000Z")
 
 ^{:refer lua.aws.common/get-aws-defaults :added "4.0"}
 (fact "gets aws defaults"
-  ^:hidden
 
   (common/get-aws-defaults {:t 0
                             :user "admin"
@@ -64,21 +59,18 @@
 
 ^{:refer lua.aws.common/get-aws-scope :added "4.0"}
 (fact "gets the scope for a call"
-  ^:hidden
-  
+
   (common/get-aws-scope 0 nil nil)
   => "19700101/us-east-1/s3/aws4_request")
 
 ^{:refer lua.aws.common/get-aws-credential :added "4.0"}
 (fact "gets the aws credential"
-  ^:hidden
-  
+
   (common/get-aws-credential "admin" 0 nil nil)
   => "admin/19700101/us-east-1/s3/aws4_request")
 
 ^{:refer lua.aws.common/get-signing-key :added "4.0"}
 (fact "gets the aws signing key"
-  ^:hidden
 
   (!.lua
    (n/to-hex (common/get-signing-key "password"
@@ -87,8 +79,7 @@
 
 ^{:refer lua.aws.common/get-canonical-headers :added "4.0"}
 (fact "gets the canonical headers"
-  ^:hidden
-  
+
   (!.lua
    (common/get-canonical-headers (tab ["B" "hello   1"]
                                       ["A" "hello   2"]
@@ -98,16 +89,14 @@
 
 ^{:refer lua.aws.common/get-canonical-route :added "4.0"}
 (fact "gets the canonical route"
-  ^:hidden
-  
+
   (!.lua
    (common/get-canonical-route "/hello?b&a&c"))
   => {"params" [["a" ""] ["b" ""] ["c" ""]], "path" "/hello"})
 
 ^{:refer lua.aws.common/get-canonical :added "4.0"}
 (fact "gets the canonical string"
-  ^:hidden
-  
+
   (!.lua
    (common/get-canonical "PUT"
                          (common/get-canonical-route
@@ -126,7 +115,7 @@
       ""
       "a;b"
       "SHA")
-  
+
   (!.lua
    (common/get-canonical
     "PUT"
@@ -153,8 +142,7 @@
 
 ^{:refer lua.aws.common/header-authorization :added "4.0"}
 (fact "creates the header authorization"
-  ^:hidden
-  
+
   (!.lua
    (var aws   (common/get-aws-defaults
                {:t (u/time {"year" 2022, "month" 7, "day" 4,
@@ -179,8 +167,7 @@
 
 ^{:refer lua.aws.common/make-request-map :added "4.0"}
 (fact "make request map"
-  ^:hidden
-  
+
   (common/make-request-map
    (common/get-aws-defaults
     (common/get-aws-defaults

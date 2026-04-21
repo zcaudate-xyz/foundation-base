@@ -80,7 +80,6 @@
             (. (-/reset-cell) ["init"]
                (then (repl/>notify))))]}
 (fact "wraps cell args against the playground worker"
-  ^:hidden
 
   (j/<! ((base-model/wrap-cell-args
           base-link-local/echo)
@@ -100,7 +99,6 @@
                                                        :defaultArgs ["hello" 100]}})
                    ["init"]))]}
 (fact "runs remote calls through the playground worker"
-  ^:hidden
 
   (j/<! (base-model/remote-call (-/CELL) "hello" "echo_async" ["hello" 100] true))
   => (contains-in
@@ -121,7 +119,6 @@
                                                  :defaultArgs ["foo"]}})
                    ["init"]))]}
 (fact "updates view input against the playground worker"
-  ^:hidden
 
   (j/<! (xtd/first
          (base-model/view-set-input
@@ -147,7 +144,6 @@
                                                   :deps ["ping"]}})
                    ["init"]))]}
 (fact "updates playground-backed models"
-  ^:hidden
 
   (j/<! (base-model/model-update
          (-/CELL)

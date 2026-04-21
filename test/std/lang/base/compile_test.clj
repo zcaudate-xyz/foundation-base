@@ -21,8 +21,7 @@
 
 ^{:refer std.lang.base.compile/compile-script :added "4.0"}
 (fact "compiles a script"
-  ^:hidden
-  
+
   (make/with:mock-compile
     (compile-script {:lang :lua
                      :root   ".build"
@@ -36,8 +35,7 @@
 
 ^{:refer std.lang.base.compile/compile-module-single :added "4.0"}
 (fact "compiles a single module"
-  ^:hidden
-  
+
   (make/with:mock-compile
     (compile-module-single
      {:lang :lua
@@ -57,7 +55,6 @@
        string?]))
 
 (fact "compiles a single module with sidecar artifacts"
-  ^:hidden
 
   (make/with:mock-compile
     (compile-module-single
@@ -75,8 +72,7 @@
 
 ^{:refer std.lang.base.compile/compile-module-graph :added "4.0"}
 (fact "compiles a module graph"
-  ^:hidden
-  
+
   (make/with:mock-compile
     (compile-module-graph
      {:lang :lua
@@ -103,8 +99,7 @@
 
 ^{:refer std.lang.base.compile/compile-module-schema :added "4.0"}
 (fact "compiles all namespaces into a single file (for sql)"
-  ^:hidden
-  
+
   (make/with:mock-compile
     (compile-module-schema
      {:lang   :postgres

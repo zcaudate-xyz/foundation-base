@@ -47,23 +47,23 @@
 
 ^{:refer std.lang.base.emit-preprocess/to-input-form :added "4.0"}
 (fact "processes a form"
-  
+
   (def hello 1)
-  
+
   (to-input-form '(@! (+ 1 2 3)))
   => '(!:template (+ 1 2 3))
-  
+
   (to-input-form '(-/Class$$new))
   => (any '(static-invoke -/Class "new")
           nil)
-  
+
   (to-input-form '(Class$$new 1 2 3))
   => (any '(static-invoke Class "new" 1 2 3)
           nil)
-  
+
   (to-input-form '@#'hello)
   => '(!:deref (var std.lang.base.emit-preprocess-test/hello))
-  
+
   (to-input-form '@(+ 1 2 3))
   => '(!:eval (+ 1 2 3))
 
@@ -72,19 +72,17 @@
 
 ^{:refer std.lang.base.emit-preprocess/to-input :added "4.0"}
 (fact "converts a form to input (extracting deref forms)"
-  ^:hidden
 
   (to-input '(do (~! [1 2 3 4])))
   => (throws)
-  
+
   (binding [*macro-splice* true]
     (to-input '(do (~! [1 2 3 4]))))
   => '(do 1 2 3 4))
 
 ^{:refer std.lang.base.emit-preprocess/get-fragment :added "4.0"}
 (fact "gets the fragment given a symbol and modules"
-  ^:hidden
-  
+
   (get-fragment 'L.core/add
                 (:modules prep/+book-min+)
                 {:module {:id 'L.util
@@ -93,8 +91,7 @@
 
 ^{:refer std.lang.base.emit-preprocess/process-namespaced-resolve :added "4.0"}
 (fact "resolves symbol in current namespace"
-  ^:hidden
-  
+
   (process-namespaced-resolve 'u/add
                               (:modules prep/+book-min+)
                               {:module   {:id 'L.util
@@ -106,7 +103,7 @@
                               {:module   {:id  'L.util
                                           :link '{u L.core}}})
   => '[L.core UNKNOWN L.core/UNKNOWN]
-  
+
   (process-namespaced-resolve 'other/function
                               (:modules prep/+book-min+)
                               {:module   {:id 'L.util
@@ -115,8 +112,7 @@
 
 ^{:refer std.lang.base.emit-preprocess/process-namespaced-symbol :added "4.0"}
 (fact "process namespaced symbols"
-  ^:hidden
-  
+
   (process-namespaced-symbol 'u/add
                              (:modules prep/+book-min+)
                              {:module   {:id 'L.util
@@ -125,7 +121,7 @@
                              (volatile! #{})
                              identity)
   => '(fn [x y] (return (+ x y)))
-  
+
   (process-namespaced-symbol 'u/sub
                              (:modules prep/+book-min+)
                              {:module   {:id 'L.util
@@ -146,7 +142,7 @@
 
   (process-namespaced-symbol '-/hello
                              (:modules prep/+book-min+)
-                             
+
                              {:entry {:id 'hello}
                               :module   {:id 'L.util
                                          :link '{u L.core
@@ -167,8 +163,7 @@
 
 ^{:refer std.lang.base.emit-preprocess/process-inline-assignment :added "4.0"}
 (fact "prepares the form for inline assignment"
-  ^:hidden
-  
+
   (def +form+
     (process-inline-assignment '(var a := (u/identity-fn 1) :inline)
                                (:modules prep/+book-min+)
@@ -183,8 +178,7 @@
 
 ^{:refer std.lang.base.emit-preprocess/to-staging-form :added "4.0"}
 (fact "different staging forms"
-  ^:hidden
-  
+
   (to-staging-form '(!:template (+ 1 2 3))
                    nil
                    (:modules prep/+book-min+)
@@ -221,7 +215,6 @@
   => '(world 1 2 3))
 
 (fact "staging failures include macro context"
-  ^:hidden
 
   (try
     (to-staging-form (with-meta '(hello 1 2 3) {:line 21})
@@ -256,8 +249,7 @@
 
 ^{:refer std.lang.base.emit-preprocess/process-standard-symbol :added "4.0"}
 (fact "processes a standard symbol"
-  ^:hidden
-  
+
   (def +library-js+
     (doto (lib/library:create
            {:snapshot (snap/snapshot {:js {:id :js
@@ -278,14 +270,13 @@
 
 ^{:refer std.lang.base.emit-preprocess/to-staging :added "4.0"}
 (fact "converts the stage"
-  ^:hidden
-  
+
   (to-staging '(u/add (u/identity-fn 1) 2)
               nil
               (:modules prep/+book-min+)
               '{:module {:link {u L.core}}})
   => '[(+ (L.core/identity-fn 1) 2) #{L.core/identity-fn} #{L.core/add} {}]
-  
+
   (to-staging '(u/sub (u/add (u/identity-fn 1) 2)
                       (-/hello))
               nil
@@ -315,7 +306,6 @@
 
 ^{:refer std.lang.base.emit-preprocess/value-standalone :added "4.1"}
 (fact "callable xtalk intrinsics use shared value-standalone compilation"
-  ^:hidden
 
   (value-standalone 'x:add +grammar+)
   => '(fn [a b] (return (+ a b)))
@@ -338,7 +328,6 @@
   => '(fn [a b] (return (+ a b))))
 
 (fact "language macro form heads do not recurse during staging"
-  ^:hidden
 
   (first
    (to-staging '(do (for:object [[k v] obj]
@@ -351,7 +340,6 @@
           (return false))))
 
 (fact "core macros remain deferred during staging"
-  ^:hidden
 
   (first
    (to-staging '(if check
@@ -366,7 +354,6 @@
          (return b)))
 
 (fact "xtalk operator heads remain in-place inside forms"
-  ^:hidden
 
   (first
    (to-staging '(do (x:set-key obj
@@ -384,7 +371,6 @@
 
 ^{:refer std.lang.base.emit-preprocess/to-resolve :added "4.0"}
 (fact "resolves only the code symbols (no macroexpansion)"
-  ^:hidden
 
   (to-resolve '(u/add (u/identity-fn 1) 2)
                nil
@@ -394,8 +380,7 @@
 
 ^{:refer std.lang.base.emit-preprocess/find-natives :added "4.0"}
 (fact "find natives for a macro entry"
-  ^:hidden
-  
+
   (def +library-js+
     (doto (lib/library:create
            {:snapshot (snap/snapshot {:js {:id :js
@@ -411,7 +396,7 @@
          :namespace 'JS.ui
          :module 'JS.ui}))))
 
-  (find-natives 
+  (find-natives
    (lib/get-entry +library-js+
                   {:lang :js
                    :module 'JS.ui

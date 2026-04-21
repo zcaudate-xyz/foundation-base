@@ -65,7 +65,6 @@
 
 ^{:refer js.cell.e2e.common/node-remote-script :added "4.1"}
 (fact "emits a Node worker bootstrap for the e2e remote cache"
-  ^:hidden
   (str/includes? +node-script+ "worker_threads")
   => true
   (str/includes? +node-script+ "__E2E_REMOTE_DB")
@@ -75,7 +74,6 @@
 
 ^{:refer js.cell.e2e.common/remote-worker-setup-eval :added "4.1"}
 (fact "installs the e2e worker actions through eval"
-  ^:hidden
   (with-node-remote +node-script+
     (. (. (cl/call remote-cell
                    {:op "eval"
@@ -95,7 +93,6 @@
 
 ^{:refer js.cell.e2e.common/shared-desc :added "4.1"}
 (fact "returns the shared schema and view descriptor"
-  ^:hidden
   (!.js
    (common/shared-desc))
   => {"schema" {"Order"
@@ -125,7 +122,6 @@
 
 ^{:refer js.cell.e2e.common/query-spec :added "4.1"}
 (fact "returns the canonical Order query spec"
-  ^:hidden
   (!.js
    (common/query-spec))
   => {"table" "Order"
@@ -134,7 +130,6 @@
 
 ^{:refer js.cell.e2e.common/sort-strings :added "4.1"}
 (fact "sorts strings without mutating the input value"
-  ^:hidden
   (!.js
    (var input ["beta" "alpha" "gamma"])
    {"input" input
@@ -144,7 +139,6 @@
 
 ^{:refer js.cell.e2e.common/sort-orders :added "4.1"}
 (fact "sorts order rows by id"
-  ^:hidden
   (!.js
    (common/sort-orders
     [{"id" "ord-2" "status" "closed"}
@@ -154,7 +148,6 @@
 
 ^{:refer js.cell.e2e.common/create-cache-db :added "4.1"}
 (fact "creates and seeds the remote cache database"
-  ^:hidden
   (!.js
    (var db (common/create-cache-db))
    {"schema" (xtd/obj-keys (xt/x:get-key db "schema"))
@@ -167,7 +160,6 @@
 
 ^{:refer js.cell.e2e.common/REMOTE_DB :added "4.1"}
 (fact "caches the remote db through the defvar getter"
-  ^:hidden
   (!.js
    (common/REMOTE_DB-reset nil)
    (var db (common/get-remote-db))
@@ -180,7 +172,6 @@
 
 ^{:refer js.cell.e2e.common/get-remote-db :added "4.1"}
 (fact "returns the same cached db across calls"
-  ^:hidden
   (!.js
    (common/REMOTE_DB-reset nil)
    (var first (common/get-remote-db))
@@ -191,7 +182,6 @@
 
 ^{:refer js.cell.e2e.common/order-query-plan :added "4.1"}
 (fact "prepares the query plan for open orders"
-  ^:hidden
   (!.js
    (common/order-query-plan "open"))
   => ["Order"
@@ -200,7 +190,6 @@
 
 ^{:refer js.cell.e2e.common/remote-action-query :added "4.1"}
 (fact "queries the remote cache through the local handler"
-  ^:hidden
   (!.js
    (common/REMOTE_DB-reset nil)
    (common/remote-action-query
@@ -209,7 +198,6 @@
 
 ^{:refer js.cell.e2e.common/remote-action-sync :added "4.1"}
 (fact "applies sync requests to the cached remote db"
-  ^:hidden
   (!.js
    (common/REMOTE_DB-reset nil)
    {"result"
@@ -226,7 +214,6 @@
 
 ^{:refer js.cell.e2e.common/remote-actions :added "4.1"}
 (fact "exposes both remote worker actions"
-  ^:hidden
   (!.js
    (var actions (common/remote-actions))
    {"names" (common/sort-strings (xtd/obj-keys actions))
@@ -238,7 +225,6 @@
 
 ^{:refer js.cell.e2e.common/remote-runtime-init :added "4.1"}
 (fact "boots the remote runtime entrypoint in a Node worker"
-  ^:hidden
   (with-node-remote +remote-runtime-init-script+
     (. (. (common/call-remote-query remote-cell "open")
           (then (fn [rows]
@@ -258,7 +244,6 @@
 
 ^{:refer js.cell.e2e.common/connect-sqlite :added "4.1"}
 (fact "opens a sqlite-wasm connection with the dbsql contract"
-  ^:hidden
   (notify/wait-on :js
     (common/connect-sqlite
      {:success (fn [conn]
@@ -271,7 +256,6 @@
 
 ^{:refer js.cell.e2e.common/sqlite-exec :added "4.1"}
 (fact "runs a synchronous sqlite query"
-  ^:hidden
   (notify/wait-on :js
     (common/connect-sqlite
      {:success (fn [conn]
@@ -284,7 +268,6 @@
 
 ^{:refer js.cell.e2e.common/sqlite-init :added "4.1"}
 (fact "creates the cache table in sqlite"
-  ^:hidden
   (notify/wait-on :js
     (common/connect-sqlite
      {:success
@@ -302,7 +285,6 @@
 
 ^{:refer js.cell.e2e.common/sqlite-result-rows :added "4.1"}
 (fact "normalizes sqlite row payloads into maps"
-  ^:hidden
   (!.js
    (common/sqlite-result-rows
     [{"columns" ["id" "status"]
@@ -313,7 +295,6 @@
 
 ^{:refer js.cell.e2e.common/sqlite-select-orders :added "4.1"}
 (fact "reads cached orders from sqlite in id order"
-  ^:hidden
   (notify/wait-on :js
     (common/connect-sqlite
      {:success
@@ -332,7 +313,6 @@
 
 ^{:refer js.cell.e2e.common/sqlite-upsert-orders :added "4.1"}
 (fact "upserts and replaces cached sqlite rows"
-  ^:hidden
   (notify/wait-on :js
     (common/connect-sqlite
      {:success
@@ -352,7 +332,6 @@
 
 ^{:refer js.cell.e2e.common/create-service-registry :added "4.1"}
 (fact "registers the remote and sqlite services under stable names"
-  ^:hidden
   (!.js
    (var registry
         (common/create-service-registry
@@ -370,7 +349,6 @@
 
 ^{:refer js.cell.e2e.common/call-remote-query :added "4.1"}
 (fact "queries the remote worker through the public helper"
-  ^:hidden
   (with-node-remote +node-script+
     (. (common/call-remote-query remote-cell "open")
        (then (repl/>notify))))
@@ -378,7 +356,6 @@
 
 ^{:refer js.cell.e2e.common/call-remote-sync :added "4.1"}
 (fact "syncs rows through the public remote helper"
-  ^:hidden
   (with-node-remote +node-script+
     (. (. (common/call-remote-sync
            remote-cell
@@ -398,7 +375,6 @@
 
 ^{:refer js.cell.e2e.common/make-proxy-model :added "4.1"}
 (fact "builds the proxy model contract for query and sync views"
-  ^:hidden
   (!.js
    (var model
         (common/make-proxy-model
@@ -418,7 +394,6 @@
 
 ^{:refer js.cell.e2e.common/summarize-model :added "4.1"}
 (fact "summarizes model view names and dependencies"
-  ^:hidden
   (!.js
    (common/summarize-model
     (common/make-proxy-model
@@ -430,7 +405,6 @@
 
 ^{:refer js.cell.e2e.common/summarize-view :added "4.1"}
 (fact "summarizes the important public view state"
-  ^:hidden
   (!.js
    (common/summarize-view
     {"options" {"context" {"kind" "remote-query"}}
@@ -447,7 +421,6 @@
 
 ^{:refer js.cell.e2e.common/boot-proxy-cell :added "4.1"}
 (fact "boots the proxy cell with the orders model attached"
-  ^:hidden
   (with-node-remote-sqlite +node-script+
     (common/sqlite-init sqlite-conn)
     (. (common/boot-proxy-cell
@@ -462,7 +435,6 @@
 
 ^{:refer js.cell.e2e.common/run-sync-view :added "4.1"}
 (fact "runs the sync pipeline and refreshes dependent views"
-  ^:hidden
   (with-node-remote-sqlite +node-script+
     (common/sqlite-init sqlite-conn)
     (. (. (common/boot-proxy-cell
@@ -487,7 +459,6 @@
 
 ^{:refer js.cell.e2e.common/proxy-public-state :added "4.1"}
 (fact "reports the proxy cell public model and view state"
-  ^:hidden
   (with-node-remote-sqlite +node-script+
     (common/sqlite-init sqlite-conn)
     (. (common/boot-proxy-cell
@@ -509,7 +480,6 @@
 
 ^{:refer js.cell.e2e.common/build-scenario-result :added "4.1"}
 (fact "assembles a full scenario snapshot from live cell state"
-  ^:hidden
   (with-node-remote-sqlite +node-script+
     (common/sqlite-init sqlite-conn)
     (. (. (common/boot-proxy-cell
@@ -537,7 +507,6 @@
 
 ^{:refer js.cell.e2e.common/run-scenario :added "4.1"}
 (fact "runs the full dual-cell cache and sqlite scenario"
-  ^:hidden
   (with-node-remote-sqlite +node-script+
     (. (common/run-scenario remote-cell sqlite-conn)
        (then (repl/>notify))))

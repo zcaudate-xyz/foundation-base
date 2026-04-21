@@ -11,7 +11,7 @@
       {:op :text, :text "ball"}
       {:op :line, :inline " ", :terminate ""}
       {:op :text, :text "cat"}
-      {:op :end}] ^:hidden
+      {:op :end}]
 
   (serialize [:span "apple" [:line ","] "ball"])
   => [{:op :text, :text "apple"}

@@ -8,8 +8,7 @@
 
 ^{:refer code.tool.translate.js-ast/initialise :added "4.1"}
 (fact "initialises the npm project"
-  ^:hidden
- 
+
   (with-redefs [os/sh identity]
     (js-ast/initialise))
   => {:root ".build/code.tool.js-ast"
@@ -17,8 +16,7 @@
 
 ^{:refer code.tool.translate.js-ast/translate-ast :added "4.1"}
 (fact "generates ast from js files"
-  ^:hidden
-  
+
   (let [tmp-input (fs/create-tmpfile "var x = 1;")
         tmp-output (str tmp-input ".json")
         ast-json "{\"type\":\"File\",\"program\":{\"type\":\"Program\",\"body\":[]},\"comments\":[]}"]
@@ -35,7 +33,6 @@
 
 ^{:refer code.tool.translate.js-ast/generate-ast :added "4.1"}
 (fact "generates ast using the build-ast runner (alias for translate-ast)"
-  ^:hidden
 
   (let [tmp-input (fs/create-tmpfile "var y = 2;")
         ast-json "{\"type\":\"File\",\"program\":{\"type\":\"Program\",\"body\":[]},\"comments\":[]}"]

@@ -16,8 +16,7 @@
 
 ^{:refer std.lang.base.manage/lib-overview-format :added "4.0"}
 (fact "formats the lib overview"
-  ^:hidden
-  
+
   (lib-overview-format (l/get-book +library+
                                    :lua))
   => string?)
@@ -36,8 +35,7 @@
 
 ^{:refer std.lang.base.manage/lib-module-filter :added "4.0"}
 (fact "filters modules based on :lang"
-  ^:hidden
-  
+
   (lib-module-filter 'L.core
                      {:lang :lua}
                      (:modules (l/get-book +library+
@@ -47,8 +45,7 @@
 
 ^{:refer std.lang.base.manage/lib-module-overview-format :added "4.0"}
 (fact "formats the module overview"
-  ^:hidden
-  
+
   (lib-module-overview-format (l/get-module +library+
                                             :lua
                                             'L.core)
@@ -68,8 +65,7 @@
 
 ^{:refer std.lang.base.manage/lib-module-entries-format :added "4.0"}
 (fact "formats the entries of a module"
-  ^:hidden
-  
+
   (lib-module-entries-format (l/get-module +library+
                                            :lua
                                            'L.core)
@@ -95,8 +91,7 @@
 
 ^{:refer std.lang.base.manage/lib-module-unused-fn :added "4.0"}
 (fact "analyzes the module for unused links"
-  ^:hidden
-  
+
   (lib-module-unused-fn 'L.core
                         {:lang :lua}
                         (:modules (l/get-book +library+
@@ -112,8 +107,7 @@
 
 ^{:refer std.lang.base.manage/lib-module-missing-line-number-fn :added "4.0"}
 (fact "helper function to `lib-module-missing-line-number`"
-  ^:hidden
-  
+
   (lib-module-missing-line-number-fn 'L.core
                                      {:lang :lua}
                                      (:modules (l/get-book +library+
@@ -129,8 +123,7 @@
 
 ^{:refer std.lang.base.manage/lib-module-incorrect-alias-fn :added "4.0"}
 (fact "helper function to `lib-module-incorrect-alias`"
-  ^:hidden
-  
+
   (lib-module-incorrect-alias-fn 'L.core
                                  {:lang :lua}
                                  (:modules (l/get-book +library+

@@ -139,7 +139,7 @@
   => coll?)
 
 ^{:refer std.timeseries.journal/add-bulk :added "3.0"}
-(fact "adds multiple entries to the journal" ^:hidden
+(fact "adds multiple entries to the journal"
 
   ;; Test for bulk + current over the limit
   (-> (journal {:meta {:time {:order :asc}
@@ -222,7 +222,7 @@
                  [2 3 6 7 8 9 10]
                  [1 3 6 7 8 9 10]
                  [1 2 3 4 8 9 10]])
-  => [1 1 1 2 2 3 3 3 3 4 4 6 6 6 7 7 8 8 8 9 9 9 9 10 10 10 10 15] ^:hidden
+  => [1 1 1 2 2 3 3 3 3 4 4 6 6 6 7 7 8 8 8 9 9 9 9 10 10 10 10 15]
 
   (-> (map reverse [[1 3 4 6 9 10 15]
                     [2 3 6 7 8 9 10]

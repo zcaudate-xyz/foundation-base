@@ -40,14 +40,13 @@
 
 ^{:refer xt.sys.cache-common/cache :added "4.0"}
 (fact "gets a cache"
-  ^:hidden
-  
+
   (!.js
    (var cache (cache/cache :GLOBAL))
    (cache/flush     cache)
    (cache/list-keys cache))
   => []
-  
+
   (!.lua
    (cache/flush     (cache/cache :GLOBAL))
    (cache/list-keys (cache/cache :GLOBAL)))
@@ -55,8 +54,7 @@
 
 ^{:refer xt.sys.cache-common/list-keys :added "4.0"}
 (fact "lists keys in the cache"
-  ^:hidden
-  
+
   (!.js
    (var cache (cache/cache :GLOBAL))
    (cache/set cache "A" 1)
@@ -73,8 +71,7 @@
 
 ^{:refer xt.sys.cache-common/flush :added "4.0"}
 (fact "clears all keys in the cache"
-  ^:hidden
-  
+
   (!.js
    (var cache (cache/cache :GLOBAL))
    (xt/for:array [k ["A" "B" "C" "D" "E"]]
@@ -102,8 +99,7 @@
 
 ^{:refer xt.sys.cache-common/incr :added "4.0"}
 (fact "increments the cache key"
-  ^:hidden
-  
+
   (!.js
    (var cache (cache/cache :GLOBAL))
    (cache/set cache "A" 1)
@@ -118,8 +114,7 @@
 
 ^{:refer xt.sys.cache-common/get-all :added "4.0"}
 (fact "gets the cache map"
-  ^:hidden
-  
+
   (!.js
    (var cache (cache/cache :GLOBAL))
    (cache/flush cache)
@@ -138,8 +133,7 @@
 
 ^{:refer xt.sys.cache-common/meta-key :added "4.0"}
 (fact "constructs a meta key"
-  ^:hidden
-  
+
   (!.js
    (cache/meta-key "hello"))
   => "__meta__:hello"
@@ -150,8 +144,7 @@
 
 ^{:refer xt.sys.cache-common/meta-get :added "4.0"}
 (fact  "gets the meta map"
-  ^:hidden
-  
+
   (!.js
    (var cache (cache/cache :GLOBAL))
    (cache/flush cache)

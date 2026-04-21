@@ -24,8 +24,7 @@
 
 ^{:refer js.react-native.ui-range/Range :added "0.1"}
 (fact "creates a slim range"
-  ^:hidden
-  
+
   (defn.js RangeHDemo
     []
     (var [lower setLower] (r/local 2))
@@ -33,8 +32,8 @@
     (var [highlighted setHighlighted] (r/local false))
     (var [disabled setDisabled] (r/local false))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-range/Range"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-range/Range"}
 [:% n/Row
        {:style {:alignItems "center"
                 :justifyContent "center"}}
@@ -55,7 +54,7 @@
                    :fgHovered 0.7
                    :bgPressed -0.2
                    :fgPressed 0.1}
-           
+
            :length 200
            :max 10
            :min 0
@@ -66,7 +65,7 @@
                      {:style {:paddingHorizontal 20
                               :height 250
                               :width 300
-                              :flex 1}})]}}]] 
+                              :flex 1}})]}}]]
 [:% n/Row
        [:% n/Button
         {:title "H"
@@ -85,8 +84,8 @@
     (var [highlighted setHighlighted] (r/local false))
     (var [disabled setDisabled] (r/local false))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-range/RangeV"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-range/RangeV"}
 [:% n/Row
        {:style {:alignItems "center"
                 :justifyContent "center"}}
@@ -118,7 +117,7 @@
                      {:style {:paddingHorizontal 20
                               :height 250
                               :width 300
-                              :flex 1}})]}}]] 
+                              :flex 1}})]}}]]
 [:% n/Row
        [:% n/Button
         {:title "H"
@@ -129,7 +128,7 @@
          :onPress (fn:> (setDisabled (not disabled)))}]
        [:% n/Text
         (n/format-entry #{lower upper})]])))
-  
-  
-  
+
+
+
   )

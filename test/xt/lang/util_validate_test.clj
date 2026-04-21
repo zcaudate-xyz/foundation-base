@@ -33,8 +33,7 @@
 
 ^{:refer xt.lang.util-validate/validate-step :added "4.0"}
 (fact "validates a single step"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var data {:first "hello"})
     (var guards [["is-not-empty" {:message "Must not be empty"
@@ -57,8 +56,7 @@
 
 ^{:refer xt.lang.util-validate/validate-field :added "4.0"}
 (fact "validates a single field"
-  ^:hidden
-  
+
   ;;
   ;; SINGLE ENTRY
   ;;
@@ -149,11 +147,11 @@
                                 (fn [success result]
                                   (repl/notify result)))))
   => {"status" "pending", "fields" {"first" {"status" "ok"}}, "::" "validation.result"}
-  
+
   ;;
   ;; ERROR ENTRY
   ;;
-  
+
   (notify/wait-on :js
    (var data {:first "hello"})
     (var validators {:first  [["is-not-empty0" {:message "Must not be empty"
@@ -205,8 +203,7 @@
 
 ^{:refer xt.lang.util-validate/validate-all :added "4.0"}
 (fact "validates all data"
-  ^:hidden
-  
+
   (notify/wait-on :js
    (var data {:first "hello"
               :last "hello"

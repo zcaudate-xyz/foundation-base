@@ -27,7 +27,6 @@
 
 ^{:refer xt.db.sql-graph/select-where.reverse-or :added "4.0"}
 (fact "reverse OR clauses keep distinct branches"
-  ^:hidden
 
   (!.js
    (g/select-where {"UserAccount" {"profile" {:type "ref"

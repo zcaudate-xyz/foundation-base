@@ -13,7 +13,6 @@
 
 ^{:refer xt.cell.service.db-stream/stream-capable? :added "4.1"}
 (fact "checks whether a db descriptor supports streaming"
-  ^:hidden
 
   (!.js
    [(db-stream/stream-capable? {"subscribe" (fn:> [stream on-event ctx] {})})
@@ -22,7 +21,6 @@
 
 ^{:refer xt.cell.service.db-stream/normalize-stream :added "4.1"}
 (fact "normalizes stream settings from the available contexts"
-  ^:hidden
 
   (!.js
    (db-stream/normalize-stream
@@ -39,7 +37,6 @@
 
 ^{:refer xt.cell.service.db-stream/subscription-key :added "4.1"}
 (fact "builds a stable stream subscription key"
-  ^:hidden
 
   (!.js
    (db-stream/subscription-key
@@ -52,7 +49,6 @@
 
 ^{:refer xt.cell.service.db-stream/subscribe-stream :added "4.1"}
 (fact "subscribes through the resolved subscribe function"
-  ^:hidden
 
   (!.js
    [(db-stream/subscribe-stream
@@ -69,7 +65,6 @@
 
 ^{:refer xt.cell.service.db-stream/unsubscribe-stream :added "4.1"}
 (fact "prefers detach_fn and falls back to unsubscribe"
-  ^:hidden
 
   (!.js
    [(db-stream/unsubscribe-stream
@@ -86,7 +81,6 @@
 
 ^{:refer xt.cell.service.db-stream/event->update :added "4.1"}
 (fact "maps stream payloads into update descriptors"
-  ^:hidden
 
   (!.js
    [(db-stream/event->update
@@ -116,7 +110,6 @@
 
 ^{:refer xt.cell.service.db-stream/attach-stream :added "4.1"}
 (fact "attaches a stream and forwards mapped updates to the callback"
-  ^:hidden
 
   (!.js
    (var seen nil)
@@ -141,7 +134,6 @@
 
 ^{:refer xt.cell.service.db-stream/detach-stream :added "4.1"}
 (fact "detaches an attached stream through unsubscribe-stream"
-  ^:hidden
 
   (!.js
    (db-stream/detach-stream

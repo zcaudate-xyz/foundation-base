@@ -30,7 +30,6 @@
 
 ^{:refer xt.cell.kernel.base-link/link-listener-call :added "4.1"}
 (fact "resolves and rejects active calls from worker responses"
-  ^:hidden
 
   (!.js
    (var out {})
@@ -92,7 +91,6 @@
 
 ^{:refer xt.cell.kernel.base-link/link-listener-event :added "4.1"}
 (fact "dispatches stream events to matching callbacks"
-  ^:hidden
 
   (!.js
    (var seen [])
@@ -114,7 +112,6 @@
 
 ^{:refer xt.cell.kernel.base-link/link-listener :added "4.1"}
 (fact "routes call and stream frames to the right handler path"
-  ^:hidden
 
   (!.js
    (var out {})
@@ -151,7 +148,6 @@
 
 ^{:refer xt.cell.kernel.base-link/link-create-worker :added "4.1"}
 (fact "creates workers from functions, create_fn maps, or direct worker objects"
-  ^:hidden
 
   (!.js
    [(xt/x:get-key
@@ -180,7 +176,6 @@
 
 ^{:refer xt.cell.kernel.base-link/link-post :added "4.1"}
 (fact "posts requests through supported worker transport methods"
-  ^:hidden
 
   (!.js
    [(base-link/link-post
@@ -198,7 +193,6 @@
 
 ^{:refer xt.cell.kernel.base-link/link-create :added "4.1"}
 (fact "creates a link record with worker, active, and callback state"
-  ^:hidden
 
   (!.js
    (var link
@@ -212,7 +206,6 @@
 
 ^{:refer xt.cell.kernel.base-link/link-active :added "4.1"}
 (fact "returns the active call map of a link"
-  ^:hidden
 
   (!.js
    (base-link/link-active
@@ -221,7 +214,6 @@
 
 ^{:refer xt.cell.kernel.base-link/add-callback :added "4.1"}
 (fact "adds callbacks onto a link"
-  ^:hidden
 
   (!.js
    (var link {"callbacks" {}})
@@ -236,7 +228,6 @@
 
 ^{:refer xt.cell.kernel.base-link/list-callbacks :added "4.1"}
 (fact "lists registered callback ids"
-  ^:hidden
 
   (!.js
    (base-link/list-callbacks
@@ -246,7 +237,6 @@
 
 ^{:refer xt.cell.kernel.base-link/remove-callback :added "4.1"}
 (fact "removes callbacks from a link"
-  ^:hidden
 
   (!.js
    (var link {"callbacks" {"cb-1" {"key" "cb-1"}}})
@@ -257,7 +247,6 @@
 
 ^{:refer xt.cell.kernel.base-link/call-id :added "4.1"}
 (fact "generates unique call ids using the link id as a prefix"
-  ^:hidden
 
   (!.js
    (xt/x:len
@@ -268,7 +257,6 @@
 
 ^{:refer xt.cell.kernel.base-link/call :added "4.1"}
 (fact "performs a round-trip call against the worker transport"
-  ^:hidden
 
   (notify/wait-on :js
     (var link

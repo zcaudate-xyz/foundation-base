@@ -22,8 +22,7 @@
 
 ^{:refer xt.db.base-check/is-uuid? :added "4.0"}
 (fact "checks that a string input is a uuid"
-  ^:hidden
-  
+
   (!.js
    [(chk/is-uuid? "527a67de-a499-4c51-a435-953e3272b00d")
     (chk/is-uuid? "527a67de-a499-4c51-a435-953e2b00d")])
@@ -41,8 +40,7 @@
 
 ^{:refer xt.db.base-check/check-arg-type :added "4.0"}
 (fact "checks the arg type of an input"
-  ^:hidden
-  
+
   (!.js
    [(chk/check-arg-type "numeric" 1.0)
     (chk/check-arg-type "integer" 1)
@@ -69,8 +67,7 @@
 
 ^{:refer xt.db.base-check/check-args-type :added "4.0"}
 (fact "checks the arg type of inputs"
-  ^:hidden
-  
+
   (!.js
    (chk/check-args-type [1 2]
                         [{:symbol "x", :type "numeric"}
@@ -92,8 +89,7 @@
 
 ^{:refer xt.db.base-check/check-args-length :added "4.0"}
 (fact "checks that input and spec are of the same length"
-  ^:hidden
-  
+
   (!.js
    (chk/check-args-length [1 2]
                           [{:symbol "x", :type "numeric"}

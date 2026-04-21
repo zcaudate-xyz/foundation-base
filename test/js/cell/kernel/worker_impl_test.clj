@@ -20,8 +20,7 @@
 
 ^{:refer js.cell.kernel.worker-impl/worker-handle-async :added "4.0" :unchecked true}
 (fact "handles async tasks"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var worker {:postMessage (fn [msg] (repl/notify msg))})
     (worker-impl/worker-handle-async
@@ -39,8 +38,7 @@
 
 ^{:refer js.cell.kernel.worker-impl/worker-process :added "4.0" :unchecked true}
 (fact "processes various types of actions"
-  ^:hidden
-  
+
   ;; Test eval operation
   (!.js
    (var messages [])
@@ -77,15 +75,14 @@
 
 ^{:refer js.cell.kernel.worker-impl/worker-init :added "4.0" :unchecked true}
 (fact "initiates the worker actions"
-  ^:hidden
-  
+
   (!.js
    (var worker {:listeners []
                 :addEventListener (fn [event listener capture]
                                     (worker.listeners.push listener))})
    (worker-impl/worker-init worker k/identity))
   => true
-  
+
   ;; Check that listener was added
   (!.js
    (var worker {:listeners []
@@ -97,8 +94,7 @@
 
 ^{:refer js.cell.kernel.worker-impl/worker-process-eval :added "4.0" :unchecked true}
 (fact "processes eval requests"
-  ^:hidden
-  
+
   (!.js
    (var messages [])
    (var worker {:postMessage (fn [msg] (messages.push msg))})
@@ -113,8 +109,7 @@
 
 ^{:refer js.cell.kernel.worker-impl/worker-process-action :added "4.0" :unchecked true}
 (fact "processes action requests"
-  ^:hidden
-  
+
   ;; Test with a registered action
   (!.js
    (var messages [])
@@ -130,7 +125,7 @@
   => (contains {"op" "call"
                 "id" "test-2"
                 "status" "ok"})
-  
+
   ;; Test with missing action
   (!.js
    (var messages [])
@@ -147,8 +142,7 @@
 
 ^{:refer js.cell.kernel.worker-impl/worker-init-signal :added "4.0" :unchecked true}
 (fact "posts an init message"
-  ^:hidden
-  
+
   (!.js
    (var messages [])
    (var worker {:postMessage (fn [msg] (messages.push msg))})

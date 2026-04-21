@@ -14,11 +14,10 @@
 
 ^{:refer lua.core/render :added "4.0"}
 (fact "renders a template"
-  ^:hidden
-  
+
   (!.lua
     (local lustache (require "lustache"))
-    
+
     (u/render "123 {{hello}} {{world}}"
               {:hello 456
                :world 789}))
@@ -26,11 +25,10 @@
 
 ^{:refer lua.core/ffi:C :added "4.0"}
 (fact "allow ffi calls"
-  ^:hidden
-  
+
   (!.lua
    (local ffi (require "ffi"))
-   
+
    (u/ffi-cdef
     (\\ "[["
      ^{:indent 2}
@@ -43,7 +41,7 @@
                     :header true}
                 exp [:double x]))))
      \\ "]]"))
-   
+
    (local math (u/ffi-load "m"))
    (local [n m] [2.5 3.5])
    [(math.powf  n m)
@@ -60,7 +58,7 @@
          (fn ^{:- [:double]
                :header true}
            exp [:double x])))
-   
+
    (local math (u/ffi-load "m"))
    (local [n m] [2.5 3.5])
    [(math.powf  n m)
@@ -70,8 +68,7 @@
 
 ^{:refer lua.core/reduce-iter :added "4.0"}
 (fact "reduces iterate"
-  ^:hidden
-  
+
   (!.lua
    (u/reduce-iter (it/iter [1 2 3 4 5 6])
                   (fn [arr x]
@@ -82,8 +79,7 @@
 
 ^{:refer lua.core/slurp :added "4.0"}
 (fact "slurps the output from path"
-  ^:hidden
-  
+
   (!.lua
    (u/spit "hello.txt" "ABC123")
    (u/slurp "hello.txt"))

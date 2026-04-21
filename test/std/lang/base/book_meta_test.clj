@@ -6,7 +6,6 @@
 
 ^{:refer std.lang.base.book-meta/book-meta? :added "4.0"}
 (fact "checks if object is a book meta"
-  ^:hidden
   (book-meta? (book-meta {})) => true)
 
 ^{:refer std.lang.base.book-meta/book-meta :added "4.0"}
@@ -14,7 +13,7 @@
 
   (book-meta {:module-export  (fn [{:keys [as]} opts]
                                 (template/$ (return ~as)))
-              :module-import  (fn [name {:keys [as]} opts]  
+              :module-import  (fn [name {:keys [as]} opts]
                                 (template/$ (var ~as := (require ~(str name)))))
               :has-ptr        (fn [ptr]
                                 (list 'not= (ut/sym-full ptr) nil))

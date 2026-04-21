@@ -78,7 +78,6 @@
                                  :link {- L.core}})))
 
 (fact "hard-link usage is inferred as :static/template during hydration"
-  ^:hidden
 
   (select-keys +template-parent-entry+ [:static/template :deps :form])
   => '{:static/template true
@@ -86,7 +85,6 @@
        :form (defn template-fn [value] (L.core/probe-hard-link value))})
 
 (fact "template entries restage for child deps and child emit"
-  ^:hidden
 
   (let [book (-> +template-helper-book+
                  (b/set-entry +template-parent-entry+)

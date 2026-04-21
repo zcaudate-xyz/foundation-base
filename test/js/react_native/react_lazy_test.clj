@@ -20,19 +20,18 @@
 
 ^{:refer js.react/useLazy :adopt true :added "4.0" :unchecked true}
 (fact "various lays of loading lazy function"
-  ^:hidden
 
   (defn.js LazyView
     []
     (return
      [:% n/Text "LAZY VIEW LOADED"]))
-  
+
   (defn.js UseLazyDemo
     []
     (var LazyButton (r/useLazy ui-button/Button))
     (var refresh    (r/useRefresh))
     (var getCount   (r/useGetCount))
-    (var module 
+    (var module
          (j/module:async
           (j/future-delayed [100]
             (return
@@ -45,14 +44,14 @@
       (j/future-delayed [500]
         (refresh)))
     (return
-     (n/EnclosedCode 
-{:label "js.react/useLazy"} 
+     (n/EnclosedCode
+{:label "js.react/useLazy"}
 [:% r/Suspense
        {:fallback [:% n/Text "LOADING"]}
        [:% LazyComponent]
        [:% LazyButton {:text "HELLO"}]
-       (r/createElement (r/lazy (fn:> module.lazyView)))] 
+       (r/createElement (r/lazy (fn:> module.lazyView)))]
 [:% n/TextDisplay
        {:count (getCount)}])))
-  
+
   )

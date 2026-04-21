@@ -25,8 +25,7 @@
 
 ^{:refer js.lib.eth-solc/contract-wrap-body :added "4.0" :unchecked true}
 (fact "wraps the body in a contract"
-  ^:hidden
-  
+
   (eth-solc/contract-wrap-body
    (prose/|
     "function test___hello() pure public returns(string memory) {"
@@ -45,7 +44,6 @@
 
 ^{:refer js.lib.eth-solc/contract-compile :added "4.0" :unchecked true}
 (fact "compiles a single contract"
-  ^:hidden
 
   (!.js
    (xtd/obj-keys
@@ -58,7 +56,7 @@
       "Test")
      "test.sol")))
   => ["contracts" "sources"]
-  
+
   (!.js
    (xtd/obj-keys
     (eth-solc/contract-compile

@@ -52,7 +52,6 @@
 
 ^{:refer xt.db/process-event :added "4.0"}
 (fact "processes an event"
-  ^:hidden
 
   (!.lua
    [(xtd/arr-sort (impl/process-event

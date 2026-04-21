@@ -37,8 +37,7 @@
 
 ^{:refer js.cell.kernel.worker-state/fn-trigger :adopt true :added "4.0"}
 (fact "triggers an event"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (worker-state/fn-trigger
      (worker-mock/mock-worker (repl/>notify))
@@ -53,7 +52,6 @@
 
 ^{:refer js.cell.kernel.worker-state/fn-trigger-async :adopt true :added "4.0"}
 (fact "triggers an event after a delay"
-  ^:hidden
 
   (notify/wait-on :js
     (worker-state/fn-trigger-async
@@ -70,7 +68,6 @@
            (j/assign (worker-state/WORKER_STATE)
                      {:final false}))]}
 (fact "helper to set the state and emit event"
-  ^:hidden
 
   (notify/wait-on :js
     (worker-state/fn-set-state
@@ -88,8 +85,7 @@
            (j/assign (worker-state/WORKER_STATE)
                      {:final false}))]}
 (fact "sets the worker state to final"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (worker-state/fn-set-final-status
      (worker-mock/mock-worker (repl/>notify))))
@@ -103,7 +99,6 @@
            (j/assign (worker-state/WORKER_STATE)
                      {:final false}))]}
 (fact "gets the final status"
-  ^:hidden
 
   (!.js (worker-state/fn-get-final-status))
   => false)
@@ -113,7 +108,6 @@
            (j/assign (worker-state/WORKER_STATE)
                      {:eval true}))]}
 (fact "enables eval"
-  ^:hidden
 
   (notify/wait-on :js
     (worker-state/fn-set-eval-status
@@ -129,7 +123,6 @@
            (j/assign (worker-state/WORKER_STATE)
                      {:eval true}))]}
 (fact "disables eval"
-  ^:hidden
 
   (notify/wait-on :js
     (worker-state/fn-set-eval-status
@@ -142,64 +135,55 @@
 
 ^{:refer js.cell.kernel.worker-state/fn-eval-status :adopt true :added "4.0"}
 (fact "gets the eval status"
-  ^:hidden
-  
+
   (worker-state/fn-get-eval-status)
   => boolean?)
 
 ^{:refer js.cell.kernel.worker-state/fn-action-list :adopt true :added "4.0"}
 (fact "gets the actions list"
-  ^:hidden
 
   (worker-state/fn-get-action-list)
   => vector?)
 
 ^{:refer js.cell.kernel.worker-state/fn-action-entry :adopt true :added "4.0"}
 (fact  "gets a action entry"
-  ^:hidden
 
   (worker-state/fn-get-action-entry "hello")
   => nil)
 
 ^{:refer js.cell.kernel.worker-state/fn-ping :adopt true :added "4.0"}
 (fact "pings the worker"
-  ^:hidden
-  
+
   (worker-state/fn-ping)
   => (contains ["pong" integer?]))
 
 ^{:refer js.cell.kernel.worker-state/fn-ping-async :adopt true :added "4.0"}
 (fact "pings after a delay"
-  ^:hidden
 
   (j/<! (worker-state/fn-ping-async 100))
   => (contains ["pong" integer?]))
 
 ^{:refer js.cell.kernel.worker-state/fn-echo :adopt true :added "4.0"}
 (fact  "echos the first arg"
-  ^:hidden
-  
+
   (worker-state/fn-echo "hello")
   => (contains ["hello" integer?]))
 
 ^{:refer js.cell.kernel.worker-state/fn-echo-async :adopt true :added "4.0"}
 (fact "echos the first arg after delay"
-  ^:hidden
 
   (j/<! (worker-state/fn-echo-async "hello" 100))
   => (contains ["hello" integer?]))
 
 ^{:refer js.cell.kernel.worker-state/fn-error :adopt true :added "4.0"}
 (fact "throws an error"
-  ^:hidden
-  
+
   (worker-state/fn-error)
   => (throws))
 
 ^{:refer js.cell.kernel.worker-state/fn-error-async :adopt true :added "4.0"}
 (fact  "throws an error after delay"
-  ^:hidden
-  
+
   (j/<! (. (worker-state/fn-error-async)
            (catch k/identity)))
   => (contains ["error"]))
@@ -207,22 +191,19 @@
 
 ^{:refer js.cell.kernel.worker-state/actions-base :adopt true :added "4.0"}
 (fact "returns the base actions"
-  ^:hidden
-  
+
   (worker-local/actions-baseline)
   => map?)
 
 ^{:refer js.cell.kernel.worker-local/actions-init :adopt true :added "4.0"}
 (fact "initiates the base actions"
-  ^:hidden
-  
+
   (worker-local/actions-init {})
   => (contains [true]))
 
 
 ^{:refer js.cell.kernel.worker-mock/create-mock :adopt true :added "4.0"}
 (fact "initiates the base actions"
-  ^:hidden
 
   (notify/wait-on :js
     (worker-mock/create-worker (repl/>notify)
@@ -232,8 +213,7 @@
 ^{:refer js.cell.kernel.worker-mock/worker-process :adopt true :added "4.0"
   :setup [(l/rt:restart)]}
 (fact "initiates the base actions"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (worker-mock/create-worker (repl/>notify)
                              {}))
@@ -248,7 +228,7 @@
       "id" nil,
       "status" "ok",
       "op" "eval"}
-  
+
   (notify/wait-on :js
     (var mock (worker-mock/create-worker (repl/>notify)
                                        {}
@@ -260,7 +240,7 @@
       "id" "A",
       "status" "ok",
       "op" "eval"}
-  
+
   (notify/wait-on :js
     (var mock (worker-mock/create-worker (repl/>notify)
                                        {}
@@ -269,7 +249,7 @@
                                         :id "id-action"
                                         :action "@worker/ping.async"
                                         :body [100]}))
-  
+
   => (contains-in
       {"body" ["pong" integer?],
        "id" "id-action",

@@ -77,7 +77,6 @@
 
 ^{:refer xt.cell.kernel/make-cell :added "4.1"}
 (fact "creates a cell and registers the raw callback"
-  ^:hidden
 
   (!.js
    (var cell
@@ -91,7 +90,6 @@
 
 ^{:refer xt.cell.kernel/GD :added "4.1"}
 (fact "returns the current cell binding"
-  ^:hidden
 
   (!.js
    (kernel/GD-reset {"::" "cell"}))
@@ -100,7 +98,6 @@
 
 ^{:refer xt.cell.kernel/GX :added "4.1"}
 (fact "returns the current annex binding"
-  ^:hidden
 
   (!.js
    (kernel/GX-reset {"named" {"::" "cell"}}))
@@ -109,7 +106,6 @@
 
 ^{:refer xt.cell.kernel/GX-val :added "4.1"}
 (fact "gets a named entry from the annex"
-  ^:hidden
 
   (!.js
    (kernel/GX-reset {"named" {"::" "cell"}})
@@ -118,7 +114,6 @@
 
 ^{:refer xt.cell.kernel/GX-set :added "4.1"}
 (fact "sets a named entry on the annex"
-  ^:hidden
 
   (!.js
    (kernel/GX-reset {})
@@ -128,7 +123,6 @@
 ^{:refer xt.cell.kernel/get-cell :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "resolves the current cell from nil, name, or object contexts"
-  ^:hidden
 
   (!.js
    [(. (kernel/get-cell nil) ["::"])
@@ -138,7 +132,6 @@
 
 ^{:refer xt.cell.kernel/call :added "4.1"}
 (fact "delegates raw calls to the underlying link"
-  ^:hidden
 
   (notify/wait-on :js
     (var link
@@ -159,7 +152,6 @@
 ^{:refer xt.cell.kernel/fn-call-cell :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "calls a handler with the resolved cell"
-  ^:hidden
 
   (!.js
    (kernel/fn-call-cell
@@ -172,7 +164,6 @@
 ^{:refer xt.cell.kernel/fn-call-model :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "calls a handler with the resolved model id"
-  ^:hidden
 
   (!.js
    (kernel/fn-call-model
@@ -186,7 +177,6 @@
 ^{:refer xt.cell.kernel/fn-call-view :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "calls a handler with the resolved model and view ids"
-  ^:hidden
 
   (!.js
    (kernel/fn-call-view
@@ -200,7 +190,6 @@
 ^{:refer xt.cell.kernel/fn-access-cell :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "maps an accessor across every view in the cell"
-  ^:hidden
 
   (!.js
    (kernel/fn-access-cell
@@ -213,7 +202,6 @@
 ^{:refer xt.cell.kernel/fn-access-model :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "maps an accessor across every view in a model"
-  ^:hidden
 
   (!.js
    (kernel/fn-access-model
@@ -226,7 +214,6 @@
 ^{:refer xt.cell.kernel/fn-access-view :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "accesses a single resolved view"
-  ^:hidden
 
   (!.js
    (kernel/fn-access-view
@@ -240,7 +227,6 @@
 ^{:refer xt.cell.kernel/list-models :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "lists model ids in the current cell"
-  ^:hidden
 
   (!.js
    (kernel/list-models nil))
@@ -249,7 +235,6 @@
 ^{:refer xt.cell.kernel/list-views :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "lists view ids in a model"
-  ^:hidden
 
   (!.js
    (kernel/list-views "hello" nil))
@@ -258,7 +243,6 @@
 ^{:refer xt.cell.kernel/get-model :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "gets a model from the current cell"
-  ^:hidden
 
   (!.js
    (kernel/get-model "hello" nil))
@@ -267,7 +251,6 @@
 ^{:refer xt.cell.kernel/get-view :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "gets a view from the current cell"
-  ^:hidden
 
   (!.js
    (kernel/get-view ["hello" "echo"] nil))
@@ -276,7 +259,6 @@
 ^{:refer xt.cell.kernel/cell-vals :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "gets current values across all views"
-  ^:hidden
 
   (!.js
    (kernel/cell-vals nil))
@@ -286,7 +268,6 @@
 ^{:refer xt.cell.kernel/cell-outputs :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "gets output records across all views"
-  ^:hidden
 
   (!.js
    [(. (kernel/cell-outputs nil) ["hello"] ["echo"] ["type"])
@@ -296,7 +277,6 @@
 ^{:refer xt.cell.kernel/cell-inputs :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "gets input records across all views"
-  ^:hidden
 
   (!.js
    [(. (kernel/cell-inputs nil) ["hello"] ["echo"] ["current"] ["data"])
@@ -307,7 +287,6 @@
 ^{:refer xt.cell.kernel/cell-trigger :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "triggers matching views across the whole cell"
-  ^:hidden
 
   (!.js
    (kernel/cell-trigger "refresh" {} nil))
@@ -317,7 +296,6 @@
 ^{:refer xt.cell.kernel/model-outputs :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "gets output records for a model"
-  ^:hidden
 
   (!.js
    (. (kernel/model-outputs "hello" nil) ["echo"] ["type"]))
@@ -326,7 +304,6 @@
 ^{:refer xt.cell.kernel/model-vals :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "gets current values for a model"
-  ^:hidden
 
   (!.js
    (kernel/model-vals "hello" nil))
@@ -335,7 +312,6 @@
 ^{:refer xt.cell.kernel/model-is-errored :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "detects errored views in a model"
-  ^:hidden
 
   (!.js
    (kernel/view-set-val ["hello" "echo"] "ERR" true nil)
@@ -345,7 +321,6 @@
 ^{:refer xt.cell.kernel/model-is-pending :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "reports whether any view in a model is pending"
-  ^:hidden
 
   (!.js
    (kernel/model-is-pending "hello" nil))
@@ -354,7 +329,6 @@
 ^{:refer xt.cell.kernel/add-model-attach :added "4.1"
   :setup [(!.js (-/reset-cell) true)]}
 (fact "attaches a model through the wrapper"
-  ^:hidden
 
   (!.js
    (kernel/add-model-attach
@@ -367,7 +341,6 @@
 ^{:refer xt.cell.kernel/add-model :added "4.1"
   :setup [(!.js (-/reset-cell) true)]}
 (fact "adds and initializes a model through the wrapper"
-  ^:hidden
 
   (!.js
    (kernel/add-model
@@ -380,7 +353,6 @@
 ^{:refer xt.cell.kernel/remove-model :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "removes a model through the wrapper"
-  ^:hidden
 
   (!.js
    (kernel/remove-model "async" nil))
@@ -394,7 +366,6 @@
 ^{:refer xt.cell.kernel/model-trigger :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "triggers a named model through the wrapper"
-  ^:hidden
 
   (!.js
    (kernel/model-trigger "hello" "refresh" {} nil))
@@ -408,7 +379,6 @@
 ^{:refer xt.cell.kernel/view-val :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "gets the current value of a view"
-  ^:hidden
 
   (!.js
    (kernel/view-val ["hello" "echo"] nil))
@@ -417,7 +387,6 @@
 ^{:refer xt.cell.kernel/view-get-input :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "gets the input record of a view"
-  ^:hidden
 
   (!.js
    (. (kernel/view-get-input ["hello" "echo"] nil) ["current"] ["data"]))
@@ -426,7 +395,6 @@
 ^{:refer xt.cell.kernel/view-get-output :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "gets the output record of a view"
-  ^:hidden
 
   (!.js
    (kernel/view-get-output ["hello" "echo"] nil))
@@ -435,7 +403,6 @@
 ^{:refer xt.cell.kernel/view-set-val :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "sets the output value of a view"
-  ^:hidden
 
   (!.js
    (kernel/view-set-val ["hello" "echo"] "VALUE" false nil)
@@ -445,7 +412,6 @@
 ^{:refer xt.cell.kernel/view-get-time-updated :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "gets the last updated timestamp for a view"
-  ^:hidden
 
   (!.js
    (kernel/view-set-val ["hello" "echo"] "VALUE" false nil)
@@ -455,7 +421,6 @@
 ^{:refer xt.cell.kernel/view-is-errored :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "checks whether a view is errored"
-  ^:hidden
 
   (!.js
    (kernel/view-set-val ["hello" "echo"] "ERR" true nil)
@@ -465,7 +430,6 @@
 ^{:refer xt.cell.kernel/view-is-pending :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "checks whether a view is pending"
-  ^:hidden
 
   (!.js
    (kernel/view-is-pending ["hello" "echo"] nil))
@@ -494,7 +458,6 @@
 ^{:refer xt.cell.kernel/view-ensure :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "ensures and returns a model/view pair"
-  ^:hidden
 
   (!.js
    [(xt/x:get-key (xtd/first (kernel/view-ensure ["hello" "echo"] nil)) "name")
@@ -529,7 +492,6 @@
 ^{:refer xt.cell.kernel/get-val :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "gets a nested subpath from the current view value"
-  ^:hidden
 
   (!.js
    (kernel/view-set-val ["hello" "echo"] {"nested" {"value" 1}} false nil)
@@ -554,7 +516,6 @@
 ^{:refer xt.cell.kernel/clear-listeners :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "clears all registered listeners"
-  ^:hidden
 
   (!.js
    (kernel/add-listener ["hello" "echo"] "@r/1" (fn:>) nil nil nil)
@@ -565,7 +526,6 @@
 ^{:refer xt.cell.kernel/add-listener :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "adds a listener to a view path"
-  ^:hidden
 
   (!.js
    (kernel/add-listener ["hello" "echo"] "@r/1" (fn:>) nil nil nil)
@@ -575,7 +535,6 @@
 ^{:refer xt.cell.kernel/remove-listener :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "removes a listener from a view path"
-  ^:hidden
 
   (!.js
    (kernel/add-listener ["hello" "echo"] "@r/1" (fn:>) nil nil nil)
@@ -586,7 +545,6 @@
 ^{:refer xt.cell.kernel/list-listeners :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "lists listeners registered on a view path"
-  ^:hidden
 
   (!.js
    (kernel/add-listener ["hello" "echo"] "@r/1" (fn:>) nil nil nil)
@@ -597,7 +555,6 @@
 ^{:refer xt.cell.kernel/list-all-listeners :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "lists every listener grouped by model and view"
-  ^:hidden
 
   (!.js
    (kernel/add-listener ["hello" "echo"] "@r/1" (fn:>) nil nil nil)
@@ -607,7 +564,6 @@
 ^{:refer xt.cell.kernel/add-raw-callback :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "adds a raw callback to the underlying link"
-  ^:hidden
 
   (!.js
    (kernel/add-raw-callback "custom" true (fn:>) nil)
@@ -617,7 +573,6 @@
 ^{:refer xt.cell.kernel/remove-raw-callback :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "removes a raw callback from the underlying link"
-  ^:hidden
 
   (!.js
    (kernel/add-raw-callback "custom" true (fn:>) nil)
@@ -628,7 +583,6 @@
 ^{:refer xt.cell.kernel/list-raw-callbacks :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "lists raw callbacks on the underlying link"
-  ^:hidden
 
   (!.js
    (kernel/list-raw-callbacks nil))

@@ -30,7 +30,6 @@
 ^{:refer std.lib.deps/deps-map :added "3.0"
   :setup [(def |ctx| (create-context))]}
 (fact "creates a map of deps"
-  ^:hidden
 
   (deps-map |ctx| [:a :b])
   => {:a #{:b}, :b #{:c}})
@@ -38,7 +37,6 @@
 ^{:refer std.lib.deps/deps-resolve :added "3.0"
   :setup [(def |ctx| (create-context))]}
 (fact "resolves all dependencies"
-  ^:hidden
   (deps-resolve |ctx| [:a])
   => {:all #{:c :b :a},
       :graph {:a #{:b}, :b #{:c}, :c #{}}}
@@ -84,7 +82,6 @@
 ^{:refer std.lib.deps/dependents-all :added "3.0"
   :setup [(def |ctx| (create-context))]}
 (fact "returns graph of all dependents"
-  ^:hidden
   (dependents-all |ctx| :c)
   => {:c #{:b}, :b #{:a}, :a #{}}
 
@@ -96,7 +93,7 @@
 (fact "returns ordered depenedents"
 
   (dependents-ordered |ctx| :c)
-  => [:a :b :c] ^:hidden
+  => [:a :b :c]
 
   (dependents-ordered |ctx| :b)
   => [:a :b])
@@ -110,7 +107,6 @@
 ^{:refer std.lib.deps/unload-entry :added "3.0"
   :setup [(def |ctx| (create-context))]}
 (fact "unloads itself as well as all dependents for a given id"
-  ^:hidden
   (-> (unload-entry |ctx| :b)
       (update 0 #(into {} %)))
   => [{:c #{}}
@@ -119,7 +115,6 @@
 ^{:refer std.lib.deps/reload-entry :added "3.0"
   :setup [(def |ctx| (create-context))]}
 (fact "unloads and reloads itself and all dependents"
-  ^:hidden
   (-> (reload-entry |ctx| :c)
       (update 0 #(into {} %)))
   => [{:c #{}, :b #{}, :a #{}}

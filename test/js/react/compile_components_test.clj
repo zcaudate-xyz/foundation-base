@@ -4,8 +4,7 @@
 
 ^{:refer js.react.compile-components/classify-tagged :added "4.0" :unchecked true}
 (fact "classifies the hiccup form"
-  ^:hidden
-  
+
   (c/classify-tagged
    [:ui/container
     [:ui/text
@@ -19,7 +18,6 @@
 
 ^{:refer js.react.compile-components/components-resolve :added "4.0" :unchecked true}
 (fact "resolve component map"
-  ^:hidden
 
   (c/components-resolve {:ui/button    [:ui/container
                                         [:ui/text
@@ -51,8 +49,7 @@
 
 ^{:refer js.react.compile-components/components-find-deps :added "4.0" :unchecked true}
 (fact "creates a dependency tree for component map"
-  ^:hidden
-  
+
   (c/components-find-deps
    (c/components-expand
     {:ui/button    [:ui/container
@@ -66,8 +63,7 @@
 
 ^{:refer js.react.compile-components/components-expand :added "4.0" :unchecked true}
 (fact "expands a vector component to standardised form"
-  ^:hidden
-  
+
   (c/components-expand {:ui/button    [:ui/container
                                        [:ui/text
                                         {:name :props/name}]]
@@ -86,8 +82,7 @@
 
 ^{:refer js.react.compile-components/compile-replace :added "4.0" :unchecked true}
 (fact "compiles the layout with parameters"
-  ^:hidden
-  
+
   (c/compile-replace [:ui/container
                       [:ui/text
                        {:name :props/name}
@@ -98,8 +93,7 @@
 
 ^{:refer js.react.compile-components/find-namespaced-props :added "4.0" :unchecked true}
 (fact "finds all the :prop/<val> keys"
-  ^:hidden
-  
+
   (c/find-namespaced-props
    [[:ui/text
      {:name :props/name}]])
@@ -107,8 +101,7 @@
 
 ^{:refer js.react.compile-components/get-tmpl-props :added "4.0" :unchecked true}
 (fact "gets template and body props given input"
-  ^:hidden
-  
+
   (c/get-tmpl-props {:name "hello"
                      :location "home"}
                     [:props/name])
@@ -116,7 +109,6 @@
 
 ^{:refer js.react.compile-components/getter-symbol :added "4.0" :unchecked true}
 (fact "creates the getter symbol"
-  ^:hidden
 
   (c/getter-symbol :var/history-idx)
   => 'historyIdx
@@ -126,8 +118,7 @@
 
 ^{:refer js.react.compile-components/setter-symbol :added "4.0" :unchecked true}
 (fact "creates the setter symbol"
-  ^:hidden
-  
+
   (c/setter-symbol :var/history-idx)
   => 'setHistoryIdx
 
@@ -136,7 +127,6 @@
 
 ^{:refer js.react.compile-components/compile-walk-variables :added "4.0" :unchecked true}
 (fact "replace :var/<name> as react states"
-  ^:hidden
 
   (c/compile-walk-variables
    '(do (:var/showDisplay true)
@@ -146,7 +136,6 @@
 
 ^{:refer js.react.compile-components/compile-element-action-do :added "4.0" :unchecked true}
 (fact "does a do block"
-  ^:hidden
 
   (c/compile-element-action-do
    '(do (:var/showDisplay true)
@@ -157,8 +146,7 @@
 
 ^{:refer js.react.compile-components/compile-element-action-set :added "4.0" :unchecked true}
 (fact "compiles the :%/set action"
-  ^:hidden
-  
+
   (c/compile-element-action-set
    :var/history-idx
    '{:to (base-fn :var/dsl-code)
@@ -167,8 +155,7 @@
 
 ^{:refer js.react.compile-components/compile-element-action-set-async :added "4.0" :unchecked true}
 (fact "compiles the :%/set-async action"
-  ^:hidden
-  
+
   (c/compile-element-action-set-async
    :var/history-idx
    '{:to (async-fn :var/dsl-code)
@@ -184,8 +171,7 @@
 
 ^{:refer js.react.compile-components/compile-element-actions :added "4.0" :unchecked true}
 (fact "compiles the element actions"
-  ^:hidden
-  
+
   (c/compile-element-actions
    '[{:%/set-async :var/output
       :to (async-fn :var/dsl-code)
@@ -206,7 +192,6 @@
 
 ^{:refer js.react.compile-components/compile-element-directives :added "4.0" :unchecked true}
 (fact "compiles element directives"
-  ^:hidden
 
   (c/compile-element-directives
    {:type :input
@@ -237,8 +222,7 @@
 
 ^{:refer js.react.compile-components/compile-element :added "4.0" :unchecked true}
 (fact "expands the template"
-  ^:hidden
-  
+
   (c/compile-element
    [:ui/button {:name "hello"} [:a]]
    (c/components-expand
@@ -252,8 +236,7 @@
 
 ^{:refer js.react.compile-components/compile-element-loop :added "4.0" :unchecked true}
 (fact "will loop until there are no dependencies"
-  ^:hidden
-  
+
   (c/compile-element-loop
    [:ui/button {:name "hello"} [:a]]
    (c/components-expand

@@ -69,11 +69,11 @@
 (fact "extracts all file from an archive"
 
   (extract "test-scratch/hello.jar")
-  => coll? ^:hidden
+  => coll?
 
   (extract "test-scratch/hello.jar" "test-scratch/output")
-  
-  
+
+
   (fs/delete "test-scratch/hello.jar")
   (fs/delete "test-scratch/hara")
   (fs/delete "test-scratch/output")
@@ -88,7 +88,6 @@
 
 ^{:refer std.fs.archive/remove :added "3.0"}
 (fact "removes an entry from the archive"
-  ^:hidden
 
   (do (fs/delete "test-scratch/remove.jar")
       (open "test-scratch/remove.jar" {:create true})
@@ -101,7 +100,6 @@
 
 ^{:refer std.fs.archive/write :added "3.0"}
 (fact "writes files to an archive"
-  ^:hidden
 
   (do (fs/delete "test-scratch/write.jar")
       (open "test-scratch/write.jar" {:create true})
@@ -115,7 +113,6 @@
 
 ^{:refer std.fs.archive/stream :added "3.0"}
 (fact "creates a stream for an entry wthin the archive"
-  ^:hidden
 
   (do (fs/delete "test-scratch/stream.jar")
       (open "test-scratch/stream.jar" {:create true})

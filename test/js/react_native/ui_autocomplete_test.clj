@@ -24,8 +24,7 @@
 
 ^{:refer js.react-native.ui-autocomplete/AutocompleteModal :added "4.0" :unchecked true}
 (fact "creates the autocomplete modal display"
-  ^:hidden
-  
+
   (defn.js AutocompleteModalDemo
     []
     (var inputRef (r/ref))
@@ -37,8 +36,8 @@
                         {:style {:padding 5}}
                         (xt/x:json-encode entry)]))))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-autocomplete/AutocompleteModal"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-autocomplete/AutocompleteModal"}
 [:% n/Isolation
        [:% n/View
         {:style {:width 300
@@ -58,13 +57,12 @@
 
 ^{:refer js.react-native.ui-autocomplete/Autocomplete :added "4.0" :unchecked true}
 (fact "creates the autocomplete"
-  ^:hidden
 
   (def.js NAMES
     (@! (->> (env/sys:resource-content "js.react-native/girl-names.json")
              (std.json/read)
              (mapv clojure.string/upper-case))))
-  
+
   (defn.js get-names
     [filt]
     (var output [])
@@ -74,7 +72,7 @@
       (when (< 15 (xt/x:len output))
         (return output)))
     (return output))
-  
+
   (defn.js AutocompleteDemo
     []
     (var inputRef (r/ref))
@@ -92,8 +90,8 @@
                         {:style {:padding 5}}
                         (xt/x:json-encode entry)]))))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-autocomplete/Autocomplete"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-autocomplete/Autocomplete"}
 [:% n/Isolation
        [:% n/View
         {:style {:width 300
@@ -112,5 +110,5 @@
            :sourceView view
            :sourceInput [value]
            :styleContainer {:backgroundColor "red"}]}]])))
-  
+
   )

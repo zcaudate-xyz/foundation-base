@@ -20,8 +20,7 @@
 
 ^{:refer js.react-native.physical-base/Tag :added "4.0" :unchecked true}
 (fact "listens to a single indicator to set ref"
-  ^:hidden
-  
+
   (defn.js TagDemo
     []
     (let [[active setActive]  (r/local 1)
@@ -31,8 +30,8 @@
                              :duration 200
                              :easing a/linear}})]
       (return
-       (n/EnclosedCode 
-{:label "js.react-native.physical-base/Tag"} 
+       (n/EnclosedCode
+{:label "js.react-native.physical-base/Tag"}
 [:% n/Row
          [:% n/Button
           {:title "PUSH"
@@ -52,8 +51,7 @@
 
 ^{:refer js.react-native.physical-base/Box :added "4.0" :unchecked true}
 (fact "demo of indicators"
-  ^:hidden
-  
+
   (defn.js BoxDemo
     []
     (let [[val0 setVal0]  (r/local true)
@@ -77,9 +75,9 @@
                              :duration 500
                              :easing a/linear}})]
       (return
-       (n/EnclosedCode 
-{:label "js.react-native.physical-base/Box"} 
-[:% n/Row 
+       (n/EnclosedCode
+{:label "js.react-native.physical-base/Box"}
+[:% n/Row
          [:% n/Row
           {:style {:flex 1}}
           [:% n/Button
@@ -103,7 +101,7 @@
             :onPress (fn [] (setVal2 (not val2)))}]
           [:% n/Padding {:style {:width 10}}]
           [:% ui/Tag
-           {:indicator ind2}]]] 
+           {:indicator ind2}]]]
 [:% ui/Box
          {:style {:height 200
                   :backgroundColor "hsl(12,100.00%,47.51%)"}
@@ -143,8 +141,7 @@
 
 ^{:refer js.react-native.physical-base/Text :added "4.0" :unchecked true}
 (fact "creates a text element"
-  ^:hidden
-  
+
   (defn.js TextDemo
     []
     (let [[val0 setVal0]  (r/local true)
@@ -154,8 +151,8 @@
                              :duration 500
                              :easing a/linear}})]
       (return
-       (n/EnclosedCode 
-{:label "js.react-native.physical-base/Text"} 
+       (n/EnclosedCode
+{:label "js.react-native.physical-base/Text"}
 [:% n/Row
          {:style {:height 50}}
          [:% ui/Text
@@ -163,7 +160,7 @@
                :value "HELLO"
                :transformations
                {:ind0 (fn:> [v]
-                        {:style {:fontSize (+ 20 (* 20 v))}})}}]] 
+                        {:style {:fontSize (+ 20 (* 20 v))}})}}]]
 [:% n/Row
           {:style {:flex 1}}
           [:% n/Button
@@ -196,8 +193,7 @@
 
 ^{:refer js.react-native.physical-base/mergeChords :added "4.0" :unchecked true}
 (comment "merges all chords, indicators and methods"
-  ^:hidden
-  
+
   (ui/mergeChords [{:chord {:a "A"}
                     :indicators {:a "A"}
                     :getA "getA"
@@ -233,14 +229,13 @@
 
 ^{:refer js.react-native.physical-base/TouchableBasePressing :added "4.0" :unchecked true}
 (fact "base touchable with pressing indicator"
-  ^:hidden
-  
+
   (defn.js TouchableBasePressingDemo
     []
     (let [[active setActive]   (r/local true)]
       (return
-       (n/EnclosedCode 
-{:label "js.react-native.physical-base/TouchableBasePressing"} 
+       (n/EnclosedCode
+{:label "js.react-native.physical-base/TouchableBasePressing"}
 [:% ui/TouchableBasePressing
          {:style {:justifyContent "center"
                   :alignItems "center"
@@ -271,14 +266,13 @@
 
 ^{:refer js.react-native.physical-base/TouchableBinary :added "4.0" :unchecked true}
 (fact "base touchable with single state"
-  ^:hidden
-  
+
   (defn.js TouchableBinaryDemo
     []
     (var [active setActive]    (r/local true))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.physical-base/TouchableBinary"} 
+     (n/EnclosedCode
+{:label "js.react-native.physical-base/TouchableBinary"}
 [:% ui/TouchableBinary
        {:style {:justifyContent "center"
                 :alignItems "center"
@@ -325,15 +319,14 @@
 
 ^{:refer js.react-native.physical-base/TouchableInput :added "4.0" :unchecked true}
 (fact "base touchable with single state"
-  ^:hidden
-  
+
   (defn.js TouchableInputDemo
     []
     (var [active setActive]    (r/local true))
     (var [value setValue] (r/local ""))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.physical-base/TouchableInput"} 
+     (n/EnclosedCode
+{:label "js.react-native.physical-base/TouchableInput"}
 [:% ui/TouchableInput
        {:style {:justifyContent "center"
                 :alignItems "center"
@@ -362,5 +355,5 @@
   (def.js MODULE
     (do (:# (!:uuid))
         (!:module)))
-  
+
   )

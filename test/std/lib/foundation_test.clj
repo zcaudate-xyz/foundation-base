@@ -6,7 +6,7 @@
 ^{:refer std.lib.foundation/T :added "3.0"}
 (fact "returns `true` for any combination of input `args`"
 
-  (T) => true ^:hidden
+  (T) => true
   (T :hello) => true
   (T 1 2 3) => true
   1 => (capture odd?))
@@ -14,14 +14,14 @@
 ^{:refer std.lib.foundation/F :added "3.0"}
 (fact "returns `false` for any combination of input `args`"
 
-  (F) => false ^:hidden
+  (F) => false
   (F :hello) => false
   (F 1 2 3) => false)
 
 ^{:refer std.lib.foundation/NIL :added "3.0"}
 (fact "returns `nil` for any combination of input `args`"
 
-  (NIL) => nil ^:hidden
+  (NIL) => nil
   (NIL :hello) => nil
   (NIL 1 2 3) => nil)
 
@@ -44,7 +44,6 @@
                         1
                         (* n (f (dec n))))))]
     ((Z factorial) 5) => 120)
-  ^:hidden
 
   ;; The body of Z can be defined as
   (defn- U1
@@ -62,7 +61,7 @@
 ^{:refer std.lib.foundation/xor :added "3.0"}
 (fact "performs xor comparison"
 
-  (xor true false) => true ^:hidden
+  (xor true false) => true
   (xor true true) => nil
   (xor false false) => nil)
 
@@ -139,8 +138,7 @@
 
 ^{:refer std.lib.foundation/concatv :added "4.0"}
 (fact "concats two seqs as vector"
-  ^:hidden
-  
+
   (concatv [1 2 3]
            [4 5 6])
   => [1 2 3 4 5 6])
@@ -218,7 +216,7 @@
 ^{:refer std.lib.foundation/code-ns :added "3.0"}
 (fact "returns the current namespace the code is in"
 
-  (code-ns)  
+  (code-ns)
   => 'std.lib.foundation-test)
 
 ^{:refer std.lib.foundation/code-line :added "3.0"}
@@ -264,9 +262,9 @@
 
 ^{:refer std.lib.foundation/unbound? :added "3.0"}
 (fact "checks if a variable is unbound"
-  
+
   (declare -lost1-)
-  
+
   (unbound? -lost1-)
   => true)
 
@@ -302,8 +300,7 @@
 
 ^{:refer std.lib.foundation/with-retry-fn :added "4.0"}
 (fact "with a retry function"
-  ^:hidden
-  
+
   (with-retry-fn
     3 100 (fn []
             (Thread/sleep 10)
@@ -312,8 +309,7 @@
 
 ^{:refer std.lib.foundation/with-retry :added "4.0"}
 (fact "with retry macro"
-  ^:hidden
-  
+
   (with-retry [3 100]
     (Thread/sleep 10)
     (throw (ex-info "hello" {})))
@@ -380,7 +376,7 @@
 ^{:refer std.lib.foundation/iref? :added "3.0"}
 (fact "Returns `true` if `x` is of type `clojure.lang.IRef`."
 
-  (iref? (atom 0))  => true ^:hidden
+  (iref? (atom 0))  => true
   (iref? (ref 0))   => true
   (iref? (agent 0)) => true
   (iref? (volatile! 0)) => false
@@ -448,7 +444,7 @@
   => false)
 
 ^{:refer std.lib.foundation/hash-id :added "3.0"}
-(fact "returns the actual memory related id for an object" ^:hidden
+(fact "returns the actual memory related id for an object"
 
   (hash-id {})
   => (hash-id {})
@@ -485,8 +481,7 @@
 
 ^{:refer std.lib.foundation/intern-form :added "3.0"}
 (fact "creates base form for `intern-in` and `intern-all`"
-  ^:hidden
-  
+
   (intern-form 'std.lib 'std.lib.foundation/unfold)
   => '(std.lib.foundation/intern-var
        'std.lib
@@ -496,36 +491,31 @@
 
 ^{:refer std.lib.foundation/intern-in :added "3.0"}
 (fact "adds a function to current"
-  ^:hidden
-  
+
   (intern-in std.lib.foundation/T)
   => #'T)
 
 ^{:refer std.lib.foundation/intern-all :added "3.0"}
 (fact "adds a namespace to current"
-  ^:hidden
-  
+
   (intern-all std.lib.apply)
   => vector?)
 
 ^{:refer std.lib.foundation/with:template-meta :added "3.0"}
 (fact "binds the template meta (for testing purposes)"
-  ^:hidden
-  
+
   (with:template-meta {:a 1} (template-meta))
   => {:a 1})
 
 ^{:refer std.lib.foundation/template-meta :added "3.0"}
 (fact "returns the intern template meta"
-  ^:hidden
-  
+
   (template-meta)
   => nil?)
 
 ^{:refer std.lib.foundation/template-vars :added "3.0"
   :style/indent 1}
 (fact "adds a function to current given var and arguments"
-  ^:hidden
 
   (defn tmpl-fn
     ([sym var opts]
@@ -540,7 +530,6 @@
 ^{:refer std.lib.foundation/template-entries :added "3.0"
   :style/indent 1}
 (fact "uses a template function to produce entries"
-  ^:hidden
 
   (defn tmpl-entry
     ([{:keys [sym var opts]}]
@@ -559,8 +548,7 @@
 
 ^{:refer std.lib.foundation/template-bulk :added "4.0"}
 (fact "template-entries but for heavy usage"
-  ^:hidden
-  
+
   (template-bulk [tmpl-fn {:meta "meta"}]
     [])
   => [])
@@ -573,28 +561,24 @@
 
 ^{:refer std.lib.foundation/wrapped :added "4.0"}
 (fact "object to display shell result"
-  ^:hidden
-  
+
   (str (wrapped "Hello"))
   "Hello")
 
 ^{:refer std.lib.foundation/wrapped? :added "4.0"}
 (fact "checks that an object is wrapped"
-  ^:hidden
-  
+
   (wrapped? (wrapped "Hello"))
   => true)
 
 ^{:refer std.lib.foundation/resolve-namespaced :added "4.0"}
 (fact "resolves a namespaced symbol"
-  ^:hidden
-  
+
   (resolve-namespaced 'clojure.core/+)
   => 'clojure.core/+)
 
 ^{:refer std.lib.foundation/def.m :added "4.0"}
 (fact "defs multiple vars"
-  ^:hidden
-  
+
   (def.m [-a- -b-] [1 2])
   [-a- -b-] => [1 2])

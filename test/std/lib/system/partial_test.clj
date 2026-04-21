@@ -19,7 +19,7 @@
     :entry {}}))
 
 ^{:refer std.lib.system.partial/valid-subcomponents :added "3.0"}
-(fact "returns only the components that will work (for partial systems)" ^:hidden
+(fact "returns only the components that will work (for partial systems)"
 
   (valid-subcomponents
    (topology/long-form {:model  [identity]
@@ -29,7 +29,7 @@
   => [:model :tag])
 
 ^{:refer std.lib.system.partial/system-subkeys :added "3.0"}
-(fact "returns the subcomponents connect with the system" ^:hidden
+(fact "returns the subcomponents connect with the system"
 
   (system-subkeys +sys+ #{:entry})
   => #{:ids :entry :model})

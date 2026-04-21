@@ -4,13 +4,12 @@
 
 ^{:refer js.react.layout/ui-template-classify :added "4.0" :unchecked true}
 (fact "classifies a hiccup element"
-  ^:hidden
 
   (layout/ui-template-classify
    [:p]
    true)
   => {:tag :p, :props {}, :children [:*/children]}
-  
+
   (layout/ui-template-classify
    [:p {:class "red"}]
    true)
@@ -33,8 +32,7 @@
 
 ^{:refer js.react.layout/ui-template-controls-layout :added "4.0" :unchecked true}
 (fact "templates the layout controls"
-  ^:hidden
-  
+
   (layout/ui-template-controls-layout
    [:*/pad {:class ["hello"]}]
    ["grow"])
@@ -53,7 +51,6 @@
 
 ^{:refer js.react.layout/ui-template-controls :added "4.0" :unchecked true}
 (fact "templates the control directives"
-  ^:hidden
 
   (layout/ui-template-controls
    [:*/v  {:gap 3
@@ -66,7 +63,7 @@
            :h :full}]
    {})
   => [:div {:class ["flex" "flex-row" "grow" "gap-3" "h-full"]}]
-  
+
   (layout/ui-template-controls
    '[:*/for [[i p] pages]
      [:div
@@ -79,13 +76,12 @@
 
 ^{:refer js.react.layout/ui-template-namespaced :added "4.0" :unchecked true}
 (fact "template namespaced tags"
-  ^:hidden
-  
+
   (layout/ui-template-namespaced
    [:ui/paragraph {:class "red"}]
    {:ui/paragraph {:tag :p, :props {}, :children [[:a] [:b]]}})
   => [:p {:class "red"} [:a] [:b]]
-  
+
   (layout/ui-template-namespaced
    [:ui/paragraph {:class "red"}]
    {:ui/paragraph {:tag 'Container, :props {}, :children [[:div {:class "container"}
@@ -104,8 +100,7 @@
 
 ^{:refer js.react.layout/ui-template :added "4.0" :unchecked true}
 (fact "compiling all the "
-  ^:hidden
-  
+
   (def app-components
     '{:app/top     [:div
                     {:class "flex flex-col bg-gray-200"}]
@@ -117,7 +112,7 @@
                     [:div {:class "flex items-center"}
                      [:a {:class "text-2xl font-display text-brand-dark font-bold"}
                       :*/children]]]})
-  
+
   (layout/ui-template
    [:app/top
     [:app/header

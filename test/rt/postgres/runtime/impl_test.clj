@@ -36,8 +36,7 @@
              :cache (str (f/uuid-nil))}
             {:track {}})]}
 (fact "flat select"
-  ^:hidden
-  
+
   (pg/t:select scratch/Task)
   => vector?
 
@@ -49,7 +48,7 @@
     {:returning #{:name}
      :as :raw})
   => collection/form?
-  
+
   (pg/t:select scratch/Task {:single true
                              :returning #{:-/data}
                              :where {:name "002"}})
@@ -58,24 +57,24 @@
   (pg/t:select scratch/Task {:single true
                              :where {:name "002"}})
   => map?
-  
+
   (pg/t:select scratch/Task {:single true
                              :returning #{:*/everything}
                              :where {:name "002"}})
   => map?
-  
+
   (pg/t:select scratch/Task
     {:returning #{:name}
      :where #{[:name "002"
                :or
                :name "001"]}})
   => vector?
-  
+
   (l/with:emit
     (l/emit-as :postgres
                `[(pg/t:select scratch/Task {:for [:update]})]))
   => "WITH j_ret AS (  \n  SELECT \"id\",\"status\",\"name\",\"cache_id\",\"time_created\",\"time_updated\" FROM \"scratch\".\"Task\"\n  FOR UPDATE)\nSELECT jsonb_agg(j_ret) FROM j_ret"
-  
+
   (l/with:emit
     (l/emit-as :postgres
                `[(pg/t:select scratch/Task {:for [:update :skip-locked]})]))
@@ -83,8 +82,7 @@
 
 ^{:refer rt.postgres.runtime.impl/t:get-field :added "4.0"}
 (fact "gets single field"
-  ^:hidden
-  
+
   (l/with:emit
     (l/emit-as :postgres
                `[(pg/t:get-field scratch/Task
@@ -94,8 +92,7 @@
 
 ^{:refer rt.postgres.runtime.impl/t:get :added "4.0"}
 (fact "get single entry"
-  ^:hidden
-  
+
   (l/with:emit
     (l/emit-as :postgres
                `[(pg/t:get scratch/Task
@@ -104,8 +101,7 @@
 
 ^{:refer rt.postgres.runtime.impl/t:id :added "4.0"}
 (fact "get id entry"
-  ^:hidden
-  
+
   (l/with:emit
     (l/emit-as :postgres
                `[(pg/t:id scratch/Task
@@ -114,8 +110,7 @@
 
 ^{:refer rt.postgres.runtime.impl/t:count :added "4.0"}
 (fact "get count entry"
-  ^:hidden
-  
+
   (l/with:emit
     (l/emit-as :postgres
                `[(pg/t:count scratch/Task
@@ -124,8 +119,7 @@
 
 ^{:refer rt.postgres.runtime.impl/t:delete :added "4.0"}
 (fact "flat delete"
-  ^:hidden
-  
+
   (l/with:emit
     (l/emit-as :postgres
                `[(pg/t:delete scratch/Task
@@ -134,8 +128,7 @@
 
 ^{:refer rt.postgres.runtime.impl/t:insert :added "4.0"}
 (fact "flat insert"
-  ^:hidden
-  
+
   (l/with:emit
     (l/emit-as :postgres
                `[(pg/t:insert scratch/TaskCache
@@ -145,8 +138,7 @@
 
 ^{:refer rt.postgres.runtime.impl/t:insert! :added "4.0"}
 (fact "inserts without o-op"
-  ^:hidden
-  
+
   (l/with:emit
     (l/emit-as :postgres
                `[(pg/t:insert! scratch/TaskCache
@@ -156,8 +148,7 @@
 
 ^{:refer rt.postgres.runtime.impl/t:upsert :added "4.0"}
 (fact "flat upsert"
-  ^:hidden
-  
+
   (l/with:emit
     (l/emit-as :postgres
                `[(pg/t:upsert scratch/TaskCache
@@ -167,8 +158,7 @@
 
 ^{:refer rt.postgres.runtime.impl/t:update :added "4.0"}
 (fact "flat update"
-  ^:hidden
-  
+
   (l/with:emit
     (l/emit-as :postgres
                `[(pg/t:update scratch/Task
@@ -179,8 +169,7 @@
 
 ^{:refer rt.postgres.runtime.impl/t:update! :added "4.0"}
 (fact "updates with o-op"
-  ^:hidden
-  
+
   (l/with:emit
     (l/emit-as :postgres
                `[(pg/t:update! scratch/Task
@@ -190,8 +179,7 @@
 
 ^{:refer rt.postgres.runtime.impl/t:modify :added "4.0"}
 (fact "flat modify"
-  ^:hidden
-  
+
   (l/with:emit
     (l/emit-as :postgres
                `[(pg/t:modify scratch/Task
@@ -202,8 +190,7 @@
 
 ^{:refer rt.postgres.runtime.impl/t:fields :added "4.0"}
 (fact "gets the fields"
-  ^:hidden
-  
+
   (l/with:emit
     (l/emit-as :postgres
                `[(pg/t:fields scratch/Task

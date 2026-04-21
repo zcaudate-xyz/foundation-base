@@ -20,7 +20,7 @@
     [:mock/label (str "Length: " (local :length) "cm")]]))
 
 ^{:refer std.dom.local/local-dom :added "3.0"}
-(fact "returns the local dom"^:hidden
+(fact "returns the local dom"
 
   (-> (base/dom-create :test/carrot)
       (impl/dom-render)
@@ -29,7 +29,7 @@
   => [:+ :test/carrot])
 
 ^{:refer std.dom.local/local-dom-state :added "3.0"}
-(fact "returns the local dom state"^:hidden
+(fact "returns the local dom state"
 
   (-> (base/dom-create :test/carrot)
       (impl/dom-render)
@@ -38,7 +38,7 @@
   => {:color "orange", :length 9})
 
 ^{:refer std.dom.local/local-parent :added "3.0"}
-(fact "returns the local dom parent"^:hidden
+(fact "returns the local dom parent"
 
   (-> (base/dom-create :test/carrot)
       (impl/dom-render)
@@ -48,7 +48,7 @@
   => [:+ :test/carrot])
 
 ^{:refer std.dom.local/local-parent-state :added "3.0"}
-(fact "returns the local dom parent state"^:hidden
+(fact "returns the local dom parent state"
 
   (-> (base/dom-create :test/carrot)
       (impl/dom-render)
@@ -59,7 +59,7 @@
 
 ^{:refer std.dom.local/dom-ops-local :added "3.0"}
 (fact "creates setters for local properties"
-  
+
   (dom-ops-local {:a [1 2] :b 1}
                  {:a [1 2 3] :c 1})
   => [[:set :a [1 2 3] [1 2]]

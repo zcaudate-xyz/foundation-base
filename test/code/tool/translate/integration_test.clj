@@ -21,8 +21,7 @@
 
 ^{:refer code.tool.translate/TRANSLATE_JS :adopt true :added "4.1"}
 (fact "TODO"
-  ^:hidden
-  
+
   (env/with-out-str
     (translate-samples))
   => string?)

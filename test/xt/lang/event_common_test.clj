@@ -43,7 +43,6 @@
 
 ^{:refer xt.lang.event-common/make-container :added "4.0"}
 (fact "makes a container"
-  ^:hidden
 
   (!.js
    (event/make-container
@@ -61,7 +60,7 @@
      (fn:> 1)
      "custom.container"
      {:info {:name "hello"}})))
-  
+
   (!.lua
    (xtd/tree-get-spec
     (event/make-container
@@ -73,7 +72,7 @@
       "initial" "function",
       "listeners" {},
       "data" "number"}
-  
+
   (!.py
    (xtd/tree-get-spec
     (event/make-container
@@ -95,8 +94,7 @@
                "listener/id" "abc",
                "listener/type" "custom"}}))]}
 (fact "makes a listener entry"
-  ^:hidden
-  
+
   (!.js
    (xtd/tree-get-data
     (event/make-listener-entry
@@ -130,8 +128,7 @@
 
 ^{:refer xt.lang.event-common/add-listener :added "4.0"}
 (fact "adds a listener to container"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var c (event/make-container
            (fn:> 1)
@@ -146,7 +143,7 @@
        "custom/label" "hello",
        "listener/type" "custom"},
       "data" "hello"}
-  
+
 
   (notify/wait-on :lua
     (var c (event/make-container
@@ -208,8 +205,7 @@
 
 ^{:refer xt.lang.event-common/remove-listener :added "4.0"}
 (fact "removes a listener"
-  ^:hidden
-  
+
   (!.js
    (var c (event/make-container
            (fn:> 1)
@@ -240,7 +236,7 @@
        "pred" nil,
        "meta" {"listener/id" "b2", "listener/type" "custom"}}
       ["a1" "c3"]]
-  
+
 
   (!.lua
    (var c (event/make-container
@@ -301,8 +297,7 @@
 
 ^{:refer xt.lang.event-common/list-listener-types :added "4.0"}
 (fact "lists listeners by their type"
-  ^:hidden
-  
+
   (!.js
    (var c (event/make-container
            (fn:> 1)
@@ -384,8 +379,7 @@
 
 ^{:refer xt.lang.event-common/trigger-entry :added "4.0"}
 (fact "triggers the individual entry"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var entry (event/make-listener-entry
                 "abc"
@@ -438,8 +432,7 @@
 
 ^{:refer xt.lang.event-common/add-keyed-listener :added "4.0"}
 (fact "adds a keyed entry"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var c (event/make-container
             (fn:> 1)
@@ -519,8 +512,7 @@
 
 ^{:refer xt.lang.event-common/remove-keyed-listener :added "4.0"}
 (fact "removes a keyed listener"
-  ^:hidden
-  
+
   (!.js
    (var c (event/make-container
            (fn:> 1)
@@ -537,7 +529,7 @@
    (event/add-keyed-listener
     c
     "key/common"
-    
+
     "b2"
     "custom"
     (fn:>)

@@ -32,7 +32,6 @@
 
 ^{:refer xt.db-lua.impl-select-view-test/VIEW-QUERY :added "4.0"}
 (fact "queries views"
-  ^:hidden
 
   (!.lua
    (view/query-select sample-scratch/Schema

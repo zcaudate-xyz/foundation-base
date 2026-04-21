@@ -20,8 +20,7 @@
 
 ^{:refer lua.nginx.websocket/STREAM-FLAG-KEY :added "4.0"}
 (fact "path to flag key - when set, will close all connections"
-  ^:hidden
-  
+
   (ws/STREAM-FLAG-KEY "TICKER")
   => "__stream__:TICKER:__flag__")
 
@@ -34,24 +33,23 @@
 ^{:refer lua.nginx.websocket/service-register :added "4.0"
   :setup [(!.lua (cache/flush (cache/cache :GLOBAL)))]}
 (fact "registers a ws service with nginx"
-  ^:hidden
-  
+
   (ws/service-register "TICKER"
                        {:hello "world"})
   => true
-  
+
   (-> (!.lua (cache/get-all (cache/cache :GLOBAL)))
       (update "__meta__:stream" json/read))
   => {"__stream__:TICKER:__active__" 0,
       "__meta__:stream" {"TICKER" {"hello" "world", "key" "TICKER"}}}
-  
+
   (ws/service-register "TICKER"
                        {:hello "world"})
   => false
-  
+
   (ws/service-unregister "TICKER")
   => true
-  
+
   (!.lua (cache/get-all (cache/cache :GLOBAL)))
   => {"__meta__:stream" "{}"}
 
@@ -66,15 +64,14 @@
           (ws/service-register "TICKER"
                                {:hello "world"})]}
 (fact "sets the flag for the service (killing all connections)"
-  ^:hidden
-  
+
   (!.lua (cache/get (cache/cache :GLOBAL)
                  (ws/STREAM-FLAG-KEY "TICKER")))
   => nil
-  
+
   (ws/service-signal-flag "TICKER")
   => true
-  
+
   (!.lua (cache/get (cache/cache :GLOBAL)
                  (ws/STREAM-FLAG-KEY "TICKER")))
   => true
@@ -94,8 +91,7 @@
           (ws/service-register "TICKER"
                        {:hello "world"})]}
 (fact "helper function to check if registeration is valid"
-  ^:hidden
-  
+
   (ws/service-prep "HELLO")
   => (throws)
 
@@ -109,18 +105,17 @@
           (ws/service-register "WS_DEBUG"
                        {:hello "world"})]}
 (fact "helper for ws-loop to add itself to registry"
-  ^:hidden
-  
+
   (ws/connection-count "WS_DEBUG")
   => 0
-  
+
   (!.lua
      (ws/service-add-connection "WS_DEBUG" "id-0" {})
      (ws/service-add-connection "WS_DEBUG" "id-1" {}))
-  
+
   (ws/connection-list "WS_DEBUG")
   => ["id-0" "id-1"]
-  
+
   (ws/connection-count "WS_DEBUG")
   => 2
 
@@ -136,13 +131,13 @@
                 "group" "WS_DEBUG",
                 "id" "id-0"
                 "hello" "world"})
-  
+
   (ws/service-remove-connection "WS_DEBUG" "id-0")
   => true
 
   (ws/service-remove-connection "WS_DEBUG" "id-0")
   => false
-  
+
   (ws/connection-count "WS_DEBUG")
   => 1
 
@@ -177,8 +172,7 @@
 
 ^{:refer lua.nginx.websocket/new-connection :added "4.0"}
 (fact "creates a new websocket connection"
-  ^:hidden
-  
+
   (!.lua
    (ws/new-connection {})
    true)
@@ -212,10 +206,9 @@
                     {})))
            true)]}
 (fact "streaming loop for passive clients"
-  ^:hidden
-  
+
   (def -out- (atom []))
-  
+
   (def -ws- @(client/websocket (str "ws://localhost:"
                                     (:port (l/rt:inner :lua))
                                     "/eval/ws")
@@ -223,8 +216,8 @@
                                                (swap! -out- conj (str data)))}))
   (ws/connection-count "WS_DEBUG")
   => 1
-  
-  (do 
+
+  (do
     (Thread/sleep 1000)
     (client/close! -ws-)
     @-out-)
@@ -254,10 +247,9 @@
                     {})))
            true)]}
 (fact "constructs a main service loop"
-  ^:hidden
-  
+
   (def -out- (atom []))
-  
+
   (def -ws- @(client/websocket (str "ws://localhost:"
                                     (:port (l/rt:inner :lua))
                                     "/eval/ws")
@@ -265,7 +257,7 @@
                                                (swap! -out- conj (str data)))}))
   (ws/connection-count "WS_DEBUG")
   => 1
-  
+
   (do @(client/send! -ws- "hello")
       (Thread/sleep 100)
       (json/read (first @-out-)))
@@ -287,19 +279,18 @@
                  (f "WS_DEBUG")))
            true)]}
 (fact "constructs an echo server"
-  ^:hidden
-  
+
   (def -out- (atom []))
-  
+
   (ws/connection-count "WS_DEBUG")
   => 0
-  
+
   (def -ws- @(client/websocket (str "ws://localhost:"
                                     (:port (l/rt:inner :lua))
                                     "/eval/ws")
                                {:on-message  (fn [ws data _]
                                                (swap! -out- conj (str data)))}))
-  
+
   (ws/connection-count "WS_DEBUG")
   => 1
 
@@ -320,12 +311,11 @@
                                   (fn [n]
                                     (return (cat  "TEST-" n)))))))]}
 (fact "runs as es-test-loop"
-  ^:hidden
-  
+
   (def +events+ (:events (net.http/event-stream
                           (str "http://localhost:" (:port (l/rt :lua))
                                "/eval/es"))))
-  
+
   ;; EVENT SOURCE
   (do (Thread/sleep 100)
       @+events+)

@@ -4,7 +4,6 @@
 
 ^{:refer code.manage.ns-rename/move-list :added "3.0"}
 (fact "compiles a list of file movements"
-  ^:hidden
 
   (with-redefs [std.fs/select (constantly [])
                 std.fs/move (constantly nil)]
@@ -13,7 +12,6 @@
 
 ^{:refer code.manage.ns-rename/change-list :added "3.0"}
 (fact "compiles a list of code changes"
-  ^:hidden
 
   (with-redefs [code.framework/transform-code (constantly {:deltas []})]
     (vec (change-list ['old 'new] {} {'old "path"} nil)))
@@ -21,7 +19,6 @@
 
 ^{:refer code.manage.ns-rename/ns-rename :added "3.0"}
 (fact "top-level ns rename function"
-  ^:hidden
 
   (with-redefs [change-list (constantly [])
                 move-list (constantly [])]

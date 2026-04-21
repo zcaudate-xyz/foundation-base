@@ -8,8 +8,7 @@
 
 ^{:refer std.lib.schema.ref/keyword-reverse :added "3.0"}
 (fact "reverses the keyword by either adding or removing '_' in the value"
-  ^:hidden
-  
+
   (keyword-reverse :a/b) => :a/_b
 
   (keyword-reverse :a/_b) => :a/b
@@ -20,20 +19,18 @@
 
 ^{:refer std.lib.schema.ref/keyword-reversed? :added "3.0"}
 (fact "checks whether the keyword is reversed (begins with '_')"
-  ^:hidden
-  
+
   (keyword-reversed? :a) => false
 
   (keyword-reversed? :a/b) => false
 
   (keyword-reversed? :a/_b) => true
-  
+
   (keyword-reversed? :_a) => false)
 
 ^{:refer std.lib.schema.ref/is-reversible? :added "3.0"}
 (fact "determines whether a ref attribute is reversible or not"
-  ^:hidden
-  
+
   (is-reversible? {:ident   :account/email    ;; okay
                    :type    :ref
                    :ref     {:ns  :email}})
@@ -43,7 +40,7 @@
                    :type    :ref
                    :ref     {:ns  :email}})
   => false
-  
+
   (is-reversible? {:ident   :account/email}) ;; is missing data
   => false
 
@@ -65,8 +62,7 @@
 
 ^{:refer std.lib.schema.ref/determine-rval :added "3.0"}
 (fact "outputs the :rval value of a :ref schema reference"
-  ^:hidden
-  
+
   (determine-rval [[:account :email false]
                    [{:ident  :account/email}]])
   => :accounts
@@ -89,7 +85,7 @@
                      :ref    {:ns    :node
                               :rval  :parents}}]])
   => :parents
-  
+
   (determine-rval [[:node  :node  false]
                    [{:ident  :node/children
                      :ref    {:ns    :node}}]])
@@ -97,8 +93,7 @@
 
 ^{:refer std.lib.schema.ref/forward-ref-attr :added "3.0"}
 (fact "creates the :ref schema attribute for the forward reference case"
-  ^:hidden
-  
+
   (forward-ref-attr [{:ident  :node/children
                       :ref    {:ns    :node
                                :rval  :parents}}])
@@ -117,8 +112,7 @@
 
 ^{:refer std.lib.schema.ref/reverse-ref-attr :added "3.0"}
 (fact "creates the reverse :ref schema attribute for backward reference"
-  ^:hidden
-  
+
   (reverse-ref-attr [{:ident    :node/children
                       :ref      {:ns     :node
                                  :type   :forward
@@ -148,16 +142,14 @@
 
 ^{:refer std.lib.schema.ref/attr-ns-pair :added "3.0"}
 (fact "constructs a :ns and :ident root pair for comparison"
-  ^:hidden
-  
+
   (attr-ns-pair [{:ident  :a/b
                   :ref    {:ns :c}}])
   => [:a :c])
 
 ^{:refer std.lib.schema.ref/mark-multiple :added "3.0"}
 (fact "marks multiple ns/ident groups"
-  ^:hidden
-  
+
   (mark-multiple [[[:a :b] [1 2]]
                   [[:c :d] [1]]])
   => [[[:c :d false] 1]
@@ -165,8 +157,7 @@
 
 ^{:refer std.lib.schema.ref/ref-attrs :added "3.0"}
 (fact "creates forward and reverse attributes for a flattened schema"
-  ^:hidden
-  
+
   (ref-attrs {:account/email [{:ident   :account/email
                                :type    :ref
                                :ref     {:ns  :email}}]})

@@ -21,7 +21,6 @@
 
 ^{:refer xt.runtime.reader/reader? :added "4.1"}
 (fact "creates runtime reader values"
-  ^:hidden
 
   (!.js
    (var reader (rdr/create "abc"))
@@ -39,7 +38,6 @@
 
 ^{:refer xt.runtime.reader/create :added "4.1"}
 (fact "creates readers with empty buffers and zero offset"
-  ^:hidden
 
   (!.js
    (var reader (rdr/create "abc"))
@@ -61,7 +59,6 @@
 
 ^{:refer xt.runtime.reader/impl-char-at :added "4.1"}
 (fact "extracts one-character slices from strings"
-  ^:hidden
 
   (!.js
    [(rdr/impl-char-at "abc" 0)
@@ -77,7 +74,6 @@
 
 ^{:refer xt.runtime.reader/reader-position :added "4.1"}
 (fact "tracks line and column positions"
-  ^:hidden
 
   (!.js
    (var reader (rdr/create "ab"))
@@ -93,7 +89,6 @@
 
 ^{:refer xt.runtime.reader/read-char :added "4.1"}
 (fact "reads chars sequentially"
-  ^:hidden
 
   (!.js
    (var reader (rdr/create "ab"))
@@ -111,7 +106,6 @@
 
 ^{:refer xt.runtime.reader/peek-char :added "4.1"}
 (fact "peeks and reads chars without losing position"
-  ^:hidden
 
   (!.js
    (var reader (rdr/create "abc"))
@@ -137,7 +131,6 @@
 
 ^{:refer xt.runtime.reader/unread-char :added "4.1"}
 (fact "unreads chars and restores the exact position"
-  ^:hidden
 
   (!.js
    (var reader (rdr/create "a\nb"))
@@ -166,7 +159,6 @@
   => [[1 2] [2 1] "\n" [2 1] "b"])
 
 (fact "throws when unreading before any char has been consumed"
-  ^:hidden
 
   (!.js
    (rdr/unread-char (rdr/create "a") "a"))
@@ -178,7 +170,6 @@
 
 ^{:refer xt.runtime.reader/throw-reader :added "4.1"}
 (fact "throws reader errors with position context"
-  ^:hidden
 
   (!.js
    (var reader (rdr/create "ab"))
@@ -194,7 +185,6 @@
 
 ^{:refer xt.runtime.reader/read-while :added "4.1"}
 (fact "scans while predicates match"
-  ^:hidden
 
   (!.js
    (var reader (rdr/create "abc 123"))
@@ -218,7 +208,6 @@
 
 ^{:refer xt.runtime.reader/read-until :added "4.1"}
 (fact "scans until predicates match"
-  ^:hidden
 
   (!.js
    (var reader (rdr/create "abc 123"))
@@ -233,7 +222,6 @@
   => ["abc " "1"])
 
 (fact "reports unexpected eof when requested"
-  ^:hidden
 
   (!.js
    (rdr/read-while (rdr/create "abc")
@@ -249,7 +237,6 @@
 
 ^{:refer xt.runtime.reader/ignore-char :added "4.1"}
 (fact "ignores chars while advancing the reader"
-  ^:hidden
 
   (!.js
    (var reader (rdr/create "ab"))
@@ -265,7 +252,6 @@
 
 ^{:refer xt.runtime.reader/slurp :added "4.1"}
 (fact "slurps the remaining input"
-  ^:hidden
 
   (!.js
    (var reader (rdr/create "abcd"))
@@ -281,7 +267,6 @@
 
 ^{:refer xt.runtime.reader/step-char :added "4.1"}
 (fact "supports stepping ignoring and slurping the remaining input"
-  ^:hidden
 
   (!.js
    (var reader (rdr/create "abcd"))

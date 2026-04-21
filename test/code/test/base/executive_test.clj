@@ -10,11 +10,10 @@
 
 (defn notify [data]
   (reset! context/*accumulator* data))
-                     
+
 ^{:refer code.test.base.executive/accumulate :added "3.0"}
 (fact "accumulates test results from various facts and files into a single data structure"
-  ^:hidden
-  
+
   (let [result (context/with-new-context {:accumulator (atom nil)}
                  (executive/accumulate (fn []
                                          (notify {:id :my-test :data 1})
@@ -25,16 +24,14 @@
 
 ^{:refer code.test.base.executive/interim :added "3.0"}
 (fact "summary function for accumulated results"
-  ^:hidden
-  
+
   (let [res (executive/interim [{:results [{:from :verify :status :success :data true :meta {:path "path"}}]}])]
     (:passed res))
   => (contains [{:from :verify :status :success :data true :meta {:path "path"}}]))
 
 ^{:refer code.test.base.executive/retrieve-line :added "3.0"}
 (fact "returns the line of the test"
-  ^:hidden
-  
+
   (executive/retrieve-line :passed {:passed [{:meta {:line 1 :refer 'test}}]})
   => [[1 'test]]
 
@@ -43,8 +40,7 @@
 
 ^{:refer code.test.base.executive/summarise :added "3.0"}
 (fact "creates a summary of given results"
-  ^:hidden
-  
+
   (binding [context/*print* #{:print-bulk}]
     (clojure.string/includes? (env/with-out-str
                      (executive/summarise {:passed [] :failed [] :throw [] :timeout []}))
@@ -53,8 +49,7 @@
 
 ^{:refer code.test.base.executive/summarise-bulk :added "3.0"}
 (fact "creates a summary of all bulk results"
-  ^:hidden
-  
+
   (binding [context/*print* #{:print-bulk}]
     (clojure.string/includes? (env/with-out-str
                      (executive/summarise-bulk nil {:id {:data {:passed [] :failed [] :throw [] :timeout []}}} nil))
@@ -77,8 +72,7 @@
 
 ^{:refer code.test.base.executive/unload-namespace :added "3.0"}
 (fact "unloads a given namespace for testing"
-  ^:hidden
-  
+
   (with-redefs [code.project/test-ns (fn [ns] ns)
                 rt/list-links (fn [_] [])
                 rt/purge-all (fn [_] nil)]
@@ -87,8 +81,7 @@
 
 ^{:refer code.test.base.executive/load-namespace :added "3.0"}
 (fact "loads a given namespace for testing"
-  ^:hidden
-  
+
   (with-redefs [executive/unload-namespace (fn [ns & _] ns)
                 clojure.core/load-file (fn [_] nil)]
     (executive/load-namespace 'my.ns nil (fn [_] "path") nil))
@@ -96,8 +89,7 @@
 
 ^{:refer code.test.base.executive/test-namespace :added "3.0"}
 (fact "runs a loaded namespace"
-  ^:hidden
-  
+
   (with-redefs [rt/all-facts (fn [_] {})
                 executive/accumulate (fn [f id] [])
                 executive/interim (fn [_] {})
@@ -107,8 +99,7 @@
 
 ^{:refer code.test.base.executive/run-namespace :added "3.0"}
 (fact "loads and run the namespace"
-  ^:hidden
-  
+
   (with-redefs [executive/load-namespace (fn [& _] nil)
                 executive/test-namespace (fn [& _] {})
                 executive/unload-namespace (fn [& _] nil)]
@@ -117,16 +108,14 @@
 
 ^{:refer code.test.base.executive/run-current :added "4.0"}
 (fact "runs the current namespace (which can be a non test namespace)"
-  ^:hidden
-  
+
   (with-redefs [executive/test-namespace (fn [& _] {})]
     (executive/run-current 'my.ns {} nil nil))
   => {})
 
 ^{:refer code.test.base.executive/eval-namespace :added "3.0"}
 (fact "evaluates the code within a specified namespace"
-  ^:hidden
-  
+
   (with-redefs [code.project/test-ns (fn [ns] ns)
                 executive/accumulate (fn [f id] [])
                 executive/interim (fn [_] {})]

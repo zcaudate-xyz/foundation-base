@@ -5,21 +5,18 @@
 
 ^{:refer code.manage.ns-format/first-element :added "3.0"}
 (fact "returns first element of list"
-  ^:hidden
 
   (first-element [1 2]) => 1
   (first-element 1) => 1)
 
 ^{:refer code.manage.ns-format/key-order :added "3.0"}
 (fact "gets key order"
-  ^:hidden
 
   (key-order :use) => 0
   (key-order :require) => 1)
 
 ^{:refer code.manage.ns-format/replace-nodes :added "3.0"}
 (fact "replace nodes with new ones"
-  ^:hidden
 
   (-> (nav/parse-string "[1 2 3]")
       (nav/down)
@@ -29,7 +26,6 @@
 
 ^{:refer code.manage.ns-format/sort-nodes :added "3.0"}
 (fact "sorts nodes"
-  ^:hidden
 
   (-> (nav/parse-string "[3 1 2]")
       (nav/down)

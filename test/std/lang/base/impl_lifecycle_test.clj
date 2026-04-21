@@ -27,8 +27,7 @@
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-prep :added "4.0"}
 (fact "prepares the module for emit"
-  ^:hidden
-  
+
   (-> (emit-module-prep 'xt.lang
                         {:lang :lua})
       second
@@ -41,14 +40,14 @@
                                     :emit {:compile {:type :graph
                                                      :root-ns 'lua}}})))
   => '#{xt.lang.common-data}
-  
+
   (:direct (second (emit-module-prep 'js.blessed
                                    {:lang :js
                                     :emit {:compile {:type :graph
                                                      :base    'js
                                                      :root-ns 'js}}})))
   => #{}
-  
+
   (:direct (second (emit-module-prep 'js.blessed.ui-core
                                      {:lang :js
                                       :emit {:compile {:type :graph
@@ -63,8 +62,7 @@
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-setup-join :added "4.0"}
 (fact "joins setup raw into the setup code"
-  ^:hidden
-  
+
   (-> (emit-module-setup-raw 'js.blessed.ui-core
                              {:lang :js
                               :emit {:export {:suppress true}
@@ -74,8 +72,7 @@
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-setup-native-arr :added "4.0"}
 (fact "creates the setup code for native imports"
-  ^:hidden
-  
+
   (emit-module-setup-native-arr 'js.blessed.ui-core
                                 (emit-module-prep 'js.blessed.ui-core
                                                   {:lang :js
@@ -86,7 +83,6 @@
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-setup-link-import :added "4.0"}
 (fact "creates a import structure from links"
-  ^:hidden
 
   (impl/with:library [+library+]
     (emit-module-setup-link-import
@@ -110,8 +106,7 @@
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-setup-link-arr :added "4.0"}
 (fact "creates the setup code for internal links"
-  ^:hidden
-  
+
   (emit-module-setup-link-arr
    {:emit {:code   {:link {:path-separator "/"
                            :root-prefix "@"}}
@@ -161,21 +156,19 @@
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-setup-raw :added "4.0"}
 (fact "creates module setup map of array strings"
-  ^:hidden
-  
+
   (emit-module-setup-raw 'js.blessed.ui-core
                          {:lang :js})
   => map?)
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-setup :added "4.0"}
 (fact "emits the entire module as string"
-  ^:hidden
-  
+
   (:link (second (emit-module-prep 'xt.lang.common-lib
                                     {:lang :lua
                                      :graph {:root-ns 'lua}})))
   => '{}
-  
+
   (emit-module-setup 'xt.lang.common-lib
                       {:lang :lua})
   => string?)
@@ -203,13 +196,12 @@
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-teardown :added "4.0"}
 (fact "creates the teardown script"
-  ^:hidden
-  
+
   (emit-module-teardown 'xt.lang.common-lib
                         {:lang :lua
                          :layout :full})
   => string?
-  
+
   (emit-module-teardown 'xt.lang.common-lib
                         {:lang :lua
                          :layout :full

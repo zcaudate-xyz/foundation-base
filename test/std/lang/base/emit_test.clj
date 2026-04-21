@@ -38,8 +38,7 @@
 
 ^{:refer std.lang.base.emit/emit :added "4.0"}
 (fact "emits form to output string"
-  ^:hidden
-  
+
   (emit/emit '(+ 1 2 3)
              @+test-grammar+
              nil
@@ -57,20 +56,18 @@
 
 ^{:refer std.lang.base.emit/prep-options :added "4.0"}
 (fact "prepares the options for processing"
-  ^:hidden
 
   (prep-options {})
   => vector?)
 
 ^{:refer std.lang.base.emit/prep-form :added "4.0"}
 (fact "prepares the form"
-  ^:hidden
-  
+
   (prep-form :raw '(+ 1 2 3) nil nil {})
   => '[(+ 1 2 3)]
 
   (prep-form :input '(+ @1 2 3) nil nil {})
   => '[(+ (!:eval 1) 2 3)]
-  
+
   (prep-form :staging '(+ @1 2 3) nil nil {})
   => '[(+ (!:eval 1) 2 3) #{} #{} {}])

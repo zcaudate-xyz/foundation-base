@@ -37,7 +37,6 @@
 
 ^{:refer net.resp.connection/pipeline :added "3.0"}
 (fact "retrieves the connection pipeline"
-  ^:hidden
 
   (test-harness
     (pipeline |conn|))
@@ -45,23 +44,20 @@
 
 ^{:refer net.resp.connection/pipeline? :added "3.0"}
 (fact "checks if object is instance of pipeline"
-  ^:hidden
-  
+
   (test-harness
     (pipeline |conn|)
     => pipeline?))
 
 ^{:refer net.resp.connection/pipeline:read :added "3.0"}
 (fact "reads from the pipeline"
-  ^:hidden
-  
+
   (test-harness
     (pipeline:read (pipeline |conn|)))
   => [])
 
 ^{:refer net.resp.connection/pipeline:write :added "3.0"}
 (fact "sends a request tot the pipeline"
-  ^:hidden
 
   (test-harness
     (f/-> (pipeline |conn|)
@@ -75,7 +71,6 @@
 
 ^{:refer net.resp.connection/connection:read :added "3.0"}
 (fact "reads from the connection"
-  ^:hidden
 
   (test-harness
     @(future/future {:timeout 100}
@@ -84,7 +79,6 @@
 
 ^{:refer net.resp.connection/connection:write :added "3.0"}
 (fact "writes to the connection"
-  ^:hidden
 
   (test-harness
     (doto |conn|
@@ -109,16 +103,14 @@
 
 ^{:refer net.resp.connection/connection:close :added "3.0"}
 (fact "closes the connection"
-  ^:hidden
 
   (test-harness
     (connection:close |conn|))
   => connection?)
 
 ^{:refer net.resp.connection/connection:request-single :added "3.0"}
-(fact "requests the connection command" ^:hidden
-  ^:hidden
-  
+(fact "requests the connection command"
+
   (test-harness
     (-> (connection:request-single |conn| ["PING"])
         (f/string)))
@@ -126,7 +118,6 @@
 
 ^{:refer net.resp.connection/connection:process-single :added "3.0"}
 (fact "processes output data"
-  ^:hidden
 
   (test-harness
     (connection:process-single nil
@@ -137,7 +128,6 @@
 
 ^{:refer net.resp.connection/connection:request-bulk :added "3.0"}
 (fact "sends a multi command to the connection"
-  ^:hidden
 
   (test-harness
     (->> (connection:request-bulk |conn|
@@ -160,15 +150,13 @@
 
 ^{:refer net.resp.connection/connection:transact-start :added "3.0"}
 (fact "command to start transaction"
-  ^:hidden
-  
+
   (connection:transact-start nil)
   => ["MULTI"])
 
 ^{:refer net.resp.connection/connection:transact-end :added "3.0"}
 (fact "command to end transaction"
-  ^:hidden
-  
+
   (connection:transact-end nil)
   => ["EXEC"])
 
@@ -182,22 +170,20 @@
 
 ^{:refer net.resp.connection/connection:info :added "3.0"}
 (fact "outputs connection info"
-  ^:hidden
 
   (test-harness
     (connection:info |conn|))
   =>  (contains-in {:host [string?], :port vector?}))
 
 ^{:refer net.resp.connection/connection:started? :added "3.0"}
-(fact "checks that connection has started" ^:hidden
-  ^:hidden
+(fact "checks that connection has started"
 
   (test-harness
     (connection:started? |conn|))
   => true)
 
 ^{:refer net.resp.connection/connection:stopped? :added "3.0"}
-(fact "checks that connection has stopped" ^:hidden
+(fact "checks that connection has stopped"
 
   (test-harness
     (connection:stopped? |conn|))
@@ -211,7 +197,7 @@
   => {:status :ok})
 
 ^{:refer net.resp.connection/connection-string :added "3.0"}
-(fact "returns the string" ^:hidden
+(fact "returns the string"
 
   (test-harness
     (connection-string |conn|))

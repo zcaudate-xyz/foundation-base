@@ -18,8 +18,7 @@
 
 ^{:refer script.sql.table.manage/table-create :added "3.0"}
 (fact "generates create table statement"
-  ^:hidden
-  
+
   (table-create :user-access [[:id :text "PRIMARY KEY"]])
   => (prose/|
       "CREATE TABLE IF NOT EXISTS \"user_access\" ("
@@ -28,15 +27,13 @@
 
 ^{:refer script.sql.table.manage/table-drop :added "3.0"}
 (fact "generates drop table statement"
-  ^:hidden
-  
+
   (table-drop :user-access)
   => "DROP TABLE IF EXISTS \"user_access\" CASCADE")
 
 ^{:refer script.sql.table.manage/single-enum :added "3.0"}
 (fact "create statements for single enum"
-  ^:hidden
-  
+
   (single-enum {:ns :user.plan :values #{:free :pro}})
   => ["CREATE TABLE IF NOT EXISTS \"user_plan\" (value text PRIMARY KEY, comment text)"
       (prose/|
@@ -48,7 +45,6 @@
 
 ^{:refer script.sql.table.manage/single-table:column :added "3.0"}
 (fact "generate statements for table column"
-  ^:hidden
 
   (single-table:column [:id {:required true :unique true}])
   => [:id :text "NOT NULL" "UNIQUE"]
@@ -58,7 +54,6 @@
 
 ^{:refer script.sql.table.manage/single-table:constraints :added "3.0"}
 (fact "generate statements for constraints on composite keys"
-  ^:hidden
 
   (single-table:constraints [:wallet-access
                              [:wallet     {:type :ref :ref {:ns :wallet}
@@ -69,8 +64,7 @@
 
 ^{:refer script.sql.table.manage/single-table :added "3.0"}
 (fact "generate create statement for single table"
-  ^:hidden
-  
+
   (single-table
    [:user [:id      {:required true :unique true}
            :profile {:type :ref :ref {:ns :profile}}]])
@@ -78,8 +72,8 @@
       "CREATE TABLE IF NOT EXISTS \"user\" ("
       " \"id\" text NOT NULL UNIQUE,"
       " \"profile_id\" text references \"profile\"(\"id\")"
-      ")")  
-  
+      ")")
+
   (single-table
    [:wallet-access
     [:wallet     {:type :ref :ref {:ns :wallet}
@@ -94,7 +88,6 @@
 
 ^{:refer script.sql.table.manage/parse:enums :added "3.0"}
 (fact "parses enum entries from schema"
-  ^:hidden
 
   (parse:enums
    {:vec [:user
@@ -104,7 +97,6 @@
 
 ^{:refer script.sql.table.manage/parse:tables :added "3.0"}
 (fact "parses table entries from schema"
-  ^:hidden
 
   (parse:tables
    {:vec [:user    [:id {:required true :unique true}]
@@ -113,7 +105,6 @@
 
 ^{:refer script.sql.table.manage/parse:formats :added "3.0"}
 (fact "parses format entries from schema"
-  ^:hidden
 
   (parse:formats
    {:vec [:login
@@ -123,7 +114,6 @@
 
 ^{:refer script.sql.table.manage/parse:aliases :added "3.0"}
 (fact "parses alias entries from schema"
-  ^:hidden
 
   (parse:aliases
    {:vec [:wallet-access
@@ -133,7 +123,7 @@
   => {:wallet-access {:id {:type :compound, :keys [:wallet :account]}}})
 
 ^{:refer script.sql.table.manage/parse:relationships :added "3.0"}
-(fact "parses relationships form schema" ^:hidden
+(fact "parses relationships form schema"
 
   (parse:relationships -schema- :enum)
   => '({:ref :meat.grade, :rval nil, :table :meat, :column :grade})
@@ -143,7 +133,6 @@
 
 ^{:refer script.sql.table.manage/create:enums :added "3.0"}
 (fact "generate create statements for schema enums"
-  ^:hidden
 
   (->> (create:enums -schema-)
        (map second)
@@ -165,14 +154,13 @@
 ^{:refer script.sql.table.manage/drop:enums :added "3.0"}
 (fact "generate drop statements for schema enums"
 
-  (drop:enums -schema-) ^:hidden
+  (drop:enums -schema-)
   => '([[:meat.grade #{:horrible :good :awesome :ok :bad :nasty :fair}]
         "DROP TABLE IF EXISTS \"meat_grade\" CASCADE"]))
 
 ^{:refer script.sql.table.manage/create:tables :added "3.0"}
 (fact "generate create statements for schema tables"
-  ^:hidden
-  
+
   (->> (create:tables -schema-)
        (map second))
   => [(prose/|
@@ -181,8 +169,8 @@
        " \"type\" text,"
        " \"amount\" int,"
        " \"grade\" text references \"meat_grade\"(\"value\")"
-       ")")       
-      
+       ")")
+
       (prose/|
        "CREATE TABLE IF NOT EXISTS \"vegetable\" ("
        " \"id\" text PRIMARY KEY,"
@@ -191,7 +179,7 @@
        ")")])
 
 ^{:refer script.sql.table.manage/drop:tables :added "3.0"}
-(fact "generate drop statements for schema tables" ^:hidden
+(fact "generate drop statements for schema tables"
 
   (->> (drop:tables -schema-)
        (map second))

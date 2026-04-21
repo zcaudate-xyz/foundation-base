@@ -163,8 +163,7 @@
 
 ^{:refer std.block.construct/root :added "3.0"}
 (fact "constructs a root block"
-  ^:hidden
-  
+
   (str (root '[a b]))
   => "a b")
 
@@ -176,8 +175,7 @@
 
 ^{:refer std.block.construct/max-width :added "3.0"}
 (fact "gets the max width of given block, along with starting offset"
-  ^:hidden
-  
+
   [(max-width
     (parse/parse-string ""))
    (base/block-info
@@ -188,26 +186,26 @@
     (parse/parse-root ""))
    (base/block-info
     (parse/parse-root ""))]
-  => [0 {:type :collection, :tag :root, :string "", :height 0, :width 0}]  
+  => [0 {:type :collection, :tag :root, :string "", :height 0, :width 0}]
 
   (base/block-info
    (parse/parse-string "\"\n\""))
-  
+
   [(max-width
     (parse/parse-string "\"\n\""))
    (base/block-info
     (parse/parse-string "\"\n\""))]
   => [1 {:type :token, :tag :string, :string "\"\n\"", :height 1, :width 1}]
-  
+
   (base/block-info
    (parse/parse-string "\"\n\n\""))
   => {:type :token, :tag :string, :string "\"\n\n\"", :height 2, :width 1}
-  
+
   (base/block-info
    (block [:very-long-line (newline) (void) 2]))
   => {:type :collection, :tag :vector, :string "[:very-long-line\n 2]", :height 1, :width 3}
 
-  
+
   ;; longest line at the start
   (max-width
    (block [:very-long-line (newline) (void) 2]))
@@ -218,7 +216,7 @@
    10)
   => 16
 
-    
+
   ;; longest line in the middle
   (max-width
    (block [(newline)
@@ -233,8 +231,7 @@
 
 ^{:refer std.block.construct/line-width :added "4.0"}
 (fact "get the width at the line which it finishes"
-  ^:hidden
-  
+
   (line-width
    (block [:very-long-line (newline) (void) 2]))
   => 3
@@ -246,15 +243,13 @@
 
 ^{:refer std.block.construct/rep :added "4.0"}
 (fact "returns the clojure forms representation of the dsl"
-  ^:hidden
-  
+
   (rep (block [1 2 3 4]))
   => [1 2 3 4])
 
 ^{:refer std.block.construct/get-lines :added "4.0"}
 (fact "gets the lines for a block"
-  ^:hidden
-  
+
   (get-lines (block [(newline)
                      (void) :very-long-line (newline)  (void) 2]))
   => ["["
@@ -263,14 +258,13 @@
 
 ^{:refer std.block.construct/line-split :added "4.0"}
 (fact "splits a block collection into "
-  ^:hidden
-  
+
   (str (line-split
         (block [(newline)
                 (void) :very-long-line (newline)  (void) 2])
         ))
   => "{:tag :vector, :lines [[] [␣ :very-long-line] [␣ 2]]}"
-  
+
   (rep
    (line-split
     (block [(newline) 1 (newline)
@@ -280,7 +274,6 @@
 
 ^{:refer std.block.construct/line-restore :added "4.0"}
 (fact "restores a dom rep, adding body indentation"
-  ^:hidden
 
   (mapv (fn [offset]
           (str (line-restore
@@ -307,9 +300,8 @@
 
 ^{:refer std.block.construct/indent-body :added "4.0"}
 (fact "indents the body given offset"
-  ^:hidden
-  
-  (str 
+
+  (str
    (indent-body
     (block [1 2 (newline) 3 4])
     5))

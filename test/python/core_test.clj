@@ -18,9 +18,8 @@
 (comment
   ^{:refer python.core/eval-return :added "4.0"}
 (fact "evaluates a function based on return"
-  ^:hidden
 
-  (json/read 
+  (json/read
    (y/eval-return '(fn [] (return 1))
                   []))
   => {"type" "data"
@@ -44,23 +43,22 @@
 
     (y/eval-fn "globals()[\"OUT\"] = 1+1")
     => 2)
-  
+
   ^{:refer python.core/wrepl-connect :added "4.0"
     :setup [(def -w- (wrepl/wrepl-python))]
     :teardown [(component/stop -w-)]}
   (fact "connects to an wrepl server, allows for multiple connections"
-    ^:hidden
-    
+
     (do (y/wrepl-connect (wrepl/get-port :python (:id -w-))
                          {})
         (wrepl/wait-ready :python (:id -w-)))
     => true
-    
+
     (defn.py add [x y]
       (return (+ x y)))
-    
+
     (:body @(wrepl/raw-eval -w- "globals()[\"OUT\"] = 10+10"))
     => "{\"type\": \"data\", \"value\": 20}"
-    
+
     (wrepl/invoke-ptr -w- add [1 2])
     => 3))

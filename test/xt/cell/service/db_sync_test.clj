@@ -12,7 +12,6 @@
 
 ^{:refer xt.cell.service.db-sync/sync-capable? :added "4.1"}
 (fact "checks whether a db descriptor supports sync operations"
-  ^:hidden
 
   (!.js
    [(db-sync/sync-capable? {"schema" {}})
@@ -21,7 +20,6 @@
 
 ^{:refer xt.cell.service.db-sync/normalize-sync :added "4.1"}
 (fact "normalizes sync input from sync and remove aliases"
-  ^:hidden
 
   (!.js
    (db-sync/normalize-sync
@@ -33,7 +31,6 @@
 
 ^{:refer xt.cell.service.db-sync/prepare-sync :added "4.1"}
 (fact "validates sync request shapes before execution"
-  ^:hidden
 
   (!.js
    [(db-sync/prepare-sync {} {} {})
@@ -51,7 +48,6 @@
 
 ^{:refer xt.cell.service.db-sync/execute-sync :added "4.1"}
 (fact "requires a local db when executing sync requests"
-  ^:hidden
 
   (!.js
    (db-sync/execute-sync
@@ -64,7 +60,6 @@
 
 ^{:refer xt.cell.service.db-sync/result->update :added "4.1"}
 (fact "maps sync results into refresh, patch, or sync updates"
-  ^:hidden
 
   (!.js
    [(db-sync/result->update
@@ -93,7 +88,6 @@
 
 ^{:refer xt.cell.service.db-sync/run-sync :added "4.1"}
 (fact "returns execution errors when the local db is missing"
-  ^:hidden
 
   (!.js
    (db-sync/run-sync

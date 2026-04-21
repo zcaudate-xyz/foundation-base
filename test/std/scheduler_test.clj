@@ -22,8 +22,7 @@
 
 ^{:refer std.scheduler/runner:start :added "3.0"}
 (fact "starts up the runner"
-  ^:hidden
-  
+
   (component/with [runner (runner:create)]
     (-> runner
         (runner:start)
@@ -34,8 +33,7 @@
 
 ^{:refer std.scheduler/runner:stop :added "3.0"}
 (fact "stops the runner"
-  ^:hidden
-  
+
   (let [runner (runner:create)]
     (runner:start runner)
     (runner:stop runner)
@@ -44,8 +42,7 @@
 
 ^{:refer std.scheduler/runner:kill :added "3.0"}
 (fact "kills the runner"
-  ^:hidden
-  
+
   (let [runner (runner:create)]
     (runner:start runner)
     (runner:kill runner)
@@ -54,16 +51,14 @@
 
 ^{:refer std.scheduler/runner:started? :added "3.0"}
 (fact "checks if runner is started"
-  ^:hidden
-  
+
   (component/with [|run| (runner:create)]
     (runner:started? |run|))
   => true)
 
 ^{:refer std.scheduler/runner:stopped? :added "3.0"}
 (fact "checks if runner has stopped"
-  ^:hidden
-  
+
   (component/with [|run| (runner:create)]
     (-> (doto |run| (runner:kill))
         (runner:stopped?))
@@ -71,21 +66,19 @@
 
 ^{:refer std.scheduler/runner:health :added "3.0"}
 (fact "returns health of runner"
-  ^:hidden
-  
+
   (component/with [|run| (runner:create)]
     (runner:health |run|))
   => {:status :ok})
 
 ^{:refer std.scheduler/runner:info :added "3.0"}
 (fact "returns runner info"
-  ^:hidden
-  
+
   (component/with [runner (runner:create {})]
     (runner:info runner))
   => {:executors {:core {:threads 0, :active 0, :queued 0, :terminated false},
                   :scheduler {:threads 0, :active 0, :queued 0, :terminated false}},
-      :programs {}} ^:hidden
+      :programs {}}
 
   (test-scaffold (fn [runner q]
                    (spawn runner :world {} "abc")
@@ -102,30 +95,26 @@
 
 ^{:refer std.scheduler/runner? :added "3.0"}
 (fact "checks if object is a runner"
-  ^:hidden
-  
+
   (runner? (runner:create))
   => true)
 
 ^{:refer std.scheduler/runner:create :added "3.0"}
 (fact "creates a runner"
-  ^:hidden
-  
+
   (runner:create {:id "runner"})
   => runner?)
 
 ^{:refer std.scheduler/runner :added "3.0"}
 (fact "creates and starts a runner"
-  ^:hidden
-  
+
   (-> (runner {:id "runner"})
       (component/kill))
   => runner?)
 
 ^{:refer std.scheduler/installed? :added "3.0"}
 (fact "checks if program is installed"
-  ^:hidden
-  
+
   (test-scaffold
    (fn [runner _]
      (installed? runner :world)))
@@ -133,8 +122,7 @@
 
 ^{:refer std.scheduler/create-program :added "3.0"}
 (fact "creates a runner program"
-  ^:hidden
-  
+
   (create-program {:type :constant
                    :id :hello
                    :interval 10})
@@ -142,8 +130,7 @@
 
 ^{:refer std.scheduler/uninstall :added "3.0"}
 (fact "uninstalls a program"
-  ^:hidden
-  
+
   (let [runner (runner:create)]
     (install runner {:id :world :type :basic :interval 100 :main-fn (fn [& args])})
     (uninstall runner :world)
@@ -152,7 +139,6 @@
 
 ^{:refer std.scheduler/install :added "3.0"}
 (fact "installs a program"
-  ^:hidden
 
   (test-scaffold
    (fn [runner _]
@@ -181,7 +167,6 @@
 
 ^{:refer std.scheduler/spawn :added "3.0"}
 (fact "spawns a runner that contains the program"
-  ^:hidden
 
   (let [runner (runner:create)]
     (runner:start runner)
@@ -192,7 +177,6 @@
 
 ^{:refer std.scheduler/unspawn :added "3.0"}
 (fact "unspawns the running program"
-  ^:hidden
 
   (let [runner (runner:create)
         program {:id :world :type :basic :interval 100 :main-fn (fn [& args])}]
@@ -205,7 +189,6 @@
 
 ^{:refer std.scheduler/trigger :added "3.0"}
 (fact "triggers the program manually, without spawning"
-  ^:hidden
 
   (test-scaffold
    (fn [runner q]
@@ -216,8 +199,7 @@
 
 ^{:refer std.scheduler/set-interval :added "3.0"}
 (fact "manually overrides the interval for a spawn/program"
-  ^:hidden
-  
+
   (time/bench-ms
    (test-scaffold
     (fn [runner q]
@@ -226,7 +208,7 @@
       (doall (for [i (range 2)]
                (cc/take q))))))
   => number?
-  
+
   (time/bench-ms
    (test-scaffold
     (fn [runner q]
@@ -238,8 +220,6 @@
 
 ^{:refer std.scheduler/get-props :added "3.0"}
 (fact "gets the current props map for the runner"
-  ^:hidden
-  ^:hidden
 
   (test-scaffold
    (fn [runner q]

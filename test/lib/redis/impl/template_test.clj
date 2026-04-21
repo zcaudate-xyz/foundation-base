@@ -5,7 +5,6 @@
 
 ^{:refer lib.redis.impl.template/redis-pipeline :added "3.0"}
 (fact "constructs a pipeline for `opts`"
-  ^:hidden
 
   (redis-pipeline :data {})
   => {:deserialize true}
@@ -15,7 +14,6 @@
 
 ^{:refer lib.redis.impl.template/redis-template :added "3.0"}
 (fact "creates a redis form from data"
-  ^:hidden
 
   (redis-template 'eval-redis #'script/in:eval)
   => '(clojure.core/defn eval-redis

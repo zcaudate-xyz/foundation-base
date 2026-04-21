@@ -15,18 +15,16 @@
 
 ^{:refer lua.nginx.crypt/crypt :added "4.0"}
 (fact "same functionality as postgres crypt"
-  ^:hidden
 
   (crypt/crypt "hello" "$1$qI5PyQbL")
   => "$1$qI5PyQbL$CGhOca3eF1M4DEWbsndfv0")
 
 ^{:refer lua.nginx.crypt/gen-salt :added "4.0"}
 (fact "generates salt compatible with pgcrypto libraries"
-  ^:hidden
-  
+
   (crypt/gen-salt "md5")
   => string?
-  
+
 
   (crypt/gen-salt "bf")
  => string?

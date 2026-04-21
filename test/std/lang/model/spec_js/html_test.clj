@@ -17,8 +17,7 @@
 
 ^{:refer std.lang.model.spec-js.html/emit-html :added "4.0"}
 (fact "emits the html"
-  ^:hidden
-  
+
   (html/tree (emit-html [:a [:b [:c]]]
                         {} {}))
   => [:a [:b [:c]]])

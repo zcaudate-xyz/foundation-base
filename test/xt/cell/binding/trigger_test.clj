@@ -13,7 +13,6 @@
 
 ^{:refer xt.cell.binding.trigger/normalize-deps :added "4.1"}
 (fact "normalizes dependency paths against the current model"
-  ^:hidden
 
   (!.js
    (trigger/normalize-deps
@@ -24,7 +23,6 @@
 
 ^{:refer xt.cell.binding.trigger/compile-trigger :added "4.1"}
 (fact "extracts trigger metadata from a prepared descriptor"
-  ^:hidden
 
   (!.js
    (trigger/compile-trigger
@@ -33,7 +31,6 @@
 
 ^{:refer xt.cell.binding.trigger/compile-stream-options :added "4.1"}
 (fact "builds stream option context with a stable subscription key"
-  ^:hidden
 
   (!.js
    (var out
@@ -51,7 +48,6 @@
 
 ^{:refer xt.cell.binding.trigger/compile-view-hooks :added "4.1"}
 (fact "compiles deps, trigger, and stream options together"
-  ^:hidden
 
   (!.js
    (trigger/compile-view-hooks

@@ -6,8 +6,7 @@
 
 ^{:refer lib.docker.common/raw-exec :guard true :added "4.0"}
 (fact "executes a shell command"
-  ^:hidden
-  
+
   (raw-exec (concat ["docker" "ps"]
                     (when *host* ["--host" *host*])
                     ["--format" "{{json .}}"])
@@ -17,16 +16,14 @@
 
 ^{:refer lib.docker.common/raw-command :added "4.0"}
 (fact "executes a docker command"
-  ^:hidden
-  
+
   (raw-command ["ps"])
   => vector?)
 
 ^{:refer lib.docker.common/get-ip :added "4.0"
   :setup [(ryuk/start-ryuk)]}
 (fact "gets the ip of a container"
-  ^:hidden
-  
+
   (get-ip (:container-id (ryuk/start-ryuk)))
   => string?)
 
@@ -38,8 +35,7 @@
 
 ^{:refer lib.docker.common/has-container? :added "4.0"}
 (fact "checks that a container exists"
-  ^:hidden
-  
+
   (has-container? (ryuk/start-ryuk))
   => true)
 

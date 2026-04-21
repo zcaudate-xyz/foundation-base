@@ -15,23 +15,20 @@
 
 ^{:refer js.core/assignNew :added "4.0" :unchecked true}
 (fact "assigns new object"
-  ^:hidden
-  
+
   (j/assignNew {:a 1} {:b 2})
   => {"a" 1, "b" 2})
 
 ^{:refer js.core/future :added "4.0" :unchecked true}
 (fact "creates a future"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (j/future (repl/notify true)))
   => true)
 
 ^{:refer js.core/future-delayed :added "4.0" :unchecked true}
 (fact "creates a future delayed call"
-  ^:hidden
-  
+
   (notify/wait-on :js
                   (j/future-delayed [100]
       (repl/notify true)))
@@ -45,15 +42,13 @@
 
 ^{:refer js.core/randomColor :added "4.0" :unchecked true}
 (fact "creates a random color"
-  ^:hidden
-  
+
   (j/randomColor)
   => string?)
 
 ^{:refer js.core/randomId :added "4.0" :unchecked true}
 (fact "creates a random id"
-  ^:hidden
-  
+
   (j/randomId 10)
   => string?)
 
@@ -74,15 +69,13 @@
 
 ^{:refer js.core/identity :added "4.0" :unchecked true}
 (fact "identity function"
-  ^:hidden
-  
+
   (j/identity 1)
   => 1)
 
 ^{:refer js.core/async :added "4.0" :unchecked true}
 (fact "performs an async call"
-  ^:hidden
-  
+
   (j/<! (j/async
          (j/future
            (return (+ 1 2 3)))
@@ -101,8 +94,7 @@
 
 ^{:refer js.core/wrap:print :added "4.0" :unchecked true}
 (fact "wraps a form in a print statement"
-  ^:hidden
-  
+
   ((:template @j/wrap:print) 'f)
   => '(fn [...args]
         (console.log "INPUT" args)
@@ -111,8 +103,7 @@
 
 ^{:refer js.core/settle :added "4.0" :unchecked true}
 (fact "notify on future"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (j/settle (repl/>notify)
               (j/future-delayed [100]
@@ -121,8 +112,7 @@
 
 ^{:refer js.core/notify :added "4.0" :unchecked true}
 (fact "notify on future"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (j/notify (j/future-delayed [100]
                 (return 1))))
@@ -130,8 +120,7 @@
 
 ^{:refer js.core/notify-api :added "4.0" :unchecked true}
 (fact "notify on api return"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (j/notify-api (j/future-delayed [100]
                     (return {:status "ok"
@@ -146,8 +135,7 @@
 
 ^{:refer js.core/STACKTRACE! :added "4.0" :unchecked true}
 (fact "Adds a trace entry with stack infomation"
-  ^:hidden
-  
+
   (!.js
    (j/STACKTRACE! "hello")
    (trace/trace-last))
@@ -158,17 +146,15 @@
 
 ^{:refer js.core/<! :added "4.0" :unchecked true}
 (fact "shortcut for notify/wait-on"
-  ^:hidden
-  
+
   (j/<! (j/future-delayed [100]
           (return 1)))
   => 1)
 
 ^{:refer js.core/<api :added "4.0" :unchecked true}
 (fact "shortcut for notify/wait-on for api calls"
-  ^:hidden
-  
-  (j/<api 
+
+  (j/<api
    (j/future-delayed [100]
      (return {:status "ok"
               :data 1})))
@@ -176,8 +162,7 @@
 
 ^{:refer js.core/module:async :added "4.0" :unchecked true}
 (fact "wraps an esm import to split out components"
-  ^:hidden
-  
+
   (j/<!
    (. (j/module:async
        (j/future-delayed [100]

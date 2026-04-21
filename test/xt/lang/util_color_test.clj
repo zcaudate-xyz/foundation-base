@@ -28,14 +28,13 @@
 
 ^{:refer xt.lang.util-color/named->rgb :added "4.0"}
 (fact "named color to rgb"
-  ^:hidden
-  
+
   (!.js
    [(color/named->rgb "aqua")
     (color/named->rgb "magenta")
     (color/named->rgb "WRONG")])
   => [[0 255 255] [255 0 255] [0 0 0]]
-  
+
   (!.lua
    [(color/named->rgb "aqua")
     (color/named->rgb "magenta")
@@ -50,8 +49,7 @@
 
 ^{:refer xt.lang.util-color/hex->n :added "4.0"}
 (fact "hex to rgb val"
-  ^:hidden
-  
+
   (!.js
    [(color/hex->n "0")
     (color/hex->n "1")
@@ -60,7 +58,7 @@
     (color/hex->n "X")
     (color/hex->n "e")])
   => [0 1 2 10 0 14]
-  
+
   (!.lua
    [(color/hex->n "0")
     (color/hex->n "1")
@@ -81,8 +79,7 @@
 
 ^{:refer xt.lang.util-color/n->hex :added "4.0"}
 (fact "converts an rgb to hex"
-  ^:hidden
-  
+
   (!.js
    [(color/n->hex 13)
     (color/n->hex 113)
@@ -106,14 +103,13 @@
 
 ^{:refer xt.lang.util-color/hex->rgb :added "4.0"}
 (fact "converts a hex value to rgb array"
-  ^:hidden
-  
+
   (!.js
    [(color/hex->rgb "#aaa")
     (color/hex->rgb "#45f981")
     (color/hex->rgb "#222222")])
   => [[170 170 170] [69 249 129] [34 34 34]]
-  
+
 
   (!.lua
    [(color/hex->rgb "#aaa")
@@ -129,8 +125,7 @@
 
 ^{:refer xt.lang.util-color/rgb->hex :added "4.0"}
 (fact "converts rgb to hex"
-  ^:hidden
-  
+
   (!.js
    [(color/rgb->hex (color/hex->rgb "#aaa"))
     (color/rgb->hex (color/hex->rgb "#45f981"))
@@ -154,8 +149,7 @@
 
 ^{:refer xt.lang.util-color/rgb->hsl :added "4.0"}
 (fact "converts rgb to hsl"
-  ^:hidden
-  
+
   (!.js [(color/rgb->hsl [0 100 100])
          (color/rgb->hsl [0 0 0])
          (color/rgb->hsl [255 255 255])
@@ -168,8 +162,8 @@
       [0 0 99.6078431372549]
       [60 100 25.098039215686274]
       [120 100 25.098039215686274]]
-  
-  
+
+
   (!.lua [(color/rgb->hsl [0 100 100])
           (color/rgb->hsl [0 0 0])
           (color/rgb->hsl [255 255 255])
@@ -180,7 +174,7 @@
       [0 0 100]
       [60 100 25.098039215686]
       [120 100 25.098039215686]]
-  
+
 
   (!.py [(color/rgb->hsl [0 100 100] nil)
          (color/rgb->hsl [0 0 0] nil)
@@ -195,22 +189,20 @@
 
 ^{:refer xt.lang.util-color/hue->v :added "4.0"}
 (fact "converts a hue to a value"
-  ^:hidden
-  
+
   (color/hue->v 20 30 0)
   => 20)
 
 ^{:refer xt.lang.util-color/hsl->rgb :added "4.0"}
 (fact "converts hsl to rgb"
-  ^:hidden
-  
+
   (!.js [(color/hsl->rgb (color/rgb->hsl [0 100 100] nil))
          (color/hsl->rgb (color/rgb->hsl [0 0 0] nil))
          (color/hsl->rgb (color/rgb->hsl [255 255 255] nil))
          (color/hsl->rgb (color/rgb->hsl [128 128 0] nil))
          (color/hsl->rgb (color/rgb->hsl [0 128 0] nil))])
   => [[0 100 100] [0 0 0] [255 255 255] [128 128 0] [0 128 0]]
-  
+
   (!.lua [(color/hsl->rgb (color/rgb->hsl [0 100 100] nil))
          (color/hsl->rgb (color/rgb->hsl [0 0 0] nil))
          (color/hsl->rgb (color/rgb->hsl [255 255 255] nil))
@@ -227,8 +219,7 @@
 
 ^{:refer xt.lang.util-color/named->hsl :added "4.0"}
 (fact "converts a named color to hsl"
-  ^:hidden
-  
+
   ^{:lang-exceptions {:lua {:expect [0 67.924528301887 41.56862745098]}}}
   (!.js
    (color/named->hsl "firebrick"))
@@ -236,15 +227,13 @@
 
 ^{:refer xt.lang.util-color/named->hex :added "4.0"}
 (fact "converts a named color to hex"
-  ^:hidden
-  
+
   (!.js
    (color/named->hex "firebrick"))
   => "#B22222")
 
 ^{:refer xt.lang.util-color/hex->hsl :added "4.0"}
 (fact "converts a hex to hsl"
-  ^:hidden
 
   ^{:lang-exceptions {:lua {:expect [0 67.924528301887 41.56862745098]}}}
   (!.js

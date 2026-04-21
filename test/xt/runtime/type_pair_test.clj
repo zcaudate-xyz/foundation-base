@@ -21,7 +21,6 @@
 
 ^{:refer xt.runtime.type-pair/pair-new :added "4.0"}
 (fact "creates a pair new"
-  ^:hidden
 
   (!.js
    (var out (pair/pair-new "a" 1 nil))
@@ -39,7 +38,6 @@
 
 ^{:refer xt.runtime.type-pair/pair :added "4.0"}
 (fact "creates a pair"
-  ^:hidden
 
   (!.js
    (var out (pair/pair "a" 1))

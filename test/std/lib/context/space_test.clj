@@ -13,7 +13,6 @@
 ^{:refer std.lib.context.space/space-context-set :added "3.0"
   :setup  [(def |sp| (space-create {:namespace 'test}))]}
 (fact "sets the context in the space"
-  ^:hidden
 
   (space-context-set (space-create {:namespace 'test})
                      :null :default {})
@@ -23,8 +22,7 @@
 
 ^{:refer std.lib.context.space/space-context-unset :added "3.0"}
 (fact "unsets the context in the space"
-  ^:hidden
-  
+
   (space-context-unset (doto (space-create {:namespace 'test})
                          (space-context-set :null :default {}))
                        :null)
@@ -33,7 +31,6 @@
 
 ^{:refer std.lib.context.space/space-context-get :added "3.0"}
 (fact "gets the context in the space"
-  ^:hidden
 
   (space-context-get (doto (space-create {:namespace 'test})
                        (space-context-set :null :default {}))
@@ -44,7 +41,6 @@
 
 ^{:refer std.lib.context.space/space-rt-start :added "3.0"}
 (fact "starts the context runtime"
-  ^:hidden
 
   (space-rt-start (doto (space-create {:namespace 'test})
                        (space-context-set :null :default {}))
@@ -53,7 +49,6 @@
 
 ^{:refer std.lib.context.space/space-rt-stop :added "3.0"}
 (fact "stops the context runtime"
-  ^:hidden
 
   (space-rt-stop (doto (space-create {:namespace 'test})
                        (space-context-set :null :default {}))
@@ -68,21 +63,18 @@
 
 ^{:refer std.lib.context.space/space-stop :added "3.0"}
 (fact "shutdown all runtimes in the space"
-  ^:hidden
-  
+
   (space-stop (space-create {:namespace 'test}))
   => space?)
 
 ^{:refer std.lib.context.space/space? :added "3.0"}
 (fact "checks that an object is of type space"
-  ^:hidden
 
   (space? (space-create {:namespace 'test}))
   => true)
 
 ^{:refer std.lib.context.space/space-create :added "3.0"}
 (fact "creates a space"
-  ^:hidden
 
   (space-create {:namespace 'test})
   => space?)
@@ -101,7 +93,6 @@
 
 ^{:refer std.lib.context.space/protocol-tmpl :added "3.0"}
 (fact "constructs a template function"
-  ^:hidden
 
   ((protocol-tmpl {:prefix   "space-"
                   :protocol "protocol.context"
@@ -116,8 +107,7 @@
 
 ^{:refer std.lib.context.space/space:rt-current :added "4.0"}
 (fact "gets the current rt in the space"
-  ^:hidden
-  
+
   (space:rt-current :null)
   => reg/rt-null?)
 
@@ -128,19 +118,19 @@
   (reg/registry-list)
   (space-rt (space 'std.lang.codegen.form-test)
             :lang/start)
-  
+
   (rt:current)
-  
+
   (res/res:spec-get :hara/context.space)
   (res/res-key :namespace :hara/context.space :default {:namespace (the-ns 'std.lib.context.pointer)})
-  
+
   (res/res-stop :hara/context.space)
-  
-  
+
+
   (f/hash-code (res/res :hara/context.space))
   (f/hash-code (res/res :hara/context.space {:namespace 'std.lib.context.pointer}))
   (f/hash-code (res/res :hara/context.space {:namespace (the-ns 'std.lib.context.pointer)}))
-  
+
 
   (space-create )
   (into {} (space))

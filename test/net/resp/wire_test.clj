@@ -22,7 +22,7 @@
 (fact "serializes objects (data) to bytes"
 
   (f/string (serialize-bytes "HELLO" :string))
-  => "HELLO" ^:hidden
+  => "HELLO"
 
   (f/string (serialize-bytes "HELLO" :edn))
   => "\"HELLO\""
@@ -53,7 +53,7 @@
   => {:a 1})
 
 ^{:refer net.resp.wire/coerce :added "3.0"}
-(fact "coerces redis return to bytes" ^:hidden
+(fact "coerces redis return to bytes"
 
   (coerce [(.getBytes "OK") [(.getBytes "OK") (.getBytes "OK")]]
           :string)

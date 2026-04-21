@@ -16,7 +16,6 @@
 
 ^{:refer rt.basic.impl.process-ruby/CANARY :adopt true :added "4.0"}
 (fact "EVALUATE ruby code"
-  ^:hidden
 
   (if CANARY-RUBY
     (!.rb
@@ -25,7 +24,7 @@
          (call)))
     :ruby-unavailable)
   => (any 3 :ruby-unavailable)
-  
+
   (default-oneshot-wrap "1")
   => string?)
 
@@ -37,7 +36,7 @@
   (defn.rb add
     []
     (return (+ 1 2 3)))
-  
+
   (default-basic-client 1000 {:host "localhost"}))
 
 

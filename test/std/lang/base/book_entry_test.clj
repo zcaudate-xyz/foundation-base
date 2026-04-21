@@ -4,12 +4,10 @@
 
 ^{:refer std.lang.base.book-entry/book-entry? :added "4.0"}
 (fact "checks if object is a book entry"
-  ^:hidden
   (book-entry? (book-entry {})) => true)
 
 ^{:refer std.lang.base.book-entry/book-entry :added "4.0"}
 (fact "creates a book entry"
-  ^:hidden
 
   ;;
   ;; defn.<> specification

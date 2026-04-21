@@ -51,8 +51,7 @@
             (. (-/reset-cell) ["init"]
                (then (repl/>notify))))]}
 (fact "puts the cell as first argument"
-  ^:hidden
-  
+
   (j/<!
    ((base-model/wrap-cell-args
      base-link-local/echo)
@@ -71,16 +70,14 @@
                                                  :defaultArgs []}})
                    ["init"]))]}
 (fact "prepares params of views"
-  ^:hidden
-  
+
   (!.js
    (base-model/prep-view (-/CELL) "hello" "ping" {}))
   => vector?)
 
 ^{:refer js.cell.kernel.base-model/get-view-dependents :added "4.0"}
 (fact "gets all dependents for a view"
-  ^:hidden
-  
+
   (!.js
    (base-model/get-view-dependents
     {:models {"test/common" {:deps {"test/common" {"b2" {"a1" true}}}}
@@ -91,8 +88,7 @@
 
 ^{:refer js.cell.kernel.base-model/get-model-dependents :added "4.0"}
 (fact "gets all dependents for a model"
-  ^:hidden
-  
+
   (!.js
    (base-model/get-model-dependents
     {:models {"test/common" {:deps {"test/common" {"b2" {"a1" true}}}}
@@ -103,8 +99,7 @@
 
 ^{:refer js.cell.kernel.base-model/run-tail-call :added "4.0"}
 (fact "helper function for tail calls on run commands"
-  ^:hidden
-  
+
   (!.js
    (var called [])
    (var acc {"ok" true})
@@ -130,8 +125,7 @@
                                                        :defaultArgs ["hello" 100]}})
                    ["init"]))]}
 (fact "runs the remote function"
-  ^:hidden
-  
+
   (j/<!
    (do:>
     (var [path context disabled]
@@ -156,8 +150,7 @@
                                                        :defaultArgs ["hello" 100]}})
                    ["init"]))]}
 (fact "runs the remote call"
-  ^:hidden
-  
+
   (j/<!
    (base-model/remote-call (-/CELL) "hello" "echo_async" ["hello" 100] true))
   => (contains-in
@@ -178,8 +171,7 @@
                                                  :defaultArgs []}})
                    ["init"]))]}
 (fact "helper function for refresh"
-  ^:hidden
-  
+
   (j/<!
    (do:>
     (var [path context disabled]
@@ -206,24 +198,23 @@
                                                   :deps ["ping"]}})
                    ["init"]))]}
 (fact "refreshes view dependents"
-  ^:hidden
-  
+
   (def +res+
     (!.js
      (var [model view] (base-impl/view-ensure (-/CELL) "hello" "ping1"))
      (. view ["output"] ["current"])))
-  
+
   (!.js
    (base-model/refresh-view-dependents (-/CELL)
                                        "hello"
                                        "ping"))
   => {"hello" ["ping1"]}
-  
+
   (def +res2+
     (!.js
      (var [model view] (base-impl/view-ensure (-/CELL) "hello" "ping1"))
      (. view ["output"] ["current"])))
-  
+
   (not= +res+ +res2+)
   => true)
 
@@ -238,8 +229,7 @@
                                                        :defaultArgs ["hello" 100]}})
                    ["init"]))]}
 (fact "refreshes a view"
-  ^:hidden
-  
+
   (j/<! (base-model/refresh-view
          (-/CELL) "hello" "echo_async" {}))
   => (contains-in
@@ -261,8 +251,7 @@
                                                        :defaultArgs ["hello" 100]}})
                    ["init"]))]}
 (fact "refreshes view remotely"
-  ^:hidden
-  
+
   (j/<! (base-model/refresh-view-remote
          (-/CELL) "hello" "echo_async" nil))
   => (contains-in
@@ -286,13 +275,12 @@
                                                   :deps ["ping"]}})
                    ["init"]))]}
 (fact "refreshes view dependents unthrottled"
-  ^:hidden
-  
+
   (def +res3+
     (!.js
      (var [model view] (base-impl/view-ensure (-/CELL) "hello" "ping1"))
      (. view ["output"] ["current"])))
-  
+
   (j/<!
    (base-model/refresh-view-dependents-unthrottled
     (-/CELL)
@@ -303,12 +291,12 @@
         "main" [true ["pong" integer?]],
         "pre" [false],
         "::" "view.run"}])
-  
+
   (def +res4+
     (!.js
      (var [model view] (base-impl/view-ensure (-/CELL) "hello" "ping1"))
      (. view ["output"] ["current"])))
-  
+
   (not= +res3+ +res4+)
   => true)
 
@@ -326,8 +314,7 @@
                                                   :deps ["ping"]}})
                    ["init"]))]}
 (fact "refreshes a model"
-  ^:hidden
-  
+
   (j/<!
    (base-model/refresh-model
     (-/CELL)
@@ -348,8 +335,7 @@
 
 ^{:refer js.cell.kernel.base-model/get-model-deps :added "4.0"}
 (fact "gets model dependencies"
-  ^:hidden
-  
+
   (base-model/get-model-deps
    "hello"
    {:ping {}
@@ -362,8 +348,7 @@
             (. (-/reset-cell) ["init"]
                (then (repl/>notify))))]}
 (fact "gets unknown dependencies"
-  ^:hidden
-  
+
   (!.js
    (base-model/get-unknown-deps
     "hello"
@@ -375,7 +360,7 @@
       :ping1 {:deps ["ping"]}})
     (-/CELL)))
   => []
-  
+
   (!.js
    (base-model/get-unknown-deps
     "hello"
@@ -394,8 +379,7 @@
             (. (-/reset-cell) ["init"]
                (then (repl/>notify))))]}
 (fact "creates a throttle"
-  ^:hidden
-  
+
   (!.js
    (base-model/create-throttle
     (-/CELL)
@@ -409,8 +393,7 @@
             (. (-/reset-cell) ["init"]
                (then (repl/>notify))))]}
 (fact "creates a view"
-  ^:hidden
-  
+
   (!.js
    (base-model/create-view
     (-/CELL)
@@ -434,8 +417,7 @@
             (. (-/reset-cell) ["init"]
                (then (repl/>notify))))]}
 (fact "attaches a model"
-  ^:hidden
-  
+
   (!.js
    (base-model/add-model-attach
     (-/CELL)
@@ -464,8 +446,7 @@
             (. (-/reset-cell) ["init"]
                (then (repl/>notify))))]}
 (fact "adds a model"
-  ^:hidden
-  
+
   (j/<!
    (. (base-model/add-model
        (-/CELL)
@@ -479,7 +460,7 @@
         "post" [false],
         "main" [true ["hello" integer?]],
         "pre" [false]}])
-  
+
   (j/<!
    (. (base-model/add-model
        (-/CELL)
@@ -516,8 +497,7 @@
                                   :defaultArgs ["hello" 100]}})
                    ["init"]))]}
 (fact "removes a model"
-  ^:hidden
-  
+
   (base-model/remove-model
    (-/CELL)
    "hello")
@@ -553,8 +533,7 @@
                                   :defaultArgs ["hello" 100]}})
                    ["init"]))]}
 (fact "removes a view"
-  ^:hidden
-  
+
   (!.js
    (base-model/remove-view
     (-/CELL) "hello" "echo_async"))
@@ -584,8 +563,7 @@
                                                   :deps ["ping"]}})
                    ["init"]))]}
 (fact "updates a model"
-  ^:hidden
-  
+
   (j/<!
    (base-model/model-update
     (-/CELL)
@@ -616,8 +594,7 @@
                                                  :defaultArgs []}})
                    ["init"]))]}
 (fact "updates a view"
-  ^:hidden
-  
+
   (j/<!
    (xtd/first
     (base-model/view-update
@@ -642,8 +619,7 @@
                                                  :defaultArgs ["foo"]}})
                    ["init"]))]}
 (fact "sets view input"
-  ^:hidden
-  
+
   (j/<!
    (xtd/first
     (base-model/view-set-input
@@ -667,8 +643,7 @@
                                                  :trigger {"hello" true}}})
                    ["init"]))]}
 (fact "triggers model raw"
-  ^:hidden
-  
+
   (!.js
    (base-model/trigger-model-raw (-/CELL)
                                  (. (-/CELL)
@@ -690,8 +665,7 @@
                                                  :trigger {"hello" true}}})
                    ["init"]))]}
 (fact "triggers a model"
-  ^:hidden
-  
+
   (!.js
    (base-model/trigger-model (-/CELL)
                              "hello"
@@ -711,8 +685,7 @@
                                                  :trigger {"hello" true}}})
                    ["init"]))]}
 (fact "triggers a view"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (. (base-model/trigger-view (-/CELL)
                                 "hello"
@@ -740,8 +713,7 @@
                                                  :trigger {"hello" true}}})
                    ["init"]))]}
 (fact "triggers all"
-  ^:hidden
-  
+
   (!.js
    (base-model/trigger-all (-/CELL)
                            "hello"
@@ -754,8 +726,7 @@
             (. (-/reset-cell) ["init"]
                (then (repl/>notify))))]}
 (fact "adds a raw callback"
-  ^:hidden
-  
+
   (!.js
    (base-model/add-raw-callback (-/CELL)))
   => vector?)
@@ -768,8 +739,7 @@
           (!.js
            (base-model/add-raw-callback (-/CELL)))]}
 (fact "removes a raw callback"
-  ^:hidden
-  
+
   (!.js
    (base-model/remove-raw-callback (-/CELL)))
   => vector?)

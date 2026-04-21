@@ -49,7 +49,6 @@
 
 ^{:refer xt.db.impl-sql/CANARY :adopt true :added "4.0"}
 (fact "checks that things are ok"
-  ^:hidden
 
   (!.js
    [(dbsql/query INSTANCE
@@ -66,7 +65,6 @@
 
 ^{:refer xt.db.impl-sql/sql-gen-delete :added "4.0"}
 (fact "generates the delete statements"
-  ^:hidden
 
   (!.js
    (impl-sql/sql-gen-delete "HELLO"
@@ -90,7 +88,6 @@
                          k/identity
                          k/lt))]}
 (fact "removes data from database"
-  ^:hidden
 
   (!.js
    (impl-sql/sql-pull-sync
@@ -153,7 +150,6 @@
                "password_updated" number?
                "is_super" 1}]))]}
 (fact "runs a pull statement"
-  ^:hidden
 
   [(set (!.js
          (impl-sql/sql-pull-sync INSTANCE

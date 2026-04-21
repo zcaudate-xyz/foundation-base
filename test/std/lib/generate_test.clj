@@ -32,7 +32,7 @@
   => true)
 
 ^{:refer std.lib.generate/visit :added "3.0"}
-(fact "testing inputs for visit" ^:hidden
+(fact "testing inputs for visit"
 
   ;; do block
   (visit '(do :a :b :c))
@@ -92,7 +92,7 @@
   => (throws))
 
 ^{:refer std.lib.generate/yield-all :added "3.0"}
-(fact "same as yield but returns entire seq" ^:hidden
+(fact "same as yield but returns entire seq"
 
   (gen (yield-all (for [i (range 10)]
                     i)))

@@ -40,7 +40,6 @@
   => {:account {:orders #{{:items {:name "one"}}
                           {:items {:name "two"}}}}}
 
-  ^:hidden
   (graph/normalise {:account/age 10}
                    {:schema (schema/schema examples/account-name-age-sex)
                     :pipeline {:pre-mask {:account {:name :checked}}}}

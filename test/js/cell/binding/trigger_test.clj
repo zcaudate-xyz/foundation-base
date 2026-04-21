@@ -22,7 +22,6 @@
 
 ^{:refer js.cell.binding.trigger/normalize-deps :added "4.1"}
 (fact "normalizes dependency paths"
-  ^:hidden
 
   (!.js
    (binding-trigger/normalize-deps (@! +prepared+)))
@@ -31,7 +30,6 @@
 
 ^{:refer js.cell.binding.trigger/compile-trigger :added "4.1"}
 (fact "passes trigger metadata through"
-  ^:hidden
 
   (!.js
    (binding-trigger/compile-trigger (@! +prepared+)))
@@ -39,7 +37,6 @@
 
 ^{:refer js.cell.binding.trigger/compile-stream-options :added "4.1"}
 (fact "compiles stream metadata into option context"
-  ^:hidden
 
   (!.js
    (binding-trigger/compile-stream-options (@! +prepared+)))
@@ -53,7 +50,6 @@
 
 ^{:refer js.cell.binding.trigger/compile-view-hooks :added "4.1"}
 (fact "compiles deps, trigger, and stream hooks together"
-  ^:hidden
 
   (!.js
    (binding-trigger/compile-view-hooks (@! +prepared+)))

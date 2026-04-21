@@ -58,8 +58,7 @@
                 "listener/type" "form"}}
               (contains ["a1" "c3"] :in-any-order)]))]}
 (fact "lists all listeners"
-  ^:hidden
-  
+
   (!.js
    (var f (form/make-form
      (fn:> {:login ""})
@@ -75,7 +74,7 @@
     (xtd/tree-get-data (form/remove-listener f  "b2"))
     (form/list-listeners f)])
   => +out+
-  
+
   (!.lua
    (var f (form/make-form
      (fn:> {:login ""})
@@ -91,7 +90,7 @@
     (xtd/tree-get-data (form/remove-listener f  "b2"))
     (form/list-listeners f)])
   => +out+
-    
+
   (!.py
    (var f (form/make-form
      (fn:> {:login ""})
@@ -122,8 +121,7 @@
               "fields" {"login" {"status" "pending"}},
               "::" "validation.result"}})]}
 (fact "creates a form"
-  ^:hidden
-  
+
   (!.js
    (xtd/tree-get-data
     (form/make-form
@@ -155,13 +153,12 @@
                 :check  (fn [v rec]
                           (return (and (k/not-nil? v)
                                        (< 0 (xt/x:len v)))))}]]})))
-  
+
   => +out+)
 
 ^{:refer xt.lang.event-form/check-event :added "4.0"}
 (fact "checks that event needs to be processed"
-  ^:hidden
-  
+
   (!.js
    [(form/check-event {:fields ["a" "b" "c"]}
                       ["a"])
@@ -197,8 +194,7 @@
                      "form/fields" ["login"],
                      "listener/type" "form"}})]}
 (fact "adds listener to a form"
-  ^:hidden
-  
+
   ^{:lang-exceptions
     {:dart
      {:form (notify/wait-on-call
@@ -270,8 +266,7 @@
               "form/fields" ["login"],
               "listener/type" "form"}})]}
 (fact "triggers all fields"
-  ^:hidden
-  
+
   ^{:lang-exceptions
     {:dart
      {:form (notify/wait-on-call
@@ -343,8 +338,7 @@
               "form/fields" ["login"],
               "listener/type" "form"}})]}
 (fact "triggers the callback"
-  ^:hidden
-  
+
   ^{:lang-exceptions
     {:dart
      {:form (notify/wait-on-call
@@ -416,8 +410,7 @@
               "form/fields" ["login"],
               "listener/type" "form"}})]}
 (fact "sets the field"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var f (form/make-form
      (fn:> {:login ""})
@@ -469,8 +462,7 @@
               "form/fields" ["login"],
               "listener/type" "form"}})]}
 (fact "constructs a field function"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var f (form/make-form
      (fn:> {:login ""})
@@ -494,7 +486,7 @@
     (form/add-listener f "a1"  ["login"] (repl/>notify) nil)
     ((form/field-fn f "login")  "world"))
   => +out+
-  
+
   (notify/wait-on :python
     (var f (form/make-form
      (fn:> {:login ""})
@@ -512,8 +504,7 @@
 
 ^{:refer xt.lang.event-form/get-field-result :added "4.0"}
 (fact "gets the validation status"
-  ^:hidden
-  
+
   (!.js
    (var f (form/make-form
      (fn:> {:login ""})
@@ -559,8 +550,7 @@
               "form/fields" ["login"],
               "listener/type" "form"}})]}
 (fact "sets the data directly"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var f (form/make-form
      (fn:> {:login ""})
@@ -599,8 +589,7 @@
 
 ^{:refer xt.lang.event-form/reset-all-data :added "4.0"}
 (fact "resets all data"
-  ^:hidden
-  
+
   (!.js
    (var f (form/make-form
      (fn:> {:login ""})
@@ -639,8 +628,7 @@
 
 ^{:refer xt.lang.event-form/reset-field-data :added "4.0"}
 (fact "reset field data"
-  ^:hidden
-  
+
   (!.js
    (var f (form/make-form
      (fn:> {:login ""})
@@ -682,8 +670,7 @@
 
 ^{:refer xt.lang.event-form/validate-all :added "4.0"}
 (fact "validates all form"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var f (form/make-form
      (fn:> {:login ""})
@@ -731,8 +718,7 @@
               "listener/type" "form"
               "form/fields" ["login"],}})]}
 (fact "validates form field"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var f (form/make-form
      (fn:> {:login ""})
@@ -766,8 +752,7 @@
               "listener/type" "form"
               "form/fields" ["login"],}})]}
 (fact "reset field validators"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var f (form/make-form
      (fn:> {:login ""})
@@ -801,8 +786,7 @@
               "listener/type" "form"
               "form/fields" ["login"],}})]}
 (fact "reset all field validators"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var f (form/make-form
      (fn:> {:login ""})
@@ -829,8 +813,7 @@
 
 ^{:refer xt.lang.event-form/reset-all :added "4.0"}
 (fact "resets data and validator result"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var f (form/make-form
      (fn:> {:login ""})
@@ -850,8 +833,7 @@
 
 ^{:refer xt.lang.event-form/check-field-passed :added "4.0"}
 (fact "checks that field has passed"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var f (form/make-form
      (fn:> {:login ""})
@@ -882,8 +864,7 @@
 
 ^{:refer xt.lang.event-form/check-field-errored :added "4.0"}
 (fact  "checks that field has passed"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var f (form/make-form
      (fn:> {:login ""})
@@ -914,8 +895,7 @@
 
 ^{:refer xt.lang.event-form/check-all-passed :added "4.0"}
 (fact "checks that all fields have passed"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var f (form/make-form
      (fn:> {:login ""})
@@ -946,8 +926,7 @@
 
 ^{:refer xt.lang.event-form/check-any-errored :added "4.0"}
 (fact  "checks that any fields have errored"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var f (form/make-form
      (fn:> {:login ""})

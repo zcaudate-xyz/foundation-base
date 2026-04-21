@@ -82,7 +82,7 @@
 
   (collector [[:map inc]]
              [])
-  => fn? ^:hidden
+  => fn?
 
   (pipe (producer (range 5)
                   [[:map inc]])
@@ -110,7 +110,7 @@
   (<*>) => :stream/<*>)
 
 ^{:refer std.lib.stream/stream :added "3.0"}
-(fact "constructs a stream operation" ^:hidden
+(fact "constructs a stream operation"
 
   ;; pipe action
   (stream (range 5)

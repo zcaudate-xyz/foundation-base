@@ -68,8 +68,7 @@
 
 ^{:refer rt.basic.type-oneshot/invoke-ptr-oneshot.compile :adopt true :added "4.0"}
 (fact "compiles the pointer body"
-  ^:hidden
-  
+
   (ptr/with:input []
     (-> (p/rt-oneshot {:lang :lua
                        :layout :full})
@@ -102,11 +101,10 @@
 
 ^{:refer rt.basic.type-oneshot/sh-exec :added "4.0"}
 (fact "basic function for executing a shell process"
-  ^:hidden
-  
+
   (p/sh-exec ["python" "-c"] "print(1 + 1)" {})
   => "2"
-  
+
   (p/sh-exec ["luajit" "-e"] "print(1 + 1)" {})
   => "2"
 
@@ -115,7 +113,6 @@
 
 ^{:refer rt.basic.type-oneshot/raw-eval-oneshot :added "4.0"}
 (fact "evaluates a raw statement with oneshot"
-  ^:hidden
 
   (-> (p/rt-oneshot {:lang :lua})
       (p/raw-eval-oneshot "print(1 + 1)"))
@@ -127,14 +124,13 @@
 
 ^{:refer rt.basic.type-oneshot/invoke-ptr-oneshot :added "4.0"}
 (fact "gets the oneshow invoke working"
-  ^:hidden
-  
+
   (-> (p/rt-oneshot {:lang :lua})
       (p/invoke-ptr-oneshot +ptr-identity+ [123])
       (ptr/with:raw)
       (json/read))
   => {"value" 123, "type" "data"}
-  
+
   (-> (p/rt-oneshot {:lang :lua
                      :program :luajit})
       (p/invoke-ptr-oneshot +ptr-identity+ [123]))
@@ -147,7 +143,7 @@
       (ptr/with:raw)
       (json/read))
   => {"value" "[string \"local function L_core___identity_fn(x)...\"]:5: Hello", "type" "error"}
-  
+
 
   (-> (p/rt-oneshot {:lang :lua
                      :program :luajit
@@ -159,15 +155,13 @@
 
 ^{:refer rt.basic.type-oneshot/rt-oneshot-setup :added "4.0"}
 (fact "helper function for preparing oneshot params"
-  ^:hidden
-  
+
   (p/rt-oneshot-setup :lua :resty {} nil)
   => vector?)
 
 ^{:refer rt.basic.type-oneshot/rt-oneshot:create :added "4.0"}
 (fact "creates a oneshot runtime"
-  ^:hidden
-  
+
   (->> (p/rt-oneshot:create {:lang :lua
                              :program :luajit})
        (into {}))
@@ -189,7 +183,6 @@
                  (p/invoke-ptr-oneshot (ut/lang-pointer lang {:library +library-ext+})
                                        ['(+ 1 2 3 4)]))])]}
 (fact "creates a oneshot runtime"
-  ^:hidden
 
   (rt-oneshot :r)
   => ["(function (){\n  return(1 + 2 + 3 + 4);\n})()"

@@ -22,8 +22,7 @@
 
 ^{:refer xt.db.cache-view/tree-base :added "4.0"}
 (fact  "creates a tree base"
-  ^:hidden
-  
+
   (!.js
    (v/tree-base sample/Schema
                 "Currency"
@@ -40,8 +39,7 @@
   :setup [(def +select+
             (pg/bind-view data/currency-all-fiat))]}
 (fact "creates a select tree"
-  ^:hidden
-  
+
   (!.js
    (v/tree-select sample/Schema
                   (@! +select+)))
@@ -51,14 +49,13 @@
   :setup [(def +return+
             (pg/bind-view data/currency-default))]}
 (fact "creates a return tree"
-  ^:hidden
-  
+
   (!.js
    (v/tree-return sample/Schema
                   (@! +return+)
                   {}))
   => ["Currency" ["*/data"]]
-  
+
   (!.js
    (v/tree-return sample/Schema
                   (@! (pg/bind-view user/user-account-info))
@@ -69,8 +66,7 @@
 
 ^{:refer xt.db.cache-view/tree-combined :added "4.0"}
 (fact "creates a combined tree"
-  ^:hidden
-  
+
   (!.js
    (v/tree-combined sample/Schema
                     (@! +select+)
@@ -94,8 +90,7 @@
 
 ^{:refer xt.db.cache-view/query-select :added "4.0"}
 (fact "tree for the query-select"
-  ^:hidden
-  
+
   (!.js
    (v/query-select sample/Schema
                    (@! (pg/bind-view user/user-account-by-organisation))
@@ -106,8 +101,7 @@
 
 ^{:refer xt.db.cache-view/query-return :added "4.0"}
 (fact "tree for the query-return"
-  ^:hidden
-  
+
   (!.js
    (v/query-return sample/Schema
                    (@! (pg/bind-view user/user-account-info))
@@ -117,8 +111,7 @@
 
 ^{:refer xt.db.cache-view/query-return-bulk :added "4.0"}
 (fact  "tree for query-return"
-  ^:hidden
-  
+
   (!.js
    (v/query-return-bulk
     sample/Schema
@@ -129,8 +122,7 @@
 
 ^{:refer xt.db.cache-view/query-combined :added "4.0"}
 (fact "tree for query combined"
-  ^:hidden
-  
+
   (!.js
    (v/query-combined
     sample/Schema

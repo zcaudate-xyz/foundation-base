@@ -13,8 +13,7 @@
 
 ^{:refer js.blessed.frame-status/Status :added "4.0" :unchecked true}
 (fact "displays status"
-  ^:hidden
-  
+
   (defn.js StatusDemo
     []
     (var [busy setBusy] (r/local false))
@@ -58,5 +57,5 @@
                  :shrink true
                  :content (+ " Busy: " busy)
                  :onClick (fn:> (setBusy (not busy)))}]]]))
-  
+
   )

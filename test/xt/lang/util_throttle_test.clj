@@ -32,15 +32,14 @@
 
 ^{:refer xt.lang.util-throttle/throttle-create :added "4.0"}
 (fact "creates a throttle"
-  ^:hidden
-  
+
   (set (!.js
         (xt/x:obj-keys
          (throttle/throttle-create
           (fn [])
           nil))))
   => #{"handler" "queued" "now_fn" "active"}
-  
+
   (set (!.lua
         (xt/x:obj-keys
          (throttle/throttle-create
@@ -50,7 +49,6 @@
 
 ^{:refer xt.lang.util-throttle/throttle-run-async :added "4.0"}
 (fact "runs an async throttle"
-  ^:hidden
   (notify/wait-on :js
     (var out [])
     (var handler
@@ -66,7 +64,7 @@
     (var throttle (throttle/throttle-create handler nil))
     (throttle/throttle-run-async throttle 1))
   => [1]
-  
+
   (notify/wait-on :lua
     (var out [])
     (var handler
@@ -77,7 +75,7 @@
     (var throttle (throttle/throttle-create handler nil))
     (throttle/throttle-run-async throttle 1))
   => [1]
-  
+
   (!.py
    (:= (!:G THROTTLE_OUT) [])
    (var handler
@@ -88,14 +86,13 @@
           (xt/x:with-delay delayed-fn 100)))
     (var throttle (throttle/throttle-create handler nil))
     (throttle/throttle-run-async throttle 1 nil))
-  
+
   (do (Thread/sleep 200)
       (!.py (!:G THROTTLE_OUT)))
   => [1])
 
 ^{:refer xt.lang.util-throttle/throttle-run :added "4.0"}
 (fact "throttles a function so that it only runs a single thread"
-  ^:hidden
   ;;
   ;; JS
   ;;
@@ -118,7 +115,7 @@
     (throttle/throttle-run throttle 1)
     (throttle/throttle-run throttle 1))
   => [1]
-  
+
   (do (Thread/sleep 500)
       (!.js (!:G OUT)))
   => [1 1]
@@ -141,7 +138,7 @@
     (throttle/throttle-run throttle 1)
     (throttle/throttle-run throttle 1))
   => [1]
-  
+
   (do (Thread/sleep 500)
       (!.lua (!:G OUT)))
   => [1 1]
@@ -159,7 +156,7 @@
    (throttle/throttle-run throttle 1 nil)
    (throttle/throttle-run throttle 1 nil)
    (throttle/throttle-run throttle 1 nil))
-  
+
   (do (Thread/sleep 120)
       (!.py (!:G THROTTLE_OUT)))
   => [1 1]
@@ -173,7 +170,6 @@
 
 ^{:refer xt.lang.util-throttle/throttle-active :added "4.0"}
 (fact "gets the active ids in a throttle"
-  ^:hidden
   (notify/wait-on :js
     (var throttle)
     (var handler
@@ -195,7 +191,7 @@
     (throttle/throttle-run throttle 3))
   => [["1" "2" "3"]
       ["1" "2" "3"]]
-  
+
 
   (notify/wait-on :lua
     (var throttle)
@@ -227,7 +223,7 @@
    (throttle/throttle-run throttle 1 nil)
    (throttle/throttle-run throttle 2 nil)
    (throttle/throttle-run throttle 3 nil))
-  
+
   (do (Thread/sleep 50)
       (let [state (!.py [(throttle/throttle-active (!:G THROTTLE_STATE))
                          (throttle/throttle-waiting (!:G THROTTLE_STATE))])]

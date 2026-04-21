@@ -9,8 +9,7 @@
 
 ^{:refer std.block.heal.core/group-min-col :added "4.0"}
 (fact "gets the minimum column"
-  ^:hidden
-  
+
   (level/group-min-col
    [{:col 6}
     {}
@@ -25,8 +24,7 @@
 
 ^{:refer std.block.heal.core/group-entries :added "4.0"}
 (fact "groups entries by colation"
-  ^:hidden
-  
+
   (level/group-entries
    [{:type :code :line 504 :last-idx 15 :col 6}
     {:type :code :line 505 :last-idx 38}
@@ -90,8 +88,7 @@
 
 ^{:refer std.block.heal.core/group-blocks-single :added "4.0"}
 (fact "creates a single block"
-  ^:hidden
-    
+
   (level/group-blocks-single
    (:entries (level/group-blocks-prep
               (prose/join-lines
@@ -120,7 +117,7 @@
         :level 0,
         :col 9,
         :last true}]}
-  
+
   (level/group-blocks-single
    (:entries (level/group-blocks-prep
               (prose/join-lines
@@ -141,11 +138,10 @@
         :line [2 2],
         :level 0,
         :col 5}]})
-  
+
 ^{:refer std.block.heal.core/group-blocks-multi :added "4.0"}
 (fact "categorises the blocks"
-  ^:hidden
-  
+
   (level/group-blocks-multi
    (:entries (level/group-blocks-prep
               (prose/join-lines
@@ -175,7 +171,6 @@
 
 ^{:refer std.block.heal.core/group-blocks-prep-entries :added "4.0"}
 (fact "prepares the block entries for a file"
-  ^:hidden 
 
   (level/group-blocks-prep-entries
    (std.block.heal.parse/parse-delimiters
@@ -196,16 +191,15 @@
 
 ^{:refer std.block.heal.core/group-blocks-prep :added "4.0"}
 (fact "prepares the block entries for a file"
-  ^:hidden 
-  
-  
+
+
   (level/group-blocks-prep
    (prose/join-lines
     ["(:? ()"
      "    ())"
      "    nil {})"]))
   => map?
-  
+
   (level/group-blocks-prep
    (slurp "test-data/std.block.heal/cases/005_example.block"))
   => (contains
@@ -214,7 +208,6 @@
 
 ^{:refer std.block.heal.core/group-blocks :added "4.0"}
 (fact "groups the lines by colation sections"
-  ^:hidden
 
   (level/group-blocks
    (prose/join-lines
@@ -235,7 +228,7 @@
          :col 3,
          :last true}],
        :last true}]
-  
+
   (level/group-blocks
    (prose/join-lines
     ["(:? ()"
@@ -259,7 +252,7 @@
          :col 5}],
        :last true}]
 
-  
+
   (level/group-blocks
    "
 (:? (or )
@@ -295,7 +288,7 @@
            :col 6,
            :last true}]}],
        :last true}]
-  
+
   (level/group-blocks
    (prose/join-lines
     (take 10
@@ -363,7 +356,6 @@
 
 ^{:refer std.block.heal.core/get-block-lines :added "4.0"}
 (fact "gets the block lines"
-  ^:hidden
 
   (level/get-block-lines
    (clojure.string/split-lines
@@ -373,7 +365,7 @@
       ""
       "(l/script :js"
       "  {:require [[js.react :as r]"]
-  
+
   (level/get-block-lines
    (clojure.string/split-lines
     (slurp "test-data/std.block.heal/cases/005_example.block"))
@@ -385,7 +377,6 @@
 
 ^{:refer std.block.heal.core/get-errored-loop :added "4.0"}
 (fact "runs the check block loop"
-  ^:hidden
 
   (level/get-errored-loop
    (nth (level/group-blocks (slurp "test-data/std.block.heal/cases/005_example.block")) 2)
@@ -441,7 +432,7 @@
        :level 9,
        :col 8,
        :last true}})
-  
+
 ^{:refer std.block.heal.core/get-errored-raw :added "4.0"}
 (fact "helper function for get-errored"
 
@@ -469,8 +460,8 @@
         :line [5 5],
         :level 0,
         :col 9}}]
-  
-  
+
+
   (level/get-errored
    (prose/join-lines
     ["          [:% fg/Input"
@@ -491,7 +482,7 @@
         :line [2 2],
         :level 1,
         :col 23}}]
-  
+
   (level/get-errored
    (prose/join-lines
     [""
@@ -513,8 +504,8 @@
         :line [3 3],
         :level 1,
         :col 23}}]
-  
-  
+
+
   (level/get-errored
    (prose/join-lines
     [""
@@ -571,7 +562,6 @@
 
 ^{:refer std.block.heal.core/get-errored :added "4.0"}
 (fact "checks content for irregular blocks"
-  ^:hidden
 
   (level/get-errored
    (prose/join-lines
@@ -601,7 +591,7 @@
         :level 5,
         :col 23,
      :last true}}]
-  
+
 
   (level/get-errored
    (prose/join-lines
@@ -622,13 +612,13 @@
         :line [1 1],
         :level 2,
         :col 9}}]
-  
+
   (level/get-errored
    (prose/join-lines
     ["(  (+ a b"
      "  {} b))"]))
   => []
-  
+
   (level/get-errored
    (prose/join-lines
     ["(:? ()"
@@ -650,8 +640,8 @@
         :level 0,
         :col 11,
         :last true}}]
-  
-  
+
+
   (level/get-errored
    (prose/join-lines
     ["(:? ()"
@@ -672,8 +662,8 @@
         :line [2 2],
         :level 0,
         :col 5}}]
-  
-  
+
+
   (level/get-errored
    (prose/join-lines
     ["(:? ()"
@@ -695,7 +685,7 @@
         :level 0,
         :col 13,
         :last true}}]
-  
+
   (level/get-errored
    (prose/join-lines
     [""
@@ -871,8 +861,7 @@
 
 ^{:refer std.block.heal.core/heal-content-single-pass :added "4.0"}
 (fact "heals the content in a single pass"
-  ^:hidden
-  
+
   (clojure.string/split-lines
    (level/heal-content-single-pass
     (prose/join-lines
@@ -950,26 +939,25 @@
         ["      [:% fg/Label {:className \"text-[10px] text-gray-500 mb-1 block\"} \"Value\"]]"],
         :position 11,
         :count 1}}])
-  
+
 ^{:refer std.block.heal.core/heal-content :added "4.0"}
 (fact "allow multiple passes to heal the delimiter"
-  ^:hidden
-  
+
   (b/parse-root
    (level/heal-content
     (slurp "test-data/std.block.heal/cases/005_example.block")))
   => b/block?
-  
+
   (b/parse-root
    (level/heal-content
     (slurp "test-data/std.block.heal/cases/004_shorten.block")))
   => b/block?
-  
+
   (b/parse-root
    (level/heal-content
     (slurp "test-data/std.block.heal/cases/003_examples.block")))
   => b/block?
-  
+
   (b/parse-root
    (level/heal-content
     (slurp "test-data/std.block.heal/cases/002_complex.block")))
@@ -977,8 +965,7 @@
 
 ^{:refer std.block.heal.core/wrap-print-diff :added "4.0"}
 (fact "print wrapper for the heal function"
-  ^:hidden
-  
+
   (env/with-out-str
     ((level/wrap-print-diff level/heal-content-single-pass)
      (prose/join-lines
@@ -989,8 +976,7 @@
 
 ^{:refer std.block.heal.core/wrap-diff :added "4.0"}
 (fact "wraps the heal function to output the diff"
-  ^:hidden
-  
+
   ((level/wrap-diff level/heal-content-single-pass)
    (prose/join-lines
     ["(:? ()"
@@ -1002,36 +988,36 @@
 
 
 (comment
-  
+
   ((level/wrap-print-diff level/heal-content)
    (prose/join-lines
     ["(:? ()"
      "    ())"
      "    nil)"]))
-  
+
   ((level/wrap-print-diff level/heal-content)
    (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/states_triggers_panel2.clj"))
-  
+
   (std.block/parse-root
    ((level/wrap-print-diff level/heal-content)
     (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser3.clj")))
-  
+
   ((level/wrap-print-diff level/heal-content)
    (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser2.clj"))
-  
+
   (s/layout
    (read-string
     (str "["
          ((level/wrap-print-diff level/heal-content)
           (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser.clj"))
          "]")))
-  
+
   (read-string
    (str "["
         ((wrap-print-diff heal-content)
          (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser.clj"))
         "]"))
-  
+
   (read-string
    (str "["
         ((wrap-print-diff std.block.heal.tokens/heal-tokens)
@@ -1039,7 +1025,7 @@
           ((wrap-print-diff heal-content)
            (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser.clj"))))
         "]"))
-  
+
   (read-string
    (str "["
         (f/suppress
@@ -1047,7 +1033,7 @@
           ((wrap-print-diff heal-content)
            (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/states_triggers_panel.clj"))))
         "]"))
-  
+
   (read-string
    (str "["
         (level/heal-content
@@ -1058,28 +1044,28 @@
         (level/heal-content
          (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/states_triggers_panel.clj"))
         "]"))
-  
-  
+
+
   (level/heal-content
    )
-  
+
   (level/heal-content
    (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/states_triggers_panel2.clj")
-   
+
    )
-  
+
   (f/suppress
    ((wrap-print-diff core/heal)
     ((wrap-print-diff heal-content)
      (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/states_triggers_panel2.clj"))))
-  
-  
-  
+
+
+
   (doseq [f (keys
              (std.fs/list
               "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/"
               {:include [".clj$"]}))]
-    
+
     (env/p f)
     (try (read-string
           (str "["
@@ -1088,7 +1074,7 @@
                "]"))
          (catch Throwable t
            (env/p :FAILED))))
-  
+
   (doseq [f (keys
              (std.fs/list
               "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/"
@@ -1101,16 +1087,16 @@
          (env/p  f :SUCCESS)
          (catch Throwable t
            (env/p  f :FAILED))))
-  
+
   (level/heal-content
    (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/chat_input.clj"))
-  
+
   (doseq [f (keys
              (std.fs/list
               "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/"
               {:include [".clj$"]}))]
-    
-    
+
+
     (try (read-string
           (str "["
                (slurp f)
@@ -1124,24 +1110,24 @@
   (count
    (clojure.string/split-lines
     (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser.clj")))
-  
+
   (level/heal-content-single-pass
    (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser.clj"))
 
   (std.block/parse-root
    ((level/wrap-print-diff level/heal-content)
     (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/app.clj")))
-  
+
   (env/p (diff/->string
         (diff/diff
          (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser.clj")
          *new-content*
          )))
-  
-  
+
+
   (group-blocks
    (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser2.clj"))
-  
+
   (env/p
    (std.text.diff/->string
     (std.text.diff/diff
@@ -1156,8 +1142,8 @@
             (level/heal-content-single-pass
              (level/heal-content-single-pass
               (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser.clj")))))))))))))
-  
-   
+
+
 
    ((level/wrap-print-diff level/heal-content)
     ((level/wrap-print-diff level/heal-content)
@@ -1168,10 +1154,10 @@
          ((level/wrap-print-diff level/heal-content)
           ((level/wrap-print-diff level/heal-content)
            ))))))))
-  
+
   (level/heal-content
    (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser.clj"))
-  
+
   (std.block.heal/print-rainbow
    (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser.clj"))
   (get-errored

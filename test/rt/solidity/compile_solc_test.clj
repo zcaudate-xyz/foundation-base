@@ -23,16 +23,14 @@
 
 ^{:refer rt.solidity.compile-solc/compile-base-emit :added "4.0"}
 (fact "emits solidity given entries and interfaces"
-  ^:hidden
-  
+
   (compile/compile-base-emit
    [@test:hello]
    [])
   => vector?)
-  
+
 ^{:refer rt.solidity.compile-solc/compile-base-code :added "4.0"}
 (fact "compiles base code"
-  ^:hidden
 
   (compile/compile-base-code "function test__hello() pure public returns(string memory) {\n  return \"HELLO WORLD\";\n}"
                              {})
@@ -47,21 +45,18 @@
 
 ^{:refer rt.solidity.compile-solc/compile-ptr-prep :added "4.0"}
 (fact "exports a ptr"
-  ^:hidden
 
   (compile/compile-ptr-prep test:hello)
   => vector?)
 
 ^{:refer rt.solidity.compile-solc/compile-ptr-code :added "4.0"}
 (fact "compiles the pointer to code"
-  ^:hidden
 
   (compile/compile-ptr-code test:hello)
   => string?)
 
 ^{:refer rt.solidity.compile-solc/compile-module-prep :added "4.0"}
 (fact "preps a namespace or map for emit"
-  ^:hidden
 
   (compile-common/with:open-methods
    (compile/compile-module-prep nil))
@@ -69,7 +64,6 @@
 
 ^{:refer rt.solidity.compile-solc/compile-module-code :added "4.0"}
 (fact "compiles the contract code"
-  ^:hidden
 
   (compile-common/with:open-methods
    (compile/compile-module-code nil))
@@ -128,7 +122,7 @@
 
 ^{:refer rt.solidity.compile-solc/create-file-entry :added "4.0"}
 (comment "creates a file entry"
-  
+
   (compile/create-file-entry {}
                              {:name "USDT.sol"
                               :file "resources/assets/rt.solidity/example/USDT.sol"}))

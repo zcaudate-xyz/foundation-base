@@ -44,7 +44,6 @@
 ^{:refer std.time/with-timezone :added "3.0" :class [:time/zone]}
 (fact "returns the same instance in a different timezone"
   (t/with-timezone 0 "EST") => 0
-  ^:hidden
   (t/to-map (t/with-timezone (common/calendar (Date. 0)
                                               (TimeZone/getTimeZone "GMT"))
               "EST"))
@@ -57,7 +56,6 @@
 (fact "retrieves the meta-data for the time object"
   (t/time-meta TimeZone)
   => {:base :zone}
-  ^:hidden
   (t/time-meta Date)
   => (contains {:base :instant,
                 :map (contains {:from (contains {:proxy java.util.Calendar,
@@ -99,13 +97,11 @@
               {:timezone "Asia/Kolkata"
                :type Date})
   => #inst "1970-01-01T00:00:00.000-00:00"
-  ^:hidden
   (t/from-map {:type Long,
                :timezone "Asia/Kolkata", :long 0
                :year 1970, :month 1, :day 1,
                :hour 5, :minute 30 :second 0, :millisecond 0})
   => 0
-  ^:hidden
   (t/from-map {:type Long
                :timezone "Asia/Kolkata",
                :year 1970, :month 1, :day 1,
@@ -136,7 +132,6 @@
 ^{:refer std.time/month :added "3.0" :class [:time/access]}
 (fact "accesses the month representated by the instant"
   (t/month 0 {:timezone "GMT"}) => 1
-  ^:hidden
   (t/month (Date. 0) {:timezone "EST"}) => 12)
 
 ^{:refer std.time/day :added "3.0" :class [:time/access]}
@@ -186,7 +181,6 @@
 (fact "returns the beginning of unix epoch"
   (t/epoch {:type Date})
   => #inst "1970-01-01T00:00:00.000-00:00"
-  ^:hidden
   (t/epoch {:type clojure.lang.PersistentArrayMap :timezone "GMT"})
   {:type clojure.lang.PersistentArrayMap,
    :timezone "GMT", :long 0,
@@ -251,7 +245,6 @@
 (fact "adjust fields of a particular time"
   (t/adjust (Date. 0) {:year 2000 :second 10} {:timezone "GMT"})
   => #inst "2000-01-01T00:00:10.000-00:00"
-  ^:hidden
   (t/adjust {:year 1970, :month 1 :day 1, :day-of-week 4,
              :hour 0 :minute 0 :second 0 :millisecond 0,
              :timezone "GMT"}
@@ -269,7 +262,6 @@
   (t/truncate #inst "1989-12-28T12:34:00.000-00:00"
               :year {:timezone "GMT"})
   => #inst "1989-01-01T00:00:00.000-00:00"
-  ^:hidden
   (t/truncate (t/to-map #inst "1989-12-28T12:34:00.000-00:00" {:timezone "GMT"})
               :hour)
   => {:type clojure.lang.PersistentHashMap, :timezone "GMT", :long 630849600000,

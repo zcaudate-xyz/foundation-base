@@ -20,7 +20,6 @@
       (path/link? "test-scratch/project.lnk"))
   => true
 
-  ^:hidden
   (delete "test-scratch/project.lnk"))
 
 ^{:refer std.fs.api/create-tmpfile :added "3.0" :class [:operation]}

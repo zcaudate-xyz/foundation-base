@@ -48,7 +48,6 @@
 
 ^{:refer xt.cell.binding.model/unwrap-result :added "4.1"}
 (fact "unwraps service-layer [ok result] tuples"
-  ^:hidden
 
   (!.js
    [(binding-model/unwrap-result [true {"value" 1}])
@@ -58,7 +57,6 @@
 
 ^{:refer xt.cell.binding.model/make-view-context :added "4.1"}
 (fact "creates the runtime context for compiled handlers"
-  ^:hidden
 
   (!.js
    (binding-model/make-view-context
@@ -75,7 +73,6 @@
 
 ^{:refer xt.cell.binding.model/compile-main-handler :added "4.1"}
 (fact "compiles a local query handler"
-  ^:hidden
 
   (!.js
    (var schema (@! +schema+))
@@ -108,7 +105,6 @@
 
 ^{:refer xt.cell.binding.model/compile-remote-handler :added "4.1"}
 (fact "compiles a Supabase-backed remote handler"
-  ^:hidden
 
   (!.js
    (var schema (@! +schema+))
@@ -139,7 +135,6 @@
 
 ^{:refer xt.cell.binding.model/compile-sync-pipeline :added "4.1"}
 (fact "compiles the sync pipeline handler"
-  ^:hidden
 
   (!.js
    (var schema (@! +schema+))
@@ -167,7 +162,6 @@
 
 ^{:refer xt.cell.binding.model/compile-view-spec :added "4.1"}
 (fact "compiles a prepared descriptor into a kernel view spec"
-  ^:hidden
 
   (!.js
    (var schema (@! +schema+))

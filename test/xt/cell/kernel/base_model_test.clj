@@ -65,7 +65,6 @@
 
 ^{:refer xt.cell.kernel.base-model/wrap-cell-args :added "4.1"}
 (fact "prepends the cell link to handler args"
-  ^:hidden
 
   (!.js
    ((base-model/wrap-cell-args
@@ -83,7 +82,6 @@
 ^{:refer xt.cell.kernel.base-model/prep-view :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "prepares the view pipeline context"
-  ^:hidden
 
   (!.js
    (xtd/first
@@ -93,7 +91,6 @@
 ^{:refer xt.cell.kernel.base-model/get-view-dependents :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "finds the views that depend on a source view"
-  ^:hidden
 
   (!.js
    (base-model/get-view-dependents (-/CELL) "hello" "echo"))
@@ -102,7 +99,6 @@
 ^{:refer xt.cell.kernel.base-model/get-model-dependents :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "finds the models that depend on a source model"
-  ^:hidden
 
   (!.js
    (base-model/get-model-dependents (-/CELL) "hello"))
@@ -110,7 +106,6 @@
 
 ^{:refer xt.cell.kernel.base-model/run-tail-call :added "4.1"}
 (fact "runs dependency refresh only for successful accumulators"
-  ^:hidden
 
   (!.js
    (var out {})
@@ -151,7 +146,6 @@
 ^{:refer xt.cell.kernel.base-model/refresh-view-dependents :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "returns dependent views and queues them through the model throttle"
-  ^:hidden
 
   (!.js
    (base-model/refresh-view-dependents (-/CELL) "hello" "echo"))
@@ -183,7 +177,6 @@
 
 ^{:refer xt.cell.kernel.base-model/get-model-deps :added "4.1"}
 (fact "indexes view dependencies by model and view"
-  ^:hidden
 
   (!.js
    (base-model/get-model-deps
@@ -196,7 +189,6 @@
 ^{:refer xt.cell.kernel.base-model/get-unknown-deps :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "reports dependency paths that are not present in the cell"
-  ^:hidden
 
   (!.js
    (base-model/get-unknown-deps
@@ -211,7 +203,6 @@
 ^{:refer xt.cell.kernel.base-model/create-throttle :added "4.1"
   :setup [(!.js (-/reset-cell) true)]}
 (fact "creates a throttle wrapper for model refreshes"
-  ^:hidden
 
   (!.js
    (base-model/create-throttle (-/CELL) "hello" nil))
@@ -221,7 +212,6 @@
 ^{:refer xt.cell.kernel.base-model/create-view :added "4.1"
   :setup [(!.js (-/reset-cell) true)]}
 (fact "creates and initializes a view record"
-  ^:hidden
 
   (!.js
    (base-model/create-view
@@ -241,7 +231,6 @@
 ^{:refer xt.cell.kernel.base-model/add-model-attach :added "4.1"
   :setup [(!.js (-/reset-cell) true)]}
 (fact "attaches a model without triggering initialization"
-  ^:hidden
 
   (!.js
    (base-model/add-model-attach
@@ -255,7 +244,6 @@
 ^{:refer xt.cell.kernel.base-model/add-model :added "4.1"
   :setup [(!.js (-/reset-cell) true)]}
 (fact "adds a model and starts its initialization task"
-  ^:hidden
 
   (!.js
    (base-model/add-model
@@ -269,7 +257,6 @@
 ^{:refer xt.cell.kernel.base-model/remove-model :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "removes a model when there are no dependents"
-  ^:hidden
 
   (!.js
    (base-model/remove-model (-/CELL) "async"))
@@ -278,7 +265,6 @@
 ^{:refer xt.cell.kernel.base-model/remove-view :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "removes a view when there are no dependents"
-  ^:hidden
 
   (!.js
    (base-model/remove-view (-/CELL) "async" "delay"))
@@ -305,7 +291,6 @@
 ^{:refer xt.cell.kernel.base-model/trigger-model-raw :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "triggers matching views on a model"
-  ^:hidden
 
   (!.js
    (var model (base-impl/model-get (-/CELL) "hello"))
@@ -315,7 +300,6 @@
 ^{:refer xt.cell.kernel.base-model/trigger-model :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "triggers matching views for a named model"
-  ^:hidden
 
   (!.js
    (base-model/trigger-model (-/CELL) "hello" "refresh" {}))
@@ -330,7 +314,6 @@
 ^{:refer xt.cell.kernel.base-model/trigger-all :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "triggers matching views across all models in the cell"
-  ^:hidden
 
   (!.js
    (base-model/trigger-all (-/CELL) "refresh" {}))
@@ -341,7 +324,6 @@
 ^{:refer xt.cell.kernel.base-model/add-raw-callback :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "registers the cell raw callback on the underlying link"
-  ^:hidden
 
   (!.js
    [(base-model/remove-raw-callback (-/CELL))
@@ -354,7 +336,6 @@
 ^{:refer xt.cell.kernel.base-model/remove-raw-callback :added "4.1"
   :setup [(!.js (-/seed-cell) true)]}
 (fact "removes the cell raw callback from the underlying link"
-  ^:hidden
 
   (!.js
    (base-model/remove-raw-callback (-/CELL)))

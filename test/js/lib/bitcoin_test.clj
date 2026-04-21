@@ -6,8 +6,8 @@
 (l/script- :js
   {:runtime :basic
    :require  [[js.lib.bitcoin :as bc :include [:fn
-                                                :ecc     
-                                                :ecpair  
+                                                :ecc
+                                                :ecpair
                                                 :bip32
                                                 :bip39
                                                 :wif
@@ -46,24 +46,23 @@
 
 ^{:refer js.lib.bitcoin/wif-encode :added "4.0" :unchecked true}
 (fact "encodes a wallet interchange format"
-  ^:hidden
-  
+
   ;;
   ;; BITCOIN
   ;;
-  
+
   (!.js
    (var privateKey
         (Buffer.from "0000000000000000000000000000000000000000000000000000000000000001"
                      "hex"))
-   
+
    (bc/wif-encode 128 privateKey true))
   => "KwDiBf89QgGbjEhKnhXJuH7LrciVrZi3qYjgd9M7rFU73sVHnoWn"
-  
+
   ;;
   ;; DOGECOIN TESTNET
   ;;
-  
+
   (!.js
     (var privateKey
          (Buffer.from "5ef54e669cad68ae73ff6f25b80a28ac3be203db0fdcf6a7894f88b0f3b99c53"
@@ -73,8 +72,7 @@
 
 ^{:refer js.lib.bitcoin/wif-decode :added "4.0" :unchecked true}
 (fact "decodes a wallet interchange format"
-  ^:hidden
-  
+
   ;;
   ;; BITCOIN
   ;;
@@ -90,13 +88,13 @@
   => {"key" "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1",
       "version" 128,
       "compressed" true}
-  
-  
-  
+
+
+
   ;;
   ;; DOGECOIN TESTNET
   ;;
-  
+
   (!.js
    (var #{privateKey
           version
@@ -111,8 +109,7 @@
 
 ^{:refer js.lib.bitcoin/pair-from-wif :added "4.0" :unchecked true}
 (fact "gets public/private pair from wif"
-  ^:hidden
-  
+
   ;;
   ;; BITCOIN
   ;;
@@ -131,18 +128,18 @@
                    "pubKeyHash" 0, "scriptHash" 5, "wif" 128,
                    "bech32" "bc"},
        "address" "1BgGZ9tcN4rm9KBzDn7KprQz87SZ26SAMH"})
-  
-  
-  
+
+
+
   ;;
   ;; DOGECOIN TESTNET
   ;;
-  
+
   (!.js
    (var pair (bc/pair-from-wif "chvYoVjuvRgDxFZrm4TZRKKh1hoRdMKb8XnaWk1gpYBq27FSwyK5"
                                (@! +dogetestnet+)))
 
-   
+
     (xtd/obj-map (Bitcoin.payments.p2pkh {:pubkey (. pair publicKey)
                                          :network (@! +dogetestnet+)})
                (fn:> [x]
@@ -155,25 +152,24 @@
                   "messagePrefix" "\\x19Dogecoin Signed Message:\\n",
                    "pubKeyHash" 113, "scriptHash" 196, "wif" 241, "bip44" 3, "bech32" "td"},
        "address" "nWajkjBzFoB4rb646NWqDRop5nmyP6WHBU", })
-  
-  
+
+
   ;;
   ;; WIF TO HEX
   ;;
-  
+
   (!.js
    (var pair (bc/pair-from-wif "chvYoVjuvRgDxFZrm4TZRKKh1hoRdMKb8XnaWk1gpYBq27FSwyK5"
                                (@! +dogetestnet+)))
-   
-   
+
+
    (. pair publicKey
       (toString "hex")))
   => "2,196,236,199,51,114,195,214,32,8,254,41,99,212,6,76,1,84,116,33,239,106,71,199,86,223,65,209,145,21,107,129,146")
 
 ^{:refer js.lib.bitcoin/pair-from-random :added "4.0" :unchecked true}
 (fact "makes a random key"
-  ^:hidden
-  
+
   (!.js
    (var pair (bc/pair-from-random))
    [(. pair publicKey
@@ -188,7 +184,7 @@
   ;;
   ;; TO AND FROM WIF
   ;;
-  
+
   (!.js
    (var privateKey
         (Buffer.from "49d80a6f9116dabd33222b0afd3a0e99d06d3ec09df29fde460aee7fc9013cd4"
@@ -201,12 +197,12 @@
       privateKey
       (toString "hex")))
   => "73,216,10,111,145,22,218,189,51,34,43,10,253,58,14,153,208,109,62,192,157,242,159,222,70,10,238,127,201,1,60,212"
-  
+
   (!.js
    (var pair (bc/pair-from-wif "chDWHF7Hg6tZzrn1XYi5VFrqidNY51Bo8LEhPmLkHh4syZV3xfTG"
                                (@! +dogetestnet+)))
 
-   
+
     (xtd/obj-map (Bitcoin.payments.p2pkh {:pubkey (. pair publicKey)
                                          :network (@! +dogetestnet+)})
                (fn:> [x]
@@ -222,8 +218,7 @@
 
 ^{:refer js.lib.bitcoin/sign-message :added "4.0" :unchecked true}
 (fact "signs a message given wif"
-  ^:hidden
-  
+
   (!.js
    (bc/sign-message "HELLO WORLD"
                     "chDWHF7Hg6tZzrn1XYi5VFrqidNY51Bo8LEhPmLkHh4syZV3xfTG"
@@ -233,8 +228,7 @@
 
 ^{:refer js.lib.bitcoin/verify-message :added "4.0" :unchecked true}
 (fact "verifies a message given address and signature"
-  ^:hidden
-  
+
   (!.js
    (bc/verify-message "HELLO WORLD"
                       "naumocEu7HMf4z2CTQRp9NWpT8JGrYaYqp"
@@ -244,12 +238,11 @@
 
 ^{:refer js.lib.bitcoin/account-from-random :added "4.0" :unchecked true}
 (fact "generates an account from random"
-  ^:hidden
-  
+
   (!.js
    (bc/account-from-random (@! +dogetestnet+)))
   => map?
-  
+
   (comment
     {"output" "76a9144c4038c315eb884b8f2946889a0b3f1131e8983a88ac",
      "hash"   "4c4038c315eb884b8f2946889a0b3f1131e8983a",
@@ -269,7 +262,7 @@
   (!.js
    (bc/account-from-random (@! +dogenet+)))
   => map?
-  
+
   (comment
     {"output" "76a914120d3ff9417bef2451db0c5825e191342d3d604088ac",
      "hash" "120d3ff9417bef2451db0c5825e191342d3d6040",
@@ -291,8 +284,7 @@
 
 ^{:refer js.lib.bitcoin/build-sweep-tx :added "4.0" :unchecked true}
 (fact "builds a sweep tx"
-  ^:hidden
-  
+
   (!.js
    (bc/build-sweep-tx
      {:network (@! +dogetestnet+)
@@ -309,8 +301,7 @@
 
 ^{:refer js.lib.bitcoin/build-payment-tx :added "4.0" :unchecked true}
 (fact "builds a payment tx"
-  ^:hidden
-  
+
   (!.js
    (bc/build-payment-tx
      {:network (@! +dogetestnet+)

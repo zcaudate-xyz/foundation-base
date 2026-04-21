@@ -33,7 +33,6 @@
 
 ^{:refer xt.db-lua.sql-sqlite/CANARY :adopt true :added "4.0"}
 (fact "connects to an embedded sqlite file"
-  ^:hidden
 
   (!.lua
    (var conn (dbsql/connect {:constructor lua-sqlite/connect-constructor
@@ -43,7 +42,6 @@
 
 ^{:refer xt.db-lua.sql-sqlite/TABLE-CREATE :adopt true :added "4.0"}
 (fact "creates tables"
-  ^:hidden
 
   (!.lua
    (str/join "\n\n"

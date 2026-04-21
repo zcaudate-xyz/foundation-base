@@ -18,15 +18,13 @@
 
 ^{:refer js.lib.valtio/make :added "4.0" :unchecked true}
 (fact "makes a proxy with reset"
-  ^:hidden
-  
+
   (!.js
    (v/make (fn:> {:a 1 :b 2})))
   => {"a" 1, "b" 2})
 
 ^{:refer js.lib.valtio/reset :added "4.0" :unchecked true}
 (fact "resets proxy to original"
-  ^:hidden
 
   (!.js
    (v/reset (j/assign (v/make (fn:> {:a 1 :b 2}))

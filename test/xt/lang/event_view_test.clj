@@ -44,8 +44,7 @@
 
 ^{:refer xt.lang.event-view/list-listeners :adopt true :added "4.0"}
 (fact "lists all listeners"
-  ^:hidden
-  
+
   ^{:lang-exceptions
     {:dart
      {:form (!.dt
@@ -72,7 +71,7 @@
         (view/add-listener v "c3" (fn:>))
         (view/list-listeners v)))
   => #{"c3" "a1" "b2"}
-  
+
   (set (!.lua
         (var v (view/create-view
                 (fn:> [x] {:value x})
@@ -87,8 +86,7 @@
 
 ^{:refer xt.lang.event-view/pipeline-run-remote.errored :adopt true :added "4.0"}
 (fact "runs the pipeline"
-  ^:hidden
-  
+
   ^{:lang-exceptions
     {:dart
      {:form (notify/wait-on :dart
@@ -139,7 +137,7 @@
       "post" [false],
       "pre" [false],
       "::" "view.run"}
-  
+
   ^{:lang-exceptions
     {:dart
      {:form (notify/wait-on :dart
@@ -190,8 +188,7 @@
 
 ^{:refer xt.lang.event-view/wrap-args :added "4.0"}
 (fact "wraps handler for context args"
-  ^:hidden
-  
+
   (!.js
    ((view/wrap-args k/identity)
     {:args [1]}))
@@ -204,8 +201,7 @@
 
 ^{:refer xt.lang.event-view/check-disabled :added "4.0"}
 (fact "checks that view is disabled"
-  ^:hidden
-  
+
   (!.js
    [(view/check-disabled
      {})
@@ -228,8 +224,7 @@
 
 ^{:refer xt.lang.event-view/parse-args :added "4.0"}
 (fact "parses args from context"
-  ^:hidden
-  
+
   (!.js
    (view/parse-args {:input {:data [1 2 3]}}))
   => [1 2 3]
@@ -252,8 +247,7 @@
               "options" {},
               "listeners" {}}))]}
 (fact "creates a view"
-  ^:hidden
-  
+
   ^{:lang-exceptions
     {:dart
       {:form (!.dt
@@ -306,7 +300,7 @@
       "input" {"current" nil, "updated" nil, "default" "<function>"},
       "options" {},
       "listeners" {}}
-  
+
 
   (!.lua
    (xtd/tree-get-data
@@ -355,8 +349,7 @@
 
 ^{:refer xt.lang.event-view/view-context :added "4.0"}
 (fact "gets the view-context"
-  ^:hidden
-  
+
     ^{:lang-exceptions
       {:dart
        {:form (set
@@ -393,8 +386,7 @@
 
 ^{:refer xt.lang.event-view/add-listener :added "4.0"}
 (fact "adds a listener to the view"
-  ^:hidden
-  
+
    ^{:lang-exceptions
      {:dart
        {:form (!.dt
@@ -439,8 +431,7 @@
 
 ^{:refer xt.lang.event-view/get-input :added "4.0"}
 (fact "gets the view input record"
-  ^:hidden
-  
+
     ^{:lang-exceptions
       {:dart
        {:form (!.dt
@@ -478,8 +469,7 @@
 
 ^{:refer xt.lang.event-view/get-output :added "4.0"}
 (fact "gets the view output record"
-  ^:hidden
-  
+
     ^{:lang-exceptions
       {:dart
        {:form (!.dt
@@ -503,7 +493,7 @@
    (view/init-view v)
    (view/get-output v))
   => {"type" "output" "elapsed" nil, "current" nil, "updated" nil}
-  
+
   (!.lua
    (var v (view/create-view
     (fn:> [x] {:value x})
@@ -538,8 +528,7 @@
 
 ^{:refer xt.lang.event-view/set-input :added "4.0"}
 (fact "sets the input"
-  ^:hidden
-  
+
    ^{:lang-exceptions
      {:dart
       {:form (notify/wait-on-call
@@ -575,7 +564,7 @@
       {"type" "view.input",
        "meta" {"listener/id" "a1", "listener/type" "view"},
        "data" map?})
-  
+
   (notify/wait-on :lua
     (var v (view/create-view
     (fn:> [x] {:value x})
@@ -592,8 +581,7 @@
 
 ^{:refer xt.lang.event-view/set-output :added "4.0"}
 (fact "sets the output"
-  ^:hidden
-  
+
    ^{:lang-exceptions
      {:dart
       {:form (notify/wait-on-call
@@ -670,8 +658,7 @@
 
 ^{:refer xt.lang.event-view/pipeline-run :added "4.0"}
 (fact "runs the pipeline"
-  ^:hidden
-  
+
   ^{:lang-exceptions
     {:dart
       {:form (!.dt
@@ -718,7 +705,7 @@
   => {"::" "view.run"
       "pre" [false],
       "main" [true {"value" 3}]
-      "post" [false]}  
+      "post" [false]}
 
   (!.lua
    (var v (view/create-view
@@ -747,8 +734,7 @@
 
 ^{:refer xt.lang.event-view/pipeline-run-remote :added "4.0"}
 (fact "runs the remote pipeline"
-  ^:hidden
-  
+
   ^{:lang-exceptions
     {:dart
       {:form (!.dt
@@ -794,7 +780,7 @@
       "pre" [false]
       "remote" [true {"value" 3}],
       "post" [false],}
-  
+
 
   (!.lua
    (var v (view/create-view
@@ -819,8 +805,7 @@
 
 ^{:refer xt.lang.event-view/pipeline-run-sync :added "4.0"}
 (fact "runs the sync pipeline"
-  ^:hidden
-  
+
   ^{:lang-exceptions
     {:dart
       {:form (!.dt
@@ -866,7 +851,7 @@
       "pre" [false]
       "sync" [true {"value" 3}],
       "post" [false],}
-  
+
 
   (!.lua
    (var v (view/create-view
@@ -891,7 +876,6 @@
 
 ^{:refer xt.lang.event-view/get-with-lookup :added "0.1"}
 (fact "creates a results vector and a lookup table"
-  ^:hidden
 
   (!.js
    (view/get-with-lookup
@@ -913,8 +897,7 @@
 
 ^{:refer xt.lang.event-view/sorted-lookup :added "0.1"}
 (fact "sorted lookup for region data"
-  ^:hidden
-  
+
   (!.js
    ((view/sorted-lookup "name")
     [{:id "A" :name "a"}
@@ -934,8 +917,7 @@
 
 ^{:refer xt.lang.event-view/group-by-lookup :added "0.1"}
 (fact "creates group-by lookup"
-  ^:hidden
-  
+
   (!.js
    ((view/group-by-lookup "name")
     [{:id "A" :name "a"}

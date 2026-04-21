@@ -94,10 +94,10 @@
 
   (container-height (construct/block []))
   => 0
-  
+
   (container-height (construct/block [(construct/newline)]))
   => 1
-  
+
   (container-height (construct/block [(construct/newline)
                                       (construct/newline)]))
   => 2)
@@ -147,8 +147,7 @@
 
 ^{:refer std.block.type/code-block? :added "4.0"}
 (fact "checks if a block can be representated as code"
-  ^:hidden
-  
+
   (code-block? (construct/void))
   => false
 

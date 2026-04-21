@@ -38,7 +38,6 @@
                     :pipeline {:pre-transform {:account {:name "Bob"}}}}
                    {:normalise [transform/wrap-model-pre-transform]})
   => {:account {:name "Bob"}}
-  ^:hidden
   (graph/normalise {:account/orders #{{:number 1 :items {:name "one"}}
                                       {:number 2 :items {:name "two"}}}}
                    {:schema (schema/schema examples/account-orders-items-image)

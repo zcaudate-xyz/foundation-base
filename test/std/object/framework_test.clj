@@ -31,7 +31,7 @@
     org.eclipse.jgit.revwalk.RevCommit
    {:tag "commit"
     :include [:commit-time :name :author-ident :full-message]})
-  
+
   (framework/map-like
    org.eclipse.jgit.lib.PersonIdent
    {:tag "person"
@@ -64,7 +64,6 @@
 
   (framework/unextend org.eclipse.jgit.lib.PersonIdent)
   ;;=> [[#multifn[-meta-read 0x4ead3109] nil #multifn[print-method 0xcd219d4]]]
-  ^:hidden
   (framework/map-like
    org.eclipse.jgit.lib.PersonIdent
    {:tag "person"

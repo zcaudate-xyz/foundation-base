@@ -51,14 +51,14 @@
 
 ^{:refer xt.db.sql-manage/table-create.sqlite :adopt true :added "4.0"}
 (fact "workflow for sqlite-wasm"
-  
+
   (notify/wait-on :js
    (dbsql/connect {:constructor js-sqlite/connect-constructor}
                   {:success (fn [conn]
                               (:= (!:G DB) conn)
                               (repl/notify true))}))
   => true
-  
+
   (!.js
    (dbsql/query-sync DB
                      (str/join "\n\n"
@@ -80,7 +80,7 @@
                                                    (ut/sqlite-opts nil))))
    true)
   => true
-  
+
   (!.js
     (dbsql/query-sync DB "SELECT name FROM sqlite_schema where type='table'"))
   => [{"values"
@@ -98,7 +98,7 @@
         ["RegionState"]
         ["RegionCity"]],
        "columns" ["name"]}]
-  
+
   (!.js
    (dbsql/query-sync DB "pragma table_info('Currency')"))
   => [{"columns" ["cid" "name" "type" "notnull" "dflt_value" "pk"],
@@ -110,7 +110,7 @@
                  [5 "name" "TEXT" 0 nil 0]
                  [6 "plural" "TEXT" 0 nil 0]
                  [7 "description" "TEXT" 0 nil 0]]}]
-  
+
   (set (!.js
         (-> (dbsql/query-sync DB
                               (graph/select sample/Schema
@@ -128,7 +128,7 @@
         "id" "63acfd25-4b1b-4de4-aa82-909019c95591"}
        {"currency" [{"id" "USD"}],
         "id" "9e576e3e-c73e-4d18-92b4-f975c1bed3d4"}}
-  
+
   (!.js
    (-> (dbsql/query-sync DB
                          (graph/select sample/Schema
@@ -215,8 +215,7 @@
 
 ^{:refer xt.db.sql-manage/table-create-column :added "4.0"}
 (fact "column creation function"
-  ^:hidden
-  
+
   (!.js
    [(manage/table-create-column sample/Schema
                                 (xtd/get-in sample/Schema
@@ -253,7 +252,7 @@
   => ["\"id\" text PRIMARY KEY"
       "\"id\" citext PRIMARY KEY"]
 
-  
+
   (!.js
    [(manage/table-create-column sample/Schema
                                 (xtd/get-in sample/Schema
@@ -279,7 +278,7 @@
   => ["\"account_id\" text REFERENCES \"UserAccount\""
       "\"account_id\" uuid REFERENCES \"scratch-sample-db\".\"UserAccount\""]
 
-  
+
 
   (!.py
    [(manage/table-create-column sample/Schema
@@ -321,8 +320,7 @@
              "  \"detail\" text"
              ");"))]}
 (fact "emits a table create string"
-  ^:hidden
-  
+
   (!.js
    [(manage/table-create sample/Schema
                          "Currency"
@@ -355,8 +353,7 @@
 
 ^{:refer xt.db.sql-manage/table-create-all :added "4.0"}
 (fact "creates all tables from schema"
-  ^:hidden
-  
+
   (def +table-all+
     (!.js
      (manage/table-create-all sample/Schema
@@ -377,8 +374,7 @@
 
 ^{:refer xt.db.sql-manage/table-drop :added "4.0"}
 (fact "creates a table statement"
-  ^:hidden
-  
+
   (!.js
    (manage/table-drop sample/Schema
                       "Currency"
@@ -413,13 +409,12 @@
              "DROP TABLE IF EXISTS \"UserProfile\";"
              "DROP TABLE IF EXISTS \"UserAccount\";"])]}
 (fact "drops all tables"
-  ^:hidden
-  
+
   (!.js
    (manage/table-drop-all sample/Schema
                           sample/SchemaLookup
                           (ut/sqlite-opts nil)))
-  
+
 
   (!.lua
    (manage/table-drop-all sample/Schema

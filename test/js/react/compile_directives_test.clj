@@ -4,8 +4,7 @@
 
 ^{:refer js.react.compile-directives/compile-ui-tailwind :added "4.0" :unchecked true}
 (fact "templates the layout controls"
-  ^:hidden
-  
+
   (d/compile-ui-tailwind
    [:*/pad {:class ["hello"]}]
    ["grow"])
@@ -24,7 +23,6 @@
 
 ^{:refer js.react.compile-directives/compile-directives :added "4.0" :unchecked true}
 (fact "templates the control directives"
-  ^:hidden
 
   (d/compile-directives
    [:*/v  {:gap 3
@@ -37,7 +35,7 @@
            :h :full}]
    {})
   => [:div {:class ["flex" "flex-row" "grow" "gap-3" "h-full"]}]
-  
+
   (d/compile-directives
    '[:*/for [[i p] pages]
      [:div

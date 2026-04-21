@@ -13,8 +13,7 @@
 
 ^{:refer rt.redis/generate-script :added "4.0"}
 (fact "generates a script given a pointer"
-  ^:hidden
-  
+
   (generate-script kmi.queue.list/mq-list-group-init)
   => string?)
 

@@ -34,8 +34,7 @@
 
 ^{:refer xt.lang.util-handle/plugin-timing :added "4.0"}
 (fact "plugin timing"
-  ^:hidden
-  
+
   (!.js
    (handle/plugin-timing {}))
   => {"output" {}, "name" "timing"}
@@ -45,12 +44,11 @@
 
 ^{:refer xt.lang.util-handle/plugin-counts :added "4.0"}
 (fact "plugin counts"
-  ^:hidden
-  
+
   (!.js
    (handle/plugin-counts {}))
   => {"output" {"success" 0, "error" 0}, "name" "counts"}
-  
+
   (!.lua
    (xtd/tree-get-spec (handle/plugin-counts {})))
   => {"output" {"success" "number", "error" "number"},
@@ -61,8 +59,7 @@
 
 ^{:refer xt.lang.util-handle/to-handle-callback :added "4.0"}
 (fact "adapts a cb map to the handle callback"
-  ^:hidden
-  
+
   (!.js
    (handle/to-handle-callback {:success "A"
                                :error   "B"
@@ -76,8 +73,7 @@
 
 ^{:refer xt.lang.util-handle/new-handle :added "4.0"}
 (fact "creates a new handle"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var T (handle/new-handle (fn [] (return 1))
                             [handle/plugin-counts

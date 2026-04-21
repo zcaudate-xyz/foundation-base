@@ -83,7 +83,6 @@
 
 ^{:refer code.framework.link/collect-linkages :added "3.0"}
 (fact "collects all imports and exports of a package"
-  ^:hidden
 
   (-> -packages-
       (collect-entries -lookups-)
@@ -94,8 +93,7 @@
 
 ^{:refer code.framework.link/collect-internal-deps :added "3.0"}
 (fact "collects all internal dependencies"
-  ^:hidden
-  
+
   (-> -packages-
       (collect-entries -lookups-)
       (collect-linkages -lookups-)
@@ -114,7 +112,6 @@
 
 ^{:refer code.framework.link/collect-transfers :added "3.0"}
 (fact "collects all files that are packaged"
-  ^:hidden
 
   (-> -packages-
       (collect-entries -lookups-)
@@ -127,7 +124,6 @@
 
 ^{:refer code.framework.link/collect :added "3.0"}
 (fact "collects comprehensive project information, including dependencies, exports, and imports, given package and file lookups"
-  ^:hidden
   (-> (collect -packages- -lookups- (project/project))
       (get 'xyz.zcaudate/std.lib)
       ((comp sort keys)))

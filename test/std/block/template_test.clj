@@ -25,8 +25,7 @@
 
 ^{:refer std.block.template/get-template-params :added "4.0"}
 (fact "gets the template params in the query"
-  ^:hidden
-  
+
   (gen/get-template-params
    (b/parse-first TEMPLATE_QUERY))
   => '((unquote return)
@@ -43,8 +42,7 @@
 
 ^{:refer std.block.template/fill-template :added "4.0"}
 (fact "fills out the template"
-  ^:hidden
-  
+
   (clojure.string/split-lines
    (gen/fill-template
     (gen/get-template TEMPLATE_QUERY)
@@ -69,7 +67,7 @@
       zip/step-outside-most
       zip/step-inside
       (nav/string))
-  
+
   (-> (nav/parse-first
        PUBLIC_QUERY)
       (nav/find-next-token 'unquote)
@@ -85,9 +83,9 @@
          (drop 1)
          (take-while identity)
          (map (comp nav/value nav/down))))
-  
-  
-  
+
+
+
   (-> (nav/parse-first
        PUBLIC_QUERY)
       (nav/find-next (fn [block]
@@ -110,8 +108,8 @@
 (defn.pg ^{:%% :sql
            :- ~return
            :api/meta ~meta-entry}
-  ~sym 
-  [] 
+  ~sym
+  []
   (~name (szndb.core.fn-util/auth-uid)))")
 
 

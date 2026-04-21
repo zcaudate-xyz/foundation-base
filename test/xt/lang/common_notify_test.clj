@@ -41,8 +41,7 @@
 
 ^{:refer xt.lang.common-notify/notify-ceremony :added "4.0"}
 (fact "creates the ceremony in order to get the port and method type"
-  ^:hidden
-  
+
   (notify/notify-ceremony (assoc (l/rt :js)
                                  :type :basic))
   => [(:id (l/rt :js))
@@ -56,8 +55,7 @@
 
 ^{:refer xt.lang.common-notify/wait-on-call :added "4.0"}
 (fact "generic wait-on-helper for oneshots"
-  ^:hidden
-  
+
   (str (notify/wait-on-call
        (fn []
          (http/post (str "http://127.0.0.1:" (:http-port (l/default-notify)))
@@ -72,8 +70,7 @@
 
 ^{:refer xt.lang.common-notify/wait-on :added "4.0"}
 (fact "sets up a code context and waits for oneshot notification"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (repl/notify 1))
   => 1
@@ -82,11 +79,11 @@
     (repl/notify 1))
   => 1
 
-  
+
   (notify/wait-on :python
     (repl/notify 1))
   => 1
-  
+
   (notify/wait-on :r
     (repl/notify 1))
   => 1)
@@ -94,8 +91,7 @@
 ^{:refer xt.lang.common-notify/captured :added "4.0"
   :setup [(notify/captured:clear-all)]}
 (fact "gets captured results"
-  ^:hidden
-  
+
   (do (notify/wait-on :js
         (repl/capture {:from "js"})
         (repl/notify 1))

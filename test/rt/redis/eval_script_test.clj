@@ -18,15 +18,13 @@
 
 ^{:refer rt.redis.eval-script/raw-compile-form :added "4.0"}
 (fact "converts a ptr into a form"
-  ^:hidden
-  
+
   (raw-compile-form redis/scan-sub)
   => '(return (kmi.redis/scan-sub (. KEYS [1]))))
 
 ^{:refer rt.redis.eval-script/raw-compile :added "4.0"}
 (fact "compiles a function as body and sha"
-  ^:hidden
-  
+
   (raw-compile redis/scan-sub)
   => {:body
       (prose/join-lines
@@ -90,8 +88,7 @@
 
 ^{:refer rt.redis.eval-script/rt-install-fn :added "4.0"}
 (fact "retries the function if not installed"
-  ^:hidden
-  
+
   (with-redefs [script/script:load (fn [& _] :load)
                 script/script:evalsha (fn [& _] :eval)]
     ((rt-install-fn {} "sha" "body" [] []) (Exception. "NOSCRIPT")))
@@ -103,8 +100,7 @@
              (cc/req -client- ["SCRIPT" "FLUSH"])]
   :teardown [(component/stop -client-)]}
 (fact "creates a sha call"
-  ^:hidden
-  
+
   (with-redefs [ptr/get-entry (fn [_] {:rt/redis {:nkeys 0}})
                 raw-compile (fn [_] {:body "return 1" :sha "sha"})
                 raw-prep-in-fn (fn [_ args] [[] args])
