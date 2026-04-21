@@ -1036,8 +1036,8 @@
 ^{:refer xt.lang.common-spec/x:arr-map :added "4.1"}
 (fact "maps an array"
 
-  (!.js
-    (xt/x:arr-map ["a" "b" "c"] (fn [e] (return (* e 2)))))
+  ^*(!.js
+      (xt/x:arr-map ["a" "b" "c"] (fn [e] (return (* e 2)))))
   => [2 4 6])
 
 ^{:refer xt.lang.common-spec/x:arr-assign :added "4.1"}
@@ -1061,41 +1061,60 @@
 (fact "filters an array"
 
   (!.js
-    (xt/x:arr-filter ["a" "b" "c" "d"] (fn [e] (return (xt/x:even? e)))))
+    (xt/x:arr-filter [2 3 4 5] (fn [e] (return (xt/x:even? e)))))
   => [2 4])
 
 ^{:refer xt.lang.common-spec/x:arr-foldl :added "4.1"}
 (fact "folds arrays from the left"
+
   (!.js
-    (xt/x:arr-foldl ["a" "b" "c"]
+    (xt/x:arr-foldl [1 2 3 4 5]
                     (fn [out e] (return (+ out e)))
                     0))
-  => 6)
+  => 15)
 
 ^{:refer xt.lang.common-spec/x:arr-foldr :added "4.1"}
 (fact "folds arrays from the right"
+
   (!.js
-    (xt/x:arr-foldr ["a" "b" "c"]
-                    (fn [out e] (return (+ (* 10 out) e)))
-                    0))
-  => 321)
+    (xt/x:arr-foldr ["a" "b" "c" "d" "e"]
+                    (fn [out e] (return (xt/x:cat out e)))
+                    ""))
+  => "edcba")
 
 ^{:refer xt.lang.common-spec/x:arr-find :added "4.1"}
 (fact "keeps the find wrapper pointed at the canonical op"
+
   (:arglists (meta #'xt/x:arr-find))
   => '([arr pred]))
 
 ^{:refer xt.lang.common-spec/x:is-function? :added "4.1"}
 (fact "recognises function values"
+
   (!.js
     (xt/x:is-function? (fn [x] (return x))))
   => true)
 
 ^{:refer xt.lang.common-spec/x:callback :added "4.1"}
-(fact "returns the empty callback token in lua"
-  (!.js
-    (xt/x:nil? (xt/x:callback)))
-  => true)
+(fact "dispatches node-style callbacks through for:return"
+
+  [(!.js
+     (var out nil)
+     (var success (fn [cb]
+                    (cb nil "OK")))
+     (xt/for:return [[ret err] (success (xt/x:callback))]
+       {:success (:= out ret)
+        :error   (:= out err)})
+     out)
+   (!.js
+     (var out nil)
+     (var failure (fn [cb]
+                    (cb "ERR" nil)))
+     (xt/for:return [[ret err] (failure (xt/x:callback))]
+       {:success (:= out ret)
+        :error   (:= out err)})
+     out)]
+  => ["OK" "ERR"])
 
 ^{:refer xt.lang.common-spec/x:return-run :added "4.1"}
 (fact "can be used directly inside for:return"
@@ -1110,109 +1129,200 @@
   => "ERR")
 
 ^{:refer xt.lang.common-spec/x:future-run :added "4.1"}
-(fact "expands and emits a lua future runner"
-  (emits-lua? '(x:future-run thunk) #"state")
-  => true)
+(fact "runs a promise-returning thunk"
+
+  (notify/wait-on :js
+    (-> (xt/x:future-run (fn []
+                           (return "OK")))
+        (xt/x:future-then (repl/>notify))))
+  => "OK")
 
 ^{:refer xt.lang.common-spec/x:future-then :added "4.1"}
-(fact "expands and emits a lua future continuation"
-  (emits-lua? '(x:future-then task on-ok) #"pcall")
-  => true)
+(fact "chains promise continuations"
+  (notify/wait-on :js
+    (-> (xt/x:future-then (xt/x:future-run (fn []
+                                             (return 2)))
+                          (fn [v]
+                            (return (* v 3))))
+        (. (then (repl/>notify)))))
+  => 6)
 
 ^{:refer xt.lang.common-spec/x:future-catch :added "4.1"}
-(fact "expands and emits a lua future error handler"
-  (emits-lua? '(x:future-catch task on-err) #"pcall")
-  => true)
+(fact "handles rejected futures"
+  (notify/wait-on :js
+    (-> (xt/x:future-catch (xt/x:future-run (fn []
+                                              (throw "ERR")))
+                           (fn [e]
+                             (return (+ e "!"))))
+        (. (then (repl/>notify)))))
+  => "ERR!")
 
 ^{:refer xt.lang.common-spec/x:future-finally :added "4.1"}
-(fact "expands and emits a lua future finalizer"
-  (emits-lua? '(x:future-finally task on-done) #"return")
-  => true)
+(fact "runs finalizers after completion"
+  (notify/wait-on :js
+    (do (:= (!:G __COMMON_SPEC_FINALLY__) [])
+        (-> (xt/x:future-finally (xt/x:future-run (fn []
+                                                    (return 3)))
+                                 (fn []
+                                   (xt/x:arr-push (!:G __COMMON_SPEC_FINALLY__) "done")))
+            (. (then (fn [v]
+                       (repl/notify [v (!:G __COMMON_SPEC_FINALLY__)])))))))
+  => [3 ["done"]])
 
 ^{:refer xt.lang.common-spec/x:future-cancel :added "4.1"}
-(fact "expands and emits a lua future cancellation"
-  (emits-lua? '(x:future-cancel task) #"cancelled")
-  => true)
+(fact "returns nil when cancellation is unsupported"
+  (!.js
+    (xt/x:future-cancel (xt/x:future-run (fn []
+                                           (return 1)))))
+  => nil)
 
 ^{:refer xt.lang.common-spec/x:future-status :added "4.1"}
-(fact "expands and emits a lua future status lookup"
-  (emits-lua? '(x:future-status task) #"state")
-  => true)
+(fact "reports pending status before resolution"
+  (!.js
+    (var task (xt/x:future-from-async
+               (fn [resolve reject]
+                 (setTimeout (fn []
+                               (resolve "OK"))
+                             50))))
+    (xt/x:future-status task))
+  => "pending")
 
 ^{:refer xt.lang.common-spec/x:future-await :added "4.1"}
-(fact "expands and emits a lua future await"
-  (emits-lua? '(x:future-await task 1000 default) #"default")
-  => true)
+(fact "passes through the awaited future in js"
+  (notify/wait-on :js
+    (-> (xt/x:future-await (xt/x:future-run (fn []
+                                              (return "OK")))
+                           1000
+                           "MISS")
+        (. (then (repl/>notify)))))
+  => "OK")
 
 ^{:refer xt.lang.common-spec/x:future-from-async :added "4.1"}
-(fact "expands and emits a lua async future bridge"
-  (emits-lua? '(x:future-from-async executor) #"executor")
-  => true)
+(fact "bridges executor-style callbacks into promises"
+  (notify/wait-on :js
+    (-> (xt/x:future-from-async (fn [resolve reject]
+                                  (resolve "ASYNC")))
+        (. (then (repl/>notify)))))
+  => "ASYNC")
 
 ^{:refer xt.lang.common-spec/x:eval :added "4.1"}
-(fact "expands and emits a lua eval form"
-  (emits-lua? '(x:eval "1 + 1") #"loadstring")
-  => true)
+(fact "evaluates javascript expressions"
+  (!.js
+    (xt/x:eval "1 + 1"))
+  => 2)
 
 ^{:refer xt.lang.common-spec/x:apply :added "4.1"}
-(fact "expands and emits a lua apply form"
-  (emits-lua? '(x:apply f args) #"unpack")
-  => true)
+(fact "applies array arguments to functions"
+  (!.js
+    (xt/x:apply (fn [a b c]
+                  (return (+ a b c)))
+                [1 2 3]))
+  => 6)
 
 ^{:refer xt.lang.common-spec/x:iter-from-obj :added "4.1"}
-(fact "expands and emits an object iterator"
-  (emits-lua? '(x:iter-from-obj obj) #"coroutine\.wrap")
-  => true)
+(fact "creates iterators over object pairs"
+  (set
+   (!.js
+     (var out [])
+     (xt/for:iter [e (xt/x:iter-from-obj {:a 1 :b 2})]
+       (xt/x:arr-push out e))
+     out))
+  => #{["a" 1] ["b" 2]})
 
 ^{:refer xt.lang.common-spec/x:iter-from-arr :added "4.1"}
-(fact "expands and emits an array iterator"
-  (emits-lua? '(x:iter-from-arr arr) #"coroutine\.wrap")
-  => true)
+(fact "creates iterators over arrays"
+  (!.js
+    (var out [])
+    (xt/for:iter [e (xt/x:iter-from-arr [1 2 3])]
+      (xt/x:arr-push out e))
+    out)
+  => [1 2 3])
 
 ^{:refer xt.lang.common-spec/x:iter-from :added "4.1"}
-(fact "expands and emits a generic iterator"
-  (emits-lua? '(x:iter-from obj) #"coroutine\.wrap")
-  => true)
+(fact "creates generic iterators from iterable values"
+  (!.js
+    (var out [])
+    (xt/for:iter [e (xt/x:iter-from [2 4 6])]
+      (xt/x:arr-push out e))
+    out)
+  => [2 4 6])
 
 ^{:refer xt.lang.common-spec/x:iter-eq :added "4.1"}
-(fact "expands and emits iterator equality checks"
-  (emits-lua? '(x:iter-eq it0 it1 eq-fn) #"for")
-  => true)
+(fact "checks iterator equality in js"
+  (!.js
+    [(xt/x:iter-eq (xt/x:iter-from-arr [1 2 3])
+                   (xt/x:iter-from-arr [1 2 3])
+                   (fn [a b]
+                     (return (== a b))))
+     (xt/x:iter-eq (xt/x:iter-from-arr [1 2 3])
+                   (xt/x:iter-from-arr [1 2 4])
+                   (fn [a b]
+                     (return (== a b))))])
+  => [true false])
 
 ^{:refer xt.lang.common-spec/x:iter-null :added "4.1"}
-(fact "expands and emits an empty iterator"
-  (emits-lua? '(x:iter-null) #"coroutine\.wrap")
+(fact "creates empty iterators"
+  (!.js
+    (. (xt/x:iter-next (xt/x:iter-null)) ["done"]))
   => true)
 
 ^{:refer xt.lang.common-spec/x:iter-next :added "4.1"}
-(fact "expands and emits an iterator advance call"
-  (emits-lua? '(x:iter-next it) #"it")
-  => true)
+(fact "advances iterators"
+  (!.js
+    (. (xt/x:iter-next (xt/x:iter-from-arr [1 2 3])) ["value"]))
+  => 1)
 
 ^{:refer xt.lang.common-spec/x:iter-has? :added "4.1"}
-(fact "expands and emits an iterator predicate"
-  (emits-lua? '(x:iter-has? it) #"iterator")
-  => true)
+(fact "checks whether values are iterable"
+  (!.js
+    [(xt/x:iter-has? [1 2 3])
+     (xt/x:iter-has? {:a 1})])
+  => [true false])
 
 ^{:refer xt.lang.common-spec/x:iter-native? :added "4.1"}
-(fact "expands and emits a native iterator predicate"
-  (emits-lua? '(x:iter-native? it) #"type")
-  => true)
+(fact "checks whether values are iterator instances"
+  (!.js
+    [(xt/x:iter-native? (xt/x:iter-from-arr [1 2 3]))
+     (xt/x:iter-native? [1 2 3])])
+  => [true false])
 
 ^{:refer xt.lang.common-spec/x:return-encode :added "4.1"}
-(fact "expands and emits the lua return encoder"
-  (emits-lua? '(x:return-encode out "id" "key") #"cjson\.encode")
-  => true)
+(fact "encodes return payloads as json"
+  (!.js
+    (xt/x:json-decode (xt/x:return-encode {:a 1} "id" "key")))
+  => {"id" "id"
+      "key" "key"
+      "type" "data"
+      "value" {"a" 1}})
 
 ^{:refer xt.lang.common-spec/x:return-wrap :added "4.1"}
-(fact "expands and emits the lua return wrapper"
-  (emits-lua? '(x:return-wrap callback encode-fn) #"pcall")
-  => true)
+(fact "wraps return values through encoder functions"
+  (!.js
+    (xt/x:json-decode
+     (xt/x:return-wrap (fn []
+                         (return 3))
+                       (fn [out]
+                         (xt/x:return-encode out "id" "key")))))
+  => {"id" "id"
+      "key" "key"
+      "type" "data"
+      "return" "number"
+      "value" 3})
 
 ^{:refer xt.lang.common-spec/x:return-eval :added "4.1"}
-(fact "expands and emits the lua return eval form"
-  (emits-lua? '(x:return-eval "1 + 1" wrap-fn) #"loadstring")
-  => true)
+(fact "evaluates code through wrapped return handlers"
+  (!.js
+    (xt/x:json-decode
+     (xt/x:return-eval "1 + 1"
+                       (fn [f]
+                         (xt/x:return-wrap f
+                                           (fn [out]
+                                             (xt/x:return-encode out "id" "key")))))))
+  => {"id" "id"
+      "key" "key"
+      "type" "data"
+      "return" "number"
+      "value" 2})
 
 ^{:refer xt.lang.common-spec/x:bit-and :added "4.1"}
 (fact "computes bitwise and"
@@ -1241,38 +1351,70 @@
 
 ^{:refer xt.lang.common-spec/x:global-set :added "4.1"}
 (fact "writes values to the shared global map"
-  (emits-lua? '(x:global-set SYM 1) #"SYM")
-  => true)
+  (!.js
+    (xt/x:global-set COMMON_SPEC_GLOBAL 1)
+    [(xt/x:global-has? COMMON_SPEC_GLOBAL)
+     (!:G COMMON_SPEC_GLOBAL)
+     (do (xt/x:global-del COMMON_SPEC_GLOBAL)
+         (xt/x:global-has? COMMON_SPEC_GLOBAL))])
+  => [true 1 false])
 
 ^{:refer xt.lang.common-spec/x:global-del :added "4.1"}
 (fact "removes values from the shared global map"
-  (emits-lua? '(x:global-del SYM) #"nil")
-  => true)
+  (!.js
+    (xt/x:global-set COMMON_SPEC_DELETE 1)
+    (xt/x:global-del COMMON_SPEC_DELETE)
+    (!:G COMMON_SPEC_DELETE))
+  => nil)
 
 ^{:refer xt.lang.common-spec/x:global-has? :added "4.1"}
 (fact "checks whether the shared global map contains a value"
-  (emits-lua? '(x:global-has? SYM) #"SYM")
-  => true)
+  (!.js
+    (xt/x:global-set COMMON_SPEC_HAS 1)
+    [(xt/x:global-has? COMMON_SPEC_HAS)
+     (do (xt/x:global-del COMMON_SPEC_HAS)
+         (xt/x:global-has? COMMON_SPEC_HAS))])
+  => [true false])
 
 ^{:refer xt.lang.common-spec/x:this :added "4.1"}
-(fact "expands and emits the lua self binding"
-  (emits-lua? '(x:this) #"self")
-  => true)
+(fact "binds this for method calls"
+  (!.js
+    (var obj {:value 2})
+    (:= (. obj ["getValue"])
+        (fn []
+          (return (. (xt/x:this) ["value"]))))
+    (. obj (getValue)))
+  => 2)
 
 ^{:refer xt.lang.common-spec/x:proto-get :added "4.1"}
-(fact "expands and emits prototype lookup"
-  (emits-lua? '(x:proto-get obj key) #"getmetatable")
-  => true)
+(fact "retrieves object prototypes"
+  (!.js
+    (var proto {:label "proto"})
+    (var obj {})
+    (xt/x:proto-set obj proto nil)
+    (. (xt/x:proto-get obj "label") ["label"]))
+  => "proto")
 
 ^{:refer xt.lang.common-spec/x:proto-set :added "4.1"}
-(fact "expands and emits prototype assignment"
-  (emits-lua? '(x:proto-set obj proto value) #"setmetatable")
-  => true)
+(fact "assigns object prototypes"
+  (!.js
+    (var proto {:label "proto"})
+    (var obj {})
+    (xt/x:proto-set obj proto nil)
+    (. obj ["label"]))
+  => "proto")
 
 ^{:refer xt.lang.common-spec/x:proto-create :added "4.1"}
-(fact "expands to a canonical prototype constructor"
-  (emits-lua? '(x:proto-create {:a 1}) #"return")
-  => true)
+(fact "creates prototypes with this-bound methods"
+  (!.js
+    (var proto (xt/x:proto-create
+                {:describe (fn [self suffix]
+                             (return (+ (. self ["name"]) suffix)))}))
+    (var obj {})
+    (xt/x:proto-set obj proto nil)
+    (:= (. obj ["name"]) "alpha")
+    (. obj (describe "!")))
+  => "alpha!")
 
 ^{:refer xt.lang.common-spec/x:proto-tostring :added "4.1"}
 (fact "expands and emits the lua tostring metamethod key"
@@ -1280,8 +1422,11 @@
   => '([value]))
 
 ^{:refer xt.lang.common-spec/x:random :added "4.1"}
-(fact "expands and emits the lua random function"
-  (emits-lua? '(x:random) #"math\.random")
+(fact "returns javascript random values"
+  (!.js
+    (var out (xt/x:random))
+    (and (>= out 0)
+         (< out 1)))
   => true)
 
 ^{:refer xt.lang.common-spec/x:throw :added "4.1"}
@@ -1296,64 +1441,148 @@
   => true)
 
 ^{:refer xt.lang.common-spec/x:unpack :added "4.1"}
-(fact "expands and emits the lua unpack helper"
-  (emits-lua? '(x:unpack args) #"unpack")
-  => true)
+(fact "spreads arrays into positional arguments"
+  (!.js
+    ((fn [a b c]
+       (return (+ a b c)))
+     (xt/x:unpack [1 2 3])))
+  => 6)
 
 ^{:refer xt.lang.common-spec/x:client-basic :added "4.1"}
-(fact "expands and emits the lua basic client loop"
-  (emits-lua? '(x:client-basic "localhost" 8080 connect-fn eval-fn) #"receive")
-  => true)
+(fact "streams newline-delimited socket input through eval handlers"
+  (notify/wait-on :js
+    (do (var net (require "net"))
+        (var port 18181)
+        (var server (. net (createServer (fn [conn]
+                                           (. conn (write "PING\n"))
+                                           (. conn (end)))))
+        (. server (listen port "127.0.0.1"))
+        (xt/x:client-basic "127.0.0.1"
+                           port
+                           (fn [host port opts]
+                             (return [true (. net (createConnection port host))]))
+                           (fn [conn line]
+                             (. server (close))
+                             (repl/notify line))))))
+  => "PING")
 
 ^{:refer xt.lang.common-spec/x:client-ws :added "4.1"}
-(fact "expands and emits the lua websocket client loop"
-  (emits-lua? '(x:client-ws "localhost" 8080 {} connect-fn eval-fn) #"recv")
-  => true)
+(fact "routes websocket messages through eval handlers"
+  (notify/wait-on :js
+    (do (var conn {})
+        (xt/x:client-ws "localhost"
+                        8080
+                        {}
+                        (fn [host port opts]
+                          (return [true conn]))
+                        (fn [ws value]
+                          (repl/notify [(== ws conn) value])))
+        ((. conn ["onmessage"]) {:data "PING"})))
+  => [true "PING"])
 
 ^{:refer xt.lang.common-spec/x:server-basic :added "4.1"}
-(fact "keeps the basic server wrapper intact"
-  (emits-lua? '(x:server-basic config) #"server")
-  => true)
+(fact "keeps the basic server wrapper metadata intact"
+  (:arglists (meta #'xt/x:server-basic))
+  => '([config]))
 
 ^{:refer xt.lang.common-spec/x:server-ws :added "4.1"}
-(fact "keeps the websocket server wrapper intact"
-  (emits-lua? '(x:server-ws config) #"server")
-  => true)
+(fact "keeps the websocket server wrapper metadata intact"
+  (:arglists (meta #'xt/x:server-ws))
+  => '([config]))
 
 ^{:refer xt.lang.common-spec/x:socket-connect :added "4.1"}
-(fact "expands and emits a lua socket connect form"
-  (emits-lua? '(x:socket-connect "localhost" 8080 {} callback) #"connect")
-  => true)
+(fact "connects sockets and forwards the connection to callbacks"
+  (notify/wait-on :js
+    (do (var net (require "net"))
+        (var port 18182)
+        (var server (. net (createServer (fn [conn]
+                                           (. conn (end)))))
+        (. server (listen port "127.0.0.1"))
+        (xt/x:socket-connect "127.0.0.1"
+                             port
+                             {}
+                             (fn [err conn]
+                               (. server (close))
+                               (repl/notify [(xt/x:nil? err)
+                                             (xt/x:is-function? (. conn ["write"]))]))))))
+  => [true true])
 
 ^{:refer xt.lang.common-spec/x:socket-send :added "4.1"}
-(fact "expands and emits a lua socket send form"
-  (emits-lua? '(x:socket-send conn "PING") #"send")
-  => true)
+(fact "sends socket messages through write"
+  (!.js
+    (var out nil)
+    (var conn {:write (fn [s]
+                        (:= out s))})
+    (xt/x:socket-send conn "PING")
+    out)
+  => "PING")
 
 ^{:refer xt.lang.common-spec/x:socket-close :added "4.1"}
-(fact "expands and emits a lua socket close form"
-  (emits-lua? '(x:socket-close conn) #"close")
-  => true)
+(fact "closes sockets through end"
+  (!.js
+    (var out nil)
+    (var conn {:end (fn []
+                      (:= out "closed"))})
+    (xt/x:socket-close conn)
+    out)
+  => "closed")
 
 ^{:refer xt.lang.common-spec/x:ws-connect :added "4.1"}
-(fact "expands and emits a lua websocket connect form"
-  (emits-lua? '(x:ws-connect "localhost" 8080 {}) #"websocket")
-  => true)
+(fact "creates websocket connections from host, port, and options"
+  (!.js
+    (:= (!:G WebSocket)
+        (fn [url]
+          (:= (. this ["url"]) url)))
+    (var [ok conn] (xt/x:ws-connect "localhost"
+                                    8080
+                                    {:schema "wss"
+                                     :url "/socket"}))
+    [ok (. conn ["url"])])
+  => [true "wss://localhost:8080/socket"])
 
 ^{:refer xt.lang.common-spec/x:ws-send :added "4.1"}
-(fact "expands and emits a lua websocket send form"
-  (emits-lua? '(x:ws-send wb "PING") #"send")
-  => true)
+(fact "sends websocket frames"
+  (!.js
+    (var out nil)
+    (var conn {:send (fn [s]
+                       (:= out s))})
+    (xt/x:ws-send conn "PING")
+    out)
+  => "PING")
 
 ^{:refer xt.lang.common-spec/x:ws-close :added "4.1"}
-(fact "expands and emits a lua websocket close form"
-  (emits-lua? '(x:ws-close wb) #"close")
-  => true)
+(fact "closes websocket connections"
+  (!.js
+    (var out nil)
+    (var conn {:close (fn []
+                        (:= out "closed"))})
+    (xt/x:ws-close conn)
+    out)
+  => "closed")
 
 ^{:refer xt.lang.common-spec/x:notify-http :added "4.1"}
-(fact "keeps the notify-http wrapper intact"
-  (emits-lua? '(x:notify-http "localhost" 8080 value "id" "key" encode-fn) #"http")
-  => true)
+(fact "posts encoded values through fetch"
+  (!.js
+    (var out nil)
+    (:= (!:G fetch)
+        (fn [url opts]
+          (:= out [url
+                   (xt/x:json-decode (. opts ["body"]))
+                   (. opts ["method"])])))
+    (xt/x:notify-http "localhost"
+                      8080
+                      {:a 1}
+                      "id"
+                      "key"
+                      (fn [value id key]
+                        (xt/x:return-encode value id key)))
+    out)
+  => ["http://localhost:8080"
+      {"id" "id"
+       "key" "key"
+       "type" "data"
+       "value" {"a" 1}}
+      "POST"])
 
 ^{:refer xt.lang.common-spec/x:notify-socket :added "4.1"}
 (fact "keeps the notify-socket wrapper intact"
@@ -1361,49 +1590,85 @@
   => '([host port value id key connect-fn encode-fn]))
 
 ^{:refer xt.lang.common-spec/x:b64-encode :added "4.1"}
-(fact "expands and emits the lua base64 encoder"
-  (emits-lua? '(x:b64-encode "hello") #"ngx\.encode")
-  => true)
+(fact "encodes base64 strings"
+  (!.js
+    (xt/x:b64-encode "hello"))
+  => "aGVsbG8=")
 
 ^{:refer xt.lang.common-spec/x:b64-decode :added "4.1"}
-(fact "expands and emits the lua base64 decoder"
-  (emits-lua? '(x:b64-decode "aGVsbG8=") #"ngx\.decode")
-  => true)
+(fact "decodes base64 strings"
+  (!.js
+    (xt/x:b64-decode "aGVsbG8="))
+  => "hello")
 
 ^{:refer xt.lang.common-spec/x:cache :added "4.1"}
-(fact "expands and emits a lua cache lookup"
-  (emits-lua? '(x:cache "GLOBAL") #"ngx\.shared")
-  => true)
+(fact "selects the global cache store"
+  (!.js
+    (:= (!:G window)
+        {:localStorage  {:name "local"}
+         :sessionStorage {:name "session"}})
+    (. (xt/x:cache "GLOBAL") ["name"]))
+  => "local")
 
 ^{:refer xt.lang.common-spec/x:cache-list :added "4.1"}
-(fact "expands and emits a lua cache key listing"
-  (emits-lua? '(x:cache-list) #"keys")
-  => true)
+(fact "lists cache keys"
+  (!.js
+    (:= (!:G window)
+        {:localStorage  {"_keys" ["a" "b"]}
+         :sessionStorage {"_keys" []}})
+    (xt/x:cache-list))
+  => ["a" "b"])
 
 ^{:refer xt.lang.common-spec/x:cache-flush :added "4.1"}
-(fact "expands and emits a lua cache flush"
-  (emits-lua? '(x:cache-flush cache) #"flush_all")
-  => true)
+(fact "flushes cache stores"
+  (!.js
+    (var out nil)
+    (var cache {:clear (fn []
+                         (:= out "flushed"))})
+    (xt/x:cache-flush cache)
+    out)
+  => "flushed")
 
 ^{:refer xt.lang.common-spec/x:cache-get :added "4.1"}
-(fact "expands and emits a lua cache get"
-  (emits-lua? '(x:cache-get cache "key") #"get")
-  => true)
+(fact "reads cache values"
+  (!.js
+    (var cache {:getItem (fn [k]
+                           (return (+ "value:" k)))})
+    (xt/x:cache-get cache "key"))
+  => "value:key")
 
 ^{:refer xt.lang.common-spec/x:cache-set :added "4.1"}
-(fact "expands and emits a lua cache set"
-  (emits-lua? '(x:cache-set cache "key" "value") #"set")
-  => true)
+(fact "writes cache values"
+  (!.js
+    (var out nil)
+    (var cache {:setItem (fn [k v]
+                           (:= out [k v])
+                           (return v))})
+    [(xt/x:cache-set cache "key" "value")
+     out])
+  => ["value" ["key" "value"]])
 
 ^{:refer xt.lang.common-spec/x:cache-del :added "4.1"}
-(fact "expands and emits a lua cache delete"
-  (emits-lua? '(x:cache-del cache "key") #"delete")
-  => true)
+(fact "deletes cache values"
+  (!.js
+    (var out nil)
+    (var cache {:removeItem (fn [k]
+                              (:= out k))})
+    (xt/x:cache-del cache "key")
+    out)
+  => "key")
 
 ^{:refer xt.lang.common-spec/x:cache-incr :added "4.1"}
-(fact "expands and emits a lua cache increment"
-  (emits-lua? '(x:cache-incr cache "key" 1) #"incr")
-  => true)
+(fact "increments cached numeric values"
+  (!.js
+    (var state {"count" "2"})
+    (var cache {:getItem (fn [k]
+                           (return (. state [k])))
+                :setItem (fn [k v]
+                           (:= (. state [k]) v)
+                           (return v))})
+    (xt/x:cache-incr cache "count" 3))
+  => 5)
 
 ^{:refer xt.lang.common-spec/x:slurp :added "4.1"}
 (fact "keeps the slurp wrapper intact"
@@ -1426,24 +1691,37 @@
   => {"a" 1})
 
 ^{:refer xt.lang.common-spec/x:shell :added "4.1"}
-(fact "expands and emits the lua shell helper"
-  (emits-lua? '(x:shell "ls" opts) #"io\.popen")
-  => true)
+(fact "executes shell commands asynchronously"
+  (notify/wait-on :js
+    (xt/x:shell "printf hello"
+                {:success (fn [res]
+                            (repl/notify res))
+                 :error   (fn [err]
+                            (repl/notify "ERR"))}))
+  => #"hello")
 
 ^{:refer xt.lang.common-spec/x:thread-spawn :added "4.1"}
-(fact "expands and emits a lua thread spawn"
-  (emits-lua? '(x:thread-spawn thunk) #"ngx\.thread\.spawn")
-  => true)
+(fact "spawns js promise-backed threads"
+  (notify/wait-on :js
+    (-> (xt/x:thread-spawn (fn []
+                             (return "OK")))
+        (. (then (repl/>notify)))))
+  => "OK")
 
 ^{:refer xt.lang.common-spec/x:thread-join :added "4.1"}
-(fact "expands and emits a lua thread join"
-  (emits-lua? '(x:thread-join thread) #"ngx\.thread\.wait")
-  => true)
+(fact "throws for unsupported js thread joins"
+  (!.js
+    (xt/x:thread-join {}))
+  => (throws))
 
 ^{:refer xt.lang.common-spec/x:with-delay :added "4.1"}
-(fact "expands and emits a delayed lua computation"
-  (emits-lua? '(x:with-delay thunk 100) #"sleep")
-  => true)
+(fact "delays asynchronous js computations"
+  (notify/wait-on :js
+    (-> (xt/x:with-delay (fn []
+                           (return "LATER"))
+                         20)
+        (. (then (repl/>notify)))))
+  => "LATER")
 
 ^{:refer xt.lang.common-spec/x:start-interval :added "4.1"}
 (fact "keeps the start-interval wrapper intact"
@@ -1456,14 +1734,16 @@
   => '([id]))
 
 ^{:refer xt.lang.common-spec/x:uri-encode :added "4.1"}
-(fact "expands and emits the lua uri encoder"
-  (emits-lua? '(x:uri-encode "hello world") #"ngx\.escape")
-  => true)
+(fact "encodes uri components"
+  (!.js
+    (xt/x:uri-encode "hello world"))
+  => "hello%20world")
 
 ^{:refer xt.lang.common-spec/x:uri-decode :added "4.1"}
-(fact "expands and emits the lua uri decoder"
-  (emits-lua? '(x:uri-decode "hello%20world") #"ngx\.unescape")
-  => true)
+(fact "decodes uri components"
+  (!.js
+    (xt/x:uri-decode "hello%20world"))
+  => "hello world")
 
 
 (comment
