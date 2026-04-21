@@ -1,9 +1,9 @@
 (ns std.lang.seedgen
   (:require [code.manage :as manage]
             [code.manage.unit.template :as template]
-            [std.lang.seedgen.seed-addlang :as addlang]
-            [std.lang.seedgen.common-infile :as infile]
-            [std.lang.seedgen.seed-removelang :as removelang]
+            [std.lang.seedgen.common-infile :as common-infile]
+            [std.lang.seedgen.form-infile :as form-infile]
+            [std.lang.seedgen.form-parse :as form-parse]
             [std.lib.invoke :as invoke]
             [std.task :as task]))
 
