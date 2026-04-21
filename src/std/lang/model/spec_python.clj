@@ -313,7 +313,7 @@
                  (= 'do:> (first statement)))
             expanded-do)
       (let [body   (or expanded-do (rest statement))
-            runner (gensym "runner")]
+            runner 'fnthunk]
         (template/$
          (try
            ~(apply list 'fn.inner (with-meta runner {:inner true}) '[] body)

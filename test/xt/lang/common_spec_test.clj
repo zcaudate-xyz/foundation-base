@@ -129,151 +129,193 @@
 (fact "reads the first indexed value"
 
   (!.js
-    (xt/x:get-idx [10 20 30] (xt/x:offset 0)))
-  => 10)
+    (xt/x:get-idx ["a" "b" "c"] (xt/x:offset 0)))
+  => "a")
 
 ^{:refer xt.lang.common-spec/x:set-idx :added "4.1"}
 (fact "writes an indexed value"
 
   (!.js
-    (var out [10 20 30])
-    (xt/x:set-idx out (xt/x:offset 1) 99)
+    (var out ["a" "b" "c"])
+    (xt/x:set-idx out (xt/x:offset 1) "B")
     out)
-  => [10 99 30])
+  => ["a" "B" "c"])
 
 ^{:refer xt.lang.common-spec/x:first :added "4.1"}
 (fact "gets the first array element"
 
   (!.js
-    (xt/x:first [10 20 30]))
-  => 10)
+    (xt/x:first ["a" "b" "c"]))
+  => "a")
 
 ^{:refer xt.lang.common-spec/x:second :added "4.1"}
 (fact "gets the second array element"
 
   (!.js
-    (xt/x:second [10 20 30]))
-  => 20)
+    (xt/x:second ["a" "b" "c"]))
+  => "b")
 
 ^{:refer xt.lang.common-spec/x:last :added "4.1"}
 (fact "gets the last array element"
 
   (!.js
-    (xt/x:last [10 20 30 40]))
-  => 40)
+    (xt/x:last ["a" "b" "c" "d"]))
+  => "d")
 
 ^{:refer xt.lang.common-spec/x:second-last :added "4.1"}
 (fact "gets the element before the last"
 
   (!.js
-    (xt/x:second-last [10 20 30 40]))
-  => 30)
+    (xt/x:second-last ["a" "b" "c" "d"]))
+  => "c")
 
 ^{:refer xt.lang.common-spec/x:arr-remove :added "4.1"}
 (fact "removes an element from an array"
 
   (!.js
-    (do (var out [0 1 2 3])
+    (do (var out ["a" "b" "c" "d"])
         (xt/x:arr-remove out (xt/x:offset 1))
         out))
-  => [0 2 3]
+  => ["a" "c" "d"]
   
   (!.py
-    (do (var out [0 1 2 3])
+    (do (var out ["a" "b" "c" "d"])
         (xt/x:arr-remove out (xt/x:offset 1))
         out))
-  => [0 2 3])
+  => ["a" "c" "d"])
 
 ^{:refer xt.lang.common-spec/x:arr-push :added "4.1"}
 (fact "pushes an element onto an array"
 
   (!.js
-    (var out [1 2 3])
-    (xt/x:arr-push out 4)
+    (var out ["a" "b" "c"])
+    (xt/x:arr-push out "D")
     out)
-  => [1 2 3 4]
+  => ["a" "b" "c" "D"]
 
   (!.py
-    (var out [1 2 3])
-    (xt/x:arr-push out 4)
+    (var out ["a" "b" "c"])
+    (xt/x:arr-push out "D")
     out)
-  => [1 2 3 4])
+  => ["a" "b" "c" "D"])
 
 ^{:refer xt.lang.common-spec/x:arr-pop :added "4.1"}
 (fact "pops the last element from an array"
 
   (!.js
-    (var out [1 2 3 4])
-    (xt/x:arr-pop out))
-  => 4
-
+    (var out ["a" "b" "c" "d"])
+    [(xt/x:arr-pop out) out])
+  => ["d" ["a" "b" "c"]]
+  
   (!.py
-    (var out [1 2 3 4])
-    (xt/x:arr-pop out))
-  => 4)
+    (var out ["a" "b" "c" "d"])
+    [(xt/x:arr-pop out) out])
+  => ["d" ["a" "b" "c"]])
 
 ^{:refer xt.lang.common-spec/x:arr-push-first :added "4.1"}
 (fact "pushes an element to the front of an array"
 
   (!.js
-    (var out [1 2 3])
-    (xt/x:arr-push-first out 0)
+    (var out ["a" "b" "c"])
+    (xt/x:arr-push-first out "D")
     out)
-  => [0 1 2 3]
+  => ["D" "a" "b" "c"]
 
   (!.py
-    (var out [1 2 3])
-    (xt/x:arr-push-first out 0)
+    (var out ["a" "b" "c"])
+    (xt/x:arr-push-first out "D")
     out)
-  => [0 1 2 3])
+  => ["D" "a" "b" "c"])
 
 ^{:refer xt.lang.common-spec/x:arr-pop-first :added "4.1"}
 (fact "pops the first element from an array"
+
   (!.js
-    (var out [0 1 2 3])
-    (xt/x:arr-pop-first out))
-  => 0)
+    (var out ["a" "b" "c" "d"])
+    [(xt/x:arr-pop-first out) out])
+  => ["a" ["b" "c" "d"]]
+
+  (!.py
+    (var out ["a" "b" "c" "d"])
+    [(xt/x:arr-pop-first out) out])
+  => ["a" ["b" "c" "d"]])
 
 ^{:refer xt.lang.common-spec/x:arr-insert :added "4.1"}
 (fact "inserts an element into an array"
+
   (!.js
-    (var out [1 2 3])
-    (xt/x:arr-insert out (xt/x:offset 1) 9)
+    (var out ["a" "b" "c"])
+    (xt/x:arr-insert out (xt/x:offset 1) "D")
     out)
-  => [1 9 2 3])
+  => ["a" "D" "b" "c"]
+
+  (!.py
+    (var out ["a" "b" "c"])
+    (xt/x:arr-insert out (xt/x:offset 1) "D")
+    out)
+  => ["a" "D" "b" "c"])
 
 ^{:refer xt.lang.common-spec/x:arr-slice :added "4.1"}
 (fact "slices a range from an array"
+
   (!.js
-    ^{:lang-exceptions {:python {:expect [1]}
-                        :dart   {:expect [1]}}}
-    (xt/x:arr-slice [1 2 3] (xt/x:offset 0) (xt/x:offset 1)))
-  => [2])
+    (xt/x:arr-slice ["a" "b" "c" "d" "e"]
+                    (xt/x:offset 1)
+                    (xt/x:offset 3)))
+  => ["b" "c"]
+
+  (!.py
+    (xt/x:arr-slice ["a" "b" "c" "d" "e"]
+                    (xt/x:offset 1)
+                    (xt/x:offset 3)))
+  => ["b" "c"])
 
 ^{:refer xt.lang.common-spec/x:arr-reverse :added "4.1"}
 (fact "reverses an array"
+
   (!.js
-    (xt/x:arr-reverse [1 2 3]))
-  => [3 2 1])
+    (xt/x:arr-reverse ["a" "b" "c"]))
+  => ["c" "b" "a"]
+
+  (!.py
+    (xt/x:arr-reverse ["a" "b" "c"]))
+  => ["c" "b" "a"])
 
 ^{:refer xt.lang.common-spec/x:del :added "4.1"}
 (fact "expands and emits a lua delete form"
+
   (!.js
     (var out {:a 1 :b 2})
+    (xt/x:del (. out ["a"]))
+    out)
+  => {"b" 2}
+
+  (!.py
+    (var out  {:a 1 :b 2})
     (xt/x:del (. out ["a"]))
     out)
   => {"b" 2})
 
 ^{:refer xt.lang.common-spec/x:cat :added "4.1"}
 (fact "concatenates strings"
+
   (!.js
+    (xt/x:cat "hello" "-" "world"))
+  => "hello-world"
+
+  (!.py
     (xt/x:cat "hello" "-" "world"))
   => "hello-world")
 
 ^{:refer xt.lang.common-spec/x:len :added "4.1"}
 (fact "gets the collection length"
+
   (!.js
-    (xt/x:len [1 2 3]))
+    (xt/x:len ["a" "b" "c"]))
+  => 3
+
+  (!.py
+    (xt/x:len ["a" "b" "c"]))
   => 3)
 
 ^{:refer xt.lang.common-spec/x:err :added "4.1"}
@@ -873,7 +915,7 @@
 (fact "iterates each element in an array"
   (!.js
     (var out [])
-    (xt/x:arr-each [1 2 3] (fn [e]
+    (xt/x:arr-each ["a" "b" "c"] (fn [e]
                              (xt/x:arr-push out (* e 2))))
     out)
   => [2 4 6])
@@ -895,29 +937,29 @@
 ^{:refer xt.lang.common-spec/x:arr-map :added "4.1"}
 (fact "maps an array"
   (!.js
-    (xt/x:arr-map [1 2 3] (fn [e] (return (* e 2)))))
+    (xt/x:arr-map ["a" "b" "c"] (fn [e] (return (* e 2)))))
   => [2 4 6])
 
 ^{:refer xt.lang.common-spec/x:arr-append :added "4.1"}
 (fact "appends one array to another"
   (!.js
     (xt/x:arr-append [1 2] [3 4]))
-  => [1 2 3 4])
+  => ["a" "b" "c" "d"])
 
 ^{:refer xt.lang.common-spec/x:arr-filter :added "4.1"}
 (fact "filters an array"
   (!.js
-    (xt/x:arr-filter [1 2 3 4] (fn [e] (return (xt/x:even? e)))))
+    (xt/x:arr-filter ["a" "b" "c" "d"] (fn [e] (return (xt/x:even? e)))))
   => [2 4])
 
 ^{:refer xt.lang.common-spec/x:arr-keep :added "4.1"}
 (fact "keeps transformed non-nil values from an array"
   (!.js
-    ^{:lang-exceptions {:python {:form (xt/x:arr-keep [1 2 3]
+    ^{:lang-exceptions {:python {:form (xt/x:arr-keep ["a" "b" "c"]
                                                        (fn:> [e]
                                                          (:? (xt/x:odd? e)
                                                              (* e 10))))}}}
-    (xt/x:arr-keep [1 2 3] (fn [e]
+    (xt/x:arr-keep ["a" "b" "c"] (fn [e]
                              (when (xt/x:odd? e)
                                (return (* e 10))))))
   => [10 30])
@@ -925,7 +967,7 @@
 ^{:refer xt.lang.common-spec/x:arr-foldl :added "4.1"}
 (fact "folds arrays from the left"
   (!.js
-    (xt/x:arr-foldl [1 2 3]
+    (xt/x:arr-foldl ["a" "b" "c"]
                     (fn [out e] (return (+ out e)))
                     0))
   => 6)
@@ -933,7 +975,7 @@
 ^{:refer xt.lang.common-spec/x:arr-foldr :added "4.1"}
 (fact "folds arrays from the right"
   (!.js
-    (xt/x:arr-foldr [1 2 3]
+    (xt/x:arr-foldr ["a" "b" "c"]
                     (fn [out e] (return (+ (* 10 out) e)))
                     0))
   => 321)
