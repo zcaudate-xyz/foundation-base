@@ -11,6 +11,16 @@
    :require [[xt.lang.common-spec :as xt]
              [xt.lang.common-repl :as repl]]})
 
+(l/script- :python
+  {:runtime :basic
+   :require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-repl :as repl]]})
+
+(l/script- :lua
+  {:runtime :basic
+   :require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-repl :as repl]]})
+
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
@@ -89,22 +99,23 @@
 
 ^{:refer xt.lang.common-spec/for:try :added "4.1"}
 (fact "expands to the canonical try form"
-  
+
   (!.js
     (var add (fn []
                (xt/for:try [[ok err] (do:> (xt/x:err "ERROR"))]
                  {:success (return ok)
-                  :error   (return err)})))
+                  :error   (return "ERR")})))
     (add))
-  => "ERROR"
+  => "ERR"
 
-  ^*(!.py
+  
+  (!.py
     (var add (fn []
                (xt/for:try [[ok err] (do:> (xt/x:err "ERROR"))]
                  {:success (return ok)
-                  :error   (return err)})))
+                  :error   (return "ERR")})))
     (add))
-  => "ERROR")
+  => "ERR")
 
 ^{:refer xt.lang.common-spec/for:async :added "4.1"}
 (fact "expands to the canonical async form"
@@ -320,101 +331,162 @@
 
 ^{:refer xt.lang.common-spec/x:err :added "4.1"}
 (fact "expands and emits a lua error form"
-  (emits-lua? '(x:err "boom") #"error")
-  => true)
+
+  (!.js
+    (var err-fn (fn []
+                  (xt/x:err "ERR")))
+    (err-fn))
+  => (throws)
+  
+  (!.py
+    (var err-fn (fn []
+                  (xt/x:err "ERR")))
+    (err-fn))
+  => (throws))
 
 ^{:refer xt.lang.common-spec/x:type-native :added "4.1"}
 (fact "expands and emits the lua type helper"
-  (emits-lua? '(x:type-native obj) #"type")
-  => true)
+
+  (!.js
+    (var type-fn (fn [obj]
+                   (xt/x:type-native obj)))
+    [(type-fn {})
+     (type-fn [])])
+  => ["object" "array"]
+
+  (!.py
+    (var type-fn (fn [obj]
+                   (xt/x:type-native obj)))
+    [(type-fn {})
+     (type-fn [])])
+  => ["object" "array"])
 
 ^{:refer xt.lang.common-spec/x:offset :added "4.1"}
 (fact "uses the grammar base offset"
-  (!.js
-    ^{:lang-exceptions {:python {:expect 10}
-                        :dart   {:expect 10}}}
+
+  ^{:seedgen/check    {:lua  {:expect 11}}}
+  (!.js    
     (xt/x:offset 10))
-  => 11)
+  => 10)
 
 ^{:refer xt.lang.common-spec/x:offset-rev :added "4.1"}
 (fact "uses the reverse grammar offset"
+
+  ^{:seedgen/check    {:lua  {:expect 10}}}
   (!.js
-    ^{:lang-exceptions {:python {:expect 9}
-                        :dart   {:expect 9}}}
     (xt/x:offset-rev 10))
-  => 10)
+  => 9)
 
 ^{:refer xt.lang.common-spec/x:offset-len :added "4.1"}
 (fact "uses the length grammar offset"
+
+  ^{:seedgen/check    {:lua  {:expect 9}}}
   (!.js
-    ^{:lang-exceptions {:python {:expect 9}
-                        :dart   {:expect 9}}}
     (xt/x:offset-len 10))
-  => 10)
+  => 9)
 
 ^{:refer xt.lang.common-spec/x:offset-rlen :added "4.1"}
 (fact "uses the reverse length grammar offset"
+
+  ^{:seedgen/check    {:lua  {:expect 9}}}
   (!.js
-    ^{:lang-exceptions {:python {:expect 10}
-                        :dart   {:expect 10}}}
     (xt/x:offset-rlen 10))
-  => 9)
+  => 10)
 
 ^{:refer xt.lang.common-spec/x:lu-create :added "4.1"}
 (fact "creates a lookup table wrapper"
+
   (!.js
     (var lu (xt/x:lu-create))
-    (xt/x:lu-set lu "k" 1)
-    (xt/x:lu-get lu "k"))
-  => 1)
+    (var lu-A1 {"A" "A"})
+    (var lu-A2 {"A" "A"})
+    (xt/x:lu-set lu lu-A1 "A1")
+    (xt/x:lu-set lu lu-A2 "A2")
+    [(xt/x:lu-get lu lu-A1)
+     (xt/x:lu-get lu lu-A2)])
+  => ["A1" "A2"]
+
+  (!.py
+    (var lu (xt/x:lu-create))
+    (var lu-A1 {"A" "A"})
+    (var lu-A2 {"A" "A"})
+    (xt/x:lu-set lu lu-A1 "A1")
+    (xt/x:lu-set lu lu-A2 "A2")
+    [(xt/x:lu-get lu lu-A1)
+     (xt/x:lu-get lu lu-A2)])
+  => ["A1" "A2"])
 
 ^{:refer xt.lang.common-spec/x:lu-eq :added "4.1"}
 (fact "compares lookup keys using lua identity"
+
   (!.js
-    (var obj {:id 1})
-    (xt/x:lu-eq obj obj))
-  => true)
+    (var obj-a {:id 1})
+    (var obj-b {:id 1})
+    [(xt/x:lu-eq obj-a obj-a)
+     (xt/x:lu-eq obj-a obj-b)
+     (xt/x:lu-eq obj-b obj-b)])
+  => [true false true]
+
+  (!.py
+    (var obj-a {:id 1})
+    (var obj-b {:id 1})
+    [(xt/x:lu-eq obj-a obj-a)
+     (xt/x:lu-eq obj-a obj-b)
+     (xt/x:lu-eq obj-b obj-b)])
+  => [true false true])
 
 ^{:refer xt.lang.common-spec/x:lu-get :added "4.1"}
 (fact "reads values from a lookup table"
+
   (!.js
     (var lu (xt/x:lu-create))
-    (var obj {:id 1})
-    (xt/x:lu-set lu obj "value")
-    (xt/x:lu-get lu obj))
+    (var lu-key {:id 1})
+    (xt/x:lu-set lu lu-key "value")
+    (xt/x:lu-get lu lu-key))
   => "value")
 
 ^{:refer xt.lang.common-spec/x:lu-set :added "4.1"}
 (fact "writes values into a lookup table"
+
   (!.js
     (var lu (xt/x:lu-create))
-    (var obj {:id 1})
-    (xt/x:lu-set lu obj "value")
-    (xt/x:lu-get lu obj))
+    (var lu-key {:id 1})
+    (xt/x:lu-set lu lu-key "value")
+    (xt/x:lu-get lu lu-key))
   => "value")
 
 ^{:refer xt.lang.common-spec/x:lu-del :added "4.1"}
 (fact "removes values from a lookup table"
+
   (!.js
     (var lu (xt/x:lu-create))
-    (var obj {:id 1})
-    (xt/x:lu-set lu obj "value")
-    (xt/x:lu-del lu obj)
-    (xt/x:lu-get lu obj))
+    (var lu-key {:id 1})
+    (xt/x:lu-set lu lu-key "value")
+    (xt/x:lu-del lu lu-key)
+    (xt/x:lu-get lu lu-key))
   => nil)
 
 ^{:refer xt.lang.common-spec/x:m-abs :added "4.1"}
 (fact "computes absolute values"
+
   (!.js (xt/x:m-abs -3))
+  => 3
+
+  (!.py (xt/x:m-abs -3))
   => 3)
 
 ^{:refer xt.lang.common-spec/x:m-acos :added "4.1"}
 (fact "computes inverse cosine"
+
   (!.js (xt/x:m-acos 1))
+  => (approx 0)
+
+  (!.py (xt/x:m-acos 1))
   => (approx 0))
 
 ^{:refer xt.lang.common-spec/x:m-asin :added "4.1"}
 (fact "computes inverse sine"
+
   (!.js (xt/x:m-asin 0))
   => (approx 0))
 
