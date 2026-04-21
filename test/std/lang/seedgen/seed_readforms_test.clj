@@ -1,8 +1,8 @@
-(ns std.lang.seedgen.seed-readforms-test
+(ns std.lang.seedgen.form-parse-test
   (:use code.test)
   (:require [code.project :as project]
             [std.block.base :as block]
-            [std.lang.seedgen.seed-readforms :as seed-readforms]))
+            [std.lang.seedgen.form-parse :as seed-readforms]))
 
 (defn- summarize-block-items
   [m]
@@ -25,7 +25,7 @@
                         (get m k))])
              [:root :derived :scaffold])))
 
-^{:refer std.lang.seedgen.seed-readforms/seedgen-readforms :added "4.1"}
+^{:refer std.lang.seedgen.form-parse/seedgen-readforms :added "4.1"}
 (fact "returns globals and analyse entries in the train-002 seedgen shape"
   (let [output (project/in-context
                 (seed-readforms/seedgen-readforms 'xt.sample.train-002-test {}))

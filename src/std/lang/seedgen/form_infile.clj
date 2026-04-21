@@ -1,11 +1,11 @@
-(ns std.lang.seedgen.seed-langforms
+(ns std.lang.seedgen.form-infile
   (:require [clojure.string :as str]
             [code.framework :as base]
             [code.project :as project]
             [std.block.base :as block]
             [std.block.navigate :as nav]
-            [std.lang.seedgen.seed-common :as common]
-            [std.lang.seedgen.seed-readforms :as readforms]
+            [std.lang.seedgen.common-util :as common]
+            [std.lang.seedgen.form-parse :as readforms]
             [std.lib.result :as res]
             [std.task :as task]))
 

@@ -1,4 +1,4 @@
-(ns std.lang.seedgen.seed-common
+(ns std.lang.seedgen.common-util
   (:require [std.fs :as fs]
             [std.lang.base.impl :as lang.impl]
             [std.lang.base.library :as lang.lib]))

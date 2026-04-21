@@ -27,19 +27,19 @@
 
 (comment
 
-  ;; need to test std.lang.seedgen.seed-infile functions
+  ;; need to test std.lang.seedgen.common-infile functions
 
   ;; seedgen-root
   ;; 
 
-  (std.lang.seedgen.seed-infile/seedgen-root)
+  (std.lang.seedgen.common-infile/seedgen-root)
   => :js
 
   
   ;; seedgen-list
   ;; 
 
-  (std.lang.seedgen.seed-infile/seedgen-list)
+  (std.lang.seedgen.common-infile/seedgen-list)
   => []
   
   

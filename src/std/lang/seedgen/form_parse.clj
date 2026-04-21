@@ -1,10 +1,10 @@
-(ns std.lang.seedgen.seed-readforms
+(ns std.lang.seedgen.form-parse
   (:require [code.framework :as base]
             [code.framework.common :as framework.common]
             [code.project :as project]
             [std.block.base :as block]
             [std.block.navigate :as nav]
-            [std.lang.seedgen.seed-common :as common]
+            [std.lang.seedgen.common-util :as common]
             [std.lib.result :as res]
             [std.task :as task]))
 
@@ -271,7 +271,7 @@
 
 (comment
   (code.project/in-context
-   (std.lang.seedgen.seed-readforms/seedgen-readforms <sample>
+   (std.lang.seedgen.form-parse/seedgen-readforms <sample>
                                                       {}))
   => '{:globals {}
        :entries {xt.lang.common-spec/example.B {:status ... }}})

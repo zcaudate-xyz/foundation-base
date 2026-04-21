@@ -2,7 +2,7 @@
   (:require [code.manage :as manage]
             [code.manage.unit.template :as template]
             [std.lang.seedgen.seed-addlang :as addlang]
-            [std.lang.seedgen.seed-infile :as infile]
+            [std.lang.seedgen.common-infile :as infile]
             [std.lang.seedgen.seed-removelang :as removelang]
             [std.lib.invoke :as invoke]
             [std.task :as task]))

@@ -1,7 +1,7 @@
-(ns std.lang.seedgen.seed-infile
+(ns std.lang.seedgen.common-infile
   (:require [code.framework :as base]
             [code.project :as project]
-            [std.lang.seedgen.seed-common :as common]
+            [std.lang.seedgen.common-util :as common]
             [std.lib.result :as res]
             [std.task :as task]))
 
@@ -29,7 +29,7 @@
 
 (comment
   (code.project/in-context
-   (std.lang.seedgen.seed-infile/seedgen-root 'xt.sample.train-001-test
+   (std.lang.seedgen.common-infile/seedgen-root 'xt.sample.train-001-test
                                               {}))
   => :js)
 
@@ -68,7 +68,7 @@
 
 (comment
   (code.project/in-context
-   (std.lang.seedgen.seed-infile/seedgen-list '<sample>
+   (std.lang.seedgen.common-infile/seedgen-list '<sample>
                                               {}))
   => [:lua :python])
 
@@ -105,6 +105,6 @@
 
 (comment
   (code.project/in-context
-   (std.lang.seedgen.seed-infile/seedgen-incomplete <sample>
+   (std.lang.seedgen.common-infile/seedgen-incomplete <sample>
                                                     {}))
   => '{xt.lang.common-spec/example.B {:status ...}})

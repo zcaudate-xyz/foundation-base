@@ -1,8 +1,8 @@
 (ns std.lang.seedgen.seed-addlang-test
   (:use code.test)
   (:require [std.lang.seedgen.seed-addlang :as seed-addlang]
-            [std.lang.seedgen.seed-common :as common]
-            [std.lang.seedgen.seed-infile :as seed-infile]))
+            [std.lang.seedgen.common-util :as common]
+            [std.lang.seedgen.common-infile :as seed-infile]))
 
 ^{:refer std.lang.seedgen.seed-addlang/seedgen-addlang :added "4.1"}
 (fact "adds seedgen runtimes back from the seedgen root form"

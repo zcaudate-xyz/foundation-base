@@ -1,7 +1,7 @@
 (ns std.lang.seedgen.seed-removelang-test
   (:use code.test)
-  (:require [std.lang.seedgen.seed-common :as common]
-            [std.lang.seedgen.seed-infile :as seed-infile]
+  (:require [std.lang.seedgen.common-util :as common]
+            [std.lang.seedgen.common-infile :as seed-infile]
             [std.lang.seedgen.seed-removelang :as seed-removelang]))
 
 ^{:refer std.lang.seedgen.seed-removelang/seedgen-removelang :added "4.1"}

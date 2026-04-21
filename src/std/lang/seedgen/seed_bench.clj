@@ -4,7 +4,7 @@
             [code.project :as project]
             [std.block.base :as block]
             [std.block.navigate :as nav]
-            [std.lang.seedgen.seed-common :as common]
+            [std.lang.seedgen.common-util :as common]
             [std.lib.result :as res]
             [std.task :as task]))
 
@@ -49,7 +49,7 @@
   
 
   (code.project/in-context
-   (std.lang.seedgen.seed-infile/seedgen-root 'xt.sample.train-001-test
+   (std.lang.seedgen.common-infile/seedgen-root 'xt.sample.train-001-test
                                               {}))
   => :js)
 
