@@ -21,13 +21,13 @@
 (defn js-tf-x-shell
   ([[_ s opts]]
    (template/$ (do (var p (require "child_process"))
-            (p.exec ~s (fn [err res]
-                         (if err
-                           (if (. ~opts ["error"])
-                             (return (. ~opts (error err))))
-                           (if (. ~opts ["success"])
-                             (return (. ~opts (success res)))))))
-            (return ["async"])))))
+                   (p.exec ~s (fn [err res]
+                                (if err
+                                  (if (. ~opts ["error"])
+                                    (return (. ~opts (error err))))
+                                  (if (. ~opts ["success"])
+                                    (return (. ~opts (success res)))))))
+                   (return ["async"])))))
 
 (defn js-tf-x-random
   [_]
@@ -36,18 +36,18 @@
 (defn js-tf-x-type-native
   [[_ obj]]
   (template/$ (do (when (== ~obj nil)
-             (return nil))
-           (var t := (typeof ~obj))
-           (if (== t "object")
-             (cond (Array.isArray ~obj)
-                   (return "array")
-                   
-                   :else
-                   (do (var tn := (. ~obj ["constructor"] ["name"]))
-                        (if (== tn "Object")
-                          (return "object")
-                          (return tn))))
-              (return t)))))
+                    (return nil))
+                  (var t := (typeof ~obj))
+                  (if (== t "object")
+                    (cond (Array.isArray ~obj)
+                          (return "array")
+                          
+                          :else
+                          (do (var tn := (. ~obj ["constructor"] ["name"]))
+                              (if (== tn "Object")
+                                (return "object")
+                                (return tn))))
+                    (return t)))))
 
 (defn js-tf-x-has-key?
   [[_ obj key check]]
@@ -58,16 +58,16 @@
 (defn js-tf-x-future-run
   [[_ thunk]]
   (template/$ (do (var p (Promise.resolve))
-           (:= p (. p (then (fn []
-                              (~thunk)))))
-           (:= (. p ["__xt_status"]) "pending")
-           (:= p (. p (then (fn [v]
-                              (:= (. p ["__xt_status"]) "ok")
-                              (return v))
-                        (fn [e]
-                          (:= (. p ["__xt_status"]) "error")
-                          (throw e)))))
-           (return p))))
+                  (:= p (. p (then (fn []
+                                     (~thunk)))))
+                  (:= (. p ["__xt_status"]) "pending")
+                  (:= p (. p (then (fn [v]
+                                     (:= (. p ["__xt_status"]) "ok")
+                                     (return v))
+                                   (fn [e]
+                                     (:= (. p ["__xt_status"]) "error")
+                                     (throw e)))))
+                  (return p))))
 
 (defn js-tf-x-future-then
   [[_ task on-ok]]
@@ -84,9 +84,9 @@
 (defn js-tf-x-future-cancel
   [[_ task]]
   (template/$ (do (var f (. ~task ["cancel"]))
-           (when f
-             (f))
-           (return nil))))
+                  (when f
+                    (f))
+                  (return nil))))
 
 (defn js-tf-x-future-status
   [[_ task]]
@@ -140,7 +140,7 @@
         (if (x:is-function? f)
           (:= (. out [k])
               (fn:> [...args]
-                (f this ...args)))
+                    (f this ...args)))
           (:= (. out [k]) f)))
        (return out))))
 
@@ -333,14 +333,10 @@
   [[_ arr key-fn comp-fn]]
   (list '. arr (list 'sort
                      (template/$ (fn [a b]
-                            (return (:? (~comp-fn
-                                         (~key-fn a)
-                                         (~key-fn b))
-                                        -1 1)))))))
-
-(defn js-tf-x-str-comp
-  [[_ a b]]
-  (list '> 0 (list '. a (list 'localeCompare b))))
+                                   (return (:? (~comp-fn
+                                                (~key-fn a)
+                                                (~key-fn b))
+                                               -1 1)))))))
 
 (def +js-arr+
   {:x-arr-clone       {:emit :alias :raw 'Array.from}
@@ -352,8 +348,7 @@
    :x-arr-pop-first   {:macro #'js-tf-x-arr-pop-first  :emit :macro   :type :template}
    :x-arr-remove      {:macro #'js-tf-x-arr-remove     :emit :macro   :type :template}
    :x-arr-insert      {:macro #'js-tf-x-arr-insert     :emit :macro   :type :template}
-   :x-arr-sort        {:macro #'js-tf-x-arr-sort       :emit :macro}
-   :x-str-comp        {:macro #'js-tf-x-str-comp       :emit :macro}})
+   :x-arr-sort        {:macro #'js-tf-x-arr-sort       :emit :macro}})
 
 ;;
 ;; STRING
@@ -378,10 +373,10 @@
 (defn js-tf-x-str-format
   ([[_ fmt values]]
    (template/$ (. ~fmt
-                   (replace (new RegExp "\\{(\\d+)\\}" "g")
-                            (fn [match idx]
-                              (return (or (. ~values [(Number idx)])
-                                          match))))))))
+                  (replace (new RegExp "\\{(\\d+)\\}" "g")
+                           (fn [match idx]
+                             (return (or (. ~values [(Number idx)])
+                                         match))))))))
 
 (defn js-tf-x-str-substring
   ([[_ s start & args]]
@@ -415,12 +410,32 @@
   ([[_ s]]
    (list '. s (list 'trimRight))))
 
+(defn js-tf-x-str-comp
+  [[_ a b]]
+  (list '> 0 (list '. a (list 'localeCompare b))))
+
+(defn js-tf-x-str-pad-left
+  ([[_ s n ch]]
+   (list '. s (list 'padStart n ch))))
+
+(defn js-tf-x-str-pad-right
+  ([[_ s n ch]]
+   (list '. s (list 'padEnd n ch))))
+
+(defn js-tf-x-str-starts-with
+  ([[_ s prefix]]
+   (list '. s (list 'startsWith prefix))))
+
+(defn js-tf-x-str-ends-with
+  ([[_ s suffix]]
+   (list '. s (list 'endsWith suffix))))
+
 (def +js-str+
-   {:x-str-char        {:macro #'js-tf-x-str-char       :emit :macro}
-    :x-str-format      {:macro #'js-tf-x-str-format     :emit :macro}
-    :x-str-split       {:macro #'js-tf-x-str-split      :emit :macro}
-    :x-str-join        {:macro #'js-tf-x-str-join       :emit :macro}
-    :x-str-index-of    {:macro #'js-tf-x-str-index-of   :emit :macro}
+  {:x-str-char        {:macro #'js-tf-x-str-char       :emit :macro}
+   :x-str-format      {:macro #'js-tf-x-str-format     :emit :macro}
+   :x-str-split       {:macro #'js-tf-x-str-split      :emit :macro}
+   :x-str-join        {:macro #'js-tf-x-str-join       :emit :macro}
+   :x-str-index-of    {:macro #'js-tf-x-str-index-of   :emit :macro}
    :x-str-substring   {:macro #'js-tf-x-str-substring  :emit :macro}
    :x-str-to-upper    {:macro #'js-tf-x-str-to-upper   :emit :macro}
    :x-str-to-lower    {:macro #'js-tf-x-str-to-lower   :emit :macro}
@@ -428,7 +443,12 @@
    :x-str-replace     {:macro #'js-tf-x-str-replace    :emit :macro}
    :x-str-trim        {:macro #'js-tf-x-str-trim       :emit :macro}
    :x-str-trim-left   {:macro #'js-tf-x-str-trim-left  :emit :macro}
-   :x-str-trim-right  {:macro #'js-tf-x-str-trim-right :emit :macro}})
+   :x-str-trim-right  {:macro #'js-tf-x-str-trim-right :emit :macro}
+   :x-str-comp        {:macro #'js-tf-x-str-comp       :emit :macro}
+   :x-str-pad-left    {:macro #'js-tf-x-str-pad-left   :emit :macro}
+   :x-str-pad-right   {:macro #'js-tf-x-str-pad-right  :emit :macro}
+   :x-str-starts-with {:macro #'js-tf-x-str-starts-with :emit :macro}
+   :x-str-ends-with   {:macro #'js-tf-x-str-ends-with   :emit :macro}})
 
 ;;
 ;; JSON
@@ -445,64 +465,64 @@
 (defn js-tf-x-return-encode
   ([[_ out id key]]
    (template/$ (do (var type-fn (fn [x]
-                           (let [name (typeof x)]
-                             (return (:? (== name "object") (:? x x.constructor.name name) name)))))
-            (var tb (typeof ~out))
-            (cond (== "function" tb)
-                  (return (JSON.stringify {:id     ~id
-                                           :key    ~key
-                                           :type   "raw"
-                                           :return "function"
-                                           :value  (. ~out (toString))}))
-                  
-                  
-                  (not= "object" tb)
-                  (return (JSON.stringify {:id     ~id
-                                           :key    ~key
-                                           :type "data"
-                                           :return tb
-                                           :value ~out}))
+                                  (let [name (typeof x)]
+                                    (return (:? (== name "object") (:? x x.constructor.name name) name)))))
+                   (var tb (typeof ~out))
+                   (cond (== "function" tb)
+                         (return (JSON.stringify {:id     ~id
+                                                  :key    ~key
+                                                  :type   "raw"
+                                                  :return "function"
+                                                  :value  (. ~out (toString))}))
+                         
+                         
+                         (not= "object" tb)
+                         (return (JSON.stringify {:id     ~id
+                                                  :key    ~key
+                                                  :type "data"
+                                                  :return tb
+                                                  :value ~out}))
 
-                  (== nil ~out)
-                  (return (JSON.stringify {:id     ~id
-                                           :key    ~key
-                                           :type "data"
-                                           :return "nil"
-                                           :value ~out}))
-                  
-                  :else
-                  (do (var ts (type-fn ~out))
-                      (try
-                        (if (or (== ts "Object")
-                                (== ts "Array"))
-                          (return (JSON.stringify {:id     ~id
-                                                   :key    ~key
-                                                   :type "data"
-                                                   :value ~out}))
-                          (return (JSON.stringify {:id     ~id
-                                                   :key    ~key
-                                                   :type  "raw"
-                                                   :return ts
-                                                   :value (. ~out (toString))})))
-                        (catch e (return (JSON.stringify {:id     id
-                                                          :key    key
-                                                          :type   "raw"
+                         (== nil ~out)
+                         (return (JSON.stringify {:id     ~id
+                                                  :key    ~key
+                                                  :type "data"
+                                                  :return "nil"
+                                                  :value ~out}))
+                         
+                         :else
+                         (do (var ts (type-fn ~out))
+                             (try
+                               (if (or (== ts "Object")
+                                       (== ts "Array"))
+                                 (return (JSON.stringify {:id     ~id
+                                                          :key    ~key
+                                                          :type "data"
+                                                          :value ~out}))
+                                 (return (JSON.stringify {:id     ~id
+                                                          :key    ~key
+                                                          :type  "raw"
                                                           :return ts
-                                                          :value (. ~out (toString))}))))))))))
+                                                          :value (. ~out (toString))})))
+                               (catch e (return (JSON.stringify {:id     id
+                                                                 :key    key
+                                                                 :type   "raw"
+                                                                 :return ts
+                                                                 :value (. ~out (toString))}))))))))))
 
 (defn js-tf-x-return-wrap
   ([[_ f encode-fn]]
    (template/$ (try (var out := (~f))
-             (return (~encode-fn  out))
-             (catch e (let [err (:? (== "string" (typeof e)) e {:message (. e ["message"]) :stack (. e ["stack"])})]
-                        (return (JSON.stringify {:type "error"
-                                                 :value err}))))))))
+                    (return (~encode-fn  out))
+                    (catch e (let [err (:? (== "string" (typeof e)) e {:message (. e ["message"]) :stack (. e ["stack"])})]
+                               (return (JSON.stringify {:type "error"
+                                                        :value err}))))))))
 
 (defn js-tf-x-return-eval
   ([[_ s wrap-fn]]
    (template/$ (return (~wrap-fn
-                 (fn []
-                   (return (eval ~s))))))))
+                        (fn []
+                          (return (eval ~s))))))))
 
 (def +js-return+
   {:x-return-encode  {:macro #'js-tf-x-return-encode   :emit :macro}
@@ -512,11 +532,11 @@
 (defn js-tf-x-socket-connect
   ([[_ host port opts cb]]
    (template/$ (do* (var net (eval "require('net')"))
-             (var rl  (eval  "require('readline')"))
-             (var conn (new net.Socket))
-             (return (conn.connect
-                      port host (fn []
-                                  (cb nil conn))))))))
+                    (var rl  (eval  "require('readline')"))
+                    (var conn (new net.Socket))
+                    (return (conn.connect
+                             port host (fn []
+                                         (cb nil conn))))))))
 
 (defn js-tf-x-socket-send
   ([[_ conn s]]
@@ -550,13 +570,13 @@
 (defn js-tf-x-iter-eq
   ([[_ it0 it1 eq-fn]]
    (template/$ (do (for [:let x0 :of ~it0]
-              (var r1 (. ~it1 (next)))
-              (cond (. r1 done)
-                    (return false)
+                     (var r1 (. ~it1 (next)))
+                     (cond (. r1 done)
+                           (return false)
 
-                    (not (~eq-fn x0 (. r1 value)))
-                    (return false)))
-            (return (. ~it1 (next) done))))))
+                           (not (~eq-fn x0 (. r1 value)))
+                           (return false)))
+                   (return (. ~it1 (next) done))))))
 
 (defn js-tf-x-iter-next
   ([[_ it]]
@@ -615,9 +635,9 @@
 (defn js-tf-x-cache-incr
   ([[_ cache key num]]
    (template/$ (do:> (var prev (Number (. ~cache (getItem ~key))))
-              (var curr (+ prev ~num))
-              (. ~cache (setItem ~key curr))
-              (return curr)))))
+                     (var curr (+ prev ~num))
+                     (. ~cache (setItem ~key curr))
+                     (return curr)))))
 
 (def +js-cache+
   {:x-cache                 {:macro #'js-tf-x-cache           :emit :macro}
@@ -649,7 +669,7 @@
 (defn js-tf-x-thread-spawn
   ([[_ thunk]]
    (template/$ (new Promise (fn [resolve reject]
-                       (resolve (~thunk)))))))
+                              (resolve (~thunk)))))))
 
 (defn js-tf-x-thread-join
   ([[_ thread]]
@@ -659,26 +679,26 @@
   ([[_ thunk ms]]
    (template/$
     (new Promise
-     (fn [resolve reject]
-       (var cb {:resolve resolve
-                :reject reject})
-       (setTimeout
-        (fn []
-          (. (new Promise
-                  (fn [inner-resolve inner-reject]
-                    (inner-resolve (~thunk))))
-             (then (fn [value]
-                     ((. cb ["resolve"]) value)))
-             (catch (fn [err]
-                      ((. cb ["reject"]) err)))))
-        ~ms))))))
+         (fn [resolve reject]
+           (var cb {:resolve resolve
+                    :reject reject})
+           (setTimeout
+            (fn []
+              (. (new Promise
+                      (fn [inner-resolve inner-reject]
+                        (inner-resolve (~thunk))))
+                 (then (fn [value]
+                         ((. cb ["resolve"]) value)))
+                 (catch (fn [err]
+                          ((. cb ["reject"]) err)))))
+            ~ms))))))
 
 (defn js-tf-x-start-interval
   ([[_ thunk ms]]
    (template/$ (setInterval (fn []
-                      (new Promise (fn [resolve reject]
-                                     (resolve (~thunk)))))
-                    ~ms))))
+                              (new Promise (fn [resolve reject]
+                                             (resolve (~thunk)))))
+                            ~ms))))
 
 (defn js-tf-x-stop-interval
   ([[_ instance]]
@@ -702,12 +722,12 @@
 (defn js-tf-x-notify-http
   ([[_ host port value id key opts]]
    (template/$ (try
-          (var #{path scheme} (or ~opts {}))
-          (fetch (+ (or scheme "http") "://" ~host ":" ~port "/" (or path ""))
-                 {:method "POST"
-                  :body (xt.lang.common-repl/return-encode ~value ~id ~key)})
-          (return ["async"])
-          (catch e (return ["unable to connect"]))))))
+                 (var #{path scheme} (or ~opts {}))
+                 (fetch (+ (or scheme "http") "://" ~host ":" ~port "/" (or path ""))
+                        {:method "POST"
+                         :body (xt.lang.common-repl/return-encode ~value ~id ~key)})
+                 (return ["async"])
+                 (catch e (return ["unable to connect"]))))))
 
 (def +js-special+
   {:x-notify-http   {:macro #'js-tf-x-notify-http    :emit :macro   :type :template}})

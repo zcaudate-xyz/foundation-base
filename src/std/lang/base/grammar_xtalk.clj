@@ -539,10 +539,7 @@
                 :arglists '([obj])}}
    {:op :x-obj-assign     :symbol #{'x:obj-assign}      :emit :hard-link :raw 'xt.lang.common-data/obj-assign
     :op-spec   {:type [:fn [:xt/obj :xt/obj] :xt/obj]
-                :arglists '([obj other])}}
-   {:op :x-obj-from-pairs :symbol #{'x:obj-from-pairs}  :emit :hard-link :raw 'xt.lang.common-data/obj-from-pairs
-    :op-spec   {:type [:fn [[:xt/array [:xt/tuple :xt/str :xt/any]]] :xt/obj]
-                :arglists '([pairs])}}])
+                :arglists '([obj other])}}])
 
 (def +xt-common-array+
   [{:op :x-get-idx         :symbol #{'x:get-idx}          :macro #'tf-get-key     :emit :macro
@@ -627,9 +624,6 @@
    {:op :x-str-char        :symbol #{'x:str-char}        :emit :abstract
     :op-spec    {:type [:fn [:xt/str :xt/num] :xt/str]
                  :arglists '([value idx])}}
-   {:op :x-str-format      :symbol #{'x:str-format}      :emit :abstract
-    :op-spec    {:arglists '([template values])
-                 :type [:fn [:xt/str [:xt/array :xt/any]] :xt/str]}}
    {:op :x-str-split       :symbol #{'x:str-split}       :emit :abstract
     :op-spec    {:arglists '([value separator])
                  :type [:fn [:xt/str :xt/str] [:xt/array :xt/str]]}}

@@ -541,12 +541,6 @@
   x:obj-assign
   ([obj other] (list (quote x:obj-assign) obj other)))
 
-(defspec.xt x:obj-from-pairs [:fn [[:xt/array [:xt/tuple :xt/str :xt/any]]] :xt/obj])
-
-(defmacro.xt ^{:standalone true :is-template false} 
-  x:obj-from-pairs
-  ([pairs] (list (quote x:obj-from-pairs) pairs)))
-
 (defspec.xt x:to-string [:fn [:xt/any] :xt/str])
 
 (defmacro.xt ^{:standalone true :is-template false} 
@@ -654,12 +648,6 @@
 (defmacro.xt ^{:standalone true :is-template false} 
   x:str-char
   ([value idx] (list (quote x:str-char) value idx)))
-
-(defspec.xt x:str-format [:fn [:xt/str [:xt/array :xt/any]] :xt/str])
-
-(defmacro.xt ^{:standalone true :is-template false} 
-  x:str-format
-  ([template values] (list (quote x:str-format) template values)))
 
 (defspec.xt x:str-split [:fn [:xt/str :xt/str] [:xt/array :xt/str]])
 

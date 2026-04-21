@@ -779,12 +779,6 @@
     (xt/x:obj-assign {:a 1} {:b 2}))
   => {"a" 1, "b" 2})
 
-^{:refer xt.lang.common-spec/x:obj-from-pairs :added "4.1"}
-(fact "creates an object from pairs"
-  (!.js
-    (xt/x:obj-from-pairs [["a" 1] ["b" 2]]))
-  => {"a" 1, "b" 2})
-
 ^{:refer xt.lang.common-spec/x:to-string :added "4.1"}
 (fact "converts a value to a string"
   (!.js
@@ -863,99 +857,114 @@
 
 ^{:refer xt.lang.common-spec/x:str-pad-left :added "4.1"}
 (fact "pads a string on the left"
+
   (!.js
     (xt/x:str-pad-left "7" 3 "0"))
   => "007")
 
 ^{:refer xt.lang.common-spec/x:str-pad-right :added "4.1"}
 (fact "pads a string on the right"
+
   (!.js
     (xt/x:str-pad-right "7" 3 "0"))
   => "700")
 
 ^{:refer xt.lang.common-spec/x:str-starts-with :added "4.1"}
 (fact "checks the string prefix"
+
   (!.js
     (xt/x:str-starts-with "hello" "he"))
   => true)
 
 ^{:refer xt.lang.common-spec/x:str-ends-with :added "4.1"}
 (fact "checks the string suffix"
+
   (!.js
     (xt/x:str-ends-with "hello" "lo"))
   => true)
 
 ^{:refer xt.lang.common-spec/x:str-char :added "4.1"}
 (fact "gets the character code at an index"
-  (!.js
-    ^{:lang-exceptions {:python {:expect 98}
-                        :dart   {:expect 98}}}
-    (xt/x:str-char "abc" 1))
-  => 97)
 
-^{:refer xt.lang.common-spec/x:str-format :added "4.1"}
-(fact "keeps the string format wrapper intact"
-  (:arglists (meta #'xt/x:str-format))
-  => '([template values]))
+  (!.js
+    (xt/x:str-char "abc" (xt/x:offset 1)))
+  => 98)
 
 ^{:refer xt.lang.common-spec/x:str-split :added "4.1"}
 (fact "splits a string"
+
   (!.js
+    (xt/x:str-split "a/b/c" "/"))
+  => ["a" "b" "c"]
+
+  (!.py
     (xt/x:str-split "a/b/c" "/"))
   => ["a" "b" "c"])
 
 ^{:refer xt.lang.common-spec/x:str-join :added "4.1"}
 (fact "joins string parts"
+
   (!.js
+    (xt/x:str-join "-" ["a" "b" "c"]))
+  => "a-b-c"
+
+  (!.py
     (xt/x:str-join "-" ["a" "b" "c"]))
   => "a-b-c")
 
 ^{:refer xt.lang.common-spec/x:str-index-of :added "4.1"}
 (fact "finds the index of a substring"
+
+  ^{:seedgen/check    {:lua  {:expect 6}}}
   (!.js
-    ^{:lang-exceptions {:python {:expect 5}
-                        :dart   {:expect 5}}}
-    (xt/x:str-index-of "hello/world" "/" 0))
-  => 6)
+    (xt/x:str-index-of "hello/world" "/" (xt/x:offset 0)))
+  => 5)
 
 ^{:refer xt.lang.common-spec/x:str-substring :added "4.1"}
 (fact "gets a substring"
+
   (!.js
-    ^{:lang-exceptions {:python {:expect "lo/wo"}
-                        :dart   {:expect "lo/wo"}}}
-    (xt/x:str-substring "hello/world" 3 8))
-  => "llo/wo")
+    (xt/x:str-substring "hello/world"
+                        (xt/x:offset 3)
+                        (xt/x:offset 8)))
+  => "lo/wo")
 
 ^{:refer xt.lang.common-spec/x:str-to-upper :added "4.1"}
 (fact "converts a string to upper case"
+
   (!.js
     (xt/x:str-to-upper "hello"))
   => "HELLO")
 
 ^{:refer xt.lang.common-spec/x:str-to-lower :added "4.1"}
 (fact "converts a string to lower case"
+
   (!.js
     (xt/x:str-to-lower "HELLO"))
   => "hello")
 
 ^{:refer xt.lang.common-spec/x:str-to-fixed :added "4.1"}
 (fact "formats a number with fixed decimals"
+
   (!.js
     (xt/x:str-to-fixed 1.2 2))
   => "1.20")
 
 ^{:refer xt.lang.common-spec/x:str-replace :added "4.1"}
 (fact "replaces matching substrings"
+
   (!.js (xt/x:str-replace "hello-world" "-" "/"))
   => "hello/world")
 
 ^{:refer xt.lang.common-spec/x:str-trim :added "4.1"}
 (fact "trims whitespace from both sides"
+
   (!.js (xt/x:str-trim "  hello  "))
   => "hello")
 
 ^{:refer xt.lang.common-spec/x:str-trim-left :added "4.1"}
 (fact "trims whitespace from the left side"
+
   (!.js (xt/x:str-trim-left "  hello"))
   => "hello")
 
