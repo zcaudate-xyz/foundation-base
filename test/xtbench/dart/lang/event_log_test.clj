@@ -37,7 +37,7 @@
    (log/queue-entry
     l
     {:id (xt/x:cat "id-" (xt/x:to-string i))}
-    log/id-fn
+    (fn [x _] (return (xt/x:get-key x "id")))
     k/identity
     1))
   (log/clear-cache l 100000)

@@ -325,7 +325,7 @@
   (:= path (:? (xt/x:nil? path) (-/path-from-tree tree) path))
   (:= path (event-common/arrayify-path path))
   (return (xt/x:get-key (-/path-params-from-tree tree path)
-                     param)))
+                      param)))
 
 (defn.xt get-all-params
   "gets all params in the route"
@@ -461,12 +461,11 @@
   (var #{history} route)
   (xtd/arr-pushl history url 50)
   (return
-   (event-common/task-await
-    (event-common/trigger-listeners
-     route
-     {:type "route.url"
-      :params dparams
-      :path   dpath}))))
+   (event-common/trigger-listeners
+    route
+    {:type "route.url"
+     :params dparams
+     :path   dpath})))
 
 (defn.xt set-path
   "sets the path and param"
@@ -480,7 +479,7 @@
   (var npath    path)
   (when (xt/x:nil? npath)
     (:= npath ppath))
-  (:= npath (event-common/arrayify-path npath))
+  (:= npath (xtd/arrayify npath))
   (var pkey    (xt/x:json-encode npath))
   
   (var pparams  (xt/x:get-key all-params pkey))
@@ -505,19 +504,18 @@
   (var #{history} route)
   (xtd/arr-pushl history (-/get-url route) 50)
   (return
-   (event-common/task-await
-    (event-common/trigger-listeners
-     route
-     {:type "route.path"
-      :params dparams
-       :path   dpath}))))
+   (event-common/trigger-listeners
+    route
+    {:type "route.path"
+     :params dparams
+     :path   dpath})))
 
 (defn.xt set-segment
   "sets the current segment"
   {:added "4.0"}
   [route path value]
   (var #{tree} route)
-  (:= path (event-common/arrayify-path path))
+  (:= path (xtd/arrayify path))
   (var pkey   (xt/x:json-encode path))
   (var pvalue (xt/x:get-key tree pkey))
   (xt/x:set-key tree pkey value)
@@ -525,12 +523,11 @@
   (var #{history} route)
   (xtd/arr-pushl history (-/get-url route) 50)
   (return
-   (event-common/task-await
-    (event-common/trigger-listeners
-     route
-     {:type "route.path"
-      :params {}
-      :path   {pkey true}}))))
+   (event-common/trigger-listeners
+    route
+    {:type "route.path"
+     :params {}
+     :path   {pkey true}})))
 
 (defn.xt set-param
   "sets a param in a route"
@@ -539,7 +536,7 @@
   (var #{tree} route)
   (when (xt/x:nil? path)
     (:= path (-/path-from-tree tree)))
-  (:= path (event-common/arrayify-path path))
+  (:= path (xtd/arrayify path))
   (var pkey (xt/x:json-encode path))
   (var all-params (xt/x:get-key tree "params"))
   (var pparams (xt/x:get-key all-params pkey))
@@ -560,15 +557,14 @@
                   :else
                   (xt/x:set-key all-params pkey pparams))
 
-             (var #{history} route)
-             (xtd/arr-pushl history (-/get-url route) 50)
-             (return
-              (event-common/task-await
+              (var #{history} route)
+              (xtd/arr-pushl history (-/get-url route) 50)
+              (return
                (event-common/trigger-listeners
                 route
                 {:type "route.params"
                  :params {param true}
-                 :path   {}}))))
+                 :path   {}})))
 
          :else
          (return [])))

@@ -77,7 +77,7 @@
     
     (xt/for:index [i [0 10]]
       (log/queue-entry l {:id (xt/x:cat "id-" (xt/x:to-string i))}
-                       log/id-fn
+                       (fn [x _] (return (xt/x:get-key x "id")))
                        k/identity
                        1))
    (log/clear-cache l 100000)
@@ -107,7 +107,7 @@
     
     (xt/for:index [i [0 9]]
       (log/queue-entry l {:id (xt/x:cat "id-" (xt/x:to-string i))}
-                       log/id-fn
+                       (fn [x _] (return (xt/x:get-key x "id")))
                        k/identity
                        1))
     (log/clear-cache l 100000)

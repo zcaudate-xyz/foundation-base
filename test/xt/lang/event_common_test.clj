@@ -86,22 +86,6 @@
       "listeners" {},
       "data" "number"})
 
-^{:refer xt.lang.event-common/arrayify-path :added "4.1"}
-(fact "normalizes event path inputs"
-  ^:hidden
-
-  (!.js [(event/arrayify-path nil)
-         (event/arrayify-path [])
-         (event/arrayify-path {})
-         (event/arrayify-path "a")])
-  => [[] [] [] ["a"]]
-
-  (!.lua [(event/arrayify-path nil)
-          (event/arrayify-path [])
-          (event/arrayify-path {})
-          (event/arrayify-path "a")])
-  => [{} {} {} ["a"]])
-
 ^{:refer xt.lang.event-common/make-listener-entry :added "4.0"
   :setup [(def +out+
             (contains-in

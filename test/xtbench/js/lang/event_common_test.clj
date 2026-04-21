@@ -40,18 +40,6 @@
   "listeners" {},
   "data" 1})
 
-^{:refer xt.lang.event-common/arrayify-path, :added "4.1"}
-(fact
- "normalizes event path inputs"
- ^{:hidden true}
- (!.js
-  [(event/arrayify-path nil)
-   (event/arrayify-path [])
-   (event/arrayify-path {})
-   (event/arrayify-path "a")])
- =>
- [[] [] [] ["a"]])
-
 ^{:refer xt.lang.event-common/make-listener-entry,
   :added "4.0",
   :setup

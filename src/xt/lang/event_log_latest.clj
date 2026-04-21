@@ -32,15 +32,12 @@
              (>= interval (- t last)))
     (return out))
   (xt/x:set-key log "last" t)
-   (xt/for:array [k (xt/x:obj-keys cache)]
-     (var entry (xt/x:get-key cache k))
-      (when (< interval (- t (. entry ["t"])))
-        (xt/x:del-key cache k)
-        (xt/x:arr-push out k)))
-   (return
-    (xtd/arr-sort out
-                  (fn [x] (return x))
-                  xt/x:str-lt)))
+  (xt/for:array [k (xt/x:obj-keys cache)]
+    (var entry (xt/x:get-key cache k))
+    (when (< interval (- t (. entry ["t"])))
+      (xt/x:del-key cache k)
+      (xt/x:arr-push out k)))
+  (return out))
 
 (defn.xt queue-latest
   "queues the latest time to log"

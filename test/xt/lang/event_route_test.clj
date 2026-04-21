@@ -500,7 +500,7 @@
               (xtd/tree-get-data (route/add-url-listener r "a1" (fn:>) nil)))}}}
   (!.js
    (var r (route/make-route "hello"))
-   (xtd/tree-get-data (route/add-url-listener r "a1" (fn:>))))
+   (xtd/tree-get-data (route/add-url-listener r "a1" (fn:>) nil)))
   => +out+
 
   ^{:lang-exceptions
@@ -510,7 +510,7 @@
               (xtd/tree-get-data (route/add-url-listener r "a1" (fn:>) nil)))}}}
   (!.js
    (var r (route/make-route "hello"))
-   (xtd/tree-get-data (route/add-url-listener r "a1" (fn:>))))
+   (xtd/tree-get-data (route/add-url-listener r "a1" (fn:>) nil)))
   => +out+
 
   (!.py
@@ -541,7 +541,7 @@
                       (route/add-path-listener r [] "a1" (fn:>) nil)))}}}
   (!.js
    (var r (route/make-route "hello"))
-   (xtd/tree-get-data (route/add-path-listener r [] "a1" (fn:>))))
+   (xtd/tree-get-data (route/add-path-listener r [] "a1" (fn:>) nil)))
   => +out+
 
   ^{:lang-exceptions
@@ -556,7 +556,7 @@
                       (route/add-path-listener r [] "a1" (fn:>) nil)))}}}
   (!.js
    (var r (route/make-route "hello"))
-   (xtd/tree-get-data (route/add-path-listener r [] "a1" (fn:>))))
+   (xtd/tree-get-data (route/add-path-listener r [] "a1" (fn:>) nil)))
   => +out+
 
   (!.py
@@ -583,12 +583,12 @@
                (route/add-param-listener r "auth" "a1" (fn:>) nil)))}}}
   (!.js
    (var r (route/make-route "hello"))
-   (xtd/tree-get-data (route/add-param-listener r "auth" "a1" (fn:>))))
+   (xtd/tree-get-data (route/add-param-listener r "auth" "a1" (fn:>) nil)))
   => +out+
 
   (!.lua
    (var r (route/make-route "hello"))
-   (xtd/tree-get-data (route/add-param-listener r "auth" "a1" (fn:>))))
+   (xtd/tree-get-data (route/add-param-listener r "auth" "a1" (fn:>) nil)))
   => +out+
 
   (!.py
@@ -616,12 +616,12 @@
                (route/add-full-listener r ["hello"] "auth" "a1" (fn:>) nil)))}}}
   (!.js
    (var r (route/make-route "hello"))
-   (xtd/tree-get-data (route/add-full-listener r ["hello"] "auth" "a1" (fn:>))))
+   (xtd/tree-get-data (route/add-full-listener r ["hello"] "auth" "a1" (fn:>) nil)))
   => +out+
 
   (!.lua
    (var r (route/make-route "hello"))
-   (xtd/tree-get-data (route/add-full-listener r ["hello"] "auth" "a1" (fn:>))))
+   (xtd/tree-get-data (route/add-full-listener r ["hello"] "auth" "a1" (fn:>) nil)))
   => +out+
 
   (!.py
@@ -672,7 +672,8 @@
    (notify/wait-on :js
         (var r (route/make-route "hello"))
         (route/add-path-listener r ["hello"] "a1"
-                                 (repl/>notify))
+                                 (repl/>notify)
+                                 nil)
        (route/set-url r "hello/world"))]
   [{"params" {},
     "path" {"[\"hello\"]" true},
@@ -684,10 +685,11 @@
   
   ^{:lang-exceptions {:dart {:skip true}}}
   (notify/wait-on :lua
-    (var r (route/make-route "hello"))
-    (route/add-path-listener r ["hello"] "a1"
-                             (repl/>notify))
-    (route/set-url r "hello/world"))
+   (var r (route/make-route "hello"))
+   (route/add-path-listener r ["hello"] "a1"
+                            (repl/>notify)
+                            nil)
+   (route/set-url r "hello/world"))
   => +out+)
 
 ^{:refer xt.lang.event-route/set-path :added "4.0"
@@ -729,10 +731,11 @@
       }} 
    [
      (notify/wait-on :js
-         (var r (route/make-route "hello"))
-         (route/add-path-listener r ["hello"] "a1"
-                                  (repl/>notify))
-        (route/set-path r ["hello" "world"] nil))
+        (var r (route/make-route "hello"))
+        (route/add-path-listener r ["hello"] "a1"
+                                 (repl/>notify)
+                                 nil)
+       (route/set-path r ["hello" "world"] nil))
     (!.js
      (var r (route/make-route "hello"))
      (route/set-path r ["hello" "world"] nil)
@@ -749,17 +752,19 @@
         "listeners" {}}]]
 
    (notify/wait-on :lua
-     (var r (route/make-route "hello"))
-    (route/add-path-listener r ["hello"] "a1"
-                             (repl/>notify))
-    (route/set-path r ["hello" "world"] nil))
+   (var r (route/make-route "hello"))
+   (route/add-path-listener r ["hello"] "a1"
+                            (repl/>notify)
+                            nil)
+   (route/set-path r ["hello" "world"] nil))
   => +out+
 
    [(notify/wait-on :python
-       (var r (route/make-route "hello"))
-       (route/add-path-listener r ["hello"] "a1"
-                                (repl/>notify))
-       (route/set-path r ["hello" "world"] nil))
+      (var r (route/make-route "hello"))
+      (route/add-path-listener r ["hello"] "a1"
+                               (repl/>notify)
+                               nil)
+      (route/set-path r ["hello" "world"] nil))
     (!.py
      (var r (route/make-route "hello"))
      (route/set-path r ["hello" "world"] nil)
@@ -816,7 +821,8 @@
    (notify/wait-on :js
         (var r (route/make-route "hello"))
         (route/add-path-listener r ["hello"] "a1"
-                                 (repl/>notify))
+                                 (repl/>notify)
+                                 nil)
        (route/set-segment r ["hello"] "world"))
    (!.js
     (var r (route/make-route "hello"))
@@ -830,10 +836,11 @@
         "listeners" {}}]]
 
   (notify/wait-on :lua
-    (var r (route/make-route "hello"))
-    (route/add-path-listener r ["hello"] "a1"
-                             (repl/>notify))
-    (route/set-segment r ["hello"] "world"))
+   (var r (route/make-route "hello"))
+   (route/add-path-listener r ["hello"] "a1"
+                            (repl/>notify)
+                            nil)
+   (route/set-segment r ["hello"] "world"))
   => +out+)
 
 ^{:refer xt.lang.event-route/set-param :added "4.0"
@@ -875,9 +882,10 @@
       }}
    [
      (notify/wait-on :js
-         (var r (route/make-route "hello?auth=sign_in"))
-         (route/add-param-listener r "auth" "a1"
-                                  (repl/>notify))
+        (var r (route/make-route "hello?auth=sign_in"))
+        (route/add-param-listener r "auth" "a1"
+                                  (repl/>notify)
+                                  nil)
        (route/set-param r "auth" "register" nil))
     (!.js
      (var r (route/make-route "hello?auth=sign_in"))
@@ -898,10 +906,11 @@
     (route/get-url r))
   
    (notify/wait-on :lua
-     (var r (route/make-route "hello?auth=sign_in"))
-     (route/add-param-listener r "auth"  "a1"
-                               (repl/>notify))
-     (route/set-param r "auth" "register" nil))
+    (var r (route/make-route "hello?auth=sign_in"))
+    (route/add-param-listener r "auth"  "a1"
+                              (repl/>notify)
+                              nil)
+    (route/set-param r "auth" "register" nil))
   => +out+)
 
 ^{:refer xt.lang.event-route/reset-route :added "4.0"}
