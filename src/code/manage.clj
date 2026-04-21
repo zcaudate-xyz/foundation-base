@@ -395,7 +395,10 @@
           :item {:list template/test-namespaces}
           :result (template/code-transform-result :changed)}])
 
-(comment (code.manage/snapto ['code.framework] {:print {:function true :item true :result true :summary true}}))
+(comment
+  
+  (code.manage/snapto ['xtbench.lua.db.base-util-test]
+                      {:print {:function true :item true :result true :summary true}}))
 
 (invoke/definvoke locate-code
   "locates code base upon query"

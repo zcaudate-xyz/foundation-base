@@ -43,18 +43,29 @@
           op
           (*test-forms* (block/value op))))))
 
+(defn leading-indent
+  "counts leading spaces and tabs in a line"
+  {:added "4.1"}
+  ([^String line]
+   (loop [i 0]
+     (if (and (< i (count line))
+              (#{\space \tab} (.charAt line i)))
+       (recur (inc i))
+       i))))
+
 (defn normalise-block-string
   "removes shared indentation from the rest of a block string"
   {:added "4.1"}
-  ([s]
+  ([^String s]
    (let [[head & rest] (str/split-lines s)]
      (if (empty? rest)
        s
-       (let [indent (->> rest
-                         (remove str/blank?)
-                         (map #(count (re-find #"^\s*" %)))
-                         (reduce min ##Inf))
-             indent (if (number? indent) indent 0)]
+       (let [indents (->> rest
+                          (remove str/blank?)
+                          (map leading-indent))
+             indent  (if (seq indents)
+                       (reduce min indents)
+                       0)]
          (str/join "\n"
                    (cons head
                          (map (fn [line]
@@ -131,15 +142,17 @@
                                      [(first more) (next more)]
                                      [nil more])
          items                     (parse-body more)
-         blocks                    (concat [(str "(" (block/string op)
-                                                 (when intro
-                                                   (str " " (block/string intro))))]
-                                           (map render-item items))
-          body       (str/join "\n\n" (rest blocks))]
+         head                      (str "(" (block/string op)
+                                         (when intro
+                                           (str " " (block/string intro))))
+         body                      (->> items
+                                        (map render-item)
+                                        (str/join "\n\n"))]
       (str prefix
-           (first blocks)
+           head
            (when (seq body)
-             (str "\n" body))
+             (str (if intro "\n\n" "\n")
+                  body))
            ")"))))
 
 (defn snap-block-string
