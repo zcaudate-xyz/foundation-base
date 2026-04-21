@@ -27,7 +27,6 @@
                    xtalk/+xt-functional-invoke+
                    xtalk/+xt-functional-return+
                    xtalk/+xt-functional-array+
-                   xtalk/+xt-functional-future+
                    xtalk/+xt-functional-iter+]
    :xtalk-impl    [xtalk/+xt-lang-global+
                    xtalk/+xt-lang-proto+

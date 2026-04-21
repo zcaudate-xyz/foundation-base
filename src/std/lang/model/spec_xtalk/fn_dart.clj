@@ -331,30 +331,6 @@
      :x-cache-del             {:macro #'dart-tf-x-cache-del       :emit :macro}
      :x-cache-incr            {:macro #'dart-tf-x-cache-incr      :emit :macro}})
 
-(defn dart-tf-x-future-run
-  [[_ thunk]]
-  (template/$
-   (Future
-    (fn []
-      (return (~thunk))))))
-(defn dart-tf-x-future-then [[_ task on-ok]] (list '. task (list 'then on-ok)))
-(defn dart-tf-x-future-catch [[_ task on-err]] (list '. task (list 'catchError on-err)))
-(defn dart-tf-x-future-finally [[_ task on-done]] (list '. task (list 'whenComplete on-done)))
-(defn dart-tf-x-future-cancel [[_ task]] (list 'null))
-(defn dart-tf-x-future-status [[_ task]] (list '"pending"))
-(defn dart-tf-x-future-await [[_ task timeout-ms default]] task)
-(defn dart-tf-x-future-from-async [[_ executor]] (list 'Future executor))
-
-(def +dart-future+
-   {:x-future-run       {:macro #'dart-tf-x-future-run      :emit :macro}
-    :x-future-then      {:macro #'dart-tf-x-future-then     :emit :macro}
-    :x-future-catch     {:macro #'dart-tf-x-future-catch    :emit :macro}
-    :x-future-finally   {:macro #'dart-tf-x-future-finally  :emit :macro}
-    :x-future-cancel    {:macro #'dart-tf-x-future-cancel   :emit :macro}
-    :x-future-status    {:macro #'dart-tf-x-future-status   :emit :macro}
-    :x-future-await     {:macro #'dart-tf-x-future-await    :emit :macro}
-    :x-future-from-async {:macro #'dart-tf-x-future-from-async :emit :macro}})
-
 (defn dart-tf-x-iter-eq
   [[_ a b eq-fn]]
   (template/$
@@ -625,7 +601,6 @@
          +dart-json+
          +dart-arr+
          +dart-cache+
-         +dart-future+
          +dart-iter+
          +dart-socket+
          +dart-proto+

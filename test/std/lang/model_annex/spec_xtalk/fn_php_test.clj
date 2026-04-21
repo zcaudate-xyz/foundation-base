@@ -329,55 +329,15 @@
   (l/emit-as :php [(php-tf-x-return-eval '[_ s wrap-fn])])
   => #"eval")
 
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-future-run :added "4.1"}
-(fact "future run emits status box"
-  (l/emit-as :php [(php-tf-x-future-run '[_ thunk])])
-  => #"status")
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-future-await :added "4.1"}
-(fact "future await emits status checks"
-  (l/emit-as :php [(php-tf-x-future-await '[_ task nil nil])])
-  => #"status")
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-future-then :added "4.1"}
-(fact "future then emits success chaining"
-  (l/emit-as :php [(php-tf-x-future-then '[_ task on-ok])])
-  => #"status")
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-future-catch :added "4.1"}
-(fact "future catch emits error chaining"
-  (l/emit-as :php [(php-tf-x-future-catch '[_ task on-err])])
-  => #"status")
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-future-finally :added "4.1"}
-(fact "future finally emits callback"
-  (l/emit-as :php [(php-tf-x-future-finally '[_ task on-done])])
-  => #"on_done")
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-future-cancel :added "4.1"}
-(fact "future cancel emits cancelled status"
-  (l/emit-as :php [(php-tf-x-future-cancel '[_ task])])
-  => #"cancelled")
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-future-status :added "4.1"}
-(fact "future status emits status lookup"
-  (l/emit-as :php [(php-tf-x-future-status '[_ task])])
-  => #"status")
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-future-from-async :added "4.1"}
-(fact "future from async emits resolve reject box"
-  (l/emit-as :php [(php-tf-x-future-from-async '[_ executor])])
-  => #"resolve")
-
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-thread-spawn :added "4.1"}
-(fact "thread spawn reuses future representation"
+(fact "thread spawn emits the thunk result"
   (l/emit-as :php [(php-tf-x-thread-spawn '[_ thunk])])
-  => #"status")
+  => #"out")
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-thread-join :added "4.1"}
-(fact "thread join awaits future representation"
+(fact "thread join passes through the thread"
   (l/emit-as :php [(php-tf-x-thread-join '[_ thread])])
-  => #"status")
+  => #"thread")
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-with-delay :added "4.1"}
 (fact "with delay emits sleep"
@@ -461,14 +421,6 @@
              :x-cache-set
              :x-client-basic
              :x-client-ws
-             :x-future-await
-             :x-future-cancel
-             :x-future-catch
-             :x-future-finally
-             :x-future-from-async
-             :x-future-run
-             :x-future-status
-             :x-future-then
              :x-has-key?
              :x-iter-eq
              :x-iter-from

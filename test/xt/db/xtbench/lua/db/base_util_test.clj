@@ -46,12 +46,10 @@
        "id" "ping",
        "flags" {},
        "type" "db"}}))]}
-(fact
- "collect routes"
- ^{:hidden true}
- (!.lua (ut/collect-routes (@! +routes+) "db"))
- =>
- +result+)
+(fact "collect routes"
+  ^{:hidden true}
+  (!.lua (ut/collect-routes (@! +routes+) "db"))
+  => +result+)
 
 ^{:refer xt.db.base-util/collect-views,
   :added "4.0",
@@ -93,38 +91,51 @@
        :access {:roles {}},
        :query {"type" "i_type"},
        :guards []}}])]}
-(fact
- "collect views into views structure"
- ^{:hidden true}
- (!.lua (ut/collect-views (@! +views+)))
- =>
- (contains-in
-  {"Currency"
-   {"select" {"all" map?, "by_type" map?}, "return" {"default" map?}}}))
+(fact "collect views into views structure"
+  ^{:hidden true}
+  (!.lua (ut/collect-views (@! +views+)))
+  => (contains-in
+     {"Currency"
+      {"select" {"all" map?, "by_type" map?}, "return" {"default" map?}}}))
 
 ^{:refer xt.db.base-util/keepf-limit, :added "4.0"}
-(fact
- "keeps given limit"
- ^{:hidden true}
- (!.lua (ut/keepf-limit [1 2 3 4 5] xt/x:odd? k/identity 3))
- =>
- [1 3 5])
+(fact "keeps given limit"
+  
+  ^{:hidden true}
+  (!.lua (ut/keepf-limit [1 2 3 4 5] xt/x:odd? k/identity 3))
+  => [1 3 5]
+
+  (!.lua (ut/keepf-limit [1 2 3 4 5] xt/x:odd? k/identity 3))
+  => [1 3 5])
 
 ^{:refer xt.db.base-util/lu-nested, :added "4.0"}
-(fact
- "helper for lu-map"
- ^{:hidden true}
- (!.lua (ut/lu-nested [{:id "1"}] (fn [e] (return e.id))))
- =>
- {"1" {"id" "1"}})
+(fact "helper for lu-map"
+  ^{:hidden true}
+  (!.lua (ut/lu-nested [{:id "1"}] (fn [e] (return e.id))))
+  => {"1" {"id" "1"}})
 
 ^{:refer xt.db.base-util/lu-map, :added "4.0"}
-(fact
- "constructs a nested lu map of ids"
- ^{:hidden true}
- (!.lua
-  [(ut/lu-map {:a [{:id "b"}]})
-   (ut/lu-map {:a [{:id "b", :sub [{:id "c"} {:id "d"}]}]})])
- =>
- [{"a" {"b" {"id" "b"}}}
-  {"a" {"b" {"sub" {"d" {"id" "d"}, "c" {"id" "c"}}, "id" "b"}}}])
+(fact "constructs a nested lu map of ids"
+  ^{:hidden true}
+  (!.lua
+   [(ut/lu-map {:a [{:id "b"}]})
+    (ut/lu-map {:a [{:id "b", :sub [{:id "c"} {:id "d"}]}]})])
+  => [{"a" {"b" {"id" "b"}}}
+     {"a" {"b" {"sub" {"d" {"id" "d"}, "c" {"id" "c"}}, "id" "b"}}}])
+
+
+;;FROM
+
+^{:refer xt.db.base-util/lu-map, :added "4.0"}
+(fact "OEOEUEOU"
+  ^{:meta true}
+  (form)
+  )
+
+;; TO
+
+^{:refer xt.db.base-util/lu-map, :added "4.0"}
+(fact "OEOEUEOU"
+
+  ^{:meta true}
+  (form))

@@ -55,51 +55,6 @@
     (list '== check (list 'x:get-key obj key nil))
     (list 'not= nil (list '. obj [key]))))
 
-(defn js-tf-x-future-run
-  [[_ thunk]]
-  (template/$ (do (var p (Promise.resolve))
-                  (:= p (. p (then (fn []
-                                     (~thunk)))))
-                  (:= (. p ["__xt_status"]) "pending")
-                  (:= p (. p (then (fn [v]
-                                     (:= (. p ["__xt_status"]) "ok")
-                                     (return v))
-                                   (fn [e]
-                                     (:= (. p ["__xt_status"]) "error")
-                                     (throw e)))))
-                  (return p))))
-
-(defn js-tf-x-future-then
-  [[_ task on-ok]]
-  (template/$ (. ~task (then ~on-ok))))
-
-(defn js-tf-x-future-catch
-  [[_ task on-err]]
-  (template/$ (. ~task (catch ~on-err))))
-
-(defn js-tf-x-future-finally
-  [[_ task on-done]]
-  (template/$ (. ~task (finally ~on-done))))
-
-(defn js-tf-x-future-cancel
-  [[_ task]]
-  (template/$ (do (var f (. ~task ["cancel"]))
-                  (when f
-                    (f))
-                  (return nil))))
-
-(defn js-tf-x-future-status
-  [[_ task]]
-  (template/$ (or (. ~task ["__xt_status"]) "pending")))
-
-(defn js-tf-x-future-await
-  [[_ task timeout-ms default]]
-  (template/$ ~task))
-
-(defn js-tf-x-future-from-async
-  [[_ executor]]
-  (template/$ (new Promise ~executor)))
-
 (def +js-core+
   {:x-del            {:emit :alias :raw 'delete}
    :x-cat            {:macro #'js-tf-x-cat  :emit :macro :value true
@@ -113,15 +68,7 @@
    :x-random         {:emit :alias :raw 'Math.random :value true}
    :x-shell          {:macro #'js-tf-x-shell         :emit :macro}
    :x-now-ms         {:emit :alias :raw 'Date.now}
-   :x-type-native    {:macro #'js-tf-x-type-native   :emit :macro}
-   :x-future-run       {:macro #'js-tf-x-future-run      :emit :macro}
-   :x-future-then      {:macro #'js-tf-x-future-then     :emit :macro}
-   :x-future-catch     {:macro #'js-tf-x-future-catch    :emit :macro}
-   :x-future-finally   {:macro #'js-tf-x-future-finally  :emit :macro}
-   :x-future-cancel    {:macro #'js-tf-x-future-cancel   :emit :macro}
-   :x-future-status    {:macro #'js-tf-x-future-status   :emit :macro}
-   :x-future-await     {:macro #'js-tf-x-future-await    :emit :macro}
-   :x-future-from-async {:macro #'js-tf-x-future-from-async :emit :macro}})
+   :x-type-native    {:macro #'js-tf-x-type-native   :emit :macro}})
 
 (defn js-tf-x-proto-get
   [[_ obj]]

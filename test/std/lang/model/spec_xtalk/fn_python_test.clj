@@ -474,46 +474,6 @@
   => #"base64")
 
 
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-future-run :added "4.1"}
-(fact "future run"
-  (l/emit-as :python [(python-tf-x-future-run '[_ thunk])])
-  => #"status")
-
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-future-then :added "4.1"}
-(fact "future then"
-  (l/emit-as :python [(python-tf-x-future-then '[_ task on-ok])])
-  => #"status")
-
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-future-catch :added "4.1"}
-(fact "future catch"
-  (l/emit-as :python [(python-tf-x-future-catch '[_ task on-err])])
-  => #"error")
-
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-future-finally :added "4.1"}
-(fact "future finally"
-  (l/emit-as :python [(python-tf-x-future-finally '[_ task on-done])])
-  => #"return")
-
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-future-cancel :added "4.1"}
-(fact "future cancel"
-  (l/emit-as :python [(python-tf-x-future-cancel '[_ task])])
-  => #"cancelled")
-
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-future-status :added "4.1"}
-(fact "future status"
-  (l/emit-as :python [(python-tf-x-future-status '[_ task])])
-  => #"status")
-
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-future-await :added "4.1"}
-(fact "future await"
-  (l/emit-as :python [(python-tf-x-future-await '[_ task 1000 default])])
-  => #"default")
-
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-future-from-async :added "4.1"}
-(fact "future from async"
-  (l/emit-as :python [(python-tf-x-future-from-async '[_ executor])])
-  => #"executor")
-
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-has-key? :added "4.1"}
 (fact "has key"
   (python-tf-x-has-key? '[_ obj key nil])

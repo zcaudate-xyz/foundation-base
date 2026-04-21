@@ -802,30 +802,6 @@
     :op-spec {:type [:fn [[:xt/array :xt/any] :xt/fn] :xt/any]
               :arglists '([arr pred])}}])
 
-(def +xt-functional-future+
-  [{:op :x-future-run        :symbol #{'x:future-run}        :emit :abstract
-    :op-spec {:template-only true
-              :arglists '([thunk])}}
-   {:op :x-future-then       :symbol #{'x:future-then}       :emit :abstract
-    :op-spec {:template-only true
-              :arglists '([task on-ok])}}
-   {:op :x-future-catch      :symbol #{'x:future-catch}      :emit :abstract
-    :op-spec {:arglists '([task on-err])}}
-   {:op :x-future-finally    :symbol #{'x:future-finally}    :emit :abstract
-    :op-spec {:template-only true
-              :arglists '([task on-done])}}
-   {:op :x-future-cancel     :symbol #{'x:future-cancel}     :emit :abstract
-    :op-spec {:template-only true
-              :arglists '([task])}}
-   {:op :x-future-status     :symbol #{'x:future-status}     :emit :abstract
-    :op-spec {:arglists '([task])}}
-   {:op :x-future-await      :symbol #{'x:future-await}      :emit :abstract
-    :op-spec {:template-only true
-              :arglists '([task timeout-ms default])}}
-   {:op :x-future-from-async :symbol #{'x:future-from-async} :emit :abstract
-    :op-spec {:template-only true
-              :arglists '([executor])}}])
-
 (def +xt-functional-iter+      
   [{:op :x-iter-from-obj  :symbol #{'x:iter-from-obj}   :emit :abstract
     :op-spec {:arglists '([obj])}}

@@ -56,103 +56,6 @@
     (list '== check (list 'x:get-key obj key nil))
     (list 'not= nil (list '. obj [key]))))
 
-(defn lua-tf-x-future-run
-  [[_ thunk]]
-  (template/$
-   (do* (local task {:state "pending"
-                     :value nil
-                     :error nil})
-        (local [ok out] (pcall ~thunk))
-        (if ok
-          (do (:= (. task ["state"]) "ok")
-              (:= (. task ["value"]) out))
-          (do (:= (. task ["state"]) "error")
-              (:= (. task ["error"]) out)))
-        (return task))))
-
-(defn lua-tf-x-future-then
-  [[_ task on-ok]]
-  (template/$
-   ((fn []
-      (local out ~task)
-      (if (== "ok" (. ~task ["state"]))
-        (do* (:= out {:state "pending"
-                      :value nil
-                      :error nil})
-             (local [ok v] (pcall (fn []
-                                    (return (~on-ok (. ~task ["value"]))))))
-             (if ok
-               (do (:= (. out ["state"]) "ok")
-                   (:= (. out ["value"]) v))
-               (do (:= (. out ["state"]) "error")
-                   (:= (. out ["error"]) v)))))
-      (return out)))))
-
-(defn lua-tf-x-future-catch
-  [[_ task on-err]]
-  (template/$
-   ((fn []
-      (local out ~task)
-      (if (== "error" (. ~task ["state"]))
-        (do* (:= out {:state "pending"
-                      :value nil
-                      :error nil})
-             (local [ok v] (pcall (fn []
-                                    (return (~on-err (. ~task ["error"]))))))
-             (if ok
-               (do (:= (. out ["state"]) "ok")
-                   (:= (. out ["value"]) v))
-               (do (:= (. out ["state"]) "error")
-                   (:= (. out ["error"]) v)))))
-      (return out)))))
-
-(defn lua-tf-x-future-finally
-  [[_ task on-done]]
-  (template/$ (do* (~on-done)
-             (return ~task))))
-
-(defn lua-tf-x-future-cancel
-  [[_ task]]
-  (template/$ (do* (:= (. ~task ["state"]) "cancelled")
-             (return ~task))))
-
-(defn lua-tf-x-future-status
-  [[_ task]]
-  (template/$ (. ~task ["state"])))
-
-(defn lua-tf-x-future-await
-  [[_ task timeout-ms default]]
-  (template/$
-   (cond (== "ok" (. ~task ["state"]))
-         (return (. ~task ["value"]))
-         
-         (== "error" (. ~task ["state"]))
-         (error (. ~task ["error"]))
-         
-         :else
-         (return ~default))))
-
-(defn lua-tf-x-future-from-async
-  [[_ executor]]
-  (template/$
-   (do* (local task {:state "pending"
-                     :value nil
-                     :error nil})
-        (local [ok out]
-               (pcall
-                (fn []
-                  (local result nil)
-                  (~executor
-                   (fn [v] (:= result v))
-                   (fn [e] (error e)))
-                  (return result))))
-        (if ok
-          (do (:= (. task ["state"]) "ok")
-              (:= (. task ["value"]) out))
-          (do (:= (. task ["state"]) "error")
-              (:= (. task ["error"]) out)))
-        (return task))))
-
 (def +lua-core+
   {:x-del            {:macro #'lua-tf-x-del  :emit :macro}
    :x-cat            {:macro #'lua-tf-x-cat  :emit :macro}
@@ -166,15 +69,7 @@
    :x-random         {:emit :alias :raw 'math.random}
    :x-shell          {:macro #'lua-tf-x-shell         :emit :macro}
    :x-now-ms         {:default '(math.floor (* 1000 (os.time)))   :emit :unit}
-   :x-type-native    {:macro #'lua-tf-x-type-native  :emit :macro}
-   :x-future-run       {:macro #'lua-tf-x-future-run      :emit :macro}
-   :x-future-then      {:macro #'lua-tf-x-future-then     :emit :macro}
-   :x-future-catch     {:macro #'lua-tf-x-future-catch    :emit :macro}
-   :x-future-finally   {:macro #'lua-tf-x-future-finally  :emit :macro}
-   :x-future-cancel    {:macro #'lua-tf-x-future-cancel   :emit :macro}
-   :x-future-status    {:macro #'lua-tf-x-future-status   :emit :macro}
-   :x-future-await     {:macro #'lua-tf-x-future-await    :emit :macro}
-   :x-future-from-async {:macro #'lua-tf-x-future-from-async :emit :macro}})
+   :x-type-native    {:macro #'lua-tf-x-type-native  :emit :macro}})
 
 (defn lua-tf-x-proto-create
   [[_ m]]

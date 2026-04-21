@@ -990,61 +990,6 @@
  =>
  '([arr pred]))
 
-^{:refer xt.lang.common-spec/x:future-run, :added "4.1"}
-(fact
- "expands and emits a lua future runner"
- (emits-lua? '(x:future-run thunk) #"state")
- =>
- true)
-
-^{:refer xt.lang.common-spec/x:future-then, :added "4.1"}
-(fact
- "expands and emits a lua future continuation"
- (emits-lua? '(x:future-then task on-ok) #"pcall")
- =>
- true)
-
-^{:refer xt.lang.common-spec/x:future-catch, :added "4.1"}
-(fact
- "expands and emits a lua future error handler"
- (emits-lua? '(x:future-catch task on-err) #"pcall")
- =>
- true)
-
-^{:refer xt.lang.common-spec/x:future-finally, :added "4.1"}
-(fact
- "expands and emits a lua future finalizer"
- (emits-lua? '(x:future-finally task on-done) #"return")
- =>
- true)
-
-^{:refer xt.lang.common-spec/x:future-cancel, :added "4.1"}
-(fact
- "expands and emits a lua future cancellation"
- (emits-lua? '(x:future-cancel task) #"cancelled")
- =>
- true)
-
-^{:refer xt.lang.common-spec/x:future-status, :added "4.1"}
-(fact
- "expands and emits a lua future status lookup"
- (emits-lua? '(x:future-status task) #"state")
- =>
- true)
-
-^{:refer xt.lang.common-spec/x:future-await, :added "4.1"}
-(fact
- "expands and emits a lua future await"
- (emits-lua? '(x:future-await task 1000 default) #"default")
- =>
- true)
-
-^{:refer xt.lang.common-spec/x:future-from-async, :added "4.1"}
-(fact
- "expands and emits a lua async future bridge"
- (emits-lua? '(x:future-from-async executor) #"executor")
- =>
- true)
 
 ^{:refer xt.lang.common-spec/x:eval, :added "4.1"}
 (fact

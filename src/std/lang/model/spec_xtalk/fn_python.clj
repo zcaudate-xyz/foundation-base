@@ -78,100 +78,6 @@
              :else
              (return (str (type ~obj))))))
 
-(defn python-tf-x-future-run
-  [[_ thunk]]
-  (template/$
-   (do (var task {"status" "pending"
-                  "value" nil
-                  "error" nil})
-       (try (:= out (~thunk))
-            (:= (. task ["status"]) "ok")
-            (:= (. task ["value"]) out)
-            (catch [Exception :as e]
-                (:= (. task ["status"]) "error")
-                (:= (. task ["error"]) e)))
-       (return task))))
-
-(defn python-tf-x-future-then
-  [[_ task on-ok]]
-  (template/$
-   (do (var out ~task)
-       (if (== "ok" (. ~task (get "status")))
-         (do (:= out {"status" "pending"
-                      "value" nil
-                      "error" nil})
-             (var v nil)
-             (try (:= v (~on-ok (. ~task (get "value"))))
-                  (:= (. out ["status"]) "ok")
-                  (:= (. out ["value"]) v)
-                  (catch [Exception :as e]
-                      (:= (. out ["status"]) "error")
-                      (:= (. out ["error"]) e)))))
-       (return out))))
-
-(defn python-tf-x-future-catch
-  [[_ task on-err]]
-  (template/$
-   (do (var out ~task)
-       (if (== "error" (. ~task (get "status")))
-         (do (:= out {"status" "pending"
-                      "value" nil
-                      "error" nil})
-             (var v nil)
-             (try (:= v (~on-err (. ~task (get "error"))))
-                  (:= (. out ["status"]) "ok")
-                  (:= (. out ["value"]) v)
-                  (catch [Exception :as e]
-                      (:= (. out ["status"]) "error")
-                      (:= (. out ["error"]) e)))))
-       (return out))))
-
-(defn python-tf-x-future-finally
-  [[_ task on-done]]
-  (template/$ (do (~on-done)
-            (return ~task))))
-
-(defn python-tf-x-future-cancel
-  [[_ task]]
-  (template/$ (do (:= (. ~task ["status"]) "cancelled")
-            (return ~task))))
-
-(defn python-tf-x-future-status
-  [[_ task]]
-  (template/$ (. ~task (get "status"))))
-
-(defn python-tf-x-future-await
-  [[_ task timeout-ms default]]
-  (template/$
-   (cond (== "ok" (. ~task (get "status")))
-         (return (. ~task (get "value")))
-         
-         (== "error" (. ~task (get "status")))
-         (throw (. ~task (get "error")))
-         
-         :else
-         (return ~default))))
-
-(defn python-tf-x-future-from-async
-  [[_ executor]]
-  (template/$
-   (do (var box {"ok" false
-                 "value" nil
-                 "error" nil})
-       (fn resolve [v]
-         (:= (. box ["ok"]) true)
-         (:= (. box ["value"]) v))
-       (fn reject [e]
-         (:= (. box ["error"]) e))
-       (~executor resolve reject)
-       (if (. box ["ok"])
-         (return {"status" "ok"
-                  "value" (. box ["value"])
-                  "error" nil})
-         (return {"status" "error"
-                  "value" nil
-                  "error" (. box ["error"])})))))
-
 (def +python-core+
   {:x-del            {:macro #'python-tf-x-del    :emit :macro}
    :x-cat            {:macro #'python-tf-x-cat    :emit :macro}
@@ -184,15 +90,7 @@
    :x-print          {:macro #'python-tf-x-print         :emit :macro}
    :x-shell          {:macro #'python-tf-x-shell         :emit :macro}
    :x-now-ms         {:default '(round (* 1000 (. (__import__ "time") (time)))) :emit :unit}
-   :x-type-native    {:macro #'python-tf-x-type-native   :emit :macro}
-   :x-future-run       {:macro #'python-tf-x-future-run      :emit :macro}
-   :x-future-then      {:macro #'python-tf-x-future-then     :emit :macro}
-   :x-future-catch     {:macro #'python-tf-x-future-catch    :emit :macro}
-   :x-future-finally   {:macro #'python-tf-x-future-finally  :emit :macro}
-   :x-future-cancel    {:macro #'python-tf-x-future-cancel   :emit :macro}
-   :x-future-status    {:macro #'python-tf-x-future-status   :emit :macro}
-    :x-future-await     {:macro #'python-tf-x-future-await    :emit :macro}
-    :x-future-from-async {:macro #'python-tf-x-future-from-async :emit :macro}})
+   :x-type-native    {:macro #'python-tf-x-type-native   :emit :macro}})
 
 ;;
 ;; PROTO

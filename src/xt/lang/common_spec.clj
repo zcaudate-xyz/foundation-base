@@ -813,54 +813,6 @@
   x:return-run
   ([runner] (list (quote x:return-run) runner)))
 
-(defspec.xt x:future-run nil)
-
-(defmacro.xt ^{:standalone true :is-template true} 
-  x:future-run
-  ([thunk] (list (quote x:future-run) thunk)))
-
-(defspec.xt x:future-then nil)
-
-(defmacro.xt ^{:standalone true :is-template true} 
-  x:future-then
-  ([task on-ok] (list (quote x:future-then) task on-ok)))
-
-(defspec.xt x:future-catch nil)
-
-(defmacro.xt ^{:standalone true :is-template false} 
-  x:future-catch
-  ([task on-err] (list (quote x:future-catch) task on-err)))
-
-(defspec.xt x:future-finally nil)
-
-(defmacro.xt ^{:standalone true :is-template true} 
-  x:future-finally
-  ([task on-done] (list (quote x:future-finally) task on-done)))
-
-(defspec.xt x:future-cancel nil)
-
-(defmacro.xt ^{:standalone true :is-template true} 
-  x:future-cancel
-  ([task] (list (quote x:future-cancel) task)))
-
-(defspec.xt x:future-status nil)
-
-(defmacro.xt ^{:standalone true :is-template false} 
-  x:future-status
-  ([task] (list (quote x:future-status) task)))
-
-(defspec.xt x:future-await nil)
-
-(defmacro.xt ^{:standalone true :is-template true} 
-  x:future-await
-  ([task timeout-ms default] (list (quote x:future-await) task timeout-ms default)))
-
-(defspec.xt x:future-from-async nil)
-
-(defmacro.xt ^{:standalone true :is-template true} 
-  x:future-from-async
-  ([executor] (list (quote x:future-from-async) executor)))
-
 (defspec.xt x:eval [:fn [:xt/str] :xt/any])
 
 (defmacro.xt ^{:standalone true :is-template false} 

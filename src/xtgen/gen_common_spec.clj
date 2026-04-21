@@ -29,12 +29,11 @@
     xtalk/+xt-common-object+
     xtalk/+xt-common-primitives+
     xtalk/+xt-common-print+
-    xtalk/+xt-common-string+
-    xtalk/+xt-functional-array+
-    xtalk/+xt-functional-base+
-    xtalk/+xt-functional-future+
-    xtalk/+xt-functional-invoke+
-    xtalk/+xt-functional-iter+
+     xtalk/+xt-common-string+
+     xtalk/+xt-functional-array+
+     xtalk/+xt-functional-base+
+     xtalk/+xt-functional-invoke+
+     xtalk/+xt-functional-iter+
     xtalk/+xt-functional-return+
     xtalk/+xt-lang-bit+
     xtalk/+xt-lang-global+

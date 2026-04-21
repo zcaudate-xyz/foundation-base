@@ -487,46 +487,6 @@
   (emit-dart (dart-tf-x-cache-incr '[_ cache key num]))
   => #"(?s)int\.parse.*curr")
 
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-future-run :added "4.1"}
-(fact "runs futures"
-  (emit-dart (dart-tf-x-future-run '[_ thunk]))
-  => #"Future")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-future-then :added "4.1"}
-(fact "chains future success callbacks"
-  (emit-dart (dart-tf-x-future-then '[_ task on-ok]))
-  => #"then")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-future-catch :added "4.1"}
-(fact "chains future error callbacks"
-  (emit-dart (dart-tf-x-future-catch '[_ task on-err]))
-  => #"catchError")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-future-finally :added "4.1"}
-(fact "chains future finalizers"
-  (emit-dart (dart-tf-x-future-finally '[_ task on-done]))
-  => #"whenComplete")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-future-cancel :added "4.1"}
-(fact "cancels futures"
-  (emit-dart (dart-tf-x-future-cancel '[_ task]))
-  => #"null")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-future-status :added "4.1"}
-(fact "reports future status"
-  (emit-dart (dart-tf-x-future-status '[_ task]))
-  => #"pending")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-future-await :added "4.1"}
-(fact "awaits futures"
-  (emit-dart (dart-tf-x-future-await '[_ task timeout-ms default]))
-  => #"task")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-future-from-async :added "4.1"}
-(fact "creates futures from async executors"
-  (emit-dart (dart-tf-x-future-from-async '[_ executor]))
-  => #"Future")
-
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-eq :added "4.1"}
 (fact "compares iterators"
   (emit-dart (dart-tf-x-iter-eq '[_ a b]))
