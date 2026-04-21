@@ -1,0 +1,25 @@
+(ns std.lang.seedgen-test
+  (:require [std.lang.seedgen :refer :all])
+  (:use code.test))
+
+^{:refer std.lang.seedgen/seedgen-root :added "4.1"}
+(fact "runs the public root lookup task without crashing on scalar results"
+  (seedgen-root '[xt.sample])
+
+  (seedgen-root '[xt.sample] {:return :summary})
+  => (contains {:errors 0
+                :warnings 0
+                :items number?
+                :results number?
+                :total number?}))
+
+^{:refer std.lang.seedgen/seedgen-incomplete :added "4.1"}
+(fact "returns summary information for incomplete seedgen tasks"
+  (seedgen-incomplete '[xt.sample] {:print {:result true :summary true}})
+
+  (seedgen-incomplete '[xt.sample] {:return :summary})
+  => (contains {:errors 0
+                :warnings 0
+                :items number?
+                :results number?
+                :total number?}))

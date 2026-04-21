@@ -3,9 +3,37 @@
             [code.manage.unit.template :as template]
             [std.lang.seedgen.common-infile :as common-infile]
             [std.lang.seedgen.form-infile :as form-infile]
-            [std.lang.seedgen.form-parse :as form-parse]
+            [std.lib.result :as res]
             [std.lib.invoke :as invoke]
             [std.task :as task]))
+
+(defn- scalar-result-ignore?
+  [data]
+  (or (nil? data)
+      (and (seqable? data)
+           (empty? data))))
+
+(defn- scalar-result-count
+  [data]
+  (cond (nil? data)
+        0
+
+        (seqable? data)
+        (count data)
+
+        :else
+        1))
+
+(defn- seedgen-incomplete-summary
+  [ns params lookup project]
+  (let [output (common-infile/seedgen-incomplete ns params lookup project)]
+    (if (res/result? output)
+      output
+      (->> output
+           (map (fn [[refer {:keys [line]}]]
+                  (with-meta refer line)))
+           sort
+           vec))))
 
 (invoke/definvoke seedgen-root
   [:task {:template :code
@@ -13,9 +41,11 @@
                    :parallel true
                    :sorted true
                    :print {:result false :summary false}}
-          :main {:fn #'infile/seedgen-root}
+          :main {:fn #'common-infile/seedgen-root}
           :item {:display identity}
-          :result {:columns (template/code-default-columns :data #{:bold})}}])
+          :result {:ignore scalar-result-ignore?
+                   :keys {:count scalar-result-count}
+                   :columns (template/code-default-columns :data #{:bold})}}])
 
 (comment (std.lang.seedgen/seedgen-root
           ['xt.sample.train-001-test]
@@ -31,11 +61,25 @@
                    :parallel true
                    :sorted true
                    :print {:result false :summary false}}
-          :main {:fn #'infile/seedgen-list}
+          :main {:fn #'common-infile/seedgen-list}
           :item {:display identity}
           :result {:columns (template/code-default-columns :data #{:bold})}}])
 
 (comment (std.lang.seedgen/seedgen-list
+          ['xt.sample]
+          {:print {:item true :result true :summary true}}))
+
+(invoke/definvoke seedgen-incomplete
+  [:task {:template :code
+          :params {:title "INCOMPLETE TESTS"
+                   :parallel true
+                   :sorted true
+                   :print {:item false}}
+          :main {:fn #'seedgen-incomplete-summary}
+          :item {:display identity}
+          :result {:columns (template/code-default-columns #{:bold :green})}}])
+
+(comment (std.lang.seedgen/seedgen-incomplete
           ['xt.sample]
           {:print {:item true :result true :summary true}}))
 
@@ -45,7 +89,7 @@
                    :parallel true
                    :sorted true
                    :print {:result false :summary false}}
-          :main {:fn #'removelang/seedgen-removelang}
+          :main {:fn #'form-infile/seedgen-removelang}
           :item {:display identity}
           :result {:columns (template/code-default-columns :data #{:bold})}}])
 
@@ -55,6 +99,6 @@
                    :parallel true
                    :sorted true
                    :print {:result false :summary false}}
-          :main {:fn #'addlang/seedgen-addlang}
+          :main {:fn #'form-infile/seedgen-addlang}
           :item {:display identity}
           :result {:columns (template/code-default-columns :data #{:bold})}}])
