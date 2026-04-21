@@ -1,5 +1,6 @@
 (ns code.manage.unit.snapto
   (:require [clojure.string :as str]
+            [std.block.base :as block.base]
             [code.framework :as base]
             [code.project :as project]
             [std.block :as block]
@@ -11,35 +12,90 @@
 (def ^:dynamic *test-forms*
   '#{fact})
 
-(defn parse-body
-  "partitions a fact body into plain forms and expression/check pairs"
+(def ^:dynamic *meta-tags*
+  #{:meta :hash-meta})
+
+(defn unwrap-fact-block
+  "returns the exact metadata prefix and inner fact block"
   {:added "4.1"}
-  ([forms]
-   (loop [forms forms
-          out   []]
-     (cond
-       (empty? forms)
-       out
+  ([block]
+   (loop [prefix ""
+          block  block]
+     (if (*meta-tags* (block/tag block))
+       (let [children   (block/children block)
+             expr       (last (filter block/expression? children))
+             block-str  (block/string block)
+             expr-str   (block/string expr)
+             prefix-str (subs block-str 0 (- (count block-str)
+                                             (count expr-str)))]
+         (recur (str prefix prefix-str) expr))
+       {:prefix prefix
+        :block  block}))))
 
-       :else
-       (let [[expr arrow expected & more] forms]
-         (cond
-           (= '=> arrow)
-           (recur more
-                  (conj out {:type :check
-                             :expr expr
-                             :expected expected}))
+(defn fact-block?
+  "checks if a block is a fact form, preserving reader/block structure"
+  {:added "4.1"}
+  ([block]
+   (let [{:keys [block]} (unwrap-fact-block block)
+         children        (remove block/void? (block/children block))
+         op              (first children)]
+     (and (= :list (block/tag block))
+          op
+          (*test-forms* (block/value op))))))
 
-           :else
-           (recur (rest forms)
-                  (conj out {:type :form
-                             :expr expr}))))))))
+(defn normalise-block-string
+  "removes shared indentation from the rest of a block string"
+  {:added "4.1"}
+  ([s]
+   (let [[head & rest] (str/split-lines s)]
+     (if (empty? rest)
+       s
+       (let [indent (->> rest
+                         (remove str/blank?)
+                         (map #(count (re-find #"^\s*" %)))
+                         (reduce min ##Inf))
+             indent (if (number? indent) indent 0)]
+         (str/join "\n"
+                   (cons head
+                         (map (fn [line]
+                                (if (str/blank? line)
+                                  line
+                                  (subs line (min indent (count line)))))
+                              rest))))))))
+
+(defn parse-body
+  "partitions fact body blocks into plain forms and expression/check pairs"
+  {:added "4.1"}
+  ([blocks]
+   (loop [blocks blocks
+           out   []]
+      (cond
+        (empty? blocks)
+        out
+
+        :else
+        (let [[expr arrow expected & more] blocks]
+          (cond
+            (and arrow
+                 (= :symbol (block/tag arrow))
+                 (= "=>" (block/string arrow)))
+            (recur more
+                   (conj out {:type :check
+                              :expr expr
+                              :expected expected}))
+
+            :else
+            (recur (rest blocks)
+                   (conj out {:type :form
+                              :expr expr}))))))))
 
 (defn render-form
-  "formats an arbitrary form"
+  "formats an arbitrary block or form"
   {:added "4.1"}
   ([form]
-   (pr-str form)))
+   (if (block.base/block? form)
+     (normalise-block-string (block/string form))
+     (pr-str form))))
 
 (defn render-item
   "formats a plain form or expression/check pair"
@@ -60,33 +116,39 @@
   "formats a single fact form into snap-to layout"
   {:added "4.1"}
   ([form]
-   (let [m          (meta form)
-         [op & more] form
-         [intro more] (if (string? (first more))
-                        [(first more) (next more)]
-                        [nil more])
-         items      (parse-body more)
-         blocks     (concat [(str "(" (name op)
-                                   (when intro
-                                     (str " " (pr-str intro))))]
-                            (map render-item items))
-         body       (str/join "\n\n" (rest blocks))]
-     (str (when (seq m)
-            (str "^" (pr-str m) "\n"))
-          (first blocks)
-          (when (seq body)
-            (str "\n" body))
-          ")"))))
+   (let [block                    (cond (block.base/block? form)
+                                        form
+
+                                        (string? form)
+                                        (block/parse-first form)
+
+                                        :else
+                                        (block/block form))
+         {:keys [prefix block]}    (unwrap-fact-block block)
+         children                  (remove block/void? (block/children block))
+         [op & more]               children
+         [intro more]              (if (= :string (some-> (first more) block/tag))
+                                     [(first more) (next more)]
+                                     [nil more])
+         items                     (parse-body more)
+         blocks                    (concat [(str "(" (block/string op)
+                                                 (when intro
+                                                   (str " " (block/string intro))))]
+                                           (map render-item items))
+          body       (str/join "\n\n" (rest blocks))]
+      (str prefix
+           (first blocks)
+           (when (seq body)
+             (str "\n" body))
+           ")"))))
 
 (defn snap-block-string
   "formats a top-level test block when it is a fact form"
   {:added "4.1"}
   ([node]
-   (let [form (read-string (block/string node))]
-     (if (and (seq? form)
-              (*test-forms* (first form)))
-       (snap-form-string form)
-       (block/string node)))))
+   (if (fact-block? node)
+     (snap-form-string node)
+     (block/string node))))
 
 (defn snapto-string
   "formats all top-level fact forms in a test file"

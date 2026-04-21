@@ -1,6 +1,7 @@
 (ns code.manage.unit.snapto-test
   (:require [code.manage.unit.snapto :refer :all]
-            [code.project :as project])
+            [code.project :as project]
+            [std.block :as block])
   (:use code.test))
 
 (def +wrong-fact+
@@ -35,18 +36,38 @@
 
 ^{:refer code.manage.unit.snapto/parse-body :added "4.1"}
 (fact "partitions a fact body into plain forms and expression/check pairs"
-  (parse-body '((+ 1 1)
-                (odd? 3) => true))
-  => '[{:type :form
-        :expr (+ 1 1)}
-       {:type :check
-        :expr (odd? 3)
-        :expected true}])
+  (->> (parse-body (->> (block/parse-first "(fact \"hello\" (+ 1 1) (odd? 3) => true)")
+                        block/children
+                        (remove block/void?)
+                        (drop 2)))
+       (mapv (fn [{:keys [type expr expected]}]
+               {:type type
+                :expr (some-> expr block/string)
+                :expected (some-> expected block/string)})))
+  => [{:type :form
+       :expr "(+ 1 1)"
+       :expected nil}
+      {:type :check
+       :expr "(odd? 3)"
+       :expected "true"}])
+
+^{:refer code.manage.unit.snapto/render-form :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.snapto/render-item :added "4.1"}
+(fact "TODO")
 
 ^{:refer code.manage.unit.snapto/snap-form-string :added "4.1"}
 (fact "formats a single fact form into snap-to layout"
-  (snap-form-string (read-string +wrong-fact+))
+  (snap-form-string (block/parse-first +wrong-fact+))
   => +right-fact+)
+
+^{:refer code.manage.unit.snapto/snap-block-string :added "4.1"}
+(fact "preserves multiline metadata blocks and reader sugar"
+  (let [source   "^{:refer xt.db.base-util/collect-routes,\n  :added \"4.0\",\n  :setup\n  [(def +routes+\n     [{:id \"ping\"}])\n   (def +result+\n     (contains-in {\"api/ping\" {:id \"ping\"}}))]}\n(fact\n \"collect routes\"\n ^{:hidden true}\n (!.lua (ut/collect-routes (@! +routes+) \"db\"))\n =>\n +result+)"
+        expected "^{:refer xt.db.base-util/collect-routes,\n  :added \"4.0\",\n  :setup\n  [(def +routes+\n     [{:id \"ping\"}])\n   (def +result+\n     (contains-in {\"api/ping\" {:id \"ping\"}}))]}\n(fact \"collect routes\"\n  ^{:hidden true}\n  (!.lua (ut/collect-routes (@! +routes+) \"db\"))\n  => +result+)"]
+    (snap-block-string (block/parse-first source))
+    => expected))
 
 ^{:refer code.manage.unit.snapto/snapto-string :added "4.1"}
 (fact "formats all top-level fact forms in a test file"

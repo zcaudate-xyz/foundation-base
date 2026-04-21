@@ -240,6 +240,11 @@
      (-> task :params :no-analysis)])
   => [:code.transform "HEAL CODE" true true])
 
+^{:refer code.manage/+tasks+ :added "4.1"}
+(fact "registers snapto in the available manage tasks"
+  (-> +tasks+ :snapto)
+  => ifn?)
+
 ^{:refer code.manage/-main :added "4.0"
   :timeout 1000}
 (fact "main entry point for code.manage"

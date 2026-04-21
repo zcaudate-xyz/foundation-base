@@ -105,6 +105,7 @@
           code.manage/pedantic
           code.manage/heal-code
           code.manage/transform-code
+          code.manage/snapto
 
           code.doc/publish
           code.doc/init-template
