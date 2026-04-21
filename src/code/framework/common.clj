@@ -8,8 +8,10 @@
 
 (def ^:dynamic *test-full* false)
 
+(def ^:dynamic *test-examples* false)
+
 (def +test-vars+ #{:class :form :intro :line :ns :refer :test :unit :var
-                   :let :use :replace :setup :teardown :id :check :sexp})
+                   :let :use :replace :setup :teardown :id :check :sexp :examples})
 
 (defn display-entry
   "creates a map represenation of the entry

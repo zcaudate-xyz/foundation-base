@@ -38,13 +38,12 @@
 ^{:refer code.manage.unit.snapto/parse-body :added "4.1"}
 (fact "partitions a fact body into plain forms and expression/check pairs"
   (->> (parse-body (->> (block/parse-first "(fact \"hello\" (+ 1 1) (odd? 3) => true)")
-                        block/children
-                        (remove block/void?)
+                        child-entries
                         (drop 2)))
        (mapv (fn [{:keys [type expr expected]}]
                {:type type
-                :expr (some-> expr block/string)
-                :expected (some-> expected block/string)})))
+                :expr (some-> expr entry-block block/string)
+                :expected (some-> expected entry-block block/string)})))
   => [{:type :form
        :expr "(+ 1 1)"
        :expected nil}
@@ -57,6 +56,15 @@
 
 ^{:refer code.manage.unit.snapto/render-item :added "4.1"}
 (fact "TODO")
+
+^{:refer code.manage.unit.snapto/render-form :added "4.1"}
+(fact "preserves nested indentation relative to the form start"
+  (let [entry (->> (block/parse-first "(fact \"iterates arrays in order\"\n  (!.js\n    (var out [])\n    out))")
+                   child-entries
+                   (drop 2)
+                   first)]
+    (render-form entry))
+  => "(!.js\n  (var out [])\n  out)")
 
 ^{:refer code.manage.unit.snapto/snap-form-string :added "4.1"}
 (fact "formats a single fact form into snap-to layout"

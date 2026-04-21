@@ -87,21 +87,23 @@
              (cond (res/result? analysis)
                    analysis
 
-                   :else
-                   (let [fact-forms (common/seedgen-fact-forms test-file)
-                         root-lang  (first (common/seedgen-root-langs test-file true))]
-                     (->> analysis
-                          vals
+                    :else
+                    (let [fact-forms (common/seedgen-fact-forms test-file)
+                          root-lang  (first (common/seedgen-root-langs test-file true))]
+                      (->> analysis
+                           vals
                           (mapcat seq)
-                          (keep (fn [[_ {:keys [ns var test]}]]
-                                  (let [refer (symbol (str ns) (str var))
-                                        form  (get fact-forms refer (:sexp test))
-                                        langs (common/seedgen-coverage-langs form)]
-                                    (when (not (some #{root-lang} langs))
-                                      [refer
-                                       {:status :incomplete
-                                        :line (:line test)}]))))
-                          (into (sorted-map))))))))))
+                           (keep (fn [[_ {:keys [ns var test]}]]
+                                   (let [refer (symbol (str ns) (str var))
+                                         form  (get fact-forms refer (:sexp test))
+                                         langs (common/seedgen-coverage-langs form)
+                                         suppress (common/seedgen-suppressed-langs form)]
+                                     (when (and (not (contains? suppress root-lang))
+                                                (not (some #{root-lang} langs)))
+                                       [refer
+                                        {:status :incomplete
+                                         :line (:line test)}]))))
+                           (into (sorted-map))))))))))
 
 (comment
   (code.project/in-context

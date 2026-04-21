@@ -67,12 +67,24 @@
       4 {:check true}})
 
 ^{:refer code.manage.unit.import/gather-fact :added "4.1"}
-(fact "filters imported fact examples using `:examples` metadata"
+(fact "imports only the intro by default"
   (-> +fact-with-examples+
       nav/parse-string
       nav/down nav/right nav/down nav/right
-      gather-fact
-      (update-in [:test] docstring/->docstring))
+      gather-fact)
+  => (contains {:added "0.1"
+                :examples [0 2 3 :no-check 4]
+                :intro "Sample test program"
+                :test []}))
+
+^{:refer code.manage.unit.import/gather-fact :added "4.1"}
+(fact "filters imported fact examples using `:examples` metadata when enabled"
+  (binding [common/*test-examples* true]
+    (-> +fact-with-examples+
+        nav/parse-string
+        nav/down nav/right nav/down nav/right
+        gather-fact
+        (update-in [:test] docstring/->docstring)))
   => (contains {:added "0.1"
                 :examples [0 2 3 :no-check 4]
                 :test +selected-docstring+}))

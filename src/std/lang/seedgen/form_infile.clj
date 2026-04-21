@@ -5,7 +5,8 @@
             [std.block.base :as block]
             [std.block.navigate :as nav]
             [std.lang.seedgen.common-util :as common]
-            [std.lang.seedgen.form-parse :as readforms]
+            [std.lang.seedgen.form-common :as form-common]
+            [std.lang.seedgen.form-parse :as seed-readforms]
             [std.lib.result :as res]
             [std.task :as task]))
 
@@ -76,7 +77,7 @@
   [s]
   (let [root    (nav/parse-root s)
         current (nav/down root)]
-    (if (readforms/meta-block? current)
+    (if (form-common/nav-meta-block? current)
       (-> current nav/down nav/right nav/block block/block-string)
       s)))
 
@@ -402,7 +403,7 @@
                                      %))
                                ordered-scripts)
         root            (nav/parse-root text)
-        top-navs        (readforms/top-level-navs root)]
+        top-navs        (form-common/nav-top-levels root)]
     (str (str/join
           "\n\n"
           (mapcat (fn [zloc]
@@ -418,7 +419,7 @@
                         []
 
                         (and (seq? form)
-                             (= 'fact (first (nav/value (readforms/body-nav zloc))))
+                             (= 'fact (first (nav/value (form-common/nav-body zloc))))
                              refer
                              (contains? fact-by-refer refer))
                         [(render-fact-string-add (get fact-by-refer refer)
@@ -457,13 +458,13 @@
                          [(line-key (item-line item)) lang]))))
              (into {}))
         root            (nav/parse-root text)
-        top-navs        (readforms/top-level-navs root)]
+        top-navs        (form-common/nav-top-levels root)]
     (str (str/join
           "\n\n"
           (mapcat (fn [zloc]
                     (let [line    (line-key (nav/line-info zloc))
                           current (block/block-string (nav/block zloc))
-                          body    (readforms/body-nav zloc)
+                          body    (form-common/nav-body zloc)
                           form    (nav/value zloc)
                           refer   (:refer (meta form))
                           head    (when (seq? (nav/value body))
@@ -504,7 +505,7 @@
                     :data :no-test-file})
 
        :else
-       (let [output      (readforms/seedgen-readforms ns {} lookup project)
+       (let [output      (seed-readforms/seedgen-readforms ns {} lookup project)
              root-lang   (get-in output [:globals :lang :root])
              stored-langs (or (root-script-meta-langs output)
                               [])
@@ -545,7 +546,7 @@
                     :data :no-test-file})
 
        :else
-       (let [output      (readforms/seedgen-readforms ns {} lookup project)
+       (let [output      (seed-readforms/seedgen-readforms ns {} lookup project)
              root-lang   (get-in output [:globals :lang :root])
              purge-langs (get-in output [:globals :lang :derived])
              target-lang (or (normalize-target-langs (:lang params))

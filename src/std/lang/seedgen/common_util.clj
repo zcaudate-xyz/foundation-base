@@ -143,8 +143,58 @@
                           (seq? form)
                           (= 'fact (first form))
                           (:refer (meta form)))
-                 [(:refer (meta form)) form])))
+                  [(:refer (meta form)) form])))
        (into {})))
+
+(defn seedgen-lang-config
+  [form]
+  (letfn [(normalize-config [lang-config]
+            (when (map? lang-config)
+              (->> lang-config
+                   (map (fn [[lang config]]
+                          [(seedgen-normalize-runtime-lang lang) config]))
+                   (into {}))))
+          (collect-config [form]
+            (let [own-config (when (instance? clojure.lang.IObj form)
+                               (normalize-config (:seedgen/lang (meta form))))]
+              (cond
+                (seq? form)
+                (reduce (fn [out entry]
+                          (merge out (collect-config entry)))
+                        (or own-config {})
+                        form)
+
+                (vector? form)
+                (reduce (fn [out entry]
+                          (merge out (collect-config entry)))
+                        (or own-config {})
+                        form)
+
+                (set? form)
+                (reduce (fn [out entry]
+                          (merge out (collect-config entry)))
+                        (or own-config {})
+                        form)
+
+                (map? form)
+                (reduce (fn [out entry]
+                          (merge out (collect-config entry)))
+                        (or own-config {})
+                        (concat (keys form) (vals form)))
+
+                :else
+                own-config)))]
+    (let [config (collect-config form)]
+      (when (seq config)
+        config))))
+
+(defn seedgen-suppressed-langs
+  [form]
+  (->> (seedgen-lang-config form)
+       (keep (fn [[lang config]]
+               (when (:suppress config)
+                 lang)))
+       set))
 
 (defn seedgen-coverage-langs
   [form]

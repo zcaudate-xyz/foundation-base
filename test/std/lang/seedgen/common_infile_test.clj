@@ -75,4 +75,10 @@
         (.delete tmp))))
   => #{'xt.lang.common-spec/example.B
        'xt.lang.common-spec/example.C
-       'xt.lang.common-spec/example.D})
+       'xt.lang.common-spec/example.D}
+
+  (-> (project/in-context
+       (seed-infile/seedgen-incomplete 'xt.sample.train-004-test {}))
+      keys
+      set)
+  => #{'xt.lang.common-spec/x:return-wrap})

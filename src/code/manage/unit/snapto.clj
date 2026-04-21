@@ -6,6 +6,7 @@
             [std.block :as block]
             [std.block.navigate :as nav]
             [std.lib.result :as res]
+            [std.lib.zip :as zip]
             [std.string.prose :as prose]
             [std.task :as task]))
 
@@ -53,26 +54,57 @@
        (recur (inc i))
        i))))
 
+(defn trim-indent
+  "removes up to n leading spaces/tabs from a line"
+  {:added "4.1"}
+  ([^String line n]
+   (let [limit (min n (leading-indent line))]
+     (subs line limit))))
+
 (defn normalise-block-string
-  "removes shared indentation from the rest of a block string"
+  "removes the parent indentation from the rest of a block string"
   {:added "4.1"}
   ([^String s]
+   (normalise-block-string s 0))
+  ([^String s indent]
    (let [[head & rest] (str/split-lines s)]
      (if (empty? rest)
        s
-       (let [indents (->> rest
-                          (remove str/blank?)
-                          (map leading-indent))
-             indent  (if (seq indents)
-                       (reduce min indents)
-                       0)]
-         (str/join "\n"
-                   (cons head
-                         (map (fn [line]
-                                (if (str/blank? line)
-                                  line
-                                  (subs line (min indent (count line)))))
-                              rest))))))))
+       (str/join "\n"
+                 (cons head
+                       (map (fn [line]
+                              (if (str/blank? line)
+                                line
+                                (trim-indent line indent)))
+                            rest)))))))
+
+(defn child-entries
+  "returns non-void child blocks together with their starting column"
+  {:added "4.1"}
+  ([block]
+   (->> (-> block nav/navigator nav/down)
+        (iterate zip/step-right)
+        (take-while zip/get)
+        (map (fn [z]
+               {:block (nav/block z)
+                :col   (-> z nav/line-info :col)}))
+        (remove (comp block/void? :block)))))
+
+(defn entry-block
+  "returns the block for an entry"
+  {:added "4.1"}
+  ([entry]
+   (if (map? entry)
+     (:block entry)
+     entry)))
+
+(defn entry-col
+  "returns the starting column for an entry"
+  {:added "4.1"}
+  ([entry]
+   (if (map? entry)
+     (:col entry)
+     1)))
 
 (defn parse-body
   "partitions fact body blocks into plain forms and expression/check pairs"
@@ -88,8 +120,8 @@
         (let [[expr arrow expected & more] blocks]
           (cond
             (and arrow
-                 (= :symbol (block/tag arrow))
-                 (= "=>" (block/string arrow)))
+                 (= :symbol (block/tag (entry-block arrow)))
+                 (= "=>" (block/string (entry-block arrow))))
             (recur more
                    (conj out {:type :check
                               :expr expr
@@ -104,9 +136,12 @@
   "formats an arbitrary block or form"
   {:added "4.1"}
   ([form]
-   (if (block.base/block? form)
-     (normalise-block-string (block/string form))
-     (pr-str form))))
+   (let [block (entry-block form)
+         col   (entry-col form)]
+     (if (block.base/block? block)
+       (normalise-block-string (block/string block)
+                               (max 0 (dec col)))
+       (pr-str form)))))
 
 (defn render-item
   "formats a plain form or expression/check pair"
@@ -136,15 +171,15 @@
                                         :else
                                         (block/block form))
          {:keys [prefix block]}    (unwrap-fact-block block)
-         children                  (remove block/void? (block/children block))
+         children                  (child-entries block)
          [op & more]               children
-         [intro more]              (if (= :string (some-> (first more) block/tag))
+         [intro more]              (if (= :string (some-> (first more) entry-block block/tag))
                                      [(first more) (next more)]
                                      [nil more])
          items                     (parse-body more)
-         head                      (str "(" (block/string op)
+         head                      (str "(" (block/string (entry-block op))
                                          (when intro
-                                           (str " " (block/string intro))))
+                                           (str " " (block/string (entry-block intro)))))
          body                      (->> items
                                         (map render-item)
                                         (str/join "\n\n"))]

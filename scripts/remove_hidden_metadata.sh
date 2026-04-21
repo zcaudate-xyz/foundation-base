@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-cd "$ROOT"
+SCRIPT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+TARGET_ROOT="$SCRIPT_ROOT"
 
 MODE="dry-run"
 
 usage() {
   cat <<'EOF'
-Usage: scripts/remove_hidden_metadata.sh [--write] [--dry-run]
+Usage: scripts/remove_hidden_metadata.sh [--write] [--dry-run] [target-root]
 
 Removes ^:hidden metadata tags from files under test/.
 
@@ -16,6 +16,9 @@ Options:
   --write    Apply the rewrite in-place.
   --dry-run  Show the files that would change without editing them.
   --help     Show this help text.
+
+Arguments:
+  target-root  Repository root to rewrite. Defaults to this repository.
 EOF
 }
 
@@ -31,6 +34,9 @@ while [[ $# -gt 0 ]]; do
       usage
       exit 0
       ;;
+    /*)
+      TARGET_ROOT="$1"
+      ;;
     *)
       printf 'Unknown option: %s\n\n' "$1" >&2
       usage >&2
@@ -39,6 +45,8 @@ while [[ $# -gt 0 ]]; do
   esac
   shift
 done
+
+cd "$TARGET_ROOT"
 
 mapfile -t FILES < <(rg -l '\^:hidden' test --glob '**/*.{clj,cljc}')
 

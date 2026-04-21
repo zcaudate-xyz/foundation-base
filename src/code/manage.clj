@@ -178,20 +178,23 @@
 (invoke/definvoke import
   "import docstrings from tests
  
-   (import {:write false})
- 
-   (import {:full true
-            :write false
-            :print {:function false}})
+    (import {:write false})
+  
+    (import {:examples true
+             :write false})
+  
+    (import {:full true
+             :write false
+             :print {:function false}})
  
    (import '[code.manage.unit]
            {:print {:summary true :result true :item true}
             :write false})"
-  {:added "3.0"}
-  [:task {:template :code.transform
-          :main   {:fn #'unit.import/import}
-          :params {:title "IMPORT DOCSTRINGS"
-                   :parallel true
+   {:added "3.0"}
+   [:task {:template :code.transform
+           :main   {:fn #'unit.import/import}
+           :params {:title "IMPORT DOCSTRINGS"
+                    :parallel true
                    :write true}
           :item   {:list template/source-namespaces}
           :result (template/code-transform-result :changed)}])
@@ -674,6 +677,5 @@
           (print-fn))
         (if-not (get opts :no-exit)
           (System/exit 0))))))
-
 
 

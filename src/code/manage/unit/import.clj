@@ -133,10 +133,16 @@
 (defn gather-fact-body
   {:added "4.1"}
   ([nav mta]
-   (if (and (not common/*test-full*)
-            (contains? mta :examples))
-     (gather-selected-fact-body nav mta)
-     (fact/gather-fact-body nav))))
+   (cond common/*test-full*
+         (fact/gather-fact-body nav)
+
+         common/*test-examples*
+         (if (contains? mta :examples)
+           (gather-selected-fact-body nav mta)
+           (fact/gather-fact-body nav))
+
+         :else
+         [])))
 
 (defn gather-fact
   {:added "4.1"}
@@ -214,12 +220,13 @@
   {:added "4.1"}
   ([ns params lookup project]
    (let [path (lookup ns)]
-     (binding [common/*path* path
-               common/*test-full* (:full params)]
-       (analyse-test-code (slurp path))))))
+      (binding [common/*path* path
+                common/*test-full* (:full params)
+                common/*test-examples* (:examples params)]
+        (analyse-test-code (slurp path))))))
 
 (defn import
-  "imports unit tests as docstrings with optional `:examples` selection"
+  "imports unit test docstrings, with optional example body selection"
   {:added "4.1"}
   ([ns params lookup project]
    (let [source-ns   (project/source-ns ns)

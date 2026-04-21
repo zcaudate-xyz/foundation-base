@@ -2,7 +2,6 @@
   (:use code.test)
   (:require [std.lang :as l]))
 
-
 ^{:seedgen/scaffold         {:python true}}
 (l/script+ [:db :postgres])   ;; this is a scaffold. any non (!.<lang> ...) and (notify/wait-on <lang>) is {:all true} by default. 
 
