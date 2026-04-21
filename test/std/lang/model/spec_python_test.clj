@@ -181,5 +181,26 @@
              (fn [value]
                (throw value)))
             (return ok)
-            (catch [Exception :as err]
-              (return err)))))
+             (catch [Exception :as err]
+               (return err)))))
+
+^{:refer std.lang.model.spec-python/tf-for-try :added "4.0"}
+(fact "for try transform"
+  ^:hidden
+
+  (py/tf-for-try '(for:try [[ok err] (call)]
+                            {:success (return ok)
+                             :error   (return err)}))
+  => '(try (var ok (call))
+           (return ok)
+           (catch [Exception :as err]
+             (return err)))
+
+  (let [out (py/tf-for-try '(for:try [[ok err] (do:> (x:err "ERROR"))]
+                                      {:success (return ok)
+                                       :error   (return err)}))]
+    (and (= 'try (first out))
+         (= 'fn.inner (-> out second first))
+         (= 'var (-> out (nth 2) first))
+         (= 'catch (-> out last first))))
+  => true)

@@ -8,11 +8,8 @@
 ^{:seedgen/root         {:all true}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.common-spec :as xt]]})
-
-(l/script- :python
-  {:runtime :basic
-   :require [[xt.lang.common-spec :as xt]]})
+   :require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -88,30 +85,45 @@
       {:success (:= out ok)
        :error (:= out err)})
     out)
-  => "ERR"
-  => ["OK" ])
+  => "ERR")
 
 ^{:refer xt.lang.common-spec/for:try :added "4.1"}
 (fact "expands to the canonical try form"
-
+  
   (!.js
-    (defn add []
-      (xt/for:try [[ok err] (xt/x:err "ERROR")]
-        {:success (return ok)
-         :error   (return err)}))
+    (var add (fn []
+               (xt/for:try [[ok err] (do:> (xt/x:err "ERROR"))]
+                 {:success (return ok)
+                  :error   (return err)})))
+    (add))
+  => "ERROR"
+
+  ^*(!.py
+    (var add (fn []
+               (xt/for:try [[ok err] (do:> (xt/x:err "ERROR"))]
+                 {:success (return ok)
+                  :error   (return err)})))
     (add))
   => "ERROR")
 
 ^{:refer xt.lang.common-spec/for:async :added "4.1"}
 (fact "expands to the canonical async form"
 
+  (notify/wait-on :js
+    (for:async [[ok err] (xt/return-run [resolve reject]
+                           (resolve "OK"))]
+               {:success (repl/notify ok)
+                :error   (repl/notify err)
+                :finally (return true)}))
+  => "OK"
 
-  (emits-lua? '(for:async [[ok err] (call (x:callback))]
-                          {:success (return ok)
-                           :error   (return err)
-                           :finally (return true)})
-              #"ngx\.thread\.spawn")
-  => true)
+  (notify/wait-on :js
+    (for:async [[ok err] (xt/return-run [resolve reject]
+                           (reject "ERR"))]
+               {:success (repl/notify ok)
+                :error   (repl/notify err)
+                :finally (return true)}))
+  => "ERR")
 
 ^{:refer xt.lang.common-spec/x:get-idx :added "4.1"}
 (fact "reads the first indexed value"
@@ -131,41 +143,46 @@
 
 ^{:refer xt.lang.common-spec/x:first :added "4.1"}
 (fact "gets the first array element"
+
   (!.js
     (xt/x:first [10 20 30]))
   => 10)
 
 ^{:refer xt.lang.common-spec/x:second :added "4.1"}
 (fact "gets the second array element"
+
   (!.js
     (xt/x:second [10 20 30]))
   => 20)
 
 ^{:refer xt.lang.common-spec/x:last :added "4.1"}
 (fact "gets the last array element"
+
   (!.js
-    (xt/x:last [10 20 30]))
-  => 30)
+    (xt/x:last [10 20 30 40]))
+  => 40)
 
 ^{:refer xt.lang.common-spec/x:second-last :added "4.1"}
 (fact "gets the element before the last"
+
   (!.js
-    (xt/x:second-last [10 20 30]))
-  => 20)
+    (xt/x:second-last [10 20 30 40]))
+  => 30)
 
 ^{:refer xt.lang.common-spec/x:arr-remove :added "4.1"}
 (fact "removes an element from an array"
+
   (!.js
-    ^{:lang-exceptions {:python {:expect [0 2 3]}
-                        :dart   {:form ((fn []
-                                          (var out [0 1 2 3])
-                                          (xt/x:arr-remove out (xt/x:offset 1))
-                                          (return out)))
-                                 :expect [0 2 3]}}}
     (do (var out [0 1 2 3])
         (xt/x:arr-remove out (xt/x:offset 1))
         out))
-  => [0 1 3])
+  => [0 2 3]
+  
+  (!.py
+    (do (var out [0 1 2 3])
+        (xt/x:arr-remove out (xt/x:offset 1))
+        out))
+  => [0 2 3])
 
 ^{:refer xt.lang.common-spec/x:arr-push :added "4.1"}
 (fact "pushes an element onto an array"
@@ -174,18 +191,37 @@
     (var out [1 2 3])
     (xt/x:arr-push out 4)
     out)
+  => [1 2 3 4]
+
+  (!.py
+    (var out [1 2 3])
+    (xt/x:arr-push out 4)
+    out)
   => [1 2 3 4])
 
 ^{:refer xt.lang.common-spec/x:arr-pop :added "4.1"}
 (fact "pops the last element from an array"
+
   (!.js
+    (var out [1 2 3 4])
+    (xt/x:arr-pop out))
+  => 4
+
+  (!.py
     (var out [1 2 3 4])
     (xt/x:arr-pop out))
   => 4)
 
 ^{:refer xt.lang.common-spec/x:arr-push-first :added "4.1"}
 (fact "pushes an element to the front of an array"
+
   (!.js
+    (var out [1 2 3])
+    (xt/x:arr-push-first out 0)
+    out)
+  => [0 1 2 3]
+
+  (!.py
     (var out [1 2 3])
     (xt/x:arr-push-first out 0)
     out)

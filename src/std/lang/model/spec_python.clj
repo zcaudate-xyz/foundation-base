@@ -1,19 +1,19 @@
 (ns std.lang.model.spec-python
   (:require [std.lang.base.book :as book]
 	    [std.lang.base.emit :as emit]
-             [std.lang.base.emit-common :as common]
-             [std.lang.base.emit-data :as data]
-             [std.lang.base.emit-helper :as helper]
-             [std.lang.base.emit-preprocess :as preprocess]
-             [std.lang.base.emit-top-level :as top]
-             [std.lang.base.grammar :as grammar]
-             [std.lang.base.grammar-spec :as spec]
-             [std.lang.base.script :as script]
-             [std.lang.typed.xtalk-analysis :as xtalk-analysis]
-             [std.lang.base.util :as ut]
-             [std.lang.model.spec-xtalk]
-             [std.lang.model.spec-xtalk.com-python :as com]
-             [std.lang.model.spec-xtalk.fn-python :as fn]
+            [std.lang.base.emit-common :as common]
+            [std.lang.base.emit-data :as data]
+            [std.lang.base.emit-helper :as helper]
+            [std.lang.base.emit-preprocess :as preprocess]
+            [std.lang.base.emit-top-level :as top]
+            [std.lang.base.grammar :as grammar]
+            [std.lang.base.grammar-spec :as spec]
+            [std.lang.base.script :as script]
+            [std.lang.typed.xtalk-analysis :as xtalk-analysis]
+            [std.lang.base.util :as ut]
+            [std.lang.model.spec-xtalk]
+            [std.lang.model.spec-xtalk.com-python :as com]
+            [std.lang.model.spec-xtalk.fn-python :as fn]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
             [std.lib.template :as template])
@@ -44,16 +44,16 @@
     xt.lang.event-route/add-url-listener 1
     xt.lang.event-route/add-path-listener 1
     xt.lang.event-route/add-param-listener 1
-     xt.lang.event-route/add-full-listener 1
-     xt.lang.event-route/set-url 1
-     xt.lang.event-route/set-path 2
-     xt.lang.event-route/set-param 1
-     xt.lang.event-route/reset-route 1
-     xt.lang.event-animate/make-linear-indicator 1
-     xt.lang.event-animate/make-circular-indicator 1
-     xt.lang.event-form/validate-all 2
-     xt.lang.event-form/validate-field 1
-     xt.lang.event-view/create-view 3
+    xt.lang.event-route/add-full-listener 1
+    xt.lang.event-route/set-url 1
+    xt.lang.event-route/set-path 2
+    xt.lang.event-route/set-param 1
+    xt.lang.event-route/reset-route 1
+    xt.lang.event-animate/make-linear-indicator 1
+    xt.lang.event-animate/make-circular-indicator 1
+    xt.lang.event-form/validate-all 2
+    xt.lang.event-form/validate-field 1
+    xt.lang.event-view/create-view 3
     xt.lang.event-view/get-output 1
     xt.lang.event-view/get-current 1
     xt.lang.event-view/is-errored 1
@@ -68,14 +68,14 @@
     xt.lang.event-view/pipeline-prep 1
     xt.lang.event-view/pipeline-set 1
     xt.lang.event-view/pipeline-call 1
-     xt.lang.event-view/pipeline-run-impl 1
-     xt.lang.event-view/pipeline-run 1
-     xt.lang.event-view/get-with-lookup 1
-     xt.lang.event-view/sorted-lookup 1
-     xt.lang.util-loader/load-tasks-single 3
-     xt.lang.util-throttle/throttle-run-async 1
-     xt.lang.util-throttle/throttle-run 1
-     xt.lang.util-color/rgb->hsl 1})
+    xt.lang.event-view/pipeline-run-impl 1
+    xt.lang.event-view/pipeline-run 1
+    xt.lang.event-view/get-with-lookup 1
+    xt.lang.event-view/sorted-lookup 1
+    xt.lang.util-loader/load-tasks-single 3
+    xt.lang.util-throttle/throttle-run-async 1
+    xt.lang.util-throttle/throttle-run 1
+    xt.lang.util-color/rgb->hsl 1})
 
 (defn- python-qualified-symbol
   [sym]
@@ -152,9 +152,9 @@
    (let [[_ name args & more] form
          decorators (get (meta name) :decorators)
          body  (list* 'defn- name (python-apply-optional-defaults name args) more)]
-      (if (empty? decorators)
-        body
-        `(\\ ~(apply list
+     (if (empty? decorators)
+       body
+       `(\\ ~(apply list
                     \\ (mapcat (fn [d]
                                  [\\ (list :%
                                            (list :- "@")
@@ -172,14 +172,14 @@
          (apply list 'fn.inner (with-meta (first args)
                                  {:inner true})
                 (rest args))
-          
-           :else
-           (let [[args body] args]
-             (apply list :- :lambda
-                    (concat (if (not-empty args)
-                              [(list 'quote args) ":"]
-                              [":"])
-                            [(python-lambda-body body)]))))))
+         
+         :else
+         (let [[args body] args]
+           (apply list :- :lambda
+                  (concat (if (not-empty args)
+                            [(list 'quote args) ":"]
+                            [":"])
+                          [(python-lambda-body body)]))))))
 
 (defn python-defclass
   "emits a defclass template for python"
@@ -236,7 +236,7 @@
       (apply list 'for [i :in (list 'range (list 'len arr))]
              (list 'var v (list '. arr [i]))
              (or (not-empty body)
-               ['(pass)])))
+                 ['(pass)])))
     (apply list 'for [e :in arr]
            (or (not-empty body)
                ['(pass)]))))
@@ -286,12 +286,47 @@
                           ~(if final (list 'return error) error)
                           ~(if final (list 'return success) success))
                         (catch [Exception :as ~ex]
-                          (:= ~err ~ex)
+                            (:= ~err ~ex)
                           ~(if final (list 'return error) error))))))
     (template/$ (try (var ~res ~statement)
                      ~(if final (list 'return success) success)
                      (catch [Exception :as ~err]
-                          ~(if final (list 'return error) error))))))
+                         ~(if final (list 'return error) error))))))
+
+(defn tf-for-try
+  "for try transform"
+  {:added "4.0"}
+  [[_ [[res err] statement] {:keys [success error]}]]
+  (let [success-form (or success '(return nil))
+        error-form   (or error '(return nil))
+        expanded-do  (when (and (seq? statement)
+                                (= 1 (count statement))
+                                (seq? (first statement))
+                                (= 'quote (ffirst statement)))
+                       (let [quoted (second (first statement))
+                             thunk  (first quoted)]
+                         (when (and (seq? thunk)
+                                    (= 'fn (first thunk))
+                                    (vector? (second thunk)))
+                           (drop 2 thunk))))]
+    (if (or (and (seq? statement)
+                 (= 'do:> (first statement)))
+            expanded-do)
+      (let [body   (or expanded-do (rest statement))
+            runner (gensym "runner")]
+        (template/$
+         (try
+           ~(apply list 'fn.inner (with-meta runner {:inner true}) '[] body)
+           (var ~res (~runner))
+           ~success-form
+           (catch [Exception :as ~err]
+             ~error-form))))
+      (template/$
+       (try
+         (var ~res ~statement)
+         ~success-form
+         (catch [Exception :as ~err]
+             ~error-form))))))
 
 (defn tf-for-async
   "for async transform"
@@ -326,7 +361,7 @@
                    ~error-form
                    ~success-form)
                  (catch [Exception :as ~ex]
-                   (:= ~err ~ex)
+                     (:= ~err ~ex)
                    ~error-form)
                  ~@(if finally
                      [(list 'finally finally)])))
@@ -337,7 +372,7 @@
                (var ~res ~statement)
                ~success-form
                (catch [Exception :as ~err]
-                 ~error-form)
+                   ~error-form)
                ~@(if finally
                    [(list 'finally finally)])))
            (x:thread-spawn ~runner))))))
@@ -357,13 +392,14 @@
                    :defgen      {:symbol #{'defgen} :macro #'python-defn :emit :macro}
                    :fn.inner    {:macro #'python-defn :emit :macro}
                    :with-global {:value true :raw "globals()"}
-                    :defclass    {:macro  #'python-defclass :emit :macro}
-                    :for-object  {:macro #'tf-for-object :emit :macro}
-                    :for-array   {:macro #'tf-for-array  :emit :macro}
-                    :for-iter    {:macro #'tf-for-iter   :emit :macro}
-                    :for-index   {:macro #'tf-for-index  :emit :macro}
-                    :for-async   {:macro #'tf-for-async  :emit :macro}
-                    :for-return  {:macro #'tf-for-return :emit :macro}}))
+                   :defclass    {:macro  #'python-defclass :emit :macro}
+                   :for-object  {:macro #'tf-for-object :emit :macro}
+                   :for-array   {:macro #'tf-for-array  :emit :macro}
+                   :for-iter    {:macro #'tf-for-iter   :emit :macro}
+                   :for-index   {:macro #'tf-for-index  :emit :macro}
+                   :for-try     {:macro #'tf-for-try    :emit :macro}
+                   :for-async   {:macro #'tf-for-async  :emit :macro}
+                   :for-return  {:macro #'tf-for-return :emit :macro}}))
         base-keys (set (keys base))
         fn-overrides (select-keys fn/+python+ base-keys)
         fn-extensions (apply dissoc fn/+python+ base-keys)
@@ -433,7 +469,7 @@
   (book/book-meta
    {:module-current (fn []
                       (template/$ (list (b:& (set [(str x) :for x :in (locals)])
-                                      (set [(str m) :for m :in sys.modules])))))
+                                             (set [(str m) :for m :in sys.modules])))))
     :module-export  (fn [{:keys [as refer]} opts])
     :module-import  (fn [name {:keys [as refer]} opts]  
                       (if as
@@ -441,7 +477,7 @@
                         (template/$ (:- :import ~name))))
     :module-unload  (fn [name as]
                       (template/$ (do (del (. sys.modules [~name]))
-                               (del ~(symbol name)))))}))
+                                      (del ~(symbol name)))))}))
 
 (def +book+
   (book/book {:lang :python
