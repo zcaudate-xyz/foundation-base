@@ -18,6 +18,7 @@
 (def +right-fact+
   "^{:refer xt.lang.common-spec/x:str-replace, :added \"4.1\"}
 (fact \"replaces matching substrings\"
+
   (!.lua (xt/x:str-replace \"hello-world\" \"-\" \"/\"))
   => \"hello/world\"
 
@@ -62,10 +63,15 @@
   (snap-form-string (block/parse-first +wrong-fact+))
   => +right-fact+)
 
+^{:refer code.manage.unit.snapto/snap-form-string :added "4.1"}
+(fact "does not add a blank line when the fact only has a docstring"
+  (snap-form-string (block/parse-first "(fact \"OEOEUEOU\")"))
+  => "(fact \"OEOEUEOU\")")
+
 ^{:refer code.manage.unit.snapto/snap-block-string :added "4.1"}
 (fact "preserves multiline metadata blocks and reader sugar"
   (let [source   "^{:refer xt.db.base-util/collect-routes,\n  :added \"4.0\",\n  :setup\n  [(def +routes+\n     [{:id \"ping\"}])\n   (def +result+\n     (contains-in {\"api/ping\" {:id \"ping\"}}))]}\n(fact\n \"collect routes\"\n ^{:hidden true}\n (!.lua (ut/collect-routes (@! +routes+) \"db\"))\n =>\n +result+)"
-        expected "^{:refer xt.db.base-util/collect-routes,\n  :added \"4.0\",\n  :setup\n  [(def +routes+\n     [{:id \"ping\"}])\n   (def +result+\n     (contains-in {\"api/ping\" {:id \"ping\"}}))]}\n(fact \"collect routes\"\n  ^{:hidden true}\n  (!.lua (ut/collect-routes (@! +routes+) \"db\"))\n  => +result+)"]
+        expected "^{:refer xt.db.base-util/collect-routes,\n  :added \"4.0\",\n  :setup\n  [(def +routes+\n     [{:id \"ping\"}])\n   (def +result+\n     (contains-in {\"api/ping\" {:id \"ping\"}}))]}\n(fact \"collect routes\"\n\n  ^{:hidden true}\n  (!.lua (ut/collect-routes (@! +routes+) \"db\"))\n  => +result+)"]
     (snap-block-string (block/parse-first source))
     => expected))
 

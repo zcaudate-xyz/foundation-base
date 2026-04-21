@@ -4,6 +4,7 @@
              [code.manage.ns-format :as ns-format]
              [code.manage.ns-rename :as ns-rename]
              [code.manage.unit :as unit]
+             [code.manage.unit.import :as unit.import]
              [code.manage.unit.snapto :as unit.snapto]
              [code.manage.unit.require :as unit.require]
              [code.manage.unit.template :as template]
@@ -188,7 +189,7 @@
             :write false})"
   {:added "3.0"}
   [:task {:template :code.transform
-          :main   {:fn #'unit/import}
+          :main   {:fn #'unit.import/import}
           :params {:title "IMPORT DOCSTRINGS"
                    :parallel true
                    :write true}
@@ -673,7 +674,6 @@
           (print-fn))
         (if-not (get opts :no-exit)
           (System/exit 0))))))
-
 
 
 
