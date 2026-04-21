@@ -778,6 +778,7 @@
 
 ^{:refer xt.lang.common-spec/x:obj-assign :added "4.1"}
 (fact "assigns object keys"
+
   (!.js
     (xt/x:obj-assign {:a 1} {:b 2}))
   => {"a" 1, "b" 2})
@@ -1010,13 +1011,15 @@
   
   (!.js
     (var out [])
-    (xt/x:arr-each [1 2 3] (fn [e]
-                             (xt/x:arr-push out (* e 2))))
+    (xt/x:arr-each [1 2 3]
+                   (fn [e]
+                     (xt/x:arr-push out (* e 2))))
     out)
   => [2 4 6])
 
 ^{:refer xt.lang.common-spec/x:arr-every :added "4.1"}
 (fact "checks whether every array element matches a predicate"
+
   (!.js
     (xt/x:arr-every [2 4 6]
                     (fn [e] (return (xt/x:even? e)))))
@@ -1024,6 +1027,7 @@
 
 ^{:refer xt.lang.common-spec/x:arr-some :added "4.1"}
 (fact "checks whether any array element matches a predicate"
+
   (!.js
     (xt/x:arr-some [1 3 4]
                    (fn [e] (return (xt/x:even? e)))))
@@ -1031,18 +1035,23 @@
 
 ^{:refer xt.lang.common-spec/x:arr-map :added "4.1"}
 (fact "maps an array"
+
   (!.js
     (xt/x:arr-map ["a" "b" "c"] (fn [e] (return (* e 2)))))
   => [2 4 6])
 
 ^{:refer xt.lang.common-spec/x:arr-assign :added "4.1"}
 (fact "appends one array to another"
+
   (!.js
-    (xt/x:arr-assign [1 2] [3 4]))
+    (var out  [1 2])
+    (xt/x:arr-assign out [3 4])
+    out)
   => [1 2 3 4])
 
 ^{:refer xt.lang.common-spec/x:arr-concat :added "4.1"}
 (fact "concatenates arrays into a new array"
+
   (!.js
     (var src [1 2])
     [(xt/x:arr-concat src [3 4]) src])
@@ -1050,6 +1059,7 @@
 
 ^{:refer xt.lang.common-spec/x:arr-filter :added "4.1"}
 (fact "filters an array"
+
   (!.js
     (xt/x:arr-filter ["a" "b" "c" "d"] (fn [e] (return (xt/x:even? e)))))
   => [2 4])

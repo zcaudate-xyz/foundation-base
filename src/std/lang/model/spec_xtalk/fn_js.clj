@@ -328,19 +328,11 @@
   [[_ arr]]
   (list '. arr (list 'slice) (list 'reverse)))
 
-(defn js-tf-x-arr-assign
-  [[_ arr other]]
-  (template/$ (do (. ~arr (push ...~other))
-                  (return ~arr))))
-
 (defn js-tf-x-arr-concat
   [[_ arr other]]
   (list '. arr (list 'concat other)))
 
-
-
 (def +js-arr+
-  ;; [:x-arr-assign :x-arr]
   {:x-arr-slice       {:macro #'js-tf-x-arr-slice      :emit :macro   :type :template}
    :x-arr-reverse     {:macro #'js-tf-x-arr-reverse    :emit :macro   :type :template}
    :x-arr-push        {:macro #'js-tf-x-arr-push       :emit :macro   :type :template}
@@ -349,9 +341,7 @@
    :x-arr-pop-first   {:macro #'js-tf-x-arr-pop-first  :emit :macro   :type :template}
    :x-arr-remove      {:macro #'js-tf-x-arr-remove     :emit :macro   :type :template}
    :x-arr-insert      {:macro #'js-tf-x-arr-insert     :emit :macro   :type :template}
-   :x-arr-assign      {:macro #'js-tf-x-arr-assign     :emit :macro   :type :template}
    :x-arr-concat      {:macro #'js-tf-x-arr-concat     :emit :macro   :type :template}})
-
 
 (defn js-tf-x-arr-clone
   [[_ arr]]
@@ -359,8 +349,7 @@
 
 (defn js-tf-x-arr-each
   [[_ arr f]]
-  (template/$ (do (. ~arr (forEach ~f))
-                  (return true))))
+  (list '. arr (list 'forEach f)))
 
 (defn js-tf-x-arr-every
   [[_ arr pred]]
