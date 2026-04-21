@@ -555,7 +555,7 @@
 (fact
  "keeps transformed non-nil values from an array"
  (!.js
-  (xt/x:arr-keep
+  (xtd/arr-keep
    [1 2 3]
    (fn [e] (when (xt/x:odd? e) (return (* e 10))))))
  =>

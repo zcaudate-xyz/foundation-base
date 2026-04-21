@@ -600,6 +600,13 @@
     (xt/x:arr-assign [1 2] [3 4]))
   => [1 2 3 4])
 
+^{:refer xt.lang.common-spec/x:arr-concat :added "4.1"}
+(fact "concatenates arrays into a new array"
+  (!.js
+    (var src [1 2])
+    [(xt/x:arr-concat src [3 4]) src])
+  => [[1 2 3 4] [1 2]])
+
 ^{:refer xt.lang.common-spec/x:arr-filter :added "4.1"}
 (fact "filters an array"
   (!.js
@@ -609,7 +616,7 @@
 ^{:refer xt.lang.common-spec/x:arr-keep :added "4.1"}
 (fact "keeps transformed non-nil values from an array"
   (!.js
-    (xt/x:arr-keep [1 2 3] (fn [e]
+    (xtd/arr-keep [1 2 3] (fn [e]
                              (when (xt/x:odd? e)
                                (return (* e 10))))))
   => [10 30])

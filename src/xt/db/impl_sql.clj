@@ -40,7 +40,7 @@
   {:added "4.0"}
   [instance tag data schema lookup opts]
   (var flat (f/flatten-bulk schema data))
-  (var ordered (xt/x:arr-keep (base-schema/table-order lookup)
+  (var ordered (xtd/arr-keep (base-schema/table-order lookup)
                            (fn [col]
                              (return (:? (xt/x:has-key? flat col) [col (xt/x:obj-keys (xt/x:get-key flat col))] nil)))))
   

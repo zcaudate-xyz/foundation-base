@@ -759,6 +759,12 @@
   x:arr-assign
   ([arr value] (list (quote x:arr-assign) arr value)))
 
+(defspec.xt x:arr-concat [:fn [[:xt/array :xt/any] :xt/any] [:xt/array :xt/any]])
+
+(defmacro.xt ^{:standalone true :is-template false}
+  x:arr-concat
+  ([arr value] (list (quote x:arr-concat) arr value)))
+
 (defspec.xt x:arr-filter [:fn [[:xt/array :xt/any] :xt/fn] [:xt/array :xt/any]])
 
 (defmacro.xt ^{:standalone true :is-template false} 

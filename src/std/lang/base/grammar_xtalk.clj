@@ -792,9 +792,6 @@
    {:op :x-arr-filter      :symbol #{'x:arr-filter}       :emit :hard-link :raw 'xt.lang.common-data/arr-filter
     :op-spec {:type [:fn [[:xt/array :xt/any] :xt/fn] [:xt/array :xt/any]]
               :arglists '([arr pred])}}
-   {:op :x-arr-keep        :symbol #{'x:arr-keep}         :emit :hard-link :raw 'xt.lang.common-data/arr-keep
-    :op-spec {:type [:fn [[:xt/array :xt/any] :xt/fn] [:xt/array :xt/any]]
-              :arglists '([arr f])}}
    {:op :x-arr-foldl       :symbol #{'x:arr-foldl}        :emit :hard-link :raw 'xt.lang.common-data/arr-foldl
     :op-spec {:type [:fn [[:xt/array :xt/any] :xt/fn :xt/any] :xt/any]
               :arglists '([arr f init])}}

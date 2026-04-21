@@ -170,6 +170,14 @@
   (!.js (xtd/arr-assign [1 2] [3 4]))
   => [1 2 3 4])
 
+^{:refer xt.lang.common-data/arr-concat :added "4.1"}
+(fact "concatenates arrays without mutating the input"
+  
+  (!.js
+   (var src [1 2])
+   [(xtd/arr-concat src [3 4]) src])
+  => [[1 2 3 4] [1 2]])
+
 ^{:refer xt.lang.common-data/arr-slice :added "4.1"}
 (fact "slices an array"
   
@@ -750,4 +758,3 @@
              (return (* x 10)))))
    [(f 2) (f 2) (f 3) n])
   => [20 20 30 2])
-

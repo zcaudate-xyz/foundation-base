@@ -144,7 +144,7 @@
   ([cache queue]
     (var ks (cache/list-keys cache))
     (var group-key (-/GROUP-KEY queue ""))
-    (return (xt/x:arr-keep ks
+    (return (xtd/arr-keep ks
                            (fn:> [k]
                              (:? (xts/starts-with? k group-key)
                                  k

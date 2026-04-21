@@ -9,16 +9,19 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]]})
 
 (fact:global
@@ -1036,25 +1039,20 @@
 (fact "appends one array to another"
   (!.js
     (xt/x:arr-assign [1 2] [3 4]))
-  => ["a" "b" "c" "d"])
+  => [1 2 3 4])
+
+^{:refer xt.lang.common-spec/x:arr-concat :added "4.1"}
+(fact "concatenates arrays into a new array"
+  (!.js
+    (var src [1 2])
+    [(xt/x:arr-concat src [3 4]) src])
+  => [[1 2 3 4] [1 2]])
 
 ^{:refer xt.lang.common-spec/x:arr-filter :added "4.1"}
 (fact "filters an array"
   (!.js
     (xt/x:arr-filter ["a" "b" "c" "d"] (fn [e] (return (xt/x:even? e)))))
   => [2 4])
-
-^{:refer xt.lang.common-spec/x:arr-keep :added "4.1"}
-(fact "keeps transformed non-nil values from an array"
-  (!.js
-    ^{:lang-exceptions {:python {:form (xt/x:arr-keep ["a" "b" "c"]
-                                                       (fn:> [e]
-                                                         (:? (xt/x:odd? e)
-                                                             (* e 10))))}}}
-    (xt/x:arr-keep ["a" "b" "c"] (fn [e]
-                             (when (xt/x:odd? e)
-                               (return (* e 10))))))
-  => [10 30])
 
 ^{:refer xt.lang.common-spec/x:arr-foldl :added "4.1"}
 (fact "folds arrays from the left"

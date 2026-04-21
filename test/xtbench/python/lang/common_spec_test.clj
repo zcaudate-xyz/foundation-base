@@ -553,7 +553,7 @@
 ^{:refer xt.lang.common-spec/x:arr-keep, :added "4.1"}
 (fact
  "keeps transformed non-nil values from an array"
- (!.py (xt/x:arr-keep [1 2 3] (fn:> [e] (:? (xt/x:odd? e) (* e 10)))))
+ (!.py (xtd/arr-keep [1 2 3] (fn:> [e] (:? (xt/x:odd? e) (* e 10)))))
  =>
  [10 30])
 

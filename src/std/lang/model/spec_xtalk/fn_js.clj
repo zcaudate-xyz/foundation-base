@@ -328,11 +328,19 @@
   [[_ arr]]
   (list '. arr (list 'slice) (list 'reverse)))
 
+(defn js-tf-x-arr-assign
+  [[_ arr other]]
+  (template/$ (do (. ~arr (push ...~other))
+                  (return ~arr))))
 
+(defn js-tf-x-arr-concat
+  [[_ arr other]]
+  (list '. arr (list 'concat other)))
 
 
 
 (def +js-arr+
+  ;; [:x-arr-assign :x-arr]
   {:x-arr-slice       {:macro #'js-tf-x-arr-slice      :emit :macro   :type :template}
    :x-arr-reverse     {:macro #'js-tf-x-arr-reverse    :emit :macro   :type :template}
    :x-arr-push        {:macro #'js-tf-x-arr-push       :emit :macro   :type :template}
@@ -341,8 +349,46 @@
    :x-arr-pop-first   {:macro #'js-tf-x-arr-pop-first  :emit :macro   :type :template}
    :x-arr-remove      {:macro #'js-tf-x-arr-remove     :emit :macro   :type :template}
    :x-arr-insert      {:macro #'js-tf-x-arr-insert     :emit :macro   :type :template}
-   })
+   :x-arr-assign      {:macro #'js-tf-x-arr-assign     :emit :macro   :type :template}
+   :x-arr-concat      {:macro #'js-tf-x-arr-concat     :emit :macro   :type :template}})
 
+
+(defn js-tf-x-arr-clone
+  [[_ arr]]
+  (list '. arr (list 'slice)))
+
+(defn js-tf-x-arr-each
+  [[_ arr f]]
+  (template/$ (do (. ~arr (forEach ~f))
+                  (return true))))
+
+(defn js-tf-x-arr-every
+  [[_ arr pred]]
+  (list '. arr (list 'every pred)))
+
+(defn js-tf-x-arr-some
+  [[_ arr pred]]
+  (list '. arr (list 'some pred)))
+
+(defn js-tf-x-arr-map
+  [[_ arr f]]
+  (list '. arr (list 'map f)))
+
+(defn js-tf-x-arr-filter
+  [[_ arr pred]]
+  (list '. arr (list 'filter pred)))
+
+(defn js-tf-x-arr-foldl
+  [[_ arr f init]]
+  (list '. arr (list 'reduce f init)))
+
+(defn js-tf-x-arr-foldr
+  [[_ arr f init]]
+  (list '. arr (list 'reduceRight f init)))
+
+(defn js-tf-x-arr-find
+  [[_ arr pred]]
+  (list '. arr (list 'findIndex pred)))
 
 (defn js-tf-x-arr-sort
   [[_ arr key-fn comp-fn]]
@@ -354,8 +400,16 @@
                                                -1 1)))))))
 
 (def +js-arr-functional+
-  ;; [:x-arr-clone :x-arr-each :x-arr-every :x-arr-some :x-arr-map :x-arr-append :x-arr-filter :x-arr-keep :x-arr-foldl :x-arr-foldr :x-arr-find]
-  :x-arr-sort      {:macro #'js-tf-x-arr-sort     :emit :macro   :type :template})
+  {:x-arr-clone    {:macro #'js-tf-x-arr-clone    :emit :macro   :type :template}
+   :x-arr-each     {:macro #'js-tf-x-arr-each     :emit :macro   :type :template}
+   :x-arr-every    {:macro #'js-tf-x-arr-every    :emit :macro   :type :template}
+   :x-arr-some     {:macro #'js-tf-x-arr-some     :emit :macro   :type :template}
+   :x-arr-map      {:macro #'js-tf-x-arr-map      :emit :macro   :type :template}
+   :x-arr-filter   {:macro #'js-tf-x-arr-filter   :emit :macro   :type :template}
+   :x-arr-foldl    {:macro #'js-tf-x-arr-foldl    :emit :macro   :type :template}
+   :x-arr-foldr    {:macro #'js-tf-x-arr-foldr    :emit :macro   :type :template}
+   :x-arr-find     {:macro #'js-tf-x-arr-find     :emit :macro   :type :template}
+   :x-arr-sort     {:macro #'js-tf-x-arr-sort     :emit :macro   :type :template}})
 
 
 
@@ -752,6 +806,7 @@
          +js-lu+
          +js-obj+
          +js-arr+
+         +js-arr-functional+
          +js-str+
          +js-js+
          +js-return+

@@ -64,7 +64,7 @@
   {:added "4.0"}
   [ks]
   (return
-   (xtd/arr-lookup (xt/x:arr-keep ks -/filter-plain-key))))
+   (xtd/arr-lookup (xtd/arr-keep ks -/filter-plain-key))))
 
 (defn.xt get-data-columns
   "get columns for given keys"

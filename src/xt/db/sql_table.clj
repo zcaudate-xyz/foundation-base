@@ -84,7 +84,7 @@
   "emit util for insert and upsert"
   {:added "4.0"}
   [emit-fn schema lookup flat opts]
-  (var ordered (xt/x:arr-keep (base-schema/table-order lookup)
+  (var ordered (xtd/arr-keep (base-schema/table-order lookup)
                            (fn [col]
                              (return (:? (xt/x:has-key? flat col) [col (xt/x:get-key flat col)] nil)))))
   (var column-fn  (xt/x:get-key opts "column_fn" (fn [x] (return x))))
@@ -114,7 +114,7 @@
                             cols
                             sout
                             sopts)))))
-  (return (xt/x:arr-keep ordered emit-pair-fn)))
+  (return (xtd/arr-keep ordered emit-pair-fn)))
 
 (defn.xt table-insert
   "creates an insert statement"

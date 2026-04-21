@@ -187,4 +187,4 @@
            (var unloaded (-/task-unload task))
            (hook-fn id unloaded)
            (return [id unloaded]))))
-  (return (xt/x:arr-keep rorder unload-task)))
+  (return (xtd/arr-keep rorder unload-task)))
