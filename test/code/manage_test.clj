@@ -132,6 +132,14 @@
   (arrange '[code.manage] {:print {:item true}
                            :write false}))
 
+^{:refer code.manage/snapto :added "4.1"}
+(fact "formats fact tests into snap-to layout"
+
+  (snapto {:write false})
+
+  (snapto '[code.manage] {:print {:item true}
+                          :write false}))
+
 ^{:refer code.manage/locate-code :added "3.0"}
 (fact "locates code base upon query"
   ^:hidden

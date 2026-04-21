@@ -545,10 +545,10 @@
  =>
  [2 4 6])
 
-^{:refer xt.lang.common-spec/x:arr-append, :added "4.1"}
+^{:refer xt.lang.common-spec/x:arr-concat, :added "4.1"}
 (fact
  "appends one array to another"
- (!.lua (xt/x:arr-append [1 2] [3 4]))
+ (!.lua (xt/x:arr-concat [1 2] [3 4]))
  =>
  [1 2 3 4])
 
@@ -933,12 +933,30 @@
  =>
  '([template values]))
 
+
+
+;;; WRONG
 ^{:refer xt.lang.common-spec/x:str-replace, :added "4.1"}
 (fact
  "replaces matching substrings"
  (!.lua (xt/x:str-replace "hello-world" "-" "/"))
  =>
- "hello/world")
+ "hello/world"
+ (!.lua (xt/x:str-replace "hello-world" "_" "/"))
+ =>
+ "hello-world")
+
+
+;;; RIGHT
+^{:refer xt.lang.common-spec/x:str-replace, :added "4.1"}
+(fact "replaces matching substrings"  ;; docstring always 
+                                      ;; always a newline gap between docstring and test as well and checks
+  (!.lua (xt/x:str-replace "hello-world" "-" "/")) ;; block should be 2 spaces
+  => "hello/world"     ;; arrow always on the next line. output immediately next to arrow
+  
+  (!.lua (xt/x:str-replace "hello-world" "_" "/"))
+  => "hello-world")
+
 
 ^{:refer xt.lang.common-spec/x:str-trim, :added "4.1"}
 (fact

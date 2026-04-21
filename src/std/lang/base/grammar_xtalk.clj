@@ -548,6 +548,9 @@
    {:op :x-set-idx         :symbol #{'x:set-idx}          :macro #'tf-set-key     :emit :macro
     :op-spec {:type [:fn [[:xt/array :xt/any] :xt/int] :xt/self]
               :arglists '([arr idx value])}}
+   {:op :x-arr-clone       :symbol #{'x:arr-clone}        :emit :hard-link :raw 'xt.lang.common-data/arr-clone
+    :op-spec {:type [:fn [[:xt/array :xt/any]] [:xt/array :xt/any]]
+              :arglists '([arr])}}
    {:op :x-arr-first       :symbol #{'x:first}        :macro #'tf-first       :emit :macro
     :op-spec  {:type [:fn [[:xt/array :xt/any]] :xt/any]
                :arglists '([arr])}}
@@ -583,7 +586,10 @@
                 :arglists '([arr start] [arr start end])}}
    {:op :x-arr-reverse     :symbol #{'x:arr-reverse}      :emit :hard-link :raw 'xt.lang.common-data/arr-reverse
     :op-spec   {:type [:fn [[:xt/array :xt/any]] [:xt/array :xt/any]]
-                :arglists '([arr])}}])
+                :arglists '([arr])}}
+   {:op :x-arr-concat     :symbol #{'x:arr-concat}      :emit :hard-link :raw 'xt.lang.common-data/arr-concat
+    :op-spec   {:type [:fn [[:xt/array :xt/any] [:xt/array :xt/any]] [:xt/array :xt/any]]
+                :arglists '([arr1 arr2])}}])
 
 (def +xt-common-print+
   [{:op :x-print          :symbol #{'x:print}           :emit :abstract
@@ -768,9 +774,6 @@
   [{:op :x-arr-sort        :symbol #{'x:arr-sort}         :emit :abstract
     :op-spec {:type [:fn [[:xt/array :xt/any] :xt/fn :xt/fn] :xt/self]
               :arglists '([arr key-fn comp-fn])}}
-   {:op :x-arr-clone       :symbol #{'x:arr-clone}        :emit :hard-link :raw 'xt.lang.common-data/arr-clone
-    :op-spec {:type [:fn [[:xt/array :xt/any]] [:xt/array :xt/any]]
-              :arglists '([arr])}}
    {:op :x-arr-each        :symbol #{'x:arr-each}         :emit :hard-link :raw 'xt.lang.common-data/arr-each
     :op-spec {:type [:fn [[:xt/array :xt/any]] nil]
               :arglists '([arr f])}}
@@ -783,9 +786,6 @@
    {:op :x-arr-map         :symbol #{'x:arr-map}          :emit :hard-link :raw 'xt.lang.common-data/arr-map
     :op-spec {:type [:fn [[:xt/array :xt/any] :xt/fn] [:xt/array :xt/any]]
               :arglists '([arr f])}}
-   {:op :x-arr-append      :symbol #{'x:arr-append}       :emit :hard-link :raw 'xt.lang.common-data/arr-append
-    :op-spec {:type [:fn [[:xt/array :xt/any] :xt/any] [:xt/array :xt/any]]
-              :arglists '([arr value])}}
    {:op :x-arr-filter      :symbol #{'x:arr-filter}       :emit :hard-link :raw 'xt.lang.common-data/arr-filter
     :op-spec {:type [:fn [[:xt/array :xt/any] :xt/fn] [:xt/array :xt/any]]
               :arglists '([arr pred])}}

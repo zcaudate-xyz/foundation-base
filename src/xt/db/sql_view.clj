@@ -35,7 +35,7 @@
   {:added "4.0"}
   [schema table-name sel-query clause returning opts]
   (var tarr (base-scope/merge-queries sel-query clause))
-  (var tree (xt/x:arr-append [table-name] tarr))
+  (var tree (xt/x:arr-concat [table-name] tarr))
   (when (xtd/not-empty? returning)
     (xt/x:arr-push tree returning))
   (return (sql-graph/select-tree schema tree opts)))
@@ -46,7 +46,7 @@
   [schema entry clause opts]
   (var #{view control} entry)
   (var #{table query} view)
-  (return (-/tree-base schema table query clause (xt/x:arr-append [{"::" "sql/count"}]
+  (return (-/tree-base schema table query clause (xt/x:arr-concat [{"::" "sql/count"}]
                                                                    (-/tree-control-array control))
                         opts)))
 
@@ -56,7 +56,7 @@
   [schema entry clause opts]
   (var #{view control} entry)
   (var #{table query} view)
-  (return (-/tree-base schema table query clause (xt/x:arr-append ["id"]
+  (return (-/tree-base schema table query clause (xt/x:arr-concat ["id"]
                                                                    (-/tree-control-array control))
                         opts)))
 
@@ -87,7 +87,7 @@
   (var combined-clause (base-scope/merge-queries clause ret-clause))
   
   (return (-/tree-base schema sel-table sel-query combined-clause
-                       (xt/x:arr-append (xt/x:arr-clone ret-query)
+                       (xt/x:arr-concat (xt/x:arr-clone ret-query)
                                      (-/tree-control-array control))
                        opts)))
 
@@ -179,9 +179,9 @@
                                 opts))
   (var qtree (-/query-fill-input itree
                                  (-> (xt/x:arr-clone  ret-args)
-                                     (xt/x:arr-append sel-args))
+                                     (xt/x:arr-concat sel-args))
                                  (-> (xt/x:arr-clone  ret-input)
-                                     (xt/x:arr-append sel-input))
+                                     (xt/x:arr-concat sel-input))
                                  true))
   (if as-tree
     (return qtree)

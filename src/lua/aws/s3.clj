@@ -132,7 +132,7 @@
   (var node
        {:tag "Delete"
         :children
-        (k/arr-append
+        (k/arr-concat
          [{:tag "Quiet"
            :children [true]}]
          (xtd/arr-map all-keys

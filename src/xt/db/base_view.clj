@@ -35,5 +35,5 @@
   (return (xtd/arr-clone
            (xtd/arr-mapcat (xt/x:obj-keys views)
                            (fn [k]
-                             (return (xt/x:arr-append (method-fn views k "select")
+                             (return (xt/x:arr-concat (method-fn views k "select")
                                                       (method-fn views k "return"))))))))

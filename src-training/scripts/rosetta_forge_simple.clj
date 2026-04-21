@@ -40,7 +40,7 @@
     :intent "Filter array elements by predicate"}
    {:category :array :name "arr-slice" :xtalk '(k/arr-slice [1 2 3 4 5] 1 3)
     :intent "Extract a slice from an array"}
-   {:category :array :name "arr-append" :xtalk '(k/arr-append [1 2] [3 4])
+   {:category :array :name "arr-concat" :xtalk '(k/arr-concat [1 2] [3 4])
     :intent "Append two arrays"}
    {:category :array :name "arr-clone" :xtalk '(k/arr-clone [1 2 3])
     :intent "Clone an array"}

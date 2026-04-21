@@ -432,7 +432,7 @@
   
   (cond accumulate
         (do (var prev (xtd/arrayify (xt/x:get-key output "current")))
-            (var next (xt/x:arr-append
+            (var next (xt/x:arr-concat
                        (xt/x:arr-clone prev)
                        (xtd/arrayify current)))
             (xt/x:set-key output "current" next))

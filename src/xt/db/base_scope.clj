@@ -104,8 +104,8 @@
   (when (== 0 (xt/x:len lmap))
     (:= lmap [{}]))
   (var lout [])
-  (xt/x:arr-append lout lmap)
-  (xt/x:arr-append lout larr)
+  (xt/x:arr-concat lout lmap)
+  (xt/x:arr-concat lout larr)
   (return [ltag lout]))
 
 ;;

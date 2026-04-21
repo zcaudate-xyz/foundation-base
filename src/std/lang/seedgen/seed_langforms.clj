@@ -1,4 +1,4 @@
-(ns std.lang.seedgen.form-infile
+(ns std.lang.seedgen.seed-langforms
   (:require [clojure.string :as str]
             [code.framework :as base]
             [code.project :as project]

@@ -101,7 +101,7 @@
   {:added "4.0"}
   [handle args tcb]
   (var #{handler wrap-fn delay id-fn plugins} handle)
-  (var tcbs (xt/x:arr-append (xt/x:arr-clone plugins)
+  (var tcbs (xt/x:arr-concat (xt/x:arr-clone plugins)
                              (:? (xt/x:nil? tcb) []
                                  (xt/x:is-array? tcb) tcb
                                  :else [tcb])))

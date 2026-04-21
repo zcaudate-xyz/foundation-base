@@ -22,7 +22,7 @@
   (when (xt/x:nil? args)
     (:= args []))
   (var inputs [id])
-  (xt/x:arr-append inputs args)
+  (xt/x:arr-concat inputs args)
   (xt/for:async [[ret err] (xt/x:apply handler inputs)]
     {:finally (do (xt/x:del-key active id)
                   (let [qentry (xt/x:get-key queued id)]

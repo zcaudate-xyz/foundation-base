@@ -174,7 +174,7 @@
   (when entry
     (var rec (xt/x:get-key entry "record"))
     (var #{ref-links rev-links} rec)
-    (var links (xt/x:arr-append (xt/x:obj-pairs ref-links)
+    (var links (xt/x:arr-concat (xt/x:obj-pairs ref-links)
                              (xt/x:obj-pairs rev-links)))
     (xt/for:array [pair links]
       (var [field m] pair)

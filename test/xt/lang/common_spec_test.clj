@@ -938,7 +938,7 @@
 
 ^{:refer xt.lang.common-spec/x:str-to-lower :added "4.1"}
 (fact "converts a string to lower case"
-
+  
   (!.js
     (xt/x:str-to-lower "HELLO"))
   => "hello")
@@ -970,11 +970,13 @@
 
 ^{:refer xt.lang.common-spec/x:str-trim-right :added "4.1"}
 (fact "trims whitespace from the right side"
+
   (!.js (xt/x:str-trim-right "hello  "))
   => "hello")
 
 ^{:refer xt.lang.common-spec/x:arr-sort :added "4.1"}
 (fact "sorts arrays using key and compare functions"
+
   (!.js
     (var out [{:id 3} {:id 1} {:id 2}])
     (xt/x:arr-sort out
@@ -985,7 +987,15 @@
 
 ^{:refer xt.lang.common-spec/x:arr-clone :added "4.1"}
 (fact "clones an array"
+  
   (!.js
+    (var src [1 2])
+    (var out (xt/x:arr-clone src))
+    (xt/x:arr-push src 3)
+    out)
+  => [1 2]
+
+  (!.lua
     (var src [1 2])
     (var out (xt/x:arr-clone src))
     (xt/x:arr-push src 3)
@@ -994,9 +1004,10 @@
 
 ^{:refer xt.lang.common-spec/x:arr-each :added "4.1"}
 (fact "iterates each element in an array"
+  
   (!.js
     (var out [])
-    (xt/x:arr-each ["a" "b" "c"] (fn [e]
+    (xt/x:arr-each [1 2 3] (fn [e]
                              (xt/x:arr-push out (* e 2))))
     out)
   => [2 4 6])
@@ -1021,10 +1032,10 @@
     (xt/x:arr-map ["a" "b" "c"] (fn [e] (return (* e 2)))))
   => [2 4 6])
 
-^{:refer xt.lang.common-spec/x:arr-append :added "4.1"}
+^{:refer xt.lang.common-spec/x:arr-concat :added "4.1"}
 (fact "appends one array to another"
   (!.js
-    (xt/x:arr-append [1 2] [3 4]))
+    (xt/x:arr-concat [1 2] [3 4]))
   => ["a" "b" "c" "d"])
 
 ^{:refer xt.lang.common-spec/x:arr-filter :added "4.1"}

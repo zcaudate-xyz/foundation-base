@@ -216,7 +216,7 @@
              (xtd/obj-not-empty? params))
     (xt/x:arr-push arr params))
   (when (xtd/arr-not-empty? children)
-    (xt/x:arr-append arr (xt/x:arr-map children
+    (xt/x:arr-concat arr (xt/x:arr-map children
                                         (fn [e]
                                           (return
                                           (:? (xt/x:is-object? e)

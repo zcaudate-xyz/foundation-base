@@ -1,12 +1,13 @@
 (ns code.manage
   (:require [code.framework :as base]
-            [code.manage.fn-format :as fn-format]
-            [code.manage.ns-format :as ns-format]
-            [code.manage.ns-rename :as ns-rename]
-            [code.manage.unit :as unit]
-            [code.manage.unit.require :as unit.require]
-            [code.manage.unit.template :as template]
-            [code.manage.var :as var]
+             [code.manage.fn-format :as fn-format]
+             [code.manage.ns-format :as ns-format]
+             [code.manage.ns-rename :as ns-rename]
+             [code.manage.unit :as unit]
+             [code.manage.unit.snapto :as unit.snapto]
+             [code.manage.unit.require :as unit.require]
+             [code.manage.unit.template :as template]
+             [code.manage.var :as var]
             [code.project :as project]
             [std.block :as block]
             [std.lib.collection :as collection]
@@ -361,7 +362,7 @@
 
 (invoke/definvoke arrange
   "arranges the test corresponding to function order
- 
+  
    (arrange {:print {:function false}
              :write false})
  
@@ -373,10 +374,28 @@
                    :parallel true
                    :write true}
           :main {:fn #'unit/arrange}
+           :item {:list template/test-namespaces}
+           :result (template/code-transform-result :changed)}])
+
+(comment (code.manage/arrange ['code.framework] {:print {:function true :item true :result true :summary true}}))
+
+(invoke/definvoke snapto
+  "formats fact tests into snap-to layout
+ 
+   (snapto {:write false})
+ 
+   (snapto '[code.manage] {:print {:item true}
+                           :write false})"
+  {:added "4.1"}
+  [:task {:template :code.transform
+          :params {:title "SNAPTO TESTS"
+                   :parallel true
+                   :write true}
+          :main {:fn #'unit.snapto/snapto}
           :item {:list template/test-namespaces}
           :result (template/code-transform-result :changed)}])
 
-(comment (code.manage/arrange ['code.framework] {:print {:function true :item true :result true :summary true}}))
+(comment (code.manage/snapto ['code.framework] {:print {:function true :item true :result true :summary true}}))
 
 (invoke/definvoke locate-code
   "locates code base upon query"

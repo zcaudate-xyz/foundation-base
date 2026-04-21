@@ -350,6 +350,23 @@
    :x-arr-insert      {:macro #'js-tf-x-arr-insert     :emit :macro   :type :template}
    :x-arr-sort        {:macro #'js-tf-x-arr-sort       :emit :macro}})
 
+
+(def +js-arr-functional+
+  ;; [:x-arr-sort :x-arr-clone :x-arr-each :x-arr-every :x-arr-some :x-arr-map :x-arr-append :x-arr-filter :x-arr-keep :x-arr-foldl :x-arr-foldr :x-arr-find]
+  {:x-arr-clone       {:emit :alias :raw 'Array.from}
+   :x-arr-slice       {:macro #'js-tf-x-arr-slice      :emit :macro   :type :template}
+   :x-arr-reverse     {:macro #'js-tf-x-arr-reverse    :emit :macro   :type :template}
+   :x-arr-push        {:macro #'js-tf-x-arr-push       :emit :macro   :type :template}
+   :x-arr-pop         {:macro #'js-tf-x-arr-pop        :emit :macro   :type :template}
+   :x-arr-push-first  {:macro #'js-tf-x-arr-push-first :emit :macro   :type :template}
+   :x-arr-pop-first   {:macro #'js-tf-x-arr-pop-first  :emit :macro   :type :template}
+   :x-arr-remove      {:macro #'js-tf-x-arr-remove     :emit :macro   :type :template}
+   :x-arr-insert      {:macro #'js-tf-x-arr-insert     :emit :macro   :type :template}
+   :x-arr-sort        {:macro #'js-tf-x-arr-sort       :emit :macro}})
+
+
+
+()
 ;;
 ;; STRING
 ;;

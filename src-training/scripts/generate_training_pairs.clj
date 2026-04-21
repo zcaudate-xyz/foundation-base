@@ -48,7 +48,7 @@
     :intent "Filter array elements by predicate"}
    {:category :array :name "arr-slice" :fn 'k/arr-slice :args [[1 2 3 4 5] 1 3]
     :intent "Extract a slice from an array"}
-   {:category :array :name "arr-append" :fn 'k/arr-append :args [[1 2] [3 4]]
+   {:category :array :name "arr-concat" :fn 'k/arr-concat :args [[1 2] [3 4]]
     :intent "Append two arrays"}
    {:category :array :name "arr-clone" :fn 'k/arr-clone :args [[1 2 3]]
     :intent "Clone an array"}

@@ -12,7 +12,7 @@
   [schema table-name sel-query returning custom-query]
   (var cquery (:? (xt/x:not-nil? custom-query) custom-query []))
   (var tarr (base-scope/merge-queries sel-query cquery))
-  (var tree (xt/x:arr-append [table-name] (:? (xt/x:not-nil? tarr) tarr [])))
+  (var tree (xt/x:arr-concat [table-name] (:? (xt/x:not-nil? tarr) tarr [])))
   (when (xtd/not-empty? returning)
     (xt/x:arr-push tree returning))
   (return tree))
@@ -112,7 +112,7 @@
                                 ret-omit))
   (return (-/query-fill-input itree
                               (-> (xt/x:arr-clone  ret-args)
-                                  (xt/x:arr-append sel-args))
+                                  (xt/x:arr-concat sel-args))
                               (-> (xt/x:arr-clone  ret-input)
-                                  (xt/x:arr-append sel-input))
+                                  (xt/x:arr-concat sel-input))
                               true)))
