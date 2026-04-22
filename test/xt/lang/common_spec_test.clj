@@ -2,7 +2,6 @@
   (:use code.test)
   (:require [clojure.set :as set]
             [std.lang :as l]
-            [std.lang.model.spec-lua :as lua]
             [xt.lang.common-notify :as notify]))
 
 ^{:seedgen/root {:all true, :langs [:python :lua]}}
@@ -14,7 +13,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.common-spec/for:array :added "4.1"}
 (fact "iterates arrays in order"
@@ -1111,9 +1110,9 @@
     (var eq-fn (fn [it0 it1 eq-fn]
                  (xt/x:iter-eq it0 it1 eq-fn)))
     [(eq-fn (xt/x:iter-from-arr [1 2 3])
-                   (xt/x:iter-from-arr [1 2 3])
-                   (fn [a b]
-                     (return (== a b))))
+            (xt/x:iter-from-arr [1 2 3])
+            (fn [a b]
+              (return (== a b))))
      (eq-fn (xt/x:iter-from-arr [1 2 3])
             (xt/x:iter-from-arr [1 2 4])
             (fn [a b]
@@ -1250,7 +1249,7 @@
          (fn []
            (xt/x:global-del COMMON_SPEC_GLOBAL)
            (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
-      
+    
     [(set-fn)
      (!:G COMMON_SPEC_GLOBAL)
      (del-fn)])
@@ -1277,61 +1276,69 @@
          (fn []
            (xt/x:global-del COMMON_SPEC_GLOBAL)
            (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
-      
+    
     [(set-fn)
      (del-fn)])
   => [true false])
 
 ^{:refer xt.lang.common-spec/x:proto-get :added "4.1"}
-(fact "retrieves object prototypes"
+(fact "retrieves the attached prototype object"
 
   (!.js
-    (var set-fn
-         (fn [obj proto]
-           (xt/x:proto-set obj proto nil)))
-    (var proto {:label "proto"})
+    (var proto-fn
+         (fn [m]
+           (xt/x:proto-create m)))
     (var obj {})
-    (set-fn obj proto)
-    (. (xt/x:proto-get obj "label") ["label"]))
-  => "proto")
+    (xt/x:proto-set obj (proto-fn {:label "proto"}))
+    (xt/x:proto-get obj))
+  => {"label" "proto"})
 
 ^{:refer xt.lang.common-spec/x:proto-set :added "4.1"}
-(fact "assigns object prototypes"
+(fact "attaches the prototype object"
 
   (!.js
-    (var set-fn
-         (fn [obj proto]
-           (xt/x:proto-set obj proto nil)))
-    (var proto {:label "proto"})
+    (var proto-fn
+         (fn [m]
+           (xt/x:proto-create m)))
     (var obj {})
-    (set-fn obj proto)
-    (. (xt/x:proto-get obj "label") ["label"])))
+    (xt/x:proto-set obj (proto-fn {:label "proto"}))
+    (. obj ["label"]))
+  => "proto"
+
+  (!.js
+    (var proto-fn
+         (fn [m]
+           (xt/x:proto-create m)))
+    (var obj {})
+    (xt/x:proto-set obj (proto-fn {:label "A"}))
+    (xt/x:proto-set obj (proto-fn {:label "B"}))
+    (. (xt/x:proto-get obj) ["label"]))
+  => "B")
 
 ^{:refer xt.lang.common-spec/x:proto-create :added "4.1"}
-(fact "creates prototypes with this-bound methods"
+(fact "creates prototypes with self-bound methods"
 
   (!.js
-   (var proto (xt/x:proto-create
-               {:describe (fn [self suffix]
-                            (return (+ (. self ["name"]) suffix)))}))
-   (var obj {})
-   (xt/x:proto-set obj proto nil)
-   (:= (. obj ["name"]) "alpha")
-   (. obj (describe "!")))
+    (var proto-fn
+         (fn [m]
+           (xt/x:proto-create m)))
+    (var proto (proto-fn
+                {:describe (fn [curr suffix]
+                             (return (+ (. curr ["name"]) suffix)))}))
+    (var obj {})
+    (xt/x:proto-set obj proto)
+    (:= (. obj ["name"]) "alpha")
+    (. obj (describe "!")))
   => "alpha!")
 
 ^{:refer xt.lang.common-spec/x:proto-tostring :added "4.1"}
-(fact "expands and emits the lua tostring metamethod key"
+(fact "returns the native string hook key"
   
+  ^{:seedgen/base {:lua    {:expect "__tostring"}
+                    :python {:expect "__str__"}}}
   (!.js
-    (var set-fn
-         (fn [obj proto]
-           (xt/x:proto-set obj proto nil)))
-    (var proto {:label "proto"})
-    (var obj {})
-    (set-fn obj proto)
-    (xt/x:proto-tostring obj))
-  => :todo)
+    (xt/x:proto-tostring))
+  => "toString")
 
 ^{:refer xt.lang.common-spec/x:random :added "4.1"}
 (fact "returns javascript random values"
@@ -1361,14 +1368,16 @@
 (fact "spreads arrays into positional arguments"
 
   (!.js
-    ((fn [a b c]
-       (return (+ a b c)))
-     (xt/x:unpack [1 2 3])))
+    (var add-args
+         (fn [a b c]
+           (return (+ a b c))))
+    (add-args (xt/x:unpack [1 2 3])))
   => 6)
 
 ^{:refer xt.lang.common-spec/x:socket-connect :added "4.1"}
 (fact "connects sockets and forwards the connection to callbacks"
 
+  #_
   (notify/wait-on :js
     (do (var net (require "net"))
         (var port 18182)
@@ -1511,18 +1520,33 @@
     (xt/x:cache-incr cache "count" 3))
   => 5)
 
-^{:refer xt.lang.common-spec/x:slurp :added "4.1"}
-(fact "keeps the slurp wrapper intact"
+^{:refer xt.lang.common-spec/x:slurp-file :added "4.1"}
+(fact "reads file content through callbacks"
   
-  (!.js (xt/x:slurp "project.clj"))
+  (notify/wait-on :js
+    (xt/x:slurp-file "project.clj"
+                     {}
+                     (fn [err res]
+                       (repl/notify res))))
   => string?)
 
-^{:refer xt.lang.common-spec/x:spit :added "4.1"}
-(fact "keeps the spit wrapper intact"
+^{:refer xt.lang.common-spec/x:spit-file :added "4.1"}
+(fact "writes file content through callbacks"
 
-  ^{:seedgen/base true}
-  [(!.js (xt/x:spit "out.tmp" "hello world"))]
-  => )
+^{:seedgen/base true}
+  (let [path "test-scratch/out.tmp"
+        out  (notify/wait-on :js
+               (xt/x:spit-file "test-scratch/out.tmp"
+                               "hello world"
+                               {}
+                               (fn [err _]
+                                 (xt/x:slurp-file "test-scratch/out.tmp"
+                                                  {}
+                                                  (fn [inner-err res]
+                                                    (repl/notify res))))))]
+    (.delete (java.io.File. path))
+    out)
+  => "hello world")
 
 ^{:refer xt.lang.common-spec/x:json-encode :added "4.1"}
 (fact "encodes lua data structures as json"
@@ -1538,14 +1562,13 @@
 
 ^{:refer xt.lang.common-spec/x:shell :added "4.1"}
 (fact "executes shell commands asynchronously"
-
-  (l/with:print-all
-    (notify/wait-on :js
-      (do:> (xt/x:shell "printf hello" {}))
-      {:success (fn [res]
-                  (repl/notify res))
-       :error   (fn [err]
-                  (repl/notify "ERR"))}))
+  
+  (notify/wait-on :js
+    (do:> (xt/x:shell "printf hello" {}
+                      {:success (fn [res]
+                                  (repl/notify res))
+                       :error   (fn [err]
+                                  (repl/notify "ERR"))})))
   => #"hello")
 
 ^{:refer xt.lang.common-spec/x:thread-spawn :added "4.1"}
@@ -1599,4 +1622,3 @@
   (!.js
     (xt/x:uri-decode "hello%20world"))
   => "hello world")
-

@@ -81,16 +81,16 @@
 (defn js-tf-x-proto-create
   [[_ m]]
   (template/$
-   ('((fn []
-        (var out {})
-        (for:object
-         [[k f] ~m]
-         (if (x:is-function? f)
-           (:= (. out [k])
-               (fn:> [...args]
-                     (f this ...args)))
-           (:= (. out [k]) f)))
-        (return out))))))
+   (do (var out {})
+       (for:object
+        [[k f] ~m]
+        (if (x:is-function? f)
+          (:= (. out [k])
+              (fn [...args]
+                (return 
+                 (f this ...args))))
+          (:= (. out [k]) f)))
+       (return out))))
 
 (def +js-proto+
   {:x-proto-get       {:macro #'js-tf-x-proto-get     :emit :macro}
@@ -642,15 +642,34 @@
 ;; FILE
 ;;
 
-(defn js-tf-x-slurp
-  ([[_ filename]]))
+(defn js-tf-x-slurp-file
+  [[_ filename opts cb]]
+  (template/$
+   ('((fn []
+        (var fs (require "fs"))
+        (var path (require "path"))
+        (var root (or (. process env ["PWD"])
+                      (. process (cwd))))
+        (return (~cb nil
+                     (. fs (readFileSync (. path (resolve root ~filename))
+                                         "utf-8")))))))))
 
-(defn js-tf-x-spit
-  ([[_ filename s]]))
+(defn js-tf-x-spit-file
+  [[_ filename s opts cb]]
+  (template/$
+   ('((fn []
+        (var fs (require "fs"))
+        (var path (require "path"))
+        (var root (or (. process env ["PWD"])
+                      (. process (cwd))))
+        (. fs (writeFileSync (. path (resolve root ~filename))
+                             ~s
+                             "utf-8"))
+        (return (~cb nil ~filename)))))))
 
 (def +js-file+
-  {:x-slurp          {:macro #'js-tf-x-slurp         :emit :macro}
-   :x-spit           {:macro #'js-tf-x-spit          :emit :macro}})
+  {:x-slurp-file     {:macro #'js-tf-x-slurp-file    :emit :macro}
+   :x-spit-file      {:macro #'js-tf-x-spit-file     :emit :macro}})
 
 ;;
 ;; THREAD

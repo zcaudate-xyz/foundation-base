@@ -416,17 +416,15 @@
   (l/emit-as :js [(js-tf-x-cache-incr '[_ cache key 1])])
   => #"getItem")
 
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-slurp :added "4.0"}
-(fact "slurp"
-  (comment
-    (l/emit-as :js [(js-tf-x-slurp '[_ filename])])
-    => nil?))
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-slurp-file :added "4.1"}
+(fact "slurp file"
+  (l/emit-as :js [(js-tf-x-slurp-file '[_ filename opts cb])])
+  => #"readFileSync")
 
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-spit :added "4.0"}
-(fact "spit"
-  (comment
-    (l/emit-as :js [(js-tf-x-spit '[_ filename s])])
-    => nil?))
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-spit-file :added "4.1"}
+(fact "spit file"
+  (l/emit-as :js [(js-tf-x-spit-file '[_ filename s opts cb])])
+  => #"writeFileSync")
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-thread-spawn :added "4.0"}
 (fact "thread spawn"

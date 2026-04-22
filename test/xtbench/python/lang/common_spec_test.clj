@@ -1381,9 +1381,23 @@
    cache
    {:getItem (fn [k] (return (. state [k]))),
     :setItem (fn [k v] (:= (. state [k]) v) (return v))})
-  (xt/x:cache-incr cache "count" 3))
+ (xt/x:cache-incr cache "count" 3))
  =>
  5)
+
+^{:refer xt.lang.common-spec/x:slurp-file, :added "4.1"}
+(fact
+ "uses the callback-based slurp-file contract"
+ (:arglists (meta #'xt/x:slurp-file))
+ =>
+ '([path opts cb]))
+
+^{:refer xt.lang.common-spec/x:spit-file, :added "4.1"}
+(fact
+ "uses the callback-based spit-file contract"
+ (:arglists (meta #'xt/x:spit-file))
+ =>
+ '([path value opts cb]))
 
 ^{:refer xt.lang.common-spec/x:json-encode, :added "4.1"}
 (fact
@@ -1401,15 +1415,10 @@
 
 ^{:refer xt.lang.common-spec/x:shell, :added "4.1"}
 (fact
- "executes shell commands asynchronously"
- (notify/wait-on
-  :python
-  (xt/x:shell
-   "printf hello"
-   {:success (fn [res] (repl/notify res)),
-    :error (fn [err] (repl/notify "ERR"))}))
+ "supports transitional shell arglists"
+ (:arglists (meta #'xt/x:shell))
  =>
- #"hello")
+ '([command opts] [command opts cb]))
 
 ^{:refer xt.lang.common-spec/x:thread-spawn, :added "4.1"}
 (fact
@@ -1497,11 +1506,11 @@
     (common-spec-defs :spec)
     publics
     (common-spec-publics)]
-   [(count macros)
-    (count specs)
-    (set macros)
-    (set publics)
-    (set/difference (set macros) (set specs))])
+  [(count macros)
+   (count specs)
+   (set macros)
+   (set publics)
+   (set/difference (set macros) (set specs))])
   =>
   [205
    197

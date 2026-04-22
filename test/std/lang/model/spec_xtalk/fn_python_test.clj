@@ -453,15 +453,15 @@
   (l/emit-as :python [(python-tf-x-with-delay '[_ thunk ms])])
   => #"sleep")
 
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-slurp :added "4.0"}
-(fact "slurp"
-  (comment (l/emit-as :python [(python-tf-x-slurp '[_ filename])])
-           => nil?))
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-slurp-file :added "4.1"}
+(fact "slurp file"
+  (comment (l/emit-as :python [(python-tf-x-slurp-file '[_ filename opts cb])])
+            => nil?))
 
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-spit :added "4.0"}
-(fact "spit"
-  (comment (l/emit-as :python [(python-tf-x-spit '[_ filename s])])
-           => nil?))
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-spit-file :added "4.1"}
+(fact "spit file"
+  (comment (l/emit-as :python [(python-tf-x-spit-file '[_ filename s opts cb])])
+            => nil?))
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-b64-encode :added "4.0"}
 (fact "b64 encode"

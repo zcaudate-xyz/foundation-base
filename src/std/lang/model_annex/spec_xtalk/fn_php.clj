@@ -450,9 +450,19 @@
 ;; FILE
 ;;
 
+(defn php-tf-x-slurp-file
+  [[_ path opts cb]]
+  (list 'call_user_func_array cb [nil (list 'file_get_contents path)]))
+
+(defn php-tf-x-spit-file
+  [[_ path content opts cb]]
+  (list 'do
+        (list 'file_put_contents path content)
+        (list 'call_user_func_array cb [nil path])))
+
 (def +php-file+
-  {:x-slurp          {:emit :alias :raw 'file_get_contents}
-   :x-spit           {:emit :alias :raw 'file_put_contents}})
+  {:x-slurp-file     {:macro #'php-tf-x-slurp-file       :emit :macro}
+   :x-spit-file      {:macro #'php-tf-x-spit-file        :emit :macro}})
 
 ;;
 ;; BASE 64

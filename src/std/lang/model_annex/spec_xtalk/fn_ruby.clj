@@ -356,17 +356,19 @@
 ;; FILE
 ;;
 
-(defn ruby-tf-x-slurp
-  [[_ path]]
-  (list '. 'File (list 'read path)))
+(defn ruby-tf-x-slurp-file
+  [[_ path opts cb]]
+  (list '. cb (list 'call nil (list '. 'File (list 'read path)))))
 
-(defn ruby-tf-x-spit
-  [[_ path content]]
-  (list '. 'File (list 'write path content)))
+(defn ruby-tf-x-spit-file
+  [[_ path content opts cb]]
+  (list 'do
+        (list '. 'File (list 'write path content))
+        (list '. cb (list 'call nil path))))
 
 (def +ruby-file+
-  {:x-slurp           {:macro #'ruby-tf-x-slurp          :emit :macro}
-   :x-spit            {:macro #'ruby-tf-x-spit           :emit :macro}})
+  {:x-slurp-file      {:macro #'ruby-tf-x-slurp-file     :emit :macro}
+   :x-spit-file       {:macro #'ruby-tf-x-spit-file      :emit :macro}})
 
 ;;
 ;; URI

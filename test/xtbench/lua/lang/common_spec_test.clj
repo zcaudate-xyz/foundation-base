@@ -635,12 +635,12 @@
    (set macros)
    (set publics)
    (set/difference (set macros) (set specs))])
- =>
- [205
-  197
-  (set (common-spec-publics))
-  (set (common-spec-publics))
-  +common-spec-control-forms+])
+  =>
+  [205
+   197
+   (set (common-spec-publics))
+   (set (common-spec-publics))
+   +common-spec-control-forms+])
 
 (fact
  "all public wrappers expose arglists metadata"
@@ -1375,19 +1375,19 @@
  =>
  true)
 
-^{:refer xt.lang.common-spec/x:slurp, :added "4.1"}
+^{:refer xt.lang.common-spec/x:slurp-file, :added "4.1"}
 (fact
- "keeps the slurp wrapper intact"
- (:arglists (meta #'xt/x:slurp))
+ "uses the callback-based slurp-file contract"
+ (:arglists (meta #'xt/x:slurp-file))
  =>
- '([path]))
+ '([path opts cb]))
 
-^{:refer xt.lang.common-spec/x:spit, :added "4.1"}
+^{:refer xt.lang.common-spec/x:spit-file, :added "4.1"}
 (fact
- "keeps the spit wrapper intact"
- (:arglists (meta #'xt/x:spit))
+ "uses the callback-based spit-file contract"
+ (:arglists (meta #'xt/x:spit-file))
  =>
- '([path value]))
+ '([path value opts cb]))
 
 ^{:refer xt.lang.common-spec/x:json-encode, :added "4.1"}
 (fact
@@ -1405,10 +1405,10 @@
 
 ^{:refer xt.lang.common-spec/x:shell, :added "4.1"}
 (fact
- "expands and emits the lua shell helper"
- (emits-lua? '(x:shell "ls" opts) #"io\.popen")
+ "supports transitional shell arglists"
+ (:arglists (meta #'xt/x:shell))
  =>
- true)
+ '([command opts] [command opts cb]))
 
 ^{:refer xt.lang.common-spec/x:thread-spawn, :added "4.1"}
 (fact

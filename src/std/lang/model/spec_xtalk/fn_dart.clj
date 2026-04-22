@@ -564,17 +564,17 @@
 (def +dart-special+
   {:x-notify-http {:macro #'dart-tf-x-notify-http :emit :macro :type :template}})
 
-(defn dart-tf-x-slurp
-  [[_ filename]]
-  (list 'throw '"slurp not implemented in Dart"))
+(defn dart-tf-x-slurp-file
+  [[_ filename opts cb]]
+  (list 'throw '"slurp-file not implemented in Dart"))
 
-(defn dart-tf-x-spit
-  [[_ filename s]]
-  (list 'throw '"spit not implemented in Dart"))
+(defn dart-tf-x-spit-file
+  [[_ filename s opts cb]]
+  (list 'throw '"spit-file not implemented in Dart"))
 
 (def +dart-file+
-  {:x-slurp          {:macro #'dart-tf-x-slurp           :emit :macro}
-   :x-spit           {:macro #'dart-tf-x-spit            :emit :macro}})
+  {:x-slurp-file     {:macro #'dart-tf-x-slurp-file      :emit :macro}
+   :x-spit-file      {:macro #'dart-tf-x-spit-file       :emit :macro}})
 
 (def +dart+
   (merge +dart-core+

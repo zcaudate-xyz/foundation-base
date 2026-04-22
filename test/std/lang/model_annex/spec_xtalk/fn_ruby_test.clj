@@ -355,15 +355,16 @@
   (ruby-tf-x-b64-decode '(_ s))
   => '(. Base64 (decode64 s)))
 
-^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-slurp :added "4.1"}
-(fact "reads file contents"
-  (ruby-tf-x-slurp '(:x-slurp path))
-  => '(. File (read path)))
+^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-slurp-file :added "4.1"}
+(fact "reads file contents through callback"
+  (ruby-tf-x-slurp-file '(:x-slurp-file path opts cb))
+  => '(. cb (call nil (. File (read path)))))
 
-^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-spit :added "4.1"}
-(fact "writes content to file"
-  (ruby-tf-x-spit '(:x-spit path content))
-  => '(. File (write path content)))
+^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-spit-file :added "4.1"}
+(fact "writes content to file through callback"
+  (ruby-tf-x-spit-file '(:x-spit-file path content opts cb))
+  => '(do (. File (write path content))
+          (. cb (call nil path))))
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-uri-encode :added "4.1"}
 (fact "URI‑encodes string"

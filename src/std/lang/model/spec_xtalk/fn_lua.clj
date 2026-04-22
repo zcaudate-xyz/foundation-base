@@ -634,15 +634,25 @@
 ;; FILE
 ;;
 
-(defn lua-tf-x-slurp
-  ([[_ filename]]))
+(defn lua-tf-x-slurp-file
+  ([[_ filename opts cb]]
+   (template/$
+    (do* (var handle (io.open ~filename "r"))
+         (var res (handle:read "*a"))
+         (handle:close)
+         (return (~cb nil res))))))
 
-(defn lua-tf-x-spit
-  ([[_ filename s]]))
+(defn lua-tf-x-spit-file
+  ([[_ filename s opts cb]]
+   (template/$
+    (do* (var handle (io.open ~filename "w"))
+         (handle:write ~s)
+         (handle:close)
+         (return (~cb nil ~filename))))))
 
 (def +lua-file+
-  {:x-slurp          {:macro #'lua-tf-x-slurp         :emit :macro}
-   :x-spit           {:macro #'lua-tf-x-spit          :emit :macro}})
+  {:x-slurp-file     {:macro #'lua-tf-x-slurp-file    :emit :macro}
+   :x-spit-file      {:macro #'lua-tf-x-spit-file     :emit :macro}})
 
 ;;
 ;; SPECIAL

@@ -732,15 +732,25 @@
 ;; FILE
 ;;
 
-(defn python-tf-x-slurp
-  ([[_ filename]]))
+(defn python-tf-x-slurp-file
+  ([[_ filename opts cb]]
+   (template/$
+    (do (var f (open ~filename "r"))
+        (var res (. f (read)))
+        (. f (close))
+        (return (~cb nil res))))))
 
-(defn python-tf-x-spit
-  ([[_ filename s]]))
+(defn python-tf-x-spit-file
+  ([[_ filename s opts cb]]
+   (template/$
+    (do (var f (open ~filename "w"))
+        (. f (write ~s))
+        (. f (close))
+        (return (~cb nil ~filename))))))
 
 (def +python-file+
-  {:x-slurp          {:macro #'python-tf-x-slurp         :emit :macro}
-   :x-spit           {:macro #'python-tf-x-spit          :emit :macro}})
+  {:x-slurp-file     {:macro #'python-tf-x-slurp-file    :emit :macro}
+   :x-spit-file      {:macro #'python-tf-x-spit-file     :emit :macro}})
 
 ;;
 ;; BASE 64

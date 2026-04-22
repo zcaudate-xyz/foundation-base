@@ -145,15 +145,15 @@
   (l/emit-as :dart [(dart-tf-x-uri-decode '[_ s])])
   => #"Uri\.decodeComponent")
 
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-slurp :added "4.1"}
-(fact "slurp not implemented"
-  (l/emit-as :dart [(dart-tf-x-slurp '[_ filename])])
-  => #"slurp not implemented")
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-slurp-file :added "4.1"}
+(fact "slurp-file not implemented"
+  (l/emit-as :dart [(dart-tf-x-slurp-file '[_ filename opts cb])])
+  => #"slurp-file not implemented")
 
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-spit :added "4.1"}
-(fact "spit not implemented"
-  (l/emit-as :dart [(dart-tf-x-spit '[_ filename s])])
-  => #"spit not implemented")
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-spit-file :added "4.1"}
+(fact "spit-file not implemented"
+  (l/emit-as :dart [(dart-tf-x-spit-file '[_ filename s opts cb])])
+  => #"spit-file not implemented")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-debug-client-basic :added "4.1"}
 (fact "client basic not implemented"

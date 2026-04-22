@@ -840,14 +840,14 @@
 
 (def +xt-lang-proto+
   [{:op :x-proto-get       :symbol #{'x:proto-get}       :emit :abstract
-    :op-spec {:arglists '([obj key])}}
+    :op-spec {:arglists '([obj])}}
    {:op :x-proto-set       :symbol #{'x:proto-set}       :emit :abstract
-    :op-spec {:arglists '([obj key value])}}
+    :op-spec {:arglists '([obj proto])}}
    {:op :x-proto-create    :symbol #{'x:proto-create}    :macro #'tf-proto-create   :emit :macro
     :op-spec {:template-only true
-              :arglists '([value])}}
+              :arglists '([m])}}
    {:op :x-proto-tostring  :symbol #{'x:proto-tostring}  :emit :abstract
-    :op-spec {:arglists '([value])}}])
+    :op-spec {:arglists '([])}}])
 
 (def +xt-lang-bit+
   [{:op :x-bit-and         :symbol #{'x:bit-and}          :macro #'tf-bit-and  :emit :macro
@@ -964,16 +964,19 @@
 (def +xt-runtime-shell+
   [{:op :x-shell          :symbol #{'x:shell}           :emit :abstract
     :op-spec {:template-only true
-              :type [:fn [:xt/str :xt/any] :xt/any]
-              :arglists '([command opts])}}])
+              :type [:fn [:xt/str :xt/any :xt/any] :xt/any]
+              :arglists '([command opts]
+                          [command opts cb])}}])
 
 (def +xt-runtime-file+
-  [{:op :x-slurp          :symbol #{'x:slurp}         :emit :abstract
-    :op-spec {:arglists '([path])
-              :type [:fn [:xt/str] :xt/str]}}
-   {:op :x-spit           :symbol #{'x:spit}          :emit :abstract
-    :op-spec {:arglists '([path value])
-              :type [:fn [:xt/str :xt/str] :xt/any]}}])
+  [{:op :x-slurp-file     :symbol #{'x:slurp-file}    :emit :abstract
+    :op-spec {:template-only true
+              :arglists '([path opts cb])
+              :type [:fn [:xt/str :xt/any :xt/any] :xt/any]}}
+   {:op :x-spit-file      :symbol #{'x:spit-file}     :emit :abstract
+    :op-spec {:template-only true
+              :arglists '([path value opts cb])
+              :type [:fn [:xt/str :xt/any :xt/any :xt/any] :xt/any]}}])
 
 (def +xt-runtime-b64+
   [{:op :x-b64-encode      :symbol #{'x:b64-encode}     :emit :abstract

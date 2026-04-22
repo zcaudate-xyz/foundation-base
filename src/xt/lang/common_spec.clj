@@ -1245,7 +1245,7 @@
   x:proto-get
   "retrieves object prototypes"
   {:added "4.1"}
-  ([obj key] (list (quote x:proto-get) obj key)))
+  ([obj] (list (quote x:proto-get) obj)))
 
 (defspec.xt x:proto-set nil)
 
@@ -1253,7 +1253,7 @@
   x:proto-set
   "assigns object prototypes"
   {:added "4.1"}
-  ([obj key value] (list (quote x:proto-set) obj key value)))
+  ([obj proto] (list (quote x:proto-set) obj proto)))
 
 (defspec.xt x:proto-create nil)
 
@@ -1261,7 +1261,7 @@
   x:proto-create
   "creates prototypes with this-bound methods"
   {:added "4.1"}
-  ([value] (list (quote x:proto-create) value)))
+  ([m] (list (quote x:proto-create) m)))
 
 (defspec.xt x:proto-tostring nil)
 
@@ -1269,7 +1269,7 @@
   x:proto-tostring
   "expands and emits the lua tostring metamethod key"
   {:added "4.1"}
-  ([value] (list (quote x:proto-tostring) value)))
+  ([] (list (quote x:proto-tostring))))
 
 (defspec.xt x:random [:fn [] :xt/num])
 
@@ -1404,21 +1404,21 @@
   {:added "4.1"}
   ([cache key val] (list (quote x:cache-incr) cache key val)))
 
-(defspec.xt x:slurp [:fn [:xt/str] :xt/str])
+(defspec.xt x:slurp-file [:fn [:xt/str :xt/any :xt/any] :xt/any])
 
-(defmacro.xt ^{:standalone true :is-template false} 
-  x:slurp
-  "keeps the slurp wrapper intact"
+(defmacro.xt ^{:standalone true :is-template true}
+  x:slurp-file
+  "reads file content through a callback-based runtime contract"
   {:added "4.1"}
-  ([path] (list (quote x:slurp) path)))
+  ([path opts cb] (list (quote x:slurp-file) path opts cb)))
 
-(defspec.xt x:spit [:fn [:xt/str :xt/str] :xt/any])
+(defspec.xt x:spit-file [:fn [:xt/str :xt/any :xt/any :xt/any] :xt/any])
 
-(defmacro.xt ^{:standalone true :is-template false} 
-  x:spit
-  "keeps the spit wrapper intact"
+(defmacro.xt ^{:standalone true :is-template true}
+  x:spit-file
+  "writes file content through a callback-based runtime contract"
   {:added "4.1"}
-  ([path value] (list (quote x:spit) path value)))
+  ([path value opts cb] (list (quote x:spit-file) path value opts cb)))
 
 (defspec.xt x:json-encode [:fn [:xt/any] :xt/str])
 
@@ -1436,13 +1436,13 @@
   {:added "4.1"}
   ([expr] (list (quote x:json-decode) expr)))
 
-(defspec.xt x:shell [:fn [:xt/str :xt/any] :xt/any])
+(defspec.xt x:shell [:fn [:xt/str :xt/any :xt/any] :xt/any])
 
 (defmacro.xt ^{:standalone true :is-template true} 
   x:shell
   "executes shell commands asynchronously"
   {:added "4.1"}
-  ([command opts] (list (quote x:shell) command opts)))
+  ([command opts cb] (list (quote x:shell) command opts cb)))
 
 (defspec.xt x:thread-spawn [:fn [:xt/fn] :xt/any])
 
