@@ -96,9 +96,10 @@
   [expr-str lang]
   (let [root     (nav/parse-root expr-str)
         expr-nav (nav/down root)
-        head-nav (some-> expr-nav nav/down)
+        form-nav (some-> expr-nav form-common/nav-body)
+        head-nav (some-> form-nav nav/down)
         arg-nav   (some-> head-nav nav/right)
-        expr-form (some-> expr-nav nav/value)
+        expr-form (some-> form-nav nav/value)
         arg-form  (some-> arg-nav nav/value)
         tag       (common/seedgen-dispatch-tag lang)]
     (cond

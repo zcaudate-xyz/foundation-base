@@ -156,7 +156,30 @@
       (finally
         (.delete tmp))))
   => (contains {:status :error
-                :data :no-seedgen-root}))
+                :data :no-seedgen-root})
+
+  (let [tmp (java.io.File/createTempFile "seedgen-langadd-meta" ".clj")
+        path (.getAbsolutePath tmp)
+        root (.getParent tmp)
+        lookup {'sample.add-test path}
+        project {:root root}]
+    (try
+      (spit path (str "(ns sample.add-test\n"
+                      "  (:use code.test)\n"
+                      "  (:require [std.lang :as l]))\n\n"
+                      "^{:seedgen/root {:all true, :langs [:lua :python]}}\n"
+                      "(l/script- :js {:runtime :basic})\n\n"
+                      "^{:refer xt.lang.common-spec/example.A :added \"4.1\"}\n"
+                      "(fact \"metadata branches\"\n\n"
+                      "  ^{:seedgen/check {:lua {:expect 6}}}\n"
+                      "  (!.js\n"
+                      "    (+ 1 2 3))\n"
+                      "  => 6)\n"))
+      (form-infile/seedgen-langadd 'sample.add-test {:write true} lookup project)
+      (slurp path)
+      (finally
+        (.delete tmp))))
+  => "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]))\n\n^{:seedgen/root {:all true, :langs [:lua :python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :lua {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example.A :added \"4.1\"}\n(fact \"metadata branches\"\n\n  ^{:seedgen/check {:lua {:expect 6}}}\n  (!.js\n    (+ 1 2 3))\n  => 6\n\n  ^{:seedgen/check {:lua {:expect 6}}}\n  (!.lua\n    (+ 1 2 3))\n  => 6\n\n  ^{:seedgen/check {:lua {:expect 6}}}\n  (!.py\n    (+ 1 2 3))\n  => 6)\n")
 
 ^{:refer std.lang.seedgen.form-infile/seedgen-langremove :added "4.1"}
 (fact "purges targeted seedgen runtimes while preserving the seedgen root"
@@ -284,4 +307,37 @@
         (.delete tmp))))
   => (contains {:status :error
                 :data :cannot-purge-root
-                :lang :js}))
+                :lang :js})
+
+  (let [tmp (java.io.File/createTempFile "seedgen-langremove-meta" ".clj")
+        path (.getAbsolutePath tmp)
+        root (.getParent tmp)
+        lookup {'sample.purge-test path}
+        project {:root root}]
+    (try
+      (spit path (str "(ns sample.purge-test\n"
+                      "  (:use code.test)\n"
+                      "  (:require [std.lang :as l]))\n\n"
+                      "^{:seedgen/root {:all true}}\n"
+                      "(l/script- :js {:runtime :basic})\n\n"
+                      "(l/script- :lua {:runtime :basic})\n\n"
+                      "(l/script- :python {:runtime :basic})\n\n"
+                      "^{:refer xt.lang.common-spec/example.A :added \"4.1\"}\n"
+                      "(fact \"metadata branches\"\n\n"
+                      "  ^{:seedgen/check {:lua {:expect 6}}}\n"
+                      "  (!.js\n"
+                      "    (+ 1 2 3))\n"
+                      "  => 6\n\n"
+                      "  ^{:seedgen/check {:lua {:expect 6}}}\n"
+                      "  (!.lua\n"
+                      "    (+ 1 2 3))\n"
+                      "  => 6\n\n"
+                      "  ^{:seedgen/check {:lua {:expect 6}}}\n"
+                      "  (!.python\n"
+                      "    (+ 1 2 3))\n"
+                      "  => 6)\n"))
+      (form-infile/seedgen-langremove 'sample.purge-test {:lang :lua :write true} lookup project)
+      (slurp path)
+      (finally
+        (.delete tmp))))
+  => "(ns sample.purge-test\n  (:use code.test)\n  (:require [std.lang :as l]))\n\n^{:seedgen/root {:all true, :langs [:lua :python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example.A :added \"4.1\"}\n(fact \"metadata branches\"\n\n  ^{:seedgen/check {:lua {:expect 6}}}\n  (!.js\n    (+ 1 2 3))\n  => 6\n\n  ^{:seedgen/check {:lua {:expect 6}}}\n  (!.python\n    (+ 1 2 3))\n  => 6)\n")
