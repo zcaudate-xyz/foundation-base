@@ -889,16 +889,11 @@
               :type [:fn [] :xt/int]}}])
 
 
-
 ;;
 ;; XTALK NOTIFY/LINK SPECIFICATION
 ;;
 
-(def +xt-notify-socket+
-  [{:op :x-notify-socket   :symbol #{'x:notify-socket}   :emit :abstract
-    :op-spec {:template-only true
-              :type  [:fn [:xt/str :xt/num :xt/any :xt/str :xt/str :xt/fn :xt/fn] :xt/any]
-              :arglists '([host port value id key connect-fn encode-fn])}}])
+
 
 (def +xt-notify-http+
   [{:op :x-notify-http     :symbol #{'x:notify-http}     :emit :hard-link
@@ -907,41 +902,6 @@
               :type  [:fn [:xt/str :xt/num :xt/any :xt/str :xt/str :xt/fn] :xt/any]
               :arglists '([host port value id key encode-fn])}}])
 
-(def +xt-network-socket+
-  [{:op :x-socket-connect  :symbol #{'x:socket-connect}   :emit :abstract
-    :op-spec {:template-only true
-              :arglists '([host port opts cb])
-              :type [:fn [:xt/str :xt/int :xt/any :xt/any] :xt/any]}}
-   {:op :x-socket-send     :symbol #{'x:socket-send}      :emit :abstract
-    :op-spec {:arglists '([conn message])
-              :type [:fn [:xt/any :xt/str] :xt/any]}}
-   {:op :x-socket-close    :symbol #{'x:socket-close}     :emit :abstract
-    :op-spec {:arglists '([conn])
-              :type [:fn [:xt/any] :xt/any]}}])
-
-(def +xt-network-ws+
-  [{:op :x-ws-connect      :symbol #{'x:ws-connect}       :emit :abstract
-    :op-spec {:template-only true
-              :arglists '([ host port opts])
-              :type [:fn [:xt/str :xt/int :xt/any] :xt/any]}}
-   {:op :x-ws-send         :symbol #{'x:ws-send}          :emit :abstract
-    :op-spec {:arglists '([conn value])
-              :type [:fn [:xt/any :xt/str] :xt/any]}}
-   {:op :x-ws-close        :symbol #{'x:ws-close}         :emit :abstract
-    :op-spec {:arglists '([conn])
-              :type [:fn [:xt/any] :xt/any]}}])
-
-(def +xt-network-client-basic+
-  [{:op :x-client-basic    :symbol #{'x:client-basic}    :emit :abstract
-    :op-spec {:template-only true
-              :arglists '([host port connect-fn eval-fn])
-              :type [:fn [:xt/str :xt/int :xt/fn :xt/fn] :xt/any]}}])
-
-(def +xt-network-client-ws+
-  [{:op :x-client-ws       :symbol #{'x:client-ws}       :emit :abstract
-    :op-spec {:template-only true
-              :arglists '([host port opts connect-fn eval-fn])
-              :type [:fn [:xt/str :xt/int :xt/any :xt/fn :xt/fn] :xt/any]}}])
 
 ;;
 ;; XTALK RUNTIME SPECIFIC INTERFACES

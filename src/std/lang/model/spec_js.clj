@@ -62,6 +62,8 @@
            (data/emit-coll :vector arr grammar mopts)))))
 
 (defn js-map
+  "emits a js map"
+  {:added "4.0"}
   [m grammar mopts]
   (let [rest (get m ':..)
         syms (get m ':#)
@@ -150,11 +152,7 @@
   (list 'var* :const decl := (last args)))
 
 (defn tf-for-object
-  "custom for:object code
- 
-   (tf-for-object '(for:object [[k v] {:a 1}]
-                               [k v]))
-   => '(for [(var* :let [k v]) :of (Object.entries {:a 1})] [k v])"
+  "custom for:object code"
   {:added "4.0"}
   [[_ [[k v] m] & body]]
   (let [[binding method] (cond (= k '_) [v  'Object.values]
@@ -164,16 +162,7 @@
            body)))
 
 (defn tf-for-array
-  "custom for:array code
- 
-   (tf-for-array '(for:array [e [1 2 3 4 5]]
-                              [k v]))
-   => '(for [(var* :let e) :of (% [1 2 3 4 5])] [k v])
- 
-   (tf-for-array '(for:array [[i e] arr]
-                             [k v]))
-   => '(for [(var* :let i := 0) (< i (. arr length))
-             (:++ i)] (var* :let e (. arr [i])) [k v])"
+  "custom for:array code"
   {:added "4.0"}
   [[_ [e arr] & body]]
   (if (vector? e)
@@ -185,11 +174,7 @@
            ~@body))))
 
 (defn tf-for-iter
-  "custom for:iter code
-   
-   (tf-for-iter '(for:iter [e iter]
-                           e))
-   => '(for [(var* :let e) :of (% iter)] e)"
+  "custom for:iter code"
   {:added "4.0"}
   [[_ [e it] & body]]
   (apply list 'for [(list 'var* :let e) :of (list '% it)]

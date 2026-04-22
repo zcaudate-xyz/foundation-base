@@ -587,8 +587,8 @@
    :x-ws-connect      {:macro #'php-tf-x-ws-connect    :emit :macro}
    :x-ws-send         {:macro #'php-tf-x-ws-send       :emit :macro}
    :x-ws-close        {:macro #'php-tf-x-ws-close      :emit :macro}
-   :x-client-basic    {:emit :alias :raw 'client_basic}
-   :x-client-ws       {:emit :alias :raw 'client_ws}
+   :x-debug-client-basic    {:emit :alias :raw 'debug_client_basic}
+   :x-debug-client-ws       {:emit :alias :raw 'debug_client_ws}
    :x-server-basic    {:emit :alias :raw 'server_basic}
    :x-server-ws       {:emit :alias :raw 'server_ws}})
 

@@ -48,14 +48,14 @@
   (l/emit-as :python [(python-tf-x-ws-close '[_ wb])])
   => #"close")
 
-^{:refer std.lang.model.spec-xtalk.com-python/python-tf-x-client-basic :added "4.0"}
+^{:refer std.lang.model.spec-xtalk.com-python/python-tf-x-debug-client-basic :added "4.0"}
 (fact "basic client"
-  (l/emit-as :python [(python-tf-x-client-basic '[_ "localhost" 8080 connect-fn eval-fn])])
+  (l/emit-as :python [(python-tf-x-debug-client-basic '[_ "localhost" 8080 connect-fn eval-fn])])
   => #"recv")
 
-^{:refer std.lang.model.spec-xtalk.com-python/python-tf-x-client-ws :added "4.0"}
+^{:refer std.lang.model.spec-xtalk.com-python/python-tf-x-debug-client-ws :added "4.0"}
 (fact "ws client"
-  (l/emit-as :python [(python-tf-x-client-ws '[_ "localhost" 8080 {} connect-fn eval-fn])])
+  (l/emit-as :python [(python-tf-x-debug-client-ws '[_ "localhost" 8080 {} connect-fn eval-fn])])
   => #"threading")
 
 ^{:refer std.lang.model.spec-xtalk.com-python/python-tf-x-print :added "4.0"}

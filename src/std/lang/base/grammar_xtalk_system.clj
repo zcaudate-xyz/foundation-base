@@ -35,12 +35,7 @@
                    xtalk/+xt-lang-unpack+
                    xtalk/+xt-lang-random+
                    xtalk/+xt-lang-time+]
-   :xtalk-link    [xtalk/+xt-notify-socket+
-                   xtalk/+xt-notify-http+
-                   xtalk/+xt-network-socket+
-                   xtalk/+xt-network-ws+
-                   xtalk/+xt-network-client-basic+
-                   xtalk/+xt-network-client-ws+]
+   :xtalk-link    [xtalk/+xt-notify-http+]
    :xtalk-runtime [xtalk/+xt-runtime-cache+
                    xtalk/+xt-runtime-thread+
                    xtalk/+xt-runtime-shell+

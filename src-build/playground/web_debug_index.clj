@@ -17,7 +17,7 @@
              [js.react.helper-data :as helper]
              [js.lib.rn-expo :as x :include [:lib]]
              [xt.lang.common-lib :as k]
-             [xt.lang.common-client :as client]
+             [xt.lang.debug-client :as client]
              [xt.lang.event-box :as base-box]]
    :static {:export MODULE}})
 
@@ -89,7 +89,7 @@
 (defrun.js ^{:rt/init true}
   __main__
   (base-box/set-data -/Global ["Main"] -/AppMain)
-  (client/client-ws "localhost"
+  (client/debug-client-ws "localhost"
                     29001
                     {}))
 

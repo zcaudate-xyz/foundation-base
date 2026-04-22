@@ -1148,7 +1148,7 @@
  =>
  6)
 
-^{:refer xt.lang.common-spec/x:client-basic, :added "4.1"}
+^{:refer xt.lang.common-spec/x:debug-client-basic, :added "4.1"}
 (fact
  "streams newline-delimited socket input through eval handlers"
  (notify/wait-on
@@ -1163,7 +1163,7 @@
      (createServer
       (fn [conn] (. conn (write "PING\n")) (. conn (end)))))
     (. server (listen port "127.0.0.1"))
-    (xt/x:client-basic
+    (xt/x:debug-client-basic
      "127.0.0.1"
      port
      (fn
@@ -1173,14 +1173,14 @@
  =>
  "PING")
 
-^{:refer xt.lang.common-spec/x:client-ws, :added "4.1"}
+^{:refer xt.lang.common-spec/x:debug-client-ws, :added "4.1"}
 (fact
  "routes websocket messages through eval handlers"
  (notify/wait-on
   :python
   (do
    (var conn {})
-   (xt/x:client-ws
+   (xt/x:debug-client-ws
     "localhost"
     8080
     {}

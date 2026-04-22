@@ -708,17 +708,17 @@
   :cases [],
   :symbols [x:return-wrap]}
  {:category :xtalk-service,
-  :canonical-symbol x:client-basic,
-  :op :x-client-basic,
+  :canonical-symbol x:debug-client-basic,
+  :op :x-debug-client-basic,
   :emit :abstract,
   :cases [],
-  :symbols [x:client-basic]}
+  :symbols [x:debug-client-basic]}
  {:category :xtalk-service,
-  :canonical-symbol x:client-ws,
-  :op :x-client-ws,
+  :canonical-symbol x:debug-client-ws,
+  :op :x-debug-client-ws,
   :emit :abstract,
   :cases [],
-  :symbols [x:client-ws]}
+  :symbols [x:debug-client-ws]}
  {:category :xtalk-service,
   :canonical-symbol x:server-basic,
   :op :x-server-basic,

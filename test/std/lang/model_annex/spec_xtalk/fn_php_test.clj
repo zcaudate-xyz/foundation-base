@@ -419,8 +419,8 @@
              :x-cache-incr
              :x-cache-list
              :x-cache-set
-             :x-client-basic
-             :x-client-ws
+             :x-debug-client-basic
+             :x-debug-client-ws
              :x-has-key?
              :x-iter-eq
              :x-iter-from

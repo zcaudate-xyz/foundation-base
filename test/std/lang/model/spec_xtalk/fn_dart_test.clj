@@ -160,9 +160,9 @@
   (l/emit-as :dart [(dart-tf-x-str-format '[_ template values])])
   => #"str-format not implemented")
 
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-client-basic :added "4.1"}
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-debug-client-basic :added "4.1"}
 (fact "client basic not implemented"
-  (l/emit-as :dart [(dart-tf-x-client-basic '[_ host port opts cb])])
+  (l/emit-as :dart [(dart-tf-x-debug-client-basic '[_ host port opts cb])])
   => #"Client not implemented")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-socket-connect :added "4.1"}
@@ -542,9 +542,9 @@
   (emit-dart (dart-tf-x-socket-close '[_ conn]))
   => #"flush")
 
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-client-ws :added "4.1"}
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-debug-client-ws :added "4.1"}
 (fact "websocket clients are not implemented"
-  (emit-dart (dart-tf-x-client-ws '[_ host port opts cb]))
+  (emit-dart (dart-tf-x-debug-client-ws '[_ host port opts cb]))
   => #"WebSocket client not implemented")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-server-basic :added "4.1"}

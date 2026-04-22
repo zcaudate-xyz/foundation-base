@@ -59,7 +59,7 @@
    :x-shell          {:macro #'ruby-tf-x-shell :emit :macro}
    :x-type-native    {:macro #'ruby-tf-x-type-native :emit :macro}
    :x-unpack         {:macro #'ruby-tf-x-unpack :emit :macro}
-   :x-client-basic   {:emit :alias :raw 'client-basic}})
+   :x-debug-client-basic   {:emit :alias :raw 'debug-client-basic}})
 
 ;;
 ;; MATH
@@ -539,7 +539,7 @@
    :x-ws-connect       {:macro #'ruby-tf-x-ws-connect       :emit :macro}
    :x-ws-send          {:macro #'ruby-tf-x-ws-send          :emit :macro}
    :x-ws-close         {:macro #'ruby-tf-x-ws-close         :emit :macro}
-   :x-client-ws        {:emit :alias :raw 'client-ws}
+   :x-debug-client-ws        {:emit :alias :raw 'debug-client-ws}
    :x-server-basic     {:emit :alias :raw 'server-basic}
    :x-server-ws        {:emit :alias :raw 'server-ws}})
 

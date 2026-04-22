@@ -1182,20 +1182,20 @@
  =>
  true)
 
-^{:refer xt.lang.common-spec/x:client-basic, :added "4.1"}
+^{:refer xt.lang.common-spec/x:debug-client-basic, :added "4.1"}
 (fact
  "expands and emits the lua basic client loop"
  (emits-lua?
-  '(x:client-basic "localhost" 8080 connect-fn eval-fn)
+  '(x:debug-client-basic "localhost" 8080 connect-fn eval-fn)
   #"receive")
  =>
  true)
 
-^{:refer xt.lang.common-spec/x:client-ws, :added "4.1"}
+^{:refer xt.lang.common-spec/x:debug-client-ws, :added "4.1"}
 (fact
  "expands and emits the lua websocket client loop"
  (emits-lua?
-  '(x:client-ws "localhost" 8080 {} connect-fn eval-fn)
+  '(x:debug-client-ws "localhost" 8080 {} connect-fn eval-fn)
   #"recv")
  =>
  true)

@@ -58,14 +58,14 @@
   (l/emit-as :js [(js-tf-x-notify-http '[_ "localhost" 8080 "val" "id" "key" encode-fn])])
   => #"fetch")
 
-^{:refer std.lang.model.spec-xtalk.com-js/js-tf-x-client-basic :added "4.0"}
+^{:refer std.lang.model.spec-xtalk.com-js/js-tf-x-debug-client-basic :added "4.0"}
 (fact "basic client"
-  (l/emit-as :js [(js-tf-x-client-basic '[_ "localhost" 8080 connect-fn eval-fn])])
+  (l/emit-as :js [(js-tf-x-debug-client-basic '[_ "localhost" 8080 connect-fn eval-fn])])
   => #"createInterface")
 
-^{:refer std.lang.model.spec-xtalk.com-js/js-tf-x-client-ws :added "4.0"}
+^{:refer std.lang.model.spec-xtalk.com-js/js-tf-x-debug-client-ws :added "4.0"}
 (fact "ws client"
-  (l/emit-as :js [(js-tf-x-client-ws '[_ "localhost" 8080 {} connect-fn eval-fn])])
+  (l/emit-as :js [(js-tf-x-debug-client-ws '[_ "localhost" 8080 {} connect-fn eval-fn])])
   => #"onmessage")
 
 ^{:refer std.lang.model.spec-xtalk.com-js/js-tf-x-print :added "4.0"}
