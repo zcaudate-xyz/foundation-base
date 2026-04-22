@@ -839,9 +839,7 @@
               :type [:fn [:xt/any] :xt/bool]}}])
 
 (def +xt-lang-proto+
-  [{:op :x-this            :symbol #{'x:this}            :emit :abstract
-    :op-spec {:arglists '([])}}
-   {:op :x-proto-get       :symbol #{'x:proto-get}       :emit :abstract
+  [{:op :x-proto-get       :symbol #{'x:proto-get}       :emit :abstract
     :op-spec {:arglists '([obj key])}}
    {:op :x-proto-set       :symbol #{'x:proto-set}       :emit :abstract
     :op-spec {:arglists '([obj key value])}}
@@ -1024,7 +1022,7 @@
     :op-spec {:arglists '([value])
               :type [:fn [:xt/str] :xt/str]}}])
 
-(def +xt-runtime-js+
+(def +xt-runtime-json+
   [{:op :x-json-encode      :symbol #{'x:json-encode}       :emit :abstract
     :op-spec {:arglists '([value])
               :type [:fn [:xt/any] :xt/str]}}

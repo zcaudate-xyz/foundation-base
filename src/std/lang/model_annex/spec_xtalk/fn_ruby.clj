@@ -59,7 +59,6 @@
    :x-shell          {:macro #'ruby-tf-x-shell :emit :macro}
    :x-type-native    {:macro #'ruby-tf-x-type-native :emit :macro}
    :x-unpack         {:macro #'ruby-tf-x-unpack :emit :macro}
-   :x-this           {:emit :alias :raw 'self}
    :x-client-basic   {:emit :alias :raw 'client-basic}})
 
 ;;

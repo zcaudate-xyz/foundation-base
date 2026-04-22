@@ -119,8 +119,7 @@
   '"__str__")
 
 (def +python-proto+
-  {:x-this           {:emit :unit :default 'self}
-   :x-proto-create   {:macro #'python-tf-x-proto-create   :emit :macro}
+  {:x-proto-create   {:macro #'python-tf-x-proto-create   :emit :macro}
    :x-proto-get      {:macro #'python-tf-x-proto-get      :emit :macro}
    :x-proto-set      {:macro #'python-tf-x-proto-set      :emit :macro}
    :x-proto-tostring {:macro #'python-tf-x-proto-tostring :emit :macro}})

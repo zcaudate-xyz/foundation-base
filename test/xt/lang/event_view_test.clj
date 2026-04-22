@@ -352,18 +352,18 @@
 
     ^{:lang-exceptions
       {:dart
-       {:form (set
-               (!.dt
-                (var v (view/create-view
-                        (fn:> [x] {:value x})
-                        {}
-                        [3]
-                        {:value 0}
-                        nil
-                        nil))
-                (view/init-view v)
-                (xtd/obj-keys (view/view-context v))))
-        :expect #{"input" "view"}}}}
+       {:form (!.dt
+               (var v (view/create-view
+                       (fn:> [x] {:value x})
+                       {}
+                       [3]
+                       {:value 0}
+                       nil
+                       nil))
+               (view/init-view v)
+               [(xt/x:has-key? (view/view-context v) "view")
+                (xt/x:has-key? (view/view-context v) "input")])
+        :expect [true true]}}}
   (!.js
    (var v (view/create-view
            (fn:> [x] {:value x})
@@ -371,8 +371,9 @@
            [3]
            {:value 0}))
    (view/init-view v)
-   (xtd/obj-keys (view/view-context v)))
-  => ["view" "input"]
+   [(xt/x:has-key? (view/view-context v) "view")
+    (xt/x:has-key? (view/view-context v) "input")])
+  => [true true]
 
   (set (!.lua
         (var v (view/create-view

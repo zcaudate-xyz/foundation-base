@@ -27,20 +27,25 @@
 
 ^{:refer xt.lang.common-data/lu-del :added "4.1" :examples [0 2 3 :no-check 4]}
 (fact "deletes a lookup entry"
-  
+
+  ^{:hello 0}        ;; meta is preserved     
   (inc 1) => 2       ;; make sure comments are preserved  <- 0
 
   (inc 2) => 5
 
-  ^{:hello 1}        ;; meta is preserved     <- 2
-  (inc 5) => 5
 
-  (inc 2)           
-  => 5               
+  ^{:hello 2}
+  (single-form-example)    ;; this is something with that does to have a check 
+
+  ^{:hello 3}
+  (no-check-example)       ;; this form is included but does not include the '=> :no-result'
+  => :no-result               
 
   (inc 2)            ;; both comments should be preserved    <- 4
   => 5               ;; comments after should also be preserved
-  )
+
+
+  (more...))
 
 
 

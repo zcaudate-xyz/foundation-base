@@ -425,19 +425,17 @@
     :x-ws-close            {:macro #'dart-tf-x-ws-close            :emit :macro}})
 
 (defn dart-tf-x-proto-create [[_ m]] m)
-(defn dart-tf-x-proto-get [[_ obj _]] (list '. obj ["__proto__"]))
+(defn dart-tf-x-proto-get [[_ obj _]]
+  (list '. obj 'runtimeType))
 (defn dart-tf-x-proto-set [[_ obj prototype _]]
-  (template/$
-   (do (:= (. ~obj ["__proto__"]) ~prototype)
-       (return ~obj))))
+  (list 'throw '"Proto set not supported in Dart"))
 (defn dart-tf-x-proto-tostring [[_ obj]] '"toString")
 
 (def +dart-proto+
     {:x-proto-create       {:macro #'dart-tf-x-proto-create      :emit :macro}
      :x-proto-get          {:macro #'dart-tf-x-proto-get         :emit :macro}
      :x-proto-set          {:macro #'dart-tf-x-proto-set         :emit :macro}
-     :x-proto-tostring     {:macro #'dart-tf-x-proto-tostring    :emit :macro}
-     :x-this               {:emit :unit :default 'this}})
+     :x-proto-tostring     {:macro #'dart-tf-x-proto-tostring    :emit :macro}})
 
 (defn dart-tf-x-return-encode
   [[_ out id key]]

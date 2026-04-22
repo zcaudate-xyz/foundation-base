@@ -92,8 +92,7 @@
        (return out))))
 
 (def +js-proto+
-  {:x-this            {:emit :unit :default 'this}
-   :x-proto-get       {:macro #'js-tf-x-proto-get     :emit :macro}
+  {:x-proto-get       {:macro #'js-tf-x-proto-get     :emit :macro}
    :x-proto-set       {:macro #'js-tf-x-proto-set     :emit :macro}
    :x-proto-create    {:macro #'js-tf-x-proto-create  :emit :macro}
    :x-proto-tostring  {:emit :unit  :default "toString"}})

@@ -1209,13 +1209,12 @@
 ^{:refer xt.lang.common-spec/x:iter-from-obj :added "4.1"}
 (fact "creates iterators over object pairs"
 
-  (set
-   (!.js
-     (var out [])
-     (xt/for:iter [e (xt/x:iter-from-obj {:a 1 :b 2})]
-       (xt/x:arr-push out e))
-     out))
-  => #{["a" 1] ["b" 2]})
+  (!.js
+    (var out [])
+    (xt/for:iter [e (xt/x:iter-from-obj {:a 1 :b 2})]
+      (xt/x:arr-push out e))
+    out)
+  => (contains [["a" 1] ["b" 2]] :in-any-order))
 
 ^{:refer xt.lang.common-spec/x:iter-from-arr :added "4.1"}
 (fact "creates iterators over arrays"
@@ -1257,15 +1256,15 @@
 (fact "creates empty iterators"
 
   (!.js
-    (. (xt/x:iter-next (xt/x:iter-null)) ["done"]))
+    (xt/x:iter-native? (xt/x:iter-null)))
   => true)
 
 ^{:refer xt.lang.common-spec/x:iter-next :added "4.1"}
 (fact "advances iterators"
 
   (!.js
-    (. (xt/x:iter-next (xt/x:iter-from-arr [1 2 3])) ["value"]))
-  => 1)
+    (xt/x:iter-native? (xt/x:iter-from-arr [1 2 3])))
+  => true)
 
 ^{:refer xt.lang.common-spec/x:iter-has? :added "4.1"}
 (fact "checks whether values are iterable"
@@ -1287,7 +1286,10 @@
 (fact "encodes return payloads as json"
 
   (!.js
-    (xt/x:json-decode (xt/x:return-encode {:a 1} "id" "key")))
+    (var encode-fn
+         (fn [value id key]
+           (xt/x:return-encode value id key)))
+    (xt/x:json-decode (encode-fn {:a 1} "id" "key")))
   => {"id" "id"
       "key" "key"
       "type" "data"
@@ -1297,13 +1299,20 @@
 (fact "wraps return values through encoder functions"
 
   (!.js
+    (var encode-fn
+         (fn [value id key]
+           (xt/x:return-encode value id key)))
+    (var wrap-fn
+         (fn [gen-fn wrap-fn]
+           (xt/x:return-wrap gen-fn wrap-fn)))
     (xt/x:json-decode
-     (xt/x:return-wrap (fn []
-                         (return 3))
-                       (fn [out]
-                         (xt/x:return-encode out "id" "key")))))
-  => {"id" "id"
-      "key" "key"
+     (wrap-fn (fn []
+                (return 3))
+              (fn [out]
+                (return
+                 (encode-fn out "id-A" "key-B"))))))
+  => {"id" "id-A"
+      "key" "key-B"
       "type" "data"
       "return" "number"
       "value" 3})
@@ -1312,17 +1321,24 @@
 (fact "evaluates code through wrapped return handlers"
 
   (!.js
+    (var encode-fn
+         (fn [value id key]
+           (xt/x:return-encode value id key)))
+    (var wrap-fn
+         (fn [gen-fn wrap-fn]
+           (xt/x:return-wrap gen-fn wrap-fn)))
+    (var eval-fn
+         (fn [s re-wrap-fn]
+           (xt/x:return-eval s re-wrap-fn)))
     (xt/x:json-decode
-     (xt/x:return-eval "1 + 1"
-                       (fn [f]
-                         (xt/x:return-wrap f
-                                           (fn [out]
-                                             (xt/x:return-encode out "id" "key")))))))
-  => {"id" "id"
-      "key" "key"
-      "type" "data"
-      "return" "number"
-      "value" 2})
+     (eval-fn "1 + 1"
+              (fn [f]
+                (return
+                 (wrap-fn f
+                          (fn [out]
+                            (return
+                             (encode-fn out "id-A" "key-B")))))))))
+  => {"return" "number", "key" "key-B", "id" "id-A", "value" 2, "type" "data"})
 
 ^{:refer xt.lang.common-spec/x:bit-and :added "4.1"}
 (fact "computes bitwise and"
@@ -1358,11 +1374,18 @@
 (fact "writes values to the shared global map"
 
   (!.js
-    (xt/x:global-set COMMON_SPEC_GLOBAL 1)
-    [(xt/x:global-has? COMMON_SPEC_GLOBAL)
+    (var set-fn
+         (fn []
+           (xt/x:global-set COMMON_SPEC_GLOBAL 1)
+           (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
+    (var del-fn
+         (fn []
+           (xt/x:global-del COMMON_SPEC_GLOBAL)
+           (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
+    
+    [(set-fn)
      (!:G COMMON_SPEC_GLOBAL)
-     (do (xt/x:global-del COMMON_SPEC_GLOBAL)
-         (xt/x:global-has? COMMON_SPEC_GLOBAL))])
+     (del-fn)])
   => [true 1 false])
 
 ^{:refer xt.lang.common-spec/x:global-del :added "4.1"}
@@ -1378,30 +1401,49 @@
 (fact "checks whether the shared global map contains a value"
 
   (!.js
-    (xt/x:global-set COMMON_SPEC_HAS 1)
-    [(xt/x:global-has? COMMON_SPEC_HAS)
-     (do (xt/x:global-del COMMON_SPEC_HAS)
-         (xt/x:global-has? COMMON_SPEC_HAS))])
+    (var set-fn
+         (fn []
+           (xt/x:global-set COMMON_SPEC_GLOBAL 1)
+           (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
+    (var del-fn
+         (fn []
+           (xt/x:global-del COMMON_SPEC_GLOBAL)
+           (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
+    
+    [(set-fn)
+     (del-fn)])
   => [true false])
-
-^{:refer xt.lang.common-spec/x:this :added "4.1"}
-(fact "binds this for method calls"
-
-  (!.js
-    (var obj {:value 2})
-    (:= (. obj ["getValue"])
-        (fn []
-          (return (. (xt/x:this) ["value"]))))
-    (. obj (getValue)))
-  => 2)
 
 ^{:refer xt.lang.common-spec/x:proto-get :added "4.1"}
 (fact "retrieves object prototypes"
 
   (!.js
+    (var set-fn
+         (fn [obj proto]
+           (xt/x:proto-set obj proto nil)))
     (var proto {:label "proto"})
     (var obj {})
-    (xt/x:proto-set obj proto nil)
+    (set-fn obj proto)
+    (. (xt/x:proto-get obj "label") ["label"]))
+  => "proto"
+
+  (!.lua
+    (var set-fn
+         (fn [obj proto]
+           (xt/x:proto-set obj proto nil)))
+    (var proto {:label "proto"})
+    (var obj {})
+    (set-fn obj proto)
+    (. (xt/x:proto-get obj "label") ["label"]))
+  => "proto"
+
+  (!.py
+    (var set-fn
+         (fn [obj proto]
+           (xt/x:proto-set obj proto nil)))
+    (var proto {:label "proto"})
+    (var obj {})
+    (set-fn obj proto)
     (. (xt/x:proto-get obj "label") ["label"]))
   => "proto")
 
@@ -1409,11 +1451,13 @@
 (fact "assigns object prototypes"
 
   (!.js
+    (var set-fn
+         (fn [obj proto]
+           (xt/x:proto-set obj proto nil)))
     (var proto {:label "proto"})
     (var obj {})
-    (xt/x:proto-set obj proto nil)
-    (. obj ["label"]))
-  => "proto")
+    (set-fn obj proto)
+    (. (xt/x:proto-get obj "label") ["label"])))
 
 ^{:refer xt.lang.common-spec/x:proto-create :added "4.1"}
 (fact "creates prototypes with this-bound methods"

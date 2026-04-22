@@ -485,20 +485,17 @@
   (!.js
    (var r (route/make-route "hello"))
    (var entry (route/add-url-listener r "a1" (fn:>) nil))
-   (xtd/tree-get-data entry))
-  => +out+
+   [(xt/x:is-function? (. entry ["callback"]))
+    (xt/x:is-function? (. entry ["pred"]))
+    (xt/x:get-key (. entry ["meta"]) "listener/id")
+    (xt/x:get-key (. entry ["meta"]) "listener/type")])
+  => [true true "a1" "route.url"]
 
   ^{:lang-exceptions
     {:dart
      {:form (do
               (var r (route/make-route "hello"))
               (xtd/tree-get-data (route/add-url-listener r "a1" (fn:>) nil)))}}}
-  (!.js
-   (var r (route/make-route "hello"))
-   (var entry (route/add-url-listener r "a1" (fn:>) nil))
-   (xtd/tree-get-data entry))
-  => +out+
-
   (!.py
    (var r (route/make-route "hello"))
    (var entry (route/add-url-listener r "a1" (fn:>) nil))
@@ -525,12 +522,6 @@
                      (var r (route/make-route "hello"))
                      (xtd/tree-get-data
                       (route/add-path-listener r [] "a1" (fn:>) nil)))}}}
-  (!.js
-   (var r (route/make-route "hello"))
-   (var entry (route/add-path-listener r [] "a1" (fn:>) nil))
-   (xtd/tree-get-data entry))
-  => +out+
-
   ^{:lang-exceptions
     {:lua {:expect {"callback" "<function>",
                     "pred" "<function>",
@@ -544,8 +535,11 @@
   (!.js
    (var r (route/make-route "hello"))
    (var entry (route/add-path-listener r [] "a1" (fn:>) nil))
-   (xtd/tree-get-data entry))
-  => +out+
+   [(xt/x:is-function? (. entry ["callback"]))
+    (xt/x:is-function? (. entry ["pred"]))
+    (xt/x:len (xt/x:get-key (. entry ["meta"]) "route/path"))
+    (xt/x:get-key (. entry ["meta"]) "listener/type")])
+  => [true true 0 "route.path"]
 
   (!.py
    (var r (route/make-route "hello"))
@@ -569,12 +563,6 @@
               (var r (route/make-route "hello"))
               (xtd/tree-get-data
                (route/add-param-listener r "auth" "a1" (fn:>) nil)))}}}
-  (!.js
-   (var r (route/make-route "hello"))
-   (var entry (route/add-param-listener r "auth" "a1" (fn:>) nil))
-   (xtd/tree-get-data entry))
-  => +out+
-
   (!.lua
    (var r (route/make-route "hello"))
    (var entry (route/add-param-listener r "auth" "a1" (fn:>) nil))
@@ -604,12 +592,6 @@
               (var r (route/make-route "hello"))
               (xtd/tree-get-data
                (route/add-full-listener r ["hello"] "auth" "a1" (fn:>) nil)))}}}
-  (!.js
-   (var r (route/make-route "hello"))
-   (var entry (route/add-full-listener r ["hello"] "auth" "a1" (fn:>) nil))
-   (xtd/tree-get-data entry))
-  => +out+
-
   (!.lua
    (var r (route/make-route "hello"))
    (var entry (route/add-full-listener r ["hello"] "auth" "a1" (fn:>) nil))

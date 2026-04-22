@@ -450,7 +450,6 @@
              :x-str-to-fixed
              :x-str-trim-left
              :x-str-trim-right
-             :x-this
              :x-thread-join
              :x-thread-spawn
              :x-uri-decode

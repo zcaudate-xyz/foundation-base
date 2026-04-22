@@ -73,8 +73,7 @@
   (list ':= (list :% obj [key]) value))
 
 (def +php-proto+
-  {:x-this            {:emit :unit  :default 'this}
-   :x-proto-get       {:macro #'php-tf-x-proto-get    :emit :macro}
+  {:x-proto-get       {:macro #'php-tf-x-proto-get    :emit :macro}
    :x-proto-set       {:macro #'php-tf-x-proto-set    :emit :macro}
    :x-proto-tostring  {:emit :unit  :default "__toString"}})
 

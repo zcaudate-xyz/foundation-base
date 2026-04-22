@@ -689,12 +689,6 @@
   :emit :abstract,
   :cases [],
   :symbols [x:proto-tostring]}
- {:category :xtalk-proto,
-  :canonical-symbol x:this,
-  :op :x-this,
-  :emit :abstract,
-  :cases [],
-  :symbols [x:this]}
  {:category :xtalk-return,
   :canonical-symbol x:return-encode,
   :op :x-return-encode,

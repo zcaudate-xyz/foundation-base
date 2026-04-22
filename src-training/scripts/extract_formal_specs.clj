@@ -260,9 +260,9 @@
                    :x-now-ms :alias :x-type-native :macro}}
      
      :proto
-     {:primitives [:x-this :x-proto-get :x-proto-set :x-proto-create :x-proto-tostring]
-      :emit-types {:x-this :unit :x-proto-get :macro :x-proto-set :macro
-                   :x-proto-create :macro :x-proto-tostring :unit}}
+      {:primitives [:x-proto-get :x-proto-set :x-proto-create :x-proto-tostring]
+       :emit-types {:x-proto-get :macro :x-proto-set :macro
+                    :x-proto-create :macro :x-proto-tostring :unit}}
      
      :math
      {:primitives [:x-m-abs :x-m-acos :x-m-asin :x-m-atan :x-m-ceil :x-m-cos

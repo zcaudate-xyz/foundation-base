@@ -1126,13 +1126,6 @@
  =>
  true)
 
-^{:refer xt.lang.common-spec/x:this, :added "4.1"}
-(fact
- "expands and emits the lua self binding"
- (emits-lua? '(x:this) #"self")
- =>
- true)
-
 ^{:refer xt.lang.common-spec/x:proto-get, :added "4.1"}
 (fact
  "expands and emits prototype lookup"
