@@ -226,6 +226,21 @@
     (s/api-call {:key "key"} {}))
   => {:status 200 :body {"ok" true}})
 
+^{:refer rt.postgres.runtime.supabase/api-call :added "4.0"}
+(fact "throws when api key is missing"
+  ^:hidden
+  
+  (s/api-call {} {})
+  => (throws clojure.lang.ExceptionInfo "Supabase API key not configured"))
+
+^{:refer rt.postgres.runtime.supabase/api-call :added "4.0"}
+(fact "throws on supabase api errors"
+  ^:hidden
+  
+  (with-redefs [http/post (fn [_ _] {:status 401 :body "{\"message\":\"bad key\"}"})]
+    (s/api-call {:key "key"} {}))
+  => (throws clojure.lang.ExceptionInfo "Supabase API request failed"))
+
 ^{:refer rt.postgres.runtime.supabase/api-rpc :added "4.0"}
 (fact "calls the rpc"
   ^:hidden

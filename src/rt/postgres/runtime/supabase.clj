@@ -446,26 +446,41 @@
                   :service (System/getenv "DEFAULT_SUPABASE_API_KEY_SERVICE")
                   :public ""))
         headers-default (case type
-                          :public {"Content-Type" "application/json"}
+          :public {"Content-Type" "application/json"}
                           {"apikey" key
                            "Authorization" (str "Bearer " (or auth key))
                            "Content-Type" "application/json"})
-        headers (merge
-                 headers-default
-                 headers)
-        call-fn (case method
-                  :delete http/delete
-                  :get http/get
-                  :post http/post)]
-    (cond (not (get headers "apikey"))
-          {:status 401, :body {"message" "No API key found in request",
-                               "hint" "No `apikey` request header or url param was found."}}
-          :else
-          (-> (call-fn (str host route)
-                       {:headers headers
-                        :body   (std.json/write body)})
-              (update :body json/read)
-              (select-keys [:status :body])))))
+         headers (merge
+                  headers-default
+                  headers)
+         call-fn (case method
+                   :delete http/delete
+                   :get http/get
+                   :post http/post)
+         request {:host host
+                  :route route
+                  :method method
+                  :type type}]
+    (when (and (not= type :public)
+               (not (get headers "apikey")))
+      (f/error "Supabase API key not configured"
+               (assoc request
+                      :env (case type
+                             :anon "DEFAULT_SUPABASE_API_KEY_ANON"
+                             :service "DEFAULT_SUPABASE_API_KEY_SERVICE"
+                             nil))))
+    (let [response (-> (call-fn (str host route)
+                                {:headers headers
+                                 :body   (std.json/write body)})
+                       (update :body #(if (string? %)
+                                        (json/read %)
+                                        %))
+                       (select-keys [:status :body]))]
+      (when (and (:status response)
+                 (<= 400 (:status response)))
+        (f/error "Supabase API request failed"
+                 (merge request response)))
+      response)))
 
 (defn api-rpc
   "calls the rpc"
@@ -552,4 +567,3 @@
                    {:route "/auth/v1/token?grant_type=impersonate"
                     :type :service})
             {:user-id uid}))
-
