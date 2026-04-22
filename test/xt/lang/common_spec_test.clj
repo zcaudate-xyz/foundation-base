@@ -1520,7 +1520,7 @@
 ^{:refer xt.lang.common-spec/x:spit :added "4.1"}
 (fact "keeps the spit wrapper intact"
 
-  ^{:seedgen/base {}}
+  ^{:seedgen/base true}
   [(!.js (xt/x:spit "out.tmp" "hello world"))]
   => )
 
@@ -1539,12 +1539,13 @@
 ^{:refer xt.lang.common-spec/x:shell :added "4.1"}
 (fact "executes shell commands asynchronously"
 
-  (notify/wait-on :js
-    (xt/x:shell "printf hello"
-                {:success (fn [res]
-                            (repl/notify res))
-                 :error   (fn [err]
-                            (repl/notify "ERR"))}))
+  (l/with:print-all
+    (notify/wait-on :js
+      (do:> (xt/x:shell "printf hello" {}))
+      {:success (fn [res]
+                  (repl/notify res))
+       :error   (fn [err]
+                  (repl/notify "ERR"))}))
   => #"hello")
 
 ^{:refer xt.lang.common-spec/x:thread-spawn :added "4.1"}
@@ -1599,60 +1600,3 @@
     (xt/x:uri-decode "hello%20world"))
   => "hello world")
 
-(comment
-  
-  (def ^:private +common-spec-control-forms+
-    '#{for:array for:object for:index for:iter
-       return-run for:return for:try for:async})
-
-  (defn- common-spec-defs [kind]
-    (let [text (slurp "src/xt/lang/common_spec.clj")
-          pattern (case kind
-                    :macro #"\(defmacro\.xt[^\n]*\n\s+([^\s\)]+)"
-                    :spec  #"\(defspec\.xt\s+([^\s\)]+)")]
-      (->> (re-seq pattern text)
-           (map second)
-           (map symbol)
-           (sort)
-           (vec))))
-
-  (defn- common-spec-publics []
-    (->> (ns-publics 'xt.lang.common-spec)
-         keys
-         sort
-         vec))
-
-  (defn- emit-lua-form
-    [form]
-    (l/emit-as :lua [(list 'fn [] form)]))
-
-  (defn- emits-lua?
-    [form pattern]
-    (boolean (re-find pattern (emit-lua-form form))))
-
-  (fact "keeps source macros and public wrappers in sync"
-    (let [macros (common-spec-defs :macro)
-          specs  (common-spec-defs :spec)
-          publics (common-spec-publics)]
-      [(count macros)
-       (count specs)
-       (set macros)
-       (set publics)
-       (set/difference (set macros) (set specs))])
-    => [205
-        197
-        (set (common-spec-publics))
-        (set (common-spec-publics))
-        +common-spec-control-forms+])
-
-  (fact "all public wrappers expose arglists metadata"
-    (->> (ns-publics 'xt.lang.common-spec)
-         (keep (fn [[sym var]]
-                 (when-not (:arglists (meta var))
-                   sym)))
-         vec)
-    => [])
-
-
-
-  )
