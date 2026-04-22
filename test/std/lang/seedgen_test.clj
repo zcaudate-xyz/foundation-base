@@ -40,10 +40,10 @@
 ^{:refer std.lang.seedgen/seedgen-benchlist :added "4.1"}
 (fact "TODO")
 
-^{:refer std.lang.seedgen/seedgen-removelang :added "4.1"}
+^{:refer std.lang.seedgen/seedgen-langremove :added "4.1"}
 (fact "TODO")
 
-^{:refer std.lang.seedgen/seedgen-addlang :added "4.1"}
+^{:refer std.lang.seedgen/seedgen-langadd :added "4.1"}
 (fact "TODO")
 
 ^{:refer std.lang.seedgen/seedgen-benchadd :added "4.1"}

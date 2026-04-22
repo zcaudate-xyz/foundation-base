@@ -554,7 +554,7 @@
                   top-navs))
          "\n")))
 
-(defn seedgen-addlang
+(defn seedgen-langadd
   {:added "4.1"}
   ([ns params lookup project]
    (let [test-ns   (project/test-ns ns)
@@ -595,7 +595,7 @@
                                 lookup
                                 project)))))))
 
-(defn seedgen-removelang
+(defn seedgen-langremove
   {:added "4.1"}
   ([ns params lookup project]
    (let [test-ns   (project/test-ns ns)

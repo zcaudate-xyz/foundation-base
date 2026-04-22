@@ -153,50 +153,50 @@
           ['xt.sample]
           {:print {:item true :result true :summary true}}))
 
-(invoke/definvoke seedgen-removelang
+(invoke/definvoke seedgen-langremove
   [:task {:template :code.transform
-          :params {:title "SEEDGEN REMOVELANG"
+          :params {:title "SEEDGEN LANGREMOVE"
                    :parallel true
                    :print {:function true}}
-          :main {:fn #'form-infile/seedgen-removelang}
+          :main {:fn #'form-infile/seedgen-langremove}
           :item {:list (fn [lookup _] (sort (keys lookup)))
                  :pre project/sym-name
                  :display (template/empty-result :changed :info :no-change)}
           :result (assoc (template/code-transform-result :changed)
                          :columns (template/code-transform-columns #{:bold :red}))}])
 
-(comment (std.lang.seedgen/seedgen-removelang
+(comment (std.lang.seedgen/seedgen-langremove
           ['xt.sample]
           {:lang :js
            :print {:function true :item true :result true :summary true}})
 
-         (std.lang.seedgen/seedgen-removelang
+         (std.lang.seedgen/seedgen-langremove
           ['xt.sample]
           {:lang :lua
            :print {:function true :item true :result true :summary true}}))
 
-(invoke/definvoke seedgen-addlang
+(invoke/definvoke seedgen-langadd
   [:task {:template :code.transform
-          :params {:title "SEEDGEN ADDLANG"
+          :params {:title "SEEDGEN LANGADD"
                    :parallel true
                    :print {:function true}}
-          :main {:fn #'form-infile/seedgen-addlang}
+          :main {:fn #'form-infile/seedgen-langadd}
           :item {:list (fn [lookup _] (sort (keys lookup)))
                  :pre project/sym-name
                  :display (template/empty-result :changed :info :no-change)}
           :result (template/code-transform-result :changed)}])
 
-(comment (std.lang.seedgen/seedgen-addlang
+(comment (std.lang.seedgen/seedgen-langadd
           ['xt.sample]
           {:lang :lua
            :print {:function true :item true :result true :summary true}})
 
-         (std.lang.seedgen/seedgen-addlang
+         (std.lang.seedgen/seedgen-langadd
           ['xt.lang.common-spec-test]
           {:lang :lua
            :print {:function true :item true :result true :summary true}})
          
-         (std.lang.seedgen/seedgen-removelang
+         (std.lang.seedgen/seedgen-langremove
           '[xt.sample]
           {:lang :lua :write false}))
 
