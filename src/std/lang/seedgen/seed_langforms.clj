@@ -108,6 +108,39 @@
   (str prefix
        (str/replace s "\n" (str "\n" prefix))))
 
+(defn- leading-indent
+  [^String line]
+  (loop [i 0]
+    (if (and (< i (count line))
+             (#{\space \tab} (.charAt line i)))
+      (recur (inc i))
+      i)))
+
+(defn- trim-indent
+  [^String line n]
+  (let [limit (min n (leading-indent line))]
+    (subs line limit)))
+
+(defn- normalise-block-string
+  [^String s indent]
+  (let [[head & rest] (str/split-lines s)]
+    (if (empty? rest)
+      s
+      (str/join "\n"
+                (cons head
+                      (map (fn [line]
+                             (if (str/blank? line)
+                               line
+                               (trim-indent line indent)))
+                           rest))))))
+
+(defn- render-item-string
+  [item]
+  (let [col (or (get-in item [:line :col]) 1)]
+    (some-> item
+            item-string
+            (normalise-block-string (max 0 (dec col))))))
+
 (defn- render-clause-snippet
   [indent expr-str expected-str]
   (str (indent-lines indent expr-str)
@@ -237,55 +270,55 @@
   [entry root-lang ordered-extra-langs target-set original-string]
   (let [root-check   (first (get-in entry [:checks :root]))]
     (if (nil? root-check)
-      original-string
-      (let [final-langs     (vec (cons root-lang ordered-extra-langs))
-            check-items     (runtime-item-map (:checks entry))
-            setup-items     (runtime-item-map (:fact-setup entry))
-            teardown-items  (runtime-item-map (:fact-teardown entry))
-            root-check-expr (item-string root-check)
-            root-check-exp  (some-> root-check :expected item-string)
-            root-setup      (some-> (get setup-items root-lang) item-string)
-            root-teardown   (some-> (get teardown-items root-lang) item-string)
-            indent          "  "
-            clause-snippets (mapv (fn [lang]
-                                    (if-let [item (get check-items lang)]
-                                      (render-clause-snippet indent
-                                                             (item-string item)
-                                                             (some-> item :expected item-string))
-                                      (render-clause-snippet indent
-                                                             (replace-dispatch-lang-string
-                                                              root-check-expr
-                                                              lang)
-                                                             root-check-exp)))
+       original-string
+       (let [final-langs     (vec (cons root-lang ordered-extra-langs))
+             check-items     (runtime-item-map (:checks entry))
+             setup-items     (runtime-item-map (:fact-setup entry))
+             teardown-items  (runtime-item-map (:fact-teardown entry))
+             root-check-expr (render-item-string root-check)
+             root-check-exp  (some-> root-check :expected render-item-string)
+             root-setup      (some-> (get setup-items root-lang) render-item-string)
+             root-teardown   (some-> (get teardown-items root-lang) render-item-string)
+             indent          "  "
+             clause-snippets (mapv (fn [lang]
+                                     (if-let [item (get check-items lang)]
+                                       (render-clause-snippet indent
+                                                              (render-item-string item)
+                                                              (some-> item :expected render-item-string))
+                                       (render-clause-snippet indent
+                                                              (replace-dispatch-lang-string
+                                                               root-check-expr
+                                                               lang)
+                                                              root-check-exp)))
                                   final-langs)
-            setup-render    (when root-setup
-                              (render-vector-string
-                               :setup
-                               (mapv (fn [lang]
-                                       (or (some-> (get setup-items lang) item-string)
-                                           (when (contains? target-set lang)
-                                             (replace-dispatch-lang-string root-setup lang))))
-                                     final-langs)))
-            teardown-render (when root-teardown
-                              (render-vector-string
-                               :teardown
-                               (mapv (fn [lang]
-                                       (or (some-> (get teardown-items lang) item-string)
-                                           (when (contains? target-set lang)
-                                             (replace-dispatch-lang-string root-teardown lang))))
-                                     final-langs)))
+             setup-render    (when root-setup
+                               (render-vector-string
+                                :setup
+                                (mapv (fn [lang]
+                                        (or (some-> (get setup-items lang) render-item-string)
+                                            (when (contains? target-set lang)
+                                              (replace-dispatch-lang-string root-setup lang))))
+                                      final-langs)))
+             teardown-render (when root-teardown
+                               (render-vector-string
+                                :teardown
+                                (mapv (fn [lang]
+                                        (or (some-> (get teardown-items lang) render-item-string)
+                                            (when (contains? target-set lang)
+                                              (replace-dispatch-lang-string root-teardown lang))))
+                                      final-langs)))
             meta-string     (render-meta-string (cond-> (entry-meta entry)
-                                                  setup-render (assoc :setup [])
-                                                  teardown-render (assoc :teardown []))
-                                               {:setup setup-render
-                                                :teardown teardown-render})
-            fact-body       (str "(fact " (pr-str (:intro entry))
-                                 "\n"
-                                 (str/join "\n\n" clause-snippets)
-                                 ")")]
-        (if meta-string
-          (str meta-string "\n" fact-body)
-          fact-body)))))
+                                                 setup-render (assoc :setup [])
+                                                 teardown-render (assoc :teardown []))
+                                                {:setup setup-render
+                                                 :teardown teardown-render})
+             fact-body       (str "(fact " (pr-str (:intro entry))
+                                  "\n\n"
+                                  (str/join "\n\n" clause-snippets)
+                                  ")")]
+         (if meta-string
+           (str meta-string "\n" fact-body)
+           fact-body)))))
 
 (defn- render-fact-string-remove
   [entry target-set original-string]
@@ -301,24 +334,24 @@
                             classify-lang-items
                             (remove #(contains? target-set (item-lang %)))
                             vec)
-        setup-render   (render-vector-string :setup (mapv item-string keep-setup))
-        teardown-render (render-vector-string :teardown (mapv item-string keep-teardown))
+        setup-render   (render-vector-string :setup (mapv render-item-string keep-setup))
+        teardown-render (render-vector-string :teardown (mapv render-item-string keep-teardown))
         meta-string    (render-meta-string (cond-> (entry-meta entry)
                                              setup-render (assoc :setup [])
                                              teardown-render (assoc :teardown []))
-                                           {:setup setup-render
-                                            :teardown teardown-render})
+                                            {:setup setup-render
+                                             :teardown teardown-render})
         fact-body      (if (seq keep-checks)
                          (str "(fact " (pr-str (:intro entry))
-                              "\n"
-                              (str/join "\n\n"
-                                        (map (fn [item]
-                                               (render-clause-snippet "  "
-                                                                      (item-string item)
-                                                                      (some-> item :expected item-string)))
-                                             keep-checks))
-                              ")")
-                         (fact-original-body-string original-string))]
+                               "\n\n"
+                               (str/join "\n\n"
+                                         (map (fn [item]
+                                                (render-clause-snippet "  "
+                                                                       (render-item-string item)
+                                                                       (some-> item :expected render-item-string)))
+                                              keep-checks))
+                               ")")
+                          (fact-original-body-string original-string))]
     (if meta-string
       (str meta-string "\n" fact-body)
       fact-body)))
@@ -333,11 +366,11 @@
                             classify-lang-items
                             (remove #(contains? target-set (item-lang %)))
                             vec)
-        setup-render   (render-vector-string :setup (mapv item-string keep-setup))
-        teardown-render (render-vector-string :teardown (mapv item-string keep-teardown))]
+        setup-render   (render-vector-string :setup (mapv render-item-string keep-setup))
+        teardown-render (render-vector-string :teardown (mapv render-item-string keep-teardown))]
     (str "(fact:global\n "
          (render-map-string {:setup setup-render
-                             :teardown teardown-render})
+                              :teardown teardown-render})
          ")")))
 
 (defn- update-root-script-string

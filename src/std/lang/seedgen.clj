@@ -209,6 +209,11 @@
 (comment (std.lang.seedgen/seedgen-benchadd
           ['xt.sample]
           {:lang :python
+           :print {:function true :item true :result true :summary true}})
+
+         (std.lang.seedgen/seedgen-benchadd
+          'xt.lang.common-spec
+          {:lang :python
            :print {:function true :item true :result true :summary true}}))
 
 (invoke/definvoke seedgen-benchremove
