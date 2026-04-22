@@ -43,7 +43,7 @@
   => [[:lua :python]
       #{:js :lua :python}
       #{:js}
-      "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]))\n\n^{:seedgen/root {:all true, :langs [:lua :python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :lua {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example.A :added \"4.1\"\n  :setup [(!.js (+ 1 2 3))\n          (!.lua (+ 1 2 3))\n          (!.python (+ 1 2 3))]}\n(fact \"runtime specific branches\"\n\n  (!.js (+ 1 2 3))\n  => 6\n\n  (!.lua (+ 1 2 3))\n  => 6\n\n  (!.python (+ 1 2 3))\n  => 6)\n\n^{:refer xt.lang.common-spec/example.B :added \"4.1\"\n  :setup [(!.js (+ 1 2 3))]}\n(fact \"TODO\")\n"]
+      "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]))\n\n^{:seedgen/root {:all true, :langs [:lua :python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :lua {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example.A :added \"4.1\"\n  :setup [(!.js (+ 1 2 3))\n          (!.lua (+ 1 2 3))\n          (!.py (+ 1 2 3))]}\n(fact \"runtime specific branches\"\n\n  (!.js (+ 1 2 3))\n  => 6\n\n  (!.lua (+ 1 2 3))\n  => 6\n\n  (!.py (+ 1 2 3))\n  => 6)\n\n^{:refer xt.lang.common-spec/example.B :added \"4.1\"\n  :setup [(!.js (+ 1 2 3))]}\n(fact \"TODO\")\n"]
 
   (let [tmp (java.io.File/createTempFile "seedgen-addlang" ".clj")
         path (.getAbsolutePath tmp)
@@ -98,7 +98,51 @@
       (slurp path)
       (finally
         (.delete tmp))))
-  => "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]))\n\n^{:seedgen/root {:all true, :langs [:python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example.A :added \"4.1\"}\n(fact \"runtime specific branches\"\n\n  (!.js\n    (+ 1 2 3))\n  => 6\n\n  (!.python\n    (+ 1 2 3))\n  => 6)\n"
+  => "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]))\n\n^{:seedgen/root {:all true, :langs [:python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example.A :added \"4.1\"}\n(fact \"runtime specific branches\"\n\n  (!.js\n    (+ 1 2 3))\n  => 6\n\n  (!.py\n    (+ 1 2 3))\n  => 6)\n"
+
+  (let [tmp (java.io.File/createTempFile "seedgen-addlang-notify" ".clj")
+        path (.getAbsolutePath tmp)
+        root (.getParent tmp)
+        lookup {'sample.add-test path}
+        project {:root root}]
+    (try
+      (spit path (str "(ns sample.add-test\n"
+                      "  (:use code.test)\n"
+                      "  (:require [std.lang :as l]\n"
+                      "            [xt.lang.base-notify :as notify]\n"
+                      "            [xt.lang.base-repl :as repl]))\n\n"
+                      "^{:seedgen/root {:all true, :langs [:python]}}\n"
+                      "(l/script- :js {:runtime :basic})\n\n"
+                      "^{:refer xt.lang.common-spec/example.A :added \"4.1\"}\n"
+                      "(fact \"runtime specific branches\"\n\n"
+                      "  (notify/wait-on :js\n"
+                      "    (repl/notify 1)))\n"))
+      (form-infile/seedgen-addlang 'sample.add-test {:write true} lookup project)
+      (slurp path)
+      (finally
+        (.delete tmp))))
+  => "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]\n            [xt.lang.base-notify :as notify]\n            [xt.lang.base-repl :as repl]))\n\n^{:seedgen/root {:all true, :langs [:python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example.A :added \"4.1\"}\n(fact \"runtime specific branches\"\n\n  (notify/wait-on :js\n    (repl/notify 1))\n\n  (notify/wait-on :py\n    (repl/notify 1)))\n"
+
+  (let [tmp (java.io.File/createTempFile "seedgen-addlang-no-assert" ".clj")
+        path (.getAbsolutePath tmp)
+        root (.getParent tmp)
+        lookup {'sample.add-test path}
+        project {:root root}]
+    (try
+      (spit path (str "(ns sample.add-test\n"
+                      "  (:use code.test)\n"
+                      "  (:require [std.lang :as l]))\n\n"
+                      "^{:seedgen/root {:all true, :langs [:lua]}}\n"
+                      "(l/script- :js {:runtime :basic})\n\n"
+                      "^{:refer xt.lang.common-spec/example.A :added \"4.1\"}\n"
+                      "(fact \"runtime specific branches\"\n\n"
+                      "  (!.js\n"
+                      "    (+ 1 2 3)))\n"))
+      (form-infile/seedgen-addlang 'sample.add-test {:write true} lookup project)
+      (slurp path)
+      (finally
+        (.delete tmp))))
+  => "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]))\n\n^{:seedgen/root {:all true, :langs [:lua]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :lua {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example.A :added \"4.1\"}\n(fact \"runtime specific branches\"\n\n  (!.js\n    (+ 1 2 3))\n\n  (!.lua\n    (+ 1 2 3)))\n"
 
   (let [tmp (java.io.File/createTempFile "seedgen-addlang" ".clj")
         path (.getAbsolutePath tmp)

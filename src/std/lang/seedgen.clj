@@ -190,10 +190,15 @@
           ['xt.sample]
           {:lang :lua
            :print {:function true :item true :result true :summary true}})
+
+         (std.lang.seedgen/seedgen-addlang
+          ['xt.lang.common-spec-test]
+          {:lang :lua
+           :print {:function true :item true :result true :summary true}})
          
          (std.lang.seedgen/seedgen-removelang
-           '[xt.sample]
-           {:lang :lua :write false}))
+          '[xt.sample]
+          {:lang :lua :write false}))
 
 (invoke/definvoke seedgen-benchadd
   [:task {:template :code.transform

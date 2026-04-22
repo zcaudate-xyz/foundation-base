@@ -526,16 +526,12 @@
    :x-return-wrap    {:macro #'python-tf-x-return-wrap     :emit :macro}
    :x-return-eval    {:macro #'python-tf-x-return-eval     :emit :macro}})
 
-;;
-;; ITER
-;;
-
 (defn python-tf-x-socket-connect
   ([[_ host port opts]]
    (template/$ (do (:- :import socket)
-            (var conn   (socket.socket))
-            (conn.connect '(host port))
-            (return conn)))))
+                   (var conn (socket.socket))
+                   (conn.connect '(~host ~port))
+                   (return conn)))))
 
 (defn python-tf-x-socket-send
   ([[_ conn s]]
@@ -546,9 +542,9 @@
    (template/$ (. ~conn (close)))))
 
 (def +python-socket+
-  {:x-socket-connect      {:macro #'python-tf-x-socket-connect      :emit :macro}
-   :x-socket-send         {:macro #'python-tf-x-socket-send         :emit :macro}
-   :x-socket-close        {:macro #'python-tf-x-socket-close        :emit :macro}})
+  {:x-socket-connect {:macro #'python-tf-x-socket-connect :emit :macro}
+   :x-socket-send    {:macro #'python-tf-x-socket-send    :emit :macro}
+   :x-socket-close   {:macro #'python-tf-x-socket-close   :emit :macro}})
 
 
 ;;

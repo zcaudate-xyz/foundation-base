@@ -176,10 +176,13 @@
 (defn- render-clause-snippet
   [indent expr-str expected-str]
   (str (indent-lines indent expr-str)
-       "\n"
-       indent
-       "=> "
-       (str/replace expected-str "\n" (str "\n" indent "   "))))
+       (when expected-str
+         (str "\n"
+              indent
+              "=> "
+              (str/replace expected-str
+                           "\n"
+                           (str "\n" indent "   "))))))
 
 (defn- render-vector-string
   [key snippets]

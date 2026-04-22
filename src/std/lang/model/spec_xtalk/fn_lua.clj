@@ -342,15 +342,6 @@
   ([[_ s tok]]
    (list 'or (list 'string.find s tok) -1)))
 
-(defn lua-tf-x-str-format
-  ([[_ fmt values]]
-   (template/$ (string.gsub ~fmt
-                            "{(%d+)}"
-                            (fn [idx]
-                              (return (or (. ~values [(+ (tonumber idx)
-                                                         1)])
-                                          idx)))))))
-
 (defn lua-tf-x-str-to-fixed
   ([[_ num digits]]
    (list 'string.format (list 'cat "%." digits "f")  num)))
@@ -373,18 +364,17 @@
 
 (def +lua-str+
    {:x-str-char       {:emit :alias :raw 'string.byte}
-    :x-str-format     {:macro #'lua-tf-x-str-format     :emit :macro}
     :x-str-split      {:macro #'lua-tf-x-str-split      :emit :macro}
     :x-str-join       {:macro #'lua-tf-x-str-join       :emit :macro}
     :x-str-index-of   {:macro #'lua-tf-x-str-index-of   :emit :macro}
    :x-str-substring  {:emit :alias :raw 'string.sub}
    :x-str-to-upper   {:emit :alias :raw 'string.upper}
    :x-str-to-lower   {:emit :alias :raw 'string.lower}
-   :x-str-to-fixed   {:macro #'lua-tf-x-str-to-fixed   :emit :macro}
-   :x-str-replace    {:macro #'lua-tf-x-str-replace    :emit :macro}
-   :x-str-trim       {:macro #'lua-tf-x-str-trim       :emit :macro}
-   :x-str-trim-left  {:macro #'lua-tf-x-str-trim-left  :emit :macro}
-   :x-str-trim-right {:macro #'lua-tf-x-str-trim-right :emit :macro}})
+     :x-str-to-fixed   {:macro #'lua-tf-x-str-to-fixed   :emit :macro}
+     :x-str-replace    {:macro #'lua-tf-x-str-replace    :emit :macro}
+     :x-str-trim       {:macro #'lua-tf-x-str-trim       :emit :macro}
+     :x-str-trim-left  {:macro #'lua-tf-x-str-trim-left  :emit :macro}
+     :x-str-trim-right {:macro #'lua-tf-x-str-trim-right :emit :macro}})
 
 ;;
 ;; JSON
@@ -450,10 +440,6 @@
    :x-return-wrap    {:macro #'lua-tf-x-return-wrap     :emit :macro}
    :x-return-eval    {:macro #'lua-tf-x-return-eval     :emit :macro}})
 
-;;
-;; SOCKET
-;;
-
 (defn lua-tf-x-socket-connect
   ([[_ host port opts]]
    (template/$ (do* (local '[conn err])
@@ -483,9 +469,9 @@
    (template/$ (. ~conn (close)))))
 
 (def +lua-socket+
-  {:x-socket-connect      {:macro #'lua-tf-x-socket-connect      :emit :macro}
-   :x-socket-send         {:macro #'lua-tf-x-socket-send         :emit :macro}
-   :x-socket-close        {:macro #'lua-tf-x-socket-close        :emit :macro}})
+  {:x-socket-connect {:macro #'lua-tf-x-socket-connect :emit :macro}
+   :x-socket-send    {:macro #'lua-tf-x-socket-send    :emit :macro}
+   :x-socket-close   {:macro #'lua-tf-x-socket-close   :emit :macro}})
 
 
 ;;

@@ -893,14 +893,25 @@
 ;; XTALK NOTIFY/LINK SPECIFICATION
 ;;
 
+(def +xt-socket+
+  [{:op :x-socket-connect :symbol #{'x:socket-connect} :emit :abstract
+    :op-spec {:template-only true
+              :type [:fn [:xt/str :xt/int :xt/any :xt/any] :xt/any]
+              :arglists '([host port opts cb])}}
+   {:op :x-socket-send :symbol #{'x:socket-send} :emit :abstract
+    :op-spec {:type [:fn [:xt/any :xt/str] :xt/any]
+              :arglists '([conn message])}}
+   {:op :x-socket-close :symbol #{'x:socket-close} :emit :abstract
+    :op-spec {:type [:fn [:xt/any] :xt/any]
+              :arglists '([conn])}}])
 
 
 (def +xt-notify-http+
   [{:op :x-notify-http     :symbol #{'x:notify-http}     :emit :hard-link
     :raw 'xt.lang.common-repl/notify-socket-http
     :op-spec {:template-only true
-              :type  [:fn [:xt/str :xt/num :xt/any :xt/str :xt/str :xt/fn] :xt/any]
-              :arglists '([host port value id key encode-fn])}}])
+              :type  [:fn [:xt/str :xt/num :xt/any :xt/str :xt/str :xt/any] :xt/any]
+              :arglists '([host port value id key opts])}}])
 
 
 ;;

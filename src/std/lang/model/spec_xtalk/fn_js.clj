@@ -369,14 +369,6 @@
   ([[_ s tok]]
    (list '. s (list 'indexOf tok))))
 
-(defn js-tf-x-str-format
-  ([[_ fmt values]]
-   (template/$ (. ~fmt
-                  (replace (new RegExp "\\{(\\d+)\\}" "g")
-                           (fn [match idx]
-                             (return (or (. ~values [(Number idx)])
-                                         match))))))))
-
 (defn js-tf-x-str-substring
   ([[_ s start & args]]
    (list '. s (apply list 'substring start args))))
@@ -431,7 +423,6 @@
 
 (def +js-str+
   {:x-str-char        {:macro #'js-tf-x-str-char       :emit :macro}
-   :x-str-format      {:macro #'js-tf-x-str-format     :emit :macro}
    :x-str-split       {:macro #'js-tf-x-str-split      :emit :macro}
    :x-str-join        {:macro #'js-tf-x-str-join       :emit :macro}
    :x-str-index-of    {:macro #'js-tf-x-str-index-of   :emit :macro}
@@ -445,9 +436,9 @@
    :x-str-trim-right  {:macro #'js-tf-x-str-trim-right :emit :macro}
    :x-str-comp        {:macro #'js-tf-x-str-comp       :emit :macro}
    :x-str-pad-left    {:macro #'js-tf-x-str-pad-left   :emit :macro}
-   :x-str-pad-right   {:macro #'js-tf-x-str-pad-right  :emit :macro}
-   :x-str-starts-with {:macro #'js-tf-x-str-starts-with :emit :macro}
-   :x-str-ends-with   {:macro #'js-tf-x-str-ends-with   :emit :macro}})
+    :x-str-pad-right   {:macro #'js-tf-x-str-pad-right  :emit :macro}
+    :x-str-starts-with {:macro #'js-tf-x-str-starts-with :emit :macro}
+    :x-str-ends-with   {:macro #'js-tf-x-str-ends-with   :emit :macro}})
 
 ;;
 ;; JSON
@@ -531,11 +522,10 @@
 (defn js-tf-x-socket-connect
   ([[_ host port opts cb]]
    (template/$ (do* (var net (eval "require('net')"))
-                    (var rl  (eval  "require('readline')"))
                     (var conn (new net.Socket))
                     (return (conn.connect
-                             port host (fn []
-                                         (cb nil conn))))))))
+                             ~port ~host (fn []
+                                           (~cb nil conn))))))))
 
 (defn js-tf-x-socket-send
   ([[_ conn s]]
@@ -546,9 +536,9 @@
    (template/$ (. ~conn (end)))))
 
 (def +js-socket+
-  {:x-socket-connect      {:macro #'js-tf-x-socket-connect      :emit :macro}
-   :x-socket-send         {:macro #'js-tf-x-socket-send         :emit :macro}
-   :x-socket-close        {:macro #'js-tf-x-socket-close        :emit :macro}})
+  {:x-socket-connect {:macro #'js-tf-x-socket-connect :emit :macro}
+   :x-socket-send    {:macro #'js-tf-x-socket-send    :emit :macro}
+   :x-socket-close   {:macro #'js-tf-x-socket-close   :emit :macro}})
 
 ;;
 ;; ITER

@@ -92,15 +92,40 @@
           nav/root-string)
       script-str)))
 
-(defn- replace-dispatch-lang-string
+(defn- replace-runtime-lang-string
   [expr-str lang]
   (let [root     (nav/parse-root expr-str)
         expr-nav (nav/down root)
-        head-nav (some-> expr-nav nav/down)]
-    (if head-nav
+        head-nav (some-> expr-nav nav/down)
+        arg-nav   (some-> head-nav nav/right)
+        expr-form (some-> expr-nav nav/value)
+        arg-form  (some-> arg-nav nav/value)
+        tag       (common/seedgen-dispatch-tag lang)]
+    (cond
+      (and head-nav
+           (common/seedgen-dispatch-lang expr-form))
       (-> head-nav
-          (nav/replace (symbol (str "!." (name lang))))
+          (nav/replace (symbol (str "!." (name tag))))
           nav/root-string)
+
+      (and arg-nav
+           (common/seedgen-runtime-reference-lang expr-form)
+           (keyword? arg-form))
+      (-> arg-nav
+          (nav/replace tag)
+          nav/root-string)
+
+      (and arg-nav
+           (common/seedgen-runtime-reference-lang expr-form)
+           (vector? arg-form)
+           (seq arg-form))
+      (if-let [first-arg-nav (some-> arg-nav nav/down)]
+        (-> first-arg-nav
+            (nav/replace tag)
+            nav/root-string)
+        expr-str)
+
+      :else
       expr-str)))
 
 (defn- indent-lines
@@ -144,10 +169,13 @@
 (defn- render-clause-snippet
   [indent expr-str expected-str]
   (str (indent-lines indent expr-str)
-       "\n"
-       indent
-       "=> "
-       (str/replace expected-str "\n" (str "\n" indent "   "))))
+       (when expected-str
+         (str "\n"
+              indent
+              "=> "
+              (str/replace expected-str
+                           "\n"
+                           (str "\n" indent "   "))))))
 
 (defn- render-vector-string
   [key snippets]
@@ -286,10 +314,10 @@
                                                               (render-item-string item)
                                                               (some-> item :expected render-item-string))
                                        (render-clause-snippet indent
-                                                              (replace-dispatch-lang-string
-                                                               root-check-expr
-                                                               lang)
-                                                              root-check-exp)))
+                                                               (replace-runtime-lang-string
+                                                                root-check-expr
+                                                                lang)
+                                                               root-check-exp)))
                                   final-langs)
              setup-render    (when root-setup
                                (render-vector-string
@@ -297,16 +325,16 @@
                                 (mapv (fn [lang]
                                         (or (some-> (get setup-items lang) render-item-string)
                                             (when (contains? target-set lang)
-                                              (replace-dispatch-lang-string root-setup lang))))
-                                      final-langs)))
+                                               (replace-runtime-lang-string root-setup lang))))
+                                       final-langs)))
              teardown-render (when root-teardown
                                (render-vector-string
                                 :teardown
                                 (mapv (fn [lang]
                                         (or (some-> (get teardown-items lang) render-item-string)
                                             (when (contains? target-set lang)
-                                              (replace-dispatch-lang-string root-teardown lang))))
-                                      final-langs)))
+                                               (replace-runtime-lang-string root-teardown lang))))
+                                       final-langs)))
             meta-string     (render-meta-string (cond-> (entry-meta entry)
                                                  setup-render (assoc :setup [])
                                                  teardown-render (assoc :teardown []))

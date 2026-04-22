@@ -1,7 +1,7 @@
 (ns std.lang.seedgen.common-util
   (:require [std.fs :as fs]
-            [std.lang.base.impl :as lang.impl]
-            [std.lang.base.library :as lang.lib]))
+             [std.lang.base.impl :as lang.impl]
+             [std.lang.base.library :as lang.lib]))
 
 ;; --------------------------------------------------
 ;; script form discovery
@@ -54,20 +54,43 @@
      notify/captured:count
      notify/captured:clear})
 
+(def ^:private +seedgen-dispatch-aliases+
+  {"py" :python})
+
+(def ^:private +seedgen-dispatch-tags+
+  {:python :py})
+
 (defn seedgen-dispatch-map
   []
   (let [library  (lang.impl/default-library)
         snapshot (lang.lib/get-snapshot library)]
-    (->> snapshot
-         vals
-         (keep (fn [{:keys [book]}]
-                 (let [lang (or (:lang book)
-                                (get-in book [:book :lang]))
-                       tag  (or (get-in book [:grammar :tag])
-                                (get-in book [:book :grammar :tag]))]
-                   (when (and lang tag)
-                     [(name tag) lang]))))
-         (into {}))))
+    (merge +seedgen-dispatch-aliases+
+           (->> snapshot
+                vals
+                (keep (fn [{:keys [book]}]
+                        (let [lang (or (:lang book)
+                                       (get-in book [:book :lang]))
+                              tag  (or (get-in book [:grammar :tag])
+                                       (get-in book [:book :grammar :tag]))]
+                          (when (and lang tag)
+                            [(name tag) lang]))))
+                (into {})))))
+
+(defn seedgen-dispatch-tag-map
+  []
+  (let [library  (lang.impl/default-library)
+        snapshot (lang.lib/get-snapshot library)]
+    (merge +seedgen-dispatch-tags+
+           (->> snapshot
+                vals
+                (keep (fn [{:keys [book]}]
+                        (let [lang (or (:lang book)
+                                       (get-in book [:book :lang]))
+                              tag  (or (get-in book [:grammar :tag])
+                                       (get-in book [:book :grammar :tag]))]
+                          (when (and lang tag)
+                            [lang tag]))))
+                (into {})))))
 
 (defn seedgen-normalize-runtime-lang
   [lang]
@@ -77,6 +100,13 @@
                    (string? lang) (keyword lang)
                    :else lang)]
     (or (get dispatch-map (name lang))
+        lang)))
+
+(defn seedgen-dispatch-tag
+  [lang]
+  (let [tag-map (seedgen-dispatch-tag-map)
+        lang    (seedgen-normalize-runtime-lang lang)]
+    (or (get tag-map lang)
         lang)))
 
 (defn seedgen-dispatch-lang

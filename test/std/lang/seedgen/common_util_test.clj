@@ -15,7 +15,14 @@
 (fact "TODO")
 
 ^{:refer std.lang.seedgen.common-util/seedgen-normalize-runtime-lang :added "4.1"}
-(fact "TODO")
+(fact "normalizes runtime tags to their installed language keys"
+  (seedgen-normalize-runtime-lang :py)
+  => :python)
+
+^{:refer std.lang.seedgen.common-util/seedgen-dispatch-tag :added "4.1"}
+(fact "returns the grammar dispatch tag for a runtime language"
+  (seedgen-dispatch-tag :python)
+  => :py)
 
 ^{:refer std.lang.seedgen.common-util/seedgen-dispatch-lang :added "4.1"}
 (fact "TODO")

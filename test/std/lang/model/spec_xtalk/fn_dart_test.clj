@@ -155,37 +155,10 @@
   (l/emit-as :dart [(dart-tf-x-spit '[_ filename s])])
   => #"spit not implemented")
 
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-format :added "4.1"}
-(fact "str-format not implemented"
-  (l/emit-as :dart [(dart-tf-x-str-format '[_ template values])])
-  => #"str-format not implemented")
-
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-debug-client-basic :added "4.1"}
 (fact "client basic not implemented"
   (l/emit-as :dart [(dart-tf-x-debug-client-basic '[_ host port opts cb])])
   => #"Client not implemented")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-socket-connect :added "4.1"}
-(fact "connects sockets through dart:io futures"
-  (emit-dart (dart-tf-x-socket-connect '[_ host port opts cb]))
-  => #"import 'dart:io';"
-
-  (emit-dart (dart-tf-x-socket-connect '[_ host port opts cb]))
-  => #"Socket\.connect"
-
-  (emit-dart (dart-tf-x-socket-connect '[_ host port opts cb]))
-  => #"catchError")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-socket-close :added "4.1"}
-(fact "flushes and destroys sockets for one-way notify"
-  (emit-dart (dart-tf-x-socket-close '[_ conn]))
-  => #"flush"
-
-  (emit-dart (dart-tf-x-socket-close '[_ conn]))
-  => #"destroy"
-
-  (emit-dart (dart-tf-x-socket-close '[_ conn]))
-  => #"return")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-thread-spawn :added "4.1"}
 (fact "thread spawn not implemented"
@@ -527,21 +500,6 @@
   (emit-dart (dart-tf-x-iter-null '[_]))
   => #"null")
 
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-socket-connect :added "4.1"}
-(fact "socket connect is not implemented"
-  (emit-dart (dart-tf-x-socket-connect '[_ host port opts cb]))
-  => #"Socket not implemented")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-socket-send :added "4.1"}
-(fact "socket send writes to the connection"
-  (emit-dart (dart-tf-x-socket-send '[_ conn s]))
-  => #"write")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-socket-close :added "4.1"}
-(fact "socket close returns the flush-close future"
-  (emit-dart (dart-tf-x-socket-close '[_ conn]))
-  => #"flush")
-
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-debug-client-ws :added "4.1"}
 (fact "websocket clients are not implemented"
   (emit-dart (dart-tf-x-debug-client-ws '[_ host port opts cb]))
@@ -556,11 +514,6 @@
 (fact "websocket servers are not implemented"
   (emit-dart (dart-tf-x-server-ws '[_ port opts cb]))
   => #"WebSocket server not implemented")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-notify-socket :added "4.1"}
-(fact "socket notifications are not implemented"
-  (emit-dart (dart-tf-x-notify-socket '[_ host port value id key opts]))
-  => #"Notify socket not implemented")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-ws-connect :added "4.1"}
 (fact "websocket connect is not implemented"

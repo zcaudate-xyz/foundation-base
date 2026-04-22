@@ -180,35 +180,30 @@
                     (list 'var* e := (list '. bound [(ut/sym-default-str e)])))
                   sym))
 
-       has-value?
-       (list 'var* sym := bound)
+        has-value?
+        (list 'var* sym := bound)
 
-       :else
-       (list 'var* sym)))))
+        :else
+        (list 'var* sym)))))
 
 (def +features+
-  (let [base (-> (grammar/build :exclude [:pointer
-                                          :block
-                                          :data-set])
-                 (grammar/build:override
-                  {:var         {:symbol '#{var*} :raw "var"}
-                   :defn        {:symbol '#{defn}}
-                   :new         {:symbol '#{new} :raw "new" :emit :new}
-                   :for-object  {:macro #'tf-for-object :emit :macro}
-                   :for-array   {:macro #'tf-for-array  :emit :macro}
-                   :for-iter    {:macro #'tf-for-iter   :emit :macro}
-                   :for-return  {:macro #'tf-for-return :emit :macro}
-                   :for-try     {:macro #'tf-for-try    :emit :macro}
-                   :for-async   {:macro #'tf-for-async  :emit :macro}
-                   :with-global {:value true :raw "globalThis"}}))
-        base-keys (set (keys base))
-        overrides (select-keys fn-dart/+dart+ base-keys)
-        extensions (apply dissoc fn-dart/+dart+ base-keys)]
-    (cond-> base
-      (seq overrides) (grammar/build:override overrides)
-      (seq extensions) (grammar/build:extend extensions)
-      true (grammar/build:extend
-            {:var-let {:op :var-let :symbol #{'var} :macro #'dart-var :emit :macro}}))))
+  (-> (grammar/build :exclude [:pointer
+                               :block
+                               :data-set])
+      (grammar/build:override
+       {:var         {:symbol '#{var*} :raw "var"}
+        :defn        {:symbol '#{defn}}
+        :new         {:symbol '#{new} :raw "new" :emit :new}
+        :for-object  {:macro #'tf-for-object :emit :macro}
+        :for-array   {:macro #'tf-for-array  :emit :macro}
+        :for-iter    {:macro #'tf-for-iter   :emit :macro}
+        :for-return  {:macro #'tf-for-return :emit :macro}
+        :for-try     {:macro #'tf-for-try    :emit :macro}
+        :for-async   {:macro #'tf-for-async  :emit :macro}
+        :with-global {:value true :raw "globalThis"}})
+      (grammar/build:override fn-dart/+dart+)
+      (grammar/build:extend
+       {:var-let {:op :var-let :symbol #{'var} :macro #'dart-var :emit :macro}})))
 
 (def +template+
   (-> (emit/default-grammar)
