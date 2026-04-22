@@ -47,7 +47,7 @@
                    xtalk/+xt-runtime-file+
                    xtalk/+xt-runtime-b64+
                    xtalk/+xt-runtime-uri+
-                   xtalk/+xt-runtime-js+]})
+                   xtalk/+xt-runtime-json+]})
 
 (def +xtalk-area->surface+
   {:xtalk-common  {:area :common

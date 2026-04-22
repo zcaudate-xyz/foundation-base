@@ -943,7 +943,6 @@
               :arglists '([host port opts connect-fn eval-fn])
               :type [:fn [:xt/str :xt/int :xt/any :xt/fn :xt/fn] :xt/any]}}])
 
-
 ;;
 ;; XTALK RUNTIME SPECIFIC INTERFACES
 ;;

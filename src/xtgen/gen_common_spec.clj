@@ -51,7 +51,7 @@
     xtalk/+xt-runtime-b64+
     xtalk/+xt-runtime-cache+
     xtalk/+xt-runtime-file+
-    xtalk/+xt-runtime-js+
+    xtalk/+xt-runtime-json+
     xtalk/+xt-runtime-shell+
     xtalk/+xt-runtime-thread+
     xtalk/+xt-runtime-uri+]))
