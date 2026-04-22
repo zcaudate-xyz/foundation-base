@@ -2,9 +2,6 @@
   (:use code.test)
   (:require [std.lang :as l]))
 
-^{:seedgen/template {:all true}}
-(l/script- :postgres)
-
 ^{:seedgen/root     {:all true}}
 (l/script- :js
   {:runtime :basic

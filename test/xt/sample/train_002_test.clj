@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [std.lang :as l]))
 
-^{:seedgen/scaffold         {:python true}}
+^{:seedgen/scaffold         {:python  {:suppress true}}}
 (l/script+ [:db :postgres])   ;; this is a scaffold. any non (!.<lang> ...) and (notify/wait-on <lang>) is {:all true} by default. 
 
 ^{:seedgen/root         {:all true}}
@@ -29,7 +29,7 @@
 ^{:refer xt.lang.common-spec/for:array :added "4.1"
   :setup    [(def +a+ (+ 1 2 3))
              (!.js (+ 1 2 3))
-             ^{:seedgen/derived   {:lua true}} ;; this is derived the meta is optional
+             ^{:seedgen/derived   {:lang :lua}} ;; this is derived the meta is optional
              (!.lua (+ 1 2 3))]
   :teardown [(!.js (+ 1 2 3))]}
 (fact "iterates arrays in order"

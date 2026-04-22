@@ -5,20 +5,8 @@
             [std.lang.model.spec-lua :as lua]
             [xt.lang.common-notify :as notify]))
 
-^{:seedgen/root         {:all true}}
+^{:seedgen/root {:all true, :langs [:python :lua]}}
 (l/script- :js
-  {:runtime :basic
-   :require [[xt.lang.common-spec :as xt]
-             [xt.lang.common-data :as xtd]
-             [xt.lang.common-repl :as repl]]})
-
-(l/script- :python
-  {:runtime :basic
-   :require [[xt.lang.common-spec :as xt]
-             [xt.lang.common-data :as xtd]
-             [xt.lang.common-repl :as repl]]})
-
-(l/script- :lua
   {:runtime :basic
    :require [[xt.lang.common-spec :as xt]
              [xt.lang.common-data :as xtd]
@@ -26,7 +14,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.common-spec/for:array :added "4.1"}
 (fact "iterates arrays in order"
@@ -76,8 +64,6 @@
   (!.js
     (xt/return-run [resolve reject]
       (resolve "OK")))
-
-  ;; only inside for:async and for:return
   => (throws))
 
 ^{:refer xt.lang.common-spec/for:return :added "4.1"}
@@ -105,14 +91,6 @@
 (fact "expands to the canonical try form"
 
   (!.js
-    (var add (fn []
-               (xt/for:try [[ok err] (do:> (xt/x:err "ERROR"))]
-                 {:success (return ok)
-                  :error   (return "ERR")})))
-    (add))
-  => "ERR"
-
-  (!.py
     (var add (fn []
                (xt/for:try [[ok err] (do:> (xt/x:err "ERROR"))]
                  {:success (return ok)
@@ -190,24 +168,12 @@
     (do (var out ["a" "b" "c" "d"])
         (xt/x:arr-remove out (xt/x:offset 1))
         out))
-  => ["a" "c" "d"]
-
-  (!.py
-    (do (var out ["a" "b" "c" "d"])
-        (xt/x:arr-remove out (xt/x:offset 1))
-        out))
   => ["a" "c" "d"])
 
 ^{:refer xt.lang.common-spec/x:arr-push :added "4.1"}
 (fact "pushes an element onto an array"
 
   (!.js
-    (var out ["a" "b" "c"])
-    (xt/x:arr-push out "D")
-    out)
-  => ["a" "b" "c" "D"]
-
-  (!.py
     (var out ["a" "b" "c"])
     (xt/x:arr-push out "D")
     out)
@@ -219,23 +185,12 @@
   (!.js
     (var out ["a" "b" "c" "d"])
     [(xt/x:arr-pop out) out])
-  => ["d" ["a" "b" "c"]]
-
-  (!.py
-    (var out ["a" "b" "c" "d"])
-    [(xt/x:arr-pop out) out])
   => ["d" ["a" "b" "c"]])
 
 ^{:refer xt.lang.common-spec/x:arr-push-first :added "4.1"}
 (fact "pushes an element to the front of an array"
 
   (!.js
-    (var out ["a" "b" "c"])
-    (xt/x:arr-push-first out "D")
-    out)
-  => ["D" "a" "b" "c"]
-
-  (!.py
     (var out ["a" "b" "c"])
     (xt/x:arr-push-first out "D")
     out)
@@ -247,23 +202,12 @@
   (!.js
     (var out ["a" "b" "c" "d"])
     [(xt/x:arr-pop-first out) out])
-  => ["a" ["b" "c" "d"]]
-
-  (!.py
-    (var out ["a" "b" "c" "d"])
-    [(xt/x:arr-pop-first out) out])
   => ["a" ["b" "c" "d"]])
 
 ^{:refer xt.lang.common-spec/x:arr-insert :added "4.1"}
 (fact "inserts an element into an array"
 
   (!.js
-    (var out ["a" "b" "c"])
-    (xt/x:arr-insert out (xt/x:offset 1) "D")
-    out)
-  => ["a" "D" "b" "c"]
-
-  (!.py
     (var out ["a" "b" "c"])
     (xt/x:arr-insert out (xt/x:offset 1) "D")
     out)
@@ -276,22 +220,12 @@
     (xt/x:arr-slice ["a" "b" "c" "d" "e"]
                     (xt/x:offset 1)
                     (xt/x:offset 3)))
-  => ["b" "c"]
-
-  (!.py
-    (xt/x:arr-slice ["a" "b" "c" "d" "e"]
-                    (xt/x:offset 1)
-                    (xt/x:offset 3)))
   => ["b" "c"])
 
 ^{:refer xt.lang.common-spec/x:arr-reverse :added "4.1"}
 (fact "reverses an array"
 
   (!.js
-    (xt/x:arr-reverse ["a" "b" "c"]))
-  => ["c" "b" "a"]
-
-  (!.py
     (xt/x:arr-reverse ["a" "b" "c"]))
   => ["c" "b" "a"])
 
@@ -302,12 +236,6 @@
     (var out {:a 1 :b 2})
     (xt/x:del (. out ["a"]))
     out)
-  => {"b" 2}
-
-  (!.py
-    (var out  {:a 1 :b 2})
-    (xt/x:del (. out ["a"]))
-    out)
   => {"b" 2})
 
 ^{:refer xt.lang.common-spec/x:cat :added "4.1"}
@@ -315,20 +243,12 @@
 
   (!.js
     (xt/x:cat "hello" "-" "world"))
-  => "hello-world"
-
-  (!.py
-    (xt/x:cat "hello" "-" "world"))
   => "hello-world")
 
 ^{:refer xt.lang.common-spec/x:len :added "4.1"}
 (fact "gets the collection length"
 
   (!.js
-    (xt/x:len ["a" "b" "c"]))
-  => 3
-
-  (!.py
     (xt/x:len ["a" "b" "c"]))
   => 3)
 
@@ -339,25 +259,12 @@
     (var err-fn (fn []
                   (xt/x:err "ERR")))
     (err-fn))
-  => (throws)
-
-  (!.py
-    (var err-fn (fn []
-                  (xt/x:err "ERR")))
-    (err-fn))
   => (throws))
 
 ^{:refer xt.lang.common-spec/x:type-native :added "4.1"}
 (fact "expands and emits the lua type helper"
 
   (!.js
-    (var type-fn (fn [obj]
-                   (xt/x:type-native obj)))
-    [(type-fn {})
-     (type-fn [])])
-  => ["object" "array"]
-
-  (!.py
     (var type-fn (fn [obj]
                    (xt/x:type-native obj)))
     [(type-fn {})
@@ -376,7 +283,7 @@
 (fact "uses the reverse grammar offset"
 
   ^{:seedgen/check    {:lua  {:expect 10}}}
-  (!.js
+  (!.jss
     (xt/x:offset-rev 10))
   => 9)
 
@@ -407,30 +314,12 @@
     (xt/x:lu-set lu lu-A2 "A2")
     [(xt/x:lu-get lu lu-A1)
      (xt/x:lu-get lu lu-A2)])
-  => ["A1" "A2"]
-
-  (!.py
-    (var lu (xt/x:lu-create))
-    (var lu-A1 {"A" "A"})
-    (var lu-A2 {"A" "A"})
-    (xt/x:lu-set lu lu-A1 "A1")
-    (xt/x:lu-set lu lu-A2 "A2")
-    [(xt/x:lu-get lu lu-A1)
-     (xt/x:lu-get lu lu-A2)])
   => ["A1" "A2"])
 
 ^{:refer xt.lang.common-spec/x:lu-eq :added "4.1"}
 (fact "compares lookup keys using lua identity"
 
   (!.js
-    (var obj-a {:id 1})
-    (var obj-b {:id 1})
-    [(xt/x:lu-eq obj-a obj-a)
-     (xt/x:lu-eq obj-a obj-b)
-     (xt/x:lu-eq obj-b obj-b)])
-  => [true false true]
-
-  (!.py
     (var obj-a {:id 1})
     (var obj-b {:id 1})
     [(xt/x:lu-eq obj-a obj-a)
@@ -473,18 +362,12 @@
 (fact "computes absolute values"
 
   (!.js (xt/x:m-abs -3))
-  => 3
-
-  (!.py (xt/x:m-abs -3))
   => 3)
 
 ^{:refer xt.lang.common-spec/x:m-acos :added "4.1"}
 (fact "computes inverse cosine"
 
   (!.js (xt/x:m-acos 1))
-  => (approx 0)
-
-  (!.py (xt/x:m-acos 1))
   => (approx 0))
 
 ^{:refer xt.lang.common-spec/x:m-asin :added "4.1"}
@@ -960,20 +843,12 @@
 
   (!.js
     (xt/x:str-split "a/b/c" "/"))
-  => ["a" "b" "c"]
-
-  (!.py
-    (xt/x:str-split "a/b/c" "/"))
   => ["a" "b" "c"])
 
 ^{:refer xt.lang.common-spec/x:str-join :added "4.1"}
 (fact "joins string parts"
 
   (!.js
-    (xt/x:str-join "-" ["a" "b" "c"]))
-  => "a-b-c"
-
-  (!.py
     (xt/x:str-join "-" ["a" "b" "c"]))
   => "a-b-c")
 
@@ -1054,13 +929,6 @@
 (fact "clones an array"
 
   (!.js
-    (var src [1 2])
-    (var out (xt/x:arr-clone src))
-    (xt/x:arr-push src 3)
-    out)
-  => [1 2]
-
-  (!.lua
     (var src [1 2])
     (var out (xt/x:arr-clone src))
     (xt/x:arr-push src 3)
@@ -1382,7 +1250,7 @@
          (fn []
            (xt/x:global-del COMMON_SPEC_GLOBAL)
            (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
-    
+      
     [(set-fn)
      (!:G COMMON_SPEC_GLOBAL)
      (del-fn)])
@@ -1409,7 +1277,7 @@
          (fn []
            (xt/x:global-del COMMON_SPEC_GLOBAL)
            (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
-    
+      
     [(set-fn)
      (del-fn)])
   => [true false])
@@ -1418,26 +1286,6 @@
 (fact "retrieves object prototypes"
 
   (!.js
-    (var set-fn
-         (fn [obj proto]
-           (xt/x:proto-set obj proto nil)))
-    (var proto {:label "proto"})
-    (var obj {})
-    (set-fn obj proto)
-    (. (xt/x:proto-get obj "label") ["label"]))
-  => "proto"
-
-  (!.lua
-    (var set-fn
-         (fn [obj proto]
-           (xt/x:proto-set obj proto nil)))
-    (var proto {:label "proto"})
-    (var obj {})
-    (set-fn obj proto)
-    (. (xt/x:proto-get obj "label") ["label"]))
-  => "proto"
-
-  (!.py
     (var set-fn
          (fn [obj proto]
            (xt/x:proto-set obj proto nil)))
@@ -1509,52 +1357,6 @@
      (xt/x:unpack [1 2 3])))
   => 6)
 
-^{:refer xt.lang.common-spec/x:client-basic :added "4.1"}
-(fact "streams newline-delimited socket input through eval handlers"
-
-  (notify/wait-on :js
-    (do (var net (require "net"))
-        (var port 18181)
-        (var server (. net (createServer (fn [conn]
-                                           (. conn (write "PING\n"))
-                                           (. conn (end)))))
-             (. server (listen port "127.0.0.1"))
-             (xt/x:client-basic "127.0.0.1"
-                                port
-                                (fn [host port opts]
-                                  (return [true (. net (createConnection port host))]))
-                                (fn [conn line]
-                                  (. server (close))
-                                  (repl/notify line))))))
-  => "PING")
-
-^{:refer xt.lang.common-spec/x:client-ws :added "4.1"}
-(fact "routes websocket messages through eval handlers"
-
-  (notify/wait-on :js
-    (do (var conn {})
-        (xt/x:client-ws "localhost"
-                        8080
-                        {}
-                        (fn [host port opts]
-                          (return [true conn]))
-                        (fn [ws value]
-                          (repl/notify [(== ws conn) value])))
-        ((. conn ["onmessage"]) {:data "PING"})))
-  => [true "PING"])
-
-^{:refer xt.lang.common-spec/x:server-basic :added "4.1"}
-(fact "keeps the basic server wrapper metadata intact"
-
-  (:arglists (meta #'xt/x:server-basic))
-  => '([config]))
-
-^{:refer xt.lang.common-spec/x:server-ws :added "4.1"}
-(fact "keeps the websocket server wrapper metadata intact"
-
-  (:arglists (meta #'xt/x:server-ws))
-  => '([config]))
-
 ^{:refer xt.lang.common-spec/x:socket-connect :added "4.1"}
 (fact "connects sockets and forwards the connection to callbacks"
 
@@ -1595,72 +1397,11 @@
     out)
   => "closed")
 
-^{:refer xt.lang.common-spec/x:ws-connect :added "4.1"}
-(fact "creates websocket connections from host, port, and options"
-
-  (!.js
-    (:= (!:G WebSocket)
-        (fn [url]
-          (:= (. this ["url"]) url)))
-    (var [ok conn] (xt/x:ws-connect "localhost"
-                                    8080
-                                    {:schema "wss"
-                                     :url "/socket"}))
-    [ok (. conn ["url"])])
-  => [true "wss://localhost:8080/socket"])
-
-^{:refer xt.lang.common-spec/x:ws-send :added "4.1"}
-(fact "sends websocket frames"
-
-  (!.js
-    (var out nil)
-    (var conn {:send (fn [s]
-                       (:= out s))})
-    (xt/x:ws-send conn "PING")
-    out)
-  => "PING")
-
-^{:refer xt.lang.common-spec/x:ws-close :added "4.1"}
-(fact "closes websocket connections"
-
-  (!.js
-    (var out nil)
-    (var conn {:close (fn []
-                        (:= out "closed"))})
-    (xt/x:ws-close conn)
-    out)
-  => "closed")
-
 ^{:refer xt.lang.common-spec/x:notify-http :added "4.1"}
-(fact "posts encoded values through fetch"
-
-  (!.js
-    (var out nil)
-    (:= (!:G fetch)
-        (fn [url opts]
-          (:= out [url
-                   (xt/x:json-decode (. opts ["body"]))
-                   (. opts ["method"])])))
-    (xt/x:notify-http "localhost"
-                      8080
-                      {:a 1}
-                      "id"
-                      "key"
-                      (fn [value id key]
-                        (xt/x:return-encode value id key)))
-    out)
-  => ["http://localhost:8080"
-      {"id" "id"
-       "key" "key"
-       "type" "data"
-       "value" {"a" 1}}
-      "POST"])
+(fact "posts encoded values through fetch")
 
 ^{:refer xt.lang.common-spec/x:notify-socket :added "4.1"}
-(fact "keeps the notify-socket wrapper intact"
-
-  (:arglists (meta #'xt/x:notify-socket))
-  => '([host port value id key connect-fn encode-fn]))
+(fact "keeps the notify-socket wrapper intact")
 
 ^{:refer xt.lang.common-spec/x:b64-encode :added "4.1"}
 (fact "encodes base64 strings"

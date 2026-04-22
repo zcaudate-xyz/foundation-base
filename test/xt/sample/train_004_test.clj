@@ -212,8 +212,7 @@
   (identity (!.js 1))
   => 1
 
-  ^{:seedgen/base      true
-    :seedgen/lang     {:python {:suppress true}}}
+  ^{:seedgen/base     {:python {:suppress true}}}
   (identity (!.js 2))
   => 2)
 
@@ -226,8 +225,7 @@
   (identity (!.js 1))
   => 1
 
-  ^{:seedgen/base      true
-    :seedgen/lang     {:python {:suppress true}}}
+  ^{:seedgen/base     {:python {:suppress true}}}
   (identity (!.js 2))
   => 2
 
@@ -249,7 +247,7 @@
 ^{:refer xt.lang.common-spec/example-f :added "4.1"}
 (fact "expect can be customised"
 
-  ^{:seedgen/check    {:lua  {:expect 11}}}
+  ^{:seedgen/base    {:lua  {:expect 11}}}
   (!.js    
     (xt/x:offset 10))
   => 10)
@@ -260,7 +258,7 @@
 (fact "expect can be customised"
 
 
-  ^{:seedgen/check    {:lua  {:expect 11}}}
+  ^{:seedgen/base    {:lua  {:expect 11}}}
   (!.js    
     (xt/x:offset 10))
   => 10
@@ -276,26 +274,26 @@
 
 
 
-;; EXAMPLE F --------------------
+;; EXAMPLE Fa --------------------
 ;; (seedgen/langadd {:lang [:lua :python]}) should generate
 
 ;; BEFORE
-^{:refer xt.lang.common-spec/example-f :added "4.1"}
+^{:refer xt.lang.common-spec/example-fa :added "4.1"}
 (fact "expect can be customised"
 
-  ^{:seedgen/check    {:lua  {:input (xt/x:offest 9)}}}
+  ^{:seedgen/base    {:lua  {:input (xt/x:offest 9)}}}
   (!.js    
     (xt/x:offset 10))
   => 10)
 
 
 ;; AFTER
-^{:refer xt.lang.common-spec/example-f :added "4.1"}
+^{:refer xt.lang.common-spec/example-fa :added "4.1"}
 (fact "expect can be customised"
 
 
-  ^{:seedgen/check    {:lua  {:input (xt/x:offest
-                                      9)}}}
+  ^{:seedgen/base    {:lua  {:input (xt/x:offest
+                                     9)}}}
   (!.js    
     (xt/x:offset 10))
   => 10
@@ -308,3 +306,53 @@
   (!.py    
     (xt/x:offset 10))
   => 10)
+
+
+
+
+;; EXAMPLE G --------------------
+;; (seedgen/langadd {:lang [:lua :python]}) should generate
+
+;; BEFORE
+^{:refer xt.lang.common-spec/example-g :added "4.1"
+  :setup [^{:seedgen/base      {:lua   {:input
+                                        (!.lua
+                                          (do (a)
+                                              (b)
+                                              (c)))}
+                                :lua   {:input
+                                        (setup-python)}}}
+          (!.js
+            (setup-js))]}
+(fact "any form is allowed with :seedgen/base meta"
+
+  ^{:seedgen/base         {:lua   {:suppress true}}}  ;; can be a map or keyword
+  [(!.js 1)
+   (inc 0)
+   (notify/wait-on :js
+     (repl/notify 1))]
+  => [1 1])
+
+;; AFTER
+^{:refer xt.lang.common-spec/example-g :added "4.1"}
+(fact "any form is allowed with :seedgen/base meta"
+
+  ^{:seedgen/base       true}
+  [(!.js 1)
+   (inc 0)
+   (notify/wait-on :js
+     (repl/notify 1))]
+  => [1 1]
+
+  [(!.lua 1)
+   (inc 0)
+   (notify/wait-on :lua
+     (repl/notify 1))]
+  => [1 1]
+
+
+  [(!.py 1)
+   (inc 0)
+   (notify/wait-on :python
+     (repl/notify 1))]
+  => [1 1])

@@ -112,6 +112,17 @@
           nav/root-string)
       script-str)))
 
+(defn- replace-ns-name-string
+  [ns-str new-ns]
+  (let [root     (nav/parse-root ns-str)
+        ns-nav   (some-> root nav/down)
+        name-nav (some-> ns-nav nav/down nav/right)]
+    (if name-nav
+      (-> name-nav
+          (nav/replace new-ns)
+          nav/root-string)
+      ns-str)))
+
 (defn- replace-runtime-lang-content-string
   [expr-str expr-form lang]
   (let [target-lang (common/seedgen-normalize-runtime-lang lang)
@@ -349,7 +360,7 @@
        distinct
        vec))
 
-(defn- root-script-meta-langs
+(defn root-script-meta-langs
   [output]
   (some-> output
           (get-in [:globals :global-script :root])
@@ -358,6 +369,15 @@
           :seedgen/root
           :langs
           normalize-target-langs))
+
+(defn- keep-target-items
+  [classification lang]
+  (->> (form-common/item-classify-langs classification)
+       (filter (fn [item]
+                 (let [item-lang (item-lang item)]
+                   (or (nil? item-lang)
+                       (= lang item-lang)))))
+       vec))
 
 (defn- render-check-clause
   [item]
@@ -664,6 +684,177 @@
                         :else
                         [current])))
                   top-navs))
+         "\n")))
+
+(defn- render-check-snippets-target
+  [entry root-lang lang]
+  (let [root-checks     (vec (sort-items (get-in entry [:checks :root])))
+        derived-by-lang (->> (get-in entry [:checks :derived])
+                             sort-items
+                             (group-by item-lang))]
+    (if (= lang root-lang)
+      (mapv render-check-clause root-checks)
+      (let [existing       (vec (get derived-by-lang lang))
+            eligible-roots (vec (remove #(item-suppressed? % lang) root-checks))
+            generated      (map-indexed
+                            (fn [idx root-item]
+                              (if-let [item (nth existing idx nil)]
+                                (render-check-clause item)
+                                (render-generated-check-clause root-item lang)))
+                            eligible-roots)
+            trailing       (map render-check-clause
+                                (drop (count eligible-roots) existing))]
+        (vec (concat (remove nil? generated)
+                     trailing))))))
+
+(defn- render-target-runtime-item
+  [classification root-lang lang]
+  (let [runtime-items (runtime-item-map classification)
+        target-item   (get runtime-items lang)
+        root-item     (get runtime-items root-lang)]
+    (or (some-> target-item render-item-string)
+        (when (and root-item
+                   (not= lang root-lang))
+          (replace-runtime-lang-string (render-item-string root-item)
+                                       lang)))))
+
+(defn- render-fact-string-target
+  [entry root-lang lang]
+  (let [check-snippets   (render-check-snippets-target entry root-lang lang)
+        setup-str        (render-target-runtime-item (:fact-setup entry) root-lang lang)
+        teardown-str     (render-target-runtime-item (:fact-teardown entry) root-lang lang)
+        setup-render     (when setup-str
+                           (render-vector-string :setup [setup-str]))
+        teardown-render  (when teardown-str
+                           (render-vector-string :teardown [teardown-str]))]
+    (when (seq check-snippets)
+      (let [meta-string (render-meta-string (cond-> (entry-meta entry)
+                                              setup-render (assoc :setup [])
+                                              teardown-render (assoc :teardown []))
+                                            {:setup setup-render
+                                             :teardown teardown-render})
+            fact-body   (str "(fact " (pr-str (:intro entry))
+                             "\n\n"
+                             (str/join "\n\n" check-snippets)
+                             ")")]
+        (if meta-string
+          (str meta-string "\n" fact-body)
+          fact-body)))))
+
+(defn- render-global-fact-target
+  [output root-lang lang]
+  (let [setup-str       (render-target-runtime-item (get-in output [:globals :global-fact-setup])
+                                                    root-lang
+                                                    lang)
+        teardown-str    (render-target-runtime-item (get-in output [:globals :global-fact-teardown])
+                                                    root-lang
+                                                    lang)
+        setup-render    (when setup-str
+                          (render-vector-string :setup [setup-str]))
+        teardown-render (when teardown-str
+                          (render-vector-string :teardown [teardown-str]))]
+    (when (or setup-render teardown-render)
+      (str "(fact:global\n "
+           (render-map-string {:setup setup-render
+                               :teardown teardown-render})
+           ")"))))
+
+(defn- render-global-top-target
+  [output lang]
+  (let [all-items (form-common/item-classify-langs (get-in output [:globals :global-top]))
+        keep-map  (->> (keep-target-items (get-in output [:globals :global-top]) lang)
+                       (map (fn [item]
+                              [(line-key (item-line item))
+                               (render-item-string item)]))
+                       (into {}))]
+    {:all-lines (->> all-items
+                     (map item-line)
+                     (map line-key)
+                     set)
+     :keep-map keep-map}))
+
+(defn- render-target-script-string
+  [output lang]
+  (let [root-lang   (get-in output [:globals :lang :root])
+        derived-map (->> (get-in output [:globals :global-script :derived])
+                         (keep (fn [item]
+                                 (let [item-lang (some-> item
+                                                         item-value
+                                                         second
+                                                         common/seedgen-normalize-runtime-lang)]
+                                   (when item-lang
+                                     [item-lang item]))))
+                         (into {}))]
+    (cond
+      (= lang root-lang)
+      (root-script-body-string output)
+
+      (get derived-map lang)
+      (some-> (get derived-map lang)
+              item-string
+              unwrap-meta-string)
+
+      :else
+      (some-> (root-script-body-string output)
+              (replace-script-lang-string lang)))))
+
+(defn render-top-level-target
+  [output text lang target-ns]
+  (let [root             (nav/parse-root text)
+        top-navs         (form-common/nav-top-levels root)
+        root-entry       (get-in output [:globals :global-script :root])
+        root-lang        (get-in output [:globals :lang :root])
+        root-script-line (some-> root-entry item-line line-key)
+        derived-lines    (->> (get-in output [:globals :global-script :derived])
+                              (map item-line)
+                              (map line-key)
+                              set)
+        fact-entries     (->> (get output :entries)
+                              vals
+                              (mapcat vals))
+        fact-by-refer    (into {}
+                               (map (fn [entry]
+                                      [(symbol (str (:ns entry)) (str (:var entry))) entry]))
+                               fact-entries)
+        {:keys [all-lines keep-map]} (render-global-top-target output lang)
+        script-string    (render-target-script-string output lang)]
+    (str (str/join
+          "\n\n"
+          (keep (fn [zloc]
+                  (let [line    (line-key (nav/line-info zloc))
+                        current (block/block-string (nav/block zloc))
+                        body    (form-common/nav-body zloc)
+                        form    (nav/value zloc)
+                        head    (when (seq? (nav/value body))
+                                  (first (nav/value body)))
+                        refer   (:refer (meta form))]
+                    (cond
+                      (and (seq? form)
+                           (= 'ns (first form)))
+                      (replace-ns-name-string current target-ns)
+
+                      (= line root-script-line)
+                      script-string
+
+                      (contains? derived-lines line)
+                      nil
+
+                      (= 'fact:global head)
+                      (render-global-fact-target output root-lang lang)
+
+                      (and (= 'fact head)
+                           refer
+                           (contains? fact-by-refer refer))
+                      (render-fact-string-target (get fact-by-refer refer)
+                                                 root-lang
+                                                 lang)
+
+                      (contains? all-lines line)
+                      (get keep-map line)
+
+                      :else
+                      current)))
+                top-navs))
          "\n")))
 
 (defn seedgen-langadd
