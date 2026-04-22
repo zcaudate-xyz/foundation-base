@@ -324,29 +324,14 @@
                  [lang item])))
        (into {})))
 
-(defn- item-lang-config
-  [item]
-  (some-> item item-value common/seedgen-lang-config))
-
-(defn- item-check-config
-  [item]
-  (some->> item
-           item-value
-           meta
-           :seedgen/check
-           (map (fn [[lang config]]
-                  [(common/seedgen-normalize-runtime-lang lang) config]))
-           (into {})))
-
 (defn- item-suppressed?
   [item lang]
-  (true? (get-in (item-lang-config item)
-                 [(common/seedgen-normalize-runtime-lang lang) :suppress])))
+  (true? (:suppress (common/seedgen-lang-entry (item-value item) lang))))
 
-(defn- item-check-override
+(defn- item-base-override
   [item lang key]
-  (get-in (item-check-config item)
-          [(common/seedgen-normalize-runtime-lang lang) key]))
+  (get (common/seedgen-lang-entry (item-value item) lang)
+       key))
 
 (defn- fact-original-body-string
   [original-string]
@@ -385,32 +370,45 @@
                          (render-item-string item)
                          (some-> item :expected render-item-string)))
 
+(defn- render-generated-item-string
+  [root-item lang]
+  (let [input-override (item-base-override root-item lang :input)]
+    (if input-override
+      (let [base-str  (replace-runtime-lang-string
+                       (render-item-string root-item)
+                       lang)
+            root      (nav/parse-root base-str)
+            expr-nav   (some-> root nav/down form-common/nav-body)
+            expr-form  (some-> expr-nav nav/value)]
+        (cond
+          (common/seedgen-dispatch-lang input-override)
+          (strip-seedgen-control-meta-string
+           (pr-str input-override))
+
+          (common/seedgen-dispatch-lang expr-form)
+          (if-let [body-nav (some-> expr-nav nav/down nav/right)]
+            (-> body-nav
+                (nav/replace input-override)
+                nav/root-string)
+            base-str)
+
+          :else
+          (strip-seedgen-control-meta-string
+           (pr-str input-override))))
+      (replace-runtime-lang-string
+       (render-item-string root-item)
+       lang))))
+
 (defn- render-generated-check-clause
   [root-item lang]
-  (let [input-override  (item-check-override root-item lang :input)
-        expect-override (item-check-override root-item lang :expect)
-        expr-str        (if input-override
-                          (let [base-str  (replace-runtime-lang-string
-                                           (render-item-string root-item)
-                                           lang)
-                                root     (nav/parse-root base-str)
-                                expr-nav  (some-> root nav/down form-common/nav-body)
-                                expr-form (some-> expr-nav nav/value)]
-                            (if (common/seedgen-dispatch-lang expr-form)
-                              (if-let [body-nav (some-> expr-nav nav/down nav/right)]
-                                (-> body-nav
-                                    (nav/replace input-override)
-                                    nav/root-string)
-                                base-str)
-                              (strip-seedgen-control-meta-string
-                               (pr-str input-override))))
-                          (replace-runtime-lang-string
-                           (render-item-string root-item)
-                           lang))
+  (let [expr-str        (render-generated-item-string root-item lang)
+        expect-override (item-base-override root-item lang :expect)
         expected-str    (if (nil? expect-override)
                           (some-> root-item :expected render-item-string)
                           (pr-str expect-override))]
     (render-clause-snippet "  " expr-str expected-str)))
+
+(declare render-target-runtime-item)
 
 (defn- render-check-snippets-add
   [entry ordered-extra-langs target-set]
@@ -445,33 +443,29 @@
     (if (empty? root-checks)
         original-string
        (let [final-langs     (vec (cons root-lang ordered-extra-langs))
-              root-check      (first root-checks)
-              check-snippets  (render-check-snippets-add entry ordered-extra-langs target-set)
-              setup-items     (runtime-item-map (:fact-setup entry))
-              teardown-items  (runtime-item-map (:fact-teardown entry))
-              root-setup      (some-> (get setup-items root-lang) render-item-string)
-              root-teardown   (some-> (get teardown-items root-lang) render-item-string)
-              setup-render    (when root-setup
-                                (render-vector-string
-                                 :setup
-                                 (mapv (fn [lang]
-                                         (or (some-> (get setup-items lang) render-item-string)
-                                            (when (contains? target-set lang)
-                                               (replace-runtime-lang-string root-setup lang))))
-                                       final-langs)))
-             teardown-render (when root-teardown
-                               (render-vector-string
-                                :teardown
-                                (mapv (fn [lang]
-                                        (or (some-> (get teardown-items lang) render-item-string)
-                                            (when (contains? target-set lang)
-                                               (replace-runtime-lang-string root-teardown lang))))
-                                       final-langs)))
-            meta-string     (render-meta-string (cond-> (entry-meta entry)
-                                                 setup-render (assoc :setup [])
-                                                 teardown-render (assoc :teardown []))
-                                                {:setup setup-render
-                                                 :teardown teardown-render})
+               root-check      (first root-checks)
+               check-snippets  (render-check-snippets-add entry ordered-extra-langs target-set)
+               setup-render    (let [items (->> final-langs
+                                                (keep (fn [lang]
+                                                        (render-target-runtime-item (:fact-setup entry)
+                                                                                    root-lang
+                                                                                    lang)))
+                                                vec)]
+                                 (when (seq items)
+                                   (render-vector-string :setup items)))
+              teardown-render (let [items (->> final-langs
+                                               (keep (fn [lang]
+                                                       (render-target-runtime-item (:fact-teardown entry)
+                                                                                   root-lang
+                                                                                   lang)))
+                                               vec)]
+                                (when (seq items)
+                                  (render-vector-string :teardown items)))
+             meta-string     (render-meta-string (cond-> (entry-meta entry)
+                                                  setup-render (assoc :setup [])
+                                                  teardown-render (assoc :teardown []))
+                                                 {:setup setup-render
+                                                  :teardown teardown-render})
               fact-body       (str "(fact " (pr-str (:intro entry))
                                    "\n\n"
                                    (str/join "\n\n" check-snippets)
@@ -715,8 +709,7 @@
     (or (some-> target-item render-item-string)
         (when (and root-item
                    (not= lang root-lang))
-          (replace-runtime-lang-string (render-item-string root-item)
-                                       lang)))))
+          (render-generated-item-string root-item lang)))))
 
 (defn- render-fact-string-target
   [entry root-lang lang]

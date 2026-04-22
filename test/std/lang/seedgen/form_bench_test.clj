@@ -150,9 +150,9 @@
                       "            [xt.lang.common-spec :as xt]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:lua]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
-                      "^{:refer xt.lang.common-spec/example.F-expect :added \"4.1\"}\n"
+                      "^{:refer xt.lang.common-spec/example-f :added \"4.1\"}\n"
                       "(fact \"expect can be customised\"\n\n"
-                      "  ^{:seedgen/check {:lua {:expect 11}}}\n"
+                      "  ^{:seedgen/base {:lua {:expect 11}}}\n"
                       "  (!.js\n"
                       "    (xt/x:offset 10))\n"
                       "  => 10)\n"))
@@ -165,7 +165,40 @@
       (slurp (str (fs/path root "test/samplebench/lua/sample/derived_test.clj")))
       (finally
         (fs/delete root {:recursive true}))))
-  => "(ns samplebench.lua.sample.derived-test\n  (:use code.test)\n  (:require [std.lang :as l]\n            [xt.lang.common-spec :as xt]))\n\n(l/script- :lua {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example.F-expect :added \"4.1\"}\n(fact \"expect can be customised\"\n\n  (!.lua\n    (xt/x:offset 10))\n  => 11)\n")
+  => "(ns samplebench.lua.sample.derived-test\n  (:use code.test)\n  (:require [std.lang :as l]\n            [xt.lang.common-spec :as xt]))\n\n(l/script- :lua {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example-f :added \"4.1\"}\n(fact \"expect can be customised\"\n\n  (!.lua\n    (xt/x:offset 10))\n  => 11)\n")
+
+^{:refer std.lang.seedgen.form-bench/seedgen-benchadd :added "4.1"}
+(fact "renders bench setup outcomes using unified seedgen base overrides"
+  (let [root    (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-setup"
+                                                                  (make-array java.nio.file.attribute.FileAttribute 0)))
+        test-dir (doto (java.io.File. root "test/sample")
+                   (.mkdirs))
+        path    (.getAbsolutePath (java.io.File. test-dir "setup_test.clj"))
+        lookup  {'xt.sample.setup-test path}
+        project {:root (.getAbsolutePath root)
+                 :test-paths ["test"]}]
+    (try
+      (spit path (str "(ns xt.sample.setup-test\n"
+                      "  (:use code.test)\n"
+                      "  (:require [std.lang :as l]))\n\n"
+                      "^{:seedgen/root {:all true, :langs [:lua]}}\n"
+                      "(l/script- :js {:runtime :basic})\n\n"
+                      "^{:refer xt.lang.common-spec/example-g :added \"4.1\"\n"
+                      "  :setup [^{:seedgen/base {:lua {:input (!.lua (setup-lua))}}}\n"
+                      "          (!.js (setup-js))]}\n"
+                      "(fact \"setup bench outcomes\"\n\n"
+                      "  (!.js 1)\n"
+                      "  => 1)\n"))
+      (form-bench/seedgen-benchadd 'xt.sample.setup-test
+                                   {:rename '{xt [samplebench :lang]}
+                                    :lang [:lua]
+                                    :write true}
+                                   lookup
+                                   project)
+      (slurp (str (fs/path root "test/samplebench/lua/sample/setup_test.clj")))
+      (finally
+        (fs/delete root {:recursive true}))))
+  => "(ns samplebench.lua.sample.setup-test\n  (:use code.test)\n  (:require [std.lang :as l]))\n\n(l/script- :lua {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example-g :added \"4.1\"\n  :setup [(!.lua (setup-lua))]}\n(fact \"setup bench outcomes\"\n\n  (!.lua 1)\n  => 1)\n")
 
 ^{:refer std.lang.seedgen.form-bench/seedgen-benchremove :added "4.1"}
 (fact "removes selected bench files while preserving other runtimes"

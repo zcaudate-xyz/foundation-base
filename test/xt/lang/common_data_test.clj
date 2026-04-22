@@ -2,10 +2,11 @@
  (:require [std.lang :as l])
  (:use code.test))
 
+^{:seedgen/root         {:all true}}
 (l/script- :js
- {:runtime :basic,
-  :require [[xt.lang.common-data :as xtd]
-            [xt.lang.common-spec :as xt]]})
+  {:runtime :basic,
+   :require [[xt.lang.common-data :as xtd]
+             [xt.lang.common-spec :as xt]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -13,7 +14,7 @@
 
 ^{:refer xt.lang.common-data/not-empty? :added "4.1"}
 (fact "checks that array is not empty"
-  
+
   (!.js
    [(xtd/not-empty? nil)
     (xtd/not-empty? "")
@@ -24,35 +25,9 @@
     (xtd/not-empty? {:a 1, :b 2})])
   => [false false true false true false true])
 
-
-^{:refer xt.lang.common-data/lu-del :added "4.1" :examples [0 2 3 :no-check 4]}
-(fact "deletes a lookup entry"
-
-  ^{:hello 0}        ;; meta is preserved     
-  (inc 1) => 2       ;; make sure comments are preserved  <- 0
-
-  (inc 2) => 5
-
-
-  ^{:hello 2}
-  (single-form-example)    ;; this is something with that does to have a check 
-
-  ^{:hello 3}
-  (no-check-example)       ;; this form is included but does not include the '=> :no-result'
-  => :no-result               
-
-  (inc 2)            ;; both comments should be preserved    <- 4
-  => 5               ;; comments after should also be preserved
-
-
-  (more...))
-
-
-
-
 ^{:refer xt.lang.common-data/lu-create :added "4.1"}
 (fact "creates a lookup table"
-  
+
   (!.js
    (var lu (xtd/lu-create))
    (xtd/lu-get lu "missing"))
@@ -60,7 +35,7 @@
 
 ^{:refer xt.lang.common-data/lu-del :added "4.1"}
 (fact "deletes a lookup entry"
-  
+
   (!.js
     (var lu (xtd/lu-create))
     (xtd/lu-set lu "a" 1)
@@ -70,7 +45,7 @@
 
 ^{:refer xt.lang.common-data/lu-get :added "4.1"}
 (fact "gets a lookup entry"
-  
+
   (!.js
    (var lu (xtd/lu-create))
    (xtd/lu-set lu "a" 1)
@@ -85,7 +60,7 @@
 
 ^{:refer xt.lang.common-data/lu-set :added "4.1"}
 (fact "sets a lookup entry"
-  
+
   (!.js
    (var lu (xtd/lu-create))
    (xtd/lu-set lu "a" 2)
@@ -94,7 +69,7 @@
 
 ^{:refer xt.lang.common-data/lu-eq :added "4.1"}
 (fact "checks lookup equality"
-  
+
   (!.js
    (var lu0 (xtd/lu-create))
    (var lu1 (xtd/lu-create))
@@ -110,32 +85,32 @@
 
 ^{:refer xt.lang.common-data/second :added "4.1"}
 (fact "gets the second item"
-  
+
   (!.js (xtd/second [1 2 3]))
   => 2)
 
 ^{:refer xt.lang.common-data/nth :added "4.1"}
 (fact "gets the nth item (index 0)"
-  
+
   (!.js [(xtd/nth [1 2 3] 0)
           (xtd/nth [1 2 3] 2)])
   => [1 3])
 
 ^{:refer xt.lang.common-data/last :added "4.1"}
 (fact "gets the last item"
-  
+
   (!.js (xtd/last [1 2 3]))
   => 3)
 
 ^{:refer xt.lang.common-data/second-last :added "4.1"}
 (fact "gets the second-last item"
-  
+
   (!.js (xtd/second-last [1 2 3]))
   => 2)
 
 ^{:refer xt.lang.common-data/arr-empty? :added "4.1"}
 (fact "checks that arrect is empty"
-  
+
   (!.js [(xtd/arr-empty? nil)
           (xtd/arr-empty? [])
           (xtd/arr-empty? [1])])
@@ -143,7 +118,7 @@
 
 ^{:refer xt.lang.common-data/arr-not-empty? :added "4.1"}
 (fact "checks that arrect is not empty"
-  
+
   (!.js [(xtd/arr-not-empty? nil)
           (xtd/arr-not-empty? [])
           (xtd/arr-not-empty? [1])])
@@ -151,38 +126,38 @@
 
 ^{:refer xt.lang.common-data/arrayify :added "4.1"}
 (fact "makes something into an array"
-  
+
   (!.js [(xtd/arrayify 1)
           (xtd/arrayify [1])])
   => [[1] [1]])
 
 ^{:refer xt.lang.common-data/arr-lookup :added "4.1"}
 (fact "constructs a lookup given keys"
-  
-  (set (!.js (xtd/obj-keys (xtd/arr-lookup ["a" "b"]))))
-  => #{"a" "b"})
+
+  (!.js (xtd/obj-keys (xtd/arr-lookup ["a" "b"])))
+  => (just ["a" "b"] :in-any-order))
 
 ^{:refer xt.lang.common-data/arr-omit :added "4.1"}
 (fact "emits index from new array"
-  
+
   (!.js (xtd/arr-omit [1 2 3] 1))
   => [1 3])
 
 ^{:refer xt.lang.common-data/arr-reverse :added "4.1"}
 (fact "reverses the array"
-  
+
   (!.js (xtd/arr-reverse [1 2 3]))
   => [3 2 1])
 
 ^{:refer xt.lang.common-data/arr-zip :added "4.1"}
 (fact "zips two arrays together into a map"
-  
+
   (!.js (xtd/arr-zip ["a" "b"] [1 2]))
   => {"a" 1, "b" 2})
 
 ^{:refer xt.lang.common-data/arr-clone :added "4.1"}
 (fact "clones an array"
-  
+
   (!.js
    (var src [1 2])
    (var out (xtd/arr-clone src))
@@ -192,13 +167,13 @@
 
 ^{:refer xt.lang.common-data/arr-assign :added "4.1"}
 (fact "appends to the end of an array"
-  
+
   (!.js (xtd/arr-assign [1 2] [3 4]))
   => [1 2 3 4])
 
 ^{:refer xt.lang.common-data/arr-concat :added "4.1"}
 (fact "concatenates arrays without mutating the input"
-  
+
   (!.js
    (var src [1 2])
    [(xtd/arr-concat src [3 4]) src])
@@ -206,13 +181,13 @@
 
 ^{:refer xt.lang.common-data/arr-slice :added "4.1"}
 (fact "slices an array"
-  
+
   (!.js (xtd/arr-slice [1 2 3 4] 1 3))
   => [2 3])
 
 ^{:refer xt.lang.common-data/arr-rslice :added "4.1"}
 (fact "gets the reverse of a slice"
-  
+
   (!.js (xtd/arr-rslice [1 2 3 4] 1 3))
   => [3 2])
 
@@ -220,13 +195,13 @@
   :added "4.1"
   :lang-exceptions {:dart {:skip true}}}
 (fact "gets the tail of the array"
-  
+
   (!.js (xtd/arr-tail [1 2 3 4] 2))
   => [4 3])
 
 ^{:refer xt.lang.common-data/arr-range :added "4.1"}
 (fact "creates a range array"
-  
+
   (!.js [(xtd/arr-range 5)
           (xtd/arr-range [2 6])
           (xtd/arr-range [2 7 2])])
@@ -235,98 +210,96 @@
 ^{:refer xt.lang.common-data/arr-intersection
   :added "4.1"}
 (fact "gets the intersection of two arrays"
-  
+
   (!.js (xtd/arr-intersection [1 2 3] [2 3 4]))
   => [2 3])
 
 ^{:refer xt.lang.common-data/arr-difference
   :added "4.1"}
 (fact "gets the difference of two arrays"
-  
+
   (!.js (xtd/arr-difference [1 2] [2 3 4]))
   => [3 4])
 
 ^{:refer xt.lang.common-data/arr-union :added "4.1"}
 (fact "gets the union of two arrays"
-  
-  (set (!.js (xtd/arr-union [1 2] [2 3])))
-  => #{1 2 3})
 
-^{:refer xt.lang.common-data/arr-shuffle
-  :added "4.1"}
+  (!.js (xtd/arr-union [1 2] [2 3]))
+  => (contains [1 2 3] :in-any-order))
+
+^{:refer xt.lang.common-data/arr-shuffle :added "4.1"}
 (fact "shuffles the array"
-  
-  (set (!.js (xtd/arr-shuffle [1 2 3])))
-  => #{1 2 3})
 
-^{:refer xt.lang.common-data/arr-pushl
-  :added "4.1"}
+  (!.js (xtd/arr-shuffle [1 2 3]))
+  => (contains [1 2 3] :in-any-order))
+
+^{:refer xt.lang.common-data/arr-pushl :added "4.1"}
 (fact "pushs an element into array"
-  
+
   (!.js (xtd/arr-pushl [1 2 3] 4 3))
   => [2 3 4])
 
 ^{:refer xt.lang.common-data/arr-pushr :added "4.1"}
 (fact "pushs an element into array"
-  
+
   (!.js (xtd/arr-pushr [1 2 3] 0 3))
   => [0 1 2])
 
 ^{:refer xt.lang.common-data/arr-interpose :added "4.1"}
 (fact "puts element between array"
-  
+
   (!.js (xtd/arr-interpose [1 2 3] 0))
   => [1 0 2 0 3])
 
 ^{:refer xt.lang.common-data/arr-random
   :added "4.1"}
 (fact "gets a random element from array"
-  
+
   (!.js (xtd/arr-random [1]))
   => 1)
 
 ^{:refer xt.lang.common-data/arr-sample
   :added "4.1"}
 (fact "samples array according to probability"
-  
+
   (!.js (xtd/arr-sample ["a" "b" "c"] [0 1 0]))
   => "b")
 
 ^{:refer xt.lang.common-data/obj-empty? :added "4.1"}
 (fact "checks that object is empty"
-  
+
   (!.js [(xtd/obj-empty? {})
           (xtd/obj-empty? {:a 1})])
   => [true false])
 
 ^{:refer xt.lang.common-data/obj-not-empty? :added "4.1"}
 (fact "checks that object is not empty"
-  
+
   (!.js [(xtd/obj-not-empty? {})
           (xtd/obj-not-empty? {:a 1})])
   => [false true])
 
 ^{:refer xt.lang.common-data/obj-first-key :added "4.1"}
 (fact "gets the first key"
-  
+
   (!.js (xtd/obj-first-key {:a 1}))
   => "a")
 
 ^{:refer xt.lang.common-data/obj-first-val :added "4.1"}
 (fact "gets the first val"
-  
+
   (!.js (xtd/obj-first-val {:a 1}))
   => 1)
 
 ^{:refer xt.lang.common-data/obj-assign-nested :added "4.1"}
 (fact "merges objects at a nesting level"
-  
+
   (!.js (xtd/obj-assign-nested {:a {:b 1}} {:a {:c 2}}))
   => {"a" {"b" 1, "c" 2}})
 
 ^{:refer xt.lang.common-data/obj-assign-with :added "4.1"}
 (fact "merges second into first given a function"
-  
+
   (!.js
    (xtd/obj-assign-with
     {:a 1, :b 2}
@@ -337,7 +310,7 @@
 ^{:refer xt.lang.common-data/obj-del
   :added "4.1"}
 (fact "deletes multiple keys"
-  
+
   (!.js (xtd/obj-del {:a 1, :b 2, :c 3} ["a" "c"]))
   => {"b" 2})
 
@@ -345,7 +318,7 @@
   :added "4.1"
   :lang-exceptions {:python {:skip true}}}
 (fact "obj del all"
-  
+
   (!.js
     (var out {:a 1, :b 2})
     (xtd/obj-del-all out)
@@ -354,49 +327,49 @@
 
 ^{:refer xt.lang.common-data/obj-pick :added "4.1"}
 (fact "select keys in object"
-  
+
   (!.js (xtd/obj-pick {:a 1, :b 2} ["a"]))
   => {"a" 1})
 
 ^{:refer xt.lang.common-data/obj-omit :added "4.1"}
 (fact "new object with missing keys"
-  
+
   (!.js (xtd/obj-omit {:a 1, :b 2} ["a"]))
   => {"b" 2})
 
 ^{:refer xt.lang.common-data/obj-transpose :added "4.1"}
 (fact "obj-transposes a map"
-  
+
   (!.js (xtd/obj-transpose {:a "x", :b "y"}))
   => {"x" "a", "y" "b"})
 
 ^{:refer xt.lang.common-data/obj-nest :added "4.1"}
 (fact "creates a nested object"
-  
+
   (!.js (xtd/obj-nest ["a" "b"] 1))
   => {"a" {"b" 1}})
 
 ^{:refer xt.lang.common-data/obj-keys :added "4.1"}
 (fact "gets keys of an object"
-  
-  (set (!.js (xtd/obj-keys {:a 1, :b 2})))
-  => #{"a" "b"})
+
+  (!.js (xtd/obj-keys {:a 1, :b 2}))
+  => (just ["a" "b"] :in-any-order))
 
 ^{:refer xt.lang.common-data/obj-vals :added "4.1"}
 (fact "gets vals of an object"
-  
-  (set (!.js (xtd/obj-vals {:a 1, :b 2})))
-  => #{1 2})
+
+  (!.js (xtd/obj-vals {:a 1, :b 2}))
+  => (just [1 2] :in-any-order))
 
 ^{:refer xt.lang.common-data/obj-pairs :added "4.1"}
 (fact "creates entry pairs from object"
-  
-  (set (!.js (xtd/obj-pairs {:a 1, :b 2})))
-  => #{["a" 1] ["b" 2]})
+
+  (!.js (xtd/obj-pairs {:a 1, :b 2}))
+  => (just [["a" 1] ["b" 2]] :in-any-order))
 
 ^{:refer xt.lang.common-data/obj-clone :added "4.1"}
 (fact "clones an object"
-  
+
   (!.js
    (var src {:a 1})
    (var out (xtd/obj-clone src))
@@ -406,21 +379,21 @@
 
 ^{:refer xt.lang.common-data/obj-assign :added "4.1"}
 (fact "merges key value pairs from into another"
-  
+
   (!.js (xtd/obj-assign {:a 1} {:b 2}))
   => {"a" 1, "b" 2})
 
 ^{:refer xt.lang.common-data/obj-from-pairs :added "4.1"}
 (fact "creates an object from pairs"
-  
+
   (!.js (xtd/obj-from-pairs [["a" 1] ["b" 2]]))
   => {"a" 1, "b" 2})
 
 ^{:refer xt.lang.common-data/get-in :added "4.1"}
 (fact "gets item in object"
-  
-(!.js [(xtd/get-in {:a {:b {:c 1}}} ["a" "b"])
-        (xtd/get-in {:a {:b {:c 1}}} ["a" "b" "c"])])
+
+  (!.js [(xtd/get-in {:a {:b {:c 1}}} ["a" "b"])
+          (xtd/get-in {:a {:b {:c 1}}} ["a" "b" "c"])])
   => [{"c" 1} 1])
 
 ^{:refer xt.lang.common-data/set-in
@@ -441,25 +414,27 @@
 
 ^{:refer xt.lang.common-data/obj-intersection :added "4.1"}
 (fact "finds the intersection between map lookups"
-  
-      (set (!.js (xtd/obj-intersection {:a true, :b true} {:b true, :c true})))
-  => #{"b"})
+
+  (!.js (xtd/obj-intersection {:a true, :b true} {:b true, :c true}))
+  => ["b"])
 
 ^{:refer xt.lang.common-data/obj-keys-nested :added "4.1"}
 (fact "gets nested keys"
-  
-  (set (!.js (xtd/obj-keys-nested {:a {:b 1, :c 2}} [])))
-  => #{[["a" "b"] 1] [["a" "c"] 2]})
+
+  (!.js (xtd/obj-keys-nested {:a {:b 1, :c 2}} []))
+  => (just [[["a" "b"] 1]
+            [["a" "c"] 2]]
+           :in-any-order))
 
 ^{:refer xt.lang.common-data/obj-difference :added "4.1"}
 (fact "finds the difference between two map lookups"
-  
-  (set (!.js (xtd/obj-difference {:a true, :b true} {:b true, :c true})))
-  => #{"c"})
+
+  (!.js (xtd/obj-difference {:a true, :b true} {:b true, :c true}))
+  => ["c"])
 
 ^{:refer xt.lang.common-data/swap-key :added "4.1"}
 (fact "swaps a value in the key with a function"
-  
+
   (!.js
    (var out {:a 1})
    (xtd/swap-key out "a" (fn [x y] (return (+ x y))) [2])
@@ -468,14 +443,14 @@
 
 ^{:refer xt.lang.common-data/to-flat :added "4.1"}
 (fact "flattens pairs of object into array"
-  
+
   (!.js (xtd/to-flat [["a" 1] ["b" 2]]))
   => ["a" 1 "b" 2])
 
 ^{:refer xt.lang.common-data/from-flat
   :added "4.1"}
 (fact "creates object from flattened pair array"
-  
+
   (!.js
    (xtd/from-flat
      ["a" 1 "b" 2]
@@ -485,7 +460,7 @@
 
 ^{:refer xt.lang.common-data/eq-nested-basic :added "4.1"}
 (fact "basic shallow equality comparator"
-  
+
   (!.js [(xtd/eq-nested-basic 1 1 nil nil nil)
           (xtd/eq-nested-basic 1 2 nil nil nil)])
   => [true false])
@@ -494,7 +469,7 @@
   :added "4.1"
   }
 (fact "switch for nested check"
-  
+
   (!.js
    [(xtd/eq-nested-loop {:a 1} {:a 1} xtd/eq-nested-obj xtd/eq-nested-arr nil)
     (xtd/eq-nested-loop {:a 1} {:a 2} xtd/eq-nested-obj xtd/eq-nested-arr nil)])
@@ -504,7 +479,7 @@
   :added "4.1"
   }
 (fact "checks object equality"
-  
+
   (!.js
    [(xtd/eq-nested-obj {:a 1} {:a 1} xtd/eq-nested-obj xtd/eq-nested-arr (xtd/lu-create))
     (xtd/eq-nested-obj {:a 1} {:a 2} xtd/eq-nested-obj xtd/eq-nested-arr (xtd/lu-create))])
@@ -514,7 +489,7 @@
   :added "4.1"
   }
 (fact "checks array equality"
-  
+
   (!.js
    [(xtd/eq-nested-arr [1 2] [1 2] xtd/eq-nested-obj xtd/eq-nested-arr (xtd/lu-create))
     (xtd/eq-nested-arr [1 2] [2 1] xtd/eq-nested-obj xtd/eq-nested-arr (xtd/lu-create))])
@@ -524,7 +499,7 @@
   :added "4.1"
   }
 (fact "checks for nested equality"
-  
+
   (!.js
    [(xtd/eq-nested {:a {:b {:c 1}}} {:a {:b {:c 1}}})
     (xtd/eq-nested {:a {:b {:c 1}}} {:a {:b {:c 2}}})
@@ -536,7 +511,7 @@
   :added "4.1"
   :lang-exceptions {:python {:skip true}}}
 (fact "checks for shallow equality"
-  
+
   (!.js
    (var arr [1])
    [(xtd/eq-shallow arr arr)
@@ -547,7 +522,7 @@
   :added "4.1"
   :lang-exceptions {:python {:skip true}}}
 (fact "walks over object"
-  
+
   (!.js
    (xtd/tree-walk
     {:a 1, :b [2 {:c 3}]}
@@ -562,7 +537,7 @@
   :added "4.1"
   }
 (fact "diffs only keys within map"
-  
+
   (!.js (xtd/tree-diff {:a 1, :b 2} {:a 1, :c 2}))
   => {"c" 2})
 
@@ -570,7 +545,7 @@
   :added "4.1"
   }
 (fact "diffs nested keys within map"
-  
+
   (!.js
    [(xtd/tree-diff-nested {:a 1, :b 2} {:a 1, :c 2})
     (xtd/tree-diff-nested {:a 1, :b {:c 3}} {:a 1, :b {:d 3}})
@@ -579,7 +554,7 @@
 
 ^{:refer xt.lang.common-data/arr-every :added "4.1"}
 (fact "checks that every element fulfills thet predicate"
-  
+
   (!.js
    [(xtd/arr-every [2 4 6] (fn [x] (return (== 0 (mod x 2)))))
     (xtd/arr-every [2 3 6] (fn [x] (return (== 0 (mod x 2)))))])
@@ -587,7 +562,7 @@
 
 ^{:refer xt.lang.common-data/arr-some :added "4.1"}
 (fact "checks that the array contains an element"
-  
+
   (!.js
    [(xtd/arr-some [1 3 5] (fn [x] (return (== 0 (mod x 2)))))
     (xtd/arr-some [1 2 5] (fn [x] (return (== 0 (mod x 2)))))])
@@ -595,7 +570,7 @@
 
 ^{:refer xt.lang.common-data/arr-each :added "4.1"}
 (fact "performs a function call for each element"
-  
+
   (!.js
    (var out [])
    (xtd/arr-each [1 2 3] (fn [x] (xt/x:arr-push out (+ x 1))))
@@ -604,7 +579,7 @@
 
 ^{:refer xt.lang.common-data/arr-find :added "4.1"}
 (fact "finds first index matching predicate"
-  
+
   (!.js
    [(xtd/arr-find [1 3 4] (fn [x] (return (== 0 (mod x 2)))))
     (xtd/arr-find [1 3 5] (fn [x] (return (== 0 (mod x 2)))))])
@@ -612,25 +587,25 @@
 
 ^{:refer xt.lang.common-data/arr-map :added "4.1"}
 (fact "maps a function across an array"
-  
+
   (!.js (xtd/arr-map [1 2 3] (fn [x] (return (+ x 1)))))
   => [2 3 4])
 
 ^{:refer xt.lang.common-data/arr-mapcat :added "4.1"}
 (fact "maps an array function, concatenting results"
-  
+
   (!.js (xtd/arr-mapcat [1 2 3] (fn [x] (return [x x]))))
   => [1 1 2 2 3 3])
 
 ^{:refer xt.lang.common-data/arr-partition :added "4.1"}
 (fact "partitions an array into arrays of length n"
-  
+
   (!.js (xtd/arr-partition [1 2 3 4 5] 2))
   => [[1 2] [3 4] [5]])
 
 ^{:refer xt.lang.common-data/arr-filter :added "4.1"}
 (fact "applies a filter across an array"
-  
+
   (!.js (xtd/arr-filter [1 2 3 4] (fn [x] (return (== 0 (mod x 2))))))
   => [2 4])
 
@@ -638,7 +613,7 @@
   :added "4.1"
   :lang-exceptions {:python {:skip true}}}
 (fact "keeps items in an array if output is not nil"
-  
+
   (!.js
    (xtd/arr-keep
     [1 2 3 4]
@@ -650,7 +625,7 @@
 
 ^{:refer xt.lang.common-data/arr-keepf :added "4.1"}
 (fact "keeps items in an array with transform if predicate holds"
-  
+
   (!.js
    (xtd/arr-keepf
     [1 2 3 4]
@@ -660,7 +635,7 @@
 
 ^{:refer xt.lang.common-data/arr-juxt :added "4.1"}
 (fact "constructs a map given a array of pairs"
-  
+
   (!.js
    (xtd/arr-juxt
     [1 2]
@@ -670,19 +645,19 @@
 
 ^{:refer xt.lang.common-data/arr-foldl :added "4.1"}
 (fact "performs reduce on an array"
-  
+
   (!.js (xtd/arr-foldl [1 2 3] (fn [acc x] (return (+ acc x))) 0))
   => 6)
 
 ^{:refer xt.lang.common-data/arr-foldr :added "4.1"}
 (fact "performs right reduce"
-  
+
   (!.js (xtd/arr-foldr [1 2 3] (fn [acc x] (return (+ (* acc 10) x))) 0))
   => 321)
 
 ^{:refer xt.lang.common-data/arr-pipel :added "4.1"}
 (fact "thrushes an input through a function pipeline"
-  
+
   (!.js
    (xtd/arr-pipel
     [(fn [x] (return (+ x 1)))
@@ -692,7 +667,7 @@
 
 ^{:refer xt.lang.common-data/arr-piper :added "4.1"}
 (fact "thrushes an input through a function pipeline from reverse"
-  
+
   (!.js
    (xtd/arr-piper
     [(fn [x] (return (+ x 1)))
@@ -702,7 +677,7 @@
 
 ^{:refer xt.lang.common-data/arr-group-by :added "4.1"}
 (fact "groups elements by key and view functions"
-  
+
   (!.js
    (xtd/arr-group-by
     [1 2 3 4]
@@ -712,19 +687,19 @@
 
 ^{:refer xt.lang.common-data/arr-repeat :added "4.1"}
 (fact "repeat function or value n times"
-  
+
   (!.js (xtd/arr-repeat 1 3))
   => [1 1 1])
 
 ^{:refer xt.lang.common-data/arr-normalise :added "4.1"}
 (fact "normalises array elements to 1"
-  
+
   (!.js (xtd/arr-normalise [2 3 5]))
   => [0.2 0.3 0.5])
 
 ^{:refer xt.lang.common-data/arr-sort :added "4.1"}
 (fact "arr-sort using key function and comparator"
-  
+
   (!.js
    (xtd/arr-sort
     [3 1 2]
@@ -736,7 +711,7 @@
   :added "4.1"
   }
 (fact "performs a merge on two sorted arrays"
-  
+
   (!.js
    (xtd/arr-sorted-merge
     [1 3 5]
@@ -746,13 +721,13 @@
 
 ^{:refer xt.lang.common-data/obj-map :added "4.1"}
 (fact "maps a function across the values of an object"
-  
+
   (!.js (xtd/obj-map {:a 1, :b 2} (fn [x] (return (+ x 1)))))
   => {"a" 2, "b" 3})
 
 ^{:refer xt.lang.common-data/obj-filter :added "4.1"}
 (fact "applies a filter across the values of an object"
-  
+
   (!.js (xtd/obj-filter {:a 1, :b 2, :c 3} (fn [x] (return (== 1 (mod x 2))))))
   => {"a" 1, "c" 3})
 
@@ -760,7 +735,7 @@
   :added "4.1"
   :lang-exceptions {:python {:skip true}}}
 (fact "applies a transform across the values of an object, keeping non-nil values"
-  
+
   (!.js
    (xtd/obj-keep
     {:a 1, :b 2, :c 3}
@@ -772,7 +747,7 @@
 
 ^{:refer xt.lang.common-data/obj-keepf :added "4.1"}
 (fact "applies a transform and filter across the values of an object"
-  
+
   (!.js
    (xtd/obj-keepf
     {:a 1, :b 2, :c 3}
@@ -782,7 +757,7 @@
 
 ^{:refer xt.lang.common-data/clone-shallow :added "4.1"}
 (fact "shallow clones an object or array"
-  
+
   (!.js [(xtd/clone-shallow nil)
           (xtd/clone-shallow 1)])
   => [nil 1])
@@ -792,7 +767,7 @@
   :lang-exceptions {:dart {:skip true}}
   }
 (fact "clone nested objects loop"
-  
+
   (!.js
    (var src {:a {:b 1}})
    (var out (xtd/clone-nested-loop src (xtd/lu-create)))
@@ -805,7 +780,7 @@
   :lang-exceptions {:dart {:skip true}}
   }
 (fact "cloning nested xects"
-  
+
   (!.js
    (var src {:a {:b 1}})
    (var out (xtd/clone-nested src))
@@ -818,7 +793,7 @@
   :lang-exceptions {:python {:skip true}
                     :dart {:skip true}}}
 (fact "memoize for functions of single argument"
-  
+
   (!.js
    (var state {"n" 0})
    (var f (xtd/memoize-key

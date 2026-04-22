@@ -176,47 +176,97 @@
                   [(:refer (meta form)) form])))
        (into {})))
 
-(defn seedgen-lang-config
+(defn- normalize-seedgen-lang-entry
+  [config]
+  (cond
+    (nil? config)
+    nil
+
+    (= true config)
+    {}
+
+    (map? config)
+    config
+
+    :else
+    {:value config}))
+
+(defn- normalize-seedgen-base-config
+  [base-config]
+  (cond
+    (nil? base-config)
+    nil
+
+    (= true base-config)
+    {:all {}}
+
+    (map? base-config)
+    (->> base-config
+         (map (fn [[lang config]]
+                [(if (= :all lang)
+                   :all
+                   (seedgen-normalize-runtime-lang lang))
+                 (normalize-seedgen-lang-entry config)]))
+         (into {}))
+
+    :else
+    {:all (normalize-seedgen-lang-entry base-config)}))
+
+(defn- merge-seedgen-configs
+  [& configs]
+  (let [merged (apply merge-with merge
+                      (map #(or % {}) configs))]
+    (when (seq merged)
+      merged)))
+
+(defn seedgen-base-config
   [form]
-  (letfn [(normalize-config [lang-config]
-            (when (map? lang-config)
-              (->> lang-config
-                   (map (fn [[lang config]]
-                          [(seedgen-normalize-runtime-lang lang) config]))
-                   (into {}))))
-          (collect-config [form]
-            (let [own-config (when (instance? clojure.lang.IObj form)
-                               (normalize-config (:seedgen/lang (meta form))))]
+  (letfn [(collect-config [form]
+            (let [m          (when (instance? clojure.lang.IObj form)
+                               (meta form))
+                  own-config (merge-seedgen-configs
+                              (normalize-seedgen-base-config (:seedgen/base m))
+                              (normalize-seedgen-base-config (:seedgen/lang m))
+                              (normalize-seedgen-base-config (:seedgen/check m)))]
               (cond
                 (seq? form)
                 (reduce (fn [out entry]
-                          (merge out (collect-config entry)))
-                        (or own-config {})
+                          (merge-seedgen-configs out (collect-config entry)))
+                        own-config
                         form)
 
                 (vector? form)
                 (reduce (fn [out entry]
-                          (merge out (collect-config entry)))
-                        (or own-config {})
+                          (merge-seedgen-configs out (collect-config entry)))
+                        own-config
                         form)
 
                 (set? form)
                 (reduce (fn [out entry]
-                          (merge out (collect-config entry)))
-                        (or own-config {})
+                          (merge-seedgen-configs out (collect-config entry)))
+                        own-config
                         form)
 
                 (map? form)
                 (reduce (fn [out entry]
-                          (merge out (collect-config entry)))
-                        (or own-config {})
+                          (merge-seedgen-configs out (collect-config entry)))
+                        own-config
                         (concat (keys form) (vals form)))
 
                 :else
                 own-config)))]
-    (let [config (collect-config form)]
-      (when (seq config)
-        config))))
+    (collect-config form)))
+
+(defn seedgen-lang-config
+  [form]
+  (seedgen-base-config form))
+
+(defn seedgen-lang-entry
+  [form lang]
+  (let [config (seedgen-base-config form)
+        lang   (seedgen-normalize-runtime-lang lang)]
+    (merge (get config :all)
+           (get config lang))))
 
 (defn seedgen-suppressed-langs
   [form]

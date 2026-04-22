@@ -46,6 +46,9 @@
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-proto-create :added "4.0"}
 (fact "creates prototype"
   (l/emit-as :js [(js-tf-x-proto-create '[_ {:a 1}])])
+  => #"function \(\)\{"
+
+  (l/emit-as :js [(js-tf-x-proto-create '[_ {:a 1}])])
   => #"Object.entries")
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-m-max :added "4.0"}

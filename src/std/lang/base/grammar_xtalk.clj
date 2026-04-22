@@ -923,8 +923,8 @@
     :op-spec {:arglists '([name])
               :type [:fn [:xt/str] :xt/any]}}
    {:op :x-cache-list     :symbol #{'x:cache-list}      :emit :abstract
-    :op-spec {:arglists '([])
-              :type [:fn [] [:xt/array :xt/str]]}}
+    :op-spec {:arglists '([cache])
+              :type [:fn [:xt/any] [:xt/array :xt/str]]}}
    {:op :x-cache-flush    :symbol #{'x:cache-flush}     :emit :abstract
     :op-spec {:arglists '([cache])
               :type [:fn [:xt/any] :xt/self]}}
@@ -941,7 +941,6 @@
     :op-spec {:template-only true
               :arglists '([cache key val])
               :type [:fn [:xt/any :xt/str :xt/int] :xt/int]}}])
-
 
 (def +xt-runtime-thread+
   [{:op :x-thread-spawn   :symbol #{'x:thread-spawn}    :emit :abstract

@@ -14,7 +14,7 @@
 ^{:refer xt.lang.common-spec/x:return-eval :added "4.1"}
 (fact "evaluates code through wrapped return handlers"
 
-  ^{:seedgen/lang     {:python  {:suppress true}}}
+ ^{:seedgen/base     {:python  {:suppress true}}}
   (!.js
     (var encode-fn
          (fn [value id key]

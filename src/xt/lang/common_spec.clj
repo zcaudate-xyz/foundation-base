@@ -1356,13 +1356,13 @@
   {:added "4.1"}
   ([name] (list (quote x:cache) name)))
 
-(defspec.xt x:cache-list [:fn [] [:xt/array :xt/str]])
+(defspec.xt x:cache-list [:fn [:xt/any] [:xt/array :xt/str]])
 
 (defmacro.xt ^{:standalone true :is-template false} 
   x:cache-list
   "lists cache keys"
   {:added "4.1"}
-  ([] (list (quote x:cache-list))))
+  ([cache] (list (quote x:cache-list) cache)))
 
 (defspec.xt x:cache-flush [:fn [:xt/any] :xt/self])
 

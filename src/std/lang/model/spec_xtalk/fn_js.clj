@@ -81,15 +81,16 @@
 (defn js-tf-x-proto-create
   [[_ m]]
   (template/$
-   (do (var out {})
-       (for:object
-        [[k f] ~m]
-        (if (x:is-function? f)
-          (:= (. out [k])
-              (fn:> [...args]
-                    (f this ...args)))
-          (:= (. out [k]) f)))
-       (return out))))
+   ('((fn []
+        (var out {})
+        (for:object
+         [[k f] ~m]
+         (if (x:is-function? f)
+           (:= (. out [k])
+               (fn:> [...args]
+                     (f this ...args)))
+           (:= (. out [k]) f)))
+        (return out))))))
 
 (def +js-proto+
   {:x-proto-get       {:macro #'js-tf-x-proto-get     :emit :macro}

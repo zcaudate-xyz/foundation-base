@@ -177,7 +177,7 @@
                       "                  (return (+ a b c)))\n"
                       "                [1 2 3]))\n"
                       "  => 6\n\n"
-                      "  ^{:seedgen/lang {:python {:suppress true}}}\n"
+                      "  ^{:seedgen/base {:python {:suppress true}}}\n"
                       "  (!.js\n"
                       "    (xt/x:apply (fn [a b c d]\n"
                       "                  (return (+ a b c d)))\n"
@@ -187,7 +187,7 @@
       (slurp path)
       (finally
         (.delete tmp))))
-  => "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]\n            [xt.lang.common-spec :as xt]))\n\n^{:seedgen/root {:all true, :langs [:python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example.A :added \"4.1\"}\n(fact \"multiple checks are also allowed\"\n\n  (!.js\n    (xt/x:apply (fn [a b c]\n                  (return (+ a b c)))\n                [1 2 3]))\n  => 6\n\n  ^{:seedgen/lang {:python {:suppress true}}}\n  (!.js\n    (xt/x:apply (fn [a b c d]\n                  (return (+ a b c d)))\n                [1 2 3 4]))\n  => 10\n\n  (!.py\n    (xt/x:apply (fn [a b c]\n                  (return (+ a b c)))\n                [1 2 3]))\n  => 6)\n"
+  => "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]\n            [xt.lang.common-spec :as xt]))\n\n^{:seedgen/root {:all true, :langs [:python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example.A :added \"4.1\"}\n(fact \"multiple checks are also allowed\"\n\n  (!.js\n    (xt/x:apply (fn [a b c]\n                  (return (+ a b c)))\n                [1 2 3]))\n  => 6\n\n  ^{:seedgen/base {:python {:suppress true}}}\n  (!.js\n    (xt/x:apply (fn [a b c d]\n                  (return (+ a b c d)))\n                [1 2 3 4]))\n  => 10\n\n  (!.py\n    (xt/x:apply (fn [a b c]\n                  (return (+ a b c)))\n                [1 2 3]))\n  => 6)\n"
 
   (let [tmp (java.io.File/createTempFile "seedgen-langadd-train004-b" ".clj")
         path (.getAbsolutePath tmp)
@@ -208,7 +208,7 @@
                       "                  (return (+ a b c)))\n"
                       "                [1 2 3]))\n"
                       "  => 6\n\n"
-                      "  ^{:seedgen/lang {:python {:suppress true}}}\n"
+                      "  ^{:seedgen/base {:python {:suppress true}}}\n"
                       "  (!.js\n"
                       "    (xt/x:apply (fn [a b c d]\n"
                       "                  (return (+ a b c d)))\n"
@@ -218,7 +218,7 @@
       (slurp path)
       (finally
         (.delete tmp))))
-  => "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]\n            [xt.lang.common-spec :as xt]))\n\n^{:seedgen/root {:all true, :langs [:lua :python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :lua {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example.B :added \"4.1\"}\n(fact \"forms can be suppressed\"\n\n  (!.js\n    (xt/x:apply (fn [a b c]\n                  (return (+ a b c)))\n                [1 2 3]))\n  => 6\n\n  ^{:seedgen/lang {:python {:suppress true}}}\n  (!.js\n    (xt/x:apply (fn [a b c d]\n                  (return (+ a b c d)))\n                [1 2 3 4]))\n  => 10\n\n  (!.lua\n    (xt/x:apply (fn [a b c]\n                  (return (+ a b c)))\n                [1 2 3]))\n  => 6\n\n  (!.lua\n    (xt/x:apply (fn [a b c d]\n                  (return (+ a b c d)))\n                [1 2 3 4]))\n  => 10\n\n  (!.py\n    (xt/x:apply (fn [a b c]\n                  (return (+ a b c)))\n                [1 2 3]))\n  => 6)\n"
+  => "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]\n            [xt.lang.common-spec :as xt]))\n\n^{:seedgen/root {:all true, :langs [:lua :python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :lua {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example.B :added \"4.1\"}\n(fact \"forms can be suppressed\"\n\n  (!.js\n    (xt/x:apply (fn [a b c]\n                  (return (+ a b c)))\n                [1 2 3]))\n  => 6\n\n  ^{:seedgen/base {:python {:suppress true}}}\n  (!.js\n    (xt/x:apply (fn [a b c d]\n                  (return (+ a b c d)))\n                [1 2 3 4]))\n  => 10\n\n  (!.lua\n    (xt/x:apply (fn [a b c]\n                  (return (+ a b c)))\n                [1 2 3]))\n  => 6\n\n  (!.lua\n    (xt/x:apply (fn [a b c d]\n                  (return (+ a b c d)))\n                [1 2 3 4]))\n  => 10\n\n  (!.py\n    (xt/x:apply (fn [a b c]\n                  (return (+ a b c)))\n                [1 2 3]))\n  => 6)\n"
 
   (let [tmp (java.io.File/createTempFile "seedgen-langadd-train004-c" ".clj")
         path (.getAbsolutePath tmp)
@@ -287,15 +287,15 @@
                       "  ^{:seedgen/base true}\n"
                       "  (identity (!.js 1))\n"
                       "  => 1\n\n"
-                      "  ^{:seedgen/base true\n"
-                      "    :seedgen/lang {:python {:suppress true}}}\n"
+                      "  ^{:seedgen/base {:all {}\n"
+                      "                   :python {:suppress true}}}\n"
                       "  (identity (!.js 2))\n"
                       "  => 2)\n"))
       (form-infile/seedgen-langadd 'sample.add-test {:write true} lookup project)
       (slurp path)
       (finally
         (.delete tmp))))
-  => "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]))\n\n^{:seedgen/root {:all true, :langs [:lua :python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :lua {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example.E :added \"4.1\"}\n(fact \"seed meta can be mixed and matched\"\n\n  ^{:seedgen/base true}\n  (identity (!.js 1))\n  => 1\n\n  ^{:seedgen/base true\n    :seedgen/lang {:python {:suppress true}}}\n  (identity (!.js 2))\n  => 2\n\n  (identity (!.lua 1))\n  => 1\n\n  (identity (!.lua 2))\n  => 2\n\n  (identity (!.py 1))\n  => 1)\n"
+  => "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]))\n\n^{:seedgen/root {:all true, :langs [:lua :python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :lua {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example.E :added \"4.1\"}\n(fact \"seed meta can be mixed and matched\"\n\n  ^{:seedgen/base true}\n  (identity (!.js 1))\n  => 1\n\n  ^{:seedgen/base {:all {}\n                   :python {:suppress true}}}\n  (identity (!.js 2))\n  => 2\n\n  (identity (!.lua 1))\n  => 1\n\n  (identity (!.lua 2))\n  => 2\n\n  (identity (!.py 1))\n  => 1)\n"
 
   (let [tmp (java.io.File/createTempFile "seedgen-langadd-meta" ".clj")
         path (.getAbsolutePath tmp)
@@ -310,7 +310,7 @@
                       "(l/script- :js {:runtime :basic})\n\n"
                       "^{:refer xt.lang.common-spec/example.A :added \"4.1\"}\n"
                       "(fact \"metadata branches\"\n\n"
-                      "  ^{:seedgen/check {:lua {:expect 6}}}\n"
+                      "  ^{:seedgen/base {:lua {:expect 6}}}\n"
                       "  (!.js\n"
                       "    (+ 1 2 3))\n"
                       "  => 6)\n"))
@@ -318,7 +318,7 @@
       (slurp path)
       (finally
         (.delete tmp))))
-  => "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]))\n\n^{:seedgen/root {:all true, :langs [:lua :python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :lua {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example.A :added \"4.1\"}\n(fact \"metadata branches\"\n\n  ^{:seedgen/check {:lua {:expect 6}}}\n  (!.js\n    (+ 1 2 3))\n  => 6\n\n  (!.lua\n    (+ 1 2 3))\n  => 6\n\n  (!.py\n    (+ 1 2 3))\n  => 6)\n"
+  => "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]))\n\n^{:seedgen/root {:all true, :langs [:lua :python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :lua {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example.A :added \"4.1\"}\n(fact \"metadata branches\"\n\n  ^{:seedgen/base {:lua {:expect 6}}}\n  (!.js\n    (+ 1 2 3))\n  => 6\n\n  (!.lua\n    (+ 1 2 3))\n  => 6\n\n  (!.py\n    (+ 1 2 3))\n  => 6)\n"
 
   (let [tmp (java.io.File/createTempFile "seedgen-langadd-train004-f-expect" ".clj")
         path (.getAbsolutePath tmp)
@@ -332,9 +332,9 @@
                       "            [xt.lang.common-spec :as xt]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:lua :python]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
-                      "^{:refer xt.lang.common-spec/example.F-expect :added \"4.1\"}\n"
+                      "^{:refer xt.lang.common-spec/example-f :added \"4.1\"}\n"
                       "(fact \"expect can be customised\"\n\n"
-                      "  ^{:seedgen/check {:lua {:expect 11}}}\n"
+                      "  ^{:seedgen/base {:lua {:expect 11}}}\n"
                       "  (!.js\n"
                       "    (xt/x:offset 10))\n"
                       "  => 10)\n"))
@@ -342,7 +342,32 @@
       (slurp path)
       (finally
         (.delete tmp))))
-  => "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]\n            [xt.lang.common-spec :as xt]))\n\n^{:seedgen/root {:all true, :langs [:lua :python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :lua {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example.F-expect :added \"4.1\"}\n(fact \"expect can be customised\"\n\n  ^{:seedgen/check {:lua {:expect 11}}}\n  (!.js\n    (xt/x:offset 10))\n  => 10\n\n  (!.lua\n    (xt/x:offset 10))\n  => 11\n\n  (!.py\n    (xt/x:offset 10))\n  => 10)\n"
+  => "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]\n            [xt.lang.common-spec :as xt]))\n\n^{:seedgen/root {:all true, :langs [:lua :python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :lua {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example-f :added \"4.1\"}\n(fact \"expect can be customised\"\n\n  ^{:seedgen/base {:lua {:expect 11}}}\n  (!.js\n    (xt/x:offset 10))\n  => 10\n\n  (!.lua\n    (xt/x:offset 10))\n  => 11\n\n  (!.py\n    (xt/x:offset 10))\n  => 10)\n"
+
+  (let [tmp (java.io.File/createTempFile "seedgen-langadd-train004-f-all-expect" ".clj")
+        path (.getAbsolutePath tmp)
+        root (.getParent tmp)
+        lookup {'sample.add-test path}
+        project {:root root}]
+    (try
+      (spit path (str "(ns sample.add-test\n"
+                      "  (:use code.test)\n"
+                      "  (:require [std.lang :as l]\n"
+                      "            [xt.lang.common-spec :as xt]))\n\n"
+                      "^{:seedgen/root {:all true, :langs [:lua :python]}}\n"
+                      "(l/script- :js {:runtime :basic})\n\n"
+                      "^{:refer xt.lang.common-spec/example-fb :added \"4.1\"}\n"
+                      "(fact \"expect outcomes can default and override\"\n\n"
+                      "  ^{:seedgen/base {:all {:expect 12}\n"
+                      "                   :lua {:expect 11}}}\n"
+                      "  (!.js\n"
+                      "    (xt/x:offset 10))\n"
+                      "  => 10)\n"))
+      (form-infile/seedgen-langadd 'sample.add-test {:write true} lookup project)
+      (slurp path)
+      (finally
+        (.delete tmp))))
+  => "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]\n            [xt.lang.common-spec :as xt]))\n\n^{:seedgen/root {:all true, :langs [:lua :python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :lua {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example-fb :added \"4.1\"}\n(fact \"expect outcomes can default and override\"\n\n  ^{:seedgen/base {:all {:expect 12}\n                   :lua {:expect 11}}}\n  (!.js\n    (xt/x:offset 10))\n  => 10\n\n  (!.lua\n    (xt/x:offset 10))\n  => 11\n\n  (!.py\n    (xt/x:offset 10))\n  => 12)\n"
 
   (let [tmp (java.io.File/createTempFile "seedgen-langadd-train004-f-input" ".clj")
         path (.getAbsolutePath tmp)
@@ -356,9 +381,9 @@
                       "            [xt.lang.common-spec :as xt]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:lua :python]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
-                      "^{:refer xt.lang.common-spec/example.F-input :added \"4.1\"}\n"
+                      "^{:refer xt.lang.common-spec/example-fa :added \"4.1\"}\n"
                       "(fact \"input can be customised\"\n\n"
-                      "  ^{:seedgen/check {:lua {:input (xt/x:offset 9)}}}\n"
+                      "  ^{:seedgen/base {:lua {:input (xt/x:offset 9)}}}\n"
                       "  (!.js\n"
                       "    (xt/x:offset 10))\n"
                       "  => 10)\n"))
@@ -366,7 +391,30 @@
       (slurp path)
       (finally
         (.delete tmp))))
-  => "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]\n            [xt.lang.common-spec :as xt]))\n\n^{:seedgen/root {:all true, :langs [:lua :python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :lua {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example.F-input :added \"4.1\"}\n(fact \"input can be customised\"\n\n  ^{:seedgen/check {:lua {:input (xt/x:offset 9)}}}\n  (!.js\n    (xt/x:offset 10))\n  => 10\n\n  (!.lua\n    (xt/x:offset 9))\n  => 10\n\n  (!.py\n    (xt/x:offset 10))\n  => 10)\n"
+  => "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]\n            [xt.lang.common-spec :as xt]))\n\n^{:seedgen/root {:all true, :langs [:lua :python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :lua {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example-fa :added \"4.1\"}\n(fact \"input can be customised\"\n\n  ^{:seedgen/base {:lua {:input (xt/x:offset 9)}}}\n  (!.js\n    (xt/x:offset 10))\n  => 10\n\n  (!.lua\n    (xt/x:offset 9))\n  => 10\n\n  (!.py\n    (xt/x:offset 10))\n  => 10)\n"
+
+  (let [tmp (java.io.File/createTempFile "seedgen-langadd-train004-g-setup" ".clj")
+        path (.getAbsolutePath tmp)
+        root (.getParent tmp)
+        lookup {'sample.add-test path}
+        project {:root root}]
+    (try
+      (spit path (str "(ns sample.add-test\n"
+                      "  (:use code.test)\n"
+                      "  (:require [std.lang :as l]))\n\n"
+                      "^{:seedgen/root {:all true, :langs [:lua :python]}}\n"
+                      "(l/script- :js {:runtime :basic})\n\n"
+                      "^{:refer xt.lang.common-spec/example-g :added \"4.1\"\n"
+                      "  :setup [^{:seedgen/base {:lua {:input (!.lua (setup-lua))}}}\n"
+                      "          (!.js (setup-js))]}\n"
+                      "(fact \"setup can be customised\"\n\n"
+                      "  (!.js 1)\n"
+                      "  => 1)\n"))
+      (form-infile/seedgen-langadd 'sample.add-test {:write true} lookup project)
+      (slurp path)
+      (finally
+        (.delete tmp))))
+  => "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]))\n\n^{:seedgen/root {:all true, :langs [:lua :python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :lua {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example-g :added \"4.1\"\n  :setup [^{:seedgen/base {:lua {:input (!.lua (setup-lua))}}}\n(!.js (setup-js))\n          (!.lua (setup-lua))\n          (!.py (setup-js))]}\n(fact \"setup can be customised\"\n\n  (!.js 1)\n  => 1\n\n  (!.lua 1)\n  => 1\n\n  (!.py 1)\n  => 1)\n"
 
 ^{:refer std.lang.seedgen.form-infile/seedgen-langremove :added "4.1"}
 (fact "purges targeted seedgen runtimes while preserving the seedgen root"
@@ -511,15 +559,15 @@
                       "(l/script- :python {:runtime :basic})\n\n"
                       "^{:refer xt.lang.common-spec/example.A :added \"4.1\"}\n"
                       "(fact \"metadata branches\"\n\n"
-                      "  ^{:seedgen/check {:lua {:expect 6}}}\n"
+                      "  ^{:seedgen/base {:lua {:expect 6}}}\n"
                       "  (!.js\n"
                       "    (+ 1 2 3))\n"
                       "  => 6\n\n"
-                      "  ^{:seedgen/check {:lua {:expect 6}}}\n"
+                      "  ^{:seedgen/base {:lua {:expect 6}}}\n"
                       "  (!.lua\n"
                       "    (+ 1 2 3))\n"
                       "  => 6\n\n"
-                      "  ^{:seedgen/check {:lua {:expect 6}}}\n"
+                      "  ^{:seedgen/base {:lua {:expect 6}}}\n"
                       "  (!.python\n"
                       "    (+ 1 2 3))\n"
                       "  => 6)\n"))
@@ -527,5 +575,5 @@
       (slurp path)
       (finally
         (.delete tmp))))
-  => "(ns sample.purge-test\n  (:use code.test)\n  (:require [std.lang :as l]))\n\n^{:seedgen/root {:all true, :langs [:lua :python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example.A :added \"4.1\"}\n(fact \"metadata branches\"\n\n  ^{:seedgen/check {:lua {:expect 6}}}\n  (!.js\n    (+ 1 2 3))\n  => 6\n\n  ^{:seedgen/check {:lua {:expect 6}}}\n  (!.python\n    (+ 1 2 3))\n  => 6)\n")
+  => "(ns sample.purge-test\n  (:use code.test)\n  (:require [std.lang :as l]))\n\n^{:seedgen/root {:all true, :langs [:lua :python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example.A :added \"4.1\"}\n(fact \"metadata branches\"\n\n  ^{:seedgen/base {:lua {:expect 6}}}\n  (!.js\n    (+ 1 2 3))\n  => 6\n\n  ^{:seedgen/base {:lua {:expect 6}}}\n  (!.python\n    (+ 1 2 3))\n  => 6)\n")
   )

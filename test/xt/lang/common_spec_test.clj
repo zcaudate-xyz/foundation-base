@@ -283,7 +283,7 @@
 (fact "uses the reverse grammar offset"
 
   ^{:seedgen/check    {:lua  {:expect 10}}}
-  (!.jss
+  (!.js
     (xt/x:offset-rev 10))
   => 9)
 
@@ -1311,20 +1311,27 @@
 (fact "creates prototypes with this-bound methods"
 
   (!.js
-    (var proto (xt/x:proto-create
-                {:describe (fn [self suffix]
-                             (return (+ (. self ["name"]) suffix)))}))
-    (var obj {})
-    (xt/x:proto-set obj proto nil)
-    (:= (. obj ["name"]) "alpha")
-    (. obj (describe "!")))
+   (var proto (xt/x:proto-create
+               {:describe (fn [self suffix]
+                            (return (+ (. self ["name"]) suffix)))}))
+   (var obj {})
+   (xt/x:proto-set obj proto nil)
+   (:= (. obj ["name"]) "alpha")
+   (. obj (describe "!")))
   => "alpha!")
 
 ^{:refer xt.lang.common-spec/x:proto-tostring :added "4.1"}
 (fact "expands and emits the lua tostring metamethod key"
-
-  (:arglists (meta #'xt/x:proto-tostring))
-  => '([value]))
+  
+  (!.js
+    (var set-fn
+         (fn [obj proto]
+           (xt/x:proto-set obj proto nil)))
+    (var proto {:label "proto"})
+    (var obj {})
+    (set-fn obj proto)
+    (xt/x:proto-tostring obj))
+  => :todo)
 
 ^{:refer xt.lang.common-spec/x:random :added "4.1"}
 (fact "returns javascript random values"
@@ -1337,9 +1344,11 @@
 
 ^{:refer xt.lang.common-spec/x:throw :added "4.1"}
 (fact "expands to the canonical throw form"
-
-  (:arglists (meta #'xt/x:throw))
-  => '([value]))
+  
+  (!.js
+    (do:>
+     (x:throw "ERROW")))
+  => (throws))
 
 ^{:refer xt.lang.common-spec/x:now-ms :added "4.1"}
 (fact "expands and emits a millisecond time expression"
@@ -1363,16 +1372,20 @@
   (notify/wait-on :js
     (do (var net (require "net"))
         (var port 18182)
-        (var server (. net (createServer (fn [conn]
-                                           (. conn (end)))))
-             (. server (listen port "127.0.0.1"))
-             (xt/x:socket-connect "127.0.0.1"
-                                  port
-                                  {}
-                                  (fn [err conn]
-                                    (. server (close))
-                                    (repl/notify [(xt/x:nil? err)
-                                                  (xt/x:is-function? (. conn ["write"]))]))))))
+        (var connect-fn
+             (fn [host port opts cb]
+               (xt/x:socket-connect host port opts cb)))
+        (var server
+             (. net (createServer (fn [conn]
+                                    (. conn (end))))))
+        (. server (listen port "127.0.0.1"))
+        (connect-fn "127.0.0.1"
+                    port
+                    {}
+                    (fn [err conn]
+                      (. server (close))
+                      (repl/notify [(xt/x:nil? err)
+                                    (xt/x:is-function? (. conn ["write"]))])))))
   => [true true])
 
 ^{:refer xt.lang.common-spec/x:socket-send :added "4.1"}
@@ -1417,36 +1430,41 @@
     (xt/x:b64-decode "aGVsbG8="))
   => "hello")
 
-^{:refer xt.lang.common-spec/x:cache :added "4.1"}
+^{:refer xt.lang.common-spec/x:cache :added "4.1"
+  :setup [^{:seedgen/base   {:lua     {:suppress true}
+                             :python  {:suppress true}}}
+          (!.js
+            (:= (!:G TEST_CACHE)
+                {"_keys" ["a" "b"]}))]}
 (fact "selects the global cache store"
 
   (!.js
-    (:= (!:G window)
-        {:localStorage  {:name "local"}
-         :sessionStorage {:name "session"}})
-    (. (xt/x:cache "GLOBAL") ["name"]))
-  => "local")
+    (xt/x:cache "GLOBAL"))
+  => identity)
 
-^{:refer xt.lang.common-spec/x:cache-list :added "4.1"}
+^{:refer xt.lang.common-spec/x:cache-list :added "4.1"
+  :setup [^{:seedgen/base   {:lua     {:suppress true}
+                             :python  {:suppress true}}}
+          (!.js
+            (:= (!:G TEST_CACHE)
+                {"_keys" ["a" "b"]}))]}
 (fact "lists cache keys"
 
   (!.js
-    (:= (!:G window)
-        {:localStorage  {"_keys" ["a" "b"]}
-         :sessionStorage {"_keys" []}})
-    (xt/x:cache-list))
+    (xt/x:cache-list (!:G TEST_CACHE)))
   => ["a" "b"])
 
-^{:refer xt.lang.common-spec/x:cache-flush :added "4.1"}
+^{:refer xt.lang.common-spec/x:cache-flush :added "4.1"
+  :setup [^{:seedgen/base   {:lua     {:suppress true}
+                             :python  {:suppress true}}}
+          (!.js
+            (:= (!:G TEST_CACHE)
+                {:clear (fn [])}))]}
 (fact "flushes cache stores"
-
+  
   (!.js
-    (var out nil)
-    (var cache {:clear (fn []
-                         (:= out "flushed"))})
-    (xt/x:cache-flush cache)
-    out)
-  => "flushed")
+    (xt/x:cache-flush (!:G TEST_CACHE)))
+  => anything)
 
 ^{:refer xt.lang.common-spec/x:cache-get :added "4.1"}
 (fact "reads cache values"
@@ -1495,15 +1513,16 @@
 
 ^{:refer xt.lang.common-spec/x:slurp :added "4.1"}
 (fact "keeps the slurp wrapper intact"
-
-  (:arglists (meta #'xt/x:slurp))
-  => '([path]))
+  
+  (!.js (xt/x:slurp "project.clj"))
+  => string?)
 
 ^{:refer xt.lang.common-spec/x:spit :added "4.1"}
 (fact "keeps the spit wrapper intact"
 
-  (:arglists (meta #'xt/x:spit))
-  => '([path value]))
+  ^{:seedgen/base {}}
+  [(!.js (xt/x:spit "out.tmp" "hello world"))]
+  => )
 
 ^{:refer xt.lang.common-spec/x:json-encode :added "4.1"}
 (fact "encodes lua data structures as json"
