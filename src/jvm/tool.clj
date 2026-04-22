@@ -108,14 +108,15 @@
           code.manage/snapto
 
           std.lang.seedgen/seedgen-list
-          std.lang.seedgen/seedgen-addlang
           std.lang.seedgen/seedgen-incomplete
           std.lang.seedgen/seedgen-benchadd
-          std.lang.seedgen/seedgen-benchlist
-          std.lang.seedgen/seedgen-root
           std.lang.seedgen/seedgen-benchremove
+          std.lang.seedgen/seedgen-benchlist
+          std.lang.seedgen/seedgen-benchadd
+          std.lang.seedgen/seedgen-root
+          std.lang.seedgen/seedgen-langadd
+          std.lang.seedgen/seedgen-langremove
           std.lang.seedgen/seedgen-readforms
-          std.lang.seedgen/seedgen-removelang
           
           code.doc/publish
           code.doc/init-template

@@ -49,7 +49,7 @@
     out)
   => [1 2 3]
 
-  (!.python
+  (!.py
     (var out [])
     (xt/for:array [e [1 2 3 4]]
       (when (> e 3)
@@ -75,7 +75,7 @@
     out)
   => (contains [["a" 1] ["b" 2]] :in-any-order)
 
-  (!.python
+  (!.py
     (var out [])
     (xt/for:object [[k v] {:a 1 :b 2}]
       (xt/x:arr-push out [k v]))
@@ -99,7 +99,7 @@
     out)
   => [0 2]
 
-  (!.python
+  (!.py
     (var out [])
     (xt/for:index [i [0 (xt/x:offset-rlen 4) 2]]
       (xt/x:arr-push out i))
@@ -123,7 +123,7 @@
     out)
   => [1 2 3]
 
-  (!.python
+  (!.py
     (var out [])
     (xt/for:iter [e (xt/x:iter-from-arr [1 2 3])]
       (xt/x:arr-push out e))
@@ -143,7 +143,7 @@
       (resolve "OK")))
   => (throws)
 
-  (!.python
+  (!.py
     (xt/return-run [resolve reject]
       (resolve "OK")))
   => (throws))
@@ -169,7 +169,7 @@
     out)
   => "ERR"
 
-  (!.python
+  (!.py
     (var out nil)
     (xt/for:return [[ok err] (xt/return-run [resolve reject]
                                (reject "ERR"))]
@@ -197,7 +197,7 @@
     (add))
   => "ERR"
 
-  (!.python
+  (!.py
     (var add (fn []
                (xt/for:try [[ok err] (do:> (xt/x:err "ERROR"))]
                  {:success (return ok)
@@ -208,7 +208,7 @@
 ^{:refer xt.lang.common-spec/for:async :added "4.1"}
 (fact "expands to the canonical async form"
 
-  (!.js :js
+  (notify/wait-on :js
     (for:async [[ok err] (xt/return-run [resolve reject]
                            (resolve "OK"))]
                {:success (repl/notify ok)
@@ -216,7 +216,7 @@
                 :finally (return true)}))
   => "OK"
 
-  (!.lua :js
+  (notify/wait-on :lua
     (for:async [[ok err] (xt/return-run [resolve reject]
                            (resolve "OK"))]
                {:success (repl/notify ok)
@@ -224,7 +224,7 @@
                 :finally (return true)}))
   => "OK"
 
-  (!.python :js
+  (notify/wait-on :python
     (for:async [[ok err] (xt/return-run [resolve reject]
                            (resolve "OK"))]
                {:success (repl/notify ok)
@@ -243,7 +243,7 @@
     (xt/x:get-idx ["a" "b" "c"] (xt/x:offset 0)))
   => "a"
 
-  (!.python
+  (!.py
     (xt/x:get-idx ["a" "b" "c"] (xt/x:offset 0)))
   => "a")
 
@@ -262,7 +262,7 @@
     out)
   => ["a" "B" "c"]
 
-  (!.python
+  (!.py
     (var out ["a" "b" "c"])
     (xt/x:set-idx out (xt/x:offset 1) "B")
     out)
@@ -279,7 +279,7 @@
     (xt/x:first ["a" "b" "c"]))
   => "a"
 
-  (!.python
+  (!.py
     (xt/x:first ["a" "b" "c"]))
   => "a")
 
@@ -294,7 +294,7 @@
     (xt/x:second ["a" "b" "c"]))
   => "b"
 
-  (!.python
+  (!.py
     (xt/x:second ["a" "b" "c"]))
   => "b")
 
@@ -309,7 +309,7 @@
     (xt/x:last ["a" "b" "c" "d"]))
   => "d"
 
-  (!.python
+  (!.py
     (xt/x:last ["a" "b" "c" "d"]))
   => "d")
 
@@ -324,7 +324,7 @@
     (xt/x:second-last ["a" "b" "c" "d"]))
   => "c"
 
-  (!.python
+  (!.py
     (xt/x:second-last ["a" "b" "c" "d"]))
   => "c")
 
@@ -343,7 +343,7 @@
         out))
   => ["a" "c" "d"]
 
-  (!.python
+  (!.py
     (do (var out ["a" "b" "c" "d"])
         (xt/x:arr-remove out (xt/x:offset 1))
         out))
@@ -364,7 +364,7 @@
     out)
   => ["a" "b" "c" "D"]
 
-  (!.python
+  (!.py
     (var out ["a" "b" "c"])
     (xt/x:arr-push out "D")
     out)
@@ -383,7 +383,7 @@
     [(xt/x:arr-pop out) out])
   => ["d" ["a" "b" "c"]]
 
-  (!.python
+  (!.py
     (var out ["a" "b" "c" "d"])
     [(xt/x:arr-pop out) out])
   => ["d" ["a" "b" "c"]])
@@ -403,7 +403,7 @@
     out)
   => ["D" "a" "b" "c"]
 
-  (!.python
+  (!.py
     (var out ["a" "b" "c"])
     (xt/x:arr-push-first out "D")
     out)
@@ -422,7 +422,7 @@
     [(xt/x:arr-pop-first out) out])
   => ["a" ["b" "c" "d"]]
 
-  (!.python
+  (!.py
     (var out ["a" "b" "c" "d"])
     [(xt/x:arr-pop-first out) out])
   => ["a" ["b" "c" "d"]])
@@ -442,7 +442,7 @@
     out)
   => ["a" "D" "b" "c"]
 
-  (!.python
+  (!.py
     (var out ["a" "b" "c"])
     (xt/x:arr-insert out (xt/x:offset 1) "D")
     out)
@@ -463,7 +463,7 @@
                     (xt/x:offset 3)))
   => ["b" "c"]
 
-  (!.python
+  (!.py
     (xt/x:arr-slice ["a" "b" "c" "d" "e"]
                     (xt/x:offset 1)
                     (xt/x:offset 3)))
@@ -480,7 +480,7 @@
     (xt/x:arr-reverse ["a" "b" "c"]))
   => ["c" "b" "a"]
 
-  (!.python
+  (!.py
     (xt/x:arr-reverse ["a" "b" "c"]))
   => ["c" "b" "a"])
 
@@ -499,7 +499,7 @@
     out)
   => {"b" 2}
 
-  (!.python
+  (!.py
     (var out {:a 1 :b 2})
     (xt/x:del (. out ["a"]))
     out)
@@ -516,7 +516,7 @@
     (xt/x:cat "hello" "-" "world"))
   => "hello-world"
 
-  (!.python
+  (!.py
     (xt/x:cat "hello" "-" "world"))
   => "hello-world")
 
@@ -531,7 +531,7 @@
     (xt/x:len ["a" "b" "c"]))
   => 3
 
-  (!.python
+  (!.py
     (xt/x:len ["a" "b" "c"]))
   => 3)
 
@@ -550,7 +550,7 @@
     (err-fn))
   => (throws)
 
-  (!.python
+  (!.py
     (var err-fn (fn []
                   (xt/x:err "ERR")))
     (err-fn))
@@ -573,7 +573,7 @@
      (type-fn [])])
   => ["object" "array"]
 
-  (!.python
+  (!.py
     (var type-fn (fn [obj]
                    (xt/x:type-native obj)))
     [(type-fn {})
@@ -583,7 +583,7 @@
 ^{:refer xt.lang.common-spec/x:offset :added "4.1"}
 (fact "uses the grammar base offset"
 
-  ^!.python
+  ^!.py
   (!.js    
     (xt/x:offset 10))
   => 10
@@ -593,7 +593,7 @@
     (xt/x:offset 10))
   => 10
 
-  ^!.python
+  ^!.py
   (!.js    
     (xt/x:offset 10))
   => 10)
@@ -601,7 +601,7 @@
 ^{:refer xt.lang.common-spec/x:offset-rev :added "4.1"}
 (fact "uses the reverse grammar offset"
 
-  ^!.python
+  ^!.py
   (!.js
     (xt/x:offset-rev 10))
   => 9
@@ -611,7 +611,7 @@
     (xt/x:offset-rev 10))
   => 9
 
-  ^!.python
+  ^!.py
   (!.js
     (xt/x:offset-rev 10))
   => 9)
@@ -619,7 +619,7 @@
 ^{:refer xt.lang.common-spec/x:offset-len :added "4.1"}
 (fact "uses the length grammar offset"
 
-  ^!.python
+  ^!.py
   (!.js
     (xt/x:offset-len 10))
   => 9
@@ -629,7 +629,7 @@
     (xt/x:offset-len 10))
   => 9
 
-  ^!.python
+  ^!.py
   (!.js
     (xt/x:offset-len 10))
   => 9)
@@ -637,7 +637,7 @@
 ^{:refer xt.lang.common-spec/x:offset-rlen :added "4.1"}
 (fact "uses the reverse length grammar offset"
 
-  ^!.python
+  ^!.py
   (!.js
     (xt/x:offset-rlen 10))
   => 10
@@ -647,7 +647,7 @@
     (xt/x:offset-rlen 10))
   => 10
 
-  ^!.python
+  ^!.py
   (!.js
     (xt/x:offset-rlen 10))
   => 10)
@@ -675,7 +675,7 @@
      (xt/x:lu-get lu lu-A2)])
   => ["A1" "A2"]
 
-  (!.python
+  (!.py
     (var lu (xt/x:lu-create))
     (var lu-A1 {"A" "A"})
     (var lu-A2 {"A" "A"})
@@ -704,7 +704,7 @@
      (xt/x:lu-eq obj-b obj-b)])
   => [true false true]
 
-  (!.python
+  (!.py
     (var obj-a {:id 1})
     (var obj-b {:id 1})
     [(xt/x:lu-eq obj-a obj-a)
@@ -729,7 +729,7 @@
     (xt/x:lu-get lu lu-key))
   => "value"
 
-  (!.python
+  (!.py
     (var lu (xt/x:lu-create))
     (var lu-key {:id 1})
     (xt/x:lu-set lu lu-key "value")
@@ -753,7 +753,7 @@
     (xt/x:lu-get lu lu-key))
   => "value"
 
-  (!.python
+  (!.py
     (var lu (xt/x:lu-create))
     (var lu-key {:id 1})
     (xt/x:lu-set lu lu-key "value")
@@ -779,7 +779,7 @@
     (xt/x:lu-get lu lu-key))
   => nil
 
-  (!.python
+  (!.py
     (var lu (xt/x:lu-create))
     (var lu-key {:id 1})
     (xt/x:lu-set lu lu-key "value")
@@ -796,7 +796,7 @@
   (!.lua (xt/x:m-abs -3))
   => 3
 
-  (!.python (xt/x:m-abs -3))
+  (!.py (xt/x:m-abs -3))
   => 3)
 
 ^{:refer xt.lang.common-spec/x:m-acos :added "4.1"}
@@ -808,7 +808,7 @@
   (!.lua (xt/x:m-acos 1))
   => (approx 0)
 
-  (!.python (xt/x:m-acos 1))
+  (!.py (xt/x:m-acos 1))
   => (approx 0))
 
 ^{:refer xt.lang.common-spec/x:m-asin :added "4.1"}
@@ -820,7 +820,7 @@
   (!.lua (xt/x:m-asin 0))
   => (approx 0)
 
-  (!.python (xt/x:m-asin 0))
+  (!.py (xt/x:m-asin 0))
   => (approx 0))
 
 ^{:refer xt.lang.common-spec/x:m-atan :added "4.1"}
@@ -832,7 +832,7 @@
   (!.lua (xt/x:m-atan 0))
   => (approx 0)
 
-  (!.python (xt/x:m-atan 0))
+  (!.py (xt/x:m-atan 0))
   => (approx 0))
 
 ^{:refer xt.lang.common-spec/x:m-ceil :added "4.1"}
@@ -844,7 +844,7 @@
   (!.lua (xt/x:m-ceil 1.2))
   => 2
 
-  (!.python (xt/x:m-ceil 1.2))
+  (!.py (xt/x:m-ceil 1.2))
   => 2)
 
 ^{:refer xt.lang.common-spec/x:m-cos :added "4.1"}
@@ -856,7 +856,7 @@
   (!.lua (xt/x:m-cos 0))
   => (approx 1)
 
-  (!.python (xt/x:m-cos 0))
+  (!.py (xt/x:m-cos 0))
   => (approx 1))
 
 ^{:refer xt.lang.common-spec/x:m-cosh :added "4.1"}
@@ -868,7 +868,7 @@
   (!.lua (xt/x:m-cosh 0))
   => (approx 1)
 
-  (!.python (xt/x:m-cosh 0))
+  (!.py (xt/x:m-cosh 0))
   => (approx 1))
 
 ^{:refer xt.lang.common-spec/x:m-exp :added "4.1"}
@@ -880,7 +880,7 @@
   (!.lua (xt/x:m-exp 0))
   => (approx 1)
 
-  (!.python (xt/x:m-exp 0))
+  (!.py (xt/x:m-exp 0))
   => (approx 1))
 
 ^{:refer xt.lang.common-spec/x:m-floor :added "4.1"}
@@ -892,7 +892,7 @@
   (!.lua (xt/x:m-floor 1.8))
   => 1
 
-  (!.python (xt/x:m-floor 1.8))
+  (!.py (xt/x:m-floor 1.8))
   => 1)
 
 ^{:refer xt.lang.common-spec/x:m-loge :added "4.1"}
@@ -904,7 +904,7 @@
   (!.lua (xt/x:m-loge 1))
   => (approx 0)
 
-  (!.python (xt/x:m-loge 1))
+  (!.py (xt/x:m-loge 1))
   => (approx 0))
 
 ^{:refer xt.lang.common-spec/x:m-log10 :added "4.1"}
@@ -916,7 +916,7 @@
   (!.lua (xt/x:m-log10 100))
   => (approx 2)
 
-  (!.python (xt/x:m-log10 100))
+  (!.py (xt/x:m-log10 100))
   => (approx 2))
 
 ^{:refer xt.lang.common-spec/x:m-max :added "4.1"}
@@ -928,7 +928,7 @@
   (!.lua (xt/x:m-max 3 5))
   => 5
 
-  (!.python (xt/x:m-max 3 5))
+  (!.py (xt/x:m-max 3 5))
   => 5)
 
 ^{:refer xt.lang.common-spec/x:m-mod :added "4.1"}
@@ -940,7 +940,7 @@
   (!.lua (xt/x:m-mod 10 3))
   => 1
 
-  (!.python (xt/x:m-mod 10 3))
+  (!.py (xt/x:m-mod 10 3))
   => 1)
 
 ^{:refer xt.lang.common-spec/x:m-min :added "4.1"}
@@ -952,7 +952,7 @@
   (!.lua (xt/x:m-min 3 5))
   => 3
 
-  (!.python (xt/x:m-min 3 5))
+  (!.py (xt/x:m-min 3 5))
   => 3)
 
 ^{:refer xt.lang.common-spec/x:m-pow :added "4.1"}
@@ -964,7 +964,7 @@
   (!.lua (xt/x:m-pow 2 4))
   => 16
 
-  (!.python (xt/x:m-pow 2 4))
+  (!.py (xt/x:m-pow 2 4))
   => 16)
 
 ^{:refer xt.lang.common-spec/x:m-quot :added "4.1"}
@@ -976,7 +976,7 @@
   (!.lua (xt/x:m-quot 7 2))
   => 3
 
-  (!.python (xt/x:m-quot 7 2))
+  (!.py (xt/x:m-quot 7 2))
   => 3)
 
 ^{:refer xt.lang.common-spec/x:m-sin :added "4.1"}
@@ -988,7 +988,7 @@
   (!.lua (xt/x:m-sin 0))
   => (approx 0)
 
-  (!.python (xt/x:m-sin 0))
+  (!.py (xt/x:m-sin 0))
   => (approx 0))
 
 ^{:refer xt.lang.common-spec/x:m-sinh :added "4.1"}
@@ -1000,7 +1000,7 @@
   (!.lua (xt/x:m-sinh 0))
   => (approx 0)
 
-  (!.python (xt/x:m-sinh 0))
+  (!.py (xt/x:m-sinh 0))
   => (approx 0))
 
 ^{:refer xt.lang.common-spec/x:m-sqrt :added "4.1"}
@@ -1012,7 +1012,7 @@
   (!.lua (xt/x:m-sqrt 9))
   => (approx 3)
 
-  (!.python (xt/x:m-sqrt 9))
+  (!.py (xt/x:m-sqrt 9))
   => (approx 3))
 
 ^{:refer xt.lang.common-spec/x:m-tan :added "4.1"}
@@ -1024,7 +1024,7 @@
   (!.lua (xt/x:m-tan 0))
   => (approx 0)
 
-  (!.python (xt/x:m-tan 0))
+  (!.py (xt/x:m-tan 0))
   => (approx 0))
 
 ^{:refer xt.lang.common-spec/x:m-tanh :added "4.1"}
@@ -1036,7 +1036,7 @@
   (!.lua (xt/x:m-tanh 0))
   => (approx 0)
 
-  (!.python (xt/x:m-tanh 0))
+  (!.py (xt/x:m-tanh 0))
   => (approx 0))
 
 ^{:refer xt.lang.common-spec/x:not-nil? :added "4.1"}
@@ -1050,7 +1050,7 @@
     (xt/x:not-nil? 0))
   => true
 
-  (!.python
+  (!.py
     (xt/x:not-nil? 0))
   => true)
 
@@ -1065,7 +1065,7 @@
     (xt/x:nil? nil))
   => true
 
-  (!.python
+  (!.py
     (xt/x:nil? nil))
   => true)
 
@@ -1080,7 +1080,7 @@
     (xt/x:add 1 2 3))
   => 6
 
-  (!.python
+  (!.py
     (xt/x:add 1 2 3))
   => 6)
 
@@ -1095,7 +1095,7 @@
     (xt/x:sub 10 3 2))
   => 5
 
-  (!.python
+  (!.py
     (xt/x:sub 10 3 2))
   => 5)
 
@@ -1110,7 +1110,7 @@
     (xt/x:mul 2 3 4))
   => 24
 
-  (!.python
+  (!.py
     (xt/x:mul 2 3 4))
   => 24)
 
@@ -1125,7 +1125,7 @@
     (xt/x:div 20 5))
   => (approx 4)
 
-  (!.python
+  (!.py
     (xt/x:div 20 5))
   => (approx 4))
 
@@ -1140,7 +1140,7 @@
     (xt/x:neg 2))
   => -2
 
-  (!.python
+  (!.py
     (xt/x:neg 2))
   => -2)
 
@@ -1155,7 +1155,7 @@
     (xt/x:inc 2))
   => 3
 
-  (!.python
+  (!.py
     (xt/x:inc 2))
   => 3)
 
@@ -1170,7 +1170,7 @@
     (xt/x:dec 2))
   => 1
 
-  (!.python
+  (!.py
     (xt/x:dec 2))
   => 1)
 
@@ -1185,7 +1185,7 @@
     (xt/x:zero? 0))
   => true
 
-  (!.python
+  (!.py
     (xt/x:zero? 0))
   => true)
 
@@ -1200,7 +1200,7 @@
     (xt/x:pos? 2))
   => true
 
-  (!.python
+  (!.py
     (xt/x:pos? 2))
   => true)
 
@@ -1215,7 +1215,7 @@
     (xt/x:neg? -2))
   => true
 
-  (!.python
+  (!.py
     (xt/x:neg? -2))
   => true)
 
@@ -1230,7 +1230,7 @@
     (xt/x:even? 4))
   => true
 
-  (!.python
+  (!.py
     (xt/x:even? 4))
   => true)
 
@@ -1245,7 +1245,7 @@
     (xt/x:odd? 5))
   => true
 
-  (!.python
+  (!.py
     (xt/x:odd? 5))
   => true)
 
@@ -1260,7 +1260,7 @@
     (xt/x:eq 2 2))
   => true
 
-  (!.python
+  (!.py
     (xt/x:eq 2 2))
   => true)
 
@@ -1275,7 +1275,7 @@
     (xt/x:neq 2 3))
   => true
 
-  (!.python
+  (!.py
     (xt/x:neq 2 3))
   => true)
 
@@ -1290,7 +1290,7 @@
     (xt/x:lt 2 3))
   => true
 
-  (!.python
+  (!.py
     (xt/x:lt 2 3))
   => true)
 
@@ -1305,7 +1305,7 @@
     (xt/x:lte 3 3))
   => true
 
-  (!.python
+  (!.py
     (xt/x:lte 3 3))
   => true)
 
@@ -1320,7 +1320,7 @@
     (xt/x:gt 4 3))
   => true
 
-  (!.python
+  (!.py
     (xt/x:gt 4 3))
   => true)
 
@@ -1335,7 +1335,7 @@
     (xt/x:gte 4 4))
   => true
 
-  (!.python
+  (!.py
     (xt/x:gte 4 4))
   => true)
 
@@ -1352,7 +1352,7 @@
     (xt/x:has-key? obj "a"))
   => true
 
-  (!.python
+  (!.py
     (var obj {:a 1})
     (xt/x:has-key? obj "a"))
   => true)
@@ -1372,7 +1372,7 @@
     out)
   => {"b" 2}
 
-  (!.python
+  (!.py
     (var out {:a 1 :b 2})
     (xt/x:del-key out "a")
     out)
@@ -1389,7 +1389,7 @@
     (xt/x:get-key {} "missing" "fallback"))
   => "fallback"
 
-  (!.python
+  (!.py
     (xt/x:get-key {} "missing" "fallback"))
   => "fallback")
 
@@ -1404,7 +1404,7 @@
     (xt/x:get-path {:nested {:b 2}} ["nested" "b"]))
   => 2
 
-  (!.python
+  (!.py
     (xt/x:get-path {:nested {:b 2}} ["nested" "b"]))
   => 2)
 
@@ -1423,7 +1423,7 @@
     out)
   => {"a" 1, "b" 2}
 
-  (!.python
+  (!.py
     (var out {:a 1})
     (xt/x:set-key out "b" 2)
     out)
@@ -1444,7 +1444,7 @@
     out)
   => {"a" 1, "c" 9}
 
-  (!.python
+  (!.py
     (var out {:a 1})
     (xt/x:copy-key out {:a 9} ["c" "a"])
     out)
@@ -1463,7 +1463,7 @@
      (xt/x:obj-keys {:a 1 :b 2})))
   => #{"a" "b"}
 
-  (!.python
+  (!.py
    (!.js
      (xt/x:obj-keys {:a 1 :b 2})))
   => #{"a" "b"})
@@ -1481,7 +1481,7 @@
      (xt/x:obj-vals {:a 1 :b 2})))
   => #{1 2}
 
-  (!.python
+  (!.py
    (!.js
      (xt/x:obj-vals {:a 1 :b 2})))
   => #{1 2})
@@ -1499,7 +1499,7 @@
      (xt/x:obj-pairs {:a 1 :b 2})))
   => #{["a" 1] ["b" 2]}
 
-  (!.python
+  (!.py
    (!.js
      (xt/x:obj-pairs {:a 1 :b 2})))
   => #{["a" 1] ["b" 2]})
@@ -1521,7 +1521,7 @@
     out)
   => {"a" 1}
 
-  (!.python
+  (!.py
     (var src {:a 1})
     (var out (xt/x:obj-clone src))
     (xt/x:set-key src "b" 2)
@@ -1539,7 +1539,7 @@
     (xt/x:obj-assign {:a 1} {:b 2}))
   => {"a" 1, "b" 2}
 
-  (!.python
+  (!.py
     (xt/x:obj-assign {:a 1} {:b 2}))
   => {"a" 1, "b" 2})
 
@@ -1554,7 +1554,7 @@
     (xt/x:to-string 12))
   => "12"
 
-  (!.python
+  (!.py
     (xt/x:to-string 12))
   => "12")
 
@@ -1569,7 +1569,7 @@
     (xt/x:to-number "12.5"))
   => 12.5
 
-  (!.python
+  (!.py
     (xt/x:to-number "12.5"))
   => 12.5)
 
@@ -1584,7 +1584,7 @@
     (xt/x:is-string? "abc"))
   => true
 
-  (!.python
+  (!.py
     (xt/x:is-string? "abc"))
   => true)
 
@@ -1599,7 +1599,7 @@
     (xt/x:is-number? 1.5))
   => true
 
-  (!.python
+  (!.py
     (xt/x:is-number? 1.5))
   => true)
 
@@ -1614,7 +1614,7 @@
     (xt/x:is-integer? 2))
   => true
 
-  (!.python
+  (!.py
     (xt/x:is-integer? 2))
   => true)
 
@@ -1629,7 +1629,7 @@
     (xt/x:is-boolean? true))
   => true
 
-  (!.python
+  (!.py
     (xt/x:is-boolean? true))
   => true)
 
@@ -1644,7 +1644,7 @@
     (xt/x:is-object? {:a 1}))
   => true
 
-  (!.python
+  (!.py
     (xt/x:is-object? {:a 1}))
   => true)
 
@@ -1659,7 +1659,7 @@
     (xt/x:is-array? [1 2]))
   => true
 
-  (!.python
+  (!.py
     (xt/x:is-array? [1 2]))
   => true)
 
@@ -1676,7 +1676,7 @@
     (xt/x:nil? (xt/x:print "hello")))
   => true
 
-  (!.python
+  (!.py
     ^{:lang-exceptions {:dart {:skip true}}}
     (xt/x:nil? (xt/x:print "hello")))
   => true)
@@ -1692,7 +1692,7 @@
     (xt/x:str-len "hello"))
   => 5
 
-  (!.python
+  (!.py
     (xt/x:str-len "hello"))
   => 5)
 
@@ -1705,7 +1705,7 @@
   (!.lua (xt/x:str-comp "abc" "abd"))
   => true
 
-  (!.python (xt/x:str-comp "abc" "abd"))
+  (!.py (xt/x:str-comp "abc" "abd"))
   => true)
 
 ^{:refer xt.lang.common-spec/x:str-lt :added "4.1"}
@@ -1717,7 +1717,7 @@
   (!.lua (xt/x:str-lt "abc" "abd"))
   => true
 
-  (!.python (xt/x:str-lt "abc" "abd"))
+  (!.py (xt/x:str-lt "abc" "abd"))
   => true)
 
 ^{:refer xt.lang.common-spec/x:str-gt :added "4.1"}
@@ -1729,7 +1729,7 @@
   (!.lua (xt/x:str-gt "abd" "abc"))
   => true
 
-  (!.python (xt/x:str-gt "abd" "abc"))
+  (!.py (xt/x:str-gt "abd" "abc"))
   => true)
 
 ^{:refer xt.lang.common-spec/x:str-pad-left :added "4.1"}
@@ -1743,7 +1743,7 @@
     (xt/x:str-pad-left "7" 3 "0"))
   => "007"
 
-  (!.python
+  (!.py
     (xt/x:str-pad-left "7" 3 "0"))
   => "007")
 
@@ -1758,7 +1758,7 @@
     (xt/x:str-pad-right "7" 3 "0"))
   => "700"
 
-  (!.python
+  (!.py
     (xt/x:str-pad-right "7" 3 "0"))
   => "700")
 
@@ -1773,7 +1773,7 @@
     (xt/x:str-starts-with "hello" "he"))
   => true
 
-  (!.python
+  (!.py
     (xt/x:str-starts-with "hello" "he"))
   => true)
 
@@ -1788,7 +1788,7 @@
     (xt/x:str-ends-with "hello" "lo"))
   => true
 
-  (!.python
+  (!.py
     (xt/x:str-ends-with "hello" "lo"))
   => true)
 
@@ -1803,7 +1803,7 @@
     (xt/x:str-char "abc" (xt/x:offset 1)))
   => 98
 
-  (!.python
+  (!.py
     (xt/x:str-char "abc" (xt/x:offset 1)))
   => 98)
 
@@ -1818,7 +1818,7 @@
     (xt/x:str-split "a/b/c" "/"))
   => ["a" "b" "c"]
 
-  (!.python
+  (!.py
     (xt/x:str-split "a/b/c" "/"))
   => ["a" "b" "c"])
 
@@ -1833,14 +1833,14 @@
     (xt/x:str-join "-" ["a" "b" "c"]))
   => "a-b-c"
 
-  (!.python
+  (!.py
     (xt/x:str-join "-" ["a" "b" "c"]))
   => "a-b-c")
 
 ^{:refer xt.lang.common-spec/x:str-index-of :added "4.1"}
 (fact "finds the index of a substring"
 
-  ^!.python
+  ^!.py
   (!.js
     (xt/x:str-index-of "hello/world" "/" (xt/x:offset 0)))
   => 5
@@ -1850,7 +1850,7 @@
     (xt/x:str-index-of "hello/world" "/" (xt/x:offset 0)))
   => 5
 
-  ^!.python
+  ^!.py
   (!.js
     (xt/x:str-index-of "hello/world" "/" (xt/x:offset 0)))
   => 5)
@@ -1870,7 +1870,7 @@
                         (xt/x:offset 8)))
   => "lo/wo"
 
-  (!.python
+  (!.py
     (xt/x:str-substring "hello/world"
                         (xt/x:offset 3)
                         (xt/x:offset 8)))
@@ -1887,7 +1887,7 @@
     (xt/x:str-to-upper "hello"))
   => "HELLO"
 
-  (!.python
+  (!.py
     (xt/x:str-to-upper "hello"))
   => "HELLO")
 
@@ -1902,7 +1902,7 @@
     (xt/x:str-to-lower "HELLO"))
   => "hello"
 
-  (!.python
+  (!.py
     (xt/x:str-to-lower "HELLO"))
   => "hello")
 
@@ -1917,7 +1917,7 @@
     (xt/x:str-to-fixed 1.2 2))
   => "1.20"
 
-  (!.python
+  (!.py
     (xt/x:str-to-fixed 1.2 2))
   => "1.20")
 
@@ -1930,7 +1930,7 @@
   (!.lua (xt/x:str-replace "hello-world" "-" "/"))
   => "hello/world"
 
-  (!.python (xt/x:str-replace "hello-world" "-" "/"))
+  (!.py (xt/x:str-replace "hello-world" "-" "/"))
   => "hello/world")
 
 ^{:refer xt.lang.common-spec/x:str-trim :added "4.1"}
@@ -1942,7 +1942,7 @@
   (!.lua (xt/x:str-trim "  hello  "))
   => "hello"
 
-  (!.python (xt/x:str-trim "  hello  "))
+  (!.py (xt/x:str-trim "  hello  "))
   => "hello")
 
 ^{:refer xt.lang.common-spec/x:str-trim-left :added "4.1"}
@@ -1954,7 +1954,7 @@
   (!.lua (xt/x:str-trim-left "  hello"))
   => "hello"
 
-  (!.python (xt/x:str-trim-left "  hello"))
+  (!.py (xt/x:str-trim-left "  hello"))
   => "hello")
 
 ^{:refer xt.lang.common-spec/x:str-trim-right :added "4.1"}
@@ -1966,7 +1966,7 @@
   (!.lua (xt/x:str-trim-right "hello  "))
   => "hello"
 
-  (!.python (xt/x:str-trim-right "hello  "))
+  (!.py (xt/x:str-trim-right "hello  "))
   => "hello")
 
 ^{:refer xt.lang.common-spec/x:arr-sort :added "4.1"}
@@ -1988,7 +1988,7 @@
     out)
   => [{"id" 1} {"id" 2} {"id" 3}]
 
-  (!.python
+  (!.py
     (var out [{:id 3} {:id 1} {:id 2}])
     (xt/x:arr-sort out
                    (fn [e] (return (xt/x:get-key e "id")))
@@ -2013,7 +2013,7 @@
     out)
   => [1 2]
 
-  (!.python
+  (!.py
     (var src [1 2])
     (var out (xt/x:arr-clone src))
     (xt/x:arr-push src 3)
@@ -2039,7 +2039,7 @@
     out)
   => [2 4 6]
 
-  (!.python
+  (!.py
     (var out [])
     (xt/x:arr-each [1 2 3]
                    (fn [e]
@@ -2060,7 +2060,7 @@
                     (fn [e] (return (xt/x:even? e)))))
   => true
 
-  (!.python
+  (!.py
     (xt/x:arr-every [2 4 6]
                     (fn [e] (return (xt/x:even? e)))))
   => true)
@@ -2078,7 +2078,7 @@
                    (fn [e] (return (xt/x:even? e)))))
   => true
 
-  (!.python
+  (!.py
     (xt/x:arr-some [1 3 4]
                    (fn [e] (return (xt/x:even? e)))))
   => true)
@@ -2094,7 +2094,7 @@
     (xt/x:arr-map [1 2 3] (fn [e] (return (* e 2)))))
   => [2 4 6]
 
-  (!.python
+  (!.py
     (xt/x:arr-map [1 2 3] (fn [e] (return (* e 2)))))
   => [2 4 6])
 
@@ -2113,7 +2113,7 @@
     out)
   => [1 2 3 4]
 
-  (!.python
+  (!.py
     (var out  [1 2])
     (xt/x:arr-assign out [3 4])
     out)
@@ -2132,7 +2132,7 @@
     [(xt/x:arr-concat src [3 4]) src])
   => [[1 2 3 4] [1 2]]
 
-  (!.python
+  (!.py
     (var src [1 2])
     [(xt/x:arr-concat src [3 4]) src])
   => [[1 2 3 4] [1 2]])
@@ -2148,7 +2148,7 @@
     (xt/x:arr-filter [2 3 4 5] (fn [e] (return (xt/x:even? e)))))
   => [2 4]
 
-  (!.python
+  (!.py
     (xt/x:arr-filter [2 3 4 5] (fn [e] (return (xt/x:even? e)))))
   => [2 4])
 
@@ -2167,7 +2167,7 @@
                     0))
   => 15
 
-  (!.python
+  (!.py
     (xt/x:arr-foldl [1 2 3 4 5]
                     (fn [out e] (return (+ out e)))
                     0))
@@ -2188,7 +2188,7 @@
                     ""))
   => "edcba"
 
-  (!.python
+  (!.py
     (xt/x:arr-foldr ["a" "b" "c" "d" "e"]
                     (fn [out e] (return (xt/x:cat out e)))
                     ""))
@@ -2211,7 +2211,7 @@
     (xt/x:is-function? (fn [x] (return x))))
   => true
 
-  (!.python
+  (!.py
     (xt/x:is-function? (fn [x] (return x))))
   => true)
 
@@ -2240,7 +2240,7 @@
      out)]
   => ["OK" "ERR"]
 
-  [!.python
+  [!.py
    (!.js
      (var out nil)
      (var failure (fn [cb]
@@ -2274,7 +2274,7 @@
     out)
   => "ERR"
 
-  (!.python
+  (!.py
     (var out nil)
     (xt/for:return [[ok err] (xt/x:return-run
                               (fn [resolve reject]
@@ -2295,7 +2295,7 @@
     (xt/x:eval "1 + 1"))
   => 2
 
-  (!.python
+  (!.py
     (xt/x:eval "1 + 1"))
   => 2)
 
@@ -2314,7 +2314,7 @@
                 [1 2 3]))
   => 6
 
-  (!.python
+  (!.py
     (xt/x:apply (fn [a b c]
                   (return (+ a b c)))
                 [1 2 3]))
@@ -2337,7 +2337,7 @@
     out)
   => (contains [["a" 1] ["b" 2]] :in-any-order)
 
-  (!.python
+  (!.py
     (var out [])
     (xt/for:iter [e (xt/x:iter-from-obj {:a 1 :b 2})]
       (xt/x:arr-push out e))
@@ -2361,7 +2361,7 @@
     out)
   => [1 2 3]
 
-  (!.python
+  (!.py
     (var out [])
     (xt/for:iter [e (xt/x:iter-from-arr [1 2 3])]
       (xt/x:arr-push out e))
@@ -2385,7 +2385,7 @@
     out)
   => [2 4 6]
 
-  (!.python
+  (!.py
     (var out [])
     (xt/for:iter [e (xt/x:iter-from [2 4 6])]
       (xt/x:arr-push out e))
@@ -2421,7 +2421,7 @@
               (return (== a b))))])
   => [true false]
 
-  (!.python
+  (!.py
     (var eq-fn (fn [it0 it1 eq-fn]
                  (xt/x:iter-eq it0 it1 eq-fn)))
     [(eq-fn (xt/x:iter-from-arr [1 2 3])
@@ -2445,7 +2445,7 @@
     (xt/x:iter-native? (xt/x:iter-null)))
   => true
 
-  (!.python
+  (!.py
     (xt/x:iter-native? (xt/x:iter-null)))
   => true)
 
@@ -2460,7 +2460,7 @@
     (xt/x:iter-native? (xt/x:iter-from-arr [1 2 3])))
   => true
 
-  (!.python
+  (!.py
     (xt/x:iter-native? (xt/x:iter-from-arr [1 2 3])))
   => true)
 
@@ -2477,7 +2477,7 @@
      (xt/x:iter-has? {:a 1})])
   => [true false]
 
-  (!.python
+  (!.py
     [(xt/x:iter-has? [1 2 3])
      (xt/x:iter-has? {:a 1})])
   => [true false])
@@ -2495,7 +2495,7 @@
      (xt/x:iter-native? [1 2 3])])
   => [true false]
 
-  (!.python
+  (!.py
     [(xt/x:iter-native? (xt/x:iter-from-arr [1 2 3]))
      (xt/x:iter-native? [1 2 3])])
   => [true false])
@@ -2523,7 +2523,7 @@
       "type" "data"
       "value" {"a" 1}}
 
-  (!.python
+  (!.py
     (var encode-fn
          (fn [value id key]
            (xt/x:return-encode value id key)))
@@ -2574,7 +2574,7 @@
       "return" "number"
       "value" 3}
 
-  (!.python
+  (!.py
     (var encode-fn
          (fn [value id key]
            (xt/x:return-encode value id key)))
@@ -2636,7 +2636,7 @@
                              (encode-fn out "id-A" "key-B")))))))))
   => {"return" "number", "key" "key-B", "id" "id-A", "value" 2, "type" "data"}
 
-  (!.python
+  (!.py
     (var encode-fn
          (fn [value id key]
            (xt/x:return-encode value id key)))
@@ -2665,7 +2665,7 @@
   (!.lua (xt/x:bit-and 6 3))
   => 2
 
-  (!.python (xt/x:bit-and 6 3))
+  (!.py (xt/x:bit-and 6 3))
   => 2)
 
 ^{:refer xt.lang.common-spec/x:bit-or :added "4.1"}
@@ -2677,7 +2677,7 @@
   (!.lua (xt/x:bit-or 6 3))
   => 7
 
-  (!.python (xt/x:bit-or 6 3))
+  (!.py (xt/x:bit-or 6 3))
   => 7)
 
 ^{:refer xt.lang.common-spec/x:bit-lshift :added "4.1"}
@@ -2689,7 +2689,7 @@
   (!.lua (xt/x:bit-lshift 3 2))
   => 12
 
-  (!.python (xt/x:bit-lshift 3 2))
+  (!.py (xt/x:bit-lshift 3 2))
   => 12)
 
 ^{:refer xt.lang.common-spec/x:bit-rshift :added "4.1"}
@@ -2701,7 +2701,7 @@
   (!.lua (xt/x:bit-rshift 12 2))
   => 3
 
-  (!.python (xt/x:bit-rshift 12 2))
+  (!.py (xt/x:bit-rshift 12 2))
   => 3)
 
 ^{:refer xt.lang.common-spec/x:bit-xor :added "4.1"}
@@ -2713,7 +2713,7 @@
   (!.lua (xt/x:bit-xor 6 3))
   => 5
 
-  (!.python (xt/x:bit-xor 6 3))
+  (!.py (xt/x:bit-xor 6 3))
   => 5)
 
 ^{:refer xt.lang.common-spec/x:global-set :added "4.1"}
@@ -2749,7 +2749,7 @@
      (del-fn)])
   => [true 1 false]
 
-  (!.python
+  (!.py
     (var set-fn
          (fn []
            (xt/x:global-set COMMON_SPEC_GLOBAL 1)
@@ -2779,7 +2779,7 @@
     (!:G COMMON_SPEC_DELETE))
   => nil
 
-  (!.python
+  (!.py
     (xt/x:global-set COMMON_SPEC_DELETE 1)
     (xt/x:global-del COMMON_SPEC_DELETE)
     (!:G COMMON_SPEC_DELETE))
@@ -2816,7 +2816,7 @@
      (del-fn)])
   => [true false]
 
-  (!.python
+  (!.py
     (var set-fn
          (fn []
            (xt/x:global-set COMMON_SPEC_GLOBAL 1)
@@ -2853,7 +2853,7 @@
     (. (xt/x:proto-get obj "label") ["label"]))
   => "proto"
 
-  (!.python
+  (!.py
     (var set-fn
          (fn [obj proto]
            (xt/x:proto-set obj proto nil)))
@@ -2884,7 +2884,7 @@
     (set-fn obj proto)
     (. (xt/x:proto-get obj "label") ["label"]))
 
-  (!.python
+  (!.py
     (var set-fn
          (fn [obj proto]
            (xt/x:proto-set obj proto nil)))
@@ -2916,7 +2916,7 @@
     (. obj (describe "!")))
   => "alpha!"
 
-  (!.python
+  (!.py
     (var proto (xt/x:proto-create
                 {:describe (fn [self suffix]
                              (return (+ (. self ["name"]) suffix)))}))
@@ -2947,7 +2947,7 @@
          (< out 1)))
   => true
 
-  (!.python
+  (!.py
     (var out (xt/x:random))
     (and (>= out 0)
          (< out 1)))
@@ -2970,7 +2970,7 @@
     (> (xt/x:now-ms) 0))
   => true
 
-  (!.python
+  (!.py
     (> (xt/x:now-ms) 0))
   => true)
 
@@ -2989,7 +2989,7 @@
      (xt/x:unpack [1 2 3])))
   => 6
 
-  (!.python
+  (!.py
     ((fn [a b c]
        (return (+ a b c)))
      (xt/x:unpack [1 2 3])))
@@ -3040,7 +3040,7 @@
        "value" {"a" 1}}
       "POST"]
 
-  (!.python
+  (!.py
     (var out nil)
     (:= (!:G fetch)
         (fn [url opts]
@@ -3072,7 +3072,7 @@
     (xt/x:b64-encode "hello"))
   => "aGVsbG8="
 
-  (!.python
+  (!.py
     (xt/x:b64-encode "hello"))
   => "aGVsbG8=")
 
@@ -3087,7 +3087,7 @@
     (xt/x:b64-decode "aGVsbG8="))
   => "hello"
 
-  (!.python
+  (!.py
     (xt/x:b64-decode "aGVsbG8="))
   => "hello")
 
@@ -3108,7 +3108,7 @@
     (. (xt/x:cache "GLOBAL") ["name"]))
   => "local"
 
-  (!.python
+  (!.py
     (:= (!:G window)
         {:localStorage  {:name "local"}
          :sessionStorage {:name "session"}})
@@ -3132,7 +3132,7 @@
     (xt/x:cache-list))
   => ["a" "b"]
 
-  (!.python
+  (!.py
     (:= (!:G window)
         {:localStorage  {"_keys" ["a" "b"]}
          :sessionStorage {"_keys" []}})
@@ -3158,7 +3158,7 @@
     out)
   => "flushed"
 
-  (!.python
+  (!.py
     (var out nil)
     (var cache {:clear (fn []
                          (:= out "flushed"))})
@@ -3181,7 +3181,7 @@
     (xt/x:cache-get cache "key"))
   => "value:key"
 
-  (!.python
+  (!.py
     (var cache {:getItem (fn [k]
                            (return (+ "value:" k)))})
     (xt/x:cache-get cache "key"))
@@ -3208,7 +3208,7 @@
      out])
   => ["value" ["key" "value"]]
 
-  (!.python
+  (!.py
     (var out nil)
     (var cache {:setItem (fn [k v]
                            (:= out [k v])
@@ -3236,7 +3236,7 @@
     out)
   => "key"
 
-  (!.python
+  (!.py
     (var out nil)
     (var cache {:removeItem (fn [k]
                               (:= out k))})
@@ -3267,7 +3267,7 @@
     (xt/x:cache-incr cache "count" 3))
   => 5
 
-  (!.python
+  (!.py
     (var state {"count" "2"})
     (var cache {:getItem (fn [k]
                            (return (. state [k])))
@@ -3298,7 +3298,7 @@
   (!.lua (xt/x:json-encode {:a 1}))
   => #"\{\"a\":\s*1\}"
 
-  (!.python (xt/x:json-encode {:a 1}))
+  (!.py (xt/x:json-encode {:a 1}))
   => #"\{\"a\":\s*1\}")
 
 ^{:refer xt.lang.common-spec/x:json-decode :added "4.1"}
@@ -3310,13 +3310,13 @@
   (!.lua (xt/x:json-decode "{\"a\":1}"))
   => {"a" 1}
 
-  (!.python (xt/x:json-decode "{\"a\":1}"))
+  (!.py (xt/x:json-decode "{\"a\":1}"))
   => {"a" 1})
 
 ^{:refer xt.lang.common-spec/x:shell :added "4.1"}
 (fact "executes shell commands asynchronously"
 
-  (!.js :js
+  (notify/wait-on :js
     (xt/x:shell "printf hello"
                 {:success (fn [res]
                             (repl/notify res))
@@ -3324,7 +3324,7 @@
                             (repl/notify "ERR"))}))
   => #"hello"
 
-  (!.lua :js
+  (notify/wait-on :lua
     (xt/x:shell "printf hello"
                 {:success (fn [res]
                             (repl/notify res))
@@ -3332,7 +3332,7 @@
                             (repl/notify "ERR"))}))
   => #"hello"
 
-  (!.python :js
+  (notify/wait-on :python
     (xt/x:shell "printf hello"
                 {:success (fn [res]
                             (repl/notify res))
@@ -3343,19 +3343,19 @@
 ^{:refer xt.lang.common-spec/x:thread-spawn :added "4.1"}
 (fact "spawns js promise-backed threads"
 
-  (!.js :js
+  (notify/wait-on :js
     (-> (xt/x:thread-spawn (fn []
                              (return "OK")))
         (. (then (repl/>notify)))))
   => "OK"
 
-  (!.lua :js
+  (notify/wait-on :lua
     (-> (xt/x:thread-spawn (fn []
                              (return "OK")))
         (. (then (repl/>notify)))))
   => "OK"
 
-  (!.python :js
+  (notify/wait-on :python
     (-> (xt/x:thread-spawn (fn []
                              (return "OK")))
         (. (then (repl/>notify)))))
@@ -3372,28 +3372,28 @@
     (xt/x:thread-join {}))
   => (throws)
 
-  (!.python
+  (!.py
     (xt/x:thread-join {}))
   => (throws))
 
 ^{:refer xt.lang.common-spec/x:with-delay :added "4.1"}
 (fact "delays asynchronous js computations"
 
-  (!.js :js
+  (notify/wait-on :js
     (-> (xt/x:with-delay (fn []
                            (return "LATER"))
                          20)
         (. (then (repl/>notify)))))
   => "LATER"
 
-  (!.lua :js
+  (notify/wait-on :lua
     (-> (xt/x:with-delay (fn []
                            (return "LATER"))
                          20)
         (. (then (repl/>notify)))))
   => "LATER"
 
-  (!.python :js
+  (notify/wait-on :python
     (-> (xt/x:with-delay (fn []
                            (return "LATER"))
                          20)
@@ -3423,7 +3423,7 @@
     (xt/x:uri-encode "hello world"))
   => "hello%20world"
 
-  (!.python
+  (!.py
     (xt/x:uri-encode "hello world"))
   => "hello%20world")
 
@@ -3438,7 +3438,7 @@
     (xt/x:uri-decode "hello%20world"))
   => "hello world"
 
-  (!.python
+  (!.py
     (xt/x:uri-decode "hello%20world"))
   => "hello world")
 
