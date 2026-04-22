@@ -33,7 +33,6 @@
 
 ^{:refer rt.postgres.base.grammar/CANARY.select :adopt true :added "4.0"}
 (fact "BASIC SELECT"
-  ^:hidden
 
   (!.pg
    [:select (pg/jsonb-agg '("A" "B"))])
@@ -68,7 +67,6 @@
 
 ^{:refer rt.postgres.base.grammar/CANARY.json :adopt true :added "4.0"}
 (fact "BASIC JSON SELECT"
-  ^:hidden
 
   (!.pg
    [:select o

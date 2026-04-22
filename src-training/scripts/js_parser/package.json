@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@babel/parser": "^7.28.5"
+  }
+}

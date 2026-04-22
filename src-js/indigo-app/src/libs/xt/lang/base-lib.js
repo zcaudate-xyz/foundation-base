@@ -447,7 +447,7 @@ export function arr_clone(arr){
   return out;
 }
 
-// xt.lang.base-lib/arr-append [509] 
+// xt.lang.base-lib/arr-assign [509] 
 export function arr_append(arr,other){
   for(let e of other){
     arr.push(e);

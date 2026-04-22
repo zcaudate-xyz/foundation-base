@@ -147,7 +147,6 @@
   :adopt true
   :added "0.1"}
 (fact  "creates a slim switch box"
-  ^:hidden
 
   (defn.js placeHolderText
     []
@@ -181,7 +180,7 @@
                 (var active (j/min (- 1 emptying)
                                    focusing))
                 (return {:style {:opacity active}}))}]))
-  
+
   (defn.js placeHolderBottom
     []
     (return [{:component n/Text
@@ -218,7 +217,7 @@
               expected setExpected
               waiting setWaiting
               done setDone}))
-  
+
   (defn.js FaroriteFormReset
     [#{favorite setFavorite
        expected setExpected
@@ -247,7 +246,7 @@
                         :margin 10
                         :alignItems "center"
                         :justifyContent "center"}}]]))
-  
+
   (defn.js FavoriteForm
     [#{favorite setFavorite
        expected setExpected
@@ -274,7 +273,7 @@
                 :style {:height 50
                         :paddingLeft 8
                         :fontSize 20}
-                
+
                 :styleContainer {:flex 1
                                  :borderRadius 10
                                  :height 50
@@ -307,7 +306,7 @@
                         :alignItems "center"
                         :justifyContent "center"}
                 :disabled waiting}]]]))
-  
+
   (defn.js FavoriteFormSubmitDemo
     []
     (var form (-/useFavoriteForm))
@@ -316,8 +315,8 @@
            waiting setWaiting
            done setDone} form)
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-form-submit-test/FavoriteForm"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-form-submit-test/FavoriteForm"}
 [:% n/View
        {:style {:justifyContent "center"
                 :alignItems "center"}}
@@ -332,7 +331,7 @@
             [[:% -/FaroriteFormReset
               #{[(:.. form)]}]
              [:% -/FavoriteForm
-              #{[(:.. form)]}]])]] 
+              #{[(:.. form)]}]])]]
 [:% n/Row
        [:% n/Button
         {:title "WAITING"
@@ -340,15 +339,15 @@
        [:% n/Text " "]
        [:% n/Button
         {:title "DONE"
-         :onPress (fn:> (setDone (not done)))}]] 
+         :onPress (fn:> (setDone (not done)))}]]
 [:% n/Caption
        {:text (n/format-entry #{favorite
                                 waiting
                                 expected})
         :style {:marginTop 10}}])))
-  
-  
-  
+
+
+
   )
 
 (comment

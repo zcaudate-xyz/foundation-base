@@ -33,7 +33,6 @@
 
 ^{:refer xt.cell/SERVICE :added "4.1"}
 (fact "returns nil when the worker service registry has not been set"
-  ^:hidden
 
   (!.js
    (cell/SERVICE))
@@ -41,7 +40,6 @@
 
 ^{:refer xt.cell/BINDINGS :added "4.1"}
 (fact "returns an empty map when the worker bindings registry has not been set"
-  ^:hidden
 
   (!.js
    (cell/BINDINGS))
@@ -49,7 +47,6 @@
 
 ^{:refer xt.cell/fn-setup-service :added "4.1"}
 (fact "stores the worker service registry in global state"
-  ^:hidden
 
   (!.js
    (cell/fn-setup-service {"dbs" {"local" {"kind" "cache"}}}))
@@ -57,7 +54,6 @@
 
 ^{:refer xt.cell/fn-get-service :added "4.1"}
 (fact "returns the previously stored worker service registry"
-  ^:hidden
 
   (!.js
    (cell/fn-setup-service {"dbs" {"local" {"kind" "cache"}}})
@@ -66,7 +62,6 @@
 
 ^{:refer xt.cell/fn-setup-bindings :added "4.1"}
 (fact "stores the worker bindings registry in global state"
-  ^:hidden
 
   (!.js
    (cell/fn-setup-bindings {"orders" {"list" {}}}))
@@ -74,7 +69,6 @@
 
 ^{:refer xt.cell/fn-get-bindings :added "4.1"}
 (fact "returns the previously stored worker bindings registry"
-  ^:hidden
 
   (!.js
    (cell/fn-setup-bindings {"orders" {"list" {}}})
@@ -83,7 +77,6 @@
 
 ^{:refer xt.cell/actions-cell :added "4.1"}
 (fact "returns the cell-specific worker setup actions"
-  ^:hidden
 
   (!.js
    (xtd/obj-keys (cell/actions-cell)))
@@ -94,7 +87,6 @@
 
 ^{:refer xt.cell/actions-baseline :added "4.1"}
 (fact "merges cell actions into the standard worker baseline"
-  ^:hidden
 
   (!.js
    [(xt/x:has-key? (cell/actions-baseline) "@cell/setup-service")
@@ -103,7 +95,6 @@
 
 ^{:refer xt.cell/actions-init :added "4.1"}
 (fact "installs cell actions into a worker action table"
-  ^:hidden
 
   (!.js
    (var worker (worker-mock/create-worker nil {} true))
@@ -117,7 +108,6 @@
 
 ^{:refer xt.cell/setup-service :added "4.1"}
 (fact "sets the worker service registry over a link transport"
-  ^:hidden
 
   (j/<!
    (cell/setup-service
@@ -127,7 +117,6 @@
 
 ^{:refer xt.cell/get-service :added "4.1"}
 (fact "gets the worker service registry over a link transport"
-  ^:hidden
 
   (!.js
    (-/LINK-reset (-/make-link))
@@ -146,7 +135,6 @@
 
 ^{:refer xt.cell/setup-bindings :added "4.1"}
 (fact "sets the worker bindings registry over a link transport"
-  ^:hidden
 
   (j/<!
    (cell/setup-bindings
@@ -156,7 +144,6 @@
 
 ^{:refer xt.cell/get-bindings :added "4.1"}
 (fact "gets the worker bindings registry over a link transport"
-  ^:hidden
 
   (!.js
    (-/LINK-reset (-/make-link))

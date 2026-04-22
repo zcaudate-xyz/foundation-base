@@ -11,7 +11,6 @@
             [std.lang.base.script :as script]
             [std.lang.base.util :as ut]
             [std.lang.model.spec-xtalk]
-            [std.lang.model.spec-xtalk.com-lua :as com]
             [std.lang.model.spec-xtalk.fn-lua :as fn]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
@@ -176,70 +175,59 @@
                             (apply list 'fn [] body)))))
 
 (def +features+
-  (let [base (-> (grammar/build :include [:builtin
-                                          :builtin-global
-                                          :builtin-module
-                                          :builtin-helper
-                                          :free-control
-                                          :free-literal
-                                          :math
-                                          :compare
-                                          :logic
-                                          :return
-                                          :data-table
-                                          :data-shortcuts
-                                          :vars
-                                          :fn
-                                          :control-base
-                                          :control-general
-                                          :top-base
-                                          :top-global
-                                          :top-declare
-                                          :for
-                                          :coroutine
-                                          :macro
-                                          :macro-arrow
-                                          :macro-let
-                                          :macro-xor])
-                 (merge (grammar/build-xtalk))
-                 (grammar/build:override
-                  {:var        {:symbol '#{var*}}
-                   :not        {:raw "not "}
-                   :and        {:raw "and"}
-                   :or         {:raw "or"}
-                   :neq        {:raw "~="}
-                   :for-object {:macro #'tf-for-object :emit :macro}
-                   :for-array  {:macro #'tf-for-array  :emit :macro}
-                   :for-iter   {:macro #'tf-for-iter   :emit :macro}
-                   :for-index  {:macro #'tf-for-index  :emit :macro}
-                   :for-return {:macro #'tf-for-return :emit :macro}
-                   :for-try    {:macro #'tf-for-try    :emit :macro}
-                   :for-async  {:macro #'tf-for-async  :emit :macro}
-                   :defgen     {:macro #'tf-defgen     :emit :macro}
-                   :yield      {:macro #'tf-yield      :emit :macro}}))
-        base-keys (set (keys base))
-        fn-overrides (select-keys fn/+lua+ base-keys)
-        fn-extensions (apply dissoc fn/+lua+ base-keys)
-        with-fn (cond-> base
-                  (seq fn-overrides) (grammar/build:override fn-overrides)
-                  (seq fn-extensions) (grammar/build:extend fn-extensions))
-        with-fn-keys (set (keys with-fn))
-        com-overrides (select-keys com/+lua-com+ with-fn-keys)
-        com-extensions (apply dissoc com/+lua-com+ with-fn-keys)]
-    (cond-> with-fn
-      (seq com-overrides) (grammar/build:override com-overrides)
-      (seq com-extensions) (grammar/build:extend com-extensions)
-      true (grammar/build:extend
-            {:cat    {:op :cat    :symbol '#{cat}       :raw ".."   :emit :infix}
-             :len    {:op :len    :symbol '#{len}       :raw "#"    :emit  :pre}
-             :local  {:op :local  :symbol '#{local var} :macro  #'tf-local :emit :macro}
-             :c-ffi  {:op :c-ffi  :symbol '#{%.c}       :macro  #'tf-c-ffi :emit :macro}
-             :repeat {:op :repeat
-                      :symbol '#{repeat} :type :block
-                      :block {:raw "repeat"
-                              :main    #{:body}
-                              :control [[:until {:required true
-                                                 :input #{:parameter}}]]}}}))))
+  (-> (grammar/build :include [:builtin
+                               :builtin-global
+                               :builtin-module
+                               :builtin-helper
+                               :free-control
+                               :free-literal
+                               :math
+                               :compare
+                               :logic
+                               :return
+                               :data-table
+                               :data-shortcuts
+                               :vars
+                               :fn
+                               :control-base
+                               :control-general
+                               :top-base
+                               :top-global
+                               :top-declare
+                               :for
+                               :coroutine
+                               :macro
+                               :macro-arrow
+                               :macro-let
+                               :macro-xor])
+      (merge (grammar/build-xtalk))
+      (grammar/build:override
+       {:var        {:symbol '#{var*}}
+        :not        {:raw "not "}
+        :and        {:raw "and"}
+        :or         {:raw "or"}
+        :neq        {:raw "~="}
+        :for-object {:macro #'tf-for-object :emit :macro}
+        :for-array  {:macro #'tf-for-array  :emit :macro}
+        :for-iter   {:macro #'tf-for-iter   :emit :macro}
+        :for-index  {:macro #'tf-for-index  :emit :macro}
+        :for-return {:macro #'tf-for-return :emit :macro}
+        :for-try    {:macro #'tf-for-try    :emit :macro}
+        :for-async  {:macro #'tf-for-async  :emit :macro}
+        :defgen     {:macro #'tf-defgen     :emit :macro}
+        :yield      {:macro #'tf-yield      :emit :macro}})
+      (grammar/build:override fn/+lua+)
+      (grammar/build:extend
+       {:cat    {:op :cat    :symbol '#{cat}       :raw ".."   :emit :infix}
+        :len    {:op :len    :symbol '#{len}       :raw "#"    :emit  :pre}
+        :local  {:op :local  :symbol '#{local var} :macro  #'tf-local :emit :macro}
+        :c-ffi  {:op :c-ffi  :symbol '#{%.c}       :macro  #'tf-c-ffi :emit :macro}
+        :repeat {:op :repeat
+                 :symbol '#{repeat} :type :block
+                 :block {:raw "repeat"
+                         :main    #{:body}
+                         :control [[:until {:required true
+                                            :input #{:parameter}}]]}}})))
 
 (def +template+
   (->> {:banned #{:keyword :set :regex}

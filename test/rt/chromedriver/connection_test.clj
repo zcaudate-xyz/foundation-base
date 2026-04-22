@@ -42,8 +42,7 @@
 
 ^{:refer rt.chromedriver.connection/gen-id :added "4.0"}
 (fact "generates an id"
-  ^:hidden
-  
+
   (conn/gen-id {})
   => integer?)
 
@@ -52,13 +51,12 @@
             (conn/conn-create {:port (:port (start-scaffold))}))]
   :teardown [(conn/conn-close +conn+)]}
 (fact "sends a command to the process"
-  ^:hidden
-  
+
   @(conn/send +conn+ "Target.detachFromTarget"
               {:targetId  (:target-id +conn+)
                :sessionId (:session-id +conn+)})
   => {}
-  
+
 
   @(conn/send +conn+ "Target.closeTarget"
               {:targetId (:target-id +conn+)})
@@ -66,15 +64,13 @@
 
 ^{:refer rt.chromedriver.connection/ws-url :added "4.0"}
 (fact "gets the ws-url"
-  ^:hidden
-  
+
   (conn/ws-url {:port (:port (start-scaffold))})
   => string?)
 
 ^{:refer rt.chromedriver.connection/conn-process :added "4.0"}
 (fact "processes the return call"
-  ^:hidden
-  
+
   (conn/conn-process (atom {})
                      (std.json/write {:id 1234
                                       :result [1 2 3 4]}))
@@ -86,8 +82,7 @@
                                :port (:port (start-scaffold))}))]
   :teardown [(conn/conn-close +conn+)]}
 (fact "creates a new target and attaches"
-  ^:hidden
-  
+
   (conn/conn-attach +conn+)
   => (contains {:session-id string?
                 :target-id string?})
@@ -96,7 +91,7 @@
               "Target.getTargetInfo"
               {})
   => (contains {"targetInfo" map?})
-  
+
   @(conn/send (dissoc +conn+ :session-id)
               "Target.getTargets"
               {})
@@ -113,8 +108,7 @@
             (conn/conn-create {:port (:port (start-scaffold))
                                :attach :new}))]}
 (fact "creates a devtools connection"
-  ^:hidden
-  
+
   ;;
   ;; Tab1
   ;;
@@ -126,16 +120,16 @@
                   3000))
   => (contains {"frameId" string?
                    "loaderId" string?})
-  
+
   (do (Thread/sleep 100)
       @(conn/send (dissoc +conn+ :session-id)
                   "Target.getTargetInfo"))
   => (contains-in {"targetInfo" {"attached" true}})
-  
+
   ;;
   ;; Tab2
   ;;
-  
+
   (def +conn2+
     (conn/conn-create {:port (:port (start-scaffold))
                        :attach :new}))
@@ -143,7 +137,7 @@
       @(conn/send (dissoc +conn2+ :session-id)
                   "Target.getTargetInfo"))
   => (contains-in {"targetInfo" {"attached" true}})
-  
+
   (do (Thread/sleep 100)
       @(conn/send +conn2+
                   "Page.navigate"

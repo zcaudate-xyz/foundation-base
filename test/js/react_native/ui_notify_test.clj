@@ -20,8 +20,7 @@
 
 ^{:refer js.react-native.ui-notify/Notify :added "4.0" :unchecked true}
 (fact "creates a Notify"
-  ^:hidden
-  
+
   (defn.js NotifyPane
     [#{visible
        position
@@ -37,20 +36,20 @@
        [:% n/Text
         {:style {:backgroundColor "yellow"}}
         "HELLO"]]]))
-  
+
   (defn.js NotifyDemo
     []
     (var [visible setVisible] (r/local true))
     (var [position setPosition] (r/local "centered"))
     (var [transition setTransition] (r/local "from_top"))
     (return
-     (n/EnclosedCode 
+     (n/EnclosedCode
 {:label "js.react-native.ui-notify/Notify"
-       :style {}} 
+       :style {}}
 [:% n/Row
        [:% n/Button
         {:title "T"
-         :onPress (fn:> (setVisible (not visible)))}]] 
+         :onPress (fn:> (setVisible (not visible)))}]]
 [:% n/Tabs
        {:data ["centered"
                "top"
@@ -62,14 +61,14 @@
                "bottom_right"
                "bottom_left"]
         :value position
-        :setValue setPosition}] 
+        :setValue setPosition}]
 [:% n/Tabs
        {:data ["from_top"
                "from_bottom"
                "from_left"
                "from_right"]
         :value transition
-        :setValue setTransition}] 
+        :setValue setTransition}]
 [:% n/Row
        {:style {:backgroundColor "#eee"}}
        [:% n/PortalProvider
@@ -81,14 +80,14 @@
           #{visible
             position
             transition
-            setVisible}]]]] 
+            setVisible}]]]]
 [:% n/TextDisplay
        {:content (n/format-entry #{visible
                                    position
                                    transition})}])))
-  
+
   (def.js MODULE
     (do (:# (!:uuid))
         (!:module)))
-  
+
   )

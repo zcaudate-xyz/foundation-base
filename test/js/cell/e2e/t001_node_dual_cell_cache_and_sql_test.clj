@@ -44,7 +44,6 @@
 
 ^{:refer js.cell.e2e.common/run-scenario :added "4.1"}
 (fact "runs a Node dual-cell cache/sqlite-wasm scenario"
-  ^:hidden
 
   (notify/wait-on :js
     (var remote-cell
@@ -61,7 +60,7 @@
                       (repl/notify {"error" err}))})))
        (catch (fn [err]
                 (repl/notify {"error" err})))))
-  
+
   => (contains-in
       {"remote_seed" [{"id" "ord-1"
                        "status" "open"}]

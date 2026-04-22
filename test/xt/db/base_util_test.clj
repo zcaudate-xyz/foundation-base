@@ -51,8 +51,7 @@
                            "flags" {},
                            "type" "db"}}))]}
 (fact "collect routes"
-  ^:hidden
-  
+
   (!.js
    (ut/collect-routes (@! +routes+) "db"))
   => +result+
@@ -110,7 +109,6 @@
                      :query {"type" "i_type"},
                      :guards []}}])]}
 (fact "collect views into views structure"
-  ^:hidden
 
   (!.js
    (ut/collect-views (@! +views+)))
@@ -135,22 +133,21 @@
 
 ^{:refer xt.db.base-util/keepf-limit :added "4.0"}
 (fact "keeps given limit"
-  ^:hidden
-  
+
   (!.js
    (ut/keepf-limit [1 2 3 4 5]
 	           xt/x:odd?
                    k/identity
                    3))
   => [1 3 5]
-  
+
   (!.lua
    (ut/keepf-limit [1 2 3 4 5]
 	           xt/x:odd?
                    k/identity
                    3))
   => [1 3 5]
-  
+
   (!.py
    (ut/keepf-limit [1 2 3 4 5]
 	           xt/x:odd?
@@ -160,8 +157,7 @@
 
 ^{:refer xt.db.base-util/lu-nested :added "4.0"}
 (fact "helper for lu-map"
-  ^:hidden
-  
+
   (!.js
    (ut/lu-nested [{:id "1"}]
                  (fn:> [e] e.id)))
@@ -179,8 +175,7 @@
 
 ^{:refer xt.db.base-util/lu-map :added "4.0"}
 (fact "constructs a nested lu map of ids"
-  ^:hidden
-  
+
   (!.js [(ut/lu-map
           {:a [{:id "b"}]})
          (ut/lu-map
@@ -189,7 +184,7 @@
                       {:id "d"}]}]})])
   => [{"a" {"b" {"id" "b"}}}
       {"a" {"b" {"sub" {"d" {"id" "d"}, "c" {"id" "c"}}, "id" "b"}}}]
-  
+
   (!.lua [(ut/lu-map
            {:a [{:id "b"}]})
           (ut/lu-map

@@ -42,7 +42,6 @@
           (def +tree+
             {"not_in" [["USER-0"]]})]}
 (fact "ret-omit should be part of the query tree"
-  ^:hidden
 
   (!.js
    (-> (v/tree-combined (@! +schema+)

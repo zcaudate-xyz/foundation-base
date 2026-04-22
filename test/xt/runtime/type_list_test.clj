@@ -27,8 +27,7 @@
 
 ^{:refer xt.runtime.type-collection/coll-into-array :adopt true :added "4.0"}
 (fact "list from array"
-  ^:hidden
-  
+
   (!.js
    (t/list-to-array
     (coll/coll-into-array
@@ -45,7 +44,6 @@
 
 ^{:refer xt.runtime.type-collection/coll-into-iter :adopt true :added "4.0"}
 (fact "list form iter"
-  ^:hidden
 
   (!.js
    (t/list-to-array
@@ -53,7 +51,7 @@
      (t/list)
      (it/range [0 10]))))
   => [9 8 7 6 5 4 3 2 1 0]
-  
+
   (!.lua
    (t/list-to-array
     (coll/coll-into-iter
@@ -63,8 +61,7 @@
 
 ^{:refer xt.runtime.type-list/list-to-iter :added "4.0"}
 (fact "list to iterator"
-  ^:hidden
-  
+
   (!.js
    (it/arr<
     (it/take
@@ -83,8 +80,7 @@
 
 ^{:refer xt.runtime.type-list/list-to-array :added "4.0"}
 (fact "list to array"
-  ^:hidden
-  
+
   (!.js
    (t/list-to-array
     (t/list 1 2 3 4)))
@@ -97,8 +93,7 @@
 
 ^{:refer xt.runtime.type-list/list-size :added "4.0"}
 (fact "gets the list size"
-  ^:hidden
-  
+
   (!.js
    (t/list-size (t/list 1 2 3)))
   => 3
@@ -109,7 +104,6 @@
 
 ^{:refer xt.runtime.type-list/list-new :added "4.0"}
 (fact "creates a new list"
-  ^:hidden
 
   (!.js
    (var out (t/list-new 1 t/EMPTY_LIST nil))
@@ -127,8 +121,7 @@
 
 ^{:refer xt.runtime.type-list/list-push :added "4.0"}
 (fact "pushs onto the front of the list"
-  ^:hidden
-  
+
   (!.js
    (t/list-to-array
     (t/list-push (t/list 1 2 3)
@@ -143,8 +136,7 @@
 
 ^{:refer xt.runtime.type-list/list-pop :added "4.0"}
 (fact "pops an element from front of list"
-  ^:hidden
-  
+
   (!.js
    (t/list-to-array
     (t/list-pop (t/list 1 2 3))))
@@ -157,8 +149,7 @@
 
 ^{:refer xt.runtime.type-list/list-empty :added "4.0"}
 (fact "gets the empty list"
-  ^:hidden
-  
+
   (!.js
    (t/list-to-array
     (t/list-empty (t/list 1 2 3))))
@@ -171,8 +162,7 @@
 
 ^{:refer xt.runtime.type-list/list-create :added "4.0"}
 (fact "creates a list"
-  ^:hidden
-  
+
   (!.lua
    [(ic/show
      (->> t/EMPTY_LIST
@@ -180,7 +170,7 @@
           (t/list-create 2)
           (t/list-create 1)))])
   => ["(1, 2, 3)"]
-  
+
   (!.js
    [(ic/show
      (->> t/EMPTY_LIST
@@ -191,13 +181,12 @@
 
 ^{:refer xt.runtime.type-list/list :added "4.0"}
 (fact "creates a list given arguments"
-  ^:hidden
-  
+
   (!.js
    (t/list-to-array
     (t/list 1 2 3 4 5)))
   => [1 2 3 4 5]
-  
+
   (!.lua
    (t/list-to-array
     (t/list 1 2 3 4 5)))
@@ -205,8 +194,7 @@
 
 ^{:refer xt.runtime.type-list/list-map :added "4.0"}
 (fact "maps function across list"
-  ^:hidden
-  
+
   (!.lua
    (t/list-to-array
     (t/list-map (t/list 1 2 3 4 5)

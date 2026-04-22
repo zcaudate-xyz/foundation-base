@@ -21,9 +21,9 @@
          limit
          offset} control)
   (when (xt/x:is-array? order-by)
-    (xt/x:arr-push out (sql-util/ORDER-BY order-by)))
-  (when order-sort
-    (xt/x:arr-push out (sql-util/ORDER-SORT order-sort)))
+     (xt/x:arr-push out (sql-util/ORDER-BY order-by)))
+  (when (xt/x:not-nil? order-sort)
+     (xt/x:arr-push out (sql-util/ORDER-SORT order-sort)))
   (when (xt/x:is-number? limit)
     (xt/x:arr-push out (sql-util/LIMIT limit)))
   (when (xt/x:is-number? offset)
@@ -35,8 +35,8 @@
   {:added "4.0"}
   [schema table-name sel-query clause returning opts]
   (var tarr (base-scope/merge-queries sel-query clause))
-  (var tree (xt/x:arr-append [table-name] tarr))
-  (when returning
+  (var tree (xt/x:arr-assign [table-name] tarr))
+  (when (xtd/not-empty? returning)
     (xt/x:arr-push tree returning))
   (return (sql-graph/select-tree schema tree opts)))
 
@@ -46,7 +46,7 @@
   [schema entry clause opts]
   (var #{view control} entry)
   (var #{table query} view)
-  (return (-/tree-base schema table query clause (xt/x:arr-append [{"::" "sql/count"}]
+  (return (-/tree-base schema table query clause (xt/x:arr-assign [{"::" "sql/count"}]
                                                                    (-/tree-control-array control))
                         opts)))
 
@@ -56,7 +56,7 @@
   [schema entry clause opts]
   (var #{view control} entry)
   (var #{table query} view)
-  (return (-/tree-base schema table query clause (xt/x:arr-append ["id"]
+  (return (-/tree-base schema table query clause (xt/x:arr-assign ["id"]
                                                                    (-/tree-control-array control))
                         opts)))
 
@@ -75,15 +75,19 @@
   (var #{control} sel-entry)
   (var sel-table   (xt/x:get-path sel-entry ["view" "table"]))
   (var ret-table   (xt/x:get-path ret-entry ["view" "table"]))
-  (var sel-query   (or (xt/x:get-path sel-entry ["view" "query"]) {}))
-  (var ret-query   (or (xt/x:get-path ret-entry ["view" "query"]) {}))
+  (var sel-query   (xt/x:get-path sel-entry ["view" "query"]))
+  (var ret-query   (xt/x:get-path ret-entry ["view" "query"]))
+  (when (xt/x:nil? sel-query)
+    (:= sel-query {}))
+  (when (xt/x:nil? ret-query)
+    (:= ret-query {}))
   (var ret-clause  (:? (xtd/not-empty? ret-omit)
                        [{:id {:not-in [ret-omit]}}]
                        []))
   (var combined-clause (base-scope/merge-queries clause ret-clause))
   
   (return (-/tree-base schema sel-table sel-query combined-clause
-                       (xt/x:arr-append (xt/x:arr-clone ret-query)
+                       (xt/x:arr-assign (xt/x:arr-clone ret-query)
                                      (-/tree-control-array control))
                        opts)))
 
@@ -175,9 +179,9 @@
                                 opts))
   (var qtree (-/query-fill-input itree
                                  (-> (xt/x:arr-clone  ret-args)
-                                     (xt/x:arr-append sel-args))
+                                     (xt/x:arr-assign sel-args))
                                  (-> (xt/x:arr-clone  ret-input)
-                                     (xt/x:arr-append sel-input))
+                                     (xt/x:arr-assign sel-input))
                                  true))
   (if as-tree
     (return qtree)

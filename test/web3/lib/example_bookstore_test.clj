@@ -20,7 +20,6 @@
   :setup [(s/with:measure
            (s/rt:deploy book/+default-contract+))]}
 (fact "creates a book"
-  ^:hidden
 
   (s/with:measure
    (book/createBook "The Hobbit"
@@ -29,7 +28,7 @@
                     100000000000))
   => (contains-in
       [(approx 0.575 0.3) map?])
-  
+
   (s/with:measure
    (book/createBook "Journey to the West"
                     "Monkey Magic"
@@ -37,7 +36,7 @@
                     100000000000))
   => (contains-in
       [(approx 0.489 0.3) map?])
-  
+
   (book/totalSupply)
   => 2)
 
@@ -52,8 +51,7 @@
 
 ^{:refer web3.lib.example-bookstore/payForBook :added "4.0"}
 (fact "pays for book"
-  ^:hidden
-  
+
   (s/with:measure
    (s/with:caller-payment [100000000000]
      (book/payForBook 1)))

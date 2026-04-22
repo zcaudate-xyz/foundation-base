@@ -27,54 +27,47 @@
 
 ^{:refer code.mcp.heal.form/get-dsl-deps-fn :added "4.1"}
 (fact "gets the dsl dependencies"
-  ^:hidden
-  
+
   (get-dsl-deps-fn "(ns my.ns (:require [std.lang :as l] [std.lib :as h])) (l/script :lua {:require [[xt.lang.common-lib :as k]]})")
   => {:ns 'my.ns :deps #{'xt.lang.common-lib}})
 
 ^{:refer code.mcp.heal.form/load-file-fn :added "4.1"}
 (fact "loads a file"
-  ^:hidden
-  
+
   (load-file-fn "(ns my.ns) (+ 1 2)")
   => ['my.ns])
 
 ^{:refer code.mcp.heal.form/get-load-order :added "4.1"}
 (fact "gets the load order"
-  ^:hidden
-  
+
   (get-load-order {'a {:ns 'a :deps #{}}
                    'b {:ns 'b :deps #{'a}}})
   => ['a 'b])
 
 ^{:refer code.mcp.heal.form/heal-directory :added "4.1"}
 (fact "heals a directory"
-  ^:hidden
-  
+
   (with-redefs [code.manage/transform-code (fn [_ _ _] :healed)]
     (heal-directory {:root "." :source-paths ["src"]}))
   => :healed)
 
 ^{:refer code.mcp.heal.form/refactor-directory :added "4.1"}
 (fact "refactors a directory"
-  ^:hidden
-  
+
   (with-redefs [code.manage/refactor-code (fn [_ _ _] :refactored)]
     (refactor-directory {:root "." :source-paths ["src"]} []))
   => :refactored)
 
 ^{:refer code.mcp.heal.form/get-dsl-deps :added "4.1"}
 (fact "gets dsl deps for directory"
-  ^:hidden
-  
+
   (with-redefs [code.manage/extract (mock-task (fn [_ _ _] :deps))]
     (get-dsl-deps {:root "." :source-paths ["src"]}))
   => :deps)
 
 ^{:refer code.mcp.heal.form/load-directory :added "4.1"}
 (fact "loads a directory"
-  ^:hidden
-  
+
   (with-redefs [code.manage/extract (mock-task (fn [_ _ _] :loaded))]
     (load-directory {:root "." :source-paths ["src"]} {}))
   => :loaded)

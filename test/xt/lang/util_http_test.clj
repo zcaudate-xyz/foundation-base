@@ -84,7 +84,7 @@
 
 ^{:refer xt.lang.util-http/fetch-call :added "4.0"}
 (fact "completes a http call with options"
-  ;;^:hidden
+  ;;
 
   #_#_#_
   (notify/wait-on :js
@@ -96,7 +96,7 @@
 
 ^{:refer xt.lang.util-http/es-connect :added "4.0"}
 (fact "connects to an event source"
-  
+
   (when (and CANARY-NGINX @+es-ready+)
     (notify/wait-on :js
       (var es (http/es-connect
@@ -128,7 +128,7 @@
 
 (comment
 
-  
+
   (l/with:input
       (!.js
        (:= EventSource (require "react-native-sse"))

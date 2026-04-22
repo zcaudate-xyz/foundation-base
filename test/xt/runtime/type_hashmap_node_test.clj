@@ -23,7 +23,6 @@
 
 ^{:refer xt.runtime.type-hashmap-node/node-create :added "4.1"}
 (fact "creates a bitmap indexed node"
-  ^:hidden
 
   (!.js
    (node/node-create 1 3 ["a" "b"]))
@@ -41,7 +40,6 @@
 
 ^{:refer xt.runtime.type-hashmap-node/node-assoc :added "4.1"}
 (fact "associates and replaces leaf entries"
-  ^:hidden
 
   (!.js
    (var added-1 (node/node-assoc node/EMPTY_HASHMAP_NODE nil 0 (ic/hash "a") "a" 1))
@@ -61,7 +59,6 @@
 
 ^{:refer xt.runtime.type-hashmap-node/branch-create :added "4.1"}
 (fact "creates nested bitmap nodes and hash collisions"
-  ^:hidden
 
   (!.js
    (var branch-a (node/node-assoc node/EMPTY_HASHMAP_NODE nil 0 1 "a" 1))
@@ -91,7 +88,6 @@
 
 ^{:refer xt.runtime.type-hashmap-node/node-dissoc :added "4.1"}
 (fact "dissociates keys from leaf and collision nodes"
-  ^:hidden
 
   (!.js
    (var collide-a (node/node-assoc node/EMPTY_HASHMAP_NODE nil 0 11 "x" 10))
@@ -118,7 +114,6 @@
 
 ^{:refer xt.runtime.type-hashmap-node/impl-mask :added "4.1"}
 (fact "masks the hash at the given shift"
-  ^:hidden
 
   (!.js
    [(node/impl-mask 33 0)
@@ -134,7 +129,6 @@
 
 ^{:refer xt.runtime.type-hashmap-node/impl-bitpos :added "4.1"}
 (fact "computes the bit position for a hash fragment"
-  ^:hidden
 
   (!.js
    [(node/impl-bitpos 33 0)
@@ -150,7 +144,6 @@
 
 ^{:refer xt.runtime.type-hashmap-node/impl-index :added "4.1"}
 (fact "counts the set bits before a bit position"
-  ^:hidden
 
   (!.js
    (var bitmap (xt/x:bit-or 2 8))
@@ -168,7 +161,6 @@
 
 ^{:refer xt.runtime.type-hashmap-node/impl-edit-allowed :added "4.1"}
 (fact "checks if a node can be edited under the current edit id"
-  ^:hidden
 
   (!.js
    [(node/impl-edit-allowed 1 1)
@@ -184,7 +176,6 @@
 
 ^{:refer xt.runtime.type-hashmap-node/leaf-create :added "4.1"}
 (fact "creates a normalised leaf"
-  ^:hidden
 
   (!.js
    (var leaf (node/leaf-create 11 "a" nil))
@@ -204,7 +195,6 @@
 
 ^{:refer xt.runtime.type-hashmap-node/collision-create :added "4.1"}
 (fact "creates a collision node"
-  ^:hidden
 
   (!.js
    (var out (node/collision-create 7 11 [(node/leaf-create 11 "a" 1)
@@ -226,7 +216,6 @@
 
 ^{:refer xt.runtime.type-hashmap-node/leaf-value :added "4.1"}
 (fact "retrieves denormalised values from leaves"
-  ^:hidden
 
   (!.js
    [(node/leaf-value (node/leaf-create 11 "a" 1))
@@ -240,7 +229,6 @@
 
 ^{:refer xt.runtime.type-hashmap-node/node-clone :added "4.1"}
 (fact "clones node and collision children arrays"
-  ^:hidden
 
   (!.js
    (var node-0 (node/node-create nil 1 ["a"]))
@@ -270,7 +258,6 @@
 
 ^{:refer xt.runtime.type-hashmap-node/node-editable :added "4.1"}
 (fact "creates an editable node tree with the given edit id"
-  ^:hidden
 
   (!.js
    (var base (. (node/node-assoc node/EMPTY_HASHMAP_NODE nil 0 (ic/hash "a") "a" 1) node))
@@ -288,7 +275,6 @@
 
 ^{:refer xt.runtime.type-hashmap-node/node-editable-root :added "4.1"}
 (fact "creates an editable root with a random edit id"
-  ^:hidden
 
   (!.js
    (var base (. (node/node-assoc node/EMPTY_HASHMAP_NODE nil 0 (ic/hash "a") "a" 1) node))
@@ -306,7 +292,6 @@
 
 ^{:refer xt.runtime.type-hashmap-node/ensure-editable :added "4.1"}
 (fact "throws when the node is not editable"
-  ^:hidden
 
   (!.js
    (node/ensure-editable
@@ -320,7 +305,6 @@
 
 ^{:refer xt.runtime.type-hashmap-node/ensure-persistent :added "4.1"}
 (fact "removes edit ids from editable nodes"
-  ^:hidden
 
   (!.js
    (var base (. (node/node-assoc node/EMPTY_HASHMAP_NODE nil 0 (ic/hash "a") "a" 1) node))
@@ -338,7 +322,6 @@
 
 ^{:refer xt.runtime.type-hashmap-node/collision-find-leaf :added "4.1"}
 (fact "finds leaves within a collision node"
-  ^:hidden
 
   (!.js
    (var col (node/collision-create nil 11 [(node/leaf-create 11 "a" 1)
@@ -360,7 +343,6 @@
 
 ^{:refer xt.runtime.type-hashmap-node/collision-assoc :added "4.1"}
 (fact "adds or replaces leaves within a collision node"
-  ^:hidden
 
   (!.js
    (var col-0 (node/collision-create nil 11 [(node/leaf-create 11 "a" 1)]))
@@ -384,7 +366,6 @@
 
 ^{:refer xt.runtime.type-hashmap-node/collision-dissoc :added "4.1"}
 (fact "removes leaves from a collision node"
-  ^:hidden
 
   (!.js
    (var col (node/collision-create nil 11 [(node/leaf-create 11 "a" 1)
@@ -410,7 +391,6 @@
 
 ^{:refer xt.runtime.type-hashmap-node/node-lookup :added "4.1"}
 (fact "looks up keys through branch and collision nodes"
-  ^:hidden
 
   (!.js
    (var root-a (. (node/node-assoc node/EMPTY_HASHMAP_NODE nil 0 1 "a" 1) node))
@@ -430,7 +410,6 @@
 
 ^{:refer xt.runtime.type-hashmap-node/node-find-leaf :added "4.1"}
 (fact "finds leaves through branch and collision nodes"
-  ^:hidden
 
   (!.js
    (var root-a (. (node/node-assoc node/EMPTY_HASHMAP_NODE nil 0 11 "a" 1) node))

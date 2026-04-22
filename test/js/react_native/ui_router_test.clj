@@ -17,14 +17,13 @@
 
 ^{:refer js.react-native.ui-router/useTransition :added "4.0" :unchecked true}
 (fact "creates all props involved with transition"
-  ^:hidden
-  
+
   (defn.js UseTransitionDemo
     []
     (return
-     (n/EnclosedCode 
+     (n/EnclosedCode
       {:label "js.react-native.ui-router/useTransition"
-       #_#_:style {:height 300}} 
+       #_#_:style {:height 300}}
       [:% n/View
        {:style {:backfaceVisibility "hidden"
                 :height 100
@@ -37,8 +36,7 @@
 
 ^{:refer js.react-native.ui-router/Router :added "4.0" :unchecked true}
 (fact "creates a Router"
-  ^:hidden
-  
+
   (defn.js RouterDemo
     []
     (var [routeKey setRouteKey]     (r/local "b2"))
@@ -59,16 +57,16 @@
                                                      :flex 1}}])}
                       [routeKey]))))
     (return
-     (n/EnclosedCode 
+     (n/EnclosedCode
       {:label "js.react-native.ui-router/Router"
-       :style {:height 400}} 
+       :style {:height 400}}
       [:% n/Tabs
        {:data ["a1"
                "b2"
                "c3"
                "d4"]
-        :value routeKey 
-        :setValue setRouteKey}] 
+        :value routeKey
+        :setValue setRouteKey}]
       [:% n/Tabs
        {:data ["from_top"
                "from_bottom"
@@ -77,7 +75,7 @@
                "flip_vertical"
                "flip_horizontal"]
         :value  transition
-        :setValue setRouteTransition}] 
+        :setValue setRouteTransition}]
       [:% ui-router/Router
        #{routeKey
          routeComponentFn
@@ -87,6 +85,6 @@
           :fade 0.2
           :style {:height 200
                   :width 350}}}])))
-  
-  
+
+
   )

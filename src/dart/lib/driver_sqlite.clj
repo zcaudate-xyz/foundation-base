@@ -43,7 +43,7 @@
         (var columns (. result columnNames))
         (var values nil)
         (:= values [])
-        (xt/for:iter [row result]
+        (xt/for:iter [row (xt/x:iter-from result)]
           (var row-values nil)
           (:= row-values [])
           (xt/for:array [[i _] columns]

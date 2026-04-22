@@ -27,7 +27,6 @@
 
 ^{:refer xt.runtime.type-hashmap/hashmap :added "4.1"}
 (fact "creates a hashmap from alternating key/value arguments"
-  ^:hidden
 
   (!.js
    (var out (hm/hashmap "a" 1 "b" 2))
@@ -45,7 +44,6 @@
 
 ^{:refer xt.runtime.type-hashmap/hashmap-find-key :added "4.1"}
 (fact "finds entries and preserves nil values"
-  ^:hidden
 
   (!.js
    (var out (hm/hashmap-assoc hm/EMPTY_HASHMAP "a" nil))
@@ -65,7 +63,6 @@
 
 ^{:refer xt.runtime.type-hashmap/hashmap-assoc :added "4.1"}
 (fact "keeps persistent updates immutable"
-  ^:hidden
 
   (!.js
    (var h0 (hm/hashmap "a" 1))
@@ -85,7 +82,6 @@
 
 ^{:refer xt.runtime.type-hashmap/hashmap-to-mutable! :added "4.1"}
 (fact "supports mutable edits and roundtrips back to persistent"
-  ^:hidden
 
   (!.js
    (var out (-> (hm/hashmap "a" 1)
@@ -113,7 +109,6 @@
 
 ^{:refer xt.runtime.type-hashmap/hashmap-eq :added "4.1"}
 (fact "compares and hashes maps independent of insertion order"
-  ^:hidden
 
   (!.js
    (var h1 (hm/hashmap "a" 1 "b" 2))
@@ -134,7 +129,6 @@
 
 ^{:refer xt.runtime.type-hashmap/hashmap-collect-pairs :added "4.1"}
 (fact "collects pair objects from the trie root"
-  ^:hidden
 
   (!.js
    (var entries (hm/hashmap-collect-pairs (. (hm/hashmap "a" 1 "b" 2) _root) []))
@@ -152,7 +146,6 @@
 
 ^{:refer xt.runtime.type-hashmap/hashmap-to-iter :added "4.1"}
 (fact "iterates over hashmap entries as pairs"
-  ^:hidden
 
   (!.js
    (var entries (it/arr< (hm/hashmap-to-iter (hm/hashmap "a" 1 "b" 2))))
@@ -170,7 +163,6 @@
 
 ^{:refer xt.runtime.type-hashmap/hashmap-to-array :added "4.1"}
 (fact "converts hashmap entries into entry arrays"
-  ^:hidden
 
   (!.js
    (hm/hashmap-to-array
@@ -184,7 +176,6 @@
 
 ^{:refer xt.runtime.type-hashmap/hashmap-new :added "4.1"}
 (fact "creates a bare hashmap object with the provided root and size"
-  ^:hidden
 
   (!.js
    (var out (hm/hashmap-new node/EMPTY_HASHMAP_NODE 3 nil))
@@ -202,7 +193,6 @@
 
 ^{:refer xt.runtime.type-hashmap/hashmap-empty :added "4.1"}
 (fact "creates an empty hashmap from an existing hashmap"
-  ^:hidden
 
   (!.js
    (var out (hm/hashmap-empty (hm/hashmap "a" 1)))
@@ -218,7 +208,6 @@
 
 ^{:refer xt.runtime.type-hashmap/hashmap-is-editable :added "4.1"}
 (fact "detects mutable vs persistent hashmaps"
-  ^:hidden
 
   (!.js
    [(hm/hashmap-is-editable (hm/hashmap "a" 1))
@@ -232,7 +221,6 @@
 
 ^{:refer xt.runtime.type-hashmap/hashmap-to-persistent! :added "4.1"}
 (fact "converts a mutable hashmap back into a persistent hashmap"
-  ^:hidden
 
   (!.js
    (var out (-> (hm/hashmap "a" 1)
@@ -254,7 +242,6 @@
 
 ^{:refer xt.runtime.type-hashmap/hashmap-lookup-key :added "4.1"}
 (fact "looks up keys with support for nil values and defaults"
-  ^:hidden
 
   (!.js
    (var out (hm/hashmap-assoc hm/EMPTY_HASHMAP "a" nil))
@@ -270,7 +257,6 @@
 
 ^{:refer xt.runtime.type-hashmap/hashmap-keys :added "4.1"}
 (fact "returns the hashmap keys"
-  ^:hidden
 
   (!.js
    (hm/hashmap-keys
@@ -284,7 +270,6 @@
 
 ^{:refer xt.runtime.type-hashmap/hashmap-vals :added "4.1"}
 (fact "returns the hashmap values"
-  ^:hidden
 
   (!.js
    (hm/hashmap-vals
@@ -298,7 +283,6 @@
 
 ^{:refer xt.runtime.type-hashmap/hashmap-assoc! :added "4.1"}
 (fact "mutably associates key/value pairs and updates existing keys"
-  ^:hidden
 
   (!.js
    (var out (hm/hashmap-empty-mutable))
@@ -322,7 +306,6 @@
 
 ^{:refer xt.runtime.type-hashmap/hashmap-dissoc :added "4.1"}
 (fact "keeps persistent dissoc immutable"
-  ^:hidden
 
   (!.js
    (var h0 (hm/hashmap "a" 1 "b" 2))
@@ -342,7 +325,6 @@
 
 ^{:refer xt.runtime.type-hashmap/hashmap-dissoc! :added "4.1"}
 (fact "mutably dissociates keys and keeps the remaining entries"
-  ^:hidden
 
   (!.js
    (var out (-> (hm/hashmap "a" 1 "b" 2)
@@ -366,7 +348,6 @@
 
 ^{:refer xt.runtime.type-hashmap/hashmap-hash :added "4.1"}
 (fact "computes the same unordered hash as the protocol hash function"
-  ^:hidden
 
   (!.js
    (var h1 (hm/hashmap "a" 1 "b" 2))
@@ -388,7 +369,6 @@
 
 ^{:refer xt.runtime.type-hashmap/hashmap-show :added "4.1"}
 (fact "shows the hashmap as an EDN-like map string"
-  ^:hidden
 
   (!.js
    (hm/hashmap-show
@@ -402,7 +382,6 @@
 
 ^{:refer xt.runtime.type-hashmap/hashmap-create :added "4.1"}
 (fact "creates a hashmap with the default prototype"
-  ^:hidden
 
   (!.js
    (var out (hm/hashmap-create node/EMPTY_HASHMAP_NODE 0))
@@ -420,7 +399,6 @@
 
 ^{:refer xt.runtime.type-hashmap/hashmap-empty-mutable :added "4.1"}
 (fact "creates an empty mutable hashmap"
-  ^:hidden
 
   (!.js
    (var out (hm/hashmap-empty-mutable))

@@ -51,7 +51,6 @@
 
 ^{:refer js.cell/setup-service :added "4.1"}
 (fact "sets worker service and bindings over a cell link"
-  ^:hidden
   (node-worker-setup-check)
   => {"service" {"dbs" {"main" {"kind" "cache"
                                 "id" "main"}}}

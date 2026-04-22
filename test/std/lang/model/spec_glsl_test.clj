@@ -5,8 +5,7 @@
 
 ^{:refer std.lang.model.spec-glsl/CANARY :adopt true :added "4.0"}
 (fact "top-level definition for shaders"
-  ^:hidden
-  
+
   (l/emit-as
    :glsl '[(defrun shader-vs
              (var :attribute :vec3 pos)

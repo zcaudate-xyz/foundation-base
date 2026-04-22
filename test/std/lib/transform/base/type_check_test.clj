@@ -7,7 +7,6 @@
 
 ^{:refer std.lib.transform.base.type-check/wrap-single-type-check :added "3.0"}
 (fact "wraps normalise to type check inputs as well as to coerce incorrect inputs"
-  ^:hidden
 
   (comment
     (graph/normalise {:account {:age "10"}}

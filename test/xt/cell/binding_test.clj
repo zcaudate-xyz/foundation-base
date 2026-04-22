@@ -29,7 +29,6 @@
 
 ^{:refer xt.cell.binding/resolve-section :added "4.1"}
 (fact "resolves named dbs inside descriptor sections"
-  ^:hidden
 
   (!.js
    [(binding/resolve-section
@@ -55,7 +54,6 @@
 
 ^{:refer xt.cell.binding/prepare-view :added "4.1"}
 (fact "prepares a view descriptor with resolved service references"
-  ^:hidden
 
   (!.js
    (binding/prepare-view
@@ -78,7 +76,6 @@
 
 ^{:refer xt.cell.binding/compile-model :added "4.1"}
 (fact "compiles all views in a model with a provided compiler"
-  ^:hidden
 
   (!.js
    (binding/compile-model
@@ -95,7 +92,6 @@
 
 ^{:refer xt.cell.binding/compile-bindings :added "4.1"}
 (fact "compiles all models with a provided compiler"
-  ^:hidden
 
   (!.js
    (binding/compile-bindings

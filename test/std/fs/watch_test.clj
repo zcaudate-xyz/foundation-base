@@ -71,7 +71,6 @@
 
 ^{:refer std.fs.watch/run-watcher :added "3.0"}
 (fact "initiates the watcher with the given callbacks"
-  ^:hidden
 
   (let [dir     (str (io/file "test-scratch/watch-run"))
         out     (promise)
@@ -112,7 +111,6 @@
 
 ^{:refer std.fs.watch/start-watcher :added "3.0"}
 (fact "starts the watcher"
-  ^:hidden
 
   (let [dir (str (io/file "test-scratch/watch-start"))
         _   (.mkdirs (io/file dir))
@@ -125,7 +123,6 @@
 
 ^{:refer std.fs.watch/stop-watcher :added "3.0"}
 (fact "stops the watcher"
-  ^:hidden
 
   (let [dir (str (io/file "test-scratch/watch-stop"))
         _   (.mkdirs (io/file dir))
@@ -156,7 +153,6 @@
 
 ^{:refer std.fs.watch/add-io-watch :added "3.0"}
 (fact "registers the watch to a global list of *filewatchers*"
-  ^:hidden
 
   (let [dir (io/file "test-scratch/io-watch")
         _   (.mkdirs dir)]
@@ -165,7 +161,6 @@
 
 ^{:refer std.fs.watch/list-io-watch :added "3.0"}
 (fact "list all *filewatchers"
-  ^:hidden
 
   (let [dir (io/file "test-scratch/io-watch-list")
         _   (.mkdirs dir)
@@ -175,7 +170,6 @@
 
 ^{:refer std.fs.watch/remove-io-watch :added "3.0"}
 (fact "removes the watcher with the given key"
-  ^:hidden
 
   (let [dir (io/file "test-scratch/io-watch-remove")
         _   (.mkdirs dir)

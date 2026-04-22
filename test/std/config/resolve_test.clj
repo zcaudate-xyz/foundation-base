@@ -50,7 +50,7 @@
   (resolve-select {:a {:b 1 :c 2}}
                   {:in   [:a]
                    :keys [:b]})
-  => {:b 1} ^:hidden
+  => {:b 1}
 
   (resolve-select {:a {:b 1 :c 2}}
                   {:in      [:a]
@@ -133,7 +133,7 @@
   (resolve-directive-merge [:merge
                             {:a {:b 1}}
                             {:a {:c 2}}])
-  => {:a {:c 2}} ^:hidden
+  => {:a {:c 2}}
 
   (resolve-directive-merge [:merge :nil
                             {:a {:b 1}}
@@ -199,7 +199,7 @@
 
   (resolve-directive-file
    [:file "test-data/std.config/hello.clear"])
-  => "hello" ^:hidden
+  => "hello"
 
   (resolve-directive-file
    [:file "test-data/std.config/hello.encrypted" {:secured true :key -key-}])
@@ -210,7 +210,7 @@
 
   (resolve-directive-resource
    [:resource "std.config/hello.clear"])
-  => "hello" ^:hidden
+  => "hello"
 
   (resolve-directive-resource
    [:resource "std.config/hello.encrypted" {:secured true :key -key-}])

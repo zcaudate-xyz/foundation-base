@@ -7,24 +7,21 @@
 
 ^{:refer std.contract.sketch/optional-string :added "3.0"}
 (fact "string for optional"
-  ^:hidden
-  
+
   (s/optional-string
    (s/as:optional :int))
   => ":int@?")
 
 ^{:refer std.contract.sketch/maybe-string :added "3.0"}
 (fact "string for maybe"
-  ^:hidden
-  
+
   (s/maybe-string
    (s/as:maybe :int))
   => "?@:int")
 
 ^{:refer std.contract.sketch/as:optional :added "3.0"}
 (fact "creates an optional"
-  ^:hidden
-  
+
   (str (s/as:optional :int))
   => ":int@?"
 
@@ -33,21 +30,19 @@
 
 ^{:refer std.contract.sketch/optional? :added "3.0"}
 (fact "checks if optional type"
-  ^:hidden
-  
+
   (s/optional? (s/as:optional :int))
   => true)
 
 ^{:refer std.contract.sketch/as:maybe :added "3.0"}
 (fact "creates a maybe"
-  ^:hidden
-  
+
   (str (s/as:maybe :int))
   => "?@:int"
-  
+
   (into {} (s/as:maybe :int))
   => {:v :int}
-  
+
   (mc/ast (s/lax {:size [:or zero? pos-int?]}))
   => {:type :map,
       :keys {:size {:order 0,
@@ -59,10 +54,10 @@
   => {:type :or,
       :children [{:type 'zero?}
                  {:type 'pos-int?}]}
-  
+
   (mc/form (s/to-schema (s/from-schema (s/lax {:size [:or zero? pos-int?]}))))
   => [:map [:size {:optional true} [:maybe [:or 'zero? 'pos-int?]]]]
-  
+
   (mc/ast (s/lax {:size "hello"}))
   => {:type :map,
       :keys {:size {:order 0, :value {:type :maybe,
@@ -71,23 +66,20 @@
 
 ^{:refer std.contract.sketch/maybe? :added "3.0"}
 (fact "checks if maybe type"
-  ^:hidden
-  
+
   (s/maybe? (s/as:maybe :string))
   => true)
 
 ^{:refer std.contract.sketch/func-string :added "3.0"}
 (fact "string for func"
-  ^:hidden
-  
+
   (s/func-string
    (s/func [x]))
   => "#spec (fn [x])")
 
 ^{:refer std.contract.sketch/func-invoke :added "3.0"}
 (fact "invokes the func"
-  ^:hidden
-  
+
   ((s/func [x])
    (fn [a b c]))
   => false
@@ -98,36 +90,31 @@
 
 ^{:refer std.contract.sketch/fn-sym :added "3.0"}
 (fact "gets function symbol"
-  ^:hidden
-  
+
   (s/fn-sym s/fn-sym)
   => symbol?)
 
 ^{:refer std.contract.sketch/func-form :added "3.0"}
 (fact "constructs a func"
-  ^:hidden
-  
+
   (str (s/func-form '[x y]))
   => "#spec (fn [x y])")
 
 ^{:refer std.contract.sketch/func :added "3.0"}
 (fact "macro for constructing a func"
-  ^:hidden
-  
+
   (str (s/func [x y]))
   => "#spec (fn [x y])")
 
 ^{:refer std.contract.sketch/func? :added "3.0"}
 (fact "checks if instance is a func"
-  ^:hidden
-  
+
   (s/func? (s/func [x y]))
   => true)
 
 
 ^{:refer std.contract.sketch/from-schema-map.properties :added "3.0"}
 (fact "sketch from malli's map syntax"
-  ^:hidden
 
   (mc/ast
    [:and
@@ -142,21 +129,21 @@
                           :y {:order 1, :value {:type 'int?}}}}
                   {:type :fn
                    :value fn?}]})
-  
+
   (with-out-str
     (pr
      (mc/from-ast
       {:type :string,
        :properties {:min 1, :max 10}})))
   => "[:string {:min 1, :max 10}]"
-  
+
   (mc/ast [:maybe :int])
   => {:type :maybe, :child {:type :int}}
-  
+
   (mc/ast [:string {:min 1, :max 10}])
   => {:type :string,
       :properties {:min 1, :max 10}}
-  
+
   (mc/ast [:tuple {:title "location"} :double :double])
   => {:type :tuple, :children [{:type :double}
                                {:type :double}],
@@ -204,7 +191,6 @@
 
 ^{:refer std.contract.sketch/from-schema-map :added "3.0"}
 (fact "sketch from malli's map syntax"
-  ^:hidden
 
   (mc/form
    (s/to-schema
@@ -214,14 +200,14 @@
                     :value {:type :maybe, :child {:type :=, :value "hello"}},
                     :properties {:optional true}}}})))
   => [:map [:size {:optional true} [:maybe [:= "hello"]]]]
-  
+
   (s/from-schema-map
    (mc/ast [:map
             [:street :string]
             [:country [:enum "FI" "UA"]]]))
   => {:street [:string], :country #{"FI" "UA"}}
 
-  
+
   (s/from-schema-map
    {:type :map,
     :keys {:street {:order 0, :value {:type :string}},
@@ -230,8 +216,7 @@
 
 ^{:refer std.contract.sketch/from-schema :added "3.0"}
 (fact "sketch from schema"
-  ^:hidden
-  
+
   (s/from-schema
    [:map
     [:street :string]
@@ -241,14 +226,12 @@
 
 ^{:refer std.contract.sketch/to-schema-extend :added "3.0"}
 (fact "extending schema conversion"
-  ^:hidden
-  
+
   (mc/form (s/to-schema-extend 1))
   => [:= 1])
 
 ^{:refer std.contract.sketch/to-schema :added "3.0"}
 (fact "converts object to schema"
-  ^:hidden
 
   (mc/form (s/to-schema {:a 1
                           :b 2}))
@@ -264,8 +247,7 @@
 
 ^{:refer std.contract.sketch/lax :added "3.0"}
 (fact "relaxes a map (optional keys and maybe vals)"
-  ^:hidden
-  
+
   (mc/form
    (s/lax {:a 1
            :b 2}))
@@ -285,8 +267,7 @@
 
 ^{:refer std.contract.sketch/norm :added "3.0"}
 (fact "gets rid of optional keys"
-  ^:hidden
-  
+
   (mc/form
    (s/norm
     (s/to-schema
@@ -310,7 +291,6 @@
 
 ^{:refer std.contract.sketch/closed :added "3.0"}
 (fact "closes the map"
-  ^:hidden
 
   (mc/form
    (s/closed {:a 1}))
@@ -318,7 +298,6 @@
 
 ^{:refer std.contract.sketch/opened :added "3.0"}
 (fact "opens the map"
-  ^:hidden
 
   (mc/form
    (s/opened (s/closed {:a 1})))
@@ -326,8 +305,7 @@
 
 ^{:refer std.contract.sketch/tighten :added "3.0"}
 (fact "tightens a map (no optionals or maybes)"
-  ^:hidden
-  
+
   (mc/form
    (s/tighten
     (s/lax {:a 1
@@ -336,8 +314,7 @@
 
 ^{:refer std.contract.sketch/remove :added "3.0"}
 (fact "removes a key from map"
-  ^:hidden
-  
+
   (mc/form
    (s/remove
     (s/lax {:a 1
@@ -353,23 +330,23 @@
    [:maybe
     (mc/schema
      [:= "hello"])])
-  
+
   (mc/schema
    [:maybe
     (mc/schema
      [:map [:a [:= "hello"]]])])
-  
+
   (mc/ast [:map
            [:x {:optional true} [:int]]])
   (mu/assoc (mc/schema
              [:map [:a [:= "hello"]]])
             :b
             [:= "world"])
-  
+
   (lax {:a "hello"})
 
   (norm (lax {:a [:string]}))
   (from-schema (lax {:a [:string]}))
   (from-schema (norm {:a "hello"}))
-  
+
   (to-schema {:a "hello"}))

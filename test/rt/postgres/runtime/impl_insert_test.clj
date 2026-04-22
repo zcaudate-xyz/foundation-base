@@ -20,8 +20,7 @@
 
 ^{:refer rt.postgres.runtime.impl-insert/t-insert-form :added "4.0"}
 (fact "insert form"
-  ^:hidden
-  
+
   (insert/t-insert-form -tsch-
                         [:id :status]
                         '("A" "B"))
@@ -30,7 +29,6 @@
 
 ^{:refer rt.postgres.runtime.impl-insert/t-insert-symbol :added "4.0"}
 (fact  "constructs an insert symbol form"
-  ^:hidden
 
   (insert/t-insert-symbol -tsch-
                           'sym
@@ -59,8 +57,7 @@
 
 ^{:refer rt.postgres.runtime.impl-insert/t-insert-map :added "4.0"}
 (fact "constructs an insert map form"
-  ^:hidden
-  
+
   (insert/t-insert-map -tsch-
                        {:name "hello"
                         :status "pending"
@@ -87,13 +84,12 @@
 
 ^{:refer rt.postgres.runtime.impl-insert/t-insert-record :added "4.0"}
 (fact "constructs a record insert form"
-  ^:hidden
-  
+
   (insert/t-insert-record
    'rt.postgres.test.scratch-v1/Task
    'e
    (tracker/add-tracker {:track 'o-op}
-                        
+
                         (:static/tracker @scratch/Task)
                         rt.postgres.test.scratch-v1/Task
                         :insert))
@@ -109,8 +105,7 @@
 
 ^{:refer rt.postgres.runtime.impl-insert/t-insert-raw :added "4.0"}
 (fact "contructs an insert form with prep"
-  ^:hidden
-  
+
   (insert/t-insert-raw
    (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))
    {:name "hello"
@@ -124,8 +119,7 @@
 
 ^{:refer rt.postgres.runtime.impl-insert/t-insert :added "4.0"}
 (fact "constructs an insert form"
-  ^:hidden
-  
+
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (insert/t-insert 'scratch/Task
                      {:name "hello"
@@ -170,8 +164,7 @@
 
 ^{:refer rt.postgres.runtime.impl-insert/t-upsert-raw :added "4.0"}
 (fact "contructs an upsert form with prep"
-  ^:hidden
-  
+
   (insert/t-upsert-raw
    (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))
    {:name "hello"
@@ -185,8 +178,7 @@
 
 ^{:refer rt.postgres.runtime.impl-insert/t-upsert :added "4.0"}
 (fact "constructs an upsert form"
-  ^:hidden
-  
+
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (insert/t-upsert 'scratch/Task
                      {:name "hello"

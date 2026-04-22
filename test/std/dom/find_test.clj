@@ -6,7 +6,7 @@
 
 ^{:refer std.dom.find/dom-match? :added "3.0"}
 (fact "tests dom to match on either function or value"
-  
+
   (dom-match? (dom/dom-compile [:mock/pane {:hello "world"}])
               :hello
               string?)
@@ -28,7 +28,7 @@
                                                [:mock/pane {:tag "B"}]]}])
       (dom-find :tag identity)
       str read-string)
-  => [:- :mock/pane {:tag "A"}]^:hidden
+  => [:- :mock/pane {:tag "A"}]
 
   (-> (dom/dom-compile [:mock/pane {:children [[:mock/pane {:tag "A"}]
                                                [:mock/pane {:tag "B"}]]}])
@@ -68,32 +68,32 @@
          {:uuid "bc4939b4-067a-4648-a85d-a02802b7cab8"
           :type :doc/markdown
           :text "start again, start again"}])
-  
+
   (def -data-
     {:title    "hello"
      :subtitle "world"
      :date     "18 March 2019"
      :order    (mapv :uuid -content-)
      :content  (zipmap (mapv :uuid -content-) -content-)})
-  
+
   (def -document- (atom -data-))
 
   (def -dom- (-> (base/dom-compile [:dian/editor-page {:document -document-}])
                  (impl/dom-init)))
-  
+
   (time (dom-find-all -dom-
                       :state
                       container.registry.h/atom?))
-  
+
   (time (dom-find -dom-
                   :class
                   ["editor-container"]))
-  
+
   (-> (base/dom-compile [:dian/editor-page {:document (atom {})}])
       (impl/dom-init)
       :shadow)
-  
-  
-  
+
+
+
 
   )

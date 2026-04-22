@@ -55,7 +55,7 @@
   => "world")
 
 ^{:refer lib.lucene.impl.document/field :added "3.0"}
-(fact "constructor for field" ^:hidden
+(fact "constructor for field"
 
   (field {:name "hello" :value "world" :type {}})
   => org.apache.lucene.document.Field)

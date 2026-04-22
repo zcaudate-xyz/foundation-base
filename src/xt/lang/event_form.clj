@@ -136,7 +136,7 @@
   "adds listener to a form"
   {:added "4.0"}
   [form listener-id fields callback meta]
-  (:= fields (xtd/arrayify fields))
+  (:= fields (event-common/arrayify-path fields))
   (return
    (event-common/add-listener
     form listener-id "form" callback
@@ -174,7 +174,7 @@
    (event-common/trigger-listeners
     form
     {:type   event-type
-     :fields (xtd/arrayify fields)})))
+     :fields (event-common/arrayify-path fields)})))
 
 (defn.xt set-field
   "sets the field"
@@ -262,17 +262,21 @@
   (var #{validators
          data
          result} form)
+  (var hook-status-fn
+       (fn [field status]
+         (when hook-fn
+           (hook-fn field status))))
+  (var complete-validation-fn
+        (fn [passed res]
+          (-/trigger-all form "form.validation")
+          (when complete-fn
+            (complete-fn passed res))))
   (return
    (validate/validate-all data
                           validators
                           result
-                          (fn [field status]
-                            (when hook-fn
-                              (hook-fn field status)))
-                          (fn [res]
-                            (-/trigger-all form "form.validation")
-                            (when complete-fn
-                              (complete-fn res))))))
+                          hook-status-fn
+                          complete-validation-fn)))
 
 (defn.xt validate-field
   "validates form field"
@@ -281,16 +285,18 @@
   (var #{validators
          data
          result} form)
+  (var complete-field-fn
+       (fn [passed status]
+         (-/trigger-field form field "form.validation")
+         (when complete-fn
+           (complete-fn passed status))))
   (return
    (validate/validate-field data
                             field
                             validators
                             result
                             hook-fn
-                            (fn [passed status]
-                              (-/trigger-field form field "form.validation")
-                              (when complete-fn
-                                (complete-fn passed status))))))
+                            complete-field-fn)))
 
 (defn.xt reset-field-validator
   "reset field validators"

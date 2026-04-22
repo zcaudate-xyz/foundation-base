@@ -60,7 +60,7 @@ Create `xt.db.view.core` with shared logic, then backend-specific wrappers.
   {:added "4.0"}
   [schema table-name sel-query clause returning custom-query]
   (var tarr (base-scope/merge-queries sel-query (or custom-query [])))
-  (var tree (k/arr-append [table-name] (or tarr [])))
+  (var tree (k/arr-assign [table-name] (or tarr [])))
   (when returning
     (x:arr-push tree returning))
   (return tree))
@@ -91,7 +91,7 @@ Create `xt.db.view.core` with shared logic, then backend-specific wrappers.
   (var sel-query   (or (k/get-path sel-entry ["view" "query"]) {}))
   (var ret-query   (or (k/get-path ret-entry ["view" "query"]) {}))
   (return (-/tree-base schema sel-table sel-query clause
-                       (k/arr-append (k/arr-clone ret-query)
+                       (k/arr-assign (k/arr-clone ret-query)
                                      (-/tree-control-array control))
                        opts)))
 
@@ -281,9 +281,9 @@ Create `xt.db.view.core` with shared logic, then backend-specific wrappers.
                                    opts))
   (var qtree (view/query-fill-input itree
                                     (-> (k/arr-clone ret-args)
-                                        (k/arr-append sel-args))
+                                        (k/arr-assign sel-args))
                                     (-> (k/arr-clone ret-input)
-                                        (k/arr-append sel-input))
+                                        (k/arr-assign sel-input))
                                     true))
   (if as-tree
     (return qtree)
@@ -360,9 +360,9 @@ Create `xt.db.view.core` with shared logic, then backend-specific wrappers.
                                    ret-omit))
   (return (view/query-fill-input itree
                                 (-> (k/arr-clone ret-args)
-                                    (k/arr-append sel-args))
+                                    (k/arr-assign sel-args))
                                 (-> (k/arr-clone ret-input)
-                                    (k/arr-append sel-input))
+                                    (k/arr-assign sel-input))
                                 true)))
 ```
 

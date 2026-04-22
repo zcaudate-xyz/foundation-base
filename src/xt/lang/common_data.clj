@@ -178,24 +178,37 @@
      (xt/x:arr-push out e))
    (return out)))
 
-(defn.xt arr-append
-  "appends to the end of an array"
+(defn.xt arr-assign
+  "others to the end of an array"
   {:added "4.0"}
   ([arr other]
    (xt/for:array [e other]
      (xt/x:arr-push arr e))
    (return arr)))
 
+(defn.xt arr-concat
+  "others to the end of an array"
+  {:added "4.0"}
+  ([arr other]
+   (var out [])
+   (xt/for:array [e arr]
+     (xt/x:arr-push out e))
+   (xt/for:array [e other]
+     (xt/x:arr-push out e))
+   (return out)))
+
 (defn.xt arr-slice
   "slices an array"
   {:added "4.0"}
   ([arr start finish]
    (var out [])
-   (var finish-idx (:? (xt/x:is-number? finish)
-                       finish
-                       (xt/x:len arr)))
-   (xt/for:index [i [(xt/x:offset start) finish-idx]]
-      (xt/x:arr-push out (xt/x:get-idx arr i)))
+   (var finish-idx nil)
+   (if (xt/x:is-number? finish)
+     (:= finish-idx finish)
+     (:= finish-idx (xt/x:len arr)))
+   (xt/for:index [i [(xt/x:offset start)
+                     (xt/x:offset finish-idx)]]
+     (xt/x:arr-push out (xt/x:get-idx arr i)))
    (return out)))
 
 (defn.xt arr-rslice
@@ -203,7 +216,8 @@
   {:added "4.0"}
   ([arr start finish]
    (var out [])
-   (xt/for:index [i [(xt/x:offset start) finish]]
+   (xt/for:index [i [(xt/x:offset start)
+                     (xt/x:offset finish)]]
      (xt/x:arr-push-first out (xt/x:get-idx arr i)))
    (return out)))
 
@@ -218,11 +232,19 @@
   "creates a range array"
   {:added "4.0"}
   [x]
-  (var arr    (:? (xt/x:is-array? x) x [x]))
+  (var arr [x])
+  (when (xt/x:is-array? x)
+    (:= arr x))
   (var arrlen (xt/x:len arr))
-  (var start  (:? (< 1 arrlen) (xt/x:first arr) 0))
-  (var finish (:? (< 1 arrlen) (xt/x:second arr) (xt/x:first arr)))
-  (var step   (:? (< 2 arrlen) (xt/x:get-idx arr (xt/x:offset 2)) 1))
+  (var start 0)
+  (when (< 1 arrlen)
+    (:= start (xt/x:first arr)))
+  (var finish (xt/x:first arr))
+  (when (< 1 arrlen)
+    (:= finish (xt/x:second arr)))
+  (var step 1)
+  (when (< 2 arrlen)
+    (:= step (xt/x:get-idx arr (xt/x:offset 2))))
   (var out [start])
   (var i (+ step start))
   (cond (and (< 0 step)
@@ -271,7 +293,7 @@
     (xt/x:set-key lu e e))
   (xt/for:array [e other]
     (xt/x:set-key lu e e))
-
+  
   (var out [])
   (xt/for:object [[_ v] lu]
     (xt/x:arr-push out v))
@@ -448,13 +470,15 @@
   {:added "4.0"}
   [obj m f]
   (when (xt/x:not-nil? m)
-    (var input (:? (xt/x:is-object? m) m {}))
+    (var input {})
+    (when (xt/x:is-object? m)
+      (:= input m))
     (xt/for:object [[k mv] input]
-      (xt/x:set-key obj k 
-                    (:? (xt/x:has-key? obj k)
-                        (f (xt/x:get-key obj k)
-                           mv)
-                        mv))))
+      (var merged mv)
+      (when (xt/x:has-key? obj k)
+        (:= merged (f (xt/x:get-key obj k)
+                      mv)))
+      (xt/x:set-key obj k merged)))
   (return obj))
 
 (defn.xt obj-from-pairs
@@ -564,7 +588,9 @@
   "sets item in object"
   {:added "4.1"}
   [obj arr v]
-  (when (== 0 (xt/x:len (:? (xt/x:nil? arr) [] arr)))
+  (when (xt/x:nil? arr)
+    (:= arr []))
+  (when (== 0 (xt/x:len arr))
     (return obj))
 
   ;; If the current branch does not exist yet, build the remaining path.
@@ -1063,9 +1089,10 @@
   [x n]
   (var out [])
   (xt/for:index [i [0 (- n (xt/x:offset))]]
-    (xt/x:arr-push out (:? (xt/x:is-function? x)
-                           (x)
-                           x)))
+    (var item x)
+    (when (xt/x:is-function? x)
+      (:= item (x)))
+    (xt/x:arr-push out item))
   (return out))
 
 (defn.xt arr-normalise
@@ -1098,8 +1125,10 @@
   "performs a merge on two sorted arrays"
   {:added "4.0"}
   [arr brr comp-fn]
-  (:= arr (:? (xt/x:nil? arr) [] arr))
-  (:= brr (:? (xt/x:nil? brr) [] brr))
+  (when (xt/x:nil? arr)
+    (:= arr []))
+  (when (xt/x:nil? brr)
+    (:= brr []))
   (var alen (xt/x:len arr))
   (var blen (xt/x:len brr))
   (var i 0)

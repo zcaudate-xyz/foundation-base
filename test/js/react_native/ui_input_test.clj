@@ -20,16 +20,15 @@
   :adopt true
   :added "0.1"}
 (fact "creates a slim input"
-  ^:hidden
-  
+
   (defn.js InputSimpleDemo
     []
     (var [first setFirst]   (r/local "Hello"))
     (var [highlighted setHighlighted] (r/local false))
     (var [disabled setDisabled] (r/local false))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-input/InputSimple"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-input/InputSimple"}
 [:% n/Row
        {:style {:alignItems "center"
                 :justifyContent "center"
@@ -52,7 +51,7 @@
          :addons [(physical-addon/tagAll
                    {:style {:paddingHorizontal 20
                             :height 80
-                            :flex 1}})]}]] 
+                            :flex 1}})]}]]
 [:% n/Row
        [:% n/Button
         {:title "H"
@@ -67,15 +66,14 @@
 
 ^{:refer js.react-native.ui-input/Input :added "0.1"}
 (fact "creates a slim input"
-  ^:hidden
-  
+
   (defn.js InputDemo
     []
     (var [first setFirst] (r/local "Hello"))
     (var [last  setLast]  (r/local "World"))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-core/TextInput"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-core/TextInput"}
 [:% n/Row
        {:style {:alignItems "center"
                 :justifyContent "center"
@@ -92,7 +90,7 @@
          :value first
          :onChangeText setFirst
          :style {:flex 1}
-         :styleContainer {:flex 1}}]] 
+         :styleContainer {:flex 1}}]]
 [:% n/Row
        {:style {:alignItems "center"
                 :justifyContent "center"
@@ -109,11 +107,11 @@
          :value last
          :onChangeText setLast
          :style {:flex 1}
-         :styleContainer {:flex 1}}]] 
+         :styleContainer {:flex 1}}]]
 [:% n/Caption
        {:text (n/format-obj #{first last})
         :style {:marginTop 10}}])))
 
-  
-  
+
+
   )

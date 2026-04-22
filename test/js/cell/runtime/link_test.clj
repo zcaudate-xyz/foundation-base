@@ -31,7 +31,7 @@
 
 ^{:refer js.cell.runtime.link/make-mock-link :added "4.1"}
 (fact "creates a mock worker link"
-  
+
   (!.js
     (var worker ((. (runtime-link/make-mock-link {})
                     ["create_fn"])
@@ -42,17 +42,17 @@
 
 ^{:refer js.cell.runtime.link/make-node-link :added "4.1"}
 (fact "creates a Node worker link"
-  
+
   (node-link-init-check)
   => [])
 
 ^{:refer js.cell.runtime.link/resolve-script :added "4.1"}
 (fact "resolves script values or thunks"
-  
+
   (!.js
     (return (runtime-link/resolve-script "abc")))
   => "abc"
-  
+
   (!.js
     (return (runtime-link/resolve-script
             (fn []
@@ -61,7 +61,6 @@
 
 ^{:refer js.cell.runtime.link/make-blob-url :added "4.1"}
 (fact "creates a blob url from a script"
-  ^:hidden
   (!.js
     (var previous-url (!:G URL))
     (:= (!:G URL) {"createObjectURL" (fn [blob]
@@ -73,7 +72,6 @@
 
 ^{:refer js.cell.runtime.link/make-webworker-link :added "4.1"}
 (fact "creates a WebWorker link"
-  ^:hidden
   (!.js
    (var previous-url (!:G URL))
    (var previous-worker (!:G Worker))
@@ -101,7 +99,6 @@
 
 ^{:refer js.cell.runtime.link/make-sharedworker-link :added "4.1"}
 (fact "creates a SharedWorker link"
-  ^:hidden
   (!.js
    (var previous-url (!:G URL))
    (var previous-shared (!:G SharedWorker))
@@ -134,7 +131,6 @@
 
 ^{:refer js.cell.runtime.link/make-link :added "4.1"}
 (fact "dispatches to a runtime-specific worker link helper"
-  ^:hidden
 
   (!.js
     (xt/x:obj-keys (runtime-link/make-link "mock" nil {})))

@@ -67,7 +67,7 @@
 ^{:refer jvm.deps/all-loaded-artifacts :added "3.0"}
 (fact "returns all loaded artifacts"
 
-  (all-loaded-artifacts) ^:hidden
+  (all-loaded-artifacts)
   => sequential?)
 
 ^{:refer jvm.deps/all-loaded :added "3.0"}

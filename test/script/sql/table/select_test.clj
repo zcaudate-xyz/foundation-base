@@ -62,7 +62,7 @@
   => " OFFSET 20")
 
 ^{:refer script.sql.table.select/sql:query :added "3.0"}
-(fact "builds select query" ^:hidden
+(fact "builds select query"
 
   (sql:query
    {:select [:id :name :country-id]

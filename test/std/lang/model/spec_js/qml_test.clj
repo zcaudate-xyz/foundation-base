@@ -7,8 +7,7 @@
 
 ^{:refer std.lang.model.spec-js.qml/qml-props? :added "4.0"}
 (fact "checks if data is a qml prop"
-  ^:hidden
-  
+
   (qml/qml-props? #{[:hello 1]})
   => true
 
@@ -20,8 +19,7 @@
 
 ^{:refer std.lang.model.spec-js.qml/qml-container? :added "4.0"}
 (fact "checks if item is a qml container"
-  ^:hidden
-  
+
   (qml/qml-container? [:qml/Item #{}])
   => true
 
@@ -30,8 +28,7 @@
 
 ^{:refer std.lang.model.spec-js.qml/classify-props :added "4.0"}
 (fact "classifies props"
-  ^:hidden
-  
+
   (qml/classify-props #{[:a 1 :b [:qml/Item]]}
                       qml/classify)
   => [[:a {:type :qml/value, :value 1}]
@@ -39,8 +36,7 @@
 
 ^{:refer std.lang.model.spec-js.qml/classify-container :added "4.0"}
 (fact "classifies a container"
-  ^:hidden
-  
+
   (qml/classify-container
    [:qml/Window #{[:a 1 :b [:qml/Item]]}
     '(fn hello [] (+ 1 2))]
@@ -58,8 +54,7 @@
 
 ^{:refer std.lang.model.spec-js.qml/classify :added "4.0"}
 (fact "classifies the data structure"
-  ^:hidden
-  
+
   (qml/classify
    '[:qml/Item
      #{[:width  bg.width
@@ -71,13 +66,13 @@
       #{[:id bg
          :onClicked (% (:= circle.x 84)
                         (:= box.rotation 0))]}
-      
+
       (var :int colorIndex := (j/floor (* 3 (j/random))))
-      (var someList := [1 2 3 4]) 
-      
+      (var someList := [1 2 3 4])
+
       (fn _test_transformed []
         (:+= circle.x 20))
-      
+
       (fn _test_overlap []
         (:+= circle.x 20))]])
   => '{:type :qml/container,
@@ -110,7 +105,6 @@
 
 ^{:refer std.lang.model.spec-js.qml/emit-value :added "4.0"}
 (fact "emits a value string"
-  ^:hidden
 
   (l/with:emit
    (qml/emit-value '{:type :qml/value,
@@ -122,7 +116,6 @@
 
 ^{:refer std.lang.model.spec-js.qml/emit-container :added "4.0"}
 (fact "emits a container string"
-  ^:hidden
 
   (l/with:emit
    (qml/emit-container '{:type :qml/container,
@@ -158,10 +151,9 @@
       "    circle.x += 20;"
       "  }"
       "}"))
-  
+
 ^{:refer std.lang.model.spec-js.qml/emit-node :added "4.0"}
 (fact "emits either container or value string"
-  ^:hidden
 
   (l/with:emit
    (qml/emit-node '{:type :qml/container,

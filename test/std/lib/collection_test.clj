@@ -228,7 +228,7 @@
   => {:b 2, :c {:d 1}})
 
 ^{:refer std.lib.collection/find-templates :added "3.0"}
-(fact "finds the template with associated path" ^:hidden
+(fact "finds the template with associated path"
 
   (find-templates {:hash  "{{hash}}"
                    :salt  "{{salt}}"
@@ -250,7 +250,7 @@
                   :db       {:login {:user {:hash "{{hash}}"
                                             :salt "{{salt}}"}
                                      :value "{{email}}"}}}
-                 [:keystore :db]) ^:hidden
+                 [:keystore :db])
    {:type :email,
     :hash "1234"
     :salt "ABCD"
@@ -261,7 +261,7 @@
               :value "a@a.com"}})
 
 ^{:refer std.lib.collection/transform :added "3.0"}
-(fact "creates a transformation function" ^:hidden
+(fact "creates a transformation function"
 
   (transform {:keystore {:hash  "{{hash}}"
                          :salt  "{{salt}}"
@@ -319,8 +319,7 @@
 
 ^{:refer std.lib.collection/split-by :added "4.0"}
 (fact "splits a sequences using a predicate "
-  ^:hidden
-  
+
   (split-by #(= % :split) [:a :b :split :c :d :split :e])
    => [[:a :b] [:c :d] [:e]]
 
@@ -354,7 +353,6 @@
 
 ^{:refer std.lib.collection/diff:changes :added "3.0"}
 (fact "Finds changes in nested maps, does not consider new elements"
-  ^:hidden
 
   (diff:changes {:a 2} {:a 1})
   => {[:a] 2}
@@ -382,7 +380,6 @@
 
 ^{:refer std.lib.collection/diff:new :added "3.0"}
 (fact "Finds new elements in nested maps, does not consider changes"
-  ^:hidden
 
   (diff:new {:a 2} {:a 1})
   => {}
@@ -401,7 +398,6 @@
 
 ^{:refer std.lib.collection/diff :added "3.0"}
 (fact "Finds the difference between two maps"
-  ^:hidden
 
   (diff {:a 2} {:a 1})
   => {:+ {} :- {} :> {[:a] 2}}
@@ -421,7 +417,6 @@
 
 ^{:refer std.lib.collection/diff:patch :added "3.0"}
 (fact "patch from old to new"
-  ^:hidden
 
   (let [m1  {:a {:b 1 :d 3}}
         m2  {:a {:c 2 :d 4}}
@@ -431,7 +426,6 @@
 
 ^{:refer std.lib.collection/diff:unpatch :added "3.0"}
 (fact "unpatch from new to old"
-  ^:hidden
 
   (let [m1  {:a {:b 1 :d 3}}
         m2  {:a {:c 2 :d 4}}

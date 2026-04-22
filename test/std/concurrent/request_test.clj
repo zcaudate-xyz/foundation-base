@@ -138,7 +138,6 @@
 ^{:refer std.concurrent.request/req:bulk.debug :added "3.0" :adopt true
   :style/indent 1}
 (fact "creates a bulk request"
-  ^:hidden
 
   (-> (req:bulk [+ {:debug true}]
                 (req-fn + [1 2 3] {:debug true})
@@ -149,28 +148,24 @@
 
 ^{:refer std.concurrent.request/bulk-context :added "3.0"}
 (fact "creates a bulk context"
-  ^:hidden
 
   (bulk-context)
   => map?)
 
 ^{:refer std.concurrent.request/transact-context :added "3.0"}
 (fact "creates a transact context"
-  ^:hidden
 
   (transact-context)
   => f/atom?)
 
 ^{:refer std.concurrent.request/req:opts-clean :added "3.0"}
 (fact "clean opts for processing inputs"
-  ^:hidden
 
   (req:opts-clean {})
   => {})
 
 ^{:refer std.concurrent.request/req:opts :added "3.0"}
 (fact "clean opts for processing inputs"
-  ^:hidden
 
   (req:opts {} {})
   => {})
@@ -205,8 +200,7 @@
 
 ^{:refer std.concurrent.request/req:return :added "3.0"}
 (fact "returns the output"
-   ^:hidden
-  
+
   (req:return 1 false)
   => 1
 
@@ -219,8 +213,7 @@
 
 ^{:refer std.concurrent.request/req:single-prep :added "3.0"}
 (fact "prepares `req:single` options"
-   ^:hidden
-  
+
   (req:single-prep {:async true})
   => map?
 
@@ -228,9 +221,8 @@
   => map?)
 
 ^{:refer std.concurrent.request/req:single-complete :added "3.0"}
-(fact "completes the `req:single` call" 
-  ^:hidden
-  
+(fact "completes the `req:single` call"
+
   (req:single-complete (req:single-prep {})
                        1)
   => 1
@@ -242,8 +234,7 @@
 ^{:refer std.concurrent.request/req:single :added "3.0"
   :setup [(def |client| (eval-client))]}
 (fact "creates a single request call"
-   ^:hidden
-  
+
   (req:single |client| {:type :eval :form '(+ 1 2 3 4)})
   => 10
 
@@ -263,7 +254,6 @@
 ^{:refer std.concurrent.request/req:unit :added "3.0"
   :setup [(def |client| (eval-client))]}
 (fact "creates a single request call with `*bulk*` context"
-  ^:hidden
 
   (binding [*bulk*    {|client| (bulk-context)}
             *current* {|client| (atom [])}]
@@ -274,7 +264,7 @@
 
 ^{:refer std.concurrent.request/bulk:inputs :added "3.0"
   :setup [(def |client| (eval-client))] :style/indent 1}
-(fact "capture all inputs on the client" ^:hidden
+(fact "capture all inputs on the client"
 
   (bulk:inputs |client|
                (fn []
@@ -286,7 +276,6 @@
 ^{:refer std.concurrent.request/bulk-collect :added "3.0"
   :setup [(def |client| (eval-client))] :style/indent 1}
 (fact "collects bulk inputs"
-  ^:hidden
 
   (-> (bulk-collect |client|
                     (fn []
@@ -300,7 +289,6 @@
 ^{:refer std.concurrent.request/bulk-process :added "3.0"
   :setup [(def |client| (eval-client))]}
 (fact "processes the client given bulk inputs"
-  ^:hidden
 
   @(bulk-process |client|
                  {:inputs [{:type :eval, :form '(+ 1 2 3)}
@@ -312,7 +300,6 @@
 ^{:refer std.concurrent.request/bulk :added "3.0"
   :setup [(def |client| (eval-client))] :style/indent 1}
 (fact "allows query inputs to be combined"
-  ^:hidden
 
   (bulk |client|
         (fn []
@@ -363,7 +350,7 @@
                  (fn []
                    (req |client| {:type :eval :form 1}
                         {:chain [#(* 8 %)]})))
-       (map deref)) ^:hidden
+       (map deref))
   => '(8)
 
   ;;
@@ -428,7 +415,7 @@
 
   (transact-prep |client| (transact-context)
                  {:type :eval, :form 1}
-                 {:chain [inc]}) ^:hidden
+                 {:chain [inc]})
   => map?)
 
 ^{:refer std.concurrent.request/req-fn :added "3.0"}
@@ -442,7 +429,6 @@
   :style/indent 1
   :setup [(def |client| (eval-client))]}
 (fact "creates a transaction within a bulk context"
-  ^:hidden
 
   (bulk:transact |client|
                  (fn []
@@ -456,7 +442,7 @@
   :setup [(def |client| (eval-client))]}
 (fact "execute command on single, bulk and transact calls"
 
-  (req |client| {:type :eval :form 1}) ^:hidden
+  (req |client| {:type :eval :form 1})
   => 1
 
   (req |client| {:type :transact/start})
@@ -473,7 +459,6 @@
 
 ^{:refer std.concurrent.request/req:in :added "3.0"}
 (fact "captures the command input"
-  ^:hidden
 
   (req:in
    (req nil [1])
@@ -484,7 +469,6 @@
 ^{:refer std.concurrent.request/req:bulk :added "3.0"
   :style/indent 1}
 (fact "creates a bulk request"
-  ^:hidden
 
   (req:bulk [+]
             (req + [1 2 3])
@@ -495,7 +479,6 @@
 ^{:refer std.concurrent.request/req:transact :added "3.0"
   :setup [(def |client| (eval-client))] :style/indent 1}
 (fact "creates a bulk transaction request"
-  ^:hidden
 
   (-> (req:transact [|client| {:debug true}]
                     (req |client| {:type :eval :form 1} {:debug true})
@@ -506,7 +489,6 @@
 ^{:refer std.concurrent.request/bulk:map :added "3.0"
   :setup [(def |client| (eval-client))] :style/indent 1}
 (fact "map function across a client"
-  ^:hidden
 
   (bulk:map |client|
             req-fn [{:type :eval :form 1}

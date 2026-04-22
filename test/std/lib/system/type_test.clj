@@ -59,7 +59,7 @@
 
 ^{:refer std.lib.system.type/system.additional-features :added "3.0" :adopt true
   :teardown [(track/tracked:last [:system] :stop)]}
-(fact "creates a system of components" ^:hidden
+(fact "creates a system of components"
 
   (def topology {:database   [{:constructor map->Database}]
                  :cameras    [[{:constructor map->Camera
@@ -113,7 +113,7 @@
 
 ^{:refer std.lib.system.type/info-system :added "3.0"
   :teardown [(track/tracked:last [:system] :stop)]}
-(fact "gets the info for the system" ^:hidden
+(fact "gets the info for the system"
 
   (def topology {:database   [{:constructor map->Database}]
 
@@ -131,7 +131,7 @@
 
 ^{:refer std.lib.system.type/health-system :added "3.0"
   :teardown [(track/tracked:last [:system] :stop)]}
-(fact "gets the health for the system" ^:hidden
+(fact "gets the health for the system"
 
   (def topology {:database   [{:constructor map->Database}]
 
@@ -148,7 +148,7 @@
 
 ^{:refer std.lib.system.type/remote?-system :added "3.0"
   :teardown [(track/tracked:last [:system] :stop)]}
-(fact "gets the remote status for the system" ^:hidden
+(fact "gets the remote status for the system"
 
   (def topology {:database   [{:constructor map->Database}]
 
@@ -174,7 +174,7 @@
   ;; The topology specifies how the system is linked
   (def topo {:db        [map->Database]
              :files     [[map->Filesystem]]
-             :catalogs  [[map->Catalog] [:files {:type :element :as :fs}] :db]}) ^:hidden
+             :catalogs  [[map->Catalog] [:files {:type :element :as :fs}] :db]})
 
   ;; The configuration customises the system
   (def cfg  {:db     {:type :basic
@@ -218,7 +218,7 @@
 (fact "exposes a component into the system")
 
 ^{:refer std.lib.system.type/start-system :added "3.0"}
-(fact "starts a system" ^:hidden
+(fact "starts a system"
   (->> (system {:models [[identity] [:files {:type :element :as :fs}]]
                 :files  [[identity]]}
                {:models [{:m 1} {:m 2}]
@@ -236,7 +236,7 @@
 (fact "deports a component from the system")
 
 ^{:refer std.lib.system.type/stop-system :added "3.0"}
-(fact "stops a system" ^:hidden
+(fact "stops a system"
 
   (->> (system {:model   [identity]
                 :ids     [[identity]]

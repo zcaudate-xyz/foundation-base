@@ -36,7 +36,7 @@
   [(log-latest/clear-cache log 0)
    (log-latest/clear-cache log (+ (xt/x:now-ms) 100000))])
  =>
- [[] ["a" "b"]])
+ [{} ["a" "b"]])
 
 ^{:refer xt.lang.event-log-latest/queue-latest, :added "4.0"}
 (fact

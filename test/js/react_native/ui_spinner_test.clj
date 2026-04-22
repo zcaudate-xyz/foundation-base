@@ -20,14 +20,13 @@
 
 ^{:refer js.react-native.ui-spinner/SpinnerStatic :added "0.1"}
 (fact "creates the spinner padding"
-  ^:hidden
-  
+
   (defn.js SpinnerStaticDemo
     []
     (var [text setText] (r/local "."))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-spinner/SpinnerStatic"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-spinner/SpinnerStatic"}
 [:% n/Row
        [:% n/Row
         {:style {:backgroundColor "#eee"
@@ -38,14 +37,13 @@
 
 ^{:refer js.react-native.ui-spinner/SpinnerDigit :added "4.0" :unchecked true}
 (fact  "creates the spinner digit"
-  ^:hidden
-  
+
   (defn.js SpinnerDigitDemo
     []
     (var [index setIndex] (r/local 5))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-spinner/SpinnerDigit"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-spinner/SpinnerDigit"}
 [:% n/Row
        [:% n/Row
         {:style {:backgroundColor "#eee"
@@ -63,15 +61,14 @@
 
 ^{:refer js.react-native.ui-spinner/SpinnerValues :added "4.0" :unchecked true}
 (fact "creates the spinner values"
-  ^:hidden
-  
+
   (defn.js SpinnerValuesDemo
     []
     (var [value setValue] (r/local 155))
     (var [max min step decimal] [100 0 1 2])
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-spinner/SpinnerValues"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-spinner/SpinnerValues"}
 [:% n/Row
        [:% n/Row
         {:style {:backgroundColor "#eee"
@@ -92,15 +89,14 @@
 
 ^{:refer js.react-native.ui-spinner/Spinner :added "0.1"}
 (fact "creates the spinner value"
-  ^:hidden
-  
+
   (defn.js SpinnerDemo
     []
     (var [value setValue] (r/local 155))
     (var [max min step decimal] [100 0 1 2])
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-spinner/Spinner"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-spinner/Spinner"}
 [:% n/Row
        [:% n/Row
         {:style {:backgroundColor "#eee"
@@ -115,7 +111,7 @@
         [:% n/Button
          {:title "-1"
           :onPress (fn:> (setValue (- value 1)))}]]])))
-  
-  
-  
+
+
+
   )

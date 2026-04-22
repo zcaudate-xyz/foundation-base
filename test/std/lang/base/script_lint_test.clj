@@ -25,15 +25,13 @@
 
 ^{:refer std.lang.base.script-lint/collect-vars :added "4.0"}
 (fact "collects all vars"
-  ^:hidden
-  
+
   (collect-vars '#{[hello #{world}]})
   => '#{hello world})
 
 ^{:refer std.lang.base.script-lint/collect-module-globals :added "4.0"}
 (fact "collects global symbols from module"
-  ^:hidden
-  
+
   (impl/with:library [+library+]
     (collect-module-globals (l/get-module
                              +library+
@@ -51,8 +49,7 @@
 
 ^{:refer std.lang.base.script-lint/sym-check-linter :added "4.0"}
 (fact "checks the linter"
-  ^:hidden
-  
+
   (impl/with:library [+library+]
     (def +out+
       (doseq [[id module] (:modules (l/get-book
@@ -84,17 +81,17 @@
   => nil)
 
 (comment
-    
+
   (collect-sym-vars @js.blessed.ui-label/ActionLabel
                     #{})
-    
+
   (collect-sym-vars @js.react-native-test/ListPaneDemo
                     #{})
-  
-  
+
+
   (collect-sym-vars @xt.lang.event-common/add-listener)
   (collect-sym-vars @xt.lang.common-repl/socket-connect)
-  
-  (get 
+
+  (get
    (set (keys
          (:reserved (std.lang/grammar :js))))))

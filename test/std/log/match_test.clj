@@ -6,7 +6,7 @@
 (fact "matches based on input and filter"
 
   (filter-base  "hello"  #"h.*")
-  => true ^:hidden
+  => true
 
   (filter-base  #{"hello"}  #"h.*")
   => true
@@ -30,7 +30,7 @@
 (fact "positive if filter is empty or one of the matches hit"
 
   (filter-include :hello nil)
-  => true ^:hidden
+  => true
 
   (filter-include :hello ["hello" "world"])
   => true
@@ -51,7 +51,7 @@
 (fact "negative if one of the matches hit"
 
   (filter-exclude :hello nil)
-  => true ^:hidden
+  => true
 
   (filter-exclude :hello ["hello" "world"])
   => false
@@ -72,7 +72,7 @@
 (fact "filters based on exclude and include filters"
 
   (filter-value  "hello"  nil)
-  => true ^:hidden
+  => true
 
   (filter-value  "hello"  {:include [#"h"]})
   => true
@@ -95,7 +95,7 @@
 
   (match {:level     :debug}
     {:log/level :debug})
-  => true ^:hidden
+  => true
 
   (match {:level     :info}
     {:log/level :debug})

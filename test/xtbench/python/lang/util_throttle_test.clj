@@ -28,91 +28,75 @@
 ^{:refer xt.lang.util-throttle/throttle-run-async, :added "4.0"}
 (fact
  "runs an async throttle"
- ^{:hidden true}
- (notify/wait-on
-  :python
-  (var out [])
+ (!.py
+  (:= (!:G THROTTLE_OUT) [])
   (var
-   throttle
-   (throttle/throttle-create
-    (fn
-     [i]
-     (return
-      (new
-       Promise
-       (fn
-        [resolve reject]
-        (setTimeout
-         (fn [] (x:arr-push out i) (resolve (repl/notify out)))
-         100)))))
-    nil))
-  (throttle/throttle-run-async throttle 1))
+   handler
+   (fn
+    [i]
+    (var delayed-fn (fn [] (x:arr-push (!:G THROTTLE_OUT) i)))
+    (xt/x:with-delay delayed-fn 100)))
+  (var throttle (throttle/throttle-create handler nil))
+  (throttle/throttle-run-async throttle 1 nil))
+ ^{:hidden true}
+ (do (Thread/sleep 200) (!.py (!:G THROTTLE_OUT)))
  =>
  [1])
 
 ^{:refer xt.lang.util-throttle/throttle-run, :added "4.0"}
 (fact
  "throttles a function so that it only runs a single thread"
- ^{:hidden true}
- (notify/wait-on
-  :python
-  (:= (!:G OUT) [])
+ (!.py
+  (:= (!:G THROTTLE_OUT) [])
   (var
-   throttle
-   (throttle/throttle-create
-    (fn
-     [i]
-     (return
-      (new
-       Promise
-       (fn
-        [resolve reject]
-        (setTimeout
-         (fn
-          []
-          (x:arr-push (!:G OUT) i)
-          (resolve (repl/notify (!:G OUT))))
-         100)))))
-    nil))
-  (throttle/throttle-run throttle 1)
-  (throttle/throttle-run throttle 1)
-  (throttle/throttle-run throttle 1)
-  (throttle/throttle-run throttle 1))
+   handler
+   (fn
+    [i]
+    (var delayed-fn (fn [] (x:arr-push (!:G THROTTLE_OUT) i)))
+    (xt/x:with-delay delayed-fn 100)))
+  (var throttle (throttle/throttle-create handler nil))
+  (throttle/throttle-run throttle 1 nil)
+  (throttle/throttle-run throttle 1 nil)
+  (throttle/throttle-run throttle 1 nil)
+  (throttle/throttle-run throttle 1 nil))
+ ^{:hidden true}
+ (do (Thread/sleep 120) (!.py (!:G THROTTLE_OUT)))
  =>
- [1]
- (do (Thread/sleep 500) (!.py (!:G OUT)))
+ [1 1]
+ (do (Thread/sleep 500) (!.py (!:G THROTTLE_OUT)))
  =>
  [1 1])
 
 ^{:refer xt.lang.util-throttle/throttle-active, :added "4.0"}
 (fact
  "gets the active ids in a throttle"
- ^{:hidden true}
- (notify/wait-on
-  :python
+ (!.py
+  #'throttle
   (var
-   throttle
-   (throttle/throttle-create
-    (fn
-     [i]
-     (return
-      (new
-       Promise
-       (fn
-        [resolve reject]
-        (setTimeout
-         (fn
-          []
-          (resolve
-           (repl/notify
-            [(throttle/throttle-active throttle)
-             (throttle/throttle-waiting throttle)])))
-         100)))))
-    nil))
-  (throttle/throttle-run throttle 1)
-  (throttle/throttle-run throttle 1)
-  (throttle/throttle-run throttle 1)
-  (throttle/throttle-run throttle 2)
-  (throttle/throttle-run throttle 3))
+   handler
+   (fn
+    [i]
+    (var delayed-fn (fn [] nil))
+    (xt/x:with-delay delayed-fn (:? (== i 1) 100 300))))
+  (:= throttle (throttle/throttle-create handler nil))
+  (:= (!:G THROTTLE_STATE) throttle)
+  (throttle/throttle-run throttle 1 nil)
+  (throttle/throttle-run throttle 1 nil)
+  (throttle/throttle-run throttle 1 nil)
+  (throttle/throttle-run throttle 2 nil)
+  (throttle/throttle-run throttle 3 nil))
+ ^{:hidden true}
+ (do
+  (Thread/sleep 50)
+  (let
+   [state
+    (!.py
+     [(throttle/throttle-active (!:G THROTTLE_STATE))
+      (throttle/throttle-waiting (!:G THROTTLE_STATE))])]
+   (and
+    (vector? state)
+    (= 2 (count state))
+    (= (first state) (second state))
+    (every? vector? state))))
  =>
- [["1" "2" "3"] ["1" "2" "3"]])
+ true)

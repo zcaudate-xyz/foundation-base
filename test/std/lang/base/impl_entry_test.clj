@@ -11,8 +11,7 @@
 
 ^{:refer std.lang.base.impl-entry/create-common :added "4.0"}
 (fact "create entry common keys from metadata"
-  ^:hidden
-  
+
   (entry/create-common {:lang :lua
                         :namespace 'L.core
                         :module 'L.core
@@ -22,8 +21,7 @@
 
 ^{:refer std.lang.base.impl-entry/create-code-raw :added "4.0"}
 (fact "creates a raw entry compatible with submit"
-  ^:hidden
-  
+
   (entry/create-code-raw
    '(defn add-fn
       "hello"
@@ -39,8 +37,7 @@
 
 ^{:refer std.lang.base.impl-entry/create-code-base :added "4.0"}
 (fact "creates the base code entry"
-  ^:hidden
-  
+
   (entry/create-code-base
    '(defn add-fn
       [a b]
@@ -53,7 +50,6 @@
 
 ^{:refer std.lang.base.impl-entry/hydrate-form :added "4.1"}
 (fact "hydrates input forms through the reserved hydrate hook"
-  ^:hidden
 
   (entry/hydrate-form '(do raw)
                       {:hydrate (fn [_ _ _]
@@ -74,8 +70,7 @@
               :module 'L.core}
              @emit/+test-grammar+))]}
 (fact "hydrates the forms"
-  ^:hidden
-  
+
   (-> (entry/create-code-hydrate +entry+
                                  (get-in @emit/+test-grammar+ [:reserved 'defn])
                                  @emit/+test-grammar+
@@ -87,7 +82,6 @@
   => '(defn add-fn [a b] (return (+ a (+ a 1)))))
 
 (fact "hydrate hooks can enrich the returned entry"
-  ^:hidden
 
   (-> (entry/create-code-hydrate +entry+
                                  (assoc (get-in @emit/+test-grammar+ [:reserved 'defn])
@@ -102,7 +96,6 @@
   => true)
 
 (fact "xtalk metadata is derived from the hydrated form"
-  ^:hidden
 
   (-> (entry/create-code-hydrate
        (assoc +entry+ :form-input '(do raw))
@@ -120,8 +113,7 @@
 
 ^{:refer std.lang.base.impl-entry/create-code :added "4.0"}
 (fact "creates the code entry"
-  ^:hidden
-  
+
   (-> (entry/create-code '(defn add-fn
                             [a b]
                             (return (-/add a (-/identity-fn b))))
@@ -135,8 +127,7 @@
 
 ^{:refer std.lang.base.impl-entry/create-fragment :added "4.0"}
 (fact "creates a fragment"
-  ^:hidden
-  
+
   (entry/create-fragment
    '(def$ G G)
    {:lang :lua
@@ -146,8 +137,7 @@
 
 ^{:refer std.lang.base.impl-entry/create-macro :added "4.0"}
 (fact "creates a macro"
-  ^:hidden
-  
+
   (entry/create-macro
    '(defmacro mul [a b] (list '* a b))
    {:lang :lua
@@ -175,8 +165,7 @@
                                             :alias {}
                                             :link  {- L.core}}))]}
 (fact "emits using the raw entry"
-  ^:hidden
-  
+
   (entry/emit-entry-raw @emit/+test-grammar+
                         +entry+
                         '{:module {:internal #{L.core}}
@@ -184,7 +173,6 @@
   => "function L_core____add_fn(a,b){\n  return a + L_core____identity_fn(b);\n}")
 
 (fact "entry emit failures include entry context"
-  ^:hidden
 
   (let [grammar (assoc-in @emit/+test-grammar+
                           [:reserved 'boom-op]
@@ -250,8 +238,7 @@
                                  book))))
                 second))]}
 (fact "emits using a potentially cached entry"
-  ^:hidden
-  
+
   (entry/emit-entry-cached {:grammar (:grammar +book+)
                             :entry (get-in +book+ '[:modules L.core :code add-fn])
                             :mopts {:layout :full
@@ -261,16 +248,14 @@
 
 ^{:refer std.lang.base.impl-entry/emit-entry-label :added "4.0"}
 (fact "emits the entry label"
-  ^:hidden
-  
+
   (entry/emit-entry-label (:grammar +book+)
                           (get-in +book+ '[:modules L.core :code add-fn]))
   => "// L.core/add-fn [] ")
 
 ^{:refer std.lang.base.impl-entry/emit-entry :added "4.0"}
 (fact "emits a given entry"
-  ^:hidden
-  
+
   (entry/emit-entry (:grammar +book+)
                     (get-in +book+ '[:modules L.core :code add-fn])
                     {:layout :full
@@ -280,7 +265,6 @@
   => "// L.core/add-fn [] \nfunction L_core____add_fn(a,b){\n  return G + L_core____identity_fn(a + b);\n}")
 
 (fact "emits template entries using merged parent modules from the snapshot"
-  ^:hidden
 
   (let [child-module (b/book-module {:id 'L.core
                                      :lang :lua

@@ -41,7 +41,7 @@
   (fact-prepare-meta 'test-hello
                      {}
                      "hello"
-                     '(1 => 1)) ^:hidden
+                     '(1 => 1))
   => '[{:path "test/code/test/compile_test.clj",
         :desc "hello",
         :ns code.test.compile-test,
@@ -103,8 +103,7 @@
 ^{:refer code.test.compile/fact:list :added "3.0"
   :style/indent 1}
 (fact "lists all facts in namespace"
-  ^:hidden
-  
+
   (ctx/with-new-context {:registry (atom {'my.ns {:facts {'a {:id 'a :line 1}}}})}
     (binding [*ns* (create-ns 'my.ns)]
       (fact:list)))

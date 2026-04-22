@@ -50,7 +50,6 @@
 
 ^{:refer xt.db.impl-sql/CANARY :adopt true :added "4.0"}
 (fact "checks that things are ok"
-  ^:hidden
 
   (!.lua
    [(dbsql/query INSTANCE
@@ -77,7 +76,6 @@
                          k/identity
                          k/lt))]}
 (fact "removes data from database"
-  ^:hidden
 
   (!.lua
    (impl-sql/sql-pull-sync
@@ -125,7 +123,6 @@
 
 ^{:refer xt.db.impl-sql/sql-gen-delete :added "4.0"}
 (fact "generates the delete statements"
-  ^:hidden
 
   (!.lua
    (impl-sql/sql-gen-delete "HELLO"
@@ -149,7 +146,6 @@
                          k/identity
                          k/lt))]}
 (fact "removes data from database"
-  ^:hidden
 
   (!.lua
    (impl-sql/sql-pull-sync
@@ -212,7 +208,6 @@
                "password_updated" number?
                "is_super" 1}]))]}
 (fact "runs a pull statement"
-  ^:hidden
 
   [(set (!.lua
          (impl-sql/sql-pull-sync INSTANCE

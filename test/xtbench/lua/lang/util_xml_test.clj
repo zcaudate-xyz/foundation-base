@@ -1,12 +1,11 @@
 (ns
  xtbench.lua.lang.util-xml-test
- (:require [std.lang :as l] [std.string.prose :as prose])
- (:use code.test))
+ (:use code.test)
+ (:require [std.lang :as l] [std.string.prose :as prose]))
 
 (l/script-
  :lua
- {:runtime :basic,
-  :require [[xt.lang.util-xml :as xml] [xt.lang.common-lib :as k]]})
+ {:runtime :basic, :require [[xt.lang.util-xml :as xml]]})
 
 (fact:global {:setup [(l/rt:restart)], :teardown [(l/rt:stop)]})
 

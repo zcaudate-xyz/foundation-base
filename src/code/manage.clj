@@ -1,12 +1,14 @@
 (ns code.manage
   (:require [code.framework :as base]
-            [code.manage.fn-format :as fn-format]
-            [code.manage.ns-format :as ns-format]
-            [code.manage.ns-rename :as ns-rename]
-            [code.manage.unit :as unit]
-            [code.manage.unit.require :as unit.require]
-            [code.manage.unit.template :as template]
-            [code.manage.var :as var]
+             [code.manage.fn-format :as fn-format]
+             [code.manage.ns-format :as ns-format]
+             [code.manage.ns-rename :as ns-rename]
+             [code.manage.unit :as unit]
+             [code.manage.unit.import :as unit.import]
+             [code.manage.unit.snapto :as unit.snapto]
+             [code.manage.unit.require :as unit.require]
+             [code.manage.unit.template :as template]
+             [code.manage.var :as var]
             [code.project :as project]
             [std.block :as block]
             [std.lib.collection :as collection]
@@ -176,20 +178,23 @@
 (invoke/definvoke import
   "import docstrings from tests
  
-   (import {:write false})
- 
-   (import {:full true
-            :write false
-            :print {:function false}})
+    (import {:write false})
+  
+    (import {:examples true
+             :write false})
+  
+    (import {:full true
+             :write false
+             :print {:function false}})
  
    (import '[code.manage.unit]
            {:print {:summary true :result true :item true}
             :write false})"
-  {:added "3.0"}
-  [:task {:template :code.transform
-          :main   {:fn #'unit/import}
-          :params {:title "IMPORT DOCSTRINGS"
-                   :parallel true
+   {:added "3.0"}
+   [:task {:template :code.transform
+           :main   {:fn #'unit.import/import}
+           :params {:title "IMPORT DOCSTRINGS"
+                    :parallel true
                    :write true}
           :item   {:list template/source-namespaces}
           :result (template/code-transform-result :changed)}])
@@ -361,7 +366,7 @@
 
 (invoke/definvoke arrange
   "arranges the test corresponding to function order
- 
+  
    (arrange {:print {:function false}
              :write false})
  
@@ -373,10 +378,31 @@
                    :parallel true
                    :write true}
           :main {:fn #'unit/arrange}
+           :item {:list template/test-namespaces}
+           :result (template/code-transform-result :changed)}])
+
+(comment (code.manage/arrange ['code.framework] {:print {:function true :item true :result true :summary true}}))
+
+(invoke/definvoke snapto
+  "formats fact tests into snap-to layout
+ 
+   (snapto {:write false})
+ 
+   (snapto '[code.manage] {:print {:item true}
+                           :write false})"
+  {:added "4.1"}
+  [:task {:template :code.transform
+          :params {:title "SNAPTO TESTS"
+                   :parallel true
+                   :write true}
+          :main {:fn #'unit.snapto/snapto}
           :item {:list template/test-namespaces}
           :result (template/code-transform-result :changed)}])
 
-(comment (code.manage/arrange ['code.framework] {:print {:function true :item true :result true :summary true}}))
+(comment
+  
+  (code.manage/snapto ['xtbench.lua.db.base-util-test]
+                      {:print {:function true :item true :result true :summary true}}))
 
 (invoke/definvoke locate-code
   "locates code base upon query"
@@ -610,6 +636,7 @@
    :create-tests  create-tests
    :in-order      in-order?
    :arrange       arrange
+   :snapto        snapto
    :locate-code   locate-code
    :locate-test   locate-test
    :grep          grep
@@ -652,111 +679,3 @@
           (System/exit 0))))))
 
 
-
-
-(comment
-
-  (invoke/definvoke replace-usages
-    "replace usages of a var
- 
-   (replace-usages '[code.manage]
-                   {:var 'code.framework/analyse
-                   :new 'analyse-changed})"
-    {:added "3.0"}
-    [:task {:template :code.transform
-            :params {:title "REPLACE VAR USAGES"
-                     :print {:item false
-                             :function true}}
-            :main   {:fn #'var/replace-usages}
-            :result (template/code-transform-result :changed)}])
-  
-  (invoke/definvoke replace-refers
-    "TODO"
-    {:added "3.0"}
-    [:task {:template :code.transform
-            :params {:title "REPLACE REFERS"
-                     :print {:item false
-                             :function true}}
-            :main   {:fn #'var/replace-refers}
-            :result (template/code-transform-result :changed)}])
-  
-  (invoke/definvoke replace-errors
-    "TODO"
-    {:added "3.0"}
-    [:task {:template :code.transform
-            :params {:title "REPLACE ERRORS"
-                     :print {:item false
-                             :function true}}
-            :main   {:fn #'var/replace-errors}
-            :result (template/code-transform-result :changed)}])
-  
-  (invoke/definvoke list-ns-unused
-    "TODO"
-    {:added "3.0"}
-    [:task {:template :code
-            :params {:title "LIST UNUSED NS ENTRIES"
-                     :print {:item true}}
-            :item {:list template/source-namespaces}
-            :main   {:fn #'var/list-ns-unused}}])
-  
-  (invoke/definvoke remove-ns-unused
-    "TODO"
-    {:added "3.0"}
-    [:task {:template :code.transform
-            :params {:title "REMOVE UNUSED NS ENTRIES"
-                     :print {:function true}}
-            :main   {:fn #'var/remove-ns-unused}
-            :result template/base-transform-result}])
-
-  (invoke/definvoke rename-ns-abbrevs
-    "TODO"
-    {:added "3.0"}
-    [:task {:template :code.transform
-            :params {:title "RENAME NS ABBREVS"
-                     :print {:function true}}
-            :main {:fn #'var/rename-ns-abbrevs}
-            :result template/base-transform-result}])
-
-  (invoke/definvoke refactor-ns-forms
-    "refactors and reorganises ns forms
- 
-   (refactor-ns-forms '[code.manage])"
-    {:added "3.0"}
-    [:task {:template :code.transform
-            :params {:title "TRANSFORMING NS FORMS"
-                     :print {:function true}}
-            :main {:fn #'ns-form/refactor}
-            :result template/base-transform-result}])
-
-  (comment
-    (code.manage/refactor-ns-forms '[code.manage] {:write true}))
-
-  (invoke/definvoke lint
-    [:task {:template :code.transform
-            :params {:title "LINTING CODE"
-                     :print {:function true}}
-            :main   {:fn #'lint/lint}
-            :result template/base-transform-result}])
-
-  (comment
-    (code.manage/lint 'code.manage {:write true}))
-
-  (invoke/definvoke line-limit
-    [:task {:template :code
-            :params {:title "LINES EXCEEDING LIMIT"
-                     :print {:function true}}
-            :main   {:fn #'lint/line-limit}}])
-
-  (comment
-    (time (analyse 'code.framework-test))
-    (time (def a (analyse 'code.framework-test)))
-    (time (def a (analyse 'code.manage)))
-    (code.framework.cache/purge)
-    (./reset '[code.manage])
-    (./reset '[code.manage])
-    (./incomplete '[code.manage])
-
-    (vars 'code.manage)
-    (vars '[thing] {:print {:item true}})
-    (./import)
-    (code.manage/line-limit ['hara] {:length 110})))

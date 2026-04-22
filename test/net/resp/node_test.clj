@@ -45,8 +45,7 @@
 
 ^{:refer net.resp.node/handle-multi :added "3.0"}
 (fact "handles a call to start transaction"
-  ^:hidden
-  
+
   (test-harness
     (cc/req |conn| ["MULTI"])
     => "OK"

@@ -21,14 +21,13 @@
 
 ^{:refer js.react-native.ui-frame/FramePane :added "4.0" :unchecked true}
 (fact "creates a Frame Pane"
-  ^:hidden
-  
+
   (defn.js FramePaneDemo
     []
     (var [visible setVisible] (r/local true))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-frame/FramePane"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-frame/FramePane"}
 [:% n/Row
        {:style {:paddingBottom 10}}
        [:% n/Button
@@ -40,15 +39,14 @@
          :fade false}
         [:% n/Text {:style {:backgroundColor "red"
                             :width 100}}
-         "HELLO"]]] 
+         "HELLO"]]]
 [:% n/Caption
        {:text (n/format-obj #{visible})
         :style {:marginTop 10}}]))))
 
 ^{:refer js.react-native.ui-frame/Frame :added "4.0" :unchecked true}
 (fact "creates a Frame"
-  ^:hidden
-  
+
   (defn.js FrameDemo
     []
     (var [topVisible setTopVisible] (r/local true))
@@ -56,9 +54,9 @@
     (var [rightVisible setRightVisible] (r/local true))
     (var [leftVisible setLeftVisible] (r/local true))
     (return
-     (n/EnclosedCode 
+     (n/EnclosedCode
 {:label "js.react-native.ui-frame/Frame"
-       :style {:height 350}} 
+       :style {:height 350}}
 [:% n/Row
        {:style {:paddingBottom 10}}
        [:% n/Button
@@ -75,7 +73,7 @@
        [:% n/Text " "]
        [:% n/Button
         {:title "R"
-         :onPress (fn:> (setRightVisible (not rightVisible)))}]] 
+         :onPress (fn:> (setRightVisible (not rightVisible)))}]]
 [:% ui-frame/Frame
        #{[topVisible
           bottomVisible
@@ -103,13 +101,13 @@
                                 (return [:% n/View {:style {:flex 1
                                                             :backgroundColor "lightgreen"}}
                                          [:% n/Text "RIGHT"]]))
-          :rightIndicatorParams 
+          :rightIndicatorParams
           {:default {:type "timing"
                      :duration 1000
                      :easing a/linear}}]}
        [:% n/View
         {:style {:padding 10}}
-        [:% n/Text "BODY"]]] 
+        [:% n/Text "BODY"]]]
 [:% n/TextDisplay
        {:style {:flex nil
                 :height 80}
@@ -117,7 +115,7 @@
                                    bottomVisible
                                    leftVisible
                                    rightVisible})}])))
-  
-  
-  
+
+
+
   )

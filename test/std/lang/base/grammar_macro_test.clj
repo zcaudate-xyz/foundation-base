@@ -29,8 +29,7 @@
 
 ^{:refer std.lang.base.grammar-macro/tf-let-bind :added "4.0"}
 (fact "converts to a statement"
-  ^:hidden
-  
+
   (tf-let-bind '(let [#{x} 1 b 2]
                   (return (+ x b))))
   => '(do* (var #{x} := 1)
@@ -39,8 +38,7 @@
 
 ^{:refer std.lang.base.grammar-macro/tf-case :added "4.0"}
 (fact "transforms the case statement to switch representation"
-  ^:hidden
-  
+
   (tf-case '(case (type obj)
               :A (return A)
               :B (return B)
@@ -53,8 +51,7 @@
 
 ^{:refer std.lang.base.grammar-macro/tf-lambda-arrow :added "4.0"}
 (fact "generalized lambda transformation"
-  ^:hidden
-  
+
   (tf-lambda-arrow '(fn:> [e] e))
   => '(fn [e] (return e)))
 
@@ -72,7 +69,6 @@
 
 ^{:refer std.lang.base.grammar-macro/tf-doto :added "4.0"}
 (fact "basic transformation for `doto` syntax"
-  ^:hidden
 
   (tf-doto '(doto sym
               (. a)

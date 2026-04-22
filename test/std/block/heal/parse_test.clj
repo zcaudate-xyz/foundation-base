@@ -6,7 +6,6 @@
 
 ^{:refer std.block.heal.parse/parse-delimiters :added "4.0"}
 (fact "gets all the delimiters in the file"
-  ^:hidden
 
   ;; Simple
   (parse/parse-delimiters
@@ -24,11 +23,11 @@
    "; \"\n\"(")
   => []
 
-  ;; In comment with 
+  ;; In comment with
   (parse/parse-delimiters
    "; \"\n\"\"(")
   => [{:char "(", :line 2, :col 3, :type :open, :style :paren}]
-  
+
 
   ;; Escaped character
   (parse/parse-delimiters
@@ -47,30 +46,29 @@
 
 ^{:refer std.block.heal.parse/pair-delimiters :added "4.0"}
 (fact "pairs the delimiters and annotates whether it's erroring"
-  ^:hidden
 
   (parse/pair-delimiters
    (parse/parse-delimiters "[]]]][]]"))
-  
+
   (parse/pair-delimiters
    (parse/parse-delimiters "[]"))
   => (contains-in
       [{:char "[", :line 1, :col 1, :type :open, :style :square, :depth 0, :correct? true, :pair-id 0}
        {:char "]", :line 1, :col 2, :type :close, :style :square, :depth 0, :correct? true, :pair-id 0}])
-  
-  
+
+
   (parse/pair-delimiters
    (parse/parse-delimiters "]"))
   => (contains-in
       [{:char "]", :line 1, :col 1, :type :close, :style :square, :depth -1, :correct? false}])
 
-  
+
   (parse/pair-delimiters
    (parse/parse-delimiters "]]"))
   => (contains-in
       [{:char "]", :line 1, :col 1, :type :close, :style :square, :depth -1, :correct? false}
        {:char "]", :line 1, :col 2, :type :close, :style :square, :depth -2, :correct? false}])
-  
+
   (parse/pair-delimiters
    (parse/parse-delimiters "[[[]"))
   => (contains-in
@@ -78,7 +76,7 @@
        {:char "[", :line 1, :col 2, :type :open, :style :square, :depth 1, :correct? false}
        {:char "[", :line 1, :col 3, :type :open, :style :square, :depth 2, :correct? true, :pair-id 0}
        {:char "]", :line 1, :col 4, :type :close, :style :square, :depth 2, :correct? true, :pair-id 0}])
-  
+
   (parse/pair-delimiters
    (parse/parse-delimiters "{)"))
   => (contains-in
@@ -102,8 +100,7 @@
 
 ^{:refer std.block.heal.parse/parse :added "4.0"}
 (fact "creates a parse function"
-  ^:hidden
-  
+
   (parse/parse "(()")
   => [{:char "(", :line 1, :col 1, :type :open, :style :paren, :depth 0, :index 0, :correct? false}
       {:correct? true, :index 1, :pair-id 0, :type :open, :style :paren, :line 1, :col 2, :depth 1, :char "("}
@@ -111,7 +108,6 @@
 
 ^{:refer std.block.heal.parse/print-delimiters :added "4.0"}
 (fact "prints all the parsed carets"
-  ^:hidden
 
   (env/with-out-str
     (parse/print-delimiters
@@ -123,14 +119,13 @@
 
 ^{:refer std.block.heal.parse/count-unescaped-quotes :added "4.0"}
 (fact "counting unescaped quotes in a line"
-  ^:hidden
-  
+
   (parse/count-unescaped-quotes "")
   => 0
-  
+
   (parse/count-unescaped-quotes "\"hello\"")
   => 2
-  
+
   (parse/count-unescaped-quotes "\"hello \\\"world\\\"\"")
   => 2
 
@@ -142,7 +137,7 @@
 
   (parse/count-unescaped-quotes "\\\"\\\"") ;; for chars
   => 0
-  
+
   (parse/count-unescaped-quotes "test\\")
   => 0
 
@@ -151,7 +146,6 @@
 
 ^{:refer std.block.heal.parse/parse-lines :added "4.0"}
 (fact "parse lines"
-  ^:hidden
 
   (parse/parse-lines
    (prose/join-lines
@@ -194,7 +188,7 @@
        :style :paren,
        :action :open}
       {:type :code, :line 3, :last-idx 10, :col 5, :char "n"}]
-  
+
   (def sample-code
     "
 (defn my-function
@@ -212,9 +206,9 @@
 
   (parse/parse-lines sample-code)
   => vector?
-  
 
-  
+
+
   (def another-sample
     "\"\"\"
 This is a triple-quoted string
@@ -224,14 +218,13 @@ that acts as a multi-line comment or docstring in other languages but not clojur
 ;; a comment
 \"single line string\"
 ")
-  
+
   (parse/parse-lines another-sample)
   => vector?)
 
 ^{:refer std.block.heal.parse/is-open-heavy :added "4.0"}
 (fact "checks if open delimiters dominate"
-  ^:hidden
-  
+
   (parse/is-open-heavy
    (parse/pair-delimiters
     (parse/parse-delimiters "(()")))
@@ -244,13 +237,12 @@ that acts as a multi-line comment or docstring in other languages but not clojur
 
 ^{:refer std.block.heal.parse/is-balanced :added "4.0"}
 (fact "checks if parens are balanced"
-  ^:hidden
-  
+
   (parse/is-balanced
    (parse/pair-delimiters
     (parse/parse-delimiters "{{])")))
   => true
-  
+
   (parse/is-balanced
    (parse/pair-delimiters
     (parse/parse-delimiters "((])")))
@@ -260,7 +252,7 @@ that acts as a multi-line comment or docstring in other languages but not clojur
    (parse/pair-delimiters
     (parse/parse-delimiters "(])")))
   => false
-  
+
   (parse/is-balanced
    (parse/pair-delimiters
     (parse/parse-delimiters "(()))")))
@@ -268,13 +260,12 @@ that acts as a multi-line comment or docstring in other languages but not clojur
 
 ^{:refer std.block.heal.parse/is-readable :added "4.0"}
 (fact "checks if parens are readable"
-  ^:hidden
-  
+
   (parse/is-readable
    (parse/pair-delimiters
     (parse/parse-delimiters "{{])")))
   => false
-  
+
   (parse/is-readable
    (parse/pair-delimiters
     (parse/parse-delimiters "((])")))
@@ -284,7 +275,7 @@ that acts as a multi-line comment or docstring in other languages but not clojur
    (parse/pair-delimiters
     (parse/parse-delimiters "(])")))
   => false
-  
+
   (parse/is-readable
    (parse/pair-delimiters
     (parse/parse-delimiters "(()))")))
@@ -292,12 +283,11 @@ that acts as a multi-line comment or docstring in other languages but not clojur
 
 ^{:refer std.block.heal.parse/is-close-heavy :added "4.0"}
 (fact "checks if parens are close heavy"
-  ^:hidden
 
   (parse/is-close-heavy
    (parse/parse "{{])"))
   => false
-  
+
   (parse/is-close-heavy
    (parse/pair-delimiters
     (parse/parse-delimiters "((])")))
@@ -307,7 +297,7 @@ that acts as a multi-line comment or docstring in other languages but not clojur
    (parse/pair-delimiters
     (parse/parse-delimiters "(])")))
   => true
-  
+
   (parse/is-close-heavy
    (parse/pair-delimiters
     (parse/parse-delimiters "(()))")))
@@ -315,7 +305,6 @@ that acts as a multi-line comment or docstring in other languages but not clojur
 
 ^{:refer std.block.heal.parse/make-delimiter-line-lu :added "4.0"}
 (fact "creates a line lu"
-  ^:hidden
 
   (parse/make-delimiter-line-lu
    (parse/pair-delimiters
@@ -328,7 +317,6 @@ that acts as a multi-line comment or docstring in other languages but not clojur
 
 ^{:refer std.block.heal.parse/make-delimiter-index-lu :added "4.0"}
 (fact "creates the index lookup"
-  ^:hidden
 
   (sort (keys (parse/make-delimiter-index-lu
                (parse/pair-delimiters
@@ -338,9 +326,9 @@ that acts as a multi-line comment or docstring in other languages but not clojur
 (comment
 
   (let [])
-  
-  
-    
+
+
+
   )
 
 

@@ -33,7 +33,7 @@
 
 (defn parse-js [js-code]
   (let [tmp-file (fs/create-tmpfile js-code)
-        proc (os/sh "node" "scripts/js_parser/parse.js" (str tmp-file) {:wait false})
+        proc (os/sh "node" "src-training/scripts/js_parser/parse.js" (str tmp-file) {:wait false})
         _    (os/sh-wait proc)
         res  (os/sh-output proc)]
     (if (zero? (:exit res))

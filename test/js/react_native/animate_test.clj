@@ -21,8 +21,7 @@
 
 ^{:refer js.react-native.animate/val :added "4.0" :unchecked true}
 (fact "shortcut for Animated.Value"
-  ^:hidden
-  
+
   ((:template @a/val) 0)
   => '(React.useCallback (new ReactNative.Animated.Value 0) [])
 
@@ -34,8 +33,8 @@
                      (fn [v]
                        (return {:text (+ "ind: " (j/toFixed v 2))})))]
       (return
-       (n/EnclosedCode 
-        {:label "js.react-native.animate/val"} 
+       (n/EnclosedCode
+        {:label "js.react-native.animate/val"}
         [:% n/Row
          [:% n/Button
           {:title "-1"
@@ -58,8 +57,7 @@
 
 ^{:refer js.react-native.animate/isAnimatedValue :added "4.0" :unchecked true}
 (comment "checks that value is animated"
-  ^:hidden
-  
+
   (!.js
    (a/isAnimatedValue (new a/Value 1)))
   => true
@@ -74,8 +72,7 @@
 
 ^{:refer js.react-native.animate/createTransition :added "4.0" :unchecked true}
 (fact "creates a transition from params"
-  ^:hidden
-  
+
   (defn.js CreateTransitionDemo
     []
     (let [ind         (a/val 0)
@@ -100,8 +97,8 @@
                    (fn [v]
                      (return {:text (j/toFixed v 3)})))]
       (return
-       (n/EnclosedCode 
-{:label "js.react-native.animate/createTransition"} 
+       (n/EnclosedCode
+{:label "js.react-native.animate/createTransition"}
 [:% n/Row
          [:% n/Button
           {:title "PUSH"
@@ -120,8 +117,7 @@
 
 ^{:refer js.react-native.animate/derive :added "4.0" :unchecked true}
 (fact "derives a value from one or more Animated.Value"
-  ^:hidden
-  
+
   (defn.js DeriveDemo
     []
     (let [ind       (a/val 1)
@@ -134,8 +130,8 @@
                                 (+ (+ " ind: "  (j/toFixed v 2))
                                    (+ ", ind2: " (j/toFixed v2 2)))})))]
       (return
-       (n/EnclosedCode 
-{:label "js.react-native.animate/val"} 
+       (n/EnclosedCode
+{:label "js.react-native.animate/val"}
 [:% n/Row
          [:% n/Button
           {:title "-1"
@@ -155,8 +151,7 @@
 
 ^{:refer js.react-native.animate/listenSingle :added "4.0" :unchecked true}
 (fact "listens to indicator and sets function"
-  ^:hidden
-  
+
   (defn.js ListenSingleDemo
     []
     (let [[active setActive]  (r/local 1)
@@ -174,8 +169,8 @@
                        (return
                         {:text (j/toFixed ind 2)}))))]
       (return
-       (n/EnclosedCode 
-{:label "js.react-native.animate/listenSingle"} 
+       (n/EnclosedCode
+{:label "js.react-native.animate/listenSingle"}
 [:% n/Row
          [:% n/Button
           {:title "PUSH"
@@ -189,8 +184,7 @@
 
 ^{:refer js.react-native.animate/useListenSingle :added "4.0" :unchecked true}
 (fact "listens to a single indicator to set ref"
-  ^:hidden
-  
+
   (defn.js UseListenSingleDemo
     []
     (let [[active setActive]  (r/local 1)
@@ -205,8 +199,8 @@
                        (return
                         {:text (j/toFixed ind 2)})))]
       (return
-       (n/EnclosedCode 
-{:label "js.react-native.animate/useListenSingle"} 
+       (n/EnclosedCode
+{:label "js.react-native.animate/useListenSingle"}
 [:% n/Row
          [:% n/Button
           {:title "PUSH"
@@ -220,8 +214,7 @@
 
 ^{:refer js.react-native.animate/listenArray :added "4.0" :unchecked true}
 (fact "listen to ref for array"
-  ^:hidden
-  
+
   (defn.js ListenArrayDemo
     []
     (let [[active setActive]  (r/local 1)
@@ -244,8 +237,8 @@
                             ", " (j/toFixed v2 2)
                             "]")}))))]
       (return
-       (n/EnclosedCode 
-{:label "js.react-native.animate/listenArray"} 
+       (n/EnclosedCode
+{:label "js.react-native.animate/listenArray"}
 [:% n/Row
          [:% n/Button
           {:title "PUSH"
@@ -260,8 +253,7 @@
 
 ^{:refer js.react-native.animate/useListenArray :added "4.0" :unchecked true}
 (fact "creates a ref as well as animated value listeners"
-  ^:hidden
-  
+
   (defn.js UseListenArrayDemo
     []
     (let [[active setActive]  (r/local 1)
@@ -285,8 +277,8 @@
                           ", " (j/toFixed v2 2)
                           "]")})))]
       (return
-       (n/EnclosedCode 
-{:label "js.react-native.animate/useListenArray"} 
+       (n/EnclosedCode
+{:label "js.react-native.animate/useListenArray"}
 [:% n/Row
          [:% n/Text
           {:style {:width 300}}
@@ -315,8 +307,7 @@
 
 ^{:refer js.react-native.animate/listenMap :added "4.0" :unchecked true}
 (fact "listen to ref for map"
-  ^:hidden
-  
+
   (defn.js ListenMapDemo
     []
     (let [[active setActive]  (r/local 1)
@@ -344,8 +335,8 @@
                             ", " (j/toFixed ind2 2)
                             "]")}))))]
       (return
-       (n/EnclosedCode 
-{:label "js.react-native.animate/listenMap"} 
+       (n/EnclosedCode
+{:label "js.react-native.animate/listenMap"}
 [:% n/Row
          [:% n/Text
           {:style {:width 300}}
@@ -374,8 +365,7 @@
 
 ^{:refer js.react-native.animate/listenTransformations :added "4.0" :unchecked true}
 (fact "listens to a transformation"
-  ^:hidden
-  
+
   (defn.js ListenTransformationsDemo
     []
     (let [[active setActive]  (r/local 1)
@@ -404,8 +394,8 @@
                               "]")}))
                        (fn:> {})))]
       (return
-       (n/EnclosedCode 
-{:label "js.react-native.animate/listenTransformations"} 
+       (n/EnclosedCode
+{:label "js.react-native.animate/listenTransformations"}
 [:% n/Row
          [:% n/Text
           {:style {:width 300}}
@@ -434,8 +424,7 @@
 
 ^{:refer js.react-native.animate/runWithCancel :added "4.0" :unchecked true}
 (fact "runs a function, cancelling the animation if too slow"
-  ^:hidden
-  
+
   (defn.js RunWithCancelDemo
     []
     (let [[active setActive]   (r/local true)
@@ -460,8 +449,8 @@
                       (fn [v]
                         (return {:text (j/toFixed v 3)})))]
       (return
-       (n/EnclosedCode 
-{:label "js.react-native.animate/runWithCancel"} 
+       (n/EnclosedCode
+{:label "js.react-native.animate/runWithCancel"}
 [:% n/Row
          [:% n/Button
           {:title "PUSH"
@@ -486,8 +475,7 @@
 
 ^{:refer js.react-native.animate/runWithChained :added "4.0" :unchecked true}
 (fact "runs with chained"
-  ^:hidden
-  
+
   (defn.js RunWithOneDemo
     []
     (let [[active setActive]   (r/local true)
@@ -502,7 +490,7 @@
                          active {:default {:type "timing"
                                            :duration 1000
                                            :easing a/linear}}))
-          
+
           boxRef   (a/useListenSingle
                     indicator
                     (fn [v]
@@ -515,8 +503,8 @@
                       (fn [v]
                         (return {:text (j/toFixed v 3)})))]
       (return
-       (n/EnclosedCode 
-{:label "js.react-native.animate/runWithOne"} 
+       (n/EnclosedCode
+{:label "js.react-native.animate/runWithOne"}
 [:% n/Row
          [:% n/Button
           {:title "PUSH"
@@ -542,12 +530,11 @@
                           :editable false
                           :style {:padding 5
                                   :width 100
-                                  :textAlign "right"}}]] 
+                                  :textAlign "right"}}]]
 [:% n/Text (n/format-entry #{progressView})])))))
 
 ^{:refer js.react-native.animate/runWith :added "4.0" :unchecked true}
   (fact "generic runWith function for animations"
-  ^:hidden
 
   (defn.js RunWithAllDemo
     []
@@ -563,7 +550,7 @@
                         active {:default {:type "timing"
                                           :duration 1000
                                           :easing a/linear}}))
-          
+
           boxRef   (a/useListenSingle
                     indicator
                     (fn [v]
@@ -576,8 +563,8 @@
                       (fn [v]
                         (return {:text (j/toFixed v 3)})))]
       (return
-       (n/EnclosedCode 
-{:label "js.react-native.animate/runWithAll"} 
+       (n/EnclosedCode
+{:label "js.react-native.animate/runWithAll"}
 [:% n/Row
          [:% n/Button
           {:title "PUSH"
@@ -603,7 +590,7 @@
                           :editable false
                           :style {:padding 5
                                   :width 100
-                                  :textAlign "right"}}]] 
+                                  :textAlign "right"}}]]
 [:% n/Text (n/format-entry #{progressView})])))))
 
 ^{:refer js.react-native.animate/useProgess :added "4.0" :unchecked true}
@@ -611,8 +598,7 @@
 
 ^{:refer js.react-native.animate/useBinaryIndicator :added "4.0" :unchecked true}
 (fact "creates a binary indicator from state"
-  ^:hidden
-  
+
   (defn.js UseBinaryIndicatorDemo
     []
     (let [[active setActive]   (r/local true)
@@ -634,8 +620,8 @@
                        {:transform
                         [{:scaleX (* 100 (j/max 0.1 v))}]}})))]
       (return
-       (n/EnclosedCode 
-{:label "js.react-native.animate/useBinaryIndicator"} 
+       (n/EnclosedCode
+{:label "js.react-native.animate/useBinaryIndicator"}
 [:% n/View
          [:% n/Row
           [:% n/Button
@@ -643,7 +629,7 @@
                        "ON"
                        "OFF")
             :onPress (fn [] (setActive (not active)))}]
-          
+
           [:% n/View
            {:style {:alignItems "center"
                     :justifyContent "center"
@@ -660,8 +646,7 @@
 
 ^{:refer js.react-native.animate/usePressIndicator :added "4.0" :unchecked true}
 (fact "accentuates the press"
-  ^:hidden
-  
+
   (defn.js UsePressIndicatorDemo
     []
     (let [[active setActive]   (r/local false)
@@ -686,8 +671,8 @@
                        {:transform
                         [{:scaleX (* 100 (j/max 0.1 v))}]}})))]
       (return
-       (n/EnclosedCode 
-{:label "js.react-native.animate/usePressIndicator"} 
+       (n/EnclosedCode
+{:label "js.react-native.animate/usePressIndicator"}
 [:% n/View
          [:% n/Row
           [:% n/Pressable
@@ -698,7 +683,7 @@
                      :backgroundColor (:? active ["green" "black"])
                      :color "white"}}
             "PRESS"]]
-          
+
           [:% n/View
            {:style {:alignItems "center"
                     :justifyContent "center"
@@ -711,13 +696,12 @@
                            :editable false
                            :style {:padding 5
                                    :width 100
-                                   :textAlign "right"}}]]] 
+                                   :textAlign "right"}}]]]
 [:% n/Text (xt/x:json-encode progress)])))))
 
 ^{:refer js.react-native.animate/useLinearIndicator :added "4.0" :unchecked true}
 (fact "uses the linear indicator"
-  ^:hidden
-  
+
   (defn.js UseLinearIndicatorDemo
     []
     (let [[index setIndex]  (r/local 1)
@@ -743,8 +727,8 @@
                    (fn [v]
                      (return {:text (j/toFixed v 3)})))]
       (return
-       (n/EnclosedCode 
-{:label "js.react-native.animate/useLinearIndicator"} 
+       (n/EnclosedCode
+{:label "js.react-native.animate/useLinearIndicator"}
 [:% n/Row
          [:% n/Text
           [:% n/Button
@@ -776,13 +760,12 @@
                           :editable false
                           :style {:padding 5
                                   :width 100
-                                  :textAlign "right"}}]] 
+                                  :textAlign "right"}}]]
 [:% n/Text (xt/x:json-encode progress)])))))
 
 ^{:refer js.react-native.animate/useIndexIndicator :added "4.0" :unchecked true}
 (fact "creates a index indicator from state"
-  ^:hidden
-  
+
   (defn.js UseIndexIndicatorDemo
     []
     (let [[index setIndex]  (r/local 1)
@@ -804,8 +787,8 @@
                    (fn [v]
                      (return {:text (j/toFixed v 3)})))]
       (return
-       (n/EnclosedCode 
-{:label "js.react-native.animate/useIndexIndicator"} 
+       (n/EnclosedCode
+{:label "js.react-native.animate/useIndexIndicator"}
 [:% n/Row
          [:% n/Text
           [:% n/Button
@@ -841,8 +824,7 @@
 
 ^{:refer js.react-native.animate/useCircularIndicator :added "4.0" :unchecked true}
 (fact "constructs a circular indicator"
-  ^:hidden
-  
+
   (defn.js UseCircularIndicatorDemo
     []
     (let [[index setIndex]  (r/local 10)
@@ -867,8 +849,8 @@
                    (fn [v]
                      (return {:text (j/toFixed v 3)})))]
       (return
-       (n/EnclosedCode 
-{:label "js.react-native.animate/useCircularIndicator"} 
+       (n/EnclosedCode
+{:label "js.react-native.animate/useCircularIndicator"}
 [:% n/Row
          [:% n/Text
           [:% n/Button
@@ -923,13 +905,12 @@
                           :editable false
                           :style {:padding 5
                                   :width 100
-                                  :textAlign "right"}}]] 
+                                  :textAlign "right"}}]]
 [:% n/Text (xt/x:json-encode progress)])))))
 
 ^{:refer js.react-native.animate/usePosition :added "4.0" :unchecked true}
 (fact "constructs position indicator for slider and pan"
-  ^:hidden
-  
+
   (defn.js UsePositionDemo
     []
     (var [value setValue]  (r/local (fn:> 5)))
@@ -953,8 +934,8 @@
                   (fn [v]
                     (return {:text (j/toFixed v 3)}))))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.animate/usePosition"} 
+     (n/EnclosedCode
+{:label "js.react-native.animate/usePosition"}
 [:% n/Row
        [:% n/Button
         {:title "+1"
@@ -979,13 +960,12 @@
                         :editable false
                         :style {:padding 5
                                 :width 100
-                                :textAlign "right"}}]] 
+                                :textAlign "right"}}]]
 [:% n/Text (xt/x:json-encode #{value position})]))))
 
 ^{:refer js.react-native.animate/useRange :added "4.0" :unchecked true}
 (fact "constructs lower and upper bound indicator for range"
-  ^:hidden
-  
+
   (defn.js UseRangeDemo
     []
     (var [upper setUpper]  (r/local (fn:> 7)))
@@ -1024,8 +1004,8 @@
                   (fn [v]
                     (return {:text (j/toFixed v 3)}))))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.animate/useRange"} 
+     (n/EnclosedCode
+{:label "js.react-native.animate/useRange"}
 [:% n/Row
        [:% n/Button
         {:title "-l"
@@ -1069,13 +1049,12 @@
                         :editable false
                         :style {:padding 5
                                 :width 100
-                                :textAlign "right"}}]] 
+                                :textAlign "right"}}]]
 [:% n/Text (xt/x:json-encode #{upper lower})]))))
 
 ^{:refer js.react-native.animate/useShowing :added "4.0" :unchecked true}
 (fact "constructs a function that removes"
-  ^:hidden
-  
+
   (defn.js UseShowingDemo
     []
     (var isMounted  (r/useIsMounted))
@@ -1098,8 +1077,8 @@
                   (fn [v]
                     (return {:text (j/toFixed v 3)}))))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.animate/useShowing"} 
+     (n/EnclosedCode
+{:label "js.react-native.animate/useShowing"}
 [:% n/Row
        [:% n/Button
         {:title "Toggle"
@@ -1108,7 +1087,7 @@
         {:style {:alignItems "center"
                  :justifyContent "center"
                  :flex 1}}
-        (:? showing 
+        (:? showing
             [[:% n/View {:ref boxRef
                          :key "showing"
                          :style [{:width 1
@@ -1118,7 +1097,7 @@
                         :editable false
                         :style {:padding 5
                                 :width 100
-                                :textAlign "right"}}]] 
+                                :textAlign "right"}}]]
 [:% n/Text (xt/x:json-encode #{visible showing})])))
 
   )

@@ -14,7 +14,7 @@
   (b/book {:lang :lua
            :meta (meta/book-meta {:module-export  (fn [{:keys [as]} opts]
                                                     (template/$ (return ~as)))
-                                  :module-import  (fn [name {:keys [as]} opts]  
+                                  :module-import  (fn [name {:keys [as]} opts]
                                                     (template/$ (var ~as := (require ~(str name)))))
                                   :has-ptr        (fn [ptr]
                                                     (list 'not= (ut/sym-full ptr) nil))
@@ -67,7 +67,6 @@
 
 ^{:refer std.lang.base.book/get-base-entry :added "4.0"}
 (fact "gets an entry in the book"
-  ^:hidden
 
   (b/get-base-entry +sample+ 'L.core 'identity :fragment)
   => +macro-entry+
@@ -77,38 +76,33 @@
 
 ^{:refer std.lang.base.book/get-code-entry :added "4.0"}
 (fact "gets a code entry in the book"
-  ^:hidden
 
   (b/get-code-entry +sample+ 'L.core/identity-fn)
   => +fn-entry+)
 
 ^{:refer std.lang.base.book/get-fragment-entry :added "4.0"}
 (fact "gets a fragment entry in the book"
-  ^:hidden
-  
+
   (b/get-fragment-entry +sample+ 'L.core/identity)
   => +macro-entry+)
 
 ^{:refer std.lang.base.book/get-entry :added "4.0"}
 (fact "gets either the module or code entry"
-  ^:hidden
-  
+
   (b/get-entry +sample+ 'L.core)
   => module/book-module?
-  
+
   (b/get-entry +sample+ 'L.core/identity-fn)
   => entry/book-entry?)
 
 ^{:refer std.lang.base.book/get-module :added "4.0"}
 (fact "gets the module"
-  ^:hidden
-  
+
   (b/get-module +sample+ 'L.core)
   => module/book-module?)
 
 ^{:refer std.lang.base.book/get-code-deps :added "4.0"}
 (fact "gets `:deps` or if a `:static/template` calculate dependencies"
-  ^:hidden
   (-> (b/set-entry +sample+
                    (entry/book-entry {:lang :lua
                                       :id 'inc-fn
@@ -125,8 +119,7 @@
 
 ^{:refer std.lang.base.book/get-deps :added "4.0"}
 (fact "get dependencies for a given id"
-  ^:hidden
-  
+
   (b/get-deps +sample+ 'L.core)
   => #{}
 
@@ -135,8 +128,7 @@
 
 ^{:refer std.lang.base.book/get-deps-native :added "4.0"}
 (fact "gets the imports for a book"
-  ^:hidden
-  
+
   (b/get-deps-native
    (-> +book+
        (b/set-module
@@ -164,8 +156,7 @@
 
 ^{:refer std.lang.base.book/list-entries :added "4.0"}
 (fact "lists entries for a given symbol"
-  ^:hidden
-  
+
   (b/list-entries +sample+ :module)
   => '(L.core)
 
@@ -174,22 +165,19 @@
 
 ^{:refer std.lang.base.book/book-string :added "4.0"}
 (fact "shows the book string"
-  ^:hidden
-  
+
   (b/book-string +sample+)
   => "#book [:lua] {L.core {:code 1, :fragment 1}}")
 
 ^{:refer std.lang.base.book/book? :added "4.0"}
 (fact "checks that object is a book"
-  ^:hidden
-  
+
   (b/book? +sample+)
   => true)
 
 ^{:refer std.lang.base.book/book :added "4.0"}
 (fact "creates a book"
-  ^:hidden
-  
+
   (b/book {:lang :redis
            :meta    (:meta +book+)
            :grammar (:grammar +book+)
@@ -199,8 +187,7 @@
 
 ^{:refer std.lang.base.book/book-merge :added "4.0"}
 (fact "merges a book with it's parent"
-  ^:hidden
-  
+
   (b/book-merge (b/book {:lang    :redis
                          :meta    (:meta +book+)
                          :grammar (:grammar +book+)
@@ -211,7 +198,6 @@
 
 ^{:refer std.lang.base.book/book-from :added "4.0"}
 (fact "returns the merged book given snapshot"
-  ^:hidden
   (let [snapshot {:lua  {:book +sample+}
                   :redis {:book (b/book {:lang :redis
                                         :meta    (:meta +book+)
@@ -230,8 +216,7 @@
                                    :merged  #{}})
                           +sample+))]}
 (fact "checks if the lang is compatible with the book"
-  ^:hidden
-  
+
   (b/check-compatible-lang +redis+ :lua)
   => true
 
@@ -243,8 +228,7 @@
 
 ^{:refer std.lang.base.book/assert-compatible-lang :added "4.0"}
 (fact "asserts that the lang is compatible"
-  ^:hidden
-  
+
   (b/assert-compatible-lang +redis+ :lua)
   => true
 
@@ -253,8 +237,7 @@
 
 ^{:refer std.lang.base.book/set-module :added "4.0"}
 (fact "adds an addional module to the book"
-  ^:hidden
-  
+
   (-> (b/set-module +redis+
                     (module/book-module
                      {:id      'L.util
@@ -262,7 +245,7 @@
                       :link    '{u L.core}}))
       second)
   => b/book?
-  
+
   (b/set-module +redis+
                 (module/book-module
                  {:id      'js.core
@@ -271,7 +254,6 @@
 
 ^{:refer std.lang.base.book/put-module :added "4.0"}
 (fact "adds or updates a module"
-  ^:hidden
 
   (-> (b/put-module +redis+
                     (module/book-module
@@ -286,7 +268,6 @@
 
 ^{:refer std.lang.base.book/delete-module :added "4.0"}
 (fact "deletes a module given a book"
-  ^:hidden
 
   (-> +redis+
       (b/set-module  (module/book-module
@@ -301,8 +282,7 @@
 
 ^{:refer std.lang.base.book/delete-modules :added "4.0"}
 (fact "deletes all modules"
-  ^:hidden
-  
+
   (-> +redis+
       (b/set-module  (module/book-module
                      {:id      'L.util
@@ -316,7 +296,6 @@
 
 ^{:refer std.lang.base.book/has-module? :added "4.0"}
 (fact "checks that a books has a given module"
-  ^:hidden
 
   (b/has-module? +redis+ 'L.core)
   => true
@@ -326,18 +305,16 @@
 
 ^{:refer std.lang.base.book/assert-module :added "4.0"}
 (fact "asserts that module exists"
-  ^:hidden
-  
+
   (b/assert-module +redis+ 'L.core)
   => true
-  
+
   (b/assert-module +redis+ 'L.other)
   => (throws))
 
 ^{:refer std.lang.base.book/set-entry :added "4.0"}
 (fact "sets entry in the book"
-  ^:hidden
-  
+
   (-> (b/set-entry +redis+
                    (entry/book-entry {:lang :lua
                                       :id 'inc-fn
@@ -354,8 +331,7 @@
 
 ^{:refer std.lang.base.book/put-entry :added "4.0"}
 (fact "updates entry value in the book"
-  ^:hidden
-  
+
   (-> (b/put-entry +redis+
                    (entry/book-entry {:lang :lua
                                       :id 'identity-fn
@@ -378,28 +354,25 @@
 
 ^{:refer std.lang.base.book/has-entry? :added "4.0"}
 (fact "checks that book has an entry"
-  ^:hidden
-  
+
   (b/has-entry? +redis+ 'L.core :fragment 'identity)
   => true)
 
 ^{:refer std.lang.base.book/assert-entry :added "4.0"}
 (fact "asserts that module exists"
-  ^:hidden
-  
+
   (b/assert-entry +redis+ 'L.core :fragment 'identity)
   => true
 
   (b/assert-entry +redis+ 'ERROR :fragment 'identity)
   => (throws)
-  
+
   (b/assert-entry +redis+ 'L.core :fragment 'ERROR)
   => (throws))
 
 ^{:refer std.lang.base.book/delete-entry :added "4.0"}
 (fact "deletes an entry"
-  ^:hidden
-  
+
   (-> (b/delete-entry +redis+ 'L.core :fragment 'identity)
       second
       b/book-string)
@@ -407,15 +380,13 @@
 
 ^{:refer std.lang.base.book/module-create-filename :added "4.0"}
 (fact "creates a filename for module"
-  ^:hidden
-  
+
   (b/module-create-filename +redis+ 'redis.core)
   => "core.lua")
 
 ^{:refer std.lang.base.book/module-create-check :added "4.0"}
 (fact "checks that bundles are available"
-  ^:hidden
-  
+
   (b/module-create-check +redis+ 'L.redis '{u L.core})
   => true
 
@@ -424,14 +395,12 @@
 
 ^{:refer std.lang.base.book/module-create-requires :added "4.0"}
 (fact "creates a map for the requires"
-  ^:hidden
   (b/module-create-requires '[[L.core :as u]])
   => '{L.core {:as u, :id L.core}})
 
 ^{:refer std.lang.base.book/module-create :added "4.0"}
 (fact "creates a module given book and options"
-  ^:hidden
-  
+
   (b/module-create +redis+
                    'L.redis
                    '{:require [[L.core :as u]]})
@@ -474,8 +443,7 @@
 
   ^{:refer std.lang.base.book/module-create-bundled :added "4.0"}
   (fact "creates bundled packages given input modules"
-    ^:hidden
-    
+
     (b/module-create-bundled
      +redis+
      (b/module-create-requires '[[L.core :as u]]))

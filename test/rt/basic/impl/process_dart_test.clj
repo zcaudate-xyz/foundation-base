@@ -6,7 +6,6 @@
 
 ^{:refer rt.basic.impl.process-dart/normalize-dart-source :added "4.1"}
 (fact "preserves multiline call continuations when normalizing dart"
-  ^:hidden
 
   (normalize-dart-source "void main() {\n  print(\n    foo(1)\n  )\n}")
   => "void main() {\n  print(\n    foo(1)\n  );\n}"
@@ -20,6 +19,9 @@
   (normalize-dart-source "make_listener_entry(listener_id, listener_type, callback, meta, pred) {\n  return <dynamic, dynamic>{\n    \"callback\":callback,\n    \"pred\":pred,\n    \"meta\":xtd.obj_assign(\n        <dynamic, dynamic>{\"listener/id\":listener_id,\"listener/type\":listener_type},\n        meta\n      )\n  };\n}")
   => "make_listener_entry(listener_id, listener_type, callback, meta, pred) {\n  return <dynamic, dynamic>{\n    \"callback\":callback,\n    \"pred\":pred,\n    \"meta\":xtd.obj_assign(\n        <dynamic, dynamic>{\"listener/id\":listener_id,\"listener/type\":listener_type},\n        meta\n      )\n  };\n}")
 
+  (normalize-dart-source "xt.lang.common_data.arr_sort(xt.lang.event_log.list_listeners(xt.lang.event_log.new_log(<dynamic, dynamic>{\n  \"listeners\":<dynamic, dynamic>{\n    \"test1\":(id, data, t) {\n      \n    },\n    \"test2\":(id, data, t) {\n      \n    }\n  }\n})),xt.lang.common_lib.identity,(x, y) {\n  return (x).toString().compareTo((y).toString()) < 0;\n})")
+  => "xt.lang.common_data.arr_sort(xt.lang.event_log.list_listeners(xt.lang.event_log.new_log(<dynamic, dynamic>{\n  \"listeners\":<dynamic, dynamic>{\n    \"test1\":(id, data, t) {\n      \n    },\n    \"test2\":(id, data, t) {\n      \n    }\n  }\n})),xt.lang.common_lib.identity,(x, y) {\n  return (x).toString().compareTo((y).toString()) < 0;\n});"
+
 ^{:refer rt.basic.impl.process-dart/ensure-dart-imports :added "4.1"}
 (fact "hoists required Dart imports for standalone scripts"
   (ensure-dart-imports "void main() {\n  print(math.max(1, 2));\n  print(jsonEncode({\"a\": 1}));\n}")
@@ -28,7 +30,6 @@
 
 ^{:refer rt.basic.impl.process-dart/sh-exec-dart :added "4.1"}
 (fact "executes dart twostep pipeline"
-  ^:hidden
   (with-redefs [os/sh (fn [_] {:pid 1})
                 os/sh-wait (fn [_] nil)
                 os/sh-output (fn [_] {:exit 0 :out "42\n" :err ""})]

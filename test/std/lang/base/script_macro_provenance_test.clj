@@ -38,7 +38,6 @@
                           (:std.lang/provenance-stack data))}))))
 
 (fact "defn.xt failures report provenance for abstract calls"
-  ^:hidden
 
   (let [[xlib reserved] (xtalk-top-level-context)
         bad-call (with-meta '(x:type-native obj)
@@ -75,7 +74,6 @@
         [:emit/entry :std.lang.base.impl-entry/emit-entry-raw]]])
 
 (fact "defn.xt failures keep entry provenance when nested forms explode"
-  ^:hidden
 
   (let [[xlib reserved] (xtalk-top-level-context)
         bad-call  (with-meta '(x:arr-push out (f e))

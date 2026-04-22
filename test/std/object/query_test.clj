@@ -101,7 +101,7 @@
 (fact "creates the form for `element` for definvoke"
 
   (invoke-intern-element :element '-foo- {:class String
-                                          :selector ["charAt"]} nil) ^:hidden
+                                          :selector ["charAt"]} nil)
   ;;   '(clojure.core/let [elem ((clojure.core/get std.object.query/+query-functions+
   ;;                                                (clojure.core/or nil :class))
   ;;                              java.lang.String

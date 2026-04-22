@@ -38,9 +38,9 @@
   [(-> (default-basic-client 4567 {:host "127.0.0.1"})
        (clojure.string/includes? "use IO::Socket::INET;"))
    (-> (default-basic-client 4567 {:host "127.0.0.1"})
-       (clojure.string/includes? "sub client_basic"))
+       (clojure.string/includes? "sub debug_client_basic"))
    (-> (default-basic-client 4567 {:host "127.0.0.1"})
-       (clojure.string/includes? "client_basic(\"127.0.0.1\", 4567"))
+       (clojure.string/includes? "debug_client_basic(\"127.0.0.1\", 4567"))
    (-> (default-basic-client 4567 {:host "127.0.0.1"})
        (clojure.string/includes? "HOST_PLACEHOLDER"))]
   => [true true true false])

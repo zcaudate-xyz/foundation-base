@@ -5,8 +5,7 @@
 ^{:refer code.test/any.checker :added "3.0"
   :adopt true}
 (fact "Test Checker"
-  ^:hidden
-  
+
   (with-new-context {}
     (fact "Test Checker"
       {:a 1}
@@ -15,8 +14,7 @@
 
   (with-new-context {:print #{}}
     (fact "contains fail"
-      ^:hidden
-      
+
       {:a 1}
       => (contains {:a 2})))
   => false)
@@ -24,12 +22,10 @@
 ^{:refer code.test/any.simple :added "3.0"
   :adopt true}
 (fact "Test simple"
-  ^:hidden
-  
+
   (with-new-context {}
     (fact "simple correct"
-      ^:hidden
-      
+
       {:a 1}
       => {:a 1}))
   => true
@@ -43,18 +39,17 @@
 ^{:refer code.test/any.fn :added "3.0"
   :adopt true}
 (fact "Test Fn"
-  ^:hidden
-  
+
   (with-new-context {}
     (fact "Test Fn"
-      
+
       1
       => odd?))
   => true
 
   (with-new-context {}
     (fact "function forms should work"
-      
+
       2
       => (fn [x]
            (= 2 x))))
@@ -66,10 +61,10 @@
 
   (with-new-context {:print #{}}
     (fact "nested check should fail"
-      
+
       (let [a 1]
         a => 2)
-      
+
       (do
         1 => 2)))
   => false

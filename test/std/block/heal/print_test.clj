@@ -6,7 +6,6 @@
 
 ^{:refer std.block.heal.print/print-rainbow :added "4.0"}
 (fact "prints out the "
-  ^:hidden
 
   (env/with-out-str
     (print/print-rainbow

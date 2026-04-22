@@ -20,16 +20,15 @@
   :adopt true
   :added "0.1"}
 (fact  "creates a slim radiobox"
-  ^:hidden
-  
+
   (defn.js RadioBoxSimpleDemo
     []
     (var [first setFirst]   (r/local true))
     (var [highlighted setHighlighted] (r/local false))
     (var [disabled setDisabled] (r/local false))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-radio-box/RadioBoxSimple"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-radio-box/RadioBoxSimple"}
 [:% n/Row
        {:style {:alignItems "center"}}
        [:% n/Text
@@ -55,7 +54,7 @@
          :addons [(physical-addon/tagAll
                    {:style {:paddingHorizontal 20
                             :height 80
-                            :flex 1}})]}]] 
+                            :flex 1}})]}]]
 [:% n/Row
        [:% n/Button
         {:title "H"
@@ -70,8 +69,7 @@
 
 ^{:refer js.react-native.ui-radio-box/RadioBox :added "0.1"}
 (fact  "creates a radio box"
-  ^:hidden
-  
+
   (defn.js RadioBoxDemo
     []
     (var [first setFirst]   (r/local true))
@@ -79,8 +77,8 @@
     (var [highlighted setHighlighted] (r/local true))
     (var [errored setErrored] (r/local true))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-radio-box/RadioBox"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-radio-box/RadioBox"}
 [:% n/Row
        {:style {:alignItems "center"
                 #_#_:margin 3}}
@@ -96,7 +94,7 @@
          :setSelected setFirst
          :style {:flex 1}
          :styleContainer {:flex 1}}]
-       
+
        [:% n/Padding {:style {:width 10}}]
        [:% ui-radio-box/RadioBox
         {:theme {:fgActive "black"
@@ -109,14 +107,14 @@
          :outlined true
          :selected second
          :setSelected setSecond}]
-       
-       
+
+
        [:% n/Padding {:style {:width 10}}]
        [:% ui-radio-box/RadioBox
         {:disabled true
          :selected true}]
        [:% n/Padding {:style {:width 10}}]
-       
+
        [:% ui-radio-box/RadioBox
         {:highlighted highlighted
          :setSelected setHighlighted
@@ -127,8 +125,8 @@
          :setSelected setErrored
          :selected errored
          :theme {:fgHighlighted "white"
-                 :bgHighlighted "red"}}]] 
-[:% n/Padding {:style {:height 10}}] 
+                 :bgHighlighted "red"}}]]
+[:% n/Padding {:style {:height 10}}]
 [:% n/Row
        {:style {:alignItems "center"
                 #_#_:margin 3}}
@@ -163,6 +161,6 @@
          :innerStyle {:borderRadius 0}
          :sizeInner 12}]])))
 
-  
-  
+
+
   )

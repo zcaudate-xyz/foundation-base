@@ -22,28 +22,27 @@
   :adopt true
   :added "0.1"}
 (fact  "creates a slim switch box"
-  ^:hidden
 
  (defn.js toTop
     [v]
    (return
     [{:translateY (math/mix 13 -20 v)}
      {:translateX (math/mix 10 -5 v)}]))
-  
+
   (defn.js toRight
     [v]
     (return
      [{:translateX (math/mix 10 -5 v)}
       {:translateY (math/mix 13 -20 v)}]))
-  
+
   (defn.js LoginFormDemo
     []
     (var [login setLogin] (r/local "oeu"))
     (var [password  setPassword]  (r/local "" #_"World"))
     (var refLink (r/ref))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-core/LoginForm"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-core/LoginForm"}
 [:% n/Row
        [:% ui-input/Input
         {:refLink refLink
@@ -56,7 +55,7 @@
                  :borderRadius 3
                  :paddingLeft 8
                  :fontSize 20}
-         
+
          :styleContainer {:flex 1
                           :maxWidth 400
                           :height 50
@@ -90,7 +89,7 @@
                           focusing}]
                      (var active (j/min (- 1 emptying)
                                         focusing))
-                     (return {:style {:opacity active}}))}]}]] 
+                     (return {:style {:opacity active}}))}]}]]
 [:% n/Caption
        {:text (n/format-entry #{login})
         :style {:marginTop 10}}]))))
@@ -100,21 +99,20 @@
   :adopt true
   :added "0.1"}
 (fact  "creates a slim switch box"
-  ^:hidden
 
   (defn.js toTop
     [v]
    (return
     [{:translateY (math/mix 13 -20 v)}
      {:translateX (math/mix 10 -5 v)}]))
-  
+
   (defn.js LoginFormTopDemo
     []
     (var [login  setLogin]  (r/local "" #_"World"))
     (var refLink (r/ref))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-core/LoginFormTop"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-core/LoginFormTop"}
 [:% n/Row
        {:style {:paddingTop 20}}
        [:% ui-input/Input
@@ -152,7 +150,7 @@
                                                        ["#999" "#555e" ]
                                                        (- 1 emptying)))
                                        :transform [{:translateY (math/mix 13 -20 (- 1 emptying))}
-                                                   {:translateX (math/mix 10 -5 (- 1 emptying))}]}}))}]}]] 
+                                                   {:translateX (math/mix 10 -5 (- 1 emptying))}]}}))}]}]]
 [:% n/Caption
        {:text (n/format-entry #{login})
         :style {:marginTop 10}}]))))
@@ -161,15 +159,14 @@
   :adopt true
   :added "0.1"}
 (fact  "creates a slim switch box"
-  ^:hidden
 
   (defn.js PasswordFormDemo
     []
     (var [password setPassword] (r/local "oeu"))
     (var refLink (r/ref))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-core/PasswordForm"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-core/PasswordForm"}
 [:% n/Row
        [:% ui-input/Input
         {:refLink refLink
@@ -216,13 +213,13 @@
                           focusing}]
                      (var active (j/min (- 1 emptying)
                                         focusing))
-                     (return {:style {:opacity active}}))}]}]] 
+                     (return {:style {:opacity active}}))}]}]]
 [:% n/Caption
        {:text (n/format-entry #{password})
         :style {:marginTop 10}}])))
 
-  
-  
+
+
   )
 
 

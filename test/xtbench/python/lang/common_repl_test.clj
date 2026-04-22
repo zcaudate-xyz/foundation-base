@@ -10,13 +10,16 @@
  :python
  {:runtime :basic, :require [[xt.lang.common-repl :as k]]})
 
+(defn decode-output [x] (if (string? x) (json/read x) x))
+
 (fact:global {:setup [(l/rt:restart)], :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.common-repl/return-encode, :added "4.0"}
 (fact
  "returns the encoded "
  ^{:hidden true}
- (json/read (!.py (k/return-encode {:data [1 2 3]} "<id>" "<key>")))
+ (decode-output
+  (!.py (k/return-encode {:data [1 2 3]} "<id>" "<key>")))
  =>
  {"key" "<key>", "id" "<id>", "value" {"data" [1 2 3]}, "type" "data"})
 
@@ -24,7 +27,7 @@
 (fact
  "returns a wrapped call"
  ^{:hidden true}
- (json/read (!.py (k/return-wrap (fn:> 1))))
+ (decode-output (!.py (k/return-wrap (fn:> 1))))
  =>
  {"key" nil, "id" nil, "value" 1, "type" "data"})
 
@@ -32,7 +35,7 @@
 (fact
  "evaluates a returns a string"
  ^{:hidden true}
- (json/read (!.py (k/return-eval "globals()[\"OUT\"] = 1")))
+ (decode-output (!.py (k/return-eval "globals()[\"OUT\"] = 1")))
  =>
  {"key" nil, "id" nil, "value" 1, "type" "data"})
 

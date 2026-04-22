@@ -9,16 +9,14 @@
 
 ^{:refer std.block.layout.common/join-blocks :added "4.0"}
 (fact "joins blocks together with a spacing array"
-  ^:hidden
-  
+
   (common/join-blocks [nil nil]
                       [1 2 3 4])
   => '(1 nil nil 2 nil nil 3 nil nil 4))
 
 ^{:refer std.block.layout.common/join-block-arrays :added "4.0"}
 (fact "joins block-arrays together with a spacing array"
-  ^:hidden
-  
+
   (common/join-block-arrays
    [nil nil]
    [[1 2] [3 4 5] [6 7]])
@@ -26,7 +24,6 @@
 
 ^{:refer std.block.layout.common/format-multiline-string :added "4.0"}
 (fact "makes a multiline string into a form"
-  ^:hidden
 
   (common/format-multiline-string
    "hoeuoeu\noeuoeuoeu\noeuoeuoe\noeoeuoe")
@@ -38,8 +35,7 @@
 
 ^{:refer std.block.layout.common/layout-single-row :added "4.0"}
 (fact "layouts a row"
-  ^:hidden
-  
+
   (construct/rep
    (common/layout-single-row
     '(1 2 3 4 5)
@@ -48,7 +44,6 @@
 
 ^{:refer std.block.layout.common/layout-one-column :added "4.0"}
 (fact "layout for one column"
-  ^:hidden
 
   (construct/rep
    (common/layout-one-column
@@ -58,15 +53,14 @@
 
 ^{:refer std.block.layout.common/layout-two-column :added "4.0"}
 (fact "layout for 2 column bindings and :key val combinations"
-  ^:hidden
-  
+
   (construct/rep
    (common/layout-two-column
     '((:key1 val) (:key2-oeueu-oeue val2))
     {:col-align false}
     {:indent 10}))
   => '[[:key1 ␣ val] [:key2-oeueu-oeue ␣ val2]]
-  
+
   (construct/rep
    (common/layout-two-column
     '((:key1 val) (:key2-oeueu-oeue val2))
@@ -84,7 +78,6 @@
 
 ^{:refer std.block.layout.common/layout-n-column-space :added "4.0"}
 (fact "layouts a set of columns with single space"
-  ^:hidden
 
   (construct/rep
    (common/layout-n-column-space [[1 2 3]
@@ -95,7 +88,6 @@
 
 ^{:refer std.block.layout.common/layout-n-column-pad :added "4.0"}
 (fact "layouts a set of columns with single space"
-  ^:hidden
 
   (construct/rep
    (common/layout-n-column-pad [[100 2 3]
@@ -119,8 +111,7 @@
 
 ^{:refer std.block.layout.common/layout-n-column-align :added "4.0"}
 (fact "layout code based on n columns"
-  ^:hidden
-  
+
   (construct/rep
    (common/layout-n-column-align
     [[100 2 3]
@@ -142,7 +133,7 @@
   => '[[100 ␣ 2 ␣ ␣ ␣ 3]
        [3 ␣ ␣ ␣ 400]
        [6 ␣ ␣ ␣ 7 ␣ ␣ ␣ 600 ␣ 7 ␣ ␣ 8]]
-  
+
   (construct/rep
    (common/layout-n-column-align
     [[100 2 3]
@@ -156,8 +147,7 @@
 
 ^{:refer std.block.layout.common/layout-n-column :added "4.0"}
 (fact "layout for arbitrary column formatting"
-  ^:hidden
-  
+
   (construct/rep
    (common/layout-n-column
     [[100 2 3]
@@ -169,30 +159,28 @@
 
 ^{:refer std.block.layout.common/layout-pair-blocks :added "4.0"}
 (fact "layout-pair-blocks"
-  ^:hidden
-  
+
   (construct/rep
-   (common/layout-pair-blocks '(:a 1 :b 2) 
+   (common/layout-pair-blocks '(:a 1 :b 2)
                               {:spec {:col-align true}
                                :indents 2}))
   => '[[(:a ␣ 1) (:b ␣ 2)] (\n ␣ ␣)]
 
-  
+
   (construct/rep
-   (common/layout-pair-blocks '(:a 1 :b 2) 
+   (common/layout-pair-blocks '(:a 1 :b 2)
                               {:spec {:col-align true}
                                :indents 5}))
   => '[[(:a ␣ 1) (:b ␣ 2)] (\n ␣ ␣ ␣ ␣ ␣)]
 
   (construct/rep
-   (common/layout-pair-blocks '(:a-long 1 :b 2) 
+   (common/layout-pair-blocks '(:a-long 1 :b 2)
                               {:spec {:col-align true}
                                :indents 5}))
   => '[[(:a-long ␣ 1) (:b ␣ ␣ ␣ ␣ ␣ ␣ 2)] (\n ␣ ␣ ␣ ␣ ␣)])
 
 ^{:refer std.block.layout.common/layout-multiline-call-setup :added "4.0"}
 (fact "helper function to prep multiline form"
-  ^:hidden
 
   (construct/rep
    (common/layout-multiline-call-setup '(apply 1 2 3 4)
@@ -201,7 +189,6 @@
 
 ^{:refer std.block.layout.common/layout-multiline-call :added "4.0"}
 (fact "custom function for most list based functions"
-  ^:hidden
 
   (construct/rep
    (common/layout-multiline-call :list
@@ -211,7 +198,6 @@
 
 ^{:refer std.block.layout.common/layout-multiline-list :added "4.0"}
 (fact "layout standard paired inputs"
-  ^:hidden
 
   (-> (common/layout-multiline-list '(defn hello
                                        "oeuoeu"
@@ -227,7 +213,7 @@
       "  {:add 1}"
       "  [x]"
       "  (+ x 1))"]
-  
+
   (-> (common/layout-multiline-list '(assoc hello :key1 val :key2-oeueu-oeue val2)
                                       {:spec {:columns 2
                                               :col-from 1
@@ -237,7 +223,7 @@
   => ["(assoc hello"
       "       :key1            val"
       "       :key2-oeueu-oeue val2)"]
-  
+
 
   (-> (common/layout-multiline-list '(assoc hello :key1 val :key2-oeueu-oeue val2)
                                       {:spec {:columns 2
@@ -267,7 +253,7 @@
       (clojure.string/split-lines))
   => ["(hash-map :key1 val"
       "          :key2-oeueu-oeue val2)"]
-  
+
 
   (-> (common/layout-multiline-list '(case (type) :a 1 :b 2)
                                       {:spec {:columns 2
@@ -278,7 +264,7 @@
   => ["(case (type)"
       "  :a 1"
       "  :b 2)"]
-  
+
   (-> (common/layout-multiline-list '(something to do (type) :a 1 :b 2)
                                       {:spec {:columns 2
                                               :col-from 3
@@ -301,8 +287,7 @@
 
 ^{:refer std.block.layout.common/layout-multiline-hiccup :added "4.0"}
 (fact "generates hiccup code"
-  ^:hidden
-  
+
   (-> (common/layout-multiline-hiccup [:hello {:a 1
                                                :b 2}
                                        [:world {}]]
@@ -326,8 +311,7 @@
 
 ^{:refer std.block.layout.common/layout-multiline-paired :added "4.0"}
 (fact "layout standard paired inputs"
-  ^:hidden
-  
+
   (-> (common/layout-multiline-paired '(assoc hello :key1 val :key2-oeueu-oeue val2)
                                       {:spec {:col-from 1
                                               :col-align true}})
@@ -336,7 +320,7 @@
   => ["(assoc hello"
       "       :key1            val"
       "       :key2-oeueu-oeue val2)"]
-  
+
 
   (-> (common/layout-multiline-paired '(assoc hello :key1 val :key2-oeueu-oeue val2)
                                       {:spec {:col-from 1
@@ -363,7 +347,7 @@
       (clojure.string/split-lines))
   => ["(hash-map :key1 val"
       "          :key2-oeueu-oeue val2)"]
-  
+
 
   (-> (common/layout-multiline-paired '(case (type) :a 1 :b 2)
                                       {:spec {:col-from 1
@@ -373,7 +357,7 @@
   => ["(case (type)"
       "  :a 1"
       "  :b 2)"]
-  
+
   (-> (common/layout-multiline-paired '(something to do (type) :a 1 :b 2)
                                       {:spec {:col-from 3
                                               :col-start 2}})
@@ -391,8 +375,7 @@
 
 ^{:refer std.block.layout.common/layout-multiline-hashmap :added "4.0"}
 (fact "layouts the hashmap"
-  ^:hidden
-  
+
   (-> (common/layout-multiline-hashmap {:a 1 :b 2}
                                        {:spec {:col-align true}})
       (base/block-string)
@@ -410,7 +393,6 @@
 
 ^{:refer std.block.layout.common/layout-by-columns :added "4.0"}
 (fact "layout data using columns"
-  ^:hidden
 
   (construct/rep
    (common/layout-by-columns [:a-long 1 :b 2]
@@ -426,8 +408,7 @@
 
 ^{:refer std.block.layout.common/layout-by-rows :added "4.0"}
 (fact "layout data using rows"
-  ^:hidden
-  
+
   (construct/rep
    (common/layout-by-rows [:a-long 1 :b-long 2]
                           1
@@ -464,8 +445,7 @@
 
 ^{:refer std.block.layout.common/layout-multiline-hashset :added "4.0"}
 (fact "layouts the hashset"
-  ^:hidden
-  
+
   (-> (common/layout-multiline-hashset [:a 1 :b 2]
                                        {:spec {:columns 3
                                                :col-align true}})
@@ -476,8 +456,7 @@
 
 ^{:refer std.block.layout.common/layout-multiline-vector :added "4.0"}
 (fact "layouts the vector"
-  ^:hidden
-  
+
   (-> (common/layout-multiline-vector [:a 1 :b 2]
                                       {:spec {:col-align true}})
       (base/block-string)
@@ -490,7 +469,7 @@
    [col-align
     columns]
    {})
-  
+
   (binding [common/*layout-fn* bind/layout-default-fn]
     (-> (common/layout-multiline-vector
          '[{:keys ^{:readable-len 10 :spec {:columns 1}}
@@ -508,7 +487,7 @@
       "  :as spec}        (merge {:col-align false :columns 2}"
       "                          spec)"
       " hello             world]"]
-  
+
   (binding [common/*layout-fn* bind/layout-default-fn]
     (-> (bind/layout-default-fn
          '(let [{:keys [col-align
@@ -528,8 +507,7 @@
 
 ^{:refer std.block.layout.common/layout-with-bindings :added "4.0"}
 (fact "layout with bindings"
-  ^:hidden
-  
+
   (-> (common/layout-with-bindings '(let [a 1 b 2]
                                       (+ a b)
                                       (+ a b)
@@ -552,8 +530,7 @@
 
 ^{:refer std.block.layout.common/layout-multiline-basic :added "4.0"}
 (fact "layout standard multiline forms"
-  ^:hidden
-  
+
   (-> (common/layout-multiline-basic '(apply 1 2 3 4)
                                     {:indents 0})
       (base/block-string)

@@ -5,14 +5,13 @@
 
 ^{:refer js.react.compile/check-valid-variables :added "4.0" :unchecked true}
 (fact "checks that all :var/<name> keywords have been defined"
-  ^:hidden
 
   (compile/check-valid-variables
    {:var/a true
     :var/b true}
    [:var/a])
   => [:var/a]
-  
+
   (compile/check-valid-variables
    {:var/a true
     :var/b true}
@@ -21,12 +20,11 @@
 
 ^{:refer js.react.compile/compile-states-deps :added "4.0" :unchecked true}
 (fact "get dependencies for states"
-  ^:hidden
-  
+
   (compile/compile-states-deps
    '{:var/html-code   ""
      :var/dsl-code    {:%/args  [""]}
-     
+
      :var/history     {:%/fn   useLocalHistory
                        :%/args ["task.translate-html"]}
      :var/history-idx 0
@@ -38,12 +36,11 @@
 
 ^{:refer js.react.compile/compile-states :added "4.0" :unchecked true}
 (fact "compiles to react code"
-  ^:hidden
-  
+
   (compile/compile-states
    '{:var/html-code   ""
      :var/dsl-code    {:%/args  [""]}
-     
+
      :var/history     {:%/fn   useLocalHistory
                        :%/args ["task.translate-html"]}
      :var/history-idx 0
@@ -51,7 +48,7 @@
                        :warning false}
      :var/combined    {:%  (+ :var/dsl-code
                               :var/html-code)}})
-  
+
   => '((var [data setData] (React.useState {:errored false, :warning false}))
        (var [historyIdx setHistoryIdx] (React.useState 0))
        (var [history setHistory] (useLocalHistory "task.translate-html"))
@@ -61,8 +58,7 @@
 
 ^{:refer js.react.compile/compile-layout-raw :added "4.0" :unchecked true}
 (fact "compiles the layout fully"
-  ^:hidden
-  
+
   (compile/compile-layout-raw
    [:ui/button
     {:name "hello"}
@@ -80,8 +76,7 @@
 
 ^{:refer js.react.compile/compile-layout :added "4.0" :unchecked true}
 (fact "compiles the ui"
-  ^:hidden
-  
+
   (compile/compile-layout
    [:ui/button
     {:name "hello"}
@@ -96,7 +91,6 @@
 
 ^{:refer js.react.compile/compile-full :added "4.0" :unchecked true}
 (fact "TODO"
-  ^:hidden
 
   (compile/compile-full
     {:states {:var/html-code   ""

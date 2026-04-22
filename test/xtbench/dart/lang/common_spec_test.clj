@@ -9,12 +9,7 @@
 
 (l/script-
  :dart
- {:runtime :twostep,
-  :require
-  [[xt.lang.common-spec :as xt]
-   [xt.lang.common-data :as xtd]
-   [xt.lang.common-repl :as repl]
-   [xt.lang.common-string :as xts]]})
+ {:runtime :twostep, :require [[xt.lang.common-spec :as xt]]})
 
 (fact:global {:setup [(l/rt:restart)], :teardown [(l/rt:stop)]})
 
@@ -546,10 +541,10 @@
  =>
  [2 4 6])
 
-^{:refer xt.lang.common-spec/x:arr-append, :added "4.1"}
+^{:refer xt.lang.common-spec/x:arr-assign, :added "4.1"}
 (fact
  "appends one array to another"
- (!.dt (xt/x:arr-append [1 2] [3 4]))
+ (!.dt (xt/x:arr-assign [1 2] [3 4]))
  =>
  [1 2 3 4])
 
@@ -564,7 +559,7 @@
 (fact
  "keeps transformed non-nil values from an array"
  (!.dt
-  (xt/x:arr-keep
+  (xtd/arr-keep
    [1 2 3]
    (fn [e] (when (xt/x:odd? e) (return (* e 10))))))
  =>
@@ -671,7 +666,7 @@
  (let
   [text (slurp "test/xt/lang/common_spec_test.clj")]
   (mapv
-   (fn* [p1__12177#] (boolean (re-find (re-pattern p1__12177#) text)))
+   (fn* [p1__12382#] (boolean (re-find (re-pattern p1__12382#) text)))
    ["\\[xt\\.lang\\.common-spec :as xt\\]"
     "\\[xt\\.lang\\.common-data :as xtd\\]"
     "\\[xt\\.lang\\.common-repl :as repl\\]"
@@ -999,61 +994,6 @@
  =>
  '([arr pred]))
 
-^{:refer xt.lang.common-spec/x:future-run, :added "4.1"}
-(fact
- "expands and emits a lua future runner"
- (emits-lua? '(x:future-run thunk) #"state")
- =>
- true)
-
-^{:refer xt.lang.common-spec/x:future-then, :added "4.1"}
-(fact
- "expands and emits a lua future continuation"
- (emits-lua? '(x:future-then task on-ok) #"pcall")
- =>
- true)
-
-^{:refer xt.lang.common-spec/x:future-catch, :added "4.1"}
-(fact
- "expands and emits a lua future error handler"
- (emits-lua? '(x:future-catch task on-err) #"pcall")
- =>
- true)
-
-^{:refer xt.lang.common-spec/x:future-finally, :added "4.1"}
-(fact
- "expands and emits a lua future finalizer"
- (emits-lua? '(x:future-finally task on-done) #"return")
- =>
- true)
-
-^{:refer xt.lang.common-spec/x:future-cancel, :added "4.1"}
-(fact
- "expands and emits a lua future cancellation"
- (emits-lua? '(x:future-cancel task) #"cancelled")
- =>
- true)
-
-^{:refer xt.lang.common-spec/x:future-status, :added "4.1"}
-(fact
- "expands and emits a lua future status lookup"
- (emits-lua? '(x:future-status task) #"state")
- =>
- true)
-
-^{:refer xt.lang.common-spec/x:future-await, :added "4.1"}
-(fact
- "expands and emits a lua future await"
- (emits-lua? '(x:future-await task 1000 default) #"default")
- =>
- true)
-
-^{:refer xt.lang.common-spec/x:future-from-async, :added "4.1"}
-(fact
- "expands and emits a lua async future bridge"
- (emits-lua? '(x:future-from-async executor) #"executor")
- =>
- true)
 
 ^{:refer xt.lang.common-spec/x:eval, :added "4.1"}
 (fact
@@ -1186,13 +1126,6 @@
  =>
  true)
 
-^{:refer xt.lang.common-spec/x:this, :added "4.1"}
-(fact
- "expands and emits the lua self binding"
- (emits-lua? '(x:this) #"self")
- =>
- true)
-
 ^{:refer xt.lang.common-spec/x:proto-get, :added "4.1"}
 (fact
  "expands and emits prototype lookup"
@@ -1249,20 +1182,20 @@
  =>
  true)
 
-^{:refer xt.lang.common-spec/x:client-basic, :added "4.1"}
+^{:refer xt.lang.common-spec/x:debug-client-basic, :added "4.1"}
 (fact
  "expands and emits the lua basic client loop"
  (emits-lua?
-  '(x:client-basic "localhost" 8080 connect-fn eval-fn)
+  '(x:debug-client-basic "localhost" 8080 connect-fn eval-fn)
   #"receive")
  =>
  true)
 
-^{:refer xt.lang.common-spec/x:client-ws, :added "4.1"}
+^{:refer xt.lang.common-spec/x:debug-client-ws, :added "4.1"}
 (fact
  "expands and emits the lua websocket client loop"
  (emits-lua?
-  '(x:client-ws "localhost" 8080 {} connect-fn eval-fn)
+  '(x:debug-client-ws "localhost" 8080 {} connect-fn eval-fn)
   #"recv")
  =>
  true)
@@ -1456,7 +1389,7 @@
 ^{:refer xt.lang.common-spec/x:with-delay, :added "4.1"}
 (fact
  "expands and emits a delayed lua computation"
- (emits-lua? '(x:with-delay 100 value) #"sleep")
+ (emits-lua? '(x:with-delay thunk 100) #"sleep")
  =>
  true)
 

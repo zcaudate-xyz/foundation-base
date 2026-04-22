@@ -22,8 +22,7 @@
 
 ^{:refer js.blessed.ui-screen/ScreenMouse :added "4.0" :unchecked true}
 (fact "component that updates mouse position"
-  ^:hidden
-  
+
   (defn.js ScreenMouseDemo
     []
     (var mouse (v/val ui-screen/Mouse))
@@ -40,7 +39,6 @@
 
 ^{:refer js.blessed.ui-screen/ScreenMeasure :added "4.0" :unchecked true}
 (fact "component that measures then screen"
-  ^:hidden
 
   (defn.js ScreenMeasureDemo
     []
@@ -58,8 +56,7 @@
 
 ^{:refer js.blessed.ui-screen/GridLayout :added "4.0" :unchecked true}
 (fact "component that implements grid layout"
-  ^:hidden
-  
+
   (defn.js GridLayoutDemo
     []
     (var dims (v/val ui-screen/Dimension))
@@ -91,7 +88,7 @@
         :left 0
         :color "yellow"
         :content (j/inspect dims)}]]))
-  
+
   )
 
 (comment

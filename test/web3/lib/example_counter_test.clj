@@ -17,8 +17,7 @@
 
 ^{:refer web3.lib.example-counter/CANARY :adopt true :added "4.0"}
 (fact "determanistic gas fees"
-  ^:hidden
-  
+
   (s/with:measure
    (s/rt:deploy counter/+default-contract+))
   => (contains-in [(approx 0.7 0.5) map?]))
@@ -27,11 +26,10 @@
   :setup [(s/with:measure
            (s/rt:deploy counter/+default-contract+))]}
 (fact "gets the 0 counter"
-  ^:hidden
 
   (counter/g:Counter0)
   (counter/g:Counter1)
-  
+
   (s/with:measure
    (counter/m:get-counter0))
   => [0.0 0]
@@ -39,7 +37,7 @@
   [(s/with:measure
     (do (counter/m:inc-counter0)
         (counter/m:get-counter0)))
-   
+
    (s/with:measure
     (do (counter/m:inc-counter0)
         (counter/m:get-counter0)))
@@ -59,8 +57,7 @@
   :setup [(s/with:measure
            (s/rt:deploy counter/+default-contract+))]}
 (fact "gets the 1 counter"
-  ^:hidden
-  
+
   (s/with:measure
    (counter/m:get-counter1))
   => [0.0 0]
@@ -93,8 +90,7 @@
   :setup [(s/with:measure
            (s/rt:deploy counter/+default-contract+))]}
 (fact "decrements counter 0"
-  ^:hidden
-  
+
   [(s/with:measure
     (counter/m:inc-counter0)
     (counter/m:get-counter0))
@@ -116,8 +112,7 @@
   :setup [(s/with:measure
            (s/rt:deploy counter/+default-contract+))]}
 (fact "increments both"
-  ^:hidden
-  
+
   [(s/with:measure
     (do (counter/m:inc-both)
         (counter/m:get-counter1)))
@@ -140,8 +135,7 @@
   :setup [(s/with:measure
            (s/rt:deploy counter/+default-contract+))]}
 (fact "performs add operation"
-  ^:hidden
-  
+
   [(s/with:measure
     (do (counter/m:add-both 10)
         (counter/m:get-counter1)))

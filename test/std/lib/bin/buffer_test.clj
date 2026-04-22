@@ -60,7 +60,7 @@
 ^{:refer std.lib.bin.buffer/create-buffer-records :added "3.0"}
 (fact "creates records for buffer types"
 
-  (macroexpand-1 '(create-buffer-records ([Byte identity]))) ^:hidden
+  (macroexpand-1 '(create-buffer-records ([Byte identity])))
   => '{:byte {:buffer java.nio.ByteBuffer
               :convert identity
               :allocate (clojure.core/fn [n] (java.nio.ByteBuffer/allocate n))
@@ -69,7 +69,7 @@
 ^{:refer std.lib.bin.buffer/create-buffer-functions :added "3.0"}
 (fact "creates functions for buffer types"
 
-  (macroexpand-1 '(create-buffer-functions (:byte))) ^:hidden
+  (macroexpand-1 '(create-buffer-functions (:byte)))
   => '[(clojure.core/defn byte-buffer
          ([len-or-elems] (byte-buffer len-or-elems {}))
          ([len-or-elems {:keys [type direct endian convert] :as opts}]
@@ -141,7 +141,7 @@
 
   (buffer 10 {:type :float
               :direct true})
-  => java.nio.FloatBuffer ^:hidden
+  => java.nio.FloatBuffer
 
   (def farr (float-array [1 2 3 4]))
   (= (.array ^java.nio.FloatBuffer (buffer farr {:type :float :wrap true}))

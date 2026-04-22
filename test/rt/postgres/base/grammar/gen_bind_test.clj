@@ -44,7 +44,6 @@
 
 ^{:refer rt.postgres.base.grammar.gen-bind/transform-to-str :added "4.0"}
 (fact "transforms relevant forms to string"
-  ^:hidden
 
   (gen/transform-to-str 'scratch/Task)
   => {"::" "sql/deftype", :schema "scratch", :name "Task"}
@@ -57,7 +56,6 @@
 
 ^{:refer rt.postgres.base.grammar.gen-bind/transform-query-or :added "4.0"}
 (fact "transforms a setvec form"
-  ^:hidden
 
   (gen/transform-query-or
    #{[:name "hello"
@@ -69,7 +67,6 @@
 
 ^{:refer rt.postgres.base.grammar.gen-bind/transform-query-classify :added "4.0"}
 (fact "transform function and quote representations"
-  ^:hidden
 
   (gen/transform-query-classify
    ''("hello" "world"))
@@ -98,7 +95,6 @@
                   "data" ["first_name" "last_name"]}]]],
               "data" ["id" "nickname"]}])]}
 (fact "generates the query interface"
-  ^:hidden
 
   (gen/transform-query
    #{:id :nickname
@@ -159,14 +155,12 @@
 
 ^{:refer rt.postgres.base.grammar.gen-bind/transform-schema :added "4.0"}
 (fact "transforms the schema"
-  ^:hidden
 
   (gen/transform-schema (:tree (:schema sample/+app+)))
   => map?)
 
 ^{:refer rt.postgres.base.grammar.gen-bind/bind-function :added "4.0"}
 (fact "generates the type signatures for a pg function"
-  ^:hidden
 
   (gen/bind-function scratch/ping)
   => {:input [], :return "text", :schema "scratch", :id "ping", :flags {}}
@@ -185,7 +179,6 @@
 
 ^{:refer rt.postgres.base.grammar.gen-bind/bind-view-guards :added "4.0"}
 (fact "gets more guards"
-  ^:hidden
 
   (gen/bind-view-guards (:guards (:static/view @user/user-account-by-organisation)))
   => [{:function
@@ -200,7 +193,6 @@
 
 ^{:refer rt.postgres.base.grammar.gen-bind/bind-view :added "4.0"}
 (fact "generates the view interface"
-  ^:hidden
 
   (gen/bind-view data/currency-all-fiat)
   => {:flags {:public true},
@@ -256,7 +248,6 @@
 
 ^{:refer rt.postgres.base.grammar.gen-bind/bind-table :added "4.0"}
 (fact "gets the table interface"
-  ^:hidden
 
   (gen/bind-table data/Currency)
   => {:schema "scratch-sample-db",
@@ -266,7 +257,6 @@
 
 ^{:refer rt.postgres.base.grammar.gen-bind/bind-app :added "4.0"}
 (fact "gets the app interface given a name"
-  ^:hidden
 
   (gen/bind-app (pg/app "xt.db.sample"))
   => {"RegionCity"
@@ -350,14 +340,12 @@
 
 ^{:refer rt.postgres.base.grammar.gen-bind/bind-schema :added "4.0"}
 (fact "binds a schema"
-  ^:hidden
 
   (gen/bind-schema (:schema (pg/app "xt.db.sample")))
   => map?)
 
 ^{:refer rt.postgres.base.grammar.gen-bind/list-view :added "4.0"}
 (fact "lists all views in the schema"
-  ^:hidden
 
   (gen/list-view 'xt.db.sample-user-test :select)
   => vector?
@@ -369,7 +357,6 @@
 
 ^{:refer rt.postgres.base.grammar.gen-bind/list-api :added "4.0"}
 (fact "lists all apis"
-  ^:hidden
 
   (gen/list-api 'rt.postgres.test.scratch-v1)
   => '[[ping rt.postgres.test.scratch-v1/ping]
@@ -378,7 +365,6 @@
 
 ^{:refer rt.postgres.base.grammar.gen-bind/list-debug :added "4.0"}
 (fact  "lists all debug apis"
-  ^:hidden
 
   (gen/list-debug 'rt.postgres.test.scratch-v1)
   => '[[as-array rt.postgres.test.scratch-v1/as-array]
@@ -392,7 +378,6 @@
 
 ^{:refer rt.postgres.base.grammar.gen-bind/list-all :added "4.0"}
 (fact "lists all function forms"
-  ^:hidden
 
   (gen/list-all 'rt.postgres.test.scratch-v1)
   => '[[as-array rt.postgres.test.scratch-v1/as-array]

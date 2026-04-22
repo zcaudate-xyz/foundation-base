@@ -59,8 +59,7 @@
    :x-shell          {:macro #'ruby-tf-x-shell :emit :macro}
    :x-type-native    {:macro #'ruby-tf-x-type-native :emit :macro}
    :x-unpack         {:macro #'ruby-tf-x-unpack :emit :macro}
-   :x-this           {:emit :alias :raw 'self}
-   :x-client-basic   {:emit :alias :raw 'client-basic}})
+   :x-debug-client-basic   {:emit :alias :raw 'debug-client-basic}})
 
 ;;
 ;; MATH
@@ -449,116 +448,6 @@
    :x-start-interval  {:macro #'ruby-tf-x-start-interval :emit :macro}
    :x-stop-interval   {:macro #'ruby-tf-x-stop-interval  :emit :macro}})
 
-;; FUTURE
-;;
-
-(defn ruby-tf-x-future-run
-  [[_ thunk]]
-  (template/$
-   (do (:= task {"status" "pending"
-                 "value" nil
-                 "error" nil})
-       (try (:= out (~thunk))
-            (:= (:% task ["status"]) "ok")
-            (:= (:% task ["value"]) out)
-            (catch Exception e
-              (:= (:% task ["status"]) "error")
-              (:= (:% task ["error"]) e)))
-       (return task))))
-
-(defn ruby-tf-x-future-then
-  [[_ task on-ok]]
-  (template/$
-   (if (== "ok" (:% ~task ["status"]))
-     (do (:= out {"status" "pending"
-                  "value" nil
-                  "error" nil})
-         (try (:= v (~on-ok (:% ~task ["value"])))
-              (:= (:% out ["status"]) "ok")
-              (:= (:% out ["value"]) v)
-              (catch Exception e
-                (:= (:% out ["status"]) "error")
-                (:= (:% out ["error"]) e)))
-         (return out))
-     (return ~task))))
-
-(defn ruby-tf-x-future-catch
-  [[_ task on-err]]
-  (template/$
-   (if (== "error" (:% ~task ["status"]))
-     (do (:= out {"status" "pending"
-                  "value" nil
-                  "error" nil})
-         (try (:= v (~on-err (:% ~task ["error"])))
-              (:= (:% out ["status"]) "ok")
-              (:= (:% out ["value"]) v)
-              (catch Exception e
-                (:= (:% out ["status"]) "error")
-                (:= (:% out ["error"]) e)))
-         (return out))
-     (return ~task))))
-
-(defn ruby-tf-x-future-finally
-  [[_ task on-done]]
-  (template/$
-   (do (~on-done)
-       (return ~task))))
-
-(defn ruby-tf-x-future-cancel
-  [[_ task]]
-  (template/$
-   (do (:= (:% ~task ["status"]) "cancelled")
-       (return ~task))))
-
-(defn ruby-tf-x-future-status
-  [[_ task]]
-  (template/$
-   (return (:% ~task ["status"]))))
-
-(defn ruby-tf-x-future-await
-  [[_ task & [timeout-ms default]]]
-  (template/$
-   (cond (== "ok" (:% ~task ["status"]))
-         (return (:% ~task ["value"]))
-         
-         (== "error" (:% ~task ["status"]))
-         (throw (:% ~task ["error"]))
-         
-         :else
-         (return ~default))))
-
-(defn ruby-tf-x-future-from-async
-  [[_ executor]]
-  (template/$
-   (do (:= box {"ok" false
-                "value" nil
-                "error" nil})
-       (:= resolve
-           (fn [v]
-             (:= (:% box ["ok"]) true)
-             (:= (:% box ["value"]) v)))
-       (:= reject
-           (fn [e]
-             (:= (:% box ["error"]) e)))
-       (~executor resolve reject)
-       (if (:% box ["ok"])
-         (return {"status" "ok"
-                  "value" (:% box ["value"])
-                  "error" nil})
-         (return {"status" "error"
-                  "value" nil
-                  "error" (:% box ["error"])})))))
-
-(def +ruby-future+
-  {:x-future-run         {:macro #'ruby-tf-x-future-run        :emit :macro}
-   :x-future-then        {:macro #'ruby-tf-x-future-then       :emit :macro}
-   :x-future-catch       {:macro #'ruby-tf-x-future-catch      :emit :macro}
-   :x-future-finally     {:macro #'ruby-tf-x-future-finally    :emit :macro}
-   :x-future-cancel      {:macro #'ruby-tf-x-future-cancel     :emit :macro}
-   :x-future-status      {:macro #'ruby-tf-x-future-status     :emit :macro}
-   :x-future-await       {:macro #'ruby-tf-x-future-await      :emit :macro}
-    :x-future-from-async  {:macro #'ruby-tf-x-future-from-async :emit :macro}})
-
 ;; ITER
 ;;
 
@@ -650,7 +539,7 @@
    :x-ws-connect       {:macro #'ruby-tf-x-ws-connect       :emit :macro}
    :x-ws-send          {:macro #'ruby-tf-x-ws-send          :emit :macro}
    :x-ws-close         {:macro #'ruby-tf-x-ws-close         :emit :macro}
-   :x-client-ws        {:emit :alias :raw 'client-ws}
+   :x-debug-client-ws        {:emit :alias :raw 'debug-client-ws}
    :x-server-basic     {:emit :alias :raw 'server-basic}
    :x-server-ws        {:emit :alias :raw 'server-ws}})
 
@@ -702,10 +591,9 @@
          +ruby-json+
          +ruby-b64+
          +ruby-file+
-         +ruby-uri+
-          +ruby-proto+
-          +ruby-thread+
-          +ruby-future+
-          +ruby-iter+
+           +ruby-uri+
+            +ruby-proto+
+            +ruby-thread+
+            +ruby-iter+
           +ruby-network+
           +ruby-return+))

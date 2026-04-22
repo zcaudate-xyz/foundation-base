@@ -15,8 +15,7 @@
 
 ^{:refer lua.nginx/req-raw-uri :added "4.0"}
 (fact "gets the raw uri"
-  ^:hidden
-  
+
   (!.lua
    (n/thread-spawn
     (fn []
@@ -29,23 +28,20 @@
 
 ^{:refer lua.nginx/req-raw-uri :added "4.0"}
 (fact "gets the raw uri"
-  ^:hidden
-  
+
   (n/req-raw-uri)
   => "eval")
 
 ^{:refer lua.nginx/getconf :added "4.0"}
 (fact "gets the current from env or global CONFIG"
-  ^:hidden
-  
+
   (!.lua (:= (. CONFIG ["HELLO"]) "WORLD")
          (n/getconf "HELLO"))
   => "WORLD")
 
 ^{:refer lua.nginx/log! :added "4.0"}
 (fact "logs out a request with clj line number"
-  ^:hidden
-  
+
   (!.lua (n/log! "HELLO" {:a 1}))
 
   (nginx/error-logs)
@@ -53,13 +49,12 @@
 
 ^{:refer lua.nginx/return-ok :added "4.0"}
 (fact "returns an http 200 response"
-  ^:hidden
 
   ((:template @n/return-ok) "OK")
   => '(do (:= ngx.status ngx.HTTP-OK)
           (ngx.say "OK")
           (return (ngx.exit ngx.HTTP-OK)))
-  
+
   (!.lua
    ('((fn []
         (n/return-ok "\"OK\"")))))
@@ -67,8 +62,7 @@
 
 ^{:refer lua.nginx/return-err :added "4.0"}
 (fact "returns an error code"
-  ^:hidden
-  
+
   ((:template @n/return-err) "NOT-FOUND" 'ngx.HTTP-FORBIDDEN)
   => '(do (:= ngx.status ngx.HTTP-FORBIDDEN)
           (ngx.say "NOT-FOUND")
@@ -76,14 +70,13 @@
 
 ^{:refer lua.nginx/return-out :added "4.0"}
 (fact "returns a message with output"
-  ^:hidden
-  
+
   ((:template @n/return-out) {:status "ok"})
   => '(do
         (:= ngx.status ngx.HTTP-OK)
         (ngx.say (cjson.encode {:status "ok"}))
         (return (ngx.exit ngx.HTTP-OK)))
-  
+
   (!.lua
    ('((fn []
         (n/return-out {:status "ok"})))))
@@ -109,8 +102,7 @@
 
 ^{:refer lua.nginx/start-task :added "4.0"}
 (fact "starts a task loop (usually in `init-worker-by-lua-block`) section"
-  ^:hidden
-  
+
   ((:template @n/start-task) 'f)
   => '(ngx.timer.at 0 (fn [] (ngx.thread.spawn f))))
 
@@ -119,8 +111,7 @@
 
 ^{:refer lua.nginx/ngx-tmpl :added "4.0"}
 (fact "creates an ngx form"
-  ^:hidden
-  
+
   (n/ngx-tmpl 'OK)
   => '(def$.lua OK ngx.OK))
 
@@ -133,7 +124,6 @@
 
 ^{:refer lua.nginx/sha1-new :added "4.0"}
 (fact "creates a sha1"
-  ^:hidden
 
   (!.lua
    (do:>
@@ -146,7 +136,6 @@
 
 ^{:refer lua.nginx/md5-new :added "4.0"}
 (fact "creates a sha1"
-  ^:hidden
 
   (!.lua
    (do:>
@@ -159,8 +148,7 @@
 
 ^{:refer lua.nginx/sha256-new :added "4.0"}
 (fact "creates a sha256"
-  ^:hidden
-  
+
   (!.lua
    (do:>
     (local ngxsha256 (require "resty.sha256"))

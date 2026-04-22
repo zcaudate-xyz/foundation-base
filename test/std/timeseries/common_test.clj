@@ -51,7 +51,7 @@
   => {:a {:b {:c 10}}})
 
 ^{:refer std.timeseries.common/create-template :added "3.0"}
-(fact "creates a template for entry" ^:hidden
+(fact "creates a template for entry"
   (create-template  {:data {:in  ""
                             :out "ABC"}})
   => (contains {:raw {:empty {:data.in "", :data.out ""}

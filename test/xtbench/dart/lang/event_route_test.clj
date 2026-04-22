@@ -27,7 +27,7 @@
    (route/interim-from-url "?id=1")
    (route/interim-from-url "hello?")])
  =>
- [{"params" {"[\"hello\", \"world\"]" {"id" "1", "type" "name"}},
+ [{"params" {"[\"hello\",\"world\"]" {"id" "1", "type" "name"}},
    "path" ["hello" "world"]}
   {"params" {"[]" {"id" "1"}}, "path" []}
   {"params" {}, "path" ["hello"]}])
@@ -71,7 +71,6 @@
       "[\"hello\"]" "world"}
      {"params" {"[]" {"id" "1", "type" "name"}},
       "[]" "hello",
-      "[\"hello\",\"world\"]" nil,
       "[\"hello\"]" "world"}])]}
 (fact
  "converts interim to tree"
@@ -91,7 +90,7 @@
    "[\"hello\"]" "world"}
   {"params" {"[]" {"id" "1", "type" "name"}},
    "[]" "hello",
-   "[\"hello\", \"world\"]" nil,
+   "[\"hello\",\"world\"]" nil,
    "[\"hello\"]" "world"}])
 
 ^{:refer xt.lang.event-route/path-from-tree, :added "4.0"}
@@ -150,9 +149,10 @@
  ^{:hidden true}
  (!.dt
   [(route/changed-path-raw ["hello" "world"] ["hello"])
+   (route/changed-path-raw ["hello"] ["hello" "world"])
    (route/changed-path-raw ["hello" "world"] ["hello" "again"])])
  =>
- [{} {"[\"hello\"]" true}])
+ [{} {"[\"hello\"]" true} {"[\"hello\"]" true}])
 
 ^{:refer xt.lang.event-route/changed-path, :added "4.0"}
 (fact
@@ -234,8 +234,15 @@
  "adds a url listener"
  ^{:hidden true}
  (!.dt
-  (var r (route/make-route "hello"))
-  (xtd/tree-get-data (route/add-url-listener r "a1" (fn:>) nil)))
+  (do
+   (var r (route/make-route "hello"))
+   (xtd/tree-get-data (route/add-url-listener r "a1" (fn:>) nil))))
+ =>
+ +out+
+ (!.dt
+  (do
+   (var r (route/make-route "hello"))
+   (xtd/tree-get-data (route/add-url-listener r "a1" (fn:>) nil))))
  =>
  +out+)
 
@@ -254,8 +261,15 @@
  "adds a path listener"
  ^{:hidden true}
  (!.dt
-  (var r (route/make-route "hello"))
-  (xtd/tree-get-data (route/add-path-listener r [] "a1" (fn:>) nil)))
+  (do
+   (var r (route/make-route "hello"))
+   (xtd/tree-get-data (route/add-path-listener r [] "a1" (fn:>) nil))))
+ =>
+ +out+
+ (!.dt
+  (do
+   (var r (route/make-route "hello"))
+   (xtd/tree-get-data (route/add-path-listener r [] "a1" (fn:>) nil))))
  =>
  +out+)
 
@@ -274,9 +288,10 @@
  "adds a param listener"
  ^{:hidden true}
  (!.dt
-  (var r (route/make-route "hello"))
-  (xtd/tree-get-data
-   (route/add-param-listener r "auth" "a1" (fn:>) nil)))
+  (do
+   (var r (route/make-route "hello"))
+   (xtd/tree-get-data
+    (route/add-param-listener r "auth" "a1" (fn:>) nil))))
  =>
  +out+)
 
@@ -296,9 +311,10 @@
  "adds a full listener"
  ^{:hidden true}
  (!.dt
-  (var r (route/make-route "hello"))
-  (xtd/tree-get-data
-   (route/add-full-listener r ["hello"] "auth" "a1" (fn:>) nil)))
+  (do
+   (var r (route/make-route "hello"))
+   (xtd/tree-get-data
+    (route/add-full-listener r ["hello"] "auth" "a1" (fn:>) nil))))
  =>
  +out+)
 
@@ -328,14 +344,7 @@
    "meta"
    {"listener/id" "a1",
     "route/path" ["hello"],
-    "listener/type" "route.path"}}]
- (notify/wait-on
-  :dart
-  (var r (route/make-route "hello"))
-  (route/add-path-listener r ["hello"] "a1" (repl/>notify))
-  (route/set-url r "hello/world"))
- =>
- +out+)
+    "listener/type" "route.path"}}])
 
 ^{:refer xt.lang.event-route/set-path,
   :added "4.0",
@@ -351,15 +360,33 @@
       "listener/type" "route.path"}})]}
 (fact
  "sets the path and param"
- ^{:hidden true}
- [(notify/wait-on
-   :dart
-   (var r (route/make-route "hello"))
-   (route/add-path-listener r ["hello"] "a1" (repl/>notify))
-   (route/set-path r ["hello" "world"]))
+ [(notify/wait-on-call
+   2000
+   (fn
+    []
+    (!.dt
+     (var r (route/make-route "hello"))
+     (route/add-path-listener
+      r
+      ["hello"]
+      "a1"
+      (fn
+       [val]
+       (return
+        {"::" "notify.task",
+         "task"
+         (repl/notify-socket
+          "127.0.0.1"
+          (@! (:socket-port (l/default-notify)))
+          val
+          (@! notify/*override-id*)
+          nil
+          {})}))
+      nil)
+     (route/set-path r ["hello" "world"] nil))))
   (!.dt
    (var r (route/make-route "hello"))
-   (route/set-path r ["hello" "world"])
+   (route/set-path r ["hello" "world"] nil)
    [(route/get-url r) r])]
  =>
  [+out+
@@ -387,12 +414,30 @@
       "listener/type" "route.path"}})]}
 (fact
  "sets the current segment"
- ^{:hidden true}
- [(notify/wait-on
-   :dart
-   (var r (route/make-route "hello"))
-   (route/add-path-listener r ["hello"] "a1" (repl/>notify))
-   (route/set-segment r ["hello"] "world"))
+ [(notify/wait-on-call
+   2000
+   (fn
+    []
+    (!.dt
+     (var r (route/make-route "hello"))
+     (route/add-path-listener
+      r
+      ["hello"]
+      "a1"
+      (fn
+       [val]
+       (return
+        {"::" "notify.task",
+         "task"
+         (repl/notify-socket
+          "127.0.0.1"
+          (@! (:socket-port (l/default-notify)))
+          val
+          (@! notify/*override-id*)
+          nil
+          {})}))
+      nil)
+     (route/set-segment r ["hello"] "world"))))
   (!.dt
    (var r (route/make-route "hello"))
    (route/set-segment r ["hello"] "world")
@@ -421,17 +466,35 @@
  "sets a param in a route"
  (!.dt
   (var r (route/make-route "hello?auth=sign_in"))
-  (route/set-param r "auth" nil)
+  (route/set-param r "auth" nil nil)
   (route/get-url r))
- ^{:hidden true}
- [(notify/wait-on
-   :dart
-   (var r (route/make-route "hello?auth=sign_in"))
-   (route/add-param-listener r "auth" "a1" (repl/>notify))
-   (route/set-param r "auth" "register"))
+ [(notify/wait-on-call
+   2000
+   (fn
+    []
+    (!.dt
+     (var r (route/make-route "hello?auth=sign_in"))
+     (route/add-param-listener
+      r
+      "auth"
+      "a1"
+      (fn
+       [val]
+       (return
+        {"::" "notify.task",
+         "task"
+         (repl/notify-socket
+          "127.0.0.1"
+          (@! (:socket-port (l/default-notify)))
+          val
+          (@! notify/*override-id*)
+          nil
+          {})}))
+      nil)
+     (route/set-param r "auth" "register" nil))))
   (!.dt
    (var r (route/make-route "hello?auth=sign_in"))
-   (route/set-param r "auth" "register")
+   (route/set-param r "auth" "register" nil)
    [(route/get-url r) r])]
  =>
  [+out+

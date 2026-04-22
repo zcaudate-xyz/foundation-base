@@ -151,7 +151,7 @@
   (->> (encrypt (.getBytes "Hello World")
                 {:public +public-key+})
 
-       (encode/to-base64)) ^:hidden
+       (encode/to-base64))
   ;; ["hQEMA2dT+OFtNfwkAQgAy4YMHQ70vRNgsoSQTFCLeHDMM6k6X+tkfs1xQzG5sdxlqXKxsaeX2z//i6iz"
   ;;  "kfEpo2MuzvecpKb3Eu4WPYGqqHcStHtyAUJYT4BxC2HZf3Nd8v6wpo4C++EdrIEUOY4cgQbpv1xBSd0c"
   ;;  "csoQPq9JPhGjBX3n9I+Nf6QDqjyC8EQixdeTJyb5SW23yDdPQGZd++CmWFxgnoMaQR6fJJpv0iO+1mpz"

@@ -15,8 +15,7 @@
 
 ^{:refer js.react-native.model-roller/roller-model :added "4.0" :unchecked true}
 (fact "constructs a roller model"
-  ^:hidden
-  
+
   (!.js
    (j/map (xtd/arr-range 4)
           (model-roller/roller-model 4 10)))
@@ -111,8 +110,7 @@
 
 ^{:refer js.react-native.model-roller/roller-shifted-norm :added "4.0" :unchecked true}
 (fact "finds the shifted-norm for an index at center"
-  ^:hidden
-  
+
   (!.js
    (j/map (xtd/arr-range 4)
           (fn:> [index]
@@ -136,12 +134,11 @@
       [3 2 1 0 -1 -2 -3]
       [-3 3 2 1 0 -1 -2]
       [-2 -3 3 2 1 0 -1]
-      [-1 -2 -3 3 2 1 0]])     
+      [-1 -2 -3 3 2 1 0]])
 
 ^{:refer js.react-native.model-roller/roller-shifted-index :added "4.0" :unchecked true}
 (fact "finds shifted index for roller divisions"
-  ^:hidden
-  
+
   (!.js
    (j/map (xtd/arr-range 7)
           (fn:> [roller-index]

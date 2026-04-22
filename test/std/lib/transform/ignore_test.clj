@@ -16,7 +16,6 @@
   => {:account {:name "Chris"
                 :age 10
                 :parents ["henry" "sally"]}}
-  ^:hidden
   (graph/normalise {:account {:name "Chris"
                               :age 10
                               :parents ["henry" "sally"]}}

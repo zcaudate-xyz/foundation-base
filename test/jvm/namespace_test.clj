@@ -22,7 +22,7 @@
   => map?)
 
 ^{:refer jvm.namespace/clear-aliases :added "3.0"}
-(fact "removes all namespace aliases" ^:hidden
+(fact "removes all namespace aliases"
   (with-temp-ns [tmp]
     (binding [*ns* tmp]
       (alias 'str 'clojure.string))
@@ -58,7 +58,7 @@
   => map?)
 
 ^{:refer jvm.namespace/clear-mappings :added "3.0"}
-(fact "removes all mapped vars in the namespace" ^:hidden
+(fact "removes all mapped vars in the namespace"
   (with-temp-ns [tmp]
     (intern tmp 'join (fn [xs] (apply str xs)))
     (ns/clear-mappings [(ns-name tmp)] {:return :summary})
@@ -128,7 +128,7 @@
   => map?)
 
 ^{:refer jvm.namespace/reset :added "3.0"}
-(fact "deletes all namespaces under the root namespace" ^:hidden
+(fact "deletes all namespaces under the root namespace"
   (let [sym (symbol "jvm.namespace.reset-temp")]
     (create-ns sym)
     (ns/reset [sym] {:return :summary})

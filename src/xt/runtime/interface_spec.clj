@@ -14,7 +14,7 @@
     (if (xt/x:is-function? f)
       (xt/x:set-key out k
                     (fn [a b c d]
-                      (return (f (xt/x:this) a b c d))))
+                      (return (f this a b c d))))
       (xt/x:set-key out k f)))
   (return out))
 

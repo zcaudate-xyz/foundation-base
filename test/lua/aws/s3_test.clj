@@ -23,8 +23,7 @@
 
 ^{:refer lua.aws.s3/policy-public-read-only :added "4.0"}
 (fact "creates bucket read only policy"
-  ^:hidden
-  
+
   (s3/policy-public-read-only "test")
   => {"Statement"
       [{"Effect" "Allow",
@@ -39,7 +38,6 @@
                          {:port 4489}
                          {})]}
 (fact "performs an s3-request"
-  ^:hidden
 
   (s3/s3-request {:method "HEAD"
                   :route "test"}
@@ -59,8 +57,7 @@
 
 ^{:refer lua.aws.s3/check-bucket :added "4.0"}
 (fact "checks that bucket exists"
-  ^:hidden
-  
+
   (s3/check-bucket {:port 4489}
                    "test")
   => (contains-in
@@ -68,7 +65,7 @@
        "has_body" false,
        "status" 200,
        "reason" "OK"})
-  
+
   (s3/check-bucket {:port 4489}
                    "test"
                    {:public true})
@@ -82,7 +79,6 @@
   :setup [(s3/purge-bucket {:port 4489}
                            "test")]}
 (fact "creates a bucket"
-  ^:hidden
 
   (s3/create-bucket {:port 4489}
                     "test")
@@ -102,7 +98,6 @@
                                  "test")
                 "body"))]}
 (fact "deletes a bucket"
-  ^:hidden
 
   (s3/delete-bucket {:port 4489}
                     "test")
@@ -116,8 +111,7 @@
   :setup [(s3/create-bucket {:port 4489}
                             "test")]}
 (fact "sets the bucket policy"
-  ^:hidden
-  
+
   (!.lua
    (s3/set-bucket-policy {:port 4489}
                          "test"
@@ -146,11 +140,10 @@
                          "hello 001"
                          {:headers {"content-type" "text/plain"}})]}
 (fact "lists objects"
-  ^:hidden
-  
+
   (s3/list-objects {:port 4489}
                    "test")
-  
+
   => (contains-in
       {"body"
        (contains ["abc000.txt"
@@ -164,8 +157,7 @@
   :setup [(s3/create-bucket {:port 4489}
                             "test")]}
 (fact "puts object in bucket"
-  ^:hidden
-  
+
   (s3/put-object {:port 4489}
                  "test"
                  "abc000.txt"
@@ -184,8 +176,7 @@
                          "hello 000"
                          {:headers {"content-type" "text/plain"}})]}
 (fact "checks that object exists"
-  ^:hidden
-  
+
  (s3/check-object {:port 4489}
                    "test"
                    "abc000.txt")
@@ -211,8 +202,7 @@
                          "hello 000"
                          {:headers {"content-type" "text/plain"}})]}
 (fact "gets the object"
-  ^:hidden
-  
+
   (s3/get-object {:port 4489}
                  "test"
                  "abc000.txt")
@@ -229,8 +219,7 @@
                          "hello 000"
                          {:headers {"content-type" "text/plain"}})]}
 (fact "deletes an object"
-  ^:hidden
-  
+
   (s3/delete-object {:port 4489}
                     "test"
                     "abc000.txt"))
@@ -252,8 +241,7 @@
                          "hello 002"
                          {:headers {"content-type" "text/plain"}})]}
 (fact "deletes all objects"
-  ^:hidden
-  
+
   (s3/delete-all-objects {:port 4489}
                          "test"
                          ["abc000.txt"
@@ -262,8 +250,8 @@
                 "has_body" true,
                 "status" 200,
                 "reason" "OK"})
-  
-  
+
+
   (s3/list-objects {:port 4489} "test")
   => (contains {"body" ["abc002.txt"],
                 "has_body" true,
@@ -289,8 +277,7 @@
                          "hello 002"
                          {:headers {"content-type" "text/plain"}})]}
 (fact "deletes the bucket and all objects"
-  ^:hidden
-  
+
   (s3/purge-bucket {:port 4489} "test")
   => (contains
       {"body" "",

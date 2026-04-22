@@ -24,7 +24,6 @@
 
 ^{:refer rt.nginx/error-logs :added "4.0"}
 (fact "gets the running nginx error log"
-  ^:hidden
   (with-redefs [l/rt:inner (constantly {:state (atom [nil "path"])})
                 slurp (constantly "log")]
     (error-logs)
@@ -32,7 +31,6 @@
 
 ^{:refer rt.nginx/access-logs :added "4.0"}
 (fact "gets the running nginx access log"
-  ^:hidden
   (with-redefs [l/rt:inner (constantly {:state (atom [nil "path"])})
                 slurp (constantly "log")]
     (access-logs)
@@ -40,7 +38,6 @@
 
 ^{:refer rt.nginx/nginx-conf :added "4.0"}
 (fact "accesses the running ngx conf"
-  ^:hidden
   (with-redefs [l/rt:inner (constantly {:state (atom [nil "path" "conf"])})
                 slurp (constantly "conf")]
     (nginx-conf)
@@ -48,7 +45,6 @@
 
 ^{:refer rt.nginx/dir-tree :added "4.0"}
 (fact "gets the running nginx access log"
-  ^:hidden
   (with-redefs [l/rt:inner (constantly {:state (atom [nil "path"])})
                 fs/list (constantly [])]
     (dir-tree)
@@ -56,21 +52,18 @@
 
 ^{:refer rt.nginx/all-nginx-ports :added "4.0"}
 (fact "gets all nginx ports on the system"
-  ^:hidden
   (with-redefs [os/sh (fn [& _] "COMMAND PID USER FD TYPE DEVICE SIZE/OFF NODE NAME\nnginx 123 root 6u IPv4 1234 0t0 TCP *:80 (LISTEN)")]
     (all-nginx-ports)
     => {80 #{123}}))
 
 ^{:refer rt.nginx/all-nginx-active :added "4.0"}
 (fact "gets all active nginx processes for a port"
-  ^:hidden
   (with-redefs [all-nginx-ports (constantly {80 #{123}})]
     (all-nginx-active 80)
     => #{123}))
 
 ^{:refer rt.nginx/make-conf :added "4.0"}
 (fact "creates a config"
-  ^:hidden
   (with-redefs [config/create-conf (fn [_] {})
                 script/write (constantly "conf")
                 env/pl (fn [& _] nil)]
@@ -79,7 +72,6 @@
 
 ^{:refer rt.nginx/make-temp :added "4.0"}
 (fact "makes a temp directory and conf"
-  ^:hidden
   (with-redefs [make-conf (constantly "conf")
                 fs/create-tmpdir (constantly "tmp")
                 fs/create-tmpfile (constantly "tmp/file")
@@ -135,7 +127,6 @@
 
 ^{:refer rt.nginx/raw-eval-nginx :added "4.0"}
 (fact "posts a raw lua string to the dev server"
-  ^:hidden
   (with-redefs [http/post (constantly {:status 200 :body "ok"})]
     (raw-eval-nginx {:host "localhost" :port 80} "body")
     => "ok"))

@@ -126,7 +126,7 @@
   => 900)
 
 ^{:refer std.image/write :added "3.0"}
-(fact "writes an image to file" ^:hidden
+(fact "writes an image to file"
   (do (fs/delete "test-scratch/circle-30.jpg")
       (-> (image/read "test-data/std.image/circle-30.png")
           (image/coerce (model/model :3-byte-bgr) :base)

@@ -9,7 +9,7 @@
   "creates a throttle"
   {:added "4.0"}
   [handler now-fn]
-  (return {:now-fn (or now-fn xt/x:now-ms)
+  (return {:now-fn (:? (xt/x:nil? now-fn) xt/x:now-ms now-fn)
            :handler handler
            :active {}
            :queued {}}))
@@ -19,14 +19,17 @@
   {:added "4.0"}
   [throttle id args]
   (var #{active queued handler now-fn} throttle)
-  (:= args (or args []))
-  (return (xt/for:async [[ret err] (handler id (xt/x:unpack args))]
-            {:finally (do (xt/x:del-key active id)
-                          (let [qentry (xt/x:get-key queued id)]
-                            (when qentry
-                              (xt/x:set-key active id qentry)
-                              (xt/x:del-key queued id)
-                              (return (-/throttle-run-async throttle id args)))))})))
+  (when (xt/x:nil? args)
+    (:= args []))
+  (var inputs [id])
+  (xt/x:arr-assign inputs args)
+  (xt/for:async [[ret err] (xt/x:apply handler inputs)]
+    {:finally (do (xt/x:del-key active id)
+                  (let [qentry (xt/x:get-key queued id)]
+                    (when (xt/x:not-nil? qentry)
+                      (xt/x:set-key active id qentry)
+                      (xt/x:del-key queued id)
+                      (return (-/throttle-run-async throttle id args)))))}))
 
 (defn.xt throttle-run
   "throttles a function so that it only runs a single thread"
@@ -34,11 +37,11 @@
   [throttle id args]
   (var #{active queued handler now-fn} throttle)
   (var qentry (xt/x:get-key queued id))
-  (when qentry
+  (when (xt/x:not-nil? qentry)
     (return qentry))
   
   (var aentry (xt/x:get-key active id))
-  (when aentry
+  (when (xt/x:not-nil? aentry)
     (:= qentry [(xt/x:first aentry) (now-fn)])
     (xt/x:set-key queued id qentry)
     (return qentry))
@@ -69,4 +72,3 @@
   [throttle]
   (var #{queued} throttle)
   (return (xt/x:obj-keys queued)))
-

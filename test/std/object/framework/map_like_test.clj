@@ -15,7 +15,7 @@
 ^{:refer std.object.framework.map-like/read-proxy-functions :added "3.0"}
 (fact "creates a proxy access through a field in the object"
 
-  (read-proxy-functions {:school [:name :raw]}) ^:hidden
+  (read-proxy-functions {:school [:name :raw]})
   => '{:name {:type java.lang.Object
               :fn (clojure.core/fn [obj]
                     (clojure.core/let [proxy (std.object.framework.access/get obj :school)]
@@ -28,7 +28,7 @@
 ^{:refer std.object.framework.map-like/write-proxy-functions :added "3.0"}
 (fact "creates a proxy access through a field in the object"
 
-  (write-proxy-functions {:school [:name :raw]}) ^:hidden
+  (write-proxy-functions {:school [:name :raw]})
   => '{:name {:type java.lang.Object
               :fn (clojure.core/fn [obj v]
                     (clojure.core/let [proxy (std.object.framework.access/get obj :school)]
@@ -41,7 +41,7 @@
 ^{:refer std.object.framework.map-like/extend-map-read :added "3.0"}
 (fact "creates the forms for read methods"
 
-  (extend-map-read 'test.Cat {:read :fields}) ^:hidden
+  (extend-map-read 'test.Cat {:read :fields})
   => '{:methods (std.object.framework.map-like/key-selection
                  (std.object.framework.read/read-fields test.Cat) nil nil)})
 
@@ -58,7 +58,7 @@
                    {:tag "build.dog"
                     :write {:empty (fn [] (test.DogBuilder.))
                             :methods :class}
-                    :read :fields}) ^:hidden
+                    :read :fields})
 
   (extend-map-like test.Dog {:tag "dog"
                              :write  {:methods :fields

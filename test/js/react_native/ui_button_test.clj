@@ -19,14 +19,13 @@
   :adopt true
   :added "0.1"}
 (fact "creates a opacity button"
-  ^:hidden
-  
+
   (defn.js ButtonOpacityDemo
     []
     (var [active setActive] (r/local true))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-button/ButtonOpacity"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-button/ButtonOpacity"}
 [:% n/Row
        {:style {:alignItems "center"
                 :backgroundColor "yellow"
@@ -54,7 +53,7 @@
                             :flex 1}})]
          :transformations
          {:bg (fn:> [#{pressing}]
-                {:style {:opacity (- 1 (* 0.8 pressing))}})}}]] 
+                {:style {:opacity (- 1 (* 0.8 pressing))}})}}]]
 [:% n/Caption
        {:text (n/format-obj #{active})
         :style {:marginTop 10}}]))))
@@ -63,14 +62,13 @@
   :adopt true
   :added "0.1"}
 (fact  "creates a size button"
-  ^:hidden
-  
+
   (defn.js ButtonSizeDemo
     []
     (var [active setActive] (r/local true))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-button/ButtonSize"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-button/ButtonSize"}
 [:% n/Row
        {:style {:alignItems "center"}}
        [:% n/Text
@@ -99,7 +97,7 @@
          :transformations
          {:bg (fn:> [#{pressing}]
                 {:style {:transform [{:scaleY (+ 1 pressing)}
-                                     {:scaleX (+ 1 pressing)}]}})}}]] 
+                                     {:scaleX (+ 1 pressing)}]}})}}]]
 [:% n/Caption
        {:text (n/format-obj #{active})
         :style {:marginTop 10}}]))))
@@ -108,14 +106,13 @@
   :adopt true
   :added "0.1"}
 (fact  "creates a button"
-  ^:hidden
-  
+
   (defn.js ButtonFractionDemo
     []
     (var [active setActive] (r/local true))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-button/ButtonFraction"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-button/ButtonFraction"}
 [:% n/Row
        {:style {:alignItems "center"}}
        [:% n/Text
@@ -141,7 +138,7 @@
                    {:style {:paddingHorizontal 20
                             :height 80
                             :flex 1}})]}]
-       [:% n/Padding {:style {:width 10}}]] 
+       [:% n/Padding {:style {:width 10}}]]
 [:% n/Caption
        {:text (n/format-obj #{active})
         :style {:marginTop 10}}]))))
@@ -151,16 +148,15 @@
 
 ^{:refer js.react-native.ui-button/Button :added "0.1"}
 (fact  "creates a simple button"
-  ^:hidden
-  
+
   (defn.js ButtonSimpleDemo
     []
     (var [active setActive] (r/local true))
     (var [highlighted setHighlighted]   (r/local false))
     (var [disabled setDisabled]   (r/local false))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-button/ButtonSimple"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-button/ButtonSimple"}
 [:% n/Row
        {:style {:alignItems "center"}}
        [:% n/Text
@@ -184,7 +180,7 @@
          :addons [(physical-addon/tagAll
                    {:style {:paddingHorizontal 20
                             :height 80
-                            :flex 1}})]}]] 
+                            :flex 1}})]}]]
 [:% n/Row
        [:% n/Button
         {:title "H"
@@ -192,12 +188,12 @@
        [:% n/Text " "]
        [:% n/Button
         {:title "D"
-         :onPress (fn:> (setDisabled (not disabled)))}]] 
+         :onPress (fn:> (setDisabled (not disabled)))}]]
 [:% n/Caption
        {:text (n/format-obj #{active})
         :style {:marginTop 10}}])))
 
-  
-  
-  
+
+
+
   )

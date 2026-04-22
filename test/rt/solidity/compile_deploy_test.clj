@@ -32,15 +32,14 @@
               '[(:= (!:G ethers) (require "ethers"))])]
   :teardown [(component/stop +rt+)]}
 (fact "deploy abi"
-  ^:hidden
-  
+
   (deploy/deploy-base +rt+
                       "http://127.0.0.1:8545"
                       (compile/create-pointer-entry +rt+ test:hello)
                       [])
   => (contains-in
       {"status" true, "contractAddress" string?}))
-  
+
 ^{:refer rt.solidity.compile-deploy/deploy-pointer :added "4.0"
   :setup    [(def +rt+
                (compile/compile-rt-prep))
@@ -49,14 +48,13 @@
               '[(:= (!:G ethers) (require "ethers"))])]
   :teardown [(component/stop +rt+)]}
 (fact "deploys a pointer"
-  ^:hidden
 
   (deploy/deploy-pointer +rt+
                          "http://127.0.0.1:8545"
                          test:hello)
   => (contains-in
       {"status" true, "contractAddress" string?})
-  
+
 
   (deploy/deploy-pointer +rt+
                          "http://127.0.0.1:8545"
@@ -71,8 +69,7 @@
               +rt+
               '[(:= (!:G ethers) (require "ethers"))])]}
 (fact "deploys a namespace on the blockchain"
-  ^:hidden
-  
+
   (deploy/deploy-module +rt+
                         "http://127.0.0.1:8545"
                         web3.lib.example-erc20/+default-contract+)

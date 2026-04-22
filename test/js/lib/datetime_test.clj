@@ -13,8 +13,7 @@
 
 ^{:refer js.lib.datetime/agoVerbose :added "4.0" :unchecked true}
 (fact "formats the time ago in verbose"
-  ^:hidden
-  
+
   (defn.js AgoDemo
     []
     (let [current (r/const (* (- (j/now) 20000) 1000))

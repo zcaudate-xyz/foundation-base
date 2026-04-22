@@ -16,15 +16,13 @@
 
 ^{:refer js.react-native.model-geom/oppositePosition :added "4.0" :unchecked true}
 (fact "gets the opposite position"
-  ^:hidden
-  
+
   (geom/oppositePosition "top")
   => "bottom")
 
 ^{:refer js.react-native.model-geom/triangleBaseStyle :added "4.0" :unchecked true}
 (fact "constructs a style for triangle"
-  ^:hidden
-  
+
   (geom/triangleBaseStyle "red" "top" 20 10)
   => {"borderLeftWidth" 10,
    "borderBottomColor" "red",
@@ -34,7 +32,7 @@
    "borderTopWidth" 0,
    "borderRightColor" "transparent",
    "borderTopColor" "transparent"}
-  
+
 
   (geom/triangleBaseStyle "red" "left" 20 10)
   => {"borderLeftWidth" 0,

@@ -18,7 +18,7 @@
 
 ^{:refer std.lib.function/fn:supplier :added "3.0"
   :style/indent 1}
-(fact "creates a java supplier" ^:hidden
+(fact "creates a java supplier"
 
   (-> (fn:supplier [] (+ 1 2 3))
       (.get))
@@ -38,7 +38,7 @@
 
 ^{:refer std.lib.function/fn:lambda :added "3.0"
   :style/indent 1}
-(fact "creates java unary/binary functions" ^:hidden
+(fact "creates java unary/binary functions"
 
   (-> (fn:lambda [a] (+ a 10))
       (.apply 1))
@@ -50,7 +50,7 @@
 
 ^{:refer std.lib.function/fn:consumer :added "3.0"
   :style/indent 1}
-(fact "creates a java unary function" ^:hidden
+(fact "creates a java unary function"
 
   (-> (fn:consumer [^long x] (+ x 1))
       (.accept 2))
@@ -114,7 +114,7 @@
 (fact "creates args for the body"
 
   (fn:create-args '[[x] (inc x) nil nil])
-  => '("" {} [x] (inc x)) ^:hidden
+  => '("" {} [x] (inc x))
 
   (fn:create-args '["doc" {:a 1} [x] (inc x)])
   => '("doc" {:a 1} [x] (inc x))

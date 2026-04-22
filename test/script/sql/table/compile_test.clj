@@ -10,7 +10,6 @@
 
 ^{:refer script.sql.table.compile/in:fn-map :added "3.0"}
 (fact "constructs an function map for sql input"
-  ^:hidden
 
   (keys (in:fn-map table-test/|schema| :meat))
   => (contains [:type :grade] :in-any-order)
@@ -22,7 +21,6 @@
 
 ^{:refer script.sql.table.compile/out:fn-map :added "3.0"}
 (fact "constructs a function map for sql output"
-  ^:hidden
 
   (keys (out:fn-map table-test/|schema| :meat))
   => (contains [:type :grade] :in-any-order)
@@ -34,7 +32,6 @@
 
 ^{:refer script.sql.table.compile/transform:fn :added "3.0"}
 (fact "constructs a data transform function"
-  ^:hidden
 
   ((transform:fn in:fn-map table-test/|schema| :meat)
    {:id "a"
@@ -57,7 +54,6 @@
 
 ^{:refer script.sql.table.compile/transform:in :added "3.0"}
 (fact "transforms data in"
-  ^:hidden
 
   (transform:in {:id "account-0" :wallet :wallet.id/w0}
                 :account
@@ -70,7 +66,6 @@
 
 ^{:refer script.sql.table.compile/transform:out :added "3.0"}
 (fact "transforms data out"
-  ^:hidden
 
   (transform:out {:id "account-0" :wallet-id "w0"}
                  :account

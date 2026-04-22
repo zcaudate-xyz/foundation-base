@@ -12,7 +12,6 @@
        (:use code.test))
       (l/script- :js {:runtime :basic})
       (fact \"identity function\"
-        ^:hidden
         (!.js (k/identity 1))
         => 1)]"))
 

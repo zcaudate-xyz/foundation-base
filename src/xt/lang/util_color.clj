@@ -197,15 +197,18 @@
   "named color to rgb"
   {:added "4.0"}
   [s]
-  (return (or (xt/x:get-key -/NAMED s)
-              [0 0 0])))
+  (return (:? (xt/x:nil? (xt/x:get-key -/NAMED s))
+              [0 0 0]
+              (xt/x:get-key -/NAMED s))))
 
 (defn.xt hex->n
   "hex to rgb val"
   {:added "4.0"}
   [s]
-  (return (or (xt/x:get-key -/HEX (xts/to-uppercase s))
-              0)))
+  (var out (xt/x:get-key -/HEX (xts/to-uppercase s)))
+  (when (xt/x:nil? out)
+    (:= out 0))
+  (return out))
 
 (defn.xt n->hex
   "converts an rgb to hex"
@@ -213,8 +216,8 @@
   [n]
   (var v1 (xtm/quot n 16))
   (var v0 (xtm/mod-pos n 16))
-  (return (xt/x:cat (or (xt/x:get-key -/LU v1) "0")
-                    (or (xt/x:get-key -/LU v0) "0"))))
+  (return (xt/x:cat (:? (xt/x:nil? (xt/x:get-key -/LU v1)) "0" (xt/x:get-key -/LU v1))
+                    (:? (xt/x:nil? (xt/x:get-key -/LU v0)) "0" (xt/x:get-key -/LU v0)))))
 
 (defn.xt hex->rgb
   "converts a hex value to rgb array"
@@ -294,7 +297,9 @@
   (var value (xtm/max r g b))
   (var whiteness (xtm/min r g b))
   (var delta (- value whiteness))
-  (var h (-/rgb->hue r g b value delta (or fallback 0)))
+  (when (xt/x:nil? fallback)
+    (:= fallback 0))
+  (var h (-/rgb->hue r g b value delta fallback))
   (var l (/ (* 100
                (+ value whiteness) 0.5)
             255))
@@ -349,7 +354,7 @@
   "converts a named color to hsl"
   {:added "4.0"}
   [s]
-  (return (-/rgb->hsl (-/named->rgb s))))
+  (return (-/rgb->hsl (-/named->rgb s) nil)))
 
 (defn.xt named->hex
   "converts a named color to hex"
@@ -361,5 +366,4 @@
   "converts a hex to hsl"
   {:added "4.0"}
   [s]
-  (return (-/rgb->hsl (-/hex->rgb s))))
-
+  (return (-/rgb->hsl (-/hex->rgb s) nil)))

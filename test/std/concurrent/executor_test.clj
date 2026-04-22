@@ -10,22 +10,22 @@
 
   ((wrap-min-time (fn []) 20 0))
   => nil
-  
+
   ((wrap-min-time (fn []) 100 10))
   => nil)
 
 ^{:refer std.concurrent.executor/exec:queue :added "3.0"}
 (fact "contructs a raw queue in different ways"
-  
+
   (exec:queue)
-  
+
   (exec:queue 1)
-  
+
   (exec:queue {:size 1})
 
   (exec:queue {})
   => java.util.concurrent.LinkedBlockingQueue
-  
+
   (exec:queue (q/queue))
   => java.util.concurrent.LinkedBlockingQueue)
 
@@ -37,7 +37,7 @@
   (doto (executor:single)
     (exec:shutdown))
   => java.util.concurrent.ThreadPoolExecutor
-  
+
   ;; fixed pool
   (doto (executor:single {:size 10})
     (exec:shutdown))
@@ -61,7 +61,6 @@
 
 ^{:refer std.concurrent.executor/exec:shutdown :added "3.0"}
 (fact "shuts down executor"
-  ^:hidden
 
   (-> (executor:single)
       (doto (submit (fn [] (Thread/sleep 1000))))
@@ -73,7 +72,6 @@
 
 ^{:refer std.concurrent.executor/exec:shutdown-now :added "3.0"}
 (fact "shuts down executor immediately"
-  ^:hidden
 
   (-> (executor:single)
       (doto (submit (fn [] (Thread/sleep 1000))))
@@ -85,8 +83,7 @@
 ^{:refer std.concurrent.executor/exec:get-queue :added "3.0"
   :teardown [(track/tracked:last [:raw :executor] :stop)]}
 (fact "gets the queue from the executor"
-  ^:hidden
-  
+
   (let [queue (q/queue)
         exe   (executor:pool 10 10 1000 queue)]
     (try
@@ -98,15 +95,14 @@
 ^{:refer std.concurrent.executor/submit :added "3.0"
   :teardown [(track/tracked:last [:raw :executor] :stop 2)]}
 (fact "submits a task to an executor"
-  ^:hidden
-  
+
   (let [exe (executor:single)]
     (try
       @(submit exe
                (fn [])
                {:min 100})
       (finally
-        (exec:shutdown exe)))) 
+        (exec:shutdown exe))))
 
   (let [exe (executor:single)]
     (try
@@ -146,7 +142,7 @@
   => java.util.concurrent.ThreadPoolExecutor)
 
 ^{:refer std.concurrent.executor/schedule :added "3.0"}
-(fact "schedules task for execution" ^:hidden
+(fact "schedules task for execution"
 
   (f/-> (doto (executor:scheduled 1)
           (schedule (fn [] (Thread/sleep 10)) 10)
@@ -158,7 +154,7 @@
   => 4)
 
 ^{:refer std.concurrent.executor/schedule:fixed-rate :added "3.0"}
-(fact "schedules task at a fixed rate" ^:hidden
+(fact "schedules task at a fixed rate"
 
   (def -counter- (atom 0))
 
@@ -170,7 +166,7 @@
   => #(<= 3 %))
 
 ^{:refer std.concurrent.executor/schedule:fixed-delay :added "3.0"}
-(fact "schedules task at fixed delay" ^:hidden
+(fact "schedules task at fixed delay"
 
   (def -counter- (atom 0))
 
@@ -182,7 +178,7 @@
   => #(<= 1 %))
 
 ^{:refer std.concurrent.executor/exec:await-termination :added "3.0"}
-(fact "await termination for executor service" ^:hidden
+(fact "await termination for executor service"
 
   ;; Shutdown
   (def -counter- (atom 0))
@@ -305,7 +301,7 @@
 
 ^{:refer std.concurrent.executor/exec:rejected-handler :added "3.0"
   :teardown [(track/tracked:last [:raw :executor] :stop 2)]}
-(fact "sets the rejected task handler" ^:hidden
+(fact "sets the rejected task handler"
 
   (def -counter- (atom 0))
   (doto (executor:single 1)
@@ -325,7 +321,7 @@
 
 ^{:refer std.concurrent.executor/exec:at-capacity? :added "3.0"
   :teardown [(track/tracked:last [:raw :executor] :stop)]}
-(fact "checks if executor is at capacity" ^:hidden
+(fact "checks if executor is at capacity"
 
   (let [exe (executor:single 1)]
     (try
@@ -337,7 +333,7 @@
 
 ^{:refer std.concurrent.executor/exec:increase-capacity :added "3.0"
   :teardown [(track/tracked:last [:raw :executor] :stop)]}
-(fact "increases the capacity of the executor" ^:hidden
+(fact "increases the capacity of the executor"
 
   (let [exe (executor:single)]
     (try
@@ -348,7 +344,7 @@
 
 ^{:refer std.concurrent.executor/executor:type :added "3.0"
   :teardown [(track/tracked:last [:raw :executor] :stop)]}
-(fact "returns executor service type" ^:hidden
+(fact "returns executor service type"
 
   (let [exe (executor:single)]
     (try
@@ -358,7 +354,7 @@
 
 ^{:refer std.concurrent.executor/executor:info :added "3.0"
   :teardown [(track/tracked:last [:raw :executor] :stop)]}
-(fact "returns executor service info" ^:hidden
+(fact "returns executor service info"
 
   (let [exe (executor:single)]
     (try
@@ -373,7 +369,7 @@
 
 ^{:refer std.concurrent.executor/executor:props :added "3.0"
   :teardown [(track/tracked:last [:raw :executor] :stop)]}
-(fact "returns props for getters and setters" ^:hidden
+(fact "returns props for getters and setters"
 
   (let [exe (executor:single)]
     (try
@@ -390,7 +386,7 @@
 
 ^{:refer std.concurrent.executor/executor:health :added "3.0"
   :teardown [(track/tracked:last [:raw :executor] :stop 2)]}
-(fact "returns health of the executor" ^:hidden
+(fact "returns health of the executor"
 
   (let [exe (executor:single)]
     (try
@@ -412,8 +408,7 @@
                    :max 3
                    :keep-alive 1000})
     (exec:shutdown))
-   ^:hidden
-  
+
   (doto (executor {:type :single
                    :size 1})
     (exec:shutdown))

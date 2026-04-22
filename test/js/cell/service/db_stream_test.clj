@@ -14,7 +14,6 @@
 
 ^{:refer js.cell.service.db-stream/stream-capable? :added "4.1"}
 (fact "checks whether a descriptor can attach streams"
-  ^:hidden
 
   (!.js
    (var db {"subscribe" (fn [stream on-event view-context]
@@ -25,7 +24,6 @@
 
 ^{:refer js.cell.service.db-stream/normalize-stream :added "4.1"}
 (fact "normalizes topic and stream helpers from the descriptor"
-  ^:hidden
 
   (!.js
    (var db {"target" "supabase-main"
@@ -47,7 +45,6 @@
 
 ^{:refer js.cell.service.db-stream/subscription-key :added "4.1"}
 (fact "builds a stable subscription key"
-  ^:hidden
 
   (!.js
    (db-stream/subscription-key
@@ -59,7 +56,6 @@
 
 ^{:refer js.cell.service.db-stream/subscribe-stream :added "4.1"}
 (fact "subscribes through the configured stream source"
-  ^:hidden
 
   (!.js
    (var [ok handle] (db-stream/subscribe-stream
@@ -76,7 +72,6 @@
 
 ^{:refer js.cell.service.db-stream/unsubscribe-stream :added "4.1"}
 (fact "unsubscribes using the stream handle"
-  ^:hidden
 
   (!.js
    (db-stream/unsubscribe-stream
@@ -87,7 +82,6 @@
 
 ^{:refer js.cell.service.db-stream/event->update :added "4.1"}
 (fact "maps payloads into update descriptors"
-  ^:hidden
 
   (!.js
    [(db-stream/event->update
@@ -117,7 +111,6 @@
 
 ^{:refer js.cell.service.db-stream/attach-stream :added "4.1"}
 (fact "attaches a stream and forwards mapped updates"
-  ^:hidden
 
   (!.js
    (var captured nil)
@@ -146,7 +139,6 @@
 
 ^{:refer js.cell.service.db-stream/detach-stream :added "4.1"}
 (fact "detaches a previously attached stream"
-  ^:hidden
 
   (!.js
    (db-stream/detach-stream

@@ -62,7 +62,7 @@
 
 ^{:refer std.dispatch.hub/put-hub :added "3.0"}
 (fact "puts an entry into the group hubs"
-  
+
   (def -d- {:runtime {:groups (atom {})}})
   (put-hub -d- :g 1)
   => (contains [1])
@@ -70,29 +70,25 @@
 
 ^{:refer std.dispatch.hub/create-hub-handler :added "3.0"}
 (fact "creates the hub handler"
-  ^:hidden
-  
+
   (create-hub-handler {:runtime {:groups (atom {})}}) => fn?)
 
 ^{:refer std.dispatch.hub/update-debounce-handler! :added "3.0"}
 (fact "updates the debounce handler"
-  ^:hidden
-  
+
   (def -d- (create-dispatch +test-config+))
   (update-debounce-handler! -d-)
   (:handler (deref (:debouncer (:runtime -d-)))) => fn?)
 
 ^{:refer std.dispatch.hub/create-debounce :added "3.0"}
 (fact "creates the debounce executor"
-  ^:hidden
-  
+
   (create-debounce {:options {:hub {:interval 100 :delay 10}}})
   => map?)
 
 ^{:refer std.dispatch.hub/start-dispatch :added "3.0"}
 (fact "starts the hub executor"
-  ^:hidden
-  
+
   (def -d- (create-dispatch +test-config+))
   (start-dispatch -d-)
   (started?-dispatch -d-) => true
@@ -100,24 +96,21 @@
 
 ^{:refer std.dispatch.hub/stop-dispatch :added "3.0"}
 (fact "stops the hub executor"
-  ^:hidden
-  
+
   (def -d- (doto (create-dispatch +test-config+) (start-dispatch)))
   (stop-dispatch -d-)
   (started?-dispatch -d-) => false)
 
 ^{:refer std.dispatch.hub/kill-dispatch :added "3.0"}
 (fact "kills the hub executor"
-  ^:hidden
-  
+
   (def -d- (doto (create-dispatch +test-config+) (start-dispatch)))
   (kill-dispatch -d-)
   (started?-dispatch -d-) => false)
 
 ^{:refer std.dispatch.hub/submit-dispatch :added "3.0"}
 (fact "submits to the hub executor"
-  ^:hidden
-  
+
   (def -d- (doto (create-dispatch +test-config+) (start-dispatch)))
   (-> (submit-dispatch -d- {:group :a :val 1})
       (nth 2)
@@ -127,16 +120,14 @@
 
 ^{:refer std.dispatch.hub/info-dispatch :added "3.0"}
 (fact "returns dispatch info"
-  ^:hidden
-  
+
   (def -d- (doto (create-dispatch +test-config+) (start-dispatch)))
   (info-dispatch -d- nil) => map?
   (stop-dispatch -d-))
 
 ^{:refer std.dispatch.hub/create-dispatch :added "3.0"}
 (fact "creates the hub executor"
-  ^:hidden
-  
+
   ;; Non Sorted
   (->> (test-scaffold +test-config+ 20 5 5)
        second
@@ -185,7 +176,7 @@
 (comment
 
   @(:debouncer (:runtime -e-))
-  
+
   (def -e- (-> (create-dispatch {:handler (fn [_ entries] (prn :ENTRIES entries))
                                  :options {:pool {:max 100
                                                   :size 100}
@@ -196,7 +187,7 @@
                                                             :run-final true}
                                                  :sort {:sequential false}}}})
                (start-dispatch)))
-  
+
   (do (future (dotimes [i 1000]
                 (Thread/sleep 1)
                 (submit-dispatch -e- 0)))

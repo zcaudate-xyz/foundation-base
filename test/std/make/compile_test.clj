@@ -10,15 +10,13 @@
 
 ^{:refer std.make.compile/compile-fullbody :added "4.0"}
 (fact "helper function for compile methods"
-  ^:hidden
-  
+
   (compile-fullbody "<BODY>" {:header "<HEADER>" :footer "<FOOTER>"})
   => "<HEADER>\n\n<BODY>\n\n<FOOTER>")
 
 ^{:refer std.make.compile/compile-out-path :added "4.0"}
 (fact "creates the output path for file"
-  ^:hidden
-  
+
   (compile-out-path {:root ".build"
                      :target "src"
                      :file "pkg/file.lua"})
@@ -26,16 +24,14 @@
 
 ^{:refer std.make.compile/compile-write :added "4.0"}
 (fact "writes body to the output path"
-  ^:hidden
-  
+
   (with:mock-compile
    (compile-write "hello.txt" "HELLO"))
   => ["hello.txt" "HELLO"])
 
 ^{:refer std.make.compile/compile-summarise :added "4.0"}
 (fact "summaries the output"
-  ^:hidden
-  
+
   (compile-summarise [[:unchanged "hello.txt"]])
   => {:files 1, :status :unchanged})
 
@@ -58,10 +54,9 @@
 
 ^{:refer std.make.compile/compile-resource :added "4.0"}
 (fact "copies resources to the build directory"
-  ^:hidden
-  
+
   (with:mock-compile
-   (compile-resource 
+   (compile-resource
     {:type :resource
      :target "assets"
      :main [["assets/std.make/tangle.sh" "tangle.make.sh"]]}))
@@ -69,10 +64,9 @@
 
 ^{:refer std.make.compile/compile-resource :added "4.0"}
 (fact "copies resources to the build directory"
-  ^:hidden
-  
+
   (with:mock-compile
-   (compile-resource 
+   (compile-resource
     {:type :resource
      :target "assets"
      :main [["assets/std.make/tangle.sh" "tangle.make.sh"]]}))
@@ -80,8 +74,7 @@
 
 ^{:refer std.make.compile/compile-custom :added "4.0"}
 (fact "creates a custom "
-  ^:hidden
-  
+
   (with:mock-compile
    (compile-custom {:root   ".build"
                     :target "src"
@@ -96,8 +89,7 @@
 
 ^{:refer std.make.compile/types-list :added "4.0"}
 (fact "lists all compilation types"
-  ^:hidden
-  
+
   (set (types-list))
   => #{:script :directory :module.schema :module.graph :custom :module.single :resource :module.directory :module.root})
 
@@ -109,11 +101,10 @@
 
 ^{:refer std.make.compile/compile-ext-fn :added "4.0"}
 (fact "creates various formats "
-  ^:hidden
-  
+
   (with:mock-compile
    (compile-ext {:root   ".build"
-                 :format :makefile 
+                 :format :makefile
                  :main  '[[:init [pnpm install --shamefully-hoist]]
                           [:dev  [yarn dev]]
                           [:package [yarn package]]
@@ -131,7 +122,7 @@
        ""
        "release: package"
        "\tyarn release")]
-  
+
   (with:mock-compile
    (compile-ext {:root   ".build"
                  :file "src/file.yaml"
@@ -153,8 +144,7 @@
 
 ^{:refer std.make.compile/compile-ext :added "4.0"}
 (fact "compiles project files of different extensions"
-  ^:hidden
-  
+
   (with:mock-compile
    (compile-ext {:format :makefile
                  :main [[:hello "world"]]}))
@@ -171,8 +161,7 @@
 
 ^{:refer std.make.compile/compile-single :added "4.0"}
 (fact "compiles a single file"
-  ^:hidden
-  
+
   (with:mock-compile
    (compile-single
     "<ROOT>/.build"
@@ -182,8 +171,7 @@
 
 ^{:refer std.make.compile/compile-section :added "4.0"}
 (fact "compiles section"
-  ^:hidden
-  
+
   (with:mock-compile
    (compile-section
     {:keys ["<ROOT>" ".build" nil nil],
@@ -204,8 +192,7 @@
 
 ^{:refer std.make.compile/compile-directive :added "4.0"}
 (fact "compiles directive"
-  ^:hidden
-  
+
   (with:mock-compile
    (compile-directive
     {:root "<ROOT>",
@@ -229,8 +216,7 @@
 
 ^{:refer std.make.compile/compile :added "4.0"}
   (fact "creates files based on entries"
-    ^:hidden
-    
+
     (with:mock-compile
      (compile {:instance (atom {:root   "<ROOT>"
                                 :build  ".build"

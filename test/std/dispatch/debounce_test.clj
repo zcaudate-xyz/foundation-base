@@ -51,7 +51,6 @@
 
 ^{:refer std.dispatch.debounce/submit-notify :added "3.0"}
 (fact "submits and executes on as well and after delay"
-  ^:hidden
 
   (test-scaffold (assoc-in +test-config+
                            [:options :debounce :strategy] :notify)

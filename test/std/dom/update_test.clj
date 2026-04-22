@@ -48,7 +48,7 @@
 
 ^{:refer std.dom.update/update-list-append :added "3.0"}
 (fact "updates :append changes to list"
-  
+
   (update-list-append ["A"]
                       [:list-append "B"])
   => ["A" "B"])
@@ -67,14 +67,14 @@
                :items
                ["a"]
                [[:list-set 0 "A" "a"]])
-  => ["A"]^:hidden
-  
+  => ["A"]
+
   (update-list (impl/dom-render (base/dom-compile [:mock/pane"a"]))
                :items
                ["a"]
                [[:list-drop "a"]])
   => []
-  
+
   (update-list (impl/dom-render (base/dom-compile [:mock/pane"a"]))
                :items
                ["a"]
@@ -83,7 +83,7 @@
 
 ^{:refer std.dom.update/update-props-delete :added "3.0"}
 (fact "updates props given an operation"
-  
+
   (update-props-delete {:text "hello"}
                        [:delete :text "hello"])
   => {})
@@ -100,7 +100,7 @@
 (fact "updates props of doms"
 
   (update-props (base/dom-compile [:mock/label]) {} [[:set :text "hello"]])
-  => {:text "hello"}^:hidden
+  => {:text "hello"}
 
   (let [-label- (base/dom-compile [:mock/label "a"])]
     (-> (update-props (doto (base/dom-compile [:mock/pane {:top -label-}])
@@ -119,7 +119,7 @@
 
 ^{:refer std.dom.update/dom-apply-default :added "3.0"}
 (fact "default function for dom-apply"
-  
+
   (-> (dom-apply-default (doto (base/dom-compile [:mock/pane {:items ["a"]}])
                            (impl/dom-render))
                          [[:update :items [[:list-set 0 "A"]]]])
@@ -129,7 +129,7 @@
 
 ^{:refer std.dom.update/dom-update :added "3.0"}
 (fact "updates current dom given new dom"
-  
+
   (-> (doto (base/dom-compile [:mock/pane {:a 1}
                                [:mock/pane {:b 2}]
                                [:mock/pane {:c 3}]])

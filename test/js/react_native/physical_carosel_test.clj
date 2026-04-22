@@ -23,10 +23,9 @@
   :adopt true
   :added "4.0" :unchecked true}
 (fact "creates a set of edit points"
-  ^:hidden
 
   (def.js DIVISIONS 2)
-  
+
   (def.js DIGITS
     ["0" "1"])
 
@@ -48,10 +47,10 @@
                                               offset0
                                               (xt/x:len -/DIGITS))))))
     (var modelFn (r/const (model-roller/roller-model -/DIVISIONS 10)))
-    
+
     (return
-     (n/EnclosedCode 
-      {:label "js.react-native.physical-carosel/DigitCaroselManual"} 
+     (n/EnclosedCode
+      {:label "js.react-native.physical-carosel/DigitCaroselManual"}
       [:% n/Row
        [:% n/View
         {:style {:flex 1
@@ -113,9 +112,9 @@
                                  {:translateX (* 8
                                                 (math/sign translate)
                                                 translate translate)}
-                                #_{:translateY (* 0.5 (j/abs translate))}]}}))}]))]] 
+                                #_{:translateY (* 0.5 (j/abs translate))}]}}))}]))]]
       [:% n/Row
-       
+
        [:% n/Button
         {:title "-1"
          :onPress (fn:> (setOffset0 (- offset0 1)))}]

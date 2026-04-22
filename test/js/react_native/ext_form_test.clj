@@ -37,8 +37,7 @@
   :adopt true
   :added "0.1"}
 (fact "adding a carosel stepper"
-  ^:hidden
-  
+
   (defn.js RegistrationFormDemo
     []
     (var form (ext-form/makeForm
@@ -46,7 +45,7 @@
                       :last-name "world"
                       :email ""})
                -/RegistraionValidation))
-    
+
     (var #{first-name
            last-name
            email} (ext-form/listenFormData form))
@@ -54,8 +53,8 @@
     (var #{fields} result)
     (var getCount (r/useGetCount))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ext-form-test/RegistrationForm"} 
+     (n/EnclosedCode
+{:label "js.react-native.ext-form-test/RegistrationForm"}
 [:% n/View
        {}
        [:% n/Row
@@ -84,7 +83,7 @@
                   :padding 5
                   :backgroundColor "#eee"}}]
         [:% n/Text (:? (== "errored" (xt/x:get-path fields ["email" "status"]))
-                       (xt/x:get-path fields ["email" "message"]))]]] 
+                       (xt/x:get-path fields ["email" "message"]))]]]
 [:% n/Row
        [:% n/Button
         {:title "Validate"
@@ -94,7 +93,7 @@
          :onPress (fn:> (event-form/reset-all-validators form))}]
        [:% n/Button
         {:title "Reset"
-         :onPress (fn:> (event-form/reset-all-data form))}]] 
+         :onPress (fn:> (event-form/reset-all-data form))}]]
 [:% n/Caption
        {:text (n/format-entry #{fields
                                 {:count (getCount)
@@ -102,10 +101,10 @@
                                          last-name
                                          email}}})
         :style {:marginTop 10}}])))
-  
+
 
   (def.js MODULE
     (do (:# (!:uuid))
         (!:module)))
-  
+
   )

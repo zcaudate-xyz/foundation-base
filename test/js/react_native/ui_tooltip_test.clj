@@ -35,8 +35,7 @@
 
 ^{:refer js.react-native.ui-tooltip/Tooltip :added "4.0" :unchecked true}
 (fact "creates a tooltip"
-  ^:hidden
-  
+
   (defn.js TooltipPane
     []
     (var [visible setVisible] (r/local true))
@@ -104,24 +103,24 @@
          :style {
                  :height 100
                  :width 100}
-         :onPress (fn:> (setVisible (not visible)))}]]]))  
-  
+         :onPress (fn:> (setVisible (not visible)))}]]]))
+
   (defn.js TooltipDemo
     []
     (var [first setFirst] (r/local 10))
     (var [highlighted setHighlighted] (r/local false))
     (var [disabled setDisabled] (r/local false))
     (return
-     (n/EnclosedCode 
+     (n/EnclosedCode
 {:label "js.react-native.ui-tooltip/Tooltip"
-       :style {:height 400}} 
+       :style {:height 400}}
 [:% n/Row
        {:style {:flex 1}}
        [:% n/PortalProvider
         [:% n/PortalSink
          {:style {:flex 1}}
          [:% -/TooltipPane]]]])))
-  
-  
+
+
 
   )

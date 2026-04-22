@@ -14,7 +14,6 @@
 
 ^{:refer js.cell.runtime.env-webworker/init-worker :added "4.1"}
 (fact "boots a WebWorker adapter"
-  ^:hidden
   (!.js
    (var messages [])
    (var worker {:listeners []
@@ -30,7 +29,6 @@
 
 ^{:refer js.cell.runtime.env-webworker/runtime-init :added "4.1"}
 (fact "boots js.cell inside a WebWorker"
-  ^:hidden
   (!.js
    (var previous-self (!:G self))
    (var messages [])

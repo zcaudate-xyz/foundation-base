@@ -107,7 +107,7 @@
 ^{:refer std.lib.memoize/invoke-intern-memoize :added "3.0"}
 (fact "creates a memoize form template for `definvoke`"
 
-  (invoke-intern-memoize :memoize 'hello {} '([x] x)) ^:hidden
+  (invoke-intern-memoize :memoize 'hello {} '([x] x))
   => '(do (clojure.core/declare hello)
           (def +hello (clojure.core/atom {}))
           (clojure.core/defn hello-raw "helper function for std.lib.memoize-test/hello" [x] x)

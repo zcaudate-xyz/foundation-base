@@ -15,7 +15,6 @@
 
 ^{:refer std.lang.base.emit-block/emit-statement :added "3.0"}
 (fact "emits a statement given grammar"
-  ^:hidden
 
   (binding [common/*emit-fn* common/emit-common]
     (emit-statement '(+ 1 2) +grammar+ {}))
@@ -23,7 +22,6 @@
 
 ^{:refer std.lang.base.emit-block/emit-do :added "3.0"}
 (fact "emits a do block"
-  ^:hidden
 
   (binding [common/*emit-fn* common/emit-common]
     (emit-do '((add 1 2) (add 3 4)) +grammar+ {}))
@@ -37,7 +35,6 @@
 
 ^{:refer std.lang.base.emit-block/block-options :added "3.0"}
 (fact "gets the block options"
-  ^:hidden
 
   (block-options :for {:parameter {:space "|"}} :parameter +grammar+)
   => {:statement ";",
@@ -56,7 +53,6 @@
 
 ^{:refer std.lang.base.emit-block/emit-block-body :added "3.0"}
 (fact "helper to emit a block body"
-  ^:hidden
 
   (emit-block-body :while
                    {}
@@ -64,7 +60,7 @@
                      (add 1 2 3)]
                    +grammar+
                    {})
-  
+
   => (prose/| "{"
                    "  (add 1 2 3);"
                    "  (add 1 2 3);"
@@ -72,7 +68,6 @@
 
 ^{:refer std.lang.base.emit-block/parse-params :added "3.0"}
 (fact "parses params for a block"
-  ^:hidden
 
   (parse-params '[i v :in (pairs)])
   => '[:statement [i v :in (pairs)]]
@@ -82,14 +77,12 @@
 
 ^{:refer std.lang.base.emit-block/emit-params-statement :added "3.0"}
 (fact "emits the params for statement"
-  ^:hidden
 
   (emit-params-statement :for {} '[i v :in (pairs x)] +grammar+ {})
   => "i, v in (pairs x)")
 
 ^{:refer std.lang.base.emit-block/emit-params :added "3.0"}
 (fact "constructs string to for loop args"
-  ^:hidden
 
   (emit-params :for {:parameter {:sep ";" :space " "}}
                '[(:= i 1) (< i 1) (inc i)]
@@ -105,7 +98,6 @@
 
 ^{:refer std.lang.base.emit-block/emit-block-control :added "3.0"}
 (fact "emits a control form code"
-  ^:hidden
 
   (emit-block-controls :catch
                        (get-in +grammar+ '[:reserved try :block])
@@ -116,7 +108,6 @@
 
 ^{:refer std.lang.base.emit-block/emit-block-controls :added "3.0"}
 (fact "emits control blocks for a form"
-  ^:hidden
 
   (emit-block-controls :catch
                        (get-in +grammar+ '[:reserved try :block])
@@ -136,8 +127,7 @@
 
 ^{:refer std.lang.base.emit-block/emit-block-setup :added "4.0"}
 (fact "parses main and control blocks"
-  ^:hidden
-  
+
   (emit-block-setup :br
                     (get-in +grammar+ '[:reserved br* :block])
                     '(br*
@@ -158,8 +148,7 @@
 
 ^{:refer std.lang.base.emit-block/emit-block-inner :added "4.0"}
 (fact "returns the inner block"
-  ^:hidden
-  
+
   (emit-block-inner :switch
                     (get-in +grammar+ '[:reserved switch :block])
                     '(switch
@@ -183,7 +172,6 @@
 
 ^{:refer std.lang.base.emit-block/emit-block-standard :added "3.0"}
 (fact "emits a generic block"
-  ^:hidden
 
   (binding [common/*emit-fn* common/emit-common]
     (emit-block-standard :br
@@ -196,7 +184,7 @@
                            (else (pr 8)))
                          +grammar+
                          {}))
-  
+
   => (prose/|
       "if(x == 1){"
       "  pr(1);"
@@ -219,8 +207,7 @@
 
 ^{:refer std.lang.base.emit-block/emit-block :added "3.0"}
 (fact "emits a minimal block expression"
-  ^:hidden
-  
+
   (emit-block :while
               '(while (< 1 2)
                  (add 1 2 3)

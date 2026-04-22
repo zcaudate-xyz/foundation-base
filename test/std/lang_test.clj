@@ -51,7 +51,6 @@
                     :library +library-ext+}))
 
 (fact "CANARY test"
-  ^:hidden
   (l/with:print [] (l/emit-as :lua '[(:= a 1)]))
   => "a = 1")
 

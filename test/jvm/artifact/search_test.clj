@@ -6,7 +6,6 @@
 
 ^{:refer jvm.artifact.search/class-seq :added "3.0"}
 (fact "creates a sequence of class names"
-  ^:hidden
 
   (some #{"clojure.lang.RT"}
         (class-seq
@@ -35,7 +34,7 @@
 (comment
   (defn match-jars
   "matches jars from any representation
- 
+
    (match-jars '[org.eclipse.aether/aether-api \"1.1.0\"])
    => (\"<.m2>/org/eclipse/aether/aether-api/1.1.0/aether-api-1.1.0.jar\")"
   {:added "3.0"}

@@ -36,7 +36,7 @@
 (fact "returns `true` if `class` is an interface"
 
   (class:interface? java.util.Map) => true
-  
+
   (class:interface? Class) => false)
 
 ^{:refer std.lib.class/class:abstract? :added "3.0"}
@@ -62,7 +62,7 @@
    :symbol    - The symbol that std.object.query uses for matching (i.e. boolean, char, int)
    :string    - The string that std.object.query uses for matching
    :class     - The primitive class representation of the primitive
-   :container - The containing class representation for the primitive type" ^:hidden
+   :container - The containing class representation for the primitive type"
 
   (primitive Boolean/TYPE :symbol)
   => 'boolean
@@ -98,7 +98,7 @@
 
   (class:interfaces clojure.lang.IFn)
   => #{java.lang.Runnable java.util.concurrent.Callable}
-  
+
   (class:interfaces clojure.lang.AFn)
   => #{java.lang.Runnable
        java.util.concurrent.Callable
@@ -115,8 +115,7 @@
          java.lang.reflect.Type
          java.lang.reflect.AnnotatedElement
          java.lang.invoke.TypeDescriptor$OfField}]]
-  
-  ^:hidden
+
   (ancestor:tree clojure.lang.PersistentHashMap)
   => [[clojure.lang.APersistentMap #{clojure.lang.IMapIterable
                                      clojure.lang.IMeta

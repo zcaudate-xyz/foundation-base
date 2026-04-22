@@ -14,8 +14,7 @@
 
 ^{:refer std.lang.base.emit-top-level/transform-defclass-inner :added "4.0"}
 (fact "transforms the body to be fn.inner and var.inner"
-  ^:hidden
-  
+
   (transform-defclass-inner '[(fn a [])
                               (fn b [])
                               (fn c [])])
@@ -23,7 +22,6 @@
 
 ^{:refer std.lang.base.emit-top-level/emit-def :added "3.0"  }
 (fact "creates the def string"
-  ^:hidden
 
   (binding [common/*emit-fn* common/emit-common]
     (emit-def :def
@@ -62,7 +60,7 @@
 ^{:refer std.lang.base.emit-top-level/emit-form :added "4.0"}
 (fact "creates a customisable emit and integrating both top-level and statements"
   ^:hiddn
-  
+
   (emit-form :custom
              '(custom 1 2 3)
              (assoc-in +grammar+

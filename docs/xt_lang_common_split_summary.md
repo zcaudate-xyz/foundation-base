@@ -94,8 +94,8 @@ Internal groups:
 - `+xt-notify-http+`
 - `+xt-network-socket+`
 - `+xt-network-ws+`
-- `+xt-network-client-basic+`
-- `+xt-network-client-ws+`
+- `+xt-network-debug-client-basic+`
+- `+xt-network-debug-client-ws+`
 - `+xt-network-server-basic+`
 - `+xt-network-server-ws+`
 

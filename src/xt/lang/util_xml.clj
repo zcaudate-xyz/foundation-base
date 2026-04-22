@@ -56,9 +56,94 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.common-string :as xts]]})
 
-(defabstract.xt parse-xml-params [s])
+(defn.xt parse-xml-params
+  "parses the args"
+  {:added "4.0"}
+  [s]
+  (var params {})
+  (var total (xt/x:str-len s))
+  (var i 0)
+  (while (< i total)
+    (while (< i total)
+      (var ch (xts/substring s i (+ i 1)))
+      (if (or (== " " ch)
+              (== "," ch))
+        (:= i (+ i 1))
+        (break)))
+    (when (>= i total)
+      (break))
+    (var key-start i)
+    (while (and (< i total)
+                (not= "=" (xts/substring s i (+ i 1))))
+      (:= i (+ i 1)))
+    (when (>= i total)
+      (break))
+    (var key (xts/trim (xts/substring s key-start i)))
+    (:= i (+ i 1))
+    (while (and (< i total)
+                (== " " (xts/substring s i (+ i 1))))
+      (:= i (+ i 1)))
+    (when (>= i total)
+      (break))
+    (var qchar (xts/substring s i (+ i 1)))
+    (var value-start (+ i 1))
+    (:= i value-start)
+    (while (and (< i total)
+                (not= qchar (xts/substring s i (+ i 1))))
+      (:= i (+ i 1)))
+    (xt/x:set-key params key (xts/substring s value-start i))
+    (:= i (+ i 1)))
+  (return params))
 
-(defabstract.xt parse-xml-stack [s])
+(defn.xt parse-xml-stack
+  "parses the xml into a ast stack"
+  {:added "4.0"}
+  [s]
+  (var output [])
+  (var total (xt/x:str-len s))
+  (var start 0)
+  (while (< start total)
+    (var ni start)
+    (while (and (< ni total)
+                (not= "<" (xts/substring s ni (+ ni 1))))
+      (:= ni (+ ni 1)))
+    (when (>= ni total)
+      (break))
+    (var j (+ ni 1))
+    (while (and (< j total)
+                (not= ">" (xts/substring s j (+ j 1))))
+      (:= j (+ j 1)))
+    (when (>= j total)
+      (break))
+    (var text (xts/trim (xts/substring s start ni)))
+    (var inner (xts/trim (xts/substring s (+ ni 1) j)))
+    (var close (xts/starts-with? inner "/"))
+    (var empty (xts/ends-with? inner "/"))
+    (when close
+      (:= inner (xts/trim (xts/substring inner 1 (xt/x:str-len inner)))))
+    (when empty
+      (:= inner (xts/trim (xts/substring inner 0 (- (xt/x:str-len inner) 1)))))
+    (var split 0)
+    (var inner-total (xt/x:str-len inner))
+    (while (and (< split inner-total)
+                (not= " " (xts/substring inner split (+ split 1))))
+      (:= split (+ split 1)))
+    (var tag (xts/substring inner 0 split))
+    (var params-str (:? (< split inner-total)
+                        (xts/trim (xts/substring inner (+ split 1) inner-total))
+                        ""))
+    (var m {:tag tag})
+    (when (< 0 (xt/x:str-len params-str))
+      (xt/x:set-key m "params" (-/parse-xml-params params-str)))
+    (when (< 0 (xt/x:str-len text))
+      (xt/x:set-key m "text" text))
+    (when close
+      (xt/x:set-key m "close" true))
+    (when empty
+      (xt/x:set-key m "empty" true))
+    (xt/x:arr-push output m)
+    (:= start (+ j 1)))
+  (return output))
 
 (defn.xt to-node-normalise
   "normalises the node for viewing"
@@ -74,7 +159,8 @@
                   (xt/x:arr-map children
                                 (fn [v]
                                   (return
-                                   (:? (== "xml" (. v ["::/__type__"]))
+                                   (:? (and (xt/x:is-object? v)
+                                            (== "xml" (xt/x:get-key v "::/__type__")))
                                        (-/to-node-normalise v)
                                        v))))))
   (return out))
@@ -88,24 +174,30 @@
   (var levels [top])
   (var current top)
   (xt/for:array [e stack]
-    (when (. e text)
-      (xt/x:arr-push (. current children) (. e text)))
-    (cond (. e empty)
-          (xt/x:arr-push (. current children) {:tag (. e tag)
-                                               :params (. e params)})
+    (var etext (xt/x:get-key e "text"))
+    (var etag (xt/x:get-key e "tag"))
+    (var eparams (xt/x:get-key e "params"))
+    (when (xt/x:not-nil? etext)
+      (xt/x:arr-push (xt/x:get-key current "children") etext))
+    (cond (== true (xt/x:get-key e "empty"))
+          (do (var enode {:tag etag})
+              (when (and (xt/x:not-nil? eparams)
+                         (xtd/obj-not-empty? eparams))
+                (xt/x:set-key enode "params" eparams))
+              (xt/x:arr-push (xt/x:get-key current "children") enode))
           
-          (not (. e close))
+          (not= true (xt/x:get-key e "close"))
           (do (var ncurrent {"::/__type__" "xml"
                              :parent current
-                             :tag (. e tag)
-                             :params (. e params)
+                             :tag etag
+                             :params eparams
                              :children []})
-              (xt/x:arr-push (. current children) ncurrent)
+              (xt/x:arr-push (xt/x:get-key current "children") ncurrent)
               (:= current ncurrent))
           
           :else
-          (:= current (. current parent))))
-  (return (-/to-node-normalise (xt/x:first (. top children)))))
+          (:= current (xt/x:get-key current "parent"))))
+  (return (-/to-node-normalise (xt/x:first (xt/x:get-key top "children")))))
 
 (defn.xt parse-xml
   "parses xml"
@@ -124,7 +216,7 @@
              (xtd/obj-not-empty? params))
     (xt/x:arr-push arr params))
   (when (xtd/arr-not-empty? children)
-    (xt/x:arr-append arr (xt/x:arr-map children
+    (xt/x:arr-assign arr (xt/x:arr-map children
                                         (fn [e]
                                           (return
                                           (:? (xt/x:is-object? e)
@@ -191,6 +283,14 @@
 ;; TO STRING
 ;;
 
+(defn.xt to-string-value
+  [v]
+  (cond (xt/x:is-boolean? v)
+        (return (:? v "true" "false"))
+
+        :else
+        (return (xt/x:to-string v))))
+
 (defn.xt to-string-params
   "to node params"
   {:added "4.0"}
@@ -202,7 +302,7 @@
         :else
         (do (var s "")
             (xt/for:object [[k v] params]
-              (:= s (xt/x:cat s " " k "=" v)))
+              (:= s (xt/x:cat s " " k "=" (-/to-string-value v))))
             (return s))))
 
 (defn.xt to-string
@@ -216,7 +316,7 @@
       (:= body (xt/x:cat body
                          (:? (xt/x:is-object? e)
                              (-/to-string e)
-                             (xt/x:to-string e))))))
+                             (-/to-string-value e))))))
   (return
    (xt/x:cat "<" tag (-/to-string-params params) ">"
              body

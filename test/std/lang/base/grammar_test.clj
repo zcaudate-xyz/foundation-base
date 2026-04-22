@@ -17,8 +17,7 @@
 
 ^{:refer std.lang.base.grammar/ops-list :added "4.0"}
 (fact "lists all ops in the grammar"
-  ^:hidden
-  
+
   (vec (ops-list))
   => [:builtin
       :builtin-global
@@ -62,42 +61,37 @@
       :xtalk-language-specific
       :xtalk-std-lang-link-specific
       :xtalk-runtime-specific])
-  
+
 ^{:refer std.lang.base.grammar/ops-symbols :added "4.0"}
 (fact "gets a list of symbols"
-  ^:hidden
 
   (ops-symbols)
   => coll?)
-  
+
 ^{:refer std.lang.base.grammar/ops-summary :added "4.0"}
 (fact "gets the symbol and op name for a given category"
-  ^:hidden
-  
+
   (ops-summary [:macro])
   => '[[:macro {:tfirst #{->}, :tlast #{->>}, :doto #{doto}, :if #{if}, :cond #{cond}, :when #{when}}]]
-  
+
   (ops-summary [:counter])
   => [[:counter {:incby #{:+=}, :decby #{:-=}, :mulby #{:*=}, :incto #{:++}, :decto #{:--}}]])
 
 ^{:refer std.lang.base.grammar/ops-detail :added "4.0"}
 (fact "get sthe detail of the ops"
-  ^:hidden
-  
+
   (ops-detail :macro-arrow)
   => map?)
 
 ^{:refer std.lang.base.grammar/build :added "3.0"}
 (fact "selector for picking required ops in grammar"
-  ^:hidden
 
   (build :include [:vars])
   => map?)
 
 ^{:refer std.lang.base.grammar/build-min :added "4.0"}
 (fact "minimum ops example for a language"
-  ^:hidden
-  
+
   (build-min)
   => map?)
 
@@ -115,8 +109,7 @@
 
 ^{:refer std.lang.base.grammar/build:override :added "4.0"}
 (fact "overrides existing ops in the map"
-  ^:hidden
-  
+
   (build:override (build-min)
                   {:WRONG {}})
   => (throws)
@@ -127,8 +120,7 @@
 
 ^{:refer std.lang.base.grammar/build:extend :added "4.0"}
 (fact "adds new  ops in the map"
-  ^:hidden
-  
+
   (build:extend (build-min)
                 {:NEW {}})
   => map?
@@ -139,8 +131,7 @@
 
 ^{:refer std.lang.base.grammar/to-reserved :added "3.0"}
 (fact "convert op map to symbol map"
-  ^:hidden
-  
+
   (to-reserved (build :include [:vars]))
   => '{:=      {:op :seteq, :symbol #{:=}, :emit :assign, :raw "="},
        var     {:op :var,
@@ -151,8 +142,7 @@
 
 ^{:refer std.lang.base.grammar/grammar-structure :added "3.0"}
 (fact "returns all the `:block` and `:fn` forms"
-  ^:hidden
-  
+
   (grammar-structure (build :include [:vars]))
   => {:block #{}, :def #{}, :fn #{}}
 
@@ -167,8 +157,7 @@
 
 ^{:refer std.lang.base.grammar/grammar-sections :added "3.0"}
 (fact "process sections witihin the grammar"
-  ^:hidden
-  
+
   (grammar-sections (build :include [:top-base]))
   => #{:code}
 
@@ -177,14 +166,12 @@
 
 ^{:refer std.lang.base.grammar/grammar-macros :added "3.0"}
 (fact "process macros within the grammar"
-  ^:hidden
-  
+
   (grammar-macros (build-min))
   => #{:defn :defglobal :def :defrun})
 
 ^{:refer std.lang.base.grammar/grammar? :added "3.0"}
 (fact "checks that an object is instance of grammar"
-  ^:hidden
 
   (grammar? (grammar :test
               (to-reserved (build))
@@ -194,7 +181,6 @@
 ^{:refer std.lang.base.grammar/grammar :added "3.0"
   :style/indent 1}
 (fact "constructs a grammar"
-  ^:hidden
 
   (grammar :test
     (to-reserved (build-min))

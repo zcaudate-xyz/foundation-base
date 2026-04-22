@@ -7,8 +7,8 @@
   :aliases
   {"test"    ["run" "-m" "code.test"]
    "manage"  ["run" "-m" "code.manage"]
-   "xtalk"   ["run" "-m" "std.lang.manage"]
-   
+   "lang"    ["run" "-m" "std.lang.manage"]
+   #_#_"test-unit"   ["run" "-m" "code.test" "exit"]
    "publish"     ["exec" "-ep" "(use 'code.doc)     (deploy-template :all) (publish :all)"]
    "incomplete"  ["exec" "-ep" "(use 'code.manage)  (incomplete :all) (System/exit 0)"]
    "install"     ["exec" "-ep" "(use 'code.tool.maven)   (install :all {:tag :all}) (System/exit 0)"]
@@ -195,7 +195,7 @@
                                       (require '[std.lib :as h])
                                       (catch Throwable t (.printStackTrace t)))]}}
   #_#_:repositories [["atlassian" "https://maven.artifacts.atlassian.com/"]]
-  :source-paths      ["src"]
+  :source-paths      ["src" "src-extra/mcp-clj" "src-training"]
   :resource-paths    ["resources" "src-build" "src-extra" "src-doc" "test-data" "test-code"]
   :java-source-paths ["src-java" "test-java"]
   :java-output-path  "target/classes"

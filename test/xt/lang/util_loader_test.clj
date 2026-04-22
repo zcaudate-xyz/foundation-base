@@ -10,8 +10,7 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.common-spec :as xt]
              [xt.lang.common-repl :as repl]
-             [xt.lang.util-loader :as loader]
-             [js.core :as j]]})
+             [xt.lang.util-loader :as loader]]})
 
 (l/script- :lua
   {:runtime :basic
@@ -37,8 +36,7 @@
 
 ^{:refer xt.lang.util-loader/new-task :added "4.0"}
 (fact "creates a new task"
-  ^:hidden
-  
+
   (set
    (!.js
     (xt/x:obj-keys
@@ -59,8 +57,7 @@
 
 ^{:refer xt.lang.util-loader/task-load :added "4.0"}
 (fact "loads a task"
-  ^:hidden
-  
+
   (!.js
    (loader/task-load
     (loader/new-task
@@ -97,8 +94,7 @@
 
 ^{:refer xt.lang.util-loader/task-unload :added "4.0"}
 (fact "unloads a task"
-  ^:hidden
-  
+
   (!.lua
    (loader/task-unload
     (loader/new-task
@@ -125,21 +121,39 @@
 
 ^{:refer xt.lang.util-loader/new-loader :added "4.0"}
 (fact "creates a new loader"
-  ^:hidden
-  
+
   (!.js
-   (loader/new-loader [(loader/new-task
-                        "A" [] []
-                        {:load-fn (fn []
-                                    (return "A"))})
-                       (loader/new-task
-                        "B" ["A"] []
-                        {:load-fn (fn []
-                                    (return "B"))})
-                       (loader/new-task
-                        "C" ["B"] []
-                        {:load-fn (fn []
-                                    (return "C"))})]))
+   (do (var loader
+            (loader/new-loader [(loader/new-task
+                                 "A" [] []
+                                 {:load-fn (fn []
+                                             (return "A"))})
+                                (loader/new-task
+                                 "B" ["A"] []
+                                 {:load-fn (fn []
+                                             (return "B"))})
+                                (loader/new-task
+                                 "C" ["B"] []
+                                 {:load-fn (fn []
+                                             (return "C"))})]))
+       {"tasks"
+        {"C" {"args" (. loader ["tasks"] ["C"] ["args"])
+              "id" (. loader ["tasks"] ["C"] ["id"])
+              "deps" (. loader ["tasks"] ["C"] ["deps"])
+              "::" (. loader ["tasks"] ["C"] ["::"])}
+         "B" {"args" (. loader ["tasks"] ["B"] ["args"])
+              "id" (. loader ["tasks"] ["B"] ["id"])
+              "deps" (. loader ["tasks"] ["B"] ["deps"])
+              "::" (. loader ["tasks"] ["B"] ["::"])}
+         "A" {"args" (. loader ["tasks"] ["A"] ["args"])
+              "id" (. loader ["tasks"] ["A"] ["id"])
+              "deps" (. loader ["tasks"] ["A"] ["deps"])
+              "::" (. loader ["tasks"] ["A"] ["::"])}}
+        "errored" (. loader ["errored"])
+        "completed" (. loader ["completed"])
+        "loading" (. loader ["loading"])
+        "order" (. loader ["order"])
+        "::" (. loader ["::"])}))
   => {"tasks"
       {"C" {"args" [], "id" "C", "deps" ["B"], "::" "loader.task"},
        "B" {"args" [], "id" "B", "deps" ["A"], "::" "loader.task"},
@@ -149,7 +163,7 @@
       "loading" {},
       "order" ["A" "B" "C"],
       "::" "loader"}
-  
+
   (!.lua
    (xtd/tree-get-spec
     (loader/new-loader [(loader/new-task
@@ -196,8 +210,7 @@
 
 ^{:refer xt.lang.util-loader/list-incomplete :added "4.0"}
 (fact "lists incomplete tasks"
-  ^:hidden
-  
+
   (set (!.js
         (loader/list-incomplete
          (loader/new-loader [(loader/new-task
@@ -235,7 +248,6 @@
 
 ^{:refer xt.lang.util-loader/load-tasks-single :added "4.0"}
 (fact "loads a single task"
-  ^:hidden
 
   (notify/wait-on :js
     (var loader (loader/new-loader [(loader/new-task
@@ -244,7 +256,9 @@
                                                  (return "A"))})]))
     (loader/load-tasks-single loader "A"
                               (fn [id done]
-                                (repl/notify [id done]))))
+                                (repl/notify [id done]))
+                              nil
+                              nil))
   => ["A" true]
 
 
@@ -256,26 +270,29 @@
                                       :load-fn (fn:> "A")})]))
     (loader/load-tasks-single loader "A"
                               (fn [id done]
-                                (repl/notify [id done]))))
+                                (repl/notify [id done]))
+                              nil
+                              nil))
   => ["A" true]
 
-  
+
   (notify/wait-on :lua
     (var loader (loader/new-loader [(loader/new-task
                                      "A" [] []
                                      {:load-fn (fn []
                                                   (return "A"))})]))
     (loader/load-tasks-single loader "A"
-                               (fn [id done]
-                                 (repl/notify [id done]))))
+                              (fn [id done]
+                                (repl/notify [id done]))
+                              nil
+                              nil))
   => ["A" true])
 
 ^{:refer xt.lang.util-loader/load-tasks :added "4.0"}
 (fact "load tasks"
-  ^:hidden
-  
+
   ;; NO SLEEP
-  
+
   (set
    (notify/wait-on :js
      (var loader (loader/new-loader [(loader/new-task
@@ -296,8 +313,8 @@
                           (repl/notify
                            (loader/list-completed loader))))))
   => #{"C" "B" "A"}
-  
-  (set 
+
+  (set
    (notify/wait-on :lua
      (var loader (loader/new-loader [(loader/new-task
                                       "A" [] []
@@ -318,34 +335,31 @@
                            (loader/list-completed loader))))))
   => #{"C" "B" "A"}
 
-  
+
   ;; WITH SLEEP
-  
+
   (set
    (notify/wait-on :js
          (:= (!:G loader) (loader/new-loader
                            [(loader/new-task
                              "A" [] []
                              {:load-fn (fn []
-                                         (return (j/future-delayed [100]
-                                                   (return "A"))))})
+                                         (return (xt/x:with-delay (fn [] (return "A")) 100)))})
                             (loader/new-task
                              "B" ["A"] []
                              {:load-fn (fn []
-                                         (return (j/future-delayed [100]
-                                                   (return "B"))))})
+                                         (return (xt/x:with-delay (fn [] (return "B")) 100)))})
                             (loader/new-task
                              "C" ["B"] []
                              {:load-fn (fn []
-                                         (return (j/future-delayed [100]
-                                                   (return "C"))))})]))
+                                         (return (xt/x:with-delay (fn [] (return "C")) 100)))})]))
          (loader/load-tasks loader
                             nil
                             (fn []
                               (repl/notify
                                (loader/list-completed loader))))))
   => #{"C" "B" "A"}
-  
+
   (set
    (notify/wait-on :lua
      (:= (!:G loader) (loader/new-loader
@@ -370,26 +384,23 @@
                               (repl/notify
                                (loader/list-completed loader))))))
   => #{"C" "B" "A"}
-  
+
   ;; WITH ERROR
-  
+
   (notify/wait-on :js
     (:= (!:G loader) (loader/new-loader
                       [(loader/new-task
                         "A" [] []
                         {:load-fn (fn []
-                                   (return (j/future-delayed [100]
-                                             (return "A"))))})
+                                    (return (xt/x:with-delay (fn [] (return "A")) 100)))})
                        (loader/new-task
                         "B" ["A"] []
                         {:load-fn (fn []
-                                    (return (j/future-delayed [100]
-                                              (throw "B"))))})
+                                    (return (xt/x:with-delay (fn [] (throw "B")) 100)))})
                        (loader/new-task
                         "C" ["B"] []
                         {:load-fn (fn []
-                                    (return (j/future-delayed [100]
-                                              (return "C"))))})]))
+                                    (return (xt/x:with-delay (fn [] (return "C")) 100)))})]))
     (loader/load-tasks loader
                        nil
                        (fn []
@@ -426,25 +437,27 @@
 
 ^{:refer xt.lang.util-loader/load-tasks.global :adopt true :added "4.0"}
 (fact "load tasks"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (:= (!:G loader) (loader/new-loader
                        [(loader/new-task
-                         "A" [] []
-                         {:load-fn (fn []
-                                     (return (j/future-delayed [100]
-                                              (:= (!:G A) (xt/x:now-ms)))))})
+                          "A" [] []
+                           {:load-fn (fn []
+                                      (return (xt/x:with-delay (fn []
+                                                                 (:= (!:G A) (xt/x:now-ms)))
+                                                               100)))})
                         (loader/new-task
-                         "B" ["A"] []
-                         {:load-fn (fn []
-                                     (return (j/future-delayed [100]
-                                              (:= (!:G B) (xt/x:now-ms)))))})
+                          "B" ["A"] []
+                           {:load-fn (fn []
+                                      (return (xt/x:with-delay (fn []
+                                                                 (:= (!:G B) (xt/x:now-ms)))
+                                                               100)))})
                         (loader/new-task
-                         "C" ["B"] []
-                         {:load-fn (fn []
-                                     (return (j/future-delayed [100]
-                                              (:= (!:G C) (xt/x:now-ms)))))})]))
+                          "C" ["B"] []
+                           {:load-fn (fn []
+                                      (return (xt/x:with-delay (fn []
+                                                                 (:= (!:G C) (xt/x:now-ms)))
+                                                               100)))})]))
     (loader/load-tasks loader
                         nil
                         (fn []

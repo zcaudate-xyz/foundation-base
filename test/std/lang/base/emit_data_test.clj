@@ -14,8 +14,7 @@
 
 ^{:refer std.lang.base.emit-data/default-map-key :added "4.0"}
 (fact "emits a default map key"
-  ^:hidden
-  
+
   (default-map-key 'hello
                    helper/+default+
                    {})
@@ -23,8 +22,7 @@
 
 ^{:refer std.lang.base.emit-data/emit-map-key :added "4.0"}
 (fact "emits the map key"
-  ^:hidden
-  
+
   (emit-map-key 'hello
                 helper/+default+
                 {})
@@ -43,7 +41,6 @@
 
 ^{:refer std.lang.base.emit-data/emit-map-entry :added "3.0"}
 (fact "emits the map entry"
-  ^:hidden
 
   (emit-map-entry [:hello "world"] helper/+default+ {})
   => "\"hello\":\"world\""
@@ -74,13 +71,12 @@
 
 ^{:refer std.lang.base.emit-data/emit-coll-layout :added "4.0"}
 (fact "constructs the collection"
-  ^:hidden
-  
+
   (emit-coll-layout :vector 2 ["1" "2" "3"] helper/+default+ {})
   => "[1,2,3]"
 
   (emit-coll-layout :vector 2 ["1" "\n2" "3"] helper/+default+ {})
-  
+
   => "[\n    1,\n    \n  2,\n    3\n  ]"
 
   (emit-coll-layout :tuple 2 ["1" "\n2" "3"] helper/+default+ {})
@@ -88,14 +84,13 @@
 
 ^{:refer std.lang.base.emit-data/emit-coll :added "3.0"}
 (fact "emits a collection"
-  ^:hidden
 
   (emit-coll :vector [1 2 3] helper/+default+ {})
   => "[1,2,3]"
 
   (emit-coll :set [1 2 3] helper/+default+ {})
   => "(1,2,3)"
-  
+
   (emit-coll :custom [1 2 3] (assoc-in helper/+default+
                                        [:data :custom]
                                        {:start "<" :end ">" :space ""}) {})
@@ -108,11 +103,10 @@
 
 ^{:refer std.lang.base.emit-data/emit-data :added "3.0"}
 (fact "main function for data forms"
-  ^:hidden
 
   (emit-data :map {:a 1 :b 2} helper/+default+ {:map {}})
   => "{[:a 1],[:b 2]}"
-  
+
   (emit-data :vector {:a 1 :b 2} helper/+default+ {:map {}})
   => "[[:a 1],[:b 2]]")
 
@@ -151,7 +145,7 @@
                         {})
   => throws
 
-  
+
   [:quote]
   (test-data-loop ''((+ A B) C)
                         +grammar+
@@ -162,13 +156,13 @@
                         +grammar+
                         {})
   => "(+ A B),C"
-  
+
   [:table]
   (test-data-loop '(tab :a (+ 1 2) :b 2)
                         +grammar+
                         {})
   => "{\"a\":(+ 1 2),\"b\":2}"
-  
+
   (test-data-loop '(tab 1 (+ 1 2) 3 4 5)
                         +grammar+
                         {})
@@ -191,7 +185,7 @@
                     +grammar+
                     {})
   => "[1 + 2,]"
-  
+
 
   (test-data-emit '{:a (+ 1 2)}
                     +grammar+
@@ -208,25 +202,25 @@
                     +grammar+
                     {})
   => "{!(1 + 2):A}"
-  
-  
+
+
   [:quote]
   (test-data-emit ''((+ A B) C)
                     +grammar+
                     {})
   => "(A + B,C)"
-  
+
   (test-data-emit ''[(+ A B) C]
                     +grammar+
                     {})
   => "A + B,C"
-  
+
   [:table]
   (test-data-emit '(tab :a (+ 1 2) :b 2)
                     +grammar+
                     {})
   => "{\"a\":1 + 2,\"b\":2}"
-  
+
   (test-data-emit '(tab 1 (+ 1 2) 3 4 5)
                     +grammar+
                     {})

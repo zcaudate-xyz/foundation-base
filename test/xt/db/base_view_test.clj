@@ -37,8 +37,7 @@
 
 ^{:refer xt.db.base-view/all-overview :added "4.0"}
 (fact "gets an overview of the views"
-  ^:hidden
-  
+
   (!.js
    (v/all-overview (ut/collect-views (@! +views+))))
   => {"RegionCity"
@@ -57,11 +56,11 @@
       "RegionCountry"
       {"return" ["with_access" "default" "info"],
        "select" ["by_name" "all"]}}
-  
+
   (set (!.lua
         (xtd/obj-keys (v/all-overview (ut/collect-views (@! +views+))))))
   => #{"RegionCity" "Organisation" "RegionState" "UserAccount" "Currency" "RegionCountry"}
-  
+
   (!.py
    (v/all-overview (ut/collect-views (@! +views+))))
   => {"RegionCity"
@@ -83,8 +82,7 @@
 
 ^{:refer xt.db.base-view/all-keys :added "4.0"}
 (fact "gets all table keys for a view"
-  ^:hidden
-  
+
   (set (!.js
         (v/all-keys (ut/collect-views (@! +views+))
                     "Currency"
@@ -134,8 +132,7 @@
               ["UserAccount" "return" "info"]
               ["UserAccount" "select" "by_organisation"]))]}
 (fact "gets all methods for views"
-  ^:hidden
-  
+
   (sort (!.js
          (v/all-methods (ut/collect-views (@! +views+)))))
   => +methods+

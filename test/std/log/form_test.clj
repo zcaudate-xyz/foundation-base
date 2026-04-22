@@ -40,7 +40,7 @@
   => "data")
 
 ^{:refer std.log.form/log-form :added "3.0"}
-(fact "function for not including log forms on static compilation" ^:hidden
+(fact "function for not including log forms on static compilation"
 
   (binding [common/*static* true
             common/*level* :info]
@@ -66,7 +66,7 @@
   => seq?)
 
 ^{:refer std.log.form/log :added "3.0"}
-(fact "produces a log" ^:hidden
+(fact "produces a log"
 
   (binding [common/*level* :info
             common/*logger* (core/identity-logger {:level :debug})]
@@ -78,12 +78,12 @@
                       :level :info, :value "Hello", :timestamp number?}))
 
 ^{:refer std.log.form/log-data-form :added "3.0"}
-(fact "creates a standard form given a type" ^:hidden
+(fact "creates a standard form given a type"
 
   (log-data-form :status))
 
 ^{:refer std.log.form/deflog-data :added "3.0"}
-(fact "creates a standard form given a type" ^:hidden
+(fact "creates a standard form given a type"
 
   (deflog-data [:status]))
 
@@ -94,7 +94,7 @@
   => seq?)
 
 ^{:refer std.log.form/deflog-error :added "3.0"}
-(fact "creates a standard form given a type" ^:hidden
+(fact "creates a standard form given a type"
 
   (deflog-error [:help]))
 

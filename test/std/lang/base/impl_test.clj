@@ -70,8 +70,7 @@
 
 ^{:refer std.lang.base.impl/default-library :added "4.0"}
 (fact "gets the default library"
-  ^:hidden
-  
+
   (default-library)
   => lib/library?)
 
@@ -94,8 +93,7 @@
 
 ^{:refer std.lang.base.impl/grammar :added "4.0"}
 (fact "gets the grammar"
-  ^:hidden
-  
+
   (with:library [+library+]
     (grammar :lua))
   => map?)
@@ -108,32 +106,29 @@
 
 ^{:refer std.lang.base.impl/to-form :added "4.0"}
 (fact "input to form"
-  ^:hidden
-  
+
   (to-form '(+ @1 2 3)
            {:- :raw
             :lang :xtalk})
   => '(+ (clojure.core/deref 1) 2 3)
-  
+
   (to-form '(+ @1 2 3)
            {:lang :lua})
   => '(+ (!:eval 1) 2 3))
 
 ^{:refer std.lang.base.impl/%.form :added "4.0"}
 (fact "converts to a form"
-  ^:hidden
-  
+
   ^{:- :raw}
   (%.form (+ @1 2 3))
   => '(+ (clojure.core/deref 1) 2 3)
-  
+
   (%.form (+ @1 2 3))
   => '(+ (!:eval 1) 2 3))
 
 ^{:refer std.lang.base.impl/emit-direct :added "4.0"}
 (fact "adds additional controls to transform form"
-  ^:hidden
-  
+
   (emit-direct (:grammar prep/+book-min+)
                '(:% (:- "   ") (+ 1 2 3)  (:- "   "))
                 *ns*
@@ -142,7 +137,6 @@
   => "1 + 2 + 3")
 
 (fact "direct emit failures include std.lang context"
-  ^:hidden
 
   (let [grammar (assoc-in (:grammar prep/+book-min+)
                           [:reserved 'boom-op]
@@ -191,8 +185,7 @@
 
 ^{:refer std.lang.base.impl/emit-str :added "4.0"}
 (fact  "converts to an output string"
-  ^:hidden
-  
+
   (emit-str '(+ 1 2 3)
             {:- :raw
              :lang :lua})
@@ -204,18 +197,17 @@
 
 ^{:refer std.lang.base.impl/%.str :added "4.0"}
 (fact "converts to an output string"
-  ^:hidden
-  
+
   ^{:- :raw}
   (%.str (+ @1 2 3))
   => (throws)
-  
+
   (%.str (+ @1 2 3))
   => "1 + 2 + 3"
 
   (%.str (+ (@! 1) 2 3))
   => "1 + 2 + 3"
-  
+
   ^{:lang :js}
   (%.str
    (defn hello
@@ -224,7 +216,7 @@
       \\ (if (not= i y)
            (if (not= 1 2)
              (return 1))))
-     
+
      (+ 6 x y)
      (return (or (not (+ 1 2))
                  (not (+ 1 2))))))
@@ -263,7 +255,7 @@
    (:# (do (+ 1 2 3)
            (+ 1 2 3))))
   => (prose/| "// 1 + 2 + 3;"
-                   "// 1 + 2 + 3;")  
+                   "// 1 + 2 + 3;")
 
   ^{:lang :js}
   (%.str
@@ -276,8 +268,7 @@
 
 ^{:refer std.lang.base.impl/emit-as :added "4.0"}
 (fact "helper function for emitting multiple forms"
-  ^:hidden
-  
+
   (emit-as :lua '[(+ 1 2 3)
                   (+ 4 5 6)]
            {:library +library+})
@@ -285,7 +276,6 @@
 
 ^{:refer std.lang.base.impl/emit-symbol :added "4.0"}
 (fact "emits string given symbol and grammar"
-  ^:hidden
 
   (with:library [+library+]
     (emit-symbol :lua 'L.core/identity-fn
@@ -299,7 +289,7 @@
                   :module (lib/get-module +library+
                                           :lua 'L.core)}))
   => "L_core____identity_fn"
-  
+
   (with:library [+library+]
     (emit-symbol :lua 'L.core/WRONG
                  {:library +library+}))
@@ -307,8 +297,7 @@
 
 ^{:refer std.lang.base.impl/get-entry :added "4.0"}
 (fact "gets an entry"
-  ^:hidden
-  
+
   (get-entry +library+
              :lua
              'L.core
@@ -317,8 +306,7 @@
 
 ^{:refer std.lang.base.impl/emit-entry :added "4.0"}
 (fact "emits an entry given parameters and options"
-  ^:hidden
-  
+
   (emit-entry '{:lang :lua
                 :module L.core
                 :id identity-fn}
@@ -345,8 +333,7 @@
 
 ^{:refer std.lang.base.impl/emit-entry-deps :added "4.0"}
 (fact "emits only the entry deps"
-  ^:hidden
-  
+
   (emit-entry-deps '{:lang :lua
                      :module L.util
                      :id add-fn}
@@ -372,8 +359,7 @@
 
 ^{:refer std.lang.base.impl/emit-script-imports :added "4.0"}
 (fact "emit imports"
-  ^:hidden
-  
+
   (emit-script-imports
    '{"cjson" {:as cjson}}
    nil
@@ -386,8 +372,7 @@
 
 ^{:refer std.lang.base.impl/emit-script-deps :added "4.0"}
 (fact "emits the script deps"
-  ^:hidden
-  
+
   (let [[stage grammar book namespace mopts] (emit-options
                                               {:lang :lua
                                                :library +library-ext+
@@ -404,8 +389,7 @@
 
 ^{:refer std.lang.base.impl/emit-script :added "4.0"}
 (fact "emits a script with all dependencies"
-  ^:hidden
-  
+
   (emit-script '(-/add-fn 1 2)
                {:lang :lua
                 :library +library-ext+
@@ -429,8 +413,8 @@
       "}"
       ""
       "add_fn(1,2)")
-  
-  
+
+
   (emit-script '(-/add-fn 1 2)
                {:lang :lua
                 :library +library-ext+

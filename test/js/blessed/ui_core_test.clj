@@ -18,8 +18,7 @@
 
 ^{:refer js.blessed.ui-core/SmallLabel :added "4.0" :unchecked true}
 (fact "Constructs a Small Label"
-  ^:hidden
-  
+
   (defn.js SmallLabelDemo
     []
     (return
@@ -32,8 +31,7 @@
 
 ^{:refer js.blessed.ui-core/MinimalButton :added "4.0" :unchecked true}
 (fact "Constructs a Minimal Button"
-  ^:hidden
-  
+
   (defn.js MinimalButtonDemo
     []
     (var [val setVal] (r/local 0))
@@ -67,8 +65,7 @@
 
 ^{:refer js.blessed.ui-core/SmallButton :added "4.0" :unchecked true}
 (fact "Constructs a Small Button"
-  ^:hidden
-  
+
   (defn.js SmallButtonDemo
     []
     (var [val setVal] (r/local 0))
@@ -102,8 +99,7 @@
 
 ^{:refer js.blessed.ui-core/ToggleButton :added "4.0" :unchecked true}
 (fact "Constructs a toggle button"
-  ^:hidden
-  
+
   (defn.js ToggleButtonDemo
     []
     (var [val setVal] (r/local true))
@@ -138,8 +134,7 @@
 
 ^{:refer js.blessed.ui-core/BigButton :added "4.0" :unchecked true}
 (fact "Constructs a Big Button"
-  ^:hidden
-  
+
   (defn.js BigButtonDemo
     []
     (var [val setVal] (r/local 0))
@@ -173,7 +168,6 @@
 
 ^{:refer js.blessed.ui-core/BigCheckBox :added "4.0" :unchecked true}
 (fact "Constructs a Big Checkbox"
-  ^:hidden
 
   (defn.js BigCheckBoxDemo
     []
@@ -193,7 +187,6 @@
 
 ^{:refer js.blessed.ui-core/ToggleSwitch :added "4.0" :unchecked true}
 (fact "Constructs a Toggle"
-  ^:hidden
 
   (defn.js ToggleSwitchDemo
     []
@@ -212,7 +205,6 @@
 
 ^{:refer js.blessed.ui-core/Spinner :added "4.0" :unchecked true}
 (fact "Constructs a Spinner"
-  ^:hidden
 
   (defn.js SpinnerDemo
     []
@@ -237,8 +229,7 @@
 
 ^{:refer js.blessed.ui-core/EnumBoxIndexed :added "4.0" :unchecked true}
 (fact "Constructs a EnumBoxIndexed"
-  ^:hidden
-  
+
   (defn.js EnumBoxDemo
     []
     (var [index setIndex] (r/local 0))
@@ -257,7 +248,6 @@
 
 ^{:refer js.blessed.ui-core/EnumBox :added "4.0" :unchecked true}
 (fact "Constructs a EnumBox"
-  ^:hidden
 
   (defn.js EnumBoxDemo
     []
@@ -280,7 +270,6 @@
 
 ^{:refer js.blessed.ui-core/DropdownIndexed :added "4.0" :unchecked true}
 (fact "Constructs a Dropdown"
-  ^:hidden
 
   (defn.js DropdownIndexedDemo
     []
@@ -300,7 +289,6 @@
 
 ^{:refer js.blessed.ui-core/Dropdown :added "4.0" :unchecked true}
 (fact "Constructs a Dropdown"
-  ^:hidden
 
   (defn.js DropdownDemo
     []
@@ -320,7 +308,6 @@
 
 ^{:refer js.blessed.ui-core/TextBox :added "4.0" :unchecked true}
 (fact "Constructs a Dropdown"
-  ^:hidden
 
   (defn.js TextBoxDemo
     []
@@ -341,8 +328,7 @@
 
 ^{:refer js.blessed.ui-core/TextDisplay :added "4.0" :unchecked true}
 (fact "Displays text as content"
-  ^:hidden
-  
+
    (defn.js TextDisplayDemo
      []
      (var content (r/const
@@ -366,8 +352,7 @@
 
 ^{:refer js.blessed.ui-core/NumberGridBox :added "4.0" :unchecked true}
 (fact "Constructs a NumberGridBox"
-  ^:hidden
-  
+
   (defn.js NumberGridBoxDemo
     []
     (let [[value setValue] (r/local 20)]

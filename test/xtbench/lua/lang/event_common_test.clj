@@ -199,8 +199,10 @@
    (fn:>)
    nil
    nil)
-  [(event/remove-keyed-listener c "key/common" "b2")
+  [(xtd/tree-get-data
+    (event/remove-keyed-listener c "key/common" "b2"))
    (event/list-keyed-listeners c "key/common")])
  =>
- [{"pred" nil, "meta" {"listener/id" "b2", "listener/type" "custom"}}
+ [{"callback" "<function>",
+   "meta" {"listener/id" "b2", "listener/type" "custom"}}
   ["a1" "c3"]])

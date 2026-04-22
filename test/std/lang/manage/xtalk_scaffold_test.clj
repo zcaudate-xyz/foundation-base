@@ -27,7 +27,6 @@
         (l/script- :lua {:runtime :basic}))
       (fact:global {:setup [(l/rt:restart)]})
       (fact \"identity function\"
-        ^:hidden
         (!.js (k/identity 1))
         => 1
         (!.lua (k/identity 1))
@@ -64,19 +63,32 @@
 (def runtime-template-forms
   (read-string
    "[(ns xtbench.js.sample.base-lib-test
-         (:require [std.lang :as l]
-                   [xt.lang.common-lib :as k])
+          (:require [std.lang :as l]
+                    [xt.lang.common-lib :as k])
          (:use code.test))
        (l/script- :js {:runtime :basic})
       (fact:global {:setup [(l/rt:restart)]})
       ^{:refer xt.lang.common-lib/identity :added \"4.0\"}
       (fact \"identity function\"
-        ^:hidden
         (!.js (k/identity 1))
         => 1)
-       (fact \"wrapped runtime form\"
-        (set (!.js (k/example)))
-        => #{1})]"))
+        (fact \"wrapped runtime form\"
+         (set (!.js (k/example)))
+         => #{1})]"))
+
+(def runtime-template-forms-with-setup
+  (read-string
+   "[(ns xtbench.js.sample.base-view-test
+         (:require [std.lang :as l]
+                   [xt.db.base-view :as v])
+         (:use code.test))
+       (l/script- :js {:runtime :basic})
+       (fact:global {:setup [(l/rt:restart)
+                             (l/rt:scaffold :js)]})
+       (def +views+ (!.js (v/example)))
+       (fact \"baseline\"
+         (!.js (v/example))
+         => +views+)]"))
 
 (def canonical-runtime-template-forms
   (read-string
@@ -88,7 +100,6 @@
       (fact:global {:setup [(l/rt:restart)]})
       ^{:refer xt.lang.common-lib/identity :added \"4.1\"}
       (fact \"identity function\"
-        ^:hidden
         (!.lua (k/identity 1))
         => 1)
       (fact \"wrapped runtime form\"
@@ -105,8 +116,102 @@
        (l/script- :js {:runtime :basic})
         (fact \"notify helper\"
          (notify/wait-on :js
-           (repl/notify 1))
-         => 1)]"))
+            (repl/notify 1))
+          => 1)]"))
+
+(def lua-empty-vector-runtime-forms
+  (read-string
+   "[(ns xt.sample.lua-empty-vector-test
+         (:require [std.lang :as l])
+         (:use code.test))
+       (l/script- :js {:runtime :basic})
+       (l/script- :lua {:runtime :basic})
+       (fact \"normalizes lua empty vectors\"
+         (!.js {:queued []})
+         => {\"queued\" []}
+         (!.lua {:queued []})
+         => {\"queued\" []})]"))
+
+(def lua-nil-map-runtime-forms
+  (read-string
+   "[(ns xt.sample.lua-nil-map-test
+         (:require [std.lang :as l])
+        (:use code.test))
+      (l/script- :js {:runtime :basic})
+      (l/script- :lua {:runtime :basic})
+      (fact \"normalizes lua nil map entries\"
+        (!.js {:meta {\"listener/id\" \"b2\"}
+               :pred nil})
+        => {\"meta\" {\"listener/id\" \"b2\"}
+            \"pred\" nil}
+        (!.lua {:meta {\"listener/id\" \"b2\"}
+                :pred nil})
+         => {\"meta\" {\"listener/id\" \"b2\"}
+             \"pred\" nil})]"))
+
+(def foreign-prefix-runtime-forms
+  (read-string
+   "[(ns xt.sample.sql-util-test
+         (:require [std.lang :as l]
+                   [xt.lang.common-spec :as xt]
+                   [xt.db.sql-util :as ut])
+         (:use code.test))
+       (l/script- :js {:runtime :basic})
+       (l/script- :lua {:runtime :basic})
+       (fact \"encodes a value to sql\"
+         (!.js (xt/x:json-encode 100000000000000000))
+         (!.lua (string.format \"%0.f\" 100000000000000000))
+         (!.js (ut/encode-value 100000000000000000))
+         => \"'100000000000000000'\"
+         (!.lua (ut/encode-value 100000000000000000))
+         => \"'100000000000000000'\") ]"))
+
+(def template-forms-with-helper-runtime
+  (read-string
+   "[(ns xtbench.js.sample.sql-call-test
+           (:require [std.lang :as l])
+           (:use code.test))
+        (l/script- :postgres {:runtime :jdbc.client
+                              :config {:dbname \"test-scratch\"}})
+        ^{:xtalk/template true}
+        (l/script- :js {:runtime :basic})
+        (fact:global {:setup [(l/rt:restart)]})
+         (fact \"placeholder\"
+           (!.js 1)
+           => 1)]"))
+
+(def js-sqlite-template-forms
+  (read-string
+   "[(ns xtbench.js.sample.sql-sqlite-test
+         (:require [std.lang :as l]
+                   [xt.lang.common-notify :as notify])
+         (:use code.test))
+       (l/script- :js {:runtime :basic
+                       :require [[xt.sys.conn-dbsql :as dbsql]
+                                 [js.lib.driver-sqlite :as js-sqlite]]})
+       (fact \"sqlite helper\"
+         (notify/wait-on :js
+           (dbsql/connect {:constructor js-sqlite/connect-constructor}
+                           {:success (fn [conn] conn)}))
+          => 1)]"))
+
+(def template-forms-with-skippable-helper
+  (read-string
+   "[(ns xtbench.js.sample.impl-select-test
+         (:require [std.lang :as l])
+         (:use code.test))
+      ^{:xtalk/template true}
+      (l/script- :js {:runtime :basic
+                      :require [[xt.lang.common-lib :as k]
+                                [xt.sys.conn-dbsql :as dbsql]
+                                [js.lib.driver-postgres :as js-postgres]]})
+      (defn ^{:lang-exceptions {:python {:skip true}}}
+        bootstrap-js
+        []
+        (!.js (dbsql/connect {:constructor js-postgres/connect-constructor} {})))
+      (fact \"portable helper-free query\"
+        (!.js (k/identity 1))
+        => 1)]"))
 
 (def split-runtime-reference-forms
   (read-string
@@ -128,7 +233,34 @@
         => [nil nil]
         [(notify/captured :lua)
          (:id (l/rt :lua))]
-        => [nil nil])]"))
+         => [nil nil])]"))
+
+(def metadata-setup-runtime-forms
+  (read-string
+   "[(ns xt.sample.cache-meta-test
+        (:require [std.lang :as l])
+        (:use code.test))
+      (l/script- :js {:runtime :basic})
+      (l/script- :lua {:runtime :basic})
+      ^{:refer xt.sample.cache-meta/setup :added \"4.1\"
+        :setup [(def +account+ (!.js {:id 1}))]}
+      (fact \"retargets metadata setup\"
+        (!.js +account+)
+        => {:id 1}
+        (!.lua +account+)
+        => {:id 1})]"))
+
+(def alias-gated-runtime-forms
+  (read-string
+   "[(ns xt.sample.alias-gated-test
+        (:require [std.lang :as l])
+        (:use code.test))
+      (l/script- :js {:runtime :basic
+                      :require [[xt.lang.common-repl :as repl]]})
+      (l/script- :lua {:runtime :basic})
+      (fact \"js-only helper\"
+        (!.js (repl/notify 1))
+        => 1)]"))
 
 (def lua-specific-template-forms
   (read-string
@@ -359,6 +491,9 @@
 ^{:refer std.lang.manage.xtalk-scaffold/commented-form? :added "4.1"}
 (fact "detects commented forms by metadata"
   (commented-form? (with-meta '(+ 1 2) {:comment true}))
+  => true
+
+  (commented-form? '(comment (+ 1 2)))
   => true)
 
 ^{:refer std.lang.manage.xtalk-scaffold/test-file-path :added "4.1"}
@@ -369,6 +504,22 @@
   (str/ends-with? (test-file-path {:root "." :test-paths ["test"]}
                                   'xtbench.js.sample.base-lib-test)
                   "/test/xtbench/js/sample/base_lib_test.clj")
+  => true)
+
+^{:refer std.lang.manage.xtalk-scaffold/derived-test-file-path :added "4.1"}
+(fact "uses canonical xtbench paths for generated suites"
+  (str/ends-with? (derived-test-file-path {:root "." :test-paths ["test"]}
+                                          "test/xt/db/base_scope_test.clj"
+                                          'xt.db.base-scope-test
+                                          'xtbench.dart.db.base-scope-test)
+                  "/test/xtbench/dart/db/base_scope_test.clj")
+  => true
+
+  (str/ends-with? (derived-test-file-path {:root "." :test-paths ["test"]}
+                                          "test/xt/db/base_scope_test.clj"
+                                          'xt.db.base-scope-test
+                                          'xt.db.base-scope-test)
+                  "/test/xt/db/base_scope_test.clj")
   => true)
 
 ^{:refer std.lang.manage.xtalk-scaffold/infer-runtime-lang :added "4.1"}
@@ -389,8 +540,16 @@
   (single-runtime-template-lang runtime-template-forms)
   => :js
 
+  (single-runtime-template-lang template-forms-with-helper-runtime)
+  => :js
+
   (single-runtime-template-lang runtime-test-forms)
   => nil)
+
+^{:refer std.lang.manage.xtalk-scaffold/infer-runtime-lang :added "4.1"}
+(fact "prefers explicitly marked template scripts over helper runtimes"
+  (infer-runtime-lang template-forms-with-helper-runtime)
+  => :js)
 
 ^{:refer std.lang.manage.xtalk-scaffold/runtime-suffixed-test-ns? :added "4.1"}
 (fact "detects runtime suffixed test namespaces"
@@ -403,11 +562,14 @@
 ^{:refer std.lang.manage.xtalk-scaffold/runtime-template-supported? :added "4.1"}
 (fact "blocks twostep suite generation for runtime-coupled templates"
   [(runtime-template-supported? canonical-runtime-template-forms :dart)
-     (runtime-template-supported? blocked-runtime-template-forms :dart)
-     (runtime-template-supported? runtime-test-forms :dart)
-     (runtime-template-supported? lua-specific-template-forms :lua)
-     (runtime-template-supported? lua-specific-template-forms :js)]
-  => [true true false true false])
+      (runtime-template-supported? blocked-runtime-template-forms :dart)
+      (runtime-template-supported? runtime-test-forms :dart)
+      (runtime-template-supported? lua-specific-template-forms :lua)
+      (runtime-template-supported? lua-specific-template-forms :js)
+      (runtime-template-supported? js-sqlite-template-forms :lua)
+      (runtime-template-supported? js-sqlite-template-forms :python)
+      (runtime-template-supported? js-sqlite-template-forms :dart)]
+  => [true true false true false false false false])
 
 ^{:refer std.lang.manage.xtalk-scaffold/replace-runtime-symbol :added "4.1"}
 (fact "replaces runtime dispatch symbol"
@@ -448,9 +610,28 @@
 (fact "retargets host-side runtime references in template output"
   (let [out (render-top-level-forms
              (template-runtime-test-forms blocked-runtime-template-forms :js :lua))]
-    [(str/includes? out "(notify/wait-on :lua)")
-     (not (str/includes? out "(notify/wait-on :js)"))])
+    [(str/includes? out "(notify/wait-on :lua ")
+     (not (str/includes? out "(notify/wait-on :js "))])
   => [true true])
+
+^{:refer std.lang.manage.xtalk-scaffold/template-runtime-test-forms :added "4.1"}
+(fact "normalizes fact:global setup in template output"
+  (let [lua-out (render-top-level-forms
+                 (template-runtime-test-forms runtime-template-forms-with-setup :js :lua))]
+    [(not (str/includes? lua-out "(l/rt:scaffold"))
+     (str/includes? lua-out "(def +views+ (!.lua (v/example)))")])
+  => [true true])
+
+^{:refer std.lang.manage.xtalk-scaffold/template-runtime-test-forms :added "4.1"}
+(fact "drops skipped named helpers and their script requires in template output"
+  (let [py-out (render-top-level-forms
+                (template-runtime-test-forms template-forms-with-skippable-helper :js :python))]
+    [(str/includes? py-out "(l/script-\n :python")
+     (str/includes? py-out "[xt.lang.common-lib :as k]")
+     (not (str/includes? py-out "js.lib.driver-postgres"))
+     (not (str/includes? py-out "xt.sys.conn-dbsql"))
+     (not (str/includes? py-out "bootstrap-js"))])
+  => [true true true true true])
 
 ^{:refer std.lang.manage.xtalk-scaffold/split-fact-form :added "4.1"}
 (fact "splits a mixed runtime fact form"
@@ -493,6 +674,34 @@
      (str/includes? lua-out "(notify/wait-on :lua)")
      (not (str/includes? lua-out "(notify/wait-on :js)"))])
   => [true true true true true true true true])
+
+^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-test-forms :added "4.1"}
+(fact "retargets metadata setup forms in split output"
+  (let [{:keys [by-lang]} (separate-runtime-test-forms metadata-setup-runtime-forms [:js :lua])
+        lua-out (render-top-level-forms (get by-lang :lua))]
+    [(str/includes? lua-out ":setup [(def +account+ (!.lua {:id 1}))]")
+     (not (str/includes? lua-out ":setup [(def +account+ (!.js {:id 1}))]"))])
+  => [true true])
+
+^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-test-forms :added "4.1"}
+(fact "does not synthesize split output when target runtime lacks required aliases"
+  (let [{:keys [by-lang]} (separate-runtime-test-forms alias-gated-runtime-forms [:js :lua])]
+    [(contains? by-lang :js)
+     (contains? by-lang :lua)])
+  => [true false])
+
+^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-test-forms :added "4.1"}
+(fact "synthesizes real base_scope facts for dart via fallback script aliases"
+  (let [forms (read-top-level-forms "test/xt/db/base_scope_test.clj")
+        {:keys [by-lang]} (separate-runtime-test-forms forms [:js :lua :python :dart])
+        dt-forms (get by-lang :dart)
+        dt-out (render-top-level-forms dt-forms)]
+    [(pos? (count (filter fact-form? dt-forms)))
+     (str/includes? dt-out "xtbench.dart.db.base-scope-test")
+     (str/includes? dt-out "!.dt")
+     (not (str/includes? dt-out "!.js"))
+     (str/includes? dt-out "xt.db.base-scope/get-tree")])
+  => [true true true true true])
 
 ^{:refer std.lang.manage.xtalk-scaffold/classify-split-form :added "4.1"}
 (fact "classifies split-relevant forms"
@@ -567,11 +776,70 @@
     runtime-test-forms
     (fn [path]
       (let [before (slurp path)]
-        (separate-runtime-tests nil {:input-path path
-                                     :langs [:js :lua]
-                                     :write true})
+       (separate-runtime-tests nil {:input-path path
+                                    :langs [:js :lua]
+                                    :write true})
         (= before (slurp path)))))
   => true)
+
+^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-tests :added "4.1"}
+(fact "separate-runtime-tests normalizes empty vector expectations for lua"
+  (with-temp-runtime-suite-file
+    lua-empty-vector-runtime-forms
+    (fn [path]
+      (let [{:keys [outputs]}
+            (separate-runtime-tests nil {:input-path path
+                                         :langs [:lua]
+                                         :write true})
+            lua-path (->> outputs
+                          (filter #(= :lua (:lang %)))
+                          first
+                          :path)
+            lua-output (slurp lua-path)]
+        (boolean (re-find #"\{\"queued\"\s+\{\}\}" lua-output)))))
+  => true)
+
+^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-tests :added "4.1"}
+(fact "separate-runtime-tests drops nil-valued lua map entries from expectations"
+  (with-temp-runtime-suite-file
+    lua-nil-map-runtime-forms
+    (fn [path]
+      (let [{:keys [outputs]}
+            (separate-runtime-tests nil {:input-path path
+                                         :langs [:lua]
+                                         :write true})
+            lua-path (->> outputs
+                          (filter #(= :lua (:lang %)))
+                          first
+                          :path)
+            lua-output (slurp lua-path)]
+        (and (str/includes? lua-output "{\"meta\" {\"listener/id\" \"b2\"}}")
+             (not (str/includes? lua-output "\"pred\" nil"))))))
+  => true)
+
+^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-tests :added "4.1"}
+(fact "separate-runtime-tests keeps foreign runtime prefixes out of other language outputs"
+  (with-temp-runtime-suite-file
+    foreign-prefix-runtime-forms
+    (fn [path]
+      (let [{:keys [outputs]}
+            (separate-runtime-tests nil {:input-path path
+                                         :langs [:js :lua]
+                                         :write true})
+            js-output (->> outputs
+                           (filter #(= :js (:lang %)))
+                           first
+                           :path
+                           slurp)
+            lua-output (->> outputs
+                            (filter #(= :lua (:lang %)))
+                            first
+                            :path
+                            slurp)]
+        [(not (str/includes? js-output "string.format"))
+         (= 1 (count (re-seq #"xt/x:json-encode 100000000000000000" js-output)))
+         (str/includes? lua-output "string.format")])))
+  => [true true true])
 
 ^{:refer std.lang.manage.xtalk-scaffold/scaffold-runtime-template :added "4.1"}
 (fact "scaffold-runtime-template is callable"
@@ -597,8 +865,21 @@
        xtbench.lua.sample.base-lib-test
        :js
        :lua
-       false
-       false])
+        false
+        false])
+
+^{:refer std.lang.manage.xtalk-scaffold/scaffold-runtime-template :added "4.1"}
+(fact "scaffold-runtime-template preserves helper runtime configs on non-target scripts"
+  (with-temp-runtime-suite-file
+    template-forms-with-helper-runtime
+    (fn [path]
+      (let [{:keys [content]}
+            (scaffold-runtime-template nil {:input-path path
+                                            :output-path (str path ".out")
+                                            :lang :js})]
+        [(str/includes? content "(l/script-\n :postgres\n {:runtime :jdbc.client")
+         (str/includes? content "(l/script-\n :js\n {:runtime :basic") ])))
+  => [true true])
 
 ^{:refer std.lang.manage.xtalk-scaffold/scaffold-runtime-template :added "4.1"}
 (fact "scaffold-runtime-template supports namespace patterns for batch generation"
@@ -625,13 +906,13 @@
 ^{:refer std.lang.manage.xtalk-scaffold/scaffold-runtime-template :added "4.1"}
 (fact "scaffold-runtime-template preserves source formatting"
   (with-temp-runtime-source-file
-    "(ns xtbench.js.sample.base-lib-test\n  (:require [std.lang :as l]\n            [xt.lang.common-lib :as k])\n  (:use code.test))\n\n(l/script- :js {:runtime :basic})\n\n(fact:global {:setup [(l/rt:restart)]})\n\n^{:refer xt.lang.common-lib/identity :added \"4.0\"}\n(fact \"identity function\"\n  ^:hidden\n  (!.js (k/identity 1))\n  => 1)\n"
+    "(ns xtbench.js.sample.base-lib-test\n  (:require [std.lang :as l]\n            [xt.lang.common-lib :as k])\n  (:use code.test))\n\n(l/script- :js {:runtime :basic})\n\n(fact:global {:setup [(l/rt:restart)]})\n\n^{:refer xt.lang.common-lib/identity :added \"4.0\"}\n(fact \"identity function\"\n\n  (!.js (k/identity 1))\n  => 1)\n"
     (fn [path]
       (let [{:keys [content]}
             (scaffold-runtime-template nil {:input-path path
                                             :output-path (str path ".out")
                                             :lang :lua})]
-        [(str/includes? content "(fact \"identity function\"\n  ^:hidden\n  (!.lua (k/identity 1))\n  => 1)")
+        [(str/includes? content "(fact \"identity function\"\n\n  (!.lua (k/identity 1))\n  => 1)")
          (str/includes? content "(l/script- :lua {:runtime :basic})")
          (not (str/includes? content "(fact \"identity function\" (!.lua"))])))
   => [true true true])
@@ -849,14 +1130,12 @@
       (let [sources (xtlang-runtime-suite-sources {:root root
                                                    :input-root "test/xt/lang"
                                                    :lang :dart})
-            source  (first sources)]
-         [(= 1 (count sources))
-          (= 'xt.sample.base-lib-test (:ns source))
-         (= :lua (:from-lang source))
-         (= :dart (:lang source))
-         (= :twostep (:runtime-type source))
-         (= :batched (:check-mode source))])))
-  => [true true true true true true])
+            summary (mapv (juxt :ns :from-lang :lang :runtime-type :check-mode) sources)]
+         [(= 2 (count sources))
+          (= '[[xt.sample.base-lib-test :lua :dart :twostep :batched]
+               [xt.sample.common-notify-test :js :dart :twostep :batched]]
+             summary)])))
+  => [true true])
 
 ^{:refer std.lang.manage.xtalk-scaffold/compile-xtlang-runtime-bulk-suites :added "4.1"}
 (fact "exports and compiles eligible xt.lang templates into dart bulk payloads"
@@ -868,17 +1147,17 @@
              (compile-xtlang-runtime-bulk-suites nil {:root root
                                                       :input-root "test/xt/lang"
                                                       :lang :dart})
+             summary (mapv (juxt :ns :from-lang :suite-count :bulk-count :runtime-type :check-mode)
+                           outputs)
              output (first outputs)]
         [(= :dart lang)
-         (= 1 count)
-         (= :lua (:from-lang output))
-         (= 2 (:suite-count output))
-         (= 2 (:bulk-count output))
-         (= :twostep (:runtime-type output))
-         (= :batched (:check-mode output))
+         (= 2 count)
+         (= '[[xt.sample.base-lib-test :lua 2 2 :twostep :batched]
+              [xt.sample.common-notify-test :js 1 1 :twostep :batched]]
+            summary)
          (str/ends-with? (:suite-path output) "_suite.edn")
          (str/ends-with? (:bulk-path output) "-dt-bulk.edn")])))
-  => [true true true true true true true true true])
+  => [true true true true true])
 
 
 ^{:refer std.lang.manage.xtalk-scaffold/runtime-type :added "4.1"}
@@ -1053,5 +1332,9 @@
 
 ^{:refer std.lang.manage.xtalk-scaffold/transform-script-runtime :added "4.1"}
 (fact "updates script runtime options for the target language"
-  (transform-script-runtime '(l/script- :js {:runtime :basic :layout :flat}) :dart)
-  => '(l/script- :js {:runtime :twostep :layout :flat}))
+  [(transform-script-runtime '(l/script- :js {:runtime :basic :layout :flat}) :js)
+   (transform-script-runtime '(l/script- :js {:runtime :basic :layout :flat}) :dart)
+   (transform-script-runtime '(l/script- :dart {:runtime :basic :layout :flat}) :dart)]
+  => '[(l/script- :js {:runtime :basic :layout :flat})
+       (l/script- :js {:runtime :basic :layout :flat})
+       (l/script- :dart {:runtime :twostep :layout :flat})])

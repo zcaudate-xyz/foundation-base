@@ -16,16 +16,15 @@
 
 ^{:refer js.react-native.helper-browser/useHashRoute :added "4.0" :unchecked true}
 (fact "listens to the browser hash route"
-  ^:hidden
-  
+
   (defn.js UseHashRouteDemo
     []
     (var route (ext-route/makeRoute "hello"))
     (var url (ext-route/listenRouteUrl route))
     (helper-browser/useHashRoute route)
     (return
-     (n/EnclosedCode 
-      {:label "js.react-native.helper-browser/useHashRoute"} 
+     (n/EnclosedCode
+      {:label "js.react-native.helper-browser/useHashRoute"}
       [:% n/Row
        [:% n/Button
         {:title   "A"

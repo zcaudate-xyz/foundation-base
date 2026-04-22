@@ -61,8 +61,7 @@
 
 ^{:refer xt.db.cache-pull/pull.control :adopt true :added "4.0"}
 (fact "gets a currency graph"
-  ^:hidden
-  
+
   (!.js
    (trace/trace-log-clear)
    (var rows {})
@@ -73,7 +72,7 @@
             :offset 2
             :order-by ["id"]}))
   => [{"id" "XLM"} {"id" "XLM.T"}]
-  
+
   (!.js
    (trace/trace-log-clear)
    (var rows {})
@@ -97,7 +96,6 @@
 
 ^{:refer xt.db.cache-pull/pull.currency :adopt true :added "4.0"}
 (fact "gets a currency graph"
-  ^:hidden
 
   (!.js
    (var rows {})
@@ -136,8 +134,7 @@
 
 ^{:refer xt.db.cache-pull/pull.currency :adopt true :added "4.0"}
 (fact "gets a currency graph"
-  ^:hidden
-  
+
   (!.js
    (var rows {})
    (data/merge-bulk rows (@! +flattened-full+) nil)
@@ -186,7 +183,7 @@
             {"asset" [{"currency" [{"id" "USD"}]}]}
             {"asset" [{"currency" [{"id" "XLM.T"}]}]}]
            :in-any-order)}]}])
-  
+
 
   (!.py
    (var rows {})
@@ -216,23 +213,20 @@
 
 ^{:refer xt.db.cache-pull/check-in-clause :added "4.0"}
 (fact "emulates the sql `in` clause"
-  ^:hidden
-  
+
   (!.js
    (q/check-in-clause "a" [["a" "b"]])))
 
 ^{:refer xt.db.cache-pull/check-like-clause :added "4.0"}
 (fact  "emulates the sql `like` clause"
-  ^:hidden
-  
+
   (!.js
    (q/check-like-clause "abc" "a%"))
   => true)
 
 ^{:refer xt.db.cache-pull/check-clause-value :added "4.0"}
 (fact "checks the clause within a record"
-  ^:hidden
-  
+
   (!.js
    (q/check-clause-value {:data {:name "abc"}}
                          "data"
@@ -242,8 +236,7 @@
 
 ^{:refer xt.db.cache-pull/check-clause-function :added "4.0"}
 (fact "checks the clause for a function within a record"
-  ^:hidden
-  
+
   (!.js
    (q/check-clause-function {:data {:name "abc"}}
                             "data"
@@ -254,8 +247,7 @@
 
 ^{:refer xt.db.cache-pull/pull-where-clause :added "4.0"}
 (fact "pull where clause"
-  ^:hidden
-  
+
   (!.js
     (var rows {})
     (data/merge-bulk rows (@! +flattened-full+) nil)
@@ -300,8 +292,7 @@
 
 ^{:refer xt.db.cache-pull/pull-where :added "4.0"}
 (fact "clause for where construct"
-  ^:hidden
-  
+
   (!.js
     (var rows {})
     (data/merge-bulk rows (@! +flattened-full+) nil)
@@ -345,12 +336,11 @@
 
 ^{:refer xt.db.cache-pull/pull-return-clause :added "4.0"}
 (fact "pull return clause"
-  ^:hidden
 
   (!.js
     (var rows {})
     (data/merge-bulk rows (@! +flattened-full+) nil)
-   (q/pull-return-clause rows 
+   (q/pull-return-clause rows
                          sample/Schema
                          (xtd/get-in rows ["UserAccount"
                                           "00000000-0000-0000-0000-000000000000"
@@ -378,7 +368,7 @@
   (!.js
     (var rows {})
     (data/merge-bulk rows (@! +flattened-full+) nil)
-   (q/pull-return-clause rows 
+   (q/pull-return-clause rows
                          sample/Schema
                          (xtd/get-in rows ["UserAccount"
                                           "00000000-0000-0000-0000-000000000000"
@@ -401,7 +391,7 @@
   (!.lua
     (var rows {})
     (data/merge-bulk rows (@! +flattened-full+) nil)
-   (q/pull-return-clause rows 
+   (q/pull-return-clause rows
                          sample/Schema
                          (xtd/get-in rows ["UserAccount"
                                           "00000000-0000-0000-0000-000000000000"
@@ -429,7 +419,7 @@
   (!.lua
     (var rows {})
     (data/merge-bulk rows (@! +flattened-full+) nil)
-   (q/pull-return-clause rows 
+   (q/pull-return-clause rows
                          sample/Schema
                          (xtd/get-in rows ["UserAccount"
                                           "00000000-0000-0000-0000-000000000000"
@@ -451,12 +441,11 @@
 
 ^{:refer xt.db.cache-pull/pull-return-clause :added "4.0"}
 (fact "pull return clause python profile match"
-  ^:hidden
 
   (!.py
     (var rows {})
     (data/merge-bulk rows (@! +flattened-full+) nil)
-   (q/pull-return-clause rows 
+   (q/pull-return-clause rows
                          sample/Schema
                          (xtd/get-in rows ["UserAccount"
                                           "00000000-0000-0000-0000-000000000000"
@@ -483,12 +472,11 @@
 
 ^{:refer xt.db.cache-pull/pull-return-clause :added "4.0"}
 (fact "pull return clause python profile miss"
-  ^:hidden
 
   (!.py
     (var rows {})
     (data/merge-bulk rows (@! +flattened-full+) nil)
-   (q/pull-return-clause rows 
+   (q/pull-return-clause rows
                          sample/Schema
                          (xtd/get-in rows ["UserAccount"
                                           "00000000-0000-0000-0000-000000000000"
@@ -510,7 +498,6 @@
 
 ^{:refer xt.db.cache-pull/pull-return :added "4.0"}
 (fact "return construct"
-  ^:hidden
 
   (!.js
     (var rows {})
@@ -519,7 +506,7 @@
                   sample/Schema
                   "UserAccount"
                    ["id" "nickname"
-                    ["profile" 
+                    ["profile"
                      ["first_name" "last_name"]]]
                    (xtd/get-in rows ["UserAccount"
                                    "00000000-0000-0000-0000-000000000000"
@@ -534,7 +521,7 @@
    (q/pull-return rows sample/Schema
                   "UserAccount"
                   ["id" "nickname"
-                   ["profile" 
+                   ["profile"
                      ["first_name" "last_name"]]]
                    (xtd/get-in rows ["UserAccount"
                                     "00000000-0000-0000-0000-000000000000"
@@ -549,7 +536,7 @@
    (q/pull-return rows sample/Schema
                    "UserAccount"
                    ["id" "nickname"
-                    ["profile" 
+                    ["profile"
                      ["first_name" "last_name"]]]
                    (xtd/get-in rows ["UserAccount"
                                     "00000000-0000-0000-0000-000000000000"
@@ -560,18 +547,17 @@
 
 ^{:refer xt.db.cache-pull/pull :added "4.0"}
 (fact "pull data from database"
-  ^:hidden
 
   (!.js
    (var rows {})
    (data/merge-bulk rows (@! +flattened+) nil)
    [(q/pull rows sample/Schema "UserAccount"
             {:returning ["id" "nickname"
-                         ["profile" 
+                         ["profile"
                           ["first_name" "last_name"]]]})
     (q/pull rows sample/Schema "UserAccount"
             {:returning ["id" "nickname"
-                         ["profile" 
+                         ["profile"
                           ["*/data"]]]})])
   => [[{"nickname" "root",
      "profile" [{"last_name" "User", "first_name" "Root"}],
@@ -591,11 +577,11 @@
    (data/merge-bulk rows (@! +flattened+) nil)
    [(q/pull rows sample/Schema "UserAccount"
             {:returning ["id" "nickname"
-                         ["profile" 
+                         ["profile"
                           ["first_name" "last_name"]]]})
     (q/pull rows sample/Schema "UserAccount"
             {:returning ["id" "nickname"
-                         ["profile" 
+                         ["profile"
                           ["*/data"]]]})])
   => (contains-in
       [[{"nickname" "root",
@@ -611,14 +597,13 @@
 
 ^{:refer xt.db.cache-pull/pull :added "4.0"}
 (fact "pull data from database python profile match"
-  ^:hidden
 
   (!.py
    (var rows {})
    (data/merge-bulk rows (@! +flattened+) nil)
    (q/pull rows sample/Schema "UserAccount"
            {:returning ["id" "nickname"
-                        ["profile" 
+                        ["profile"
                          ["first_name" "last_name"]]]}))
   => [{"nickname" "root",
        "profile" [{"last_name" "User", "first_name" "Root"}],
@@ -626,14 +611,13 @@
 
 ^{:refer xt.db.cache-pull/pull :added "4.0"}
 (fact "pull data from database python profile full"
-  ^:hidden
 
   (!.py
    (var rows {})
    (data/merge-bulk rows (@! +flattened+) nil)
    (q/pull rows sample/Schema "UserAccount"
            {:returning ["id" "nickname"
-                        ["profile" 
+                        ["profile"
                          ["*/data"]]]}))
   => [{"nickname" "root",
        "profile"
@@ -647,9 +631,9 @@
 
 (comment
 
-  
-  
-  
+
+
+
   (q/pull rows sample/Schema "UserAccount"
           {:returning ["id" "nickname"
                        ["profile" ["first_name" "last_name"]]

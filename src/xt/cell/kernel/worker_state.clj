@@ -161,7 +161,7 @@
   (return
    (task/task-from-async
     (fn [resolve reject]
-      (xt/x:with-delay
+     (xt/x:with-delay
        (fn []
          (resolve (-/fn-trigger worker op signal status body)))
        ms)))))

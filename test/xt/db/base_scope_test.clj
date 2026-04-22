@@ -54,7 +54,7 @@
                                         "RegionState"
                                         ["*/info" "country"])
                 (fn:> [e] (. e ["ident"]))))
-  
+
   (!.js
    (xtd/arr-map (scope/get-data-columns sample/Schema
                                         "RegionState"
@@ -85,7 +85,7 @@
         "country_id"
         "about"
         "language"]}]
- 
+
   (!.js
    (scope/get-tree sample/Schema
                       "UserAccount"
@@ -120,8 +120,8 @@
      "is_super"
      "is_suspended"
      "is_official"]}]
-  
-  
+
+
   (!.py
    (scope/get-tree sample/Schema
                    "UserAccount"
@@ -167,7 +167,7 @@
                "data" ["id"]}]]],
            "data" ["id" "slug"]}]]],
        "data" []}]
-  
+
   (!.py
    (scope/get-tree sample/Schema
                    "UserAccount"
@@ -208,33 +208,60 @@
 
 ^{:refer xt.db.base-scope/get-link-standard.more :adopt true :added "4.0"}
 (fact "classifies the link"
-  ^:hidden
-  
+
   (!.js
    (scope/get-link-standard ["hello" {} {} ["hello"]]))
   => ["hello" [{} {} ["hello"]]])
 
 ^{:refer xt.db.base-scope/get-link-standard.more :adopt true :added "4.0"}
 (fact "classifies the link"
-  ^:hidden
 
 
   (!.js
    (xtd/arr-map (scope/get-link-columns sample/Schema
-                                      "UserAccount"
-                                      [["profile"
-                                        {:id "1"}
-                                        {:id "2"}
-                                        {:id "3"}
-                                        ["first_name"
-                                         "last_name"]]])
-              (fn [[e cols]] (return [e.ident cols]))))
+                                       "UserAccount"
+                                       [["profile"
+                                         {:id "1"}
+                                         {:id "2"}
+                                         {:id "3"}
+                                         ["first_name"
+                                          "last_name"]]])
+               (fn [[e cols]] (return [e.ident cols]))))
+  => [["profile" [{"id" "1"} {"id" "2"} {"id" "3"} ["first_name" "last_name"]]]]
+
+  (!.lua
+   (xtd/arr-map (scope/get-link-columns sample/Schema
+                                       "UserAccount"
+                                       [["profile"
+                                         {:id "1"}
+                                         {:id "2"}
+                                         {:id "3"}
+                                         ["first_name"
+                                          "last_name"]]])
+               (fn [e]
+                 (return [(xt/x:get-key (xtd/first e)
+                                        "ident")
+                          (xtd/second e)]))))
+  => [["profile" [{"id" "1"} {"id" "2"} {"id" "3"} ["first_name" "last_name"]]]]
+
+  (!.py
+   (xtd/arr-map (scope/get-link-columns sample/Schema
+                                       "UserAccount"
+                                       [["profile"
+                                         {:id "1"}
+                                         {:id "2"}
+                                         {:id "3"}
+                                         ["first_name"
+                                          "last_name"]]])
+               (fn [e]
+                 (return [(xt/x:get-key (xtd/first e)
+                                        "ident")
+                          (xtd/second e)]))))
   => [["profile" [{"id" "1"} {"id" "2"} {"id" "3"} ["first_name" "last_name"]]]])
 
 ^{:refer xt.db.base-scope/merge-queries :added "4.0"}
 (fact "merges query with clause"
-  ^:hidden
-  
+
   (!.js
    [(scope/merge-queries [] [])
     (scope/merge-queries [{:a 1}] [{:a 2}])
@@ -273,7 +300,6 @@
 
 ^{:refer xt.db.base-scope/filter-scope :added "4.0"}
 (fact "filter scopes from keys"
-  ^:hidden
 
   (!.js  [(scope/filter-scope ["-/data"  "id"])
           (scope/filter-scope ["-/data" "-/key"])
@@ -325,7 +351,6 @@
 
 ^{:refer xt.db.base-scope/filter-plain-key :added "4.0"}
 (fact  "converts _id tags to standard keys"
-  ^:hidden
 
   (!.js
    [(scope/filter-plain-key "hello")
@@ -344,9 +369,8 @@
 
 ^{:refer xt.db.base-scope/filter-plain :added "4.0"}
 (fact "filter ids keys from scope keys"
-  ^:hidden
 
-  (!.js 
+  (!.js
    (scope/filter-plain  ["-/data"  "id"]))
   => {"id" true}
 
@@ -363,8 +387,7 @@
             ["id" "account" "first_name" "last_name" "city"
              "state" "country" "about" "language" "detail"])]}
 (fact "get columns for given keys"
-  ^:hidden
-  
+
   (!.js
    (xtd/arr-map (scope/get-data-columns sample/Schema
                                 "UserAccount"
@@ -386,7 +409,7 @@
                                       ["*/data"])
               (fn:> [e] (. e ["ident"]))))
   => ["id" "nickname" "password_updated" "is_super" "is_suspended" "is_official"]
-  
+
   (!.lua
    (xtd/arr-map (scope/get-data-columns sample/Schema
                                       "UserProfile"
@@ -400,7 +423,7 @@
                                       ["*/data"])
               (fn:> [e] (. e ["ident"]))))
   => ["id" "nickname" "password_updated" "is_super" "is_suspended" "is_official"]
-  
+
   (!.py
    (xtd/arr-map (scope/get-data-columns sample/Schema
                                       "UserProfile"
@@ -410,8 +433,7 @@
 
 ^{:refer xt.db.base-scope/get-link-standard :added "4.0"}
 (fact "classifies the link"
-  ^:hidden
-  
+
   (!.js
    (scope/get-link-standard ["hello" ["hello"]]))
   => ["hello" [{} ["hello"]]]
@@ -426,8 +448,7 @@
 
 ^{:refer xt.db.base-scope/get-query-tables :added "4.0"}
 (fact "get columns for given query"
-  ^:hidden
-  
+
   (!.js
    (scope/get-query-tables sample/Schema
                            "UserAccount"
@@ -453,8 +474,7 @@
 
 ^{:refer xt.db.base-scope/get-link-columns :added "4.0"}
 (fact "get columns for given keys"
-  ^:hidden
-  
+
   (!.js
    (xtd/arr-map (scope/get-link-columns sample/Schema
                                         "UserAccount"
@@ -462,7 +482,7 @@
                                                      "last_name"]]])
                 (fn [[e cols]] (return [e.ident cols]))))
   => [["profile" [{} ["first_name" "last_name"]]]]
-  
+
   (!.lua
    (xtd/arr-map (scope/get-link-columns sample/Schema
                                         "UserAccount"
@@ -485,8 +505,7 @@
 
 ^{:refer xt.db.base-scope/get-linked-tables :added "4.0"}
 (fact "calculated linked tables given query"
-  ^:hidden
-  
+
   (!.js
    (scope/get-linked-tables sample/Schema
                                 "UserAccount"
@@ -519,8 +538,7 @@
 
 ^{:refer xt.db.base-scope/get-tree :added "4.0"}
 (fact "calculated linked tree given query"
-  ^:hidden
-  
+
   (!.js
    (scope/get-tree sample/Schema
                    "UserAccount"
@@ -565,23 +583,23 @@
 (comment
   (!.py
    (xt/x:get-path sample/Schema ["UserProfile" "account"]))
-  
+
   (!.py
    (scope/get-tree sample/Schema
                    "UserProfile"
                    {:id "zcaudate"}
                    ["account"]
                    {}))
-  
-  
+
+
   (!.py
    (scope/get-tree sample/Schema
                    "UserAccount"
                    {:id "zcaudate"}
                    [["profile" {:name "hello"}]]
                    {}))
-  
-  
+
+
   (!.js
    (scope/get-tree sample/Schema
                    "UserProfile"
@@ -595,7 +613,7 @@
                    {}
                    [["profile"]]
                    {}))
-  
+
   (!.js
    (scope/get-tree sample/Schema
                    "UserProfile"

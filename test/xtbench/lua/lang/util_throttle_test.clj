@@ -34,10 +34,9 @@
   :lua
   (var out [])
   (var
-   throttle
-   (throttle/throttle-create
-    (fn [i] (ngx.sleep 0.1) (x:arr-push out i) (repl/notify out))
-    nil))
+   handler
+   (fn [i] (ngx.sleep 0.1) (x:arr-push out i) (repl/notify out)))
+  (var throttle (throttle/throttle-create handler nil))
   (throttle/throttle-run-async throttle 1))
  =>
  [1])
@@ -50,15 +49,14 @@
   :lua
   (:= (!:G OUT) [])
   #'throttle
-  (:=
-   throttle
-   (throttle/throttle-create
-    (fn
-     [i]
-     (ngx.sleep 0.1)
-     (x:arr-push (!:G OUT) i)
-     (repl/notify (!:G OUT)))
-    nil))
+  (var
+   handler
+   (fn
+    [i]
+    (ngx.sleep 0.1)
+    (x:arr-push (!:G OUT) i)
+    (repl/notify (!:G OUT))))
+  (:= throttle (throttle/throttle-create handler nil))
   (throttle/throttle-run throttle 1)
   (throttle/throttle-run throttle 1)
   (throttle/throttle-run throttle 1)
@@ -76,16 +74,15 @@
  (notify/wait-on
   :lua
   #'throttle
-  (:=
-   throttle
-   (throttle/throttle-create
-    (fn
-     [i]
-     (ngx.sleep 0.1)
-     (repl/notify
-      [(throttle/throttle-active throttle)
-       (throttle/throttle-waiting throttle)]))
-    nil))
+  (var
+   handler
+   (fn
+    [i]
+    (ngx.sleep 0.1)
+    (repl/notify
+     [(throttle/throttle-active throttle)
+      (throttle/throttle-waiting throttle)])))
+  (:= throttle (throttle/throttle-create handler nil))
   (throttle/throttle-run throttle 1)
   (throttle/throttle-run throttle 1)
   (throttle/throttle-run throttle 1)

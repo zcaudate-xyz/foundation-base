@@ -17,7 +17,7 @@
 
 ^{:refer lib.aether/populate-artifact :added "3.0"}
 (fact "allows coordinate to fill rest of values"
-  
+
   (populate-artifact '[midje "1.6.3"]
                      {:artifacts [{:extension "pom"
                                    :file "midje.pom"}
@@ -79,7 +79,7 @@
 ^{:refer lib.aether/pull :added "3.0"}
 (fact "resolves the coordinate from maven and loads dependency into classpath"
 
-  (pull '[[joda-time "2.9"]]) ^:hidden
+  (pull '[[joda-time "2.9"]])
   => (contains {:artifacts sequential?
                 :unloaded sequential?
                 :loaded sequential?}))
@@ -87,7 +87,7 @@
 ^{:refer lib.aether/push :added "3.0"}
 (fact "gets rid of a dependency that is not needed"
 
-  (push '[[joda-time "2.9"]]) ^:hidden
+  (push '[[joda-time "2.9"]])
   => (contains {:artifacts sequential?
                 :unloaded sequential?
                 :cleaned sequential?})

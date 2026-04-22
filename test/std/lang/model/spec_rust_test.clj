@@ -24,7 +24,7 @@
            (:to 1 2)
            (:to 2 9)
            _ => "lots")
-    
+
     (assert_eq! message "a few"))
 
   (!.rs
@@ -45,7 +45,7 @@ let a: List<i32> = List::Cons(7, Box::new(List::Cons(13, Box::new(List::Nil))));
 
 (deftrait.rs ^{:% ["#[allow(dead_code)]"]}
   Animal
-  
+
   (fn ^{:- [:Self]}
     new  [:&'static :str name])
 
@@ -54,7 +54,7 @@ let a: List<i32> = List::Cons(7, Box::new(List::Cons(13, Box::new(List::Nil))));
 
   (fn ^{:- [:&'static :str]}
     noise [])
-  
+
   (fn talk []
     (println! "{} says {}",
               (. self (name)),
@@ -63,16 +63,16 @@ let a: List<i32> = List::Cons(7, Box::new(List::Cons(13, Box::new(List::Nil))));
 (!.rs
   (deftrait ;;^{:% ["#[allow(dead_code)]"]}
     Animal
-    
+
     (fn ^{:- [:Self]}
       new  [:&'static :str name])
 
     (fn ^{:- [:&'static :str]}
       name [&self])
-    
+
     (fn ^{:- [:&'static :str]}
       noise  [^:&mut self])
-    
+
     (fn talk [^:& self]
       (println! "{} says {}",
                 (. self (name)),
@@ -110,10 +110,10 @@ let a: List<i32> = List::Cons(7, Box::new(List::Cons(13, Box::new(List::Nil))));
 
 (defimpl.rs Animal<>Sheep
   [-/Animal :for -/Sheep]
-  
+
   (fn ^{:- [-/Sheep]} new [:&'static :str name]
     (new Sheep :name name :naked false))
-  
+
   (fn ^{:- [:&'static :str]}
     name [&self]
     (. self name))
@@ -126,13 +126,13 @@ let a: List<i32> = List::Cons(7, Box::new(List::Cons(13, Box::new(List::Nil))));
 
 (comment
 
-  
+
   (defn.rs ^{:- [[:> Hello :i32]]}
     combine-vecs
     [[:> Vec :i32] u
      [:> Vec :i32] v])
-  
-  
+
+
   (defn.rs ^{:- [[:> "iter::Cycle"
                   [:> "iter::Chain"
                    [:> IntoIter :i32]
@@ -141,7 +141,7 @@ let a: List<i32> = List::Cons(7, Box::new(List::Cons(13, Box::new(List::Nil))));
     [[:> Vec :i32] v
      [:> Vec :i32] u]
     ($ iter "Cycle"))
-  
+
   (defn.rs ^{:- [:impl [:> "Iterator" "Item=i32"]]}
     combine-vecs
     [[:> Vec :i32] u
@@ -159,7 +159,7 @@ let a: List<i32> = List::Cons(7, Box::new(List::Cons(13, Box::new(List::Nil))));
        (into-iter)
        (chain (. u (into-iter)))
        (cycle)))
-  
+
   (defn.rs ^{:- [:impl [:> Iterator :Item=i32]]}
     combine-vecs
     [[:> Vec :i32] u
@@ -168,20 +168,20 @@ let a: List<i32> = List::Cons(7, Box::new(List::Cons(13, Box::new(List::Nil))));
        (into-iter)
        (chain (. u (into-iter)))
        (cycle)))
-  
+
   )
 
 (comment
 
   (into {} List)
-  
+
   (!.rs
     (defimpl Animal<>Sheep
       [-/Animal :for -/Sheep]
-      
+
       (fn ^{:- [-/Sheep]} new [:&'static :str name]
         (new Sheep :name name :naked false))
-      
+
       (fn ^{:- [:&'static :str]}
         name [&self]
         (. self name))
@@ -191,54 +191,54 @@ let a: List<i32> = List::Cons(7, Box::new(List::Cons(13, Box::new(List::Nil))));
         (if (. self (is-naked))
           "baaaaah?"
           "baaaaah!"))))
-  
-  
+
+
   (!.rs
     (defenum [:> List T]
       [Nil
        (Cons T [:> Box [:> List T]])]))
-  
+
   (!.rs
     (deftrait [:> List T]
       [Nil
        (Cons T [:> Box [:> List T]])]))
-  
-  
+
+
   (!.rs
     (defenum [:> List T]
       Nil
       (Cons T [:> Box [:> List T]])))
-  
+
   (!.rs
     (var [:> List :i32] a
          ($ List "Cons" 7 ($ Box "new"
                              ($ List "Cons" 13
                                 ($ Box "new"
                                    ($ List "Nil")))))))
-  
+
   (!.rs
     (var [:> List :i32] a
          ($ List "Cons" 7 ($ Box "new"
                              ($ List "Cons" 13
                                 ($ Box "new"
                                    ($ List "Nil")))))))
-  
+
   (!.rs
     (var [:> List A B] a "hello")
     )
-  
+
   (!.rs
     [:> Box [:i32]])
-  
+
   (!.rs :i32)
-  
+
   (!.rs
     (var [:> List :i32] a
          ($ List "Cons" 7 ($ Box "new"
                              ($ List "Cons" 13
                                 ($ Box "new"
                                    ($ List :Nil)))))))
-  
+
   (!.rs
     ($ Box "new" ($ List :Nil)))
 
@@ -247,27 +247,27 @@ let a: List<i32> = List::Cons(7, Box::new(List::Cons(13, Box::new(List::Nil))));
 
   (!.rs
     (:&' hello))
-  
+
   (!.rs
     (:& hello))
-  
+
   (!.rs
     (fn ^{:- [T]} newe [:&'static name]))
-  
+
   (!.rs
     (fn ^{:- [:String]} get [&self]))
-  
+
   (!.rs
     (fn ^{:- [:String]}
       get [&self]))
-  
+
   (!.rs
     (defn ^{:- [:String]}
       get [&self]))
-  
+
   (!.rs
     &'hello)
-  
+
   (!.rs
     (defenum [:> List T]
       [Nil
@@ -275,7 +275,7 @@ let a: List<i32> = List::Cons(7, Box::new(List::Cons(13, Box::new(List::Nil))));
   )
 
 (comment
-  
+
 
   (!.rs ^{:# [[lang := "owned_box"]
               [fundamental]
@@ -284,31 +284,29 @@ let a: List<i32> = List::Cons(7, Box::new(List::Cons(13, Box::new(List::Nil))));
   => "1 + 2 + 3;")
 
 (fact "various test cases for rust code"
-  ^:hidden
-  
+
   (!.rs
     (defstruct ^{:- [[T Sized]]}
       Box))
   => "struct Box;"
-  
+
   (!.rs
     (defimpl Box<>Base
       [Box]
-      
-      
+
+
       (fn ^{:- [:String]} get [])))
 
   (!.rs
     (fn [:> double-positive :'a]))
-  
+
 
   (!.rs
     (deftrait UsernameWidget
-      
+
       (fn ^{:- [:String]} get [&self]))))
 
 (fact "various test cases for rust code"
-  ^:hidden
 
   (!.rs
     (defn main []
@@ -321,11 +319,11 @@ let a: List<i32> = List::Cons(7, Box::new(List::Cons(13, Box::new(List::Nil))));
   (!.js
    (var (:int a) 3))
   => "let int a = 3;"
-  
+
   (!.rs
     (var :mutable (:f64 number) 1.0))
   => "let mutable number: f64 = 1.0;"
-  
+
   (!.rs
     (var (:f64 number) 1.0))
   => "let number: f64 = 1.0;"
@@ -333,22 +331,22 @@ let a: List<i32> = List::Cons(7, Box::new(List::Cons(13, Box::new(List::Nil))));
   (!.rs
     (var (:f64 n) 1.0))
   => "let n: f64 = 1.0;"
-  
+
   (!.rs
     (:to 0 3))
   => "0..3;"
-  
+
   (!.rs
     ($ Class "new"))
   => "Class::new();"
-  
+
   (!.rs
     ($ Class :new))
   => "Class::new;"
 
 
-  
-  
+
+
   (!.rs
     (defn main []
       (println! "{subject} {verb} {object}"
@@ -364,13 +362,13 @@ let a: List<i32> = List::Cons(7, Box::new(List::Cons(13, Box::new(List::Nil))));
       "    subject=\"the quick brown fox\""
       "  );"
       "}")
-  
+
   (!.rs
     (defn is-divisible-by [:u32 lhs
                            :u32 rhs]
       (if (== rhs 0)
         (return false))
-      
+
       (return
        (== 0 (mod lhs rhs)))))
   => (prose/|
@@ -439,12 +437,12 @@ let a: List<i32> = List::Cons(7, Box::new(List::Cons(13, Box::new(List::Nil))));
      [Paste [:String]]
      [Click [[:i64 x]
              [:i64 y]]]])
-  
-  
+
+
   (defstruct Person
     [[:String name]
      [:u8 age]])
-  
+
   (defstruct Unit)
 
   (defstruct Pair [:i32 :f32])
@@ -452,11 +450,11 @@ let a: List<i32> = List::Cons(7, Box::new(List::Cons(13, Box::new(List::Nil))));
   (defstruct Point
     [[:f32 x]
      [:f32 y]])
-  
+
   (defstruct Rectangle
     [[-/Point top-left]
      [-/Point bottom-right]])
-  
+
   "
 enum WebEvent {
     // An `enum` variant may either be `unit-like`,
@@ -485,7 +483,7 @@ fn inspect(event: WebEvent) {
     }
 }
 "
-  
+
   (do (spit "hello.rs"
             "
 #[derive(Debug)]
@@ -505,9 +503,9 @@ fn main() {
       (os/sh {:args ["rustc" "hello.rs"]})
       (os/sh {:args ["hello"]})))
 
-  
-  
-  
+
+
+
 
 
 (comment
@@ -515,33 +513,33 @@ fn main() {
   (!.rs
     (^{:- [:i32]} fn [:i32 i]
      (+ i 10)))
-  
+
   (!.rs
     (mut (:f64 n) 1.0))
-  
+
   (!.rs
     (var (:f64 n)))
-  
+
   (!.rs
     (var (:f64  number) 1.0)
     (var (:bool number) 1.0)
     (var :mut number 1.0))
-  
+
   (!.rs
     #_#_
     (var (:f64  number) 1.0)
     (var (:bool number) 1.0)
     (var :mut number 1.0))
-  
+
   (!.rs
     (defn main []
       (println! "Base 10:    {}"    69420)
       (println! "Base 2:     {:b}"  69420)
       (println! "Base 8:     {:o}"  69420)
       (println! "Base 16:    {:x}"  69420)))
-  
-  
-  
+
+
+
   )
 
 

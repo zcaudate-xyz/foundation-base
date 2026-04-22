@@ -13,8 +13,7 @@
 
 ^{:refer code.tool.translate.c-ast/translate-ast :added "4.1"}
 (fact "builds the translator and shells out to clang"
-  ^:hidden
-  
+
   (let [input (fs/create-tmpfile "int main(){return 0;}")
         output (str input ".json")]
     (with-redefs [make/build-all (fn [target] target)

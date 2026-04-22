@@ -28,8 +28,7 @@
 
 ^{:refer script.sql.table/table-common-options :added "4.0"}
 (fact "returns the common options"
-  ^:hidden
-  
+
   (table-common-options)
   => (contains
       {:table-fn fn?
@@ -37,8 +36,7 @@
 
 ^{:refer script.sql.table/schema:order :added "3.0"}
 (fact "produces an ordered list of data from schema"
-  ^:hidden
-  
+
   (schema:order {:vec [:account {}
                        :wallet  {}]}
                 {:account {}
@@ -47,15 +45,13 @@
 
 ^{:refer script.sql.table/schema:ids:alias :added "3.0"}
 (fact "retreives the alias for a given id"
-  ^:hidden
-  
+
   (schema:ids:alias |schema| :meat [:type :amount])
   => [:type :amount])
 
 ^{:refer script.sql.table/schema:ids :added "3.0"}
 (fact "constructs an access vector for ids"
-  ^:hidden
-  
+
   (schema:ids (schema/schema
                [:access [:id {:type :alias
                               :alias {:keys [:first :nick]}}
@@ -66,7 +62,6 @@
 
 ^{:refer script.sql.table/table:query:id :added "3.0"}
 (fact "constructs an sql query"
-  ^:hidden
 
   (table:query:id :user "id-0")
   => "SELECT * FROM \"user\" WHERE id = 'id-0'")
@@ -79,8 +74,7 @@
 
 ^{:refer script.sql.table/table-compile :added "4.0"}
 (fact "compiles a table in the schema"
-  ^:hidden
-  
+
   (table-compile builder/for-insert-multi
                  :meat
                  [{:id "a0" :type :beef :amount 100 :grade :good}
@@ -91,7 +85,6 @@
 
 ^{:refer script.sql.table/table-batch :added "3.0"}
 (fact "helper function for batch calls"
-  ^:hidden
 
   (table-batch builder/for-insert-multi
                {:meat [{:id "a0" :type :beef :amount 100 :grade :good}
@@ -105,7 +98,6 @@
 
 ^{:refer script.sql.table/table:put:batch :added "3.0"}
 (fact "constructs a batch upsert statement"
-  ^:hidden
 
   (table:put:batch {:meat [{:id "a0" :type :beef :amount 100 :grade :good}
                            {:id "b0" :type :pork :amount 10  :grade :bad}
@@ -124,7 +116,6 @@
 
 ^{:refer script.sql.table/table:put:single :added "3.0"}
 (fact "constructs a single upsert statement"
-  ^:hidden
 
   (table:put:single :meat {:id "a0" :type :chicken :amount 100 :grade :good}
                     {:schema |schema|})
@@ -138,7 +129,6 @@
 
 ^{:refer script.sql.table/table:set:batch :added "3.0"}
 (fact "constructs a batch insert statement"
-  ^:hidden
 
   (table:set:batch {:meat [{:id "a0" :type :beef :amount 100 :grade :good}
                            {:id "b0" :type :pork :amount 10  :grade :bad}
@@ -154,7 +144,6 @@
 
 ^{:refer script.sql.table/table:set:single :added "3.0"}
 (fact "constructs a single insert statement"
-  ^:hidden
 
   (table:set:single :meat {:id "a0" :type :chicken :amount 100 :grade :good}
                     {:schema |schema|})
@@ -166,7 +155,6 @@
 
 ^{:refer script.sql.table/table:delete :added "3.0"}
 (fact "constructs a delete statement"
-  ^:hidden
 
   (table:delete :meat "id-0" {:schema |schema|})
   => "DELETE FROM \"meat\" WHERE \"id\" = 'id-0'")
@@ -179,14 +167,12 @@
 
 ^{:refer script.sql.table/table:clear :added "3.0"}
 (fact "constructs a clear table statement"
-  ^:hidden
 
   (table:clear :meat)
   => "DELETE FROM \"meat\"")
 
 ^{:refer script.sql.table/table:select :added "3.0"}
 (fact "constructs sql select statement"
-  ^:hidden
 
   (table:select :meat
                 {:amount 100}
@@ -205,14 +191,12 @@
 
 ^{:refer script.sql.table/table:get :added "3.0"}
 (fact "constructs an sql get statement"
-  ^:hidden
 
   (table:get :meat "a0" {:schema |schema|})
   => "SELECT * FROM \"meat\" WHERE \"id\" = 'a0'")
 
 ^{:refer script.sql.table/table:cas :added "3.0"}
 (fact "constructs a cas statement"
-  ^:hidden
 
   (table:cas :meat
              {:id "i0" :amount 100}
@@ -233,7 +217,6 @@
 
 ^{:refer script.sql.table/table:count :added "3.0"}
 (fact "constructs an sql count statement"
-  ^:hidden
 
   (table:count :meat nil {:schema |schema|})
   => "SELECT count(*) FROM \"meat\"")
@@ -255,7 +238,6 @@
 
 ^{:refer script.sql.table/table:batch :added "3.0"}
 (fact "batched queries grouped by op and table"
-  ^:hidden
 
   (table:batch {:set {:meat [{:id 1}]
                       :vegetable [{:id 2}]}}

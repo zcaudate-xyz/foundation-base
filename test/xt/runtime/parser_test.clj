@@ -41,7 +41,6 @@
 
 ^{:refer xt.runtime.parser-common/whitespace? :added "4.1"}
 (fact "detects reader whitespace"
-  ^:hidden
 
   (!.js
    [(pc/whitespace? " ")
@@ -57,7 +56,6 @@
 
 ^{:refer xt.runtime.parser-common/token-boundary? :added "4.1"}
 (fact "detects token boundaries"
-  ^:hidden
 
   (!.js
    [(pc/token-boundary? " ")
@@ -73,7 +71,6 @@
 
 ^{:refer xt.runtime.parser-common/read-comment :added "4.1"}
 (fact "consumes line comments"
-  ^:hidden
 
   (!.js
    (var reader (rdr/create "note\nx"))
@@ -89,7 +86,6 @@
 
 ^{:refer xt.runtime.parser-common/skip-whitespace :added "4.1"}
 (fact "skips whitespace and comments"
-  ^:hidden
 
   (!.js
    (var reader (rdr/create " \n; note\nabc"))
@@ -105,7 +101,6 @@
 
 ^{:refer xt.runtime.parser-common/digit? :added "4.1"}
 (fact "detects digit chars"
-  ^:hidden
 
   (!.js
    [(pc/digit? "1")
@@ -119,7 +114,6 @@
 
 ^{:refer xt.runtime.parser-common/numeric-leading? :added "4.1"}
 (fact "detects numeric-looking tokens"
-  ^:hidden
 
   (!.js
    [(pc/numeric-leading? "12")
@@ -135,7 +129,6 @@
 
 ^{:refer xt.runtime.parser-common/match-number :added "4.1"}
 (fact "matches integer and decimal tokens"
-  ^:hidden
 
   (!.js
    [(pc/match-number "12")
@@ -151,7 +144,6 @@
 
 ^{:refer xt.runtime.parser-common/read-token :added "4.1"}
 (fact "reads tokens until the next boundary"
-  ^:hidden
 
   (!.js
    (var reader (rdr/create "bc]"))
@@ -165,7 +157,6 @@
 
 ^{:refer xt.runtime.parser-common/interpret-token :added "4.1"}
 (fact "interprets atom tokens into runtime values"
-  ^:hidden
 
   (!.js
    (var reader (rdr/create ""))
@@ -190,7 +181,6 @@
   => [true true -2 ["symbol" "hello" "world"] ["keyword" "user" "id"]])
 
 (fact "rejects invalid numeric tokens"
-  ^:hidden
 
   (!.js
    (pc/interpret-token (rdr/create "") "12a"))
@@ -202,7 +192,6 @@
 
 ^{:refer xt.runtime.parser-common/normalise-meta :added "4.1"}
 (fact "normalises metadata shorthand"
-  ^:hidden
 
   (!.js
    (var from-string (pc/normalise-meta "tagged"))
@@ -220,7 +209,6 @@
 
 ^{:refer xt.runtime.parser/read-delimited :added "4.1"}
 (fact "reads delimited forms into arrays"
-  ^:hidden
 
   (!.js
    (var reader (rdr/create "1 2]"))
@@ -229,7 +217,6 @@
 
 ^{:refer xt.runtime.parser-common/read-string-body :added "4.1"}
 (fact "reads string bodies with simple escapes"
-  ^:hidden
 
   (!.js
    (var reader (rdr/create "a\\n\\\"b\""))
@@ -243,7 +230,6 @@
 
 ^{:refer xt.runtime.parser/read-list :added "4.1"}
 (fact "reads list forms"
-  ^:hidden
 
   (!.js
    (list/list-to-array (p/read-list (rdr/create "1 2 3)"))))
@@ -251,7 +237,6 @@
 
 ^{:refer xt.runtime.parser/read-vector :added "4.1"}
 (fact "reads vector forms"
-  ^:hidden
 
   (!.js
    (. (p/read-vector (rdr/create "1 2 3]")) (to-array)))
@@ -259,7 +244,6 @@
 
 ^{:refer xt.runtime.parser/read-map :added "4.1"}
 (fact "reads map forms"
-  ^:hidden
 
   (!.js
    (var out (p/read-map (rdr/create ":a 1 :b 2}")))
@@ -269,7 +253,6 @@
   => [2 1 2])
 
 (fact "rejects odd map forms"
-  ^:hidden
 
   (!.js
    (p/read-map (rdr/create ":a 1 :b}")))
@@ -281,7 +264,6 @@
 
 ^{:refer xt.runtime.parser/read-set :added "4.1"}
 (fact "reads set forms"
-  ^:hidden
 
   (!.js
    (var out (p/read-set (rdr/create ":a :b :a}")))
@@ -292,7 +274,6 @@
 
 ^{:refer xt.runtime.parser/read-quote :added "4.1"}
 (fact "reads quoted forms into runtime lists"
-  ^:hidden
 
   (!.js
    (var out (list/list-to-array (p/read-quote (rdr/create "hello"))))
@@ -302,7 +283,6 @@
 
 ^{:refer xt.runtime.parser/read-syntax-quote :added "4.1"}
 (fact "reads syntax-quote forms into runtime lists"
-  ^:hidden
 
   (!.js
    (var out (list/list-to-array (p/read-syntax-quote (rdr/create "hello"))))
@@ -312,7 +292,6 @@
 
 ^{:refer xt.runtime.parser/read-deref :added "4.1"}
 (fact "reads deref forms into runtime lists"
-  ^:hidden
 
   (!.js
    (var out (list/list-to-array (p/read-deref (rdr/create "hello"))))
@@ -322,7 +301,6 @@
 
 ^{:refer xt.runtime.parser/read-unquote :added "4.1"}
 (fact "reads unquote forms into runtime lists"
-  ^:hidden
 
   (!.js
    (var out (list/list-to-array (p/read-unquote (rdr/create "hello"))))
@@ -332,7 +310,6 @@
 
 ^{:refer xt.runtime.parser/read-unquote-splicing :added "4.1"}
 (fact "reads unquote-splicing forms into runtime lists"
-  ^:hidden
 
   (!.js
    (var out (list/list-to-array (p/read-unquote-splicing (rdr/create "hello"))))
@@ -342,7 +319,6 @@
 
 ^{:refer xt.runtime.parser/read-meta :added "4.1"}
 (fact "reads metadata into syntax wrappers"
-  ^:hidden
 
   (!.js
    (var out (p/read-meta (rdr/create ":dynamic hello")))
@@ -355,7 +331,6 @@
 
 ^{:refer xt.runtime.parser/read-var-quote :added "4.1"}
 (fact "reads var-quote forms into runtime lists"
-  ^:hidden
 
   (!.js
    (var out (list/list-to-array (p/read-var-quote (rdr/create "hello"))))
@@ -365,7 +340,6 @@
 
 ^{:refer xt.runtime.parser/read-discard :added "4.1"}
 (fact "reads discard forms by skipping one form"
-  ^:hidden
 
   (!.js
    (var out (p/read-discard (rdr/create "hello world")))
@@ -374,7 +348,6 @@
 
 ^{:refer xt.runtime.parser/read-dispatch :added "4.1"}
 (fact "reads dispatch set forms"
-  ^:hidden
 
   (!.js
    (var out (p/read-dispatch (rdr/create "{:a :b}")))
@@ -384,7 +357,6 @@
   => [2 true true])
 
 (fact "reads var-quote and discard dispatch forms"
-  ^:hidden
 
   (!.js
    (var quoted (list/list-to-array (p/read-dispatch (rdr/create "'hello"))))
@@ -395,7 +367,6 @@
   => [["var" "hello"] "world"])
 
 (fact "rejects unsupported dispatch macros"
-  ^:hidden
 
   (!.js
    (p/read-dispatch (rdr/create "?x")))
@@ -406,7 +377,6 @@
   => (throws))
 
 (fact "rejects EOF for prefix reader syntax"
-  ^:hidden
 
   (!.js
    (p/read (rdr/create "'")))
@@ -438,7 +408,6 @@
 
 ^{:refer xt.runtime.parser/read :added "4.1"}
 (fact "reads atom and collection forms from readers"
-  ^:hidden
 
   (!.js
    (var list-out (p/read (rdr/create "(1 2 3)")))
@@ -449,7 +418,6 @@
   => [[1 2 3] [1 2 3] true])
 
 (fact "reads deref, unquote, syntax-quote, and dispatch reader syntax"
-  ^:hidden
 
   (!.js
    (var syntax-out (list/list-to-array (p/read (rdr/create "`hello"))))
@@ -477,7 +445,6 @@
       "world"])
 
 (fact "rejects unmatched delimiters"
-  ^:hidden
 
   (!.js
    (p/read (rdr/create ")")))
@@ -489,7 +456,6 @@
 
 ^{:refer xt.runtime.parser/read-string :added "4.1"}
 (fact "reads forms directly from strings"
-  ^:hidden
 
   (!.js
    (var out (p/read-string "  ; ignore\n^{:tag true} [1 2]"))
@@ -499,7 +465,6 @@
   => [[1 2] 1])
 
 (fact "returns nil for empty or comment-only strings"
-  ^:hidden
 
   (!.js
    (== nil (p/read-string "  ; comment\n")))

@@ -68,7 +68,7 @@
 
   (def -opts- {:a 1})
   (read/parse-opts '-opts-)
-  => {:a 1} ^:hidden
+  => {:a 1}
 
   (read/parse-opts {})
   => {})

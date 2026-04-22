@@ -27,7 +27,6 @@
 
 ^{:refer xt.runtime.type-hashset/hashset :added "4.1"}
 (fact "creates a hashset and removes duplicates"
-  ^:hidden
 
   (!.js
    (var out (hs/hashset "a" "b" "a"))
@@ -47,7 +46,6 @@
 
 ^{:refer xt.runtime.type-hashset/hashset-find :added "4.1"}
 (fact "finds existing values and preserves nil members"
-  ^:hidden
 
   (!.js
    (var out (-> hs/EMPTY_HASHSET
@@ -65,7 +63,6 @@
 
 ^{:refer xt.runtime.type-hashset/hashset-push :added "4.1"}
 (fact "keeps persistent updates immutable"
-  ^:hidden
 
   (!.js
    (var s0 (hs/hashset "a"))
@@ -85,7 +82,6 @@
 
 ^{:refer xt.runtime.type-hashset/hashset-to-mutable! :added "4.1"}
 (fact "supports mutable edits and roundtrips back to persistent"
-  ^:hidden
 
   (!.js
    (var out (-> (hs/hashset "a")
@@ -113,7 +109,6 @@
 
 ^{:refer xt.runtime.type-hashset/hashset-eq :added "4.1"}
 (fact "compares and hashes sets independent of insertion order"
-  ^:hidden
 
   (!.js
    (var s1 (hs/hashset "a" "b"))
@@ -134,7 +129,6 @@
 
 ^{:refer xt.runtime.type-hashset/hashset-to-array :added "4.1"}
 (fact "converts the hashset to an array"
-  ^:hidden
 
   (!.js
    (hs/hashset-to-array
@@ -148,7 +142,6 @@
 
 ^{:refer xt.runtime.type-hashset/hashset-to-iter :added "4.1"}
 (fact "iterates over the hashset values"
-  ^:hidden
 
   (!.js
    (it/arr<
@@ -164,7 +157,6 @@
 
 ^{:refer xt.runtime.type-hashset/hashset-new :added "4.1"}
 (fact "creates a bare hashset from an underlying hashmap"
-  ^:hidden
 
   (!.js
    (var out (hs/hashset-new hm/EMPTY_HASHMAP nil))
@@ -182,7 +174,6 @@
 
 ^{:refer xt.runtime.type-hashset/hashset-empty :added "4.1"}
 (fact "creates an empty hashset from the current hashset"
-  ^:hidden
 
   (!.js
    (var out (hs/hashset-empty (hs/hashset "a")))
@@ -198,7 +189,6 @@
 
 ^{:refer xt.runtime.type-hashset/hashset-is-editable :added "4.1"}
 (fact "detects mutable vs persistent hashsets"
-  ^:hidden
 
   (!.js
    [(hs/hashset-is-editable (hs/hashset "a"))
@@ -212,7 +202,6 @@
 
 ^{:refer xt.runtime.type-hashset/hashset-to-persistent! :added "4.1"}
 (fact "converts a mutable hashset back into a persistent hashset"
-  ^:hidden
 
   (!.js
    (var out (-> (hs/hashset "a")
@@ -234,7 +223,6 @@
 
 ^{:refer xt.runtime.type-hashset/hashset-has? :added "4.1"}
 (fact "checks membership in the hashset"
-  ^:hidden
 
   (!.js
    [(hs/hashset-has? (hs/hashset "a" "b") "a")
@@ -248,7 +236,6 @@
 
 ^{:refer xt.runtime.type-hashset/hashset-push! :added "4.1"}
 (fact "mutably adds values without growing for duplicates"
-  ^:hidden
 
   (!.js
    (var out (hs/hashset-empty-mutable))
@@ -272,7 +259,6 @@
 
 ^{:refer xt.runtime.type-hashset/hashset-dissoc :added "4.1"}
 (fact "keeps persistent removals immutable"
-  ^:hidden
 
   (!.js
    (var s0 (hs/hashset "a" "b"))
@@ -292,7 +278,6 @@
 
 ^{:refer xt.runtime.type-hashset/hashset-dissoc! :added "4.1"}
 (fact "mutably removes values and ignores missing values"
-  ^:hidden
 
   (!.js
    (var out (-> (hs/hashset "a" "b")
@@ -316,7 +301,6 @@
 
 ^{:refer xt.runtime.type-hashset/hashset-hash :added "4.1"}
 (fact "computes the same unordered hash as the protocol hash function"
-  ^:hidden
 
   (!.js
    (var s1 (hs/hashset "a" "b"))
@@ -338,7 +322,6 @@
 
 ^{:refer xt.runtime.type-hashset/hashset-show :added "4.1"}
 (fact "shows the hashset as an EDN-like set string"
-  ^:hidden
 
   (!.js
    (hs/hashset-show
@@ -352,7 +335,6 @@
 
 ^{:refer xt.runtime.type-hashset/hashset-create :added "4.1"}
 (fact "creates a hashset with the default prototype"
-  ^:hidden
 
   (!.js
    (var out (hs/hashset-create hm/EMPTY_HASHMAP))
@@ -370,7 +352,6 @@
 
 ^{:refer xt.runtime.type-hashset/hashset-empty-mutable :added "4.1"}
 (fact "creates an empty mutable hashset"
-  ^:hidden
 
   (!.js
    (var out (hs/hashset-empty-mutable))

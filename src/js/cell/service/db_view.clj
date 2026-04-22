@@ -42,7 +42,7 @@
                        (xt/x:arr-filter return-query xt/x:is-string?)
                        return-query))
   (var query (xtd/get-in return-entry ["view" "query"]))
-  (xt/x:arr-append query query-mixin)
+  (xt/x:arr-assign query query-mixin)
   (return return-entry))
 
 (defn.xt view-query-entries

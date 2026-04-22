@@ -27,14 +27,13 @@
 
 ^{:refer std.make.project/def.make :added "4.0"}
 (fact "macro to instantiate a section"
-  ^:hidden
-  
+
   (require '[std.make.common :as common])
   (def.make TEST_MAKE
     {:tag "test.make"
      :default [{:type :raw :file "hello.txt" :main "hello"}]
      :triggers #{"test.trigger"}})
-  
+
   (common/triggers-get TEST_MAKE)
   => #{"test.trigger"})
 
@@ -46,7 +45,7 @@
   (fn? file-watcher-handler) => true)
 
 (comment
-  
+
   (defn add [x y]
     (+ x y))
 
@@ -63,8 +62,8 @@
 
     (map resolve (map :refer (vals (get-in @code.test.base.runtime/*registry* [(env/ns-sym) :facts]))))
     (#'std.make.project/makefile-parse #'std.make.project/build-all #'std.make.project/def-make-fn #'std.make.project/def.make)
-    
-    
+
+
     (meta #'std.make.project/makefile-parse))
 
   (require '[code.test.base.runtime :as rt])
@@ -97,33 +96,33 @@
   (comment
 
     (get-line)
-    
+
     (defmacro get-line
       []
       (meta &form))
 
-    
+
     (map :line (vals (rt/all-facts)))
 
     (defn create-form-fn
       [ns {:keys [line]}]
       (rt/find-fact ns {:line line}) #_(let [{:keys [refer]} (rt/find-fact {:line line})]
                                          refer))
-    
+
     (rt/find-fact (env/ns-sym)
                   {:line 10})
     (create-form-fn (env/ns-sym)
                     {:line 10})
-    
-    
+
+
     (create-form)
-    
-    
+
+
     (defmacro create-form
       []
       `(create-form-fn (env/ns-sym) ~(meta &form)))
-    
-    
+
+
 
 
     (trace-install (env/ns-sym))
@@ -134,12 +133,12 @@
     (trace/add-base-trace #'add))
 
   (comment
-    
+
     (meta #'add)
     (trace/add-base-trace #'add)
     (trace/get-trace #'add)
     (trace/remove-trace #'add)
-    
+
     (add 1 2)))
 
 

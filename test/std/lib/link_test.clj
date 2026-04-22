@@ -21,7 +21,6 @@
 
 ^{:refer std.lib.link/ns-metadata-raw :added "3.0"}
 (fact "returns the metadata associated with a given namespace"
-  ^:hidden
 
   (ns-metadata-raw 'code.test.compile)
   => map?)
@@ -38,7 +37,6 @@
 
 ^{:refer std.lib.link/link:create :added "3.0"}
 (fact "creates a link"
-  ^:hidden
 
   (ns-unmap *ns* '-ipending0?-)
   (declare -ipending0?-)
@@ -51,7 +49,6 @@
 ^{:refer std.lib.link/link? :added "3.0"
   :setup [(def |lnk| (create-link))]}
 (fact "checks if object is a link"
-  ^:hidden
 
   (link? |lnk|)
   => true)
@@ -59,7 +56,6 @@
 ^{:refer std.lib.link/register-link :added "3.0"
   :setup [(def |lnk| (create-link))]}
 (fact "adds link to global registry"
-  ^:hidden
 
   (register-link |lnk|)
   => #'std.lib.link-test/|lnk|
@@ -70,7 +66,6 @@
 ^{:refer std.lib.link/deregister-link :added "3.0"
   :setup [(def |lnk| (create-link))]}
 (fact "removes a link from global registry"
-  ^:hidden
 
   (deregister-link |lnk|)
   => #'std.lib.link-test/|lnk|
@@ -81,7 +76,6 @@
 ^{:refer std.lib.link/registered-link? :added "3.0"
   :setup [(def |lnk| (create-link))]}
 (fact "checks if a link is registered"
-  ^:hidden
 
   (registered-link? |lnk|)
   => any?)
@@ -89,7 +83,6 @@
 ^{:refer std.lib.link/registered-links :added "3.0"
   :setup [(def |lnk| (create-link))]}
 (fact "returns all registered links"
-  ^:hidden
 
   (register-link |lnk|)
   => #'std.lib.link-test/|lnk|
@@ -111,7 +104,6 @@
 ^{:refer std.lib.link/link:bound? :added "3.0"
   :setup [(def |lnk| (create-link))]}
 (fact "checks if the var of the link has been bound, should be true"
-  ^:hidden
 
   (link:bound? |lnk|)
   => true
@@ -125,13 +117,12 @@
 ^{:refer std.lib.link/link:status :added "3.0"
   :setup [(def |lnk| (create-link))]}
 (fact "lists the current status of the link"
-  ^:hidden
 
   (link:status (->Link {:ns 'std.lib :name 'iobj?}
                        nil
                        nil
                        nil))
-  => :unresolved ^:hidden
+  => :unresolved
 
   (link:status (->Link {:ns 'std.lib.foundation :name 'WRONG}
                        nil
@@ -153,7 +144,6 @@
 
 ^{:refer std.lib.link/find-source-var :added "3.0"}
 (fact "finds the source var in the link"
-  ^:hidden
 
   (find-source-var (->Link {:ns 'std.lib.foundation :name 'iobj?}
                            nil
@@ -163,7 +153,6 @@
 
 ^{:refer std.lib.link/link-synced? :added "3.0"}
 (fact "checks if the source and alias have the same value"
-  ^:hidden
 
   (def -iobj?- std.lib.foundation/iobj?)
 
@@ -175,7 +164,6 @@
 
 ^{:refer std.lib.link/link-selfied? :added "3.0"}
 (fact "checks if the source and alias have the same value"
-  ^:hidden
 
   (declare -selfied-)
   (def -selfied- (link:create {:name '-selfied-}
@@ -201,7 +189,6 @@
 
 ^{:refer std.lib.link/bind-metadata :added "3.0"}
 (fact "retrievess the metadata of a function from source code"
-  ^:hidden
 
   (declare -metadata-)
   (def -metadata- (link:create {:ns 'std.lib.foundation :name 'iobj?}
@@ -215,7 +202,6 @@
 
 ^{:refer std.lib.link/bind-source :added "3.0"}
 (fact "retrieves the source var"
-  ^:hidden
 
   (declare -source-)
   (def ^Link -source- (link:create {} #'-source-))
@@ -225,7 +211,6 @@
 
 ^{:refer std.lib.link/bind-resolve :added "3.0"}
 (fact "binds a link or a series of links"
-  ^:hidden
 
   (deflink -ipending0?- std.lib.foundation/iobj?)
 
@@ -241,7 +226,6 @@
 
 ^{:refer std.lib.link/bind-preempt :added "3.0"}
 (fact "retrieves the source var if available"
-  ^:hidden
 
   (deflink -ipending0?- std.lib.foundation/iobj?)
 
@@ -251,7 +235,6 @@
 
 ^{:refer std.lib.link/bind-verify :added "3.0"}
 (fact "retrieves the source var if available"
-  ^:hidden
 
   (deflink -ipending0?- std.lib.foundation/iobj?)
 
@@ -261,17 +244,15 @@
 
 ^{:refer std.lib.link/link:bind :added "3.0"}
 (fact "automatically loads the var if possible"
-  ^:hidden
 
   (deflink -ipending0?- std.lib.foundation/iobj?)
-  
+
   (binding [*bind-root* true]
     (link:bind -ipending0?- :auto))
   => std.lib.foundation/iobj?)
 
 ^{:refer std.lib.link/link-invoke :added "3.0"}
 (fact "invokes a link"
-  ^:hidden
 
   (deflink -ipending0?- std.lib.foundation/iobj?)
 
@@ -283,7 +264,6 @@
 
 ^{:refer std.lib.link/intern-link :added "3.0"}
 (fact "creates a registers a link"
-  ^:hidden
 
   (intern-link '-ipending0?- {:ns 'std.lib.foundation :name 'iobj?})
   ;;#link{:source org.registry.iobj?, :bound true, :status :resolved, :synced false, :registered true}
@@ -291,22 +271,19 @@
 
 ^{:refer std.lib.link/link-form :added "3.0"}
 (fact "creates the form in `link` macro"
-  ^:hidden
-  
+
   (link-form 'ns 'sym :resolve)
   => seq?)
 
 ^{:refer std.lib.link/deflink :added "3.0"}
 (fact "creates a named link"
-  ^:hidden
-  
+
   (deflink -hello- std.lib.foundation/iobj?)
   => var?)
 
 ^{:refer std.lib.link/link :added "3.0"}
 (fact "creates invokable aliases for early binding"
-  ^:hidden
-  
+
   (link {:ns 'std.lib.foundation :resolve :auto
          :name 'iobj?} )
   => vector?)

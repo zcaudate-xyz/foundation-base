@@ -21,8 +21,7 @@
 
 ^{:refer js.blessed.ui-date/TimePicker :added "4.0" :unchecked true}
 (fact "Constructs a TimePicker"
-  ^:hidden
-  
+
   (defn.js TimePickerDemo
     []
     (var [minute setMinute] (r/local 30))
@@ -36,7 +35,7 @@
         :minuteHidden false
         :minuteLabel "m"
         :minute minute
-        :setMinute setMinute 
+        :setMinute setMinute
         :hourLabel "h"
         :hour hour
         :setHour setHour
@@ -47,8 +46,7 @@
 
 ^{:refer js.blessed.ui-date/DatePicker :added "4.0" :unchecked true}
 (fact "Constructs a DatePicker"
-  ^:hidden
-  
+
   (defn.js DatePickerDemo
     []
     (var [day setDay]     (r/local 10))
@@ -61,11 +59,11 @@
        {:top 2
         :width 25
         :day day
-        :setDay setDay 
+        :setDay setDay
         :month month
-        :setMonth setMonth 
+        :setMonth setMonth
         :year year
-        :setYear setYear 
+        :setYear setYear
         :color "green"}]
       [:box {:left 20 :shrink true
              :content (+ day "/" month "/" year)}]]))
@@ -74,8 +72,7 @@
 
 ^{:refer js.blessed.ui-date/DurationPicker :added "4.0" :unchecked true}
 (fact "Constructs a DurationPicker"
-  ^:hidden
-  
+
   (defn.js DurationPickerDemo
     []
     (var [day setDay] (r/local 30))
@@ -90,7 +87,7 @@
         :minuteHidden true
         :dayLabel "d"
         :day day
-        :setDay setDay 
+        :setDay setDay
         :hourLabel "h"
         :hour hour
         :setHour setHour

@@ -24,7 +24,6 @@
 
   (bitseq-to-number (repeat 10 1))
   => 1023
-  ^:hidden
   (- (bitseq-to-number (repeat 64 1))
      (bitseq-to-number (repeat 63 1)))
   => 9223372036854775808N)
@@ -135,7 +134,6 @@
 
   (binary/number "100011")
   => 49
-  ^:hidden
   (-> (binary/number (byte-array [78 45 34 -12 45 34 56]))
       (binary/bitstr)
       (binary/bitset)

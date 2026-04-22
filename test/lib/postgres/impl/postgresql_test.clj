@@ -24,7 +24,6 @@
   (execute-statement (mock-pooled-conn) :input (fn [_ input] input))
   => :input)
 (fact "create-pool returns a pooled connection from config"
-  ^:hidden
 
   (try (create-pool {:host "127.0.0.1" :port 5432 :dbname "test"})
        (catch Throwable t t))
@@ -34,7 +33,6 @@
 
 ^{:refer lib.postgres.impl.postgresql/execute-statement :added "4.1"}
 (fact "execute-statement runs execute fn with a connection from pool"
-  ^:hidden
 
   (let [results [{:col 42}]
         mock-conn (reify java.sql.Connection

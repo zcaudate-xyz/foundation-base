@@ -8,14 +8,12 @@
 
 ^{:refer lib.redis.impl.generator/expand-process :added "3.0"}
 (fact "expands the argument for the `:process` keys"
-  ^:hidden
 
   (expand-process {:type :data})
   => `common/process:data)
 
 ^{:refer lib.redis.impl.generator/expand-prelim :added "3.0"}
 (fact "expands the initial argument"
-  ^:hidden
 
   (expand-prelim {:type :data})
   => '{:type :data,
@@ -29,7 +27,6 @@
 
 ^{:refer lib.redis.impl.generator/expand-enum :added "3.0"}
 (fact "expands the enum structure"
-  ^:hidden
 
   (expand-enum {:enum ["async"]})
   => '{:type :flag, :sym async, :name "async"}
@@ -42,7 +39,6 @@
 
 ^{:refer lib.redis.impl.generator/expand-argument :added "3.0"}
 (fact "expands an argument"
-  ^:hidden
 
   (expand-argument {:type :data :multiple true})
   => (contains {:type :data, :multiple true, :sym 'datas
@@ -54,7 +50,6 @@
 
 ^{:refer lib.redis.impl.generator/command-redefs :added "3.0"}
 (fact "creates redefinitions for let bindings"
-  ^:hidden
 
   (command-redefs {:sym 'key
                    :process `common/process:key})
@@ -62,7 +57,6 @@
 
 ^{:refer lib.redis.impl.generator/command-step :added "3.0"}
 (fact "creates a command step"
-  ^:hidden
 
   (command-step {:type :key :sym 'key})
   => '[key (clojure.core/conj key)]
@@ -76,7 +70,6 @@
 
 ^{:refer lib.redis.impl.generator/command-tmpl :added "3.0"}
 (fact "creates a command function from data"
-  ^:hidden
 
   (command-tmpl (command-parse (ref/command :ttl)
                                {}))
@@ -89,7 +82,6 @@
 
 ^{:refer lib.redis.impl.generator/command-type :added "3.0"}
 (fact "normalizes a command type"
-  ^:hidden
 
   (command-type "key")
   => :key
@@ -99,7 +91,6 @@
 
 ^{:refer lib.redis.impl.generator/optional-tmpl :added "3.0"}
 (fact "creates the optional form from data"
-  ^:hidden
 
   (-> (command-parse (ref/command :client-tracking)
                      {})
@@ -148,7 +139,6 @@
 
 ^{:refer lib.redis.impl.generator/command-form :added "3.0"}
 (fact "create the command form"
-  ^:hidden
 
   (command-form :ttl)
   => '(clojure.core/defn in:ttl
@@ -160,7 +150,6 @@
 
 ^{:refer lib.redis.impl.generator/select-commands :added "3.0"}
 (fact "select commands and create a list of params"
-  ^:hidden
 
   (select-commands {:group :list})
   => seq?

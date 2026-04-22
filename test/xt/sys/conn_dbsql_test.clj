@@ -31,8 +31,7 @@
 
 ^{:refer xt.sys.conn-dbsql/connect :added "4.0"}
 (fact "connects to a database"
-  ^:hidden
-  
+
   (!.lua
    (var conn (dbsql/connect {:constructor lua-postgres/connect-constructor}))
    (dbsql/query conn "SELECT 1;"))
@@ -43,7 +42,7 @@
                    {:success (fn [conn]
                                (dbsql/query conn "SELECT 1;"
                                             (repl/<!)))}))
-  
+
   => (any 1 [{"?column?" 1}])
 
   (notify/wait-on :js

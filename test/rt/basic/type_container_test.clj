@@ -5,7 +5,6 @@
 
 ^{:refer rt.basic.type-container/start-container :added "4.1"}
 (fact "start-container preserves explicit container exec"
-  ^:hidden
 
   (with-redefs [oneshot/rt-oneshot-setup (fn [& _]
                                            [:erlang

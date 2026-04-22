@@ -83,21 +83,19 @@
 
 ^{:refer std.string.prose/write-line :added "4.0"}
 (fact "writes a line based on data structure"
-  ^:hidden
-  
+
   (write-line [:a :b ["hello" "world"]])
   => "a b hello world")
 
 ^{:refer std.string.prose/write-lines :added "4.0"}
 (fact "writes a block of string"
-  ^:hidden
-  
+
   (write-lines ["a" "b" "c"])
   => "a\nb\nc")
 
 ^{:refer std.string.prose/indent :added "4.0"}
 (fact "indents a block of string"
-  
+
   (indent (write-lines ["a" "b" "c"]) 2)
   => "  a\n  b\n  c")
 

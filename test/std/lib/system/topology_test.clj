@@ -13,7 +13,7 @@
   => {:ids {:type :element, :as :id}})
 
 ^{:refer std.lib.system.topology/long-form-entry :added "3.0"}
-(fact "converts short form entry into long form" ^:hidden
+(fact "converts short form entry into long form"
 
   (long-form-entry [{:constructor :identity
                      :initialiser :identity}])
@@ -39,7 +39,7 @@
                 :dependencies [:model :ids]}))
 
 ^{:refer std.lib.system.topology/long-form :added "3.0"}
-(fact "converts entire topology to long form" ^:hidden
+(fact "converts entire topology to long form"
 
   (long-form {:db [identity]
               :count [{:expose :count} :db]})
@@ -55,7 +55,7 @@
                            :dependencies [:db]}}))
 
 ^{:refer std.lib.system.topology/get-dependencies :added "3.0"}
-(fact "get dependencies for long form" ^:hidden
+(fact "get dependencies for long form"
   (-> (long-form {:model   [identity]
                   :ids     [[identity]]
                   :traps   [[identity] [:model {:as :raw}] [:ids {:type :element :as :id}]]
@@ -72,7 +72,7 @@
       :model-tag #{:model}})
 
 ^{:refer std.lib.system.topology/get-exposed :added "3.0"}
-(fact "get exposed keys for long form" ^:hidden
+(fact "get exposed keys for long form"
   (-> (long-form {:model   [identity]
                   :ids     [[identity]]
                   :traps   [[identity] [:model {:as :raw}] [:ids {:type :element :as :id}]]
@@ -84,7 +84,7 @@
   => [:nums :model-tag])
 
 ^{:refer std.lib.system.topology/all-dependencies :added "3.0"}
-(fact "gets all dependencies for long form" ^:hidden
+(fact "gets all dependencies for long form"
 
   (all-dependencies
    {1 #{4 2}

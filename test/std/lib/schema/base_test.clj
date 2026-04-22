@@ -4,8 +4,7 @@
 
 ^{:refer std.lib.schema.base/expand-scopes :added "4.0"}
 (fact "expand scopes for all globbed keywords"
-  ^:hidden
-  
+
   (base/expand-scopes base/+scope-brief+)
   => #:*{:min #{:-/id :-/key},
          :info #{:-/info :-/id :-/key},
@@ -25,8 +24,7 @@
 
 ^{:refer std.lib.schema.base/check-scope :added "4.0"}
 (fact "check if a scope is valid"
-  ^:hidden
-  
+
   (base/check-scope :-/info)
   => :-/info
 
@@ -35,8 +33,7 @@
 
 ^{:refer std.lib.schema.base/attr-add-ident :added "3.0"}
 (fact "adds the key of a pair as :ident to a schema property pair"
-  ^:hidden
-  
+
   (base/attr-add-ident [:person [{}]])
   => [:person [{:ident :person}]]
 
@@ -45,8 +42,7 @@
 
 ^{:refer std.lib.schema.base/attr-add-defaults :added "3.0"}
 (fact "adds defaults to a given schema property pair"
-  ^:hidden
-  
+
   (base/attr-add-defaults [:person [{}]] [])
   => [:person [{}]]
 

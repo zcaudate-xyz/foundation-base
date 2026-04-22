@@ -11,8 +11,7 @@
 
 ^{:refer rt.postgres.base.grammar.meta/has-function :added "4.0"}
 (fact "checks for existence of a function"
-  ^:hidden
-  
+
   (has-function "is-email"
                 "core/util")
   => '[:select
@@ -25,8 +24,7 @@
 
 ^{:refer rt.postgres.base.grammar.meta/has-table :added "4.0"}
 (fact "checks for existence of a table"
-  ^:hidden
-  
+
   (has-table "Op"
              "core/system")
   => '[:select
@@ -37,7 +35,6 @@
 
 ^{:refer rt.postgres.base.grammar.meta/has-enum :added "4.0"}
 (fact "checks for existence of an enum"
-  ^:hidden
 
   (has-enum "EnumPrediction"
             "core/system")
@@ -72,8 +69,7 @@
 
 ^{:refer rt.postgres.base.grammar.meta/get-schema-seed :added "4.0"}
 (fact "gets schema seed for a given module"
-  ^:hidden
-  
+
   (get-schema-seed (l/get-module (l/runtime-library)
                                  :postgres
                                  'rt.postgres.base.grammar.meta-test))
@@ -96,8 +92,7 @@
 
 ^{:refer rt.postgres.base.grammar.meta/classify-ptr :added "4.0"}
 (fact "classifies the pointer"
-  ^:hidden
-  
+
   (classify-ptr builtin/acosd)
   => '["acosd" "public" nil nil def$])
 

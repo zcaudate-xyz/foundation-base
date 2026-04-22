@@ -29,8 +29,7 @@
 
 ^{:refer xt.runtime.type-vector/vector-get-idx :added "4.0"}
 (fact "gets the index in the persistent vector"
-  ^:hidden
-  
+
   (!.js
    (v/vector-get-idx
     (k/arr-foldl
@@ -51,8 +50,7 @@
 
 ^{:refer xt.runtime.type-vector/vector-to-iter :added "4.0"}
 (fact "converts vector to iterator"
-  ^:hidden
-  
+
   (!.js
    (it/arr<
     (v/vector-to-iter
@@ -61,7 +59,6 @@
 
 ^{:refer xt.runtime.type-vector/vector-to-array :added "4.0"}
 (fact "converts vector to array"
-  ^:hidden
 
   (!.js
    (v/vector-to-array
@@ -75,7 +72,6 @@
 
 ^{:refer xt.runtime.type-vector/vector-new :added "4.0"}
 (fact "creates a new vector"
-  ^:hidden
 
   (!.js
    (var out (v/vector-new (node/node-create nil [])
@@ -103,8 +99,7 @@
 
 ^{:refer xt.runtime.type-vector/vector-empty :added "4.0"}
 (fact "creates an empty vector from current"
-  ^:hidden
-  
+
   (!.js
    (v/vector-to-array
     (v/vector-empty
@@ -113,7 +108,6 @@
 
 ^{:refer xt.runtime.type-vector/vector-is-editable :added "4.0"}
 (fact "checks that vector is editable"
-  ^:hidden
 
   (!.js
    [(v/vector-is-editable (v/vector 1 2 3))
@@ -127,8 +121,7 @@
 
 ^{:refer xt.runtime.type-vector/vector-push-last :added "4.0"}
 (fact "push-lastoins an element to the vector"
-  ^:hidden
-  
+
   (!.js
    (v/vector-to-array
     (v/vector-push-last v/EMPTY_VECTOR
@@ -143,8 +136,7 @@
 
 ^{:refer xt.runtime.type-vector/vector-pop-last :added "4.0"}
 (fact "pops the last element off vector"
-  ^:hidden
-  
+
   (!.js
    (v/vector-to-array
     (k/arr-foldl
@@ -169,8 +161,7 @@
 
 ^{:refer xt.runtime.type-vector/vector-pop-last! :added "4.0"}
 (fact "pops the last element"
-  ^:hidden
-  
+
   (!.js
    (-> (v/vector 1 2 3 4 5 6)
        (v/vector-to-mutable!)
@@ -191,8 +182,7 @@
 
 ^{:refer xt.runtime.type-vector/vector-push-last! :added "4.0"}
 (fact "pushes the last element into vector"
-  ^:hidden
-  
+
   (!.js
    (var V0 (v/vector-empty-mutable))
    (k/arr-foldl
@@ -213,7 +203,6 @@
 
 ^{:refer xt.runtime.type-vector/vector-to-mutable! :added "4.0"}
 (fact "mutates the vector"
-  ^:hidden
 
   (!.js
    (var out (v/vector-to-mutable! (v/vector 1 2 3)))
@@ -229,7 +218,6 @@
 
 ^{:refer xt.runtime.type-vector/vector-to-persistent! :added "4.0"}
 (fact "creates persistent vector"
-  ^:hidden
 
   (!.js
    (var out (-> (v/vector 1 2 3)
@@ -251,7 +239,6 @@
 
 ^{:refer xt.runtime.type-vector/vector-find-idx :added "4.0"}
 (fact "finds the pair entry"
-  ^:hidden
 
   (!.js
    (var entry (v/vector-find-idx (v/vector 1 2 3) 1))
@@ -269,7 +256,6 @@
 
 ^{:refer xt.runtime.type-vector/vector-lookup-idx :added "4.0"}
 (fact "finds the value"
-  ^:hidden
 
   (!.js
    [(v/vector-lookup-idx (v/vector 1 2 3) 1 "missing")
@@ -283,8 +269,7 @@
 
 ^{:refer xt.runtime.type-vector/vector-create :added "4.0"}
 (fact "creates a vector"
-  ^:hidden
-  
+
   (!.js
    (v/vector-create (node/node-create nil [])
                     0
@@ -295,7 +280,7 @@
       "_size" 0,
       "_root" {"children" [], "::" "vector.node"},
       "_shift" 5}
-  
+
 
   (!.lua
    (v/vector-create (node/node-create nil [])
@@ -310,8 +295,7 @@
 
 ^{:refer xt.runtime.type-vector/vector-empty-mutable :added "4.0"}
 (fact "creates an empty mutable vector"
-  ^:hidden
-  
+
   (!.js
    (v/vector-empty-mutable))
   => map?
@@ -322,8 +306,7 @@
 
 ^{:refer xt.runtime.type-vector/vector :added "4.0"}
 (fact "creates a vector"
-  ^:hidden
-  
+
   (!.js
    (v/vector-to-array
     (v/vector 1 2 3 4)))

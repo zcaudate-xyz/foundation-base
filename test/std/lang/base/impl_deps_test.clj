@@ -57,8 +57,7 @@
 
 ^{:refer std.lang.base.impl-deps/module-import-form :added "4.0"}
 (fact "import form"
-  ^:hidden
-  
+
   (deps/module-import-form prep/+book-min+
                            'cjson
                            '{:as cjson}
@@ -67,8 +66,7 @@
 
 ^{:refer std.lang.base.impl-deps/module-export-form :added "4.0"}
 (fact "export form"
-  ^:hidden
-  
+
   (deps/module-export-form prep/+book-min+
                            {}
                            {})
@@ -76,8 +74,7 @@
 
 ^{:refer std.lang.base.impl-deps/module-link-form :added "4.0"}
 (fact "link form for projects"
-  ^:hidden
-  
+
   (deps/module-link-form prep/+book-min+
                          'kmi.common
                          {:root-ns 'kmi.hello})
@@ -85,32 +82,28 @@
 
 ^{:refer std.lang.base.impl-deps/has-module-form :added "4.0"}
 (fact "checks if module is available"
-  ^:hidden
-  
+
   (deps/has-module-form prep/+book-min+
                         'kmi.common)
   => nil)
 
 ^{:refer std.lang.base.impl-deps/setup-module-form :added "4.0"}
 (fact "setup the module"
-  ^:hidden
-  
+
   (deps/setup-module-form prep/+book-min+
                           'kmi.common)
   => nil)
 
 ^{:refer std.lang.base.impl-deps/teardown-module-form :added "4.0"}
 (fact "teardown the module"
-  ^:hidden
-  
+
   (deps/teardown-module-form prep/+book-min+
                              'kmi.common)
   => nil)
 
 ^{:refer std.lang.base.impl-deps/has-ptr-form :added "4.0"}
 (fact "form to check if pointer exists"
-  ^:hidden
-  
+
   (deps/has-ptr-form prep/+book-min+
                      '{:id hello
                        :module kmi.common})
@@ -118,8 +111,7 @@
 
 ^{:refer std.lang.base.impl-deps/setup-ptr-form :added "4.0"}
 (fact "form to setup pointer"
-  ^:hidden
-  
+
   (deps/setup-ptr-form prep/+book-min+
                        '{:id hello
                          :module kmi.common})
@@ -127,8 +119,7 @@
 
 ^{:refer std.lang.base.impl-deps/teardown-ptr-form :added "4.0"}
 (fact "form to teardown pointer"
-  ^:hidden
-  
+
   (deps/teardown-ptr-form prep/+book-min+
                           '{:id hello
                             :module kmi.common})
@@ -136,8 +127,7 @@
 
 ^{:refer std.lang.base.impl-deps/collect-script-natives :added "4.0"}
 (fact "gets native imported modules"
-  ^:hidden
-  
+
   (deps/collect-script-natives [{:native {'cjson "cjson"}}
                                 {:native {'cjson "cjson"
                                           'lustache "lustache"}}]
@@ -146,16 +136,14 @@
 
 ^{:refer std.lang.base.impl-deps/collect-script-entries :added "4.0"}
 (fact "collects all entries"
-  ^:hidden
-  
+
   (deps/collect-script-entries (lib/get-book +library-ext+ :lua)
                                '[L.util/add-fn])
   => vector?)
 
 ^{:refer std.lang.base.impl-deps/collect-script :added "4.0"}
 (fact "collect dependencies given a form and book"
-  ^:hidden
-  
+
   (-> (deps/collect-script (lib/get-book +library-ext+ :lua)
                            '(u/add (ut/sub-fn 1 2)
                                    (ut/add-fn 3 4))
@@ -178,8 +166,7 @@
 
 ^{:refer std.lang.base.impl-deps/collect-script-summary :added "4.0"}
 (fact "summaries the output of `collect-script`"
-  ^:hidden
-  
+
   (-> '[(+ (L.util/sub-fn 1 2) (L.util/add-fn 3 4))
         ()
         {"cjson" {:as cjson}}]
@@ -192,14 +179,13 @@
 
 ^{:refer std.lang.base.impl-deps/collect-module :added "4.0"}
 (fact "collects information for the entire module"
-  ^:hidden
-  
+
   (-> (deps/collect-module (lib/get-book +library-ext+ :lua)
                            (lib/get-module +library-ext+ :lua 'L.util))
       (update :code (fn [arr]
                       (set (map :id arr)))))
   => '{:setup nil, :teardown nil, :code #{cjson-read add-fn sub-fn}, :native {"cjson" {:as cjson}}, :direct #{L.core}}
-  
+
 
   (-> (deps/collect-module (lib/get-book +library-ext+ :lua)
                            (lib/get-module +library-ext+ :lua 'L.util))

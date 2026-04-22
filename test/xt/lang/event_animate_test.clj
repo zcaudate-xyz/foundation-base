@@ -9,8 +9,7 @@
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-repl :as repl]
              [xt.lang.event-animate :as base-animate]
-             [xt.lang.event-animate-mock :as mock]
-             [js.core :as j]]})
+             [xt.lang.event-animate-mock :as mock]]})
 
 (l/script- :lua
   {:runtime :basic
@@ -33,8 +32,7 @@
 
 ^{:refer xt.lang.event-animate/new-derived :added "4.0"}
 (fact "creates a new derived value"
-  ^:hidden
-  
+
   (!.js
    (mock/get-value
     (base-animate/new-derived mock/MOCK
@@ -55,8 +53,7 @@
 
 ^{:refer xt.lang.event-animate/listen-single :added "4.0"}
 (fact "listens to a single observer"
-  ^:hidden
-  
+
   (!.js
    (var ref {:current {}})
    (var obs (mock/new-observed 0.5))
@@ -79,7 +76,7 @@
       {"opacity" 0.6000000000000001}
       nil
       {"opacity" 0.5}]
-  
+
   (!.lua
    (var ref {:current {}})
    (var obs (mock/new-observed 0.5))
@@ -103,8 +100,7 @@
 
 ^{:refer xt.lang.event-animate/listen-array :added "4.0"}
 (fact "listens to array for changes"
-  ^:hidden
-  
+
   (!.js
    (var ref {:current {}})
    (var o1 (mock/new-observed 0.1))
@@ -124,7 +120,7 @@
     (mock/set-value o2 0.3)
     (get-style ref)])
   => [{"opacity" 0.4} nil {"opacity" 0.7} nil {"opacity" 0.8}]
-  
+
   (!.lua
    (var ref {:current {}})
    (var o1 (mock/new-observed 0.1))
@@ -147,7 +143,6 @@
 
 ^{:refer xt.lang.event-animate/get-map-paths :added "4.0"}
 (fact "gets map paths"
-  ^:hidden
 
   (!.js
    (base-animate/get-map-paths mock/MOCK
@@ -167,8 +162,7 @@
 
 ^{:refer xt.lang.event-animate/get-map-input :added "4.0"}
 (fact "gets the map input"
-  ^:hidden
-  
+
   (!.js
    (base-animate/get-map-input
     mock/MOCK
@@ -187,43 +181,45 @@
 
 ^{:refer xt.lang.event-animate/listen-map :added "4.0"}
 (fact "listens to a map of indicators"
-  ^:hidden
 
   (!.js
    (var ref {:current {}})
    (var o1 (mock/new-observed 0.1))
    (var o2 (mock/new-observed 0.2))
-   
-   (base-animate/listen-map
-    mock/MOCK
-    ref
-    {:a o1
-     :b {:c o2}}
-    (fn [e]
-      (var #{a b} e)
-      (var #{c} b)
-      (return {:style {:opacity (+ a c)}}))))
+   (var render-fn
+        (fn [e]
+          (var #{a b} e)
+          (var #{c} b)
+          (return {:style {:opacity (+ a c)}})))
+
+    (base-animate/listen-map
+     mock/MOCK
+     ref
+     {:a o1
+      :b {:c o2}}
+     render-fn))
   => {"style" {"opacity" 0.30000000000000004}}
 
   (!.lua
    (var ref {:current {}})
    (var o1 (mock/new-observed 0.1))
    (var o2 (mock/new-observed 0.2))
-   
-   (base-animate/listen-map
-    mock/MOCK
-    ref
-    {:a o1
-     :b {:c o2}}
-    (fn [e]
-      (var #{a b} e)
-      (var #{c} b)
-      (return {:style {:opacity (+ a c)}}))))
+   (var render-fn
+        (fn [e]
+          (var #{a b} e)
+          (var #{c} b)
+          (return {:style {:opacity (+ a c)}})))
+
+    (base-animate/listen-map
+     mock/MOCK
+     ref
+     {:a o1
+      :b {:c o2}}
+     render-fn))
   => {"style" {"opacity" 0.3}})
 
 ^{:refer xt.lang.event-animate/listen-transformations :added "4.0"}
 (fact "converts to the necessary listeners"
-  ^:hidden
 
   (!.js
    (base-animate/listen-transformations
@@ -233,7 +229,7 @@
     {}
     (fn:> {})))
   => {}
-  
+
   (!.lua
    (base-animate/listen-transformations
     mock/MOCK
@@ -245,8 +241,7 @@
 
 ^{:refer xt.lang.event-animate/new-progressing :added "4.0"}
 (fact "creates a new progressing element"
-  ^:hidden
-  
+
   (!.js
    (base-animate/new-progressing))
   => {"running" false, "queued" [], "animation" nil}
@@ -275,21 +270,20 @@
 
 ^{:refer xt.lang.event-animate/make-binary-transitions :added "4.0"}
 (fact "makes a binary transition"
-  ^:hidden
-  
+
   (!.js
    (var t (base-animate/make-binary-transitions
            mock/MOCK
            false
            {}))
-   (var #{indicator
-          zero-fn
-          one-fn} t)
-   [(mock/get-value indicator)
-    (one-fn)
-    (mock/get-value indicator)
-    (zero-fn)
-    (mock/get-value indicator)])
+    (var #{indicator
+           zero-fn
+           one-fn} t)
+    [(mock/get-value indicator)
+     (one-fn nil)
+     (mock/get-value indicator)
+     (zero-fn nil)
+     (mock/get-value indicator)])
   => [0 nil 1 nil 0]
 
   (!.lua
@@ -297,146 +291,228 @@
            mock/MOCK
            false
            {}))
-   (var #{indicator
-          zero-fn
-          one-fn} t)
-   [(mock/get-value indicator)
-    (one-fn)
-    (mock/get-value indicator)
-    (zero-fn)
-    (mock/get-value indicator)])
+    (var #{indicator
+           zero-fn
+           one-fn} t)
+    [(mock/get-value indicator)
+     (one-fn nil)
+     (mock/get-value indicator)
+     (zero-fn nil)
+     (mock/get-value indicator)])
   => [0 nil 1 nil 0])
 
 ^{:refer xt.lang.event-animate/make-binary-indicator :added "4.0"}
 (fact "makes a binary indicator"
-  ^:hidden
-  
+
+  ^{:lang-exceptions {:lua {:skip true}
+                      :dart {:expect [0
+                                      {"running" false, "queued" [], "animation" nil}
+                                      1
+                                      {"running" false, "queued" [], "animation" nil}
+                                      0]}}}
   (!.js
+   (var progress-fn (fn [_] (return nil)))
+     (var t (base-animate/make-binary-indicator
+            mock/MOCK
+            false
+            {}
+            "cancel"
+            (base-animate/new-progressing)
+            progress-fn))
+    (var #{indicator trigger-fn} t)
+    [(mock/get-value indicator)
+      (trigger-fn true)
+      (mock/get-value indicator)
+      (trigger-fn false)
+      (mock/get-value indicator)])
+   => [0 {"running" false, "queued" []}
+       1 {"running" false, "queued" []}
+       0]
+
+  (!.py
+   (var progress-fn (fn [_] (return nil)))
    (var t (base-animate/make-binary-indicator
            mock/MOCK
            false
            {}
            "cancel"
            (base-animate/new-progressing)
-           (fn:>)))
+           progress-fn))
    (var #{indicator trigger-fn} t)
    [(mock/get-value indicator)
     (trigger-fn true)
     (mock/get-value indicator)
     (trigger-fn false)
     (mock/get-value indicator)])
-  => [0 {"running" false, "queued" []}
-      1 {"running" false, "queued" []}
-      0]
-
-  (comment
-    "NOT WORKING"
-    (!.lua
-     (var t (base-animate/make-binary-indicator
-             mock/MOCK
-             false
-             {}
-             "cancel"
-             (base-animate/new-progressing)
-             (fn:>)))
-     (var #{indicator trigger-fn} t)
-     [(mock/get-value indicator)
-      (trigger-fn true)
-      (mock/get-value indicator)
-      (trigger-fn false)
-      (mock/get-value indicator)])
-    => [0 {"running" false, "queued" {}}
-        1 {"running" false, "queued" {}}
-        0]))
+  => [0 {"running" false, "queued" [], "animation" nil}
+      1 {"running" false, "queued" [], "animation" nil}
+      0])
 
 ^{:refer xt.lang.event-animate/make-linear-indicator :added "4.0"}
 (fact  "makes a linear indicator"
-  ^:hidden
-  
+
+  ^{:lang-exceptions {:dart {:expect [1
+                                      {"running" false, "queued" [], "animation" nil}
+                                      3
+                                      {"running" false, "queued" [], "animation" nil}
+                                      8]}}}
   (!.js
-   (var prev {:current 1})
-   
-   (var t (base-animate/make-linear-indicator
-           mock/MOCK
-           1
-           (fn:> (. prev ["current"]))
-           (fn [v] (:= (. prev ["current"])
-                       v))
-           {}
-           "cancel"
-           (base-animate/new-progressing)
-           (fn:>)))
-   (var #{indicator trigger-fn} t)
-   [(mock/get-value indicator)
-    (trigger-fn 3)
-    (mock/get-value indicator)
-    (trigger-fn 8)
-    (mock/get-value indicator)])
-  => [1 {"running" false, "queued" []} 3 {"running" false, "queued" []} 8]
+     (var prev {:current 1})
+     (var set-prev
+         (fn [v]
+           (:= (. prev ["current"])
+               v)))
+    (var progress-fn (fn [_] (return nil)))
+
+    (var t (base-animate/make-linear-indicator
+            mock/MOCK
+            1
+            (fn:> (. prev ["current"]))
+            set-prev
+            {}
+            "cancel"
+            (base-animate/new-progressing)
+            progress-fn))
+    (var #{indicator trigger-fn} t)
+    [(mock/get-value indicator)
+     (trigger-fn 3)
+     (mock/get-value indicator)
+     (trigger-fn 8)
+     (mock/get-value indicator)])
+   => [1 {"running" false, "queued" []} 3 {"running" false, "queued" []} 8]
 
   (!.lua
+    (var prev {:current 1})
+    (var set-prev
+         (fn [v]
+           (:= (. prev ["current"])
+               v)))
+    (var progress-fn (fn [_] (return nil)))
+
+    (var t (base-animate/make-linear-indicator
+            mock/MOCK
+            1
+            (fn:> (. prev ["current"]))
+            set-prev
+            {}
+            "cancel"
+            (base-animate/new-progressing)
+            progress-fn))
+    (var #{indicator trigger-fn} t)
+    [(mock/get-value indicator)
+     (trigger-fn 3)
+     (mock/get-value indicator)
+     (trigger-fn 8)
+     (mock/get-value indicator)])
+   => [1 {"running" false, "queued" {}} 3 {"running" false, "queued" {}} 8]
+
+  (!.py
    (var prev {:current 1})
-   
+   (var set-prev
+        (fn [v]
+          (:= (. prev ["current"])
+              v)))
+   (var progress-fn (fn [_] (return nil)))
    (var t (base-animate/make-linear-indicator
            mock/MOCK
            1
            (fn:> (. prev ["current"]))
-           (fn [v] (:= (. prev ["current"])
-                       v))
+           set-prev
            {}
            "cancel"
            (base-animate/new-progressing)
-           (fn:>)))
+           progress-fn))
    (var #{indicator trigger-fn} t)
    [(mock/get-value indicator)
     (trigger-fn 3)
     (mock/get-value indicator)
     (trigger-fn 8)
     (mock/get-value indicator)])
-  => [1 {"running" false, "queued" {}} 3 {"running" false, "queued" {}} 8])
+  => [1 {"running" false, "queued" [], "animation" nil}
+      3 {"running" false, "queued" [], "animation" nil}
+      8])
 
 ^{:refer xt.lang.event-animate/make-circular-indicator :added "4.0"}
 (fact "makes a circular indicator"
-  ^:hidden
-  
+
+  ^{:lang-exceptions {:dart {:expect [1
+                                      {"running" false, "queued" [], "animation" nil}
+                                      1
+                                      {"running" false, "queued" [], "animation" nil}
+                                      -13]}}}
   (!.js
-   (var prev {:current 1})
-   (var t (base-animate/make-circular-indicator
-           mock/MOCK
-           1
-           (fn:> (. prev ["current"]))
-           (fn [v] (:= (. prev ["current"])
-                       v))
-           {}
-           "cancel"
-           10
-           (base-animate/new-progressing)
-           (fn:>)))
-   (var #{indicator trigger-fn} t)
-   [(mock/get-value indicator)
-    (trigger-fn -9)
-    (mock/get-value indicator)
-    (trigger-fn 7)
-    (mock/get-value indicator)])
-  => [1 {"running" false, "queued" []} 1 {"running" false, "queued" []} -13]
+     (var prev {:current 1})
+     (var set-prev
+         (fn [v]
+           (:= (. prev ["current"])
+               v)))
+    (var progress-fn (fn [_] (return nil)))
+    (var t (base-animate/make-circular-indicator
+            mock/MOCK
+            1
+            (fn:> (. prev ["current"]))
+            set-prev
+            {}
+            "cancel"
+            10
+            (base-animate/new-progressing)
+            progress-fn))
+    (var #{indicator trigger-fn} t)
+    [(mock/get-value indicator)
+     (trigger-fn -9)
+     (mock/get-value indicator)
+     (trigger-fn 7)
+     (mock/get-value indicator)])
+   => [1 {"running" false, "queued" []} 1 {"running" false, "queued" []} -13]
 
   (!.lua
+    (var prev {:current 1})
+    (var set-prev
+         (fn [v]
+           (:= (. prev ["current"])
+               v)))
+    (var progress-fn (fn [_] (return nil)))
+    (var t (base-animate/make-circular-indicator
+            mock/MOCK
+            1
+            (fn:> (. prev ["current"]))
+            set-prev
+            {}
+            "cancel"
+            10
+            (base-animate/new-progressing)
+            progress-fn))
+    (var #{indicator trigger-fn} t)
+    [(mock/get-value indicator)
+     (trigger-fn -9)
+     (mock/get-value indicator)
+     (trigger-fn 7)
+     (mock/get-value indicator)])
+   => [1 {"running" false, "queued" {}} 1 {"running" false, "queued" {}} -13]
+
+  (!.py
    (var prev {:current 1})
+   (var set-prev
+        (fn [v]
+          (:= (. prev ["current"])
+              v)))
+   (var progress-fn (fn [_] (return nil)))
    (var t (base-animate/make-circular-indicator
            mock/MOCK
            1
            (fn:> (. prev ["current"]))
-           (fn [v] (:= (. prev ["current"])
-                       v))
+           set-prev
            {}
            "cancel"
            10
            (base-animate/new-progressing)
-           (fn:>)))
+           progress-fn))
    (var #{indicator trigger-fn} t)
    [(mock/get-value indicator)
     (trigger-fn -9)
     (mock/get-value indicator)
     (trigger-fn 7)
     (mock/get-value indicator)])
-  => [1 {"running" false, "queued" {}} 1 {"running" false, "queued" {}} -13])
+  => [1 {"running" false, "queued" [], "animation" nil}
+      1 {"running" false, "queued" [], "animation" nil}
+      -13])

@@ -4,8 +4,7 @@
 
 ^{:refer std.block.layout.estimate/get-max-width :added "4.0"}
 (fact "gets the max width of whole form"
-  ^:hidden
-  
+
   (est/get-max-width [:a :b :c])
   => 10
 
@@ -14,7 +13,6 @@
 
 ^{:refer std.block.layout.estimate/get-max-width-children :added "4.0"}
 (fact "gets the max with of the children"
-  ^:hidden
 
   (est/get-max-width-children [:a :b :c])
   => 8
@@ -48,25 +46,23 @@
 
 ^{:refer std.block.layout.estimate/estimate-multiline-list :added "4.0"}
 (fact "estimates if special forms are multilined"
-  ^:hidden
-  
+
   (est/estimate-multiline-list '(let [] a)
                                {:readable-len 30})
   => false
-  
+
   (est/estimate-multiline-list '(let [a 1] a)
                                {:readable-len 10})
   => true)
 
 ^{:refer std.block.layout.estimate/estimate-multiline :added "4.0"}
 (fact "creates multiline function"
-  ^:hidden
 
   ;; check for functions
   (est/estimate-multiline '(a-function that does this)
                           {:readable-len 30})
   => false
-  
+
   (est/estimate-multiline '(a-really-long funtion with lots of parameters)
                           {:readable-len 30})
   => true

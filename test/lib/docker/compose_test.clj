@@ -19,7 +19,7 @@
 (defn entry-minio
   [{:keys [name image ip]}]
   {:compose  [[:image (or image "minio/minio")]
-              
+
               [:command ["minio" "server" "/data" "--console-address" ":9001"]]
               [:volumes [(format "./volumes/%s/data:/data"
                                  name)]]
@@ -51,14 +51,13 @@
 
 ^{:refer lib.docker.compose/create-compose-single :guard true :added "4.0"}
 (fact "executes a shell command"
-  ^:hidden
-  
+
   (compose/create-compose-single
    [[:image "postgres:14"]
     [:environment {:POSTGRES_USER "postgres",
                    :POSTGRES_PASSWORD "postgres",
                    :POSTGRES_DB "statstrade"}]
-    [:volumes 
+    [:volumes
      ["./volumes/app-db/data:/var/lib/postgresql/data"]]
     [:healthcheck {:test ["CMD" "pg_isready" "-U" "postgres"], :interval "1m"}]]
    {:environment {:EV_HOST "172.1.0.20", :EV_PORT 6379},
@@ -80,8 +79,7 @@
 
 ^{:refer lib.docker.compose/create-compose :added "4.0"}
 (fact "executes a docker command"
-  ^:hidden
-  
+
   (compose/create-compose
    {:config   {:minio          {:type :minio
                                 :ip "172.1.0.10"}

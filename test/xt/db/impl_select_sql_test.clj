@@ -16,7 +16,10 @@
              [js.lib.driver-postgres :as js-postgres]
              [xt.lang.common-repl :as repl]]})
 
-(defn bootstrap-js
+(defn ^{:lang-exceptions {:lua {:skip true}
+                          :python {:skip true}
+                          :dart {:skip true}}}
+  bootstrap-js
   []
   (notify/wait-on [:js 5000]
     (dbsql/connect {:constructor js-postgres/connect-constructor
@@ -26,9 +29,12 @@
                                (repl/notify true))})))
 
 (fact:global
+ ^{:lang-exceptions {:lua {:skip true}
+                     :python {:skip true}
+                     :dart {:skip true}}}
  {:setup    [(l/rt:restart)
-             (l/rt:scaffold :js)
-             (bootstrap-js)
+              (l/rt:scaffold :js)
+              (bootstrap-js)
              (notify/wait-on :js
                (dbsql/query CONN
                             "CREATE SCHEMA IF NOT EXISTS \"scratch\";"
@@ -59,7 +65,12 @@
                             (repl/<!)))]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.impl-select-sql-test/CONNECTION :adopt true :added "4.0"}
+^{:refer xt.db.impl-select-sql-test/CONNECTION
+  :adopt true
+  :added "4.0"
+  :lang-exceptions {:lua {:skip true}
+                    :python {:skip true}
+                    :dart {:skip true}}}
 (fact "CONNECTED"
 
   (notify/wait-on :js
@@ -70,19 +81,27 @@
     (dbsql/query CONN "SELECT count(*) FROM \"scratch\".\"Entry\";" (repl/<!)))
   => (any nil "2" 2 [{"count" "2"}] [{"count" 2}]))
 
-^{:refer xt.db.impl-select-sql-test/QUERY :adopt true :added "4.0"}
-(fact "runs select queries"
-  ^:hidden
+^{:refer xt.db.impl-select-sql-test/QUERY
+  :adopt true
+  :added "4.0"
+  :lang-exceptions {:lua {:skip true}
+                    :python {:skip true}
+                    :dart {:skip true}}}
+(fact "builds select queries"
+  (graph/select sample-scratch/Schema
+                ["Entry"
+                 ["name"
+                  (ut/LIMIT 1)]]
+                (ut/postgres-opts {"Entry" {"schema" "scratch"}}))
+  => string?)
 
-  (notify/wait-on :js
-    (repl/notify
-     (graph/select sample-scratch/Schema
-                   ["Entry"
-                    ["name"
-                     (ut/LIMIT 1)]]
-                   (ut/postgres-opts {"Entry" {"schema" "scratch"}}))))
-  => string?
-  
+^{:refer xt.db.impl-select-sql-test/QUERY
+  :adopt true
+  :added "4.0"
+  :lang-exceptions {:lua {:skip true}
+                    :python {:skip true}
+                    :dart {:skip true}}}
+(fact "runs select queries against scratch db"
   (notify/wait-on :js
     (dbsql/query CONN
                  (graph/select sample-scratch/Schema

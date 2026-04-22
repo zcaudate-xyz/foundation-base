@@ -137,7 +137,6 @@
                         2))
   => [15 31]
 
-  ^:hidden
   (defn argb->int [arr]
     (int-array (mapv (fn [[a r g b]]
                        (unchecked-int (+ (bit-shift-left a 24)
@@ -203,7 +202,6 @@
        display-standard-data)
   => {:red [3 4], :green [4 8], :blue [5 10]}
 
-  ^:hidden
   (->> (retrieve-all {:type  :ushort-gray
                       :model (model/model :ushort-gray)
                       :data   (short-array [256 (* 8 256) (* 16 256)])}
@@ -249,7 +247,6 @@
        :data :raw vec)
   => [1 8]
 
-  ^:hidden
   (->> {:model  (model/model :3-byte-bgr)
         :size   [2 1]
         :data   (byte-array [3 4 5 6 8 10])}
@@ -268,7 +265,6 @@
                       8 32)
       (util/>> [8 8 8 8]))
   => [4 3 2 1]
-  ^:hidden
   (-> (set-single-val [0 63 127 255] {1 [0  5]
                                       2 [5  5]
                                       3 [10 5]}
@@ -295,7 +291,6 @@
                   2)
       vec)
   => [2560 5120]
-  ^:hidden
   (-> (set-single [(byte-array [255 255])
                    (byte-array [10 40])
                    (byte-array [20 50])
@@ -347,7 +342,6 @@
       ((fn [[barr iarr]]
          [(vec barr) (util/>> iarr [8 8])])))
   => [[-1 10 -1 40] [[20 30] [50 60]]]
-  ^:hidden
   (-> (set-all [(byte-array [255 255])
                 (byte-array [10 40])
                 (byte-array [20 50])
@@ -380,7 +374,6 @@
       :data
       (util/>> [5 5 5]))
   => [[1 1 1] [2 2 2]]
-  ^:hidden
   (-> {:model (model/model :standard-gray)
        :size [2 1]
        :data {:raw (short-array [10 20])}}
@@ -399,7 +392,6 @@
       :data
       (->> (mapv vec)))
   => [[10 20] [10 20] [10 20]]
-  ^:hidden
   (-> {:model (model/model :ushort-gray)
        :size [2 1]
        :data (short-array [2560 5120])}

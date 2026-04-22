@@ -11,7 +11,6 @@
 
 ^{:refer rt.basic.impl-annex.process-php-test/CANARY-PHP :adopt true :added "4.0"}
 (fact "EVALUATE php code"
-  ^:hidden
 
   (if CANARY-PHP
     (-> (p/rt-oneshot {:lang :php})

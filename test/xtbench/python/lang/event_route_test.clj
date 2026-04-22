@@ -351,15 +351,14 @@
       "listener/type" "route.path"}})]}
 (fact
  "sets the path and param"
- ^{:hidden true}
  [(notify/wait-on
    :python
    (var r (route/make-route "hello"))
    (route/add-path-listener r ["hello"] "a1" (repl/>notify))
-   (route/set-path r ["hello" "world"]))
+   (route/set-path r ["hello" "world"] nil))
   (!.py
    (var r (route/make-route "hello"))
-   (route/set-path r ["hello" "world"])
+   (route/set-path r ["hello" "world"] nil)
    [(route/get-url r) r])]
  =>
  [+out+
@@ -368,7 +367,7 @@
     "tree"
     {"params" {},
      "[]" "hello",
-     "[\"hello\",\"world\"]" nil,
+     "[\"hello\", \"world\"]" nil,
      "[\"hello\"]" "world"},
     "history" ["hello/world"],
     "listeners" {}}]])
@@ -421,17 +420,17 @@
  "sets a param in a route"
  (!.py
   (var r (route/make-route "hello?auth=sign_in"))
-  (route/set-param r "auth" nil)
+  (route/set-param r "auth" nil nil)
   (route/get-url r))
  ^{:hidden true}
  [(notify/wait-on
    :python
    (var r (route/make-route "hello?auth=sign_in"))
    (route/add-param-listener r "auth" "a1" (repl/>notify))
-   (route/set-param r "auth" "register"))
+   (route/set-param r "auth" "register" nil))
   (!.py
    (var r (route/make-route "hello?auth=sign_in"))
-   (route/set-param r "auth" "register")
+   (route/set-param r "auth" "register" nil)
    [(route/get-url r) r])]
  =>
  [+out+

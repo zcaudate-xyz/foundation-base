@@ -13,7 +13,7 @@
   (multi? println) => false)
 
 ^{:refer std.lib.invoke/multi:clone :added "3.0"}
-(fact "creates a multimethod from an existing one" ^:hidden
+(fact "creates a multimethod from an existing one"
 
   (defmulti hello :type)
 
@@ -91,7 +91,7 @@
                   protocol.invoke/-invoke-package
                   :fn
                   +default-packages+)
-  => nil ^:hidden
+  => nil
 
   (resolve-method protocol.invoke/-invoke-intern
                   protocol.invoke/-invoke-package
@@ -121,7 +121,7 @@
 ^{:refer std.lib.invoke/invoke-intern-fn :added "3.0"}
 (fact "method body for `:fn` invoke"
 
-  (invoke-intern-fn :fn '-fn-form- {} '([x] x)) ^:hidden
+  (invoke-intern-fn :fn '-fn-form- {} '([x] x))
   => '(def -fn-form- (clojure.core/fn -fn-form- [x] x))
 
   (definvoke -add10-
@@ -135,7 +135,7 @@
 ^{:refer std.lib.invoke/invoke-intern-dynamic :added "3.0"}
 (fact "constructs a body for the :dynamic keyword"
 
-  (invoke-intern-dynamic nil '-hello- {:val :world} nil) ^:hidden
+  (invoke-intern-dynamic nil '-hello- {:val :world} nil)
   => '(do (def *-hello-* :world)
           (clojure.core/defn -hello- ([] *-hello-*)
             ([v]
@@ -145,7 +145,7 @@
 ^{:refer std.lib.invoke/invoke-intern-multi :added "3.0"}
 (fact "method body for `:multi` form"
 
-  (invoke-intern-multi :multi '-multi-form- {} '([x] x)) ^:hidden
+  (invoke-intern-multi :multi '-multi-form- {} '([x] x))
   => '(do ((clojure.core/deref (var clojure.core/check-valid-options)) {} :default :hierarchy)
           (clojure.core/let [v (def -multi-form-)]
             (if (clojure.core/or
@@ -178,7 +178,7 @@
   (invoke-intern-compose :compose
                          '-compose-form-
                          {:val '(partial + 1 2)
-                          :arglists ''([& more])} nil) ^:hidden
+                          :arglists ''([& more])} nil)
   => '(def -compose-form- (partial + 1 2))
 
   (definvoke ->symbol
@@ -201,12 +201,11 @@
                        '-macro-form-
                        {:fn '-macro-fn-
                         :args []}
-                       nil) ^:hidden
+                       nil)
   => '(def -macro-form- (clojure.core/fn [x] x)))
 
 ^{:refer std.lib.invoke/recent-fn :added "3.0"}
 (fact "creates a recent function"
-  ^:hidden
 
   ((recent-fn {:op #(* 2 %)
                :key str
@@ -217,7 +216,6 @@
 
 ^{:refer std.lib.invoke/invoke-intern-recent :added "3.0"}
 (fact "creates a body for `recent`"
-  ^:hidden
 
   (invoke-intern-recent :recent
                         'hello

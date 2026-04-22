@@ -76,7 +76,6 @@
 
 ^{:refer js.cell.runtime.browser/make-webworker-cell :added "4.1"}
 (fact "creates a kernel cell backed by a browser WebWorker"
-  ^:hidden
   (if +chromium-available+
     (webworker-cell-check)
     :skip)
@@ -86,7 +85,6 @@
 
 ^{:refer js.cell.runtime.browser/make-sharedworker-cell :added "4.1"}
 (fact "creates a kernel cell backed by a browser SharedWorker"
-  ^:hidden
   (if +chromium-available+
     (sharedworker-cell-check)
     :skip)

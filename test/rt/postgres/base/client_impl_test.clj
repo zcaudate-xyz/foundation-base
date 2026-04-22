@@ -13,8 +13,7 @@
 
 ^{:refer rt.postgres.base.client-impl/raw-eval-pg-return :added "4.0"}
 (fact "returns a regularised result"
-  ^:hidden
-  
+
   (client-impl/raw-eval-pg-return [{:pg_jit_available true}])
   => true
 
@@ -26,8 +25,7 @@
                                          :temp :create}))]
   :teardown (component/stop -pg-)}
 (fact "executes a raw value"
-  ^:hidden
-  
+
   (binding [conn/*execute* jdbc/fetch]
     (client-impl/raw-eval-pg -pg- "select 1;"))
   => [{:?column? 1}])
@@ -43,32 +41,31 @@
 
 ^{:refer rt.postgres.base.client-impl/prepend-select-check-form :added "4.0"}
 (fact "checks if form needs a `SELECT` prepended"
-  ^:hidden
-  
+
   (client-impl/prepend-select-check builtin/acos
                              [])
   => true
-  
+
   (client-impl/prepend-select-check addon/b:insert
                              [])
   => false
-  
+
   (client-impl/prepend-select-check (ut/lang-pointer :postgres)
                              [1])
   => true
-  
+
   (client-impl/prepend-select-check (ut/lang-pointer :postgres)
                              ["hello"])
   => true
-  
+
   (client-impl/prepend-select-check (ut/lang-pointer :postgres)
                              ['(:int 0.5)])
   => true
-  
+
   (client-impl/prepend-select-check (ut/lang-pointer :postgres)
                              ['(++ 0.5 :int)])
   => true
-  
+
   (client-impl/prepend-select-check (ut/lang-pointer :postgres)
                              ['(if a 1 2)])
   => false
@@ -91,8 +88,7 @@
 
 ^{:refer rt.postgres.base.client-impl/prepend-select-check :added "4.0"}
 (fact "checks if values needs a `SELECT` prepended"
-  ^:hidden
-  
+
   (client-impl/prepend-select-check builtin/cot [40])
   => true)
 
@@ -100,8 +96,7 @@
   :setup [(def -pg- (client/rt-postgres {:dbname "test-scratch"}))]
   :teardown (component/stop -pg-)}
 (fact "invokes single "
-  ^:hidden
-  
+
   (client-impl/invoke-ptr-pg-single -pg-
                                     (ut/lang-pointer :postgres)
                                     '[(+ 1 2)])
@@ -109,15 +104,13 @@
 
 ^{:refer rt.postgres.base.client-impl/invoke-ptr-pg-transform-let-fn :added "4.0"}
 (fact "transforms the let form"
-  ^:hidden
-  
+
   (client-impl/invoke-ptr-pg-transform-let-fn
    'form)
   => '[:DO :$$ :BEGIN \\ (\| (do [:LOOP \\ (\| (do form [:exit])) \\ :END-LOOP])) \\ :END :$$ :LANGUAGE "plpgsql"])
 
 ^{:refer rt.postgres.base.client-impl/invoke-ptr-pg-transform-try-fn :added "4.0"}
 (fact "transforms the try form"
-  ^:hidden
 
   (client-impl/invoke-ptr-pg-transform-try-fn
    'form)
@@ -125,8 +118,7 @@
 
 ^{:refer rt.postgres.base.client-impl/invoke-ptr-pg-transform-prep :added "4.0"}
 (fact "transforms a form"
-  ^:hidden
-  
+
   (client-impl/invoke-ptr-pg-transform-prep
    '(try
       (return (+ a b c))
@@ -137,7 +129,6 @@
 
 ^{:refer rt.postgres.base.client-impl/invoke-ptr-pg-transform :added "4.0"}
 (fact "transforms a let and try form"
-  ^:hidden
 
   (client-impl/invoke-ptr-pg-transform
    :try
@@ -197,8 +188,7 @@
   :setup [(def -pg- (client/rt-postgres {:dbname "test-scratch"}))]
   :teardown (component/stop -pg-)}
 (fact "invokes a block"
-  ^:hidden
-  
+
   (client-impl/invoke-ptr-pg-block -pg-
                                    (ut/lang-pointer :postgres)
                                    '[(let [(:integer a) 1
@@ -210,8 +200,7 @@
   :setup [(def -pg- (client/rt-postgres {:dbname "test-scratch"}))]
   :teardown (component/stop -pg-)}
 (fact "invokes a pointer in runtime"
-  ^:hidden
-  
+
   (client-impl/invoke-ptr-pg -pg- builtin/cot [40])
   => -0.8950829176379128
 

@@ -1,7 +1,7 @@
 (ns
  xtbench.python.lang.common-data-test
- (:require [std.lang :as l])
- (:use code.test))
+ (:use code.test)
+ (:require [std.lang :as l]))
 
 (l/script-
  :python
@@ -157,10 +157,10 @@
  =>
  [1 2])
 
-^{:refer xt.lang.common-data/arr-append, :added "4.1"}
+^{:refer xt.lang.common-data/arr-assign, :added "4.1"}
 (fact
  "appends to the end of an array"
- (!.py (xtd/arr-append [1 2] [3 4]))
+ (!.py (xtd/arr-assign [1 2] [3 4]))
  =>
  [1 2 3 4])
 

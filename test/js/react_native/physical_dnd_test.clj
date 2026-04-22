@@ -22,8 +22,7 @@
   :adopt true
   :added "4.0" :unchecked true}
 (fact "creates a PanResponder"
-  ^:hidden
-  
+
   (defn.js DragAndDropDemo
     []
     (let [axis       "horizontal"
@@ -43,8 +42,8 @@
                                                                :useNativeDriver false})
                                                     (start)))})]
       (return
-       (n/EnclosedCode 
-{:label "js.react-native.physical-dnd/DragAndDropDemo"} 
+       (n/EnclosedCode
+{:label "js.react-native.physical-dnd/DragAndDropDemo"}
 [:% n/Row
          [:% physical-base/HoverableTarget
           {:indicators {:dragging idragging}
@@ -84,7 +83,7 @@
                                   (return {:style {:backgroundColor
                                                    (:? (> m.dragging 0.5)
                                                        ["black" "red"])}}))}
-                               
+
                                responder.panHandlers)
                               (j/assign
                                {:component n/View
@@ -104,11 +103,11 @@
                                                                      "translateX"
                                                                      "translateY")
                                                                  v}]}}))}}
-                               
+
                                responder.panHandlers)]}]]}]
          [:% physical-base/Tag
           {:indicator position}]]))))
-  
-  
-  
+
+
+
   )

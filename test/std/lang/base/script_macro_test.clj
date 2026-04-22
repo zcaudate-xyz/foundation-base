@@ -24,8 +24,7 @@
 
 ^{:refer std.lang.base.script-macro/body-arglists :added "4.0"}
 (fact "makes arglists from body"
-  ^:hidden
-  
+
   (macro/body-arglists '([a b c]))
   => '([a b c])
 
@@ -34,16 +33,14 @@
 
 ^{:refer std.lang.base.script-macro/intern-in :added "4.0"}
 (fact "interns a macro"
-  ^:hidden
-  
+
   (do (macro/intern-in 'toy '.hello 1)
       (eval '@(var toy.hello)))
   => 1)
 
 ^{:refer std.lang.base.script-macro/intern-prep :added "4.0"}
 (fact "outputs the module and form meta"
-  ^:hidden
-  
+
   (macro/intern-prep :lua
                      (with-meta
                        '(def$.lua hello hello)
@@ -53,8 +50,7 @@
 
 ^{:refer std.lang.base.script-macro/intern-def$-fn :added "4.0"}
 (fact "interns a fragment macro"
-  ^:hidden
-  
+
   (impl/with:library [+library+]
     (macro/intern-def$-fn :lua
                           (with-meta
@@ -76,7 +72,7 @@
                 :display :default,
                 :form 'hello,
                 :namespace 'std.lang.base.script-macro-test})
-  
+
   (impl/with:library [+library+]
     (ptr/ptr-display hello {}))
   => "hello"
@@ -88,8 +84,7 @@
 
 ^{:refer std.lang.base.script-macro/intern-def$ :added "4.0"}
 (fact "intern a def fragment macro"
-  ^:hidden
-  
+
   (macro/intern-def$ :x "hello")
   => #'std.lang.base.script-macro-test/def$.hello
 
@@ -108,7 +103,7 @@
                 :display :default,
                 :form 'x,
                 :namespace 'std.lang.base.script-macro-test})
-  
+
   (impl/with:library [+library+]
     (ptr/ptr-display x {}))
   => "x"
@@ -127,15 +122,14 @@
       multiply multiply))
 
   (impl/with:library [+library+]
-    (ptr/ptr-invoke-string multiply 
+    (ptr/ptr-invoke-string multiply
                            [1 2 3] {}))
   => "multiply(1,2,3)"
-   
+
   (meta #'multiply)
   => (contains '{:rt/kernel "hello", :arglists ([a b])}))
 
 (fact "xtalk fragments display their stored form"
-  ^:hidden
 
   (let [xlib (lib/library {})]
     (lib/add-book! xlib (assoc xtalk/+book+ :modules {}))
@@ -154,8 +148,7 @@
 
 ^{:refer std.lang.base.script-macro/intern-defmacro-fn :added "4.0"}
 (fact "function to intern a macro"
-  ^:hidden
-  
+
   (impl/with:library [+library+]
     (macro/intern-defmacro-fn
      :lua
@@ -175,7 +168,6 @@
   => "[1,2,3]")
 
 (fact "function to intern a macro supports multi-arity clauses"
-  ^:hidden
 
   (let [xlib (lib/library {})]
     (lib/add-book! xlib (assoc xtalk/+book+ :modules {}))
@@ -204,7 +196,6 @@
         (x:get-idx arr idx fallback)])
 
 (fact "top level function and macro pointers can be printed"
-  ^:hidden
 
   (impl/with:library [+library+]
     (let [macro-var (macro/intern-defmacro-fn
@@ -230,7 +221,6 @@
   => true)
 
 (fact "xtalk top level forms print and hydrate without forcing abstract emit"
-  ^:hidden
 
   (let [xlib (lib/library {})]
     (lib/add-book! xlib (assoc xtalk/+book+ :modules {}))
@@ -278,7 +268,6 @@
   => true)
 
 (fact "postgres top level functions initialize against a runtime context"
-  ^:hidden
 
   (let [plib (lib/library {:snapshot prep/+snap+})]
     (lib/add-book! plib (assoc pg/+book+ :modules {}))
@@ -305,14 +294,13 @@
 
 ^{:refer std.lang.base.script-macro/intern-defmacro :added "4.0"}
 (fact "the intern macro function"
-  ^:hidden
-  
+
   (macro/intern-defmacro :x "hello")
   => #'std.lang.base.script-macro-test/defmacro.hello
 
   (impl/with:library [+library+]
     ^{:module x.core}
-    (defmacro.hello 
+    (defmacro.hello
       divide [x y]
       (list '/ x y)))
   => #'std.lang.base.script-macro-test/divide
@@ -327,15 +315,14 @@
 
 ^{:refer std.lang.base.script-macro/call-thunk :added "4.0"}
 (fact "calls the thunk given meta to control pointer output"
-  
+
   (macro/call-thunk {:debug true}
                     (fn [] ptr/*print*))
   => #{:input})
 
 ^{:refer std.lang.base.script-macro/intern-!-fn :added "4.0"}
 (fact "interns a free pointer macro"
-  ^:hidden
-  
+
   (-> (macro/intern-!-fn :lua [1 2 3] {})
       (clojure.string/replace ";" ""))
   => "1\n2\n3"
@@ -345,8 +332,7 @@
 
 ^{:refer std.lang.base.script-macro/intern-! :added "4.0"}
 (fact "interns a macro for free evalutation"
-  ^:hidden
-  
+
   (macro/intern-! :lua "hello")
   => #'std.lang.base.script-macro-test/!.hello
 
@@ -356,7 +342,7 @@
 
 ^{:refer std.lang.base.script-macro/intern-free-fn :added "4.0"}
 (fact "interns a free pointer in the namespace"
-  
+
   (macro/intern-free-fn :lua '(defptr.lua hello 1)
                         {})
   => #'std.lang.base.script-macro-test/hello)
@@ -369,8 +355,7 @@
 
 ^{:refer std.lang.base.script-macro/intern-top-level-fn :added "4.0"}
 (fact "interns a top level function"
-  ^:hidden
-  
+
   (impl/with:library [+library+]
     (macro/intern-top-level-fn
      :lua
@@ -390,10 +375,10 @@
                              :module L.core
                              :id add-more})
   => book/book-entry?
-  
+
   (meta #'add-more)
   => (contains {:a 1, :doc "hello"})
-  
+
   (impl/with:library [+library+]
     (ptr/ptr-invoke-string add-more [1 2 3] {}))
   => "add_more(1,2,3)"
@@ -413,7 +398,7 @@
     ^{:module L.core}
     (def.hello abc 1))
   => #'std.lang.base.script-macro-test/abc
-  
+
   (impl/with:library [+library+]
     (ptr/ptr-deref abc))
   => book/book-entry?
@@ -437,7 +422,7 @@
 
   (:macros (:grammar (lib/get-book +library+ :lua)))
   => '#{defrun defn defglobal defgen defn- deftemp defclass defabstract def}
-  
+
   (impl/with:library [+library+]
     (macro/intern-grammar :lua (:grammar (lib/get-book +library+ :lua))))
   => map?)

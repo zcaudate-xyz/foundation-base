@@ -420,45 +420,6 @@
   (ruby-tf-x-stop-interval '(:x-stop-interval instance))
   => '(. instance kill))
 
-^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-future-run :added "4.1"}
-(fact "future run emits status box"
-  (l/emit-as :ruby [(ruby-tf-x-future-run '[_ thunk])])
-  => #"status")
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-future-then :added "4.1"}
-(fact "future then emits success chaining"
-  (l/emit-as :ruby [(ruby-tf-x-future-then '[_ task on-ok])])
-  => #"status")
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-future-catch :added "4.1"}
-(fact "future catch emits error chaining"
-  (l/emit-as :ruby [(ruby-tf-x-future-catch '[_ task on-err])])
-  => #"status")
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-future-finally :added "4.1"}
-(fact "future finally emits callback"
-  (l/emit-as :ruby [(ruby-tf-x-future-finally '[_ task on-done])])
-  => #"on_done")
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-future-cancel :added "4.1"}
-(fact "future cancel emits cancelled status"
-  (l/emit-as :ruby [(ruby-tf-x-future-cancel '[_ task])])
-  => #"cancelled")
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-future-status :added "4.1"}
-(fact "future status emits status check"
-  (l/emit-as :ruby [(ruby-tf-x-future-status '[_ task])])
-  => #"status")
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-future-await :added "4.1"}
-(fact "future await emits status checks"
-  (l/emit-as :ruby [(ruby-tf-x-future-await '[_ task nil nil])])
-  => #"status")
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-future-from-async :added "4.1"}
-(fact "future from async emits promise box"
-  (l/emit-as :ruby [(ruby-tf-x-future-from-async '[_ executor])])
-  => #"box")
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-iter-from-obj :added "4.1"}
 (fact "converts hash to array of pairs"

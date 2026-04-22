@@ -5,9 +5,7 @@
 
 (l/script-
  :js
- {:runtime :basic,
-  :require
-  [[xt.lang.common-math :as xtm] [xt.lang.common-spec :as xt]]})
+ {:runtime :basic, :require [[xt.lang.common-math :as xtm]]})
 
 (fact:global {:setup [(l/rt:restart)], :teardown [(l/rt:stop)]})
 

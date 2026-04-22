@@ -14,14 +14,12 @@
 
 ^{:refer xt.lang.util-xml/parse-xml-params :added "4.0"}
 (fact "parses the args"
-  ^:hidden
-  
+
   (xml/parse-xml-params "a='123', b=\"456\" ")
   => {"a" "123", "b" "456"})
 
 ^{:refer xt.lang.util-xml/parse-xml-stack :added "4.0"}
 (fact "parses the xml into a ast stack"
-  ^:hidden
 
   (xml/parse-xml-stack "<a/>")
   => [{"tag" "a", "empty" true}]
@@ -29,11 +27,11 @@
   (xml/parse-xml-stack "<a></a>")
   => [{"tag" "a"}
       {"tag" "a", "close" true}]
-  
+
   (xml/parse-xml-stack "<a>1</a>")
   => [{"tag" "a"}
       {"tag" "a", "text" "1", "close" true}]
-  
+
   (xml/parse-xml-stack "<a><b></b></a>")
   => [{"tag" "a"}
       {"tag" "b"}
@@ -63,8 +61,7 @@
 
 ^{:refer xt.lang.util-xml/to-node :added "4.0"}
 (fact "transforms stack to node"
-  ^:hidden
-  
+
   (xml/to-node
    [{"tag" "a", "empty" true}])
   => {"tag" "a"}
@@ -112,17 +109,16 @@
 
 ^{:refer xt.lang.util-xml/parse-xml :added "4.0"}
 (fact "parses xml"
-  ^:hidden
-  
+
   (xml/parse-xml "<a/>")
   => {"tag" "a"}
-  
+
   (xml/parse-xml "<a></a>")
   => {"tag" "a"}
-  
+
   (xml/parse-xml "<a>1</a>")
   => {"children" ["1"], "tag" "a"}
-  
+
   (xml/parse-xml "<a><b></b></a>")
   => {"children" [{"tag" "b"}], "tag" "a"}
 
@@ -137,8 +133,7 @@
 
 ^{:refer xt.lang.util-xml/to-tree :added "4.0"}
 (fact "to node to tree"
-  ^:hidden
-  
+
   (!.lua
    (xml/to-tree
     (xml/parse-xml "<a/>")))
@@ -158,7 +153,7 @@
    (xml/to-tree
     (xml/parse-xml "<a>1<b>2</b>3</a>")))
   => ["a" "1" ["b" "2"] "3"]
-  
+
   (!.lua
    (xml/to-tree
     (xml/parse-xml
@@ -189,8 +184,7 @@
 
 ^{:refer xt.lang.util-xml/from-tree :added "4.0"}
 (fact "creates nodes from tree"
-  ^:hidden
-  
+
   (xml/from-tree
    ["helo:test"
     ["ErrorCode" "ESB-00-000"]
@@ -224,7 +218,6 @@
 
 ^{:refer xt.lang.util-xml/to-brief :added "4.0"}
 (fact "xml to a more readable form"
-  ^:hidden
 
   (!.lua
    (xml/to-brief
@@ -253,7 +246,7 @@
        "ErrorCode" "ESB-00-000",
        "B" true,
        "A" {"A1" "Hello-11-222"}}}
-  
+
   (!.lua
    (xml/to-brief
     (xml/parse-xml
@@ -277,7 +270,6 @@
 
 ^{:refer xt.lang.util-xml/to-string-params :added "4.0"}
 (fact "to node params"
-  ^:hidden
 
   (!.lua
    (xml/to-string-params (tab [:a 1])))
@@ -285,8 +277,7 @@
 
 ^{:refer xt.lang.util-xml/to-string :added "4.0"}
 (fact "node to string"
-  ^:hidden
-  
+
   (!.lua
    (xml/to-string
     {"tag" "helo:test"
@@ -314,7 +305,7 @@
        ["C3" "Tiga"]
        ["C4" ["C41" "Empat-Satu"]]]])))
   => "<helo:test><ErrorCode>ESB-00-000</ErrorCode><A><A1>Hello-11-222</A1><A2>Bandung</A2></A><B></B><C><C1>Satu</C1><C2>Dua</C2><C3>Tiga</C3><C4><C41>Empat-Satu</C41></C4></C></helo:test>"
-  
+
   (!.lua
    (xml/to-string
     (xml/from-tree

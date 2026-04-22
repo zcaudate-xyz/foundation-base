@@ -26,8 +26,7 @@
 
 ^{:refer js.cell.kernel.worker-impl/CANARY :adopt true :added "4.0"}
 (fact "preliminary check"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var Worker (require (@! +tiny-worker-path+)))
     (var worker
@@ -84,11 +83,11 @@
                (return worker))}))
     (j/notify (base-link-local/ping l)))
   => (contains ["pong"])
-  
+
   (comment ;; FOR BROWSER
     (notify/wait-on :js
       (var l (base-link/link-create
-              
+
               (+ "data:text/javascript;base64,"
                  (btoa (@! (browser/play-worker true))))))
       (j/notify (worker/ping l)))
@@ -96,8 +95,7 @@
 
 ^{:refer js.cell.kernel.worker-impl/worker-handle-async :added "4.0"}
 (fact "worker function for handling async tasks"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var Worker (require (@! +tiny-worker-path+)))
     (var worker
@@ -125,8 +123,7 @@
 
 ^{:refer js.cell.kernel.worker-impl/worker-process :added "4.0"}
 (fact "processes various types of actions"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (worker-local/actions-init {})
     (var Worker (require (@! +tiny-worker-path+)))
@@ -151,7 +148,7 @@
   => {"op" "eval"
       "id" "id-eval",
       "status" "ok"
-      "body" "{\"type\":\"data\",\"return\":\"number\",\"value\":2}",}  
+      "body" "{\"type\":\"data\",\"return\":\"number\",\"value\":2}",}
 
   (notify/wait-on :js
     (worker-local/actions-init {})
@@ -203,8 +200,7 @@
 
 ^{:refer js.cell.kernel.worker-impl/worker-init :added "4.0"}
 (fact "initiates the worker actions"
-  ^:hidden
-  
+
   (!.js
    (var Worker (require (@! +tiny-worker-path+)))
    (var worker
@@ -222,7 +218,6 @@
 
 ^{:refer js.cell.kernel.worker-impl/worker-init-signal :added "4.0"}
 (fact "posts an init message"
-  ^:hidden
 
   (notify/wait-on :js
     (var Worker (require (@! +tiny-worker-path+)))
@@ -249,8 +244,7 @@
 
 ^{:refer js.cell.kernel.worker-mock/mock-worker-send :added "4.0"}
 (fact "sends a request to the mock worker"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var mock (worker-mock/create-worker (repl/>notify)
                                   {}

@@ -258,12 +258,18 @@
   (var r (route/make-route "hello"))
   (xtd/tree-get-data (route/add-path-listener r [] "a1" (fn:>))))
  =>
- +out+
+ {"callback" "<function>",
+  "pred" "<function>",
+  "meta"
+  {"listener/id" "a1", "route/path" {}, "listener/type" "route.path"}}
  (!.lua
   (var r (route/make-route "hello"))
   (xtd/tree-get-data (route/add-path-listener r [] "a1" (fn:>))))
  =>
- +out+)
+ {"callback" "<function>",
+  "pred" "<function>",
+  "meta"
+  {"listener/id" "a1", "route/path" {}, "listener/type" "route.path"}})
 
 ^{:refer xt.lang.event-route/add-param-listener,
   :added "4.0",

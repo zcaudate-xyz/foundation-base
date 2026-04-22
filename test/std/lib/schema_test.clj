@@ -593,8 +593,7 @@
 
 ^{:refer std.lib.schema/expand-scopes :added "4.0"}
 (fact "expand `*` keys into `-` keys"
-  ^:hidden
-  
+
   (schema/expand-scopes :*/data)
   => #{:-/info :-/id :-/data :-/key}
 
@@ -603,8 +602,7 @@
 
 ^{:refer std.lib.schema/linked-primary :added "4.0"}
 (fact "gets the linked primary column"
-  ^:hidden
-  
+
   (schema/linked-primary -tsch-
                          :cache
                          +schema+)
@@ -614,8 +612,7 @@
 
 ^{:refer std.lib.schema/order-keys :added "4.0"}
 (fact "order keys given schema"
-  ^:hidden
-  
+
   (schema/order-keys -tsch-
                      [:cache
                       :status
@@ -625,15 +622,13 @@
 
 ^{:refer std.lib.schema/get-defaults :added "4.0"}
 (fact "get defaults in the schema"
-  ^:hidden
-  
+
   (schema/get-defaults -tsch-)
   => '{:__deleted__ false, :id (rt.postgres/uuid-generate-v4)})
 
 ^{:refer std.lib.schema/check-valid-columns :added "4.0"}
 (fact "check if columns are valid"
-  ^:hidden
-  
+
   (schema/check-valid-columns -tsch- [:id :status])
   => [true]
 
@@ -642,8 +637,7 @@
 
 ^{:refer std.lib.schema/check-missing-columns :added "4.0"}
 (fact "check if columns are missing"
-  ^:hidden
-  
+
   (schema/check-missing-columns -tsch-
                          [:status]
                          :required)
@@ -663,7 +657,7 @@
 
 ^{:refer std.lib.schema/get-returning :added "4.0"}
 (fact "collects the returning ids and columns"
-  
+
   (->> (schema/get-returning -tsch-
                       [:*/data :cache])
        (map first))

@@ -15,7 +15,6 @@
 
 ^{:refer xt.cell.kernel.base-util/rand-id :added "4.1"}
 (fact "builds a random id with the requested prefix and size"
-  ^:hidden
 
   (!.js
    (xt/x:len (base-util/rand-id "id-" 4)))
@@ -23,7 +22,6 @@
 
 ^{:refer xt.cell.kernel.base-util/check-event :added "4.1"}
 (fact "supports nil, literal, boolean, and functional event predicates"
-  ^:hidden
 
   (!.js
    [(base-util/check-event nil "refresh" {} {})
@@ -40,7 +38,6 @@
 
 ^{:refer xt.cell.kernel.base-util/arg-encode :added "4.1"}
 (fact "encodes functions inside payload trees"
-  ^:hidden
 
   (!.js
    (xtd/first
@@ -60,7 +57,6 @@
 
 ^{:refer xt.cell.kernel.base-util/arg-decode :added "4.1"}
 (fact "decodes encoded functions back into callable values"
-  ^:hidden
 
   (!.js
    (var encoded
@@ -71,7 +67,6 @@
 
 ^{:refer xt.cell.kernel.base-util/req-frame :added "4.1"}
 (fact "builds protocol frames with merged metadata and extras"
-  ^:hidden
 
   (!.js
    (base-util/req-frame
@@ -88,7 +83,6 @@
 
 ^{:refer xt.cell.kernel.base-util/req-call :added "4.1"}
 (fact "builds raw call requests"
-  ^:hidden
 
   (!.js
    (base-util/req-call "@worker/echo" ["hello"]))
@@ -98,7 +92,6 @@
 
 ^{:refer xt.cell.kernel.base-util/req-eval :added "4.1"}
 (fact "builds raw eval requests"
-  ^:hidden
 
   (!.js
    (base-util/req-eval "1 + 1" true))
@@ -108,7 +101,6 @@
 
 ^{:refer xt.cell.kernel.base-util/resp-ok :added "4.1"}
 (fact "builds ok response frames"
-  ^:hidden
 
   (!.js
    (base-util/resp-ok "call" "id-1" ["pong" 1]))
@@ -119,7 +111,6 @@
 
 ^{:refer xt.cell.kernel.base-util/resp-error :added "4.1"}
 (fact "builds error response frames"
-  ^:hidden
 
   (!.js
    (base-util/resp-error "call" "id-2" {"message" "boom"}))
@@ -130,7 +121,6 @@
 
 ^{:refer xt.cell.kernel.base-util/resp-stream :added "4.1"}
 (fact "builds stream response frames"
-  ^:hidden
 
   (!.js
    (base-util/resp-stream "orders/updated" {"id" 1}))

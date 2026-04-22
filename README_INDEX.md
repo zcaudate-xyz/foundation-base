@@ -134,7 +134,7 @@ cache/foundation/.clojure-mcp/symbol-index.db
 The main project provides a wrapper script at:
 
 ```
-./scripts/foundation-index
+./src-training/scripts/foundation-index
 ```
 
 This script automatically finds and uses the foundation index database.

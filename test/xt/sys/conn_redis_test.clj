@@ -30,12 +30,11 @@
 
 ^{:refer xt.sys.conn-redis/connect :added "4.0"}
 (fact "connects to a datasource"
-  ^:hidden
-  
+
   ;;
   ;; LUA
   ;;
-  
+
   (!.lua
    (var conn (redis/connect {:constructor lua-driver/connect-constructor
                              :port 17001}
@@ -53,7 +52,7 @@
   ;;
   ;; JS
   ;;
-  
+
   (notify/wait-on :js
     (redis/connect {:constructor js-driver/connect-constructor
                     :port 17001}
@@ -61,7 +60,7 @@
                                (redis/exec conn "ping" []
                                            (repl/<!)))}))
   => "PONG"
-  
+
   (notify/wait-on :js
     (redis/connect {:constructor js-driver/connect-constructor
                     :port 17001}
@@ -75,22 +74,21 @@
 
 ^{:refer xt.sys.conn-redis/exec :added "4.0"}
 (fact "executes a redis command"
-  ^:hidden
-  
+
   (!.lua
    (var conn (redis/connect {:constructor lua-driver/connect-constructor
                              :port 17001}
                             {}))
    [(redis/exec conn "ping" [])
     (redis/exec conn "echo" ["hello"])])
-  => ["PONG" "hello"]  
+  => ["PONG" "hello"]
 
   (do
     (notify/wait-on :js
       (:= (!:G conn) (redis/connect {:constructor js-driver/connect-constructor
                                      :port 17001}
                                     (repl/<!))))
-    
+
     [(notify/wait-on :js
        (redis/exec conn "ping" [] (repl/<!)))
      (notify/wait-on :js
@@ -103,8 +101,7 @@
           (bench/start-redis-array [17001])
           (l/rt:restart)]}
 (fact "creates a subscription given channel"
-  ^:hidden
-  
+
   (do (def ^:dynamic *res*
         (future
           (notify/wait-on [:lua 5000]
@@ -131,7 +128,6 @@
           (bench/start-redis-array [17001])
           (l/rt:restart)]}
 (fact "creates a pattern subscription given channel"
-  ^:hidden
 
   (do (def ^:dynamic *res*
         (future
@@ -156,8 +152,7 @@
 
 ^{:refer xt.sys.conn-redis/eval-body :added "4.0"}
 (fact "evaluates a the body"
-  ^:hidden
-  
+
   (!.lua
    (var conn (redis/connect {:constructor lua-driver/connect-constructor
                              :port 17001}
@@ -182,7 +177,7 @@
                      {})])
   => [1 0 nil nil 1 "hello"]
 
-  
+
   (do
     (notify/wait-on :js
       (:= (!:G  conn) (redis/connect {:constructor js-driver/connect-constructor
@@ -216,8 +211,7 @@
 
 ^{:refer xt.sys.conn-redis/eval-script :added "4.0"}
 (fact "evaluates sha, then body if errored"
-  ^:hidden
-  
+
   (!.lua
    (var conn (redis/connect {:constructor lua-driver/connect-constructor
                              :port 17001}

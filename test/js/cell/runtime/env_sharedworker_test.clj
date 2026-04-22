@@ -14,7 +14,6 @@
 
 ^{:refer js.cell.runtime.env-sharedworker/init-port :added "4.1"}
 (fact "boots a SharedWorker port"
-  ^:hidden
   (!.js
    (var messages [])
    (var port {:listeners []
@@ -31,7 +30,6 @@
 
 ^{:refer js.cell.runtime.env-sharedworker/runtime-init :added "4.1"}
 (fact "boots js.cell inside a SharedWorker"
-  ^:hidden
   (!.js
    (var previous-self (!:G self))
    (var messages [])

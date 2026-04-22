@@ -20,8 +20,7 @@
 
 ^{:refer js.react-native.physical-edit/createPan :added "4.0" :unchecked true}
 (fact "creates a PanResponder"
-  ^:hidden
-  
+
   (defn.js CreatePanDemo
     []
     (let [axis       "horizontal"
@@ -35,8 +34,8 @@
                                                                :useNativeDriver false})
                                                     (start)))})]
       (return
-       (n/EnclosedCode 
-{:label "js.react-native.physical-edit/createPan"} 
+       (n/EnclosedCode
+{:label "js.react-native.physical-edit/createPan"}
 [:% n/Row
          [:% physical-base/Box
           #{[:indicators #{position}
@@ -61,7 +60,7 @@
                                                             "translateX"
                                                             "translateY")
                                                         v}]}}))}}
-                      
+
                       responder.panHandlers)]]}]
          [:% physical-base/Tag
           {:indicator position}]])))))
@@ -70,8 +69,7 @@
   :adopt true
   :added "4.0" :unchecked true}
 (fact "creates a PanResponder"
-  ^:hidden
-  
+
   (defn.js CreatePanVelocityDemo
     []
     (let [axis       "horizontal"
@@ -101,8 +99,8 @@
         (return (fn []
                   (j/clearInterval interval))))
       (return
-       (n/EnclosedCode 
-{:label "js.react-native.physical-edit/createPanVelocity"} 
+       (n/EnclosedCode
+{:label "js.react-native.physical-edit/createPanVelocity"}
 [:% n/Row
          [:% physical-base/Box
           {:indicators #{rotation}
@@ -136,7 +134,7 @@
                                                             "translateX"
                                                             "translateY")
                                                         v}]}}))}}
-                      
+
                       responder.panHandlers)]]}]
          [:% physical-base/Tag
           {:indicator position}]])))))
@@ -146,8 +144,7 @@
   :adopt true
   :added "4.0" :unchecked true}
 (fact "creates a Progress element"
-  ^:hidden
-  
+
   (defn.js ProgressDemo
     []
     (var position     (a/val 100))
@@ -158,13 +155,13 @@
                                 {:pan {:dx position}
                                  :absolute true})))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.physical-edit/ProgressDemo"} 
+     (n/EnclosedCode
+{:label "js.react-native.physical-edit/ProgressDemo"}
 [:% n/Row
        [:% n/View
         [:% physical-base/Box
          {:indicators #{position
-                        percentage} 
+                        percentage}
           :style [{:height 20
                    :backgroundColor "blue"
                    :width 220}]
@@ -180,7 +177,7 @@
                      (fn [v]
                        (return {:style {:transform
                                         [{:translateX (j/max 0 (j/min 200 v))}]}}))}}
-                   
+
                    responder.panHandlers)
                   {:component n/View
                    :style {:alignItems "end"}

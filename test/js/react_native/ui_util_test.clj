@@ -18,14 +18,13 @@
 
 ^{:refer js.react-native.ui-util/Page :added "4.0" :unchecked true}
 (fact "creates a Page"
-  ^:hidden
-  
+
   (defn.js PageDemo
     []
     (return
-     (n/EnclosedCode 
+     (n/EnclosedCode
       {:label "js.react-native.ui-util/Page"
-       :style {:height 200}} 
+       :style {:height 200}}
       [:% ui-util/Page
        {:headerComponent (fn:> [:% n/View {:style {:height 30
                                                    :backgroundColor "red"}}])
@@ -34,10 +33,10 @@
         :styleMenu {:height 60}
         :titleComponent  (fn:> [:% n/View {:style {:flex 1
                                                    :backgroundColor "yellow"}}])
-        
+
         :leftComponent   (fn:> [:% n/View {:style {:flex 1
                                                    :backgroundColor "green"}}])
-        
+
         :rightComponent  (fn:> [:% n/View {:style {:flex 1
                                                    :backgroundColor "blue"}}])}
        [:% n/View
@@ -46,19 +45,18 @@
 
 ^{:refer js.react-native.ui-util/Fade :added "4.0" :unchecked true}
 (fact "creates a Fade"
-  ^:hidden
-  
+
   (defn.js FadeDemo
     []
     (var [visible setVisible] (r/local true))
     (var [size setSize] (r/local 100))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-util/Fade"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-util/Fade"}
 [:% n/Row
        [:% n/Button
         {:title "V"
-         :onPress (fn:> (setVisible (not visible)))}]] 
+         :onPress (fn:> (setVisible (not visible)))}]]
 [:% ui-util/Fade
        {:visible visible}
        [:% n/View
@@ -74,16 +72,15 @@
 
 ^{:refer js.react-native.ui-util/FoldInner :added "4.0" :unchecked true}
 (fact "creates the fold inner container"
-  ^:hidden
-  
+
   (defn.js FoldInnerDemo
     []
     (var [visible setVisible] (r/local true))
     (var [size setSize] (r/local 100))
     (var vindicator (a/useBinaryIndicator visible))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-util/FoldInner"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-util/FoldInner"}
 [:% n/Row
        [:% n/Button
         {:title "V"
@@ -91,7 +88,7 @@
        [:% n/Tabs
         {:value size
          :setValue setSize
-         :data [100 200]}]] 
+         :data [100 200]}]]
 [:% n/Row
        {:style {:height 100}}
        [:% ui-util/FoldInner
@@ -109,15 +106,14 @@
 
 ^{:refer js.react-native.ui-util/Fold :added "4.0" :unchecked true}
 (fact "creates the fold"
-  ^:hidden
-  
+
   (defn.js FoldDemo
     []
     (var [visible setVisible] (r/local true))
     (var [size setSize] (r/local 100))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-util/Fold"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-util/Fold"}
 [:% n/Row
        [:% n/Button
         {:title "V"
@@ -125,7 +121,7 @@
        [:% n/Tabs
         {:value size
          :setValue setSize
-         :data [100 200]}]] 
+         :data [100 200]}]]
 [:% n/Row
        {:style {:height 100}}
        [:% ui-util/Fold
@@ -141,14 +137,14 @@
          {:style {:height 100
                   :width size
                   :backgroundColor "blue"}}]]])))
-  
-  
+
+
 
   )
 
 (comment
 
-  
-  
-  
+
+
+
   )

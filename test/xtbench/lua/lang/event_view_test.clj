@@ -12,6 +12,7 @@
   :config {:program :resty},
   :require
   [[xt.lang.common-lib :as k]
+   [xt.lang.common-spec :as xt]
    [xt.lang.common-data :as xtd]
    [xt.lang.common-repl :as repl]
    [xt.lang.event-view :as view]
@@ -32,6 +33,41 @@
    (view/list-listeners v)))
  =>
  #{"c3" "a1" "b2"})
+
+^{:refer xt.lang.event-view/pipeline-run-remote.errored,
+  :adopt true,
+  :added "4.0"}
+(fact
+ "runs the pipeline"
+ ^{:hidden true}
+ (!.lua
+  (var
+   v
+   (view/create-view
+    nil
+    {:remote {:handler (fn:> [x] "ERRORED")}}
+    [3]
+    ["BLAH"]
+    xtd/first))
+  (view/init-view v)
+  (var [context disabled] (view/pipeline-prep v nil))
+  (var
+   async-fn
+   (fn
+    [handler-fn context cb]
+    (var out (handler-fn context))
+    (if
+     (== out "ERRORED")
+     (return ((xt/x:get-key cb "error") out))
+     (return ((xt/x:get-key cb "success") out)))))
+  (view/pipeline-run-remote context true async-fn nil nil)
+  (xt/x:get-key context "acc"))
+ =>
+ {"error" true,
+  "remote" [true "ERRORED" true],
+  "post" [false],
+  "pre" [false],
+  "::" "view.run"})
 
 ^{:refer xt.lang.event-view/wrap-args, :added "4.0"}
 (fact
@@ -187,14 +223,14 @@
  (!.lua
   (var v (view/create-view (fn:> [x] {:value x}) {} [3] {}))
   (view/init-view v)
-  (var [context disabled] (view/pipeline-prep v))
+  (var [context disabled] (view/pipeline-prep v nil))
   (var
    async-fn
    (fn
     [handler-fn context cb]
-    (return (cb.success (handler-fn context)))))
-  (view/pipeline-run context disabled async-fn (fn:>) (fn:>))
-  context.acc)
+    (return ((. cb ["success"]) (handler-fn context)))))
+  (view/pipeline-run context disabled async-fn nil nil)
+  (. context ["acc"]))
  =>
  {"::" "view.run",
   "pre" [false],
@@ -213,14 +249,14 @@
     {:remote {:handler (fn:> [x] {:value x})}}
     [3]))
   (view/init-view v)
-  (var [context disabled] (view/pipeline-prep v))
+  (var [context disabled] (view/pipeline-prep v nil))
   (var
    async-fn
    (fn
     [handler-fn context cb]
-    (return (cb.success (handler-fn context)))))
-  (view/pipeline-run-remote context true async-fn (fn:>) (fn:>))
-  context.acc)
+    (return ((. cb ["success"]) (handler-fn context)))))
+  (view/pipeline-run-remote context true async-fn nil nil)
+  (. context ["acc"]))
  =>
  {"::" "view.run",
   "pre" [false],
@@ -236,14 +272,14 @@
    v
    (view/create-view nil {:sync {:handler (fn:> [x] {:value x})}} [3]))
   (view/init-view v)
-  (var [context disabled] (view/pipeline-prep v))
+  (var [context disabled] (view/pipeline-prep v nil))
   (var
    async-fn
    (fn
     [handler-fn context cb]
-    (return (cb.success (handler-fn context)))))
-  (view/pipeline-run-sync context true async-fn (fn:>) (fn:>))
-  context.acc)
+    (return ((. cb ["success"]) (handler-fn context)))))
+  (view/pipeline-run-sync context true async-fn nil nil)
+  (. context ["acc"]))
  =>
  {"::" "view.run",
   "pre" [false],
@@ -254,7 +290,7 @@
 (fact
  "creates a results vector and a lookup table"
  ^{:hidden true}
- (!.lua (view/get-with-lookup [{:id "A"} {:id "B"} {:id "C"}]))
+ (!.lua (view/get-with-lookup [{:id "A"} {:id "B"} {:id "C"}] nil))
  =>
  {"results" [{"id" "A"} {"id" "B"} {"id" "C"}],
   "lookup" {"C" {"id" "C"}, "B" {"id" "B"}, "A" {"id" "A"}}})

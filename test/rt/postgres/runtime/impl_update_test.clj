@@ -21,8 +21,7 @@
 
 ^{:refer rt.postgres.runtime.impl-update/t-update-symbol :added "4.0"}
 (fact "constructs with symbol"
-  ^:hidden
-  
+
   (update/t-update-symbol -tsch-
                           'e
                           (tracker/add-tracker {:set {:status "error"}
@@ -42,8 +41,8 @@
                                         #{"cache_id"}))
             (== #{"op_updated"} (:uuid (:->> o-op "id")))
             (== #{"time_updated"} (:bigint (:->> o-op "time")))])
-  
-  
+
+
   (update/t-update-symbol -tsch-
                           'e
                           (tracker/add-tracker {:set {:status "error"}
@@ -69,7 +68,6 @@
 
 ^{:refer rt.postgres.runtime.impl-update/t-update-map :added "4.0"}
 (fact  "constructs with map"
-  ^:hidden
 
   (update/t-update-map -tsch-
                        {:status "error"}
@@ -96,8 +94,7 @@
 
 ^{:refer rt.postgres.runtime.impl-update/t-update-raw :added "4.0"}
 (fact "contructs an update form with prep"
-  ^:hidden
-  
+
   (update/t-update-raw
    (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))
    (tracker/add-tracker {:set {:status "error"}
@@ -124,7 +121,6 @@
 
 ^{:refer rt.postgres.runtime.impl-update/t-update :added "4.0"}
 (fact "contructs an update form"
-  ^:hidden
 
   ;; MAP
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
@@ -187,8 +183,7 @@
 
 ^{:refer rt.postgres.runtime.impl-update/t-modify-raw :added "4.0"}
 (fact "contructs an upsert form with prep"
-  ^:hidden
-  
+
   (update/t-modify-raw
    (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))
    (tracker/add-tracker {:set {:status "error"}
@@ -212,8 +207,7 @@
 
 ^{:refer rt.postgres.runtime.impl-update/t-modify :added "4.0"}
 (fact "constructs a modify form"
-  ^:hidden
-  
+
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (update/t-modify 'scratch/Task
                      {:set {:status "error"}
@@ -222,7 +216,7 @@
   => '(let [(++ u-ret rt.postgres.test.scratch-v1/Task)
             [:update rt.postgres.test.scratch-v1/Task
              :set
-             
+
              (---
               [(==
                 #{"status"}
@@ -233,7 +227,7 @@
              \\ :returning * :into u-ret]
             _ (if [:not (exists [:select u-ret])]
                 [:raise-exception (% "Record Not Found")])])
-  
+
   ;; assign/fn
   ((-> (l/with:macro-opts [(l/rt:macro-opts :postgres)]
          (update/t-modify 'scratch/Task

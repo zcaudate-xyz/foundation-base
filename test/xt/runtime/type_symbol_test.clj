@@ -23,15 +23,14 @@
 
 ^{:refer xt.runtime.type-symbol/symbol-hash :added "4.0"}
 (fact "gets the symbol hash"
-  ^:hidden
-  
+
   (!.js
    [(sym/symbol-hash (sym/symbol "hello" "world"))
     (tc/hash (sym/symbol "hello" "world"))])
   => (contains-in
       [integer?
        integer?])
-  
+
   (!.lua
    [(sym/symbol-hash (sym/symbol "hello" "world"))
     (tc/hash (sym/symbol "hello" "world"))])
@@ -41,8 +40,7 @@
 
 ^{:refer xt.runtime.type-symbol/symbol-show :added "4.0"}
 (fact "shows the symbol"
-  ^:hidden
-  
+
   (!.js
    (sym/symbol-show (sym/symbol "hello" "world")))
   => "hello/world"
@@ -53,8 +51,7 @@
 
 ^{:refer xt.runtime.type-symbol/symbol-eq :added "4.0"}
 (fact "gets symbol equality"
-  ^:hidden
-  
+
   (!.js
    [(sym/symbol-eq (sym/symbol "hello" "world")
                    (sym/symbol "hello" "world"))
@@ -79,7 +76,6 @@
 
 ^{:refer xt.runtime.type-symbol/symbol-create :added "4.0"}
 (fact "creates a symbol"
-  ^:hidden
 
   (!.js
    (var out (sym/symbol-create "hello" "world"))
@@ -99,7 +95,6 @@
 
 ^{:refer xt.runtime.type-symbol/symbol :added "4.0"}
 (fact "creates the symbol or pulls it from cache"
-  ^:hidden
 
   (!.js
    (var s0 (sym/symbol "hello" "world"))

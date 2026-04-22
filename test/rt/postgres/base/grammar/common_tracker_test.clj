@@ -5,8 +5,7 @@
 
 ^{:refer rt.postgres.base.grammar.common-tracker/add-tracker :added "4.0"}
 (fact "call to adjust data to that of the tracker"
-  ^:hidden
-  
+
   (tracker/add-tracker {:track 'op}
                        (:static/tracker @scratch/Task)
                        `scratch/Task
@@ -15,8 +14,7 @@
 
 ^{:refer rt.postgres.base.grammar.common-tracker/tracker-map-in :added "4.0"}
 (fact "creates the insert map"
-  ^:hidden
-  
+
   (tracker/tracker-map-in
    (tracker/add-tracker {:track 'op}
                        (:static/tracker @scratch/Task)
@@ -29,7 +27,6 @@
 
 ^{:refer rt.postgres.base.grammar.common-tracker/tracker-map-modify :added "4.0"}
 (fact "creates the modify map"
-  ^:hidden
 
   (tracker/tracker-map-modify
    (tracker/add-tracker {:track 'op}

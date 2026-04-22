@@ -47,20 +47,19 @@
 
 ^{:refer js.cell.kernel.base-impl/new-cell-init :added "4.0"}
 (fact "creates a record for asynchronous resolve"
-  ^:hidden
-  
+
   (set (!.js
         (xtd/obj-keys
          (base-impl/new-cell-init))))
   => #{"resolve" "current" "reject"}
-  
+
   (notify/wait-on :js
     (:= (!:G INIT) (base-impl/new-cell-init))
     ((. INIT ["resolve"]) true)
     (. INIT ["current"]
        (then (repl/>notify))))
   => true
-  
+
   (notify/wait-on :js
     (. INIT ["current"]
        (then (repl/>notify))))
@@ -69,13 +68,12 @@
 ^{:refer js.cell.kernel.base-impl/new-cell :added "4.0"
   :setup [(fact:global :setup)]}
 (fact "makes the core link"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (. (-/reset-cell) ["init"]
        (then (repl/>notify))))
   => true
-  
+
   (notify/wait-on :js
     (var cell (-/reset-cell))
     (var #{link} cell)
@@ -86,7 +84,7 @@
                      :status "ok"
                      :body {}})))
   => {"body" {}, "status" "ok", "op" "stream", "signal" "hello"}
-  
+
   (notify/wait-on :js
     (var cell (-/reset-cell))
     (. (base-link-local/error (. cell ["link"]))
@@ -110,8 +108,7 @@
                                  "common/hello1"
                                  {:echo {:handler base-link-local/echo}}))]}
 (fact "lists all models"
-  ^:hidden
-  
+
   (set (!.js
         (base-impl/list-models (-/CELL))))
   => #{"common/hello" "common/hello1"})
@@ -122,15 +119,14 @@
             (. (-/reset-cell) ["init"]
                (then (repl/>notify))))]}
 (fact "conducts a call, either for a link or cell"
-  ^:hidden
-  
+
   (j/<!
    (base-impl/call (-/CELL)
                    {:op "call"
                     :action "@worker/echo"
                     :body ["hello"]}))
   => (contains ["hello" integer?])
-  
+
   (j/<!
    (base-impl/call (. (-/CELL) ["link"])
                    {:op "call"
@@ -152,8 +148,7 @@
                ["init"]
                (then (repl/>notify))))]}
 (fact "gets a model"
-  ^:hidden
-  
+
   (!.js
    (base-impl/model-get (-/CELL) "hello"))
   => (contains-in
@@ -174,7 +169,7 @@
        "deps" {},
        "init" {},
        "throttle" {"queued" {}, "active" {}}})
-  
+
   (!.js
    (base-impl/model-get (-/CELL) "WRONG"))
   => nil)
@@ -185,8 +180,7 @@
             (. (-/reset-cell) ["init"]
                (then (repl/>notify))))]}
 (fact "throws an error if model is not present"
-  ^:hidden
-  
+
   (!.js
    (base-impl/model-ensure (-/CELL) "WRONG"))
   => (throws))
@@ -205,8 +199,7 @@
                ["init"]
                (then (repl/>notify))))]}
 (fact "lists views in the model"
-  ^:hidden
-  
+
   (!.js
    (base-impl/list-views (-/CELL) "hello"))
   => ["echo"])
@@ -225,8 +218,7 @@
                ["init"]
                (then (repl/>notify))))]}
 (fact "gets the view"
-  ^:hidden
-  
+
   (!.js
    (xtd/second (base-impl/view-ensure (-/CELL)
                                     "hello"
@@ -258,8 +250,7 @@
                ["init"]
                (then (repl/>notify))))]}
 (fact "acts as the view access function"
-  ^:hidden
-  
+
   (!.js
    (base-impl/view-access (-/CELL)
                           "hello"
@@ -268,7 +259,7 @@
                             (return (. view ["input"] ["current"] ["data"])))
                           []))
   => ["TEST"]
-  
+
   (!.js
    (base-impl/view-access (-/CELL)
                           "hello"
@@ -289,8 +280,7 @@
                                                  :defaultArgs ["TEST"]}})
                    ["init"]))]}
 (fact "add listener to cell"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (base-impl/add-listener (-/CELL)
                             ["hello" "echo"]
@@ -322,8 +312,7 @@
                                    "@react/1234"
                                    (fn:>)))]}
 (fact "remove listeners from cell"
-  ^:hidden
-  
+
   (!.js
    (base-impl/remove-listener (-/CELL)
                               ["hello" "echo"]
@@ -345,8 +334,7 @@
                                    "@react/5678"
                                    (fn:>)))]}
 (fact "lists listeners in a cell path"
-  ^:hidden
-  
+
   (!.js
    (base-impl/list-listeners (-/CELL)
                              ["hello" "echo"]))
@@ -367,8 +355,7 @@
                                    "@react/5678"
                                    (fn:>)))]}
 (fact "lists all listeners in cell"
-  ^:hidden
-  
+
   (!.js
    (base-impl/list-all-listeners (-/CELL)))
   => {"hello" {"echo" ["@react/1234" "@react/5678"]}})
@@ -379,8 +366,7 @@
             (. (-/reset-cell) ["init"]
                (then (repl/>notify))))]}
 (fact "triggers listeners"
-  ^:hidden
-  
+
   (!.js
    (base-impl/add-listener (-/CELL)
                            ["hello" "echo"]
@@ -393,7 +379,7 @@
                                  ["hello" "WRONG"]
                                  {})])
   => [["@react/1234"] []]
-  
+
   (notify/wait-on :js
     (base-impl/add-listener (-/CELL)
                             ["hello" "echo"]

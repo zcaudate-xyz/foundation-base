@@ -35,8 +35,7 @@
 
 ^{:refer xt.runtime.interface-common/impl-normalise :added "4.0"}
 (fact "normalises the value"
-  ^:hidden
-  
+
   (!.js
    (== v/NIL (v/impl-normalise nil)))
   => true
@@ -47,8 +46,7 @@
 
 ^{:refer xt.runtime.interface-common/impl-denormalise :added "4.0"}
 (fact "denormalises the value"
-  ^:hidden
-  
+
   (!.js
    (v/impl-denormalise v/NIL))
   => nil
@@ -59,8 +57,7 @@
 
 ^{:refer xt.runtime.interface-common/is-managed? :added "4.0"}
 (fact "checks if object is managed via the runtime"
-  ^:hidden
-  
+
   (!.js
    [(v/is-managed?  (kw/keyword nil "hello"))
     (v/is-managed?  (sym/symbol nil "hello"))])
@@ -73,7 +70,6 @@
 
 ^{:refer xt.runtime.interface-common/is-syntax? :added "4.0"}
 (fact "checks if object is of type syntax"
-  ^:hidden
 
   (!.js
    [(v/is-syntax? nil)
@@ -87,14 +83,13 @@
 
 ^{:refer xt.runtime.interface-common/hash :added "4.0"}
 (fact "gets the hash of an object"
-  ^:hidden
-  
+
   (!.js
    [(v/hash "hello")
     (v/hash (list/list 1 2 3 4))
     (v/hash (vec/vector 1 2 3 4))])
   => [667819 1875393 1090685]
-  
+
   (!.lua
    [(v/hash "hello")
     (v/hash (list/list 1 2 3 4))
@@ -103,7 +98,6 @@
 
 ^{:refer xt.runtime.interface-common/get-name :added "4.0"}
 (fact "gets the name of a symbol, keyword or var"
-  ^:hidden
 
   (!.js
    [(v/get-name (kw/keyword nil "hello"))
@@ -119,7 +113,6 @@
 
 ^{:refer xt.runtime.interface-common/get-namespace :added "4.0"}
 (fact "gets the namespace of a symbol, keyword or var"
-  ^:hidden
 
   (!.js
    [(v/get-namespace (kw/keyword nil "hello"))
@@ -135,7 +128,6 @@
 
 ^{:refer xt.runtime.interface-common/hash-with-cache :added "4.0"}
 (fact "gets a memoized cache id"
-  ^:hidden
 
   (!.js
    (var calls 0)
@@ -169,7 +161,6 @@
 
 ^{:refer xt.runtime.interface-common/wrap-with-cache :added "4.0"}
 (fact "wraps hash-fn call with caching"
-  ^:hidden
 
   (!.js
    (var cached-calls 0)
@@ -223,8 +214,7 @@
 
 ^{:refer xt.runtime.interface-common/show :added "4.0"}
 (fact "show interface"
-  ^:hidden
-  
+
   (!.js
    [(v/show "hello")
     (v/show [1 2 3 4])
@@ -241,7 +231,6 @@
 
 ^{:refer xt.runtime.interface-common/eq :added "4.0"}
 (fact "equivalence check"
-  ^:hidden
 
   (!.js
    [(v/eq (syn/syntax-create 1 nil) 1)
@@ -259,8 +248,7 @@
 
 ^{:refer xt.runtime.interface-common/count :added "4.0"}
 (fact "gets the count for a "
-  ^:hidden
-  
+
   (!.js
    [(v/count "hello")
     (v/count [1 2 3 4])
@@ -277,8 +265,7 @@
 
 ^{:refer xt.runtime.interface-common/is-persistent? :added "4.0"}
 (fact "checks if collection is persistent"
-  ^:hidden
-  
+
   (!.js
    [(v/is-persistent? (list/list))
     (v/is-persistent? (vec/vector))
@@ -293,8 +280,7 @@
 
 ^{:refer xt.runtime.interface-common/is-mutable? :added "4.0"}
 (fact  "checks if collection is mutable"
-  ^:hidden
-  
+
   (!.js
    [(v/is-mutable? (list/list))
     (v/is-mutable? (vec/vector))
@@ -309,7 +295,6 @@
 
 ^{:refer xt.runtime.interface-common/to-persistent :added "4.0"}
 (fact "converts to persistent"
-  ^:hidden
 
   (!.js
    (var out (-> (vec/vector 1 2 3)
@@ -331,7 +316,6 @@
 
 ^{:refer xt.runtime.interface-common/to-mutable :added "4.0"}
 (fact "converts to mutable"
-  ^:hidden
 
   (!.js
    (var out (v/to-mutable (vec/vector 1 2 3)))
@@ -347,8 +331,7 @@
 
 ^{:refer xt.runtime.interface-common/push :added "4.0"}
 (fact "pushs elements "
-  ^:hidden
-  
+
   (!.js
    [(-> (list/list)
         (v/push 1)
@@ -379,8 +362,7 @@
 
 ^{:refer xt.runtime.interface-common/pop :added "4.0"}
 (fact "pops element from collection"
-  ^:hidden
-  
+
   (!.js
    [(-> (list/list 1 2 3 4)
         (v/pop)
@@ -405,7 +387,6 @@
 
 ^{:refer xt.runtime.interface-common/nth :added "4.0"}
 (fact "nth coll"
-  ^:hidden
 
   (!.js
    [(v/nth (vec/vector 1 2 3) 0)
@@ -419,7 +400,6 @@
 
 ^{:refer xt.runtime.interface-common/push-mutable :added "4.0"}
 (fact "pushes an element into an editable collection"
-  ^:hidden
 
   (!.js
    (var out (vec/vector-empty-mutable))
@@ -437,7 +417,6 @@
 
 ^{:refer xt.runtime.interface-common/pop-mutable :added "4.0"}
 (fact "pops an element from an editable collection"
-  ^:hidden
 
   (!.js
    (var out (v/to-mutable (vec/vector 1 2 3 4)))
@@ -455,7 +434,6 @@
 
 ^{:refer xt.runtime.interface-common/assoc :added "4.0"}
 (fact "associates a key value pair into a persistent collection"
-  ^:hidden
 
   (!.js
    (var h0 (hm/hashmap "a" 1))
@@ -475,7 +453,6 @@
 
 ^{:refer xt.runtime.interface-common/dissoc :added "4.0"}
 (fact "disassociates a key from aa persistent collection"
-  ^:hidden
 
   (!.js
    (var out (v/dissoc (hm/hashmap "a" 1 "b" 2) "a"))
@@ -491,7 +468,6 @@
 
 ^{:refer xt.runtime.interface-common/assoc-mutable :added "4.0"}
 (fact "associates a key value pair into a mutable collection"
-  ^:hidden
 
   (!.js
    (var out (v/to-mutable (hm/hashmap "a" 1)))
@@ -509,7 +485,6 @@
 
 ^{:refer xt.runtime.interface-common/dissoc-mutable :added "4.0"}
 (fact "disassociates a key pair from a mutable collection"
-  ^:hidden
 
   (!.js
    (var out (v/to-mutable (hm/hashmap "a" 1 "b" 2)))
@@ -527,7 +502,6 @@
 
 ^{:refer xt.runtime.interface-common/to-iter :added "4.0"}
 (fact "to iter"
-  ^:hidden
 
   (!.js
    (it/arr<
@@ -541,7 +515,6 @@
 
 ^{:refer xt.runtime.interface-common/to-array :added "4.0"}
 (fact "to array"
-  ^:hidden
 
   (!.js
    (v/to-array (vec/vector 1 2 3)))
@@ -553,7 +526,6 @@
 
 ^{:refer xt.runtime.interface-common/find :added "4.0"}
 (fact "find coll"
-  ^:hidden
 
   (!.js
    (var entry (v/find (vec/vector 1 2 3) 1))
@@ -571,7 +543,6 @@
 
 ^{:refer xt.runtime.interface-common/empty :added "4.0"}
 (fact "empty coll"
-  ^:hidden
 
   (!.js
    [(v/show (v/empty (vec/vector 1 2 3)))

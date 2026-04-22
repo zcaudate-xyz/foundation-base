@@ -7,8 +7,7 @@
 
 ^{:refer rt.postgres.base.grammar.form-defn/pg-defn-format :added "4.0"}
 (fact "formats a defn form"
-  ^:hidden
-  
+
   (pg-defn-format
    '(defn ^{:- [:real]
             :%% :python}
@@ -24,8 +23,7 @@
 
 ^{:refer rt.postgres.base.grammar.form-defn/pg-defn :added "4.0"}
 (fact "creates the complete defn"
-  ^:hidden
-  
+
   (l/with:emit
    (pg-defn '(defn ^{:- [:real]
                      :static/language :python}
@@ -35,7 +33,7 @@
                (return (* fraction subtotal)))
             g/+grammar+
             {:snapshot (l/get-snapshot (l/runtime-library))}))
-  
+
   => (prose/|
       "CREATE OR REPLACE FUNCTION sales_tax("
       "  subtotal REAL,"

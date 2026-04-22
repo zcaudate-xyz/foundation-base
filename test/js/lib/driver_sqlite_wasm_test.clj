@@ -24,7 +24,6 @@
 
 ^{:refer js.lib.driver-sqlite-wasm/connect-constructor :added "4.1" :unchecked true}
 (fact "connects to an embedded sqlite-wasm database"
-  ^:hidden
 
   (notify/wait-on :js
     (dbsql/connect {:constructor js-sqlite-wasm/connect-constructor}

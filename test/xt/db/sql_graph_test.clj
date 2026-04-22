@@ -34,6 +34,16 @@
               [xt.db.base-scope :as scope]
               [xt.db.sample-test :as sample]]})
 
+(l/script- :dart
+  {:runtime :twostep
+   :require [[xt.db.sql-graph :as g]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-lib :as k]
+             [xt.db.sql-util :as ut]
+             [xt.db.base-schema :as sch]
+             [xt.db.base-scope :as scope]
+             [xt.db.sample-test :as sample]]})
+
 (fact:global
  {:setup    [(l/rt:restart)
              (l/rt:scaffold :js)
@@ -43,8 +53,7 @@
 
 ^{:refer xt.db.sql-graph/select-where.darr :adopt true :added "4.0"}
 (fact "multi select"
-  ^:hidden
-  
+
   (!.lua
    (g/select-where-pair sample/Schema
                         "UserAccount"
@@ -66,8 +75,7 @@
 
 ^{:refer xt.db.sql-graph/select-where.more :adopt true :added "4.0"}
 (fact "formats the query return"
-  ^:hidden
-  
+
   (!.js
    (g/select-where sample/Schema
                    "UserProfile"
@@ -77,7 +85,7 @@
                     :first-name "hello"}
                    0
                    {}))
-  
+
   => (prose/|
       "SELECT id FROM UserProfile"
       "WHERE account_id IN ("
@@ -87,10 +95,21 @@
       "    WHERE id IN ("
       "      SELECT wallet_id FROM WalletAsset"
       "      WHERE asset_id = 'XLM'"
-   "    )"
-   "  ) AND is_official = TRUE"
-   ") AND first_name = 'hello'")
-  
+    "    )"
+    "  ) AND is_official = TRUE"
+    ") AND first_name = 'hello'")
+
+  (!.lua
+   (g/select-where sample/Schema
+                   "UserProfile"
+                   "id"
+                   {:account {:wallets {:entries {:asset "XLM"}}
+                              :is-official true}
+                    :first-name "hello"}
+                   0
+                   {}))
+  => #"(?s)(?=.*SELECT id FROM UserProfile)(?=.*account_id IN \()(?=.*SELECT id FROM UserAccount)(?=.*SELECT owner_id FROM Wallet)(?=.*SELECT wallet_id FROM WalletAsset)(?=.*asset_id = 'XLM')(?=.*is_official = TRUE)(?=.*first_name = 'hello').*"
+
   (!.js
    (g/select-where sample/Schema
                    "Wallet"
@@ -107,12 +126,21 @@
       "    SELECT account_id FROM UserProfile"
       "    WHERE first_name = 'hello'"
       "  ) AND is_official = TRUE"
-      ")"))
+      ")")
+
+  (!.lua
+   (g/select-where sample/Schema
+                   "Wallet"
+                   "id"
+                   {:owner {:profile {:first-name "hello"}
+                            :is-official true}}
+                   0
+                   {}))
+  => #"(?s)(?=.*SELECT id FROM Wallet)(?=.*owner_id IN \()(?=.*SELECT id FROM UserAccount)(?=.*SELECT account_id FROM UserProfile)(?=.*first_name = 'hello')(?=.*is_official = TRUE).*")
 
 ^{:refer xt.db.sql-graph/base-query-inputs :added "4.0"}
 (fact "formats the query inputs"
-  ^:hidden
-  
+
   (!.js
    (g/base-query-inputs
     ["UserAccount"
@@ -142,8 +170,7 @@
 
 ^{:refer xt.db.sql-graph/base-format-return :added "4.0"}
 (fact "formats the query return"
-  ^:hidden
-  
+
   (!.js
    [(g/base-format-return {:expr "count(*)"} nil nil)
     (g/base-format-return {:expr "count(*)"
@@ -170,7 +197,6 @@
 
 ^{:refer xt.db.sql-graph/select-where-pair :added "4.0"}
 (fact "formats the query return"
-  ^:hidden
 
   (!.js
    (g/select-where-pair sample/Schema
@@ -185,7 +211,7 @@
       "  SELECT account_id FROM UserProfile"
       "  WHERE first_name = 'hello'"
       ")")
-  
+
   (!.lua
    (g/select-where-pair sample/Schema
                         "UserAccount"
@@ -216,7 +242,6 @@
 
 ^{:refer xt.db.sql-graph/select-where :added "4.0"}
 (fact "formats the query return"
-  ^:hidden
 
   (!.js
    (g/select-where sample/Schema
@@ -232,7 +257,7 @@
       "  SELECT account_id FROM UserProfile"
       "  WHERE first_name = 'hello' AND last_name = 'hello'"
       ")")
-  
+
   (!.lua
    (g/select-where sample/Schema
                    "UserAccount"
@@ -246,7 +271,7 @@
       "  SELECT account_id FROM UserProfile"
       "  WHERE first_name = 'hello'"
       ")")
-  
+
   (!.py
    (g/select-where sample/Schema
                    "UserAccount"
@@ -268,8 +293,7 @@
              "(SELECT id, nickname, password_updated, is_super, is_suspended, is_official FROM UserAccount"
              "  WHERE id = UserProfile.account_id) AS account"))]}
 (fact "select return string loop"
-  ^:hidden
-  
+
   (!.js
    (g/select-return-str sample/Schema
                         (xtd/second (scope/get-tree sample/Schema
@@ -281,8 +305,8 @@
                         0
                         {}))
   => +result+
-  
-  
+
+
 
   (!.lua
    (g/select-return-str sample/Schema
@@ -314,8 +338,7 @@
              "SELECT (SELECT id, nickname, password_updated, is_super, is_suspended, is_official FROM UserAccount"
              "  WHERE id = UserProfile.account_id) AS account FROM UserProfile"))]}
 (fact "select return call"
-  ^:hidden
-  
+
   (!.js
    (g/select-return sample/Schema
                     (scope/get-tree sample/Schema
@@ -325,8 +348,8 @@
                                     {})
                     0
                     {}))
-  
-  
+
+
   => +result+
 
   (!.lua
@@ -339,7 +362,7 @@
                     0
                     {}))
   => +result+
-  
+
 
   (!.py
    (g/select-return sample/Schema
@@ -373,8 +396,7 @@
                    "is_official"]}]]],
               "data" []}])]}
 (fact "gets the selection tree structure"
-  ^:hidden
-  
+
   (!.js
    (g/select-tree sample/Schema
                   ["UserProfile"
@@ -418,7 +440,6 @@
 
 ^{:refer xt.db.sql-graph/select :added "4.0"}
 (fact "encodes a select state given schema and graph"
-  ^:hidden
 
   (!.js
    (g/select sample/Schema
@@ -426,7 +447,7 @@
               [{"::" "sql/count"}]]
              {:wrapper-fn ut/postgres-wrapper-fn}))
   => "WITH j_ret AS (\n  SELECT count(*) FROM UserAccount\n) SELECT jsonb_agg(j_ret) FROM j_ret"
-  
+
   (!.js
    (g/select sample/Schema
              ["UserAccount"
@@ -443,8 +464,8 @@
       "      WHERE owner_id = UserAccount.id"
       "  ) SELECT jsonb_agg(j_ret) FROM j_ret) AS wallets FROM UserAccount ORDER BY hello ASC LIMIT 1"
       ") SELECT jsonb_agg(j_ret) FROM j_ret")
-  
-  
+
+
   (!.js
    (g/select sample/Schema
              ["UserAccount"
@@ -462,7 +483,7 @@
       "      WHERE owner_id = UserAccount.id"
       "  ) SELECT jsonb_agg(j_ret) FROM j_ret) AS wallets FROM UserAccount"
       ") SELECT jsonb_agg(j_ret) FROM j_ret")
-  
+
   (def +out+
     (!.js
      (g/select sample/Schema
@@ -486,7 +507,7 @@
                ["account"]]]
              {:wrapper-fn ut/postgres-wrapper-fn}))
   => +out+
-  
+
   (!.py
    (g/select sample/Schema
              ["UserProfile"

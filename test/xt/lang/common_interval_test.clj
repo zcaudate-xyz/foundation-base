@@ -14,8 +14,7 @@
 
 ^{:refer xt.lang.common-interval/start-interval :added "4.0"}
 (fact "starts an interval"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (interval/start-interval
      (fn []
@@ -26,8 +25,7 @@
 ^{:refer xt.lang.common-interval/stop-interval :added "4.0"
   :setup [(l/rt:restart)]}
 (fact "stops the interval from happening"
-  ^:hidden
-  
+
   (!.js
    (var it (interval/start-interval
             (fn []

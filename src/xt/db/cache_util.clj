@@ -174,7 +174,7 @@
   (when entry
     (var rec (xt/x:get-key entry "record"))
     (var #{ref-links rev-links} rec)
-    (var links (xt/x:arr-append (xt/x:obj-pairs ref-links)
+    (var links (xt/x:arr-assign (xt/x:obj-pairs ref-links)
                              (xt/x:obj-pairs rev-links)))
     (xt/for:array [pair links]
       (var [field m] pair)
@@ -192,7 +192,7 @@
   "removes bulk data"
   {:added "4.0"}
   ([rows schema table-key ids]
-   (return (-> (xt/x:arr-keep ids
+   (return (-> (xtd/arr-keep ids
                            (fn [id]
                              (return (-/remove-single rows schema table-key id))))
                (xtd/arr-mapcat (fn [x] (return x)))))))

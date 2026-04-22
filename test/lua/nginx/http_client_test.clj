@@ -17,8 +17,7 @@
 
 ^{:refer lua.nginx.http-client/new :added "4.0"}
 (fact "creates a new lua client"
-  ^:hidden
-  
+
   (!.lua
    (local ngxhttp (require "resty.http"))
    (http/new))

@@ -9,6 +9,7 @@
    :config  {:dbname "test-scratch"}
    :require [[rt.postgres.test.scratch-v1 :as scratch]]})
 
+^{:xtalk/template true}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-spec :as xt]
@@ -25,24 +26,25 @@
 
 ^{:refer xt.db.sql-call/decode-return :added "4.0"}
 (fact "decodes the return value"
-  ^:hidden
-  
-  (!.js
-   (call/decode-return (xt/x:json-encode
-                        {:status "ok"
-                         :data 1})))
-  => 1
 
   (!.js
    (call/decode-return (xt/x:json-encode
-                        {:status "error"
-                         :data "NOT VALID"})))
+                        {:status "ok"
+                         :data 1})
+                        nil))
+  => 1
+
+  ^{:lang-exceptions {:dart {:skip true}}}
+  (!.js
+   (call/decode-return (xt/x:json-encode
+                         {:status "error"
+                         :data "NOT VALID"})
+                        nil))
   => (throws))
 
 ^{:refer xt.db.sql-call/call-format-input :added "4.0"}
 (fact "formats the inputs"
-  ^:hidden
-  
+
   (!.js
    (call/call-format-input {:input [{:type "numeric"}
                                     {:type "jsonb"}]}
@@ -52,18 +54,20 @@
 
 ^{:refer xt.db.sql-call/call-format-query :added "4.0"}
 (fact "formats a query"
-  ^:hidden
-  
+
   (!.js
    (call/call-format-query
     (@! (pg/bind-function scratch/divf))
     [1 2]))
   => "SELECT \"scratch\".divf('1', '2');")
 
-^{:refer xt.db.sql-call/call-raw :added "4.0"}
+^{:refer xt.db.sql-call/call-raw
+  :added "4.0"
+  :lang-exceptions {:lua {:skip true}
+                    :python {:skip true}
+                    :dart {:skip true}}}
 (fact "calls a database function"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (driver/connect {:constructor js-postgres/connect-constructor
                      :database "test-scratch"}
@@ -76,10 +80,13 @@
                           (then (repl/>notify))))}))
   => "30")
 
-^{:refer xt.db.sql-call/call-api :added "4.0"}
+^{:refer xt.db.sql-call/call-api
+  :added "4.0"
+  :lang-exceptions {:lua {:skip true}
+                    :python {:skip true}
+                    :dart {:skip true}}}
 (fact "results an api style result"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (driver/connect {:constructor js-postgres/connect-constructor
                      :database "test-scratch"}

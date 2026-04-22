@@ -54,8 +54,7 @@
 
 ^{:refer std.lib.network/socket:address :added "3.0"}
 (fact "gets the remote socket address"
-  ^:hidden
-  
+
   (with-open [s (java.net.ServerSocket. 0)]
     (with-open [c (socket (.getLocalPort s))]
       (socket:address c)))
@@ -63,8 +62,7 @@
 
 ^{:refer std.lib.network/socket:local-address :added "3.0"}
 (fact "getst the local socket address"
-  ^:hidden
-  
+
   (with-open [s (java.net.ServerSocket. 0)]
     (with-open [c (socket (.getLocalPort s))]
       (socket:local-address c)))

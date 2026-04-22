@@ -20,7 +20,7 @@
                                    :profile :profile.id/a}}
                         {:schema -schema-}
                         {:normalise-single [wrap-keyword-id]})
-  => {:student {:id "a", :profile :profile.id/a}} ^:hidden
+  => {:student {:id "a", :profile :profile.id/a}}
 
   (graph/normalise-base {:student {:id "a"
                                    :profile "profile.id/a"}}

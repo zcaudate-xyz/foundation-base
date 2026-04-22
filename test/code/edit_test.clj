@@ -10,7 +10,6 @@
 
 ^{:refer std.block.navigate/nav-template :added "3.0"}
 (fact "generates a navigation function definition from a given symbol and a block tag function"
-  ^:hidden
 
   (nav-template '-tag- #'std.block.base/block-tag)
   => '(clojure.core/defn -tag-
@@ -21,32 +20,28 @@
 
 ^{:refer std.block.navigate/left-anchor :added "3.0" :class [:nav/primitive]}
 (fact "calculates the length to the last newline"
-  ^:hidden
-  
+
   (left-anchor (-> (navigator nil)
                    (zip/step-right)))
   => 3)
 
 ^{:refer std.block.navigate/update-step-left :added "3.0" :class [:nav/primitive]}
 (fact "updates the step position to the left"
-  ^:hidden
-  
+
   (-> {:position [0 7]}
       (update-step-left (construct/block [1 2 3])))
   => {:position [0 0]})
 
 ^{:refer std.block.navigate/update-step-right :added "3.0" :class [:nav/primitive]}
 (fact "updates the step position to the right"
-  ^:hidden
-  
+
   (-> {:position [0 0]}
       (update-step-right (construct/block [1 2 3])))
   => {:position [0 7]})
 
 ^{:refer std.block.navigate/update-step-inside :added "3.0" :class [:nav/primitive]}
 (fact "updates the step position to within a block"
-  ^:hidden
-  
+
   (-> {:position [0 0]}
       (update-step-inside (construct/block #{})))
   => {:position [0 2]})
@@ -59,8 +54,7 @@
 
 ^{:refer std.block.navigate/update-step-outside :added "3.0" :class [:nav/primitive]}
 (fact "updates the step position to be outside a block"
-  ^:hidden
-  
+
   (let [left-elems [(construct/block [1 2 3]) (construct/newline)]]
     (-> {:position [1 0]
          :left left-elems}
@@ -70,51 +64,44 @@
 
 ^{:refer std.block.navigate/display-navigator :added "3.0" :class [:nav/primitive]}
 (fact "displays a string representing the navigator"
-  ^:hidden
-  
+
   (-> (navigator [1 2 3 4])
       (display-navigator))
   => "<0,0> |[1 2 3 4]")
 
 ^{:refer std.block.navigate/navigator :added "3.0" :class [:nav/general]}
 (fact "creates a navigator for the block"
-  ^:hidden
-  
+
   (str (navigator [1 2 3 4]))
   => "<0,0> |[1 2 3 4]")
 
 ^{:refer std.block.navigate/navigator? :added "3.0" :class [:nav/general]}
 (fact "checks if object is navigator"
-  ^:hidden
-  
+
   (navigator? (navigator [1 2 3 4]))
   => true)
 
 ^{:refer std.block.navigate/from-status :added "3.0" :class [:nav/general]}
 (fact "constructs a navigator from a given status"
-  ^:hidden
-  
+
   (str (from-status (construct/block [1 2 3 (construct/cursor) 4])))
   => "<0,7> [1 2 3 |4]")
 
 ^{:refer std.block.navigate/parse-string :added "3.0" :class [:nav/general]}
 (fact "creates a navigator from string"
-  ^:hidden
-  
+
   (str (parse-string "(2   #|   3  )"))
   => "<0,5> (2   |   3  )")
 
 ^{:refer std.block.navigate/parse-root :added "3.0" :class [:nav/general]}
 (fact "parses the navigator from root string"
-  ^:hidden
-  
+
   (str (parse-root "a b c"))
   => "<0,0> |a b c")
 
 ^{:refer std.block.navigate/parse-first :added "4.0"}
 (fact "parses the navigator from the first form"
-  ^:hidden
-  
+
   (str (parse-first "a b c"))
   => "<0,0> |a"
 
@@ -123,22 +110,19 @@
 
 ^{:refer std.block.navigate/parse-root-status :added "3.0" :class [:nav/general]}
 (fact "parses string and creates a navigator from status"
-  ^:hidden
-  
+
   (str (parse-root-status "a b #|c"))
   => "<0,4> a b |c")
 
 ^{:refer std.block.navigate/root-string :added "3.0" :class [:nav/general]}
 (fact "returns the top level string"
-  ^:hidden
-  
+
   (root-string (navigator [1 2 3 4]))
   => "[1 2 3 4]")
 
 ^{:refer std.block.navigate/left-expression :added "3.0" :class [:nav/general]}
 (fact "returns the expression on the left"
-  ^:hidden
-  
+
   (-> {:left [(construct/newline)
               (construct/block [1 2 3])]}
       (left-expression)
@@ -147,8 +131,7 @@
 
 ^{:refer std.block.navigate/left-expressions :added "3.0" :class [:nav/general]}
 (fact "returns all expressions on the left"
-  ^:hidden
-  
+
   (->> {:left [(construct/newline)
                (construct/block :b)
                (construct/space)
@@ -160,8 +143,7 @@
 
 ^{:refer std.block.navigate/right-expression :added "3.0" :class [:nav/general]}
 (fact "returns the expression on the right"
-  ^:hidden
-  
+
   (-> {:right [(construct/newline)
                (construct/block [1 2 3])]}
       (right-expression)
@@ -170,8 +152,7 @@
 
 ^{:refer std.block.navigate/right-expressions :added "3.0" :class [:nav/general]}
 (fact "returns all expressions on the right"
-  ^:hidden
-  
+
   (->> {:right [(construct/newline)
                 (construct/block :b)
                 (construct/space)
@@ -183,8 +164,7 @@
 
 ^{:refer std.block.navigate/top :added "4.0"}
 (fact "moves cursor to the top"
-  ^:hidden
-  
+
   (-> (parse-string "(1  [1 2 3]    #|)")
       (top)
       str)
@@ -192,8 +172,7 @@
 
 ^{:refer std.block.navigate/left :added "3.0" :class [:nav/move]}
 (fact "moves to the left expression"
-  ^:hidden
-  
+
   (-> (parse-string "(1  [1 2 3]    #|)")
       (left)
       str)
@@ -201,8 +180,7 @@
 
 ^{:refer std.block.navigate/left-most :added "3.0" :class [:nav/move]}
 (fact "moves to the left-most expression"
-  ^:hidden
-  
+
   (-> (parse-string "(1  [1 2 3]  3 4   #|)")
       (left-most)
       str)
@@ -210,16 +188,14 @@
 
 ^{:refer std.block.navigate/left-most? :added "3.0" :class [:nav/move]}
 (fact "checks if navigator is at left-most"
-  ^:hidden
-  
+
   (-> (from-status [1 [(construct/cursor) 2 3]])
       (left-most?))
   => true)
 
 ^{:refer std.block.navigate/right :added "3.0" :class [:nav/move]}
 (fact "moves to the expression on the right"
-  ^:hidden
-  
+
   (-> (parse-string "(#|[1 2 3]  3 4  ) ")
       (right)
       str)
@@ -227,8 +203,7 @@
 
 ^{:refer std.block.navigate/right-most :added "3.0" :class [:nav/move]}
 (fact "moves to the right-most expression"
-   ^:hidden
- 
+
   (-> (parse-string "(#|[1 2 3]  3 4  ) ")
       (right-most)
       str)
@@ -236,51 +211,44 @@
 
 ^{:refer std.block.navigate/right-most? :added "3.0" :class [:nav/move]}
 (fact "checks if navigator is at right-most"
-  ^:hidden
-  
+
   (-> (from-status [1 [2 3 (construct/cursor)]])
       (right-most?))
   => true)
 
 ^{:refer std.block.navigate/up :added "3.0" :class [:nav/move]}
 (fact "navigates outside of the form"
-  ^:hidden
-  
+
   (str (up (from-status [1 [2 (construct/cursor) 3]])))
   => "<0,3> [1 |[2 3]]")
 
 ^{:refer std.block.navigate/down :added "3.0" :class [:nav/move]}
 (fact "navigates into the form"
-  ^:hidden
-  
+
   (str (down (from-status [1 (construct/cursor) [2 3]])))
   => "<0,4> [1 [|2 3]]")
 
 ^{:refer std.block.navigate/right* :added "3.0" :class [:nav/move]}
 (fact "navigates to right element, including whitespace"
-  ^:hidden
-  
+
   (str (right* (from-status [(construct/cursor) 1 2])))
   => "<0,2> [1| 2]")
 
 ^{:refer std.block.navigate/left* :added "3.0" :class [:nav/move]}
 (fact "navigates to left element, including whitespace"
-  ^:hidden
-  
+
   (str (left* (from-status [1 (construct/cursor) 2])))
   => "<0,2> [1| 2]")
 
 ^{:refer std.block.navigate/block :added "3.0" :class [:nav/general]}
 (fact "returns the current block"
-  ^:hidden
-  
+
   (block (from-status [1 [2 (construct/cursor) 3]]))
   => (construct/block 3))
 
 ^{:refer std.block.navigate/prev :added "3.0" :class [:nav/move]}
 (fact "moves to the previous expression"
-  ^:hidden
-  
+
   (-> (parse-string "([1 2 [3]] #|)")
       (prev)
       str)
@@ -288,8 +256,7 @@
 
 ^{:refer std.block.navigate/find-prev :added "4.0"}
 (fact "finds the previous token or whitespace"
-  ^:hidden
-  
+
   (-> (parse-string "( \n \n [[3 \n]] #|  )")
       (find-prev type/linebreak-block?)
       (str))
@@ -297,8 +264,7 @@
 
 ^{:refer std.block.navigate/find-prev-token :added "4.0"}
 (fact "finds the previous token"
-  ^:hidden
-  
+
   (-> (parse-string "( \n \n [[3 \n]] #|  )")
       (find-prev-token 3)
       (str))
@@ -306,8 +272,7 @@
 
 ^{:refer std.block.navigate/next :added "3.0" :class [:nav/move]}
 (fact "moves to the next expression"
-  ^:hidden
-  
+
   (-> (parse-string "(#|  [[3]]  )")
       (next)
       (next)
@@ -317,8 +282,7 @@
 
 ^{:refer std.block.navigate/find-next :added "4.0"}
 (fact "finds the next expression"
-  ^:hidden
-  
+
   (-> (parse-string "(#|  [[3] @5]  )")
       (find-next (fn [x]
                    (= :deref (base/block-tag x))))
@@ -327,8 +291,7 @@
 
 ^{:refer std.block.navigate/find-next-token :added "3.0" :class [:nav/move]}
 (fact "moves to the next token"
-  ^:hidden
-  
+
   (-> (parse-string "(#|  [[3 2]]  )")
       (find-next-token 2)
       str)
@@ -336,13 +299,12 @@
 
 ^{:refer std.block.navigate/prev-anchor :added "3.0" :class [:nav/move]}
 (fact "moves to the previous newline"
-  ^:hidden
-  
+
   (-> (parse-string "( \n \n [[3 \n]] #|  )")
       (prev-anchor)
       (:position))
   => [3 0]
-  
+
   (-> (parse-string "( #| )")
       (prev-anchor)
       (:position))
@@ -350,8 +312,7 @@
 
 ^{:refer std.block.navigate/next-anchor :added "3.0" :class [:nav/move]}
 (fact "moves to the next newline"
-  ^:hidden
-  
+
   (-> (parse-string "( \n \n#| [[3 \n]]  )")
       (next-anchor)
       (:position))
@@ -359,8 +320,7 @@
 
 ^{:refer std.block.navigate/left-token :added "3.0" :class [:nav/move]}
 (fact "moves to the left token"
-  ^:hidden
-  
+
   (-> (parse-string "(1  {}  #|2 3 4)")
       (left-token)
       str)
@@ -368,8 +328,7 @@
 
 ^{:refer std.block.navigate/left-most-token :added "3.0" :class [:nav/move]}
 (fact "moves to the left-most token"
-  ^:hidden
-  
+
   (-> (parse-string "(1  {}  2 3 #|4)")
       (left-most-token)
       str)
@@ -377,8 +336,7 @@
 
 ^{:refer std.block.navigate/right-token :added "3.0" :class [:nav/move]}
 (fact "moves to the right token"
-  ^:hidden
-  
+
   (-> (parse-string "(#|1  {}  2 3 4)")
       (right-token)
       str)
@@ -386,8 +344,7 @@
 
 ^{:refer std.block.navigate/right-most-token :added "3.0" :class [:nav/move]}
 (fact "moves to the right-most token"
-  ^:hidden
-  
+
   (-> (parse-string "(#|1  {}  2 3 [4])")
       (right-most-token)
       str)
@@ -395,8 +352,7 @@
 
 ^{:refer std.block.navigate/prev-token :added "3.0" :class [:nav/move]}
 (fact "moves to the previous token"
-  ^:hidden
-  
+
   (-> (parse-string "(1 (2 3 [4])#|)")
       (prev-token)
       str)
@@ -404,8 +360,7 @@
 
 ^{:refer std.block.navigate/next-token :added "3.0" :class [:nav/move]}
 (fact "moves to the next token"
-  ^:hidden
-  
+
   (-> (parse-string "(#|[[1 2 3 4]])")
       (next-token)
       str)
@@ -413,8 +368,7 @@
 
 ^{:refer std.block.navigate/position-left :added "3.0" :class [:nav/move]}
 (fact "moves the cursor to left expression"
-  ^:hidden
-  
+
   (-> (parse-string "( 2   #|   3  )")
       (position-left)
       str)
@@ -427,8 +381,7 @@
 
 ^{:refer std.block.navigate/position-right :added "3.0" :class [:nav/move]}
 (fact "moves the cursor the right expression"
-  ^:hidden
-  
+
   (-> (parse-string "(2   #|    3  )")
       (position-right)
       str)
@@ -441,8 +394,7 @@
 
 ^{:refer std.block.navigate/tighten-left :added "3.0" :class [:nav/edit]}
 (fact "removes extra spaces on the left"
-  ^:hidden
-  
+
   (-> (parse-string "(1 2 3   #|4)")
       (tighten-left)
       str)
@@ -460,8 +412,7 @@
 
 ^{:refer std.block.navigate/tighten-right :added "3.0" :class [:nav/edit]}
 (fact "removes extra spaces on the right"
-  ^:hidden
-  
+
   (-> (parse-string "(1 2 #|3       4)")
       (tighten-right)
       str)
@@ -479,8 +430,7 @@
 
 ^{:refer std.block.navigate/tighten :added "3.0" :class [:nav/edit]}
 (fact "removes extra spaces on both the left and right"
-  ^:hidden
-  
+
   (-> (parse-string "(1 2      #|3       4)")
       (tighten)
       str)
@@ -488,21 +438,19 @@
 
 ^{:refer std.block.navigate/level-empty? :added "3.0" :class [:nav/edit]}
 (fact "checks if current container has expressions"
-  ^:hidden
-  
+
   (-> (parse-string "( #| )")
       (level-empty?))
   => true)
 
 ^{:refer std.block.navigate/insert-raw :added "4.0"}
 (fact "inserts a raw element"
-  ^:hidden
-  
+
   (-> (parse-string "( #| )")
       (insert-raw (construct/space))
       str)
   => "<0,3> (  | )"
-  
+
   (-> (parse-string "( #| )")
       (insert-raw (construct/space))
       (insert-raw (construct/space))
@@ -513,8 +461,7 @@
 
 ^{:refer std.block.navigate/insert-empty :added "3.0" :class [:nav/edit]}
 (fact "inserts an element into an empty container"
-  ^:hidden
-  
+
   (-> (parse-string "( #| )")
       (insert-empty 1)
       str)
@@ -522,8 +469,7 @@
 
 ^{:refer std.block.navigate/insert-token-to-right :added "3.0" :class [:nav/edit]}
 (fact "inserts an element to the right"
-  ^:hidden
-  
+
   (-> (parse-string "(#|0)")
       (insert-token-to-right 1)
       str)
@@ -541,8 +487,7 @@
 
 ^{:refer std.block.navigate/insert-token-to-left :added "3.0" :class [:nav/edit]}
 (fact "inserts an element to the left"
-  ^:hidden
-  
+
   (-> (parse-string "(#|0)")
       (insert-token-to-left 1)
       str)
@@ -560,8 +505,7 @@
 
 ^{:refer std.block.navigate/insert-token :added "4.0"}
 (fact "standard insert token"
-  ^:hidden
-  
+
   (-> (parse-string "(#|0)")
       (insert-token 1)
       str)
@@ -569,8 +513,7 @@
 
 ^{:refer std.block.navigate/insert-all :added "3.0"}
 (fact "inserts all expressions into the block"
-  ^:hidden
-  
+
   (-> (parse-string "")
       (insert-all [1 2 3 4 5 6])
       str)
@@ -578,7 +521,6 @@
 
 ^{:refer std.block.navigate/insert-newline :added "3.0"}
 (fact "insert newline/s into the block"
-  ^:hidden
 
   (-> (parse-string "(#|0)")
       (insert-newline 2)
@@ -587,7 +529,6 @@
 
 ^{:refer std.block.navigate/insert-space :added "3.0"}
 (fact "insert space/s into the block"
-  ^:hidden
 
   (-> (parse-string "(#|0)")
       (insert-space 2)
@@ -596,8 +537,7 @@
 
 ^{:refer std.block.navigate/delete-spaces-left :added "4.0"}
 (fact "deletes spaces to the left"
-  ^:hidden
-  
+
   (-> (parse-string "(1 2      #|3       4)")
       (delete-spaces-left)
       str)
@@ -605,8 +545,7 @@
 
 ^{:refer std.block.navigate/delete-spaces-right :added "4.0"}
 (fact "deletes spaces to the left"
-  ^:hidden
-  
+
   (-> (parse-string "(1 2      3 #|       4)")
       (delete-spaces-right)
       str)
@@ -614,8 +553,7 @@
 
 ^{:refer std.block.navigate/delete-left :added "3.0" :class [:nav/edit]}
 (fact "deletes left of the current expression"
-  ^:hidden
-  
+
   (-> (parse-string "(1 2   #|3)")
       (delete-left)
       str)
@@ -641,8 +579,7 @@
 
 ^{:refer std.block.navigate/delete-right :added "3.0" :class [:nav/edit]}
 (fact "deletes right of the current expression"
-  ^:hidden
-  
+
   (-> (parse-string "(  #|1 2 3)")
       (delete-right)
       str)
@@ -665,8 +602,7 @@
 
 ^{:refer std.block.navigate/delete :added "3.0" :class [:nav/edit]}
 (fact "deletes the current element"
-  ^:hidden
-  
+
   (-> (parse-string "(  #|1   2 3)")
       (delete)
       str)
@@ -684,12 +620,11 @@
 
 ^{:refer std.block.navigate/backspace :added "3.0" :class [:nav/edit]}
 (fact "the reverse of insert"
-  ^:hidden
-  
+
   (-> (parse-string "(0  #|1   2 3)")
       (backspace)
       str)
-  => "<0,1> (|0 2 3)" ^:hidden
+  => "<0,1> (|0 2 3)"
 
   (-> (parse-string "(  #|1   2 3)")
       (backspace)
@@ -698,8 +633,7 @@
 
 ^{:refer std.block.navigate/replace :added "3.0" :class [:nav/edit]}
 (fact "replaces an element at the cursor"
-  ^:hidden
-  
+
   (-> (parse-string "(0  #|1   2 3)")
       (position-right)
       (replace :a)
@@ -708,8 +642,7 @@
 
 ^{:refer std.block.navigate/replace-splice :added "3.0" :class [:nav/edit]}
 (fact "replaces an element at the cursor"
-  ^:hidden
-  
+
   (-> (parse-string "(0  #|1   2 3)")
       (position-right)
       (replace-splice [:a :b :c])
@@ -718,8 +651,7 @@
 
 ^{:refer std.block.navigate/swap :added "3.0" :class [:nav/edit]}
 (fact "applies a function to the element at the current cursor position, replacing it with the result"
-  ^:hidden
-  
+
   (-> (parse-string "(0  #|1   2 3)")
       (position-right)
       (swap inc)
@@ -728,8 +660,7 @@
 
 ^{:refer std.block.navigate/update-children :added "3.0" :class [:nav/edit]}
 (fact "replaces the current children"
-  ^:hidden
-  
+
   (-> (update-children (parse-string "[1 2 3]")
                        [(construct/block 4)
                         (construct/space)
@@ -739,8 +670,7 @@
 
 ^{:refer std.block.navigate/line-info :added "3.0" :class [:nav/general]}
 (fact "returns the line info for the current block"
-  ^:hidden
-  
+
   (line-info (parse-string "[1 \\n  2 3]"))
   => {:row 1, :col 1, :end-row 1, :end-col 12}
 

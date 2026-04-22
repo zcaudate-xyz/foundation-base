@@ -24,8 +24,7 @@
 
 ^{:refer xt.db.sql-raw/raw-delete :added "4.0"}
 (fact "encodes a delete query"
-  ^:hidden
-  
+
   (!.js
    [(raw/raw-delete "Currency"
                     {:id "XLM"}
@@ -60,8 +59,7 @@
 
 ^{:refer xt.db.sql-raw/raw-insert-array :added "4.0"}
 (fact "constructs an array for insert and upsert"
-  ^:hidden
-  
+
   (!.js
    (raw/raw-insert-array "Currency"
                          ["id" "name" "type"]
@@ -87,8 +85,7 @@
 
 ^{:refer xt.db.sql-raw/raw-insert :added "4.0"}
 (fact "encodes an insert query"
-  ^:hidden
-  
+
   (!.js
    (raw/raw-insert "Currency"
                  ["id" "name" "type"]
@@ -130,7 +127,6 @@
 
 ^{:refer xt.db.sql-raw/raw-upsert :added "4.0"}
 (fact  "encodes an upsert query"
-  ^:hidden
 
   (!.js
    (raw/raw-upsert "Currency"
@@ -147,8 +143,8 @@
       " ('XLM','XLM','crypto')"
       "ON CONFLICT (id) DO UPDATE SET"
       "name=coalesce(\"excluded\".name,name),"
-      "type=coalesce(\"excluded\".type,type);")  
-  
+      "type=coalesce(\"excluded\".type,type);")
+
   (!.lua
    (raw/raw-upsert "Currency"
                    "id"
@@ -195,7 +191,6 @@
              "type=coalesce(\"excluded\".type,type)"
              "WHERE \"excluded\".time_updated < time_updated;"))]}
 (fact  "encodes an upsert query"
-  ^:hidden
 
   (!.js
    (raw/raw-upsert "Currency"
@@ -205,10 +200,10 @@
                      :name "XLM"
                      :type "crypto"}]
                    {:upsert-clause "\"excluded\".time_updated < time_updated"}))
-  
+
   => +input+
-  
-  
+
+
   (!.lua
    (raw/raw-upsert "Currency"
                    "id"
@@ -231,7 +226,6 @@
 
 ^{:refer xt.db.sql-raw/raw-update :added "4.0"}
 (fact "encodes an update query"
-  ^:hidden
 
   (!.js
    (raw/raw-update "Currency"
@@ -256,7 +250,6 @@
 
 ^{:refer xt.db.sql-raw/raw-select :added "4.0"}
 (fact "encodes an select query"
-  ^:hidden
 
   (!.js
    (raw/raw-select "Currency"
@@ -271,7 +264,7 @@
                    ["id" "name" "type"]
                    {}))
   => "SELECT id, name, type\n  FROM Currency\n WHERE id = 'XLM';"
-  
+
 
   (!.py
    (raw/raw-select "Currency"

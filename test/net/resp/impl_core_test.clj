@@ -32,7 +32,6 @@
 ^{:refer net.resp.wire/call :added "3.0"
   :adopt true}
 (fact "calls a redis command with additional processing"
-  ^:hidden
 
   (test-harness
     (-> (call |conn| ["SET" "TEST:A" (serialize-bytes {:a 1 :b 2} :json)])
@@ -42,7 +41,6 @@
 ^{:refer net.resp.wire/read :added "3.0"
   :adopt true}
 (fact "reads from a client or connection"
-  ^:hidden
 
   (test-harness
     (-> (doto |conn|
@@ -54,7 +52,6 @@
 
 ^{:refer std.concurrent.request/request-bulk :added "3.0" :adopt true}
 (fact "returns a bulked request"
-  ^:hidden
 
   (test-harness
     (->> (std.concurrent.request/request-bulk |conn|
@@ -99,7 +96,7 @@
 
 ^{:refer std.concurrent.request/req:single :added "3.0"
   :adopt true}
-(fact "requests a redis command with additional processing" ^:hidden
+(fact "requests a redis command with additional processing"
 
   (test-harness
     (req/req:single |conn| ["SET" "TEST:A" (serialize-bytes {:a 1 :b 2} :json)])
@@ -123,7 +120,7 @@
   (test-harness
     (req/bulk |conn|
       (fn []
-        (req/req:unit |conn| ["SET" "TEST:A" "1"]))) ^:hidden
+        (req/req:unit |conn| ["SET" "TEST:A" "1"])))
     => ["OK"]
 
     @(req/bulk |conn|

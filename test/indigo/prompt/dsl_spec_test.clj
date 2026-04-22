@@ -4,11 +4,10 @@
 
 ^{:refer indigo.prompt.dsl-spec/construct-item :added "4.0"}
 (fact "constructs the item"
-  ^:hidden
-  
+
   (spec/construct-item '(cond (== x 1)
                               (do (:= a 1))
-                              
+
                               :else
                               (do (:= b 1))))
   => {:op :convert,
@@ -19,8 +18,7 @@
 
 ^{:refer indigo.prompt.dsl-spec/construct-alts :added "4.0"}
 (fact "constructs alternative forms that result in the same JS string"
-  ^:hidden
-  
+
   (spec/construct-alts '[(. this prop long [1] (call))
                          (. this.prop.long [1] (call))])
   => {:op :alternate,
@@ -30,12 +28,11 @@
 
 ^{:refer indigo.prompt.dsl-spec/create-spec-description :added "4.0"}
 (fact "creates the descriptions for spec"
-  ^:hidden
-  
+
   (spec/create-spec-description
    (spec/construct-item 'undefined))
   => string?
-  
+
   (spec/create-spec-description
    (spec/construct-item '(fn [(:= a 1)
                               (:= b 2)]
@@ -50,8 +47,7 @@
 
 ^{:refer indigo.prompt.dsl-spec/create-spec-main :added "4.0"}
 (fact "creates the actual spec"
-  ^:hidden
-  
+
   (spec/create-spec-main spec/+meta+
                          (spec/spec-example-forms)
                          []

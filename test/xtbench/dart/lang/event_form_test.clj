@@ -1,12 +1,12 @@
 (ns
  xtbench.dart.lang.event-form-test
+ (:use code.test)
  (:require
   [net.http :as http]
   [std.json :as json]
   [std.lang :as l]
   [std.lang.interface.type-notify :as interface]
-  [xt.lang.common-notify :as notify])
- (:use code.test))
+  [xt.lang.common-notify :as notify]))
 
 (l/script-
  :dart
@@ -117,22 +117,38 @@
       "listener/type" "form"}})]}
 (fact
  "adds listener to a form"
- ^{:hidden true}
- (notify/wait-on
-  :dart
-  (var
-   f
-   (form/make-form
-    (fn:> {:login ""})
-    {:login
-     [["is-required"
-       {:message "Required field.",
-        :check
-        (fn
-         [v rec]
-         (return (and (k/not-nil? v) (< 0 (xt/x:len v)))))}]]}))
-  (form/add-listener f "abc" ["login"] (repl/>notify) nil)
-  (form/set-field f "login" "test00001"))
+ (notify/wait-on-call
+  2000
+  (fn
+   []
+   (!.dt
+    (var
+     f
+     (form/make-form
+      (fn:> {:login ""})
+      {:login
+       [["is-required"
+         {:message "Required field.",
+          :check
+          (fn
+           [v rec]
+           (return (and (k/not-nil? v) (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener
+     f
+     "abc"
+     ["login"]
+     (fn
+      [val]
+      (return
+       (repl/notify-socket
+        "127.0.0.1"
+        (@! (:socket-port (l/default-notify)))
+        val
+        (@! notify/*override-id*)
+        nil
+        {})))
+     nil)
+    (form/set-field f "login" "test00001"))))
  =>
  +out+)
 
@@ -149,22 +165,38 @@
       "listener/type" "form"}})]}
 (fact
  "triggers all fields"
- ^{:hidden true}
- (notify/wait-on
-  :dart
-  (var
-   f
-   (form/make-form
-    (fn:> {:login ""})
-    {:login
-     [["is-required"
-       {:message "Required field.",
-        :check
-        (fn
-         [v rec]
-         (return (and (k/not-nil? v) (< 0 (xt/x:len v)))))}]]}))
-  (form/add-listener f "abc" ["login"] (repl/>notify) nil)
-  (form/trigger-all f "form.data"))
+ (notify/wait-on-call
+  2000
+  (fn
+   []
+   (!.dt
+    (var
+     f
+     (form/make-form
+      (fn:> {:login ""})
+      {:login
+       [["is-required"
+         {:message "Required field.",
+          :check
+          (fn
+           [v rec]
+           (return (and (k/not-nil? v) (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener
+     f
+     "abc"
+     ["login"]
+     (fn
+      [val]
+      (return
+       (repl/notify-socket
+        "127.0.0.1"
+        (@! (:socket-port (l/default-notify)))
+        val
+        (@! notify/*override-id*)
+        nil
+        {})))
+     nil)
+    (form/trigger-all f "form.data"))))
  =>
  +out+)
 
@@ -181,22 +213,38 @@
       "listener/type" "form"}})]}
 (fact
  "triggers the callback"
- ^{:hidden true}
- (notify/wait-on
-  :dart
-  (var
-   f
-   (form/make-form
-    (fn:> {:login ""})
-    {:login
-     [["is-required"
-       {:message "Required field.",
-        :check
-        (fn
-         [v rec]
-         (return (and (k/not-nil? v) (< 0 (xt/x:len v)))))}]]}))
-  (form/add-listener f "abc" ["login"] (repl/>notify) nil)
-  (form/trigger-field f "login" "form.data"))
+ (notify/wait-on-call
+  2000
+  (fn
+   []
+   (!.dt
+    (var
+     f
+     (form/make-form
+      (fn:> {:login ""})
+      {:login
+       [["is-required"
+         {:message "Required field.",
+          :check
+          (fn
+           [v rec]
+           (return (and (k/not-nil? v) (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener
+     f
+     "abc"
+     ["login"]
+     (fn
+      [val]
+      (return
+       (repl/notify-socket
+        "127.0.0.1"
+        (@! (:socket-port (l/default-notify)))
+        val
+        (@! notify/*override-id*)
+        nil
+        {})))
+     nil)
+    (form/trigger-field f "login" "form.data"))))
  =>
  +out+)
 
@@ -375,7 +423,10 @@
         (fn
          [v rec]
          (return (and (k/not-nil? v) (< 0 (xt/x:len v)))))}]]}))
-  (form/validate-all f k/identity (repl/>notify)))
+  (form/validate-all
+   f
+   (fn [field status] (return nil))
+   (repl/>notify)))
  =>
  false)
 
@@ -407,7 +458,7 @@
          [v rec]
          (return (and (k/not-nil? v) (< 0 (xt/x:len v)))))}]]}))
   (form/add-listener f "a1" ["login"] (repl/>notify) nil)
-  (form/validate-field f "login" k/identity))
+  (form/validate-field f "login" (fn [field status] (return nil)) nil))
  =>
  +out+)
 
@@ -523,8 +574,8 @@
    f
    "a1"
    ["login"]
-   (fn [] (repl/notify (form/check-field-passed f "login"))))
-  (form/validate-all f))
+   (fn [_] (repl/notify (form/check-field-passed f "login"))))
+  (form/validate-all f nil nil))
  =>
  false)
 
@@ -549,8 +600,8 @@
    f
    "a1"
    ["login"]
-   (fn [] (repl/notify (form/check-field-errored f "login"))))
-  (form/validate-all f))
+   (fn [_] (repl/notify (form/check-field-errored f "login"))))
+  (form/validate-all f nil nil))
  =>
  true)
 
@@ -575,8 +626,8 @@
    f
    "a1"
    ["login"]
-   (fn [] (repl/notify (form/check-all-passed f))))
-  (form/validate-all f))
+   (fn [_] (repl/notify (form/check-all-passed f))))
+  (form/validate-all f nil nil))
  =>
  false)
 
@@ -601,7 +652,7 @@
    f
    "a1"
    ["login"]
-   (fn [] (repl/notify (form/check-any-errored f))))
-  (form/validate-all f))
+   (fn [_] (repl/notify (form/check-any-errored f))))
+  (form/validate-all f nil nil))
  =>
  true)

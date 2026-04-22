@@ -71,7 +71,6 @@
 
 ^{:refer js.cell.service.db-query/query-capable? :added "4.1"}
 (fact "checks whether a descriptor can prepare queries"
-  ^:hidden
 
   (!.js
    [(db-query/query-capable? (@! +db+))
@@ -80,7 +79,6 @@
 
 ^{:refer js.cell.service.db-query/view-local-transform :added "4.1"}
 (fact "removes `__deleted__` from the local view query"
-  ^:hidden
 
   (!.js
    (db-query/view-local-transform
@@ -92,7 +90,6 @@
 
 ^{:refer js.cell.service.db-query/query-check :added "4.1"}
 (fact "checks argument length and type against a view entry"
-  ^:hidden
 
   (!.js
    [(db-query/query-check
@@ -111,7 +108,6 @@
 
 ^{:refer js.cell.service.db-query/normalize-query :added "4.1"}
 (fact "normalizes a query spec with defaults from the view context"
-  ^:hidden
 
   (!.js
    (db-query/normalize-query
@@ -128,7 +124,6 @@
 
 ^{:refer js.cell.service.db-query/prepare-query :added "4.1"}
 (fact "prepares a cache-view query tree from the descriptor"
-  ^:hidden
 
   (!.js
    (var [ok tree] (db-query/prepare-query
@@ -151,7 +146,6 @@
 
 ^{:refer js.cell.service.db-query/execute-query :added "4.1"}
 (fact "executes a prepared query against a local cache db"
-  ^:hidden
 
   (!.js
    (var desc (@! +db+))
@@ -197,7 +191,6 @@
 
 ^{:refer js.cell.service.db-query/run-query :added "4.1"}
 (fact "prepares and executes a local cache query"
-  ^:hidden
 
   (!.js
    (var desc (@! +db+))

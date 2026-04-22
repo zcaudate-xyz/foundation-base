@@ -61,7 +61,7 @@
      :format format
      :align  :left
      :length 80
-     :color  color}]))
+      :color  color}]))
 
 (def code-info-columns
   (fn
@@ -83,14 +83,14 @@
    :params    {:print {:result true
                        :summary true}}
    :arglists '([] [ns] [ns params] [ns params project] [ns params lookup project])
-   :main      {:count 4}
-   :item      {:list     (fn [lookup _] (sort (keys lookup)))
-               :pre      project/sym-name
-               :display  (empty-status :info :ok)}
-   :result    {:ignore   empty?
-               :keys    {:count count}
-               :columns (code-default-columns #{:yellow})}
-   :summary  {:aggregate {:total [:count + 0]}}})
+    :main      {:count 4}
+    :item      {:list     (fn [lookup _] (sort (keys lookup)))
+                :pre      project/sym-name
+                :display  (empty-status :info :ok)}
+    :result    {:ignore   empty?
+                :keys    {:count count}
+                :columns (code-default-columns #{:yellow})}
+    :summary  {:aggregate {:total [:count + 0]}}})
 
 ;;
 ;;

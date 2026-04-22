@@ -56,101 +56,6 @@
     (list '== check (list 'x:get-key obj key nil))
     (list 'not= nil (list '. obj [key]))))
 
-(defn lua-tf-x-future-run
-  [[_ thunk]]
-  (template/$
-   (do* (local task {:state "pending"
-                     :value nil
-                     :error nil})
-        (local [ok out] (pcall ~thunk))
-        (if ok
-          (do (:= (. task ["state"]) "ok")
-              (:= (. task ["value"]) out))
-          (do (:= (. task ["state"]) "error")
-              (:= (. task ["error"]) out)))
-        (return task))))
-
-(defn lua-tf-x-future-then
-  [[_ task on-ok]]
-  (template/$
-   (if (== "ok" (. ~task ["state"]))
-     (do* (local out {:state "pending"
-                      :value nil
-                      :error nil})
-          (local [ok v] (pcall (fn []
-                                 (return (~on-ok (. ~task ["value"]))))))
-          (if ok
-            (do (:= (. out ["state"]) "ok")
-                (:= (. out ["value"]) v))
-            (do (:= (. out ["state"]) "error")
-                (:= (. out ["error"]) v)))
-          (return out))
-     (return ~task))))
-
-(defn lua-tf-x-future-catch
-  [[_ task on-err]]
-  (template/$
-   (if (== "error" (. ~task ["state"]))
-     (do* (local out {:state "pending"
-                      :value nil
-                      :error nil})
-          (local [ok v] (pcall (fn []
-                                 (return (~on-err (. ~task ["error"]))))))
-          (if ok
-            (do (:= (. out ["state"]) "ok")
-                (:= (. out ["value"]) v))
-            (do (:= (. out ["state"]) "error")
-                (:= (. out ["error"]) v)))
-          (return out))
-     (return ~task))))
-
-(defn lua-tf-x-future-finally
-  [[_ task on-done]]
-  (template/$ (do* (~on-done)
-             (return ~task))))
-
-(defn lua-tf-x-future-cancel
-  [[_ task]]
-  (template/$ (do* (:= (. ~task ["state"]) "cancelled")
-             (return ~task))))
-
-(defn lua-tf-x-future-status
-  [[_ task]]
-  (template/$ (. ~task ["state"])))
-
-(defn lua-tf-x-future-await
-  [[_ task timeout-ms default]]
-  (template/$
-   (cond (== "ok" (. ~task ["state"]))
-         (return (. ~task ["value"]))
-         
-         (== "error" (. ~task ["state"]))
-         (error (. ~task ["error"]))
-         
-         :else
-         (return ~default))))
-
-(defn lua-tf-x-future-from-async
-  [[_ executor]]
-  (template/$
-   (do* (local task {:state "pending"
-                     :value nil
-                     :error nil})
-        (local [ok out]
-               (pcall
-                (fn []
-                  (local result nil)
-                  (~executor
-                   (fn [v] (:= result v))
-                   (fn [e] (error e)))
-                  (return result))))
-        (if ok
-          (do (:= (. task ["state"]) "ok")
-              (:= (. task ["value"]) out))
-          (do (:= (. task ["state"]) "error")
-              (:= (. task ["error"]) out)))
-        (return task))))
-
 (def +lua-core+
   {:x-del            {:macro #'lua-tf-x-del  :emit :macro}
    :x-cat            {:macro #'lua-tf-x-cat  :emit :macro}
@@ -164,15 +69,7 @@
    :x-random         {:emit :alias :raw 'math.random}
    :x-shell          {:macro #'lua-tf-x-shell         :emit :macro}
    :x-now-ms         {:default '(math.floor (* 1000 (os.time)))   :emit :unit}
-   :x-type-native    {:macro #'lua-tf-x-type-native  :emit :macro}
-   :x-future-run       {:macro #'lua-tf-x-future-run      :emit :macro}
-   :x-future-then      {:macro #'lua-tf-x-future-then     :emit :macro}
-   :x-future-catch     {:macro #'lua-tf-x-future-catch    :emit :macro}
-   :x-future-finally   {:macro #'lua-tf-x-future-finally  :emit :macro}
-   :x-future-cancel    {:macro #'lua-tf-x-future-cancel   :emit :macro}
-   :x-future-status    {:macro #'lua-tf-x-future-status   :emit :macro}
-   :x-future-await     {:macro #'lua-tf-x-future-await    :emit :macro}
-   :x-future-from-async {:macro #'lua-tf-x-future-from-async :emit :macro}})
+   :x-type-native    {:macro #'lua-tf-x-type-native  :emit :macro}})
 
 (defn lua-tf-x-proto-create
   [[_ m]]
@@ -182,8 +79,7 @@
        (return mt))))
 
 (def +lua-proto+
-  {:x-this            {:emit :unit  :default 'self}
-   :x-proto-get       {:emit :alias :raw 'getmetatable}
+  {:x-proto-get       {:emit :alias :raw 'getmetatable}
    :x-proto-set       {:emit :alias :raw 'setmetatable}
    :x-proto-create    {:macro #'lua-tf-x-proto-create  :emit :macro}
    :x-proto-tostring  {:emit :unit  :default "__tostring"}})
@@ -446,15 +342,6 @@
   ([[_ s tok]]
    (list 'or (list 'string.find s tok) -1)))
 
-(defn lua-tf-x-str-format
-  ([[_ fmt values]]
-   (template/$ (string.gsub ~fmt
-                            "{(%d+)}"
-                            (fn [idx]
-                              (return (or (. ~values [(+ (tonumber idx)
-                                                         1)])
-                                          idx)))))))
-
 (defn lua-tf-x-str-to-fixed
   ([[_ num digits]]
    (list 'string.format (list 'cat "%." digits "f")  num)))
@@ -477,18 +364,17 @@
 
 (def +lua-str+
    {:x-str-char       {:emit :alias :raw 'string.byte}
-    :x-str-format     {:macro #'lua-tf-x-str-format     :emit :macro}
     :x-str-split      {:macro #'lua-tf-x-str-split      :emit :macro}
     :x-str-join       {:macro #'lua-tf-x-str-join       :emit :macro}
     :x-str-index-of   {:macro #'lua-tf-x-str-index-of   :emit :macro}
    :x-str-substring  {:emit :alias :raw 'string.sub}
    :x-str-to-upper   {:emit :alias :raw 'string.upper}
    :x-str-to-lower   {:emit :alias :raw 'string.lower}
-   :x-str-to-fixed   {:macro #'lua-tf-x-str-to-fixed   :emit :macro}
-   :x-str-replace    {:macro #'lua-tf-x-str-replace    :emit :macro}
-   :x-str-trim       {:macro #'lua-tf-x-str-trim       :emit :macro}
-   :x-str-trim-left  {:macro #'lua-tf-x-str-trim-left  :emit :macro}
-   :x-str-trim-right {:macro #'lua-tf-x-str-trim-right :emit :macro}})
+     :x-str-to-fixed   {:macro #'lua-tf-x-str-to-fixed   :emit :macro}
+     :x-str-replace    {:macro #'lua-tf-x-str-replace    :emit :macro}
+     :x-str-trim       {:macro #'lua-tf-x-str-trim       :emit :macro}
+     :x-str-trim-left  {:macro #'lua-tf-x-str-trim-left  :emit :macro}
+     :x-str-trim-right {:macro #'lua-tf-x-str-trim-right :emit :macro}})
 
 ;;
 ;; JSON
@@ -554,10 +440,6 @@
    :x-return-wrap    {:macro #'lua-tf-x-return-wrap     :emit :macro}
    :x-return-eval    {:macro #'lua-tf-x-return-eval     :emit :macro}})
 
-;;
-;; SOCKET
-;;
-
 (defn lua-tf-x-socket-connect
   ([[_ host port opts]]
    (template/$ (do* (local '[conn err])
@@ -587,9 +469,9 @@
    (template/$ (. ~conn (close)))))
 
 (def +lua-socket+
-  {:x-socket-connect      {:macro #'lua-tf-x-socket-connect      :emit :macro}
-   :x-socket-send         {:macro #'lua-tf-x-socket-send         :emit :macro}
-   :x-socket-close        {:macro #'lua-tf-x-socket-close        :emit :macro}})
+  {:x-socket-connect {:macro #'lua-tf-x-socket-connect :emit :macro}
+   :x-socket-send    {:macro #'lua-tf-x-socket-send    :emit :macro}
+   :x-socket-close   {:macro #'lua-tf-x-socket-close   :emit :macro}})
 
 
 ;;

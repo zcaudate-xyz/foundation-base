@@ -18,8 +18,7 @@
 
 ^{:refer js.cell.kernel.worker-mock/mock-worker :added "4.0" :unchecked true}
 (fact "creates a new mock worker"
-  ^:hidden
-  
+
   (!.js
    (var messages [])
    (var worker (worker-mock/mock-worker
@@ -32,8 +31,7 @@
 
 ^{:refer js.cell.kernel.worker-mock/mock-worker-send :added "4.0" :unchecked true}
 (fact "sends a request to the mock worker"
-  ^:hidden
-  
+
   (!.js
    (var worker (worker-mock/mock-worker (fn [msg])))
    ;; Returns undefined because no actions are registered
@@ -42,8 +40,7 @@
 
 ^{:refer js.cell.kernel.worker-mock/create-worker :added "4.0" :unchecked true}
 (fact "initialises the mock worker"
-  ^:hidden
-  
+
   (!.js
    (var messages [])
    (var worker (worker-mock/create-worker
@@ -52,7 +49,7 @@
                 true))
    (xt/x:get-key worker "::"))
   => "worker.mock"
-  
+
   ;; Check that worker has postMessage function
   (!.js
    (var worker (worker-mock/create-worker k/identity {} true))

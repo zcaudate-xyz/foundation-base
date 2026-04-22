@@ -7,8 +7,7 @@
 
 ^{:refer rt.postgres.base.grammar.form-defconst/pg-defconst-hydrate :added "4.0"}
 (fact "creates the "
-  ^:hidden
-  
+
   (def -out-
     (form/pg-defconst-hydrate (list 'defconst
                                     (with-meta 'hello {:track {}})
@@ -29,8 +28,7 @@
 
 ^{:refer rt.postgres.base.grammar.form-defconst/pg-defconst :added "4.0"}
 (fact "emits the static form"
-  ^:hidden
-  
+
   (form/pg-defconst
    (second -out-))
   => '(do:block
@@ -75,7 +73,7 @@
            (. (:- "EXCLUDED") #{"cache_id"})
            (. (:- "EXCLUDED") #{"op_updated"})
            (. (:- "EXCLUDED") #{"time_updated"}))])))
-  
-  
-  
-  
+
+
+
+

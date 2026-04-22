@@ -8,7 +8,6 @@
 
 ^{:refer rt.postgres.base.grammar.form-let/pg-tf-let-block :added "4.0"}
 (fact "transforms a let block call"
-  ^:hidden
 
   (pg-tf-let-block '(let:block {:name hello
                                 :declare [(:int v := 8)
@@ -24,11 +23,10 @@
 
 ^{:refer rt.postgres.base.grammar.form-let/pg-tf-let-assign :added "4.0"}
 (fact "create assignment statments for let form"
-  ^:hidden
-  
+
   (pg-tf-let-assign '[sym (hello)])
   => '[(:= sym (hello))]
-  
+
   (pg-tf-let-assign '[sym [:select * :from table]])
   => '[[:select * :from table :into sym]])
 
@@ -54,8 +52,7 @@
 
 ^{:refer rt.postgres.base.grammar.form-let/pg-tf-let :added "4.0"}
 (fact "creates a let form"
-  ^:hidden
-  
+
   (pg-tf-let '(let [(:int a) 1
                     (:int b) 2
                     _ (:= a (+ a b))]
@@ -69,7 +66,7 @@
                       (:= a (+ a b))
                       (return a)))
            \\ :end])
-  
+
   (pg-tf-let '(let [(:int a) 1]
                 (let [(:int b) 2]
                   (return (+ a b)))))

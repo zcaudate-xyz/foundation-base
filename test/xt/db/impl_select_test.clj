@@ -9,6 +9,7 @@
    :require [[rt.postgres.test.scratch-v1 :as scratch]
              [rt.postgres :as pg]]})
 
+^{:xtalk/template true}
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.base-schema :as sch]
@@ -28,5 +29,4 @@
              (l/rt:setup-to :postgres)
              (l/rt:scaffold :js)]
   :teardown [(l/rt:stop)]})
-
 

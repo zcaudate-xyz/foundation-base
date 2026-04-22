@@ -37,7 +37,7 @@
    (log/queue-entry
     l
     {:id (xt/x:cat "id-" (xt/x:to-string i))}
-    log/id-fn
+    (fn [x _] (return (xt/x:get-key x "id")))
     k/identity
     1))
   (log/clear-cache l 100000)
@@ -66,14 +66,15 @@
 (fact
  "lists all listeners"
  ^{:hidden true}
- (set
-  (!.dt
+ (!.dt
+  (xtd/arr-sort
    (log/list-listeners
     (log/new-log
-     {:listeners
-      {:test1 (fn [id data t]), :test2 (fn [id data t])}}))))
+     {:listeners {:test1 (fn [id data t]), :test2 (fn [id data t])}}))
+   k/identity
+   xt/x:str-lt))
  =>
- #{"test1" "test2"})
+ ["test1" "test2"])
 
 ^{:refer xt.lang.event-log/add-listener, :added "4.0"}
 (fact

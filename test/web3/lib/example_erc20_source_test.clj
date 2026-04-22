@@ -22,8 +22,7 @@
 
 ^{:refer web3.lib.example-erc20-source/totalSupply :added "4.0"}
 (fact "gets the totalSupply"
-  ^:hidden
-  
+
   (source/totalSupply)
   => integer?)
 
@@ -32,8 +31,7 @@
                           :caller-private-key (second env/+default-private-keys+)}
             (s/rt:deploy source/+default-contract+))]}
 (fact "gets the balance of an address"
-  ^:hidden
-  
+
   (source/balanceOf (last env/+default-addresses+))
   => 0
 
@@ -45,7 +43,6 @@
                           :caller-private-key (second env/+default-private-keys+)}
             (s/rt:deploy source/+default-contract+))]}
 (fact "transfers to another balance"
-  ^:hidden
 
   (s/with:params {:caller-address (second env/+default-addresses+)
                   :caller-private-key (second env/+default-private-keys+)}

@@ -16,8 +16,7 @@
 
 ^{:refer js.react.helper-portal/newRegistry :added "4.0" :unchecked true}
 (fact "creates a new portal registry"
-  ^:hidden
-  
+
   (portal/newRegistry)
   => (contains
       {"id" string?
@@ -29,8 +28,7 @@
 
 ^{:refer js.react.helper-portal/triggerSink :added "4.0" :unchecked true}
 (fact "triggers the registry"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (portal/triggerSink
      {:sinks {:hello {:setSource (repl/>notify)}}
@@ -42,8 +40,7 @@
 
 ^{:refer js.react.helper-portal/addSink :added "4.0" :unchecked true}
 (fact "adds a sink to the registry"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (portal/addSink
      {:sinks  {}
@@ -70,8 +67,7 @@
 
 ^{:refer js.react.helper-portal/addSource :added "4.0" :unchecked true}
 (fact "adds a source for render"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (portal/addSource
      {:sinks {:hello {:setSource (repl/>notify)}}
@@ -86,8 +82,7 @@
 
 ^{:refer js.react.helper-portal/removeSource :added "4.0" :unchecked true}
 (fact "removes a source for render"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (portal/removeSource
      {:sinks {:hello {:setSource (repl/>notify)}}

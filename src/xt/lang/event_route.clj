@@ -154,10 +154,13 @@
                 (xt/x:arr-filter (fn [x]
                                    (return (< 0 (xt/x:len x)))))))
   (var params {})
-  (when search
-    (xt/for:array [pair (xt/x:str-split search "&")]
-                 (var [key val] (xt/x:str-split pair "="))
-                 (xt/x:set-key params key val)))
+  (when (xt/x:not-nil? search)
+     (xt/for:array [pair (xt/x:str-split search "&")]
+                   (when (< 0 (xt/x:len pair))
+                     (var parts (xt/x:str-split pair "="))
+                     (var key   (xt/x:first parts))
+                     (var val   (xt/x:second parts))
+                     (xt/x:set-key params key val))))
   (cond (xtd/obj-empty? params)
         (return {:path path :params {}})
 
@@ -170,9 +173,11 @@
   [interim]
   (var #{path params} interim)
   (var param-arr [])
-  (xt/for:object [[key val] (or (xt/x:get-key params (xt/x:json-encode path))
-                               {})]
-    (when val
+  (var scoped-params (xt/x:get-key params (xt/x:json-encode path)))
+  (when (xt/x:nil? scoped-params)
+    (:= scoped-params {}))
+  (xt/for:object [[key val] scoped-params]
+    (when (xt/x:not-nil? val)
       (xt/x:arr-push param-arr (xt/x:cat key "=" val))))
   (return
    (xt/x:cat (xt/x:str-join "/" path)
@@ -218,10 +223,13 @@
   {:added "4.0"}
   [tree path]
   (return
-   (or (-> tree
+   (:? (xt/x:nil? (-> tree
+                      (xt/x:get-key "params")
+                      (xt/x:get-key (xt/x:json-encode path))))
+       {}
+       (-> tree
            (xt/x:get-key "params")
-           (xt/x:get-key (xt/x:json-encode path)))
-       {})))
+           (xt/x:get-key (xt/x:json-encode path))))))
 
 (defn.xt interim-from-tree
   "converts interim from tree"
@@ -229,15 +237,19 @@
   [tree]
   (var #{params} tree)
   (var path (-/path-from-tree tree))
+  (when (xt/x:nil? params)
+    (:= params {}))
   (return {:path path
-           :params (or params {})}))
+           :params params}))
 
 (defn.xt changed-params-raw
   "checks for changed params"
   {:added "4.0"}
   [pparams nparams]
-  (:= pparams (or pparams {}))
-  (:= nparams (or nparams {}))
+  (when (xt/x:nil? pparams)
+    (:= pparams {}))
+  (when (xt/x:nil? nparams)
+    (:= nparams {}))
   (var diff-fn
        (fn [m other]
          (var out {})
@@ -253,8 +265,11 @@
   "gets diff between params"
   {:added "4.0"}
   [ptree ntree path]
-  (var pparams (-/path-params-from-tree ptree (or path [])))
-  (var nparams (-/path-params-from-tree ntree (or path [])))
+  (var path* path)
+  (when (xt/x:nil? path*)
+    (:= path* []))
+  (var pparams (-/path-params-from-tree ptree path*))
+  (var nparams (-/path-params-from-tree ntree path*))
   (return (-/changed-params-raw pparams nparams)))
 
 (defn.xt changed-path-raw
@@ -263,15 +278,19 @@
   [ppath npath]
   (var all {})
   (var arr [])
+  (var i 0)
   (var changed false)
   
-  (xt/for:array [[i v] npath]
-    (var pv (xt/x:get-idx ppath i))
+  (xt/for:array [v npath]
+    (var pv nil)
+    (when (< i (xt/x:len ppath))
+      (:= pv (xt/x:get-idx ppath (xt/x:offset i))))
     (when (not= pv v)
       (:= changed true))
     (when changed
       (xt/x:set-key all (xt/x:json-encode arr) true))
-    (xt/x:arr-push arr v))
+    (xt/x:arr-push arr v)
+    (:= i (+ i 1)))
   (return all))
 
 (defn.xt changed-path
@@ -294,6 +313,7 @@
   {:added "4.0"}
   [route path]
   (var #{tree} route)
+  (:= path (event-common/arrayify-path path))
   (var pkey (xt/x:json-encode path))
   (return (xt/x:get-key tree pkey)))
 
@@ -302,16 +322,18 @@
   {:added "4.0"}
   [route param path]
   (var #{tree} route)
-  (:= path (or path (-/path-from-tree tree)))
+  (:= path (:? (xt/x:nil? path) (-/path-from-tree tree) path))
+  (:= path (event-common/arrayify-path path))
   (return (xt/x:get-key (-/path-params-from-tree tree path)
-                     param)))
+                      param)))
 
 (defn.xt get-all-params
   "gets all params in the route"
   {:added "4.0"}
   [route path]
   (var #{tree} route)
-  (:= path (or path (-/path-from-tree tree)))
+  (:= path (:? (xt/x:nil? path) (-/path-from-tree tree) path))
+  (:= path (event-common/arrayify-path path))
   (return (-/path-params-from-tree tree path)))
 
 
@@ -347,6 +369,7 @@
   "adds a path listener"
   {:added "4.0"}
   [route path listener-id callback meta]
+  (:= path (event-common/arrayify-path path))
   (var pkey (xt/x:json-encode path))
   (return
    (event-common/add-listener
@@ -378,20 +401,23 @@
   "adds a full listener"
   {:added "4.0"}
   [route path param listener-id callback meta]
+  (:= path (event-common/arrayify-path path))
   (var pkey (xt/x:json-encode path))
   (return
    (event-common/add-listener
     route listener-id "route.full"
     callback
-    (xt/x:obj-assign
-     {:route/path  path
-      :route/param param}
-     meta)
-    (fn [event]
-      (return (and (xt/x:get-key (. event ["path"])
-                              pkey)
-                   (xt/x:get-key (. event ["params"])
-                              param)))))))
+     (xt/x:obj-assign
+      {:route/path  path
+       :route/param param}
+      meta)
+     (fn [event]
+       (return (and (== true
+                        (xt/x:get-key (. event ["path"])
+                                       pkey))
+                    (xt/x:not-nil?
+                     (xt/x:get-key (. event ["params"])
+                                   param))))))))
 
 (def.xt ^{:arglists '([route listener-id])}
   remove-listener
@@ -417,7 +443,8 @@
   
   (var pparams (xt/x:get-key all-params pkey))
   (var nparams (xt/x:get-key ninterim-params pkey))
-  (:= nparams (or nparams {}))
+  (when (xt/x:nil? nparams)
+    (:= nparams {}))
 
   (var dpath   (-/changed-path-raw ppath npath))
   (var dparams (-/changed-params-raw pparams nparams))
@@ -425,7 +452,8 @@
   ^MERGE
   (xt/x:obj-assign tree (-/path-to-tree npath terminate))
   (cond (xtd/obj-empty? nparams)
-        (xt/x:del-key all-params pkey)
+        (when (xt/x:has-key? all-params pkey)
+          (xt/x:del-key all-params pkey))
         
         :else
         (xt/x:set-key all-params pkey nparams))
@@ -448,12 +476,18 @@
 
   ^CHANGES
   (var ppath    (-/path-from-tree tree))
-  (var npath    (or path ppath))
+  (var npath    path)
+  (when (xt/x:nil? npath)
+    (:= npath ppath))
+  (:= npath (xtd/arrayify npath))
   (var pkey    (xt/x:json-encode npath))
   
   (var pparams  (xt/x:get-key all-params pkey))
-  (var nparams  (or params pparams))
-  (:= nparams (or nparams {}))
+  (var nparams  params)
+  (when (xt/x:nil? nparams)
+    (:= nparams pparams))
+  (when (xt/x:nil? nparams)
+    (:= nparams {}))
 
   (var dpath   (-/changed-path-raw ppath npath))
   (var dparams (-/changed-params-raw pparams nparams))
@@ -461,7 +495,8 @@
   ^MERGE
   (xt/x:obj-assign tree (-/path-to-tree npath true))
   (cond (xtd/obj-empty? nparams)
-        (xt/x:del-key all-params pkey)
+        (when (xt/x:has-key? all-params pkey)
+          (xt/x:del-key all-params pkey))
         
         :else
         (xt/x:set-key all-params pkey nparams))
@@ -480,6 +515,7 @@
   {:added "4.0"}
   [route path value]
   (var #{tree} route)
+  (:= path (xtd/arrayify path))
   (var pkey   (xt/x:json-encode path))
   (var pvalue (xt/x:get-key tree pkey))
   (xt/x:set-key tree pkey value)
@@ -498,10 +534,14 @@
   {:added "4.0"}
   [route param value path]
   (var #{tree} route)
-  (:= path  (or path (-/path-from-tree tree)))
+  (when (xt/x:nil? path)
+    (:= path (-/path-from-tree tree)))
+  (:= path (xtd/arrayify path))
   (var pkey (xt/x:json-encode path))
   (var all-params (xt/x:get-key tree "params"))
-  (var pparams (or (xt/x:get-key all-params pkey) {}))
+  (var pparams (xt/x:get-key all-params pkey))
+  (when (xt/x:nil? pparams)
+    (:= pparams {}))
   (var pvalue  (xt/x:get-key pparams param))
   (cond (not= pvalue value)
         (do (cond (xt/x:nil? value)
@@ -510,29 +550,31 @@
                   :else
                   (xt/x:set-key pparams param value))
 
-            (cond (xtd/obj-empty? pparams)
-                  (xt/x:del-key all-params pkey)
+             (cond (xtd/obj-empty? pparams)
+                  (when (xt/x:has-key? all-params pkey)
+                    (xt/x:del-key all-params pkey))
                   
                   :else
                   (xt/x:set-key all-params pkey pparams))
 
-            (var #{history} route)
-            (xtd/arr-pushl history (-/get-url route) 50)
-            (return
-             (event-common/trigger-listeners
-              route
-              {:type "route.params"
-               :params {param true}
-               :path   {}})))
+              (var #{history} route)
+              (xtd/arr-pushl history (-/get-url route) 50)
+              (return
+               (event-common/trigger-listeners
+                route
+                {:type "route.params"
+                 :params {param true}
+                 :path   {}})))
 
-        :else
-        (return [])))
+         :else
+         (return [])))
 
 (defn.xt reset-route
   "resets the route, clearing all params"
   {:added "4.0"}
   [route url]
   (xt/x:set-key route "history" [])
+  (var url* (:? (xt/x:nil? url) "" url))
   (xt/x:set-key route "tree"
-             (-/interim-to-tree (-/interim-from-url (or url "")) true))
-  (-/set-url route (or url "") true))
+             (-/interim-to-tree (-/interim-from-url url*) true))
+  (-/set-url route url* true))

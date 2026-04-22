@@ -77,8 +77,7 @@
 
 ^{:refer net.http.client/request :added "3.0"}
 (fact "performs a http request"
-  ^:hidden
-  
+
   (comment
     (request "http://www.yahoo.com")
     => (contains {:status number?

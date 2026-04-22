@@ -11,6 +11,7 @@
  {:runtime :twostep,
   :require
   [[xt.lang.common-lib :as k]
+   [xt.lang.common-spec :as xt]
    [xt.lang.common-data :as xtd]
    [xt.lang.common-repl :as repl]
    [xt.lang.event-view :as view]]})
@@ -20,16 +21,54 @@
 ^{:refer xt.lang.event-view/list-listeners, :adopt true, :added "4.0"}
 (fact
  "lists all listeners"
- ^{:hidden true}
- (set
-  (!.dt
-   (var v (view/create-view (fn:> [x] {:value x}) {} [3] {:value 0}))
-   (view/add-listener v "a1" (fn:>))
-   (view/add-listener v "b2" (fn:>))
-   (view/add-listener v "c3" (fn:>))
-   (view/list-listeners v)))
+ (!.dt
+  (var
+   v
+   (view/create-view (fn:> [x] {:value x}) {} [3] {:value 0} nil nil))
+  (view/add-listener v "a1" (fn:>) nil nil)
+  (view/add-listener v "b2" (fn:>) nil nil)
+  (view/add-listener v "c3" (fn:>) nil nil)
+  (view/list-listeners v))
  =>
- #{"c3" "a1" "b2"})
+ ["a1" "b2" "c3"])
+
+^{:refer xt.lang.event-view/pipeline-run-remote.errored,
+  :adopt true,
+  :added "4.0"}
+(fact
+ "runs the pipeline"
+ ^{:hidden true}
+ (!.dt
+  (notify/wait-on
+   :dart
+   (var
+    v
+    (view/create-view
+     nil
+     {:remote {:handler (fn:> [x] (throw "ERRORED"))}}
+     [3]
+     ["BLAH"]
+     xtd/first
+     nil))
+   (view/init-view v)
+   (var [context disabled] (view/pipeline-prep v nil))
+   (var
+    async-fn
+    (fn
+     [handler-fn context cb]
+     (var out (handler-fn context))
+     (if
+      (== out "ERRORED")
+      (return ((xt/x:get-key cb "error") out))
+      (return ((xt/x:get-key cb "success") out)))))
+   (view/pipeline-run-remote context true async-fn nil nil)
+   (xt/x:get-key context "acc")))
+ =>
+ {"error" true,
+  "remote" [true "ERRORED" true],
+  "post" [false],
+  "pre" [false],
+  "::" "view.run"})
 
 ^{:refer xt.lang.event-view/wrap-args, :added "4.0"}
 (fact
@@ -76,13 +115,17 @@
       "listeners" {}}))]}
 (fact
  "creates a view"
- ^{:hidden true}
  (!.dt
   (xtd/tree-get-data
-   (view/create-view (fn:> [x] {:value x}) {} [3] {:value 0})))
+   (view/create-view (fn:> [x] {:value x}) {} [3] {:value 0} nil nil)))
  =>
  {"output"
-  {"process" "<function>", "type" "output", "default" "<function>"},
+  {"elapsed" nil,
+   "process" "<function>",
+   "current" nil,
+   "type" "output",
+   "updated" nil,
+   "default" "<function>"},
   "::" "event.view",
   "pipeline"
   {"remote" {"wrapper" "<function>"},
@@ -90,17 +133,18 @@
    "check_args" "<function>",
    "main" {"handler" "<function>", "wrapper" "<function>"},
    "sync" {"wrapper" "<function>"}},
-  "input" {"default" "<function>"},
+  "input" {"current" nil, "updated" nil, "default" "<function>"},
   "options" {},
   "listeners" {}})
 
 ^{:refer xt.lang.event-view/view-context, :added "4.0"}
 (fact
  "gets the view-context"
- ^{:hidden true}
  (set
   (!.dt
-   (var v (view/create-view (fn:> [x] {:value x}) {} [3] {:value 0}))
+   (var
+    v
+    (view/create-view (fn:> [x] {:value x}) {} [3] {:value 0} nil nil))
    (view/init-view v)
    (xtd/obj-keys (view/view-context v))))
  =>
@@ -109,12 +153,19 @@
 ^{:refer xt.lang.event-view/add-listener, :added "4.0"}
 (fact
  "adds a listener to the view"
- ^{:hidden true}
- (notify/wait-on
-  :dart
-  (var v (view/create-view (fn:> [x] {:value x}) {} [3] {:value 0}))
-  (view/add-listener v "a1" (repl/>notify))
-  (view/trigger-listeners v "output" {:value 0}))
+ (!.dt
+  (var out nil)
+  (var
+   v
+   (view/create-view (fn:> [x] {:value x}) {} [3] {:value 0} nil nil))
+  (view/add-listener
+   v
+   "a1"
+   (fn [res] (:= out (xtd/tree-get-data res)) (return nil))
+   nil
+   nil)
+  (view/trigger-listeners v "output" {:value 0})
+  out)
  =>
  {"type" "output",
   "meta" {"listener/id" "a1", "listener/type" "view"},
@@ -123,34 +174,55 @@
 ^{:refer xt.lang.event-view/get-input, :added "4.0"}
 (fact
  "gets the view input record"
- ^{:hidden true}
  (!.dt
-  (var v (view/create-view (fn:> [x] {:value x}) {} [3] {:value 0}))
-  (view/init-view v)
-  (view/get-input v))
+  (do
+   (var
+    v
+    (view/create-view (fn:> [x] {:value x}) {} [3] {:value 0} nil nil))
+   (view/init-view v)
+   (xtd/tree-get-data (view/get-input v))))
  =>
  (contains-in {"current" {"data" [3]}, "updated" integer?}))
 
 ^{:refer xt.lang.event-view/get-output, :added "4.0"}
 (fact
  "gets the view output record"
- ^{:hidden true}
  (!.dt
-  (var v (view/create-view (fn:> [x] {:value x}) {} [3] {:value 0}))
-  (view/init-view v)
-  (view/get-output v))
+  (do
+   (var
+    v
+    (view/create-view (fn:> [x] {:value x}) {} [3] {:value 0} nil nil))
+   (view/init-view v)
+   (xtd/tree-get-data (view/get-output v nil))))
  =>
  {"type" "output", "elapsed" nil, "current" nil, "updated" nil})
 
 ^{:refer xt.lang.event-view/set-input, :added "4.0"}
 (fact
  "sets the input"
- ^{:hidden true}
- (notify/wait-on
-  :dart
-  (var v (view/create-view (fn:> [x] {:value x}) {} [3] {:value 0}))
-  (view/add-listener v "a1" (repl/>notify))
-  (view/set-input v 1))
+ (notify/wait-on-call
+  2000
+  (fn
+   []
+   (!.dt
+    (var out nil)
+    (var
+     v
+     (view/create-view
+      (fn:> [x] {:value x})
+      {}
+      [3]
+      {:value 0}
+      nil
+      nil))
+    (view/add-listener
+     v
+     "a1"
+     (fn [res] (:= out (xtd/tree-get-data res)) (return nil))
+     nil
+     nil)
+    (view/set-input v 1)
+    out)))
  =>
  (contains-in
   {"type" "view.input",
@@ -160,12 +232,29 @@
 ^{:refer xt.lang.event-view/set-output, :added "4.0"}
 (fact
  "sets the output"
- ^{:hidden true}
- (notify/wait-on
-  :dart
-  (var v (view/create-view (fn:> [x] {:value x}) {} [3] {:value 0}))
-  (view/add-listener v "a1" (repl/>notify))
-  (view/set-output v 1 nil))
+ (notify/wait-on-call
+  2000
+  (fn
+   []
+   (!.dt
+    (var out nil)
+    (var
+     v
+     (view/create-view
+      (fn:> [x] {:value x})
+      {}
+      [3]
+      {:value 0}
+      nil
+      nil))
+    (view/add-listener
+     v
+     "a1"
+     (fn [res] (:= out (xtd/tree-get-data res)) (return nil))
+     nil
+     nil)
+    (view/set-output v 1 nil nil nil nil)
+    out)))
  =>
  (contains-in
   {"type" "view.output",
@@ -175,18 +264,21 @@
 ^{:refer xt.lang.event-view/pipeline-run, :added "4.0"}
 (fact
  "runs the pipeline"
- ^{:hidden true}
  (!.dt
-  (var v (view/create-view (fn:> [x] {:value x}) {} [3] {}))
+  (var
+   v
+   (view/create-view (fn:> [x] (return {:value x})) {} [3] {} nil nil))
   (view/init-view v)
-  (var [context disabled] (view/pipeline-prep v))
+  (var [context disabled] (view/pipeline-prep v nil))
   (var
    async-fn
    (fn
     [handler-fn context cb]
-    (return (cb.success (handler-fn context)))))
-  (view/pipeline-run context disabled async-fn (fn:>) (fn:>))
-  context.acc)
+    (try
+     (return ((xt/x:get-key cb "success") (handler-fn context)))
+     (catch err (return ((xt/x:get-key cb "error") err))))))
+  (view/pipeline-run context disabled async-fn nil nil nil)
+  (xt/x:get-key context "acc"))
  =>
  {"::" "view.run",
   "pre" [false],
@@ -196,23 +288,27 @@
 ^{:refer xt.lang.event-view/pipeline-run-remote, :added "4.0"}
 (fact
  "runs the remote pipeline"
- ^{:hidden true}
  (!.dt
   (var
    v
    (view/create-view
     nil
-    {:remote {:handler (fn:> [x] {:value x})}}
-    [3]))
+    {:remote {:handler (fn:> [x] (return {:value x}))}}
+    [3]
+    nil
+    nil
+    nil))
   (view/init-view v)
-  (var [context disabled] (view/pipeline-prep v))
+  (var [context disabled] (view/pipeline-prep v nil))
   (var
    async-fn
    (fn
     [handler-fn context cb]
-    (return (cb.success (handler-fn context)))))
-  (view/pipeline-run-remote context true async-fn (fn:>) (fn:>))
-  context.acc)
+    (try
+     (return ((xt/x:get-key cb "success") (handler-fn context)))
+     (catch err (return ((xt/x:get-key cb "error") err))))))
+  (view/pipeline-run-remote context true async-fn nil nil)
+  (xt/x:get-key context "acc"))
  =>
  {"::" "view.run",
   "pre" [false],
@@ -222,20 +318,27 @@
 ^{:refer xt.lang.event-view/pipeline-run-sync, :added "4.0"}
 (fact
  "runs the sync pipeline"
- ^{:hidden true}
  (!.dt
   (var
    v
-   (view/create-view nil {:sync {:handler (fn:> [x] {:value x})}} [3]))
+   (view/create-view
+    nil
+    {:sync {:handler (fn:> [x] (return {:value x}))}}
+    [3]
+    nil
+    nil
+    nil))
   (view/init-view v)
-  (var [context disabled] (view/pipeline-prep v))
+  (var [context disabled] (view/pipeline-prep v nil))
   (var
    async-fn
    (fn
     [handler-fn context cb]
-    (return (cb.success (handler-fn context)))))
-  (view/pipeline-run-sync context true async-fn (fn:>) (fn:>))
-  context.acc)
+    (try
+     (return ((xt/x:get-key cb "success") (handler-fn context)))
+     (catch err (return ((xt/x:get-key cb "error") err))))))
+  (view/pipeline-run-sync context true async-fn nil nil)
+  (xt/x:get-key context "acc"))
  =>
  {"::" "view.run",
   "pre" [false],
@@ -246,7 +349,7 @@
 (fact
  "creates a results vector and a lookup table"
  ^{:hidden true}
- (!.dt (view/get-with-lookup [{:id "A"} {:id "B"} {:id "C"}]))
+ (!.dt (view/get-with-lookup [{:id "A"} {:id "B"} {:id "C"}] nil))
  =>
  {"results" [{"id" "A"} {"id" "B"} {"id" "C"}],
   "lookup" {"C" {"id" "C"}, "B" {"id" "B"}, "A" {"id" "A"}}})

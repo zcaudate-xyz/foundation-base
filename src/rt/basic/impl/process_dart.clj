@@ -30,29 +30,29 @@
                                          (- (char-count trimmed \[)
                                             (char-count trimmed \])))
                        next-paren     (max 0 (+ paren-depth p-delta))
-                        closing-brace? (str/starts-with? trimmed "}")
-                        opening-brace? (str/ends-with? trimmed "{")
-                        ;; distinguish block bodies (fn/if/for/etc) from map/object literals
-                        block-brace?   (and opening-brace?
-                                            (or (re-find #"(?:\)|async|sync\*?)\s*\{$" trimmed)
-                                                (re-find #"^(?:else|try|finally|do)\s*\{$" trimmed)))
-                        assign-brace?  (and opening-brace?
-                                            (not block-brace?))
-                        next-brace-stack (let [closed-stack (if (and closing-brace?
-                                                                     (seq brace-stack))
-                                                              (rest brace-stack)
-                                                              brace-stack)]
-                                           (if opening-brace?
-                                             (cons (if assign-brace?
-                                                     :assignment
-                                                     :block)
-                                                   closed-stack)
-                                             closed-stack))
-                       in-brace?      (seq brace-stack)
-                       in-assign?     (= (first brace-stack) :assignment)
-                       complete?      (and (zero? paren-depth)
-                                           (zero? next-paren)
-                                           (not in-brace?))
+                       closing-brace? (str/starts-with? trimmed "}")
+                       opening-brace? (str/ends-with? trimmed "{")
+                       ;; distinguish block bodies (fn/if/for/etc) from map/object literals
+                       block-brace?   (and opening-brace?
+                                           (or (re-find #"(?:\)|async|sync\*?)\s*\{$" trimmed)
+                                               (re-find #"^(?:else|try|finally|do)\s*\{$" trimmed)))
+                       assign-brace?  (and opening-brace?
+                                           (not block-brace?))
+                       closed-stack   (if (and closing-brace?
+                                               (seq brace-stack))
+                                        (rest brace-stack)
+                                        brace-stack)
+                       next-brace-stack (if opening-brace?
+                                          (cons (if assign-brace?
+                                                  :assignment
+                                                  :block)
+                                                closed-stack)
+                                          closed-stack)
+                        in-brace?      (seq brace-stack)
+                        in-assign?     (= (first brace-stack) :assignment)
+                        complete?      (and (zero? paren-depth)
+                                            (zero? next-paren)
+                                            (not in-brace?))
                        line'          (cond
                                         ;; blank lines and comments unchanged
                                         (or (empty? trimmed)
@@ -61,10 +61,14 @@
 
                                         ;; closing brace of an assignment block (map/object)
                                         ;; the var declaration needs its semicolon here
-                                        (and closing-brace? in-assign?)
-                                        (if (str/ends-with? trimmed ";")
-                                          line
-                                          (str line ";"))
+                                         (and closing-brace?
+                                              in-assign?
+                                              (zero? next-paren)
+                                              (not opening-brace?)
+                                              (not= (first closed-stack) :assignment))
+                                          (if (str/ends-with? trimmed ";")
+                                            line
+                                           (str line ";"))
 
                                         ;; closing brace of a function/control block
                                         closing-brace?
@@ -345,29 +349,31 @@
   (let [forms (if (symbol? (first forms))
                 [forms]
                 forms)
+        out-sym (gensym "out_")
         statement-op? '#{:- := var return break throw
-                         do do* if for while try
-                         xt/for:index xt/for:array xt/for:object xt/for:iter}
+                          do do* if for while try
+                          for:return for:try for:async
+                          for:index for:array for:object for:iter
+                          xt/for:return xt/for:try xt/for:async
+                          xt/for:index xt/for:array xt/for:object xt/for:iter}
+        await-sync-form (fn [form]
+                          (list 'await
+                                (list 'Future.sync
+                                      (list 'fn '[]
+                                            (list 'return form)))))
         await-form (fn [form]
                      (if (and (seq? form)
-                              (statement-op? (first form)))
-                       form
-                       (list 'await form)))
-        out-json (list ':?
-                       (list '== 'out nil)
-                       (list 'jsonEncode 'out)
-                       (list ':?
-                             (list '== (list '. (list '. 'out 'runtimeType) (list 'toString))
-                                   "String")
-                             'out
-                             (list 'jsonEncode 'out)))
+                               (statement-op? (first form)))
+                        form
+                        (await-sync-form form)))
+        out-json (list 'jsonEncode out-sym)
         body  (concat '[do]
                       (map await-form (butlast forms))
-                      [(list 'var 'out (list 'await (last forms)))
+                      [(list 'var out-sym (await-sync-form (last forms)))
                        (list 'print out-json)])]
     `(:- "Future<void> main() async {\n "
-         ~body
-          "\n}")))
+          ~body
+           "\n}")))
 
 (defn- dart-exec
   "Resolves a user-local Dart SDK binary before falling back to PATH."

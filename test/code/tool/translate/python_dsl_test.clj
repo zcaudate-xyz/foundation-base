@@ -10,7 +10,7 @@
 (fact "translate-node operators"
   (py-dsl/translate-node {:type "BinOp" :op {:type "Add"} :left {:type "Name" :id "a"} :right {:type "Name" :id "b"}})
   => '(+ a b)
-  
+
   (py-dsl/translate-node {:type "Compare" :left {:type "Name" :id "a"} :ops [{:type "Eq"}] :comparators [{:type "Name" :id "b"}]})
   => '(== a b))
 
@@ -31,7 +31,6 @@
 
 ^{:refer code.tool.translate.python-dsl/translate-node :added "4.1"}
 (fact "translates various Python AST nodes to DSL"
-  ^:hidden
 
   (py-dsl/translate-node {:type "Call" :func {:type "Name" :id "print"} :args [{:type "Constant" :value "hello"}] :keywords []})
   => '(print "hello")
@@ -41,12 +40,12 @@
 
   (py-dsl/translate-node {:type "Dict" :keys [{:type "Constant" :value "k"}] :values [{:type "Constant" :value "v"}]})
   => {"k" "v"}
-  
+
   (py-dsl/translate-node {:type "Return" :value {:type "Constant" :value 1}})
   => '(return 1)
-  
+
   (py-dsl/translate-node {:type "Import" :names [{:name "math"}]})
   => '(do (import math))
-  
+
   (py-dsl/translate-node {:type "ImportFrom" :module "math" :level 0 :names [{:name "sqrt"}]})
   => '(do (from math import sqrt)))

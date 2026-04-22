@@ -67,7 +67,6 @@
       :hour 6, :minute 30,
       :second 0, :millisecond 0}
 
-  ^:hidden
   (f/parse "00 00 01 01 01 1989 +0000"
            "ss mm HH dd MM yyyy Z")
   => map?)

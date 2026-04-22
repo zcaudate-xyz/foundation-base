@@ -57,7 +57,6 @@
 
 ^{:refer xt.db.supabase/payload->xdb-events :added "4.1.3"}
 (fact "translates canonical supabase payloads to xt.db events"
-  ^:hidden
 
   (!.js
     (:= (!:G USD) @+usd-snake+)
@@ -102,7 +101,6 @@
 
 ^{:refer xt.db.supabase/apply-payload :added "4.1.3"}
 (fact "applies supabase payload to local xt.db (sqlite)"
-  ^:hidden
 
   (!.js
    ;; stash USD row in JS global so the expected map is stable in compiled output
@@ -120,7 +118,7 @@
                       sample/Schema
                       ["Currency" ["id"]]))
   => [{"id" "USD"}]
-  
+
   (!.js
     ;; delete
    (sup/apply-payload DBSQL
@@ -137,7 +135,6 @@
 
 ^{:refer xt.db.supabase/attach-events :added "4.1.3"}
 (fact "attaches a stubbed supabase realtime client and applies payloads"
-  ^:hidden
 
   (!.js
    (:= (!:G USD) @+usd-snake+)

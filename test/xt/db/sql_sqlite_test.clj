@@ -34,7 +34,6 @@
 
 ^{:refer xt.db.sql-sqlite/CANARY :adopt true :added "4.0"}
 (fact "connects to an embedded sqlite file"
-  ^:hidden
 
   (notify/wait-on :js
     (dbsql/connect {:constructor js-sqlite/connect-constructor}
@@ -45,7 +44,6 @@
 
 ^{:refer xt.db.sql-sqlite/CANARY.schema :adopt true :added "4.0"}
 (fact "ensures that the results are the same"
-  ^:hidden
 
   (!.js
     (manage/table-create-all
@@ -53,7 +51,7 @@
      sample/SchemaLookup
      (ut/sqlite-opts nil)))
   => vector?
-  
+
   (notify/wait-on :js
     (dbsql/query DB
                  (str/join "\n\n"
@@ -67,7 +65,6 @@
 
 ^{:refer xt.db.sql-sqlite/CANARY.data :adopt true :added "4.0"}
 (fact "ensures that the results are the same"
-  ^:hidden
 
   (notify/wait-on :js
     (dbsql/query DB

@@ -12,7 +12,7 @@
 
   (has-method -without-method-
               String)
-  => nil ^:hidden
+  => nil
 
   (has-method -without-method-
               clojure.lang.PersistentArrayMap)
@@ -23,7 +23,7 @@
 
   (methods-with-same-name-and-count -without-method- clojure.lang.IPersistentMap)
   ;; (#<Method clojure.lang.IPersistentMap.without(java.lang.Object)>)
-  =>  #(-> % count (= 1)) ^:hidden
+  =>  #(-> % count (= 1))
 
   (methods-with-same-name-and-count
    (.getDeclaredMethod String "charAt"

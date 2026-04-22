@@ -27,7 +27,6 @@
                    xtalk/+xt-functional-invoke+
                    xtalk/+xt-functional-return+
                    xtalk/+xt-functional-array+
-                   xtalk/+xt-functional-future+
                    xtalk/+xt-functional-iter+]
    :xtalk-impl    [xtalk/+xt-lang-global+
                    xtalk/+xt-lang-proto+
@@ -36,19 +35,15 @@
                    xtalk/+xt-lang-unpack+
                    xtalk/+xt-lang-random+
                    xtalk/+xt-lang-time+]
-   :xtalk-link    [xtalk/+xt-notify-socket+
-                   xtalk/+xt-notify-http+
-                   xtalk/+xt-network-socket+
-                   xtalk/+xt-network-ws+
-                   xtalk/+xt-network-client-basic+
-                   xtalk/+xt-network-client-ws+]
+    :xtalk-link    [xtalk/+xt-socket+
+                    xtalk/+xt-notify-http+]
    :xtalk-runtime [xtalk/+xt-runtime-cache+
                    xtalk/+xt-runtime-thread+
                    xtalk/+xt-runtime-shell+
                    xtalk/+xt-runtime-file+
                    xtalk/+xt-runtime-b64+
                    xtalk/+xt-runtime-uri+
-                   xtalk/+xt-runtime-js+]})
+                   xtalk/+xt-runtime-json+]})
 
 (def +xtalk-area->surface+
   {:xtalk-common  {:area :common

@@ -63,7 +63,6 @@
 
 ^{:refer js.cell.service.db-view/get-views :added "4.1"}
 (fact "gets the db views"
-  ^:hidden
 
   (!.js
    (xtd/obj-keys (db-view/get-views (@! +db+))))
@@ -71,7 +70,6 @@
 
 ^{:refer js.cell.service.db-view/get-schema :added "4.1"}
 (fact "gets the db schema"
-  ^:hidden
 
   (!.js
    (xtd/obj-keys (db-view/get-schema (@! +db+))))
@@ -79,7 +77,6 @@
 
 ^{:refer js.cell.service.db-view/view-query-return-entry :added "4.1"}
 (fact "creates the return entry for `return-query` key"
-  ^:hidden
 
   (!.js
    (db-view/view-query-return-entry "Order"
@@ -96,7 +93,6 @@
 
 ^{:refer js.cell.service.db-view/view-query-return-combined :added "4.1"}
 (fact "creates the combined return entry for `return-query` key"
-  ^:hidden
 
   (!.js
    (db-view/view-query-return-combined
@@ -108,7 +104,6 @@
 
 ^{:refer js.cell.service.db-view/view-query-entries :added "4.1"}
 (fact "gets the select and return entries"
-  ^:hidden
 
   (!.js
    (db-view/view-query-entries
@@ -143,7 +138,6 @@
 
 ^{:refer js.cell.service.db-view/view-triggers :added "4.1"}
 (fact "gets the triggers for a given view"
-  ^:hidden
 
   (!.js
    (db-view/view-triggers
@@ -157,7 +151,6 @@
 
 ^{:refer js.cell.service.db-view/view-overview :added "4.1"}
 (fact "gets the view overview"
-  ^:hidden
 
   (!.js
    (db-view/view-overview (@! +db+)))
@@ -167,7 +160,6 @@
 
 ^{:refer js.cell.service.db-view/view-tables :added "4.1"}
 (fact "gets the view tables"
-  ^:hidden
 
   (!.js
    (db-view/view-tables (@! +db+)))
@@ -175,7 +167,6 @@
 
 ^{:refer js.cell.service.db-view/view-methods :added "4.1"}
 (fact "gets the view methods"
-  ^:hidden
 
   (!.js
    (db-view/view-methods (@! +db+) "Order"))
@@ -184,7 +175,6 @@
 
 ^{:refer js.cell.service.db-view/view-detail :added "4.1"}
 (fact "gets the view detail"
-  ^:hidden
 
   (!.js
    (db-view/view-detail (@! +db+) "Order" "select" "by_account"))

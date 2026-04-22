@@ -12,7 +12,6 @@
 
 ^{:refer xt.cell.service.db-query/query-capable? :added "4.1"}
 (fact "checks whether a db descriptor can prepare queries"
-  ^:hidden
 
   (!.js
    [(db-query/query-capable? {"schema" {} "views" {}})
@@ -21,7 +20,6 @@
 
 ^{:refer xt.cell.service.db-query/view-local-transform :added "4.1"}
 (fact "removes __deleted__ markers from local view entries"
-  ^:hidden
 
   (!.js
    (db-query/view-local-transform
@@ -31,7 +29,6 @@
 
 ^{:refer xt.cell.service.db-query/query-check :added "4.1"}
 (fact "validates args against entry input definitions"
-  ^:hidden
 
   (!.js
    [(db-query/query-check {"input" []} [] false)
@@ -41,7 +38,6 @@
 
 ^{:refer xt.cell.service.db-query/normalize-query :added "4.1"}
 (fact "fills query defaults from the view context"
-  ^:hidden
 
   (!.js
    (db-query/normalize-query
@@ -61,7 +57,6 @@
 
 ^{:refer xt.cell.service.db-query/prepare-query :added "4.1"}
 (fact "fails cleanly when a referenced select method is missing"
-  ^:hidden
 
   (!.js
    (db-query/prepare-query
@@ -77,7 +72,6 @@
 
 ^{:refer xt.cell.service.db-query/execute-query :added "4.1"}
 (fact "requires a local db when executing a prepared query"
-  ^:hidden
 
   (!.js
    (db-query/execute-query
@@ -90,7 +84,6 @@
 
 ^{:refer xt.cell.service.db-query/run-query :added "4.1"}
 (fact "propagates prepare failures without executing the query"
-  ^:hidden
 
   (!.js
    (db-query/run-query

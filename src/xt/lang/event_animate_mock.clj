@@ -46,8 +46,8 @@
    (var [prev curr] transition)
    (return (fn [callback]
              (-/set-value indicator (tf curr))
-             (when callback
-               (callback))))))
+             (when (xt/x:not-nil? callback)
+               (callback nil))))))
 
 (def.xt MOCK
   {:create-val        -/new-observed
@@ -58,4 +58,3 @@
    :is-animated       -/is-observed
    :create-transition -/mock-transition
    :stop-transition   (fn [])})
-

@@ -32,7 +32,6 @@
 
 ^{:refer js.cell.runtime.env-node/init-worker :added "4.0"}
 (fact "boots a Node worker adapter"
-  ^:hidden
   (!.js
    (var messages [])
    (var worker {:listeners []
@@ -50,13 +49,11 @@
 
 ^{:refer js.cell.runtime.env-node/runtime-init :added "4.0"}
 (fact "boots js.cell inside a Node worker thread"
-  ^:hidden
   (node-runtime-init-check)
   => [])
 
 ^{:refer js.cell.runtime.env-webworker/init-worker :added "4.0"}
 (fact "boots a WebWorker adapter"
-  ^:hidden
   (!.js
    (var messages [])
    (var worker {:listeners []
@@ -74,7 +71,6 @@
 
 ^{:refer js.cell.runtime.env-webworker/runtime-init :added "4.0"}
 (fact "boots js.cell inside a WebWorker"
-  ^:hidden
   (!.js
    (var previous-self (!:G self))
    (var messages [])
@@ -94,7 +90,6 @@
 
 ^{:refer js.cell.runtime.env-sharedworker/init-port :added "4.0"}
 (fact "boots a SharedWorker port"
-  ^:hidden
   (!.js
    (var messages [])
    (var port {:listeners []
@@ -113,7 +108,6 @@
 
 ^{:refer js.cell.runtime.env-sharedworker/runtime-init :added "4.0"}
 (fact "boots js.cell inside a SharedWorker"
-  ^:hidden
   (!.js
    (var previous-self (!:G self))
    (var messages [])

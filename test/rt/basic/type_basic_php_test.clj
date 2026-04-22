@@ -38,7 +38,6 @@
 
 ^{:refer rt.basic.type-basic/invoke-ptr-basic :added "4.1"}
 (fact "php basic emits executable input and decodes output"
-  ^:hidden
 
   (if CANARY-PHP
     (let [rt (p/rt-basic {:lang :php

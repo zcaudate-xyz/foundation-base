@@ -6,14 +6,13 @@
 
 ^{:refer std.block.heal.edit/update-content :added "4.0"}
 (fact "performs the necessary edits to a string"
-  ^:hidden
 
   (core/update-content
    "("
    '({:action :insert, :line 1, :col 1, :new-char ")"}))
   => "()"
 
-  
+
   (core/update-content
    "
 (defn my-func [x]
@@ -30,8 +29,7 @@
 
 ^{:refer std.block.heal.edit/create-mismatch-edits :added "4.0"}
 (fact "find the actions required to edit the content"
-  ^:hidden
-  
+
   (core/create-mismatch-edits
    (parse/pair-delimiters
     (parse/parse-delimiters
@@ -66,8 +64,7 @@
 
 ^{:refer std.block.heal.edit/create-append-edits :added "4.0"}
 (fact "creates the append edits"
-  ^:hidden
-  
+
   (core/create-append-edits
    (parse/parse-delimiters" ( "))
   => [{:action :insert, :line 1, :col 2, :new-char ")"}])

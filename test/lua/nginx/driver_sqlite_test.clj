@@ -16,8 +16,7 @@
 
 ^{:refer lua.nginx.driver-sqlite/CANARY :adopt true :added "4.0"}
 (fact "preliminary checks"
-  ^:hidden
-  
+
   (!.lua
    (:= ngxsqlite (require "lsqlite3"))
    [(lua-sqlite/version)
@@ -27,8 +26,7 @@
 
 ^{:refer lua.nginx.driver-sqlite/coerce-number :added "4.0"}
 (fact "Performs a raw query"
-  ^:hidden
-  
+
   (lua-sqlite/coerce-number "hello")
   => "hello"
 
@@ -37,8 +35,7 @@
 
 ^{:refer lua.nginx.driver-sqlite/raw-exec :added "4.0"}
 (fact "performs a raw execution"
-  ^:hidden
-  
+
   (!.lua
    (local conn (lua-sqlite/connect-constructor {:memory true}))
    (lua-sqlite/raw-exec (. conn ["raw"]) "select 1;"))
@@ -51,8 +48,7 @@
 
 ^{:refer lua.nginx.driver-sqlite/raw-query :added "4.0"}
 (fact "Performs a raw query"
-  ^:hidden
-  
+
   (!.lua
    (local conn (lua-sqlite/connect-constructor {:memory true}))
    (lua-sqlite/raw-query (. conn ["raw"]) "select 1;"))
@@ -65,7 +61,6 @@
 
 ^{:refer lua.nginx.driver-sqlite/connect-constructor :added "4.0"}
 (fact "create db connection"
-  ^:hidden
 
   ;; ENCODING TRUE INTEGER
   (!.lua

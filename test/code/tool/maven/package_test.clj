@@ -44,7 +44,6 @@
 
 ^{:refer code.tool.maven.package/pom-xml :added "3.0"}
 (fact "generates the XML content for a Maven Project Object Model (POM) file"
-  ^:hidden
 
   (->> (pom-xml '{:description "task execution of and standardization",
                   :name xyz.zcaudate/std.task,
@@ -62,16 +61,15 @@
        [:name "xyz.zcaudate/std.task"]
        [:description "task execution of and standardization"]
        [:dependencies
-        [:dependency 
-         [:groupid "xyz.zcaudate"] 
-         [:artifactid "std.lib"] 
+        [:dependency
+         [:groupid "xyz.zcaudate"]
+         [:artifactid "std.lib"]
          [:version "3.0.1"]]]]
       :gaps-ok))
 
 ^{:refer code.tool.maven.package/project-clj-content :added "4.0"}
 (fact "generates the project-clj text"
-  ^:hidden
-  
+
   (project-clj-content '{:description "task execution of and standardization",
                          :name xyz.zcaudate/std.task,
                          :artifact "std.task",
@@ -88,13 +86,12 @@
 
 ^{:refer code.tool.maven.package/generate-pom :added "3.0"}
 (fact "generates a pom file given an entry"
-  ^:hidden
-  
+
   (-> (generate-pom {:artifact "std.task"
                      :group "xyz.zcaudate"
                      :version "3.0.1"}
                     "test-scratch")
-      (update-in [0] html/tree)) ^:hidden
+      (update-in [0] html/tree))
   => (contains
       [(contains [:project
                   [:packaging "jar"]
@@ -119,7 +116,7 @@
 
 ^{:refer code.tool.maven.package/linkage :added "3.0"}
 (fact "returns the linkage for a given name"
-  
+
   (linkage 'xyz.zcaudate/std.lib nil -collected- nil)
   => (contains {:name 'xyz.zcaudate/std.lib}))
 
@@ -129,7 +126,7 @@
   (package 'xyz.zcaudate/std.image {} -collected-
            {:root "." :version "3.0.1"
             :license {:name "MIT License", :url "http://opensource.org/licenses/MIT"}})
-  
+
   => (contains {:package 'xyz.zcaudate/std.image,
                 :jar "xyz.zcaudate-std.image-3.0.1.jar",
                 :pom "xyz.zcaudate-std.image-3.0.1.pom.xml",

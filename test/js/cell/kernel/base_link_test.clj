@@ -28,15 +28,14 @@
 
 ^{:refer js.cell.kernel.base-link/link-listener-call :added "4.0"}
 (fact "resolves a call to the link"
-  ^:hidden
-  
+
   (base-link/link-listener-call {:op "eval"
                                  :id "hello"
                                  :status "ok"
                                  :body "1"}
                                 {:hello {:resolve k/identity}})
   => 1
-  
+
   (base-link/link-listener-call {:op "eval"
                                  :id "hello"
                                  :status "ok"}
@@ -46,7 +45,7 @@
                 "id" "hello",
                 "status" "error",
                 "op" "eval"})
-  
+
   (base-link/link-listener-call {:op "eval"
                                  :id "hello"
                                  :status "error"
@@ -60,8 +59,7 @@
 
 ^{:refer js.cell.kernel.base-link/link-listener-event :added "4.0"}
 (fact "notifies all registered callbacks"
-  ^:hidden
-  
+
   (!.js
    (base-link/link-listener-event {:op "stream"
                                    :signal "hello"}
@@ -74,8 +72,7 @@
 
 ^{:refer js.cell.kernel.base-link/link-listener :added "4.0"}
 (fact "constructs a link listener"
-  ^:hidden
-  
+
   (base-link/link-listener {:data {:op "eval"
                                    :id "hello"
                                    :status "ok"
@@ -86,8 +83,7 @@
 
 ^{:refer js.cell.kernel.base-link/link-create-worker :added "4.0"}
 (fact "helper function to create a worker"
-  ^:hidden
-  
+
   (!.js
    (xt/x:get-key
     (base-link/link-create-worker
@@ -101,19 +97,18 @@
 
 ^{:refer js.cell.kernel.base-link/link-create :added "4.0"}
 (fact "creates a link from url"
-  ^:hidden
-  
+
   (!.js
    (xt/x:get-key (-/make-link) "::"))
   => "cell.link"
-  
+
   (notify/wait-on :js
     (var link (-/make-link))
     (. (base-link/call link {:op "eval"
                              :body "1+1"})
        (then (repl/>notify))))
   => 2
-  
+
   (notify/wait-on :js
     (var link (-/make-link))
     (. (base-link/call link {:op "call"
@@ -124,8 +119,7 @@
 
 ^{:refer js.cell.kernel.base-link/link-active :added "4.0"}
 (fact "gets the calls that are active"
-  ^:hidden
-  
+
   (vals
    (!.js
     (var link (-/make-link))
@@ -138,8 +132,7 @@
 
 ^{:refer js.cell.kernel.base-link/add-callback :added "4.0"}
 (fact "adds a callback to the link"
-  ^:hidden
-  
+
   (!.js
    (var link (-/make-link))
    (base-link/add-callback link "hello" true (fn:> true))
@@ -149,8 +142,7 @@
 
 ^{:refer js.cell.kernel.base-link/list-callbacks :added "4.0"}
 (fact "lists all callbacks on the link"
-  ^:hidden
-  
+
   (!.js
    (var link (-/make-link))
    (base-link/add-callback link "a" true (fn:> true))
@@ -160,8 +152,7 @@
 
 ^{:refer js.cell.kernel.base-link/remove-callback :added "4.0"}
 (fact "removes a callback on the link"
-  ^:hidden
-  
+
   (!.js
    (var link (-/make-link))
    (base-link/add-callback link "a" true (fn:> true))
@@ -170,23 +161,21 @@
 
 ^{:refer js.cell.kernel.base-link/call-id :added "4.0"}
 (fact "gets the call id"
-  ^:hidden
-  
+
   (!.js
    (base-link/call-id (-/make-link)))
   => string?)
 
 ^{:refer js.cell.kernel.base-link/call :added "4.0"}
 (fact "calls the link with an event"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (var link (-/make-link))
     (. (base-link/call link {:op "eval"
                              :body "1+1"})
        (then (repl/>notify))))
   => 2
-  
+
   (notify/wait-on :js
     (var link (-/make-link))
     (. (base-link-local/error-async link 100)

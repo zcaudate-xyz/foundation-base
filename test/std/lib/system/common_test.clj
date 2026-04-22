@@ -5,13 +5,13 @@
   (:use code.test))
 
 ^{:refer std.lib.system.common/system? :added "3.0"}
-(fact "checks if a component extends ISystem" ^:hidden
+(fact "checks if a component extends ISystem"
 
   (system? 1)
   => false)
 
 ^{:refer std.lib.system.common/primitive? :added "3.0"}
-(fact "checks if a component is a primitive type" ^:hidden
+(fact "checks if a component is a primitive type"
 
   (primitive? 1) => true
 

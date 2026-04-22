@@ -100,9 +100,12 @@
   (event/add-listener c "a1" "custom" (fn:>) nil nil)
   (event/add-listener c "b2" "custom" (fn:>) nil nil)
   (event/add-listener c "c3" "custom" (fn:>) nil nil)
-  [(event/remove-listener c "b2") (event/list-listeners c)])
+  [(xtd/tree-get-data (event/remove-listener c "b2"))
+   (event/list-listeners c)])
  =>
- [{"pred" nil, "meta" {"listener/id" "b2", "listener/type" "custom"}}
+ [{"callback" "<function>",
+   "pred" nil,
+   "meta" {"listener/id" "b2", "listener/type" "custom"}}
   ["a1" "c3"]])
 
 ^{:refer xt.lang.event-common/list-listener-types, :added "4.0"}
@@ -196,8 +199,11 @@
    (fn:>)
    nil
    nil)
-  [(event/remove-keyed-listener c "key/common" "b2")
+  [(xtd/tree-get-data
+    (event/remove-keyed-listener c "key/common" "b2"))
    (event/list-keyed-listeners c "key/common")])
  =>
- [{"pred" nil, "meta" {"listener/id" "b2", "listener/type" "custom"}}
+ [{"callback" "<function>",
+   "pred" nil,
+   "meta" {"listener/id" "b2", "listener/type" "custom"}}
   ["a1" "c3"]])

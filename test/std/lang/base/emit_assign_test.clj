@@ -37,8 +37,7 @@
 
 ^{:refer std.lang.base.emit-assign/emit-def-assign-inline :added "4.0"}
 (fact "assigns an inline form directly"
-  ^:hidden
-  
+
   (emit-def-assign-inline
    'j '[x.core/complex-fn (1)] +grammar+ {:lang :x
                                           :book +book-x+})
@@ -47,7 +46,6 @@
 
 ^{:refer std.lang.base.emit-assign/emit-def-assign :added "3.0"}
 (fact "emits a declare expression"
-  ^:hidden
 
   (emit-def-assign :def-assign
                    {:raw "var"}
@@ -65,8 +63,7 @@
 
 ^{:refer std.lang.base.emit-assign/test-assign-loop :adopt true :added "4.0"}
 (fact "emit do"
-  ^:hidden
-  
+
   (assign/test-assign-loop '(var a 1)
                            +grammar+
                            {})
@@ -86,19 +83,19 @@
                            +grammar+
                            {})
   => "int a = 9"
-  
-  
+
+
   (assign/test-assign-loop '(var :const a (+ b1 2))
                            +grammar+
                            {})
   => "const a = (+ b1 2)"
-  
-  
+
+
   (assign/test-assign-emit '(var a (+ 1 2))
                            +grammar+
                            {})
   => "a = 1 + 2"
-  
+
   (assign/test-assign-emit '(var :const a (+ b1 2))
                            +grammar+
                            {})

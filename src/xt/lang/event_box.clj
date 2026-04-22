@@ -83,7 +83,7 @@
   "adds a listener to box"
   {:added "4.0"}
   [box listener-id path callback meta]
-  (:= path (xtd/arrayify path))
+  (:= path (event-common/arrayify-path path))
   (return
    (event-common/add-listener
     box listener-id "box" callback
@@ -106,7 +106,7 @@
   {:added "4.0"}
   [box path]
   (var #{data} box)
-  (:= path (xtd/arrayify path))
+  (:= path (event-common/arrayify-path path))
   (return (xtd/get-in data path)))
 
 (defn.xt set-data-raw
@@ -125,7 +125,7 @@
   {:added "4.0"}
   [box path value]
   (var #{data} box)
-  (:= path (xtd/arrayify path))
+  (:= path (event-common/arrayify-path path))
   (-/set-data-raw box path value)
   (return
    (event-common/trigger-listeners
@@ -138,10 +138,11 @@
   "removes the data in the box"
   {:added "4.0"}
   [box path]
+  (:= path (event-common/arrayify-path path))
   (var #{data} box)
   (var ppath (xt/x:arr-slice path 0 (- (xt/x:len path) 1)))
   (var parent (xtd/get-in data ppath))
-  (when parent
+  (when (xt/x:not-nil? parent)
     (var val (xt/x:get-key parent (xt/x:last path)))
     (xt/x:del-key parent (xt/x:last path))
     (return (xt/x:not-nil? val)))
@@ -151,6 +152,7 @@
   "removes data with trigger"
   {:added "4.0"}
   [box path]
+  (:= path (event-common/arrayify-path path))
   (var #{data} box)
   (when (-/del-data-raw box path)
     (return
@@ -171,8 +173,9 @@
   "merges the data in the box"
   {:added "4.0"}
   [box path value]
+  (:= path (event-common/arrayify-path path))
   (var prev   (-/get-data box path))
-  (var merged (xt/x:obj-assign (xt/x:obj-clone prev) value))
+  (var merged (xtd/obj-assign (xtd/obj-clone prev) value))
   (return
    (-/set-data box path merged)))
 
@@ -180,6 +183,7 @@
   "merges the data in the box"
   {:added "4.0"}
   [box path value]
+  (:= path (event-common/arrayify-path path))
   (var arr   (xt/x:arr-clone (-/get-data box path)))
   (xt/x:arr-push arr value)
   (return

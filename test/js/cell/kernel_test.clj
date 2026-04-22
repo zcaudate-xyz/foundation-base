@@ -61,8 +61,7 @@
   :setup [(!.js
             (cl/GD-reset (-/make-playground-cell)))]}
 (fact "gets the current cell"
-  ^:hidden
-  
+
   (cl/GD)
   => map?)
 
@@ -72,38 +71,33 @@
              "p0"
              (-/make-playground-cell)))]}
 (fact "gets the current annex"
-  ^:hidden
-  
+
   (!.js
    (xt/x:obj-keys (cl/GX)))
   => ["p0"])
 
 ^{:refer js.cell.kernel/GX-val :added "4.0" :unchecked true}
 (fact "gets the current annex key"
-  ^:hidden
-  
+
   (cl/GX-val "p0")
   => map?)
 
 ^{:refer js.cell.kernel/GX-set :added "4.0" :unchecked true}
 (fact "set the current annex key"
-  ^:hidden
-  
+
    (!.js
     (cl/GX-set "p0" (-/make-playground-cell)))
   => map?)
 
 ^{:refer js.cell.kernel/get-cell :added "4.0" :unchecked true}
 (fact "gets the current cell"
-  ^:hidden
-  
+
   (cl/get-cell)
   => map?)
 
 ^{:refer js.cell.kernel/fn-call-cell :added "4.0" :unchecked true}
 (fact "calls the cell in context"
-  ^:hidden
-  
+
   (cl/fn-call-cell j/identity [])
   => map?
 
@@ -116,15 +110,13 @@
                                 {:echo  {:handler link-fn/echo
                                          :defaultArgs ["HELLO"]}}))]}
 (fact "calls the model in context"
-  ^:hidden
-  
+
   (cl/fn-call-model impl-common/model-get "hello" [])
   => map?)
 
 ^{:refer js.cell.kernel/fn-call-view :added "4.0" :unchecked true}
 (fact "calls the view in context"
-  ^:hidden
-  
+
   (!.js
    (xt/x:second (cl/fn-call-view impl-common/view-ensure ["hello" "echo"] [])))
   => map?)
@@ -140,16 +132,14 @@
                ["init"]
                (then (repl/>notify))))]}
 (fact "calls access function on the current cell"
-  ^:hidden
-  
+
   (!.js (cl/fn-access-cell base-view/get-current))
   => (contains-in
       {"hello" {"echo" ["HELLO" integer?]}}))
 
 ^{:refer js.cell.kernel/fn-access-model :added "4.0" :unchecked true}
 (fact "calls access function on the current model"
-  ^:hidden
-  
+
   (!.js (cl/fn-access-model base-view/get-current "hello"))
   => (contains-in
       {"echo" ["HELLO" integer?]}))
@@ -165,46 +155,40 @@
                ["init"]
                (then (repl/>notify))))]}
 (fact "calls access function on the current view"
-  ^:hidden
-  
+
   (!.js (cl/fn-access-view base-view/get-current
                            ["hello" "echo"] []))
   => (contains ["HELLO" integer?]))
 
 ^{:refer js.cell.kernel/list-models :added "4.0" :unchecked true}
 (fact "lists all models"
-  ^:hidden
-  
+
   (!.js
    (cl/list-models))
   => ["hello"])
 
 ^{:refer js.cell.kernel/list-views :added "4.0" :unchecked true}
 (fact "lists all views"
-  ^:hidden
-  
+
   (!.js
    (cl/list-views "hello"))
   => ["echo"])
 
 ^{:refer js.cell.kernel/get-model :added "4.0" :unchecked true}
 (fact "gets the model in context"
-  ^:hidden
-  
+
   (cl/get-model "hello")
   => map?)
 
 ^{:refer js.cell.kernel/get-view :added "4.0" :unchecked true}
 (fact "gets the view in context"
-  ^:hidden
-  
+
   (cl/get-view ["hello" "echo"])
   => map?)
 
 ^{:refer js.cell.kernel/cell-vals :added "4.0" :unchecked true}
 (fact "gets all vals in the context"
-  ^:hidden
-  
+
   (cl/cell-vals)
   => (contains-in {"hello" {"echo" ["HELLO" integer?]}})
 
@@ -213,20 +197,18 @@
 
 ^{:refer js.cell.kernel/cell-outputs :added "4.0" :unchecked true}
 (fact "gets all output data in the context"
-  ^:hidden
-  
+
   (cl/cell-outputs)
   => (contains-in
       {"hello" {"echo" {"current" ["HELLO" integer?],
                         "updated" integer?}}})
-  
+
   (cl/cell-inputs "p0")
   => {})
 
 ^{:refer js.cell.kernel/cell-inputs :added "4.0" :unchecked true}
 (fact "gets all output data in the context"
-  ^:hidden
-  
+
   (cl/cell-inputs)
   => (contains-in {"hello" {"echo" {"current" {"data" ["HELLO"]},
                                     "updated" integer?}}})
@@ -247,8 +229,7 @@
                                  :defaultArgs ["HELLO"]}})
                        (repl/notify true)))))]}
 (fact "triggers a view given event"
-  ^:hidden
-  
+
   (cl/view-val ["hello" "echo"])
   => nil
 
@@ -257,21 +238,19 @@
                                     "@/::EVENT"
                                     {}))
        (then (fn [_]
-               (repl/notify (cl/view-val ["hello" "echo"])))))) 
+               (repl/notify (cl/view-val ["hello" "echo"]))))))
   => (contains-in ["HELLO" integer?]))
 
 ^{:refer js.cell.kernel/model-outputs :added "4.0" :unchecked true}
 (fact "gets the model outputs"
-  ^:hidden
-  
+
   (cl/model-outputs "hello")
   => (contains-in {"echo" {"current" ["HELLO" integer?],
                            "updated" integer?}}))
 
 ^{:refer js.cell.kernel/model-vals :added "4.0" :unchecked true}
 (fact "gets model vals"
-  ^:hidden
-  
+
   (cl/model-vals "hello")
   => (contains-in {"echo" ["HELLO" integer?]}))
 
@@ -285,18 +264,17 @@
   :setup [(!.js
             (cl/GD-reset (-/make-playground-cell)))]}
 (fact "adds a model"
-  ^:hidden
-  
-  (!.js 
+
+  (!.js
    (cl/add-model-attach "hello0"
                         {:echo0  {:handler link-fn/echo
                                   :defaultArgs ["HELLO"]}})
-   
+
    (cl/add-model-attach "hello1"
                         {:echo1  {:handler link-fn/echo
                                   :defaultArgs ["HELLO"]}}))
   => map?
-  
+
   (!.js
    (cl/list-models))
   => ["hello0" "hello1"]
@@ -310,8 +288,7 @@
   :setup [(!.js
             (cl/GD-reset (-/make-playground-cell)))]}
 (fact "attaches a model"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (. (cl/add-model "hello"
                      {:echo  {:handler link-fn/echo
@@ -342,8 +319,7 @@
                                                       :defaultArgs ["HELLO1"]}})
                        (repl/notify true)))))]}
 (fact "calls update on a model"
-  ^:hidden
-  
+
   (cl/model-vals "hello")
   => {"echo1" nil, "echo" nil}
 
@@ -353,14 +329,14 @@
   => (contains-in
       {"echo1"
        {"path" ["hello" "echo1"],
-        
+
         "post" [false],
         "main" [true ["HELLO1" integer?]],
         "pre" [false],
         "::" "view.run"},
        "echo"
        {"path" ["hello" "echo"],
-        
+
         "post" [false],
         "main" [true ["HELLO" integer?]],
         "pre" [false],
@@ -376,11 +352,10 @@
                                          :trigger  {"@/::HELLO" true}
                                          :defaultArgs ["HELLO1"]}}))]}
 (fact "triggers an event on the model"
-  ^:hidden
 
   (cl/model-trigger "hello" "@/::OTHER" {})
   => []
-  
+
   (cl/model-trigger "hello" "@/::HELLO" {})
   => ["echo"])
 
@@ -397,8 +372,7 @@
                                  :trigger {"@/::HELLO" true}
                                  :defaultArgs ["HELLO"]}}))]}
 (fact "gets the view val"
-  ^:hidden
-  
+
   (cl/view-val ["hello" "echo"])
   => nil
 
@@ -408,15 +382,13 @@
 
 ^{:refer js.cell.kernel/view-get-input :added "4.0" :unchecked true}
 (fact "gets the view input"
-  ^:hidden
 
   (cl/view-get-input ["hello" "echo"])
   => map?)
 
 ^{:refer js.cell.kernel/view-get-output :added "4.0" :unchecked true}
 (fact "gets the view output"
-  ^:hidden
-  
+
   (set (!.js
         (xt/x:obj-keys (cl/view-get-output ["hello" "echo"]))))
   =>  #{"current" "default" "elapsed" "process" "tag" "type" "updated"}
@@ -426,8 +398,7 @@
 
 ^{:refer js.cell.kernel/view-set-val :added "4.0" :unchecked true}
 (fact "sets the view val"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (cl/add-listener ["hello" "echo"]
                      "oneshot"
@@ -442,8 +413,7 @@
 
 ^{:refer js.cell.kernel/view-get-time-updated :added "4.0" :unchecked true}
 (fact "gets updated"
-  ^:hidden
-  
+
   (cl/view-get-time-updated ["hello" "echo"])
   => integer?)
 
@@ -452,8 +422,7 @@
 
 ^{:refer js.cell.kernel/view-is-pending :added "4.0" :unchecked true}
 (fact "gets pending"
-  ^:hidden
-  
+
   (!.js
    (cl/view-is-pending ["hello" "echo"]))
   => false)
@@ -463,7 +432,6 @@
             (. (cl/view-refresh ["hello" "echo"])
                (then (repl/>notify))))]}
 (fact "gets the elapsed time"
-  ^:hidden
 
   (!.js
    (cl/view-get-time-elapsed ["hello" "echo"]))
@@ -471,8 +439,7 @@
 
 ^{:refer js.cell.kernel/view-set-input :added "4.0" :unchecked true}
 (fact "sets the view input"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (. (xt/x:first (cl/view-set-input ["hello" "echo"]
                                       {:data ["WORLD"]}))
@@ -480,7 +447,7 @@
   => (contains-in
       {"::" "view.run"
        "path" ["hello" "echo"],
-       
+
        "post" [false],
        "main" [true ["WORLD" integer?]],
        "pre" [false]}))
@@ -495,23 +462,21 @@
                                          :trigger {"@/::HELLO" true}
                                          :defaultArgs ["HELLO"]}}))]}
 (fact "refreshes the view"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (. (cl/view-refresh ["hello" "echo"])
        (then (repl/>notify))))
   => (contains-in
       {"::" "view.run"
        "path" ["hello" "echo"],
-       
+
        "post" [false],
        "main" [true ["HELLO" integer?]],
        "pre" [false]}))
 
 ^{:refer js.cell.kernel/view-update :added "4.0" :unchecked true}
 (fact "updates the view"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (. (xt/x:first (cl/view-update ["hello" "echo"]))
        (then (repl/>notify))))
@@ -524,15 +489,13 @@
 
 ^{:refer js.cell.kernel/view-ensure :added "4.0" :unchecked true}
 (fact "ensures view"
-  ^:hidden
 
   (!.js (cl/view-ensure ["hello" "echo"]))
   => (contains [map? map?]))
 
 ^{:refer js.cell.kernel/view-call-remote :added "4.0" :unchecked true}
 (fact "calls the remote function"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (. (cl/view-call-remote ["hello" "echo"]
                             1
@@ -546,8 +509,7 @@
 
 ^{:refer js.cell.kernel/view-refresh-remote :added "4.0" :unchecked true}
 (fact "refreshes the remote function"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (. (cl/view-refresh-remote ["hello" "echo"])
        (then (repl/>notify))))
@@ -559,8 +521,7 @@
 
 ^{:refer js.cell.kernel/view-trigger :added "4.0" :unchecked true}
 (fact "triggers the view with an event"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (. (xt/x:first (cl/view-trigger ["hello" "echo"]
                                     "@/::HELLO"
@@ -575,8 +536,7 @@
 
 ^{:refer js.cell.kernel/view-for :added "4.0" :unchecked true}
 (fact "gets the view after update"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (. (cl/view-for ["hello" "echo"])
        (then (repl/>notify))))
@@ -584,8 +544,7 @@
 
 ^{:refer js.cell.kernel/view-for-input :added "4.0" :unchecked true}
 (fact "gets the view after setting input"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (. (cl/view-for-input ["hello" "echo"] {})
        (then (repl/>notify))))
@@ -593,15 +552,13 @@
 
 ^{:refer js.cell.kernel/get-val :added "4.0" :unchecked true}
 (fact "gets the subview"
-  ^:hidden
-  
+
   (first (cl/get-val ["hello" "echo"]))
   => "HELLO")
 
 ^{:refer js.cell.kernel/get-for :added "4.0" :unchecked true}
 (fact "gets the subview after update"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (. (cl/get-for ["hello" "echo"]
                    [0])
@@ -629,14 +586,13 @@
                ["init"]
                (then (repl/>notify))))]}
 (fact "adds a cell listener"
-  ^:hidden
-  
+
   (notify/wait-on :js
     (cl/add-listener ["hello" "echo"]
                      "@react/1234"
                      (fn [event]
                        (var #{type} event)
-                       
+
                        (when (== "view.output" type)
                          (repl/notify event))))
     (cl/view-update ["hello" "echo"]))
@@ -647,7 +603,7 @@
        "data"
        {"current" ["HELLO" integer?],
         "updated" integer?
-        "pending" true}})  
+        "pending" true}})
 
   (!.js
    (cl/list-listeners ["hello" "echo"]))
@@ -679,8 +635,7 @@
             (. (cl/GD) ["init"]
                (then (repl/>notify))))]}
 (fact "adds a raw callback (for all events)"
-  ^:hidden
-   
+
   (notify/wait-on :js
     (cl/add-raw-callback "@/TEST"
                          true

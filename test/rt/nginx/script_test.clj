@@ -4,8 +4,7 @@
 
 ^{:refer rt.nginx.script/emit-block :added "4.0"}
 (fact  "emits a block"
-  ^:hidden
-  
+
   (emit-block [[:- "hello \nwhere"]])
   => "hello \nwhere"
 

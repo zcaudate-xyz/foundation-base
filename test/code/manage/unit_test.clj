@@ -1,5 +1,6 @@
 (ns code.manage.unit-test
   (:require [code.manage.unit :refer :all]
+            [code.manage.unit.snapto]
             [code.project :as project])
   (:use code.test))
 
@@ -75,6 +76,12 @@
 (fact "arranges the test code to be in the same order as the source code"
 
   (project/in-context (arrange))
+  => map?)
+
+^{:refer code.manage.unit.snapto/snapto :added "4.1"}
+(fact "formats fact tests into a consistent snap-to layout"
+
+  (project/in-context (code.manage.unit.snapto/snapto {:write false}))
   => map?)
 
 ^{:refer code.manage.unit/create-tests :added "3.0"}

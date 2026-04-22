@@ -19,15 +19,13 @@
 
 ^{:refer js.lib.fastify/current-servers :added "4.0" :unchecked true}
 (fact "gets the current servers"
-  ^:hidden
-  
+
   (http/current-servers)
   => map?)
 
 ^{:refer js.lib.fastify/wrap-handler :added "4.0" :unchecked true}
 (fact "wraps the request into a map"
-  ^:hidden
-  
+
   (!.js
     ((http/wrap-handler k/identity)
      {"raw"{"rawHeaders" ["Connection" "Upgrade, HTTP2-Settings",
@@ -58,11 +56,10 @@
           (http/stop-server +port+)]
   :teardown [(http/stop-server +port+)]}
 (fact "starts a fastify server"
-  ^:hidden
-  
+
   (def -server-
     (j/<! (http/start-server (@! +port+) k/identity)))
-  
+
   -server-
   => map?
 

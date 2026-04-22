@@ -35,8 +35,7 @@
                                     {"scale" 1}],
                        "opacity" 1}}])]}
 (fact "creates the animate function"
-  ^:hidden
-  
+
   (!.js
    (var f (helper-transition/absoluteAnimateFn
            {:transition "from_left"
@@ -47,10 +46,9 @@
             :width 100}))
    (j/map [0 0.2 0.5 0.8 1] f))
   => vector?)
-  
+
 ^{:refer js.react-native.helper-transition/absoluteAnimateProgress :added "4.0" :unchecked true}
 (fact "applies the animate function"
-  ^:hidden
 
   (!.js
    (var f (fn [progress]
@@ -68,8 +66,7 @@
 
 ^{:refer js.react-native.helper-transition/relativeAnimateProgress :added "4.0" :unchecked true}
 (fact "applies the relative animate function"
-  ^:hidden
-  
+
   (!.js
    (var f (fn [progress]
             (return
@@ -104,4 +101,4 @@
       {"style"
        {"transform" [{"translateX" 0} {"translateY" 0} {"scale" 1}],
         "opacity" 1}}])
-  
+

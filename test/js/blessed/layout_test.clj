@@ -19,8 +19,7 @@
 
 ^{:refer js.blessed.layout/PrimaryButton :added "4.0" :unchecked true}
 (fact "creates a primary layout button"
-  ^:hidden
-  
+
   (defn.js PrimaryButtonDemo
     []
     (let [[route setRoute] (r/local "file")]
@@ -44,8 +43,7 @@
 
 ^{:refer js.blessed.layout/layoutMenu :added "4.0" :unchecked true}
 (fact "layout for menu entry"
-  ^:hidden
-  
+
   (layout/layoutMenu
    [{:index "f1"
      :label "File"
@@ -68,8 +66,7 @@
 
 ^{:refer js.blessed.layout/layoutToggles :added "4.0" :unchecked true}
 (fact "layout for toggle entry"
-  ^:hidden
-  
+
   (layout/layoutToggles
    [{:label "F"}
     {:type "separator"}
@@ -80,8 +77,7 @@
 
 ^{:refer js.blessed.layout/PrimaryMenu :added "4.0" :unchecked true}
 (fact "creates a primary menu"
-  ^:hidden
-  
+
   (defn.js PrimaryMenuDemo
     []
     (var [route setRoute] (r/local "file"))
@@ -102,8 +98,7 @@
 
 ^{:refer js.blessed.layout/PrimaryToggle :added "4.0" :unchecked true}
 (fact "creates a primary toggle"
-  ^:hidden
-  
+
   (defn.js PrimaryToggleDemo
     []
     (var [active setActive] (r/local true))
@@ -122,8 +117,7 @@
 
 ^{:refer js.blessed.layout/PrimaryToggles :added "4.0" :unchecked true}
 (fact "creates primary toggles"
-  ^:hidden
-  
+
   (defn.js PrimaryTogglesDemo
     []
     (var [activeD setActiveD] (r/local false))
@@ -142,8 +136,7 @@
 
 ^{:refer js.blessed.layout/SecondaryButton :added "4.0" :unchecked true}
 (fact "creates a secondary button"
-  ^:hidden
-  
+
   (defn.js SecondaryButtonDemo
     []
     (var [index setIndex] (r/local 1))
@@ -166,8 +159,7 @@
 
 ^{:refer js.blessed.layout/SecondaryMenu :added "4.0" :unchecked true}
 (fact "creates a secondary button"
-  ^:hidden
-  
+
   (defn.js SecondaryMenuDemo
     []
     (var [index setIndex] (r/local 1))
@@ -201,8 +193,7 @@
 
 ^{:refer js.blessed.layout/LayoutStatus :added "4.0" :unchecked true}
 (fact "constructs the status line"
-  ^:hidden
-  
+
   (defn.js LayoutStatusDemo
     []
     (var [busy setBusy] (r/local false))
@@ -248,7 +239,6 @@
 
 ^{:refer js.blessed.layout/LayoutNotify :added "4.0" :unchecked true}
 (fact "constructs the notification panel"
-  ^:hidden
 
   (defn.js LayoutNotifyDemo
     []
@@ -279,8 +269,7 @@
 
 ^{:refer js.blessed.layout/LayoutMain :added "4.0" :unchecked true}
 (fact "constructs the main page"
-  ^:hidden
-  
+
   (defmacro.js ^{:style/indent 1}
     content-frame
     [label & content]
@@ -342,22 +331,22 @@
     [{:label "Alt 1"  :name "section-1" :view -/Alt1Panel}
      {:label "Alt 2"  :name "section-2" :view -/Alt2Panel}
      {:label "Alt 3"  :name "section-3" :view -/Alt3Panel}])
-  
+
   (defglobal.js Route
     (v/make {:current "starter"}))
-  
+
   (defglobal.js RouteIndex
     (v/make {}))
-    
+
   (defn.js LayoutMainDemo
     []
     (let [[route setRoute] (v/useProxyField -/Route "current")
           [index setIndex] (v/useProxyField -/RouteIndex route)])
     (return
      [:% layout/LayoutMain
-      {:route route 
+      {:route route
        :setRoute setRoute
-       :index index 
+       :index index
        :setIndex setIndex
        :header {:menu [{:index "f1"
                         :route "starter"
@@ -384,7 +373,7 @@
                             :label "Starter"}
                   :alt     {:items -/AltItems
                             :label "Alt"}}}]))
-  
+
   )
 
 (comment

@@ -96,7 +96,7 @@
   => [[1.0 0.6] [0.4285714285714286 1.0] [0.5714285714285715 0.6] [0.7142857142857143 0.6]])
 
 ^{:refer std.timeseries.process/process :added "3.0"}
-(comment "processes time series" ^:hidden
+(comment "processes time series"
 
   (process (->> @(first (vals (:active @(:runtime (:collector @*instance*)))))
                 :results
@@ -184,7 +184,7 @@
                                                ;;:sample 10
                                             :aggregate :max}]}
                     :indicators {:lag-norm '(/ :bench.stats.lag [:s/max :bench.stats.lag])
-                                    ;;:lag-norm :bench.stats.lag 
+                                    ;;:lag-norm :bench.stats.lag
                                  }})
           (map/map-vals count))))
 

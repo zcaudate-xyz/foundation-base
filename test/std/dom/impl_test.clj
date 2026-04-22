@@ -11,7 +11,7 @@
   (-> (base/dom-create :mock/pane {} ["hello"])
       (dom-render)
       (base/dom-format))
-  => [:+ :mock/pane "hello"]^:hidden
+  => [:+ :mock/pane "hello"]
 
   (-> (base/dom-create :mock/pane {:dom/init {:children ["hello"]}})
       (dom-render)
@@ -20,7 +20,7 @@
   => [:mock/pane "hello"])
 
 ^{:refer std.dom.impl/dom-render-default :added "3.0"}
-(fact "default implementation of dom-render. throws exception"^:hidden
+(fact "default implementation of dom-render. throws exception"
 
   (-> (base/dom-create :mock/pane {} ["hello"])
       (dom-render-default)
@@ -31,7 +31,7 @@
 (fact "renders the dom element if input is dom and not rendered"
 
   (dom-init 1) => 1
-  
+
   (base/dom-format (dom-init (base/dom-create :mock/pane)))
   => [:+ :mock/pane])
 
@@ -51,7 +51,7 @@
   => [:- :mock/pane "hello"])
 
 ^{:refer std.dom.impl/dom-remove-default :added "3.0"}
-(fact "default implementation of dom-remove."^:hidden
+(fact "default implementation of dom-remove."
 
   (-> (base/dom-create :mock/pane {} ["hello"])
       (dom-render)
@@ -70,7 +70,7 @@
   => {:children ["world"]})
 
 ^{:refer std.dom.impl/dom-replace-default :added "3.0"}
-(fact "default implementation of dom-remove."^:hidden
+(fact "default implementation of dom-remove."
 
   (-> (base/dom-create :mock/pane {} ["hello"])
       (dom-render)

@@ -19,17 +19,27 @@
 (fact
  "plugin timing"
  ^{:hidden true}
- (!.dt (handle/plugin-timing {}))
+ (!.dt
+  (xtd/tree-get-spec (handle/plugin-timing {})))
  =>
- {"output" {}, "name" "timing"})
+ {"on_setup" "function",
+  "output" {},
+  "on_reset" "function",
+  "name" "string",
+  "on_teardown" "function"})
 
 ^{:refer xt.lang.util-handle/plugin-counts, :added "4.0"}
 (fact
  "plugin counts"
  ^{:hidden true}
- (!.dt (handle/plugin-counts {}))
+ (!.dt
+  (xtd/tree-get-spec (handle/plugin-counts {})))
  =>
- {"output" {"success" 0, "error" 0}, "name" "counts"})
+ {"output" {"success" "number", "error" "number"},
+  "on_error" "function",
+  "on_reset" "function",
+  "name" "string",
+  "on_success" "function"})
 
 ^{:refer xt.lang.util-handle/to-handle-callback, :added "4.0"}
 (fact
@@ -44,22 +54,23 @@
 (fact
  "creates a new handle"
  ^{:hidden true}
- (notify/wait-on
-  :dart
+ (!.dt
   (var
    T
    (handle/new-handle
     (fn [] (return 1))
     [handle/plugin-counts handle/plugin-timing]
     {:delay 100}))
-  (var
-   result
-   (handle/run-handle
-    T
-    []
-    {:on-teardown (fn [] (repl/notify result))})))
+  (var result (handle/run-handle T [] nil))
+  (var receipt (xt/x:first result))
+  (var proc (xt/x:second result))
+  (xt/for:async
+   [[ret err] proc]
+   {:success (return [receipt ret])
+    :error (xt/x:throw err)}))
  =>
  (contains-in
   [{"id" "id-0",
     "counts" {"success" 1, "error" 0},
-    "timing" {"start" number?, "end" number?}}]))
+    "timing" {"start" number?, "end" number?}}
+   1]))

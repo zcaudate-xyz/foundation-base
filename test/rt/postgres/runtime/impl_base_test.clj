@@ -21,15 +21,13 @@
 ^{:refer rt.postgres.runtime.impl-base/prep-entry :added "4.0"
   :setup [@Hello]}
 (fact "prepares data given an entry sym"
-  ^:hidden
-  
+
   (second (prep-entry '-/Hello (l/rt:macro-opts :postgres)))
   => book/book-entry?)
 
 ^{:refer rt.postgres.runtime.impl-base/prep-table :added "4.0"}
 (fact "prepares data related to the table sym"
-  ^:hidden
-  
+
   (prep-table '-/Hello false (l/rt:macro-opts :postgres))
   => vector?)
 
@@ -40,8 +38,7 @@
 
 ^{:refer rt.postgres.runtime.impl-base/t-input-check :guard true :added "4.0"}
 (fact "passes the input if check is ok"
-  ^:hidden
-  
+
   (t-input-check (get-in (app/app "scratch")
                          [:schema
                           :tree
@@ -67,15 +64,13 @@
 
 ^{:refer rt.postgres.runtime.impl-base/t-input-collect :added "4.0"}
 (fact "adds schema info to keys of map"
-  ^:hidden
-  
+
   (t-input-collect -tsch-
                    '{:status a})
   => (contains {:status (contains ['a map?])}))
 
 ^{:refer rt.postgres.runtime.impl-base/t-val-process :added "4.0"}
 (fact "allows additional filters to be added"
-  ^:hidden
 
   (t-val-process [['add 5]
                   ['sub 5]]
@@ -84,12 +79,11 @@
 
 ^{:refer rt.postgres.runtime.impl-base/t-val-fn :added "4.0"}
 (fact "builds a js val given input"
-  ^:hidden
-  
+
   (t-val-fn -tsch-
             :status 'a {} {})
   => '(++ a rt.postgres.test.scratch-v1/EnumStatus)
-  
+
   (t-val-fn -tsch-
             :cache 'a {}
             (last (prep-table 'scratch/Task true (l/rt:macro-opts :postgres))))
@@ -109,8 +103,7 @@
 
 ^{:refer rt.postgres.runtime.impl-base/t-key-attrs-fn :added "4.0"}
 (fact "builds a js key"
-  ^:hidden
-  
+
   (t-key-attrs-fn [:cache  (get -tsch- :cache)])
   => "cache_id"
 
@@ -119,8 +112,7 @@
 
 ^{:refer rt.postgres.runtime.impl-base/t-key-fn :added "4.0"}
 (fact "builds a js key"
-  ^:hidden
-  
+
   (t-key-fn -tsch-
             :cache)
   => "cache_id"
@@ -131,13 +123,12 @@
 
 ^{:refer rt.postgres.runtime.impl-base/t-sym-fn :added "4.0"}
 (fact "builds a json access form"
-  ^:hidden
-  
+
   (t-sym-fn -tsch-
             :cache
             'e)
   => '(:uuid (coalesce (:->> e "cache_id") (:->> (:-> e "cache") "id")))
-  
+
   (t-sym-fn -tsch-
             :id
             'e)
@@ -145,8 +136,7 @@
 
 ^{:refer rt.postgres.runtime.impl-base/t-build-js-map :added "4.0"}
 (fact "builds a js map"
-  ^:hidden
-  
+
   (t-build-js-map -tsch-
                   (t-input-collect -tsch-
                                    '{:status a
@@ -162,8 +152,7 @@
 
 ^{:refer rt.postgres.runtime.impl-base/t-create-fn :added "4.0"}
 (fact "the flat create-fn"
-  ^:hidden
-  
+
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (t-create-fn 'scratch/Task '{:status a
                                  :name "hello"
@@ -177,44 +166,42 @@
 
 ^{:refer rt.postgres.runtime.impl-base/t-returning-cols :added "4.0"}
 (fact "formats returning cols given"
-  ^:hidden
-  
-  (t-returning-cols -tsch- 
+
+  (t-returning-cols -tsch-
                     [:*/data]
                     t-key-attrs-fn)
   => [#{"id"} #{"status"} #{"name"} #{"time_created"} #{"time_updated"}]
 
-  (t-returning-cols -tsch- 
+  (t-returning-cols -tsch-
                     [:-/id]
                     t-key-attrs-fn)
   => [#{"id"}]
 
-  (t-returning-cols -tsch- 
+  (t-returning-cols -tsch-
                     [:name :time-created]
                     t-key-attrs-fn)
   => [#{"name"} #{"time_created"}]
 
-  (t-returning-cols -tsch- 
+  (t-returning-cols -tsch-
                     '[hello-id]
                     t-key-attrs-fn)
   => [#{"hello_id"}])
 
 ^{:refer rt.postgres.runtime.impl-base/t-returning :added "4.0"}
 (fact "formats the returning expression"
-  ^:hidden
-  
-  (t-returning -tsch- 
+
+  (t-returning -tsch-
                #{:*/data})
   => '(--- [#{"id"} #{"status"} #{"name"} #{"time_created"} #{"time_updated"}])
 
-  (t-returning -tsch- 
+  (t-returning -tsch-
                :*/data)
   => '(--- [#{"id"} #{"status"} #{"name"} #{"time_created"} #{"time_updated"}])
 
   (t-returning -tsch- '*)
   => '*
 
-  
+
   (t-returning -tsch- #{{:expr '(count *)}})
   => '(--- [(count *)])
 
@@ -224,15 +211,13 @@
 
 ^{:refer rt.postgres.runtime.impl-base/t-where-hashvec-transform :added "4.0"}
 (fact "transforms entries"
-  ^:hidden
-  
+
   (t-where-hashvec-transform [[:id 1] [:cache 1]] identity)
   => #{[:id 1 :or :cache 1]})
 
 ^{:refer rt.postgres.runtime.impl-base/t-where-hashvec :added "4.0"}
 (fact "function for where transform"
-  ^:hidden
-  
+
   (t-where-hashvec #{[:simple-id [:eq 1]]}
                    identity)
   => #{[:simple-id [:eq 1]]}
@@ -246,8 +231,7 @@
 
 ^{:refer rt.postgres.runtime.impl-base/t-where-transform :added "4.0"}
 (fact "creates a where transform"
-  ^:hidden
-  
+
   (t-where-transform -tsch- {:id 1} {})
   => {"id" [:eq 1]}
 
@@ -261,11 +245,10 @@
 
 ^{:refer rt.postgres.runtime.impl-base/t-wrap-json :added "4.0"}
 (fact "wraps a json return to the statement"
-  ^:hidden
 
   (t-wrap-json '<FORM> :json 'js-agg 'output nil)
   => '[:with j-ret :as <FORM> \\ :select (js-agg j-ret) :from j-ret]
-  
+
   (t-wrap-json '<FORM> :json 'js-agg 'output :id)
   => '[:with j-ret :as <FORM> \\ :select (js-agg (. j-ret #{:id})) :from j-ret]
 
@@ -274,8 +257,7 @@
 
 ^{:refer rt.postgres.runtime.impl-base/t-wrap-where :added "4.0"}
 (fact "adds a `where` clause"
-  ^:hidden
-  
+
   (t-wrap-where []
                 {:id 1}
                 -tsch-
@@ -285,8 +267,7 @@
 
 ^{:refer rt.postgres.runtime.impl-base/t-wrap-order-by :added "4.0"}
 (fact "adds an `order-by` clause"
-  ^:hidden
-  
+
   (t-wrap-order-by []
                    [:id :status]
                    -tsch-
@@ -295,8 +276,7 @@
 
 ^{:refer rt.postgres.runtime.impl-base/t-wrap-order-sort :added "4.0"}
 (fact "determines asc or desc key"
-  ^:hidden
-  
+
   (t-wrap-order-sort []
                      :asc
                      -tsch-
@@ -305,36 +285,31 @@
 
 ^{:refer rt.postgres.runtime.impl-base/t-wrap-limit :added "4.0"}
 (fact "adds a `limit` clause"
-  ^:hidden
-  
+
   (t-wrap-limit [] 10 {})
   => [:limit 10])
 
 ^{:refer rt.postgres.runtime.impl-base/t-wrap-offset :added "4.0"}
 (fact "adds a `offset` clause"
-  ^:hidden
-  
+
   (t-wrap-offset [] 10 {})
   => [:offset 10])
 
 ^{:refer rt.postgres.runtime.impl-base/t-wrap-into :added "4.0"}
 (fact "adds `into` clause"
-  ^:hidden
-  
+
   (t-wrap-into [] 'hello {})
   => '[:into hello])
 
 ^{:refer rt.postgres.runtime.impl-base/t-wrap-returning :added "4.0"}
 (fact "adds `returning` clause"
-  ^:hidden
-  
+
   (t-wrap-returning [] [#{"id"} #{"status"}] {})
   => [:returning [#{"id"} #{"status"}]])
 
 ^{:refer rt.postgres.runtime.impl-base/t-wrap-group-by :added "4.0"}
 (fact "adds `group-by` clause"
-  ^:hidden
-  
+
   (t-wrap-group-by [] [#{"id"} #{"status"}] {})
   => [:group-by [#{"id"} #{"status"}]])
 
@@ -351,22 +326,19 @@
 
 ^{:refer rt.postgres.runtime.impl-base/t-wrap-join :added "4.1"}
 (fact "adds a `join` clause"
-  ^:hidden
-  
+
   (t-wrap-join [] [[:left-join "target" :on [:= "s.id" "t.id"]]] {})
   => [[:left-join "target" :on [:= "s.id" "t.id"]]])
 
 ^{:refer rt.postgres.runtime.impl-base/t-wrap-having :added "4.1"}
 (fact "adds a `having` clause"
-  ^:hidden
-  
+
   (t-wrap-having [] {:id 1} -tsch- {} {})
   => '[:having {"id" [:eq 1]}])
 
 ^{:refer rt.postgres.runtime.impl-base/t-join-transform :added "4.1"}
 (fact "transforms join entries"
-  ^:hidden
-  
+
   (let [out (t-join-transform {:task [{:type :ref :ref {:link {:ns "scratch" :id "Task"}}}]}
                               [:task]
                               "Hello"

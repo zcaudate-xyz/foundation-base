@@ -46,6 +46,9 @@
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-proto-create :added "4.0"}
 (fact "creates prototype"
   (l/emit-as :js [(js-tf-x-proto-create '[_ {:a 1}])])
+  => #"function \(\)\{"
+
+  (l/emit-as :js [(js-tf-x-proto-create '[_ {:a 1}])])
   => #"Object.entries")
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-m-max :added "4.0"}
@@ -183,10 +186,75 @@
   (l/emit-as :js [(js-tf-x-arr-sort '[_ arr key-fn comp-fn])])
   => #"sort")
 
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-arr-str-comp :added "4.0"}
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-arr-clone :added "4.0"}
+(fact "clones array"
+  (l/emit-as :js [(js-tf-x-arr-clone '[_ arr])])
+  => #"slice")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-arr-assign :added "4.1"}
+(fact "assigns into the original array"
+  (l/emit-as :js [(js-tf-x-arr-assign '[_ arr other])])
+  => #"push")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-arr-concat :added "4.1"}
+(fact "concatenates into a new array"
+  (l/emit-as :js [(js-tf-x-arr-concat '[_ arr other])])
+  => #"concat")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-arr-each :added "4.0"}
+(fact "iterates array"
+  (l/emit-as :js [(js-tf-x-arr-each '[_ arr f])])
+  => #"forEach")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-arr-every :added "4.0"}
+(fact "checks every element"
+  (l/emit-as :js [(js-tf-x-arr-every '[_ arr pred])])
+  => #"every")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-arr-some :added "4.0"}
+(fact "checks some element"
+  (l/emit-as :js [(js-tf-x-arr-some '[_ arr pred])])
+  => #"some")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-arr-map :added "4.0"}
+(fact "maps array"
+  (l/emit-as :js [(js-tf-x-arr-map '[_ arr f])])
+  => #"map")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-arr-filter :added "4.0"}
+(fact "filters array"
+  (l/emit-as :js [(js-tf-x-arr-filter '[_ arr pred])])
+  => #"filter")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-arr-foldl :added "4.0"}
+(fact "reduces from the left"
+  (l/emit-as :js [(js-tf-x-arr-foldl '[_ arr f init])])
+  => #"reduce")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-arr-foldr :added "4.0"}
+(fact "reduces from the right"
+  (l/emit-as :js [(js-tf-x-arr-foldr '[_ arr f init])])
+  => #"reduceRight")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-arr-find :added "4.0"}
+(fact "finds array index"
+  (l/emit-as :js [(js-tf-x-arr-find '[_ arr pred])])
+  => #"findIndex")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-str-comp :added "4.0"}
 (fact "compares strings"
-  (l/emit-as :js [(js-tf-x-arr-str-comp '[_ a b])])
+  (l/emit-as :js [(js-tf-x-str-comp '[_ a b])])
   => #"localeCompare")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/+js+ :added "4.0"}
+(fact "registers functional array templates"
+  (mapv (fn [k] (get-in +js+ [k :macro]))
+        [:x-arr-clone :x-arr-each :x-arr-every :x-arr-some
+         :x-arr-map :x-arr-filter :x-arr-keep
+         :x-arr-foldl :x-arr-foldr :x-arr-find :x-arr-sort])
+  => [#'js-tf-x-arr-clone #'js-tf-x-arr-each #'js-tf-x-arr-every #'js-tf-x-arr-some
+      #'js-tf-x-arr-map #'js-tf-x-arr-filter
+      #'js-tf-x-arr-foldl #'js-tf-x-arr-foldr #'js-tf-x-arr-find #'js-tf-x-arr-sort])
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-str-char :added "4.0"}
 (fact "gets char"
@@ -391,46 +459,6 @@
     (l/emit-as :js [(js-tf-x-notify-http '[_ host port value id key opts])])
     => #"fetch"))
 
-
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-future-run :added "4.1"}
-(fact "future run"
-  (l/emit-as :js [(js-tf-x-future-run '[_ thunk])])
-  => #"Promise.resolve")
-
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-future-then :added "4.1"}
-(fact "future then"
-  (l/emit-as :js [(js-tf-x-future-then '[_ task on-ok])])
-  => #"then")
-
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-future-catch :added "4.1"}
-(fact "future catch"
-  (l/emit-as :js [(js-tf-x-future-catch '[_ task on-err])])
-  => #"catch")
-
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-future-finally :added "4.1"}
-(fact "future finally"
-  (l/emit-as :js [(js-tf-x-future-finally '[_ task on-done])])
-  => #"finally")
-
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-future-cancel :added "4.1"}
-(fact "future cancel"
-  (l/emit-as :js [(js-tf-x-future-cancel '[_ task])])
-  => #"cancel")
-
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-future-status :added "4.1"}
-(fact "future status"
-  (l/emit-as :js [(js-tf-x-future-status '[_ task])])
-  => #"__xt_status")
-
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-future-await :added "4.1"}
-(fact "future await"
-  (l/emit-as :js [(js-tf-x-future-await '[_ task 1000 nil])])
-  => #"task")
-
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-future-from-async :added "4.1"}
-(fact "future from async"
-  (l/emit-as :js [(js-tf-x-future-from-async '[_ executor])])
-  => #"new Promise")
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-has-key? :added "4.1"}
 (fact "has key"

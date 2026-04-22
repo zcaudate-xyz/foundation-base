@@ -208,7 +208,7 @@
 - **Dispatch Hooks Counter**: The `std.dispatch.hooks/counter` map includes `:poll`, `:skip`, and `:batch` keys in addition to standard lifecycle keys to support all dispatch hooks.
 - **Spawn Form Tests**: Tests for `std.scheduler.common` functions that use `resolve` (like `spawn-form`) require dummy target functions to be defined at the top level of the test namespace to be resolvable.
 - **Async Stream Lib**: The `std.lib.stream.async` library provides a reactive programming model with `Mono` (a stream of at most one item) and `Flux` (a stream of many items) for building asynchronous, stream-based data processing pipelines.
-- **CI Scripts**: The user prefers using Bash scripts (e.g., `scripts/test_changed.sh`) for CI/CD workflow orchestration logic (like file change detection) rather than embedding it entirely within Clojure code.
+- **CI Scripts**: The user prefers using Bash scripts (e.g., `src-training/scripts/test_changed.sh`) for CI/CD workflow orchestration logic (like file change detection) rather than embedding it entirely within Clojure code.
 - **Repo Purpose**: The repository `foundation-base` is a Clojure-based project focusing on `std.lang` for multi-language integration.
 - **Logger Component**: `BasicLogger` in `std.log.core` does not implement `std.protocol.component/IComponent`, rendering `std.lib/start` effectively a no-op; tests must explicitly call `logger-start` to initialize the executor and `logger-stop` to prevent thread leaks.
 - **Dispatch Hooks**: The `std.concurrent.dispatch` library provides a system of lifecycle hooks (e.g., `:on-submit`, `:on-queued`, `:on-skip`, `:on-error`) that can be configured under the `:hooks` key to monitor and extend dispatcher behavior.
@@ -319,7 +319,7 @@
 - **Make Bulk Name**: The `std.make.bulk/make-bulk` function requires the `:name` key in its arguments map to prevent a `NullPointerException` during log formatting.
 - **Matchwalk Insertion**: When performing insertion operations during `code.query.walk/matchwalk` traversal, predicates must verify the right sibling (e.g., `zip/right-element`) or otherwise ensure the zipper advances past the insertion to prevent infinite recursion.
 - **MCP Guidelines**: Comprehensive guidelines, tool schemas, and agent workflows (e.g., Exploration, Modification) for `code.ai.server` MCP clients are documented in `plans/mcp_client_guidelines.md`.
-- **Test Changed Script**: The `scripts/test_changed.sh` script facilitates selective testing in CI by using `git diff` to identify changed `.clj` files and passing them to `lein test` via the `:files` argument.
+- **Test Changed Script**: The `src-training/scripts/test_changed.sh` script facilitates selective testing in CI by using `git diff` to identify changed `.clj` files and passing them to `lein test` via the `:files` argument.
 - **Scaffold Append**: When generating or modifying test files, the return value of `code.manage.unit.scaffold/scaffold-append` must be used to ensure the namespace declaration is correctly included.
 - **Trace Lib**: The `std.lib.trace` namespace provides runtime tracing. `trace-ns` instruments all functions in a namespace, and `get-trace` retrieves the call history (a list of maps with `:in` and `:out` keys) from a function var's metadata.
 - **Emit As Regex**: The `std.lang/emit-as` function returns the transpiled source code string; tests should use regex (via `h/match?` or implied by `=>`) to verify the presence of expected tokens rather than relying on exact string equality.

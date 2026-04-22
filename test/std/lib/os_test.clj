@@ -157,15 +157,13 @@
 
 ^{:refer std.lib.os/url-encode :added "4.0"}
 (fact "encodes string to url"
-  ^:hidden
-  
+
   (url-encode "http://www.goggle.com")
   => "http%3A%2F%2Fwww.goggle.com")
 
 ^{:refer std.lib.os/url-decode :added "4.0"}
 (fact "decodes string from url"
-  ^:hidden
-  
+
   (url-decode "http%3A%2F%2Fwww.goggle.com")
   => "http://www.goggle.com")
 

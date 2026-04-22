@@ -24,8 +24,8 @@
 (fact "returns the associated metatype"
 
   (dom-metatype (dom-new :mock/label {}))
-  => :dom/element^:hidden
-  
+  => :dom/element
+
   (dom-metatype (dom-new :mock/insets {}))
   => :dom/value)
 
@@ -33,8 +33,8 @@
 (fact "returns the associated metaclass"
 
   (dom-metaclass (dom-new :mock/label {}))
-  => :mock/element^:hidden
-  
+  => :mock/element
+
   (dom-metaclass (dom-new :mock/insets {}))
   => :mock/value)
 
@@ -114,7 +114,7 @@
 
   (dom-children (dom-create :mock/pane {} ["hello"]))
   => {:key :children
-      :children ["hello"]}^:hidden
+      :children ["hello"]}
 
   (dom-children (dom-create :mock/pane {}
                             [(dom-create :mock/pane)
@@ -136,12 +136,12 @@
 
   (dom-create :mock/pane {} ["hello"])
   ;; [:- :label "hello"]
-  => dom?^:hidden
+  => dom?
 
   (-> (dom-create :mock/pane {:dom/init {:children ["hello"]}})
       :extra)
   => {:dom/init {:children ["hello"]}}
-  
+
   (-> (dom-create :mock/pane {:dom/key 123})
       :extra)
   => {:dom/key 123})
@@ -171,7 +171,7 @@
 
   (dom-equal? (dom-create :mock/label {} ["hello"])
               (dom-create :mock/label {} ["hello"]))
-  => true^:hidden
+  => true
 
   (dom-equal? (dom-create :mock/label)
               (dom-create :mock/label {} ["hello"]))

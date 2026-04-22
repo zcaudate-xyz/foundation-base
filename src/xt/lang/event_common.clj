@@ -44,6 +44,9 @@
         [:xt/maybe [:fn [:xt/any] :xt/bool]]]
        EventListenerEntry])
 
+(defspec.xt arrayify-path
+  [:fn [:xt/any] [:xt/array :xt/any]])
+
 (defspec.xt clear-listeners
   [:fn [EventContainer] EventListenerMap])
 
@@ -107,9 +110,10 @@
   "makes a container"
   {:added "4.0"}
   [initial type-name opts]
-  (var initialFn (:? (xt/x:is-function? initial)
-                     initial
-                     (fn [] (return initial))))
+  (var initialFn initial)
+  (when (not (xt/x:is-function? initialFn))
+    (:= initialFn
+        (fn [] (return initial))))
   (var data   (initialFn))
   (var container (xt/x:obj-assign
                   {"::" type-name
@@ -125,11 +129,23 @@
   [listener-id listener-type callback meta pred]
   (return
    {:callback callback
-    :pred pred
-           :meta (xt/x:obj-assign
-                  {:listener/id   listener-id
-                   :listener/type listener-type}
-                  meta)}))
+     :pred pred
+            :meta (xt/x:obj-assign
+                   {:listener/id   listener-id
+                    :listener/type listener-type}
+                   meta)}))
+
+(defn.xt arrayify-path
+  "normalizes event path-like inputs, treating empty objects as empty arrays"
+  {:added "4.1"}
+  [x]
+  (when (xt/x:is-array? x)
+    (return x))
+  (when (or (xt/x:nil? x)
+            (and (xt/x:is-object? x)
+                 (xtd/is-empty? x)))
+    (return []))
+  (return [x]))
 
 (defn.xt clear-listeners
   "clears all listeners"
@@ -170,8 +186,8 @@
   [container]
   (var #{listeners} container)
   (var out {})
-  (xt/for:object [[id entry] listeners]
-    (var #{meta} entry)
+  (xt/for:object [[id listener-entry] listeners]
+    (var #{meta} listener-entry)
     (var t   (xt/x:get-key meta "listener/type"))
     (var arr (xt/x:get-key out t))
     (when (xt/x:nil? arr)
@@ -188,8 +204,8 @@
   (when (or (xt/x:nil? pred)
             (pred event))
     (var nmeta (xt/x:obj-assign (or (xt/x:get-key event "meta")
-                                 {})
-                             meta))
+                                    {})
+                                meta))
     (callback (xt/x:obj-assign
                (xt/x:obj-clone event)
                {:meta nmeta}))))
@@ -198,7 +214,8 @@
   "triggers listeners given event"
   {:added "4.0"}
   [container event]
-  (:= event (or event {}))
+  (when (xt/x:nil? event)
+    (:= event {}))
   (var #{listeners} container)
   (var triggered [])
   (xt/for:object [[id entry] listeners]
@@ -263,7 +280,8 @@
   "triggers listeners under a key"
   {:added "4.0"}
   [container key event]
-  (:= event (or event {}))
+  (when (xt/x:nil? event)
+    (:= event {}))
   (var #{listeners} container)
   (var group (xt/x:get-key listeners key))
   (var triggered [])

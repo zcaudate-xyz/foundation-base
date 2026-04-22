@@ -51,8 +51,7 @@
 
 ^{:refer code.tool.maven.command/prepare-artifacts :added "3.0"}
 (fact "prepares the files for deployment"
-  ^:hidden
-  
+
   (prepare-artifacts {:pom "test-data/code.tool.maven/sample.pom"
                       :jar "test-data/code.tool.maven/sample.pom"
                       :interim ""}
@@ -67,8 +66,8 @@
            {}
            -collected-
            (assoc (project/project) :version "3.0.1" :aether (aether/aether)))
-  => (contains [artifact/rep? artifact/rep?]) ^:hidden
-  
+  => (contains [artifact/rep? artifact/rep?])
+
   (install 'xyz.zcaudate/std.object
            {:secure true :digest true}
            -collected-

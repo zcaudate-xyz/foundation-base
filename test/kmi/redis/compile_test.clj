@@ -6,7 +6,6 @@
 
 ^{:refer kmi.redis.compile/parse-map :added "3.0"}
 (fact "parses the :map type from a spec and key"
-  ^:hidden
 
   (parse-map type/<SPEC> :__meta__)
   => {:type :hash}
@@ -26,7 +25,6 @@
 
 ^{:refer kmi.redis.compile/compile-path :added "3.0"}
 (fact "creates a typed path"
-  ^:hidden
 
   (compile-path type/<SPEC> [:active "<ID>"])
   => [{:type :key, :path :active} {:type :zset, :path "<ID>"}])
@@ -36,7 +34,6 @@
 
 ^{:refer kmi.redis.compile/to:array :added "3.0"}
 (fact "creates a form for arrays"
-  ^:hidden
 
   (to:array ['<RETURN>])
   => '[(unpack (xt.lang.common-data/to-flat <RETURN>))]
@@ -46,7 +43,6 @@
 
 ^{:refer kmi.redis.compile/build-path :added "3.0"}
 (fact "build path command"
-  ^:hidden
 
   (build-path [{:path 'hello}]
               ["test"])
@@ -54,7 +50,6 @@
 
 ^{:refer kmi.redis.compile/build-command :added "3.0"}
 (fact "builds a redis command"
-  ^:hidden
 
   (build-command {:prefix ["GET"] :suffix []}
                  [{:path 'hello}]
@@ -63,7 +58,6 @@
 
 ^{:refer kmi.redis.compile/run-command :added "3.0"}
 (fact "command for run"
-  ^:hidden
 
   (compile type/<SPEC>
            '[:RUN "ZRANGE" ["test"] [:active]])
@@ -71,7 +65,6 @@
 
 ^{:refer kmi.redis.compile/path-command :added "3.0"}
 (fact "command for path"
-  ^:hidden
 
   (compile type/<SPEC>
            '[:PATH ["test"] [:active id]])
@@ -79,7 +72,6 @@
 
 ^{:refer kmi.redis.compile/get-all-command :added "3.0"}
 (fact "creates a get all command"
-  ^:hidden
 
   (get-all-command {:type :zset :path 'hello}
                    []
@@ -93,7 +85,6 @@
 
 ^{:refer kmi.redis.compile/get-vals-command :added "3.0"}
 (fact "command for set vals"
-  ^:hidden
 
   (compile type/<SPEC>
            '[:GET ["test"] [:unfilled <id>] ["volume"]])
@@ -105,7 +96,6 @@
 
 ^{:refer kmi.redis.compile/get-entry-command :added "3.0"}
 (fact "command for get entry"
-  ^:hidden
 
   (compile type/<SPEC>
            '[:GET ["test"] [:active :ask <id>]])
@@ -117,7 +107,6 @@
 
 ^{:refer kmi.redis.compile/get-all-key :added "3.0"}
 (fact "export all sub keys"
-  ^:hidden
 
   (compile type/<SPEC>
            '[:GET [] [:active]])
@@ -125,7 +114,6 @@
 
 ^{:refer kmi.redis.compile/get-vals-key :added "3.0"}
 (fact "export input keys"
-  ^:hidden
 
   (compile type/<SPEC>
            '[:GET [] [:active] ["ask" "bid"]])
@@ -136,7 +124,6 @@
 
 ^{:refer kmi.redis.compile/len-command :added "3.0"}
 (fact "command for length"
-  ^:hidden
 
   (compile type/<SPEC>
            '[:LEN ["test"] [:unfilled <id>]])
@@ -148,7 +135,6 @@
 
 ^{:refer kmi.redis.compile/keys-command :added "3.0"}
 (fact "command for keys"
-  ^:hidden
 
   (compile type/<SPEC>
            '[:KEYS ["test"] [:unfilled]])
@@ -160,7 +146,6 @@
 
 ^{:refer kmi.redis.compile/has-command :added "3.0"}
 (fact "command for has"
-  ^:hidden
 
   (compile type/<SPEC>
            '[:HAS ["test"] [:unfilled <id>]])
@@ -172,7 +157,6 @@
 
 ^{:refer kmi.redis.compile/del-all-key :added "3.0"}
 (fact "delete all for :key"
-  ^:hidden
 
   (compile type/<SPEC>
            '[:DEL ["test"] [:unfilled]])
@@ -180,7 +164,6 @@
 
 ^{:refer kmi.redis.compile/del-vals-key :added "3.0"}
 (fact "delete for :key inputs"
-  ^:hidden
 
   (compile type/<SPEC>
            '[:DEL ["test"] [:unfilled] ["a" "b"]])
@@ -192,7 +175,6 @@
 
 ^{:refer kmi.redis.compile/del-vals-command :added "3.0"}
 (fact "delete for data structures"
-  ^:hidden
 
   (compile type/<SPEC>
            '[:DEL ["test"] [:completed] ["a" "b"]])
@@ -204,7 +186,6 @@
 
 ^{:refer kmi.redis.compile/del-entry-command :added "3.0"}
 (fact "deletes for single field values"
-  ^:hidden
 
   (compile type/<SPEC>
            '[:DEL ["test"] [:unfilled :ask "a"]])
@@ -215,7 +196,6 @@
 
 ^{:refer kmi.redis.compile/set-vals-command :added "3.0"}
 (fact "command for set vals"
-  ^:hidden
 
   (compile type/<SPEC>
            '[:SET ["test"] [:unfilled :ask] {10 100}])
@@ -224,7 +204,6 @@
 
 ^{:refer kmi.redis.compile/set-entry-command :added "3.0"}
 (fact "command for set entry"
-  ^:hidden
 
   (compile type/<SPEC>
            '[:SET ["test"] [:unfilled :ask 10] 100])
@@ -232,7 +211,6 @@
 
 ^{:refer kmi.redis.compile/set-command :added "3.0"}
 (fact "command for set"
-  ^:hidden
 
   (compile type/<SPEC>
            '[:SET ["test"] [:frame] 100])
@@ -240,7 +218,6 @@
 
 ^{:refer kmi.redis.compile/incr-command :added "3.0"}
 (fact "command for incr"
-  ^:hidden
 
   (compile type/<SPEC>
            '[:INCR ["test"] [:frame]])
@@ -252,7 +229,6 @@
 
 ^{:refer kmi.redis.compile/decr-command :added "3.0"}
 (fact "command for decr"
-  ^:hidden
 
   (compile type/<SPEC>
            '[:DECR ["test"] [:frame]])

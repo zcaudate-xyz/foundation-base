@@ -19,7 +19,6 @@
 
 ^{:refer std.lang.base.runtime-h/wrap-start :adopt true :added "3.0"}
 (fact "install setup steps for keys"
-  ^:hidden
 
   (component/with [|client| (r/client:create {:port 17001})]
     (-> ((component/wrap-start identity [{:key :events  :start event/start:events-redis}])
@@ -35,15 +34,13 @@
 
 ^{:refer rt.redis.client/client:create :added "3.0"}
 (fact "creates a redis client"
-  ^:hidden
-  
+
   (r/client:create {:id "localhost"
                     :port 17001})
   => r/client?)
 
 ^{:refer rt.redis.client/client :added "3.0"}
 (fact "creates and starts a redis client"
-  ^:hidden
 
   (component/with [|client| (r/client:create {:port 17001})]
     (cc/pool:with-resource [conn (:pool |client|)]
@@ -56,8 +53,7 @@
 
 ^{:refer rt.redis.client/test:client :added "3.0"}
 (fact "creates a test client on docker"
-  ^:hidden
-  
+
   (component/with [|client| (r/client:create {:port 17001})]
     (with-redefs [conn/test:config (fn [] {:port 17001})]
       (r/test:client)))
@@ -68,7 +64,7 @@
 
 ^{:refer rt.redis.client/client? :added "3.0"}
 (fact "checks that instance is a client"
-  
+
   (r/client? (r/client:create {}))
   => true)
 

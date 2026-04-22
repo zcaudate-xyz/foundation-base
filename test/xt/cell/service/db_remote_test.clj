@@ -12,7 +12,6 @@
 
 ^{:refer xt.cell.service.db-remote/remote-capable? :added "4.1"}
 (fact "checks whether a db descriptor supports remote dispatch"
-  ^:hidden
 
   (!.js
    [(db-remote/remote-capable? {"dispatch" (fn:> [request ctx] [true request])})
@@ -21,7 +20,6 @@
 
 ^{:refer xt.cell.service.db-remote/normalize-remote :added "4.1"}
 (fact "merges remote settings from remote spec, db, and view context"
-  ^:hidden
 
   (!.js
    (db-remote/normalize-remote
@@ -37,7 +35,6 @@
 
 ^{:refer xt.cell.service.db-remote/build-request :added "4.1"}
 (fact "builds a remote request envelope with view context metadata"
-  ^:hidden
 
   (!.js
    (db-remote/build-request
@@ -54,7 +51,6 @@
 
 ^{:refer xt.cell.service.db-remote/dispatch-request :added "4.1"}
 (fact "dispatches requests through the resolved dispatch function"
-  ^:hidden
 
   (!.js
    [(db-remote/dispatch-request
@@ -70,7 +66,6 @@
 
 ^{:refer xt.cell.service.db-remote/decode-response :added "4.1"}
 (fact "applies an optional decode function to remote responses"
-  ^:hidden
 
   (!.js
    (db-remote/decode-response
@@ -84,7 +79,6 @@
 
 ^{:refer xt.cell.service.db-remote/map-remote-error :added "4.1"}
 (fact "maps remote errors into the local contract"
-  ^:hidden
 
   (!.js
    [(db-remote/map-remote-error {} {"message" "boom"} {})
@@ -104,7 +98,6 @@
 
 ^{:refer xt.cell.service.db-remote/run-remote-query :added "4.1"}
 (fact "returns query preparation errors before dispatch"
-  ^:hidden
 
   (!.js
    (db-remote/run-remote-query
@@ -121,7 +114,6 @@
 
 ^{:refer xt.cell.service.db-remote/run-remote-sync :added "4.1"}
 (fact "returns sync preparation errors before dispatch"
-  ^:hidden
 
   (!.js
    (db-remote/run-remote-sync

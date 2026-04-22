@@ -29,12 +29,13 @@
   "walks over the list of edges"
   {:added "4.0"}
   [nodes visited sorted id ancestors]
-  (if (xt/x:get-key visited id)
+  (if (== true (xt/x:get-key visited id))
     (return))
   (var node (. nodes [id]))
-  (if (not node)
+  (if (xt/x:nil? node)
     (xt/x:err (xt/x:cat "Not available: " id)))
-  (do (:= ancestors (or ancestors []))
+  (do (when (xt/x:nil? ancestors)
+        (:= ancestors []))
       (xt/x:arr-push ancestors id)
       (xt/x:set-key visited id true)
       (var input (. node ["links"]))
@@ -66,4 +67,3 @@
     (xt/for:array [d deps]
       (xt/x:arr-push edges [root d])))
   (return (xt/x:arr-reverse (-/sort-edges edges))))
-

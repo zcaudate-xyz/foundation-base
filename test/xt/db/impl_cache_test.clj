@@ -47,8 +47,7 @@
             sample/SchemaLookup
             nil))]}
 (fact "removes data from database"
-  ^:hidden
-  
+
   (!.lua
    (impl-cache/cache-pull-sync
     INSTANCE
@@ -59,7 +58,7 @@
        ["first_name"]]]]
     nil))
   => [{"nickname" "root", "profile" [{"first_name" "Root"}]}]
-  
+
   (!.lua
    (impl-cache/cache-process-event-remove
     INSTANCE
@@ -79,7 +78,7 @@
          sample/SchemaLookup
          nil)))
   => ["UserAccount" "UserProfile"]
-  
+
   (!.lua
    (impl-cache/cache-pull-sync
     INSTANCE
@@ -106,8 +105,7 @@
                          k/identity
                          k/lt))]}
 (fact "removes data from database"
-  ^:hidden
-  
+
   (!.js
    (impl-cache/cache-pull-sync
     INSTANCE
@@ -118,7 +116,7 @@
        ["first_name"]]]]
     nil))
   => [{"nickname" "root", "profile" [{"first_name" "Root"}]}]
-  
+
   (!.js
    (impl-cache/cache-process-event-remove
     INSTANCE
@@ -138,7 +136,7 @@
          sample/SchemaLookup
          nil)))
   => ["UserAccount" "UserProfile"]
-  
+
   (!.js
    (impl-cache/cache-pull-sync
     INSTANCE
@@ -165,7 +163,6 @@
                "password_updated" number?
                "is_super" true}]))]}
 (fact "runs a pull statement"
-  ^:hidden
 
   [(set (!.js
          (impl-cache/cache-process-event-sync
@@ -175,7 +172,7 @@
           sample/Schema
           sample/SchemaLookup
           nil)
-         
+
          (impl-cache/cache-pull-sync INSTANCE
                                      sample/Schema
                                      ["Currency"
@@ -198,8 +195,8 @@
      nil))]
   => (contains [#{{"id" "USD"} {"id" "XLM.T"} {"id" "STATS"} {"id" "XLM"}}
                 +account+])
-  
-  
+
+
   [(set (!.lua
          (impl-cache/cache-process-event-sync
           INSTANCE
@@ -208,7 +205,7 @@
           sample/Schema
           sample/SchemaLookup
           nil)
-         
+
          (impl-cache/cache-pull-sync INSTANCE
                                      sample/Schema
                                      ["Currency"
@@ -237,8 +234,7 @@
 
 {:refer xt.db.impl-cache/cache-pull-sync :added "4.0"}
 (fact "sample of different types of pull"
-  ^:hidden
-  
+
   (!.js
    (impl-cache/cache-pull-sync INSTANCE
                                sample/Schema
@@ -247,8 +243,8 @@
                                 ["id"]]
                                nil))
   => [{"id" "STATS"}]
-  
-  
+
+
   (!.js
    (impl-cache/cache-pull-sync INSTANCE
                                sample/Schema
@@ -259,7 +255,7 @@
                                 ["id"]]
                                nil))
   => [{"id" "XLM"}]
-  
+
   (!.js
    (impl-cache/cache-pull-sync INSTANCE
                                sample/Schema

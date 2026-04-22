@@ -23,15 +23,14 @@
 
 ^{:refer xt.runtime.type-keyword/keyword-hash :added "4.0"}
 (fact "gets the keyword hash"
-  ^:hidden
-  
+
   (!.js
    [(kw/keyword-hash (kw/keyword "hello" "world"))
     (tc/hash (kw/keyword "hello" "world"))])
   => (contains-in
       [integer?
        integer?])
-  
+
   (!.lua
    [(kw/keyword-hash (kw/keyword "hello" "world"))
     (tc/hash (kw/keyword "hello" "world"))])
@@ -41,8 +40,7 @@
 
 ^{:refer xt.runtime.type-keyword/keyword-show :added "4.0"}
 (fact "shows the keyword"
-  ^:hidden
-  
+
   (!.js
    (kw/keyword-show (kw/keyword "hello" "world")))
   => ":hello/world"
@@ -53,8 +51,7 @@
 
 ^{:refer xt.runtime.type-keyword/keyword-eq :added "4.0"}
 (fact "gets keyword equality"
-  ^:hidden
-  
+
   (!.js
    [(kw/keyword-eq (kw/keyword "hello" "world")
                    (kw/keyword "hello" "world"))
@@ -79,7 +76,6 @@
 
 ^{:refer xt.runtime.type-keyword/keyword-create :added "4.0"}
 (fact "creates a keyword"
-  ^:hidden
 
   (!.js
    (var out (kw/keyword-create "hello" "world"))
@@ -99,7 +95,6 @@
 
 ^{:refer xt.runtime.type-keyword/keyword :added "4.0"}
 (fact "creates the keyword or pulls it from cache"
-  ^:hidden
 
   (!.js
    (var k0 (kw/keyword "hello" "world"))

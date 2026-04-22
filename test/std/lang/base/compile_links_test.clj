@@ -4,7 +4,6 @@
 
 ^{:refer std.lang.base.compile-links/get-link-lookup :added "4.0"}
 (fact "gets a lookup value"
-  ^:hidden
 
   (get-link-lookup 'indigo
                    {'indigo "hello"})
@@ -24,7 +23,6 @@
 
 ^{:refer std.lang.base.compile-links/link-attributes :added "4.0"}
 (fact "gets link attributes"
-  ^:hidden
 
   (link-attributes 'code
                    'indigo.server

@@ -31,7 +31,6 @@
 
 ^{:refer xt.db-lua.impl-select-sql-test/QUERY :adopt true :added "4.0"}
 (fact "runs select queries"
-  ^:hidden
 
   (!.lua
    (graph/select sample-scratch/Schema

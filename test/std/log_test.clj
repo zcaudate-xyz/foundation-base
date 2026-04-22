@@ -61,7 +61,7 @@
   => (contains {:a 1}))
 
 ^{:refer std.log/with :added "3.0"}
-(fact "enables targeted printing of statements" ^:hidden
+(fact "enables targeted printing of statements"
 
   (binding [common/*logger* (log/logger {:type :identity :level :debug})]
     (log/with {:level :info}

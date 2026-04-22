@@ -15,7 +15,6 @@
 
 ^{:refer rt.solidity.script.util/ut:str-comp :added "4.0"}
 (fact "compares two strings together"
-  ^:hidden
 
   (s/with:temp
     (s/ut:str-comp "123"

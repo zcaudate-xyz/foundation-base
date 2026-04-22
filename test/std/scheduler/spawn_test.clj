@@ -37,16 +37,14 @@
 
 ^{:refer std.scheduler.spawn/spawn-status :added "3.0"}
 (fact "returns the spawn status"
-  ^:hidden
-  
+
   (spawn-status (doto (create-spawn)
                   (set-props :started true)))
   => :running)
 
 ^{:refer std.scheduler.spawn/spawn-info :added "3.0"}
 (fact "returns the spawn info"
-  ^:hidden
-  
+
   (keys (spawn-info (create-spawn)))
   => (contains [:status :duration :jobs :id :state]))
 
@@ -89,7 +87,6 @@
 
 ^{:refer std.scheduler.spawn/update-job :added "3.0"}
 (fact "updates a job given key"
-  ^:hidden
 
   (-> (doto (create-spawn)
         (add-job "j.1" {:id "j.1"})
@@ -99,7 +96,6 @@
 
 ^{:refer std.scheduler.spawn/remove-job :added "3.0"}
 (fact "removes a job given key"
-  ^:hidden
 
   (-> (doto (create-spawn)
         (add-job "j.1" {:id "j.1"})
@@ -110,7 +106,6 @@
 
 ^{:refer std.scheduler.spawn/add-job :added "3.0"}
 (fact "adds job to the spawn"
-  ^:hidden
 
   (-> (doto (create-spawn)
         (add-job "j.1" {:id "j.1"}))
@@ -118,7 +113,7 @@
   => #{"j.1"})
 
 ^{:refer std.scheduler.spawn/list-jobs :added "3.0"}
-(fact "list all jobs" ^:hidden
+(fact "list all jobs"
 
   (-> (doto (create-spawn)
         (add-job "j.1" {:id "j.1"})
@@ -128,7 +123,7 @@
   => [{:id "j.1"} {:id "j.2"} {:id "j.3"}])
 
 ^{:refer std.scheduler.spawn/list-job-ids :added "3.0"}
-(fact "lists all job ids" ^:hidden
+(fact "lists all job ids"
 
   (-> (doto (create-spawn)
         (add-job "j.1" {:id "j.1"})
@@ -138,7 +133,7 @@
   => #{"j.3" "j.1" "j.2"})
 
 ^{:refer std.scheduler.spawn/count-jobs :added "3.0"}
-(fact "returns the number of jobs" ^:hidden
+(fact "returns the number of jobs"
 
   (-> (doto (create-spawn)
         (add-job "j.1" {:id "j.1"})
@@ -175,7 +170,7 @@
 
 ^{:refer std.scheduler.spawn/create-handler-basic :added "3.0"}
 (fact "creates a basic handler"
-  
+
   ((create-handler-basic *defaults* (create-spawn))
    {} "j.1")
   => nil)
@@ -219,7 +214,7 @@
 ^{:refer std.scheduler.spawn/spawn-loop :added "3.0"
   :setup [(setup-rt)]
   :teardown [(teardown-rt)]}
-(fact "creates a spawn loop" ^:hidden
+(fact "creates a spawn loop"
 
   (spawn-loop |rt|
               (assoc *defaults* :type :basic)
@@ -229,7 +224,7 @@
 ^{:refer std.scheduler.spawn/run :added "3.0"
   :setup [(setup-rt)]
   :teardown [(teardown-rt)]}
-(fact "constructs and starts a spawn loop" ^:hidden
+(fact "constructs and starts a spawn loop"
 
   (run |rt|
        :test-program
@@ -242,7 +237,7 @@
 ^{:refer std.scheduler.spawn/get-all-spawn :added "3.0"
   :setup [(setup-rt)]
   :teardown [(teardown-rt)]}
-(fact "returns all running spawns" ^:hidden
+(fact "returns all running spawns"
 
   (-> (doto |rt|
         (run :test-program
@@ -268,7 +263,7 @@
 ^{:refer std.scheduler.spawn/get-spawn :added "3.0"
   :setup [(setup-rt)]
   :teardown [(teardown-rt)]}
-(fact "gets running spawn with id" ^:hidden
+(fact "gets running spawn with id"
   (run |rt| :test-program
        {:type :basic
         :main-fn identity
@@ -281,7 +276,7 @@
 ^{:refer std.scheduler.spawn/count-spawn :added "3.0"
   :setup [(setup-rt3)]
   :teardown [(teardown-rt3)]}
-(fact "counts all running spawns" ^:hidden
+(fact "counts all running spawns"
 
   (count-spawn |rt3| :test-program)
   => 3)
@@ -289,7 +284,7 @@
 ^{:refer std.scheduler.spawn/list-spawn :added "3.0"
   :setup [(setup-rt3)]
   :teardown [(teardown-rt3)]}
-(fact "lists all running spawns" ^:hidden
+(fact "lists all running spawns"
 
   (map :id (list-spawn |rt3| :test-program))
   => ["s0" "s1" "s2"])
@@ -297,7 +292,7 @@
 ^{:refer std.scheduler.spawn/latest-spawn :added "3.0"
   :setup [(setup-rt3)]
   :teardown [(teardown-rt3)]}
-(fact "returns latest created spawn" ^:hidden
+(fact "returns latest created spawn"
 
   (:id (latest-spawn |rt3| :test-program))
   => "s2")
@@ -305,7 +300,7 @@
 ^{:refer std.scheduler.spawn/earliest-spawn :added "3.0"
   :setup [(setup-rt3)]
   :teardown [(teardown-rt3)]}
-(fact "returns earliest created spawn" ^:hidden
+(fact "returns earliest created spawn"
 
   (:id (earliest-spawn |rt3| :test-program))
   => "s0")
@@ -313,7 +308,7 @@
 ^{:refer std.scheduler.spawn/list-stopped :added "3.0"
   :setup [(setup-rt3)]
   :teardown [(teardown-rt3)]}
-(fact "lists all stopped spawns" ^:hidden
+(fact "lists all stopped spawns"
 
   (-> (doto |rt3|
         (stop-spawn :test-program "s1"))
@@ -325,7 +320,7 @@
 ^{:refer std.scheduler.spawn/latest-stopped :added "3.0"
   :setup [(setup-rt3)]
   :teardown [(teardown-rt3)]}
-(fact "returns the most recently stopped spawn" ^:hidden
+(fact "returns the most recently stopped spawn"
 
   (-> (doto |rt3|
         (stop-spawn :test-program "s1")
@@ -337,7 +332,7 @@
 ^{:refer std.scheduler.spawn/latest :added "3.0"
   :setup [(setup-rt3)]
   :teardown [(teardown-rt3)]}
-(fact "returns the latest active or past spawn" ^:hidden
+(fact "returns the latest active or past spawn"
 
   (-> (doto |rt3|
         (stop-spawn :test-program "s0"))

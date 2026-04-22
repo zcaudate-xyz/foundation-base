@@ -34,12 +34,11 @@
 
 ^{:refer xt.lang.event-log/new-log :added "4.0"}
 (fact "creates a new log"
-  ^:hidden
 
   (!.js
    (log/new-log {}))
   => map?
-  
+
   (!.lua
    (log/new-log {}))
   => map?)
@@ -70,14 +69,13 @@
 
 ^{:refer xt.lang.event-log/queue-entry :added "4.0"}
 (fact "queues a log entry"
-  ^:hidden
-  
+
    (!.js
     (var l (log/new-log {}))
-    
+
     (xt/for:index [i [0 10]]
       (log/queue-entry l {:id (xt/x:cat "id-" (xt/x:to-string i))}
-                       log/id-fn
+                       (fn [x _] (return (xt/x:get-key x "id")))
                        k/identity
                        1))
    (log/clear-cache l 100000)
@@ -100,14 +98,14 @@
       "interval" 30000,
       "last" 100000,
       "listeners" {}}
-  
+
 
   (!.lua
    (var l (log/new-log {}))
-    
+
     (xt/for:index [i [0 9]]
       (log/queue-entry l {:id (xt/x:cat "id-" (xt/x:to-string i))}
-                       log/id-fn
+                       (fn [x _] (return (xt/x:get-key x "id")))
                        k/identity
                        1))
     (log/clear-cache l 100000)
@@ -132,23 +130,27 @@
 
 ^{:refer xt.lang.event-log/list-listeners :adopt true :added "4.0"}
 (fact "lists all listeners"
-  ^:hidden
-  
-  (set (!.js
-        (log/list-listeners
-         (log/new-log {:listeners {:test1 (fn [id data t])
-                                   :test2 (fn [id data t])}}))))
-  => #{"test1" "test2"}
 
-  (set (!.lua
-        (log/list-listeners
-         (log/new-log {:listeners {:test1 (fn [id data t])
-                                   :test2 (fn [id data t])}}))))
-  => #{"test1" "test2"})
+  (!.js
+   (xtd/arr-sort
+    (log/list-listeners
+     (log/new-log {:listeners {:test1 (fn [id data t])
+                               :test2 (fn [id data t])}}))
+    k/identity
+    xt/x:str-lt))
+  => ["test1" "test2"]
+
+  (!.lua
+   (xtd/arr-sort
+    (log/list-listeners
+     (log/new-log {:listeners {:test1 (fn [id data t])
+                               :test2 (fn [id data t])}}))
+    k/identity
+    xt/x:str-lt))
+  => ["test1" "test2"])
 
 ^{:refer xt.lang.event-log/add-listener :added "4.0"}
 (fact "adds a listener to the log"
-  ^:hidden
 
   (!.js
    (log/add-listener
@@ -178,8 +180,8 @@
 
 ^{:refer xt.lang.event-log/remove-listener :adopt true :added "4.0"}
 (fact "removes a listener"
-  ^:hidden
-  
+
+  ^{:lang-exceptions {:lua {:skip true}}}
   (!.js
    (var l (log/new-log {}))
    (log/add-listener

@@ -14,7 +14,6 @@
                                                                    :values #{:vip :guest}}}]})}
                    {:normalise-single [wrap-single-enum]})
   => {:account {:type :guest}}
-  ^:hidden
   (graph/normalise {:account {:type :account.type/WRONG}}
                    {:schema (schema/schema {:account/type [{:type :enum
                                                             :enum {:ns :account.type

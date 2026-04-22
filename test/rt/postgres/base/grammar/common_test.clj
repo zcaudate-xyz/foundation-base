@@ -9,8 +9,7 @@
 
 ^{:refer rt.postgres.base.grammar.common/pg-type-alias :added "4.0"}
 (fact "gets the type alias"
-  ^:hidden
-  
+
   (common/pg-type-alias :long)
   => :bigint
 
@@ -19,8 +18,7 @@
 
 ^{:refer rt.postgres.base.grammar.common/pg-sym-meta :added "4.0"}
 (fact "returns the sym meta"
-  ^:hidden
-  
+
   (common/pg-sym-meta (with-meta 'hello
                         {:- [:int]
                          :%% :default
@@ -32,14 +30,12 @@
 
 ^{:refer rt.postgres.base.grammar.common/pg-format :added "4.0"}
 (fact "formats a form, extracting static components"
-  ^:hidden
-  
+
   (common/pg-format '(def ^{:- [:int]} hello 1))
   => vector?)
 
 ^{:refer rt.postgres.base.grammar.common/pg-hydrate-module-static :added "4.0"}
 (fact "gets the static module"
-  ^:hidden
 
   (common/pg-hydrate-module-static
    {:static {:application "app" :all {:schema ["schema"]}}})
@@ -47,15 +43,13 @@
 
 ^{:refer rt.postgres.base.grammar.common/pg-hydrate :added "4.0"}
 (fact "hydrate function for top level entries"
-  ^:hidden
 
   (common/pg-hydrate '(defn foo [] 1) {} {:module {:static {:application "app" :all {:schema ["schema"]}}}})
   => vector?)
 
 ^{:refer rt.postgres.base.grammar.common/pg-string :added "4.0"}
 (fact "constructs a pg string"
-  ^:hidden
-  
+
   (common/pg-string "hello")
   => "'hello'"
 
@@ -70,8 +64,7 @@
 
 ^{:refer rt.postgres.base.grammar.common/pg-set :added "4.0"}
 (fact "makes a set object"
-  ^:hidden
-  
+
   (common/pg-set #{"hello"}
                  nil
                  {})
@@ -103,29 +96,25 @@
 
 ^{:refer rt.postgres.base.grammar.common/pg-base-token :added "4.0"}
 (fact "creates a base token"
-  ^:hidden
-  
+
   (common/pg-base-token #{"hello"} "schema")
   => '(. #{"schema"} #{"hello"}))
 
 ^{:refer rt.postgres.base.grammar.common/pg-full-token :added "4.0"}
 (fact "creates a full token (for types and enums)"
-  ^:hidden
-  
+
   (common/pg-full-token "hello" "schema")
   => '(. #{"schema"} #{"hello"}))
 
 ^{:refer rt.postgres.base.grammar.common/pg-entry-literal :added "4.0"}
 (fact "creates an entry literal"
-  ^:hidden
 
   (common/pg-entry-literal {:static/schema "schema" :id "id" :op 'defn})
   => "schema.id")
 
 ^{:refer rt.postgres.base.grammar.common/pg-entry-token :added "4.0"}
 (fact "gets the entry token"
-  ^:hidden
-  
+
   (common/pg-entry-token {:static/schema "schema" :id "id" :op 'defn})
   => '(. #{"schema"} id))
 
@@ -142,8 +131,7 @@
 
 ^{:refer rt.postgres.base.grammar.common/block-do-block :added "4.0"}
 (fact "initates do block"
-  ^:hidden
-  
+
   (common/block-do-block '[(+ 1 2 3) \;])
   => '[:do :$$
        \\ :begin
@@ -153,8 +141,7 @@
 
 ^{:refer rt.postgres.base.grammar.common/block-do-suppress :added "4.0"}
 (fact "initates suppress block"
-  ^:hidden
-  
+
   (common/block-do-suppress '[(+ 1 2 3) \;])
   => '[:do :$$
        \\ :begin
@@ -165,15 +152,13 @@
 
 ^{:refer rt.postgres.base.grammar.common/block-loop-block :added "4.0"}
 (fact "emits loop block"
-  ^:hidden
-  
+
   (common/block-loop-block
    '_ '(+ 1 2 3) '(+ 4 5 6))
   => '[:loop \\ (\| (do (+ 1 2 3) (+ 4 5 6))) \\ :end-loop])
 
 ^{:refer rt.postgres.base.grammar.common/block-case-block :added "4.0"}
 (fact "emits case block"
-  ^:hidden
 
   (common/block-case-block
    'type
@@ -183,8 +168,7 @@
 
 ^{:refer rt.postgres.base.grammar.common/pg-defenum :added "4.0"}
 (fact "defenum block"
-  ^:hidden
-  
+
   (common/pg-defenum '(defenum ^{:static/schema "schema"} hello [:a :b :c]))
   => '[:do :$$
        \\ :begin
@@ -195,44 +179,38 @@
 
 ^{:refer rt.postgres.base.grammar.common/pg-defindex :added "4.0"}
 (fact "defindex block"
-  ^:hidden
 
   (common/pg-defindex '(defindex hello [table cols] body))
   => '[:create-index :if-not-exists hello :on table (quote ([cols])) body \;])
 
 ^{:refer rt.postgres.base.grammar.common/pg-defpolicy :added "4.0"}
 (fact "defpolicy block"
-  ^:hidden
-  
+
   (common/pg-defpolicy '(defpolicy hello [table] ()))
   => '(do [:drop-policy-if-exists #{"hello - "} :on table] [:create-policy #{"hello - "} :on table \\]))
 
 ^{:refer rt.postgres.base.grammar.common/pg-defblock :added "4.0"}
 (fact "creates generic defblock"
-  ^:hidden
-  
+
   (common/pg-defblock '(def ^{:static/return [:index]
                               :static/schema "scratch"} hello []))
   => '(do [:create :index (. #{"scratch"} #{"hello"})]))
 
 ^{:refer rt.postgres.base.grammar.common/pg-policy-format :added "4.0"}
 (fact "formats a policy definition"
-  ^:hidden
-  
+
   (common/pg-policy-format '(defpolicy hello [table] ()))
   => '[{:doc "", :static/policy-name "hello - ", :static/policy-table nil, :static/policy-schema "table"}
        (defpolicy hello "" [table] ())])
 
 ^{:refer rt.postgres.base.grammar.common/pg-deftrigger :added "4.0"}
 (fact "deftrigger block"
-  ^:hidden
-  
+
   (common/pg-deftrigger '(deftrigger hello [table] ()))
   => '(do [:drop-trigger-if-exists hello :on table] [:create-trigger hello :on table \\]))
 
 ^{:refer rt.postgres.base.grammar.common/pg-uuid :added "4.1"}
 (fact "constructs a pg uuid"
-  ^:hidden
 
   (common/pg-uuid "123")
   => "'123'::uuid")

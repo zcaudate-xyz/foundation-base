@@ -23,16 +23,15 @@
 ^{:refer js.react-native.ui-toggle-button/ToggleButton
   :added "0.1"}
 (fact "gets a toggleButton button"
-  ^:hidden
-  
+
   (defn.js ToggleButtonSimpleDemo
     []
     (var [selected setSelected] (r/local true))
     (var [highlighted setHighlighted]   (r/local false))
     (var [disabled setDisabled]   (r/local false))
     (return
-     (n/EnclosedCode 
-{:label " js.react-native.ui-toggle-button/ToggleButtonSimple"} 
+     (n/EnclosedCode
+{:label " js.react-native.ui-toggle-button/ToggleButtonSimple"}
 [:% n/Row
        {:style {:alignItems "center"}}
        [:% n/Text
@@ -85,7 +84,7 @@
          :addons [(physical-addon/tagAll
                    {:style {:paddingHorizontal 20
                             :height 80
-                            :flex 1}})]}]] 
+                            :flex 1}})]}]]
 [:% n/Row
        [:% n/Button
         {:title "H"
@@ -93,14 +92,14 @@
        [:% n/Text " "]
        [:% n/Button
         {:title "D"
-         :onPress (fn:> (setDisabled (not disabled)))}]] 
+         :onPress (fn:> (setDisabled (not disabled)))}]]
 [:% n/Caption
        {:text (n/format-obj #{selected})
         :style {:marginTop 10}}])))
-  
 
-  
-  
+
+
+
   )
 
 (comment
@@ -110,8 +109,8 @@
     (var [selected setSelected] (r/local true))
     (var [selected2 setSelected2] (r/local true))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-toggle-button/ToggleButton"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-toggle-button/ToggleButton"}
 [:% n/Row
        {:style {:alignItems "center"}}
        [:% n/Text
@@ -132,8 +131,8 @@
          :size "lg"
          :onPress (fn []
                     (setSelected (not selected)))}]
-       [:% n/Padding {:style {:width 10}}]] 
-[:% n/Padding {:style {:height 10}}] 
+       [:% n/Padding {:style {:width 10}}]]
+[:% n/Padding {:style {:height 10}}]
 [:% n/Row
        {:style {:alignItems "center"}}
        [:% n/Text
@@ -156,7 +155,7 @@
                      :fontWeight "800"}
          :onPress (fn []
                     (setSelected (not selected)))}]
-       [:% n/Padding {:style {:width 10}}]] 
+       [:% n/Padding {:style {:width 10}}]]
 [:% n/Caption
        {:text (n/format-obj #{selected})
         :style {:marginTop 10}}]))))

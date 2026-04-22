@@ -21,16 +21,15 @@
 
 ^{:refer js.react-native.ui-slider/Slider :added "0.1"}
 (fact "creates a slim slider"
-  ^:hidden
-  
+
   (defn.js SliderHDemo
     []
     (var [first setFirst] (r/local 10))
     (var [highlighted setHighlighted] (r/local false))
     (var [disabled setDisabled] (r/local false))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-slider/Slider"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-slider/Slider"}
 [:% n/Row
        {:style {:alignItems "center"
                 :justifyContent "center"}}
@@ -49,7 +48,7 @@
                  :fgHovered 0.7
                  :bgPressed -0.2
                  :fgPressed 0.1}
-         
+
          :value first
          :setValue setFirst
          :length 200
@@ -61,7 +60,7 @@
          :addons [(physical-addon/tagAll
                    {:style {:paddingHorizontal 20
                             :height 80
-                            :flex 1}})]}]] 
+                            :flex 1}})]}]]
 [:% n/Row
        [:% n/Button
         {:title "H"
@@ -79,8 +78,8 @@
     (var [highlighted setHighlighted] (r/local false))
     (var [disabled setDisabled] (r/local false))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-slider/SliderV"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-slider/SliderV"}
 [:% n/Row
        {:style {:alignItems "center"
                 :justifyContent "center"}}
@@ -100,7 +99,7 @@
                  :fgHovered 0.7
                  :bgPressed -0.2
                  :fgPressed 0.1}
-         
+
          :value first
          :setValue setFirst
          :length 200
@@ -112,7 +111,7 @@
          :addons [(physical-addon/tagAll
                    {:style {:paddingHorizontal 20
                             :height 80
-                            :flex 1}})]}]] 
+                            :flex 1}})]}]]
 [:% n/Row
        [:% n/Button
         {:title "H"
@@ -123,7 +122,7 @@
          :onPress (fn:> (setDisabled (not disabled)))}]
        [:% n/Text
         (n/format-entry #{first})]])))
-  
-  
-  
+
+
+
   )

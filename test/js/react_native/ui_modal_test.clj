@@ -29,8 +29,7 @@
 
 ^{:refer js.react-native.ui-modal/Modal :added "4.0" :unchecked true}
 (fact "creates a Modal"
-  ^:hidden
-  
+
   (defn.js ModalDemo
     []
     (var [visible setVisible] (r/local))
@@ -42,12 +41,12 @@
     (r/init []
       (setVisible false))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-modal/Modal"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-modal/Modal"}
 [:% n/Row
        [:% n/Button
         {:title "T"
-         :onPress (fn:> (setVisible true))}]] 
+         :onPress (fn:> (setVisible true))}]]
 [:% n/Tabs
        {:data ["centered"
                "top"
@@ -59,14 +58,14 @@
                "bottom_right"
                "bottom_left"]
         :value position
-        :setValue setPosition}] 
+        :setValue setPosition}]
 [:% n/Tabs
        {:data ["from_top"
                "from_bottom"
                "from_left"
                "from_right"]
         :value transition
-        :setValue setTransition}] 
+        :setValue setTransition}]
 [:% ui-modal/Modal
        {:visible visible
         :position position
@@ -79,9 +78,9 @@
         [:% n/Text
          {:style {:flex 1
                   :backgroundColor "yellow"}}
-         "HELLO"]]] 
+         "HELLO"]]]
 [:% n/Caption
        {:text (n/format-obj #{visible})
         :style {:marginTop 10}}])))
-  
+
   )

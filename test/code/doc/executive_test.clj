@@ -10,7 +10,7 @@
   (-> (all-pages {:publish (config/load "config/code.doc.edn")})
       keys
       sort
-      vec) ^:hidden
+      vec)
   ;;[hara/hara-code hara/hara-code-query ... spirit/spirit-net-mail]
   => sequential?)
 

@@ -26,8 +26,7 @@
 
 ^{:refer std.lib.enum/enum-map :added "3.0"}
 (fact "cached map of enum values"
-  ^:hidden
-  
+
   (enum-map ElementType)
   => (satisfies [:annotation-type
                  :constructor
@@ -45,9 +44,8 @@
 
 ^{:refer std.lib.enum/enum-map-form :added "3.0"}
 (fact "creates the form for the enum"
-  ^:hidden
-  
-  (enum-map-form ElementType) 
+
+  (enum-map-form ElementType)
   => '{:package java.lang.annotation.ElementType/PACKAGE,
        :type-use java.lang.annotation.ElementType/TYPE_USE,
        :method java.lang.annotation.ElementType/METHOD,
@@ -63,8 +61,7 @@
 
 ^{:refer std.lib.enum/enum-map> :added "3.0"}
 (fact "a macro for getting elements of the enum"
-  ^:hidden
-  
+
   (enum-map> ElementType)
   => {:package ElementType/PACKAGE,
       :type-use ElementType/TYPE_USE,
@@ -81,7 +78,7 @@
 
 ^{:refer std.lib.enum/to-enum :added "3.0"}
 (fact "gets an enum value given a symbol"
-  
+
   (to-enum "TYPE" ElementType)
   => ElementType/TYPE
 

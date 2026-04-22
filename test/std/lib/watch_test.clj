@@ -41,7 +41,7 @@
   (resolve 'process-options) => var?)
 
 ^{:refer std.lib.watch/watch:add :added "3.0"}
-(fact "Adds a watch function through the IWatch protocol" ^:hidden
+(fact "Adds a watch function through the IWatch protocol"
 
   (def subject (atom nil))
   (def observer (atom nil))
@@ -72,7 +72,7 @@
   @observer => 1)
 
 ^{:refer std.lib.watch/watch:list :added "3.0"}
-(fact "Lists watch functions through the IWatch protocol" ^:hidden
+(fact "Lists watch functions through the IWatch protocol"
 
   (def subject   (atom nil))
   (do (watch:add subject :a (fn [_ _ _ n]))
@@ -81,7 +81,7 @@
   => (contains {:a fn? :b fn?}))
 
 ^{:refer std.lib.watch/watch:remove :added "3.0"}
-(fact "Removes watch function through the IWatch protocol" ^:hidden
+(fact "Removes watch function through the IWatch protocol"
 
   (def subject   (atom nil))
   (do (watch:add subject :a (fn [_ _ _ n]))
@@ -91,7 +91,7 @@
   => (contains {:a fn?}))
 
 ^{:refer std.lib.watch/watch:clear :added "3.0"}
-(fact "Clears all watches form the object" ^:hidden
+(fact "Clears all watches form the object"
 
   (def subject   (atom nil))
   (do (watch:add subject :a (fn [_ _ _ n]))
@@ -101,7 +101,7 @@
   => {})
 
 ^{:refer std.lib.watch/watch:set :added "3.0"}
-(fact "Sets a watch in the form of a map" ^:hidden
+(fact "Sets a watch in the form of a map"
   (def obj (atom nil))
   (do (watch:set obj {:a (fn [_ _ _ n])
                       :b (fn [_ _ _ n])})
@@ -109,7 +109,7 @@
   => (contains {:a fn? :b fn?}))
 
 ^{:refer std.lib.watch/watch:copy :added "3.0"}
-(fact "Copies watches from one object to another" ^:hidden
+(fact "Copies watches from one object to another"
   (def obj-a   (atom nil))
   (def obj-b   (atom nil))
   (do (watch:set obj-a {:a (fn [_ _ _ n])

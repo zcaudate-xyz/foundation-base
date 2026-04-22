@@ -47,15 +47,13 @@
 
 ^{:refer std.lang.model-annex.spec-ruby/ruby-defn :added "4.1"}
 (fact "emit ruby function definition"
-  ^:hidden
-  
+
   (l/emit-as :ruby '[(defn add [a b] (return (+ a b)))])
   => "def add(a,b)\n  return a + b\nend")
 
 ^{:refer std.lang.model-annex.spec-ruby/ruby-symbol :added "4.1"}
 (fact "emit ruby symbol"
-  ^:hidden
-  
+
   (spec-ruby/ruby-symbol :a spec-ruby/+grammar+ {})
   => ":a"
   (spec-ruby/ruby-symbol 'a spec-ruby/+grammar+ {})
@@ -63,21 +61,18 @@
 
 ^{:refer std.lang.model-annex.spec-ruby/ruby-var :added "4.1"}
 (fact "emit ruby variable"
-  ^:hidden
-  
+
   (spec-ruby/ruby-var '(var a 1))
   => '(:= a 1))
 
 ^{:refer std.lang.model-annex.spec-ruby/ruby-map :added "4.1"}
 (fact "emit ruby hash"
-  ^:hidden
-  
+
   (l/emit-as :ruby '[{:a 1 :b 2}])
   => "{:a => 1, :b => 2}")
 
 ^{:refer std.lang.model-annex.spec-ruby/ruby-fn :added "4.1"}
 (fact "basic transform for ruby blocks"
-  ^:hidden
-  
+
   (spec-ruby/ruby-fn '(fn [a] (+ a 1)))
   => '(:- :lambda (quote [a]) "{" (+ a 1) "}"))

@@ -21,22 +21,22 @@
 (fact
  "validates a single step"
  ^{:hidden true}
- (notify/wait-on
-  :dart
-  (var data {:first "hello"})
-  (var
-   guards
-   [["is-not-empty"
-     {:message "Must not be empty",
-      :check (fn:> [v rec] (and (k/not-nil? v) (< 0 (xt/x:len v))))}]])
-  (var result {:fields {:first {:status "pending"}}})
-  (validate/validate-step
-   data
-   "first"
-   guards
-   0
-   result
-   nil
-   (fn [success result] (repl/notify result))))
+ (!.dt
+  (do
+    (var data {:first "hello"})
+    (var
+     guards
+     [["is-not-empty"
+       {:message "Must not be empty",
+        :check (fn:> [v rec] (and (k/not-nil? v) (< 0 (xt/x:len v))))}]])
+    (var result {:fields {:first {:status "pending"}}})
+    (validate/validate-step
+     data
+     "first"
+     guards
+     0
+     result
+     nil
+     nil)))
  =>
  {"fields" {"first" {"status" "ok"}}})

@@ -28,7 +28,7 @@
                     base/dom? ;; [:- :test/date {:value 100}]
                     base/dom? ;; [:- :test/date]
                     ]])
-  
+
   (-> (base/dom-create :test/date)
       (impl/dom-render)
       (update/dom-update (base/dom-create :test/date {:value 100}))
@@ -72,8 +72,8 @@
 (fact "returns the setters for the given tag"
 
   (item-setters :test/cat)
-  => (contains-in {:name {:type java.lang.String, :fn fn?}})^:hidden
-  
+  => (contains-in {:name {:type java.lang.String, :fn fn?}})
+
   (item-setters :test/date)
   => (throws))
 
@@ -81,7 +81,7 @@
 (fact "returns the getters for the given tag"
 
   (item-getters :test/cat)
-  => (contains-in {:name {:type java.lang.String, :fn fn?}})^:hidden
+  => (contains-in {:name {:type java.lang.String, :fn fn?}})
 
   (item-getters :test/date)
   => (throws))
@@ -124,7 +124,7 @@
 ^{:refer std.dom.item/item-props-set :added "3.0"}
 (fact "provides an extensible interface for set item prop calls"
 
-  
+
   (.getName ^test.Cat
             (item-props-set :test/cat
                             (item-create :test/cat)
@@ -135,7 +135,7 @@
     (#(item-props-set :mock/pane % {:a 1 :b 2}))))
 
 ^{:refer std.dom.item/item-props-set-default :added "3.0"}
-(fact "default implementation of item-prop-set. throws exception"^:hidden
+(fact "default implementation of item-prop-set. throws exception"
 
   (item-props-set-default :test/cat
                           (item-create :test/cat)
@@ -157,8 +157,7 @@
 
 ^{:refer std.dom.item/item-props-delete-default :added "3.0"}
 (fact "default implementation of item-prop-set. returns item"
-  ^:hidden
-  
+
   (item-props-delete-default :test/cat (item-create :test/cat) {})
   => test.Cat)
 
@@ -196,7 +195,7 @@
   => mock/mock?)
 
 ^{:refer std.dom.item/item-cleanup-default :added "3.0"}
-(fact "default implementation of item-prop-update. does nothing."^:hidden
+(fact "default implementation of item-prop-update. does nothing."
 
   (item-cleanup-default :mock/pane (item-create :mock/pane))
   => mock/mock?)

@@ -26,16 +26,15 @@
 
 ^{:refer js.react-native.ui-picker-basic/PickerBasicIndexed :added "0.1"}
 (fact "creates a slim picker"
-  ^:hidden
-  
+
   (defn.js PickerBasicIndexedDemo
     []
     (var [first setFirst] (r/local 5))
     (var [highlighted setHighlighted] (r/local false))
     (var [disabled setDisabled] (r/local false))
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-picker-basic/PickerIndexed"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-picker-basic/PickerIndexed"}
 [:% n/Row
        #_{:style {:alignItems "center"
                 :justifyContent "center"}}
@@ -61,7 +60,7 @@
                    {:style {:paddingHorizontal 20
                             :height 80
                             :width 100
-                            :flex 1}})]}]] 
+                            :flex 1}})]}]]
 [:% n/Row
        [:% n/Button
         {:title "+1"
@@ -78,7 +77,7 @@
          :onPress (fn:> (setDisabled (not disabled)))}]
        [:% n/Text
         (n/format-entry #{first disabled highlighted})]])))
-  
-  
-  
+
+
+
   )

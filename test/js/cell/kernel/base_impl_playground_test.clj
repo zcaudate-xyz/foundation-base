@@ -78,7 +78,6 @@
 ^{:refer js.cell.kernel.base-impl/new-cell :added "4.0"
   :setup [(fact:global :setup)]}
 (fact "integrates new-cell with the playground worker"
-  ^:hidden
 
   (notify/wait-on :js
     (. (-/reset-cell) ["init"]
@@ -112,7 +111,6 @@
             (. (-/reset-cell) ["init"]
                (then (repl/>notify))))]}
 (fact "conducts calls against the playground worker"
-  ^:hidden
 
   (j/<! (base-impl/call (-/CELL)
                         {:op "call"
@@ -142,7 +140,6 @@
                                                  :defaultArgs ["TEST"]}})
                    ["init"]))]}
 (fact "lists playground-backed models"
-  ^:hidden
 
   (set (!.js
         (base-impl/list-models (-/CELL))))

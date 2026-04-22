@@ -30,16 +30,14 @@
 ^{:refer std.lang.interface.type-notify/get-sink :added "4.0"
   :setup [(notify/clear-sink +server+ "abc")]}
 (fact "gets a sink from the notification app server"
-  ^:hidden
-  
+
   (notify/get-sink +server+ "abc")
   => f/atom?)
 
 ^{:refer std.lang.interface.type-notify/clear-sink :added "4.0"
   :setup [(notify/get-sink +server+ "abc")]}
 (fact "clears a sink"
-  ^:hidden
-  
+
   (notify/clear-sink +server+ "abc")
   => f/atom?)
 
@@ -62,15 +60,13 @@
 
 ^{:refer std.lang.interface.type-notify/get-oneshot-id :added "4.0"}
 (fact "registers a oneshot id for the app server"
-  ^:hidden
-  
+
   (notify/get-oneshot-id +server+)
   => #"oneshot")
 
 ^{:refer std.lang.interface.type-notify/remove-oneshot-id :added "4.0"}
 (fact "removes a oneshot id"
-  ^:hidden
-  
+
   (->> (notify/get-oneshot-id +server+)
        (notify/remove-oneshot-id +server+))
   => string?)
@@ -78,8 +74,7 @@
 ^{:refer std.lang.interface.type-notify/clear-oneshot-sinks :added "4.0"
   :setup [(notify/clear-oneshot-sinks +server+)]}
 (fact "clear all registered oneshot sinks"
-  ^:hidden
-  
+
   (do (dotimes [i 10]
         (notify/get-oneshot-id +server+))
       (count (notify/clear-oneshot-sinks +server+)))
@@ -113,13 +108,12 @@
 
 ^{:refer std.lang.interface.type-notify/start-notify-http :added "4.0"}
 (fact "starts http server"
-  ^:hidden
-  
+
   (do (def +value+ (f/sid))
       (http/post (str "http://127.0.0.1:" (:http-port +server+) "/")
                  {:body (json/write {:id "hello"
                                      :data +value+})})
-      
+
       (get @(notify/get-sink +server+ "hello")
            "data"))
   => +value+)

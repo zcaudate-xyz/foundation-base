@@ -16,7 +16,6 @@
             [std.lang.model.spec-js.meta :as meta]
             [std.lang.model.spec-js.qml :as qml]
             [std.lang.model.spec-xtalk]
-            [std.lang.model.spec-xtalk.com-js :as com]
             [std.lang.model.spec-xtalk.fn-js :as fn]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
@@ -62,6 +61,8 @@
            (data/emit-coll :vector arr grammar mopts)))))
 
 (defn js-map
+  "emits a js map"
+  {:added "4.0"}
   [m grammar mopts]
   (let [rest (get m ':..)
         syms (get m ':#)
@@ -150,11 +151,7 @@
   (list 'var* :const decl := (last args)))
 
 (defn tf-for-object
-  "custom for:object code
- 
-   (tf-for-object '(for:object [[k v] {:a 1}]
-                               [k v]))
-   => '(for [(var* :let [k v]) :of (Object.entries {:a 1})] [k v])"
+  "custom for:object code"
   {:added "4.0"}
   [[_ [[k v] m] & body]]
   (let [[binding method] (cond (= k '_) [v  'Object.values]
@@ -164,16 +161,7 @@
            body)))
 
 (defn tf-for-array
-  "custom for:array code
- 
-   (tf-for-array '(for:array [e [1 2 3 4 5]]
-                              [k v]))
-   => '(for [(var* :let e) :of (% [1 2 3 4 5])] [k v])
- 
-   (tf-for-array '(for:array [[i e] arr]
-                             [k v]))
-   => '(for [(var* :let i := 0) (< i (. arr length))
-             (:++ i)] (var* :let e (. arr [i])) [k v])"
+  "custom for:array code"
   {:added "4.0"}
   [[_ [e arr] & body]]
   (if (vector? e)
@@ -185,11 +173,7 @@
            ~@body))))
 
 (defn tf-for-iter
-  "custom for:iter code
-   
-   (tf-for-iter '(for:iter [e iter]
-                           e))
-   => '(for [(var* :let e) :of (% iter)] e)"
+  "custom for:iter code"
   {:added "4.0"}
   [[_ [e it] & body]]
   (apply list 'for [(list 'var* :let e) :of (list '% it)]
@@ -274,50 +258,39 @@
                               (list 'fn [err]
                                     error))])
                    ~@(if finally
-                       [(list 'finally
-                              (list 'fn '[]
-                                    finally))])))))
+                        [(list 'finally
+                               (list 'fn '[]
+                                     finally))])))))
 
 (def +features+
-  (let [base (-> (grammar/build :exclude [:pointer
-                                          :block
-                                          :data-range])
-                 (grammar/build:override
-                  {:var         {:symbol '#{var*}}
-                   :mul         {:value true}
-                   :defn        {:symbol '#{defn defn- defelem}}
-                   :with-global {:value true :raw "globalThis"}
-                   :defclass    {:macro  #'js-defclass    :emit :macro}
-                   :for-object  {:macro  #'tf-for-object  :emit :macro}
-                   :for-array   {:macro  #'tf-for-array   :emit :macro}
-                   :for-iter    {:macro  #'tf-for-iter    :emit :macro}
-                   :for-return  {:macro  #'tf-for-return  :emit :macro}
-                   :for-try     {:macro  #'tf-for-try     :emit :macro}
-                   :for-async   {:macro  #'tf-for-async   :emit :macro}}))
-        base-keys (set (keys base))
-        fn-overrides (select-keys fn/+js+ base-keys)
-        fn-extensions (apply dissoc fn/+js+ base-keys)
-        with-fn (cond-> base
-                  (seq fn-overrides) (grammar/build:override fn-overrides)
-                  (seq fn-extensions) (grammar/build:extend fn-extensions))
-        with-fn-keys (set (keys with-fn))
-        com-overrides (select-keys com/+js-com+ with-fn-keys)
-        com-extensions (apply dissoc com/+js-com+ with-fn-keys)]
-    (cond-> with-fn
-      (seq com-overrides) (grammar/build:override com-overrides)
-      (seq com-extensions) (grammar/build:extend com-extensions)
-      true (grammar/build:extend
-            {:property   {:op :property  :symbol  '#{property}   :assign ":" :raw "property" :value true :emit :def-assign}
-             :teq        {:op :teq       :symbol  '#{===}        :raw "===" :emit :bi}
-             :tneq       {:op :tneq      :symbol  '#{not==}      :raw "!==" :emit :bi}
-             :delete     {:op :delete    :symbol  '#{del}        :raw "delete" :value true :emit :prefix}
-             :typeof     {:op :typeof    :symbol  '#{typeof}     :raw "typeof" :emit :prefix}
-             :instanceof {:op :instof    :symbol  '#{instanceof} :raw "instanceof" :emit :bi}
-             :undef      {:op :undef     :symbol  '#{undefined}  :raw "undefined" :value true :emit :throw}
-             :nan        {:op :nan       :symbol  '#{NaN} :raw "NaN" :value true :emit :throw}
-             :vargs      {:op :vargs     :symbol  '#{...} :raw "...vargs" :value true :emit :throw}
-             :var-let    {:op :var-let   :symbol  '#{var}     :macro  #'tf-var-let :emit :macro}
-             :var-const  {:op :var-const :symbol  '#{const}   :macro  #'tf-var-const :emit :macro}}))))
+  (-> (grammar/build :exclude [:pointer
+                               :block
+                               :data-range])
+      (grammar/build:override
+       {:var         {:symbol '#{var*}}
+        :mul         {:value true}
+        :defn        {:symbol '#{defn defn- defelem}}
+        :with-global {:value true :raw "globalThis"}
+        :defclass    {:macro  #'js-defclass    :emit :macro}
+        :for-object  {:macro  #'tf-for-object  :emit :macro}
+        :for-array   {:macro  #'tf-for-array   :emit :macro}
+        :for-iter    {:macro  #'tf-for-iter    :emit :macro}
+        :for-return  {:macro  #'tf-for-return  :emit :macro}
+        :for-try     {:macro  #'tf-for-try     :emit :macro}
+        :for-async   {:macro  #'tf-for-async   :emit :macro}})
+      (grammar/build:override fn/+js+)
+      (grammar/build:extend
+       {:property   {:op :property  :symbol  '#{property}   :assign ":" :raw "property" :value true :emit :def-assign}
+        :teq        {:op :teq       :symbol  '#{===}        :raw "===" :emit :bi}
+        :tneq       {:op :tneq      :symbol  '#{not==}      :raw "!==" :emit :bi}
+        :delete     {:op :delete    :symbol  '#{del}        :raw "delete" :value true :emit :prefix}
+        :typeof     {:op :typeof    :symbol  '#{typeof}     :raw "typeof" :emit :prefix}
+        :instanceof {:op :instof    :symbol  '#{instanceof} :raw "instanceof" :emit :bi}
+        :undef      {:op :undef     :symbol  '#{undefined}  :raw "undefined" :value true :emit :throw}
+        :nan        {:op :nan       :symbol  '#{NaN} :raw "NaN" :value true :emit :throw}
+        :vargs      {:op :vargs     :symbol  '#{...} :raw "...vargs" :value true :emit :throw}
+        :var-let    {:op :var-let   :symbol  '#{var}     :macro  #'tf-var-let :emit :macro}
+        :var-const  {:op :var-const :symbol  '#{const}   :macro  #'tf-var-const :emit :macro}})))
 
 (def +template+
   (->> {:banned #{:keyword}

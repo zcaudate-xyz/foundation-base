@@ -121,10 +121,9 @@
 
 ^{:refer std.lang.base.impl-deps-imports/get-entry-imports :added "4.0"}
 (fact "gets all fragment imports from code entries"
-  ^:hidden
-  
+
   (deps-imports/get-entry-imports
-   (map #(b/get-fragment-entry (lib/get-book +library-js+ :js) %) 
+   (map #(b/get-fragment-entry (lib/get-book +library-js+ :js) %)
         (deps-imports/get-fragment-deps
          (lib/get-book +library-js+ :js)
          (first (deps/collect-script-entries
@@ -134,8 +133,7 @@
 
 ^{:refer std.lang.base.impl-deps-imports/get-namespace-imports :added "4.0"}
 (fact "merges imports for both fragment and code entries"
-  ^:hidden
-  
+
   (deps-imports/get-namespace-imports
    (concat
     '{JS.ui/Puck {"@measured/puck" #{Puck}}}
@@ -144,8 +142,7 @@
 
 ^{:refer std.lang.base.impl-deps-imports/get-fragment-deps :added "4.0"}
 (fact "gets all the fragment dependencies"
-  ^:hidden
-  
+
   (deps-imports/get-fragment-deps
    (lib/get-book +library-js+ :js)
    (first (deps/collect-script-entries
@@ -155,7 +152,6 @@
 
 ^{:refer std.lang.base.impl-deps-imports/format-namespace-imports :added "4.0"}
 (fact "formats a list of namespace imports into an import map"
-  ^:hidden
 
   (deps-imports/format-namespace-imports
    (lib/get-book +library-js+ :js)
@@ -169,8 +165,7 @@
 
 ^{:refer std.lang.base.impl-deps-imports/script-import-deps :added "4.0"}
 (fact "collect all native imports"
-  ^:hidden
-  
+
   (deps-imports/script-import-deps
    (lib/get-book +library-js+ :js)
    (first (deps/collect-script-entries
@@ -191,7 +186,7 @@
        :link {ui JS.ui, - JS.app},
       :id JS.app,
        :display :default}
-  
+
   (dissoc (lib/get-module +library-js+ :js 'JS.ui)
           :fragment :code)
   => '{:require-impl nil,
@@ -212,8 +207,7 @@
 
 ^{:refer std.lang.base.impl-deps-imports/script-imports :added "4.0"}
 (fact "gets the ns imports for a script"
-  ^:hidden
-  
+
   (deps-imports/script-imports
    (lib/get-book +library-js+ :js)
    (first (deps/collect-script-entries
@@ -225,15 +219,14 @@
 
 ^{:refer std.lang.base.impl-deps-imports/module-imports :added "4.0"}
 (fact "gets a modules imports as well as code links"
-  ^:hidden
-  
+
   (deps-imports/module-imports
    (lib/get-book +library-js+ :js)
    'JS.app)
   => '{:native {"@measured/puck" {:as [* Puck]},
                 "@radix-ui/themes" {:as [* Radix], :bundle {"@radix-ui/themes/styles.css" {}}}},
        :direct #{}}
-  
+
   (impl/with:library [+library-js-cloned+]
     (deps-imports/module-imports
      (lib/get-book
@@ -242,7 +235,7 @@
      'js.react))
   => '{:native {"react" {:as React}, "react-dom/client" {:as ReactDOM}},
        :direct #{xt.lang.common-lib}}
-  
+
   (impl/with:library [+library-js-cloned+]
     (deps-imports/module-imports
      (lib/get-book
@@ -262,7 +255,7 @@
   => '{:native {"react" {:as React},
                 "blessed" {:as Blessed}},
        :direct #{js.blessed.ui-style xt.lang.common-lib js.react}}
-  
+
   (impl/with:library [+library-js-cloned+]
     (deps-imports/module-imports
      (lib/get-book
@@ -290,8 +283,7 @@
 
 ^{:refer std.lang.base.impl-deps-imports/module-code-deps :added "4.0"}
 (fact "gets the code dependencies for the module"
-  ^:hidden
-  
+
   (impl/with:library [+library-js-cloned+]
     (deps-imports/module-code-deps
      (lib/get-book
@@ -318,7 +310,7 @@
                                            js.react}
                js.blessed.ui-style       #{xt.lang.common-lib}
                js.react                  #{xt.lang.common-lib}}}
-  
+
   (impl/with:library [+library-js-cloned+]
     (deps-imports/module-code-deps
      (lib/get-book
@@ -332,7 +324,7 @@
 
 (comment
 
-  (dissoc 
+  (dissoc
    (std.lang/get-module
     +library-js+
     :js
@@ -363,7 +355,7 @@
 
 (comment
 
-  
+
 (lib/get-entry +library-js+
                '{:lang :js
                  :id Puck

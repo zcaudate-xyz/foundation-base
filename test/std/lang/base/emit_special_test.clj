@@ -39,8 +39,7 @@
 
 ^{:refer std.lang.base.emit-special/emit-with-module-all-ids :added "4.0"}
 (fact "emits the module given snapshot in opts"
-  ^:hidden
-  
+
   (set
    (emit-with-module-all-ids (lib/get-snapshot +library-ext+)
                              :lua
@@ -50,8 +49,7 @@
 
 ^{:refer std.lang.base.emit-special/emit-with-module :added "4.0"}
 (fact "emits the module given snapshot in opts"
-  ^:hidden
-  
+
   (emit-with-module nil nil '(module :lua L.util)
                     (:grammar prep/+book-min+)
                     {:snapshot (lib/get-snapshot +library-ext+)})
@@ -79,8 +77,7 @@
 
 ^{:refer std.lang.base.emit-special/emit-with-eval :added "4.0"}
 (fact "emits an eval form"
-  ^:hidden
-  
+
   (emit-with-eval nil nil
                   '(!:eval (+ 1 2 3))
                   (:grammar prep/+book-min+)
@@ -88,7 +85,7 @@
                    :module   (lib/get-module +library-ext+ :lua 'L.util)
                    :snapshot (lib/get-snapshot +library-ext+)})
   => "6"
-  
+
   (emit-with-eval nil nil
                   '(!:eval '(+ 1 2 3))
                   (:grammar prep/+book-min+)
@@ -108,10 +105,9 @@
 
 ^{:refer std.lang.base.emit-special/emit-with-deref :added "4.0"}
 (fact "emits an embedded var"
-  ^:hidden
 
   (def hello 1)
-  
+
   (emit-with-deref nil nil '(!:deref (var hello))
                    (:grammar prep/+book-min+)
                    {:lang :lua
@@ -120,7 +116,7 @@
   => "1"
 
   (def world '(L.core/sub 1 2))
-  
+
   (emit-with-deref nil nil '(!:deref (var world))
                    (:grammar prep/+book-min+)
                    {:lang :lua
@@ -130,8 +126,7 @@
 
 ^{:refer std.lang.base.emit-special/emit-with-lang :added "4.0"}
 (fact "emits an embedded eval"
-  ^:hidden
-  
+
   (emit-with-lang nil nil '(!:lang {:lang :lua} (+ @1 2 3))
                   (:grammar prep/+book-min+)
                   {:snapshot (lib/get-snapshot +library-ext+)
@@ -146,8 +141,7 @@
 
 ^{:refer std.lang.base.emit-special/test-special-loop :added "4.0"}
 (fact "test step for special ops"
-  ^:hidden
-  
+
   (test-special-loop '(!:lang {:lang :lua} (+ @1 2 3))
                            (:grammar prep/+book-min+)
                            {:snapshot (lib/get-snapshot +library-ext+)})
@@ -155,8 +149,7 @@
 
 ^{:refer std.lang.base.emit-special/test-special-emit :added "4.0"}
 (fact "test function for special ops"
-  ^:hidden
-  
+
   (test-special-emit '(!:lang {:lang :lua} (+ @1 2 3))
                        (:grammar prep/+book-min+)
                        {:snapshot (lib/get-snapshot +library-ext+)})

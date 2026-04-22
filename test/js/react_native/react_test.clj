@@ -18,15 +18,14 @@
 
 ^{:refer js.react/useRefresh :adopt true :added "4.0" :unchecked true}
 (fact "performs refresh function"
-  ^:hidden
-  
+
   (defn.js UseRefreshDemo
     []
     (var refresh (r/useRefresh))
     (var getCount (r/useGetCount))
     (return
-     (n/EnclosedCode 
-{:label "js.react/useRefresh"} 
+     (n/EnclosedCode
+{:label "js.react/useRefresh"}
 [:% n/Row
        [:% n/Button
         {:title "Refresh"
@@ -36,16 +35,15 @@
 
 ^{:refer js.react/useGetCount :adopt true :added "4.0" :unchecked true}
 (fact "ref counter"
-  ^:hidden
-  
+
   (defn.js UseGetCountDemo
     []
     (var [valA setValA] (r/local (fn:> 0)))
     (var [valB setValB] (r/local (fn:> 0)))
     (var getCount (r/useGetCount))
     (return
-     (n/EnclosedCode 
-{:label "js.react/useGetCount"} 
+     (n/EnclosedCode
+{:label "js.react/useGetCount"}
 [:% n/Row
        [:% n/Button
         {:title   "IncA"
@@ -61,15 +59,14 @@
 
 ^{:refer js.react/useFollowRef :adopt true :added "4.0" :unchecked true}
 (fact "ref follower"
-  ^:hidden
-  
+
   (defn.js UseFollowRefDemo
     []
     (var [val setVal] (r/local (fn:> 0)))
     (var valRef (r/useFollowRef val))
     (return
-     (n/EnclosedCode 
-{:label "js.react/useFollowRef"} 
+     (n/EnclosedCode
+{:label "js.react/useFollowRef"}
 [:% n/Row
        [:% n/Button
         {:title   "Inc"
@@ -85,7 +82,6 @@
 
 ^{:refer js.react/useIsMounted :adopt true :added "4.0" :unchecked true}
 (fact "checks if component is mounted"
-  ^:hidden
 
   (defn.js IsMountedPane
     [#{callback
@@ -99,7 +95,7 @@
      [:% n/Button
       {:title "Unmount"
        :onPress (fn:> (setMounted false))}]))
-  
+
   (defn.js UseIsMountedDemo
     []
     (var [mounted setMounted] (r/local (fn:> false)))
@@ -110,8 +106,8 @@
                       (do (setOn  (+ 1 on)))
                       (do (setOff (+ 1 off))))))
     (return
-     (n/EnclosedCode 
-{:label "js.react/useIsMounted"} 
+     (n/EnclosedCode
+{:label "js.react/useIsMounted"}
 [:% n/Row
        (:? mounted
            [[:% n/Row
@@ -142,15 +138,15 @@
      [:% n/Button
       {:title "Unmount"
        :onPress (fn:> (setMounted false))}]))
-  
+
   (defn.js UseMountedCallbackDemo
     []
     (var [mounted setMounted] (r/local (fn:> false)))
     (var [on setOn]   (r/local 0))
     (var [off setOff] (r/local 0))
     (return
-     (n/EnclosedCode 
-{:label "js.react/useMountedCallback"} 
+     (n/EnclosedCode
+{:label "js.react/useMountedCallback"}
 [:% n/Row
        (:? mounted
            [[:% n/Row
@@ -168,16 +164,15 @@
 
 ^{:refer js.react/useFollowDelayed :adopt true :added "4.0" :unchecked true}
 (fact "ref follower after delay"
-  ^:hidden
-  
+
   (defn.js UseFollowDelayedDemo
     []
     (var [val setVal] (r/local (fn:> 0)))
     (var isMounted (r/useIsMounted))
     (var [valDelay] (r/useFollowDelayed val 500 isMounted))
     (return
-     (n/EnclosedCode 
-{:label "js.react/useFollowDelayed"} 
+     (n/EnclosedCode
+{:label "js.react/useFollowDelayed"}
 [:% n/Row
        [:% n/Button
         {:title   "Inc"
@@ -189,8 +184,7 @@
 
 ^{:refer js.react/useInterval :adopt true :added "4.0" :unchecked true}
 (fact "performs a task at a given iterval"
-  ^:hidden
-  
+
   (defn.js IntervalPane
     [#{setMounted}]
     (var [val setVal] (r/local (fn:> 100)))
@@ -198,7 +192,7 @@
     (var [index setIndex]   (r/local (fn:> 0)))
     (var choices [300 1000 nil])
     (var ms (. choices [(mod index 3)]))
-    
+
     (var upFn   (fn []
                   (setVal (+ val 1))))
     (var downFn (fn []
@@ -231,24 +225,23 @@
         :onPress stopInterval}]
       [:% n/Padding {:style {:flex 1}}]
       [:% n/Text (+ "value: " val)]]))
-  
+
   (defn.js UseIntervalDemo
     []
     (var [mounted setMounted] (r/local false))
     (return
-     (n/EnclosedCode 
-{:label "js.react/useInterval"} 
+     (n/EnclosedCode
+{:label "js.react/useInterval"}
 [:% n/Row
        [:% n/Button
         {:title (:? mounted "Hide" "Show")
-         :onPress (fn:> (setMounted (not mounted)))}]] 
+         :onPress (fn:> (setMounted (not mounted)))}]]
 (:? mounted [[:% -/IntervalPane
                     {:key "interval"}]])))))
 
 ^{:refer js.react/useTimeout :adopt true :added "4.0" :unchecked true}
 (fact  "performs a task at a given iterval"
-  ^:hidden
-  
+
   (defn.js TimeoutPane
     [#{setMounted}]
     (var [val setVal] (r/local (fn:> 100)))
@@ -256,7 +249,7 @@
     (var [index setIndex]   (r/local (fn:> 0)))
     (var choices [300 1000 nil])
     (var ms (. choices [(mod index 3)]))
-    
+
     (var upFn   (fn []
                   (setVal (+ val 1))))
     (var downFn (fn []
@@ -289,18 +282,17 @@
         :onPress stopTimeout}]
       [:% n/Padding {:style {:flex 1}}]
       [:% n/Text (+ "value: " val)]]))
-  
+
   (defn.js UseTimeoutDemo
     []
     (return
-     (n/EnclosedCode 
-{:label "js.react/useTimeout"} 
+     (n/EnclosedCode
+{:label "js.react/useTimeout"}
 [:% -/TimeoutPane]))))
 
 
 ^{:refer js.react/useCountdown :adopt true :added "4.0" :unchecked true}
 (fact "countdown value every second"
-  ^:hidden
 
   (defn.js CountdownPane
     []
@@ -316,7 +308,7 @@
       [:% n/Button
        {:title "Reset"
         :onPress (fn:> (setCurrent 100))}]
-      
+
       [:% n/Text " "]
       [:% n/Button
        {:title "Start"
@@ -328,23 +320,22 @@
         :onPress stopCountdown}]
       [:% n/Padding {:style {:flex 1}}]
       [:% n/Text (+ "value: " current)]]))
-  
+
   (defn.js UseCountdownDemo
     []
     (var [mounted setMounted] (r/local false))
     (return
-     (n/EnclosedCode 
-{:label "js.react/useCountdown"} 
+     (n/EnclosedCode
+{:label "js.react/useCountdown"}
 [:% n/Row
        [:% n/Button
         {:title (:? mounted "Hide" "Show")
-         :onPress (fn:> (setMounted (not mounted)))}]] 
+         :onPress (fn:> (setMounted (not mounted)))}]]
 (:? mounted [[:% -/CountdownPane
                     {:key "countdown"}]])))))
 
 ^{:refer js.react/useNow :adopt true :added "4.0" :unchecked true}
 (fact "uses the current time"
-  ^:hidden
 
   (defn.js NowPane
     []
@@ -364,31 +355,30 @@
         :onPress stopNow}]
       [:% n/Padding {:style {:flex 1}}]
       [:% n/Text (+ "value: " current)]]))
-  
+
   (defn.js UseNowDemo
     []
     (var [mounted setMounted] (r/local false))
     (return
-     (n/EnclosedCode 
-{:label "js.react/useNow"} 
+     (n/EnclosedCode
+{:label "js.react/useNow"}
 [:% n/Row
        [:% n/Button
         {:title (:? mounted "Hide" "Show")
-         :onPress (fn:> (setMounted (not mounted)))}]] 
+         :onPress (fn:> (setMounted (not mounted)))}]]
 (:? mounted [[:% -/NowPane
                     {:key "now"}]])))))
 
 ^{:refer js.react/useChanging :adopt true :added "4.0" :unchecked true}
 (fact "uses value and setValue that may be influenced by available data"
-  ^:hidden
 
   (defn.js UseChangingDemo
     []
     (var [data setData] (r/local ["A" "B" "C"]))
     (var [value setValue] (r/useChanging data))
     (return
-     (n/EnclosedCode 
-{:label "js.react/useChanging"} 
+     (n/EnclosedCode
+{:label "js.react/useChanging"}
 [:% n/Row
        [:% n/Button
         {:title "ABC"
@@ -403,8 +393,7 @@
 
 ^{:refer js.react/useTree :adopt true :added "4.0" :unchecked true}
 (fact "tree function helper"
-  ^:hidden
-  
+
   (defn.js UseTreeDemo
     []
     (var #{branch
@@ -420,8 +409,8 @@
                                              {:content (n/format-entry
                                                         #{target branch parents root})}]))}))
     (return
-     (n/EnclosedCode 
-{:label "js.react/useTree"} 
+     (n/EnclosedCode
+{:label "js.react/useTree"}
 [:% n/Row {:style {:marginVertical 5}}
        [:% n/Button
         {:title "a"
@@ -429,12 +418,12 @@
        [:% n/Text " "]
        [:% n/Button
         {:title "x"
-         :onPress (fn:> (setBranch "x"))}]] 
-view 
-[:% n/Row {:style {:padding 5}}] 
+         :onPress (fn:> (setBranch "x"))}]]
+view
+[:% n/Row {:style {:padding 5}}]
 [:% n/TextDisplay
        {:content (n/format-entry #{branch branches})}])))
-  
+
   (def.js MODULE
     (do (:# (!:uuid))
         (!:module)))

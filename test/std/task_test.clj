@@ -5,14 +5,12 @@
 
 ^{:refer std.task/task-defaults :added "3.0"}
 (fact "creates default settings for task groups"
-  ^:hidden
 
   (task-defaults :default)
   => {:main {:arglists '([] [entry])}})
 
 ^{:refer std.task/map->Task :added "3.0" :adopt true}
 (fact "constructs a invokable Task object"
-  ^:hidden
 
   (-> (map->Task {:type :namespace
                   :name "list-interns"
@@ -22,7 +20,6 @@
 
 ^{:refer std.task/task-status :added "3.0"}
 (fact "displays the task-status"
-  ^:hidden
 
   (-> (task :namespace "list-interns" ns-interns)
       (task-status))
@@ -30,7 +27,6 @@
 
 ^{:refer std.task/task-info :added "3.0"}
 (fact "displays the task-body"
-  ^:hidden
 
   (-> (task :namespace "list-interns" ns-interns)
       (task-info))
@@ -38,14 +34,12 @@
 
 ^{:refer std.task/single-function-print :added "3.0"}
 (fact "if not `:bulk`, then print function output"
-  ^:hidden
 
   (single-function-print {})
   => {:print {:function true}})
 
 ^{:refer std.task/task :added "3.0"}
 (fact "creates a task"
-  ^:hidden
 
   (task? (task :namespace "list-interns" ns-interns))
   => true
@@ -57,26 +51,23 @@
 
 ^{:refer std.task/task? :added "3.0"}
 (fact "check if object is a task"
-  ^:hidden
-  
+
   (-> (task :namespace "list-interns" ns-interns)
       (task?))
   => true)
 
 ^{:refer std.task/invoke-intern-task :added "3.0"}
 (fact "creates a form defining a task"
-  ^:hidden
-  
+
   (invoke-intern-task '-task- '{:template :namespace
-                                :main {:fn clojure.core/ns-aliases}}) ^:hidden
+                                :main {:fn clojure.core/ns-aliases}})
   => '(def -task-
         (std.task/task :namespace "-task-"
                        {:template :namespace, :main {:fn clojure.core/ns-aliases}})))
 
 ^{:refer std.task/deftask :added "3.0"}
 (fact "defines a top level task"
-  ^:hidden
-  
+
   (macroexpand-1
    '(deftask -list-aliases-
       {:template :namespace
@@ -93,8 +84,7 @@
 
 ^{:refer std.task/process-ns-args :added "4.0"}
 (fact "processes arguments for tasks"
-  ^:hidden
-  
+
   (process-ns-args [":only" "foo"])
   => {:ns 'foo}
 

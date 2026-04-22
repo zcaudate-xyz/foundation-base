@@ -24,7 +24,6 @@
 
 ^{:refer js.cell.service.db-sync/sync-capable? :added "4.1"}
 (fact "checks whether a descriptor can process sync requests"
-  ^:hidden
 
   (!.js
    [(db-sync/sync-capable? (@! +db+))
@@ -33,7 +32,6 @@
 
 ^{:refer js.cell.service.db-sync/normalize-sync :added "4.1"}
 (fact "normalizes local sync and remove keys into the canonical contract"
-  ^:hidden
 
   (!.js
    (db-sync/normalize-sync
@@ -48,7 +46,6 @@
 
 ^{:refer js.cell.service.db-sync/prepare-sync :added "4.1"}
 (fact "validates and prepares the canonical sync request"
-  ^:hidden
 
   (!.js
    [(db-sync/prepare-sync
@@ -69,7 +66,6 @@
 
 ^{:refer js.cell.service.db-sync/execute-sync :added "4.1"}
 (fact "applies sync and remove requests to a local cache db"
-  ^:hidden
 
   (!.js
    (var desc (@! +db+))
@@ -100,7 +96,6 @@
 
 ^{:refer js.cell.service.db-sync/result->update :added "4.1"}
 (fact "summarizes sync results for the binding layer"
-  ^:hidden
 
   (!.js
    [(db-sync/result->update
@@ -124,7 +119,6 @@
 
 ^{:refer js.cell.service.db-sync/run-sync :added "4.1"}
 (fact "prepares, executes, and emits a summarized sync update"
-  ^:hidden
 
   (!.js
    (var desc (@! +db+))

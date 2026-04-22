@@ -19,18 +19,17 @@
 
 ^{:refer js.react-native.ui-scrollview/ScrollView :added "4.0" :unchecked true}
 (fact "creates a scrollview"
-  ^:hidden
-  
+
   (defn.js ScrollViewDemo
     []
     (return
-     (n/EnclosedCode 
-{:label "js.react-native.ui-scrollview/ScrollView"} 
+     (n/EnclosedCode
+{:label "js.react-native.ui-scrollview/ScrollView"}
 [:% ui-scrollview/ScrollView
        {:style {:height 300
                 :width 400}}
        [:% n/View
         {:style {:height 500
                  :backgroundColor "yellow"}}]])))
-  
+
   )

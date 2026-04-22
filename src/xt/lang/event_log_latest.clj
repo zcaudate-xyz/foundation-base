@@ -3,6 +3,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.lang.event-common :as event-common]]})
 
 (defn.xt new-log-latest
@@ -23,14 +24,17 @@
   "clears the cache given a time point"
   {:added "4.0"}
   [log t]
-  (:= t (or t (xt/x:now-ms)))
+  (when (xt/x:nil? t)
+    (:= t (xt/x:now-ms)))
   (var #{last interval cache} log)
   (var out [])
-  (when (and last (>= interval (- t last)))
+  (when (and (xt/x:not-nil? last)
+             (>= interval (- t last)))
     (return out))
   (xt/x:set-key log "last" t)
-  (xt/for:object [[k entry] cache]
-    (when (< interval (- t (. entry t)))
+  (xt/for:array [k (xt/x:obj-keys cache)]
+    (var entry (xt/x:get-key cache k))
+    (when (< interval (- t (. entry ["t"])))
       (xt/x:del-key cache k)
       (xt/x:arr-push out k)))
   (return out))
@@ -43,17 +47,16 @@
   (var entry (xt/x:get-key cache key))
   (var t (xt/x:now-ms))
   (cond (xt/x:nil? entry)
-        (do (xt/x:set-key cache key {:t t
-                                  :latest latest})
-            (-/clear-cache log t)
-            (return true))
+         (do (xt/x:set-key cache key {:t t
+                                   :latest latest})
+             (-/clear-cache log t)
+             (return true))
 
-        (< (. entry latest) latest)
-        (do (xt/x:set-key cache key {:t t
-                                  :latest latest})
-            (-/clear-cache log t)
-            (return true))
+         (< (. entry ["latest"]) latest)
+         (do (xt/x:set-key cache key {:t t
+                                   :latest latest})
+             (-/clear-cache log t)
+             (return true))
         
         :else
         (return false)))
-

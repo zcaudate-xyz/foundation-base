@@ -60,113 +60,6 @@
    :x-now-ms         {:macro #'php-tf-x-now-ms :emit :macro}
    :x-type-native    {:macro #'php-tf-x-type-native :emit :macro}})
 
-(defn php-tf-x-future-run
-  [[_ thunk]]
-  (template/$
-   (do (:= task {"status" "pending"
-                 "value" nil
-                 "error" nil})
-       (try (:= out (~thunk))
-            (:= (:% task ["status"]) "ok")
-            (:= (:% task ["value"]) out)
-            (catch Exception $e
-              (:= (:% task ["status"]) "error")
-              (:= (:% task ["error"]) $e)))
-       (return task))))
-
-(defn php-tf-x-future-then
-  [[_ task on-ok]]
-  (template/$
-   (if (== "ok" (:% ~task ["status"]))
-     (do (:= out {"status" "pending"
-                  "value" nil
-                  "error" nil})
-         (try (:= v (~on-ok (:% ~task ["value"])))
-              (:= (:% out ["status"]) "ok")
-              (:= (:% out ["value"]) v)
-              (catch Exception $e
-                (:= (:% out ["status"]) "error")
-                (:= (:% out ["error"]) $e)))
-         (return out))
-     (return ~task))))
-
-(defn php-tf-x-future-catch
-  [[_ task on-err]]
-  (template/$
-   (if (== "error" (:% ~task ["status"]))
-     (do (:= out {"status" "pending"
-                  "value" nil
-                  "error" nil})
-         (try (:= v (~on-err (:% ~task ["error"])))
-              (:= (:% out ["status"]) "ok")
-              (:= (:% out ["value"]) v)
-              (catch Exception $e
-                (:= (:% out ["status"]) "error")
-                (:= (:% out ["error"]) $e)))
-         (return out))
-     (return ~task))))
-
-(defn php-tf-x-future-finally
-  [[_ task on-done]]
-  (template/$
-   (do (~on-done)
-       (return ~task))))
-
-(defn php-tf-x-future-cancel
-  [[_ task]]
-  (template/$
-   (do (:= (:% ~task ["status"]) "cancelled")
-       (return ~task))))
-
-(defn php-tf-x-future-status
-  [[_ task]]
-  (template/$
-   (return (:% ~task ["status"]))))
-
-(defn php-tf-x-future-await
-  [[_ task & [timeout-ms default]]]
-  (template/$
-   (cond (== "ok" (:% ~task ["status"]))
-         (return (:% ~task ["value"]))
-
-         (== "error" (:% ~task ["status"]))
-         (throw (:% ~task ["error"]))
-
-         :else
-         (return ~default))))
-
-(defn php-tf-x-future-from-async
-  [[_ executor]]
-  (template/$
-   (do (:= box {"ok" false
-                "value" nil
-                "error" nil})
-       (:= resolve
-           (fn [v]
-             (:= (:% box ["ok"]) true)
-             (:= (:% box ["value"]) v)))
-       (:= reject
-           (fn [e]
-             (:= (:% box ["error"]) e)))
-       (~executor resolve reject)
-       (if (:% box ["ok"])
-         (return {"status" "ok"
-                  "value" (:% box ["value"])
-                  "error" nil})
-         (return {"status" "error"
-                  "value" nil
-                  "error" (:% box ["error"])})))))
-
-(def +php-future+
-  {:x-future-run         {:macro #'php-tf-x-future-run        :emit :macro}
-   :x-future-then        {:macro #'php-tf-x-future-then       :emit :macro}
-   :x-future-catch       {:macro #'php-tf-x-future-catch      :emit :macro}
-   :x-future-finally     {:macro #'php-tf-x-future-finally    :emit :macro}
-   :x-future-cancel      {:macro #'php-tf-x-future-cancel     :emit :macro}
-   :x-future-status      {:macro #'php-tf-x-future-status     :emit :macro}
-   :x-future-await       {:macro #'php-tf-x-future-await      :emit :macro}
-   :x-future-from-async  {:macro #'php-tf-x-future-from-async :emit :macro}})
-
 ;;
 ;; PROTO
 ;;
@@ -180,8 +73,7 @@
   (list ':= (list :% obj [key]) value))
 
 (def +php-proto+
-  {:x-this            {:emit :unit  :default 'this}
-   :x-proto-get       {:macro #'php-tf-x-proto-get    :emit :macro}
+  {:x-proto-get       {:macro #'php-tf-x-proto-get    :emit :macro}
    :x-proto-set       {:macro #'php-tf-x-proto-set    :emit :macro}
    :x-proto-tostring  {:emit :unit  :default "__toString"}})
 
@@ -520,11 +412,13 @@
 
 (defn php-tf-x-thread-spawn
   [[_ thunk]]
-  (php-tf-x-future-run [nil thunk]))
+  (template/$
+   (do (:= out (~thunk))
+       (return out))))
 
 (defn php-tf-x-thread-join
   [[_ thread]]
-  (php-tf-x-future-await [nil thread nil nil]))
+  thread)
 
 (defn php-tf-x-with-delay
   [[_ thunk ms]]
@@ -693,8 +587,8 @@
    :x-ws-connect      {:macro #'php-tf-x-ws-connect    :emit :macro}
    :x-ws-send         {:macro #'php-tf-x-ws-send       :emit :macro}
    :x-ws-close        {:macro #'php-tf-x-ws-close      :emit :macro}
-   :x-client-basic    {:emit :alias :raw 'client_basic}
-   :x-client-ws       {:emit :alias :raw 'client_ws}
+   :x-debug-client-basic    {:emit :alias :raw 'debug_client_basic}
+   :x-debug-client-ws       {:emit :alias :raw 'debug_client_ws}
    :x-server-basic    {:emit :alias :raw 'server_basic}
    :x-server-ws       {:emit :alias :raw 'server_ws}})
 
@@ -736,7 +630,6 @@
 
 (def +php+
   (merge +php-core+
-         +php-future+
          +php-proto+
          +php-custom+
          +php-math+

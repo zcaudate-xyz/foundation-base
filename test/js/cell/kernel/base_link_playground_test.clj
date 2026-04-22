@@ -63,7 +63,6 @@
 
 ^{:refer js.cell.kernel.base-link/link-create :added "4.0"}
 (fact "integrates link-create with the playground worker"
-  ^:hidden
 
   (notify/wait-on :js
     (var link (-/make-link))
@@ -103,7 +102,6 @@
 
 ^{:refer js.cell.kernel.base-link/link-active :added "4.0"}
 (fact "tracks active playground calls"
-  ^:hidden
 
   (vals
    (!.js
@@ -115,7 +113,6 @@
 
 ^{:refer js.cell.kernel.base-link-eval/wait-post :added "4.0"}
 (fact "posts directly to the playground worker"
-  ^:hidden
 
   (base-link-eval/wait-post
    (. (-/make-link) ["worker"])
@@ -135,7 +132,6 @@
 ^{:refer js.cell.kernel.base-link-eval/post-eval :added "4.0"
   :setup [(!.js (:= (!:G LK) (-/make-link)))]}
 (fact "evaluates playground code through post-eval"
-  ^:hidden
 
   (j/<! (base-link-eval/post-eval LK
           (base-link-eval/async-post [1 2 3 4])))
@@ -144,7 +140,6 @@
 ^{:refer js.cell.kernel.base-link-eval/wait-eval :added "4.0"
   :setup [(!.js (:= (!:G LK) (-/make-link)))]}
 (fact "evaluates playground code through wait-eval"
-  ^:hidden
 
   (base-link-eval/wait-eval LK
     [1 2 3 4])

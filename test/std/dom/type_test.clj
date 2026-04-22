@@ -4,9 +4,9 @@
 
 ^{:refer std.dom.type/metaclass :added "3.0"}
 (fact "returns info associated with given metaclass"
-  
+
   (metaclass-add :test {:metatype :value :data "hello"})
-  
+
   (metaclass :test)
   => {:id :test :metatype :value :data "hello"})
 
@@ -26,7 +26,7 @@
 (fact "returns metaprops info associated with the node"
 
   (metaprops-add :test {:tag :test/node})
-  
+
   (metaprops :test/node)
   => {:tag :test/node,
       :metaclass :test,
@@ -53,7 +53,7 @@
 
   (metaprops-install {:test/a {:tag :test/a
                                :metaclass :dom/value
-                               :metatype :dom/value}})^:hidden
-  
+                               :metatype :dom/value}})
+
   (metaprops-remove :test/a)
   => (contains {:tag :test/a}))

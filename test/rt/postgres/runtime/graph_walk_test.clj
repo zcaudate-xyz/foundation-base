@@ -30,9 +30,8 @@
 
 ^{:refer rt.postgres.runtime.graph-walk/link-data :added "4.0"}
 (fact"adds missing ids to tree"
-  ^:hidden
-  
-  (walk/link-data 
+
+  (walk/link-data
    '{:TaskCache
      {:id "hello",
       :tasks
@@ -52,8 +51,7 @@
 
 ^{:refer rt.postgres.runtime.graph-walk/flatten-data :added "4.0"}
 (fact "converts tree to flattened data by table"
-  ^:hidden
-  
+
   (walk/flatten-data
    {:TaskCache
      {:id "hello",

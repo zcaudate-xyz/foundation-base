@@ -25,13 +25,12 @@
 
 ^{:refer js.lib.driver-postgres/connect-constructor :added "4.0" :unchecked true}
 (fact "constructs the postgres instance"
-  ^:hidden
 
   (str (!.js
         (js-postgres/connect-constructor (js-postgres/default-env))))
   => "<Client>\n[object Object]"
 
-  
+
   (do (notify/wait-on [:js 5000]
         (dbsql/connect {:constructor js-postgres/connect-constructor}
                        {:success (fn [conn]
