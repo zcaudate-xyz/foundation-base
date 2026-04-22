@@ -13,6 +13,9 @@
                 :results number?
                 :total number?}))
 
+^{:refer std.lang.seedgen/seedgen-list :added "4.1"}
+(fact "TODO")
+
 ^{:refer std.lang.seedgen/seedgen-readforms :added "4.1"}
 (fact "returns summary information for public seedgen readforms analysis"
   (seedgen-readforms '[xt.sample.train-002] {:return :summary})
@@ -21,6 +24,9 @@
                 :items 1
                 :results 1
                 :total number?}))
+
+^{:refer std.lang.seedgen/seedgen-benchlist :added "4.1"}
+(fact "TODO")
 
 ^{:refer std.lang.seedgen/seedgen-incomplete :added "4.1"}
 (fact "returns summary information for incomplete seedgen tasks"
@@ -32,13 +38,6 @@
                 :items number?
                 :results number?
                 :total number?}))
-
-
-^{:refer std.lang.seedgen/seedgen-list :added "4.1"}
-(fact "TODO")
-
-^{:refer std.lang.seedgen/seedgen-benchlist :added "4.1"}
-(fact "TODO")
 
 ^{:refer std.lang.seedgen/seedgen-langremove :added "4.1"}
 (fact "TODO")

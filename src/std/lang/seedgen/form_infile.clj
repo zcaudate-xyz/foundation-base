@@ -81,6 +81,26 @@
       (-> current nav/down nav/right nav/block block/block-string)
       s)))
 
+(defn- strip-seedgen-control-meta-string
+  [s]
+  (let [root    (nav/parse-root s)
+        current (nav/down root)]
+    (if-let [mnav (some-> current form-common/nav-meta)]
+      (let [m      (nav/value mnav)
+            next-m (dissoc m :seedgen/lang :seedgen/base :seedgen/check)]
+        (cond
+          (= m next-m)
+          s
+
+          (empty? next-m)
+          (-> current form-common/nav-body nav/block block/block-string)
+
+          :else
+          (-> mnav
+              (nav/replace next-m)
+              nav/root-string)))
+      s)))
+
 (defn- replace-script-lang-string
   [script-str lang]
   (let [root       (nav/parse-root script-str)
@@ -92,9 +112,29 @@
           nav/root-string)
       script-str)))
 
+(defn- replace-runtime-lang-content-string
+  [expr-str expr-form lang]
+  (let [target-lang (common/seedgen-normalize-runtime-lang lang)
+        target-tag  (common/seedgen-dispatch-tag target-lang)
+        langs       (common/seedgen-runtime-dispatch-langs expr-form)
+        replace-lang-token
+        (fn [s src]
+          (let [src-lang (common/seedgen-normalize-runtime-lang src)
+                src-tag  (common/seedgen-dispatch-tag src-lang)
+                out      (str/replace s
+                                      (re-pattern (str "!" "\\." (java.util.regex.Pattern/quote (name src-tag)) "(?![A-Za-z0-9_\\-])"))
+                                      (str "!." (name target-tag)))]
+            (-> out
+                (str/replace (re-pattern (str ":" (java.util.regex.Pattern/quote (name src-lang)) "(?![A-Za-z0-9_\\-])"))
+                             (str ":" (name target-lang)))
+                (str/replace (re-pattern (str ":" (java.util.regex.Pattern/quote (name src-tag)) "(?![A-Za-z0-9_\\-])"))
+                             (str ":" (name target-lang))))))]
+    (reduce replace-lang-token expr-str langs)))
+
 (defn- replace-runtime-lang-string
   [expr-str lang]
-  (let [root     (nav/parse-root expr-str)
+  (let [expr-str (strip-seedgen-control-meta-string expr-str)
+        root     (nav/parse-root expr-str)
         expr-nav (nav/down root)
         form-nav (some-> expr-nav form-common/nav-body)
         head-nav (some-> form-nav nav/down)
@@ -113,7 +153,7 @@
            (common/seedgen-runtime-reference-lang expr-form)
            (keyword? arg-form))
       (-> arg-nav
-          (nav/replace tag)
+          (nav/replace lang)
           nav/root-string)
 
       (and arg-nav
@@ -122,12 +162,12 @@
            (seq arg-form))
       (if-let [first-arg-nav (some-> arg-nav nav/down)]
         (-> first-arg-nav
-            (nav/replace tag)
+            (nav/replace lang)
             nav/root-string)
         expr-str)
 
       :else
-      expr-str)))
+      (replace-runtime-lang-content-string expr-str expr-form lang))))
 
 (defn- indent-lines
   [prefix s]
@@ -273,6 +313,30 @@
                  [lang item])))
        (into {})))
 
+(defn- item-lang-config
+  [item]
+  (some-> item item-value common/seedgen-lang-config))
+
+(defn- item-check-config
+  [item]
+  (some->> item
+           item-value
+           meta
+           :seedgen/check
+           (map (fn [[lang config]]
+                  [(common/seedgen-normalize-runtime-lang lang) config]))
+           (into {})))
+
+(defn- item-suppressed?
+  [item lang]
+  (true? (get-in (item-lang-config item)
+                 [(common/seedgen-normalize-runtime-lang lang) :suppress])))
+
+(defn- item-check-override
+  [item lang key]
+  (get-in (item-check-config item)
+          [(common/seedgen-normalize-runtime-lang lang) key]))
+
 (defn- fact-original-body-string
   [original-string]
   (unwrap-meta-string original-string))
@@ -295,36 +359,83 @@
           :langs
           normalize-target-langs))
 
+(defn- render-check-clause
+  [item]
+  (render-clause-snippet "  "
+                         (render-item-string item)
+                         (some-> item :expected render-item-string)))
+
+(defn- render-generated-check-clause
+  [root-item lang]
+  (let [input-override  (item-check-override root-item lang :input)
+        expect-override (item-check-override root-item lang :expect)
+        expr-str        (if input-override
+                          (let [base-str  (replace-runtime-lang-string
+                                           (render-item-string root-item)
+                                           lang)
+                                root     (nav/parse-root base-str)
+                                expr-nav  (some-> root nav/down form-common/nav-body)
+                                expr-form (some-> expr-nav nav/value)]
+                            (if (common/seedgen-dispatch-lang expr-form)
+                              (if-let [body-nav (some-> expr-nav nav/down nav/right)]
+                                (-> body-nav
+                                    (nav/replace input-override)
+                                    nav/root-string)
+                                base-str)
+                              (strip-seedgen-control-meta-string
+                               (pr-str input-override))))
+                          (replace-runtime-lang-string
+                           (render-item-string root-item)
+                           lang))
+        expected-str    (if (nil? expect-override)
+                          (some-> root-item :expected render-item-string)
+                          (pr-str expect-override))]
+    (render-clause-snippet "  " expr-str expected-str)))
+
+(defn- render-check-snippets-add
+  [entry ordered-extra-langs target-set]
+  (let [root-checks     (vec (sort-items (get-in entry [:checks :root])))
+        derived-by-lang (->> (get-in entry [:checks :derived])
+                             sort-items
+                             (group-by item-lang))
+        root-snippets   (mapv render-check-clause root-checks)
+        extra-snippets
+        (mapcat (fn [lang]
+                  (let [existing       (vec (get derived-by-lang lang))
+                        eligible-roots (vec (remove #(item-suppressed? % lang) root-checks))
+                        generated      (map-indexed
+                                        (fn [idx root-item]
+                                          (if-let [item (nth existing idx nil)]
+                                            (render-check-clause item)
+                                            (when (contains? target-set lang)
+                                              (render-generated-check-clause
+                                               root-item
+                                               lang))))
+                                        eligible-roots)
+                        trailing       (map render-check-clause
+                                            (drop (count eligible-roots) existing))]
+                    (concat (remove nil? generated)
+                            trailing)))
+                ordered-extra-langs)]
+    (vec (concat root-snippets extra-snippets))))
+
 (defn- render-fact-string-add
   [entry root-lang ordered-extra-langs target-set original-string]
-  (let [root-check   (first (get-in entry [:checks :root]))]
-    (if (nil? root-check)
-       original-string
+  (let [root-checks (vec (sort-items (get-in entry [:checks :root])))]
+    (if (empty? root-checks)
+        original-string
        (let [final-langs     (vec (cons root-lang ordered-extra-langs))
-             check-items     (runtime-item-map (:checks entry))
-             setup-items     (runtime-item-map (:fact-setup entry))
-             teardown-items  (runtime-item-map (:fact-teardown entry))
-             root-check-expr (render-item-string root-check)
-             root-check-exp  (some-> root-check :expected render-item-string)
-             root-setup      (some-> (get setup-items root-lang) render-item-string)
-             root-teardown   (some-> (get teardown-items root-lang) render-item-string)
-             indent          "  "
-             clause-snippets (mapv (fn [lang]
-                                     (if-let [item (get check-items lang)]
-                                       (render-clause-snippet indent
-                                                              (render-item-string item)
-                                                              (some-> item :expected render-item-string))
-                                       (render-clause-snippet indent
-                                                               (replace-runtime-lang-string
-                                                                root-check-expr
-                                                                lang)
-                                                               root-check-exp)))
-                                  final-langs)
-             setup-render    (when root-setup
-                               (render-vector-string
-                                :setup
-                                (mapv (fn [lang]
-                                        (or (some-> (get setup-items lang) render-item-string)
+              root-check      (first root-checks)
+              check-snippets  (render-check-snippets-add entry ordered-extra-langs target-set)
+              setup-items     (runtime-item-map (:fact-setup entry))
+              teardown-items  (runtime-item-map (:fact-teardown entry))
+              root-setup      (some-> (get setup-items root-lang) render-item-string)
+              root-teardown   (some-> (get teardown-items root-lang) render-item-string)
+              setup-render    (when root-setup
+                                (render-vector-string
+                                 :setup
+                                 (mapv (fn [lang]
+                                         (or (some-> (get setup-items lang) render-item-string)
                                             (when (contains? target-set lang)
                                                (replace-runtime-lang-string root-setup lang))))
                                        final-langs)))
@@ -341,13 +452,13 @@
                                                  teardown-render (assoc :teardown []))
                                                 {:setup setup-render
                                                  :teardown teardown-render})
-             fact-body       (str "(fact " (pr-str (:intro entry))
-                                  "\n\n"
-                                  (str/join "\n\n" clause-snippets)
-                                  ")")]
-         (if meta-string
-           (str meta-string "\n" fact-body)
-           fact-body)))))
+              fact-body       (str "(fact " (pr-str (:intro entry))
+                                   "\n\n"
+                                   (str/join "\n\n" check-snippets)
+                                   ")")]
+          (if meta-string
+            (str meta-string "\n" fact-body)
+            fact-body)))))
 
 (defn- render-fact-string-remove
   [entry target-set original-string]
