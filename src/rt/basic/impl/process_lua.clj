@@ -48,39 +48,39 @@
 
 (def +program-init+
   (common/put-program-options
-   :lua  {:default  {:oneshot        :luajit
- 	             :basic          :luajit
-	             :websocket      :resty}
-          :env      {:lua       {:exec   "lua"
-                                 :shell  +lua-local-rocks-shell+
-	                         :flags  {:oneshot ["-e"]
-                                          :basic   ["-e"]
-                                          :interactive ["-i"]
-	                                  :json ["cjson" :install]
-                                          :bench {:basic     ["luasocket" :install]}}}
-	             :luajit    {:exec   "luajit"
-                                 :shell  +lua-local-rocks-shell+
-	                         :flags   {:oneshot ["-e"]
-                                           :basic   ["-e"]
-                                           :interactive  ["-i"]
-	                                   :json ["cjson" :install]
-                                           :bench {:basic     ["luasocket" :install]}}}
-                     :torch     {:exec   "th"
-                                 :shell  +lua-local-rocks-shell+
-	                         :flags   {:oneshot ["-e"]
-                                           :basic   ["-e"]
-                                           :interactive  ["-i"]
-	                                   :json ["cjson" :install]
-                                           :bench {:basic     ["luasocket" :install]}}}
-	             :resty     {:exec   "resty"
-                                 :shell  +lua-local-rocks-shell+
-	                         :flags   {:oneshot   ["-e"]
-                                           :basic     ["-e"]
-                                           :websocket ["-e"]
-                                           :interactive false
- 	                                   :json ["cjson" :builtin]
-                                            :bench {:basic     ["resty.socket" :builtin]
-                                                    :websocket ["resty.websocket.client" :builtin]}}}}}))
+   :lua {:default {:oneshot   :luajit
+                   :basic     :luajit
+                   :websocket :resty}
+         :env {:lua {:exec  "lua"
+                     :shell +lua-local-rocks-shell+
+                     :flags {:oneshot    ["-e"]
+                             :basic      ["-e"]
+                             :interactive ["-i"]
+                             :json       ["cjson" :install]
+                             :bench      {:basic ["luasocket" :install]}}}
+               :luajit {:exec  "luajit"
+                        :shell +lua-local-rocks-shell+
+                        :flags {:oneshot    ["-e"]
+                                :basic      ["-e"]
+                                :interactive ["-i"]
+                                :json       ["cjson" :install]
+                                :bench      {:basic ["luasocket" :install]}}}
+               :torch {:exec  "th"
+                       :shell +lua-local-rocks-shell+
+                       :flags {:oneshot    ["-e"]
+                               :basic      ["-e"]
+                               :interactive ["-i"]
+                               :json       ["cjson" :install]
+                               :bench      {:basic ["luasocket" :install]}}}
+               :resty {:exec  "resty"
+                       :shell +lua-local-rocks-shell+
+                       :flags {:oneshot    ["-e"]
+                               :basic      ["-e"]
+                               :websocket  ["-e"]
+                               :interactive false
+                               :json       ["cjson" :builtin]
+                               :bench      {:basic     ["resty.socket" :builtin]
+                                            :websocket ["resty.websocket.client" :builtin]}}}}}))
 
 (def +program-init-nginx+
   (common/put-program-options

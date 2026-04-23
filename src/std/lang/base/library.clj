@@ -79,14 +79,14 @@
 (defn get-book-raw
   "gets the raw book, without merge
   
-    (b/list-entries (lib/get-book-raw +library+ :lua.redis))
-    => empty?
-    
-    (b/list-entries (lib/get-book +library+ :lua.redis))
-    => coll?
-    
-    (b/list-entries (lib/get-book +library+ :lua.nginx))
-    => coll?"
+   (b/list-entries (lib/get-book-raw +library+ :lua.redis))
+   => empty?
+   
+   (b/list-entries (lib/get-book +library+ :lua.redis))
+   => coll?
+   
+   (b/list-entries (lib/get-book +library+ :lua.nginx))
+   => coll?"
   {:added "4.0"}
   [lib lang]
   (wait-apply lib snap/get-book-raw lang))
