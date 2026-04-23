@@ -96,8 +96,7 @@
         reserved-opts (when (and (collection/form? value)
                                  (symbol? (first value)))
                         (let [reserved (get-in grammar [:reserved (first value)])]
-                          (when (= :macro (:emit reserved))
-                            (select-keys reserved +assign-types+))))]
+                          (select-keys reserved +assign-types+)))]
     (merge reserved-opts meta-opts)))
 
 (defn assign-value
