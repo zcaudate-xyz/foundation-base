@@ -3,7 +3,7 @@
             [std.lib.env :as env]
             [std.lib.foundation :as f]
             [std.lib.template :as template]
-            [xt.lang.common-repl :as repl])
+            [xt.lang.common-lib :as lib])
   (:refer-clojure :exclude [print flush time re-find]))
 
 (l/script :lua
@@ -251,7 +251,7 @@
   (list 'do
         '(ngx.req.read-body)
         '(local body (ngx.req.get-body-data))
-        (list `return-ok (list `repl/return-eval 'body))))
+        (list `return-ok (list `lib/return-eval 'body))))
 
 (defmacro.lua http-echo-ws
   "http echo ws form"

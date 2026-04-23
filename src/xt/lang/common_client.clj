@@ -3,7 +3,7 @@
             [xt.lang.common-repl :as repl]))
 
 (l/script :js
-  {:require [[xt.lang.common-repl :as repl]
+  {:require [[xt.lang.common-lib :as lib]
              [js.core :as j]]})
 
 (defn.js client-basic
@@ -22,7 +22,7 @@
                              (stream.on
                               "line"
                               (fn [line]
-                                (conn.write (+ (repl/return-eval
+                                (conn.write (+ (lib/return-eval
                                                 (JSON.parse line))
                                                "\n")))))))
         _      (. (eval "require('process')")
@@ -47,7 +47,7 @@
           (return))
         
         (let [#{id body} (JSON.parse msg.data)
-              out (repl/return-eval body)]
+              out (lib/return-eval body)]
           (. conn (send (JSON.stringify {:id id
                                          :status "ok"
                                          :body out})))))))

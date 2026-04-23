@@ -6,7 +6,7 @@
             [std.lang.base.impl :as impl]
             [std.lang.base.runtime :as rt]
             [std.lang.model-annex.spec-erlang :as spec]
-            [xt.lang.common-repl :as repl]))
+            [xt.lang.common-lib :as lib]))
 
 (def +erlang-init+
   (common/put-program-options

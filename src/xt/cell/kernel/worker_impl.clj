@@ -3,7 +3,7 @@
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-repl :as repl]
+  {:require [[xt.lang.common-lib :as lib]
               [xt.lang.spec-base :as xt]
               [xt.lang.common-trace :as trace]
               [xt.lang.common-task :as task]
@@ -78,7 +78,7 @@
   (when (== false (. (worker-state/get-state worker)
                      ["eval"]))
     (-/post-message worker (util/resp-error op id "Not enabled - EVAL")))
-  (var out (repl/return-eval body))
+  (var out (lib/return-eval body))
   (var f (:? (. input ["async"])
              (fn [x] (return x))
              post-fn))

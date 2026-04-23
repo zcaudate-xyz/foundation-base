@@ -7,7 +7,7 @@
             [std.lang.base.impl :as impl]
             [std.lang.base.runtime :as rt]
             [std.lang.interface.type-notify :as notify]
-            [xt.lang.common-repl :as repl]))
+            [xt.lang.common-lib :as lib]))
 
 (defn node-path
   "Builds a NODE_PATH that keeps temp-file Node executions resolving project-local modules."
@@ -66,7 +66,7 @@
 (def ^{:arglists '([body])}
   default-oneshot-wrap
   (let [bootstrap  (impl/emit-entry-deps
-                    repl/return-eval
+                    lib/return-eval
                     {:lang :js
                      :layout :flat})]
     (fn [body]
@@ -113,7 +113,7 @@
   (fn []
     (clojure.string/join "\n\n"
               [(impl/emit-entry-deps
-                repl/return-eval
+                lib/return-eval
                 {:lang :js
                  :layout :flat})
                (impl/emit-as
@@ -179,7 +179,7 @@
 (def ^{:arglists '([port & [{:keys [host]}]])}
   default-websocket-client
   (let [bootstrap (->> [(impl/emit-entry-deps
-                         repl/return-eval
+                         lib/return-eval
                          {:lang :js
                           :layout :flat})
                         (impl/emit-as

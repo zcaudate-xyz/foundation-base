@@ -11,7 +11,7 @@
             [std.lib.impl]
             [std.protocol.component :as protocol.component]
             [std.protocol.context :as protocol.context]
-            [xt.lang.common-repl :as repl]))
+            [xt.lang.common-lib :as lib]))
 
 (defonce +preamble+
   (delay (lp/initialize!)))

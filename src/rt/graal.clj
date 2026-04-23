@@ -13,7 +13,7 @@
             [std.lib.impl]
             [std.protocol.component :as protocol.component]
             [std.protocol.context :as protocol.context]
-            [xt.lang.common-repl :as k])
+            [xt.lang.common-lib :as lib])
   (:import (org.graalvm.polyglot Context Context$Builder Engine Value Source) (org.graalvm.polyglot.io ByteSequence) (hara.lib.graal Require ResourceFolder FilesystemFolder)))
 
 (def ^:dynamic *lang* nil)
@@ -106,14 +106,14 @@
 (def +options+
   (delay
     {:js      {:bootstrap (impl/emit-entry-deps
-                           k/return-eval
+                           lib/return-eval
                            {:lang :js
                             :layout :flat
                             :emit {:lang/format :commonjs}})
                :json   false
                :emit  {:body  {:transform #'default/return-transform}}}
      :python  {:bootstrap  (impl/emit-entry-deps
-                            k/return-eval
+                            lib/return-eval
                             {:lang :python
                              :layout :flat})
                :main  {:out   (comp json/read str)}

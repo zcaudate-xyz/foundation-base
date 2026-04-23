@@ -3,7 +3,7 @@
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :js
-  {:require [[js.core :as j] [xt.lang.spec-base :as xt] [xt.lang.common-trace :as trace] [xt.lang.common-repl :as repl] [js.cell.kernel.base-util :as util] [js.cell.kernel.worker-state :as worker-state]]})
+  {:require [[js.core :as j] [xt.lang.spec-base :as xt] [xt.lang.common-trace :as trace] [xt.lang.common-lib :as lib] [js.cell.kernel.base-util :as util] [js.cell.kernel.worker-state :as worker-state]]})
 
 (defspec.xt worker-handle-async
   [:fn [:xt/any [:fn [js.cell.kernel.spec/AnyList] :xt/any]
@@ -57,7 +57,7 @@
   (when (== false (. (worker-state/get-state worker)
                      ["eval"]))
     (j/postMessage worker (util/resp-error op id "Not enabled - EVAL")))
-  (var out (repl/return-eval body))
+  (var out (lib/return-eval body))
   (var f (:? (. input ["async"])
              j/identity
              post-fn))

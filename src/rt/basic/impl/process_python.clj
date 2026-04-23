@@ -10,7 +10,7 @@
             [std.lang.base.runtime :as rt]
             [std.lang.model.spec-python :as spec]
             [std.lib.os :as os]
-            [xt.lang.common-repl :as repl]))
+            [xt.lang.common-lib :as lib]))
 
 (def +python-init+
   (common/put-program-options
@@ -77,7 +77,7 @@
 (def ^{:arglists '([body])}
   default-oneshot-wrap
   (let [bootstrap (impl/emit-entry-deps
-                   repl/return-eval
+                   lib/return-eval
                    {:lang :python
                     :layout :flat})]
     (fn [body]
@@ -130,7 +130,7 @@
 (def ^{:arglists '([port & [{:keys [host]}]])}
   default-basic-client
   (let [bootstrap (->> [(impl/emit-entry-deps
-                         repl/return-eval
+                         lib/return-eval
                          {:lang :python
                           :layout :flat})
                         (impl/emit-as
@@ -191,7 +191,7 @@
 (def ^{:arglists '([port & [{:keys [host]}]])}
   default-websocket-client
   (let [bootstrap  (->> [(impl/emit-entry-deps
-                          repl/return-eval
+                          lib/return-eval
                          {:lang :python
                           :layout :flat})
                         (impl/emit-as
@@ -259,7 +259,7 @@
   (spit
    "hello.py"
    (->> [(impl/emit-entry-deps
-          repl/return-eval
+          lib/return-eval
           {:lang :python
            :layout :flat})
          (impl/emit-as

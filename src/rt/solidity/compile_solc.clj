@@ -14,7 +14,7 @@
             [std.make.compile :as compile]
             [std.string.prose :as prose]
             [xt.lang.common-notify :as notify]
-            [xt.lang.common-repl :as repl]))
+            [xt.lang.common-lib :as lib]))
 
 (defn compile-base-emit
   "emits solidity given entries and interfaces"

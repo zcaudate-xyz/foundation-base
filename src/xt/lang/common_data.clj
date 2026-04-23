@@ -6,7 +6,7 @@
   {:require [[xt.lang.spec-base :as xt]]})
 
 ;;
-;; LOOKUP
+;; EMPTY
 ;;
 
 (defn.xt is-empty?

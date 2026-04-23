@@ -6,7 +6,7 @@
             [std.lang.base.impl :as impl]
             [std.lang.base.runtime :as rt]
             [std.lang.model-annex.spec-perl :as spec]
-            [xt.lang.common-repl :as repl]))
+            [xt.lang.common-lib :as lib]))
 
 (def +perl-init+
   (common/put-program-options
@@ -46,7 +46,7 @@
 (def ^{:arglists '([body])}
   default-oneshot-wrap
   (let [bootstrap  (impl/emit-entry-deps
-                    repl/return-eval
+                    lib/return-eval
                     {:lang :perl
                      :layout :flat})]
     (fn [body]
@@ -88,7 +88,7 @@
 (def ^{:arglists '([port & [{:keys [host]}]])}
   default-basic-client
   (let [return-eval-src (impl/emit-entry-deps
-                         repl/return-eval
+                         lib/return-eval
                           {:lang :perl
                            :layout :flat})]
     (fn [port & [{:keys [host]}]]

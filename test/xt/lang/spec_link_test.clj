@@ -4,26 +4,26 @@
             [std.lang :as l]
             [xt.lang.common-notify :as notify]))
 
-^{:seedgen/root {:all true, :langs [:python :lua]}}
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.spec-link :as xt-link]]})
+   :require [[xt.lang.spec-link :as spec-link]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-
 ^{:refer xt.lang.spec-link/x:socket-connect :added "4.1"}
 (fact "connects sockets and forwards the connection to callbacks"
 
-  #_
   (notify/wait-on :js
     (do (var net (require "net"))
         (var port 18182)
         (var connect-fn
              (fn [host port opts cb]
-               (xt/x:socket-connect host port opts cb)))
+               (spec-link/x:socket-connect host port opts cb)))
         (var server
              (. net (createServer (fn [conn]
                                     (. conn (end))))))
@@ -44,7 +44,7 @@
     (var out nil)
     (var conn {:write (fn [s]
                         (:= out s))})
-    (xt/x:socket-send conn "PING")
+    (spec-link/x:socket-send conn "PING")
     out)
   => "PING")
 
@@ -55,7 +55,7 @@
     (var out nil)
     (var conn {:end (fn []
                       (:= out "closed"))})
-    (xt/x:socket-close conn)
+    (spec-link/x:socket-close conn)
     out)
   => "closed")
 

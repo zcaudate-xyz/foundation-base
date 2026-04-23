@@ -3,7 +3,7 @@
             [std.lib.network :as network]))
 
 (l/script :python
-  {:require [[xt.lang.common-repl :as repl]]
+  {:require [[xt.lang.common-lib :as lib]]
    :import  [["asyncio" :as asyncio]
              ["socket" :as socket]
              ["json" :as json]
@@ -28,7 +28,7 @@
             
             :else
             (let [input (json.loads l)
-                  out   (repl/return-eval input)]
+                  out   (lib/return-eval input)]
               (:- :await (. loop (sock-sendall client (. out (encode)))))
               (:- :await (. loop (sock-sendall client (:% b "\n"))))))))
   (. client (close)))

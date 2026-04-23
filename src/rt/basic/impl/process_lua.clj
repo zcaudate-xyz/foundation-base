@@ -10,7 +10,7 @@
              [std.lib.collection :as collection]
              [std.lib.env :as env]
              [std.lib.os :as os]
-             [xt.lang.common-repl :as repl]))
+             [xt.lang.common-lib :as lib]))
 
 ;;
 ;; PROGRAM
@@ -142,7 +142,7 @@
 (def ^{:arglists '([body])}
   default-oneshot-wrap
   (let [bootstrap (impl/emit-entry-deps
-                   repl/return-eval
+                   lib/return-eval
                    {:lang :lua
                      :layout :flat})]
     (fn [body]
@@ -195,7 +195,7 @@
   default-basic-client
   (let [bootstrap (->> ["cjson = require(\"cjson\")"
                         (impl/emit-entry-deps
-                         repl/return-eval
+                         lib/return-eval
                          {:lang :lua
                           :layout :flat})
                         (impl/emit-as
@@ -255,7 +255,7 @@
   default-websocket-client
   (let [bootstrap (->> ["cjson = require(\"cjson\")"
                         (impl/emit-entry-deps
-                         repl/return-eval
+                         lib/return-eval
                          {:lang :lua
                           :layout :flat})
                         (impl/emit-as

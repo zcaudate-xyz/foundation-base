@@ -10,7 +10,7 @@
             [std.lang.base.runtime :as default]
             [std.lib.env :as env]
             [std.lib.foundation :as f]
-            [xt.lang.common-repl :as repl]))
+            [xt.lang.common-lib :as lib]))
 
 (def ^:dynamic *runtime-opts* {})
 
