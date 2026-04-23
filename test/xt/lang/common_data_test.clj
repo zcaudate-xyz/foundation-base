@@ -12,6 +12,9 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
+^{:refer xt.lang.common-data/is-empty? :added "4.1"}
+(fact "TODO")
+
 ^{:refer xt.lang.common-data/not-empty? :added "4.1"}
 (fact "checks that array is not empty"
   
@@ -291,6 +294,40 @@
   (!.js (xtd/obj-first-val {:a 1}))
   => 1)
 
+^{:refer xt.lang.common-data/obj-keys :added "4.1"}
+(fact "gets keys of an object"
+
+  (!.js (xtd/obj-keys {:a 1, :b 2}))
+  => (just ["a" "b"] :in-any-order))
+
+^{:refer xt.lang.common-data/obj-vals :added "4.1"}
+(fact "gets vals of an object"
+
+  (!.js (xtd/obj-vals {:a 1, :b 2}))
+  => (just [1 2] :in-any-order))
+
+^{:refer xt.lang.common-data/obj-pairs :added "4.1"}
+(fact "creates entry pairs from object"
+
+  (!.js (xtd/obj-pairs {:a 1, :b 2}))
+  => (just [["a" 1] ["b" 2]] :in-any-order))
+
+^{:refer xt.lang.common-data/obj-clone :added "4.1"}
+(fact "clones an object"
+
+  (!.js
+   (var src {:a 1})
+   (var out (xtd/obj-clone src))
+   (xt/x:set-key src "b" 2)
+   out)
+  => {"a" 1})
+
+^{:refer xt.lang.common-data/obj-assign :added "4.1"}
+(fact "merges key value pairs from into another"
+
+  (!.js (xtd/obj-assign {:a 1} {:b 2}))
+  => {"a" 1, "b" 2})
+
 ^{:refer xt.lang.common-data/obj-assign-nested :added "4.1"}
 (fact "merges objects at a nesting level"
 
@@ -306,6 +343,12 @@
     {:a 3, :c 4}
     (fn [x y] (return (+ x y)))))
   => {"a" 4, "b" 2, "c" 4})
+
+^{:refer xt.lang.common-data/obj-from-pairs :added "4.1"}
+(fact "creates an object from pairs"
+
+  (!.js (xtd/obj-from-pairs [["a" 1] ["b" 2]]))
+  => {"a" 1, "b" 2})
 
 ^{:refer xt.lang.common-data/obj-del
   :added "4.1"}
@@ -348,46 +391,6 @@
 
   (!.js (xtd/obj-nest ["a" "b"] 1))
   => {"a" {"b" 1}})
-
-^{:refer xt.lang.common-data/obj-keys :added "4.1"}
-(fact "gets keys of an object"
-
-  (!.js (xtd/obj-keys {:a 1, :b 2}))
-  => (just ["a" "b"] :in-any-order))
-
-^{:refer xt.lang.common-data/obj-vals :added "4.1"}
-(fact "gets vals of an object"
-
-  (!.js (xtd/obj-vals {:a 1, :b 2}))
-  => (just [1 2] :in-any-order))
-
-^{:refer xt.lang.common-data/obj-pairs :added "4.1"}
-(fact "creates entry pairs from object"
-
-  (!.js (xtd/obj-pairs {:a 1, :b 2}))
-  => (just [["a" 1] ["b" 2]] :in-any-order))
-
-^{:refer xt.lang.common-data/obj-clone :added "4.1"}
-(fact "clones an object"
-
-  (!.js
-   (var src {:a 1})
-   (var out (xtd/obj-clone src))
-   (xt/x:set-key src "b" 2)
-   out)
-  => {"a" 1})
-
-^{:refer xt.lang.common-data/obj-assign :added "4.1"}
-(fact "merges key value pairs from into another"
-
-  (!.js (xtd/obj-assign {:a 1} {:b 2}))
-  => {"a" 1, "b" 2})
-
-^{:refer xt.lang.common-data/obj-from-pairs :added "4.1"}
-(fact "creates an object from pairs"
-
-  (!.js (xtd/obj-from-pairs [["a" 1] ["b" 2]]))
-  => {"a" 1, "b" 2})
 
 ^{:refer xt.lang.common-data/get-in :added "4.1"}
 (fact "gets item in object"
@@ -444,6 +447,9 @@
 
   (!.js (xtd/to-flat [["a" 1] ["b" 2]]))
   => ["a" 1 "b" 2])
+
+^{:refer xt.lang.common-data/set-pair-step :added "4.1"}
+(fact "TODO")
 
 ^{:refer xt.lang.common-data/from-flat
   :added "4.1"}
@@ -518,6 +524,15 @@
         (return (+ x 1))
         (return x)))))
   => {"a" 2, "b" [3 {"c" 4}]})
+
+^{:refer xt.lang.common-data/tree-type-native :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-data/tree-get-data :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-data/tree-get-spec :added "4.1"}
+(fact "TODO")
 
 ^{:refer xt.lang.common-data/tree-diff  :added "4.1"}
 (fact "diffs only keys within map"
@@ -764,6 +779,9 @@
    out)
   => {"a" {"b" 1}})
 
+^{:refer xt.lang.common-data/memoize-key-step :added "4.1"}
+(fact "TODO")
+
 ^{:refer xt.lang.common-data/memoize-key :added "4.1"}
 (fact "memoize for functions of single argument"
 
@@ -777,28 +795,9 @@
    [(f 2) (f 2) (f 3) (xt/x:get-key state "n")])
   => [20 20 30 2])
 
-^{:refer xt.lang.common-data/is-empty? :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.lang.common-data/set-pair-step :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.lang.common-data/tree-type-native :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.lang.common-data/tree-get-data :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.lang.common-data/tree-get-spec :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.lang.common-data/memoize-key-step :added "4.1"}
-(fact "TODO")
-
 (comment
   
   (s/seedgen-langadd 'xt.lang.spec-base {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.lang.spec-base {:lang [:lua :python] :write true})
 
   )
-

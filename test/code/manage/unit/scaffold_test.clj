@@ -1,5 +1,6 @@
 (ns code.manage.unit.scaffold-test
   (:require [code.manage.unit.scaffold :refer :all]
+            [clojure.string :as str]
             [code.project :as project]
             [std.fs :as fs])
   (:use code.test))
@@ -30,6 +31,22 @@
 (fact "arranges tests to match the order of functions in source file"
   (scaffold-arrange "^{:refer foo/a} (fact) ^{:refer foo/b} (fact)" ['b 'a])
   => "^{:refer foo/b} (fact)\n\n^{:refer foo/a} (fact)")
+
+^{:refer code.manage.unit.scaffold/scaffold-arrange :added "4.1"}
+(fact "ignores metadata forms without `:refer` when arranging"
+  (let [output (scaffold-arrange (str "(ns foo-test)\n\n"
+                                      "^{:seedgen/root {:all true}}\n"
+                                      "(l/script- :js {:require [[foo :as f]]})\n\n"
+                                      "^{:refer foo/a} (fact \"a\")\n\n"
+                                      "^{:refer foo/b} (fact \"b\")\n\n"
+                                      "(fact:global {:setup []})")
+                                ['b 'a])]
+    (and (< (.indexOf output "seedgen/root")
+            (.indexOf output ":refer foo/b"))
+         (< (.indexOf output ":refer foo/b")
+            (.indexOf output ":refer foo/a"))
+         (str/includes? output "(fact:global {:setup []})")))
+  => true)
 
 (comment
   (code.manage/import {:write true}))

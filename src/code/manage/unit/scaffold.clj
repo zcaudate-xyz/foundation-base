@@ -73,11 +73,19 @@
                           (iterate nav/right)
                           (take-while identity)
                           (map nav/block))
-         key-var     #(-> % (block/children) first block/value :refer name symbol source-lu)
-         is-ns?      #(-> % block/value first (= 'ns))
-         is-var?     #(and (-> % block/tag (= :meta))
-                           (key-var %))
-         is-comment? #(-> % block/value first (= 'comment))
+          key-var     (fn [node]
+                        (when-let [var-sym (some-> node
+                                                   block/children
+                                                   first
+                                                   block/value
+                                                   :refer
+                                                   name
+                                                   symbol)]
+                          (source-lu var-sym)))
+          is-ns?      #(-> % block/value first (= 'ns))
+          is-var?     #(and (-> % block/tag (= :meta))
+                            (key-var %))
+          is-comment? #(-> % block/value first (= 'comment))
          ns-nodes    (->> all-nodes (filter is-ns?))
          var-table   (->> all-nodes
                           (filter is-var?)
