@@ -13,7 +13,7 @@
   (lua/variant-meta +meta-delta+))
 
 (def +grammar+
-  (lua/variant-grammar :lua.redis +grammar-delta+))
+  (lua/variant-grammar +grammar-delta+))
 
 (def +book+
   (book/book {:lang :lua.redis

@@ -19,7 +19,7 @@
   (b/book {:lang :lua.redis
            :parent :lua
            :meta    (b/book-meta {})
-           :grammar (grammar/grammar :lua.redis
+           :grammar (grammar/grammar :lua
                       (grammar/to-reserved (grammar/build))
                       helper/+default+)}))
 

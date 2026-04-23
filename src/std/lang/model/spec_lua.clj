@@ -324,10 +324,9 @@
 (defn variant-grammar
   "merges variant grammar overrides onto base lua grammar"
   {:added "4.1"}
-  [lang m]
+  [m]
   (-> +grammar+
-      (collection/merge-nested m)
-      (assoc :tag lang)))
+      (collection/merge-nested m)))
 
 (def +book+
   (book/book {:lang :lua
