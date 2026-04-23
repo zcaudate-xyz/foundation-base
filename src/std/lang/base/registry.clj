@@ -112,11 +112,11 @@
          [:lua      :default]          {:ns 'std.lang.model.spec-lua
                                         :book '+book+
                                         :parent :xtalk}
-         [:lua.redis :default]         {:ns 'std.lang.model.spec-lua
-                                        :book '+book-lua-redis+
+         [:lua.redis :default]         {:ns 'std.lang.model.spec-lua.variant-redis
+                                        :book '+book+
                                         :parent :lua}
-         [:lua.nginx :default]         {:ns 'std.lang.model.spec-lua
-                                        :book '+book-lua-nginx+
+         [:lua.nginx :default]         {:ns 'std.lang.model.spec-lua.variant-nginx
+                                        :book '+book+
                                         :parent :lua}
          [:python   :default]          {:ns 'std.lang.model.spec-python
                                         :book '+book+

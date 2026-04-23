@@ -314,6 +314,21 @@
     (grammar/to-reserved +features+)
     +template+))
 
+(defn variant-meta
+  "merges variant metadata onto base lua metadata"
+  {:added "4.1"}
+  [m]
+  (book/book-meta
+   (collection/merge-nested +meta+ m)))
+
+(defn variant-grammar
+  "merges variant grammar overrides onto base lua grammar"
+  {:added "4.1"}
+  [lang m]
+  (-> +grammar+
+      (collection/merge-nested m)
+      (assoc :tag lang)))
+
 (def +book+
   (book/book {:lang :lua
               :parent :xtalk
@@ -322,24 +337,6 @@
 
 (def +init+
   (script/install +book+))
-
-(def +book-lua-redis+
-  (book/book {:lang :lua.redis
-              :parent :lua
-              :meta +meta+
-              :grammar (assoc +grammar+ :tag :lua.redis)}))
-
-(def +init-lua-redis+
-  (script/install +book-lua-redis+))
-
-(def +book-lua-nginx+
-  (book/book {:lang :lua.nginx
-              :parent :lua
-              :meta +meta+
-              :grammar +grammar+}))
-
-(def +init-lua-nginx+
-  (script/install +book-lua-nginx+))
 
 (comment
   (lib/get-book (impl/default-library) :lua)
