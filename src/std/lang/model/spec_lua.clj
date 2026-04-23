@@ -327,7 +327,7 @@
   (book/book {:lang :lua.redis
               :parent :lua
               :meta +meta+
-              :grammar (assoc +grammar+ :tag :redis)}))
+              :grammar (assoc +grammar+ :tag :lua.redis)}))
 
 (def +init-lua-redis+
   (script/install +book-lua-redis+))
