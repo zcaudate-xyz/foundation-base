@@ -410,6 +410,41 @@
 
 (declare render-target-runtime-item)
 
+(defn- render-target-runtime-items
+  [classification root-lang langs]
+  (:out
+   (reduce (fn [{:keys [out emitted]} item]
+             (if-let [current-lang (item-lang item)]
+               (cond
+                 (contains? emitted current-lang)
+                 {:out out
+                  :emitted emitted}
+
+                 (= current-lang root-lang)
+                 (let [rendered (->> langs
+                                     (remove emitted)
+                                     (keep (fn [lang]
+                                             (when-let [snippet (render-target-runtime-item classification
+                                                                                            root-lang
+                                                                                            lang)]
+                                               [lang snippet])))
+                                     vec)]
+                   {:out (into out (map second rendered))
+                    :emitted (into emitted (map first rendered))})
+
+                 (some #{current-lang} langs)
+                 {:out (conj out (render-item-string item))
+                  :emitted (conj emitted current-lang)}
+
+                 :else
+                 {:out out
+                  :emitted emitted})
+               {:out (conj out (render-item-string item))
+                :emitted emitted}))
+           {:out []
+            :emitted #{}}
+           (classify-lang-items classification))))
+
 (defn- render-check-snippets-add
   [entry ordered-extra-langs target-set]
   (let [root-checks     (vec (sort-items (get-in entry [:checks :root])))
@@ -445,20 +480,14 @@
        (let [final-langs     (vec (cons root-lang ordered-extra-langs))
                root-check      (first root-checks)
                check-snippets  (render-check-snippets-add entry ordered-extra-langs target-set)
-               setup-render    (let [items (->> final-langs
-                                                (keep (fn [lang]
-                                                        (render-target-runtime-item (:fact-setup entry)
-                                                                                    root-lang
-                                                                                    lang)))
-                                                vec)]
+               setup-render    (let [items (render-target-runtime-items (:fact-setup entry)
+                                                                       root-lang
+                                                                       final-langs)]
                                  (when (seq items)
                                    (render-vector-string :setup items)))
-              teardown-render (let [items (->> final-langs
-                                               (keep (fn [lang]
-                                                       (render-target-runtime-item (:fact-teardown entry)
-                                                                                   root-lang
-                                                                                   lang)))
-                                               vec)]
+              teardown-render (let [items (render-target-runtime-items (:fact-teardown entry)
+                                                                      root-lang
+                                                                      final-langs)]
                                 (when (seq items)
                                   (render-vector-string :teardown items)))
              meta-string     (render-meta-string (cond-> (entry-meta entry)
@@ -714,12 +743,12 @@
 (defn- render-fact-string-target
   [entry root-lang lang]
   (let [check-snippets   (render-check-snippets-target entry root-lang lang)
-        setup-str        (render-target-runtime-item (:fact-setup entry) root-lang lang)
-        teardown-str     (render-target-runtime-item (:fact-teardown entry) root-lang lang)
-        setup-render     (when setup-str
-                           (render-vector-string :setup [setup-str]))
-        teardown-render  (when teardown-str
-                           (render-vector-string :teardown [teardown-str]))]
+        setup-items      (render-target-runtime-items (:fact-setup entry) root-lang [lang])
+        teardown-items   (render-target-runtime-items (:fact-teardown entry) root-lang [lang])
+        setup-render     (when (seq setup-items)
+                           (render-vector-string :setup setup-items))
+        teardown-render  (when (seq teardown-items)
+                           (render-vector-string :teardown teardown-items))]
     (when (seq check-snippets)
       (let [meta-string (render-meta-string (cond-> (entry-meta entry)
                                               setup-render (assoc :setup [])
@@ -736,16 +765,16 @@
 
 (defn- render-global-fact-target
   [output root-lang lang]
-  (let [setup-str       (render-target-runtime-item (get-in output [:globals :global-fact-setup])
-                                                    root-lang
-                                                    lang)
-        teardown-str    (render-target-runtime-item (get-in output [:globals :global-fact-teardown])
-                                                    root-lang
-                                                    lang)
-        setup-render    (when setup-str
-                          (render-vector-string :setup [setup-str]))
-        teardown-render (when teardown-str
-                          (render-vector-string :teardown [teardown-str]))]
+  (let [setup-items     (render-target-runtime-items (get-in output [:globals :global-fact-setup])
+                                                     root-lang
+                                                     [lang])
+        teardown-items  (render-target-runtime-items (get-in output [:globals :global-fact-teardown])
+                                                     root-lang
+                                                     [lang])
+        setup-render    (when (seq setup-items)
+                          (render-vector-string :setup setup-items))
+        teardown-render (when (seq teardown-items)
+                          (render-vector-string :teardown teardown-items))]
     (when (or setup-render teardown-render)
       (str "(fact:global\n "
            (render-map-string {:setup setup-render
