@@ -68,11 +68,16 @@
       (apply list 'fn args body))))
 
 (defn lambda-compatible?
-  [form]
-  (let [[name _ body] (fn-parts form)]
-    (and (nil? name)
-         (= 1 (count body))
-         (not (do-form? (first body))))))
+  ([form]
+   (lambda-compatible? form nil))
+  ([form block-form?]
+   (let [[name _ body] (fn-parts form)
+         body-form     (first body)]
+     (and (nil? name)
+          (= 1 (count body))
+          (not (or (do-form? body-form)
+                   (and block-form?
+                        (block-form? body-form))))))))
 
 (defn lift-named-lambda
   ([form rewrite-statements]

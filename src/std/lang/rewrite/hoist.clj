@@ -3,9 +3,12 @@
             [std.lib.collection :as collection]))
 
 (defn create-rewriter
-  [{:keys [fn-tags symbol-prefix bulk-do*?]
+  [{:keys [fn-tags symbol-prefix bulk-do*? block-form?]
     :or {fn-tags #{'fn}
          symbol-prefix "lifted_lambda__"
+         block-form? (fn [form grammar]
+                       (and (collection/form? form)
+                            (= :block (get-in grammar [:reserved (first form) :type]))))
          bulk-do*? (fn [form mopts]
                      (and (:bulk (meta form))
                           (not (get-in mopts [:emit :body :transform]))))}}]
@@ -14,36 +17,42 @@
             (and (collection/form? form)
                  (contains? fn-tags (first form))))
 
+          (lambda-compatible?
+            [form grammar]
+            (lift/lambda-compatible?
+             form
+             #(block-form? % grammar)))
+
           (rewrite-expression-coll
-            [form]
+            [form grammar]
             (reduce (fn [[prefix out] item]
-                      (let [[item-prefix item-out] (rewrite-expression item)]
+                      (let [[item-prefix item-out] (rewrite-expression item grammar)]
                         [(into prefix item-prefix)
                          (conj out item-out)]))
                     [[] []]
                     form))
 
           (rewrite-expression-map
-            [form]
+            [form grammar]
             (reduce (fn [[prefix out] [k v]]
-                      (let [[kp ko] (rewrite-expression k)
-                            [vp vo] (rewrite-expression v)]
+                      (let [[kp ko] (rewrite-expression k grammar)
+                            [vp vo] (rewrite-expression v grammar)]
                         [(into (into prefix kp) vp)
                          (conj out [ko vo])]))
                     [[] []]
                     form))
 
           (rewrite-fn-body
-            [form]
-            (lift/rewrite-fn-body form rewrite-statements))
+            [form grammar]
+            (lift/rewrite-fn-body form #(rewrite-statements % grammar)))
 
           (rewrite-expression
-            [form]
+            [form grammar]
             (cond (function-form? form)
-                  (if (lift/lambda-compatible? form)
+                  (if (lambda-compatible? form grammar)
                     [[] form]
                     (lift/lift-named-lambda form
-                                            rewrite-statements
+                                            #(rewrite-statements % grammar)
                                             {:symbol-prefix symbol-prefix}))
 
                   (and (collection/form? form)
@@ -51,19 +60,19 @@
                   [[] form]
 
                   (collection/form? form)
-                  (let [[prefix out] (rewrite-expression-coll form)]
+                  (let [[prefix out] (rewrite-expression-coll form grammar)]
                     [prefix (lift/with-form-meta form (apply list out))])
 
                   (vector? form)
-                  (let [[prefix out] (rewrite-expression-coll form)]
+                  (let [[prefix out] (rewrite-expression-coll form grammar)]
                     [prefix (lift/with-form-meta form (vec out))])
 
                   (set? form)
-                  (let [[prefix out] (rewrite-expression-coll form)]
+                  (let [[prefix out] (rewrite-expression-coll form grammar)]
                     [prefix (lift/with-form-meta form (set out))])
 
                   (map? form)
-                  (let [[prefix out] (rewrite-expression-map form)]
+                  (let [[prefix out] (rewrite-expression-map form grammar)]
                     [prefix (lift/with-form-meta form (into (empty form) out))])
 
                   :else
@@ -77,7 +86,7 @@
                 (apply list 'do* (concat prefix [out])))))
 
           (rewrite-var
-            [form]
+            [form grammar]
             (let [[tag sym & args] form]
               (if (empty? args)
                 form
@@ -87,89 +96,89 @@
                     (lift/with-form-meta form
                       (apply list tag sym
                              (concat leading
-                                     [(lift/normalize-fn bound rewrite-statements)])))
-                    (let [[prefix bound-out] (rewrite-expression bound)
+                                     [(lift/normalize-fn bound #(rewrite-statements % grammar))])))
+                    (let [[prefix bound-out] (rewrite-expression bound grammar)
                           out (lift/with-form-meta form
                                 (apply list tag sym (concat leading [bound-out])))]
                       (wrap-prefix form prefix out)))))))
 
           (rewrite-return
-            [form]
+            [form grammar]
             (let [[tag & args] form]
               (if (empty? args)
                 form
-                (let [[prefix value] (rewrite-expression (first args))
+                (let [[prefix value] (rewrite-expression (first args) grammar)
                       out (lift/with-form-meta form (list tag value))]
                   (wrap-prefix form prefix out)))))
 
           (rewrite-if
-            [form]
+            [form grammar]
             (let [[tag test then else] form
-                  [prefix test-out] (rewrite-expression test)
+                  [prefix test-out] (rewrite-expression test grammar)
                   out (lift/with-form-meta form
                         (apply list tag
                                (cond-> [test-out
-                                        (rewrite-statement then)]
-                                 else (conj (rewrite-statement else)))))]
+                                        (rewrite-statement then grammar)]
+                                 else (conj (rewrite-statement else grammar)))))]
               (wrap-prefix form prefix out)))
 
           (rewrite-when
-            [form]
+            [form grammar]
             (let [[tag test & body] form
-                  [prefix test-out] (rewrite-expression test)
+                  [prefix test-out] (rewrite-expression test grammar)
                   out (lift/with-form-meta form
-                        (apply list tag test-out (rewrite-statements body)))]
+                        (apply list tag test-out (rewrite-statements body grammar)))]
               (wrap-prefix form prefix out)))
 
           (rewrite-do
-            [form]
+            [form grammar]
             (let [[tag & body] form]
               (lift/with-form-meta form
                 (apply list tag
                        (-> body
-                           rewrite-statements
+                           (rewrite-statements grammar)
                            lift/splice-do*)))))
 
           (rewrite-defn
-            [form]
+            [form grammar]
             (let [[tag name args & body] form]
               (lift/with-form-meta form
                 (apply list tag name args
                        (-> body
-                           rewrite-statements
+                           (rewrite-statements grammar)
                            lift/splice-do*)))))
 
           (rewrite-statement
-            [form]
+            [form grammar]
             (cond (not (collection/form? form))
                   form
 
                   :else
                   (case (first form)
-                    (do do*)      (rewrite-do form)
-                    (var var*)    (rewrite-var form)
-                    :=            (rewrite-var form)
-                    return        (rewrite-return form)
-                    if            (rewrite-if form)
-                    when          (rewrite-when form)
+                    (do do*)      (rewrite-do form grammar)
+                    (var var*)    (rewrite-var form grammar)
+                    :=            (rewrite-var form grammar)
+                    return        (rewrite-return form grammar)
+                    if            (rewrite-if form grammar)
+                    when          (rewrite-when form grammar)
                     (defn defn- defgen)
-                    (rewrite-defn form)
+                    (rewrite-defn form grammar)
                     (if (function-form? form)
-                      (rewrite-fn-body form)
-                      (let [[prefix out] (rewrite-expression form)]
+                      (rewrite-fn-body form grammar)
+                      (let [[prefix out] (rewrite-expression form grammar)]
                         (wrap-prefix form prefix out))))))
 
           (rewrite-statements
-            [forms]
-            (map rewrite-statement forms))
+            [forms grammar]
+            (map #(rewrite-statement % grammar) forms))
 
           (rewrite-stage
-            [form {:keys [mopts]}]
+            [form {:keys [mopts grammar]}]
             (cond (collection/form? form)
-                  (rewrite-statement form)
+                  (rewrite-statement form grammar)
 
                   (vector? form)
-                  (let [rewritten (mapv rewrite-statement form)]
+                  (let [rewritten (mapv #(rewrite-statement % grammar) form)]
                     (if (bulk-do*? form mopts)
                       (lift/with-form-meta form
                         (apply list 'do*

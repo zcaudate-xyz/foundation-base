@@ -15,6 +15,15 @@
   (lift/lambda-compatible? '(fn named [x] (return x)))
   => false
 
+  (lift/lambda-compatible? '(fn [x]
+                              (if cond
+                                (return x)
+                                (return nil)))
+                          (fn [form]
+                            (and (seq? form)
+                                 (= 'if (first form)))))
+  => false
+
   (lift/lambda-compatible? '(fn [x] (do (step x) (return x))))
   => false)
 
