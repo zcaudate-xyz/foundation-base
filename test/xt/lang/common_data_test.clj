@@ -14,7 +14,7 @@
 
 ^{:refer xt.lang.common-data/not-empty? :added "4.1"}
 (fact "checks that array is not empty"
-
+  
   (!.js
    [(xtd/not-empty? nil)
     (xtd/not-empty? "")
@@ -396,9 +396,7 @@
           (xtd/get-in {:a {:b {:c 1}}} ["a" "b" "c"])])
   => [{"c" 1} 1])
 
-^{:refer xt.lang.common-data/set-in
-  :added "4.1"
-  }
+^{:refer xt.lang.common-data/set-in :added "4.1"}
 (fact "sets item in object"
 
   [(!.js
@@ -465,9 +463,7 @@
           (xtd/eq-nested-basic 1 2 nil nil nil)])
   => [true false])
 
-^{:refer xt.lang.common-data/eq-nested-loop
-  :added "4.1"
-  }
+^{:refer xt.lang.common-data/eq-nested-loop  :added "4.1"}
 (fact "switch for nested check"
 
   (!.js
@@ -475,9 +471,7 @@
     (xtd/eq-nested-loop {:a 1} {:a 2} xtd/eq-nested-obj xtd/eq-nested-arr nil)])
   => [true false])
 
-^{:refer xt.lang.common-data/eq-nested-obj
-  :added "4.1"
-  }
+^{:refer xt.lang.common-data/eq-nested-obj  :added "4.1"}
 (fact "checks object equality"
 
   (!.js
@@ -485,9 +479,7 @@
     (xtd/eq-nested-obj {:a 1} {:a 2} xtd/eq-nested-obj xtd/eq-nested-arr (xtd/lu-create))])
   => [true false])
 
-^{:refer xt.lang.common-data/eq-nested-arr
-  :added "4.1"
-  }
+^{:refer xt.lang.common-data/eq-nested-arr  :added "4.1"}
 (fact "checks array equality"
 
   (!.js
@@ -495,9 +487,7 @@
     (xtd/eq-nested-arr [1 2] [2 1] xtd/eq-nested-obj xtd/eq-nested-arr (xtd/lu-create))])
   => [true false])
 
-^{:refer xt.lang.common-data/eq-nested
-  :added "4.1"
-  }
+^{:refer xt.lang.common-data/eq-nested  :added "4.1"}
 (fact "checks for nested equality"
 
   (!.js
@@ -507,9 +497,7 @@
     (xtd/eq-nested [1] [2])])
   => [true false true false])
 
-^{:refer xt.lang.common-data/eq-shallow
-  :added "4.1"
-  :lang-exceptions {:python {:skip true}}}
+^{:refer xt.lang.common-data/eq-shallow  :added "4.1"}
 (fact "checks for shallow equality"
 
   (!.js
@@ -518,9 +506,7 @@
     (xtd/eq-shallow [1] [1])])
   => [true false])
 
-^{:refer xt.lang.common-data/tree-walk
-  :added "4.1"
-  :lang-exceptions {:python {:skip true}}}
+^{:refer xt.lang.common-data/tree-walk  :added "4.1"}
 (fact "walks over object"
 
   (!.js
@@ -533,9 +519,7 @@
         (return x)))))
   => {"a" 2, "b" [3 {"c" 4}]})
 
-^{:refer xt.lang.common-data/tree-diff
-  :added "4.1"
-  }
+^{:refer xt.lang.common-data/tree-diff  :added "4.1"}
 (fact "diffs only keys within map"
 
   (!.js (xtd/tree-diff {:a 1, :b 2} {:a 1, :c 2}))
@@ -731,9 +715,7 @@
   (!.js (xtd/obj-filter {:a 1, :b 2, :c 3} (fn [x] (return (== 1 (mod x 2))))))
   => {"a" 1, "c" 3})
 
-^{:refer xt.lang.common-data/obj-keep
-  :added "4.1"
-  :lang-exceptions {:python {:skip true}}}
+^{:refer xt.lang.common-data/obj-keep  :added "4.1"}
 (fact "applies a transform across the values of an object, keeping non-nil values"
 
   (!.js
@@ -762,10 +744,7 @@
           (xtd/clone-shallow 1)])
   => [nil 1])
 
-^{:refer xt.lang.common-data/clone-nested-loop
-  :added "4.1"
-  :lang-exceptions {:dart {:skip true}}
-  }
+^{:refer xt.lang.common-data/clone-nested-loop :added "4.1"}
 (fact "clone nested objects loop"
 
   (!.js
@@ -775,10 +754,7 @@
    out)
   => {"a" {"b" 1}})
 
-^{:refer xt.lang.common-data/clone-nested
-  :added "4.1"
-  :lang-exceptions {:dart {:skip true}}
-  }
+^{:refer xt.lang.common-data/clone-nested :added "4.1"}
 (fact "cloning nested xects"
 
   (!.js
@@ -788,10 +764,7 @@
    out)
   => {"a" {"b" 1}})
 
-^{:refer xt.lang.common-data/memoize-key
-  :added "4.1"
-  :lang-exceptions {:python {:skip true}
-                    :dart {:skip true}}}
+^{:refer xt.lang.common-data/memoize-key :added "4.1"}
 (fact "memoize for functions of single argument"
 
   (!.js
@@ -806,3 +779,26 @@
 
 ^{:refer xt.lang.common-data/is-empty? :added "4.1"}
 (fact "TODO")
+
+^{:refer xt.lang.common-data/set-pair-step :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-data/tree-type-native :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-data/tree-get-data :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-data/tree-get-spec :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-data/memoize-key-step :added "4.1"}
+(fact "TODO")
+
+(comment
+  
+  (s/seedgen-langadd 'xt.lang.spec-base {:lang [:lua :python] :write true})
+  (s/seedgen-langremove 'xt.lang.spec-base {:lang [:lua :python] :write true})
+
+  )
+

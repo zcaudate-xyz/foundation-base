@@ -15,18 +15,23 @@
 ;; SOCKET
 ;;
 
+(defn.xt socket-connect-raw
+  [host port opts cb]
+  (xt-link/x:socket-connect host port opts cb))
+
 (defn.xt socket-connect
   "connects a a socket to port"
   {:added "4.0"}
   [host port opts]
   (var success-fn (xt-lib/wrap-callback opts "success"))
   (var error-fn   (xt-lib/wrap-callback opts "error"))
-  (for:return [[conn err] (xt-link/x:socket-connect  host port
-                                                     opts
-                                                     (xt/x:callback))]
+  (for:return [[conn err] (-/socket-connect-raw  host
+                                                 port
+                                                 opts
+                                                 (xt/x:callback))]
               {:success (return (success-fn conn))
-     :error   (return (error-fn err))
-     :final   true}))
+               :error   (return (error-fn err))
+               :final   true}))
 
 ;;
 ;; NOTIFY

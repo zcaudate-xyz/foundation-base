@@ -1303,22 +1303,6 @@
   {:added "4.1"}
   ([value] (list (quote x:unpack) value)))
 
-(defspec.xt x:b64-encode [:fn [:xt/str] :xt/str])
-
-(defmacro.xt ^{:standalone true :is-template false} 
-  x:b64-encode
-  "encodes base64 strings"
-  {:added "4.1"}
-  ([value] (list (quote x:b64-encode) value)))
-
-(defspec.xt x:b64-decode [:fn [:xt/str] :xt/str])
-
-(defmacro.xt ^{:standalone true :is-template false} 
-  x:b64-decode
-  "decodes base64 strings"
-  {:added "4.1"}
-  ([value] (list (quote x:b64-decode) value)))
-
 (defspec.xt x:json-encode [:fn [:xt/any] :xt/str])
 
 (defmacro.xt ^{:standalone true :is-template false} 
@@ -1334,19 +1318,3 @@
   "decodes json strings into lua data structures"
   {:added "4.1"}
   ([expr] (list (quote x:json-decode) expr)))
-
-(defspec.xt x:uri-encode [:fn [:xt/str] :xt/str])
-
-(defmacro.xt ^{:standalone true :is-template false} 
-  x:uri-encode
-  "encodes uri components"
-  {:added "4.1"}
-  ([value] (list (quote x:uri-encode) value)))
-
-(defspec.xt x:uri-decode [:fn [:xt/str] :xt/str])
-
-(defmacro.xt ^{:standalone true :is-template false} 
-  x:uri-decode
-  "decodes uri components"
-  {:added "4.1"}
-  ([value] (list (quote x:uri-decode) value)))
