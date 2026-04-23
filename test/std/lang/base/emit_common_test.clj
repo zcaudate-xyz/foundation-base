@@ -156,22 +156,34 @@
   => "((!= 1 x))")
 
 (fact "block forms are rejected in value positions"
-  (emit/emit-main '(+ 1 (do 2 3))
-                  +grammar+
-                  {})
-  => (throws)
+  (try
+    (emit/emit-main '(+ 1 (do 2 3))
+                    +grammar+
+                    {})
+    nil
+    (catch Throwable t
+      (ex-message t)))
+  => #"Block form cannot be emitted as value"
 
-  (emit/emit-main '[1 (do 2 3)]
-                  +grammar+
-                  {})
-  => (throws)
+  (try
+    (emit/emit-main '[1 (do 2 3)]
+                    +grammar+
+                    {})
+    nil
+    (catch Throwable t
+      (ex-message t)))
+  => #"Block form cannot be emitted as value"
 
-  (emit/emit-main '(return (if check
-                             (return a)
-                             (return b)))
-                  +grammar+
-                  {})
-  => (throws))
+  (try
+    (emit/emit-main '(return (if check
+                               (return a)
+                               (return b)))
+                    +grammar+
+                    {})
+    nil
+    (catch Throwable t
+      (ex-message t)))
+  => #"Block form cannot be emitted as value")
 
 ^{:refer std.lang.base.emit-common/wrapped-str :added "3.0"}
 (fact "wrapped string using `:start` and `:end` keys of grammar"

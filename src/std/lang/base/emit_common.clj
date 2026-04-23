@@ -25,7 +25,12 @@
 
 (def ^:dynamic *emit-fn* helper/default-emit-fn)
 
-(def ^:dynamic *emit-level* :statement)
+(def ^:dynamic *emit-level*
+  "Controls the emission context level.
+
+   Valid values are `:statement` for top-level/block emission and
+   `:value` for expression emission where block forms are disallowed."
+  :statement)
 
 (defmacro with:explode
   "form to control `explode` option"
@@ -71,13 +76,13 @@
   (if-let [{:keys [emit value free raw] :as props} (get reserved form)]
     (or (and value
              (or free
-                 raw
-                 (f/error "No raw value found" props)))
-        
-         (f/error "Cannot use reserved token in body" props))))
+                  raw
+                  (f/error "No raw value found" props)))
+
+        (f/error "Cannot use reserved token in body" props))))
 
 (defn emit-value
-  "emits a nested value/expression"
+  "Emits a nested value/expression using the surrounding `*emit-fn*` binding."
   {:added "4.1"}
   [form grammar mopts]
   (binding [*emit-level* :value]
@@ -90,11 +95,11 @@
    (let [str-array (binding [*indent* 0]
                      (mapv (fn [e]
                              [e (or (and (string? e) e)
-                                    (and (keyword? e)
-                                         (or (emit-reserved-value e grammar mopts)
+                                     (and (keyword? e)
+                                          (or (emit-reserved-value e grammar mopts)
                                               (f/strn e)))
                                      (emit-value e grammar mopts))])
-                            args))]
+                             args))]
      (loop [[prev out]   (first str-array)
             [[curr s] :as input] (rest str-array)]
        (cond (empty? input)
@@ -112,10 +117,10 @@
 (defn emit-free
   "emits string with multiline support"
   {:added "4.0"}
-   ([{:keys [sep]} [tag & more :as form] grammar mopts]
+  ([{:keys [sep]} [tag & more :as form] grammar mopts]
    (let [{:keys [indent prefix full-body]} (meta form)
-         prev    *indent*
-         output  (emit-free-raw sep more grammar mopts)]
+          prev    *indent*
+          output  (emit-free-raw sep more grammar mopts)]
      (if (prose/multi-line? output)
        (let [indent-fn (if full-body
                          prose/indent
@@ -184,7 +189,7 @@
   "returns an array of emitted strings"
   {:added "4.0"}
   ([array grammar mopts]
-    (emit-array array grammar mopts *emit-fn*))
+   (emit-array array grammar mopts *emit-fn*))
   ([array grammar mopts emit-fn]
    (map #(emit-fn % grammar mopts) array)))
 
@@ -214,7 +219,7 @@
   "emits a potentially wrapped form"
   {:added "4.0"}
   ([form grammar mopts]
-    (let [result (emit-value form grammar mopts)
+   (let [result (emit-value form grammar mopts)
           {:keys [start end]} (get-in grammar [:default :common])
           wrap? (emit-wrappable? form grammar)]
      (if wrap?
@@ -236,28 +241,28 @@
   "emits a unit"
   {:added "4.0"}
   ([{:keys [raw default transform] :as props} [_ value] grammar mopts]
-    (emit-value (cond-> (or value default)
-                  transform (transform raw))
-                grammar mopts)))
+   (emit-value (cond-> (or value default)
+                 transform (transform raw))
+               grammar mopts)))
 
 (defn emit-internal
   "emits string within the form"
   {:added "4.0"}
   ([[_ value] grammar mopts]
-    (emit-value value grammar mopts)))
+   (emit-value value grammar mopts)))
 
 (defn emit-internal-str
   "emits internal string"
   {:added "4.0"}
   ([[_ value] grammar mopts]
    (binding [*emit-internal* true]
-      (cond (vector? value)
-            (clojure.string/join "\n"
-                      (mapv #(emit-value % grammar mopts)
-                            value))
+     (cond (vector? value)
+           (clojure.string/join "\n"
+                                (mapv #(emit-value % grammar mopts)
+                                      value))
 
-            :else
-            (emit-value value grammar mopts)))))
+           :else
+           (emit-value value grammar mopts)))))
 
 (defn emit-pre
   "emits string before the arg"
@@ -630,19 +635,19 @@
   "emits a kw argument pair"
   {:added "3.0"}
    ([[k v] grammar mopts]
-    (let [{:keys [assign]} (helper/get-options grammar [:default :invoke])]
-      (str (case/snake-case (f/strn k)) assign (emit-value v grammar mopts)))))
+   (let [{:keys [assign]} (helper/get-options grammar [:default :invoke])]
+     (str (case/snake-case (f/strn k)) assign (emit-value v grammar mopts)))))
 
 (defn emit-invoke-args
   "produces the string for invoke call"
   {:added "3.0"}
   ([args grammar mopts]
    (let [[args kwargs] (invoke-kw-parse args)
-          cargs (concat (if (not-empty args)
-                          (emit-array args grammar mopts emit-value))
-                        (if (not-empty kwargs)
-                          (map #(emit-invoke-kw-pair % grammar mopts) kwargs)))]
-      cargs)))
+         cargs (concat (if (not-empty args)
+                         (emit-array args grammar mopts emit-value))
+                       (if (not-empty kwargs)
+                         (map #(emit-invoke-kw-pair % grammar mopts) kwargs)))]
+     cargs)))
 
 (defn emit-invoke-layout
   "layout for invoke blocks
@@ -692,9 +697,9 @@
   ([form grammar mopts]
    (assert (<= 2 (count form)) (str "At least two arguments for cast"))
    (let [{:keys [start end]} (helper/get-options grammar [:default :invoke])
-          sym   (last form)
-          casts (map name (butlast form))]
-      (str start start (clojure.string/join " " casts) end (emit-value sym grammar mopts) end))))
+         sym   (last form)
+         casts (map name (butlast form))]
+     (str start start (clojure.string/join " " casts) end (emit-value sym grammar mopts) end))))
 
 (defn emit-invoke
   "general invoke call, incorporating keywords"
@@ -755,10 +760,10 @@
              (str "." (emit-symbol v grammar mopts)))
 
          (collection/form? v)
-         (let [sym  (first v)
-               sym  (if (string? sym)
-                      (symbol sym)
-                      sym)
+          (let [sym  (first v)
+                sym  (if (string? sym)
+                       (symbol sym)
+                       sym)
                _     (assert (symbol? sym))
                {:keys [apply]}   (helper/get-options grammar [:default :invoke])
                braces (meta sym)]
@@ -769,13 +774,13 @@
                                     ""))
                              (rest v) grammar mopts))
 
-         (vector? v)
+          (vector? v)
           (do (assert (= 1 (count v)) "Only one index")
               (let [{:keys [start end]}   (helper/get-options grammar [:default :index])]
                 (str start (emit-value (first v) grammar mopts) end)))
 
 
-         (set? v)
+          (set? v)
           (str "." (emit-value v grammar mopts))
          
          :else (f/error "Not valid" {:input v}))))
@@ -897,7 +902,7 @@
    (let [output-fn (fn [[key type]]
                      (if (and (= :value *emit-level*)
                               (= :block type))
-                       (f/error "Block form cannot be emitted as value"
+                       (f/error "Block form cannot be emitted as value. Use this form in a statement context or wrap with an explicit block construct."
                                 {:form form
                                  :key key
                                  :type type})

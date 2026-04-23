@@ -28,11 +28,11 @@
    (cond (keyword? form)
          (let [convert (or (get-in grammar [:data :map-entry :keyword])
                            :string)
-                tok (case convert
-                      :symbol  (symbol (f/strn form))
-                      :string  (f/strn form)
-                      :keyword form)]
-            (common/emit-value tok grammar mopts))
+               tok (case convert
+                     :symbol  (symbol (f/strn form))
+                     :string  (f/strn form)
+                     :keyword form)]
+           (common/emit-value tok grammar mopts))
           
           :else
           (common/emit-value form grammar mopts))))
@@ -44,9 +44,9 @@
     (let [{:keys [start end sep space assign key-fn val-fn]
            :or {key-fn emit-map-key
                 val-fn common/emit-value}} (helper/get-options grammar [:data :map-entry])
-         val-e (val-fn v grammar mopts)
-         val-e (if (prose/multi-line? val-e)
-                 (prose/indent-rest val-e 2)
+          val-e (val-fn v grammar mopts)
+          val-e (if (prose/multi-line? val-e)
+                  (prose/indent-rest val-e 2)
                  val-e)]
      (str start (clojure.string/join (str assign space)
                           [(key-fn k grammar mopts)
@@ -208,7 +208,7 @@
          entry-fn (fn [e]
                     (if (vector? e)
                       (emit-map-entry e grammar mopts)
-                       (common/emit-value e grammar mopts)))
+                      (common/emit-value e grammar mopts)))
          indent     common/*indent*
          str-array (binding [common/*indent* 0]
                      (mapv entry-fn args))]

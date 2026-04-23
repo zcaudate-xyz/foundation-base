@@ -16,33 +16,33 @@
          {:keys [reversed hint]
           :as invoke}  (helper/get-options grammar [:default :invoke])
          {vmod true kmod false} (if (:vector-last (helper/get-options grammar [:default :modifier]))
-                                  (group-by vector? modifiers)
-                                  {false modifiers})
-          {:keys [uppercase]} (:type invoke)
-          arr-fn (fn [mod]
-                   (if (keyword? mod)
-                     (cond-> (name mod)
-                       uppercase (clojure.string/upper-case))
-                     (common/emit-value mod grammar mopts)))
+                                   (group-by vector? modifiers)
+                                   {false modifiers})
+         {:keys [uppercase]} (:type invoke)
+         arr-fn (fn [mod]
+                  (if (keyword? mod)
+                    (cond-> (name mod)
+                      uppercase (clojure.string/upper-case))
+                    (common/emit-value mod grammar mopts)))
          tmod   (if type
-                  (vec type)
-                  [])
+                   (vec type)
+                   [])
          
          tmodarr (mapv arr-fn tmod)
          kmodarr (mapv arr-fn kmod)
          mod-rev?    (and (or (empty tmodarr)
-                              (not-empty kmodarr))
-                          reversed)
+                               (not-empty kmodarr))
+                           reversed)
          mod-has?    (or (not-empty tmodarr)
-                         (not-empty kmodarr))
-          mod-sym     (str (if symbol
-                             (common/emit-value symbol grammar mopts))
-                           (if (and mod-rev?
-                                    mod-has?)
-                             hint))
+                          (not-empty kmodarr))
+         mod-sym     (str (if symbol
+                            (common/emit-value symbol grammar mopts))
+                          (if (and mod-rev?
+                                   mod-has?)
+                            hint))
          mixarr    (concat (if (not mod-rev?)
-                             (concat kmodarr tmodarr)
-                             (if (not= kmodarr mod-has?)
+                              (concat kmodarr tmodarr)
+                              (if (not= kmodarr mod-has?)
                                kmodarr))
                            (filter not-empty [mod-sym])
                            (if mod-rev? mod-has?))
@@ -56,42 +56,42 @@
                            :mixarr  mixarr
                            :mod-has? mod-has?})
 
-         mixstr (clojure.string/join " "
-                          (filter (fn [x]
-                                    (if (seq x)
-                                      (not-empty x)
-                                      x))
-                                  mixarr))]
+          mixstr (clojure.string/join " "
+                                     (filter (fn [x]
+                                               (if (seq x)
+                                                 (not-empty x)
+                                                 x))
+                                             mixarr))]
      (str mixstr
           (if (not-empty vmod)
             (clojure.string/join
              (map (fn [arr]
-                     (str start
-                          (if-let [n (first arr)]
-                            (common/emit-value n grammar mopts))
-                          end))
-                   vmod)))
-           (if (or force value)
-             (str " " assign " " (common/emit-value value grammar mopts)))))))
+                    (str start
+                         (if-let [n (first arr)]
+                           (common/emit-value n grammar mopts))
+                         end))
+                  vmod)))
+          (if (or force value)
+            (str " " assign " " (common/emit-value value grammar mopts)))))))
 
 (defn emit-hint-type
   "emits the return type"
   {:added "4.0"}
   ([type name suffix grammar mopts]
-   (let [arr  (cond-> (:- (meta name))
-                :then vec
-                (not-empty suffix) (conj suffix))]
+    (let [arr  (cond-> (:- (meta name))
+                 :then vec
+                 (not-empty suffix) (conj suffix))]
      
-     (clojure.string/join " " (map (fn [v]
-                          (cond (or (keyword? v)
-                                    (string? v)
-                                    (and (vector? v)
-                                         (empty? v)))
-                                 (cond-> (f/strn v)
-                                   (:uppercase type) (clojure.string/upper-case))
+      (clojure.string/join " " (map (fn [v]
+                                      (cond (or (keyword? v)
+                                                (string? v)
+                                                (and (vector? v)
+                                                     (empty? v)))
+                                            (cond-> (f/strn v)
+                                              (:uppercase type) (clojure.string/upper-case))
 
-                                 :else (common/emit-value v grammar mopts)))
-                         arr)))))
+                                            :else (common/emit-value v grammar mopts)))
+                                    arr)))))
 
 (defn emit-def-type
   "emits the def type"
@@ -112,7 +112,7 @@
   {:added "4.0"}
   [key grammar]
   (collection/merge-nested (get-in grammar [:default :function])
-                  (get-in grammar [:function key])))
+                           (get-in grammar [:function key])))
 
 (defn emit-fn-preamble-args
   "constructs the function preamble args"
@@ -121,7 +121,7 @@
    (let [args  (helper/emit-typed-args args grammar)
          {:keys [sep space assign start end multiline]}
          (collection/merge-nested (helper/get-options grammar [:default :function :args])
-                         (get-in grammar [:function key :args]))]
+                                  (get-in grammar [:function key :args]))]
      (map #(emit-input-default % assign grammar mopts)
           args))))
 
@@ -133,18 +133,18 @@
          {:keys [prefix]} (helper/get-options grammar [:default :function])
          {:keys [sep space assign start end multiline]}
          (collection/merge-nested (helper/get-options grammar [:default :function :args])
-                         (get-in grammar [:function key :args]))]
-      (str (if (not-empty prefix) (str prefix " "))
-            (if name (common/emit-value name grammar mopts))
-            space
-           (cond (empty? iargs) (str start end)
-                
+                                  (get-in grammar [:function key :args]))]
+     (str (if (not-empty prefix) (str prefix " "))
+          (if name (common/emit-value name grammar mopts))
+          space
+          (cond (empty? iargs) (str start end)
+
                 multiline
                 (str start
                      (common/with-indent [2]
                        (str (common/newline-indent)
                             (clojure.string/join (str sep (common/newline-indent))
-                                      iargs)))
+                                                 iargs)))
                      (common/newline-indent)
                      end)
 
