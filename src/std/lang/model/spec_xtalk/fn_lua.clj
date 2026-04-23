@@ -447,8 +447,16 @@
 
 (defn lua-tf-x-socket-connect
   ([[_ host port opts]]
-   (template/$ (do* (local socket (require "socket"))
-                    (return (socket.connect ~host ~port))))))
+   (template/$ (do* (when (== ~host "host.docker.internal")
+                     (local handle (io.popen
+                                    (cat "ping host.docker.internal -c 1 -q 2>&1"
+                                         " | "
+                                         "grep -Po \"(\\d{1,3}\\.){3}\\d{1,3}\"")))
+                     (:= ~host (handle:read "*a"))
+                     (:= ~host (string.sub ~host 1 (- (len ~host) 1)))
+                     (handle:close))
+                   (local socket (require "socket"))
+                   (return (socket.connect ~host ~port))))))
 
 (defn lua-tf-x-socket-send
   ([[_ conn s]]

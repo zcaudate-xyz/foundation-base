@@ -2,7 +2,6 @@
   (:require [std.lang.base.book :as book]
             [std.lang.base.script :as script]
             [std.lang.model.spec-lua :as lua]
-            [std.lang.model.spec-xtalk.fn-lua :as fn]
             [std.lib.foundation :as f]
             [std.lib.template :as template]))
 
@@ -108,7 +107,7 @@
   (lua/variant-meta +meta-delta+))
 
 (def +grammar+
-  (lua/variant-grammar (merge fn/+lua+ +grammar-delta+)))
+  (lua/variant-grammar +grammar-delta+))
 
 (def +book+
   (book/book {:lang :lua.nginx
