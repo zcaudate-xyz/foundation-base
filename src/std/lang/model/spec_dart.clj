@@ -241,12 +241,12 @@
          :for-return  {:macro #'tf-for-return :emit :macro}
          :for-try     {:macro #'tf-for-try    :emit :macro}
          :for-async   {:macro #'tf-for-async  :emit :macro}
-         :dart-or     {:symbol #{'dart:or} :macro #'dart-tf-or :emit :macro}
-         :dart-ternary {:symbol #{'dart:ternary} :macro #'dart-tf-ternary :emit :macro}
          :with-global {:value true :raw "globalThis"}})
        (grammar/build:override fn-dart/+dart+)
        (grammar/build:extend
-        {:var-let {:op :var-let :symbol #{'var} :macro #'dart-var :emit :macro}})))
+        {:var-let      {:op :var-let :symbol #{'var} :macro #'dart-var :emit :macro}
+         :dart-or      {:symbol #{'dart:or} :macro #'dart-tf-or :emit :macro}
+         :dart-ternary {:symbol #{'dart:ternary} :macro #'dart-tf-ternary :emit :macro}})))
 
 (def +template+
   (-> (emit/default-grammar)

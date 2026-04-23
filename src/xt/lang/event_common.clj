@@ -119,14 +119,7 @@
   "maps an async task back to a stable return value"
   {:added "4.1"}
   [result value]
-  (var task (-/task-pending? result))
-  (var output value)
-  (when (xt/x:not-nil? task)
-    (:= output
-        (xt/x:future-then task
-                          (fn [_]
-                            (return value)))))
-  (return output))
+  (return value))
 
 (defn.xt blank-container
   "creates a blank container"
