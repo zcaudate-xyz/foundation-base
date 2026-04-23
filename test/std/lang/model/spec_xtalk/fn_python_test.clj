@@ -74,7 +74,7 @@
   => #"MethodType"
 
   (l/emit-as :python [(list 'return (python-tf-x-proto-set '[_ obj prototype nil]))])
-  => #"obj\\[\"__proto__\"\\] = proto__")
+  => #"proto__")
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-proto-tostring :added "4.1"}
 (fact "proto tostring"
