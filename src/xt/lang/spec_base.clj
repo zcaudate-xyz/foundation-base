@@ -886,7 +886,7 @@
   ([value pattern] (list (quote x:str-index-of) value pattern)) 
   ([value pattern from] (list (quote x:str-index-of) value pattern from)))
 
-(defspec.xt x:str-substring [:fn [:xt/str :xt/num :xt/num] :xt/str])
+(defspec.xt x:str-substring [:fn [:xt/str :xt/num [:xt/maybe :xt/num]] :xt/str])
 
 (defmacro.xt ^{:standalone true :is-template false} 
   x:str-substring

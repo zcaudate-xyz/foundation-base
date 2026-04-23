@@ -446,6 +446,19 @@
                                                      :ns 'sample.route :aliases {}})))
   => '{:kind :primitive :name :xt/str})
 
+^{:refer std.lang.typed.xtalk-infer/infer-type :added "4.1"}
+(fact "infers builtin substring with optional finish"
+  [(types/type->data (:type (infer-type '(x:str-substring value 3)
+                                        {:env '{value {:kind :primitive :name :xt/str}}
+                                         :ns 'sample.route
+                                         :aliases {}})))
+   (:errors (infer-type '(x:str-substring value 3)
+                        {:env '{value {:kind :primitive :name :xt/str}}
+                         :ns 'sample.route
+                         :aliases {}}))]
+  => '[{:kind :primitive :name :xt/str}
+        []])
+
 ^{:refer std.lang.typed.xtalk-infer/infer-get-path :added "4.1"}
 (fact "infers path access through nested records"
   (types/type->data (:type (infer-get-path '(x:get-path route ["user" "id"] nil)
