@@ -1082,13 +1082,15 @@
 (fact "walks over object"
 
   (!.js
-   (xtd/tree-walk
-    {:a 1, :b [2 {:c 3}]}
-    (fn [x] (return x))
-    (fn [x]
-      (if (xt/x:is-number? x)
-        (return (+ x 1))
-        (return x)))))
+    (var do-fn
+         (fn [x]
+           (if (xt/x:is-number? x)
+         (return (+ x 1))
+         (return x))))
+    (xtd/tree-walk
+     {:a 1, :b [2 {:c 3}]}
+     (fn [x] (return x))
+     do-fn))
   => {"a" 2, "b" [3 {"c" 4}]}
 
   (!.lua
@@ -1102,13 +1104,15 @@
   => {"a" 2, "b" [3 {"c" 4}]}
 
   (!.py
-   (xtd/tree-walk
-    {:a 1, :b [2 {:c 3}]}
-    (fn [x] (return x))
-    (fn [x]
-      (if (xt/x:is-number? x)
-        (return (+ x 1))
-        (return x)))))
+    (var do-fn
+         (fn [x]
+           (if (xt/x:is-number? x)
+         (return (+ x 1))
+         (return x))))
+    (xtd/tree-walk
+     {:a 1, :b [2 {:c 3}]}
+     (fn [x] (return x))
+     do-fn))
   => {"a" 2, "b" [3 {"c" 4}]})
 
 ^{:refer xt.lang.common-data/tree-diff :added "4.1"}
@@ -1271,14 +1275,16 @@
 (fact "keeps items in an array if output is not nil"
 
   (!.js
-   (xtd/arr-keep
-    [1 2 3 4]
-    (fn [x]
-      (if (== 0 (mod x 2))
-        (return (* x 10))
-        (return nil)))))
+    (var x5-fn
+         (fn [x]
+           (if (== 0 (mod x 2))
+             (return (* x 10))
+             (return nil))))
+    (xtd/arr-keep
+     [1 2 3 4]
+     x5-fn))
   => [20 40]
-
+  
   (!.lua
    (xtd/arr-keep
     [1 2 3 4]
@@ -1289,12 +1295,14 @@
   => [20 40]
 
   (!.py
-   (xtd/arr-keep
-    [1 2 3 4]
-    (fn [x]
-      (if (== 0 (mod x 2))
-        (return (* x 10))
-        (return nil)))))
+    (var x5-fn
+         (fn [x]
+           (if (== 0 (mod x 2))
+             (return (* x 10))
+             (return nil))))
+    (xtd/arr-keep
+     [1 2 3 4]
+     x5-fn))
   => [20 40])
 
 ^{:refer xt.lang.common-data/arr-keepf :added "4.1"}
@@ -1541,14 +1549,16 @@
 (fact "applies a transform across the values of an object, keeping non-nil values"
 
   (!.js
-   (xtd/obj-keep
-    {:a 1, :b 2, :c 3}
-    (fn [x]
-      (if (== 0 (mod x 2))
-        (return (* x 10))
-        (return nil)))))
+    (var x5-fn
+         (fn [x]
+           (if (== 0 (mod x 2))
+             (return (* x 10))
+             (return nil))))
+    (xtd/obj-keep
+     {:a 1, :b 2, :c 3}
+     x5-fn))
   => {"b" 20}
-
+  
   (!.lua
    (xtd/obj-keep
     {:a 1, :b 2, :c 3}
@@ -1558,13 +1568,15 @@
         (return nil)))))
   => {"b" 20}
 
-  (!.py
-   (xtd/obj-keep
-    {:a 1, :b 2, :c 3}
-    (fn [x]
-      (if (== 0 (mod x 2))
-        (return (* x 10))
-        (return nil)))))
+  (!.js
+    (var x5-fn
+         (fn [x]
+           (if (== 0 (mod x 2))
+             (return (* x 10))
+             (return nil))))
+    (xtd/obj-keep
+     {:a 1, :b 2, :c 3}
+     x5-fn))
   => {"b" 20})
 
 ^{:refer xt.lang.common-data/obj-keepf :added "4.1"}
@@ -1659,11 +1671,11 @@
 
   (!.js
    (var state {"n" 0})
-   (var f (xtd/memoize-key
-           (fn [x]
-             (do
-               (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
-               (return (* x 10))))))
+   (var f-raw (fn [x]
+                (do
+                  (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
+                  (return (* x 10)))))
+   (var f (xtd/memoize-key f-raw))
    [(f 2) (f 2) (f 3) (xt/x:get-key state "n")])
   => [20 20 30 2]
 
@@ -1679,35 +1691,255 @@
 
   (!.py
    (var state {"n" 0})
-   (var f (xtd/memoize-key
-           (fn [x]
-             (do
-               (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
-               (return (* x 10))))))
+   (var f-raw (fn [x]
+                (do
+                  (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
+                  (return (* x 10)))))
+   (var f (xtd/memoize-key f-raw))
    [(f 2) (f 2) (f 3) (xt/x:get-key state "n")])
+
   => [20 20 30 2])
 
+
+(comment
+  ;; needs a seperate rewrite module in std.lang to hook into emit:
+
+  ;; this
+  (!.py
+    (var state {"n" 0})
+    (var f (xtd/memoize-key
+            (fn f-raw [x]
+              (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
+              (return (* x 10)))))
+    [(f 2) (f 2) (f 3) (xt/x:get-key state "n")])
+
+  ;; to this... and other rules as well for different languages
+  (!.py
+    (var state {"n" 0})
+    (var f-raw (fn [x]
+                 (do
+                   (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
+                   (return (* x 10)))))
+    (var f (xtd/memoize-key f-raw))
+    [(f 2) (f 2) (f 3) (xt/x:get-key state "n")])
+
+  I'd like to have a clean interface (as seen in the historical xt.lang.base-lib)
+
+  and to have languages such as python/dart/ruby etc have a rewrite stage to
+  compile forms
+  
+  )
+
 ^{:refer xt.lang.common-data/is-empty? :added "4.1"}
-(fact "TODO")
+(fact "checks that array is empty"
+
+  (!.js
+   [(xtd/is-empty? nil)
+    (xtd/is-empty? "")
+    (xtd/is-empty? "123")
+    (xtd/is-empty? [])
+    (xtd/is-empty? [1 2 3])
+    (xtd/is-empty? {})
+    (xtd/is-empty? {:a 1, :b 2})])
+  => [true true false true false true false]
+
+  (!.lua
+   [(xtd/is-empty? nil)
+    (xtd/is-empty? "")
+    (xtd/is-empty? "123")
+    (xtd/is-empty? [])
+    (xtd/is-empty? [1 2 3])
+    (xtd/is-empty? {})
+    (xtd/is-empty? {:a 1, :b 2})])
+  => [true true false true false true false]
+
+  (!.py
+   [(xtd/is-empty? nil)
+    (xtd/is-empty? "")
+    (xtd/is-empty? "123")
+    (xtd/is-empty? [])
+    (xtd/is-empty? [1 2 3])
+    (xtd/is-empty? {})
+    (xtd/is-empty? {:a 1, :b 2})])
+  => [true true false true false true false])
 
 ^{:refer xt.lang.common-data/set-pair-step :added "4.1"}
-(fact "TODO")
+(fact "sets a pair into an object and returns it"
+
+  (!.js
+   (var out {})
+   [(xt/x:get-key (xtd/set-pair-step out "a" 1) "a")
+    (xt/x:get-key (xtd/set-pair-step out "b" 2) "b")
+    out])
+  => [1 2 {"a" 1, "b" 2}]
+
+  (!.lua
+   (var out {})
+   [(xt/x:get-key (xtd/set-pair-step out "a" 1) "a")
+    (xt/x:get-key (xtd/set-pair-step out "b" 2) "b")
+    out])
+  => [1 2 {"a" 1, "b" 2}]
+
+  (!.py
+   (var out {})
+   [(xt/x:get-key (xtd/set-pair-step out "a" 1) "a")
+    (xt/x:get-key (xtd/set-pair-step out "b" 2) "b")
+    out])
+  => [1 2 {"a" 1, "b" 2}])
 
 ^{:refer xt.lang.common-data/tree-type-native :added "4.1"}
-(fact "TODO")
+(fact "gets the normalized native type for tree helpers"
+
+  (!.js
+   [(xtd/tree-type-native {:a 1})
+    (xtd/tree-type-native [1])
+    (xtd/tree-type-native "hello")
+    (xtd/tree-type-native 1)
+    (xtd/tree-type-native true)])
+  => ["object" "array" "string" "number" "boolean"]
+
+  (!.lua
+   [(xtd/tree-type-native {:a 1})
+    (xtd/tree-type-native [1])
+    (xtd/tree-type-native "hello")
+    (xtd/tree-type-native 1)
+    (xtd/tree-type-native true)])
+  => ["object" "array" "string" "number" "boolean"]
+
+  (!.py
+   [(xtd/tree-type-native {:a 1})
+    (xtd/tree-type-native [1])
+    (xtd/tree-type-native "hello")
+    (xtd/tree-type-native 1)
+    (xtd/tree-type-native true)])
+  => ["object" "array" "string" "number" "boolean"])
 
 ^{:refer xt.lang.common-data/tree-get-data :added "4.1"}
-(fact "TODO")
+(fact "normalizes nested data values for inspection"
+
+  (!.js
+   (xtd/tree-get-data
+    {:a 1
+     :nested {:flag true
+              :arr [1 2]
+              :callback (fn:>)}}))
+  => {"a" 1,
+      "nested" {"flag" true,
+                "arr" [1 2],
+                "callback" "<function>"}}
+
+  (!.lua
+   (xtd/tree-get-data
+    {:a 1
+     :nested {:flag true
+              :arr [1 2]
+              :callback (fn:>)}}))
+  => {"a" 1,
+      "nested" {"flag" true,
+                "arr" [1 2],
+                "callback" "<function>"}}
+
+  (!.py
+   (xtd/tree-get-data
+    {:a 1
+     :nested {:flag true
+              :arr [1 2]
+              :callback (fn:>)}}))
+  => {"a" 1,
+      "nested" {"flag" true,
+                "arr" [1 2],
+                "callback" "<function>"}})
 
 ^{:refer xt.lang.common-data/tree-get-spec :added "4.1"}
-(fact "TODO")
+(fact "normalizes nested values to their runtime-native types"
+
+  (!.js
+   (xtd/tree-get-spec
+    {:a 1
+     :nested {:flag true
+              :arr [1 2]
+              :callback (fn:>)}}))
+  => {"a" "number",
+      "nested" {"flag" "boolean",
+                "arr" ["number" "number"],
+                "callback" "function"}}
+
+  (!.lua
+   (xtd/tree-get-spec
+    {:a 1
+     :nested {:flag true
+              :arr [1 2]
+              :callback (fn:>)}}))
+  => {"a" "number",
+      "nested" {"flag" "boolean",
+                "arr" ["number" "number"],
+                "callback" "function"}}
+
+  (!.py
+   (xtd/tree-get-spec
+    {:a 1
+     :nested {:flag true
+              :arr [1 2]
+              :callback (fn:>)}}))
+  => {"a" "number",
+      "nested" {"flag" "boolean",
+                "arr" ["number" "number"],
+                "callback" "function"}})
 
 ^{:refer xt.lang.common-data/memoize-key-step :added "4.1"}
-(fact "TODO")
+(fact "computes and caches a memoized value"
+  
+  (!.js
+   (var state {"n" 0})
+   (var cache {})
+   (var f-raw
+        (fn [key]
+          (do
+            (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
+            (return (xt/x:cat key "-value")))))
+   [(xtd/memoize-key-step
+     f-raw
+     "a"
+     cache)
+    (xt/x:get-key cache "a")
+    (xt/x:get-key state "n")])
+  => ["a-value" "a-value" 1]
+
+  (!.lua
+   (var state {"n" 0})
+   (var cache {})
+   (var f-raw
+        (fn [key]
+          (do
+            (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
+            (return (xt/x:cat key "-value")))))
+   [(xtd/memoize-key-step
+     f-raw
+     "a"
+     cache)
+    (xt/x:get-key cache "a")
+    (xt/x:get-key state "n")])
+  => ["a-value" "a-value" 1]
+
+  (!.py
+   (var state {"n" 0})
+   (var cache {})
+   (var f-raw
+        (fn [key]
+          (do
+            (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
+            (return (xt/x:cat key "-value")))))
+   [(xtd/memoize-key-step
+     f-raw
+     "a"
+     cache)
+    (xt/x:get-key cache "a")
+    (xt/x:get-key state "n")])
+  => ["a-value" "a-value" 1])
 
 (comment
   
   (s/seedgen-langadd 'xt.lang.common-data {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.lang.common-data {:lang [:lua :python] :write true})
-
+  
   )

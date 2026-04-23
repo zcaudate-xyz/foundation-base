@@ -207,7 +207,7 @@
      (:= finish-idx finish)
      (:= finish-idx (xt/x:len arr)))
    (xt/for:index [i [(xt/x:offset start)
-                     (xt/x:offset finish-idx)]]
+                     finish-idx]]
      (xt/x:arr-push out (xt/x:get-idx arr i)))
    (return out)))
 
@@ -217,7 +217,7 @@
   ([arr start finish]
    (var out [])
    (xt/for:index [i [(xt/x:offset start)
-                     (xt/x:offset finish)]]
+                     finish]]
      (xt/x:arr-push-first out (xt/x:get-idx arr i)))
    (return out)))
 
@@ -715,11 +715,6 @@
 ;; EQUALITY
 ;;
 
-(defn.xt eq-nested-basic
-  "basic shallow equality comparator"
-  {:added "4.1"}
-  [src dst eq-obj eq-arr cache]
-  (return (== src dst)))
 
 (defn.xt eq-nested-loop
   "switch for nested check"
@@ -741,6 +736,24 @@
         
         :else
         (return (== src dst))))
+
+(defn.xt eq-shallow-raw
+  "basic shallow equality comparator"
+  {:added "4.1"}
+  [src dst eq-obj eq-arr cache]
+  (return (xt/x:lu-eq src dst)))
+
+(defn.xt eq-shallow
+  "checks for shallow equality"
+  {:added "4.1"}
+  [obj m]
+  (return (-/eq-nested-loop
+           obj m
+           -/eq-shallow-raw
+           -/eq-shallow-raw
+           nil)))
+
+
 
 (defn.xt eq-nested-obj
   "checks object equality"
@@ -787,17 +800,6 @@
            -/eq-nested-obj
            -/eq-nested-arr
            nil)))
-
-(defn.xt eq-shallow
-  "checks for shallow equality"
-  {:added "4.1"}
-  [obj m]
-  (return (-/eq-nested-loop
-           obj m
-           -/eq-nested-basic
-           -/eq-nested-basic
-           nil)))
-
 
 ;;
 ;; TREE
