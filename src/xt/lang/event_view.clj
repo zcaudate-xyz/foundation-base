@@ -244,18 +244,18 @@
                          :elapsed nil
                          :process process-fn
                          :default default-output-fn}})
-  (when (xt/x:not-nil? (xtd/get-in pipeline ["remote"]))
-      (xt/x:set-key entry "remote" {:type "remote"
-                                  :current nil
-                                  :updated nil
-                                  :elapsed nil
-                                   :process process-fn
-                                  :default default-output-fn}))
-  (when (xt/x:not-nil? (xtd/get-in pipeline ["sync"]))
-      (xt/x:set-key entry "sync" {:type "sync"
-                                  :current nil
-                                  :updated nil
-                                  :elapsed nil
+  (when (xtd/get-in pipeline ["remote"])
+     (xt/x:set-key entry "remote" {:type "remote"
+                                 :current nil
+                                 :updated nil
+                                 :elapsed nil
+                                  :process process-fn
+                                 :default default-output-fn}))
+  (when (xtd/get-in pipeline ["sync"])
+     (xt/x:set-key entry "sync" {:type "sync"
+                                 :current nil
+                                 :updated nil
+                                 :elapsed nil
                                   :process process-fn
                                  :default default-output-fn}))
   (return
@@ -269,10 +269,13 @@
   [view]
   (var #{pipeline options} view)
   (var #{input} view)
+  (var context-opts (xt/x:get-key options "context"))
+  (when (xt/x:nil? context-opts)
+    (:= context-opts {}))
   (var context  (xt/x:obj-assign
                  {:view  view
-                  :input (. input ["current"])}
-                 (xt/x:get-key options "context")))
+                   :input (. input ["current"])}
+                 context-opts))
   (return context))
 
 (defn.xt add-listener
@@ -406,9 +409,9 @@
   (var #{input
          callback} view)
   (xt/x:obj-assign input {:current current
-                        :updated (xt/x:now-ms)})
-  (-/trigger-listeners view "view.input" input)
-  (return input))
+                       :updated (xt/x:now-ms)})
+  (var task (-/trigger-listeners view "view.input" input))
+  (return (event-common/task-return task input)))
 
 (defn.xt set-output
   "sets the output"
@@ -429,15 +432,15 @@
   
   (cond accumulate
         (do (var prev (xtd/arrayify (xt/x:get-key output "current")))
-            (var next (xt/x:arr-assign
+            (var next (xt/x:arr-append
                        (xt/x:arr-clone prev)
                        (xtd/arrayify current)))
             (xt/x:set-key output "current" next))
 
         :else
         (xt/x:set-key output "current" current))
-  (-/trigger-listeners view "view.output" output)
-  (return current))
+  (var task (-/trigger-listeners view "view.output" output))
+  (return (event-common/task-return task current)))
 
 (defn.xt set-output-disabled
   "sets the output disabled flag"
@@ -451,8 +454,8 @@
     (xt/x:set-key output "disabled" value)
     (when (xt/x:has-key? output "disabled")
       (xt/x:del-key output "disabled")))
-  (-/trigger-listeners view "view.disabled" value)
-  (return output))
+  (var task (-/trigger-listeners view "view.disabled" value))
+  (return (event-common/task-return task output)))
 
 (defn.xt set-pending
   "sets the output pending time"
@@ -465,8 +468,8 @@
     (xt/x:set-key output "pending" value)
     (when (xt/x:has-key? output "pending")
       (xt/x:del-key output "pending")))
-  (-/trigger-listeners view "view.pending" value)
-  (return output))
+  (var task (-/trigger-listeners view "view.pending" value))
+  (return (event-common/task-return task output)))
 
 (defn.xt set-elapsed
   "sets the output elapsed time"
@@ -479,8 +482,8 @@
     (xt/x:set-key output "elapsed" value)
     (when (xt/x:has-key? output "elapsed")
       (xt/x:del-key output "elapsed")))
-  (-/trigger-listeners view "view.elapsed" value)
-  (return output))
+  (var task (-/trigger-listeners view "view.elapsed" value))
+  (return (event-common/task-return task output)))
 
 (defn.xt init-view
   "initialises view"
@@ -526,10 +529,8 @@
   {:added "4.0"}
   [context tag acc dest-key]
   (var #{cell view} context)
-  (when (xt/x:nil? dest-key)
-    (:= dest-key "output"))
-  (var process (xtd/get-in view [dest-key
-                                 "process"]))
+  (var process (xtd/get-in view [(or dest-key "output")
+                               "process"]))
   (var record (xt/x:get-key acc tag))
   (var update? nil)
   (when (< 0 (xt/x:len record))
@@ -541,8 +542,9 @@
   (when (< 2 (xt/x:len record))
     (:= errored (. record [2])))
   (when (xt/x:nil? current)
-    (:= current ((xtd/get-in view [dest-key
-                                   "default"]))))
+    (:= current ((xtd/get-in view [(or dest-key
+                                      "output")
+                                  "default"]))))
   
   (when update?
     (var output current)
@@ -561,18 +563,14 @@
   {:added "4.0"}
   [context tag disabled async-fn hook-fn skip-guard]
   (var identity-fn (fn [x] (return x)))
-  (when (xt/x:nil? skip-guard)
-    (:= skip-guard {}))
-  (when (xt/x:nil? hook-fn)
-    (:= hook-fn identity-fn))
+  (:= skip-guard (or skip-guard {}))
+  (:= hook-fn (or hook-fn identity-fn))
   (var #{cell model view args acc} context)
   (var #{pipeline} view)
-  (var stage (xt/x:get-key pipeline tag))
-  (when (xt/x:nil? stage)
-    (:= stage {}))
+  (var stage (or (xt/x:get-key pipeline tag)
+                 {}))
   (var #{handler guard wrapper} stage)
-  (when (xt/x:nil? wrapper)
-    (:= wrapper identity-fn))
+  (:= wrapper (or wrapper identity-fn))
   (var error-fn   (fn [err]
                     (:= (. acc [tag]) [true err true])
                     (:= (. acc ["error"]) true)
@@ -594,8 +592,8 @@
     (:= success-fn result-fn))
   (return
    (async-fn handler-fn context
-             {"success" success-fn
-              "error"   error-fn})))
+             {:success success-fn
+              :error   error-fn})))
 
 (defn.xt pipeline-run-impl
   "runs the pipeline"
@@ -626,8 +624,7 @@
   {:added "4.0"}
   [context disabled async-fn hook-fn complete-fn dest-key]
   (var #{view acc} context)
-  (when (xt/x:nil? dest-key)
-    (:= dest-key "output"))
+  (:= dest-key (or dest-key "output"))
   (var dest-tag dest-key)
   (when (== dest-key "output")
     (:= dest-tag "main"))
@@ -642,13 +639,12 @@
                      (hook-fn acc tag))
                    (when complete-fn
                      (complete-fn acc))))
-             (-/set-output-disabled view true dest-key)
-             (return (-/pipeline-call context
-                                      dest-tag
-                                      true
-                                      async-fn
-                                      disabled-hook
-                                      nil)))
+            (-/set-output-disabled view true dest-key)
+            (return (-/pipeline-call context
+                                     dest-tag
+                                     true
+                                     async-fn
+                                     disabled-hook)))
         
         :else
         (do (var run-hook
@@ -666,15 +662,14 @@
             (when (xt/x:get-key output "disabled")
               (-/set-output-disabled view false dest-key))
             (-/set-pending view true dest-key)
-             (return
-              (-/pipeline-run-impl context ["pre"
-                                            dest-tag
-                                            "post"]
-                                   (xt/x:offset 0)
-                                   async-fn
-                                   run-hook
-                                   run-complete
-                                   nil)))))
+            (return
+             (-/pipeline-run-impl context ["pre"
+                                           dest-tag
+                                           "post"]
+                                  (xt/x:offset 0)
+                                  async-fn
+                                  run-hook
+                                  run-complete)))))
 
 (defn.xt pipeline-run-force
   "runs the pipeline via sync or remote paths"
@@ -697,15 +692,14 @@
          (-/set-elapsed view (- (xt/x:now-ms) started) dest-key)
          (-/set-pending view false dest-key)))
   (-/set-pending view true dest-key)
-   (return
-    (-/pipeline-run-impl context ["pre"
-                                  dest-key
-                                  "post"]
-                         (xt/x:offset 0)
-                         async-fn
-                         force-hook
-                         force-complete
-                         nil)))
+  (return
+   (-/pipeline-run-impl context ["pre"
+                                 dest-key
+                                 "post"]
+                        (xt/x:offset 0)
+                        async-fn
+                        force-hook
+                        force-complete)))
   
 (defn.xt pipeline-run-remote
   "runs the remote pipeline"
@@ -729,47 +723,40 @@
   "creates a results vector and a lookup table"
   {:added "0.1"}
   [results opts]
-  (when (xt/x:nil? opts)
-    (:= opts {}))
+  (:= opts (or opts {}))
   (var #{sort-fn
          key-fn
          val-fn} opts)
-  (when (xt/x:not-nil? sort-fn)
+  (when sort-fn
     (:= results (sort-fn results)))
-  (when (xt/x:nil? key-fn)
-    (:= key-fn
-        (fn [e]
-          (return (xt/x:get-key e "id")))))
-  (when (xt/x:nil? val-fn)
-    (:= val-fn
-        (fn [x]
-          (return x))))
-  (when (xt/x:nil? results)
-    (:= results []))
+  (:= key-fn (or key-fn
+                 (fn [e]
+                   (return (xt/x:get-key e "id")))))
+  (:= val-fn (or val-fn
+                 (fn [x]
+                   (return x))))
   (return {:results results
-           :lookup (xtd/arr-juxt results
-                                  key-fn
-                                  val-fn)}))
+           :lookup (xtd/arr-juxt (or results [])
+                                 key-fn
+                                 val-fn)}))
 
 (defn.xt sorted-lookup
   "sorted lookup for region data"
   {:added "0.1"}
   [key]
-  (var sort-key key)
-  (when (xt/x:nil? sort-key)
-    (:= sort-key "name"))
+  (var sort-key (or key "name"))
   (return
    (fn [results]
      (return
-       (-/get-with-lookup
-        results
-        {:sort-fn
-         (fn [arr]
-           (return
-            (xtd/arr-sort arr
-                          (fn [e]
-                            (return (xt/x:get-key e sort-key)))
-                          xt/x:str-lt)))})))))
+      (-/get-with-lookup
+       results
+       {:sort-fn
+        (fn [arr]
+          (return
+           (xtd/arr-sort arr
+                         (fn [e]
+                           (return (xt/x:get-key e sort-key)))
+                         xt/x:lt)))})))))
 
 (defn.xt group-by-lookup
   "creates group-by lookup"

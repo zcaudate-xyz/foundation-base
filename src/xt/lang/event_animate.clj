@@ -35,8 +35,7 @@
    ref
    ind
    f]
-  (when (xt/x:nil? f)
-    (:= f (fn [_] (return {}))))
+  (:= f (:? (xt/x:nil? f) (fn [_] (return {})) f))
   (var #{add-listener
          set-props
          get-value} impl)
@@ -56,18 +55,17 @@
    ref
    arr
    f]
-  (when (xt/x:nil? f)
-    (:= f (fn [_] (return {}))))
+  (:= f (:? (xt/x:nil? f) (fn [_] (return {})) f))
   (var #{add-listener
          set-props
          get-value} impl)
   (var trigger-fn
        (fn [_]
-         (var vals  (xt/x:arr-map arr get-value))
-         (var props (xt/x:apply f vals))
-         (when (and (xt/x:not-nil? ref) (xt/x:has-key? ref "current"))
-           (set-props (. ref ["current"]) props))
-         (return props)))
+          (let [vals  (xt/x:arr-map arr get-value)
+                props (xt/x:apply f vals)]
+              (when (and (xt/x:not-nil? ref) (xt/x:has-key? ref "current"))
+                (set-props (. ref ["current"]) props))
+             (return props))))
   (xt/for:array [ind arr]
     (add-listener ind trigger-fn))
   (return (trigger-fn nil)))
@@ -79,10 +77,8 @@
    m
    parent
    all]
-  (when (xt/x:nil? parent)
-    (:= parent []))
-  (when (xt/x:nil? all)
-    (:= all []))
+  (:= parent (:? (xt/x:nil? parent) [] parent))
+  (:= all (:? (xt/x:nil? all) [] all))
   (var #{is-animated} impl)
   (xt/for:object [[k x] m]
     (cond (is-animated x)
@@ -109,38 +105,30 @@
   (var out {})
   (xt/for:array [e paths]
     (var [path key v] e)
-    (var val nil)
+    (var val {})
     (when (and (xt/x:not-nil? v)
                (not= false v))
       (:= val (get-value v)))
-    (when (== false v)
-      (:= val {}))
-    (var entry {})
-    (if (or (xt/x:nil? path)
-            (== 0 (xt/x:len path)))
-      (xt/x:set-key entry key val)
-      (do (var leaf {})
-          (xt/x:set-key leaf key val)
-          (xtd/set-in entry path leaf)))
-    (xtd/obj-assign-nested out entry))
+    (cond (or (xt/x:nil? path)
+              (== 0 (xt/x:len path)))
+          (xt/x:set-key out key val)
+          
+          :else
+          (xt/x:set-key (xtd/get-in out path)
+                        key val)))
   (return out))
 
 (defn.xt listen-map
   "listens to a map of indicators"
   {:added "4.0"}
   [impl ref m f]
-  (when (xt/x:nil? f)
-    (:= f (fn [_] (return {}))))
+  (:= f (:? (xt/x:nil? f) (fn [_] (return {})) f))
   (var #{add-listener
          set-props} impl)
   (var paths      (-/get-map-paths impl m))
-  (var keep-indicator
-       (fn [entry]
-         (var indicator (xt/x:last entry))
-         (when (and (xt/x:not-nil? indicator)
-                    (not= false indicator))
-           (return indicator))))
-  (var animated   (xtd/arr-keep paths keep-indicator))
+  (var animated   (xtd/arr-keepf paths
+                                 xt/x:last
+                                 xt/x:last))
   (var trigger-fn
        (fn [_]
           (var input (-/get-map-input impl paths))
@@ -199,20 +187,20 @@
          animation} progressing)
   (var #{stop-transition} impl)
   (when (and running
-             (xt/x:not-nil? animation))
+             animation)
     (stop-transition animation)
     (xt/x:obj-assign progressing {:running false
                                   :animation nil}))
   (var finish-fn
-        (fn [finished]
-          (xt/x:obj-assign progressing {:running false
-                                        :animation nil})
-          (when (xt/x:not-nil? progress-fn)
-            (progress-fn {:status "stopped"
-                          :finished finished}))))
+       (fn [finished]
+         (xt/x:obj-assign progressing {:running false
+                                       :animation nil})
+         (when progress-fn
+           (progress-fn {:status "stopped"
+                         :finished finished}))))
   (var anim (animate-fn finish-fn))
   (xt/x:obj-assign progressing {:animation anim})
-  (when (xt/x:not-nil? progress-fn)
+  (when progress-fn
     (progress-fn {:status "running"}))
   (return progressing))
 
@@ -225,7 +213,7 @@
   {:added "4.0"}
   [impl progressing progress-fn]
   (var out (xt/x:obj-assign progressing (-/new-progressing)))
-  (when (xt/x:not-nil? progress-fn)
+  (when progress-fn
     (progress-fn {:status "cleanup"}))
   (return out))
 
@@ -241,11 +229,11 @@
                                        progress-fn)))
   
   (var anim (queued-fn (fn:> (-/animate-chained-cleanup impl
-                                                         progressing
-                                                         progress-fn))))
+                                                        progressing
+                                                        progress-fn))))
   (xt/x:obj-assign progressing {:running  true
                                 :animation anim})
-  (when (xt/x:not-nil? progress-fn)
+  (when progress-fn
     (progress-fn {:status "running"}))
   (return progressing))
 
@@ -262,10 +250,10 @@
   (when (xt/x:not-nil? queued-fn)
     (var anim (queued-fn (fn:> [res]
                            (-/animate-chained-all impl progressing progress-fn))))
-    (when (xt/x:not-nil? anim)
+    (when anim
       (xt/x:obj-assign progressing {:running  true
                                     :animation anim})
-      (when (xt/x:not-nil? progress-fn)
+      (when progress-fn
         (progress-fn {:status "running"}))))
   (return progressing))
 
@@ -274,22 +262,22 @@
   {:added "4.0"}
   [impl type animate-fn progressing progress-fn]
   (var callback-fn
-       (fn []
-         (return (-/animate-chained-all impl progressing progress-fn))))
-  (when (== type "chained-one")
-    (:= callback-fn
-        (fn []
-          (return (-/animate-chained-one impl progressing progress-fn)))))
+       (:? (== type "chained-one")
+           (fn []
+             (return (-/animate-chained-one impl progressing progress-fn)))
+           :else
+           (fn []
+             (return (-/animate-chained-all impl progressing progress-fn)))))
   (var #{running queued} progressing)
   (cond (not running)
          (do (var anim (animate-fn callback-fn))
-             (when (xt/x:not-nil? anim)
+             (when anim
                (xt/x:obj-assign progressing {:running  true
                                              :animation anim})))
-          
-          (and (== type "chained-one")
-               (xt/x:not-nil? (xt/x:first queued)))
-          (return progressing)
+         
+         (and (== type "chained-one")
+              (xt/x:first queued))
+         (return progressing)
          
          :else
          (xt/x:arr-push queued animate-fn))
@@ -320,14 +308,10 @@
   [impl
    initial
    tparams]
-  (when (xt/x:nil? tparams)
-    (:= tparams {}))
+  (:= tparams (or tparams {}))
   (var #{create-val
          create-transition} impl)
-  (var initial-value 0)
-  (when initial
-    (:= initial-value 1))
-  (var indicator    (create-val initial-value))
+  (var indicator    (create-val (:? initial 1 0)))
   (var identity-fn  (fn [x] (return x)))
   (var zero-fn      (create-transition indicator
                                        tparams
@@ -338,13 +322,10 @@
                                        [0 1]
                                        identity-fn))
   (var #{check} tparams)
-  (var check-fn check)
-  (when (xt/x:nil? check-fn)
-    (:= check-fn identity-fn))
   (return {:indicator indicator
-            :zero-fn zero-fn
-            :one-fn one-fn
-            :check-fn check-fn}))
+           :zero-fn zero-fn
+           :one-fn one-fn
+           :check-fn (or check identity-fn)}))
 
 (defn.xt make-binary-indicator
   "makes a binary indicator"
@@ -355,25 +336,24 @@
    type
    progressing
    progress-fn]
-  (when (xt/x:nil? tparams)
-    (:= tparams {}))
+  (:= tparams (or tparams {}))
   (var transitions (-/make-binary-transitions impl
-                                               initial
-                                               tparams))
+                                              initial
+                                              tparams))
   (var #{indicator
          zero-fn
          one-fn
          check-fn} transitions)
   (var trigger-fn
        (fn [flag]
-           (when (xt/x:not-nil? progress-fn)
-             (progress-fn {:status "started"}))
-           (if (check-fn flag)
-              (return (-/run-with impl type one-fn progressing progress-fn))
-             (return (-/run-with impl type zero-fn progressing progress-fn)))))
+          (when progress-fn
+            (progress-fn {:status "started"}))
+          (if (check-fn flag)
+           (return (-/run-with impl type one-fn progressing progress-fn))
+           (return (-/run-with impl type zero-fn progressing progress-fn)))))
   (return
    {:indicator indicator
-     :trigger-fn trigger-fn}))
+    :trigger-fn trigger-fn}))
 
 (defn.xt make-linear-indicator-inner
   "makes a linear indicator"
@@ -392,20 +372,16 @@
   (var indicator (create-val initial))
   (var trigger-fn
        (fn [value]
-          (var should-run true)
-          (when (xt/x:not-nil? check-fn)
-            (var check-out (check-fn value))
-            (:= should-run (and (xt/x:not-nil? check-out)
-                                (not= false check-out))))
-          (when should-run
-            (var t-fn (create-transition indicator
-                                         tparams
-                                         [(get-prev) value]
-                                         (fn [x] (return x))))
-            (when (xt/x:not-nil? progress-fn)
-              (progress-fn {:status "started"}))
-            (var out (-/run-with impl type t-fn progressing progress-fn))
-            (set-prev value)
+         (when (or (xt/x:nil? check-fn)
+                   (check-fn value))
+           (var t-fn (create-transition indicator
+                                        tparams
+                                        [(get-prev) value]
+                                        (fn [x] (return x))))
+           (when progress-fn
+             (progress-fn {:status "started"}))
+           (var out (-/run-with impl type t-fn progressing progress-fn))
+           (set-prev value)
            (return out))))
   (return
    {:indicator indicator
@@ -450,26 +426,19 @@
   (var indicator (create-val initial))
   (var trigger-fn
        (fn [value]
-          (var should-run true)
-          (when (xt/x:not-nil? check-fn)
-            (var check-out (check-fn value))
-            (:= should-run (and (xt/x:not-nil? check-out)
-                                (not= false check-out))))
-          (when should-run
-            (var pval (get-prev))
-            (var modulo-val modulo)
-            (when (xt/x:nil? modulo-val)
-              (:= modulo-val 360))
-            (var offset (xtm/mod-offset pval value modulo-val))
-            (var nval (+ pval offset))
-            (var t-fn (create-transition indicator
-                                         tparams
-                                         [pval nval]
-                                         (fn [x] (return x))))
-            (when (xt/x:not-nil? progress-fn)
-              (progress-fn {:status "started"}))
-            (var out (-/run-with impl type t-fn progressing progress-fn))
-            (set-prev value)
+         (when (or (xt/x:nil? check-fn)
+                   (check-fn value))
+           (var pval (get-prev))
+           (var offset (xtm/mod-offset pval value (or modulo 360)))
+           (var nval (+ pval offset))
+           (var t-fn (create-transition indicator
+                                        tparams
+                                        [pval nval]
+                                        (fn [x] (return x))))
+           (when progress-fn
+             (progress-fn {:status "started"}))
+           (var out (-/run-with impl type t-fn progressing progress-fn))
+           (set-prev value)
            (return out))))
   (return
    {:indicator indicator

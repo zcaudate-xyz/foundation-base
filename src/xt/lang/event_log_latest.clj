@@ -24,20 +24,21 @@
   "clears the cache given a time point"
   {:added "4.0"}
   [log t]
-  (when (xt/x:nil? t)
-    (:= t (xt/x:now-ms)))
+  (:= t (or t (xt/x:now-ms)))
   (var #{last interval cache} log)
   (var out [])
-  (when (and (xt/x:not-nil? last)
-             (>= interval (- t last)))
+  (when (and last (>= interval (- t last)))
     (return out))
   (xt/x:set-key log "last" t)
-  (xt/for:array [k (xt/x:obj-keys cache)]
-    (var entry (xt/x:get-key cache k))
-    (when (< interval (- t (. entry ["t"])))
-      (xt/x:del-key cache k)
-      (xt/x:arr-push out k)))
-  (return out))
+   (xt/for:array [k (xt/x:obj-keys cache)]
+     (var entry (xt/x:get-key cache k))
+      (when (< interval (- t (. entry ["t"])))
+        (xt/x:del-key cache k)
+        (xt/x:arr-push out k)))
+   (return
+    (xtd/arr-sort out
+                  (fn [x] (return x))
+                  xt/x:str-lt)))
 
 (defn.xt queue-latest
   "queues the latest time to log"

@@ -1,16 +1,17 @@
 (ns std.lang.model.spec-dart
   (:require [std.lang.base.book :as book]
-            [std.lang.base.emit :as emit]
-            [std.lang.base.emit-common :as common]
-            [std.lang.base.emit-data :as data]
-            [std.lang.base.grammar :as grammar]
-            [std.lang.base.script :as script]
-            [std.lang.base.util :as ut]
-            [std.lang.model.spec-xtalk]
-            [std.lang.model.spec-xtalk.fn-dart :as fn-dart]
-            [std.lib.collection :as collection]
-            [std.lib.template :as template]
-            [std.lib.walk :as walk]))
+             [std.lang.base.emit :as emit]
+             [std.lang.base.emit-common :as common]
+             [std.lang.base.emit-data :as data]
+             [std.lang.base.grammar :as grammar]
+             [std.lang.base.script :as script]
+             [std.lang.base.util :as ut]
+             [std.lang.model.spec-dart.rewrite :as rewrite]
+             [std.lang.model.spec-xtalk]
+             [std.lang.model.spec-xtalk.fn-dart :as fn-dart]
+             [std.lib.collection :as collection]
+             [std.lib.template :as template]
+             [std.lib.walk :as walk]))
 
 (defn dart-map-key
   [key grammar mopts]
@@ -183,27 +184,69 @@
         has-value?
         (list 'var* sym := bound)
 
+         :else
+         (list 'var* sym)))))
+
+(defn dart-truthy-form
+  [expr]
+  (list 'and
+        (list 'not= expr nil)
+        (list 'not= expr false)))
+
+(defn dart-iife
+  [body]
+  (list (apply list 'fn '[] body)))
+
+(defn dart-tf-ternary
+  [[_ test then else]]
+  (let [test-sym (gensym "dart_truthy__")]
+    (dart-iife
+     [(list 'var test-sym test)
+      (list 'if (dart-truthy-form test-sym)
+            (list 'return then)
+            (list 'return else))])))
+
+(defn dart-tf-or
+  [[_ & args]]
+  (cond (empty? args)
+        nil
+
+        (= 1 (count args))
+        (first args)
+
         :else
-        (list 'var* sym)))))
+        (let [pairs (mapv (fn [arg]
+                            [(gensym "dart_or__") arg])
+                          (butlast args))
+              body  (mapcat (fn [[sym arg]]
+                              [(list 'var sym arg)
+                               (list 'if (dart-truthy-form sym)
+                                     (list 'return sym))])
+                            pairs)]
+          (dart-iife
+           (concat body
+                   [(list 'return (last args))])))))
 
 (def +features+
   (-> (grammar/build :exclude [:pointer
                                :block
                                :data-set])
-      (grammar/build:override
-       {:var         {:symbol '#{var*} :raw "var"}
-        :defn        {:symbol '#{defn}}
-        :new         {:symbol '#{new} :raw "new" :emit :new}
-        :for-object  {:macro #'tf-for-object :emit :macro}
-        :for-array   {:macro #'tf-for-array  :emit :macro}
-        :for-iter    {:macro #'tf-for-iter   :emit :macro}
-        :for-return  {:macro #'tf-for-return :emit :macro}
-        :for-try     {:macro #'tf-for-try    :emit :macro}
-        :for-async   {:macro #'tf-for-async  :emit :macro}
-        :with-global {:value true :raw "globalThis"}})
-      (grammar/build:override fn-dart/+dart+)
-      (grammar/build:extend
-       {:var-let {:op :var-let :symbol #{'var} :macro #'dart-var :emit :macro}})))
+       (grammar/build:override
+        {:var         {:symbol '#{var*} :raw "var"}
+         :defn        {:symbol '#{defn}}
+         :new         {:symbol '#{new} :raw "new" :emit :new}
+         :for-object  {:macro #'tf-for-object :emit :macro}
+         :for-array   {:macro #'tf-for-array  :emit :macro}
+         :for-iter    {:macro #'tf-for-iter   :emit :macro}
+         :for-return  {:macro #'tf-for-return :emit :macro}
+         :for-try     {:macro #'tf-for-try    :emit :macro}
+         :for-async   {:macro #'tf-for-async  :emit :macro}
+         :dart-or     {:symbol #{'dart:or} :macro #'dart-tf-or :emit :macro}
+         :dart-ternary {:symbol #{'dart:ternary} :macro #'dart-tf-ternary :emit :macro}
+         :with-global {:value true :raw "globalThis"}})
+       (grammar/build:override fn-dart/+dart+)
+       (grammar/build:extend
+        {:var-let {:op :var-let :symbol #{'var} :macro #'dart-var :emit :macro}})))
 
 (def +template+
   (-> (emit/default-grammar)
@@ -217,13 +260,14 @@
                      :invoke    {:reversed true :hint ""}
                      :block     {:start " {" :end "}"}}
          :block   {:for {:parameter {:sep ";"}}}
-         :function {:defgen {:body {:start " sync* {" :end "}"}}}
-         :define  {:def {:raw "var"}}
-         :token   {:symbol {:replace {\- "_"}}
-                   :nil {:as "null"}}
-          :data    {:vector {:start "[" :end "]" :space ""}
-                    :map    {:start "<dynamic, dynamic>{" :end "}" :space ""}
-                   :map-entry {:key-fn #'dart-map-key}}})))
+          :function {:defgen {:body {:start " sync* {" :end "}"}}}
+          :define  {:def {:raw "var"}}
+          :token   {:symbol {:replace {\- "_"}}
+                    :nil {:as "null"}}
+          :rewrite {:staging [#'rewrite/dart-rewrite-stage]}
+           :data    {:vector {:start "[" :end "]" :space ""}
+                     :map    {:start "<dynamic, dynamic>{" :end "}" :space ""}
+                    :map-entry {:key-fn #'dart-map-key}}})))
 
 (def +grammar+
   (grammar/grammar :dt

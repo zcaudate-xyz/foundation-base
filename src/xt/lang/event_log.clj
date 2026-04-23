@@ -88,17 +88,26 @@
   (when (xt/x:nil? t)
     (:= t (xt/x:now-ms)))
   (var #{last interval cache} log)
+  (var stale [])
   (var out [])
-  (when (and (xt/x:not-nil? last)
+  (when (and (not (xt/x:nil? last))
              (>= interval (- t last)))
     (return out))
   
   (xt/x:set-key log "last" t)
   (xt/for:object [[k kt] cache]
     (when (< interval (- t kt))
-      (xt/x:del-key cache k)
-      (xt/x:arr-push out k)))
+      (xt/x:arr-push stale k)))
+  (xt/for:array [k stale]
+    (xt/x:del-key cache k)
+    (xt/x:arr-push out k))
   (return out))
+
+(defn.xt id-fn
+  "gets the id of a log entry"
+  {:added "4.1"}
+  [x]
+  (return (xt/x:get-key x "id")))
 
 
 (def.xt METHODS
@@ -134,9 +143,9 @@
   (when (xt/x:nil? t)
     (:= t (xt/x:now-ms)))
   (var #{processed cache maximum callback listeners} log)
-  (var key  (:? key-fn
-                (key-fn input t)
-                t))
+  (var key t)
+  (when (not (xt/x:nil? key-fn))
+    (:= key (key-fn input)))
   (var data (data-fn input))
   (-/clear-cache log t)
   
@@ -149,11 +158,11 @@
             (xtd/arr-pushl processed
                            (xtd/clone-nested data)
                            maximum)
-            (when callback
+            (when (not (xt/x:nil? callback))
               (callback data t))
             (xt/for:object [[id listener-entry] listeners]
               (var #{callback meta} listener-entry)
-              (when callback
+              (when (not (xt/x:nil? callback))
                 (callback id data t meta)))
             (return data))))
 
