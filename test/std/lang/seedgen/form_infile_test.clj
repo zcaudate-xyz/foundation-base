@@ -437,13 +437,14 @@
                       "  => 1)\n"))
       (form-infile/seedgen-langadd 'sample.add-test {:write true} lookup project)
       (let [output (slurp path)]
-        [(str/includes? output ":setup [(def +s+ (apply str (repeat 5 \"1234567890\")))\n          (def +out+ [\"1234567890\" \"1234567890\" \"1234567890\" \"1234567890\" \"1234567890\"])]")
+        [(str/includes? output ":setup [(def +s+ (apply str (repeat 5 \"1234567890\")))")
+         (str/includes? output "(def +out+ [\"1234567890\" \"1234567890\" \"1234567890\" \"1234567890\" \"1234567890\"])]")
          (str/includes? output ":teardown [(def +done+ true)]")
          (str/includes? output "(!.lua 1)\n  => 1")
          (str/includes? output "(!.py 1)\n  => 1")])
       (finally
         (.delete tmp))))
-  => [true true true true]
+  => [true true true true true]
 
 ^{:refer std.lang.seedgen.form-infile/seedgen-langremove :added "4.1"}
 (fact "purges targeted seedgen runtimes while preserving the seedgen root"

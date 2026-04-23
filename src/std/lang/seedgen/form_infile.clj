@@ -411,6 +411,8 @@
 (declare render-target-runtime-item)
 
 (defn- render-target-runtime-items
+  "Renders setup/teardown items for the requested languages while preserving
+   scaffold-only forms in their original position."
   [classification root-lang langs]
   (:out
    (reduce (fn [{:keys [out emitted]} item]
