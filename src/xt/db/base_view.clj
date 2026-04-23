@@ -22,7 +22,7 @@
   (var ttypes (:? (xt/x:not-nil? tviews)
                   (xt/x:get-key tviews type)
                   {}))
-  (return (xtd/arr-clone (xt/x:obj-keys ttypes))))
+  (return (xt/x:obj-keys (or ttypes {}))))
 
 (defn.xt all-methods
   "gets all methods for views"
@@ -30,10 +30,9 @@
   [views]
   (var method-fn
        (fn [views table type]
-          (return (xt/x:arr-map (-/all-keys views table type)
-                                (fn [sk] (return [table type sk]))))))
-  (return (xtd/arr-clone
-           (xtd/arr-mapcat (xt/x:obj-keys views)
-                           (fn [k]
-                             (return (xt/x:arr-assign (method-fn views k "select")
-                                                      (method-fn views k "return"))))))))
+         (return (xt/x:arr-map (-/all-keys views table type)
+                               (fn [sk] (return [table type sk]))))))
+  (return (xtd/arr-mapcat (xt/x:obj-keys views)
+                          (fn [k]
+                            (return (xt/x:arr-assign (method-fn views k "select")
+                                                     (method-fn views k "return")))))))

@@ -54,10 +54,9 @@
   {:added "4.0"}
   [s]
   (when (== nil (xts/sym-ns s))
-    (return (:? (and (>= (xt/x:str-len s) 3)
-                     (xt/x:str-ends-with s "_id"))
-                 (xt/x:str-substring s 0 (- (xt/x:len s) 3))
-                 s))))
+    (return (:? (xt/x:str-ends-with s "_id")
+                (xt/x:str-substring s 0 (- (xt/x:len s) 3))
+                s))))
 
 (defn.xt filter-plain
   "filter ids keys from scope keys"

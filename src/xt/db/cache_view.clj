@@ -10,10 +10,10 @@
   "creates a tree base"
   {:added "4.0"}
   [schema table-name sel-query returning custom-query]
-  (var cquery (:? (xt/x:not-nil? custom-query) custom-query []))
-  (var tarr (base-scope/merge-queries sel-query cquery))
-  (var tree (xt/x:arr-assign [table-name] (:? (xt/x:not-nil? tarr) tarr [])))
-  (when (xtd/not-empty? returning)
+  (var tarr (base-scope/merge-queries sel-query (or custom-query
+                                                    [])))
+  (var tree (xt/x:arr-assign [table-name] (or tarr [])))
+  (when returning
     (xt/x:arr-push tree returning))
   (return tree))
 
@@ -39,12 +39,8 @@
   [schema sel-entry ret-entry ret-omit]
   (var sel-table   (xt/x:get-path sel-entry ["view" "table"]))
   (var ret-table   (xt/x:get-path ret-entry ["view" "table"]))
-  (var sel-query   (xt/x:get-path sel-entry ["view" "query"]))
-  (var ret-query   (xt/x:get-path ret-entry ["view" "query"]))
-  (when (xt/x:nil? sel-query)
-    (:= sel-query {}))
-  (when (xt/x:nil? ret-query)
-    (:= ret-query {}))
+  (var sel-query   (or (xt/x:get-path sel-entry ["view" "query"]) {}))
+  (var ret-query   (or (xt/x:get-path ret-entry ["view" "query"]) {}))
   (return (-/tree-base schema
                        sel-table
                        sel-query
