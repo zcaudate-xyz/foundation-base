@@ -41,10 +41,10 @@
                                       "^{:refer foo/b} (fact \"b\")\n\n"
                                       "(fact:global {:setup []})")
                                 ['b 'a])]
-    (and (< (.indexOf output "seedgen/root")
-            (.indexOf output ":refer foo/b"))
-         (< (.indexOf output ":refer foo/b")
-            (.indexOf output ":refer foo/a"))
+    (and (< (str/index-of output "seedgen/root")
+            (str/index-of output ":refer foo/b"))
+         (< (str/index-of output ":refer foo/b")
+            (str/index-of output ":refer foo/a"))
          (str/includes? output "(fact:global {:setup []})")))
   => true)
 
