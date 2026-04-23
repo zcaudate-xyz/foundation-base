@@ -2,7 +2,7 @@
  (:require [std.lang :as l])
  (:use code.test))
 
-^{:seedgen/root         {:all true}}
+^{:seedgen/root {:all true, :langs [:lua :python]}}
 (l/script- :js
   {:runtime :basic,
    :require [[xt.lang.common-data :as xtd]
@@ -20,7 +20,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.common-data/not-empty? :added "4.1"}
 (fact "checks that array is not empty"
@@ -1094,13 +1094,15 @@
   => {"a" 2, "b" [3 {"c" 4}]}
 
   (!.lua
-   (xtd/tree-walk
-    {:a 1, :b [2 {:c 3}]}
-    (fn [x] (return x))
-    (fn [x]
-      (if (xt/x:is-number? x)
-        (return (+ x 1))
-        (return x)))))
+    (var do-fn
+         (fn [x]
+           (if (xt/x:is-number? x)
+         (return (+ x 1))
+         (return x))))
+    (xtd/tree-walk
+     {:a 1, :b [2 {:c 3}]}
+     (fn [x] (return x))
+     do-fn))
   => {"a" 2, "b" [3 {"c" 4}]}
 
   (!.py
@@ -1284,14 +1286,16 @@
      [1 2 3 4]
      x5-fn))
   => [20 40]
-  
+
   (!.lua
-   (xtd/arr-keep
-    [1 2 3 4]
-    (fn [x]
-      (if (== 0 (mod x 2))
-        (return (* x 10))
-        (return nil)))))
+    (var x5-fn
+         (fn [x]
+           (if (== 0 (mod x 2))
+             (return (* x 10))
+             (return nil))))
+    (xtd/arr-keep
+     [1 2 3 4]
+     x5-fn))
   => [20 40]
 
   (!.py
@@ -1558,17 +1562,52 @@
      {:a 1, :b 2, :c 3}
      x5-fn))
   => {"b" 20}
-  
-  (!.lua
-   (xtd/obj-keep
-    {:a 1, :b 2, :c 3}
-    (fn [x]
-      (if (== 0 (mod x 2))
-        (return (* x 10))
-        (return nil)))))
-  => {"b" 20}
 
   (!.js
+    (var x5-fn
+         (fn [x]
+           (if (== 0 (mod x 2))
+             (return (* x 10))
+             (return nil))))
+    (xtd/obj-keep
+     {:a 1, :b 2, :c 3}
+     x5-fn))
+  => {"b" 20}
+
+  (!.lua
+    (var x5-fn
+         (fn [x]
+           (if (== 0 (mod x 2))
+             (return (* x 10))
+             (return nil))))
+    (xtd/obj-keep
+     {:a 1, :b 2, :c 3}
+     x5-fn))
+  => {"b" 20}
+
+  (!.lua
+    (var x5-fn
+         (fn [x]
+           (if (== 0 (mod x 2))
+             (return (* x 10))
+             (return nil))))
+    (xtd/obj-keep
+     {:a 1, :b 2, :c 3}
+     x5-fn))
+  => {"b" 20}
+
+  (!.py
+    (var x5-fn
+         (fn [x]
+           (if (== 0 (mod x 2))
+             (return (* x 10))
+             (return nil))))
+    (xtd/obj-keep
+     {:a 1, :b 2, :c 3}
+     x5-fn))
+  => {"b" 20}
+
+  (!.py
     (var x5-fn
          (fn [x]
            (if (== 0 (mod x 2))
@@ -1681,11 +1720,11 @@
 
   (!.lua
    (var state {"n" 0})
-   (var f (xtd/memoize-key
-           (fn [x]
-             (do
-               (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
-               (return (* x 10))))))
+   (var f-raw (fn [x]
+                (do
+                  (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
+                  (return (* x 10)))))
+   (var f (xtd/memoize-key f-raw))
    [(f 2) (f 2) (f 3) (xt/x:get-key state "n")])
   => [20 20 30 2]
 
@@ -1697,9 +1736,7 @@
                   (return (* x 10)))))
    (var f (xtd/memoize-key f-raw))
    [(f 2) (f 2) (f 3) (xt/x:get-key state "n")])
-
   => [20 20 30 2])
-
 
 (comment
   ;; needs a seperate rewrite module in std.lang to hook into emit:
@@ -1888,7 +1925,7 @@
 
 ^{:refer xt.lang.common-data/memoize-key-step :added "4.1"}
 (fact "computes and caches a memoized value"
-  
+
   (!.js
    (var state {"n" 0})
    (var cache {})
