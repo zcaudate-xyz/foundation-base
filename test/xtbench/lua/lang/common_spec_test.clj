@@ -708,7 +708,7 @@
     {:success (return ok),
      :error (return err),
      :finally (return true)})
-  #"ngx\.thread\.spawn")
+  #"coroutine\.create")
  =>
  true)
 
