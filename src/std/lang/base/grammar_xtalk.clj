@@ -643,7 +643,7 @@
     :op-spec    {:type [:fn [:xt/str :xt/str :xt/num] :xt/str]
                  :arglists '([value pattern] [value pattern from])}}
    {:op :x-str-substring   :symbol #{'x:str-substring}   :emit :abstract
-    :op-spec    {:type [:fn [:xt/str :xt/num :xt/num] :xt/str]
+    :op-spec    {:type [:fn [:xt/str :xt/num [:xt/maybe :xt/num]] :xt/str]
                  :arglists '([value start] [value start len])}}
    {:op :x-str-to-upper    :symbol #{'x:str-to-upper}    :emit :abstract
     :op-spec     {:arglists '([value])
