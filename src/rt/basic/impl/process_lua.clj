@@ -233,8 +233,8 @@
     :main  {}
     :emit  {:body  {:transform #'default-body-transform}}
     :json :full
-     :encode :json
-     :timeout 2000}))
+    :encode :json
+    :timeout 2000}))
 
 (def +lua-nginx-basic-config+
   (common/set-context-options
@@ -309,8 +309,8 @@
     :main  {}
     :emit  {:body  {:transform #'default-body-transform}}
     :json :full
-     :encode :json
-     :timeout 2000}))
+    :encode :json
+    :timeout 2000}))
 
 (def +lua-nginx-websocket-config+
   (common/set-context-options

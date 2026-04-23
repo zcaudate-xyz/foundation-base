@@ -18,10 +18,10 @@
 (def +book-redis-empty+
   (b/book {:lang :lua.redis
            :parent :lua
-            :meta    (b/book-meta {})
+           :meta    (b/book-meta {})
            :grammar (grammar/grammar :redis
-                       (grammar/to-reserved (grammar/build))
-                       helper/+default+)}))
+                      (grammar/to-reserved (grammar/build))
+                      helper/+default+)}))
 
 (def +x-module+
   (b/book-module

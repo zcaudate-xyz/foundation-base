@@ -12,7 +12,7 @@
 (def +eval-block+
   (str "cjson = require('cjson')\n\n"
        (std.lang.base.pointer/ptr-invoke-script
-         lua.nginx/http-debug-api []
+        lua.nginx/http-debug-api []
         {:lang :lua.nginx})))
 
 (def +eval-ws+

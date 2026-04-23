@@ -336,15 +336,15 @@
      :config {:layout :full}
      :instance {:create nginx:create}})
    
-    (default/install-type!
-     :lua :nginx
-     {:type :hara/rt.nginx
-      :instance
-      {:create (fn [m]
-                 (-> {:rt/client {:type :hara/rt.nginx 
-                                  :constructor nginx:create}}
-                     (merge m)
-                     (shared/rt-shared:create)))}})
+   (default/install-type!
+    :lua :nginx
+    {:type :hara/rt.nginx
+     :instance
+     {:create (fn [m]
+                (-> {:rt/client {:type :hara/rt.nginx 
+                                 :constructor nginx:create}}
+                    (merge m)
+                    (shared/rt-shared:create)))}})
    (default/install-type!
     :lua.nginx :nginx
     {:type :hara/rt.nginx
@@ -353,7 +353,7 @@
                 (-> {:rt/client {:type :hara/rt.nginx 
                                  :constructor nginx:create}}
                     (merge m)
-                     (shared/rt-shared:create)))}})])
+                    (shared/rt-shared:create)))}})])
 
 
 (comment
