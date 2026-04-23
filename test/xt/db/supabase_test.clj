@@ -5,7 +5,7 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.common-spec :as xt]
+   :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-string :as str]
              [xt.lang.common-repl :as repl]
              [xt.sys.conn-dbsql :as dbsql]

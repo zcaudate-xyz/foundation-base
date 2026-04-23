@@ -3,7 +3,7 @@
             [xt.sys.conn-dbsql :as dbsql]))
 
 (l/script :lua
-  {:import [["pgmoon" :as ngxpg]] :require [[xt.lang.common-lib :as k] [xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-runtime :as rt]]})
+  {:import [["pgmoon" :as ngxpg]] :require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-runtime :as rt]]})
 
 (defn.lua default-env
   "gets the default env"

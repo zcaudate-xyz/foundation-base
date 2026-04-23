@@ -231,7 +231,7 @@
   [namespace]
   (spit "src/xt/lang/common_spec.clj"
         (str/join "\n\n"
-                  (concat [(generate-common-ns-template 'xt.lang.common-spec)
+                  (concat [(generate-common-ns-template 'xt.lang.spec-base)
                            GENERATE_COMMON_FOR_TEMPLATE]
                           (interleave (map generate-common-type +xtalk-entries+)
                                       (map generate-common-macro +xtalk-entries+))))))

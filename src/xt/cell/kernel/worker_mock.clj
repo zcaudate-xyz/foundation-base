@@ -3,7 +3,7 @@
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]
+  {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-trace :as trace]
              [xt.lang.common-task :as task]
              [xt.cell.kernel.worker-local :as worker-local]

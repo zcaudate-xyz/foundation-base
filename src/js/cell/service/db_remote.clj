@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:export [MODULE] :require [[js.cell.service.db-query :as db-query] [js.cell.service.db-sync :as db-sync] [xt.lang.common-spec :as xt]]})
+  {:export [MODULE] :require [[js.cell.service.db-query :as db-query] [js.cell.service.db-sync :as db-sync] [xt.lang.spec-base :as xt]]})
 
 (defn.xt remote-capable?
   "checks that the db descriptor can dispatch remote requests"

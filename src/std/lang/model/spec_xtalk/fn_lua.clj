@@ -29,13 +29,18 @@
     (template/$ (error ~s))))
 
 (defn lua-tf-x-shell
-  ([[_ s cm]]
-   (template/$ (do* (var handle (io.popen ~s))
-             (var res (handle:read "*a"))
-             (var f (. ~cm ["success"]))
-             (if f
-               (return (f res))
-               (return res))))))
+  ([[_ s opts cb]]
+   (template/$
+    (do* (var '[ok handle] (pcall (fn [] (return (io.popen ~s)))))
+         (if (not ok)
+           (return nil handle)
+           (do* (var res (handle:read "*a"))
+                (var '[closed reason code] (handle:close))
+                (if closed
+                  (return res nil)
+                  (return nil {:reason reason
+                               :code code
+                               :output res}))))))))
 
 (defn lua-tf-x-hash-id
   [[_ obj]]

@@ -6,7 +6,7 @@
 
 (l/script :lua
   kmi.redis
-  {:require [[xt.lang.common-spec :as xt]
+  {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]]
    :static {:lang/lint-globals #{redis}}})

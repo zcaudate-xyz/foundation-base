@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-spec :as xt]]})
+  {:require [[xt.lang.spec-base :as xt]]})
 
 (defn.js fetch-call
   "completes a http call with options

@@ -9,7 +9,7 @@
              [xt.db.sql-graph :as sql-graph]
              [xt.db.sql-table :as sql-table]
              [xt.db.sql-raw :as raw]
-             [xt.lang.common-spec :as xt]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]]})
 
 (defn.xt sql-gen-delete

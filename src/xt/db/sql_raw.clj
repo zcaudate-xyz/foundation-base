@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]
+  {:require [[xt.lang.spec-base :as xt]
              [xt.db.sql-util :as ut]]})
 
 (defn.xt raw-delete

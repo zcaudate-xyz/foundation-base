@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [xt.lang.common-spec :as xt] [js.core :as j] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style] [js.blessed.ui-core :as ui-core]]})
+  {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [js.core :as j] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style] [js.blessed.ui-core :as ui-core]]})
 
 (defn.js TimePicker
   "Constructs a TimePicker"

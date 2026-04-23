@@ -8,7 +8,7 @@
 
 (l/script-
  :dart
- {:runtime :twostep, :require [[xt.lang.common-repl :as k]]})
+ {:runtime :twostep, :require [[xt.lang.common-repl :as repl]]})
 
 (defn decode-output [x] (if (string? x) (json/read x) x))
 

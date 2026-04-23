@@ -109,4 +109,4 @@
   (code.project/in-context
    (std.lang.seedgen.common-infile/seedgen-incomplete <sample>
                                                     {}))
-  => '{xt.lang.common-spec/example.B {:status ...}})
+  => '{xt.lang.spec-base/example.B {:status ...}})

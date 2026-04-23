@@ -13,7 +13,7 @@
    :require [[js.core :as j]
              [xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
-             [xt.lang.common-spec :as xt]]})
+             [xt.lang.spec-base :as xt]]})
 
 (def +networks+
   {:citycoin ["main" "test"],

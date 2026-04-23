@@ -3,7 +3,7 @@
             [std.lib.foundation :as f]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]
+  {:require [[xt.lang.spec-base :as xt]
              [xt.db.sql-util :as ut]
              [xt.db.base-check :as check]
              [xt.sys.conn-dbsql :as driver]]})

@@ -11,7 +11,7 @@
  {:runtime :basic,
   :require
   [[xt.lang.common-lib :as k]
-   [xt.lang.common-spec :as xt]
+   [xt.lang.spec-base :as xt]
    [xt.lang.common-repl :as repl]
    [xt.lang.util-validate :as validate]
    [js.core :as j]]})

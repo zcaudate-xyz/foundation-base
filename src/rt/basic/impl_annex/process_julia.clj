@@ -7,7 +7,7 @@
             [std.lang.base.impl :as impl]
             [std.lang.base.runtime :as rt]
             [std.lang.model-annex.spec-julia :as spec]
-            [xt.lang.common-repl :as k]))
+            [xt.lang.common-repl :as repl]))
 
 (def +julia-init+
   (common/put-program-options
@@ -51,7 +51,7 @@
 (def ^{:arglists '([body])}
   default-oneshot-wrap
   (let [bootstrap (impl/emit-entry-deps
-                   k/return-eval
+                   repl/return-eval
                    {:lang :julia
                     :layout :flat})]
     (fn [body]
@@ -97,7 +97,7 @@
 (def ^{:arglists '([port & [{:keys [host]}]])}
   default-basic-client
   (let [bootstrap (->> [(impl/emit-entry-deps
-                         k/return-eval
+                         repl/return-eval
                          {:lang :julia
                           :layout :flat})
                         (impl/emit-as

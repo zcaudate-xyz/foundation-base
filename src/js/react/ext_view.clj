@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [xt.lang.event-view :as event-view] [js.react :as r] [js.core :as j] [xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-trace :as trace]]})
+  {:require [[xt.lang.common-lib :as k] [xt.lang.event-view :as event-view] [js.react :as r] [js.core :as j] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-trace :as trace]]})
 
 (defn.js throttled-setter
   "creates a throttled setter which only updates after a delay"

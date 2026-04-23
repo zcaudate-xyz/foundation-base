@@ -7,7 +7,7 @@
    :require [[js.cell.binding :as binding]
               [js.cell.binding.model :as binding-model]
               [xt.db :as xdb]
-              [xt.lang.common-spec :as xt]
+              [xt.lang.spec-base :as xt]
               [xt.lang.common-data :as xtd]]})
 
 (fact:global

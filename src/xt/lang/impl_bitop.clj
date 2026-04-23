@@ -3,7 +3,7 @@
   (:refer-clojure :exclude []))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]]})
+  {:require [[xt.lang.spec-base :as xt]]})
 
 (defn.xt bit-count
   "get the bit count"

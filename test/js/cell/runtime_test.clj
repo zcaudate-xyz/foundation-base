@@ -7,7 +7,7 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.common-spec :as xt]
+   :require [[xt.lang.spec-base :as xt]
               [js.cell.runtime.link :as runtime-link]]})
 
 (fact:global

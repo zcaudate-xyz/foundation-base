@@ -19,7 +19,7 @@
    [xt.db.sql-manage :as manage]
    [xt.db.sql-table :as table]
    [xt.db.sample-test :as sample]
-   [xt.lang.common-spec :as xt]
+   [xt.lang.spec-base :as xt]
    [xt.lang.common-data :as xtd]
    [xt.lang.common-string :as str]
    [xt.lang.common-repl :as repl]

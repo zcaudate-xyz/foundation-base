@@ -31,7 +31,7 @@
 (fact
  "evaluates a returns a string"
  ^{:hidden true}
- (decode-output (!.php (k/return-eval "1")))
+ (decode-output (!.php ([xt.lang.common-repl :as repl] "1")))
  =>
  {"return" "number", "value" 1, "type" "data"})
 

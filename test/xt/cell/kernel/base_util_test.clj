@@ -6,7 +6,7 @@
   {:runtime :basic
    :require [[xt.cell.kernel.base-util :as base-util]
               [xt.lang.common-lib :as k]
-              [xt.lang.common-spec :as xt]
+              [xt.lang.spec-base :as xt]
               [xt.lang.common-data :as xtd]]})
 
 (fact:global

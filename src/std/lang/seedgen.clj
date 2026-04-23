@@ -192,7 +192,7 @@
            :print {:function true :item true :result true :summary true}})
 
          (std.lang.seedgen/seedgen-langadd
-          ['xt.lang.common-spec-test]
+          ['xt.lang.spec-base-test]
           {:lang :lua
            :print {:function true :item true :result true :summary true}})
          
@@ -217,7 +217,7 @@
            :print {:function true :item true :result true :summary true}})
 
          (std.lang.seedgen/seedgen-benchadd
-          'xt.lang.common-spec
+          'xt.lang.spec-base
           {:lang :python
            :print {:function true :item true :result true :summary true}}))
 

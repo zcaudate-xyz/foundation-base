@@ -5,7 +5,7 @@
             [std.lib.template :as template]
             [std.lang :as l]
             [xt.db :as xdb]
-            [xt.lang.common-spec :as xt]
+            [xt.lang.spec-base :as xt]
             [xt.lang.common-data :as xtd]))
 
 (def +schema+
@@ -59,7 +59,7 @@
               [js.cell.service.db-sync :as db-sync]
               [js.lib.driver-sqlite-wasm :as sqlite-wasm]
               [xt.db :as xdb]
-              [xt.lang.common-spec :as xt]
+              [xt.lang.spec-base :as xt]
               [xt.lang.common-data :as xtd]
               [xt.lang.common-runtime :as rt :with [defvar.js]]
               [xt.lang.event-view :as event-view]
@@ -71,7 +71,7 @@
     '(do
       (var worker (js.cell.runtime.env-node/make-node-worker))
       (var existing-db (!:G __E2E_REMOTE_DB))
-      (when (xt.lang.common-spec/x:nil? existing-db)
+      (when (xt.lang.spec-base/x:nil? existing-db)
         (var schema {"Order"
                      {"id" {"ident" "id" "type" "text" "order" 0}
                       "status" {"ident" "status" "type" "text" "order" 1}}})
@@ -129,8 +129,8 @@
         "@e2e/sync"
         {"handler"
          (fn [sync-request]
-           (var db-sync (xt.lang.common-spec/x:get-key sync-request "db/sync"))
-           (when (and (xt.lang.common-spec/x:is-object? db-sync)
+           (var db-sync (xt.lang.spec-base/x:get-key sync-request "db/sync"))
+           (when (and (xt.lang.spec-base/x:is-object? db-sync)
                       (xt.lang.common-data/not-empty? db-sync))
              (xt.db/sync-event (!:G __E2E_REMOTE_DB) ["add" db-sync]))
            (return sync-request))
@@ -147,7 +147,7 @@
   (l/emit-script
    '(do
       (var existing-db (!:G __E2E_REMOTE_DB))
-      (when (xt.lang.common-spec/x:nil? existing-db)
+      (when (xt.lang.spec-base/x:nil? existing-db)
         (var schema {"Order"
                      {"id" {"ident" "id" "type" "text" "order" 0}
                       "status" {"ident" "status" "type" "text" "order" 1}}})
@@ -207,8 +207,8 @@
          "@e2e/sync"
          {"handler"
           (fn [sync-request]
-            (var db-sync (xt.lang.common-spec/x:get-key sync-request "db/sync"))
-            (when (and (xt.lang.common-spec/x:is-object? db-sync)
+            (var db-sync (xt.lang.spec-base/x:get-key sync-request "db/sync"))
+            (when (and (xt.lang.spec-base/x:is-object? db-sync)
                        (xt.lang.common-data/not-empty? db-sync))
               (xt.db/sync-event (!:G __E2E_REMOTE_DB) ["add" db-sync]))
             (return sync-request))

@@ -9,7 +9,7 @@
 ;;
 
 (l/script :js
-  {:require [[xt.lang.common-spec :as xt]
+  {:require [[xt.lang.spec-base :as xt]
              [xt.db :as xdb]]})
 
 (defn.js snake->kebab

@@ -3,7 +3,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.common-runtime :as rt :with [defvar.xt]]
-             [xt.lang.common-spec :as xt]
+             [xt.lang.spec-base :as xt]
              [xt.cell.kernel :as kernel]
              [xt.cell.kernel.base-link-local :as base-link-local]
              [xt.cell.kernel.worker-local :as worker-local]

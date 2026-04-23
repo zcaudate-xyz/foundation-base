@@ -3,7 +3,7 @@
   (:refer-clojure :exclude [mod round abs max min quot]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]]})
+  {:require [[xt.lang.spec-base :as xt]]})
 
 (defspec.xt abs [:fn [:xt/num] :xt/num])
 

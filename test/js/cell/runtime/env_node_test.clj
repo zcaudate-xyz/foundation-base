@@ -7,7 +7,7 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.common-spec :as xt]
+   :require [[xt.lang.spec-base :as xt]
               [xt.lang.common-repl :as repl]
               [js.cell.kernel :as cl]
               [js.cell.runtime.env-node :as env-node]

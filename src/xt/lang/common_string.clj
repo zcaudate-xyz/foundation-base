@@ -3,7 +3,7 @@
   (:refer-clojure :exclude [replace]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]]})
+  {:require [[xt.lang.spec-base :as xt]]})
 
 ;;
 ;; XLANG STRING

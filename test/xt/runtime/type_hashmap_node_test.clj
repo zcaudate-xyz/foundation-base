@@ -6,14 +6,14 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.runtime.type-hashmap-node :as node]
-             [xt.lang.common-spec :as xt]
+             [xt.lang.spec-base :as xt]
              [xt.runtime.interface-common :as ic]
              [xt.lang.common-repl :as repl]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.runtime.type-hashmap-node :as node]
-             [xt.lang.common-spec :as xt]
+             [xt.lang.spec-base :as xt]
              [xt.runtime.interface-common :as ic]
              [xt.lang.common-repl :as repl]]})
 

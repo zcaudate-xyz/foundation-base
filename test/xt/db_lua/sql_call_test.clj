@@ -12,7 +12,7 @@
 (l/script- :lua
   {:runtime :basic
    :config  {:program :resty}
-   :require [[xt.lang.common-spec :as xt]
+   :require [[xt.lang.spec-base :as xt]
              [xt.db.sql-call :as call]
              [xt.sys.conn-dbsql :as driver]
              [lua.nginx.driver-postgres :as lua-postgres]]})

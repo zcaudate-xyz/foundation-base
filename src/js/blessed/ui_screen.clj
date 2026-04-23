@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-data :as xtd] [js.core :as j] [js.lib.valtio :as v] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style] [xt.lang.common-spec :as xt]]})
+  {:require [[xt.lang.common-data :as xtd] [js.core :as j] [js.lib.valtio :as v] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style] [xt.lang.spec-base :as xt]]})
 
 ;;
 ;;

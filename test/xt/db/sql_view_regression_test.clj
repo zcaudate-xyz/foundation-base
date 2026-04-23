@@ -5,19 +5,19 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.sql-view :as v]
-             [xt.lang.common-spec :as xt]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.db.sql-view :as v]
-             [xt.lang.common-spec :as xt]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.db.sql-view :as v]
-             [xt.lang.common-spec :as xt]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]]})
 
 (fact:global

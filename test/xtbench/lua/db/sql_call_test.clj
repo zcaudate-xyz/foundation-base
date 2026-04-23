@@ -16,7 +16,7 @@
 (l/script-
  :lua
  {:runtime :basic,
-  :require [[xt.lang.common-spec :as xt] [xt.db.sql-call :as call]]})
+  :require [[xt.lang.spec-base :as xt] [xt.db.sql-call :as call]]})
 
 (fact:global
  {:setup [(l/rt:restart) (l/rt:setup :postgres)],

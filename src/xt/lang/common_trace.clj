@@ -5,7 +5,7 @@
             [std.lib.env :as env]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]
+  {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]]})
 
 ;;

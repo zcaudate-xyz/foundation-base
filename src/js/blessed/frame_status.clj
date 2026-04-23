@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [js.core :as j] [js.react :as r] [js.lib.chalk :as chalk] [xt.lang.common-spec :as xt]]})
+  {:require [[xt.lang.common-lib :as k] [js.core :as j] [js.react :as r] [js.lib.chalk :as chalk] [xt.lang.spec-base :as xt]]})
 
 (defn.js Status
   "displays status"

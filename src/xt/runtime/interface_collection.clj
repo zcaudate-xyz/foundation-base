@@ -3,7 +3,7 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]
+  {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
              [xt.runtime.common-hash :as common-hash]
              [xt.runtime.interface-common :as interface-common]]})

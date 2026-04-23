@@ -965,8 +965,7 @@
   [{:op :x-shell          :symbol #{'x:shell}           :emit :abstract
     :op-spec {:template-only true
               :type [:fn [:xt/str :xt/any :xt/any] :xt/any]
-              :arglists '([command opts]
-                          [command opts cb])}}])
+              :arglists '([command opts cb])}}])
 
 (def +xt-runtime-file+
   [{:op :x-slurp-file     :symbol #{'x:slurp-file}    :emit :abstract

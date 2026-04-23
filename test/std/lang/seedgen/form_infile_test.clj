@@ -17,12 +17,12 @@
                                         "  (:require [std.lang :as l]))\n\n"
                                         "^{:seedgen/root {:all true, :langs [:lua :python]}}\n"
                                         "(l/script- :js {:runtime :basic})\n\n"
-                                        "^{:refer xt.lang.common-spec/example.A :added \"4.1\"\n"
+                                        "^{:refer xt.lang.spec-base/example.A :added \"4.1\"\n"
                                         "  :setup [(!.js (+ 1 2 3))]}\n"
                                         "(fact \"runtime specific branches\"\n"
                                         "  (!.js (+ 1 2 3))\n"
                                         "  => 6)\n\n"
-                                        "^{:refer xt.lang.common-spec/example.B :added \"4.1\"\n"
+                                        "^{:refer xt.lang.spec-base/example.B :added \"4.1\"\n"
                                         "  :setup [(!.js (+ 1 2 3))]}\n"
                                         "(fact \"TODO\")\n")))]
     (try
@@ -30,11 +30,11 @@
       (form-infile/seedgen-langadd 'sample.add-test {:write true} lookup project)
       [(common-infile/seedgen-list 'sample.add-test {} lookup nil)
        (-> (common/seedgen-fact-forms path)
-           (get 'xt.lang.common-spec/example.A)
+           (get 'xt.lang.spec-base/example.A)
            common/seedgen-coverage-langs
            set)
        (-> (common/seedgen-fact-forms path)
-           (get 'xt.lang.common-spec/example.B)
+           (get 'xt.lang.spec-base/example.B)
            common/seedgen-coverage-langs
            set)
        (slurp path)]
@@ -57,7 +57,7 @@
                       "^{:seedgen/root {:all true, :langs [:lua :python]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "(l/script- :python {:runtime :basic})\n\n"
-                      "^{:refer xt.lang.common-spec/example.A :added \"4.1\"\n"
+                      "^{:refer xt.lang.spec-base/example.A :added \"4.1\"\n"
                       "  :setup [(!.js (+ 1 2 3))\n"
                       "          (!.python (+ 1 2 3))]}\n"
                       "(fact \"runtime specific branches\"\n"
@@ -68,7 +68,7 @@
       (form-infile/seedgen-langadd 'sample.add-test {:lang :lua :write true} lookup project)
       [(common-infile/seedgen-list 'sample.add-test {} lookup nil)
        (-> (common/seedgen-fact-forms path)
-           (get 'xt.lang.common-spec/example.A)
+           (get 'xt.lang.spec-base/example.A)
            common/seedgen-coverage-langs
            set)
        (slurp path)]
@@ -89,7 +89,7 @@
                       "  (:require [std.lang :as l]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:python]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
-                      "^{:refer xt.lang.common-spec/example.A :added \"4.1\"}\n"
+                      "^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n"
                       "(fact \"runtime specific branches\"\n\n"
                       "  (!.js\n"
                       "    (+ 1 2 3))\n"
@@ -113,7 +113,7 @@
                       "            [xt.lang.base-repl :as repl]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:python]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
-                      "^{:refer xt.lang.common-spec/example.A :added \"4.1\"}\n"
+                      "^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n"
                       "(fact \"runtime specific branches\"\n\n"
                       "  (notify/wait-on :js\n"
                       "    (repl/notify 1)))\n"))
@@ -134,7 +134,7 @@
                       "  (:require [std.lang :as l]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:lua]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
-                      "^{:refer xt.lang.common-spec/example.A :added \"4.1\"}\n"
+                      "^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n"
                       "(fact \"runtime specific branches\"\n\n"
                       "  (!.js\n"
                       "    (+ 1 2 3)))\n"))
@@ -167,10 +167,10 @@
       (spit path (str "(ns sample.add-test\n"
                       "  (:use code.test)\n"
                       "  (:require [std.lang :as l]\n"
-                      "            [xt.lang.common-spec :as xt]))\n\n"
+                      "            [xt.lang.spec-base :as xt]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:python]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
-                      "^{:refer xt.lang.common-spec/example.A :added \"4.1\"}\n"
+                      "^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n"
                       "(fact \"multiple checks are also allowed\"\n\n"
                       "  (!.js\n"
                       "    (xt/x:apply (fn [a b c]\n"
@@ -198,10 +198,10 @@
       (spit path (str "(ns sample.add-test\n"
                       "  (:use code.test)\n"
                       "  (:require [std.lang :as l]\n"
-                      "            [xt.lang.common-spec :as xt]))\n\n"
+                      "            [xt.lang.spec-base :as xt]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:lua :python]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
-                      "^{:refer xt.lang.common-spec/example.B :added \"4.1\"}\n"
+                      "^{:refer xt.lang.spec-base/example.B :added \"4.1\"}\n"
                       "(fact \"forms can be suppressed\"\n\n"
                       "  (!.js\n"
                       "    (xt/x:apply (fn [a b c]\n"
@@ -233,7 +233,7 @@
                       "            [xt.lang.base-repl :as repl]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:python :lua]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
-                      "^{:refer xt.lang.common-spec/example.C :added \"4.1\"}\n"
+                      "^{:refer xt.lang.spec-base/example.C :added \"4.1\"}\n"
                       "(fact \"order is important\"\n\n"
                       "  (notify/wait-on :js\n"
                       "    (repl/notify 1))\n"
@@ -257,7 +257,7 @@
                       "            [xt.lang.base-repl :as repl]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:lua :python]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
-                      "^{:refer xt.lang.common-spec/example.D :added \"4.1\"}\n"
+                      "^{:refer xt.lang.spec-base/example.D :added \"4.1\"}\n"
                       "(fact \"any form is allowed with :seedgen/base meta\"\n\n"
                       "  ^{:seedgen/base true}\n"
                       "  [(!.js 1)\n"
@@ -282,7 +282,7 @@
                       "  (:require [std.lang :as l]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:lua :python]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
-                      "^{:refer xt.lang.common-spec/example.E :added \"4.1\"}\n"
+                      "^{:refer xt.lang.spec-base/example.E :added \"4.1\"}\n"
                       "(fact \"seed meta can be mixed and matched\"\n\n"
                       "  ^{:seedgen/base true}\n"
                       "  (identity (!.js 1))\n"
@@ -308,7 +308,7 @@
                       "  (:require [std.lang :as l]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:lua :python]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
-                      "^{:refer xt.lang.common-spec/example.A :added \"4.1\"}\n"
+                      "^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n"
                       "(fact \"metadata branches\"\n\n"
                       "  ^{:seedgen/base {:lua {:expect 6}}}\n"
                       "  (!.js\n"
@@ -329,10 +329,10 @@
       (spit path (str "(ns sample.add-test\n"
                       "  (:use code.test)\n"
                       "  (:require [std.lang :as l]\n"
-                      "            [xt.lang.common-spec :as xt]))\n\n"
+                      "            [xt.lang.spec-base :as xt]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:lua :python]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
-                      "^{:refer xt.lang.common-spec/example-f :added \"4.1\"}\n"
+                      "^{:refer xt.lang.spec-base/example-f :added \"4.1\"}\n"
                       "(fact \"expect can be customised\"\n\n"
                       "  ^{:seedgen/base {:lua {:expect 11}}}\n"
                       "  (!.js\n"
@@ -353,10 +353,10 @@
       (spit path (str "(ns sample.add-test\n"
                       "  (:use code.test)\n"
                       "  (:require [std.lang :as l]\n"
-                      "            [xt.lang.common-spec :as xt]))\n\n"
+                      "            [xt.lang.spec-base :as xt]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:lua :python]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
-                      "^{:refer xt.lang.common-spec/example-fb :added \"4.1\"}\n"
+                      "^{:refer xt.lang.spec-base/example-fb :added \"4.1\"}\n"
                       "(fact \"expect outcomes can default and override\"\n\n"
                       "  ^{:seedgen/base {:all {:expect 12}\n"
                       "                   :lua {:expect 11}}}\n"
@@ -378,10 +378,10 @@
       (spit path (str "(ns sample.add-test\n"
                       "  (:use code.test)\n"
                       "  (:require [std.lang :as l]\n"
-                      "            [xt.lang.common-spec :as xt]))\n\n"
+                      "            [xt.lang.spec-base :as xt]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:lua :python]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
-                      "^{:refer xt.lang.common-spec/example-fa :added \"4.1\"}\n"
+                      "^{:refer xt.lang.spec-base/example-fa :added \"4.1\"}\n"
                       "(fact \"input can be customised\"\n\n"
                       "  ^{:seedgen/base {:lua {:input (xt/x:offset 9)}}}\n"
                       "  (!.js\n"
@@ -404,7 +404,7 @@
                       "  (:require [std.lang :as l]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:lua :python]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
-                      "^{:refer xt.lang.common-spec/example-g :added \"4.1\"\n"
+                      "^{:refer xt.lang.spec-base/example-g :added \"4.1\"\n"
                       "  :setup [^{:seedgen/base {:lua {:input (!.lua (setup-lua))}}}\n"
                       "          (!.js (setup-js))]}\n"
                       "(fact \"setup can be customised\"\n\n"
@@ -431,7 +431,7 @@
                                         "(l/script- :js {:runtime :basic})\n\n"
                                         "(l/script- :lua {:runtime :basic})\n\n"
                                         "(l/script- :python {:runtime :basic})\n\n"
-                                        "^{:refer xt.lang.common-spec/example.A :added \"4.1\"\n"
+                                        "^{:refer xt.lang.spec-base/example.A :added \"4.1\"\n"
                                         "  :setup [(!.js (+ 1 2 3))\n"
                                         "          (!.lua (+ 1 2 3))\n"
                                         "          (!.python (+ 1 2 3))]\n"
@@ -443,7 +443,7 @@
                                         "  => 6\n\n"
                                         "  (!.python (+ 1 2 3))\n"
                                         "  => 6)\n\n"
-                                        "^{:refer xt.lang.common-spec/example.B :added \"4.1\"\n"
+                                        "^{:refer xt.lang.spec-base/example.B :added \"4.1\"\n"
                                         "  :setup [(!.js (+ 1 2 3))]}\n"
                                         "(fact \"TODO\")\n")))]
     (try
@@ -451,7 +451,7 @@
       (form-infile/seedgen-langremove 'sample.purge-test {:lang :all :write true} lookup project)
       [(common-infile/seedgen-list 'sample.purge-test {} lookup nil)
        (-> (common/seedgen-fact-forms path)
-           (get 'xt.lang.common-spec/example.A)
+           (get 'xt.lang.spec-base/example.A)
            common/seedgen-coverage-langs
            set)
        (slurp path)]
@@ -473,7 +473,7 @@
                                         "(l/script- :js {:runtime :basic})\n\n"
                                         "(l/script- :lua {:runtime :basic})\n\n"
                                         "(l/script- :python {:runtime :basic})\n\n"
-                                        "^{:refer xt.lang.common-spec/example.A :added \"4.1\"\n"
+                                        "^{:refer xt.lang.spec-base/example.A :added \"4.1\"\n"
                                         "  :setup [(!.js (+ 1 2 3))\n"
                                         "          (!.lua (+ 1 2 3))\n"
                                         "          (!.python (+ 1 2 3))]}\n"
@@ -489,7 +489,7 @@
       (form-infile/seedgen-langremove 'sample.purge-test {:lang :lua :write true} lookup project)
       [(common-infile/seedgen-list 'sample.purge-test {} lookup nil)
        (-> (common/seedgen-fact-forms path)
-           (get 'xt.lang.common-spec/example.A)
+           (get 'xt.lang.spec-base/example.A)
            common/seedgen-coverage-langs
            set)
        (slurp path)]
@@ -511,7 +511,7 @@
                       "(l/script- :js {:runtime :basic})\n\n"
                       "(l/script- :lua {:runtime :basic})\n\n"
                       "(l/script- :python {:runtime :basic})\n\n"
-                      "^{:refer xt.lang.common-spec/example.A :added \"4.1\"}\n"
+                      "^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n"
                       "(fact \"runtime specific branches\"\n\n"
                       "  (!.js\n"
                       "    (+ 1 2 3))\n"
@@ -557,7 +557,7 @@
                       "(l/script- :js {:runtime :basic})\n\n"
                       "(l/script- :lua {:runtime :basic})\n\n"
                       "(l/script- :python {:runtime :basic})\n\n"
-                      "^{:refer xt.lang.common-spec/example.A :added \"4.1\"}\n"
+                      "^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n"
                       "(fact \"metadata branches\"\n\n"
                       "  ^{:seedgen/base {:lua {:expect 6}}}\n"
                       "  (!.js\n"

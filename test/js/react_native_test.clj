@@ -12,7 +12,7 @@
     :require [[js.core :as j]
               [js.react :as r]
               [js.react-native :as n :include [:fn]]
-              [xt.lang.common-spec :as xt]
+              [xt.lang.spec-base :as xt]
               [xt.lang.common-lib :as k]
               [xt.lang.common-data :as xtd]]
     })

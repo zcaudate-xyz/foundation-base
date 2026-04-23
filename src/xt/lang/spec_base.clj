@@ -1,4 +1,4 @@
-(ns xt.lang.common-spec
+(ns xt.lang.spec-base
   (:require [std.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk)
@@ -1303,35 +1303,6 @@
   {:added "4.1"}
   ([value] (list (quote x:unpack) value)))
 
-(defspec.xt x:socket-connect [:fn [:xt/str :xt/int :xt/any :xt/any] :xt/any])
-
-(defmacro.xt ^{:standalone true :is-template true}
-  x:socket-connect
-  {:added "4.1"}
-  ([host port opts cb] (list (quote x:socket-connect) host port opts cb)))
-
-(defspec.xt x:socket-send [:fn [:xt/any :xt/str] :xt/any])
-
-(defmacro.xt ^{:standalone true :is-template false}
-  x:socket-send
-  {:added "4.1"}
-  ([conn message] (list (quote x:socket-send) conn message)))
-
-(defspec.xt x:socket-close [:fn [:xt/any] :xt/any])
-
-(defmacro.xt ^{:standalone true :is-template false}
-  x:socket-close
-  {:added "4.1"}
-  ([conn] (list (quote x:socket-close) conn)))
-
-(defspec.xt x:notify-http [:fn [:xt/str :xt/num :xt/any :xt/str :xt/str :xt/any] :xt/any])
-
-(defmacro.xt ^{:standalone true :is-template true} 
-  x:notify-http
-  "posts encoded values through fetch"
-  {:added "4.1"}
-  ([host port value id key opts] (list (quote x:notify-http) host port value id key opts)))
-
 (defspec.xt x:b64-encode [:fn [:xt/str] :xt/str])
 
 (defmacro.xt ^{:standalone true :is-template false} 
@@ -1348,78 +1319,6 @@
   {:added "4.1"}
   ([value] (list (quote x:b64-decode) value)))
 
-(defspec.xt x:cache [:fn [:xt/str] :xt/any])
-
-(defmacro.xt ^{:standalone true :is-template false} 
-  x:cache
-  "selects the global cache store"
-  {:added "4.1"}
-  ([name] (list (quote x:cache) name)))
-
-(defspec.xt x:cache-list [:fn [:xt/any] [:xt/array :xt/str]])
-
-(defmacro.xt ^{:standalone true :is-template false} 
-  x:cache-list
-  "lists cache keys"
-  {:added "4.1"}
-  ([cache] (list (quote x:cache-list) cache)))
-
-(defspec.xt x:cache-flush [:fn [:xt/any] :xt/self])
-
-(defmacro.xt ^{:standalone true :is-template false} 
-  x:cache-flush
-  "flushes cache stores"
-  {:added "4.1"}
-  ([cache] (list (quote x:cache-flush) cache)))
-
-(defspec.xt x:cache-get [:fn [:xt/any :xt/str] :xt/str])
-
-(defmacro.xt ^{:standalone true :is-template false} 
-  x:cache-get
-  "reads cache values"
-  {:added "4.1"}
-  ([cache key] (list (quote x:cache-get) cache key)))
-
-(defspec.xt x:cache-set [:fn [:xt/any :xt/str :xt/str] :xt/str])
-
-(defmacro.xt ^{:standalone true :is-template false} 
-  x:cache-set
-  "writes cache values"
-  {:added "4.1"}
-  ([cache key value] (list (quote x:cache-set) cache key value)))
-
-(defspec.xt x:cache-del [:fn [:xt/any :xt/str] :xt/str])
-
-(defmacro.xt ^{:standalone true :is-template false} 
-  x:cache-del
-  "deletes cache values"
-  {:added "4.1"}
-  ([cache key] (list (quote x:cache-del) cache key)))
-
-(defspec.xt x:cache-incr [:fn [:xt/any :xt/str :xt/int] :xt/int])
-
-(defmacro.xt ^{:standalone true :is-template true} 
-  x:cache-incr
-  "increments cached numeric values"
-  {:added "4.1"}
-  ([cache key val] (list (quote x:cache-incr) cache key val)))
-
-(defspec.xt x:slurp-file [:fn [:xt/str :xt/any :xt/any] :xt/any])
-
-(defmacro.xt ^{:standalone true :is-template true}
-  x:slurp-file
-  "reads file content through a callback-based runtime contract"
-  {:added "4.1"}
-  ([path opts cb] (list (quote x:slurp-file) path opts cb)))
-
-(defspec.xt x:spit-file [:fn [:xt/str :xt/any :xt/any :xt/any] :xt/any])
-
-(defmacro.xt ^{:standalone true :is-template true}
-  x:spit-file
-  "writes file content through a callback-based runtime contract"
-  {:added "4.1"}
-  ([path value opts cb] (list (quote x:spit-file) path value opts cb)))
-
 (defspec.xt x:json-encode [:fn [:xt/any] :xt/str])
 
 (defmacro.xt ^{:standalone true :is-template false} 
@@ -1435,54 +1334,6 @@
   "decodes json strings into lua data structures"
   {:added "4.1"}
   ([expr] (list (quote x:json-decode) expr)))
-
-(defspec.xt x:shell [:fn [:xt/str :xt/any :xt/any] :xt/any])
-
-(defmacro.xt ^{:standalone true :is-template true} 
-  x:shell
-  "executes shell commands asynchronously"
-  {:added "4.1"}
-  ([command opts cb] (list (quote x:shell) command opts cb)))
-
-(defspec.xt x:thread-spawn [:fn [:xt/fn] :xt/any])
-
-(defmacro.xt ^{:standalone true :is-template true} 
-  x:thread-spawn
-  "spawns js promise-backed threads"
-  {:added "4.1"}
-  ([f] (list (quote x:thread-spawn) f)))
-
-(defspec.xt x:thread-join [:fn [:xt/any] :xt/any])
-
-(defmacro.xt ^{:standalone true :is-template false} 
-  x:thread-join
-  "throws for unsupported js thread joins"
-  {:added "4.1"}
-  ([thread] (list (quote x:thread-join) thread)))
-
-(defspec.xt x:with-delay [:fn [:xt/int :xt/any] :xt/any])
-
-(defmacro.xt ^{:standalone true :is-template true} 
-  x:with-delay
-  "delays asynchronous js computations"
-  {:added "4.1"}
-  ([ms value] (list (quote x:with-delay) ms value)))
-
-(defspec.xt x:start-interval [:fn [:xt/int :xt/fn] :xt/any])
-
-(defmacro.xt ^{:standalone true :is-template false} 
-  x:start-interval
-  "keeps the start-interval wrapper intact"
-  {:added "4.1"}
-  ([ms f] (list (quote x:start-interval) ms f)))
-
-(defspec.xt x:stop-interval [:fn [:xt/str] :xt/any])
-
-(defmacro.xt ^{:standalone true :is-template false} 
-  x:stop-interval
-  "keeps the stop-interval wrapper intact"
-  {:added "4.1"}
-  ([id] (list (quote x:stop-interval) id)))
 
 (defspec.xt x:uri-encode [:fn [:xt/str] :xt/str])
 

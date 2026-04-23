@@ -7,7 +7,7 @@
 (l/script :js
   {:require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
-             [xt.lang.common-spec :as xt]
+             [xt.lang.spec-base :as xt]
              [js.core :as j]
              [js.react :as r]
              [js.react-native :as n]

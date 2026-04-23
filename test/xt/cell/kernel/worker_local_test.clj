@@ -5,7 +5,7 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
-             [xt.lang.common-spec :as xt]
+             [xt.lang.spec-base :as xt]
               [js.core :as j]
               [xt.cell.kernel.worker-state :as worker-state]
               [xt.cell.kernel.worker-local :as worker-local]]})

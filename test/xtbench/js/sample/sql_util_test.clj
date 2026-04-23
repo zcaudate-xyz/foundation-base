@@ -2,7 +2,7 @@
  xtbench.js.sample.sql-util-test
  (:require
   [std.lang :as l]
-  [xt.lang.common-spec :as xt]
+  [xt.lang.spec-base :as xt]
   [xt.db.sql-util :as ut])
  (:use code.test))
 

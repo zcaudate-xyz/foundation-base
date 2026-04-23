@@ -12,23 +12,23 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.common-repl :as k]]})
+   :require [[xt.lang.common-repl :as repl]]})
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.lang.common-repl :as k]]})
+   :require [[xt.lang.common-repl :as repl]]})
 
 (l/script- :python
   {:runtime :basic
-    :require [[xt.lang.common-repl :as k]]})
+    :require [[xt.lang.common-repl :as repl]]})
 
 (l/script- :dart
   {:runtime :twostep
-   :require [[xt.lang.common-repl :as k]]})
+   :require [[xt.lang.common-repl :as repl]]})
 
 (l/script- :r
   {:runtime :basic
-   :require [[xt.lang.common-repl :as k]]})
+   :require [[xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -90,24 +90,24 @@
 
   (decode-output
    (!.js
-    (k/return-eval "1")))
+    ([xt.lang.common-repl :as repl] "1")))
   => {"return" "number", "value" 1, "type" "data"}
 
   (decode-output
    (!.lua
-    (k/return-eval "return 1")))
+    ([xt.lang.common-repl :as repl] "return 1")))
   => {"value" 1, "type" "data"}
 
   ^{:lang-exceptions {:dart {:form :dart-unsupported-return-eval
                              :expect :dart-unsupported-return-eval}}}
   (decode-output
    (!.py
-     (k/return-eval "globals()[\"OUT\"] = 1")))
+     ([xt.lang.common-repl :as repl] "globals()[\"OUT\"] = 1")))
   => {"key" nil, "id" nil, "value" 1, "type" "data"}
 
   (decode-output
    (!.R
-    (k/return-eval "1")))
+    ([xt.lang.common-repl :as repl] "1")))
   => {"key" nil, "id" nil, "value" 1, "type" "data"})
 
 ^{:refer xt.lang.common-repl/return-callbacks :added "4.0"}

@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-spec :as xt]
+  {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]]})
 
 (defn.js proto-create
@@ -19,7 +19,7 @@
   (return out))
 
 (l/script :lua
-  {:require [[xt.lang.common-spec :as xt]
+  {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]]})
 
 (defn.lua proto-create
@@ -30,7 +30,7 @@
   (return spec-map))
 
 (l/script :python
-  {:require [[xt.lang.common-spec :as xt]
+  {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]]})
 
 (defn.py proto-create
@@ -82,7 +82,7 @@
   (return (xt/x:get-key obj "_rt_protocol")))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]
+  {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
              [xt.lang.common-data :as xtd]]})
 

@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd] [js.react :as r] [js.core :as j] [js.cell.kernel :as cl] [js.react.ext-view :as ext-view]]})
+  {:require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [js.react :as r] [js.core :as j] [js.cell.kernel :as cl] [js.react.ext-view :as ext-view]]})
 
 (def.js TYPES
   {:input    [cl/view-get-input  "current"]

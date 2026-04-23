@@ -9,7 +9,7 @@
   :config {:program :nodejs},
   :require
   [[xt.db.base-util :as ut]
-   [xt.lang.common-spec :as xt]
+   [xt.lang.spec-base :as xt]
    [xt.lang.common-lib :as k]]})
 
 ^{:refer xt.db.base-util/collect-routes,

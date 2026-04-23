@@ -6,7 +6,7 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.common-spec :as xt]
+   :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as k]
              [xt.lang.common-repl :as repl]
              [xt.sys.cache-common :as cache]]})
@@ -25,7 +25,7 @@
 (l/script- :lua
   {:runtime :basic
    :config  {:exec ["resty" "--http-conf" "client_body_buffer_size 1m;\nvariables_hash_max_size 2048;\nvariables_hash_bucket_size 128;\nlua_shared_dict GLOBAL 20k;\nlua_shared_dict WS_DEBUG 20k;\nlua_shared_dict ES_DEBUG 20k;" "-e"]}
-   :require [[xt.lang.common-spec :as xt]
+   :require [[xt.lang.spec-base :as xt]
              [xt.sys.cache-common :as cache]]})
 
 (fact:global

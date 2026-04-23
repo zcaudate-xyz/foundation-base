@@ -7,7 +7,7 @@
  :python
  {:runtime :basic,
   :require
-  [[xt.lang.common-data :as xtd] [xt.lang.common-spec :as xt]]})
+  [[xt.lang.common-data :as xtd] [xt.lang.spec-base :as xt]]})
 
 (fact:global {:setup [(l/rt:restart)], :teardown [(l/rt:stop)]})
 

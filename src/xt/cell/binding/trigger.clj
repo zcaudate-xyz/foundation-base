@@ -3,7 +3,7 @@
 
 (l/script :xtalk
   {:require [[xt.cell.service.db-stream :as db-stream]
-             [xt.lang.common-spec :as xt]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]]
    :export  [MODULE]})
 

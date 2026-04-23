@@ -14,7 +14,7 @@
             [rt.basic.impl.process-js :as js]
             [rt.chromedriver.connection :as conn]
             [rt.chromedriver.util :as util]
-            [xt.lang.common-repl :as k]))
+            [xt.lang.common-repl :as repl]))
 
 (def ^:dynamic *chrome*
   (or (System/getenv "CHROME")
@@ -22,7 +22,7 @@
 
 (def +bootstrap+
   (impl/emit-entry-deps
-   k/return-eval
+   repl/return-eval
    {:lang :js
     :layout :flat
     :emit {:lang/format :commonjs}}))

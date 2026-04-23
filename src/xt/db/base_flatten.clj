@@ -3,7 +3,7 @@
   (:refer-clojure :exclude [flatten]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]
+  {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.db.base-schema :as sch]]})
 

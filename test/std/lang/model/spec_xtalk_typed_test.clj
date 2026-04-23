@@ -32,14 +32,14 @@
 
 (fact "registry entries expose explicit declaration kinds"
   (typed/clear-registry!)
-  (typed/analyze-and-register! 'xt.lang.common-spec)
+  (typed/analyze-and-register! 'xt.lang.spec-base)
   (typed/analyze-and-register! 'xt.db.base-scope)
-  [(-> (typed/get-entry 'xt.lang.common-spec/x:add)
+  [(-> (typed/get-entry 'xt.lang.spec-base/x:add)
        types/entry-kinds
        set)
-   (types/declaration-kind (typed/get-macro 'xt.lang.common-spec/x:add))
+   (types/declaration-kind (typed/get-macro 'xt.lang.spec-base/x:add))
    (types/declaration-kind (typed/get-value 'xt.db.base-scope/Scopes))
-   (nil? (typed/get-type 'xt.lang.common-spec/x:add))
+   (nil? (typed/get-type 'xt.lang.spec-base/x:add))
    (= :value (-> (typed/get-entry 'xt.db.base-scope/Scopes)
                   types/entry-primary-kind))]
   => '[#{:macro :spec}
@@ -480,7 +480,7 @@
         true])
 
 (fact "analyzes macro and value declarations separately"
-  [(-> (parse/analyze-namespace 'xt.lang.common-spec)
+  [(-> (parse/analyze-namespace 'xt.lang.spec-base)
        :macros
        count
        pos?)
@@ -492,10 +492,10 @@
 
 (fact "registers macros and values in the typed registry"
   (typed/clear-registry!)
-  (typed/analyze-and-register! 'xt.lang.common-spec)
+  (typed/analyze-and-register! 'xt.lang.spec-base)
   (typed/analyze-and-register! 'xt.db.base-scope)
-  [(some? (typed/get-macro 'xt.lang.common-spec/x:add))
-   (true? (get-in (typed/get-macro 'xt.lang.common-spec/x:add) [:body-meta :macro]))
+  [(some? (typed/get-macro 'xt.lang.spec-base/x:add))
+   (true? (get-in (typed/get-macro 'xt.lang.spec-base/x:add) [:body-meta :macro]))
    (some? (typed/get-value 'xt.db.base-scope/Scopes))
    (true? (get-in (typed/get-value 'xt.db.base-scope/Scopes) [:body-meta :def]))
    (some? (typed/get-declaration 'xt.db.base-scope/Scopes :value))
@@ -692,7 +692,7 @@
 (fact "analyzes base namespace specs"
   (typed/clear-registry!)
   (doseq [ns-sym '[xt.lang.common-lib
-                   xt.lang.common-spec
+                   xt.lang.spec-base
                    xt.lang.common-runtime
                    xt.lang.common-iter
                    xt.lang.common-repl
@@ -706,7 +706,7 @@
    (analysis/get-function-output-type 'xt.lang.common-repl/return-encode)
    (analysis/get-function-output-type 'xt.lang.common-string/tag-string)
    (analysis/get-function-output-type 'xt.lang.common-interval/start-interval)
-   (-> (typed/get-macro 'xt.lang.common-spec/x:add)
+   (-> (typed/get-macro 'xt.lang.spec-base/x:add)
        :output
        types/type->data)]
   => '[{:kind :named :name xt.lang.common-lib/StringPair}

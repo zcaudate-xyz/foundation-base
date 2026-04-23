@@ -7,7 +7,7 @@
   {:runtime :redis.client
    :config {:port 17003
             :bench true}
-   :require [[xt.lang.common-spec :as xt]
+   :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
               [kmi.redis :as r]
               [kmi.queue.common :as mq]

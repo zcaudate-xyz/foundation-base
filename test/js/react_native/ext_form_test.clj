@@ -13,7 +13,7 @@
               [js.react :as r :include [:fn]]
               [js.react-native :as n :include [:fn]]
               [js.react.ext-form :as ext-form]
-              [xt.lang.common-spec :as xt]
+              [xt.lang.spec-base :as xt]
               [xt.lang.event-form :as event-form]]
     })
 

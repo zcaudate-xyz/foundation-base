@@ -8,7 +8,7 @@
 
 (l/script-
  :js
- {:runtime :basic, :require [[xt.lang.common-repl :as k]]})
+ {:runtime :basic, :require [[xt.lang.common-repl :as repl]]})
 
 (defn decode-output [x] (if (string? x) (json/read x) x))
 
@@ -35,7 +35,7 @@
 (fact
  "evaluates a returns a string"
  ^{:hidden true}
- (decode-output (!.js (k/return-eval "1")))
+ (decode-output (!.js ([xt.lang.common-repl :as repl] "1")))
  =>
  {"return" "number", "value" 1, "type" "data"})
 

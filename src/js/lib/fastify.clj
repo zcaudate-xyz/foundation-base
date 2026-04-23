@@ -5,7 +5,7 @@
 (l/script :js
    {:require [[js.core :as j]
               [xt.lang.common-data :as d]
-              [xt.lang.common-spec :as x]
+              [xt.lang.spec-base :as x]
               [xt.lang.common-runtime :as rt :with [defvar.js]]]
     :import  [["fastify" :as Fastify]]})
 

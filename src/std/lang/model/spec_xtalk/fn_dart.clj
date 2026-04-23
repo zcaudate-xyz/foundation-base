@@ -99,8 +99,19 @@
   (list '. obj (list 'remove key)))
 
 (defn dart-tf-x-shell
-  [[_ s opts]]
-  (list 'throw '"shell not implemented in Dart"))
+  [[_ s opts cb]]
+  (template/$
+   (do (:- "import 'dart:io';")
+       (return (. (Process.run "sh" ["-lc" ~s])
+                  (then (fn [result]
+                          (if (not= 0 (. result exitCode))
+                            (return (~cb {:code (. result exitCode)
+                                          :stderr (. result stderr)
+                                          :output (. result stdout)}
+                                         nil))
+                            (return (~cb nil (. result stdout))))))
+                  (catchError (fn [err]
+                                (return (~cb err nil)))))))))
 
 (def +dart-core+
   {:x-print    {:macro #'dart-tf-x-print    :emit :macro :value true}

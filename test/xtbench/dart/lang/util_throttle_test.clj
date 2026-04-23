@@ -10,7 +10,7 @@
  :dart
  {:runtime :twostep,
    :require
-   [[xt.lang.common-spec :as xt]
+   [[xt.lang.spec-base :as xt]
     [xt.lang.common-repl :as repl]
     [xt.lang.util-throttle :as throttle]]})
 

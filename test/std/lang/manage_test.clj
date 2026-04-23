@@ -151,12 +151,12 @@
   (let [{:keys [templates languages status summary lang-summary scaffold-summary]}
         (manage/runtime-template-matrix {:nss '[xt.lang.common-iter-test
                                                xt.lang.common-string-test
-                                               xt.lang.common-spec-test]
+                                               xt.lang.spec-base-test]
                                          :langs [:js :lua :python :dart]})]
     [(= (set templates)
         #{'xt.lang.common-iter-test
           'xt.lang.common-string-test
-          'xt.lang.common-spec-test})
+          'xt.lang.spec-base-test})
      (= languages [:dart :js :lua :python])
      (= #{:ready}
         (set (for [source-ns templates
@@ -168,7 +168,7 @@
         (get summary 'xt.lang.common-iter-test))
      (= {:full 0 :partial 2 :stub 1 :unwritten 0 :unsupported 0 :scaffold-error 0 :diagnose-error 0}
         (get lang-summary :python))
-     (= 4 (get-in scaffold-summary ['xt.lang.common-spec-test :ready]))])
+     (= 4 (get-in scaffold-summary ['xt.lang.spec-base-test :ready]))])
   => [true true true true true true true])
 
 ^{:refer std.lang.manage/missing-by-language :added "4.1"}

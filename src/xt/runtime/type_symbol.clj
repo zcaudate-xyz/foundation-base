@@ -3,7 +3,7 @@
   (:refer-clojure :exclude [symbol]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]
+  {:require [[xt.lang.spec-base :as xt]
              [xt.runtime.interface-common :as interface-common]
              [xt.runtime.interface-spec :as spec]
              [xt.runtime.common-hash :as common-hash]]})

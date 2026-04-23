@@ -75,30 +75,30 @@
          js.core/map
          js.react/ref
          js.react/curr:set
-         xt.lang.common-spec/x:json-encode
-         xt.lang.common-spec/x:now-ms
-         xt.lang.common-spec/for:array
+         xt.lang.spec-base/x:json-encode
+         xt.lang.spec-base/x:now-ms
+         xt.lang.spec-base/for:array
          js.react/lazy
          js.react/watch
          js.core/delayed
-         xt.lang.common-spec/x:nil?
+         xt.lang.spec-base/x:nil?
          js.react/Component
          js.react/init
          js.react/createDOMRoot
-         xt.lang.common-spec/x:get-key
+         xt.lang.spec-base/x:get-key
          js.core/min
          js.react/local
          js.core/identity
          js.core/repeating
          js.core/round
-         xt.lang.common-spec/x:len
+         xt.lang.spec-base/x:len
          js.react/run
          js.react/curr
          js.core/randomId
          js.core/future
          js.core/indexOf
-         xt.lang.common-spec/x:not-nil?
-         xt.lang.common-spec/x:is-function?
+         xt.lang.spec-base/x:not-nil?
+         xt.lang.spec-base/x:is-function?
          xt.lang.common-trace/LOG!
          js.core/clearTimeout
          js.core/clearInterval

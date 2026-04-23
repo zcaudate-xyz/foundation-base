@@ -7,7 +7,7 @@
             [std.lang.base.impl :as impl]
             [std.lang.base.runtime :as rt]
             [std.lang.model-annex.spec-r :as spec]
-            [xt.lang.common-repl :as k]))
+            [xt.lang.common-repl :as repl]))
 
 (def +program-init+
   (common/put-program-options
@@ -25,7 +25,7 @@
   default-oneshot-wrap
   (let [bootstrap (->> ["library(jsonlite)"
                         (impl/emit-entry-deps
-                         k/return-eval
+                         repl/return-eval
                          {:lang :r
                           :layout :flat})]
                        (clojure.string/join "\n\n"))]
@@ -85,7 +85,7 @@
   default-basic-client
   (let [bootstrap (->> ["library(jsonlite)"
                         (impl/emit-entry-deps
-                         k/return-eval
+                         repl/return-eval
                          {:lang :r
                           :layout :flat})
                         (impl/emit-as

@@ -6,7 +6,7 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
-             [xt.lang.common-spec :as xt]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [js.core :as j]
              [js.cell.kernel.worker-mock :as worker-mock]]})

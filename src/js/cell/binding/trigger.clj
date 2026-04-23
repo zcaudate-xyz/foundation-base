@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:export [MODULE] :require [[js.cell.service.db-stream :as db-stream] [xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd]]})
+  {:export [MODULE] :require [[js.cell.service.db-stream :as db-stream] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]]})
 
 (defn.xt normalize-deps
   "normalizes dependency paths"

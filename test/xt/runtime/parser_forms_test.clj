@@ -5,7 +5,7 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.common-spec :as xt]
+   :require [[xt.lang.spec-base :as xt]
              [xt.runtime.interface-common :as ic]
              [xt.runtime.parser-core :as core]
              [xt.runtime.parser-forms :as forms]

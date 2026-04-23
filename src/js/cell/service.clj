@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:export [MODULE] :require [[xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd]]})
+  {:export [MODULE] :require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]]})
 
 (defn.xt service?
   "checks if the value is a service registry"

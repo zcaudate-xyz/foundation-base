@@ -27,7 +27,7 @@
 (fact "returns globals and analyse entries in the train-002 seedgen shape"
   (let [output (project/in-context
                 (seed-readforms/seedgen-readforms 'xt.sample.train-002-test {}))
-        entry  (get-in output '[:entries xt.lang.common-spec for:array])]
+        entry  (get-in output '[:entries xt.lang.spec-base for:array])]
     {:globals {:lang (get-in output [:globals :lang])
                :global-script {:root (some-> (get-in output [:globals :global-script :root])
                                              :form
@@ -43,8 +43,8 @@
              :checks (summarize-checks (:checks entry))}})
   => {:globals {:lang {:root :js
                        :derived [:lua]}
-                :global-script {:root "^{:seedgen/root         {:all true}}\n(l/script- :js\n  {:runtime :basic\n   :require [[xt.lang.common-spec :as xt]]})"
-                                :derived ["(l/script- :lua\n  {:runtime :basic\n   :require [[xt.lang.common-spec :as xt]]})"]}
+                :global-script {:root "^{:seedgen/root         {:all true}}\n(l/script- :js\n  {:runtime :basic\n   :require [[xt.lang.spec-base :as xt]]})"
+                                :derived ["(l/script- :lua\n  {:runtime :basic\n   :require [[xt.lang.spec-base :as xt]]})"]}
                 :global-fact-setup {:root ["(!.js (+ 3 4 5))"]
                                     :derived ["(!.lua (+ 1 2 3))"]
                                     :scaffold ["(l/rt:restart)"]}

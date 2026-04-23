@@ -11,7 +11,7 @@
  {:runtime :twostep,
   :require
   [[xt.db.base-schema :as sch]
-   [xt.lang.common-spec :as xt]
+   [xt.lang.spec-base :as xt]
    [xt.lang.common-data :as xtd]
    [xt.lang.common-string :as str]
    [xt.db.sql-util :as ut]

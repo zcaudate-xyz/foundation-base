@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:export [MODULE] :require [[js.cell.service.db-query :as db-query] [xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd]]})
+  {:export [MODULE] :require [[js.cell.service.db-query :as db-query] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]]})
 
 (defn.xt supabase-capable?
   "checks that the db descriptor can execute compiled supabase queries"

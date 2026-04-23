@@ -6,7 +6,7 @@
 ;;
 
 (l/script :js
-  {:require [[xt.lang.common-spec :as xt]
+  {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
              [xt.lang.common-runtime :as rt]]})
 
@@ -23,7 +23,7 @@
 ;;
 
 (l/script :lua
-  {:require [[xt.lang.common-spec :as xt]
+  {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
              [xt.lang.common-runtime :as rt]]})
 
@@ -43,7 +43,7 @@
 ;;
 
 (l/script :python
-  {:require [[xt.lang.common-spec :as xt]
+  {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
              [xt.lang.common-runtime :as rt]]})
 
@@ -64,7 +64,7 @@
 ;;
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]
+  {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
              [xt.lang.common-runtime :as rt]]})
 

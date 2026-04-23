@@ -7,7 +7,7 @@
              [xt.db.base-scope :as scope]
              [xt.db.cache-pull :as cache-pull]
              [xt.db.cache-util :as cache-util]
-             [xt.lang.common-spec :as xt]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.util-throttle :as th]]})
 

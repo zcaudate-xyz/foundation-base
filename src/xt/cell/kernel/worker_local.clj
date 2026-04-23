@@ -6,7 +6,7 @@
   {:require [[xt.cell.kernel.base-util :as util]
              [xt.cell.kernel.worker-state :as state]
              [xt.lang.common-runtime :as rt :with [defvar.xt]]
-             [xt.lang.common-spec :as xt]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]]})
 
 

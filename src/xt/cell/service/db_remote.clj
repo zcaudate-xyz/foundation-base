@@ -4,7 +4,7 @@
 (l/script :xtalk
   {:require [[xt.cell.service.db-query :as db-query]
              [xt.cell.service.db-sync :as db-sync]
-             [xt.lang.common-spec :as xt]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]]
    :export  [MODULE]})
 

@@ -83,8 +83,8 @@
 (fact "get-macro returns macro defs when present"
   (do
     (clear-registry!)
-    (analyze-and-register! 'xt.lang.common-spec)
-    (true? (get-in (get-macro 'xt.lang.common-spec/x:add) [:body-meta :macro])))
+    (analyze-and-register! 'xt.lang.spec-base)
+    (true? (get-in (get-macro 'xt.lang.spec-base/x:add) [:body-meta :macro])))
   => true)
 
 ^{:refer std.lang.typed.xtalk/get-value :added "4.1"}
@@ -114,7 +114,7 @@
 (fact "lists macros through facade"
   (do
     (clear-registry!)
-    (analyze-and-register! 'xt.lang.common-spec)
+    (analyze-and-register! 'xt.lang.spec-base)
     (pos? (count (list-macros))))
   => true)
 

@@ -7,7 +7,7 @@
              [std.lib.template :as template]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]
+  {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as common-data]
              [xt.lang.common-string :as xts]]})
 

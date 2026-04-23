@@ -6,17 +6,17 @@
 ^{:seedgen/root         {:all true}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.common-spec :as xt]
+   :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]]})
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.lang.common-spec :as xt]
+   :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]]})
 
 (l/script- :python
   {:runtime :basic
-   :require [[xt.lang.common-spec :as xt]
+   :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]]})
 
 (fact:global
@@ -28,7 +28,7 @@
 ;; (seedgen/langadd {:lang :python}) should generate
 
 ;; BEFORE
-^{:refer xt.lang.common-spec/example-a :added "4.1"}
+^{:refer xt.lang.spec-base/example-a :added "4.1"}
 (fact "muliple checks are also allowed"
 
   (!.js
@@ -46,7 +46,7 @@
 
 
 ;; AFTER
-^{:refer xt.lang.common-spec/example-a :added "4.1"}
+^{:refer xt.lang.spec-base/example-a :added "4.1"}
 (fact "muliple checks are also allowed"
 
   (!.js
@@ -75,7 +75,7 @@
 ;; (seedgen/langadd {:lang [:lua :python]}) should generate
 
 ;; BEFORE
-^{:refer xt.lang.common-spec/example-b :added "4.1"}
+^{:refer xt.lang.spec-base/example-b :added "4.1"}
 (fact "forms can be suppressed"
 
   (!.js
@@ -93,7 +93,7 @@
 
 
 ;; AFTER
-^{:refer xt.lang.common-spec/example-b :added "4.1"}
+^{:refer xt.lang.spec-base/example-b :added "4.1"}
 (fact "forms can be suppressed"
 
   (!.js
@@ -132,7 +132,7 @@
 ;; (seedgen/langadd {:lang [:python :lua]}) should generate
 
 ;; BEFORE
-^{:refer xt.lang.common-spec/example-c :added "4.1"}
+^{:refer xt.lang.spec-base/example-c :added "4.1"}
 (fact "order is important"
 
   (notify/wait-on :js
@@ -141,7 +141,7 @@
 
 
 ;; AFTER
-^{:refer xt.lang.common-spec/example-c :added "4.1"}
+^{:refer xt.lang.spec-base/example-c :added "4.1"}
 (fact "order is important"
 
   (notify/wait-on :js
@@ -163,7 +163,7 @@
 ;; (seedgen/langadd {:lang [:lua :python]}) should generate
 
 ;; BEFORE
-^{:refer xt.lang.common-spec/example-d :added "4.1"}
+^{:refer xt.lang.spec-base/example-d :added "4.1"}
 (fact "any form is allowed with :seedgen/base meta"
 
   ^{:seedgen/base      true}
@@ -175,7 +175,7 @@
 
 
 ;; AFTER
-^{:refer xt.lang.common-spec/example-d :added "4.1"}
+^{:refer xt.lang.spec-base/example-d :added "4.1"}
 (fact "any form is allowed with :seedgen/base meta"
 
   ^{:seedgen/base       true}
@@ -205,7 +205,7 @@
 ;; (seedgen/langadd {:lang [:lua :python]}) should generate
 
 ;; BEFORE
-^{:refer xt.lang.common-spec/example-e :added "4.1"}
+^{:refer xt.lang.spec-base/example-e :added "4.1"}
 (fact "seed meta can be mixed and matched"
 
   ^{:seedgen/base      true}
@@ -218,7 +218,7 @@
 
 
 ;; AFTER
-^{:refer xt.lang.common-spec/example-e :added "4.1"}
+^{:refer xt.lang.spec-base/example-e :added "4.1"}
 (fact "seed meta can be mixed and matched"
 
   ^{:seedgen/base      true}
@@ -244,7 +244,7 @@
 ;; (seedgen/langadd {:lang [:lua :python]}) should generate
 
 ;; BEFORE
-^{:refer xt.lang.common-spec/example-f :added "4.1"}
+^{:refer xt.lang.spec-base/example-f :added "4.1"}
 (fact "expect can be customised"
 
   ^{:seedgen/base    {:lua  {:expect 11}}}
@@ -254,7 +254,7 @@
 
 
 ;; AFTER
-^{:refer xt.lang.common-spec/example-f :added "4.1"}
+^{:refer xt.lang.spec-base/example-f :added "4.1"}
 (fact "expect can be customised"
 
 
@@ -278,7 +278,7 @@
 ;; (seedgen/langadd {:lang [:lua :python]}) should generate
 
 ;; BEFORE
-^{:refer xt.lang.common-spec/example-fa :added "4.1"}
+^{:refer xt.lang.spec-base/example-fa :added "4.1"}
 (fact "expect can be customised"
 
   ^{:seedgen/base    {:lua  {:input (xt/x:offest 9)}}}
@@ -288,7 +288,7 @@
 
 
 ;; AFTER
-^{:refer xt.lang.common-spec/example-fa :added "4.1"}
+^{:refer xt.lang.spec-base/example-fa :added "4.1"}
 (fact "expect can be customised"
 
 
@@ -314,7 +314,7 @@
 ;; (seedgen/langadd {:lang [:lua :python]}) should generate
 
 ;; BEFORE
-^{:refer xt.lang.common-spec/example-g :added "4.1"
+^{:refer xt.lang.spec-base/example-g :added "4.1"
   :setup [^{:seedgen/base      {:lua   {:input
                                         (!.lua
                                           (do (a)
@@ -334,7 +334,7 @@
   => [1 1])
 
 ;; AFTER
-^{:refer xt.lang.common-spec/example-g :added "4.1"}
+^{:refer xt.lang.spec-base/example-g :added "4.1"}
 (fact "any form is allowed with :seedgen/base meta"
 
   ^{:seedgen/base       true}

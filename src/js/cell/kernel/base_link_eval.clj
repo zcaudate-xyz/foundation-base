@@ -7,7 +7,7 @@
             [xt.lang.common-notify :as notify]))
 
 (l/script :js
-  {:require [[js.cell.kernel.base-link :as link] [xt.lang.common-repl :as repl] [xt.lang.common-spec :as xt]]})
+  {:require [[js.cell.kernel.base-link :as link] [xt.lang.common-repl :as repl] [xt.lang.spec-base :as xt]]})
 
 
 (defspec.xt post-eval

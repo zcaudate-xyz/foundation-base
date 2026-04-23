@@ -19,14 +19,10 @@
   (list '. f (list 'apply nil args)))
 
 (defn js-tf-x-shell
-  ([[_ s opts]]
+  ([[_ s opts cb]]
    (template/$ (do (var p (require "child_process"))
-                   (p.exec ~s (fn [err res]
-                                (if err
-                                  (if (. ~opts ["error"])
-                                    (return (. ~opts (error err))))
-                                  (if (. ~opts ["success"])
-                                    (return (. ~opts (success res)))))))
+                   (p.exec ~s ~opts (fn [err stdout stderr]
+                                      (return (~cb err stdout))))
                    (return ["async"])))))
 
 (defn js-tf-x-random

@@ -14,7 +14,7 @@
             [std.lib.resource :as resource]
             [std.protocol.component :as protocol.component]
             [std.protocol.context :as protocol.context]
-            [xt.lang.common-repl :as k])
+            [xt.lang.common-repl :as repl])
   (:import (jep SharedInterpreter Interpreter) (jep.python PyObject PyCallable)))
 
 (defonce ^:dynamic *interpreters* (atom #{}))
@@ -32,7 +32,7 @@
 
 (def +startup+
   (impl/emit-entry-deps
-   k/return-eval
+   repl/return-eval
    {:lang :python
     :layout :flat}))
 

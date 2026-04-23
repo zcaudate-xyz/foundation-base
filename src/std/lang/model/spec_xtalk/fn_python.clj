@@ -48,12 +48,11 @@
    (apply list 'print args)))
 
 (defn python-tf-x-shell
-  ([[_ s cm]]
-   (template/$ (do (var res (. (__import__ "os") (system ~s)))
-            (var f (. ~cm (get "success")))
-            (if f
-              (return (f res))
-              (return res))))))
+  ([[_ s opts cb]]
+   (template/$ (do (var subprocess (__import__ "subprocess"))
+            (var output (. (subprocess.check_output ["sh" "-lc" ~s])
+                           (decode "utf-8")))
+            (return output)))))
 
 (defn python-tf-x-type-native
   [[_ obj]]

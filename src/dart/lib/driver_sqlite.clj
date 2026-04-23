@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :dart
-  {:require [[xt.lang.common-spec :as xt]]
+  {:require [[xt.lang.spec-base :as xt]]
    :import [["package:sqlite3/sqlite3.dart" :as sqlite]]})
 
 (defn.dt query-returns-rows?

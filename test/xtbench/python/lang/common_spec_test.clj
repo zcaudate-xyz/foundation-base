@@ -11,13 +11,13 @@
  :python
  {:runtime :basic,
   :require
-  [[xt.lang.common-spec :as xt]
+  [[xt.lang.spec-base :as xt]
    [xt.lang.common-data :as xtd]
    [xt.lang.common-repl :as repl]]})
 
 (fact:global {:setup [(l/rt:restart)], :teardown [(l/rt:stop)]})
 
-^{:refer xt.lang.common-spec/for:array, :added "4.1"}
+^{:refer xt.lang.spec-base/for:array, :added "4.1"}
 (fact
  "iterates arrays in order"
  (!.py
@@ -30,7 +30,7 @@
  =>
  [1 2 3])
 
-^{:refer xt.lang.common-spec/for:object, :added "4.1"}
+^{:refer xt.lang.spec-base/for:object, :added "4.1"}
 (fact
  "iterates object key value pairs"
  (!.py
@@ -40,7 +40,7 @@
  =>
  (contains [["a" 1] ["b" 2]] :in-any-order))
 
-^{:refer xt.lang.common-spec/for:index, :added "4.1"}
+^{:refer xt.lang.spec-base/for:index, :added "4.1"}
 (fact
  "iterates a numeric range"
  (!.py
@@ -50,7 +50,7 @@
  =>
  [0 2])
 
-^{:refer xt.lang.common-spec/for:iter, :added "4.1"}
+^{:refer xt.lang.spec-base/for:iter, :added "4.1"}
 (fact
  "expands to the canonical iterator form"
  (!.py
@@ -60,14 +60,14 @@
  =>
  [1 2 3])
 
-^{:refer xt.lang.common-spec/return-run, :added "4.1"}
+^{:refer xt.lang.spec-base/return-run, :added "4.1"}
 (fact
  "supports final returns through for:return"
  (!.py (xt/return-run [resolve reject] (resolve "OK")))
  =>
  (throws))
 
-^{:refer xt.lang.common-spec/for:return, :added "4.1"}
+^{:refer xt.lang.spec-base/for:return, :added "4.1"}
 (fact
  "dispatches success and error branches"
  (!.py
@@ -87,7 +87,7 @@
  =>
  "ERR")
 
-^{:refer xt.lang.common-spec/for:try, :added "4.1"}
+^{:refer xt.lang.spec-base/for:try, :added "4.1"}
 (fact
  "expands to the canonical try form"
  (!.py
@@ -102,7 +102,7 @@
  =>
  "ERR")
 
-^{:refer xt.lang.common-spec/for:async, :added "4.1"}
+^{:refer xt.lang.spec-base/for:async, :added "4.1"}
 (fact
  "expands to the canonical async form"
  (notify/wait-on
@@ -124,14 +124,14 @@
  =>
  "ERR")
 
-^{:refer xt.lang.common-spec/x:get-idx, :added "4.1"}
+^{:refer xt.lang.spec-base/x:get-idx, :added "4.1"}
 (fact
  "reads the first indexed value"
  (!.py (xt/x:get-idx ["a" "b" "c"] (xt/x:offset 0)))
  =>
  "a")
 
-^{:refer xt.lang.common-spec/x:set-idx, :added "4.1"}
+^{:refer xt.lang.spec-base/x:set-idx, :added "4.1"}
 (fact
  "writes an indexed value"
  (!.py
@@ -141,35 +141,35 @@
  =>
  ["a" "B" "c"])
 
-^{:refer xt.lang.common-spec/x:first, :added "4.1"}
+^{:refer xt.lang.spec-base/x:first, :added "4.1"}
 (fact
  "gets the first array element"
  (!.py (xt/x:first ["a" "b" "c"]))
  =>
  "a")
 
-^{:refer xt.lang.common-spec/x:second, :added "4.1"}
+^{:refer xt.lang.spec-base/x:second, :added "4.1"}
 (fact
  "gets the second array element"
  (!.py (xt/x:second ["a" "b" "c"]))
  =>
  "b")
 
-^{:refer xt.lang.common-spec/x:last, :added "4.1"}
+^{:refer xt.lang.spec-base/x:last, :added "4.1"}
 (fact
  "gets the last array element"
  (!.py (xt/x:last ["a" "b" "c" "d"]))
  =>
  "d")
 
-^{:refer xt.lang.common-spec/x:second-last, :added "4.1"}
+^{:refer xt.lang.spec-base/x:second-last, :added "4.1"}
 (fact
  "gets the element before the last"
  (!.py (xt/x:second-last ["a" "b" "c" "d"]))
  =>
  "c")
 
-^{:refer xt.lang.common-spec/x:arr-remove, :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-remove, :added "4.1"}
 (fact
  "removes an element from an array"
  (!.py
@@ -180,35 +180,35 @@
  =>
  ["a" "c" "d"])
 
-^{:refer xt.lang.common-spec/x:arr-push, :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-push, :added "4.1"}
 (fact
  "pushes an element onto an array"
  (!.py (var out ["a" "b" "c"]) (xt/x:arr-push out "D") out)
  =>
  ["a" "b" "c" "D"])
 
-^{:refer xt.lang.common-spec/x:arr-pop, :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-pop, :added "4.1"}
 (fact
  "pops the last element from an array"
  (!.py (var out ["a" "b" "c" "d"]) [(xt/x:arr-pop out) out])
  =>
  ["d" ["a" "b" "c"]])
 
-^{:refer xt.lang.common-spec/x:arr-push-first, :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-push-first, :added "4.1"}
 (fact
  "pushes an element to the front of an array"
  (!.py (var out ["a" "b" "c"]) (xt/x:arr-push-first out "D") out)
  =>
  ["D" "a" "b" "c"])
 
-^{:refer xt.lang.common-spec/x:arr-pop-first, :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-pop-first, :added "4.1"}
 (fact
  "pops the first element from an array"
  (!.py (var out ["a" "b" "c" "d"]) [(xt/x:arr-pop-first out) out])
  =>
  ["a" ["b" "c" "d"]])
 
-^{:refer xt.lang.common-spec/x:arr-insert, :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-insert, :added "4.1"}
 (fact
  "inserts an element into an array"
  (!.py
@@ -218,7 +218,7 @@
  =>
  ["a" "D" "b" "c"])
 
-^{:refer xt.lang.common-spec/x:arr-slice, :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-slice, :added "4.1"}
 (fact
  "slices a range from an array"
  (!.py
@@ -229,38 +229,38 @@
  =>
  ["b" "c"])
 
-^{:refer xt.lang.common-spec/x:arr-reverse, :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-reverse, :added "4.1"}
 (fact
  "reverses an array"
  (!.py (xt/x:arr-reverse ["a" "b" "c"]))
  =>
  ["c" "b" "a"])
 
-^{:refer xt.lang.common-spec/x:del, :added "4.1"}
+^{:refer xt.lang.spec-base/x:del, :added "4.1"}
 (fact
  "expands and emits a lua delete form"
  (!.py (var out {:a 1, :b 2}) (xt/x:del (. out ["a"])) out)
  =>
  {"b" 2})
 
-^{:refer xt.lang.common-spec/x:cat, :added "4.1"}
+^{:refer xt.lang.spec-base/x:cat, :added "4.1"}
 (fact
  "concatenates strings"
  (!.py (xt/x:cat "hello" "-" "world"))
  =>
  "hello-world")
 
-^{:refer xt.lang.common-spec/x:len, :added "4.1"}
+^{:refer xt.lang.spec-base/x:len, :added "4.1"}
 (fact "gets the collection length" (!.py (xt/x:len ["a" "b" "c"])) => 3)
 
-^{:refer xt.lang.common-spec/x:err, :added "4.1"}
+^{:refer xt.lang.spec-base/x:err, :added "4.1"}
 (fact
  "expands and emits a lua error form"
  (!.py (var err-fn (fn [] (xt/x:err "ERR"))) (err-fn))
  =>
  (throws))
 
-^{:refer xt.lang.common-spec/x:type-native, :added "4.1"}
+^{:refer xt.lang.spec-base/x:type-native, :added "4.1"}
 (fact
  "expands and emits the lua type helper"
  (!.py
@@ -269,7 +269,7 @@
  =>
  ["object" "array"])
 
-^{:refer xt.lang.common-spec/x:offset, :added "4.1"}
+^{:refer xt.lang.spec-base/x:offset, :added "4.1"}
 (fact
  "uses the grammar base offset"
  ^#:seedgen{:check {:lua {:expect 11}}}
@@ -277,7 +277,7 @@
  =>
  10)
 
-^{:refer xt.lang.common-spec/x:offset-rev, :added "4.1"}
+^{:refer xt.lang.spec-base/x:offset-rev, :added "4.1"}
 (fact
  "uses the reverse grammar offset"
  ^#:seedgen{:check {:lua {:expect 10}}}
@@ -285,7 +285,7 @@
  =>
  9)
 
-^{:refer xt.lang.common-spec/x:offset-len, :added "4.1"}
+^{:refer xt.lang.spec-base/x:offset-len, :added "4.1"}
 (fact
  "uses the length grammar offset"
  ^#:seedgen{:check {:lua {:expect 9}}}
@@ -293,7 +293,7 @@
  =>
  9)
 
-^{:refer xt.lang.common-spec/x:offset-rlen, :added "4.1"}
+^{:refer xt.lang.spec-base/x:offset-rlen, :added "4.1"}
 (fact
  "uses the reverse length grammar offset"
  ^#:seedgen{:check {:lua {:expect 9}}}
@@ -301,7 +301,7 @@
  =>
  10)
 
-^{:refer xt.lang.common-spec/x:lu-create, :added "4.1"}
+^{:refer xt.lang.spec-base/x:lu-create, :added "4.1"}
 (fact
  "creates a lookup table wrapper"
  (!.py
@@ -314,7 +314,7 @@
  =>
  ["A1" "A2"])
 
-^{:refer xt.lang.common-spec/x:lu-eq, :added "4.1"}
+^{:refer xt.lang.spec-base/x:lu-eq, :added "4.1"}
 (fact
  "compares lookup keys using lua identity"
  (!.py
@@ -326,7 +326,7 @@
  =>
  [true false true])
 
-^{:refer xt.lang.common-spec/x:lu-get, :added "4.1"}
+^{:refer xt.lang.spec-base/x:lu-get, :added "4.1"}
 (fact
  "reads values from a lookup table"
  (!.py
@@ -337,7 +337,7 @@
  =>
  "value")
 
-^{:refer xt.lang.common-spec/x:lu-set, :added "4.1"}
+^{:refer xt.lang.spec-base/x:lu-set, :added "4.1"}
 (fact
  "writes values into a lookup table"
  (!.py
@@ -348,7 +348,7 @@
  =>
  "value")
 
-^{:refer xt.lang.common-spec/x:lu-del, :added "4.1"}
+^{:refer xt.lang.spec-base/x:lu-del, :added "4.1"}
 (fact
  "removes values from a lookup table"
  (!.py
@@ -360,217 +360,217 @@
  =>
  nil)
 
-^{:refer xt.lang.common-spec/x:m-abs, :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-abs, :added "4.1"}
 (fact "computes absolute values" (!.py (xt/x:m-abs -3)) => 3)
 
-^{:refer xt.lang.common-spec/x:m-acos, :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-acos, :added "4.1"}
 (fact "computes inverse cosine" (!.py (xt/x:m-acos 1)) => (approx 0))
 
-^{:refer xt.lang.common-spec/x:m-asin, :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-asin, :added "4.1"}
 (fact "computes inverse sine" (!.py (xt/x:m-asin 0)) => (approx 0))
 
-^{:refer xt.lang.common-spec/x:m-atan, :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-atan, :added "4.1"}
 (fact "computes inverse tangent" (!.py (xt/x:m-atan 0)) => (approx 0))
 
-^{:refer xt.lang.common-spec/x:m-ceil, :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-ceil, :added "4.1"}
 (fact "rounds numbers upward" (!.py (xt/x:m-ceil 1.2)) => 2)
 
-^{:refer xt.lang.common-spec/x:m-cos, :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-cos, :added "4.1"}
 (fact "computes cosine" (!.py (xt/x:m-cos 0)) => (approx 1))
 
-^{:refer xt.lang.common-spec/x:m-cosh, :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-cosh, :added "4.1"}
 (fact "computes hyperbolic cosine" (!.py (xt/x:m-cosh 0)) => (approx 1))
 
-^{:refer xt.lang.common-spec/x:m-exp, :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-exp, :added "4.1"}
 (fact
  "computes the exponential function"
  (!.py (xt/x:m-exp 0))
  =>
  (approx 1))
 
-^{:refer xt.lang.common-spec/x:m-floor, :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-floor, :added "4.1"}
 (fact "rounds numbers downward" (!.py (xt/x:m-floor 1.8)) => 1)
 
-^{:refer xt.lang.common-spec/x:m-loge, :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-loge, :added "4.1"}
 (fact
  "computes the natural logarithm"
  (!.py (xt/x:m-loge 1))
  =>
  (approx 0))
 
-^{:refer xt.lang.common-spec/x:m-log10, :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-log10, :added "4.1"}
 (fact
  "computes the base-10 logarithm"
  (!.py (xt/x:m-log10 100))
  =>
  (approx 2))
 
-^{:refer xt.lang.common-spec/x:m-max, :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-max, :added "4.1"}
 (fact "computes the maximum value" (!.py (xt/x:m-max 3 5)) => 5)
 
-^{:refer xt.lang.common-spec/x:m-mod, :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-mod, :added "4.1"}
 (fact "computes modulo values" (!.py (xt/x:m-mod 10 3)) => 1)
 
-^{:refer xt.lang.common-spec/x:m-min, :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-min, :added "4.1"}
 (fact "computes the minimum value" (!.py (xt/x:m-min 3 5)) => 3)
 
-^{:refer xt.lang.common-spec/x:m-pow, :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-pow, :added "4.1"}
 (fact "raises numbers to a power" (!.py (xt/x:m-pow 2 4)) => 16)
 
-^{:refer xt.lang.common-spec/x:m-quot, :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-quot, :added "4.1"}
 (fact "computes integer quotients" (!.py (xt/x:m-quot 7 2)) => 3)
 
-^{:refer xt.lang.common-spec/x:m-sin, :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-sin, :added "4.1"}
 (fact "computes sine" (!.py (xt/x:m-sin 0)) => (approx 0))
 
-^{:refer xt.lang.common-spec/x:m-sinh, :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-sinh, :added "4.1"}
 (fact "computes hyperbolic sine" (!.py (xt/x:m-sinh 0)) => (approx 0))
 
-^{:refer xt.lang.common-spec/x:m-sqrt, :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-sqrt, :added "4.1"}
 (fact "computes square roots" (!.py (xt/x:m-sqrt 9)) => (approx 3))
 
-^{:refer xt.lang.common-spec/x:m-tan, :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-tan, :added "4.1"}
 (fact "computes tangent" (!.py (xt/x:m-tan 0)) => (approx 0))
 
-^{:refer xt.lang.common-spec/x:m-tanh, :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-tanh, :added "4.1"}
 (fact
  "computes hyperbolic tangent"
  (!.py (xt/x:m-tanh 0))
  =>
  (approx 0))
 
-^{:refer xt.lang.common-spec/x:not-nil?, :added "4.1"}
+^{:refer xt.lang.spec-base/x:not-nil?, :added "4.1"}
 (fact "checks for non-nil values" (!.py (xt/x:not-nil? 0)) => true)
 
-^{:refer xt.lang.common-spec/x:nil?, :added "4.1"}
+^{:refer xt.lang.spec-base/x:nil?, :added "4.1"}
 (fact "checks for nil values" (!.py (xt/x:nil? nil)) => true)
 
-^{:refer xt.lang.common-spec/x:add, :added "4.1"}
+^{:refer xt.lang.spec-base/x:add, :added "4.1"}
 (fact "adds numbers" (!.py (xt/x:add 1 2 3)) => 6)
 
-^{:refer xt.lang.common-spec/x:sub, :added "4.1"}
+^{:refer xt.lang.spec-base/x:sub, :added "4.1"}
 (fact "subtracts numbers" (!.py (xt/x:sub 10 3 2)) => 5)
 
-^{:refer xt.lang.common-spec/x:mul, :added "4.1"}
+^{:refer xt.lang.spec-base/x:mul, :added "4.1"}
 (fact "multiplies numbers" (!.py (xt/x:mul 2 3 4)) => 24)
 
-^{:refer xt.lang.common-spec/x:div, :added "4.1"}
+^{:refer xt.lang.spec-base/x:div, :added "4.1"}
 (fact "divides numbers" (!.py (xt/x:div 20 5)) => (approx 4))
 
-^{:refer xt.lang.common-spec/x:neg, :added "4.1"}
+^{:refer xt.lang.spec-base/x:neg, :added "4.1"}
 (fact "negates a number" (!.py (xt/x:neg 2)) => -2)
 
-^{:refer xt.lang.common-spec/x:inc, :added "4.1"}
+^{:refer xt.lang.spec-base/x:inc, :added "4.1"}
 (fact "increments a number" (!.py (xt/x:inc 2)) => 3)
 
-^{:refer xt.lang.common-spec/x:dec, :added "4.1"}
+^{:refer xt.lang.spec-base/x:dec, :added "4.1"}
 (fact "decrements a number" (!.py (xt/x:dec 2)) => 1)
 
-^{:refer xt.lang.common-spec/x:zero?, :added "4.1"}
+^{:refer xt.lang.spec-base/x:zero?, :added "4.1"}
 (fact "checks whether a number is zero" (!.py (xt/x:zero? 0)) => true)
 
-^{:refer xt.lang.common-spec/x:pos?, :added "4.1"}
+^{:refer xt.lang.spec-base/x:pos?, :added "4.1"}
 (fact
  "checks whether a number is positive"
  (!.py (xt/x:pos? 2))
  =>
  true)
 
-^{:refer xt.lang.common-spec/x:neg?, :added "4.1"}
+^{:refer xt.lang.spec-base/x:neg?, :added "4.1"}
 (fact
  "checks whether a number is negative"
  (!.py (xt/x:neg? -2))
  =>
  true)
 
-^{:refer xt.lang.common-spec/x:even?, :added "4.1"}
+^{:refer xt.lang.spec-base/x:even?, :added "4.1"}
 (fact "checks whether a number is even" (!.py (xt/x:even? 4)) => true)
 
-^{:refer xt.lang.common-spec/x:odd?, :added "4.1"}
+^{:refer xt.lang.spec-base/x:odd?, :added "4.1"}
 (fact "checks whether a number is odd" (!.py (xt/x:odd? 5)) => true)
 
-^{:refer xt.lang.common-spec/x:eq, :added "4.1"}
+^{:refer xt.lang.spec-base/x:eq, :added "4.1"}
 (fact "checks equality" (!.py (xt/x:eq 2 2)) => true)
 
-^{:refer xt.lang.common-spec/x:neq, :added "4.1"}
+^{:refer xt.lang.spec-base/x:neq, :added "4.1"}
 (fact "checks inequality" (!.py (xt/x:neq 2 3)) => true)
 
-^{:refer xt.lang.common-spec/x:lt, :added "4.1"}
+^{:refer xt.lang.spec-base/x:lt, :added "4.1"}
 (fact "checks less than" (!.py (xt/x:lt 2 3)) => true)
 
-^{:refer xt.lang.common-spec/x:lte, :added "4.1"}
+^{:refer xt.lang.spec-base/x:lte, :added "4.1"}
 (fact "checks less than or equal" (!.py (xt/x:lte 3 3)) => true)
 
-^{:refer xt.lang.common-spec/x:gt, :added "4.1"}
+^{:refer xt.lang.spec-base/x:gt, :added "4.1"}
 (fact "checks greater than" (!.py (xt/x:gt 4 3)) => true)
 
-^{:refer xt.lang.common-spec/x:gte, :added "4.1"}
+^{:refer xt.lang.spec-base/x:gte, :added "4.1"}
 (fact "checks greater than or equal" (!.py (xt/x:gte 4 4)) => true)
 
-^{:refer xt.lang.common-spec/x:has-key?, :added "4.1"}
+^{:refer xt.lang.spec-base/x:has-key?, :added "4.1"}
 (fact
  "checks whether an object has a key"
  (!.py (var obj {:a 1}) (xt/x:has-key? obj "a"))
  =>
  true)
 
-^{:refer xt.lang.common-spec/x:del-key, :added "4.1"}
+^{:refer xt.lang.spec-base/x:del-key, :added "4.1"}
 (fact
  "deletes keys from objects"
  (!.py (var out {:a 1, :b 2}) (xt/x:del-key out "a") out)
  =>
  {"b" 2})
 
-^{:refer xt.lang.common-spec/x:get-key, :added "4.1"}
+^{:refer xt.lang.spec-base/x:get-key, :added "4.1"}
 (fact
  "gets a value by key with a fallback"
  (!.py (xt/x:get-key {} "missing" "fallback"))
  =>
  "fallback")
 
-^{:refer xt.lang.common-spec/x:get-path, :added "4.1"}
+^{:refer xt.lang.spec-base/x:get-path, :added "4.1"}
 (fact
  "gets a nested value by path"
  (!.py (xt/x:get-path {:nested {:b 2}} ["nested" "b"]))
  =>
  2)
 
-^{:refer xt.lang.common-spec/x:set-key, :added "4.1"}
+^{:refer xt.lang.spec-base/x:set-key, :added "4.1"}
 (fact
  "sets a key on an object"
  (!.py (var out {:a 1}) (xt/x:set-key out "b" 2) out)
  =>
  {"a" 1, "b" 2})
 
-^{:refer xt.lang.common-spec/x:copy-key, :added "4.1"}
+^{:refer xt.lang.spec-base/x:copy-key, :added "4.1"}
 (fact
  "copies a key from another object"
  (!.py (var out {:a 1}) (xt/x:copy-key out {:a 9} ["c" "a"]) out)
  =>
  {"a" 1, "c" 9})
 
-^{:refer xt.lang.common-spec/x:obj-keys, :added "4.1"}
+^{:refer xt.lang.spec-base/x:obj-keys, :added "4.1"}
 (fact
  "lists object keys"
  (set (!.py (xt/x:obj-keys {:a 1, :b 2})))
  =>
  #{"a" "b"})
 
-^{:refer xt.lang.common-spec/x:obj-vals, :added "4.1"}
+^{:refer xt.lang.spec-base/x:obj-vals, :added "4.1"}
 (fact
  "lists object values"
  (set (!.py (xt/x:obj-vals {:a 1, :b 2})))
  =>
  #{1 2})
 
-^{:refer xt.lang.common-spec/x:obj-pairs, :added "4.1"}
+^{:refer xt.lang.spec-base/x:obj-pairs, :added "4.1"}
 (fact
  "lists object pairs"
  (set (!.py (xt/x:obj-pairs {:a 1, :b 2})))
  =>
  #{["b" 2] ["a" 1]})
 
-^{:refer xt.lang.common-spec/x:obj-clone, :added "4.1"}
+^{:refer xt.lang.spec-base/x:obj-clone, :added "4.1"}
 (fact
  "clones an object"
  (!.py
@@ -581,122 +581,122 @@
  =>
  {"a" 1})
 
-^{:refer xt.lang.common-spec/x:obj-assign, :added "4.1"}
+^{:refer xt.lang.spec-base/x:obj-assign, :added "4.1"}
 (fact
  "assigns object keys"
  (!.py (xt/x:obj-assign {:a 1} {:b 2}))
  =>
  {"a" 1, "b" 2})
 
-^{:refer xt.lang.common-spec/x:to-string, :added "4.1"}
+^{:refer xt.lang.spec-base/x:to-string, :added "4.1"}
 (fact "converts a value to a string" (!.py (xt/x:to-string 12)) => "12")
 
-^{:refer xt.lang.common-spec/x:to-number, :added "4.1"}
+^{:refer xt.lang.spec-base/x:to-number, :added "4.1"}
 (fact
  "converts a string to a number"
  (!.py (xt/x:to-number "12.5"))
  =>
  12.5)
 
-^{:refer xt.lang.common-spec/x:is-string?, :added "4.1"}
+^{:refer xt.lang.spec-base/x:is-string?, :added "4.1"}
 (fact "recognises strings" (!.py (xt/x:is-string? "abc")) => true)
 
-^{:refer xt.lang.common-spec/x:is-number?, :added "4.1"}
+^{:refer xt.lang.spec-base/x:is-number?, :added "4.1"}
 (fact "recognises numbers" (!.py (xt/x:is-number? 1.5)) => true)
 
-^{:refer xt.lang.common-spec/x:is-integer?, :added "4.1"}
+^{:refer xt.lang.spec-base/x:is-integer?, :added "4.1"}
 (fact "recognises integers" (!.py (xt/x:is-integer? 2)) => true)
 
-^{:refer xt.lang.common-spec/x:is-boolean?, :added "4.1"}
+^{:refer xt.lang.spec-base/x:is-boolean?, :added "4.1"}
 (fact "recognises booleans" (!.py (xt/x:is-boolean? true)) => true)
 
-^{:refer xt.lang.common-spec/x:is-object?, :added "4.1"}
+^{:refer xt.lang.spec-base/x:is-object?, :added "4.1"}
 (fact "recognises objects" (!.py (xt/x:is-object? {:a 1})) => true)
 
-^{:refer xt.lang.common-spec/x:is-array?, :added "4.1"}
+^{:refer xt.lang.spec-base/x:is-array?, :added "4.1"}
 (fact "recognises arrays" (!.py (xt/x:is-array? [1 2])) => true)
 
-^{:refer xt.lang.common-spec/x:print, :added "4.1"}
+^{:refer xt.lang.spec-base/x:print, :added "4.1"}
 (fact
  "expands and emits a lua print form"
  (!.py (xt/x:nil? (xt/x:print "hello")))
  =>
  true)
 
-^{:refer xt.lang.common-spec/x:str-len, :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-len, :added "4.1"}
 (fact "gets the string length" (!.py (xt/x:str-len "hello")) => 5)
 
-^{:refer xt.lang.common-spec/x:str-comp, :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-comp, :added "4.1"}
 (fact
  "compares strings by sort order"
  (!.py (xt/x:str-comp "abc" "abd"))
  =>
  true)
 
-^{:refer xt.lang.common-spec/x:str-lt, :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-lt, :added "4.1"}
 (fact
  "checks whether one string sorts before another"
  (!.py (xt/x:str-lt "abc" "abd"))
  =>
  true)
 
-^{:refer xt.lang.common-spec/x:str-gt, :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-gt, :added "4.1"}
 (fact
  "checks whether one string sorts after another"
  (!.py (xt/x:str-gt "abd" "abc"))
  =>
  true)
 
-^{:refer xt.lang.common-spec/x:str-pad-left, :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-pad-left, :added "4.1"}
 (fact
  "pads a string on the left"
  (!.py (xt/x:str-pad-left "7" 3 "0"))
  =>
  "007")
 
-^{:refer xt.lang.common-spec/x:str-pad-right, :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-pad-right, :added "4.1"}
 (fact
  "pads a string on the right"
  (!.py (xt/x:str-pad-right "7" 3 "0"))
  =>
  "700")
 
-^{:refer xt.lang.common-spec/x:str-starts-with, :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-starts-with, :added "4.1"}
 (fact
  "checks the string prefix"
  (!.py (xt/x:str-starts-with "hello" "he"))
  =>
  true)
 
-^{:refer xt.lang.common-spec/x:str-ends-with, :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-ends-with, :added "4.1"}
 (fact
  "checks the string suffix"
  (!.py (xt/x:str-ends-with "hello" "lo"))
  =>
  true)
 
-^{:refer xt.lang.common-spec/x:str-char, :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-char, :added "4.1"}
 (fact
  "gets the character code at an index"
  (!.py (xt/x:str-char "abc" (xt/x:offset 1)))
  =>
  98)
 
-^{:refer xt.lang.common-spec/x:str-split, :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-split, :added "4.1"}
 (fact
  "splits a string"
  (!.py (xt/x:str-split "a/b/c" "/"))
  =>
  ["a" "b" "c"])
 
-^{:refer xt.lang.common-spec/x:str-join, :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-join, :added "4.1"}
 (fact
  "joins string parts"
  (!.py (xt/x:str-join "-" ["a" "b" "c"]))
  =>
  "a-b-c")
 
-^{:refer xt.lang.common-spec/x:str-index-of, :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-index-of, :added "4.1"}
 (fact
  "finds the index of a substring"
  ^#:seedgen{:check {:lua {:expect 6}}}
@@ -704,7 +704,7 @@
  =>
  5)
 
-^{:refer xt.lang.common-spec/x:str-substring, :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-substring, :added "4.1"}
 (fact
  "gets a substring"
  (!.py
@@ -712,56 +712,56 @@
  =>
  "lo/wo")
 
-^{:refer xt.lang.common-spec/x:str-to-upper, :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-to-upper, :added "4.1"}
 (fact
  "converts a string to upper case"
  (!.py (xt/x:str-to-upper "hello"))
  =>
  "HELLO")
 
-^{:refer xt.lang.common-spec/x:str-to-lower, :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-to-lower, :added "4.1"}
 (fact
  "converts a string to lower case"
  (!.py (xt/x:str-to-lower "HELLO"))
  =>
  "hello")
 
-^{:refer xt.lang.common-spec/x:str-to-fixed, :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-to-fixed, :added "4.1"}
 (fact
  "formats a number with fixed decimals"
  (!.py (xt/x:str-to-fixed 1.2 2))
  =>
  "1.20")
 
-^{:refer xt.lang.common-spec/x:str-replace, :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-replace, :added "4.1"}
 (fact
  "replaces matching substrings"
  (!.py (xt/x:str-replace "hello-world" "-" "/"))
  =>
  "hello/world")
 
-^{:refer xt.lang.common-spec/x:str-trim, :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-trim, :added "4.1"}
 (fact
  "trims whitespace from both sides"
  (!.py (xt/x:str-trim "  hello  "))
  =>
  "hello")
 
-^{:refer xt.lang.common-spec/x:str-trim-left, :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-trim-left, :added "4.1"}
 (fact
  "trims whitespace from the left side"
  (!.py (xt/x:str-trim-left "  hello"))
  =>
  "hello")
 
-^{:refer xt.lang.common-spec/x:str-trim-right, :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-trim-right, :added "4.1"}
 (fact
  "trims whitespace from the right side"
  (!.py (xt/x:str-trim-right "hello  "))
  =>
  "hello")
 
-^{:refer xt.lang.common-spec/x:arr-sort, :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-sort, :added "4.1"}
 (fact
  "sorts arrays using key and compare functions"
  (!.py
@@ -774,7 +774,7 @@
  =>
  [{"id" 1} {"id" 2} {"id" 3}])
 
-^{:refer xt.lang.common-spec/x:arr-clone, :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-clone, :added "4.1"}
 (fact
  "clones an array"
  (!.py
@@ -785,7 +785,7 @@
  =>
  [1 2])
 
-^{:refer xt.lang.common-spec/x:arr-each, :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-each, :added "4.1"}
 (fact
  "iterates each element in an array"
  (!.py
@@ -795,56 +795,56 @@
  =>
  [2 4 6])
 
-^{:refer xt.lang.common-spec/x:arr-every, :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-every, :added "4.1"}
 (fact
  "checks whether every array element matches a predicate"
  (!.py (xt/x:arr-every [2 4 6] (fn [e] (return (xt/x:even? e)))))
  =>
  true)
 
-^{:refer xt.lang.common-spec/x:arr-some, :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-some, :added "4.1"}
 (fact
  "checks whether any array element matches a predicate"
  (!.py (xt/x:arr-some [1 3 4] (fn [e] (return (xt/x:even? e)))))
  =>
  true)
 
-^{:refer xt.lang.common-spec/x:arr-map, :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-map, :added "4.1"}
 (fact
  "maps an array"
  (!.py (xt/x:arr-map [1 2 3] (fn [e] (return (* e 2)))))
  =>
  [2 4 6])
 
-^{:refer xt.lang.common-spec/x:arr-assign, :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-assign, :added "4.1"}
 (fact
  "appends one array to another"
  (!.py (var out [1 2]) (xt/x:arr-assign out [3 4]) out)
  =>
  [1 2 3 4])
 
-^{:refer xt.lang.common-spec/x:arr-concat, :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-concat, :added "4.1"}
 (fact
  "concatenates arrays into a new array"
  (!.py (var src [1 2]) [(xt/x:arr-concat src [3 4]) src])
  =>
  [[1 2 3 4] [1 2]])
 
-^{:refer xt.lang.common-spec/x:arr-filter, :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-filter, :added "4.1"}
 (fact
  "filters an array"
  (!.py (xt/x:arr-filter [2 3 4 5] (fn [e] (return (xt/x:even? e)))))
  =>
  [2 4])
 
-^{:refer xt.lang.common-spec/x:arr-foldl, :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-foldl, :added "4.1"}
 (fact
  "folds arrays from the left"
  (!.py (xt/x:arr-foldl [1 2 3 4 5] (fn [out e] (return (+ out e))) 0))
  =>
  15)
 
-^{:refer xt.lang.common-spec/x:arr-foldr, :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-foldr, :added "4.1"}
 (fact
  "folds arrays from the right"
  (!.py
@@ -855,14 +855,14 @@
  =>
  "edcba")
 
-^{:refer xt.lang.common-spec/x:is-function?, :added "4.1"}
+^{:refer xt.lang.spec-base/x:is-function?, :added "4.1"}
 (fact
  "recognises function values"
  (!.py (xt/x:is-function? (fn [x] (return x))))
  =>
  true)
 
-^{:refer xt.lang.common-spec/x:callback, :added "4.1"}
+^{:refer xt.lang.spec-base/x:callback, :added "4.1"}
 (fact
  "dispatches node-style callbacks through for:return"
  [(!.py
@@ -882,7 +882,7 @@
  =>
  ["OK" "ERR"])
 
-^{:refer xt.lang.common-spec/x:return-run, :added "4.1"}
+^{:refer xt.lang.spec-base/x:return-run, :added "4.1"}
 (fact
  "can be used directly inside for:return"
  (!.py
@@ -894,21 +894,21 @@
  =>
  "ERR")
 
-^{:refer xt.lang.common-spec/x:eval, :added "4.1"}
+^{:refer xt.lang.spec-base/x:eval, :added "4.1"}
 (fact
  "evaluates javascript expressions"
  (!.py (xt/x:eval "1 + 1"))
  =>
  2)
 
-^{:refer xt.lang.common-spec/x:apply, :added "4.1"}
+^{:refer xt.lang.spec-base/x:apply, :added "4.1"}
 (fact
  "applies array arguments to functions"
  (!.py (xt/x:apply (fn [a b c] (return (+ a b c))) [1 2 3]))
  =>
  6)
 
-^{:refer xt.lang.common-spec/x:iter-from-obj, :added "4.1"}
+^{:refer xt.lang.spec-base/x:iter-from-obj, :added "4.1"}
 (fact
  "creates iterators over object pairs"
  (!.py
@@ -920,7 +920,7 @@
  =>
  (contains [["a" 1] ["b" 2]] :in-any-order))
 
-^{:refer xt.lang.common-spec/x:iter-from-arr, :added "4.1"}
+^{:refer xt.lang.spec-base/x:iter-from-arr, :added "4.1"}
 (fact
  "creates iterators over arrays"
  (!.py
@@ -930,7 +930,7 @@
  =>
  [1 2 3])
 
-^{:refer xt.lang.common-spec/x:iter-from, :added "4.1"}
+^{:refer xt.lang.spec-base/x:iter-from, :added "4.1"}
 (fact
  "creates generic iterators from iterable values"
  (!.py
@@ -940,7 +940,7 @@
  =>
  [2 4 6])
 
-^{:refer xt.lang.common-spec/x:iter-eq, :added "4.1"}
+^{:refer xt.lang.spec-base/x:iter-eq, :added "4.1"}
 (fact
  "checks iterator equality in js"
  (!.py
@@ -956,28 +956,28 @@
  =>
  [true false])
 
-^{:refer xt.lang.common-spec/x:iter-null, :added "4.1"}
+^{:refer xt.lang.spec-base/x:iter-null, :added "4.1"}
 (fact
  "creates empty iterators"
  (!.py (xt/x:iter-native? (xt/x:iter-null)))
  =>
  true)
 
-^{:refer xt.lang.common-spec/x:iter-next, :added "4.1"}
+^{:refer xt.lang.spec-base/x:iter-next, :added "4.1"}
 (fact
  "advances iterators"
  (!.py (xt/x:iter-next (xt/x:iter-from-arr [1 2 3])))
  =>
  nil)
 
-^{:refer xt.lang.common-spec/x:iter-has?, :added "4.1"}
+^{:refer xt.lang.spec-base/x:iter-has?, :added "4.1"}
 (fact
  "checks whether values are iterable"
  (!.py [(xt/x:iter-has? [1 2 3]) (xt/x:iter-has? {:a 1})])
  =>
  [true false])
 
-^{:refer xt.lang.common-spec/x:iter-native?, :added "4.1"}
+^{:refer xt.lang.spec-base/x:iter-native?, :added "4.1"}
 (fact
  "checks whether values are iterator instances"
  (!.py
@@ -986,7 +986,7 @@
  =>
  [true false])
 
-^{:refer xt.lang.common-spec/x:return-encode, :added "4.1"}
+^{:refer xt.lang.spec-base/x:return-encode, :added "4.1"}
 (fact
  "encodes return payloads as json"
  (!.py
@@ -995,7 +995,7 @@
  =>
  {"id" "id", "key" "key", "type" "data", "value" {"a" 1}})
 
-^{:refer xt.lang.common-spec/x:return-wrap, :added "4.1"}
+^{:refer xt.lang.spec-base/x:return-wrap, :added "4.1"}
 (fact
  "wraps return values through encoder functions"
  (!.py
@@ -1012,7 +1012,7 @@
   "return" "number",
   "value" 3})
 
-^{:refer xt.lang.common-spec/x:return-eval, :added "4.1"}
+^{:refer xt.lang.spec-base/x:return-eval, :added "4.1"}
 (fact
  "evaluates code through wrapped return handlers"
  (!.py
@@ -1035,26 +1035,26 @@
   "value" 2,
   "type" "data"})
 
-^{:refer xt.lang.common-spec/x:bit-and, :added "4.1"}
+^{:refer xt.lang.spec-base/x:bit-and, :added "4.1"}
 (fact "computes bitwise and" (!.py (xt/x:bit-and 6 3)) => 2)
 
-^{:refer xt.lang.common-spec/x:bit-or, :added "4.1"}
+^{:refer xt.lang.spec-base/x:bit-or, :added "4.1"}
 (fact "computes bitwise or" (!.py (xt/x:bit-or 6 3)) => 7)
 
-^{:refer xt.lang.common-spec/x:bit-lshift, :added "4.1"}
+^{:refer xt.lang.spec-base/x:bit-lshift, :added "4.1"}
 (fact "computes bitwise left shifts" (!.py (xt/x:bit-lshift 3 2)) => 12)
 
-^{:refer xt.lang.common-spec/x:bit-rshift, :added "4.1"}
+^{:refer xt.lang.spec-base/x:bit-rshift, :added "4.1"}
 (fact
  "computes bitwise right shifts"
  (!.py (xt/x:bit-rshift 12 2))
  =>
  3)
 
-^{:refer xt.lang.common-spec/x:bit-xor, :added "4.1"}
+^{:refer xt.lang.spec-base/x:bit-xor, :added "4.1"}
 (fact "computes bitwise xor" (!.py (xt/x:bit-xor 6 3)) => 5)
 
-^{:refer xt.lang.common-spec/x:global-set, :added "4.1"}
+^{:refer xt.lang.spec-base/x:global-set, :added "4.1"}
 (fact
  "writes values to the shared global map"
  (!.py
@@ -1067,7 +1067,7 @@
  =>
  [true 1 false])
 
-^{:refer xt.lang.common-spec/x:global-del, :added "4.1"}
+^{:refer xt.lang.spec-base/x:global-del, :added "4.1"}
 (fact
  "removes values from the shared global map"
  (!.py
@@ -1077,7 +1077,7 @@
  =>
  nil)
 
-^{:refer xt.lang.common-spec/x:global-has?, :added "4.1"}
+^{:refer xt.lang.spec-base/x:global-has?, :added "4.1"}
 (fact
  "checks whether the shared global map contains a value"
  (!.py
@@ -1089,7 +1089,7 @@
  =>
  [true false])
 
-^{:refer xt.lang.common-spec/x:proto-get, :added "4.1"}
+^{:refer xt.lang.spec-base/x:proto-get, :added "4.1"}
 (fact
  "retrieves object prototypes"
  (!.py
@@ -1100,7 +1100,7 @@
  =>
  "proto")
 
-^{:refer xt.lang.common-spec/x:proto-set, :added "4.1"}
+^{:refer xt.lang.spec-base/x:proto-set, :added "4.1"}
 (fact
  "assigns object prototypes"
  (!.py
@@ -1111,7 +1111,7 @@
  =>
  "proto")
 
-^{:refer xt.lang.common-spec/x:proto-create, :added "4.1"}
+^{:refer xt.lang.spec-base/x:proto-create, :added "4.1"}
 (fact
  "creates prototypes with this-bound methods"
  (!.py
@@ -1127,28 +1127,28 @@
  =>
  "alpha!")
 
-^{:refer xt.lang.common-spec/x:random, :added "4.1"}
+^{:refer xt.lang.spec-base/x:random, :added "4.1"}
 (fact
  "returns javascript random values"
  (!.py (var out (xt/x:random)) (and (>= out 0) (< out 1)))
  =>
  true)
 
-^{:refer xt.lang.common-spec/x:now-ms, :added "4.1"}
+^{:refer xt.lang.spec-base/x:now-ms, :added "4.1"}
 (fact
  "expands and emits a millisecond time expression"
  (!.py (> (xt/x:now-ms) 0))
  =>
  true)
 
-^{:refer xt.lang.common-spec/x:unpack, :added "4.1"}
+^{:refer xt.lang.spec-base/x:unpack, :added "4.1"}
 (fact
  "spreads arrays into positional arguments"
  (!.py ((fn [a b c] (return (+ a b c))) (xt/x:unpack [1 2 3])))
  =>
  6)
 
-^{:refer xt.lang.common-spec/x:debug-client-basic, :added "4.1"}
+^{:refer xt.lang.spec-base/x:debug-client-basic, :added "4.1"}
 (fact
  "streams newline-delimited socket input through eval handlers"
  (notify/wait-on
@@ -1173,7 +1173,7 @@
  =>
  "PING")
 
-^{:refer xt.lang.common-spec/x:debug-client-ws, :added "4.1"}
+^{:refer xt.lang.spec-base/x:debug-client-ws, :added "4.1"}
 (fact
  "routes websocket messages through eval handlers"
  (notify/wait-on
@@ -1190,7 +1190,7 @@
  =>
  [true "PING"])
 
-^{:refer xt.lang.common-spec/x:socket-connect, :added "4.1"}
+^{:refer xt.lang.spec-base/x:socket-connect, :added "4.1"}
 (fact
  "connects sockets and forwards the connection to callbacks"
  (notify/wait-on
@@ -1214,7 +1214,7 @@
  =>
  [true true])
 
-^{:refer xt.lang.common-spec/x:socket-send, :added "4.1"}
+^{:refer xt.lang.spec-base/x:socket-send, :added "4.1"}
 (fact
  "sends socket messages through write"
  (!.py
@@ -1225,7 +1225,7 @@
  =>
  "PING")
 
-^{:refer xt.lang.common-spec/x:socket-close, :added "4.1"}
+^{:refer xt.lang.spec-base/x:socket-close, :added "4.1"}
 (fact
  "closes sockets through end"
  (!.py
@@ -1236,7 +1236,7 @@
  =>
  "closed")
 
-^{:refer xt.lang.common-spec/x:ws-connect, :added "4.1"}
+^{:refer xt.lang.spec-base/x:ws-connect, :added "4.1"}
 (fact
  "creates websocket connections from host, port, and options"
  (!.py
@@ -1248,7 +1248,7 @@
  =>
  [true "wss://localhost:8080/socket"])
 
-^{:refer xt.lang.common-spec/x:ws-send, :added "4.1"}
+^{:refer xt.lang.spec-base/x:ws-send, :added "4.1"}
 (fact
  "sends websocket frames"
  (!.py
@@ -1259,7 +1259,7 @@
  =>
  "PING")
 
-^{:refer xt.lang.common-spec/x:ws-close, :added "4.1"}
+^{:refer xt.lang.spec-base/x:ws-close, :added "4.1"}
 (fact
  "closes websocket connections"
  (!.py
@@ -1270,7 +1270,7 @@
  =>
  "closed")
 
-^{:refer xt.lang.common-spec/x:notify-http, :added "4.1"}
+^{:refer xt.lang.spec-base/x:notify-http, :added "4.1"}
 (fact
  "posts encoded values through fetch"
  (!.py
@@ -1295,21 +1295,21 @@
   {"id" "id", "key" "key", "type" "data", "value" {"a" 1}}
   "POST"])
 
-^{:refer xt.lang.common-spec/x:b64-encode, :added "4.1"}
+^{:refer xt.lang.spec-base/x:b64-encode, :added "4.1"}
 (fact
  "encodes base64 strings"
  (!.py (xt/x:b64-encode "hello"))
  =>
  "aGVsbG8=")
 
-^{:refer xt.lang.common-spec/x:b64-decode, :added "4.1"}
+^{:refer xt.lang.spec-base/x:b64-decode, :added "4.1"}
 (fact
  "decodes base64 strings"
  (!.py (xt/x:b64-decode "aGVsbG8="))
  =>
  "hello")
 
-^{:refer xt.lang.common-spec/x:cache, :added "4.1"}
+^{:refer xt.lang.spec-base/x:cache, :added "4.1"}
 (fact
  "selects the global cache store"
  (!.py
@@ -1320,7 +1320,7 @@
  =>
  "local")
 
-^{:refer xt.lang.common-spec/x:cache-list, :added "4.1"}
+^{:refer xt.lang.spec-base/x:cache-list, :added "4.1"}
 (fact
  "lists cache keys"
  (!.py
@@ -1331,7 +1331,7 @@
  =>
  ["a" "b"])
 
-^{:refer xt.lang.common-spec/x:cache-flush, :added "4.1"}
+^{:refer xt.lang.spec-base/x:cache-flush, :added "4.1"}
 (fact
  "flushes cache stores"
  (!.py
@@ -1342,7 +1342,7 @@
  =>
  "flushed")
 
-^{:refer xt.lang.common-spec/x:cache-get, :added "4.1"}
+^{:refer xt.lang.spec-base/x:cache-get, :added "4.1"}
 (fact
  "reads cache values"
  (!.py
@@ -1351,7 +1351,7 @@
  =>
  "value:key")
 
-^{:refer xt.lang.common-spec/x:cache-set, :added "4.1"}
+^{:refer xt.lang.spec-base/x:cache-set, :added "4.1"}
 (fact
  "writes cache values"
  (!.py
@@ -1361,7 +1361,7 @@
  =>
  ["value" ["key" "value"]])
 
-^{:refer xt.lang.common-spec/x:cache-del, :added "4.1"}
+^{:refer xt.lang.spec-base/x:cache-del, :added "4.1"}
 (fact
  "deletes cache values"
  (!.py
@@ -1372,7 +1372,7 @@
  =>
  "key")
 
-^{:refer xt.lang.common-spec/x:cache-incr, :added "4.1"}
+^{:refer xt.lang.spec-base/x:cache-incr, :added "4.1"}
 (fact
  "increments cached numeric values"
  (!.py
@@ -1385,42 +1385,42 @@
  =>
  5)
 
-^{:refer xt.lang.common-spec/x:slurp-file, :added "4.1"}
+^{:refer xt.lang.spec-base/x:slurp-file, :added "4.1"}
 (fact
  "uses the callback-based slurp-file contract"
  (:arglists (meta #'xt/x:slurp-file))
  =>
  '([path opts cb]))
 
-^{:refer xt.lang.common-spec/x:spit-file, :added "4.1"}
+^{:refer xt.lang.spec-base/x:spit-file, :added "4.1"}
 (fact
  "uses the callback-based spit-file contract"
  (:arglists (meta #'xt/x:spit-file))
  =>
  '([path value opts cb]))
 
-^{:refer xt.lang.common-spec/x:json-encode, :added "4.1"}
+^{:refer xt.lang.spec-base/x:json-encode, :added "4.1"}
 (fact
  "encodes lua data structures as json"
  (!.py (xt/x:json-encode {:a 1}))
  =>
  #"\{\"a\":\s*1\}")
 
-^{:refer xt.lang.common-spec/x:json-decode, :added "4.1"}
+^{:refer xt.lang.spec-base/x:json-decode, :added "4.1"}
 (fact
  "decodes json strings into lua data structures"
  (!.py (xt/x:json-decode "{\"a\":1}"))
  =>
  {"a" 1})
 
-^{:refer xt.lang.common-spec/x:shell, :added "4.1"}
+^{:refer xt.lang.spec-base/x:shell, :added "4.1"}
 (fact
  "supports transitional shell arglists"
  (:arglists (meta #'xt/x:shell))
  =>
  '([command opts] [command opts cb]))
 
-^{:refer xt.lang.common-spec/x:thread-spawn, :added "4.1"}
+^{:refer xt.lang.spec-base/x:thread-spawn, :added "4.1"}
 (fact
  "spawns js promise-backed threads"
  (notify/wait-on
@@ -1431,14 +1431,14 @@
  =>
  "OK")
 
-^{:refer xt.lang.common-spec/x:thread-join, :added "4.1"}
+^{:refer xt.lang.spec-base/x:thread-join, :added "4.1"}
 (fact
  "throws for unsupported js thread joins"
  (!.py (xt/x:thread-join {}))
  =>
  (throws))
 
-^{:refer xt.lang.common-spec/x:with-delay, :added "4.1"}
+^{:refer xt.lang.spec-base/x:with-delay, :added "4.1"}
 (fact
  "delays asynchronous js computations"
  (notify/wait-on
@@ -1449,14 +1449,14 @@
  =>
  "LATER")
 
-^{:refer xt.lang.common-spec/x:uri-encode, :added "4.1"}
+^{:refer xt.lang.spec-base/x:uri-encode, :added "4.1"}
 (fact
  "encodes uri components"
  (!.py (xt/x:uri-encode "hello world"))
  =>
  "hello%20world")
 
-^{:refer xt.lang.common-spec/x:uri-decode, :added "4.1"}
+^{:refer xt.lang.spec-base/x:uri-decode, :added "4.1"}
 (fact
  "decodes uri components"
  (!.py (xt/x:uri-decode "hello%20world"))
@@ -1491,7 +1491,7 @@
  (defn-
   common-spec-publics
   []
-  (->> (ns-publics 'xt.lang.common-spec) keys sort vec))
+  (->> (ns-publics 'xt.lang.spec-base) keys sort vec))
  (defn- emit-lua-form [form] (l/emit-as :lua [(list 'fn [] form)]))
  (defn-
   emits-lua?
@@ -1520,7 +1520,7 @@
  (fact
   "all public wrappers expose arglists metadata"
   (->>
-   (ns-publics 'xt.lang.common-spec)
+   (ns-publics 'xt.lang.spec-base)
    (keep (fn [[sym var]] (when-not (:arglists (meta var)) sym)))
    vec)
   =>

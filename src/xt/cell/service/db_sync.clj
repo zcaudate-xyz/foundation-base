@@ -5,7 +5,7 @@
   {:require [[xt.cell.service.db-view :as db-view]
              [xt.db :as xdb]
              [xt.db.base-flatten :as flatten]
-             [xt.lang.common-spec :as xt]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]]
    :export  [MODULE]})
 

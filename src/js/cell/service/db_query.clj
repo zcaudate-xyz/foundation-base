@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:export [MODULE] :require [[js.cell.service.db-view :as db-view] [xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd] [xt.db :as xdb] [xt.db.base-check :as check] [xt.db.cache-view :as cache-view]]})
+  {:export [MODULE] :require [[js.cell.service.db-view :as db-view] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.db :as xdb] [xt.db.base-check :as check] [xt.db.cache-view :as cache-view]]})
 
 (defn.xt query-capable?
   "checks that the db descriptor can prepare queries"

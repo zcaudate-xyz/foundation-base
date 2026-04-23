@@ -16,7 +16,7 @@
               [js.react-native.physical-base :as physical-base]
               [js.react-native.model-roller :as model-roller]
               [xt.lang.common-data :as xtd]
-              [xt.lang.common-spec :as xt]
+              [xt.lang.spec-base :as xt]
               [xt.lang.common-math :as math]]})
 
 ^{:refer js.react-native.physical-carosel/DigitCaroselManual

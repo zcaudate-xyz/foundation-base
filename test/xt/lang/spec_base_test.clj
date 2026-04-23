@@ -1,4 +1,4 @@
-(ns xt.lang.common-spec-test
+(ns xt.lang.spec-base-test
   (:use code.test)
   (:require [clojure.set :as set]
             [std.lang :as l]
@@ -7,7 +7,7 @@
 ^{:seedgen/root {:all true, :langs [:python :lua]}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.common-spec :as xt]
+   :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]]})
 
@@ -15,7 +15,7 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.lang.common-spec/for:array :added "4.1"}
+^{:refer xt.lang.spec-base/for:array :added "4.1"}
 (fact "iterates arrays in order"
 
   (!.js
@@ -27,7 +27,7 @@
     out)
   => [1 2 3])
 
-^{:refer xt.lang.common-spec/for:object :added "4.1"}
+^{:refer xt.lang.spec-base/for:object :added "4.1"}
 (fact "iterates object key value pairs"
 
   (!.js
@@ -37,7 +37,7 @@
     out)
   => (contains [["a" 1] ["b" 2]] :in-any-order))
 
-^{:refer xt.lang.common-spec/for:index :added "4.1"}
+^{:refer xt.lang.spec-base/for:index :added "4.1"}
 (fact "iterates a numeric range"
 
   (!.js
@@ -47,7 +47,7 @@
     out)
   => [0 2])
 
-^{:refer xt.lang.common-spec/for:iter :added "4.1"}
+^{:refer xt.lang.spec-base/for:iter :added "4.1"}
 (fact "expands to the canonical iterator form"
 
   (!.js
@@ -57,7 +57,7 @@
     out)
   => [1 2 3])
 
-^{:refer xt.lang.common-spec/return-run :added "4.1"}
+^{:refer xt.lang.spec-base/return-run :added "4.1"}
 (fact "supports final returns through for:return"
 
   (!.js
@@ -65,7 +65,7 @@
       (resolve "OK")))
   => (throws))
 
-^{:refer xt.lang.common-spec/for:return :added "4.1"}
+^{:refer xt.lang.spec-base/for:return :added "4.1"}
 (fact "dispatches success and error branches"
 
   (!.js
@@ -86,7 +86,7 @@
     out)
   => "ERR")
 
-^{:refer xt.lang.common-spec/for:try :added "4.1"}
+^{:refer xt.lang.spec-base/for:try :added "4.1"}
 (fact "expands to the canonical try form"
 
   (!.js
@@ -97,7 +97,7 @@
     (add))
   => "ERR")
 
-^{:refer xt.lang.common-spec/for:async :added "4.1"}
+^{:refer xt.lang.spec-base/for:async :added "4.1"}
 (fact "expands to the canonical async form"
 
   (notify/wait-on :js
@@ -116,14 +116,14 @@
                 :finally (return true)}))
   => "ERR")
 
-^{:refer xt.lang.common-spec/x:get-idx :added "4.1"}
+^{:refer xt.lang.spec-base/x:get-idx :added "4.1"}
 (fact "reads the first indexed value"
 
   (!.js
     (xt/x:get-idx ["a" "b" "c"] (xt/x:offset 0)))
   => "a")
 
-^{:refer xt.lang.common-spec/x:set-idx :added "4.1"}
+^{:refer xt.lang.spec-base/x:set-idx :added "4.1"}
 (fact "writes an indexed value"
 
   (!.js
@@ -132,35 +132,35 @@
     out)
   => ["a" "B" "c"])
 
-^{:refer xt.lang.common-spec/x:first :added "4.1"}
+^{:refer xt.lang.spec-base/x:first :added "4.1"}
 (fact "gets the first array element"
 
   (!.js
     (xt/x:first ["a" "b" "c"]))
   => "a")
 
-^{:refer xt.lang.common-spec/x:second :added "4.1"}
+^{:refer xt.lang.spec-base/x:second :added "4.1"}
 (fact "gets the second array element"
 
   (!.js
     (xt/x:second ["a" "b" "c"]))
   => "b")
 
-^{:refer xt.lang.common-spec/x:last :added "4.1"}
+^{:refer xt.lang.spec-base/x:last :added "4.1"}
 (fact "gets the last array element"
 
   (!.js
     (xt/x:last ["a" "b" "c" "d"]))
   => "d")
 
-^{:refer xt.lang.common-spec/x:second-last :added "4.1"}
+^{:refer xt.lang.spec-base/x:second-last :added "4.1"}
 (fact "gets the element before the last"
 
   (!.js
     (xt/x:second-last ["a" "b" "c" "d"]))
   => "c")
 
-^{:refer xt.lang.common-spec/x:arr-remove :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-remove :added "4.1"}
 (fact "removes an element from an array"
 
   (!.js
@@ -169,7 +169,7 @@
         out))
   => ["a" "c" "d"])
 
-^{:refer xt.lang.common-spec/x:arr-push :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-push :added "4.1"}
 (fact "pushes an element onto an array"
 
   (!.js
@@ -178,7 +178,7 @@
     out)
   => ["a" "b" "c" "D"])
 
-^{:refer xt.lang.common-spec/x:arr-pop :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-pop :added "4.1"}
 (fact "pops the last element from an array"
 
   (!.js
@@ -186,7 +186,7 @@
     [(xt/x:arr-pop out) out])
   => ["d" ["a" "b" "c"]])
 
-^{:refer xt.lang.common-spec/x:arr-push-first :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-push-first :added "4.1"}
 (fact "pushes an element to the front of an array"
 
   (!.js
@@ -195,7 +195,7 @@
     out)
   => ["D" "a" "b" "c"])
 
-^{:refer xt.lang.common-spec/x:arr-pop-first :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-pop-first :added "4.1"}
 (fact "pops the first element from an array"
 
   (!.js
@@ -203,7 +203,7 @@
     [(xt/x:arr-pop-first out) out])
   => ["a" ["b" "c" "d"]])
 
-^{:refer xt.lang.common-spec/x:arr-insert :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-insert :added "4.1"}
 (fact "inserts an element into an array"
 
   (!.js
@@ -212,7 +212,7 @@
     out)
   => ["a" "D" "b" "c"])
 
-^{:refer xt.lang.common-spec/x:arr-slice :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-slice :added "4.1"}
 (fact "slices a range from an array"
 
   (!.js
@@ -221,14 +221,14 @@
                     (xt/x:offset 3)))
   => ["b" "c"])
 
-^{:refer xt.lang.common-spec/x:arr-reverse :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-reverse :added "4.1"}
 (fact "reverses an array"
 
   (!.js
     (xt/x:arr-reverse ["a" "b" "c"]))
   => ["c" "b" "a"])
 
-^{:refer xt.lang.common-spec/x:del :added "4.1"}
+^{:refer xt.lang.spec-base/x:del :added "4.1"}
 (fact "expands and emits a lua delete form"
 
   (!.js
@@ -237,21 +237,21 @@
     out)
   => {"b" 2})
 
-^{:refer xt.lang.common-spec/x:cat :added "4.1"}
+^{:refer xt.lang.spec-base/x:cat :added "4.1"}
 (fact "concatenates strings"
 
   (!.js
     (xt/x:cat "hello" "-" "world"))
   => "hello-world")
 
-^{:refer xt.lang.common-spec/x:len :added "4.1"}
+^{:refer xt.lang.spec-base/x:len :added "4.1"}
 (fact "gets the collection length"
 
   (!.js
     (xt/x:len ["a" "b" "c"]))
   => 3)
 
-^{:refer xt.lang.common-spec/x:err :added "4.1"}
+^{:refer xt.lang.spec-base/x:err :added "4.1"}
 (fact "expands and emits a lua error form"
 
   (!.js
@@ -260,7 +260,7 @@
     (err-fn))
   => (throws))
 
-^{:refer xt.lang.common-spec/x:type-native :added "4.1"}
+^{:refer xt.lang.spec-base/x:type-native :added "4.1"}
 (fact "expands and emits the lua type helper"
 
   (!.js
@@ -270,7 +270,7 @@
      (type-fn [])])
   => ["object" "array"])
 
-^{:refer xt.lang.common-spec/x:offset :added "4.1"}
+^{:refer xt.lang.spec-base/x:offset :added "4.1"}
 (fact "uses the grammar base offset"
 
   ^{:seedgen/check    {:lua  {:expect 11}}}
@@ -278,7 +278,7 @@
     (xt/x:offset 10))
   => 10)
 
-^{:refer xt.lang.common-spec/x:offset-rev :added "4.1"}
+^{:refer xt.lang.spec-base/x:offset-rev :added "4.1"}
 (fact "uses the reverse grammar offset"
 
   ^{:seedgen/check    {:lua  {:expect 10}}}
@@ -286,7 +286,7 @@
     (xt/x:offset-rev 10))
   => 9)
 
-^{:refer xt.lang.common-spec/x:offset-len :added "4.1"}
+^{:refer xt.lang.spec-base/x:offset-len :added "4.1"}
 (fact "uses the length grammar offset"
 
   ^{:seedgen/check    {:lua  {:expect 9}}}
@@ -294,7 +294,7 @@
     (xt/x:offset-len 10))
   => 9)
 
-^{:refer xt.lang.common-spec/x:offset-rlen :added "4.1"}
+^{:refer xt.lang.spec-base/x:offset-rlen :added "4.1"}
 (fact "uses the reverse length grammar offset"
 
   ^{:seedgen/check    {:lua  {:expect 9}}}
@@ -302,7 +302,7 @@
     (xt/x:offset-rlen 10))
   => 10)
 
-^{:refer xt.lang.common-spec/x:lu-create :added "4.1"}
+^{:refer xt.lang.spec-base/x:lu-create :added "4.1"}
 (fact "creates a lookup table wrapper"
 
   (!.js
@@ -315,7 +315,7 @@
      (xt/x:lu-get lu lu-A2)])
   => ["A1" "A2"])
 
-^{:refer xt.lang.common-spec/x:lu-eq :added "4.1"}
+^{:refer xt.lang.spec-base/x:lu-eq :added "4.1"}
 (fact "compares lookup keys using lua identity"
 
   (!.js
@@ -326,7 +326,7 @@
      (xt/x:lu-eq obj-b obj-b)])
   => [true false true])
 
-^{:refer xt.lang.common-spec/x:lu-get :added "4.1"}
+^{:refer xt.lang.spec-base/x:lu-get :added "4.1"}
 (fact "reads values from a lookup table"
 
   (!.js
@@ -336,7 +336,7 @@
     (xt/x:lu-get lu lu-key))
   => "value")
 
-^{:refer xt.lang.common-spec/x:lu-set :added "4.1"}
+^{:refer xt.lang.spec-base/x:lu-set :added "4.1"}
 (fact "writes values into a lookup table"
 
   (!.js
@@ -346,7 +346,7 @@
     (xt/x:lu-get lu lu-key))
   => "value")
 
-^{:refer xt.lang.common-spec/x:lu-del :added "4.1"}
+^{:refer xt.lang.spec-base/x:lu-del :added "4.1"}
 (fact "removes values from a lookup table"
 
   (!.js
@@ -357,273 +357,273 @@
     (xt/x:lu-get lu lu-key))
   => nil)
 
-^{:refer xt.lang.common-spec/x:m-abs :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-abs :added "4.1"}
 (fact "computes absolute values"
 
   (!.js (xt/x:m-abs -3))
   => 3)
 
-^{:refer xt.lang.common-spec/x:m-acos :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-acos :added "4.1"}
 (fact "computes inverse cosine"
 
   (!.js (xt/x:m-acos 1))
   => (approx 0))
 
-^{:refer xt.lang.common-spec/x:m-asin :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-asin :added "4.1"}
 (fact "computes inverse sine"
 
   (!.js (xt/x:m-asin 0))
   => (approx 0))
 
-^{:refer xt.lang.common-spec/x:m-atan :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-atan :added "4.1"}
 (fact "computes inverse tangent"
 
   (!.js (xt/x:m-atan 0))
   => (approx 0))
 
-^{:refer xt.lang.common-spec/x:m-ceil :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-ceil :added "4.1"}
 (fact "rounds numbers upward"
 
   (!.js (xt/x:m-ceil 1.2))
   => 2)
 
-^{:refer xt.lang.common-spec/x:m-cos :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-cos :added "4.1"}
 (fact "computes cosine"
 
   (!.js (xt/x:m-cos 0))
   => (approx 1))
 
-^{:refer xt.lang.common-spec/x:m-cosh :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-cosh :added "4.1"}
 (fact "computes hyperbolic cosine"
 
   (!.js (xt/x:m-cosh 0))
   => (approx 1))
 
-^{:refer xt.lang.common-spec/x:m-exp :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-exp :added "4.1"}
 (fact "computes the exponential function"
 
   (!.js (xt/x:m-exp 0))
   => (approx 1))
 
-^{:refer xt.lang.common-spec/x:m-floor :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-floor :added "4.1"}
 (fact "rounds numbers downward"
 
   (!.js (xt/x:m-floor 1.8))
   => 1)
 
-^{:refer xt.lang.common-spec/x:m-loge :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-loge :added "4.1"}
 (fact "computes the natural logarithm"
 
   (!.js (xt/x:m-loge 1))
   => (approx 0))
 
-^{:refer xt.lang.common-spec/x:m-log10 :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-log10 :added "4.1"}
 (fact "computes the base-10 logarithm"
 
   (!.js (xt/x:m-log10 100))
   => (approx 2))
 
-^{:refer xt.lang.common-spec/x:m-max :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-max :added "4.1"}
 (fact "computes the maximum value"
 
   (!.js (xt/x:m-max 3 5))
   => 5)
 
-^{:refer xt.lang.common-spec/x:m-mod :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-mod :added "4.1"}
 (fact "computes modulo values"
 
   (!.js (xt/x:m-mod 10 3))
   => 1)
 
-^{:refer xt.lang.common-spec/x:m-min :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-min :added "4.1"}
 (fact "computes the minimum value"
 
   (!.js (xt/x:m-min 3 5))
   => 3)
 
-^{:refer xt.lang.common-spec/x:m-pow :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-pow :added "4.1"}
 (fact "raises numbers to a power"
 
   (!.js (xt/x:m-pow 2 4))
   => 16)
 
-^{:refer xt.lang.common-spec/x:m-quot :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-quot :added "4.1"}
 (fact "computes integer quotients"
 
   (!.js (xt/x:m-quot 7 2))
   => 3)
 
-^{:refer xt.lang.common-spec/x:m-sin :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-sin :added "4.1"}
 (fact "computes sine"
 
   (!.js (xt/x:m-sin 0))
   => (approx 0))
 
-^{:refer xt.lang.common-spec/x:m-sinh :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-sinh :added "4.1"}
 (fact "computes hyperbolic sine"
 
   (!.js (xt/x:m-sinh 0))
   => (approx 0))
 
-^{:refer xt.lang.common-spec/x:m-sqrt :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-sqrt :added "4.1"}
 (fact "computes square roots"
 
   (!.js (xt/x:m-sqrt 9))
   => (approx 3))
 
-^{:refer xt.lang.common-spec/x:m-tan :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-tan :added "4.1"}
 (fact "computes tangent"
 
   (!.js (xt/x:m-tan 0))
   => (approx 0))
 
-^{:refer xt.lang.common-spec/x:m-tanh :added "4.1"}
+^{:refer xt.lang.spec-base/x:m-tanh :added "4.1"}
 (fact "computes hyperbolic tangent"
 
   (!.js (xt/x:m-tanh 0))
   => (approx 0))
 
-^{:refer xt.lang.common-spec/x:not-nil? :added "4.1"}
+^{:refer xt.lang.spec-base/x:not-nil? :added "4.1"}
 (fact "checks for non-nil values"
 
   (!.js
     (xt/x:not-nil? 0))
   => true)
 
-^{:refer xt.lang.common-spec/x:nil? :added "4.1"}
+^{:refer xt.lang.spec-base/x:nil? :added "4.1"}
 (fact "checks for nil values"
 
   (!.js
     (xt/x:nil? nil))
   => true)
 
-^{:refer xt.lang.common-spec/x:add :added "4.1"}
+^{:refer xt.lang.spec-base/x:add :added "4.1"}
 (fact "adds numbers"
 
   (!.js
     (xt/x:add 1 2 3))
   => 6)
 
-^{:refer xt.lang.common-spec/x:sub :added "4.1"}
+^{:refer xt.lang.spec-base/x:sub :added "4.1"}
 (fact "subtracts numbers"
 
   (!.js
     (xt/x:sub 10 3 2))
   => 5)
 
-^{:refer xt.lang.common-spec/x:mul :added "4.1"}
+^{:refer xt.lang.spec-base/x:mul :added "4.1"}
 (fact "multiplies numbers"
 
   (!.js
     (xt/x:mul 2 3 4))
   => 24)
 
-^{:refer xt.lang.common-spec/x:div :added "4.1"}
+^{:refer xt.lang.spec-base/x:div :added "4.1"}
 (fact "divides numbers"
 
   (!.js
     (xt/x:div 20 5))
   => (approx 4))
 
-^{:refer xt.lang.common-spec/x:neg :added "4.1"}
+^{:refer xt.lang.spec-base/x:neg :added "4.1"}
 (fact "negates a number"
 
   (!.js
     (xt/x:neg 2))
   => -2)
 
-^{:refer xt.lang.common-spec/x:inc :added "4.1"}
+^{:refer xt.lang.spec-base/x:inc :added "4.1"}
 (fact "increments a number"
 
   (!.js
     (xt/x:inc 2))
   => 3)
 
-^{:refer xt.lang.common-spec/x:dec :added "4.1"}
+^{:refer xt.lang.spec-base/x:dec :added "4.1"}
 (fact "decrements a number"
 
   (!.js
     (xt/x:dec 2))
   => 1)
 
-^{:refer xt.lang.common-spec/x:zero? :added "4.1"}
+^{:refer xt.lang.spec-base/x:zero? :added "4.1"}
 (fact "checks whether a number is zero"
 
   (!.js
     (xt/x:zero? 0))
   => true)
 
-^{:refer xt.lang.common-spec/x:pos? :added "4.1"}
+^{:refer xt.lang.spec-base/x:pos? :added "4.1"}
 (fact "checks whether a number is positive"
 
   (!.js
     (xt/x:pos? 2))
   => true)
 
-^{:refer xt.lang.common-spec/x:neg? :added "4.1"}
+^{:refer xt.lang.spec-base/x:neg? :added "4.1"}
 (fact "checks whether a number is negative"
 
   (!.js
     (xt/x:neg? -2))
   => true)
 
-^{:refer xt.lang.common-spec/x:even? :added "4.1"}
+^{:refer xt.lang.spec-base/x:even? :added "4.1"}
 (fact "checks whether a number is even"
 
   (!.js
     (xt/x:even? 4))
   => true)
 
-^{:refer xt.lang.common-spec/x:odd? :added "4.1"}
+^{:refer xt.lang.spec-base/x:odd? :added "4.1"}
 (fact "checks whether a number is odd"
 
   (!.js
     (xt/x:odd? 5))
   => true)
 
-^{:refer xt.lang.common-spec/x:eq :added "4.1"}
+^{:refer xt.lang.spec-base/x:eq :added "4.1"}
 (fact "checks equality"
 
   (!.js
     (xt/x:eq 2 2))
   => true)
 
-^{:refer xt.lang.common-spec/x:neq :added "4.1"}
+^{:refer xt.lang.spec-base/x:neq :added "4.1"}
 (fact "checks inequality"
 
   (!.js
     (xt/x:neq 2 3))
   => true)
 
-^{:refer xt.lang.common-spec/x:lt :added "4.1"}
+^{:refer xt.lang.spec-base/x:lt :added "4.1"}
 (fact "checks less than"
 
   (!.js
     (xt/x:lt 2 3))
   => true)
 
-^{:refer xt.lang.common-spec/x:lte :added "4.1"}
+^{:refer xt.lang.spec-base/x:lte :added "4.1"}
 (fact "checks less than or equal"
 
   (!.js
     (xt/x:lte 3 3))
   => true)
 
-^{:refer xt.lang.common-spec/x:gt :added "4.1"}
+^{:refer xt.lang.spec-base/x:gt :added "4.1"}
 (fact "checks greater than"
 
   (!.js
     (xt/x:gt 4 3))
   => true)
 
-^{:refer xt.lang.common-spec/x:gte :added "4.1"}
+^{:refer xt.lang.spec-base/x:gte :added "4.1"}
 (fact "checks greater than or equal"
 
   (!.js
     (xt/x:gte 4 4))
   => true)
 
-^{:refer xt.lang.common-spec/x:has-key? :added "4.1"}
+^{:refer xt.lang.spec-base/x:has-key? :added "4.1"}
 (fact "checks whether an object has a key"
 
   (!.js
@@ -631,7 +631,7 @@
     (xt/x:has-key? obj "a"))
   => true)
 
-^{:refer xt.lang.common-spec/x:del-key :added "4.1"}
+^{:refer xt.lang.spec-base/x:del-key :added "4.1"}
 (fact "deletes keys from objects"
 
   (!.js
@@ -640,21 +640,21 @@
     out)
   => {"b" 2})
 
-^{:refer xt.lang.common-spec/x:get-key :added "4.1"}
+^{:refer xt.lang.spec-base/x:get-key :added "4.1"}
 (fact "gets a value by key with a fallback"
 
   (!.js
     (xt/x:get-key {} "missing" "fallback"))
   => "fallback")
 
-^{:refer xt.lang.common-spec/x:get-path :added "4.1"}
+^{:refer xt.lang.spec-base/x:get-path :added "4.1"}
 (fact "gets a nested value by path"
 
   (!.js
     (xt/x:get-path {:nested {:b 2}} ["nested" "b"]))
   => 2)
 
-^{:refer xt.lang.common-spec/x:set-key :added "4.1"}
+^{:refer xt.lang.spec-base/x:set-key :added "4.1"}
 (fact "sets a key on an object"
 
   (!.js
@@ -663,7 +663,7 @@
     out)
   => {"a" 1, "b" 2})
 
-^{:refer xt.lang.common-spec/x:copy-key :added "4.1"}
+^{:refer xt.lang.spec-base/x:copy-key :added "4.1"}
 (fact "copies a key from another object"
 
   (!.js
@@ -672,7 +672,7 @@
     out)
   => {"a" 1, "c" 9})
 
-^{:refer xt.lang.common-spec/x:obj-keys :added "4.1"}
+^{:refer xt.lang.spec-base/x:obj-keys :added "4.1"}
 (fact "lists object keys"
 
   (set
@@ -680,7 +680,7 @@
      (xt/x:obj-keys {:a 1 :b 2})))
   => #{"a" "b"})
 
-^{:refer xt.lang.common-spec/x:obj-vals :added "4.1"}
+^{:refer xt.lang.spec-base/x:obj-vals :added "4.1"}
 (fact "lists object values"
 
   (set
@@ -688,7 +688,7 @@
      (xt/x:obj-vals {:a 1 :b 2})))
   => #{1 2})
 
-^{:refer xt.lang.common-spec/x:obj-pairs :added "4.1"}
+^{:refer xt.lang.spec-base/x:obj-pairs :added "4.1"}
 (fact "lists object pairs"
 
   (set
@@ -696,7 +696,7 @@
      (xt/x:obj-pairs {:a 1 :b 2})))
   => #{["a" 1] ["b" 2]})
 
-^{:refer xt.lang.common-spec/x:obj-clone :added "4.1"}
+^{:refer xt.lang.spec-base/x:obj-clone :added "4.1"}
 (fact "clones an object"
 
   (!.js
@@ -706,70 +706,70 @@
     out)
   => {"a" 1})
 
-^{:refer xt.lang.common-spec/x:obj-assign :added "4.1"}
+^{:refer xt.lang.spec-base/x:obj-assign :added "4.1"}
 (fact "assigns object keys"
 
   (!.js
     (xt/x:obj-assign {:a 1} {:b 2}))
   => {"a" 1, "b" 2})
 
-^{:refer xt.lang.common-spec/x:to-string :added "4.1"}
+^{:refer xt.lang.spec-base/x:to-string :added "4.1"}
 (fact "converts a value to a string"
 
   (!.js
     (xt/x:to-string 12))
   => "12")
 
-^{:refer xt.lang.common-spec/x:to-number :added "4.1"}
+^{:refer xt.lang.spec-base/x:to-number :added "4.1"}
 (fact "converts a string to a number"
 
   (!.js
     (xt/x:to-number "12.5"))
   => 12.5)
 
-^{:refer xt.lang.common-spec/x:is-string? :added "4.1"}
+^{:refer xt.lang.spec-base/x:is-string? :added "4.1"}
 (fact "recognises strings"
 
   (!.js
     (xt/x:is-string? "abc"))
   => true)
 
-^{:refer xt.lang.common-spec/x:is-number? :added "4.1"}
+^{:refer xt.lang.spec-base/x:is-number? :added "4.1"}
 (fact "recognises numbers"
 
   (!.js
     (xt/x:is-number? 1.5))
   => true)
 
-^{:refer xt.lang.common-spec/x:is-integer? :added "4.1"}
+^{:refer xt.lang.spec-base/x:is-integer? :added "4.1"}
 (fact "recognises integers"
 
   (!.js
     (xt/x:is-integer? 2))
   => true)
 
-^{:refer xt.lang.common-spec/x:is-boolean? :added "4.1"}
+^{:refer xt.lang.spec-base/x:is-boolean? :added "4.1"}
 (fact "recognises booleans"
 
   (!.js
     (xt/x:is-boolean? true))
   => true)
 
-^{:refer xt.lang.common-spec/x:is-object? :added "4.1"}
+^{:refer xt.lang.spec-base/x:is-object? :added "4.1"}
 (fact "recognises objects"
 
   (!.js
     (xt/x:is-object? {:a 1}))
   => true)
 
-^{:refer xt.lang.common-spec/x:is-array? :added "4.1"}
+^{:refer xt.lang.spec-base/x:is-array? :added "4.1"}
 (fact "recognises arrays"
 
   (!.js
     (xt/x:is-array? [1 2]))
   => true)
 
-^{:refer xt.lang.common-spec/x:print :added "4.1"}
+^{:refer xt.lang.spec-base/x:print :added "4.1"}
 (fact "expands and emits a lua print form"
 
   (!.js
@@ -777,81 +777,81 @@
     (xt/x:nil? (xt/x:print "hello")))
   => true)
 
-^{:refer xt.lang.common-spec/x:str-len :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-len :added "4.1"}
 (fact "gets the string length"
 
   (!.js
     (xt/x:str-len "hello"))
   => 5)
 
-^{:refer xt.lang.common-spec/x:str-comp :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-comp :added "4.1"}
 (fact "compares strings by sort order"
 
   (!.js (xt/x:str-comp "abc" "abd"))
   => true)
 
-^{:refer xt.lang.common-spec/x:str-lt :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-lt :added "4.1"}
 (fact "checks whether one string sorts before another"
 
   (!.js (xt/x:str-lt "abc" "abd"))
   => true)
 
-^{:refer xt.lang.common-spec/x:str-gt :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-gt :added "4.1"}
 (fact "checks whether one string sorts after another"
 
   (!.js (xt/x:str-gt "abd" "abc"))
   => true)
 
-^{:refer xt.lang.common-spec/x:str-pad-left :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-pad-left :added "4.1"}
 (fact "pads a string on the left"
 
   (!.js
     (xt/x:str-pad-left "7" 3 "0"))
   => "007")
 
-^{:refer xt.lang.common-spec/x:str-pad-right :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-pad-right :added "4.1"}
 (fact "pads a string on the right"
 
   (!.js
     (xt/x:str-pad-right "7" 3 "0"))
   => "700")
 
-^{:refer xt.lang.common-spec/x:str-starts-with :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-starts-with :added "4.1"}
 (fact "checks the string prefix"
 
   (!.js
     (xt/x:str-starts-with "hello" "he"))
   => true)
 
-^{:refer xt.lang.common-spec/x:str-ends-with :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-ends-with :added "4.1"}
 (fact "checks the string suffix"
 
   (!.js
     (xt/x:str-ends-with "hello" "lo"))
   => true)
 
-^{:refer xt.lang.common-spec/x:str-char :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-char :added "4.1"}
 (fact "gets the character code at an index"
 
   (!.js
     (xt/x:str-char "abc" (xt/x:offset 1)))
   => 98)
 
-^{:refer xt.lang.common-spec/x:str-split :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-split :added "4.1"}
 (fact "splits a string"
 
   (!.js
     (xt/x:str-split "a/b/c" "/"))
   => ["a" "b" "c"])
 
-^{:refer xt.lang.common-spec/x:str-join :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-join :added "4.1"}
 (fact "joins string parts"
 
   (!.js
     (xt/x:str-join "-" ["a" "b" "c"]))
   => "a-b-c")
 
-^{:refer xt.lang.common-spec/x:str-index-of :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-index-of :added "4.1"}
 (fact "finds the index of a substring"
 
   ^{:seedgen/check    {:lua  {:expect 6}}}
@@ -859,7 +859,7 @@
     (xt/x:str-index-of "hello/world" "/" (xt/x:offset 0)))
   => 5)
 
-^{:refer xt.lang.common-spec/x:str-substring :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-substring :added "4.1"}
 (fact "gets a substring"
 
   (!.js
@@ -868,52 +868,52 @@
                         (xt/x:offset 8)))
   => "lo/wo")
 
-^{:refer xt.lang.common-spec/x:str-to-upper :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-to-upper :added "4.1"}
 (fact "converts a string to upper case"
 
   (!.js
     (xt/x:str-to-upper "hello"))
   => "HELLO")
 
-^{:refer xt.lang.common-spec/x:str-to-lower :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-to-lower :added "4.1"}
 (fact "converts a string to lower case"
 
   (!.js
     (xt/x:str-to-lower "HELLO"))
   => "hello")
 
-^{:refer xt.lang.common-spec/x:str-to-fixed :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-to-fixed :added "4.1"}
 (fact "formats a number with fixed decimals"
 
   (!.js
     (xt/x:str-to-fixed 1.2 2))
   => "1.20")
 
-^{:refer xt.lang.common-spec/x:str-replace :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-replace :added "4.1"}
 (fact "replaces matching substrings"
 
   (!.js (xt/x:str-replace "hello-world" "-" "/"))
   => "hello/world")
 
-^{:refer xt.lang.common-spec/x:str-trim :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-trim :added "4.1"}
 (fact "trims whitespace from both sides"
 
   (!.js (xt/x:str-trim "  hello  "))
   => "hello")
 
-^{:refer xt.lang.common-spec/x:str-trim-left :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-trim-left :added "4.1"}
 (fact "trims whitespace from the left side"
 
   (!.js (xt/x:str-trim-left "  hello"))
   => "hello")
 
-^{:refer xt.lang.common-spec/x:str-trim-right :added "4.1"}
+^{:refer xt.lang.spec-base/x:str-trim-right :added "4.1"}
 (fact "trims whitespace from the right side"
 
   (!.js (xt/x:str-trim-right "hello  "))
   => "hello")
 
-^{:refer xt.lang.common-spec/x:arr-sort :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-sort :added "4.1"}
 (fact "sorts arrays using key and compare functions"
 
   (!.js
@@ -924,7 +924,7 @@
     out)
   => [{"id" 1} {"id" 2} {"id" 3}])
 
-^{:refer xt.lang.common-spec/x:arr-clone :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-clone :added "4.1"}
 (fact "clones an array"
 
   (!.js
@@ -934,7 +934,7 @@
     out)
   => [1 2])
 
-^{:refer xt.lang.common-spec/x:arr-each :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-each :added "4.1"}
 (fact "iterates each element in an array"
 
   (!.js
@@ -945,7 +945,7 @@
     out)
   => [2 4 6])
 
-^{:refer xt.lang.common-spec/x:arr-every :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-every :added "4.1"}
 (fact "checks whether every array element matches a predicate"
 
   (!.js
@@ -953,7 +953,7 @@
                     (fn [e] (return (xt/x:even? e)))))
   => true)
 
-^{:refer xt.lang.common-spec/x:arr-some :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-some :added "4.1"}
 (fact "checks whether any array element matches a predicate"
 
   (!.js
@@ -961,14 +961,14 @@
                    (fn [e] (return (xt/x:even? e)))))
   => true)
 
-^{:refer xt.lang.common-spec/x:arr-map :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-map :added "4.1"}
 (fact "maps an array"
 
   (!.js
     (xt/x:arr-map [1 2 3] (fn [e] (return (* e 2)))))
   => [2 4 6])
 
-^{:refer xt.lang.common-spec/x:arr-assign :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-assign :added "4.1"}
 (fact "appends one array to another"
 
   (!.js
@@ -977,7 +977,7 @@
     out)
   => [1 2 3 4])
 
-^{:refer xt.lang.common-spec/x:arr-concat :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-concat :added "4.1"}
 (fact "concatenates arrays into a new array"
 
   (!.js
@@ -985,14 +985,14 @@
     [(xt/x:arr-concat src [3 4]) src])
   => [[1 2 3 4] [1 2]])
 
-^{:refer xt.lang.common-spec/x:arr-filter :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-filter :added "4.1"}
 (fact "filters an array"
 
   (!.js
     (xt/x:arr-filter [2 3 4 5] (fn [e] (return (xt/x:even? e)))))
   => [2 4])
 
-^{:refer xt.lang.common-spec/x:arr-foldl :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-foldl :added "4.1"}
 (fact "folds arrays from the left"
 
   (!.js
@@ -1001,7 +1001,7 @@
                     0))
   => 15)
 
-^{:refer xt.lang.common-spec/x:arr-foldr :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-foldr :added "4.1"}
 (fact "folds arrays from the right"
 
   (!.js
@@ -1010,20 +1010,20 @@
                     ""))
   => "edcba")
 
-^{:refer xt.lang.common-spec/x:arr-find :added "4.1"}
+^{:refer xt.lang.spec-base/x:arr-find :added "4.1"}
 (fact "keeps the find wrapper pointed at the canonical op"
 
   (:arglists (meta #'xt/x:arr-find))
   => '([arr pred]))
 
-^{:refer xt.lang.common-spec/x:is-function? :added "4.1"}
+^{:refer xt.lang.spec-base/x:is-function? :added "4.1"}
 (fact "recognises function values"
 
   (!.js
     (xt/x:is-function? (fn [x] (return x))))
   => true)
 
-^{:refer xt.lang.common-spec/x:callback :added "4.1"}
+^{:refer xt.lang.spec-base/x:callback :added "4.1"}
 (fact "dispatches node-style callbacks through for:return"
 
   [(!.js
@@ -1044,7 +1044,7 @@
      out)]
   => ["OK" "ERR"])
 
-^{:refer xt.lang.common-spec/x:return-run :added "4.1"}
+^{:refer xt.lang.spec-base/x:return-run :added "4.1"}
 (fact "can be used directly inside for:return"
 
   (!.js
@@ -1057,14 +1057,14 @@
     out)
   => "ERR")
 
-^{:refer xt.lang.common-spec/x:eval :added "4.1"}
+^{:refer xt.lang.spec-base/x:eval :added "4.1"}
 (fact "evaluates javascript expressions"
 
   (!.js
     (xt/x:eval "1 + 1"))
   => 2)
 
-^{:refer xt.lang.common-spec/x:apply :added "4.1"}
+^{:refer xt.lang.spec-base/x:apply :added "4.1"}
 (fact "applies array arguments to functions"
 
   (!.js
@@ -1073,7 +1073,7 @@
                 [1 2 3]))
   => 6)
 
-^{:refer xt.lang.common-spec/x:iter-from-obj :added "4.1"}
+^{:refer xt.lang.spec-base/x:iter-from-obj :added "4.1"}
 (fact "creates iterators over object pairs"
 
   (!.js
@@ -1083,7 +1083,7 @@
     out)
   => (contains [["a" 1] ["b" 2]] :in-any-order))
 
-^{:refer xt.lang.common-spec/x:iter-from-arr :added "4.1"}
+^{:refer xt.lang.spec-base/x:iter-from-arr :added "4.1"}
 (fact "creates iterators over arrays"
 
   (!.js
@@ -1093,7 +1093,7 @@
     out)
   => [1 2 3])
 
-^{:refer xt.lang.common-spec/x:iter-from :added "4.1"}
+^{:refer xt.lang.spec-base/x:iter-from :added "4.1"}
 (fact "creates generic iterators from iterable values"
 
   (!.js
@@ -1103,7 +1103,7 @@
     out)
   => [2 4 6])
 
-^{:refer xt.lang.common-spec/x:iter-eq :added "4.1"}
+^{:refer xt.lang.spec-base/x:iter-eq :added "4.1"}
 (fact "checks iterator equality in js"
 
   (!.js
@@ -1119,21 +1119,21 @@
               (return (== a b))))])
   => [true false])
 
-^{:refer xt.lang.common-spec/x:iter-null :added "4.1"}
+^{:refer xt.lang.spec-base/x:iter-null :added "4.1"}
 (fact "creates empty iterators"
 
   (!.js
     (xt/x:iter-native? (xt/x:iter-null)))
   => true)
 
-^{:refer xt.lang.common-spec/x:iter-next :added "4.1"}
+^{:refer xt.lang.spec-base/x:iter-next :added "4.1"}
 (fact "advances iterators"
 
   (!.js
     (xt/x:iter-native? (xt/x:iter-from-arr [1 2 3])))
   => true)
 
-^{:refer xt.lang.common-spec/x:iter-has? :added "4.1"}
+^{:refer xt.lang.spec-base/x:iter-has? :added "4.1"}
 (fact "checks whether values are iterable"
 
   (!.js
@@ -1141,7 +1141,7 @@
      (xt/x:iter-has? {:a 1})])
   => [true false])
 
-^{:refer xt.lang.common-spec/x:iter-native? :added "4.1"}
+^{:refer xt.lang.spec-base/x:iter-native? :added "4.1"}
 (fact "checks whether values are iterator instances"
 
   (!.js
@@ -1149,7 +1149,7 @@
      (xt/x:iter-native? [1 2 3])])
   => [true false])
 
-^{:refer xt.lang.common-spec/x:return-encode :added "4.1"}
+^{:refer xt.lang.spec-base/x:return-encode :added "4.1"}
 (fact "encodes return payloads as json"
 
   (!.js
@@ -1162,7 +1162,7 @@
       "type" "data"
       "value" {"a" 1}})
 
-^{:refer xt.lang.common-spec/x:return-wrap :added "4.1"}
+^{:refer xt.lang.spec-base/x:return-wrap :added "4.1"}
 (fact "wraps return values through encoder functions"
 
   (!.js
@@ -1184,7 +1184,7 @@
       "return" "number"
       "value" 3})
 
-^{:refer xt.lang.common-spec/x:return-eval :added "4.1"}
+^{:refer xt.lang.spec-base/x:return-eval :added "4.1"}
 (fact "evaluates code through wrapped return handlers"
 
   (!.js
@@ -1207,37 +1207,37 @@
                              (encode-fn out "id-A" "key-B")))))))))
   => {"return" "number", "key" "key-B", "id" "id-A", "value" 2, "type" "data"})
 
-^{:refer xt.lang.common-spec/x:bit-and :added "4.1"}
+^{:refer xt.lang.spec-base/x:bit-and :added "4.1"}
 (fact "computes bitwise and"
 
   (!.js (xt/x:bit-and 6 3))
   => 2)
 
-^{:refer xt.lang.common-spec/x:bit-or :added "4.1"}
+^{:refer xt.lang.spec-base/x:bit-or :added "4.1"}
 (fact "computes bitwise or"
 
   (!.js (xt/x:bit-or 6 3))
   => 7)
 
-^{:refer xt.lang.common-spec/x:bit-lshift :added "4.1"}
+^{:refer xt.lang.spec-base/x:bit-lshift :added "4.1"}
 (fact "computes bitwise left shifts"
 
   (!.js (xt/x:bit-lshift 3 2))
   => 12)
 
-^{:refer xt.lang.common-spec/x:bit-rshift :added "4.1"}
+^{:refer xt.lang.spec-base/x:bit-rshift :added "4.1"}
 (fact "computes bitwise right shifts"
 
   (!.js (xt/x:bit-rshift 12 2))
   => 3)
 
-^{:refer xt.lang.common-spec/x:bit-xor :added "4.1"}
+^{:refer xt.lang.spec-base/x:bit-xor :added "4.1"}
 (fact "computes bitwise xor"
 
   (!.js (xt/x:bit-xor 6 3))
   => 5)
 
-^{:refer xt.lang.common-spec/x:global-set :added "4.1"}
+^{:refer xt.lang.spec-base/x:global-set :added "4.1"}
 (fact "writes values to the shared global map"
 
   (!.js
@@ -1255,7 +1255,7 @@
      (del-fn)])
   => [true 1 false])
 
-^{:refer xt.lang.common-spec/x:global-del :added "4.1"}
+^{:refer xt.lang.spec-base/x:global-del :added "4.1"}
 (fact "removes values from the shared global map"
 
   (!.js
@@ -1264,7 +1264,7 @@
     (!:G COMMON_SPEC_DELETE))
   => nil)
 
-^{:refer xt.lang.common-spec/x:global-has? :added "4.1"}
+^{:refer xt.lang.spec-base/x:global-has? :added "4.1"}
 (fact "checks whether the shared global map contains a value"
 
   (!.js
@@ -1281,7 +1281,7 @@
      (del-fn)])
   => [true false])
 
-^{:refer xt.lang.common-spec/x:proto-get :added "4.1"}
+^{:refer xt.lang.spec-base/x:proto-get :added "4.1"}
 (fact "retrieves the attached prototype object"
 
   (!.js
@@ -1293,7 +1293,7 @@
     (xt/x:proto-get obj))
   => {"label" "proto"})
 
-^{:refer xt.lang.common-spec/x:proto-set :added "4.1"}
+^{:refer xt.lang.spec-base/x:proto-set :added "4.1"}
 (fact "attaches the prototype object"
 
   (!.js
@@ -1315,7 +1315,7 @@
     (. (xt/x:proto-get obj) ["label"]))
   => "B")
 
-^{:refer xt.lang.common-spec/x:proto-create :added "4.1"}
+^{:refer xt.lang.spec-base/x:proto-create :added "4.1"}
 (fact "creates prototypes with self-bound methods"
 
   (!.js
@@ -1331,16 +1331,16 @@
     (. obj (describe "!")))
   => "alpha!")
 
-^{:refer xt.lang.common-spec/x:proto-tostring :added "4.1"}
+^{:refer xt.lang.spec-base/x:proto-tostring :added "4.1"}
 (fact "returns the native string hook key"
   
   ^{:seedgen/base {:lua    {:expect "__tostring"}
-                    :python {:expect "__str__"}}}
+                   :python {:expect "__str__"}}}
   (!.js
     (xt/x:proto-tostring))
   => "toString")
 
-^{:refer xt.lang.common-spec/x:random :added "4.1"}
+^{:refer xt.lang.spec-base/x:random :added "4.1"}
 (fact "returns javascript random values"
 
   (!.js
@@ -1349,7 +1349,7 @@
          (< out 1)))
   => true)
 
-^{:refer xt.lang.common-spec/x:throw :added "4.1"}
+^{:refer xt.lang.spec-base/x:throw :added "4.1"}
 (fact "expands to the canonical throw form"
   
   (!.js
@@ -1357,14 +1357,14 @@
      (x:throw "ERROW")))
   => (throws))
 
-^{:refer xt.lang.common-spec/x:now-ms :added "4.1"}
+^{:refer xt.lang.spec-base/x:now-ms :added "4.1"}
 (fact "expands and emits a millisecond time expression"
 
   (!.js
     (> (xt/x:now-ms) 0))
   => true)
 
-^{:refer xt.lang.common-spec/x:unpack :added "4.1"}
+^{:refer xt.lang.spec-base/x:unpack :added "4.1"}
 (fact "spreads arrays into positional arguments"
 
   (!.js
@@ -1374,72 +1374,21 @@
     (add-args (xt/x:unpack [1 2 3])))
   => 6)
 
-^{:refer xt.lang.common-spec/x:socket-connect :added "4.1"}
-(fact "connects sockets and forwards the connection to callbacks"
-
-  #_
-  (notify/wait-on :js
-    (do (var net (require "net"))
-        (var port 18182)
-        (var connect-fn
-             (fn [host port opts cb]
-               (xt/x:socket-connect host port opts cb)))
-        (var server
-             (. net (createServer (fn [conn]
-                                    (. conn (end))))))
-        (. server (listen port "127.0.0.1"))
-        (connect-fn "127.0.0.1"
-                    port
-                    {}
-                    (fn [err conn]
-                      (. server (close))
-                      (repl/notify [(xt/x:nil? err)
-                                    (xt/x:is-function? (. conn ["write"]))])))))
-  => [true true])
-
-^{:refer xt.lang.common-spec/x:socket-send :added "4.1"}
-(fact "sends socket messages through write"
-
-  (!.js
-    (var out nil)
-    (var conn {:write (fn [s]
-                        (:= out s))})
-    (xt/x:socket-send conn "PING")
-    out)
-  => "PING")
-
-^{:refer xt.lang.common-spec/x:socket-close :added "4.1"}
-(fact "closes sockets through end"
-
-  (!.js
-    (var out nil)
-    (var conn {:end (fn []
-                      (:= out "closed"))})
-    (xt/x:socket-close conn)
-    out)
-  => "closed")
-
-^{:refer xt.lang.common-spec/x:notify-http :added "4.1"}
-(fact "posts encoded values through fetch")
-
-^{:refer xt.lang.common-spec/x:notify-socket :added "4.1"}
-(fact "keeps the notify-socket wrapper intact")
-
-^{:refer xt.lang.common-spec/x:b64-encode :added "4.1"}
+^{:refer xt.lang.spec-base/x:b64-encode :added "4.1"}
 (fact "encodes base64 strings"
 
   (!.js
     (xt/x:b64-encode "hello"))
   => "aGVsbG8=")
 
-^{:refer xt.lang.common-spec/x:b64-decode :added "4.1"}
+^{:refer xt.lang.spec-base/x:b64-decode :added "4.1"}
 (fact "decodes base64 strings"
 
   (!.js
     (xt/x:b64-decode "aGVsbG8="))
   => "hello")
 
-^{:refer xt.lang.common-spec/x:cache :added "4.1"
+^{:refer xt.lang.spec-base/x:cache :added "4.1"
   :setup [^{:seedgen/base   {:lua     {:suppress true}
                              :python  {:suppress true}}}
           (!.js
@@ -1451,7 +1400,7 @@
     (xt/x:cache "GLOBAL"))
   => identity)
 
-^{:refer xt.lang.common-spec/x:cache-list :added "4.1"
+^{:refer xt.lang.spec-base/x:cache-list :added "4.1"
   :setup [^{:seedgen/base   {:lua     {:suppress true}
                              :python  {:suppress true}}}
           (!.js
@@ -1463,7 +1412,7 @@
     (xt/x:cache-list (!:G TEST_CACHE)))
   => ["a" "b"])
 
-^{:refer xt.lang.common-spec/x:cache-flush :added "4.1"
+^{:refer xt.lang.spec-base/x:cache-flush :added "4.1"
   :setup [^{:seedgen/base   {:lua     {:suppress true}
                              :python  {:suppress true}}}
           (!.js
@@ -1475,7 +1424,7 @@
     (xt/x:cache-flush (!:G TEST_CACHE)))
   => anything)
 
-^{:refer xt.lang.common-spec/x:cache-get :added "4.1"}
+^{:refer xt.lang.spec-base/x:cache-get :added "4.1"}
 (fact "reads cache values"
 
   (!.js
@@ -1484,7 +1433,7 @@
     (xt/x:cache-get cache "key"))
   => "value:key")
 
-^{:refer xt.lang.common-spec/x:cache-set :added "4.1"}
+^{:refer xt.lang.spec-base/x:cache-set :added "4.1"}
 (fact "writes cache values"
 
   (!.js
@@ -1496,7 +1445,7 @@
      out])
   => ["value" ["key" "value"]])
 
-^{:refer xt.lang.common-spec/x:cache-del :added "4.1"}
+^{:refer xt.lang.spec-base/x:cache-del :added "4.1"}
 (fact "deletes cache values"
 
   (!.js
@@ -1507,7 +1456,7 @@
     out)
   => "key")
 
-^{:refer xt.lang.common-spec/x:cache-incr :added "4.1"}
+^{:refer xt.lang.spec-base/x:cache-incr :added "4.1"}
 (fact "increments cached numeric values"
 
   (!.js
@@ -1520,7 +1469,7 @@
     (xt/x:cache-incr cache "count" 3))
   => 5)
 
-^{:refer xt.lang.common-spec/x:slurp-file :added "4.1"}
+^{:refer xt.lang.spec-base/x:slurp-file :added "4.1"}
 (fact "reads file content through callbacks"
   
   (notify/wait-on :js
@@ -1530,10 +1479,10 @@
                        (repl/notify res))))
   => string?)
 
-^{:refer xt.lang.common-spec/x:spit-file :added "4.1"}
+^{:refer xt.lang.spec-base/x:spit-file :added "4.1"}
 (fact "writes file content through callbacks"
 
-^{:seedgen/base true}
+  ^{:seedgen/base true}
   (let [path "test-scratch/out.tmp"
         out  (notify/wait-on :js
                (xt/x:spit-file "test-scratch/out.tmp"
@@ -1548,19 +1497,19 @@
     out)
   => "hello world")
 
-^{:refer xt.lang.common-spec/x:json-encode :added "4.1"}
+^{:refer xt.lang.spec-base/x:json-encode :added "4.1"}
 (fact "encodes lua data structures as json"
 
   (!.js (xt/x:json-encode {:a 1}))
   => #"\{\"a\":\s*1\}")
 
-^{:refer xt.lang.common-spec/x:json-decode :added "4.1"}
+^{:refer xt.lang.spec-base/x:json-decode :added "4.1"}
 (fact "decodes json strings into lua data structures"
 
   (!.js (xt/x:json-decode "{\"a\":1}"))
   => {"a" 1})
 
-^{:refer xt.lang.common-spec/x:shell :added "4.1"}
+^{:refer xt.lang.spec-base/x:shell :added "4.1"}
 (fact "executes shell commands asynchronously"
   
   (notify/wait-on :js
@@ -1571,13 +1520,23 @@
                                   (repl/notify "ERR"))})))
   => #"hello")
 
-^{:refer xt.lang.common-spec/x:thread-spawn :added "4.1"}
+^{:refer xt.lang.spec-base/x:shell :added "4.1"}
+(fact "supports transitional shell callback arglists"
+  
+  (notify/wait-on :js
+    (do:> (xt/x:shell "printf hello"
+                      {:success (fn [res]
+                                  (repl/notify res))
+                       :error   (fn [err]
+                                  (repl/notify "ERR"))})))
+  => #"hello")
+
+^{:refer xt.lang.spec-base/x:thread-spawn :added "4.1"}
 (fact "spawns js promise-backed threads"
 
   (notify/wait-on :js
-    (-> (xt/x:thread-spawn (fn []
-                             (return "OK")))
-        (. (then (repl/>notify)))))
+    (xt/x:thread-spawn (fn []
+                         (repl/notify "OK"))))
   => "OK")
 
 ^{:refer xt.lang.common-spec/x:thread-join :added "4.1"}
@@ -1591,23 +1550,34 @@
 (fact "delays asynchronous js computations"
 
   (notify/wait-on :js
-    (-> (xt/x:with-delay (fn []
-                           (return "LATER"))
-                         20)
-        (. (then (repl/>notify)))))
+    (xt/x:with-delay 20
+                     (fn []
+                       (repl/notify "OK"))
+                     ))
   => "LATER")
 
 ^{:refer xt.lang.common-spec/x:start-interval :added "4.1"}
-(fact "keeps the start-interval wrapper intact"
+(fact "starts an interval handle"
 
-  (:arglists (meta #'xt/x:start-interval))
-  => '([ms f]))
+  ^{:seedgen/base {:python {:suppress true}}}
+  (notify/wait-on :js
+    (var it nil)
+    (:= it
+        (xt/x:start-interval
+         50
+         (fn []
+           (xt/x:stop-interval it)
+           (repl/notify "hello")))))
+  => "hello")
 
 ^{:refer xt.lang.common-spec/x:stop-interval :added "4.1"}
-(fact "keeps the stop-interval wrapper intact"
+(fact "stops an interval handle"
 
-  (:arglists (meta #'xt/x:stop-interval))
-  => '([id]))
+  ^{:seedgen/base {:python {:suppress true}}}
+  (!.js
+    (var it (xt/x:start-interval (fn []) 50))
+    (xt/x:stop-interval it))
+  => nil)
 
 ^{:refer xt.lang.common-spec/x:uri-encode :added "4.1"}
 (fact "encodes uri components"

@@ -6,7 +6,7 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.db :as impl]
-             [xt.lang.common-spec :as xt]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-string :as str]
              [xt.lang.common-repl :as repl]

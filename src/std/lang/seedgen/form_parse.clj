@@ -225,4 +225,4 @@
    (std.lang.seedgen.form-parse/seedgen-readforms 'xt.sample.train-002-test
                                                   {}))
   => '{:globals {}
-       :entries {xt.lang.common-spec/example.B {:status ... }}})
+       :entries {xt.lang.spec-base/example.B {:status ... }}})

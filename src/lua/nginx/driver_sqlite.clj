@@ -4,7 +4,7 @@
              [xt.sys.conn-dbsql :as dbsql]))
 
 (l/script :lua
-  {:import [["lsqlite3" :as ngxsqlite]] :require [[xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd]]})
+  {:import [["lsqlite3" :as ngxsqlite]] :require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]]})
 
 (f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ngxsqlite"

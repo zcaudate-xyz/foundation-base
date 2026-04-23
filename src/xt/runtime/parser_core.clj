@@ -3,7 +3,7 @@
   (:refer-clojure :exclude [read read-string]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]
+  {:require [[xt.lang.spec-base :as xt]
              [xt.runtime.parser-common :as pc]
              [xt.runtime.parser-forms :as forms]
              [xt.runtime.reader :as rdr]]})

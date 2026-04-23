@@ -3,7 +3,7 @@
 
 (l/script :xtalk
   {:require [[xt.cell.service.db-view :as db-view]
-             [xt.lang.common-spec :as xt]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.db :as xdb]
              [xt.db.base-check :as check]

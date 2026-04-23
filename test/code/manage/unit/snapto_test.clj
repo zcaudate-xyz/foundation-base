@@ -5,7 +5,7 @@
   (:use code.test))
 
 (def +wrong-fact+
-  "^{:refer xt.lang.common-spec/x:str-replace, :added \"4.1\"}
+  "^{:refer xt.lang.spec-base/x:str-replace, :added \"4.1\"}
 (fact
  \"replaces matching substrings\"
  (!.lua (xt/x:str-replace \"hello-world\" \"-\" \"/\"))
@@ -16,7 +16,7 @@
  \"hello-world\")")
 
 (def +right-fact+
-  "^{:refer xt.lang.common-spec/x:str-replace, :added \"4.1\"}
+  "^{:refer xt.lang.spec-base/x:str-replace, :added \"4.1\"}
 (fact \"replaces matching substrings\"
 
   (!.lua (xt/x:str-replace \"hello-world\" \"-\" \"/\"))

@@ -6,7 +6,7 @@
   [xt.lang.common-notify :as notify])
  (:use code.test))
 
-(l/script- :r {:runtime :basic, :require [[xt.lang.common-repl :as k]]})
+(l/script- :r {:runtime :basic, :require [[xt.lang.common-repl :as repl]]})
 
 (defn decode-output [x] (if (string? x) (json/read x) x))
 
@@ -32,7 +32,7 @@
 (fact
  "evaluates a returns a string"
  ^{:hidden true}
- (decode-output (!.R (k/return-eval "1")))
+ (decode-output (!.R ([xt.lang.common-repl :as repl] "1")))
  =>
  {"key" nil, "id" nil, "value" 1, "type" "data"})
 

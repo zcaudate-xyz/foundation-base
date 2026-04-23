@@ -7,7 +7,7 @@
              [xt.db.base-scope :as scope]
              [xt.db.impl-cache :as impl-cache]
              [xt.db.impl-sql :as impl-sql]
-             [xt.lang.common-spec :as xt]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.util-throttle :as th]
              [xt.sys.conn-dbsql :as conn-dbsql]]})

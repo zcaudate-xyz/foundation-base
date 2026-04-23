@@ -9,7 +9,7 @@
              [xt.runtime.type-hashmap :as hm]
              [xt.runtime.interface-common :as ic]
              [xt.lang.common-iter :as it]
-             [xt.lang.common-spec :as xt]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]]})
 
 (l/script- :lua
@@ -18,7 +18,7 @@
              [xt.runtime.type-hashmap :as hm]
              [xt.runtime.interface-common :as ic]
              [xt.lang.common-iter :as it]
-             [xt.lang.common-spec :as xt]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]]})
 
 (fact:global

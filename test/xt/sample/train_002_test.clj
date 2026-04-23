@@ -8,11 +8,11 @@
 ^{:seedgen/root         {:all true}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.common-spec :as xt]]})
+   :require [[xt.lang.spec-base :as xt]]})
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.lang.common-spec :as xt]]})
+   :require [[xt.lang.spec-base :as xt]]})
 
 (fact:global ;; this should be a scaffold form
  {:setup [(l/rt:restart)    
@@ -26,7 +26,7 @@
 
 (l/! :db (+ 1 2 3))    ;; this is also a scaffold form
 
-^{:refer xt.lang.common-spec/for:array :added "4.1"
+^{:refer xt.lang.spec-base/for:array :added "4.1"
   :setup    [(def +a+ (+ 1 2 3))
              (!.js (+ 1 2 3))
              ^{:seedgen/derived   {:lang :lua}} ;; this is derived the meta is optional

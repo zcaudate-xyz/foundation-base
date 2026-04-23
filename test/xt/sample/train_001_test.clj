@@ -5,13 +5,13 @@
 ^{:seedgen/root     {:all true}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.common-spec :as xt]]})
+   :require [[xt.lang.spec-base :as xt]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.lang.common-spec/for:array :added "4.1"
+^{:refer xt.lang.spec-base/for:array :added "4.1"
   :setup [(!.js (+ 1 2 3 ))]}
 (fact "iterates arrays in order"
   

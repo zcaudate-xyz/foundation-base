@@ -5,13 +5,13 @@
 ^{:seedgen/root     {:all true}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.common-spec :as xt]]})
+   :require [[xt.lang.spec-base :as xt]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.lang.common-spec/x:return-eval :added "4.1"}
+^{:refer xt.lang.spec-base/x:return-eval :added "4.1"}
 (fact "evaluates code through wrapped return handlers"
 
  ^{:seedgen/base     {:python  {:suppress true}}}

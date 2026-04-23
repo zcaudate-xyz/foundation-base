@@ -8,7 +8,7 @@
 
 (l/script-
  :python
- {:runtime :basic, :require [[xt.lang.common-repl :as k]]})
+ {:runtime :basic, :require [[xt.lang.common-repl :as repl]]})
 
 (defn decode-output [x] (if (string? x) (json/read x) x))
 
@@ -35,7 +35,7 @@
 (fact
  "evaluates a returns a string"
  ^{:hidden true}
- (decode-output (!.py (k/return-eval "globals()[\"OUT\"] = 1")))
+ (decode-output (!.py ([xt.lang.common-repl :as repl] "globals()[\"OUT\"] = 1")))
  =>
  {"key" nil, "id" nil, "value" 1, "type" "data"})
 

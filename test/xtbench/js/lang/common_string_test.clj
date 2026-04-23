@@ -7,7 +7,7 @@
  :js
  {:runtime :basic,
   :require
-  [[xt.lang.common-string :as xts] [xt.lang.common-spec :as xt]]})
+  [[xt.lang.common-string :as xts] [xt.lang.spec-base :as xt]]})
 
 (fact:global {:setup [(l/rt:restart)], :teardown [(l/rt:stop)]})
 

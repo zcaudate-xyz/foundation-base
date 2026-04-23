@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:export [MODULE] :require [[js.cell.service :as service] [xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd]]})
+  {:export [MODULE] :require [[js.cell.service :as service] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]]})
 
 (defn.xt resolve-section
   "resolves a named db inside a descriptor section"

@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd] [xt.lang.event-route :as event-route] [js.react :as r] [js.core :as j]]})
+  {:require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.event-route :as event-route] [js.react :as r] [js.core :as j]]})
 
 (defn.js makeRoute
   "makes a react compatible route"

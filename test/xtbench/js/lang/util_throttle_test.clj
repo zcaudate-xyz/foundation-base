@@ -11,7 +11,7 @@
  {:runtime :basic,
   :require
   [[xt.lang.common-lib :as k]
-   [xt.lang.common-spec :as xt]
+   [xt.lang.spec-base :as xt]
    [xt.lang.util-throttle :as throttle]
    [xt.lang.common-repl :as repl]]})
 

@@ -185,7 +185,7 @@
   ;; ^{:seedgen/root     {:all true}}
   ;; (l/script- :js
   ;;            {:runtime :basic
-  ;;             :require [[xt.lang.common-spec :as xt]]})
+  ;;             :require [[xt.lang.spec-base :as xt]]})
   
   
   (code.project/in-context
@@ -229,7 +229,7 @@
   ;; ^{:seedgen/root     {:all true}}
   ;; (l/script- :js
   ;;            {:runtime :basic
-  ;;             :require [[xt.lang.common-spec :as xt]]})
+  ;;             :require [[xt.lang.spec-base :as xt]]})
   
   
   (code.project/in-context

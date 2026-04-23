@@ -5,7 +5,7 @@
 
 (l/script :js
   {:require [[js.core :as j]
-              [xt.lang.common-spec :as xt]
+              [xt.lang.spec-base :as xt]
               [xt.lang.common-string :as str]]})
 
 (defn.js compile

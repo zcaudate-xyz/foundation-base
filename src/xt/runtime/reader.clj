@@ -3,7 +3,7 @@
   (:refer-clojure :exclude [slurp]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]]})
+  {:require [[xt.lang.spec-base :as xt]]})
 
 (defn.xt impl-char-at
   "returns a one-character string at the current reader offset"

@@ -7,7 +7,7 @@
  :lua
  {:runtime :basic,
   :require
-  [[xt.lang.common-spec :as xt]
+  [[xt.lang.spec-base :as xt]
    [xt.lang.common-data :as xtd]
    [xt.db.base-flatten :as f]
    [xt.db.base-schema :as sch]

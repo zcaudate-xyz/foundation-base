@@ -48,22 +48,22 @@
                       "^{:seedgen/root {:all true}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "(l/script- :lua {:runtime :basic})\n\n"
-                      "^{:refer xt.lang.common-spec/example.A :added \"4.1\"\n"
+                      "^{:refer xt.lang.spec-base/example.A :added \"4.1\"\n"
                       "  :setup [(!.js (+ 1 2 3))]}\n"
                       "(fact \"covered from setup\"\n"
                       "  \"TODO\")\n\n"
-                      "^{:refer xt.lang.common-spec/example.B :added \"4.1\"}\n"
+                      "^{:refer xt.lang.spec-base/example.B :added \"4.1\"}\n"
                       "(fact \"TODO\")\n\n"
-                      "^{:refer xt.lang.common-spec/example.C :added \"4.1\"\n"
+                      "^{:refer xt.lang.spec-base/example.C :added \"4.1\"\n"
                       "  :teardown [(!.lua (+ 1 2 3))]}\n"
                       "(fact \"covered from teardown\"\n"
                       "  \"TODO\")\n\n"
-                      "^{:refer xt.lang.common-spec/example.D :added \"4.1\"}\n"
+                      "^{:refer xt.lang.spec-base/example.D :added \"4.1\"}\n"
                       "(fact \"covered from notify wait\"\n"
                       "  (notify/wait-on :dt\n"
                       "    (repl/notify 1))\n"
                       "  \"TODO\")\n\n"
-                      "^{:refer xt.lang.common-spec/example.E :added \"4.1\"}\n"
+                      "^{:refer xt.lang.spec-base/example.E :added \"4.1\"}\n"
                       "(fact \"covered from matching notify wait\"\n"
                       "  (notify/wait-on :js\n"
                       "    (repl/notify 1))\n"
@@ -73,9 +73,9 @@
            set)
       (finally
         (.delete tmp))))
-  => #{'xt.lang.common-spec/example.B
-       'xt.lang.common-spec/example.C
-       'xt.lang.common-spec/example.D}
+  => #{'xt.lang.spec-base/example.B
+       'xt.lang.spec-base/example.C
+       'xt.lang.spec-base/example.D}
 
   (-> (project/in-context
        (seed-infile/seedgen-incomplete 'xt.sample.train-004-test {}))

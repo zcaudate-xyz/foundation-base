@@ -5,7 +5,7 @@
                             neg? even? odd?]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]
+  {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-string :as str]]})
 
@@ -155,22 +155,14 @@
 (defn.xt proto-get
   "creates the prototype map"
   {:added "4.0"}
-  ([obj key]
-   (return (xt/x:proto-get obj key))))
+  ([obj]
+   (return (xt/x:proto-get obj))))
 
 (defn.xt proto-set
   "creates the prototype map"
   {:added "4.0"}
-  ([obj key value]
-   (return (xt/x:proto-set obj key value))))
-
-(defn.xt proto-tostring
-  "creates the prototype map"
-  {:added "4.0"}
-  ([obj]
-   (return (xt/x:proto-tostring obj))))
-
-
+  ([obj proto]
+   (return (xt/x:proto-set obj proto))))
 
 ;;
 ;; FN.BASIC
@@ -349,8 +341,32 @@
     (:= callbacks {}))
   (var result-fn
        (fn [result]
-          (var f (xt/x:get-key callbacks key))
+         (var f (xt/x:get-key callbacks key))
          (if (xt/x:not-nil? f)
            (return (f result))
            (return result))))
   (return result-fn))
+
+;;
+;; RETURN
+;;
+
+(defn.xt return-encode
+  "returns the encoded"
+  {:added "4.0"}
+  [out id key]
+  (xt/x:return-encode out id key))
+
+(defn.xt return-wrap
+  "returns a wrapped call"
+  {:added "4.0"}
+  [f]
+  (xt/x:return-wrap f -/return-encode))
+
+(defn.xt return-eval
+  "evaluates a returns a string"
+  {:added "4.0"}
+  [s]
+  (xt/x:return-eval s -/return-wrap))
+
+

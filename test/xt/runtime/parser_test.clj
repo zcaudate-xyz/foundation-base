@@ -5,7 +5,7 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.common-spec :as xt]
+   :require [[xt.lang.spec-base :as xt]
              [xt.runtime.interface-common :as ic]
              [xt.runtime.parser-common :as pc]
              [xt.runtime.parser :as p]
@@ -21,7 +21,7 @@
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.lang.common-spec :as xt]
+   :require [[xt.lang.spec-base :as xt]
              [xt.runtime.interface-common :as ic]
              [xt.runtime.parser-common :as pc]
              [xt.runtime.parser :as p]

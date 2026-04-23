@@ -3,7 +3,7 @@
   (:refer-clojure :exclude [first second nth last get-in]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]]})
+  {:require [[xt.lang.spec-base :as xt]]})
 
 ;;
 ;; LOOKUP

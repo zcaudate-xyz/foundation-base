@@ -9,7 +9,7 @@
   :require
   [[xt.lang.common-iter :as it]
    [xt.lang.common-lib :as k]
-   [xt.lang.common-spec :as xt]]})
+   [xt.lang.spec-base :as xt]]})
 
 (fact:global {:setup [(l/rt:restart)], :teardown [(l/rt:stop)]})
 

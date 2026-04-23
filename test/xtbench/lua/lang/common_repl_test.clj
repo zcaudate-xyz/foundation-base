@@ -8,7 +8,7 @@
 
 (l/script-
  :lua
- {:runtime :basic, :require [[xt.lang.common-repl :as k]]})
+ {:runtime :basic, :require [[xt.lang.common-repl :as repl]]})
 
 (defn decode-output [x] (if (string? x) (json/read x) x))
 
@@ -35,7 +35,7 @@
 (fact
  "evaluates a returns a string"
  ^{:hidden true}
- (decode-output (!.lua (k/return-eval "return 1")))
+ (decode-output (!.lua ([xt.lang.common-repl :as repl] "return 1")))
  =>
  {"value" 1, "type" "data"})
 

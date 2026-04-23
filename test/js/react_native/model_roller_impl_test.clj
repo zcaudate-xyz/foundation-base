@@ -17,7 +17,7 @@
               [js.react-native.model-roller :as model-roller]
               [js.react-native.physical-edit :as physical-edit]
               [xt.lang.common-data :as xtd]
-              [xt.lang.common-spec :as xt]
+              [xt.lang.spec-base :as xt]
               [xt.lang.common-math :as math]]
     })
 
