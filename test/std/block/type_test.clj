@@ -155,7 +155,6 @@
   (code-block? (construct/token '+))
   => true)
 
-^{:refer std.block.type/void-block? :added "4.0"}
 (fact "predicates remain stable after resetting std.block.type"
   (let [space     (construct/space)
         token     (construct/token 1)
