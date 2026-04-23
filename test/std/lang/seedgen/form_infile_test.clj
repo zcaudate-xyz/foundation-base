@@ -1,6 +1,7 @@
 (ns std.lang.seedgen.form-infile-test
   (:use code.test)
-  (:require [std.lang.seedgen.common-util :as common]
+  (:require [clojure.string :as str]
+            [std.lang.seedgen.common-util :as common]
             [std.lang.seedgen.common-infile :as common-infile]
             [std.lang.seedgen.form-infile :as form-infile]))
 
@@ -415,6 +416,34 @@
       (finally
         (.delete tmp))))
   => "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]))\n\n^{:seedgen/root {:all true, :langs [:lua :python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :lua {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.common-spec/example-g :added \"4.1\"\n  :setup [^{:seedgen/base {:lua {:input (!.lua (setup-lua))}}}\n(!.js (setup-js))\n          (!.lua (setup-lua))\n          (!.py (setup-js))]}\n(fact \"setup can be customised\"\n\n  (!.js 1)\n  => 1\n\n  (!.lua 1)\n  => 1\n\n  (!.py 1)\n  => 1)\n"
+
+  (let [tmp (java.io.File/createTempFile "seedgen-langadd-scaffold-meta" ".clj")
+        path (.getAbsolutePath tmp)
+        root (.getParent tmp)
+        lookup {'sample.add-test path}
+        project {:root root}]
+    (try
+      (spit path (str "(ns sample.add-test\n"
+                      "  (:use code.test)\n"
+                      "  (:require [std.lang :as l]))\n\n"
+                      "^{:seedgen/root {:all true, :langs [:lua :python]}}\n"
+                      "(l/script- :js {:runtime :basic})\n\n"
+                      "^{:refer xt.lang.spec-base/example-h :added \"4.1\"\n"
+                      "  :setup [(def +s+ (apply str (repeat 5 \"1234567890\")))\n"
+                      "          (def +out+ [\"1234567890\" \"1234567890\" \"1234567890\" \"1234567890\" \"1234567890\"])]\n"
+                      "  :teardown [(def +done+ true)]}\n"
+                      "(fact \"scaffold setup is preserved\"\n\n"
+                      "  (!.js 1)\n"
+                      "  => 1)\n"))
+      (form-infile/seedgen-langadd 'sample.add-test {:write true} lookup project)
+      (let [output (slurp path)]
+        [(str/includes? output ":setup [(def +s+ (apply str (repeat 5 \"1234567890\")))\n          (def +out+ [\"1234567890\" \"1234567890\" \"1234567890\" \"1234567890\" \"1234567890\"])]")
+         (str/includes? output ":teardown [(def +done+ true)]")
+         (str/includes? output "(!.lua 1)\n  => 1")
+         (str/includes? output "(!.py 1)\n  => 1")])
+      (finally
+        (.delete tmp))))
+  => [true true true true]
 
 ^{:refer std.lang.seedgen.form-infile/seedgen-langremove :added "4.1"}
 (fact "purges targeted seedgen runtimes while preserving the seedgen root"
