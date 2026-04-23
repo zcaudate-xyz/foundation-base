@@ -209,6 +209,16 @@
    :mopts mopts
    :reserved reserved})
 
+(defn expand-reserved-form-fallback
+  "fallback chain for reserved form expansion"
+  {:added "4.1"}
+  [form reserved]
+  (or (when-let [macro (:macro reserved)]
+        (macro form))
+      (when (and (:raw reserved)
+                 (#{:alias :hard-link} (:emit reserved)))
+        (cons (:raw reserved) (rest form)))))
+
 (defn expand-reserved-form
   "expands a reserved form using context-aware hooks when available"
   {:added "4.1"}
@@ -220,11 +230,7 @@
      (let [ctx (reserved-expand-context :form form grammar modules mopts reserved)]
        (or (when-let [expand (:expand/form reserved)]
              (expand ctx))
-           (when-let [macro (:macro reserved)]
-             (macro form))
-           (when (and (:raw reserved)
-                      (#{:alias :hard-link} (:emit reserved)))
-             (cons (:raw reserved) (rest form))))))))
+           (expand-reserved-form-fallback form reserved))))))
 
 (defn expand-reserved-assign
   "expands a reserved form for assignment-aware lowering"
@@ -238,6 +244,19 @@
        (or (when-let [expand (:expand/assign reserved)]
              (expand ctx))
            (expand-reserved-form form grammar modules mopts))))))
+
+(defn wrap-value-standalone
+  "wraps a lifted reserved value as a callable fn"
+  {:added "4.1"}
+  [args expanded return-mode]
+  (case return-mode
+    :self (let [self-arg (first args)]
+            (list 'fn args
+                  expanded
+                  (list 'return self-arg)))
+    :statement (list 'fn args expanded)
+    (list 'fn args
+          (list 'return expanded))))
 
 (defn value-standalone
   "returns the standalone expansion for a value-liftable reserved symbol"
@@ -261,18 +280,12 @@
 
            (and (= true expand-value)
                 (seq args))
-           (let [expanded (expand-reserved-form (apply list sym args)
-                                                grammar
-                                                modules
-                                                mopts)]
-             (case return-mode
-               :self (let [self-arg (first args)]
-                       (list 'fn args
-                             expanded
-                             (list 'return self-arg)))
-               :statement (list 'fn args expanded)
-               (list 'fn args
-                     (list 'return expanded))))
+           (wrap-value-standalone args
+                                  (expand-reserved-form (apply list sym args)
+                                                        grammar
+                                                        modules
+                                                        mopts)
+                                  return-mode)
 
            (or (collection/form? standalone)
                (symbol? standalone))
@@ -285,14 +298,9 @@
                               (when (= :macro emit)
                                 macro))
                  args     (value-template-args template)]
-             (if (= :self return-mode)
-               (let [self-arg (first args)]
-                 (list 'fn args
-                       (template (apply list nil args))
-                       (list 'return self-arg)))
-               (list 'fn args
-                     (list 'return
-                           (template (apply list nil args))))))
+             (wrap-value-standalone args
+                                    (template (apply list nil args))
+                                    return-mode))
 
            :else
            nil))))

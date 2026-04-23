@@ -346,6 +346,24 @@
                         {:tag :form})
   => '(quote [(hello 1) :form])
 
+  (expand-reserved-form '(hello 1 2)
+                        {:reserved {'hello {:emit :macro
+                                            :macro (fn [[_ a b]]
+                                                     (list '+ a b))}}}
+                        {})
+  => '(+ 1 2)
+
+  (expand-reserved-form '(hello 1 2)
+                        {:reserved {'hello {:emit :alias
+                                            :raw 'world}}}
+                        {})
+  => '(world 1 2)
+
+  (expand-reserved-form '(hello 1)
+                        {:reserved {'hello {:emit :abstract}}}
+                        {})
+  => nil
+
   (value-standalone 'hello
                     {:reserved {'hello {:expand/value (fn [{:keys [symbol mopts]}]
                                                         (list 'quote [symbol (:tag mopts)]))}}}

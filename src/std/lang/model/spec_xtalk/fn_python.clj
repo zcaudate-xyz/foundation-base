@@ -1,5 +1,6 @@
 (ns std.lang.model.spec-xtalk.fn-python
-  (:require [std.lib.template :as template]))
+  (:require [std.lang.base.emit-preprocess :as preprocess]
+            [std.lib.template :as template]))
 
 (defn python-tf-x-del
   [[_ obj]]
@@ -121,13 +122,13 @@
                      (fn [{:keys [form]}]
                        (python-tf-x-proto-set form)))]
     (list 'fn args
-          (expand {:mode :form
-                   :form form
-                   :symbol symbol
-                   :grammar grammar
-                   :modules modules
-                   :mopts mopts
-                   :reserved (get-in grammar [:reserved symbol])}))))
+          (expand (preprocess/reserved-expand-context
+                   :form
+                   form
+                   grammar
+                   modules
+                   mopts
+                   (get-in grammar [:reserved symbol]))))))
 
 (defn python-tf-x-proto-tostring
   [[_ _]]
