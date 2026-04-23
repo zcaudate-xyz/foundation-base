@@ -92,12 +92,16 @@
 
 (defn emit-options
   "create emit options
- 
+  
    (emit-options {:lang :lua})
    => vector?"
   {:added "4.0"}
   [{:keys [lang library snapshot emit] :as meta}]
-  (let [_ (assert (identity lang) "Lang Required")
+  (let [meta (merge (select-keys (preprocess/macro-opts)
+                                 [:library :snapshot :module :layout])
+                    meta)
+        {:keys [lang library snapshot emit]} meta
+        _ (assert (identity lang) "Lang Required")
         [snapshot book] (emit-options-raw library snapshot lang)]
     (emit/prep-options (assoc meta
                               :book book

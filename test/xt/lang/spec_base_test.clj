@@ -234,21 +234,21 @@
 ^{:refer xt.lang.spec-base/for:async :added "4.1"}
 (fact "expands to the canonical async form"
 
-  (notify/wait-on :js
-    (xt/for:async [[ok err] (xt/return-run [resolve reject]
-                              (resolve "OK"))]
-      {:success (repl/notify ok)
-       :error   (repl/notify err)
-       :finally (return true)}))
-  => "OK"
+  ^{:seedgen/base    {:lua  {:suppress true}}}
+  [(notify/wait-on :js
+     (xt/for:async [[ok err] (xt/return-run [resolve reject]
+                               (resolve "OK"))]
+       {:success (repl/notify ok)
+        :error   (repl/notify err)
+        :finally (return true)}))
 
-  (notify/wait-on :js
-    (xt/for:async [[ok err] (xt/return-run [resolve reject]
-                              (reject "ERR"))]
-      {:success (repl/notify ok)
-       :error   (repl/notify err)
-       :finally (return true)}))
-  => "ERR"
+   (notify/wait-on :js
+     (xt/for:async [[ok err] (xt/return-run [resolve reject]
+                               (reject "ERR"))]
+       {:success (repl/notify ok)
+        :error   (repl/notify err)
+        :finally (return true)}))]
+  => ["OK" "ERR"]
   
   (notify/wait-on :python
     (xt/for:async [[ok err] (xt/return-run [resolve reject]
@@ -259,22 +259,6 @@
   => "OK"
 
   (notify/wait-on :python
-    (xt/for:async [[ok err] (xt/return-run [resolve reject]
-                              (reject "ERR"))]
-      {:success (repl/notify ok)
-       :error   (repl/notify err)
-       :finally (return true)}))
-  => "ERR"
-
-  (notify/wait-on :lua
-    (xt/for:async [[ok err] (xt/return-run [resolve reject]
-                              (resolve "OK"))]
-      {:success (repl/notify ok)
-       :error   (repl/notify err)
-       :finally (return true)}))
-  => "OK"
-
-  (notify/wait-on :lua
     (xt/for:async [[ok err] (xt/return-run [resolve reject]
                               (reject "ERR"))]
       {:success (repl/notify ok)
@@ -609,26 +593,30 @@
 ^{:refer xt.lang.spec-base/x:type-native :added "4.1"}
 (fact "expands and emits the lua type helper"
 
+  ^{:seedgen/base    {:lua  {:expect ["object" "object" "array"]}}}
   (!.js
     (var type-fn (fn [obj]
                    (xt/x:type-native obj)))
     [(type-fn {})
-     (type-fn [])])
-  => ["object" "array"]
+     (type-fn [])
+     (type-fn [1])])
+  => ["object" "array" "array"]
 
   (!.py
     (var type-fn (fn [obj]
                    (xt/x:type-native obj)))
     [(type-fn {})
-     (type-fn [])])
-  => ["object" "array"]
+     (type-fn [])
+     (type-fn [1])])
+  => ["object" "array" "array"]
 
   (!.lua
     (var type-fn (fn [obj]
                    (xt/x:type-native obj)))
     [(type-fn {})
-     (type-fn [])])
-  => ["object" "array"])
+     (type-fn [])
+     (type-fn [1])])
+  => ["object" "object" "array"])
 
 ^{:refer xt.lang.spec-base/x:offset :added "4.1"}
 (fact "uses the grammar base offset"
@@ -1899,16 +1887,9 @@
 (fact "gets a substring"
 
   (!.js
-    (xt/x:str-substring "hello/world" (xt/x:offset 3) 8))
-  => "lo/wo"
-
-  (!.py
-    (xt/x:str-substring "hello/world" (xt/x:offset 3) 8))
-  => "lo/wo"
-
-  (!.lua
-    (xt/x:str-substring "hello/world" (xt/x:offset 3) 8))
-  => "lo/wo")
+    [(xt/x:str-substring "hello/world" (xt/x:offset 3))
+     (xt/x:str-substring "hello/world" (xt/x:offset 3) 8)])
+  => ["lo/world" "lo/wo"])
 
 ^{:refer xt.lang.spec-base/x:str-to-upper :added "4.1"}
 (fact "converts a string to upper case"

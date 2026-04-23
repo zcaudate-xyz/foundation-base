@@ -893,7 +893,7 @@
   "gets a substring"
   {:added "4.1"}
   ([value start] (list (quote x:str-substring) value start)) 
-  ([value start len] (list (quote x:str-substring) value start len)))
+  ([value start finish] (list (quote x:str-substring) value start finish)))
 
 (defspec.xt x:str-to-upper [:fn [:xt/str] :xt/str])
 

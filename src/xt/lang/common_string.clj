@@ -37,13 +37,16 @@
    (return (- (xt/x:str-index-of s tok 0)
               (xt/x:offset 0)))))
 
+(defspec.xt substring
+  [:fn [:xt/str :xt/num [:xt/maybe :xt/num]] :xt/str])
+
 (defn.xt substring
   "gets the substring"
   {:added "4.0"}
   ([s start finish]
    (return (xt/x:str-substring s
-                                (xt/x:offset start)
-                                finish))))
+                               (xt/x:offset start)
+                               finish))))
 
 (defn.xt to-uppercase
   "converts string to uppercase"
