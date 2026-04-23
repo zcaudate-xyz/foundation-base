@@ -269,7 +269,9 @@
   [view]
   (var #{pipeline options} view)
   (var #{input} view)
-  (var context-opts (or (xt/x:get-key options "context") {}))
+  (var context-opts (xt/x:get-key options "context"))
+  (when (xt/x:nil? context-opts)
+    (:= context-opts {}))
   (var context  (xt/x:obj-assign
                  {:view  view
                    :input (. input ["current"])}
@@ -754,7 +756,7 @@
            (xtd/arr-sort arr
                          (fn [e]
                            (return (xt/x:get-key e sort-key)))
-                         xt/x:str-lt)))})))))
+                         xt/x:lt)))})))))
 
 (defn.xt group-by-lookup
   "creates group-by lookup"

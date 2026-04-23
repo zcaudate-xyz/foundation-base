@@ -35,7 +35,7 @@
    ref
    ind
    f]
-  (:= f (or f (fn [_] (return {}))))
+  (:= f (:? (xt/x:nil? f) (fn [_] (return {})) f))
   (var #{add-listener
          set-props
          get-value} impl)
@@ -55,17 +55,17 @@
    ref
    arr
    f]
-  (:= f (or f (fn [_] (return {}))))
+  (:= f (:? (xt/x:nil? f) (fn [_] (return {})) f))
   (var #{add-listener
          set-props
          get-value} impl)
   (var trigger-fn
        (fn [_]
-         (var vals  (xt/x:arr-map arr get-value))
-         (var props (xt/x:apply f vals))
-         (when (and (xt/x:not-nil? ref) (xt/x:has-key? ref "current"))
-           (set-props (. ref ["current"]) props))
-         (return props)))
+          (let [vals  (xt/x:arr-map arr get-value)
+                props (xt/x:apply f vals)]
+              (when (and (xt/x:not-nil? ref) (xt/x:has-key? ref "current"))
+                (set-props (. ref ["current"]) props))
+             (return props))))
   (xt/for:array [ind arr]
     (add-listener ind trigger-fn))
   (return (trigger-fn nil)))
@@ -77,8 +77,8 @@
    m
    parent
    all]
-  (:= parent (or parent []))
-  (:= all (or all []))
+  (:= parent (:? (xt/x:nil? parent) [] parent))
+  (:= all (:? (xt/x:nil? all) [] all))
   (var #{is-animated} impl)
   (xt/for:object [[k x] m]
     (cond (is-animated x)
@@ -105,27 +105,24 @@
   (var out {})
   (xt/for:array [e paths]
     (var [path key v] e)
-    (var val nil)
+    (var val {})
     (when (and (xt/x:not-nil? v)
                (not= false v))
       (:= val (get-value v)))
-    (when (== false v)
-      (:= val {}))
-    (var entry {})
-    (if (or (xt/x:nil? path)
-            (== 0 (xt/x:len path)))
-      (xt/x:set-key entry key val)
-      (do (var leaf {})
-          (xt/x:set-key leaf key val)
-          (xtd/set-in entry path leaf)))
-    (xtd/obj-assign-nested out entry))
+    (cond (or (xt/x:nil? path)
+              (== 0 (xt/x:len path)))
+          (xt/x:set-key out key val)
+          
+          :else
+          (xt/x:set-key (xtd/get-in out path)
+                        key val)))
   (return out))
 
 (defn.xt listen-map
   "listens to a map of indicators"
   {:added "4.0"}
   [impl ref m f]
-  (:= f (or f (fn [_] (return {}))))
+  (:= f (:? (xt/x:nil? f) (fn [_] (return {})) f))
   (var #{add-listener
          set-props} impl)
   (var paths      (-/get-map-paths impl m))

@@ -737,11 +737,11 @@
         :else
         (return (== src dst))))
 
-(defn.xt eq-shallow-raw
+(defn.xt eq-nested-basic
   "basic shallow equality comparator"
   {:added "4.1"}
   [src dst eq-obj eq-arr cache]
-  (return (xt/x:lu-eq src dst)))
+  (return (== src dst)))
 
 (defn.xt eq-shallow
   "checks for shallow equality"
@@ -749,8 +749,8 @@
   [obj m]
   (return (-/eq-nested-loop
            obj m
-           -/eq-shallow-raw
-           -/eq-shallow-raw
+           -/eq-nested-basic
+           -/eq-nested-basic
            nil)))
 
 
