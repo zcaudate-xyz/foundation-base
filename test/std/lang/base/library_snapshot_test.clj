@@ -284,7 +284,7 @@
                      (b/book {:lang :lua.redis
                               :meta    (meta/book-meta {})
                               :grammar (assoc lua/+grammar+
-                                               :tag :lua)}))
+                                               :tag :lua.redis)}))
   => vector?)
 
 (comment
