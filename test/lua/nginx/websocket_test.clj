@@ -6,7 +6,7 @@
             [std.lang :as l])
   (:use code.test))
 
-(l/script- :lua
+(l/script- :lua.nginx
   {:runtime :nginx.instance
    :require [[lua.nginx :as n]
               [lua.nginx.websocket :as ws]
@@ -210,7 +210,7 @@
   (def -out- (atom []))
 
   (def -ws- @(client/websocket (str "ws://localhost:"
-                                    (:port (l/rt:inner :lua))
+                                    (:port (l/rt:inner :lua.nginx))
                                     "/eval/ws")
                                {:on-message  (fn [ws data _]
                                                (swap! -out- conj (str data)))}))
@@ -251,7 +251,7 @@
   (def -out- (atom []))
 
   (def -ws- @(client/websocket (str "ws://localhost:"
-                                    (:port (l/rt:inner :lua))
+                                    (:port (l/rt:inner :lua.nginx))
                                     "/eval/ws")
                                {:on-message  (fn [ws data _]
                                                (swap! -out- conj (str data)))}))
@@ -286,7 +286,7 @@
   => 0
 
   (def -ws- @(client/websocket (str "ws://localhost:"
-                                    (:port (l/rt:inner :lua))
+                                    (:port (l/rt:inner :lua.nginx))
                                     "/eval/ws")
                                {:on-message  (fn [ws data _]
                                                (swap! -out- conj (str data)))}))

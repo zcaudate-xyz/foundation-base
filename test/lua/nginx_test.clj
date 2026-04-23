@@ -4,7 +4,7 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-(l/script- :lua
+(l/script- :lua.nginx
   {:runtime :nginx.instance
    :require [[lua.nginx :as n]
              [xt.lang.common-repl :as repl]]})

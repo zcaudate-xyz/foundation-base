@@ -1,7 +1,8 @@
 (ns std.lang.model.spec-lua-test
   (:require [std.lang.base.script :as script]
-            [std.lang.base.util :as ut]
-            [std.lang.model.spec-lua :refer :all])
+             [std.lang.base.util :as ut]
+             [std.lang.model.spec-lua :refer :all]
+             [std.lang.model.spec-lua.variant-nginx :as nginx])
   (:use code.test))
 
 (script/script- :lua)
@@ -148,6 +149,19 @@
                             {:success (return ok)
                              :error   (return err)
                              :finally (return true)}))
+  => '(x:thread-spawn
+        (fn []
+          (for:try [[ok err] (call (x:callback))]
+                   {:success (return ok),
+                    :error   (return err)})
+          (return true))))
+
+(fact "for async transform for nginx"
+
+  (nginx/tf-for-async '(for:async [[ok err] (call (x:callback))]
+                                  {:success (return ok)
+                                   :error   (return err)
+                                   :finally (return true)}))
   => '(ngx.thread.spawn
        (fn []
          (for:try [[ok err] (call (x:callback))]

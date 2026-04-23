@@ -2,7 +2,7 @@
   (:require [std.lang :as l]
             [std.lib.foundation :as f]))
 
-(l/script :lua
+(l/script :lua.nginx
   {:import [["resty.websocket.server" :as ngxwsserver] ["cjson" :as cjson] ["resty.websocket.server" :as ngxwsserver]] :require [[xt.lang.spec-base :as xt] [xt.sys.cache-common :as cache] [lua.nginx :as n]]})
 
 (f/template-entries [l/tmpl-macro {:base "websocket"

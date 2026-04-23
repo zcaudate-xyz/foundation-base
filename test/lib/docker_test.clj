@@ -352,7 +352,7 @@
                           :cmd    ["redis-server" "--protected-mode" "no"]}}})
   
   
-  (std.lang/script :redis
+  (std.lang/script :lua.redis
     {:runtime :redis.client
      :config {:host "172.17.0.3"}})
   

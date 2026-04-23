@@ -1,5 +1,6 @@
 (ns std.lang.model.spec-xtalk.fn-lua-test
   (:require [std.lang :as l]
+            [std.lang.model.spec-lua.variant-nginx :as nginx]
             [std.lang.model.spec-xtalk.fn-lua :refer :all])
   (:use code.test))
 
@@ -296,54 +297,63 @@
   (l/emit-as :lua [(lua-tf-x-iter-native? '[_ it])])
   => #"type")
 
-^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-cache :added "4.0"}
+^{:refer std.lang.model.spec-lua.variant-nginx/lua-tf-x-cache :added "4.0"}
 (fact "cache"
-  (l/emit-as :lua [(lua-tf-x-cache '[_ key])])
+  (l/emit-as :lua.nginx [(nginx/lua-tf-x-cache '[_ key])])
   => #"ngx.shared")
 
-^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-cache-list :added "4.0"}
+^{:refer std.lang.model.spec-lua.variant-nginx/lua-tf-x-cache-list :added "4.0"}
 (fact "cache list"
-  (l/emit-as :lua [(lua-tf-x-cache-list '[_ cache])])
+  (l/emit-as :lua.nginx [(nginx/lua-tf-x-cache-list '[_ cache])])
   => #"get_keys")
 
-^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-cache-flush :added "4.0"}
+^{:refer std.lang.model.spec-lua.variant-nginx/lua-tf-x-cache-flush :added "4.0"}
 (fact "cache flush"
-  (l/emit-as :lua [(lua-tf-x-cache-flush '[_ cache])])
+  (l/emit-as :lua.nginx [(nginx/lua-tf-x-cache-flush '[_ cache])])
   => #"flush_all")
 
-^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-cache-get :added "4.0"}
+^{:refer std.lang.model.spec-lua.variant-nginx/lua-tf-x-cache-get :added "4.0"}
 (fact "cache get"
-  (l/emit-as :lua [(lua-tf-x-cache-get '[_ cache key])])
+  (l/emit-as :lua.nginx [(nginx/lua-tf-x-cache-get '[_ cache key])])
   => #"get")
 
-^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-cache-set :added "4.0"}
+^{:refer std.lang.model.spec-lua.variant-nginx/lua-tf-x-cache-set :added "4.0"}
 (fact "cache set"
-  (l/emit-as :lua [(lua-tf-x-cache-set '[_ cache key val])])
+  (l/emit-as :lua.nginx [(nginx/lua-tf-x-cache-set '[_ cache key val])])
   => #"set")
 
-^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-cache-del :added "4.0"}
+^{:refer std.lang.model.spec-lua.variant-nginx/lua-tf-x-cache-del :added "4.0"}
 (fact "cache del"
-  (l/emit-as :lua [(lua-tf-x-cache-del '[_ cache key])])
+  (l/emit-as :lua.nginx [(nginx/lua-tf-x-cache-del '[_ cache key])])
   => #"delete")
 
-^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-cache-incr :added "4.0"}
+^{:refer std.lang.model.spec-lua.variant-nginx/lua-tf-x-cache-incr :added "4.0"}
 (fact "cache incr"
-  (l/emit-as :lua [(lua-tf-x-cache-incr '[_ cache key num])])
+  (l/emit-as :lua.nginx [(nginx/lua-tf-x-cache-incr '[_ cache key num])])
   => #"incr")
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-thread-spawn :added "4.0"}
 (fact "thread spawn"
   (l/emit-as :lua [(lua-tf-x-thread-spawn '[_ thunk])])
+  => #"coroutine.create"
+
+  (l/emit-as :lua.nginx [(nginx/lua-tf-x-thread-spawn '[_ thunk])])
   => #"ngx.thread.spawn")
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-thread-join :added "4.0"}
 (fact "thread join"
   (l/emit-as :lua [(lua-tf-x-thread-join '[_ thread])])
+  => #"coroutine.resume"
+
+  (l/emit-as :lua.nginx [(nginx/lua-tf-x-thread-join '[_ thread])])
   => #"ngx.thread.wait")
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-with-delay :added "4.0"}
 (fact "with delay"
   (l/emit-as :lua [(lua-tf-x-with-delay '[_ thunk ms])])
+  => #"socket.sleep"
+
+  (l/emit-as :lua.nginx [(nginx/lua-tf-x-with-delay '[_ thunk ms])])
   => #"ngx.thread.spawn")
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-slurp-file :added "4.1"}

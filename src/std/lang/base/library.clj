@@ -78,11 +78,14 @@
 
 (defn get-book-raw
   "gets the raw book, without merge
- 
-   (b/list-entries (lib/get-book-raw +library+ :redis))
+  
+   (b/list-entries (lib/get-book-raw +library+ :lua.redis))
    => empty?
    
-   (b/list-entries (lib/get-book +library+ :redis))
+   (b/list-entries (lib/get-book +library+ :lua.redis))
+   => coll?
+   
+   (b/list-entries (lib/get-book +library+ :lua.nginx))
    => coll?"
   {:added "4.0"}
   [lib lang]
@@ -151,13 +154,13 @@
 (defn add-module!
   "adds a module to the library
  
-   (lib/add-module! +library+ (module/book-module '{:lang :redis
+   (lib/add-module! +library+ (module/book-module '{:lang :lua.redis
                                                     :id L.redis.hello
                                                     :link {r L.redis
                                                            u L.core}}))
    => coll?
    
-   (lib/delete-module! +library+ :redis 'L.redis.hello )
+   (lib/delete-module! +library+ :lua.redis 'L.redis.hello )
    => coll?"
   {:added "4.0"}
   [lib module]

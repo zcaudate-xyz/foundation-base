@@ -37,8 +37,8 @@
   => b/book?
 
   (lib/wait-apply +library+
-                   deps/deps-ordered [:redis])
-  => '(:x :lua :redis))
+                   deps/deps-ordered [:lua.redis])
+  => '(:x :lua :lua.redis))
 
 ^{:refer std.lang.base.library/wait-mutate! :added "4.0"}
 (fact "mutates library once task queue is empty"
@@ -69,10 +69,10 @@
 ^{:refer std.lang.base.library/get-book-raw :added "4.0"}
 (fact "gets the raw book, without merge"
 
-  (b/list-entries (lib/get-book-raw +library+ :redis))
+  (b/list-entries (lib/get-book-raw +library+ :lua.redis))
   => empty?
 
-  (b/list-entries (lib/get-book +library+ :redis))
+  (b/list-entries (lib/get-book +library+ :lua.redis))
   => coll?)
 
 ^{:refer std.lang.base.library/get-module :added "4.0"}
@@ -137,22 +137,22 @@
 ^{:refer std.lang.base.library/add-module! :added "4.0"}
 (fact "adds a module to the library"
 
-  (lib/add-module! +library+ (module/book-module '{:lang :redis
+  (lib/add-module! +library+ (module/book-module '{:lang :lua.redis
                                                    :id L.redis.hello
                                                    :link {r L.redis
                                                           u L.core}}))
   => coll?
 
-  (lib/delete-module! +library+ :redis 'L.redis.hello )
+  (lib/delete-module! +library+ :lua.redis 'L.redis.hello )
   => coll?)
 
 ^{:refer std.lang.base.library/delete-module! :added "4.0"}
 (fact "deletes a module from the library"
-  (lib/delete-module! +library+ :redis 'L.redis.hello) => coll?)
+  (lib/delete-module! +library+ :lua.redis 'L.redis.hello) => coll?)
 
 ^{:refer std.lang.base.library/delete-modules! :added "4.0"}
 (fact  "deletes a bunch of modules from the library"
-  (lib/delete-modules! +library+ :redis ['L.redis.hello]) => coll?)
+  (lib/delete-modules! +library+ :lua.redis ['L.redis.hello]) => coll?)
 
 ^{:refer std.lang.base.library/library-string :added "4.0"}
 (fact "returns the library string"
@@ -227,16 +227,16 @@
   => coll?)
 
 ^{:refer std.lang.base.library/install-book! :added "4.0"
-  :setup [(lib/delete-book! +library+ :redis)]}
+  :setup [(lib/delete-book! +library+ :lua.redis)]}
 (fact "installs a book to library"
 
-  (lib/install-book! +library+ prep/+book-redis-empty+)
+  (lib/install-book! +library+ prep/+book-lua-redis-empty+)
   => coll?
 
-  (:parent (lib/get-book-raw +library+ :redis))
+  (:parent (lib/get-book-raw +library+ :lua.redis))
   => :lua
 
-  (:parent prep/+book-redis-empty+)
+  (:parent prep/+book-lua-redis-empty+)
   => :lua)
 
 ^{:refer std.lang.base.library/purge-book! :added "4.0"}

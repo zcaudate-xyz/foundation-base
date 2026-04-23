@@ -3,7 +3,7 @@
             [std.lib.foundation :as f])
   (:refer-clojure :exclude [send]))
 
-(l/script :lua
+(l/script :lua.nginx
   {:import [["resty.mail" :as ngxmail]
             ["resty.mail" :as ngxmail]]})
 

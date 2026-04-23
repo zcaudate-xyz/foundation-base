@@ -4,7 +4,7 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-(l/script- :lua
+(l/script- :lua.nginx
   {:runtime :basic
    :config  {:program :resty}
    :require [[xt.sys.conn-redis :as redis]

@@ -4,7 +4,7 @@
             [std.lang :as l])
   (:use code.test))
 
-(l/script- :lua
+(l/script- :lua.nginx
   {:runtime :basic
    :config  {:exec ["resty" "--http-conf" (config/create-resty-params) "-e"]}
    :require [[lua.nginx :as n]

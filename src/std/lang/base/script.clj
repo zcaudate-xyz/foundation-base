@@ -147,13 +147,18 @@
      (script-fn lang (env/ns-sym) module)
      (script-fn lang  module {})))
   ([lang module config]
-   (let [;; loading runtime
+   (let [library (impl/default-library)
+         ;; loading runtime
          _ (if-let [ns (get @reg/+registry+ [lang :default])] (require ns))
+         ;; loading book
+         _ (when-not (lib/get-book library lang)
+             (some-> (reg/registry-book-ns lang)
+                     require))
          ;; _ (h/prn lang module config)
-         rt-config (script-fn-base lang module config (impl/default-library))]
-     (control/script-rt-get lang
-                            (:runtime config)
-                            rt-config))))
+         rt-config (script-fn-base lang module config library)]
+      (control/script-rt-get lang
+                             (:runtime config)
+                             rt-config))))
 
 (defmacro ^{:style/indent 1}
   script

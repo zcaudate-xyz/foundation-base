@@ -5,9 +5,6 @@
          [:postgres :jdbc]             'rt.postgres.base.client
          [:postgres :jdbc.client]      'rt.postgres.base.client
          
-         [:redis    :default]          'rt.redis
-         [:redis    :redis]            'rt.redis
-         
          [:solidity :default]          'rt.solidity.grammar
 	 
 	 [:bash   :oneshot]            'rt.basic.impl.process-bash
@@ -21,6 +18,16 @@
          [:lua    :nginx]              'rt.nginx
          [:lua    :nginx.instance]     'rt.nginx
          [:lua    :redis]              'rt.redis
+         [:lua.redis :default]         'rt.redis
+         [:lua.redis :redis]           'rt.redis
+         [:lua.nginx :oneshot]         'rt.basic.impl.process-lua
+         [:lua.nginx :basic]           'rt.basic.impl.process-lua
+         [:lua.nginx :interactive]     'rt.basic.impl.process-lua
+         [:lua.nginx :websocket]       'rt.basic.impl.process-lua
+         [:lua.nginx :nginx]           'rt.nginx
+         [:lua.nginx :nginx.instance]  'rt.nginx
+         [:lua.nginx :remote-port]     'rt.basic.impl.process-lua
+         [:lua.nginx :remote-ws]       'rt.basic.impl.process-lua
          [:lua    :remote-port]        'rt.basic.impl.process-lua
          [:lua    :remote-ws]          'rt.basic.impl.process-lua
          
@@ -105,8 +112,11 @@
          [:lua      :default]          {:ns 'std.lang.model.spec-lua
                                         :book '+book+
                                         :parent :xtalk}
-         [:redis    :default]          {:ns 'std.lang.model.spec-lua
-                                        :book '+book-redis+
+         [:lua.redis :default]         {:ns 'std.lang.model.spec-lua.variant-redis
+                                        :book '+book+
+                                        :parent :lua}
+         [:lua.nginx :default]         {:ns 'std.lang.model.spec-lua.variant-nginx
+                                        :book '+book+
                                         :parent :lua}
          [:python   :default]          {:ns 'std.lang.model.spec-python
                                         :book '+book+

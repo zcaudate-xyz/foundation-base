@@ -116,15 +116,15 @@
                     (merge m)
                     (shared/rt-shared:create)))}})])
 
-(def +redis-oneshot+
+(def +lua-redis-oneshot+
   [(default/install-type!
-    :redis :redis.client
+    :lua.redis :redis.client
     {:type :hara/rt.redis.client
      :config {:bootstrap false
               :layout :flat}
      :instance {:create client:create}})
    (default/install-type!
-    :redis :redis
+    :lua.redis :redis
     {:type :hara/rt.redis
      :config {:bootstrap false
               :layout :flat}

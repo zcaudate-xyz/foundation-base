@@ -2,7 +2,7 @@
   (:require [std.lang :as l])
   (:refer-clojure :exclude [print flush time re-find]))
 
-(l/script :lua
+(l/script :lua.nginx
   {:import [["crypt.core" :as ngxcryptcore]] :require [[xt.lang.common-lib :suppress true :as k] [lua.core :as u] [xt.lang.spec-base :as xt]]})
 
 (def.lua CHARS "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")

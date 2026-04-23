@@ -3,7 +3,7 @@
              [std.lib.foundation :as f]
              [xt.sys.conn-dbsql :as dbsql]))
 
-(l/script :lua
+(l/script :lua.nginx
   {:import [["lsqlite3" :as ngxsqlite]] :require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]]})
 
 (f/template-entries [l/tmpl-entry {:type :fragment

@@ -48,39 +48,45 @@
 
 (def +program-init+
   (common/put-program-options
-   :lua  {:default  {:oneshot        :luajit
-	             :basic          :luajit
-	             :websocket      :resty}
-          :env      {:lua       {:exec   "lua"
-                                 :shell  +lua-local-rocks-shell+
-	                         :flags  {:oneshot ["-e"]
-                                          :basic   ["-e"]
-                                          :interactive ["-i"]
-	                                  :json ["cjson" :install]
-                                          :bench {:basic     ["luasocket" :install]}}}
-	             :luajit    {:exec   "luajit"
-                                 :shell  +lua-local-rocks-shell+
-	                         :flags   {:oneshot ["-e"]
-                                           :basic   ["-e"]
-                                           :interactive  ["-i"]
-	                                   :json ["cjson" :install]
-                                           :bench {:basic     ["luasocket" :install]}}}
-                     :torch     {:exec   "th"
-                                 :shell  +lua-local-rocks-shell+
-	                         :flags   {:oneshot ["-e"]
-                                           :basic   ["-e"]
-                                           :interactive  ["-i"]
-	                                   :json ["cjson" :install]
-                                           :bench {:basic     ["luasocket" :install]}}}
-	             :resty     {:exec   "resty"
-                                 :shell  +lua-local-rocks-shell+
-	                         :flags   {:oneshot   ["-e"]
-                                           :basic     ["-e"]
-                                           :websocket ["-e"]
-                                           :interactive false
-	                                   :json ["cjson" :builtin]
-                                           :bench {:basic     ["resty.socket" :builtin]
-                                                   :websocket ["resty.websocket.client" :builtin]}}}}}))
+   :lua {:default {:oneshot   :luajit
+                   :basic     :luajit
+                   :websocket :resty}
+         :env {:lua {:exec  "lua"
+                     :shell +lua-local-rocks-shell+
+                     :flags {:oneshot    ["-e"]
+                             :basic      ["-e"]
+                             :interactive ["-i"]
+                             :json       ["cjson" :install]
+                             :bench      {:basic ["luasocket" :install]}}}
+               :luajit {:exec  "luajit"
+                        :shell +lua-local-rocks-shell+
+                        :flags {:oneshot    ["-e"]
+                                :basic      ["-e"]
+                                :interactive ["-i"]
+                                :json       ["cjson" :install]
+                                :bench      {:basic ["luasocket" :install]}}}
+               :torch {:exec  "th"
+                       :shell +lua-local-rocks-shell+
+                       :flags {:oneshot    ["-e"]
+                               :basic      ["-e"]
+                               :interactive ["-i"]
+                               :json       ["cjson" :install]
+                               :bench      {:basic ["luasocket" :install]}}}
+               :resty {:exec  "resty"
+                       :shell +lua-local-rocks-shell+
+                       :flags {:oneshot    ["-e"]
+                               :basic      ["-e"]
+                               :websocket  ["-e"]
+                               :interactive false
+                               :json       ["cjson" :builtin]
+                               :bench      {:basic     ["resty.socket" :builtin]
+                                            :websocket ["resty.websocket.client" :builtin]}}}}}))
+
+(def +program-init-nginx+
+  "registers nginx Lua programs with the same executable matrix as base Lua"
+  (common/put-program-options
+   :lua.nginx
+   (common/get-program-options :lua)))
 
 ;;
 ;; ONESHOT
@@ -159,9 +165,21 @@
     :emit  {:body  {:transform #'default-body-transform}}
     :json :full}))
 
+(def +lua-nginx-oneshot-config+
+  (common/set-context-options
+   [:lua.nginx :oneshot :default]
+   {:main  {:in    #'default-oneshot-wrap}
+    :emit  {:body  {:transform #'default-body-transform}}
+    :json :full}))
+
 (def +lua-oneshot+
   [(rt/install-type!
     :lua :oneshot
+    {:type :hara/rt.oneshot
+     :instance {:create #'oneshot/rt-oneshot:create}
+     :config {:layout :full}})
+   (rt/install-type!
+    :lua.nginx :oneshot
     {:type :hara/rt.oneshot
      :instance {:create #'oneshot/rt-oneshot:create}
      :config {:layout :full}})])
@@ -219,9 +237,24 @@
     :encode :json
     :timeout 2000}))
 
+(def +lua-nginx-basic-config+
+  (common/set-context-options
+   [:lua.nginx :basic :default]
+   {:bootstrap #'default-basic-client
+    :main  {}
+    :emit  {:body  {:transform #'default-body-transform}}
+    :json :full
+    :encode :json
+    :timeout 2000}))
+
 (def +lua-basic+
   [(rt/install-type!
     :lua :basic
+    {:type :hara/rt.basic
+     :instance {:create #'basic/rt-basic:create}
+     :config {:layout :full}})
+   (rt/install-type!
+    :lua.nginx :basic
     {:type :hara/rt.basic
      :instance {:create #'basic/rt-basic:create}
      :config {:layout :full}})])
@@ -280,9 +313,24 @@
     :encode :json
     :timeout 2000}))
 
+(def +lua-nginx-websocket-config+
+  (common/set-context-options
+   [:lua.nginx :websocket :default]
+   {:bootstrap #'default-websocket-client
+    :main  {}
+    :emit  {:body  {:transform #'default-body-transform}}
+    :json :full
+    :encode :json
+    :timeout 2000}))
+
 (def +lua-websocket+
   [(rt/install-type!
     :lua :websocket
+    {:type :hara/rt.websocket
+     :instance {:create #'websocket/rt-websocket:create}
+     :config {:layout :full}})
+   (rt/install-type!
+    :lua.nginx :websocket
     {:type :hara/rt.websocket
      :instance {:create #'websocket/rt-websocket:create}
      :config {:layout :full}})])

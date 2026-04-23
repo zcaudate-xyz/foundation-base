@@ -447,23 +447,16 @@
 
 (defn lua-tf-x-socket-connect
   ([[_ host port opts]]
-   (template/$ (do* (local '[conn err])
-             (local '[ok res] (pcall (fn:> [] (not= nil ngx))))
-             (when (== ~host "host.docker.internal")
-               (local handle (io.popen
-                              (cat "ping host.docker.internal -c 1 -q 2>&1"
-                                   " | "
-                                   "grep -Po \"(\\d{1,3}\\.){3}\\d{1,3}\"")))
-               
-               (:= ~host (handle:read "*a"))
-               (:= ~host (string.sub ~host 1 (- (len ~host) 1)))
-               (handle:close))
-             (if (and ok res)
-               (do (:= conn (ngx.socket.tcp))
-                   (:= '[res err]  (conn:connect ~host ~port)))
-               (do (local socket (require "socket"))
-                   (:= '[conn err] (socket.connect ~host ~port))))
-             (return conn err)))))
+   (template/$ (do* (when (== ~host "host.docker.internal")
+                     (local handle (io.popen
+                                    (cat "ping host.docker.internal -c 1 -q 2>&1"
+                                         " | "
+                                         "grep -Po \"(\\d{1,3}\\.){3}\\d{1,3}\"")))
+                     (:= ~host (handle:read "*a"))
+                     (:= ~host (string.sub ~host 1 (- (len ~host) 1)))
+                     (handle:close))
+                   (local socket (require "socket"))
+                   (return (socket.connect ~host ~port))))))
 
 (defn lua-tf-x-socket-send
   ([[_ conn s]]
@@ -566,38 +559,27 @@
   ([[_ cache key num]]
    (list '. cache (list 'incr key num))))
 
-(def +lua-cache+
-  {:x-cache                 {:macro #'lua-tf-x-cache          :emit :macro}
-   :x-cache-list            {:macro #'lua-tf-x-cache-list      :emit :macro}
-   :x-cache-flush           {:macro #'lua-tf-x-cache-flush     :emit :macro}
-   :x-cache-get             {:macro #'lua-tf-x-cache-get       :emit :macro}
-   :x-cache-set             {:macro #'lua-tf-x-cache-set       :emit :macro}
-   :x-cache-del             {:macro #'lua-tf-x-cache-del       :emit :macro}
-   :x-cache-incr            {:macro #'lua-tf-x-cache-incr      :emit :macro}})
-
-
-;;
-;; THREAD
-;;
-
 (defn lua-tf-x-thread-spawn
   ([[_ thunk & [strategy]]]
    (case strategy
-     :mock  (list 'coroutine.create thunk)
-     (list 'ngx.thread.spawn  thunk))))
+      :mock  (list 'coroutine.create thunk)
+      (list 'coroutine.create thunk))))
 
 (defn lua-tf-x-thread-join
   ([[_ thread & [strategy]]]
    (case strategy
-     :mock (list  'coroutine.resume thread)
-     (list 'ngx.thread.wait thread))))
+      :mock (list  'coroutine.resume thread)
+      (list 'coroutine.resume thread))))
 
 (defn lua-tf-x-with-delay
   ([[_ thunk ms]]
-   (list 'return (list 'ngx.thread.spawn (list 'fn []
-                                               (list 'ngx.sleep (list '/ ms 1000))
-                                               (list 'var 'f := thunk)
-                                               (list 'return (list 'f)))))))
+   (template/$
+    (return (coroutine.create
+             (fn []
+               (local socket (require "socket"))
+               (socket.sleep (/ ~ms 1000))
+               (var f := ~thunk)
+               (return (f))))))))
 
 (defn lua-tf-x-start-interval
   ([[_ thunk ms]]
@@ -612,27 +594,10 @@
 
 (def +lua-thread+
    {:x-thread-spawn   {:macro #'lua-tf-x-thread-spawn  :emit :macro}
-    :x-thread-join    {:macro #'lua-tf-x-thread-join   :emit :macro}
-    :x-with-delay     {:macro #'lua-tf-x-with-delay    :emit :macro}
-    :x-start-interval {:macro #'lua-tf-x-start-interval :emit :macro}
-    :x-stop-interval  {:macro #'lua-tf-x-stop-interval  :emit :macro}})
-
-;;
-;; BASE 64
-;;
-
-(def +lua-b64+
-  {:x-b64-decode     {:emit :alias :raw 'ngx.decode-base64}
-   :x-b64-encode     {:emit :alias :raw 'ngx.encode-base64}})
-
-
-;;
-;; URI 
-;;
-
-(def +lua-uri+
-  {:x-uri-decode     {:emit :alias :raw 'ngx.unescape-uri}
-   :x-uri-encode     {:emit :alias :raw 'ngx.escape-uri}})
+     :x-thread-join    {:macro #'lua-tf-x-thread-join   :emit :macro}
+     :x-with-delay     {:macro #'lua-tf-x-with-delay    :emit :macro}
+     :x-start-interval {:macro #'lua-tf-x-start-interval :emit :macro}
+     :x-stop-interval  {:macro #'lua-tf-x-stop-interval  :emit :macro}})
 
 
 ;;
@@ -682,9 +647,6 @@
          +lua-return+
          +lua-socket+
          +lua-iter+
-         +lua-cache+
          +lua-thread+
          +lua-file+
-         +lua-b64+
-         +lua-uri+
          +lua-special+))

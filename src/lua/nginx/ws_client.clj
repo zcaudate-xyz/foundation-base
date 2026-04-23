@@ -2,7 +2,7 @@
   (:require [std.lang :as l]
             [std.lib.foundation :as f]))
 
-(l/script :lua
+(l/script :lua.nginx
   {:import [["resty.websocket.client" :as ngxwsclient]
             ["resty.websocket.client" :as ngxwsclient]]})
 

@@ -153,11 +153,11 @@
   "for async transform"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error finally]}]]
-  (template/$ (ngx.thread.spawn
+  (template/$ (x:thread-spawn
         (fn []
           (for:try [[~res ~err] ~statement]
                    {:success ~success
-                    :error ~error})
+                     :error ~error})
           ~@(if finally [finally])))))
 
 (defn tf-yield
@@ -314,6 +314,22 @@
     (grammar/to-reserved +features+)
     +template+))
 
+(defn variant-meta
+  "merges variant metadata onto base lua metadata"
+  {:added "4.1"}
+  [m]
+  (book/book-meta
+   (collection/merge-nested +meta+ m)))
+
+(defn variant-grammar
+  "merges variant feature overrides onto base lua grammar"
+  {:added "4.1"}
+  [m]
+  (grammar/grammar :lua
+    (grammar/to-reserved
+     (collection/merge-nested +features+ m))
+    +template+))
+
 (def +book+
   (book/book {:lang :lua
               :parent :xtalk
@@ -322,15 +338,6 @@
 
 (def +init+
   (script/install +book+))
-
-(def +book-redis+
-  (book/book {:lang :redis
-              :parent :lua
-              :meta +meta+
-              :grammar (assoc +grammar+ :tag :redis)}))
-
-(def +init-redis+
-  (script/install +book-redis+))
 
 (comment
   (lib/get-book (impl/default-library) :lua)
