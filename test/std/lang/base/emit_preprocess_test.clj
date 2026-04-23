@@ -1,17 +1,20 @@
 (ns std.lang.base.emit-preprocess-test
-  (:require [std.lang.base.book :as b]
-            [std.lang.base.book-entry :as entry]
-            [std.lang.base.emit-common :as common]
-            [std.lang.base.emit-helper :as helper]
+  (:require [std.lang :as l]
+            [std.lang.base.book :as b]
+             [std.lang.base.book-entry :as entry]
+             [std.lang.base.emit-common :as common]
+             [std.lang.base.emit-helper :as helper]
             [std.lang.base.emit-prep-js-test :as prep-js]
             [std.lang.base.emit-prep-lua-test :as prep]
             [std.lang.base.emit-preprocess :refer :all]
-            [std.lang.base.grammar :as grammar]
-            [std.lang.base.grammar-xtalk-system :as grammar-xtalk]
-            [std.lang.base.impl-entry :as impl-entry]
-            [std.lang.base.library :as lib]
-            [std.lang.base.library-snapshot :as snap]
-            [std.lang.model.spec-js :as js])
+             [std.lang.base.grammar :as grammar]
+             [std.lang.base.grammar-xtalk-system :as grammar-xtalk]
+             [std.lang.base.impl-entry :as impl-entry]
+             [std.lang.base.library :as lib]
+             [std.lang.base.library-snapshot :as snap]
+             [std.lang.model.spec-js :as js]
+             [std.lang.model.spec-lua :as lua]
+             [std.lang.model.spec-python :as python])
   (:use code.test))
 
 (def +reserved+
@@ -323,9 +326,32 @@
                                         :macro (with-meta
                                                  (fn [[_ a b]]
                                                    (list '+ a b))
-                                                 {:arglists '([_ a b])})
+                                                  {:arglists '([_ a b])})
                                          :value/standalone true}}})
-  => '(fn [a b] (return (+ a b))))
+  => '(fn [a b] (return (+ a b)))
+
+  (l/emit-as :js [(value-standalone 'x:proto-set js/+grammar+)])
+  => #"Object\.setPrototypeOf"
+
+  (l/emit-as :lua [(value-standalone 'x:proto-set lua/+grammar+)])
+  => #"setmetatable"
+
+  (l/emit-as :python [(value-standalone 'x:proto-set python/+grammar+)])
+  => #"MethodType")
+
+(fact "reserved expand hooks can use richer context"
+  (expand-reserved-form '(hello 1)
+                        {:reserved {'hello {:expand/form (fn [{:keys [form mopts]}]
+                                                           (list 'quote [form (:tag mopts)]))}}}
+                        {:tag :form})
+  => '(quote [(hello 1) :form])
+
+  (value-standalone 'hello
+                    {:reserved {'hello {:expand/value (fn [{:keys [symbol mopts]}]
+                                                        (list 'quote [symbol (:tag mopts)]))}}}
+                    nil
+                    {:tag :value})
+  => '(quote [hello :value]))
 
 (fact "language macro form heads do not recurse during staging"
 

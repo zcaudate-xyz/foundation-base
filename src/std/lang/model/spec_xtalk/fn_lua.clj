@@ -85,7 +85,8 @@
 
 (def +lua-proto+
   {:x-proto-get       {:emit :alias :raw 'getmetatable}
-   :x-proto-set       {:emit :alias :raw 'setmetatable}
+   :x-proto-set       {:emit :alias :raw 'setmetatable
+                       :expand/value true}
    :x-proto-create    {:macro #'lua-tf-x-proto-create  :emit :macro}
    :x-proto-tostring  {:emit :unit  :default "__tostring"}})
 

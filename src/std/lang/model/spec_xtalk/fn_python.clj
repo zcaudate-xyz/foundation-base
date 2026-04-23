@@ -113,6 +113,22 @@
            (:= (. ~obj [k]) f)))
        (return ~obj))))
 
+(defn python-expand-x-proto-set-value
+  [{:keys [symbol grammar modules mopts]}]
+  (let [args     '[obj prototype]
+        form     (apply list symbol args)
+        expand   (or (get-in grammar [:reserved symbol :expand/form])
+                     (fn [{:keys [form]}]
+                       (python-tf-x-proto-set form)))]
+    (list 'fn args
+          (expand {:mode :form
+                   :form form
+                   :symbol symbol
+                   :grammar grammar
+                   :modules modules
+                   :mopts mopts
+                   :reserved (get-in grammar [:reserved symbol])}))))
+
 (defn python-tf-x-proto-tostring
   [[_ _]]
   '"__str__")
@@ -120,7 +136,8 @@
 (def +python-proto+
   {:x-proto-create   {:macro #'python-tf-x-proto-create   :emit :macro}
    :x-proto-get      {:macro #'python-tf-x-proto-get      :emit :macro}
-   :x-proto-set      {:macro #'python-tf-x-proto-set      :emit :macro}
+   :x-proto-set      {:macro #'python-tf-x-proto-set      :emit :macro
+                      :expand/value #'python-expand-x-proto-set-value}
    :x-proto-tostring {:macro #'python-tf-x-proto-tostring :emit :macro}})
 
 

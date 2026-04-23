@@ -155,44 +155,137 @@
                                          (vals link)))
                           sym-ns)]
        (or (get-in modules [sym-module :fragment sym-id])
-           (if-let [et (and (get-in modules [sym-module :code sym-id]))]
-             (if (= :defrun (:op-key et))
-               (apply list 'do (drop 2 (:form et))))))))))
+            (if-let [et (and (get-in modules [sym-module :code sym-id]))]
+              (if (= :defrun (:op-key et))
+                (apply list 'do (drop 2 (:form et))))))))))
+
+(defn arglists->argv
+  "normalizes arglists to a single argv vector"
+  {:added "4.1"}
+  [arglists]
+  (let [argv (-> arglists first)]
+    (if (vector? (first argv))
+      (first argv)
+      argv)))
 
 (defn value-template-args
   "derives callable value args from a template var"
   {:added "4.1"}
   [template]
   (let [arglists (-> template meta :arglists)
-        argv     (-> arglists first)
-        argv     (if (vector? (first argv))
-                   (first argv)
-                   argv)]
+        argv     (arglists->argv arglists)]
     (->> argv
          rest
          vec)))
 
+(defn reserved-value-args
+  "derives callable value args for a reserved entry"
+  {:added "4.1"}
+  [reserved]
+  (or (some-> reserved :op-spec :arglists arglists->argv vec)
+      (some-> (or (:value/template reserved)
+                  (when (= :macro (:emit reserved))
+                    (:macro reserved)))
+              value-template-args)))
+
+(defn reserved-return-mode
+  "gets semantic return mode for a reserved entry"
+  {:added "4.1"}
+  [reserved]
+  (or (:return-mode reserved)
+      (when (= :xt/self
+               (get-in reserved [:op-spec :type 2]))
+        :self)))
+
+(defn reserved-expand-context
+  "creates context for reserved expander functions"
+  {:added "4.1"}
+  [mode form grammar modules mopts reserved]
+  {:mode mode
+   :form form
+   :symbol (if (symbol? form) form (first form))
+   :grammar grammar
+   :modules modules
+   :mopts mopts
+   :reserved reserved})
+
+(defn expand-reserved-form
+  "expands a reserved form using context-aware hooks when available"
+  {:added "4.1"}
+  ([form grammar mopts]
+   (expand-reserved-form form grammar nil mopts))
+  ([form grammar modules mopts]
+   (when-let [reserved (and (collection/form? form)
+                            (get-in grammar [:reserved (first form)]))]
+     (let [ctx (reserved-expand-context :form form grammar modules mopts reserved)]
+       (or (when-let [expand (:expand/form reserved)]
+             (expand ctx))
+           (when-let [macro (:macro reserved)]
+             (macro form))
+           (when (and (:raw reserved)
+                      (#{:alias :hard-link} (:emit reserved)))
+             (cons (:raw reserved) (rest form))))))))
+
+(defn expand-reserved-assign
+  "expands a reserved form for assignment-aware lowering"
+  {:added "4.1"}
+  ([form grammar mopts]
+   (expand-reserved-assign form grammar nil mopts))
+  ([form grammar modules mopts]
+   (when-let [reserved (and (collection/form? form)
+                            (get-in grammar [:reserved (first form)]))]
+     (let [ctx (reserved-expand-context :assign form grammar modules mopts reserved)]
+       (or (when-let [expand (:expand/assign reserved)]
+             (expand ctx))
+           (expand-reserved-form form grammar modules mopts))))))
+
 (defn value-standalone
   "returns the standalone expansion for a value-liftable reserved symbol"
   {:added "4.1"}
-  [sym grammar]
-  (let [{:keys [emit macro]
+  ([sym grammar]
+   (value-standalone sym grammar nil nil))
+  ([sym grammar modules mopts]
+   (let [{:keys [emit macro]
           template :value/template
           standalone :value/standalone
-          op-spec :op-spec} (get-in grammar [:reserved sym])
-        template (or template
-                     (when (= :macro emit)
-                       macro))
-        self-return? (= :xt/self
-                        (get-in op-spec [:type 2]))]
-    (cond (or (collection/form? standalone)
-              (symbol? standalone))
+          expand-value :expand/value
+          :as reserved} (get-in grammar [:reserved sym])
+         args        (reserved-value-args reserved)
+         return-mode (reserved-return-mode reserved)]
+     (cond (fn? expand-value)
+           (expand-value (reserved-expand-context :value sym grammar modules mopts reserved))
+
+           (or (collection/form? expand-value)
+               (symbol? expand-value))
+           expand-value
+
+           (and (= true expand-value)
+                (seq args))
+           (let [expanded (expand-reserved-form (apply list sym args)
+                                                grammar
+                                                modules
+                                                mopts)]
+             (case return-mode
+               :self (let [self-arg (first args)]
+                       (list 'fn args
+                             expanded
+                             (list 'return self-arg)))
+               :statement (list 'fn args expanded)
+               (list 'fn args
+                     (list 'return expanded))))
+
+           (or (collection/form? standalone)
+               (symbol? standalone))
            standalone
 
            (and (= true standalone)
-                template)
-           (let [args (value-template-args template)]
-             (if self-return?
+                (or template
+                    (and (= :macro emit) macro)))
+           (let [template (or template
+                              (when (= :macro emit)
+                                macro))
+                 args     (value-template-args template)]
+             (if (= :self return-mode)
                (let [self-arg (first args)]
                  (list 'fn args
                        (template (apply list nil args))
@@ -202,7 +295,7 @@
                            (template (apply list nil args))))))
 
            :else
-           nil)))
+           nil))))
 
 (defn process-namespaced-resolve
   "resolves symbol in current namespace"
@@ -330,11 +423,11 @@
                          :std.lang/lang (:lang mopts)
                          :std.lang/module (ut/module-id (:module mopts))})]
             (try
-              (binding [*macro-opts* mopts]
-                (walk-fn ((:macro reserved) form)))
-              (catch Throwable t
-                (ut/throw-with-context
-                 "std.lang staging template expansion failed"
+               (binding [*macro-opts* mopts]
+                 (walk-fn (expand-reserved-form form grammar modules mopts)))
+               (catch Throwable t
+                 (ut/throw-with-context
+                  "std.lang staging template expansion failed"
                  (:std.lang/provenance mopts)
                  t))))
           
@@ -426,13 +519,13 @@
             form  (walk/prewalk
                    (fn walk-fn [form]
                      (cond (collection/form? form)
-                           (to-staging-form form grammar modules mopts deps-fragment walk-fn)
-                           
-                           (and (symbol? form))
-                           (or (when-let [standalone (value-standalone form grammar)]
-                                 (walk-fn standalone))
-                               (if (namespace form)
-                                 (process-namespaced-symbol form modules mopts deps deps-fragment walk-fn)
+                            (to-staging-form form grammar modules mopts deps-fragment walk-fn)
+                            
+                            (and (symbol? form))
+                            (or (when-let [standalone (value-standalone form grammar modules mopts)]
+                                  (walk-fn standalone))
+                                (if (namespace form)
+                                  (process-namespaced-symbol form modules mopts deps deps-fragment walk-fn)
                                  (process-standard-symbol form mopts deps-native)))
                            
                            :else form))
@@ -460,13 +553,13 @@
 
                            (and (collection/form? form)
                                 (get-in grammar [:reserved (first form)]))
-                           (protect-reserved-head form)
+                            (protect-reserved-head form)
 
-                           (symbol? form)
-                           (or (value-standalone form grammar)
-                               (if (namespace form)
-                                (process-namespaced-symbol form modules mopts nil nil identity)
-                                (process-standard-symbol form mopts nil)))
+                            (symbol? form)
+                            (or (value-standalone form grammar modules mopts)
+                                (if (namespace form)
+                                 (process-namespaced-symbol form modules mopts nil nil identity)
+                                 (process-standard-symbol form mopts nil)))
                           
                           :else
                           form))

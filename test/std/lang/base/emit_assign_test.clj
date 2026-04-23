@@ -182,6 +182,14 @@
                           {:emit :macro
                            :macro (fn [_]
                                     '(sym :as [1 2 3]))
-                           :assign/template 'sym})
-                {})
-  => [:template '(a :as [1 2 3])])
+                            :assign/template 'sym})
+                 {})
+  => [:template '(a :as [1 2 3])]
+
+  (assign-value 'a
+                '(hello 1 2)
+                {:reserved {'hello {:assign/template 'sym
+                                    :expand/assign (fn [{:keys [form mopts]}]
+                                                     (list 'sym :ctx (:tag mopts) form))}}}
+                {:tag :assign})
+  => [:template '(a :ctx :assign (hello 1 2))])

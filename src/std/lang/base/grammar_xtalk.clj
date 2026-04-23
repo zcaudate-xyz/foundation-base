@@ -842,6 +842,7 @@
   [{:op :x-proto-get       :symbol #{'x:proto-get}       :emit :abstract
     :op-spec {:arglists '([obj])}}
    {:op :x-proto-set       :symbol #{'x:proto-set}       :emit :abstract
+    :return-mode :self
     :op-spec {:arglists '([obj proto])}}
    {:op :x-proto-create    :symbol #{'x:proto-create}    :macro #'tf-proto-create   :emit :macro
     :op-spec {:template-only true

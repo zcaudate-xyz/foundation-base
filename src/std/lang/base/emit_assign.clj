@@ -110,9 +110,13 @@
         reserved (when (and (collection/form? value)
                             (symbol? (first value)))
                    (get-in grammar [:reserved (first value)]))
-        expanded (if (and (= :macro (:emit reserved))
-                          (or assign-fn template inline))
-                   ((:macro reserved) value)
+        expanded (if (and reserved
+                          (or assign-fn
+                              template
+                              inline
+                              (:expand/assign reserved)))
+                   (or (preprocess/expand-reserved-assign value grammar mopts)
+                       value)
                    value)]
     (cond assign-fn [:raw      (assign-fn symbol)]
           template [:template (walk/prewalk-replace {template symbol} expanded)]

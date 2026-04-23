@@ -161,11 +161,11 @@
   {:added "4.0"}
   ([_ [tag & more :as form] grammar mopts]
    (let [{:keys [macro] :as m} (get-in grammar [:reserved tag])]
-     (if m
-       (binding [preprocess/*macro-opts* mopts
-                 preprocess/*macro-grammar* grammar]
-         (*emit-fn* (macro form) grammar mopts))
-       (f/error "Not found: " {:input form})))))
+      (if m
+        (binding [preprocess/*macro-opts* mopts
+                  preprocess/*macro-grammar* grammar]
+          (*emit-fn* (preprocess/expand-reserved-form form grammar mopts) grammar mopts))
+        (f/error "Not found: " {:input form})))))
 
 ;;
 ;; HELPERS
