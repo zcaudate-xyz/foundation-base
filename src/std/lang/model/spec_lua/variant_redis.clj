@@ -4,9 +4,11 @@
             [std.lang.model.spec-lua :as lua]))
 
 (def +meta-delta+
+  "Redis-specific metadata overrides layered onto base Lua."
   {})
 
 (def +grammar-delta+
+  "Redis-specific grammar overrides layered onto base Lua."
   {})
 
 (def +meta+

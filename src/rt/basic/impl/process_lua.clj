@@ -83,6 +83,7 @@
                                             :websocket ["resty.websocket.client" :builtin]}}}}}))
 
 (def +program-init-nginx+
+  "registers nginx Lua programs with the same executable matrix as base Lua"
   (common/put-program-options
    :lua.nginx
    (common/get-program-options :lua)))

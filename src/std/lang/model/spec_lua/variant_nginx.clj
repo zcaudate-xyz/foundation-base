@@ -4,9 +4,11 @@
             [std.lang.model.spec-lua :as lua]))
 
 (def +meta-delta+
+  "Nginx-specific metadata overrides layered onto base Lua."
   {})
 
 (def +grammar-delta+
+  "Nginx-specific grammar overrides layered onto base Lua."
   {})
 
 (def +meta+
