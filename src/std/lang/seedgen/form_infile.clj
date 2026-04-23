@@ -414,37 +414,38 @@
   "Renders setup/teardown items for the requested languages while preserving
    scaffold-only forms in their original position."
   [classification root-lang langs]
-  (:out
-   (reduce (fn [{:keys [out emitted]} item]
+  (:rendered-items
+   (reduce (fn [{:keys [rendered-items processed-langs]} item]
              (if-let [current-lang (item-lang item)]
                (cond
-                 (contains? emitted current-lang)
-                 {:out out
-                  :emitted emitted}
+                 (contains? processed-langs current-lang)
+                 {:rendered-items rendered-items
+                  :processed-langs processed-langs}
 
                  (= current-lang root-lang)
                  (let [rendered (->> langs
-                                     (remove emitted)
+                                     (remove processed-langs)
                                      (keep (fn [lang]
                                              (when-let [snippet (render-target-runtime-item classification
                                                                                             root-lang
                                                                                             lang)]
                                                [lang snippet])))
                                      vec)]
-                   {:out (into out (map second rendered))
-                    :emitted (into emitted (map first rendered))})
+                   {:rendered-items (into rendered-items (map second rendered))
+                    :processed-langs (into processed-langs (map first rendered))})
 
                  (some #{current-lang} langs)
-                 {:out (conj out (render-item-string item))
-                  :emitted (conj emitted current-lang)}
+                 {:rendered-items (conj rendered-items (render-item-string item))
+                  :processed-langs (conj processed-langs current-lang)}
 
                  :else
-                 {:out out
-                  :emitted emitted})
-               {:out (conj out (render-item-string item))
-                :emitted emitted}))
-           {:out []
-            :emitted #{}}
+                 {:rendered-items rendered-items
+                  :processed-langs processed-langs})
+               ;; Preserve scaffold-only forms that aren't language-specific.
+               {:rendered-items (conj rendered-items (render-item-string item))
+                :processed-langs processed-langs}))
+           {:rendered-items []
+            :processed-langs #{}}
            (classify-lang-items classification))))
 
 (defn- render-check-snippets-add

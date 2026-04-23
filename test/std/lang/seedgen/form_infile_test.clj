@@ -429,16 +429,16 @@
                       "^{:seedgen/root {:all true, :langs [:lua :python]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "^{:refer xt.lang.spec-base/example-h :added \"4.1\"\n"
-                      "  :setup [(def +s+ (apply str (repeat 5 \"1234567890\")))\n"
-                      "          (def +out+ [\"1234567890\" \"1234567890\" \"1234567890\" \"1234567890\" \"1234567890\"])]\n"
+                      "  :setup [(def +s+ \"seed\")\n"
+                      "          (def +out+ [\"seed\"])]\n"
                       "  :teardown [(def +done+ true)]}\n"
                       "(fact \"scaffold setup is preserved\"\n\n"
                       "  (!.js 1)\n"
                       "  => 1)\n"))
       (form-infile/seedgen-langadd 'sample.add-test {:write true} lookup project)
       (let [output (slurp path)]
-        [(str/includes? output ":setup [(def +s+ (apply str (repeat 5 \"1234567890\")))")
-         (str/includes? output "(def +out+ [\"1234567890\" \"1234567890\" \"1234567890\" \"1234567890\" \"1234567890\"])]")
+        [(str/includes? output ":setup [(def +s+ \"seed\")")
+         (str/includes? output "(def +out+ [\"seed\"])]")
          (str/includes? output ":teardown [(def +done+ true)]")
          (str/includes? output "(!.lua 1)\n  => 1")
          (str/includes? output "(!.py 1)\n  => 1")])
