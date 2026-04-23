@@ -19,7 +19,7 @@
          [:lua    :nginx.instance]     'rt.nginx
          [:lua    :redis]              'rt.redis
          [:lua.redis :default]         'rt.redis
-          [:lua.redis :redis]           'rt.redis
+         [:lua.redis :redis]           'rt.redis
          [:lua.nginx :oneshot]         'rt.basic.impl.process-lua
          [:lua.nginx :basic]           'rt.basic.impl.process-lua
          [:lua.nginx :interactive]     'rt.basic.impl.process-lua
