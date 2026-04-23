@@ -117,9 +117,9 @@
   [book form mopts]
   (let [_ (assert book "Book required.")
         input (preprocess/to-input form)
-        [form sym-ids]  (preprocess/to-staging input
-                                               (:grammar book)
-                                               (:modules book) mopts)
+        [form sym-ids]  (preprocess/to-code input
+                                            (:grammar book)
+                                            (:modules book) mopts)
         [entries module-lu] (collect-script-entries book sym-ids)
         natives (imports/script-imports book entries)]
     [form entries natives]))

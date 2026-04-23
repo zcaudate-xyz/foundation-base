@@ -45,10 +45,10 @@
                           [(let [result  (assign-fn e)
                                  {:keys [snapshot] :as mopts} (l/macro-opts)
                                  book (snap/get-book snapshot :postgres)]
-                             (first (preprocess/to-staging result
-                                                           (:grammar book)
-                                                           (:modules book)
-                                                           mopts)))]
+                             (first (preprocess/to-code result
+                                                        (:grammar book)
+                                                        (:modules book)
+                                                        mopts)))]
                           
                           (not (vector? v))
                           [(list := e v)]
@@ -235,4 +235,3 @@
       (apply common/block-case-block forms)
       grammar
       mopts))))
-

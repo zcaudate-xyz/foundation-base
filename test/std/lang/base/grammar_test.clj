@@ -1,7 +1,11 @@
 (ns std.lang.base.grammar-test
   (:require [std.lang.base.grammar :refer :all]
-            [std.lang.base.grammar-spec :as spec])
+             [std.lang.base.grammar-spec :as spec])
   (:use code.test))
+
+(defn grammar-rewrite-probe
+  [form _ _]
+  form)
 
 ^{:refer std.lang.base.grammar/gen-ops :added "4.0"}
 (fact "generates ops"
@@ -185,7 +189,15 @@
   (grammar :test
     (to-reserved (build-min))
     {})
-  => map?)
+  => map?
+
+  (select-keys
+   (grammar :test
+     (to-reserved (build-min))
+     {:rewrite [#'grammar-rewrite-probe]})
+   [:tag :rewrite])
+  => {:tag :test
+      :rewrite [#'grammar-rewrite-probe]})
 
 (comment
   (./import)

@@ -34,13 +34,13 @@
                                (if hydrate
                                  (hydrate (:form-input entry) grammar context)
                                  [nil (:form-input entry)]))
-        [form
-         deps
-         deps-fragment
-         deps-native] (preprocess/to-staging form-hydrate
-                                             grammar
-                                             modules
-                                             context)
+         [form
+          deps
+          deps-fragment
+          deps-native] (preprocess/to-code form-hydrate
+                                           grammar
+                                           modules
+                                           context)
          {:keys [ops profiles polyfill-modules]}
          (xtalk-system/scan-xtalk form-hydrate)]
     {:hmeta hmeta

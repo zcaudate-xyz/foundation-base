@@ -5,7 +5,8 @@
              [std.lang.base.grammar :as grammar]
              [std.lang.base.impl-template :refer :all]
              [std.lang.base.impl-entry :as entry]
-             [std.lib.env :as env])
+             [std.lib.env :as env]
+             [std.lib.walk :as walk])
   (:use code.test))
 
 (def +template-build+
@@ -21,6 +22,14 @@
                    (grammar/to-reserved +template-build+)
                    helper/+default+))
 
+(defn template-child-rewrite
+  [form _ _]
+  (walk/postwalk (fn [x]
+                   (if (= x '(return value))
+                     '(return (+ value 2))
+                     x))
+                 form))
+
 (def +template-child-grammar+
   (grammar/grammar
    :template-child
@@ -28,10 +37,10 @@
     (grammar/build:override
      +template-build+
      {:x-probe {:emit :macro
-                :type :template
-                :macro (fn [[_ value]]
-                         (list 'return value))}}))
-   helper/+default+))
+                 :type :template
+                 :macro (fn [[_ value]]
+                          (list 'return value))}}))
+   (assoc helper/+default+ :rewrite [#'template-child-rewrite])))
 
 (def +template-module+
   (b/book-module
@@ -89,17 +98,17 @@
   (let [book (-> +template-helper-book+
                  (b/set-entry +template-parent-entry+)
                  second)
-        snapshot {:template {:book book}}]
+         snapshot {:template {:book book}}]
     [(b/get-code-deps book 'L.core/template-fn)
      (entry/emit-entry (:grammar book)
                        (get-in book '[:modules L.core :code template-fn])
-                       {:lang :template
-                        :snapshot snapshot
-                        :module (assoc (get-in book '[:modules L.core])
-                                       :display :brief)
-                        :emit {:label false}})])
+                        {:lang :template
+                         :snapshot snapshot
+                         :module (assoc (get-in book '[:modules L.core])
+                                        :display :brief)
+                         :emit {:label false}})])
   => '[#{}
-        "function template_fn(value){\n  return value;\n}"])
+        "function template_fn(value){\n  return value + 2;\n}"])
 
 
 ^{:refer std.lang.base.impl-template/infer-static-template :added "4.1"}
@@ -148,17 +157,17 @@
 (fact "restages template entries using the per-entry cache"
   (select-keys
    (cached-code-state +template-parent-entry+
-                      (get-in +template-parent-grammar+ [:reserved 'defn])
-                      +template-parent-grammar+
+                       (get-in +template-parent-grammar+ [:reserved 'defn])
+                       +template-parent-grammar+
                       (:modules +template-helper-book+)
-                      '{:lang :template
-                        :module {:id L.core
-                                 :alias {}
-                                 :link {- L.core}}})
+                       '{:lang :template
+                         :module {:id L.core
+                                  :alias {}
+                                  :link {- L.core}}})
    [:form :deps :static/template])
-  => '{:form (defn template-fn [value] (return value))
-       :deps #{}
-       :static/template true})
+  => '{:form (defn template-fn [value] (return (+ value 2)))
+        :deps #{}
+        :static/template true})
 
 ^{:refer std.lang.base.impl-template/cached-entry-deps :added "4.1"}
 (fact "returns restaged code dependencies for the current language"

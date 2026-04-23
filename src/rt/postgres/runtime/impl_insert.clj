@@ -100,11 +100,11 @@
    (let [[entry tsch mopts] (base/prep-table spec-sym false (l/macro-opts))
          {:keys [book]} mopts]
      (t-insert-raw [entry tsch mopts]
-                   (first (preprocess/to-staging data
-                                                 (:grammar book)
-                                                 (:modules book)
-                                                 mopts))
-                   params))))
+                   (first (preprocess/to-code data
+                                              (:grammar book)
+                                              (:modules book)
+                                              mopts))
+                    params))))
 
 ;;
 ;; upsert

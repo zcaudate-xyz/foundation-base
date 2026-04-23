@@ -68,9 +68,9 @@
   [form grammar {:keys [lang snapshot] :as mopts}]
   (let [book    (book/book-from snapshot lang)
         [body]  (-> (preprocess/to-input form)
-                    (preprocess/to-staging grammar
-                                           (:modules book)
-                                           mopts))]
+                    (preprocess/to-code grammar
+                                        (:modules book)
+                                        mopts))]
     (common/*emit-fn* body grammar mopts)))
 
 (defn emit-with-eval
@@ -102,9 +102,9 @@
         mopts  (merge (assoc mopts :book book :module module)
                       opts)
         [body] (-> (preprocess/to-input body)
-                   (preprocess/to-staging grammar
-                                          (:modules book)
-                                          mopts))]
+                   (preprocess/to-code grammar
+                                       (:modules book)
+                                       mopts))]
     (common/*emit-fn* body grammar mopts)))
 
 ;;

@@ -99,11 +99,11 @@
   [meta]
   (let [{:keys [lang grammar book namespace snapshot]
          step :-} meta
-        step (or step
-                 (if (or (and lang snapshot)
-                         book)
-                   :staging
-                   :input))
+         step (or step
+                  (if (or (and lang snapshot)
+                          book)
+                    :code
+                    :input))
         namespace (or namespace
                       (env/ns-sym))
         book     (or (if (symbol? book)
@@ -121,7 +121,8 @@
 (def +steps+
   [[:raw]
    [:input]
-   [:staging]])
+   [:staging]
+   [:code]])
 
 (defn prep-form
   "prepares the form"
@@ -133,4 +134,8 @@
     :staging (preprocess/to-staging (preprocess/to-input form)
                                     grammar
                                     (:modules book)
-                                    mopts)))
+                                    mopts)
+    :code    (preprocess/to-code (preprocess/to-input form)
+                                 grammar
+                                 (:modules book)
+                                 mopts)))

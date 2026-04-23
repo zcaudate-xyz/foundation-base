@@ -442,7 +442,50 @@
                                             form))
                                form)]
       
-        [form @deps @deps-fragment @deps-native]))))
+         [form @deps @deps-fragment @deps-native]))))
+
+(defn rewrite-code
+  "applies the grammar-owned rewrite phase to staged code"
+  {:added "4.1"}
+  [form grammar mopts]
+  (let [rewrite (:rewrite grammar)
+        fns     (cond (nil? rewrite) nil
+                      (or (fn? rewrite)
+                          (var? rewrite)) [rewrite]
+                      :else (vec rewrite))]
+    (if (empty? fns)
+      form
+      (let [mopts (provenance/with-provenance
+                    mopts
+                    {:std.lang/phase :rewrite
+                     :std.lang/subsystem :std.lang.base.emit-preprocess/rewrite-code
+                     :std.lang/lang (:lang mopts)
+                     :std.lang/module (ut/module-id (:module mopts))
+                     :std.lang/entry (some-> (:entry mopts) ut/entry-summary)
+                     :std.lang/form form})]
+        (try
+          (reduce (fn [current rewrite-fn]
+                    (rewrite-fn current grammar mopts))
+                  form
+                  fns)
+          (catch Throwable t
+            (ut/throw-with-context
+             "std.lang rewrite failed"
+             (:std.lang/provenance mopts)
+             t)))))))
+
+(defn to-code
+  "converts input into rewritten staged code"
+  {:added "4.1"}
+  [input grammar modules mopts]
+  (let [[form deps deps-fragment deps-native] (to-staging input
+                                                          grammar
+                                                          modules
+                                                          mopts)]
+    [(rewrite-code form grammar mopts)
+     deps
+     deps-fragment
+     deps-native]))
 
 (defn to-resolve
   "resolves only the code symbols (no macroexpansion)"

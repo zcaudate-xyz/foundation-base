@@ -11,7 +11,8 @@
             [std.lang.base.impl-entry :as impl-entry]
             [std.lang.base.library :as lib]
             [std.lang.base.library-snapshot :as snap]
-            [std.lang.model.spec-js :as js])
+            [std.lang.model.spec-js :as js]
+            [std.lib.walk :as walk])
   (:use code.test))
 
 (def +reserved+
@@ -20,6 +21,18 @@
 
 (def +grammar+
   (grammar/grammar :test +reserved+ helper/+default+))
+
+(defn rewrite-probe
+  [form _ _]
+  (walk/postwalk (fn [x]
+                   (if (= x '(+ 1 2 3))
+                     '(+ 1 2 3 4)
+                     x))
+                 form))
+
+(def +rewrite-grammar+
+  (grammar/grammar :rewrite +reserved+ (assoc helper/+default+
+                                              :rewrite [#'rewrite-probe])))
 
 ^{:refer std.lang.base.emit-preprocess/macro-form :added "4.0"}
 (fact "gets the current macro form"
@@ -323,9 +336,28 @@
                                         :macro (with-meta
                                                  (fn [[_ a b]]
                                                    (list '+ a b))
-                                                 {:arglists '([_ a b])})
+                                                  {:arglists '([_ a b])})
                                          :value/standalone true}}})
   => '(fn [a b] (return (+ a b))))
+
+^{:refer std.lang.base.emit-preprocess/rewrite-code :added "4.1"}
+(fact "applies grammar-owned rewrite functions to staged code"
+  (rewrite-code '(do (+ 1 2 3))
+                +rewrite-grammar+
+                '{:lang :lua
+                  :module {:id L.core
+                           :link {}}})
+  => '(do (+ 1 2 3 4)))
+
+^{:refer std.lang.base.emit-preprocess/to-code :added "4.1"}
+(fact "returns rewritten staged code"
+  (to-code '(do (+ 1 2 3))
+           +rewrite-grammar+
+           {}
+           '{:lang :lua
+             :module {:id L.core
+                      :link {}}})
+  => '[(do (+ 1 2 3 4)) #{} #{} {}])
 
 (fact "language macro form heads do not recurse during staging"
 

@@ -17,11 +17,11 @@
   ([[op sym [spec-sym] data] grammar {:keys [module
                                              snapshot]
                                       :as mopts}]
-   (let [[data]  (preprocess/to-staging data
-                                        grammar
-                                        (:modules (snap/get-book snapshot :postgres))
-                                        mopts)
-         mmeta (common/pg-hydrate-module-static module)
+   (let [[data]  (preprocess/to-code data
+                                     grammar
+                                     (:modules (snap/get-book snapshot :postgres))
+                                     mopts)
+          mmeta (common/pg-hydrate-module-static module)
          [entry tsch mopts] (base/prep-table spec-sym true mopts)
          {:static/keys [tracker]} entry
          {:keys [track] :as msym} (meta sym)

@@ -173,13 +173,13 @@
               :deps-fragment #{}
               :deps-native   deps-native))
      (let [{:keys [form]} entry
-           [_
-            deps
-            deps-fragment
-            deps-native]   (preprocess/to-staging form
-                                                  grammar
-                                                  modules
-                                                  mopts)
+            [_
+             deps
+             deps-fragment
+             deps-native]   (preprocess/to-code form
+                                                grammar
+                                                modules
+                                                mopts)
            {:keys [ops profiles polyfill-modules]} (xtalk-system/scan-xtalk form)]
        (assoc entry
               :deps #{}

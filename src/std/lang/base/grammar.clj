@@ -310,7 +310,7 @@
                :highlight highlight
                :macros macros))))
 
-(impl/defimpl Grammer [tag emit structure reserved banned highlight]
+(impl/defimpl Grammer [tag emit rewrite structure reserved banned highlight]
   :string grammar-string)
 
 (defn grammar?
