@@ -6,9 +6,11 @@
 (fact "lists all registered books"
   (let [books (set (registry-book-list))]
     [(contains? books [:js :default])
-     (contains? books [:lua :default])
-     (contains? books [:postgres :default])])
-  => [true true true])
+      (contains? books [:lua :default])
+      (contains? books [:lua.nginx :default])
+      (contains? books [:lua.redis :default])
+      (contains? books [:postgres :default])])
+  => [true true true true true])
 
 ^{:refer std.lang.base.registry/registry-book-ns :added "4.1"}
 (fact "gets the namespace for a registry entry"

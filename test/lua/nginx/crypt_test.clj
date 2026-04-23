@@ -2,7 +2,7 @@
   (:require [std.lang :as l])
   (:use code.test))
 
-(l/script- :lua
+(l/script- :lua.nginx
   {:runtime :basic
    :config  {:program :resty}
    :require [[xt.lang.common-lib :as k :include [:json]]

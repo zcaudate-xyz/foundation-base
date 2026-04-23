@@ -20,8 +20,8 @@
   (snap/get-deps prep/+snap+ :x)
   => #{}
 
-  (deps/deps-ordered prep/+snap+ [:redis])
-  => '(:x :lua :redis)
+  (deps/deps-ordered prep/+snap+ [:lua.redis])
+  => '(:x :lua :lua.redis)
 
   (deps/deps-ordered prep/+snap+ [:lua])
   => '(:x :lua))
@@ -30,7 +30,7 @@
 (fact "gets the snapshot string"
 
   (snap/snapshot-string prep/+snap+)
-  => "#lib.snapshot [:lua :redis :x]")
+  => "#lib.snapshot [:lua :lua.redis :x]")
 
 ^{:refer std.lang.base.library-snapshot/snapshot? :added "4.0"}
 (fact "checks if object is a snapshot"
@@ -75,7 +75,7 @@
       keys)
   => '(L.core)
 
-  (-> (snap/get-book-raw prep/+snap+ :redis)
+  (-> (snap/get-book-raw prep/+snap+ :lua.redis)
       :modules
       keys)
   => nil)
@@ -83,7 +83,7 @@
 ^{:refer std.lang.base.library-snapshot/get-book :added "4.0"}
 (fact "gets the merged book for a given language"
 
-  (-> (snap/get-book prep/+snap+ :redis)
+  (-> (snap/get-book prep/+snap+ :lua.redis)
       :modules
       keys
       set)
@@ -101,14 +101,14 @@
 (fact "sets a module in the snapshot"
 
   (-> (snap/set-module prep/+snap+
-                       (m/book-module '{:lang :redis
+                       (m/book-module '{:lang :lua.redis
                                         :id L.redis
                                         :link {- L.redis
                                                u L.core}}))
       second
-      (get-in [:redis :book])
+      (get-in [:lua.redis :book])
       (b/book-string))
-  => "#book [:redis] {L.redis {:code 0, :fragment 0}}")
+  => "#book [:lua.redis] {L.redis {:code 0, :fragment 0}}")
 
 ^{:refer std.lang.base.library-snapshot/delete-module :added "4.0"}
 (fact "deletes a module in the snapshot"
@@ -179,7 +179,7 @@
                                      :module 'L.core}
                                     {})])
                 second
-                (snap/set-module (m/book-module '{:lang :redis
+                (snap/set-module (m/book-module '{:lang :lua.redis
                                                   :id L.redis
                                                   :link {- L.redis
                                                          u L.core}}))
@@ -191,12 +191,12 @@
                           '(defn redis-g
                              []
                              (return u/G))
-                          {:lang :redis
+                          {:lang :lua.redis
                            :namespace (env/ns-sym)
                            :module 'L.redis}
                           {})])
       second
-      (get-in [:redis :book :modules 'L.redis :code 'redis-g :form]))
+      (get-in [:lua.redis :book :modules 'L.redis :code 'redis-g :form]))
   => '(defn redis-g [] (return G))
 
   ;;
@@ -281,10 +281,10 @@
   => vector?
 
   (snap/install-book prep/+snap+
-                     (b/book {:lang :redis
+                     (b/book {:lang :lua.redis
                               :meta    (meta/book-meta {})
                               :grammar (assoc lua/+grammar+
-                                              :tag :redis)}))
+                                               :tag :redis)}))
   => vector?)
 
 (comment

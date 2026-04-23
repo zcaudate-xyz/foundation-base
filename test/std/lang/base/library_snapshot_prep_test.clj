@@ -16,12 +16,12 @@
                       helper/+default+)}))
 
 (def +book-redis-empty+
-  (b/book {:lang :redis
+  (b/book {:lang :lua.redis
            :parent :lua
-           :meta    (b/book-meta {})
+            :meta    (b/book-meta {})
            :grammar (grammar/grammar :redis
-                      (grammar/to-reserved (grammar/build))
-                      helper/+default+)}))
+                       (grammar/to-reserved (grammar/build))
+                       helper/+default+)}))
 
 (def +x-module+
   (b/book-module
@@ -75,4 +75,3 @@
       (snap/add-book (assoc prep/+book-min+ :parent :x))
       (snap/add-book +book-x+)
       (snap/add-book +book-redis-empty+)))
-

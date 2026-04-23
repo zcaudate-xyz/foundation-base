@@ -25,7 +25,7 @@
   "gets the running nginx error log"
   {:added "4.0"}
   ([]
-   (error-logs (l/rt:inner :lua)))
+   (error-logs (l/rt:inner :lua.nginx)))
   ([{:keys [state] :as rt}]
    (slurp (str (second @state) "/error.log"))))
 
@@ -33,7 +33,7 @@
   "gets the running nginx access log"
   {:added "4.0"}
   ([]
-   (access-logs (l/rt:inner :lua)))
+   (access-logs (l/rt:inner :lua.nginx)))
   ([{:keys [state] :as rt}]
    (slurp (str (second @state) "/access.log"))))
 
@@ -41,7 +41,7 @@
   "accesses the running ngx conf"
   {:added "4.0"}
   ([]
-   (nginx-conf (l/rt:inner :lua)))
+   (nginx-conf (l/rt:inner :lua.nginx)))
   ([{:keys [state] :as rt}]
    (slurp (last @state))))
 
@@ -49,7 +49,7 @@
   "gets the running nginx access log"
   {:added "4.0"}
   ([]
-   (dir-tree (l/rt:inner :lua)))
+   (dir-tree (l/rt:inner :lua.nginx)))
   ([{:keys [state] :as rt}]
    (fs/list (second @state)
             {:recursive true})))
@@ -330,16 +330,30 @@
     {:type :hara/rt.nginx.instance
      :config {:layout :full}
      :instance {:create nginx:create}})
-   
    (default/install-type!
-    :lua :nginx
+    :lua.nginx :nginx.instance
+    {:type :hara/rt.nginx.instance
+     :config {:layout :full}
+     :instance {:create nginx:create}})
+   
+    (default/install-type!
+     :lua :nginx
+     {:type :hara/rt.nginx
+      :instance
+      {:create (fn [m]
+                 (-> {:rt/client {:type :hara/rt.nginx 
+                                  :constructor nginx:create}}
+                     (merge m)
+                     (shared/rt-shared:create)))}})
+   (default/install-type!
+    :lua.nginx :nginx
     {:type :hara/rt.nginx
      :instance
      {:create (fn [m]
                 (-> {:rt/client {:type :hara/rt.nginx 
                                  :constructor nginx:create}}
                     (merge m)
-                    (shared/rt-shared:create)))}})])
+                     (shared/rt-shared:create)))}})])
 
 
 (comment

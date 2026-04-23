@@ -323,14 +323,23 @@
 (def +init+
   (script/install +book+))
 
-(def +book-redis+
-  (book/book {:lang :redis
+(def +book-lua-redis+
+  (book/book {:lang :lua.redis
               :parent :lua
               :meta +meta+
               :grammar (assoc +grammar+ :tag :redis)}))
 
-(def +init-redis+
-  (script/install +book-redis+))
+(def +init-lua-redis+
+  (script/install +book-lua-redis+))
+
+(def +book-lua-nginx+
+  (book/book {:lang :lua.nginx
+              :parent :lua
+              :meta +meta+
+              :grammar +grammar+}))
+
+(def +init-lua-nginx+
+  (script/install +book-lua-nginx+))
 
 (comment
   (lib/get-book (impl/default-library) :lua)

@@ -2,7 +2,7 @@
   (:require [std.lang :as l])
   (:refer-clojure :exclude [print flush time re-find]))
 
-(l/script :lua
+(l/script :lua.nginx
   {:import [["resty.openssl.hmac" :as ngxhmac]
             ["resty.openssl.hmac" :as ngxhmac]
             ["resty.openssl.digest" :as ngxdigest]]})

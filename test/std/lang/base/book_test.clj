@@ -178,7 +178,7 @@
 ^{:refer std.lang.base.book/book :added "4.0"}
 (fact "creates a book"
 
-  (b/book {:lang :redis
+  (b/book {:lang :lua.redis
            :meta    (:meta +book+)
            :grammar (:grammar +book+)
            :parent  :lua
@@ -188,7 +188,7 @@
 ^{:refer std.lang.base.book/book-merge :added "4.0"}
 (fact "merges a book with it's parent"
 
-  (b/book-merge (b/book {:lang    :redis
+  (b/book-merge (b/book {:lang    :lua.redis
                          :meta    (:meta +book+)
                          :grammar (:grammar +book+)
                          :parent  :lua
@@ -199,17 +199,17 @@
 ^{:refer std.lang.base.book/book-from :added "4.0"}
 (fact "returns the merged book given snapshot"
   (let [snapshot {:lua  {:book +sample+}
-                  :redis {:book (b/book {:lang :redis
+                  :lua.redis {:book (b/book {:lang :lua.redis
                                         :meta    (:meta +book+)
                                         :grammar (:grammar +book+)
                                         :parent  :lua
                                         :merged  #{}})}}]
-    (b/book-from snapshot :redis))
+    (b/book-from snapshot :lua.redis))
   => b/book?)
 
 ^{:refer std.lang.base.book/check-compatible-lang :added "4.0"
   :setup [(def +redis+
-            (b/book-merge (b/book {:lang    :redis
+            (b/book-merge (b/book {:lang    :lua.redis
                                    :meta    (:meta +book+)
                                    :grammar (:grammar +book+)
                                    :parent  :lua
@@ -220,7 +220,7 @@
   (b/check-compatible-lang +redis+ :lua)
   => true
 
-  (b/check-compatible-lang +redis+ :redis)
+  (b/check-compatible-lang +redis+ :lua.redis)
   => true
 
   (b/check-compatible-lang +redis+ :js)
@@ -376,7 +376,7 @@
   (-> (b/delete-entry +redis+ 'L.core :fragment 'identity)
       second
       b/book-string)
-  => "#book [:redis] {L.core {:code 1, :fragment 0}}")
+  => "#book [:lua.redis] {L.core {:code 1, :fragment 0}}")
 
 ^{:refer std.lang.base.book/module-create-filename :added "4.0"}
 (fact "creates a filename for module"

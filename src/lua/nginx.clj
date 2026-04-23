@@ -6,7 +6,7 @@
             [xt.lang.common-lib :as lib])
   (:refer-clojure :exclude [print flush time re-find]))
 
-(l/script :lua
+(l/script :lua.nginx
   {:import [["cjson" :as cjson]
             ["resty.md5" :as ngxmd5]
             ["resty.string" :as ngxstr]

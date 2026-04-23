@@ -2,7 +2,7 @@
   (:require [std.lang :as l]
             [xt.sys.conn-dbsql :as dbsql]))
 
-(l/script :lua
+(l/script :lua.nginx
   {:import [["pgmoon" :as ngxpg]] :require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-runtime :as rt]]})
 
 (defn.lua default-env

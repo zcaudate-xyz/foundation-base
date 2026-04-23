@@ -12,24 +12,24 @@
 (def +eval-block+
   (str "cjson = require('cjson')\n\n"
        (std.lang.base.pointer/ptr-invoke-script
-        lua.nginx/http-debug-api []
-       {:lang :lua})))
+         lua.nginx/http-debug-api []
+        {:lang :lua.nginx})))
 
 (def +eval-ws+
   (l/emit-as
-   :lua '[(lua.nginx/http-debug-ws)]))
+   :lua.nginx '[(lua.nginx/http-debug-ws)]))
 
 (def +eval-es+
   (l/emit-as
-   :lua '[(lua.nginx/http-debug-es)]))
+   :lua.nginx '[(lua.nginx/http-debug-es)]))
 
 (def +echo-ws+
   (l/emit-as
-   :lua '[(lua.nginx/http-echo-ws)]))
+   :lua.nginx '[(lua.nginx/http-echo-ws)]))
 
 (def +init-block+
   (l/emit-as
-   :lua '[(lua.nginx/http-setup-global)]))
+   :lua.nginx '[(lua.nginx/http-setup-global)]))
 
 (defn create-resty-params
   "creates default resty params"
