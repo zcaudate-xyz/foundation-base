@@ -105,13 +105,15 @@
 
 (defn python-tf-x-proto-set
   [[_ obj prototype _]]
-  (template/$
-   (do (:= (. ~obj ["__proto__"]) ~prototype)
-       (for:object [[k f] ~prototype]
-         (if (callable f)
-           (:= (. ~obj [k]) (. (__import__ "types") (MethodType f ~obj)))
-           (:= (. ~obj [k]) f)))
-       (return ~obj))))
+  (let [proto-sym (gensym "proto__")]
+    (template/$
+     (do (var ~proto-sym ~prototype)
+         (:= (. ~obj ["__proto__"]) ~proto-sym)
+         (for:object [[k f] ~proto-sym]
+           (if (callable f)
+             (:= (. ~obj [k]) (. (__import__ "types") (MethodType f ~obj)))
+             (:= (. ~obj [k]) f)))
+         ~obj))))
 
 (defn python-tf-x-proto-tostring
   [[_ _]]
