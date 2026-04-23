@@ -140,6 +140,14 @@
   (snapto '[code.manage] {:print {:item true}
                           :write false}))
 
+^{:refer code.manage/isolate :added "4.1"}
+(fact "builds the isolate task"
+  (let [task (into {} isolate)]
+    [(:template task)
+     (-> task :params :title)
+     (fn? (-> task :main :fn))])
+  => [:code.transform "ISOLATE TESTS" true])
+
 ^{:refer code.manage/locate-code :added "3.0"}
 (fact "locates code base upon query"
 
@@ -236,9 +244,10 @@
   => [:code.transform "HEAL CODE" true true])
 
 ^{:refer code.manage/+tasks+ :added "4.1"}
-(fact "registers snapto in the available manage tasks"
-  (-> +tasks+ :snapto)
-  => ifn?)
+(fact "registers isolate and snapto in the available manage tasks"
+  [(task/task? (-> +tasks+ :isolate))
+   (task/task? (-> +tasks+ :snapto))]
+  => [true true])
 
 ^{:refer code.manage/-main :added "4.0"
   :timeout 1000}

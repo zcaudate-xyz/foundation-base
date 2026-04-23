@@ -1,5 +1,6 @@
 (ns code.test.base.executive-test
-  (:require [clojure.string]
+  (:require [clojure.edn :as edn]
+            [clojure.string]
             [code.project :as project]
             [code.test.base.context :as context]
             [code.test.base.executive :as executive]
@@ -69,6 +70,41 @@
                 clojure.core/println (fn [_] :printed)]
     (executive/save-report {:passed []}))
   => nil)
+
+^{:refer code.test.base.executive/save-report :added "4.1"}
+(fact "writes EDN-safe run reports"
+  (let [report  (atom nil)
+        wrapped (reify Object
+                  (toString [_]
+                    "#<Wrapped@1: \"oops\">"))]
+    (binding [context/*root* "."]
+      (with-redefs [std.fs/create-directory (fn [_] :created)
+                    clojure.core/spit (fn [_ content]
+                                        (reset! report content))
+                    clojure.core/println (fn [_] :printed)]
+        (executive/save-report
+         {:failed [{:status :success
+                    :data false
+                    :from :verify
+                    :meta {:path "path"
+                           :function 'demo/fn
+                           :ns 'demo.core-test
+                           :line 10
+                           :desc "demo"}
+                    :checker {:tag :satisfies
+                              :form :ok
+                              :fn inc}
+                    :actual {:type :code/test
+                             :status :success
+                             :data [wrapped (ex-info "bad" {:demo true})]
+                             :form '(demo)
+                             :from :evaluate}}]}))
+      (let [entry (-> @report edn/read-string :failed first)]
+        [(string? (get-in entry [:checker :fn]))
+         (get-in entry [:actual :data 0])
+         (get-in entry [:actual :data 1 :tag])
+         (get-in entry [:actual :data 1 :message])])))
+  => [true "#<Wrapped@1: \"oops\">" :throwable "bad"])
 
 ^{:refer code.test.base.executive/unload-namespace :added "3.0"}
 (fact "unloads a given namespace for testing"

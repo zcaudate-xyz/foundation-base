@@ -1,14 +1,15 @@
 (ns code.manage
   (:require [code.framework :as base]
-             [code.manage.fn-format :as fn-format]
-             [code.manage.ns-format :as ns-format]
-             [code.manage.ns-rename :as ns-rename]
-             [code.manage.unit :as unit]
-             [code.manage.unit.import :as unit.import]
-             [code.manage.unit.snapto :as unit.snapto]
-             [code.manage.unit.require :as unit.require]
-             [code.manage.unit.template :as template]
-             [code.manage.var :as var]
+            [code.manage.fn-format :as fn-format]
+            [code.manage.ns-format :as ns-format]
+            [code.manage.ns-rename :as ns-rename]
+            [code.manage.unit :as unit]
+            [code.manage.unit.isolate :as unit.isolate]
+            [code.manage.unit.import :as unit.import]
+            [code.manage.unit.snapto :as unit.snapto]
+            [code.manage.unit.require :as unit.require]
+            [code.manage.unit.template :as template]
+            [code.manage.var :as var]
             [code.project :as project]
             [std.block :as block]
             [std.lib.collection :as collection]
@@ -174,7 +175,6 @@
           :main   {:fn #'base/transform-code}
           :result template/base-transform-result}])
 
-
 (invoke/definvoke import
   "import docstrings from tests
  
@@ -190,11 +190,11 @@
    (import '[code.manage.unit]
            {:print {:summary true :result true :item true}
             :write false})"
-   {:added "3.0"}
-   [:task {:template :code.transform
-           :main   {:fn #'unit.import/import}
-           :params {:title "IMPORT DOCSTRINGS"
-                    :parallel true
+  {:added "3.0"}
+  [:task {:template :code.transform
+          :main   {:fn #'unit.import/import}
+          :params {:title "IMPORT DOCSTRINGS"
+                   :parallel true
                    :write true}
           :item   {:list template/source-namespaces}
           :result (template/code-transform-result :changed)}])
@@ -378,8 +378,8 @@
                    :parallel true
                    :write true}
           :main {:fn #'unit/arrange}
-           :item {:list template/test-namespaces}
-           :result (template/code-transform-result :changed)}])
+          :item {:list template/test-namespaces}
+          :result (template/code-transform-result :changed)}])
 
 (comment (code.manage/arrange ['code.framework] {:print {:function true :item true :result true :summary true}}))
 
@@ -403,6 +403,31 @@
   
   (code.manage/snapto ['xtbench.lua.db.base-util-test]
                       {:print {:function true :item true :result true :summary true}}))
+
+(invoke/definvoke isolate
+  "copies failing facts from a run report into a new test namespace
+ 
+   (code.manage/isolate
+     [xt.lang.spec-base-test]
+     {:run \".hara/runs/run-1776913569354.edn\"
+      :suffix \"-fix\"
+      :print {:item true :result true :summary true}})"
+  {:added "4.1"}
+  [:task {:template :code.transform
+          :params {:title "ISOLATE TESTS"
+                   :parallel true
+                   :write true}
+          :main {:fn #'unit.isolate/isolate}
+          :item {:list template/test-namespaces
+                 :display (template/empty-result :functions :info :no-failures)}
+          :result (template/code-transform-result :functions)}])
+
+(comment
+  (code.manage/isolate
+   '[xt.lang.spec-base-test]
+   {;:run ".hara/runs/run-1776913569354.edn"
+    :suffix "-fix"
+    :print {:item true :result true :summary true}}))
 
 (invoke/definvoke locate-code
   "locates code base upon query"
@@ -637,6 +662,7 @@
    :in-order      in-order?
    :arrange       arrange
    :snapto        snapto
+   :isolate       isolate
    :locate-code   locate-code
    :locate-test   locate-test
    :grep          grep
@@ -677,5 +703,4 @@
           (print-fn))
         (if-not (get opts :no-exit)
           (System/exit 0))))))
-
 

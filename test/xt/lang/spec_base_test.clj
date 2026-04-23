@@ -3143,6 +3143,7 @@
   => {"a" 1})
 
 (comment
+
   (s/seedgen-langadd 'xt.lang.spec-base {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.lang.spec-base {:lang [:lua :python] :write true})
 

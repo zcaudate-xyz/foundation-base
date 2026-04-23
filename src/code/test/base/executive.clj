@@ -13,6 +13,56 @@
 
 (defonce +latest+ (atom {}))
 
+(defn report-edn-safe?
+  "checks if a value can be written as EDN without coercion"
+  {:added "4.1"}
+  [x]
+  (or (nil? x)
+      (boolean? x)
+      (string? x)
+      (char? x)
+      (keyword? x)
+      (symbol? x)
+      (number? x)
+      (instance? java.util.UUID x)
+      (instance? java.util.Date x)))
+
+(defn report-edn
+  "coerces a report value into an EDN-safe shape"
+  {:added "4.1"}
+  [x]
+  (cond (report-edn-safe? x)
+        x
+
+        (instance? Throwable x)
+        (cond-> {:tag :throwable
+                 :class (.getName (class x))
+                 :message (.getMessage ^Throwable x)}
+          (ex-data x) (assoc :data (report-edn (ex-data x))))
+
+        (map? x)
+        (reduce-kv (fn [out k v]
+                     (assoc out
+                            (report-edn k)
+                            (report-edn v)))
+                   {}
+                   x)
+
+        (vector? x)
+        (mapv report-edn x)
+
+        (set? x)
+        (into #{} (map report-edn) x)
+
+        (seq? x)
+        (apply list (map report-edn x))
+
+        (sequential? x)
+        (mapv report-edn x)
+
+        :else
+        (str x)))
+
 (defn accumulate
   "accumulates test results from various facts and files into a single data structure"
   {:added "3.0"}
@@ -118,16 +168,17 @@
                                (listener/summarise-verify item)
                                (listener/summarise-evaluate item))
                      :timeout (listener/summarise-evaluate item)))
-         failures (reduce (fn [out k]
-                            (let [data (map (partial process k) (get items k))]
-                              (if (seq data)
-                                (assoc out k data)
-                                out)))
-                          {}
-                          [:failed :throw :timeout])]
-     (when (seq failures)
-       (let [dir  (str (fs/path context/*root* ".hara/runs"))
-             _    (fs/create-directory dir)
+          failures (reduce (fn [out k]
+                             (let [data (map (comp report-edn (partial process k))
+                                             (get items k))]
+                               (if (seq data)
+                                 (assoc out k data)
+                                 out)))
+                           {}
+                           [:failed :throw :timeout])]
+      (when (seq failures)
+        (let [dir  (str (fs/path context/*root* ".hara/runs"))
+              _    (fs/create-directory dir)
              file (str (fs/path dir (str "run-" (t/system-ms) ".edn")))]
          (spit file (with-out-str (clojure.pprint/pprint failures)))
          (println (str "Report saved to " file)))))))
