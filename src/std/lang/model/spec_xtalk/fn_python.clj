@@ -116,7 +116,8 @@
 
 (defn python-expand-x-proto-set-value
   [{:keys [symbol grammar modules mopts]}]
-  (let [args     '[obj prototype]
+  (let [reserved (get-in grammar [:reserved symbol])
+        args     (preprocess/reserved-value-args reserved)
         form     (apply list symbol args)
         expand   (or (get-in grammar [:reserved symbol :expand/form])
                      (fn [{:keys [form]}]
@@ -128,7 +129,7 @@
                    grammar
                    modules
                    mopts
-                   (get-in grammar [:reserved symbol]))))))
+                   reserved)))))
 
 (defn python-tf-x-proto-tostring
   [[_ _]]

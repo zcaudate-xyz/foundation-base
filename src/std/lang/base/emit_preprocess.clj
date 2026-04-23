@@ -188,14 +188,27 @@
                     (:macro reserved)))
               value-template-args)))
 
+(defn reserved-op-return-type
+  "gets the return slot from an xtalk op-spec type tuple"
+  {:added "4.1"}
+  [reserved]
+  (get-in reserved [:op-spec :type 2]))
+
 (defn reserved-return-mode
   "gets semantic return mode for a reserved entry"
   {:added "4.1"}
   [reserved]
   (or (:return-mode reserved)
       (when (= :xt/self
-               (get-in reserved [:op-spec :type 2]))
+               (reserved-op-return-type reserved))
         :self)))
+
+(defn reserved-self-return?
+  "checks if the reserved entry semantically returns its first argument"
+  {:added "4.1"}
+  [reserved]
+  (= :self
+     (reserved-return-mode reserved)))
 
 (defn reserved-expand-context
   "creates context for reserved expander functions"
@@ -250,7 +263,10 @@
   {:added "4.1"}
   [args expanded return-mode]
   (case return-mode
-    :self (let [self-arg (first args)]
+    :self (let [self-arg (or (first args)
+                             (f/error "Self-return lifting requires at least one arg."
+                                      {:args args
+                                       :expanded expanded}))]
             (list 'fn args
                   expanded
                   (list 'return self-arg)))
