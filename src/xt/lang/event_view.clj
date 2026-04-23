@@ -756,7 +756,7 @@
            (xtd/arr-sort arr
                          (fn [e]
                            (return (xt/x:get-key e sort-key)))
-                         xt/x:lt)))})))))
+                         xt/x:str-lt)))})))))
 
 (defn.xt group-by-lookup
   "creates group-by lookup"

@@ -153,19 +153,23 @@
    (xt/x:proto-create m)))
 
 (defn.xt proto-get
-  "creates the prototype map"
+  "gets the prototype or a prototype key"
   {:added "4.0"}
+  ([obj]
+   (return (xt/x:proto-get obj)))
   ([obj key]
    (return (xt/x:proto-get obj key))))
 
 (defn.xt proto-set
-  "creates the prototype map"
+  "sets the prototype or a prototype key"
   {:added "4.0"}
+  ([obj proto]
+   (return (xt/x:proto-set obj proto)))
   ([obj key value]
    (return (xt/x:proto-set obj key value))))
 
 (defn.xt proto-tostring
-  "creates the prototype map"
+  "gets the prototype tostring key"
   {:added "4.0"}
   ([obj]
    (return (xt/x:proto-tostring obj))))
@@ -374,4 +378,3 @@
   {:added "4.0"}
   [s]
   (xt/x:return-eval s -/return-wrap))
-
