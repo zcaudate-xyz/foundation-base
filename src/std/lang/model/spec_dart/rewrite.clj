@@ -16,6 +16,7 @@
 (defn rewrite-form
   [form]
   (cond (and (collection/form? form)
+             (seq form)
              (= 'quote (first form)))
         form
 

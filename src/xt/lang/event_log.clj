@@ -103,13 +103,6 @@
     (xt/x:arr-push out k))
   (return out))
 
-(defn.xt id-fn
-  "gets the id of a log entry"
-  {:added "4.1"}
-  [x]
-  (return (xt/x:get-key x "id")))
-
-
 (def.xt METHODS
   {:count {:handler -/get-count
            :input []}

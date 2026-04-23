@@ -269,9 +269,7 @@
   [view]
   (var #{pipeline options} view)
   (var #{input} view)
-  (var context-opts (xt/x:get-key options "context"))
-  (when (xt/x:nil? context-opts)
-    (:= context-opts {}))
+  (var context-opts (or (xt/x:get-key options "context") {}))
   (var context  (xt/x:obj-assign
                  {:view  view
                    :input (. input ["current"])}
