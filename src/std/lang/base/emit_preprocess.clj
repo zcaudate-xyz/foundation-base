@@ -155,9 +155,9 @@
                                          (vals link)))
                           sym-ns)]
        (or (get-in modules [sym-module :fragment sym-id])
-            (if-let [et (and (get-in modules [sym-module :code sym-id]))]
-              (if (= :defrun (:op-key et))
-                (apply list 'do (drop 2 (:form et))))))))))
+           (if-let [et (and (get-in modules [sym-module :code sym-id]))]
+             (if (= :defrun (:op-key et))
+               (apply list 'do (drop 2 (:form et))))))))))
 
 (defn arglists->argv
   "normalizes arglists to a single argv vector"
@@ -423,11 +423,11 @@
                          :std.lang/lang (:lang mopts)
                          :std.lang/module (ut/module-id (:module mopts))})]
             (try
-               (binding [*macro-opts* mopts]
-                 (walk-fn (expand-reserved-form form grammar modules mopts)))
-               (catch Throwable t
-                 (ut/throw-with-context
-                  "std.lang staging template expansion failed"
+              (binding [*macro-opts* mopts]
+                (walk-fn (expand-reserved-form form grammar modules mopts)))
+              (catch Throwable t
+                (ut/throw-with-context
+                 "std.lang staging template expansion failed"
                  (:std.lang/provenance mopts)
                  t))))
           
@@ -519,13 +519,13 @@
             form  (walk/prewalk
                    (fn walk-fn [form]
                      (cond (collection/form? form)
-                            (to-staging-form form grammar modules mopts deps-fragment walk-fn)
-                            
-                            (and (symbol? form))
-                            (or (when-let [standalone (value-standalone form grammar modules mopts)]
-                                  (walk-fn standalone))
-                                (if (namespace form)
-                                  (process-namespaced-symbol form modules mopts deps deps-fragment walk-fn)
+                           (to-staging-form form grammar modules mopts deps-fragment walk-fn)
+                           
+                           (and (symbol? form))
+                           (or (when-let [standalone (value-standalone form grammar modules mopts)]
+                                 (walk-fn standalone))
+                               (if (namespace form)
+                                 (process-namespaced-symbol form modules mopts deps deps-fragment walk-fn)
                                  (process-standard-symbol form mopts deps-native)))
                            
                            :else form))
@@ -547,19 +547,19 @@
     (let [form  (walk/prewalk
                  (fn walk-fn [form]
                     
-                    (cond  (and (collection/form? form)
-                                (= (first form) '!:template))
-                           (walk-fn (eval (second form)))
+                    (cond (and (collection/form? form)
+                               (= (first form) '!:template))
+                          (walk-fn (eval (second form)))
 
-                           (and (collection/form? form)
-                                (get-in grammar [:reserved (first form)]))
-                            (protect-reserved-head form)
+                          (and (collection/form? form)
+                               (get-in grammar [:reserved (first form)]))
+                          (protect-reserved-head form)
 
-                            (symbol? form)
-                            (or (value-standalone form grammar modules mopts)
-                                (if (namespace form)
-                                 (process-namespaced-symbol form modules mopts nil nil identity)
-                                 (process-standard-symbol form mopts nil)))
+                          (symbol? form)
+                          (or (value-standalone form grammar modules mopts)
+                              (if (namespace form)
+                                (process-namespaced-symbol form modules mopts nil nil identity)
+                                (process-standard-symbol form mopts nil)))
                           
                           :else
                           form))

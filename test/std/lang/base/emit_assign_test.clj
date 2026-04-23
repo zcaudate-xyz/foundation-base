@@ -182,8 +182,8 @@
                           {:emit :macro
                            :macro (fn [_]
                                     '(sym :as [1 2 3]))
-                            :assign/template 'sym})
-                 {})
+                           :assign/template 'sym})
+                {})
   => [:template '(a :as [1 2 3])]
 
   (assign-value 'a
