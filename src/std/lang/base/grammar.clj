@@ -34,7 +34,7 @@
   (cond-> entry
     (and (contains? entry :value/standalone)
          (not (contains? entry :expr)))
-    (assoc :expr (:value/standalone))))
+    (assoc :expr (:value/standalone entry))))
 
 (defn collect-ops
   "collects alll ops together
