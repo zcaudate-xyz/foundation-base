@@ -383,19 +383,19 @@
 
   (!.js
     (do (var out ["a" "b" "c" "d"])
-        (xt/x:arr-remove out (xt/x:offset 1))
+        (xt/x:arr-remove out 1)
         out))
   => ["a" "c" "d"]
 
   (!.py
     (do (var out ["a" "b" "c" "d"])
-        (xt/x:arr-remove out (xt/x:offset 1))
+        (xt/x:arr-remove out 1)
         out))
   => ["a" "c" "d"]
-
+  
   (!.lua
     (do (var out ["a" "b" "c" "d"])
-        (xt/x:arr-remove out (xt/x:offset 1))
+        (xt/x:arr-remove out 1)
         out))
   => ["a" "c" "d"])
 
@@ -503,20 +503,20 @@
 
   (!.js
     (xt/x:arr-slice ["a" "b" "c" "d" "e"]
-                    (xt/x:offset 1)
-                    (xt/x:offset 3)))
+                    1
+                    3))
   => ["b" "c"]
 
   (!.py
     (xt/x:arr-slice ["a" "b" "c" "d" "e"]
-                    (xt/x:offset 1)
-                    (xt/x:offset 3)))
+                    1
+                    3))
   => ["b" "c"]
 
   (!.lua
     (xt/x:arr-slice ["a" "b" "c" "d" "e"]
-                    (xt/x:offset 1)
-                    (xt/x:offset 3)))
+                    1
+                    3))
   => ["b" "c"])
 
 ^{:refer xt.lang.spec-base/x:arr-reverse :added "4.1"}
@@ -633,7 +633,7 @@
 ^{:refer xt.lang.spec-base/x:offset :added "4.1"}
 (fact "uses the grammar base offset"
 
-  ^{:seedgen/check    {:lua  {:expect 11}}}
+  ^{:seedgen/base    {:lua  {:expect 11}}}
   (!.js    
     (xt/x:offset 10))
   => 10
@@ -649,7 +649,7 @@
 ^{:refer xt.lang.spec-base/x:offset-rev :added "4.1"}
 (fact "uses the reverse grammar offset"
 
-  ^{:seedgen/check    {:lua  {:expect 10}}}
+  ^{:seedgen/base    {:lua  {:expect 10}}}
   (!.js
     (xt/x:offset-rev 10))
   => 9
@@ -665,7 +665,7 @@
 ^{:refer xt.lang.spec-base/x:offset-len :added "4.1"}
 (fact "uses the length grammar offset"
 
-  ^{:seedgen/check    {:lua  {:expect 9}}}
+  ^{:seedgen/base    {:lua  {:expect 10}}}
   (!.js
     (xt/x:offset-len 10))
   => 9
@@ -676,12 +676,12 @@
 
   (!.lua
     (xt/x:offset-len 10))
-  => 9)
+  => 10)
 
 ^{:refer xt.lang.spec-base/x:offset-rlen :added "4.1"}
 (fact "uses the reverse length grammar offset"
 
-  ^{:seedgen/check    {:lua  {:expect 9}}}
+  ^{:seedgen/base    {:lua  {:expect 9}}}
   (!.js
     (xt/x:offset-rlen 10))
   => 10
@@ -1882,7 +1882,7 @@
 ^{:refer xt.lang.spec-base/x:str-index-of :added "4.1"}
 (fact "finds the index of a substring"
 
-  ^{:seedgen/check    {:lua  {:expect 6}}}
+  ^{:seedgen/base    {:lua  {:expect 6}}}
   (!.js
     (xt/x:str-index-of "hello/world" "/" (xt/x:offset 0)))
   => 5
@@ -1899,21 +1899,15 @@
 (fact "gets a substring"
 
   (!.js
-    (xt/x:str-substring "hello/world"
-                        (xt/x:offset 3)
-                        (xt/x:offset 8)))
+    (xt/x:str-substring "hello/world" (xt/x:offset 3) 8))
   => "lo/wo"
 
   (!.py
-    (xt/x:str-substring "hello/world"
-                        (xt/x:offset 3)
-                        (xt/x:offset 8)))
+    (xt/x:str-substring "hello/world" (xt/x:offset 3) 8))
   => "lo/wo"
 
   (!.lua
-    (xt/x:str-substring "hello/world"
-                        (xt/x:offset 3)
-                        (xt/x:offset 8)))
+    (xt/x:str-substring "hello/world" (xt/x:offset 3) 8))
   => "lo/wo")
 
 ^{:refer xt.lang.spec-base/x:str-to-upper :added "4.1"}
@@ -2257,20 +2251,20 @@
 
 ^{:refer xt.lang.spec-base/x:callback :added "4.1"}
 (fact "dispatches node-style callbacks through for:return"
-
+  
   [(!.js
      (var out nil)
-     (var success (fn [cb]
-                    (cb nil "OK")))
-     (xt/for:return [[ret err] (success (xt/x:callback))]
-       {:success (:= out ret)
-        :error   (:= out err)})
+     (var success-fn (fn [cb]
+                       (cb nil "OK")))
+     (xt/for:return [[ret err] (xt/x:callback)]
+       {:success (cb ret)
+        :error   (cb err)})
      out)
    (!.js
      (var out nil)
-     (var failure (fn [cb]
+     (var failure-fn (fn [cb]
                     (cb "ERR" nil)))
-     (xt/for:return [[ret err] (failure (xt/x:callback))]
+     (xt/for:return [[ret err] (failure-fn (xt/x:callback))]
        {:success (:= out ret)
         :error   (:= out err)})
      out)]
@@ -2278,17 +2272,17 @@
 
   [(!.py
      (var out nil)
-     (var success (fn [cb]
-                    (cb nil "OK")))
-     (xt/for:return [[ret err] (success (xt/x:callback))]
+     (var success-fn (fn [cb]
+                       (cb nil "OK")))
+     (xt/for:return [[ret err] (success-fn (xt/x:callback))]
        {:success (:= out ret)
         :error   (:= out err)})
      out)
    (!.py
      (var out nil)
-     (var failure (fn [cb]
-                    (cb "ERR" nil)))
-     (xt/for:return [[ret err] (failure (xt/x:callback))]
+     (var failure-fn (fn [cb]
+                       (cb "ERR" nil)))
+     (xt/for:return [[ret err] (failure-fn (xt/x:callback))]
        {:success (:= out ret)
         :error   (:= out err)})
      out)]
@@ -2296,17 +2290,17 @@
 
   [(!.lua
      (var out nil)
-     (var success (fn [cb]
-                    (cb nil "OK")))
-     (xt/for:return [[ret err] (success (xt/x:callback))]
+     (var success-fn (fn [cb]
+                       (cb nil "OK")))
+     (xt/for:return [[ret err] (success-fn (xt/x:callback))]
        {:success (:= out ret)
         :error   (:= out err)})
      out)
    (!.lua
      (var out nil)
-     (var failure (fn [cb]
-                    (cb "ERR" nil)))
-     (xt/for:return [[ret err] (failure (xt/x:callback))]
+     (var failure-fn (fn [cb]
+                       (cb "ERR" nil)))
+     (xt/for:return [[ret err] (failure-fn (xt/x:callback))]
        {:success (:= out ret)
         :error   (:= out err)})
      out)]
@@ -3144,6 +3138,7 @@
 
 (comment
 
+  (code.manage/isolate 'xt.lang.spec-base-test {:suffix "-fix"})
   (s/seedgen-langadd 'xt.lang.spec-base {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.lang.spec-base {:lang [:lua :python] :write true})
 

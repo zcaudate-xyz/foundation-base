@@ -16,6 +16,23 @@
 (def ^:dynamic *meta-tags*
   #{:meta :hash-meta})
 
+(defn unwrap-fact-block
+  "returns the exact metadata prefix and inner fact block"
+  {:added "4.1"}
+  ([blk]
+   (loop [prefix ""
+          blk    blk]
+     (if (*meta-tags* (block/tag blk))
+       (let [children   (block/children blk)
+             expr       (last (filter block/expression? children))
+             block-str  (block/string blk)
+             expr-str   (block/string expr)
+             prefix-str (subs block-str 0 (- (count block-str)
+                                             (count expr-str)))]
+         (recur (str prefix prefix-str) expr))
+       {:prefix prefix
+        :block  blk}))))
+
 (defn unwrap-meta-block
   "returns the inner expression for metadata-wrapped blocks"
   {:added "4.1"}
@@ -45,8 +62,8 @@
          children (remove block/void? (block/children blk))
          op       (first children)]
      (and (= :list (block/tag blk))
-          op
-          (*test-forms* (block/value op))))))
+           op
+           (*test-forms* (block/value op))))))
 
 (defn top-level-entries
   "returns top level blocks with their line ranges"
@@ -120,6 +137,144 @@
            :else
            nil))))
 
+(defn significant-entry?
+  {:added "4.1"}
+  ([entry]
+   (let [blk (:block entry)]
+     (and (not (block/void? blk))
+          (not (block/comment? blk))))))
+
+(defn arrow-entry?
+  {:added "4.1"}
+  ([entry]
+   (let [blk (:block entry)]
+     (and (= :symbol (block/tag blk))
+          (= '=> (block/value blk))))))
+
+(defn next-significant-index
+  {:added "4.1"}
+  ([entries start]
+   (first (keep-indexed (fn [i entry]
+                          (when (and (<= start i)
+                                     (significant-entry? entry))
+                            i))
+                        entries))))
+
+(defn trim-right-void
+  {:added "4.1"}
+  ([entries]
+   (loop [out entries]
+     (if (and (seq out)
+              (block/void? (:block (peek out))))
+       (recur (pop out))
+       out))))
+
+(defn find-example-end
+  {:added "4.1"}
+  ([entries expr-idx]
+   (let [sig-idx (next-significant-index entries (inc expr-idx))]
+     (cond (nil? sig-idx)
+           (count entries)
+
+           (arrow-entry? (nth entries sig-idx))
+           (if-let [result-idx (next-significant-index entries (inc sig-idx))]
+             (or (next-significant-index entries (inc result-idx))
+                 (count entries))
+             (count entries))
+
+           :else
+           sig-idx))))
+
+(defn entry-matches-line?
+  "checks if an entry spans any of the target lines"
+  {:added "4.1"}
+  ([{:keys [line]} target-lines]
+   (some (fn [row]
+           (<= (:row line) row (:end-row line)))
+         target-lines)))
+
+(defn body-entries
+  "returns all child entries of a fact block, including whitespace"
+  {:added "4.1"}
+  ([blk row-base]
+   (->> (-> blk nav/navigator nav/down)
+        (iterate nav/right*)
+        (take-while (comp some? nav/block))
+        (mapv (fn [z]
+                (let [line (nav/line-info z)]
+                  {:block (nav/block z)
+                   :line  (-> line
+                              (update :row #(+ row-base %))
+                              (update :end-row #(+ row-base %)))}))))))
+
+(defn fact-body-entries
+  "returns the operator, optional intro, and body entries for a fact"
+  {:added "4.1"}
+  ([entry]
+   (let [{:keys [prefix block]} (unwrap-fact-block (:block entry))
+         row-base        (+ (-> entry :line :row)
+                            (count (filter #{\newline} prefix))
+                            -1)
+         entries         (body-entries block row-base)
+         op-idx          (next-significant-index entries 0)
+         intro-idx       (when-let [idx (next-significant-index entries (inc op-idx))]
+                            (when (= :string (some-> (nth entries idx nil) :block block/tag))
+                              idx))
+         body-start      (if intro-idx
+                           (inc intro-idx)
+                           (inc op-idx))]
+     {:op     (nth entries op-idx)
+      :intro  (when intro-idx
+                (nth entries intro-idx))
+      :body   (subvec entries body-start)})))
+
+(defn example-ranges
+  "returns body ranges for individual fact examples"
+  {:added "4.1"}
+  ([entries]
+   (loop [expr-idx (next-significant-index entries 0)
+          out      []]
+     (if (nil? expr-idx)
+       out
+       (let [end-idx (find-example-end entries expr-idx)]
+         (recur (when (< end-idx (count entries))
+                  end-idx)
+                (conj out [expr-idx end-idx])))))))
+
+(defn selected-fact-body
+  "returns a body string for the selected failing examples within a fact"
+  {:added "4.1"}
+  ([entries target-lines intro?]
+   (->> (example-ranges entries)
+        (keep (fn [[start end]]
+                (let [example (-> (subvec entries start end)
+                                  trim-right-void)]
+                  (when (some #(entry-matches-line? % target-lines)
+                              (filter significant-entry? example))
+                    (apply str (map (comp block/string :block) example))))))
+        (map-indexed (fn [i example]
+                       (str (if (zero? i)
+                              (if intro? "\n\n  " "\n  ")
+                              "\n\n  ")
+                            example)))
+        (apply str))))
+
+(defn isolate-fact-string
+  "returns a fact string containing only the selected examples"
+  {:added "4.1"}
+  ([entry target-lines]
+   (let [{:keys [prefix]}        (unwrap-fact-block (:block entry))
+         {:keys [op intro body]} (fact-body-entries entry)
+         selected                (selected-fact-body body target-lines (boolean intro))]
+     (when (seq selected)
+       (str prefix
+            "("
+            (block/string (:block op))
+            (when intro
+              (str " " (block/string (:block intro))))
+            selected
+            ")")))))
+
 (defn failing-entries
   "returns failing run entries for a test namespace"
   {:added "4.1"}
@@ -150,15 +305,7 @@
                  out
                  (conj out f))))
            []
-           entries)))
-
-(defn entry-matches-line?
-  "checks if an entry spans any of the target lines"
-  {:added "4.1"}
-  ([{:keys [line]} target-lines]
-   (some (fn [row]
-           (<= (:row line) row (:end-row line)))
-         target-lines)))
+            entries)))
 
 (defn isolate-target-ns
   "returns the target namespace for isolated tests"
@@ -171,7 +318,7 @@
                 (project/test-suffix)))))
 
 (defn isolate-string
-  "returns a test file containing only the selected failing facts"
+  "returns a test file containing only the selected failing checks"
   {:added "4.1"}
   ([original target-ns target-lines]
    (->> (top-level-entries original)
@@ -182,8 +329,8 @@
                       (not (fact-block? block))
                       (block/string block)
 
-                      (entry-matches-line? entry target-lines)
-                      (block/string block))))
+                      :else
+                      (isolate-fact-string entry target-lines))))
         (str/join "\n\n"))))
 
 (defn isolate

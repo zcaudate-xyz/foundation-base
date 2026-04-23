@@ -17,7 +17,9 @@
        "^{:refer example.core/second :added \"0.1\"}\n"
        "(fact \"second\"\n"
        "  (+ helper 2)\n"
-       "  => 4)\n"))
+       "  => 4\n\n"
+       "  (+ helper 3)\n"
+       "  => 5)\n"))
 
 (defn fact-count
   [s]
@@ -80,17 +82,19 @@
       "#<Wrapped@1: \"oops\">"])
 
 ^{:refer code.manage.unit.isolate/isolate-string :added "4.1"}
-(fact "keeps support forms and only the selected failing facts"
+(fact "keeps support forms and only the selected failing checks"
   (let [out (isolate-string +sample-test+
                             'example.core-fix-test
-                            #{14})]
+                            #{18})]
     [(-> out top-level-entries first :block block/value second)
      (str/includes? out "(def helper 1)")
      (str/includes? out "fact:global")
      (fact-count out)
      (str/includes? out "\"first\"")
-     (str/includes? out "\"second\"")])
-  => ['example.core-fix-test true true 1 false true])
+     (str/includes? out "\"second\"")
+     (str/includes? out "(+ helper 2)")
+     (str/includes? out "(+ helper 3)")])
+  => ['example.core-fix-test true true 1 false true false true])
 
 ^{:refer code.manage.unit.isolate/isolate :added "4.1"}
 (fact "writes an isolated namespace from a saved run report"
@@ -109,7 +113,7 @@
       (fs/create-directory test-dir)
       (fs/create-directory run-dir)
       (spit test-path +sample-test+)
-      (spit run-path "{:failed [{:ns example.core-test :line 14 :function example.core/second}]}")
+      (spit run-path "{:failed [{:ns example.core-test :line 18 :function example.core/second}]}")
       (let [result      (isolate 'example.core-test
                                  {:run run-path
                                   :suffix "-fix"
@@ -124,7 +128,9 @@
          (fact-count out)
          (str/includes? out "\"second\"")
          (str/includes? out "\"first\"")
+         (str/includes? out "(+ helper 2)")
+         (str/includes? out "(+ helper 3)")
          (:functions result)])
-      (finally
-        (fs/delete root))))
-  => [true 'example.core-fix-test 1 true false '[example.core/second]])
+       (finally
+         (fs/delete root))))
+  => [true 'example.core-fix-test 1 true false false true '[example.core/second]])
