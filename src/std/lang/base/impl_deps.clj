@@ -3,6 +3,7 @@
             [std.lang.base.book :as b]
             [std.lang.base.emit :as emit]
             [std.lang.base.emit-preprocess :as preprocess]
+            [std.lang.base.emit-rewrite :as rewrite]
             [std.lang.base.impl-deps-imports :as imports]
             [std.lang.base.impl-entry :as entry]
             [std.lang.base.util :as ut]
@@ -120,6 +121,10 @@
         [form sym-ids]  (preprocess/to-staging input
                                                (:grammar book)
                                                (:modules book) mopts)
+        form (rewrite/rewrite-stage :staging
+                                    form
+                                    (:grammar book)
+                                    (assoc mopts :book book))
         [entries module-lu] (collect-script-entries book sym-ids)
         natives (imports/script-imports book entries)]
     [form entries natives]))

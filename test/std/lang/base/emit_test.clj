@@ -1,10 +1,12 @@
 (ns std.lang.base.emit-test
   (:require [std.lang.base.book-entry :as entry]
-            [std.lang.base.emit :as emit :refer :all]
-            [std.lang.base.emit-common :as common]
-            [std.lang.base.emit-helper :as helper]
-            [std.lang.base.emit-prep-lua-test :as prep]
-            [std.lang.base.grammar :as grammar])
+  	        [std.lang.base.emit :as emit :refer :all]
+  	        [std.lang.base.emit-common :as common]
+  	        [std.lang.base.emit-helper :as helper]
+            [std.lang.base.emit-preprocess :as preprocess]
+  	        [std.lang.base.emit-prep-lua-test :as prep]
+            [std.lang.base.emit-rewrite :as rewrite]
+  	        [std.lang.base.grammar :as grammar])
   (:use code.test))
 
 (def +reserved+
@@ -71,3 +73,25 @@
 
   (prep-form :staging '(+ @1 2 3) nil nil {})
   => '[(+ (!:eval 1) 2 3) #{} #{} {}])
+
+^{:refer std.lang.base.emit/prep-form :added "4.1"}
+(fact "runs staging rewrites after to-staging"
+  (with-redefs [preprocess/to-input
+                (fn [_]
+                  'input-form)
+
+                preprocess/to-staging
+                (fn [form _ _ _]
+                  (if (= form 'input-form)
+                    ['staged-form #{:dep} #{:fragment} {:native :dep}]
+                    (throw (ex-info "Unexpected pre-staging form" {:form form}))))
+
+                rewrite/rewrite-stage
+                (fn [stage form _ _]
+                  (if (and (= :staging stage)
+                           (= form 'staged-form))
+                    'rewritten-form
+                    (throw (ex-info "Rewrite saw wrong form" {:stage stage
+                                                              :form form}))))]
+    (prep-form :staging '(ignored) nil {:modules {}} {}))
+  => '[rewritten-form #{:dep} #{:fragment} {:native :dep}])

@@ -1,5 +1,6 @@
 (ns std.lang.base.impl-template
   (:require [std.lang.base.emit-preprocess :as preprocess]
+            [std.lang.base.emit-rewrite :as rewrite]
             [std.lang.base.grammar-xtalk-system :as xtalk-system]
             [std.lib.collection :as collection]
             [std.lib.walk :as walk]))
@@ -34,25 +35,29 @@
                                (if hydrate
                                  (hydrate (:form-input entry) grammar context)
                                  [nil (:form-input entry)]))
-        [form
+        [form-staged
          deps
          deps-fragment
          deps-native] (preprocess/to-staging form-hydrate
                                              grammar
                                              modules
                                              context)
-         {:keys [ops profiles polyfill-modules]}
-         (xtalk-system/scan-xtalk form-hydrate)]
+        form-rewrite (rewrite/rewrite-stage :staging
+                                            form-staged
+                                            grammar
+                                            context)
+        {:keys [ops profiles polyfill-modules]}
+        (xtalk-system/scan-xtalk form-rewrite)]
     {:hmeta hmeta
-     :form form
+     :form form-rewrite
      :deps deps
      :deps-fragment deps-fragment
      :deps-native deps-native
-      :xtalk-ops ops
-      :xtalk-profiles profiles
-      :polyfill-modules polyfill-modules
-      :static/template (or (:static/template entry)
-                           (infer-static-template grammar form-hydrate))}))
+     :xtalk-ops ops
+     :xtalk-profiles profiles
+     :polyfill-modules polyfill-modules
+     :static/template (or (:static/template entry)
+                          (infer-static-template grammar form-hydrate))}))
 
 (defn cached-code-state
   "restages a template entry for the current language, using the per-entry cache when available"
@@ -68,9 +73,9 @@
                   (fn [m]
                     (if (contains? m lang)
                       m
-                       (assoc m lang (compute)))))
+                      (assoc m lang (compute)))))
            lang)
-       (compute))))
+      (compute))))
 
 (defn cached-entry-deps
   "restages a template entry and returns its current code dependencies for the book language"

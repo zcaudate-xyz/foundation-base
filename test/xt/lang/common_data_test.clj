@@ -1730,43 +1730,12 @@
 
   (!.py
    (var state {"n" 0})
-   (var f-raw (fn [x]
-                (do
-                  (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
-                  (return (* x 10)))))
-   (var f (xtd/memoize-key f-raw))
+   (var f (xtd/memoize-key
+           (fn f-raw [x]
+             (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
+             (return (* x 10)))))
    [(f 2) (f 2) (f 3) (xt/x:get-key state "n")])
   => [20 20 30 2])
-
-(comment
-  ;; needs a seperate rewrite module in std.lang to hook into emit:
-
-  ;; this
-  (!.py
-    (var state {"n" 0})
-    (var f (xtd/memoize-key
-            (fn f-raw [x]
-              (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
-              (return (* x 10)))))
-    [(f 2) (f 2) (f 3) (xt/x:get-key state "n")])
-
-  ;; to this... and other rules as well for different languages
-  (!.py
-    (var state {"n" 0})
-    (var f-raw (fn [x]
-                 (do
-                   (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
-                   (return (* x 10)))))
-    (var f (xtd/memoize-key f-raw))
-    [(f 2) (f 2) (f 3) (xt/x:get-key state "n")])
-
-  I'd like to have a clean interface (as seen in the historical xt.lang.base-lib)
-
-  and to have languages such as python/dart/ruby etc have a rewrite stage to
-  compile forms
-  
-  )
-
 ^{:refer xt.lang.common-data/is-empty? :added "4.1"}
 (fact "checks that array is empty"
 

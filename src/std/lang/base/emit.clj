@@ -1,14 +1,15 @@
 (ns std.lang.base.emit
   (:require [std.lang.base.emit-block :as block]
-            [std.lang.base.emit-common :as common]
-            [std.lang.base.emit-fn :as fn]
-            [std.lang.base.emit-helper :as helper]
-            [std.lang.base.emit-preprocess :as preprocess]
-            [std.lang.base.emit-top-level :as top]
-            [std.lang.base.grammar :as grammar]
-            [std.lang.base.util :as ut]
-            [std.lib.collection :as collection]
-            [std.lib.env :as env]))
+	    [std.lang.base.emit-common :as common]
+  	    [std.lang.base.emit-fn :as fn]
+  	    [std.lang.base.emit-helper :as helper]
+  	    [std.lang.base.emit-preprocess :as preprocess]
+            [std.lang.base.emit-rewrite :as rewrite]
+  	    [std.lang.base.emit-top-level :as top]
+  	    [std.lang.base.grammar :as grammar]
+  	    [std.lang.base.util :as ut]
+  	    [std.lib.collection :as collection]
+  	    [std.lib.env :as env]))
 
 (defn default-grammar
   "returns the default grammar
@@ -127,10 +128,18 @@
   "prepares the form"
   {:added "4.0"}
   [step form grammar book mopts]
-  (case step
-    :raw     [form]
-    :input   [(preprocess/to-input form)]
-    :staging (preprocess/to-staging (preprocess/to-input form)
-                                    grammar
-                                    (:modules book)
-                                    mopts)))
+  (let [input (preprocess/to-input form)]
+    (case step
+      :raw     [form]
+      :input   [input]
+      :staging (let [[staged deps deps-fragment deps-native]
+                     (preprocess/to-staging input
+                                            grammar
+                                            (:modules book)
+                                            mopts)
+                     rewritten
+                     (rewrite/rewrite-stage :staging
+                                            staged
+                                            grammar
+                                            (assoc mopts :book book))]
+                 [rewritten deps deps-fragment deps-native]))))

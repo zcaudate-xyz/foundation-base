@@ -12,6 +12,7 @@
             [std.lang.typed.xtalk-analysis :as xtalk-analysis]
             [std.lang.base.util :as ut]
             [std.lang.model.spec-xtalk]
+            [std.lang.model.spec-python.rewrite :as rewrite]
             [std.lang.model.spec-xtalk.fn-python :as fn]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
@@ -439,6 +440,7 @@
                    :vector    {:start "[" :end "]" :space ""}
                    :tuple     {:start "(" :end ")" :space ""}
                    :free      {:start ""  :end "" :space ""}}
+        :rewrite  {:staging [#'rewrite/python-rewrite-stage]}
         :function {:defn        {:raw "def"
                                  :args  {:start "(" :end "):" :space ""}}
                    :fn.inner    {:raw "def"
