@@ -230,13 +230,13 @@
   :setup [(lib/delete-book! +library+ :lua.redis)]}
 (fact "installs a book to library"
 
-  (lib/install-book! +library+ prep/+book-redis-empty+)
+  (lib/install-book! +library+ prep/+book-lua-redis-empty+)
   => coll?
 
   (:parent (lib/get-book-raw +library+ :lua.redis))
   => :lua
 
-  (:parent prep/+book-redis-empty+)
+  (:parent prep/+book-lua-redis-empty+)
   => :lua)
 
 ^{:refer std.lang.base.library/purge-book! :added "4.0"}
