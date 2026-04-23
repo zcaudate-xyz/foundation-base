@@ -19,7 +19,7 @@
   (let [key-str (if (keyword? key)
                   (ut/sym-default-str key)
                   key)]
-    (common/*emit-fn* key-str grammar nsp)))
+    (common/emit-value key-str grammar nsp)))
 
 (defn emit-map-key
   "emits the map key"
@@ -28,22 +28,22 @@
    (cond (keyword? form)
          (let [convert (or (get-in grammar [:data :map-entry :keyword])
                            :string)
-               tok (case convert
-                     :symbol  (symbol (f/strn form))
-                     :string  (f/strn form)
-                     :keyword form)]
-           (common/*emit-fn* tok grammar mopts))
-         
-         :else
-         (common/*emit-fn* form grammar mopts))))
+                tok (case convert
+                      :symbol  (symbol (f/strn form))
+                      :string  (f/strn form)
+                      :keyword form)]
+            (common/emit-value tok grammar mopts))
+          
+          :else
+          (common/emit-value form grammar mopts))))
 
 (defn emit-map-entry
   "emits the map entry"
   {:added "3.0"}
   ([[k v] grammar mopts]
-   (let [{:keys [start end sep space assign key-fn val-fn]
-          :or {key-fn emit-map-key
-               val-fn common/*emit-fn*}} (helper/get-options grammar [:data :map-entry])
+    (let [{:keys [start end sep space assign key-fn val-fn]
+           :or {key-fn emit-map-key
+                val-fn common/emit-value}} (helper/get-options grammar [:data :map-entry])
          val-e (val-fn v grammar mopts)
          val-e (if (prose/multi-line? val-e)
                  (prose/indent-rest val-e 2)
@@ -109,7 +109,7 @@
   "emits a collection"
   {:added "3.0"}
   ([key form grammar mopts]
-   (emit-coll key form grammar mopts common/*emit-fn*))
+   (emit-coll key form grammar mopts common/emit-value))
   ([key form grammar mopts emit-fn]
    (let [indent     common/*indent*
          form      (if (map? form)
@@ -208,7 +208,7 @@
          entry-fn (fn [e]
                     (if (vector? e)
                       (emit-map-entry e grammar mopts)
-                      (common/*emit-fn* e grammar mopts)))
+                       (common/emit-value e grammar mopts)))
          indent     common/*indent*
          str-array (binding [common/*indent* 0]
                      (mapv entry-fn args))]

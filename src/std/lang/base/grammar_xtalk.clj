@@ -397,6 +397,7 @@
 
 (def +xt-common-number+
   [{:op :x-add            :symbol #{'x:add}             :macro #'tf-add    :emit :macro
+    :expr true
     :op-spec {:variadic true
               :arglists '([x y])
               :type [:fn [:xt/num :xt/num] :xt/num]}}

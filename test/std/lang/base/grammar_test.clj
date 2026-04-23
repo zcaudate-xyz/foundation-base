@@ -193,19 +193,24 @@
 
 
 ^{:refer std.lang.base.grammar/normalize-op-entry :added "4.1"}
-(fact "normalizes shared macro and hard-link defaults"
+(fact "normalizes explicit expression defaults"
   (normalize-op-entry
    {:op :x-add
-    :emit :macro
-    :macro #'std.lang.base.grammar-xtalk/tf-add})
-  => (contains {:value/template #'std.lang.base.grammar-xtalk/tf-add
-                :value/standalone true})
+     :emit :macro
+     :macro #'std.lang.base.grammar-xtalk/tf-add})
+  => (contains {:macro #'std.lang.base.grammar-xtalk/tf-add})
 
   (normalize-op-entry
    {:op :helper
-    :emit :hard-link
-    :raw 'xt.lang.common-data/obj-keys})
-  => (contains {:value/standalone 'xt.lang.common-data/obj-keys}))
+     :emit :hard-link
+     :raw 'xt.lang.common-data/obj-keys
+     :expr 'xt.lang.common-data/obj-keys})
+  => (contains {:expr 'xt.lang.common-data/obj-keys})
+
+  (normalize-op-entry
+   {:op :legacy
+    :value/standalone true})
+  => (contains {:expr true}))
 
 
 ^{:refer std.lang.base.grammar/default-lookup :added "4.1"}

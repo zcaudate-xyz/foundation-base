@@ -54,8 +54,9 @@
    => \"!(1 + 2 + 3)\""
   {:added "4.0"}
   ([form grammar mopts]
-   (binding [common/*emit-fn* emit-main-loop]
-     (emit-main-loop form grammar mopts))))
+   (binding [common/*emit-fn* emit-main-loop
+             common/*emit-level* :statement]
+      (emit-main-loop form grammar mopts))))
 
 (defn emit
   "emits form to output string"

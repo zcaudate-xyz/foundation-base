@@ -173,36 +173,34 @@
          vec)))
 
 (defn value-standalone
-  "returns the standalone expansion for a value-liftable reserved symbol"
+  "returns the standalone expansion for an expression-safe reserved symbol"
   {:added "4.1"}
   [sym grammar]
   (let [{:keys [emit macro]
           template :value/template
-          standalone :value/standalone
+          expr :expr
           op-spec :op-spec} (get-in grammar [:reserved sym])
-        template (or template
-                     (when (= :macro emit)
-                       macro))
+        template (or template macro)
         self-return? (= :xt/self
-                        (get-in op-spec [:type 2]))]
-    (cond (or (collection/form? standalone)
-              (symbol? standalone))
-           standalone
+                         (get-in op-spec [:type 2]))]
+    (cond (or (collection/form? expr)
+              (symbol? expr))
+           expr
 
-           (and (= true standalone)
-                template)
-           (let [args (value-template-args template)]
-             (if self-return?
-               (let [self-arg (first args)]
-                 (list 'fn args
+            (and (= true expr)
+                 template)
+            (let [args (value-template-args template)]
+              (if self-return?
+                (let [self-arg (first args)]
+                  (list 'fn args
                        (template (apply list nil args))
                        (list 'return self-arg)))
                (list 'fn args
                      (list 'return
                            (template (apply list nil args))))))
 
-           :else
-           nil)))
+            :else
+            nil)))
 
 (defn process-namespaced-resolve
   "resolves symbol in current namespace"

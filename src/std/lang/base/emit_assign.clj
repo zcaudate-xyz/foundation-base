@@ -129,11 +129,11 @@
          args     (helper/emit-typed-args args grammar)
          
          argstrs  (map (fn [{:keys [value symbol] :as arg}]
-                         (let [custom (assign-value symbol value grammar mopts)]
-                           (if custom
-                             (common/*emit-fn* (second custom) grammar mopts)
-                             (fn/emit-input-default arg assign grammar mopts))))
-                       args)
+                          (let [custom (assign-value symbol value grammar mopts)]
+                            (if custom
+                              (common/emit-value (second custom) grammar mopts)
+                              (fn/emit-input-default arg assign grammar mopts))))
+                        args)
          vstr    (clojure.string/join (str sep space) argstrs)
          rawstr  (if (not-empty raw) (str raw space))]
      (str rawstr vstr))))

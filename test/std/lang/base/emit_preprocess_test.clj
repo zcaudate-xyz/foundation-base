@@ -302,13 +302,13 @@
               {}
               '{:module {:id L.core
                          :link {}}})
-  => '[(fn [a b] (return (+ a b))) #{} #{} {}])
+  => '[(fn [a b & more] (return (+ a b & more))) #{} #{} {}])
 
 ^{:refer std.lang.base.emit-preprocess/value-standalone :added "4.1"}
-(fact "callable xtalk intrinsics use shared value-standalone compilation"
+(fact "expression-safe operators use explicit standalone compilation"
 
   (value-standalone 'x:add +grammar+)
-  => '(fn [a b] (return (+ a b)))
+  => '(fn [a b & more] (return (+ a b & more)))
 
   (value-standalone 'x:arr-push js/+grammar+)
   => '(fn [arr item]
@@ -324,8 +324,14 @@
                                                  (fn [[_ a b]]
                                                    (list '+ a b))
                                                  {:arglists '([_ a b])})
-                                         :value/standalone true}}})
-  => '(fn [a b] (return (+ a b))))
+                                         :expr true}}})
+  => '(fn [a b] (return (+ a b)))
+
+  (value-standalone 'world
+                    {:reserved {'world {:emit :hard-link
+                                        :raw 'xt.lang.common-data/obj-keys
+                                        :expr 'xt.lang.common-data/obj-keys}}})
+  => 'xt.lang.common-data/obj-keys)
 
 (fact "language macro form heads do not recurse during staging"
 

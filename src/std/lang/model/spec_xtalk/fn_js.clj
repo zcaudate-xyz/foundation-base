@@ -278,7 +278,7 @@
 (def +js-arr+
   {:x-arr-slice       {:macro #'js-tf-x-arr-slice      :emit :macro   :type :template}
    :x-arr-reverse     {:macro #'js-tf-x-arr-reverse    :emit :macro   :type :template}
-   :x-arr-push        {:macro #'js-tf-x-arr-push       :emit :macro   :type :template}
+   :x-arr-push        {:macro #'js-tf-x-arr-push       :emit :macro   :type :template :expr true}
    :x-arr-pop         {:macro #'js-tf-x-arr-pop        :emit :macro   :type :template}
    :x-arr-push-first  {:macro #'js-tf-x-arr-push-first :emit :macro   :type :template}
    :x-arr-pop-first   {:macro #'js-tf-x-arr-pop-first  :emit :macro   :type :template}

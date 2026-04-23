@@ -1,8 +1,17 @@
 (ns std.lang.base.emit-common-test
-  (:require [std.lang.base.emit-common :as common :refer :all]
-            [std.lang.base.emit-helper :as helper]
-            [std.string.prose :as prose])
+  (:require [std.lang.base.emit :as emit]
+            [std.lang.base.emit-common :as common :refer :all]
+             [std.lang.base.emit-helper :as helper]
+            [std.lang.base.grammar :as grammar]
+             [std.string.prose :as prose])
   (:use code.test))
+
+(def +reserved+
+  (-> (grammar/build)
+      (grammar/to-reserved)))
+
+(def +grammar+
+  (grammar/grammar :test +reserved+ helper/+default+))
 
 ^{:refer std.lang.base.emit-common/with:explode :added "4.0"}
 (fact "form to control `explode` option"
@@ -145,6 +154,24 @@
                         {:reserved {'!= {:emit :infix}}})
                  {})
   => "((!= 1 x))")
+
+(fact "block forms are rejected in value positions"
+  (emit/emit-main '(+ 1 (do 2 3))
+                  +grammar+
+                  {})
+  => (throws)
+
+  (emit/emit-main '[1 (do 2 3)]
+                  +grammar+
+                  {})
+  => (throws)
+
+  (emit/emit-main '(return (if check
+                             (return a)
+                             (return b)))
+                  +grammar+
+                  {})
+  => (throws))
 
 ^{:refer std.lang.base.emit-common/wrapped-str :added "3.0"}
 (fact "wrapped string using `:start` and `:end` keys of grammar"

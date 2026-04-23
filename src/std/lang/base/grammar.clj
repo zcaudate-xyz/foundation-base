@@ -32,21 +32,9 @@
   {:added "4.1"}
   [entry]
   (cond-> entry
-    (and (= :macro (:emit entry))
-         (not (contains? entry :value/template))
-         (:macro entry))
-    (assoc :value/template (:macro entry))
-
-    (and (= :macro (:emit entry))
-          (not (contains? entry :value/standalone)))
-    (assoc :value/standalone
-           (and (keyword? (:op entry))
-                (clojure.string/starts-with? (name (:op entry)) "x-")))
-
-    (and (= :hard-link (:emit entry))
-         (symbol? (:raw entry))
-         (not (contains? entry :value/standalone)))
-    (assoc :value/standalone (:raw entry))))
+    (and (contains? entry :value/standalone)
+         (not (contains? entry :expr)))
+    (assoc :expr (:value/standalone))))
 
 (defn collect-ops
   "collects alll ops together
