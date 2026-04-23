@@ -48,12 +48,13 @@
 
 (defn void-block?
   "checks if the block is a void block
- 
+  
    (void-block? (construct/void))
    => true"
   {:added "3.0"}
-  ([^IBlock block]
-   (instance? VoidBlock block)))
+  ([block]
+   (and (base/block? block)
+        (= :void (base/block-type block)))))
 
 (defn void-block
   "constructs a void block
@@ -67,13 +68,13 @@
 
 (defn space-block?
   "checks if block is of type \\space
- 
+  
    (space-block? (construct/space))
    => true"
   {:added "3.0"}
   ([block]
    (and (void-block? block)
-        (= (.-character ^VoidBlock block) \space))))
+        (= " " (base/block-string block)))))
 
 (defn linebreak-block?
   "checks if block is of type :linebreak
@@ -144,12 +145,13 @@
 
 (defn comment-block?
   "checks if the block is a token block
- 
+  
    (comment-block? (construct/comment \";;hello\"))
    => true"
   {:added "3.0"}
   ([block]
-   (instance? CommentBlock block)))
+   (and (base/block? block)
+        (= :comment (base/block-type block)))))
 
 (defn comment-block
   "constructs a comment block
@@ -191,12 +193,13 @@
 
 (defn token-block?
   "checks if the block is a token block
- 
+  
    (token-block? (construct/token \"hello\"))
    => true"
   {:added "3.0"}
   ([block]
-   (instance? TokenBlock block)))
+   (and (base/block? block)
+        (= :token (base/block-type block)))))
 
 (defn token-block
   "creates a token block
@@ -291,20 +294,21 @@
 
 (defn container-value-string
   "returns the string for 
- 
+  
    (container-value-string (construct/block [::a :b :c]))
    => \"[:std.block.type-test/a :b :c]\"
  
    (container-value-string (parse/parse-string \"[::a :b :c]\"))
    => \"[(keyword \\\":a\\\") (keyword \\\"b\\\") (keyword \\\"c\\\")]\""
   {:added "3.0"}
-  ([^ContainerBlock block]
-   (let [{:keys [start end]} (.props block)
-         children (._children block)
-         all  (->> (keep (fn [block]
-                           (or (if (base/expression? block)
-                                 (base/block-value-string block))
-                               (if (base/modifier? block)
+  ([block]
+   (let [{:keys [start end]} (get base/*container-limits*
+                                  (base/block-tag block))
+          children (base/block-children block)
+          all  (->> (keep (fn [block]
+                            (or (if (base/expression? block)
+                                  (base/block-value-string block))
+                                (if (base/modifier? block)
                                  (base/block-string block))))
                          children)
                    (clojure.string/join " "))]
@@ -317,11 +321,12 @@
         (apply str))))
 
 (defmethod container-string :default
-  ([^ContainerBlock block]
-   (let [{:keys [start end]} (.props block)
-         children (._children block)
-         all (apply str (map base/block-string children))]
-     (str start all end))))
+  ([block]
+   (let [{:keys [start end]} (get base/*container-limits*
+                                  (base/block-tag block))
+          children (base/block-children block)
+          all (apply str (map base/block-string children))]
+      (str start all end))))
 
 (defmethod print-method ContainerBlock
   ([v ^java.io.Writer w]
@@ -329,12 +334,13 @@
 
 (defn container-block?
   "checks if block is a container block
- 
+  
    (container-block? (construct/block []))
    => true"
   {:added "3.0"}
   ([block]
-   (instance? ContainerBlock block)))
+   (and (base/container? block)
+        (= :collection (base/block-type block)))))
 
 (defn container-block
   "constructs a container block
@@ -378,12 +384,13 @@
 
 (defn modifier-block?
   "checks if block is a modifier block
- 
+  
    (modifier-block? (construct/uneval))
    => true"
   {:added "3.0"}
   ([block]
-   (instance? ModifierBlock block)))
+   (and (base/block? block)
+        (= :modifier (base/block-type block)))))
 
 (defn modifier-block
   "creates a modifier block, specifically #_

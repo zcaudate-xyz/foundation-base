@@ -1,8 +1,9 @@
 (ns std.block.type-test
   (:require [std.block.base :as base]
-            [std.block.construct :as construct]
-            [std.block.parse :as parse]
-            [std.block.type :refer :all])
+             [std.block.construct :as construct]
+             [std.block.parse :as parse]
+             [std.block.type :refer :all]
+             [jvm.namespace :as jvm.ns])
   (:use code.test))
 
 ^{:refer std.block.type/block-compare :added "3.0"}
@@ -153,3 +154,26 @@
 
   (code-block? (construct/token '+))
   => true)
+
+^{:refer std.block.type/void-block? :added "4.0"}
+(fact "predicates remain stable after resetting std.block.type"
+  (let [space     (construct/space)
+        token     (construct/token 1)
+        container (construct/block [])
+        modifier  (construct/uneval)
+        newline   (construct/newline)]
+    (jvm.ns/reset 'std.block.type)
+    (require 'std.block.type)
+    (let [void-block?*      (resolve 'std.block.type/void-block?)
+          token-block?*     (resolve 'std.block.type/token-block?)
+          container-block?* (resolve 'std.block.type/container-block?)
+          modifier-block?*  (resolve 'std.block.type/modifier-block?)
+          nil-void?*        (resolve 'std.block.type/nil-void?)
+          linebreak-block?* (resolve 'std.block.type/linebreak-block?)]
+      [(void-block?* space)
+       (token-block?* token)
+       (container-block?* container)
+       (modifier-block?* modifier)
+       (nil-void?* space)
+       (linebreak-block?* newline)])
+    => [true true true true true true]))
