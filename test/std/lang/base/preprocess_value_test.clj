@@ -1,9 +1,9 @@
 (ns std.lang.base.preprocess-value-test
   (:use code.test)
   (:require [std.lang.base.emit-helper :as helper]
-            [std.lang.base.grammar :as grammar]
-            [std.lang.base.preprocess-value :refer :all]
-            [std.lang.model.spec-js :as js]))
+             [std.lang.base.grammar :as grammar]
+             [std.lang.base.preprocess-value :refer :all]
+             [std.lang.model.spec-js :as js]))
 
 (def +reserved+
   (-> (grammar/build)
@@ -11,6 +11,21 @@
 
 (def +grammar+
   (grammar/grammar :test +reserved+ helper/+default+))
+
+(def +modules+
+  {'JS.base {:id 'JS.base
+             :fragment {'x:type-native {:id 'x:type-native
+                                        :template (fn [value]
+                                                    (list 'x:type-native value))
+                                        :form '(fn [value]
+                                                 (list 'x:type-native value))
+                                        :standalone true}}}
+   'JS.user {:id 'JS.user
+             :link {'xt 'JS.base}}})
+
+(def +mopts+
+  {:module {:id 'JS.user
+            :link {'xt 'JS.base}}})
 
 ^{:refer std.lang.base.preprocess-value/value-template-args :added "4.1"}
 (fact "derives template value args from arglists metadata"
@@ -99,6 +114,49 @@
                       js/+grammar+
                       '{:module {:id JS.core
                                  :link {- JS.core}}})
+  => '(g ((fn [value]
+            (do
+              (when (== value nil)
+                (return nil))
+              (var t := (typeof value))
+              (if (== t "object")
+                (cond
+                  (Array.isArray value)
+                  (return "array")
+                  :else
+                  (do
+                    (var tn := (. value ["constructor"] ["name"]))
+                    (if (== tn "Object")
+                      (return "object")
+                      (return tn))))
+                 (return t))))
+          obj)))
+
+(fact "namespaced standalone xtalk fragments are lowered in value positions"
+  (process-value-form '(return (xt/x:type-native obj))
+                      js/+grammar+
+                      +modules+
+                      +mopts+)
+  => '(do
+        (when (== obj nil)
+          (return nil))
+        (var t := (typeof obj))
+        (if (== t "object")
+          (cond
+            (Array.isArray obj)
+            (return "array")
+            :else
+            (do
+              (var tn := (. obj ["constructor"] ["name"]))
+              (if (== tn "Object")
+                (return "object")
+                (return tn))))
+          (return t)))
+
+  (process-value-form '(g (xt/x:type-native obj))
+                      js/+grammar+
+                      +modules+
+                      +mopts+)
   => '(g ((fn [value]
             (do
               (when (== value nil)

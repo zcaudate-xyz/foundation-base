@@ -52,10 +52,8 @@
                      (apply (:template entry) (rest form)))
           expanded (with-meta expanded
                      (merge (meta form) (meta expanded)))]
-      (if (= expanded form)
-        expanded
-        (or (expand-value-form expanded grammar modules mopts)
-            expanded)))))
+      (when (not= expanded form)
+        (expand-value-form expanded grammar modules mopts)))))
 
 (defn expand-value-form
   "expands a form that needs block-aware value lowering"
@@ -135,13 +133,9 @@
                             template)
                        (let [args (vec (second form))
                              body (apply template args)
-                             body (or (expand-value-form body grammar modules mopts)
-                                      body)]
-                         (list 'fn args
-                               (if (and (collection/form? body)
-                                        ('#{do do*} (first body)))
-                                 body
-                                 (list 'return body))))
+                             body (expand-value-form body grammar modules mopts)]
+                         (when body
+                           (list 'fn args body)))
 
                        :else
                        nil))))))))
@@ -161,21 +155,22 @@
            expanded)
 
          :else
-         (let [[head & args0] form
-               args  (vec args0)
-               args' (mapv (fn [arg]
-                             (let [standalone (and (collection/form? arg)
-                                                   (symbol? (first arg))
-                                                   (value-standalone (first arg)
-                                                                     grammar
-                                                                     modules
-                                                                     mopts))]
-                               (if standalone
-                                 (with-meta (cons standalone
-                                                  (rest arg))
-                                   (meta arg))
-                                 arg)))
-                           args)]
-           (when (not= args' args)
-             (with-meta (apply list head args')
-               (meta form)))))))
+         (let [[head & args0] form]
+           (when-not ('#{do do*} head)
+             (let [args  (vec args0)
+                   args' (mapv (fn [arg]
+                                 (let [standalone (and (collection/form? arg)
+                                                       (symbol? (first arg))
+                                                       (value-standalone (first arg)
+                                                                         grammar
+                                                                         modules
+                                                                         mopts))]
+                                   (if standalone
+                                     (with-meta (cons standalone
+                                                      (rest arg))
+                                       (meta arg))
+                                     arg)))
+                               args)]
+               (when (not= args' args)
+                 (with-meta (apply list head args')
+                   (meta form)))))))))

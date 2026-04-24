@@ -1,8 +1,23 @@
 (ns std.lang.base.preprocess-assign-test
   (:use code.test)
   (:require [std.lang.base.emit-prep-lua-test :as prep]
-            [std.lang.base.preprocess-assign :refer :all]
-            [std.lang.model.spec-js :as js]))
+             [std.lang.base.preprocess-assign :refer :all]
+             [std.lang.model.spec-js :as js]))
+
+(def +modules+
+  {'JS.base {:id 'JS.base
+             :fragment {'x:type-native {:id 'x:type-native
+                                        :template (fn [value]
+                                                    (list 'x:type-native value))
+                                        :form '(fn [value]
+                                                 (list 'x:type-native value))
+                                        :standalone true}}}
+   'JS.user {:id 'JS.user
+             :link {'xt 'JS.base}}})
+
+(def +mopts+
+  {:module {:id 'JS.user
+            :link {'xt 'JS.base}}})
 
 ^{:refer std.lang.base.preprocess-assign/process-inline-assignment :added "4.1"}
 (fact "prepares the form for inline assignment"
@@ -86,3 +101,48 @@
       grammar
       nil)])
   => '[nil (:= a i)])
+
+(fact "rewrites namespaced standalone xtalk fragments in assignment positions"
+  (process-template-assignment
+   '(var a := (xt/x:type-native obj))
+   js/+grammar+
+   +modules+
+   +mopts+)
+  => '(do
+        (var* :let a := nil)
+        (do
+          (when (== obj nil)
+            (return nil))
+          (var t := (typeof obj))
+          (if (== t "object")
+            (cond
+              (Array.isArray obj)
+              (:= a "array")
+              :else
+              (do
+                (var tn := (. obj ["constructor"] ["name"]))
+                (if (== tn "Object")
+                  (:= a "object")
+                  (:= a tn))))
+            (:= a t))))
+
+  (process-template-assignment
+   '(:= a (xt/x:type-native obj))
+   js/+grammar+
+   +modules+
+   +mopts+)
+  => '(do
+        (when (== obj nil)
+          (return nil))
+        (var t := (typeof obj))
+        (if (== t "object")
+          (cond
+            (Array.isArray obj)
+            (:= a "array")
+            :else
+            (do
+              (var tn := (. obj ["constructor"] ["name"]))
+              (if (== tn "Object")
+                (:= a "object")
+                (:= a tn))))
+          (:= a t))))
