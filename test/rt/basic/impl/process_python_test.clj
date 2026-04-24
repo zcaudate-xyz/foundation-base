@@ -79,6 +79,6 @@
                         (return (x:iter-null))))
                  (x:iter-native? (iter-fn))]
                {:bulk true})])]
-    [(boolean (re-find #"if False:\n\s+yield" out))
-     (boolean (re-find #"hasattr\(iter_fn\(\),\"__next__\"\)" out))])
+    [(boolean (re-find #"if\s+False:\s+yield" out))
+     (boolean (re-find #"hasattr\s*\(iter_fn\(\),\"__next__\"\)" out))])
   => [true true])

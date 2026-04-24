@@ -238,7 +238,7 @@
   {:added "4.1"}
   [form & [opts]]
   (let [controls (clojure.set/union '#{:- := var return break throw yield}
-                                    opts)]
+                                    (or opts #{}))]
     (boolean
      (some (fn [entry]
              (and (collection/form? entry)
