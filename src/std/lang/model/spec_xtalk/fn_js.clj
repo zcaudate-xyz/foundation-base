@@ -433,9 +433,9 @@
    :x-str-trim-right  {:macro #'js-tf-x-str-trim-right :emit :macro}
    :x-str-comp        {:macro #'js-tf-x-str-comp       :emit :macro}
    :x-str-pad-left    {:macro #'js-tf-x-str-pad-left   :emit :macro}
-    :x-str-pad-right   {:macro #'js-tf-x-str-pad-right  :emit :macro}
-    :x-str-starts-with {:macro #'js-tf-x-str-starts-with :emit :macro}
-    :x-str-ends-with   {:macro #'js-tf-x-str-ends-with   :emit :macro}})
+   :x-str-pad-right   {:macro #'js-tf-x-str-pad-right  :emit :macro}
+   :x-str-starts-with {:macro #'js-tf-x-str-starts-with :emit :macro}
+   :x-str-ends-with   {:macro #'js-tf-x-str-ends-with   :emit :macro}})
 
 ;;
 ;; JSON
@@ -451,51 +451,56 @@
 
 (defn js-tf-x-return-encode
   ([[_ out id key]]
-   (template/$ (do (var type-fn (fn [x]
-                                  (let [name (typeof x)]
-                                    (return (:? (== name "object") (:? x x.constructor.name name) name)))))
-                   (var tb (typeof ~out))
-                   (cond (== "function" tb)
-                         (return (JSON.stringify {:id     ~id
-                                                  :key    ~key
-                                                  :type   "raw"
-                                                  :return "function"
-                                                  :value  (. ~out (toString))}))
-                         
-                         
-                         (not= "object" tb)
-                         (return (JSON.stringify {:id     ~id
-                                                  :key    ~key
-                                                  :type "data"
-                                                  :return tb
-                                                  :value ~out}))
+   (template/$
+    (do (var type-fn (fn [obj]
+                       (when (== obj nil)
+                         (return nil))
+                       (var t := (typeof obj))
+                       (if (== t "object")
+                         (cond (Array.isArray obj)
+                               (return "array")
+                               
+                               :else
+                               (do (var tn := (. obj ["constructor"] ["name"]))
+                                   (if (== tn "Object")
+                                     (return "object")
+                                     (return tn))))
+                         (return t))))
+        (var ts (type-fn ~out))
+        (cond (== "function" ts)
+              (return (JSON.stringify {:id     ~id
+                                       :key    ~key
+                                       :type   "raw"
+                                       :return "function"
+                                       :value  (. ~out (toString))}))
+              
+              
+              (not= "object" ts)
+              (return (JSON.stringify {:id     ~id
+                                       :key    ~key
+                                       :type "data"
+                                       :return ts
+                                       :value ~out}))
 
-                         (== nil ~out)
-                         (return (JSON.stringify {:id     ~id
-                                                  :key    ~key
-                                                  :type "data"
-                                                  :return "nil"
-                                                  :value ~out}))
-                         
-                         :else
-                         (do (var ts (type-fn ~out))
-                             (try
-                               (if (or (== ts "Object")
-                                       (== ts "Array"))
-                                 (return (JSON.stringify {:id     ~id
-                                                          :key    ~key
-                                                          :type "data"
-                                                          :value ~out}))
-                                 (return (JSON.stringify {:id     ~id
-                                                          :key    ~key
-                                                          :type  "raw"
-                                                          :return ts
-                                                          :value (. ~out (toString))})))
-                               (catch e (return (JSON.stringify {:id     id
-                                                                 :key    key
-                                                                 :type   "raw"
-                                                                 :return ts
-                                                                 :value (. ~out (toString))}))))))))))
+              (== nil ~out)
+              (return (JSON.stringify {:id     ~id
+                                       :key    ~key
+                                       :type "data"
+                                       :return "nil"
+                                       :value ~out}))
+              
+              :else
+              (try
+                (return (JSON.stringify {:id     ~id
+                                         :key    ~key
+                                         :type   "data"
+                                         :return ts
+                                         :value ~out}))
+                (catch e (return (JSON.stringify {:id     id
+                                                  :key    key
+                                                  :type   "raw"
+                                                  :return ts
+                                                  :value (. ~out (toString))})))))))))
 
 (defn js-tf-x-return-wrap
   ([[_ f encode-fn]]
@@ -647,8 +652,8 @@
         (var root (or (. process env ["PWD"])
                       (. process (cwd))))
         (return (~cb nil
-                     (. fs (readFileSync (. path (resolve root ~filename))
-                                         "utf-8")))))))))
+                 (. fs (readFileSync (. path (resolve root ~filename))
+                                     "utf-8")))))))))
 
 (defn js-tf-x-spit-file
   [[_ filename s opts cb]]
