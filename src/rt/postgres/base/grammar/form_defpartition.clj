@@ -1,7 +1,7 @@
 (ns rt.postgres.base.grammar.form-defpartition
   (:require [rt.postgres.base.grammar.common :as common]
             [std.lang.base.book :as book]
-            [std.lang.base.emit-preprocess :as preprocess]
+            [std.lang.base.preprocess :as preprocess]
             [std.lang.base.grammar-spec :as grammar-spec]
             [std.lang.base.library-snapshot :as snap]
             [std.lib.foundation :as f]))
