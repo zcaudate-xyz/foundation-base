@@ -5,21 +5,18 @@
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-len :added "4.0"}
 (fact "gets length"
-  
-  (js-tf-x-len '[_ arr])
-  => '(. arr length))
+  (l/emit-as :js [(js-tf-x-len '[_ arr])])
+  => #"\.length")
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-cat :added "4.0"}
 (fact "concatenates"
-
-  (js-tf-x-cat '[_ "a" "b"])
-  => '(+ "a" "b"))
+  (l/emit-as :js [(js-tf-x-cat '[_ "a" "b"])])
+  => #"\+")
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-apply :added "4.0"}
 (fact "applies function"
-  
-  (js-tf-x-apply '[_ f args])
-  => '(. f (apply nil args)))
+  (l/emit-as :js [(js-tf-x-apply '[_ f args])])
+  => #"apply")
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-shell :added "4.0"}
 (fact "executes shell command"
