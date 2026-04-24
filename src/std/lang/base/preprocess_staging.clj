@@ -18,7 +18,8 @@
                   mopts
                   {:std.lang/form form
                    :std.lang/symbol fsym})
-        template-assignment (assign/process-template-assignment form grammar mopts)]
+        template-assignment (assign/process-template-assignment form grammar mopts)
+        value-form          (value/process-value-form form grammar mopts)]
     (cond (= fsym '!:template)
           (walk-fn (eval (second form)))
 
@@ -50,6 +51,9 @@
 
           template-assignment
           (walk-fn template-assignment)
+
+          value-form
+          (walk-fn value-form)
 
           reserved
           (assign/protect-reserved-head form)

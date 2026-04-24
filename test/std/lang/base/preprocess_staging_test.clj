@@ -161,7 +161,76 @@
               {}
               '{:module {:id L.core
                          :link {}}})
-  => '[(fn [x y] (return (+ x y))) #{} #{} {}])
+  => '[(fn [x y] (return (+ x y))) #{} #{} {}]
+
+  (first
+   (to-staging '(return (x:type-native obj))
+               js/+grammar+
+               {}
+               '{:module {:id JS.core
+                          :link {- JS.core}}}))
+  => '(do
+        (when (== obj nil)
+          (return nil))
+        (var t := (typeof obj))
+        (if (== t "object")
+          (cond
+            (Array.isArray obj)
+            (return "array")
+            :else
+            (do
+              (var tn := (. obj ["constructor"] ["name"]))
+              (if (== tn "Object")
+                (return "object")
+                (return tn))))
+          (return t)))
+
+  (first
+   (to-staging '(f (g (x:type-native obj)))
+               js/+grammar+
+               {}
+               '{:module {:id JS.core
+                          :link {- JS.core}}}))
+  => '(f (g ((fn [value]
+               (do
+                 (when (== value nil)
+                   (return nil))
+                 (var t := (typeof value))
+                 (if (== t "object")
+                   (cond
+                     (Array.isArray value)
+                     (return "array")
+                     :else
+                     (do
+                       (var tn := (. value ["constructor"] ["name"]))
+                       (if (== tn "Object")
+                         (return "object")
+                         (return tn))))
+                   (return t))))
+             obj)))
+
+  (to-staging 'x:type-native
+              js/+grammar+
+              {}
+              '{:module {:id JS.core
+                         :link {- JS.core}}})
+  => '[(fn [value]
+         (do
+           (when (== value nil)
+             (return nil))
+           (var t := (typeof value))
+           (if (== t "object")
+             (cond
+               (Array.isArray value)
+               (return "array")
+               :else
+               (do
+                 (var tn := (. value ["constructor"] ["name"]))
+                 (if (== tn "Object")
+                   (return "object")
+                   (return tn))))
+             (return t))))
+       #{} #{} {}])
 
 (fact "language macro form heads do not recurse during staging"
   (first
