@@ -119,30 +119,6 @@
   [x]
   (return (xt/x:is-object? x)))
 
-
-
-;;
-;; PROTO
-;;
-
-(defn.xt prototype-create
-  "creates the prototype map"
-  {:added "4.0"}
-  ([m]
-   (xt/x:prototype-create m)))
-
-(defn.xt prototype-get
-  "creates the prototype map"
-  {:added "4.0"}
-  ([obj]
-   (return (xt/x:prototype-get obj))))
-
-(defn.xt prototype-set
-  "creates the prototype map"
-  {:added "4.0"}
-  ([obj proto]
-   (return (xt/x:prototype-set obj proto))))
-
 ;;
 ;; FN.BASIC
 ;;
@@ -174,8 +150,6 @@
   "always false"
   {:added "4.1"}
   [x] (return false))
-
-
 
 ;;
 ;; FN.NUMBER

@@ -98,53 +98,6 @@
     (k/is-object? [1 2 3])])
   => [true false])
 
-^{:refer xt.lang.common-lib/prototype-create
-  :added "4.1"
-  :lang-exceptions {:python {:skip true}
-                    :dart   {:skip true}}}
-(fact "creates the prototype map"
-  (!.lua
-   (var mt (k/prototype-create {:hello (fn:> [v] (. v world))
-                            :world "hello"}))
-   (var a {})
-   (k/prototype-set a mt nil)
-   (. a (hello)))
-  => "hello")
-
-^{:refer xt.lang.common-lib/prototype-get
-  :added "4.1"
-  :lang-exceptions {:python {:skip true}}}
-(fact "gets the prototype map from an object"
-  (!.lua
-   (var mt (k/prototype-create {:world "hello"}))
-   (var a {})
-   (k/prototype-set a mt nil)
-   (== (k/prototype-get a nil) mt))
-  => true)
-
-^{:refer xt.lang.common-lib/prototype-set
-  :added "4.1"
-  :lang-exceptions {:python {:skip true}
-                    :dart   {:skip true}}}
-(fact "sets the prototype map onto an object"
-  (!.lua
-   (var mt (k/prototype-create {:hello (fn:> [v] (. v world))
-                            :world "hello"}))
-   (var a {})
-   (k/prototype-set a mt nil)
-   (. a (hello)))
-  => "hello")
-
-^{:refer xt.lang.common-lib/prototype-tostring
-  :added "4.1"
-  :lang-exceptions {:python {:skip true}}}
-(fact "compiles the runtime tostring helper"
-  (!.lua
-   (var _ (fn [obj]
-            (k/prototype-tostring obj)))
-   true)
-  => true)
-
 ^{:refer xt.lang.common-lib/noop :added "4.1"}
 (fact "returns nil"
   (!.lua

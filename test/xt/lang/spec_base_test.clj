@@ -2498,6 +2498,7 @@
 ^{:refer xt.lang.spec-base/x:iter-from :added "4.1"}
 (fact "creates generic iterators from iterable values"
 
+  ^{:seedgen/base {:lua {:transform {xt/x:iter-from xt/x:iter-from-arr}}}}
   (!.js
     (var out [])
     (xt/for:iter [e (xt/x:iter-from [2 4 6])]
@@ -2514,7 +2515,7 @@
 
   (!.lua
     (var out [])
-    (xt/for:iter [e (xt/x:iter-from [2 4 6])]
+    (xt/for:iter [e (xt/x:iter-from-arr [2 4 6])]
       (xt/x:arr-push out e))
     out)
   => [2 4 6])
@@ -2564,25 +2565,25 @@
 ^{:refer xt.lang.spec-base/x:iter-null :added "4.1"}
 (fact "creates empty iterators"
 
-  ^*(!.js
-      (var iter-fn
-           (fn []
-             (return (xt/x:iter-null))))
+  (!.js
+    (var iter-fn
+         (fn []
+           (return (xt/x:iter-null))))
       (xt/x:iter-native? (iter-fn)))
   => true
 
   (!.py
-      (var iter-fn
-           (fn []
-             (return (xt/x:iter-null))))
-      (xt/x:iter-native? (iter-fn)))
+    (var iter-fn
+         (fn []
+           (xt/x:iter-null)))
+    (xt/x:iter-native? (iter-fn)))
   => true
 
-  ^*(!.lua
-      (var iter-fn
-           (fn []
-             (return (xt/x:iter-null))))
-      (xt/x:iter-native? (iter-fn)))
+  (!.lua
+    (var iter-fn
+         (fn []
+           (return (xt/x:iter-null))))
+    (xt/x:iter-native? (iter-fn)))
   => true)
 
 ^{:refer xt.lang.spec-base/x:iter-next :added "4.1"}
