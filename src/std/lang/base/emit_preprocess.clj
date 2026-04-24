@@ -174,6 +174,7 @@
           vec)))
 
 (def +value-types+
+  "Shared value options for macro expansion and standalone value lifting."
   #{:value/template
     :value/standalone})
 

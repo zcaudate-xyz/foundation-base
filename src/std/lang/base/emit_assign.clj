@@ -17,6 +17,7 @@
     :assign/fn})
 
 (def ^:private +return-sentinel+
+  "Sentinel marker used while walking forms to remove handled return nodes."
   '<RETURN>)
 
 ;;
@@ -117,7 +118,7 @@
                                           form))
                                       body)
             _          (or @return-ref
-                           (f/error "Cannot assign expanded value without a return."
+                           (f/error "Cannot assign expanded value: no return statement found."
                                     {:symbol sym
                                      :input expanded}))
             assign-ref (volatile! nil)
