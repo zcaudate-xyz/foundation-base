@@ -2,7 +2,7 @@
   (:require [rt.postgres.runtime.graph-base :as base]
             [rt.postgres.runtime.graph-query :as query]
             [std.lang :as l]
-            [std.lang.base.emit-preprocess :as preprocess]
+            [std.lang.base.preprocess :as preprocess]
             [std.lib.foundation :as f]
             [std.lib.template :as template]
             [std.lib.walk :as walk]

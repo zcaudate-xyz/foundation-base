@@ -1,0 +1,342 @@
+(ns std.lang.base.preprocess-staging
+  (:require [std.lang.base.preprocess :as preprocess]
+            [std.lang.base.preprocess-assign :as assign]
+            [std.lang.base.provenance :as provenance]
+            [std.lang.base.util :as ut]
+            [std.lib.collection :as collection]
+            [std.lib.foundation :as f]
+            [std.lib.walk :as walk]))
+
+(defn get-fragment
+  "gets the fragment given a symbol and modules"
+  {:added "4.0"}
+  ([sym modules mopts]
+   (if (and (symbol? sym)
+            (namespace sym))
+     (let [[sym-ns sym-id] (ut/sym-pair sym)
+           {:keys [id link]} (:module mopts)
+           sym-module (or (if (= sym-ns id) id)
+                          (get link sym-ns)
+                          (first (filter #(= % sym-ns)
+                                         (vals link)))
+                          sym-ns)]
+       (or (get-in modules [sym-module :fragment sym-id])
+           (if-let [et (and (get-in modules [sym-module :code sym-id]))]
+             (if (= :defrun (:op-key et))
+               (apply list 'do (drop 2 (:form et))))))))))
+
+(defn value-template-args
+  "derives callable value args from op or template arglists"
+  {:added "4.1"}
+  ([template]
+   (value-template-args nil template))
+  ([arglists template]
+   (if arglists
+     (let [argv (-> arglists first)
+           argv (if (vector? (first argv))
+                  (first argv)
+                  argv)]
+       (vec argv))
+     (let [arglists (-> template meta :arglists)
+           argv     (-> arglists first)
+           argv     (if (vector? (first argv))
+                      (first argv)
+                      argv)]
+       (->> argv
+            rest
+            vec)))))
+
+(defn value-standalone
+  "returns the standalone expansion for a value-liftable reserved symbol"
+  {:added "4.1"}
+  [sym grammar]
+  (let [{:keys [emit macro]
+         template :value/template
+         standalone :value/standalone
+         op-spec :op-spec} (get-in grammar [:reserved sym])
+        template (or template
+                     (when (= :macro emit)
+                       macro))
+        self-return? (= :xt/self
+                        (get-in op-spec [:type 2]))]
+    (cond (or (collection/form? standalone)
+              (symbol? standalone))
+          standalone
+
+          (and (= true standalone)
+               template)
+          (let [args (value-template-args (:arglists op-spec)
+                                          template)]
+            (if self-return?
+              (let [self-arg (first args)]
+                (list 'fn args
+                      (template (apply list nil args))
+                      (list 'return self-arg)))
+              (list 'fn args
+                    (list 'return
+                          (template (apply list nil args))))))
+
+          :else
+          nil)))
+
+(defn process-namespaced-resolve
+  "resolves symbol in current namespace"
+  {:added "4.0"}
+  [sym modules {:keys [module] :as mopts}]
+  (let [[sym-ns sym-id] (ut/sym-pair sym)
+        sym-module (or (if (= '- sym-ns) (:id module))
+                       (get (:link module) sym-ns)
+                       (if (get modules sym-ns) sym-ns))]
+    (cond (not sym-module)
+          (f/error "Cannot resolve Module." {:input sym
+                                             :current module
+                                             :modules (keys modules)})
+
+          :else
+          [sym-module sym-id
+           (ut/sym-full sym-module sym-id)])))
+
+(defn process-namespaced-symbol
+  "process namespaced symbols"
+  {:added "4.0"}
+  [sym modules {:keys [module entry] :as mopts} deps deps-fragment walk-fn]
+  (let [walk-fn (or walk-fn identity)
+        [sym-module sym-id sym-full] (process-namespaced-resolve sym modules mopts)
+        module-id (:id module)]
+    (cond (and (= sym-module module-id)
+               (= sym-id (:id entry)))
+          sym-full
+
+          :else
+          (let [[type entry] (or (if-let [e (get-in modules [sym-module :code sym-id])]
+                                   [:code e])
+                                 (if-let [e (get-in modules [sym-module :fragment sym-id])]
+                                   [:fragment e])
+                                 (if-let [e (get-in modules [sym-module :header sym-id])]
+                                   [:header e])
+                                 (f/error (str "Upstream not found: "
+                                               (ut/sym-full {:module sym-module
+                                                             :id sym-id}))
+                                          {:entry (ut/sym-full {:module sym-module
+                                                                :id sym-id})
+                                           :opts  (select-keys mopts [:lang :module])}))]
+            (or (if preprocess/*macro-skip-deps*
+                  sym-full)
+                (case type
+                  (:header :code) (let [{:keys [op]} entry
+                                        _ (if (and (get (:suppress module) sym-module)
+                                                    (not= 'defglobal op))
+                                            (f/error "Suppressed module - macros only"
+                                                     {:sym [sym-module sym-id]
+                                                      :module (dissoc module :code :fragment)}))
+                                        _ (if (not (or preprocess/*macro-skip-deps*
+                                                       (not deps)
+                                                       (= 'defglobal op)
+                                                       (= 'defrun op)))
+                                            (vswap! deps conj sym-full))]
+                                    sym-full)
+                  :fragment (let [{:keys [template standalone form]} entry
+                                  _ (if (not (or preprocess/*macro-skip-deps*
+                                                 (not deps-fragment)))
+                                      (vswap! deps-fragment conj sym-full))]
+                              (cond (not template) form
+
+                                    (not standalone)
+                                    (f/error "Pure templates are not allowed in body"
+                                             {:module sym-module
+                                              :id sym-id
+                                              :form sym})
+
+                                    (or (collection/form? standalone)
+                                        (symbol? standalone))
+                                    (walk-fn (:standalone entry))
+
+                                    :else
+                                    (let [args (second form)]
+                                      (list 'fn args
+                                            (list 'return
+                                                  (apply template args))))))))))))
+
+(defn to-staging-form
+  "different staging forms"
+  {:added "4.0"}
+  [form grammar modules mopts deps-fragment walk-fn]
+  (let [fsym     (first form)
+        reserved (get-in grammar [:reserved (first form)])
+        mopts    (provenance/with-provenance
+                  mopts
+                  {:std.lang/form form
+                   :std.lang/symbol fsym})]
+    (cond (= fsym '!:template)
+          (walk-fn (eval (second form)))
+
+          ('#{!:lang !:eval !:deref !:decorate} fsym)
+          (volatile! form)
+
+          (= :template (:type reserved))
+          (let [mopts (provenance/with-provenance
+                        mopts
+                        {:std.lang/phase :staging/reserved-template
+                         :std.lang/subsystem :std.lang.base.preprocess/reserved-template
+                         :std.lang/lang (:lang mopts)
+                         :std.lang/module (ut/module-id (:module mopts))})]
+            (try
+              (binding [preprocess/*macro-opts* mopts]
+                (walk-fn ((:macro reserved) form)))
+              (catch Throwable t
+                (ut/throw-with-context
+                 "std.lang staging template expansion failed"
+                 (:std.lang/provenance mopts)
+                 t))))
+
+          (= :hard-link (:emit reserved))
+          (walk-fn (cons (:raw reserved) (rest form)))
+
+          (and (= :def-assign (:emit reserved))
+               (= :inline (last form)))
+          (walk-fn (assign/process-inline-assignment form modules mopts))
+
+          reserved
+          (assign/protect-reserved-head form)
+
+          :else
+          (let [fe (get-fragment (first form)
+                                 modules
+                                 mopts)]
+            (if (:template fe)
+              (let [mopts (provenance/with-provenance
+                            mopts
+                            {:std.lang/phase :staging/fragment-template
+                             :std.lang/subsystem :std.lang.base.preprocess/fragment-template
+                             :std.lang/lang (:lang mopts)
+                             :std.lang/module (ut/module-id (:module mopts))
+                             :std.lang/entry (ut/entry-summary fe)})]
+                (do (if deps-fragment
+                      (vswap! deps-fragment conj (ut/sym-full fe)))
+                    (walk-fn (try
+                               (binding [preprocess/*macro-form* form
+                                         preprocess/*macro-opts* mopts]
+                                 (apply (:template fe) (rest form)))
+                               (catch Throwable t
+                                 (ut/throw-with-context
+                                  "std.lang staging macro expansion failed"
+                                  (:std.lang/provenance mopts)
+                                  t))))))
+              form)))))
+
+(defn process-standard-symbol
+  [sym mopts deps-native]
+  (let [symstr (name sym)
+        idx    (.indexOf (name sym) ".")
+        _      (if (<= 0 idx)
+                 (let [symlead (symbol (subs symstr 0 idx))
+                       import  (get-in mopts
+                                       [:module
+                                        :native-lu
+                                        symlead])]
+                   (if (and import deps-native)
+                     (vswap! deps-native
+                             update
+                             import
+                             (fnil #(conj % symlead) #{}))))
+                 (let [import (get-in mopts
+                                      [:module
+                                       :native-lu
+                                       sym])]
+                   (if (and import deps-native)
+                     (vswap! deps-native
+                             update
+                             import
+                             (fnil #(conj % sym) #{})))))]
+    sym))
+
+(defn to-staging
+  "converts the stage"
+  {:added "4.0"}
+  [input grammar modules mopts]
+  (let [mopts (provenance/with-provenance
+                mopts
+                {:std.lang/phase :staging
+                 :std.lang/subsystem :std.lang.base.preprocess/to-staging
+                 :std.lang/lang (:lang mopts)
+                 :std.lang/module (ut/module-id (:module mopts))
+                 :std.lang/entry (some-> (:entry mopts) ut/entry-summary)})]
+    (binding [preprocess/*macro-skip-deps* false
+              preprocess/*macro-grammar* grammar
+              preprocess/*macro-opts* mopts]
+      (let [deps          (volatile! #{})
+            deps-fragment (volatile! #{})
+            deps-native   (volatile! {})
+            _             (if-let [includes (-> mopts :module :includes)]
+                            (doseq [inc-id includes]
+                              (if-let [module (get modules inc-id)]
+                                (doseq [entry (vals (:code module))]
+                                  (vswap! deps conj (ut/sym-full entry))))))
+            form          (walk/prewalk
+                           (fn walk-fn [form]
+                             (cond (collection/form? form)
+                                   (to-staging-form form grammar modules mopts deps-fragment walk-fn)
+
+                                   (symbol? form)
+                                   (or (when-let [standalone (value-standalone form grammar)]
+                                         (walk-fn standalone))
+                                       (if (namespace form)
+                                         (process-namespaced-symbol form modules mopts deps deps-fragment walk-fn)
+                                         (process-standard-symbol form mopts deps-native)))
+
+                                   :else form))
+                           input)
+            form          (walk/postwalk (fn [form]
+                                           (if (volatile? form)
+                                             @form
+                                             form))
+                                         form)]
+        [form @deps @deps-fragment @deps-native]))))
+
+(defn to-resolve
+  "resolves only the code symbols (no macroexpansion)"
+  {:added "4.0"}
+  [input grammar modules mopts]
+  (binding [preprocess/*macro-skip-deps* true
+            preprocess/*macro-grammar* grammar
+            preprocess/*macro-opts* mopts]
+    (let [form (walk/prewalk
+                (fn walk-fn [form]
+                  (cond (and (collection/form? form)
+                             (= (first form) '!:template))
+                        (walk-fn (eval (second form)))
+
+                        (and (collection/form? form)
+                             (get-in grammar [:reserved (first form)]))
+                        (assign/protect-reserved-head form)
+
+                        (symbol? form)
+                        (or (value-standalone form grammar)
+                            (if (namespace form)
+                              (process-namespaced-symbol form modules mopts nil nil identity)
+                              (process-standard-symbol form mopts nil)))
+
+                        :else
+                        form))
+                input)]
+      form)))
+
+(defn find-natives
+  [entry mopts]
+  (let [deps-quoted (volatile! [])
+        deps-native (volatile! {})
+        _           (walk/postwalk
+                     (fn [form]
+                       (if (and (list? form)
+                                (= (first form) 'quote))
+                         (vswap! deps-quoted conj (second form)))
+                       form)
+                     (:form entry))
+        _           (walk/postwalk
+                     (fn [form]
+                       (cond (symbol? form)
+                             (process-standard-symbol form mopts deps-native)
+
+                             :else form))
+                     @deps-quoted)]
+    @deps-native))

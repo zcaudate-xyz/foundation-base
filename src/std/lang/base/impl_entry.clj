@@ -2,7 +2,7 @@
   (:require [std.lang.base.book :as book]
              [std.lang.base.impl-template :as impl-template]
              [std.lang.base.emit :as emit]
-             [std.lang.base.emit-preprocess :as preprocess]
+             [std.lang.base.preprocess :as preprocess]
              [std.lang.base.grammar-xtalk-system :as xtalk-system]
              [std.lang.base.provenance :as provenance]
              [std.lang.base.util :as ut]

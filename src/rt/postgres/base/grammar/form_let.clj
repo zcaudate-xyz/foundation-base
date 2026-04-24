@@ -4,7 +4,7 @@
             [rt.postgres.base.grammar.tf :as tf]
             [std.lang :as l]
             [std.lang.base.emit-common :as emit-common]
-            [std.lang.base.emit-preprocess :as preprocess]
+            [std.lang.base.preprocess :as preprocess]
             [std.lang.base.library-snapshot :as snap]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]

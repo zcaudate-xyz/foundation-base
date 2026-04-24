@@ -1,11 +1,11 @@
-(ns std.lang.base.emit-preprocess-test
+(ns std.lang.base.preprocess-test
   (:require [std.lang.base.book :as b]
             [std.lang.base.book-entry :as entry]
             [std.lang.base.emit-common :as common]
             [std.lang.base.emit-helper :as helper]
             [std.lang.base.emit-prep-js-test :as prep-js]
             [std.lang.base.emit-prep-lua-test :as prep]
-            [std.lang.base.emit-preprocess :refer :all]
+            [std.lang.base.preprocess :refer :all]
             [std.lang.base.grammar :as grammar]
             [std.lang.base.grammar-xtalk-system :as grammar-xtalk]
             [std.lang.base.impl-entry :as impl-entry]
@@ -21,31 +21,31 @@
 (def +grammar+
   (grammar/grammar :test +reserved+ helper/+default+))
 
-^{:refer std.lang.base.emit-preprocess/macro-form :added "4.0"}
+^{:refer std.lang.base.preprocess/macro-form :added "4.0"}
 (fact "gets the current macro form"
   (binding [*macro-form* 'hello]
     (macro-form))
   => 'hello)
 
-^{:refer std.lang.base.emit-preprocess/macro-opts :added "4.0"}
+^{:refer std.lang.base.preprocess/macro-opts :added "4.0"}
 (fact "gets current macro-opts"
   (binding [*macro-opts* {:a 1}]
     (macro-opts))
   => {:a 1})
 
-^{:refer std.lang.base.emit-preprocess/macro-grammar :added "4.0"}
+^{:refer std.lang.base.preprocess/macro-grammar :added "4.0"}
 (fact "gets the current grammar"
   (binding [*macro-grammar* {:a 1}]
     (macro-grammar))
   => {:a 1})
 
-^{:refer std.lang.base.emit-preprocess/with:macro-opts :added "4.0"}
+^{:refer std.lang.base.preprocess/with:macro-opts :added "4.0"}
 (fact "bind macro opts"
   (with:macro-opts [{:a 1}]
     (macro-opts))
   => {:a 1})
 
-^{:refer std.lang.base.emit-preprocess/to-input-form :added "4.0"}
+^{:refer std.lang.base.preprocess/to-input-form :added "4.0"}
 (fact "processes a form"
 
   (def hello 1)
@@ -62,7 +62,7 @@
           nil)
 
   (to-input-form '@#'hello)
-  => '(!:deref (var std.lang.base.emit-preprocess-test/hello))
+  => '(!:deref (var std.lang.base.preprocess-test/hello))
 
   (to-input-form '@(+ 1 2 3))
   => '(!:eval (+ 1 2 3))
@@ -70,7 +70,7 @@
   (to-input-form '(@.lua (do 1 2 3)))
   => '(!:lang {:lang :lua} (do 1 2 3)))
 
-^{:refer std.lang.base.emit-preprocess/to-input :added "4.0"}
+^{:refer std.lang.base.preprocess/to-input :added "4.0"}
 (fact "converts a form to input (extracting deref forms)"
 
   (to-input '(do (~! [1 2 3 4])))
@@ -80,7 +80,7 @@
     (to-input '(do (~! [1 2 3 4]))))
   => '(do 1 2 3 4))
 
-^{:refer std.lang.base.emit-preprocess/get-fragment :added "4.0"}
+^{:refer std.lang.base.preprocess/get-fragment :added "4.0"}
 (fact "gets the fragment given a symbol and modules"
 
   (get-fragment 'L.core/add
@@ -89,7 +89,7 @@
                           :link '{u L.core}}})
   => entry/book-entry?)
 
-^{:refer std.lang.base.emit-preprocess/process-namespaced-resolve :added "4.0"}
+^{:refer std.lang.base.preprocess/process-namespaced-resolve :added "4.0"}
 (fact "resolves symbol in current namespace"
 
   (process-namespaced-resolve 'u/add
@@ -110,7 +110,7 @@
                                           :link '{u L.core}}})
   => (throws))
 
-^{:refer std.lang.base.emit-preprocess/process-namespaced-symbol :added "4.0"}
+^{:refer std.lang.base.preprocess/process-namespaced-symbol :added "4.0"}
 (fact "process namespaced symbols"
 
   (process-namespaced-symbol 'u/add
@@ -161,7 +161,7 @@
                              identity)
   => (throws))
 
-^{:refer std.lang.base.emit-preprocess/process-inline-assignment :added "4.0"}
+^{:refer std.lang.base.preprocess/process-inline-assignment :added "4.0"}
 (fact "prepares the form for inline assignment"
 
   (def +form+
@@ -176,7 +176,7 @@
   (meta (last +form+))
   => {:assign/inline true})
 
-^{:refer std.lang.base.emit-preprocess/to-staging-form :added "4.0"}
+^{:refer std.lang.base.preprocess/to-staging-form :added "4.0"}
 (fact "different staging forms"
 
   (to-staging-form '(!:template (+ 1 2 3))
@@ -240,14 +240,14 @@
                      :std.lang/form])))
   => '{:probe true
         :std.lang/phase :staging/reserved-template
-        :std.lang/subsystem :std.lang.base.emit-preprocess/reserved-template
+        :std.lang/subsystem :std.lang.base.preprocess/reserved-template
         :std.lang/lang :lua
         :std.lang/line 21
         :std.lang/module L.core
         :std.lang/symbol hello
         :std.lang/form (hello 1 2 3)})
 
-^{:refer std.lang.base.emit-preprocess/process-standard-symbol :added "4.0"}
+^{:refer std.lang.base.preprocess/process-standard-symbol :added "4.0"}
 (fact "processes a standard symbol"
 
   (def +library-js+
@@ -268,7 +268,7 @@
     [sym @deps-native])
   => '[Puck.Puck {"@measured/puck" #{Puck}}])
 
-^{:refer std.lang.base.emit-preprocess/to-staging :added "4.0"}
+^{:refer std.lang.base.preprocess/to-staging :added "4.0"}
 (fact "converts the stage"
 
   (to-staging '(u/add (u/identity-fn 1) 2)
@@ -304,7 +304,7 @@
                          :link {}}})
   => '[(fn [x y] (return (+ x y))) #{} #{} {}])
 
-^{:refer std.lang.base.emit-preprocess/value-standalone :added "4.1"}
+^{:refer std.lang.base.preprocess/value-standalone :added "4.1"}
 (fact "callable xtalk intrinsics use shared value-standalone compilation"
 
   (value-standalone 'x:add +grammar+)
@@ -369,7 +369,7 @@
                      (x:arr-second e))
           (return obj)))
 
-^{:refer std.lang.base.emit-preprocess/to-resolve :added "4.0"}
+^{:refer std.lang.base.preprocess/to-resolve :added "4.0"}
 (fact "resolves only the code symbols (no macroexpansion)"
 
   (to-resolve '(u/add (u/identity-fn 1) 2)
@@ -378,7 +378,7 @@
                '{:module {:link {u L.core}}})
   => '(L.core/add (L.core/identity-fn 1) 2))
 
-^{:refer std.lang.base.emit-preprocess/find-natives :added "4.0"}
+^{:refer std.lang.base.preprocess/find-natives :added "4.0"}
 (fact "find natives for a macro entry"
 
   (def +library-js+
@@ -408,7 +408,7 @@
   => '{"react" #{React}})
 
 
-^{:refer std.lang.base.emit-preprocess/value-template-args :added "4.1"}
+^{:refer std.lang.base.preprocess/value-template-args :added "4.1"}
 (fact "derives template value args from arglists metadata"
   (value-template-args
    (with-meta
@@ -429,7 +429,7 @@
      {:arglists '([ctx a b & more])}))
   => '[x y])
 
-^{:refer std.lang.base.emit-preprocess/protect-reserved-head :added "4.1"}
+^{:refer std.lang.base.preprocess/protect-reserved-head :added "4.1"}
 (fact "protects reserved heads by wrapping them in a volatile"
   (let [out (protect-reserved-head (with-meta '(return value) {:line 10}))]
     [(volatile? (first out))

@@ -1,94 +1,33 @@
 (ns std.lang.base.preprocess-assign
-  (:require [clojure.string]
-            [std.lang.base.provenance :as provenance]
-            [std.lang.base.util :as ut]
-            [std.lib.collection :as collection]
-            [std.lib.context.pointer :as ptr]
-            [std.lib.foundation :as f]
-            [std.lib.walk :as walk]))
+  (:require [std.lang.base.util :as ut]
+            [std.lib.foundation :as f]))
 
+(defn process-inline-assignment
+  "prepares the form for inline assignment"
+  {:added "4.0"}
+  [form modules mopts & [unwrapped]]
+  (let [[_ bind-form & rdecl] (reverse form)
+        [f & args] bind-form
+        [sym-ns sym-id] (ut/sym-pair f)
+        {:keys [module]} mopts
+        f-module (or (if (= '- sym-ns) (:id module))
+                     (get (:link module) sym-ns)
+                     (if (get modules sym-ns) sym-ns))
+        _ (or f-module
+              (f/error "Cannot resolve Module." {:input f
+                                                 :current module
+                                                 :modules (keys modules)}))
+        _ (or (get-in modules [f-module :code sym-id])
+              (f/error "Code entry not found:" {:input f
+                                                :form form}))]
+    (concat (reverse rdecl)
+            [(with-meta (cons (cond-> (ut/sym-full f-module sym-id)
+                                (not unwrapped) (volatile!))
+                             args)
+               {:assign/inline true})])))
 
-(comment
-
-  ;; -------
-  ;; return case
-  (return (x:type-native obj))
-
-  ;;
-  (do (when (== obj nil) (return nil))
-      (var t := (typeof obj))
-      (if (== t "object")
-        (cond (Array.isArray obj)
-              (return "array")
-
-              :else
-              (do
-                (var tn := (. obj ["constructor"] ["name"]))
-                (if (== tn "Object")
-                  (return "object")
-                  (return tn))))
-        (return t)))
-  
-  ;; -------
-  ;; assign case
-  (var a (x:type-native obj))
-  (:= a  (x:type-native obj))
-
-  ;;
-  (var a nil)
-  (do (when (== obj nil) (return nil))
-      (var t := (typeof obj))
-      (if (== t "object")
-        (cond (Array.isArray obj)
-              (:= a "array")
-
-              :else
-              (do
-                (var tn := (. obj ["constructor"] ["name"]))
-                (if (== tn "Object")
-                  (:= a "object")
-                  (:= a tn))))
-        (:= a t)))
-
-  ;; -------
-  ;; general usage case
-  (f (g (x:type-native obj)))
-
-  (var type-native-fn
-       (fn type-native-lambda [obj]
-         (when (== obj nil) (return nil))
-         (var t := (typeof obj))
-         (if (== t "object")
-           (cond (Array.isArray obj)
-                 (return "array")
-
-                 :else
-                 (do
-                   (var tn := (. obj ["constructor"] ["name"]))
-                   (if (== tn "Object")
-                     (return "object")
-                     (return tn))))
-           (return t))))
-  (f (g (type-native-fn obj)))
-
-  ;; -------
-  ;; standalone
-  x:type-native
-
-  ;;
-  (fn type-native-lambda [obj]
-    (when (== obj nil) (return nil))
-    (var t := (typeof obj))
-    (if (== t "object")
-      (cond (Array.isArray obj)
-            (return "array")
-
-            :else
-            (do
-              (var tn := (. obj ["constructor"] ["name"]))
-              (if (== tn "Object")
-                (return "object")
-                (return tn))))
-      (return t)))
-  )
-
+(defn protect-reserved-head
+  [form]
+  (with-meta (cons (volatile! (first form))
+                   (rest form))
+    (meta form)))

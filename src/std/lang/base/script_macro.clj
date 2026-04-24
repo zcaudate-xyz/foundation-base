@@ -1,6 +1,6 @@
 (ns std.lang.base.script-macro
   (:require [std.lang.base.emit :as emit]
-            [std.lang.base.emit-preprocess :as preprocess]
+            [std.lang.base.preprocess :as preprocess]
             [std.lang.base.impl :as impl]
             [std.lang.base.impl-entry :as entry]
             [std.lang.base.library :as lib]
