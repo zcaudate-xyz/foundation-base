@@ -3,6 +3,8 @@
             [std.lang.base.preprocess-resolve :as resolve]
             [std.lib.collection :as collection]))
 
+(declare expand-value-form)
+
 (defn value-block-entry
   "returns the reserved entry for a block-valued macro call"
   {:added "4.1"}
@@ -25,8 +27,6 @@
                      (macro form))]
       (with-meta expanded
         (merge (meta form) (meta expanded))))))
-
-(declare expand-value-form)
 
 (defn value-fragment-entry
   "returns the standalone fragment entry for a namespaced value form"
@@ -140,6 +140,9 @@
                        :else
                        nil))))))))
 
+(def ^:private +statement-block-heads+
+  '#{do do*})
+
 (defn process-value-form
   "rewrites block-valued macros used in value position"
   {:added "4.1"}
@@ -156,7 +159,7 @@
 
          :else
          (let [[head & args0] form]
-           (when-not ('#{do do*} head)
+           (when-not (contains? +statement-block-heads+ head)
              (let [args  (vec args0)
                    args' (mapv (fn [arg]
                                  (let [standalone (and (collection/form? arg)

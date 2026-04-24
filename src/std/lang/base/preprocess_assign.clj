@@ -1,6 +1,6 @@
 (ns std.lang.base.preprocess-assign
   (:require [std.lang.base.emit-helper :as helper]
- 	    [std.lang.base.preprocess-base :as preprocess-base]
+            [std.lang.base.preprocess-base :as preprocess-base]
             [std.lang.base.preprocess-value :as value]
             [std.lang.base.util :as ut]
             [std.lib.collection :as collection]
@@ -142,22 +142,22 @@
                             (merge (meta form) (meta expanded)))))))
                   form)]
      (when-let [{:keys [declare? target value]} (assignment-target form grammar)]
-       (when-let [expanded (and (collection/form? value)
-                                (symbol? (first value))
-                                (value/expand-value-form value
-                                                         grammar
-                                                         modules
-                                                         mopts))]
-         (let [rewritten (rewrite-tail-return expanded target)]
-           (cond-> (if declare?
-                     (with-meta (list 'do
-                                      (with-meta (apply list (concat (butlast form) [nil]))
-                                        (meta form))
-                                      rewritten)
-                       (meta form))
-                     (with-meta rewritten
-                       (meta form)))
-             true (vary-meta assoc :assign/template-default true))))))))
+       (when (and (collection/form? value)
+                  (symbol? (first value)))
+         (when-let [expanded (value/expand-value-form value
+                                                      grammar
+                                                      modules
+                                                      mopts)]
+           (let [rewritten (rewrite-tail-return expanded target)]
+             (cond-> (if declare?
+                       (with-meta (list 'do
+                                        (with-meta (apply list (concat (butlast form) [nil]))
+                                          (meta form))
+                                        rewritten)
+                         (meta form))
+                       (with-meta rewritten
+                         (meta form)))
+               true (vary-meta assoc :assign/template-default true)))))))))
 
 (defn protect-reserved-head
   [form]
