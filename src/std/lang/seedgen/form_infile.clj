@@ -1,14 +1,15 @@
 (ns std.lang.seedgen.form-infile
   (:require [clojure.string :as str]
-            [code.framework :as base]
-            [code.project :as project]
-            [std.block.base :as block]
-            [std.block.navigate :as nav]
-            [std.lang.seedgen.common-util :as common]
-            [std.lang.seedgen.form-common :as form-common]
-            [std.lang.seedgen.form-parse :as seed-readforms]
-            [std.lib.result :as res]
-            [std.task :as task]))
+             [code.framework :as base]
+             [code.project :as project]
+             [std.block.base :as block]
+             [std.block.navigate :as nav]
+             [std.lang.seedgen.common-util :as common]
+             [std.lang.seedgen.form-common :as form-common]
+             [std.lang.seedgen.form-parse :as seed-readforms]
+             [std.lib.walk :as walk]
+             [std.lib.result :as res]
+             [std.task :as task]))
 
 (defn- normalize-target-langs
   [lang]
@@ -333,14 +334,47 @@
   (get (common/seedgen-lang-entry (item-value item) lang)
        key))
 
+(defn- transform-string-match?
+  [match]
+  (or (instance? Character match)
+      (instance? CharSequence match)
+      (instance? java.util.regex.Pattern match)))
+
+(defn- transform-literal
+  [form]
+  (if (and (seq? form)
+           (= 'quote (first form))
+           (= 2 (count form)))
+    (second form)
+    form))
+
+(defn- apply-item-transform-form
+  [s from to]
+  (let [root     (nav/parse-root s)
+        expr-nav (nav/down root)
+        body-nav (some-> expr-nav form-common/nav-body)]
+    (if body-nav
+      (let [body-form   (nav/value body-nav)
+            transformed (walk/postwalk-replace {from to} body-form)]
+        (if (= body-form transformed)
+          s
+          (-> body-nav
+              (nav/replace transformed)
+              nav/root-string)))
+      s)))
+
 (defn- apply-item-transform-string
   [s item lang]
   (let [transform-override (item-base-override item lang :transform)]
     (if (and s (map? transform-override))
       (reduce-kv (fn [out from to]
-                   (str/replace out from to))
-                 s
-                 transform-override)
+                   (let [from (transform-literal from)
+                         to   (transform-literal to)]
+                     (if (transform-string-match? from)
+                       (str/replace out from to)
+                       (apply-item-transform-form out from to))))
+                  s
+                  transform-override)
       s)))
 
 (defn- fact-original-body-string

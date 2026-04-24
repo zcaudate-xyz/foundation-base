@@ -109,7 +109,7 @@
        {:success (repl/notify ok)
         :error   (repl/notify err)
         :finally (return true)}))
-  
+      
    (notify/wait-on :js
      (xt/for:async [[ok err] (xt/return-run [resolve reject]
                                (reject "ERR"))]
@@ -1089,33 +1089,35 @@
 ^{:refer xt.lang.spec-base/x:callback :added "4.1"}
 (fact "dispatches node-style callbacks through for:return"
 
-  ^{:seedgen/base   {:lua    {:transform {(fn [cb]
+  ^{:seedgen/base   {:lua    {:transform {'(fn [cb]
                                              (cb nil "OK"))
-                                          (fn [cb]
-                                             (return nil "OK"))
-                                          
-                                          (fn [cb]
+                                          '(fn [cb]
+                                             (return nil "OK"))}}
+                     :python {:suppress true}}}
+  (!.js
+    (var out nil)
+    (var success-fn (fn [cb]
+                      (cb nil "OK")))
+    (xt/for:return [[ret err] (success-fn (xt/x:callback))]
+      {:success (:= out ret)
+       :error   (:= out err)})
+    out)
+  => "OK"
+
+  ^{:seedgen/base   {:lua    {:transform {'(fn [cb]
                                              (cb "ERR" nil))
-                                          (fn [cb]
+                                          '(fn [cb]
                                              (return "ERR" nil))}}
                      :python {:suppress true}}}
-  [(!.js
-     (var out nil)
-     (var success-fn (fn [cb]
-                       (cb nil "OK")))
-     (xt/for:return [[ret err] (success-fn (xt/x:callback))]
-       {:success (:= out ret)
-        :error   (:= out err)})
-     out)
-   (!.js
-     (var out nil)
-     (var failure-fn (fn [cb]
-                       (cb "ERR" nil)))
-     (xt/for:return [[ret err] (failure-fn (xt/x:callback))]
-       {:success (:= out ret)
-        :error   (:= out err)})
-     out)]
-  => ["OK" "ERR"])
+  (!.js
+    (var out nil)
+    (var failure-fn (fn [cb]
+                      (cb "ERR" nil)))
+    (xt/for:return [[ret err] (failure-fn (xt/x:callback))]
+      {:success (:= out ret)
+       :error   (:= out err)})
+    out)
+  => "ERR")
 
 ^{:refer xt.lang.spec-base/x:return-run :added "4.1"}
 (fact "can be used directly inside for:return"
@@ -1231,19 +1233,19 @@
 ^{:refer xt.lang.spec-base/x:return-encode :added "4.1"}
 (fact "encodes return payloads as json"
 
-  ^{:seedgen/base  true}
-  [(!.js
+  (!.js
      (var encode-fn
           (fn [value id key]
             (xt/x:return-encode value id key)))
      (xt/x:json-decode (encode-fn {:a 1} "id" "key")))
-   (!.js
-     (var encode-fn
-          (fn [value id key]
-            (xt/x:return-encode value id key)))
-     (xt/x:json-decode (encode-fn "hello" "id" "key")))]
-  => [{"return" "object", "key" "key", "id" "id", "value" {"a" 1}, "type" "data"}
-      {"return" "string", "key" "key", "id" "id", "value" "hello", "type" "data"}])
+  => {"return" "object", "key" "key", "id" "id", "value" {"a" 1}, "type" "data"}
+  
+  (!.js
+    (var encode-fn
+         (fn [value id key]
+           (xt/x:return-encode value id key)))
+    (xt/x:json-decode (encode-fn "hello" "id" "key")))
+  => {"return" "string", "key" "key", "id" "id", "value" "hello", "type" "data"})
 
 ^{:refer xt.lang.spec-base/x:return-wrap :added "4.1"}
 (fact "wraps return values through encoder functions"
@@ -1334,7 +1336,7 @@
          (fn []
            (xt/x:global-del COMMON_SPEC_GLOBAL)
            (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
-        
+            
     [(set-fn)
      (!:G COMMON_SPEC_GLOBAL)
      (del-fn)])
@@ -1361,7 +1363,7 @@
          (fn []
            (xt/x:global-del COMMON_SPEC_GLOBAL)
            (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
-        
+            
     [(set-fn)
      (del-fn)])
   => [true false])

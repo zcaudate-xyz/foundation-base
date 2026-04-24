@@ -423,6 +423,82 @@
         (.delete tmp))))
   => "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]\n            [xt.lang.spec-base :as xt]))\n\n^{:seedgen/root {:all true, :langs [:lua]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :lua {:runtime :basic})\n\n^{:refer xt.lang.spec-base/x:return-eval :added \"4.1\"}\n(fact \"transform can be customised\"\n\n  ^{:seedgen/base {:lua {:transform {\"1 + 1\" \"return 1 + 1\"}}}}\n  (!.js\n    (var eval-fn\n         (fn [s re-wrap-fn]\n           (xt/x:return-eval s re-wrap-fn)))\n    (eval-fn \"1 + 1\"\n             (fn [f]\n               (return f))))\n  => 2\n\n  (!.lua\n    (var eval-fn\n         (fn [s re-wrap-fn]\n           (xt/x:return-eval s re-wrap-fn)))\n    (eval-fn \"return 1 + 1\"\n             (fn [f]\n               (return f))))\n  => 2)\n"
 
+  (let [tmp (java.io.File/createTempFile "seedgen-langadd-train004-transform-symbol" ".clj")
+        path (.getAbsolutePath tmp)
+        root (.getParent tmp)
+        lookup {'sample.add-test path}
+        project {:root root}]
+    (try
+      (spit path (str "(ns sample.add-test\n"
+                      "  (:use code.test)\n"
+                      "  (:require [std.lang :as l]\n"
+                      "            [xt.lang.spec-base :as xt]))\n\n"
+                      "^{:seedgen/root {:all true, :langs [:lua]}}\n"
+                      "(l/script- :js {:runtime :basic})\n\n"
+                      "^{:refer xt.lang.spec-base/x:iter-from :added \"4.1\"}\n"
+                      "(fact \"symbol transforms use block-aware replacement\"\n\n"
+                      "  ^{:seedgen/base {:lua {:transform {xt/x:iter-from xt/x:iter-from-arr}}}}\n"
+                      "  (!.js\n"
+                      "    (var out [])\n"
+                      "    (xt/for:iter [e (xt/x:iter-from [2 4 6])]\n"
+                      "      (xt/x:arr-push out e))\n"
+                      "    out)\n"
+                      "  => [2 4 6])\n"))
+      (form-infile/seedgen-langadd 'sample.add-test {:write true} lookup project)
+      (let [output (slurp path)]
+        [(str/includes? output "(xt/for:iter [e (xt/x:iter-from-arr [2 4 6])]")
+         (not (str/includes? output "(!.lua\n    (var out [])\n    (xt/for:iter [e (xt/x:iter-from [2 4 6])]"))])
+      (finally
+        (.delete tmp))))
+  => [true true]
+
+  (let [tmp (java.io.File/createTempFile "seedgen-langadd-train004-transform-form" ".clj")
+        path (.getAbsolutePath tmp)
+        root (.getParent tmp)
+        lookup {'sample.add-test path}
+        project {:root root}]
+    (try
+      (spit path (str "(ns sample.add-test\n"
+                      "  (:use code.test)\n"
+                      "  (:require [std.lang :as l]\n"
+                      "            [xt.lang.spec-base :as xt]))\n\n"
+                      "^{:seedgen/root {:all true, :langs [:lua]}}\n"
+                      "(l/script- :js {:runtime :basic})\n\n"
+                      "^{:refer xt.lang.spec-base/x:callback :added \"4.1\"}\n"
+                      "(fact \"quoted form transforms use block-aware replacement\"\n\n"
+                      "  ^{:seedgen/base {:lua {:transform {'(fn [cb]\n"
+                      "                                         (cb nil \"OK\"))\n"
+                      "                                      '(fn [cb]\n"
+                      "                                         (return nil \"OK\"))\n\n"
+                      "                                      '(fn [cb]\n"
+                      "                                         (cb \"ERR\" nil))\n"
+                      "                                      '(fn [cb]\n"
+                      "                                         (return \"ERR\" nil))}}}}\n"
+                      "  [(!.js\n"
+                      "     (var out nil)\n"
+                      "     (var success-fn (fn [cb]\n"
+                      "                       (cb nil \"OK\")))\n"
+                      "     (xt/for:return [[ret err] (success-fn (xt/x:callback))]\n"
+                      "       {:success (:= out ret)\n"
+                      "        :error   (:= out err)})\n"
+                      "     out)\n"
+                      "   (!.js\n"
+                      "     (var out nil)\n"
+                      "     (var failure-fn (fn [cb]\n"
+                      "                       (cb \"ERR\" nil)))\n"
+                      "     (xt/for:return [[ret err] (failure-fn (xt/x:callback))]\n"
+                      "       {:success (:= out ret)\n"
+                      "        :error   (:= out err)})\n"
+                      "     out)]\n"
+                      "  => [\"OK\" \"ERR\"])\n"))
+      (form-infile/seedgen-langadd 'sample.add-test {:write true} lookup project)
+      (let [output (slurp path)]
+        [(str/includes? output "(var success-fn (fn [cb] (return nil \"OK\")))")
+         (str/includes? output "(var failure-fn (fn [cb] (return \"ERR\" nil)))")])
+      (finally
+        (.delete tmp))))
+  => [true true]
+
   (let [tmp (java.io.File/createTempFile "seedgen-langadd-train004-g-setup" ".clj")
         path (.getAbsolutePath tmp)
         root (.getParent tmp)
