@@ -1,5 +1,5 @@
 (ns std.lang.base.preprocess-staging
-  (:require [std.lang.base.emit-preprocess :as preprocess] [std.lang.base.preprocess-base :as preprocess-base]
+  (:require [std.lang.base.preprocess-base :as preprocess-base]
             [std.lang.base.preprocess-assign :as assign]
             [std.lang.base.preprocess-resolve :as resolve]
             [std.lang.base.preprocess-value :as value]
@@ -29,7 +29,7 @@
           (let [mopts (provenance/with-provenance
                         mopts
                         {:std.lang/phase :staging/reserved-template
-                         :std.lang/subsystem :std.lang.base.preprocess/reserved-template
+                         :std.lang/subsystem :std.lang/reserved-template
                          :std.lang/lang (:lang mopts)
                          :std.lang/module (ut/module-id (:module mopts))})]
             (try
@@ -62,7 +62,7 @@
               (let [mopts (provenance/with-provenance
                             mopts
                             {:std.lang/phase :staging/fragment-template
-                             :std.lang/subsystem :std.lang.base.preprocess/fragment-template
+                             :std.lang/subsystem :std.lang/fragment-template
                              :std.lang/lang (:lang mopts)
                              :std.lang/module (ut/module-id (:module mopts))
                              :std.lang/entry (ut/entry-summary fe)})]
@@ -86,7 +86,7 @@
   (let [mopts (provenance/with-provenance
                 mopts
                 {:std.lang/phase :staging
-                 :std.lang/subsystem :std.lang.base.preprocess/to-staging
+                 :std.lang/subsystem :std.lang/to-staging
                  :std.lang/lang (:lang mopts)
                  :std.lang/module (ut/module-id (:module mopts))
                  :std.lang/entry (some-> (:entry mopts) ut/entry-summary)})]

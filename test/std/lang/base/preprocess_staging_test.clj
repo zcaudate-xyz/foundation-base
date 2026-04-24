@@ -75,7 +75,7 @@
                     :std.lang/form])))
   => '{:probe true
         :std.lang/phase :staging/reserved-template
-        :std.lang/subsystem :std.lang.base.preprocess/reserved-template
+        :std.lang/subsystem :std.lang/reserved-template
         :std.lang/lang :lua
         :std.lang/line 21
         :std.lang/module L.core

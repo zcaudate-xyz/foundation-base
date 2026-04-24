@@ -5,7 +5,8 @@
             [std.lang.base.emit :as emit]
             [std.lang.base.emit-common :as common]
             [std.lang.base.emit-helper :as helper]
-            [std.lang.base.emit-preprocess :as preprocess] [std.lang.base.preprocess-base :as preprocess-base]
+            [std.lang.base.emit-preprocess :as preprocess]
+            [std.lang.base.preprocess-base :as preprocess-base]
             [std.lang.base.impl :as impl]
             [std.lang.base.impl-entry :as entry]
             [std.lang.base.impl-lifecycle :as lifecycle]
@@ -55,10 +56,10 @@
  helper/basic-typed-args
  helper/emit-type-record
 
- preprocess/macro-form
- preprocess/macro-opts
- preprocess/macro-grammar
- preprocess/with:macro-opts
+ preprocess-base/macro-form
+ preprocess-base/macro-opts
+ preprocess-base/macro-grammar
+ preprocess-base/with:macro-opts
  
  impl/emit-script
  impl/emit-str
