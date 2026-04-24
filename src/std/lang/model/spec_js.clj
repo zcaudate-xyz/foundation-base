@@ -6,7 +6,7 @@
             [std.lang.base.emit-common :as common]
             [std.lang.base.emit-data :as data]
             [std.lang.base.emit-helper :as helper]
-            [std.lang.base.emit-preprocess :as preprocess] [std.lang.base.preprocess-base :as preprocess-base]
+            [std.lang.base.preprocess-base :as preprocess-base]
             [std.lang.base.emit-top-level :as top]
             [std.lang.base.grammar :as grammar]
             [std.lang.base.grammar-spec :as spec]
@@ -265,7 +265,8 @@
 (def +features+
   (-> (grammar/build :exclude [:pointer
                                :block
-                               :data-range])
+                               :data-range
+                               :functional-core])
       (grammar/build:override
        {:var         {:symbol '#{var*}}
         :mul         {:value true}

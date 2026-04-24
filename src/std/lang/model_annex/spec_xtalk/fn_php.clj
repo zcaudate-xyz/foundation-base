@@ -64,18 +64,18 @@
 ;; PROTO
 ;;
 
-(defn php-tf-x-proto-get
+(defn php-tf-x-prototype-get
   [[_ obj key]]
   (list :% obj [key]))
 
-(defn php-tf-x-proto-set
+(defn php-tf-x-prototype-set
   [[_ obj key value]]
   (list ':= (list :% obj [key]) value))
 
 (def +php-proto+
-  {:x-proto-get       {:macro #'php-tf-x-proto-get    :emit :macro}
-   :x-proto-set       {:macro #'php-tf-x-proto-set    :emit :macro}
-   :x-proto-tostring  {:emit :unit  :default "__toString"}})
+  {:x-prototype-get       {:macro #'php-tf-x-prototype-get    :emit :macro}
+   :x-prototype-set       {:macro #'php-tf-x-prototype-set    :emit :macro}
+   :x-prototype-tostring  {:emit :unit  :default "__toString"}})
 
 ;;
 ;; CUSTOM

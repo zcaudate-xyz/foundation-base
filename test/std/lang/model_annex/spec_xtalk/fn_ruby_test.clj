@@ -376,24 +376,24 @@
   (ruby-tf-x-uri-decode '(:x-uri-decode s))
   => '(. URI (decode s)))
 
-^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-proto-get :added "4.1"}
+^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-prototype-get :added "4.1"}
 (fact "gets object's class"
-  (ruby-tf-x-proto-get '(:x-proto-get obj))
+  (ruby-tf-x-prototype-get '(:x-prototype-get obj))
   => '(. obj class))
 
-^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-proto-set :added "4.1"}
+^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-prototype-set :added "4.1"}
 (fact "sets object prototype (no‑op in Ruby)"
-  (ruby-tf-x-proto-set '(:x-proto-set obj prototype))
+  (ruby-tf-x-prototype-set '(:x-prototype-set obj prototype))
   => 'obj)
 
-^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-proto-create :added "4.1"}
+^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-prototype-create :added "4.1"}
 (fact "creates object with prototype (empty hash)"
-  (ruby-tf-x-proto-create '(:x-proto-create prototype))
+  (ruby-tf-x-prototype-create '(:x-prototype-create prototype))
   => '{})
 
-^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-proto-tostring :added "4.1"}
+^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-prototype-tostring :added "4.1"}
 (fact "converts object to string"
-  (ruby-tf-x-proto-tostring '(:x-proto-tostring obj))
+  (ruby-tf-x-prototype-tostring '(:x-prototype-tostring obj))
   => '(. obj to_s))
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-thread-spawn :added "4.1"}

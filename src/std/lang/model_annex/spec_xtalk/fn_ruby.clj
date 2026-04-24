@@ -390,27 +390,27 @@
 ;; PROTO
 ;;
 
-(defn ruby-tf-x-proto-get
+(defn ruby-tf-x-prototype-get
   [[_ obj]]
   (list '. obj 'class))
 
-(defn ruby-tf-x-proto-set
+(defn ruby-tf-x-prototype-set
   [[_ obj prototype]]
   obj)  ;; ignore, cannot set prototype in Ruby
 
-(defn ruby-tf-x-proto-create
+(defn ruby-tf-x-prototype-create
   [[_ prototype]]
   '{})
 
-(defn ruby-tf-x-proto-tostring
+(defn ruby-tf-x-prototype-tostring
   [[_ obj]]
   (list '. obj 'to_s))
 
 (def +ruby-proto+
-  {:x-proto-get       {:macro #'ruby-tf-x-proto-get     :emit :macro}
-   :x-proto-set       {:macro #'ruby-tf-x-proto-set     :emit :macro}
-   :x-proto-create    {:macro #'ruby-tf-x-proto-create  :emit :macro}
-    :x-proto-tostring  {:macro #'ruby-tf-x-proto-tostring :emit :macro}})
+  {:x-prototype-get       {:macro #'ruby-tf-x-prototype-get     :emit :macro}
+   :x-prototype-set       {:macro #'ruby-tf-x-prototype-set     :emit :macro}
+   :x-prototype-create    {:macro #'ruby-tf-x-prototype-create  :emit :macro}
+    :x-prototype-tostring  {:macro #'ruby-tf-x-prototype-tostring :emit :macro}})
 
 ;;
 ;; THREAD

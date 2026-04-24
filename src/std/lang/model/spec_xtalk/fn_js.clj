@@ -66,35 +66,6 @@
    :x-now-ms         {:emit :alias :raw 'Date.now}
    :x-type-native    {:macro #'js-tf-x-type-native   :emit :macro}})
 
-(defn js-tf-x-proto-get
-  [[_ obj]]
-  (list 'Object.getPrototypeOf obj))
-
-(defn js-tf-x-proto-set
-  [[_ obj prototype]]
-  (list 'Object.setPrototypeOf obj prototype))
-
-(defn js-tf-x-proto-create
-  [[_ m]]
-  (template/$
-   (do (var out {})
-       (for:object
-        [[k f] ~m]
-        (if (x:is-function? f)
-          (:= (. out [k])
-              (fn [...args]
-                (return 
-                 (f this ...args))))
-          (:= (. out [k]) f)))
-       (return out))))
-
-(def +js-proto+
-  {:x-proto-get       {:macro #'js-tf-x-proto-get     :emit :macro}
-   :x-proto-set       {:macro #'js-tf-x-proto-set     :emit :macro}
-   :x-proto-create    {:macro #'js-tf-x-proto-create  :emit :macro}
-   :x-proto-tostring  {:emit :unit  :default "toString"}})
-
-
 (def +js-global+
   {})
 

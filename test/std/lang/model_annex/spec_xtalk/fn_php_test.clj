@@ -218,14 +218,14 @@
   (php-tf-x-has-key? '(:x-has-key? obj k nil))
   => '(array_key_exists k obj))
 
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-proto-get :added "4.1"}
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-prototype-get :added "4.1"}
 (fact "gets proto slot via index access"
-  (php-tf-x-proto-get '(:x-proto-get obj k))
+  (php-tf-x-prototype-get '(:x-prototype-get obj k))
   => '(:% obj [k]))
 
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-proto-set :added "4.1"}
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-prototype-set :added "4.1"}
 (fact "sets proto slot via index access"
-  (php-tf-x-proto-set '(:x-proto-set obj k v))
+  (php-tf-x-prototype-set '(:x-prototype-set obj k v))
   => '(:= (:% obj [k]) v))
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-lu-get :added "4.1"}
@@ -434,9 +434,9 @@
              :x-lu-get
              :x-lu-set
              :x-notify-socket
-             :x-proto-get
-             :x-proto-set
-             :x-proto-tostring
+             :x-prototype-get
+             :x-prototype-set
+             :x-prototype-tostring
              :x-server-basic
              :x-server-ws
              :x-slurp-file

@@ -130,22 +130,22 @@
       (return t)))
   )
 
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-proto-get :added "4.0"}
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-prototype-get :added "4.0"}
 (fact "gets prototype"
-  (l/emit-as :js [(js-tf-x-proto-get '[_ obj])])
+  (l/emit-as :js [(js-tf-x-prototype-get '[_ obj])])
   => #"Object.getPrototypeOf")
 
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-proto-set :added "4.0"}
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-prototype-set :added "4.0"}
 (fact "sets prototype"
-  (l/emit-as :js [(js-tf-x-proto-set '[_ obj proto])])
+  (l/emit-as :js [(js-tf-x-prototype-set '[_ obj proto])])
   => #"Object.setPrototypeOf")
 
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-proto-create :added "4.0"}
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-prototype-create :added "4.0"}
 (fact "creates prototype"
-  (l/emit-as :js [(js-tf-x-proto-create '[_ {:a 1}])])
+  (l/emit-as :js [(js-tf-x-prototype-create '[_ {:a 1}])])
   => #"\.\.\.args"
 
-  (l/emit-as :js [(js-tf-x-proto-create '[_ {:a 1}])])
+  (l/emit-as :js [(js-tf-x-prototype-create '[_ {:a 1}])])
   => #"Object.entries")
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-m-max :added "4.0"}

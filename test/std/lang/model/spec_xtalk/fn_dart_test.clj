@@ -530,19 +530,19 @@
   (emit-dart (dart-tf-x-ws-close '[_ conn]))
   => #"WebSocket close not implemented")
 
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-proto-get :added "4.1"}
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-prototype-get :added "4.1"}
 (fact "gets runtime prototypes"
-  (emit-dart (dart-tf-x-proto-get '[_ obj]))
+  (emit-dart (dart-tf-x-prototype-get '[_ obj]))
   => #"runtimeType")
 
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-proto-set :added "4.1"}
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-prototype-set :added "4.1"}
 (fact "setting prototypes is not supported"
-  (emit-dart (dart-tf-x-proto-set '[_ obj prototype]))
+  (emit-dart (dart-tf-x-prototype-set '[_ obj prototype]))
   => #"Proto set not supported in Dart")
 
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-proto-tostring :added "4.1"}
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-prototype-tostring :added "4.1"}
 (fact "stringifies prototypes"
-  (emit-dart (dart-tf-x-proto-tostring '[_ obj]))
+  (emit-dart (dart-tf-x-prototype-tostring '[_ obj]))
   => #"toString")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-return-encode :added "4.1"}

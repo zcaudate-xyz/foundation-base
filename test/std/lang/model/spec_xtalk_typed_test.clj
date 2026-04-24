@@ -394,15 +394,15 @@
 
 (fact "parses single-clause multi-arity forms tolerantly"
   (let [fn-def (parse/parse-defn
-                '(defn.xt proto-create
+                '(defn.xt prototype-create
                    ([m]
-                    (x:proto-create m)))
+                    (x:prototype-create m)))
                 'xt.lang.common-lib
                 {})]
     {:inputs (mapv (comp types/type->data :type) (:inputs fn-def))
      :body (:raw-body fn-def)})
   => '{:inputs [{:kind :primitive :name :xt/unknown}]
-     :body [(x:proto-create m)]})
+     :body [(x:prototype-create m)]})
 
 (fact "parses rest and destructured args tolerantly"
   (let [fn-def (parse/parse-defn

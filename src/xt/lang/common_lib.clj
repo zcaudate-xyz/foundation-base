@@ -125,23 +125,23 @@
 ;; PROTO
 ;;
 
-(defn.xt proto-create
+(defn.xt prototype-create
   "creates the prototype map"
   {:added "4.0"}
   ([m]
-   (xt/x:proto-create m)))
+   (xt/x:prototype-create m)))
 
-(defn.xt proto-get
+(defn.xt prototype-get
   "creates the prototype map"
   {:added "4.0"}
   ([obj]
-   (return (xt/x:proto-get obj))))
+   (return (xt/x:prototype-get obj))))
 
-(defn.xt proto-set
+(defn.xt prototype-set
   "creates the prototype map"
   {:added "4.0"}
   ([obj proto]
-   (return (xt/x:proto-set obj proto))))
+   (return (xt/x:prototype-set obj proto))))
 
 ;;
 ;; FN.BASIC

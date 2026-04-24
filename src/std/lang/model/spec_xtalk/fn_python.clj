@@ -95,15 +95,15 @@
 ;; PROTO
 ;;
 
-(defn python-tf-x-proto-create
+(defn python-tf-x-prototype-create
   [[_ m]]
   m)
 
-(defn python-tf-x-proto-get
+(defn python-tf-x-prototype-get
   [[_ obj _]]
   (template/$ (. ~obj (get "__proto__"))))
 
-(defn python-tf-x-proto-set
+(defn python-tf-x-prototype-set
   [[_ obj prototype _]]
   (template/$
    (do (:= (. ~obj ["__proto__"]) ~prototype)
@@ -113,15 +113,15 @@
            (:= (. ~obj [k]) f)))
        (return ~obj))))
 
-(defn python-tf-x-proto-tostring
+(defn python-tf-x-prototype-tostring
   [[_ _]]
   '"__str__")
 
 (def +python-proto+
-  {:x-proto-create   {:macro #'python-tf-x-proto-create   :emit :macro}
-   :x-proto-get      {:macro #'python-tf-x-proto-get      :emit :macro}
-   :x-proto-set      {:macro #'python-tf-x-proto-set      :emit :macro}
-   :x-proto-tostring {:macro #'python-tf-x-proto-tostring :emit :macro}})
+  {:x-prototype-create   {:macro #'python-tf-x-prototype-create   :emit :macro}
+   :x-prototype-get      {:macro #'python-tf-x-prototype-get      :emit :macro}
+   :x-prototype-set      {:macro #'python-tf-x-prototype-set      :emit :macro}
+   :x-prototype-tostring {:macro #'python-tf-x-prototype-tostring :emit :macro}})
 
 
 ;;

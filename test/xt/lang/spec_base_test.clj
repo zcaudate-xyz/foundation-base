@@ -2828,156 +2828,156 @@
      (del-fn)])
   => [true false])
 
-^{:refer xt.lang.spec-base/x:proto-get :added "4.1"}
+^{:refer xt.lang.spec-base/x:prototype-get :added "4.1"}
 (fact "retrieves the attached prototype object"
 
   ^{:seedgen/base {:python {:suppress true}}}
   (!.js
-   (var proto-fn
+   (var prototype-fn
         (fn [m]
-          (xt/x:proto-create m)))
+          (xt/x:prototype-create m)))
    (var obj {})
-   (xt/x:proto-set obj (proto-fn {:label "proto"}))
-   (xt/x:obj-keys  (xt/x:proto-get obj)))
+   (xt/x:prototype-set obj (prototype-fn {:label "proto"}))
+   (xt/x:obj-keys  (xt/x:prototype-get obj)))
   => (contains ["label"])
 
   ^*(!.py
-    (var proto-fn
+    (var prototype-fn
          (fn [m]
-           (xt/x:proto-create m)))
+           (xt/x:prototype-create m)))
     (var obj {})
-    (xt/x:proto-set obj (proto-fn {:label "proto"}))
-    (xt/x:obj-keys  (xt/x:proto-get obj)))
+    (xt/x:prototype-set obj (prototype-fn {:label "proto"}))
+    (xt/x:obj-keys  (xt/x:prototype-get obj)))
   
   (!.lua
-    (var proto-fn
+    (var prototype-fn
          (fn [m]
-           (xt/x:proto-create m)))
+           (xt/x:prototype-create m)))
     (var obj {})
-    (xt/x:proto-set obj (proto-fn {:label "proto"}))
-    (xt/x:obj-keys  (xt/x:proto-get obj)))
+    (xt/x:prototype-set obj (prototype-fn {:label "proto"}))
+    (xt/x:obj-keys  (xt/x:prototype-get obj)))
   => (contains ["label"]))
 
-^{:refer xt.lang.spec-base/x:proto-set :added "4.1"}
+^{:refer xt.lang.spec-base/x:prototype-set :added "4.1"}
 (fact "attaches the prototype object"
 
   ^{:seedgen/base {:python {:suppress true}}}
   (!.js
-   (var proto-fn
+   (var prototype-fn
         (fn [m]
-          (xt/x:proto-create m)))
+          (xt/x:prototype-create m)))
    (var obj {})
-   (xt/x:proto-set obj (proto-fn {:label "proto"}))
+   (xt/x:prototype-set obj (prototype-fn {:label "proto"}))
    (. obj ["label"]))
   => "proto"
 
   ^{:seedgen/base {:python {:suppress true}}}
   (!.js
-   (var proto-fn
+   (var prototype-fn
         (fn [m]
-          (xt/x:proto-create m)))
+          (xt/x:prototype-create m)))
    (var obj {})
-   (xt/x:proto-set obj (proto-fn {:label "A"}))
-   (xt/x:proto-set obj (proto-fn {:label "B"}))
-   (. (xt/x:proto-get obj) ["label"]))
+   (xt/x:prototype-set obj (prototype-fn {:label "A"}))
+   (xt/x:prototype-set obj (prototype-fn {:label "B"}))
+   (. (xt/x:prototype-get obj) ["label"]))
   => "B"
 
   (!.py
-    (var proto-fn
+    (var prototype-fn
          (fn [m]
-           (xt/x:proto-create m)))
+           (xt/x:prototype-create m)))
     (var obj {})
-    (xt/x:proto-set obj (proto-fn {:label "proto"}))
+    (xt/x:prototype-set obj (prototype-fn {:label "proto"}))
     (. obj ["label"]))
   => "proto"
 
   (!.py
-    (var proto-fn
+    (var prototype-fn
          (fn [m]
-           (xt/x:proto-create m)))
+           (xt/x:prototype-create m)))
     (var obj {})
-    (xt/x:proto-set obj (proto-fn {:label "A"}))
-    (xt/x:proto-set obj (proto-fn {:label "B"}))
-    (. (xt/x:proto-get obj) ["label"]))
+    (xt/x:prototype-set obj (prototype-fn {:label "A"}))
+    (xt/x:prototype-set obj (prototype-fn {:label "B"}))
+    (. (xt/x:prototype-get obj) ["label"]))
   => "B"
 
   (!.lua
-    (var proto-fn
+    (var prototype-fn
          (fn [m]
-           (xt/x:proto-create m)))
+           (xt/x:prototype-create m)))
     (var obj {})
-    (xt/x:proto-set obj (proto-fn {:label "proto"}))
+    (xt/x:prototype-set obj (prototype-fn {:label "proto"}))
     (. obj ["label"]))
   => "proto"
 
   (!.lua
-    (var proto-fn
+    (var prototype-fn
          (fn [m]
-           (xt/x:proto-create m)))
+           (xt/x:prototype-create m)))
     (var obj {})
-    (xt/x:proto-set obj (proto-fn {:label "A"}))
-    (xt/x:proto-set obj (proto-fn {:label "B"}))
-    (. (xt/x:proto-get obj) ["label"]))
+    (xt/x:prototype-set obj (prototype-fn {:label "A"}))
+    (xt/x:prototype-set obj (prototype-fn {:label "B"}))
+    (. (xt/x:prototype-get obj) ["label"]))
   => "B")
 
-^{:refer xt.lang.spec-base/x:proto-create :added "4.1"}
+^{:refer xt.lang.spec-base/x:prototype-create :added "4.1"}
 (fact "creates prototypes with self-bound methods"
 
   ^{:seedgen/base {:python {:suppress true}}}
   (!.js
-   (var proto-fn
+   (var prototype-fn
         (fn [m]
-          (xt/x:proto-create m)))
-   (var proto (proto-fn
+          (xt/x:prototype-create m)))
+   (var proto (prototype-fn
                {:describe (fn [curr suffix]
                             (return (xt/x:cat (. curr ["name"]) suffix)))}))
    (var obj {})
-   (xt/x:proto-set obj proto)
+   (xt/x:prototype-set obj proto)
    (:= (. obj ["name"]) "alpha")
    (. obj (describe "!")))
   => "alpha!"
 
   ^*(!.py
-    (var proto-fn
+    (var prototype-fn
          (fn [m]
-           (xt/x:proto-create m)))
-    (var proto (proto-fn
+           (xt/x:prototype-create m)))
+    (var proto (prototype-fn
                 {:describe (fn [curr suffix]
                              (return (xt/x:cat (. curr ["name"]) suffix)))}))
     (var obj {})
-    (xt/x:proto-set obj proto)
+    (xt/x:prototype-set obj proto)
     (:= (. obj ["name"]) "alpha")
     (. obj (describe "!")))
   => "alpha!"
 
   (!.lua
-   (var proto-fn
+   (var prototype-fn
         (fn [m]
-          (xt/x:proto-create m)))
-   (var proto (proto-fn
+          (xt/x:prototype-create m)))
+   (var proto (prototype-fn
                {:describe (fn [curr suffix]
                             (return (xt/x:cat (. curr ["name"]) suffix)))}))
    (var obj {})
-   (xt/x:proto-set obj proto)
+   (xt/x:prototype-set obj proto)
    (:= (. obj ["name"]) "alpha")
    (. obj (describe "!")))
   => "alpha!")
 
-^{:refer xt.lang.spec-base/x:proto-tostring :added "4.1"}
+^{:refer xt.lang.spec-base/x:prototype-tostring :added "4.1"}
 (fact "returns the native string hook key"
 
   ^{:seedgen/base {:lua    {:expect "__tostring"}
                    :python {:expect "__str__"}}}
   (!.js
-    (xt/x:proto-tostring))
+    (xt/x:prototype-tostring))
   => "toString"
 
   (!.py
-    (xt/x:proto-tostring))
+    (xt/x:prototype-tostring))
   => "__str__"
 
   (!.lua
-    (xt/x:proto-tostring))
+    (xt/x:prototype-tostring))
   => "__tostring")
 
 ^{:refer xt.lang.spec-base/x:random :added "4.1"}

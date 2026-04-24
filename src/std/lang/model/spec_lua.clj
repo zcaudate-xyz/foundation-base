@@ -174,6 +174,13 @@
         (list 'return (list 'coroutine.wrap
                             (apply list 'fn [] body)))))
 
+(defn lua-tf-prototype-create
+  [[_ m]]
+  (template/$
+   (do (var mt ~m)
+       (:= (. mt __index) mt)
+       (return mt))))
+
 (def +features+
   (-> (grammar/build :include [:builtin
                                :builtin-global
@@ -196,6 +203,7 @@
                                :top-declare
                                :for
                                :coroutine
+                               :prototype
                                :macro
                                :macro-arrow
                                :macro-let
@@ -215,7 +223,11 @@
         :for-try    {:macro #'tf-for-try    :emit :macro}
         :for-async  {:macro #'tf-for-async  :emit :macro}
         :defgen     {:macro #'tf-defgen     :emit :macro}
-        :yield      {:macro #'tf-yield      :emit :macro}})
+        :yield      {:macro #'tf-yield      :emit :macro}
+        :prototype-get       {:emit :alias :raw 'getmetatable}
+        :prototype-set       {:emit :alias :raw 'setmetatable}
+        :prototype-create    {:macro #'lua-tf-prototype-create  :emit :macro}
+        :prototype-tostring  {:emit :unit  :default "__tostring"}})
       (grammar/build:override fn/+lua+)
       (grammar/build:extend
        {:cat    {:op :cat    :symbol '#{cat}       :raw ".."   :emit :infix}

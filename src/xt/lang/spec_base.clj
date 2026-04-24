@@ -1239,37 +1239,37 @@
   {:added "4.1"}
   ([sym] (list (quote x:global-has?) sym)))
 
-(defspec.xt x:proto-get nil)
+(defspec.xt x:prototype-get nil)
 
 (defmacro.xt ^{:standalone true} 
-  x:proto-get
+  x:prototype-get
   "retrieves object prototypes"
   {:added "4.1"}
-  ([obj] (list (quote x:proto-get) obj)))
+  ([obj] (list (quote x:prototype-get) obj)))
 
-(defspec.xt x:proto-set nil)
+(defspec.xt x:prototype-set nil)
 
 (defmacro.xt ^{:standalone true} 
-  x:proto-set
+  x:prototype-set
   "assigns object prototypes"
   {:added "4.1"}
-  ([obj proto] (list (quote x:proto-set) obj proto)))
+  ([obj proto] (list (quote x:prototype-set) obj proto)))
 
-(defspec.xt x:proto-create nil)
+(defspec.xt x:prototype-create nil)
 
 (defmacro.xt ^{:standalone true} 
-  x:proto-create
+  x:prototype-create
   "creates prototypes with this-bound methods"
   {:added "4.1"}
-  ([m] (list (quote x:proto-create) m)))
+  ([m] (list (quote x:prototype-create) m)))
 
-(defspec.xt x:proto-tostring nil)
+(defspec.xt x:prototype-tostring nil)
 
 (defmacro.xt ^{:standalone true} 
-  x:proto-tostring
+  x:prototype-tostring
   "expands and emits the lua tostring metamethod key"
   {:added "4.1"}
-  ([] (list (quote x:proto-tostring))))
+  ([] (list (quote x:prototype-tostring))))
 
 (defspec.xt x:random [:fn [] :xt/num])
 

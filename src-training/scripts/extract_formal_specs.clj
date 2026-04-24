@@ -226,7 +226,7 @@
     [{:name "tf-throw" :form "(throw obj)" :expands-to "(throw obj)"}
      {:name "tf-eq-nil?" :form "(x:nil? obj)" :expands-to "(== nil obj)"}
      {:name "tf-not-nil?" :form "(x:not-nil? obj)" :expands-to "(not= nil obj)"}
-     {:name "tf-proto-create" :form "(x:proto-create m)" :expands-to "(return m)"}
+     {:name "tf-prototype-create" :form "(x:prototype-create m)" :expands-to "(return m)"}
      {:name "tf-has-key?" :form "(x:has-key? obj key check)" :expands-to "(not= (x:get-key obj key) nil)"}
      {:name "tf-get-path" :form "(x:get-path obj ks default)" :expands-to "(. obj ks) with or default"}
      {:name "tf-get-key" :form "(x:get-key obj k default)" :expands-to "(. obj [k]) with or default"}
@@ -260,9 +260,9 @@
                    :x-now-ms :alias :x-type-native :macro}}
      
      :proto
-      {:primitives [:x-proto-get :x-proto-set :x-proto-create :x-proto-tostring]
-       :emit-types {:x-proto-get :macro :x-proto-set :macro
-                    :x-proto-create :macro :x-proto-tostring :unit}}
+      {:primitives [:x-prototype-get :x-prototype-set :x-prototype-create :x-prototype-tostring]
+       :emit-types {:x-prototype-get :macro :x-prototype-set :macro
+                    :x-prototype-create :macro :x-prototype-tostring :unit}}
      
      :math
      {:primitives [:x-m-abs :x-m-acos :x-m-asin :x-m-atan :x-m-ceil :x-m-cos

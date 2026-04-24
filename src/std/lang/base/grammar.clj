@@ -63,21 +63,12 @@
                     arr)
        (into {})))
 
-(def +op-functional-core+
-  [{:op :letrec            :symbol #{'letrec 'letfn}
-    :emit :abstract        :type :block
-    :block {:main #{:parameter :body}}}
-   {:op :match             :symbol #{'match}
-    :emit :abstract        :type :block
-    :block {:main #{:parameter :body}}}])
-
 (def +optional-categories+
   #{:functional-core})
 
 (def ^{:generator (fn []
                     (vec (concat (gen-ops 'std.lang.base.grammar-spec "spec")
                                  (gen-ops 'std.lang.base.grammar-macro "macro")
-                                 [[:functional-core '+op-functional-core+]]
                                  (gen-ops 'std.lang.base.grammar-xtalk "xtalk"))))}
   +op-all+
   (->> (concat [[:builtin spec/+op-builtin+]
@@ -105,12 +96,13 @@
                 [:control-base      spec/+op-control-base+]
                 [:control-general   spec/+op-control-general+]
                 [:control-try-catch spec/+op-control-try-catch+]
-                [:top-base     spec/+op-top-base+]
-                [:top-global   spec/+op-top-global+]
-                [:class        spec/+op-class+]
-                [:for          spec/+op-for+]
-                [:coroutine    spec/+op-coroutine+]
-                [:functional-core +op-functional-core+]
+                [:top-base        spec/+op-top-base+]
+                [:top-global      spec/+op-top-global+]
+                [:class           spec/+op-class+]
+                [:for             spec/+op-for+]
+                [:coroutine       spec/+op-coroutine+]
+                [:prototype       spec/+op-prototype+]
+                [:functional-core spec/+op-functional-core+]
                 [:macro         macro/+op-macro+]
                 [:macro-arrow   macro/+op-macro-arrow+]
                 [:macro-let     macro/+op-macro-let+]
@@ -232,21 +224,12 @@
   []
   (build :include xtalk-system/+xtalk-profile-order+))
 
-(defn build-functional-core
-  "functional core ops
-
-   (build-functional-core)
-   => map?"
-  {:added "4.1"}
-  []
-  (build :include [:functional-core]))
-
 (defn build:override
   "overrides existing ops in the map"
   {:added "4.0"}
   [build m]
   (let [ks (clojure.set/difference (set (keys m))
-                         (set (keys build)))
+                                   (set (keys build)))
         _  (if (not-empty ks)
              (f/error "Keys not in original map: " {:keys ks}))
         merged (collection/merge-nested build m)]

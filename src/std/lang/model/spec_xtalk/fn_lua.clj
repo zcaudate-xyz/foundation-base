@@ -76,19 +76,6 @@
    :x-now-ms         {:default '(math.floor (* 1000 (os.time)))   :emit :unit}
    :x-type-native    {:macro #'lua-tf-x-type-native  :emit :macro}})
 
-(defn lua-tf-x-proto-create
-  [[_ m]]
-  (template/$
-   (do (var mt ~m)
-       (:= (. mt __index) mt)
-       (return mt))))
-
-(def +lua-proto+
-  {:x-proto-get       {:emit :alias :raw 'getmetatable}
-   :x-proto-set       {:emit :alias :raw 'setmetatable}
-   :x-proto-create    {:macro #'lua-tf-x-proto-create  :emit :macro}
-   :x-proto-tostring  {:emit :unit  :default "__tostring"}})
-
 ;;
 ;; GLOBAL
 ;;
@@ -422,7 +409,7 @@
 (defn lua-tf-x-return-wrap
   ([[_ f encode-fn]]
    (template/$ (do (local out)
-            (local '[o-ok o-err] (pcall (fn [] (:= out (~f)))))
+                   (local '[o-ok o-err] (pcall (fn [] (:= out (~f)))))
             (cond o-err
                   (return (cjson.encode {:type "error"
                                          :value o-err}))
@@ -432,13 +419,14 @@
 
 (defn lua-tf-x-return-eval
   ([[_ s wrap-fn]]
-   (template/$ (return (~wrap-fn
-                 (fn []
-                   (local load-fn (or loadstring load))
-                   (local '[f err] (load-fn ~s))
-                   (if err
-                     (error err)
-                     (return (f)))))))))
+   (template/$
+    (return (~wrap-fn
+             (fn []
+               (local load-fn (or loadstring load))
+               (local '[f err] (load-fn ~s))
+               (if err
+                 (error err)
+                 (return (f)))))))))
 
 (def +lua-return+
   {:x-return-encode  {:macro #'lua-tf-x-return-encode   :emit :macro}
@@ -447,16 +435,17 @@
 
 (defn lua-tf-x-socket-connect
   ([[_ host port opts]]
-   (template/$ (do* (when (== ~host "host.docker.internal")
-                     (local handle (io.popen
-                                    (cat "ping host.docker.internal -c 1 -q 2>&1"
-                                         " | "
-                                         "grep -Po \"(\\d{1,3}\\.){3}\\d{1,3}\"")))
-                     (:= ~host (handle:read "*a"))
-                     (:= ~host (string.sub ~host 1 (- (len ~host) 1)))
-                     (handle:close))
-                   (local socket (require "socket"))
-                   (return (socket.connect ~host ~port))))))
+   (template/$
+    (do* (when (== ~host "host.docker.internal")
+           (local handle (io.popen
+                          (cat "ping host.docker.internal -c 1 -q 2>&1"
+                               " | "
+                               "grep -Po \"(\\d{1,3}\\.){3}\\d{1,3}\"")))
+           (:= ~host (handle:read "*a"))
+           (:= ~host (string.sub ~host 1 (- (len ~host) 1)))
+           (handle:close))
+         (local socket (require "socket"))
+         (return (socket.connect ~host ~port))))))
 
 (defn lua-tf-x-socket-send
   ([[_ conn s]]
@@ -478,29 +467,33 @@
 
 (defn lua-tf-x-iter-from-obj
   ([[_ obj]]
-   (template/$ (coroutine.wrap
-         (fn [] (for [k v :in (pairs ~obj)]
-                  (coroutine.yield [k v])))))))
+   (template/$
+    (coroutine.wrap
+     (fn [] (for [k v :in (pairs ~obj)]
+              (coroutine.yield [k v])))))))
 
 (defn lua-tf-x-iter-from-arr
   ([[_ arr]]
-   (template/$ (coroutine.wrap
-          (fn [] (for [_ v :in (ipairs ~arr)]
-                   (coroutine.yield v)))))))
+   (template/$
+    (coroutine.wrap
+     (fn [] (for [_ v :in (ipairs ~arr)]
+              (coroutine.yield v)))))))
 
 (defn lua-tf-x-iter-from
   ([[_ obj]]
-   (template/$ (coroutine.wrap
-         (fn [] (for [e :in (. ~obj ["iterator"])]
-                  (coroutine.yield v)))))))
+   (template/$
+    (coroutine.wrap
+     (fn [] (for [e :in (. ~obj ["iterator"])]
+              (coroutine.yield v)))))))
 
 (defn lua-tf-x-iter-eq
   ([[_ it0 it1 eq-fn]]
-   (template/$ (do (for [x0 :in ~it0]
-              (var x1 (~it1))
-              (when (not (~eq-fn x0 x1))
-                (return false)))
-            (return (== nil (~it1)))))))
+   (template/$
+    (do (for [x0 :in ~it0]
+          (var x1 (~it1))
+          (when (not (~eq-fn x0 x1))
+            (return false)))
+        (return (== nil (~it1)))))))
 
 (defn lua-tf-x-iter-next
   ([[_ it]]
@@ -633,7 +626,6 @@
 
 (def +lua+
   (merge +lua-core+
-         +lua-proto+
          +lua-global+
          +lua-custom+
          +lua-math+

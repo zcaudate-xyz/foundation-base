@@ -383,18 +383,18 @@
    :x-iter-next        {:macro #'dart-tf-x-iter-next       :emit :macro}
    :x-iter-null        {:macro #'dart-tf-x-iter-null       :emit :macro}})
 
-(defn dart-tf-x-proto-create [[_ m]] m)
-(defn dart-tf-x-proto-get [[_ obj _]]
+(defn dart-tf-x-prototype-create [[_ m]] m)
+(defn dart-tf-x-prototype-get [[_ obj _]]
   (list '. obj 'runtimeType))
-(defn dart-tf-x-proto-set [[_ obj prototype _]]
+(defn dart-tf-x-prototype-set [[_ obj prototype _]]
   (list 'throw '"Proto set not supported in Dart"))
-(defn dart-tf-x-proto-tostring [[_ obj]] '"toString")
+(defn dart-tf-x-prototype-tostring [[_ obj]] '"toString")
 
 (def +dart-proto+
-  {:x-proto-create       {:macro #'dart-tf-x-proto-create      :emit :macro}
-   :x-proto-get          {:macro #'dart-tf-x-proto-get         :emit :macro}
-   :x-proto-set          {:macro #'dart-tf-x-proto-set         :emit :macro}
-   :x-proto-tostring     {:macro #'dart-tf-x-proto-tostring    :emit :macro}})
+  {:x-prototype-create       {:macro #'dart-tf-x-prototype-create      :emit :macro}
+   :x-prototype-get          {:macro #'dart-tf-x-prototype-get         :emit :macro}
+   :x-prototype-set          {:macro #'dart-tf-x-prototype-set         :emit :macro}
+   :x-prototype-tostring     {:macro #'dart-tf-x-prototype-tostring    :emit :macro}})
 
 (defn dart-tf-x-return-encode
   [[_ out id key]]

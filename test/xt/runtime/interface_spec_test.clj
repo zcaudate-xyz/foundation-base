@@ -29,11 +29,11 @@
     (spec/iface-combine [spec/IValue spec/ICounted spec/IValue]))
    => ["eq" "hash" "show" "size"])
 
- ^{:refer xt.runtime.interface-spec/proto-group :added "4.1"}
- (fact "creates grouped protocol entries for proto-spec"
+ ^{:refer xt.runtime.interface-spec/prototype-group :added "4.1"}
+ (fact "creates grouped protocol entries for prototype-spec"
    (!.js
-    (spec/proto-spec
-     [(spec/proto-group
+    (spec/prototype-spec
+     [(spec/prototype-group
        [spec/IValue spec/INamed]
        {:eq "eq"
         :hash "hash"
@@ -47,8 +47,8 @@
        "namespace" "namespace"}
 
    (!.lua
-    (spec/proto-spec
-     [(spec/proto-group
+    (spec/prototype-spec
+     [(spec/prototype-group
        [spec/IValue spec/INamed]
        {:eq "eq"
         :hash "hash"
@@ -109,7 +109,7 @@
  (fact "attaches runtime dispatch entries directly to managed objects"
 
    (!.js
-   (var protocol (spec/proto-create
+   (var protocol (spec/prototype-create
                    {"extra" 4
                     "read_value" (fn [self]
                                    (return (. self value)))}))
@@ -122,7 +122,7 @@
    => [4 10 true]
 
    (!.lua
-   (var protocol (spec/proto-create
+   (var protocol (spec/prototype-create
                    {"extra" 4
                     "read_value" (fn [self]
                                    (return (. self value)))}))
@@ -135,11 +135,11 @@
    => [4 10 true])
 
 
-^{:refer xt.runtime.interface-spec/proto-create :added "4.1"}
+^{:refer xt.runtime.interface-spec/prototype-create :added "4.1"}
 (fact "creates a prototype object suitable for runtime dispatch"
 
   (!.js
-   (var proto (spec/proto-create
+   (var proto (spec/prototype-create
                {"value" 4
                 "sum" (fn [x]
                         (return x))}))
@@ -148,7 +148,7 @@
   => [4 true]
 
   (!.lua
-   (var proto (spec/proto-create
+   (var proto (spec/prototype-create
                {"value" 4
                 "sum" (fn [x]
                         (return x))}))
@@ -157,17 +157,17 @@
     (== proto (xt/x:get-key proto "__index"))])
   => [4 true true])
 
-^{:refer xt.runtime.interface-spec/proto-spec :added "4.1"}
+^{:refer xt.runtime.interface-spec/prototype-spec :added "4.1"}
 (fact "merges protocol entries into a validated spec map"
 
   (!.js
-   (spec/proto-spec
+   (spec/prototype-spec
     [[["eq" "hash"] {"eq" "eq" "hash" "hash"}]
      [["show"] {"show" "show"}]]))
   => {"eq" "eq" "hash" "hash" "show" "show"}
 
   (!.lua
-   (spec/proto-spec
+   (spec/prototype-spec
     [[["eq" "hash"] {"eq" "eq" "hash" "hash"}]
      [["show"] {"show" "show"}]]))
   => {"eq" "eq" "hash" "hash" "show" "show"})

@@ -264,14 +264,14 @@
 
 (def lua-specific-template-forms
   (read-string
-   "[(ns xt.sample.common-proto-test
+   "[(ns xt.sample.common-prototype-test
        (:require [std.lang :as l])
        (:use code.test))
       (l/script- :lua {:runtime :basic
                        :require [[xt.lang.common-lib :as k]]})
       (fact \"lua-only helper\"
         (!.lua
-         (var mt (k/proto-create {:world \"hello\"}))
+         (var mt (k/prototype-create {:world \"hello\"}))
          (var a {})
          (setmetatable a mt)
          true)
@@ -933,8 +933,8 @@
      from-lang
      js-target-ns
      (str/includes? js-content "xtbench.js.lang.common-lib-test")
-     (str/includes? js-content "xt.lang.common-lib/proto-create")
-     (str/includes? js-content "(k/proto-set a mt nil)")
+     (str/includes? js-content "xt.lang.common-lib/prototype-create")
+     (str/includes? js-content "(k/prototype-set a mt nil)")
      lua-target-ns
      (str/includes? lua-content "xtbench.lua.lang.common-lib-test")
      (str/includes? js-content ":require [[xt.lang.common-lib :as k]]")
@@ -966,12 +966,12 @@
                                         :lang :dart})]
     [py-target-ns
      (str/includes? py-content "xtbench.python.lang.common-lib-test")
-     (not (str/includes? py-content "xt.lang.common-lib/proto-create"))
-     (not (str/includes? py-content "(k/proto-set a mt nil)"))
+     (not (str/includes? py-content "xt.lang.common-lib/prototype-create"))
+     (not (str/includes? py-content "(k/prototype-set a mt nil)"))
      dt-target-ns
      (str/includes? dt-content "xtbench.dart.lang.common-lib-test")
-     (not (str/includes? dt-content "xt.lang.common-lib/proto-create"))
-     (not (str/includes? dt-content "xt.lang.common-lib/proto-set"))])
+     (not (str/includes? dt-content "xt.lang.common-lib/prototype-create"))
+     (not (str/includes? dt-content "xt.lang.common-lib/prototype-set"))])
   => '[xtbench.python.lang.common-lib-test
        true
        true

@@ -130,12 +130,6 @@
   [[_ obj]]
   (list 'not= nil obj))
 
-(defn tf-proto-create
-  "creates the prototype map"
-  {:added "4.0"}
-  [[_ m]]
-  (list 'return m))
-
 (defn tf-has-key?
   "has key default transform"
   {:added "4.0"}
@@ -835,17 +829,6 @@
    {:op :x-global-has?    :symbol #{'x:global-has?}     :macro #'tf-global-has?  :emit :macro
     :op-spec {:arglists '([sym])
               :type [:fn [:xt/any] :xt/bool]}}])
-
-(def +xt-lang-proto+
-  [{:op :x-proto-get       :symbol #{'x:proto-get}       :emit :abstract
-    :op-spec {:arglists '([obj])}}
-   {:op :x-proto-set       :symbol #{'x:proto-set}       :emit :abstract
-    :op-spec {:arglists '([obj proto])}}
-   {:op :x-proto-create    :symbol #{'x:proto-create}    :macro #'tf-proto-create   :emit :macro
-    :op-spec {:allow-blocks true
-              :arglists '([m])}}
-   {:op :x-proto-tostring  :symbol #{'x:proto-tostring}  :emit :abstract
-    :op-spec {:arglists '([])}}])
 
 (def +xt-lang-bit+
   [{:op :x-bit-and         :symbol #{'x:bit-and}          :macro #'tf-bit-and  :emit :macro

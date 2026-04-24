@@ -78,7 +78,7 @@
       ~@body)))
 
 ;;
-;; SPEC;
+;; SPEC
 ;;
 
 (def +op-builtin+
@@ -274,6 +274,23 @@
    {:op :fn.inner    :symbol #{'fn.inner}   :type :fn :block  {:raw "" :main #{:body}}}
    {:op :var.inner   :symbol #{'var.inner}  :assign "=" :raw "" :emit :def-assign}])
 
+;;
+;; FUNCTIONAL CORE
+;;
+
+(def +op-functional-core+
+  [{:op :letrec            :symbol #{'letrec 'letfn}
+    :emit :abstract        :type :block
+    :block {:main #{:parameter :body}}}
+   {:op :match             :symbol #{'match}
+    :emit :abstract        :type :block
+    :block {:main #{:parameter :body}}}])
+
+
+;;
+;; EXECUTION PRIMITIVES
+;;
+
 (def +op-for+
   [{:op :for-index   :symbol #{'for:index}     :emit :macro :macro #'tf-for-index :style/indent 1}
    {:op :for-object  :symbol #{'for:object}    :emit :abstract :style/indent 1}
@@ -289,3 +306,18 @@
     :arglists '([sym doc? & [attr? & body]])
     :format #'format-defn}
    {:op :yield     :symbol #{'yield}     :emit :return   :raw "yield"}])
+
+;;
+;; Prototypes
+;;
+
+(def +op-prototype+
+  [{:op :prototype-get       :symbol #{'proto:get}       :emit :abstract
+    :op-spec {:arglists '([obj])}}
+   {:op :prototype-set       :symbol #{'proto:set}       :emit :abstract
+    :op-spec {:arglists '([obj proto])}}
+   {:op :prototype-create    :symbol #{'proto:create}    :emit :abstract
+    :op-spec {:allow-blocks true
+              :arglists '([m])}}
+   {:op :prototype-tostring  :symbol #{'proto:tostring}  :emit :abstract
+    :op-spec {:arglists '([])}}])

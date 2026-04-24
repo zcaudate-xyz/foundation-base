@@ -29,9 +29,9 @@
   (tf-not-nil? '(x:not-nil? a))
   => '(not= nil a))
 
-^{:refer std.lang.base.grammar-xtalk/tf-proto-create :added "4.0"}
+^{:refer std.lang.base.grammar-xtalk/tf-prototype-create :added "4.0"}
 (fact "creates the prototype map"
-  (tf-proto-create '(x:proto-create {}))
+  (tf-prototype-create '(x:prototype-create {}))
   => '(return {}))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-has-key? :added "4.0"}

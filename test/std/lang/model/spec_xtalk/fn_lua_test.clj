@@ -44,9 +44,9 @@
   (l/emit-as :lua [(lua-tf-x-type-native '[_ obj])])
   => #"type")
 
-^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-proto-create :added "4.0"}
+^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-prototype-create :added "4.0"}
 (fact "proto create"
-  (l/emit-as :lua [(lua-tf-x-proto-create '[_ {}])])
+  (l/emit-as :lua [(lua-tf-x-prototype-create '[_ {}])])
   => #"__index")
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-global-has? :added "4.0"}
