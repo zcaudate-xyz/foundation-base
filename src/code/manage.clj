@@ -1,14 +1,15 @@
 (ns code.manage
   (:require [code.framework :as base]
-            [code.manage.fn-format :as fn-format]
-            [code.manage.ns-format :as ns-format]
-            [code.manage.ns-rename :as ns-rename]
-            [code.manage.unit :as unit]
-            [code.manage.unit.isolate :as unit.isolate]
-            [code.manage.unit.import :as unit.import]
-            [code.manage.unit.snapto :as unit.snapto]
-            [code.manage.unit.require :as unit.require]
-            [code.manage.unit.template :as template]
+             [code.manage.fn-format :as fn-format]
+             [code.manage.ns-format :as ns-format]
+             [code.manage.ns-rename :as ns-rename]
+             [code.manage.unit :as unit]
+             [code.manage.unit.factcheck :as unit.factcheck]
+             [code.manage.unit.isolate :as unit.isolate]
+             [code.manage.unit.import :as unit.import]
+             [code.manage.unit.snapto :as unit.snapto]
+             [code.manage.unit.require :as unit.require]
+             [code.manage.unit.template :as template]
             [code.manage.var :as var]
             [code.project :as project]
             [std.block :as block]
@@ -383,9 +384,41 @@
 
 (comment (code.manage/arrange ['code.framework] {:print {:function true :item true :result true :summary true}}))
 
+(invoke/definvoke factcheck-remove
+  "removes `=>` expectations from fact tests
+ 
+   (factcheck-remove {:write false})
+ 
+   (factcheck-remove '[code.manage] {:print {:item true}
+                                     :write false})"
+  {:added "4.1"}
+  [:task {:template :code.transform
+          :params {:title "REMOVE FACT CHECKS"
+                   :parallel true
+                   :write true}
+          :main {:fn #'unit.factcheck/factcheck-remove}
+          :item {:list template/test-namespaces}
+          :result (template/code-transform-result :changed)}])
+
+(invoke/definvoke factcheck-generate
+  "regenerates `=>` expectations for fact tests
+ 
+   (factcheck-generate {:write false})
+ 
+   (factcheck-generate '[code.manage] {:print {:item true}
+                                       :write false})"
+  {:added "4.1"}
+  [:task {:template :code.transform
+          :params {:title "GENERATE FACT CHECKS"
+                   :parallel true
+                   :write true}
+          :main {:fn #'unit.factcheck/factcheck-generate}
+          :item {:list template/test-namespaces}
+          :result (template/code-transform-result :changed)}])
+
 (invoke/definvoke snapto
   "formats fact tests into snap-to layout
- 
+  
    (snapto {:write false})
  
    (snapto '[code.manage] {:print {:item true}
@@ -661,6 +694,8 @@
    :create-tests  create-tests
    :in-order      in-order?
    :arrange       arrange
+   :factcheck-remove factcheck-remove
+   :factcheck-generate factcheck-generate
    :snapto        snapto
    :isolate       isolate
    :locate-code   locate-code
@@ -703,4 +738,3 @@
           (print-fn))
         (if-not (get opts :no-exit)
           (System/exit 0))))))
-
