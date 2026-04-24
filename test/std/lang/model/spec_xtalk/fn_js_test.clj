@@ -45,6 +45,18 @@
                 (if (== tn "Object") (return "object") (return tn))))
             (return t))))
 
+ (fact "supports staged value-position lowering for native type"
+   (l/emit-as :js ['(fn [obj]
+                     (return (x:type-native obj)))])
+   => #"function \(obj\)\{[\s\S]*typeof obj[\s\S]*Array\.isArray\(obj\)"
+
+   (l/emit-as :js ['(fn [obj f g]
+                     (return (f (g (x:type-native obj)))))])
+   => #"return f\(g\(\(function \(value\)\{[\s\S]*typeof value[\s\S]*\}\)\(obj\)\)\);"
+
+   (l/emit-as :js ['x:type-native])
+   => #"function \(value\)\{[\s\S]*typeof value[\s\S]*Array\.isArray\(value\)")
+
 
 (comment
 
