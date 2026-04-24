@@ -302,7 +302,7 @@
               {}
               '{:module {:id L.core
                          :link {}}})
-  => '[(fn [a b] (return (+ a b))) #{} #{} {}])
+  => '[(fn [a b & more] (return (+ a b & more))) #{} #{} {}])
 
 (fact "default assign values expand during staging before rewrite"
 
@@ -325,7 +325,7 @@
 (fact "callable xtalk intrinsics use shared value-standalone compilation"
 
   (value-standalone 'x:add +grammar+)
-  => '(fn [a b] (return (+ a b)))
+  => '(fn [a b & more] (return (+ a b & more)))
 
   (value-standalone 'x:arr-push js/+grammar+)
   => '(fn [arr item]
@@ -341,8 +341,92 @@
                                                  (fn [[_ a b]]
                                                    (list '+ a b))
                                                  {:arglists '([_ a b])})
-                                         :value/standalone true}}})
+                                          :value/standalone true}}})
   => '(fn [a b] (return (+ a b))))
+
+^{:refer std.lang.base.emit-preprocess/value-options :added "4.1"}
+(fact "gets shared value options from reserved entries and metadata"
+  (value-options
+   'hello
+   {:reserved {'hello {:value/template 'reserved-template
+                       :value/standalone true}}})
+  => '{:value/template reserved-template
+       :value/standalone true}
+
+  (value-options
+   (with-meta '(hello 1)
+     {:value/standalone 'meta-standalone})
+   {:reserved {'hello {:emit :macro
+                       :value/template 'reserved-template
+                       :value/standalone true}}})
+  => '{:value/template reserved-template
+       :value/standalone meta-standalone})
+
+^{:refer std.lang.base.emit-preprocess/value-expand :added "4.1"}
+(fact "expands values through shared value template defaults"
+  (let [grammar {:reserved {'hello {:emit :macro
+                                    :macro (fn [[_ x y]]
+                                             (list '+ x y))}}}]
+    (value-expand '(hello 1 2) grammar))
+  => '(+ 1 2)
+
+  (let [grammar {:reserved {'hello {:emit :macro
+                                    :macro (fn [_]
+                                             :unused)
+                                    :value/template (fn [[_ x y]]
+                                                      (list 'do
+                                                            (list 'var 'thread := (list '+ x y))
+                                                            (list 'return 'thread)))}}}]
+    (value-expand '(hello 1 2) grammar))
+  => '(do (var thread := (+ 1 2))
+           (return thread)))
+
+^{:refer std.lang.base.emit-preprocess/process-default-assignment :added "4.1"}
+(fact "expands default assignments during preprocess"
+  (let [grammar {:reserved {'hello {:emit :macro
+                                    :value/template (fn [[_ x y]]
+                                                      (list 'do
+                                                            (list 'var 'thread := (list '+ x y))
+                                                            (list 'return 'thread)))}}}]
+    (process-default-assignment
+     '(var a := (hello 1 2) :const b := (world 2 3))
+     grammar))
+  => '(var a := (do (var thread := (+ 1 2))
+                    (return thread))
+           :const b := (world 2 3)))
+
+(fact "x:type-native regression coverage matches original intent"
+
+  ;; return case
+  (value-expand '(x:type-native obj) js/+grammar+)
+  => '(do (when (== obj nil)
+            (return nil))
+          (var t := (typeof obj))
+          (if (== t "object")
+            (cond (Array.isArray obj)
+                  (return "array")
+                  :else
+                  (do (var tn := (. obj ["constructor"] ["name"]))
+                      (if (== tn "Object")
+                        (return "object")
+                        (return tn))))
+            (return t)))
+
+  ;; standalone case
+  (value-standalone 'x:type-native js/+grammar+)
+  => '(fn type-native-lambda [obj]
+        (when (== obj nil)
+          (return nil))
+        (var t := (typeof obj))
+        (if (== t "object")
+          (cond (Array.isArray obj)
+                (return "array")
+                :else
+                (do (var tn := (. obj ["constructor"] ["name"]))
+                    (if (== tn "Object")
+                      (return "object")
+                      (return tn))))
+          (return t))))
 
 (fact "language macro form heads do not recurse during staging"
 

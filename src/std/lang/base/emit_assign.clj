@@ -216,11 +216,16 @@
                             {})
    => \"(a :as [1 2 3])\"
  
-   (assign/test-assign-loop (list 'var 'a := (with-meta '(sym :as [1 2 3])
-                                               {:assign/template 'sym}))
-                            +grammar+
+   (assign/test-assign-loop '(var a := (hello 1 2))
+                            (assoc-in +grammar+
+                                      [:reserved 'hello]
+                                      {:emit :macro
+                                       :macro (fn [[_ x y]]
+                                                (list 'do
+                                                      (list 'var 'thread := (list '+ x y))
+                                                      (list 'return 'thread)))})
                             {})
-   => \"(a :as [1 2 3])\"
+   => \"(do* (var a := (+ 1 2)))\"
  
    (assign/test-assign-loop (list 'var 'a := (with-meta '(x.core/identity-fn 1)
                                                {:assign/inline 'x.core/identity-fn}))

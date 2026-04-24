@@ -200,3 +200,31 @@
         (return (+ 1 2))))
   => '(do* (hello)
            (var a := (+ 1 2))))
+
+(fact "x:type-native assign regression follows the original assign example"
+  (emit-def-assign-default
+   'a
+   '(do (when (== obj nil)
+          (return nil))
+        (var t := (typeof obj))
+        (if (== t "object")
+          (cond (Array.isArray obj)
+                (return "array")
+                :else
+                (do (var tn := (. obj ["constructor"] ["name"]))
+                    (if (== tn "Object")
+                      (return "object")
+                      (return tn))))
+          (return t))))
+  => '(do* (when (== obj nil)
+             (return nil))
+           (var t := (typeof obj))
+           (if (== t "object")
+             (cond (Array.isArray obj)
+                   (:= a "array")
+                   :else
+                   (do (var tn := (. obj ["constructor"] ["name"]))
+                       (if (== tn "Object")
+                         (:= a "object")
+                         (:= a tn))))
+             (:= a t))))
