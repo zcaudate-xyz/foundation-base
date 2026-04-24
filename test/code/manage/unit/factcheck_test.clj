@@ -105,14 +105,14 @@
 
 ^{:refer code.manage.unit.factcheck/result-string :added "4.1"}
 (fact "formats generated values through `std.block`"
-  (result-string '{:a1 {:b1-data-long0 1
-                        :b1-data-long1 2}
-                   :a2 {:b2-data-long0 3
-                        :b2-data-long1 4}})
-  => "{:a1 {:b1-data-long0 1
-      :b1-data-long1 2}
- :a2 {:b2-data-long0 3
-      :b2-data-long1 4}}")
+  (result-string '{:alpha {:nested-key-one 1
+                           :nested-key-two 2}
+                   :beta  {:nested-key-three 3
+                           :nested-key-four 4}})
+  => "{:alpha {:nested-key-one 1
+         :nested-key-two 2}
+ :beta {:nested-key-three 3
+        :nested-key-four 4}}")
 
 ^{:refer code.manage.unit.factcheck/factcheck-generate-form-string :added "4.1"}
 (fact "generates `=>` expectations for a single fact form"
@@ -127,11 +127,16 @@
 (fact "generates multiline expectations with `std.block` formatting"
   (factcheck-generate-form-string
    (block/parse-first "(fact \"sample\"\n\n  (identity :value))")
-   ['{:a1 {:b1-data-long0 1
-           :b1-data-long1 2}
-      :a2 {:b2-data-long0 3
-           :b2-data-long1 4}}])
-  => "(fact \"sample\"\n\n  (identity :value)\n  => {:a1 {:b1-data-long0 1\n           :b1-data-long1 2}\n      :a2 {:b2-data-long0 3\n           :b2-data-long1 4}})")
+   ['{:alpha {:nested-key-one 1
+              :nested-key-two 2}
+      :beta  {:nested-key-three 3
+              :nested-key-four 4}}])
+  => (str "(fact \"sample\"\n\n"
+           "  (identity :value)\n"
+           "  => {:alpha {:nested-key-one 1\n"
+           "              :nested-key-two 2}\n"
+           "      :beta {:nested-key-three 3\n"
+           "             :nested-key-four 4}})"))
 
 ^{:refer code.manage.unit.factcheck/factcheck-generate-string :added "4.1"}
 (fact "generates `=>` expectations for all fact forms in a file"
