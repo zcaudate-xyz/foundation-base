@@ -63,10 +63,22 @@
             []
             (:- :import traceback)
             (var err)
-            (try
-              1
-              2
-              (return 3)
-              (catch Exception (:= err (. traceback (format-exc)))))
-            (throw (Exception err)))
-          (:= (. (globals) ["OUT"]) (OUT-FN))))
+             (try
+               1
+               2
+               (return 3)
+               (catch Exception (:= err (. traceback (format-exc)))))
+             (throw (Exception err)))
+          (:= (. (globals) ["OUT"]) (OUT-FN)))
+
+  (let [out (l/emit-as
+             :python
+             [(default-body-transform
+               '[(var iter-fn
+                      (fn []
+                        (return (x:iter-null))))
+                 (x:iter-native? (iter-fn))]
+               {:bulk true})])]
+    [(boolean (re-find #"if False:\n\s+yield" out))
+     (boolean (re-find #"hasattr\(iter_fn\(\),\"__next__\"\)" out))])
+  => [true true])

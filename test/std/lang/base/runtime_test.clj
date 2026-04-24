@@ -126,7 +126,10 @@
 (fact "standard format for return"
 
   (rt/return-format '[1 2 (:= x 3)])
-  => '(1 2 (:= x 3)))
+  => '(1 2 (:= x 3))
+
+  (rt/return-format '[(if false (yield))])
+  => '((if false (yield))))
 
 ^{:refer std.lang.base.runtime/return-wrap-invoke :added "4.0"}
 (fact "wraps forms to be invoked"

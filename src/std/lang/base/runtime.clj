@@ -233,17 +233,27 @@
   (concat (butlast forms)
           [(list 'return (last forms))]))
 
+(defn return-control-form?
+  "checks whether a form already contains terminal control flow"
+  {:added "4.1"}
+  [form & [opts]]
+  (let [controls (clojure.set/union '#{:- := var return break throw yield}
+                                    opts)]
+    (boolean
+     (some (fn [entry]
+             (and (collection/form? entry)
+                  (controls (first entry))))
+           (tree-seq coll? seq form)))))
+
 (defn return-format
   "standard format for return"
   {:added "4.0"}
   [forms & [opts]]
   (let [v (last forms)
         v (if (and (collection/form? v)
-                   ((clojure.set/union '#{:- := var return break throw}
-                             opts)
-                    (first v)))
-            v
-            (list 'return v))]
+                   (return-control-form? v opts))
+             v
+             (list 'return v))]
     (concat (butlast forms) [v])))
 
 (defn return-wrap-invoke
