@@ -44,7 +44,7 @@
        +factcheck-removed+))
 
 (defn with-sample-fpkg
-  [f]
+  [test-fn]
   (let [fpkg (compile/create-fact {:ns 'code.manage.unit.factcheck-test
                                    :id +sample-fact-id+
                                    :path "test/code/manage/unit/factcheck_test.clj"
@@ -52,7 +52,7 @@
                                   +sample-fact-body+)]
     (rt/set-fact (:ns fpkg) (:id fpkg) fpkg)
     (try
-      (f fpkg)
+      (test-fn fpkg)
       (finally
         (rt/remove-fact (:ns fpkg) (:id fpkg))))))
 
@@ -103,6 +103,17 @@
   (with-sample-fpkg fact-result-values)
   => [2 [2 3]])
 
+^{:refer code.manage.unit.factcheck/result-string :added "4.1"}
+(fact "formats generated values through `std.block`"
+  (result-string '{:a1 {:b1-data-long0 1
+                        :b1-data-long1 2}
+                   :a2 {:b2-data-long0 3
+                        :b2-data-long1 4}})
+  => "{:a1 {:b1-data-long0 1
+      :b1-data-long1 2}
+ :a2 {:b2-data-long0 3
+      :b2-data-long1 4}}")
+
 ^{:refer code.manage.unit.factcheck/factcheck-generate-form-string :added "4.1"}
 (fact "generates `=>` expectations for a single fact form"
   (with-sample-fpkg
@@ -111,6 +122,16 @@
       (block/parse-first +factcheck-removed+)
       (fact-result-values fpkg))))
   => +factcheck-generated+)
+
+^{:refer code.manage.unit.factcheck/factcheck-generate-form-string :added "4.1"}
+(fact "generates multiline expectations with `std.block` formatting"
+  (factcheck-generate-form-string
+   (block/parse-first "(fact \"sample\"\n\n  (identity :value))")
+   ['{:a1 {:b1-data-long0 1
+           :b1-data-long1 2}
+      :a2 {:b2-data-long0 3
+           :b2-data-long1 4}}])
+  => "(fact \"sample\"\n\n  (identity :value)\n  => {:a1 {:b1-data-long0 1\n           :b1-data-long1 2}\n      :a2 {:b2-data-long0 3\n           :b2-data-long1 4}})")
 
 ^{:refer code.manage.unit.factcheck/factcheck-generate-string :added "4.1"}
 (fact "generates `=>` expectations for all fact forms in a file"

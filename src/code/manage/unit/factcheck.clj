@@ -200,7 +200,7 @@
   "renders an evaluation result as an EDN string"
   {:added "4.1"}
   ([value]
-   (-> value executive/report-edn pr-str)))
+   (-> value executive/report-edn (block/layout {}) block/string)))
 
 (defn render-generated-item
   "renders a fact item with a generated expectation"
