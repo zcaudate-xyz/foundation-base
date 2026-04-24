@@ -491,17 +491,72 @@
 
 (defn python-tf-x-return-encode
   ([[_ out id key]]
-   (template/$ (do (:- :import json)
-            (try
-              (return (json.dumps {:id  ~id
-                                   :key ~key
-                                   :type  "data"
-                                   :value  ~out}))
-              (catch Exception
-                  (return (json.dumps {:id ~id
-                                       :key ~key
-                                       :type  "raw"
-                                       :value (str ~out)}))))))))
+   (let [ts (gensym "ts")]
+     (template/$
+      (do (:- :import json)
+          (cond (== nil ~out)
+                (return (json.dumps {:id     ~id
+                                     :key    ~key
+                                     :type   "data"
+                                     :return "nil"
+                                     :value  nil}))
+
+                (callable ~out)
+                (return (json.dumps {:id     ~id
+                                     :key    ~key
+                                     :type   "raw"
+                                     :return "function"
+                                     :value  (str ~out)}))
+
+                (== bool (type ~out))
+                (return (json.dumps {:id     ~id
+                                     :key    ~key
+                                     :type   "data"
+                                     :return "boolean"
+                                     :value  ~out}))
+
+                (isinstance ~out '(int float))
+                (return (json.dumps {:id     ~id
+                                     :key    ~key
+                                     :type   "data"
+                                     :return "number"
+                                     :value  ~out}))
+
+                (isinstance ~out '(str))
+                (return (json.dumps {:id     ~id
+                                     :key    ~key
+                                     :type   "data"
+                                     :return "string"
+                                     :value  ~out}))
+
+                :else
+                (do (var ~ts nil)
+                    (cond (isinstance ~out '(dict))
+                          (:= ~ts "object")
+
+                          (isinstance ~out '(list))
+                          (:= ~ts "array")
+
+                          :else
+                          (:= ~ts (str (type ~out))))
+                    (try
+                      (if (or (== ~ts "object")
+                              (== ~ts "array"))
+                        (return (json.dumps {:id    ~id
+                                             :key   ~key
+                                             :type  "data"
+                                             :value ~out})))
+                      (return (json.dumps {:id     ~id
+                                           :key    ~key
+                                           :type   "raw"
+                                           :return ~ts
+                                           :value  (str ~out)}))
+                      (catch Exception
+                          (return (json.dumps {:id     ~id
+                                               :key    ~key
+                                               :type   "raw"
+                                               :return ~ts
+                                               :value  (str ~out)})))))))))))
 
 (defn python-tf-x-return-wrap
   ([[_ f encode-fn]]

@@ -395,29 +395,65 @@
 
 (defn lua-tf-x-return-encode
   ([[_ out id key]]
-   (template/$ (do (do (local ret nil)
-                (local '[r-ok r-err]
-                       (pcall (fn []
-                                (cond (== nil ~out)
-                                      (:= ret (cjson.encode {:id  ~id
-                                                             :key ~key
-                                                             :type "data"
-                                                             :value (. cjson ["null"])}))
-                                      
-                                      :else
-                                      (:= ret (cjson.encode {:id  ~id
-                                                             :key ~key
-                                                             :type "data"
-                                                             :value ~out}))))))
-                (cond r-err
-                      (return (cjson.encode {:id  ~id
-                                             :key ~key
-                                             :type "raw"
-                                             :error (tostring r-err)
-                                             :value (tostring ~out)}))
-                      
-                      :else
-                      (return ret)))))))
+   (let [tb  (gensym "tb")
+         mt  (gensym "mt")
+         ts  (gensym "ts")
+         ret (gensym "ret")
+         rok (gensym "r_ok")
+         rerr (gensym "r_err")]
+     (template/$
+      (do (local ~tb := (type ~out))
+          (cond (== nil ~out)
+                (return (cjson.encode {:id     ~id
+                                       :key    ~key
+                                       :type   "data"
+                                       :return "nil"
+                                       :value  (. cjson ["null"])}))
+
+                (== ~tb "function")
+                (return (cjson.encode {:id     ~id
+                                       :key    ~key
+                                       :type   "raw"
+                                       :return "function"
+                                       :value  (tostring ~out)}))
+
+                (not= ~tb "table")
+                (return (cjson.encode {:id     ~id
+                                       :key    ~key
+                                       :type   "data"
+                                       :return ~tb
+                                       :value  ~out}))
+
+                :else
+                (do (local ~mt := (getmetatable ~out))
+                    (local ~ts nil)
+                    (local ~ret nil)
+                    (if (and ~mt
+                             (not= nil (. ~mt ["__name"])))
+                      (:= ~ts (. ~mt ["__name"]))
+                      (if (== nil (. '(~out) [1]))
+                        (:= ~ts "Object")
+                        (:= ~ts "Array")))
+                    (local '[~rok ~rerr]
+                           (pcall (fn []
+                                    (if (or (== ~ts "Object")
+                                            (== ~ts "Array"))
+                                      (:= ~ret (cjson.encode {:id    ~id
+                                                              :key   ~key
+                                                              :type  "data"
+                                                              :value ~out}))
+                                      (:= ~ret (cjson.encode {:id     ~id
+                                                              :key    ~key
+                                                              :type   "raw"
+                                                              :return ~ts
+                                                              :value  (tostring ~out)}))))))
+                    (if ~rok
+                      (return ~ret)
+                      (return (cjson.encode {:id     ~id
+                                             :key    ~key
+                                             :type   "raw"
+                                             :return ~ts
+                                             :value  (tostring ~out)}))))))))))
 
 (defn lua-tf-x-return-wrap
   ([[_ f encode-fn]]

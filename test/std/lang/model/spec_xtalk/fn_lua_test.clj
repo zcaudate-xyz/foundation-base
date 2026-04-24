@@ -235,7 +235,10 @@
   => #"cjson.encode"
 
   (l/emit-as :lua [(lua-tf-x-return-encode '[_ out id key])])
-  => #"\['return'\]")
+  => #"\['return'\]"
+
+  (l/emit-as :lua [(lua-tf-x-return-encode '[_ out id key])])
+  => #"getmetatable")
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-return-wrap :added "4.0"}
 (fact "return wrap"

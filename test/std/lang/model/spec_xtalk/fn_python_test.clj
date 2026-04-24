@@ -376,7 +376,13 @@
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-return-encode :added "4.0"}
 (fact "return encode"
   (l/emit-as :python [(python-tf-x-return-encode '[_ out id key])])
-  => #"json.dumps")
+  => #"json.dumps"
+
+  (l/emit-as :python [(python-tf-x-return-encode '[_ out id key])])
+  => #"callable"
+
+  (l/emit-as :python [(python-tf-x-return-encode '[_ out id key])])
+  => #"\"return\"")
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-return-wrap :added "4.0"}
 (fact "return wrap"
