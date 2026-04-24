@@ -233,11 +233,14 @@
   (concat (butlast forms)
           [(list 'return (last forms))]))
 
+(def +terminal-controls+
+  '#{:- := var return break throw yield})
+
 (defn return-control-form?
   "checks whether a form already contains terminal control flow"
   {:added "4.1"}
   [form & [opts]]
-  (let [controls (clojure.set/union '#{:- := var return break throw yield}
+  (let [controls (clojure.set/union +terminal-controls+
                                     (or opts #{}))]
     (boolean
      (some (fn [entry]
