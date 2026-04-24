@@ -114,6 +114,15 @@
  :beta {:nested-key-three 3
         :nested-key-four 4}}")
 
+^{:refer code.manage.unit.factcheck/result-string :added "4.1"}
+(fact "formats vector examples through `std.block`"
+  (result-string '[{:alpha {:nested-key-one 1
+                            :nested-key-two 2}}
+                   {:beta [:first-value {:deep-key :deep-value}]}])
+  => "[{:alpha {:nested-key-one 1
+          :nested-key-two 2}}
+ {:beta [:first-value {:deep-key :deep-value}]}]")
+
 ^{:refer code.manage.unit.factcheck/factcheck-generate-form-string :added "4.1"}
 (fact "generates `=>` expectations for a single fact form"
   (with-sample-fpkg
@@ -127,16 +136,14 @@
 (fact "generates multiline expectations with `std.block` formatting"
   (factcheck-generate-form-string
    (block/parse-first "(fact \"sample\"\n\n  (identity :value))")
-   ['{:alpha {:nested-key-one 1
-              :nested-key-two 2}
-      :beta  {:nested-key-three 3
-              :nested-key-four 4}}])
+   ['[{:alpha {:nested-key-one 1
+               :nested-key-two 2}}
+      {:beta [:first-value {:deep-key :deep-value}]}]])
   => (str "(fact \"sample\"\n\n"
            "  (identity :value)\n"
-           "  => {:alpha {:nested-key-one 1\n"
-           "              :nested-key-two 2}\n"
-           "      :beta {:nested-key-three 3\n"
-           "             :nested-key-four 4}})"))
+           "  => [{:alpha {:nested-key-one 1\n"
+           "               :nested-key-two 2}}\n"
+           "      {:beta [:first-value {:deep-key :deep-value}]}])"))
 
 ^{:refer code.manage.unit.factcheck/factcheck-generate-string :added "4.1"}
 (fact "generates `=>` expectations for all fact forms in a file"
