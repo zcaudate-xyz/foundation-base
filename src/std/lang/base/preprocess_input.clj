@@ -1,6 +1,6 @@
 (ns std.lang.base.preprocess-input
   (:require [clojure.string]
-            [std.lang.base.preprocess :as preprocess]
+            [std.lang.base.preprocess-base :as preprocess]
             [std.lang.base.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.context.pointer :as ptr]
