@@ -33,49 +33,6 @@
   [v]
   (if v "True" "False"))
 
-(def ^:private +python-optional-default-counts+
-  '{xt.lang.event-box/add-listener 1
-    xt.lang.event-box/get-data 1
-    xt.lang.event-route/path-to-tree 1
-    xt.lang.event-route/interim-to-tree 1
-    xt.lang.event-route/changed-params 1
-    xt.lang.event-route/get-param 1
-    xt.lang.event-route/get-all-params 1
-    xt.lang.event-route/add-url-listener 1
-    xt.lang.event-route/add-path-listener 1
-    xt.lang.event-route/add-param-listener 1
-    xt.lang.event-route/add-full-listener 1
-    xt.lang.event-route/set-url 1
-    xt.lang.event-route/set-path 2
-    xt.lang.event-route/set-param 1
-    xt.lang.event-route/reset-route 1
-    xt.lang.event-animate/make-linear-indicator 1
-    xt.lang.event-animate/make-circular-indicator 1
-    xt.lang.event-form/validate-all 2
-    xt.lang.event-form/validate-field 1
-    xt.lang.event-view/create-view 3
-    xt.lang.event-view/get-output 1
-    xt.lang.event-view/get-current 1
-    xt.lang.event-view/is-errored 1
-    xt.lang.event-view/is-pending 1
-    xt.lang.event-view/get-time-elapsed 1
-    xt.lang.event-view/get-time-updated 1
-    xt.lang.event-view/get-success 1
-    xt.lang.event-view/set-output 3
-    xt.lang.event-view/set-output-disabled 1
-    xt.lang.event-view/set-pending 1
-    xt.lang.event-view/set-elapsed 1
-    xt.lang.event-view/pipeline-prep 1
-    xt.lang.event-view/pipeline-set 1
-    xt.lang.event-view/pipeline-call 1
-    xt.lang.event-view/pipeline-run-impl 1
-    xt.lang.event-view/pipeline-run 1
-    xt.lang.event-view/get-with-lookup 1
-    xt.lang.event-view/sorted-lookup 1
-    xt.lang.util-loader/load-tasks-single 3
-    xt.lang.util-throttle/throttle-run-async 1
-    xt.lang.util-throttle/throttle-run 1
-    xt.lang.util-color/rgb->hsl 1})
 
 (defn- python-qualified-symbol
   [sym]
@@ -105,10 +62,9 @@
             inferred-count (when fn-def
                              (count (take-while python-optional-input?
                                                 (reverse (:inputs fn-def)))))
-            optional-count (or (when (and inferred-count
-                                          (pos? inferred-count))
-                                 inferred-count)
-                               (get +python-optional-default-counts+ qualified))]
+            optional-count (when (and inferred-count
+                                      (pos? inferred-count))
+                             inferred-count)]
         (if (and optional-count (pos? optional-count))
           (let [optional-args (take-last optional-count args)]
             (if (not (neg? (collection/index-at #{:=} args)))

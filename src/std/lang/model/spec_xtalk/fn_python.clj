@@ -263,9 +263,9 @@
 
 (def +python-lu+
   {:x-lu-create      {:macro #'python-tf-x-lu-create  :emit :macro}
-    :x-lu-eq          {:macro #'python-tf-x-lu-eq  :emit :macro}
-    :x-lu-get         {:macro #'python-tf-x-lu-get :emit :macro}
-    :x-lu-set         {:macro #'python-tf-x-lu-set :emit :macro}
+   :x-lu-eq          {:macro #'python-tf-x-lu-eq  :emit :macro}
+   :x-lu-get         {:macro #'python-tf-x-lu-get :emit :macro}
+   :x-lu-set         {:macro #'python-tf-x-lu-set :emit :macro}
    :x-lu-del         {:macro #'python-tf-x-lu-del :emit :macro}})
 
 ;;
@@ -301,13 +301,13 @@
 ;;
 
 (defn python-tf-x-arr-clone
-    [[_ arr]]
-    (list '. arr [(list :- ":")]))
+  [[_ arr]]
+  (list '. arr [(list :- ":")]))
 
-  (defn python-tf-x-arr-slice
-    [[_ arr start end]]
-    (list '. arr [(list :to (list '- start (list 'x:offset))
-                         end)]))
+(defn python-tf-x-arr-slice
+  [[_ arr start end]]
+  (list '. arr [(list :to (list '- start (list 'x:offset))
+                      end)]))
 
 
 
@@ -343,12 +343,12 @@
   [[_ arr key-fn compare-fn]]
   (list '. arr (list 'sort :key #_key-fn
                      (template/$ (. (__import__ "functools")
-                              (cmp_to_key
-                               (fn:> [a b]
-                                     (:? (~compare-fn
-                                          (~key-fn a)
-                                          (~key-fn b))
-                                         -1 1))))))))
+                                    (cmp_to_key
+                                     (fn:> [a b]
+                                           (:? (~compare-fn
+                                                (~key-fn a)
+                                                (~key-fn b))
+                                               -1 1))))))))
 
 (defn python-tf-x-str-comp
   [[_ a b]]
@@ -377,7 +377,7 @@
   (template/$ (all (map ~pred ~arr))))
 
 (defn python-tf-arr-some
-    [[_ arr pred]]
+  [[_ arr pred]]
   (template/$ (any (map ~pred ~arr))))
 
 (def +python-fn+
@@ -446,7 +446,7 @@
 
 (defn python-tf-x-str-pad-right
   ([[_ s n ch]]
-     (list '. s (list 'ljust n ch))))
+   (list '. s (list 'ljust n ch))))
 
 (def +python-str+
   {:x-str-char       {:macro #'python-tf-x-str-char      :emit :macro}
@@ -590,15 +590,15 @@
 (defn python-tf-x-iter-eq
   ([[_ it0 it1 eq-fn]]
    (template/$ (do (for [x0 :in ~it0]
-              (try
-                (var x1 (next ~it1))
-                (if (not (~eq-fn x0 x1))
-                  (return false))
-                (catch StopIteration (return false))))
-            (try
-              (next ~it1)
-              (return false)
-              (catch StopIteration (return true)))))))
+                     (try
+                       (var x1 (next ~it1))
+                       (if (not (~eq-fn x0 x1))
+                         (return false))
+                       (catch StopIteration (return false))))
+                   (try
+                     (next ~it1)
+                     (return false)
+                     (catch StopIteration (return true)))))))
 
 (defn python-tf-x-iter-next
   ([[_ it]]
@@ -612,12 +612,16 @@
   ([[_ it]]
    (list 'hasattr it "__next__")))
 
+(defn python-tf-x-iter-null
+  ([[_]]
+   '(if false (yield))))
+
 (def +python-iter+
   {:x-iter-from-obj       {:macro #'python-tf-x-iter-from-obj       :emit :macro}
    :x-iter-from-arr       {:macro #'python-tf-x-iter-from-arr       :emit :macro}
    :x-iter-from           {:macro #'python-tf-x-iter-from           :emit :macro}
    :x-iter-eq             {:macro #'python-tf-x-iter-eq             :emit :macro}
-   :x-iter-null           {:default '(if false (yield)) :emit :unit}
+   :x-iter-null           {:macro #'python-tf-x-iter-null           :emit :macro}
    :x-iter-next           {:macro #'python-tf-x-iter-next           :emit :macro}
    :x-iter-has?           {:macro #'python-tf-x-iter-has?           :emit :macro}
    :x-iter-native?        {:macro #'python-tf-x-iter-native?        :emit :macro}})
@@ -689,7 +693,7 @@
 (defn python-tf-x-b64-decode
   ([[_ s]]
    (list '. (list '. (list '__import__ "base64")
-            (list 'b64decode s))
+                  (list 'b64decode s))
          (list 'decode "utf-8"))))
 
 (def +python-b64+
@@ -717,7 +721,7 @@
 
 (comment
 
- 
+  
 
 
   

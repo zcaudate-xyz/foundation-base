@@ -796,24 +796,30 @@
 
 (def +xt-functional-iter+      
   [{:op :x-iter-from-obj  :symbol #{'x:iter-from-obj}   :emit :abstract
-    :op-spec {:arglists '([obj])}}
+    :op-spec {:allow-blocks true
+              :arglists '([obj])}}
    {:op :x-iter-from-arr  :symbol #{'x:iter-from-arr}   :emit :abstract
-    :op-spec {:arglists '([arr])}}
+    :op-spec {:allow-blocks true
+              :arglists '([arr])}}
    {:op :x-iter-from      :symbol #{'x:iter-from}       :emit :abstract
-    :op-spec {:arglists '([value])}}
+    :op-spec {:allow-blocks true
+              :arglists '([value])}}
    {:op :x-iter-eq        :symbol #{'x:iter-eq}         :emit :abstract
     :op-spec {:allow-blocks true
               :arglists '([iter0 iter1 eq-fn])
               :type [:fn [:xt/any :xt/any :xt/fn] :xt/bool]}}
    {:op :x-iter-null      :symbol #{'x:iter-null}       :emit :abstract
-    :op-spec {:arglists '([])}}
+    :op-spec {:allow-blocks true
+              :arglists '([])}}
    {:op :x-iter-next      :symbol #{'x:iter-next}       :emit :abstract
     :op-spec {:arglists '([iter])}}
    {:op :x-iter-has?      :symbol #{'x:iter-has?}       :emit :abstract
-    :op-spec {:arglists '([iter])
+    :op-spec {:allow-blocks true
+              :arglists '([iter])
               :type [:fn [:xt/any] :xt/bool]}}
    {:op :x-iter-native?   :symbol #{'x:iter-native?}    :emit :abstract
-    :op-spec {:arglists '([iter])
+    :op-spec {:allow-blocks true
+              :arglists '([iter])
               :type [:fn [:xt/any] :xt/bool]}}])
 
 ;;
@@ -861,12 +867,14 @@
 
 (def +xt-lang-random+
   [{:op :x-random         :symbol #{'x:random}          :emit :abstract
-    :op-spec {:type  [:fn [] :xt/num]
+    :op-spec {:allow-blocks true
+              :type  [:fn [] :xt/num]
               :arglists '([])}}])
 
 (def +xt-lang-time+
   [{:op :x-now-ms         :symbol #{'x:now-ms}          :emit :abstract
-    :op-spec {:arglists '([])
+    :op-spec {:allow-blocks true
+              :arglists '([])
               :type [:fn [] :xt/int]}}])
 
 
@@ -880,10 +888,12 @@
               :type [:fn [:xt/str :xt/int :xt/any :xt/any] :xt/any]
               :arglists '([host port opts cb])}}
    {:op :x-socket-send :symbol #{'x:socket-send} :emit :abstract
-    :op-spec {:type [:fn [:xt/any :xt/str] :xt/any]
+    :op-spec {:allow-blocks true
+              :type [:fn [:xt/any :xt/str] :xt/any]
               :arglists '([conn message])}}
    {:op :x-socket-close :symbol #{'x:socket-close} :emit :abstract
-    :op-spec {:type [:fn [:xt/any] :xt/any]
+    :op-spec {:allow-blocks true
+              :type [:fn [:xt/any] :xt/any]
               :arglists '([conn])}}])
 
 (def +xt-notify-http+
@@ -930,24 +940,30 @@
 
 (def +xt-runtime-b64+
   [{:op :x-b64-encode      :symbol #{'x:b64-encode}     :emit :abstract
-    :op-spec {:arglists '([value])
+    :op-spec {:allow-blocks true
+              :arglists '([value])
               :type [:fn [:xt/str] :xt/str]}}
    {:op :x-b64-decode      :symbol #{'x:b64-decode}     :emit :abstract
-    :op-spec {:arglists '([value])
+    :op-spec {:allow-blocks true
+              :arglists '([value])
               :type [:fn [:xt/str] :xt/str]}}])
 
 (def +xt-runtime-uri+
   [{:op :x-uri-encode      :symbol #{'x:uri-encode}     :emit :abstract
-    :op-spec {:arglists '([value])
+    :op-spec {:allow-blocks true
+              :arglists '([value])
               :type [:fn [:xt/str] :xt/str]}}
    {:op :x-uri-decode      :symbol #{'x:uri-decode}     :emit :abstract
-    :op-spec {:arglists '([value])
+    :op-spec {:allow-blocks true
+              :arglists '([value])
               :type [:fn [:xt/str] :xt/str]}}])
 
 (def +xt-runtime-json+
   [{:op :x-json-encode      :symbol #{'x:json-encode}       :emit :abstract
-    :op-spec {:arglists '([value])
+    :op-spec {:allow-blocks true
+              :arglists '([value])
               :type [:fn [:xt/any] :xt/str]}}
    {:op :x-json-decode      :symbol #{'x:json-decode}       :emit :abstract
-    :op-spec {:arglists '([expr])
+    :op-spec {:allow-blocks true
+              :arglists '([expr])
               :type [:fn [:xt/str] :xt/any]}}])
