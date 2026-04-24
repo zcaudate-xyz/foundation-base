@@ -160,17 +160,25 @@
                (apply list 'do (drop 2 (:form et))))))))))
 
 (defn value-template-args
-  "derives callable value args from a template var"
+  "derives callable value args from op or template arglists"
   {:added "4.1"}
-  [template]
-  (let [arglists (-> template meta :arglists)
-        argv     (-> arglists first)
-        argv     (if (vector? (first argv))
-                   (first argv)
-                   argv)]
-    (->> argv
-         rest
-         vec)))
+  ([template]
+   (value-template-args nil template))
+  ([arglists template]
+   (if arglists
+     (let [argv (-> arglists first)
+           argv (if (vector? (first argv))
+                  (first argv)
+                  argv)]
+       (vec argv))
+     (let [arglists (-> template meta :arglists)
+           argv     (-> arglists first)
+           argv     (if (vector? (first argv))
+                      (first argv)
+                      argv)]
+       (->> argv
+            rest
+            vec)))))
 
 (defn value-standalone
   "returns the standalone expansion for a value-liftable reserved symbol"
@@ -189,12 +197,13 @@
               (symbol? standalone))
            standalone
 
-           (and (= true standalone)
-                template)
-           (let [args (value-template-args template)]
-             (if self-return?
-               (let [self-arg (first args)]
-                 (list 'fn args
+            (and (= true standalone)
+                 template)
+            (let [args (value-template-args (:arglists op-spec)
+                                            template)]
+              (if self-return?
+                (let [self-arg (first args)]
+                  (list 'fn args
                        (template (apply list nil args))
                        (list 'return self-arg)))
                (list 'fn args

@@ -5,18 +5,21 @@
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-len :added "4.0"}
 (fact "gets length"
-  (l/emit-as :js [(js-tf-x-len '[_ arr])])
-  => #"\.length")
+  
+  (js-tf-x-len '[_ arr])
+  => '(. arr length))
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-cat :added "4.0"}
 (fact "concatenates"
-  (l/emit-as :js [(js-tf-x-cat '[_ "a" "b"])])
-  => #"\+")
+
+  (js-tf-x-cat '[_ "a" "b"])
+  => '(+ "a" "b"))
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-apply :added "4.0"}
 (fact "applies function"
-  (l/emit-as :js [(js-tf-x-apply '[_ f args])])
-  => #"apply")
+  
+  (js-tf-x-apply '[_ f args])
+  => '(. f (apply nil args)))
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-shell :added "4.0"}
 (fact "executes shell command"
@@ -30,8 +33,20 @@
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-type-native :added "4.0"}
 (fact "gets native type"
-  (l/emit-as :js [(js-tf-x-type-native '[_ obj])])
-  => #"typeof")
+
+  (js-tf-x-type-native '[_ obj])
+  => '(do (when (== obj nil) (return nil))
+          (var t := (typeof obj))
+          (if
+              (== t "object")
+            (cond
+              (Array.isArray obj)
+              (return "array")
+              :else
+              (do
+                (var tn := (. obj ["constructor"] ["name"]))
+                (if (== tn "Object") (return "object") (return tn))))
+            (return t))))
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-proto-get :added "4.0"}
 (fact "gets prototype"

@@ -7,11 +7,9 @@
             [std.lang.base.library :as lib]
             [std.lang.base.library-snapshot :as snap]
             [std.lang.base.runtime :as rt]
-             [std.lang.base.script :as script]
-             [std.lang.model.spec-lua :as lua]
-             [std.lib.env :as env]
-             [xt.lang.common-data]
-             [xt.lang.common-lib])
+            [std.lang.base.script :as script]
+            [std.lang.model.spec-lua :as lua]
+            [std.lib.env :as env])
   (:use code.test))
 
 (def +library+
@@ -21,7 +19,7 @@
 
 (l/script+ [:LUA.0 :lua]
   {:runtime :oneshot
-   :require [[xt.lang.common-data :as k]]})
+   :require [[xt.lang.common-data :as xtd]]})
 
 ^{:refer std.lang.base.script/install :added "4.0"}
 (fact "installs a language"
@@ -35,7 +33,7 @@
 (fact "imports the namespace and sets a primary flag"
 
   (impl/with:library [+library+]
-    (script/script-ns-import {:require '[[xt.lang.common-data :as k :primary true]]}))
+    (script/script-ns-import {:require '[[xt.lang.common-data :as xtd :primary true]]}))
   => '#{xt.lang.common-data})
 
 ^{:refer std.lang.base.script/script-macro-import :added "4.0"}
@@ -59,8 +57,8 @@
   (impl/with:library [+library+]
     (binding [book/*skip-check* true]
       (keys (script/script-fn-base :lua 'std.lang.base.script-test
-                                   {:require '[[xt.lang.common-data :as k]]}
-                                    (l/runtime-library)))))
+                                   {:require '[[xt.lang.common-data :as xtd]]}
+                                   (l/runtime-library)))))
   => (contains [:module :module/internal :module/primary]))
 
 ^{:refer std.lang.base.script/script-fn :added "4.0"}
@@ -96,13 +94,13 @@
 ^{:refer std.lang.base.script/script-ext :added "4.0"}
 (fact "the `script+` function call"
 
-  (script/script-ext [:LUA.0 :lua] {:runtime :oneshot})
+  (script/script-ext [:LUA.1 :lua] {:runtime :oneshot})
   => vector?)
 
 ^{:refer std.lang.base.script/script+ :added "4.0"}
 (fact "macro for test extension setup"
 
-  (script/script+ [:LUA.0 :lua] {:runtime :oneshot})
+  (script/script+ [:LUA.2 :lua] {:runtime :oneshot})
   => vector?)
 
 ^{:refer std.lang.base.script/script-ext-run :added "4.0"}
@@ -114,11 +112,11 @@
 (fact "switch between defined annex envs"
 
   (l/! [:LUA.0] (xtd/arr-map [1 2 3 4]
-                           (fn:> [x] (+ x 1))))
+                             (fn:> [x] (+ x 1))))
   => [2 3 4 5]
 
   (l/! [:NOT-FOUND] (xtd/arr-map [1 2 3 4]
-                               (fn:> [x] (+ x 1))))
+                                 (fn:> [x] (+ x 1))))
   => (throws))
 
 ^{:refer std.lang.base.script/annex:start :added "4.0"}
@@ -167,11 +165,12 @@
 (fact "lists all annexs"
 
   (script/annex:list)
-  => {:registered #{:LUA.0}, :active #{}}
+  => {:registered #{:LUA.0 :LUA.1 :LUA.2}, :active #{}}
 
   (do (script/annex:start-all)
       (script/annex:list))
-  => {:registered #{:LUA.0}, :active #{:LUA.0}})
+  => {:registered #{:LUA.0 :LUA.1 :LUA.2}
+      :active #{:LUA.0 :LUA.1 :LUA.2}})
 
 (comment
   (./import)

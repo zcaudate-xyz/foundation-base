@@ -272,8 +272,7 @@
   "gets the second last element of an indexed collection"
   {:added "4.1"}
   [[_ arr]]
-  (list 'x:get-idx arr (list '+ (list 'x:len arr)
-                             (list 'x:offset -2))))
+  (list 'x:get-idx arr (list 'x:offset-len (list '- (list 'x:len arr) 1))))
 
 (defn tf-str-lt
   "checks if string a sorts before b"
@@ -318,7 +317,6 @@
   {:added "4.0"}
   [[_ o1 o2]]
   (list '== o1 o2))
-
 
 ;;
 ;; BIT

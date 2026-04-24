@@ -302,17 +302,17 @@
               {}
               '{:module {:id L.core
                          :link {}}})
-  => '[(fn [a b] (return (+ a b))) #{} #{} {}])
+  => '[(fn [x y] (return (+ x y))) #{} #{} {}])
 
 ^{:refer std.lang.base.emit-preprocess/value-standalone :added "4.1"}
 (fact "callable xtalk intrinsics use shared value-standalone compilation"
 
   (value-standalone 'x:add +grammar+)
-  => '(fn [a b] (return (+ a b)))
+  => '(fn [x y] (return (+ x y)))
 
   (value-standalone 'x:arr-push js/+grammar+)
-  => '(fn [arr item]
-        (. arr (push item))
+  => '(fn [arr value]
+        (. arr (push value))
         (return arr))
 
   (value-standalone 'for:object js/+grammar+)
@@ -420,7 +420,14 @@
    (with-meta
      (fn [_ [sym value]] [sym value])
      {:arglists '(( [ctx sym value] ))}))
-  => '[sym value])
+  => '[sym value]
+
+  (value-template-args
+   '([x y])
+   (with-meta
+     (fn [_ a b & more] [a b more])
+     {:arglists '([ctx a b & more])}))
+  => '[x y])
 
 ^{:refer std.lang.base.emit-preprocess/protect-reserved-head :added "4.1"}
 (fact "protects reserved heads by wrapping them in a volatile"
