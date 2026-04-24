@@ -475,11 +475,12 @@
 
 (defn js-tf-x-return-wrap
   ([[_ f encode-fn]]
-   (template/$ (try (var out := (~f))
-                    (return (~encode-fn  out))
-                    (catch e (let [err (:? (== "string" (typeof e)) e {:message (. e ["message"]) :stack (. e ["stack"])})]
-                               (return (JSON.stringify {:type "error"
-                                                        :value err}))))))))
+   (template/$
+    (try (var out := (~f))
+         (return (~encode-fn  out))
+         (catch e (let [err (:? (== "string" (typeof e)) e {:message (. e ["message"]) :stack (. e ["stack"])})]
+                    (return (JSON.stringify {:type "error"
+                                             :value err}))))))))
 
 (defn js-tf-x-return-eval
   ([[_ s wrap-fn]]
@@ -715,7 +716,6 @@
 
 (def +js+
   (merge +js-core+
-         +js-proto+
          +js-global+
          +js-custom+
          +js-math+

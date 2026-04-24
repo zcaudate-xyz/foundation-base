@@ -2,7 +2,7 @@
   (:require [clojure.string :as str]
             [std.block.template :as gen]
             [std.lib.foundation :as f]
-            [std.lang.base.emit-preprocess :as preprocess] [std.lang.base.preprocess-base :as preprocess-base]))
+            [std.lang.base.preprocess-base :as preprocess-base]))
 
 (defn tf-throw
   "wrapper for throw transform"
@@ -886,42 +886,12 @@
     :op-spec {:type [:fn [:xt/any] :xt/any]
               :arglists '([conn])}}])
 
-
 (def +xt-notify-http+
   [{:op :x-notify-http     :symbol #{'x:notify-http}     :emit :hard-link
     :raw 'xt.lang.common-repl/notify-socket-http
     :op-spec {:allow-blocks true
               :type  [:fn [:xt/str :xt/num :xt/any :xt/str :xt/str :xt/any] :xt/any]
               :arglists '([host port value id key opts])}}])
-
-
-;;
-;; XTALK RUNTIME SPECIFIC INTERFACES
-;;
-
-(def +xt-runtime-cache+
-  [{:op :x-cache          :symbol #{'x:cache}           :emit :abstract
-    :op-spec {:arglists '([name])
-              :type [:fn [:xt/str] :xt/any]}}
-   {:op :x-cache-list     :symbol #{'x:cache-list}      :emit :abstract
-    :op-spec {:arglists '([cache])
-              :type [:fn [:xt/any] [:xt/array :xt/str]]}}
-   {:op :x-cache-flush    :symbol #{'x:cache-flush}     :emit :abstract
-    :op-spec {:arglists '([cache])
-              :type [:fn [:xt/any] :xt/self]}}
-   {:op :x-cache-get      :symbol #{'x:cache-get}       :emit :abstract
-    :op-spec {:arglists '([cache key])
-              :type [:fn [:xt/any :xt/str] :xt/str]}}
-   {:op :x-cache-set      :symbol #{'x:cache-set}       :emit :abstract
-    :op-spec {:arglists '([cache key value])
-              :type [:fn [:xt/any :xt/str :xt/str] :xt/str]}}
-   {:op :x-cache-del      :symbol #{'x:cache-del}       :emit :abstract
-    :op-spec {:arglists '([cache key])
-              :type [:fn [:xt/any :xt/str] :xt/str]}}
-   {:op :x-cache-incr     :symbol #{'x:cache-incr}      :emit :abstract
-    :op-spec {:allow-blocks true
-              :arglists '([cache key val])
-              :type [:fn [:xt/any :xt/str :xt/int] :xt/int]}}])
 
 (def +xt-runtime-thread+
   [{:op :x-thread-spawn   :symbol #{'x:thread-spawn}    :emit :abstract

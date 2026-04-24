@@ -531,40 +531,6 @@
    :x-iter-has?           {:macro #'lua-tf-x-iter-has?           :emit :macro}
    :x-iter-native?        {:macro #'lua-tf-x-iter-native?        :emit :macro}})
 
-;;
-;; CACHE
-;;
-
-(defn lua-tf-x-cache
-  ([[_ key]]
-   (list '. 'ngx.shared [(if (symbol? key)
-                           key
-                           (f/strn key))])))
-
-(defn lua-tf-x-cache-list
-  ([[_ cache]]
-   (list '. cache '(get-keys 0))))
-
-(defn lua-tf-x-cache-flush
-  ([[_ cache]]
-   (list '. cache '(flush-all))))
-
-(defn lua-tf-x-cache-get
-  ([[_ cache key]]
-   (list '. cache (list 'get key))))
-
-(defn lua-tf-x-cache-set
-  ([[_ cache key val]]
-   (list '. cache (list 'set key val))))
-
-(defn lua-tf-x-cache-del
-  ([[_ cache key]]
-   (list '. cache (list 'delete key))))
-
-(defn lua-tf-x-cache-incr
-  ([[_ cache key num]]
-   (list '. cache (list 'incr key num))))
-
 (defn lua-tf-x-thread-spawn
   ([[_ thunk & [strategy]]]
    (case strategy

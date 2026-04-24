@@ -93,38 +93,6 @@
    :x-now-ms         {:default '(round (* 1000 (. (__import__ "time") (time)))) :emit :unit}
    :x-type-native    {:macro #'python-tf-x-type-native   :emit :macro}})
 
-;;
-;; PROTO
-;;
-
-(defn python-tf-x-prototype-create
-  [[_ m]]
-  m)
-
-(defn python-tf-x-prototype-get
-  [[_ obj _]]
-  (template/$ (. ~obj (get "__proto__"))))
-
-(defn python-tf-x-prototype-set
-  [[_ obj prototype _]]
-  (template/$
-   (do (:= (. ~obj ["__proto__"]) ~prototype)
-       (for:object [[k f] ~prototype]
-         (if (callable f)
-           (:= (. ~obj [k]) (. (__import__ "types") (MethodType f ~obj)))
-           (:= (. ~obj [k]) f)))
-       (return ~obj))))
-
-(defn python-tf-x-prototype-tostring
-  [[_ _]]
-  '"__str__")
-
-(def +python-proto+
-  {:x-prototype-create   {:macro #'python-tf-x-prototype-create   :emit :macro}
-   :x-prototype-get      {:macro #'python-tf-x-prototype-get      :emit :macro}
-   :x-prototype-set      {:macro #'python-tf-x-prototype-set      :emit :macro}
-   :x-prototype-tostring {:macro #'python-tf-x-prototype-tostring :emit :macro}})
-
 
 ;;
 ;; GLOBAL
@@ -184,27 +152,27 @@
                                           (list 'tanh num)))
 
 (def +python-math+
-  {:x-m-abs           {:macro #'python-tf-x-m-abs,                 :emit :macro}
-   :x-m-acos          {:macro #'python-tf-x-m-acos,                :emit :macro}
-   :x-m-asin          {:macro #'python-tf-x-m-asin,                :emit :macro}
-   :x-m-atan          {:macro #'python-tf-x-m-atan,                :emit :macro}
-   :x-m-ceil          {:macro #'python-tf-x-m-ceil,                :emit :macro}
-   :x-m-cos           {:macro #'python-tf-x-m-cos,                 :emit :macro}
-   :x-m-cosh          {:macro #'python-tf-x-m-cosh,                :emit :macro}
-   :x-m-exp           {:macro #'python-tf-x-m-exp,                 :emit :macro}
-   :x-m-floor         {:macro #'python-tf-x-m-floor,               :emit :macro}
-   :x-m-loge          {:macro #'python-tf-x-m-loge,                :emit :macro}
-   :x-m-log10         {:macro #'python-tf-x-m-log10,               :emit :macro}
-   :x-m-max           {:macro #'python-tf-x-m-max,                 :emit :macro}
-   :x-m-min           {:macro #'python-tf-x-m-min,                 :emit :macro}
-   :x-m-mod           {:macro #'python-tf-x-m-mod,                 :emit :macro}
-   :x-m-pow           {:macro #'python-tf-x-m-pow,                 :emit :macro}
-   :x-m-quot          {:macro #'python-tf-x-m-quot,                :emit :macro}
-   :x-m-sin           {:macro #'python-tf-x-m-sin,                 :emit :macro}
-   :x-m-sinh          {:macro #'python-tf-x-m-sinh,                :emit :macro}
-   :x-m-sqrt          {:macro #'python-tf-x-m-sqrt,                :emit :macro}
-   :x-m-tan           {:macro #'python-tf-x-m-tan,                 :emit :macro}
-   :x-m-tanh          {:macro #'python-tf-x-m-tanh,                :emit :macro}})
+  {:x-m-abs           {:macro #'python-tf-x-m-abs                 :emit :macro}
+   :x-m-acos          {:macro #'python-tf-x-m-acos                :emit :macro}
+   :x-m-asin          {:macro #'python-tf-x-m-asin                :emit :macro}
+   :x-m-atan          {:macro #'python-tf-x-m-atan                :emit :macro}
+   :x-m-ceil          {:macro #'python-tf-x-m-ceil                :emit :macro}
+   :x-m-cos           {:macro #'python-tf-x-m-cos                 :emit :macro}
+   :x-m-cosh          {:macro #'python-tf-x-m-cosh                :emit :macro}
+   :x-m-exp           {:macro #'python-tf-x-m-exp                 :emit :macro}
+   :x-m-floor         {:macro #'python-tf-x-m-floor               :emit :macro}
+   :x-m-loge          {:macro #'python-tf-x-m-loge                :emit :macro}
+   :x-m-log10         {:macro #'python-tf-x-m-log10               :emit :macro}
+   :x-m-max           {:macro #'python-tf-x-m-max                 :emit :macro}
+   :x-m-min           {:macro #'python-tf-x-m-min                 :emit :macro}
+   :x-m-mod           {:macro #'python-tf-x-m-mod                 :emit :macro}
+   :x-m-pow           {:macro #'python-tf-x-m-pow                 :emit :macro}
+   :x-m-quot          {:macro #'python-tf-x-m-quot                :emit :macro}
+   :x-m-sin           {:macro #'python-tf-x-m-sin                 :emit :macro}
+   :x-m-sinh          {:macro #'python-tf-x-m-sinh                :emit :macro}
+   :x-m-sqrt          {:macro #'python-tf-x-m-sqrt                :emit :macro}
+   :x-m-tan           {:macro #'python-tf-x-m-tan                 :emit :macro}
+   :x-m-tanh          {:macro #'python-tf-x-m-tanh                :emit :macro}})
 
 ;;
 ;; TYPE
@@ -401,6 +369,23 @@
 
 
 ;;
+;; FN
+;;
+
+(defn python-tf-arr-every
+  [[_ arr pred]]
+  (template/$ (all (map ~pred ~arr))))
+
+(defn python-tf-arr-some
+    [[_ arr pred]]
+  (template/$ (any (map ~pred ~arr))))
+
+(def +python-fn+
+  {:arr-every       {:macro #'python-tf-arr-every   :emit :macro}
+   :arr-some        {:macro #'python-tf-arr-some    :emit :macro}})
+
+
+;;
 ;; STRING
 ;;
 
@@ -455,6 +440,14 @@
   ([[_ s]]
    (list '. s '(rstrip))))
 
+(defn python-tf-x-str-pad-left
+  ([[_ s n ch]]
+   (list '. s (list 'rjust n ch))))
+
+(defn python-tf-x-str-pad-right
+  ([[_ s n ch]]
+     (list '. s (list 'ljust n ch))))
+
 (def +python-str+
   {:x-str-char       {:macro #'python-tf-x-str-char      :emit :macro}
    :x-str-split      {:macro #'python-tf-x-str-split      :emit :macro}
@@ -467,7 +460,9 @@
    :x-str-replace    {:macro #'python-tf-x-str-replace    :emit :macro}
    :x-str-trim       {:macro #'python-tf-x-str-trim       :emit :macro}
    :x-str-trim-left  {:macro #'python-tf-x-str-trim-left  :emit :macro}
-   :x-str-trim-right {:macro #'python-tf-x-str-trim-right :emit :macro}})
+   :x-str-trim-right {:macro #'python-tf-x-str-trim-right :emit :macro}
+   :x-str-pad-left   {:macro #'python-tf-x-str-pad-left   :emit :macro}
+   :x-str-pad-right  {:macro #'python-tf-x-str-pad-right  :emit :macro}})
 
 ;;
 ;; JSON
@@ -628,116 +623,15 @@
    :x-iter-native?        {:macro #'python-tf-x-iter-native?        :emit :macro}})
 
 ;;
-;; CACHE
-;;
-
-(defn python-cache-name
-  [cache]
-  (or cache "__GLOBAL__"))
-
-(defn python-global-cache-root
-  []
-  (list '. '(globals) ["__xtalk_cache__"]))
-
-(defn python-global-cache-bucket
-  [cache]
-  (list '. (python-global-cache-root) [(python-cache-name cache)]))
-
-(defn python-tf-x-cache
-  ([[_ name]]
-   (template/$ (do (var g (globals))
-                   (if (not (. g (get "__xtalk_cache__")))
-                     (:= (. g ["__xtalk_cache__"]) {}))
-                   (if (not (. (. g ["__xtalk_cache__"]) (get ~name)))
-                     (:= (. (. g ["__xtalk_cache__"]) [~name]) {}))
-                   (return ~name)))))
-
-(defn python-tf-x-cache-list
-  ([[_ cache]]
-   (template/$ (do (var g (globals))
-                   (if (not (. g (get "__xtalk_cache__")))
-                     (:= (. g ["__xtalk_cache__"]) {}))
-                   (if (not (. (. g ["__xtalk_cache__"]) (get ~(python-cache-name cache))))
-                     (:= (. (. g ["__xtalk_cache__"]) [~(python-cache-name cache)]) {}))
-                   (return (list (. ~(python-global-cache-bucket cache) (keys))))))))
-
-(defn python-tf-x-cache-flush
-  ([[_ cache]]
-   (template/$ (do (var g (globals))
-                   (if (not (. g (get "__xtalk_cache__")))
-                     (:= (. g ["__xtalk_cache__"]) {}))
-                   (:= (. (. g ["__xtalk_cache__"]) [~(python-cache-name cache)]) {})
-                   (return ~(python-global-cache-bucket cache))))))
-
-(defn python-tf-x-cache-get
-  ([[_ cache key]]
-   (template/$ (do (var g (globals))
-                   (if (not (. g (get "__xtalk_cache__")))
-                     (:= (. g ["__xtalk_cache__"]) {}))
-                   (if (not (. (. g ["__xtalk_cache__"]) (get ~(python-cache-name cache))))
-                     (:= (. (. g ["__xtalk_cache__"]) [~(python-cache-name cache)]) {}))
-                   (return (. ~(python-global-cache-bucket cache) (get ~key)))))))
-
-(defn python-tf-x-cache-set
-  ([[_ cache key val]]
-   (template/$ (do (var g (globals))
-                   (if (not (. g (get "__xtalk_cache__")))
-                     (:= (. g ["__xtalk_cache__"]) {}))
-                   (if (not (. (. g ["__xtalk_cache__"]) (get ~(python-cache-name cache))))
-                     (:= (. (. g ["__xtalk_cache__"]) [~(python-cache-name cache)]) {}))
-                   (:= (. ~(python-global-cache-bucket cache) [~key]) ~val)
-                   (return ~val)))))
-
-(defn python-tf-x-cache-del
-  ([[_ cache key]]
-   (template/$ (do (var g (globals))
-                   (if (not (. g (get "__xtalk_cache__")))
-                     (:= (. g ["__xtalk_cache__"]) {}))
-                   (if (not (. (. g ["__xtalk_cache__"]) (get ~(python-cache-name cache))))
-                     (:= (. (. g ["__xtalk_cache__"]) [~(python-cache-name cache)]) {}))
-                   (. ~(python-global-cache-bucket cache) (pop ~key nil))
-                   (return true)))))
-
-(defn python-tf-x-cache-incr
-  ([[_ cache key amount]]
-   (template/$ (do (var g (globals))
-                   (if (not (. g (get "__xtalk_cache__")))
-                     (:= (. g ["__xtalk_cache__"]) {}))
-                   (if (not (. (. g ["__xtalk_cache__"]) (get ~(python-cache-name cache))))
-                     (:= (. (. g ["__xtalk_cache__"]) [~(python-cache-name cache)]) {}))
-                   (var prev (or (. ~(python-global-cache-bucket cache) (get ~key))
-                                 0))
-                   (var curr (+ prev ~amount))
-                   (:= (. ~(python-global-cache-bucket cache) [~key]) curr)
-                   (return curr)))))
-
-(def +python-cache+
-  {:x-cache                 {:macro #'python-tf-x-cache        :emit :macro}
-   :x-cache-list            {:macro #'python-tf-x-cache-list   :emit :macro}
-   :x-cache-flush           {:macro #'python-tf-x-cache-flush  :emit :macro}
-   :x-cache-get             {:macro #'python-tf-x-cache-get    :emit :macro}
-   :x-cache-set             {:macro #'python-tf-x-cache-set    :emit :macro}
-   :x-cache-del             {:macro #'python-tf-x-cache-del    :emit :macro}
-   :x-cache-incr            {:macro #'python-tf-x-cache-incr   :emit :macro}})
-
-;;
 ;; ASYNC
 ;;
 
 (defn python-tf-x-thread-spawn
   ([[_ thunk]]
-   (template/$ (. (__import__ "threading")
-           (Thread :target ~thunk)
-           (start)))))
-
-(defn python-tf-x-thread-spawn
-  ([[_ thunk]]
-   (with-meta
-      (template/$ (do (var threading  (__import__ "threading"))
-               (var thread := (threading.Thread :target ~thunk))
-               (. thread (start))
-               (return thread)))
-      {:assign/template 'thread})))
+   (template/$
+    (. (__import__ "threading")
+       (Thread :target ~thunk)
+       (start)))))
 
 (defn python-tf-x-thread-join
   ([[_ thread]]
@@ -745,12 +639,13 @@
 
 (defn python-tf-x-with-delay
   ([[_ thunk ms]]
-   (template/$ (do (fn delay_target []
-                     (. (__import__ "time")
-                        (sleep (/ ~ms 1000)))
-                     (var f := ~thunk)
-                     (return (f)))
-                   (x:thread-spawn delay_target)))))
+   (template/$
+    (do (fn delay_target []
+          (. (__import__ "time")
+             (sleep (/ ~ms 1000)))
+          (var f := ~thunk)
+          (return (f)))
+        (x:thread-spawn delay_target)))))
 
 (def +python-thread+
   {:x-thread-spawn   {:macro #'python-tf-x-thread-spawn  :emit :macro   :type :template}
@@ -803,7 +698,6 @@
 
 (def +python+
   (merge +python-core+
-         +python-proto+
          +python-global+
          +python-custom+
          +python-math+
@@ -816,7 +710,6 @@
          +python-return+
          +python-socket+
          +python-iter+
-         +python-cache+
          +python-thread+
          +python-file+
          +python-b64+))
@@ -826,46 +719,8 @@
 
  
 
-  ;;
-  ;; FN
-  ;;
 
-  (defn python-tf-x-fn-every
-    [[_ arr pred]]
-    (template/$ (return (all (map pred arr)))))
-
-  (defn python-tf-x-fn-some
-    [[_ arr pred]]
-    (template/$ (return (any (map pred arr)))))
-
-  (defn python-tf-x-fn-foldl
-    [[_ arr f init]]
-    (template/$ (do (:- :import functools)
-             (return (functools.reduce ~f ~arr ~init)))))
-
-  (defn python-tf-x-fn-foldr
-    [[_ arr f init]]
-    (template/$ (do (:- :import functools)
-             (return (functools.reduce ~f
-                                       (:% ~arr [(:- "::-1")])
-                                       ~init)))))
-
-  (def +python-fn+
-    {:x-fn-every       {:macro #'python-tf-x-fn-every   :emit :macro}
-     :x-fn-some        {:macro #'python-tf-x-fn-some    :emit :macro}
-     :x-fn-foldl       {:macro #'python-tf-x-fn-foldl   :emit :macro}
-     :x-fn-foldr       {:macro #'python-tf-x-fn-foldr   :emit :macro}})
-
-
-  (defn python-tf-x-str-pad-left
-    ([[_ s n ch]]
-     (list '. s (list 'rjust n ch))))
-
-  (defn python-tf-x-str-pad-right
-    ([[_ s n ch]]
-     (list '. s (list 'ljust n ch))))
-  :x-str-pad-left   {:macro #'python-tf-x-str-pad-left   :emit :macro}
-  :x-str-pad-right  {:macro #'python-tf-x-str-pad-right  :emit :macro}
+  
   
   
   ;;

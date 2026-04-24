@@ -262,6 +262,28 @@
                                (list 'fn '[]
                                      finally))])))))
 
+(defn js-tf-prototype-get
+  [[_ obj]]
+  (list 'Object.getPrototypeOf obj))
+
+(defn js-tf-prototype-set
+  [[_ obj prototype]]
+  (list 'Object.setPrototypeOf obj prototype))
+
+(defn js-tf-prototype-create
+  [[_ m]]
+  (template/$
+   (do (var out {})
+       (for:object
+        [[k f] ~m]
+        (if (x:is-function? f)
+          (:= (. out [k])
+              (fn [...args]
+                (return 
+                 (f this ...args))))
+          (:= (. out [k]) f)))
+       (return out))))
+
 (def +features+
   (-> (grammar/build :exclude [:pointer
                                :block
@@ -278,7 +300,11 @@
         :for-iter    {:macro  #'tf-for-iter    :emit :macro}
         :for-return  {:macro  #'tf-for-return  :emit :macro}
         :for-try     {:macro  #'tf-for-try     :emit :macro}
-        :for-async   {:macro  #'tf-for-async   :emit :macro}})
+        :for-async   {:macro  #'tf-for-async   :emit :macro}
+        :prototype-get       {:macro #'js-tf-prototype-get     :emit :macro}
+        :prototype-set       {:macro #'js-tf-prototype-set     :emit :macro}
+        :prototype-create    {:macro #'js-tf-prototype-create  :emit :macro}
+        :prototype-tostring  {:emit :unit  :default "toString"}})
       (grammar/build:override fn/+js+)
       (grammar/build:extend
        {:property   {:op :property  :symbol  '#{property}   :assign ":" :raw "property" :value true :emit :def-assign}

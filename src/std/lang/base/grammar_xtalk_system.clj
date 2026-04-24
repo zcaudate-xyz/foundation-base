@@ -29,7 +29,6 @@
                    xtalk/+xt-functional-array+
                    xtalk/+xt-functional-iter+]
    :xtalk-impl    [xtalk/+xt-lang-global+
-                   xtalk/+xt-lang-proto+
                    xtalk/+xt-lang-bit+
                    xtalk/+xt-lang-throw+
                    xtalk/+xt-lang-unpack+
