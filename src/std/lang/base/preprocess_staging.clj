@@ -1,5 +1,5 @@
 (ns std.lang.base.preprocess-staging
-  (:require [std.lang.base.preprocess-base :as preprocess]
+  (:require [std.lang.base.emit-preprocess :as preprocess] [std.lang.base.preprocess-base :as preprocess-base]
             [std.lang.base.preprocess-assign :as assign]
             [std.lang.base.preprocess-resolve :as resolve]
             [std.lang.base.preprocess-value :as value]
@@ -33,7 +33,7 @@
                          :std.lang/lang (:lang mopts)
                          :std.lang/module (ut/module-id (:module mopts))})]
             (try
-              (binding [preprocess/*macro-opts* mopts]
+              (binding [preprocess-base/*macro-opts* mopts]
                 (walk-fn ((:macro reserved) form)))
               (catch Throwable t
                 (ut/throw-with-context
@@ -69,8 +69,8 @@
                 (do (if deps-fragment
                       (vswap! deps-fragment conj (ut/sym-full fe)))
                     (walk-fn (try
-                               (binding [preprocess/*macro-form* form
-                                         preprocess/*macro-opts* mopts]
+                               (binding [preprocess-base/*macro-form* form
+                                         preprocess-base/*macro-opts* mopts]
                                  (apply (:template fe) (rest form)))
                                (catch Throwable t
                                  (ut/throw-with-context
@@ -90,9 +90,9 @@
                  :std.lang/lang (:lang mopts)
                  :std.lang/module (ut/module-id (:module mopts))
                  :std.lang/entry (some-> (:entry mopts) ut/entry-summary)})]
-    (binding [preprocess/*macro-skip-deps* false
-              preprocess/*macro-grammar* grammar
-              preprocess/*macro-opts* mopts]
+    (binding [preprocess-base/*macro-skip-deps* false
+              preprocess-base/*macro-grammar* grammar
+              preprocess-base/*macro-opts* mopts]
       (let [deps          (volatile! #{})
             deps-fragment (volatile! #{})
             deps-native   (volatile! {})
@@ -126,9 +126,9 @@
   "resolves only the code symbols (no macroexpansion)"
   {:added "4.0"}
   [input grammar modules mopts]
-  (binding [preprocess/*macro-skip-deps* true
-            preprocess/*macro-grammar* grammar
-            preprocess/*macro-opts* mopts]
+  (binding [preprocess-base/*macro-skip-deps* true
+            preprocess-base/*macro-grammar* grammar
+            preprocess-base/*macro-opts* mopts]
     (let [form (walk/prewalk
                 (fn walk-fn [form]
                   (cond (and (collection/form? form)

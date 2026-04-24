@@ -2,7 +2,7 @@
   (:require [clojure.set :as set]
             [std.lang.base.book :as b]
             [std.lang.base.emit :as emit]
-            [std.lang.base.emit-preprocess :as preprocess]
+            [std.lang.base.emit-preprocess :as preprocess] [std.lang.base.preprocess-base :as preprocess-base]
             [std.lang.base.emit-rewrite :as rewrite]
             [std.lang.base.impl-deps-imports :as imports]
             [std.lang.base.impl-entry :as entry]

@@ -5,7 +5,7 @@
             [std.lang.base.emit-common :as common]
             [std.lang.base.emit-data :as data]
             [std.lang.base.emit-helper :as helper]
-            [std.lang.base.emit-preprocess :as preprocess]
+            [std.lang.base.emit-preprocess :as preprocess] [std.lang.base.preprocess-base :as preprocess-base]
             [std.lang.base.emit-top-level :as top]
             [std.lang.base.grammar :as grammar]
             [std.lang.base.script :as script]
@@ -62,8 +62,8 @@
 (defn php-defn
   "emit php function definition"
   [[_ sym args & body]]
-  (let [grammar preprocess/*macro-grammar*
-        mopts   preprocess/*macro-opts*
+  (let [grammar preprocess-base/*macro-grammar*
+        mopts   preprocess-base/*macro-opts*
         sym-str (common/emit-symbol sym grammar (assoc mopts :php/func true))
         args-str (php-invoke-args args grammar (dissoc mopts :php/func))
         body-str (common/*emit-fn* (cons 'do body) grammar (dissoc mopts :php/func))]
@@ -72,8 +72,8 @@
 (defn php-defn-
   "emit php anonymous function"
   [[_ args & body]]
-  (let [grammar preprocess/*macro-grammar*
-        mopts   preprocess/*macro-opts*
+  (let [grammar preprocess-base/*macro-grammar*
+        mopts   preprocess-base/*macro-opts*
         args-str (php-invoke-args args grammar (dissoc mopts :php/func))
         body-str (common/*emit-fn* (cons 'do body) grammar (dissoc mopts :php/func))]
     (list :- (str "function (" args-str ") {\n" body-str "\n}"))))
@@ -118,15 +118,15 @@
 (defn php-dot
   "emit php object access ->"
   [[_ obj & props]]
-  (let [grammar preprocess/*macro-grammar*
-        mopts   preprocess/*macro-opts*]
+  (let [grammar preprocess-base/*macro-grammar*
+        mopts   preprocess-base/*macro-opts*]
     (list :- (php-dot-string obj props grammar mopts))))
 
 (defn php-new
   "emit new Class()"
   [[_ cls & args]]
-  (let [grammar preprocess/*macro-grammar*
-        mopts   preprocess/*macro-opts*
+  (let [grammar preprocess-base/*macro-grammar*
+        mopts   preprocess-base/*macro-opts*
         cls-str (common/emit-symbol cls grammar (assoc mopts :php/func true))
         args-str (php-invoke-args args grammar mopts)]
     (list :- (str "new " cls-str "(" args-str ")"))))

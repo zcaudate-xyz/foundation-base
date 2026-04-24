@@ -6,7 +6,7 @@
             [rt.postgres.runtime.impl-insert :as insert]
             [rt.postgres.runtime.impl-main :as main]
             [std.lang :as l]
-            [std.lang.base.emit-preprocess :as preprocess]
+            [std.lang.base.emit-preprocess :as preprocess] [std.lang.base.preprocess-base :as preprocess-base]
             [std.lang.base.library-snapshot :as snap]
             [std.lang.base.util :as ut]
             [std.lib.foundation :as f]))

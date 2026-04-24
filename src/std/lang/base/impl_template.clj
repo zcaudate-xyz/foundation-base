@@ -1,5 +1,5 @@
 (ns std.lang.base.impl-template
-  (:require [std.lang.base.emit-preprocess :as preprocess]
+  (:require [std.lang.base.emit-preprocess :as preprocess] [std.lang.base.preprocess-base :as preprocess-base]
             [std.lang.base.emit-rewrite :as rewrite]
             [std.lang.base.grammar-xtalk-system :as xtalk-system]
             [std.lib.collection :as collection]

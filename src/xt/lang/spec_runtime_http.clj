@@ -5,7 +5,7 @@
 
 (defspec.xt x:b64-encode [:fn [:xt/str] :xt/str])
 
-(defmacro.xt ^{:standalone true :is-template false} 
+(defmacro.xt ^{:standalone true} 
   x:b64-encode
   "encodes base64 strings"
   {:added "4.1"}
@@ -13,7 +13,7 @@
 
 (defspec.xt x:b64-decode [:fn [:xt/str] :xt/str])
 
-(defmacro.xt ^{:standalone true :is-template false} 
+(defmacro.xt ^{:standalone true} 
   x:b64-decode
   "decodes base64 strings"
   {:added "4.1"}
@@ -22,7 +22,7 @@
 
 (defspec.xt x:uri-encode [:fn [:xt/str] :xt/str])
 
-(defmacro.xt ^{:standalone true :is-template false} 
+(defmacro.xt ^{:standalone true} 
   x:uri-encode
   "encodes uri components"
   {:added "4.1"}
@@ -30,7 +30,7 @@
 
 (defspec.xt x:uri-decode [:fn [:xt/str] :xt/str])
 
-(defmacro.xt ^{:standalone true :is-template false} 
+(defmacro.xt ^{:standalone true} 
   x:uri-decode
   "decodes uri components"
   {:added "4.1"}

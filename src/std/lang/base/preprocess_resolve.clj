@@ -1,5 +1,5 @@
 (ns std.lang.base.preprocess-resolve
-  (:require [std.lang.base.emit-preprocess :as preprocess]
+  (:require [std.lang.base.emit-preprocess :as preprocess] [std.lang.base.preprocess-base :as preprocess-base]
             [std.lang.base.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
@@ -63,7 +63,7 @@
       (f/error "Suppressed module - macros only"
                {:sym [sym-module (:id entry)]
                 :module (dissoc module :code :fragment)}))
-    (if (not (or preprocess/*macro-skip-deps*
+    (if (not (or preprocess-base/*macro-skip-deps*
                  (not deps)
                  (= 'defglobal op)
                  (= 'defrun op)))
@@ -73,7 +73,7 @@
 (defn- process-fragment-entry
   [entry sym-full sym-module sym deps-fragment walk-fn]
   (let [{:keys [template standalone form]} entry]
-    (if (not (or preprocess/*macro-skip-deps*
+    (if (not (or preprocess-base/*macro-skip-deps*
                  (not deps-fragment)))
       (vswap! deps-fragment conj sym-full))
     (cond (not template) form
@@ -105,7 +105,7 @@
              (= sym-id (:id entry)))
       sym-full
       (let [[type entry] (resolve-module-entry sym-module sym-id modules mopts)]
-        (or (if preprocess/*macro-skip-deps*
+        (or (if preprocess-base/*macro-skip-deps*
               sym-full)
             (case type
               (:header :code) (process-code-entry entry sym-full sym-module module deps)

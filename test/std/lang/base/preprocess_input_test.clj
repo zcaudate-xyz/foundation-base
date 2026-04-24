@@ -1,6 +1,6 @@
 (ns std.lang.base.preprocess-input-test
   (:use code.test)
-  (:require [std.lang.base.emit-preprocess :as preprocess]
+  (:require [std.lang.base.emit-preprocess :as preprocess] [std.lang.base.preprocess-base :as preprocess-base]
             [std.lang.base.preprocess-input :refer :all]))
 
 ^{:refer std.lang.base.preprocess-input/to-input-form :added "4.1"}
@@ -32,6 +32,6 @@
   (to-input '(do (~! [1 2 3 4])))
   => (throws)
 
-  (binding [preprocess/*macro-splice* true]
+  (binding [preprocess-base/*macro-splice* true]
     (to-input '(do (~! [1 2 3 4]))))
   => '(do 1 2 3 4))

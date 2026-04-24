@@ -1,7 +1,7 @@
 (ns std.lang.base.emit-common
   (:require [clojure.string]
             [std.lang.base.emit-helper :as helper]
-            [std.lang.base.emit-preprocess :as preprocess]
+            [std.lang.base.emit-preprocess :as preprocess] [std.lang.base.preprocess-base :as preprocess-base]
             [std.lang.base.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
@@ -162,8 +162,8 @@
   ([_ [tag & more :as form] grammar mopts]
    (let [{:keys [macro] :as m} (get-in grammar [:reserved tag])]
      (if m
-       (binding [preprocess/*macro-opts* mopts
-                 preprocess/*macro-grammar* grammar]
+       (binding [preprocess-base/*macro-opts* mopts
+                 preprocess-base/*macro-grammar* grammar]
          (*emit-fn* (macro form) grammar mopts))
        (f/error "Not found: " {:input form})))))
 

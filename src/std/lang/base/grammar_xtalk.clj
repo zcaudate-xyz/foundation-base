@@ -2,7 +2,7 @@
   (:require [clojure.string :as str]
             [std.block.template :as gen]
             [std.lib.foundation :as f]
-            [std.lang.base.emit-preprocess :as preprocess]))
+            [std.lang.base.emit-preprocess :as preprocess] [std.lang.base.preprocess-base :as preprocess-base]))
 
 (defn tf-throw
   "wrapper for throw transform"
@@ -196,14 +196,14 @@
   "del-key transform"
   {:added "4.0"}
   []
-  (let [grammar preprocess/*macro-grammar*]
+  (let [grammar preprocess-base/*macro-grammar*]
     (or (get-in grammar [:default :index :offset]) 0)))
 
 (defn tf-grammar-end-inclusive
   "gets the end inclusive flag"
   {:added "4.0"}
   []
-  (let [grammar preprocess/*macro-grammar*]
+  (let [grammar preprocess-base/*macro-grammar*]
     (get-in grammar [:default :index :end-inclusive])))
 
 (defn tf-offset-base

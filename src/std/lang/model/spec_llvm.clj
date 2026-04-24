@@ -3,7 +3,7 @@
             [std.lang.base.book :as book]
             [std.lang.base.emit :as emit]
             [std.lang.base.emit-common :as common]
-            [std.lang.base.emit-preprocess :as preprocess]
+            [std.lang.base.emit-preprocess :as preprocess] [std.lang.base.preprocess-base :as preprocess-base]
             [std.lang.base.grammar :as grammar]
             [std.lang.base.script :as script]
             [std.lang.base.util :as ut]
@@ -16,13 +16,13 @@
   (let [args-str (if (vector? args)
                    (str "("
                         (clojure.string/join ", " (map (fn [[t n]]
-                                              (str (common/emit-common t preprocess/*macro-grammar* {})
+                                              (str (common/emit-common t preprocess-base/*macro-grammar* {})
                                                    " "
-                                                   (common/emit-common n preprocess/*macro-grammar* {})))
+                                                   (common/emit-common n preprocess-base/*macro-grammar* {})))
                                             (partition 2 args)))
                         ")")
-                   (common/emit-common args preprocess/*macro-grammar* {}))
-        name-str (common/emit-common name preprocess/*macro-grammar* {})]
+                   (common/emit-common args preprocess-base/*macro-grammar* {}))
+        name-str (common/emit-common name preprocess-base/*macro-grammar* {})]
     (list :- "define" ret-type (str name-str args-str)
           (list :- "{"
                 (list \\
@@ -36,18 +36,18 @@
   (let [args-str (if (vector? args)
                    (str "("
                         (clojure.string/join ", " (map (fn [x]
-                                              (common/emit-common x preprocess/*macro-grammar* {}))
+                                              (common/emit-common x preprocess-base/*macro-grammar* {}))
                                             args))
                         ")")
-                   (common/emit-common args preprocess/*macro-grammar* {}))
-        name-str (common/emit-common name preprocess/*macro-grammar* {})]
+                   (common/emit-common args preprocess-base/*macro-grammar* {}))
+        name-str (common/emit-common name preprocess-base/*macro-grammar* {})]
     (list :- "declare" ret-type (str name-str args-str))))
 
 (defn tf-label
   "transforms label"
   {:added "4.0"}
   [[_ name]]
-  (list :- (str (common/emit-common name preprocess/*macro-grammar* {}) ":")))
+  (list :- (str (common/emit-common name preprocess-base/*macro-grammar* {}) ":")))
 
 (defn tf-ret
   "transforms ret"
@@ -68,13 +68,13 @@
   {:added "4.0"}
   [op]
   (fn [[_ type op1 op2]]
-    (list :- op type (str (common/emit-common op1 preprocess/*macro-grammar* {}) ",") op2)))
+    (list :- op type (str (common/emit-common op1 preprocess-base/*macro-grammar* {}) ",") op2)))
 
 (defn tf-icmp
   "transforms icmp"
   {:added "4.0"}
   [[_ cond type op1 op2]]
-  (list :- "icmp" cond type (str (common/emit-common op1 preprocess/*macro-grammar* {}) ",") op2))
+  (list :- "icmp" cond type (str (common/emit-common op1 preprocess-base/*macro-grammar* {}) ",") op2))
 
 (defn tf-br
   "transforms br"
@@ -83,9 +83,9 @@
   (if (= 1 (count args))
     (list :- "br" "label" (first args))
     (let [[cond true-label false-label] args
-          cond-str (str (common/emit-common cond preprocess/*macro-grammar* {}) ",")
-          true-label-str (str "label " (common/emit-common true-label preprocess/*macro-grammar* {}) ",")
-          false-label-str (str "label " (common/emit-common false-label preprocess/*macro-grammar* {}))]
+          cond-str (str (common/emit-common cond preprocess-base/*macro-grammar* {}) ",")
+          true-label-str (str "label " (common/emit-common true-label preprocess-base/*macro-grammar* {}) ",")
+          false-label-str (str "label " (common/emit-common false-label preprocess-base/*macro-grammar* {}))]
       (list :- "br" "i1" cond-str true-label-str false-label-str))))
 
 (defn tf-call
@@ -96,13 +96,13 @@
                       (clojure.string/join ", " (map (fn [arg]
                                             (if (vector? arg)
                                               (let [[t v] arg]
-                                                (str (common/emit-common t preprocess/*macro-grammar* {})
+                                                (str (common/emit-common t preprocess-base/*macro-grammar* {})
                                                      " "
-                                                     (common/emit-common v preprocess/*macro-grammar* {})))
-                                              (common/emit-common arg preprocess/*macro-grammar* {})))
+                                                     (common/emit-common v preprocess-base/*macro-grammar* {})))
+                                              (common/emit-common arg preprocess-base/*macro-grammar* {})))
                                           args))
                       ")")]
-    (list :- "call" ret-type (str (common/emit-common name preprocess/*macro-grammar* {}) args-str))))
+    (list :- "call" ret-type (str (common/emit-common name preprocess-base/*macro-grammar* {}) args-str))))
 
 (defn tf-alloca
   "transforms alloca"
@@ -116,13 +116,13 @@
   "transforms store"
   {:added "4.0"}
   [[_ type val ptr-type ptr]]
-  (list :- "store" type (str (common/emit-common val preprocess/*macro-grammar* {}) ",") ptr-type ptr))
+  (list :- "store" type (str (common/emit-common val preprocess-base/*macro-grammar* {}) ",") ptr-type ptr))
 
 (defn tf-load
   "transforms load"
   {:added "4.0"}
   [[_ type ptr-type ptr]]
-  (list :- "load" (str (common/emit-common type preprocess/*macro-grammar* {}) ",") ptr-type ptr))
+  (list :- "load" (str (common/emit-common type preprocess-base/*macro-grammar* {}) ",") ptr-type ptr))
 
 (def +features+
   (-> (grammar/build :include [:builtin :builtin-helper :free-control :control-base])

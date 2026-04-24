@@ -149,7 +149,7 @@
 
 (def ^:private GENERATE_COMMON_MACRO_TEMPLATE
   "
-(defmacro.xt ^{:standalone ~standalone :is-template ~is-template} 
+(defmacro.xt ^{:standalone ~standalone} 
   ~target
   ~@forms)")
 
@@ -170,10 +170,9 @@
                          (interpose [(std.block/newline)])
                          (mapcat (fn [x]
                                    (if (vector? x) x [x])))))]
-    {'target   target
-     'forms     forms
-     'standalone true
-     'is-template (boolean allow-blocks)}))
+     {'target   target
+      'forms     forms
+      'standalone true}))
 
 (def ^:private +generate-common-macro+
   (gen/get-template GENERATE_COMMON_MACRO_TEMPLATE

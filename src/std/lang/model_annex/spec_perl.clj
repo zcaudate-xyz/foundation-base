@@ -5,7 +5,7 @@
             [std.lang.base.emit-common :as common]
             [std.lang.base.emit-data :as data]
             [std.lang.base.emit-helper :as helper]
-            [std.lang.base.emit-preprocess :as preprocess]
+            [std.lang.base.emit-preprocess :as preprocess] [std.lang.base.preprocess-base :as preprocess-base]
             [std.lang.base.emit-top-level :as top]
             [std.lang.base.grammar :as grammar]
             [std.lang.base.script :as script]
@@ -26,7 +26,7 @@
         sym-str (if (keyword? sym)
                   (f/strn sym)
                   (str "$" (f/strn sym)))]
-    (list :- (str "my " sym-str " = " (common/*emit-fn* val preprocess/*macro-grammar* preprocess/*macro-opts*)))))
+    (list :- (str "my " sym-str " = " (common/*emit-fn* val preprocess-base/*macro-grammar* preprocess-base/*macro-opts*)))))
 
 (defn perl-symbol
   "emit perl symbol with $ prefix if it's a variable"
@@ -61,8 +61,8 @@
 (defn perl-defn
   "emit perl subroutine definition"
   [[_ sym args & body]]
-  (let [grammar preprocess/*macro-grammar*
-        mopts   preprocess/*macro-opts*
+  (let [grammar preprocess-base/*macro-grammar*
+        mopts   preprocess-base/*macro-opts*
         sym-str (common/emit-symbol sym grammar (assoc mopts :perl/func true))
         args-emit (map (fn [arg]
                          (str "my " (perl-symbol arg grammar mopts) " = shift;"))

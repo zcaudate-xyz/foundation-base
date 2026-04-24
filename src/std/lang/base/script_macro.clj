@@ -1,6 +1,6 @@
 (ns std.lang.base.script-macro
   (:require [std.lang.base.emit :as emit]
-            [std.lang.base.emit-preprocess :as preprocess]
+            [std.lang.base.emit-preprocess :as preprocess] [std.lang.base.preprocess-base :as preprocess-base]
             [std.lang.base.impl :as impl]
             [std.lang.base.impl-entry :as entry]
             [std.lang.base.library :as lib]
@@ -198,7 +198,7 @@
          [module fmeta] (intern-prep lang form-raw)
          form          (apply list op sym body)
          
-         [tmeta entry] (binding [preprocess/*macro-splice* (:static/template smeta)]
+         [tmeta entry] (binding [preprocess-base/*macro-splice* (:static/template smeta)]
                          (entry/create-code-raw form
                                                 reserved
                                                 (merge smeta

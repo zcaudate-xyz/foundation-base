@@ -1,6 +1,6 @@
 (ns std.lang.base.preprocess-assign
   (:require [std.lang.base.emit-helper :as helper]
-            [std.lang.base.preprocess-base :as preprocess]
+            [std.lang.base.emit-preprocess :as preprocess] [std.lang.base.preprocess-base :as preprocess-base]
             [std.lang.base.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]))
@@ -130,9 +130,9 @@
                               (when-let [op (:op (get-in grammar [:reserved (first form)]))]
                                 (.startsWith (name op) "var-"))
                               macro)
-                     (let [expanded (binding [preprocess/*macro-form* form
-                                              preprocess/*macro-grammar* grammar
-                                              preprocess/*macro-opts* mopts]
+                     (let [expanded (binding [preprocess-base/*macro-form* form
+                                              preprocess-base/*macro-grammar* grammar
+                                              preprocess-base/*macro-opts* mopts]
                                       (macro form))]
                        (when (assignment-target expanded grammar)
                          (with-meta expanded
@@ -145,9 +145,9 @@
             (when (and (= :macro emit)
                        (:allow-blocks op-spec)
                        macro)
-            (let [expanded (binding [preprocess/*macro-form* value
-                                     preprocess/*macro-grammar* grammar
-                                     preprocess/*macro-opts* mopts]
+            (let [expanded (binding [preprocess-base/*macro-form* value
+                                     preprocess-base/*macro-grammar* grammar
+                                     preprocess-base/*macro-opts* mopts]
                              (macro value))
                   rewritten (rewrite-tail-return expanded target)]
               (cond-> (if declare?

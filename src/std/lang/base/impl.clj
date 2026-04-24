@@ -2,7 +2,7 @@
   (:require [clojure.string]
              [std.lang.base.emit :as emit]
              [std.lang.base.emit-common :as emit-common]
-             [std.lang.base.emit-preprocess :as preprocess]
+             [std.lang.base.emit-preprocess :as preprocess] [std.lang.base.preprocess-base :as preprocess-base]
              [std.lang.base.grammar :as grammar]
              [std.lang.base.impl-deps :as deps]
              [std.lang.base.impl-entry :as entry]
@@ -144,8 +144,8 @@
                  :std.lang/lang lang
                  :std.lang/module (ut/module-id (:module mopts))
                  :std.lang/namespace (ns-name (the-ns namespace))})]
-    (binding [preprocess/*macro-grammar* grammar
-              preprocess/*macro-opts* mopts]
+    (binding [preprocess-base/*macro-grammar* grammar
+              preprocess-base/*macro-opts* mopts]
       (if (not (:suppress emit))
         (let [{:keys [trim transform]} emit
               form (cond-> form transform (transform mopts))
