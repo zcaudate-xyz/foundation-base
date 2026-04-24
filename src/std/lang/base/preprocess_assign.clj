@@ -1,6 +1,7 @@
 (ns std.lang.base.preprocess-assign
   (:require [std.lang.base.emit-helper :as helper]
-            [std.lang.base.preprocess-base :as preprocess-base]
+ 	    [std.lang.base.preprocess-base :as preprocess-base]
+            [std.lang.base.preprocess-value :as value]
             [std.lang.base.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]))
@@ -124,41 +125,39 @@
 (defn process-template-assignment
   "rewrites rewrite-block xtalk macros in assignment position"
   {:added "4.1"}
-  [form grammar mopts]
-  (let [form (or (when-let [{:keys [emit macro]} (get-in grammar [:reserved (first form)])]
-                   (when (and (= :macro emit)
-                              (when-let [op (:op (get-in grammar [:reserved (first form)]))]
-                                (.startsWith (name op) "var-"))
-                              macro)
-                     (let [expanded (binding [preprocess-base/*macro-form* form
-                                              preprocess-base/*macro-grammar* grammar
-                                              preprocess-base/*macro-opts* mopts]
-                                      (macro form))]
-                       (when (assignment-target expanded grammar)
-                         (with-meta expanded
-                           (merge (meta form) (meta expanded)))))))
-                 form)]
-    (when-let [{:keys [declare? target value]} (assignment-target form grammar)]
-      (when (and (collection/form? value)
-                 (symbol? (first value)))
-          (let [{:keys [emit macro op-spec]} (get-in grammar [:reserved (first value)])]
-            (when (and (= :macro emit)
-                       (:allow-blocks op-spec)
-                       macro)
-            (let [expanded (binding [preprocess-base/*macro-form* value
-                                     preprocess-base/*macro-grammar* grammar
-                                     preprocess-base/*macro-opts* mopts]
-                             (macro value))
-                  rewritten (rewrite-tail-return expanded target)]
-              (cond-> (if declare?
-                        (with-meta (list 'do
-                                         (with-meta (apply list (concat (butlast form) [nil]))
-                                           (meta form))
-                                         rewritten)
-                          (meta form))
-                        (with-meta rewritten
-                          (meta form)))
-                true (vary-meta assoc :assign/template-default true)))))))))
+  ([form grammar mopts]
+   (process-template-assignment form grammar nil mopts))
+  ([form grammar modules mopts]
+   (let [form (or (when-let [{:keys [emit macro]} (get-in grammar [:reserved (first form)])]
+                    (when (and (= :macro emit)
+                               (when-let [op (:op (get-in grammar [:reserved (first form)]))]
+                                 (.startsWith (name op) "var-"))
+                               macro)
+                      (let [expanded (binding [preprocess-base/*macro-form* form
+                                               preprocess-base/*macro-grammar* grammar
+                                               preprocess-base/*macro-opts* mopts]
+                                       (macro form))]
+                        (when (assignment-target expanded grammar)
+                          (with-meta expanded
+                            (merge (meta form) (meta expanded)))))))
+                  form)]
+     (when-let [{:keys [declare? target value]} (assignment-target form grammar)]
+       (when-let [expanded (and (collection/form? value)
+                                (symbol? (first value))
+                                (value/expand-value-form value
+                                                         grammar
+                                                         modules
+                                                         mopts))]
+         (let [rewritten (rewrite-tail-return expanded target)]
+           (cond-> (if declare?
+                     (with-meta (list 'do
+                                      (with-meta (apply list (concat (butlast form) [nil]))
+                                        (meta form))
+                                      rewritten)
+                       (meta form))
+                     (with-meta rewritten
+                       (meta form)))
+             true (vary-meta assoc :assign/template-default true))))))))
 
 (defn protect-reserved-head
   [form]
