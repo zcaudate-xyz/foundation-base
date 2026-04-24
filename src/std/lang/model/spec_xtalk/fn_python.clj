@@ -612,15 +612,22 @@
   ([[_ it]]
    (list 'hasattr it "__next__")))
 
+(defn python-tf-x-iter-null
+  ([[_]]
+   '(if false (yield))))
+
 (def +python-iter+
-  {:x-iter-from-obj       {:macro #'python-tf-x-iter-from-obj       :emit :macro}
-   :x-iter-from-arr       {:macro #'python-tf-x-iter-from-arr       :emit :macro}
-   :x-iter-from           {:macro #'python-tf-x-iter-from           :emit :macro}
-   :x-iter-eq             {:macro #'python-tf-x-iter-eq             :emit :macro}
-   :x-iter-null           {:default '(if false (yield)) :emit :unit}
-   :x-iter-next           {:macro #'python-tf-x-iter-next           :emit :macro}
-   :x-iter-has?           {:macro #'python-tf-x-iter-has?           :emit :macro}
-   :x-iter-native?        {:macro #'python-tf-x-iter-native?        :emit :macro}})
+   {:x-iter-from-obj       {:macro #'python-tf-x-iter-from-obj       :emit :macro}
+    :x-iter-from-arr       {:macro #'python-tf-x-iter-from-arr       :emit :macro}
+    :x-iter-from           {:macro #'python-tf-x-iter-from           :emit :macro}
+    :x-iter-eq             {:macro #'python-tf-x-iter-eq             :emit :macro}
+    :x-iter-null           {:macro #'python-tf-x-iter-null
+                            :emit :macro
+                            :op-spec {:allow-blocks true}
+                            :value/standalone false}
+    :x-iter-next           {:macro #'python-tf-x-iter-next           :emit :macro}
+    :x-iter-has?           {:macro #'python-tf-x-iter-has?           :emit :macro}
+    :x-iter-native?        {:macro #'python-tf-x-iter-native?        :emit :macro}})
 
 ;;
 ;; ASYNC

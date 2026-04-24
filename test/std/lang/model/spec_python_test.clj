@@ -99,6 +99,14 @@
      (boolean (re-find #"return \{\"FINISHED\"\}" out))])
   => [true true true true true true true true])
 
+^{:added "4.1"}
+(fact "return can lower iterator-yield blocks in python"
+
+  (l/emit-as
+   :python '[(defn iter-fn []
+               (return (x:iter-null)))])
+  => "def iter_fn():\n  if False:\n    yield")
+
 ^{:refer std.lang.model.spec-python/python-var :added "4.0"}
 (fact "var -> fn.inner shorthand"
 
