@@ -33,15 +33,15 @@
                    xtalk/+xt-lang-throw+
                    xtalk/+xt-lang-unpack+
                    xtalk/+xt-lang-random+
-                   xtalk/+xt-lang-time+]
+                   xtalk/+xt-lang-time+
+                   xtalk/+xt-lang-json+]
    :xtalk-link    [xtalk/+xt-socket+
                    xtalk/+xt-notify-http+]
    :xtalk-runtime [xtalk/+xt-runtime-thread+
                    xtalk/+xt-runtime-shell+
                    xtalk/+xt-runtime-file+
                    xtalk/+xt-runtime-b64+
-                   xtalk/+xt-runtime-uri+
-                   xtalk/+xt-runtime-json+]})
+                   xtalk/+xt-runtime-uri+]})
 
 (def +xtalk-area->surface+
   {:xtalk-common  {:area :common

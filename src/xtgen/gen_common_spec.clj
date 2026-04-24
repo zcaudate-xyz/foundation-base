@@ -37,18 +37,18 @@
           xtalk/+xt-functional-return+
           xtalk/+xt-lang-bit+
           xtalk/+xt-lang-global+
-          xtalk/+xt-lang-proto+
           xtalk/+xt-lang-random+
           xtalk/+xt-lang-throw+
           xtalk/+xt-lang-time+
           xtalk/+xt-lang-unpack+
+          xtalk/+xt-lang-json+
+          xtalk/+xt-socket+
           xtalk/+xt-notify-http+
-          xtalk/+xt-runtime-b64+
-          xtalk/+xt-runtime-cache+
+          
           xtalk/+xt-runtime-file+
-          xtalk/+xt-runtime-json+
           xtalk/+xt-runtime-shell+
           xtalk/+xt-runtime-thread+
+          xtalk/+xt-runtime-b64+
           xtalk/+xt-runtime-uri+]))
 
 

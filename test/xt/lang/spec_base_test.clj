@@ -2360,10 +2360,22 @@
     out)
   => "ERR"
 
-  (!.lua (var out nil) (var success-fn (fn [cb] (return nil "OK"))) (xt/for:return [[ret err] (success-fn (xt/x:callback))] {:error (:= out err) :success (:= out ret)}) out)
+  (!.lua
+    (var out nil)
+    (var success-fn (fn [cb] (return nil "OK")))
+    (xt/for:return [[ret err] (success-fn (xt/x:callback))]
+      {:success (:= out ret)
+       :error   (:= out err)})
+    out)
   => "OK"
 
-  (!.lua (var out nil) (var failure-fn (fn [cb] (return "ERR" nil))) (xt/for:return [[ret err] (failure-fn (xt/x:callback))] {:error (:= out err) :success (:= out ret)}) out)
+  (!.lua
+    (var out nil)
+    (var failure-fn (fn [cb] (return "ERR" nil)))
+    (xt/for:return [[ret err] (failure-fn (xt/x:callback))]
+      {:success (:= out ret)
+       :error   (:= out err)})
+    out)
   => "ERR")
 
 ^{:refer xt.lang.spec-base/x:return-run :added "4.1"}
@@ -2556,18 +2568,18 @@
       (xt/x:iter-native? (iter-fn)))
   => true
   
-  ^*(!.py
+  (!.py
     (var iter-fn
          (fn []
            (return (xt/x:iter-null))))
-      (xt/x:iter-native? (iter-fn)))
+    (xt/x:iter-native? (iter-fn)))
   => true
-
+   
   (!.lua
     (var iter-fn
          (fn []
            (return (xt/x:iter-null))))
-      (xt/x:iter-native? (iter-fn)))
+    (xt/x:iter-native? (iter-fn)))
   => true)
 
 ^{:refer xt.lang.spec-base/x:iter-next :added "4.1"}

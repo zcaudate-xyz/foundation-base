@@ -877,6 +877,16 @@
               :arglists '([])
               :type [:fn [] :xt/int]}}])
 
+(def +xt-lang-json+
+  [{:op :x-json-encode      :symbol #{'x:json-encode}       :emit :abstract
+    :op-spec {:allow-blocks true
+              :arglists '([value])
+              :type [:fn [:xt/any] :xt/str]}}
+   {:op :x-json-decode      :symbol #{'x:json-decode}       :emit :abstract
+    :op-spec {:allow-blocks true
+              :arglists '([expr])
+              :type [:fn [:xt/str] :xt/any]}}])
+
 
 ;;
 ;; XTALK NOTIFY/LINK SPECIFICATION
@@ -902,6 +912,11 @@
     :op-spec {:allow-blocks true
               :type  [:fn [:xt/str :xt/num :xt/any :xt/str :xt/str :xt/any] :xt/any]
               :arglists '([host port value id key opts])}}])
+
+
+;;
+;; XTALK RUNTIME OS
+;;
 
 (def +xt-runtime-thread+
   [{:op :x-thread-spawn   :symbol #{'x:thread-spawn}    :emit :abstract
@@ -938,6 +953,11 @@
               :arglists '([path value opts cb])
               :type [:fn [:xt/str :xt/any :xt/any :xt/any] :xt/any]}}])
 
+
+;;
+;; XTALK RUNTIME HTTP
+;;
+
 (def +xt-runtime-b64+
   [{:op :x-b64-encode      :symbol #{'x:b64-encode}     :emit :abstract
     :op-spec {:allow-blocks true
@@ -957,13 +977,3 @@
     :op-spec {:allow-blocks true
               :arglists '([value])
               :type [:fn [:xt/str] :xt/str]}}])
-
-(def +xt-runtime-json+
-  [{:op :x-json-encode      :symbol #{'x:json-encode}       :emit :abstract
-    :op-spec {:allow-blocks true
-              :arglists '([value])
-              :type [:fn [:xt/any] :xt/str]}}
-   {:op :x-json-decode      :symbol #{'x:json-decode}       :emit :abstract
-    :op-spec {:allow-blocks true
-              :arglists '([expr])
-              :type [:fn [:xt/str] :xt/any]}}])
