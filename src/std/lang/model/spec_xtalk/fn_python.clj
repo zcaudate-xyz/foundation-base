@@ -702,12 +702,10 @@
 
 (defn python-tf-x-thread-spawn
   ([[_ thunk]]
-   (with-meta
-      (template/$ (do (var threading  (__import__ "threading"))
-               (var thread := (threading.Thread :target ~thunk))
-               (. thread (start))
-               (return thread)))
-      {:assign/template 'thread})))
+   (template/$ (do (var threading  (__import__ "threading"))
+                   (var thread := (threading.Thread :target ~thunk))
+                   (. thread (start))
+                   (return thread)))))
 
 (defn python-tf-x-thread-join
   ([[_ thread]]

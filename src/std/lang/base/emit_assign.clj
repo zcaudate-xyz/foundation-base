@@ -14,7 +14,6 @@
 
 (def +assign-types+
   #{:assign/inline
-    :assign/template
     :assign/fn})
 
 ;;
@@ -22,12 +21,9 @@
 ;;
 ;; :assign/inline will work with functions
 ;; - it will check if function is inlineable (one var declaration, one return statement, return statement is symbol)
-;; - it will do template substitution for the form
+;; - it will rewrite the assigned return into the target symbol
 ;; - preprocessor will exclude the first element of the list from deps
 ;; - it will always link to a code entry so if a macro in needed, tough.
-;;
-;; :assign/template works with macros, which will compile to a single form and have :assign out
-;; as the replacement
 ;;
 ;; :assign/fn works as well but it will bypass the dependency checker so be careful.
 ;;
@@ -85,8 +81,55 @@
     (if (and rsym? asym?)
       (apply list 'do* body)
       (apply list 'do* (concat body [(list 'var sym := (if rsym?
-                                                         (get smap @return-ref)
-                                                         @return-ref))])))))
+                                                          (get smap @return-ref)
+                                                          @return-ref))])))))
+
+(defn emit-def-assign-default
+  "assigns the expanded value using its return form"
+  {:added "4.1"}
+  [sym expanded]
+  (let [body (cond (and (collection/form? expanded)
+                        ('#{do do*} (first expanded)))
+                   (rest expanded)
+
+                   (and (collection/form? expanded)
+                        (= 'return (first expanded)))
+                   [expanded])]
+    (when (seq body)
+      (let [return-ref (volatile! nil)
+            body       (walk/postwalk (fn [form]
+                                        (if (collection/form? form)
+                                          (cond (= 'return (first form))
+                                                (if @return-ref
+                                                  (f/error "Default assign cannot have multiple returns."
+                                                           {:input expanded})
+                                                  (do (vreset! return-ref (second form))
+                                                      '<RETURN>))
+
+                                                :else
+                                                (remove (fn [x]
+                                                          (= x '<RETURN>))
+                                                        form))
+                                          form))
+                                      body)
+            _          (or @return-ref
+                           (f/error "Default assign requires a return."
+                                    {:input expanded}))
+            assign-ref (volatile! nil)
+            -          (walk/postwalk (fn [form]
+                                        (do (when (and (collection/form? form)
+                                                       (= 'var (first form)))
+                                              (let [asym (first (filter symbol? (rest form)))]
+                                                (when (= @return-ref asym)
+                                                  (vreset! assign-ref asym))))
+                                            form))
+                                      body)
+            body       (if @assign-ref
+                         (walk/prewalk-replace {@assign-ref sym} body)
+                         body)]
+        (if @assign-ref
+          (apply list 'do* body)
+          (apply list 'do* (concat body [(list 'var sym := @return-ref)])))))))
 
 (defn assign-options
   "gets assignment options either from value metadata or from a reserved macro entry"
@@ -105,21 +148,17 @@
   {:added "4.1"}
   [symbol value grammar mopts]
   (let [{inline :assign/inline
-         template :assign/template
          assign-fn :assign/fn} (assign-options value grammar)
-        reserved (when (and (collection/form? value)
-                            (symbol? (first value)))
-                   (get-in grammar [:reserved (first value)]))
-        expanded (if (and (= :macro (:emit reserved))
-                          (or assign-fn template inline))
-                   ((:macro reserved) value)
-                   value)]
+        expanded (preprocess/value-expand value grammar)]
     (cond assign-fn [:raw      (assign-fn symbol)]
-          template [:template (walk/prewalk-replace {template symbol} expanded)]
+          (and (not inline)
+               (not= expanded value))
+          (when-let [default (emit-def-assign-default symbol expanded)]
+            [:default default])
           inline   [:inline   (emit-def-assign-inline symbol
-                                                     expanded
-                                                     grammar
-                                                     mopts)])))
+                                                      value
+                                                      grammar
+                                                      mopts)])))
 
 (defn emit-def-assign
   "emits a declare expression"

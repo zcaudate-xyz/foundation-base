@@ -168,21 +168,56 @@
         argv     (if (vector? (first argv))
                    (first argv)
                    argv)]
-    (->> argv
-         rest
-         vec)))
+     (->> argv
+          rest
+          vec)))
+
+(def +value-types+
+  #{:value/template
+    :value/standalone})
+
+(defn value-options
+  "gets shared value options from metadata and reserved entries"
+  {:added "4.1"}
+  [value grammar]
+  (let [meta-opts (select-keys (meta value) +value-types+)
+        reserved-opts (cond (symbol? value)
+                            (select-keys (get-in grammar [:reserved value])
+                                         +value-types+)
+
+                            (and (collection/form? value)
+                                 (symbol? (first value)))
+                            (let [reserved (get-in grammar [:reserved (first value)])]
+                              (when (= :macro (:emit reserved))
+                                (select-keys reserved +value-types+))))]
+    (merge reserved-opts meta-opts)))
+
+(defn value-expand
+  "expands a value using shared value/template defaults"
+  {:added "4.1"}
+  [value grammar]
+  (let [{template :value/template} (value-options value grammar)
+        reserved (when (and (collection/form? value)
+                            (symbol? (first value)))
+                   (get-in grammar [:reserved (first value)]))]
+    (if (and (= :macro (:emit reserved))
+             (fn? template))
+      (template value)
+      value)))
 
 (defn value-standalone
   "returns the standalone expansion for a value-liftable reserved symbol"
   {:added "4.1"}
   [sym grammar]
   (let [{:keys [emit macro]
-          template :value/template
           standalone :value/standalone
           op-spec :op-spec} (get-in grammar [:reserved sym])
+        {template :value/template
+         standalone-override :value/standalone} (value-options sym grammar)
+        standalone (or standalone-override standalone)
         template (or template
-                     (when (= :macro emit)
-                       macro))
+                      (when (= :macro emit)
+                        macro))
         self-return? (= :xt/self
                         (get-in op-spec [:type 2]))]
     (cond (or (collection/form? standalone)
