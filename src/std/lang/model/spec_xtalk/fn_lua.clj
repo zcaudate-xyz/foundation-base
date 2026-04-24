@@ -399,6 +399,7 @@
          mt  (gensym "mt")
          ts  (gensym "ts")
          ret (gensym "ret")
+         has-num-key (gensym "has_num_key")
          rok (gensym "r_ok")
          rerr (gensym "r_err")]
      (template/$
@@ -428,12 +429,16 @@
                 (do (local ~mt := (getmetatable ~out))
                     (local ~ts nil)
                     (local ~ret nil)
+                    (local ~has-num-key false)
                     (if (and ~mt
                              (not= nil (. ~mt ["__name"])))
                       (:= ~ts (. ~mt ["__name"]))
-                      (if (== nil (. '(~out) [1]))
-                        (:= ~ts "Object")
-                        (:= ~ts "Array")))
+                      (do (for [k _ :in (pairs ~out)]
+                            (if (== "number" (type k))
+                              (:= ~has-num-key true)))
+                          (if ~has-num-key
+                            (:= ~ts "Array")
+                            (:= ~ts "Object"))))
                     (local '[~rok ~rerr]
                            (pcall (fn []
                                     (if (or (== ~ts "Object")

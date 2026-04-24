@@ -231,14 +231,11 @@
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-return-encode :added "4.0"}
 (fact "return encode"
-  (l/emit-as :lua [(lua-tf-x-return-encode '[_ out id key])])
-  => #"cjson.encode"
-
-  (l/emit-as :lua [(lua-tf-x-return-encode '[_ out id key])])
-  => #"\['return'\]"
-
-  (l/emit-as :lua [(lua-tf-x-return-encode '[_ out id key])])
-  => #"getmetatable")
+  (let [out (l/emit-as :lua [(lua-tf-x-return-encode '[_ out id key])])]
+    (boolean (and (re-find #"cjson.encode" out)
+                  (re-find #"\['return'\]" out)
+                  (re-find #"getmetatable" out))))
+  => true)
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-return-wrap :added "4.0"}
 (fact "return wrap"
