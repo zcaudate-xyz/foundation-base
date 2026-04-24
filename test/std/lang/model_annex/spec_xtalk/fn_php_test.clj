@@ -143,9 +143,9 @@
   (php-tf-x-arr-sort '(:x-arr-sort arr compare-fn))
   => '(usort arr compare-fn))
 
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-arr-str-comp :added "4.1"}
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-str-comp :added "4.1"}
 (fact "compares strings for array sorting"
-  (php-tf-x-arr-str-comp '(:x-arr-str-comp a b))
+  (php-tf-x-str-comp '(:x-str-comp a b))
   => '(< (strcmp a b) 0))
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-str-char :added "4.1"}
@@ -409,7 +409,7 @@
   (let [ops [:x-arr-insert
              :x-arr-remove
              :x-arr-sort
-             :x-arr-str-comp
+             :x-str-comp
              :x-b64-decode
              :x-b64-encode
              :x-cache

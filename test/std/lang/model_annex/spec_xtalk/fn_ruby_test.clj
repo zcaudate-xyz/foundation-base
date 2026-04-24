@@ -257,9 +257,9 @@
   (ruby-tf-x-to-number '(:x-to-number e))
   => '(. e to_f))
 
-^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-arr-str-comp :added "4.1"}
+^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-str-comp :added "4.1"}
 (fact "compares strings"
-  (ruby-tf-x-arr-str-comp '(_ a b))
+  (ruby-tf-x-str-comp '(_ a b))
   => '(< a b))
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-str-char :added "4.1"}

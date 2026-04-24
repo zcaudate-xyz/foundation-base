@@ -143,7 +143,7 @@
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-proto-create :added "4.0"}
 (fact "creates prototype"
   (l/emit-as :js [(js-tf-x-proto-create '[_ {:a 1}])])
-  => #"function \(\)\{"
+  => #"\.\.\.args"
 
   (l/emit-as :js [(js-tf-x-proto-create '[_ {:a 1}])])
   => #"Object.entries")
@@ -347,11 +347,12 @@
 (fact "registers functional array templates"
   (mapv (fn [k] (get-in +js+ [k :macro]))
         [:x-arr-clone :x-arr-each :x-arr-every :x-arr-some
-         :x-arr-map :x-arr-filter :x-arr-keep
-         :x-arr-foldl :x-arr-foldr :x-arr-find :x-arr-sort])
+          :x-arr-map :x-arr-filter :x-arr-keep
+          :x-arr-foldl :x-arr-foldr :x-arr-find :x-arr-sort])
   => [#'js-tf-x-arr-clone #'js-tf-x-arr-each #'js-tf-x-arr-every #'js-tf-x-arr-some
-      #'js-tf-x-arr-map #'js-tf-x-arr-filter
-      #'js-tf-x-arr-foldl #'js-tf-x-arr-foldr #'js-tf-x-arr-find #'js-tf-x-arr-sort])
+       #'js-tf-x-arr-map #'js-tf-x-arr-filter
+       #'js-tf-x-arr-keep
+       #'js-tf-x-arr-foldl #'js-tf-x-arr-foldr #'js-tf-x-arr-find #'js-tf-x-arr-sort])
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-str-char :added "4.0"}
 (fact "gets char"

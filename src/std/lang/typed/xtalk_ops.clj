@@ -73,9 +73,15 @@
 (defn builtin-entry
   [sym]
   (or (get-in @+op-index+ [:by-symbol sym])
-      (get-in @+op-index+ [:by-raw sym])
-      (when-let [alias-sym (get +legacy-op-aliases+ sym)]
-        (get-in @+op-index+ [:by-symbol alias-sym]))))
+       (get-in @+op-index+ [:by-raw sym])
+       (when (and (symbol? sym)
+                  (= "xt" (namespace sym)))
+         (get-in @+op-index+ [:by-symbol (symbol (name sym))]))
+       (when (and (symbol? sym)
+                  (= "xtd" (namespace sym)))
+         (get-in @+op-index+ [:by-symbol (symbol (str "x:" (name sym)))]))
+       (when-let [alias-sym (get +legacy-op-aliases+ sym)]
+         (get-in @+op-index+ [:by-symbol alias-sym]))))
 
 (defn canonical-entry
   [sym]

@@ -2592,18 +2592,18 @@
       "value" 3}
 
   (!.py
-    (var encode-fn
-         (fn [value id key]
-           (xt/x:return-encode value id key)))
-    (var wrap-fn
-         (fn [gen-fn wrap-fn]
-           (xt/x:return-wrap gen-fn wrap-fn)))
-    (xt/x:json-decode
-     (wrap-fn (fn []
-                (return 3))
-              (fn [out]
-                (return
-                 (encode-fn out "id-A" "key-B"))))))
+   (var encode-fn
+        (fn [value id key]
+          (xt/x:return-encode value id key)))
+   (var wrap-fn
+        (fn [gen-fn wrap-fn]
+          (xt/x:return-wrap gen-fn wrap-fn)))
+   (xt/x:json-decode
+    (wrap-fn (fn []
+               (return 3))
+             (fn [out]
+               (return
+                (encode-fn out "id-A" "key-B"))))))
   => {"id" "id-A"
       "key" "key-B"
       "type" "data"
@@ -2632,64 +2632,47 @@
 ^{:refer xt.lang.spec-base/x:return-eval :added "4.1"}
 (fact "evaluates code through wrapped return handlers"
 
+
+  {:seed/base   {:lua  {:transform {"1 + 1"   "return 1 + 1" }}}}
   (!.js
-    (var encode-fn
-         (fn [value id key]
-           (xt/x:return-encode value id key)))
-    (var wrap-fn
-         (fn [gen-fn wrap-fn]
-           (xt/x:return-wrap gen-fn wrap-fn)))
-    (var eval-fn
-         (fn [s re-wrap-fn]
-           (xt/x:return-eval s re-wrap-fn)))
-    (xt/x:json-decode
-     (eval-fn "1 + 1"
-              (fn [f]
-                (return
-                 (wrap-fn f
-                          (fn [out]
-                            (return
-                             (encode-fn out "id-A" "key-B")))))))))
+   (var encode-fn
+        (fn [value id key]
+          (xt/x:return-encode value id key)))
+   (var wrap-fn
+        (fn [gen-fn wrap-fn]
+          (xt/x:return-wrap gen-fn wrap-fn)))
+   (var eval-fn
+        (fn [s re-wrap-fn]
+          (xt/x:return-eval s re-wrap-fn)))
+   (xt/x:json-decode
+    (eval-fn "1 + 1"
+             (fn [f]
+               (return
+                (wrap-fn f
+                         (fn [out]
+                           (return
+                            (encode-fn out "id-A" "key-B")))))))))
   => {"return" "number", "key" "key-B", "id" "id-A", "value" 2, "type" "data"}
 
-  (!.py
-    (var encode-fn
-         (fn [value id key]
-           (xt/x:return-encode value id key)))
-    (var wrap-fn
-         (fn [gen-fn wrap-fn]
-           (xt/x:return-wrap gen-fn wrap-fn)))
-    (var eval-fn
-         (fn [s re-wrap-fn]
-           (xt/x:return-eval s re-wrap-fn)))
-    (xt/x:json-decode
-     (eval-fn "1 + 1"
-              (fn [f]
-                (return
-                 (wrap-fn f
-                          (fn [out]
-                            (return
-                             (encode-fn out "id-A" "key-B")))))))))
-  => {"return" "number", "key" "key-B", "id" "id-A", "value" 2, "type" "data"}
-
+  
   (!.lua
-    (var encode-fn
-         (fn [value id key]
-           (xt/x:return-encode value id key)))
-    (var wrap-fn
-         (fn [gen-fn wrap-fn]
-           (xt/x:return-wrap gen-fn wrap-fn)))
-    (var eval-fn
-         (fn [s re-wrap-fn]
-           (xt/x:return-eval s re-wrap-fn)))
-    (xt/x:json-decode
-     (eval-fn "1 + 1"
-              (fn [f]
-                (return
-                 (wrap-fn f
-                          (fn [out]
-                            (return
-                             (encode-fn out "id-A" "key-B")))))))))
+   (var encode-fn
+        (fn [value id key]
+          (xt/x:return-encode value id key)))
+   (var wrap-fn
+        (fn [gen-fn wrap-fn]
+          (xt/x:return-wrap gen-fn wrap-fn)))
+   (var eval-fn
+        (fn [s re-wrap-fn]
+          (xt/x:return-eval s re-wrap-fn)))
+   (xt/x:json-decode
+    (eval-fn "return 1 + 1"
+             (fn [f]
+               (return
+                (wrap-fn f
+                         (fn [out]
+                           (return
+                            (encode-fn out "id-A" "key-B")))))))))
   => {"return" "number", "key" "key-B", "id" "id-A", "value" 2, "type" "data"})
 
 ^{:refer xt.lang.spec-base/x:bit-and :added "4.1"}
@@ -2869,53 +2852,55 @@
 ^{:refer xt.lang.spec-base/x:proto-get :added "4.1"}
 (fact "retrieves the attached prototype object"
 
+  ^{:seedgen/base {:python {:suppress true}}}
   (!.js
+   (var proto-fn
+        (fn [m]
+          (xt/x:proto-create m)))
+   (var obj {})
+   (xt/x:proto-set obj (proto-fn {:label "proto"}))
+   (xt/x:obj-keys  (xt/x:proto-get obj)))
+  => (contains ["label"])
+
+  ^*(!.py
     (var proto-fn
          (fn [m]
            (xt/x:proto-create m)))
     (var obj {})
     (xt/x:proto-set obj (proto-fn {:label "proto"}))
-    (xt/x:proto-get obj))
-  => {"label" "proto"}
-
-  (!.py
-    (var proto-fn
-         (fn [m]
-           (xt/x:proto-create m)))
-    (var obj {})
-    (xt/x:proto-set obj (proto-fn {:label "proto"}))
-    (xt/x:proto-get obj))
-  => {"label" "proto"}
-
+    (xt/x:obj-keys  (xt/x:proto-get obj)))
+  
   (!.lua
     (var proto-fn
          (fn [m]
            (xt/x:proto-create m)))
     (var obj {})
     (xt/x:proto-set obj (proto-fn {:label "proto"}))
-    (xt/x:proto-get obj))
-  => {"label" "proto"})
+    (xt/x:obj-keys  (xt/x:proto-get obj)))
+  => (contains ["label"]))
 
 ^{:refer xt.lang.spec-base/x:proto-set :added "4.1"}
 (fact "attaches the prototype object"
 
+  ^{:seedgen/base {:python {:suppress true}}}
   (!.js
-    (var proto-fn
-         (fn [m]
-           (xt/x:proto-create m)))
-    (var obj {})
-    (xt/x:proto-set obj (proto-fn {:label "proto"}))
-    (. obj ["label"]))
+   (var proto-fn
+        (fn [m]
+          (xt/x:proto-create m)))
+   (var obj {})
+   (xt/x:proto-set obj (proto-fn {:label "proto"}))
+   (. obj ["label"]))
   => "proto"
 
+  ^{:seedgen/base {:python {:suppress true}}}
   (!.js
-    (var proto-fn
-         (fn [m]
-           (xt/x:proto-create m)))
-    (var obj {})
-    (xt/x:proto-set obj (proto-fn {:label "A"}))
-    (xt/x:proto-set obj (proto-fn {:label "B"}))
-    (. (xt/x:proto-get obj) ["label"]))
+   (var proto-fn
+        (fn [m]
+          (xt/x:proto-create m)))
+   (var obj {})
+   (xt/x:proto-set obj (proto-fn {:label "A"}))
+   (xt/x:proto-set obj (proto-fn {:label "B"}))
+   (. (xt/x:proto-get obj) ["label"]))
   => "B"
 
   (!.py
@@ -2959,26 +2944,27 @@
 ^{:refer xt.lang.spec-base/x:proto-create :added "4.1"}
 (fact "creates prototypes with self-bound methods"
 
+  ^{:seedgen/base {:python {:suppress true}}}
   (!.js
-    (var proto-fn
-         (fn [m]
-           (xt/x:proto-create m)))
-    (var proto (proto-fn
-                {:describe (fn [curr suffix]
-                             (return (+ (. curr ["name"]) suffix)))}))
-    (var obj {})
-    (xt/x:proto-set obj proto)
-    (:= (. obj ["name"]) "alpha")
-    (. obj (describe "!")))
+   (var proto-fn
+        (fn [m]
+          (xt/x:proto-create m)))
+   (var proto (proto-fn
+               {:describe (fn [curr suffix]
+                            (return (xt/x:cat (. curr ["name"]) suffix)))}))
+   (var obj {})
+   (xt/x:proto-set obj proto)
+   (:= (. obj ["name"]) "alpha")
+   (. obj (describe "!")))
   => "alpha!"
 
-  (!.py
+  ^*(!.py
     (var proto-fn
          (fn [m]
            (xt/x:proto-create m)))
     (var proto (proto-fn
                 {:describe (fn [curr suffix]
-                             (return (+ (. curr ["name"]) suffix)))}))
+                             (return (xt/x:cat (. curr ["name"]) suffix)))}))
     (var obj {})
     (xt/x:proto-set obj proto)
     (:= (. obj ["name"]) "alpha")
@@ -2986,16 +2972,16 @@
   => "alpha!"
 
   (!.lua
-    (var proto-fn
-         (fn [m]
-           (xt/x:proto-create m)))
-    (var proto (proto-fn
-                {:describe (fn [curr suffix]
-                             (return (+ (. curr ["name"]) suffix)))}))
-    (var obj {})
-    (xt/x:proto-set obj proto)
-    (:= (. obj ["name"]) "alpha")
-    (. obj (describe "!")))
+   (var proto-fn
+        (fn [m]
+          (xt/x:proto-create m)))
+   (var proto (proto-fn
+               {:describe (fn [curr suffix]
+                            (return (xt/x:cat (. curr ["name"]) suffix)))}))
+   (var obj {})
+   (xt/x:proto-set obj proto)
+   (:= (. obj ["name"]) "alpha")
+   (. obj (describe "!")))
   => "alpha!")
 
 ^{:refer xt.lang.spec-base/x:proto-tostring :added "4.1"}

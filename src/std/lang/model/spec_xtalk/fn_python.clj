@@ -510,7 +510,7 @@
                  (catch [Exception :as e]
                      (return (json.dumps {:type "error"
                                           :value (str e)}))))
-            (return (~encode-fn out nil nil))))))
+            (return (~encode-fn out))))))
 
 (defn python-tf-x-return-eval
   ([[_ s wrap-fn]]

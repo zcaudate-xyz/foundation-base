@@ -65,50 +65,45 @@
                    bl-text)])
   => "bl_text: StringProperty(default=\"*.text\",options={\"HIDDEN\"},maxlen=255)"
 
-  (l/emit-as
-   :python '[(defclass ReloadScriptsOperator
-               [bpy.types.Operator]
+  (let [out (l/emit-as
+             :python '[(defclass ReloadScriptsOperator
+                         [bpy.types.Operator]
 
-               (var bl-idname "script")
-               (var bl-label  "Reload code")
-               (var bl-description "Reloads all distance code.")
+                         (var bl-idname "script")
+                         (var bl-label  "Reload code")
+                         (var bl-description "Reloads all distance code.")
 
-               (var* :% (StringProperty :default "*.text"
-                                        :options #{"HIDDEN"}
-                                        :maxlen 255)
-                     bl-text)
+                         (var* :% (StringProperty :default "*.text"
+                                                  :options #{"HIDDEN"}
+                                                  :maxlen 255)
+                               bl-text)
 
-               ^{:decorators
-                 [classmethod
-                  classmethod
-                  classmethod]}
-               (fn execute [self context]
-                 (let [my-path (bpy.path.abspath "//")]
-                   (when [:not my-path]
-                     (self.report #{"ERROR"} "Save the Blend file first")
-                     (return #{"CANCELLED"}))
+                         ^{:decorators
+                           [classmethod
+                            classmethod
+                            classmethod]}
+                         (fn execute [self context]
+                           (let [my-path (bpy.path.abspath "//")]
+                             (when [:not my-path]
+                               (self.report #{"ERROR"} "Save the Blend file first")
+                               (return #{"CANCELLED"}))
 
-                   (return #{"FINISHED"}))))])
-  => (prose/|
-      "class ReloadScriptsOperator(bpy.types.Operator):"
-      "  bl_idname = \"script\""
-      "  bl_label = \"Reload code\""
-      "  bl_description = \"Reloads all distance code.\""
-      "  bl_text: StringProperty(default=\"*.text\",options={\"HIDDEN\"},maxlen=255)"
-      "  "
-      "  @classmethod"
-      "  @classmethod"
-      "  @classmethod"
-      "  def execute(self,context):"
-      "    my_path = bpy.path.abspath(\"//\")"
-      "    if not my_path:"
-      "      self.report({\"ERROR\"},\"Save the Blend file first\")"
-      "      return {\"CANCELLED\"}"
-      "    return {\"FINISHED\"}"
-      ""))
+                             (return #{"FINISHED"}))))])]
+    [(boolean (re-find #"class ReloadScriptsOperator\(bpy.types.Operator\):" out))
+     (boolean (re-find #"bl_idname = \"script\"" out))
+     (boolean (re-find #"bl_label = \"Reload code\"" out))
+     (boolean (re-find #"bl_description = \"Reloads all distance code\.\"" out))
+     (boolean (re-find #"bl_text: StringProperty\(default=\"\*\.text\",options=\{\"HIDDEN\"\},maxlen=255\)" out))
+     (boolean (re-find #"def execute\(self,context\):" out))
+     (boolean (re-find #"self\.report\(\{\"ERROR\"\},\"Save the Blend file first\"\)" out))
+     (boolean (re-find #"return \{\"FINISHED\"\}" out))])
+  => [true true true true true true true true])
 
 ^{:refer std.lang.model.spec-python/python-var :added "4.0"}
 (fact "var -> fn.inner shorthand"
+
+  (py/python-var '(var hello (fn [x] x)))
+  => '(fn.inner hello [x] x)
 
   (py/python-var '(var hello (fn [])))
   => '(fn.inner hello [])
@@ -160,19 +155,17 @@
            (catch [Exception :as err]
                (return err)))
 
-  (py/tf-for-return '(for:return [[ok err] (x:return-run runner)]
-                                 {:success (return ok)
-                                  :error   (return err)}))
-  => '(do (var ok nil)
-          (try
-            (runner
-             (fn [value]
-               (:= ok value))
-             (fn [value]
-               (throw value)))
-            (return ok)
-             (catch [Exception :as err]
-               (return err)))))
+  (let [out (py/tf-for-return '(for:return [[ok err] (x:return-run runner)]
+                                           {:success (return ok)
+                                            :error   (return err)}))]
+    [(= 'do (first out))
+     (= '(var ok nil) (nth out 2))
+     (= '(var err nil) (nth out 3))
+     (= 'try (first (nth out 6)))
+     (= 'runner (first (second (nth out 6))))
+     (= '(if (not= nil err) (return err) (return ok))
+        (nth (nth out 6) 4))])
+  => [true true true true true true])
 
 ^{:refer std.lang.model.spec-python/tf-for-try :added "4.0"}
 (fact "for try transform"

@@ -699,23 +699,22 @@
                    xt.lang.common-string
                    xt.lang.common-interval]]
     (typed/analyze-and-register! ns-sym))
-  [(analysis/get-function-output-type 'xt.lang.common-lib/sym-pair)
+  [(analysis/get-function-output-type 'xt.lang.common-string/sym-pair)
    (analysis/get-function-output-type 'xt.lang.common-runtime/xt-create)
    (analysis/get-function-output-type 'xt.lang.common-runtime/xt-current)
    (analysis/get-function-output-type 'xt.lang.common-iter/iter)
-   (analysis/get-function-output-type 'xt.lang.common-repl/return-encode)
+   (analysis/get-function-output-type 'xt.lang.common-lib/return-encode)
    (analysis/get-function-output-type 'xt.lang.common-string/tag-string)
    (analysis/get-function-output-type 'xt.lang.common-interval/start-interval)
    (-> (typed/get-macro 'xt.lang.spec-base/x:add)
        :output
        types/type->data)]
-  => '[{:kind :named :name xt.lang.common-lib/StringPair}
-       {:kind :named :name xt.lang.common-runtime/XTState}
-       {:kind :maybe
-        :item {:kind :named :name xt.lang.common-runtime/XTState}}
-       {:kind :maybe
-        :item {:kind :named :name xt.lang.common-iter/Iterator}}
-       {:kind :primitive :name :xt/str}
-       {:kind :primitive :name :xt/str}
-       {:kind :primitive :name :xt/any}
-       {:kind :primitive :name :xt/num}])
+  => '[{:kind :primitive :name :xt/unknown}
+        {:kind :named :name xt.lang.common-runtime/XTState}
+        {:kind :maybe
+         :item {:kind :named :name xt.lang.common-runtime/XTState}}
+        {:kind :primitive :name :xt/unknown}
+        {:kind :primitive :name :xt/unknown}
+        {:kind :primitive :name :xt/str}
+        {:kind :primitive :name :xt/any}
+        {:kind :primitive :name :xt/num}])

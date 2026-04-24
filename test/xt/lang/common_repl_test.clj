@@ -67,8 +67,8 @@
 
   (decode-output
    (!.lua
-    (k/return-wrap (fn:> 1))))
-  => {"value" 1, "type" "data"}
+     (k/return-wrap (fn:> 1))))
+  => {"value" 1, "type" "data", "return" "number"}
 
   ^{:lang-exceptions {:dart {:expect {"key" nil
                                      "id" nil
@@ -95,8 +95,8 @@
 
   (decode-output
    (!.lua
-    ([xt.lang.common-repl :as repl] "return 1")))
-  => {"value" 1, "type" "data"}
+     ([xt.lang.common-repl :as repl] "return 1")))
+  => {"value" 1, "type" "data", "return" "number"}
 
   ^{:lang-exceptions {:dart {:form :dart-unsupported-return-eval
                              :expect :dart-unsupported-return-eval}}}

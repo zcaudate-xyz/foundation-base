@@ -51,7 +51,7 @@
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-shell :added "4.0"}
 (fact "shell"
   (l/emit-as :python [(python-tf-x-shell '[_ "ls" cm])])
-  => #"os")
+  => #"subprocess")
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-type-native :added "4.0"}
 (fact "type native"
@@ -61,7 +61,7 @@
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-proto-create :added "4.1"}
 (fact "proto create"
   (l/emit-as :python [(python-tf-x-proto-create '[_ {:a 1}])])
-  => #"\{\"a\": 1\}")
+  => #"\{\"a\":1\}")
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-proto-get :added "4.1"}
 (fact "proto get"
@@ -318,9 +318,9 @@
   (l/emit-as :python [(python-tf-x-arr-sort '[_ arr k c])])
   => #"sort")
 
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-arr-str-comp :added "4.0"}
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-str-comp :added "4.0"}
 (fact "arr str comp"
-  (l/emit-as :python [(python-tf-x-arr-str-comp '[_ a b])])
+  (l/emit-as :python [(python-tf-x-str-comp '[_ a b])])
   => #"<")
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-str-char :added "4.0"}

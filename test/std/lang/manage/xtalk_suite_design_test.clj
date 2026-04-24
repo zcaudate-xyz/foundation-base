@@ -33,7 +33,7 @@
 (fact "templating a common js runtime suite to dart keeps the twostep runtime"
   (let [out-forms (scaffold/template-runtime-test-forms runtime-template-forms :js :dart)
         out (scaffold/render-top-level-forms out-forms)]
-    [(= 'xt.lang.common-lib-dt-test
+    [(= 'xtbench.dart.lang.common-lib-test
         (second (first out-forms)))
      (str/includes? out "(l/script- :dart {:runtime :twostep})")
      (str/includes? out "!.dt")

@@ -191,7 +191,7 @@
 
   (rt-oneshot :lua)
   => ["return 1 + 2 + 3 + 4"
-      {"value" 10, "type" "data"}
+      {"value" 10, "type" "data", "return" "number"}
       10]
 
   (rt-oneshot :js)

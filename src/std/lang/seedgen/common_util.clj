@@ -63,18 +63,22 @@
 (defn seedgen-dispatch-map
   []
   (let [library  (lang.impl/default-library)
-        snapshot (lang.lib/get-snapshot library)]
+         snapshot (lang.lib/get-snapshot library)]
     (merge +seedgen-dispatch-aliases+
-           (->> snapshot
-                vals
-                (keep (fn [{:keys [book]}]
-                        (let [lang (or (:lang book)
-                                       (get-in book [:book :lang]))
-                              tag  (or (get-in book [:grammar :tag])
-                                       (get-in book [:book :grammar :tag]))]
-                          (when (and lang tag)
-                            [(name tag) lang]))))
-                (into {})))))
+           (reduce (fn [out {:keys [book]}]
+                     (let [lang   (or (:lang book)
+                                      (get-in book [:book :lang]))
+                           tag    (or (get-in book [:grammar :tag])
+                                      (get-in book [:book :grammar :tag]))
+                           parent (or (:parent book)
+                                      (get-in book [:book :parent]))]
+                       (if (and lang
+                                tag
+                                (not (contains? snapshot parent)))
+                         (assoc out (name tag) lang)
+                         out)))
+                   {}
+                   (vals snapshot)))))
 
 (defn seedgen-dispatch-tag-map
   []

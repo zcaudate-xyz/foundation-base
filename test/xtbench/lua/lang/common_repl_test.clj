@@ -29,7 +29,7 @@
  ^{:hidden true}
  (decode-output (!.lua (k/return-wrap (fn:> 1))))
  =>
- {"value" 1, "type" "data"})
+ {"value" 1, "type" "data", "return" "number"})
 
 ^{:refer xt.lang.common-repl/return-eval, :added "4.0"}
 (fact
@@ -37,7 +37,7 @@
  ^{:hidden true}
  (decode-output (!.lua ([xt.lang.common-repl :as repl] "return 1")))
  =>
- {"value" 1, "type" "data"})
+ {"value" 1, "type" "data", "return" "number"})
 
 ^{:refer xt.lang.common-repl/socket-send, :added "4.0"}
 (fact

@@ -38,15 +38,14 @@
   [[_ & args]]
   (cond
     (empty? args)
-    '(fn [& _args]
-       (return nil))
+    (list (intrinsic-sym "const-fn") nil)
 
     (vector? (first args))
     (list* 'fn (first args) (rest args))
 
     :else
-    (list 'fn '[& _args]
-          (list 'return (first args)))))
+    (list (intrinsic-sym "const-fn")
+          (first args))))
 
 (declare lower-form)
 

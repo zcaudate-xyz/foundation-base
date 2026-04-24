@@ -158,17 +158,17 @@
           'xt.lang.common-string-test
           'xt.lang.spec-base-test})
      (= languages [:dart :js :lua :python])
-     (= #{:ready}
+     (= #{:ready :unsupported}
         (set (for [source-ns templates
                    lang languages]
                (get-in status [source-ns lang :status]))))
      (= (set (keys summary))
         (set templates))
-     (= {:full 2 :partial 1 :stub 1 :unwritten 0 :unsupported 0 :scaffold-error 0 :diagnose-error 0}
-        (get summary 'xt.lang.common-iter-test))
-     (= {:full 0 :partial 2 :stub 1 :unwritten 0 :unsupported 0 :scaffold-error 0 :diagnose-error 0}
-        (get lang-summary :python))
-     (= 4 (get-in scaffold-summary ['xt.lang.spec-base-test :ready]))])
+     (= {:full 4 :partial 0 :stub 0 :unwritten 0 :unsupported 0 :scaffold-error 0 :diagnose-error 0}
+         (get summary 'xt.lang.common-iter-test))
+     (= {:full 1 :partial 0 :stub 0 :unwritten 0 :unsupported 0 :scaffold-error 0 :diagnose-error 0}
+         (get lang-summary :python))
+     (= 0 (get-in scaffold-summary ['xt.lang.spec-base-test :ready]))])
   => [true true true true true true true])
 
 ^{:refer std.lang.manage/missing-by-language :added "4.1"}
