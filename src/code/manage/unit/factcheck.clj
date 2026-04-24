@@ -19,9 +19,6 @@
 (def ^:dynamic *meta-tags*
   #{:meta :hash-meta})
 
-(def ^:private +missing+
-  ::missing)
-
 (defn unwrap-fact-block
   "returns the exact metadata prefix and inner fact block"
   {:added "4.1"}
@@ -96,8 +93,9 @@
           out    []]
      (if (empty? blocks)
        out
-       (let [[expr arrow expected & more] blocks]
+        (let [[expr arrow expected & more] blocks]
          (if (and arrow
+                  expected
                   (= :symbol (block/tag (entry-block arrow)))
                   (= "=>" (block/string (entry-block arrow))))
            (recur more
@@ -247,8 +245,9 @@
   ([test-ns op]
    (let [form   (fact-op-form op)
          meta   (assoc (:meta op) :ns test-ns)
-         result (binding [context/*timeout* (or (:timeout meta)
-                                                context/*timeout-global*)]
+         timeout (or (:timeout meta)
+                     context/*timeout-global*)
+         result (binding [context/*timeout* timeout]
                   (process/evaluate {:form form
                                      :meta meta}))]
      (case (:status result)
@@ -256,7 +255,8 @@
        :timeout (throw (ex-info "factcheck evaluation timed out"
                                 {:ns test-ns
                                  :form form
-                                 :meta meta}))
+                                 :meta meta
+                                 :timeout timeout}))
        (throw (ex-info "factcheck evaluation failed"
                        {:ns test-ns
                         :form form
@@ -270,13 +270,13 @@
   ([fpkg]
    (let [test-ns   (:ns fpkg)
          id        (:id fpkg)
-         needs-teardown? (or (rt/get-fact test-ns id :function :teardown)
-                             (rt/get-flag test-ns id :setup))]
+         needs-cleanup? (or (rt/get-fact test-ns id :function :teardown)
+                            (rt/get-flag test-ns id :setup))]
      (rt/setup-fact test-ns id)
      (try
        (mapv (partial evaluate-fact-op test-ns) (:full fpkg))
        (finally
-         (when needs-teardown?
+         (when needs-cleanup?
            (rt/teardown-fact test-ns id)))))))
 
 (defn factcheck-generate-form-string
@@ -286,10 +286,9 @@
    (let [items (-> form fact-block-data :items)]
      (->> items
           (map-indexed (fn [i item]
-                         (let [value (get values i +missing+)]
-                           (if (= +missing+ value)
-                             (render-checkless-item item)
-                             (render-generated-item item value)))))
+                         (if (contains? values i)
+                           (render-generated-item item (get values i))
+                           (render-checkless-item item))))
           (render-fact form)))))
 
 (defn factcheck-generate-string
