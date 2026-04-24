@@ -15,7 +15,7 @@
   '((+ 1 1) => 2
     (mapv inc [1 2]) => [2 3]))
 
-(def +factcheck-generated+
+(def ^:private +factcheck-generated+
   "^{:id factcheck-sample}
 (fact \"sample generation fact\"
 
@@ -25,7 +25,7 @@
   (mapv inc [1 2])
   => [2 3])")
 
-(def +factcheck-removed+
+(def ^:private +factcheck-removed+
   "^{:id factcheck-sample}
 (fact \"sample generation fact\"
 
@@ -33,12 +33,12 @@
 
   (mapv inc [1 2]))")
 
-(def +factcheck-generated-file+
+(def ^:private +factcheck-generated-file+
   (str "(ns example.core-test\n"
        "  (:use code.test))\n\n"
        +factcheck-generated+))
 
-(def +factcheck-removed-file+
+(def ^:private +factcheck-removed-file+
   (str "(ns example.core-test\n"
        "  (:use code.test))\n\n"
        +factcheck-removed+))

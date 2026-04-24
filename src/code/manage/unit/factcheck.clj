@@ -237,7 +237,10 @@
   ([op]
    (case (:type op)
      :test-equal (get-in op [:input :form])
-     (:form op))))
+     :form (:form op)
+     (throw (ex-info "Unsupported fact op type"
+                     {:type (:type op)
+                      :op op})))))
 
 (defn evaluate-fact-op
   "evaluates a compiled fact op and returns its value"
@@ -272,13 +275,13 @@
   ([fpkg]
    (let [test-ns   (:ns fpkg)
          id        (:id fpkg)
-         has-lifecycle-hooks? (or (rt/get-fact test-ns id :function :teardown)
-                                  (rt/get-flag test-ns id :setup))]
+         should-call-teardown? (or (rt/get-fact test-ns id :function :teardown)
+                                   (rt/get-flag test-ns id :setup))]
      (rt/setup-fact test-ns id)
      (try
        (mapv (partial evaluate-fact-op test-ns id) (:full fpkg))
        (finally
-         (when has-lifecycle-hooks?
+         (when should-call-teardown?
            (rt/teardown-fact test-ns id)))))))
 
 (defn factcheck-generate-form-string
