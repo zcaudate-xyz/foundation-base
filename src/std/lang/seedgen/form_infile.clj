@@ -1,5 +1,6 @@
 (ns std.lang.seedgen.form-infile
   (:require [clojure.string :as str]
+             [code.query :as query]
              [code.framework :as base]
              [code.project :as project]
              [std.block.base :as block]
@@ -7,7 +8,6 @@
              [std.lang.seedgen.common-util :as common]
              [std.lang.seedgen.form-common :as form-common]
              [std.lang.seedgen.form-parse :as seed-readforms]
-             [std.lib.walk :as walk]
              [std.lib.result :as res]
              [std.task :as task]))
 
@@ -354,13 +354,11 @@
         expr-nav (nav/down root)
         body-nav (some-> expr-nav form-common/nav-body)]
     (if body-nav
-      (let [body-form   (nav/value body-nav)
-            transformed (walk/postwalk-replace {from to} body-form)]
-        (if (= body-form transformed)
-          s
-          (-> body-nav
-              (nav/replace transformed)
-              nav/root-string)))
+      (-> (query/modify body-nav
+                        [{:is from}]
+                        (fn [zloc]
+                          (nav/replace zloc to)))
+          nav/root-string)
       s)))
 
 (defn- apply-item-transform-string

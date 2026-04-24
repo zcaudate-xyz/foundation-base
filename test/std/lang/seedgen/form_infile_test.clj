@@ -447,10 +447,11 @@
       (form-infile/seedgen-langadd 'sample.add-test {:write true} lookup project)
       (let [output (slurp path)]
         [(str/includes? output "(xt/for:iter [e (xt/x:iter-from-arr [2 4 6])]")
-         (not (str/includes? output "(!.lua\n    (var out [])\n    (xt/for:iter [e (xt/x:iter-from [2 4 6])]"))])
+         (str/includes? output "  (!.lua\n    (var out [])\n    (xt/for:iter [e (xt/x:iter-from-arr [2 4 6])]")
+         (not (str/includes? output "  (!.lua (var out []) (xt/for:iter [e (xt/x:iter-from-arr [2 4 6])]"))])
       (finally
         (.delete tmp))))
-  => [true true]
+  => [true true true]
 
   (let [tmp (java.io.File/createTempFile "seedgen-langadd-train004-transform-form" ".clj")
         path (.getAbsolutePath tmp)
@@ -469,12 +470,8 @@
                       "  ^{:seedgen/base {:lua {:transform {'(fn [cb]\n"
                       "                                         (cb nil \"OK\"))\n"
                       "                                      '(fn [cb]\n"
-                      "                                         (return nil \"OK\"))\n\n"
-                      "                                      '(fn [cb]\n"
-                      "                                         (cb \"ERR\" nil))\n"
-                      "                                      '(fn [cb]\n"
-                      "                                         (return \"ERR\" nil))}}}}\n"
-                      "  [(!.js\n"
+                      "                                         (return nil \"OK\"))}}}}\n"
+                      "  (!.js\n"
                       "     (var out nil)\n"
                       "     (var success-fn (fn [cb]\n"
                       "                       (cb nil \"OK\")))\n"
@@ -482,22 +479,31 @@
                       "       {:success (:= out ret)\n"
                       "        :error   (:= out err)})\n"
                       "     out)\n"
-                      "   (!.js\n"
+                      "  => \"OK\"\n\n"
+                      "  ^{:seedgen/base {:lua {:transform {'(fn [cb]\n"
+                      "                                         (cb \"ERR\" nil))\n"
+                      "                                      '(fn [cb]\n"
+                      "                                         (return \"ERR\" nil))}}}}\n"
+                      "  (!.js\n"
                       "     (var out nil)\n"
                       "     (var failure-fn (fn [cb]\n"
                       "                       (cb \"ERR\" nil)))\n"
                       "     (xt/for:return [[ret err] (failure-fn (xt/x:callback))]\n"
                       "       {:success (:= out ret)\n"
                       "        :error   (:= out err)})\n"
-                      "     out)]\n"
-                      "  => [\"OK\" \"ERR\"])\n"))
+                      "     out)\n"
+                      "  => \"ERR\")\n"))
       (form-infile/seedgen-langadd 'sample.add-test {:write true} lookup project)
       (let [output (slurp path)]
         [(str/includes? output "(var success-fn (fn [cb] (return nil \"OK\")))")
-         (str/includes? output "(var failure-fn (fn [cb] (return \"ERR\" nil)))")])
+         (str/includes? output "(var failure-fn (fn [cb] (return \"ERR\" nil)))")
+         (str/includes? output "  (!.lua\n     (var out nil)\n     (var success-fn (fn [cb] (return nil \"OK\")))")
+         (str/includes? output "  (!.lua\n     (var out nil)\n     (var failure-fn (fn [cb] (return \"ERR\" nil)))")
+         (not (str/includes? output "  (!.lua (var out nil) (var success-fn (fn [cb] (return nil \"OK\")))"))
+         (not (str/includes? output "  (!.lua (var out nil) (var failure-fn (fn [cb] (return \"ERR\" nil)))"))])
       (finally
         (.delete tmp))))
-  => [true true]
+  => [true true true true true true]
 
   (let [tmp (java.io.File/createTempFile "seedgen-langadd-train004-g-setup" ".clj")
         path (.getAbsolutePath tmp)
