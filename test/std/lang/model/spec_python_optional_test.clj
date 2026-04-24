@@ -1,6 +1,6 @@
 (ns std.lang.model.spec-python-optional-test
   (:require [std.lang :as l]
-            [std.lang.base.preprocess :as preprocess])
+            [std.lang.base.emit-preprocess :as preprocess])
   (:use code.test))
 
 (fact "python emission inherits module context for optional xtalk args"

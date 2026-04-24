@@ -5,7 +5,7 @@
             [std.lang.base.emit-data :as data]
             [std.lang.base.emit-fn :as fn]
             [std.lang.base.emit-helper :as helper]
-            [std.lang.base.preprocess :as preprocess]
+            [std.lang.base.emit-preprocess :as preprocess]
             [std.lang.base.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.env :as env]

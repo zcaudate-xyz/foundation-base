@@ -5,7 +5,7 @@
             [std.lang.base.emit :as emit]
             [std.lang.base.emit-common :as common]
             [std.lang.base.emit-helper :as helper]
-            [std.lang.base.preprocess :as preprocess]
+            [std.lang.base.emit-preprocess :as preprocess]
             [std.lang.base.impl :as impl]
             [std.lang.base.impl-entry :as entry]
             [std.lang.base.impl-lifecycle :as lifecycle]

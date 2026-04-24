@@ -1,7 +1,7 @@
 (ns std.lang.base.emit-common
   (:require [clojure.string]
             [std.lang.base.emit-helper :as helper]
-            [std.lang.base.preprocess :as preprocess]
+            [std.lang.base.emit-preprocess :as preprocess]
             [std.lang.base.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]

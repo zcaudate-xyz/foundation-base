@@ -3,7 +3,7 @@
             [std.lang.base.emit-common :as common]
             [std.lang.base.emit-data :as data]
             [std.lang.base.emit-helper :as helper]
-            [std.lang.base.preprocess :as preprocess]
+            [std.lang.base.emit-preprocess :as preprocess]
             [std.lib.env :as env]
             [std.lib.foundation :as f]))
 

@@ -2,7 +2,7 @@
   (:require [rt.postgres.base.grammar.common-tracker :as tracker]
             [rt.postgres.runtime.impl-base :as base]
             [std.lang :as l]
-            [std.lang.base.preprocess :as preprocess]
+            [std.lang.base.emit-preprocess :as preprocess]
             [std.lang.base.util :as ut]
             [std.lib.foundation :as f]
             [std.lib.schema :as schema]))

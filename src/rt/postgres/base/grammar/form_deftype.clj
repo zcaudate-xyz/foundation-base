@@ -5,7 +5,7 @@
             [rt.postgres.base.grammar.common-tracker :as tracker]
             [rt.postgres.base.grammar.form-defpartition :as form-defpartition]
             [std.lang.base.book :as book]
-            [std.lang.base.preprocess :as preprocess]
+            [std.lang.base.emit-preprocess :as preprocess]
             [std.lang.base.grammar-spec :as grammar-spec]
             [std.lang.base.library-snapshot :as snap]
             [std.lang.base.util :as ut]

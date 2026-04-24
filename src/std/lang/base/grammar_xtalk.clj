@@ -2,7 +2,7 @@
   (:require [clojure.string :as str]
             [std.block.template :as gen]
             [std.lib.foundation :as f]
-            [std.lang.base.preprocess :as preprocess]))
+            [std.lang.base.emit-preprocess :as preprocess]))
 
 (defn tf-throw
   "wrapper for throw transform"

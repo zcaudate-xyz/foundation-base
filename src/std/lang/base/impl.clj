@@ -2,7 +2,7 @@
   (:require [clojure.string]
              [std.lang.base.emit :as emit]
              [std.lang.base.emit-common :as emit-common]
-             [std.lang.base.preprocess :as preprocess]
+             [std.lang.base.emit-preprocess :as preprocess]
              [std.lang.base.grammar :as grammar]
              [std.lang.base.impl-deps :as deps]
              [std.lang.base.impl-entry :as entry]

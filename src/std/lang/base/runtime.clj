@@ -3,7 +3,7 @@
             [clojure.string]
             [std.json :as json]
             [std.lang.base.emit-common :as common]
-            [std.lang.base.preprocess :as preprocess]
+            [std.lang.base.emit-preprocess :as preprocess]
             [std.lang.base.impl :as impl]
             [std.lang.base.impl-deps :as deps]
             [std.lang.base.impl-lifecycle :as lifecycle]
