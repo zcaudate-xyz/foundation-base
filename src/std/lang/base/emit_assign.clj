@@ -16,6 +16,9 @@
   #{:assign/inline
     :assign/fn})
 
+(def ^:private +return-sentinel+
+  '<RETURN>)
+
 ;;
 ;; All will compile to a function :assign/fn that will then get executed on the symbol
 ;;
@@ -45,15 +48,15 @@
         body       (walk/postwalk (fn [form]
                                  (if (collection/form? form)
                                    (cond (= 'return (first form))
-                                         (if @return-ref
-                                           (f/error "Inline cannot have multiple returns." {:input @return-ref})
-                                           (do (vreset! return-ref (second form))
-                                               '<RETURN>))
-                                         
-                                         :else
-                                         (remove (fn [x]
-                                                   (= x '<RETURN>))
-                                                 form))
+                                          (if @return-ref
+                                            (f/error "Inline cannot have multiple returns." {:input @return-ref})
+                                            (do (vreset! return-ref (second form))
+                                                +return-sentinel+))
+                                          
+                                          :else
+                                          (remove (fn [x]
+                                                    (= x +return-sentinel+))
+                                                  form))
                                    form))
                                body)
         _          (or (not (coll? @return-ref))
@@ -101,20 +104,22 @@
                                         (if (collection/form? form)
                                           (cond (= 'return (first form))
                                                 (if @return-ref
-                                                  (f/error "Default assign cannot have multiple returns."
-                                                           {:input expanded})
+                                                  (f/error "Cannot assign expanded value with multiple returns."
+                                                           {:symbol sym
+                                                            :input expanded})
                                                   (do (vreset! return-ref (second form))
-                                                      '<RETURN>))
+                                                      +return-sentinel+))
 
                                                 :else
                                                 (remove (fn [x]
-                                                          (= x '<RETURN>))
+                                                          (= x +return-sentinel+))
                                                         form))
                                           form))
                                       body)
             _          (or @return-ref
-                           (f/error "Default assign requires a return."
-                                    {:input expanded}))
+                           (f/error "Cannot assign expanded value without a return."
+                                    {:symbol sym
+                                     :input expanded}))
             assign-ref (volatile! nil)
             -          (walk/postwalk (fn [form]
                                         (do (when (and (collection/form? form)

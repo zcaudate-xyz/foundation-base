@@ -197,14 +197,14 @@
   "expands a value using shared value/template defaults"
   {:added "4.1"}
   [value grammar]
-  (let [{template :value/template} (value-options value grammar)
+  (let [{template-fn :value/template} (value-options value grammar)
         reserved (when (and (collection/form? value)
                             (symbol? (first value)))
                    (get-in grammar [:reserved (first value)]))]
     (if (and (= :macro (:emit reserved))
-             (fn? (or template
-                      (:macro reserved))))
-      ((or template
+             (fn? (or template-fn
+                       (:macro reserved))))
+      ((or template-fn
            (:macro reserved))
        value)
       value)))
