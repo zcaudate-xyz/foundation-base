@@ -93,11 +93,11 @@
           out    []]
      (if (empty? blocks)
        out
-        (let [[expr arrow expected & more] blocks]
-         (if (and arrow
+        (let [[expr arrow-symbol expected & more] blocks]
+         (if (and arrow-symbol
                   expected
-                  (= :symbol (block/tag (entry-block arrow)))
-                  (= "=>" (block/string (entry-block arrow))))
+                  (= :symbol (block/tag (entry-block arrow-symbol)))
+                  (= "=>" (block/string (entry-block arrow-symbol))))
            (recur more
                   (conj out {:type :check
                              :expr expr
@@ -242,7 +242,7 @@
 (defn evaluate-fact-op
   "evaluates a compiled fact op and returns its value"
   {:added "4.1"}
-  ([test-ns op]
+  ([test-ns fact-id op]
    (let [form   (fact-op-form op)
          meta   (assoc (:meta op) :ns test-ns)
          timeout (or (:timeout meta)
@@ -254,11 +254,13 @@
        :success (res/result-data result)
        :timeout (throw (ex-info "factcheck evaluation timed out"
                                 {:ns test-ns
+                                 :id fact-id
                                  :form form
                                  :meta meta
                                  :timeout timeout}))
-       (throw (ex-info "factcheck evaluation failed"
+       (throw (ex-info (str "factcheck evaluation failed (" (:status result) ")")
                        {:ns test-ns
+                        :id fact-id
                         :form form
                         :meta meta
                         :status (:status result)}
@@ -270,13 +272,13 @@
   ([fpkg]
    (let [test-ns   (:ns fpkg)
          id        (:id fpkg)
-         needs-cleanup? (or (rt/get-fact test-ns id :function :teardown)
-                            (rt/get-flag test-ns id :setup))]
+         has-lifecycle-hooks? (or (rt/get-fact test-ns id :function :teardown)
+                                  (rt/get-flag test-ns id :setup))]
      (rt/setup-fact test-ns id)
      (try
-       (mapv (partial evaluate-fact-op test-ns) (:full fpkg))
+       (mapv (partial evaluate-fact-op test-ns id) (:full fpkg))
        (finally
-         (when needs-cleanup?
+         (when has-lifecycle-hooks?
            (rt/teardown-fact test-ns id)))))))
 
 (defn factcheck-generate-form-string

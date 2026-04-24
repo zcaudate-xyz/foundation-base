@@ -1,8 +1,19 @@
 (ns code.manage.unit.factcheck-test
   (:require [code.manage.unit.factcheck :refer :all]
+            [code.test.compile :as compile]
             [code.test.base.runtime :as rt]
             [std.block :as block])
   (:use code.test))
+
+(def ^:private +fact-body-offset+
+  2)
+
+(def ^:private +sample-fact-id+
+  'factcheck-sample-data)
+
+(def ^:private +sample-fact-body+
+  '((+ 1 1) => 2
+    (mapv inc [1 2]) => [2 3]))
 
 (def +factcheck-generated+
   "^{:id factcheck-sample}
@@ -32,20 +43,24 @@
        "  (:use code.test))\n\n"
        +factcheck-removed+))
 
-^{:id factcheck-sample}
-(fact "sample generation fact"
-
-  (+ 1 1)
-  => 2
-
-  (mapv inc [1 2])
-  => [2 3])
+(defn with-sample-fpkg
+  [f]
+  (let [fpkg (compile/create-fact {:ns 'code.manage.unit.factcheck-test
+                                   :id +sample-fact-id+
+                                   :path "test/code/manage/unit/factcheck_test.clj"
+                                   :desc "sample generation fact"}
+                                  +sample-fact-body+)]
+    (rt/set-fact (:ns fpkg) (:id fpkg) fpkg)
+    (try
+      (f fpkg)
+      (finally
+        (rt/remove-fact (:ns fpkg) (:id fpkg))))))
 
 ^{:refer code.manage.unit.factcheck/parse-body :added "4.1"}
 (fact "parses checks only when an expectation is present"
   (->> (parse-body (->> (block/parse-first "(fact \"hello\" (+ 1 1) =>)")
                         child-entries
-                        (drop 2)))
+                        (drop +fact-body-offset+)))
        (mapv (fn [{:keys [type expr expected]}]
                {:type type
                 :expr (some-> expr entry-block block/string)
@@ -61,7 +76,7 @@
 (fact "does not treat nested `=>` symbols as top-level checks"
   (->> (parse-body (->> (block/parse-first "(fact \"hello\" (vector '=> 1) (+ 1 1))")
                         child-entries
-                        (drop 2)))
+                        (drop +fact-body-offset+)))
        (mapv (fn [{:keys [type expr expected]}]
                {:type type
                 :expr (some-> expr entry-block block/string)
@@ -85,14 +100,16 @@
 
 ^{:refer code.manage.unit.factcheck/fact-result-values :added "4.1"}
 (fact "evaluates compiled fact ops sequentially"
-  (fact-result-values (rt/get-fact 'code.manage.unit.factcheck-test 'factcheck-sample))
+  (with-sample-fpkg fact-result-values)
   => [2 [2 3]])
 
 ^{:refer code.manage.unit.factcheck/factcheck-generate-form-string :added "4.1"}
 (fact "generates `=>` expectations for a single fact form"
-  (factcheck-generate-form-string
-   (block/parse-first +factcheck-removed+)
-   (fact-result-values (rt/get-fact 'code.manage.unit.factcheck-test 'factcheck-sample)))
+  (with-sample-fpkg
+   (fn [fpkg]
+     (factcheck-generate-form-string
+      (block/parse-first +factcheck-removed+)
+      (fact-result-values fpkg))))
   => +factcheck-generated+)
 
 ^{:refer code.manage.unit.factcheck/factcheck-generate-string :added "4.1"}
