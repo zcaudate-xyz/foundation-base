@@ -49,33 +49,35 @@
 
 (defn python-tf-x-shell
   ([[_ s opts cb]]
-   (template/$ (do (var subprocess (__import__ "subprocess"))
-            (var output (. (subprocess.check_output ["sh" "-lc" ~s])
-                           (decode "utf-8")))
-            (return output)))))
+   (template/$
+    (do (var subprocess (__import__ "subprocess"))
+        (var output (. (subprocess.check_output ["sh" "-lc" ~s])
+                       (decode "utf-8")))
+        (return output)))))
 
 (defn python-tf-x-type-native
   [[_ obj]]
-  (template/$ (cond (isinstance ~obj '(dict))
-             (return "object")
-             
-             (isinstance ~obj '(list))
-             (return "array")
-             
-             (callable ~obj)
-             (return "function")
+  (template/$
+   (cond (isinstance ~obj '(dict))
+         (return "object")
+         
+         (isinstance ~obj '(list))
+         (return "array")
+         
+         (callable ~obj)
+         (return "function")
 
-             (== bool (type ~obj))
-             (return "boolean")
+         (== bool (type ~obj))
+         (return "boolean")
 
-             (isinstance ~obj '(int float))
-             (return "number")
-             
-             (isinstance ~obj '(str))
-             (return "string")
-             
-             :else
-             (return (str (type ~obj))))))
+         (isinstance ~obj '(int float))
+         (return "number")
+         
+         (isinstance ~obj '(str))
+         (return "string")
+         
+         :else
+         (return (str (type ~obj))))))
 
 (def +python-core+
   {:x-del            {:macro #'python-tf-x-del    :emit :macro}
@@ -491,34 +493,62 @@
 
 (defn python-tf-x-return-encode
   ([[_ out id key]]
-   (template/$ (do (:- :import json)
-            (try
-              (return (json.dumps {:id  ~id
+   (template/$
+    (do (:- :import json)
+        (var type-fn
+             (fn [obj]
+               (cond (isinstance obj '(dict))
+                     (return "object")
+                     
+                     (isinstance obj '(list))
+                     (return "array")
+                     
+                     (callable obj)
+                     (return "function")
+
+                     (== bool (type obj))
+                     (return "boolean")
+
+                     (isinstance obj '(int float))
+                     (return "number")
+                     
+                     (isinstance obj '(str))
+                     (return "string")
+                     
+                     :else
+                     (return (str (type obj))))))
+        (var ts (type-fn ~out))
+        (try
+          (return (json.dumps {:id  ~id
+                               :key ~key
+                               :type  "data"
+                               :return ts
+                               :value  ~out}))
+          (catch Exception
+              (return (json.dumps {:id ~id
                                    :key ~key
-                                   :type  "data"
-                                   :value  ~out}))
-              (catch Exception
-                  (return (json.dumps {:id ~id
-                                       :key ~key
-                                       :type  "raw"
-                                       :value (str ~out)}))))))))
+                                   :type  "raw"
+                                   :return ts
+                                   :value (str ~out)}))))))))
 
 (defn python-tf-x-return-wrap
   ([[_ f encode-fn]]
-   (template/$ (do (:- :import json)
-            (try (:= out (~f))
-                 (catch [Exception :as e]
-                     (return (json.dumps {:type "error"
-                                          :value (str e)}))))
-            (return (~encode-fn out nil nil))))))
+   (template/$
+    (do (:- :import json)
+        (try (:= out (~f))
+             (catch [Exception :as e]
+                 (return (json.dumps {:type "error"
+                                      :value (str e)}))))
+        (return (~encode-fn out nil nil))))))
 
 (defn python-tf-x-return-eval
   ([[_ s wrap-fn]]
-   (template/$ (do (fn thunk []
-              (let [g   (globals)]
-                (exec ~s g g)
-                (return (g.get "OUT"))))
-            (return (~wrap-fn thunk))))))
+   (template/$
+    (do (fn thunk []
+          (let [g   (globals)]
+            (exec ~s g g)
+            (return (g.get "OUT"))))
+        (return (~wrap-fn thunk))))))
 
 (def +python-return+
   {:x-return-encode  {:macro #'python-tf-x-return-encode   :emit :macro}

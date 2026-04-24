@@ -49,11 +49,11 @@
 (defn lua-tf-x-type-native
   [[_ obj]]
   (template/$ (do (local t := (type ~obj))
-           (if (== t "table")
-             (if (== nil (. '(~obj) [1]))
-               (return "object")
-                (return "array"))
-              (return t)))))
+                  (if (== t "table")
+                    (if (== nil (. '(~obj) [1]))
+                      (return "object")
+                      (return "array"))
+                    (return t)))))
 
 (defn lua-tf-x-has-key?
   [[_ obj key check]]
@@ -167,14 +167,14 @@
 (defn lua-tf-x-is-object?
   [[_ e]]
   (template/$ (or (and (== "table" (type ~e))
-                (== nil (. '(~e) [1])))
-           (== "object" (type ~e)))))
+                       (== nil (. '(~e) [1])))
+                  (== "object" (type ~e)))))
 
 (defn lua-tf-x-is-array?
   [[_ e]]
   (template/$ (or (and (== "table" (type ~e))
-                (not= nil (. '(~e) [1])))
-           (== "array" (type ~e)))))
+                       (not= nil (. '(~e) [1])))
+                  (== "array" (type ~e)))))
 
 (def +lua-type+
   {:x-to-string      {:emit :alias :raw 'tostring}
@@ -294,9 +294,9 @@
   [[_ arr key-fn comp-fn]]
   (list 'table.sort arr
         (template/$ (fn [a b]
-               (return (~comp-fn
-                        (~key-fn a)
-                        (~key-fn b)))))))
+                      (return (~comp-fn
+                               (~key-fn a)
+                               (~key-fn b)))))))
 
 (def +lua-arr+
   {:x-arr-clone       {:macro #'lua-tf-x-arr-clone      :emit :macro  :type :template}
@@ -318,13 +318,13 @@
 (defn lua-tf-x-str-split
   ([[_ s tok]]
    (template/$ ('((fn [s tok]
-             (var out := {})
-             (string.gsub s
-                          (string.format "([^%s]+)" tok)
-                          (fn [c]
-                            (table.insert out c)))
-             (return out)))
-         ~s ~tok))))
+                    (var out := {})
+                    (string.gsub s
+                                 (string.format "([^%s]+)" tok)
+                                 (fn [c]
+                                   (table.insert out c)))
+                    (return out)))
+                ~s ~tok))))
 
 (defn lua-tf-x-str-join
   ([[_ s arr]]
@@ -355,18 +355,18 @@
    (list 'string.gsub s "^(%s*.-)%s*$" "%1")))
 
 (def +lua-str+
-   {:x-str-char       {:emit :alias :raw 'string.byte}
-    :x-str-split      {:macro #'lua-tf-x-str-split      :emit :macro}
-    :x-str-join       {:macro #'lua-tf-x-str-join       :emit :macro}
-    :x-str-index-of   {:macro #'lua-tf-x-str-index-of   :emit :macro}
+  {:x-str-char       {:emit :alias :raw 'string.byte}
+   :x-str-split      {:macro #'lua-tf-x-str-split      :emit :macro}
+   :x-str-join       {:macro #'lua-tf-x-str-join       :emit :macro}
+   :x-str-index-of   {:macro #'lua-tf-x-str-index-of   :emit :macro}
    :x-str-substring  {:emit :alias :raw 'string.sub}
    :x-str-to-upper   {:emit :alias :raw 'string.upper}
    :x-str-to-lower   {:emit :alias :raw 'string.lower}
-     :x-str-to-fixed   {:macro #'lua-tf-x-str-to-fixed   :emit :macro}
-     :x-str-replace    {:macro #'lua-tf-x-str-replace    :emit :macro}
-     :x-str-trim       {:macro #'lua-tf-x-str-trim       :emit :macro}
-     :x-str-trim-left  {:macro #'lua-tf-x-str-trim-left  :emit :macro}
-     :x-str-trim-right {:macro #'lua-tf-x-str-trim-right :emit :macro}})
+   :x-str-to-fixed   {:macro #'lua-tf-x-str-to-fixed   :emit :macro}
+   :x-str-replace    {:macro #'lua-tf-x-str-replace    :emit :macro}
+   :x-str-trim       {:macro #'lua-tf-x-str-trim       :emit :macro}
+   :x-str-trim-left  {:macro #'lua-tf-x-str-trim-left  :emit :macro}
+   :x-str-trim-right {:macro #'lua-tf-x-str-trim-right :emit :macro}})
 
 ;;
 ;; JSON
@@ -382,40 +382,53 @@
 
 (defn lua-tf-x-return-encode
   ([[_ out id key]]
-   (template/$ (do (do (local ret nil)
-                (local '[r-ok r-err]
-                       (pcall (fn []
-                                (cond (== nil ~out)
-                                      (:= ret (cjson.encode {:id  ~id
-                                                             :key ~key
-                                                             :type "data"
-                                                             :value (. cjson ["null"])}))
-                                      
-                                      :else
-                                      (:= ret (cjson.encode {:id  ~id
-                                                             :key ~key
-                                                             :type "data"
-                                                             :value ~out}))))))
-                (cond r-err
-                      (return (cjson.encode {:id  ~id
-                                             :key ~key
-                                             :type "raw"
-                                             :error (tostring r-err)
-                                             :value (tostring ~out)}))
-                      
-                      :else
-                      (return ret)))))))
+   (template/$
+    (do (local ret nil)
+        (local type-fn
+               (fn [obj]
+                 (local t (type obj))
+                 (if (== t "table")
+                   (if (== nil (. '(obj) [1]))
+                     (return "object")
+                     (return "array"))
+                   (return t))))
+        (local '[r-ok r-err]
+               (pcall (fn []
+                        (cond (== nil ~out)
+                              (:= ret (cjson.encode {:id  ~id
+                                                     :key ~key
+                                                     :return "nil"
+                                                     :type "data"
+                                                     :value (. cjson ["null"])}))
+                                         
+                              :else
+                              (:= ret (cjson.encode {:id  ~id
+                                                     :key ~key
+                                                     :return (type-fn ~out)
+                                                     :type "data"
+                                                     :value ~out}))))))
+        (cond r-err
+              (return (cjson.encode {:id  ~id
+                                     :key ~key
+                                     :type "raw"
+                                     :return (type-fn ~out)
+                                     :error (tostring r-err)
+                                     :value (tostring ~out)}))
+                         
+              :else
+              (return ret))))))
 
 (defn lua-tf-x-return-wrap
   ([[_ f encode-fn]]
-   (template/$ (do (local out)
-                   (local '[o-ok o-err] (pcall (fn [] (:= out (~f)))))
-            (cond o-err
-                  (return (cjson.encode {:type "error"
-                                         :value o-err}))
-                  
-                  :else
-                  (return (~encode-fn out)))))))
+   (template/$
+    (do (local out)
+        (local '[o-ok o-err] (pcall (fn [] (:= out (~f)))))
+        (cond o-err
+              (return (cjson.encode {:type "error"
+                                     :value o-err}))
+              
+              :else
+              (return (~encode-fn out)))))))
 
 (defn lua-tf-x-return-eval
   ([[_ s wrap-fn]]
@@ -502,7 +515,7 @@
 (defn lua-tf-x-iter-has?
   ([[_ obj]]
    (template/$ (and (== "table" (type ~obj))
-             (== "function" (. '(~obj) ["iterator"]))))))
+                    (== "function" (. '(~obj) ["iterator"]))))))
 
 (defn lua-tf-x-iter-native?
   ([[_ it]]
@@ -555,14 +568,14 @@
 (defn lua-tf-x-thread-spawn
   ([[_ thunk & [strategy]]]
    (case strategy
-      :mock  (list 'coroutine.create thunk)
-      (list 'coroutine.create thunk))))
+     :mock  (list 'coroutine.create thunk)
+     (list 'coroutine.create thunk))))
 
 (defn lua-tf-x-thread-join
   ([[_ thread & [strategy]]]
    (case strategy
-      :mock (list  'coroutine.resume thread)
-      (list 'coroutine.resume thread))))
+     :mock (list  'coroutine.resume thread)
+     (list 'coroutine.resume thread))))
 
 (defn lua-tf-x-with-delay
   ([[_ thunk ms]]
@@ -586,11 +599,11 @@
                    (return ~instance)))))
 
 (def +lua-thread+
-   {:x-thread-spawn   {:macro #'lua-tf-x-thread-spawn  :emit :macro}
-     :x-thread-join    {:macro #'lua-tf-x-thread-join   :emit :macro}
-     :x-with-delay     {:macro #'lua-tf-x-with-delay    :emit :macro}
-     :x-start-interval {:macro #'lua-tf-x-start-interval :emit :macro}
-     :x-stop-interval  {:macro #'lua-tf-x-stop-interval  :emit :macro}})
+  {:x-thread-spawn   {:macro #'lua-tf-x-thread-spawn  :emit :macro}
+   :x-thread-join    {:macro #'lua-tf-x-thread-join   :emit :macro}
+   :x-with-delay     {:macro #'lua-tf-x-with-delay    :emit :macro}
+   :x-start-interval {:macro #'lua-tf-x-start-interval :emit :macro}
+   :x-stop-interval  {:macro #'lua-tf-x-stop-interval  :emit :macro}})
 
 
 ;;
