@@ -53,7 +53,7 @@
                                       :emit {:compile {:type :graph
                                                        :base    'js
                                                        :root-ns 'js.blessed.ui-core}}})))
-  => '#{js.blessed.ui-style xt.lang.common-lib js.react})
+  => '#{js.blessed.ui-style xt.lang.common-data xt.lang.common-lib js.react})
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-setup-concat :added "4.0"}
 (fact "joins setup raw into individual blocks"
@@ -125,8 +125,9 @@
                       :root-ns 'js.blessed.ui-core
                       }}}))
 
-  => (contains ["import * as ui_style from '@/blessed/ui-style'"
-                "import * as k from '@/libs/xt/lang/base-lib'"
+  => (contains ["import * as xtd from '@/libs/xt/lang/common-data'"
+                "import * as ui_style from '@/blessed/ui-style'"
+                "import * as k from '@/libs/xt/lang/common-lib'"
                 "import * as r from '@/react'"] :in-any-order)
 
   (emit-module-setup-link-arr
@@ -145,8 +146,9 @@
      :emit {:compile {:type :graph
                       :base    'js
                       :root-ns 'js.blessed.ui-core}}}))
-  => (contains ["import * as ui_style from '@|blessed|ui-style'"
-                "import * as k from '@|libs/xt/lang|base-lib'"
+  => (contains ["import * as xtd from '@|libs|xt|lang|common-data'"
+                "import * as ui_style from '@|blessed|ui-style'"
+                "import * as k from '@|libs/xt/lang|common-lib'"
                 "import * as r from '@|react'"] :in-any-order))
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-setup-export-body :added "4.0"}

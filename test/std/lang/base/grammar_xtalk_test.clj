@@ -17,7 +17,7 @@
 ^{:refer std.lang.base.grammar-xtalk/tf-first :added "4.1"}
 (fact "wrapper for first transform"
   (tf-first '(x:first arr))
-  => '(x:get-idx arr 0))
+  => '(x:get-idx arr (x:offset 0)))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-eq-nil? :added "4.0"}
 (fact "equals nil transform"
@@ -52,7 +52,7 @@
   => '(. obj ["a"])
 
   (tf-get-key '(x:get-key obj "a" "DEFAULT"))
-  => '(or (. obj ["a"]) "DEFAULT"))
+  => '(:? (x:nil? (. obj ["a"])) "DEFAULT" (. obj ["a"])))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-set-key :added "4.0"}
 (fact "set-key transform"
@@ -262,7 +262,7 @@
 ^{:refer std.lang.base.grammar-xtalk/tf-second :added "4.1"}
 (fact "gets the second element"
   (tf-second '(x:second arr))
-  => '(x:get-idx arr 1))
+  => '(x:get-idx arr (x:offset 1)))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-last :added "4.1"}
 (fact "gets the last element"
@@ -272,17 +272,17 @@
 ^{:refer std.lang.base.grammar-xtalk/tf-second-last :added "4.1"}
 (fact "gets the second last element"
   (tf-second-last '(x:second-last arr))
-  => '(x:get-idx arr (+ (x:len arr) (x:offset -2))))
+  => '(x:get-idx arr (x:offset-len (- (x:len arr) 1))))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-str-lt :added "4.1"}
 (fact "checks string ordering ascending"
   (tf-str-lt '(x:str-lt a b))
-  => '(x:arr-str-comp a b))
+  => '(x:str-comp a b))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-str-gt :added "4.1"}
 (fact "checks string ordering descending"
   (tf-str-gt '(x:str-gt a b))
-  => '(x:arr-str-comp b a))
+  => '(x:str-comp b a))
 
 (fact "all xtalk grammar map entries expose op-spec contracts"
   (vec
@@ -295,40 +295,15 @@
   => [])
 
 
-(fact "generator-backed fragment spec emits the expected form"
-  (xtalk/xtgen.fragment-spec
-   {:symbol  '[x:arr-push]
-    :op-spec {:type '[:fn [:xt/arr :xt/any] :xt/self]}})
-  => '(defspec.xt x:arr-push
-        [:fn [:xt/arr :xt/any] :xt/self]))
-
-(fact "common-lib generator emits def$.xt aliases"
-  (xtgen/generate-common-lib
-   {:symbol  '[x:arr-push]
-    :op-spec {:arglists '([arr val])}})
-  => '(def$.xt arr-push x:arr-push))
-
-(fact "generator-backed fragment fn emits macro wrapper"
-  (let [form (xtalk/xtgen.fragment-fn
-              {:symbol  '[x:arr-push]
-               :op-spec {:arglists '([arr val])}})]
-    [(first form)
-     (second form)
-     (nth form 2)
-     (nth form 3)])
-  => '[defmacro.xt
-       x:arr-push
-       ([arr val])
-       (x:arr-push arr val)])
-
-^{:refer std.lang.base.grammar-xtalk/tmpl-fragment-fn :added "4.1"}
-(fact "compatibility wrapper delegates to xtgen fragment fn"
-  (let [entry {:symbol  '[x:arr-push]
-               :op-spec {:arglists '([arr val])}}]
-    (tmpl-fragment-fn entry))
-  => (xtalk/xtgen.fragment-fn
-      {:symbol  '[x:arr-push]
-       :op-spec {:arglists '([arr val])}}))
+(fact "common-lib generator emits the current macro wrapper"
+  (read-string
+   (xtgen/generate-common-lib
+    {:symbol  '[x:arr-push]
+     :op-spec {:arglists '([arr val])}}))
+  => '(defmacro.xt ^{:standalone true}
+        x:arr-push
+        [arr val]
+        (x:arr-push [arr val])))
 
 
 ^{:refer std.lang.base.grammar-xtalk/tf-lt-string :added "4.1"}

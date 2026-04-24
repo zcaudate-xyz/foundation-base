@@ -4,7 +4,7 @@
   (:refer-clojure :exclude [use val proxy]))
 
 (l/script :js
-  {:import [["valtio/vanilla" :as [* ValtioCore]] ["valtio/utils" :as [* ValtioUtils]] ["valtio" :as [* Valtio]] ["valtio" :as [* Valtio]] ["valtio/vanilla" :as [* ValtioCore]] ["valtio/utils" :as [* ValtioUtils]]] :require [[xt.lang.common-lib :as k] [xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd] [js.core :as j]]})
+  {:import [["valtio/vanilla" :as [* ValtioCore]] ["valtio/utils" :as [* ValtioUtils]] ["valtio" :as [* Valtio]] ["valtio" :as [* Valtio]] ["valtio/vanilla" :as [* ValtioCore]] ["valtio/utils" :as [* ValtioUtils]]] :require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [js.core :as j]]})
 
 ;;
 ;; valtio

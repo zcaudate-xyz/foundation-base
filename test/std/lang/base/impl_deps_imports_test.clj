@@ -230,11 +230,14 @@
   (impl/with:library [+library-js-cloned+]
     (deps-imports/module-imports
      (lib/get-book
-      +library-js-cloned+
-      :js)
+       +library-js-cloned+
+       :js)
      'js.react))
   => '{:native {"react" {:as React}, "react-dom/client" {:as ReactDOM}},
-       :direct #{xt.lang.common-lib}}
+       :direct #{xt.lang.common-data
+                 xt.lang.common-lib
+                 xt.lang.common-math
+                 xt.lang.common-string}}
 
   (impl/with:library [+library-js-cloned+]
     (deps-imports/module-imports
@@ -249,12 +252,15 @@
   (impl/with:library [+library-js-cloned+]
     (deps-imports/module-imports
      (lib/get-book
-      +library-js-cloned+
-      :js)
+       +library-js-cloned+
+       :js)
      'js.blessed.ui-core))
   => '{:native {"react" {:as React},
                 "blessed" {:as Blessed}},
-       :direct #{js.blessed.ui-style xt.lang.common-lib js.react}}
+       :direct #{js.blessed.ui-style
+                 js.react
+                 xt.lang.common-data
+                 xt.lang.common-lib}}
 
   (impl/with:library [+library-js-cloned+]
     (deps-imports/module-imports
@@ -275,10 +281,15 @@
   (impl/with:library [+library-js-cloned+]
     (deps-imports/module-imports
      (lib/get-book
-      +library-js-cloned+
-      :js)
+       +library-js-cloned+
+       :js)
      'js.blessed.frame-console))
-  => '{:native {}, :direct #{js.blessed.ui-group xt.lang.common-lib js.blessed.ui-core}})
+  => '{:native {}
+       :direct #{js.blessed.ui-core
+                 js.blessed.ui-group
+                 xt.lang.common-data
+                 xt.lang.common-lib
+                 xt.lang.common-sort-by}})
 
 
 ^{:refer std.lang.base.impl-deps-imports/module-code-deps :added "4.0"}
@@ -287,40 +298,63 @@
   (impl/with:library [+library-js-cloned+]
     (deps-imports/module-code-deps
      (lib/get-book
-      +library-js-cloned+
-      :js)
+       +library-js-cloned+
+       :js)
      '[js.blessed.frame-console]))
   => '{:all #{js.blessed.ui-style
-              js.blessed.ui-group
-              js.blessed.frame-console
-              xt.lang.common-lib
-              xt.lang.common-data
-              js.react
-              js.blessed.ui-core}
-       :graph {js.blessed.frame-console  #{js.blessed.ui-group
+               js.blessed.ui-group
+               js.blessed.frame-console
+               xt.lang.common-sort-by
+               xt.lang.common-lib
+               xt.lang.common-data
+               xt.lang.common-math
+               xt.lang.common-string
+               js.react
+               js.blessed.ui-core}
+       :graph {js.blessed.frame-console  #{js.blessed.ui-core
+                                           js.blessed.ui-group
+                                           xt.lang.common-data
                                            xt.lang.common-lib
-                                           js.blessed.ui-core}
+                                           xt.lang.common-sort-by}
                js.blessed.ui-group       #{js.blessed.ui-style
+                                           js.react
+                                           xt.lang.common-data
                                            xt.lang.common-lib
-                                           js.react}
-               xt.lang.common-lib          #{xt.lang.common-data}
+                                           }
+               xt.lang.common-sort-by    #{xt.lang.common-data}
+               xt.lang.common-lib        #{xt.lang.common-data}
                xt.lang.common-data       #{}
+               xt.lang.common-math       #{}
+               xt.lang.common-string     #{}
                js.blessed.ui-core        #{js.blessed.ui-style
+                                           js.react
+                                           xt.lang.common-data
+                                           xt.lang.common-lib}
+               js.blessed.ui-style       #{xt.lang.common-data}
+               js.react                  #{xt.lang.common-data
                                            xt.lang.common-lib
-                                           js.react}
-               js.blessed.ui-style       #{xt.lang.common-lib}
-               js.react                  #{xt.lang.common-lib}}}
+                                           xt.lang.common-math
+                                           xt.lang.common-string}}}
 
   (impl/with:library [+library-js-cloned+]
     (deps-imports/module-code-deps
      (lib/get-book
-      +library-js-cloned+
-      :js)
+       +library-js-cloned+
+       :js)
      '[js.react]))
-  => '{:all #{xt.lang.common-lib xt.lang.common-data js.react},
-       :graph {js.react #{xt.lang.common-lib},
-               xt.lang.common-lib #{xt.lang.common-data},
-               xt.lang.common-data #{}}})
+  => '{:all #{js.react
+              xt.lang.common-data
+              xt.lang.common-lib
+              xt.lang.common-math
+              xt.lang.common-string},
+       :graph {js.react #{xt.lang.common-data
+                          xt.lang.common-lib
+                          xt.lang.common-math
+                          xt.lang.common-string},
+                xt.lang.common-lib #{xt.lang.common-data},
+                xt.lang.common-data #{}
+                xt.lang.common-math #{}
+                xt.lang.common-string #{}}})
 
 (comment
 

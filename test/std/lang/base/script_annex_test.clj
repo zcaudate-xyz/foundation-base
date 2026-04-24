@@ -5,7 +5,6 @@
              [std.lib.context.registry :as reg]
              [std.lib.context.space :as space]
              [std.lib.env :as env]
-             [xt.lang]
              [xt.lang.common-data]
              [xt.lang.common-lib])
   (:use code.test))

@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:config {:bench false :emit {:native {:suppress true} :lang/jsx false} :id :play/web-main :notify {:host "test.statstrade.io"}} :require [[xt.lang.common-lib :as k] [js.core :as j] [js.react :as r] [js.react-native :as n] [js.react-native.animate :as a] [js.react-native.helper-theme-default :as helper-theme-default] [xt.lang.common-data :as xtd] [xt.lang.common-spec :as xt]] :runtime :websocket})
+  {:config {:bench false :emit {:native {:suppress true} :lang/jsx false} :id :play/web-main :notify {:host "test.statstrade.io"}} :require [[xt.lang.common-lib :as k] [js.core :as j] [js.react :as r] [js.react-native :as n] [js.react-native.animate :as a] [js.react-native.helper-theme-default :as helper-theme-default] [xt.lang.common-data :as xtd] [xt.lang.spec-base :as xt]] :runtime :websocket})
 
 (defn.js Tag
   "listens to a single indicator to set ref"

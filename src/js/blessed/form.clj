@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [xt.lang.event-form :as base-form] [js.core :as j] [js.react :as r] [js.react.ext-form :as ext-form] [js.blessed.ui-style :as ui-style] [js.blessed.ui-core :as ui-core] [js.blessed.ui-group :as ui-group] [js.blessed.ui-date :as ui-date] [xt.lang.common-spec :as xt]]})
+  {:require [[xt.lang.common-lib :as k] [xt.lang.event-form :as base-form] [js.core :as j] [js.react :as r] [js.react.ext-form :as ext-form] [js.blessed.ui-style :as ui-style] [js.blessed.ui-core :as ui-core] [js.blessed.ui-group :as ui-group] [js.blessed.ui-date :as ui-date] [xt.lang.spec-base :as xt]]})
 
 (defn.js FormWrapper
   "addes `width`, `offset` and `label`"

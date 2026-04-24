@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:config {:bench false :emit {:native {:suppress true} :lang/jsx false} :id :play/web-main :notify {:host "test.statstrade.io"}} :require [[xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.common-spec :as xt] [xt.lang.common-string :as str]] :runtime :websocket})
+  {:config {:bench false :emit {:native {:suppress true} :lang/jsx false} :id :play/web-main :notify {:host "test.statstrade.io"}} :require [[xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.spec-base :as xt] [xt.lang.common-string :as str]] :runtime :websocket})
 
 (def.js POSITION
   {"top"    {:opposite "bottom"

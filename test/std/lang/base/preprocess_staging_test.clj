@@ -110,6 +110,52 @@
                '{:module {:link {u L.core}}}))
   => '[[(var a := (L.core/identity-fn 1)) #{} #{} {}] #:assign{:inline true}]
 
+  (first
+   (to-staging '(var a := (x:type-native obj))
+               js/+grammar+
+               {}
+               '{:module {:id JS.core
+                          :link {- JS.core}}}))
+  => '(do
+        (var* :let a := nil)
+        (do
+          (when (== obj nil)
+            (return nil))
+          (var t := (typeof obj))
+          (if (== t "object")
+            (cond
+              (Array.isArray obj)
+              (:= a "array")
+              :else
+              (do
+                (var tn := (. obj ["constructor"] ["name"]))
+                (if (== tn "Object")
+                  (:= a "object")
+                  (:= a tn))))
+            (:= a t))))
+
+  (first
+   (to-staging '(:= a (x:type-native obj))
+               js/+grammar+
+               {}
+               '{:module {:id JS.core
+                          :link {- JS.core}}}))
+  => '(do
+        (when (== obj nil)
+          (return nil))
+        (var t := (typeof obj))
+        (if (== t "object")
+          (cond
+            (Array.isArray obj)
+            (:= a "array")
+            :else
+            (do
+              (var tn := (. obj ["constructor"] ["name"]))
+              (if (== tn "Object")
+                (:= a "object")
+                (:= a tn))))
+          (:= a t)))
+
   (to-staging 'x:add
               +grammar+
               {}

@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-runtime :as rt :with [defvar.js]] [xt.lang.common-spec :as xt] [js.cell.kernel :as kernel] [js.cell.kernel.base-link-local :as base-link-local] [js.cell.kernel.worker-local :as worker-local] [js.cell.kernel.worker-state :as worker-state]]})
+  {:require [[xt.lang.common-runtime :as rt :with [defvar.js]] [xt.lang.spec-base :as xt] [js.cell.kernel :as kernel] [js.cell.kernel.base-link-local :as base-link-local] [js.cell.kernel.worker-local :as worker-local] [js.cell.kernel.worker-state :as worker-state]]})
 
 (defvar.js ^{:ns "@worker"}
   SERVICE

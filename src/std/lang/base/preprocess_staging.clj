@@ -17,7 +17,8 @@
         mopts    (provenance/with-provenance
                   mopts
                   {:std.lang/form form
-                   :std.lang/symbol fsym})]
+                   :std.lang/symbol fsym})
+        template-assignment (assign/process-template-assignment form grammar mopts)]
     (cond (= fsym '!:template)
           (walk-fn (eval (second form)))
 
@@ -46,6 +47,9 @@
           (and (= :def-assign (:emit reserved))
                (= :inline (last form)))
           (walk-fn (assign/process-inline-assignment form modules mopts))
+
+          template-assignment
+          (walk-fn template-assignment)
 
           reserved
           (assign/protect-reserved-head form)

@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:config {:bench false :emit {:native {:suppress true} :lang/jsx false} :id :play/web-main :notify {:host "test.statstrade.io"}} :require [[js.core :as j] [js.react :as r] [js.react-native :as n] [js.react-native.animate :as a] [js.react-native.physical-base :as physical-base] [xt.lang.common-data :as xtd] [xt.lang.common-lib :as k] [xt.lang.common-spec :as xt]] :runtime :websocket})
+  {:config {:bench false :emit {:native {:suppress true} :lang/jsx false} :id :play/web-main :notify {:host "test.statstrade.io"}} :require [[js.core :as j] [js.react :as r] [js.react-native :as n] [js.react-native.animate :as a] [js.react-native.physical-base :as physical-base] [xt.lang.common-data :as xtd] [xt.lang.common-lib :as k] [xt.lang.spec-base :as xt]] :runtime :websocket})
 
 (defn.js Page
   "creates a Page"

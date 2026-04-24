@@ -8,7 +8,7 @@
   (:refer-clojure :exclude [> ref derive sync get set]))
 
 (l/script :js
-  {:import [["react" :as React] ["react-dom/client" :as ReactDOM] ["react-nil" :as ReactNIL]] :require [[js.core :as j] [xt.lang.common-lib :as k] [xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-string :as str] [xt.lang.common-math :as math] [xt.lang.common-trace :as trace]]})
+  {:import [["react" :as React] ["react-dom/client" :as ReactDOM] ["react-nil" :as ReactNIL]] :require [[js.core :as j] [xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-string :as str] [xt.lang.common-math :as math] [xt.lang.common-trace :as trace]]})
 
 #_(defrun.js __init__
   (:# "eslint-disable react-hooks/rules-of-hooks"))

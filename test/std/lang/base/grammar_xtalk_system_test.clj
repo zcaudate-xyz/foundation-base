@@ -96,8 +96,7 @@
                   x:str-ends-with}
        :profiles #{:xtalk-common
                    :xtalk-functional}
-       :polyfill-modules #{xt.lang.common-lib
-                           xt.lang.common-data
+       :polyfill-modules #{xt.lang.common-data
                            xt.lang.common-string}}
 
   (scan-xtalk '(do (tmpl:call v))

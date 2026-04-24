@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[js.cell.binding.trigger :as binding-trigger] [js.cell.service.db-query :as db-query] [js.cell.service.db-remote :as db-remote] [js.cell.service.db-supabase :as db-supabase] [js.cell.service.db-sync :as db-sync] [xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd]]})
+  {:require [[js.cell.binding.trigger :as binding-trigger] [js.cell.service.db-query :as db-query] [js.cell.service.db-remote :as db-remote] [js.cell.service.db-supabase :as db-supabase] [js.cell.service.db-sync :as db-sync] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]]})
 
 (defn.js unwrap-result
   "unwraps a service-layer [ok result] tuple"
