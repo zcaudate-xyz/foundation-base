@@ -257,7 +257,12 @@
                                 {:ns test-ns
                                  :form form
                                  :meta meta}))
-       (throw (res/result-data result))))))
+       (throw (ex-info "factcheck evaluation failed"
+                       {:ns test-ns
+                        :form form
+                        :meta meta
+                        :status (:status result)}
+                       (res/result-data result)))))))
 
 (defn fact-result-values
   "evaluates every compiled op in a fact and returns the raw values"
@@ -265,13 +270,13 @@
   ([fpkg]
    (let [test-ns   (:ns fpkg)
          id        (:id fpkg)
-         teardown? (or (rt/get-fact test-ns id :function :teardown)
-                       (rt/get-flag test-ns id :setup))]
+         needs-teardown? (or (rt/get-fact test-ns id :function :teardown)
+                             (rt/get-flag test-ns id :setup))]
      (rt/setup-fact test-ns id)
      (try
        (mapv (partial evaluate-fact-op test-ns) (:full fpkg))
        (finally
-         (when teardown?
+         (when needs-teardown?
            (rt/teardown-fact test-ns id)))))))
 
 (defn factcheck-generate-form-string

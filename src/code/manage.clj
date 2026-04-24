@@ -418,7 +418,7 @@
 
 (invoke/definvoke snapto
   "formats fact tests into snap-to layout
-  
+
    (snapto {:write false})
  
    (snapto '[code.manage] {:print {:item true}
