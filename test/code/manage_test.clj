@@ -244,7 +244,7 @@
   => [:code.transform "HEAL CODE" true true])
 
 ^{:refer code.manage/+tasks+ :added "4.1"}
-(fact "registers factcheck, isolate and snapto in the available manage tasks"
+(fact "registers isolate, snapto and factcheck tasks in the available manage tasks"
   [(task/task? (-> +tasks+ :isolate))
    (task/task? (-> +tasks+ :snapto))
    (task/task? (-> +tasks+ :factcheck-remove))
