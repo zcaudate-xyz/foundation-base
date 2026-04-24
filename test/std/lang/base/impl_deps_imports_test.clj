@@ -321,11 +321,11 @@
                                            xt.lang.common-data
                                            xt.lang.common-lib
                                            }
-               xt.lang.common-sort-by    #{xt.lang.common-data}
-               xt.lang.common-lib        #{xt.lang.common-data}
-               xt.lang.common-data       #{}
-               xt.lang.common-math       #{}
-               xt.lang.common-string     #{}
+                xt.lang.common-sort-by    #{xt.lang.common-data}
+                xt.lang.common-lib        #{}
+                xt.lang.common-data       #{}
+                xt.lang.common-math       #{}
+                xt.lang.common-string     #{}
                js.blessed.ui-core        #{js.blessed.ui-style
                                            js.react
                                            xt.lang.common-data
@@ -351,10 +351,10 @@
                           xt.lang.common-lib
                           xt.lang.common-math
                           xt.lang.common-string},
-                xt.lang.common-lib #{xt.lang.common-data},
-                xt.lang.common-data #{}
-                xt.lang.common-math #{}
-                xt.lang.common-string #{}}})
+                 xt.lang.common-lib #{},
+                 xt.lang.common-data #{}
+                 xt.lang.common-math #{}
+                 xt.lang.common-string #{}}})
 
 (comment
 

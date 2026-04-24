@@ -122,11 +122,13 @@
     nil))
 
 (defn process-template-assignment
-  "rewrites template-only xtalk macros in assignment position"
+  "rewrites rewrite-block xtalk macros in assignment position"
   {:added "4.1"}
   [form grammar mopts]
   (let [form (or (when-let [{:keys [emit macro]} (get-in grammar [:reserved (first form)])]
                    (when (and (= :macro emit)
+                              (when-let [op (:op (get-in grammar [:reserved (first form)]))]
+                                (.startsWith (name op) "var-"))
                               macro)
                      (let [expanded (binding [preprocess/*macro-form* form
                                               preprocess/*macro-grammar* grammar
@@ -139,10 +141,10 @@
     (when-let [{:keys [declare? target value]} (assignment-target form grammar)]
       (when (and (collection/form? value)
                  (symbol? (first value)))
-        (let [{:keys [emit macro op-spec]} (get-in grammar [:reserved (first value)])]
-          (when (and (= :macro emit)
-                     (:template-only op-spec)
-                     macro)
+          (let [{:keys [emit macro op-spec]} (get-in grammar [:reserved (first value)])]
+            (when (and (= :macro emit)
+                       (:allow-blocks op-spec)
+                       macro)
             (let [expanded (binding [preprocess/*macro-form* value
                                      preprocess/*macro-grammar* grammar
                                      preprocess/*macro-opts* mopts]

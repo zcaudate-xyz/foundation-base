@@ -26,7 +26,7 @@
   => '[true return (value) {:line 10}])
 
 ^{:refer std.lang.base.preprocess-assign/process-template-assignment :added "4.1"}
-(fact "rewrites template-only xtalk macros in assignment position"
+(fact "rewrites rewrite-block xtalk macros in declaration position"
   (process-template-assignment
    '(var a := (x:type-native obj))
    js/+grammar+
@@ -48,8 +48,9 @@
                 (if (== tn "Object")
                   (:= a "object")
                   (:= a tn))))
-            (:= a t))))
+            (:= a t)))))
 
+(fact "rewrites rewrite-block xtalk macros in assignment position"
   (process-template-assignment
    '(:= a (x:type-native obj))
    js/+grammar+
@@ -69,4 +70,19 @@
               (if (== tn "Object")
                 (:= a "object")
                 (:= a tn))))
-          (:= a t)))))
+          (:= a t))))
+
+(fact "ignores non-assignment macros that stage to a symbol"
+   (let [grammar {:reserved {':= {:emit :assign}
+                             'x:offset {:emit :macro
+                                        :macro (fn [[_ n]] n)
+                                        :op-spec {:allow-blocks true}}}}]
+    [(process-template-assignment
+      '(x:offset i)
+      grammar
+      nil)
+     (process-template-assignment
+      '(:= a (x:offset i))
+      grammar
+      nil)])
+  => '[nil (:= a i)])

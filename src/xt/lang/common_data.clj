@@ -99,7 +99,6 @@
   ([arr]
    (return (xt/x:second-last arr))))
 
-
 ;;
 ;; ARRAY CONTAINER
 ;;
@@ -359,11 +358,9 @@
     (when (< q 0)
       (return (. arr [i])))))
 
-
 ;;
 ;; OBJECT
 ;;
-
 
 (defn.xt obj-empty?
   "checks that object is empty"

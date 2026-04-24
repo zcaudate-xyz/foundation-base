@@ -5,9 +5,7 @@
                             neg? even? odd?]))
 
 (l/script :xtalk
-  {:require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-data :as xtd]
-             [xt.lang.common-string :as str]]})
+  {:require [[xt.lang.spec-base :as xt]]})
 
 ;;
 ;; TYPE
@@ -19,7 +17,7 @@
   "gets the native type"
   {:added "4.0"}
   ([obj]
-   (xt/x:type-native obj)))
+   (return (xt/x:type-native obj))))
 
 (defspec.xt type-class [:fn [:xt/any] :xt/str])
 
@@ -45,25 +43,6 @@
   "converts a string to a number"
   {:added "4.0"}
   ([x] (return (xt/x:to-number x))))
-
-(defspec.xt proto-spec [:fn [[:xt/array :xt/any]] :xt/obj])
-
-(defn.xt proto-spec
-  "creates a prototype spec map from interface entries"
-  {:added "4.1"}
-  [spec-arr]
-  (var acc {})
-  (xt/for:array [e spec-arr]
-    (var spec-i (xt/x:first e))
-    (var spec-map (xt/x:second e))
-    (xt/for:array [key spec-i]
-      (when (xt/x:nil? (xt/x:get-key spec-map key))
-        (xt/x:err
-         (xt/x:cat "NOT VALID."
-                   (xt/x:json-encode {:required key
-                                      :actual (xt/x:obj-keys spec-map)})))))
-    (:= acc (xt/x:obj-assign acc spec-map)))
-  (return acc))
 
 
 ;;

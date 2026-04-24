@@ -36,10 +36,10 @@
   => '(:code :direct :native :setup :teardown)
 
   (:direct (second (emit-module-prep 'xt.lang.common-lib
-                                   {:lang :lua
-                                    :emit {:compile {:type :graph
-                                                     :root-ns 'lua}}})))
-  => '#{xt.lang.common-data}
+                                    {:lang :lua
+                                     :emit {:compile {:type :graph
+                                                      :root-ns 'lua}}})))
+  => '#{}
 
   (:direct (second (emit-module-prep 'js.blessed
                                    {:lang :js

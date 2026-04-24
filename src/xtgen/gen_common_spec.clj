@@ -156,9 +156,9 @@
 (defn generate-common-macro-template
   [{:keys [op-spec] :as e}]
   (let [target    (first (:symbol e))
-        {:keys [arglists
-                variadic
-                template-only]} op-spec
+         {:keys [arglists
+                 variadic
+                allow-blocks]} op-spec
         forms     (if variadic
                     (list (conj (first arglists)
                                 '& 'more)
@@ -173,7 +173,7 @@
     {'target   target
      'forms     forms
      'standalone true
-     'is-template (boolean template-only)}))
+     'is-template (boolean allow-blocks)}))
 
 (def ^:private +generate-common-macro+
   (gen/get-template GENERATE_COMMON_MACRO_TEMPLATE

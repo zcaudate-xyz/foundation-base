@@ -375,7 +375,7 @@
                  :type [:fn [:xt/any] :xt/any]
                  :arglists '([message])}}
    {:op :x-type-native    :symbol #{'x:type-native}     :emit :abstract
-    :op-spec    {:template-only true
+    :op-spec    {:allow-blocks true
                  :type [:fn [:xt/any] :xt/string]
                  :arglists '([value])}}])
 
@@ -756,18 +756,18 @@
 
 (def +xt-functional-return+
   [{:op :x-return-run      :symbol #{'x:return-run}      :emit :abstract
-    :op-spec {:template-only true
+    :op-spec {:allow-blocks true
               :arglists '([runner])}}
    {:op :x-return-encode   :symbol #{'x:return-encode}   :emit :abstract
-    :op-spec {:template-only true
+    :op-spec {:allow-blocks true
               :type [:fn [:xt/any :xt/str :xt/str] :xt/str]
               :arglists '([out id key])}}
    {:op :x-return-wrap     :symbol #{'x:return-wrap}     :emit :abstract
-    :op-spec {:template-only true
+    :op-spec {:allow-blocks true
               :type [:fn [[:fn [:xt/any] :xt/any]] [:fn [:xt/any] :xt/str]]
               :arglists '([callbock encode-fn])}}
    {:op :x-return-eval     :symbol #{'x:return-eval}     :emit :abstract
-    :op-spec {:template-only true
+    :op-spec {:allow-blocks true
               :type [:fn [:xt/str] :xt/str]
               :arglists '([expr wrap-fn])}}])
 
@@ -808,7 +808,7 @@
    {:op :x-iter-from      :symbol #{'x:iter-from}       :emit :abstract
     :op-spec {:arglists '([value])}}
    {:op :x-iter-eq        :symbol #{'x:iter-eq}         :emit :abstract
-    :op-spec {:template-only true
+    :op-spec {:allow-blocks true
               :arglists '([iter0 iter1 eq-fn])
               :type [:fn [:xt/any :xt/any :xt/fn] :xt/bool]}}
    {:op :x-iter-null      :symbol #{'x:iter-null}       :emit :abstract
@@ -842,7 +842,7 @@
    {:op :x-proto-set       :symbol #{'x:proto-set}       :emit :abstract
     :op-spec {:arglists '([obj proto])}}
    {:op :x-proto-create    :symbol #{'x:proto-create}    :macro #'tf-proto-create   :emit :macro
-    :op-spec {:template-only true
+    :op-spec {:allow-blocks true
               :arglists '([m])}}
    {:op :x-proto-tostring  :symbol #{'x:proto-tostring}  :emit :abstract
     :op-spec {:arglists '([])}}])
@@ -893,7 +893,7 @@
 
 (def +xt-socket+
   [{:op :x-socket-connect :symbol #{'x:socket-connect} :emit :abstract
-    :op-spec {:template-only true
+    :op-spec {:allow-blocks true
               :type [:fn [:xt/str :xt/int :xt/any :xt/any] :xt/any]
               :arglists '([host port opts cb])}}
    {:op :x-socket-send :symbol #{'x:socket-send} :emit :abstract
@@ -907,7 +907,7 @@
 (def +xt-notify-http+
   [{:op :x-notify-http     :symbol #{'x:notify-http}     :emit :hard-link
     :raw 'xt.lang.common-repl/notify-socket-http
-    :op-spec {:template-only true
+    :op-spec {:allow-blocks true
               :type  [:fn [:xt/str :xt/num :xt/any :xt/str :xt/str :xt/any] :xt/any]
               :arglists '([host port value id key opts])}}])
 
@@ -936,20 +936,20 @@
     :op-spec {:arglists '([cache key])
               :type [:fn [:xt/any :xt/str] :xt/str]}}
    {:op :x-cache-incr     :symbol #{'x:cache-incr}      :emit :abstract
-    :op-spec {:template-only true
+    :op-spec {:allow-blocks true
               :arglists '([cache key val])
               :type [:fn [:xt/any :xt/str :xt/int] :xt/int]}}])
 
 (def +xt-runtime-thread+
   [{:op :x-thread-spawn   :symbol #{'x:thread-spawn}    :emit :abstract
-    :op-spec {:template-only true
+    :op-spec {:allow-blocks true
               :arglists '([f])
               :type [:fn [:xt/fn] :xt/any]}}
    {:op :x-thread-join    :symbol #{'x:thread-join}     :emit :abstract
     :op-spec {:arglists '([thread])
               :type [:fn [:xt/any] :xt/any]}}
    {:op :x-with-delay     :symbol #{'x:with-delay}      :emit :abstract
-    :op-spec {:template-only true
+    :op-spec {:allow-blocks true
               :arglists '([ms value])
               :type [:fn [:xt/int :xt/any] :xt/any]}}
    {:op :x-start-interval :symbol #{'x:start-interval}  :emit :abstract
@@ -961,17 +961,17 @@
 
 (def +xt-runtime-shell+
   [{:op :x-shell          :symbol #{'x:shell}           :emit :abstract
-    :op-spec {:template-only true
+    :op-spec {:allow-blocks true
               :type [:fn [:xt/str :xt/any :xt/any] :xt/any]
               :arglists '([command opts cb])}}])
 
 (def +xt-runtime-file+
   [{:op :x-slurp-file     :symbol #{'x:slurp-file}    :emit :abstract
-    :op-spec {:template-only true
+    :op-spec {:allow-blocks true
               :arglists '([path opts cb])
               :type [:fn [:xt/str :xt/any :xt/any] :xt/any]}}
    {:op :x-spit-file      :symbol #{'x:spit-file}     :emit :abstract
-    :op-spec {:template-only true
+    :op-spec {:allow-blocks true
               :arglists '([path value opts cb])
               :type [:fn [:xt/str :xt/any :xt/any :xt/any] :xt/any]}}])
 
