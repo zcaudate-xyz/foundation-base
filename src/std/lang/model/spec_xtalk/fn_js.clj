@@ -564,54 +564,6 @@
    :x-iter-native?     {:macro #'js-tf-x-iter-native?        :emit :macro}})
 
 ;;
-;; CACHE
-;;
-
-(defn js-tf-x-cache
-  ([[_ name]]
-   (if (= (f/strn name) "GLOBAL")
-     'window.localStorage
-     'window.sessionStorage)))
-
-(defn js-tf-x-cache-list
-  ([[_ cache]]
-   (list 'or
-         (list '. cache ["_keys"])
-         (list 'Object.keys cache))))
-
-(defn js-tf-x-cache-flush
-  ([[_ cache]]
-   (list '. cache '(clear))))
-
-(defn js-tf-x-cache-get
-  ([[_ cache key]]
-   (list '. cache (list 'getItem key))))
-
-(defn js-tf-x-cache-set
-  ([[_ cache key val]]
-   (list '. cache (list 'setItem key val))))
-
-(defn js-tf-x-cache-del
-  ([[_ cache key]]
-   (list '. cache (list 'removeItem key))))
-
-(defn js-tf-x-cache-incr
-  ([[_ cache key num]]
-   (template/$ (do:> (var prev (Number (. ~cache (getItem ~key))))
-                     (var curr (+ prev ~num))
-                     (. ~cache (setItem ~key curr))
-                     (return curr)))))
-
-(def +js-cache+
-  {:x-cache                 {:macro #'js-tf-x-cache           :emit :macro}
-   :x-cache-flush           {:macro #'js-tf-x-cache-flush     :emit :macro}
-   :x-cache-list            {:macro #'js-tf-x-cache-list      :emit :macro}
-   :x-cache-get             {:macro #'js-tf-x-cache-get       :emit :macro}
-   :x-cache-set             {:macro #'js-tf-x-cache-set       :emit :macro}
-   :x-cache-del             {:macro #'js-tf-x-cache-del       :emit :macro}
-   :x-cache-incr            {:macro #'js-tf-x-cache-incr      :emit :macro}})
-
-;;
 ;; FILE
 ;;
 
@@ -729,7 +681,6 @@
          +js-return+
          +js-socket+
          +js-iter+
-         +js-cache+
          +js-thread+
          +js-file+
          +js-b64+

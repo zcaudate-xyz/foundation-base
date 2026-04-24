@@ -1,12 +1,6 @@
 (ns std.lang.model.spec-xtalk.fn-go
   (:require [std.lib.collection :as collection]))
 
-(defn- add-sym [m]
-  (collection/map-entries (fn [[k v]]
-                   [k (assoc v :symbol #{(symbol (name k))
-                                         (symbol (clojure.string/replace (name k) "-" ":"))})])
-                 m))
-
 ;;
 ;; CORE
 ;;
@@ -42,14 +36,13 @@
 (defn go-tf-x-m-pow   [[_ b e]] (list 'math.Pow b e))
 
 (def +go-math+
-  (add-sym
-   {:x-m-abs           {:macro #'go-tf-x-m-abs   :emit :macro :value true}
-    :x-m-max           {:macro #'go-tf-x-m-max   :emit :macro :value true}
-    :x-m-min           {:macro #'go-tf-x-m-min   :emit :macro :value true}
-    :x-m-ceil          {:macro #'go-tf-x-m-ceil  :emit :macro :value true}
-    :x-m-floor         {:macro #'go-tf-x-m-floor :emit :macro :value true}
-    :x-m-sqrt          {:macro #'go-tf-x-m-sqrt  :emit :macro :value true}
-    :x-m-pow           {:macro #'go-tf-x-m-pow   :emit :macro :value true}}))
+  {:x-m-abs           {:macro #'go-tf-x-m-abs   :emit :macro :value true}
+   :x-m-max           {:macro #'go-tf-x-m-max   :emit :macro :value true}
+   :x-m-min           {:macro #'go-tf-x-m-min   :emit :macro :value true}
+   :x-m-ceil          {:macro #'go-tf-x-m-ceil  :emit :macro :value true}
+   :x-m-floor         {:macro #'go-tf-x-m-floor :emit :macro :value true}
+   :x-m-sqrt          {:macro #'go-tf-x-m-sqrt  :emit :macro :value true}
+   :x-m-pow           {:macro #'go-tf-x-m-pow   :emit :macro :value true}})
 
 ;;
 ;; STRING

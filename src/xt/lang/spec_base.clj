@@ -68,6 +68,40 @@
           :error error
           :finally finally})))
 
+(defspec.xt proto:get nil)
+
+(defmacro.xt ^{:standalone true} 
+  proto:get
+  "retrieves object prototypes"
+  {:added "4.1"}
+  ([obj] (list (quote proto:get) obj)))
+
+(defspec.xt proto:set nil)
+
+(defmacro.xt ^{:standalone true} 
+  proto:set
+  "assigns object prototypes"
+  {:added "4.1"}
+  ([obj proto] (list (quote proto:set) obj proto)))
+
+(defspec.xt proto:create nil)
+
+(defmacro.xt ^{:standalone true} 
+  proto:create
+  "creates prototypes with this-bound methods"
+  {:added "4.1"}
+  ([m] (list (quote proto:create) m)))
+
+(defspec.xt proto:tostring nil)
+
+(defmacro.xt ^{:standalone true} 
+  proto:tostring
+  "expands and emits the lua tostring metamethod key"
+  {:added "4.1"}
+  ([] (list (quote proto:tostring))))
+
+
+
 (defspec.xt x:get-idx [:fn [[:xt/array :xt/any] :xt/int :xt/any] :xt/any])
 
 (defmacro.xt ^{:standalone true} 
@@ -1238,38 +1272,6 @@
   "checks whether the shared global map contains a value"
   {:added "4.1"}
   ([sym] (list (quote x:global-has?) sym)))
-
-(defspec.xt x:prototype-get nil)
-
-(defmacro.xt ^{:standalone true} 
-  x:prototype-get
-  "retrieves object prototypes"
-  {:added "4.1"}
-  ([obj] (list (quote x:prototype-get) obj)))
-
-(defspec.xt x:prototype-set nil)
-
-(defmacro.xt ^{:standalone true} 
-  x:prototype-set
-  "assigns object prototypes"
-  {:added "4.1"}
-  ([obj proto] (list (quote x:prototype-set) obj proto)))
-
-(defspec.xt x:prototype-create nil)
-
-(defmacro.xt ^{:standalone true} 
-  x:prototype-create
-  "creates prototypes with this-bound methods"
-  {:added "4.1"}
-  ([m] (list (quote x:prototype-create) m)))
-
-(defspec.xt x:prototype-tostring nil)
-
-(defmacro.xt ^{:standalone true} 
-  x:prototype-tostring
-  "expands and emits the lua tostring metamethod key"
-  {:added "4.1"}
-  ([] (list (quote x:prototype-tostring))))
 
 (defspec.xt x:random [:fn [] :xt/num])
 

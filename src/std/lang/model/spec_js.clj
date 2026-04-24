@@ -127,7 +127,7 @@
   "creates a defclass function"
   {:added "4.0"}
   ([[_ sym inherit & body]]
-   (let [{:keys [module] :as mopts}  (preprocess/macro-opts)
+   (let [{:keys [module] :as mopts}  (preprocess-base/macro-opts)
          body      (top/transform-defclass-inner body)
          sym-name  (symbol (if module (name (:id module)))
                            (name sym))

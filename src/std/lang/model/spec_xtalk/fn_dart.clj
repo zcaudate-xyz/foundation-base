@@ -315,28 +315,6 @@
    :x-arr-sort        {:macro #'dart-tf-x-arr-sort       :emit :macro}
    :x-str-comp        {:macro #'dart-tf-x-str-comp       :emit :macro}})
 
-(defn dart-tf-x-cache [[_ name]] (list 'new 'Map))
-(defn dart-tf-x-cache-list [[_ cache]] (dart-method0 (list '. cache 'keys) 'toList))
-(defn dart-tf-x-cache-flush [[_ cache]] (dart-method0 cache 'clear))
-(defn dart-tf-x-cache-get [[_ cache key]] (list '. cache [key]))
-(defn dart-tf-x-cache-set [[_ cache key val]] (list ':= (list '. cache [key]) val))
-(defn dart-tf-x-cache-del [[_ cache key]] (list '. cache (list 'remove key)))
-(defn dart-tf-x-cache-incr [[_ cache key num]]
-  (list (list 'fn '[]
-              (list 'var 'prev (list 'int.parse (list 'or (list '. cache [key]) '"0")))
-              (list 'var 'curr (list '+ 'prev num))
-              (list ':= (list '. cache [key]) 'curr)
-              (list 'return 'curr))))
-
-(def +dart-cache+
-  {:x-cache                 {:macro #'dart-tf-x-cache           :emit :macro}
-   :x-cache-flush           {:macro #'dart-tf-x-cache-flush     :emit :macro}
-   :x-cache-list            {:macro #'dart-tf-x-cache-list      :emit :macro}
-   :x-cache-get             {:macro #'dart-tf-x-cache-get       :emit :macro}
-   :x-cache-set             {:macro #'dart-tf-x-cache-set       :emit :macro}
-   :x-cache-del             {:macro #'dart-tf-x-cache-del       :emit :macro}
-   :x-cache-incr            {:macro #'dart-tf-x-cache-incr      :emit :macro}})
-
 (defn dart-tf-x-iter-eq
   [[_ a b eq-fn]]
   (template/$
@@ -595,9 +573,7 @@
          +dart-lu+
          +dart-json+
          +dart-arr+
-         +dart-cache+
          +dart-iter+
-         +dart-proto+
          +dart-return+
          +dart-socket+
          +dart-thread+
