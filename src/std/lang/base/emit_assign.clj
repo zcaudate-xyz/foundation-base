@@ -155,9 +155,10 @@
   [symbol value grammar mopts]
   (let [{inline :assign/inline
          assign-fn :assign/fn} (assign-options value grammar)
-        expanded (preprocess/value-expand value grammar)]
+        expanded (when-not inline
+                   (preprocess/value-expand value grammar))]
     (cond assign-fn [:raw      (assign-fn symbol)]
-          (and (not inline)
+          (and expanded
                (not= expanded value))
           (when-let [default (emit-def-assign-default symbol expanded)]
             [:default default])

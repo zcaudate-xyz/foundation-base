@@ -201,13 +201,12 @@
   (let [{template-fn :value/template} (value-options value grammar)
         reserved (when (and (collection/form? value)
                             (symbol? (first value)))
-                   (get-in grammar [:reserved (first value)]))]
+                   (get-in grammar [:reserved (first value)]))
+        expansion-fn (or template-fn
+                         (:macro reserved))]
     (if (and (= :macro (:emit reserved))
-             (fn? (or template-fn
-                       (:macro reserved))))
-      ((or template-fn
-           (:macro reserved))
-       value)
+             (fn? expansion-fn))
+      (expansion-fn value)
       value)))
 
 (defn value-standalone
