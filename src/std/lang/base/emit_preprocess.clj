@@ -1,5 +1,6 @@
 (ns std.lang.base.emit-preprocess
   (:require [clojure.string]
+            [std.lang.base.emit-helper :as helper]
             [std.lang.base.provenance :as provenance]
             [std.lang.base.util :as ut]
             [std.lib.collection :as collection]
@@ -201,8 +202,11 @@
                             (symbol? (first value)))
                    (get-in grammar [:reserved (first value)]))]
     (if (and (= :macro (:emit reserved))
-             (fn? template))
-      (template value)
+             (fn? (or template
+                      (:macro reserved))))
+      ((or template
+           (:macro reserved))
+       value)
       value)))
 
 (defn value-standalone
@@ -331,9 +335,24 @@
                                                  :form form}))]
     (concat (reverse rdecl)
              [(with-meta (cons (cond-> (ut/sym-full f-module f-id)
-                                 (not unwrapped) (volatile!))
-                              args)
-                {:assign/inline true})])))
+                                  (not unwrapped) (volatile!))
+                               args)
+                 {:assign/inline true})])))
+
+(defn process-default-assignment
+  "expands assigned values before later assign rewrites"
+  {:added "4.1"}
+  [form grammar]
+  (let [[tag & args] form
+        args (helper/emit-typed-args args grammar)
+        args (mapcat (fn [{:keys [modifiers symbol value] :as arg}]
+                       (concat modifiers
+                               [symbol]
+                               (when (contains? arg :value)
+                                 [:= (value-expand value grammar)])))
+                     args)]
+    (with-meta (apply list tag args)
+      (meta form))))
 
 (defn protect-reserved-head
   [form]
@@ -379,6 +398,9 @@
           (and (= :def-assign (:emit reserved))
                (= :inline (last form)))
           (walk-fn (process-inline-assignment form modules mopts))
+
+          (= :def-assign (:emit reserved))
+          (protect-reserved-head (process-default-assignment form grammar))
 
           reserved
           (protect-reserved-head form)

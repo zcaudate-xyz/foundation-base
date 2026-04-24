@@ -304,6 +304,24 @@
                          :link {}}})
   => '[(fn [a b] (return (+ a b))) #{} #{} {}])
 
+(fact "default assign values expand during staging before rewrite"
+
+  (first
+   (to-staging '(var a := (hello 1 2))
+               {:reserved {'var   {:emit :def-assign}
+                           'hello {:emit :macro
+                                    :value/template (with-meta
+                                                      (fn [[_ x y]]
+                                                        (list 'do
+                                                              (list 'var 'thread := (list '+ x y))
+                                                              (list 'return 'thread)))
+                                                      {:arglists '([_ x y])})}}}
+                {}
+                '{:module {:id L.core
+                           :link {}}}))
+  => '(var a := (do (var thread := (+ 1 2))
+                    (return thread))))
+
 ^{:refer std.lang.base.emit-preprocess/value-standalone :added "4.1"}
 (fact "callable xtalk intrinsics use shared value-standalone compilation"
 

@@ -139,16 +139,17 @@
 
 ^{:refer std.lang.base.emit-assign/assign-options :added "4.1"}
 (fact "gets assignment options from reserved entries and metadata"
-  (assign-options
-   (with-meta '(hello 1)
-     {:assign/fn (fn [sym]
-                   (list 'var sym := 1))})
-    {:reserved {'hello {:emit :macro
-                        :assign/fn (fn [sym]
-                                     (list 'var sym := 2))
-                        :assign/inline 'x.core/identity-fn}}})
-  => (contains {:assign/fn fn?
-        :assign/inline x.core/identity-fn}
+  (let [opts (assign-options
+              (with-meta '(hello 1)
+                {:assign/fn (fn [sym]
+                              (list 'var sym := 1))})
+              {:reserved {'hello {:emit :macro
+                                  :assign/fn (fn [sym]
+                                               (list 'var sym := 2))
+                                  :assign/inline 'x.core/identity-fn}}})]
+    [(:assign/inline opts)
+     (fn? (:assign/fn opts))])
+  => '[x.core/identity-fn true]
 
   (assign-options
    '(identity 1)
@@ -198,4 +199,4 @@
    '(do (hello)
         (return (+ 1 2))))
   => '(do* (hello)
-           (var a := (+ 1 2)))))
+           (var a := (+ 1 2))))
