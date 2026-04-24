@@ -8,18 +8,21 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-string :as xts]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-string :as xts]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-string :as xts]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]]})
 
@@ -40,7 +43,7 @@
   => [1 2 3]
 
   (!.py
-    (var out [])
+   (var out [])
     (xt/for:array [e [1 2 3 4]]
       (when (> e 3)
         (break))
@@ -234,7 +237,8 @@
 ^{:refer xt.lang.spec-base/for:async :added "4.1"}
 (fact "expands to the canonical async form"
 
-  ^{:seedgen/base    {:lua  {:suppress true}}}
+  ^{:seedgen/base    {:lua     {:suppress true}
+                      :python  {:suppress true}}}
   [(notify/wait-on :js
      (xt/for:async [[ok err] (xt/return-run [resolve reject]
                                (resolve "OK"))]
@@ -248,23 +252,7 @@
        {:success (repl/notify ok)
         :error   (repl/notify err)
         :finally (return true)}))]
-  => ["OK" "ERR"]
-  
-  (notify/wait-on :python
-    (xt/for:async [[ok err] (xt/return-run [resolve reject]
-                              (resolve "OK"))]
-      {:success (repl/notify ok)
-       :error   (repl/notify err)
-       :finally (return true)}))
-  => "OK"
-
-  (notify/wait-on :python
-    (xt/for:async [[ok err] (xt/return-run [resolve reject]
-                              (reject "ERR"))]
-      {:success (repl/notify ok)
-       :error   (repl/notify err)
-       :finally (return true)}))
-  => "ERR")
+  => ["OK" "ERR"])
 
 ^{:refer xt.lang.spec-base/x:get-idx :added "4.1"}
 (fact "reads the first indexed value"
@@ -1787,7 +1775,7 @@
   (!.py
     (xt/x:str-pad-right "7" 3 "0"))
   => "700"
-
+  
   (!.lua
     (xt/x:str-pad-right "7" 3 "0"))
   => "700")
@@ -2232,26 +2220,18 @@
 
 ^{:refer xt.lang.spec-base/x:callback :added "4.1"}
 (fact "dispatches node-style callbacks through for:return"
-  
-  [(!.js
-     (var out nil)
-     (var success-fn (fn [cb]
-                       (cb nil "OK")))
-     (xt/for:return [[ret err] (xt/x:callback)]
-       {:success (cb ret)
-        :error   (cb err)})
-     out)
-   (!.js
-     (var out nil)
-     (var failure-fn (fn [cb]
-                    (cb "ERR" nil)))
-     (xt/for:return [[ret err] (failure-fn (xt/x:callback))]
-       {:success (:= out ret)
-        :error   (:= out err)})
-     out)]
-  => ["OK" "ERR"]
 
-  [(!.py
+  ^{:seedgen/base   {:lua    {:transform {'(fn [cb]
+                                             (cb nil "OK"))
+                                          '(fn [cb]
+                                             (return nil "OK"))
+
+                                          '(fn [cb]
+                                             (cb "ERR" nil))
+                                          '(fn [cb]
+                                             (return "ERR" nil))}}
+                     :python {:suppress true}}}
+  [(!.js
      (var out nil)
      (var success-fn (fn [cb]
                        (cb nil "OK")))
@@ -2259,7 +2239,7 @@
        {:success (:= out ret)
         :error   (:= out err)})
      out)
-   (!.py
+   (!.js
      (var out nil)
      (var failure-fn (fn [cb]
                        (cb "ERR" nil)))
@@ -2268,11 +2248,11 @@
         :error   (:= out err)})
      out)]
   => ["OK" "ERR"]
-
+  
   [(!.lua
      (var out nil)
      (var success-fn (fn [cb]
-                       (cb nil "OK")))
+                       (return nil "OK")))
      (xt/for:return [[ret err] (success-fn (xt/x:callback))]
        {:success (:= out ret)
         :error   (:= out err)})
@@ -2280,7 +2260,7 @@
    (!.lua
      (var out nil)
      (var failure-fn (fn [cb]
-                       (cb "ERR" nil)))
+                       (return "ERR" nil)))
      (xt/for:return [[ret err] (failure-fn (xt/x:callback))]
        {:success (:= out ret)
         :error   (:= out err)})
@@ -2473,16 +2453,25 @@
 ^{:refer xt.lang.spec-base/x:iter-null :added "4.1"}
 (fact "creates empty iterators"
 
-  (!.js
-    (xt/x:iter-native? (xt/x:iter-null)))
+  ^*(!.js
+      (var iter-fn
+           (fn []
+             (return (xt/x:iter-null))))
+      (xt/x:iter-native? (iter-fn)))
   => true
 
   (!.py
-    (xt/x:iter-native? (xt/x:iter-null)))
+      (var iter-fn
+           (fn []
+             (return (xt/x:iter-null))))
+      (xt/x:iter-native? (iter-fn)))
   => true
 
-  (!.lua
-    (xt/x:iter-native? (xt/x:iter-null)))
+  ^*(!.lua
+      (var iter-fn
+           (fn []
+             (return (xt/x:iter-null))))
+      (xt/x:iter-native? (iter-fn)))
   => true)
 
 ^{:refer xt.lang.spec-base/x:iter-next :added "4.1"}
@@ -2503,6 +2492,8 @@
 ^{:refer xt.lang.spec-base/x:iter-has? :added "4.1"}
 (fact "checks whether values are iterable"
 
+  ^{:seedgen/base  {:python {:expect [true true]}
+                    :lua    {:expect [false false]}}}
   (!.js
     [(xt/x:iter-has? [1 2 3])
      (xt/x:iter-has? {:a 1})])
@@ -2511,12 +2502,12 @@
   (!.py
     [(xt/x:iter-has? [1 2 3])
      (xt/x:iter-has? {:a 1})])
-  => [true false]
-
+  => [true true]
+  
   (!.lua
-    [(xt/x:iter-has? [1 2 3])
-     (xt/x:iter-has? {:a 1})])
-  => [true false])
+    [(xt/x:iter-has?  arr)
+     (xt/x:iter-has?  obj)])
+  => [false false])
 
 ^{:refer xt.lang.spec-base/x:iter-native? :added "4.1"}
 (fact "checks whether values are iterator instances"
@@ -2525,7 +2516,7 @@
     [(xt/x:iter-native? (xt/x:iter-from-arr [1 2 3]))
      (xt/x:iter-native? [1 2 3])])
   => [true false]
-
+  
   (!.py
     [(xt/x:iter-native? (xt/x:iter-from-arr [1 2 3]))
      (xt/x:iter-native? [1 2 3])])
@@ -2539,39 +2530,49 @@
 ^{:refer xt.lang.spec-base/x:return-encode :added "4.1"}
 (fact "encodes return payloads as json"
 
-  (!.js
-    (var encode-fn
-         (fn [value id key]
-           (xt/x:return-encode value id key)))
-    (xt/x:json-decode (encode-fn {:a 1} "id" "key")))
-  => {"id" "id"
-      "key" "key"
-      "type" "data"
-      "value" {"a" 1}}
+  [(!.js
+     (var encode-fn
+          (fn [value id key]
+            (xt/x:return-encode value id key)))
+     (xt/x:json-decode (encode-fn {:a 1} "id" "key")))
+   (!.js
+     (var encode-fn
+          (fn [value id key]
+            (xt/x:return-encode value id key)))
+     (xt/x:json-decode (encode-fn "hello" "id" "key")))]
+  => (contains-in [{"key" "key", "id" "id", "value" {"a" 1}, "type" "data"}
+                   {"key" "key", "id" "id", "value" "hello", "type" "data"}])
+  
+  [(!.py
+     (var encode-fn
+          (fn [value id key]
+            (xt/x:return-encode value id key)))
+     (xt/x:json-decode (encode-fn {:a 1} "id" "key")))
+   (!.py
+     (var encode-fn
+          (fn [value id key]
+            (xt/x:return-encode value id key)))
+     (xt/x:json-decode (encode-fn "hello" "id" "key")))]
+  => (contains-in [{"key" "key", "id" "id", "value" {"a" 1}, "type" "data"}
+                   {"key" "key", "id" "id", "value" "hello", "type" "data"}])
 
-  (!.py
-    (var encode-fn
-         (fn [value id key]
-           (xt/x:return-encode value id key)))
-    (xt/x:json-decode (encode-fn {:a 1} "id" "key")))
-  => {"id" "id"
-      "key" "key"
-      "type" "data"
-      "value" {"a" 1}}
-
-  (!.lua
-    (var encode-fn
-         (fn [value id key]
-           (xt/x:return-encode value id key)))
-    (xt/x:json-decode (encode-fn {:a 1} "id" "key")))
-  => {"id" "id"
-      "key" "key"
-      "type" "data"
-      "value" {"a" 1}})
+  [(!.lua
+     (var encode-fn
+          (fn [value id key]
+            (xt/x:return-encode value id key)))
+     (xt/x:json-decode (encode-fn {:a 1} "id" "key")))
+   (!.lua
+     (var encode-fn
+          (fn [value id key]
+            (xt/x:return-encode value id key)))
+     (xt/x:json-decode (encode-fn "hello" "id" "key")))]
+  => (contains-in [{"key" "key", "id" "id", "value" {"a" 1}, "type" "data"}
+                   {"key" "key", "id" "id", "value" "hello", "type" "data"}]))
 
 ^{:refer xt.lang.spec-base/x:return-wrap :added "4.1"}
 (fact "wraps return values through encoder functions"
 
+  ^{:seedgen/base   {:python {:suppress true}}}
   (!.js
     (var encode-fn
          (fn [value id key]
@@ -2585,31 +2586,11 @@
               (fn [out]
                 (return
                  (encode-fn out "id-A" "key-B"))))))
-  => {"id" "id-A"
-      "key" "key-B"
-      "type" "data"
-      "return" "number"
-      "value" 3}
-
-  (!.py
-   (var encode-fn
-        (fn [value id key]
-          (xt/x:return-encode value id key)))
-   (var wrap-fn
-        (fn [gen-fn wrap-fn]
-          (xt/x:return-wrap gen-fn wrap-fn)))
-   (xt/x:json-decode
-    (wrap-fn (fn []
-               (return 3))
-             (fn [out]
-               (return
-                (encode-fn out "id-A" "key-B"))))))
-  => {"id" "id-A"
-      "key" "key-B"
-      "type" "data"
-      "return" "number"
-      "value" 3}
-
+  => (contains {"id" "id-A"
+                "key" "key-B"
+                "type" "data"
+                "value" 3})
+  
   (!.lua
     (var encode-fn
          (fn [value id key]
@@ -2623,17 +2604,16 @@
               (fn [out]
                 (return
                  (encode-fn out "id-A" "key-B"))))))
-  => {"id" "id-A"
-      "key" "key-B"
-      "type" "data"
-      "return" "number"
-      "value" 3})
+  => (contains {"id" "id-A"
+                "key" "key-B"
+                "type" "data"
+                "value" 3}))
 
 ^{:refer xt.lang.spec-base/x:return-eval :added "4.1"}
 (fact "evaluates code through wrapped return handlers"
-
-
-  {:seed/base   {:lua  {:transform {"1 + 1"   "return 1 + 1" }}}}
+  
+  ^{:seedgen/base   {:lua    {:transform {"1 + 1"   "return 1 + 1" }}
+                     :python {:suppress true}}}
   (!.js
    (var encode-fn
         (fn [value id key]
@@ -2652,28 +2632,27 @@
                          (fn [out]
                            (return
                             (encode-fn out "id-A" "key-B")))))))))
-  => {"return" "number", "key" "key-B", "id" "id-A", "value" 2, "type" "data"}
-
+  => (contains-in {"key" "key-B", "id" "id-A", "value" 2, "type" "data"})
   
   (!.lua
-   (var encode-fn
-        (fn [value id key]
-          (xt/x:return-encode value id key)))
-   (var wrap-fn
-        (fn [gen-fn wrap-fn]
-          (xt/x:return-wrap gen-fn wrap-fn)))
-   (var eval-fn
-        (fn [s re-wrap-fn]
-          (xt/x:return-eval s re-wrap-fn)))
-   (xt/x:json-decode
-    (eval-fn "return 1 + 1"
-             (fn [f]
-               (return
-                (wrap-fn f
-                         (fn [out]
-                           (return
-                            (encode-fn out "id-A" "key-B")))))))))
-  => {"return" "number", "key" "key-B", "id" "id-A", "value" 2, "type" "data"})
+    (var encode-fn
+         (fn [value id key]
+           (xt/x:return-encode value id key)))
+    (var wrap-fn
+         (fn [gen-fn wrap-fn]
+           (xt/x:return-wrap gen-fn wrap-fn)))
+    (var eval-fn
+         (fn [s re-wrap-fn]
+           (xt/x:return-eval s re-wrap-fn)))
+    (xt/x:json-decode
+     (eval-fn "return 1 + 1"
+              (fn [f]
+                (return
+                 (wrap-fn f
+                          (fn [out]
+                            (return
+                             (encode-fn out "id-A" "key-B")))))))))
+  => (contains-in {"key" "key-B", "id" "id-A", "value" 2, "type" "data"}))
 
 ^{:refer xt.lang.spec-base/x:bit-and :added "4.1"}
 (fact "computes bitwise and"

@@ -333,6 +333,16 @@
   (get (common/seedgen-lang-entry (item-value item) lang)
        key))
 
+(defn- apply-item-transform-string
+  [s item lang]
+  (let [transform-override (item-base-override item lang :transform)]
+    (if (and s (map? transform-override))
+      (reduce-kv (fn [out from to]
+                   (str/replace out from to))
+                 s
+                 transform-override)
+      s)))
+
 (defn- fact-original-body-string
   [original-string]
   (unwrap-meta-string original-string))
@@ -372,32 +382,33 @@
 
 (defn- render-generated-item-string
   [root-item lang]
-  (let [input-override (item-base-override root-item lang :input)]
-    (if input-override
-      (let [base-str  (replace-runtime-lang-string
-                       (render-item-string root-item)
-                       lang)
-            root      (nav/parse-root base-str)
-            expr-nav   (some-> root nav/down form-common/nav-body)
-            expr-form  (some-> expr-nav nav/value)]
-        (cond
-          (common/seedgen-dispatch-lang input-override)
-          (strip-seedgen-control-meta-string
-           (pr-str input-override))
+  (let [input-override (item-base-override root-item lang :input)
+        generated-str  (if input-override
+                         (let [base-str  (replace-runtime-lang-string
+                                          (render-item-string root-item)
+                                          lang)
+                               root      (nav/parse-root base-str)
+                               expr-nav  (some-> root nav/down form-common/nav-body)
+                               expr-form (some-> expr-nav nav/value)]
+                           (cond
+                             (common/seedgen-dispatch-lang input-override)
+                             (strip-seedgen-control-meta-string
+                              (pr-str input-override))
 
-          (common/seedgen-dispatch-lang expr-form)
-          (if-let [body-nav (some-> expr-nav nav/down nav/right)]
-            (-> body-nav
-                (nav/replace input-override)
-                nav/root-string)
-            base-str)
+                             (common/seedgen-dispatch-lang expr-form)
+                             (if-let [body-nav (some-> expr-nav nav/down nav/right)]
+                               (-> body-nav
+                                   (nav/replace input-override)
+                                   nav/root-string)
+                               base-str)
 
-          :else
-          (strip-seedgen-control-meta-string
-           (pr-str input-override))))
-      (replace-runtime-lang-string
-       (render-item-string root-item)
-       lang))))
+                             :else
+                             (strip-seedgen-control-meta-string
+                              (pr-str input-override))))
+                         (replace-runtime-lang-string
+                          (render-item-string root-item)
+                          lang))]
+    (apply-item-transform-string generated-str root-item lang)))
 
 (defn- render-generated-check-clause
   [root-item lang]
