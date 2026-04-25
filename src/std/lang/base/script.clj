@@ -40,11 +40,11 @@
    :require
    :import
    :macro-only
-    :bundle
-    :file
-    :export
-    :static
-    :script/support])
+   :bundle
+   :file
+   :export
+   :static
+   :script/support])
 
 (def +runtime-keys+
   [:runtime
