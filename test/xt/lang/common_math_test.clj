@@ -237,9 +237,8 @@
 
 ^{:refer xt.lang.common-math/mod :added "4.1"}
 (fact "returns the modulo"
-
-  ^{:seedgen/base  {:lua     {:expect [1 4]}
-                    :python  {:expect [1 4]}}}
+      
+  ^{:seedgen/base  {:all     {:expect [1 4]}}}
   (!.js
     [(xtm/mod 10 3)
      (xtm/mod -1 5)])
@@ -555,7 +554,9 @@
     (xtm/clamp 0 10 12)])
   => [0 7 10])
 
+
 (comment
-  
+  (s/seedgen-benchadd 'xt.lang.common-math {:lang [:r] :write true})
+  (s/seedgen-langadd 'xt.lang.common-math {:lang [:lua :python] :write true})
   (s/seedgen-langadd 'xt.lang.common-math {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.lang.common-math {:lang [:lua :python] :write true}))
