@@ -39,32 +39,46 @@
 
 
 ^{:refer xt.lang.common-lib/type-native :added "4.1"}
-(fact "gets the native type"
+(comment "gets the native type"
 
   (l/emit-script '(xt.lang.common-lib/type-native "hello")
                  {:lang :js})
+  => "function type_native(obj){\n  return if(obj == null){\n    return null;\n  }\n  let t = typeof obj;\n  if(t == \"object\"){\n    if(Array.isArray(obj)){\n      return \"array\";\n    }\n    else{\n      let tn = obj[\"constructor\"][\"name\"];\n      if(tn == \"Object\"){\n        return \"object\";\n      }\n      else{\n        return tn;\n      }\n    }\n  }\n  else{\n    return t;\n  };\n}\n\nxt.lang.common_lib.type_native(\"hello\")"
 
   (l/emit-script '(xt.lang.common-lib/type-native "hello")
                  {:lang :lua})
-
+  => "local function type_native(obj)\n  return local t = type(obj)\n  if t == 'table' then\n    if nil == (obj)[1] then\n      return 'object'\n    else\n      return 'array'\n    end\n  else\n    return t\n  end\nend\n\nxt.lang.common_lib.type_native('hello')"
+  
   (l/emit-script '(xt.lang.common-lib/type-native "hello")
-                 {:lang :python}))
+                 {:lang :python})
+  => "def type_native(obj):\n  return if isinstance(obj,(dict)):\n    return \"object\"\n  elif isinstance(obj,(list)):\n    return \"array\"\n  elif callable(obj):\n    return \"function\"\n  elif bool == type(obj):\n    return \"boolean\"\n  elif isinstance(obj,(int,float)):\n    return \"number\"\n  elif isinstance(obj,(str)):\n    return \"string\"\n  else:\n    return str(type(obj))\n\nxt.lang.common_lib.type_native(\"hello\")")
 
 
 ^{:refer xt.lang.common-lib/type-class :added "4.1"}
-(fact "compiles the type-class helper"
+(fact "gets the class type"
 
   (!.js
-   true)
-  => true
-
+   [(k/type-class "hello")
+    (k/type-class 1)])
+  => ["string" "number"]
+  
   (!.lua
-   true)
-  => true
+    [(k/type-class "hello")
+     (k/type-class 1)])
+  => ["string" "number"]
 
   (!.py
-   true)
-  => true)
+   [(k/type-class "hello")
+    (k/type-class 1)])
+  => ["string" "number"])
+
+
+^{:refer xt.lang.common-lib/type-class :added "4.1"}
+(comment "compiles the type-class helper"
+  
+  (l/emit-script '(xt.lang.common-lib/type-class "hello")
+                 {:lang :js})
+  "function type_class(x){\n  let ntype = if(x == null){\n    return null;\n  }\n  let t = typeof x;\n  if(t == \"object\"){\n    if(Array.isArray(x)){\n      return \"array\";\n    }\n    else{\n      let tn = x[\"constructor\"][\"name\"];\n      if(tn == \"Object\"){\n        return \"object\";\n      }\n      else{\n        return tn;\n      }\n    }\n  }\n  else{\n    return t;\n  };\n  if((null != x) && (\"object\" == (typeof x)) && !Array.isArray(x)){\n    return (null == x[\"::\"]) ? \"object\" : x[\"::\"];\n  }\n  else{\n    return ntype;\n  }\n}\n\nxt.lang.common_lib.type_class(\"hello\")")
 
 ^{:refer xt.lang.common-lib/to-string :added "4.1"}
 (fact "converts a value to a string"
