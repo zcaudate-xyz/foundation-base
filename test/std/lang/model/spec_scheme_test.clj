@@ -8,7 +8,6 @@
   (emit-scheme '(defn hello [x] (return (== x nil))) {})
   => "(define (hello x) (equal? x '()))")
 
-^{:refer std.lang.model.spec-scheme/emit-scheme :added "4.0"}
 (fact "emits scheme data structures"
   (emit-scheme {:a 1 :b [2 3]} {})
   => "(hash \"a\" 1 \"b\" #(2 3))")
