@@ -20,9 +20,6 @@
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.lang.common-repl/return-callbacks :added "4.0"}
-(fact "constructs return callbacks")
-
 ^{:refer xt.lang.common-repl/socket-send :added "4.0"}
 (fact "sends a message via the socket"
 

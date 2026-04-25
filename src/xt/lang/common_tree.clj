@@ -10,22 +10,20 @@
 ;; EQUALITY
 ;;
 
-
 (defn.xt eq-nested-loop
   "switch for nested check"
   {:added "4.1"}
   [src dst eq-obj eq-arr cache]
-  (when (xt/x:nil? cache)
-    (:= cache (xt/x:lu-create)))
+  (:= cache (or cache (xt/x:lu-create)))
   (cond (and (xt/x:is-object? src) (xt/x:is-object? dst))
-        (if (and (xt/x:not-nil? (xt/x:lu-get cache src))
-                 (xt/x:not-nil? (xt/x:lu-get cache dst)))
+        (if (and (xt/x:lu-get cache src)
+                 (xt/x:lu-get cache dst))
           (return true)
           (return (eq-obj src dst eq-obj eq-arr cache)))
         
         (and (xt/x:is-array? src) (xt/x:is-array? dst))
-        (if (and (xt/x:not-nil? (xt/x:lu-get cache src))
-                 (xt/x:not-nil? (xt/x:lu-get cache dst)))
+        (if (and (xt/x:lu-get cache src)
+                 (xt/x:lu-get cache dst))
           (return true)
           (return (eq-arr src dst eq-obj eq-arr cache)))
         
@@ -48,8 +46,6 @@
            -/eq-shallow-raw
            nil)))
 
-
-
 (defn.xt eq-nested-obj
   "checks object equality"
   {:added "4.1"}
@@ -58,7 +54,8 @@
   (xt/x:lu-set cache dst dst)
   (var ks-src (xt/x:obj-keys src))
   (var ks-dst (xt/x:obj-keys dst))
-  (if (not= (xt/x:len ks-src) (xt/x:len ks-dst))
+  (if (not= (xt/x:len ks-src)
+            (xt/x:len ks-dst))
     (return false))
   (xt/for:array [k ks-src]
     (if (not (-/eq-nested-loop (xt/x:get-key src k)
@@ -188,6 +185,7 @@
   [obj m]
   (if (xt/x:nil? m)   (return {}))
   (if (xt/x:nil? obj) (return m))
+
   (var out {})
   (var ks (xt/x:obj-keys m))
   (xt/for:array [k ks]

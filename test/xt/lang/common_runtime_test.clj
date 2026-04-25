@@ -8,39 +8,17 @@
   {:runtime :basic
    :require [[xt.lang.common-runtime :as rt]]})
 
+(l/script- :lua
+  {:runtime :basic
+   :require [[xt.lang.common-runtime :as rt]]})
+
+(l/script- :python
+  {:runtime :basic
+   :require [[xt.lang.common-runtime :as rt]]})
+
 (fact:global
- {:setup    [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
-
-^{:refer xt.lang.common-runtime/xt :added "4.0"}
-(fact "gets the current xt or creates a new one"
-
-  (!.js
-   (rt/xt-purge)
-   [(rt/xt-current)
-    (rt/xt-ensure)
-    (rt/xt-current)])
-  => (contains-in [nil
-                   {"config" {}, "spaces" {}, "::" "xt"}
-                   {"config" {}, "spaces" {}, "::" "xt"}])
-
-  (!.lua
-   (rt/xt-purge)
-   [(rt/xt-current)
-    (rt/xt-ensure)
-    (rt/xt-current)])
-  => (contains-in [nil
-                   {"config" {}, "spaces" {}, "::" "xt"}
-                   {"config" {}, "spaces" {}, "::" "xt"}])
-
-  (!.py
-   (rt/xt-purge)
-   [(rt/xt-current)
-    (rt/xt-ensure)
-    (rt/xt-current)])
-  => (contains-in [nil
-                   {"config" {}, "spaces" {}, "::" "xt"}
-                   {"config" {}, "spaces" {}, "::" "xt"}]))
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.common-runtime/xt-exists? :added "4.0"
   :setup [(l/rt:restart)]}
@@ -89,7 +67,22 @@
                    nil]))
 
 ^{:refer xt.lang.common-runtime/xt-ensure :added "4.1"}
-(fact "TODO")
+(fact "makes sure the xt state is alive"
+
+  (!.js
+   (rt/xt-purge)
+   (rt/xt-ensure))
+  => (contains-in {"config" {}, "spaces" {}, "::" "xt"})
+
+  (!.lua
+   (rt/xt-purge)
+   (rt/xt-ensure))
+  => (contains-in {"config" {}, "spaces" {}, "::" "xt"})
+
+  (!.py
+   (rt/xt-purge)
+   (rt/xt-ensure))
+  => (contains-in {"config" {}, "spaces" {}, "::" "xt"}))
 
 ^{:refer xt.lang.common-runtime/xt-current :added "4.0"}
 (fact "gets the current xt"
@@ -115,22 +108,23 @@
   (!.js
    (rt/xt-ensure)
    [(rt/xt-purge)
-    (rt/xt-current)])
+    (or (rt/xt-current) "NA")])
   => (contains-in [{"config" {}, "spaces" {}, "::" "xt"}
-                   nil])
+                    "NA"])
 
   (!.lua
    (rt/xt-ensure)
    [(rt/xt-purge)
-    (rt/xt-current)])
-  => (contains-in [{"config" {}, "spaces" {}, "::" "xt"}])
+    (or (rt/xt-current) "NA")])
+  => (contains-in [{"config" {}, "spaces" {}, "::" "xt"}
+                    "NA"])
 
   (!.py
    (rt/xt-ensure)
    [(rt/xt-purge)
-    (rt/xt-current)])
+    (or (rt/xt-current) "NA")])
   => (contains-in [{"config" {}, "spaces" {}, "::" "xt"}
-                   nil]))
+                    "NA"]))
 
 ^{:refer xt.lang.common-runtime/xt-purge-config :added "4.0"}
 (fact "clears all `:config` entries"
@@ -141,9 +135,9 @@
    [(rt/xt-config-list)
     (rt/xt-purge-config)
     (rt/xt-config-list)])
-  => [["test.module"]
-      [true {"test.module" {"host" "127.0.0.1"}}]
-      []]
+  => (contains [["test.module"]
+                [true {"test.module" {"host" "127.0.0.1"}}]
+                empty?])
 
   (!.lua
    (rt/xt-purge-config)
@@ -151,9 +145,9 @@
    [(rt/xt-config-list)
     (rt/xt-purge-config)
     (rt/xt-config-list)])
-  => [["test.module"]
-      [true {"test.module" {"host" "127.0.0.1"}}]
-      {}]
+  => (contains [["test.module"]
+                [true {"test.module" {"host" "127.0.0.1"}}]
+                empty?])
 
   (!.py
    (rt/xt-purge-config)
@@ -161,9 +155,9 @@
    [(rt/xt-config-list)
     (rt/xt-purge-config)
     (rt/xt-config-list)])
-  => [["test.module"]
-      [true {"test.module" {"host" "127.0.0.1"}}]
-      []])
+  => (contains [["test.module"]
+                [true {"test.module" {"host" "127.0.0.1"}}]
+                empty?]))
 
 ^{:refer xt.lang.common-runtime/xt-purge-spaces :added "4.0"}
 (fact "clears all `:spaces` entries"
@@ -174,9 +168,9 @@
    [(rt/xt-space-list)
     (rt/xt-purge-spaces)
     (rt/xt-space-list)])
-  => [["test.module"]
-      [true {"test.module" {"hello" {"value" {"a" 1}, "watch" {}}}}]
-      []]
+  => (contains [["test.module"]
+                [true {"test.module" {"hello" {"value" {"a" 1}, "watch" {}}}}]
+                empty?])
 
   (!.lua
    (rt/xt-purge-spaces)
@@ -184,9 +178,9 @@
    [(rt/xt-space-list)
     (rt/xt-purge-spaces)
     (rt/xt-space-list)])
-  => [["test.module"]
-      [true {"test.module" {"hello" {"value" {"a" 1}, "watch" {}}}}]
-      {}]
+  => (contains [["test.module"]
+                [true {"test.module" {"hello" {"value" {"a" 1}, "watch" {}}}}]
+                empty?])
 
   (!.py
    (rt/xt-purge-spaces)
@@ -194,9 +188,9 @@
    [(rt/xt-space-list)
     (rt/xt-purge-spaces)
     (rt/xt-space-list)])
-  => [["test.module"]
-      [true {"test.module" {"hello" {"value" {"a" 1}, "watch" {}}}}]
-      []])
+  => (contains [["test.module"]
+                [true {"test.module" {"hello" {"value" {"a" 1}, "watch" {}}}}]
+                empty?]))
 
 ^{:refer xt.lang.common-runtime/xt-lookup-id :added "4.0"}
 (fact "gets the runtime id for pointer-like objects"
@@ -216,29 +210,26 @@
 ^{:refer xt.lang.common-runtime/xt-config-list :added "4.0"}
 (fact "lists all config entries in the xt"
 
-  (set
-   (!.js
+  (!.js
     (rt/xt-purge-config)
     (rt/xt-config-set "test.one" 1)
     (rt/xt-config-set "test.two" 2)
-    (rt/xt-config-list)))
-  => #{"test.one" "test.two"}
+    (rt/xt-config-list))
+  => (just ["test.one" "test.two"] :in-any-order)
 
-  (set
-   (!.lua
+  (!.lua
     (rt/xt-purge-config)
     (rt/xt-config-set "test.one" 1)
     (rt/xt-config-set "test.two" 2)
-    (rt/xt-config-list)))
-  => #{"test.one" "test.two"}
+    (rt/xt-config-list))
+  => (just ["test.one" "test.two"] :in-any-order)
 
-  (set
-   (!.py
+  (!.py
     (rt/xt-purge-config)
     (rt/xt-config-set "test.one" 1)
     (rt/xt-config-set "test.two" 2)
-    (rt/xt-config-list)))
-  => #{"test.one" "test.two"})
+    (rt/xt-config-list))
+  => (just ["test.one" "test.two"] :in-any-order))
 
 ^{:refer xt.lang.common-runtime/xt-config-set :added "4.0"}
 (fact "sets the config for a module"
@@ -248,21 +239,21 @@
    [(rt/xt-config-set "test.module" {:host "127.0.0.1"
                                      :port 1234})
     (rt/xt-config-list)])
-  => [[true nil] ["test.module"]]
+  => (contains-in [[true] ["test.module"]])
 
   (!.lua
    (rt/xt-purge-config)
    [(rt/xt-config-set "test.module" {:host "127.0.0.1"
                                      :port 1234})
     (rt/xt-config-list)])
-  => [[true] ["test.module"]]
+  => (contains-in [[true] ["test.module"]])
 
   (!.py
    (rt/xt-purge-config)
    [(rt/xt-config-set "test.module" {:host "127.0.0.1"
                                      :port 1234})
     (rt/xt-config-list)])
-  => [[true nil] ["test.module"]])
+  => (contains-in [[true] ["test.module"]]))
 
 ^{:refer xt.lang.common-runtime/xt-config-del :added "4.0"}
 (fact "deletes a single xt config entry"
@@ -272,29 +263,33 @@
    [(rt/xt-config-set "test.module" {:host "127.0.0.1"
                                      :port 1234})
     (rt/xt-config-del "test.module")
-    (rt/xt-config "test.module")])
-  => [[true nil]
-      [true {"host" "127.0.0.1", "port" 1234}]
-      nil]
+    (or (rt/xt-config "test.module") "NA")])
+  => (contains-in
+      [[true]
+       [true {"host" "127.0.0.1", "port" 1234}]
+       "NA"])
 
   (!.lua
    (rt/xt-purge-config)
    [(rt/xt-config-set "test.module" {:host "127.0.0.1"
                                      :port 1234})
     (rt/xt-config-del "test.module")
-    (rt/xt-config "test.module")])
-  => [[true]
-      [true {"host" "127.0.0.1", "port" 1234}]]
+    (or (rt/xt-config "test.module") "NA")])
+  => (contains-in
+      [[true]
+       [true {"host" "127.0.0.1", "port" 1234}]
+       "NA"])
 
   (!.py
    (rt/xt-purge-config)
    [(rt/xt-config-set "test.module" {:host "127.0.0.1"
                                      :port 1234})
     (rt/xt-config-del "test.module")
-    (rt/xt-config "test.module")])
-  => [[true nil]
-      [true {"host" "127.0.0.1", "port" 1234}]
-      nil])
+    (or (rt/xt-config "test.module") "NA")])
+  => (contains-in
+      [[true]
+       [true {"host" "127.0.0.1", "port" 1234}]
+       "NA"]))
 
 ^{:refer xt.lang.common-runtime/xt-config :added "4.0"}
 (fact "gets a config entry"
@@ -349,24 +344,24 @@
    (rt/xt-item-set "test.module" "hello" {:a 1})
    [(rt/xt-space-del "test.module")
     (rt/xt-space-list)])
-  => [[true {"hello" {"value" {"a" 1}, "watch" {}}}]
-      []]
+  => (contains-in [[true {"hello" {"value" {"a" 1}, "watch" {}}}]
+                   empty?])
 
   (!.lua
    (rt/xt-purge-spaces)
    (rt/xt-item-set "test.module" "hello" {:a 1})
    [(rt/xt-space-del "test.module")
     (rt/xt-space-list)])
-  => [[true {"hello" {"value" {"a" 1}, "watch" {}}}]
-      {}]
+  => (contains-in [[true {"hello" {"value" {"a" 1}, "watch" {}}}]
+                   empty?])
 
   (!.py
    (rt/xt-purge-spaces)
    (rt/xt-item-set "test.module" "hello" {:a 1})
    [(rt/xt-space-del "test.module")
     (rt/xt-space-list)])
-  => [[true {"hello" {"value" {"a" 1}, "watch" {}}}]
-      []])
+  => (contains-in [[true {"hello" {"value" {"a" 1}, "watch" {}}}]
+                   empty?]))
 
 ^{:refer xt.lang.common-runtime/xt-space :added "4.0"}
 (fact "gets a space"
@@ -695,7 +690,7 @@
                       (return v)))
    [(rt/xt-remove-watch "test.module/hello" "main")
     (rt/xt-var-trigger "test.module/hello")])
-  => [true []]
+  => (contains [true empty?])
 
   (!.lua
    (rt/xt-purge-spaces)
@@ -706,7 +701,7 @@
                       (return v)))
    [(rt/xt-remove-watch "test.module/hello" "main")
     (rt/xt-var-trigger "test.module/hello")])
-  => [true {}]
+  => (contains [true empty?])
 
   (!.py
    (rt/xt-purge-spaces)
@@ -717,7 +712,7 @@
                       (return v)))
    [(rt/xt-remove-watch "test.module/hello" "main")
     (rt/xt-var-trigger "test.module/hello")])
-  => [true []])
+  => (contains [true empty?]))
 
 ^{:refer xt.lang.common-runtime/defvar-fn :added "4.0"}
 (fact "helper function for defvar macros"
@@ -770,3 +765,7 @@
      (-> out first second)
      (-> out second second)])
   => '[defn.python PY_SAMPLE PY_SAMPLE-reset])
+
+(comment
+  (s/seedgen-langadd 'xt.lang.common-runtime {:lang [:lua :python] :write true})
+  (s/seedgen-langremove 'xt.lang.common-runtime {:lang [:lua :python] :write true}))

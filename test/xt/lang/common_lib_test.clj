@@ -5,19 +5,22 @@
 ^{:seedgen/root {:all true, :langs [:lua :python]}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.common-lib :as k]]})
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]]})
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.lang.common-lib :as k]]})
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]]})
 
 (l/script- :python
   {:runtime :basic
-   :require [[xt.lang.common-lib :as k]]})
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]]})
 
 (fact:global
-  {:setup [(l/rt:restart)]
-   :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.common-lib/type-native :added "4.1"}
 (fact "gets the native type"
@@ -33,8 +36,8 @@
   => ["string" "number"]
 
   (!.py
-   [(k/type-native "hello")
-    (k/type-native 1)])
+    [(k/type-native "hello")
+     (k/type-native 1)])
   => ["string" "number"])
 
 ^{:refer xt.lang.common-lib/type-class :added "4.1"}
@@ -46,8 +49,8 @@
   => ["string" "number"]
 
   (!.lua
-    [(k/type-class "hello")
-     (k/type-class 1)])
+   [(k/type-class "hello")
+    (k/type-class 1)])
   => ["string" "number"]
 
   (!.py
@@ -633,6 +636,60 @@
    [((k/wrap-callback {:success (fn [i] (return (* 2 i)))} "success") 1)
     ((k/wrap-callback {} "missing") 3)])
   => [2 3])
+
+^{:refer xt.lang.common-lib/return-encode :added "4.1"}
+(fact "encode result for publish"
+
+  (!.js
+    (xt/x:json-decode
+     (k/return-encode 1 "id-A" "key-A")))
+  => {"return" "number", "key" "key-A", "id" "id-A", "value" 1, "type" "data"}
+
+  (!.lua
+    (xt/x:json-decode
+     (k/return-encode 1 "id-A" "key-A")))
+  => {"return" "number", "key" "key-A", "id" "id-A", "value" 1, "type" "data"}
+
+  (!.py
+    (xt/x:json-decode
+     (k/return-encode 1 "id-A" "key-A")))
+  => {"return" "number", "key" "key-A", "id" "id-A", "value" 1, "type" "data"})
+
+^{:refer xt.lang.common-lib/return-wrap :added "4.1"}
+(fact "wraps a function for encode"
+
+  (!.js
+    (xt/x:json-decode
+     (k/return-wrap (fn []
+                      (return 3)))))
+  => (contains {"return" "number", "value" 3, "type" "data"})
+
+  (!.lua
+    (xt/x:json-decode
+     (k/return-wrap (fn []
+                      (return 3)))))
+  => (contains {"return" "number", "value" 3, "type" "data"})
+
+  (!.py
+    (xt/x:json-decode
+     (k/return-wrap (fn []
+                      (return 3)))))
+  => (contains {"return" "number", "value" 3, "type" "data"}))
+
+^{:refer xt.lang.common-lib/return-eval :added "4.1"}
+(fact "returns evaluation"
+
+  ^{:seedgen/base   {:lua    {:transform {"1+1" "return 1+1"}}
+                     :python {:suppress true}}}
+  (!.js
+    (xt/x:json-decode
+     (k/return-eval "1+1")))
+  => {"return" "number", "value" 2, "type" "data"}
+
+  (!.lua
+    (xt/x:json-decode
+     (k/return-eval "return 1+1")))
+  => {"return" "number", "value" 2, "type" "data"})
 
 (comment
   

@@ -265,7 +265,7 @@
   "gets the intersection of two arrays"
   {:added "4.0"}
   [arr other]
-  (var lu  (-/arr-lookup arr))
+  (var lu  (-/arr-lookup arr) :inline)
   (var out [])
   (xt/for:array [e other]
     (if (xt/x:has-key? lu e)
@@ -276,7 +276,7 @@
   "gets the difference of two arrays"
   {:added "4.0"}
   [arr other]
-  (var lu  (-/arr-lookup arr))
+  (var lu  (-/arr-lookup arr) :inline)
   (var out [])
   (xt/for:array [e other]
     (if (not (xt/x:has-key? lu e))
@@ -438,8 +438,7 @@
   "merges key value pairs from into another"
   {:added "4.0"}
   [obj m]
-  (when (xt/x:nil? obj)
-    (:= obj {}))
+  (:= obj (or obj {}))
   (if (xt/x:not-nil? m)
     (xt/for:object [[k v] m]
       (xt/x:set-key obj k v)))
@@ -449,8 +448,7 @@
   "merges objects at a nesting level"
   {:added "4.0"}
   ([obj m]
-   (when (xt/x:nil? obj)
-     (:= obj {}))
+   (:= obj (or obj {}))
    (when (xt/x:not-nil? m)
      (xt/for:object [[k mv] m]
        (var v (xt/x:get-key obj k))
@@ -921,10 +919,8 @@
   "performs a merge on two sorted arrays"
   {:added "4.0"}
   [arr brr comp-fn]
-  (when (xt/x:nil? arr)
-    (:= arr []))
-  (when (xt/x:nil? brr)
-    (:= brr []))
+  (:= arr (or arr []))
+  (:= brr (or brr []))
   (var alen (xt/x:len arr))
   (var blen (xt/x:len brr))
   (var i 0)

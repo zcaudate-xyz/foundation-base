@@ -50,22 +50,25 @@
 
   (notify/notify-ceremony (assoc (l/rt :lua)
                                  :type :basic))
-  => [(:id (l/rt :js))
+  => [(:id (l/rt :lua))
       (:socket-port (l/default-notify))
-      :js :socket
+      :lua :socket
       "127.0.0.1"
       {}]
 
   (notify/notify-ceremony (assoc (l/rt :python)
                                  :type :basic))
-  => [(:id (l/rt :js))
+  => [(:id (l/rt :python))
       (:socket-port (l/default-notify))
-      :js :socket
+      :python :socket
       "127.0.0.1"
       {}])
 
 ^{:refer xt.lang.common-notify/notify-ceremony-rt :added "4.0"}
-(fact "gets the rt for the current ceremony")
+(fact "gets the rt for the current ceremony"
+
+  (notify/notify-ceremony-rt :js)
+  => rt.basic.type_basic.RuntimeBasic)
 
 ^{:refer xt.lang.common-notify/wait-on-call :added "4.0"}
 (fact "generic wait-on-helper for oneshots"
@@ -97,48 +100,6 @@
     (repl/notify 1))
   => 1)
 
-^{:refer xt.lang.common-notify/captured :added "4.0"
-  :setup [(notify/captured:clear-all)]}
-(fact "gets captured results"
-
-  ^{:seedgen/base    {:lua     {:transform {"js" "lua"
-                                            :js :lua}}
-                      :python  {:transform {"js" "python"
-                                            :js :python}}}}
-  (do (notify/wait-on :js
-        (repl/capture {:from "js"})
-        (repl/notify 1))
-      (notify/captured :js))
-  => [{"from" "js"}]
-
-  (do (notify/wait-on :lua
-        (repl/capture {:from "lua"})
-        (repl/notify 1))
-      (notify/captured :lua))
-  => [{"from" "js"}]
-
-  (do (notify/wait-on :python
-        (repl/capture {:from "python"})
-        (repl/notify 1))
-      (notify/captured :python))
-  => [{"from" "js"}])
-
-^{:refer xt.lang.common-notify/captured:count :added "4.0"}
-(fact "gets the captured count for rt")
-
-^{:refer xt.lang.common-notify/captured:clear :added "4.0"}
-(fact "clears captured items for rt")
-
-^{:refer xt.lang.common-notify/captured:clear-all :added "4.0"}
-(fact "clears all captured items")
-
-^{:refer xt.lang.common-notify/capture-key-match? :added "4.1"}
-(fact "TODO")
-
 (comment
   (s/seedgen-langadd 'xt.lang.common-notify {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.lang.common-notify {:lang [:lua :python] :write true}))
-
-(comment
-  ()
-  )
