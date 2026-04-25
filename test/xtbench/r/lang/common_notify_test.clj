@@ -20,9 +20,9 @@
 
   (notify/notify-ceremony (assoc (l/rt :r)
                                  :type :basic))
-  => [(:id (l/rt :js))
+  => [(:id (l/rt :r))
       (:socket-port (l/default-notify))
-      :js :socket
+      :r :socket
       "127.0.0.1"
       {}])
 
@@ -34,5 +34,6 @@
   => 1)
 
 (comment
+  (s/seedgen-benchadd 'xt.lang.common-notify {:lang [:lua :python] :write true})
   (s/seedgen-langadd 'xt.lang.common-notify {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.lang.common-notify {:lang [:lua :python] :write true}))

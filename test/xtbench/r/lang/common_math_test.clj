@@ -112,7 +112,7 @@
   (!.R
     [(xtm/mod 10 3)
      (xtm/mod -1 5)])
-  => [1 -1])
+  => [1 4])
 
 ^{:refer xt.lang.common-math/min :added "4.1"}
 (fact "returns the minimum value"
@@ -247,6 +247,7 @@
   => [0 7 10])
 
 (comment
-  
+  (s/seedgen-benchadd 'xt.lang.common-math {:lang [:r] :write true})
+  (s/seedgen-langadd 'xt.lang.common-math {:lang [:lua :python] :write true})
   (s/seedgen-langadd 'xt.lang.common-math {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.lang.common-math {:lang [:lua :python] :write true}))

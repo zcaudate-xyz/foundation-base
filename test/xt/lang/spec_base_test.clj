@@ -684,7 +684,8 @@
 ^{:refer xt.lang.spec-base/x:offset :added "4.1"}
 (fact "uses the grammar base offset"
 
-  ^{:seedgen/base    {:lua  {:expect 11}}}
+  ^{:seedgen/base    {:lua  {:expect 11}
+                      :r    {:expect 11}}}
   (!.js    
     (xt/x:offset 10))
   => 10
@@ -700,7 +701,8 @@
 ^{:refer xt.lang.spec-base/x:offset-rev :added "4.1"}
 (fact "uses the reverse grammar offset"
 
-  ^{:seedgen/base    {:lua  {:expect 10}}}
+  ^{:seedgen/base    {:lua  {:expect 10}
+                      :r    {:expect 10}}}
   (!.js
     (xt/x:offset-rev 10))
   => 9
@@ -716,7 +718,8 @@
 ^{:refer xt.lang.spec-base/x:offset-len :added "4.1"}
 (fact "uses the length grammar offset"
 
-  ^{:seedgen/base    {:lua  {:expect 10}}}
+  ^{:seedgen/base    {:lua  {:expect 10}
+                      :r    {:expect 10}}}
   (!.js
     (xt/x:offset-len 10))
   => 9
@@ -732,7 +735,8 @@
 ^{:refer xt.lang.spec-base/x:offset-rlen :added "4.1"}
 (fact "uses the reverse length grammar offset"
 
-  ^{:seedgen/base    {:lua  {:expect 9}}}
+  ^{:seedgen/base    {:lua  {:expect 9}
+                      :r    {:expect 9}}}
   (!.js
     (xt/x:offset-rlen 10))
   => 10

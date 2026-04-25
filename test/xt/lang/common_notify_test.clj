@@ -39,7 +39,8 @@
 (fact "creates the ceremony in order to get the port and method type"
 
   ^{:seedgen/base    {:lua     {:transform {:js :lua}}
-                      :python  {:transform {:js :python}}}}
+                      :python  {:transform {:js :python}}
+                      :r       {:transform {:js :r}}}}
   (notify/notify-ceremony (assoc (l/rt :js)
                                  :type :basic))
   => [(:id (l/rt :js))
@@ -101,5 +102,6 @@
   => 1)
 
 (comment
+  (s/seedgen-benchadd 'xt.lang.common-notify {:lang [:lua :python] :write true})
   (s/seedgen-langadd 'xt.lang.common-notify {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.lang.common-notify {:lang [:lua :python] :write true}))
