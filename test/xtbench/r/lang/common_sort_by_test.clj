@@ -15,7 +15,7 @@
 ^{:refer xt.lang.common-sort-by/sort-by :added "4.1"}
 (fact "sorts string keys lexicographically"
 
-  (!.r
+  (!.R
    (xtsb/sort-by
     [{"id" "a" "name" "beta"}
      {"id" "b" "name" "alpha"}
@@ -28,7 +28,7 @@
 ^{:refer xt.lang.common-sort-by/sort-by :added "4.1"}
 (fact "sorts string keys lexicographically"
 
-  (!.r
+  (!.R
    (xtsb/sort-by
     [{"id" "a" "name" "beta"}
      {"id" "b" "name" "alpha"}
@@ -41,7 +41,7 @@
 ^{:refer xt.lang.common-sort-by/sort-by :added "4.1"}
 (fact "sorts string keys lexicographically"
 
-  (!.r
+  (!.R
    (xtsb/sort-by
     [{"id" "a" "name" "beta"}
      {"id" "b" "name" "alpha"}

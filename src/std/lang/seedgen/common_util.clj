@@ -1,7 +1,8 @@
 (ns std.lang.seedgen.common-util
   (:require [std.fs :as fs]
-             [std.lang.base.impl :as lang.impl]
-             [std.lang.base.library :as lang.lib]))
+              [std.lang.base.impl :as lang.impl]
+              [std.lang.base.library :as lang.lib]
+              [std.lang.manage.xtalk-scaffold :as xtalk-scaffold]))
 
 ;; --------------------------------------------------
 ;; script form discovery
@@ -54,47 +55,75 @@
      notify/captured:count
      notify/captured:clear})
 
-(def ^:private +seedgen-dispatch-aliases+
-  {"py" :python})
+(defn- runtime-book-parent
+  [book]
+  (or (:parent book)
+      (get-in book [:book :parent])))
 
-(def ^:private +seedgen-dispatch-tags+
-  {:python :py})
+(defn- runtime-book-tag
+  [book]
+  (or (get-in book [:grammar :tag])
+      (get-in book [:book :grammar :tag])))
 
-(defn seedgen-dispatch-map
+(defn- runtime-book-root?
+  [book]
+  (let [parent (runtime-book-parent book)]
+    (or (nil? parent)
+        (= :xtalk parent))))
+
+(defn- runtime-config-dispatch-map
   []
-  (let [library  (lang.impl/default-library)
-         snapshot (lang.lib/get-snapshot library)]
-    (merge +seedgen-dispatch-aliases+
-           (reduce (fn [out {:keys [book]}]
-                     (let [lang   (or (:lang book)
-                                      (get-in book [:book :lang]))
-                           tag    (or (get-in book [:grammar :tag])
-                                      (get-in book [:book :grammar :tag]))
-                           parent (or (:parent book)
-                                      (get-in book [:book :parent]))]
-                       (if (and lang
-                                tag
-                                (not (contains? snapshot parent)))
-                         (assoc out (name tag) lang)
-                         out)))
-                   {}
-                   (vals snapshot)))))
+  (->> xtalk-scaffold/+runtime-lang-config+
+       vals
+       (keep (fn [{:keys [script dispatch]}]
+               (when (and script dispatch)
+                 [(subs (name dispatch) 2) script])))
+       (into {})))
 
-(defn seedgen-dispatch-tag-map
+(defn- runtime-config-dispatch-tag-map
+  []
+  (->> xtalk-scaffold/+runtime-lang-config+
+       vals
+       (keep (fn [{:keys [script dispatch]}]
+               (when (and script dispatch)
+                 [script (keyword (subs (name dispatch) 2))])))
+       (into {})))
+
+(defn- snapshot-runtime-dispatch-map
   []
   (let [library  (lang.impl/default-library)
         snapshot (lang.lib/get-snapshot library)]
-    (merge +seedgen-dispatch-tags+
-           (->> snapshot
-                vals
-                (keep (fn [{:keys [book]}]
-                        (let [lang (or (:lang book)
-                                       (get-in book [:book :lang]))
-                              tag  (or (get-in book [:grammar :tag])
-                                       (get-in book [:book :grammar :tag]))]
-                          (when (and lang tag)
-                            [lang tag]))))
-                (into {})))))
+    (->> snapshot
+         (keep (fn [[lang {:keys [book]}]]
+                 (let [tag (when (and book
+                                      (runtime-book-root? book))
+                             (runtime-book-tag book))]
+                   (when tag
+                     [(name tag) lang]))))
+         (into {}))))
+
+(defn- snapshot-runtime-dispatch-tag-map
+  []
+  (let [library  (lang.impl/default-library)
+        snapshot (lang.lib/get-snapshot library)]
+    (->> snapshot
+         (keep (fn [[lang {:keys [book]}]]
+                 (let [tag (when (and book
+                                      (runtime-book-root? book))
+                             (runtime-book-tag book))]
+                   (when tag
+                     [lang tag]))))
+         (into {}))))
+
+(defn seedgen-dispatch-map
+  []
+  (merge (runtime-config-dispatch-map)
+         (snapshot-runtime-dispatch-map)))
+
+(defn seedgen-dispatch-tag-map
+  []
+  (merge (runtime-config-dispatch-tag-map)
+         (snapshot-runtime-dispatch-tag-map)))
 
 (defn seedgen-normalize-runtime-lang
   [lang]

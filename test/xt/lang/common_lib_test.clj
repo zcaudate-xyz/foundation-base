@@ -692,6 +692,8 @@
   => {"return" "number", "value" 2, "type" "data"})
 
 (comment
+
+  (s/seedgen-benchadd '[xt.lang.common] {:lang [:r] :write true})
   
   (s/seedgen-langadd 'xt.lang.common-lib {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.lang.common-lib {:lang [:lua :python] :write true}))

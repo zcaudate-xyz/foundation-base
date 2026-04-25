@@ -236,33 +236,67 @@
 ;; LU
 ;;
 
+(defn r-tf-x-lu-key
+  [obj]
+  (let [scalar? (template/$ (and (== 1 (length ~obj))
+                                 (or (is.character ~obj)
+                                     (is.numeric ~obj)
+                                     (is.logical ~obj))))]
+    (list ':?
+          (list 'is.null obj)
+          "__xt_nil__"
+          (list ':?
+                (list '== "environment" (list 'typeof obj))
+                (list 'paste "env" (list 'format obj) :sep ":")
+                (list ':?
+                      scalar?
+                      (list 'paste (list 'typeof obj)
+                            (list 'as.character obj)
+                            :sep ":")
+                      (list 'tracemem obj))))))
+
+(defn r-tf-x-lu-create
+  "creates an environment-backed lookup table"
+  {:added "4.1"}
+  ([[_]]
+   (list 'new.env :hash true :parent (list 'emptyenv))))
+
 (defn r-tf-x-lu-eq
   "converts map to array"
   {:added "4.0"}
   ([[_ o1 o2]]
-   (list '== (list 'tracemem o1) (list 'tracemem o2))))
+   (list '== (r-tf-x-lu-key o1) (r-tf-x-lu-key o2))))
 
 (defn r-tf-x-lu-get
   "converts map to array"
   {:added "4.0"}
-  ([[_ lu obj]]
-   (template/$ (. ~lu [(tracemem ~obj)]))))
+  ([[_ lu obj default]]
+   (list 'get0 (r-tf-x-lu-key obj)
+         :envir lu
+         :inherits false
+         :ifnotfound default)))
 
 (defn r-tf-x-lu-set
   "converts map to array"
   {:added "4.0"}
   ([[_ lu obj gid]]
-   (template/$ (:= (. ~lu [(tracemem ~obj)]) ~gid))))
+   (list 'assign (r-tf-x-lu-key obj)
+         gid
+         :envir lu)))
 
 (defn r-tf-x-lu-del
   "converts map to array"
   {:added "4.0"}
   ([[_ lu obj]]
-   (template/$ (:= (. ~lu [(tracemem ~obj)])
-            nil))))
+   (let [key (r-tf-x-lu-key obj)]
+     (list ':?
+           (list 'exists key :envir lu :inherits false)
+           (list 'rm :list key :envir lu :inherits false)
+           nil))))
 
 (def +r-lu+
-  {:x-lu-eq          {:macro #'r-tf-x-lu-eq}
+  {:x-lu-create      {:macro #'r-tf-x-lu-create :emit :macro}
+   :x-lu-eq          {:macro #'r-tf-x-lu-eq :emit :macro}
    :x-lu-get         {:macro #'r-tf-x-lu-get :emit :macro}
    :x-lu-set         {:macro #'r-tf-x-lu-set :emit :macro}
    :x-lu-del         {:macro #'r-tf-x-lu-del :emit :macro}})

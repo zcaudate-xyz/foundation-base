@@ -73,11 +73,37 @@
            common/seedgen-coverage-langs
            set)
        (slurp path)]
-      (finally
-        (.delete tmp))))
+       (finally
+         (.delete tmp))))
   => [[:lua :python]
       #{:js :lua :python}
       "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]))\n\n^{:seedgen/root {:all true, :langs [:lua :python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :lua {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.spec-base/example.A :added \"4.1\"\n  :setup [(!.js (+ 1 2 3))\n          (!.lua (+ 1 2 3))\n          (!.python (+ 1 2 3))]}\n(fact \"runtime specific branches\"\n\n  (!.js (+ 1 2 3))\n  => 6\n\n  (!.lua (+ 1 2 3))\n  => 6\n\n  (!.python (+ 1 2 3))\n  => 6)\n"]
+
+  (let [tmp (java.io.File/createTempFile "seedgen-langadd-r" ".clj")
+        path (.getAbsolutePath tmp)
+        root (.getParent tmp)
+        lookup {'sample.add-test path}
+        project {:root root}]
+    (try
+      (spit path (str "(ns sample.add-test\n"
+                      "  (:use code.test)\n"
+                      "  (:require [std.lang :as l]))\n\n"
+                      "^{:seedgen/root {:all true, :langs [:r]}}\n"
+                      "(l/script- :js {:runtime :basic})\n\n"
+                      "^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n"
+                      "(fact \"runtime specific branches\"\n\n"
+                      "  (!.js (+ 1 2 3))\n"
+                      "  => 6)\n"))
+      (form-infile/seedgen-langadd 'sample.add-test {:write true} lookup project)
+      [(-> (common/seedgen-fact-forms path)
+           (get 'xt.lang.spec-base/example.A)
+           common/seedgen-coverage-langs
+           set)
+       (slurp path)]
+      (finally
+        (.delete tmp))))
+  => [#{:js :r}
+      "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]))\n\n^{:seedgen/root {:all true, :langs [:r]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :r {:runtime :basic})\n\n^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n(fact \"runtime specific branches\"\n\n  (!.js (+ 1 2 3))\n  => 6\n\n  (!.R (+ 1 2 3))\n  => 6)\n"]
 
   (let [tmp (java.io.File/createTempFile "seedgen-langadd" ".clj")
         path (.getAbsolutePath tmp)

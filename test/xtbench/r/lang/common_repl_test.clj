@@ -30,7 +30,7 @@
 
   (notify/wait-on-call
    (fn []
-     (!.r
+     (!.R
        (repl/socket-connect
         "127.0.0.1"
         (@! (:socket-port (l/default-notify)))
@@ -45,7 +45,7 @@
 (fact "notifies the socket of a value"
 
   (notify/wait-on-call
-   (fn [] (!.r
+   (fn [] (!.R
            (repl/notify-socket "127.0.0.1" (@! (:socket-port (l/default-notify)))
                             "hello"
                             (@! notify/*override-id*)
@@ -57,7 +57,7 @@
 (fact "using the base socket implementation to notify on http protocol"
 
   (notify/wait-on-call
-   (fn [] (!.r
+   (fn [] (!.R
            (repl/notify-socket-http
             "127.0.0.1" (@! (:http-port (l/default-notify)))
             "hello"
@@ -67,13 +67,13 @@
   => "hello")
 
 ^{:refer xt.lang.common-repl/notify-http :added "4.0"
-  :setup [(!.r
+  :setup [(!.R
   (:= (!:G fetch)
       (. (require "node-fetch") default)))]}
 (fact "call a http notify function."
 
   (notify/wait-on-call
-   (fn [] (!.r
+   (fn [] (!.R
             (repl/notify-http "127.0.0.1" (@! (:http-port (l/default-notify)))
                               "hello"
                               (@! notify/*override-id*)

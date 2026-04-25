@@ -14,7 +14,7 @@
 ^{:refer xt.lang.common-tree/eq-nested-loop :added "4.1"}
 (fact "switch for nested check"
 
-  (!.r
+  (!.R
    [(xtt/eq-nested-loop {:a 1} {:a 1} xtt/eq-nested-obj xtt/eq-nested-arr nil)
     (xtt/eq-nested-loop {:a 1} {:a 2} xtt/eq-nested-obj xtt/eq-nested-arr nil)])
   => [true false])
@@ -22,7 +22,7 @@
 ^{:refer xt.lang.common-tree/eq-nested-obj :added "4.1"}
 (fact "checks object equality"
 
-  (!.r
+  (!.R
    [(xtt/eq-nested-obj {:a 1} {:a 1} xtt/eq-nested-obj xtt/eq-nested-arr (xt/x:lu-create))
     (xtt/eq-nested-obj {:a 1} {:a 2} xtt/eq-nested-obj xtt/eq-nested-arr (xt/x:lu-create))])
   => [true false])
@@ -30,7 +30,7 @@
 ^{:refer xt.lang.common-tree/eq-nested-arr :added "4.1"}
 (fact "checks array equality"
 
-  (!.r
+  (!.R
    [(xtt/eq-nested-arr [1 2] [1 2] xtt/eq-nested-obj xtt/eq-nested-arr (xt/x:lu-create))
     (xtt/eq-nested-arr [1 2] [2 1] xtt/eq-nested-obj xtt/eq-nested-arr (xt/x:lu-create))])
   => [true false])
@@ -38,7 +38,7 @@
 ^{:refer xt.lang.common-tree/eq-nested :added "4.1"}
 (fact "checks for nested equality"
 
-  (!.r
+  (!.R
    [(xtt/eq-nested {:a {:b {:c 1}}} {:a {:b {:c 1}}})
     (xtt/eq-nested {:a {:b {:c 1}}} {:a {:b {:c 2}}})
     (xtt/eq-nested [1] [1])
@@ -48,14 +48,14 @@
 ^{:refer xt.lang.common-tree/eq-shallow-raw :added "4.1"}
 (fact "basic shallow equality comparator"
 
-  (!.r [(xtt/eq-shallow-raw 1 1 nil nil nil)
+  (!.R [(xtt/eq-shallow-raw 1 1 nil nil nil)
           (xtt/eq-shallow-raw 1 2 nil nil nil)])
   => [true false])
 
 ^{:refer xt.lang.common-tree/eq-shallow :added "4.1"}
 (fact "checks for shallow equality"
 
-  (!.r
+  (!.R
    (var arr [1])
    [(xtt/eq-shallow arr arr)
     (xtt/eq-shallow [1] [1])])
@@ -64,7 +64,7 @@
 ^{:refer xt.lang.common-tree/tree-walk :added "4.1"}
 (fact "walks over object"
 
-  (!.r
+  (!.R
     (xtt/tree-walk
      {:a 1, :b [2 {:c 3}]}
      (fn [x] (return x))
@@ -77,7 +77,7 @@
 ^{:refer xt.lang.common-tree/tree-get-data :added "4.1"}
 (fact "gets the data component"
 
-  (!.r
+  (!.R
     (xtt/tree-get-data {:name "hello"
                         :job  {:patients [[1 "alice"]
                                           [1 "body"]]
@@ -88,7 +88,7 @@
 ^{:refer xt.lang.common-tree/tree-get-spec :added "4.1"}
 (fact "gets the shape of the current data"
 
-  (!.r
+  (!.R
     (xtt/tree-get-spec {:name "hello"
                         :job  {:patients [[1 "alice"]
                                           [1 "body"]]
@@ -102,13 +102,13 @@
 ^{:refer xt.lang.common-tree/tree-diff :added "4.1"}
 (fact "diffs only keys within map"
 
-  (!.r (xtt/tree-diff {:a 1, :b 2} {:a 1, :c 2}))
+  (!.R (xtt/tree-diff {:a 1, :b 2} {:a 1, :c 2}))
   => {"c" 2})
 
 ^{:refer xt.lang.common-tree/tree-diff-nested :added "4.1"}
 (fact "diffs nested keys within map"
 
-  (!.r
+  (!.R
    [(xtt/tree-diff-nested {:a 1, :b 2} {:a 1, :c 2})
     (xtt/tree-diff-nested {:a 1, :b {:c 3}} {:a 1, :b {:d 3}})
     (xtt/tree-diff-nested {:a 1, :b {:c {:d 3}}} {:a 1, :b {:c {:e 3}}})])
