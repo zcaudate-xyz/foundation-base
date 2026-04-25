@@ -45,25 +45,34 @@
 
 (defn r-tf-x-type-native
   [[_ obj]]
-  (template/$ (do (var t := (typeof ~obj))
-           (cond (== t "list")
-                 (if (not (is.null (names ~obj)))
-                   (return "object")
-                   (return "array"))
+  (template/$
+   (do (var t := (typeof ~obj))
+       (cond (is.null ~obj)
+             (return "nil")
 
-                 (== t "closure")
-                 (return "function")
+             (== t "list")
+             (if (not (is.null (names ~obj)))
+               (return "object")
+               (return "array"))
 
-                 (== t "double")
-                 (return "number")
+             (== t "closure")
+             (return "function")
 
-                 (== t "character")
-                 (return "string")
+             (and (is.atomic ~obj)
+                  (not (is.null ~obj))
+                  (not (== 1 (length ~obj))))
+             (return "array")
 
-                 (== t "logical")
-                 (return "boolean")
+             (== t "double")
+             (return "number")
 
-                 :else (return t)))))
+             (== t "character")
+             (return "string")
+
+             (== t "logical")
+             (return "boolean")
+
+             :else (return t)))))
 
 (def +r-core+
   {:x-del            {:macro #'r-tf-x-del   :emit :macro}
@@ -76,7 +85,8 @@
    :x-print          {:macro #'r-tf-x-print         :emit :macro}
    :x-shell          {:macro #'r-tf-x-shell         :emit :macro}
    :x-now-ms         {:default '(floor (* 1000 (as.numeric (Sys.time)))) :emit :unit}
-   :x-type-native    {:macro #'r-tf-x-type-native    :emit :macro}})
+   :x-type-native    {:macro #'r-tf-x-type-native    :emit :macro}
+   :x-unpack         {:emit :throw}})
 
 ;;
 ;; GLOBAL
@@ -112,15 +122,79 @@
   [[_ obj]]
   (list 'is.null obj))
 
+(defn r-propagate-symbol
+  [sym]
+  (when (symbol? sym)
+    (let [name (str sym)]
+      (template/$
+       (when (exists ~name
+                         :envir (parent.env (environment))
+                         :inherits true)
+         (assign ~name
+                 ~sym
+                 :envir (parent.env (environment))))))))
+
 (defn r-tf-x-has-key?
   [[_ obj key check]]
-  (if check
-    (list '== check (list 'x:get-key obj key nil))
-    (list :- (list '% key) "%in%" (list 'names obj))))
+  (let [present (template/$
+                 (:? (x:is-object? ~obj)
+                     (not (is.na (match (as.character ~key)
+                                        (names ~obj))))
+                     (and (is.numeric ~key)
+                          (>= ~key 1)
+                          (<= ~key (length ~obj)))))]
+    (if check
+      (template/$
+       (and ~present
+            (== ~check (x:get-key ~obj ~key nil))))
+      present)))
+
+(defn r-tf-x-set-key
+  [[_ obj key value]]
+  (let [sync (r-propagate-symbol obj)]
+    (if sync
+      (template/$
+       (do (:= (. ~obj [(:? (x:is-object? ~obj)
+                            (as.character ~key)
+                            ~key)])
+               ~value)
+           ~sync
+           ~obj))
+      (template/$
+       (do (:= (. ~obj [(:? (x:is-object? ~obj)
+                            (as.character ~key)
+                            ~key)])
+               ~value)
+           ~obj)))))
+
+(defn r-tf-x-del-key
+  [[_ obj key]]
+  (let [sync (r-propagate-symbol obj)]
+    (if sync
+      (template/$
+       (do (:= (. ~obj [(:? (x:is-object? ~obj)
+                            (as.character ~key)
+                            ~key)])
+               nil)
+           ~sync
+           ~obj))
+      (template/$
+       (do (:= (. ~obj [(:? (x:is-object? ~obj)
+                            (as.character ~key)
+                            ~key)])
+               nil)
+           ~obj)))))
 
 (defn r-tf-x-get-key
   [[_ obj key default]]
-  (let [val (default/tf-get-key [_ obj key])]
+  (let [val (template/$
+             (:? (x:is-object? ~obj)
+                 (. ~obj [(as.character ~key)])
+                 (:? (and (is.numeric ~key)
+                          (>= ~key 1)
+                          (<= ~key (length ~obj)))
+                     (. ~obj [~key])
+                     nil)))]
     (if default
       (list :?
             (list 'x:has-key? obj key)
@@ -132,6 +206,8 @@
   {:x-not-nil?         {:macro #'r-tf-x-not-nil? :emit :macro}
    :x-nil?             {:macro #'r-tf-x-nil?  :emit :macro}
    :x-has-key?         {:macro #'r-tf-x-has-key? :emit :macro}
+   :x-set-key          {:macro #'r-tf-x-set-key :emit :macro}
+   :x-del-key          {:macro #'r-tf-x-del-key :emit :macro}
    :x-get-key          {:macro #'r-tf-x-get-key :emit :macro}})
 
 ;;
@@ -204,6 +280,12 @@
   [[_ e]]
   (list 'is.numeric e))
 
+(defn r-tf-x-is-integer?
+  [[_ e]]
+  (template/$ (and (is.numeric ~e)
+                   (== 1 (length ~e))
+                   (== ~e (floor ~e)))))
+
 (defn r-tf-x-is-boolean?
   [[_ e]]
   (list '== "logical" (list 'typeof e)))
@@ -215,18 +297,23 @@
 (defn r-tf-x-is-object?
   [[_ e]]
   (template/$ (and (== "list" (typeof ~e))
-            (not (is.null (names ~e))))))
+             (not (is.null (names ~e))))))
 
 (defn r-tf-x-is-array?
   [[_ e]]
-  (template/$ (and (== "list" (typeof ~e))
-            (is.null (names ~e)))))
+  (template/$
+   (or (and (== "list" (typeof ~e))
+            (is.null (names ~e)))
+       (and (is.atomic ~e)
+            (not (is.null ~e))
+            (not (== 1 (length ~e)))))))
 
 (def +r-type+
   {:x-to-string      {:macro #'r-tf-x-to-string :emit :macro}
    :x-to-number      {:macro #'r-tf-x-to-number :emit :macro}
    :x-is-string?     {:macro #'r-tf-x-is-string? :emit :macro}
    :x-is-number?     {:macro #'r-tf-x-is-number? :emit :macro}
+   :x-is-integer?    {:macro #'r-tf-x-is-integer? :emit :macro}
    :x-is-boolean?    {:macro #'r-tf-x-is-boolean? :emit :macro}
    :x-is-function?   {:macro #'r-tf-x-is-function? :emit :macro}
    :x-is-object?     {:macro #'r-tf-x-is-object? :emit :macro}
@@ -307,28 +394,88 @@
 
 (defn r-tf-x-arr-push
   [[_ arr item]]
-  (template/$ (:= (. ~arr [(+ (length ~arr) 1)])
-            ~item)))
+  (let [sync (r-propagate-symbol arr)]
+    (if sync
+      (template/$
+       (do (:= ~arr
+               (append (as.list ~arr)
+                       (list ~item)))
+           ~sync
+           ~arr))
+      (template/$
+       (do (:= ~arr
+               (append (as.list ~arr)
+                       (list ~item)))
+           ~arr)))))
 
 (defn r-tf-x-arr-pop
   [[_ arr]]
-  (list := (list '. arr [(list 'length arr)])
-        nil))
+  (let [sync (r-propagate-symbol arr)]
+    (if sync
+      (template/$
+       (do (:= ~arr
+               (head (as.list ~arr) -1))
+           ~sync
+           ~arr))
+      (template/$
+       (do (:= ~arr
+               (head (as.list ~arr) -1))
+           ~arr)))))
 
 (defn r-tf-x-arr-push-first
   [[_ arr item]]
-  (list := arr (list 'append [item] arr)))
+  (let [sync (r-propagate-symbol arr)]
+    (if sync
+      (template/$
+       (do (:= ~arr
+               (append (list ~item)
+                       (as.list ~arr)))
+           ~sync
+           ~arr))
+      (template/$
+       (do (:= ~arr
+               (append (list ~item)
+                       (as.list ~arr)))
+           ~arr)))))
 
 (defn r-tf-x-arr-pop-first
   [[_ arr]]
-  (list := (list '. arr [1]) nil))
+  (let [sync (r-propagate-symbol arr)]
+    (if sync
+      (template/$
+       (do (:= ~arr
+               (tail (as.list ~arr) -1))
+           ~sync
+           ~arr))
+      (template/$
+       (do (:= ~arr
+               (tail (as.list ~arr) -1))
+           ~arr)))))
+
+(defn r-tf-x-arr-insert
+  [[_ arr idx item]]
+  (let [sync (r-propagate-symbol arr)]
+    (if sync
+      (template/$
+       (do (:= ~arr
+               (append (as.list ~arr)
+                       (list ~item)
+                       :after (- ~idx 1)))
+           ~sync
+           ~arr))
+      (template/$
+       (do (:= ~arr
+               (append (as.list ~arr)
+                       (list ~item)
+                       :after (- ~idx 1)))
+           ~arr)))))
 
 (def +r-arr+
   {:x-arr-push        {:macro #'r-tf-x-arr-push    :emit :macro}
    :x-arr-pop         {:macro #'r-tf-x-arr-pop     :emit :macro}
    :x-arr-push-first  {:macro #'r-tf-x-arr-push-first :emit :macro}
    :x-arr-pop-first   {:macro #'r-tf-x-arr-pop-first  :emit :macro}
-   :x-arr-insert      {:emit :throw}})
+   :x-arr-insert      {:macro #'r-tf-x-arr-insert :emit :macro}})
 
 ;;
 ;; STRING
@@ -340,7 +487,7 @@
 
 (defn r-tf-x-str-split
   ([[_ s tok]]
-   (list 'unlist (list 'strsplit s tok))))
+   (list 'unlist (list 'strsplit s tok :fixed true))))
 
 (defn r-tf-x-str-join
   ([[_ s arr]]
@@ -352,7 +499,17 @@
 
 (defn r-tf-x-str-substring
   ([[_ s start & [end]]]
-   (list 'substr s start (or end (list 'nchar s)))))
+   (list 'substr s
+         start
+         (if end
+           (list ':? (list 'x:nil? end)
+                 (list 'nchar s)
+                 end)
+           (list 'nchar s)))))
+
+(defn r-tf-x-str-char
+  ([[_ s i]]
+   (list '. (list 'utf8ToInt (list 'substr s i i)) [1])))
 
 (defn r-tf-x-str-to-upper
   ([[_ s]]
@@ -362,9 +519,29 @@
   ([[_ s]]
    (list 'tolower s)))
 
+(defn r-tf-x-str-to-fixed
+  ([[_ n digits]]
+   (list 'sprintf (list 'paste0 "%." digits "f") n)))
+
 (defn r-tf-x-str-replace
   ([[_ s tok replacement]]
    (list 'gsub tok replacement s)))
+
+(defn r-tf-x-str-trim
+  ([[_ s]]
+   (list 'trimws s)))
+
+(defn r-tf-x-str-trim-left
+  ([[_ s]]
+   (list 'trimws s :which "left")))
+
+(defn r-tf-x-str-trim-right
+  ([[_ s]]
+   (list 'trimws s :which "right")))
+
+(defn r-tf-x-str-comp
+  [[_ a b]]
+  (list '< a b))
 
 (def +r-str+
   {:x-str-len        {:macro #'r-tf-x-str-len        :emit :macro}
@@ -372,9 +549,15 @@
    :x-str-join       {:macro #'r-tf-x-str-join       :emit :macro}
    :x-str-index-of   {:macro #'r-tf-x-str-index-of   :emit :macro}
    :x-str-substring  {:macro #'r-tf-x-str-substring  :emit :macro}
-   :x-str-to-upper      {:macro #'r-tf-x-str-to-upper      :emit :macro}
-   :x-str-to-lower      {:macro #'r-tf-x-str-to-lower      :emit :macro}
-   :x-str-replace    {:macro #'r-tf-x-str-replace    :emit :macro}})
+   :x-str-char       {:macro #'r-tf-x-str-char       :emit :macro}
+   :x-str-to-upper   {:macro #'r-tf-x-str-to-upper   :emit :macro}
+   :x-str-to-lower   {:macro #'r-tf-x-str-to-lower   :emit :macro}
+   :x-str-to-fixed   {:macro #'r-tf-x-str-to-fixed   :emit :macro}
+   :x-str-replace    {:macro #'r-tf-x-str-replace    :emit :macro}
+   :x-str-trim       {:macro #'r-tf-x-str-trim       :emit :macro}
+   :x-str-trim-left  {:macro #'r-tf-x-str-trim-left  :emit :macro}
+   :x-str-trim-right {:macro #'r-tf-x-str-trim-right :emit :macro}
+   :x-str-comp       {:macro #'r-tf-x-str-comp       :emit :macro}})
 
 
 ;;
@@ -401,30 +584,40 @@
 
 (defn r-tf-x-return-encode
   ([[_ out id key]]
-   (template/$ (do* (library "jsonlite")
-             (tryCatch (block (toJSON {:type "data"
-                                       :value ~out
-                                       :id ~id
-                                       :key ~key}
-                                      :auto-unbox true :null "null"))
-                       :error (fn [err]
-                                (toJSON {:type "raw"
-                                         :value (toString out)
-                                         :id ~id
-                                         :key ~key}
-                                        :auto-unbox true :null "null")))))))
+   (template/$
+     (do* (library "jsonlite")
+          (var outtype := (x:type-native ~out))
+          (var payload := {:type "data"
+                           :return outtype
+                           :value ~out})
+          (when (not (is.null ~id))
+            (:= (. payload ["id"]) ~id))
+          (when (not (is.null ~key))
+            (:= (. payload ["key"]) ~key))
+         (when (== "function" outtype)
+           (:= (. payload ["type"]) "raw")
+           (:= (. payload ["value"]) (toString ~out)))
+         (tryCatch
+          (block
+            (return (toJSON payload :auto-unbox true :null "null")))
+          :error (fn [err]
+                   (do (:= (. payload ["type"]) "raw")
+                       (:= (. payload ["value"]) (toString ~out))
+                       (return (toJSON payload :auto-unbox true :null "null")))))))))
 
 (defn r-tf-x-return-wrap
   ([[_ f encode-fn]]
-   (template/$ (do* (library "jsonlite")
-             (tryCatch
-              (block
-               (:= out (~f))
-               (~encode-fn out nil nil))
-              :error   (fn [err]
-                         (paste "{\"type\":\"error\",\"value\":"
-                                (toJSON (toString err))
-                                "}")))))))
+   (template/$
+     (do* (library "jsonlite")
+          (tryCatch
+           (block
+             (var out := (~f))
+             (~encode-fn out nil nil))
+           :error (fn [err]
+                    (toJSON {:type "error"
+                             :return "error"
+                            :value (toString err)}
+                           :auto-unbox true :null "null")))))))
 
 (defn r-tf-x-return-eval
   ([[_ s wrap-fn]]
@@ -458,8 +651,67 @@
 ;; ITER
 ;;
 
+(defn r-tf-x-iter-mark
+  [value]
+  (list 'structure value :class "xt_iterator"))
+
+(defn r-tf-x-iter-from-obj
+  [[_ obj]]
+  (r-tf-x-iter-mark
+   (template/$
+    (lapply (names ~obj)
+            (fn [k]
+              (list k (. ~obj [k])))))))
+
+(defn r-tf-x-iter-from-arr
+  [[_ arr]]
+  (r-tf-x-iter-mark arr))
+
+(defn r-tf-x-iter-from
+  [[_ obj]]
+  (r-tf-x-iter-mark
+   (template/$ (. ~obj ["iterator"]))))
+
+(defn r-tf-x-iter-eq
+  [[_ it0 it1 eq-fn]]
+  (template/$
+   (if (not (== (length ~it0) (length ~it1)))
+     (return false)
+     (do (for [i :in (seq_len (length ~it0))]
+           (if (not (~eq-fn (. ~it0 [i])
+                            (. ~it1 [i])))
+             (return false)))
+         (return true)))))
+
+(defn r-tf-x-iter-next
+  [[_ it]]
+  (template/$
+   (:? (== 0 (length ~it))
+       nil
+       (. ~it [1]))))
+
+(defn r-tf-x-iter-has?
+  [[_ obj]]
+  (template/$
+   (isTRUE
+    (and (== "list" (typeof ~obj))
+         (not (is.null (names ~obj)))
+         (x:has-key? ~obj "iterator")))))
+
+(defn r-tf-x-iter-native?
+  [[_ it]]
+  (list 'isTRUE (list 'inherits it "xt_iterator")))
+
 (def +r-iter+
-  {})
+  {:x-iter-from-obj       {:macro #'r-tf-x-iter-from-obj       :emit :macro}
+   :x-iter-from-arr       {:macro #'r-tf-x-iter-from-arr       :emit :macro}
+   :x-iter-from           {:macro #'r-tf-x-iter-from           :emit :macro}
+   :x-iter-eq             {:macro #'r-tf-x-iter-eq             :emit :macro}
+   :x-iter-null           {:default '(structure (list) :class "xt_iterator")
+                           :emit :unit}
+   :x-iter-next           {:macro #'r-tf-x-iter-next           :emit :macro}
+   :x-iter-has?           {:macro #'r-tf-x-iter-has?           :emit :macro}
+   :x-iter-native?        {:macro #'r-tf-x-iter-native?        :emit :macro}})
 
 ;;
 ;; THREAD

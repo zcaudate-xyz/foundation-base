@@ -10,7 +10,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.common-string/get-char :added "4.1"}
 (fact "gets a character code from string"
