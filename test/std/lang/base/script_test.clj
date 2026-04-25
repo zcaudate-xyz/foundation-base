@@ -77,11 +77,14 @@
       (binding [*ns* (the-ns ns-sym)]
         (refer 'clojure.core)
         (script/script-ns-import {:require '[[xt.lang.common-runtime :as rt :with [defvar.js]]]})
-        (impl/with:library [+library+]
-          (script/script-support-import (l/get-book (l/runtime-library) :js))))
+        [(impl/with:library [+library+]
+           (script/script-support-import (l/get-book (l/runtime-library) :js)))
+         (-> (macroexpand-1 '(defvar.js JS_SAMPLE [] (return 1)))
+             first
+             first)])
       (finally
         (remove-ns ns-sym))))
-  => '[#{} #{defvar.js}])
+  => '[[#{} #{defvar.js}] defn.js]))
 
 
 ^{:refer std.lang.base.script/script-fn-base :added "4.0"}
