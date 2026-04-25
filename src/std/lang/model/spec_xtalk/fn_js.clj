@@ -666,7 +666,8 @@
       (catch e (return ["unable to connect"]))))))
 
 (def +js-special+
-  {:x-notify-http   {:macro #'js-tf-x-notify-http    :emit :macro   :type :template}})
+  {:x-notify-http   {:macro #'js-tf-x-notify-http    :emit :macro   :type :template
+                     :op-spec {:allow-blocks true}}})
 
 (def +js+
   (merge +js-core+

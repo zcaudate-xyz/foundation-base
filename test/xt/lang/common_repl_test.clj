@@ -17,32 +17,12 @@
 
 (l/script- :python
   {:runtime :basic
-    :require [[xt.lang.common-repl :as repl]
-              [xt.lang.common-lib :as xtl]]})
+   :require [[xt.lang.common-repl :as repl]
+             [xt.lang.common-lib :as xtl]]})
 
 (fact:global
- {:setup    [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
-
-^{:refer xt.lang.common-repl/socket-send :added "4.0"}
-(fact "sends a message via the socket"
-  
-  ^{:seedgen/base             {}}
-  (notify/wait-on-call
-   (fn []
-     (!.js
-       (repl/socket-connect
-        "127.0.0.1"
-        (@! (:socket-port (l/default-notify)))
-        {:success (fn [conn]
-                    (repl/notify-socket-handler conn
-                                                (xtl/return-encode "hello"
-                                                                   (@! notify/*override-id*)
-                                                                   "hello")))}))))
-  => "hello")
-
-^{:refer xt.lang.common-repl/socket-close :added "4.0"}
-(fact "closes the socket")
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.common-repl/socket-connect-base :added "4.0"}
 (fact "base connect call")
@@ -57,18 +37,65 @@
      (@! (:socket-port (l/default-notify)))
      {:success (fn [conn]
                  (repl/notify "OK"))}))
+  => "OK"
+
+  (notify/wait-on :lua
+    (repl/socket-connect
+     "127.0.0.1"
+     (@! (:socket-port (l/default-notify)))
+     {:success (fn [conn]
+                 (repl/notify "OK"))}))
+  => "OK"
+
+  (notify/wait-on :python
+    (repl/socket-connect
+     "127.0.0.1"
+     (@! (:socket-port (l/default-notify)))
+     {:success (fn [conn]
+                 (repl/notify "OK"))}))
   => "OK")
 
 ^{:refer xt.lang.common-repl/notify-socket-handler :added "4.0"}
 (fact "helper function for `notify-socket`"
 
-  (notify/wait-on :js
-    (repl/socket-connect
-     "127.0.0.1"
-     (@! (:socket-port (l/default-notify)))
-     {:success (fn [conn]
-                 (repl/notify-socket-handler conn
-                                             "OK"))})))
+  (notify/wait-on-call
+   (fn []
+     (!.js
+       (repl/socket-connect
+        "127.0.0.1"
+        (@! (:socket-port (l/default-notify)))
+        {:success (fn [conn]
+                    (repl/notify-socket-handler conn
+                                                (xtl/return-encode "hello"
+                                                                   (@! notify/*override-id*)
+                                                                   "hello")))}))))
+  => "hello"
+
+  (notify/wait-on-call
+   (fn []
+     (!.lua
+       (repl/socket-connect
+        "127.0.0.1"
+        (@! (:socket-port (l/default-notify)))
+        {:success (fn [conn]
+                    (repl/notify-socket-handler conn
+                                                (xtl/return-encode "hello"
+                                                                   (@! notify/*override-id*)
+                                                                   "hello")))}))))
+  => "hello"
+
+  (notify/wait-on-call
+   (fn []
+     (!.py
+       (repl/socket-connect
+        "127.0.0.1"
+        (@! (:socket-port (l/default-notify)))
+        {:success (fn [conn]
+                    (repl/notify-socket-handler conn
+                                                (xtl/return-encode "hello"
+                                                                   (@! notify/*override-id*)
+                                                                   "hello")))}))))
+  => "hello")
 
 ^{:refer xt.lang.common-repl/notify-socket :added "4.0"}
 (fact "notifies the socket of a value"
@@ -91,21 +118,10 @@
                             {}))))
   => "hello"
 
-  ^{:lang-exceptions
-    {:dart
-     {:form (notify/wait-on-call
-             2000
-             (fn []
-               (!.dt
-                (repl/notify-socket "127.0.0.1" (@! (:socket-port (l/default-notify)))
-                                 "hello"
-                                 (@! notify/*override-id*)
-                                 nil
-                                 {}))))}}}
   (notify/wait-on-call
    (fn [] (!.py
            (repl/notify-socket "127.0.0.1" (@! (:socket-port (l/default-notify)))
-                             "hello"
+                            "hello"
                             (@! notify/*override-id*)
                             nil
                             {}))))
@@ -137,18 +153,6 @@
             {}))))
   => "hello"
 
-  ^{:lang-exceptions
-    {:dart
-     {:form (notify/wait-on-call
-             2000
-             (fn []
-               (!.dt
-                (repl/notify-socket-http
-                 "127.0.0.1" (@! (:http-port (l/default-notify)))
-                 "hello"
-                 (@! notify/*override-id*)
-                 nil
-                 {}))))}}}
   (notify/wait-on-call
    (fn [] (!.py
            (repl/notify-socket-http
@@ -159,47 +163,39 @@
             {}))))
   => "hello")
 
-^{:refer xt.lang.common-repl/notify-http :added "4.0"}
+^{:refer xt.lang.common-repl/notify-http :added "4.0"
+  :setup [^{:seedgen/base   {:lua     {:suppress true}
+                             :python  {:suppress true}}}
+          (!.js
+            (:= (!:G fetch)
+                (. (require "node-fetch") default)))]}
 (fact "call a http notify function."
 
   (notify/wait-on-call
    (fn [] (!.js
-            (:= (!:G fetch) (. (require "node-fetch") default))
             (repl/notify-http "127.0.0.1" (@! (:http-port (l/default-notify)))
-                           "hello"
-                           (@! notify/*override-id*)
-                           nil
-                           {}))))
+                              "hello"
+                              (@! notify/*override-id*)
+                              nil
+                              {}))))
   => "hello"
 
   (notify/wait-on-call
    (fn [] (!.lua
-           (repl/notify-http "127.0.0.1" (@! (:http-port (l/default-notify)))
-                          "hello"
-                          (@! notify/*override-id*)
-                          nil
-                          {}))))
+            (repl/notify-http "127.0.0.1" (@! (:http-port (l/default-notify)))
+                              "hello"
+                              (@! notify/*override-id*)
+                              nil
+                              {}))))
   => "hello"
 
-  ^{:lang-exceptions
-    {:dart
-     {:form (notify/wait-on-call
-             2000
-             (fn []
-               (!.dt
-                (repl/notify-http "127.0.0.1" (@! (:http-port (l/default-notify)))
-                               "hello"
-                               (@! notify/*override-id*)
-                               nil
-                               {}))))}}}
   (notify/wait-on-call
-   (fn []
-     (!.py
-      (repl/notify-http "127.0.0.1" (@! (:http-port (l/default-notify)))
-                     "hello"
-                     (@! notify/*override-id*)
-                     nil
-                     {}))))
+   (fn [] (!.py
+            (repl/notify-http "127.0.0.1" (@! (:http-port (l/default-notify)))
+                              "hello"
+                              (@! notify/*override-id*)
+                              nil
+                              {}))))
   => "hello")
 
 ^{:refer xt.lang.common-repl/notify-form :added "4.0"}
@@ -222,13 +218,6 @@
     (repl/notify 1))
   => 1
 
-  ^{:lang-exceptions
-    {:dart
-     {:form (notify/wait-on-call
-             2000
-             (fn []
-               (!.dt
-                (repl/notify 1))))}}}
   (notify/wait-on :python
     (repl/notify 1))
   => 1)
@@ -245,19 +234,15 @@
   => 1
 
   (notify/wait-on :lua
-   ((. (repl/<!)
+    ((. (repl/<!)
        ["success"]) 1))
   => 1
 
-  ^{:lang-exceptions
-    {:dart
-     {:form (notify/wait-on-call
-             2000
-             (fn []
-               (!.dt
-                ((. (repl/<!)
-                    ["success"]) 1))))}}}
   (notify/wait-on :python
-   ((. (repl/<!)
+    ((. (repl/<!)
        ["success"]) 1))
   => 1)
+
+(comment
+  (s/seedgen-langadd 'xt.lang.common-repl {:lang [:lua :python] :write true})
+  (s/seedgen-langremove 'xt.lang.common-repl {:lang [:lua :python] :write true}))

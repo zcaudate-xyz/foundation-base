@@ -15,6 +15,8 @@
 ;; SOCKET
 ;;
 
+
+
 (defn.xt socket-connect-base
   [host port opts cb]
   (return
@@ -26,13 +28,13 @@
   [host port opts]
   (var success-fn (xt-lib/wrap-callback opts "success"))
   (var error-fn   (xt-lib/wrap-callback opts "error"))
-  (for:return [[conn err] (-/socket-connect-raw  host
-                                                 port
-                                                 opts
-                                                 (xt/x:callback))]
-              {:success (return (success-fn conn))
-               :error   (return (error-fn err))
-               :final   true}))
+  (xt/for:return [[conn err] (-/socket-connect-base  host
+                                                     port
+                                                     opts
+                                                     (xt/x:callback))]
+    {:success (return (success-fn conn))
+     :error   (return (error-fn err))
+     :final   true}))
 
 ;;
 ;; NOTIFY
@@ -145,7 +147,7 @@
   {:added "4.0"}
   [& [f]]
   (template/$ (fn [val]
-                (return (xt.lang.base-repl/notify ~(if f
+                (return (xt.lang.common-repl/notify ~(if f
                                                      (list f 'val)
                                                      'val))))))
 
@@ -155,6 +157,6 @@
   {:added "4.0"}
   []
   ''({:success (fn [val]
-                 (return (xt.lang.base-repl/notify val)))
+                 (return (xt.lang.common-repl/notify val)))
       :error   (fn [err]
-                 (return (xt.lang.base-repl/notify err)))}))
+                 (return (xt.lang.common-repl/notify err)))}))

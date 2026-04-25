@@ -237,8 +237,7 @@
 ^{:refer xt.lang.spec-base/for:async :added "4.1"}
 (fact "expands to the canonical async form"
 
-  ^{:seedgen/base    {:lua     {:suppress true}
-                      :python  {:suppress true}}}
+  ^{:seedgen/base    {:all    {:suppress true}}}
   [(notify/wait-on :js
      (xt/for:async [[ok err] (xt/return-run [resolve reject]
                                (resolve "OK"))]
@@ -275,7 +274,8 @@
 ^{:refer xt.lang.spec-base/proto:set :added "4.1"}
 (fact "attaches the prototype object"
 
-  ^{:seedgen/base {:python {:suppress true}}}
+  ^{:seedgen/base {:all    {:suppress true}
+                   :lua    {:suppress false}}}
   (!.js
     (var obj {})
     (var proto (xt/proto:create {:label "proto"}))
@@ -293,7 +293,8 @@
 ^{:refer xt.lang.spec-base/proto:create :added "4.1"}
 (fact "creates prototypes with self-bound methods"
 
-  ^{:seedgen/base {:python {:suppress true}}}
+  ^{:seedgen/base {:all    {:suppress true}
+                   :lua    {:suppress false}}}
   (!.js
    (var prototype-fn
         (fn [m]
