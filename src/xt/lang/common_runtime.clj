@@ -1,6 +1,6 @@
 (ns xt.lang.common-runtime
   (:require [std.lang :as l]
-             [std.lang.base.script-macro :as script-macro]
+             [std.lang.base.script-plugin :as plugin]
              [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
@@ -428,7 +428,7 @@
   (return false))
 
 (def +defvar+
-  [(script-macro/intern-supports :xtalk (:grammar (l/get-book (l/runtime-library) :xtalk)) [:defvar])
-   (script-macro/intern-supports :js (:grammar (l/get-book (l/runtime-library) :js)) [:defvar])
-   (script-macro/intern-supports :lua (:grammar (l/get-book (l/runtime-library) :lua)) [:defvar])
-   (script-macro/intern-supports :python (:grammar (l/get-book (l/runtime-library) :python)) [:defvar])])
+  [(plugin/intern-plugins :xtalk (:grammar (l/get-book (l/runtime-library) :xtalk)) [:defvar])
+   (plugin/intern-plugins :js (:grammar (l/get-book (l/runtime-library) :js)) [:defvar])
+   (plugin/intern-plugins :lua (:grammar (l/get-book (l/runtime-library) :lua)) [:defvar])
+   (plugin/intern-plugins :python (:grammar (l/get-book (l/runtime-library) :python)) [:defvar])])

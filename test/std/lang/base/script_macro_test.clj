@@ -353,21 +353,6 @@
   (macro/intern-free :lua "hello")
   => #'std.lang.base.script-macro-test/defptr.hello)
 
-^{:refer std.lang.base.script-macro/defvar-fn :added "4.0"}
-(fact "creates getter and reset forms for defvar support"
-  (let [out (macro/defvar-fn '(defvar.js JS_SAMPLE [] (return 1))
-                             "js"
-                             'JS_SAMPLE
-                             nil
-                             nil
-                             '([]
-                               (return 1)))]
-    [(-> out first first)
-     (-> out first second)
-     (-> out second first)
-     (-> out second second)])
-  => '[defn.js JS_SAMPLE defn.js JS_SAMPLE-reset])
-
 ^{:refer std.lang.base.script-macro/intern-top-level-fn :added "4.0"}
 (fact "interns a top level function"
 
@@ -441,20 +426,6 @@
   (impl/with:library [+library+]
     (macro/intern-grammar :lua (:grammar (lib/get-book +library+ :lua))))
   => map?)
-
-^{:refer std.lang.base.script-macro/intern-supports :added "4.0"}
-(fact "interns declared support macros"
-  (let [ns-sym 'std.lang.base.script-macro-test.support
-        _      (when (find-ns ns-sym)
-                 (remove-ns ns-sym))
-        _      (create-ns ns-sym)]
-    (try
-      (binding [*ns* (the-ns ns-sym)]
-        (refer 'clojure.core)
-        (macro/intern-supports :js js/+grammar+ [:defvar]))
-      (finally
-        (remove-ns ns-sym))))
-  => '[#{defvar.js} #{defvar.js}])
 
 ^{:refer std.lang.base.script-macro/intern-defmacro-rt-fn :added "4.0"}
 (fact "defines both a library entry as well as a runtime macro"

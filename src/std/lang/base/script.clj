@@ -12,6 +12,7 @@
             [std.lang.base.script-annex :as annex]
             [std.lang.base.script-control :as control]
             [std.lang.base.script-macro :as macro]
+            [std.lang.base.script-plugin :as plugin]
             [std.lang.base.util :as ut]
             [std.lib.atom :as atom]
             [std.lib.collection :as collection]
@@ -108,10 +109,10 @@
   (->> [(:script/support book)
         (:script/support module)
         (:script/support config)]
-       (mapcat (fn [support]
-                 (cond (nil? support) []
-                       (coll? support) support
-                       :else [support])))
+        (mapcat (fn [support]
+                  (cond (nil? support) []
+                        (coll? support) support
+                        :else [support])))
        (remove nil?)
        distinct
        vec))
@@ -126,11 +127,11 @@
    (script-support-import book nil nil))
   ([book module config]
    (let [supports (script-supports book module config)]
-     (if (empty? supports)
-       [#{} #{}]
-       (macro/intern-supports (:lang book)
-                              (:grammar book)
-                              supports)))))
+      (if (empty? supports)
+        [#{} #{}]
+        (plugin/intern-plugins (:lang book)
+                               (:grammar book)
+                               supports)))))
 
 
 ;; script-base

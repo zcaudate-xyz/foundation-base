@@ -84,7 +84,7 @@
              first)])
       (finally
         (remove-ns ns-sym))))
-  => '[[#{} #{defvar.js}] defn.js]))
+  => '[[#{} #{defvar.js}] defn.js])
 
 
 ^{:refer std.lang.base.script/script-fn-base :added "4.0"}
