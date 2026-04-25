@@ -1,5 +1,6 @@
 (ns std.lang.model.spec-xtalk.fn-scheme-test
   (:require [std.lang :as l]
+            [std.lang.model.spec-scheme]
             [std.lang.model.spec-xtalk.fn-scheme :refer :all])
   (:use code.test))
 

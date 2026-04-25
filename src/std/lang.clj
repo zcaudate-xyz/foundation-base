@@ -33,6 +33,7 @@
             [std.lang.model.spec-glsl]
             [std.lang.model.spec-js]
             [std.lang.model.spec-lua]
+            [std.lang.model.spec-scheme]
             [std.lang.model.spec-python]
             [std.lib.context.pointer]
             [std.lib.deps :as deps]

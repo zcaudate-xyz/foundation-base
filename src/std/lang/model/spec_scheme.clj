@@ -1,5 +1,6 @@
 (ns std.lang.model.spec-scheme
-  (:require [std.lang.base.book :as book]
+  (:require [clojure.string :as str]
+            [std.lang.base.book :as book]
             [std.lang.base.grammar :as grammar]
             [std.lang.base.script :as script]
             [std.lang.model.spec-xtalk :as xtalk]
@@ -8,12 +9,50 @@
 
 (def +features+
   (-> (grammar/build-min [:coroutine
-                          :xtalk
-                          :xtalk-common
-                          :xtalk-functional
-                          :xtalk-language-specific
-                          :xtalk-runtime-specific])
+                          :xtalk])
+      (merge (grammar/build-xtalk))
       (grammar/build:override fn/+scheme+)))
+
+(def +reserved+
+  (grammar/to-reserved +features+))
+
+(declare scheme-expand)
+
+(defn scheme-expand
+  [form]
+  (cond (collection/form? form)
+        (let [form     (apply list (map scheme-expand form))
+              op       (first form)
+              reserved (and (symbol? op)
+                            (str/starts-with? (name op) "x:")
+                            (get +reserved+ op))]
+          (cond (and reserved
+                     (= :macro (:emit reserved))
+                     (:macro reserved))
+                (recur ((:macro reserved) form))
+
+                (and reserved
+                     (= :hard-link (:emit reserved))
+                     (:raw reserved))
+                (recur (cons (:raw reserved) (rest form)))
+
+                :else
+                form))
+
+        (vector? form)
+        (mapv scheme-expand form)
+
+        (map? form)
+        (into (empty form)
+              (map (fn [[k v]]
+                     [(scheme-expand k) (scheme-expand v)]))
+              form)
+
+        (set? form)
+        (set (map scheme-expand form))
+
+        :else
+        form))
 
 (declare scheme-transform)
 
@@ -129,12 +168,13 @@
           (first form)
           (cons 'begin form))
         form)
+      (scheme-expand)
       (scheme-transform)
       (emit-scheme-form)))
 
 (def +grammar+
   (grammar/grammar :scm
-    (grammar/to-reserved +features+)
+    +reserved+
     {:emit #'emit-scheme}))
 
 (def +meta+ (book/book-meta {}))
