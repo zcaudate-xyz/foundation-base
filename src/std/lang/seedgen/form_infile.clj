@@ -326,13 +326,21 @@
        (into {})))
 
 (defn- item-suppressed?
-  [item lang]
-  (true? (:suppress (common/seedgen-lang-entry (item-value item) lang))))
+  [entry item lang]
+  (true? (:suppress (merge (some-> entry
+                                   :meta
+                                   not-empty
+                                   (#(common/seedgen-lang-entry (with-meta [] %) lang)))
+                           (common/seedgen-lang-entry (item-value item) lang)))))
 
 (defn- item-base-override
-  [item lang key]
-  (get (common/seedgen-lang-entry (item-value item) lang)
-       key))
+  [entry item lang key]
+  (get (merge (some-> entry
+                      :meta
+                      not-empty
+                      (#(common/seedgen-lang-entry (with-meta [] %) lang)))
+              (common/seedgen-lang-entry (item-value item) lang))
+        key))
 
 (defn- transform-string-match?
   [match]
@@ -413,11 +421,11 @@
                          (some-> item :expected render-item-string)))
 
 (defn- render-generated-item-string
-  [root-item lang]
-  (let [input-override (item-base-override root-item lang :input)
-        generated-str  (if input-override
-                         (let [base-str  (replace-runtime-lang-string
-                                          (render-item-string root-item)
+  [entry root-item lang]
+  (let [input-override (item-base-override entry root-item lang :input)
+         generated-str  (if input-override
+                          (let [base-str  (replace-runtime-lang-string
+                                           (render-item-string root-item)
                                           lang)
                                root      (nav/parse-root base-str)
                                expr-nav  (some-> root nav/down form-common/nav-body)
@@ -437,14 +445,14 @@
                              :else
                              (strip-seedgen-control-meta-string
                               (pr-str input-override))))
-                         (replace-runtime-lang-string
-                           (render-item-string root-item)
-                           lang))]
-    (apply-item-transform-string generated-str root-item lang)))
+                          (replace-runtime-lang-string
+                            (render-item-string root-item)
+                            lang))]
+     (apply-item-transform-string generated-str root-item lang)))
 
 (defn- render-generated-expected-string
-  [root-item lang]
-  (let [expect-override (item-base-override root-item lang :expect)]
+  [entry root-item lang]
+  (let [expect-override (item-base-override entry root-item lang :expect)]
     (if (nil? expect-override)
       (some-> root-item
               :expected
@@ -453,17 +461,17 @@
       (pr-str expect-override))))
 
 (defn- render-generated-check-clause
-  [root-item lang]
-  (let [expr-str     (render-generated-item-string root-item lang)
-        expected-str (render-generated-expected-string root-item lang)]
+  [entry root-item lang]
+  (let [expr-str     (render-generated-item-string entry root-item lang)
+        expected-str (render-generated-expected-string entry root-item lang)]
     (render-clause-snippet "  " expr-str expected-str)))
 
 (declare render-target-runtime-item)
 
 (defn- render-target-runtime-items
   "Renders setup/teardown items for the requested languages while preserving
-   scaffold-only forms in their original position."
-  [classification root-lang langs]
+    scaffold-only forms in their original position."
+  [entry classification root-lang langs]
   (:rendered-items
    (reduce (fn [{:keys [rendered-items processed-langs]} item]
              (if-let [current-lang (item-lang item)]
@@ -474,12 +482,13 @@
 
                  (= current-lang root-lang)
                  (let [rendered (->> langs
-                                     (remove processed-langs)
-                                     (keep (fn [lang]
-                                             (when-let [snippet (render-target-runtime-item classification
-                                                                                            root-lang
-                                                                                            lang)]
-                                               [lang snippet])))
+                                      (remove processed-langs)
+                                      (keep (fn [lang]
+                                              (when-let [snippet (render-target-runtime-item entry
+                                                                                             classification
+                                                                                             root-lang
+                                                                                             lang)]
+                                                [lang snippet])))
                                      vec)]
                    {:rendered-items (into rendered-items (map second rendered))
                     :processed-langs (into processed-langs (map first rendered))})
@@ -505,19 +514,20 @@
                              sort-items
                              (group-by item-lang))
         root-snippets   (mapv render-check-clause root-checks)
-        extra-snippets
-        (mapcat (fn [lang]
-                  (let [existing       (vec (get derived-by-lang lang))
-                        eligible-roots (vec (remove #(item-suppressed? % lang) root-checks))
-                        generated      (map-indexed
-                                        (fn [idx root-item]
-                                          (if-let [item (nth existing idx nil)]
-                                            (render-check-clause item)
-                                            (when (contains? target-set lang)
-                                              (render-generated-check-clause
-                                               root-item
-                                               lang))))
-                                        eligible-roots)
+         extra-snippets
+         (mapcat (fn [lang]
+                   (let [existing       (vec (get derived-by-lang lang))
+                         eligible-roots (vec (remove #(item-suppressed? entry % lang) root-checks))
+                         generated      (map-indexed
+                                         (fn [idx root-item]
+                                           (if-let [item (nth existing idx nil)]
+                                             (render-check-clause item)
+                                             (when (contains? target-set lang)
+                                               (render-generated-check-clause
+                                                entry
+                                                root-item
+                                                lang))))
+                                         eligible-roots)
                         trailing       (map render-check-clause
                                             (drop (count eligible-roots) existing))]
                     (concat (remove nil? generated)
@@ -530,19 +540,21 @@
   (let [root-checks (vec (sort-items (get-in entry [:checks :root])))]
     (if (empty? root-checks)
         original-string
-       (let [final-langs     (vec (cons root-lang ordered-extra-langs))
-               root-check      (first root-checks)
-               check-snippets  (render-check-snippets-add entry ordered-extra-langs target-set)
-               setup-render    (let [items (render-target-runtime-items (:fact-setup entry)
+        (let [final-langs     (vec (cons root-lang ordered-extra-langs))
+                root-check      (first root-checks)
+                check-snippets  (render-check-snippets-add entry ordered-extra-langs target-set)
+                setup-render    (let [items (render-target-runtime-items entry
+                                                                        (:fact-setup entry)
+                                                                        root-lang
+                                                                        final-langs)]
+                                  (when (seq items)
+                                    (render-vector-string :setup items)))
+               teardown-render (let [items (render-target-runtime-items entry
+                                                                       (:fact-teardown entry)
                                                                        root-lang
                                                                        final-langs)]
                                  (when (seq items)
-                                   (render-vector-string :setup items)))
-              teardown-render (let [items (render-target-runtime-items (:fact-teardown entry)
-                                                                      root-lang
-                                                                      final-langs)]
-                                (when (seq items)
-                                  (render-vector-string :teardown items)))
+                                   (render-vector-string :teardown items)))
              meta-string     (render-meta-string (cond-> (entry-meta entry)
                                                   setup-render (assoc :setup [])
                                                   teardown-render (assoc :teardown []))
@@ -771,12 +783,12 @@
     (if (= lang root-lang)
       (mapv render-check-clause root-checks)
       (let [existing       (vec (get derived-by-lang lang))
-            eligible-roots (vec (remove #(item-suppressed? % lang) root-checks))
+            eligible-roots (vec (remove #(item-suppressed? entry % lang) root-checks))
             generated      (map-indexed
                             (fn [idx root-item]
                               (if-let [item (nth existing idx nil)]
                                 (render-check-clause item)
-                                (render-generated-check-clause root-item lang)))
+                                (render-generated-check-clause entry root-item lang)))
                             eligible-roots)
             trailing       (map render-check-clause
                                 (drop (count eligible-roots) existing))]
@@ -784,20 +796,20 @@
                      trailing))))))
 
 (defn- render-target-runtime-item
-  [classification root-lang lang]
+  [entry classification root-lang lang]
   (let [runtime-items (runtime-item-map classification)
         target-item   (get runtime-items lang)
         root-item     (get runtime-items root-lang)]
     (or (some-> target-item render-item-string)
         (when (and root-item
                    (not= lang root-lang))
-          (render-generated-item-string root-item lang)))))
+          (render-generated-item-string entry root-item lang)))))
 
 (defn- render-fact-string-target
   [entry root-lang lang]
   (let [check-snippets   (render-check-snippets-target entry root-lang lang)
-        setup-items      (render-target-runtime-items (:fact-setup entry) root-lang [lang])
-        teardown-items   (render-target-runtime-items (:fact-teardown entry) root-lang [lang])
+        setup-items      (render-target-runtime-items entry (:fact-setup entry) root-lang [lang])
+        teardown-items   (render-target-runtime-items entry (:fact-teardown entry) root-lang [lang])
         setup-render     (when (seq setup-items)
                            (render-vector-string :setup setup-items))
         teardown-render  (when (seq teardown-items)

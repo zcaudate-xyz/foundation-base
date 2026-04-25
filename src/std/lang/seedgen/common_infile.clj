@@ -5,6 +5,13 @@
             [std.lib.result :as res]
             [std.task :as task]))
 
+(defn- fact-lang-entry
+  [form lang]
+  (some-> form
+          meta
+          not-empty
+          (#(common/seedgen-lang-entry (with-meta [] %) lang))))
+
 (defn seedgen-root
   "returns an explicit error result when the test file is missing
    (project/in-context
@@ -94,14 +101,14 @@
                            vals
                           (mapcat seq)
                            (keep (fn [[_ {:keys [ns var test]}]]
-                                   (let [refer (symbol (str ns) (str var))
-                                         form  (get fact-forms refer (:sexp test))
-                                         langs (common/seedgen-coverage-langs form)
-                                         suppress (common/seedgen-suppressed-langs form)]
-                                     (when (and (not (contains? suppress root-lang))
-                                                (not (some #{root-lang} langs)))
-                                       [refer
-                                        {:status :incomplete
+                                    (let [refer (symbol (str ns) (str var))
+                                          form  (get fact-forms refer (:sexp test))
+                                          langs (common/seedgen-coverage-langs form)
+                                          suppress? (true? (:suppress (fact-lang-entry form root-lang)))]
+                                      (when (and (not suppress?)
+                                                 (not (some #{root-lang} langs)))
+                                        [refer
+                                         {:status :incomplete
                                          :line (:line test)}]))))
                            (into (sorted-map))))))))))
 

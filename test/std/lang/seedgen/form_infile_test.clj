@@ -167,9 +167,32 @@
                       "    (+ 1 2 3)))\n"))
       (form-infile/seedgen-langadd 'sample.add-test {:write true} lookup project)
       (slurp path)
+       (finally
+         (.delete tmp))))
+  => "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]))\n\n^{:seedgen/root {:all true, :langs [:lua]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :lua {:runtime :basic})\n\n^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n(fact \"runtime specific branches\"\n\n  (!.js\n    (+ 1 2 3))\n\n  (!.lua\n    (+ 1 2 3)))\n"
+
+  (let [tmp (java.io.File/createTempFile "seedgen-langadd-fact-suppress" ".clj")
+        path (.getAbsolutePath tmp)
+        root (.getParent tmp)
+        lookup {'sample.add-test path}
+        project {:root root}]
+    (try
+      (spit path (str "(ns sample.add-test\n"
+                      "  (:use code.test)\n"
+                      "  (:require [std.lang :as l]))\n\n"
+                      "^{:seedgen/root {:all true, :langs [:lua]}}\n"
+                      "(l/script- :js {:runtime :basic})\n\n"
+                      "^{:refer xt.lang.spec-base/example.A :added \"4.1\"\n"
+                      "  :seedgen/base {:all {:suppress true}\n"
+                      "                  :lua {:expect 6}}}\n"
+                      "(fact \"fact-level defaults can suppress generation\"\n\n"
+                      "  (!.js (+ 1 2 3))\n"
+                      "  => 6)\n"))
+      (form-infile/seedgen-langadd 'sample.add-test {:write true} lookup project)
+      (slurp path)
       (finally
         (.delete tmp))))
-  => "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]))\n\n^{:seedgen/root {:all true, :langs [:lua]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :lua {:runtime :basic})\n\n^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n(fact \"runtime specific branches\"\n\n  (!.js\n    (+ 1 2 3))\n\n  (!.lua\n    (+ 1 2 3)))\n"
+  => "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]))\n\n^{:seedgen/root {:all true, :langs [:lua]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :lua {:runtime :basic})\n\n^{:refer xt.lang.spec-base/example.A :added \"4.1\"\n  :seedgen/base {:all {:suppress true}\n                  :lua {:expect 6}}}\n(fact \"fact-level defaults can suppress generation\"\n\n  (!.js (+ 1 2 3))\n  => 6)\n"
 
   (let [tmp (java.io.File/createTempFile "seedgen-langadd" ".clj")
         path (.getAbsolutePath tmp)

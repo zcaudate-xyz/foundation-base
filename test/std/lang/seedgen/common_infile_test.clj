@@ -63,14 +63,19 @@
                       "  (notify/wait-on :dt\n"
                       "    (repl/notify 1))\n"
                       "  \"TODO\")\n\n"
-                      "^{:refer xt.lang.spec-base/example.E :added \"4.1\"}\n"
-                      "(fact \"covered from matching notify wait\"\n"
-                      "  (notify/wait-on :js\n"
-                      "    (repl/notify 1))\n"
-                      "  \"TODO\")\n"))
-      (->> (seed-infile/seedgen-incomplete 'sample.incomplete-test {} lookup nil)
-           keys
-           set)
+                       "^{:refer xt.lang.spec-base/example.E :added \"4.1\"}\n"
+                       "(fact \"covered from matching notify wait\"\n"
+                       "  (notify/wait-on :js\n"
+                       "    (repl/notify 1))\n"
+                       "  \"TODO\")\n\n"
+                       "^{:refer xt.lang.spec-base/example.F :added \"4.1\"\n"
+                       "  :seedgen/base {:all {:suppress true}\n"
+                       "                  :lua {:expect 6}}}\n"
+                       "(fact \"fact-level suppress skips default seedgen requirements\"\n"
+                       "  \"TODO\")\n"))
+       (->> (seed-infile/seedgen-incomplete 'sample.incomplete-test {} lookup nil)
+            keys
+            set)
       (finally
         (.delete tmp))))
   => #{'xt.lang.spec-base/example.B
