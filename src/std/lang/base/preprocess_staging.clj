@@ -46,7 +46,9 @@
           (walk-fn (cons (:raw reserved) (rest form)))
 
           (and (= :def-assign (:emit reserved))
-               (= :inline (last form)))
+               (or (= :inline (last form))
+                   (and (-> form last meta :inline)
+                        (not (-> form last meta :assign/inline)))))
           (walk-fn (assign/process-inline-assignment form modules mopts))
 
           template-assignment

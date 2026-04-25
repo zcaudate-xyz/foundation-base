@@ -73,6 +73,74 @@
              (return nil)))
         (nth binding 2))
      (= '(var f (xtd/arr-keep [1 2 3 4] CALLBACK))
+         (clojure.walk/prewalk-replace {callback 'CALLBACK} assign))])
+   => [true true true true true])
+
+^{:refer std.lang.model.spec-python.rewrite/python-rewrite-stage :added "4.1"}
+(fact "keeps lambda-compatible empty callbacks inline"
+  (rewrite/python-rewrite-stage
+   '(var data
+         (xtd/tree-get-data
+          {:name "hello"
+           :job  {:patients [[1 "alice"] [1 "body"]]
+                  :name     "doctor"
+                  :heal     (fn [])}}))
+   {:grammar py/+grammar+})
+  => '(var data
+            (xtd/tree-get-data
+              {:name "hello"
+               :job  {:patients [[1 "alice"] [1 "body"]]
+                      :name     "doctor"
+                      :heal     (fn [])}})))
+
+^{:refer std.lang.model.spec-python.rewrite/python-rewrite-stage :added "4.1"}
+(fact "hoists single-body branch callbacks for python"
+  (let [out (rewrite/python-rewrite-stage
+             '(var data
+                   (xtd/tree-get-data
+                    {:heal (fn []
+                             (if test
+                               (return 1)
+                               (return 2)))}))
+             {:grammar py/+grammar+})
+        [_ binding assign] out
+        callback          (second binding)]
+    [(= 'do* (first out))
+     (symbol? callback)
+     (.startsWith (name callback) "py_callback__")
+     (= '(fn []
+           (if test
+             (return 1)
+             (return 2)))
+        (nth binding 2))
+     (= '(var data
+              (xtd/tree-get-data
+               {:heal CALLBACK}))
+        (clojure.walk/prewalk-replace {callback 'CALLBACK} assign))])
+  => [true true true true true])
+
+^{:refer std.lang.model.spec-python.rewrite/python-rewrite-stage :added "4.1"}
+(fact "hoists statement-like callbacks for python"
+  (let [out (rewrite/python-rewrite-stage
+             '(var data
+                   (xtd/tree-get-data
+                    {:heal (fn []
+                             (var tmp 1)
+                             (return tmp))}))
+             {:grammar py/+grammar+})
+        [_ binding assign] out
+        callback          (second binding)]
+    [(= 'do* (first out))
+     (symbol? callback)
+     (.startsWith (name callback) "py_callback__")
+     (= '(fn []
+           (do
+             (var tmp 1)
+             (return tmp)))
+        (nth binding 2))
+     (= '(var data
+              (xtd/tree-get-data
+               {:heal CALLBACK}))
         (clojure.walk/prewalk-replace {callback 'CALLBACK} assign))])
   => [true true true true true])
 

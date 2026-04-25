@@ -3,25 +3,27 @@
             [std.lib.collection :as collection]))
 
 (defn create-rewriter
-  [{:keys [fn-tags symbol-prefix bulk-do*? block-form?]
+  [{:keys [fn-tags symbol-prefix bulk-do*? block-form? lambda-compatible?]
     :or {fn-tags #{'fn}
          symbol-prefix "lifted_lambda__"
          block-form? (fn [form grammar]
                        (and (collection/form? form)
                             (= :block (get-in grammar [:reserved (first form) :type]))))
+         lambda-compatible? (fn [form grammar]
+                              (lift/lambda-compatible?
+                               form
+                               #(block-form? % grammar)))
          bulk-do*? (fn [form mopts]
                      (and (:bulk (meta form))
-                          (not (get-in mopts [:emit :body :transform]))))}}]
+                           (not (get-in mopts [:emit :body :transform]))))}}]
   (letfn [(function-form?
             [form]
             (and (collection/form? form)
                  (contains? fn-tags (first form))))
 
-          (lambda-compatible?
+          (lambda-compatible-form?
             [form grammar]
-            (lift/lambda-compatible?
-             form
-             #(block-form? % grammar)))
+            (lambda-compatible? form grammar))
 
           (rewrite-expression-coll
             [form grammar]
@@ -46,14 +48,14 @@
             [form grammar]
             (lift/rewrite-fn-body form #(rewrite-statements % grammar)))
 
-          (rewrite-expression
-            [form grammar]
-            (cond (function-form? form)
-                  (if (lambda-compatible? form grammar)
-                    [[] form]
-                    (lift/lift-named-lambda form
-                                            #(rewrite-statements % grammar)
-                                            {:symbol-prefix symbol-prefix}))
+           (rewrite-expression
+             [form grammar]
+             (cond (function-form? form)
+                   (if (lambda-compatible-form? form grammar)
+                     [[] form]
+                     (lift/lift-named-lambda form
+                                             #(rewrite-statements % grammar)
+                                             {:symbol-prefix symbol-prefix}))
 
                   (and (collection/form? form)
                        (= 'quote (first form)))

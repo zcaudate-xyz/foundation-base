@@ -13,8 +13,22 @@
     form
     => '(var a := (L.core/identity-fn 1))
 
-    (meta (last form))
+    (select-keys (meta (last form))
+                 [:assign/inline])
     => {:assign/inline true}))
+
+(fact "prepares metadata-based inline assignments"
+  (let [form (process-inline-assignment '(var a ^:inline (u/identity-fn 1))
+                                        (:modules prep/+book-min+)
+                                        '{:module {:link {u L.core}}}
+                                        true)]
+    form
+    => '(var a (L.core/identity-fn 1))
+
+    (select-keys (meta (last form))
+                 [:inline :assign/inline])
+    => {:inline true
+        :assign/inline true}))
 
 ^{:refer std.lang.base.preprocess-assign/protect-reserved-head :added "4.1"}
 (fact "protects reserved heads by wrapping them in a volatile"

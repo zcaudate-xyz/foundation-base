@@ -44,6 +44,10 @@
   => "lambda : 1"
 
   (l/emit-as
+   :python '[(fn [])])
+  => "lambda : (None)"
+
+  (l/emit-as
    :python '[(fn [x] (return [x x]))])
   => "lambda x : [x,x]"
 
@@ -53,7 +57,31 @@
 
   (l/emit-as
    :python '[(fn hello [] (return 1))])
-  => "def hello():\n  return 1")
+  => "def hello():\n  return 1"
+
+  (let [out (l/emit-as
+             :python '[(var data
+                            {:heal (fn []
+                                     (if test
+                                       (return 1)
+                                       (return 2)))})])]
+    [(boolean (re-find #"def py_callback__.*\(\):" out))
+     (boolean (re-find #"if test:" out))
+     (boolean (re-find #"return 1" out))
+     (boolean (re-find #"return 2" out))
+     (boolean (re-find #"data = \{\"heal\":py_callback__" out))])
+  => [true true true true true]
+
+  (let [out (l/emit-as
+             :python '[(var data
+                            {:heal (fn []
+                                     (var tmp 1)
+                                     (return tmp))})])]
+    [(boolean (re-find #"def py_callback__.*\(\):" out))
+     (boolean (re-find #"tmp = 1" out))
+     (boolean (re-find #"return tmp" out))
+     (boolean (re-find #"data = \{\"heal\":py_callback__" out))])
+  => [true true true true])
 
 ^{:refer std.lang.model.spec-python/python-defclass :added "4.0"}
 (fact "emits a defclass template for python"

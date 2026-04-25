@@ -103,12 +103,33 @@
        {}]
 
   ((juxt identity
-         (comp meta last first))
+         (comp #(select-keys % [:assign/inline])
+               meta
+               last
+               first))
    (to-staging '(var a := (u/identity-fn 1) :inline)
                {:reserved {'var {:emit :def-assign}}}
                (:modules prep/+book-min+)
                '{:module {:link {u L.core}}}))
   => '[[(var a := (L.core/identity-fn 1)) #{} #{} {}] #:assign{:inline true}]
+
+  (let [[form deps deps-fragment deps-native]
+        (to-staging '(var a ^:inline (u/identity-fn 1))
+                    {:reserved {'var {:emit :def-assign}}}
+                    (:modules prep/+book-min+)
+                    '{:module {:link {u L.core}}})]
+    [form
+     deps
+     deps-fragment
+     deps-native
+     (select-keys (meta (last form))
+                  [:inline :assign/inline])])
+  => '[(var a (L.core/identity-fn 1))
+       #{}
+       #{}
+       {}
+       {:inline true
+        :assign/inline true}]
 
   (first
    (to-staging '(var a := (x:type-native obj))

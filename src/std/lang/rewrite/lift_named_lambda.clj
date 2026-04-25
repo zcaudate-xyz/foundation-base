@@ -72,12 +72,13 @@
    (lambda-compatible? form nil))
   ([form block-form?]
    (let [[name _ body] (fn-parts form)
-         body-form     (first body)]
-     (and (nil? name)
-          (= 1 (count body))
-          (not (or (do-form? body-form)
-                   (and block-form?
-                        (block-form? body-form))))))))
+          body-form     (first body)]
+      (and (nil? name)
+           (or (empty? body)
+               (and (= 1 (count body))
+                    (not (or (do-form? body-form)
+                             (and block-form?
+                                  (block-form? body-form))))))))))
 
 (defn lift-named-lambda
   ([form rewrite-statements]
