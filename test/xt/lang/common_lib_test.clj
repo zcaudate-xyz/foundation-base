@@ -26,7 +26,7 @@
     [(k/type-native "hello")
      (k/type-native 1)])
   => ["string" "number"]
-  
+
   (!.lua
     [(k/type-native "hello")
      (k/type-native 1)])
@@ -44,7 +44,7 @@
    [(k/type-class "hello")
     (k/type-class 1)])
   => ["string" "number"]
-  
+
   (!.lua
     [(k/type-class "hello")
      (k/type-class 1)])

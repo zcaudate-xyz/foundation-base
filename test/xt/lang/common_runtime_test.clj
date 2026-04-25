@@ -725,6 +725,7 @@
 
 ^{:refer xt.lang.common-runtime/defvar-fn :added "4.0"}
 (fact "helper function for defvar macros"
+
   (let [out (rt/defvar-fn '(rt/defvar.js JS_SAMPLE [] (return 1))
                           "js"
                           'JS_SAMPLE
@@ -740,6 +741,7 @@
 
 ^{:refer xt.lang.common-runtime/defvar.xt :added "4.0"}
 (fact "shortcut for a xt getter and a reset var"
+
   (let [out (macroexpand-1 '(rt/defvar.xt XT_SAMPLE [] (return 1)))]
     [(-> out first first)
      (-> out first second)
@@ -748,6 +750,7 @@
 
 ^{:refer xt.lang.common-runtime/defvar.js :added "4.0"}
 (fact "shortcut for a js getter and a reset var"
+
   (let [out (macroexpand-1 '(rt/defvar.js JS_SAMPLE [] (return 1)))]
     [(-> out first first)
      (-> out first second)
@@ -756,21 +759,21 @@
 
 ^{:refer xt.lang.common-runtime/defvar.lua :added "4.0"}
 (fact "shortcut for a lua getter and a reset var"
+
   (let [out (macroexpand-1 '(rt/defvar.lua LUA_SAMPLE [] (return 1)))]
     [(-> out first first)
      (-> out first second)
      (-> out second second)])
   => '[defn.lua LUA_SAMPLE LUA_SAMPLE-reset])
 
-
 ^{:refer xt.lang.common-runtime/defvar.py :added "4.0"}
 (fact "shortcut for a python getter and a reset var"
+
   (let [out (macroexpand-1 '(rt/defvar.py PY_SAMPLE [] (return 1)))]
     [(-> out first first)
      (-> out first second)
      (-> out second second)])
   => '[defn.python PY_SAMPLE PY_SAMPLE-reset])
-
 
 ^{:refer xt.lang.common-runtime/xt-ensure :added "4.1"}
 (fact "TODO")

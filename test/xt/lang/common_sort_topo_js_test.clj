@@ -12,6 +12,7 @@
 
 ^{:refer xt.lang.common-sort-topo/sort-edges-build :added "4.1"}
 (fact "builds an edge with links"
+
   (!.js
    (var out {})
    (topo/sort-edges-build out ["a" "b"])
@@ -21,6 +22,7 @@
 
 ^{:refer xt.lang.common-sort-topo/sort-edges-visit :added "4.1"}
 (fact "visits nodes and pushes the sorted ids"
+
   (!.js
    (var nodes {"a" {"id" "a", "links" ["b"]}
                "b" {"id" "b", "links" ["c"]}
@@ -34,12 +36,14 @@
 
 ^{:refer xt.lang.common-sort-topo/sort-edges :added "4.1"}
 (fact "sorts edges given a list"
+
   (!.js
    (topo/sort-edges [["a" "b"] ["b" "c"] ["c" "d"] ["d" "e"]]))
   => ["a" "b" "c" "d" "e"])
 
 ^{:refer xt.lang.common-sort-topo/sort-topo :added "4.1"}
 (fact "sorts in topological order"
+
   (!.js
    (topo/sort-topo [["a" ["b" "c"]] ["c" ["b"]]]))
   => ["b" "c" "a"])

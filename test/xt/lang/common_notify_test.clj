@@ -79,7 +79,6 @@
     (repl/notify 1))
   => 1
 
-
   (notify/wait-on :python
     (repl/notify 1))
   => 1
@@ -124,8 +123,6 @@
 
 ^{:refer xt.lang.common-notify/captured:clear-all :added "4.0"}
 (fact "clears all captured items")
-
-
 
 ^{:refer xt.lang.common-notify/capture-key-match? :added "4.1"}
 (fact "TODO")

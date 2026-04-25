@@ -2,7 +2,7 @@
   (:require [std.lang :as l])
   (:use code.test))
 
-(l/script- :lua
+(l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-sort-by :as xtsb]
              [xt.lang.common-data :as xtd]
@@ -14,7 +14,8 @@
 
 ^{:refer xt.lang.common-sort-by/sort-by :added "4.1"}
 (fact "sorts records by a single ascending key"
-  (!.lua
+
+  (!.js
    (xtsb/sort-by
     [{"id" "b" "rank" 2}
      {"id" "a" "rank" 1}
@@ -26,7 +27,8 @@
 
 ^{:refer xt.lang.common-sort-by/sort-by :added "4.1"}
 (fact "sorts by multiple keys and respects descending flags"
-  (!.lua
+
+  (!.js
    (xtsb/sort-by
     [{"id" "a" "group" 1 "rank" 1}
      {"id" "b" "group" 1 "rank" 3}
@@ -40,7 +42,8 @@
 
 ^{:refer xt.lang.common-sort-by/sort-by :added "4.1"}
 (fact "sorts string keys lexicographically"
-  (!.lua
+
+  (!.js
    (xtsb/sort-by
     [{"id" "a" "name" "beta"}
      {"id" "b" "name" "alpha"}
