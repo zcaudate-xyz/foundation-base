@@ -1,45 +1,90 @@
 (ns std.lang.model-annex.spec-r
   (:require [clojure.string :as str]
-            [std.lang.base.book :as book]
-            [std.lang.base.emit :as emit]
-            [std.lang.base.emit-common :as common]
-            [std.lang.base.emit-data :as data]
-            [std.lang.base.emit-top-level :as top]
-            [std.lang.base.grammar :as grammar]
-            [std.lang.base.grammar-spec :as spec]
-            [std.lang.base.script :as script]
-            [std.lang.base.util :as ut]
-            [std.lang.model.spec-xtalk]
-            [std.lang.model-annex.spec-xtalk.fn-r :as fn]
-            [std.lib.collection :as collection]
-            [std.lib.template :as template]))
+             [std.lang.base.book :as book]
+             [std.lang.base.emit :as emit]
+             [std.lang.base.emit-common :as common]
+             [std.lang.base.emit-data :as data]
+             [std.lang.base.emit-preprocess :as preprocess]
+             [std.lang.base.emit-top-level :as top]
+             [std.lang.base.grammar :as grammar]
+             [std.lang.base.grammar-spec :as spec]
+             [std.lang.base.script :as script]
+             [std.lang.typed.xtalk-analysis :as xtalk-analysis]
+             [std.lang.base.util :as ut]
+             [std.lang.model.spec-xtalk]
+             [std.lang.model-annex.spec-r.rewrite :as rewrite]
+             [std.lang.model-annex.spec-xtalk.fn-r :as fn]
+             [std.lib.collection :as collection]
+             [std.lib.template :as template]))
+
+(defn- r-qualified-symbol
+  [sym]
+  (let [{:keys [module]} (preprocess/macro-opts)
+        module-id (:id module)]
+    (cond
+      (or (nil? sym)
+          (namespace sym)
+          (:inner (meta sym))
+          (nil? module-id))
+      sym
+
+      :else
+      (symbol (name module-id) (name sym)))))
+
+(defn- r-optional-input?
+  [input]
+  (= :maybe (get-in input [:type :kind])))
 
 (defn r-normalize-args
-  [args]
-  (let [[mandatory tail] (split-with #(not= '& %) args)]
-    (if-let [optional (and (= '& (first tail))
-                           (vector? (second tail))
-                           (second tail))]
-      (vec (concat mandatory
-                   (mapcat (fn [sym]
-                             [sym := nil])
-                           optional)))
-      args)))
+  [sym args]
+  (let [[mandatory tail] (split-with #(not= '& %) args)
+        args             (if-let [optional (and (= '& (first tail))
+                                                (vector? (second tail))
+                                                (second tail))]
+                           (vec (concat mandatory
+                                        (mapcat (fn [arg]
+                                                  [arg := nil])
+                                                optional)))
+                           args)]
+    (if-not (and sym
+                 (vector? args)
+                 (neg? (collection/index-at #{:=} args)))
+      args
+      (try
+        (let [qualified      (r-qualified-symbol sym)
+              fn-def         (xtalk-analysis/resolve-function-def qualified)
+              inferred-count (when fn-def
+                               (count (take-while r-optional-input?
+                                                  (reverse (:inputs fn-def)))))
+              optional-count (when (and inferred-count
+                                        (pos? inferred-count))
+                               inferred-count)]
+          (if (and optional-count
+                   (pos? optional-count))
+            (let [optional-args (take-last optional-count args)]
+              (vec
+               (concat (drop-last optional-count args)
+                       (mapcat (fn [arg]
+                                 [arg := nil])
+                               optional-args))))
+            args))
+        (catch Throwable _
+          args)))))
 
 (defn tf-defn
-  "function declaration for python
-  
-   (tf-defn '(defn hello [x y] (return (+ x y))))
-   => '(def hello (fn [x y] (return (+ x y))))
+  "function declaration for R
+   
+    (tf-defn '(defn hello [x y] (return (+ x y))))
+    => '(def hello (fn [x y] (return (+ x y))))
    
    (!.R
     (defn ^{:inner true}
       hello [x y] (+ x y))
     (hello 1 2))
-   => 3"
+    => 3"
   {:added "3.0"}
   ([[_ sym args & body]]
-   (list 'def sym (apply list 'fn (r-normalize-args args) body))))
+   (list 'def sym (apply list 'fn (r-normalize-args sym args) body))))
 
 (defn tf-infix-if
   "transform for infix if"
@@ -278,10 +323,11 @@
                   :boolean   {:as #'r-token-boolean}
                   :string    {:quote :single}
                   :symbol    {}}
-          :data   {:vector    {:custom #'r-vector
-                               :start "c(" :end ")" :space ""}
-                   :map       {:custom #'r-map
-                               :start "list(" :end ")" :space ""}
+          :rewrite {:staging [#'rewrite/r-rewrite-stage]}
+           :data   {:vector    {:custom #'r-vector
+                                :start "c(" :end ")" :space ""}
+                    :map       {:custom #'r-map
+                                :start "list(" :end ")" :space ""}
                    :map-entry {:start ""  :end ""  :space "" :assign "=" :keyword :symbol}}
          :define {:assign "<-"
                   :def    {:raw ""}

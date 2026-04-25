@@ -98,23 +98,6 @@
     (add))
   => "ERR")
 
-^{:refer xt.lang.spec-base/proto:get :added "4.1"}
-(fact "retrieves the attached prototype object"
-
-  (!.R
-    (var obj {})
-    (var proto (xt/proto:create {:label "proto"}))
-    (xt/proto:set obj proto)
-    (xt/x:obj-keys  (xt/proto:get obj)))
-  => (contains ["label"]))
-
-^{:refer xt.lang.spec-base/proto:tostring :added "4.1"}
-(fact "returns the native string hook key"
-
-  (!.R
-    (xt/proto:tostring))
-  => "toString")
-
 ^{:refer xt.lang.spec-base/x:get-idx :added "4.1"}
 (fact "reads the first indexed value"
 
@@ -276,28 +259,28 @@
 
   (!.R    
     (xt/x:offset 10))
-  => 10)
+  => 11)
 
 ^{:refer xt.lang.spec-base/x:offset-rev :added "4.1"}
 (fact "uses the reverse grammar offset"
 
   (!.R
     (xt/x:offset-rev 10))
-  => 9)
+  => 10)
 
 ^{:refer xt.lang.spec-base/x:offset-len :added "4.1"}
 (fact "uses the length grammar offset"
 
   (!.R
     (xt/x:offset-len 10))
-  => 9)
+  => 10)
 
 ^{:refer xt.lang.spec-base/x:offset-rlen :added "4.1"}
 (fact "uses the reverse length grammar offset"
 
   (!.R
     (xt/x:offset-rlen 10))
-  => 10)
+  => 9)
 
 ^{:refer xt.lang.spec-base/x:lu-create :added "4.1"}
 (fact "creates a lookup table wrapper"

@@ -48,7 +48,7 @@
 
 (defn lua-tf-x-type-native
   [[_ obj]]
-  (template/$ (do (local t := (type ~obj))
+  (template/$ (do (var t := (type ~obj))
                   (if (== t "table")
                     (if (== nil (. '(~obj) [1]))
                       (return "object")
@@ -383,16 +383,16 @@
 (defn lua-tf-x-return-encode
   ([[_ out id key]]
    (template/$
-    (do (local ret nil)
-        (local type-fn
+    (do (var ret nil)
+        (var type-fn
                (fn [obj]
-                 (local t (type obj))
+                 (var t (type obj))
                  (if (== t "table")
                    (if (== nil (. '(obj) [1]))
                      (return "object")
                      (return "array"))
                    (return t))))
-        (local '[r-ok r-err]
+        (var '[r-ok r-err]
                (pcall (fn []
                         (cond (== nil ~out)
                               (:= ret (cjson.encode {:id  ~id
@@ -421,8 +421,8 @@
 (defn lua-tf-x-return-wrap
   ([[_ f encode-fn]]
    (template/$
-    (do (local out)
-        (local '[o-ok o-err] (pcall (fn [] (:= out (~f)))))
+    (do (var out)
+        (var '[o-ok o-err] (pcall (fn [] (:= out (~f)))))
         (cond o-err
               (return (cjson.encode {:type "error"
                                      :value o-err}))
@@ -435,8 +435,8 @@
    (template/$
     (return (~wrap-fn
              (fn []
-               (local load-fn (or loadstring load))
-               (local '[f err] (load-fn ~s))
+               (var load-fn (or loadstring load))
+               (var '[f err] (load-fn ~s))
                (if err
                  (error err)
                  (return (f)))))))))
@@ -450,14 +450,14 @@
   ([[_ host port opts]]
    (template/$
     (do* (when (== ~host "host.docker.internal")
-           (local handle (io.popen
+           (var handle (io.popen
                           (cat "ping host.docker.internal -c 1 -q 2>&1"
                                " | "
                                "grep -Po \"(\\d{1,3}\\.){3}\\d{1,3}\"")))
            (:= ~host (handle:read "*a"))
            (:= ~host (string.sub ~host 1 (- (len ~host) 1)))
            (handle:close))
-         (local socket (require "socket"))
+         (var socket (require "socket"))
          (return (socket.connect ~host ~port))))))
 
 (defn lua-tf-x-socket-send
@@ -550,7 +550,7 @@
    (template/$
     (return (coroutine.create
              (fn []
-               (local socket (require "socket"))
+               (var socket (require "socket"))
                (socket.sleep (/ ~ms 1000))
                (var f := ~thunk)
                (return (f))))))))
