@@ -265,7 +265,7 @@
   "gets the intersection of two arrays"
   {:added "4.0"}
   [arr other]
-  (var lu  (-/arr-lookup arr) :inline)
+  (var lu  ^:inline (-/arr-lookup arr))
   (var out [])
   (xt/for:array [e other]
     (if (xt/x:has-key? lu e)
@@ -276,7 +276,7 @@
   "gets the difference of two arrays"
   {:added "4.0"}
   [arr other]
-  (var lu  (-/arr-lookup arr) :inline)
+  (var lu  ^:inline (-/arr-lookup arr))
   (var out [])
   (xt/for:array [e other]
     (if (not (xt/x:has-key? lu e))

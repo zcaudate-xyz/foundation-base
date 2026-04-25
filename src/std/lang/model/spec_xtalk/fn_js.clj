@@ -656,13 +656,14 @@
 
 (defn js-tf-x-notify-http
   ([[_ host port value id key opts]]
-   (template/$ (try
-                 (var #{path scheme} (or ~opts {}))
-                 (fetch (+ (or scheme "http") "://" ~host ":" ~port "/" (or path ""))
-                        {:method "POST"
-                         :body (xt.lang.common-repl/return-encode ~value ~id ~key)})
-                 (return ["async"])
-                 (catch e (return ["unable to connect"]))))))
+   (template/$
+    (try
+      (var #{path scheme} (or ~opts {}))
+      (fetch (+ (or scheme "http") "://" ~host ":" ~port "/" (or path ""))
+             {:method "POST"
+              :body (xt.lang.common-lib/return-encode ~value ~id ~key)})
+      (return ["async"])
+      (catch e (return ["unable to connect"]))))))
 
 (def +js-special+
   {:x-notify-http   {:macro #'js-tf-x-notify-http    :emit :macro   :type :template}})

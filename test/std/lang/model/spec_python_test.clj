@@ -58,7 +58,7 @@
   (l/emit-as
    :python '[(fn hello [] (return 1))])
   => "def hello():\n  return 1"
-
+  
   (let [out (l/emit-as
              :python '[(var data
                             {:heal (fn []

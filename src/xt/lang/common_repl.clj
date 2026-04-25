@@ -15,7 +15,7 @@
 ;; SOCKET
 ;;
 
-(defn.xt socket-connect-raw
+(defn.xt socket-connect-base
   [host port opts cb]
   (return
    (xt-link/x:socket-connect host port opts cb)))

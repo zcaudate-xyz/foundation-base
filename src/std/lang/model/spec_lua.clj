@@ -10,6 +10,7 @@
             [std.lang.base.impl :as impl]
             [std.lang.base.script :as script]
             [std.lang.base.util :as ut]
+            [std.lang.model.spec-lua.rewrite :as rewrite]
             [std.lang.model.spec-xtalk]
             [std.lang.model.spec-xtalk.fn-lua :as fn]
             [std.lib.collection :as collection]
@@ -125,7 +126,7 @@
   {:added "4.0"}
   [[_ [i [start end step :as range]] & body]]
   (apply list 'for [i := (list 'quote [start end (or step 1)])]
-           body))
+         body))
 
 (defn lua-tf-for-return
   "for return transform"
@@ -156,23 +157,23 @@
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error]}]]
   (template/$ (do (var '[ok out] (pcall (fn []
-                                   (return ~statement))))
-           (if ok
-             (do* (var ~res := out)
-                  ~@(if success [success]))
-             (do* (var ~err := out)
-                  ~@(if error [error]))))))
+                                          (return ~statement))))
+                  (if ok
+                    (do* (var ~res := out)
+                         ~@(if success [success]))
+                    (do* (var ~err := out)
+                         ~@(if error [error]))))))
 
 (defn lua-tf-for-async
   "for async transform"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error finally]}]]
   (template/$ (x:thread-spawn
-        (fn []
-          (for:try [[~res ~err] ~statement]
-                   {:success ~success
-                     :error ~error})
-          ~@(if finally [finally])))))
+               (fn []
+                 (for:try [[~res ~err] ~statement]
+                          {:success ~success
+                           :error ~error})
+                 ~@(if finally [finally])))))
 
 (defn lua-tf-yield
   "yield transform"
@@ -280,6 +281,7 @@
         :data   {:map-entry {:start ""  :end ""  :space "" :assign "=" :keyword :symbol
                              :key-fn #'lua-map-key}
                  :vector    {:start "{" :end "}" :space ""}}
+        :rewrite {:staging [#'rewrite/lua-rewrite-stage]}
         :block  {:for       {:body    {:start "do" :end "end"}}
                  :while     {:body    {:start "do" :end "end"}}
                  :branch    {:wrap    {:start "" :end "end"}
@@ -300,7 +302,7 @@
    
    (lua-module-link 'kmi.common {:root-ns 'kmi.hello})
    => \"./common\"
- 
+  
    (lua-module-link 'kmi.exchange
                     {:root-ns 'kmi :target \"src\"})
    => \"./kmi/exchange\""
@@ -373,12 +375,12 @@
   (lib/get-book (impl/default-library) :lua)
 
   (!.lua
-   (let [#{a} hello
-         b 2]))
+    (let [#{a} hello
+          b 2]))
   
   (!.lua
-   (defgen hello []
-     (yield n)))
+    (defgen hello []
+      (yield n)))
   (!.lua (x:offset))
   (!.lua (x:random))
 

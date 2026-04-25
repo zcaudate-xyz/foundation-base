@@ -166,6 +166,10 @@
         :else
         (return (xtl/type-native obj))))
 
+;;
+;; DIFF
+;;
+
 (defn.xt tree-diff
   "diffs only keys within map"
   {:added "4.1"}
