@@ -201,8 +201,7 @@
                   (first sym-id)
                   sym-id)
         sym-key (f/strn sym-id)
-        [doc attr more] (fn/fn:init-args doc? attrs? more)
-        _      [doc attr]
+        [_doc _attr more] (fn/fn:init-args doc? attrs? more)
         more   (if (vector? (first more))
                  more
                  (first more))
@@ -258,7 +257,10 @@
                                   :grammar (:tag grammar)})))
 
 (defn intern-supports
-  "interns declared support macros, skipping existing imports"
+  "interns declared support macros, skipping existing imports.
+
+   Returns `[added ids]` where `added` contains newly interned symbols and
+   `ids` contains all requested support symbols."
   {:added "4.0"}
   [lang grammar supports]
   (let [curr     (env/ns-sym)

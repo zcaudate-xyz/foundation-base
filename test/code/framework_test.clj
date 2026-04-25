@@ -20,7 +20,7 @@
   ;;[(#{<def forms>} | -hello- & _)]
   => vector?
 
-  (every? *toplevel-forms* '[defvar.lua defvar.py])
+  (every? *toplevel-forms* '[defvar.xt defvar.js defvar.lua defvar.py])
   => true)
 
 ^{:refer code.framework/analyse-source-function :added "3.0"}

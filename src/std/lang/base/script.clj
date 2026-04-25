@@ -101,7 +101,8 @@
       [refers ids])))
 
 (defn script-supports
-  "returns support macros declared for the current script context"
+  "returns support macros declared for the current script context,
+   merging book, module and config declarations with duplicates removed"
   {:added "4.0"}
   [book module config]
   (->> [(:script/support book)
@@ -116,7 +117,10 @@
        vec))
 
 (defn script-support-import
-  "imports declared support macros into the namespace"
+  "imports declared support macros into the namespace.
+
+   Returns `[added ids]` where `added` are newly interned symbols and
+   `ids` are all requested support symbols for the current context."
   {:added "4.0"}
   ([book]
    (script-support-import book nil nil))
