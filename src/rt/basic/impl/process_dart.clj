@@ -368,6 +368,7 @@
                         (await-sync-form form)))
         out-json (list 'jsonEncode out-sym)
         body  (concat '[do]
+                      '[(var __globals__ {})]
                       (map await-form (butlast forms))
                       [(list 'var out-sym (await-sync-form (last forms)))
                        (list 'print out-json)])]

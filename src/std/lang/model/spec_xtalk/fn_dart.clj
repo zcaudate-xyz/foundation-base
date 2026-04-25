@@ -22,7 +22,13 @@
 
 (defn dart-tf-x-print
   [[_ & args]]
-  (apply list 'print args))
+  (let [value (if (= 1 (count args))
+                (first args)
+                (apply list '+ args))]
+    (template/$
+     ((fn []
+        (print ~value)
+        (return nil))))))
 
 (defn dart-tf-x-arr-push
   [[_ arr item]]
@@ -349,7 +355,7 @@
           (list 'not= nil iter)
           (list '. rtype-expr (list 'contains "Iterator")))))
 (defn dart-tf-x-iter-next [[_ iter]] (list '. iter 'current))
-(defn dart-tf-x-iter-null [[_]] '(if false (yield nil)))
+(defn dart-tf-x-iter-null [[_]] '(. [] iterator))
 
 (def +dart-iter+
   {:x-iter-eq          {:macro #'dart-tf-x-iter-eq         :emit :macro}
@@ -369,10 +375,10 @@
 (defn dart-tf-x-prototype-tostring [[_ obj]] '"toString")
 
 (def +dart-proto+
-  {:x-prototype-create       {:macro #'dart-tf-x-prototype-create      :emit :macro}
-   :x-prototype-get          {:macro #'dart-tf-x-prototype-get         :emit :macro}
-   :x-prototype-set          {:macro #'dart-tf-x-prototype-set         :emit :macro}
-   :x-prototype-tostring     {:macro #'dart-tf-x-prototype-tostring    :emit :macro}})
+  {:prototype-create         {:macro #'dart-tf-x-prototype-create      :emit :macro}
+   :prototype-get            {:macro #'dart-tf-x-prototype-get         :emit :macro}
+   :prototype-set            {:macro #'dart-tf-x-prototype-set         :emit :macro}
+   :prototype-tostring       {:macro #'dart-tf-x-prototype-tostring    :emit :macro}})
 
 (defn dart-tf-x-return-encode
   [[_ out id key]]
@@ -408,7 +414,10 @@
   [[_ f encode-fn]]
   (list 'try
         (list 'var 'out (list f))
-        (list 'return (list encode-fn 'out nil nil))
+        (list 'try
+              (list 'return (list 'Function.apply encode-fn ['out]))
+              (list 'catch '_
+                    (list 'return (list 'Function.apply encode-fn ['out nil nil]))))
         (list 'catch 'e
               (list 'return
                     (list 'json.encode
@@ -567,17 +576,18 @@
 
 (def +dart+
   (merge +dart-core+
-         +dart-math+
-         +dart-type+
-         +dart-str+
-         +dart-lu+
-         +dart-json+
-         +dart-arr+
-         +dart-iter+
-         +dart-return+
-         +dart-socket+
-         +dart-thread+
-         +dart-b64+
+          +dart-math+
+          +dart-type+
+          +dart-str+
+          +dart-lu+
+          +dart-json+
+          +dart-arr+
+          +dart-iter+
+          +dart-proto+
+          +dart-return+
+          +dart-socket+
+          +dart-thread+
+          +dart-b64+
          +dart-uri+
          +dart-special+
          +dart-file+))

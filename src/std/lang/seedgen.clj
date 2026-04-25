@@ -61,9 +61,10 @@
       output
       (assoc output
              :new (bench-output-targets (:outputs output)
-                                        #(or (:updated %)
-                                             (pos? (+ (or (:inserts %) 0)
-                                                      (or (:deletes %) 0)))))))))
+                                         #(or (:updated %)
+                                              (pos? (+ (or (:inserts %) 0)
+                                                       (or (:deletes %) 0)))))
+              :functions (:functions output)))))
 
 (defn- seedgen-benchremove-summary
   [ns params lookup project]
@@ -209,7 +210,10 @@
           :item {:list (fn [lookup _] (sort (keys lookup)))
                  :pre project/sym-name
                  :display (template/empty-result :new :info :no-new)}
-          :result (template/code-transform-result :new)}])
+          :result (assoc (template/code-transform-result :new)
+                         :keys {:count (comp count :new)
+                                :functions (fn [{:keys [functions new]}]
+                                             (or functions new))})}])
 
 (comment (std.lang.seedgen/seedgen-benchadd
           ['xt.sample]
