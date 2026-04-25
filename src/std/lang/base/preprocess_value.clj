@@ -1,6 +1,9 @@
 (ns std.lang.base.preprocess-value
   (:require [std.lang.base.preprocess-base :as preprocess-base]
+            [std.lang.base.preprocess-resolve :as resolve]
             [std.lib.collection :as collection]))
+
+(declare resolve-block-form)
 
 (defn value-block-entry
   "returns the reserved entry for a block-valued macro call"
@@ -16,14 +19,45 @@
 (defn expand-value-block
   "expands a block-valued macro call"
   {:added "4.1"}
-  [form grammar mopts]
-  (when-let [macro (:macro (value-block-entry form grammar))]
-    (let [expanded (binding [preprocess-base/*macro-form* form
-                             preprocess-base/*macro-grammar* grammar
-                             preprocess-base/*macro-opts* mopts]
-                     (macro form))]
-      (with-meta expanded
-        (merge (meta form) (meta expanded))))))
+  ([form grammar mopts]
+   (expand-value-block form grammar nil mopts))
+  ([form grammar modules mopts]
+   (when-let [form (resolve-block-form form grammar modules mopts)]
+     (let [macro (:macro (value-block-entry form grammar))
+           expanded (binding [preprocess-base/*macro-form* form
+                              preprocess-base/*macro-grammar* grammar
+                              preprocess-base/*macro-opts* mopts]
+                      (macro form))]
+       (with-meta expanded
+         (merge (meta form) (meta expanded)))))))
+
+(defn resolve-block-form
+  "resolves namespaced fragment wrappers to block-valued reserved forms"
+  {:added "4.1"}
+  ([form grammar mopts]
+   (resolve-block-form form grammar nil mopts))
+  ([form grammar modules mopts]
+   (loop [form form]
+     (cond (value-block-entry form grammar)
+           form
+
+           (and modules
+                (collection/form? form)
+                (symbol? (first form))
+                (namespace (first form)))
+           (when-let [fragment (resolve/get-fragment (first form) modules mopts)]
+             (when-let [template (:template fragment)]
+               (let [expanded (binding [preprocess-base/*macro-form* form
+                                        preprocess-base/*macro-grammar* grammar
+                                        preprocess-base/*macro-opts* mopts]
+                                (apply template (rest form)))
+                     expanded (with-meta expanded
+                                (merge (meta form) (meta expanded)))]
+                 (when (not= form expanded)
+                   (recur expanded)))))
+
+           :else
+           nil))))
 
 (defn value-template-args
   "derives callable value args from op or template arglists"
@@ -86,22 +120,24 @@
 (defn process-value-form
   "rewrites block-valued macros used in value position"
   {:added "4.1"}
-  [form grammar mopts]
-  (cond (and (= 'return (first form))
-             (= 2 (count form)))
-        (when-let [expanded (expand-value-block (second form) grammar mopts)]
-          expanded)
+  ([form grammar mopts]
+   (process-value-form form grammar nil mopts))
+  ([form grammar modules mopts]
+   (cond (and (= 'return (first form))
+              (= 2 (count form)))
+         (when-let [expanded (expand-value-block (second form) grammar modules mopts)]
+           expanded)
 
-        :else
-        (let [[head & args0] form
-              args  (vec args0)
-              args' (mapv (fn [arg]
-                            (if-let [_ (value-block-entry arg grammar)]
-                              (with-meta (cons (value-standalone (first arg) grammar)
-                                               (rest arg))
-                                (meta arg))
-                              arg))
-                          args)]
-          (when (not= args' args)
-            (with-meta (apply list head args')
-              (meta form))))))
+         :else
+         (let [[head & args0] form
+               args  (vec args0)
+               args' (mapv (fn [arg]
+                             (if-let [block-form (resolve-block-form arg grammar modules mopts)]
+                               (with-meta (cons (value-standalone (first block-form) grammar)
+                                                (rest block-form))
+                                 (meta arg))
+                               arg))
+                           args)]
+           (when (not= args' args)
+             (with-meta (apply list head args')
+               (meta form)))))))

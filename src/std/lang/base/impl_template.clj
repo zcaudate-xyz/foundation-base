@@ -1,24 +1,31 @@
 (ns std.lang.base.impl-template
   (:require [std.lang.base.emit-preprocess :as preprocess] [std.lang.base.preprocess-base :as preprocess-base]
+            [std.lang.base.preprocess-resolve :as resolve]
             [std.lang.base.emit-rewrite :as rewrite]
             [std.lang.base.grammar-xtalk-system :as xtalk-system]
             [std.lib.collection :as collection]
             [std.lib.walk :as walk]))
 
 (defn infer-static-template
-  "determines whether any hydrated form head resolves to a hard-link in the current grammar"
+  "determines whether any hydrated form head resolves to a hard-link or linked fragment template"
   {:added "4.1"}
-  [grammar form]
+  [grammar modules form mopts]
   (let [template? (volatile! false)]
     (walk/prewalk
      (fn [x]
-       (when (and (collection/form? x)
-                  (symbol? (first x))
-                  (= :hard-link (get-in grammar [:reserved (first x) :emit])))
-         (vreset! template? true))
-       x)
-     form)
-    @template?))
+        (when (and (collection/form? x)
+                   (symbol? (first x))
+                   (or (= :hard-link (get-in grammar [:reserved (first x) :emit]))
+                       (when-let [fragment (and modules
+                                                (namespace (first x))
+                                                (resolve/get-fragment (first x)
+                                                                      modules
+                                                                      mopts))]
+                         (:template fragment))))
+          (vreset! template? true))
+        x)
+      form)
+     @template?))
 
 (defn create-code-state
   "hydrates and stages a code entry for the current grammar"
@@ -52,12 +59,12 @@
      :form form-rewrite
      :deps deps
      :deps-fragment deps-fragment
-     :deps-native deps-native
-     :xtalk-ops ops
-     :xtalk-profiles profiles
-     :polyfill-modules polyfill-modules
-     :static/template (or (:static/template entry)
-                          (infer-static-template grammar form-hydrate))}))
+      :deps-native deps-native
+      :xtalk-ops ops
+      :xtalk-profiles profiles
+      :polyfill-modules polyfill-modules
+      :static/template (or (:static/template entry)
+                           (infer-static-template grammar modules form-hydrate context))}))
 
 (defn cached-code-state
   "restages a template entry for the current language, using the per-entry cache when available"
