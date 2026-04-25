@@ -93,9 +93,13 @@
             defn   (scheme-transform-defn form)
             defgen (scheme-transform-defn form)
             let    (scheme-transform-let form)
-            not=   (list 'not (list 'equal?
-                                    (scheme-transform (first args))
-                                    (scheme-transform (second args))))
+            not=   (if (= 2 (count args))
+                     (list 'not (list 'equal?
+                                      (scheme-transform (first args))
+                                      (scheme-transform (second args))))
+                     (apply list
+                            (map scheme-transform
+                                 (cons op args))))
             ==     (list 'equal?
                          (scheme-transform (first args))
                          (scheme-transform (second args)))
