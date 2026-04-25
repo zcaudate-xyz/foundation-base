@@ -14,13 +14,15 @@
   "checks that two iterators are equal"
   {:added "4.0"}
   [it0 it1 eq-fn]
-  (xt/x:iter-eq it0 it1 eq-fn))
+  (return
+   (xt/x:iter-eq it0 it1 eq-fn)))
 
 (defgen.xt iter-null
   "creates a null iterator"
   {:added "4.0"}
   []
-  (xt/x:iter-null))
+  (return
+   (xt/x:iter-null)))
 
 (defn.xt iter?
   "checks object is an iter"

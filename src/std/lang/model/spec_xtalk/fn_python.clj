@@ -617,7 +617,8 @@
    {:x-iter-from-obj       {:macro #'python-tf-x-iter-from-obj       :emit :macro}
     :x-iter-from-arr       {:macro #'python-tf-x-iter-from-arr       :emit :macro}
     :x-iter-from           {:macro #'python-tf-x-iter-from           :emit :macro}
-    :x-iter-eq             {:macro #'python-tf-x-iter-eq             :emit :macro}
+    :x-iter-eq             {:macro #'python-tf-x-iter-eq             :emit :macro
+                            :op-spec {:allow-blocks true}}
     :x-iter-null           {:default '(iter [])                      :emit :unit}
     :x-iter-next           {:macro #'python-tf-x-iter-next           :emit :macro}
     :x-iter-has?           {:macro #'python-tf-x-iter-has?           :emit :macro}

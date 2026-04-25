@@ -10,6 +10,7 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-string :as xts]
              [xt.lang.common-data :as xtd]
+             [xt.lang.common-iter :as xti]
              [xt.lang.common-repl :as repl]]})
 
 (l/script- :python
@@ -17,6 +18,7 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-string :as xts]
              [xt.lang.common-data :as xtd]
+             [xt.lang.common-iter :as xti]
              [xt.lang.common-repl :as repl]]})
 
 (l/script- :lua
@@ -24,6 +26,7 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-string :as xts]
              [xt.lang.common-data :as xtd]
+             [xt.lang.common-iter :as xti]
              [xt.lang.common-repl :as repl]]})
 
 (fact:global
@@ -2316,7 +2319,7 @@
     out)
   => "ERR"
 
-  (!.lua
+  ^*(!.lua
     (var out nil)
     (var success-fn (fn [cb] (return nil "OK")))
     (xt/for:return [[ret err] (success-fn (xt/x:callback))]
@@ -2525,7 +2528,7 @@
     (var it (xt/x:iter-null))
     (xt/x:iter-native? it))
   => true
-
+  
   (!.py
     (var it (xt/x:iter-null))
     (xt/x:iter-native? it))

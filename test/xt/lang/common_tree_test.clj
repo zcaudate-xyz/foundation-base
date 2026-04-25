@@ -187,8 +187,8 @@
                                :name "doctor"
                                :heal (fn [])}}))
   => {"job" {"name" "doctor", "heal" "<function>", "patients" [[1 "alice"] [1 "body"]]}, "name" "hello"}
-
-  ^*(!.py
+  
+  (!.py
     (xtt/tree-get-data {:name "hello"
                         :job  {:patients [[1 "alice"]
                                           [1 "body"]]
