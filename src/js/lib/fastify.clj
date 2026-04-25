@@ -6,7 +6,7 @@
    {:require [[js.core :as j]
               [xt.lang.common-data :as d]
               [xt.lang.spec-base :as x]
-              [xt.lang.common-runtime :as rt :with [defvar.js]]]
+              [xt.lang.common-runtime :as rt]]
     :import  [["fastify" :as Fastify]]})
 
 (defvar.js current-servers

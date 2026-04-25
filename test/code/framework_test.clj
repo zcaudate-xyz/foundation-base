@@ -18,7 +18,10 @@
 
   (toplevel-selector '-hello-)
   ;;[(#{<def forms>} | -hello- & _)]
-  => vector?)
+  => vector?
+
+  *toplevel-forms*
+  => (contains #{'defvar.lua 'defvar.py}))
 
 ^{:refer code.framework/analyse-source-function :added "3.0"}
 (fact "analyzes a single function definition within a source file, used as a helper for `analyse-source-code`"

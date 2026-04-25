@@ -13,7 +13,7 @@
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]
-             [xt.lang.common-runtime :as rt :with [defvar.js]]
+             [xt.lang.common-runtime :as rt]
              [xt.lang.event-view :as event-view]
              [js.cell.kernel :as cl]
              [js.cell.e2e.common :as common]

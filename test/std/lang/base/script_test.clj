@@ -50,6 +50,40 @@
                                :highlights []})
   => '[#{} #{}])
 
+^{:refer std.lang.base.script/script-support-import :added "4.0"}
+(fact "imports declared support macros"
+
+  (let [ns-sym 'std.lang.base.script-test.support
+        _      (when (find-ns ns-sym)
+                 (remove-ns ns-sym))
+        _      (create-ns ns-sym)]
+    (try
+      (binding [*ns* (the-ns ns-sym)]
+        (refer 'clojure.core)
+        (impl/with:library [+library+]
+          (script/script-support-import (l/get-book (l/runtime-library) :js)))
+        [(-> (resolve 'defvar.js) meta :macro)
+         (-> (macroexpand-1 '(defvar.js JS_SAMPLE [] (return 1)))
+             first
+             first)])
+      (finally
+        (remove-ns ns-sym))))
+  => '[true defn.js]
+
+  (let [ns-sym 'std.lang.base.script-test.support-manual
+        _      (when (find-ns ns-sym)
+                 (remove-ns ns-sym))
+        _      (create-ns ns-sym)]
+    (try
+      (binding [*ns* (the-ns ns-sym)]
+        (refer 'clojure.core)
+        (script/script-ns-import {:require '[[xt.lang.common-runtime :as rt :with [defvar.js]]]})
+        (impl/with:library [+library+]
+          (script/script-support-import (l/get-book (l/runtime-library) :js))))
+      (finally
+        (remove-ns ns-sym))))
+  => '[#{} #{defvar.js}])
+
 
 ^{:refer std.lang.base.script/script-fn-base :added "4.0"}
 (fact "setup for the runtime"
@@ -58,8 +92,25 @@
     (binding [book/*skip-check* true]
       (keys (script/script-fn-base :lua 'std.lang.base.script-test
                                    {:require '[[xt.lang.common-data :as xtd]]}
-                                   (l/runtime-library)))))
-  => (contains [:module :module/internal :module/primary]))
+                                    (l/runtime-library)))))
+  => (contains [:module :module/internal :module/primary :module/support])
+
+  (let [ns-sym 'std.lang.base.script-test.auto
+        _      (when (find-ns ns-sym)
+                 (remove-ns ns-sym))
+        _      (create-ns ns-sym)]
+    (try
+      (binding [*ns* (the-ns ns-sym)]
+        (refer 'clojure.core)
+        (impl/with:library [+library+]
+          (binding [book/*skip-check* true]
+            (script/script-fn-base :js ns-sym {} (l/runtime-library))))
+        (-> (macroexpand-1 '(defvar.js JS_SAMPLE [] (return 1)))
+            first
+            first))
+      (finally
+        (remove-ns ns-sym))))
+  => 'defn.js)
 
 ^{:refer std.lang.base.script/script-fn :added "4.0"}
 (fact "calls the regular setup script for the namespace"

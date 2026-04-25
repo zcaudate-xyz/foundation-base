@@ -723,15 +723,15 @@
     (rt/xt-var-trigger "test.module/hello")])
   => [true []])
 
-^{:refer xt.lang.common-runtime/defvar-fn :added "4.0"}
+^{:refer std.lang.base.script-macro/defvar-fn :added "4.0"}
 (fact "helper function for defvar macros"
-  (let [out (rt/defvar-fn '(rt/defvar.js JS_SAMPLE [] (return 1))
-                          "js"
-                          'JS_SAMPLE
-                          nil
-                          nil
-                          '([]
-                            (return 1)))]
+  (let [out (std.lang.base.script-macro/defvar-fn '(rt/defvar.js JS_SAMPLE [] (return 1))
+                                                  "js"
+                                                  'JS_SAMPLE
+                                                  nil
+                                                  nil
+                                                  '([]
+                                                    (return 1)))]
     [(-> out first first)
      (-> out first second)
      (-> out second first)

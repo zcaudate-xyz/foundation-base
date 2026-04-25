@@ -6,7 +6,7 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
-              [xt.lang.common-runtime :as rt :with [defvar.js]]
+              [xt.lang.common-runtime :as rt]
               [xt.lang.spec-base :as xt]
               [xt.lang.common-data :as xtd]
               [js.core :as j]

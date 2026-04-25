@@ -25,7 +25,8 @@
 (def +book+
   (book/book {:lang :xtalk
               :meta +meta+
-              :grammar +grammar+}))
+              :grammar +grammar+
+              :script/support #{:defvar}}))
 
 (def +init+
   (script/install +book+))

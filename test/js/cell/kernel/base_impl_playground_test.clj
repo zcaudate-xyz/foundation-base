@@ -26,7 +26,7 @@
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
               [xt.lang.common-repl :as repl]
-              [xt.lang.common-runtime :as rt :with [defvar.js]]
+              [xt.lang.common-runtime :as rt]
               [js.core :as j]
                [js.cell.kernel.base-link :as base-link]
                [js.cell.kernel.base-link-local :as base-link-local]

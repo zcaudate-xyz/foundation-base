@@ -1,10 +1,7 @@
 (ns xt.lang.common-runtime
   (:require [std.lang :as l]
-             [std.lang.typed.xtalk :refer [defspec.xt]]
-             [std.lib.env :as env]
-             [std.lib.foundation]
-             [std.lib.function :as f]
-             [std.lib.template :as template]))
+             [std.lang.base.script-macro :as script-macro]
+             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
@@ -430,56 +427,8 @@
     (return true))
   (return false))
 
-(defn defvar-fn
-  "helper function for defvar macros"
-  {:added "4.0"}
-  [&form tag sym-id doc? attrs? more]
-  (let [sym-ns  (or (get (meta sym-id) :ns)
-                    (str (env/ns-sym)))
-        sym-id  (if (vector? sym-id)
-                  (first sym-id)
-                  sym-id)
-        sym-key (std.lib.foundation/strn sym-id)
-        [doc attr more] (f/fn:init-args doc? attrs? more)
-        more (if (vector? (first more))
-               more
-               (first more))
-        def-sym (clojure.core/symbol (str "defn." tag))]
-    (template/$ [(~def-sym ~(with-meta sym-id (merge (meta &form)
-                                              (meta sym-id)))
-             []
-             (return (xt.lang.common-runtime/xt-item-get
-                      ~sym-ns
-                      ~sym-key
-                      (fn ~@more))))
-          (~def-sym ~(with-meta (clojure.core/symbol (str sym-id "-reset"))
-                        (merge (meta &form)
-                               (meta sym-id)))
-            [val]
-            (return (xt.lang.common-runtime/xt-var-set
-                     ~(str sym-ns "/" sym-key)
-                     val)))])))
-
-(defmacro defvar.xt
-  "shortcut for a xt getter and a reset var"
-  {:added "4.0"}
-  [sym-id & [doc? attrs? & more]]
-  (defvar-fn &form "xt" sym-id doc? attrs? more))
-
-(defmacro defvar.js
-  "shortcut for a js getter and a reset var"
-  {:added "4.0"}
-  [sym-id & [doc? attrs? & more]]
-  (defvar-fn &form "js" sym-id doc? attrs? more))
-
-(defmacro defvar.lua
-  "shortcut for a lua getter and a reset var"
-  {:added "4.0"}
-  [sym-id & [doc? attrs? & more]]
-  (defvar-fn &form "lua" sym-id doc? attrs? more))
-
-(defmacro defvar.py
-  "TODO"
-  {:added "4.0"}
-  [sym-id & [doc? attrs? & more]]
-  (defvar-fn &form "python" sym-id doc? attrs? more))
+(def +defvar+
+  [(script-macro/intern-supports :xtalk (:grammar (l/get-book (l/runtime-library) :xtalk)) [:defvar])
+   (script-macro/intern-supports :js (:grammar (l/get-book (l/runtime-library) :js)) [:defvar])
+   (script-macro/intern-supports :lua (:grammar (l/get-book (l/runtime-library) :lua)) [:defvar])
+   (script-macro/intern-supports :python (:grammar (l/get-book (l/runtime-library) :python)) [:defvar])])

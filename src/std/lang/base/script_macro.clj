@@ -1,20 +1,21 @@
 (ns std.lang.base.script-macro
   (:require [std.lang.base.emit :as emit]
-            [std.lang.base.emit-preprocess :as preprocess] [std.lang.base.preprocess-base :as preprocess-base]
-            [std.lang.base.impl :as impl]
-            [std.lang.base.impl-entry :as entry]
-            [std.lang.base.library :as lib]
-            [std.lang.base.pointer :as ptr]
-            [std.lang.base.script-annex :as annex]
-            [std.lang.base.script-control :as control]
-            [std.lang.base.script-lint :as lint]
-            [std.lang.base.util :as ut]
-            [std.lib.context.pointer]
-            [std.lib.context.space :as space]
-            [std.lib.env :as env]
-            [std.lib.foundation :as f]
-            [std.lib.function :as fn]
-            [std.lib.time :as time]))
+             [std.lang.base.emit-preprocess :as preprocess] [std.lang.base.preprocess-base :as preprocess-base]
+             [std.lang.base.impl :as impl]
+             [std.lang.base.impl-entry :as entry]
+             [std.lang.base.library :as lib]
+             [std.lang.base.pointer :as ptr]
+             [std.lang.base.script-annex :as annex]
+             [std.lang.base.script-control :as control]
+             [std.lang.base.script-lint :as lint]
+             [std.lang.base.util :as ut]
+             [std.lib.context.pointer]
+             [std.lib.context.space :as space]
+             [std.lib.env :as env]
+             [std.lib.foundation :as f]
+             [std.lib.function :as fn]
+             [std.lib.template :as template]
+             [std.lib.time :as time]))
 
 (def +form-allow+ [:line :column :file :name :ns])
 
@@ -179,16 +180,102 @@
 
 (defn intern-free
   "creates a defptr macro
- 
+  
    (macro/intern-free :lua \"hello\")
-   => #'std.lang.base.script-macro-test/defptr.hello"
+    => #'std.lang.base.script-macro-test/defptr.hello"
   {:added "4.0"}
   ([lang tag]
    (intern-in
     "defptr." tag
-    (fn [&form _ & body]
-      `(intern-free-fn ~lang (quote ~&form)
-                       ~(meta &form))))))
+     (fn [&form _ & body]
+       `(intern-free-fn ~lang (quote ~&form)
+                        ~(meta &form))))))
+
+(defn defvar-fn
+  "helper function for defvar support macros"
+  {:added "4.0"}
+  [&form tag sym-id doc? attrs? more]
+  (let [sym-ns  (or (get (meta sym-id) :ns)
+                    (str (env/ns-sym)))
+        sym-id  (if (vector? sym-id)
+                  (first sym-id)
+                  sym-id)
+        sym-key (f/strn sym-id)
+        [doc attr more] (f/fn:init-args doc? attrs? more)
+        _      [doc attr]
+        more   (if (vector? (first more))
+                 more
+                 (first more))
+        def-sym (symbol (str "defn." tag))
+        item-sym 'xt.lang.common-runtime/xt-item-get
+        set-sym  'xt.lang.common-runtime/xt-var-set]
+    (template/$ [(~def-sym ~(with-meta sym-id (merge (meta &form)
+                                                     (meta sym-id)))
+                   []
+                   (return (~item-sym
+                            ~sym-ns
+                            ~sym-key
+                            (fn ~@more))))
+                 (~def-sym ~(with-meta (symbol (str sym-id "-reset"))
+                              (merge (meta &form)
+                                     (meta sym-id)))
+                   [val]
+                   (return (~set-sym
+                            ~(str sym-ns "/" sym-key)
+                            val)))])))
+
+(defn intern-defvar
+  "interns the `defvar.<tag>` support macro"
+  {:added "4.0"}
+  ([lang]
+   (let [lib     (impl/runtime-library)
+         grammar (:grammar (lib/get-book lib lang))]
+     (intern-defvar lang grammar)))
+  ([lang grammar]
+   (let [tag (name (:tag grammar))]
+     (intern-in
+      "defvar." tag
+      (fn [&form _ sym-id & [doc? attrs? & more]]
+        (defvar-fn &form tag sym-id doc? attrs? more))))))
+
+(defn support-symbol
+  "returns the symbol that a support macro will intern"
+  {:added "4.0"}
+  [support grammar]
+  (case support
+    :defvar (symbol (str "defvar." (name (:tag grammar))))
+    (f/error "Support not found" {:support support
+                                  :grammar (:tag grammar)})))
+
+(defn intern-support
+  "interns a support macro for the active namespace"
+  {:added "4.0"}
+  [lang grammar support]
+  (case support
+    :defvar (intern-defvar lang grammar)
+    (f/error "Support not found" {:support support
+                                  :lang lang
+                                  :grammar (:tag grammar)})))
+
+(defn intern-supports
+  "interns declared support macros, skipping existing imports"
+  {:added "4.0"}
+  [lang grammar supports]
+  (let [curr     (env/ns-sym)
+        existing (set (concat (keys (ns-refers curr))
+                              (keys (ns-interns curr))))
+        [added ids _]
+        (reduce (fn [[added ids seen] support]
+                  (let [sym (support-symbol support grammar)]
+                    (if (contains? seen sym)
+                      [added (conj ids sym) seen]
+                      (do (intern-support lang grammar support)
+                          [(conj added sym)
+                           (conj ids sym)
+                           (conj seen sym)]))))
+                [#{} #{} existing]
+                supports)]
+    [added ids]))
 
 (defn intern-top-level-fn
   "interns a top level function"

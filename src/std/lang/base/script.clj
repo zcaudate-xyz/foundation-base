@@ -40,10 +40,11 @@
    :require
    :import
    :macro-only
-   :bundle
-   :file
-   :export
-   :static])
+    :bundle
+    :file
+    :export
+    :static
+    :script/support])
 
 (def +runtime-keys+
   [:runtime
@@ -96,8 +97,33 @@
                                                        (keys (ns-interns curr)))))
          refers (clojure.set/difference ids ignore)]
      (when-let [mns (some-> syms first ut/sym-module)]
-       (refer mns :only (vec refers)))
-     [refers ids])))
+        (refer mns :only (vec refers)))
+      [refers ids])))
+
+(defn script-supports
+  "returns support macros declared for the current script context"
+  {:added "4.0"}
+  [book module config]
+  (->> [(:script/support book)
+        (:script/support module)
+        (:script/support config)]
+       flatten
+       (remove nil?)
+       distinct
+       vec))
+
+(defn script-support-import
+  "imports declared support macros into the namespace"
+  {:added "4.0"}
+  ([book]
+   (script-support-import book nil nil))
+  ([book module config]
+   (let [supports (script-supports book module config)]
+     (if (empty? supports)
+       [#{} #{}]
+       (macro/intern-supports (:lang book)
+                              (:grammar book)
+                              supports)))))
 
 
 ;; script-base
@@ -127,15 +153,17 @@
                                                                     :config
                                                                     :layout
                                                                     :emit))
-         book    (snap/get-book-raw snapshot lang)
-         module  (get-in book [:modules module-id])
-         macros  (script-macro-import book)]
-     (merge (:config config)
-            {:module module-id
-             :module/internal (get module :internal)
-             :module/primary primary}
-            (select-keys config [:layout
-                                 :emit])))))
+          book    (snap/get-book-raw snapshot lang)
+          module  (get-in book [:modules module-id])
+          macros  (script-macro-import book)
+          support (script-support-import book module config)]
+      (merge (:config config)
+             {:module module-id
+              :module/internal (get module :internal)
+              :module/primary primary
+              :module/support support}
+             (select-keys config [:layout
+                                  :emit])))))
 
 (defn script-fn
   "calls the regular setup script for the namespace"

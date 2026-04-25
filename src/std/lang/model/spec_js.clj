@@ -352,7 +352,8 @@
   (book/book {:lang :js
               :parent :xtalk
               :meta meta/+meta+
-              :grammar +grammar+}))
+              :grammar +grammar+
+              :script/support #{:defvar}}))
 
 (def +init+
   (script/install +book+))

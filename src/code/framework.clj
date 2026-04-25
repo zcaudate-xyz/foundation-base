@@ -52,6 +52,8 @@
      defmacro.sh
      defmacro.sol
      defmacro.xt
+     defvar.lua
+     defvar.py
      defvar.xt
      defvar.js
      defcache
