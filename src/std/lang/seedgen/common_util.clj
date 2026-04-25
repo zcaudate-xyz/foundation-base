@@ -142,6 +142,14 @@
     (or (get tag-map lang)
         lang)))
 
+(defn seedgen-default-runtime
+  [lang]
+  (let [lang (seedgen-normalize-runtime-lang lang)]
+    (some (fn [{:keys [script runtime]}]
+            (when (= script lang)
+              runtime))
+          (vals xtalk-scaffold/+runtime-lang-config+))))
+
 (defn seedgen-dispatch-lang
   [form]
   (when (seq? form)

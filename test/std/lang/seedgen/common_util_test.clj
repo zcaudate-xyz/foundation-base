@@ -47,6 +47,14 @@
   (seedgen-dispatch-lang '(!.dt (+ 1 2 3)))
   => :dart)
 
+^{:refer std.lang.seedgen.common-util/seedgen-default-runtime :added "4.1"}
+(fact "returns the default runtime for generated script headers"
+  (seedgen-default-runtime :dart)
+  => :twostep
+
+  (seedgen-default-runtime :r)
+  => :basic)
+
 ^{:refer std.lang.seedgen.common-util/seedgen-runtime-reference-lang :added "4.1"}
 (fact "TODO")
 

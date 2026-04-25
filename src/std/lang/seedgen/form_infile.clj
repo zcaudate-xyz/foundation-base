@@ -107,11 +107,38 @@
   (let [root       (nav/parse-root script-str)
         script-nav (nav/down root)
         lang-nav   (some-> script-nav nav/down nav/right)]
-    (if lang-nav
-      (-> lang-nav
-          (nav/replace lang)
-          nav/root-string)
-      script-str)))
+    (let [script-str (if lang-nav
+                       (-> lang-nav
+                           (nav/replace lang)
+                           nav/root-string)
+                       script-str)
+          target-runtime (common/seedgen-default-runtime lang)
+          root           (nav/parse-root script-str)
+          script-nav     (nav/down root)
+          config-nav     (some-> script-nav nav/down nav/right nav/right)
+          script-form    (some-> script-nav nav/value)]
+      (cond
+        (nil? target-runtime)
+        script-str
+
+        (and config-nav
+             (map? (nav/value config-nav)))
+        (if-let [runtime-nav (form-common/nav-map-value config-nav :runtime)]
+          (-> runtime-nav
+              (nav/replace target-runtime)
+              nav/root-string)
+          (-> config-nav
+              (nav/replace (assoc (nav/value config-nav) :runtime target-runtime))
+              nav/root-string))
+
+        (and (seq? script-form)
+             (<= (count script-form) 2))
+        (-> script-nav
+            (nav/replace (apply list (concat script-form [{:runtime target-runtime}])))
+            nav/root-string)
+
+        :else
+        script-str))))
 
 (defn- replace-ns-name-string
   [ns-str new-ns]
@@ -370,8 +397,8 @@
       s)))
 
 (defn- apply-item-transform-string
-  [s item lang]
-  (let [transform-override (item-base-override item lang :transform)]
+  [s entry item lang]
+  (let [transform-override (item-base-override entry item lang :transform)]
     (if (and s (map? transform-override))
       (reduce-kv (fn [out from to]
                    (let [from (transform-literal from)
@@ -448,7 +475,7 @@
                           (replace-runtime-lang-string
                             (render-item-string root-item)
                             lang))]
-     (apply-item-transform-string generated-str root-item lang)))
+     (apply-item-transform-string generated-str entry root-item lang)))
 
 (defn- render-generated-expected-string
   [entry root-item lang]
@@ -457,7 +484,7 @@
       (some-> root-item
               :expected
               render-item-string
-              (apply-item-transform-string root-item lang))
+              (apply-item-transform-string entry root-item lang))
       (pr-str expect-override))))
 
 (defn- render-generated-check-clause

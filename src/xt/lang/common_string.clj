@@ -178,7 +178,7 @@
   (var lines (xt/x:str-split s "\n"))
   (var out := "")
   (xt/for:array [line lines]
-    (when (< 0 (xt/x:len out))
+    (when (< 0 (xt/x:str-len out))
       (:= out (xt/x:cat out "\n")))
     (:= out (xt/x:cat out (-/pad-left "" n " ") line)))
   (return out))
