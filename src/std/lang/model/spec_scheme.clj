@@ -125,7 +125,7 @@
 (defn emit-scheme-coll
   [start end coll]
   (str start
-       (clojure.string/join " " (map emit-scheme-form coll))
+       (str/join " " (map emit-scheme-form coll))
        end))
 
 (defn emit-scheme-map
@@ -133,11 +133,11 @@
   (str "(hash"
        (if (seq m)
          (str " "
-              (clojure.string/join " "
-                                   (mapcat (fn [[k v]]
-                                             [(emit-scheme-form k)
-                                              (emit-scheme-form v)])
-                                           m)))
+              (str/join " "
+                        (mapcat (fn [[k v]]
+                                  [(emit-scheme-form k)
+                                   (emit-scheme-form v)])
+                                m)))
          "")
        ")"))
 
