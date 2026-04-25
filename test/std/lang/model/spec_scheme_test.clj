@@ -15,4 +15,4 @@
 ^{:refer std.lang.model.spec-scheme/+book+ :added "4.1"}
 (fact "emits xtalk through the scheme backend"
   (l/emit-as :scheme '[(x:print (x:cat "a" "b"))])
-  => #"\(display \(string-append \"a\" \"b\"\)\)")
+  => "(display (string-append \"a\" \"b\"))")

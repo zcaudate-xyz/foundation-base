@@ -11,8 +11,11 @@
 
 ^{:refer std.lang.model.spec-xtalk.fn-scheme/scheme-tf-x-len :added "4.1"}
 (fact "gets length"
-  (l/emit-as :scheme [(scheme-tf-x-len '(x:len arr))])
-  => #"vector-length")
+  (scheme-tf-x-len '(x:len arr))
+  => '(cond ((vector? arr) (vector-length arr))
+            ((string? arr) (string-length arr))
+            ((hash? arr) (hash-count arr))
+            (else (length arr))))
 
 ^{:refer std.lang.model.spec-xtalk.fn-scheme/scheme-tf-x-cat :added "4.1"}
 (fact "concatenates strings"
