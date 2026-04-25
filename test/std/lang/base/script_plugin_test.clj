@@ -31,7 +31,7 @@
   => '[defn.js JS_SAMPLE defn.js JS_SAMPLE-reset])
 
 ^{:refer std.lang.base.script-plugin/intern-plugins :added "4.0"}
-(fact "interns declared support plugins"
+(fact "interns declared support plugins and preserves manual import compatibility"
   (let [ns-sym 'std.lang.base.script-plugin-test.support
         _      (when (find-ns ns-sym)
                  (remove-ns ns-sym))
