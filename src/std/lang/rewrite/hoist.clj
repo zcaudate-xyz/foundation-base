@@ -109,8 +109,8 @@
             (let [[tag & args] form]
               (if (empty? args)
                 form
-                (let [[prefix value] (rewrite-expression (first args) grammar)
-                      out (lift/with-form-meta form (list tag value))]
+                (let [[prefix values] (rewrite-expression-coll args grammar)
+                      out (lift/with-form-meta form (apply list tag values))]
                   (wrap-prefix form prefix out)))))
 
           (rewrite-if

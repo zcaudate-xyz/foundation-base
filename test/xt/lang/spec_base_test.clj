@@ -666,27 +666,12 @@
   ^{:seedgen/base    {:lua  {:expect ["object" "object" "array"]}}}
   (!.js
     (var type-fn (fn [obj]
-                   (xt/x:type-native obj)))
+                   (return
+                    (xt/x:type-native obj))))
     [(type-fn {})
      (type-fn [])
      (type-fn [1])])
-  => ["object" "array" "array"]
-
-  (!.py
-    (var type-fn (fn [obj]
-                   (xt/x:type-native obj)))
-    [(type-fn {})
-     (type-fn [])
-     (type-fn [1])])
-  => ["object" "array" "array"]
-
-  (!.lua
-    (var type-fn (fn [obj]
-                   (xt/x:type-native obj)))
-    [(type-fn {})
-     (type-fn [])
-     (type-fn [1])])
-  => ["object" "object" "array"])
+  => ["object" "array" "array"])
 
 ^{:refer xt.lang.spec-base/x:offset :added "4.1"}
 (fact "uses the grammar base offset"
@@ -1758,17 +1743,14 @@
 (fact "expands and emits a lua print form"
 
   (!.js
-    ^{:lang-exceptions {:dart {:skip true}}}
     (xt/x:nil? (xt/x:print "hello")))
   => true
 
   (!.py
-    ^{:lang-exceptions {:dart {:skip true}}}
     (xt/x:nil? (xt/x:print "hello")))
   => true
 
   (!.lua
-    ^{:lang-exceptions {:dart {:skip true}}}
     (xt/x:nil? (xt/x:print "hello")))
   => true)
 
@@ -2540,33 +2522,36 @@
 (fact "creates empty iterators"
 
   (!.js
-   (xt/x:iter-native? (xt/x:iter-null)))
+    (var it (xt/x:iter-null))
+    (xt/x:iter-native? it))
   => true
 
   (!.py
-   (xt/x:iter-native? (xt/x:iter-null)))
+    (var it (xt/x:iter-null))
+    (xt/x:iter-native? it))
   => true
-
+  
   (!.lua
-   (xt/x:iter-native? (xt/x:iter-null)))
+    (var it (xt/x:iter-null))
+    (xt/x:iter-native? it))
   => true)
 
 ^{:refer xt.lang.spec-base/x:iter-next :added "4.1"}
 (fact "advances iterators"
 
   (!.js
-    (var iter (xt/x:iter-from-arr [1 2 3]))
-    (xt/x:iter-native? iter))
+    (var it (xt/x:iter-from-arr [1 2 3]))
+    (xt/x:iter-native? it))
   => true
 
   (!.py
-    (var iter (xt/x:iter-from-arr [1 2 3]))
-    (xt/x:iter-native? iter))
+    (var it (xt/x:iter-from-arr [1 2 3]))
+    (xt/x:iter-native? it))
   => true
 
-  ^*(!.lua
-      (var iter (xt/x:iter-from-arr [1 2 3]))
-      (xt/x:iter-native? iter)))
+  (!.lua
+    (var it (xt/x:iter-from-arr [1 2 3]))
+    (xt/x:iter-native? it)))
 
 ^{:refer xt.lang.spec-base/x:iter-has? :added "4.1"}
 (fact "checks whether values are iterable"
@@ -2612,42 +2597,16 @@
   (!.js
      (var encode-fn
           (fn [value id key]
-            (xt/x:return-encode value id key)))
+            (return
+             (xt/x:return-encode value id key))))
      (xt/x:json-decode (encode-fn {:a 1} "id" "key")))
   => {"return" "object", "key" "key", "id" "id", "value" {"a" 1}, "type" "data"}
 
   (!.js
     (var encode-fn
          (fn [value id key]
-           (xt/x:return-encode value id key)))
-    (xt/x:json-decode (encode-fn "hello" "id" "key")))
-  => {"return" "string", "key" "key", "id" "id", "value" "hello", "type" "data"}
-
-  (!.py
-     (var encode-fn
-          (fn [value id key]
-            (xt/x:return-encode value id key)))
-     (xt/x:json-decode (encode-fn {:a 1} "id" "key")))
-  => {"return" "object", "key" "key", "id" "id", "value" {"a" 1}, "type" "data"}
-
-  (!.py
-    (var encode-fn
-         (fn [value id key]
-           (xt/x:return-encode value id key)))
-    (xt/x:json-decode (encode-fn "hello" "id" "key")))
-  => {"return" "string", "key" "key", "id" "id", "value" "hello", "type" "data"}
-
-  (!.lua
-     (var encode-fn
-          (fn [value id key]
-            (xt/x:return-encode value id key)))
-     (xt/x:json-decode (encode-fn {:a 1} "id" "key")))
-  => {"return" "object", "key" "key", "id" "id", "value" {"a" 1}, "type" "data"}
-
-  (!.lua
-    (var encode-fn
-         (fn [value id key]
-           (xt/x:return-encode value id key)))
+           (return
+            (xt/x:return-encode value id key))))
     (xt/x:json-decode (encode-fn "hello" "id" "key")))
   => {"return" "string", "key" "key", "id" "id", "value" "hello", "type" "data"})
 
@@ -2658,28 +2617,12 @@
   (!.js
     (var encode-fn
          (fn [value id key]
-           (xt/x:return-encode value id key)))
+           (return
+            (xt/x:return-encode value id key))))
     (var wrap-fn
          (fn [gen-fn wrap-fn]
-           (xt/x:return-wrap gen-fn wrap-fn)))
-    (xt/x:json-decode
-     (wrap-fn (fn []
-                (return 3))
-              (fn [out]
-                (return
-                 (encode-fn out "id-A" "key-B"))))))
-  => (contains {"id" "id-A"
-                "key" "key-B"
-                "type" "data"
-                "value" 3})
-
-  (!.lua
-    (var encode-fn
-         (fn [value id key]
-           (xt/x:return-encode value id key)))
-    (var wrap-fn
-         (fn [gen-fn wrap-fn]
-           (xt/x:return-wrap gen-fn wrap-fn)))
+           (return
+            (xt/x:return-wrap gen-fn wrap-fn))))
     (xt/x:json-decode
      (wrap-fn (fn []
                 (return 3))
@@ -2699,35 +2642,18 @@
   (!.js
    (var encode-fn
         (fn [value id key]
-          (xt/x:return-encode value id key)))
+          (return
+           (xt/x:return-encode value id key))))
    (var wrap-fn
         (fn [gen-fn wrap-fn]
-          (xt/x:return-wrap gen-fn wrap-fn)))
+          (return
+           (xt/x:return-wrap gen-fn wrap-fn))))
    (var eval-fn
         (fn [s re-wrap-fn]
-          (xt/x:return-eval s re-wrap-fn)))
+          (return
+           (xt/x:return-eval s re-wrap-fn))))
    (xt/x:json-decode
     (eval-fn "1 + 1"
-             (fn [f]
-               (return
-                (wrap-fn f
-                         (fn [out]
-                           (return
-                            (encode-fn out "id-A" "key-B")))))))))
-  => (contains-in {"key" "key-B", "id" "id-A", "value" 2, "type" "data"})
-
-  (!.lua
-   (var encode-fn
-        (fn [value id key]
-          (xt/x:return-encode value id key)))
-   (var wrap-fn
-        (fn [gen-fn wrap-fn]
-          (xt/x:return-wrap gen-fn wrap-fn)))
-   (var eval-fn
-        (fn [s re-wrap-fn]
-          (xt/x:return-eval s re-wrap-fn)))
-   (xt/x:json-decode
-    (eval-fn "return 1 + 1"
              (fn [f]
                (return
                 (wrap-fn f

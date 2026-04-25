@@ -438,6 +438,11 @@
   (l/emit-as :python [(python-tf-x-iter-native? '[_ it])])
   => #"hasattr")
 
+^{:refer std.lang.model.spec-xtalk.fn-python/+python-iter :added "4.1"}
+(fact "iter null"
+  (l/emit-as :python [(:default (:x-iter-null +python-iter+))])
+  => #"iter")
+
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-thread-spawn :added "4.0"}
 (fact "thread spawn"
   (l/emit-as :python [(python-tf-x-thread-spawn '[_ thunk])])

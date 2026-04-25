@@ -44,3 +44,20 @@
     [(boolean (re-find #"hello\(inc_fn\)" out))
      (nil? (re-find #"hello\(function \(x\)" out))])
   => [true true])
+
+(fact "preserves multi-value returns during lua rewrite"
+  (rewrite/lua-rewrite-stage
+   '(return nil "OK")
+   {:grammar lua/+grammar+})
+  => '(return nil "OK")
+
+  (rewrite/lua-rewrite-stage
+   '(fn [cb]
+      (return nil "OK"))
+   {:grammar lua/+grammar+})
+  => '(fn [cb]
+        (return nil "OK"))
+
+  (let [out (l/emit-as :lua '[(fn [cb] (return nil "OK"))])]
+    (boolean (re-find #"return nil,\s*'OK'" out)))
+  => true)
