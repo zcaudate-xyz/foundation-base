@@ -303,7 +303,8 @@
         :for-async   {:macro  #'tf-for-async   :emit :macro}
         :prototype-get       {:macro #'js-tf-prototype-get     :emit :macro}
         :prototype-set       {:macro #'js-tf-prototype-set     :emit :macro}
-        :prototype-create    {:macro #'js-tf-prototype-create  :emit :macro}
+        :prototype-create    {:macro #'js-tf-prototype-create  :emit :macro
+                              :op-spec {:allow-blocks true}}
         :prototype-tostring  {:emit :unit  :default "toString"}})
       (grammar/build:override fn/+js+)
       (grammar/build:extend

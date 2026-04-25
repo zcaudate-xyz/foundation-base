@@ -38,10 +38,9 @@
     (assoc :value/template (:macro entry))
 
     (and (= :macro (:emit entry))
+          (:macro entry)
           (not (contains? entry :value/standalone)))
-    (assoc :value/standalone
-           (and (keyword? (:op entry))
-                (clojure.string/starts-with? (name (:op entry)) "x-")))
+    (assoc :value/standalone true)
 
     (and (= :hard-link (:emit entry))
          (symbol? (:raw entry))

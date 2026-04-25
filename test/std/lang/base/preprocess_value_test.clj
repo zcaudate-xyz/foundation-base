@@ -3,7 +3,8 @@
   (:require [std.lang.base.emit-helper :as helper]
             [std.lang.base.grammar :as grammar]
             [std.lang.base.preprocess-value :refer :all]
-            [std.lang.model.spec-js :as js]))
+            [std.lang.model.spec-js :as js]
+            [std.lang.model.spec-lua :as lua]))
 
 (def +reserved+
   (-> (grammar/build)
@@ -43,8 +44,12 @@
         (. arr (push value))
         (return arr))
 
-  (value-standalone 'for:object js/+grammar+)
-  => nil
+  (value-standalone 'proto:create lua/+grammar+)
+  => '(fn [m]
+        (do
+          (var mt m)
+          (:= (. mt __index) mt)
+          (return mt)))
 
   (value-standalone 'hello
                     {:reserved {'hello {:emit :macro

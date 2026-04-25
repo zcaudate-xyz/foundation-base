@@ -226,7 +226,8 @@
         :yield      {:macro #'tf-yield      :emit :macro}
         :prototype-get       {:emit :alias :raw 'getmetatable}
         :prototype-set       {:emit :alias :raw 'setmetatable}
-        :prototype-create    {:macro #'lua-tf-prototype-create  :emit :macro}
+        :prototype-create    {:macro #'lua-tf-prototype-create  :emit :macro
+                              :op-spec {:allow-blocks true}}
         :prototype-tostring  {:emit :unit  :default "__tostring"}})
       (grammar/build:override fn/+lua+)
       (grammar/build:extend

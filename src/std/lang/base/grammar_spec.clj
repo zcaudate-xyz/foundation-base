@@ -317,7 +317,6 @@
    {:op :prototype-set       :symbol #{'proto:set}       :emit :abstract
     :op-spec {:arglists '([obj proto])}}
    {:op :prototype-create    :symbol #{'proto:create}    :emit :abstract
-    :op-spec {:allow-blocks true
-              :arglists '([m])}}
+    :op-spec {:arglists '([m])}}
    {:op :prototype-tostring  :symbol #{'proto:tostring}  :emit :abstract
     :op-spec {:arglists '([])}}])

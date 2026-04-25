@@ -202,6 +202,13 @@
                 :value/standalone true})
 
   (normalize-op-entry
+   {:op :prototype-create
+    :emit :macro
+    :macro #'std.lang.base.grammar-xtalk/tf-add})
+  => (contains {:value/template #'std.lang.base.grammar-xtalk/tf-add
+                :value/standalone true})
+
+  (normalize-op-entry
    {:op :helper
     :emit :hard-link
     :raw 'xt.lang.common-data/obj-keys})
