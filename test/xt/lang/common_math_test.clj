@@ -2,10 +2,21 @@
   (:use code.test)
   (:require [std.lang :as l]))
 
+^{:seedgen/root {:all true, :langs [:lua :python]}}
+(l/script- :js
+  {:runtime :basic
+   :require [[xt.lang.common-math :as xtm]
+             [xt.lang.spec-base :as xt]]})
+
 (l/script- :lua
- {:runtime :basic
-  :require [[xt.lang.common-math :as xtm]
-            [xt.lang.spec-base :as xt]]})
+  {:runtime :basic
+   :require [[xt.lang.common-math :as xtm]
+             [xt.lang.spec-base :as xt]]})
+
+(l/script- :python
+  {:runtime :basic
+   :require [[xt.lang.common-math :as xtm]
+             [xt.lang.spec-base :as xt]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -13,162 +24,415 @@
 
 ^{:refer xt.lang.common-math/abs :added "4.1"}
 (fact "returns the absolute value"
+
+  (!.js
+   [(xtm/abs -5)
+    (xtm/abs 5)])
+  => [5 5]
+
   (!.lua
+   [(xtm/abs -5)
+    (xtm/abs 5)])
+  => [5 5]
+
+  (!.py
    [(xtm/abs -5)
     (xtm/abs 5)])
   => [5 5])
 
 ^{:refer xt.lang.common-math/acos :added "4.1"}
 (fact "returns the arccosine"
+
+  (!.js
+    [(xtm/acos 1)
+     (xtm/acos -1)])
+  => (contains [(approx 0) (approx 3.14159)])
+
   (!.lua
     [(xtm/acos 1)
      (xtm/acos -1)])
-  => (contains [(approx 0) (approx 3.1415926535898)]))
+  => (contains [(approx 0) (approx 3.14159)])
+
+  (!.py
+    [(xtm/acos 1)
+     (xtm/acos -1)])
+  => (contains [(approx 0) (approx 3.14159)]))
 
 ^{:refer xt.lang.common-math/asin :added "4.1"}
 (fact "returns the arcsine"
+
+  (!.js
+    [(xtm/asin 0)
+     (xtm/asin 1)])
+  => (contains [(approx 0) (approx 1.57079)])
+
   (!.lua
     [(xtm/asin 0)
      (xtm/asin 1)])
-  => (contains [(approx 0) (approx 1.5707963267949)]))
+  => (contains [(approx 0) (approx 1.57079)])
+
+  (!.py
+    [(xtm/asin 0)
+     (xtm/asin 1)])
+  => (contains [(approx 0) (approx 1.57079)]))
 
 ^{:refer xt.lang.common-math/atan :added "4.1"}
 (fact "returns the arctangent"
+
+  (!.js
+    [(xtm/atan 0)
+     (xtm/atan 1)])
+  => (contains [(approx 0) (approx 0.78539)])
+
   (!.lua
     [(xtm/atan 0)
      (xtm/atan 1)])
-  => (contains [(approx 0) (approx 0.78539816339745)]))
+  => (contains [(approx 0) (approx 0.78539)])
+
+  (!.py
+    [(xtm/atan 0)
+     (xtm/atan 1)])
+  => (contains [(approx 0) (approx 0.78539)]))
 
 ^{:refer xt.lang.common-math/ceil :added "4.1"}
 (fact "rounds up to the nearest integer"
+
+  (!.js
+   [(xtm/ceil 1.2)
+    (xtm/ceil -1.2)])
+  => [2 -1]
+
   (!.lua
+   [(xtm/ceil 1.2)
+    (xtm/ceil -1.2)])
+  => [2 -1]
+
+  (!.py
    [(xtm/ceil 1.2)
     (xtm/ceil -1.2)])
   => [2 -1])
 
 ^{:refer xt.lang.common-math/cos :added "4.1"}
 (fact "returns the cosine"
+
+  (!.js
+   [(xtm/cos 0)
+    (xtm/cos 3.1415926535898)])
+  => (contains [(approx 1) (approx -1)])
+
   (!.lua
+   [(xtm/cos 0)
+    (xtm/cos 3.1415926535898)])
+  => (contains [(approx 1) (approx -1)])
+
+  (!.py
    [(xtm/cos 0)
     (xtm/cos 3.1415926535898)])
   => (contains [(approx 1) (approx -1)]))
 
 ^{:refer xt.lang.common-math/cosh :added "4.1"}
 (fact "returns the hyperbolic cosine"
+
+  (!.js
+    [(xtm/cosh 0)
+     (xtm/cosh 1)])
+  => (contains [(approx 1) (approx 1.54308)])
+
   (!.lua
     [(xtm/cosh 0)
      (xtm/cosh 1)])
-  => (contains [(approx 1) (approx 1.5430806348152)]))
+  => (contains [(approx 1) (approx 1.54308)])
+
+  (!.py
+    [(xtm/cosh 0)
+     (xtm/cosh 1)])
+  => (contains [(approx 1) (approx 1.54308)]))
 
 ^{:refer xt.lang.common-math/exp :added "4.1"}
 (fact "returns e raised to a power"
+
+  (!.js
+    [(xtm/exp 0)
+     (xtm/exp 1)])
+  => (contains [(approx 1) (approx 2.71828)])
+
   (!.lua
     [(xtm/exp 0)
      (xtm/exp 1)])
-  => (contains [(approx 1) (approx 2.718281828459)]))
+  => (contains [(approx 1) (approx 2.71828)])
+
+  (!.py
+    [(xtm/exp 0)
+     (xtm/exp 1)])
+  => (contains [(approx 1) (approx 2.71828)]))
 
 ^{:refer xt.lang.common-math/floor :added "4.1"}
 (fact "rounds down to the nearest integer"
+
+  (!.js
+   [(xtm/floor 1.8)
+    (xtm/floor -1.2)])
+  => [1 -2]
+
   (!.lua
+   [(xtm/floor 1.8)
+    (xtm/floor -1.2)])
+  => [1 -2]
+
+  (!.py
    [(xtm/floor 1.8)
     (xtm/floor -1.2)])
   => [1 -2])
 
 ^{:refer xt.lang.common-math/loge :added "4.1"}
 (fact "returns the natural logarithm"
+
+  (!.js
+   (xtm/loge 1))
+  => (approx 0)
+
   (!.lua
+   (xtm/loge 1))
+  => (approx 0)
+
+  (!.py
    (xtm/loge 1))
   => (approx 0))
 
 ^{:refer xt.lang.common-math/log10 :added "4.1"}
 (fact "returns the base-10 logarithm"
+
+  (!.js
+   [(xtm/log10 1)
+    (xtm/log10 1000)])
+  => (contains [(approx 0) (approx 3)])
+
   (!.lua
+   [(xtm/log10 1)
+    (xtm/log10 1000)])
+  => (contains [(approx 0) (approx 3)])
+
+  (!.py
    [(xtm/log10 1)
     (xtm/log10 1000)])
   => (contains [(approx 0) (approx 3)]))
 
 ^{:refer xt.lang.common-math/max :added "4.1"}
 (fact "returns the maximum value"
+
+  (!.js
+   [(xtm/max 3 7)
+    (xtm/max 3 7 5 1)])
+  => [7 7]
+
   (!.lua
+   [(xtm/max 3 7)
+    (xtm/max 3 7 5 1)])
+  => [7 7]
+
+  (!.py
    [(xtm/max 3 7)
     (xtm/max 3 7 5 1)])
   => [7 7])
 
-^{:refer xt.lang.common-math/mod
-  :added "4.1"}
+^{:refer xt.lang.common-math/mod :added "4.1"}
 (fact "returns the modulo"
+
+  ^{:seedgen/base  {:lua     {:expect [1 4]}
+                    :python  {:expect [1 4]}}}
+  (!.js
+    [(xtm/mod 10 3)
+     (xtm/mod -1 5)])
+  => [1 -1]
+
   (!.lua
-    ^{:lang-exceptions {:js {:expect [1 -1]}}}
+    [(xtm/mod 10 3)
+     (xtm/mod -1 5)])
+  => [1 4]
+
+  (!.py
     [(xtm/mod 10 3)
      (xtm/mod -1 5)])
   => [1 4])
 
 ^{:refer xt.lang.common-math/min :added "4.1"}
 (fact "returns the minimum value"
+
+  (!.js
+   [(xtm/min 3 7)
+    (xtm/min 3 7 5 1)])
+  => [3 1]
+
   (!.lua
+   [(xtm/min 3 7)
+    (xtm/min 3 7 5 1)])
+  => [3 1]
+
+  (!.py
    [(xtm/min 3 7)
     (xtm/min 3 7 5 1)])
   => [3 1])
 
 ^{:refer xt.lang.common-math/pow :added "4.1"}
 (fact "raises a number to a power"
+
+  (!.js
+   [(xtm/pow 2 5)
+    (xtm/pow 9 0.5)])
+  => [32 3]
+
   (!.lua
+   [(xtm/pow 2 5)
+    (xtm/pow 9 0.5)])
+  => [32 3]
+
+  (!.py
    [(xtm/pow 2 5)
     (xtm/pow 9 0.5)])
   => [32 3])
 
 ^{:refer xt.lang.common-math/quot :added "4.1"}
 (fact "returns floored division"
+
+  (!.js
+   [(xtm/quot 7 3)
+    (xtm/quot 9 3)])
+  => [2 3]
+
   (!.lua
+   [(xtm/quot 7 3)
+    (xtm/quot 9 3)])
+  => [2 3]
+
+  (!.py
    [(xtm/quot 7 3)
     (xtm/quot 9 3)])
   => [2 3])
 
 ^{:refer xt.lang.common-math/sin :added "4.1"}
 (fact "returns the sine"
+
+  (!.js
+   [(xtm/sin 0)
+    (xtm/sin 1.5707963267949)])
+  => (contains [(approx 0) (approx 1)])
+
   (!.lua
+   [(xtm/sin 0)
+    (xtm/sin 1.5707963267949)])
+  => (contains [(approx 0) (approx 1)])
+
+  (!.py
    [(xtm/sin 0)
     (xtm/sin 1.5707963267949)])
   => (contains [(approx 0) (approx 1)]))
 
 ^{:refer xt.lang.common-math/sinh :added "4.1"}
 (fact "returns the hyperbolic sine"
+
+  (!.js
+    [(xtm/sinh 0)
+     (xtm/sinh 1)])
+  => (contains [(approx 0) (approx 1.1752)])
+
   (!.lua
     [(xtm/sinh 0)
      (xtm/sinh 1)])
-  => (contains [(approx 0) (approx 1.1752011936438)]))
+  => (contains [(approx 0) (approx 1.1752)])
+
+  (!.py
+    [(xtm/sinh 0)
+     (xtm/sinh 1)])
+  => (contains [(approx 0) (approx 1.1752)]))
 
 ^{:refer xt.lang.common-math/sqrt :added "4.1"}
 (fact "returns the square root"
+
+  (!.js
+   [(xtm/sqrt 4)
+    (xtm/sqrt 0)])
+  => (contains [(approx 2) (approx 0)])
+
   (!.lua
+   [(xtm/sqrt 4)
+    (xtm/sqrt 0)])
+  => (contains [(approx 2) (approx 0)])
+
+  (!.py
    [(xtm/sqrt 4)
     (xtm/sqrt 0)])
   => (contains [(approx 2) (approx 0)]))
 
 ^{:refer xt.lang.common-math/tan :added "4.1"}
 (fact "returns the tangent"
+
+  (!.js
+    [(xtm/tan 0)
+     (xtm/tan 0.78539816339745)])
+  => (contains [(approx 0) (approx 1)])
+
   (!.lua
+    [(xtm/tan 0)
+     (xtm/tan 0.78539816339745)])
+  => (contains [(approx 0) (approx 1)])
+
+  (!.py
     [(xtm/tan 0)
      (xtm/tan 0.78539816339745)])
   => (contains [(approx 0) (approx 1)]))
 
 ^{:refer xt.lang.common-math/tanh :added "4.1"}
 (fact "returns the hyperbolic tangent"
+
+  (!.js
+    [(xtm/tanh 0)
+     (xtm/tanh 1)])
+  => (contains [(approx 0) (approx 0.76159)])
+
   (!.lua
     [(xtm/tanh 0)
      (xtm/tanh 1)])
-  => (contains [(approx 0) (approx 0.76159415595576)]))
+  => (contains [(approx 0) (approx 0.76159)])
+
+  (!.py
+    [(xtm/tanh 0)
+     (xtm/tanh 1)])
+  => (contains [(approx 0) (approx 0.76159)]))
 
 ^{:refer xt.lang.common-math/mod-pos :added "4.1"}
 (fact "returns a positive modulo"
+
+  (!.js
+   [(xtm/mod-pos -1 5)
+    (xtm/mod-pos 6 5)])
+  => [4 1]
+
   (!.lua
+   [(xtm/mod-pos -1 5)
+    (xtm/mod-pos 6 5)])
+  => [4 1]
+
+  (!.py
    [(xtm/mod-pos -1 5)
     (xtm/mod-pos 6 5)])
   => [4 1])
 
 ^{:refer xt.lang.common-math/mod-offset :added "4.1"}
 (fact "returns the closest modular offset"
+
+  (!.js
+   [(xtm/mod-offset 9 1 10)
+    (xtm/mod-offset 1 9 10)
+    (xtm/mod-offset 2 4 10)])
+  => [2 -2 2]
+
   (!.lua
+   [(xtm/mod-offset 9 1 10)
+    (xtm/mod-offset 1 9 10)
+    (xtm/mod-offset 2 4 10)])
+  => [2 -2 2]
+
+  (!.py
    [(xtm/mod-offset 9 1 10)
     (xtm/mod-offset 1 9 10)
     (xtm/mod-offset 2 4 10)])
@@ -176,28 +440,74 @@
 
 ^{:refer xt.lang.common-math/gcd :added "4.1"}
 (fact "returns the greatest common divisor"
+
+  (!.js
+   [(xtm/gcd 54 24)
+    (xtm/gcd 10 0)])
+  => [6 10]
+
   (!.lua
+   [(xtm/gcd 54 24)
+    (xtm/gcd 10 0)])
+  => [6 10]
+
+  (!.py
    [(xtm/gcd 54 24)
     (xtm/gcd 10 0)])
   => [6 10])
 
 ^{:refer xt.lang.common-math/lcm :added "4.1"}
 (fact "returns the least common multiple"
+
+  (!.js
+   [(xtm/lcm 4 6)
+    (xtm/lcm 3 7)])
+  => [12 21]
+
   (!.lua
+   [(xtm/lcm 4 6)
+    (xtm/lcm 3 7)])
+  => [12 21]
+
+  (!.py
    [(xtm/lcm 4 6)
     (xtm/lcm 3 7)])
   => [12 21])
 
 ^{:refer xt.lang.common-math/mix :added "4.1"}
 (fact "interpolates between two values"
+
+  (!.js
+   [(xtm/mix 0 10 0.5)
+    (xtm/mix 10 20 0.25)])
+  => [5 12.5]
+
   (!.lua
+   [(xtm/mix 0 10 0.5)
+    (xtm/mix 10 20 0.25)])
+  => [5 12.5]
+
+  (!.py
    [(xtm/mix 0 10 0.5)
     (xtm/mix 10 20 0.25)])
   => [5 12.5])
 
 ^{:refer xt.lang.common-math/sign :added "4.1"}
 (fact "returns the sign of a number"
+
+  (!.js
+   [(xtm/sign -10)
+    (xtm/sign 0)
+    (xtm/sign 10)])
+  => [-1 0 1]
+
   (!.lua
+   [(xtm/sign -10)
+    (xtm/sign 0)
+    (xtm/sign 10)])
+  => [-1 0 1]
+
+  (!.py
    [(xtm/sign -10)
     (xtm/sign 0)
     (xtm/sign 10)])
@@ -205,7 +515,20 @@
 
 ^{:refer xt.lang.common-math/round :added "4.1"}
 (fact "rounds to the nearest integer"
+
+  (!.js
+   [(xtm/round 1.2)
+    (xtm/round 1.7)
+    (xtm/round 2.5)])
+  => [1 2 3]
+
   (!.lua
+   [(xtm/round 1.2)
+    (xtm/round 1.7)
+    (xtm/round 2.5)])
+  => [1 2 3]
+
+  (!.py
    [(xtm/round 1.2)
     (xtm/round 1.7)
     (xtm/round 2.5)])
@@ -213,8 +536,26 @@
 
 ^{:refer xt.lang.common-math/clamp :added "4.1"}
 (fact "clamps a value between bounds"
+
+  (!.js
+   [(xtm/clamp 0 10 -3)
+    (xtm/clamp 0 10 7)
+    (xtm/clamp 0 10 12)])
+  => [0 7 10]
+
   (!.lua
    [(xtm/clamp 0 10 -3)
     (xtm/clamp 0 10 7)
     (xtm/clamp 0 10 12)])
+  => [0 7 10]
+
+  (!.py
+   [(xtm/clamp 0 10 -3)
+    (xtm/clamp 0 10 7)
+    (xtm/clamp 0 10 12)])
   => [0 7 10])
+
+(comment
+  
+  (s/seedgen-langadd 'xt.lang.common-math {:lang [:lua :python] :write true})
+  (s/seedgen-langremove 'xt.lang.common-math {:lang [:lua :python] :write true}))

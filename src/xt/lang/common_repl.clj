@@ -17,7 +17,8 @@
 
 (defn.xt socket-connect-raw
   [host port opts cb]
-  (xt-link/x:socket-connect host port opts cb))
+  (return
+   (xt-link/x:socket-connect host port opts cb)))
 
 (defn.xt socket-connect
   "connects a a socket to port"
@@ -42,7 +43,8 @@
   {:added "4.0"}
   [conn out]
   (xt-link/x:socket-send conn (xt/x:cat out"\n"))
-  (xt-link/x:socket-close conn))
+  (return
+   (xt-link/x:socket-close conn)))
 
 (defn.xt notify-socket
   "notifies the socket of a value"
@@ -67,7 +69,8 @@
                        "\r\n"
                        output))
   (xt-link/x:socket-send conn envelope)
-  (xt-link/x:socket-close conn))
+  (return
+   (xt-link/x:socket-close conn)))
 
 (defn.xt notify-socket-http
   "using the base socket implementation to notify on http protocol"
@@ -83,7 +86,8 @@
   "call a http notify function."
   {:added "4.0"}
   [host port value id key opts]
-  (xt-link/x:notify-http host port value id key opts))
+  (return
+   (xt-link/x:notify-http host port value id key opts)))
 
 (defn notify-form
   "creates the notify form"

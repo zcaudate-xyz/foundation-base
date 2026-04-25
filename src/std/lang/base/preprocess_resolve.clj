@@ -66,9 +66,24 @@
     (if (not (or preprocess-base/*macro-skip-deps*
                  (not deps)
                  (= 'defglobal op)
-                 (= 'defrun op)))
-      (vswap! deps conj sym-full))
-    sym-full))
+                  (= 'defrun op)))
+       (vswap! deps conj sym-full))
+     sym-full))
+
+(defn- fragment-template-args
+  [form template]
+  (let [arglist (or (-> template meta :arglists first)
+                    (let [args (second form)]
+                      (cond (vector? args)
+                            args
+
+                            (and (seq? args)
+                                 (vector? (first args)))
+                            (first args))))]
+    (if arglist
+      (vec arglist)
+      (f/error "Unable to derive standalone fragment args"
+               {:form form}))))
 
 (defn- process-fragment-entry
   [entry sym-full sym-module sym deps-fragment walk-fn]
@@ -86,13 +101,13 @@
 
           (or (collection/form? standalone)
               (symbol? standalone))
-          (walk-fn standalone)
-
-          :else
-          (let [args (second form)]
-            (list 'fn args
-                  (list 'return
-                        (apply template args)))))))
+           (walk-fn standalone)
+ 
+           :else
+           (let [args (fragment-template-args form template)]
+             (list 'fn args
+                   (list 'return
+                         (apply template args)))))))
 
 (defn process-namespaced-symbol
   "process namespaced symbols"

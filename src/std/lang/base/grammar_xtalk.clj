@@ -796,30 +796,23 @@
 
 (def +xt-functional-iter+      
   [{:op :x-iter-from-obj  :symbol #{'x:iter-from-obj}   :emit :abstract
-    :op-spec {:allow-blocks true
-              :arglists '([obj])}}
+    :op-spec {:arglists '([obj])}}
    {:op :x-iter-from-arr  :symbol #{'x:iter-from-arr}   :emit :abstract
-    :op-spec {:allow-blocks true
-              :arglists '([arr])}}
+    :op-spec {:arglists '([arr])}}
    {:op :x-iter-from      :symbol #{'x:iter-from}       :emit :abstract
-    :op-spec {:allow-blocks true
-              :arglists '([value])}}
+    :op-spec {:arglists '([value])}}
    {:op :x-iter-eq        :symbol #{'x:iter-eq}         :emit :abstract
-    :op-spec {:allow-blocks true
-              :arglists '([iter0 iter1 eq-fn])
+    :op-spec {:arglists '([iter0 iter1 eq-fn])
               :type [:fn [:xt/any :xt/any :xt/fn] :xt/bool]}}
    {:op :x-iter-null      :symbol #{'x:iter-null}       :emit :abstract
-    :op-spec {:allow-blocks true
-              :arglists '([])}}
+    :op-spec {:arglists '([])}}
    {:op :x-iter-next      :symbol #{'x:iter-next}       :emit :abstract
     :op-spec {:arglists '([iter])}}
    {:op :x-iter-has?      :symbol #{'x:iter-has?}       :emit :abstract
-    :op-spec {:allow-blocks true
-              :arglists '([iter])
+    :op-spec {:arglists '([iter])
               :type [:fn [:xt/any] :xt/bool]}}
    {:op :x-iter-native?   :symbol #{'x:iter-native?}    :emit :abstract
-    :op-spec {:allow-blocks true
-              :arglists '([iter])
+    :op-spec {:arglists '([iter])
               :type [:fn [:xt/any] :xt/bool]}}])
 
 ;;
@@ -867,24 +860,20 @@
 
 (def +xt-lang-random+
   [{:op :x-random         :symbol #{'x:random}          :emit :abstract
-    :op-spec {:allow-blocks true
-              :type  [:fn [] :xt/num]
+    :op-spec {:type  [:fn [] :xt/num]
               :arglists '([])}}])
 
 (def +xt-lang-time+
   [{:op :x-now-ms         :symbol #{'x:now-ms}          :emit :abstract
-    :op-spec {:allow-blocks true
-              :arglists '([])
+    :op-spec {:arglists '([])
               :type [:fn [] :xt/int]}}])
 
 (def +xt-lang-json+
   [{:op :x-json-encode      :symbol #{'x:json-encode}       :emit :abstract
-    :op-spec {:allow-blocks true
-              :arglists '([value])
+    :op-spec {:arglists '([value])
               :type [:fn [:xt/any] :xt/str]}}
    {:op :x-json-decode      :symbol #{'x:json-decode}       :emit :abstract
-    :op-spec {:allow-blocks true
-              :arglists '([expr])
+    :op-spec {:arglists '([expr])
               :type [:fn [:xt/str] :xt/any]}}])
 
 
@@ -894,23 +883,19 @@
 
 (def +xt-socket+
   [{:op :x-socket-connect :symbol #{'x:socket-connect} :emit :abstract
-    :op-spec {:allow-blocks true
-              :type [:fn [:xt/str :xt/int :xt/any :xt/any] :xt/any]
+    :op-spec {:type [:fn [:xt/str :xt/int :xt/any :xt/any] :xt/any]
               :arglists '([host port opts cb])}}
    {:op :x-socket-send :symbol #{'x:socket-send} :emit :abstract
-    :op-spec {:allow-blocks true
-              :type [:fn [:xt/any :xt/str] :xt/any]
+    :op-spec {:type [:fn [:xt/any :xt/str] :xt/any]
               :arglists '([conn message])}}
    {:op :x-socket-close :symbol #{'x:socket-close} :emit :abstract
-    :op-spec {:allow-blocks true
-              :type [:fn [:xt/any] :xt/any]
+    :op-spec {:type [:fn [:xt/any] :xt/any]
               :arglists '([conn])}}])
 
 (def +xt-notify-http+
   [{:op :x-notify-http     :symbol #{'x:notify-http}     :emit :hard-link
     :raw 'xt.lang.common-repl/notify-socket-http
-    :op-spec {:allow-blocks true
-              :type  [:fn [:xt/str :xt/num :xt/any :xt/str :xt/str :xt/any] :xt/any]
+    :op-spec {:type  [:fn [:xt/str :xt/num :xt/any :xt/str :xt/str :xt/any] :xt/any]
               :arglists '([host port value id key opts])}}])
 
 
@@ -920,15 +905,13 @@
 
 (def +xt-runtime-thread+
   [{:op :x-thread-spawn   :symbol #{'x:thread-spawn}    :emit :abstract
-    :op-spec {:allow-blocks true
-              :arglists '([f])
+    :op-spec {:arglists '([f])
               :type [:fn [:xt/fn] :xt/any]}}
    {:op :x-thread-join    :symbol #{'x:thread-join}     :emit :abstract
     :op-spec {:arglists '([thread])
               :type [:fn [:xt/any] :xt/any]}}
    {:op :x-with-delay     :symbol #{'x:with-delay}      :emit :abstract
-    :op-spec {:allow-blocks true
-              :arglists '([ms value])
+    :op-spec {:arglists '([ms value])
               :type [:fn [:xt/int :xt/any] :xt/any]}}
    {:op :x-start-interval :symbol #{'x:start-interval}  :emit :abstract
     :op-spec {:arglists '([ms f])
@@ -939,18 +922,15 @@
 
 (def +xt-runtime-shell+
   [{:op :x-shell          :symbol #{'x:shell}           :emit :abstract
-    :op-spec {:allow-blocks true
-              :type [:fn [:xt/str :xt/any :xt/any] :xt/any]
+    :op-spec {:type [:fn [:xt/str :xt/any :xt/any] :xt/any]
               :arglists '([command opts cb])}}])
 
 (def +xt-runtime-file+
   [{:op :x-slurp-file     :symbol #{'x:slurp-file}    :emit :abstract
-    :op-spec {:allow-blocks true
-              :arglists '([path opts cb])
+    :op-spec {:arglists '([path opts cb])
               :type [:fn [:xt/str :xt/any :xt/any] :xt/any]}}
    {:op :x-spit-file      :symbol #{'x:spit-file}     :emit :abstract
-    :op-spec {:allow-blocks true
-              :arglists '([path value opts cb])
+    :op-spec {:arglists '([path value opts cb])
               :type [:fn [:xt/str :xt/any :xt/any :xt/any] :xt/any]}}])
 
 
@@ -960,20 +940,16 @@
 
 (def +xt-runtime-b64+
   [{:op :x-b64-encode      :symbol #{'x:b64-encode}     :emit :abstract
-    :op-spec {:allow-blocks true
-              :arglists '([value])
+    :op-spec {:arglists '([value])
               :type [:fn [:xt/str] :xt/str]}}
    {:op :x-b64-decode      :symbol #{'x:b64-decode}     :emit :abstract
-    :op-spec {:allow-blocks true
-              :arglists '([value])
+    :op-spec {:arglists '([value])
               :type [:fn [:xt/str] :xt/str]}}])
 
 (def +xt-runtime-uri+
   [{:op :x-uri-encode      :symbol #{'x:uri-encode}     :emit :abstract
-    :op-spec {:allow-blocks true
-              :arglists '([value])
+    :op-spec {:arglists '([value])
               :type [:fn [:xt/str] :xt/str]}}
    {:op :x-uri-decode      :symbol #{'x:uri-decode}     :emit :abstract
-    :op-spec {:allow-blocks true
-              :arglists '([value])
+    :op-spec {:arglists '([value])
               :type [:fn [:xt/str] :xt/str]}}])

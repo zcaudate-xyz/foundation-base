@@ -308,18 +308,21 @@
   "returns the encoded"
   {:added "4.0"}
   [out id key]
-  (xt/x:return-encode out id key))
+  (return
+   (xt/x:return-encode out id key)))
 
 (defn.xt return-wrap
   "returns a wrapped call"
   {:added "4.0"}
   [f]
-  (xt/x:return-wrap f -/return-encode))
+  (return
+   (xt/x:return-wrap f -/return-encode)))
 
 (defn.xt return-eval
   "evaluates a returns a string"
   {:added "4.0"}
   [s]
-  (xt/x:return-eval s -/return-wrap))
+  (return
+   (xt/x:return-eval s -/return-wrap)))
 
 

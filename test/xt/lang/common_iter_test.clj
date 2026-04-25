@@ -8,9 +8,21 @@
              [xt.lang.common-lib :as k]
              [xt.lang.spec-base :as xt]]})
 
+(l/script- :js
+  {:runtime :basic
+   :require [[xt.lang.common-iter :as it]
+             [xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]]})
+
+(l/script- :python
+  {:runtime :basic
+   :require [[xt.lang.common-iter :as it]
+             [xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]]})
+
 (fact:global
-  {:setup [(l/rt:restart)]
-   :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)]
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.common-iter/iter-eq :added "4.1"}
 (fact "checks that two iterators are equal"
@@ -32,9 +44,16 @@
 
 ^{:refer xt.lang.common-iter/iter-null :added "4.1"}
 (fact "creates a null iterator"
+
   (!.lua
-   (it/arr< (it/iter-null)))
-  => {})
+    (it/arr< (it/iter-null)))
+  => {}
+
+  (!.js
+    (it/arr< (it/iter-null)))
+  
+  (!.py
+    (it/arr< (it/iter-null))))
 
 ^{:refer xt.lang.common-iter/iter? :added "4.1"}
 (fact "checks if the input is an iterator"
@@ -193,3 +212,10 @@
   => [[0 2 4 6 8]
       [0 3 6 9]
       [1 5 9]])
+
+
+
+(comment
+  (s/snapto)
+  (s/seedgen-langadd 'xt.lang.common-lib {:lang [:lua :python] :write true})
+  (s/seedgen-langremove 'xt.lang.common-lib {:lang [:lua :python] :write true}))
