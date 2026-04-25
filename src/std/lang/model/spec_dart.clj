@@ -195,7 +195,11 @@
   "nil-safe ternary transform for dart-specific rewrites"
   {:added "4.1"}
   [[_ test then else]]
-  (list :? (list 'x:not-nil? test) then else))
+  (list :? (list 'and
+                 (list 'x:not-nil? test)
+                 (list 'not= false test))
+        then
+        else))
 
 (def +features+
   (-> (grammar/build :exclude [:pointer
@@ -211,10 +215,10 @@
          :for-return  {:macro #'tf-for-return :emit :macro}
          :for-try     {:macro #'tf-for-try    :emit :macro}
          :for-async   {:macro #'tf-for-async  :emit :macro}
-         :with-global {:value true :raw "globalThis"}})
-       (grammar/build:override fn-dart/+dart+)
-       (grammar/build:extend
-        {:var-let      {:op :var-let      :symbol #{'var}          :macro #'dart-var        :emit :macro}
+         :with-global {:value true :raw "__globals__"}})
+        (grammar/build:override fn-dart/+dart+)
+        (grammar/build:extend
+         {:var-let      {:op :var-let      :symbol #{'var}          :macro #'dart-var        :emit :macro}
          :dart-or      {:op :dart-or      :symbol #{'dart:or}      :emit :infix             :raw "??"}
          :dart-ternary {:op :dart-ternary :symbol #{'dart:ternary} :macro #'dart-tf-ternary :emit :macro}})))
 

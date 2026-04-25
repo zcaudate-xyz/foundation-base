@@ -31,6 +31,16 @@
   (l/emit-as :dart [(dart-tf-x-apply '[_ f args])])
   => #"Function\.apply")
 
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-eq :added "4.1"}
+(fact "iter equality stays as a returnable iife in function bodies"
+  (let [out (l/emit-as :dart ['(fn [it0 it1 eq-fn]
+                                 (return (x:iter-eq it0 it1 eq-fn)))])]
+    [(boolean (re-find #"return\s+\(\(\)\s*\{" out))
+     (boolean (re-find #"while\s*\(" out))
+     (boolean (re-find #"dart_callback__" out))
+     (boolean (re-find #"return while" out))])
+  => [true true false false])
+
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-now-ms :added "4.1"}
 (fact "gets current time in milliseconds"
   (l/emit-as :dart [(dart-tf-x-now-ms '[_])])
@@ -549,6 +559,13 @@
 (fact "encodes return values"
   (emit-dart (dart-tf-x-return-encode '[_ out id key]))
   => #"json\.encode")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-return-encode :added "4.1"}
+(fact "encodes aggregate return types with explicit type tags"
+  (let [out (emit-dart (dart-tf-x-return-encode '[_ out id key]))]
+    [(boolean (re-find #"\"return\": \"array\"" out))
+     (boolean (re-find #"\"return\": \"object\"" out))])
+  => [true true])
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-return-wrap :added "4.1"}
 (fact "wraps return handlers"

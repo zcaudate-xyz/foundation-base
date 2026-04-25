@@ -802,10 +802,10 @@
    {:op :x-iter-from      :symbol #{'x:iter-from}       :emit :abstract
     :op-spec {:arglists '([value])}}
    {:op :x-iter-eq        :symbol #{'x:iter-eq}         :emit :abstract
-    :op-spec {:arglists '([iter0 iter1 eq-fn])
-              :type [:fn [:xt/any :xt/any :xt/fn] :xt/bool]}}
+     :op-spec {:arglists '([iter0 iter1 eq-fn])
+               :type [:fn [:xt/any :xt/any :xt/fn] :xt/bool]}}
    {:op :x-iter-null      :symbol #{'x:iter-null}       :emit :abstract
-    :op-spec {:arglists '([])}}
+     :op-spec {:arglists '([])}}
    {:op :x-iter-next      :symbol #{'x:iter-next}       :emit :abstract
     :op-spec {:arglists '([iter])}}
    {:op :x-iter-has?      :symbol #{'x:iter-has?}       :emit :abstract

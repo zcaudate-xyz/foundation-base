@@ -98,6 +98,26 @@
     (add))
   => "ERR")
 
+^{:refer xt.lang.spec-base/proto:get :added "4.1"}
+(fact "retrieves the attached prototype object"
+
+  (!.dt
+    (var obj {})
+    (var proto (xt/proto:create {:label "proto"}))
+    (xt/proto:set obj proto)
+    (xt/x:obj-keys  (xt/proto:get obj)))
+  => (satisfies (fn [out]
+                  (boolean
+                   (re-find #"Proto set not supported in Dart"
+                            (str out))))))
+
+^{:refer xt.lang.spec-base/proto:tostring :added "4.1"}
+(fact "returns the native string hook key"
+
+  (!.dt
+    (xt/proto:tostring))
+  => "toString")
+
 ^{:refer xt.lang.spec-base/x:get-idx :added "4.1"}
 (fact "reads the first indexed value"
 
@@ -240,7 +260,10 @@
     (var err-fn (fn []
                   (xt/x:err "ERR")))
     (err-fn))
-  => #"(?s)Unhandled exception:.*ERR.*")
+  => (satisfies (fn [out]
+                  (boolean
+                   (re-find #"Unhandled exception:[\s\S]*ERR"
+                            (str out))))))
 
 ^{:refer xt.lang.spec-base/x:type-native :added "4.1"}
 (fact "expands and emits the lua type helper"
@@ -1032,7 +1055,10 @@
 
   (!.dt
     (xt/x:eval "1 + 1"))
-  => #"(?s).*eval not supported in Dart.*")
+  => (satisfies (fn [out]
+                  (boolean
+                   (re-find #"eval not supported in Dart"
+                            (str out))))))
 
 ^{:refer xt.lang.spec-base/x:apply :added "4.1"}
 (fact "applies array arguments to functions"
@@ -1077,16 +1103,14 @@
 (fact "checks iterator equality in js"
 
   (!.dt
-    (var eq-fn (fn [it0 it1 eq-fn]
-                 (xt/x:iter-eq it0 it1 eq-fn)))
-    [(eq-fn (xt/x:iter-from-arr [1 2 3])
-            (xt/x:iter-from-arr [1 2 3])
-            (fn [a b]
-              (return (== a b))))
-     (eq-fn (xt/x:iter-from-arr [1 2 3])
-            (xt/x:iter-from-arr [1 2 4])
-            (fn [a b]
-              (return (== a b))))])
+    [(xti/iter-eq (xt/x:iter-from-arr [1 2 3])
+                  (xt/x:iter-from-arr [1 2 3])
+                  (fn [a b]
+                    (return (== a b))))
+     (xti/iter-eq (xt/x:iter-from-arr [1 2 3])
+                  (xt/x:iter-from-arr [1 2 4])
+                  (fn [a b]
+                    (return (== a b))))])
   => [true false])
 
 ^{:refer xt.lang.spec-base/x:iter-null :added "4.1"}
@@ -1187,7 +1211,10 @@
                          (fn [out]
                            (return
                             (encode-fn out "id-A" "key-B")))))))))
-  => #"(?s).*eval not supported in Dart.*")
+  => (satisfies (fn [out]
+                  (boolean
+                   (re-find #"eval not supported in Dart"
+                            (str out))))))
 
 ^{:refer xt.lang.spec-base/x:bit-and :added "4.1"}
 (fact "computes bitwise and"
@@ -1278,7 +1305,10 @@
   (!.dt
     (do:>
      (x:throw "ERROW")))
-  => #"(?s)Unhandled exception:.*ERROW.*")
+  => (satisfies (fn [out]
+                  (boolean
+                   (re-find #"Unhandled exception:[\s\S]*ERROW"
+                            (str out))))))
 
 ^{:refer xt.lang.spec-base/x:now-ms :added "4.1"}
 (fact "expands and emits a millisecond time expression"

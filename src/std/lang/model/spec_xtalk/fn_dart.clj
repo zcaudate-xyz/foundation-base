@@ -324,12 +324,13 @@
 (defn dart-tf-x-iter-eq
   [[_ a b eq-fn]]
   (template/$
-   (do (while (. ~a (moveNext))
-         (if (not (. ~b (moveNext)))
-           (return false))
-         (if (not (~eq-fn (. ~a current) (. ~b current)))
-           (return false)))
-       (return (not (. ~b (moveNext)))))))
+   ((fn []
+      (while (. ~a (moveNext))
+        (if (not (. ~b (moveNext)))
+          (return false))
+        (if (not (~eq-fn (. ~a current) (. ~b current)))
+          (return false)))
+      (return (not (. ~b (moveNext))))))))
 (defn dart-tf-x-iter-from [[_ x]] (list '. x 'iterator))
 (defn dart-tf-x-iter-from-arr [[_ arr]] (list '. arr 'iterator))
 (defn dart-tf-x-iter-from-obj
@@ -399,16 +400,17 @@
            (return (json.encode {"id" ~id "key" ~key "type" "data" "return" "number" "value" ~out})))
          (if (== "bool" ~outtype)
            (return (json.encode {"id" ~id "key" ~key "type" "data" "return" "boolean" "value" ~out})))
-         (if (or (== "List" ~outtype)
-                 (. ~outtype (contains "List"))
-                 (== "Map" ~outtype)
-                 (. ~outtype (contains "Map")))
-           (return (json.encode {"id" ~id "key" ~key "type" "data" "value" ~out})))
-         (if (or (. ~outtype (contains "Function"))
-                 (. ~outtype (contains "=>"))
-                 (. ~outstr (startsWith "Closure")))
-           (return (json.encode {"id" ~id "key" ~key "type" "raw" "return" "function" "value" ~outstr})))
-         (return (json.encode {"id" ~id "key" ~key "type" "raw" "return" (. ~outtype (toLowerCase)) "value" ~outstr}))))))
+          (if (or (== "List" ~outtype)
+                  (. ~outtype (contains "List")))
+            (return (json.encode {"id" ~id "key" ~key "type" "data" "return" "array" "value" ~out})))
+          (if (or (== "Map" ~outtype)
+                  (. ~outtype (contains "Map")))
+            (return (json.encode {"id" ~id "key" ~key "type" "data" "return" "object" "value" ~out})))
+          (if (or (. ~outtype (contains "Function"))
+                  (. ~outtype (contains "=>"))
+                  (. ~outstr (startsWith "Closure")))
+            (return (json.encode {"id" ~id "key" ~key "type" "raw" "return" "function" "value" ~outstr})))
+          (return (json.encode {"id" ~id "key" ~key "type" "raw" "return" (. ~outtype (toLowerCase)) "value" ~outstr}))))))
 
 (defn dart-tf-x-return-wrap
   [[_ f encode-fn]]

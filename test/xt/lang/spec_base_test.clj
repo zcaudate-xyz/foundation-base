@@ -259,7 +259,8 @@
 ^{:refer xt.lang.spec-base/proto:get :added "4.1"}
 (fact "retrieves the attached prototype object"
 
-  ^{:seedgen/base {:python {:suppress true}}}
+  ^{:seedgen/base {:all    {:suppress true}
+                   :lua    {:suppress false}}}
   (!.js
     (var obj {})
     (var proto (xt/proto:create {:label "proto"}))
@@ -329,7 +330,8 @@
 ^{:refer xt.lang.spec-base/proto:tostring :added "4.1"}
 (fact "returns the native string hook key"
 
-  ^{:seedgen/base {:lua    {:expect "__tostring"}
+  ^{:seedgen/base {:all    {:suppress true}
+                   :lua    {:suppress false :expect "__tostring"}
                    :python {:suppress true}}}
   (!.js
     (xt/proto:tostring))
@@ -644,6 +646,9 @@
 
 ^{:refer xt.lang.spec-base/x:err :added "4.1"}
 (fact "expands and emits a lua error form"
+
+  ^{:seedgen/base {:dart {:expect (satisfies #(and (string? %)
+                                                   (re-find #"(?s).*Unhandled exception:.*ERR.*" %)))}}}
 
   (!.js
     (var err-fn (fn []
@@ -2373,6 +2378,9 @@
 ^{:refer xt.lang.spec-base/x:eval :added "4.1"}
 (fact "evaluates javascript expressions"
 
+  ^{:seedgen/base {:dart {:expect (satisfies #(and (string? %)
+                                                   (re-find #"(?s).*eval not supported in Dart.*" %)))}}}
+
   (!.js
     (xt/x:eval "1 + 1"))
   => 2
@@ -2641,7 +2649,9 @@
 (fact "evaluates code through wrapped return handlers"
 
   ^{:seedgen/base   {:lua    {:transform {"1 + 1"   "return 1 + 1" }}
-                     :python {:suppress true}}}
+                     :python {:suppress true}
+                     :dart   {:expect (satisfies #(and (string? %)
+                                                       (re-find #"(?s).*eval not supported in Dart.*" %)))}}}
   (!.js
    (var encode-fn
         (fn [value id key]
@@ -2862,6 +2872,9 @@
 
 ^{:refer xt.lang.spec-base/x:throw :added "4.1"}
 (fact "expands to the canonical throw form"
+
+  ^{:seedgen/base {:dart {:expect (satisfies #(and (string? %)
+                                                   (re-find #"(?s).*Unhandled exception:.*ERROW.*" %)))}}}
 
   (!.js
     (do:>

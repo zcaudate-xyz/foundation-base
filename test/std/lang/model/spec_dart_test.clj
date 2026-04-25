@@ -33,6 +33,13 @@
   (l/emit-as :dart ['(x:arr-push items 1)])
   => "items.add(1)")
 
+(fact "dart globals target the injected runtime map"
+  (let [out (l/emit-as :dart ['(do (x:global-set HELLO 1)
+                                   (x:global-has? HELLO))])]
+    [(boolean (re-find #"__globals__" out))
+     (boolean (re-find #"globalThis" out))])
+  => [true false])
+
 ^{:refer std.lang.model.spec-dart/dart-map-key :added "4.1"}
 (fact "emits map keys for dart"
 

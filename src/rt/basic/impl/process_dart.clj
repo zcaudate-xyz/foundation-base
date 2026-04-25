@@ -217,18 +217,23 @@
                            :as opts
                            :or {trim str/trim-newline}}]
   (let [package-root  (ensure-dart-package-context root input-body)
-        raw-output    (fn [{:keys [exit out err]}]
-                        (let [out-lines (->> (str/split-lines (trim out))
-                                             (remove empty?)
-                                             seq)
-                              err-lines (->> (str/split-lines (trim err))
-                                             (remove empty?)
-                                             seq)]
-                          [exit (or out-lines err-lines [])]))
-        stderr-output (fn [{:keys [out err]}]
-                        (trim (or (not-empty err)
-                                  out
-                                  "")))]
+         raw-output    (fn [{:keys [exit out err]}]
+                         (let [out-lines (->> (str/split-lines (trim out))
+                                              (remove empty?)
+                                              seq)
+                               err-lines (->> (str/split-lines (trim err))
+                                              (remove empty?)
+                                              seq)]
+                           [exit (or out-lines err-lines [])]))
+         stdout-output (fn [{:keys [out]}]
+                         (or (->> (str/split-lines (trim out))
+                                  (remove empty?)
+                                  last)
+                             ""))
+         stderr-output (fn [{:keys [out err]}]
+                         (trim (or (not-empty err)
+                                   out
+                                   "")))]
     (if package-root
       (let [script-dir (doto (java.io.File. (str package-root "/bin"))
                          (.mkdirs))
@@ -255,14 +260,14 @@
                              normalize-dart-source
                              ensure-dart-imports))
           (let [run-ret (run! run-args)]
-            (if raw
-              (raw-output run-ret)
-              (if (zero? (:exit run-ret))
-                (trim (:out run-ret))
-                (if stderr
-                  (stderr-output run-ret)
-                  (f/error "Twostep execution failed"
-                           {:args run-args
+             (if raw
+               (raw-output run-ret)
+               (if (zero? (:exit run-ret))
+                 (stdout-output run-ret)
+                 (if stderr
+                   (stderr-output run-ret)
+                   (f/error "Twostep execution failed"
+                            {:args run-args
                             :root package-root
                             :file tmp-file
                             :result run-ret})))))
@@ -324,7 +329,7 @@
                   :else
                   (let [run-ret (run! run-args)]
                     (if (zero? (:exit run-ret))
-                      (trim (:out run-ret))
+                      (stdout-output run-ret)
                       (if stderr
                         (stderr-output run-ret)
                         (f/error "Twostep execution failed"

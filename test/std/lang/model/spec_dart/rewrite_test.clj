@@ -47,19 +47,26 @@
 
 (fact "adds dart-specific nil-coalesce ops"
   (dart/dart-tf-ternary '(dart:ternary a out {}))
-  => '(:? (x:not-nil? a) out {})
+  => '(:? (and (x:not-nil? a)
+               (not= false a))
+           out
+           {})
 
   (l/emit-as :dart ['(var a (dart:or b {}))])
   => "var a = b ?? <dynamic, dynamic>{}"
 
-  (l/emit-as :dart ['(return (dart:ternary a out {}))])
-  => "return (null != a) ? out : <dynamic, dynamic>{}")
+  (let [out (l/emit-as :dart ['(return (dart:ternary a out {}))])]
+    [(str/includes? out "null != a")
+     (str/includes? out "false != a")
+     (str/includes? out "runtimeType")])
+  => [true true false])
 
 (fact "emits rewritten Dart defaults without iifes"
   (let [or-out      (l/emit-as :dart ['(var a (or a b c))])
         ternary-out (l/emit-as :dart ['(return (:? a out {}))])]
     [(str/includes? or-out "??")
      (str/includes? or-out "runtimeType")
-     (str/includes? ternary-out "(null != a) ? out : <dynamic, dynamic>{}")
+     (str/includes? ternary-out "null != a")
+     (str/includes? ternary-out "false != a")
      (str/includes? ternary-out "runtimeType")])
-  => [true false true false])
+  => [true false true true false])
