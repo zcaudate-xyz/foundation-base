@@ -61,14 +61,13 @@
       (binding [*ns* (the-ns ns-sym)]
         (refer 'clojure.core)
         (impl/with:library [+library+]
-          (script/script-support-import (l/get-book (l/runtime-library) :js)))
-        [(-> (resolve 'defvar.js) meta :macro)
+          [(first (script/script-support-import (l/get-book (l/runtime-library) :js)))
          (-> (macroexpand-1 '(defvar.js JS_SAMPLE [] (return 1)))
              first
-             first)])
+             first)]))
       (finally
         (remove-ns ns-sym))))
-  => '[true defn.js]
+  => '[#{defvar.js} defn.js]
 
   (let [ns-sym 'std.lang.base.script-test.support-manual
         _      (when (find-ns ns-sym)

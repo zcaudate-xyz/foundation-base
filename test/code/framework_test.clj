@@ -20,8 +20,8 @@
   ;;[(#{<def forms>} | -hello- & _)]
   => vector?
 
-  *toplevel-forms*
-  => (contains #{'defvar.lua 'defvar.py}))
+  (every? *toplevel-forms* '[defvar.lua defvar.py])
+  => true)
 
 ^{:refer code.framework/analyse-source-function :added "3.0"}
 (fact "analyzes a single function definition within a source file, used as a helper for `analyse-source-code`"

@@ -107,7 +107,10 @@
   (->> [(:script/support book)
         (:script/support module)
         (:script/support config)]
-       flatten
+       (mapcat (fn [support]
+                 (cond (nil? support) []
+                       (coll? support) support
+                       :else [support])))
        (remove nil?)
        distinct
        vec))

@@ -201,7 +201,7 @@
                   (first sym-id)
                   sym-id)
         sym-key (f/strn sym-id)
-        [doc attr more] (f/fn:init-args doc? attrs? more)
+        [doc attr more] (fn/fn:init-args doc? attrs? more)
         _      [doc attr]
         more   (if (vector? (first more))
                  more

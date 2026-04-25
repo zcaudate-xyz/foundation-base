@@ -451,7 +451,7 @@
     (try
       (binding [*ns* (the-ns ns-sym)]
         (refer 'clojure.core)
-        (macro/intern-supports :js (:grammar (lib/get-book +library+ :js)) [:defvar]))
+        (macro/intern-supports :js js/+grammar+ [:defvar]))
       (finally
         (remove-ns ns-sym))))
   => '[#{defvar.js} #{defvar.js}])
