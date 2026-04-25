@@ -438,17 +438,24 @@
                              (strip-seedgen-control-meta-string
                               (pr-str input-override))))
                          (replace-runtime-lang-string
-                          (render-item-string root-item)
-                          lang))]
+                           (render-item-string root-item)
+                           lang))]
     (apply-item-transform-string generated-str root-item lang)))
+
+(defn- render-generated-expected-string
+  [root-item lang]
+  (let [expect-override (item-base-override root-item lang :expect)]
+    (if (nil? expect-override)
+      (some-> root-item
+              :expected
+              render-item-string
+              (apply-item-transform-string root-item lang))
+      (pr-str expect-override))))
 
 (defn- render-generated-check-clause
   [root-item lang]
-  (let [expr-str        (render-generated-item-string root-item lang)
-        expect-override (item-base-override root-item lang :expect)
-        expected-str    (if (nil? expect-override)
-                          (some-> root-item :expected render-item-string)
-                          (pr-str expect-override))]
+  (let [expr-str     (render-generated-item-string root-item lang)
+        expected-str (render-generated-expected-string root-item lang)]
     (render-clause-snippet "  " expr-str expected-str)))
 
 (declare render-target-runtime-item)

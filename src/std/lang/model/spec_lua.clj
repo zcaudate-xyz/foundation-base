@@ -16,11 +16,25 @@
             [std.lib.foundation :as f]
             [std.lib.template :as template]))
 
-;;
-;; LANG
-;;
+(defn lua-tf-incby
+  "lowers `:+=` into plain assignment"
+  {:added "4.1"}
+  [[_ target value]]
+  (list := target (list '+ target value)))
 
-(defn tf-local
+(defn lua-tf-decby
+  "lowers `:-=` into plain assignment"
+  {:added "4.1"}
+  [[_ target value]]
+  (list := target (list '- target value)))
+
+(defn lua-tf-mulby
+  "lowers `:*=` into plain assignment"
+  {:added "4.1"}
+  [[_ target value]]
+  (list := target (list '* target value)))
+
+(defn lua-tf-local
   "a more flexible `var` replacement"
   {:added "4.0"}
   [[_ decl & args]]
@@ -45,7 +59,7 @@
             
             :else (list 'var* :local decl := bound)))))
 
-(defn tf-c-ffi
+(defn lua-tf-c-ffi
   "transforms a c ffi block"
   {:added "4.0"}
   [[_ & forms]]
@@ -82,14 +96,14 @@
          :else
          (str  "[" (common/*emit-fn* key grammar mopts) "]"))))
 
-(defn tf-for-object
+(defn lua-tf-for-object
   "for object transform"
   {:added "4.0"}
   [[_ [[k v] m] & body]]
   (apply list 'for [[k v] :in (list 'pairs m)]
          body))
 
-(defn tf-for-array
+(defn lua-tf-for-array
   "for array transform"
   {:added "4.0"}
   [[_ [e arr] & body]]
@@ -99,21 +113,21 @@
     (apply list 'for [['_ e] :in (list 'ipairs arr)]
            body)))
 
-(defn tf-for-iter
+(defn lua-tf-for-iter
   "for iter transform"
   {:added "4.0"}
   [[_ [e it] & body]]
   (apply list 'for [e :in it]
          body))
 
-(defn tf-for-index
+(defn lua-tf-for-index
   "for index transform"
   {:added "4.0"}
   [[_ [i [start end step :as range]] & body]]
   (apply list 'for [i := (list 'quote [start end (or step 1)])]
            body))
 
-(defn tf-for-return
+(defn lua-tf-for-return
   "for return transform"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error final]}]]
@@ -137,7 +151,7 @@
                       ~(if final (list 'return success) success)
                       ~(if final (list 'return error) error))))))
 
-(defn tf-for-try
+(defn lua-tf-for-try
   "for try transform"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error]}]]
@@ -149,7 +163,7 @@
              (do* (var ~err := out)
                   ~@(if error [error]))))))
 
-(defn tf-for-async
+(defn lua-tf-for-async
   "for async transform"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error finally]}]]
@@ -160,13 +174,13 @@
                      :error ~error})
           ~@(if finally [finally])))))
 
-(defn tf-yield
+(defn lua-tf-yield
   "yield transform"
   {:added "4.0"}
   [[_ e]]
   (list 'coroutine.yield e))
 
-(defn tf-defgen
+(defn lua-tf-defgen
   "defgen transform"
   {:added "4.0"}
   [[_ sym args & body]]
@@ -215,15 +229,15 @@
         :and        {:raw "and"}
         :or         {:raw "or"}
         :neq        {:raw "~="}
-        :for-object {:macro #'tf-for-object :emit :macro}
-        :for-array  {:macro #'tf-for-array  :emit :macro}
-        :for-iter   {:macro #'tf-for-iter   :emit :macro}
-        :for-index  {:macro #'tf-for-index  :emit :macro}
-        :for-return {:macro #'tf-for-return :emit :macro}
-        :for-try    {:macro #'tf-for-try    :emit :macro}
-        :for-async  {:macro #'tf-for-async  :emit :macro}
-        :defgen     {:macro #'tf-defgen     :emit :macro}
-        :yield      {:macro #'tf-yield      :emit :macro}
+        :for-object {:macro #'lua-tf-for-object :emit :macro}
+        :for-array  {:macro #'lua-tf-for-array  :emit :macro}
+        :for-iter   {:macro #'lua-tf-for-iter   :emit :macro}
+        :for-index  {:macro #'lua-tf-for-index  :emit :macro}
+        :for-return {:macro #'lua-tf-for-return :emit :macro}
+        :for-try    {:macro #'lua-tf-for-try    :emit :macro}
+        :for-async  {:macro #'lua-tf-for-async  :emit :macro}
+        :defgen     {:macro #'lua-tf-defgen     :emit :macro}
+        :yield      {:macro #'lua-tf-yield      :emit :macro}
         :prototype-get       {:emit :alias :raw 'getmetatable}
         :prototype-set       {:emit :alias :raw 'setmetatable}
         :prototype-create    {:macro #'lua-tf-prototype-create  :emit :macro
@@ -233,8 +247,11 @@
       (grammar/build:extend
        {:cat    {:op :cat    :symbol '#{cat}       :raw ".."   :emit :infix}
         :len    {:op :len    :symbol '#{len}       :raw "#"    :emit  :pre}
-        :local  {:op :local  :symbol '#{local var} :macro  #'tf-local :emit :macro}
-        :c-ffi  {:op :c-ffi  :symbol '#{%.c}       :macro  #'tf-c-ffi :emit :macro}
+        :incby  {:op :incby  :symbol '#{:+=}       :macro  #'lua-tf-incby :emit :macro}
+        :decby  {:op :decby  :symbol '#{:-=}       :macro  #'lua-tf-decby :emit :macro}
+        :mulby  {:op :mulby  :symbol '#{:*=}       :macro  #'lua-tf-mulby :emit :macro}
+        :local  {:op :local  :symbol '#{local var} :macro  #'lua-tf-local :emit :macro}
+        :c-ffi  {:op :c-ffi  :symbol '#{%.c}       :macro  #'lua-tf-c-ffi :emit :macro}
         :repeat {:op :repeat
                  :symbol '#{repeat} :type :block
                  :block {:raw "repeat"

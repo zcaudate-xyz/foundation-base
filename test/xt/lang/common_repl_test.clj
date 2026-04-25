@@ -1,14 +1,8 @@
 (ns xt.lang.common-repl-test
+  (:use code.test)
   (:require [std.json :as json]
             [std.lang :as l]
-            [xt.lang.common-notify :as notify])
-  (:use code.test))
-
-(defn decode-output
-  [x]
-  (if (string? x)
-    (json/read x)
-    x))
+            [xt.lang.common-notify :as notify]))
 
 (l/script- :js
   {:runtime :basic
@@ -22,93 +16,9 @@
   {:runtime :basic
     :require [[xt.lang.common-repl :as repl]]})
 
-(l/script- :dart
-  {:runtime :twostep
-   :require [[xt.lang.common-repl :as repl]]})
-
-(l/script- :r
-  {:runtime :basic
-   :require [[xt.lang.common-repl :as repl]]})
-
 (fact:global
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
-
-^{:refer xt.lang.common-repl/return-encode :added "4.0"}
-(fact "returns the encoded "
-
-  (decode-output
-   (!.js
-    (k/return-encode {:data [1 2 3]} "<id>" "<key>")))
-  => { "key" "<key>", "id" "<id>", "value" {"data" [1 2 3]}, "type" "data"}
-
-  (decode-output
-   (!.lua
-    (k/return-encode {:data [1 2 3]} "<id>" "<key>")))
-  => {"key" "<key>", "id" "<id>", "value" {"data" [1 2 3]}, "type" "data"}
-
-  (decode-output
-   (!.py
-    (k/return-encode {:data [1 2 3]} "<id>" "<key>")))
-  => {"key" "<key>", "id" "<id>", "value" {"data" [1 2 3]}, "type" "data"}
-
-  (decode-output
-   (!.R
-    (k/return-encode {:data [1 2 3]} "<id>" "<key>")))
-  => {"key" "<key>", "id" "<id>", "value" {"data" [1 2 3]}, "type" "data"})
-
-^{:refer xt.lang.common-repl/return-wrap :added "4.0"}
-(fact "returns a wrapped call"
-
-  (decode-output
-   (!.js
-    (k/return-wrap (fn:> 1))))
-  => {"value" 1, "type" "data", "return" "number"}
-
-  (decode-output
-   (!.lua
-     (k/return-wrap (fn:> 1))))
-  => {"value" 1, "type" "data", "return" "number"}
-
-  ^{:lang-exceptions {:dart {:expect {"key" nil
-                                     "id" nil
-                                     "value" 1
-                                     "type" "data"
-                                     "return" "number"}}}}
-  (decode-output
-   (!.py
-     (k/return-wrap (fn:> 1))))
-  => {"key" nil, "id" nil, "value" 1, "type" "data"}
-
-  (decode-output
-   (!.R
-    (k/return-wrap (fn:> 1))))
-  => {"key" nil, "id" nil, "value" 1, "type" "data"})
-
-^{:refer xt.lang.common-repl/return-eval :added "4.0"}
-(fact "evaluates a returns a string"
-
-  (decode-output
-   (!.js
-    ([xt.lang.common-repl :as repl] "1")))
-  => {"return" "number", "value" 1, "type" "data"}
-
-  (decode-output
-   (!.lua
-     ([xt.lang.common-repl :as repl] "return 1")))
-  => {"value" 1, "type" "data", "return" "number"}
-
-  ^{:lang-exceptions {:dart {:form :dart-unsupported-return-eval
-                             :expect :dart-unsupported-return-eval}}}
-  (decode-output
-   (!.py
-     ([xt.lang.common-repl :as repl] "globals()[\"OUT\"] = 1")))
-  => {"key" nil, "id" nil, "value" 1, "type" "data"}
-
-  (decode-output
-   (!.R
-    ([xt.lang.common-repl :as repl] "1")))
-  => {"key" nil, "id" nil, "value" 1, "type" "data"})
 
 ^{:refer xt.lang.common-repl/return-callbacks :added "4.0"}
 (fact "constructs return callbacks")

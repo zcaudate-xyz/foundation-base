@@ -566,7 +566,8 @@
    (template/$ (. ~conn (close)))))
 
 (def +python-socket+
-  {:x-socket-connect {:macro #'python-tf-x-socket-connect :emit :macro}
+  {:x-socket-connect {:macro #'python-tf-x-socket-connect :emit :macro
+                      :op-spec {:allow-blocks true}}
    :x-socket-send    {:macro #'python-tf-x-socket-send    :emit :macro}
    :x-socket-close   {:macro #'python-tf-x-socket-close   :emit :macro}})
 

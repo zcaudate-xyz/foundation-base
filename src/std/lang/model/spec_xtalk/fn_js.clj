@@ -510,7 +510,8 @@
    (template/$ (. ~conn (end)))))
 
 (def +js-socket+
-  {:x-socket-connect {:macro #'js-tf-x-socket-connect :emit :macro}
+  {:x-socket-connect {:macro #'js-tf-x-socket-connect :emit :macro
+                      :op-spec {:allow-blocks true}}
    :x-socket-send    {:macro #'js-tf-x-socket-send    :emit :macro}
    :x-socket-close   {:macro #'js-tf-x-socket-close   :emit :macro}})
 

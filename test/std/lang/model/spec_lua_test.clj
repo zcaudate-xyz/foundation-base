@@ -1,5 +1,6 @@
 (ns std.lang.model.spec-lua-test
-  (:require [std.lang.base.script :as script]
+  (:require [std.lang :as l]
+             [std.lang.base.script :as script]
              [std.lang.base.util :as ut]
              [std.lang.model.spec-lua :refer :all]
              [std.lang.model.spec-lua.variant-nginx :as nginx])
@@ -24,6 +25,17 @@
 
   (tf-local '(local '[a b] (hello)))
   => '(var* :local (quote [a b]) := (hello)))
+
+^{:refer std.lang.model.spec-lua/tf-counter :added "4.1"}
+(fact "compound assignment lowers to valid lua assignments"
+  [(l/emit-as :lua '[(:+= a 2)])
+   (l/emit-as :lua '[(:-= a 2)])
+   (l/emit-as :lua '[(:*= a 2)])
+   (l/emit-as :lua '[(:+= circle.x 20)])]
+  => ["a = (a + 2)"
+      "a = (a - 2)"
+      "a = (a * 2)"
+      "circle.x = (circle.x + 20)"])
 
 ^{:refer std.lang.model.spec-lua/tf-c-ffi :added "4.0"}
 (fact "transforms a c ffi block"

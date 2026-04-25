@@ -101,48 +101,48 @@
       "  }"
       "}"))
 
-^{:refer std.lang.model.spec-js/tf-var-let :added "4.0"}
+^{:refer std.lang.model.spec-js/js-tf-var-let :added "4.0"}
 (fact "outputs the let keyword"
 
-  (tf-var-let '(var a 1))
+  (js-tf-var-let '(var a 1))
   => '(var* :let a := 1))
 
-^{:refer std.lang.model.spec-js/tf-var-const :added "4.0"}
+^{:refer std.lang.model.spec-js/js-tf-var-const :added "4.0"}
 (fact "outputs the const keyword"
 
-  (tf-var-const '(const a 1))
+  (js-tf-var-const '(const a 1))
   => '(var* :const a := 1))
 
-^{:refer std.lang.model.spec-js/tf-for-object :added "4.0"}
+^{:refer std.lang.model.spec-js/js-tf-for-object :added "4.0"}
 (fact "custom for:object code"
 
-  (tf-for-object '(for:object [[k v] {:a 1}]
+  (js-tf-for-object '(for:object [[k v] {:a 1}]
                               [k v]))
   => '(for [(var* :let [k v]) :of (Object.entries {:a 1})] [k v]))
 
-^{:refer std.lang.model.spec-js/tf-for-array :added "4.0"}
+^{:refer std.lang.model.spec-js/js-tf-for-array :added "4.0"}
 (fact "custom for:array code"
 
-  (tf-for-array '(for:array [e [1 2 3 4 5]]
+  (js-tf-for-array '(for:array [e [1 2 3 4 5]]
                              [k v]))
   => '(for [(var* :let e) :of (% [1 2 3 4 5])] [k v])
 
-  (tf-for-array '(for:array [[i e] arr]
+  (js-tf-for-array '(for:array [[i e] arr]
                             [k v]))
   => '(for [(var* :let i := 0) (< i (. arr length))
             (:++ i)] (var* :let e (. arr [i])) [k v]))
 
-^{:refer std.lang.model.spec-js/tf-for-iter :added "4.0"}
+^{:refer std.lang.model.spec-js/js-tf-for-iter :added "4.0"}
 (fact "custom for:iter code"
 
-  (tf-for-iter '(for:iter [e iter]
+  (js-tf-for-iter '(for:iter [e iter]
                           e))
   => '(for [(var* :let e) :of (% iter)] e))
 
-^{:refer std.lang.model.spec-js/tf-for-return :added "4.0"}
+^{:refer std.lang.model.spec-js/js-tf-for-return :added "4.0"}
 (fact "for return transform"
 
-  (tf-for-return '(for:return [[ok err] (call (x:callback))]
+  (js-tf-for-return '(for:return [[ok err] (call (x:callback))]
                               {:success (return ok)
                                :error   (return err)}))
   => '(call (fn [err ok]
@@ -150,7 +150,7 @@
                 (return err)
                 (return ok))))
 
-  (tf-for-return '(for:return [[ok err] (x:return-run runner)]
+  (js-tf-for-return '(for:return [[ok err] (x:return-run runner)]
                               {:success (return ok)
                                :error   (return err)}))
   => '(do
@@ -170,7 +170,7 @@
           (catch err
             (return err))))
 
-  (tf-for-return '(for:return [[ok err] (x:return-run runner)]
+  (js-tf-for-return '(for:return [[ok err] (x:return-run runner)]
                               {:success ok
                                :error   err
                                :final   true}))
@@ -191,20 +191,20 @@
           (catch err
             (return err)))))
 
-^{:refer std.lang.model.spec-js/tf-for-try :added "4.0"}
+^{:refer std.lang.model.spec-js/js-tf-for-try :added "4.0"}
 (fact "for try transform"
 
-  (tf-for-try '(for:try [[ok err] (call (x:callback))]
+  (js-tf-for-try '(for:try [[ok err] (call (x:callback))]
                         {:success (return ok)
                          :error   (return err)}))
   => '(try (var ok := (call (x:callback)))
            (return ok)
            (catch err (return err))))
 
-^{:refer std.lang.model.spec-js/tf-for-async :added "4.0"}
+^{:refer std.lang.model.spec-js/js-tf-for-async :added "4.0"}
 (fact  "for async transform"
 
-  (tf-for-async '(for:async [[ok err] (call (x:callback))]
+  (js-tf-for-async '(for:async [[ok err] (call (x:callback))]
                             {:success (return ok)
                              :error   (return err)
                              :finally (return true)}))
@@ -214,7 +214,7 @@
          (catch (fn [err] (return err)))
          (finally (fn [] (return true))))
 
-  (tf-for-async '(for:async [[ok err] (x:return-run runner)]
+  (js-tf-for-async '(for:async [[ok err] (x:return-run runner)]
                             {:success (return ok)
                              :error   (return err)
                              :finally (return true)}))

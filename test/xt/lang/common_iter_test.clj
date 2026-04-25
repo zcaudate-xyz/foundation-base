@@ -157,7 +157,7 @@
   => (just [["a" 1] ["b" 2]] :in-any-order)
 
   (!.py
-   (it/arr< (it/iter nil)))
+    (it/arr< (it/iter nil)))
   => empty?)
 
 ^{:refer xt.lang.common-iter/collect :added "4.1"}

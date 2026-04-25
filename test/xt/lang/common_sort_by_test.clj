@@ -1,7 +1,8 @@
 (ns xt.lang.common-sort-by-test
-  (:require [std.lang :as l])
-  (:use code.test))
+  (:use code.test)
+  (:require [std.lang :as l]))
 
+^{:seedgen/root {:all true, :langs [:js :python]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-sort-by :as xtsb]
@@ -52,3 +53,9 @@
   => [{"id" "b" "name" "alpha"}
       {"id" "a" "name" "beta"}
       {"id" "c" "name" "gamma"}])
+
+
+
+(comment
+  (s/seedgen-langadd 'xt.lang.common-sort-by {:lang [:lua :python] :write true})
+  (s/seedgen-langremove 'xt.lang.common-sort-by {:lang [:lua :python] :write true}))

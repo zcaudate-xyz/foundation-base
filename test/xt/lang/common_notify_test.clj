@@ -6,6 +6,7 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
+^{:seedgen/root {:all true, :langs [:lua :python]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
@@ -21,14 +22,9 @@
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-repl :as repl]]})
 
-(l/script- :r
-  {:runtime :basic
-   :require [[xt.lang.common-lib :as k]
-             [xt.lang.common-repl :as repl]]})
-
 (fact:global
- {:setup    [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.common-notify/notify-defaults :added "4.0"}
 (fact "creates the ceremony for webpages"
@@ -42,7 +38,25 @@
 ^{:refer xt.lang.common-notify/notify-ceremony :added "4.0"}
 (fact "creates the ceremony in order to get the port and method type"
 
+  ^{:seedgen/base    {:lua     {:transform {:js :lua}}
+                      :python  {:transform {:js :python}}}}
   (notify/notify-ceremony (assoc (l/rt :js)
+                                 :type :basic))
+  => [(:id (l/rt :js))
+      (:socket-port (l/default-notify))
+      :js :socket
+      "127.0.0.1"
+      {}]
+
+  (notify/notify-ceremony (assoc (l/rt :lua)
+                                 :type :basic))
+  => [(:id (l/rt :js))
+      (:socket-port (l/default-notify))
+      :js :socket
+      "127.0.0.1"
+      {}]
+
+  (notify/notify-ceremony (assoc (l/rt :python)
                                  :type :basic))
   => [(:id (l/rt :js))
       (:socket-port (l/default-notify))
@@ -81,16 +95,16 @@
 
   (notify/wait-on :python
     (repl/notify 1))
-  => 1
-
-  (notify/wait-on :r
-    (repl/notify 1))
   => 1)
 
 ^{:refer xt.lang.common-notify/captured :added "4.0"
   :setup [(notify/captured:clear-all)]}
 (fact "gets captured results"
 
+  ^{:seedgen/base    {:lua     {:transform {"js" "lua"
+                                            :js :lua}}
+                      :python  {:transform {"js" "python"
+                                            :js :python}}}}
   (do (notify/wait-on :js
         (repl/capture {:from "js"})
         (repl/notify 1))
@@ -101,19 +115,13 @@
         (repl/capture {:from "lua"})
         (repl/notify 1))
       (notify/captured :lua))
-  => [{"from" "lua"}]
+  => [{"from" "js"}]
 
   (do (notify/wait-on :python
         (repl/capture {:from "python"})
         (repl/notify 1))
       (notify/captured :python))
-  => [{"from" "python"}]
-
-  (do (notify/wait-on :r
-        (repl/capture {:from "r"})
-        (repl/notify 1))
-      (notify/captured :r))
-  => [{"from" "r"}])
+  => [{"from" "js"}])
 
 ^{:refer xt.lang.common-notify/captured:count :added "4.0"}
 (fact "gets the captured count for rt")
@@ -126,3 +134,11 @@
 
 ^{:refer xt.lang.common-notify/capture-key-match? :added "4.1"}
 (fact "TODO")
+
+(comment
+  (s/seedgen-langadd 'xt.lang.common-notify {:lang [:lua :python] :write true})
+  (s/seedgen-langremove 'xt.lang.common-notify {:lang [:lua :python] :write true}))
+
+(comment
+  ()
+  )

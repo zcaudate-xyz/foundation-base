@@ -138,19 +138,19 @@
            \\)
           \}))))
 
-(defn tf-var-let
+(defn js-tf-var-let
   "outputs the let keyword"
   {:added "4.0"}
   [[_ decl & args]]
   (list 'var* :let decl := (last args)))
 
-(defn tf-var-const
+(defn js-tf-var-const
   "outputs the const keyword"
   {:added "4.0"}
   [[_ decl & args]]
   (list 'var* :const decl := (last args)))
 
-(defn tf-for-object
+(defn js-tf-for-object
   "custom for:object code"
   {:added "4.0"}
   [[_ [[k v] m] & body]]
@@ -160,7 +160,7 @@
     (apply list 'for [(list 'var* :let binding) :of (list method m)]
            body)))
 
-(defn tf-for-array
+(defn js-tf-for-array
   "custom for:array code"
   {:added "4.0"}
   [[_ [e arr] & body]]
@@ -172,14 +172,14 @@
     (template/$ (for [(var* :let ~e) :of (% ~arr)]
            ~@body))))
 
-(defn tf-for-iter
+(defn js-tf-for-iter
   "custom for:iter code"
   {:added "4.0"}
   [[_ [e it] & body]]
   (apply list 'for [(list 'var* :let e) :of (list '% it)]
          body))
 
-(defn tf-for-return
+(defn js-tf-for-return
   "for return transform"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error final]}]]
@@ -220,7 +220,7 @@
     (cond->> out
       (and final (not return-run?)) (list 'return))))
 
-(defn tf-for-try
+(defn js-tf-for-try
   "for try transform"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error]}]]
@@ -229,7 +229,7 @@
          ~success
          (catch ~err ~error))))
 
-(defn tf-for-async
+(defn js-tf-for-async
   "for async transform"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error finally]}]]
@@ -295,12 +295,12 @@
         :defn        {:symbol '#{defn defn- defelem}}
         :with-global {:value true :raw "globalThis"}
         :defclass    {:macro  #'js-defclass    :emit :macro}
-        :for-object  {:macro  #'tf-for-object  :emit :macro}
-        :for-array   {:macro  #'tf-for-array   :emit :macro}
-        :for-iter    {:macro  #'tf-for-iter    :emit :macro}
-        :for-return  {:macro  #'tf-for-return  :emit :macro}
-        :for-try     {:macro  #'tf-for-try     :emit :macro}
-        :for-async   {:macro  #'tf-for-async   :emit :macro}
+        :for-object  {:macro  #'js-tf-for-object  :emit :macro}
+        :for-array   {:macro  #'js-tf-for-array   :emit :macro}
+        :for-iter    {:macro  #'js-tf-for-iter    :emit :macro}
+        :for-return  {:macro  #'js-tf-for-return  :emit :macro}
+        :for-try     {:macro  #'js-tf-for-try     :emit :macro}
+        :for-async   {:macro  #'js-tf-for-async   :emit :macro}
         :prototype-get       {:macro #'js-tf-prototype-get     :emit :macro}
         :prototype-set       {:macro #'js-tf-prototype-set     :emit :macro}
         :prototype-create    {:macro #'js-tf-prototype-create  :emit :macro
@@ -317,8 +317,8 @@
         :undef      {:op :undef     :symbol  '#{undefined}  :raw "undefined" :value true :emit :throw}
         :nan        {:op :nan       :symbol  '#{NaN} :raw "NaN" :value true :emit :throw}
         :vargs      {:op :vargs     :symbol  '#{...} :raw "...vargs" :value true :emit :throw}
-        :var-let    {:op :var-let   :symbol  '#{var}     :macro  #'tf-var-let :emit :macro}
-        :var-const  {:op :var-const :symbol  '#{const}   :macro  #'tf-var-const :emit :macro}})))
+        :var-let    {:op :var-let   :symbol  '#{var}     :macro  #'js-tf-var-let :emit :macro}
+        :var-const  {:op :var-const :symbol  '#{const}   :macro  #'js-tf-var-const :emit :macro}})))
 
 (def +template+
   (->> {:banned #{:keyword}

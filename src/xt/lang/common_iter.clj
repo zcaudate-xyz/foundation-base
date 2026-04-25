@@ -43,14 +43,14 @@
         (-/iter? x)
         (return x)
 
-        (xt/x:iter-has? x)
-        (return (xt/x:iter-from x))
-
         (xt/x:is-array? x)
         (return (xt/x:iter-from-arr x))
         
         (xt/x:is-object? x)
         (return (xt/x:iter-from-obj x))
+
+        (xt/x:iter-has? x)
+        (return (xt/x:iter-from x))
 
         :else
         (return nil)))

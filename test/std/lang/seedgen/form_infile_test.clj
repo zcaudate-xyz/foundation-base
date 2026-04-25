@@ -423,6 +423,28 @@
         (.delete tmp))))
   => "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]\n            [xt.lang.spec-base :as xt]))\n\n^{:seedgen/root {:all true, :langs [:lua]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :lua {:runtime :basic})\n\n^{:refer xt.lang.spec-base/x:return-eval :added \"4.1\"}\n(fact \"transform can be customised\"\n\n  ^{:seedgen/base {:lua {:transform {\"1 + 1\" \"return 1 + 1\"}}}}\n  (!.js\n    (var eval-fn\n         (fn [s re-wrap-fn]\n           (xt/x:return-eval s re-wrap-fn)))\n    (eval-fn \"1 + 1\"\n             (fn [f]\n               (return f))))\n  => 2\n\n  (!.lua\n    (var eval-fn\n         (fn [s re-wrap-fn]\n           (xt/x:return-eval s re-wrap-fn)))\n    (eval-fn \"return 1 + 1\"\n             (fn [f]\n               (return f))))\n  => 2)\n"
 
+  (let [tmp (java.io.File/createTempFile "seedgen-langadd-train004-transform-output" ".clj")
+        path (.getAbsolutePath tmp)
+        root (.getParent tmp)
+        lookup {'sample.add-test path}
+        project {:root root}]
+    (try
+      (spit path (str "(ns sample.add-test\n"
+                      "  (:use code.test)\n"
+                      "  (:require [std.lang :as l]))\n\n"
+                      "^{:seedgen/root {:all true, :langs [:lua]}}\n"
+                      "(l/script- :js {:runtime :basic})\n\n"
+                      "^{:refer xt.lang.spec-base/example-transform-output :added \"4.1\"}\n"
+                      "(fact \"transform updates expected forms too\"\n\n"
+                      "  ^{:seedgen/base {:lua {:transform {:js :lua}}}}\n"
+                      "  (!.js {:lang :js})\n"
+                      "  => {:lang :js})\n"))
+      (form-infile/seedgen-langadd 'sample.add-test {:write true} lookup project)
+      (slurp path)
+      (finally
+        (.delete tmp))))
+  => "(ns sample.add-test\n  (:use code.test)\n  (:require [std.lang :as l]))\n\n^{:seedgen/root {:all true, :langs [:lua]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :lua {:runtime :basic})\n\n^{:refer xt.lang.spec-base/example-transform-output :added \"4.1\"}\n(fact \"transform updates expected forms too\"\n\n  ^{:seedgen/base {:lua {:transform {:js :lua}}}}\n  (!.js {:lang :js})\n  => {:lang :js}\n\n  (!.lua {:lang :lua})\n  => {:lang :lua})\n"
+
   (let [tmp (java.io.File/createTempFile "seedgen-langadd-train004-transform-symbol" ".clj")
         path (.getAbsolutePath tmp)
         root (.getParent tmp)

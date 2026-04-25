@@ -3,21 +3,44 @@
   (:require [std.lang :as l]
             [xt.lang.common-runtime :as rt]))
 
+^{:seedgen/root {:all true, :langs [:lua :python]}}
 (l/script- :js
-  {:runtime :basic
-   :require [[xt.lang.common-runtime :as rt]]})
-
-(l/script- :lua
-  {:runtime :basic
-   :require [[xt.lang.common-runtime :as rt]]})
-
-(l/script- :python
   {:runtime :basic
    :require [[xt.lang.common-runtime :as rt]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
+
+^{:refer xt.lang.common-runtime/xt :added "4.0"}
+(fact "gets the current xt or creates a new one"
+
+  (!.js
+   (rt/xt-purge)
+   [(rt/xt-current)
+    (rt/xt-ensure)
+    (rt/xt-current)])
+  => (contains-in [nil
+                   {"config" {}, "spaces" {}, "::" "xt"}
+                   {"config" {}, "spaces" {}, "::" "xt"}])
+
+  (!.lua
+   (rt/xt-purge)
+   [(rt/xt-current)
+    (rt/xt-ensure)
+    (rt/xt-current)])
+  => (contains-in [nil
+                   {"config" {}, "spaces" {}, "::" "xt"}
+                   {"config" {}, "spaces" {}, "::" "xt"}])
+
+  (!.py
+   (rt/xt-purge)
+   [(rt/xt-current)
+    (rt/xt-ensure)
+    (rt/xt-current)])
+  => (contains-in [nil
+                   {"config" {}, "spaces" {}, "::" "xt"}
+                   {"config" {}, "spaces" {}, "::" "xt"}]))
 
 ^{:refer xt.lang.common-runtime/xt-exists? :added "4.0"
   :setup [(l/rt:restart)]}
@@ -65,35 +88,8 @@
   => (contains-in [{"config" {}, "spaces" {}, "::" "xt"}
                    nil]))
 
-^{:refer xt.lang.common-runtime/xt :added "4.0"}
-(fact "gets the current xt or creates a new one"
-
-  (!.js
-   (rt/xt-purge)
-   [(rt/xt-current)
-    (rt/xt-ensure)
-    (rt/xt-current)])
-  => (contains-in [nil
-                   {"config" {}, "spaces" {}, "::" "xt"}
-                   {"config" {}, "spaces" {}, "::" "xt"}])
-
-  (!.lua
-   (rt/xt-purge)
-   [(rt/xt-current)
-    (rt/xt-ensure)
-    (rt/xt-current)])
-  => (contains-in [nil
-                   {"config" {}, "spaces" {}, "::" "xt"}
-                   {"config" {}, "spaces" {}, "::" "xt"}])
-
-  (!.py
-   (rt/xt-purge)
-   [(rt/xt-current)
-    (rt/xt-ensure)
-    (rt/xt-current)])
-  => (contains-in [nil
-                   {"config" {}, "spaces" {}, "::" "xt"}
-                   {"config" {}, "spaces" {}, "::" "xt"}]))
+^{:refer xt.lang.common-runtime/xt-ensure :added "4.1"}
+(fact "TODO")
 
 ^{:refer xt.lang.common-runtime/xt-current :added "4.0"}
 (fact "gets the current xt"
@@ -774,6 +770,3 @@
      (-> out first second)
      (-> out second second)])
   => '[defn.python PY_SAMPLE PY_SAMPLE-reset])
-
-^{:refer xt.lang.common-runtime/xt-ensure :added "4.1"}
-(fact "TODO")

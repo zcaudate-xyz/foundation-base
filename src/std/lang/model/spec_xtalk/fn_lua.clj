@@ -469,7 +469,8 @@
    (template/$ (. ~conn (close)))))
 
 (def +lua-socket+
-  {:x-socket-connect {:macro #'lua-tf-x-socket-connect :emit :macro}
+  {:x-socket-connect {:macro #'lua-tf-x-socket-connect :emit :macro
+                      :op-spec {:allow-blocks true}}
    :x-socket-send    {:macro #'lua-tf-x-socket-send    :emit :macro}
    :x-socket-close   {:macro #'lua-tf-x-socket-close   :emit :macro}})
 
