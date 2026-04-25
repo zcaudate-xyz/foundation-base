@@ -200,6 +200,48 @@
         (fs/delete root {:recursive true}))))
   => "(ns samplebench.lua.sample.setup-test\n  (:use code.test)\n  (:require [std.lang :as l]))\n\n(l/script- :lua {:runtime :basic})\n\n^{:refer xt.lang.spec-base/example-g :added \"4.1\"\n  :setup [(!.lua (setup-lua))]}\n(fact \"setup bench outcomes\"\n\n  (!.lua 1)\n  => 1)\n")
 
+^{:refer std.lang.seedgen.form-bench/seedgen-benchadd :added "4.1"}
+(fact "renders global fact setup and teardown in bench targets"
+  (let [root    (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-global"
+                                                                  (make-array java.nio.file.attribute.FileAttribute 0)))
+        test-dir (doto (java.io.File. root "test/sample")
+                   (.mkdirs))
+        path    (.getAbsolutePath (java.io.File. test-dir "global_test.clj"))
+        lookup  {'xt.sample.global-test path}
+        project {:root (.getAbsolutePath root)
+                 :test-paths ["test"]}]
+    (try
+      (spit path (str "(ns xt.sample.global-test\n"
+                      "  (:use code.test)\n"
+                      "  (:require [std.lang :as l]))\n\n"
+                      "^{:seedgen/root {:all true, :langs [:dart]}}\n"
+                      "(l/script- :js {:runtime :basic})\n\n"
+                      "(fact:global\n"
+                      " {:setup [(!.js (setup-js))]\n"
+                      "  :teardown [(!.js (teardown-js))]})\n\n"
+                      "^{:refer xt.lang.spec-base/example-h :added \"4.1\"}\n"
+                      "(fact \"global bench outcomes\"\n\n"
+                      "  (!.js 1)\n"
+                      "  => 1)\n"))
+      (let [output (form-bench/seedgen-benchadd 'xt.sample.global-test
+                                                {:rename '{xt [samplebench :lang]}
+                                                 :lang [:dart]
+                                                 :write true}
+                                                lookup
+                                                project)
+            bench-path (str (fs/path root "test/samplebench/dart/sample/global_test.clj"))]
+        [(-> output :outputs first (select-keys [:lang :ns :updated]))
+         (let [content (slurp bench-path)]
+           [(boolean (re-find #"\(fact:global" content))
+            (boolean (re-find #"\(!\.dt \(setup-js\)\)" content))
+            (boolean (re-find #"\(!\.dt \(teardown-js\)\)" content))])])
+      (finally
+        (fs/delete root {:recursive true}))))
+  => [{:lang :dart
+       :ns 'samplebench.dart.sample.global-test
+       :updated true}
+      [true true true]])
+
 ^{:refer std.lang.seedgen.form-bench/seedgen-benchremove :added "4.1"}
 (fact "removes selected bench files while preserving other runtimes"
   (let [root   (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchremove"

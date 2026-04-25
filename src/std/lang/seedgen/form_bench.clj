@@ -110,7 +110,16 @@
                                                                  text
                                                                  lang
                                                                  ns)))
-           targets)))
+          targets)))
+
+(defn- bench-output-functions
+  [output]
+  (->> output
+       :entries
+       vals
+       (mapcat keys)
+       sort
+       vec))
 
 (defn seedgen-benchlist
   "returns the bench namespaces that should be created for a seedgen test
@@ -151,20 +160,21 @@
   ([ns params lookup project]
    (let [resolved (bench-resolve-targets ns params lookup project)]
      (if (res/result? resolved)
-       resolved
-         (let [{:keys [output project params test-file targets]} resolved
-               rendered (bench-render-targets output test-file targets)
-               write?   (boolean (:write params))
-               lookup'  (reduce (fn [m {:keys [ns path]}]
-                                  (assoc m ns path))
-                              lookup
-                              rendered)]
-         {:outputs
-          (mapv (fn [{:keys [lang ns path content]}]
-                  (when write?
-                    (fs/create-directory (fs/parent path)))
-                  (let [result (base/transform-code ns
-                                                    (assoc params
+        resolved
+          (let [{:keys [output project params test-file targets]} resolved
+                rendered (bench-render-targets output test-file targets)
+                write?   (boolean (:write params))
+                lookup'  (reduce (fn [m {:keys [ns path]}]
+                                   (assoc m ns path))
+                               lookup
+                               rendered)]
+          {:functions (bench-output-functions output)
+           :outputs
+           (mapv (fn [{:keys [lang ns path content]}]
+                   (when write?
+                     (fs/create-directory (fs/parent path)))
+                   (let [result (base/transform-code ns
+                                                     (assoc params
                                                            :transform (constantly content)
                                                            :no-analysis true)
                                                     lookup'

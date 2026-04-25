@@ -857,10 +857,12 @@
 
 (defn- render-global-fact-target
   [output root-lang lang]
-  (let [setup-items     (render-target-runtime-items (get-in output [:globals :global-fact-setup])
+  (let [setup-items     (render-target-runtime-items nil
+                                                     (get-in output [:globals :global-fact-setup])
                                                      root-lang
                                                      [lang])
-        teardown-items  (render-target-runtime-items (get-in output [:globals :global-fact-teardown])
+        teardown-items  (render-target-runtime-items nil
+                                                     (get-in output [:globals :global-fact-teardown])
                                                      root-lang
                                                      [lang])
         setup-render    (when (seq setup-items)
