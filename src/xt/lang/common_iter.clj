@@ -17,7 +17,7 @@
   (return
    (xt/x:iter-eq it0 it1 eq-fn)))
 
-(defgen.xt iter-null
+(defn.xt iter-null
   "creates a null iterator"
   {:added "4.0"}
   []
