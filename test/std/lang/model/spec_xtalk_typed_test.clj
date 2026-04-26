@@ -693,15 +693,15 @@
   (typed/clear-registry!)
   (doseq [ns-sym '[xt.lang.common-lib
                    xt.lang.spec-base
-                   xt.lang.common-runtime
+                   xt.lang.common-space
                    xt.lang.common-iter
                    xt.lang.common-repl
                    xt.lang.common-string
                    xt.lang.common-interval]]
     (typed/analyze-and-register! ns-sym))
   [(analysis/get-function-output-type 'xt.lang.common-string/sym-pair)
-   (analysis/get-function-output-type 'xt.lang.common-runtime/xt-create)
-   (analysis/get-function-output-type 'xt.lang.common-runtime/xt-current)
+   (analysis/get-function-output-type 'xt.lang.common-space/xt-create)
+   (analysis/get-function-output-type 'xt.lang.common-space/xt-current)
    (analysis/get-function-output-type 'xt.lang.common-iter/iter)
    (analysis/get-function-output-type 'xt.lang.common-lib/return-encode)
    (analysis/get-function-output-type 'xt.lang.common-string/tag-string)
@@ -710,9 +710,9 @@
        :output
        types/type->data)]
   => '[{:kind :primitive :name :xt/unknown}
-        {:kind :named :name xt.lang.common-runtime/XTState}
+        {:kind :named :name xt.lang.common-space/XTState}
         {:kind :maybe
-         :item {:kind :named :name xt.lang.common-runtime/XTState}}
+         :item {:kind :named :name xt.lang.common-space/XTState}}
         {:kind :primitive :name :xt/unknown}
         {:kind :primitive :name :xt/unknown}
         {:kind :primitive :name :xt/str}

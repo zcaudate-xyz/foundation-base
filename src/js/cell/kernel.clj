@@ -17,13 +17,13 @@
 ;; STATE
 ;;
 
-(defvar.js
+(defsingleton.js
   GD
   "gets the current cell"
   {:added "4.0"}
   [] (return nil))
 
-(defvar.js
+(defsingleton.js
   GX
   "gets the current annex"
   {:added "4.0"}

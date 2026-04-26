@@ -7,7 +7,7 @@
     :require [[xt.lang.common-lib :as k]
               [xt.lang.spec-base :as xt]
               [xt.lang.common-data :as xtd]
-              [xt.lang.common-runtime :as rt :with [defvar.js]]
+              [xt.lang.common-space :as rt :with [defsingleton.js]]
               [js.core :as j]
               [xt.cell :as cell]
              [xt.cell.kernel.base-link :as base-link]
@@ -27,7 +27,7 @@
        (cell/actions-init {} worker)
        (return worker))})))
 
-(defvar.js LINK
+(defsingleton.js LINK
   []
   (return nil))
 

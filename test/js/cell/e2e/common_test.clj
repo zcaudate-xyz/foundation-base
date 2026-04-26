@@ -13,7 +13,7 @@
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]
-             [xt.lang.common-runtime :as rt :with [defvar.js]]
+             [xt.lang.common-space :as rt :with [defsingleton.js]]
              [xt.lang.event-view :as event-view]
              [js.cell.kernel :as cl]
              [js.cell.e2e.common :as common]
@@ -159,7 +159,7 @@
       "open" [{"id" "ord-1" "status" "open"}]})
 
 ^{:refer js.cell.e2e.common/REMOTE_DB :added "4.1"}
-(fact "caches the remote db through the defvar getter"
+(fact "caches the remote db through the defsingleton getter"
   (!.js
    (common/REMOTE_DB-reset nil)
    (var db (common/get-remote-db))

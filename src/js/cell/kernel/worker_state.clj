@@ -3,7 +3,7 @@
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :js
-  {:require [[js.core :as j] [js.cell.kernel.base-util :as util] [xt.lang.spec-base :as xt] [xt.lang.common-runtime :as rt :with [defvar.js]]]})
+  {:require [[js.core :as j] [js.cell.kernel.base-util :as util] [xt.lang.spec-base :as xt] [xt.lang.common-space :as rt :with [defsingleton.js]]]})
 
 
 (defspec.xt WORKER_STATE
@@ -75,7 +75,7 @@
 (defspec.xt fn-error-async
   [:fn [:xt/int] :xt/any])
 
-(defvar.js ^{:ns "@worker"}
+(defsingleton.js ^{:ns "@worker"}
   WORKER_STATE
   "gets worker state
  
@@ -85,7 +85,7 @@
   []
   (return  {:eval true}))
 
-(defvar.js ^{:ns "@worker"}
+(defsingleton.js ^{:ns "@worker"}
   WORKER_ACTIONS
   "gets worker actions
  

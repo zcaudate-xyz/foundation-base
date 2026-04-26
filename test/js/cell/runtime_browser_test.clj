@@ -26,7 +26,7 @@
     {:runtime :chromedriver.instance
       :config {:url (runtime-browser-url)}
       :require [[xt.lang.common-repl :as repl]
-                [xt.lang.common-runtime :as rt]
+                [xt.lang.common-space :as rt]
                 [js.cell.kernel :as cl]
                 [js.cell.kernel.base-link-local :as base-link-local]
                 [js.cell.runtime.browser :as runtime-browser]]}))

@@ -6,10 +6,10 @@
    {:require [[js.core :as j]
               [xt.lang.common-data :as d]
               [xt.lang.spec-base :as x]
-              [xt.lang.common-runtime :as rt :with [defvar.js]]]
+              [xt.lang.common-space :as rt :with [defsingleton.js]]]
     :import  [["fastify" :as Fastify]]})
 
-(defvar.js current-servers
+(defsingleton.js current-servers
   "gets the current servers"
   {:added "4.0"}
   []

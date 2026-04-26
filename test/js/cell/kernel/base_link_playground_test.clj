@@ -26,7 +26,7 @@
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
               [xt.lang.common-repl :as repl]
-               [xt.lang.common-runtime :as rt]
+               [xt.lang.common-space :as rt]
               [js.cell.kernel.base-link :as base-link]
               [js.cell.kernel.base-link-eval :as base-link-eval]
               [js.cell.kernel.base-link-local :as base-link-local]

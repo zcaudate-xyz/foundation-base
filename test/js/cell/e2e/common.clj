@@ -61,7 +61,7 @@
               [xt.db :as xdb]
               [xt.lang.spec-base :as xt]
               [xt.lang.common-data :as xtd]
-              [xt.lang.common-runtime :as rt :with [defvar.js]]
+              [xt.lang.common-space :as rt :with [defsingleton.js]]
               [xt.lang.event-view :as event-view]
               [xt.sys.conn-dbsql :as dbsql]]})
 
@@ -260,7 +260,7 @@
   (xdb/sync-event db ["add" (@! +seed-sync+)])
   (return db))
 
-(defvar.js
+(defsingleton.js
   REMOTE_DB
   []
   (return nil))

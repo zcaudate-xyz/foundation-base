@@ -175,6 +175,25 @@
 ^{:refer std.lang.model.spec-python/tf-for-return :added "4.0"}
 (fact "for return transform"
 
+  (let [out (py/tf-for-return '(for:return [[ok err] (call (x:callback))]
+                                           {:success (return ok)
+                                            :error   (return err)}))
+        binding (second out)
+        callback (nth binding 1)
+        assign (nth out 2)]
+    [(= 'do* (first out))
+     (= 'var (first binding))
+     (symbol? callback)
+     (.startsWith (name callback) "py_callback__")
+     (= '(fn [err ok]
+            (if (not= err nil)
+              (return err)
+              (return ok)))
+         (nth binding 2))
+     (= '(call CALLBACK)
+        (clojure.walk/prewalk-replace {callback 'CALLBACK} assign))])
+  => [true true true true true true]
+
   (py/tf-for-return '(for:return [[ok err] (call)]
                                  {:success (return ok)
                                   :error   (return err)}))

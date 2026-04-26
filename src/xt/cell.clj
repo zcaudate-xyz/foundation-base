@@ -2,21 +2,21 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-runtime :as rt :with [defvar.xt]]
+  {:require [[xt.lang.common-space :as rt :with [defsingleton.xt]]
              [xt.lang.spec-base :as xt]
              [xt.cell.kernel :as kernel]
              [xt.cell.kernel.base-link-local :as base-link-local]
              [xt.cell.kernel.worker-local :as worker-local]
              [xt.cell.kernel.worker-state :as worker-state]]})
 
-(defvar.xt ^{:ns "@worker"}
+(defsingleton.xt ^{:ns "@worker"}
   SERVICE
   "gets the current service registry"
   {:added "4.0"}
   []
   (return nil))
 
-(defvar.xt ^{:ns "@worker"}
+(defsingleton.xt ^{:ns "@worker"}
   BINDINGS
   "gets the current bindings registry"
   {:added "4.0"}

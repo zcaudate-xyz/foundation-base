@@ -2980,7 +2980,7 @@
 (comment
 
   (code.manage/isolate 'xt.lang.spec-base-test {:suffix "-fix"})
-  (s/seedgen-benchadd 'xt.lang.spec-base {:lang [:lua :python] :write true})
+  (s/seedgen-benchadd 'xt.lang.spec-base {:lang [:r :dart] :write true})
   (s/seedgen-langadd 'xt.lang.spec-base {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.lang.spec-base {:lang [:lua :python] :write true})
   

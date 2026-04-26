@@ -8,7 +8,7 @@
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]
-             [xt.lang.common-runtime :as rt :with [defvar.js]]
+             [xt.lang.common-space :as rt :with [defsingleton.js]]
              [xt.lang.event-view :as base-view]
              [js.core :as j]
              [js.cell.kernel.base-link :as base-link]
@@ -23,7 +23,7 @@
                   (l/rt:scaffold-imports :js))]
    :teardown  [(l/rt:stop)]})
 
-(defvar.js CELL
+(defsingleton.js CELL
   []
   (return nil))
 

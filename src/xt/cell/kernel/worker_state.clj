@@ -5,7 +5,7 @@
 (l/script :xtalk
   {:require [[xt.cell.kernel.base-util :as util]
              [xt.lang.common-task :as task]
-             [xt.lang.common-runtime :as rt :with [defvar.xt]]
+             [xt.lang.common-space :as rt :with [defsingleton.xt]]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]]})
 
@@ -79,7 +79,7 @@
 (defspec.xt post-message
   [:fn [:xt/any :xt/any] :xt/any])
 
-(defvar.xt ^{:ns "@worker"}
+(defsingleton.xt ^{:ns "@worker"}
   WORKER_STATE
   "gets worker state
  
@@ -89,7 +89,7 @@
   []
   (return  {:eval true}))
 
-(defvar.xt ^{:ns "@worker"}
+(defsingleton.xt ^{:ns "@worker"}
   WORKER_ACTIONS
   "gets worker actions
  

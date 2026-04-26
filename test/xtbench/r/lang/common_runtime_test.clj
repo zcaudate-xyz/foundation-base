@@ -1,17 +1,17 @@
 (ns xtbench.r.lang.common-runtime-test
   (:use code.test)
   (:require [std.lang :as l]
-            [xt.lang.common-runtime :as rt]))
+            [xt.lang.common-space :as rt]))
 
 (l/script- :r
   {:runtime :basic
-   :require [[xt.lang.common-runtime :as rt]]})
+   :require [[xt.lang.common-space :as rt]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
  :teardown [(l/rt:stop)]})
 
-^{:refer xt.lang.common-runtime/xt-exists? :added "4.0"
+^{:refer xt.lang.common-space/xt-exists? :added "4.0"
   :setup [(l/rt:restart)]}
 (fact "checks that the xt map exists"
 
@@ -21,7 +21,7 @@
     (rt/xt-exists?)])
   => (contains-in [false {"config" {}, "spaces" {}, "::" "xt"} true]))
 
-^{:refer xt.lang.common-runtime/xt-create :added "4.0"}
+^{:refer xt.lang.common-space/xt-create :added "4.0"}
 (fact "creates an empty xt structure"
 
   (!.R
@@ -31,7 +31,7 @@
   => (contains-in [{"config" {}, "spaces" {}, "::" "xt"}
                    nil]))
 
-^{:refer xt.lang.common-runtime/xt-ensure :added "4.1"}
+^{:refer xt.lang.common-space/xt-ensure :added "4.1"}
 (fact "makes sure the xt state is alive"
 
   (!.R
@@ -39,7 +39,7 @@
    (rt/xt-ensure))
   => (contains-in {"config" {}, "spaces" {}, "::" "xt"}))
 
-^{:refer xt.lang.common-runtime/xt-current :added "4.0"}
+^{:refer xt.lang.common-space/xt-current :added "4.0"}
 (fact "gets the current xt"
 
   (!.R
@@ -47,7 +47,7 @@
    (rt/xt-current))
   => nil)
 
-^{:refer xt.lang.common-runtime/xt-purge :added "4.0"}
+^{:refer xt.lang.common-space/xt-purge :added "4.0"}
 (fact "empties the current xt"
 
   (!.R
@@ -57,7 +57,7 @@
   => (contains-in [{"config" {}, "spaces" {}, "::" "xt"}
                     "NA"]))
 
-^{:refer xt.lang.common-runtime/xt-purge-config :added "4.0"}
+^{:refer xt.lang.common-space/xt-purge-config :added "4.0"}
 (fact "clears all `:config` entries"
 
   (!.R
@@ -70,7 +70,7 @@
                 [true {"test.module" {"host" "127.0.0.1"}}]
                 empty?]))
 
-^{:refer xt.lang.common-runtime/xt-purge-spaces :added "4.0"}
+^{:refer xt.lang.common-space/xt-purge-spaces :added "4.0"}
 (fact "clears all `:spaces` entries"
 
   (!.R
@@ -83,14 +83,14 @@
                 [true {"test.module" {"hello" {"value" {"a" 1}, "watch" {}}}}]
                 empty?]))
 
-^{:refer xt.lang.common-runtime/xt-lookup-id :added "4.0"}
+^{:refer xt.lang.common-space/xt-lookup-id :added "4.0"}
 (fact "gets the runtime id for pointer-like objects"
 
   (!.R
    (rt/xt-lookup-id {}))
   => integer?)
 
-^{:refer xt.lang.common-runtime/xt-config-list :added "4.0"}
+^{:refer xt.lang.common-space/xt-config-list :added "4.0"}
 (fact "lists all config entries in the xt"
 
   (!.R
@@ -100,7 +100,7 @@
     (rt/xt-config-list))
   => (just ["test.one" "test.two"] :in-any-order))
 
-^{:refer xt.lang.common-runtime/xt-config-set :added "4.0"}
+^{:refer xt.lang.common-space/xt-config-set :added "4.0"}
 (fact "sets the config for a module"
 
   (!.R
@@ -110,7 +110,7 @@
     (rt/xt-config-list)])
   => (contains-in [[true] ["test.module"]]))
 
-^{:refer xt.lang.common-runtime/xt-config-del :added "4.0"}
+^{:refer xt.lang.common-space/xt-config-del :added "4.0"}
 (fact "deletes a single xt config entry"
 
   (!.R
@@ -124,7 +124,7 @@
        [true {"host" "127.0.0.1", "port" 1234}]
        "NA"]))
 
-^{:refer xt.lang.common-runtime/xt-config :added "4.0"}
+^{:refer xt.lang.common-space/xt-config :added "4.0"}
 (fact "gets a config entry"
 
   (!.R
@@ -134,7 +134,7 @@
    (rt/xt-config "test.module"))
   => {"host" "127.0.0.1", "port" 1234})
 
-^{:refer xt.lang.common-runtime/xt-space-list :added "4.0"}
+^{:refer xt.lang.common-space/xt-space-list :added "4.0"}
 (fact "lists all spaces in the xt"
 
   (!.R
@@ -143,7 +143,7 @@
    (rt/xt-space-list))
   => ["test.module"])
 
-^{:refer xt.lang.common-runtime/xt-space-del :added "4.0"}
+^{:refer xt.lang.common-space/xt-space-del :added "4.0"}
 (fact "deletes a space"
 
   (!.R
@@ -154,7 +154,7 @@
   => (contains-in [[true {"hello" {"value" {"a" 1}, "watch" {}}}]
                    empty?]))
 
-^{:refer xt.lang.common-runtime/xt-space :added "4.0"}
+^{:refer xt.lang.common-space/xt-space :added "4.0"}
 (fact "gets a space"
 
   (!.R
@@ -163,7 +163,7 @@
    (rt/xt-space "test.module"))
   => {"hello" {"value" {"a" 1, "b" 2}, "watch" {}}})
 
-^{:refer xt.lang.common-runtime/xt-space-clear :added "4.0"}
+^{:refer xt.lang.common-space/xt-space-clear :added "4.0"}
 (fact "clears all items in the space"
 
   (!.R
@@ -174,7 +174,7 @@
   => [[true {"hello" {"value" 42, "watch" {}}}]
       {}])
 
-^{:refer xt.lang.common-runtime/xt-item-del :added "4.0"}
+^{:refer xt.lang.common-space/xt-item-del :added "4.0"}
 (fact "deletes a single item in the space"
 
   (!.R
@@ -185,7 +185,7 @@
   => [[true {"value" 42, "watch" {}}]
       true])
 
-^{:refer xt.lang.common-runtime/xt-item-trigger :added "4.0"}
+^{:refer xt.lang.common-space/xt-item-trigger :added "4.0"}
 (fact "triggers as item"
 
   (!.R
@@ -198,7 +198,7 @@
    (rt/xt-item-trigger "test.module" "hello"))
   => ["main"])
 
-^{:refer xt.lang.common-runtime/xt-item-set :added "4.0"}
+^{:refer xt.lang.common-space/xt-item-set :added "4.0"}
 (fact "sets a single item in the space"
 
   (!.R
@@ -208,7 +208,7 @@
   => [[true {"value" 42, "watch" {}}]
       42])
 
-^{:refer xt.lang.common-runtime/xt-item :added "4.0"}
+^{:refer xt.lang.common-space/xt-item :added "4.0"}
 (fact "gets an xt item by module and key"
 
   (!.R
@@ -217,7 +217,7 @@
    (rt/xt-item "test.module" "hello"))
   => {"a" 1})
 
-^{:refer xt.lang.common-runtime/xt-item-get :added "4.0"}
+^{:refer xt.lang.common-space/xt-item-get :added "4.0"}
 (fact "gets an xt item or sets a default if not exist"
 
   (!.R
@@ -226,7 +226,7 @@
     (rt/xt-item-get "test.module" "hello" (fn [] (return 2)))])
   => [1 1])
 
-^{:refer xt.lang.common-runtime/xt-var-entry :added "4.0"}
+^{:refer xt.lang.common-space/xt-var-entry :added "4.0"}
 (fact "gets the var entry"
 
   (!.R
@@ -235,7 +235,7 @@
    (rt/xt-var-entry "test.module/hello"))
   => {"value" 42, "watch" {}})
 
-^{:refer xt.lang.common-runtime/xt-var :added "4.0"}
+^{:refer xt.lang.common-space/xt-var :added "4.0"}
 (fact "gets an xt item"
 
   (!.R
@@ -244,7 +244,7 @@
    (rt/xt-var "test.module/hello"))
   => {"a" 1})
 
-^{:refer xt.lang.common-runtime/xt-var-set :added "4.0"}
+^{:refer xt.lang.common-space/xt-var-set :added "4.0"}
 (fact "sets the var"
 
   (!.R
@@ -256,7 +256,7 @@
       [true {"value" 42, "watch" {}}]
       true])
 
-^{:refer xt.lang.common-runtime/xt-var-trigger :added "4.0"}
+^{:refer xt.lang.common-space/xt-var-trigger :added "4.0"}
 (fact "triggers the var"
 
   (!.R
@@ -269,7 +269,7 @@
    (rt/xt-var-trigger "test.module/hello"))
   => ["main"])
 
-^{:refer xt.lang.common-runtime/xt-add-watch :added "4.0"}
+^{:refer xt.lang.common-space/xt-add-watch :added "4.0"}
 (fact "adds a watch"
 
   (!.R
@@ -283,7 +283,7 @@
   => [true
       ["main"]])
 
-^{:refer xt.lang.common-runtime/xt-remove-watch :added "4.0"}
+^{:refer xt.lang.common-space/xt-remove-watch :added "4.0"}
 (fact "removes a watch"
 
   (!.R
@@ -298,5 +298,5 @@
   => (contains [true empty?]))
 
 (comment
-  (s/seedgen-langadd 'xt.lang.common-runtime {:lang [:lua :python] :write true})
-  (s/seedgen-langremove 'xt.lang.common-runtime {:lang [:lua :python] :write true}))
+  (s/seedgen-langadd 'xt.lang.common-space {:lang [:lua :python] :write true})
+  (s/seedgen-langremove 'xt.lang.common-space {:lang [:lua :python] :write true}))

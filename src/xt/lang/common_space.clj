@@ -1,4 +1,4 @@
-(ns xt.lang.common-runtime
+(ns xt.lang.common-space
   (:require [std.lang :as l]
              [std.lang.typed.xtalk :refer [defspec.xt]]
              [std.lib.env :as env]
@@ -430,8 +430,8 @@
     (return true))
   (return false))
 
-(defn defvar-fn
-  "helper function for defvar macros"
+(defn defsingleton-fn
+  "helper function for defsingleton macros"
   {:added "4.0"}
   [&form tag sym-id doc? attrs? more]
   (let [sym-ns  (or (get (meta sym-id) :ns)
@@ -448,7 +448,7 @@
     (template/$ [(~def-sym ~(with-meta sym-id (merge (meta &form)
                                               (meta sym-id)))
              []
-             (return (xt.lang.common-runtime/xt-item-get
+             (return (xt.lang.common-space/xt-item-get
                       ~sym-ns
                       ~sym-key
                       (fn ~@more))))
@@ -456,30 +456,30 @@
                         (merge (meta &form)
                                (meta sym-id)))
             [val]
-            (return (xt.lang.common-runtime/xt-var-set
+            (return (xt.lang.common-space/xt-var-set
                      ~(str sym-ns "/" sym-key)
                      val)))])))
 
-(defmacro defvar.xt
+(defmacro defsingleton.xt
   "shortcut for a xt getter and a reset var"
   {:added "4.0"}
   [sym-id & [doc? attrs? & more]]
-  (defvar-fn &form "xt" sym-id doc? attrs? more))
+  (defsingleton-fn &form "xt" sym-id doc? attrs? more))
 
-(defmacro defvar.js
+(defmacro defsingleton.js
   "shortcut for a js getter and a reset var"
   {:added "4.0"}
   [sym-id & [doc? attrs? & more]]
-  (defvar-fn &form "js" sym-id doc? attrs? more))
+  (defsingleton-fn &form "js" sym-id doc? attrs? more))
 
-(defmacro defvar.lua
+(defmacro defsingleton.lua
   "shortcut for a lua getter and a reset var"
   {:added "4.0"}
   [sym-id & [doc? attrs? & more]]
-  (defvar-fn &form "lua" sym-id doc? attrs? more))
+  (defsingleton-fn &form "lua" sym-id doc? attrs? more))
 
-(defmacro defvar.py
+(defmacro defsingleton.py
   "TODO"
   {:added "4.0"}
   [sym-id & [doc? attrs? & more]]
-  (defvar-fn &form "python" sym-id doc? attrs? more))
+  (defsingleton-fn &form "python" sym-id doc? attrs? more))

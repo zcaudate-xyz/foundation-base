@@ -8,7 +8,7 @@
 (l/script :js
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
-             [xt.lang.common-runtime :as rt]]})
+             [xt.lang.common-space :as rt]]})
 
 (defn.js hash-float
   "hashes a floating point"
@@ -25,7 +25,7 @@
 (l/script :lua
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
-             [xt.lang.common-runtime :as rt]]})
+             [xt.lang.common-space :as rt]]})
 
 (defn.lua hash-float
   "hashes a floating point"
@@ -45,7 +45,7 @@
 (l/script :python
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
-             [xt.lang.common-runtime :as rt]]})
+             [xt.lang.common-space :as rt]]})
 
 (defn.py hash-float
   "hashes a floating point"
@@ -66,7 +66,7 @@
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
-             [xt.lang.common-runtime :as rt]]})
+             [xt.lang.common-space :as rt]]})
 
 (defabstract.xt hash-float [f])
 

@@ -52,8 +52,8 @@
      defmacro.sh
      defmacro.sol
      defmacro.xt
-     defvar.xt
-     defvar.js
+     defsingleton.xt
+     defsingleton.js
      defcache
      invoke/definvoke
      defmemoize

@@ -26,7 +26,7 @@
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
               [xt.lang.common-repl :as repl]
-              [xt.lang.common-runtime :as rt :with [defvar.js]]
+              [xt.lang.common-space :as rt :with [defsingleton.js]]
               [js.core :as j]
                [js.cell.kernel.base-link :as base-link]
                [js.cell.kernel.base-link-local :as base-link-local]
@@ -40,7 +40,7 @@
   :teardown  [(browser/stop-playground)
               (l/rt:stop)]})
 
-(defvar.js CELL
+(defsingleton.js CELL
   []
   (return nil))
 

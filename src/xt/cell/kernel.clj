@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-runtime :as rt :with [defvar.xt]]
+  {:require [[xt.lang.common-space :as rt :with [defsingleton.xt]]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-task :as task]
@@ -30,13 +30,13 @@
 ;; STATE
 ;;
 
-(defvar.xt
+(defsingleton.xt
   GD
   "gets the current cell"
   {:added "4.0"}
   [] (return nil))
 
-(defvar.xt
+(defsingleton.xt
   GX
   "gets the current annex"
   {:added "4.0"}
