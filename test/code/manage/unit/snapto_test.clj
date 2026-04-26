@@ -78,8 +78,8 @@
 
 ^{:refer code.manage.unit.snapto/snap-block-string :added "4.1"}
 (fact "preserves multiline metadata blocks and reader sugar"
-  (let [source   "^{:refer xt.db.base-util/collect-routes,\n  :added \"4.0\",\n  :setup\n  [(def +routes+\n     [{:id \"ping\"}])\n   (def +result+\n     (contains-in {\"api/ping\" {:id \"ping\"}}))]}\n(fact\n \"collect routes\"\n ^{:hidden true}\n (!.lua (ut/collect-routes (@! +routes+) \"db\"))\n =>\n +result+)"
-        expected "^{:refer xt.db.base-util/collect-routes,\n  :added \"4.0\",\n  :setup\n  [(def +routes+\n     [{:id \"ping\"}])\n   (def +result+\n     (contains-in {\"api/ping\" {:id \"ping\"}}))]}\n(fact \"collect routes\"\n\n  ^{:hidden true}\n  (!.lua (ut/collect-routes (@! +routes+) \"db\"))\n  => +result+)"]
+  (let [source   "^{:refer xt.lib.db.base-util/collect-routes,\n  :added \"4.0\",\n  :setup\n  [(def +routes+\n     [{:id \"ping\"}])\n   (def +result+\n     (contains-in {\"api/ping\" {:id \"ping\"}}))]}\n(fact\n \"collect routes\"\n ^{:hidden true}\n (!.lua (ut/collect-routes (@! +routes+) \"db\"))\n =>\n +result+)"
+        expected "^{:refer xt.lib.db.base-util/collect-routes,\n  :added \"4.0\",\n  :setup\n  [(def +routes+\n     [{:id \"ping\"}])\n   (def +result+\n     (contains-in {\"api/ping\" {:id \"ping\"}}))]}\n(fact \"collect routes\"\n\n  ^{:hidden true}\n  (!.lua (ut/collect-routes (@! +routes+) \"db\"))\n  => +result+)"]
     (snap-block-string (block/parse-first source))
     => expected))
 
