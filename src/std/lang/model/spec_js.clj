@@ -179,42 +179,6 @@
   (apply list 'for [(list 'var* :let e) :of (list '% it)]
          body))
 
-(defn js-tf-for-return
-  "for return transform"
-  {:added "4.0"}
-  [[_ [[res err] statement] {:keys [success error final]}]]
-  (let [cb (list 'fn [err res]
-                 (list 'if err
-                       error
-                       success))
-        out (walk/prewalk (fn [x]
-                            (if (= x '(x:callback))
-                              cb
-                           x))
-                          statement)]
-    (cond->> out
-      final (list 'return))))
-
-(defn js-tf-for-async
-  "for async transform"
-  {:added "4.0"}
-  [[_ [[res err] statement] {:keys [success error finally]}]]
-  (template/$
-   (. (new Promise (fn [resolve reject]
-                     (resolve ~statement)))
-      ~@(if success
-          [(list 'then
-                 (list 'fn [res]
-                       success))])
-      ~@(if error
-          [(list 'catch
-                 (list 'fn [err]
-                       error))])
-      ~@(if finally
-          [(list 'finally
-                 (list 'fn '[]
-                       finally))]))))
-
 (defn js-tf-prototype-create
   [[_ m]]
   (template/$
@@ -243,8 +207,6 @@
         :for-object  {:macro  #'js-tf-for-object  :emit :macro}
         :for-array   {:macro  #'js-tf-for-array   :emit :macro}
         :for-iter    {:macro  #'js-tf-for-iter    :emit :macro}
-        :for-return  {:macro  #'js-tf-for-return  :emit :macro}
-        :for-async   {:macro  #'js-tf-for-async   :emit :macro}
         :prototype-get       {:emit :alias :raw 'Object.getPrototypeOf}
         :prototype-set       {:emit :alias :raw 'Object.setPrototypeOf}
         :prototype-create    {:macro #'js-tf-prototype-create  :emit :macro

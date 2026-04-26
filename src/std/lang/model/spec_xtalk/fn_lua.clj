@@ -28,20 +28,6 @@
     (template/$ (error (cjson.encode ~[s data])))
     (template/$ (error ~s))))
 
-(defn lua-tf-x-shell
-  ([[_ s opts cb]]
-   (template/$
-    (do* (var '[ok handle] (pcall (fn [] (return (io.popen ~s)))))
-         (if (not ok)
-           (return nil handle)
-           (do* (var res (handle:read "*a"))
-                (var '[closed reason code] (handle:close))
-                (if closed
-                  (return res nil)
-                  (return nil {:reason reason
-                               :code code
-                               :output res}))))))))
-
 (defn lua-tf-x-hash-id
   [[_ obj]]
   (template/$ (return nil)))
@@ -70,11 +56,11 @@
    :x-apply          {:macro #'lua-tf-x-apply  :emit :macro}
    :x-unpack         {:emit :alias :raw 'unpack}
    :x-print          {:emit :alias :raw 'print}
-   
-   :x-random         {:emit :alias :raw 'math.random}
-   :x-shell          {:macro #'lua-tf-x-shell         :emit :macro}
-   :x-now-ms         {:default '(math.floor (* 1000 (os.time)))   :emit :unit}
-   :x-type-native    {:macro #'lua-tf-x-type-native  :emit :macro}})
+    
+    :x-random         {:emit :alias :raw 'math.random}
+    :x-now-ms         {:default '(math.floor (* 1000 (os.time)))   :emit :unit}
+    :x-type-native    {:macro #'lua-tf-x-type-native  :emit :macro}})
+
 
 ;;
 ;; GLOBAL
@@ -543,19 +529,50 @@
    :x-promise-finally  {:emit :hard-link :raw 'lua.core.common-promise/promise-finally}
    :x-promise-native?  {:emit :hard-link :raw 'lua.core.common-promise/promise-native?}})
 
+(defn lua-tf-x-pwd
+  [[_]]
+  (template/$
+   (os.getenv "PWD")))
+
+(defn lua-tf-x-shell
+  ([[_ s root cb]]
+   (template/$
+    (do* (var command (if root
+                        (cat "cd " root " && " ~s)
+                        ~s))
+         (var '[ok handle] (pcall (fn [] (return (io.popen command)))))
+         (if (not ok)
+           (return (~cb handle nil))
+           (do* (var res (handle:read "*a"))
+                (var '[closed reason code] (handle:close))
+                (if closed
+                  (return (~cb nil res))
+                  (return (~cb {:err reason
+                                :code code
+                                :out res}
+                           nil)))))))))
+
+(def +lua-shell+
+  {:x-pwd            {:macro #'lua-tf-x-pwd           :emit :macro}
+   :x-shell          {:macro #'lua-tf-x-shell         :emit :macro
+                      :op-spec {:allow-blocks true}}})
+
 ;;
 ;; FILE
 ;;
 
-(defn lua-tf-x-file-slurp
-  ([[_ filename opts cb]]
+(defn lua-tf-x-file-resolve
+  ([[_ root path]]
    (template/$
-    (do* (var root (os.getenv "PWD"))
-         (var resolved ~filename)
-         (when (and root
-                    (not= "/" (string.sub resolved 1 1)))
-           (:= resolved (cat root "/" resolved)))
-         (var '[handle err] (io.open resolved "r"))
+    (if (or (== nil ~root)
+            (== "/" (string.sub ~path 1 1)))
+      (return ~path)
+      (return (cat ~root "/" ~path))))))
+
+(defn lua-tf-x-file-slurp
+  ([[_ filename cb]]
+   (template/$
+    (do* (var '[handle err] (io.open ~filename "r"))
          (if err
            (return (~cb err nil))
            (do* (var '[res read-err] (handle:read "*a"))
@@ -565,24 +582,21 @@
                   (return (~cb nil res)))))))))
 
 (defn lua-tf-x-file-spit
-  ([[_ filename s opts cb]]
+  ([[_ filename content cb]]
    (template/$
-    (do* (var root (os.getenv "PWD"))
-         (var resolved ~filename)
-         (when (and root
-                    (not= "/" (string.sub resolved 1 1)))
-           (:= resolved (cat root "/" resolved)))
-         (var '[handle err] (io.open resolved "w"))
+    (do* (var '[handle err] (io.open ~filename "w"))
          (if err
            (return (~cb err nil))
-           (do* (var '[out write-err] (handle:write ~s))
+           (do* (var '[out write-err] (handle:write ~content))
                 (handle:close)
                 (if write-err
                   (return (~cb write-err nil))
                   (return (~cb nil ~filename)))))))))
 
 (def +lua-file+
-  {:x-file-slurp     {:macro #'lua-tf-x-file-slurp    :emit :macro
+  {:x-file-resolve   {:macro #'lua-tf-x-file-resolve  :emit :macro
+                      :op-spec {:allow-blocks true}}
+   :x-file-slurp     {:macro #'lua-tf-x-file-slurp    :emit :macro
                       :op-spec {:allow-blocks true}}
    :x-file-spit      {:macro #'lua-tf-x-file-spit     :emit :macro
                       :op-spec {:allow-blocks true}}})
@@ -603,4 +617,5 @@
          +lua-socket+
          +lua-iter+
          +lua-promise+
-         +lua-file+))
+         +lua-file+
+         +lua-shell+))

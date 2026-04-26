@@ -18,8 +18,6 @@
   [[_ f args]]
   (list '. f (list 'apply nil args)))
 
- 
-
 (defn js-tf-x-random
   [_]
   '(Math.random))
@@ -46,6 +44,7 @@
     (list '== check (list 'x:get-key obj key nil))
     (list 'not= nil (list '. obj [key]))))
 
+
 (def +js-core+
   {:x-del            {:emit :alias :raw 'delete}
    :x-cat            {:macro #'js-tf-x-cat  :emit :macro :value true
@@ -57,7 +56,6 @@
    :x-unpack         {:emit :alias :raw :..}
    :x-print          {:emit :alias :raw 'console.log :value true}
    :x-random         {:emit :alias :raw 'Math.random :value true}
-   
    :x-now-ms         {:emit :alias :raw 'Date.now}
    :x-type-native    {:macro #'js-tf-x-type-native   :emit :macro}})
 
@@ -65,8 +63,7 @@
   {})
 
 (def +js-custom+
-  {:x-callback       {:emit :throw}
-   :x-has-key?       {:macro #'js-tf-x-has-key? :emit :macro}})
+  {:x-has-key?       {:macro #'js-tf-x-has-key? :emit :macro}})
 
 ;;
 ;; MATH
@@ -578,52 +575,10 @@
    :x-iter-has?        {:macro #'js-tf-x-iter-has?           :emit :macro}
    :x-iter-native?     {:macro #'js-tf-x-iter-native?        :emit :macro}})
 
+
 ;;
-;; FILE
+;; PROMISE
 ;;
-
-(defn js-tf-x-slurp-file
-  [[_ filename opts cb]]
-  (template/$
-   (do (var root (or (. process env ["PWD"])
-                     (. process (cwd))))
-       (. (require "fs")
-          (readFile (. (require "path")
-                       (resolve root ~filename))
-                    "utf-8"
-                    ~cb))
-       (return ["async"]))))
-
-(defn js-tf-x-spit-file
-  [[_ filename s opts cb]]
-  (template/$
-   (do (var root (or (. process env ["PWD"])
-                     (. process (cwd))))
-       (. (require "fs")
-          (writeFile (. (require "path")
-                        (resolve root ~filename))
-                     ~s
-                     "utf-8"
-                     ~cb))
-       (return ["async"]))))
-
-(def +js-file+
-  {:x-slurp-file     {:macro #'js-tf-x-slurp-file    :emit :macro
-                      :op-spec {:allow-blocks true}}
-   :x-spit-file      {:macro #'js-tf-x-spit-file     :emit :macro
-                      :op-spec {:allow-blocks true}}})
-
-(defn js-tf-x-shell
-  ([[_ s opts cb]]
-   (template/$
-    (do (. (require "child_process")
-           (exec ~s ~opts (fn [err stdout stderr]
-                            (~cb err {:out stdout
-                                      :err stderr}))))
-        (return ["async"])))))
-
-(def +js-shell+
-  {:x-shell          {:macro #'js-tf-x-shell         :emit :macro}})
 
 (defn js-tf-x-with-delay
   ([[_ thunk ms cb]]
@@ -666,10 +621,76 @@
    :x-promise-then     {:macro #'js-tf-x-promise-then     :emit :macro}
    :x-promise-catch    {:macro #'js-tf-x-promise-catch    :emit :macro}
    :x-promise-finally  {:macro #'js-tf-x-promise-finally  :emit :macro}
-   :x-promise-native?  {:macro #'js-tf-x-promise-native?  :emit :macro}})
+   :x-promise-native?  {:macro #'js-tf-x-promise-native?  :emit :macro}
+   :x-with-delay       {:macro #'js-tf-x-with-delay     :emit :macro}})
 
-(def +js-thread+
-  {:x-with-delay     {:macro #'js-tf-x-with-delay     :emit :macro}})
+
+
+;;
+;; SHELL
+;;
+
+(defn js-tf-x-pwd
+  [[_]]
+  '(or (. process env ["PWD"])
+       (. process (cwd))))
+
+(defn js-tf-x-shell
+  ([[_ s root cb]]
+   (template/$
+    (do (. (require "child_process")
+           (exec ~s {:cwd ~root}
+                 (fn [err stdout stderr]
+                   (if err
+                     (return (~cb {:code (. err ["code"])
+                                   :err stderr
+                                   :out stdout}
+                              nil))
+                     (return (~cb nil stdout))))))
+        (return ["async"])))))
+
+(def +js-shell+
+  {:x-pwd            {:macro #'js-tf-x-pwd    :emit :macro}
+   :x-shell          {:macro #'js-tf-x-shell  :emit :macro}})
+
+;;
+;; FILE
+;;
+
+(defn js-tf-x-file-resolve
+  [[_ root path]]
+  (template/$
+   (. (require "path")
+      (resolve ~root ~path))))
+
+(defn js-tf-x-file-slurp
+  [[_ filename cb]]
+  (template/$
+   (do (. (require "fs")
+          (readFile ~filename
+                    "utf-8"
+                    ~cb))
+       (return ["async"]))))
+
+(defn js-tf-x-file-spit
+  [[_ filename content cb]]
+  (template/$
+   (do (. (require "fs")
+          (writeFile (. (require "path")
+                        (resolve root ~filename))
+                     ~content
+                     "utf-8"
+                     ~cb))
+       (return ["async"]))))
+
+(def +js-file+
+  {:x-file-resolve   {:macro #'js-tf-x-file-resolve  :emit :macro}
+   :x-file-slurp     {:macro #'js-tf-x-file-slurp    :emit :macro
+                      :op-spec {:allow-blocks true}}
+   :x-file-spit      {:macro #'js-tf-x-file-spit     :emit :macro
+                      :op-spec {:allow-blocks true}}})
+
+
 
 (def +js+
   (merge +js-core+
@@ -688,6 +709,5 @@
          +js-http+
          +js-iter+
          +js-promise+
-         +js-thread+
          +js-shell+
          +js-file+))

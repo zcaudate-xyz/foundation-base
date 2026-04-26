@@ -114,7 +114,6 @@
         :for-object  {:macro #'tf-for-object :emit :macro}
         :for-array   {:macro #'tf-for-array  :emit :macro}
         :for-iter    {:macro #'tf-for-iter   :emit :macro}
-        :for-return  {:macro #'tf-for-return :emit :macro}
         :with-global {:value true :raw "__globals__"}})
       (grammar/build:override fn-dart/+dart+)
       (grammar/build:extend

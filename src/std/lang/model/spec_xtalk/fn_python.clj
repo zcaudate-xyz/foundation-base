@@ -47,14 +47,6 @@
   ([[_ & args]]
    (apply list 'print args)))
 
-(defn python-tf-x-shell
-  ([[_ s opts cb]]
-   (template/$
-    (do (var subprocess (__import__ "subprocess"))
-        (var output (. (subprocess.check_output ["sh" "-lc" ~s])
-                       (decode "utf-8")))
-        (return output)))))
-
 (defn python-tf-x-type-native
   [[_ obj]]
   (template/$
@@ -89,9 +81,9 @@
    :x-unpack         {:raw :*  :emit :alias}
    :x-random         {:macro #'python-tf-x-random  :emit :macro}
    :x-print          {:macro #'python-tf-x-print         :emit :macro}
-   :x-shell          {:macro #'python-tf-x-shell         :emit :macro}
    :x-now-ms         {:default '(round (* 1000 (. (__import__ "time") (time)))) :emit :unit}
    :x-type-native    {:macro #'python-tf-x-type-native   :emit :macro}})
+
 
 
 ;;
@@ -556,13 +548,13 @@
 (defn python-tf-x-socket-connect
   ([[_ host port opts cb]]
    (template/$
-     (do (:- :import socket)
-         (try
-           (var conn (socket.socket))
-           (conn.connect '(~host ~port))
-           (catch [Exception :as e]
-             (return (~cb e nil))))
-         (return (~cb nil conn))))))
+    (do (:- :import socket)
+        (try
+          (var conn (socket.socket))
+          (conn.connect '(~host ~port))
+          (catch [Exception :as e]
+              (return (~cb e nil))))
+        (return (~cb nil conn))))))
 
 (defn python-tf-x-socket-send
   ([[_ conn s]]
@@ -621,15 +613,15 @@
    (list 'hasattr it "__next__")))
 
 (def +python-iter+
-   {:x-iter-from-obj       {:macro #'python-tf-x-iter-from-obj       :emit :macro}
-    :x-iter-from-arr       {:macro #'python-tf-x-iter-from-arr       :emit :macro}
-    :x-iter-from           {:macro #'python-tf-x-iter-from           :emit :macro}
-    :x-iter-eq             {:macro #'python-tf-x-iter-eq             :emit :macro
-                            :op-spec {:allow-blocks true}}
-    :x-iter-null           {:default '(iter [])                      :emit :unit}
-    :x-iter-next           {:macro #'python-tf-x-iter-next           :emit :macro}
-    :x-iter-has?           {:macro #'python-tf-x-iter-has?           :emit :macro}
-    :x-iter-native?        {:macro #'python-tf-x-iter-native?        :emit :macro}})
+  {:x-iter-from-obj       {:macro #'python-tf-x-iter-from-obj       :emit :macro}
+   :x-iter-from-arr       {:macro #'python-tf-x-iter-from-arr       :emit :macro}
+   :x-iter-from           {:macro #'python-tf-x-iter-from           :emit :macro}
+   :x-iter-eq             {:macro #'python-tf-x-iter-eq             :emit :macro
+                           :op-spec {:allow-blocks true}}
+   :x-iter-null           {:default '(iter [])                      :emit :unit}
+   :x-iter-next           {:macro #'python-tf-x-iter-next           :emit :macro}
+   :x-iter-has?           {:macro #'python-tf-x-iter-has?           :emit :macro}
+   :x-iter-native?        {:macro #'python-tf-x-iter-native?        :emit :macro}})
 
 ;;
 ;; ASYNC
@@ -645,105 +637,88 @@
           (return (f)))
         (x:thread-spawn delay_target)))))
 
-(defn python-promise-fn-form?
-  [form]
-  (and (seq? form)
-       (contains? #{'fn 'fn:>} (first form))))
-
-(defn python-promise-fn-def
-  [name thunk]
-  (let [[tag params & body] thunk
-        body (if (= 'fn:> tag)
-               [(list 'return (first body))]
-               body)]
-    (list* 'fn name params body)))
-
-(defn python-promise-call
-  [target name args thunk]
-  (if (python-promise-fn-form? thunk)
-    (let [fndef (python-promise-fn-def name thunk)]
-      (template/$
-       (do ~fndef
-           (return (~target ~@args ~name)))))
-    (apply list target (concat args [thunk]))))
-
-(defn python-tf-x-promise
-  [[_ thunk]]
-  (python-promise-call 'python.core.common-promise/promise
-                       'promise_thunk
-                       []
-                       thunk))
-
-(defn python-tf-x-promise-then
-  [[_ promise thunk]]
-  (python-promise-call 'python.core.common-promise/promise-then
-                       'promise_then
-                       [promise]
-                       thunk))
-
-(defn python-tf-x-promise-catch
-  [[_ promise thunk]]
-  (python-promise-call 'python.core.common-promise/promise-catch
-                       'promise_catch
-                       [promise]
-                       thunk))
-
-(defn python-tf-x-promise-finally
-  [[_ promise thunk]]
-  (python-promise-call 'python.core.common-promise/promise-finally
-                       'promise_finally
-                       [promise]
-                       thunk))
-
 (def +python-promise+
-  {:x-promise          {:macro #'python-tf-x-promise         :emit :macro
-                        :op-spec {:allow-blocks true}}
-   :x-promise-then     {:macro #'python-tf-x-promise-then    :emit :macro
-                        :op-spec {:allow-blocks true}}
-   :x-promise-catch    {:macro #'python-tf-x-promise-catch   :emit :macro
-                        :op-spec {:allow-blocks true}}
-   :x-promise-finally  {:macro #'python-tf-x-promise-finally :emit :macro
-                        :op-spec {:allow-blocks true}}
+  {:x-promise          {:emit :hard-link :raw 'python.core.common-promise/promise}
+   :x-promise-then     {:emit :hard-link :raw 'python.core.common-promise/promise-then}
+   :x-promise-catch    {:emit :hard-link :raw 'python.core.common-promise/promise-catch}
+   :x-promise-finally  {:emit :hard-link :raw 'python.core.common-promise/promise-finally}
    :x-promise-native?  {:emit :hard-link :raw 'python.core.common-promise/promise-native?}})
 
-(def +python-thread+
-  {:x-with-delay     {:macro #'python-tf-x-with-delay    :emit :macro
+
+
+;;
+;; SHELL
+;;
+   
+
+(defn python-tf-x-pwd
+  ([[_]]
+   (template/$
+    (or (. (__import__ "os")
+           environ
+           (get "PWD"))
+        (. (__import__ "os") (getcwd))))))
+
+(defn python-tf-x-shell
+  ([[_ s root cb]]
+   (template/$
+    (do (try
+          (var result (subprocess.run ["sh" "-lc" ~s]
+                                      :capture_output true
+                                      :text true
+                                      :cwd ~root))
+          (if (not= 0 (. result returncode))
+            (return (~cb {:code (. result returncode)
+                          :err  (. result stderr)
+                          :out  (. result stdout)}
+                     nil))
+            (return (~cb nil (. result stdout))))
+          (catch [Exception :as e]
+              (return (~cb e nil))))))))
+
+(def +python-shell+
+  {:x-pwd            {:macro #'python-tf-x-pwd           :emit :macro}
+   :x-shell          {:macro #'python-tf-x-shell         :emit :macro
                       :op-spec {:allow-blocks true}}})
 
 ;;
 ;; FILE
 ;;
 
-(defn python-tf-x-file-slurp
-  ([[_ filename opts cb]]
+(defn python-tf-x-file-resolve
+  ([[_ root relpath]]
    (template/$
-    (do (var os (__import__ "os"))
-        (var root (or (. (. os environ) (get "PWD"))
-                      (. os (getcwd))))
-        (var resolved (. (. os path)
-                         (abspath (. (. os path)
-                                     (join root ~filename)))))
-        (var f (open resolved "r"))
-        (var res (. f (read)))
-        (. f (close))
-        (return (~cb nil res))))))
+    (. (__import__ "os")
+       path
+       (abspath (. (__import__ "os")
+                   path
+                   (join ~root ~relpath)))))))
+
+(defn python-tf-x-file-slurp
+  ([[_ filename cb]]
+   (template/$
+    (do (try
+          (var f (open ~filename "r"))
+          (var res (. f (read)))
+          (. f (close))
+          (return (~cb nil res))
+          (catch [Exception :as e]
+              (return (~cb e nil))))))))
 
 (defn python-tf-x-file-spit
-  ([[_ filename s opts cb]]
+  ([[_ filename content cb]]
    (template/$
-    (do (var os (__import__ "os"))
-        (var root (or (. (. os environ) (get "PWD"))
-                      (. os (getcwd))))
-        (var resolved (. (. os path)
-                         (abspath (. (. os path)
-                                     (join root ~filename)))))
-        (var f (open resolved "w"))
-        (. f (write ~s))
-        (. f (close))
-        (return (~cb nil ~filename))))))
+    (do (try
+          (var f (open ~filename "w"))
+          (. f (write ~content))
+          (. f (close))
+          (return (~cb nil ~filename))
+          (catch [Exception :as e]
+              (return (~cb e nil))))))))
 
 (def +python-file+
-  {:x-file-slurp     {:macro #'python-tf-x-file-slurp    :emit :macro
+  {:x-file-resolve   {:macro #'python-tf-x-file-resolve  :emit :macro}
+   :x-file-slurp     {:macro #'python-tf-x-file-slurp    :emit :macro
                       :op-spec {:allow-blocks true}}
    :x-file-spit      {:macro #'python-tf-x-file-spit     :emit :macro
                       :op-spec {:allow-blocks true}}})
@@ -763,5 +738,5 @@
          +python-socket+
          +python-iter+
          +python-promise+
-         +python-thread+
+         +python-shell+
          +python-file+))

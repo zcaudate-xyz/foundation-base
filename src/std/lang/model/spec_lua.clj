@@ -208,8 +208,6 @@
         :for-array  {:macro #'lua-tf-for-array  :emit :macro}
         :for-iter   {:macro #'lua-tf-for-iter   :emit :macro}
         :for-index  {:macro #'lua-tf-for-index  :emit :macro}
-        :for-return {:macro #'lua-tf-for-return :emit :macro}
-        :for-async  {:macro #'lua-tf-for-async  :emit :macro}
         :defgen     {:macro #'lua-tf-defgen     :emit :macro}
         :yield      {:macro #'lua-tf-yield      :emit :macro}
         :prototype-get       {:emit :alias :raw 'getmetatable}

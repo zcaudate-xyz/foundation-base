@@ -14,6 +14,43 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
+^{:refer xt.lang.spec-promise/x:promise-then :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.spec-promise/x:promise-catch :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.spec-promise/x:promise-finally :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.spec-promise/x:promise-native? :added "4.1"}
+(fact "TODO")
+
+
+^{:refer xt.lang.spec-promise/x:with-delay :added "4.1"}
+(fact "delays asynchronous js computations"
+
+  (notify/wait-on :js
+                  (spec-promise/x:with-delay 20
+                                             (fn []
+                                               (repl/notify "OK"))))
+  => "LATER"
+  
+  (notify/wait-on :python
+                  (spec-promise/x:with-delay 20
+                                             (fn []
+                                               (repl/notify "OK"))))
+  => "LATER"
+
+  (notify/wait-on :lua
+                  (spec-promise/x:with-delay 20
+                                             (fn []
+                                               (repl/notify "OK"))))
+  => "LATER")
+
+
+(comment
+  
 ^{:refer xt.lang.spec-base/x:promise :added "4.1"}
 (fact "python runtime hardlinks promise helpers"
   (!.py
@@ -62,37 +99,4 @@
      (. finaled ["value"])])
   => ["resolved" true 7 42 7])
 
-
-^{:refer xt.lang.spec-promise/x:promise-then :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.lang.spec-promise/x:promise-catch :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.lang.spec-promise/x:promise-finally :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.lang.spec-promise/x:promise-native? :added "4.1"}
-(fact "TODO")
-
-
-^{:refer xt.lang.spec-promise/x:with-delay :added "4.1"}
-(fact "delays asynchronous js computations"
-
-  (notify/wait-on :js
-                  (spec-promise/x:with-delay 20
-                                             (fn []
-                                               (repl/notify "OK"))))
-  => "LATER"
-  
-  (notify/wait-on :python
-                  (spec-promise/x:with-delay 20
-                                             (fn []
-                                               (repl/notify "OK"))))
-  => "LATER"
-
-  (notify/wait-on :lua
-                  (spec-promise/x:with-delay 20
-                                             (fn []
-                                               (repl/notify "OK"))))
-  => "LATER")
+  )

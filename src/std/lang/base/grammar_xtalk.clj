@@ -735,10 +735,7 @@
 (def +xt-functional-base+
   [{:op :x-is-function?   :symbol #{'x:is-function?}    :emit :abstract
     :op-spec {:arglists '([value])
-              :type [:fn [:xt/any] :xt/bool]}}
-   {:op :x-callback       :symbol #{'x:callback}        :emit :unit :default nil
-    :op-spec {:type [:fn [] [:fn [:xt/any] nil]]
-              :arglists '([])}}])
+              :type [:fn [:xt/any] :xt/bool]}}])
 
 (def +xt-functional-invoke+
   [{:op :x-eval           :symbol #{'x:eval}            :emit :abstract
@@ -924,17 +921,17 @@
               :arglists '([])}}
    {:op :x-shell          :symbol #{'x:shell}           :emit :abstract
     :op-spec {:type [:fn [:xt/str :xt/obj [:xt/fn [:xt/any :xt/any] :xt/any]]]
-              :arglists '([command opts cb])}}])
+              :arglists '([command root cb])}}])
 
 (def +xt-runtime-file+
   [{:op :x-file-resolve   :symbol #{'x:file-resolve}     :emit :abstract
     :op-spec {:type [:fn [:xt/str :xt/str] :xt/str]
               :arglists '([root path])}}
    {:op :x-file-slurp     :symbol #{'x:file-slurp}    :emit :abstract
-    :op-spec {:arglists '([path opts cb])
+    :op-spec {:arglists '([path cb])
               :type [:fn [:xt/str :xt/obj [:xt/fn [:xt/any :xt/any] :xt/any]]]}}
    {:op :x-file-spit      :symbol #{'x:file-spit}     :emit :abstract
-    :op-spec {:arglists '([path value opts cb])
+    :op-spec {:arglists '([path value cb])
               :type [:fn [:xt/str :xt/str :xt/obj [:xt/fn [:xt/any :xt/any] :xt/any]]]}}])
 
 ;;
