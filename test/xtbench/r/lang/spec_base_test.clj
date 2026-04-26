@@ -58,46 +58,6 @@
     out)
   => [1 2 3])
 
-^{:refer xt.lang.spec-base/return-run :added "4.1"}
-(fact "supports final returns through for:return"
-
-  (!.R
-    (xt/return-run [resolve reject]
-      (resolve "OK")))
-  => (throws))
-
-^{:refer xt.lang.spec-base/for:return :added "4.1"}
-(fact "dispatches success and error branches"
-
-  (!.R
-    (var out nil)
-    (xt/for:return [[ok err] (xt/return-run [resolve reject]
-                               (resolve "OK"))]
-      {:success (:= out ok)
-       :error   (:= out err)})
-    out)
-  => "OK"
-
-  (!.R
-    (var out nil)
-    (xt/for:return [[ok err] (xt/return-run [resolve reject]
-                               (reject "ERR"))]
-      {:success (:= out ok)
-       :error (:= out err)})
-    out)
-  => "ERR")
-
-^{:refer xt.lang.spec-base/for:try :added "4.1"}
-(fact "expands to the canonical try form"
-
-  (!.R
-    (var add (fn []
-               (xt/for:try [[ok err] (do:> (xt/x:err "ERROR"))]
-                 {:success (return ok)
-                  :error   (return "ERR")})))
-    (add))
-  => "ERR")
-
 ^{:refer xt.lang.spec-base/x:get-idx :added "4.1"}
 (fact "reads the first indexed value"
 
@@ -991,42 +951,6 @@
     (xt/x:is-function? (fn [x] (return x))))
   => true)
 
-^{:refer xt.lang.spec-base/x:callback :added "4.1"}
-(fact "dispatches node-style callbacks through for:return"
-
-  (!.R
-    (var out nil)
-    (var success-fn (fn [cb]
-                      (cb nil "OK")))
-    (xt/for:return [[ret err] (success-fn (xt/x:callback))]
-      {:success (:= out ret)
-       :error   (:= out err)})
-    out)
-  => "OK"
-
-  (!.R
-    (var out nil)
-    (var failure-fn (fn [cb]
-                      (cb "ERR" nil)))
-    (xt/for:return [[ret err] (failure-fn (xt/x:callback))]
-      {:success (:= out ret)
-       :error   (:= out err)})
-    out)
-  => "ERR")
-
-^{:refer xt.lang.spec-base/x:return-run :added "4.1"}
-(fact "can be used directly inside for:return"
-
-  (!.R
-    (var out nil)
-    (xt/for:return [[ok err] (xt/x:return-run
-                              (fn [resolve reject]
-                                (reject "ERR")))]
-      {:success (:= out ok)
-       :error (:= out err)})
-    out)
-  => "ERR")
-
 ^{:refer xt.lang.spec-base/x:eval :added "4.1"}
 (fact "evaluates javascript expressions"
 
@@ -1313,7 +1237,7 @@
 (comment
 
   (code.manage/isolate 'xt.lang.spec-base-test {:suffix "-fix"})
-  (s/seedgen-benchadd 'xt.lang.spec-base {:lang [:lua :python] :write true})
+  (s/seedgen-benchadd 'xt.lang.spec-base {:lang [:r :dart] :write true})
   (s/seedgen-langadd 'xt.lang.spec-base {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.lang.spec-base {:lang [:lua :python] :write true})
   

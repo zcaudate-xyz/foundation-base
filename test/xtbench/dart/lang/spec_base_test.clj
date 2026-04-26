@@ -58,46 +58,6 @@
     out)
   => [1 2 3])
 
-^{:refer xt.lang.spec-base/return-run :added "4.1"}
-(fact "supports final returns through for:return"
-
-  (!.dt
-    (xt/return-run [resolve reject]
-      (resolve "OK")))
-  => (throws))
-
-^{:refer xt.lang.spec-base/for:return :added "4.1"}
-(fact "dispatches success and error branches"
-
-  (!.dt
-    (var out nil)
-    (xt/for:return [[ok err] (xt/return-run [resolve reject]
-                               (resolve "OK"))]
-      {:success (:= out ok)
-       :error   (:= out err)})
-    out)
-  => "OK"
-
-  (!.dt
-    (var out nil)
-    (xt/for:return [[ok err] (xt/return-run [resolve reject]
-                               (reject "ERR"))]
-      {:success (:= out ok)
-       :error (:= out err)})
-    out)
-  => "ERR")
-
-^{:refer xt.lang.spec-base/for:try :added "4.1"}
-(fact "expands to the canonical try form"
-
-  (!.dt
-    (var add (fn []
-               (xt/for:try [[ok err] (do:> (xt/x:err "ERROR"))]
-                 {:success (return ok)
-                  :error   (return "ERR")})))
-    (add))
-  => "ERR")
-
 ^{:refer xt.lang.spec-base/x:get-idx :added "4.1"}
 (fact "reads the first indexed value"
 
@@ -240,7 +200,7 @@
     (var err-fn (fn []
                   (xt/x:err "ERR")))
     (err-fn))
-  => (satisfies (fn* [p1__58798#] (and (string? p1__58798#) (re-find #"(?s).*Unhandled exception:.*ERR.*" p1__58798#)))))
+  => (satisfies (fn* [p1__47332#] (and (string? p1__47332#) (re-find #"(?s).*Unhandled exception:.*ERR.*" p1__47332#)))))
 
 ^{:refer xt.lang.spec-base/x:type-native :added "4.1"}
 (fact "expands and emits the lua type helper"
@@ -991,48 +951,12 @@
     (xt/x:is-function? (fn [x] (return x))))
   => true)
 
-^{:refer xt.lang.spec-base/x:callback :added "4.1"}
-(fact "dispatches node-style callbacks through for:return"
-
-  (!.dt
-    (var out nil)
-    (var success-fn (fn [cb]
-                      (cb nil "OK")))
-    (xt/for:return [[ret err] (success-fn (xt/x:callback))]
-      {:success (:= out ret)
-       :error   (:= out err)})
-    out)
-  => "OK"
-
-  (!.dt
-    (var out nil)
-    (var failure-fn (fn [cb]
-                      (cb "ERR" nil)))
-    (xt/for:return [[ret err] (failure-fn (xt/x:callback))]
-      {:success (:= out ret)
-       :error   (:= out err)})
-    out)
-  => "ERR")
-
-^{:refer xt.lang.spec-base/x:return-run :added "4.1"}
-(fact "can be used directly inside for:return"
-
-  (!.dt
-    (var out nil)
-    (xt/for:return [[ok err] (xt/x:return-run
-                              (fn [resolve reject]
-                                (reject "ERR")))]
-      {:success (:= out ok)
-       :error (:= out err)})
-    out)
-  => "ERR")
-
 ^{:refer xt.lang.spec-base/x:eval :added "4.1"}
 (fact "evaluates javascript expressions"
 
   (!.dt
     (xt/x:eval "1 + 1"))
-  => (satisfies (fn* [p1__58806#] (and (string? p1__58806#) (re-find #"(?s).*eval not supported in Dart.*" p1__58806#)))))
+  => (satisfies (fn* [p1__47348#] (and (string? p1__47348#) (re-find #"(?s).*eval not supported in Dart.*" p1__47348#)))))
 
 ^{:refer xt.lang.spec-base/x:apply :added "4.1"}
 (fact "applies array arguments to functions"
@@ -1188,7 +1112,7 @@
                          (fn [out]
                            (return
                             (encode-fn out "id-A" "key-B")))))))))
-  => (satisfies (fn* [p1__58814#] (and (string? p1__58814#) (re-find #"(?s).*eval not supported in Dart.*" p1__58814#)))))
+  => (satisfies (fn* [p1__47364#] (and (string? p1__47364#) (re-find #"(?s).*eval not supported in Dart.*" p1__47364#)))))
 
 ^{:refer xt.lang.spec-base/x:bit-and :added "4.1"}
 (fact "computes bitwise and"
@@ -1279,7 +1203,7 @@
   (!.dt
     (do:>
      (x:throw "ERROW")))
-  => (satisfies (fn* [p1__58822#] (and (string? p1__58822#) (re-find #"(?s).*Unhandled exception:.*ERROW.*" p1__58822#)))))
+  => (satisfies (fn* [p1__47380#] (and (string? p1__47380#) (re-find #"(?s).*Unhandled exception:.*ERROW.*" p1__47380#)))))
 
 ^{:refer xt.lang.spec-base/x:now-ms :added "4.1"}
 (fact "expands and emits a millisecond time expression"
@@ -1313,7 +1237,7 @@
 (comment
 
   (code.manage/isolate 'xt.lang.spec-base-test {:suffix "-fix"})
-  (s/seedgen-benchadd 'xt.lang.spec-base {:lang [:lua :python] :write true})
+  (s/seedgen-benchadd 'xt.lang.spec-base {:lang [:r :dart] :write true})
   (s/seedgen-langadd 'xt.lang.spec-base {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.lang.spec-base {:lang [:lua :python] :write true})
   

@@ -16,26 +16,24 @@
 
 ^{:refer xt.lang.spec-link/x:socket-connect :added "4.1"}
 (fact "connects sockets and forwards the connection to callbacks"
-  
-  (notify/wait-on [:dart 2000]
+
+  (notify/wait-on :dart
     (var connect-fn
          (fn [host port opts cb]
            (return
             (spec-link/x:socket-connect host port opts cb))))
-    (xt/for:return [[conn err] (connect-fn  "127.0.0.1"
-                                            (@! (:socket-port (l/default-notify)))
-                                            {}
-                                            (xt/x:callback))]
-      {:success (repl/notify "OK")
-       :error   (repl/notify "ERR")})
-    (return true))
+    (connect-fn  "127.0.0.1"
+                 (@! (:socket-port (l/default-notify)))
+                 {}
+                 (fn [err conn]
+                   (do (repl/notify "OK")
+                       (spec-link/x:socket-close conn)))))
   => "OK")
 
 ^{:refer xt.lang.spec-link/x:notify-http :added "4.1"}
 (fact "posts encoded values through fetch"
 
   (notify/wait-on-call
-   2000
    (fn [] (!.dt
             (var notify-fn
                  (fn [host port value id key opts]
@@ -50,8 +48,11 @@
 
 (comment
   
+  (s/seedgen-benchadd '[xt.lang.spec-link] {:lang [:python] :write true})
   (s/seedgen-benchadd '[xt.lang.spec-link] {:lang [:dart] :write true})
   (s/seedgen-benchadd '[xt.lang.spec-link] {:lang [:r] :write true})
   
+  (s/seedgen-langadd 'xt.lang.spec-link {:lang [:lua] :write true})
+
   (s/seedgen-langadd 'xt.lang.spec-link {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.lang.spec-link {:lang [:lua :python] :write true}))

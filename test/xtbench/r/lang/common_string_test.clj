@@ -183,7 +183,7 @@
 ^{:refer xt.lang.common-string/tag-string :added "4.1"}
 (fact "gets the string description for a given tag"
 
-  ^*(!.R (xts/tag-string "user.account/login"))
+  (!.R (xts/tag-string "user.account/login"))
   => "account login")
 
 (comment

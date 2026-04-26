@@ -34,6 +34,7 @@
   => 1)
 
 (comment
-  (s/seedgen-benchadd 'xt.lang.common-notify {:lang [:lua :python] :write true})
+  (s/seedgen-benchadd 'xt.lang.common-notify {:lang [:r] :write true})
+  (s/seedgen-benchadd 'xt.lang.common-notify {:lang [:dart] :write true})
   (s/seedgen-langadd 'xt.lang.common-notify {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.lang.common-notify {:lang [:lua :python] :write true}))
