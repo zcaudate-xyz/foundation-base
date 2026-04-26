@@ -18,13 +18,7 @@
   [[_ f args]]
   (list '. f (list 'apply nil args)))
 
-(defn js-tf-x-shell
-   ([[_ s opts cb]]
-    (template/$
-     (do (var p (require "child_process"))
-         (p.exec ~s ~opts (fn [err stdout stderr]
-                            ~dispatch))
-         (return ["async"]))))) 
+ 
 
 (defn js-tf-x-random
   [_]
@@ -63,7 +57,7 @@
    :x-unpack         {:emit :alias :raw :..}
    :x-print          {:emit :alias :raw 'console.log :value true}
    :x-random         {:emit :alias :raw 'Math.random :value true}
-   :x-shell          {:macro #'js-tf-x-shell         :emit :macro}
+   
    :x-now-ms         {:emit :alias :raw 'Date.now}
    :x-type-native    {:macro #'js-tf-x-type-native   :emit :macro}})
 
@@ -516,6 +510,21 @@
    :x-socket-send    {:macro #'js-tf-x-socket-send    :emit :macro}
    :x-socket-close   {:macro #'js-tf-x-socket-close   :emit :macro}})
 
+(defn js-tf-x-notify-http
+  ([[_ host port value id key opts]]
+   (template/$
+    (try
+      (var #{path scheme} (or ~opts {}))
+      (fetch (+ (or scheme "http") "://" ~host ":" ~port "/" (or path ""))
+             {:method "POST"
+              :body (xt.lang.common-lib/return-encode ~value ~id ~key)})
+      (return ["async"])
+      (catch e (return ["unable to connect"]))))))
+
+(def +js-http+
+  {:x-notify-http   {:macro #'js-tf-x-notify-http    :emit :macro   :type :template
+                     :op-spec {:allow-blocks true}}})
+
 ;;
 ;; ITER
 ;;
@@ -601,77 +610,34 @@
    :x-spit-file      {:macro #'js-tf-x-spit-file     :emit :macro
                       :op-spec {:allow-blocks true}}})
 
-;;
-;; THREAD
-;;
+(defn js-tf-x-shell
+  ([[_ s opts cb]]
+   (template/$
+    (do (. (require "child_process")
+           (exec ~s ~opts (fn [err stdout stderr]
+                            (~cb err {:out stdout
+                                      :err stderr}))))
+        (return ["async"])))))
 
-(defn js-tf-x-thread-spawn
-  ([[_ thunk]]
-   (template/$ (new Promise (fn [resolve reject]
-                              (resolve (~thunk)))))))
-
-(defn js-tf-x-thread-join
-  ([[_ thread]]
-   '(x:error "Thread join not Supported")))
+(def +js-shell+
+  {:x-shell          {:macro #'js-tf-x-shell         :emit :macro}})
 
 (defn js-tf-x-with-delay
-  ([[_ thunk ms]]
+  ([[_ thunk ms cb]]
    (template/$
-    (new Promise
-         (fn [resolve reject]
-           (var cb {:resolve resolve
-                    :reject reject})
-           (setTimeout
-            (fn []
-              (. (new Promise
-                      (fn [inner-resolve inner-reject]
-                        (inner-resolve (~thunk))))
-                 (then (fn [value]
-                         ((. cb ["resolve"]) value)))
-                 (catch (fn [err]
-                          ((. cb ["reject"]) err)))))
-            ~ms))))))
-
-(defn js-tf-x-start-interval
-  ([[_ thunk ms]]
-   (template/$ (setInterval (fn []
-                              (new Promise (fn [resolve reject]
-                                             (resolve (~thunk)))))
-                            ~ms))))
-
-(defn js-tf-x-stop-interval
-  ([[_ instance]]
-   (template/$ (clearInterval instance))))
+    (setTimeout
+     (fn []
+       (. (new Promise
+               (fn [inner-resolve inner-reject]
+                 (inner-resolve (~thunk))))
+          (then (fn [value]
+                  (~cb nil value)))
+          (catch (fn [err]
+                   (~cb err nil)))))
+     ~ms))))
 
 (def +js-thread+
-  {:x-thread-spawn   {:macro #'js-tf-x-thread-spawn   :emit :macro}
-   :x-thread-join    {:macro #'js-tf-x-thread-join    :emit :macro}
-   :x-with-delay     {:macro #'js-tf-x-with-delay     :emit :macro}
-   :x-start-interval {:macro #'js-tf-x-start-interval :emit :macro}
-   :x-stop-interval  {:macro #'js-tf-x-stop-interval  :emit :macro}})
-
-(def +js-b64+
-  {:x-b64-decode     {:emit :alias :raw 'atob}
-   :x-b64-encode     {:emit :alias :raw 'btoa}})
-
-(def +js-uri+
-  {:x-uri-decode     {:emit :alias :raw 'decodeURIComponent}
-   :x-uri-encode     {:emit :alias :raw 'encodeURIComponent}})
-
-(defn js-tf-x-notify-http
-  ([[_ host port value id key opts]]
-   (template/$
-    (try
-      (var #{path scheme} (or ~opts {}))
-      (fetch (+ (or scheme "http") "://" ~host ":" ~port "/" (or path ""))
-             {:method "POST"
-              :body (xt.lang.common-lib/return-encode ~value ~id ~key)})
-      (return ["async"])
-      (catch e (return ["unable to connect"]))))))
-
-(def +js-special+
-  {:x-notify-http   {:macro #'js-tf-x-notify-http    :emit :macro   :type :template
-                     :op-spec {:allow-blocks true}}})
+  {:x-with-delay     {:macro #'js-tf-x-with-delay     :emit :macro}})
 
 (def +js+
   (merge +js-core+
@@ -687,9 +653,8 @@
          +js-js+
          +js-return+
          +js-socket+
+         +js-http+
          +js-iter+
          +js-thread+
-         +js-file+
-         +js-b64+
-         +js-uri+
-         +js-special+))
+         +js-shell+
+         +js-file+))

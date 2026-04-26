@@ -37,7 +37,7 @@
                    xtalk/+xt-lang-json+]
    :xtalk-link    [xtalk/+xt-socket+
                    xtalk/+xt-notify-http+]
-   :xtalk-runtime [xtalk/+xt-runtime-thread+
+   :xtalk-runtime [xtalk/+xt-runtime-delay+
                    xtalk/+xt-runtime-shell+
                    xtalk/+xt-runtime-file+
                    xtalk/+xt-runtime-b64+

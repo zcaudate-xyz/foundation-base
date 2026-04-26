@@ -650,9 +650,12 @@
         (x:thread-spawn delay_target)))))
 
 (def +python-thread+
-  {:x-thread-spawn   {:macro #'python-tf-x-thread-spawn  :emit :macro   :type :template}
-   :x-thread-join    {:macro #'python-tf-x-thread-join   :emit :macro}
-   :x-with-delay     {:macro #'python-tf-x-with-delay    :emit :macro}})
+  {:x-thread-spawn   {:macro #'python-tf-x-thread-spawn  :emit :macro   :type :template
+                      :op-spec {:allow-blocks true}}
+   :x-thread-join    {:macro #'python-tf-x-thread-join   :emit :macro
+                      :op-spec {:allow-blocks true}}
+   :x-with-delay     {:macro #'python-tf-x-with-delay    :emit :macro
+                      :op-spec {:allow-blocks true}}})
 
 ;;
 ;; FILE
@@ -661,7 +664,11 @@
 (defn python-tf-x-slurp-file
   ([[_ filename opts cb]]
    (template/$
-    (do (var f (open ~filename "r"))
+    (do (var os (__import__ "os"))
+        (var root (or (. (. os environ) (get "PWD"))
+                      (. os (getcwd))))
+        (var target (. (. os path) (join root ~filename)))
+        (var f (open target "r"))
         (var res (. f (read)))
         (. f (close))
         (return (~cb nil res))))))
@@ -669,14 +676,20 @@
 (defn python-tf-x-spit-file
   ([[_ filename s opts cb]]
    (template/$
-    (do (var f (open ~filename "w"))
+    (do (var os (__import__ "os"))
+        (var root (or (. (. os environ) (get "PWD"))
+                      (. os (getcwd))))
+        (var target (. (. os path) (join root ~filename)))
+        (var f (open target "w"))
         (. f (write ~s))
         (. f (close))
         (return (~cb nil ~filename))))))
 
 (def +python-file+
-  {:x-slurp-file     {:macro #'python-tf-x-slurp-file    :emit :macro}
-   :x-spit-file      {:macro #'python-tf-x-spit-file     :emit :macro}})
+  {:x-slurp-file     {:macro #'python-tf-x-slurp-file    :emit :macro
+                      :op-spec {:allow-blocks true}}
+   :x-spit-file      {:macro #'python-tf-x-spit-file     :emit :macro
+                      :op-spec {:allow-blocks true}}})
 
 ;;
 ;; BASE 64

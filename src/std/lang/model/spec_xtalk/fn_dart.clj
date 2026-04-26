@@ -104,21 +104,6 @@
   [[_ obj key]]
   (list '. obj (list 'remove key)))
 
-(defn dart-tf-x-shell
-  [[_ s opts cb]]
-  (template/$
-   (do (:- "import 'dart:io';")
-       (return (. (Process.run "sh" ["-lc" ~s])
-                  (then (fn [result]
-                          (if (not= 0 (. result exitCode))
-                            (return (~cb {:code (. result exitCode)
-                                          :stderr (. result stderr)
-                                          :output (. result stdout)}
-                                         nil))
-                            (return (~cb nil (. result stdout))))))
-                  (catchError (fn [err]
-                                (return (~cb err nil)))))))))
-
 (def +dart-core+
   {:x-print    {:macro #'dart-tf-x-print    :emit :macro :value true}
    :x-len      {:macro #'dart-tf-x-len      :emit :macro :value true}
@@ -132,8 +117,8 @@
    :x-eval     {:macro #'dart-tf-x-eval     :emit :macro}
    :x-has-key? {:macro #'dart-tf-x-has-key? :emit :macro}
    :x-del-key  {:macro #'dart-tf-x-del-key  :emit :macro}
-   :x-unpack   {:emit :alias :raw '...}
-   :x-shell    {:macro #'dart-tf-x-shell    :emit :macro}})
+   :x-unpack   {:emit :alias :raw '...}})
+
 
 (defn dart-tf-x-m-abs [[_ x]] (dart-method0 x 'abs))
 (defn dart-tf-x-m-ceil [[_ x]] (dart-method0 x 'ceil))
@@ -430,13 +415,10 @@
   [[_ s wrap-fn]]
   (list 'throw '"eval not supported in Dart"))
 
-(defn dart-tf-x-thread-spawn
-  [[_ f]]
-  (list 'throw '"Thread spawn not implemented in Dart"))
-
-(defn dart-tf-x-thread-join
-  [[_ thread]]
-  (list 'throw '"Thread join not implemented in Dart"))
+(def +dart-return+
+  {:x-return-encode  {:macro #'dart-tf-x-return-encode   :emit :macro}
+   :x-return-wrap    {:macro #'dart-tf-x-return-wrap     :emit :macro}
+   :x-return-eval    {:macro #'dart-tf-x-return-eval     :emit :macro}})
 
 (defn dart-tf-x-with-delay
   [[_ thunk ms]]
@@ -445,28 +427,8 @@
     (:- "Duration(milliseconds: " ~ms ")")
     (fn [] (return (~thunk))))))
 
-(defn dart-tf-x-start-interval
-  [[_ ms f]]
-  (template/$
-   (Timer.periodic
-    (:- "Duration(milliseconds: " ~ms ")")
-    (fn [timer] (~f)))))
-
-(defn dart-tf-x-stop-interval
-  [[_ timer]]
-  (list '. timer 'cancel))
-
 (def +dart-thread+
-  {:x-thread-spawn    {:macro #'dart-tf-x-thread-spawn    :emit :macro}
-   :x-thread-join     {:macro #'dart-tf-x-thread-join     :emit :macro}
-   :x-with-delay      {:macro #'dart-tf-x-with-delay      :emit :macro}
-   :x-start-interval  {:macro #'dart-tf-x-start-interval  :emit :macro}
-   :x-stop-interval   {:macro #'dart-tf-x-stop-interval   :emit :macro}})
-
-(def +dart-return+
-  {:x-return-encode  {:macro #'dart-tf-x-return-encode   :emit :macro}
-   :x-return-wrap    {:macro #'dart-tf-x-return-wrap     :emit :macro}
-   :x-return-eval    {:macro #'dart-tf-x-return-eval     :emit :macro}})
+  {:x-with-delay      {:macro #'dart-tf-x-with-delay      :emit :macro}})
 
 (defn dart-tf-x-socket-connect
   [[_ host port opts cb]]
@@ -493,34 +455,11 @@
       (then (fn [_]
               (. ~conn (destroy))
               (return nil))))))
+
 (def +dart-socket+
   {:x-socket-connect {:macro #'dart-tf-x-socket-connect :emit :macro}
    :x-socket-send    {:macro #'dart-tf-x-socket-send    :emit :macro}
    :x-socket-close   {:macro #'dart-tf-x-socket-close   :emit :macro}})
-
-(defn dart-tf-x-b64-encode
-  [[_ s]]
-  (list 'base64.encode (list 'utf8.encode s)))
-
-(defn dart-tf-x-b64-decode
-  [[_ s]]
-  (list 'utf8.decode (list 'base64.decode s)))
-
-(def +dart-b64+
-  {:x-b64-encode     {:macro #'dart-tf-x-b64-encode      :emit :macro}
-   :x-b64-decode     {:macro #'dart-tf-x-b64-decode      :emit :macro}})
-
-(defn dart-tf-x-uri-encode
-  [[_ s]]
-  (list 'Uri.encodeComponent s))
-
-(defn dart-tf-x-uri-decode
-  [[_ s]]
-  (list 'Uri.decodeComponent s))
-
-(def +dart-uri+
-  {:x-uri-encode     {:macro #'dart-tf-x-uri-encode      :emit :macro}
-   :x-uri-decode     {:macro #'dart-tf-x-uri-decode      :emit :macro}})
 
 (defn dart-tf-x-slurp-file
   [[_ filename opts cb]]
@@ -534,19 +473,37 @@
   {:x-slurp-file     {:macro #'dart-tf-x-slurp-file      :emit :macro}
    :x-spit-file      {:macro #'dart-tf-x-spit-file       :emit :macro}})
 
+
+(defn dart-tf-x-shell
+  [[_ s opts cb]]
+  (template/$
+   (do (:- "import 'dart:io';")
+       (return (. (Process.run "sh" ["-lc" ~s])
+                  (then (fn [result]
+                          (if (not= 0 (. result exitCode))
+                            (return (~cb {:code (. result exitCode)
+                                          :err  (. result stderr)
+                                          :out  (. result stdout)}
+                                     nil))
+                            (return (~cb nil (. result stdout))))))
+                  (catchError (fn [err]
+                                (return (~cb err nil)))))))))
+
+(def +dart-shell+
+  {:x-shell    {:macro #'dart-tf-x-shell    :emit :macro}})
+
 (def +dart+
   (merge +dart-core+
-          +dart-math+
-          +dart-type+
-          +dart-str+
-          +dart-lu+
-          +dart-json+
-          +dart-arr+
-          +dart-iter+
-          +dart-proto+
-          +dart-return+
-          +dart-socket+
-          +dart-thread+
-          +dart-b64+
-          +dart-uri+
-          +dart-file+))
+         +dart-math+
+         +dart-type+
+         +dart-str+
+         +dart-lu+
+         +dart-json+
+         +dart-arr+
+         +dart-iter+
+         +dart-proto+
+         +dart-return+
+         +dart-socket+
+         +dart-file+
+         +dart-thread+
+         +dart-shell+))

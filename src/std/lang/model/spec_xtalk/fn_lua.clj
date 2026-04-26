@@ -533,47 +533,6 @@
    :x-iter-has?           {:macro #'lua-tf-x-iter-has?           :emit :macro}
    :x-iter-native?        {:macro #'lua-tf-x-iter-native?        :emit :macro}})
 
-(defn lua-tf-x-thread-spawn
-  ([[_ thunk & [strategy]]]
-   (case strategy
-     :mock  (list 'coroutine.create thunk)
-     (list 'coroutine.create thunk))))
-
-(defn lua-tf-x-thread-join
-  ([[_ thread & [strategy]]]
-   (case strategy
-     :mock (list  'coroutine.resume thread)
-     (list 'coroutine.resume thread))))
-
-(defn lua-tf-x-with-delay
-  ([[_ thunk ms]]
-   (template/$
-    (return (coroutine.create
-             (fn []
-               (var socket (require "socket"))
-               (socket.sleep (/ ~ms 1000))
-               (var f := ~thunk)
-               (return (f))))))))
-
-(defn lua-tf-x-start-interval
-  ([[_ thunk ms]]
-   (template/$ (return {:active true
-                        :ms ~ms
-                        :thunk ~thunk}))))
-
-(defn lua-tf-x-stop-interval
-  ([[_ instance]]
-   (template/$ (do (:= (. ~instance ["active"]) false)
-                   (return ~instance)))))
-
-(def +lua-thread+
-  {:x-thread-spawn   {:macro #'lua-tf-x-thread-spawn  :emit :macro}
-   :x-thread-join    {:macro #'lua-tf-x-thread-join   :emit :macro}
-   :x-with-delay     {:macro #'lua-tf-x-with-delay    :emit :macro}
-   :x-start-interval {:macro #'lua-tf-x-start-interval :emit :macro}
-   :x-stop-interval  {:macro #'lua-tf-x-stop-interval  :emit :macro}})
-
-
 ;;
 ;; FILE
 ;;
@@ -595,8 +554,10 @@
          (return (~cb nil ~filename))))))
 
 (def +lua-file+
-  {:x-slurp-file     {:macro #'lua-tf-x-slurp-file    :emit :macro}
-   :x-spit-file      {:macro #'lua-tf-x-spit-file     :emit :macro}})
+  {:x-slurp-file     {:macro #'lua-tf-x-slurp-file    :emit :macro
+                      :op-spec {:allow-blocks true}}
+   :x-spit-file      {:macro #'lua-tf-x-spit-file     :emit :macro
+                      :op-spec {:allow-blocks true}}})
 
 ;;
 ;; SPECIAL
@@ -620,6 +581,5 @@
          +lua-return+
          +lua-socket+
          +lua-iter+
-         +lua-thread+
          +lua-file+
          +lua-special+))

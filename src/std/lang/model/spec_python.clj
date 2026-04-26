@@ -1,6 +1,7 @@
 (ns std.lang.model.spec-python
-  (:require [std.lang.base.book :as book]
-	    [std.lang.base.emit :as emit]
+  (:require [std.lib.walk :as walk]
+            [std.lang.base.book :as book]
+ 	    [std.lang.base.emit :as emit]
             [std.lang.base.emit-common :as common]
             [std.lang.base.emit-data :as data]
             [std.lang.base.emit-helper :as helper]
@@ -217,37 +218,69 @@
   "for return transform"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error final]}]]
-  (if (and (seq? statement)
-           (= 'x:return-run (first statement)))
-    (let [[_ runner] statement
-          on-ok (gensym "on_ok")
-          on-err (gensym "on_err")
-          ex (gensym "ex")
-          state (gensym "state")]
-      (template/$ (do (var ~state {"res" nil
-                                   "err" nil})
-                      (var ~res nil)
-                      (var ~err nil)
-                      (fn ~on-ok [value]
-                        (:= (. ~state ["res"]) value)
-                        (:= (. ~state ["err"]) nil))
-                      (fn ~on-err [value]
-                        (:= (. ~state ["res"]) nil)
-                        (:= (. ~state ["err"]) value))
-                      (try
-                        (~runner ~on-ok ~on-err)
-                        (:= ~res (. ~state ["res"]))
-                        (:= ~err (. ~state ["err"]))
-                        (if (not= nil ~err)
-                          ~(if final (list 'return error) error)
-                          ~(if final (list 'return success) success))
-                        (catch [Exception :as ~ex]
-                            (:= ~err ~ex)
-                          ~(if final (list 'return error) error))))))
-    (template/$ (try (var ~res ~statement)
-                     ~(if final (list 'return success) success)
-                     (catch [Exception :as ~err]
-                         ~(if final (list 'return error) error))))))
+  (let [return-run? (and (seq? statement)
+                         (= 'x:return-run (first statement)))
+        callback?   (let [found (volatile! false)]
+                      (walk/prewalk (fn [x]
+                                      (when (= x '(x:callback))
+                                        (vreset! found true))
+                                      x)
+                                    statement)
+                      @found)
+        success*    (if (and final return-run?)
+                      (list 'return success)
+                      success)
+        error*      (if (and final return-run?)
+                      (list 'return error)
+                      error)
+        out         (if return-run?
+                      (let [[_ runner] statement
+                            on-ok (gensym "on_ok")
+                            on-err (gensym "on_err")
+                            ex (gensym "ex")
+                            state (gensym "state")]
+                        (template/$
+                         (do (var ~state {"res" nil
+                                          "err" nil})
+                             (var ~res nil)
+                             (var ~err nil)
+                             (fn ~on-ok [value]
+                               (:= (. ~state ["res"]) value)
+                               (:= (. ~state ["err"]) nil))
+                             (fn ~on-err [value]
+                               (:= (. ~state ["res"]) nil)
+                               (:= (. ~state ["err"]) value))
+                             (try
+                               (~runner ~on-ok ~on-err)
+                               (:= ~res (. ~state ["res"]))
+                               (:= ~err (. ~state ["err"]))
+                               (if (not= nil ~err)
+                                 ~error*
+                                 ~success*)
+                                (catch [Exception :as ~ex]
+                                  (:= ~err ~ex)
+                                  ~error*)))))
+                      (if callback?
+                        (let [cb-sym (gensym "py_callback__")
+                              cb     (list 'var cb-sym
+                                           (list 'fn [err res]
+                                                 (list 'if (list 'not= err nil)
+                                                       error
+                                                       success)))
+                              stmt   (walk/prewalk (fn [x]
+                                                     (if (= x '(x:callback))
+                                                       cb-sym
+                                                       x))
+                                                   statement)]
+                          (list 'do* cb stmt))
+                        (template/$
+                         (try
+                           (var ~res ~statement)
+                           ~@(if success [success])
+                           (catch [Exception :as ~err]
+                             ~@(if error [error]))))))]
+    (cond->> out
+      (and final (not return-run?)) (list 'return))))
 
 (defn tf-for-try
   "for try transform"

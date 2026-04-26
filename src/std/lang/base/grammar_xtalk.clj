@@ -903,22 +903,10 @@
 ;; XTALK RUNTIME OS
 ;;
 
-(def +xt-runtime-thread+
-  [{:op :x-thread-spawn   :symbol #{'x:thread-spawn}    :emit :abstract
-    :op-spec {:arglists '([f])
-              :type [:fn [:xt/fn] :xt/any]}}
-   {:op :x-thread-join    :symbol #{'x:thread-join}     :emit :abstract
-    :op-spec {:arglists '([thread])
-              :type [:fn [:xt/any] :xt/any]}}
-   {:op :x-with-delay     :symbol #{'x:with-delay}      :emit :abstract
+(def +xt-runtime-delay+
+  [{:op :x-with-delay     :symbol #{'x:with-delay}      :emit :abstract
     :op-spec {:arglists '([ms value])
-              :type [:fn [:xt/int :xt/any] :xt/any]}}
-   {:op :x-start-interval :symbol #{'x:start-interval}  :emit :abstract
-    :op-spec {:arglists '([ms f])
-              :type [:fn [:xt/int :xt/fn] :xt/any]}}
-   {:op :x-stop-interval  :symbol #{'x:stop-interval}   :emit :abstract
-    :op-spec {:arglists '([id])
-              :type [:fn [:xt/str] :xt/any]}}])
+              :type [:fn [:xt/int :xt/any] :xt/any]}}])
 
 (def +xt-runtime-shell+
   [{:op :x-shell          :symbol #{'x:shell}           :emit :abstract
@@ -933,23 +921,3 @@
     :op-spec {:arglists '([path value opts cb])
               :type [:fn [:xt/str :xt/any :xt/any :xt/any] :xt/any]}}])
 
-
-;;
-;; XTALK RUNTIME HTTP
-;;
-
-(def +xt-runtime-b64+
-  [{:op :x-b64-encode      :symbol #{'x:b64-encode}     :emit :abstract
-    :op-spec {:arglists '([value])
-              :type [:fn [:xt/str] :xt/str]}}
-   {:op :x-b64-decode      :symbol #{'x:b64-decode}     :emit :abstract
-    :op-spec {:arglists '([value])
-              :type [:fn [:xt/str] :xt/str]}}])
-
-(def +xt-runtime-uri+
-  [{:op :x-uri-encode      :symbol #{'x:uri-encode}     :emit :abstract
-    :op-spec {:arglists '([value])
-              :type [:fn [:xt/str] :xt/str]}}
-   {:op :x-uri-decode      :symbol #{'x:uri-decode}     :emit :abstract
-    :op-spec {:arglists '([value])
-              :type [:fn [:xt/str] :xt/str]}}])
