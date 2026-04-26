@@ -212,11 +212,11 @@
                              (list 'if err
                                    error
                                    success))]
-                (walk/prewalk (fn [x]
-                                (if (= x '(x:callback))
-                                  cb
-                                  x))
-                              statement)))]
+                (walk/postwalk (fn [x]
+                                 (if (= x '(x:callback))
+                                   cb
+                                   x))
+                               statement)))]
     (cond->> out
       (and final (not return-run?)) (list 'return))))
 

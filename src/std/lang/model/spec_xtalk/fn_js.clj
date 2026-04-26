@@ -20,10 +20,11 @@
 
 (defn js-tf-x-shell
    ([[_ s opts cb]]
-    (template/$ (do (var p (require "child_process"))
-                    (p.exec ~s ~opts (fn [err stdout stderr]
-                                       (return (~cb err stdout))))
-                    (return ["async"])))))
+    (template/$
+     (do (var p (require "child_process"))
+         (p.exec ~s ~opts (fn [err stdout stderr]
+                            ~dispatch))
+         (return ["async"]))))) 
 
 (defn js-tf-x-random
   [_]
@@ -572,37 +573,33 @@
 (defn js-tf-x-slurp-file
   [[_ filename opts cb]]
   (template/$
-   ('((fn []
-        (var fs (require "fs"))
-        (var path (require "path"))
-        (var root (or (. process env ["PWD"])
-                      (. process (cwd))))
-        (. fs (readFile (. path (resolve root ~filename))
-                        "utf-8"
-                        (fn [err data]
-                          (return (~cb err data))))
-           )
-        (return ["async"])))))))
+   (do (var root (or (. process env ["PWD"])
+                     (. process (cwd))))
+       (. (require "fs")
+          (readFile (. (require "path")
+                       (resolve root ~filename))
+                    "utf-8"
+                    ~cb))
+       (return ["async"]))))
 
 (defn js-tf-x-spit-file
   [[_ filename s opts cb]]
   (template/$
-   ('((fn []
-        (var fs (require "fs"))
-        (var path (require "path"))
-        (var root (or (. process env ["PWD"])
-                      (. process (cwd))))
-        (. fs (writeFile (. path (resolve root ~filename))
-                         ~s
-                         "utf-8"
-                         (fn [err]
-                           (return (~cb err ~filename))))
-           )
-        (return ["async"])))))))
+   (do (var root (or (. process env ["PWD"])
+                     (. process (cwd))))
+       (. (require "fs")
+          (writeFile (. (require "path")
+                        (resolve root ~filename))
+                     ~s
+                     "utf-8"
+                     ~cb))
+       (return ["async"]))))
 
 (def +js-file+
-  {:x-slurp-file     {:macro #'js-tf-x-slurp-file    :emit :macro}
-   :x-spit-file      {:macro #'js-tf-x-spit-file     :emit :macro}})
+  {:x-slurp-file     {:macro #'js-tf-x-slurp-file    :emit :macro
+                      :op-spec {:allow-blocks true}}
+   :x-spit-file      {:macro #'js-tf-x-spit-file     :emit :macro
+                      :op-spec {:allow-blocks true}}})
 
 ;;
 ;; THREAD
