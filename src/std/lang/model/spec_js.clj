@@ -179,7 +179,7 @@
   (apply list 'for [(list 'var* :let e) :of (list '% it)]
          body))
 
-(defn tf-for-return
+(defn js-tf-for-return
   "for return transform"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error final]}]]
@@ -195,7 +195,7 @@
     (cond->> out
       final (list 'return))))
 
-(defn tf-for-async
+(defn js-tf-for-async
   "for async transform"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error finally]}]]

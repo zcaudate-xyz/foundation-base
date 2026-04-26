@@ -128,7 +128,7 @@
   (apply list 'for [i := (list 'quote [start end (or step 1)])]
          body))
 
-(defn tf-for-return
+(defn lua-tf-for-return
   "for return transform"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error]}]]

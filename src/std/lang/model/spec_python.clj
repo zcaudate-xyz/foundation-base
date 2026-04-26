@@ -242,7 +242,7 @@
         :for-array   {:macro #'tf-for-array  :emit :macro}
         :for-iter    {:macro #'tf-for-iter   :emit :macro}
         :for-index   {:macro #'tf-for-index  :emit :macro}
-        :for-async   {:macro #'tf-for-async  :emit :macro}
+        ;;:for-async   {:macro #'tf-for-async  :emit :macro}
         :for-return  {:macro #'tf-for-return :emit :macro}})
       (grammar/build:override fn/+python+)
       (grammar/build:extend
