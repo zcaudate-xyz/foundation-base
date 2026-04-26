@@ -150,6 +150,18 @@
                 (return err)
                 (return ok))))
 
+  (js-tf-for-return '(for:return [[ok err] (call (x:callback))]
+                              {:success (do (for:return [[inner-ok inner-err] (nested (x:callback))]
+                                               {:success (return inner-ok)
+                                                :error   (return inner-err)}))
+                               :error   (return err)}))
+  => '(call (fn [err ok]
+              (if err
+                (return err)
+                (do (for:return [[inner-ok inner-err] (nested (x:callback))]
+                      {:success (return inner-ok)
+                       :error   (return inner-err)})))))
+
   (js-tf-for-return '(for:return [[ok err] (x:return-run runner)]
                               {:success (return ok)
                                :error   (return err)}))

@@ -24,7 +24,7 @@
   => #"child_process"
 
   (l/emit-as :js [(js-tf-x-shell '[_ "ls" opts cb])])
-  => #"\\[\"async\"\\]")
+  => #"\[\"async\"\]")
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-random :added "4.0"}
 (fact "generates random number"
@@ -535,7 +535,7 @@
   => #"readFile"
 
   (l/emit-as :js [(js-tf-x-slurp-file '[_ filename opts cb])])
-  => #"\\[\"async\"\\]")
+  => #"\[\"async\"\]")
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-spit-file :added "4.1"}
 (fact "spit file"
@@ -543,7 +543,7 @@
   => #"writeFile"
 
   (l/emit-as :js [(js-tf-x-spit-file '[_ filename s opts cb])])
-  => #"\\[\"async\"\\]")
+  => #"\[\"async\"\]")
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-thread-spawn :added "4.0"}
 (fact "thread spawn"
