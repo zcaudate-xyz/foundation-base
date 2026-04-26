@@ -484,9 +484,12 @@
                           (return (eval ~s))))))))
 
 (def +js-return+
-  {:x-return-encode  {:macro #'js-tf-x-return-encode   :emit :macro}
-   :x-return-wrap    {:macro #'js-tf-x-return-wrap     :emit :macro}
-   :x-return-eval    {:macro #'js-tf-x-return-eval     :emit :macro}})
+  {:x-return-encode  {:macro #'js-tf-x-return-encode   :emit :macro
+                      :op-spec {:allow-blocks true}}
+   :x-return-wrap    {:macro #'js-tf-x-return-wrap     :emit :macro
+                      :op-spec {:allow-blocks true}}
+   :x-return-eval    {:macro #'js-tf-x-return-eval     :emit :macro
+                      :op-spec {:allow-blocks true}}})
 
 (defn js-tf-x-socket-connect
   ([[_ host port opts cb]]

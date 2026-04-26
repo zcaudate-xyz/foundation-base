@@ -546,9 +546,12 @@
         (return (~wrap-fn thunk))))))
 
 (def +python-return+
-  {:x-return-encode  {:macro #'python-tf-x-return-encode   :emit :macro}
-   :x-return-wrap    {:macro #'python-tf-x-return-wrap     :emit :macro}
-   :x-return-eval    {:macro #'python-tf-x-return-eval     :emit :macro}})
+  {:x-return-encode  {:macro #'python-tf-x-return-encode   :emit :macro
+                      :op-spec {:allow-blocks true}}
+   :x-return-wrap    {:macro #'python-tf-x-return-wrap     :emit :macro
+                      :op-spec {:allow-blocks true}}
+   :x-return-eval    {:macro #'python-tf-x-return-eval     :emit :macro
+                      :op-spec {:allow-blocks true}}})
 
 (defn python-tf-x-socket-connect
   ([[_ host port opts]]
@@ -628,17 +631,6 @@
 ;; ASYNC
 ;;
 
-(defn python-tf-x-thread-spawn
-  ([[_ thunk]]
-   (template/$
-    (. (__import__ "threading")
-       (Thread :target ~thunk)
-       (start)))))
-
-(defn python-tf-x-thread-join
-  ([[_ thread]]
-   '(x:error "Thread join not Supported")))
-
 (defn python-tf-x-with-delay
   ([[_ thunk ms]]
    (template/$
@@ -650,11 +642,7 @@
         (x:thread-spawn delay_target)))))
 
 (def +python-thread+
-  {:x-thread-spawn   {:macro #'python-tf-x-thread-spawn  :emit :macro   :type :template
-                      :op-spec {:allow-blocks true}}
-   :x-thread-join    {:macro #'python-tf-x-thread-join   :emit :macro
-                      :op-spec {:allow-blocks true}}
-   :x-with-delay     {:macro #'python-tf-x-with-delay    :emit :macro
+  {:x-with-delay     {:macro #'python-tf-x-with-delay    :emit :macro
                       :op-spec {:allow-blocks true}}})
 
 ;;
@@ -664,11 +652,7 @@
 (defn python-tf-x-slurp-file
   ([[_ filename opts cb]]
    (template/$
-    (do (var os (__import__ "os"))
-        (var root (or (. (. os environ) (get "PWD"))
-                      (. os (getcwd))))
-        (var target (. (. os path) (join root ~filename)))
-        (var f (open target "r"))
+    (do (var f (open ~filename "r"))
         (var res (. f (read)))
         (. f (close))
         (return (~cb nil res))))))
@@ -676,11 +660,7 @@
 (defn python-tf-x-spit-file
   ([[_ filename s opts cb]]
    (template/$
-    (do (var os (__import__ "os"))
-        (var root (or (. (. os environ) (get "PWD"))
-                      (. os (getcwd))))
-        (var target (. (. os path) (join root ~filename)))
-        (var f (open target "w"))
+    (do (var f (open ~filename "w"))
         (. f (write ~s))
         (. f (close))
         (return (~cb nil ~filename))))))
@@ -690,26 +670,6 @@
                       :op-spec {:allow-blocks true}}
    :x-spit-file      {:macro #'python-tf-x-spit-file     :emit :macro
                       :op-spec {:allow-blocks true}}})
-
-;;
-;; BASE 64
-;;
-
-(defn python-tf-x-b64-encode
-  ([[_ obj]]
-   (list '. (list '. (list '__import__ "base64")
-                  (list 'b64encode (list 'bytes obj "utf-8")))
-         (list 'decode "utf-8"))))
-
-(defn python-tf-x-b64-decode
-  ([[_ s]]
-   (list '. (list '. (list '__import__ "base64")
-                  (list 'b64decode s))
-         (list 'decode "utf-8"))))
-
-(def +python-b64+
-  {:x-b64-decode     {:macro #'python-tf-x-b64-decode         :emit :macro}
-   :x-b64-encode     {:macro #'python-tf-x-b64-encode         :emit :macro}})
 
 (def +python+
   (merge +python-core+
@@ -726,22 +686,5 @@
          +python-socket+
          +python-iter+
          +python-thread+
-         +python-file+
-         +python-b64+))
+         +python-file+))
 
-
-(comment
-
-  
-
-
-  
-  
-  
-  ;;
-  ;; ARR
-  ;;
-
-  
-
-  )

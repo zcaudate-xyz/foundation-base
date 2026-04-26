@@ -34,7 +34,6 @@
   [v]
   (if v "True" "False"))
 
-
 (defn- python-qualified-symbol
   [sym]
   (let [{:keys [module]} (preprocess/macro-opts)

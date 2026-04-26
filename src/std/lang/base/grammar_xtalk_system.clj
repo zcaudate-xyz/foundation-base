@@ -39,9 +39,7 @@
                    xtalk/+xt-notify-http+]
    :xtalk-runtime [xtalk/+xt-runtime-delay+
                    xtalk/+xt-runtime-shell+
-                   xtalk/+xt-runtime-file+
-                   xtalk/+xt-runtime-b64+
-                   xtalk/+xt-runtime-uri+]})
+                   xtalk/+xt-runtime-file+]})
 
 (def +xtalk-area->surface+
   {:xtalk-common  {:area :common
