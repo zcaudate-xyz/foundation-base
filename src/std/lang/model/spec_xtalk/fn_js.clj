@@ -676,8 +676,7 @@
   [[_ filename content cb]]
   (template/$
    (do (. (require "fs")
-          (writeFile (. (require "path")
-                        (resolve root ~filename))
+          (writeFile  ~filename
                      ~content
                      "utf-8"
                      ~cb))

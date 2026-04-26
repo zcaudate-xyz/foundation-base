@@ -537,9 +537,9 @@
 (defn lua-tf-x-shell
   ([[_ s root cb]]
    (template/$
-    (do* (var command (if root
-                        (cat "cd " root " && " ~s)
-                        ~s))
+    (do* (var command (:? root
+                          (cat "cd " root " && " ~s)
+                          ~s))
          (var '[ok handle] (pcall (fn [] (return (io.popen command)))))
          (if (not ok)
            (return (~cb handle nil))
@@ -564,10 +564,10 @@
 (defn lua-tf-x-file-resolve
   ([[_ root path]]
    (template/$
-    (if (or (== nil ~root)
+    (:? (or (== nil ~root)
             (== "/" (string.sub ~path 1 1)))
-      (return ~path)
-      (return (cat ~root "/" ~path))))))
+        ~path
+        (cat ~root "/" ~path)))))
 
 (defn lua-tf-x-file-slurp
   ([[_ filename cb]]
@@ -594,8 +594,7 @@
                   (return (~cb nil ~filename)))))))))
 
 (def +lua-file+
-  {:x-file-resolve   {:macro #'lua-tf-x-file-resolve  :emit :macro
-                      :op-spec {:allow-blocks true}}
+  {:x-file-resolve   {:macro #'lua-tf-x-file-resolve  :emit :macro}
    :x-file-slurp     {:macro #'lua-tf-x-file-slurp    :emit :macro
                       :op-spec {:allow-blocks true}}
    :x-file-spit      {:macro #'lua-tf-x-file-spit     :emit :macro

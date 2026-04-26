@@ -663,10 +663,11 @@
   ([[_ s root cb]]
    (template/$
     (do (try
-          (var result (subprocess.run ["sh" "-lc" ~s]
-                                      :capture_output true
-                                      :text true
-                                      :cwd ~root))
+          (var result (. (__import__ "subprocess")
+                         (run ["sh" "-lc" ~s]
+                           :capture_output true
+                           :text true
+                           :cwd ~root)))
           (if (not= 0 (. result returncode))
             (return (~cb {:code (. result returncode)
                           :err  (. result stderr)
