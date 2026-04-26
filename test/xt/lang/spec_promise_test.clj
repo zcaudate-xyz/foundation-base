@@ -1,102 +1,251 @@
 (ns xt.lang.spec-promise-test
-  (:use code.test)
-  (:require [std.lang :as l]))
+  (:require [std.lang :as l]
+            [xt.lang.common-notify :as notify])
+  (:use code.test))
+
+^{:seedgen/root {:all true, :langs [:python :lua]}}
+(l/script- :js
+  {:runtime :basic
+   :require [[xt.lang.spec-promise :as spec-promise]
+             [xt.lang.common-repl :as repl]]})
 
 (l/script- :python
   {:runtime :basic
-   :require [[python.core.common-promise :as pp]]})
+   :require [[xt.lang.spec-promise :as spec-promise]
+             [xt.lang.common-repl :as repl]
+             [python.core.common-promise]]})
 
 (l/script- :lua
   {:runtime :basic
-   :require [[lua.core.common-promise :as lp]]})
+   :require [[xt.lang.spec-promise :as spec-promise]
+             [xt.lang.common-repl :as repl]
+             [lua.core.common-promise]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.spec-promise/x:promise-then :added "4.1"}
-(fact "TODO")
+(fact "chains a resolved js promise"
+
+  (notify/wait-on :js
+    (spec-promise/x:promise-then
+     (spec-promise/x:promise
+      (fn []
+        (return 5)))
+     (fn [value]
+       (repl/notify (+ value 2)))))
+  => 7
+
+  (notify/wait-on :python
+    (spec-promise/x:promise-then
+     (spec-promise/x:promise
+      (fn []
+        (return 5)))
+     (fn [value]
+       (repl/notify (+ value 2)))))
+  => 7
+
+  (notify/wait-on :lua
+    (spec-promise/x:promise-then
+     (spec-promise/x:promise
+      (fn []
+        (return 5)))
+     (fn [value]
+       (repl/notify (+ value 2)))))
+  => 7)
 
 ^{:refer xt.lang.spec-promise/x:promise-catch :added "4.1"}
-(fact "TODO")
+(fact "recovers a rejected js promise"
+
+  (notify/wait-on :js
+    (spec-promise/x:promise-catch
+     (spec-promise/x:promise
+      (fn []
+        (throw "boom")))
+     (fn [err]
+       (repl/notify err)
+       (return err))))
+  => "boom"
+
+  (notify/wait-on :python
+    (spec-promise/x:promise-catch
+     (spec-promise/x:promise
+      (fn []
+        (throw "boom")))
+     (fn [err]
+       (repl/notify err)
+       (return err))))
+  => "boom"
+
+  (notify/wait-on :lua
+    (spec-promise/x:promise-catch
+     (spec-promise/x:promise
+      (fn []
+        (throw "boom")))
+     (fn [err]
+       (repl/notify err)
+       (return err))))
+  => "boom")
 
 ^{:refer xt.lang.spec-promise/x:promise-finally :added "4.1"}
-(fact "TODO")
+(fact "runs cleanup without changing the resolved value"
+
+  (notify/wait-on :js
+    (var out [])
+    (spec-promise/x:promise-then
+        (spec-promise/x:promise-finally
+         (spec-promise/x:promise-then
+          (spec-promise/x:promise
+           (fn []
+             (return 5)))
+          (fn [value]
+            (. out (push "then"))
+            (return (+ value 2))))
+         (fn []
+           (. out (push "finally"))))
+        (fn [value]
+          (return (repl/notify [out value])))))
+  => [["then" "finally"] 7]
+
+  (notify/wait-on :python
+    (var out [])
+    (spec-promise/x:promise-then
+        (spec-promise/x:promise-finally
+         (spec-promise/x:promise-then
+          (spec-promise/x:promise
+           (fn []
+             (return 5)))
+          (fn [value]
+            (. out (push "then"))
+            (return (+ value 2))))
+         (fn []
+           (. out (push "finally"))))
+        (fn [value]
+          (return (repl/notify [out value])))))
+  => [["then" "finally"] 7]
+
+  (notify/wait-on :lua
+    (var out [])
+    (spec-promise/x:promise-then
+        (spec-promise/x:promise-finally
+         (spec-promise/x:promise-then
+          (spec-promise/x:promise
+           (fn []
+             (return 5)))
+          (fn [value]
+            (. out (push "then"))
+            (return (+ value 2))))
+         (fn []
+           (. out (push "finally"))))
+        (fn [value]
+          (return (repl/notify [out value])))))
+  => [["then" "finally"] 7])
 
 ^{:refer xt.lang.spec-promise/x:promise-native? :added "4.1"}
-(fact "TODO")
+(fact "detects native js promises"
 
+  (!.js
+    (var p
+         (spec-promise/x:promise
+          (fn []
+            (return 1))))
+    [(spec-promise/x:promise-native? p)
+     (spec-promise/x:promise-native? 1)])
+  => [true false]
+
+  (!.py
+    (var p
+         (spec-promise/x:promise
+          (fn []
+            (return 1))))
+    [(spec-promise/x:promise-native? p)
+     (spec-promise/x:promise-native? 1)])
+  => [true false]
+
+  (!.lua
+    (var p
+         (spec-promise/x:promise
+          (fn []
+            (return 1))))
+    [(spec-promise/x:promise-native? p)
+     (spec-promise/x:promise-native? 1)])
+  => [true false])
 
 ^{:refer xt.lang.spec-promise/x:with-delay :added "4.1"}
 (fact "delays asynchronous js computations"
 
   (notify/wait-on :js
-                  (spec-promise/x:with-delay 20
-                                             (fn []
-                                               (repl/notify "OK"))))
-  => "LATER"
-  
+    (spec-promise/x:with-delay 100
+                               (fn []
+                                 (repl/notify "OK"))))
+  => "OK"
+
   (notify/wait-on :python
-                  (spec-promise/x:with-delay 20
-                                             (fn []
-                                               (repl/notify "OK"))))
-  => "LATER"
+    (spec-promise/x:with-delay 100
+                               (fn []
+                                 (repl/notify "OK"))))
+  => "OK"
 
   (notify/wait-on :lua
-                  (spec-promise/x:with-delay 20
-                                             (fn []
-                                               (repl/notify "OK"))))
-  => "LATER")
+    (spec-promise/x:with-delay 100
+                               (fn []
+                                 (repl/notify "OK"))))
+  => "OK")
 
+(comment
+
+  (s/seedgen-benchadd '[xt.lang.spec-promise] {:lang [:dart] :write true})
+  
+  (s/seedgen-langadd 'xt.lang.common-promise {:lang [:lua :python] :write true})
+  (s/seedgen-langremove 'xt.lang.common-promise {:lang [:lua :python] :write true}))
 
 (comment
   
-^{:refer xt.lang.spec-base/x:promise :added "4.1"}
-(fact "python runtime hardlinks promise helpers"
-  (!.py
-    (var resolved (pp/promise (fn [] (return 5))))
-    (var chained (pp/promise-then resolved (fn [value] (return (+ value 2)))))
-    (var rejected (pp/promise (fn [] (/ 1 0))))
-    (var handled (pp/promise-catch rejected (fn [err] (return 42))))
-    (var finaled (pp/promise-finally chained (fn [] (return "ignored"))))
-    [(. resolved ["status"])
-     (pp/promise-native? resolved)
-     (. chained ["value"])
-     (. handled ["value"])
-     (. finaled ["value"])])
-  => ["resolved" true 7 42 7]
+  ^{:refer xt.lang.spec-base/x:promise :added "4.1"}
+  (fact "python runtime hardlinks promise helpers"
+    (!.py
+      (var resolved (pp/promise (fn [] (return 5))))
+      (var chained (pp/promise-then resolved (fn [value] (return (+ value 2)))))
+      (var rejected (pp/promise (fn [] (/ 1 0))))
+      (var handled (pp/promise-catch rejected (fn [err] (return 42))))
+      (var finaled (pp/promise-finally chained (fn [] (return "ignored"))))
+      [(. resolved ["status"])
+       (pp/promise-native? resolved)
+       (. chained ["value"])
+       (. handled ["value"])
+       (. finaled ["value"])])
+    => ["resolved" true 7 42 7]
 
-  (!.py
-    (:- :import asyncio)
-    (var resolved (pp/promise (fn [] (. asyncio (sleep 0 :result 7)))))
-    (var chained (pp/promise-then resolved
-                                  (fn [value]
-                                    (return (. asyncio (sleep 0 :result (+ value 2)))))))
-    (var rejected (pp/promise (fn [] (/ 1 0))))
-    (var handled (pp/promise-catch rejected
-                                   (fn [err]
-                                     (return (. asyncio (sleep 0 :result "handled"))))))
-    (var finaled (pp/promise-finally chained
-                                     (fn []
-                                       (return (. asyncio (sleep 0 :result "cleanup"))))))
-    [(. resolved ["status"])
-     (. resolved ["value"])
-     (. chained ["value"])
-     (. handled ["value"])
-     (. finaled ["value"])])
-  => ["resolved" 7 9 "handled" 9]
+    (!.py
+      (:- :import asyncio)
+      (var resolved (pp/promise (fn [] (. asyncio (sleep 0 :result 7)))))
+      (var chained (pp/promise-then resolved
+                                    (fn [value]
+                                      (return (. asyncio (sleep 0 :result (+ value 2)))))))
+      (var rejected (pp/promise (fn [] (/ 1 0))))
+      (var handled (pp/promise-catch rejected
+                                     (fn [err]
+                                       (return (. asyncio (sleep 0 :result "handled"))))))
+      (var finaled (pp/promise-finally chained
+                                       (fn []
+                                         (return (. asyncio (sleep 0 :result "cleanup"))))))
+      [(. resolved ["status"])
+       (. resolved ["value"])
+       (. chained ["value"])
+       (. handled ["value"])
+       (. finaled ["value"])])
+    => ["resolved" 7 9 "handled" 9]
 
-  (!.lua
-    (var resolved (lp/promise (fn [] (return 5))))
-    (var chained (lp/promise-then resolved (fn [value] (return (+ value 2)))))
-    (var rejected (lp/promise (fn [] (error "boom"))))
-    (var handled (lp/promise-catch rejected (fn [err] (return 42))))
-    (var finaled (lp/promise-finally chained (fn [] (return "ignored"))))
-    [(. resolved ["status"])
-     (lp/promise-native? resolved)
-     (. chained ["value"])
-     (. handled ["value"])
-     (. finaled ["value"])])
-  => ["resolved" true 7 42 7])
-
-  )
+    (!.lua
+      (var resolved (lp/promise (fn [] (return 5))))
+      (var chained (lp/promise-then resolved (fn [value] (return (+ value 2)))))
+      (var rejected (lp/promise (fn [] (error "boom"))))
+      (var handled (lp/promise-catch rejected (fn [err] (return 42))))
+      (var finaled (lp/promise-finally chained (fn [] (return "ignored"))))
+      [(. resolved ["status"])
+       (lp/promise-native? resolved)
+       (. chained ["value"])
+       (. handled ["value"])
+       (. finaled ["value"])])
+    => ["resolved" true 7 42 7]))

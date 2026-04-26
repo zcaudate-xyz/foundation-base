@@ -107,11 +107,11 @@
   (-> (grammar/build :exclude [:pointer
                                :block
                                :data-set])
-      (grammar/build:override
-       {:var         {:symbol '#{var*} :raw "var"}
-        :defn        {:symbol '#{defn}}
-        :new         {:symbol '#{new} :raw "new" :emit :new}
-        :for-object  {:macro #'tf-for-object :emit :macro}
+       (grammar/build:override
+        {:var         {:symbol '#{var var*} :raw "var"}
+         :defn        {:symbol '#{defn}}
+         :new         {:symbol '#{new} :raw "new" :emit :new}
+         :for-object  {:macro #'tf-for-object :emit :macro}
         :for-array   {:macro #'tf-for-array  :emit :macro}
         :for-iter    {:macro #'tf-for-iter   :emit :macro}
         :with-global {:value true :raw "__globals__"}})

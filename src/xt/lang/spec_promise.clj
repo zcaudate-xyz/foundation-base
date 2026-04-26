@@ -42,3 +42,12 @@
   "checks whether a value is already a native host promise"
   {:added "4.1"}
   ([value] (list (quote x:promise-native?) value)))
+
+
+(defspec.xt x:with-delay [:fn [[:xt/fn] :xt/int] :xt/any])
+
+(defmacro.xt ^{:standalone true}
+  x:with-delay
+  "wraps thunk execution in the native host with-delay type"
+  {:added "4.1"}
+  ([ms thunk] (list (quote x:with-delay) ms thunk)))

@@ -912,8 +912,8 @@
     :op-spec {:arglists '([x])
               :type [:fn [:xt/any] :xt/bool]}}
    {:op :x-with-delay  :symbol #{'x:with-delay}  :emit :abstract
-    :op-spec {:arglists '([thunk ms])
-              :type [:fn [[:xt/fn] :xt/num] :xt/any]}}])
+    :op-spec {:arglists '([ms thunk])
+              :type [:fn [:xt/num [:xt/fn []]] :xt/any]}}])
 
 (def +xt-runtime-shell+
   [{:op :x-pwd           :symbol #{'x:pwd}              :emit :abstract

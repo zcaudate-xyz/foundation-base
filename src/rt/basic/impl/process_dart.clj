@@ -115,7 +115,11 @@
   [source]
   (let [convert-needed? (or (str/includes? source "jsonEncode(")
                             (str/includes? source "jsonDecode("))
-        io-needed?      (str/includes? source "Socket.")
+        io-needed?      (or (str/includes? source "Socket.")
+                            (str/includes? source "Directory.")
+                            (str/includes? source "File(")
+                            (str/includes? source "Process.")
+                            (str/includes? source "Platform."))
         math-needed?    (str/includes? source "math.")
         lines           (str/split-lines source)
         [import-lines body-lines]

@@ -131,9 +131,13 @@
 
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-shell :added "4.1"}
-(fact "shell not implemented"
-  (l/emit-as :dart [(dart-tf-x-shell '[_ s opts])])
-  => #"shell not implemented")
+(fact "shell uses Process.run"
+  (let [out (l/emit-as :dart [(dart-tf-x-shell '[_ s root cb])])]
+    [(boolean (re-find #"Process\.run" out))
+     (boolean (re-find #"cd " out))
+     (boolean (re-find #"stdout" out))
+     (boolean (re-find #"catchError" out))])
+  => [true true true true])
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-b64-encode :added "4.1"}
 (fact "base64 encode"
@@ -156,14 +160,20 @@
   => #"Uri\.decodeComponent")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-file-slurp :added "4.1"}
-(fact "file-slurp not implemented"
-  (l/emit-as :dart [(dart-tf-x-file-slurp '[_ filename opts cb])])
-  => #"file-slurp not implemented")
+(fact "file-slurp reads file content"
+  (let [out (l/emit-as :dart [(dart-tf-x-file-slurp '[_ filename cb])])]
+    [(boolean (re-find #"File\(filename\)" out))
+     (boolean (re-find #"readAsString" out))
+     (boolean (re-find #"catchError" out))])
+  => [true true true])
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-file-spit :added "4.1"}
-(fact "file-spit not implemented"
-  (l/emit-as :dart [(dart-tf-x-file-spit '[_ filename s opts cb])])
-  => #"file-spit not implemented")
+(fact "file-spit writes file content"
+  (let [out (l/emit-as :dart [(dart-tf-x-file-spit '[_ filename s cb])])]
+    [(boolean (re-find #"File\(filename\)" out))
+     (boolean (re-find #"writeAsString" out))
+     (boolean (re-find #"catchError" out))])
+  => [true true true])
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-debug-client-basic :added "4.1"}
 (fact "client basic not implemented"

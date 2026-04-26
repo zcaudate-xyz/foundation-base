@@ -581,18 +581,19 @@
 ;;
 
 (defn js-tf-x-with-delay
-  ([[_ thunk ms cb]]
+  ([[_  ms thunk]]
    (template/$
-    (setTimeout
-     (fn []
-       (. (new Promise
-                (fn [inner-resolve inner-reject]
-                  (inner-resolve (~thunk))))
-           (then (fn [value]
-                   (~cb nil value)))
-           (catch (fn [err]
-                    (~cb err nil)))))
-      ~ms))))
+    (new Promise
+         (fn [resolve reject]
+           (setTimeout (fn []
+                         (. (new Promise
+                                 (fn [inner-resolve]
+                                   (inner-resolve (~thunk))))
+                            (then  (fn [value]
+                                     (resolve value)))
+                            (catch (fn [err]
+                                     (reject error)))))
+                       ~ms))))))
 
 (defn js-tf-x-promise
   [[_ thunk]]

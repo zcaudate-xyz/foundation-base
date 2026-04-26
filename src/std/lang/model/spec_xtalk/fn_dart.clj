@@ -493,24 +493,56 @@
    :x-socket-send    {:macro #'dart-tf-x-socket-send    :emit :macro}
    :x-socket-close   {:macro #'dart-tf-x-socket-close   :emit :macro}})
 
+(defn dart-tf-x-pwd
+  [[_]]
+  (template/$
+   (:- "(Platform.environment[\"PWD\"] ?? Directory.current.path)")))
+
+(defn dart-tf-x-file-resolve
+  [[_ root path]]
+  (template/$
+   ((fn []
+      (var base ~root)
+      (return (:? (or (== nil base)
+                      (. ~path (startsWith "/")))
+                  ~path
+                  (+ base "/" ~path)))))))
+
 (defn dart-tf-x-file-slurp
-  [[_ filename opts cb]]
-  (list 'throw '"file-slurp not implemented in Dart"))
+  [[_ filename cb]]
+  (template/$
+   (. (. (File ~filename) (readAsString))
+      (then (fn [out]
+              (return (~cb nil out))))
+      (catchError (fn [err]
+                    (return (~cb err nil)))))))
 
 (defn dart-tf-x-file-spit
-  [[_ filename s opts cb]]
-  (list 'throw '"file-spit not implemented in Dart"))
+  [[_ filename s cb]]
+  (template/$
+   (. (. (File ~filename) (writeAsString ~s))
+      (then (fn [_]
+              (return (~cb nil ~filename))))
+      (catchError (fn [err]
+                    (return (~cb err nil)))))))
 
 (def +dart-file+
-  {:x-file-slurp     {:macro #'dart-tf-x-file-slurp      :emit :macro}
-   :x-file-spit      {:macro #'dart-tf-x-file-spit       :emit :macro}})
+  {:x-file-resolve   {:macro #'dart-tf-x-file-resolve    :emit :macro}
+   :x-file-slurp     {:macro #'dart-tf-x-file-slurp      :emit :macro
+                      :op-spec {:allow-blocks true}}
+   :x-file-spit      {:macro #'dart-tf-x-file-spit       :emit :macro
+                      :op-spec {:allow-blocks true}}})
 
 
 (defn dart-tf-x-shell
-  [[_ s opts cb]]
+  [[_ s root cb]]
   (template/$
-   (do (:- "import 'dart:io';")
-       (return (. (Process.run "sh" ["-lc" ~s])
+   (do (var command
+            (:? (or (== nil ~root)
+                    (== "" ~root))
+                ~s
+                (+ "cd " ~root " && " ~s)))
+       (return (. (Process.run "sh" ["-lc" command])
                   (then (fn [result]
                           (if (not= 0 (. result exitCode))
                             (return (~cb {:code (. result exitCode)
@@ -522,7 +554,9 @@
                                 (return (~cb err nil)))))))))
 
 (def +dart-shell+
-  {:x-shell    {:macro #'dart-tf-x-shell    :emit :macro}})
+  {:x-pwd      {:macro #'dart-tf-x-pwd      :emit :macro}
+   :x-shell    {:macro #'dart-tf-x-shell    :emit :macro
+                :op-spec {:allow-blocks true}}})
 
 (def +dart+
   (merge +dart-core+
