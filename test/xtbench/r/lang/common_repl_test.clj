@@ -5,7 +5,7 @@
             [xt.lang.common-notify :as notify]))
 
 (l/script- :r
-  {:runtime :basic
+  {:runtime :oneshot
    :require [[xt.lang.common-repl :as repl]
              [xt.lang.common-lib :as xtl]]})
 
@@ -13,8 +13,7 @@
  {:setup [(l/rt:restart)]
  :teardown [(l/rt:stop)]})
 
-^{:refer xt.lang.common-repl/socket-connect :added "4.0"
-  :setup [(l/rt:restart)]}
+^{:refer xt.lang.common-repl/socket-connect :added "4.0"}
 (fact "connects a a socket to port"
 
   (notify/wait-on :r
@@ -56,20 +55,18 @@
 ^{:refer xt.lang.common-repl/notify-socket-http :added "4.0"}
 (fact "using the base socket implementation to notify on http protocol"
 
-  (notify/wait-on-call
-   (fn [] (!.R
-           (repl/notify-socket-http
-            "127.0.0.1" (@! (:http-port (l/default-notify)))
-            "hello"
-            (@! notify/*override-id*)
-            nil
-            {}))))
+  (l/with:print-all
+    (notify/wait-on-call
+     (fn [] (!.R
+              (repl/notify-socket-http
+               "127.0.0.1" (@! (:http-port (l/default-notify)))
+               "hello"
+               (@! notify/*override-id*)
+               nil
+               {})))))
   => "hello")
 
-^{:refer xt.lang.common-repl/notify-http :added "4.0"
-  :setup [(!.R
-  (:= (!:G fetch)
-      (. (require "node-fetch") default)))]}
+^{:refer xt.lang.common-repl/notify-http :added "4.0"}
 (fact "call a http notify function."
 
   (notify/wait-on-call

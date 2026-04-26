@@ -645,6 +645,67 @@
           (return (f)))
         (x:thread-spawn delay_target)))))
 
+(defn python-promise-fn-form?
+  [form]
+  (and (seq? form)
+       (contains? #{'fn 'fn:>} (first form))))
+
+(defn python-promise-fn-def
+  [name thunk]
+  (let [[tag params & body] thunk
+        body (if (= 'fn:> tag)
+               [(list 'return (first body))]
+               body)]
+    (list* 'fn name params body)))
+
+(defn python-promise-call
+  [target name args thunk]
+  (if (python-promise-fn-form? thunk)
+    (let [fndef (python-promise-fn-def name thunk)]
+      (template/$
+       (do ~fndef
+           (return (~target ~@args ~name)))))
+    (apply list target (concat args [thunk]))))
+
+(defn python-tf-x-promise
+  [[_ thunk]]
+  (python-promise-call 'python.core.common-promise/promise
+                       'promise_thunk
+                       []
+                       thunk))
+
+(defn python-tf-x-promise-then
+  [[_ promise thunk]]
+  (python-promise-call 'python.core.common-promise/promise-then
+                       'promise_then
+                       [promise]
+                       thunk))
+
+(defn python-tf-x-promise-catch
+  [[_ promise thunk]]
+  (python-promise-call 'python.core.common-promise/promise-catch
+                       'promise_catch
+                       [promise]
+                       thunk))
+
+(defn python-tf-x-promise-finally
+  [[_ promise thunk]]
+  (python-promise-call 'python.core.common-promise/promise-finally
+                       'promise_finally
+                       [promise]
+                       thunk))
+
+(def +python-promise+
+  {:x-promise          {:macro #'python-tf-x-promise         :emit :macro
+                        :op-spec {:allow-blocks true}}
+   :x-promise-then     {:macro #'python-tf-x-promise-then    :emit :macro
+                        :op-spec {:allow-blocks true}}
+   :x-promise-catch    {:macro #'python-tf-x-promise-catch   :emit :macro
+                        :op-spec {:allow-blocks true}}
+   :x-promise-finally  {:macro #'python-tf-x-promise-finally :emit :macro
+                        :op-spec {:allow-blocks true}}
+   :x-promise-native?  {:emit :hard-link :raw 'python.core.common-promise/promise-native?}})
+
 (def +python-thread+
   {:x-with-delay     {:macro #'python-tf-x-with-delay    :emit :macro
                       :op-spec {:allow-blocks true}}})
@@ -689,5 +750,6 @@
          +python-return+
          +python-socket+
          +python-iter+
+         +python-promise+
          +python-thread+
          +python-file+))

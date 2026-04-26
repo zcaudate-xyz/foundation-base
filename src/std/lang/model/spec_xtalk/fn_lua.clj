@@ -533,6 +533,13 @@
    :x-iter-has?           {:macro #'lua-tf-x-iter-has?           :emit :macro}
    :x-iter-native?        {:macro #'lua-tf-x-iter-native?        :emit :macro}})
 
+(def +lua-promise+
+  {:x-promise          {:emit :hard-link :raw 'lua.core.common-promise/promise}
+   :x-promise-then     {:emit :hard-link :raw 'lua.core.common-promise/promise-then}
+   :x-promise-catch    {:emit :hard-link :raw 'lua.core.common-promise/promise-catch}
+   :x-promise-finally  {:emit :hard-link :raw 'lua.core.common-promise/promise-finally}
+   :x-promise-native?  {:emit :hard-link :raw 'lua.core.common-promise/promise-native?}})
+
 ;;
 ;; FILE
 ;;
@@ -574,4 +581,5 @@
          +lua-return+
          +lua-socket+
          +lua-iter+
+         +lua-promise+
          +lua-file+))

@@ -48,6 +48,14 @@
   (xtalk-op-profiles :x-add)
   => #{:xtalk-common})
 
+^{:refer std.lang.base.grammar-xtalk-system/xtalk-op-profiles :added "4.1"}
+(fact "includes promise ops in the language-specific profile"
+  (xtalk-op-profiles :x-promise)
+  => #{:xtalk-language-specific}
+
+  (xtalk-op-profiles :x-promise-native?)
+  => #{:xtalk-language-specific})
+
 ^{:refer std.lang.base.grammar-xtalk-system/xtalk-op-entry :added "4.1"}
 (fact "returns the full xtalk entry for an op"
   (select-keys (xtalk-op-entry :x-add) [:op :symbol :emit])
@@ -65,7 +73,14 @@
   (-> (xtalk-symbol-entry 'x:add)
       (select-keys [:op :emit]))
   => '{:op :x-add
-       :emit :macro})
+        :emit :macro})
+
+^{:refer std.lang.base.grammar-xtalk-system/xtalk-symbol-entry :added "4.1"}
+(fact "maps promise symbols back to xtalk entries"
+  (-> (xtalk-symbol-entry 'x:promise)
+      (select-keys [:op :emit]))
+  => '{:op :x-promise
+       :emit :abstract})
 
 ^{:refer std.lang.base.grammar-xtalk-system/xtalk-op-requires :added "4.1"}
 (fact "returns direct required xtalk ops"

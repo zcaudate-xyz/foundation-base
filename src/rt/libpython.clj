@@ -1,5 +1,6 @@
 (ns rt.libpython
   (:require [libpython-clj2.python :as lp]
+            [python.core.common-promise]
             [rt.basic.impl.process-js :as js]
             [rt.basic.impl.process-python :as python]
             [std.concurrent :as cc]

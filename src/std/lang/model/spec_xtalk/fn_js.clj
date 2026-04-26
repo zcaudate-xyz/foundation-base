@@ -631,13 +631,42 @@
     (setTimeout
      (fn []
        (. (new Promise
-               (fn [inner-resolve inner-reject]
-                 (inner-resolve (~thunk))))
-          (then (fn [value]
-                  (~cb nil value)))
-          (catch (fn [err]
-                   (~cb err nil)))))
-     ~ms))))
+                (fn [inner-resolve inner-reject]
+                  (inner-resolve (~thunk))))
+           (then (fn [value]
+                   (~cb nil value)))
+           (catch (fn [err]
+                    (~cb err nil)))))
+      ~ms))))
+
+(defn js-tf-x-promise
+  [[_ thunk]]
+  (template/$
+   (. (. Promise (resolve))
+      (then ~thunk))))
+
+(defn js-tf-x-promise-then
+  [[_ promise thunk]]
+  (list '. promise (list 'then thunk)))
+
+(defn js-tf-x-promise-catch
+  [[_ promise thunk]]
+  (list '. promise (list 'catch thunk)))
+
+(defn js-tf-x-promise-finally
+  [[_ promise thunk]]
+  (list '. promise (list 'finally thunk)))
+
+(defn js-tf-x-promise-native?
+  [[_ value]]
+  (list 'instanceof value 'Promise))
+
+(def +js-promise+
+  {:x-promise          {:macro #'js-tf-x-promise          :emit :macro}
+   :x-promise-then     {:macro #'js-tf-x-promise-then     :emit :macro}
+   :x-promise-catch    {:macro #'js-tf-x-promise-catch    :emit :macro}
+   :x-promise-finally  {:macro #'js-tf-x-promise-finally  :emit :macro}
+   :x-promise-native?  {:macro #'js-tf-x-promise-native?  :emit :macro}})
 
 (def +js-thread+
   {:x-with-delay     {:macro #'js-tf-x-with-delay     :emit :macro}})
@@ -658,6 +687,7 @@
          +js-socket+
          +js-http+
          +js-iter+
+         +js-promise+
          +js-thread+
          +js-shell+
          +js-file+))

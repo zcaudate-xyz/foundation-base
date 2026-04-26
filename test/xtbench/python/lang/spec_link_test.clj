@@ -17,35 +17,37 @@
 ^{:refer xt.lang.spec-link/x:socket-connect :added "4.1"}
 (fact "connects sockets and forwards the connection to callbacks"
 
-  (notify/wait-on :python
-    (var connect-fn
-         (fn [host port opts cb]
-           (return
-            (spec-link/x:socket-connect host port opts cb))))
-    (xt/for:return [[conn err] (connect-fn  "127.0.0.1"
-                                            (@! (:socket-port (l/default-notify)))
-                                            {}
-                                            (xt/x:callback))]
-      {:success (do (spec-link/x:socket-close conn)
-                    (repl/notify "OK"))
-       :error   (repl/notify "ERR")})
-    (return true))
+  (l/with:print-all
+    (notify/wait-on :python
+      (var connect-fn
+           (fn [host port opts cb]
+             (return
+              (spec-link/x:socket-connect host port opts cb))))
+      (xt/for:return [[conn err] (connect-fn  "127.0.0.1"
+                                              (@! (:socket-port (l/default-notify)))
+                                              {}
+                                              (xt/x:callback))]
+        {:success (do (spec-link/x:socket-close conn)
+                      (repl/notify "OK"))
+         :error   (repl/notify "ERR")})
+      (return true)))
   => "OK")
 
 ^{:refer xt.lang.spec-link/x:notify-http :added "4.1"}
 (fact "posts encoded values through fetch"
 
-  (notify/wait-on-call
-   (fn [] (!.py
-            (var notify-fn
-                 (fn [host port value id key opts]
-                   (return
-                    (spec-link/x:notify-http host port value id key opts))))
-            (notify-fn "127.0.0.1" (@! (:http-port (l/default-notify)))
-                       "hello"
-                       (@! notify/*override-id*)
-                       nil
-                       {}))))
+  (l/with:print-all
+    (notify/wait-on-call
+     (fn [] (!.py
+              (var notify-fn
+                   (fn [host port value id key opts]
+                     (return
+                      (spec-link/x:notify-http host port value id key opts))))
+              (notify-fn "127.0.0.1" (@! (:http-port (l/default-notify)))
+                         "hello"
+                         (@! notify/*override-id*)
+                         nil
+                         {})))))
   => "hello")
 
 (comment

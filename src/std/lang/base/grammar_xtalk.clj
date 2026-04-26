@@ -873,7 +873,6 @@
     :op-spec {:arglists '([expr])
               :type [:fn [:xt/str] :xt/any]}}])
 
-
 ;;
 ;; XTALK NOTIFY/LINK SPECIFICATION
 ;;
@@ -895,15 +894,29 @@
     :op-spec {:type  [:fn [:xt/str :xt/num :xt/any :xt/str :xt/str :xt/any] :xt/any]
               :arglists '([host port value id key opts])}}])
 
-
 ;;
 ;; XTALK RUNTIME OS
 ;;
 
-(def +xt-runtime-delay+
-  [{:op :x-with-delay     :symbol #{'x:with-delay}      :emit :abstract
-    :op-spec {:arglists '([ms value])
-              :type [:fn [:xt/int :xt/any] :xt/any]}}])
+(def +xt-runtime-promise+
+  [{:op :x-promise          :symbol #{'x:promise}          :emit :abstract
+    :op-spec {:arglists '([thunk])
+              :type [:fn [[:xt/fn]] :xt/promise]}}
+   {:op :x-promise-then     :symbol #{'x:promise-then}     :emit :abstract
+    :op-spec {:arglists '([promise thunk])
+              :type [:fn [:xt/promise [:xt/fn]] :xt/promise]}}
+   {:op :x-promise-catch    :symbol #{'x:promise-catch}    :emit :abstract
+    :op-spec {:arglists '([promise thunk])
+              :type [:fn [:xt/promise [:xt/fn]] :xt/promise]}}
+   {:op :x-promise-finally  :symbol #{'x:promise-finally}  :emit :abstract
+    :op-spec {:arglists '([promise thunk])
+              :type [:fn [:xt/promise [:xt/fn]] :xt/promise]}}
+   {:op :x-promise-native?  :symbol #{'x:promise-native?}  :emit :abstract
+    :op-spec {:arglists '([x])
+              :type [:fn [:xt/any] :xt/bool]}}
+   {:op :x-with-delay  :symbol #{'x:with-delay}  :emit :abstract
+    :op-spec {:arglists '([thunk ms])
+              :type [:fn [[:xt/fn] :xt/num] :xt/any]}}])
 
 (def +xt-runtime-shell+
   [{:op :x-shell          :symbol #{'x:shell}           :emit :abstract
@@ -917,4 +930,3 @@
    {:op :x-spit-file      :symbol #{'x:spit-file}     :emit :abstract
     :op-spec {:arglists '([path value opts cb])
               :type [:fn [:xt/str :xt/any :xt/any :xt/any] :xt/any]}}])
-

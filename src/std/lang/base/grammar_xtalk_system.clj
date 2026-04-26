@@ -28,18 +28,18 @@
                    xtalk/+xt-functional-return+
                    xtalk/+xt-functional-array+
                    xtalk/+xt-functional-iter+]
-   :xtalk-impl    [xtalk/+xt-lang-global+
-                   xtalk/+xt-lang-bit+
-                   xtalk/+xt-lang-throw+
-                   xtalk/+xt-lang-unpack+
-                   xtalk/+xt-lang-random+
-                   xtalk/+xt-lang-time+
-                   xtalk/+xt-lang-json+]
-   :xtalk-link    [xtalk/+xt-socket+
-                   xtalk/+xt-notify-http+]
-   :xtalk-runtime [xtalk/+xt-runtime-delay+
-                   xtalk/+xt-runtime-shell+
-                   xtalk/+xt-runtime-file+]})
+    :xtalk-impl    [xtalk/+xt-lang-global+
+                    xtalk/+xt-lang-bit+
+                    xtalk/+xt-lang-throw+
+                    xtalk/+xt-lang-unpack+
+                    xtalk/+xt-lang-random+
+                    xtalk/+xt-lang-time+
+                    xtalk/+xt-lang-json+]
+    :xtalk-link    [xtalk/+xt-socket+
+                    xtalk/+xt-notify-http+]
+    :xtalk-runtime [xtalk/+xt-runtime-promise+
+                    xtalk/+xt-runtime-shell+
+                    xtalk/+xt-runtime-file+]})
 
 (def +xtalk-area->surface+
   {:xtalk-common  {:area :common

@@ -427,6 +427,38 @@
     (:- "Duration(milliseconds: " ~ms ")")
     (fn [] (return (~thunk))))))
 
+(defn dart-tf-x-promise
+  [[_ thunk]]
+  (list 'Future.sync thunk))
+
+(defn dart-tf-x-promise-then
+  [[_ promise thunk]]
+  (list '. promise (list 'then thunk)))
+
+(defn dart-tf-x-promise-catch
+  [[_ promise thunk]]
+  (list '. promise (list 'catchError thunk)))
+
+(defn dart-tf-x-promise-finally
+  [[_ promise thunk]]
+  (list '. promise (list 'whenComplete thunk)))
+
+(defn dart-tf-x-promise-native?
+  [[_ value]]
+  (let [rtype-expr (dart-runtime-type-string value)]
+    (list 'and
+          (list 'not= nil value)
+          (list 'or
+                (list '== "Future" rtype-expr)
+                (list '. rtype-expr (list 'startsWith "Future<"))))))
+
+(def +dart-promise+
+  {:x-promise          {:macro #'dart-tf-x-promise          :emit :macro}
+   :x-promise-then     {:macro #'dart-tf-x-promise-then     :emit :macro}
+   :x-promise-catch    {:macro #'dart-tf-x-promise-catch    :emit :macro}
+   :x-promise-finally  {:macro #'dart-tf-x-promise-finally  :emit :macro}
+   :x-promise-native?  {:macro #'dart-tf-x-promise-native?  :emit :macro}})
+
 (def +dart-thread+
   {:x-with-delay      {:macro #'dart-tf-x-with-delay      :emit :macro}})
 
@@ -505,5 +537,6 @@
          +dart-return+
          +dart-socket+
          +dart-file+
+         +dart-promise+
          +dart-thread+
          +dart-shell+))

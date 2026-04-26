@@ -199,20 +199,21 @@
   "for async transform"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error finally]}]]
-  (template/$ (. (new Promise (fn [resolve reject]
-                                (resolve ~statement)))
-          ~@(if success
-              [(list 'then
-                     (list 'fn [res]
-                           success))])
-          ~@(if error
-              [(list 'catch
-                     (list 'fn [err]
-                           error))])
-          ~@(if finally
-              [(list 'finally
-                     (list 'fn '[]
-                           finally))]))))
+  (template/$
+   (. (new Promise (fn [resolve reject]
+                     (resolve ~statement)))
+      ~@(if success
+          [(list 'then
+                 (list 'fn [res]
+                       success))])
+      ~@(if error
+          [(list 'catch
+                 (list 'fn [err]
+                       error))])
+      ~@(if finally
+          [(list 'finally
+                 (list 'fn '[]
+                       finally))]))))
 
 (defn js-tf-prototype-create
   [[_ m]]

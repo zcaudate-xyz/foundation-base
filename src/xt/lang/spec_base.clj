@@ -31,43 +31,6 @@
   ([[e it] & body]
    (apply list 'for:iter [e it] body)))
 
-(defmacro.xt ^{:style/indent 1}
-  return-run
-  "supports final returns through for:return"
-  {:added "4.1"}
-  ([[resolve reject] & body]
-   (list 'x:return-run
-         (clojure.core/apply list 'fn [resolve reject] body))))
-
-(defmacro.xt ^{:style/indent 1}
-  for:return
-  "dispatches success and error branches"
-  {:added "4.1"}
-  ([[[ok err] statement] {:keys [success error final]}]
-   (list 'for:return [[ok err] statement]
-         {:success success
-          :error error
-          :final final})))
-
-(defmacro.xt ^{:style/indent 1}
-  for:try
-  "expands to the canonical try form"
-  {:added "4.1"}
-  ([[[ok err] statement] {:keys [success error]}]
-   (list 'for:try [[ok err] statement]
-         {:success success
-          :error error})))
-
-(defmacro.xt ^{:style/indent 1}
-  for:async
-  "expands to the canonical async form"
-  {:added "4.1"}
-  ([[[ok err] statement] {:keys [success error finally]}]
-   (list 'for:async [[ok err] statement]
-         {:success success
-          :error error
-          :finally finally})))
-
 (defspec.xt proto:get nil)
 
 (defmacro.xt ^{:standalone true} 
@@ -99,8 +62,6 @@
   "expands and emits the lua tostring metamethod key"
   {:added "4.1"}
   ([] (list (quote proto:tostring))))
-
-
 
 (defspec.xt x:get-idx [:fn [[:xt/array :xt/any] :xt/int :xt/any] :xt/any])
 
@@ -1088,22 +1049,6 @@
   "recognises function values"
   {:added "4.1"}
   ([value] (list (quote x:is-function?) value)))
-
-(defspec.xt x:callback [:fn [] [:fn [:xt/any] nil]])
-
-(defmacro.xt ^{:standalone true} 
-  x:callback
-  "dispatches node-style callbacks through for:return"
-  {:added "4.1"}
-  ([] (list (quote x:callback))))
-
-(defspec.xt x:return-run nil)
-
-(defmacro.xt ^{:standalone true}
-  x:return-run
-  "can be used directly inside for:return"
-  {:added "4.1"}
-  ([runner] (list (quote x:return-run) runner)))
 
 (defspec.xt x:eval [:fn [:xt/str] :xt/any])
 

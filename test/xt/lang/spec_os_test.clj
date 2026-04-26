@@ -1,4 +1,4 @@
-(ns xt.lang.spec-runtime-os-test
+(ns xt.lang.spec-os-test
   (:use code.test)
   (:require [clojure.set :as set]
             [std.lang :as l]
@@ -7,19 +7,19 @@
 ^{:seedgen/root {:all true, :langs [:python :lua]}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.spec-runtime-os :as spec-os]
+   :require [[xt.lang.spec-os :as spec-os]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]]})
 
 (l/script- :python
   {:runtime :basic
-   :require [[xt.lang.spec-runtime-os :as spec-os]
+   :require [[xt.lang.spec-os :as spec-os]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]]})
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.lang.spec-runtime-os :as spec-os]
+   :require [[xt.lang.spec-os :as spec-os]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]]})
 
@@ -27,7 +27,7 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.lang.spec-runtime-os/x:slurp-file :added "4.1"}
+^{:refer xt.lang.spec-os/x:slurp-file :added "4.1"}
 (fact "reads file content through callbacks"
 
   (notify/wait-on :js
@@ -67,7 +67,7 @@
     (return true))
   )
 
-^{:refer xt.lang.spec-runtime-os/x:spit-file :added "4.1"}
+^{:refer xt.lang.spec-os/x:spit-file :added "4.1"}
 (fact "writes file content through callbacks"
   
   (notify/wait-on :js
@@ -90,7 +90,7 @@
     (return true))
   => "hello world")
 
-^{:refer xt.lang.spec-runtime-os/x:shell :added "4.1"}
+^{:refer xt.lang.spec-os/x:shell :added "4.1"}
 (fact "supports transitional shell callback arglists"
 
 
@@ -106,7 +106,7 @@
     (return true))
   => string?)
 
-^{:refer xt.lang.spec-runtime-os/x:with-delay :added "4.1"}
+^{:refer xt.lang.spec-os/x:with-delay :added "4.1"}
 (fact "delays asynchronous js computations"
 
   (notify/wait-on :js
@@ -129,8 +129,9 @@
 
 (comment
   
-  (s/seedgen-benchadd '[xt.lang.spec-runtime-os] {:lang [:dart] :write true})
-  (s/seedgen-benchadd '[xt.lang.spec-runtime-os] {:lang [:r] :write true})
+  (s/seedgen-benchadd '[xt.lang.spec-os] {:lang [:dart] :write true})
+  (s/seedgen-benchadd '[xt.lang.spec-os] {:lang [:r] :write true})
   
-  (s/seedgen-langadd 'xt.lang.spec-runtime-os {:lang [:lua :python] :write true})
-  (s/seedgen-langremove 'xt.lang.spec-runtime-os {:lang [:lua :python] :write true}))
+  (s/seedgen-langadd 'xt.lang.spec-os {:lang [:lua :python] :write true})
+  (s/seedgen-langremove 'xt.lang.spec-os
+{:lang [:lua :python] :write true}))
