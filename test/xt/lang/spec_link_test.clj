@@ -5,8 +5,14 @@
             [xt.lang.common-notify :as notify]))
 
 ^{:seedgen/root {:all true}}
-(l/script- :js
+#_(l/script- :js
   {:runtime :basic
+   :require [[xt.lang.spec-link :as spec-link]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-repl :as repl]]})
+
+(l/script- :js
+  {:runtime :oneshot
    :require [[xt.lang.spec-link :as spec-link]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]]})
@@ -30,19 +36,22 @@
 ^{:refer xt.lang.spec-link/x:socket-connect :added "4.1"}
 (fact "connects sockets and forwards the connection to callbacks"
 
-  (notify/wait-on :js
-    (var connect-fn
-         (fn [host port opts cb]
-           (return
-            (spec-link/x:socket-connect host port opts cb))))
-    (xt/for:return [[conn err] (connect-fn  "127.0.0.1"
-                                            (@! (:socket-port (l/default-notify)))
-                                            {}
-                                            (xt/x:callback))]
-      {:success (repl/notify "OK")
-       :error   (repl/notify "ERR")}))
+  (l/with:print-all
+    (notify/wait-on :js
+      (var connect-fn
+           (fn [host port opts cb]
+             (return
+              (spec-link/x:socket-connect host port opts cb))))
+      (xt/for:return [[conn err] (connect-fn  "127.0.0.1"
+                                              (@! (:socket-port (l/default-notify)))
+                                              {}
+                                              (xt/x:callback))]
+        {:success (do (spec-link/x:socket-close conn)
+                      (repl/notify "OK"))
+         :error   (repl/notify "ERR")})
+      (return true)))
+  => "OK"
   
-  (l/with:print-all)
   (notify/wait-on :lua
     (var connect-fn
          (fn [host port opts cb]
@@ -53,7 +62,9 @@
                                             {}
                                             (xt/x:callback))]
       {:success (repl/notify "OK")
-       :error   (repl/notify "ERR")}))
+       :error   (repl/notify "ERR")})
+    (return true))
+  => "OK"
   
   (notify/wait-on :python
     (var connect-fn
@@ -65,7 +76,9 @@
                                             {}
                                             (xt/x:callback))]
       {:success (repl/notify "OK")
-       :error   (repl/notify "ERR")})))
+       :error   (repl/notify "ERR")})
+    (return true))
+  => "OK")
 
 ^{:refer xt.lang.spec-link/x:socket-send :added "4.1"}
 (fact "sends socket messages through write")
@@ -116,6 +129,9 @@
   => "hello")
 
 (comment
-
+  
+  (s/seedgen-benchadd '[xt.lang.spec-link] {:lang [:dart] :write true})
+  (s/seedgen-benchadd '[xt.lang.spec-link] {:lang [:r] :write true})
+  
   (s/seedgen-langadd 'xt.lang.spec-link {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.lang.spec-link {:lang [:lua :python] :write true}))

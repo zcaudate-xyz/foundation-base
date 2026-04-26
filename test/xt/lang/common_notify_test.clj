@@ -40,7 +40,8 @@
 
   ^{:seedgen/base    {:lua     {:transform {:js :lua}}
                       :python  {:transform {:js :python}}
-                      :r       {:transform {:js :r}}}}
+                      :r       {:transform {:js :r}}
+                      :dart    {:transform {:js :dart}}}}
   (notify/notify-ceremony (assoc (l/rt :js)
                                  :type :basic))
   => [(:id (l/rt :js))
@@ -102,6 +103,7 @@
   => 1)
 
 (comment
-  (s/seedgen-benchadd 'xt.lang.common-notify {:lang [:lua :python] :write true})
+  (s/seedgen-benchadd 'xt.lang.common-notify {:lang [:r] :write true})
+  (s/seedgen-benchadd 'xt.lang.common-notify {:lang [:dart] :write true})
   (s/seedgen-langadd 'xt.lang.common-notify {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.lang.common-notify {:lang [:lua :python] :write true}))

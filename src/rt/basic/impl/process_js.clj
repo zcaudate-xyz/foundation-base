@@ -63,17 +63,27 @@
 ;; ONESHOT
 ;;
 
+(def +oneshot-require-bootstrap+
+  '[(:- :import #{createRequire} :from "'module'")
+    (var require (createRequire (+ (or (. process env ["PWD"])
+                                       (. process (cwd)))
+                                   "/package.json")))])
+
 (def ^{:arglists '([body])}
   default-oneshot-wrap
-  (let [bootstrap  (impl/emit-entry-deps
-                    lib/return-eval
-                    {:lang :js
-                     :layout :flat})]
+  (let [bootstrap  (clojure.string/join
+                    "\n\n"
+                    [(impl/emit-as
+                      :js +oneshot-require-bootstrap+)
+                     (impl/emit-entry-deps
+                      lib/return-eval
+                      {:lang :js
+                       :layout :flat})])]
     (fn [body]
       (str bootstrap
            "\n\n"
            (impl/emit-as
-            :js [(list 'console.log (list 'return-eval body))])))))
+             :js [(list 'console.log (list 'return-eval body))])))))
 
 (def +js-oneshot-config+
   (common/set-context-options

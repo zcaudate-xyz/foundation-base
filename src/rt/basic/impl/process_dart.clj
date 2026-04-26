@@ -115,6 +115,7 @@
   [source]
   (let [convert-needed? (or (str/includes? source "jsonEncode(")
                             (str/includes? source "jsonDecode("))
+        io-needed?      (str/includes? source "Socket.")
         math-needed?    (str/includes? source "math.")
         lines           (str/split-lines source)
         [import-lines body-lines]
@@ -128,6 +129,9 @@
                           (and convert-needed?
                                (not-any? #(= "import 'dart:convert';" %) import-lines))
                           (conj "import 'dart:convert';")
+                          (and io-needed?
+                               (not-any? #(= "import 'dart:io';" %) import-lines))
+                          (conj "import 'dart:io';")
                           (and math-needed?
                                (not-any? #(= "import 'dart:math' as math;" %) import-lines))
                           (conj "import 'dart:math' as math;"))]
@@ -357,9 +361,7 @@
         out-sym (gensym "out_")
         statement-op? '#{:- := var return break throw
                           do do* if for while try
-                          for:return for:try for:async
                           for:index for:array for:object for:iter
-                          xt/for:return xt/for:try xt/for:async
                           xt/for:index xt/for:array xt/for:object xt/for:iter}
         await-sync-form (fn [form]
                           (list 'await

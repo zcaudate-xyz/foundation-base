@@ -471,36 +471,24 @@
 (defn dart-tf-x-socket-connect
   [[_ host port opts cb]]
   (template/$
-   (do (:- "import 'dart:io';")
-       (return (. (Socket.connect ~host ~port)
-                  (then (fn [conn]
-                          (return (~cb nil conn))))
-                  (catchError (fn [err]
-                                (return (~cb err nil)))))))))
+   (. (Socket.connect ~host ~port)
+      (then (fn [conn]
+              (return (~cb nil conn))))
+      (catchError (fn [err]
+                    (return (~cb err nil)))))))
 
 (defn dart-tf-x-socket-send
   [[_ conn s]]
   (template/$
-   (do (:- "import 'dart:io';")
-       (. ~conn (write ~s)))))
+   (. ~conn (write ~s))))
 
 (defn dart-tf-x-socket-close
   [[_ conn]]
   (template/$
-   (return
-    (. (. ~conn (flush))
-       (then (fn [_]
-               (. ~conn (destroy))
-               (return nil)))))))
-(defn dart-tf-x-socket-connect [[_ host port opts cb]]
-  (list 'throw '"Socket not implemented"))
-
-(defn dart-tf-x-socket-send [[_ conn s]]
-  (list 'throw '"Socket not implemented"))
-
-(defn dart-tf-x-socket-close [[_ conn]]
-  (list 'throw '"Socket not implemented"))
-
+   (. (. ~conn (flush))
+      (then (fn [_]
+              (. ~conn (destroy))
+              (return nil))))))
 (def +dart-socket+
   {:x-socket-connect {:macro #'dart-tf-x-socket-connect :emit :macro}
    :x-socket-send    {:macro #'dart-tf-x-socket-send    :emit :macro}
@@ -533,10 +521,9 @@
 (defn dart-tf-x-notify-http
   [[_ host port value id key opts]]
   (template/$
-   (do (:- "import 'dart:io';")
-       (var resolved-opts (:? (xt/x:nil? ~opts) {} ~opts))
+   (do (var resolved-opts (:? (xt/x:nil? ~opts) {} ~opts))
        (var #{path} resolved-opts)
-       (var output (xt.lang.common-repl/return-encode ~value ~id ~key))
+       (var output (xt.lang.common-lib/return-encode ~value ~id ~key))
        (var endpoint (:? (xt/x:nil? path) "/" path))
        (var envelope (xt/x:cat "POST "
                                endpoint
@@ -551,15 +538,15 @@
                                "\r\n"
                                "\r\n"
                                output))
-       (return (. (Socket.connect ~host ~port)
-                  (then (fn [conn]
-                          (. conn (write envelope))
-                          (return (. (. conn (flush))
-                                     (then (fn [_]
-                                             (. conn (destroy))
-                                             (return nil)))))))
-                  (catchError (fn [e]
-                                (return ["unable to connect"]))))))))
+       (. (Socket.connect ~host ~port)
+          (then (fn [conn]
+                  (. conn (write envelope))
+                  (return (. (. conn (flush))
+                             (then (fn [_]
+                                     (. conn (destroy))
+                                     (return nil)))))))
+          (catchError (fn [e]
+                        (return ["unable to connect"])))))))
 
 (def +dart-special+
   {:x-notify-http {:macro #'dart-tf-x-notify-http :emit :macro :type :template}})
