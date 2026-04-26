@@ -473,7 +473,11 @@
   (template/$
    (. (Socket.connect ~host ~port)
       (then (fn [conn]
-              (return (~cb nil conn))))
+              (return (. (Future.sync (fn []
+                                        (return (~cb nil conn))))
+                         (whenComplete (fn []
+                                         (. conn (destroy))
+                                         (return nil)))))))
       (catchError (fn [err]
                     (return (~cb err nil)))))))
 
@@ -518,39 +522,6 @@
   {:x-uri-encode     {:macro #'dart-tf-x-uri-encode      :emit :macro}
    :x-uri-decode     {:macro #'dart-tf-x-uri-decode      :emit :macro}})
 
-(defn dart-tf-x-notify-http
-  [[_ host port value id key opts]]
-  (template/$
-   (do (var resolved-opts (:? (xt/x:nil? ~opts) {} ~opts))
-       (var #{path} resolved-opts)
-       (var output (xt.lang.common-lib/return-encode ~value ~id ~key))
-       (var endpoint (:? (xt/x:nil? path) "/" path))
-       (var envelope (xt/x:cat "POST "
-                               endpoint
-                               " HTTP/1.0\r\n"
-                               "Host: "
-                               ~host
-                               ":"
-                               (xt/x:to-string ~port)
-                               "\r\n"
-                               "Content-Length: "
-                               (xt/x:to-string (xt/x:len output))
-                               "\r\n"
-                               "\r\n"
-                               output))
-       (. (Socket.connect ~host ~port)
-          (then (fn [conn]
-                  (. conn (write envelope))
-                  (return (. (. conn (flush))
-                             (then (fn [_]
-                                     (. conn (destroy))
-                                     (return nil)))))))
-          (catchError (fn [e]
-                        (return ["unable to connect"])))))))
-
-(def +dart-special+
-  {:x-notify-http {:macro #'dart-tf-x-notify-http :emit :macro :type :template}})
-
 (defn dart-tf-x-slurp-file
   [[_ filename opts cb]]
   (list 'throw '"slurp-file not implemented in Dart"))
@@ -577,6 +548,5 @@
           +dart-socket+
           +dart-thread+
           +dart-b64+
-         +dart-uri+
-         +dart-special+
-         +dart-file+))
+          +dart-uri+
+          +dart-file+))

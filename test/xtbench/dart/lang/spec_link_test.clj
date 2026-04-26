@@ -16,8 +16,8 @@
 
 ^{:refer xt.lang.spec-link/x:socket-connect :added "4.1"}
 (fact "connects sockets and forwards the connection to callbacks"
-
-  (notify/wait-on :dart
+  
+  (notify/wait-on [:dart 2000]
     (var connect-fn
          (fn [host port opts cb]
            (return
@@ -35,6 +35,7 @@
 (fact "posts encoded values through fetch"
 
   (notify/wait-on-call
+   2000
    (fn [] (!.dt
             (var notify-fn
                  (fn [host port value id key opts]

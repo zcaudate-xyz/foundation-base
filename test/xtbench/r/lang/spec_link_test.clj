@@ -12,7 +12,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.spec-link/x:socket-connect :added "4.1"}
 (fact "connects sockets and forwards the connection to callbacks"
@@ -33,7 +33,7 @@
 
 ^{:refer xt.lang.spec-link/x:notify-http :added "4.1"}
 (fact "posts encoded values through fetch"
-
+  
   (notify/wait-on-call
    (fn [] (!.R
             (var notify-fn

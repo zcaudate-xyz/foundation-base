@@ -1,7 +1,8 @@
 (ns std.lang.model-annex.spec-r-test
   (:require [std.lang :as l]
-            [std.lang.base.book :as book]
-            [std.lang.model-annex.spec-r :refer :all])
+             [std.lang.base.book :as book]
+             [std.lang.model-annex.spec-r.rewrite :as rewrite]
+             [std.lang.model-annex.spec-r :refer :all])
   (:use code.test))
 
 (fact "Preliminary Checks"
@@ -71,7 +72,37 @@
           (runner
            (fn [value]
              (:= ok value))
-           (fn [value]
-             (stop value)))
+            (fn [value]
+              (stop value)))
           ok)
          :error (fn [err] err))))
+
+^{:refer std.lang.model-annex.spec-r.rewrite/r-rewrite-input :added "4.1"}
+(fact "rewrites set destructuring before R staging"
+  (let [out (rewrite/r-rewrite-input '(var #{path host} opts) nil)
+        [_ temp-bind & binds] out
+        [_ temp-sym temp-val] temp-bind
+        bind-set (set binds)]
+    (and (= 'do (first out))
+         (= 'var (first temp-bind))
+         (= 'opts temp-val)
+         (contains? bind-set
+                    (list 'var 'host (list 'x:get-key temp-sym "host" nil)))
+         (contains? bind-set
+                    (list 'var 'path (list 'x:get-key temp-sym "path" nil)))))
+  => true
+
+  (let [out (rewrite/r-rewrite-input '(let [#{path} opts
+                                            x 1]
+                                        path)
+                                     nil)
+        [_ bindings body] out
+        [temp-sym temp-val path-sym path-val x-sym x-val] bindings]
+    (and (= 'let (first out))
+         (= 'opts temp-val)
+         (= 'path path-sym)
+         (= (list 'x:get-key temp-sym "path" nil) path-val)
+         (= 'x x-sym)
+         (= 1 x-val)
+         (= 'path body)))
+  => true)

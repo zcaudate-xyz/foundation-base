@@ -106,13 +106,19 @@
                           ~error*
                           ~success*)
                        (catch ~err ~error*)))))
-              (let [cb (list 'fn [err res]
-                             (list 'if (list 'not= err nil)
-                                   error
-                                   success))]
-                (walk/prewalk (fn [x]
-                                (if (= x '(x:callback))
-                                  cb
+               (let [cb (list 'fn [err res]
+                              (list 'if (list 'not= err nil)
+                                    (if (and (seq? error)
+                                             (= 'return (first error)))
+                                      error
+                                      (list 'return error))
+                                    (if (and (seq? success)
+                                             (= 'return (first success)))
+                                      success
+                                      (list 'return success))))]
+                 (walk/prewalk (fn [x]
+                                 (if (= x '(x:callback))
+                                   cb
                                   x))
                               statement)))]
     (cond->> out
@@ -163,34 +169,6 @@
                               (list 'fn '[]
                                     finally))])))))
 
-(defn dart-var
-  "var -> destructuring shorthand for dart"
-  {:added "4.1"}
-  ([[_ sym & args]]
-   (let [bound (last args)
-         has-value? (pos? (count args))]
-     (cond
-       (and (vector? sym) has-value?)
-       (let [tmp (gensym "tmp_")]
-         (cons 'do*
-               (concat
-                [(list 'var* tmp := bound)]
-                (map-indexed (fn [i e]
-                               (list 'var* e := (list '. tmp [i])))
-                             sym))))
-
-       (and (set? sym) has-value?)
-       (cons 'do*
-             (map (fn [e]
-                    (list 'var* e := (list '. bound [(ut/sym-default-str e)])))
-                  sym))
-
-        has-value?
-        (list 'var* sym := bound)
-
-         :else
-         (list 'var* sym)))))
-
 (defn dart-tf-ternary
   "nil-safe ternary transform for dart-specific rewrites"
   {:added "4.1"}
@@ -210,17 +188,16 @@
         :defn        {:symbol '#{defn}}
         :new         {:symbol '#{new} :raw "new" :emit :new}
         :for-object  {:macro #'tf-for-object :emit :macro}
-         :for-array   {:macro #'tf-for-array  :emit :macro}
-         :for-iter    {:macro #'tf-for-iter   :emit :macro}
-         :for-return  {:macro #'tf-for-return :emit :macro}
-         :for-try     {:macro #'tf-for-try    :emit :macro}
-         :for-async   {:macro #'tf-for-async  :emit :macro}
-         :with-global {:value true :raw "__globals__"}})
-        (grammar/build:override fn-dart/+dart+)
-        (grammar/build:extend
-         {:var-let      {:op :var-let      :symbol #{'var}          :macro #'dart-var        :emit :macro}
-         :dart-or      {:op :dart-or      :symbol #{'dart:or}      :emit :infix             :raw "??"}
-         :dart-ternary {:op :dart-ternary :symbol #{'dart:ternary} :macro #'dart-tf-ternary :emit :macro}})))
+        :for-array   {:macro #'tf-for-array  :emit :macro}
+        :for-iter    {:macro #'tf-for-iter   :emit :macro}
+        :for-return  {:macro #'tf-for-return :emit :macro}
+        :for-try     {:macro #'tf-for-try    :emit :macro}
+        :for-async   {:macro #'tf-for-async  :emit :macro}
+        :with-global {:value true :raw "__globals__"}})
+      (grammar/build:override fn-dart/+dart+)
+      (grammar/build:extend
+         {:dart-or      {:op :dart-or      :symbol #{'dart:or}      :emit :infix             :raw "??"}
+          :dart-ternary {:op :dart-ternary :symbol #{'dart:ternary} :macro #'dart-tf-ternary :emit :macro}})))
 
 (def +template+
   (-> (emit/default-grammar)

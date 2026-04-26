@@ -323,16 +323,16 @@
                   :boolean   {:as #'r-token-boolean}
                   :string    {:quote :single}
                   :symbol    {}}
-          :rewrite {:staging [#'rewrite/r-rewrite-stage]}
-           :data   {:vector    {:custom #'r-vector
-                                :start "c(" :end ")" :space ""}
-                    :map       {:custom #'r-map
-                                :start "list(" :end ")" :space ""}
-                   :map-entry {:start ""  :end ""  :space "" :assign "=" :keyword :symbol}}
-         :define {:assign "<-"
-                  :def    {:raw ""}
+        :rewrite {:staging [#'rewrite/r-rewrite-stage]}
+        :data   {:vector    {:custom #'r-vector
+                             :start "c(" :end ")" :space ""}
+                 :map       {:custom #'r-map
+                             :start "list(" :end ")" :space ""}
+                 :map-entry {:start ""  :end ""  :space "" :assign "=" :keyword :symbol}}
+        :define {:assign "<-"
+                 :def    {:raw ""}
                  :defn   {:raw ""}}}
-        (collection/merge-nested (emit/default-grammar))))
+       (collection/merge-nested (emit/default-grammar))))
 
 (def +grammar+
   (grammar/grammar :R

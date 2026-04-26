@@ -63,7 +63,7 @@
   {:added "4.0"}
   [conn host port opts output]
   (var resolved-opts (:? (xt/x:nil? opts) {} opts))
-  (var #{path} resolved-opts)
+  (var path (xt/x:get-key resolved-opts "path"))
   (var endpoint (:? (xt/x:nil? path) "/" path))
   (var envelope (xt/x:cat "POST " endpoint " HTTP/1.0\r\n"
                        "Host: " host ":"  (xt/x:to-string port) "\r\n"
