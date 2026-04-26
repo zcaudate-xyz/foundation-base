@@ -57,26 +57,6 @@
   [temp sym]
   (list 'x:get-key temp (name sym) nil))
 
-(defn- rewrite-var-destructure
-  [form iterator]
-  (let [[_ target & args] form]
-    (when (destructure-target? target)
-      (let [value (some-> (last args) (r-rewrite-expression iterator))
-            temp  (gensym "r_destructure__")
-            binds (map (fn [sym]
-                         (list 'var sym
-                               (if value
-                                 (destructure-value temp sym)
-                                 nil)))
-                       (destructure-symbols target))]
-        (with-form-meta
-          form
-          (apply list 'do
-                 (concat (if value
-                           [(list 'var temp value)]
-                           [])
-                         binds)))))))
-
 (defn- rewrite-let-bindings
   [bindings iterator]
   (->> (partition 2 bindings)
@@ -96,10 +76,9 @@
   (cond
     (and (collection/form? form)
          (= 'var (first form)))
-    (or (rewrite-var-destructure form iterator)
-        (with-form-meta
-          form
-          (apply list (map #(r-rewrite-expression % iterator) form))))
+    (with-form-meta
+      form
+      (apply list (map #(r-rewrite-expression % iterator) form)))
 
     (and (collection/form? form)
          (#{'let 'let*} (first form)))

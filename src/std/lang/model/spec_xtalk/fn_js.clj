@@ -19,11 +19,11 @@
   (list '. f (list 'apply nil args)))
 
 (defn js-tf-x-shell
-  ([[_ s opts cb]]
-   (template/$ (do (var p (require "child_process"))
-                   (p.exec ~s ~opts (fn [err stdout stderr]
-                                      (return (~cb err stdout))))
-                   (return ["async"])))))
+   ([[_ s opts cb]]
+    (template/$ (do (var p (require "child_process"))
+                    (p.exec ~s ~opts (fn [err stdout stderr]
+                                       (return (~cb err stdout))))
+                    (return ["async"])))))
 
 (defn js-tf-x-random
   [_]
@@ -577,9 +577,12 @@
         (var path (require "path"))
         (var root (or (. process env ["PWD"])
                       (. process (cwd))))
-        (return (~cb nil
-                 (. fs (readFileSync (. path (resolve root ~filename))
-                                     "utf-8")))))))))
+        (. fs (readFile (. path (resolve root ~filename))
+                        "utf-8"
+                        (fn [err data]
+                          (return (~cb err data))))
+           )
+        (return ["async"])))))))
 
 (defn js-tf-x-spit-file
   [[_ filename s opts cb]]
@@ -589,10 +592,13 @@
         (var path (require "path"))
         (var root (or (. process env ["PWD"])
                       (. process (cwd))))
-        (. fs (writeFileSync (. path (resolve root ~filename))
-                             ~s
-                             "utf-8"))
-        (return (~cb nil ~filename)))))))
+        (. fs (writeFile (. path (resolve root ~filename))
+                         ~s
+                         "utf-8"
+                         (fn [err]
+                           (return (~cb err ~filename))))
+           )
+        (return ["async"])))))))
 
 (def +js-file+
   {:x-slurp-file     {:macro #'js-tf-x-slurp-file    :emit :macro}

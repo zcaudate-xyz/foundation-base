@@ -144,9 +144,41 @@
   "transform plain `var` declarations into assignment-friendly forms"
   {:added "4.1"}
   [[_ decl & args]]
-  (if (empty? args)
-    (list 'var* decl)
-    (list 'var* decl := (last args))))
+  (letfn [(destructure-target? [target]
+            (or (and (vector? target)
+                     (seq target)
+                     (every? symbol? target))
+                (and (set? target)
+                     (seq target)
+                     (every? symbol? target))))
+          (destructure-symbols [target]
+            (if (vector? target)
+              target
+              (sort-by name target)))
+          (destructure-value [temp target idx sym]
+            (if (vector? target)
+              (list 'x:get-idx temp (list 'x:offset idx))
+              (list 'x:get-key temp (name sym) nil)))]
+    (if-not (destructure-target? decl)
+      (if (empty? args)
+        (list 'var* decl)
+        (list 'var* decl := (last args)))
+      (let [syms  (destructure-symbols decl)
+            value (last args)]
+        (with-meta
+          (apply list 'do
+                 (concat (if (empty? args)
+                           []
+                           (let [temp (gensym "r_destructure__")]
+                             (concat [(list 'var* temp := value)]
+                                     (map-indexed (fn [idx sym]
+                                                    (list 'var* sym := (destructure-value temp decl idx sym)))
+                                                  syms))))
+                          (when (empty? args)
+                            (map (fn [sym]
+                                   (list 'var* sym))
+                                 syms))))
+          (meta decl))))))
 
 (defn tf-for-object
   "transform for `for:object`"

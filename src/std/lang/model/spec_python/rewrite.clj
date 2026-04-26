@@ -89,6 +89,65 @@
     :symbol-prefix "py_callback__"
     :lambda-compatible? python-lambda-compatible?}))
 
+(defn- with-form-meta
+  [source out]
+  (if (instance? clojure.lang.IObj out)
+    (with-meta out (meta source))
+    out))
+
+(defn- python-do-expression?
+  [form]
+  (and (collection/form? form)
+       (#{'do 'do*} (first form))))
+
+(declare python-rewrite-inline-do)
+
+(defn- python-rewrite-inline-do-list
+  [form]
+  (let [rewritten (with-form-meta form
+                    (apply list (map python-rewrite-inline-do form)))]
+    (if (and (= 'return (first rewritten))
+             (= 2 (count rewritten))
+             (python-do-expression? (second rewritten)))
+      (let [expr (second rewritten)
+            body (rest expr)]
+        (with-form-meta
+          form
+          (apply list 'do*
+                 (concat (butlast body)
+                         [(with-form-meta
+                            rewritten
+                            (list 'return (last body)))]))))
+      rewritten)))
+
+(defn- python-rewrite-inline-do
+  [form]
+  (cond
+    (and (collection/form? form)
+         (= 'quote (first form)))
+    form
+
+    (collection/form? form)
+    (python-rewrite-inline-do-list form)
+
+    (vector? form)
+    (with-form-meta form (vec (map python-rewrite-inline-do form)))
+
+    (set? form)
+    (with-form-meta form (set (map python-rewrite-inline-do form)))
+
+    (map? form)
+    (with-form-meta
+      form
+      (into (empty form)
+            (map (fn [[k v]]
+                   [(python-rewrite-inline-do k)
+                    (python-rewrite-inline-do v)]))
+            form))
+
+    :else
+    form))
+
 (def python-rewrite-expression
   (:rewrite-expression +python-rewriter+))
 
@@ -98,5 +157,7 @@
 (def python-rewrite-statements
   (:rewrite-statements +python-rewriter+))
 
-(def python-rewrite-stage
-  (:rewrite-stage +python-rewriter+))
+(defn python-rewrite-stage
+  [form opts]
+  (-> ((:rewrite-stage +python-rewriter+) form opts)
+      (python-rewrite-inline-do)))

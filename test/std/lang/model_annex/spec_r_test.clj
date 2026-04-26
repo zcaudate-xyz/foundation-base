@@ -1,5 +1,6 @@
 (ns std.lang.model-annex.spec-r-test
-  (:require [std.lang :as l]
+  (:require [clojure.walk :as walk]
+            [std.lang :as l]
              [std.lang.base.book :as book]
              [std.lang.model-annex.spec-r.rewrite :as rewrite]
              [std.lang.model-annex.spec-r :refer :all])
@@ -77,22 +78,32 @@
           ok)
          :error (fn [err] err))))
 
-^{:refer std.lang.model-annex.spec-r.rewrite/r-rewrite-input :added "4.1"}
-(fact "rewrites set destructuring before R staging"
-  (let [out (rewrite/r-rewrite-input '(var #{path host} opts) nil)
+^{:refer std.lang.model-annex.spec-r/r-tf-var :added "4.1"}
+(fact "transforms destructuring vars for R"
+  (let [out (r-tf-var '(var #{path host} opts))
         [_ temp-bind & binds] out
-        [_ temp-sym temp-val] temp-bind
+        [_ temp-sym _ temp-val] temp-bind
         bind-set (set binds)]
     (and (= 'do (first out))
-         (= 'var (first temp-bind))
+         (= 'var* (first temp-bind))
          (= 'opts temp-val)
          (contains? bind-set
-                    (list 'var 'host (list 'x:get-key temp-sym "host" nil)))
+                    (list 'var* 'host := (list 'x:get-key temp-sym "host" nil)))
          (contains? bind-set
-                    (list 'var 'path (list 'x:get-key temp-sym "path" nil)))))
+                    (list 'var* 'path := (list 'x:get-key temp-sym "path" nil)))))
   => true
 
-  (let [out (rewrite/r-rewrite-input '(let [#{path} opts
+  (let [out (r-tf-var '(var [ns name] pair))
+        [_ temp-bind ns-bind name-bind] out
+        [_ temp-sym _ temp-val] temp-bind]
+    (and (= 'do (first out))
+         (= 'var* (first temp-bind))
+         (= 'pair temp-val)
+         (= '(var* ns := (x:get-idx TEMP (x:offset 0))) (walk/postwalk-replace {temp-sym 'TEMP} ns-bind))
+         (= '(var* name := (x:get-idx TEMP (x:offset 1))) (walk/postwalk-replace {temp-sym 'TEMP} name-bind))))
+  => true
+
+  (let [out (rewrite/r-rewrite-stage '(let [#{path} opts
                                             x 1]
                                         path)
                                      nil)

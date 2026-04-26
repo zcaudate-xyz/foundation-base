@@ -213,4 +213,49 @@
          (= 'fn.inner (-> out second first))
          (= 'var (-> out (nth 2) first))
          (= 'catch (-> out last first))))
-  => true)
+   => true)
+
+^{:refer std.lang.model.spec-python/tf-for-async :added "4.1"}
+(fact "for async transform"
+
+  (let [out (py/tf-for-async '(for:async [[ok err] (call)]
+                                          {:success (return ok)
+                                           :error   (return err)
+                                           :finally (return true)}))]
+    [(= '. (first out))
+     (= 'Thread (-> out (nth 2) first))
+     (= 'fn (-> out (nth 2) (nth 2) first))
+     (= 'try (-> out (nth 2) (nth 2) (nth 2) first))])
+  => [true true true true]
+
+  (let [out (py/tf-for-async '(for:async [[ok err] (call)]
+                                          {:success (return ok)
+                                           :error   (return err)
+                                           :finally (return true)}))]
+    [(= 'start (-> out last first))])
+  => [true]
+
+  (let [out (py/tf-for-async '(for:async [[ok err] (x:return-run runner)]
+                                          {:success (return ok)
+                                           :error   (return err)
+                                           :finally (return true)}))]
+    [(= '. (first out))
+     (= 'Thread (-> out (nth 2) first))
+     (= 'fn (-> out (nth 2) (nth 2) first))
+     (= 'var (-> out (nth 2) (nth 2) (nth 2) first))
+     (= 'try (-> out (nth 2) (nth 2) last first))])
+  => [true true true true true]
+
+  (let [out (l/emit-as
+             :python
+             ['(defn OUT_FN []
+                 (return
+                  (for:async [[ok err] (x:return-run runner)]
+                    {:success (return ok)
+                     :error   (return err)
+                     :finally (return true)})))])]
+    [(boolean (re-find #"def py_callback__.*\(\):" out))
+     (boolean (re-find #"return .*Thread\(target=py_callback__" out))
+     (boolean (re-find #"\.start\(\)" out))
+     (not (boolean (re-find #"return\\s+def\\s" out)))])
+  => [true true true true])

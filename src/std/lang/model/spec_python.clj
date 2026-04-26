@@ -297,41 +297,44 @@
             on-ok (gensym "on_ok")
             on-err (gensym "on_err")
             ex (gensym "ex")
-            state (gensym "state")
-            thunk (gensym "runner")]
+            state (gensym "state")]
         (template/$
-         (do (fn ~thunk []
-               (var ~state {"res" nil
-                            "err" nil})
-               (fn ~on-ok [value]
-                 (:= (. ~state ["res"]) value)
-                 (:= (. ~state ["err"]) nil))
-               (fn ~on-err [value]
-                 (:= (. ~state ["res"]) nil)
-                 (:= (. ~state ["err"]) value))
-               (try
-                 (~runner ~on-ok ~on-err)
-                 (:= ~res (. ~state ["res"]))
-                 (:= ~err (. ~state ["err"]))
-                 (if (not= nil ~err)
-                   ~error-form
-                   ~success-form)
-                 (catch [Exception :as ~ex]
-                     (:= ~err ~ex)
-                   ~error-form)
-                 ~@(if finally
-                     [(list 'finally finally)])))
-             (x:thread-spawn ~thunk))))
+         (. (__import__ "threading")
+            (Thread :target
+                    (fn []
+                      (var ~state {"res" nil
+                                   "err" nil})
+                      (fn ~on-ok [value]
+                        (:= (. ~state ["res"]) value)
+                        (:= (. ~state ["err"]) nil))
+                      (fn ~on-err [value]
+                        (:= (. ~state ["res"]) nil)
+                        (:= (. ~state ["err"]) value))
+                      (try
+                        (~runner ~on-ok ~on-err)
+                        (:= ~res (. ~state ["res"]))
+                        (:= ~err (. ~state ["err"]))
+                        (if (not= nil ~err)
+                          ~error-form
+                          ~success-form)
+                        (catch [Exception :as ~ex]
+                            (:= ~err ~ex)
+                          ~error-form)
+                        ~@(if finally
+                            [(list 'finally finally)]))))
+            (start))))
       (template/$
-       (do (fn ~runner []
-             (try
-               (var ~res ~statement)
-               ~success-form
-               (catch [Exception :as ~err]
-                   ~error-form)
-               ~@(if finally
-                   [(list 'finally finally)])))
-            (x:thread-spawn ~runner))))))
+       (. (__import__ "threading")
+          (Thread :target
+                  (fn []
+                    (try
+                      (var ~res ~statement)
+                      ~success-form
+                      (catch [Exception :as ~err]
+                          ~error-form)
+                      ~@(if finally
+                          [(list 'finally finally)]))))
+          (start))))))
 
 (def +features+
   (-> (grammar/build :exclude [:pointer
@@ -354,7 +357,7 @@
         :for-iter    {:macro #'tf-for-iter   :emit :macro}
         :for-index   {:macro #'tf-for-index  :emit :macro}
         :for-try     {:macro #'tf-for-try    :emit :macro}
-        :for-async   {:macro #'tf-for-async  :emit :macro}
+        :for-async   {:macro #'tf-for-async  :emit :macro :type :template}
         :for-return  {:macro #'tf-for-return :emit :macro}})
       (grammar/build:override fn/+python+)
       (grammar/build:extend
