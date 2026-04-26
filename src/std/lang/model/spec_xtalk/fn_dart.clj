@@ -493,17 +493,17 @@
    :x-socket-send    {:macro #'dart-tf-x-socket-send    :emit :macro}
    :x-socket-close   {:macro #'dart-tf-x-socket-close   :emit :macro}})
 
-(defn dart-tf-x-slurp-file
+(defn dart-tf-x-file-slurp
   [[_ filename opts cb]]
-  (list 'throw '"slurp-file not implemented in Dart"))
+  (list 'throw '"file-slurp not implemented in Dart"))
 
-(defn dart-tf-x-spit-file
+(defn dart-tf-x-file-spit
   [[_ filename s opts cb]]
-  (list 'throw '"spit-file not implemented in Dart"))
+  (list 'throw '"file-spit not implemented in Dart"))
 
 (def +dart-file+
-  {:x-slurp-file     {:macro #'dart-tf-x-slurp-file      :emit :macro}
-   :x-spit-file      {:macro #'dart-tf-x-spit-file       :emit :macro}})
+  {:x-file-slurp     {:macro #'dart-tf-x-file-slurp      :emit :macro}
+   :x-file-spit      {:macro #'dart-tf-x-file-spit       :emit :macro}})
 
 
 (defn dart-tf-x-shell

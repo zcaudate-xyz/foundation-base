@@ -345,8 +345,8 @@
       :emit-types {:x-socket-connect :macro :x-socket-send :macro :x-socket-close :macro}}
      
      :io
-     {:primitives [:x-slurp-file :x-spit-file]
-      :emit-types {:x-slurp-file :macro :x-spit-file :macro}}}}
+     {:primitives [:x-file-slurp :x-file-spit]
+      :emit-types {:x-file-slurp :macro :x-file-spit :macro}}}}
    
    ;; =========================================================
    ;; LANGUAGE-SPECIFIC SPECS

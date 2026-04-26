@@ -529,20 +529,20 @@
   (l/emit-as :js [(js-tf-x-cache-incr '[_ cache key 1])])
   => #"getItem")
 
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-slurp-file :added "4.1"}
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-file-slurp :added "4.1"}
 (fact "slurp file"
-  (l/emit-as :js [(js-tf-x-slurp-file '[_ filename opts cb])])
+  (l/emit-as :js [(js-tf-x-file-slurp '[_ filename opts cb])])
   => #"readFile"
 
-  (l/emit-as :js [(js-tf-x-slurp-file '[_ filename opts cb])])
+  (l/emit-as :js [(js-tf-x-file-slurp '[_ filename opts cb])])
   => #"\[\"async\"\]")
 
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-spit-file :added "4.1"}
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-file-spit :added "4.1"}
 (fact "spit file"
-  (l/emit-as :js [(js-tf-x-spit-file '[_ filename s opts cb])])
+  (l/emit-as :js [(js-tf-x-file-spit '[_ filename s opts cb])])
   => #"writeFile"
 
-  (l/emit-as :js [(js-tf-x-spit-file '[_ filename s opts cb])])
+  (l/emit-as :js [(js-tf-x-file-spit '[_ filename s opts cb])])
   => #"\[\"async\"\]")
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-thread-spawn :added "4.0"}

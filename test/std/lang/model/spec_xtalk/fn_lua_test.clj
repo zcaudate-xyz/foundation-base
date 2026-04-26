@@ -252,8 +252,12 @@
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-socket-connect :added "4.0"}
 (fact "socket connect"
-  (l/emit-as :lua [(lua-tf-x-socket-connect '[_ host port opts])])
-  => #"socket")
+  (let [out (l/emit-as :lua [(lua-tf-x-socket-connect '[_ host port opts cb])])]
+    [(boolean (re-find #"require\(\"socket\"\)" out))
+     (boolean (re-find #"socket\.connect\(host,\s*port\)" out))
+     (boolean (re-find #"return cb\(err,\s*nil\)" out))
+     (boolean (re-find #"return cb\(nil,\s*conn\)" out))])
+  => [true true true true])
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-socket-send :added "4.0"}
 (fact "socket send"
@@ -304,6 +308,15 @@
 (fact "cache"
   (l/emit-as :lua.nginx [(nginx/lua-tf-x-cache '[_ key])])
   => #"ngx.shared")
+
+^{:refer std.lang.model.spec-lua.variant-nginx/lua-tf-x-socket-connect :added "4.1"}
+(fact "nginx socket connect"
+  (let [out (l/emit-as :lua.nginx [(nginx/lua-tf-x-socket-connect '[_ host port opts cb])])]
+    [(boolean (re-find #"ngx\.socket\.tcp\(\)" out))
+     (boolean (re-find #"conn:connect\(host,\s*port\)" out))
+     (boolean (re-find #"return cb\(err,\s*nil\)" out))
+     (boolean (re-find #"return cb\(nil,\s*conn\)" out))])
+  => [true true true true])
 
 ^{:refer std.lang.model.spec-lua.variant-nginx/lua-tf-x-cache-list :added "4.0"}
 (fact "cache list"
@@ -359,15 +372,23 @@
   (l/emit-as :lua.nginx [(nginx/lua-tf-x-with-delay '[_ thunk ms])])
   => #"ngx.thread.spawn")
 
-^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-slurp-file :added "4.1"}
+^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-file-slurp :added "4.1"}
 (fact "slurp file"
-  (comment (l/emit-as :lua [(lua-tf-x-slurp-file '[_ filename opts cb])])
-            => nil?))
+  (let [out (l/emit-as :lua [(lua-tf-x-file-slurp '[_ filename opts cb])])]
+    [(boolean (re-find #"os\.getenv\('PWD'\)" out))
+     (boolean (re-find #"io\.open\(resolved,\s*'r'\)" out))
+     (boolean (re-find #"return cb\(err,\s*nil\)" out))
+     (boolean (re-find #"return cb\(nil,\s*res\)" out))])
+  => [true true true true])
 
-^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-spit-file :added "4.1"}
+^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-file-spit :added "4.1"}
 (fact "spit file"
-  (comment (l/emit-as :lua [(lua-tf-x-spit-file '[_ filename s opts cb])])
-            => nil?))
+  (let [out (l/emit-as :lua [(lua-tf-x-file-spit '[_ filename s opts cb])])]
+    [(boolean (re-find #"os\.getenv\('PWD'\)" out))
+     (boolean (re-find #"io\.open\(resolved,\s*'w'\)" out))
+     (boolean (re-find #"return cb\(err,\s*nil\)" out))
+     (boolean (re-find #"return cb\(nil,\s*filename\)" out))])
+  => [true true true true])
 
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-has-key? :added "4.1"}

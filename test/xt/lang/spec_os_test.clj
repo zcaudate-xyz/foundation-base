@@ -27,105 +27,158 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.lang.spec-os/x:slurp-file :added "4.1"}
+^{:refer xt.lang.spec-os/x:pwd :added "4.1"}
+(fact "gets the current pwd"
+  
+  (!.js
+    (spec-os/x:pwd))
+  => string?
+
+  (!.lua
+    (spec-os/x:pwd))
+  => string?
+
+  (!.py
+    (spec-os/x:pwd))
+  => string?)
+
+^{:refer xt.lang.spec-os/x:shell :added "4.1"}
+(fact "supports transitional shell callback arglists"
+
+  (l/with:print-all
+    (notify/wait-on :js
+      (var shell-fn
+           (fn [command opts cb]
+             (return
+              (spec-os/x:shell command opts cb))))
+      (shell-fn "printf hello"
+                {:root (spec-os/x:os-pwd)}
+                (fn [err out]
+                  (repl/notify out)))))
+  => string?
+
+  (l/with:print-all
+    (notify/wait-on :lua
+      (var shell-fn
+           (fn [command opts cb]
+             (return
+              (spec-os/x:shell command opts cb))))
+      (shell-fn "printf hello"
+                {:root (spec-os/x:os-pwd)}
+                (fn [err out]
+                  (repl/notify out)))))
+  => string?
+
+  (l/with:print-all
+    (notify/wait-on :python
+      (var shell-fn
+           (fn [command opts cb]
+             (return
+              (spec-os/x:shell command opts cb))))
+      (shell-fn "printf hello"
+                {:root (spec-os/x:os-pwd)}
+                (fn [err out]
+                  (repl/notify out)))))
+  => string?)
+
+^{:refer xt.lang.spec-os/x:file-slurp :added "4.1"}
 (fact "reads file content through callbacks"
 
-  (notify/wait-on :js
-    (var slurp-fn
-         (fn [path opts cb]
-           (return
-            (spec-os/x:slurp-file path opts cb))))
-    (xt/for:return [[out err] (slurp-fn "project.clj"
-                                        {}
-                                        (xt/x:callback))]
-      {:success (repl/notify out)})
-    (return true))
+  (l/with:print-all
+    (notify/wait-on :js
+      (var slurp-fn
+           (fn [path opts cb]
+             (return
+              (spec-os/x:file-slurp path opts cb))))
+      (slurp-fn (xt/x:cat (spec-os/x:os-pwd) "/" "project.clj")
+                {}
+                (fn [err out]
+                  (repl/notify out)))))
   => string?
 
-  
-  (notify/wait-on :python
-    (var slurp-fn
-         (fn [path opts cb]
-           (return
-            (spec-os/x:slurp-file path opts cb))))
-    (xt/for:return [[out err] (slurp-fn "project.clj"
-                                        {}
-                                        (xt/x:callback))]
-      {:success (repl/notify out)})
-    (return true))
+  (l/with:print-all
+    (notify/wait-on :lua
+      (var slurp-fn
+           (fn [path opts cb]
+             (return
+              (spec-os/x:file-slurp path opts cb))))
+      (slurp-fn (xt/x:cat (spec-os/x:os-pwd) "/" "project.clj")
+                {}
+                (fn [err out]
+                  (repl/notify out)))))
   => string?
-  
-  (notify/wait-on :lua
-    (var slurp-fn
-         (fn [path opts cb]
-           (return
-            (spec-os/x:slurp-file path opts cb))))
-    (xt/for:return [[out err] (slurp-fn "project.clj"
-                                        {}
-                                        (xt/x:callback))]
-      {:success (repl/notify out)})
-    (return true))
-  )
 
-^{:refer xt.lang.spec-os/x:spit-file :added "4.1"}
+  (l/with:print-all
+    (notify/wait-on :python
+      (var slurp-fn
+           (fn [path opts cb]
+             (return
+              (spec-os/x:file-slurp path opts cb))))
+      (slurp-fn "project.clj"
+                {}
+                (fn [err out]
+                  (repl/notify out)))))
+  => string?)
+
+^{:refer xt.lang.spec-os/x:file-spit :added "4.1"}
 (fact "writes file content through callbacks"
   
   (notify/wait-on :js
     (var spit-fn
          (fn [path content opts cb]
            (return
-            (spec-os/x:spit-file path content opts cb))))
+            (spec-os/x:file-spit path content opts cb))))
     (var slurp-fn
          (fn [path opts cb]
            (return
-            (spec-os/x:slurp-file path opts cb))))
-    (xt/for:return [[out err] (spit-fn "test-scratch/out.tmp"
-                                       "hello world"
-                                       {}
-                                       (xt/x:callback))]
-      {:success (do (xt/for:return [[out err] (slurp-fn "test-scratch/out.tmp"
-                                                        {}
-                                                        (xt/x:callback))]
-                      {:success (repl/notify out)}))})
-    (return true))
-  => "hello world")
-
-^{:refer xt.lang.spec-os/x:shell :added "4.1"}
-(fact "supports transitional shell callback arglists"
-
-
-  (notify/wait-on :js
-    (var shell-fn
-         (fn [command opts cb]
-           (return
-            (spec-os/x:shell path opts cb))))
-    (xt/for:return [[out err] (shell-fn "printf hello"
-                                        {}
-                                        (xt/x:callback))]
-      {:success (repl/notify out)})
-    (return true))
-  => string?)
-
-^{:refer xt.lang.spec-os/x:with-delay :added "4.1"}
-(fact "delays asynchronous js computations"
-
-  (notify/wait-on :js
-    (spec-os/x:with-delay 20
-                          (fn []
-                            (repl/notify "OK"))))
-  => "LATER"
-  
-  (notify/wait-on :python
-    (spec-os/x:with-delay 20
-                          (fn []
-                            (repl/notify "OK"))))
-  => "LATER"
+            (spec-os/x:file-slurp path opts cb))))
+    (spit-fn (xt/x:cat (spec-os/x:os-pwd) "/" "test-scratch/out.tmp")
+             "hello world"
+             {}
+             (fn [err out]
+                (slurp-fn (xt/x:cat (spec-os/x:os-pwd) "/" "test-scratch/out.tmp")
+                          {}
+                          (fn [err out]
+                            (repl/notify out))))))
+  => "hello world"
 
   (notify/wait-on :lua
-    (spec-os/x:with-delay 20
-                          (fn []
-                            (repl/notify "OK"))))
-  => "LATER")
+    (var spit-fn
+         (fn [path content opts cb]
+           (return
+            (spec-os/x:file-spit path content opts cb))))
+    (var slurp-fn
+         (fn [path opts cb]
+           (return
+            (spec-os/x:file-slurp path opts cb))))
+    (spit-fn (xt/x:cat (spec-os/x:os-pwd) "/" "test-scratch/out.tmp")
+             "hello world"
+             {}
+             (fn [err out]
+                (slurp-fn (xt/x:cat (spec-os/x:os-pwd) "/" "test-scratch/out.tmp")
+                          {}
+                          (fn [err out]
+                            (repl/notify out))))))
+  => "hello world"
+
+  (notify/wait-on :python
+    (var spit-fn
+         (fn [path content opts cb]
+           (return
+            (spec-os/x:file-spit path content opts cb))))
+    (var slurp-fn
+         (fn [path opts cb]
+           (return
+            (spec-os/x:file-slurp path opts cb))))
+    (spit-fn (xt/x:cat (spec-os/x:os-pwd) "/" "test-scratch/out.tmp")
+             "hello world"
+             {}
+             (fn [err out]
+                (slurp-fn (xt/x:cat (spec-os/x:os-pwd) "/" "test-scratch/out.tmp")
+                          {}
+                          (fn [err out]
+                            (repl/notify out))))))
+  => "hello world")
 
 (comment
   

@@ -17,6 +17,12 @@
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]]})
 
+(l/script- :python
+  {:runtime :basic
+   :require [[xt.lang.spec-link :as spec-link]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-repl :as repl]]})
+
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
@@ -29,14 +35,12 @@
          (fn [host port opts cb]
            (return
             (spec-link/x:socket-connect host port opts cb))))
-    (xt/for:return [[conn err] (connect-fn  "127.0.0.1"
-                                            (@! (:socket-port (l/default-notify)))
-                                            {}
-                                            (xt/x:callback))]
-      {:success (do (spec-link/x:socket-close conn)
-                    (repl/notify "OK"))
-       :error   (repl/notify "ERR")})
-    (return true))
+    (connect-fn  "127.0.0.1"
+                 (@! (:socket-port (l/default-notify)))
+                 {}
+                 (fn [err conn]
+                   (do (repl/notify "OK")
+                       (spec-link/x:socket-close conn)))))
   => "OK"
 
   (notify/wait-on :lua
@@ -44,14 +48,25 @@
          (fn [host port opts cb]
            (return
             (spec-link/x:socket-connect host port opts cb))))
-    (xt/for:return [[conn err] (connect-fn  "127.0.0.1"
-                                            (@! (:socket-port (l/default-notify)))
-                                            {}
-                                            (xt/x:callback))]
-      {:success (do (spec-link/x:socket-close conn)
-                    (repl/notify "OK"))
-       :error   (repl/notify "ERR")})
-    (return true))
+    (connect-fn  "127.0.0.1"
+                 (@! (:socket-port (l/default-notify)))
+                 {}
+                 (fn [err conn]
+                   (do (repl/notify "OK")
+                       (spec-link/x:socket-close conn)))))
+  => "OK"
+
+  (notify/wait-on :python
+    (var connect-fn
+         (fn [host port opts cb]
+           (return
+            (spec-link/x:socket-connect host port opts cb))))
+    (connect-fn  "127.0.0.1"
+                 (@! (:socket-port (l/default-notify)))
+                 {}
+                 (fn [err conn]
+                   (do (repl/notify "OK")
+                       (spec-link/x:socket-close conn)))))
   => "OK")
 
 ^{:refer xt.lang.spec-link/x:socket-send :added "4.1"}
@@ -87,6 +102,19 @@
                        (@! notify/*override-id*)
                        nil
                        {}))))
+  => "hello"
+
+  (notify/wait-on-call
+   (fn [] (!.py
+            (var notify-fn
+                 (fn [host port value id key opts]
+                   (return
+                    (spec-link/x:notify-http host port value id key opts))))
+            (notify-fn "127.0.0.1" (@! (:http-port (l/default-notify)))
+                       "hello"
+                       (@! notify/*override-id*)
+                       nil
+                       {}))))
   => "hello")
 
 (comment
@@ -96,4 +124,6 @@
   (s/seedgen-benchadd '[xt.lang.spec-link] {:lang [:r] :write true})
   
   (s/seedgen-langadd 'xt.lang.spec-link {:lang [:lua] :write true})
+
+  (s/seedgen-langadd 'xt.lang.spec-link {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.lang.spec-link {:lang [:lua :python] :write true}))

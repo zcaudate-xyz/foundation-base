@@ -17,8 +17,8 @@
                  ~@(if finally [finally])))))
 
 (defn lua-tf-x-socket-connect
-  [[_ host port opts]]
-  (template/$ (do* (local '[conn err])
+  [[_ host port opts cb]]
+  (template/$ (do* (local '[conn res err])
                    (when (== ~host "host.docker.internal")
                      (local handle (io.popen
                                     (cat "ping host.docker.internal -c 1 -q 2>&1"
@@ -29,7 +29,9 @@
                      (handle:close))
                    (:= conn (ngx.socket.tcp))
                    (:= '[res err] (conn:connect ~host ~port))
-                   (return conn err))))
+                   (if err
+                     (return (~cb err nil))
+                     (return (~cb nil conn))))))
 
 (defn lua-tf-x-with-delay
   [[_ thunk ms]]

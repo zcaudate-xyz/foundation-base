@@ -350,19 +350,19 @@
 ;; FILE
 ;;
 
-(defn ruby-tf-x-slurp-file
+(defn ruby-tf-x-file-slurp
   [[_ path opts cb]]
   (list '. cb (list 'call nil (list '. 'File (list 'read path)))))
 
-(defn ruby-tf-x-spit-file
+(defn ruby-tf-x-file-spit
   [[_ path content opts cb]]
   (list 'do
         (list '. 'File (list 'write path content))
         (list '. cb (list 'call nil path))))
 
 (def +ruby-file+
-  {:x-slurp-file      {:macro #'ruby-tf-x-slurp-file     :emit :macro}
-   :x-spit-file       {:macro #'ruby-tf-x-spit-file      :emit :macro}})
+  {:x-file-slurp      {:macro #'ruby-tf-x-file-slurp     :emit :macro}
+   :x-file-spit       {:macro #'ruby-tf-x-file-spit      :emit :macro}})
 
 ;;
 ;; THREAD

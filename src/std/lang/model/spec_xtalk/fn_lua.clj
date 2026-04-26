@@ -447,7 +447,7 @@
    :x-return-eval    {:macro #'lua-tf-x-return-eval     :emit :macro}})
 
 (defn lua-tf-x-socket-connect
-  ([[_ host port opts]]
+  ([[_ host port opts cb]]
    (template/$
     (do* (when (== ~host "host.docker.internal")
            (var handle (io.popen
@@ -458,7 +458,10 @@
            (:= ~host (string.sub ~host 1 (- (len ~host) 1)))
            (handle:close))
          (var socket (require "socket"))
-         (return (socket.connect ~host ~port))))))
+         (var '[conn err] (socket.connect ~host ~port))
+         (if err
+           (return (~cb err nil))
+           (return (~cb nil conn)))))))
 
 (defn lua-tf-x-socket-send
   ([[_ conn s]]
@@ -544,26 +547,44 @@
 ;; FILE
 ;;
 
-(defn lua-tf-x-slurp-file
+(defn lua-tf-x-file-slurp
   ([[_ filename opts cb]]
    (template/$
-    (do* (var handle (io.open ~filename "r"))
-         (var res (handle:read "*a"))
-         (handle:close)
-         (return (~cb nil res))))))
+    (do* (var root (os.getenv "PWD"))
+         (var resolved ~filename)
+         (when (and root
+                    (not= "/" (string.sub resolved 1 1)))
+           (:= resolved (cat root "/" resolved)))
+         (var '[handle err] (io.open resolved "r"))
+         (if err
+           (return (~cb err nil))
+           (do* (var '[res read-err] (handle:read "*a"))
+                (handle:close)
+                (if read-err
+                  (return (~cb read-err nil))
+                  (return (~cb nil res)))))))))
 
-(defn lua-tf-x-spit-file
+(defn lua-tf-x-file-spit
   ([[_ filename s opts cb]]
    (template/$
-    (do* (var handle (io.open ~filename "w"))
-         (handle:write ~s)
-         (handle:close)
-         (return (~cb nil ~filename))))))
+    (do* (var root (os.getenv "PWD"))
+         (var resolved ~filename)
+         (when (and root
+                    (not= "/" (string.sub resolved 1 1)))
+           (:= resolved (cat root "/" resolved)))
+         (var '[handle err] (io.open resolved "w"))
+         (if err
+           (return (~cb err nil))
+           (do* (var '[out write-err] (handle:write ~s))
+                (handle:close)
+                (if write-err
+                  (return (~cb write-err nil))
+                  (return (~cb nil ~filename)))))))))
 
 (def +lua-file+
-  {:x-slurp-file     {:macro #'lua-tf-x-slurp-file    :emit :macro
+  {:x-file-slurp     {:macro #'lua-tf-x-file-slurp    :emit :macro
                       :op-spec {:allow-blocks true}}
-   :x-spit-file      {:macro #'lua-tf-x-spit-file     :emit :macro
+   :x-file-spit      {:macro #'lua-tf-x-file-spit     :emit :macro
                       :op-spec {:allow-blocks true}}})
 
 (def +lua+

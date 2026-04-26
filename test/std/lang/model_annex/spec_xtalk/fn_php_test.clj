@@ -439,11 +439,11 @@
              :x-prototype-tostring
              :x-server-basic
              :x-server-ws
-             :x-slurp-file
+             :x-file-slurp
              :x-socket-close
              :x-socket-connect
              :x-socket-send
-             :x-spit-file
+             :x-file-spit
              :x-start-interval
              :x-stop-interval
              :x-str-format

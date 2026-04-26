@@ -919,14 +919,25 @@
               :type [:fn [[:xt/fn] :xt/num] :xt/any]}}])
 
 (def +xt-runtime-shell+
-  [{:op :x-shell          :symbol #{'x:shell}           :emit :abstract
-    :op-spec {:type [:fn [:xt/str :xt/any :xt/any] :xt/any]
+  [{:op :x-pwd           :symbol #{'x:pwd}              :emit :abstract
+    :op-spec {:type [:fn [] :xt/str]
+              :arglists '([])}}
+   {:op :x-shell          :symbol #{'x:shell}           :emit :abstract
+    :op-spec {:type [:fn [:xt/str :xt/obj [:xt/fn [:xt/any :xt/any] :xt/any]]]
               :arglists '([command opts cb])}}])
 
 (def +xt-runtime-file+
-  [{:op :x-slurp-file     :symbol #{'x:slurp-file}    :emit :abstract
+  [{:op :x-file-resolve   :symbol #{'x:file-resolve}     :emit :abstract
+    :op-spec {:type [:fn [:xt/str :xt/str] :xt/str]
+              :arglists '([root path])}}
+   {:op :x-file-slurp     :symbol #{'x:file-slurp}    :emit :abstract
     :op-spec {:arglists '([path opts cb])
-              :type [:fn [:xt/str :xt/any :xt/any] :xt/any]}}
-   {:op :x-spit-file      :symbol #{'x:spit-file}     :emit :abstract
+              :type [:fn [:xt/str :xt/obj [:xt/fn [:xt/any :xt/any] :xt/any]]]}}
+   {:op :x-file-spit      :symbol #{'x:file-spit}     :emit :abstract
     :op-spec {:arglists '([path value opts cb])
-              :type [:fn [:xt/str :xt/any :xt/any :xt/any] :xt/any]}}])
+              :type [:fn [:xt/str :xt/str :xt/obj [:xt/fn [:xt/any :xt/any] :xt/any]]]}}])
+
+;;
+;; I've created additional x-pwd and x-file-resolve ops
+;;
+

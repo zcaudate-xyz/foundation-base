@@ -556,13 +556,13 @@
 (defn python-tf-x-socket-connect
   ([[_ host port opts cb]]
    (template/$
-    (do (:- :import socket)
-        (try
-          (var conn (socket.socket))
-          (conn.connect '(~host ~port))
-          (return (~cb nil conn))
-          (catch [Exception :as e]
-            (return (~cb e nil))))))))
+     (do (:- :import socket)
+         (try
+           (var conn (socket.socket))
+           (conn.connect '(~host ~port))
+           (catch [Exception :as e]
+             (return (~cb e nil))))
+         (return (~cb nil conn))))))
 
 (defn python-tf-x-socket-send
   ([[_ conn s]]
@@ -714,26 +714,38 @@
 ;; FILE
 ;;
 
-(defn python-tf-x-slurp-file
+(defn python-tf-x-file-slurp
   ([[_ filename opts cb]]
    (template/$
-    (do (var f (open ~filename "r"))
+    (do (var os (__import__ "os"))
+        (var root (or (. (. os environ) (get "PWD"))
+                      (. os (getcwd))))
+        (var resolved (. (. os path)
+                         (abspath (. (. os path)
+                                     (join root ~filename)))))
+        (var f (open resolved "r"))
         (var res (. f (read)))
         (. f (close))
         (return (~cb nil res))))))
 
-(defn python-tf-x-spit-file
+(defn python-tf-x-file-spit
   ([[_ filename s opts cb]]
    (template/$
-    (do (var f (open ~filename "w"))
+    (do (var os (__import__ "os"))
+        (var root (or (. (. os environ) (get "PWD"))
+                      (. os (getcwd))))
+        (var resolved (. (. os path)
+                         (abspath (. (. os path)
+                                     (join root ~filename)))))
+        (var f (open resolved "w"))
         (. f (write ~s))
         (. f (close))
         (return (~cb nil ~filename))))))
 
 (def +python-file+
-  {:x-slurp-file     {:macro #'python-tf-x-slurp-file    :emit :macro
+  {:x-file-slurp     {:macro #'python-tf-x-file-slurp    :emit :macro
                       :op-spec {:allow-blocks true}}
-   :x-spit-file      {:macro #'python-tf-x-spit-file     :emit :macro
+   :x-file-spit      {:macro #'python-tf-x-file-spit     :emit :macro
                       :op-spec {:allow-blocks true}}})
 
 (def +python+

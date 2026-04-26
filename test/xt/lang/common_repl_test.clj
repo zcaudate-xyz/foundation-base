@@ -8,17 +8,23 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-repl :as repl]
-             [xt.lang.common-lib :as xtl]]})
+             [xt.lang.common-lib :as xtl]
+             [xt.lang.spec-link :as spec-link]
+             [xt.lang.spec-base :as xt]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.common-repl :as repl]
-             [xt.lang.common-lib :as xtl]]})
+             [xt.lang.common-lib :as xtl]
+             [xt.lang.spec-link :as spec-link]
+             [xt.lang.spec-base :as xt]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.lang.common-repl :as repl]
-             [xt.lang.common-lib :as xtl]]})
+             [xt.lang.common-lib :as xtl]
+             [xt.lang.spec-link :as spec-link]
+             [xt.lang.spec-base :as xt]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -36,7 +42,8 @@
      "127.0.0.1"
      (@! (:socket-port (l/default-notify)))
      {:success (fn [conn]
-                 (repl/notify "OK"))}))
+                  (do (spec-link/x:socket-close conn)
+                      (repl/notify "OK")))}))
   => "OK"
 
   (notify/wait-on :lua
@@ -44,7 +51,8 @@
      "127.0.0.1"
      (@! (:socket-port (l/default-notify)))
      {:success (fn [conn]
-                 (repl/notify "OK"))}))
+                  (do (spec-link/x:socket-close conn)
+                      (repl/notify "OK")))}))
   => "OK"
 
   (notify/wait-on :python
@@ -52,7 +60,8 @@
      "127.0.0.1"
      (@! (:socket-port (l/default-notify)))
      {:success (fn [conn]
-                 (repl/notify "OK"))}))
+                 (do (spec-link/x:socket-close conn)
+                     (repl/notify "OK")))}))
   => "OK")
 
 ^{:refer xt.lang.common-repl/notify-socket-handler :added "4.0"}
@@ -237,7 +246,7 @@
     ((. (repl/<!)
        ["success"]) 1))
   => 1
-
+  
   (notify/wait-on :python
     ((. (repl/<!)
        ["success"]) 1))

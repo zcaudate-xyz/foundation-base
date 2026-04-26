@@ -3,23 +3,23 @@
 
 (l/script :xtalk)
 
-(defspec.xt x:slurp-file [:fn [:xt/str :xt/any :xt/any] :xt/any])
+(defspec.xt x:pwd [:fn [] :xt/str])
 
 (defmacro.xt ^{:standalone true}
-  x:slurp-file
+  x:pwd
   "reads file content through a callback-based runtime contract"
   {:added "4.1"}
-  ([path opts cb] (list (quote x:slurp-file) path opts cb)))
+  ([] (list (quote x:pwd))))
 
-(defspec.xt x:spit-file [:fn [:xt/str :xt/any :xt/any :xt/any] :xt/any])
+(defspec.xt x:file-resolve [:fn [] :xt/str])
 
 (defmacro.xt ^{:standalone true}
-  x:spit-file
-  "writes file content through a callback-based runtime contract"
+  x:pwd
+  "reads file content through a callback-based runtime contract"
   {:added "4.1"}
-  ([path value opts cb] (list (quote x:spit-file) path value opts cb)))
+  ([] (list (quote x:pwd))))
 
-(defspec.xt x:shell [:fn [:xt/str :xt/any :xt/any] :xt/any])
+(defspec.xt x:shell [:fn [:xt/str :xt/obj [:xt/fn [:xt/any :xt/any] :xt/any]] :xt/any])
 
 (defmacro.xt ^{:standalone true} 
   x:shell
@@ -27,10 +27,27 @@
   {:added "4.1"}
   ([command opts cb] (list (quote x:shell) command opts cb)))
 
-(defspec.xt x:with-delay [:fn [:xt/int :xt/any] :xt/any])
+(defspec.xt x:file-resolve [:fn [:xt/str :xt/obj [:xt/fn [:xt/any :xt/any] :xt/any]]])
 
-(defmacro.xt ^{:standalone true} 
-  x:with-delay
-  "delays asynchronous js computations"
+(defmacro.xt ^{:standalone true}
+  x:file-resolve
+  "reads file content through a callback-based runtime contract"
   {:added "4.1"}
-  ([ms value cb] (list (quote x:with-delay) ms value cb)))
+  ([root path] (list (quote x:file-resolve) root path)))
+
+(defspec.xt x:file-slurp [:fn [:xt/str :xt/obj [:xt/fn [:xt/any :xt/any] :xt/any]]])
+
+(defmacro.xt ^{:standalone true}
+  x:file-slurp
+  "reads file content through a callback-based runtime contract"
+  {:added "4.1"}
+  ([path opts cb] (list (quote x:file-slurp) path opts cb)))
+
+
+(defspec.xt x:file-spit [:fn [:xt/str :xt/str :xt/obj [:xt/fn [:xt/any :xt/any] :xt/any]]])
+
+(defmacro.xt ^{:standalone true}
+  x:file-spit
+  "writes file content through a callback-based runtime contract"
+  {:added "4.1"}
+  ([path value opts cb] (list (quote x:file-spit) path value opts cb)))

@@ -28,13 +28,16 @@
   [host port opts]
   (var success-fn (xt-lib/wrap-callback opts "success"))
   (var error-fn   (xt-lib/wrap-callback opts "error"))
-  (xt/for:return [[conn err] (-/socket-connect-base  host
-                                                     port
-                                                     opts
-                                                     (xt/x:callback))]
-    {:success (return (success-fn conn))
-     :error   (return (error-fn err))
-     :final   true}))
+  (var callback-fn
+       (fn [err out]
+         (if err
+           (return (error-fn err))
+           (return (success-fn out)))))
+  (return
+   (-/socket-connect-base  host
+                           port
+                           opts
+                           callback-fn)))
 
 ;;
 ;; NOTIFY

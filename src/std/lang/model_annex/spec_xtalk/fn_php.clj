@@ -406,19 +406,19 @@
 ;; FILE
 ;;
 
-(defn php-tf-x-slurp-file
+(defn php-tf-x-file-slurp
   [[_ path opts cb]]
   (list 'call_user_func_array cb [nil (list 'file_get_contents path)]))
 
-(defn php-tf-x-spit-file
+(defn php-tf-x-file-spit
   [[_ path content opts cb]]
   (list 'do
         (list 'file_put_contents path content)
         (list 'call_user_func_array cb [nil path])))
 
 (def +php-file+
-  {:x-slurp-file     {:macro #'php-tf-x-slurp-file       :emit :macro}
-   :x-spit-file      {:macro #'php-tf-x-spit-file        :emit :macro}})
+  {:x-file-slurp     {:macro #'php-tf-x-file-slurp       :emit :macro}
+   :x-file-spit      {:macro #'php-tf-x-file-spit        :emit :macro}})
 
 ;;
 ;; RETURN

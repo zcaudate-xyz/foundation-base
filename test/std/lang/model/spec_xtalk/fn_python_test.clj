@@ -393,9 +393,9 @@
   (let [out (l/emit-as :python [(python-tf-x-socket-connect '[_ host port opts cb])])]
     [(boolean (re-find #"conn = socket\.socket\(\)" out))
      (boolean (re-find #"conn\.connect\(\(host,port\)\)" out))
-     (boolean (re-find #"return cb\(None,conn\)" out))
      (boolean (re-find #"except Exception as e:" out))
-     (boolean (re-find #"return cb\(e,None\)" out))])
+     (boolean (re-find #"return cb\(e,None\)" out))
+     (boolean (re-find #"(?s)conn\.connect\(\(host,port\)\)\s+except Exception as e:\s+return cb\(e,None\)\s+return cb\(None,conn\)" out))])
   => [true true true true true])
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-socket-send :added "4.0"}
@@ -463,14 +463,14 @@
   (l/emit-as :python [(python-tf-x-with-delay '[_ thunk ms])])
   => #"sleep")
 
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-slurp-file :added "4.1"}
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-file-slurp :added "4.1"}
 (fact "slurp file"
-  (comment (l/emit-as :python [(python-tf-x-slurp-file '[_ filename opts cb])])
+  (comment (l/emit-as :python [(python-tf-x-file-slurp '[_ filename opts cb])])
             => nil?))
 
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-spit-file :added "4.1"}
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-file-spit :added "4.1"}
 (fact "spit file"
-  (comment (l/emit-as :python [(python-tf-x-spit-file '[_ filename s opts cb])])
+  (comment (l/emit-as :python [(python-tf-x-file-spit '[_ filename s opts cb])])
             => nil?))
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-b64-encode :added "4.0"}

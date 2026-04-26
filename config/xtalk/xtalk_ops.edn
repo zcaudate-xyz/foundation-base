@@ -367,17 +367,17 @@
   :doc "set-key transform",
   :symbols [x:set-key]}
  {:category :xtalk-file,
-  :canonical-symbol x:slurp-file,
-  :op :x-slurp-file,
+  :canonical-symbol x:file-slurp,
+  :op :x-file-slurp,
   :emit :abstract,
   :cases [],
-  :symbols [x:slurp-file]}
+  :symbols [x:file-slurp]}
  {:category :xtalk-file,
-  :canonical-symbol x:spit-file,
-  :op :x-spit-file,
+  :canonical-symbol x:file-spit,
+  :op :x-file-spit,
   :emit :abstract,
   :cases [],
-  :symbols [x:spit-file]}
+  :symbols [x:file-spit]}
  {:category :xtalk-global,
   :canonical-symbol x:global-del,
   :op :x-global-del,
