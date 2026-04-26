@@ -1078,7 +1078,8 @@
 
   (!.R
     (var eq-fn (fn [it0 it1 eq-fn]
-                 (xt/x:iter-eq it0 it1 eq-fn)))
+                 (return
+                  (xt/x:iter-eq it0 it1 eq-fn))))
     [(eq-fn (xt/x:iter-from-arr [1 2 3])
             (xt/x:iter-from-arr [1 2 3])
             (fn [a b]
@@ -1312,6 +1313,7 @@
 (comment
 
   (code.manage/isolate 'xt.lang.spec-base-test {:suffix "-fix"})
+  (s/seedgen-benchadd 'xt.lang.spec-base {:lang [:lua :python] :write true})
   (s/seedgen-langadd 'xt.lang.spec-base {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.lang.spec-base {:lang [:lua :python] :write true})
   

@@ -240,7 +240,8 @@
 ^{:refer xt.lang.spec-base/for:async :added "4.1"}
 (fact "expands to the canonical async form"
 
-  ^{:seedgen/base    {:all    {:suppress true}}}
+  ^{:seedgen/base    {:all       {:suppress true}
+                      :python    {:suppress false}}}
   [(notify/wait-on :js
      (xt/for:async [[ok err] (xt/return-run [resolve reject]
                                (resolve "OK"))]
@@ -254,7 +255,22 @@
        {:success (repl/notify ok)
         :error   (repl/notify err)
         :finally (return true)}))]
-  => ["OK" "ERR"])
+  => ["OK" "ERR"]
+
+  [(l/with:print-all
+     (notify/wait-on :python
+       (xt/for:async [[ok err] (xt/return-run [resolve reject]
+                                 (resolve "OK"))]
+         {:success (repl/notify ok)
+          :error   (repl/notify err)
+          :finally (return true)})))
+   
+   (notify/wait-on :python
+     (xt/for:async [[ok err] (xt/return-run [resolve reject]
+                               (reject "ERR"))]
+       {:success (repl/notify ok)
+        :error   (repl/notify err)
+        :finally (return true)}))])
 
 ^{:refer xt.lang.spec-base/proto:get :added "4.1"}
 (fact "retrieves the attached prototype object"
@@ -2496,7 +2512,8 @@
 
   (!.js
     (var eq-fn (fn [it0 it1 eq-fn]
-                 (xt/x:iter-eq it0 it1 eq-fn)))
+                 (return
+                  (xt/x:iter-eq it0 it1 eq-fn))))
     [(eq-fn (xt/x:iter-from-arr [1 2 3])
             (xt/x:iter-from-arr [1 2 3])
             (fn [a b]
@@ -2509,7 +2526,8 @@
 
   (!.py
     (var eq-fn (fn [it0 it1 eq-fn]
-                 (xt/x:iter-eq it0 it1 eq-fn)))
+                 (return
+                  (xt/x:iter-eq it0 it1 eq-fn))))
     [(eq-fn (xt/x:iter-from-arr [1 2 3])
             (xt/x:iter-from-arr [1 2 3])
             (fn [a b]
@@ -2522,7 +2540,8 @@
 
   (!.lua
     (var eq-fn (fn [it0 it1 eq-fn]
-                 (xt/x:iter-eq it0 it1 eq-fn)))
+                 (return
+                  (xt/x:iter-eq it0 it1 eq-fn))))
     [(eq-fn (xt/x:iter-from-arr [1 2 3])
             (xt/x:iter-from-arr [1 2 3])
             (fn [a b]
@@ -2961,6 +2980,7 @@
 (comment
 
   (code.manage/isolate 'xt.lang.spec-base-test {:suffix "-fix"})
+  (s/seedgen-benchadd 'xt.lang.spec-base {:lang [:lua :python] :write true})
   (s/seedgen-langadd 'xt.lang.spec-base {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.lang.spec-base {:lang [:lua :python] :write true})
   

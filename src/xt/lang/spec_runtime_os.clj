@@ -25,6 +25,7 @@
   x:shell
   "executes shell commands through the canonical for:return contract"
   {:added "4.1"}
+  ([command cb] (list (quote x:shell) command {} cb))
   ([command opts cb] (list (quote x:shell) command opts cb)))
 
 (defspec.xt x:thread-spawn [:fn [:xt/fn] :xt/any])

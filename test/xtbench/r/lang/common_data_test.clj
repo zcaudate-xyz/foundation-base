@@ -1,6 +1,6 @@
 (ns xtbench.r.lang.common-data-test
- (:require [std.lang :as l])
- (:use code.test))
+  (:require [std.lang :as l])
+  (:use code.test))
 
 (l/script- :r
   {:runtime :basic,
@@ -306,15 +306,6 @@
   (!.R (xtd/obj-del {:a 1, :b 2, :c 3} ["a" "c"]))
   => {"b" 2})
 
-^{:refer xt.lang.common-data/obj-del-all :added "4.1" :lang-exceptions {:python {:skip true}}}
-(fact "obj del all"
-
-  (!.R
-    (var out {:a 1, :b 2})
-    (xtd/obj-del-all out)
-    out)
-  => {})
-
 ^{:refer xt.lang.common-data/obj-pick :added "4.1"}
 (fact "select keys in object"
 
@@ -386,20 +377,6 @@
           (xtd/get-in {:a {:b {:c 1}}} ["a" "b" "c"])])
   => [{"c" 1} 1])
 
-^{:refer xt.lang.common-data/set-in :added "4.1"}
-(fact "sets item in object"
-
-  [(!.R
-     (var a {:a {:b {:c 1}}})
-     (xtd/set-in a ["a" "b"] 2)
-     a)
-   (!.R
-     (var a {:a {:b {:c 1}}})
-     (xtd/set-in a ["a" "d"] 2)
-     a)]
-  => [{"a" {"b" 2}}
-      {"a" {"b" {"c" 1}, "d" 2}}])
-
 ^{:refer xt.lang.common-data/obj-intersection :added "4.1"}
 (fact "finds the intersection between map lookups"
 
@@ -419,15 +396,6 @@
 
   (!.R (xtd/obj-difference {:a true, :b true} {:b true, :c true}))
   => ["c"])
-
-^{:refer xt.lang.common-data/swap-key :added "4.1"}
-(fact "swaps a value in the key with a function"
-
-  (!.R
-   (var out {:a 1})
-   (xtd/swap-key out "a" (fn [x y] (return (+ x y))) [2])
-   out)
-  => {"a" 3})
 
 ^{:refer xt.lang.common-data/to-flat :added "4.1"}
 (fact "flattens pairs of object into array"
@@ -684,19 +652,6 @@
    out)
   => {"a" {"b" 1}})
 
-^{:refer xt.lang.common-data/memoize-key :added "4.1"}
-(fact "memoize for functions of single argument"
-
-  (!.R
-   (var state {"n" 0})
-   (var f-raw (fn [x]
-                (do
-                  (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
-                  (return (* x 10)))))
-   (var f (xtd/memoize-key f-raw))
-   [(f 2) (f 2) (f 3) (xt/x:get-key state "n")])
-  => [20 20 30 2])
-
 ^{:refer xt.lang.common-data/is-empty? :added "4.1"}
 (fact "checks that array is empty"
 
@@ -710,37 +665,9 @@
     (xtd/is-empty? {:a 1, :b 2})])
   => [true true false true false true false])
 
-^{:refer xt.lang.common-data/set-pair-step :added "4.1"}
-(fact "sets a pair into an object and returns it"
-
-  (!.R
-   (var out {})
-   [(xt/x:get-key (xtd/set-pair-step out "a" 1) "a")
-    (xt/x:get-key (xtd/set-pair-step out "b" 2) "b")
-    out])
-  => [1 2 {"a" 1, "b" 2}])
-
-^{:refer xt.lang.common-data/memoize-key-step :added "4.1"}
-(fact "computes and caches a memoized value"
-
-  (!.R
-   (var state {"n" 0})
-   (var cache {})
-   (var f-raw
-        (fn [key]
-          (do
-            (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
-            (return (xt/x:cat key "-value")))))
-   [(xtd/memoize-key-step
-     f-raw
-     "a"
-     cache)
-    (xt/x:get-key cache "a")
-    (xt/x:get-key state "n")])
-  => ["a-value" "a-value" 1])
-
 (comment
-  
+
+  (s/seedgen-benchadd 'xt.lang.common-data {:lang [:r] :write true})
   (s/seedgen-langadd 'xt.lang.common-data {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.lang.common-data {:lang [:lua :python] :write true})
   

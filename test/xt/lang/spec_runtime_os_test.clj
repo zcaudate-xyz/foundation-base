@@ -20,10 +20,15 @@
 
   ^{:seedgen/base {:all {:suppress true}}}
   (notify/wait-on :js
-    (spec-os/x:slurp-file "project.clj"
-                          {}
-                          (fn [err res]
-                            (repl/notify res))))
+    (var slurp-fn
+         (fn [path opts cb]
+           (return
+            (spec-os/x:slurp-file path opts cb))))
+    (xt/for:return [[out err] (slurp-fn "project.clj"
+                                        {}
+                                        (xt/x:callback)) ]
+      {:success (repl/notify out)})
+    (return true))
   => string?)
 
 ^{:refer xt.lang.spec-runtime-os/x:spit-file :added "4.1"}
@@ -49,11 +54,12 @@
   
   ^{:seedgen/base {:all {:suppress true}}}
   (notify/wait-on :js
-    (do:> (spec-os/x:shell "printf hello" {}
-                           {:success (fn [res]
-                                       (repl/notify res))
-                            :error   (fn [err]
-                                       (repl/notify "ERR"))})))
+    (xt/for:return [[out err] (spec-os/x:shell "printf hello"
+                                               {}
+                                               (xt/x:callback))]
+      {:success (repl/notify out)
+       :error   (repl/notify "ERR")})
+    (return true))
   => #"hello")
 
 ^{:refer xt.lang.spec-runtime-os/x:shell :added "4.1"}
