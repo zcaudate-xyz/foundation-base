@@ -1,4 +1,4 @@
-(ns xt.lang.util-throttle
+(ns xt.lib.util-throttle
   (:require [std.lang :as l]))
 
 (l/script :xtalk

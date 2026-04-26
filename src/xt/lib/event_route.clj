@@ -1,11 +1,11 @@
-(ns xt.lang.event-route
+(ns xt.lib.event-route
   (:require [std.lang :as l]
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-             [xt.lang.event-common :as event-common]]})
+             [xt.lib.event-common :as event-common]]})
 
 (defspec.xt RoutePath
   [:xt/array :xt/str])
@@ -32,12 +32,12 @@
    ["type" :xt/str]
    ["params" RouteDiff]
    ["path" RouteDiff]
-   ["meta" [:xt/maybe xt.lang.event-common/EventListenerMeta]]])
+   ["meta" [:xt/maybe xt.lib.event-common/EventListenerMeta]]])
 
 (defspec.xt EventRoute
   [:xt/record
    ["::" :xt/str]
-   ["listeners" xt.lang.event-common/EventListenerMap]
+   ["listeners" xt.lib.event-common/EventListenerMap]
    ["tree" RouteTree]
    ["history" [:xt/array :xt/str]]])
 
@@ -93,24 +93,24 @@
   [:fn [EventRoute
         :xt/str
         [:fn [RouteEvent] :xt/any]
-        [:xt/maybe xt.lang.event-common/EventListenerMeta]]
-       xt.lang.event-common/EventListenerEntry])
+        [:xt/maybe xt.lib.event-common/EventListenerMeta]]
+       xt.lib.event-common/EventListenerEntry])
 
 (defspec.xt add-path-listener
   [:fn [EventRoute
         RoutePath
         :xt/str
         [:fn [RouteEvent] :xt/any]
-        [:xt/maybe xt.lang.event-common/EventListenerMeta]]
-       xt.lang.event-common/EventListenerEntry])
+        [:xt/maybe xt.lib.event-common/EventListenerMeta]]
+       xt.lib.event-common/EventListenerEntry])
 
 (defspec.xt add-param-listener
   [:fn [EventRoute
         :xt/str
         :xt/str
         [:fn [RouteEvent] :xt/any]
-        [:xt/maybe xt.lang.event-common/EventListenerMeta]]
-       xt.lang.event-common/EventListenerEntry])
+        [:xt/maybe xt.lib.event-common/EventListenerMeta]]
+       xt.lib.event-common/EventListenerEntry])
 
 (defspec.xt add-full-listener
   [:fn [EventRoute
@@ -118,8 +118,8 @@
         :xt/str
         :xt/str
         [:fn [RouteEvent] :xt/any]
-        [:xt/maybe xt.lang.event-common/EventListenerMeta]]
-       xt.lang.event-common/EventListenerEntry])
+        [:xt/maybe xt.lib.event-common/EventListenerMeta]]
+       xt.lib.event-common/EventListenerEntry])
 
 (defspec.xt set-url
   [:fn [EventRoute :xt/str [:xt/maybe :xt/bool]] [:xt/array :xt/str]])

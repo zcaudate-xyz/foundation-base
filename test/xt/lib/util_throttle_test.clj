@@ -1,4 +1,4 @@
-(ns xt.lang.util-throttle-test
+(ns xt.lib.util-throttle-test
   (:require [std.json :as json]
             [std.lang :as l]
             [xt.lang.common-notify :as notify])
@@ -8,7 +8,7 @@
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
              [xt.lang.spec-base :as xt]
-             [xt.lang.util-throttle :as throttle]
+             [xt.lib.util-throttle :as throttle]
              [xt.lang.common-repl :as repl]]})
 
 (l/script- :lua
@@ -16,21 +16,21 @@
    :config  {:program :resty}
    :require [[xt.lang.common-lib :as k]
              [xt.lang.spec-base :as xt]
-             [xt.lang.util-throttle :as throttle]
+             [xt.lib.util-throttle :as throttle]
              [xt.lang.common-repl :as repl]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
              [xt.lang.spec-base :as xt]
-             [xt.lang.util-throttle :as throttle]
+             [xt.lib.util-throttle :as throttle]
              [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.lang.util-throttle/throttle-create :added "4.0"}
+^{:refer xt.lib.util-throttle/throttle-create :added "4.0"}
 (fact "creates a throttle"
 
   (set (!.js
@@ -47,7 +47,7 @@
           nil))))
   => #{"handler" "queued" "now_fn" "active"})
 
-^{:refer xt.lang.util-throttle/throttle-run-async :added "4.0"}
+^{:refer xt.lib.util-throttle/throttle-run-async :added "4.0"}
 (fact "runs an async throttle"
   (notify/wait-on :js
     (var out [])
@@ -91,7 +91,7 @@
       (!.py (!:G THROTTLE_OUT)))
   => [1])
 
-^{:refer xt.lang.util-throttle/throttle-run :added "4.0"}
+^{:refer xt.lib.util-throttle/throttle-run :added "4.0"}
 (fact "throttles a function so that it only runs a single thread"
   ;;
   ;; JS
@@ -165,10 +165,10 @@
       (!.py (!:G THROTTLE_OUT)))
   => [1 1])
 
-^{:refer xt.lang.util-throttle/throttle-waiting :added "4.0"}
+^{:refer xt.lib.util-throttle/throttle-waiting :added "4.0"}
 (fact "gets all the waiting ids")
 
-^{:refer xt.lang.util-throttle/throttle-active :added "4.0"}
+^{:refer xt.lib.util-throttle/throttle-active :added "4.0"}
 (fact "gets the active ids in a throttle"
   (notify/wait-on :js
     (var throttle)
@@ -233,5 +233,5 @@
              (every? vector? state))))
   => true)
 
-^{:refer xt.lang.util-throttle/throttle-queued :added "4.0"}
+^{:refer xt.lib.util-throttle/throttle-queued :added "4.0"}
 (fact "gets all the queued ids")

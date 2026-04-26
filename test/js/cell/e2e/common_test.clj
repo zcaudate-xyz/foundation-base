@@ -14,7 +14,7 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]
              [xt.lang.common-space :as rt :with [defsingleton.js]]
-             [xt.lang.event-view :as event-view]
+             [xt.lib.event-view :as event-view]
              [js.cell.kernel :as cl]
              [js.cell.e2e.common :as common]
              [js.cell.runtime.link :as runtime-link]

@@ -4,7 +4,7 @@
   (:use code.test))
 
 (fact "python emission inherits module context for optional xtalk args"
-  (preprocess/with:macro-opts [{:module {:id 'xt.lang.event-view}}]
+  (preprocess/with:macro-opts [{:module {:id 'xt.lib.event-view}}]
     (l/emit-as :python
                '[(defn get-output [view dest-key]
                    (return dest-key))]))

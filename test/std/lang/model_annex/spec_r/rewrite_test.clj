@@ -39,13 +39,13 @@
   (r/r-normalize-args 'hello '[x & [y z]])
   => '[x y := nil z := nil]
 
-  (preprocess/with:macro-opts [{:module {:id 'xt.lang.event-view}}]
+  (preprocess/with:macro-opts [{:module {:id 'xt.lib.event-view}}]
     (r/r-normalize-args 'get-output '[view dest-key]))
   => '[view dest-key := nil])
 
 ^{:refer std.lang.model-annex.spec-r/tf-defn :added "4.1"}
 (fact "applies inferred optional arguments during defn expansion"
-  (preprocess/with:macro-opts [{:module {:id 'xt.lang.event-view}}]
+  (preprocess/with:macro-opts [{:module {:id 'xt.lib.event-view}}]
     (r/tf-defn '(defn get-output [view dest-key]
                   (return dest-key))))
   => '(def get-output

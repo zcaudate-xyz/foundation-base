@@ -1,4 +1,4 @@
-(ns xt.lang.event-route-test
+(ns xt.lib.event-route-test
   (:require [std.json :as json]
             [std.lang :as l]
             [xt.lang.common-notify :as notify])
@@ -9,7 +9,7 @@
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
-             [xt.lang.event-route :as route]
+             [xt.lib.event-route :as route]
              [xt.lang.common-repl :as repl]]})
 
 (l/script- :lua
@@ -17,7 +17,7 @@
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
-             [xt.lang.event-route :as route]
+             [xt.lib.event-route :as route]
              [xt.lang.common-repl :as repl]]})
 
 (l/script- :python
@@ -25,7 +25,7 @@
     :require [[xt.lang.common-lib :as k]
               [xt.lang.common-data :as xtd]
               [xt.lang.spec-base :as xt]
-              [xt.lang.event-route :as route]
+              [xt.lib.event-route :as route]
               [xt.lang.common-repl :as repl]]})
 
 (l/script- :dart
@@ -33,14 +33,14 @@
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
-             [xt.lang.event-route :as route]
+             [xt.lib.event-route :as route]
              [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.lang.event-route/interim-from-url :added "4.0"}
+^{:refer xt.lib.event-route/interim-from-url :added "4.0"}
 (fact "creates interim from url"
 
   (!.js
@@ -76,7 +76,7 @@
       {"params" {"[]" {"id" "1"}}, "path" []}
       {"params" {}, "path" ["hello"]}])
 
-^{:refer xt.lang.event-route/interim-to-url :added "4.0"
+^{:refer xt.lib.event-route/interim-to-url :added "4.0"
   :setup [(def +out+
             [{"params" {"id" "1", "type" "name"}, "path" ["hello" "world"]}
              "?id=1"
@@ -104,7 +104,7 @@
     (route/interim-to-url {"params" {}, "path" ["hello"]})])
   => ["hello/world?id=1&type=name" "?id=1" "hello"])
 
-^{:refer xt.lang.event-route/path-to-tree :added "4.0"}
+^{:refer xt.lib.event-route/path-to-tree :added "4.0"}
 (fact "turns a path to tree"
 
   ^{:lang-exceptions
@@ -121,7 +121,7 @@
    (route/path-to-tree ["hello" "world"] false))
   => {"[]" "hello", "[\"hello\"]" "world"})
 
-^{:refer xt.lang.event-route/interim-to-tree :added "4.0"
+^{:refer xt.lib.event-route/interim-to-tree :added "4.0"
   :setup [(def +out+
             [{"params" {"[]" {"id" "1", "type" "name"}},
               "[]" "hello",
@@ -191,7 +191,7 @@
        "[\"hello\", \"world\"]" nil,
        "[\"hello\"]" "world"}])
 
-^{:refer xt.lang.event-route/path-from-tree :added "4.0"}
+^{:refer xt.lib.event-route/path-from-tree :added "4.0"}
 (fact "gets the path from tree"
 
   (!.js
@@ -206,10 +206,10 @@
    (route/path-from-tree {"[]" "hello", "[\"hello\"]" "world"}))
   => ["hello" "world"])
 
-^{:refer xt.lang.event-route/path-params-from-tree :added "4.0"}
+^{:refer xt.lib.event-route/path-params-from-tree :added "4.0"}
 (fact "gets path params from tree")
 
-^{:refer xt.lang.event-route/interim-from-tree :added "4.0"}
+^{:refer xt.lib.event-route/interim-from-tree :added "4.0"}
 (fact "converts interim from tree"
 
   (!.js
@@ -227,7 +227,7 @@
     {"params" {"[]" {"id" "1", "type" "name"}}, "[]" "hello", "[\"hello\"]" "world"}))
   => {"params" {"[]" {"id" "1", "type" "name"}}, "path" ["hello" "world"]})
 
-^{:refer xt.lang.event-route/changed-params-raw :added "4.0"}
+^{:refer xt.lib.event-route/changed-params-raw :added "4.0"}
 (fact "checks for changed params"
 
   (!.js
@@ -257,7 +257,7 @@
      {"type" "hello"})])
   => [{"type" true} {"id" true, "type" true}])
 
-^{:refer xt.lang.event-route/changed-params :added "4.0"}
+^{:refer xt.lib.event-route/changed-params :added "4.0"}
 (fact "gets diff between params"
 
   ^{:lang-exceptions
@@ -291,7 +291,7 @@
                           [])])
   => [{"type" true} {"id" true, "type" true}])
 
-^{:refer xt.lang.event-route/changed-path-raw :added "4.0"}
+^{:refer xt.lib.event-route/changed-path-raw :added "4.0"}
 (fact "checks that path has changed"
 
   (!.js
@@ -327,7 +327,7 @@
      ["hello" "again"])])
   => [{} {"[\"hello\"]" true}])
 
-^{:refer xt.lang.event-route/changed-path :added "4.0"}
+^{:refer xt.lib.event-route/changed-path :added "4.0"}
 (fact "gets changed routes"
 
   (!.js
@@ -357,7 +357,7 @@
      {"[]" "world"})])
   => [{"[\"hello\"]" true} {"[]" true}])
 
-^{:refer xt.lang.event-route/get-url :added "4.0"}
+^{:refer xt.lib.event-route/get-url :added "4.0"}
 (fact "gets the url for the route"
 
   (!.js
@@ -381,7 +381,7 @@
     (route/get-url (route/make-route "hello?name=2"))])
   => ["hello" "hello?id=1" "?id=1" "hello?name=2"])
 
-^{:refer xt.lang.event-route/get-segment :added "4.0"}
+^{:refer xt.lib.event-route/get-segment :added "4.0"}
 (fact "gets the value for a segment segment"
 
   (!.js
@@ -408,7 +408,7 @@
     (route/get-segment (route/make-route "hello") ["hello"])])
   => ["hello" "a" "b" nil nil])
 
-^{:refer xt.lang.event-route/get-param :added "4.0"}
+^{:refer xt.lib.event-route/get-param :added "4.0"}
 (fact "gets the param value"
 
   ^{:lang-exceptions
@@ -432,7 +432,7 @@
                     nil))
   => "sign_in")
 
-^{:refer xt.lang.event-route/get-all-params :added "4.0"}
+^{:refer xt.lib.event-route/get-all-params :added "4.0"}
 (fact "gets all params in the route"
 
   (!.js
@@ -453,7 +453,7 @@
     ["hello"]))
   => {"a" "1", "b" "2"})
 
-^{:refer xt.lang.event-route/make-route :added "4.0"}
+^{:refer xt.lib.event-route/make-route :added "4.0"}
 (fact "makes a route"
 
   (!.js
@@ -469,7 +469,7 @@
    (route/make-route "hello"))
   => {"::" "event.route", "tree" {"params" {}, "[]" "hello"}, "history" [], "listeners" {}})
 
-^{:refer xt.lang.event-route/add-url-listener :added "4.0"
+^{:refer xt.lib.event-route/add-url-listener :added "4.0"
   :setup [(def +out+
             {"callback" "<function>",
              "pred" "<function>",
@@ -502,7 +502,7 @@
    (xtd/tree-get-data entry))
   => +out+)
 
-^{:refer xt.lang.event-route/add-path-listener :added "4.0"
+^{:refer xt.lib.event-route/add-path-listener :added "4.0"
   :setup [(def +out+
             {"callback" "<function>",
              "pred" "<function>",
@@ -547,7 +547,7 @@
    (xtd/tree-get-data entry))
   => +out+)
 
-^{:refer xt.lang.event-route/add-param-listener :added "4.0"
+^{:refer xt.lib.event-route/add-param-listener :added "4.0"
   :setup [(def +out+
             {"callback" "<function>",
              "pred" "<function>",
@@ -575,7 +575,7 @@
    (xtd/tree-get-data entry))
   => +out+)
 
-^{:refer xt.lang.event-route/add-full-listener :added "4.0"
+^{:refer xt.lib.event-route/add-full-listener :added "4.0"
   :setup [(def +out+
             {"callback" "<function>",
              "pred" "<function>",
@@ -604,7 +604,7 @@
    (xtd/tree-get-data entry))
   => +out+)
 
-^{:refer xt.lang.event-route/set-url :added "4.0"
+^{:refer xt.lib.event-route/set-url :added "4.0"
   :setup [(def +out+
             {"params" {},
              "path" {"[\"hello\"]" true},
@@ -666,7 +666,7 @@
    (route/set-url r "hello/world"))
   => +out+)
 
-^{:refer xt.lang.event-route/set-path :added "4.0"
+^{:refer xt.lib.event-route/set-path :added "4.0"
   :setup [(def +out+
             {"params" {}
              "path" {"[\"hello\"]" true},
@@ -753,7 +753,7 @@
         "history" ["hello/world"],
         "listeners" {}}]])
 
-^{:refer xt.lang.event-route/set-segment :added "4.0"
+^{:refer xt.lib.event-route/set-segment :added "4.0"
   :setup [(def +out+
             {"params" {},
              "path" {"[\"hello\"]" true},
@@ -815,7 +815,7 @@
    (route/set-segment r ["hello"] "world"))
   => +out+)
 
-^{:refer xt.lang.event-route/set-param :added "4.0"
+^{:refer xt.lib.event-route/set-param :added "4.0"
   :setup [(def +out+
             {"params" {"auth" true},
              "path" {},
@@ -884,7 +884,7 @@
     (route/set-param r "auth" "register" nil))
   => +out+)
 
-^{:refer xt.lang.event-route/reset-route :added "4.0"}
+^{:refer xt.lib.event-route/reset-route :added "4.0"}
 (fact "resets the route, clearing all params"
 
   (!.js

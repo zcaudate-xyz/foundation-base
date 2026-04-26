@@ -535,7 +535,7 @@
    :x-promise-catch    {:emit :hard-link :raw 'lua.core.common-promise/promise-catch}
    :x-promise-finally  {:emit :hard-link :raw 'lua.core.common-promise/promise-finally}
    :x-promise-native?  {:emit :hard-link :raw 'lua.core.common-promise/promise-native?}
-   :x-with-delay       {:macro #'lua-tf-x-with-delay :emit :macro}})
+   :x-with-delay       {:emit :hard-link :raw 'lua.core.common-promise/with-delay}})
 
 (defn lua-tf-x-pwd
   [[_]]

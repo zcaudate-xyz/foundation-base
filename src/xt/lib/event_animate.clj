@@ -1,4 +1,4 @@
-(ns xt.lang.event-animate
+(ns xt.lib.event-animate
   (:require [std.lang :as l]
             [xt.lang.common-data :as xtd]))
 

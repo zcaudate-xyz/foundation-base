@@ -1,11 +1,11 @@
-(ns xt.lang.event-form
+(ns xt.lib.event-form
   (:require [std.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-             [xt.lang.event-common :as event-common]
-             [xt.lang.util-validate :as validate]]})
+             [xt.lib.event-common :as event-common]
+             [xt.lib.util-validate :as validate]]})
 
 (defspec.xt ValidationFieldResult
   [:xt/record
@@ -21,12 +21,12 @@
   [:xt/record
    ["type" :xt/str]
    ["fields" [:xt/array :xt/str]]
-   ["meta" [:xt/maybe xt.lang.event-common/EventListenerMeta]]])
+   ["meta" [:xt/maybe xt.lib.event-common/EventListenerMeta]]])
 
 (defspec.xt EventForm
   [:xt/record
    ["::" :xt/str]
-   ["listeners" xt.lang.event-common/EventListenerMap]
+   ["listeners" xt.lib.event-common/EventListenerMap]
    ["data" [:xt/dict :xt/str :xt/any]]
    ["validators" [:xt/dict :xt/str :xt/any]]
    ["result" ValidationResult]])
@@ -45,8 +45,8 @@
         :xt/str
         [:or :xt/str [:xt/array :xt/str]]
         [:fn [FormEvent] :xt/any]
-        [:xt/maybe xt.lang.event-common/EventListenerMeta]]
-       xt.lang.event-common/EventListenerEntry])
+        [:xt/maybe xt.lib.event-common/EventListenerMeta]]
+       xt.lib.event-common/EventListenerEntry])
 
 (defspec.xt trigger-all
   [:fn [EventForm :xt/str] [:xt/array :xt/str]])

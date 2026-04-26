@@ -163,8 +163,8 @@
 (fact "checks namespaces through facade"
   (do
     (clear-registry!)
-    (:namespace (check-namespace 'xt.lang.event-route)))
-  => 'xt.lang.event-route)
+    (:namespace (check-namespace 'xt.lib.event-route)))
+  => 'xt.lib.event-route)
 
 
 ^{:refer std.lang.typed.xtalk/analyze-file-raw :added "4.1"}

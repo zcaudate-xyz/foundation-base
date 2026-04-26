@@ -640,7 +640,7 @@
    :x-promise-catch    {:emit :hard-link :raw 'python.core.common-promise/promise-catch}
    :x-promise-finally  {:emit :hard-link :raw 'python.core.common-promise/promise-finally}
    :x-promise-native?  {:emit :hard-link :raw 'python.core.common-promise/promise-native?}
-   :x-with-delay       {:macro #'python-tf-x-with-delay :emit :macro}})
+   :x-with-delay       {:emit :hard-link :raw 'python.core.common-promise/with-delay}})
 
 
 

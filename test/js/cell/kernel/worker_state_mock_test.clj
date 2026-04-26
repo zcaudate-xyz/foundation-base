@@ -9,7 +9,7 @@
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-repl :as repl]
              [xt.lang.common-space :as rt]
-             [xt.lang.util-throttle :as th]
+             [xt.lib.util-throttle :as th]
              [js.core :as j]
              [js.cell.kernel.worker-state :as worker-state]
              [js.cell.kernel.worker-local :as worker-local]

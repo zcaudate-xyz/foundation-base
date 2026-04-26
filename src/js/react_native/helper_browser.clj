@@ -4,7 +4,7 @@
 (l/script :js
   {:require [[xt.lang.common-lib :as k]
              [xt.lang.common-string :as str]
-             [xt.lang.event-route :as event-route]
+             [xt.lib.event-route :as event-route]
              [js.react :as r]
              [js.react-native :as n]
              [js.react.ext-route :as ext-route]]})

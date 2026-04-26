@@ -1,4 +1,4 @@
-(ns xt.lang.util-validate-test
+(ns xt.lib.util-validate-test
   (:require [std.json :as json]
             [std.lang :as l]
             [xt.lang.common-notify :as notify])
@@ -9,7 +9,7 @@
    :require [[xt.lang.common-lib :as k]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
-             [xt.lang.util-validate :as validate]]})
+             [xt.lib.util-validate :as validate]]})
 
 (l/script- :lua
   {:runtime :basic
@@ -17,7 +17,7 @@
    :require [[xt.lang.common-lib :as k]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
-             [xt.lang.util-validate :as validate]
+             [xt.lib.util-validate :as validate]
              [lua.nginx :as n]]})
 
 (l/script- :python
@@ -25,13 +25,13 @@
    :require [[xt.lang.common-lib :as k]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
-             [xt.lang.util-validate :as validate]]})
+             [xt.lib.util-validate :as validate]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.lang.util-validate/validate-step :added "4.0"}
+^{:refer xt.lib.util-validate/validate-step :added "4.0"}
 (fact "validates a single step"
 
   (notify/wait-on :js
@@ -54,7 +54,7 @@
                                                                (repl/notify result))))
   => {"fields" {"first" {"status" "ok"}}})
 
-^{:refer xt.lang.util-validate/validate-field :added "4.0"}
+^{:refer xt.lib.util-validate/validate-field :added "4.0"}
 (fact "validates a single field"
 
   ;;
@@ -201,7 +201,7 @@
       "::" "validation.result"})
 
 
-^{:refer xt.lang.util-validate/validate-all :added "4.0"}
+^{:refer xt.lib.util-validate/validate-all :added "4.0"}
 (fact "validates all data"
 
   (notify/wait-on :js
@@ -267,5 +267,5 @@
                 "first" {"status" "ok"}},
       "::" "validation.result"})
 
-^{:refer xt.lang.util-validate/create-result :added "4.0"}
+^{:refer xt.lib.util-validate/create-result :added "4.0"}
 (fact "creates a result datastructure")

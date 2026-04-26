@@ -372,6 +372,11 @@
   (l/emit-as :lua.nginx [(nginx/lua-tf-x-with-delay '[_ ms thunk])])
   => #"ngx.thread.spawn")
 
+^{:refer std.lang.model.spec-xtalk.fn-lua/+lua-promise+ :added "4.1"}
+(fact "promise delay hard-links through common-promise"
+  (get-in +lua-promise+ [:x-with-delay :raw])
+  => 'lua.core.common-promise/with-delay)
+
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-file-slurp :added "4.1"}
 (fact "slurp file"
   (let [out (l/emit-as :lua [(lua-tf-x-file-slurp '[_ filename opts cb])])]

@@ -674,7 +674,7 @@
         base-fields [{:name "::" :type (:type type-out) :optional? false}
                      {:name "listeners"
                       :type {:kind :named
-                             :name 'xt.lang.event-common/EventListenerMap}
+                             :name 'xt.lib.event-common/EventListenerMap}
                       :optional? false}
                      {:name "data" :type data-type :optional? false}
                      {:name "initial"
@@ -698,7 +698,7 @@
         base-fields [{:name "::" :type (:type type-out) :optional? false}
                      {:name "listeners"
                       :type {:kind :named
-                             :name 'xt.lang.event-common/EventListenerMap}
+                             :name 'xt.lib.event-common/EventListenerMap}
                       :optional? false}]
         extra-fields (if (= :record (:kind opts-type))
                        (:fields opts-type)
@@ -1160,7 +1160,7 @@
                                                  arg-type (arrayify-type (:type arg-out) ctx)]
                                              (result arg-type
                                                      (:errors arg-out)))
-                 xt.lang.event-common/make-container (infer-make-container form ctx)
+                 xt.lib.event-common/make-container (infer-make-container form ctx)
                  (if (keyword? op)
                    (infer-keyword-call form ctx)
                    (infer-function-call form ctx))))))))

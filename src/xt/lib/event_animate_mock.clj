@@ -1,5 +1,5 @@
 ^{:no-test true}
-(ns xt.lang.event-animate-mock
+(ns xt.lib.event-animate-mock
   (:require [std.lang :as l]))
 
 (l/script :xtalk

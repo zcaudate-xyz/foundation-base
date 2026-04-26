@@ -1,4 +1,4 @@
-(ns xt.lang.util-loader-test
+(ns xt.lib.util-loader-test
   (:require [std.json :as json]
             [std.lang :as l]
             [xt.lang.common-notify :as notify])
@@ -10,7 +10,7 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
-             [xt.lang.util-loader :as loader]]})
+             [xt.lib.util-loader :as loader]]})
 
 (l/script- :lua
   {:runtime :basic
@@ -19,7 +19,7 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
-             [xt.lang.util-loader :as loader]
+             [xt.lib.util-loader :as loader]
              [lua.nginx :as n]]})
 
 (l/script- :python
@@ -28,13 +28,13 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
-             [xt.lang.util-loader :as loader]]})
+             [xt.lib.util-loader :as loader]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.lang.util-loader/new-task :added "4.0"}
+^{:refer xt.lib.util-loader/new-task :added "4.0"}
 (fact "creates a new task"
 
   (set
@@ -55,7 +55,7 @@
                   (return "A"))}))))
   => #{"args" "id" "load_fn" "deps" "::"})
 
-^{:refer xt.lang.util-loader/task-load :added "4.0"}
+^{:refer xt.lib.util-loader/task-load :added "4.0"}
 (fact "loads a task"
 
   (!.js
@@ -92,7 +92,7 @@
       :load-fn (fn:> "A")})))
   => "B")
 
-^{:refer xt.lang.util-loader/task-unload :added "4.0"}
+^{:refer xt.lib.util-loader/task-unload :added "4.0"}
 (fact "unloads a task"
 
   (!.lua
@@ -113,13 +113,13 @@
       :unload-fn (fn:> "A")})))
   => false)
 
-^{:refer xt.lang.util-loader/new-loader-blank :added "4.0"}
+^{:refer xt.lib.util-loader/new-loader-blank :added "4.0"}
 (fact "creates a blank loader")
 
-^{:refer xt.lang.util-loader/add-tasks :added "4.0"}
+^{:refer xt.lib.util-loader/add-tasks :added "4.0"}
 (fact "add tasks to a loader")
 
-^{:refer xt.lang.util-loader/new-loader :added "4.0"}
+^{:refer xt.lib.util-loader/new-loader :added "4.0"}
 (fact "creates a new loader"
 
   (!.js
@@ -202,13 +202,13 @@
       "order" ["string" "string" "string"],
       "::" "string"})
 
-^{:refer xt.lang.util-loader/list-loading :added "4.0"}
+^{:refer xt.lib.util-loader/list-loading :added "4.0"}
 (fact "lists all loading ids")
 
-^{:refer xt.lang.util-loader/list-completed :added "4.0"}
+^{:refer xt.lib.util-loader/list-completed :added "4.0"}
 (fact "lists all completed ids")
 
-^{:refer xt.lang.util-loader/list-incomplete :added "4.0"}
+^{:refer xt.lib.util-loader/list-incomplete :added "4.0"}
 (fact "lists incomplete tasks"
 
   (set (!.js
@@ -243,10 +243,10 @@
                                           (return "C"))})]))))
   => #{"C" "B" "A"})
 
-^{:refer xt.lang.util-loader/list-waiting :added "4.0"}
+^{:refer xt.lib.util-loader/list-waiting :added "4.0"}
 (fact "lists all waiting ids")
 
-^{:refer xt.lang.util-loader/load-tasks-single :added "4.0"}
+^{:refer xt.lib.util-loader/load-tasks-single :added "4.0"}
 (fact "loads a single task"
 
   (notify/wait-on :js
@@ -288,7 +288,7 @@
                               nil))
   => ["A" true])
 
-^{:refer xt.lang.util-loader/load-tasks :added "4.0"}
+^{:refer xt.lib.util-loader/load-tasks :added "4.0"}
 (fact "load tasks"
 
   ;; NO SLEEP
@@ -432,10 +432,10 @@
                            (loader/list-completed loader)))))
   => ["A"])
 
-^{:refer xt.lang.util-loader/unload-tasks :added "4.0"}
+^{:refer xt.lib.util-loader/unload-tasks :added "4.0"}
 (fact "unload tasks")
 
-^{:refer xt.lang.util-loader/load-tasks.global :adopt true :added "4.0"}
+^{:refer xt.lib.util-loader/load-tasks.global :adopt true :added "4.0"}
 (fact "load tasks"
 
   (notify/wait-on :js

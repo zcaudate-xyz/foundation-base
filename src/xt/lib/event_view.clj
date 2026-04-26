@@ -1,11 +1,11 @@
-(ns xt.lang.event-view
+(ns xt.lib.event-view
   (:require [std.lang :as l]
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-             [xt.lang.event-common :as event-common]]})
+             [xt.lib.event-common :as event-common]]})
 
 (defspec.xt ViewHandler
   [:fn [:xt/any] :xt/any])
@@ -40,12 +40,12 @@
   [:xt/record
    ["type" :xt/str]
    ["data" [:xt/maybe :xt/any]]
-   ["meta" [:xt/maybe xt.lang.event-common/EventListenerMeta]]])
+   ["meta" [:xt/maybe xt.lib.event-common/EventListenerMeta]]])
 
 (defspec.xt EventView
   [:xt/record
    ["::" :xt/str]
-   ["listeners" xt.lang.event-common/EventListenerMap]
+   ["listeners" xt.lib.event-common/EventListenerMap]
    ["pipeline" ViewPipeline]
    ["options" [:xt/dict :xt/str :xt/any]]
    ["input" ViewInput]
@@ -76,9 +76,9 @@
   [:fn [EventView
         :xt/str
         [:fn [ViewEvent] :xt/any]
-        [:xt/maybe xt.lang.event-common/EventListenerMeta]
+        [:xt/maybe xt.lib.event-common/EventListenerMeta]
         [:xt/maybe [:fn [ViewEvent] :xt/bool]]]
-       xt.lang.event-common/EventListenerEntry])
+       xt.lib.event-common/EventListenerEntry])
 
 (defspec.xt trigger-listeners
   [:fn [EventView :xt/str :xt/any] [:xt/array :xt/str]])

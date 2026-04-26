@@ -200,7 +200,6 @@
       (merge (grammar/build-xtalk))
        (grammar/build:override
         {:var        {:symbol '#{var*}}
-         :throw      {:raw "error" :emit :prefix}
          :not        {:raw "not "}
          :and        {:raw "and"}
          :or         {:raw "or"}

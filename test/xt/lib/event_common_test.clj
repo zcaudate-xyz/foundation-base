@@ -1,4 +1,4 @@
-(ns xt.lang.event-common-test
+(ns xt.lib.event-common-test
   (:require [net.http :as http]
             [rt.basic :as basic]
             [std.json :as json]
@@ -10,38 +10,38 @@
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
-              [xt.lang.event-common :as event]
+              [xt.lib.event-common :as event]
               [xt.lang.common-repl :as repl]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
-              [xt.lang.event-common :as event]
+              [xt.lib.event-common :as event]
               [xt.lang.common-repl :as repl]]})
 
 (l/script- :python
   {:runtime :basic
     :require [[xt.lang.common-lib :as k]
                [xt.lang.common-data :as xtd]
-                [xt.lang.event-common :as event]
+                [xt.lib.event-common :as event]
                 [xt.lang.common-repl :as repl]]})
 
 (l/script- :dart
   {:runtime :twostep
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
-             [xt.lang.event-common :as event]
+             [xt.lib.event-common :as event]
              [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.lang.event-common/blank-container :added "4.0"}
+^{:refer xt.lib.event-common/blank-container :added "4.0"}
 (fact "creates a blank container")
 
-^{:refer xt.lang.event-common/make-container :added "4.0"}
+^{:refer xt.lib.event-common/make-container :added "4.0"}
 (fact "makes a container"
 
   (!.js
@@ -85,7 +85,7 @@
       "listeners" {},
       "data" "number"})
 
-^{:refer xt.lang.event-common/make-listener-entry :added "4.0"
+^{:refer xt.lib.event-common/make-listener-entry :added "4.0"
   :setup [(def +out+
             (contains-in
              {"callback" "<function>",
@@ -123,10 +123,10 @@
      nil)))
   => +out+)
 
-^{:refer xt.lang.event-common/clear-listeners :added "4.0"}
+^{:refer xt.lib.event-common/clear-listeners :added "4.0"}
 (fact "clears all listeners")
 
-^{:refer xt.lang.event-common/add-listener :added "4.0"}
+^{:refer xt.lib.event-common/add-listener :added "4.0"}
 (fact "adds a listener to container"
 
   (notify/wait-on :js
@@ -203,7 +203,7 @@
        "listener/type" "custom"},
       "data" "hello"})
 
-^{:refer xt.lang.event-common/remove-listener :added "4.0"}
+^{:refer xt.lib.event-common/remove-listener :added "4.0"}
 (fact "removes a listener"
 
   (!.js
@@ -292,10 +292,10 @@
    (event/list-listeners c))
   => ["a1" "c3"])
 
-^{:refer xt.lang.event-common/list-listeners :added "4.0"}
+^{:refer xt.lib.event-common/list-listeners :added "4.0"}
 (fact "lists all current listeners")
 
-^{:refer xt.lang.event-common/list-listener-types :added "4.0"}
+^{:refer xt.lib.event-common/list-listener-types :added "4.0"}
 (fact "lists listeners by their type"
 
   (!.js
@@ -377,7 +377,7 @@
    (event/list-listener-types c))
   => {"custom.2" ["b2"], "custom.1" ["a1" "c3"]})
 
-^{:refer xt.lang.event-common/trigger-entry :added "4.0"}
+^{:refer xt.lib.event-common/trigger-entry :added "4.0"}
 (fact "triggers the individual entry"
 
   (notify/wait-on :js
@@ -427,10 +427,10 @@
    (event/trigger-entry entry {}))
   => {"meta" {"listener/id" "abc", "listener/type" "custom"}})
 
-^{:refer xt.lang.event-common/trigger-listeners :added "4.0"}
+^{:refer xt.lib.event-common/trigger-listeners :added "4.0"}
 (fact "triggers listeners given event")
 
-^{:refer xt.lang.event-common/add-keyed-listener :added "4.0"}
+^{:refer xt.lib.event-common/add-keyed-listener :added "4.0"}
 (fact "adds a keyed entry"
 
   (notify/wait-on :js
@@ -510,7 +510,7 @@
        "listener/type" "custom"},
       "data" "hello"})
 
-^{:refer xt.lang.event-common/remove-keyed-listener :added "4.0"}
+^{:refer xt.lib.event-common/remove-keyed-listener :added "4.0"}
 (fact "removes a keyed listener"
 
   (!.js
@@ -551,11 +551,11 @@
        "meta" {"listener/id" "b2", "listener/type" "custom"}}
       ["a1" "c3"]])
 
-^{:refer xt.lang.event-common/list-keyed-listeners :added "4.0"}
+^{:refer xt.lib.event-common/list-keyed-listeners :added "4.0"}
 (fact "lists all listeners under and key")
 
-^{:refer xt.lang.event-common/all-keyed-listeners :added "4.0"}
+^{:refer xt.lib.event-common/all-keyed-listeners :added "4.0"}
 (fact "lists all listeners")
 
-^{:refer xt.lang.event-common/trigger-keyed-listeners :added "4.0"}
+^{:refer xt.lib.event-common/trigger-keyed-listeners :added "4.0"}
 (fact "triggers listeners under a key")

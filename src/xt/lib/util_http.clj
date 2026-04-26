@@ -1,4 +1,4 @@
-(ns xt.lang.util-http
+(ns xt.lib.util-http
   (:require [std.lang :as l]))
 
 (l/script :js

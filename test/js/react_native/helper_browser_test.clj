@@ -3,7 +3,7 @@
   (:use code.test))
 
 (l/script :js
-  {:require [[xt.lang.event-route :as event-route]
+  {:require [[xt.lib.event-route :as event-route]
              [js.react-native :as n :include [:fn]]
              [js.react.ext-route :as ext-route]
              [js.react-native.helper-browser :as helper-browser]]})

@@ -1,10 +1,10 @@
-(ns xt.lang.event-box
+(ns xt.lib.event-box
   (:require [std.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
           {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-             [xt.lang.event-common :as event-common]]})
+             [xt.lib.event-common :as event-common]]})
 
 (defspec.xt BoxPath
   [:xt/array :xt/any])
@@ -14,12 +14,12 @@
    ["path" BoxPath]
    ["value" [:xt/maybe :xt/any]]
    ["data" [:xt/dict :xt/str :xt/any]]
-   ["meta" [:xt/maybe xt.lang.event-common/EventListenerMeta]]])
+   ["meta" [:xt/maybe xt.lib.event-common/EventListenerMeta]]])
 
 (defspec.xt EventBox
   [:xt/record
    ["::" :xt/str]
-   ["listeners" xt.lang.event-common/EventListenerMap]
+   ["listeners" xt.lib.event-common/EventListenerMap]
    ["data" [:xt/dict :xt/str :xt/any]]])
 
 (defspec.xt make-box
@@ -33,8 +33,8 @@
         :xt/str
         BoxPath
         [:fn [BoxEvent] :xt/any]
-        [:xt/maybe xt.lang.event-common/EventListenerMeta]]
-       xt.lang.event-common/EventListenerEntry])
+        [:xt/maybe xt.lib.event-common/EventListenerMeta]]
+       xt.lib.event-common/EventListenerEntry])
 
 (defspec.xt get-data
   [:fn [EventBox [:xt/maybe BoxPath]] [:xt/maybe :xt/any]])

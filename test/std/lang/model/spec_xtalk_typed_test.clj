@@ -584,41 +584,41 @@
 
 (fact "analyzes event-common and event-form namespace specs"
   (typed/clear-registry!)
-  (typed/analyze-and-register! 'xt.lang.event-common)
-  (typed/analyze-and-register! 'xt.lang.event-form)
-  [(analysis/get-function-output-type 'xt.lang.event-common/blank-container)
-   (analysis/get-function-output-type 'xt.lang.event-common/add-listener)
-   (analysis/get-function-output-type 'xt.lang.event-form/make-form)
-   (analysis/get-function-output-type 'xt.lang.event-form/get-result)]
-  => '[{:kind :named :name xt.lang.event-common/EventContainer}
-       {:kind :named :name xt.lang.event-common/EventListenerEntry}
-       {:kind :named :name xt.lang.event-form/EventForm}
-       {:kind :named :name xt.lang.event-form/ValidationResult}])
+  (typed/analyze-and-register! 'xt.lib.event-common)
+  (typed/analyze-and-register! 'xt.lib.event-form)
+  [(analysis/get-function-output-type 'xt.lib.event-common/blank-container)
+   (analysis/get-function-output-type 'xt.lib.event-common/add-listener)
+   (analysis/get-function-output-type 'xt.lib.event-form/make-form)
+   (analysis/get-function-output-type 'xt.lib.event-form/get-result)]
+  => '[{:kind :named :name xt.lib.event-common/EventContainer}
+       {:kind :named :name xt.lib.event-common/EventListenerEntry}
+       {:kind :named :name xt.lib.event-form/EventForm}
+       {:kind :named :name xt.lib.event-form/ValidationResult}])
 
 (fact "analyzes event-route, event-view, and event-box namespace specs"
   (typed/clear-registry!)
-  (typed/analyze-and-register! 'xt.lang.event-route)
-  (typed/analyze-and-register! 'xt.lang.event-view)
-  (typed/analyze-and-register! 'xt.lang.event-box)
-  [(analysis/get-function-output-type 'xt.lang.event-route/make-route)
-   (analysis/get-function-output-type 'xt.lang.event-route/get-param)
-   (analysis/get-function-output-type 'xt.lang.event-view/create-view)
-   (analysis/get-function-output-type 'xt.lang.event-view/pipeline-prep)
-   (analysis/get-function-output-type 'xt.lang.event-box/make-box)]
-  => '[{:kind :named :name xt.lang.event-route/EventRoute}
+  (typed/analyze-and-register! 'xt.lib.event-route)
+  (typed/analyze-and-register! 'xt.lib.event-view)
+  (typed/analyze-and-register! 'xt.lib.event-box)
+  [(analysis/get-function-output-type 'xt.lib.event-route/make-route)
+   (analysis/get-function-output-type 'xt.lib.event-route/get-param)
+   (analysis/get-function-output-type 'xt.lib.event-view/create-view)
+   (analysis/get-function-output-type 'xt.lib.event-view/pipeline-prep)
+   (analysis/get-function-output-type 'xt.lib.event-box/make-box)]
+  => '[{:kind :named :name xt.lib.event-route/EventRoute}
        {:kind :maybe
         :item {:kind :primitive :name :xt/str}}
-       {:kind :named :name xt.lang.event-view/EventView}
+       {:kind :named :name xt.lib.event-view/EventView}
        {:kind :tuple
-        :types [{:kind :named :name xt.lang.event-view/ViewContext}
+        :types [{:kind :named :name xt.lib.event-view/ViewContext}
                 {:kind :primitive :name :xt/bool}]}
-       {:kind :named :name xt.lang.event-box/EventBox}])
+       {:kind :named :name xt.lib.event-box/EventBox}])
 
 (fact "check-namespace can analyze event-route without crashing"
   (typed/clear-registry!)
-  (-> (typed/check-namespace 'xt.lang.event-route)
+  (-> (typed/check-namespace 'xt.lib.event-route)
       :namespace)
-  => 'xt.lang.event-route)
+  => 'xt.lib.event-route)
 
 
 

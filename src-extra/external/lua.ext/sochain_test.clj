@@ -8,7 +8,7 @@
   {:runtime :basic
    :config {:program :resty}
    :require [[xt.lang.common-lib :as k]
-             [xt.lang.event-log :as event-log]
+             [xt.lib.event-log :as event-log]
              [xt.lang.common-repl :as repl]
              [lua.nginx :as n]
              [lua.nginx.task :as t]

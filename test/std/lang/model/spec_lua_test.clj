@@ -176,15 +176,20 @@
 (fact "for async transform for nginx"
 
   (nginx/tf-for-async '(for:async [[ok err] (call (x:callback))]
-                                  {:success (return ok)
-                                   :error   (return err)
-                                   :finally (return true)}))
+                                   {:success (return ok)
+                                    :error   (return err)
+                                    :finally (return true)}))
   => '(ngx.thread.spawn
        (fn []
          (for:try [[ok err] (call (x:callback))]
                   {:success (return ok),
                    :error   (return err)})
          (return true))))
+
+^{:refer std.lang.model.spec-lua.variant-nginx/+grammar-delta+ :added "4.1"}
+(fact "nginx delay hard-links through nginx common-promise"
+  (get-in nginx/+grammar-delta+ [:x-with-delay :raw])
+  => 'lua.nginx.common-promise/with-delay)
 
 ^{:refer std.lang.model.spec-lua/tf-yield :added "4.0"}
 (fact "yield transform"

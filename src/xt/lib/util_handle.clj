@@ -1,4 +1,4 @@
-(ns xt.lang.util-handle
+(ns xt.lib.util-handle
   (:require [std.lang :as l]))
 
 (l/script :xtalk

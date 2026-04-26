@@ -7,8 +7,8 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.common-trace :as trace]
              [xt.lang.common-task :as task]
-             [xt.lang.util-throttle :as th]
-             [xt.lang.event-view :as event-view]
+             [xt.lib.util-throttle :as th]
+             [xt.lib.event-view :as event-view]
              [xt.cell.kernel.base-link :as link]
              [xt.cell.kernel.base-util :as util]
              [xt.cell.kernel.base-impl :as impl]]})

@@ -1,4 +1,4 @@
-(ns xt.lang.util-handle-test
+(ns xt.lib.util-handle-test
   (:require [std.lang :as l]
             [xt.lang.common-notify :as notify])
   (:use code.test))
@@ -8,7 +8,7 @@
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
-             [xt.lang.util-handle :as handle]
+             [xt.lib.util-handle :as handle]
              [xt.lang.common-repl :as repl]]})
 
 (l/script- :lua
@@ -17,7 +17,7 @@
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
-             [xt.lang.util-handle :as handle]
+             [xt.lib.util-handle :as handle]
              [xt.lang.common-repl :as repl]]})
 
 (l/script- :python
@@ -25,14 +25,14 @@
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
-             [xt.lang.util-handle :as handle]
+             [xt.lib.util-handle :as handle]
              [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.lang.util-handle/plugin-timing :added "4.0"}
+^{:refer xt.lib.util-handle/plugin-timing :added "4.0"}
 (fact "plugin timing"
 
   (!.js
@@ -42,7 +42,7 @@
    (xtd/tree-get-spec (handle/plugin-timing {})))
   => {"on_setup" "function", "output" {}, "on_reset" "function", "name" "string", "on_teardown" "function"})
 
-^{:refer xt.lang.util-handle/plugin-counts :added "4.0"}
+^{:refer xt.lib.util-handle/plugin-counts :added "4.0"}
 (fact "plugin counts"
 
   (!.js
@@ -57,7 +57,7 @@
       "name" "string",
       "on_success" "function"})
 
-^{:refer xt.lang.util-handle/to-handle-callback :added "4.0"}
+^{:refer xt.lib.util-handle/to-handle-callback :added "4.0"}
 (fact "adapts a cb map to the handle callback"
 
   (!.js
@@ -71,7 +71,7 @@
                                :finally "C"}))
   => {"on_error" "B", "on_teardown" "C", "on_success" "A"})
 
-^{:refer xt.lang.util-handle/new-handle :added "4.0"}
+^{:refer xt.lib.util-handle/new-handle :added "4.0"}
 (fact "creates a new handle"
 
   (notify/wait-on :js
@@ -97,9 +97,9 @@
   => (contains-in {"id" "id-0", "counts" {"success" 1, "error" 0},
                    "timing" {"start" number? "end" number?}}))
 
-^{:refer xt.lang.util-handle/run-handle :added "4.0"}
+^{:refer xt.lib.util-handle/run-handle :added "4.0"}
 (fact "runs a handle")
 
 
-^{:refer xt.lang.util-handle/incr-fn :added "4.1"}
+^{:refer xt.lib.util-handle/incr-fn :added "4.1"}
 (fact "TODO")

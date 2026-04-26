@@ -1,4 +1,4 @@
-(ns xt.lang.event-form-test
+(ns xt.lib.event-form-test
   (:require [net.http :as http]
             [std.json :as json]
             [std.lang :as l]
@@ -12,7 +12,7 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
-             [xt.lang.event-form :as form]]})
+             [xt.lib.event-form :as form]]})
 
 (l/script- :lua
   {:runtime :basic
@@ -21,7 +21,7 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
-             [xt.lang.event-form :as form]]})
+             [xt.lib.event-form :as form]]})
 
 (l/script- :python
   {:runtime :basic
@@ -29,7 +29,7 @@
               [xt.lang.common-data :as xtd]
               [xt.lang.spec-base :as xt]
               [xt.lang.common-repl :as repl]
-              [xt.lang.event-form :as form]]})
+              [xt.lib.event-form :as form]]})
 
 (l/script- :dart
   {:runtime :twostep
@@ -37,16 +37,16 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
-             [xt.lang.event-form :as form]]})
+             [xt.lib.event-form :as form]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.lang.event-form/remove-listener :adopt true :added "4.0"}
+^{:refer xt.lib.event-form/remove-listener :adopt true :added "4.0"}
 (fact "removes all listeners")
 
-^{:refer xt.lang.event-form/list-listeners :adopt true :added "4.0"
+^{:refer xt.lib.event-form/list-listeners :adopt true :added "4.0"
   :setup [(def +out+
             (contains-in
              [(contains ["a1" "b2" "c3"] :in-any-order)
@@ -107,7 +107,7 @@
     (form/list-listeners f)])
   => +out+)
 
-^{:refer xt.lang.event-form/make-form :added "4.0"
+^{:refer xt.lib.event-form/make-form :added "4.0"
   :setup [(def +out+
             {"initial" "<function>",
              "::" "event.form",
@@ -156,7 +156,7 @@
 
   => +out+)
 
-^{:refer xt.lang.event-form/check-event :added "4.0"}
+^{:refer xt.lib.event-form/check-event :added "4.0"}
 (fact "checks that event needs to be processed"
 
   (!.js
@@ -186,7 +186,7 @@
                       ["b" "d"])])
   => [true false true])
 
-^{:refer xt.lang.event-form/add-listener :added "4.0"
+^{:refer xt.lib.event-form/add-listener :added "4.0"
   :setup [(def +out+
             {"type" "form.data",
              "fields" ["login"],
@@ -257,7 +257,7 @@
     (form/set-field f "login" "test00001"))
   => +out+)
 
-^{:refer xt.lang.event-form/trigger-all :added "4.0"
+^{:refer xt.lib.event-form/trigger-all :added "4.0"
   :setup [(def +out+
             {"type" "form.data",
              "fields" ["login"],
@@ -329,7 +329,7 @@
     (form/trigger-all f "form.data"))
   => +out+)
 
-^{:refer xt.lang.event-form/trigger-field :added "4.0"
+^{:refer xt.lib.event-form/trigger-field :added "4.0"
   :setup [(def +out+
             {"type" "form.data",
              "fields" ["login"],
@@ -401,7 +401,7 @@
     (form/trigger-field f "login" "form.data"))
   => +out+)
 
-^{:refer xt.lang.event-form/set-field :added "4.0"
+^{:refer xt.lib.event-form/set-field :added "4.0"
   :setup [(def +out+
             {"type" "form.data",
              "fields" ["login"],
@@ -447,13 +447,13 @@
     (form/set-field f "login" "world"))
   => +out+)
 
-^{:refer xt.lang.event-form/get-field :added "4.0"}
+^{:refer xt.lib.event-form/get-field :added "4.0"}
 (fact "gets the field")
 
-^{:refer xt.lang.event-form/toggle-field :added "4.0"}
+^{:refer xt.lib.event-form/toggle-field :added "4.0"}
 (fact "toggles the field")
 
-^{:refer xt.lang.event-form/field-fn :added "4.0"
+^{:refer xt.lib.event-form/field-fn :added "4.0"
   :setup [(def +out+
             {"type" "form.data",
              "fields" ["login"],
@@ -499,10 +499,10 @@
     ((form/field-fn f "login")  "world"))
   => +out+)
 
-^{:refer xt.lang.event-form/get-result :added "4.0"}
+^{:refer xt.lib.event-form/get-result :added "4.0"}
 (fact "gets the validation result")
 
-^{:refer xt.lang.event-form/get-field-result :added "4.0"}
+^{:refer xt.lib.event-form/get-field-result :added "4.0"}
 (fact "gets the validation status"
 
   (!.js
@@ -538,10 +538,10 @@
    (form/get-field-result f "login"))
   => {"status" "pending"})
 
-^{:refer xt.lang.event-form/get-data :added "4.0"}
+^{:refer xt.lib.event-form/get-data :added "4.0"}
 (fact "gets the data")
 
-^{:refer xt.lang.event-form/set-data :added "4.0"
+^{:refer xt.lib.event-form/set-data :added "4.0"
   :setup [(def +out+
             {"type" "form.data",
              "fields" ["login"],
@@ -587,7 +587,7 @@
     (form/set-data f {:login "world"}))
   => +out+)
 
-^{:refer xt.lang.event-form/reset-all-data :added "4.0"}
+^{:refer xt.lib.event-form/reset-all-data :added "4.0"}
 (fact "resets all data"
 
   (!.js
@@ -626,7 +626,7 @@
     (form/reset-all-data f)])
   => [[] []])
 
-^{:refer xt.lang.event-form/reset-field-data :added "4.0"}
+^{:refer xt.lib.event-form/reset-field-data :added "4.0"}
 (fact "reset field data"
 
   (!.js
@@ -668,7 +668,7 @@
    (form/get-data f))
   => {"login" ""})
 
-^{:refer xt.lang.event-form/validate-all :added "4.0"}
+^{:refer xt.lib.event-form/validate-all :added "4.0"}
 (fact "validates all form"
 
   (notify/wait-on :js
@@ -709,7 +709,7 @@
                          (repl/notify passed))))
   => false)
 
-^{:refer xt.lang.event-form/validate-field :added "4.0"
+^{:refer xt.lib.event-form/validate-field :added "4.0"
   :setup [(def +out+
             {"type" "form.validation",
              "fields" ["login"],
@@ -743,7 +743,7 @@
     (form/validate-field f "login" (fn [field status] (return nil)) nil))
   => +out+)
 
-^{:refer xt.lang.event-form/reset-field-validator :added "4.0"
+^{:refer xt.lib.event-form/reset-field-validator :added "4.0"
   :setup [(def +out+
             {"type" "form.validation",
              "fields" ["login"],
@@ -777,7 +777,7 @@
     (form/reset-field-validator f "login"))
   => +out+)
 
-^{:refer xt.lang.event-form/reset-all-validators :added "4.0"
+^{:refer xt.lib.event-form/reset-all-validators :added "4.0"
   :setup [(def +out+
             {"type" "form.validation",
              "fields" ["login"],
@@ -811,7 +811,7 @@
     (form/reset-all-validators f))
   => +out+)
 
-^{:refer xt.lang.event-form/reset-all :added "4.0"}
+^{:refer xt.lib.event-form/reset-all :added "4.0"}
 (fact "resets data and validator result"
 
   (notify/wait-on :js
@@ -831,7 +831,7 @@
         "form/fields" ["login"],
         "listener/type" "form"}}))
 
-^{:refer xt.lang.event-form/check-field-passed :added "4.0"}
+^{:refer xt.lib.event-form/check-field-passed :added "4.0"}
 (fact "checks that field has passed"
 
   (notify/wait-on :js
@@ -862,7 +862,7 @@
     (form/validate-all f nil nil))
   => false)
 
-^{:refer xt.lang.event-form/check-field-errored :added "4.0"}
+^{:refer xt.lib.event-form/check-field-errored :added "4.0"}
 (fact  "checks that field has passed"
 
   (notify/wait-on :js
@@ -893,7 +893,7 @@
     (form/validate-all f nil nil))
   => true)
 
-^{:refer xt.lang.event-form/check-all-passed :added "4.0"}
+^{:refer xt.lib.event-form/check-all-passed :added "4.0"}
 (fact "checks that all fields have passed"
 
   (notify/wait-on :js
@@ -924,7 +924,7 @@
     (form/validate-all f nil nil))
   => false)
 
-^{:refer xt.lang.event-form/check-any-errored :added "4.0"}
+^{:refer xt.lib.event-form/check-any-errored :added "4.0"}
 (fact  "checks that any fields have errored"
 
   (notify/wait-on :js

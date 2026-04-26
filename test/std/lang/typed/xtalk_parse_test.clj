@@ -3,7 +3,7 @@
   (:require [std.lang.typed.xtalk-common :as types]
             [std.lang.typed.xtalk-parse :refer :all]))
 
-(def +ctx+ {:ns 'sample.route :aliases '{types xt.lang.event-common}})
+(def +ctx+ {:ns 'sample.route :aliases '{types xt.lib.event-common}})
 
 ^{:refer std.lang.typed.xtalk-parse/read-forms :added "4.1"}
 (fact "reads forms from files"
@@ -49,9 +49,9 @@
 ^{:refer std.lang.typed.xtalk-parse/extract-aliases :added "4.1"}
 (fact "extracts aliases from require vectors"
   (extract-aliases '[[xt.lang.common-lib :as k]
-                     [xt.lang.event-common :as event-common]])
+                     [xt.lib.event-common :as event-common]])
   => '{k xt.lang.common-lib
-       event-common xt.lang.event-common})
+       event-common xt.lib.event-common})
 
 ^{:refer std.lang.typed.xtalk-parse/extract-ns-aliases :added "4.1"}
 (fact "extracts aliases from ns forms"

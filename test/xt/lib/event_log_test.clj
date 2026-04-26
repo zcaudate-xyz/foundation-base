@@ -1,4 +1,4 @@
-(ns xt.lang.event-log-test
+(ns xt.lib.event-log-test
   (:require [std.json :as json]
             [std.lang :as l]
             [xt.lang.common-notify :as notify])
@@ -9,7 +9,7 @@
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
-             [xt.lang.event-log :as log]
+             [xt.lib.event-log :as log]
              [xt.lang.common-repl :as repl]]})
 
 (l/script- :lua
@@ -17,7 +17,7 @@
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
               [xt.lang.spec-base :as xt]
-              [xt.lang.event-log :as log]
+              [xt.lib.event-log :as log]
               [xt.lang.common-repl :as repl]]})
 
 (l/script- :python
@@ -25,14 +25,14 @@
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
-             [xt.lang.event-log :as log]
+             [xt.lib.event-log :as log]
              [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.lang.event-log/new-log :added "4.0"}
+^{:refer xt.lib.event-log/new-log :added "4.0"}
 (fact "creates a new log"
 
   (!.js
@@ -43,31 +43,31 @@
    (log/new-log {}))
   => map?)
 
-^{:refer xt.lang.event-log/get-count :added "4.0"}
+^{:refer xt.lib.event-log/get-count :added "4.0"}
 (fact "gets the current count")
 
-^{:refer xt.lang.event-log/get-last :added "4.0"}
+^{:refer xt.lib.event-log/get-last :added "4.0"}
 (fact "gets the last log entry")
 
-^{:refer xt.lang.event-log/get-head :added "4.0"}
+^{:refer xt.lib.event-log/get-head :added "4.0"}
 (fact "gets `n` elements from beginning")
 
-^{:refer xt.lang.event-log/get-filtered :added "4.0"}
+^{:refer xt.lib.event-log/get-filtered :added "4.0"}
 (fact "filters entries using predicate")
 
-^{:refer xt.lang.event-log/get-tail :added "4.0"}
+^{:refer xt.lib.event-log/get-tail :added "4.0"}
 (fact "gets `n` elements from tail")
 
-^{:refer xt.lang.event-log/get-slice :added "4.0"}
+^{:refer xt.lib.event-log/get-slice :added "4.0"}
 (fact "gets a slice of the log entries")
 
-^{:refer xt.lang.event-log/clear :added "4.0"}
+^{:refer xt.lib.event-log/clear :added "4.0"}
 (fact "clears all processed entries")
 
-^{:refer xt.lang.event-log/clear-cache :added "4.0"}
+^{:refer xt.lib.event-log/clear-cache :added "4.0"}
 (fact "clears log cache")
 
-^{:refer xt.lang.event-log/queue-entry :added "4.0"}
+^{:refer xt.lib.event-log/queue-entry :added "4.0"}
 (fact "queues a log entry"
 
    (!.js
@@ -128,7 +128,7 @@
       "last" 100000,
       "listeners" {}})
 
-^{:refer xt.lang.event-log/list-listeners :adopt true :added "4.0"}
+^{:refer xt.lib.event-log/list-listeners :adopt true :added "4.0"}
 (fact "lists all listeners"
 
   (!.js
@@ -149,7 +149,7 @@
     xt/x:str-lt))
   => ["test1" "test2"])
 
-^{:refer xt.lang.event-log/add-listener :added "4.0"}
+^{:refer xt.lib.event-log/add-listener :added "4.0"}
 (fact "adds a listener to the log"
 
   (!.js
@@ -178,7 +178,7 @@
       "pred" nil,
       "meta" {"listener/id" "test1", "listener/type" "log"}})
 
-^{:refer xt.lang.event-log/remove-listener :adopt true :added "4.0"}
+^{:refer xt.lib.event-log/remove-listener :adopt true :added "4.0"}
 (fact "removes a listener"
 
   ^{:lang-exceptions {:lua {:skip true}}}

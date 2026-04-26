@@ -1,4 +1,4 @@
-(ns xt.lang.event-box-test
+(ns xt.lib.event-box-test
   (:require [rt.basic :as basic]
             [std.lang :as l]
             [xt.lang.common-notify :as notify])
@@ -9,34 +9,34 @@
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
               [xt.lang.common-repl :as repl]
-              [xt.lang.event-box :as box]]})
+              [xt.lib.event-box :as box]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
               [xt.lang.common-repl :as repl]
-              [xt.lang.event-box :as box]]})
+              [xt.lib.event-box :as box]]})
 
 (l/script- :python
   {:runtime :basic
     :require [[xt.lang.common-lib :as k]
                [xt.lang.common-data :as xtd]
                 [xt.lang.common-repl :as repl]
-                [xt.lang.event-box :as box]]})
+                [xt.lib.event-box :as box]]})
 
 (l/script- :dart
   {:runtime :twostep
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]
-             [xt.lang.event-box :as box]]})
+             [xt.lib.event-box :as box]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.lang.event-box/make-box :added "4.0"}
+^{:refer xt.lib.event-box/make-box :added "4.0"}
 (fact "creates a box"
 
   (!.js
@@ -57,7 +57,7 @@
       "listeners" {},
       "data" {"a" 1}})
 
-^{:refer xt.lang.event-box/check-event :added "4.0"}
+^{:refer xt.lib.event-box/check-event :added "4.0"}
 (fact "checks that event matches path predicate"
 
   (!.js
@@ -95,7 +95,7 @@
                      ["a" "b" "c"])])
   => [true true false false])
 
-^{:refer xt.lang.event-box/add-listener :added "4.0"}
+^{:refer xt.lib.event-box/add-listener :added "4.0"}
 (fact "adds a listener to box"
 
   (notify/wait-on :js
@@ -166,10 +166,10 @@
        "listener/type" "box"},
       "data" {"a" {"b" 3}}})
 
-^{:refer xt.lang.event-box/get-data :added "4.0"}
+^{:refer xt.lib.event-box/get-data :added "4.0"}
 (fact "gets the current data in the box")
 
-^{:refer xt.lang.event-box/set-data-raw :added "4.0"}
+^{:refer xt.lib.event-box/set-data-raw :added "4.0"}
 (fact "sets the data in the box"
 
   (!.js
@@ -177,7 +177,7 @@
    (box/set-data-raw b ["c"] 3))
   => {"a" {"b" 2}, "c" 3})
 
-^{:refer xt.lang.event-box/set-data :added "4.0"}
+^{:refer xt.lib.event-box/set-data :added "4.0"}
 (fact "sets data with a trigger"
 
   (!.js
@@ -186,7 +186,7 @@
      (box/get-data b [])])
   => [[] {"a" {"b" 2}, "c" 3}])
 
-^{:refer xt.lang.event-box/del-data-raw :added "4.0"}
+^{:refer xt.lib.event-box/del-data-raw :added "4.0"}
 (fact "removes the data in the box"
 
   (!.js
@@ -195,7 +195,7 @@
      (box/get-data b [])])
   => [true {"a" {}}])
 
-^{:refer xt.lang.event-box/del-data :added "4.0"}
+^{:refer xt.lib.event-box/del-data :added "4.0"}
 (fact "removes data with trigger"
 
   (!.js
@@ -204,7 +204,7 @@
      (box/get-data b [])])
   => [[] {"a" {}}])
 
-^{:refer xt.lang.event-box/reset-data :added "4.0"}
+^{:refer xt.lib.event-box/reset-data :added "4.0"}
 (fact "resets the data in the box"
 
   (!.js
@@ -216,7 +216,7 @@
   [[] {"a" {"b" 2}, "c" 3}
    [] {"a" {"b" 2}}])
 
-^{:refer xt.lang.event-box/merge-data :added "4.0"}
+^{:refer xt.lib.event-box/merge-data :added "4.0"}
 (fact "merges the data in the box"
 
   (!.js
@@ -231,7 +231,7 @@
    (box/get-data b []))
   => {"d" 4, "a" 1, "b" 2, "c" 3})
 
-^{:refer xt.lang.event-box/append-data :added "4.0"}
+^{:refer xt.lib.event-box/append-data :added "4.0"}
 (fact "merges the data in the box"
 
   (!.js

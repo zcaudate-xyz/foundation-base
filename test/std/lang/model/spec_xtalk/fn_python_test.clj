@@ -1,5 +1,6 @@
 (ns std.lang.model.spec-xtalk.fn-python-test
   (:require [std.lang :as l]
+            [python.core.common-promise]
             [std.lang.model.spec-xtalk.fn-python :refer :all])
   (:use code.test))
 
@@ -414,6 +415,16 @@
     [(boolean (re-find #"sleep\(ms / 1000\.0\)" out))
      (boolean (re-find #"return thunk\(\)" out))])
   => [true true])
+
+^{:refer std.lang.model.spec-xtalk.fn-python/+python-promise+ :added "4.1"}
+(fact "promise delay hard-links through common-promise"
+  [(get-in +python-promise+ [:x-with-delay :raw])
+   (let [out (l/emit-as :python ['(python.core.common-promise/with-delay ms thunk)
+                                 '(python.core.common-promise/with-delay thunk ms)])]
+     [(boolean (re-find #"python\.core\.common_promise\.with_delay\(ms,\s*thunk\)" out))
+      (boolean (re-find #"python\.core\.common_promise\.with_delay\(thunk,\s*ms\)" out))])]
+  => ['python.core.common-promise/with-delay
+      [true true]])
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-iter-from-obj :added "4.0"}
 (fact "iter from obj"

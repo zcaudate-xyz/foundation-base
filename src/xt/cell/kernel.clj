@@ -6,7 +6,7 @@
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-task :as task]
-             [xt.lang.event-view :as event-view]
+             [xt.lib.event-view :as event-view]
              [xt.cell.kernel.base-link :as raw]
              [xt.cell.kernel.base-impl :as impl-common]
              [xt.cell.kernel.base-model :as impl-model]]})

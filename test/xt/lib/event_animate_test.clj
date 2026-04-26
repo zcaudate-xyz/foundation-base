@@ -1,4 +1,4 @@
-(ns xt.lang.event-animate-test
+(ns xt.lib.event-animate-test
   (:require [std.json :as json]
             [std.lang :as l]
             [xt.lang.common-notify :as notify])
@@ -8,29 +8,29 @@
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-repl :as repl]
-             [xt.lang.event-animate :as base-animate]
-             [xt.lang.event-animate-mock :as mock]]})
+             [xt.lib.event-animate :as base-animate]
+             [xt.lib.event-animate-mock :as mock]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-repl :as repl]
-             [xt.lang.event-animate :as base-animate]
-             [xt.lang.event-animate-mock :as mock]]})
+             [xt.lib.event-animate :as base-animate]
+             [xt.lib.event-animate-mock :as mock]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-repl :as repl]
-             [xt.lang.event-animate :as base-animate]
-             [xt.lang.event-animate-mock :as mock]]})
+             [xt.lib.event-animate :as base-animate]
+             [xt.lib.event-animate-mock :as mock]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
 
-^{:refer xt.lang.event-animate/new-derived :added "4.0"}
+^{:refer xt.lib.event-animate/new-derived :added "4.0"}
 (fact "creates a new derived value"
 
   (!.js
@@ -51,7 +51,7 @@
                              (mock/new-observed 3)])))
   => 6)
 
-^{:refer xt.lang.event-animate/listen-single :added "4.0"}
+^{:refer xt.lib.event-animate/listen-single :added "4.0"}
 (fact "listens to a single observer"
 
   (!.js
@@ -98,7 +98,7 @@
       {"opacity" 0.6} nil
       {"opacity" 0.5}])
 
-^{:refer xt.lang.event-animate/listen-array :added "4.0"}
+^{:refer xt.lib.event-animate/listen-array :added "4.0"}
 (fact "listens to array for changes"
 
   (!.js
@@ -141,7 +141,7 @@
     (get-style ref)])
   => [{"opacity" 0.4} nil {"opacity" 0.7} nil {"opacity" 0.8}])
 
-^{:refer xt.lang.event-animate/get-map-paths :added "4.0"}
+^{:refer xt.lib.event-animate/get-map-paths :added "4.0"}
 (fact "gets map paths"
 
   (!.js
@@ -160,7 +160,7 @@
        [{} "b" false]
        [["b"] "c" {"value" 2, "::" "observed", "listeners" {}}]})
 
-^{:refer xt.lang.event-animate/get-map-input :added "4.0"}
+^{:refer xt.lib.event-animate/get-map-input :added "4.0"}
 (fact "gets the map input"
 
   (!.js
@@ -179,7 +179,7 @@
      [["b"] "c" {"value" 2, "::" "observed", "listeners" []}]]))
   => {"a" 1, "b" {"c" 2}})
 
-^{:refer xt.lang.event-animate/listen-map :added "4.0"}
+^{:refer xt.lib.event-animate/listen-map :added "4.0"}
 (fact "listens to a map of indicators"
 
   (!.js
@@ -218,7 +218,7 @@
      render-fn))
   => {"style" {"opacity" 0.3}})
 
-^{:refer xt.lang.event-animate/listen-transformations :added "4.0"}
+^{:refer xt.lib.event-animate/listen-transformations :added "4.0"}
 (fact "converts to the necessary listeners"
 
   (!.js
@@ -239,7 +239,7 @@
     (fn:> {})))
   => {})
 
-^{:refer xt.lang.event-animate/new-progressing :added "4.0"}
+^{:refer xt.lib.event-animate/new-progressing :added "4.0"}
 (fact "creates a new progressing element"
 
   (!.js
@@ -250,25 +250,25 @@
    (base-animate/new-progressing))
   => {"running" false, "queued" {}})
 
-^{:refer xt.lang.event-animate/run-with-cancel :added "4.0"}
+^{:refer xt.lib.event-animate/run-with-cancel :added "4.0"}
 (fact "runs with cancel")
 
-^{:refer xt.lang.event-animate/animate-chained-cleanup :added "4.0"}
+^{:refer xt.lib.event-animate/animate-chained-cleanup :added "4.0"}
 (fact "runs with cleanup")
 
-^{:refer xt.lang.event-animate/animate-chained-one :added "4.0"}
+^{:refer xt.lib.event-animate/animate-chained-one :added "4.0"}
 (fact "runs with single chain")
 
-^{:refer xt.lang.event-animate/animate-chained-all :added "4.0"}
+^{:refer xt.lib.event-animate/animate-chained-all :added "4.0"}
 (fact "runs with all chained")
 
-^{:refer xt.lang.event-animate/run-with-chained :added "4.0"}
+^{:refer xt.lib.event-animate/run-with-chained :added "4.0"}
 (fact "runs chained")
 
-^{:refer xt.lang.event-animate/run-with :added "4.0"}
+^{:refer xt.lib.event-animate/run-with :added "4.0"}
 (fact "runs effects")
 
-^{:refer xt.lang.event-animate/make-binary-transitions :added "4.0"}
+^{:refer xt.lib.event-animate/make-binary-transitions :added "4.0"}
 (fact "makes a binary transition"
 
   (!.js
@@ -301,7 +301,7 @@
      (mock/get-value indicator)])
   => [0 nil 1 nil 0])
 
-^{:refer xt.lang.event-animate/make-binary-indicator :added "4.0"}
+^{:refer xt.lib.event-animate/make-binary-indicator :added "4.0"}
 (fact "makes a binary indicator"
 
   ^{:lang-exceptions {:lua {:skip true}
@@ -348,7 +348,7 @@
       1 {"running" false, "queued" [], "animation" nil}
       0])
 
-^{:refer xt.lang.event-animate/make-linear-indicator :added "4.0"}
+^{:refer xt.lib.event-animate/make-linear-indicator :added "4.0"}
 (fact  "makes a linear indicator"
 
   ^{:lang-exceptions {:dart {:expect [1
@@ -432,7 +432,7 @@
       3 {"running" false, "queued" [], "animation" nil}
       8])
 
-^{:refer xt.lang.event-animate/make-circular-indicator :added "4.0"}
+^{:refer xt.lib.event-animate/make-circular-indicator :added "4.0"}
 (fact "makes a circular indicator"
 
   ^{:lang-exceptions {:dart {:expect [1

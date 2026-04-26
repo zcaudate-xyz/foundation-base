@@ -9,7 +9,7 @@
              [xt.db.cache-util :as cache-util]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-             [xt.lang.util-throttle :as th]]})
+             [xt.lib.util-throttle :as th]]})
 
 (defn.xt cache-process-event-sync
   "processes event sync data from database"

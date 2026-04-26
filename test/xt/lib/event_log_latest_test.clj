@@ -1,4 +1,4 @@
-(ns xt.lang.event-log-latest-test
+(ns xt.lib.event-log-latest-test
   (:require [std.json :as json]
             [std.lang :as l]
             [xt.lang.common-notify :as notify])
@@ -8,28 +8,28 @@
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
              [xt.lang.spec-base :as xt]
-             [xt.lang.event-log-latest :as log-latest]
+             [xt.lib.event-log-latest :as log-latest]
              [xt.lang.common-repl :as repl]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
              [xt.lang.spec-base :as xt]
-             [xt.lang.event-log-latest :as log-latest]
+             [xt.lib.event-log-latest :as log-latest]
              [xt.lang.common-repl :as repl]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
              [xt.lang.spec-base :as xt]
-             [xt.lang.event-log-latest :as log-latest]
+             [xt.lib.event-log-latest :as log-latest]
              [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.lang.event-log-latest/new-log-latest :added "4.0"}
+^{:refer xt.lib.event-log-latest/new-log-latest :added "4.0"}
 (fact "creates a new log-latest"
 
   (!.js
@@ -40,7 +40,7 @@
    (log-latest/new-log-latest {}))
   => map?)
 
-^{:refer xt.lang.event-log-latest/clear-cache :added "4.0"}
+^{:refer xt.lib.event-log-latest/clear-cache :added "4.0"}
 (fact "clears the cache given a time point"
 
   (!.js
@@ -52,7 +52,7 @@
                                    100000))])
   => [[] ["a" "b"]])
 
-^{:refer xt.lang.event-log-latest/queue-latest :added "4.0"}
+^{:refer xt.lib.event-log-latest/queue-latest :added "4.0"}
 (fact "queues the latest time to log"
 
   (!.js

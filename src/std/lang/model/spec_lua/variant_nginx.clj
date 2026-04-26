@@ -49,7 +49,7 @@
   "Nginx-specific grammar overrides layered onto base Lua."
   {:for-async      {:macro #'tf-for-async :emit :macro}
    :x-socket-connect {:macro #'lua-tf-x-socket-connect :emit :macro}
-   :x-with-delay     {:macro #'lua-tf-x-with-delay :emit :macro}
+   :x-with-delay     {:emit :hard-link :raw 'lua.nginx.common-promise/with-delay}
    :x-b64-decode     {:emit :alias :raw 'ngx.decode-base64}
    :x-b64-encode     {:emit :alias :raw 'ngx.encode-base64}
    :x-uri-decode     {:emit :alias :raw 'ngx.unescape-uri}

@@ -1,4 +1,4 @@
-(ns xt.lang.util-http-test
+(ns xt.lib.util-http-test
   (:require [net.http :as nhttp]
             [org.httpkit.server :as server]
    	        [rt.nginx :as nginx]
@@ -11,7 +11,7 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.util-http :as http]
+   :require [[xt.lib.util-http :as http]
              [xt.lang.common-repl :as repl]]})
 
 (l/script+ [:es :lua]
@@ -77,12 +77,12 @@
               (when CANARY-NGINX
                 (l/annex:stop-all))]})
 
-^{:refer xt.lang.util-http/CANARY :adopt true :added "4.0"}
+^{:refer xt.lib.util-http/CANARY :adopt true :added "4.0"}
 (fact "tests that scaffold is working"
   true
   => true)
 
-^{:refer xt.lang.util-http/fetch-call :added "4.0"}
+^{:refer xt.lib.util-http/fetch-call :added "4.0"}
 (fact "completes a http call with options"
   ;;
 
@@ -94,7 +94,7 @@
         (. (then (repl/>notify)))))
   => "OK")
 
-^{:refer xt.lang.util-http/es-connect :added "4.0"}
+^{:refer xt.lib.util-http/es-connect :added "4.0"}
 (fact "connects to an event source"
 
   (when (and CANARY-NGINX @+es-ready+)
@@ -107,22 +107,22 @@
                               (es.close))}))))
   => (if (and CANARY-NGINX @+es-ready+) "TEST-5" nil))
 
-^{:refer xt.lang.util-http/es-active? :added "4.0"}
+^{:refer xt.lib.util-http/es-active? :added "4.0"}
 (fact "checks if event source is active")
 
-^{:refer xt.lang.util-http/es-close :added "4.0"}
+^{:refer xt.lib.util-http/es-close :added "4.0"}
 (fact "closes the event source")
 
-^{:refer xt.lang.util-http/ws-connect :added "4.0"}
+^{:refer xt.lib.util-http/ws-connect :added "4.0"}
 (fact "connects to a websocket source")
 
-^{:refer xt.lang.util-http/ws-active? :added "4.0"}
+^{:refer xt.lib.util-http/ws-active? :added "4.0"}
 (fact "checks if websocket is active")
 
-^{:refer xt.lang.util-http/ws-close :added "4.0"}
+^{:refer xt.lib.util-http/ws-close :added "4.0"}
 (fact "closes the websocket")
 
-^{:refer xt.lang.util-http/ws-send :added "4.0"}
+^{:refer xt.lib.util-http/ws-send :added "4.0"}
 (fact "sends text through websocket")
 
 

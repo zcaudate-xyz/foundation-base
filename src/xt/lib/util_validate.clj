@@ -1,4 +1,4 @@
-(ns xt.lang.util-validate
+(ns xt.lib.util-validate
   (:require [std.lang :as l]
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 

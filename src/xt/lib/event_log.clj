@@ -1,10 +1,10 @@
-(ns xt.lang.event-log
+(ns xt.lib.event-log
   (:require [std.lang :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-             [xt.lang.event-common :as event-common]]})
+             [xt.lib.event-common :as event-common]]})
 
 (defn.xt new-log
   "creates a new log"
