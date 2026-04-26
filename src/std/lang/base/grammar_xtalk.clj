@@ -749,10 +749,7 @@
               :arglists '([f args])}}])
 
 (def +xt-functional-return+
-  [{:op :x-return-run      :symbol #{'x:return-run}      :emit :abstract
-    :op-spec {:allow-blocks true
-              :arglists '([runner])}}
-   {:op :x-return-encode   :symbol #{'x:return-encode}   :emit :abstract
+  [{:op :x-return-encode   :symbol #{'x:return-encode}   :emit :abstract
     :op-spec {:allow-blocks true
               :type [:fn [:xt/any :xt/str :xt/str] :xt/str]
               :arglists '([out id key])}}

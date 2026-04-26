@@ -559,13 +559,6 @@
    :x-spit-file      {:macro #'lua-tf-x-spit-file     :emit :macro
                       :op-spec {:allow-blocks true}}})
 
-;;
-;; SPECIAL
-;;
-
-(def +lua-special+
-  {})
-
 (def +lua+
   (merge +lua-core+
          +lua-global+
@@ -581,5 +574,4 @@
          +lua-return+
          +lua-socket+
          +lua-iter+
-         +lua-file+
-         +lua-special+))
+         +lua-file+))

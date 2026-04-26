@@ -81,93 +81,17 @@
   "for return transform"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error final]}]]
-  (let [return-run? (and (seq? statement)
-                         (= 'x:return-run (first statement)))
-        success* (if (and return-run? final)
-                   (list 'return success)
-                   success)
-        error* (if (and return-run? final)
-                 (list 'return error)
-                 error)
-        out (if return-run?
-              (let [[_ runner] statement]
-               (template/$
-                 (do (var ~res nil)
-                     (var ~err nil)
-                     (try
-                       (~runner
-                        (fn [value]
-                          (:= ~res value)
-                          (:= ~err nil))
-                        (fn [value]
-                          (:= ~res nil)
-                          (:= ~err value)))
-                       (if (not= nil ~err)
-                          ~error*
-                          ~success*)
-                       (catch ~err ~error*)))))
-               (let [cb (list 'fn [err res]
-                              (list 'if (list 'not= err nil)
-                                    (if (and (seq? error)
-                                             (= 'return (first error)))
-                                      error
-                                      (list 'return error))
-                                    (if (and (seq? success)
-                                             (= 'return (first success)))
-                                      success
-                                      (list 'return success))))]
-                 (walk/prewalk (fn [x]
-                                 (if (= x '(x:callback))
-                                   cb
-                                  x))
-                              statement)))]
+  (let [cb (list 'fn [err res]
+                 (list 'if err
+                       error
+                       success))
+        out (walk/prewalk (fn [x]
+                            (if (= x '(x:callback))
+                              cb
+                           x))
+                          statement)]
     (cond->> out
-      (and final (not return-run?)) (list 'return))))
-
-(defn tf-for-try
-  "for try transform"
-  {:added "4.0"}
-  [[_ [[res err] statement] {:keys [success error]}]]
-  (template/$ (try
-                (var ~res := ~statement)
-                ~success
-                (catch ~err ~error))))
-
-(defn tf-for-async
-  "for async transform"
-  {:added "4.0"}
-  [[_ [[res err] statement] {:keys [success error finally]}]]
-  (let [return-run? (and (seq? statement)
-                         (= 'x:return-run (first statement)))
-        base (if return-run?
-               (let [[_ runner] statement]
-                 (template/$
-                  (do (var completer (new Completer))
-                      (try
-                        (~runner
-                         (fn [~res]
-                           (. completer (complete ~res)))
-                         (fn [~err]
-                           (. completer (completeError ~err))))
-                        (catch ~err
-                          (. completer (completeError ~err))))
-                      (. completer future))))
-               (template/$
-                (Future (fn []
-                          (return ~statement)))))]
-    (template/$ (. ~base
-                   ~@(if success
-                       [(list 'then
-                              (list 'fn [res]
-                                    success))])
-                   ~@(if error
-                       [(list 'catchError
-                              (list 'fn [err]
-                                    error))])
-                   ~@(if finally
-                       [(list 'whenComplete
-                              (list 'fn '[]
-                                    finally))])))))
+      final (list 'return))))
 
 (defn dart-tf-ternary
   "nil-safe ternary transform for dart-specific rewrites"
@@ -191,8 +115,6 @@
         :for-array   {:macro #'tf-for-array  :emit :macro}
         :for-iter    {:macro #'tf-for-iter   :emit :macro}
         :for-return  {:macro #'tf-for-return :emit :macro}
-        :for-try     {:macro #'tf-for-try    :emit :macro}
-        :for-async   {:macro #'tf-for-async  :emit :macro}
         :with-global {:value true :raw "__globals__"}})
       (grammar/build:override fn-dart/+dart+)
       (grammar/build:extend

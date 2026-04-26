@@ -128,41 +128,15 @@
   (apply list 'for [i := (list 'quote [start end (or step 1)])]
          body))
 
-(defn lua-tf-for-return
+(defn tf-for-return
   "for return transform"
   {:added "4.0"}
-  [[_ [[res err] statement] {:keys [success error final]}]]
-  (if (and (seq? statement)
-           (= 'x:return-run (first statement)))
-    (let [[_ runner] statement]
-      (template/$ (do (var ~res nil)
-                      (var ~err nil)
-                      (~runner
-                       (fn [value]
-                         (:= ~res value)
-                         (:= ~err nil))
-                       (fn [value]
-                         (:= ~res nil)
-                         (:= ~err value)))
-                      (if (not ~err)
-                        ~(if final (list 'return success) success)
-                        ~(if final (list 'return error) error)))))
-    (template/$ (do (var '[~res ~err] ~statement)
-                    (if (not ~err)
-                      ~(if final (list 'return success) success)
-                      ~(if final (list 'return error) error))))))
-
-(defn lua-tf-for-try
-  "for try transform"
-  {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error]}]]
-  (template/$ (do (var '[ok out] (pcall (fn []
-                                          (return ~statement))))
-                  (if ok
-                    (do* (var ~res := out)
-                         ~@(if success [success]))
-                    (do* (var ~err := out)
-                         ~@(if error [error]))))))
+  (template/$
+   (do (var '[~res ~err] ~statement)
+       (if (not ~err)
+         ~success
+         ~error))))
 
 (defn lua-tf-for-async
   "for async transform"
@@ -235,7 +209,6 @@
         :for-iter   {:macro #'lua-tf-for-iter   :emit :macro}
         :for-index  {:macro #'lua-tf-for-index  :emit :macro}
         :for-return {:macro #'lua-tf-for-return :emit :macro}
-        :for-try    {:macro #'lua-tf-for-try    :emit :macro}
         :for-async  {:macro #'lua-tf-for-async  :emit :macro}
         :defgen     {:macro #'lua-tf-defgen     :emit :macro}
         :yield      {:macro #'lua-tf-yield      :emit :macro}
@@ -370,20 +343,3 @@
 
 (def +init+
   (script/install +book+))
-
-(comment
-  (lib/get-book (impl/default-library) :lua)
-
-  (!.lua
-    (let [#{a} hello
-          b 2]))
-  
-  (!.lua
-    (defgen hello []
-      (yield n)))
-  (!.lua (x:offset))
-  (!.lua (x:random))
-
-  
-  
-  (./create-tests))

@@ -554,11 +554,15 @@
                       :op-spec {:allow-blocks true}}})
 
 (defn python-tf-x-socket-connect
-  ([[_ host port opts]]
-   (template/$ (do (:- :import socket)
-                   (var conn (socket.socket))
-                   (conn.connect '(~host ~port))
-                   (return conn)))))
+  ([[_ host port opts cb]]
+   (template/$
+    (do (:- :import socket)
+        (try
+          (var conn (socket.socket))
+          (conn.connect '(~host ~port))
+          (return (~cb nil conn))
+          (catch [Exception :as e]
+            (return (~cb e nil))))))))
 
 (defn python-tf-x-socket-send
   ([[_ conn s]]
@@ -687,4 +691,3 @@
          +python-iter+
          +python-thread+
          +python-file+))
-

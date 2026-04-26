@@ -1,7 +1,6 @@
 (ns std.lang.model.spec-python
-  (:require [std.lib.walk :as walk]
-            [std.lang.base.book :as book]
- 	    [std.lang.base.emit :as emit]
+  (:require [std.lang.base.book :as book]
+	    [std.lang.base.emit :as emit]
             [std.lang.base.emit-common :as common]
             [std.lang.base.emit-data :as data]
             [std.lang.base.emit-helper :as helper]
@@ -33,6 +32,7 @@
 (defn- python-token-boolean
   [v]
   (if v "True" "False"))
+
 
 (defn- python-qualified-symbol
   [sym]
@@ -216,157 +216,11 @@
 (defn tf-for-return
   "for return transform"
   {:added "4.0"}
-  [[_ [[res err] statement] {:keys [success error final]}]]
-  (let [return-run? (and (seq? statement)
-                         (= 'x:return-run (first statement)))
-        callback?   (let [found (volatile! false)]
-                      (walk/prewalk (fn [x]
-                                      (when (= x '(x:callback))
-                                        (vreset! found true))
-                                      x)
-                                    statement)
-                      @found)
-        success*    (if (and final return-run?)
-                      (list 'return success)
-                      success)
-        error*      (if (and final return-run?)
-                      (list 'return error)
-                      error)
-        out         (if return-run?
-                      (let [[_ runner] statement
-                            on-ok (gensym "on_ok")
-                            on-err (gensym "on_err")
-                            ex (gensym "ex")
-                            state (gensym "state")]
-                        (template/$
-                         (do (var ~state {"res" nil
-                                          "err" nil})
-                             (var ~res nil)
-                             (var ~err nil)
-                             (fn ~on-ok [value]
-                               (:= (. ~state ["res"]) value)
-                               (:= (. ~state ["err"]) nil))
-                             (fn ~on-err [value]
-                               (:= (. ~state ["res"]) nil)
-                               (:= (. ~state ["err"]) value))
-                             (try
-                               (~runner ~on-ok ~on-err)
-                               (:= ~res (. ~state ["res"]))
-                               (:= ~err (. ~state ["err"]))
-                               (if (not= nil ~err)
-                                 ~error*
-                                 ~success*)
-                                (catch [Exception :as ~ex]
-                                  (:= ~err ~ex)
-                                  ~error*)))))
-                      (if callback?
-                        (let [cb-sym (gensym "py_callback__")
-                              cb     (list 'var cb-sym
-                                           (list 'fn [err res]
-                                                 (list 'if (list 'not= err nil)
-                                                       error
-                                                       success)))
-                              stmt   (walk/prewalk (fn [x]
-                                                     (if (= x '(x:callback))
-                                                       cb-sym
-                                                       x))
-                                                   statement)]
-                          (list 'do* cb stmt))
-                        (template/$
-                         (try
-                           (var ~res ~statement)
-                           ~@(if success [success])
-                           (catch [Exception :as ~err]
-                             ~@(if error [error]))))))]
-    (cond->> out
-      (and final (not return-run?)) (list 'return))))
-
-(defn tf-for-try
-  "for try transform"
-  {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error]}]]
-  (let [success-form (or success '(return nil))
-        error-form   (or error '(return nil))
-        expanded-do  (when (and (seq? statement)
-                                (= 1 (count statement))
-                                (seq? (first statement))
-                                (= 'quote (ffirst statement)))
-                       (let [quoted (second (first statement))
-                             thunk  (first quoted)]
-                         (when (and (seq? thunk)
-                                    (= 'fn (first thunk))
-                                    (vector? (second thunk)))
-                           (drop 2 thunk))))]
-    (if (or (and (seq? statement)
-                 (= 'do:> (first statement)))
-            expanded-do)
-      (let [body   (or expanded-do (rest statement))
-            runner 'fnthunk]
-        (template/$
-         (try
-           ~(apply list 'fn.inner (with-meta runner {:inner true}) '[] body)
-           (var ~res (~runner))
-           ~success-form
-           (catch [Exception :as ~err]
-             ~error-form))))
-      (template/$
-       (try
-         (var ~res ~statement)
-         ~success-form
-         (catch [Exception :as ~err]
-             ~error-form))))))
+  (template/$ (try (var ~res ~statement)
+                   ~success
+                   (catch [Exception :as ~err] ~error))))
 
-(defn tf-for-async
-  "for async transform"
-  {:added "4.0"}
-  [[_ [[res err] statement] {:keys [success error finally]}]]
-  (let [success-form (or success '(return nil))
-        error-form   (or error '(return nil))
-        runner       (gensym "runner")]
-    (if (and (seq? statement)
-             (= 'x:return-run (first statement)))
-      (let [[_ runner] statement
-            on-ok (gensym "on_ok")
-            on-err (gensym "on_err")
-            ex (gensym "ex")
-            state (gensym "state")]
-        (template/$
-         (. (__import__ "threading")
-            (Thread :target
-                    (fn []
-                      (var ~state {"res" nil
-                                   "err" nil})
-                      (fn ~on-ok [value]
-                        (:= (. ~state ["res"]) value)
-                        (:= (. ~state ["err"]) nil))
-                      (fn ~on-err [value]
-                        (:= (. ~state ["res"]) nil)
-                        (:= (. ~state ["err"]) value))
-                      (try
-                        (~runner ~on-ok ~on-err)
-                        (:= ~res (. ~state ["res"]))
-                        (:= ~err (. ~state ["err"]))
-                        (if (not= nil ~err)
-                          ~error-form
-                          ~success-form)
-                        (catch [Exception :as ~ex]
-                            (:= ~err ~ex)
-                          ~error-form)
-                        ~@(if finally
-                            [(list 'finally finally)]))))
-            (start))))
-      (template/$
-       (. (__import__ "threading")
-          (Thread :target
-                  (fn []
-                    (try
-                      (var ~res ~statement)
-                      ~success-form
-                      (catch [Exception :as ~err]
-                          ~error-form)
-                      ~@(if finally
-                          [(list 'finally finally)]))))
-          (start))))))
 
 (def +features+
   (-> (grammar/build :exclude [:pointer
@@ -388,8 +242,7 @@
         :for-array   {:macro #'tf-for-array  :emit :macro}
         :for-iter    {:macro #'tf-for-iter   :emit :macro}
         :for-index   {:macro #'tf-for-index  :emit :macro}
-        :for-try     {:macro #'tf-for-try    :emit :macro}
-        :for-async   {:macro #'tf-for-async  :emit :macro :type :template}
+        :for-async   {:macro #'tf-for-async  :emit :macro}
         :for-return  {:macro #'tf-for-return :emit :macro}})
       (grammar/build:override fn/+python+)
       (grammar/build:extend
@@ -468,3 +321,4 @@
 
 (def +init+
   (script/install +book+))
+

@@ -179,96 +179,40 @@
   (apply list 'for [(list 'var* :let e) :of (list '% it)]
          body))
 
-(defn js-tf-for-return
+(defn tf-for-return
   "for return transform"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error final]}]]
-  (let [return-run? (and (seq? statement)
-                         (= 'x:return-run (first statement)))
-        success* (if (and return-run? final)
-                   (list 'return success)
-                   success)
-        error* (if (and return-run? final)
-                 (list 'return error)
-                 error)
-        out (if return-run?
-              (let [[_ runner] statement]
-                (template/$
-                 (do (var ~res nil)
-                     (var ~err nil)
-                     (try
-                       (~runner
-                        (fn [value]
-                          (:= ~res value)
-                          (:= ~err nil))
-                        (fn [value]
-                          (:= ~res nil)
-                          (:= ~err value)))
-                       (if ~err
-                         ~error*
-                         ~success*)
-                       (catch ~err ~error*)))))
-              (let [cb (list 'fn [err res]
-                             (list 'if err
-                                   error
-                                   success))]
-                (walk/postwalk (fn [x]
-                                 (if (= x '(x:callback))
-                                   cb
-                                   x))
-                               statement)))]
+  (let [cb (list 'fn [err res]
+                 (list 'if err
+                       error
+                       success))
+        out (walk/prewalk (fn [x]
+                            (if (= x '(x:callback))
+                              cb
+                           x))
+                          statement)]
     (cond->> out
-      (and final (not return-run?)) (list 'return))))
+      final (list 'return))))
 
-(defn js-tf-for-try
-  "for try transform"
-  {:added "4.0"}
-  [[_ [[res err] statement] {:keys [success error]}]]
-  (template/$ (try
-         (var ~res := ~statement)
-         ~success
-         (catch ~err ~error))))
-
-(defn js-tf-for-async
+(defn tf-for-async
   "for async transform"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error finally]}]]
-  (let [return-run? (and (seq? statement)
-                         (= 'x:return-run (first statement)))
-        base (if return-run?
-               (let [[_ runner] statement]
-                 (template/$
-                  (new Promise
-                       (fn [resolve reject]
-                         (try
-                           (~runner resolve reject)
-                           (catch ~err
-                             (reject ~err)))))))
-               (template/$
-                (new Promise
-                     (fn [resolve reject]
-                       (resolve ~statement)))))]
-    (template/$ (. ~base
-                   ~@(if success
-                       [(list 'then
-                              (list 'fn [res]
-                                    success))])
-                   ~@(if error
-                       [(list 'catch
-                              (list 'fn [err]
-                                    error))])
-                   ~@(if finally
-                        [(list 'finally
-                               (list 'fn '[]
-                                     finally))])))))
-
-(defn js-tf-prototype-get
-  [[_ obj]]
-  (list 'Object.getPrototypeOf obj))
-
-(defn js-tf-prototype-set
-  [[_ obj prototype]]
-  (list 'Object.setPrototypeOf obj prototype))
+  (template/$ (. (new Promise (fn [resolve reject]
+                                (resolve ~statement)))
+          ~@(if success
+              [(list 'then
+                     (list 'fn [res]
+                           success))])
+          ~@(if error
+              [(list 'catch
+                     (list 'fn [err]
+                           error))])
+          ~@(if finally
+              [(list 'finally
+                     (list 'fn '[]
+                           finally))]))))
 
 (defn js-tf-prototype-create
   [[_ m]]
@@ -299,10 +243,9 @@
         :for-array   {:macro  #'js-tf-for-array   :emit :macro}
         :for-iter    {:macro  #'js-tf-for-iter    :emit :macro}
         :for-return  {:macro  #'js-tf-for-return  :emit :macro}
-        :for-try     {:macro  #'js-tf-for-try     :emit :macro}
         :for-async   {:macro  #'js-tf-for-async   :emit :macro}
-        :prototype-get       {:macro #'js-tf-prototype-get     :emit :macro}
-        :prototype-set       {:macro #'js-tf-prototype-set     :emit :macro}
+        :prototype-get       {:emit :alias :raw 'Object.getPrototypeOf}
+        :prototype-set       {:emit :alias :raw 'Object.setPrototypeOf}
         :prototype-create    {:macro #'js-tf-prototype-create  :emit :macro
                               :op-spec {:allow-blocks true}}
         :prototype-tostring  {:emit :unit  :default "toString"}})

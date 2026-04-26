@@ -297,8 +297,7 @@
    {:op :for-array   :symbol #{'for:array}     :emit :abstract :style/indent 1}
    {:op :for-iter    :symbol #{'for:iter}      :emit :abstract :style/indent 1}
    {:op :for-return  :symbol #{'for:return}    :emit :abstract :style/indent 1}
-   {:op :for-async   :symbol #{'for:async}     :emit :abstract :style/indent 1}
-   {:op :for-try     :symbol #{'for:try}       :emit :abstract :style/indent 1}])
+   {:op :for-async   :symbol #{'for:async}     :emit :abstract :style/indent 1}])
 
 (def +op-coroutine+
   [{:op :defgen    :symbol #{'defgen}   :spec :defgen  

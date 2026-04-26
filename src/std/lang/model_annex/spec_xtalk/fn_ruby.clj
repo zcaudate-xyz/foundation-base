@@ -46,8 +46,7 @@
   (list '* arr))
 
 (def +ruby-core+
-  {:x-cat            {:macro #'ruby-tf-x-cat  :emit :macro :value true
-                       :raw "(lambda { |*args| args.join('') })"}
+  {:x-cat            {:macro #'ruby-tf-x-cat  :emit :macro :value true}
    :x-len            {:macro #'ruby-tf-x-len  :emit :macro}
    :x-err            {:emit :alias :raw 'raise}
    :x-eval           {:emit :alias :raw 'eval}
@@ -58,8 +57,7 @@
    :x-apply          {:macro #'ruby-tf-x-apply :emit :macro}
    :x-shell          {:macro #'ruby-tf-x-shell :emit :macro}
    :x-type-native    {:macro #'ruby-tf-x-type-native :emit :macro}
-   :x-unpack         {:macro #'ruby-tf-x-unpack :emit :macro}
-   :x-debug-client-basic   {:emit :alias :raw 'debug-client-basic}})
+   :x-unpack         {:macro #'ruby-tf-x-unpack :emit :macro}})
 
 ;;
 ;; MATH
@@ -348,10 +346,6 @@
   [[_ s]]
   (list '. 'Base64 (list 'decode64 s)))
 
-(def +ruby-b64+
-  {:x-b64-encode      {:macro #'ruby-tf-x-b64-encode    :emit :macro}
-   :x-b64-decode      {:macro #'ruby-tf-x-b64-decode    :emit :macro}})
-
 ;;
 ;; FILE
 ;;
@@ -371,58 +365,8 @@
    :x-spit-file       {:macro #'ruby-tf-x-spit-file      :emit :macro}})
 
 ;;
-;; URI
-;;
-
-(defn ruby-tf-x-uri-encode
-  [[_ s]]
-  (list '. 'URI (list 'encode s)))
-
-(defn ruby-tf-x-uri-decode
-  [[_ s]]
-  (list '. 'URI (list 'decode s)))
-
-(def +ruby-uri+
-  {:x-uri-encode      {:macro #'ruby-tf-x-uri-encode    :emit :macro}
-   :x-uri-decode      {:macro #'ruby-tf-x-uri-decode    :emit :macro}})
-
-;;
-;; PROTO
-;;
-
-(defn ruby-tf-x-prototype-get
-  [[_ obj]]
-  (list '. obj 'class))
-
-(defn ruby-tf-x-prototype-set
-  [[_ obj prototype]]
-  obj)  ;; ignore, cannot set prototype in Ruby
-
-(defn ruby-tf-x-prototype-create
-  [[_ prototype]]
-  '{})
-
-(defn ruby-tf-x-prototype-tostring
-  [[_ obj]]
-  (list '. obj 'to_s))
-
-(def +ruby-proto+
-  {:x-prototype-get       {:macro #'ruby-tf-x-prototype-get     :emit :macro}
-   :x-prototype-set       {:macro #'ruby-tf-x-prototype-set     :emit :macro}
-   :x-prototype-create    {:macro #'ruby-tf-x-prototype-create  :emit :macro}
-    :x-prototype-tostring  {:macro #'ruby-tf-x-prototype-tostring :emit :macro}})
-
-;;
 ;; THREAD
 ;;
-
-(defn ruby-tf-x-thread-spawn
-  [[_ thunk]]
-  (list 'Thread.new (list 'fn [] (list '. thunk 'call))))
-
-(defn ruby-tf-x-thread-join
-  [[_ thread]]
-  (list '. thread 'join))
 
 (defn ruby-tf-x-with-delay
   [[_ thunk ms]]
@@ -430,25 +374,8 @@
         (list 'sleep (list '/ ms 1000.0))
         (list '. thunk 'call)))
 
-(defn ruby-tf-x-start-interval
-  [[_ thunk ms]]
-  (list 'Thread.new
-        (list 'fn []
-              (list 'while 'true
-                    (list 'do
-                          (list '. thunk 'call)
-                          (list 'sleep (list '/ ms 1000.0)))))))
-
-(defn ruby-tf-x-stop-interval
-  [[_ instance]]
-  (list '. instance 'kill))
-
 (def +ruby-thread+
-  {:x-thread-spawn    {:macro #'ruby-tf-x-thread-spawn   :emit :macro}
-   :x-thread-join     {:macro #'ruby-tf-x-thread-join    :emit :macro}
-   :x-with-delay      {:macro #'ruby-tf-x-with-delay     :emit :macro}
-   :x-start-interval  {:macro #'ruby-tf-x-start-interval :emit :macro}
-   :x-stop-interval   {:macro #'ruby-tf-x-stop-interval  :emit :macro}})
+  {:x-with-delay      {:macro #'ruby-tf-x-with-delay     :emit :macro}})
 
 ;; ITER
 ;;
@@ -472,7 +399,7 @@
      (return false)
      (do (for [i (range 0 (. ~it0 length))]
            (if (not (~eq-fn (:% ~it0 [i])
-                            (:% ~it1 [i])))
+                     (:% ~it1 [i])))
              (return false)))
          (return true)))))
 
@@ -517,33 +444,11 @@
   [[_ conn]]
   (list '. conn 'close))
 
-(defn ruby-tf-x-notify-socket
-  [[_ message]]
-  (vector "async" message))
-
-(defn ruby-tf-x-ws-connect
-  [[_ url & [opts]]]
-  (ruby-tf-x-socket-connect [nil url nil opts]))
-
-(defn ruby-tf-x-ws-send
-  [[_ conn value]]
-  (ruby-tf-x-socket-send [nil conn value]))
-
-(defn ruby-tf-x-ws-close
-  [[_ conn]]
-  (ruby-tf-x-socket-close [nil conn]))
-
 (def +ruby-network+
-  {:x-socket-connect   {:macro #'ruby-tf-x-socket-connect   :emit :macro}
+  {:x-socket-connect   {:macro #'ruby-tf-x-socket-connect   :emit :macro
+                        :op-spec {:allow-blocks true}}
    :x-socket-send      {:macro #'ruby-tf-x-socket-send      :emit :macro}
-   :x-socket-close     {:macro #'ruby-tf-x-socket-close     :emit :macro}
-   :x-notify-socket    {:macro #'ruby-tf-x-notify-socket    :emit :macro}
-   :x-ws-connect       {:macro #'ruby-tf-x-ws-connect       :emit :macro}
-   :x-ws-send          {:macro #'ruby-tf-x-ws-send          :emit :macro}
-   :x-ws-close         {:macro #'ruby-tf-x-ws-close         :emit :macro}
-   :x-debug-client-ws        {:emit :alias :raw 'debug-client-ws}
-   :x-server-basic     {:emit :alias :raw 'server-basic}
-   :x-server-ws        {:emit :alias :raw 'server-ws}})
+   :x-socket-close     {:macro #'ruby-tf-x-socket-close     :emit :macro}})
 
 ;;
 ;; RETURN
@@ -552,36 +457,39 @@
 (defn ruby-tf-x-return-encode
   ([[_ out id key]]
    (template/$ (do (:- "require 'json'")
-            (try
-              (return (JSON.generate {:id  ~id
-                                      :key ~key
-                                      :type  "data"
-                                      :value  ~out}))
-              (catch e
-                  (return (JSON.generate {:id ~id
-                                          :key ~key
-                                          :type  "raw"
-                                          :value (. e (to_s))}))))))))
+                   (try
+                     (return (JSON.generate {:id  ~id
+                                             :key ~key
+                                             :type  "data"
+                                             :value  ~out}))
+                     (catch e
+                         (return (JSON.generate {:id ~id
+                                                 :key ~key
+                                                 :type  "raw"
+                                                 :value (. e (to_s))}))))))))
 
 (defn ruby-tf-x-return-wrap
   ([[_ f encode-fn]]
    (template/$ (do (:- "require 'json'")
-            (try
-              (:= out (. ~f (call)))
-              (catch e
-                (return (JSON.generate {:type "error"
-                                        :value (. e (to_s))}))))
-            (return (~encode-fn out nil nil))))))
+                   (try
+                     (:= out (. ~f (call)))
+                     (catch e
+                         (return (JSON.generate {:type "error"
+                                                 :value (. e (to_s))}))))
+                   (return (~encode-fn out nil nil))))))
 
 (defn ruby-tf-x-return-eval
   ([[_ s wrap-fn]]
    (template/$ (return (~wrap-fn (fn []
-                            (return (eval ~s))))))))
+                                   (return (eval ~s))))))))
 
 (def +ruby-return+
-  {:x-return-encode  {:macro #'ruby-tf-x-return-encode   :emit :macro}
-   :x-return-wrap    {:macro #'ruby-tf-x-return-wrap     :emit :macro}
-   :x-return-eval    {:macro #'ruby-tf-x-return-eval     :emit :macro}})
+  {:x-return-encode  {:macro #'ruby-tf-x-return-encode   :emit :macro
+                      :op-spec {:allow-blocks true}}
+   :x-return-wrap    {:macro #'ruby-tf-x-return-wrap     :emit :macro
+                      :op-spec {:allow-blocks true}}
+   :x-return-eval    {:macro #'ruby-tf-x-return-eval     :emit :macro
+                      :op-spec {:allow-blocks true}}})
 
 (def +ruby+
   (merge +ruby-core+
@@ -591,11 +499,8 @@
          +ruby-str+
          +ruby-lu+
          +ruby-json+
-         +ruby-b64+
          +ruby-file+
-           +ruby-uri+
-            +ruby-proto+
-            +ruby-thread+
-            +ruby-iter+
-          +ruby-network+
-          +ruby-return+))
+         +ruby-thread+
+         +ruby-iter+
+         +ruby-network+
+         +ruby-return+))

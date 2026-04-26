@@ -390,8 +390,13 @@
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-socket-connect :added "4.0"}
 (fact "socket connect"
-  (l/emit-as :python [(python-tf-x-socket-connect '[_ host port opts])])
-  => #"socket")
+  (let [out (l/emit-as :python [(python-tf-x-socket-connect '[_ host port opts cb])])]
+    [(boolean (re-find #"conn = socket\.socket\(\)" out))
+     (boolean (re-find #"conn\.connect\(\(host,port\)\)" out))
+     (boolean (re-find #"return cb\(None,conn\)" out))
+     (boolean (re-find #"except Exception as e:" out))
+     (boolean (re-find #"return cb\(e,None\)" out))])
+  => [true true true true true])
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-socket-send :added "4.0"}
 (fact "socket send"
