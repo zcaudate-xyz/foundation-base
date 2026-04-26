@@ -90,16 +90,6 @@
                          ~(or step 1))]
          ~@body)))
 
-(defn tf-for-return
-  "transform for `for:return`"
-  {:added "4.0"}
-  [[_ [[res err] statement] {:keys [success error]}]]
-  (template/$ (tryCatch
-        (block
-         (var ~res ~statement)
-         ~success)
-        :error (fn [~err] ~error))))
-
 (defn- r-token-boolean
   [bool]
   (if bool "TRUE" "FALSE"))
@@ -139,8 +129,7 @@
         :for-object  {:macro #'tf-for-object :emit :macro}
         :for-array   {:macro #'tf-for-array  :emit :macro}
         :for-iter    {:macro #'tf-for-iter   :emit :macro}
-        :for-index   {:macro #'tf-for-index  :emit :macro}
-        :for-return  {:macro #'tf-for-return :emit :macro}})
+        :for-index   {:macro #'tf-for-index  :emit :macro}})
       (grammar/build:override fn/+r+ )
       (grammar/build:extend
        {;;:na     {:op :na    :symbol '#{NA}    :raw "NA"    :value true :emit :throw}

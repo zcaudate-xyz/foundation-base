@@ -187,9 +187,19 @@
          (return true))))
 
 ^{:refer std.lang.model.spec-lua.variant-nginx/+grammar-delta+ :added "4.1"}
-(fact "nginx delay hard-links through nginx common-promise"
-  (get-in nginx/+grammar-delta+ [:x-with-delay :raw])
-  => 'lua.nginx.common-promise/with-delay)
+(fact "nginx promise ops hard-link through nginx common-promise"
+  [(get-in nginx/+grammar-delta+ [:x-promise :raw])
+   (get-in nginx/+grammar-delta+ [:x-promise-then :raw])
+   (get-in nginx/+grammar-delta+ [:x-promise-catch :raw])
+   (get-in nginx/+grammar-delta+ [:x-promise-finally :raw])
+   (get-in nginx/+grammar-delta+ [:x-promise-native? :raw])
+   (get-in nginx/+grammar-delta+ [:x-with-delay :raw])]
+  => ['lua.nginx.common-promise/promise
+      'lua.nginx.common-promise/promise-then
+      'lua.nginx.common-promise/promise-catch
+      'lua.nginx.common-promise/promise-finally
+      'lua.nginx.common-promise/promise-native?
+      'lua.nginx.common-promise/with-delay])
 
 ^{:refer std.lang.model.spec-lua/tf-yield :added "4.0"}
 (fact "yield transform"
