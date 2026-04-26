@@ -34,7 +34,7 @@
                      (return (~cb nil conn))))))
 
 (defn lua-tf-x-with-delay
-  [[_ thunk ms]]
+  [[_ ms thunk]]
   (list 'return (list 'ngx.thread.spawn
                       (list 'fn []
                             (list 'ngx.sleep (list '/ ms 1000))

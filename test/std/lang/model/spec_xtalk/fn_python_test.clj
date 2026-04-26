@@ -408,6 +408,13 @@
   (l/emit-as :python [(python-tf-x-socket-close '[_ conn])])
   => #"close")
 
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-with-delay :added "4.1"}
+(fact "with delay"
+  (let [out (l/emit-as :python [(python-tf-x-with-delay '[_ ms thunk])])]
+    [(boolean (re-find #"sleep\(ms / 1000\.0\)" out))
+     (boolean (re-find #"return thunk\(\)" out))])
+  => [true true])
+
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-iter-from-obj :added "4.0"}
 (fact "iter from obj"
   (l/emit-as :python [(python-tf-x-iter-from-obj '[_ obj])])

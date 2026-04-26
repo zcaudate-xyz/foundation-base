@@ -138,9 +138,14 @@
            (fn [value]
              (:= ok nil)
              (:= err value)))
-          (if (not err)
-            (return ok)
-            (return err))))
+           (if (not err)
+             (return ok)
+             (return err))))
+
+^{:refer std.lang.model.spec-lua/+grammar+ :added "4.1"}
+(fact "throw emits lua errors"
+  (l/emit-as :lua '[(throw "boom")])
+  => "error('boom')")
 
 ^{:refer std.lang.model.spec-lua/tf-for-try :added "4.0"}
 (fact "for try transform"

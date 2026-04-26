@@ -522,12 +522,20 @@
    :x-iter-has?           {:macro #'lua-tf-x-iter-has?           :emit :macro}
    :x-iter-native?        {:macro #'lua-tf-x-iter-native?        :emit :macro}})
 
+(defn lua-tf-x-with-delay
+  ([[_ ms thunk]]
+   (template/$
+    (do (var socket (require "socket"))
+        (socket.sleep (/ ~ms 1000.0))
+        (return (~thunk))))))
+
 (def +lua-promise+
   {:x-promise          {:emit :hard-link :raw 'lua.core.common-promise/promise}
    :x-promise-then     {:emit :hard-link :raw 'lua.core.common-promise/promise-then}
    :x-promise-catch    {:emit :hard-link :raw 'lua.core.common-promise/promise-catch}
    :x-promise-finally  {:emit :hard-link :raw 'lua.core.common-promise/promise-finally}
-   :x-promise-native?  {:emit :hard-link :raw 'lua.core.common-promise/promise-native?}})
+   :x-promise-native?  {:emit :hard-link :raw 'lua.core.common-promise/promise-native?}
+   :x-with-delay       {:macro #'lua-tf-x-with-delay :emit :macro}})
 
 (defn lua-tf-x-pwd
   [[_]]

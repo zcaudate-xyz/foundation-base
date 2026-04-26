@@ -145,6 +145,27 @@
   => [true true true true true])
 
 ^{:refer std.lang.model.spec-python.rewrite/python-rewrite-stage :added "4.1"}
+(fact "hoists throwing callbacks for python"
+  (let [out (rewrite/python-rewrite-stage
+             '(var p
+                   (spec-promise/x:promise
+                    (fn []
+                      (throw "boom"))))
+             {:grammar py/+grammar+})
+        [_ binding assign] out
+        callback          (second binding)]
+    [(= 'do* (first out))
+     (symbol? callback)
+     (.startsWith (name callback) "py_callback__")
+     (= '(fn []
+           (throw "boom"))
+        (nth binding 2))
+     (= '(var p
+              (spec-promise/x:promise CALLBACK))
+        (clojure.walk/prewalk-replace {callback 'CALLBACK} assign))])
+  => [true true true true true])
+
+^{:refer std.lang.model.spec-python.rewrite/python-rewrite-stage :added "4.1"}
 (fact "keeps top-level named functions intact"
   (rewrite/python-rewrite-stage
    '(fn f-raw [x]

@@ -628,21 +628,19 @@
 ;;
 
 (defn python-tf-x-with-delay
-  ([[_ thunk ms]]
+  ([[_ ms thunk]]
    (template/$
-    (do (fn delay_target []
-          (. (__import__ "time")
-             (sleep (/ ~ms 1000)))
-          (var f := ~thunk)
-          (return (f)))
-        (x:thread-spawn delay_target)))))
+    (do (. (__import__ "time")
+           (sleep (/ ~ms 1000.0)))
+        (return (~thunk))))))
 
 (def +python-promise+
   {:x-promise          {:emit :hard-link :raw 'python.core.common-promise/promise}
    :x-promise-then     {:emit :hard-link :raw 'python.core.common-promise/promise-then}
    :x-promise-catch    {:emit :hard-link :raw 'python.core.common-promise/promise-catch}
    :x-promise-finally  {:emit :hard-link :raw 'python.core.common-promise/promise-finally}
-   :x-promise-native?  {:emit :hard-link :raw 'python.core.common-promise/promise-native?}})
+   :x-promise-native?  {:emit :hard-link :raw 'python.core.common-promise/promise-native?}
+   :x-with-delay       {:macro #'python-tf-x-with-delay :emit :macro}})
 
 
 

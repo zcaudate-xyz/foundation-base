@@ -913,7 +913,7 @@
               :type [:fn [:xt/any] :xt/bool]}}
    {:op :x-with-delay  :symbol #{'x:with-delay}  :emit :abstract
     :op-spec {:arglists '([ms thunk])
-              :type [:fn [:xt/num [:xt/fn []]] :xt/any]}}])
+              :type [:fn [:xt/num [:xt/fn []]] :xt/promise]}}])
 
 (def +xt-runtime-shell+
   [{:op :x-pwd           :symbol #{'x:pwd}              :emit :abstract

@@ -198,12 +198,13 @@
                                :macro-let
                                :macro-xor])
       (merge (grammar/build-xtalk))
-      (grammar/build:override
-       {:var        {:symbol '#{var*}}
-        :not        {:raw "not "}
-        :and        {:raw "and"}
-        :or         {:raw "or"}
-        :neq        {:raw "~="}
+       (grammar/build:override
+        {:var        {:symbol '#{var*}}
+         :throw      {:raw "error" :emit :prefix}
+         :not        {:raw "not "}
+         :and        {:raw "and"}
+         :or         {:raw "or"}
+         :neq        {:raw "~="}
         :for-object {:macro #'lua-tf-for-object :emit :macro}
         :for-array  {:macro #'lua-tf-for-array  :emit :macro}
         :for-iter   {:macro #'lua-tf-for-iter   :emit :macro}

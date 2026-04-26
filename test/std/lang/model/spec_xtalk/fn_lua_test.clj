@@ -366,10 +366,10 @@
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-with-delay :added "4.0"}
 (fact "with delay"
-  (l/emit-as :lua [(lua-tf-x-with-delay '[_ thunk ms])])
+  (l/emit-as :lua [(lua-tf-x-with-delay '[_ ms thunk])])
   => #"socket.sleep"
 
-  (l/emit-as :lua.nginx [(nginx/lua-tf-x-with-delay '[_ thunk ms])])
+  (l/emit-as :lua.nginx [(nginx/lua-tf-x-with-delay '[_ ms thunk])])
   => #"ngx.thread.spawn")
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-file-slurp :added "4.1"}

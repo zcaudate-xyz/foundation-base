@@ -25,6 +25,9 @@
     :def
     :free})
 
+(def ^:private +python-lambda-disallowed-ops+
+  #{:throw})
+
 (declare python-lambda-compatible?)
 
 (defn- python-lambda-expr?
@@ -65,7 +68,8 @@
 
         (collection/form? form)
         (let [entry (get-in grammar [:reserved (first form)])]
-          (and (not (contains? +python-lambda-disallowed-types+ (:type entry)))
+          (and (not (contains? +python-lambda-disallowed-ops+ (:op entry)))
+               (not (contains? +python-lambda-disallowed-types+ (:type entry)))
                (not (contains? +python-lambda-disallowed-emits+ (:emit entry)))
                (every? #(python-lambda-expr? % grammar) (rest form))))
 

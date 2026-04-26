@@ -1,23 +1,27 @@
 (ns xt.lang.spec-promise-test
   (:require [std.lang :as l]
-            [xt.lang.common-notify :as notify])
+            [xt.lang.common-notify :as notify]
+            [xt.lang.spec-base :as xt])
   (:use code.test))
 
 ^{:seedgen/root {:all true, :langs [:python :lua]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-promise :as spec-promise]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.lang.spec-promise :as spec-promise]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [python.core.common-promise]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.spec-promise :as spec-promise]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [lua.core.common-promise]]})
 
@@ -68,24 +72,26 @@
        (return err))))
   => "boom"
 
-  (notify/wait-on :python
-    (spec-promise/x:promise-catch
-     (spec-promise/x:promise
-      (fn []
-        (throw "boom")))
-     (fn [err]
-       (repl/notify err)
-       (return err))))
+  (l/with:print-all
+    (notify/wait-on :python
+      (spec-promise/x:promise-catch
+       (spec-promise/x:promise
+        (fn []
+          (throw "boom")))
+       (fn [err]
+         (repl/notify err)
+         (return err)))))
   => "boom"
 
-  (notify/wait-on :lua
-    (spec-promise/x:promise-catch
-     (spec-promise/x:promise
-      (fn []
-        (throw "boom")))
-     (fn [err]
-       (repl/notify err)
-       (return err))))
+  (l/with:print-all
+    (notify/wait-on :lua
+      (spec-promise/x:promise-catch
+       (spec-promise/x:promise
+        (fn []
+          (throw "boom")))
+       (fn [err]
+         (repl/notify err)
+         (return err)))))
   => "boom")
 
 ^{:refer xt.lang.spec-promise/x:promise-finally :added "4.1"}
@@ -94,52 +100,54 @@
   (notify/wait-on :js
     (var out [])
     (spec-promise/x:promise-then
-        (spec-promise/x:promise-finally
-         (spec-promise/x:promise-then
-          (spec-promise/x:promise
-           (fn []
-             (return 5)))
-          (fn [value]
-            (. out (push "then"))
-            (return (+ value 2))))
-         (fn []
-           (. out (push "finally"))))
-        (fn [value]
-          (return (repl/notify [out value])))))
+     (spec-promise/x:promise-finally
+      (spec-promise/x:promise-then
+       (spec-promise/x:promise
+        (fn []
+          (return 5)))
+       (fn [value]
+         (xt/x:arr-push out "then")
+         (return (+ value 2))))
+      (fn []
+        (xt/x:arr-push out "finally")))
+     (fn [value]
+       (return (repl/notify [out value])))))
+  => [["then" "finally"] 7]
+  
+  (l/with:print-all
+    (notify/wait-on :python
+      (var out [])
+      (spec-promise/x:promise-then
+       (spec-promise/x:promise-finally
+        (spec-promise/x:promise-then
+         (spec-promise/x:promise
+          (fn []
+            (return 5)))
+         (fn [value]
+           (xt/x:arr-push out "then")
+           (return (+ value 2))))
+        (fn []
+          (xt/x:arr-push out "finally")))
+       (fn [value]
+         (return (repl/notify [out value]))))))
   => [["then" "finally"] 7]
 
-  (notify/wait-on :python
-    (var out [])
-    (spec-promise/x:promise-then
-        (spec-promise/x:promise-finally
-         (spec-promise/x:promise-then
-          (spec-promise/x:promise
-           (fn []
-             (return 5)))
-          (fn [value]
-            (. out (push "then"))
-            (return (+ value 2))))
-         (fn []
-           (. out (push "finally"))))
-        (fn [value]
-          (return (repl/notify [out value])))))
-  => [["then" "finally"] 7]
-
-  (notify/wait-on :lua
-    (var out [])
-    (spec-promise/x:promise-then
-        (spec-promise/x:promise-finally
-         (spec-promise/x:promise-then
-          (spec-promise/x:promise
-           (fn []
-             (return 5)))
-          (fn [value]
-            (. out (push "then"))
-            (return (+ value 2))))
-         (fn []
-           (. out (push "finally"))))
-        (fn [value]
-          (return (repl/notify [out value])))))
+  (l/with:print-all
+    (notify/wait-on :lua
+      (var out [])
+      (spec-promise/x:promise-then
+       (spec-promise/x:promise-finally
+        (spec-promise/x:promise-then
+         (spec-promise/x:promise
+          (fn []
+            (return 5)))
+         (fn [value]
+           (xt/x:arr-push out "then")
+           (return (+ value 2))))
+        (fn []
+          (xt/x:arr-push out "finally")))
+       (fn [value]
+         (return (repl/notify [out value]))))))
   => [["then" "finally"] 7])
 
 ^{:refer xt.lang.spec-promise/x:promise-native? :added "4.1"}
