@@ -43,6 +43,9 @@
 (defn.xt substring
   "gets the substring"
   {:added "4.0"}
+  ([s start]
+   (return (xt/x:str-substring s
+                               (xt/x:offset start))))
   ([s start finish]
    (return (xt/x:str-substring s
                                (xt/x:offset start)

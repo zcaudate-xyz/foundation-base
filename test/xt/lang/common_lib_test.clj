@@ -692,7 +692,7 @@
   => {"return" "number", "value" 2, "type" "data"})
 
 (comment
-
+  
   (s/seedgen-benchadd '[xt.lang.spec] {:lang [:r] :write true})
   (s/seedgen-benchadd '[xt.lang.spec-base] {:lang [:r] :write true})
   (s/seedgen-benchadd '[xt.lang.common] {:lang [:dart] :write true})

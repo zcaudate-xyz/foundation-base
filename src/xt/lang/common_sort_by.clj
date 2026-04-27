@@ -3,7 +3,8 @@
   (:refer-clojure :exclude [sort-by]))
 
 (l/script :xtalk
-  {:require [[xt.lang.spec-base :as xt]]})
+  {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-data]]})
 
 ;;
 ;; SORT BY

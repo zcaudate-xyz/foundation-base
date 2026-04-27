@@ -8,19 +8,23 @@
              [xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as k]]})
 
+(fact:global
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
+
 ^{:refer xt.db.schema.base-util/collect-routes :added "4.0"
   :setup [(def +routes+ [{:input [],
-      :return "text",
-      :schema "core/util",
-      :id "ping",
-      :flags {}
-      :url "api/ping"}
-     {:input [{:symbol "input", :type "text"}],
-      :return "text",
-      :schema "core/util",
-      :id "echo",
-      :flags {}
-      :url "api/echo"}])
+                :return "text",
+                :schema "core/util",
+                :id "ping",
+                :flags {}
+                :url "api/ping"}
+               {:input [{:symbol "input", :type "text"}],
+                :return "text",
+                :schema "core/util",
+                :id "echo",
+                :flags {}
+                :url "api/echo"}])
           (def +result+
             (contains-in {"api/echo"
                           {"url" "api/echo",

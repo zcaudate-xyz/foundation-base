@@ -15,16 +15,6 @@
                  (fn [e] (return (xt/x:obj-assign {:type type}
                                                   e))))))
 
-(defn.xt collect-routes-object
-  "TODO"
-  {:added "4.0"}
-  [routes type]
-  (return
-   (xtd/arr-juxt (xt/x:obj-vals routes)
-                 (fn [e] (return (xt/x:get-key e "url")))
-                 (fn [e] (return (xt/x:obj-assign {:type type}
-                                                  e))))))
-
 (defn.xt collect-views
   "collect views into views structure"
   {:added "4.0"}
