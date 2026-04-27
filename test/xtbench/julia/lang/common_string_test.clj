@@ -43,7 +43,7 @@
   => 5)
 
 ^{:refer xt.lang.common-string/substring :added "4.1"}
-  (fact "gets the substring"
+(fact "gets the substring"
 
   (!.julia
     [(xts/substring "hello/world" 3 11)

@@ -1169,8 +1169,8 @@
 
   (!.dt
     (do:>
-     (x:throw "ERROW")))
-  => (fn [out] (re-find #"ERROR" (deref out))))
+     (x:throw "THROW")))
+  => (fn [out] (re-find #"THROW" (deref out))))
 
 ^{:refer xt.lang.spec-base/x:now-ms :added "4.1"}
 (fact "expands and emits a millisecond time expression"

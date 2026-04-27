@@ -34,40 +34,108 @@
 
   (!.js
     (sch/list-tables sample/Schema))
-  => (just ["Currency" "RegionCity" "RegionCountry" "RegionState"] :in-any-order))
+  => (just ["Asset"
+            "Currency"
+            "Organisation"
+            "OrganisationAccess"
+            "RegionCity"
+            "RegionCountry"
+            "RegionState"
+            "UserAccount"
+            "UserNotification"
+            "UserPrivilege"
+            "UserProfile"
+            "Wallet"
+            "WalletAsset"]
+           :in-any-order)
+
+  (!.lua
+    (sch/list-tables sample/Schema))
+  => (just ["Asset"
+            "Currency"
+            "Organisation"
+            "OrganisationAccess"
+            "RegionCity"
+            "RegionCountry"
+            "RegionState"
+            "UserAccount"
+            "UserNotification"
+            "UserPrivilege"
+            "UserProfile"
+            "Wallet"
+            "WalletAsset"]
+           :in-any-order)
+
+  (!.py
+    (sch/list-tables sample/Schema))
+  => (just ["Asset"
+            "Currency"
+            "Organisation"
+            "OrganisationAccess"
+            "RegionCity"
+            "RegionCountry"
+            "RegionState"
+            "UserAccount"
+            "UserNotification"
+            "UserPrivilege"
+            "UserProfile"
+            "Wallet"
+            "WalletAsset"]
+           :in-any-order))
 
 ^{:refer xt.db.schema.base-schema/get-cached-schema :added "4.0"}
 (fact "get lookup"
 
   (!.js (sch/get-cached-schema sample/Schema))
+  => map?
+
+  (!.lua (sch/get-cached-schema sample/Schema))
+  => map?
+
+  (!.py (sch/get-cached-schema sample/Schema))
   => map?)
 
 ^{:refer xt.db.schema.base-schema/create-data-keys :added "4.0"}
 (fact "creates data keys"
-  
+
   (!.js
     (sch/create-data-keys sample/SchemaCurrency "Currency"))
   => ["id" "type" "symbol" "native" "decimal" "name" "plural" "description"]
-  
-  ^*(!.lua
+
+  (!.lua
       (sch/create-data-keys sample/SchemaCurrency "Currency"))
   => ["id" "type" "symbol" "native" "decimal" "name" "plural" "description"]
-  
-  ^*(!.py
+
+  (!.py
     (sch/create-data-keys sample/SchemaCurrency "Currency"))
   => ["id" "type" "symbol" "native" "decimal" "name" "plural" "description"])
 
 ^{:refer xt.db.schema.base-schema/create-ref-keys :added "4.0"}
 (fact "creates ref keys"
-  
-  (l/with:print-all
-    (!.js (sch/create-ref-keys sample/Schema "UserProfile")))
+
+  (!.js (sch/create-ref-keys sample/Schema "UserProfile"))
+  => (just ["account" "state" "country"]  :in-any-order)
+
+  (!.lua (sch/create-ref-keys sample/Schema "UserProfile"))
+  => (just ["account" "state" "country"]  :in-any-order)
+
+  (!.py (sch/create-ref-keys sample/Schema "UserProfile"))
   => (just ["account" "state" "country"]  :in-any-order))
 
 ^{:refer xt.db.schema.base-schema/create-rev-keys :added "4.0"}
 (fact "creates rev keys"
-  
+
   (!.js
+    (sch/create-rev-keys sample/Schema "UserAccount"))
+  => (just ["organisations" "profile" "privileges" "organisation_accesses" "wallets" "notification"]
+           :in-any-order)
+
+  (!.lua
+    (sch/create-rev-keys sample/Schema "UserAccount"))
+  => (just ["organisations" "profile" "privileges" "organisation_accesses" "wallets" "notification"]
+           :in-any-order)
+
+  (!.py
     (sch/create-rev-keys sample/Schema "UserAccount"))
   => (just ["organisations" "profile" "privileges" "organisation_accesses" "wallets" "notification"]
            :in-any-order))
@@ -80,108 +148,115 @@
 
 ^{:refer xt.db.schema.base-schema/create-all-keys :added "4.0"
   :setup [(def +all-wallet+
-            {"table"
-             [{"ident" "id",
-               "primary" true,
-               "scope" "id",
-               "order" 0,
-               "type" "uuid",
-               "cardinality" "one"}
-              {"ident" "slug",
-               "scope" "data",
-               "order" 1,
-               "type" "citext",
-               "cardinality" "one",
-               "sql" {"default" "default"}}
-              {"ident" "owner",
-               "scope" "ref",
-               "order" 2,
-               "required" true,
-               "type" "ref",
-               "ref"
-               {"key" "owner",
-                "rkey" "_owner",
-                "link"
-                {"lang" "postgres",
-                 "id" "UserAccount",
-                 "section" "code",
-                 "module" "xt.db.schema.sample-user-test"},
-                "type" "forward",
-                "rident" "wallets",
-                "rval" "wallets",
-                "ns" "UserAccount",
-                "val" "owner"},
-               "cardinality" "one"}],
-             "rev" ["entries"],
-             "ref" ["owner"],
-             "data" ["id" "slug"],
-             "defaults" {"slug" "default"},
-             "ref_id" {"owner_id" "owner"}})]}
+  {"table"
+   [{"ident" "id",
+     "primary" true,
+     "scope" "id",
+     "order" 0,
+     "type" "uuid",
+     "cardinality" "one"}
+    {"ident" "slug",
+     "scope" "data",
+     "order" 1,
+     "type" "citext",
+     "cardinality" "one",
+     "sql" {"default" "default"}}
+    {"ident" "owner",
+     "scope" "ref",
+     "order" 2,
+     "required" true,
+     "type" "ref",
+     "ref"
+     {"key" "owner",
+      "rkey" "_owner",
+      "link"
+      {"lang" "postgres",
+       "id" "UserAccount",
+       "section" "code",
+       "module" "xt.db.helpers.seed-user-test"},
+      "type" "forward",
+      "rident" "wallets",
+      "rval" "wallets",
+      "ns" "UserAccount",
+      "val" "owner"},
+     "cardinality" "one"}],
+   "rev" ["entries"],
+   "ref" ["owner"],
+   "data" ["id" "slug"],
+   "defaults" {"slug" "default"},
+   "ref_id" {"owner_id" "owner"}})]}
 (fact "creates all keys"
 
   (!.js
+   (sch/create-all-keys sample/Schema "Wallet"))
+  => +all-wallet+
+
+  (!.lua
+   (sch/create-all-keys sample/Schema "Wallet"))
+  => +all-wallet+
+
+  (!.py
    (sch/create-all-keys sample/Schema "Wallet"))
   => +all-wallet+)
 
 ^{:refer xt.db.schema.base-schema/get-all-keys :added "4.0"
   :setup [(def +all-org+
-            {"table"
-             [{"ident" "id",
-               "primary" true,
-               "scope" "id",
-               "order" 0,
-               "type" "uuid",
-               "cardinality" "one"}
-              {"ident" "name",
-               "unique" true,
-               "scope" "data",
-               "order" 1,
-               "required" true,
-               "type" "citext",
-               "cardinality" "one"}
-              {"ident" "title",
-               "scope" "data",
-               "order" 2,
-               "required" true,
-               "type" "text",
-               "cardinality" "one"}
-              {"ident" "description",
-               "scope" "data",
-               "order" 3,
-               "type" "text",
-               "cardinality" "one"}
-              {"ident" "tags",
-               "scope" "data",
-               "order" 4,
-               "type" "array",
-               "cardinality" "one"}
-              {"ident" "owner",
-               "scope" "ref",
-               "order" 5,
-               "type" "ref",
-               "ref"
-               {"key" "owner",
-                "rkey" "_owner",
-                "link"
-                {"lang" "postgres",
-                 "id" "UserAccount",
-                 "section" "code",
-                 "module" "xt.db.schema.sample-user-test"},
-                "type" "forward",
-                "rident" "organisations",
-                "rval" "organisations",
-                "ns" "UserAccount",
-                "val" "owner"},
-               "cardinality" "one"}],
-             "rev" ["access"],
-             "ref" ["owner"],
-             "data" ["id" "name" "title" "description" "tags"],
-             "defaults" {},
-             "ref_id" {"owner_id" "owner"}})]}
+  {"table"
+   [{"ident" "id",
+     "primary" true,
+     "scope" "id",
+     "order" 0,
+     "type" "uuid",
+     "cardinality" "one"}
+    {"ident" "name",
+     "unique" true,
+     "scope" "data",
+     "order" 1,
+     "required" true,
+     "type" "citext",
+     "cardinality" "one"}
+    {"ident" "title",
+     "scope" "data",
+     "order" 2,
+     "required" true,
+     "type" "text",
+     "cardinality" "one"}
+    {"ident" "description",
+     "scope" "data",
+     "order" 3,
+     "type" "text",
+     "cardinality" "one"}
+    {"ident" "tags",
+     "scope" "data",
+     "order" 4,
+     "type" "array",
+     "cardinality" "one"}
+    {"ident" "owner",
+     "scope" "ref",
+     "order" 5,
+     "type" "ref",
+     "ref"
+     {"key" "owner",
+      "rkey" "_owner",
+      "link"
+      {"lang" "postgres",
+       "id" "UserAccount",
+       "section" "code",
+       "module" "xt.db.helpers.seed-user-test"},
+      "type" "forward",
+      "rident" "organisations",
+      "rval" "organisations",
+      "ns" "UserAccount",
+      "val" "owner"},
+     "cardinality" "one"}],
+   "rev" ["access"],
+   "ref" ["owner"],
+   "data" ["id" "name" "title" "description" "tags"],
+   "defaults" {},
+   "ref_id" {"owner_id" "owner"}})]}
 (fact "get all keys"
 
   (!.js (sch/get-all-keys sample/Schema "Organisation"))
-
   => +all-org+
 
   (!.lua (sch/get-all-keys sample/Schema "Organisation"))
@@ -252,13 +327,12 @@
 
 ^{:refer xt.db.schema.base-schema/table-columns :added "4.0"
   :setup [(def +out+
-            ["id" "account_id" "first_name" "last_name" "city"
-             "state_id" "country_id" "about" "language" "detail"])]}
+  ["id" "account_id" "first_name" "last_name" "city"
+   "state_id" "country_id" "about" "language" "detail"])]}
 (fact "ges the table columns"
 
   (!.js (sch/table-columns sample/Schema "UserProfile"))
   => +out+
-
 
   (!.lua (sch/table-columns sample/Schema "UserProfile"))
   => +out+
@@ -268,19 +342,19 @@
 
 ^{:refer xt.db.schema.base-schema/create-table-order :added "4.0"
   :setup [(def +ordered+
-            ["UserAccount"
-             "UserProfile"
-             "UserNotification"
-             "UserPrivilege"
-             "Asset"
-             "Wallet"
-             "WalletAsset"
-             "Organisation"
-             "OrganisationAccess"
-             "Currency"
-             "RegionCountry"
-             "RegionState"
-             "RegionCity"])]}
+  ["UserAccount"
+   "UserProfile"
+   "UserNotification"
+   "UserPrivilege"
+   "Asset"
+   "Wallet"
+   "WalletAsset"
+   "Organisation"
+   "OrganisationAccess"
+   "Currency"
+   "RegionCountry"
+   "RegionState"
+   "RegionCity"])]}
 (fact "creates the table order"
 
   (!.js
@@ -353,5 +427,8 @@
       {"organisations" [{"name" "hello"}], "is_super" true}])
 
 (comment
-  (./import)
-  (./create-tests))
+
+  (s/run ['xt.db.schema.base-schema])
+  
+  (s/seedgen-langadd 'xt.db.schema.base-schema {:lang [:lua :python] :write true})
+  (s/seedgen-langremove 'xt.db.schema.base-schema {:lang [:lua :python] :write true}))

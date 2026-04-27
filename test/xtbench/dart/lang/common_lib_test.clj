@@ -305,19 +305,15 @@
                       (return 3)))))
   => (contains {"return" "number", "value" 3, "type" "data"}))
 
-^{:refer xt.lang.common-lib/return-eval :added "4.1"}
-(fact "returns evaluation"
-
-  (!.dt
-    (xt/x:json-decode
-     (k/return-eval "1+1")))
-  => {"return" "number", "value" 2, "type" "data"})
-
 (comment
   
   (s/seedgen-benchadd '[xt.lang.spec] {:lang [:r] :write true})
   (s/seedgen-benchadd '[xt.lang.spec-base] {:lang [:r] :write true})
-  (s/seedgen-benchadd '[xt.lang.common] {:lang [:dart] :write true})
+  (s/seedgen-benchadd '[xt.lang.common] {:lang [:dart :julia] :write true})
+  (s/seedgen-benchadd '[xt.lang.spec] {:lang [:dart :julia] :write true})
+  
+  (s/seedgen-benchadd '[xt.db] {:lang [:dart :julia] :write true})
+  
   (s/seedgen-benchadd '[xt.lang.spec] {:lang [:dart] :write true})
   (s/seedgen-benchadd '[xt.lang.common] {:lang [:dart] :write true})
   

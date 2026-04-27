@@ -26,7 +26,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.schema.sql-util/encode-query-string.more :added "4.0" :adopt true}
 (fact "encodes a query segment"
@@ -122,12 +122,36 @@
     [(ut/encode-operator "eq" {})
      (ut/encode-operator "lte" {})
      (ut/encode-operator "gte" {})])
+  => ["=" "<=" ">="]
+
+  (!.lua
+    [(ut/encode-operator "eq" {})
+     (ut/encode-operator "lte" {})
+     (ut/encode-operator "gte" {})])
+  => ["=" "<=" ">="]
+
+  (!.py
+    [(ut/encode-operator "eq" {})
+     (ut/encode-operator "lte" {})
+     (ut/encode-operator "gte" {})])
   => ["=" "<=" ">="])
 
 ^{:refer xt.db.schema.sql-util/encode-json :added "4.0"}
 (fact "encodes a json value"
 
   (!.js
+    (ut/encode-json {:a 1}))
+  => (fn [m]
+       (= (std.json/read (std.json/read m))
+          {"a" 1}))
+
+  (!.lua
+    (ut/encode-json {:a 1}))
+  => (fn [m]
+       (= (std.json/read (std.json/read m))
+          {"a" 1}))
+
+  (!.py
     (ut/encode-json {:a 1}))
   => (fn [m]
        (= (std.json/read (std.json/read m))
@@ -453,21 +477,21 @@
 
 ^{:refer xt.db.schema.sql-util/encode-sql :added "4.0"
   :setup [(def +inputs+
-  [{"::" "sql/column"
-    :name "hello"}
-   {"::" "sql/cast"
-    :args ["k" {"::" "sql/table"
-                :name "hello"
-                :schema "ENUM"}]}
-   {"::" "sql/fn"
-    :name "+"
-    :args ["k" {"::" "sql/fn"
-                :name "+"
-                :args [1 2 3]}]}
-   {"::" "sql/select"
-    :args ["*" "from" {"::" "sql/fn"
-                       :name "jsonb_each"
-                       :args ["'[1,2,3]'" true]}]}])]}
+[{"::" "sql/column"
+:name "hello"}
+{"::" "sql/cast"
+:args ["k" {"::" "sql/table"
+:name "hello"
+:schema "ENUM"}]}
+{"::" "sql/fn"
+:name "+"
+:args ["k" {"::" "sql/fn"
+:name "+"
+:args [1 2 3]}]}
+{"::" "sql/select"
+:args ["*" "from" {"::" "sql/fn"
+   :name "jsonb_each"
+   :args ["'[1,2,3]'" true]}]}])]}
 (fact "encodes an sql value"
 
   (!.js
@@ -694,11 +718,11 @@
 
 ^{:refer xt.db.schema.sql-util/encode-query-segment :added "4.0"
   :setup [(def +out+
-  ["name = 'hello'"
-   "name != 'hell''o'"
-   "name in ('hello', 'hello')"
-   "name != (k + ('1' + '2' + '3'))"
-   "data = '{\"a\":1}'"])]}
+["name = 'hello'"
+"name != 'hell''o'"
+"name in ('hello', 'hello')"
+"name != (k + ('1' + '2' + '3'))"
+"data = '{\"a\":1}'"])]}
 (fact "encodes a query segment"
 
   (!.js
@@ -933,21 +957,24 @@
     (ut/default-return-format-fn
      "hello"
      k/identity
-     ut/default-quote-fn))
+     ut/default-quote-fn
+     {}))
   => "\"hello\""
 
   (!.lua
     (ut/default-return-format-fn
      "hello"
      k/identity
-     ut/default-quote-fn))
+     ut/default-quote-fn
+     {}))
   => "\"hello\""
 
-  ^*(!.py
+  (!.py
     (ut/default-return-format-fn
      "hello"
      k/identity
-     ut/default-quote-fn))
+     ut/default-quote-fn
+     {}))
   => "\"hello\"")
 
 ^{:refer xt.db.schema.sql-util/default-table-fn :added "4.0"}
@@ -984,6 +1011,14 @@
 (fact "constructs postgres options"
 
   (!.js
+    (xt/x:is-object? (ut/postgres-opts {})))
+  => true
+
+  (!.lua
+    (xt/x:is-object? (ut/postgres-opts {})))
+  => true
+
+  (!.py
     (xt/x:is-object? (ut/postgres-opts {})))
   => true)
 

@@ -130,7 +130,6 @@
       {"a" {"b" {"sub" {"d" {"id" "d"}, "c" {"id" "c"}}, "id" "b"}}}])
 
 (comment
-
   (s/run ['xt.db.schema.base-util])
   (s/seedgen-benchadd '[xt.lang.spec] {:lang [:r] :write true})
   (s/seedgen-benchadd '[xt.db.schema.base-util] {:lang [:julia :dart] :write true})

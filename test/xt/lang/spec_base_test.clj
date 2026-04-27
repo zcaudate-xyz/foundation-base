@@ -2678,21 +2678,21 @@
 (fact "expands to the canonical throw form"
 
   ^{:seedgen/base {:dart {:expect (fn [out]
-                                    (re-find #"ERROR" @out))}}}
+                                    (re-find #"THROW" @out))}}}
 
   (!.js
     (do:>
-     (x:throw "ERROW")))
+     (x:throw "THROW")))
   => (throws)
 
   (!.py
     (do:>
-     (x:throw "ERROW")))
+     (x:throw "THROW")))
   => (throws)
 
   (!.lua
     (do:>
-     (x:throw "ERROW")))
+     (x:throw "THROW")))
   => (throws))
 
 ^{:refer xt.lang.spec-base/x:now-ms :added "4.1"}

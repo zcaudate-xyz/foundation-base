@@ -490,13 +490,13 @@
     {"UserAccount" [sample/RootUserFull]}))
   => +user-full+)
 
+
+
 (comment
+
   (s/run ['xt.db.schema.base-flatten])
   
   (s/seedgen-langadd 'xt.db.schema.base-flatten {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.db.schema.base-flatten {:lang [:lua :python] :write true}))
 
-(comment
-  (./import)
-  (./create-tests)
-  )
+

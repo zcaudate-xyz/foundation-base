@@ -396,7 +396,8 @@
     (ut/default-return-format-fn
      "hello"
      k/identity
-     ut/default-quote-fn))
+     ut/default-quote-fn
+     {}))
   => "\"hello\"")
 
 ^{:refer xt.db.schema.sql-util/default-table-fn :added "4.0"}
@@ -417,8 +418,8 @@
 (fact "constructs postgres options"
 
   (!.dt
-    (ut/postgres-opts {}))
-  => map?)
+    (xt/x:is-object? (ut/postgres-opts {})))
+  => true)
 
 ^{:refer xt.db.schema.sql-util/sqlite-return-format-fn :added "4.0"}
 (fact "sqlite return format function"
@@ -453,8 +454,8 @@
 (fact "constructs sqlite options"
 
   (!.dt
-    (ut/sqlite-opts {}))
-  => map?)
+    (xt/x:is-object? (ut/sqlite-opts {})))
+  => true)
 
 (comment
   (s/pedantic ['xt.db.schema.sql-util])
