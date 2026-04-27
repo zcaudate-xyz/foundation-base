@@ -1,15 +1,16 @@
 (ns std.lang.model-annex.spec-julia
   (:require [clojure.string]
-            [std.fs :as fs]
-            [std.lang.base.book :as book]
-            [std.lang.base.book-module :as module]
-            [std.lang.base.emit :as emit]
-            [std.lang.base.emit-common :as common]
-            [std.lang.base.grammar :as grammar]
-            [std.lang.base.script :as script]
-            [std.lang.base.util :as ut]
-            [std.lang.model.spec-xtalk]
-            [std.lang.model-annex.spec-xtalk.fn-julia :as fn]
+             [std.fs :as fs]
+             [std.lang.base.book :as book]
+             [std.lang.base.book-module :as module]
+             [std.lang.base.emit :as emit]
+             [std.lang.base.emit-common :as common]
+             [std.lang.base.emit-helper :as helper]
+             [std.lang.base.grammar :as grammar]
+             [std.lang.base.script :as script]
+             [std.lang.base.util :as ut]
+             [std.lang.model.spec-xtalk]
+             [std.lang.model-annex.spec-xtalk.fn-julia :as fn]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
             [std.lib.template :as template])
@@ -59,7 +60,7 @@
       (let [[i v] e]
         (template/$
          (for [~idx :in (to 1 1 (length ~arr))]
-           (local ~i (- ~idx 1))
+           (local ~i ~idx)
            (local ~v (getindex ~arr ~idx))
            ~@body)))
       (template/$
@@ -98,7 +99,7 @@
   "for index transform"
   {:added "4.0"}
   [[_ [i [start end step :as range]] & body]]
-  (apply list 'for [i :in (list 'to start (or step 1) (list '- end 1))]
+  (apply list 'for [i :in (list 'to start (or step 1) end)]
          body))
 
 (defn tf-dict
@@ -193,7 +194,8 @@
                   :global    {:reference nil}}
         :token  {:nil       {:as "nothing"}
                  :string    {:quote :double}
-                 :symbol    {:global #'julia-symbol-global}}
+                 :symbol    {:global #'julia-symbol-global
+                             :replace (assoc helper/+sym-replace+ \! "!")}}
         :data   {:map-entry {:start ""  :end ""  :space "" :assign " => " :keyword :string
                              :key-fn #'julia-map-key}
                  :map       {:start "Dict(" :end ")"}

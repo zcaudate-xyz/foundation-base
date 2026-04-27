@@ -157,37 +157,40 @@
 ^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-return-encode :added "4.1"}
 (fact "encodes a return value with id and key"
   (julia-tf-x-return-encode '(:x-return-encode out id key))
-  => '(do
-        (var type-fn
-             (fn [obj]
-               (cond (== obj nil)
-                     (return "nil")
-                     (isa obj Dict)
-                     (return "object")
-                     (isa obj AbstractArray)
-                     (return "array")
-                     (isa obj Function)
-                     (return "function")
-                     (isa obj Bool)
-                     (return "boolean")
-                     (isa obj Number)
-                     (return "number")
-                     (isa obj AbstractString)
-                     (return "string")
-                     :else
-                     (return (string (typeof obj))))))
-        (var ts (type-fn out))
-        (if (== ts "function")
-          (return (JSON.json {:id id
-                              :key key
-                              :type "raw"
-                              :return ts
-                              :value (string out)}))
-          (return (JSON.json {:id id
-                              :key key
-                              :type "data"
-                              :return ts
-                              :value out})))))
+  => '(:-
+       "(function()\n"
+       (% (do
+            (var type-fn
+                 (fn [obj]
+                   (cond (== obj nil)
+                         (return "nil")
+                         (isa obj Dict)
+                         (return "object")
+                         (isa obj AbstractArray)
+                         (return "array")
+                         (isa obj Function)
+                         (return "function")
+                         (isa obj Bool)
+                         (return "boolean")
+                         (isa obj Number)
+                         (return "number")
+                         (isa obj AbstractString)
+                         (return "string")
+                         :else
+                         (return (string (typeof obj))))))
+            (var ts (type-fn out))
+            (if (== ts "function")
+              (return (JSON.json {:id id
+                                  :key key
+                                  :type "raw"
+                                  :return ts
+                                  :value (string out)}))
+              (return (JSON.json {:id id
+                                  :key key
+                                  :type "data"
+                                  :return ts
+                                  :value out})))))
+       "\nend)()"))
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-return-wrap :added "4.1"}
 (fact "wraps a function with error handling"

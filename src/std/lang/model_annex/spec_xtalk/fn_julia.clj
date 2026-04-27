@@ -271,13 +271,16 @@
 
 (defn julia-tf-x-obj-assign
   [[_ obj m]]
-  (list 'do
-        (list 'var 'out obj)
-        (list 'when (list '== 'out nil)
-              (list ':= 'out (list 'Dict)))
-        (list 'if (list '== m nil)
-              (list 'return 'out)
-              (list 'return (list 'merge 'out m)))))
+  (julia-free-iife
+   (template/$
+    (do (var out (if (== ~obj nil)
+                   (Dict)
+                   (copy ~obj)))
+        (if (not (== ~m nil))
+          (for [pair :in (collect ~m)]
+            (:= (. out [(first pair)]) (last pair)))
+          nil)
+        (return out)))))
 
 (def +julia-obj+
   {:x-obj-keys    {:macro #'julia-tf-x-obj-keys   :emit :macro}
@@ -317,6 +320,7 @@
   (merge {:x-arr-slice  {:macro #'julia-tf-x-arr-slice  :emit :macro}
           :x-arr-remove {:macro #'julia-tf-x-arr-remove :emit :macro}
           :x-arr-insert {:macro #'julia-tf-x-arr-insert :emit :macro}
+          :x-arr-sort   {:macro #'julia-tf-x-arr-sort   :emit :macro}
           :x-arr-foldr  {:macro #'julia-tf-x-arr-foldr  :emit :macro}
           :x-arr-clone      {:raw "copy" :emit :invoke}
           :x-arr-reverse    {:raw "reverse" :emit :invoke}
@@ -331,29 +335,27 @@
 
 (defn julia-tf-x-str-char
   ([[_ s i]]
-   (list 'Int (list 'x:get-idx s (list 'x:offset i)))))
+   (list 'Int (list 'x:get-idx s i))))
 
 (defn julia-tf-x-str-index-of
   ([[_ s tok & [start]]]
-   (list ':- "begin\n"
-         "local idx = findnext("
-         (list '% tok)
-         ", "
-         (list '% s)
-         ", "
-         (list '% (or start (list 'x:offset 0)))
-         ")\n"
-         "if idx === nothing\n"
-         "  nothing\n"
-         "else\n"
-         "  (isa(idx, Integer) ? Int(idx) - 1 : Int(first(idx)) - 1)\n"
-         "end\n"
-         "end")))
+   (template/$
+    (do (var start-idx (:? (or (== ~start nil)
+                               (< ~start 1))
+                           1
+                           ~start))
+        (var idx (findnext ~tok ~s start-idx))
+        (return (:? (== idx nothing)
+                    -1
+                    (:? (isa idx Integer)
+                        (Int idx)
+                        (Int (first idx)))))))))
 
 (defn julia-tf-x-str-substring
   ([[_ s start & [end]]]
    (list '. s [(list 'to
-                     (list 'x:offset start)
+                     (list 'max 1 start)
+                     1
                      (or end (list 'lastindex s)))])))
 
 (defn julia-tf-x-str-join
@@ -372,11 +374,13 @@
 
 (def +julia-str+
   (merge {:x-str-char      {:macro #'julia-tf-x-str-char      :emit :macro}
-          :x-str-join      {:macro #'julia-tf-x-str-join      :emit :macro}
-          :x-str-index-of  {:macro #'julia-tf-x-str-index-of  :emit :macro}
-          :x-str-replace   {:macro #'julia-tf-x-str-replace   :emit :macro}
-          :x-str-substring {:macro #'julia-tf-x-str-substring :emit :macro}
-          :x-str-to-fixed  {:macro #'julia-tf-x-str-to-fixed  :emit :macro}}
+           :x-str-join      {:macro #'julia-tf-x-str-join      :emit :macro}
+           :x-str-index-of  {:macro #'julia-tf-x-str-index-of  :emit :macro}
+           :x-str-pad-left  {:raw "lpad"                       :emit :invoke}
+           :x-str-pad-right {:raw "rpad"                       :emit :invoke}
+           :x-str-replace   {:macro #'julia-tf-x-str-replace   :emit :macro}
+           :x-str-substring {:macro #'julia-tf-x-str-substring :emit :macro}
+           :x-str-to-fixed  {:macro #'julia-tf-x-str-to-fixed  :emit :macro}}
          {:x-str-split      {:raw "split" :emit :invoke}
           :x-str-to-upper   {:raw "uppercase" :emit :invoke}
           :x-str-to-lower   {:raw "lowercase" :emit :invoke}
@@ -457,15 +461,15 @@
   (let [err-form (julia-error-value-expr 'e)]
     (julia-free-try-catch
      (template/$
-      (do (var output (x:return-encode ~value ~id ~key))
-          (var path (:? (or (== ~opts nil)
-                            (== (get ~opts "path" nil) nil))
-                        "/"
-                        (get ~opts "path" nil)))
-          (var conn (connect ~host ~port))
-          (write conn
-                 (x:cat "POST "
-                        path
+       (do (var output (x:return-encode ~value ~id ~key))
+           (var path (if (or (== ~opts nil)
+                             (== (get ~opts "path" nil) nil))
+                       "/"
+                       (get ~opts "path" nil)))
+           (var conn (connect ~host ~port))
+           (write conn
+                  (x:cat "POST "
+                         path
                         " HTTP/1.0\r\n"
                         "Host: "
                         ~host
@@ -498,7 +502,41 @@
    (Iterators.Stateful
     (map (fn [pair]
            (return [(first pair) (last pair)]))
-         (collect ~obj)))))
+          (collect ~obj)))))
+
+(defn julia-tf-x-iter-eq
+  [[_ it0 it1 eq-fn]]
+  (julia-free-iife
+   (template/$
+    (do (var left (collect ~it0))
+        (var right (collect ~it1))
+        (if (not (== (length left) (length right)))
+          (return false)
+          (do (for [i :in (to 1 1 (length left))]
+                (if (not (~eq-fn (. left [i])
+                                 (. right [i])))
+                  (return false)))
+              (return true)))))))
+
+(defn julia-tf-x-iter-has?
+  [[_ obj]]
+  (template/$
+   (or (x:iter-native? ~obj)
+       (x:is-array? ~obj))))
+
+(defn julia-tf-x-iter-native?
+  [[_ it]]
+  (list 'isa it 'Base.Iterators.Stateful))
+
+(def +julia-iter+
+  {:x-iter-from-arr  {:raw "Iterators.Stateful" :emit :invoke}
+   :x-iter-from-obj  {:macro #'julia-tf-x-iter-from-obj :emit :macro}
+   :x-iter-from      {:raw "Iterators.Stateful" :emit :invoke}
+   :x-iter-eq        {:macro #'julia-tf-x-iter-eq :emit :macro}
+   :x-iter-next      {:raw "popfirst!" :emit :invoke}
+   :x-iter-has?      {:macro #'julia-tf-x-iter-has? :emit :macro}
+   :x-iter-null      {:default '(Iterators.Stateful []) :emit :unit}
+   :x-iter-native?   {:macro #'julia-tf-x-iter-native? :emit :macro}})
 
 
 (def +python-promise+
@@ -589,44 +627,45 @@
 
 (defn julia-tf-x-return-encode
   ([[_ out id key]]
-   (template/$
-    (do (var type-fn
-             (fn [obj]
-               (cond (== obj nil)
-                     (return "nil")
+   (julia-free-iife
+    (template/$
+     (do (var type-fn
+              (fn [obj]
+                (cond (== obj nil)
+                      (return "nil")
 
-                     (isa obj Dict)
-                     (return "object")
+                      (isa obj Dict)
+                      (return "object")
 
-                     (isa obj AbstractArray)
-                     (return "array")
+                      (isa obj AbstractArray)
+                      (return "array")
 
-                     (isa obj Function)
-                     (return "function")
+                      (isa obj Function)
+                      (return "function")
 
-                     (isa obj Bool)
-                     (return "boolean")
+                      (isa obj Bool)
+                      (return "boolean")
 
-                     (isa obj Number)
-                     (return "number")
+                      (isa obj Number)
+                      (return "number")
 
-                     (isa obj AbstractString)
-                     (return "string")
+                      (isa obj AbstractString)
+                      (return "string")
 
-                     :else
-                     (return (string (typeof obj))))))
-        (var ts (type-fn ~out))
-        (if (== ts "function")
-          (return (JSON.json {:id ~id
-                              :key ~key
-                              :type "raw"
-                              :return ts
-                              :value (string ~out)}))
-          (return (JSON.json {:id ~id
-                              :key ~key
-                              :type "data"
-                              :return ts
-                              :value ~out})))))))
+                      :else
+                      (return (string (typeof obj))))))
+         (var ts (type-fn ~out))
+         (if (== ts "function")
+           (return (JSON.json {:id ~id
+                               :key ~key
+                               :type "raw"
+                               :return ts
+                               :value (string ~out)}))
+           (return (JSON.json {:id ~id
+                               :key ~key
+                               :type "data"
+                               :return ts
+                               :value ~out}))))))))
 
 (defn julia-tf-x-return-wrap
   ([[_ f encode-fn]]
@@ -669,7 +708,7 @@
          +julia-js+
          +julia-socket+
          +julia-http+
-         #_+julia-iter+
+         +julia-iter+
          #_+julia-promise+
          +julia-shell+
          +julia-file+

@@ -34,10 +34,10 @@
 
 ^{:refer std.lang.model-annex.spec-julia/tf-for-index :added "4.0"}
 (fact "for index transform"
-
-  (tf-for-index '(for:index [i [0 2 10]]
-                            i))
-  => '(for [i :in (to 0 10 2)] i))
+ 
+  (tf-for-index '(for:index [i [0 10 2]]
+                             i))
+  => '(for [i :in (to 0 2 10)] i))
 
 ^{:refer std.lang.model-annex.spec-julia/julia-module-link :added "4.0"}
 (fact "gets the absolute julia based module"
@@ -92,8 +92,12 @@
    => "for e in iter\n  e\nend"
 
    (!.julia
-    (push! arr 1))
-   => "push!(arr,1)")
+     (push! arr 1))
+   => "push!(arr,1)"
+
+   (!.julia
+    (delete! obj "a"))
+   => "delete!(obj,\"a\")")
 
 (fact "Xtalk Julia mappings"
   (!.julia (x:print "Hello"))
