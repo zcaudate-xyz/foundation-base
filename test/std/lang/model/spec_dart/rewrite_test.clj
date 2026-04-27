@@ -45,6 +45,38 @@
    {:grammar dart/+grammar+})
   => '(return (:? (x:not-nil? a) out {})))
 
+(fact "rewrites cond tests and keeps branch bodies as statements"
+  (rewrite/dart-rewrite-stage
+   '(cond curr
+      (return 1)
+      :else
+      (return 2))
+   {:grammar dart/+grammar+})
+  => '(cond (and (x:not-nil? curr)
+                 (not= false curr))
+       (return 1)
+       :else
+       (return 2))
+
+  (rewrite/dart-rewrite-stage
+   '(defgen sample [n seq]
+      (var i 0)
+      (for:iter [e seq]
+        (if (< i n)
+          (do (:= i (+ i 1))
+              (yield e))
+          (return))))
+   {:grammar dart/+grammar+})
+  => '(defgen sample [n seq]
+       (do
+         (var i 0)
+         (for:iter [e seq]
+           (if (< i n)
+             (do
+               (:= i (+ i 1))
+               (yield e))
+             (return))))))
+
 (fact "adds dart-specific nil-coalesce ops"
   (dart/dart-tf-ternary '(dart:ternary a out {}))
   => '(:? (and (x:not-nil? a)
@@ -63,10 +95,44 @@
 
 (fact "emits rewritten Dart defaults without iifes"
   (let [or-out      (l/emit-as :dart ['(var a (or a b c))])
-        ternary-out (l/emit-as :dart ['(return (:? a out {}))])]
+         ternary-out (l/emit-as :dart ['(return (:? a out {}))])]
     [(str/includes? or-out "??")
      (str/includes? or-out "runtimeType")
      (str/includes? ternary-out "null != a")
      (str/includes? ternary-out "false != a")
      (str/includes? ternary-out "runtimeType")])
   => [true false true true false])
+
+(fact "emits cond, do expressions and loop bodies safely for Dart"
+  (let [cond-out (l/emit-as :dart ['(cond curr
+                                      (return 1)
+                                      :else
+                                      (return 2))])
+        do-out   (l/emit-as :dart ['(do (print 1) 2)])
+        ret-out  (l/emit-as :dart ['(return (do (print 1) 2))])
+        gen-out  (l/emit-as :dart ['(defgen sample [n seq]
+                                     (var i 0)
+                                     (for:iter [e seq]
+                                       (if (< i n)
+                                         (do (:= i (+ i 1))
+                                             (yield e))
+                                         (return))))])
+        loop-out (l/emit-as :dart ['(defn sample [m path]
+                                     (var out [])
+                                     (for:object [[k v] m]
+                                       (var npath [(x:unpack path)])
+                                       (x:arr-push npath k)
+                                       (cond (x:is-object? v)
+                                             (do (for:array [e (xt.lang.common-data/obj-keys-nested v npath)]
+                                                   (x:arr-push out e)))
+                                             :else
+                                             (x:arr-push out [npath v])))
+                                     (return out))])]
+    [(str/includes? cond-out "null != curr")
+     (str/includes? cond-out "false != curr")
+     (str/includes? do-out "return 2;")
+     (str/includes? ret-out "return 2;")
+     (str/includes? gen-out "yield e;")
+     (not (str/includes? gen-out "(()"))
+     (not (str/includes? loop-out "return var"))])
+  => [true true true true true true true])

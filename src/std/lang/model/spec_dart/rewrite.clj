@@ -50,10 +50,17 @@
      :=
      return
      if
+     cond
      when
      while
      try
      for
+     for:async
+     for:index
+     for:object
+     for:array
+     for:iter
+     br*
      throw
      break
      continue
@@ -124,6 +131,31 @@
                 (dart-rewrite-expression v grammar)]))
         form))
 
+(defn- ensure-return
+  [stmt]
+  (cond
+    (and (collection/form? stmt)
+         (contains? +dart-statement-heads+ (first stmt)))
+    (if (#{'do 'do*} (first stmt))
+      (let [prefix (butlast (rest stmt))
+            tail   (last stmt)]
+        (with-form-meta
+          stmt
+          (apply list (first stmt)
+                 (concat prefix
+                         [(ensure-return tail)]))))
+      stmt)
+
+    :else
+    (list 'return stmt)))
+
+(defn- ensure-tail-return
+  [stmts]
+  (if (seq stmts)
+    (concat (butlast stmts)
+            [(ensure-return (last stmts))])
+    stmts))
+
 (defn- rewrite-fn
   [form grammar]
   (let [[name args body] (lift/fn-parts form)]
@@ -132,29 +164,66 @@
       (apply list 'fn
              (concat (when name [name])
                      [args]
-                     (letfn [(ensure-return [stmt]
-                               (cond
-                                 (and (collection/form? stmt)
-                                      (contains? +dart-statement-heads+ (first stmt)))
-                                 (if (#{'do 'do*} (first stmt))
-                                   (let [prefix (butlast (rest stmt))
-                                         tail   (last stmt)]
-                                     (with-form-meta
-                                       stmt
-                                       (apply list (first stmt)
-                                              (concat prefix
-                                                      [(ensure-return tail)]))))
-                                   stmt)
+                     (-> body
+                         (dart-rewrite-statements grammar)
+                         ensure-tail-return
+                         lift/splice-do*
+                         lift/wrap-body))))))
 
-                                 :else
-                                 (list 'return stmt)))]
-                       (-> body
-                           (dart-rewrite-statements grammar)
-                           (#(if (= 1 (count %))
-                               [(ensure-return (first %))]
-                               %))
-                           lift/splice-do*
-                           lift/wrap-body)))))))
+(defn- rewrite-binding-vector
+  [binding grammar]
+  (if (and (vector? binding)
+           (<= 2 (count binding)))
+    (let [[lhs rhs & more] binding]
+      (with-form-meta
+        binding
+        (vec (concat [lhs (dart-rewrite-expression rhs grammar)]
+                     more))))
+    binding))
+
+(defn- rewrite-for-statement
+  [form grammar]
+  (let [[tag binding & body] form]
+    (with-form-meta
+      form
+      (apply list tag
+             (concat [(rewrite-binding-vector binding grammar)]
+                     (dart-rewrite-statements body grammar))))))
+
+(defn- rewrite-cond-statement
+  [form grammar]
+  (with-form-meta
+    form
+    (apply list 'cond
+           (mapcat (fn [[test body]]
+                     (if (= :else test)
+                       [test
+                        (dart-rewrite-statement body grammar)]
+                       [(dart-rewrite-conditional-expression test grammar)
+                        (dart-rewrite-statement body grammar)]))
+                   (partition 2 (rest form))))))
+
+(defn- rewrite-branch-control
+  [form grammar]
+  (let [[tag & args] form]
+    (with-form-meta
+      form
+      (case tag
+        else
+        (apply list tag
+               (dart-rewrite-statements args grammar))
+
+        (let [[test & body] args]
+          (apply list tag
+                 (concat [(dart-rewrite-conditional-expression test grammar)]
+                         (dart-rewrite-statements body grammar))))))))
+
+(defn- rewrite-branch-statement
+  [form grammar]
+  (with-form-meta
+    form
+    (apply list 'br*
+           (map #(rewrite-branch-control % grammar) (rest form)))))
 
 (defn- rewrite-or-expression
   [form grammar]
@@ -414,13 +483,17 @@
 
      :else
      (case (first form)
-       (do do*)      (rewrite-do-statement form grammar)
-       (var var* :=) (rewrite-var-statement form grammar)
-       for:async     (rewrite-for-async-form form grammar)
-       return        (rewrite-return-statement form grammar)
-       if            (rewrite-if-statement form grammar)
-       when          (rewrite-when-statement form grammar)
-       while         (rewrite-while-statement form grammar)
+        (do do*)      (rewrite-do-statement form grammar)
+        (var var* :=) (rewrite-var-statement form grammar)
+        cond          (rewrite-cond-statement form grammar)
+        br*           (rewrite-branch-statement form grammar)
+        (for:index for:object for:array for:iter)
+        (rewrite-for-statement form grammar)
+        for:async     (rewrite-for-async-form form grammar)
+        return        (rewrite-return-statement form grammar)
+        if            (rewrite-if-statement form grammar)
+        when          (rewrite-when-statement form grammar)
+        while         (rewrite-while-statement form grammar)
       (defn defn- defgen)
       (rewrite-defn-statement form grammar)
       fn
