@@ -107,11 +107,15 @@
   [source form]
   (if (boolish-form? form)
     form
-    (with-form-meta
-      source
-      (list 'and
-            (list 'x:not-nil? form)
-            (list 'not= false form)))))
+    (let [value-sym (gensym "truthy_")]
+      (with-form-meta
+        source
+        (list (list 'fn [value-sym]
+                    (list 'return
+                          (list 'and
+                                (list 'x:not-nil? value-sym)
+                                (list 'not= false value-sym))))
+              form)))))
 
 (defn- unpack-form?
   [form]

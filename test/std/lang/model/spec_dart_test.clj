@@ -33,6 +33,13 @@
   (l/emit-as :dart ['(x:arr-push items 1)])
   => "items.add(1)")
 
+(fact "dart truthy rewrites evaluate expressions once"
+  (let [out (l/emit-as :dart ['(if (not (probe value))
+                                 1
+                                 2)])]
+    (count (re-seq #"probe\(value\)" out)))
+  => 1)
+
 (fact "dart globals target the injected runtime map"
   (let [out (l/emit-as :dart ['(do (x:global-set HELLO 1)
                                    (x:global-has? HELLO))])]
