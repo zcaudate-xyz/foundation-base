@@ -186,7 +186,7 @@
   (var arg-arr (:? (xt/x:is-array? args) args []))
   (var fargs (xt/x:arr-map arg-arr arg-fn))
   (if (xtd/arr-empty? fargs)
-    (return name)
+    (return (xt/x:to-string name))
     (return (xt/x:cat name " " (xt/x:str-join " " fargs)))))
 
 (defn.xt encode-sql-fn
@@ -409,9 +409,9 @@
         (if (xt/x:has-key? input "::")
           (return (-/encode-sql input column-fn opts -/encode-loop-fn))
           (return (xt/x:cat (xt/x:get-key input "expr")
-                         (:? (xt/x:has-key? input "as")
-                             (xt/x:cat " AS " (xt/x:get-key input "as"))
-                             ""))))
+                            (:? (xt/x:has-key? input "as")
+                                (xt/x:cat " AS " (xt/x:get-key input "as"))
+                                ""))))
         
         (xt/x:is-array? input)
         (return (nest-fn input))

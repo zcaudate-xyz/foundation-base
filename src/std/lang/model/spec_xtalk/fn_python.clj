@@ -462,8 +462,9 @@
 
 (defn python-tf-x-json-encode
   ([[_ obj]]
-   (list '. (list '__import__ "json")
-         (list 'dumps obj))))
+    (list '. (list '__import__ "json")
+         (list 'dumps obj
+               :separators ["," ":"]))))
 
 (defn python-tf-x-json-decode
   ([[_ s]]

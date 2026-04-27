@@ -500,6 +500,7 @@
            (return [(first pair) (last pair)]))
          (collect ~obj)))))
 
+
 (def +python-promise+
   {:x-promise          {:emit :hard-link :raw 'python.core.common-promise/promise}
    :x-promise-then     {:emit :hard-link :raw 'python.core.common-promise/promise-then}
@@ -668,8 +669,8 @@
          +julia-js+
          +julia-socket+
          +julia-http+
-         +julia-iter+
-         +julia-promise+
+         #_+julia-iter+
+         #_+julia-promise+
          +julia-shell+
          +julia-file+
          +julia-bit+
