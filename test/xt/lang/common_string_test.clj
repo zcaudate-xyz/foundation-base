@@ -84,20 +84,20 @@
   => 5)
 
 ^{:refer xt.lang.common-string/substring :added "4.1"}
-(fact "gets the substring"
+  (fact "gets the substring"
 
   (!.js
-    [(xts/substring "hello/world" 3)
+    [(xts/substring "hello/world" 3 11)
      (xts/substring "hello/world" 3 8)])
   => ["lo/world" "lo/wo"]
 
   (!.py
-    [(xts/substring "hello/world" 3)
+    [(xts/substring "hello/world" 3 11)
      (xts/substring "hello/world" 3 8)])
   => ["lo/world" "lo/wo"]
 
   (!.lua
-    [(xts/substring "hello/world" 3)
+    [(xts/substring "hello/world" 3 11)
      (xts/substring "hello/world" 3 8)])
   => ["lo/world" "lo/wo"])
 

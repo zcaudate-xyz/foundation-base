@@ -43,10 +43,10 @@
   => 5)
 
 ^{:refer xt.lang.common-string/substring :added "4.1"}
-(fact "gets the substring"
+  (fact "gets the substring"
 
   (!.R
-    [(xts/substring "hello/world" 3)
+    [(xts/substring "hello/world" 3 11)
      (xts/substring "hello/world" 3 8)])
   => ["lo/world" "lo/wo"])
 

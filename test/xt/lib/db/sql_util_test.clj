@@ -508,6 +508,9 @@
 ^{:refer xt.lib.db.sql-util/encode-loop-fn :added "4.0"}
 (fact "loop function to encode")
 
+^{:refer xt.lib.db.sql-util/encode-query-value :added "4.1"}
+(fact "TODO")
+
 ^{:refer xt.lib.db.sql-util/encode-query-segment :added "4.0"
   :setup [(def +out+
             ["name = 'hello'"

@@ -207,11 +207,8 @@
   => [{"a" {"b" {"id" "b"}}}
       {"a" {"b" {"sub" {"d" {"id" "d"}, "c" {"id" "c"}}, "id" "b"}}}])
 
-^{:refer xt.db.schema.base-util/collect-routes-object :added "4.0"}
-(fact "collects routes from an object input")
 
 (comment
-
   (s/run ['xt.db.schema.base-util])
   (s/seedgen-benchadd '[xt.lang.spec] {:lang [:r] :write true})
   (s/seedgen-benchadd '[xt.db.schema.base-util] {:lang [:julia :dart] :write true})

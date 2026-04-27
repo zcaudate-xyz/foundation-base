@@ -78,7 +78,6 @@
                          {:symbol "y", :type "numeric"}]))
   => [true]
 
-
   (!.lua
    (chk/check-args-type [1 2]
                         [{:symbol "x", :type "numeric"}
@@ -98,6 +97,23 @@
    (chk/check-args-length [1 2]
                           [{:symbol "x", :type "numeric"}
                            {:symbol "y", :type "numeric"}]))
+  => [true]
+
+  (!.lua
+   (chk/check-args-length [1 2]
+                          [{:symbol "x", :type "numeric"}
+                           {:symbol "y", :type "numeric"}]))
+  => [true]
+
+  (!.py
+   (chk/check-args-length [1 2]
+                          [{:symbol "x", :type "numeric"}
+                           {:symbol "y", :type "numeric"}]))
   => [true])
 
-
+(comment
+  (s/run ['xt.db.schema.base-check])
+  (s/seedgen-benchadd '[xt.db.schema.base-check] {:lang [:julia :dart] :write true})
+  
+  (s/seedgen-langadd 'xt.db.schema.base-check {:lang [:lua :python] :write true})
+  (s/seedgen-langremove 'xt.db.schema.base-check {:lang [:lua :python] :write true}))
