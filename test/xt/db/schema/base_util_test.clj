@@ -23,7 +23,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.schema.base-util/collect-routes :added "4.0"
   :setup [(def +routes+ [{:input [],
@@ -57,101 +57,128 @@
 (fact "collect routes"
 
   (!.js
-   (ut/collect-routes (@! +routes+) "db"))
+    (ut/collect-routes (@! +routes+) "db"))
   => +result+
 
   (!.lua
-   (ut/collect-routes (@! +routes+) "db"))
+    (ut/collect-routes (@! +routes+) "db"))
   => +result+
 
   (!.py
-   (ut/collect-routes (@! +routes+) "db"))
+    (ut/collect-routes (@! +routes+) "db"))
   => +result+)
 
 ^{:refer xt.db.schema.base-util/collect-views :added "4.0"
   :setup [(def +views+
-  [{:input [{:symbol "i_currency_id", :type "citext"}],
-    :return "jsonb",
-    :schema "core/application-support",
-    :id "currency_default",
-    :flags {:public true},
-    :view {:table "Currency",
-           :type "return",
-           :tag "default",
-           :access {:query nil,
-                    :roles {},
-                    :relation nil,
-                    :symbol nil},
-           :query ["*/data"],
-           :guards []}}
-   {:input [],
-    :return "jsonb",
-    :schema "core/application-support",
-    :id "currency_all",
-    :flags {:public true},
-    :view {:table "Currency",
-           :type "select",
-           :tag "all",
-           :access {:query nil,
-                    :roles {},
-                    :relation nil,
-                    :symbol nil},
-           :query nil,
-           :guards []}}
-   {:input [{:symbol "i_type", :type "text"}],
-    :return "jsonb",
-    :schema "core/application-support",
-    :id "currency_by_type",
-    :flags {:public true},
-    :view {:table "Currency",
-           :type "select",
-           :tag "by_type",
-           :access {:query nil,
-                    :roles {},
-                    :relation nil,
-                    :symbol nil},
-           :query {"type" "i_type"},
-           :guards []}}])]}
+            [{:input [{:symbol "i_currency_id", :type "citext"}],
+              :return "jsonb",
+              :schema "core/application-support",
+              :id "currency_default",
+              :flags {:public true},
+              :view {:table "Currency",
+                     :type "return",
+                     :tag "default",
+                     :access {:query nil,
+                              :roles {},
+                              :relation nil,
+                              :symbol nil},
+                     :query ["*/data"],
+                     :guards []}}
+             {:input [],
+              :return "jsonb",
+              :schema "core/application-support",
+              :id "currency_all",
+              :flags {:public true},
+              :view {:table "Currency",
+                     :type "select",
+                     :tag "all",
+                     :access {:query nil,
+                              :roles {},
+                              :relation nil,
+                              :symbol nil},
+                     :query nil,
+                     :guards []}}
+             {:input [{:symbol "i_type", :type "text"}],
+              :return "jsonb",
+              :schema "core/application-support",
+              :id "currency_by_type",
+              :flags {:public true},
+              :view {:table "Currency",
+                     :type "select",
+                     :tag "by_type",
+                     :access {:query nil,
+                              :roles {},
+                              :relation nil,
+                              :symbol nil},
+                     :query {"type" "i_type"},
+                     :guards []}}])]}
 (fact "collect views into views structure"
 
   (!.js
-   (ut/collect-views (@! +views+)))
+    (ut/collect-views (@! +views+)))
   => (contains-in {"Currency" {"select" {"all" map?
                                          "by_type" map?}
                                "return" {"default" map?}}})
 
   (!.lua
-   (ut/collect-views (@! +views+)))
+    (ut/collect-views (@! +views+)))
   => (contains-in {"Currency" {"select" {"all" map?
                                          "by_type" map?}
                                "return" {"default" map?}}})
 
   (!.py
-   (ut/collect-views (@! +views+)))
+    (ut/collect-views (@! +views+)))
   => (contains-in {"Currency" {"select" {"all" map?
                                          "by_type" map?}
                                "return" {"default" map?}}}))
 
 ^{:refer xt.db.schema.base-util/merge-views :added "4.0"}
-(fact "merges multiple views together")
+(fact "merges multiple views together"
+
+  (!.js
+    (ut/merge-views
+     [{"Currency" {"select" {"all" {"id" "currency_all"}}}}
+      {"Wallet" {"return" {"default" {"id" "wallet_default"}}}}]
+     {"RegionCountry" {"select" {"all" {"id" "country_all"}}}}))
+  => {"Currency" {"select" {"all" {"id" "currency_all"}}}
+      "Wallet" {"return" {"default" {"id" "wallet_default"}}}
+      "RegionCountry" {"select" {"all" {"id" "country_all"}}}}
+
+  (!.lua
+    (ut/merge-views
+     [{"Currency" {"select" {"all" {"id" "currency_all"}}}}
+      {"Wallet" {"return" {"default" {"id" "wallet_default"}}}}]
+     {"RegionCountry" {"select" {"all" {"id" "country_all"}}}}))
+  => {"Currency" {"select" {"all" {"id" "currency_all"}}}
+      "Wallet" {"return" {"default" {"id" "wallet_default"}}}
+      "RegionCountry" {"select" {"all" {"id" "country_all"}}}}
+
+  (!.py
+    (ut/merge-views
+     [{"Currency" {"select" {"all" {"id" "currency_all"}}}}
+      {"Wallet" {"return" {"default" {"id" "wallet_default"}}}}]
+     {"RegionCountry" {"select" {"all" {"id" "country_all"}}}}))
+  => {"Currency" {"select" {"all" {"id" "currency_all"}}}
+      "Wallet" {"return" {"default" {"id" "wallet_default"}}}
+      "RegionCountry" {"select" {"all" {"id" "country_all"}}}})
 
 ^{:refer xt.db.schema.base-util/keepf-limit :added "4.0"}
 (fact "keeps given limit"
 
   (!.js
-   (ut/keepf-limit [1 2 3 4 5]
-                   xt/x:odd?
-                   k/identity
-                   3))
+    (ut/keepf-limit [1 2 3 4 5]
+                    xt/x:odd?
+                    k/identity
+                    3))
   => [1 3 5]
-  
+
   (!.lua
     (ut/keepf-limit [1 2 3 4 5]
                     xt/x:odd?
-                   k/identity
-                   3))
+                    k/identity
+                    3))
   => [1 3 5]
-  
+
   (!.py
     (ut/keepf-limit [1 2 3 4 5]
                     xt/x:odd?
@@ -168,13 +195,13 @@
   => {"1" {"id" "1"}}
 
   (!.lua
-   (ut/lu-nested [{:id "1"}]
-                 (fn [e] (return e.id))))
+    (ut/lu-nested [{:id "1"}]
+                  (fn [e] (return e.id))))
   => {"1" {"id" "1"}}
 
   (!.py
-   (ut/lu-nested [{:id "1"}]
-                 (fn [e] (return (xt/x:get-key e "id")))))
+    (ut/lu-nested [{:id "1"}]
+                  (fn [e] (return (xt/x:get-key e "id")))))
   => {"1" {"id" "1"}})
 
 ^{:refer xt.db.schema.base-util/lu-map :added "4.0"}
@@ -190,11 +217,11 @@
       {"a" {"b" {"sub" {"d" {"id" "d"}, "c" {"id" "c"}}, "id" "b"}}}]
 
   (!.lua [(ut/lu-map
-          {:a [{:id "b"}]})
-         (ut/lu-map
-          {:a [{:id "b"
-                :sub [{:id "c"}
-                      {:id "d"}]}]})])
+           {:a [{:id "b"}]})
+          (ut/lu-map
+           {:a [{:id "b"
+                 :sub [{:id "c"}
+                       {:id "d"}]}]})])
   => [{"a" {"b" {"id" "b"}}}
       {"a" {"b" {"sub" {"d" {"id" "d"}, "c" {"id" "c"}}, "id" "b"}}}]
 
@@ -206,7 +233,6 @@
                       {:id "d"}]}]})])
   => [{"a" {"b" {"id" "b"}}}
       {"a" {"b" {"sub" {"d" {"id" "d"}, "c" {"id" "c"}}, "id" "b"}}}])
-
 
 (comment
   (s/run ['xt.db.schema.base-util])

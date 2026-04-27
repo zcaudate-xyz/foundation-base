@@ -35,45 +35,45 @@
 (fact "flatten links"
 
   (!.js
-   (f/flatten-get-links {:currencies [{:id "hello"}]}))
+    (f/flatten-get-links {:currencies [{:id "hello"}]}))
   => {"currencies" {"hello" true}}
 
   (!.lua
-   (f/flatten-get-links {:currencies [{:id "hello"}]}))
+    (f/flatten-get-links {:currencies [{:id "hello"}]}))
   => {"currencies" {"hello" true}}
 
   (!.py
-   (f/flatten-get-links {:currencies [{:id "hello"}]}))
+    (f/flatten-get-links {:currencies [{:id "hello"}]}))
   => {"currencies" {"hello" true}})
 
 ^{:refer xt.db.schema.base-flatten/flatten-merge :added "4.0"}
 (fact "flatten data"
 
   (!.js
-   (f/flatten-merge {}
-                    {:id "hello"}
-                    {:profile {"profile-id" true}}
-                    {}))
+    (f/flatten-merge {}
+                     {:id "hello"}
+                     {:profile {"profile-id" true}}
+                     {}))
   => {"hello" {"ref_links" {"profile" {"profile-id" true}},
                "id" "hello",
                "rev_links" {},
                "data" {"id" "hello"}}}
 
   (!.lua
-   (f/flatten-merge {}
-                    {:id "hello"}
-                    {:profile {"profile-id" true}}
-                    {}))
+    (f/flatten-merge {}
+                     {:id "hello"}
+                     {:profile {"profile-id" true}}
+                     {}))
   => {"hello" {"ref_links" {"profile" {"profile-id" true}},
                "id" "hello",
                "rev_links" {},
                "data" {"id" "hello"}}}
 
   (!.py
-   (f/flatten-merge {}
-                    {:id "hello"}
-                    {:profile {"profile-id" true}}
-                    {}))
+    (f/flatten-merge {}
+                     {:id "hello"}
+                     {:profile {"profile-id" true}}
+                     {}))
   => {"hello" {"ref_links" {"profile" {"profile-id" true}},
                "id" "hello",
                "rev_links" {},
@@ -84,28 +84,28 @@
 
   (!.js
     (var out (f/flatten-node sample/Schema
-                                 "UserAccount"
-                                 sample/RootUserFull
-                                 {}
-                                 {}))
+                             "UserAccount"
+                             sample/RootUserFull
+                             {}
+                             {}))
     (xtd/obj-keys out))
   => (just ["table_map" "data_obj" "ref_obj" "rev_obj"] :in-any-order)
 
   (!.lua
     (var out (f/flatten-node sample/Schema
-                                 "UserAccount"
-                                 sample/RootUserFull
-                                 {}
-                                 {}))
+                             "UserAccount"
+                             sample/RootUserFull
+                             {}
+                             {}))
     (xtd/obj-keys out))
   => (just ["table_map" "data_obj" "ref_obj" "rev_obj"] :in-any-order)
 
   (!.py
     (var out (f/flatten-node sample/Schema
-                                 "UserAccount"
-                                 sample/RootUserFull
-                                 {}
-                                 {}))
+                             "UserAccount"
+                             sample/RootUserFull
+                             {}
+                             {}))
     (xtd/obj-keys out))
   => (just ["table_map" "data_obj" "ref_obj" "rev_obj"] :in-any-order))
 
@@ -129,30 +129,30 @@
 (fact "flatten node example for user account"
 
   (!.js
-   (-> (f/flatten-node sample/Schema
-                       "UserAccount"
-                       sample/RootUserFull
-                       {}
-                       {})
-       (xt/x:get-key "table_map")))
+    (-> (f/flatten-node sample/Schema
+                        "UserAccount"
+                        sample/RootUserFull
+                        {}
+                        {})
+        (xt/x:get-key "table_map")))
   => +table-map-account+
 
   (!.lua
-   (-> (f/flatten-node sample/Schema
-                       "UserAccount"
-                       sample/RootUserFull
-                       {}
-                       {})
-       (xt/x:get-key "table_map")))
+    (-> (f/flatten-node sample/Schema
+                        "UserAccount"
+                        sample/RootUserFull
+                        {}
+                        {})
+        (xt/x:get-key "table_map")))
   => +table-map-account+
 
   (!.py
-   (-> (f/flatten-node sample/Schema
-                       "UserAccount"
-                       sample/RootUserFull
-                       {}
-                       {})
-       (xt/x:get-key "table_map")))
+    (-> (f/flatten-node sample/Schema
+                        "UserAccount"
+                        sample/RootUserFull
+                        {}
+                        {})
+        (xt/x:get-key "table_map")))
   => +table-map-account+)
 
 ^{:refer xt.db.schema.base-flatten/flatten-node.profile :added "4.0"
@@ -175,39 +175,39 @@
 (fact "flatten node example for user account"
 
   (!.js
-   (f/flatten-node sample/Schema
-                   "UserProfile"
-                   {"id" "c4643895-b0ce-44cc-b07b-2386bf18d43b",
-                    "account" ["hello"]
-                    "last_name" "User",
-                    "first_name" "Root",
-                    "language" "en"}
-                   {}
-                   {}))
+    (f/flatten-node sample/Schema
+                    "UserProfile"
+                    {"id" "c4643895-b0ce-44cc-b07b-2386bf18d43b",
+                     "account" ["hello"]
+                     "last_name" "User",
+                     "first_name" "Root",
+                     "language" "en"}
+                    {}
+                    {}))
   => +table-map-profile+
 
   (!.lua
-   (f/flatten-node sample/Schema
-                   "UserProfile"
-                   {"id" "c4643895-b0ce-44cc-b07b-2386bf18d43b",
-                    "account" ["hello"]
-                    "last_name" "User",
-                    "first_name" "Root",
-                    "language" "en"}
-                   {}
-                   {}))
+    (f/flatten-node sample/Schema
+                    "UserProfile"
+                    {"id" "c4643895-b0ce-44cc-b07b-2386bf18d43b",
+                     "account" ["hello"]
+                     "last_name" "User",
+                     "first_name" "Root",
+                     "language" "en"}
+                    {}
+                    {}))
   => +table-map-profile+
 
   (!.py
-   (f/flatten-node sample/Schema
-                   "UserProfile"
-                   {"id" "c4643895-b0ce-44cc-b07b-2386bf18d43b",
-                    "account" ["hello"]
-                    "last_name" "User",
-                    "first_name" "Root",
-                    "language" "en"}
-                   {}
-                   {}))
+    (f/flatten-node sample/Schema
+                    "UserProfile"
+                    {"id" "c4643895-b0ce-44cc-b07b-2386bf18d43b",
+                     "account" ["hello"]
+                     "last_name" "User",
+                     "first_name" "Root",
+                     "language" "en"}
+                    {}
+                    {}))
   => +table-map-profile+)
 
 ^{:refer xt.db.schema.base-flatten/flatten-linked :added "4.0"
@@ -233,45 +233,45 @@
 (fact "flatten linked for schema"
 
   (!.js
-   (f/flatten-linked sample/Schema
-                     "UserAccount"
-                     {"profile" [{"id" "c4643895-b0ce-44cc-b07b-2386bf18d43b",
-                                  "last_name" "User", "first_name" "Root", "picture" {"url" "static/user.jpg",
-                                                                                      "type" "base"},
-                                  "language" "en"}]
-                      "organisations" [{"id" "ec088f52-310b-491b-a034-d4efc222fd00",
-                                        "name" "root"}],}
-                     "hello"
-                     {}
-                     f/flatten-obj))
+    (f/flatten-linked sample/Schema
+                      "UserAccount"
+                      {"profile" [{"id" "c4643895-b0ce-44cc-b07b-2386bf18d43b",
+                                   "last_name" "User", "first_name" "Root", "picture" {"url" "static/user.jpg",
+                                                                                       "type" "base"},
+                                   "language" "en"}]
+                       "organisations" [{"id" "ec088f52-310b-491b-a034-d4efc222fd00",
+                                         "name" "root"}],}
+                      "hello"
+                      {}
+                      f/flatten-obj))
   => +table-linked+
 
   (!.lua
-   (f/flatten-linked sample/Schema
-                     "UserAccount"
-                     {"profile" [{"id" "c4643895-b0ce-44cc-b07b-2386bf18d43b",
-                                  "last_name" "User", "first_name" "Root", "picture" {"url" "static/user.jpg",
-                                                                                      "type" "base"},
-                                  "language" "en"}]
-                      "organisations" [{"id" "ec088f52-310b-491b-a034-d4efc222fd00",
-                                        "name" "root"}],}
-                     "hello"
-                     {}
-                     f/flatten-obj))
+    (f/flatten-linked sample/Schema
+                      "UserAccount"
+                      {"profile" [{"id" "c4643895-b0ce-44cc-b07b-2386bf18d43b",
+                                   "last_name" "User", "first_name" "Root", "picture" {"url" "static/user.jpg",
+                                                                                       "type" "base"},
+                                   "language" "en"}]
+                       "organisations" [{"id" "ec088f52-310b-491b-a034-d4efc222fd00",
+                                         "name" "root"}],}
+                      "hello"
+                      {}
+                      f/flatten-obj))
   => +table-linked+
 
   (!.py
-   (f/flatten-linked sample/Schema
-                     "UserAccount"
-                     {"profile" [{"id" "c4643895-b0ce-44cc-b07b-2386bf18d43b",
-                                  "last_name" "User", "first_name" "Root", "picture" {"url" "static/user.jpg",
-                                                                                      "type" "base"},
-                                  "language" "en"}]
-                      "organisations" [{"id" "ec088f52-310b-491b-a034-d4efc222fd00",
-                                        "name" "root"}],}
-                     "hello"
-                     {}
-                     f/flatten-obj))
+    (f/flatten-linked sample/Schema
+                      "UserAccount"
+                      {"profile" [{"id" "c4643895-b0ce-44cc-b07b-2386bf18d43b",
+                                   "last_name" "User", "first_name" "Root", "picture" {"url" "static/user.jpg",
+                                                                                       "type" "base"},
+                                   "language" "en"}]
+                       "organisations" [{"id" "ec088f52-310b-491b-a034-d4efc222fd00",
+                                         "name" "root"}],}
+                      "hello"
+                      {}
+                      f/flatten-obj))
   => +table-linked+)
 
 ^{:refer xt.db.schema.base-flatten/flatten-obj :added "4.0"
@@ -422,75 +422,73 @@
 (fact "flatten data for schema"
 
   (!.js
-   (f/flatten-obj sample/Schema
-                  "UserAccount"
-                  sample/RootUserFull
-                  {}
-                  {}))
+    (f/flatten-obj sample/Schema
+                   "UserAccount"
+                   sample/RootUserFull
+                   {}
+                   {}))
   => +user-full+
 
   (!.lua
-   (f/flatten-obj sample/Schema
-                  "UserAccount"
-                  sample/RootUserFull
-                  {}
-                  {}))
+    (f/flatten-obj sample/Schema
+                   "UserAccount"
+                   sample/RootUserFull
+                   {}
+                   {}))
   => +user-full+
 
   (!.py
-   (f/flatten-obj sample/Schema
-                  "UserAccount"
-                  sample/RootUserFull
-                  {}
-                  {}))
+    (f/flatten-obj sample/Schema
+                   "UserAccount"
+                   sample/RootUserFull
+                   {}
+                   {}))
   => +user-full+)
 
 ^{:refer xt.db.schema.base-flatten/flatten :added "4.0"}
 (fact "flattens data schema"
 
   (!.js
-   (f/flatten sample/Schema
-              "UserAccount"
-              sample/RootUserFull
-              nil))
+    (f/flatten sample/Schema
+               "UserAccount"
+               sample/RootUserFull
+               nil))
   => +user-full+
 
   (!.lua
-   (f/flatten sample/Schema
-              "UserAccount"
-              sample/RootUserFull
-              nil))
+    (f/flatten sample/Schema
+               "UserAccount"
+               sample/RootUserFull
+               nil))
   => +user-full+
 
   (!.py
-   (f/flatten sample/Schema
-              "UserAccount"
-              sample/RootUserFull
-              nil))
+    (f/flatten sample/Schema
+               "UserAccount"
+               sample/RootUserFull
+               nil))
   => +user-full+)
 
 ^{:refer xt.db.schema.base-flatten/flatten-bulk :added "4.0"}
 (fact "flattens bulk data"
 
   (!.js
-   (f/flatten-bulk
-    sample/Schema
-    {"UserAccount" [sample/RootUserFull]}))
+    (f/flatten-bulk
+     sample/Schema
+     {"UserAccount" [sample/RootUserFull]}))
   => +user-full+
 
   (!.lua
-   (f/flatten-bulk
-    sample/Schema
-    {"UserAccount" [sample/RootUserFull]}))
+    (f/flatten-bulk
+     sample/Schema
+     {"UserAccount" [sample/RootUserFull]}))
   => +user-full+
 
   (!.py
-   (f/flatten-bulk
-    sample/Schema
-    {"UserAccount" [sample/RootUserFull]}))
+    (f/flatten-bulk
+     sample/Schema
+     {"UserAccount" [sample/RootUserFull]}))
   => +user-full+)
-
-
 
 (comment
 
@@ -498,5 +496,3 @@
   
   (s/seedgen-langadd 'xt.db.schema.base-flatten {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.db.schema.base-flatten {:lang [:lua :python] :write true}))
-
-

@@ -27,7 +27,37 @@
   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.schema.base-schema/get-ident-id :added "4.0"}
-(fact "gets the ident id for a schema entry")
+(fact "gets the ident id for a schema entry"
+
+  (!.js
+    (sch/get-ident-id {"ident" "name"
+                       "type" "text"}))
+  => "name"
+
+  (!.js
+    (sch/get-ident-id {"ident" "owner"
+                       "type" "ref"}))
+  => "owner_id"
+
+  (!.lua
+    (sch/get-ident-id {"ident" "name"
+                       "type" "text"}))
+  => "name"
+
+  (!.lua
+    (sch/get-ident-id {"ident" "owner"
+                       "type" "ref"}))
+  => "owner_id"
+
+  (!.py
+    (sch/get-ident-id {"ident" "name"
+                       "type" "text"}))
+  => "name"
+
+  (!.py
+    (sch/get-ident-id {"ident" "owner"
+                       "type" "ref"}))
+  => "owner_id")
 
 ^{:refer xt.db.schema.base-schema/list-tables :added "4.0"}
 (fact "list schema tables"
@@ -103,7 +133,7 @@
   => ["id" "type" "symbol" "native" "decimal" "name" "plural" "description"]
 
   (!.lua
-      (sch/create-data-keys sample/SchemaCurrency "Currency"))
+    (sch/create-data-keys sample/SchemaCurrency "Currency"))
   => ["id" "type" "symbol" "native" "decimal" "name" "plural" "description"]
 
   (!.py
@@ -141,10 +171,124 @@
            :in-any-order))
 
 ^{:refer xt.db.schema.base-schema/create-table-entries :added "4.0"}
-(fact "creates the table keys")
+(fact "creates the table keys"
+
+  (!.js
+    (sch/create-table-entries sample/Schema "Wallet"))
+  => [{"ident" "id",
+       "primary" true,
+       "scope" "id",
+       "order" 0,
+       "type" "uuid",
+       "cardinality" "one"}
+      {"ident" "slug",
+       "scope" "data",
+       "order" 1,
+       "type" "citext",
+       "cardinality" "one",
+       "sql" {"default" "default"}}
+      {"ident" "owner",
+       "scope" "ref",
+       "order" 2,
+       "required" true,
+       "type" "ref",
+       "ref"
+       {"key" "owner",
+        "rkey" "_owner",
+        "link"
+        {"lang" "postgres",
+         "id" "UserAccount",
+         "section" "code",
+         "module" "xt.db.helpers.seed-user-test"},
+        "type" "forward",
+        "rident" "wallets",
+        "rval" "wallets",
+        "ns" "UserAccount",
+        "val" "owner"},
+       "cardinality" "one"}]
+
+  (!.lua
+    (sch/create-table-entries sample/Schema "Wallet"))
+  => [{"ident" "id",
+       "primary" true,
+       "scope" "id",
+       "order" 0,
+       "type" "uuid",
+       "cardinality" "one"}
+      {"ident" "slug",
+       "scope" "data",
+       "order" 1,
+       "type" "citext",
+       "cardinality" "one",
+       "sql" {"default" "default"}}
+      {"ident" "owner",
+       "scope" "ref",
+       "order" 2,
+       "required" true,
+       "type" "ref",
+       "ref"
+       {"key" "owner",
+        "rkey" "_owner",
+        "link"
+        {"lang" "postgres",
+         "id" "UserAccount",
+         "section" "code",
+         "module" "xt.db.helpers.seed-user-test"},
+        "type" "forward",
+        "rident" "wallets",
+        "rval" "wallets",
+        "ns" "UserAccount",
+        "val" "owner"},
+       "cardinality" "one"}]
+
+  (!.py
+    (sch/create-table-entries sample/Schema "Wallet"))
+  => [{"ident" "id",
+       "primary" true,
+       "scope" "id",
+       "order" 0,
+       "type" "uuid",
+       "cardinality" "one"}
+      {"ident" "slug",
+       "scope" "data",
+       "order" 1,
+       "type" "citext",
+       "cardinality" "one",
+       "sql" {"default" "default"}}
+      {"ident" "owner",
+       "scope" "ref",
+       "order" 2,
+       "required" true,
+       "type" "ref",
+       "ref"
+       {"key" "owner",
+        "rkey" "_owner",
+        "link"
+        {"lang" "postgres",
+         "id" "UserAccount",
+         "section" "code",
+         "module" "xt.db.helpers.seed-user-test"},
+        "type" "forward",
+        "rident" "wallets",
+        "rval" "wallets",
+        "ns" "UserAccount",
+        "val" "owner"},
+       "cardinality" "one"}])
 
 ^{:refer xt.db.schema.base-schema/create-defaults :added "4.0"}
-(fact "creates defaults from sql inputs")
+(fact "creates defaults from sql inputs"
+
+  (!.js
+    (sch/create-defaults sample/Schema "Wallet"))
+  => {"slug" "default"}
+
+  (!.lua
+    (sch/create-defaults sample/Schema "Wallet"))
+  => {"slug" "default"}
+
+  (!.py
+    (sch/create-defaults sample/Schema "Wallet"))
+  => {"slug" "default"})
 
 ^{:refer xt.db.schema.base-schema/create-all-keys :added "4.0"
   :setup [(def +all-wallet+
@@ -188,15 +332,15 @@
 (fact "creates all keys"
 
   (!.js
-   (sch/create-all-keys sample/Schema "Wallet"))
+    (sch/create-all-keys sample/Schema "Wallet"))
   => +all-wallet+
 
   (!.lua
-   (sch/create-all-keys sample/Schema "Wallet"))
+    (sch/create-all-keys sample/Schema "Wallet"))
   => +all-wallet+
 
   (!.py
-   (sch/create-all-keys sample/Schema "Wallet"))
+    (sch/create-all-keys sample/Schema "Wallet"))
   => +all-wallet+)
 
 ^{:refer xt.db.schema.base-schema/get-all-keys :added "4.0"
@@ -320,10 +464,124 @@
   => #{"organisations" "profile" "privileges" "organisation_accesses" "wallets" "notification"})
 
 ^{:refer xt.db.schema.base-schema/table-defaults :added "4.0"}
-(fact "gets the table defaults")
+(fact "gets the table defaults"
+
+  (!.js
+    (sch/table-defaults sample/Schema "Wallet"))
+  => {"slug" "default"}
+
+  (!.lua
+    (sch/table-defaults sample/Schema "Wallet"))
+  => {"slug" "default"}
+
+  (!.py
+    (sch/table-defaults sample/Schema "Wallet"))
+  => {"slug" "default"})
 
 ^{:refer xt.db.schema.base-schema/table-entries :added "4.0"}
-(fact "gets the table entries")
+(fact "gets the table entries"
+
+  (!.js
+    (sch/table-entries sample/Schema "Wallet"))
+  => [{"ident" "id",
+       "primary" true,
+       "scope" "id",
+       "order" 0,
+       "type" "uuid",
+       "cardinality" "one"}
+      {"ident" "slug",
+       "scope" "data",
+       "order" 1,
+       "type" "citext",
+       "cardinality" "one",
+       "sql" {"default" "default"}}
+      {"ident" "owner",
+       "scope" "ref",
+       "order" 2,
+       "required" true,
+       "type" "ref",
+       "ref"
+       {"key" "owner",
+        "rkey" "_owner",
+        "link"
+        {"lang" "postgres",
+         "id" "UserAccount",
+         "section" "code",
+         "module" "xt.db.helpers.seed-user-test"},
+        "type" "forward",
+        "rident" "wallets",
+        "rval" "wallets",
+        "ns" "UserAccount",
+        "val" "owner"},
+       "cardinality" "one"}]
+
+  (!.lua
+    (sch/table-entries sample/Schema "Wallet"))
+  => [{"ident" "id",
+       "primary" true,
+       "scope" "id",
+       "order" 0,
+       "type" "uuid",
+       "cardinality" "one"}
+      {"ident" "slug",
+       "scope" "data",
+       "order" 1,
+       "type" "citext",
+       "cardinality" "one",
+       "sql" {"default" "default"}}
+      {"ident" "owner",
+       "scope" "ref",
+       "order" 2,
+       "required" true,
+       "type" "ref",
+       "ref"
+       {"key" "owner",
+        "rkey" "_owner",
+        "link"
+        {"lang" "postgres",
+         "id" "UserAccount",
+         "section" "code",
+         "module" "xt.db.helpers.seed-user-test"},
+        "type" "forward",
+        "rident" "wallets",
+        "rval" "wallets",
+        "ns" "UserAccount",
+        "val" "owner"},
+       "cardinality" "one"}]
+
+  (!.py
+    (sch/table-entries sample/Schema "Wallet"))
+  => [{"ident" "id",
+       "primary" true,
+       "scope" "id",
+       "order" 0,
+       "type" "uuid",
+       "cardinality" "one"}
+      {"ident" "slug",
+       "scope" "data",
+       "order" 1,
+       "type" "citext",
+       "cardinality" "one",
+       "sql" {"default" "default"}}
+      {"ident" "owner",
+       "scope" "ref",
+       "order" 2,
+       "required" true,
+       "type" "ref",
+       "ref"
+       {"key" "owner",
+        "rkey" "_owner",
+        "link"
+        {"lang" "postgres",
+         "id" "UserAccount",
+         "section" "code",
+         "module" "xt.db.helpers.seed-user-test"},
+        "type" "forward",
+        "rident" "wallets",
+        "rval" "wallets",
+        "ns" "UserAccount",
+        "val" "owner"},
+       "cardinality" "one"}])
 
 ^{:refer xt.db.schema.base-schema/table-columns :added "4.0"
   :setup [(def +out+
@@ -358,71 +616,71 @@
 (fact "creates the table order"
 
   (!.js
-   (sch/create-table-order sample/SchemaLookup))
+    (sch/create-table-order sample/SchemaLookup))
   => +ordered+
 
   (!.lua
-   (sch/create-table-order sample/SchemaLookup))
+    (sch/create-table-order sample/SchemaLookup))
   => +ordered+
 
   (!.py
-   (sch/create-table-order sample/SchemaLookup))
+    (sch/create-table-order sample/SchemaLookup))
   => +ordered+)
 
 ^{:refer xt.db.schema.base-schema/table-order :added "4.0"}
 (fact "table order with caching"
 
   (!.js
-   (sch/table-order  sample/SchemaLookup))
+    (sch/table-order  sample/SchemaLookup))
   => +ordered+
 
   (!.lua
-   (sch/table-order  sample/SchemaLookup))
+    (sch/table-order  sample/SchemaLookup))
   => +ordered+
 
   (!.py
-   (sch/table-order  sample/SchemaLookup))
+    (sch/table-order  sample/SchemaLookup))
   => +ordered+)
 
 ^{:refer xt.db.schema.base-schema/table-coerce :added "4.0"}
 (fact "coerces output given schema and type functions"
 
   (!.js
-   [(sch/table-coerce sample/Schema
-                      "UserAccount"
-                      {:is-super 1}
-                      {:boolean ut/sqlite-to-boolean})
-    (sch/table-coerce sample/Schema
-                      "UserAccount"
-                      {:is-super 1
-                       :organisations [{:name "hello"}]}
-                      {:boolean ut/sqlite-to-boolean})])
+    [(sch/table-coerce sample/Schema
+                       "UserAccount"
+                       {:is-super 1}
+                       {:boolean ut/sqlite-to-boolean})
+     (sch/table-coerce sample/Schema
+                       "UserAccount"
+                       {:is-super 1
+                        :organisations [{:name "hello"}]}
+                       {:boolean ut/sqlite-to-boolean})])
   => [{"is_super" true}
       {"organisations" [{"name" "hello"}], "is_super" true}]
 
   (!.lua
-   [(sch/table-coerce sample/Schema
-                      "UserAccount"
-                      {:is-super 1}
-                      {:boolean ut/sqlite-to-boolean})
-    (sch/table-coerce sample/Schema
-                      "UserAccount"
-                      {:is-super 1
-                       :organisations [{:name "hello"}]}
-                      {:boolean ut/sqlite-to-boolean})])
+    [(sch/table-coerce sample/Schema
+                       "UserAccount"
+                       {:is-super 1}
+                       {:boolean ut/sqlite-to-boolean})
+     (sch/table-coerce sample/Schema
+                       "UserAccount"
+                       {:is-super 1
+                        :organisations [{:name "hello"}]}
+                       {:boolean ut/sqlite-to-boolean})])
   => [{"is_super" true}
       {"organisations" [{"name" "hello"}], "is_super" true}]
 
   (!.py
-   [(sch/table-coerce sample/Schema
-                      "UserAccount"
-                      {:is-super 1}
-                      {:boolean ut/sqlite-to-boolean})
-    (sch/table-coerce sample/Schema
-                      "UserAccount"
-                      {:is-super 1
-                       :organisations [{:name "hello"}]}
-                      {:boolean ut/sqlite-to-boolean})])
+    [(sch/table-coerce sample/Schema
+                       "UserAccount"
+                       {:is-super 1}
+                       {:boolean ut/sqlite-to-boolean})
+     (sch/table-coerce sample/Schema
+                       "UserAccount"
+                       {:is-super 1
+                        :organisations [{:name "hello"}]}
+                       {:boolean ut/sqlite-to-boolean})])
   => [{"is_super" true}
       {"organisations" [{"name" "hello"}], "is_super" true}])
 
