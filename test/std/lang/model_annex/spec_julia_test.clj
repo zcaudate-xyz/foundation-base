@@ -32,13 +32,6 @@
   (julia-map-key :abc +grammar+ {})
   => "\"abc\"")
 
-^{:refer std.lang.model-annex.spec-julia/tf-for-iter :added "4.0"}
-(fact  "for iter transform"
-
-  (tf-for-iter '(for:iter [e iter]
-                          e))
-  => '(for [e :in iter] e))
-
 ^{:refer std.lang.model-annex.spec-julia/tf-for-index :added "4.0"}
 (fact "for index transform"
 
@@ -61,12 +54,6 @@
 
   (tf-dict '(dict :a 1 :b 2))
   => '(Dict (=> "a" 1) (=> "b" 2)))
-
-^{:refer std.lang.model-annex.spec-julia/tf-push! :added "4.0"}
-(fact "push! transform to avoid sanitization"
-
-  (tf-push! '(push! arr 1))
-  => '(:% "push!(" arr ", " 1 ")"))
 
 ^{:refer std.lang.model-annex.spec-julia/julia-module-export :added "4.0"}
 (fact "outputs the julia module export form"
@@ -95,9 +82,18 @@
   => "if true\n  println(\"Yes\")\nelse\n  println(\"No\")\nend"
 
   (!.julia
-   (for [i :in (to 1 1 3)]
-     (println i)))
-  => "for i in 1:3\n  println(i)\nend")
+    (for [i :in (to 1 1 3)]
+      (println i)))
+   => "for i in 1:3\n  println(i)\nend"
+
+   (!.julia
+    (for:iter [e iter]
+      e))
+   => "for e in iter\n  e\nend"
+
+   (!.julia
+    (push! arr 1))
+   => "push!(arr,1)")
 
 (fact "Xtalk Julia mappings"
   (!.julia (x:print "Hello"))
@@ -108,6 +104,15 @@
 
   (!.julia (x:cat "a" "b"))
   => "\"a\" * \"b\""
+
+  (!.julia (x:offset 10))
+  => "11"
+
+  (!.julia (x:get-idx arr (x:offset 0)))
+  => "arr[1]"
+
+  (!.julia (x:set-idx arr (x:offset 1) value))
+  => "arr[2] = value"
 
   (!.julia (x:get-key (dict :a 1) "a" 0))
   => "get(Dict(\"a\" => 1),\"a\",0)"
@@ -122,7 +127,7 @@
   => "join([\"a\",\"b\"],\", \")"
 
   (!.julia (x:arr-push [1] 2))
-  => "\"push!(\"[1]\", \"2\")\"")
+  => "push!([1],2)")
 
 
 ^{:refer std.lang.model-annex.spec-julia/emit-to :added "4.1"}

@@ -56,10 +56,10 @@
    :x-apply          {:macro #'lua-tf-x-apply  :emit :macro}
    :x-unpack         {:emit :alias :raw 'unpack}
    :x-print          {:emit :alias :raw 'print}
-    
-    :x-random         {:emit :alias :raw 'math.random}
-    :x-now-ms         {:default '(math.floor (* 1000 (os.time)))   :emit :unit}
-    :x-type-native    {:macro #'lua-tf-x-type-native  :emit :macro}})
+   
+   :x-random         {:emit :alias :raw 'math.random}
+   :x-now-ms         {:default '(math.floor (* 1000 (os.time)))   :emit :unit}
+   :x-type-native    {:macro #'lua-tf-x-type-native  :emit :macro}})
 
 
 ;;
@@ -278,7 +278,7 @@
 
 (defn lua-tf-x-arr-sort
   [[_ arr key-fn comp-fn]]
-  (list 'table.sort arr
+  (list 'table.sort ()arr
         (template/$ (fn [a b]
                       (return (~comp-fn
                                (~key-fn a)
@@ -294,7 +294,7 @@
    :x-arr-push-first  {:macro #'lua-tf-x-arr-push-first :emit :macro}
    :x-arr-pop-first   {:macro #'lua-tf-x-arr-pop-first  :emit :macro}
    :x-arr-insert      {:macro #'lua-tf-x-arr-insert     :emit :macro}
-   :x-arr-sort        {:macro #'lua-tf-x-arr-sort       :emit :macro}
+   #_#_:x-arr-sort        {:macro #'lua-tf-x-arr-sort       :emit :macro}
    :x-str-comp        {:emit :alias :raw '<}})
 
 ;;
@@ -371,28 +371,28 @@
    (template/$
     (do (var ret nil)
         (var type-fn
-               (fn [obj]
-                 (var t (type obj))
-                 (if (== t "table")
-                   (if (== nil (. '(obj) [1]))
-                     (return "object")
-                     (return "array"))
-                   (return t))))
+             (fn [obj]
+               (var t (type obj))
+               (if (== t "table")
+                 (if (== nil (. '(obj) [1]))
+                   (return "object")
+                   (return "array"))
+                 (return t))))
         (var '[r-ok r-err]
-               (pcall (fn []
-                        (cond (== nil ~out)
-                              (:= ret (cjson.encode {:id  ~id
-                                                     :key ~key
-                                                     :return "nil"
-                                                     :type "data"
-                                                     :value (. cjson ["null"])}))
-                                         
-                              :else
-                              (:= ret (cjson.encode {:id  ~id
-                                                     :key ~key
-                                                     :return (type-fn ~out)
-                                                     :type "data"
-                                                     :value ~out}))))))
+             (pcall (fn []
+                      (cond (== nil ~out)
+                            (:= ret (cjson.encode {:id  ~id
+                                                   :key ~key
+                                                   :return "nil"
+                                                   :type "data"
+                                                   :value (. cjson ["null"])}))
+                            
+                            :else
+                            (:= ret (cjson.encode {:id  ~id
+                                                   :key ~key
+                                                   :return (type-fn ~out)
+                                                   :type "data"
+                                                   :value ~out}))))))
         (cond r-err
               (return (cjson.encode {:id  ~id
                                      :key ~key
@@ -400,7 +400,7 @@
                                      :return (type-fn ~out)
                                      :error (tostring r-err)
                                      :value (tostring ~out)}))
-                         
+              
               :else
               (return ret))))))
 
@@ -437,9 +437,9 @@
    (template/$
     (do* (when (== ~host "host.docker.internal")
            (var handle (io.popen
-                          (cat "ping host.docker.internal -c 1 -q 2>&1"
-                               " | "
-                               "grep -Po \"(\\d{1,3}\\.){3}\\d{1,3}\"")))
+                        (cat "ping host.docker.internal -c 1 -q 2>&1"
+                             " | "
+                             "grep -Po \"(\\d{1,3}\\.){3}\\d{1,3}\"")))
            (:= ~host (handle:read "*a"))
            (:= ~host (string.sub ~host 1 (- (len ~host) 1)))
            (handle:close))

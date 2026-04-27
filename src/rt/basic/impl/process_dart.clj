@@ -479,22 +479,22 @@
                     [(list 'var out-sym (await-sync-form last-form))])
         out-json (list 'jsonEncode out-sym)
         body  (concat '[do]
-                      '[(var __globals__ {})
-                        (var __tasks__ (:- "<Future>[]"))
-                        (var __track (fn [task]
-                                       (. __tasks__ (add task))
-                                       (return task)))]
+                      '[(var __tasks__ (:- "<Future>[]"))
+                         (var __track (fn [task]
+                                        (. __tasks__ (add task))
+                                        (return task)))]
                         (map await-form (butlast forms))
-                       last-body
+                        last-body
                        ['(var __task_idx 0)
                         '(while (< __task_idx (. __tasks__ length))
                            (var __pending := (. __tasks__ (sublist __task_idx)))
                            (:= __task_idx (. __tasks__ length))
                           (await (Future.wait __pending)))
                         (list 'print out-json)])]
-    `(:- "Future<void> main() async {\n "
-          ~body
-           "\n}")))
+    `(:- "final __globals__ = <dynamic, dynamic>{};\n\n"
+          "Future<void> main() async {\n "
+           ~body
+            "\n}")))
 
 (defn- dart-exec
   "Resolves a user-local Dart SDK binary before falling back to PATH."

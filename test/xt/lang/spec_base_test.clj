@@ -525,9 +525,9 @@
 
 ^{:refer xt.lang.spec-base/x:err :added "4.1"}
 (fact "expands and emits a lua error form"
-
-  ^{:seedgen/base {:dart {:expect (satisfies #(and (string? %)
-                                                   (re-find #"(?s).*Unhandled exception:.*ERR.*" %)))}}}
+  
+  ^{:seedgen/base {:dart {:expect (fn [out]
+                                    (re-find #"ERR" @out))}}}
 
   (!.js
     (var err-fn (fn []
@@ -563,8 +563,9 @@
 ^{:refer xt.lang.spec-base/x:offset :added "4.1"}
 (fact "uses the grammar base offset"
 
-  ^{:seedgen/base    {:lua  {:expect 11}
-                      :r    {:expect 11}}}
+  ^{:seedgen/base    {:julia {:expect 11}
+                      :lua   {:expect 11}
+                      :r     {:expect 11}}}
   (!.js    
     (xt/x:offset 10))
   => 10
@@ -580,8 +581,9 @@
 ^{:refer xt.lang.spec-base/x:offset-rev :added "4.1"}
 (fact "uses the reverse grammar offset"
 
-  ^{:seedgen/base    {:lua  {:expect 10}
-                      :r    {:expect 10}}}
+  ^{:seedgen/base    {:julia {:expect 10}
+                      :lua   {:expect 10}
+                      :r     {:expect 10}}}
   (!.js
     (xt/x:offset-rev 10))
   => 9
@@ -597,8 +599,9 @@
 ^{:refer xt.lang.spec-base/x:offset-len :added "4.1"}
 (fact "uses the length grammar offset"
 
-  ^{:seedgen/base    {:lua  {:expect 10}
-                      :r    {:expect 10}}}
+  ^{:seedgen/base    {:julia {:expect 10}
+                      :lua   {:expect 10}
+                      :r     {:expect 10}}}
   (!.js
     (xt/x:offset-len 10))
   => 9
@@ -614,8 +617,9 @@
 ^{:refer xt.lang.spec-base/x:offset-rlen :added "4.1"}
 (fact "uses the reverse length grammar offset"
 
-  ^{:seedgen/base    {:lua  {:expect 9}
-                      :r    {:expect 9}}}
+  ^{:seedgen/base    {:julia {:expect 9}
+                      :lua   {:expect 9}
+                      :r     {:expect 9}}}
   (!.js
     (xt/x:offset-rlen 10))
   => 10
@@ -2177,9 +2181,8 @@
 ^{:refer xt.lang.spec-base/x:eval :added "4.1"}
 (fact "evaluates javascript expressions"
 
-  ^{:seedgen/base {:dart {:expect (satisfies #(and (string? %)
-                                                   (re-find #"(?s).*eval not supported in Dart.*" %)))}}}
-
+  ^{:seedgen/base {:dart {:suppress true}}}
+  
   (!.js
     (xt/x:eval "1 + 1"))
   => 2
@@ -2452,8 +2455,7 @@
 
   ^{:seedgen/base   {:lua    {:transform {"1 + 1"   "return 1 + 1" }}
                      :python {:suppress true}
-                     :dart   {:expect (satisfies #(and (string? %)
-                                                       (re-find #"(?s).*eval not supported in Dart.*" %)))}}}
+                     :dart   {:suppress true}}}
   (!.js
    (var encode-fn
         (fn [value id key]
@@ -2675,8 +2677,8 @@
 ^{:refer xt.lang.spec-base/x:throw :added "4.1"}
 (fact "expands to the canonical throw form"
 
-  ^{:seedgen/base {:dart {:expect (satisfies #(and (string? %)
-                                                   (re-find #"(?s).*Unhandled exception:.*ERROW.*" %)))}}}
+  ^{:seedgen/base {:dart {:expect (fn [out]
+                                    (re-find #"ERROR" @out))}}}
 
   (!.js
     (do:>

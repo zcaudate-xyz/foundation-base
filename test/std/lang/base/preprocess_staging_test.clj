@@ -82,6 +82,21 @@
         :std.lang/symbol hello
         :std.lang/form (hello 1 2 3)})
 
+(fact "reserved template heads expand before value-position fragments"
+  (to-staging-form '(-> xs (u/filter odd?))
+                   {:reserved {'-> {:type :template
+                                    :macro macroexpand-1}}}
+                   '{L.core {:fragment {filter {:id 'filter
+                                               :module L.core
+                                               :template (fn [arr pred]
+                                                           (list 'filter arr pred))
+                                               :form '(fn [arr pred])}}}}
+                   '{:module {:id L.current
+                              :link {u L.core}}}
+                   nil
+                   identity)
+  => '(u/filter xs odd?))
+
 ^{:refer std.lang.base.preprocess-staging/to-staging :added "4.1"}
 (fact "converts the stage"
   (to-staging '(u/add (u/identity-fn 1) 2)

@@ -47,8 +47,10 @@
   ([schema table-name]
    (var table-def := (xt/x:get-key schema table-name))
    (return (-> (xt/x:obj-vals table-def)
-               (xt/x:arr-filter (fn:> [e] (and (xt/x:is-number? (xt/x:get-key e "order"))
-                                               (not= (xt/x:get-key e "type") "ref"))))
+               (xt/x:arr-filter (fn [e]
+                                  (return
+                                   (and (xt/x:is-number? (xt/x:get-key e "order"))
+                                        (not= (xt/x:get-key e "type") "ref")))))
                (xt/x:arr-sort    -/get-order xt/x:lt)
                (xt/x:arr-map    -/get-ident)))))
 
@@ -60,7 +62,7 @@
    (return (-> (xt/x:obj-vals table-def)
                (xt/x:arr-filter (fn:> [e] (and (xt/x:is-number? (xt/x:get-key e "order"))
                                                (== (xt/x:get-key e "type") "ref"))))
-               (xt/x:arr-sort     -/get-order xt/x:lt)
+               (xt/x:arr-sort   -/get-order xt/x:lt)
                (xt/x:arr-map    -/get-ident)))))
 
 (defn.xt create-rev-keys

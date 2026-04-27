@@ -6,11 +6,10 @@
             [std.lang.base.emit :as emit]
             [std.lang.base.emit-common :as common]
             [std.lang.base.grammar :as grammar]
-            [std.lang.base.impl :as impl]
             [std.lang.base.script :as script]
             [std.lang.base.util :as ut]
             [std.lang.model.spec-xtalk]
-            [std.lang.model-annex.spec-xtalk.fn-julia :as fn]
+             [std.lang.model-annex.spec-xtalk.fn-julia :as fn]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
             [std.lib.template :as template])
@@ -25,9 +24,7 @@
   {:added "4.0"}
   [[op decl & args]]
   (if (empty? args)
-    (if (= op 'local)
-      (list 'var* :local decl)
-      (list 'var* :local decl)) ;; default declaration
+    (list 'var* :local decl)
     (let [bound (last args)]
       (cond (and (collection/form? bound)
                  (= 'fn (first bound)))
@@ -52,13 +49,6 @@
 (defn julia-symbol-global
   [key _grammar _mopts]
   (list 'convert 'Any (list 'get 'XT_GLOBALS (ut/sym-default-str key) nil)))
-
-(defn tf-for-iter
-  "for iter transform"
-  {:added "4.0"}
-  [[_ [e it] & body]]
-  (apply list 'for [e :in it]
-         body))
 
 (defn tf-for-array
   "for array transform"
@@ -97,6 +87,13 @@
              (local ~v (getindex ~pair 2))
              ~@body)))))
 
+(defn tf-for-iter
+  "for iter transform"
+  {:added "4.1"}
+  [[_ [e it] & body]]
+  (apply list 'for [e :in it]
+         body))
+
 (defn tf-for-index
   "for index transform"
   {:added "4.0"}
@@ -113,12 +110,6 @@
                      (list '=> (if (keyword? k) (name k) k) v))
                    pairs)]
     (apply list 'Dict args)))
-
-(defn tf-push!
-  "push! transform to avoid sanitization"
-  {:added "4.0"}
-  [[_ arr item]]
-  (list ':- "push!(" arr ", " item ")"))
 
 (defn emit-to
   "emits the range"
@@ -166,23 +157,23 @@
          :mod    {:raw "%"}
          :pow    {:raw "^"}
          :with-global {:value true :raw "XT_GLOBALS"}
-         :for-array  {:macro #'tf-for-array  :emit :macro}
-         :for-object {:macro #'tf-for-object :emit :macro}
-         :for-iter   {:macro #'tf-for-iter   :emit :macro}
-         :for-index  {:macro #'tf-for-index  :emit :macro}})
+         :for-array  {:macro #'tf-for-array   :emit :macro}
+         :for-object {:macro #'tf-for-object  :emit :macro}
+         :for-iter   {:macro #'tf-for-iter    :emit :macro}
+         :for-index  {:macro #'tf-for-index   :emit :macro}})
       (grammar/build:override fn/+julia+)
       (grammar/build:extend
-       {:cat    {:op :cat    :symbol '#{cat}       :raw "*"   :emit :infix}
-        :len    {:op :len    :symbol '#{len}       :raw "length"    :emit  :pre}
-        :local  {:op :local  :symbol '#{local var} :macro  #'tf-local :emit :macro}
-        :pair   {:op :pair   :symbol '#{=>}        :raw "=>"        :emit :infix}
-         :dict   {:op :dict   :symbol '#{dict}      :macro #'tf-dict :emit :macro}
-         :push!  {:op :push!  :symbol '#{push!}     :macro #'tf-push! :emit :macro}
-         :xor    {:op :xor    :symbol '#{xor}       :raw "⊻"         :emit :infix}
-         :bxor   {:op :bxor   :symbol '#{b:xor}     :raw "⊻"         :emit :infix}
-         :splat  {:op :splat  :symbol '#{...}       :raw "..."       :emit :post}
-         :%      {:op :%      :symbol #{:%}         :emit :squash}
-         :to     {:op :to     :symbol #{'to}        :emit #'emit-to}})))
+        {:cat   {:op :cat   :symbol '#{cat}       :raw "*"      :emit :infix}
+         :len   {:op :len   :symbol '#{len}       :raw "length" :emit :pre}
+         :local {:op :local :symbol '#{local var} :macro #'tf-local :emit :macro}
+         :pair  {:op :pair  :symbol '#{=>}        :raw "=>"     :emit :infix}
+         :dict  {:op :dict  :symbol '#{dict}      :macro #'tf-dict :emit :macro}
+         :push! {:op :push! :symbol '#{push!}     :raw "push!"  :emit :invoke}
+         :xor   {:op :xor   :symbol '#{xor}       :raw "⊻"      :emit :infix}
+         :bxor  {:op :bxor  :symbol '#{b:xor}     :raw "⊻"      :emit :infix}
+         :splat {:op :splat :symbol '#{...}       :raw "..."    :emit :post}
+         :%     {:op :%     :symbol #{:%}         :emit :squash}
+         :to    {:op :to    :symbol #{'to}        :emit #'emit-to}})))
 
 (def +template+
   (->> {:banned #{:set :regex}
@@ -192,7 +183,7 @@
                   :common    {:apply "(" :statement ""
                               :namespace-full "."
                               :namespace-sep  "."}
-                  :index     {:offset 0  :end-inclusive false}
+                  :index     {:offset 1  :end-inclusive false}
                   :return    {:multi true}
                   :block     {:parameter {:start "(" :end ")" :space ", "}
                               :body      {:start "" :end "end"}}

@@ -1,34 +1,6 @@
 (ns std.lang.model-annex.spec-xtalk.fn-julia
   (:require [std.lang.base.util :as ut]
-            [std.lib.template :as template]))
-
-(defn julia-free-call
-  [fname & args]
-  (apply list ':- (concat [fname \(]
-                          (->> args
-                               (map (fn [arg] (list '% arg)))
-                               (interpose \,))
-                          [\)])))
-
-(defn julia-free-getindex
-  [target idx]
-  (list ':- (list '% target) \[ (list '% idx) \]))
-
-(defn julia-free-setindex
-  [target idx value]
-  (list ':- (list '% target) \[ (list '% idx) \] "=" (list '% value)))
-
-(defn julia-free-slice
-  [target start end]
-  (list ':- (list '% target) \[ (list '% start) \: (list '% end) \]))
-
-(defn julia-free-range
-  [start end]
-  (list ':- \( (list '% start) \) \: \( (list '% end) \)))
-
-(defn julia-free-unpack
-  [arr]
-  (list '... arr))
+             [std.lib.template :as template]))
 
 (defn julia-free-infix
   [a op b]
@@ -88,11 +60,11 @@
 
 (defn julia-shell-read-expr
   [command root]
-  (list ':- "read(Cmd([\"sh\", \"-lc\", "
+  (list ':- "cd(() -> read(Cmd([\"sh\", \"-lc\", "
         (list '% command)
-        "]; dir = "
+        "]), String), "
         (list '% root)
-        "), String)"))
+        ")"))
 
 (defn julia-tf-x-del
   [[_ obj]]
@@ -101,33 +73,13 @@
            (= 3 (count obj))
            (vector? (nth obj 2))
            (= 1 (count (nth obj 2))))
-    (let [[_ target [key]] obj]
-      (julia-free-call "delete!" target key))
-    (julia-free-call "delete!" obj)))
-
-(defn julia-tf-x-cat
-  [[_ & args]]
-  (apply list '* args))
-
-(defn julia-tf-x-len
-  [[_ arr]]
-  (list 'length arr))
+     (let [[_ target [key]] obj]
+       (list 'delete! target key))
+     (list 'delete! obj)))
 
 (defn julia-tf-x-get-key
-  [[_ obj key default]]
+  [[_ obj key & [default]]]
   (list 'get obj key default))
-
-(defn julia-tf-x-get-idx
-  [[_ arr idx]]
-  (julia-free-getindex arr (list '+ idx 1)))
-
-(defn julia-tf-x-set-idx
-  [[_ arr idx value]]
-  (julia-free-setindex arr (list '+ idx 1) value))
-
-(defn julia-tf-x-err
-  [[_ msg]]
-  (list 'error msg))
 
 (defn julia-tf-x-eval
   [[_ s]]
@@ -135,19 +87,11 @@
 
 (defn julia-tf-x-apply
   [[_ f args]]
-  (list ':- \( (list '% f) \) \( (list '% (julia-free-unpack args)) \)))
+  (list f (list '... args)))
 
 (defn julia-tf-x-unpack
   [[_ arr]]
-  (julia-free-unpack arr))
-
-(defn julia-tf-x-random
-  [_]
-  (list 'rand))
-
-(defn julia-tf-x-print
-  ([[_ & args]]
-   (apply list 'println args)))
+  (list '... arr))
 
 (defn julia-tf-x-type-native
   [[_ obj]]
@@ -177,20 +121,18 @@
          (return (string (typeof ~obj))))))
 
 (def +julia-core+
-  {:x-del            {:macro #'julia-tf-x-del      :emit :macro}
-   :x-cat            {:macro #'julia-tf-x-cat      :emit :macro}
-   :x-len            {:macro #'julia-tf-x-len      :emit :macro}
-   :x-err            {:macro #'julia-tf-x-err      :emit :macro}
-   :x-eval           {:macro #'julia-tf-x-eval     :emit :macro}
-   :x-apply          {:macro #'julia-tf-x-apply    :emit :macro}
-   :x-unpack         {:macro #'julia-tf-x-unpack :emit :macro}
-   :x-random         {:macro #'julia-tf-x-random   :emit :macro}
-   :x-print          {:macro #'julia-tf-x-print    :emit :macro}
-   :x-now-ms         {:default '(round (* 1000 (time))) :emit :unit}
-   :x-get-key        {:macro #'julia-tf-x-get-key  :emit :macro}
-   :x-get-idx        {:macro #'julia-tf-x-get-idx  :emit :macro}
-   :x-set-idx        {:macro #'julia-tf-x-set-idx  :emit :macro}
-   :x-type-native    {:macro #'julia-tf-x-type-native :emit :macro}})
+  (merge {:x-del         {:macro #'julia-tf-x-del         :emit :macro}
+           :x-eval        {:macro #'julia-tf-x-eval        :emit :macro}
+           :x-apply       {:macro #'julia-tf-x-apply       :emit :macro}
+           :x-unpack      {:macro #'julia-tf-x-unpack      :emit :macro}
+           :x-type-native {:macro #'julia-tf-x-type-native :emit :macro}
+           :x-get-key     {:macro #'julia-tf-x-get-key     :emit :macro}}
+          {:x-cat         {:raw "*" :emit :infix}
+          :x-len         {:raw "length" :emit :invoke}
+          :x-err         {:raw "error" :emit :invoke}
+          :x-random      {:default '(rand) :emit :unit}
+          :x-print       {:raw "println" :emit :invoke}
+          :x-now-ms      {:default '(round (* 1000 (time))) :emit :unit}}))
 
 ;;
 ;; GLOBAL
@@ -203,58 +145,35 @@
 ;; MATH
 ;;
 
-(defn julia-tf-x-m-abs   [[_ num]] (list 'abs num))
-(defn julia-tf-x-m-acos  [[_ num]] (list 'acos num))
-(defn julia-tf-x-m-asin  [[_ num]] (list 'asin num))
-(defn julia-tf-x-m-atan  [[_ num]] (list 'atan num))
-(defn julia-tf-x-m-cos   [[_ num]] (list 'cos num))
-(defn julia-tf-x-m-cosh  [[_ num]] (list 'cosh num))
-(defn julia-tf-x-m-exp   [[_ num]] (list 'exp num))
-(defn julia-tf-x-m-loge  [[_ num]] (list 'log num))
-(defn julia-tf-x-m-log10 [[_ num]] (list 'log10 num))
-(defn julia-tf-x-m-max   [[_ & args]] (apply list 'max args))
-(defn julia-tf-x-m-min   [[_ & args]] (apply list 'min args))
 (defn julia-tf-x-m-ceil  [[_ num]] (list 'ceil 'Int num))
 (defn julia-tf-x-m-floor [[_ num]] (list 'floor 'Int num))
-(defn julia-tf-x-m-mod   [[_ num denom]] (list 'mod num denom))
-(defn julia-tf-x-m-pow   [[_ base n]] (list (symbol "^") base n))
-(defn julia-tf-x-m-quot  [[_ num denom]] (list 'div num denom))
-(defn julia-tf-x-m-sin   [[_ num]] (list 'sin num))
-(defn julia-tf-x-m-sinh  [[_ num]] (list 'sinh num))
-(defn julia-tf-x-m-sqrt  [[_ num]] (list 'sqrt num))
-(defn julia-tf-x-m-tan   [[_ num]] (list 'tan num))
-(defn julia-tf-x-m-tanh  [[_ num]] (list 'tanh num))
 
 (def +julia-math+
-  {:x-m-abs           {:macro #'julia-tf-x-m-abs,                 :emit :macro}
-   :x-m-acos          {:macro #'julia-tf-x-m-acos,                :emit :macro}
-   :x-m-asin          {:macro #'julia-tf-x-m-asin,                :emit :macro}
-   :x-m-atan          {:macro #'julia-tf-x-m-atan,                :emit :macro}
-   :x-m-ceil          {:macro #'julia-tf-x-m-ceil,                :emit :macro}
-   :x-m-cos           {:macro #'julia-tf-x-m-cos,                 :emit :macro}
-   :x-m-cosh          {:macro #'julia-tf-x-m-cosh,                :emit :macro}
-   :x-m-exp           {:macro #'julia-tf-x-m-exp,                 :emit :macro}
-   :x-m-floor         {:macro #'julia-tf-x-m-floor,               :emit :macro}
-   :x-m-loge          {:macro #'julia-tf-x-m-loge,                :emit :macro}
-   :x-m-log10         {:macro #'julia-tf-x-m-log10,               :emit :macro}
-   :x-m-max           {:macro #'julia-tf-x-m-max,                 :emit :macro}
-   :x-m-min           {:macro #'julia-tf-x-m-min,                 :emit :macro}
-   :x-m-mod           {:macro #'julia-tf-x-m-mod,                 :emit :macro}
-   :x-m-pow           {:macro #'julia-tf-x-m-pow,                 :emit :macro}
-   :x-m-quot          {:macro #'julia-tf-x-m-quot,                :emit :macro}
-   :x-m-sin           {:macro #'julia-tf-x-m-sin,                 :emit :macro}
-   :x-m-sinh          {:macro #'julia-tf-x-m-sinh,                :emit :macro}
-   :x-m-sqrt          {:macro #'julia-tf-x-m-sqrt,                :emit :macro}
-   :x-m-tan           {:macro #'julia-tf-x-m-tan,                 :emit :macro}
-   :x-m-tanh          {:macro #'julia-tf-x-m-tanh,                :emit :macro}})
+  (merge {:x-m-ceil  {:macro #'julia-tf-x-m-ceil  :emit :macro}
+          :x-m-floor {:macro #'julia-tf-x-m-floor :emit :macro}}
+         {:x-m-abs   {:raw "abs" :emit :invoke}
+          :x-m-acos  {:raw "acos" :emit :invoke}
+          :x-m-asin  {:raw "asin" :emit :invoke}
+          :x-m-atan  {:raw "atan" :emit :invoke}
+          :x-m-cos   {:raw "cos" :emit :invoke}
+          :x-m-cosh  {:raw "cosh" :emit :invoke}
+          :x-m-exp   {:raw "exp" :emit :invoke}
+          :x-m-loge  {:raw "log" :emit :invoke}
+          :x-m-log10 {:raw "log10" :emit :invoke}
+          :x-m-max   {:raw "max" :emit :invoke}
+          :x-m-min   {:raw "min" :emit :invoke}
+          :x-m-mod   {:raw "mod" :emit :invoke}
+          :x-m-pow   {:raw "^" :emit :bi}
+          :x-m-quot  {:raw "div" :emit :invoke}
+          :x-m-sin   {:raw "sin" :emit :invoke}
+          :x-m-sinh  {:raw "sinh" :emit :invoke}
+          :x-m-sqrt  {:raw "sqrt" :emit :invoke}
+          :x-m-tan   {:raw "tan" :emit :invoke}
+          :x-m-tanh  {:raw "tanh" :emit :invoke}}))
 
 ;;
 ;; TYPE
 ;;
-
-(defn julia-tf-x-to-string
-  [[_ e]]
-  (list 'string e))
 
 (defn julia-tf-x-to-number
   [[_ e]]
@@ -289,7 +208,7 @@
   (list 'isa e 'AbstractArray))
 
 (def +julia-type+
-  {:x-to-string      {:macro #'julia-tf-x-to-string :emit :macro}
+  {:x-to-string      {:raw "string" :emit :invoke}
    :x-to-number      {:macro #'julia-tf-x-to-number :emit :macro}
    :x-is-string?     {:macro #'julia-tf-x-is-string? :emit :macro}
    :x-is-number?     {:macro #'julia-tf-x-is-number? :emit :macro}
@@ -313,11 +232,11 @@
 
 (defn julia-tf-x-lu-set
   [[_ lu obj gid]]
-  (julia-free-setindex lu obj gid))
+  (list ':= (list '. lu [obj]) gid))
 
 (defn julia-tf-x-lu-del
   [[_ lu obj]]
-  (julia-free-call "delete!" lu obj))
+  (list 'delete! lu obj))
 
 (defn julia-tf-x-lu-eq
   [[_ a b]]
@@ -350,69 +269,38 @@
            (return [(first pair) (last pair)]))
          (collect ~obj)))))
 
-(defn julia-tf-x-obj-clone
-  [[_ obj]]
-  (list 'copy obj))
-
 (defn julia-tf-x-obj-assign
   [[_ obj m]]
-  (template/$
-   (do (var out (if (== ~obj nil)
-                  (Dict())
-                  ~obj))
-       (if (== ~m nil)
-         (return out)
-         (return (merge out ~m))))))
+  (list 'do
+        (list 'var 'out obj)
+        (list 'when (list '== 'out nil)
+              (list ':= 'out (list 'Dict)))
+        (list 'if (list '== m nil)
+              (list 'return 'out)
+              (list 'return (list 'merge 'out m)))))
 
 (def +julia-obj+
   {:x-obj-keys    {:macro #'julia-tf-x-obj-keys   :emit :macro}
    :x-obj-vals    {:macro #'julia-tf-x-obj-vals   :emit :macro}
    :x-obj-pairs   {:macro #'julia-tf-x-obj-pairs  :emit :macro}
-   :x-obj-clone   {:macro #'julia-tf-x-obj-clone  :emit :macro}
-   :x-obj-assign  {:macro #'julia-tf-x-obj-assign :emit :macro
-                   :raw nil
-                   :value/standalone true
-                   :value/template #'julia-tf-x-obj-assign}})
+   :x-obj-clone   {:raw "copy" :emit :invoke}
+   :x-obj-assign  {:macro #'julia-tf-x-obj-assign :emit :macro}})
 
 ;;
 ;; ARR
 ;;
 
-(defn julia-tf-x-arr-clone
-  [[_ arr]]
-  (list 'copy arr))
-
 (defn julia-tf-x-arr-slice
   [[_ arr start end]]
-  (list 'getindex arr (julia-free-range (list '+ start 1) end)))
-
-(defn julia-tf-x-arr-push
-  [[_ arr item]]
-  (julia-free-call "push!" arr item))
-
-(defn julia-tf-x-arr-pop
-  [[_ arr]]
-  (julia-free-call "pop!" arr))
-
-(defn julia-tf-x-arr-reverse
-  [[_ arr]]
-  (list 'reverse arr))
-
-(defn julia-tf-x-arr-push-first
-  [[_ arr item]]
-  (julia-free-call "pushfirst!" arr item))
-
-(defn julia-tf-x-arr-pop-first
-  [[_ arr]]
-  (julia-free-call "popfirst!" arr))
+  (list '. arr [(list 'to (list 'x:offset start) 1 end)]))
 
 (defn julia-tf-x-arr-insert
   [[_ arr idx e]]
-  (julia-free-call "insert!" arr (list '+ idx 1) e))
+  (list 'insert! arr idx e))
 
 (defn julia-tf-x-arr-remove
   [[_ arr idx]]
-  (julia-free-call "splice!" arr (list '+ idx 1)))
+  (list 'splice! arr (list 'x:offset idx)))
 
 (defn julia-tf-x-arr-sort
   [[_ arr key-fn compare-fn]]
@@ -426,20 +314,17 @@
         ", Iterators.reverse(" (list '% arr) "); init = " (list '% init) ")"))
 
 (def +julia-arr+
-  {:x-arr-clone       {:macro #'julia-tf-x-arr-clone      :emit :macro}
-   :x-arr-slice       {:macro #'julia-tf-x-arr-slice      :emit :macro}
-   :x-arr-reverse     {:macro #'julia-tf-x-arr-reverse    :emit :macro}
-   :x-arr-push        {:macro #'julia-tf-x-arr-push       :emit :macro}
-   :x-arr-pop         {:macro #'julia-tf-x-arr-pop        :emit :macro}
-   :x-arr-push-first  {:macro #'julia-tf-x-arr-push-first :emit :macro}
-   :x-arr-pop-first   {:macro #'julia-tf-x-arr-pop-first  :emit :macro}
-   :x-arr-remove      {:macro #'julia-tf-x-arr-remove     :emit :macro}
-   :x-arr-insert      {:macro #'julia-tf-x-arr-insert     :emit :macro}
-   :x-arr-sort        {:macro #'julia-tf-x-arr-sort       :emit :macro}
-   :x-arr-foldr       {:macro #'julia-tf-x-arr-foldr      :emit :macro
-                       :raw nil
-                       :value/standalone true
-                       :value/template #'julia-tf-x-arr-foldr}})
+  (merge {:x-arr-slice  {:macro #'julia-tf-x-arr-slice  :emit :macro}
+          :x-arr-remove {:macro #'julia-tf-x-arr-remove :emit :macro}
+          :x-arr-insert {:macro #'julia-tf-x-arr-insert :emit :macro}
+          :x-arr-sort   {:macro #'julia-tf-x-arr-sort   :emit :macro}
+          :x-arr-foldr  {:macro #'julia-tf-x-arr-foldr  :emit :macro}}
+         {:x-arr-clone      {:raw "copy" :emit :invoke}
+          :x-arr-reverse    {:raw "reverse" :emit :invoke}
+          :x-arr-push       {:raw "push!" :emit :invoke}
+          :x-arr-pop        {:raw "pop!" :emit :invoke}
+          :x-arr-push-first {:raw "pushfirst!" :emit :invoke}
+          :x-arr-pop-first  {:raw "popfirst!" :emit :invoke}}))
 
 ;;
 ;; STRING
@@ -447,15 +332,7 @@
 
 (defn julia-tf-x-str-char
   ([[_ s i]]
-   (list 'Int (list 'getindex s (list '+ i 1)))))
-
-(defn julia-tf-x-str-split
-  ([[_ s tok]]
-   (list 'split s tok)))
-
-(defn julia-tf-x-str-join
-  ([[_ s arr]]
-   (list 'join arr s)))
+   (list 'Int (list 'x:get-idx s i))))
 
 (defn julia-tf-x-str-index-of
   ([[_ s tok & [start]]]
@@ -465,7 +342,7 @@
          ", "
          (list '% s)
          ", "
-         (list '% (list '+ 1 (or start 0)))
+         (list '% (or start (list 'x:offset 0)))
          ")\n"
          "if idx === nothing\n"
          "  nothing\n"
@@ -476,21 +353,15 @@
 
 (defn julia-tf-x-str-substring
   ([[_ s start & [end]]]
-   (list 'getindex s
-         (julia-free-range (list '+ start 1)
-                           (or end (list 'lastindex s))))))
+   (list '. s [(list 'to start 1 (or end (list 'lastindex s)))])))
 
-(defn julia-tf-x-str-to-upper
-  ([[_ s]]
-   (list 'uppercase s)))
-
-(defn julia-tf-x-str-to-lower
-  ([[_ s]]
-   (list 'lowercase s)))
+(defn julia-tf-x-str-join
+  [[_ sep arr]]
+  (list 'join arr sep))
 
 (defn julia-tf-x-str-replace
-  ([[_ s tok replacement]]
-    (list 'replace s (list '=> tok replacement))))
+  [[_ s tok replacement]]
+  (list 'replace s (list '=> tok replacement)))
 
 (defn julia-tf-x-str-to-fixed
   [[_ n digits]]
@@ -498,54 +369,28 @@
         (list 'Printf.Format (list 'string "%." digits "f"))
         n))
 
-(defn julia-tf-x-str-trim
-  [[_ s]]
-  (list 'strip s))
-
-(defn julia-tf-x-str-trim-left
-  [[_ s]]
-  (list 'lstrip s))
-
-(defn julia-tf-x-str-trim-right
-  [[_ s]]
-  (list 'rstrip s))
-
-(defn julia-tf-x-str-comp
-  [[_ a b]]
-  (list '< a b))
-
 (def +julia-str+
-  {:x-str-char       {:macro #'julia-tf-x-str-char      :emit :macro}
-   :x-str-split      {:macro #'julia-tf-x-str-split      :emit :macro}
-   :x-str-join       {:macro #'julia-tf-x-str-join       :emit :macro}
-   :x-str-index-of   {:macro #'julia-tf-x-str-index-of   :emit :macro
-                      :value/standalone true
-                      :value/template #'julia-tf-x-str-index-of}
-   :x-str-substring  {:macro #'julia-tf-x-str-substring  :emit :macro}
-   :x-str-to-upper   {:macro #'julia-tf-x-str-to-upper      :emit :macro}
-   :x-str-to-lower   {:macro #'julia-tf-x-str-to-lower      :emit :macro}
-   :x-str-to-fixed   {:macro #'julia-tf-x-str-to-fixed   :emit :macro}
-   :x-str-replace    {:macro #'julia-tf-x-str-replace    :emit :macro}
-   :x-str-trim       {:macro #'julia-tf-x-str-trim       :emit :macro}
-   :x-str-trim-left  {:macro #'julia-tf-x-str-trim-left  :emit :macro}
-   :x-str-trim-right {:macro #'julia-tf-x-str-trim-right :emit :macro}
-   :x-str-comp       {:macro #'julia-tf-x-str-comp       :emit :macro}})
+  (merge {:x-str-char      {:macro #'julia-tf-x-str-char      :emit :macro}
+          :x-str-join      {:macro #'julia-tf-x-str-join      :emit :macro}
+          :x-str-index-of  {:macro #'julia-tf-x-str-index-of  :emit :macro}
+          :x-str-replace   {:macro #'julia-tf-x-str-replace   :emit :macro}
+          :x-str-substring {:macro #'julia-tf-x-str-substring :emit :macro}
+          :x-str-to-fixed  {:macro #'julia-tf-x-str-to-fixed  :emit :macro}}
+          {:x-str-split      {:raw "split" :emit :invoke}
+           :x-str-to-upper   {:raw "uppercase" :emit :invoke}
+           :x-str-to-lower   {:raw "lowercase" :emit :invoke}
+           :x-str-trim       {:raw "strip" :emit :invoke}
+           :x-str-trim-left  {:raw "lstrip" :emit :invoke}
+           :x-str-trim-right {:raw "rstrip" :emit :invoke}
+           :x-str-comp       {:raw "<" :emit :infix}}))
 
 ;;
 ;; JSON
 ;;
 
-(defn julia-tf-x-json-encode
-  ([[_ obj]]
-   (list 'JSON.json obj)))
-
-(defn julia-tf-x-json-decode
-  ([[_ s]]
-   (list 'JSON.parse s)))
-
 (def +julia-js+
-  {:x-json-encode      {:macro #'julia-tf-x-json-encode      :emit :macro}
-   :x-json-decode      {:macro #'julia-tf-x-json-decode      :emit :macro}})
+  {:x-json-encode      {:raw "JSON.json" :emit :invoke}
+   :x-json-decode      {:raw "JSON.parse" :emit :invoke}})
 
 (defn julia-tf-x-has-key?
   [[_ obj key check]]
@@ -555,11 +400,11 @@
 
 (defn julia-tf-x-global-set
   [[_ key value]]
-  (julia-free-setindex 'XT_GLOBALS (julia-global-key key) value))
+  (list ':= (list '. 'XT_GLOBALS [(julia-global-key key)]) value))
 
 (defn julia-tf-x-global-del
   [[_ key]]
-  (julia-free-call "delete!" 'XT_GLOBALS (julia-global-key key)))
+  (list 'delete! 'XT_GLOBALS (julia-global-key key)))
 
 (defn julia-tf-x-global-has?
   [[_ key]]
@@ -567,12 +412,9 @@
 
 (def +julia-custom+
   {:x-has-key?    {:macro #'julia-tf-x-has-key?    :emit :macro}
-   :x-global-set  {:macro #'julia-tf-x-global-set  :emit :macro
-                    :value/template #'julia-tf-x-global-set}
-   :x-global-del  {:macro #'julia-tf-x-global-del  :emit :macro
-                    :value/template #'julia-tf-x-global-del}
-   :x-global-has? {:macro #'julia-tf-x-global-has? :emit :macro
-                    :value/template #'julia-tf-x-global-has?}})
+   :x-global-set  {:macro #'julia-tf-x-global-set  :emit :macro}
+   :x-global-del  {:macro #'julia-tf-x-global-del  :emit :macro}
+   :x-global-has? {:macro #'julia-tf-x-global-has? :emit :macro}})
 
 ;;
 ;; SOCKET
@@ -630,11 +472,12 @@
                         (x:to-string ~port)
                         "\r\n"
                         "Content-Length: "
-                        (x:to-string (x:len output))
+                        (x:to-string (x:str-len output))
                         "\r\n"
                         "\r\n"
                         output))
           (flush conn)
+          (sleep 0.05)
           (close conn)
           (return ["async"])))
      "e"
@@ -656,14 +499,6 @@
            (return [(first pair) (last pair)]))
          (collect ~obj)))))
 
-(defn julia-tf-x-iter-from-arr
-  [[_ arr]]
-  (list 'Iterators.Stateful arr))
-
-(defn julia-tf-x-iter-from
-  [[_ obj]]
-  (list 'Iterators.Stateful obj))
-
 (defn julia-tf-x-iter-eq
   [[_ it0 it1 eq-fn]]
   (template/$
@@ -673,14 +508,6 @@
          (if (not (~eq-fn x0 (x:iter-next ~it1)))
            (return false)))
         (return (isempty ~it1)))))
-
-(defn julia-tf-x-iter-next
-  [[_ it]]
-  (julia-free-call "popfirst!" it))
-
-(defn julia-tf-x-iter-null
-  [_]
-  (list ':- "Iterators.Stateful([])"))
 
 (defn julia-tf-x-iter-has?
   [[_ obj]]
@@ -693,15 +520,15 @@
   (list 'isa it 'Iterators.Stateful))
 
 (def +julia-iter+
-  {:x-iter-from-obj    {:macro #'julia-tf-x-iter-from-obj   :emit :macro}
-   :x-iter-from-arr    {:macro #'julia-tf-x-iter-from-arr   :emit :macro}
-   :x-iter-from        {:macro #'julia-tf-x-iter-from       :emit :macro}
-   :x-iter-eq          {:macro #'julia-tf-x-iter-eq         :emit :macro
-                        :op-spec {:allow-blocks true}}
-   :x-iter-null        {:macro #'julia-tf-x-iter-null       :emit :macro}
-   :x-iter-next        {:macro #'julia-tf-x-iter-next       :emit :macro}
-   :x-iter-has?        {:macro #'julia-tf-x-iter-has?       :emit :macro}
-   :x-iter-native?     {:macro #'julia-tf-x-iter-native?    :emit :macro}})
+  (merge {:x-iter-from-obj {:macro #'julia-tf-x-iter-from-obj :emit :macro}
+          :x-iter-eq       {:macro #'julia-tf-x-iter-eq       :emit :macro
+                            :op-spec {:allow-blocks true}}
+          :x-iter-has?     {:macro #'julia-tf-x-iter-has?     :emit :macro}
+          :x-iter-native?  {:macro #'julia-tf-x-iter-native?  :emit :macro}}
+         {:x-iter-from-arr {:raw "Iterators.Stateful" :emit :invoke}
+          :x-iter-from     {:raw "Iterators.Stateful" :emit :invoke}
+          :x-iter-null     {:default '(Iterators.Stateful []) :emit :unit}
+          :x-iter-next     {:raw "popfirst!" :emit :invoke}}))
 
 ;;
 ;; PROMISE
@@ -805,10 +632,6 @@
 ;; SHELL
 ;;
 
-(defn julia-tf-x-pwd
-  [[_]]
-  '(get ENV "PWD" (pwd)))
-
 (defn julia-tf-x-shell
   [[_ s root cb]]
   (let [read-form (julia-shell-read-expr s root)
@@ -827,7 +650,7 @@
            (list 'return ["async"])))))
 
 (def +julia-shell+
-  {:x-pwd   {:macro #'julia-tf-x-pwd   :emit :macro}
+  {:x-pwd   {:default '(get ENV "PWD" (pwd)) :emit :unit}
    :x-shell {:macro #'julia-tf-x-shell :emit :macro
              :op-spec {:allow-blocks true}}})
 
@@ -871,37 +694,12 @@
    :x-file-spit      {:macro #'julia-tf-x-file-spit    :emit :macro
                       :op-spec {:allow-blocks true}}})
 
-(defn julia-tf-x-bit-and
-  [[_ a b]]
-  (julia-free-infix a "&" b))
-
-(defn julia-tf-x-bit-or
-  [[_ a b]]
-  (julia-free-infix a "|" b))
-
-(defn julia-tf-x-bit-lshift
-  [[_ a b]]
-  (julia-free-infix a "<<" b))
-
-(defn julia-tf-x-bit-rshift
-  [[_ a b]]
-  (julia-free-infix a ">>" b))
-
-(defn julia-tf-x-bit-xor
-  [[_ a b]]
-  (julia-free-infix a "⊻" b))
-
 (def +julia-bit+
-  {:x-bit-and    {:macro #'julia-tf-x-bit-and    :emit :macro
-                  :value/template #'julia-tf-x-bit-and}
-   :x-bit-or     {:macro #'julia-tf-x-bit-or     :emit :macro
-                  :value/template #'julia-tf-x-bit-or}
-   :x-bit-lshift {:macro #'julia-tf-x-bit-lshift :emit :macro
-                  :value/template #'julia-tf-x-bit-lshift}
-   :x-bit-rshift {:macro #'julia-tf-x-bit-rshift :emit :macro
-                  :value/template #'julia-tf-x-bit-rshift}
-   :x-bit-xor    {:macro #'julia-tf-x-bit-xor    :emit :macro
-                  :value/template #'julia-tf-x-bit-xor}})
+  {:x-bit-and    {:raw "&" :emit :bi}
+   :x-bit-or     {:raw "|" :emit :bi}
+   :x-bit-lshift {:raw "<<" :emit :bi}
+   :x-bit-rshift {:raw ">>" :emit :bi}
+   :x-bit-xor    {:raw "⊻" :emit :bi}})
 
 ;;
 ;; RETURN

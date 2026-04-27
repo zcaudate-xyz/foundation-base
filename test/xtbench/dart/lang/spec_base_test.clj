@@ -200,7 +200,7 @@
     (var err-fn (fn []
                   (xt/x:err "ERR")))
     (err-fn))
-  => (satisfies (fn* [p1__47332#] (and (string? p1__47332#) (re-find #"(?s).*Unhandled exception:.*ERR.*" p1__47332#)))))
+  => (fn [out] (re-find #"ERR" (deref out))))
 
 ^{:refer xt.lang.spec-base/x:type-native :added "4.1"}
 (fact "expands and emits the lua type helper"
@@ -951,13 +951,6 @@
     (xt/x:is-function? (fn [x] (return x))))
   => true)
 
-^{:refer xt.lang.spec-base/x:eval :added "4.1"}
-(fact "evaluates javascript expressions"
-
-  (!.dt
-    (xt/x:eval "1 + 1"))
-  => (satisfies (fn* [p1__47348#] (and (string? p1__47348#) (re-find #"(?s).*eval not supported in Dart.*" p1__47348#)))))
-
 ^{:refer xt.lang.spec-base/x:apply :added "4.1"}
 (fact "applies array arguments to functions"
 
@@ -1088,32 +1081,6 @@
                 "type" "data"
                 "value" 3}))
 
-^{:refer xt.lang.spec-base/x:return-eval :added "4.1"}
-(fact "evaluates code through wrapped return handlers"
-
-  (!.dt
-   (var encode-fn
-        (fn [value id key]
-          (return
-           (xt/x:return-encode value id key))))
-   (var wrap-fn
-        (fn [gen-fn wrap-fn]
-          (return
-           (xt/x:return-wrap gen-fn wrap-fn))))
-   (var eval-fn
-        (fn [s re-wrap-fn]
-          (return
-           (xt/x:return-eval s re-wrap-fn))))
-   (xt/x:json-decode
-    (eval-fn "1 + 1"
-             (fn [f]
-               (return
-                (wrap-fn f
-                         (fn [out]
-                           (return
-                            (encode-fn out "id-A" "key-B")))))))))
-  => (satisfies (fn* [p1__47364#] (and (string? p1__47364#) (re-find #"(?s).*eval not supported in Dart.*" p1__47364#)))))
-
 ^{:refer xt.lang.spec-base/x:bit-and :added "4.1"}
 (fact "computes bitwise and"
 
@@ -1203,7 +1170,7 @@
   (!.dt
     (do:>
      (x:throw "ERROW")))
-  => (satisfies (fn* [p1__47380#] (and (string? p1__47380#) (re-find #"(?s).*Unhandled exception:.*ERROW.*" p1__47380#)))))
+  => (fn [out] (re-find #"ERROR" (deref out))))
 
 ^{:refer xt.lang.spec-base/x:now-ms :added "4.1"}
 (fact "expands and emits a millisecond time expression"

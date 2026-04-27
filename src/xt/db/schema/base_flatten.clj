@@ -38,7 +38,7 @@
              :ref-links {}
              :rev-links {}})
     (xt/x:set-key table-map id rec))
-  (xt/x:obj-assign (xt/x:get-key rec "data") data-obj)
+  (xtd/swap-key rec "data" xtd/obj-assign [data-obj])
   (xtd/swap-key rec "ref_links" xtd/obj-assign-with [ref-links xt/x:obj-assign])
   (xtd/swap-key rec "rev_links" xtd/obj-assign-with [rev-links xt/x:obj-assign])
   (return table-map))

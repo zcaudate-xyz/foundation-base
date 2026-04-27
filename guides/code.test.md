@@ -135,4 +135,5 @@ You can use the `capture` checker to inspect intermediate values during test dev
 - **All**: `lein test`
 - **Namespace**: `lein test :only my.ns`
 - **Pattern**: `lein test :in my.pkg`
+- **Save REPL rerun helper**: `lein test :only my.ns :save-run true` writes `.hara/runs/run-<timestamp>.run.edn` with a copy-pastable `code.test/run` form.
 - **Re-run failures**: The runner typically outputs instructions or you can use `code.manage` to focus on failures.

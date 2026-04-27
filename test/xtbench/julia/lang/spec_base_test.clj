@@ -219,28 +219,28 @@
 
   (!.julia    
     (xt/x:offset 10))
-  => 10)
+  => 11)
 
 ^{:refer xt.lang.spec-base/x:offset-rev :added "4.1"}
 (fact "uses the reverse grammar offset"
 
   (!.julia
     (xt/x:offset-rev 10))
-  => 9)
+  => 10)
 
 ^{:refer xt.lang.spec-base/x:offset-len :added "4.1"}
 (fact "uses the length grammar offset"
 
   (!.julia
     (xt/x:offset-len 10))
-  => 9)
+  => 10)
 
 ^{:refer xt.lang.spec-base/x:offset-rlen :added "4.1"}
 (fact "uses the reverse length grammar offset"
 
   (!.julia
     (xt/x:offset-rlen 10))
-  => 10)
+  => 9)
 
 ^{:refer xt.lang.spec-base/x:lu-create :added "4.1"}
 (fact "creates a lookup table wrapper"

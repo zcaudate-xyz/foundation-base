@@ -356,7 +356,7 @@
    :x-arr-pop-first   {:macro #'python-tf-x-arr-pop-first  :emit :macro}
    :x-arr-insert      {:macro #'python-tf-x-arr-insert     :emit :macro}
    :x-arr-remove      {:macro #'python-tf-x-arr-remove     :emit :macro}
-   :x-arr-sort        {:macro #'python-tf-x-arr-sort       :emit :macro}
+   #_#_:x-arr-sort        {:macro #'python-tf-x-arr-sort       :emit :macro}
    :x-str-comp        {:macro #'python-tf-x-str-comp       :emit :macro}})
 
 

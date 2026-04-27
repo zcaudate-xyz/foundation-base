@@ -93,8 +93,18 @@
          (contains? +dart-boolish-ops+ (first form)))
     true
 
-    :else
-    false))
+     :else
+     false))
+
+(defn- truthy-form
+  [source form]
+  (if (boolish-form? form)
+    form
+    (with-form-meta
+      source
+      (list 'and
+            (list 'x:not-nil? form)
+            (list 'not= false form)))))
 
 (defn- unpack-form?
   [form]
@@ -195,6 +205,11 @@
     quote
     form
 
+    (do do*)
+    (with-form-meta
+      form
+      (list (rewrite-fn (apply list 'fn '[] (rest form)) grammar)))
+
     fn
     (rewrite-fn form grammar)
 
@@ -280,27 +295,28 @@
 
 (defn dart-rewrite-conditional-expression
   [form grammar]
-  (cond
-    (collection/form? form)
-    (rewrite-conditional-expression-list form grammar)
+  (let [form* (cond
+                (collection/form? form)
+                (rewrite-conditional-expression-list form grammar)
 
-    (vector? form)
-    (with-form-meta form (vec (map #(dart-rewrite-expression % grammar) form)))
+                (vector? form)
+                (with-form-meta form (vec (map #(dart-rewrite-expression % grammar) form)))
 
-    (set? form)
-    (with-form-meta form (set (map #(dart-rewrite-expression % grammar) form)))
+                (set? form)
+                (with-form-meta form (set (map #(dart-rewrite-expression % grammar) form)))
 
-    (map? form)
-    (with-form-meta
-      form
-      (into (empty form)
-            (map (fn [[k v]]
-                   [(dart-rewrite-expression k grammar)
-                    (dart-rewrite-expression v grammar)]))
-            form))
+                (map? form)
+                (with-form-meta
+                  form
+                  (into (empty form)
+                        (map (fn [[k v]]
+                               [(dart-rewrite-expression k grammar)
+                                (dart-rewrite-expression v grammar)]))
+                        form))
 
-    :else
-    form))
+                :else
+                form)]
+    (truthy-form form form*)))
 
 (defn dart-rewrite-expression
   [form grammar]

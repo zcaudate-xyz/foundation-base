@@ -902,18 +902,18 @@
   "arr-sort using key function and comparator"
   {:added "4.0"}
   [arr key-fn comp-fn]
-  (var out [])
-  (xt/for:array [e arr]
-    (var inserted false)
-    (xt/for:index [i [(xt/x:offset) (xt/x:len out)]]
-      (when (and (not inserted)
-                 (comp-fn (key-fn e)
-                          (key-fn (xt/x:get-idx out i))))
-        (xt/x:arr-insert out i e)
-        (:= inserted true)))
-    (when (not inserted)
-      (xt/x:arr-push out e)))
-  (return out))
+  (var tmp nil)
+  (var total (xt/x:len arr))
+  (xt/for:index [i [(xt/x:offset) (- total 1)]]
+    (xt/for:index [j [(+ i 1) total]]
+      (var left (xt/x:get-idx arr i))
+      (var right (xt/x:get-idx arr j))
+      (when (comp-fn (key-fn right)
+                     (key-fn left))
+        (:= tmp left)
+        (xt/x:set-idx arr i right)
+        (xt/x:set-idx arr j tmp))))
+  (return arr))
 
 (defn.xt arr-sorted-merge
   "performs a merge on two sorted arrays"

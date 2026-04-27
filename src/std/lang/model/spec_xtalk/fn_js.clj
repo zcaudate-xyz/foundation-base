@@ -304,7 +304,7 @@
    :x-arr-foldl    {:macro #'js-tf-x-arr-foldl    :emit :macro   :type :template}
    :x-arr-foldr    {:macro #'js-tf-x-arr-foldr    :emit :macro   :type :template}
    :x-arr-find     {:macro #'js-tf-x-arr-find     :emit :macro   :type :template}
-   :x-arr-sort     {:macro #'js-tf-x-arr-sort     :emit :macro   :type :template}})
+   #_#_:x-arr-sort     {:macro #'js-tf-x-arr-sort     :emit :macro   :type :template}})
 
 
 

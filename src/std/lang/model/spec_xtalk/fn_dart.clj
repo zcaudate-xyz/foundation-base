@@ -303,7 +303,7 @@
    :x-arr-pop-first   {:macro #'dart-tf-x-arr-pop-first  :emit :macro :type :template}
    :x-arr-insert      {:macro #'dart-tf-x-arr-insert     :emit :macro :type :template}
    :x-arr-remove      {:macro #'dart-tf-x-arr-remove     :emit :macro :type :template}
-   :x-arr-sort        {:macro #'dart-tf-x-arr-sort       :emit :macro}
+   #_#_:x-arr-sort        {:macro #'dart-tf-x-arr-sort       :emit :macro}
    :x-str-comp        {:macro #'dart-tf-x-str-comp       :emit :macro}})
 
 (defn dart-tf-x-iter-eq

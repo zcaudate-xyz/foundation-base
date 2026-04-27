@@ -1298,24 +1298,30 @@
 (fact "arr-sort using key function and comparator"
 
   (!.js
+   (var out [3 1 2])
    (xtd/arr-sort
-    [3 1 2]
+    out
     (fn [x] (return x))
-    (fn [a b] (return (< a b)))))
+    (fn [a b] (return (< a b))))
+   out)
   => [1 2 3]
 
   (!.lua
+   (var out [3 1 2])
    (xtd/arr-sort
-    [3 1 2]
+    out
     (fn [x] (return x))
-    (fn [a b] (return (< a b)))))
+    (fn [a b] (return (< a b))))
+   out)
   => [1 2 3]
 
   (!.py
+   (var out [3 1 2])
    (xtd/arr-sort
-    [3 1 2]
+    out
     (fn [x] (return x))
-    (fn [a b] (return (< a b)))))
+    (fn [a b] (return (< a b))))
+   out)
   => [1 2 3])
 
 ^{:refer xt.lang.common-data/arr-sorted-merge :added "4.1"}

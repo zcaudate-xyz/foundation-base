@@ -132,13 +132,13 @@
              :scope #{:public}
              :args [:text i-type]
              :api/view true}
-  currency-by-type {:type (++ i-type xt.lib.db.sample-data-test/EnumCurrencyType)})
+  currency-by-type {:type (++ i-type xt.db.helpers.seed-system-test/EnumCurrencyType)})
 
 (defsel.pg ^{:- [-/Currency]
              :scope #{:public}
              :args [:citext i-iso]
              :api/view true}
-  currency-by-country {:id [:in (rt.postgres/t:select xt.lib.db.sample-data-test/RegionCountry
+  currency-by-country {:id [:in (rt.postgres/t:select xt.db.helpers.seed-system-test/RegionCountry
                                   {:returning  (rt.postgres/jsonb-object-keys #{"currencies"})
                                    :where {:id i-iso}
                                    :as :raw})]})

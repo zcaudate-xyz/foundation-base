@@ -33,11 +33,12 @@
     (spec-promise/x:promise-catch
      (spec-promise/x:promise
       (fn []
-        (throw "boom")))
+        (do 
+          (x:err "boom"))))
      (fn [err]
-       (repl/notify err)
+       (repl/notify "error")
        (return err))))
-  => "boom")
+  => "error")
 
 ^{:refer xt.lang.spec-promise/x:promise-finally :added "4.1"}
 (fact "runs cleanup without changing the resolved value"

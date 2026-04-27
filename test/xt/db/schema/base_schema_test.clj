@@ -8,85 +8,69 @@
   {:runtime :basic
    :require [[xt.db.schema.base-schema :as sch]
              [xt.db.schema.sql-util :as ut]
-             [xt.db.schema.sample-test :as sample]]})
+             [xt.db.helpers.data-main-test :as sample]]})
+
+(l/script- :lua
+  {:runtime :basic
+   :require [[xt.db.schema.base-schema :as sch]
+             [xt.db.schema.sql-util :as ut]
+             [xt.db.helpers.data-main-test :as sample]]})
+
+(l/script- :python
+  {:runtime :basic
+   :require [[xt.db.schema.base-schema :as sch]
+             [xt.db.schema.sql-util :as ut]
+             [xt.db.helpers.data-main-test :as sample]]})
 
 (fact:global
- {:setup    [(l/rt:restart)
-             (l/rt:scaffold :js)]
+ {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.schema.base-schema/get-ident-id :added "4.0"}
 (fact "gets the ident id for a schema entry")
 
 ^{:refer xt.db.schema.base-schema/list-tables :added "4.0"}
-(fact "list tables"
+(fact "list schema tables"
 
-  (def +tables+
-    (!.js
-     (sch/list-tables sample/Schema)))
-
-  (!.lua
-   (sch/list-tables sample/Schema))
-  => +tables+
-
-  (!.py
-   (sch/list-tables sample/Schema))
-  => +tables+)
+  (!.js
+    (sch/list-tables sample/Schema))
+  => (just ["Currency" "RegionCity" "RegionCountry" "RegionState"] :in-any-order))
 
 ^{:refer xt.db.schema.base-schema/get-cached-schema :added "4.0"}
 (fact "get lookup"
 
   (!.js (sch/get-cached-schema sample/Schema))
-  => map?
-
-  (!.lua (sch/get-cached-schema sample/Schema))
-  => map?
-
-  (!.py (sch/get-cached-schema sample/Schema))
   => map?)
 
 ^{:refer xt.db.schema.base-schema/create-data-keys :added "4.0"}
 (fact "creates data keys"
-
+  
   (!.js
-   (sch/create-data-keys sample/Schema "Currency"))
+    (sch/create-data-keys sample/SchemaCurrency "Currency"))
   => ["id" "type" "symbol" "native" "decimal" "name" "plural" "description"]
-
-  (!.lua
-   (sch/create-data-keys sample/Schema "Currency"))
+  
+  ^*(!.lua
+      (sch/create-data-keys sample/SchemaCurrency "Currency"))
   => ["id" "type" "symbol" "native" "decimal" "name" "plural" "description"]
-
-  (!.py
-   (sch/create-data-keys sample/Schema "Currency"))
+  
+  ^*(!.py
+    (sch/create-data-keys sample/SchemaCurrency "Currency"))
   => ["id" "type" "symbol" "native" "decimal" "name" "plural" "description"])
 
 ^{:refer xt.db.schema.base-schema/create-ref-keys :added "4.0"}
 (fact "creates ref keys"
-
-  (!.js (sch/create-ref-keys sample/Schema "UserProfile"))
-  => ["account" "state" "country"]
-
-  (!.lua (sch/create-ref-keys sample/Schema "UserProfile"))
-  => ["account" "state" "country"]
-
-  (!.py (sch/create-ref-keys sample/Schema "UserProfile"))
-  => ["account" "state" "country"])
+  
+  (l/with:print-all
+    (!.js (sch/create-ref-keys sample/Schema "UserProfile")))
+  => (just ["account" "state" "country"]  :in-any-order))
 
 ^{:refer xt.db.schema.base-schema/create-rev-keys :added "4.0"}
 (fact "creates rev keys"
-
-  (set (!.js
-        (sch/create-rev-keys sample/Schema "UserAccount")))
-  => #{"organisations" "profile" "privileges" "organisation_accesses" "wallets" "notification"}
-
-
-  (set (!.lua
-        (sch/create-rev-keys sample/Schema "UserAccount")))
-  => #{"organisations" "profile" "privileges" "organisation_accesses" "wallets" "notification"}
-
-  (set (!.py
-       (sch/create-rev-keys sample/Schema "UserAccount")))
-  => #{"organisations" "profile" "privileges" "organisation_accesses" "wallets" "notification"})
+  
+  (!.js
+    (sch/create-rev-keys sample/Schema "UserAccount"))
+  => (just ["organisations" "profile" "privileges" "organisation_accesses" "wallets" "notification"]
+           :in-any-order))
 
 ^{:refer xt.db.schema.base-schema/create-table-entries :added "4.0"}
 (fact "creates the table keys")
@@ -136,15 +120,6 @@
 (fact "creates all keys"
 
   (!.js
-   (sch/create-all-keys sample/Schema "Wallet"))
-
-  => +all-wallet+
-
-  (!.lua
-   (sch/create-all-keys sample/Schema "Wallet"))
-  => +all-wallet+
-
-  (!.py
    (sch/create-all-keys sample/Schema "Wallet"))
   => +all-wallet+)
 

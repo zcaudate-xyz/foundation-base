@@ -620,3 +620,12 @@
                    {:first-name "hello"}
                    [["account" {:is-official true}]]
                    {})))
+
+
+(comment
+  (s/run ['xt.db.schema.base-scope])
+  (s/seedgen-benchadd '[xt.lang.spec] {:lang [:r] :write true})
+  (s/seedgen-benchadd '[xt.db.schema.base-scope] {:lang [:julia :dart] :write true})
+  
+  (s/seedgen-langadd 'xt.db.schema.base-scope {:lang [:lua :python] :write true})
+  (s/seedgen-langremove 'xt.db.schema.base-scope {:lang [:lua :python] :write true}))
