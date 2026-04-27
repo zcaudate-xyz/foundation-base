@@ -1,9 +1,9 @@
-(ns xtbench.dart.lang.common-lib-test
+(ns xtbench.julia.lang.common-lib-test
   (:require [std.lang :as l])
   (:use code.test))
 
-(l/script- :dart
-  {:runtime :twostep
+(l/script- :julia
+  {:runtime :basic
    :require [[xt.lang.common-lib :as k]
              [xt.lang.spec-base :as xt]]})
 
@@ -14,7 +14,7 @@
 ^{:refer xt.lang.common-lib/type-native :added "4.1"}
 (fact "gets the native type"
 
-  (!.dt
+  (!.julia
     [(k/type-native "hello")
      (k/type-native 1)])
   => ["string" "number"])
@@ -22,7 +22,7 @@
 ^{:refer xt.lang.common-lib/type-class :added "4.1"}
 (fact "gets the class type"
 
-  (!.dt
+  (!.julia
    [(k/type-class "hello")
     (k/type-class 1)])
   => ["string" "number"])
@@ -30,21 +30,21 @@
 ^{:refer xt.lang.common-lib/to-string :added "4.1"}
 (fact "converts a value to a string"
 
-  (!.dt
+  (!.julia
    (k/to-string 42))
   => "42")
 
 ^{:refer xt.lang.common-lib/to-number :added "4.1"}
 (fact "converts a string to a number"
 
-  (!.dt
+  (!.julia
    (k/to-number "42.5"))
   => 42.5)
 
 ^{:refer xt.lang.common-lib/nil? :added "4.1"}
 (fact "checks whether a value is nil"
 
-  (!.dt
+  (!.julia
    [(k/nil? nil)
     (k/nil? 0)])
   => [true false])
@@ -52,7 +52,7 @@
 ^{:refer xt.lang.common-lib/not-nil? :added "4.1"}
 (fact "checks whether a value is not nil"
 
-  (!.dt
+  (!.julia
    [(k/not-nil? nil)
     (k/not-nil? 0)])
   => [false true])
@@ -60,7 +60,7 @@
 ^{:refer xt.lang.common-lib/is-boolean? :added "4.1"}
 (fact "checks if a value is boolean"
 
-  (!.dt
+  (!.julia
    [(k/is-boolean? true)
     (k/is-boolean? 1)])
   => [true false])
@@ -68,7 +68,7 @@
 ^{:refer xt.lang.common-lib/is-integer? :added "4.1"}
 (fact "checks if a value is an integer"
 
-  (!.dt
+  (!.julia
    [(k/is-integer? 4)
     (k/is-integer? 4.5)])
   => [true false])
@@ -76,7 +76,7 @@
 ^{:refer xt.lang.common-lib/is-number? :added "4.1"}
 (fact "checks if a value is numeric"
 
-  (!.dt
+  (!.julia
    [(k/is-number? 4)
     (k/is-number? "4")])
   => [true false])
@@ -84,7 +84,7 @@
 ^{:refer xt.lang.common-lib/is-string? :added "4.1"}
 (fact "checks if a value is a string"
 
-  (!.dt
+  (!.julia
    [(k/is-string? "hello")
     (k/is-string? 1)])
   => [true false])
@@ -92,7 +92,7 @@
 ^{:refer xt.lang.common-lib/is-function? :added "4.1"}
 (fact "checks if a value is a function"
 
-  (!.dt
+  (!.julia
    [(k/is-function? (fn:> [x] x))
     (k/is-function? 1)])
   => [true false])
@@ -100,7 +100,7 @@
 ^{:refer xt.lang.common-lib/is-array? :added "4.1"}
 (fact "checks if a value is an array"
 
-  (!.dt
+  (!.julia
    [(k/is-array? [1 2 3])
     (k/is-array? {:a 1})])
   => [true false])
@@ -108,7 +108,7 @@
 ^{:refer xt.lang.common-lib/is-object? :added "4.1"}
 (fact "checks if a value is an object"
 
-  (!.dt
+  (!.julia
    [(k/is-object? {:a 1})
     (k/is-object? [1 2 3])])
   => [true false])
@@ -116,63 +116,63 @@
 ^{:refer xt.lang.common-lib/noop :added "4.1"}
 (fact "returns nil"
 
-  (!.dt
+  (!.julia
    (k/noop))
   => nil)
 
 ^{:refer xt.lang.common-lib/identity :added "4.1"}
 (fact "returns the input value"
 
-  (!.dt
+  (!.julia
    (k/identity 1))
   => 1)
 
 ^{:refer xt.lang.common-lib/T :added "4.1"}
 (fact "always returns true"
 
-  (!.dt
+  (!.julia
    (k/T "anything"))
   => true)
 
 ^{:refer xt.lang.common-lib/F :added "4.1"}
 (fact "always returns false"
 
-  (!.dt
+  (!.julia
    (k/F "anything"))
   => false)
 
 ^{:refer xt.lang.common-lib/add :added "4.1"}
 (fact "adds two numbers"
 
-  (!.dt
+  (!.julia
    (k/add 1 2))
   => 3)
 
 ^{:refer xt.lang.common-lib/sub :added "4.1"}
 (fact "subtracts two numbers"
 
-  (!.dt
+  (!.julia
    (k/sub 5 3))
   => 2)
 
 ^{:refer xt.lang.common-lib/mul :added "4.1"}
 (fact "multiplies two numbers"
 
-  (!.dt
+  (!.julia
    (k/mul 3 4))
   => 12)
 
 ^{:refer xt.lang.common-lib/div :added "4.1"}
 (fact "divides two numbers"
 
-  (!.dt
+  (!.julia
    (k/div 10 4))
   => 2.5)
 
 ^{:refer xt.lang.common-lib/gt :added "4.1"}
 (fact "checks whether the first number is greater"
 
-  (!.dt
+  (!.julia
    [(k/gt 3 2)
     (k/gt 2 3)])
   => [true false])
@@ -180,7 +180,7 @@
 ^{:refer xt.lang.common-lib/lt :added "4.1"}
 (fact "checks whether the first number is smaller"
 
-  (!.dt
+  (!.julia
    [(k/lt 2 3)
     (k/lt 3 2)])
   => [true false])
@@ -188,7 +188,7 @@
 ^{:refer xt.lang.common-lib/gte :added "4.1"}
 (fact "checks whether the first number is greater than or equal"
 
-  (!.dt
+  (!.julia
    [(k/gte 3 2)
     (k/gte 3 3)
     (k/gte 2 3)])
@@ -197,7 +197,7 @@
 ^{:refer xt.lang.common-lib/lte :added "4.1"}
 (fact "checks whether the first number is less than or equal"
 
-  (!.dt
+  (!.julia
    [(k/lte 2 3)
     (k/lte 3 3)
     (k/lte 3 2)])
@@ -206,7 +206,7 @@
 ^{:refer xt.lang.common-lib/eq :added "4.1"}
 (fact "checks numeric equality"
 
-  (!.dt
+  (!.julia
    [(k/eq 3 3)
     (k/eq 3 2)])
   => [true false])
@@ -214,7 +214,7 @@
 ^{:refer xt.lang.common-lib/neq :added "4.1"}
 (fact "checks numeric inequality"
 
-  (!.dt
+  (!.julia
    [(k/neq 3 3)
     (k/neq 3 2)])
   => [false true])
@@ -222,28 +222,28 @@
 ^{:refer xt.lang.common-lib/neg :added "4.1"}
 (fact "returns the negated number"
 
-  (!.dt
+  (!.julia
    (k/neg 3))
   => -3)
 
 ^{:refer xt.lang.common-lib/inc :added "4.1"}
 (fact "increments a number"
 
-  (!.dt
+  (!.julia
    (k/inc 1))
   => 2)
 
 ^{:refer xt.lang.common-lib/dec :added "4.1"}
 (fact "decrements a number"
 
-  (!.dt
+  (!.julia
    (k/dec 1))
   => 0)
 
 ^{:refer xt.lang.common-lib/zero? :added "4.1"}
 (fact "checks whether a number is zero"
 
-  (!.dt
+  (!.julia
    [(k/zero? 0)
     (k/zero? 1)])
   => [true false])
@@ -251,7 +251,7 @@
 ^{:refer xt.lang.common-lib/pos? :added "4.1"}
 (fact "checks whether a number is positive"
 
-  (!.dt
+  (!.julia
    [(k/pos? 1)
     (k/pos? -1)])
   => [true false])
@@ -259,7 +259,7 @@
 ^{:refer xt.lang.common-lib/neg? :added "4.1"}
 (fact "checks whether a number is negative"
 
-  (!.dt
+  (!.julia
    [(k/neg? -1)
     (k/neg? 1)])
   => [true false])
@@ -267,7 +267,7 @@
 ^{:refer xt.lang.common-lib/even? :added "4.1"}
 (fact "checks whether a number is even"
 
-  (!.dt
+  (!.julia
    [(k/even? 2)
     (k/even? 3)])
   => [true false])
@@ -275,7 +275,7 @@
 ^{:refer xt.lang.common-lib/odd? :added "4.1"}
 (fact "checks whether a number is odd"
 
-  (!.dt
+  (!.julia
    [(k/odd? 2)
     (k/odd? 3)])
   => [false true])
@@ -283,7 +283,7 @@
 ^{:refer xt.lang.common-lib/wrap-callback :added "4.1"}
 (fact "returns a wrapped callback given a map"
 
-  (!.dt
+  (!.julia
    [((k/wrap-callback {:success (fn [i] (return (* 2 i)))} "success") 1)
     ((k/wrap-callback {} "missing") 3)])
   => [2 3])
@@ -291,7 +291,7 @@
 ^{:refer xt.lang.common-lib/return-encode :added "4.1"}
 (fact "encode result for publish"
 
-  (!.dt
+  (!.julia
     (xt/x:json-decode
      (k/return-encode 1 "id-A" "key-A")))
   => {"return" "number", "key" "key-A", "id" "id-A", "value" 1, "type" "data"})
@@ -299,7 +299,7 @@
 ^{:refer xt.lang.common-lib/return-wrap :added "4.1"}
 (fact "wraps a function for encode"
 
-  (!.dt
+  (!.julia
     (xt/x:json-decode
      (k/return-wrap (fn []
                       (return 3)))))
@@ -308,7 +308,7 @@
 ^{:refer xt.lang.common-lib/return-eval :added "4.1"}
 (fact "returns evaluation"
 
-  (!.dt
+  (!.julia
     (xt/x:json-decode
      (k/return-eval "1+1")))
   => {"return" "number", "value" 2, "type" "data"})

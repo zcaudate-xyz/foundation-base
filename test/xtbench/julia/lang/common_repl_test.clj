@@ -1,11 +1,11 @@
-(ns xtbench.dart.lang.common-repl-test
+(ns xtbench.julia.lang.common-repl-test
   (:use code.test)
   (:require [std.json :as json]
             [std.lang :as l]
             [xt.lang.common-notify :as notify]))
 
-(l/script- :dart
-  {:runtime :twostep
+(l/script- :julia
+  {:runtime :basic
    :require [[xt.lang.common-repl :as repl]
              [xt.lang.common-lib :as xtl]
              [xt.lang.spec-link :as spec-link]
@@ -19,7 +19,7 @@
   :setup [(l/rt:restart)]}
 (fact "connects a a socket to port"
 
-  (notify/wait-on :dart
+  (notify/wait-on :julia
     (repl/socket-connect
      "127.0.0.1"
      (@! (:socket-port (l/default-notify)))
@@ -33,7 +33,7 @@
 
   (notify/wait-on-call
    (fn []
-     (!.dt
+     (!.julia
        (repl/socket-connect
         "127.0.0.1"
         (@! (:socket-port (l/default-notify)))
@@ -48,7 +48,7 @@
 (fact "notifies the socket of a value"
 
   (notify/wait-on-call
-   (fn [] (!.dt
+   (fn [] (!.julia
            (repl/notify-socket "127.0.0.1" (@! (:socket-port (l/default-notify)))
                             "hello"
                             (@! notify/*override-id*)
@@ -60,7 +60,7 @@
 (fact "using the base socket implementation to notify on http protocol"
 
   (notify/wait-on-call
-   (fn [] (!.dt
+   (fn [] (!.julia
            (repl/notify-socket-http
             "127.0.0.1" (@! (:http-port (l/default-notify)))
             "hello"
@@ -70,13 +70,13 @@
   => "hello")
 
 ^{:refer xt.lang.common-repl/notify-http :added "4.0"
-  :setup [(!.dt
+  :setup [(!.julia
   (:= (!:G fetch)
       (. (require "node-fetch") default)))]}
 (fact "call a http notify function."
 
   (notify/wait-on-call
-   (fn [] (!.dt
+   (fn [] (!.julia
             (repl/notify-http "127.0.0.1" (@! (:http-port (l/default-notify)))
                               "hello"
                               (@! notify/*override-id*)
@@ -87,14 +87,14 @@
 ^{:refer xt.lang.common-repl/notify :added "4.0"}
 (fact "sends a message to the notify server"
 
-  (notify/wait-on :dart
+  (notify/wait-on :julia
     (repl/notify 1))
   => 1)
 
 ^{:refer xt.lang.common-repl/<! :added "4.0"}
 (fact "creates a callback map"
 
-  (notify/wait-on :dart
+  (notify/wait-on :julia
     ((. (repl/<!)
        ["success"]) 1))
   => 1)
