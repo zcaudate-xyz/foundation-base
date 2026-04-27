@@ -3,7 +3,8 @@
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-data :as xtd]]})
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-tree :as xtt]]})
 
 (defn.xt has-entry
   "checks if entry exists"
@@ -60,8 +61,8 @@
     (var entries (or m {}))
     (xt/for:object [[id new-record] entries]
       (xtd/set-in out [table-key id]
-                (-/merge-single rows table-key id new-record
-                                (or new-fn (fn [x] (return x)))))))
+                  (-/merge-single rows table-key id new-record
+                                  (or new-fn (fn [x] (return x)))))))
   (return out))
 
 (defn.xt get-ids
@@ -69,7 +70,7 @@
   {:added "4.0"}
   [rows table-key]
   (return (xt/x:obj-keys (or (xt/x:get-key rows table-key)
-                          {}))))
+                             {}))))
 
 (defn.xt all-records
   "returns all records"
@@ -77,14 +78,14 @@
   [rows table-key]
   (if (xt/x:nil? table-key)
     (return (-> (xtd/arr-juxt (xt/x:obj-keys rows)
-                            (fn [x] (return x))
-                            (fn [k] (return (-/all-records rows k))))
+                              (fn [x] (return x))
+                              (fn [k] (return (-/all-records rows k))))
                 (xtd/obj-filter (fn [e]
-                                (return (or (xt/x:nil? e)
-                                            (< 0 (xt/x:len (xt/x:obj-keys e)))))))))
+                                  (return (or (xt/x:nil? e)
+                                              (< 0 (xt/x:len (xt/x:obj-keys e)))))))))
     (return (xtd/obj-map (xt/x:get-key rows table-key)
-                       (fn [e]
-                         (return (xt/x:get-key e "record")))))))
+                         (fn [e]
+                           (return (xt/x:get-key e "record")))))))
 
 (defn.xt get-changed-single
   "gets changed record"
@@ -95,7 +96,7 @@
         (return record)
 
         :else
-        (return (xtd/tree-diff-nested (xt/x:get-key curr "record")
+        (return (xtt/tree-diff-nested (xt/x:get-key curr "record")
                                       record))))
 
 (defn.xt has-changed-single
@@ -116,11 +117,11 @@
         link-type (xt/x:get-key attr "type")
         [table-link
          inverse-link] (xt/x:get-key {:reverse ["rev_links" "ref_links"]
-                                    :forward ["ref_links" "rev_links"]}
-                                   link-type)]
+                                      :forward ["ref_links" "rev_links"]}
+                                     link-type)]
     (return {:table-key     table-key
-              :table-link    table-link
-              :table-field   field
+             :table-link    table-link
+             :table-field   field
              :inverse-key   ns
              :inverse-link  inverse-link
              :inverse-field rval})))
@@ -175,7 +176,7 @@
     (var rec (xt/x:get-key entry "record"))
     (var #{ref-links rev-links} rec)
     (var links (xt/x:arr-assign (xt/x:obj-pairs ref-links)
-                             (xt/x:obj-pairs rev-links)))
+                                (xt/x:obj-pairs rev-links)))
     (xt/for:array [pair links]
       (var [field m] pair)
       (var attrs (-/get-link-attrs schema table-key field))
@@ -193,8 +194,8 @@
   {:added "4.0"}
   ([rows schema table-key ids]
    (return (-> (xtd/arr-keep ids
-                           (fn [id]
-                             (return (-/remove-single rows schema table-key id))))
+                             (fn [id]
+                               (return (-/remove-single rows schema table-key id))))
                (xtd/arr-mapcat (fn [x] (return x)))))))
 
 
@@ -266,7 +267,7 @@
         (do (i-entry-fn)
             (t-entry-fn)))
   (return l-arr))
-  
+
 (defn.xt add-bulk-links
   "adding bulk links from external data (to be doubly sure)"
   {:added "4.0"}
@@ -280,14 +281,14 @@
         (xt/for:object [[link-id _] links]
           (-/add-single-link rows schema table-key row-id field link-id)
           (xt/x:arr-push out {:table table-key
-                           :id row-id
-                           :field field
-                           :link-id link-id})))
+                              :id row-id
+                              :field field
+                              :link-id link-id})))
       (xt/for:object [[field links] rev-links]
         (xt/for:object [[link-id _] links]
           (-/add-single-link rows schema table-key row-id field link-id)
           (xt/x:arr-push out {:table table-key
-                           :id row-id
-                           :field field
-                           :link-id link-id})))))
+                              :id row-id
+                              :field field
+                              :link-id link-id})))))
   (return out))
