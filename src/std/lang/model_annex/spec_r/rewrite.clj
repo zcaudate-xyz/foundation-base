@@ -12,6 +12,7 @@
 (declare r-rewrite-expression)
 (declare r-rewrite-statement)
 (declare r-rewrite-statements)
+(declare r-rewrite-inline-do)
 
 (defn- with-form-meta
   [source out]
@@ -26,6 +27,17 @@
   [sym]
   (gensym (str (name (or sym 'r_generator))
                "__iter__")))
+
+(defn- do-expression?
+  [form]
+  (and (collection/form? form)
+       (#{'do 'do*} (first form))))
+
+(defn- unpack-form?
+  [form]
+  (and (collection/form? form)
+       (= 'x:unpack (first form))
+       (= 2 (count form))))
 
 (defn- rewrite-yield
   [form iterator]
@@ -42,6 +54,30 @@
   [[k v] iterator]
   [(r-rewrite-expression k iterator)
    (r-rewrite-expression v iterator)])
+
+(defn- rewrite-invoke-args
+  [args iterator]
+  (reduce (fn [acc arg]
+            (let [segment (if (unpack-form? arg)
+                            (list 'as.list
+                                  (r-rewrite-expression (second arg) iterator))
+                            (list 'list
+                                  (r-rewrite-expression arg iterator)))]
+              (list 'append acc segment)))
+          []
+          args))
+
+(defn- rewrite-invoke-expression
+  [form iterator]
+  (let [head    (first form)
+        head*   (r-rewrite-expression head iterator)
+        args    (rest form)
+        unpack? (some unpack-form? args)]
+    (with-form-meta
+      form
+      (if unpack?
+        (list 'do.call head* (rewrite-invoke-args args iterator))
+        (apply list head* (map #(r-rewrite-expression % iterator) args))))))
 
 (defn- destructure-target?
   [form]
@@ -103,9 +139,7 @@
     form
 
     (collection/form? form)
-    (with-form-meta
-      form
-      (apply list (map #(r-rewrite-expression % iterator) form)))
+    (rewrite-invoke-expression form iterator)
 
     (vector? form)
     (with-form-meta
@@ -150,16 +184,69 @@
   [forms iterator]
   (map #(r-rewrite-statement % iterator) forms))
 
-(defn r-rewrite-stage
-  [form _opts]
+(defn- r-rewrite-inline-do-list
+  [form]
+  (let [rewritten (with-form-meta form
+                    (apply list (map r-rewrite-inline-do form)))]
+    (if (and (= 'return (first rewritten))
+             (= 2 (count rewritten))
+             (do-expression? (second rewritten)))
+      (let [expr (second rewritten)
+            body (rest expr)]
+        (with-form-meta
+          form
+          (apply list 'do*
+                 (concat (butlast body)
+                         [(with-form-meta
+                            rewritten
+                            (list 'return (last body)))]))))
+      rewritten)))
+
+(defn- r-rewrite-inline-do
+  [form]
   (cond
+    (and (collection/form? form)
+         (= 'quote (first form)))
+    form
+
     (collection/form? form)
-    (r-rewrite-statement form nil)
+    (r-rewrite-inline-do-list form)
 
     (vector? form)
+    (with-form-meta form (vec (map r-rewrite-inline-do form)))
+
+    (set? form)
+    (with-form-meta form (set (map r-rewrite-inline-do form)))
+
+    (map? form)
     (with-form-meta
       form
-      (mapv #(r-rewrite-statement % nil) form))
+      (into (empty form)
+            (map (fn [[k v]]
+                   [(r-rewrite-inline-do k)
+                    (r-rewrite-inline-do v)]))
+            form))
 
     :else
     form))
+
+(defn r-rewrite-stage
+  [form _opts]
+  (-> (cond
+        (do-expression? form)
+        (with-form-meta
+          form
+          (apply list 'do*
+                 (map #(r-rewrite-statement % nil) (rest form))))
+
+        (collection/form? form)
+        (r-rewrite-statement form nil)
+
+        (vector? form)
+        (with-form-meta
+          form
+          (mapv #(r-rewrite-statement % nil) form))
+
+        :else
+        form)
+      (r-rewrite-inline-do)))

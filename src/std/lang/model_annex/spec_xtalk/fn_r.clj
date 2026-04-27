@@ -37,8 +37,10 @@
                    (= 1 (count args)) (first args)
                    :else (cons 'x:cat args))]
      (template/$
-      (do (print ~out)
-          nil)))))
+      (local
+       (block
+        (print ~out)
+        nil))))))
 
 (defn r-tf-x-shell
   ([[_ s root cb]]
@@ -153,8 +155,12 @@
                          :envir (parent.env (environment))
                          :inherits true)
          (assign ~name
-                 ~sym
-                 :envir (parent.env (environment))))))))
+                  ~sym
+                  :envir (parent.env (environment))))))))
+
+(defn r-local-block
+  [& body]
+  (list 'local (apply list 'block body)))
 
 (defn r-tf-x-has-key?
   [[_ obj key check]]
@@ -432,17 +438,21 @@
 
 (defn r-tf-x-arr-pop
   [[_ arr]]
-  (let [sync (r-propagate-symbol arr)]
-    (if sync
-      (template/$
-       (do (:= ~arr
-               (head (as.list ~arr) -1))
-           ~sync
-           ~arr))
-      (template/$
-       (do (:= ~arr
-               (head (as.list ~arr) -1))
-           ~arr)))))
+  (let [items (gensym "arr_items__")
+        len   (gensym "arr_len__")
+        item  (gensym "arr_item__")
+        sync  (r-propagate-symbol arr)]
+    (apply r-local-block
+           (concat [(list 'var items := (list 'as.list arr))
+                    (list 'var len := (list 'length items))
+                    (list 'var item := (list ':? (list '== len 0)
+                                             nil
+                                             (list '. items [len])))
+                    (list ':= arr (list ':? (list '<= len 1)
+                                        []
+                                        (list 'head items -1)))]
+                   (when sync [sync])
+                   [item]))))
 
 (defn r-tf-x-arr-push-first
   [[_ arr item]]
@@ -462,17 +472,55 @@
 
 (defn r-tf-x-arr-pop-first
   [[_ arr]]
-  (let [sync (r-propagate-symbol arr)]
-    (if sync
-      (template/$
-       (do (:= ~arr
-               (tail (as.list ~arr) -1))
-           ~sync
-           ~arr))
-      (template/$
-       (do (:= ~arr
-               (tail (as.list ~arr) -1))
-           ~arr)))))
+  (let [items (gensym "arr_items__")
+        len   (gensym "arr_len__")
+        item  (gensym "arr_item__")
+        sync  (r-propagate-symbol arr)]
+    (apply r-local-block
+           (concat [(list 'var items := (list 'as.list arr))
+                    (list 'var len := (list 'length items))
+                    (list 'var item := (list ':? (list '== len 0)
+                                             nil
+                                             (list '. items [1])))
+                    (list ':= arr (list ':? (list '<= len 1)
+                                        []
+                                        (list 'tail items -1)))]
+                   (when sync [sync])
+                   [item]))))
+
+(defn r-tf-x-arr-remove
+  [[_ arr idx]]
+  (let [items      (gensym "arr_items__")
+        len        (gensym "arr_len__")
+        pos        (gensym "arr_pos__")
+        invalid    (gensym "arr_invalid__")
+        item       (gensym "arr_item__")
+        before     (gensym "arr_before__")
+        after-count (gensym "arr_after_count__")
+        after      (gensym "arr_after__")
+        sync       (r-propagate-symbol arr)]
+    (apply r-local-block
+           (concat [(list 'var items := (list 'as.list arr))
+                    (list 'var len := (list 'length items))
+                    (list 'var pos := (list '+ idx 1))
+                    (list 'var invalid := (list 'or
+                                                (list '< pos 1)
+                                                (list '> pos len)))
+                    (list 'var item := (list ':? invalid
+                                             nil
+                                             (list '. items [pos])))
+                    (list 'var before := (list ':? (list '<= pos 1)
+                                               []
+                                               (list 'head items (list '- pos 1))))
+                    (list 'var after-count := (list '- len pos))
+                    (list 'var after := (list ':? (list '<= after-count 0)
+                                              []
+                                              (list 'tail items after-count)))
+                    (list ':= arr (list ':? invalid
+                                        items
+                                        (list 'append before after)))]
+                   (when sync [sync])
+                   [item]))))
 
 (defn r-tf-x-arr-insert
   [[_ arr idx item]]
@@ -492,12 +540,132 @@
                        :after (- ~idx 1)))
            ~arr)))))
 
+(defn r-tf-x-arr-slice
+  [[_ arr start finish]]
+  (let [items      (gensym "arr_items__")
+        out        (gensym "arr_out__")
+        start-idx  (gensym "arr_start__")
+        finish-idx (gensym "arr_finish__")]
+    (r-local-block
+     (list 'var items := (list 'as.list arr))
+     (list 'var out := [])
+     (list 'var start-idx := (list '+ start 1))
+     (list 'var finish-idx := (list ':? (list 'x:nil? finish)
+                                    (list 'length items)
+                                    (list 'min finish
+                                          (list 'length items))))
+     (list 'if (list '< finish-idx start-idx)
+           out
+           (list 'block
+                 (list 'for ['i :in (list 'seq start-idx finish-idx 1)]
+                       (list ':= out
+                             (list 'append
+                                   (list 'as.list out)
+                                   (list 'list (list '. items ['i])))))
+                 out)))))
+
+(defn r-tf-x-obj-assign
+  [[_ obj other]]
+  (let [out  (gensym "obj_out__")
+        sync (r-propagate-symbol obj)
+        tail (if sync
+               [(list ':= obj out)
+                sync
+                obj]
+               [out])]
+    (apply r-local-block
+           (concat [(list 'var out := (list ':? (list 'x:nil? obj)
+                                           {}
+                                           obj))
+                    (list 'if (list 'and
+                                    (list 'not (list 'x:nil? other))
+                                    (list 'not (list 'is.null (list 'names other))))
+                          (list 'block
+                                (list 'for ['k :in (list 'names other)]
+                                      (list ':= (list '. out [(list 'as.character 'k)])
+                                            (list '. other ['k]))))
+                          nil)]
+                   tail))))
+
+(defn r-tf-x-arr-assign
+  [[_ arr other]]
+  (let [sync (r-propagate-symbol arr)]
+    (apply r-local-block
+           (concat [(list ':= arr
+                          (list 'append (list 'as.list arr)
+                                (list 'as.list other)))]
+                   (when sync [sync])
+                   [arr]))))
+
+(defn r-tf-x-arr-sort
+  [[_ arr key-fn comp-fn]]
+  (let [items (gensym "arr_items__")
+        len   (gensym "arr_len__")
+        left  (gensym "left_key__")
+        right (gensym "right_key__")
+        tmp   (gensym "arr_tmp__")
+        sync  (r-propagate-symbol arr)
+        swap  (list 'block
+                    (list 'var tmp := (list '. items ['i]))
+                    (list ':= (list '. items ['i])
+                          (list '. items ['j]))
+                    (list ':= (list '. items ['j]) tmp))
+        inner (list 'block
+                    (list 'var left := (list key-fn (list '. items ['i])))
+                    (list 'var right := (list key-fn (list '. items ['j])))
+                    (list 'if (list 'not (list comp-fn left right))
+                          swap
+                          nil))
+        body  (list 'block
+                    (list 'for ['i :in (list 'seq_len (list '- len 1))]
+                          (list 'for ['j :in (list 'seq (list '+ 'i 1) len 1)]
+                                inner)))]
+    (apply r-local-block
+           (concat [(list 'var items := (list 'as.list arr))
+                    (list 'var len := (list 'length items))
+                    (list 'if (list '> len 1)
+                          body
+                          nil)
+                    (list ':= arr items)]
+                   (when sync [sync])
+                   [arr]))))
+
+(defn r-tf-x-arr-foldl
+  [[_ arr f init]]
+  (let [out (gensym "fold_out__")]
+    (r-local-block
+     (list 'var out := init)
+     (list 'for ['e :in (list '% arr)]
+           (list ':= out (list f out 'e)))
+     out)))
+
+(defn r-tf-x-arr-foldr
+  [[_ arr f init]]
+  (let [items (gensym "arr_items__")
+        out   (gensym "fold_out__")]
+    (r-local-block
+     (list 'var items := (list 'as.list arr))
+     (list 'var out := init)
+     (list 'if (list '> (list 'length items) 0)
+           (list 'block
+                 (list 'for ['i :in (list 'seq (list 'length items) 1 -1)]
+                       (list ':= out (list f out (list '. items ['i])))))
+           nil)
+     out)))
+
 (def +r-arr+
   {:x-arr-push        {:macro #'r-tf-x-arr-push    :emit :macro}
-   :x-arr-pop         {:macro #'r-tf-x-arr-pop     :emit :macro}
-   :x-arr-push-first  {:macro #'r-tf-x-arr-push-first :emit :macro}
-   :x-arr-pop-first   {:macro #'r-tf-x-arr-pop-first  :emit :macro}
-   :x-arr-insert      {:macro #'r-tf-x-arr-insert :emit :macro}})
+    :x-arr-pop         {:macro #'r-tf-x-arr-pop     :emit :macro}
+    :x-arr-push-first  {:macro #'r-tf-x-arr-push-first :emit :macro}
+    :x-arr-pop-first   {:macro #'r-tf-x-arr-pop-first  :emit :macro}
+    :x-arr-remove      {:macro #'r-tf-x-arr-remove  :emit :macro}
+    :x-arr-insert      {:macro #'r-tf-x-arr-insert :emit :macro}
+    :x-arr-slice       {:macro #'r-tf-x-arr-slice   :emit :macro}
+    :x-obj-assign      {:macro #'r-tf-x-obj-assign  :emit :macro}
+    :x-arr-assign      {:macro #'r-tf-x-arr-assign  :emit :macro}
+    :x-arr-sort        {:macro #'r-tf-x-arr-sort    :emit :macro}
+    :x-arr-foldl       {:macro #'r-tf-x-arr-foldl   :emit :macro}
+    :x-arr-foldr       {:macro #'r-tf-x-arr-foldr   :emit :macro}})
 
 ;;
 ;; STRING
@@ -517,19 +685,21 @@
 
 (defn r-tf-x-str-index-of
   ([[_ s tok & [start]]]
-   (template/$
-    (do (var local-start := (:? (or (is.null ~start)
-                                    (<= ~start 1))
-                                1
-                                ~start))
-        (var segment := (:? (<= local-start 1)
-                            ~s
-                            (substr ~s local-start (nchar ~s))))
-        (var idx := (regexpr ~tok segment :fixed true))
-        (:? (< idx 0)
-            idx
-            (+ (- local-start 1)
-               (- idx 1)))))))
+   (let [start-expr (list ':? (list 'or
+                                    (list 'is.null start)
+                                    (list '<= start 1))
+                          1
+                          start)
+         segment    (list ':? (list '<= start-expr 1)
+                          s
+                          (list 'substr s start-expr (list 'nchar s)))
+         idx        (list 'regexpr tok segment :fixed true)]
+     (list ':?
+           (list '< idx 0)
+           idx
+           (list '+
+                 (list '- start-expr 1)
+                 (list '- idx 1))))))
 
 (defn r-tf-x-str-substring
   ([[_ s start & [end]]]
@@ -701,10 +871,7 @@
 
 (defn r-tf-x-pwd
   [[_]]
-  (template/$
-   (:? (== "" (Sys.getenv "PWD" :unset ""))
-       (getwd)
-       (Sys.getenv "PWD" :unset ""))))
+  '(getwd))
 
 (def +r-shell+
   {:x-pwd            {:macro #'r-tf-x-pwd    :emit :macro}
@@ -800,8 +967,16 @@
 
 (defn r-tf-x-iter-from
   [[_ obj]]
-  (r-tf-x-iter-mark
-   (template/$ (. ~obj ["iterator"]))))
+  (template/$
+   (:? (x:iter-native? ~obj)
+       ~obj
+       (:? (x:is-array? ~obj)
+           (x:iter-from-arr ~obj)
+           (:? (and (x:is-object? ~obj)
+                    (x:has-key? ~obj "::" "iterator")
+                    (x:has-key? ~obj "iterator"))
+               (x:get-key ~obj "iterator")
+               nil)))))
 
 (defn r-tf-x-iter-eq
   [[_ it0 it1 eq-fn]]
@@ -825,9 +1000,11 @@
   [[_ obj]]
   (template/$
    (isTRUE
-    (and (== "list" (typeof ~obj))
-         (not (is.null (names ~obj)))
-         (x:has-key? ~obj "iterator")))))
+    (or (x:iter-native? ~obj)
+        (x:is-array? ~obj)
+        (and (x:is-object? ~obj)
+             (x:has-key? ~obj "::" "iterator")
+             (x:has-key? ~obj "iterator"))))))
 
 (defn r-tf-x-iter-native?
   [[_ it]]

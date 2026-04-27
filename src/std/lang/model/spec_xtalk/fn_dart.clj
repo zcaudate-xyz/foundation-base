@@ -437,7 +437,12 @@
 
 (defn dart-tf-x-promise-catch
   [[_ promise thunk]]
-  (list '. promise (list 'catchError thunk)))
+  (template/$
+   (. (. ~promise
+         (then (fn [value]
+                 (var out value)
+                 (return out))))
+      (catchError ~thunk))))
 
 (defn dart-tf-x-promise-finally
   [[_ promise thunk]]
@@ -467,8 +472,11 @@
   (template/$
    (. (Socket.connect ~host ~port)
       (then (fn [conn]
-              (return (Future.sync (fn []
-                                     (return (~cb nil conn)))))))
+              (return (. (Future.sync (fn []
+                                        (return (~cb nil conn))))
+                         (whenComplete (fn []
+                                         (. conn (destroy))
+                                         (return nil)))))))
       (catchError (fn [err]
                     (return (~cb err nil)))))))
 
@@ -480,15 +488,29 @@
 (defn dart-tf-x-socket-close
   [[_ conn]]
   (template/$
-   (. (. ~conn (flush))
-      (then (fn [_]
-              (. ~conn (destroy))
-              (return nil))))))
+   (. ~conn (close))))
 
 (def +dart-socket+
   {:x-socket-connect {:macro #'dart-tf-x-socket-connect :emit :macro}
    :x-socket-send    {:macro #'dart-tf-x-socket-send    :emit :macro}
    :x-socket-close   {:macro #'dart-tf-x-socket-close   :emit :macro}})
+
+(defn dart-tf-x-notify-http
+  [[_ host port value id key opts]]
+  (template/$
+   (. (. (HttpClient)
+         (post ~host ~port "/"))
+      (then (fn [req]
+              (. req (write (xt.lang.common-lib/return-encode ~value ~id ~key)))
+              (return (. req (close)))))
+      (then (fn [_]
+              (return ["async"])))
+      (catchError (fn [_]
+                    (return ["unable to connect"]))))))
+
+(def +dart-http+
+  {:x-notify-http {:macro #'dart-tf-x-notify-http :emit :macro
+                   :op-spec {:allow-blocks true}}})
 
 (defn dart-tf-x-pwd
   [[_]]
@@ -534,12 +556,12 @@
 (defn dart-tf-x-shell
   [[_ s root cb]]
   (template/$
-   (do (var command
-            (:? (or (== nil ~root)
-                    (== "" ~root))
-                ~s
-                (+ "cd " ~root " && " ~s)))
-       (return (. (Process.run "sh" ["-lc" command])
+   (do (var shell_command
+             (:? (or (== nil ~root)
+                     (== "" ~root))
+                 ~s
+                 (+ "cd " ~root " && " ~s)))
+       (return (. (Process.run "sh" ["-lc" shell_command])
                   (then (fn [result]
                           (if (not= 0 (. result exitCode))
                             (return (~cb {:code (. result exitCode)
@@ -567,6 +589,7 @@
          +dart-proto+
          +dart-return+
          +dart-socket+
+         +dart-http+
          +dart-file+
          +dart-promise+
          +dart-thread+

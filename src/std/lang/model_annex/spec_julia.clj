@@ -46,8 +46,12 @@
    (cond (keyword? key)
          (str "\"" (name key) "\"")
 
-         :else
-         (common/*emit-fn* key grammar mopts))))
+          :else
+          (common/*emit-fn* key grammar mopts))))
+
+(defn julia-symbol-global
+  [key _grammar _mopts]
+  (list 'convert 'Any (list 'get 'XT_GLOBALS (ut/sym-default-str key) nil)))
 
 (defn tf-for-iter
   "for iter transform"
@@ -70,15 +74,35 @@
            ~@body)))
       (template/$
        (for [~idx :in (to 1 1 (length ~arr))]
-         (local ~e (getindex ~arr ~idx))
-         ~@body)))))
+          (local ~e (getindex ~arr ~idx))
+          ~@body)))))
+
+(defn tf-for-object
+  "for object transform"
+  {:added "4.0"}
+  [[_ [[k v] m] & body]]
+  (cond (= k '_)
+        (apply list 'for [v :in (list 'values m)]
+               body)
+
+        (= v '_)
+        (apply list 'for [k :in (list 'keys m)]
+               body)
+
+        :else
+        (let [pair (gensym "pair__")]
+          (template/$
+           (for [~pair :in (collect ~m)]
+             (local ~k (getindex ~pair 1))
+             (local ~v (getindex ~pair 2))
+             ~@body)))))
 
 (defn tf-for-index
   "for index transform"
   {:added "4.0"}
   [[_ [i [start end step :as range]] & body]]
-  (apply list 'for [i :in (list 'to start (or step 1) end)]
-           body))
+  (apply list 'for [i :in (list 'to start (or step 1) (list '- end 1))]
+         body))
 
 (defn tf-dict
   "dict transform"
@@ -143,6 +167,7 @@
          :pow    {:raw "^"}
          :with-global {:value true :raw "XT_GLOBALS"}
          :for-array  {:macro #'tf-for-array  :emit :macro}
+         :for-object {:macro #'tf-for-object :emit :macro}
          :for-iter   {:macro #'tf-for-iter   :emit :macro}
          :for-index  {:macro #'tf-for-index  :emit :macro}})
       (grammar/build:override fn/+julia+)
@@ -151,10 +176,13 @@
         :len    {:op :len    :symbol '#{len}       :raw "length"    :emit  :pre}
         :local  {:op :local  :symbol '#{local var} :macro  #'tf-local :emit :macro}
         :pair   {:op :pair   :symbol '#{=>}        :raw "=>"        :emit :infix}
-        :dict   {:op :dict   :symbol '#{dict}      :macro #'tf-dict :emit :macro}
-        :push!  {:op :push!  :symbol '#{push!}     :macro #'tf-push! :emit :macro}
-        :%      {:op :%      :symbol #{:%}         :emit :squash}
-        :to     {:op :to     :symbol #{'to}        :emit #'emit-to}})))
+         :dict   {:op :dict   :symbol '#{dict}      :macro #'tf-dict :emit :macro}
+         :push!  {:op :push!  :symbol '#{push!}     :macro #'tf-push! :emit :macro}
+         :xor    {:op :xor    :symbol '#{xor}       :raw "⊻"         :emit :infix}
+         :bxor   {:op :bxor   :symbol '#{b:xor}     :raw "⊻"         :emit :infix}
+         :splat  {:op :splat  :symbol '#{...}       :raw "..."       :emit :post}
+         :%      {:op :%      :symbol #{:%}         :emit :squash}
+         :to     {:op :to     :symbol #{'to}        :emit #'emit-to}})))
 
 (def +template+
   (->> {:banned #{:set :regex}
@@ -164,7 +192,7 @@
                   :common    {:apply "(" :statement ""
                               :namespace-full "."
                               :namespace-sep  "."}
-                  :index     {:offset 1  :end-inclusive true}
+                  :index     {:offset 0  :end-inclusive false}
                   :return    {:multi true}
                   :block     {:parameter {:start "(" :end ")" :space ", "}
                               :body      {:start "" :end "end"}}
@@ -173,17 +201,25 @@
                   :infix     {:if  {:check "&&" :then "||"}}
                   :global    {:reference nil}}
         :token  {:nil       {:as "nothing"}
-                 :string    {:quote :double}}
+                 :string    {:quote :double}
+                 :symbol    {:global #'julia-symbol-global}}
         :data   {:map-entry {:start ""  :end ""  :space "" :assign " => " :keyword :string
                              :key-fn #'julia-map-key}
                  :map       {:start "Dict(" :end ")"}
                  :vector    {:start "[" :end "]" :space ", "}}
-        :block  {:for       {:body    {:start "" :end "end"}
-                             :parameter {:start " " :end "" :space " "}}
-                 :while     {:body    {:start "" :end "end"}}
-                 :branch    {:wrap    {:start "" :end "end"}
-                             :control {:default {:parameter  {:start " " :end ""}
-                                                 :body {:append true :start "" :end ""}}
+         :block  {:for       {:body    {:start "" :end "end"}
+                              :parameter {:start " " :end "" :space " "}}
+                  :try      {:wrap    {:start "" :end "end"}
+                              :body    {:start "" :end ""}
+                              :control {:catch   {:raw "catch"
+                                                  :parameter {:start " " :end ""}
+                                                  :body {:start "" :end ""}}
+                                        :finally {:raw "finally"
+                                                  :body {:start "" :end ""}}}}
+                  :while     {:body    {:start "" :end "end"}}
+                  :branch    {:wrap    {:start "" :end "end"}
+                              :control {:default {:parameter  {:start " " :end ""}
+                                                  :body {:append true :start "" :end ""}}
                                        :if      {:raw "if"}
                                        :elseif  {:raw "elseif"}
                                        :else    {:raw "else"}}}}

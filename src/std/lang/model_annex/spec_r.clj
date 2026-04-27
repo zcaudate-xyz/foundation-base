@@ -94,6 +94,12 @@
   [bool]
   (if bool "TRUE" "FALSE"))
 
+(defn r-map
+  [m grammar mopts]
+  (if (empty? m)
+    "structure(list(), names=character())"
+    (data/emit-coll :map m grammar mopts)))
+
 (def +features+
   (-> (merge (grammar/build :include [:builtin
                                       :builtin-global
@@ -120,30 +126,32 @@
                                       :macro-arrow
                                       :macro-let
                                       :macro-xor])
-             (grammar/build-xtalk))
+              (grammar/build-xtalk))
       (grammar/build:override
-       {:seteq       {:op :seteq :symbol '#{:=} :raw "<-"}
-        :mod         {:raw "%%"}
-        :defn        {:op :defn  :symbol '#{defn}     :macro  #'tf-defn :type :macro}
-        :inif        {:macro #'tf-infix-if   :emit :macro}
-        :for-object  {:macro #'tf-for-object :emit :macro}
-        :for-array   {:macro #'tf-for-array  :emit :macro}
-        :for-iter    {:macro #'tf-for-iter   :emit :macro}
-        :for-index   {:macro #'tf-for-index  :emit :macro}})
-      (grammar/build:override fn/+r+ )
+        {:seteq       {:op :seteq :symbol '#{:=} :raw "<-"}
+         :mod         {:raw "%%"}
+         :defn        {:op :defn  :symbol '#{defn}     :macro  #'tf-defn :type :macro}
+         :inif        {:macro #'tf-infix-if   :emit :macro}
+         :for-object  {:macro #'tf-for-object :emit :macro}
+         :for-array   {:macro #'tf-for-array  :emit :macro}
+         :for-iter    {:macro #'tf-for-iter   :emit :macro}
+         :for-index   {:macro #'tf-for-index  :emit :macro}})
+      (grammar/build:override fn/+r+)
       (grammar/build:extend
-       {;;:na     {:op :na    :symbol '#{NA}    :raw "NA"    :value true :emit :throw}
-        :next   {:op :next  :symbol '#{:next} :raw "next"  :emit :return}
-        :throw  {:op :next  :symbol '#{throw} :raw 'stop :emit :alias}
-        :repeat {:op :repeat
-                 :symbol '#{repeat} :type :block
-                 :block {:raw "repeat"
-                         :main    #{:body}
-                         :control [[:until {:required true
-                                            :input #{:parameter}}]]}}})))
+        {;;:na     {:op :na    :symbol '#{NA}    :raw "NA"    :value true :emit :throw}
+         :next   {:op :next  :symbol '#{:next} :raw "next"  :emit :return}
+         :throw  {:op :next  :symbol '#{throw} :raw 'stop :emit :alias}
+         :repeat {:op :repeat
+                  :symbol '#{repeat}
+                  :type :block
+                  :block {:raw "repeat"
+                          :main #{:body}
+                          :control [[:until {:required true
+                                             :input #{:parameter}}]]}}})))
 
 (def +template+
   (->> {:banned #{:set :keyword}
+        :allow  {:assign #{:symbol :vector :map :set}}
         :highlight '#{block}
         :default {:comment   {:prefix "#"}
                   :common    {:apply "$" :assign "<-"}
@@ -151,16 +159,19 @@
                   :function  {:raw "function"}
                   :index     {:offset 1  :end-inclusive true
                               :start "[[" :end "]]"}}
-        :token  {:nil       {:as "NULL"}
-                 :boolean   {:as #'r-token-boolean}
-                 :string    {:quote :single}
-                 :symbol    {}}
-        :data   {:vector    {:start "list(" :end ")" :space ""}
-                 :map       {:start "list(" :end ")" :space ""}
-                 :map-entry {:start ""  :end ""  :space "" :assign "=" :keyword :symbol}}
-        :define {:def       {:raw ""}
-                 :defn      {:raw ""}}}
-       (collection/merge-nested (emit/default-grammar))))
+         :token  {:nil       {:as "NULL"}
+                  :boolean   {:as #'r-token-boolean}
+                  :string    {:quote :single}
+                  :symbol    {}}
+         :data   {:vector    {:start "list(" :end ")" :space ""}
+                  :map       {:start "list(" :end ")" :space ""
+                              :custom #'r-map}
+                  :map-entry {:start ""  :end ""  :space "" :assign "=" :keyword :symbol}}
+         :rewrite {:staging [#'rewrite/r-rewrite-stage]}
+         :define {:def       {:raw ""}
+                  :defn      {:raw ""}
+                  :shorthand true}}
+        (collection/merge-nested (emit/default-grammar))))
 
 (def +grammar+
   (grammar/grammar :R

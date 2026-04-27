@@ -38,9 +38,29 @@
      x:is-number?
      x:is-object?
      x:is-string?
-     x:iter-eq
-     x:iter-has?
-     x:iter-native?})
+      x:iter-eq
+      x:iter-has?
+      x:iter-native?})
+
+(def ^:private +dart-statement-heads+
+  '#{do
+     do*
+     var
+     var*
+     :=
+     return
+     if
+     when
+     while
+     try
+     for
+     throw
+     break
+     continue
+     defn
+     defn-
+     defgen
+     fn})
 
 (declare dart-rewrite-expression)
 (declare dart-rewrite-statement)
@@ -102,10 +122,29 @@
       (apply list 'fn
              (concat (when name [name])
                      [args]
-                     (-> body
-                         (dart-rewrite-statements grammar)
-                         lift/splice-do*
-                         lift/wrap-body))))))
+                     (letfn [(ensure-return [stmt]
+                               (cond
+                                 (and (collection/form? stmt)
+                                      (contains? +dart-statement-heads+ (first stmt)))
+                                 (if (#{'do 'do*} (first stmt))
+                                   (let [prefix (butlast (rest stmt))
+                                         tail   (last stmt)]
+                                     (with-form-meta
+                                       stmt
+                                       (apply list (first stmt)
+                                              (concat prefix
+                                                      [(ensure-return tail)]))))
+                                   stmt)
+
+                                 :else
+                                 (list 'return stmt)))]
+                       (-> body
+                           (dart-rewrite-statements grammar)
+                           (#(if (= 1 (count %))
+                               [(ensure-return (first %))]
+                               %))
+                           lift/splice-do*
+                           lift/wrap-body)))))))
 
 (defn- rewrite-or-expression
   [form grammar]
