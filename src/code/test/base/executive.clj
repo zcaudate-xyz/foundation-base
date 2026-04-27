@@ -9,6 +9,7 @@
             [std.fs :as fs]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
+            [std.print :as output]
             [std.lib.time :as t]
             [std.task :as task]))
 
@@ -135,12 +136,64 @@
 (defn save-artifact
   "saves a generated test artifact"
   {:added "4.1"}
-  [label path content]
+  [_ path content]
   (when path
     (fs/create-directory (fs/parent path))
     (spit path content)
-    (println (str label " saved to " path))
     path))
+
+(defn artifact-notices
+  "returns any save notices for written artifacts"
+  {:added "4.1"}
+  [{:keys [report-path run-path]}]
+  (cond-> []
+    report-path
+    (conj (str "Report saved to " report-path))
+
+    run-path
+    (conj (str "Run helper saved to " run-path))))
+
+(defn save-report-paths
+  "writes report artifacts and returns the written paths"
+  {:added "4.1"}
+  [items selector params]
+  (let [process (fn [type item]
+                  (case type
+                    :failed (listener/summarise-verify item)
+                    :throw  (if (= :verify (:from item))
+                              (listener/summarise-verify item)
+                              (listener/summarise-evaluate item))
+                    :timeout (listener/summarise-evaluate item)))
+        failures (reduce (fn [out k]
+                           (let [data (map (comp report-edn (partial process k))
+                                           (get items k))]
+                             (if (seq data)
+                               (assoc out k data)
+                               out)))
+                         {}
+                         [:failed :throw :timeout])
+        report-path (when (seq failures)
+                      (report-file-path))
+        run-path    (run-file-path report-path params)]
+    (when report-path
+      (save-artifact "Report"
+                     report-path
+                     (with-out-str (clojure.pprint/pprint failures))))
+    (when (and run-path selector)
+      (save-artifact "Run helper"
+                     run-path
+                     (with-out-str
+                       (clojure.pprint/pprint (run-file-form selector params)))))
+    {:report-path report-path
+     :run-path run-path}))
+
+(defn announce-artifacts
+  "prints save notices for written artifacts"
+  {:added "4.1"}
+  [artifacts]
+  (doseq [line (artifact-notices artifacts)]
+    (output/println line))
+  artifacts)
 
 (defn accumulate
   "accumulates test results from various facts and files into a single data structure"
@@ -242,54 +295,35 @@
   ([items]
    (save-report items nil context/*settings*))
   ([items selector params]
-   (let [process (fn [type item]
-                    (case type
-                      :failed (listener/summarise-verify item)
-                      :throw  (if (= :verify (:from item))
-                                (listener/summarise-verify item)
-                                (listener/summarise-evaluate item))
-                      :timeout (listener/summarise-evaluate item)))
-           failures (reduce (fn [out k]
-                              (let [data (map (comp report-edn (partial process k))
-                                              (get items k))]
-                                (if (seq data)
-                                  (assoc out k data)
-                                  out)))
-                            {}
-                            [:failed :throw :timeout])
-         report-path (when (seq failures)
-                       (report-file-path))
-         run-path    (run-file-path report-path params)]
-     (when report-path
-       (save-artifact "Report"
-                      report-path
-                      (with-out-str (clojure.pprint/pprint failures))))
-     (when (and run-path selector)
-       (save-artifact "Run helper"
-                      run-path
-                      (with-out-str
-                        (clojure.pprint/pprint (run-file-form selector params)))))
-     run-path)))
+   (-> (save-report-paths items selector params)
+       (announce-artifacts)
+       (:run-path))))
 
 (defn summarise-bulk
   "creates a summary of all bulk results"
   {:added "3.0"}
   ([_ items _]
-  (let [_ (reset! +latest+ {})
-       all-items (reduce (fn [out [id item]]
-                             (reduce (fn [out [k data]]
-                                       (update-in out [k] concat data))
-                                      out
-                                      (or (:data item)
-                                          (:data (meta item)))))
-                            {}
-                            (remove (fn [[ns item]]
-                                      (when (= :error (:status item))
-                                        (swap! +latest+ update-in [:errored] conj ns)
-                                        true))
-                                    items))]
-       (save-report all-items (vec (keys items)) context/*settings*)
-       (summarise all-items))))
+   (let [_           (reset! +latest+ {})
+          item-entries (if (map? items) items (seq items))
+         all-items   (reduce (fn [out [id item]]
+                               (reduce (fn [out [k data]]
+                                         (update-in out [k] concat data))
+                                       out
+                                       (or (:data item)
+                                           (:data (meta item)))))
+                             {}
+                              (remove (fn [[ns item]]
+                                        (when (= :error (:status item))
+                                          (swap! +latest+ update-in [:errored] conj ns)
+                                          true))
+                                      item-entries))]
+      (let [artifacts (save-report-paths all-items
+                                         (mapv first item-entries)
+                                         context/*settings*)
+            notices   (artifact-notices artifacts)]
+        (cond-> (summarise all-items)
+          (seq notices)
+          (vary-meta assoc :std.task/after-summary notices))))))
 
 (defn unload-namespace
   "unloads a given namespace for testing"
@@ -345,7 +379,8 @@
             _       (rt/get-global ns :teardown)
             results (-> (interim facts)
                         (assoc :queued (repeat (count tests) true)))]
-        (save-report results ns params)
+        (when-not (:bulk params)
+          (save-report results ns params))
         results))))
 
 (defn run-namespace
