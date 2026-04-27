@@ -28,8 +28,8 @@
              [xt.db.schema.sql-util :as ut]]})
 
 (fact:global
- {:setup    [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.schema.base-scope/get-data-columns.more :added "4.0" :adopt true}
 (fact "classifies the link"
@@ -92,21 +92,7 @@
                "country_id"
                "about"
                "language"]}])
-          (def +profile-lua+
-            ["UserProfile"
-             {"custom" {},
-              "where" [{"id" "zcaudate"}],
-              "links" {},
-              "data"
-              ["id"
-               "account_id"
-               "first_name"
-               "last_name"
-               "city"
-               "state_id"
-               "country_id"
-               "about"
-               "language"]}])
+          
           (def +account+
             ["UserAccount"
              {"custom" [],
@@ -134,38 +120,10 @@
                "password_updated"
                 "is_super"
                 "is_suspended"
-               "is_official"]}])
-          (def +account-lua+
-            ["UserAccount"
-             {"custom" {},
-              "where" [{"id" "zcaudate"}],
-              "links"
-              [["profile"
-                "reverse"
-                ["UserProfile"
-                 {"custom" {},
-                  "where" [{"account" ["eq" ["UserAccount.id"]]}],
-                  "links" {},
-                  "data"
-                  ["id"
-                   "account_id"
-                   "first_name"
-                   "last_name"
-                   "city"
-                   "state_id"
-                   "country_id"
-                   "about"
-                   "language"]}]]],
-              "data"
-              ["id"
-               "nickname"
-               "password_updated"
-               "is_super"
-               "is_suspended"
                "is_official"]}])] :adopt true}
 (fact "MORE CHECKS"
 
-  ^{:seedgen/base {:lua {:transform {[] {}}}}}
+  ^{:seedgen/base {:lua {:transform {+profile+ (l/as-lua +profile+)}}}}
   (!.js
     (scope/get-tree sample/Schema
                     "UserProfile"
@@ -174,7 +132,7 @@
                     {}))
   => +profile+
 
-  ^{:seedgen/base {:lua {:transform {[] {}}}}}
+  ^{:seedgen/base {:lua {:transform {+account+ (l/as-lua +account+)}}}}
   (!.js
     (scope/get-tree sample/Schema
                     "UserAccount"
@@ -183,14 +141,14 @@
                      ["profile" [{:name "hello"}] ["*/default"]]]
                     {}))
   => +account+
-
+  
   (!.lua
     (scope/get-tree sample/Schema
                     "UserProfile"
                     {:id "zcaudate"}
                     ["*/default"]
                     {}))
-  => +profile-lua+
+  => (l/as-lua +profile+)
 
   (!.lua
     (scope/get-tree sample/Schema
@@ -199,7 +157,7 @@
                     ["*/data"
                      ["profile" [{:name "hello"}] ["*/default"]]]
                     {}))
-  => +account-lua+
+  => (l/as-lua +account+)
 
   (!.py
     (scope/get-tree sample/Schema
@@ -230,7 +188,9 @@
                                            {:id "3"}
                                            ["first_name"
                                             "last_name"]]])
-                 (fn [[e cols]] (return [e.ident cols]))))
+                 (fn [out]
+                   (var [e cols] out)
+                   (return [(. e ["ident"]) cols]))))
   => [["profile" [{"id" "1"} {"id" "2"} {"id" "3"} ["first_name" "last_name"]]]]
 
   (!.lua
@@ -241,11 +201,10 @@
                                            {:id "2"}
                                            {:id "3"}
                                            ["first_name"
-                                             "last_name"]]])
-                 (fn [e]
-                   (return [(xt/x:get-key (xtd/first e)
-                                          "ident")
-                            (xtd/second e)]))))
+                                            "last_name"]]])
+                 (fn [out]
+                   (var [e cols] out)
+                   (return [(. e ["ident"]) cols]))))
   => [["profile" [{"id" "1"} {"id" "2"} {"id" "3"} ["first_name" "last_name"]]]]
 
   (!.py
@@ -256,11 +215,10 @@
                                            {:id "2"}
                                            {:id "3"}
                                            ["first_name"
-                                             "last_name"]]])
-                 (fn [e]
-                   (return [(xt/x:get-key (xtd/first e)
-                                          "ident")
-                            (xtd/second e)]))))
+                                            "last_name"]]])
+                 (fn [out]
+                   (var [e cols] out)
+                   (return [(. e ["ident"]) cols]))))
   => [["profile" [{"id" "1"} {"id" "2"} {"id" "3"} ["first_name" "last_name"]]]])
 
 ^{:refer xt.db.schema.base-scope/get-link-standard.more :added "4.0" :adopt true}
@@ -275,7 +233,9 @@
                                            {:id "3"}
                                            ["first_name"
                                             "last_name"]]])
-                 (fn [[e cols]] (return [e.ident cols]))))
+                 (fn [out]
+                   (var [e cols] out)
+                   (return [(. e ["ident"]) cols]))))
   => [["profile" [{"id" "1"} {"id" "2"} {"id" "3"} ["first_name" "last_name"]]]]
 
   (!.lua
@@ -286,11 +246,10 @@
                                            {:id "2"}
                                            {:id "3"}
                                            ["first_name"
-                                             "last_name"]]])
-                 (fn [e]
-                   (return [(xt/x:get-key (xtd/first e)
-                                          "ident")
-                            (xtd/second e)]))))
+                                            "last_name"]]])
+                 (fn [out]
+                   (var [e cols] out)
+                   (return [(. e ["ident"]) cols]))))
   => [["profile" [{"id" "1"} {"id" "2"} {"id" "3"} ["first_name" "last_name"]]]]
 
   (!.py
@@ -301,11 +260,10 @@
                                            {:id "2"}
                                            {:id "3"}
                                            ["first_name"
-                                             "last_name"]]])
-                 (fn [e]
-                   (return [(xt/x:get-key (xtd/first e)
-                                          "ident")
-                            (xtd/second e)]))))
+                                            "last_name"]]])
+                 (fn [out]
+                   (var [e cols] out)
+                   (return [(. e ["ident"]) cols]))))
   => [["profile" [{"id" "1"} {"id" "2"} {"id" "3"} ["first_name" "last_name"]]]])
 
 ^{:refer xt.db.schema.base-scope/merge-queries :added "4.0"}
@@ -325,12 +283,12 @@
       [{"a" 1, "b" 2} {"a" 1, "c" 3} {"b" 2, "c" 1} {"c" 3}]]
 
   (!.lua
-    [(scope/merge-queries [] [])
+    [(scope/merge-queries {} {})
      (scope/merge-queries [{:a 1}] [{:a 2}])
      (scope/merge-queries [{:a 1}] [{:b 2}])
      (scope/merge-queries [{:a 1}] [{:b 2} {:c 3}])
      (scope/merge-queries [{:a 1} {:c 1}] [{:b 2} {:c 3}])])
-  => [{} 
+  => [{}
       [{"a" 2}]
       [{"a" 1, "b" 2}]
       [{"a" 1, "b" 2} {"a" 1, "c" 3}]
@@ -368,9 +326,9 @@
        "-/id" true}]
 
   (!.lua  [(scope/filter-scope ["-/data"  "id"])
-           (scope/filter-scope ["-/data" "-/key"])
-           (scope/filter-scope ["*/data" "-/key"])
-           (scope/filter-scope ["*/everything"])])
+          (scope/filter-scope ["-/data" "-/key"])
+          (scope/filter-scope ["*/data" "-/key"])
+          (scope/filter-scope ["*/everything"])])
   => [{"-/data" true}
       {"-/data" true, "-/key" true}
       {"-/data" true, "-/key" true, "-/info" true, "-/id" true}
@@ -519,34 +477,35 @@
 ^{:refer xt.db.schema.base-scope/get-link-columns :added "4.0"}
 (fact "get columns for given keys"
 
+  ^{:seedgen/base {:lua {:transform {[] {}}}}}
   (!.js
     (xtd/arr-map (scope/get-link-columns sample/Schema
                                          "UserAccount"
                                          [["profile" ["first_name"
                                                       "last_name"]]])
-                 (fn [[e cols]] (return [e.ident cols]))))
+                 (fn [out]
+                   (var [e cols] out)
+                   (return [(. e ["ident"]) cols]))))
   => [["profile" [{} ["first_name" "last_name"]]]]
-
+  
   (!.lua
     (xtd/arr-map (scope/get-link-columns sample/Schema
                                          "UserAccount"
                                          [["profile" ["first_name"
-                                                       "last_name"]]])
-                 (fn [e]
-                   (return [(xt/x:get-key (xtd/first e)
-                                          "ident")
-                            (xtd/second e)]))))
+                                                      "last_name"]]])
+                 (fn [out]
+                   (var [e cols] out)
+                   (return [(. e ["ident"]) cols]))))
   => [["profile" [{} ["first_name" "last_name"]]]]
 
   (!.py
     (xtd/arr-map (scope/get-link-columns sample/Schema
-                                         "UserAccount"
+                                           "UserAccount"
                                          [["profile" ["first_name"
-                                                       "last_name"]]])
-                 (fn [e]
-                   (return [(xt/x:get-key (xtd/first e)
-                                          "ident")
-                            (xtd/second e)]))))
+                                                      "last_name"]]])
+                   (fn [out]
+                     (var [e cols] out)
+                     (return [(. e ["ident"]) cols]))))
   => [["profile" [{} ["first_name" "last_name"]]]])
 
 ^{:refer xt.db.schema.base-scope/get-linked-tables :added "4.0"}
@@ -591,7 +550,7 @@
   => [[] [{"id" "zcaudate"} {"id" "z1"}] [{"id" "zcaudate"}]]
 
   (!.lua
-    [(scope/as-where-input [])
+    [(scope/as-where-input {})
      (scope/as-where-input [{:id "zcaudate"}
                             {:id "z1"}])
      (scope/as-where-input {:id "zcaudate"})])
@@ -606,31 +565,31 @@
 
 ^{:refer xt.db.schema.base-scope/get-tree :added "4.0"
   :setup [(def +account+
-            ["UserAccount"
-             {"custom" [],
-              "where" [{"id" "zcaudate"} {"id" "z1"} {"id" "z3"}],
-              "links"
-              [["wallets"
-                "reverse"
-                ["Wallet"
-                 {"custom" [],
-                  "where"
-                  [{"owner" ["eq" ["UserAccount.id"]], "id" "W1"}
-                   {"owner" ["eq" ["UserAccount.id"]], "id" "W2"}
-                   {"owner" ["eq" ["UserAccount.id"]], "id" "W3"}],
-                  "links"
-                  [["entries"
-                    "reverse"
-                    ["WalletAsset"
-                     {"custom" [],
-                      "where"
-                      [{"wallet" ["eq" ["Wallet.id"]], "id" "E1"}
-                       {"wallet" ["eq" ["Wallet.id"]], "id" "E2"}
-                       {"wallet" ["eq" ["Wallet.id"]], "id" "E3"}],
-                      "links" [],
-                      "data" ["id"]}]]],
-                  "data" []}]]],
-              "data" []}])
+["UserAccount"
+{"custom" [],
+"where" [{"id" "zcaudate"} {"id" "z1"} {"id" "z3"}],
+"links"
+[["wallets"
+"reverse"
+["Wallet"
+{"custom" [],
+"where"
+[{"owner" ["eq" ["UserAccount.id"]], "id" "W1"}
+{"owner" ["eq" ["UserAccount.id"]], "id" "W2"}
+{"owner" ["eq" ["UserAccount.id"]], "id" "W3"}],
+"links"
+[["entries"
+"reverse"
+["WalletAsset"
+{"custom" [],
+"where"
+[{"wallet" ["eq" ["Wallet.id"]], "id" "E1"}
+{"wallet" ["eq" ["Wallet.id"]], "id" "E2"}
+{"wallet" ["eq" ["Wallet.id"]], "id" "E3"}],
+"links" [],
+"data" ["id"]}]]],
+"data" []}]]],
+"data" []}])
           (def +account-lua+
             ["UserAccount"
              {"custom" {},
@@ -659,7 +618,7 @@
               "data" {}}])]}
 (fact "calculated linked tree given query"
 
-  ^{:seedgen/base  {:lua {:transform {[] {}}}}}
+  ^{:seedgen/base  {:lua {:transform {+account+ (l/as-lua +account+)}}}}
   (!.js
     (scope/get-tree sample/Schema
                     "UserAccount"
@@ -686,13 +645,13 @@
                     [["wallets"
                       {:id "W1"}
                       {:id "W2"}
-                       {:id "W3"}
-                       [["entries"
-                         {:id "E1"}
-                         {:id "E2"}
-                         {:id "E3"}]]]]
+                      {:id "W3"}
+                      [["entries"
+                        {:id "E1"}
+                        {:id "E2"}
+                        {:id "E3"}]]]]
                     {}))
-  => +account-lua+
+  => (l/as-lua +account+)
 
   (!.py
     (scope/get-tree sample/Schema
@@ -710,6 +669,7 @@
                         {:id "E3"}]]]]
                     {}))
   => +account+)
+
 
 (comment
   (s/run ['xt.db.schema.base-scope])
