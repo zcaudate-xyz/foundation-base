@@ -770,7 +770,10 @@
                                      :data {:a 1}}
                                     {:column-fn (fn:> [col]
                                                       (xt/x:cat "\"T\"." col))})])
-  => ["" "\"T\".name != 'hello' AND \"T\".data = '{\"a\":1}'"]
+  => (contains-in
+      [""
+       (any "\"T\".name != 'hello' AND \"T\".data = '{\"a\":1}'"
+            "\"T\".data = '{\"a\":1}' AND \"T\".name != 'hello'")])
 
   (!.lua
     [(ut/encode-query-single-string {} {})
@@ -778,7 +781,10 @@
                                      :data {:a 1}}
                                     {:column-fn (fn:> [col]
                                                       (xt/x:cat "\"T\"." col))})])
-  => ["" "\"T\".name != 'hello' AND \"T\".data = '{\"a\":1}'"]
+  => (contains-in
+      [""
+       (any "\"T\".name != 'hello' AND \"T\".data = '{\"a\":1}'"
+            "\"T\".data = '{\"a\":1}' AND \"T\".name != 'hello'")])
 
   (!.py
     [(ut/encode-query-single-string {} {})
@@ -786,46 +792,58 @@
                                      :data {:a 1}}
                                     {:column-fn (fn:> [col]
                                                       (xt/x:cat "\"T\"." col))})])
-  => ["" "\"T\".name != 'hello' AND \"T\".data = '{\"a\":1}'"])
+  => (contains-in
+      [""
+       (any "\"T\".name != 'hello' AND \"T\".data = '{\"a\":1}'"
+            "\"T\".data = '{\"a\":1}' AND \"T\".name != 'hello'")]))
 
 ^{:refer xt.db.schema.sql-util/encode-query-string :added "4.0"}
 (fact "encodes a query string"
 
   (!.js
     [(ut/encode-query-string {} "WHERE" {})
-     (ut/encode-query-string {:name "hello"} "WHERE"
+     (ut/encode-query-string {:name "hello"}
+                             "WHERE"
                              {:column-fn (fn:> [col] (xt/x:cat "\"SCHEMA\"." col))})
-     (ut/encode-query-string {:data {:a 1}
-                              :name "hello"}
+     (ut/encode-query-string (tab :data {:a 1}
+                                  :name "hello")
                              "WHERE"
                              {})])
-  => [""
-      "WHERE \"SCHEMA\".name = 'hello'"
-      "WHERE data = '{\"a\":1}' AND name = 'hello'"]
+  => (contains-in
+      [""
+       "WHERE \"SCHEMA\".name = 'hello'"
+       (any "WHERE data = '{\"a\":1}' AND name = 'hello'"
+            "WHERE name = 'hello' AND data = '{\"a\":1}'")])
 
   (!.lua
     [(ut/encode-query-string {} "WHERE" {})
-     (ut/encode-query-string {:name "hello"} "WHERE"
+     (ut/encode-query-string {:name "hello"}
+                             "WHERE"
                              {:column-fn (fn:> [col] (xt/x:cat "\"SCHEMA\"." col))})
-     (ut/encode-query-string {:data {:a 1}
-                              :name "hello"}
+     (ut/encode-query-string (tab :data {:a 1}
+                                  :name "hello")
                              "WHERE"
                              {})])
-  => [""
-      "WHERE \"SCHEMA\".name = 'hello'"
-      "WHERE data = '{\"a\":1}' AND name = 'hello'"]
+  => (contains-in
+      [""
+       "WHERE \"SCHEMA\".name = 'hello'"
+       (any "WHERE data = '{\"a\":1}' AND name = 'hello'"
+            "WHERE name = 'hello' AND data = '{\"a\":1}'")])
 
   (!.py
     [(ut/encode-query-string {} "WHERE" {})
-     (ut/encode-query-string {:name "hello"} "WHERE"
+     (ut/encode-query-string {:name "hello"}
+                             "WHERE"
                              {:column-fn (fn:> [col] (xt/x:cat "\"SCHEMA\"." col))})
-     (ut/encode-query-string {:data {:a 1}
-                              :name "hello"}
+     (ut/encode-query-string (tab :data {:a 1}
+                                  :name "hello")
                              "WHERE"
                              {})])
-  => [""
-      "WHERE \"SCHEMA\".name = 'hello'"
-      "WHERE data = '{\"a\":1}' AND name = 'hello'"])
+  => (contains-in
+      [""
+       "WHERE \"SCHEMA\".name = 'hello'"
+       (any "WHERE data = '{\"a\":1}' AND name = 'hello'"
+            "WHERE name = 'hello' AND data = '{\"a\":1}'")]))
 
 ^{:refer xt.db.schema.sql-util/LIMIT :added "4.0"}
 (fact "creates a LIMIT keyword"

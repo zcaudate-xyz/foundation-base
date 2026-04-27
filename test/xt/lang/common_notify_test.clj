@@ -41,7 +41,8 @@
   ^{:seedgen/base    {:lua     {:transform {:js :lua}}
                       :python  {:transform {:js :python}}
                       :r       {:transform {:js :r}}
-                      :dart    {:transform {:js :dart}}}}
+                      :dart    {:transform {:js :dart}}
+                      :julia    {:transform {:js :julia}}}}
   (notify/notify-ceremony (assoc (l/rt :js)
                                  :type :basic))
   => [(:id (l/rt :js))

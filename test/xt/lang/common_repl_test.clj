@@ -235,7 +235,7 @@
 
 ^{:refer xt.lang.common-repl/<! :added "4.0"}
 (fact "creates a callback map"
-
+  
   (notify/wait-on :js
     ((. (repl/<!)
        ["success"]) 1))
