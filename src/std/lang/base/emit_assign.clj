@@ -117,20 +117,22 @@
     (cond assign-fn [:raw      (assign-fn symbol)]
           template [:template (walk/prewalk-replace {template symbol} expanded)]
           inline   [:inline   (emit-def-assign-inline symbol
-                                                     expanded
-                                                     grammar
-                                                     mopts)])))
+                                                      expanded
+                                                      grammar
+                                                      mopts)])))
 
 (defn emit-def-assign
   "emits a declare expression"
   {:added "3.0"}
   ([_ {:keys [raw] :as props} [_ & args] grammar mopts]
    (let [{:keys [sep space assign]} (helper/get-options grammar [:default :define])
-         args     (helper/emit-typed-args args grammar)
-         
-         argstrs  (map (fn [{:keys [value symbol] :as arg}]
-                         (let [custom (assign-value symbol value grammar mopts)]
-                           (if custom
+          args     (helper/emit-typed-args args
+                                           grammar
+                                           {:shorthand (get-in grammar [:define :shorthand])})
+           
+          argstrs  (map (fn [{:keys [value symbol] :as arg}]
+                           (let [custom (assign-value symbol value grammar mopts)]
+                            (if custom
                              (common/*emit-fn* (second custom) grammar mopts)
                              (fn/emit-input-default arg assign grammar mopts))))
                        args)

@@ -97,8 +97,23 @@
   => '[{:modifiers [], :symbol a, :type (:int), :value 9}]
 
   (emit-typed-args '(:mutable (:int a) 9)
+                    +grammar+)
+  => '[{:modifiers [:mutable], :symbol a, :type (:int), :value 9}]
+
+  (emit-typed-args '(a b)
                    +grammar+)
-  => '[{:modifiers [:mutable], :symbol a, :type (:int), :value 9}])
+  => '[{:modifiers [], :symbol a}
+       {:modifiers [], :symbol b}]
+
+  (emit-typed-args '(a b)
+                   +grammar+
+                   {:shorthand true})
+  => '[{:modifiers [], :symbol a, :value b}]
+
+  (emit-typed-args '(out [])
+                   +grammar+
+                   {:shorthand true})
+  => '[{:modifiers [], :symbol out, :value []}])
 
 ^{:refer std.lang.base.emit-helper/emit-symbol-full :added "4.0"}
 (fact "emits a full symbol"

@@ -59,7 +59,21 @@
                    '(var (:int i) 9)
                    +grammar+
                    {})
-  => "var int i = 9")
+  => "var int i = 9"
+
+  (emit-def-assign :def-assign
+                   {:raw "var"}
+                   '(var a b)
+                   (assoc-in +grammar+ [:define :shorthand] true)
+                   {})
+  => "var a = b"
+
+  (emit-def-assign :def-assign
+                   {:raw "var"}
+                   '(var out [])
+                   (assoc-in +grammar+ [:define :shorthand] true)
+                   {})
+  => "var out = []")
 
 ^{:refer std.lang.base.emit-assign/test-assign-loop :adopt true :added "4.0"}
 (fact "emit do"

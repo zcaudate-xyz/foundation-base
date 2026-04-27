@@ -101,9 +101,9 @@
   (let [{:strs [value key]} msg
         {:strs [line column namespace id data]} (second key)]
     (env/p (str "\n" namespace (if id (str "/" id))
-              (if (or line column)
-                (str " (" line ":" column ")"))
-              (if data (str " " data))))
+                (if (or line column)
+                  (str " (" line ":" column ")"))
+                (if data (str " " data))))
     (env/prf value true)))
 
 (defn process-capture
@@ -124,8 +124,8 @@
           (process-capture msg)
           
           (and id
-                 (or (not (clojure.string/starts-with? id  "oneshot/"))
-                     (has-sink? app id)))
+               (or (not (clojure.string/starts-with? id  "oneshot/"))
+                   (has-sink? app id)))
           (reset! (get-sink app id) msg))))
 
 ;;
@@ -197,8 +197,8 @@
                          (when (not (.isClosed server))
                            (try
                              (let [socket   (.accept server)
-                                   _  (future/future
-                                        (#'handle-notify-socket socket app))])
+                                   _  (future/future {:pool :async}
+                                                     (#'handle-notify-socket socket app))])
                              (catch java.net.SocketException e))
                            (recur))))
            thread   (cc/thread {:start true
@@ -243,7 +243,7 @@
   (str "#notify.server" {:http   [http-port   (boolean @http-instance)]
                          :socket [socket-port (boolean @socket-instance)]
                          :sinks (clojure.set/difference (set (keys @sinks))
-                                               @oneshots)
+                                                        @oneshots)
                          :oneshots (count @oneshots)}))
 
 (std.lib.impl/defimpl NotifyServer [port sinks oneshots]
@@ -312,10 +312,10 @@
         p   (-> pi 
                 (future/future:timeout timeout)
                 (future/on:complete (fn [ret _]
-                                 (remove-watch q id)
-                                 (remove-oneshot-id app id)
-                                 (clear-sink app id)
-                                 ret)))
+                                      (remove-watch q id)
+                                      (remove-oneshot-id app id)
+                                      (clear-sink app id)
+                                      ret)))
         _  (add-watch q id (fn [_ _ _ v]
                              (future/future:force pi v)))]
     [id p]))

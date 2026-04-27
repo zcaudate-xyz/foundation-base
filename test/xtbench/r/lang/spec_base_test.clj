@@ -106,9 +106,9 @@
 (fact "removes an element from an array"
 
   (!.R
-    (do (var out ["a" "b" "c" "d"])
-        (xt/x:arr-remove out 1)
-        out))
+    (var out ["a" "b" "c" "d"])
+    (xt/x:arr-remove out 1)
+    out)
   => ["a" "c" "d"])
 
 ^{:refer xt.lang.spec-base/x:arr-push :added "4.1"}

@@ -495,6 +495,7 @@
    :x-socket-send    {:macro #'dart-tf-x-socket-send    :emit :macro}
    :x-socket-close   {:macro #'dart-tf-x-socket-close   :emit :macro}})
 
+#_#_
 (defn dart-tf-x-notify-http
   [[_ host port value id key opts]]
   (template/$
@@ -589,7 +590,8 @@
          +dart-proto+
          +dart-return+
          +dart-socket+
-         +dart-http+
+         
+         #_+dart-http+
          +dart-file+
          +dart-promise+
          +dart-thread+

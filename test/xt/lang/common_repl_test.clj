@@ -173,8 +173,7 @@
   => "hello")
 
 ^{:refer xt.lang.common-repl/notify-http :added "4.0"
-  :setup [^{:seedgen/base   {:lua     {:suppress true}
-                             :python  {:suppress true}}}
+  :setup [^{:seedgen/base   {:all     {:suppress true}}}
           (!.js
             (:= (!:G fetch)
                 (. (require "node-fetch") default)))]}

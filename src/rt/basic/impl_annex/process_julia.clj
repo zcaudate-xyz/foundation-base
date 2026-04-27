@@ -18,10 +18,10 @@
                                               :basic     ["-e"]}}}}))
 
 (def ^:private +julia-oneshot-prefix+
-  "using JSON;\nXT_GLOBALS = Dict()\n\n")
+  "using JSON;\nusing Sockets;\nusing Printf;\nXT_GLOBALS = Dict()\n\n")
 
 (def ^:private +julia-basic-prefix+
-  "using JSON; using Sockets;\nXT_GLOBALS = Dict()\n\n")
+  "using JSON; using Sockets; using Printf;\nXT_GLOBALS = Dict()\n\n")
 
 ;;
 ;; EVAL

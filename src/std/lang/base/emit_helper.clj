@@ -169,6 +169,8 @@
   "create types args from declarationns"
   {:added "3.0"}
   ([args grammar]
+   (emit-typed-args args grammar nil))
+  ([args grammar {:keys [shorthand]}]
    (loop [all  []
           curr {:modifiers []}
           [sym & more :as args] args]
@@ -176,23 +178,23 @@
            (if (:symbol curr)
              (conj all curr)
              all)
-           
+
            (= := sym)
            (if (:symbol curr)
              (recur all (assoc curr :assign true :force true) more)
              (let [[all curr] (emit-typed-allowed-args [all curr] grammar)]
                (recur all (assoc curr :force true) more)))
-           
+
            (= :% sym)
            (if (:symbol curr)
              (recur (conj all curr) {:modifiers [(first more)]} (rest more))
              (recur all (update curr :modifiers conj (first more)) (rest more)))
-           
+
            (:assign curr)
            (recur (conj all (assoc curr :value sym))
                   {:modifiers []}
                   more)
-           
+
            (and (not (:symbol curr))
                 (list? sym)
                 (not (neg? (collection/index-at #{:=} sym))))
@@ -201,7 +203,10 @@
                     {:modifiers []}
                     more))
 
-           (or (symbol? sym)
+           (or (and (symbol? sym)
+                    (not (and shorthand
+                              (:symbol curr)
+                              (empty? more))))
                (and (set? sym)
                     (-> grammar
                         :allow
@@ -240,15 +245,15 @@
                                :type   (butlast sym)
                                :symbol (last sym))
                     more))
-           
+
            (or (keyword? sym) (vector? sym))
            (if (:symbol curr)
              (recur (conj all curr) {:modifiers [sym]} more)
              (recur all (update curr :modifiers conj sym) more))
-           
+
            (:symbol curr)
            (recur (conj all (assoc curr :value sym)) {:modifiers []} more)
-           
+
            :else
            (f/error "Not a valid input" {:input sym
                                          :all all

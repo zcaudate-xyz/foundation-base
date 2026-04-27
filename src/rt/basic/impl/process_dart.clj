@@ -159,7 +159,7 @@
 (defn dart-package-root
   "Returns the cached Dart package root used for twostep scripts."
   {:added "4.1"}
-  [root]
+  [^String root]
   (str (java.io.File. (or root (System/getProperty "user.dir"))
                       "target/dart-twostep")))
 
@@ -185,7 +185,7 @@
   (let [packages (dart-package-imports source)]
     (when (seq packages)
       (let [package-root   (dart-package-root root)
-            package-dir    (java.io.File. package-root)
+            package-dir    (java.io.File. ^String package-root)
             _              (.mkdirs package-dir)
             pubspec-path   (str package-root "/pubspec.yaml")
             pubspec-body   (dart-pubspec packages)
@@ -363,10 +363,104 @@
                 [forms]
                 forms)
         out-sym (gensym "out_")
+        async-statement-op? (fn [head]
+                              (when (instance? clojure.lang.Named head)
+                                (contains? #{"notify"
+                                             "notify-socket"
+                                             "notify-socket-http"
+                                             "notify-http"
+                                             "socket-connect"
+                                             "x:notify-http"
+                                             "x:shell"
+                                             "x:file-slurp"
+                                             "x:file-spit"
+                                             "x:with-delay"}
+                                           (name head))))
         statement-op? '#{:- := var return break throw
                           do do* if for while try
                           for:index for:array for:object for:iter
                           xt/for:index xt/for:array xt/for:object xt/for:iter}
+        forms (letfn [(track-form [form]
+                      (cond
+                        (seq? form)
+                        (let [head (first form)]
+                          (case head
+                            quote
+                            form
+
+                            fn
+                            (let [[_ maybe-name maybe-args & more] form
+                                  [name args body] (if (vector? maybe-name)
+                                                     [nil maybe-name (cons maybe-args more)]
+                                                     [maybe-name maybe-args more])]
+                              (apply list 'fn
+                                     (concat (when name [name])
+                                             [args]
+                                             (map track-statement body))))
+
+                            do
+                            (apply list 'do (map track-statement (rest form)))
+
+                            do*
+                            (apply list 'do* (map track-statement (rest form)))
+
+                            if
+                            (let [[_ test then & [else]] form]
+                              (apply list 'if
+                                     (cond-> [(track-form test)
+                                              (track-statement then)]
+                                       else (conj (track-statement else)))))
+
+                            when
+                            (let [[_ test & body] form]
+                              (apply list 'when
+                                     (track-form test)
+                                     (map track-statement body)))
+
+                            while
+                            (let [[_ test & body] form]
+                              (apply list 'while
+                                     (track-form test)
+                                     (map track-statement body)))
+
+                            try
+                            (apply list 'try
+                                   (map (fn [part]
+                                          (if (and (seq? part)
+                                                   (#{'catch 'finally} (first part)))
+                                            (apply list (first part)
+                                                   (concat (take 2 (rest part))
+                                                           (map track-statement (drop 2 (rest part)))))
+                                            (track-statement part)))
+                                        (rest form)))
+
+                            (apply list head (map track-form (rest form)))))
+
+                        (vector? form)
+                        (mapv track-form form)
+
+                        (map? form)
+                        (into (empty form)
+                              (map (fn [[k v]]
+                                     [(track-form k) (track-form v)]))
+                              form)
+
+                        (set? form)
+                        (set (map track-form form))
+
+                        :else
+                        form))
+
+                    (track-statement [form]
+                      (let [form* (track-form form)]
+                         (if (and (seq? form*)
+                                  (async-statement-op? (first form*)))
+                           (list '__track
+                                 (list 'Future.sync
+                                       (list 'fn []
+                                             (list 'return form*))))
+                           form*)))]
+                (map track-statement forms))
         await-sync-form (fn [form]
                           (list 'await
                                 (list 'Future.sync
@@ -374,15 +468,30 @@
                                             (list 'return form)))))
         await-form (fn [form]
                      (if (and (seq? form)
-                               (statement-op? (first form)))
-                        form
-                        (await-sync-form form)))
+                                 (statement-op? (first form)))
+                          form
+                          (await-sync-form form)))
+        last-form (last forms)
+        last-body (if (and (seq? last-form)
+                           (= '__track (first last-form)))
+                    [last-form
+                     (list 'var out-sym nil)]
+                    [(list 'var out-sym (await-sync-form last-form))])
         out-json (list 'jsonEncode out-sym)
         body  (concat '[do]
-                      '[(var __globals__ {})]
-                      (map await-form (butlast forms))
-                      [(list 'var out-sym (await-sync-form (last forms)))
-                       (list 'print out-json)])]
+                      '[(var __globals__ {})
+                        (var __tasks__ (:- "<Future>[]"))
+                        (var __track (fn [task]
+                                       (. __tasks__ (add task))
+                                       (return task)))]
+                        (map await-form (butlast forms))
+                       last-body
+                       ['(var __task_idx 0)
+                        '(while (< __task_idx (. __tasks__ length))
+                           (var __pending := (. __tasks__ (sublist __task_idx)))
+                           (:= __task_idx (. __tasks__ length))
+                          (await (Future.wait __pending)))
+                        (list 'print out-json)])]
     `(:- "Future<void> main() async {\n "
           ~body
            "\n}")))
@@ -395,7 +504,7 @@
         candidates (remove nil?
                            [(some-> home (str "/.local/bin/dart"))
                             (some-> home (str "/.local/lib/dart-sdk/bin/dart"))])]
-    (or (some (fn [path]
+    (or (some (fn [^String path]
                 (when (.exists (java.io.File. path))
                   path))
               candidates)

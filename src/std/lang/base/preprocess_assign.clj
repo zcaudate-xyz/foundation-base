@@ -123,7 +123,9 @@
          :value value}))
 
     :def-assign
-    (let [args (helper/emit-typed-args (rest form) grammar)]
+    (let [args (helper/emit-typed-args (rest form)
+                                       grammar
+                                       {:shorthand (get-in grammar [:define :shorthand])})]
       (when (= 1 (count args))
         (let [{:keys [symbol value]} (first args)]
           (when value

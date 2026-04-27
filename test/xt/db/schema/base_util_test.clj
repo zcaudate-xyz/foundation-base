@@ -210,7 +210,7 @@
 
   (s/run ['xt.db.schema.base-util])
   (s/seedgen-benchadd '[xt.lang.spec] {:lang [:r] :write true})
-  (s/seedgen-benchadd '[xt.db.schema.base-util] {:lang [:julia] :write true})
+  (s/seedgen-benchadd '[xt.db.schema.base-util] {:lang [:julia :dart] :write true})
   
   (s/seedgen-langadd 'xt.db.schema.base-util {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.db.schema.base-util {:lang [:lua :python] :write true}))

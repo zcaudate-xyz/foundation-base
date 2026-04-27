@@ -48,6 +48,52 @@
         (list '% handler)
         "\nend"))
 
+(defn julia-free-iife
+  [body]
+  (list ':- "(function()\n"
+        (list '% body)
+        "\nend)()"))
+
+(defn julia-promise-native-check
+  [value]
+  (list 'and
+        (list 'isa value 'AbstractDict)
+        (list '== "xt.promise" (list 'get value "__type__" nil))))
+
+(defn julia-promise-resolve-form
+  [value]
+  {"__type__" "xt.promise"
+   "status" "resolved"
+   "value" value})
+
+(defn julia-promise-reject-form
+  [err]
+  {"__type__" "xt.promise"
+   "status" "rejected"
+   "error" err})
+
+(defn julia-promise-wrap-expr
+  [value]
+  (list 'if (julia-promise-native-check value)
+        value
+        (julia-promise-resolve-form value)))
+
+(defn julia-error-value-expr
+  [err]
+  (list 'if (list 'isa err 'AbstractString)
+        err
+        (list 'if (list 'isa err 'ErrorException)
+              (list 'getfield err :msg)
+              (list 'sprint 'showerror err))))
+
+(defn julia-shell-read-expr
+  [command root]
+  (list ':- "read(Cmd([\"sh\", \"-lc\", "
+        (list '% command)
+        "]; dir = "
+        (list '% root)
+        "), String)"))
+
 (defn julia-tf-x-del
   [[_ obj]]
   (if (and (seq? obj)
@@ -298,7 +344,11 @@
 
 (defn julia-tf-x-obj-pairs
   [[_ obj]]
-  (list 'collect obj))
+  (template/$
+   (collect
+    (map (fn [pair]
+           (return [(first pair) (last pair)]))
+         (collect ~obj)))))
 
 (defn julia-tf-x-obj-clone
   [[_ obj]]
@@ -310,10 +360,9 @@
    (do (var out (if (== ~obj nil)
                   (Dict())
                   ~obj))
-        (if (not= nil ~m)
-          (for [k :in (keys ~m)]
-            (x:set-key out k (x:get-key ~m k nil))))
-        (return out))))
+       (if (== ~m nil)
+         (return out)
+         (return (merge out ~m))))))
 
 (def +julia-obj+
   {:x-obj-keys    {:macro #'julia-tf-x-obj-keys   :emit :macro}
@@ -410,11 +459,20 @@
 
 (defn julia-tf-x-str-index-of
   ([[_ s tok & [start]]]
-   (template/$
-    (do (var idx (findnext ~tok ~s (+ 1 ~(or start 0))))
-        (if (== idx nothing)
-          (return nil)
-          (return (- (Int (first idx)) 1)))))))
+   (list ':- "begin\n"
+         "local idx = findnext("
+         (list '% tok)
+         ", "
+         (list '% s)
+         ", "
+         (list '% (list '+ 1 (or start 0)))
+         ")\n"
+         "if idx === nothing\n"
+         "  nothing\n"
+         "else\n"
+         "  (isa(idx, Integer) ? Int(idx) - 1 : Int(first(idx)) - 1)\n"
+         "end\n"
+         "end")))
 
 (defn julia-tf-x-str-substring
   ([[_ s start & [end]]]
@@ -510,11 +568,81 @@
 (def +julia-custom+
   {:x-has-key?    {:macro #'julia-tf-x-has-key?    :emit :macro}
    :x-global-set  {:macro #'julia-tf-x-global-set  :emit :macro
-                   :value/template #'julia-tf-x-global-set}
+                    :value/template #'julia-tf-x-global-set}
    :x-global-del  {:macro #'julia-tf-x-global-del  :emit :macro
-                   :value/template #'julia-tf-x-global-del}
+                    :value/template #'julia-tf-x-global-del}
    :x-global-has? {:macro #'julia-tf-x-global-has? :emit :macro
-                   :value/template #'julia-tf-x-global-has?}})
+                    :value/template #'julia-tf-x-global-has?}})
+
+;;
+;; SOCKET
+;;
+
+(defn julia-tf-x-socket-connect
+  [[_ host port opts cb]]
+  (let [err-form (julia-error-value-expr 'e)]
+    (julia-free-try-catch
+     (list 'do
+           (list 'var 'conn (list 'connect host port))
+           (list 'return (list cb nil 'conn)))
+     "e"
+     (list 'return (list cb err-form nil)))))
+
+(defn julia-tf-x-socket-send
+  [[_ conn s]]
+  (template/$
+   (do (write ~conn ~s)
+       (flush ~conn))))
+
+(defn julia-tf-x-socket-close
+  [[_ conn]]
+  (template/$
+   (close ~conn)))
+
+(def +julia-socket+
+  {:x-socket-connect {:macro #'julia-tf-x-socket-connect :emit :macro
+                      :op-spec {:allow-blocks true}}
+   :x-socket-send    {:macro #'julia-tf-x-socket-send    :emit :macro}
+   :x-socket-close   {:macro #'julia-tf-x-socket-close   :emit :macro}})
+
+;;
+;; HTTP
+;;
+
+(defn julia-tf-x-notify-http
+  [[_ host port value id key opts]]
+  (let [err-form (julia-error-value-expr 'e)]
+    (julia-free-try-catch
+     (template/$
+      (do (var output (x:return-encode ~value ~id ~key))
+          (var path (:? (or (== ~opts nil)
+                            (== (get ~opts "path" nil) nil))
+                        "/"
+                        (get ~opts "path" nil)))
+          (var conn (connect ~host ~port))
+          (write conn
+                 (x:cat "POST "
+                        path
+                        " HTTP/1.0\r\n"
+                        "Host: "
+                        ~host
+                        ":"
+                        (x:to-string ~port)
+                        "\r\n"
+                        "Content-Length: "
+                        (x:to-string (x:len output))
+                        "\r\n"
+                        "\r\n"
+                        output))
+          (flush conn)
+          (close conn)
+          (return ["async"])))
+     "e"
+     (list 'return ["unable to connect" err-form]))))
+
+(def +julia-http+
+  {:x-notify-http {:macro #'julia-tf-x-notify-http :emit :macro
+                   :op-spec {:allow-blocks true}}})
 
 ;;
 ;; ITER
@@ -574,6 +702,174 @@
    :x-iter-next        {:macro #'julia-tf-x-iter-next       :emit :macro}
    :x-iter-has?        {:macro #'julia-tf-x-iter-has?       :emit :macro}
    :x-iter-native?     {:macro #'julia-tf-x-iter-native?    :emit :macro}})
+
+;;
+;; PROMISE
+;;
+
+(defn julia-tf-x-with-delay
+  [[_ ms thunk]]
+  (julia-free-iife
+   (template/$
+    (do (sleep (/ ~ms 1000.0))
+        (return (x:promise ~thunk))))))
+
+(defn julia-tf-x-promise
+  [[_ thunk]]
+  (let [out-sym     (gensym "promise_out__")
+        wrap-out    (julia-promise-wrap-expr out-sym)
+        reject-form (julia-promise-reject-form
+                     (julia-error-value-expr 'e))]
+    (julia-free-iife
+     (julia-free-try-catch
+      (list 'do
+            (list 'var out-sym (list thunk))
+            (list 'return wrap-out))
+      "e"
+      (list 'return reject-form)))))
+
+(defn julia-tf-x-promise-then
+  [[_ promise thunk]]
+  (let [promise-sym  (gensym "promise_value__")
+        current-sym  (gensym "promise_current__")
+        out-sym      (gensym "promise_out__")
+        current-form (julia-promise-wrap-expr promise-sym)
+        wrap-out     (julia-promise-wrap-expr out-sym)
+        reject-form  (julia-promise-reject-form
+                      (julia-error-value-expr 'e))]
+    (julia-free-iife
+     (list 'do
+           (list 'var promise-sym promise)
+           (list 'var current-sym current-form)
+           (list 'if (list '== "rejected" (list 'get current-sym "status" nil))
+                 (list 'return current-sym)
+                 (julia-free-try-catch
+                  (list 'do
+                        (list 'var out-sym (list thunk (list 'get current-sym "value" nil)))
+                        (list 'return wrap-out))
+                  "e"
+                  (list 'return reject-form)))))))
+
+(defn julia-tf-x-promise-catch
+  [[_ promise thunk]]
+  (let [promise-sym  (gensym "promise_value__")
+        current-sym  (gensym "promise_current__")
+        out-sym      (gensym "promise_out__")
+        current-form (julia-promise-wrap-expr promise-sym)
+        wrap-out     (julia-promise-wrap-expr out-sym)
+        reject-form  (julia-promise-reject-form
+                      (julia-error-value-expr 'e))]
+    (julia-free-iife
+     (list 'do
+           (list 'var promise-sym promise)
+           (list 'var current-sym current-form)
+           (list 'if (list 'not= "rejected" (list 'get current-sym "status" nil))
+                 (list 'return current-sym)
+                 (julia-free-try-catch
+                  (list 'do
+                        (list 'var out-sym (list thunk (list 'get current-sym "error" nil)))
+                        (list 'return wrap-out))
+                  "e"
+                  (list 'return reject-form)))))))
+
+(defn julia-tf-x-promise-finally
+  [[_ promise thunk]]
+  (let [promise-sym  (gensym "promise_value__")
+        current-sym  (gensym "promise_current__")
+        current-form (julia-promise-wrap-expr promise-sym)
+        reject-form  (julia-promise-reject-form
+                      (julia-error-value-expr 'e))]
+    (julia-free-iife
+     (julia-free-try-catch
+      (list 'do
+            (list 'var promise-sym promise)
+            (list 'var current-sym current-form)
+            (list thunk)
+            (list 'return current-sym))
+      "e"
+      (list 'return reject-form)))))
+
+(defn julia-tf-x-promise-native?
+  [[_ value]]
+  (julia-promise-native-check value))
+
+(def +julia-promise+
+  {:x-promise          {:macro #'julia-tf-x-promise         :emit :macro}
+   :x-promise-then     {:macro #'julia-tf-x-promise-then    :emit :macro}
+   :x-promise-catch    {:macro #'julia-tf-x-promise-catch   :emit :macro}
+   :x-promise-finally  {:macro #'julia-tf-x-promise-finally :emit :macro}
+   :x-promise-native?  {:macro #'julia-tf-x-promise-native? :emit :macro}
+   :x-with-delay       {:macro #'julia-tf-x-with-delay      :emit :macro}})
+
+;;
+;; SHELL
+;;
+
+(defn julia-tf-x-pwd
+  [[_]]
+  '(get ENV "PWD" (pwd)))
+
+(defn julia-tf-x-shell
+  [[_ s root cb]]
+  (let [read-form (julia-shell-read-expr s root)
+        err-form  (julia-error-value-expr 'e)]
+    (julia-free-try-catch
+     (list 'do
+            (list 'var 'out read-form)
+            (list cb nil 'out)
+            (list 'return ["async"]))
+     "e"
+     (list 'do
+           (list cb {"code" 1
+                     "err" err-form
+                     "out" ""}
+                 nil)
+           (list 'return ["async"])))))
+
+(def +julia-shell+
+  {:x-pwd   {:macro #'julia-tf-x-pwd   :emit :macro}
+   :x-shell {:macro #'julia-tf-x-shell :emit :macro
+             :op-spec {:allow-blocks true}}})
+
+;;
+;; FILE
+;;
+
+(defn julia-tf-x-file-resolve
+  [[_ root path]]
+  (list 'abspath (list 'joinpath root path)))
+
+(defn julia-tf-x-file-slurp
+  [[_ filename cb]]
+  (let [err-form (julia-error-value-expr 'e)]
+    (julia-free-try-catch
+     (list 'do
+           (list cb nil (list 'read filename 'String))
+           (list 'return ["async"]))
+     "e"
+     (list 'do
+           (list cb err-form nil)
+           (list 'return ["async"])))))
+
+(defn julia-tf-x-file-spit
+  [[_ filename content cb]]
+  (let [err-form (julia-error-value-expr 'e)]
+    (julia-free-try-catch
+     (list 'do
+            (list 'write filename content)
+            (list cb nil filename)
+            (list 'return ["async"]))
+     "e"
+     (list 'do
+           (list cb err-form nil)
+           (list 'return ["async"])))))
+
+(def +julia-file+
+  {:x-file-resolve   {:macro #'julia-tf-x-file-resolve :emit :macro}
+   :x-file-slurp     {:macro #'julia-tf-x-file-slurp   :emit :macro
+                      :op-spec {:allow-blocks true}}
+   :x-file-spit      {:macro #'julia-tf-x-file-spit    :emit :macro
+                      :op-spec {:allow-blocks true}}})
 
 (defn julia-tf-x-bit-and
   [[_ a b]]
@@ -682,15 +978,20 @@
 
 (def +julia+
   (merge +julia-core+
-          +julia-custom+
-          +julia-global+
-          +julia-math+
-          +julia-type+
-          +julia-lu+
-          +julia-obj+
-          +julia-arr+
-          +julia-str+
-          +julia-js+
-          +julia-iter+
-          +julia-bit+
-          +julia-return+))
+           +julia-custom+
+           +julia-global+
+           +julia-math+
+           +julia-type+
+           +julia-lu+
+           +julia-obj+
+           +julia-arr+
+           +julia-str+
+           +julia-js+
+           +julia-socket+
+           +julia-http+
+           +julia-iter+
+           +julia-promise+
+           +julia-shell+
+           +julia-file+
+           +julia-bit+
+           +julia-return+))

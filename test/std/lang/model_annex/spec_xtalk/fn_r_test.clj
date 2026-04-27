@@ -78,6 +78,22 @@
   (l/emit-as :r [(r-tf-x-is-integer? '(_ x))])
   => #"floor")
 
+(fact "uses base R collection primitives for array, object, and iterator helpers"
+  (l/emit-as :r [(r-tf-x-arr-map '(_ arr f))])
+  => #"lapply"
+
+  (l/emit-as :r [(r-tf-x-arr-filter '(_ arr pred))])
+  => #"Filter"
+
+  (l/emit-as :r [(r-tf-x-arr-foldl '(_ arr f init))])
+  => #"Reduce"
+
+  (l/emit-as :r [(r-tf-x-obj-pairs '(_ obj))])
+  => #"Map"
+
+  (l/emit-as :r [(r-tf-x-iter-from-obj '(_ obj))])
+  => #"Map")
+
 (fact "supports key R backend runtime helpers"
   (!.R
    [(xt/x:is-array? [1 2 3])
@@ -127,4 +143,29 @@
      (xt/x:bit-lshift 3 2)
      (xt/x:bit-rshift 12 2)
      (xt/x:bit-xor 6 3)])
-  => [2 7 12 3 5])
+  => [2 7 12 3 5]
+
+  (!.R
+    (var out ["a" "b" "c" "d"])
+    [(xt/x:arr-remove out 1)
+     out])
+  => ["b" ["a" "c" "d"]]
+
+  (!.R
+    (var out [{:id 3} {:id 1} {:id 2}])
+    (xt/x:arr-sort out
+                   (fn [e] (return (xt/x:get-key e "id")))
+                   (fn [a b] (return (xt/x:lt a b))))
+    out)
+  => [{"id" 1} {"id" 2} {"id" 3}]
+
+  (!.R
+    [(xt/x:iter-has? [1 2 3])
+     (xt/x:iter-has? {:a 1})])
+  => [true false]
+
+  (!.R
+    [(xt/x:obj-keys {:a 1})
+     (xt/x:obj-vals {:a 1})
+     (xt/x:obj-pairs {:a 1})])
+  => [["a"] [1] [["a" 1]]])

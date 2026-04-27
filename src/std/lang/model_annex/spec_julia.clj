@@ -206,7 +206,7 @@
         :data   {:map-entry {:start ""  :end ""  :space "" :assign " => " :keyword :string
                              :key-fn #'julia-map-key}
                  :map       {:start "Dict(" :end ")"}
-                 :vector    {:start "[" :end "]" :space ", "}}
+                  :vector    {:start "Any[" :end "]" :space ", "}}
          :block  {:for       {:body    {:start "" :end "end"}
                               :parameter {:start " " :end "" :space " "}}
                   :try      {:wrap    {:start "" :end "end"}

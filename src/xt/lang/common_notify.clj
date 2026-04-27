@@ -104,7 +104,7 @@
    (wait-on-call nil f))
   ([timeout f]
    (let [app     (notify/default-notify)
-         [id p]  (notify/watch-oneshot app (or timeout 1000))
+         [id p]  (notify/watch-oneshot app (or timeout 2000))
          out (binding [*override-id* id]
                (f))]
      (if (:input ptr/*input*)
