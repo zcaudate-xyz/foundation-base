@@ -78,20 +78,35 @@
 
 ^{:refer xt.db.schema.base-scope/get-tree.more :added "4.0"
   :setup [(def +profile+
-  ["UserProfile"
-   {"custom" [],
-    "where" [{"id" "zcaudate"}],
-    "links" [],
-    "data"
-    ["id"
-     "account_id"
-     "first_name"
-     "last_name"
-     "city"
-     "state_id"
-     "country_id"
-     "about"
-     "language"]}])
+            ["UserProfile"
+             {"custom" [],
+              "where" [{"id" "zcaudate"}],
+              "links" [],
+              "data"
+              ["id"
+               "account_id"
+               "first_name"
+               "last_name"
+               "city"
+               "state_id"
+               "country_id"
+               "about"
+               "language"]}])
+          (def +profile-lua+
+            ["UserProfile"
+             {"custom" {},
+              "where" [{"id" "zcaudate"}],
+              "links" {},
+              "data"
+              ["id"
+               "account_id"
+               "first_name"
+               "last_name"
+               "city"
+               "state_id"
+               "country_id"
+               "about"
+               "language"]}])
           (def +account+
             ["UserAccount"
              {"custom" [],
@@ -117,11 +132,40 @@
               ["id"
                "nickname"
                "password_updated"
+                "is_super"
+                "is_suspended"
+               "is_official"]}])
+          (def +account-lua+
+            ["UserAccount"
+             {"custom" {},
+              "where" [{"id" "zcaudate"}],
+              "links"
+              [["profile"
+                "reverse"
+                ["UserProfile"
+                 {"custom" {},
+                  "where" [{"account" ["eq" ["UserAccount.id"]]}],
+                  "links" {},
+                  "data"
+                  ["id"
+                   "account_id"
+                   "first_name"
+                   "last_name"
+                   "city"
+                   "state_id"
+                   "country_id"
+                   "about"
+                   "language"]}]]],
+              "data"
+              ["id"
+               "nickname"
+               "password_updated"
                "is_super"
                "is_suspended"
                "is_official"]}])] :adopt true}
 (fact "MORE CHECKS"
 
+  ^{:seedgen/base {:lua {:transform {[] {}}}}}
   (!.js
     (scope/get-tree sample/Schema
                     "UserProfile"
@@ -130,6 +174,7 @@
                     {}))
   => +profile+
 
+  ^{:seedgen/base {:lua {:transform {[] {}}}}}
   (!.js
     (scope/get-tree sample/Schema
                     "UserAccount"
@@ -145,7 +190,7 @@
                     {:id "zcaudate"}
                     ["*/default"]
                     {}))
-  => +profile+
+  => +profile-lua+
 
   (!.lua
     (scope/get-tree sample/Schema
@@ -154,7 +199,7 @@
                     ["*/data"
                      ["profile" [{:name "hello"}] ["*/default"]]]
                     {}))
-  => +account+
+  => +account-lua+
 
   (!.py
     (scope/get-tree sample/Schema
@@ -196,8 +241,11 @@
                                            {:id "2"}
                                            {:id "3"}
                                            ["first_name"
-                                            "last_name"]]])
-                 (fn [[e cols]] (return [e.ident cols]))))
+                                             "last_name"]]])
+                 (fn [e]
+                   (return [(xt/x:get-key (xtd/first e)
+                                          "ident")
+                            (xtd/second e)]))))
   => [["profile" [{"id" "1"} {"id" "2"} {"id" "3"} ["first_name" "last_name"]]]]
 
   (!.py
@@ -208,8 +256,11 @@
                                            {:id "2"}
                                            {:id "3"}
                                            ["first_name"
-                                            "last_name"]]])
-                 (fn [[e cols]] (return [e.ident cols]))))
+                                             "last_name"]]])
+                 (fn [e]
+                   (return [(xt/x:get-key (xtd/first e)
+                                          "ident")
+                            (xtd/second e)]))))
   => [["profile" [{"id" "1"} {"id" "2"} {"id" "3"} ["first_name" "last_name"]]]])
 
 ^{:refer xt.db.schema.base-scope/get-link-standard.more :added "4.0" :adopt true}
@@ -235,8 +286,11 @@
                                            {:id "2"}
                                            {:id "3"}
                                            ["first_name"
-                                            "last_name"]]])
-                 (fn [[e cols]] (return [e.ident cols]))))
+                                             "last_name"]]])
+                 (fn [e]
+                   (return [(xt/x:get-key (xtd/first e)
+                                          "ident")
+                            (xtd/second e)]))))
   => [["profile" [{"id" "1"} {"id" "2"} {"id" "3"} ["first_name" "last_name"]]]]
 
   (!.py
@@ -247,13 +301,17 @@
                                            {:id "2"}
                                            {:id "3"}
                                            ["first_name"
-                                            "last_name"]]])
-                 (fn [[e cols]] (return [e.ident cols]))))
+                                             "last_name"]]])
+                 (fn [e]
+                   (return [(xt/x:get-key (xtd/first e)
+                                          "ident")
+                            (xtd/second e)]))))
   => [["profile" [{"id" "1"} {"id" "2"} {"id" "3"} ["first_name" "last_name"]]]])
 
 ^{:refer xt.db.schema.base-scope/merge-queries :added "4.0"}
 (fact "merges query with clause"
 
+  ^{:seedgen/base {:lua {:transform {[] {}}}}}
   (!.js
     [(scope/merge-queries [] [])
      (scope/merge-queries [{:a 1}] [{:a 2}])
@@ -272,7 +330,7 @@
      (scope/merge-queries [{:a 1}] [{:b 2}])
      (scope/merge-queries [{:a 1}] [{:b 2} {:c 3}])
      (scope/merge-queries [{:a 1} {:c 1}] [{:b 2} {:c 3}])])
-  => [[]
+  => [{} 
       [{"a" 2}]
       [{"a" 1, "b" 2}]
       [{"a" 1, "b" 2} {"a" 1, "c" 3}]
@@ -473,16 +531,22 @@
     (xtd/arr-map (scope/get-link-columns sample/Schema
                                          "UserAccount"
                                          [["profile" ["first_name"
-                                                      "last_name"]]])
-                 (fn [[e cols]] (return [e.ident cols]))))
+                                                       "last_name"]]])
+                 (fn [e]
+                   (return [(xt/x:get-key (xtd/first e)
+                                          "ident")
+                            (xtd/second e)]))))
   => [["profile" [{} ["first_name" "last_name"]]]]
 
   (!.py
     (xtd/arr-map (scope/get-link-columns sample/Schema
                                          "UserAccount"
                                          [["profile" ["first_name"
-                                                      "last_name"]]])
-                 (fn [[e cols]] (return [e.ident cols]))))
+                                                       "last_name"]]])
+                 (fn [e]
+                   (return [(xt/x:get-key (xtd/first e)
+                                          "ident")
+                            (xtd/second e)]))))
   => [["profile" [{} ["first_name" "last_name"]]]])
 
 ^{:refer xt.db.schema.base-scope/get-linked-tables :added "4.0"}
@@ -518,6 +582,7 @@
 ^{:refer xt.db.schema.base-scope/as-where-input :added "4.0"}
 (fact "when empty, returns an empty array"
 
+  ^{:seedgen/base {:lua {:transform {[] {}}}}}
   (!.js
     [(scope/as-where-input [])
      (scope/as-where-input [{:id "zcaudate"}
@@ -530,7 +595,7 @@
      (scope/as-where-input [{:id "zcaudate"}
                             {:id "z1"}])
      (scope/as-where-input {:id "zcaudate"})])
-  => [[] [{"id" "zcaudate"} {"id" "z1"}] [{"id" "zcaudate"}]]
+  => [{} [{"id" "zcaudate"} {"id" "z1"}] [{"id" "zcaudate"}]]
 
   (!.py
     [(scope/as-where-input [])
@@ -541,31 +606,57 @@
 
 ^{:refer xt.db.schema.base-scope/get-tree :added "4.0"
   :setup [(def +account+
-  ["UserAccount"
-   {"custom" [],
-    "where" [{"id" "zcaudate"} {"id" "z1"} {"id" "z3"}],
-    "links"
-    [["wallets"
-      "reverse"
-      ["Wallet"
-       {"custom" [],
-        "where"
-        [{"owner" ["eq" ["UserAccount.id"]], "id" "W1"}
-         {"owner" ["eq" ["UserAccount.id"]], "id" "W2"}
-         {"owner" ["eq" ["UserAccount.id"]], "id" "W3"}],
-        "links"
-        [["entries"
-          "reverse"
-          ["WalletAsset"
-           {"custom" [],
-            "where"
-            [{"wallet" ["eq" ["Wallet.id"]], "id" "E1"}
-             {"wallet" ["eq" ["Wallet.id"]], "id" "E2"}
-             {"wallet" ["eq" ["Wallet.id"]], "id" "E3"}],
-            "links" [],
-            "data" ["id"]}]]],
-        "data" []}]]],
-    "data" []}])]}
+            ["UserAccount"
+             {"custom" [],
+              "where" [{"id" "zcaudate"} {"id" "z1"} {"id" "z3"}],
+              "links"
+              [["wallets"
+                "reverse"
+                ["Wallet"
+                 {"custom" [],
+                  "where"
+                  [{"owner" ["eq" ["UserAccount.id"]], "id" "W1"}
+                   {"owner" ["eq" ["UserAccount.id"]], "id" "W2"}
+                   {"owner" ["eq" ["UserAccount.id"]], "id" "W3"}],
+                  "links"
+                  [["entries"
+                    "reverse"
+                    ["WalletAsset"
+                     {"custom" [],
+                      "where"
+                      [{"wallet" ["eq" ["Wallet.id"]], "id" "E1"}
+                       {"wallet" ["eq" ["Wallet.id"]], "id" "E2"}
+                       {"wallet" ["eq" ["Wallet.id"]], "id" "E3"}],
+                      "links" [],
+                      "data" ["id"]}]]],
+                  "data" []}]]],
+              "data" []}])
+          (def +account-lua+
+            ["UserAccount"
+             {"custom" {},
+              "where" [{"id" "zcaudate"} {"id" "z1"} {"id" "z3"}],
+              "links"
+              [["wallets"
+                "reverse"
+                ["Wallet"
+                 {"custom" {},
+                  "where"
+                  [{"owner" ["eq" ["UserAccount.id"]], "id" "W1"}
+                   {"owner" ["eq" ["UserAccount.id"]], "id" "W2"}
+                   {"owner" ["eq" ["UserAccount.id"]], "id" "W3"}],
+                  "links"
+                  [["entries"
+                    "reverse"
+                    ["WalletAsset"
+                     {"custom" {},
+                      "where"
+                      [{"wallet" ["eq" ["Wallet.id"]], "id" "E1"}
+                       {"wallet" ["eq" ["Wallet.id"]], "id" "E2"}
+                       {"wallet" ["eq" ["Wallet.id"]], "id" "E3"}],
+                      "links" {},
+                      "data" ["id"]}]]],
+                  "data" {}}]]],
+              "data" {}}])]}
 (fact "calculated linked tree given query"
 
   ^{:seedgen/base  {:lua {:transform {[] {}}}}}
@@ -595,13 +686,13 @@
                     [["wallets"
                       {:id "W1"}
                       {:id "W2"}
-                      {:id "W3"}
-                      [["entries"
-                        {:id "E1"}
-                        {:id "E2"}
-                        {:id "E3"}]]]]
+                       {:id "W3"}
+                       [["entries"
+                         {:id "E1"}
+                         {:id "E2"}
+                         {:id "E3"}]]]]
                     {}))
-  => +account+
+  => +account-lua+
 
   (!.py
     (scope/get-tree sample/Schema
