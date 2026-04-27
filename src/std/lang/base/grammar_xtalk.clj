@@ -760,7 +760,7 @@
               :arglists '([expr wrap-fn])}}])
 
 (def +xt-functional-array+
-  [{:op :x-arr-sort        :symbol #{'x:arr-sort}         :emit :abstract
+  [{:op :x-arr-sort        :symbol #{'x:arr-sort}         :emit :hard-link :raw 'xt.lang.common-data/arr-sort
     :op-spec {:type [:fn [[:xt/array :xt/any] :xt/fn :xt/fn] :xt/self]
               :arglists '([arr key-fn comp-fn])}}
    {:op :x-arr-each        :symbol #{'x:arr-each}         :emit :hard-link :raw 'xt.lang.common-data/arr-each

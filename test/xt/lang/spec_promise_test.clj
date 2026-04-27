@@ -66,33 +66,34 @@
     (spec-promise/x:promise-catch
      (spec-promise/x:promise
       (fn []
-        (throw "boom")))
+        (do 
+          (x:err "boom"))))
      (fn [err]
-       (repl/notify err)
+       (repl/notify "error")
        (return err))))
-  => "boom"
+  => "error"
 
-  (l/with:print-all
-    (notify/wait-on :python
-      (spec-promise/x:promise-catch
-       (spec-promise/x:promise
-        (fn []
-          (throw "boom")))
-       (fn [err]
-         (repl/notify err)
-         (return err)))))
-  => "boom"
+  (notify/wait-on :python
+    (spec-promise/x:promise-catch
+     (spec-promise/x:promise
+      (fn []
+        (do 
+          (x:err "boom"))))
+     (fn [err]
+       (repl/notify "error")
+       (return err))))
+  => "error"
 
-  (l/with:print-all
-    (notify/wait-on :lua
-      (spec-promise/x:promise-catch
-       (spec-promise/x:promise
-        (fn []
-          (throw "boom")))
-       (fn [err]
-         (repl/notify err)
-         (return err)))))
-  => "boom")
+  (notify/wait-on :lua
+    (spec-promise/x:promise-catch
+     (spec-promise/x:promise
+      (fn []
+        (do 
+          (x:err "boom"))))
+     (fn [err]
+       (repl/notify "error")
+       (return err))))
+  => "error")
 
 ^{:refer xt.lang.spec-promise/x:promise-finally :added "4.1"}
 (fact "runs cleanup without changing the resolved value"
@@ -114,40 +115,38 @@
        (return (repl/notify [out value])))))
   => [["then" "finally"] 7]
   
-  (l/with:print-all
-    (notify/wait-on :python
-      (var out [])
+  (notify/wait-on :python
+    (var out [])
+    (spec-promise/x:promise-then
+     (spec-promise/x:promise-finally
       (spec-promise/x:promise-then
-       (spec-promise/x:promise-finally
-        (spec-promise/x:promise-then
-         (spec-promise/x:promise
-          (fn []
-            (return 5)))
-         (fn [value]
-           (xt/x:arr-push out "then")
-           (return (+ value 2))))
+       (spec-promise/x:promise
         (fn []
-          (xt/x:arr-push out "finally")))
+          (return 5)))
        (fn [value]
-         (return (repl/notify [out value]))))))
+         (xt/x:arr-push out "then")
+         (return (+ value 2))))
+      (fn []
+        (xt/x:arr-push out "finally")))
+     (fn [value]
+       (return (repl/notify [out value])))))
   => [["then" "finally"] 7]
 
-  (l/with:print-all
-    (notify/wait-on :lua
-      (var out [])
+  (notify/wait-on :lua
+    (var out [])
+    (spec-promise/x:promise-then
+     (spec-promise/x:promise-finally
       (spec-promise/x:promise-then
-       (spec-promise/x:promise-finally
-        (spec-promise/x:promise-then
-         (spec-promise/x:promise
-          (fn []
-            (return 5)))
-         (fn [value]
-           (xt/x:arr-push out "then")
-           (return (+ value 2))))
+       (spec-promise/x:promise
         (fn []
-          (xt/x:arr-push out "finally")))
+          (return 5)))
        (fn [value]
-         (return (repl/notify [out value]))))))
+         (xt/x:arr-push out "then")
+         (return (+ value 2))))
+      (fn []
+        (xt/x:arr-push out "finally")))
+     (fn [value]
+       (return (repl/notify [out value])))))
   => [["then" "finally"] 7])
 
 ^{:refer xt.lang.spec-promise/x:promise-native? :added "4.1"}

@@ -18,8 +18,7 @@
                   mopts
                   {:std.lang/form form
                    :std.lang/symbol fsym})
-        template-assignment (assign/process-template-assignment form grammar modules mopts)
-        value-form          (value/process-value-form form grammar modules mopts)]
+        template-assignment (assign/process-template-assignment form grammar modules mopts)]
     (cond (= fsym '!:template)
           (walk-fn (eval (second form)))
 
@@ -54,36 +53,36 @@
           template-assignment
           (walk-fn template-assignment)
 
-          value-form
-          (walk-fn value-form)
-
-          reserved
-          (assign/protect-reserved-head form)
-
           :else
-          (let [fe (resolve/get-fragment (first form)
-                                         modules
-                                         mopts)]
-            (if (:template fe)
-              (let [mopts (provenance/with-provenance
-                            mopts
-                            {:std.lang/phase :staging/fragment-template
-                             :std.lang/subsystem :std.lang/fragment-template
-                             :std.lang/lang (:lang mopts)
-                             :std.lang/module (ut/module-id (:module mopts))
-                             :std.lang/entry (ut/entry-summary fe)})]
-                (do (if deps-fragment
-                      (vswap! deps-fragment conj (ut/sym-full fe)))
-                    (walk-fn (try
-                               (binding [preprocess-base/*macro-form* form
-                                         preprocess-base/*macro-opts* mopts]
-                                 (apply (:template fe) (rest form)))
-                               (catch Throwable t
-                                 (ut/throw-with-context
-                                  "std.lang staging macro expansion failed"
-                                  (:std.lang/provenance mopts)
-                                  t))))))
-              form)))))
+          (if-let [value-form (value/process-value-form form grammar modules mopts)]
+            (walk-fn value-form)
+
+            (if reserved
+              (assign/protect-reserved-head form)
+
+              (let [fe (resolve/get-fragment (first form)
+                                             modules
+                                             mopts)]
+                (if (:template fe)
+                  (let [mopts (provenance/with-provenance
+                                mopts
+                                {:std.lang/phase :staging/fragment-template
+                                 :std.lang/subsystem :std.lang/fragment-template
+                                 :std.lang/lang (:lang mopts)
+                                 :std.lang/module (ut/module-id (:module mopts))
+                                 :std.lang/entry (ut/entry-summary fe)})]
+                    (do (if deps-fragment
+                          (vswap! deps-fragment conj (ut/sym-full fe)))
+                        (walk-fn (try
+                                   (binding [preprocess-base/*macro-form* form
+                                             preprocess-base/*macro-opts* mopts]
+                                     (apply (:template fe) (rest form)))
+                                   (catch Throwable t
+                                     (ut/throw-with-context
+                                      "std.lang staging macro expansion failed"
+                                      (:std.lang/provenance mopts)
+                                      t))))))
+                  form)))))))
 
 (defn to-staging
   "converts the stage"

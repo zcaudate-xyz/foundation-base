@@ -18,10 +18,9 @@
   (var inverts (xt/x:arr-map inputs (fn [e] (return (:? (xt/x:is-array? e) (xt/x:second e) false)))))
   (var get-fn
        (fn [e key]
-         (cond (xt/x:is-function? key)
-               (return (key e))
-               
-               :else (return (xt/x:get-key e key)))))
+         (if (xt/x:is-function? key)
+           (return (key e))
+           (return (xt/x:get-key e key)))))
   (var key-fn
        (fn [e]
          (return (xt/x:arr-map keys (fn [key] (return (get-fn e key)))))))

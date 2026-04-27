@@ -228,10 +228,68 @@
       "(SELECT * from jsonb_each('[1,2,3]', TRUE))"])
 
 ^{:refer xt.db.schema.sql-util/encode-loop-fn :added "4.0"}
-(fact "loop function to encode")
+(fact "loop function to encode"
+
+  (!.js
+    [(ut/encode-loop-fn {"::" "sql/fn"
+                         :name "+"
+                         :args ["k" {"::" "sql/fn"
+                                     :name "+"
+                                     :args [1 2 3]}]}
+                        ut/default-quote-fn
+                        {:strict true
+                         :values {:replace {}}}
+                        ut/encode-loop-fn)
+     (ut/encode-loop-fn "hello"
+                        ut/default-quote-fn
+                        {:strict true
+                         :values {:replace {}}}
+                        ut/encode-loop-fn)
+     (ut/encode-loop-fn {:a 1}
+                        ut/default-quote-fn
+                        {:strict true
+                         :values {:replace {}}}
+                        ut/encode-loop-fn)])
+  => ["(k + ('1' + '2' + '3'))"
+      "hello"
+      "'{\"a\":1}'"])
 
 ^{:refer xt.db.schema.sql-util/encode-query-value :added "4.1"}
-(fact "TODO")
+(fact "encodes a query value recursively"
+
+  (!.js
+    [(ut/encode-query-value {"::" "sql/fn"
+                             :name "+"
+                             :args ["k" {"::" "sql/fn"
+                                         :name "+"
+                                         :args [1 2 3]}]}
+                            k/identity
+                            {})
+     (ut/encode-query-value [["hello" "world"]]
+                            k/identity
+                            {})
+     (ut/encode-query-value ["RAW_SQL_FRAGMENT"]
+                            k/identity
+                            {})
+     (ut/encode-query-value ["and" {"::" "sql/fn"
+                                    :name "+"
+                                    :args ["k" {"::" "sql/fn"
+                                                :name "+"
+                                                :args [1 2 3]}]}]
+                            k/identity
+                            {})
+     (ut/encode-query-value "or"
+                            k/identity
+                            {})
+     (ut/encode-query-value {:a 1}
+                            k/identity
+                            {})])
+  => ["(k + ('1' + '2' + '3'))"
+      "('hello', 'world')"
+      "RAW_SQL_FRAGMENT"
+      "and (k + ('1' + '2' + '3'))"
+      "or"
+      "'{\"a\":1}'"])
 
 ^{:refer xt.db.schema.sql-util/encode-query-segment :added "4.0"
   :setup [(def +out+
@@ -255,7 +313,15 @@
   => +out+)
 
 ^{:refer xt.db.schema.sql-util/encode-query-single-string :added "4.0"}
-(fact "helper for encode-query-string")
+(fact "helper for encode-query-string"
+
+  (!.js
+    [(ut/encode-query-single-string {} {})
+     (ut/encode-query-single-string {:name ["neq" "hello"]
+                                     :data {:a 1}}
+                                    {:column-fn (fn:> [col]
+                                                  (xt/x:cat "\"T\"." col))})])
+  => ["" "\"T\".name != 'hello' AND \"T\".data = '{\"a\":1}'"])
 
 ^{:refer xt.db.schema.sql-util/encode-query-string :added "4.0"}
 (fact "encodes a query string"
@@ -355,7 +421,25 @@
   => map?)
 
 ^{:refer xt.db.schema.sql-util/sqlite-return-format-fn :added "4.0"}
-(fact "sqlite return format function")
+(fact "sqlite return format function"
+
+  (!.js
+    [(ut/sqlite-return-format-fn {:expr "\"name\""
+                                  :as "n"}
+                                 (fn:> [arr] (xt/x:str-join "|" arr))
+                                 ut/default-quote-fn
+                                 {})
+     (ut/sqlite-return-format-fn ["name" "data"]
+                                 (fn:> [arr] (xt/x:str-join "|" arr))
+                                 ut/default-quote-fn
+                                 {})
+     (ut/sqlite-return-format-fn "name"
+                                 (fn:> [arr] (xt/x:str-join "|" arr))
+                                 ut/default-quote-fn
+                                 {})])
+  => ["'n', \"name\""
+      "name|data"
+      "'name', \"name\""])
 
 ^{:refer xt.db.schema.sql-util/sqlite-to-boolean :added "4.0"}
 (fact "coerces 1 to true and 0 to false"
@@ -373,6 +457,8 @@
   => map?)
 
 (comment
+  (s/pedantic ['xt.db.schema.sql-util])
+  
   (s/run ['xt.db.schema.sql-util])
   (s/seedgen-benchadd '[xt.lang.spec] {:lang [:r] :write true})
   (s/seedgen-benchadd '[xt.db.schema.sql-util] {:lang [:julia :dart] :write true})
