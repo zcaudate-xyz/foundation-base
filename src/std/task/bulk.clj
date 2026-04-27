@@ -226,14 +226,16 @@
                                           (zero? %))
                                     second))
                       (into {}))
-         _       (when (:summary print)
-                   (print/print "\n")
-                   (print/print-subtitle (format "SUMMARY %s"
-                                                 (str (assoc display
-                                                             :cumulative (time/format-ms cumulative)
-                                                             :elapsed (time/format-ms elapsed)))))
-                   (print/println))]
-     (assoc summary :cumulative cumulative :elapsed elapsed))))
+          _       (when (:summary print)
+                    (print/print "\n")
+                    (print/print-subtitle (format "SUMMARY %s"
+                                                  (str (assoc display
+                                                              :cumulative (time/format-ms cumulative)
+                                                              :elapsed (time/format-ms elapsed)))))
+                    (print/println))
+          _       (doseq [line (-> summary meta :std.task/after-summary)]
+                    (print/println line))]
+      (assoc summary :cumulative cumulative :elapsed elapsed))))
 
 (defn bulk-package
   "packages results for return"
