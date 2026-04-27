@@ -1,7 +1,51 @@
 (ns std.lang.seedgen-test
   (:require [std.fs :as fs]
+            [std.lang.seedgen.form-bench :as form-bench]
+            [std.lang.seedgen.form-infile :as form-infile]
             [std.lang.seedgen :refer :all])
   (:use code.test))
+
+(def ^:private +seedgen-spacing-source+
+  (str "(ns xt.sample.spacing-test\n"
+       "  (:use code.test)\n"
+       "  (:require [std.lang :as l]))\n\n"
+       "^{:seedgen/root {:all true}}\n"
+       "(l/script- :js {:runtime :basic})\n\n"
+       "^{:refer xt.lang.spec-base/example-h :added \"4.1\"\n"
+       "  :setup [(def +setup-check+\n"
+       "            (contains-in\n"
+       "             {:setup true\n"
+       "              :nested {:value 1}}))]\n"
+       "  :teardown [(def +teardown-check+\n"
+       "               (contains-in\n"
+       "                {:teardown true\n"
+       "                 :nested {:value 0}}))]}\n"
+       "(fact \"metadata spacing\"\n\n"
+       "  (!.js 1)\n"
+       "  => 1)\n"))
+
+(def ^:private +seedgen-setup-spacing+
+  #"(?ms):setup \[\(def \+setup-check\+\n {8,}\(contains-in\n {8,}\{:setup true\n {8,}:nested \{:value 1\}\}\)\)\]")
+
+(def ^:private +seedgen-teardown-spacing+
+  #"(?ms):teardown \[\(def \+teardown-check\+\n {8,}\(contains-in\n {8,}\{:teardown true\n {8,}:nested \{:value 0\}\}\)\)\]")
+
+(defn- seedgen-spacing-context
+  [prefix]
+  (let [root     (.toFile (java.nio.file.Files/createTempDirectory prefix
+                                                                  (make-array java.nio.file.attribute.FileAttribute 0)))
+        test-dir (doto (java.io.File. root "test/xt/sample")
+                   (.mkdirs))
+        path     (.getAbsolutePath (java.io.File. test-dir "spacing_test.clj"))
+        lookup   {'xt.sample.spacing-test path}
+        project  {:root (.getAbsolutePath root)
+                  :test-paths ["test"]}]
+    (spit path +seedgen-spacing-source+)
+    {:root root
+     :path path
+     :bench-path (.getAbsolutePath (java.io.File. root "test/xtbench/dart/sample/spacing_test.clj"))
+     :lookup lookup
+     :project project}))
 
 ^{:refer std.lang.seedgen/seedgen-root :added "4.1"}
 (fact "runs the public root lookup task without crashing on scalar results"
@@ -44,7 +88,20 @@
 (fact "TODO")
 
 ^{:refer std.lang.seedgen/seedgen-langadd :added "4.1"}
-(fact "TODO")
+(fact "langadd preserves multiline setup and teardown indentation"
+  (let [{:keys [root path lookup project]} (seedgen-spacing-context "seedgen-langadd-spacing")]
+    (try
+      (form-infile/seedgen-langadd 'xt.sample.spacing
+                                   {:lang [:dart] :write true}
+                                   lookup
+                                   project)
+      (let [content (slurp path)]
+        [(boolean (re-find +seedgen-setup-spacing+ content))
+         (boolean (re-find +seedgen-teardown-spacing+ content))
+         (boolean (re-find #"\(!\.dt 1\)" content))])
+      (finally
+        (fs/delete root {:recursive true}))))
+  => [true true true])
 
 ^{:refer std.lang.seedgen/seedgen-benchadd :added "4.1"}
 (fact "benchadd summary reports generated function refs while counting target namespaces"
@@ -79,6 +136,22 @@
         (fs/delete root {:recursive true}))))
   => ['[example.A]
       '[samplebench.python.sample.summary-test]])
+
+^{:refer std.lang.seedgen/seedgen-benchadd :added "4.1"}
+(fact "benchadd preserves multiline setup and teardown indentation"
+  (let [{:keys [root bench-path lookup project]} (seedgen-spacing-context "seedgen-benchadd-spacing")]
+    (try
+      (form-bench/seedgen-benchadd 'xt.sample.spacing
+                                   {:lang [:dart] :write true}
+                                   lookup
+                                   project)
+      (let [content (slurp bench-path)]
+        [(boolean (re-find +seedgen-setup-spacing+ content))
+         (boolean (re-find +seedgen-teardown-spacing+ content))
+         (boolean (re-find #"\(!\.dt 1\)" content))])
+      (finally
+        (fs/delete root {:recursive true}))))
+  => [true true true])
 
 ^{:refer std.lang.seedgen/seedgen-benchremove :added "4.1"}
 (fact "TODO")

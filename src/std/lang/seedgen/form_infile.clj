@@ -213,6 +213,19 @@
   (str prefix
        (str/replace s "\n" (str "\n" prefix))))
 
+(defn- indent-rest-lines
+  [prefix s]
+  (let [[head & rest] (str/split-lines s)]
+    (if (empty? rest)
+      s
+      (str/join "\n"
+                (cons head
+                      (map (fn [line]
+                             (if (str/blank? line)
+                               line
+                               (str prefix line)))
+                           rest))))))
+
 (defn- leading-indent
   [^String line]
   (loop [i 0]
@@ -260,20 +273,31 @@
 (defn- render-vector-string
   [key snippets]
   (let [items        (vec (remove nil? snippets))
-        prefix-count (+ 2 (count (str key)) 2)
-        prefix       (apply str (repeat prefix-count \space))]
+         prefix-count (+ 2 (count (str key)) 2)
+         prefix       (apply str (repeat prefix-count \space))]
     (cond
       (empty? items)
       nil
 
       (= 1 (count items))
-      (str "[" (first items) "]")
+      (str "[" (indent-rest-lines " " (first items)) "]")
 
       :else
-      (str "[" (first items)
+      (str "[" (indent-rest-lines " " (first items))
            "\n"
            (str/join "\n" (map #(indent-lines prefix %) (rest items)))
            "]"))))
+
+(defn- render-map-entry
+  [indent k rendered]
+  (let [rendered (if (str/includes? rendered "\n")
+                   (indent-rest-lines (apply str (repeat (+ indent
+                                                            (count (str k))
+                                                            1)
+                                                         \space))
+                                      rendered)
+                   rendered)]
+    (str k " " rendered)))
 
 (defn- render-meta-string
   [m vector-values]
@@ -288,23 +312,28 @@
                                     (cond-> out
                                       rendered
                                       (conj [k rendered]))))
-                                []
-                                ordered-keys)]
+                                 []
+                                 ordered-keys)]
     (when (seq entries)
-      (str "^{"
+      (str "^{" 
            (loop [[[k rendered] & more] entries
                   out nil]
-             (let [piece (str k " " rendered)
-                   out   (if out
-                           (str out
-                                (if (str/starts-with? rendered "[")
-                                  "\n  "
-                                  " ")
-                                piece)
-                           piece)]
-               (if more
-                 (recur more out)
-                 out)))
+              (let [multiline? (or (str/starts-with? rendered "[")
+                                   (str/includes? rendered "\n"))
+                    indent     (if out
+                                 (if multiline? 2 0)
+                                 0)
+                    piece      (render-map-entry indent k rendered)
+                    out        (if out
+                                 (str out
+                                      (if multiline?
+                                        "\n  "
+                                        " ")
+                                      piece)
+                                 piece)]
+                (if more
+                  (recur more out)
+                  out)))
            "}"))))
 
 (defn- render-map-string
@@ -313,23 +342,28 @@
         entries      (keep (fn [k]
                              (when-let [rendered (get vector-values k)]
                                [k rendered]))
-                           ordered-keys)]
+                            ordered-keys)]
     (if (empty? entries)
       "{}"
       (str "{"
            (loop [[[k rendered] & more] entries
                   out nil]
-             (let [piece (str k " " rendered)
-                   out   (if out
-                           (str out
-                                (if (str/starts-with? rendered "[")
-                                  "\n "
-                                  " ")
-                                piece)
-                           piece)]
-               (if more
-                 (recur more out)
-                 out)))
+              (let [multiline? (or (str/starts-with? rendered "[")
+                                   (str/includes? rendered "\n"))
+                    indent     (if out
+                                 (if multiline? 1 0)
+                                 0)
+                    piece      (render-map-entry indent k rendered)
+                    out        (if out
+                                 (str out
+                                      (if multiline?
+                                        "\n "
+                                        " ")
+                                      piece)
+                                 piece)]
+                (if more
+                  (recur more out)
+                  out)))
            "}"))))
 
 (defn- entry-meta
@@ -870,9 +904,10 @@
         teardown-render (when (seq teardown-items)
                           (render-vector-string :teardown teardown-items))]
     (when (or setup-render teardown-render)
-      (str "(fact:global\n "
-           (render-map-string {:setup setup-render
-                               :teardown teardown-render})
+      (str "(fact:global\n"
+           (indent-lines " "
+                         (render-map-string {:setup setup-render
+                                             :teardown teardown-render}))
            ")"))))
 
 (defn- render-global-top-target
