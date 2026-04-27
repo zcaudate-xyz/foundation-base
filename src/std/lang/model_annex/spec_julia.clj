@@ -9,7 +9,7 @@
             [std.lang.base.script :as script]
             [std.lang.base.util :as ut]
             [std.lang.model.spec-xtalk]
-             [std.lang.model-annex.spec-xtalk.fn-julia :as fn]
+            [std.lang.model-annex.spec-xtalk.fn-julia :as fn]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
             [std.lib.template :as template])
@@ -43,8 +43,8 @@
    (cond (keyword? key)
          (str "\"" (name key) "\"")
 
-          :else
-          (common/*emit-fn* key grammar mopts))))
+         :else
+         (common/*emit-fn* key grammar mopts))))
 
 (defn julia-symbol-global
   [key _grammar _mopts]
@@ -64,8 +64,8 @@
            ~@body)))
       (template/$
        (for [~idx :in (to 1 1 (length ~arr))]
-          (local ~e (getindex ~arr ~idx))
-          ~@body)))))
+         (local ~e (getindex ~arr ~idx))
+         ~@body)))))
 
 (defn tf-for-object
   "for object transform"
@@ -149,31 +149,31 @@
                                :macro-xor])
       (merge (grammar/build-xtalk))
       (grammar/build:override
-        {:var    {:symbol '#{var*}}
-         :not    {:raw "!"}
-         :and    {:raw "&&"}
-         :or     {:raw "||"}
-         :neq    {:raw "!="}
-         :mod    {:raw "%"}
-         :pow    {:raw "^"}
-         :with-global {:value true :raw "XT_GLOBALS"}
-         :for-array  {:macro #'tf-for-array   :emit :macro}
-         :for-object {:macro #'tf-for-object  :emit :macro}
-         :for-iter   {:macro #'tf-for-iter    :emit :macro}
-         :for-index  {:macro #'tf-for-index   :emit :macro}})
+       {:var    {:symbol '#{var*}}
+        :not    {:raw "!"}
+        :and    {:raw "&&"}
+        :or     {:raw "||"}
+        :neq    {:raw "!="}
+        :mod    {:raw "%"}
+        :pow    {:raw "^"}
+        :with-global {:value true :raw "XT_GLOBALS"}
+        :for-array  {:macro #'tf-for-array   :emit :macro}
+        :for-object {:macro #'tf-for-object  :emit :macro}
+        :for-iter   {:macro #'tf-for-iter    :emit :macro}
+        :for-index  {:macro #'tf-for-index   :emit :macro}})
       (grammar/build:override fn/+julia+)
       (grammar/build:extend
-        {:cat   {:op :cat   :symbol '#{cat}       :raw "*"      :emit :infix}
-         :len   {:op :len   :symbol '#{len}       :raw "length" :emit :pre}
-         :local {:op :local :symbol '#{local var} :macro #'tf-local :emit :macro}
-         :pair  {:op :pair  :symbol '#{=>}        :raw "=>"     :emit :infix}
-         :dict  {:op :dict  :symbol '#{dict}      :macro #'tf-dict :emit :macro}
-         :push! {:op :push! :symbol '#{push!}     :raw "push!"  :emit :invoke}
-         :xor   {:op :xor   :symbol '#{xor}       :raw "⊻"      :emit :infix}
-         :bxor  {:op :bxor  :symbol '#{b:xor}     :raw "⊻"      :emit :infix}
-         :splat {:op :splat :symbol '#{...}       :raw "..."    :emit :post}
-         :%     {:op :%     :symbol #{:%}         :emit :squash}
-         :to    {:op :to    :symbol #{'to}        :emit #'emit-to}})))
+       {:cat   {:op :cat   :symbol '#{cat}       :raw "*"      :emit :infix}
+        :len   {:op :len   :symbol '#{len}       :raw "length" :emit :pre}
+        :local {:op :local :symbol '#{local var} :macro #'tf-local :emit :macro}
+        :pair  {:op :pair  :symbol '#{=>}        :raw "=>"     :emit :infix}
+        :dict  {:op :dict  :symbol '#{dict}      :macro #'tf-dict :emit :macro}
+        :push! {:op :push! :symbol '#{push!}     :raw "push!"  :emit :invoke}
+        :xor   {:op :xor   :symbol '#{xor}       :raw "⊻"      :emit :infix}
+        :bxor  {:op :bxor  :symbol '#{b:xor}     :raw "⊻"      :emit :infix}
+        :splat {:op :splat :symbol '#{...}       :raw "..."    :emit :post}
+        :%     {:op :%     :symbol #{:%}         :emit :squash}
+        :to    {:op :to    :symbol #{'to}        :emit #'emit-to}})))
 
 (def +template+
   (->> {:banned #{:set :regex}
@@ -183,7 +183,7 @@
                   :common    {:apply "(" :statement ""
                               :namespace-full "."
                               :namespace-sep  "."}
-                  :index     {:offset 1  :end-inclusive false}
+                  :index     {:offset 1  :end-inclusive true}
                   :return    {:multi true}
                   :block     {:parameter {:start "(" :end ")" :space ", "}
                               :body      {:start "" :end "end"}}
@@ -197,20 +197,20 @@
         :data   {:map-entry {:start ""  :end ""  :space "" :assign " => " :keyword :string
                              :key-fn #'julia-map-key}
                  :map       {:start "Dict(" :end ")"}
-                  :vector    {:start "Any[" :end "]" :space ", "}}
-         :block  {:for       {:body    {:start "" :end "end"}
-                              :parameter {:start " " :end "" :space " "}}
-                  :try      {:wrap    {:start "" :end "end"}
-                              :body    {:start "" :end ""}
-                              :control {:catch   {:raw "catch"
-                                                  :parameter {:start " " :end ""}
-                                                  :body {:start "" :end ""}}
-                                        :finally {:raw "finally"
-                                                  :body {:start "" :end ""}}}}
-                  :while     {:body    {:start "" :end "end"}}
-                  :branch    {:wrap    {:start "" :end "end"}
-                              :control {:default {:parameter  {:start " " :end ""}
-                                                  :body {:append true :start "" :end ""}}
+                 :vector    {:start "Any[" :end "]" :space ", "}}
+        :block  {:for       {:body    {:start "" :end "end"}
+                             :parameter {:start " " :end "" :space " "}}
+                 :try      {:wrap    {:start "" :end "end"}
+                            :body    {:start "" :end ""}
+                            :control {:catch   {:raw "catch"
+                                                :parameter {:start " " :end ""}
+                                                :body {:start "" :end ""}}
+                                      :finally {:raw "finally"
+                                                :body {:start "" :end ""}}}}
+                 :while     {:body    {:start "" :end "end"}}
+                 :branch    {:wrap    {:start "" :end "end"}
+                             :control {:default {:parameter  {:start " " :end ""}
+                                                 :body {:append true :start "" :end ""}}
                                        :if      {:raw "if"}
                                        :elseif  {:raw "elseif"}
                                        :else    {:raw "else"}}}}

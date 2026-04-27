@@ -1,6 +1,6 @@
 (ns std.lang.model-annex.spec-xtalk.fn-julia
   (:require [std.lang.base.util :as ut]
-             [std.lib.template :as template]))
+            [std.lib.template :as template]))
 
 (defn julia-free-infix
   [a op b]
@@ -73,9 +73,9 @@
            (= 3 (count obj))
            (vector? (nth obj 2))
            (= 1 (count (nth obj 2))))
-     (let [[_ target [key]] obj]
-       (list 'delete! target key))
-     (list 'delete! obj)))
+    (let [[_ target [key]] obj]
+      (list 'delete! target key))
+    (list 'delete! obj)))
 
 (defn julia-tf-x-get-key
   [[_ obj key & [default]]]
@@ -121,18 +121,18 @@
          (return (string (typeof ~obj))))))
 
 (def +julia-core+
-  (merge {:x-del         {:macro #'julia-tf-x-del         :emit :macro}
-           :x-eval        {:macro #'julia-tf-x-eval        :emit :macro}
-           :x-apply       {:macro #'julia-tf-x-apply       :emit :macro}
-           :x-unpack      {:macro #'julia-tf-x-unpack      :emit :macro}
-           :x-type-native {:macro #'julia-tf-x-type-native :emit :macro}
-           :x-get-key     {:macro #'julia-tf-x-get-key     :emit :macro}}
-          {:x-cat         {:raw "*" :emit :infix}
-          :x-len         {:raw "length" :emit :invoke}
-          :x-err         {:raw "error" :emit :invoke}
-          :x-random      {:default '(rand) :emit :unit}
-          :x-print       {:raw "println" :emit :invoke}
-          :x-now-ms      {:default '(round (* 1000 (time))) :emit :unit}}))
+  {:x-del         {:macro #'julia-tf-x-del         :emit :macro}
+   :x-eval        {:macro #'julia-tf-x-eval        :emit :macro}
+   :x-apply       {:macro #'julia-tf-x-apply       :emit :macro}
+   :x-unpack      {:macro #'julia-tf-x-unpack      :emit :macro}
+   :x-type-native {:macro #'julia-tf-x-type-native :emit :macro}
+   :x-get-key     {:macro #'julia-tf-x-get-key     :emit :macro}
+   :x-cat         {:raw "*" :emit :infix}
+   :x-len         {:raw "length" :emit :invoke}
+   :x-err         {:raw "error" :emit :invoke}
+   :x-random      {:default '(rand) :emit :unit}
+   :x-print       {:raw "println" :emit :invoke}
+   :x-now-ms      {:default '(round (* 1000 (time))) :emit :unit}})
 
 ;;
 ;; GLOBAL
@@ -216,7 +216,7 @@
    :x-is-boolean?    {:macro #'julia-tf-x-is-boolean? :emit :macro}
    :x-is-function?   {:macro #'julia-tf-x-is-function? :emit :macro}
    :x-is-object?     {:macro #'julia-tf-x-is-object? :emit :macro}
-    :x-is-array?      {:macro #'julia-tf-x-is-array? :emit :macro}})
+   :x-is-array?      {:macro #'julia-tf-x-is-array? :emit :macro}})
 
 ;;
 ;; LU
@@ -317,9 +317,8 @@
   (merge {:x-arr-slice  {:macro #'julia-tf-x-arr-slice  :emit :macro}
           :x-arr-remove {:macro #'julia-tf-x-arr-remove :emit :macro}
           :x-arr-insert {:macro #'julia-tf-x-arr-insert :emit :macro}
-          :x-arr-sort   {:macro #'julia-tf-x-arr-sort   :emit :macro}
-          :x-arr-foldr  {:macro #'julia-tf-x-arr-foldr  :emit :macro}}
-         {:x-arr-clone      {:raw "copy" :emit :invoke}
+          :x-arr-foldr  {:macro #'julia-tf-x-arr-foldr  :emit :macro}
+          :x-arr-clone      {:raw "copy" :emit :invoke}
           :x-arr-reverse    {:raw "reverse" :emit :invoke}
           :x-arr-push       {:raw "push!" :emit :invoke}
           :x-arr-pop        {:raw "pop!" :emit :invoke}
@@ -332,7 +331,7 @@
 
 (defn julia-tf-x-str-char
   ([[_ s i]]
-   (list 'Int (list 'x:get-idx s i))))
+   (list 'Int (list 'x:get-idx s (list 'x:offset i)))))
 
 (defn julia-tf-x-str-index-of
   ([[_ s tok & [start]]]
@@ -353,7 +352,9 @@
 
 (defn julia-tf-x-str-substring
   ([[_ s start & [end]]]
-   (list '. s [(list 'to start 1 (or end (list 'lastindex s)))])))
+   (list '. s [(list 'to
+                     (list 'x:offset start)
+                     (or end (list 'lastindex s)))])))
 
 (defn julia-tf-x-str-join
   [[_ sep arr]]
@@ -376,13 +377,13 @@
           :x-str-replace   {:macro #'julia-tf-x-str-replace   :emit :macro}
           :x-str-substring {:macro #'julia-tf-x-str-substring :emit :macro}
           :x-str-to-fixed  {:macro #'julia-tf-x-str-to-fixed  :emit :macro}}
-          {:x-str-split      {:raw "split" :emit :invoke}
-           :x-str-to-upper   {:raw "uppercase" :emit :invoke}
-           :x-str-to-lower   {:raw "lowercase" :emit :invoke}
-           :x-str-trim       {:raw "strip" :emit :invoke}
-           :x-str-trim-left  {:raw "lstrip" :emit :invoke}
-           :x-str-trim-right {:raw "rstrip" :emit :invoke}
-           :x-str-comp       {:raw "<" :emit :infix}}))
+         {:x-str-split      {:raw "split" :emit :invoke}
+          :x-str-to-upper   {:raw "uppercase" :emit :invoke}
+          :x-str-to-lower   {:raw "lowercase" :emit :invoke}
+          :x-str-trim       {:raw "strip" :emit :invoke}
+          :x-str-trim-left  {:raw "lstrip" :emit :invoke}
+          :x-str-trim-right {:raw "rstrip" :emit :invoke}
+          :x-str-comp       {:raw "<" :emit :infix}}))
 
 ;;
 ;; JSON
@@ -499,134 +500,14 @@
            (return [(first pair) (last pair)]))
          (collect ~obj)))))
 
-(defn julia-tf-x-iter-eq
-  [[_ it0 it1 eq-fn]]
-  (template/$
-   (do (for [x0 :in ~it0]
-         (if (isempty ~it1)
-           (return false))
-         (if (not (~eq-fn x0 (x:iter-next ~it1)))
-           (return false)))
-        (return (isempty ~it1)))))
+(def +python-promise+
+  {:x-promise          {:emit :hard-link :raw 'python.core.common-promise/promise}
+   :x-promise-then     {:emit :hard-link :raw 'python.core.common-promise/promise-then}
+   :x-promise-catch    {:emit :hard-link :raw 'python.core.common-promise/promise-catch}
+   :x-promise-finally  {:emit :hard-link :raw 'python.core.common-promise/promise-finally}
+   :x-promise-native?  {:emit :hard-link :raw 'python.core.common-promise/promise-native?}
+   :x-with-delay       {:emit :hard-link :raw 'python.core.common-promise/with-delay}})
 
-(defn julia-tf-x-iter-has?
-  [[_ obj]]
-  (list 'and
-        (list 'not (list 'isa obj 'Dict))
-        (list 'applicable 'iterate obj)))
-
-(defn julia-tf-x-iter-native?
-  [[_ it]]
-  (list 'isa it 'Iterators.Stateful))
-
-(def +julia-iter+
-  (merge {:x-iter-from-obj {:macro #'julia-tf-x-iter-from-obj :emit :macro}
-          :x-iter-eq       {:macro #'julia-tf-x-iter-eq       :emit :macro
-                            :op-spec {:allow-blocks true}}
-          :x-iter-has?     {:macro #'julia-tf-x-iter-has?     :emit :macro}
-          :x-iter-native?  {:macro #'julia-tf-x-iter-native?  :emit :macro}}
-         {:x-iter-from-arr {:raw "Iterators.Stateful" :emit :invoke}
-          :x-iter-from     {:raw "Iterators.Stateful" :emit :invoke}
-          :x-iter-null     {:default '(Iterators.Stateful []) :emit :unit}
-          :x-iter-next     {:raw "popfirst!" :emit :invoke}}))
-
-;;
-;; PROMISE
-;;
-
-(defn julia-tf-x-with-delay
-  [[_ ms thunk]]
-  (julia-free-iife
-   (template/$
-    (do (sleep (/ ~ms 1000.0))
-        (return (x:promise ~thunk))))))
-
-(defn julia-tf-x-promise
-  [[_ thunk]]
-  (let [out-sym     (gensym "promise_out__")
-        wrap-out    (julia-promise-wrap-expr out-sym)
-        reject-form (julia-promise-reject-form
-                     (julia-error-value-expr 'e))]
-    (julia-free-iife
-     (julia-free-try-catch
-      (list 'do
-            (list 'var out-sym (list thunk))
-            (list 'return wrap-out))
-      "e"
-      (list 'return reject-form)))))
-
-(defn julia-tf-x-promise-then
-  [[_ promise thunk]]
-  (let [promise-sym  (gensym "promise_value__")
-        current-sym  (gensym "promise_current__")
-        out-sym      (gensym "promise_out__")
-        current-form (julia-promise-wrap-expr promise-sym)
-        wrap-out     (julia-promise-wrap-expr out-sym)
-        reject-form  (julia-promise-reject-form
-                      (julia-error-value-expr 'e))]
-    (julia-free-iife
-     (list 'do
-           (list 'var promise-sym promise)
-           (list 'var current-sym current-form)
-           (list 'if (list '== "rejected" (list 'get current-sym "status" nil))
-                 (list 'return current-sym)
-                 (julia-free-try-catch
-                  (list 'do
-                        (list 'var out-sym (list thunk (list 'get current-sym "value" nil)))
-                        (list 'return wrap-out))
-                  "e"
-                  (list 'return reject-form)))))))
-
-(defn julia-tf-x-promise-catch
-  [[_ promise thunk]]
-  (let [promise-sym  (gensym "promise_value__")
-        current-sym  (gensym "promise_current__")
-        out-sym      (gensym "promise_out__")
-        current-form (julia-promise-wrap-expr promise-sym)
-        wrap-out     (julia-promise-wrap-expr out-sym)
-        reject-form  (julia-promise-reject-form
-                      (julia-error-value-expr 'e))]
-    (julia-free-iife
-     (list 'do
-           (list 'var promise-sym promise)
-           (list 'var current-sym current-form)
-           (list 'if (list 'not= "rejected" (list 'get current-sym "status" nil))
-                 (list 'return current-sym)
-                 (julia-free-try-catch
-                  (list 'do
-                        (list 'var out-sym (list thunk (list 'get current-sym "error" nil)))
-                        (list 'return wrap-out))
-                  "e"
-                  (list 'return reject-form)))))))
-
-(defn julia-tf-x-promise-finally
-  [[_ promise thunk]]
-  (let [promise-sym  (gensym "promise_value__")
-        current-sym  (gensym "promise_current__")
-        current-form (julia-promise-wrap-expr promise-sym)
-        reject-form  (julia-promise-reject-form
-                      (julia-error-value-expr 'e))]
-    (julia-free-iife
-     (julia-free-try-catch
-      (list 'do
-            (list 'var promise-sym promise)
-            (list 'var current-sym current-form)
-            (list thunk)
-            (list 'return current-sym))
-      "e"
-      (list 'return reject-form)))))
-
-(defn julia-tf-x-promise-native?
-  [[_ value]]
-  (julia-promise-native-check value))
-
-(def +julia-promise+
-  {:x-promise          {:macro #'julia-tf-x-promise         :emit :macro}
-   :x-promise-then     {:macro #'julia-tf-x-promise-then    :emit :macro}
-   :x-promise-catch    {:macro #'julia-tf-x-promise-catch   :emit :macro}
-   :x-promise-finally  {:macro #'julia-tf-x-promise-finally :emit :macro}
-   :x-promise-native?  {:macro #'julia-tf-x-promise-native? :emit :macro}
-   :x-with-delay       {:macro #'julia-tf-x-with-delay      :emit :macro}})
 
 ;;
 ;; SHELL
@@ -638,9 +519,9 @@
         err-form  (julia-error-value-expr 'e)]
     (julia-free-try-catch
      (list 'do
-            (list 'var 'out read-form)
-            (list cb nil 'out)
-            (list 'return ["async"]))
+           (list 'var 'out read-form)
+           (list cb nil 'out)
+           (list 'return ["async"]))
      "e"
      (list 'do
            (list cb {"code" 1
@@ -679,9 +560,9 @@
   (let [err-form (julia-error-value-expr 'e)]
     (julia-free-try-catch
      (list 'do
-            (list 'write filename content)
-            (list cb nil filename)
-            (list 'return ["async"]))
+           (list 'write filename content)
+           (list cb nil filename)
+           (list 'return ["async"]))
      "e"
      (list 'do
            (list cb err-form nil)
@@ -776,20 +657,20 @@
 
 (def +julia+
   (merge +julia-core+
-           +julia-custom+
-           +julia-global+
-           +julia-math+
-           +julia-type+
-           +julia-lu+
-           +julia-obj+
-           +julia-arr+
-           +julia-str+
-           +julia-js+
-           +julia-socket+
-           +julia-http+
-           +julia-iter+
-           +julia-promise+
-           +julia-shell+
-           +julia-file+
-           +julia-bit+
-           +julia-return+))
+         +julia-custom+
+         +julia-global+
+         +julia-math+
+         +julia-type+
+         +julia-lu+
+         +julia-obj+
+         +julia-arr+
+         +julia-str+
+         +julia-js+
+         +julia-socket+
+         +julia-http+
+         +julia-iter+
+         +julia-promise+
+         +julia-shell+
+         +julia-file+
+         +julia-bit+
+         +julia-return+))
