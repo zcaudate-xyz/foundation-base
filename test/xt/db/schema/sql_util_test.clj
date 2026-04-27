@@ -26,7 +26,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.schema.sql-util/encode-query-string.more :added "4.0" :adopt true}
 (fact "encodes a query segment"
@@ -477,21 +477,21 @@
 
 ^{:refer xt.db.schema.sql-util/encode-sql :added "4.0"
   :setup [(def +inputs+
-[{"::" "sql/column"
-:name "hello"}
-{"::" "sql/cast"
-:args ["k" {"::" "sql/table"
-:name "hello"
-:schema "ENUM"}]}
-{"::" "sql/fn"
-:name "+"
-:args ["k" {"::" "sql/fn"
-:name "+"
-:args [1 2 3]}]}
-{"::" "sql/select"
-:args ["*" "from" {"::" "sql/fn"
-:name "jsonb_each"
-:args ["'[1,2,3]'" true]}]}])]}
+            [{"::" "sql/column"
+              :name "hello"}
+             {"::" "sql/cast"
+              :args ["k" {"::" "sql/table"
+                          :name "hello"
+                          :schema "ENUM"}]}
+             {"::" "sql/fn"
+              :name "+"
+              :args ["k" {"::" "sql/fn"
+                          :name "+"
+                          :args [1 2 3]}]}
+             {"::" "sql/select"
+              :args ["*" "from" {"::" "sql/fn"
+                                 :name "jsonb_each"
+                                 :args ["'[1,2,3]'" true]}]}])]}
 (fact "encodes an sql value"
 
   (!.js
@@ -718,11 +718,11 @@
 
 ^{:refer xt.db.schema.sql-util/encode-query-segment :added "4.0"
   :setup [(def +out+
-["name = 'hello'"
-"name != 'hell''o'"
-"name in ('hello', 'hello')"
-"name != (k + ('1' + '2' + '3'))"
-"data = '{\"a\":1}'"])]}
+            ["name = 'hello'"
+             "name != 'hell''o'"
+             "name in ('hello', 'hello')"
+             "name != (k + ('1' + '2' + '3'))"
+             "data = '{\"a\":1}'"])]}
 (fact "encodes a query segment"
 
   (!.js

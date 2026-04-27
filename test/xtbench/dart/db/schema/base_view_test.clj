@@ -1,4 +1,4 @@
-(ns xt.db.schema.base-view-test
+(ns xtbench.dart.db.schema.base-view-test
   (:require [rt.postgres :as pg]
             [std.lang :as l]
             [xt.lib.db.gen-bind :as bind]
@@ -6,27 +6,14 @@
             [xt.db.helpers.seed-user-test :as user])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:lua :python]}}
-(l/script- :js
-  {:runtime :basic
-   :require [[xt.lang.common-data :as xtd]
-             [xt.db.schema.base-view :as v]
-             [xt.db.schema.base-util :as ut]]})
-
-(l/script- :lua
-  {:runtime :basic
-   :require [[xt.lang.common-data :as xtd]
-             [xt.db.schema.base-view :as v]
-             [xt.db.schema.base-util :as ut]]})
-
-(l/script- :python
-  {:runtime :basic
+(l/script- :dart
+  {:runtime :twostep
    :require [[xt.lang.common-data :as xtd]
              [xt.db.schema.base-view :as v]
              [xt.db.schema.base-util :as ut]]})
 
 (fact:global
- {:setup    [(l/rt:restart)]
+ {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
 (def +views+
@@ -58,34 +45,14 @@
                "select" (just ["by_name" "all"] :in-any-order)}}))]}
 (fact "gets an overview of the views"
 
-  (!.js
-    (v/all-overview (ut/collect-views (@! +views+))))
-  => +all-overview-check+
-
-  (!.lua
-    (v/all-overview (ut/collect-views (@! +views+))))
-  => +all-overview-check+
-
-  (!.py
+  (!.dt
     (v/all-overview (ut/collect-views (@! +views+))))
   => +all-overview-check+)
 
 ^{:refer xt.db.schema.base-view/all-keys :added "4.0"}
 (fact "gets all table keys for a view"
 
-  (!.js
-    (v/all-keys (ut/collect-views (@! +views+))
-                "Currency"
-                "select"))
-  => (just ["all" "all_fiat" "all_crypto" "by_type" "by_country"] :in-any-order)
-
-  (!.lua
-    (v/all-keys (ut/collect-views (@! +views+))
-                "Currency"
-                "select"))
-  => (just ["all" "all_fiat" "all_crypto" "by_type" "by_country"] :in-any-order)
-
-  (!.py
+  (!.dt
     (v/all-keys (ut/collect-views (@! +views+))
                 "Currency"
                 "select"))
@@ -124,16 +91,8 @@
               ["UserAccount" "select" "by_organisation"]]
              :in-any-order))]}
 (fact "gets all methods for views"
-  
-  (!.js
-    (v/all-methods (ut/collect-views (@! +views+))))
-  => +all-methods-check+
 
-  (!.lua
-    (v/all-methods (ut/collect-views (@! +views+))))
-  => +all-methods-check+
-
-  (!.py
+  (!.dt
     (v/all-methods (ut/collect-views (@! +views+))))
   => +all-methods-check+)
 

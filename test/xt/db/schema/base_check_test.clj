@@ -22,7 +22,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.schema.base-check/is-uuid? :added "4.0"}
 (fact "checks that a string input is a uuid"

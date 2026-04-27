@@ -6,33 +6,33 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.schema.sql-graph :as g]
-              [xt.db.schema.sql-util :as ut]
-              [xt.db.schema.sql-raw :as raw]
-              [xt.lang.common-data :as xtd]
-              [xt.lang.common-lib :as k]
-              [xt.db.schema.base-schema :as sch]
-              [xt.db.schema.base-scope :as scope]
-              [xt.lib.db.sample-test :as sample]]})
+             [xt.db.schema.sql-util :as ut]
+             [xt.db.schema.sql-raw :as raw]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-lib :as k]
+             [xt.db.schema.base-schema :as sch]
+             [xt.db.schema.base-scope :as scope]
+             [xt.lib.db.sample-test :as sample]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.db.schema.sql-graph :as g]
-              [xt.lang.common-data :as xtd]
-              [xt.lang.common-lib :as k]
-              [xt.db.schema.sql-util :as ut]
-              [xt.db.schema.base-schema :as sch]
-              [xt.db.schema.base-scope :as scope]
-              [xt.lib.db.sample-test :as sample]]})
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-lib :as k]
+             [xt.db.schema.sql-util :as ut]
+             [xt.db.schema.base-schema :as sch]
+             [xt.db.schema.base-scope :as scope]
+             [xt.lib.db.sample-test :as sample]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.db.schema.sql-graph :as g]
-              [xt.lang.common-data :as xtd]
-              [xt.lang.common-lib :as k]
-              [xt.db.schema.sql-util :as ut]
-              [xt.db.schema.base-schema :as sch]
-              [xt.db.schema.base-scope :as scope]
-              [xt.lib.db.sample-test :as sample]]})
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-lib :as k]
+             [xt.db.schema.sql-util :as ut]
+             [xt.db.schema.base-schema :as sch]
+             [xt.db.schema.base-scope :as scope]
+             [xt.lib.db.sample-test :as sample]]})
 
 (l/script- :dart
   {:runtime :twostep
@@ -95,9 +95,9 @@
       "    WHERE id IN ("
       "      SELECT wallet_id FROM WalletAsset"
       "      WHERE asset_id = 'XLM'"
-    "    )"
-    "  ) AND is_official = TRUE"
-    ") AND first_name = 'hello'")
+      "    )"
+      "  ) AND is_official = TRUE"
+      ") AND first_name = 'hello'")
 
   (!.lua
    (g/select-where sample/Schema
@@ -297,10 +297,10 @@
   (!.js
    (g/select-return-str sample/Schema
                         (xtd/second (scope/get-tree sample/Schema
-                                                  "UserProfile"
-                                                  {}
-                                                  [["account"]]
-                                                  {}))
+                                                    "UserProfile"
+                                                    {}
+                                                    [["account"]]
+                                                    {}))
                         g/select-return
                         0
                         {}))
@@ -311,10 +311,10 @@
   (!.lua
    (g/select-return-str sample/Schema
                         (xtd/second (scope/get-tree sample/Schema
-                                                  "UserProfile"
-                                                  {}
-                                                  [["account"]]
-                                                  {}))
+                                                    "UserProfile"
+                                                    {}
+                                                    [["account"]]
+                                                    {}))
                         g/select-return
                         0
                         {}))
@@ -322,14 +322,14 @@
 
   (!.py
    (g/select-return-str sample/Schema
-                    (xtd/second (scope/get-tree sample/Schema
-                                              "UserProfile"
-                                              {}
-                                              [["account"]]
-                                              {}))
-                    g/select-return
-                    0
-                    {}))
+                        (xtd/second (scope/get-tree sample/Schema
+                                                    "UserProfile"
+                                                    {}
+                                                    [["account"]]
+                                                    {}))
+                        g/select-return
+                        0
+                        {}))
   => +result+)
 
 ^{:refer xt.db.schema.sql-graph/select-return :added "4.0"

@@ -29,7 +29,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.schema.base-scope/get-data-columns.more :added "4.0" :adopt true}
 (fact "classifies the link"
@@ -118,8 +118,8 @@
               ["id"
                "nickname"
                "password_updated"
-                "is_super"
-                "is_suspended"
+               "is_super"
+               "is_suspended"
                "is_official"]}])] :adopt true}
 (fact "MORE CHECKS"
 
@@ -326,9 +326,9 @@
        "-/id" true}]
 
   (!.lua  [(scope/filter-scope ["-/data"  "id"])
-          (scope/filter-scope ["-/data" "-/key"])
-          (scope/filter-scope ["*/data" "-/key"])
-          (scope/filter-scope ["*/everything"])])
+           (scope/filter-scope ["-/data" "-/key"])
+           (scope/filter-scope ["*/data" "-/key"])
+           (scope/filter-scope ["*/everything"])])
   => [{"-/data" true}
       {"-/data" true, "-/key" true}
       {"-/data" true, "-/key" true, "-/info" true, "-/id" true}
@@ -500,12 +500,12 @@
 
   (!.py
     (xtd/arr-map (scope/get-link-columns sample/Schema
-                                           "UserAccount"
+                                         "UserAccount"
                                          [["profile" ["first_name"
                                                       "last_name"]]])
-                   (fn [out]
-                     (var [e cols] out)
-                     (return [(. e ["ident"]) cols]))))
+                 (fn [out]
+                   (var [e cols] out)
+                   (return [(. e ["ident"]) cols]))))
   => [["profile" [{} ["first_name" "last_name"]]]])
 
 ^{:refer xt.db.schema.base-scope/get-linked-tables :added "4.0"}
@@ -565,31 +565,31 @@
 
 ^{:refer xt.db.schema.base-scope/get-tree :added "4.0"
   :setup [(def +account+
-["UserAccount"
-{"custom" [],
-"where" [{"id" "zcaudate"} {"id" "z1"} {"id" "z3"}],
-"links"
-[["wallets"
-"reverse"
-["Wallet"
-{"custom" [],
-"where"
-[{"owner" ["eq" ["UserAccount.id"]], "id" "W1"}
-{"owner" ["eq" ["UserAccount.id"]], "id" "W2"}
-{"owner" ["eq" ["UserAccount.id"]], "id" "W3"}],
-"links"
-[["entries"
-"reverse"
-["WalletAsset"
-{"custom" [],
-"where"
-[{"wallet" ["eq" ["Wallet.id"]], "id" "E1"}
-{"wallet" ["eq" ["Wallet.id"]], "id" "E2"}
-{"wallet" ["eq" ["Wallet.id"]], "id" "E3"}],
-"links" [],
-"data" ["id"]}]]],
-"data" []}]]],
-"data" []}])
+            ["UserAccount"
+             {"custom" [],
+              "where" [{"id" "zcaudate"} {"id" "z1"} {"id" "z3"}],
+              "links"
+              [["wallets"
+                "reverse"
+                ["Wallet"
+                 {"custom" [],
+                  "where"
+                  [{"owner" ["eq" ["UserAccount.id"]], "id" "W1"}
+                   {"owner" ["eq" ["UserAccount.id"]], "id" "W2"}
+                   {"owner" ["eq" ["UserAccount.id"]], "id" "W3"}],
+                  "links"
+                  [["entries"
+                    "reverse"
+                    ["WalletAsset"
+                     {"custom" [],
+                      "where"
+                      [{"wallet" ["eq" ["Wallet.id"]], "id" "E1"}
+                       {"wallet" ["eq" ["Wallet.id"]], "id" "E2"}
+                       {"wallet" ["eq" ["Wallet.id"]], "id" "E3"}],
+                      "links" [],
+                      "data" ["id"]}]]],
+                  "data" []}]]],
+              "data" []}])
           (def +account-lua+
             ["UserAccount"
              {"custom" {},

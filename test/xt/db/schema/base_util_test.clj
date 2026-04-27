@@ -23,21 +23,21 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.schema.base-util/collect-routes :added "4.0"
   :setup [(def +routes+ [{:input [],
-:return "text",
-:schema "core/util",
-:id "ping",
-:flags {}
-:url "api/ping"}
-{:input [{:symbol "input", :type "text"}],
-:return "text",
-:schema "core/util",
-:id "echo",
-:flags {}
-:url "api/echo"}])
+                          :return "text",
+                          :schema "core/util",
+                          :id "ping",
+                          :flags {}
+                          :url "api/ping"}
+                         {:input [{:symbol "input", :type "text"}],
+                          :return "text",
+                          :schema "core/util",
+                          :id "echo",
+                          :flags {}
+                          :url "api/echo"}])
           (def +result+
             (contains-in {"api/echo"
                           {"url" "api/echo",
@@ -70,48 +70,48 @@
 
 ^{:refer xt.db.schema.base-util/collect-views :added "4.0"
   :setup [(def +views+
-[{:input [{:symbol "i_currency_id", :type "citext"}],
-:return "jsonb",
-:schema "core/application-support",
-:id "currency_default",
-:flags {:public true},
-:view {:table "Currency",
-:type "return",
-:tag "default",
-:access {:query nil,
-:roles {},
-:relation nil,
-:symbol nil},
-:query ["*/data"],
-:guards []}}
-{:input [],
-:return "jsonb",
-:schema "core/application-support",
-:id "currency_all",
-:flags {:public true},
-:view {:table "Currency",
-:type "select",
-:tag "all",
-:access {:query nil,
-:roles {},
-:relation nil,
-:symbol nil},
-:query nil,
-:guards []}}
-{:input [{:symbol "i_type", :type "text"}],
-:return "jsonb",
-:schema "core/application-support",
-:id "currency_by_type",
-:flags {:public true},
-:view {:table "Currency",
-:type "select",
-:tag "by_type",
-:access {:query nil,
-:roles {},
-:relation nil,
-:symbol nil},
-:query {"type" "i_type"},
-:guards []}}])]}
+            [{:input [{:symbol "i_currency_id", :type "citext"}],
+              :return "jsonb",
+              :schema "core/application-support",
+              :id "currency_default",
+              :flags {:public true},
+              :view {:table "Currency",
+                     :type "return",
+                     :tag "default",
+                     :access {:query nil,
+                              :roles {},
+                              :relation nil,
+                              :symbol nil},
+                     :query ["*/data"],
+                     :guards []}}
+             {:input [],
+              :return "jsonb",
+              :schema "core/application-support",
+              :id "currency_all",
+              :flags {:public true},
+              :view {:table "Currency",
+                     :type "select",
+                     :tag "all",
+                     :access {:query nil,
+                              :roles {},
+                              :relation nil,
+                              :symbol nil},
+                     :query nil,
+                     :guards []}}
+             {:input [{:symbol "i_type", :type "text"}],
+              :return "jsonb",
+              :schema "core/application-support",
+              :id "currency_by_type",
+              :flags {:public true},
+              :view {:table "Currency",
+                     :type "select",
+                     :tag "by_type",
+                     :access {:query nil,
+                              :roles {},
+                              :relation nil,
+                              :symbol nil},
+                     :query {"type" "i_type"},
+                     :guards []}}])]}
 (fact "collect views into views structure"
 
   (!.js
@@ -217,11 +217,11 @@
       {"a" {"b" {"sub" {"d" {"id" "d"}, "c" {"id" "c"}}, "id" "b"}}}]
 
   (!.lua [(ut/lu-map
-          {:a [{:id "b"}]})
-         (ut/lu-map
-          {:a [{:id "b"
-                :sub [{:id "c"}
-                      {:id "d"}]}]})])
+           {:a [{:id "b"}]})
+          (ut/lu-map
+           {:a [{:id "b"
+                 :sub [{:id "c"}
+                       {:id "d"}]}]})])
   => [{"a" {"b" {"id" "b"}}}
       {"a" {"b" {"sub" {"d" {"id" "d"}, "c" {"id" "c"}}, "id" "b"}}}]
 

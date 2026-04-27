@@ -31,15 +31,15 @@
    (call/decode-return (xt/x:json-encode
                         {:status "ok"
                          :data 1})
-                        nil))
+                       nil))
   => 1
 
   ^{:lang-exceptions {:dart {:skip true}}}
   (!.js
    (call/decode-return (xt/x:json-encode
-                         {:status "error"
+                        {:status "error"
                          :data "NOT VALID"})
-                        nil))
+                       nil))
   => (throws))
 
 ^{:refer xt.db.schema.sql-call/call-format-input :added "4.0"}
