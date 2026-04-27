@@ -2,27 +2,28 @@
   (:require [rt.postgres :as pg]
             [std.lang :as l]
             [xt.lib.db.gen-bind :as bind]
-            [xt.lib.db.sample-data-test :as data]
-            [xt.lib.db.sample-user-test :as user])
+            [xt.db.helpers.seed-system-test :as data]
+            [xt.db.helpers.seed-user-test :as user])
   (:use code.test))
 
+^{:seedgen/root {:all true, :langs [:lua :python]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-data :as xtd]
-              [xt.db.schema.base-view :as v]
-              [xt.db.schema.base-util :as ut]]})
+             [xt.db.schema.base-view :as v]
+             [xt.db.schema.base-util :as ut]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.common-data :as xtd]
-              [xt.db.schema.base-view :as v]
-              [xt.db.schema.base-util :as ut]]})
+             [xt.db.schema.base-view :as v]
+             [xt.db.schema.base-util :as ut]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.lang.common-data :as xtd]
-              [xt.db.schema.base-view :as v]
-              [xt.db.schema.base-util :as ut]]})
+             [xt.db.schema.base-view :as v]
+             [xt.db.schema.base-util :as ut]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -30,80 +31,70 @@
 
 (def +views+
   (mapv (comp pg/bind-view deref resolve second)
-        (concat (pg/list-view 'xt.lib.db.sample-data-test :select)
-                (pg/list-view 'xt.lib.db.sample-data-test :return)
-                (pg/list-view 'xt.lib.db.sample-user-test :select)
-                (pg/list-view 'xt.lib.db.sample-user-test :return))))
+        (concat (pg/list-view 'xt.db.helpers.seed-system-test :select)
+                (pg/list-view 'xt.db.helpers.seed-system-test :return)
+                (pg/list-view 'xt.db.helpers.seed-user-test :select)
+                (pg/list-view 'xt.db.helpers.seed-user-test :return))))
 
-^{:refer xt.db.schema.base-view/all-overview :added "4.0"}
+^{:refer xt.db.schema.base-view/all-overview :added "4.0"
+  :setup [(def +all-overview-check+
+            (just-in 
+             {"RegionCity"
+              {"return" (just ["with_access" "default" "info"] :in-any-order),
+               "select" (just ["by_country" "by_state"] :in-any-order)},
+              "Organisation"
+              {"return" (just ["view_membership" "view_default"] :in-any-order),
+               "select" (just ["by_name" "all_as_owner" "all_as_admin" "all_as_member"]  :in-any-order)},
+              "RegionState"
+              {"return" (just ["default" "info"] :in-any-order),
+               "select" ["by_country"]},
+              "UserAccount"
+              {"return" ["info"], "select" ["by_organisation"]},
+              "Currency"
+              {"return" (just ["default" "info"]  :in-any-order),
+               "select" (just ["all" "all_fiat" "all_crypto" "by_type" "by_country"]  :in-any-order)},
+              "RegionCountry"
+              {"return" (just ["with_access" "default" "info"] :in-any-order),
+               "select" (just ["by_name" "all"] :in-any-order)}}))]}
 (fact "gets an overview of the views"
 
   (!.js
-   (v/all-overview (ut/collect-views (@! +views+))))
-  => {"RegionCity"
-      {"return" ["with_access" "default" "info"],
-       "select" ["by_country" "by_state"]},
-      "Organisation"
-      {"return" ["view_membership" "view_default"],
-       "select"
-       ["by_name" "all_as_owner" "all_as_admin" "all_as_member"]},
-      "RegionState"
-      {"return" ["default" "info"], "select" ["by_country"]},
-      "UserAccount" {"return" ["info"], "select" ["by_organisation"]},
-      "Currency"
-      {"return" ["default" "info"],
-       "select" ["all" "all_fiat" "all_crypto" "by_type" "by_country"]},
-      "RegionCountry"
-      {"return" ["with_access" "default" "info"],
-       "select" ["by_name" "all"]}}
+    (v/all-overview (ut/collect-views (@! +views+))))
+  => +all-overview-check+
 
-  (set (!.lua
-        (xtd/obj-keys (v/all-overview (ut/collect-views (@! +views+))))))
-  => #{"RegionCity" "Organisation" "RegionState" "UserAccount" "Currency" "RegionCountry"}
+  (!.lua
+    (v/all-overview (ut/collect-views (@! +views+))))
+  => +all-overview-check+
 
   (!.py
    (v/all-overview (ut/collect-views (@! +views+))))
-  => {"RegionCity"
-      {"return" ["with_access" "default" "info"],
-       "select" ["by_country" "by_state"]},
-      "Organisation"
-      {"return" ["view_membership" "view_default"],
-       "select"
-       ["by_name" "all_as_owner" "all_as_admin" "all_as_member"]},
-      "RegionState"
-      {"return" ["default" "info"], "select" ["by_country"]},
-      "UserAccount" {"return" ["info"], "select" ["by_organisation"]},
-      "Currency"
-      {"return" ["default" "info"],
-       "select" ["all" "all_fiat" "all_crypto" "by_type" "by_country"]},
-      "RegionCountry"
-      {"return" ["with_access" "default" "info"],
-       "select" ["by_name" "all"]}})
+  => +all-overview-check+)
 
 ^{:refer xt.db.schema.base-view/all-keys :added "4.0"}
 (fact "gets all table keys for a view"
 
-  (set (!.js
-        (v/all-keys (ut/collect-views (@! +views+))
-                    "Currency"
-                    "select")))
-  => #{"by_country" "all_fiat" "all" "all_crypto" "by_type"}
+  (!.js
+    (v/all-keys (ut/collect-views (@! +views+))
+                "Currency"
+                "select"))
+  => (just ["all" "all_fiat" "all_crypto" "by_type" "by_country"] :in-any-order)
 
-  (set (!.lua
-        (v/all-keys (ut/collect-views (@! +views+))
-                    "Currency"
-                    "select")))
-  => #{"by_country" "all_fiat" "all" "all_crypto" "by_type"}
+  (!.lua
+    (v/all-keys (ut/collect-views (@! +views+))
+                "Currency"
+                "select"))
+  => (just ["all" "all_fiat" "all_crypto" "by_type" "by_country"] :in-any-order)
 
-  (set (!.py
-        (v/all-keys (ut/collect-views (@! +views+))
-                    "Currency"
-                    "select")))
-  => #{"by_country" "all_fiat" "all" "all_crypto" "by_type"})
+  (!.py
+   (v/all-keys (ut/collect-views (@! +views+))
+               "Currency"
+               "select"))
+  => (just ["all" "all_fiat" "all_crypto" "by_type" "by_country"] :in-any-order))
 
 ^{:refer xt.db.schema.base-view/all-methods :added "4.0"
-  :setup [(def +methods+
-            '(["Currency" "return" "default"]
+  :setup [(def +all-methods-check+
+            (just 
+             [["Currency" "return" "default"]
               ["Currency" "return" "info"]
               ["Currency" "select" "all"]
               ["Currency" "select" "all_crypto"]
@@ -130,17 +121,26 @@
               ["RegionState" "return" "info"]
               ["RegionState" "select" "by_country"]
               ["UserAccount" "return" "info"]
-              ["UserAccount" "select" "by_organisation"]))]}
+              ["UserAccount" "select" "by_organisation"]]
+             :in-any-order))]}
 (fact "gets all methods for views"
+  
+  (!.js
+    (v/all-methods (ut/collect-views (@! +views+))))
+  => +all-methods-check+
 
-  (sort (!.js
-         (v/all-methods (ut/collect-views (@! +views+)))))
-  => +methods+
+  (!.lua
+    (v/all-methods (ut/collect-views (@! +views+))))
+  => +all-methods-check+
 
-  (sort (!.lua
-         (v/all-methods (ut/collect-views (@! +views+)))))
-  => +methods+
+  (!.py
+   (v/all-methods (ut/collect-views (@! +views+))))
+  => +all-methods-check+)
 
-  (sort (!.py
-         (v/all-methods (ut/collect-views (@! +views+)))))
-  => +methods+)
+(comment
+  (s/run ['xt.db.schema.base-view])
+  (s/seedgen-benchadd '[xt.lang.spec] {:lang [:r] :write true})
+  (s/seedgen-benchadd '[xt.db.schema.base-view] {:lang [:julia :dart] :write true})
+  
+  (s/seedgen-langadd 'xt.db.schema.base-view {:lang [:lua :python] :write true})
+  (s/seedgen-langremove 'xt.db.schema.base-view {:lang [:lua :python] :write true}))

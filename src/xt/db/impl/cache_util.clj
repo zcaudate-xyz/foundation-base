@@ -36,21 +36,29 @@
   "merges a single entry"
   {:added "4.0"}
   [rows table-key id new-record new-fn]
-  (let [incoming-record (or new-record {})
-        entry    (or (-/get-entry rows table-key id)
-                     {:record {:id id
-                               :data {}
-                               :ref-links {}
-                               :rev-links {}}})
-        #{data rev-links ref-links} incoming-record
-        #{record} entry
-        _ (xt/x:obj-assign (xt/x:get-key record "data") data)
-        _ (xtd/swap-key record "ref_links" xtd/obj-assign-with [ref-links xt/x:obj-assign])
-        _ (xtd/swap-key record "rev_links" xtd/obj-assign-with [rev-links xt/x:obj-assign])
-        new-entry  (new-fn {:t (xt/x:now-ms)
-                            :record record})]
-    (xtd/set-in rows [table-key id] new-entry)
-    (return new-entry)))
+  (var incoming-record (or new-record {}))
+  (var entry (-/get-entry rows table-key id))
+  (when (not (xt/x:is-object? entry))
+    (:= entry {:record {:id id
+                        :data {}
+                        :ref-links {}
+                        :rev-links {}}}))
+  (var record (xt/x:get-key entry "record"))
+  (var data (or (xt/x:get-key incoming-record "data")
+                {}))
+  (var ref-links (or (xt/x:get-key incoming-record "ref_links")
+                     (xt/x:get-key incoming-record "ref-links")
+                     {}))
+  (var rev-links (or (xt/x:get-key incoming-record "rev_links")
+                     (xt/x:get-key incoming-record "rev-links")
+                     {}))
+  (xtd/swap-key record "data" xt/x:obj-assign [data])
+  (xtd/swap-key record "ref_links" xtd/obj-assign-with [ref-links xt/x:obj-assign])
+  (xtd/swap-key record "rev_links" xtd/obj-assign-with [rev-links xt/x:obj-assign])
+  (var new-entry (new-fn {:t (xt/x:now-ms)
+                          :record record}))
+  (xtd/set-in rows [table-key id] new-entry)
+  (return new-entry))
 
 (defn.xt merge-bulk
   "merges flattened data into the database"
