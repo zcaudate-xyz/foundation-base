@@ -55,8 +55,36 @@
   (binding [context/*print* #{:print-bulk}]
     (clojure.string/includes? (env/with-out-str
                      (executive/summarise-bulk nil {:id {:data {:passed [] :failed [] :throw [] :timeout []}}} nil))
-                   "Summary"))
+                    "Summary"))
   => true)
+
+^{:refer code.test.base.executive/summarise-bulk :added "4.1"}
+(fact "aggregates detailed failures from wrapped namespace summaries"
+  (let [captured (atom nil)
+        summary-a (with-meta {:passed 2 :failed 1 :throw 0 :timeout 0}
+                    {:data {:passed [:ok-a :ok-b]
+                            :failed [{:meta {:line 10 :ns 'demo.alpha-test}}]
+                            :throw []
+                            :timeout []}})
+        summary-b (with-meta {:passed 1 :failed 0 :throw 1 :timeout 0}
+                    {:data {:passed [:ok-c]
+                            :failed []
+                            :throw [{:meta {:line 20 :ns 'demo.beta-test}}]
+                            :timeout []}})]
+    (binding [context/*settings* {:save-run false}]
+      (with-redefs [executive/save-report-paths (fn [items selector params]
+                                                  (reset! captured [items selector params])
+                                                  {})]
+        (executive/summarise-bulk nil
+                                  {'demo.alpha-test {:data summary-a}
+                                   'demo.beta-test  {:data summary-b}}
+                                  nil)
+        @captured)))
+  => [{:failed [{:meta {:line 10 :ns 'demo.alpha-test}}]
+       :throw [{:meta {:line 20 :ns 'demo.beta-test}}]
+       :timeout []}
+      ['demo.alpha-test 'demo.beta-test]
+      {:save-run false}])
 
 ^{:refer code.test.base.executive/save-report :added "4.1"}
 (fact "saves the report to .hara/runs"

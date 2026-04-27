@@ -295,33 +295,54 @@
   ([items]
    (save-report items nil context/*settings*))
   ([items selector params]
-   (-> (save-report-paths items selector params)
-       (announce-artifacts)
-       (:run-path))))
+    (-> (save-report-paths items selector params)
+        (announce-artifacts)
+        (:run-path))))
+
+(def ^:private +bulk-report-keys+
+  [:failed :throw :timeout])
+
+(defn- bulk-report-data
+  "extracts detailed bulk report collections from an item result"
+  {:added "4.1"}
+  [item]
+  (let [summary (:data item)
+        details (or (some-> summary meta :data)
+                    (:data (meta item))
+                    summary)]
+    (if (map? details)
+      (select-keys details +bulk-report-keys+)
+      {})))
+
+(defn- merge-bulk-report-data
+  [out item]
+  (reduce (fn [out k]
+            (let [data (get (bulk-report-data item) k)]
+              (if (coll? data)
+                (update out k (fnil into []) data)
+                out)))
+          out
+          +bulk-report-keys+))
 
 (defn summarise-bulk
   "creates a summary of all bulk results"
   {:added "3.0"}
   ([_ items _]
    (let [_           (reset! +latest+ {})
-          item-entries (if (map? items) items (seq items))
-         all-items   (reduce (fn [out [id item]]
-                               (reduce (fn [out [k data]]
-                                         (update-in out [k] concat data))
-                                       out
-                                       (or (:data item)
-                                           (:data (meta item)))))
-                             {}
+         item-entries (if (map? items) items (seq items))
+         all-items    (reduce (fn [out [id item]]
+                                (merge-bulk-report-data out item))
+                              {}
                               (remove (fn [[ns item]]
                                         (when (= :error (:status item))
                                           (swap! +latest+ update-in [:errored] conj ns)
                                           true))
                                       item-entries))]
-      (let [artifacts (save-report-paths all-items
-                                         (mapv first item-entries)
-                                         context/*settings*)
-            notices   (artifact-notices artifacts)]
-        (cond-> (summarise all-items)
+       (let [artifacts (save-report-paths all-items
+                                          (mapv first item-entries)
+                                          context/*settings*)
+             notices   (artifact-notices artifacts)]
+         (cond-> (summarise all-items)
           (seq notices)
           (vary-meta assoc :std.task/after-summary notices))))))
 
