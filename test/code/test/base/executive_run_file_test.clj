@@ -91,7 +91,25 @@
   => [{:queued ()}
       'demo.core
       {:save-run true
-       :run-command 'code.test/run}])
+        :run-command 'code.test/run}])
+
+^{:refer code.test.base.executive/test-namespace :added "4.1"}
+(fact "skips per-namespace report saving for bulk runs"
+  (let [captured (atom nil)]
+    (with-redefs [rt/all-facts (fn [_] {})
+                  executive/accumulate (fn [& _] [])
+                  executive/interim (fn [_] {})
+                  rt/get-global (fn [& _] nil)
+                  executive/save-report (fn [items selector params]
+                                          (reset! captured [items selector params]))]
+      (executive/test-namespace 'demo.core
+                                {:bulk true
+                                 :save-run true
+                                 :run-command 'code.test/run}
+                                nil
+                                {:root "."})
+      @captured))
+  => nil)
 
 ^{:refer code.test.base.executive/summarise-bulk :added "4.1"}
 (fact "routes bulk helper saving through save-report"
@@ -120,3 +138,21 @@
        ['demo.alpha-test 'demo.beta-test]
        {:save-run true
         :run-command 'code.test/run}]])
+
+^{:refer code.test.base.executive/summarise-bulk :added "4.1"}
+(fact "defers bulk save notices until after summary printing"
+  (binding [context/*settings* {:save-run true
+                                :run-command 'code.test/run}]
+    (with-redefs [executive/save-report-paths (fn [& _]
+                                                {:report-path "tmp/report.edn"
+                                                 :run-path "tmp/report.run.edn"})]
+      (-> (executive/summarise-bulk nil
+                                    {'demo.alpha-test {:data {:passed []
+                                                              :failed []
+                                                              :throw []
+                                                              :timeout []}}}
+                                    nil)
+          meta
+          :std.task/after-summary)))
+  => ["Report saved to tmp/report.edn"
+      "Run helper saved to tmp/report.run.edn"])

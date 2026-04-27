@@ -88,6 +88,30 @@
                 100)
   => map?)
 
+^{:refer std.task.bulk/bulk-summary :added "4.1"}
+(fact "prints deferred summary notices after the summary output"
+  (let [calls (atom [])
+        task  {:summary {:finalise (fn [& _]
+                                     (with-meta {:items 1
+                                                 :results 1}
+                                       {:std.task/after-summary ["saved"]}))}}]
+    (with-redefs [std.print/print (fn [& args]
+                                    (swap! calls conj (vec (cons :print args))))
+                  std.print/print-subtitle (fn [& args]
+                                             (swap! calls conj (vec (cons :subtitle args))))
+                  std.print/println (fn [& args]
+                                      (swap! calls conj (vec (cons :println args))))]
+      (bulk-summary task
+                    {:print {:summary true}}
+                    [[1 {:time 10 :status :return :data 1}]]
+                    []
+                    []
+                    []
+                    100)
+      [(-> @calls last first)
+       (-> @calls last second)]))
+  => [:println "saved"])
+
 ^{:refer std.task.bulk/bulk-package :added "3.0"}
 (fact "packages results for return"
 

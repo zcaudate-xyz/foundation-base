@@ -1,12 +1,13 @@
 (ns code.test.base.executive-test
   (:require [clojure.edn :as edn]
-            [clojure.string]
-            [code.project :as project]
-            [code.test.base.context :as context]
-            [code.test.base.executive :as executive]
-            [code.test.base.print :as print]
-            [code.test.base.runtime :as rt]
-            [std.lib.env :as env])
+             [clojure.string]
+             [code.project :as project]
+             [code.test.base.context :as context]
+             [code.test.base.executive :as executive]
+             [code.test.base.print :as print]
+             [code.test.base.runtime :as rt]
+             [std.lib.env :as env]
+             [std.print])
   (:use [code.test :exclude [run]]))
 
 (defn notify [data]
@@ -59,15 +60,18 @@
 
 ^{:refer code.test.base.executive/save-report :added "4.1"}
 (fact "saves the report to .hara/runs"
-  (with-redefs [std.fs/create-directory (fn [_] :created)
-                clojure.core/spit (fn [_ _] :spit)
-                clojure.core/println (fn [_] :printed)]
-    (executive/save-report {:failed [{:from :verify :data 1}]}))
-  => :printed
+  (let [prints (atom [])]
+    (with-redefs [std.fs/create-directory (fn [_] :created)
+                  clojure.core/spit (fn [_ _] :spit)
+                  std.print/println (fn [& args]
+                                      (swap! prints conj args))]
+      (executive/save-report {:failed [{:from :verify :data 1}]})
+      (-> @prints first first)))
+  => #"^Report saved to "
 
   (with-redefs [std.fs/create-directory (fn [_] :created)
                 clojure.core/spit (fn [_ _] :spit)
-                clojure.core/println (fn [_] :printed)]
+                std.print/println (fn [& _] :printed)]
     (executive/save-report {:passed []}))
   => nil)
 
@@ -81,7 +85,7 @@
       (with-redefs [std.fs/create-directory (fn [_] :created)
                     clojure.core/spit (fn [_ content]
                                         (reset! report content))
-                    clojure.core/println (fn [_] :printed)]
+                    std.print/println (fn [& _] :printed)]
         (executive/save-report
          {:failed [{:status :success
                     :data false
