@@ -10,8 +10,7 @@
             [std.lang.model.spec-dart.rewrite :as rewrite]
             [std.lang.model.spec-xtalk.fn-dart :as fn-dart]
             [std.lib.collection :as collection]
-            [std.lib.template :as template]
-            [std.lib.walk :as walk]))
+            [std.lib.template :as template]))
 
 (defn dart-map-key
   [key grammar mopts]
@@ -31,24 +30,51 @@
   [key _grammar _mopts]
   (list '. '__globals__ [(ut/sym-default-str key)]))
 
+(defn dart-var
+  "Normalizes Dart `var` declarations so values always lower through `var* :=`.
+   This keeps collection literals and complex expressions from being misread as
+   modifiers by the generic def-assign emitter."
+  {:added "4.1"}
+  [[_ decl & args]]
+  (if (empty? args)
+    (list 'var* decl)
+    (let [bound (last args)]
+      (cond
+        (vector? decl)
+        (let [tmp (gensym "value_")]
+          (apply list 'do*
+                 (cons (list 'var* tmp := bound)
+                       (map-indexed (fn [i sym]
+                                      (list 'var* sym := (list '. tmp [i])))
+                                    decl))))
+
+        (set? decl)
+        (apply list 'do*
+               (map (fn [sym]
+                      (list 'var* sym := (list '. bound [(ut/sym-default-str sym)])))
+                    (sort-by ut/sym-default-str decl)))
+
+        :else
+        (list 'var* decl := bound)))))
+
 (defn tf-for-object
   "for object transform"
   {:added "4.0"}
   [[_ [[k v] m] & body]]
   (cond (= k '_)
-        (apply list 'for [(list 'var v) :in (list '. m 'values)]
+        (apply list 'for [(list 'var* v) :in (list '. m 'values)]
                body)
 
         (= v '_)
-        (apply list 'for [(list 'var k) :in (list '. m 'keys)]
+        (apply list 'for [(list 'var* k) :in (list '. m 'keys)]
                body)
 
         :else
         (let [entry (gensym "entry_")]
-          (apply list 'for [(list 'var entry) :in (list '. m 'entries)]
-                 (concat [(list 'var k (list '. entry 'key))
-                          (list 'var v (list '. entry 'value))]
-                         body)))))
+          (apply list 'for [(list 'var* entry) :in (list '. m 'entries)]
+                 (concat [(list 'var* k := (list '. entry 'key))
+                          (list 'var* v := (list '. entry 'value))]
+                          body)))))
 
 (defn tf-for-array
   "for array transform"
@@ -57,14 +83,14 @@
   (let [arr-sym (gensym "arr_")]
     (if (vector? e)
       (let [[i v] e]
-        (template/$ (do (var ~arr-sym ~arr)
-                        (for [(var ~i := 0) (< ~i (. ~arr-sym length)) (:++ ~i)]
-                          (var ~v (. ~arr-sym [~i]))
+        (template/$ (do (var* ~arr-sym := ~arr)
+                        (for [(var* ~i := 0) (< ~i (. ~arr-sym length)) (:++ ~i)]
+                          (var* ~v := (. ~arr-sym [~i]))
                           ~@body))))
       (let [i (gensym "i")]
-        (template/$ (do (var ~arr-sym ~arr)
-                        (for [(var ~i := 0) (< ~i (. ~arr-sym length)) (:++ ~i)]
-                          (var ~e (. ~arr-sym [~i]))
+        (template/$ (do (var* ~arr-sym := ~arr)
+                        (for [(var* ~i := 0) (< ~i (. ~arr-sym length)) (:++ ~i)]
+                          (var* ~e := (. ~arr-sym [~i]))
                           ~@body)))))))
 
 (defn tf-for-iter
@@ -72,26 +98,10 @@
   {:added "4.0"}
   [[_ [e it] & body]]
   (let [it-sym (gensym "iter_")]
-    (template/$ (do (var ~it-sym ~it)
+    (template/$ (do (var* ~it-sym := ~it)
                     (while (. ~it-sym (moveNext))
-                      (var ~e (. ~it-sym current))
+                      (var* ~e := (. ~it-sym current))
                       ~@body)))))
-
-(defn tf-for-return
-  "for return transform"
-  {:added "4.0"}
-  [[_ [[res err] statement] {:keys [success error final]}]]
-  (let [cb (list 'fn [err res]
-                 (list 'if err
-                       error
-                       success))
-        out (walk/prewalk (fn [x]
-                            (if (= x '(x:callback))
-                              cb
-                           x))
-                          statement)]
-    (cond->> out
-      final (list 'return))))
 
 (defn dart-tf-ternary
   "nil-safe ternary transform for dart-specific rewrites"
@@ -108,17 +118,18 @@
                                :block
                                :data-set])
        (grammar/build:override
-        {:var         {:symbol '#{var var*} :raw "var"}
-         :defn        {:symbol '#{defn}}
-         :new         {:symbol '#{new} :raw "new" :emit :new}
-         :for-object  {:macro #'tf-for-object :emit :macro}
-        :for-array   {:macro #'tf-for-array  :emit :macro}
-        :for-iter    {:macro #'tf-for-iter   :emit :macro}
-        :with-global {:value true :raw "__globals__"}})
-      (grammar/build:override fn-dart/+dart+)
-      (grammar/build:extend
-         {:dart-or      {:op :dart-or      :symbol #{'dart:or}      :emit :infix             :raw "??"}
-          :dart-ternary {:op :dart-ternary :symbol #{'dart:ternary} :macro #'dart-tf-ternary :emit :macro}})))
+        {:var         {:symbol '#{var*} :raw "var"}
+          :defn        {:symbol '#{defn}}
+          :new         {:symbol '#{new} :raw "new" :emit :new}
+          :for-object  {:macro #'tf-for-object :emit :macro}
+         :for-array   {:macro #'tf-for-array  :emit :macro}
+         :for-iter    {:macro #'tf-for-iter   :emit :macro}
+         :with-global {:value true :raw "__globals__"}})
+       (grammar/build:override fn-dart/+dart+)
+        (grammar/build:extend
+           {:dart-or      {:op :dart-or      :symbol #{'dart:or}      :emit :infix             :raw "??"}
+            :dart-ternary {:op :dart-ternary :symbol #{'dart:ternary} :macro #'dart-tf-ternary :emit :macro}
+            :dart-var     {:op :dart-var     :symbol #{'var}          :macro #'dart-var         :emit :macro}})))
 
 (def +template+
   (-> (emit/default-grammar)

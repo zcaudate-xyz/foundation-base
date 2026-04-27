@@ -421,11 +421,11 @@
    :x-return-eval    {:macro #'dart-tf-x-return-eval     :emit :macro}})
 
 (defn dart-tf-x-with-delay
-  [[_ thunk ms]]
+  [[_ ms thunk]]
   (template/$
    (Future.delayed
-    (:- "Duration(milliseconds: " ~ms ")")
-    (fn [] (return (~thunk))))))
+     (:- "Duration(milliseconds: " ~ms ")")
+     (fn [] (return (~thunk))))))
 
 (defn dart-tf-x-promise
   [[_ thunk]]
@@ -467,11 +467,8 @@
   (template/$
    (. (Socket.connect ~host ~port)
       (then (fn [conn]
-              (return (. (Future.sync (fn []
-                                        (return (~cb nil conn))))
-                         (whenComplete (fn []
-                                         (. conn (destroy))
-                                         (return nil)))))))
+              (return (Future.sync (fn []
+                                     (return (~cb nil conn)))))))
       (catchError (fn [err]
                     (return (~cb err nil)))))))
 
@@ -485,8 +482,7 @@
   (template/$
    (. (. ~conn (flush))
       (then (fn [_]
-              (. ~conn (destroy))
-              (return nil))))))
+              (return (. ~conn (close))))))))
 
 (def +dart-socket+
   {:x-socket-connect {:macro #'dart-tf-x-socket-connect :emit :macro}

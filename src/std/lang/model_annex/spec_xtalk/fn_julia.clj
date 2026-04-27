@@ -1,4 +1,5 @@
-(ns std.lang.model-annex.spec-xtalk.fn-julia)
+(ns std.lang.model-annex.spec-xtalk.fn-julia
+  (:require [std.lib.template :as template]))
 
 (defn julia-tf-x-del
   [[_ obj]]
@@ -307,25 +308,67 @@
 
 (defn julia-tf-x-return-encode
   ([[_ out id key]]
-   (list 'JSON.json {:id id
-                     :key key
-                     :type "data"
-                     :value out})))
+   (template/$
+    (do (var type-fn
+             (fn [obj]
+               (cond (== obj nil)
+                     (return "nil")
+
+                     (isa obj Dict)
+                     (return "object")
+
+                     (isa obj AbstractArray)
+                     (return "array")
+
+                     (isa obj Function)
+                     (return "function")
+
+                     (isa obj Bool)
+                     (return "boolean")
+
+                     (isa obj Number)
+                     (return "number")
+
+                     (isa obj AbstractString)
+                     (return "string")
+
+                     :else
+                     (return (string (typeof obj))))))
+        (var ts (type-fn ~out))
+        (if (== ts "function")
+          (return (JSON.json {:id ~id
+                              :key ~key
+                              :type "raw"
+                              :return ts
+                              :value (string ~out)}))
+          (return (JSON.json {:id ~id
+                              :key ~key
+                              :type "data"
+                              :return ts
+                              :value ~out})))))))
 
 (defn julia-tf-x-return-wrap
   ([[_ f encode-fn]]
-   (list encode-fn (list f) nil nil)))
+   (template/$
+    (do (var out (~f))
+        (if (applicable ~encode-fn out)
+          (return (~encode-fn out))
+          (return (~encode-fn out nil nil)))))))
 
 (defn julia-tf-x-return-eval
   ([[_ s wrap-fn]]
-   (list wrap-fn
-         (list 'fn []
-               (list 'include_string 'Main s)))))
+   (template/$
+    (return (~wrap-fn
+             (fn []
+               (return (include_string Main ~s))))))))
 
 (def +julia-return+
-  {:x-return-encode  {:macro #'julia-tf-x-return-encode   :emit :macro}
-   :x-return-wrap    {:macro #'julia-tf-x-return-wrap     :emit :macro}
-   :x-return-eval    {:macro #'julia-tf-x-return-eval     :emit :macro}})
+  {:x-return-encode  {:macro #'julia-tf-x-return-encode   :emit :macro
+                      :op-spec {:allow-blocks true}}
+   :x-return-wrap    {:macro #'julia-tf-x-return-wrap     :emit :macro
+                      :op-spec {:allow-blocks true}}
+   :x-return-eval    {:macro #'julia-tf-x-return-eval     :emit :macro
+                      :op-spec {:allow-blocks true}}})
 
 (def +julia+
   (merge +julia-core+

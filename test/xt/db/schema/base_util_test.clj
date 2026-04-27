@@ -1,39 +1,39 @@
-(ns xt.lib.db.base-util-test
+(ns xt.db.schema.base-util-test
   (:require [std.lang :as l])
   (:use code.test))
 
+^{:seedgen/root {:all true, :langs [:lua :python]}}
 (l/script- :js
   {:runtime :oneshot
-   :config {:program :nodejs}
-   :require [[xt.lib.db.base-util :as ut]
+   :require [[xt.db.schema.base-util :as ut]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as k]]})
 
 (l/script- :lua
   {:runtime :oneshot
-   :require [[xt.lib.db.base-util :as ut]
+   :require [[xt.db.schema.base-util :as ut]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as k]]})
 
 (l/script- :python
   {:runtime :oneshot
-   :require [[xt.lib.db.base-util :as ut]
+   :require [[xt.db.schema.base-util :as ut]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as k]]})
 
-^{:refer xt.lib.db.base-util/collect-routes :added "4.0"
+^{:refer xt.db.schema.base-util/collect-routes :added "4.0"
   :setup [(def +routes+ [{:input [],
-                          :return "text",
-                          :schema "core/util",
-                          :id "ping",
-                          :flags {}
-                          :url "api/ping"}
-                         {:input [{:symbol "input", :type "text"}],
-                          :return "text",
-                          :schema "core/util",
-                          :id "echo",
-                          :flags {}
-                          :url "api/echo"}])
+                :return "text",
+                :schema "core/util",
+                :id "ping",
+                :flags {}
+                :url "api/ping"}
+               {:input [{:symbol "input", :type "text"}],
+                :return "text",
+                :schema "core/util",
+                :id "echo",
+                :flags {}
+                :url "api/echo"}])
           (def +result+
             (contains-in {"api/echo"
                           {"url" "api/echo",
@@ -64,53 +64,50 @@
    (ut/collect-routes (@! +routes+) "db"))
   => +result+)
 
-^{:refer xt.lib.db.base-util/collect-routes-object :added "4.0"}
-(fact "collects routes from an object input")
-
-^{:refer xt.lib.db.base-util/collect-views :added "4.0"
+^{:refer xt.db.schema.base-util/collect-views :added "4.0"
   :setup [(def +views+
-            [{:input [{:symbol "i_currency_id", :type "citext"}],
-              :return "jsonb",
-              :schema "core/application-support",
-              :id "currency_default",
-              :flags {:public true},
-              :view {:table "Currency",
-                     :type "return",
-                     :tag "default",
-                     :access {:query nil,
-                              :roles {},
-                              :relation nil,
-                              :symbol nil},
-                     :query ["*/data"],
-                     :guards []}}
-             {:input [],
-              :return "jsonb",
-              :schema "core/application-support",
-              :id "currency_all",
-              :flags {:public true},
-              :view {:table "Currency",
-                     :type "select",
-                     :tag "all",
-                     :access {:query nil,
-                              :roles {},
-                              :relation nil,
-                              :symbol nil},
-                     :query nil,
-                     :guards []}}
-             {:input [{:symbol "i_type", :type "text"}],
-              :return "jsonb",
-              :schema "core/application-support",
-              :id "currency_by_type",
-              :flags {:public true},
-              :view {:table "Currency",
-                     :type "select",
-                     :tag "by_type",
-                     :access {:query nil,
-                              :roles {},
-                              :relation nil,
-                              :symbol nil},
-                     :query {"type" "i_type"},
-                     :guards []}}])]}
+  [{:input [{:symbol "i_currency_id", :type "citext"}],
+    :return "jsonb",
+    :schema "core/application-support",
+    :id "currency_default",
+    :flags {:public true},
+    :view {:table "Currency",
+           :type "return",
+           :tag "default",
+           :access {:query nil,
+                    :roles {},
+                    :relation nil,
+                    :symbol nil},
+           :query ["*/data"],
+           :guards []}}
+   {:input [],
+    :return "jsonb",
+    :schema "core/application-support",
+    :id "currency_all",
+    :flags {:public true},
+    :view {:table "Currency",
+           :type "select",
+           :tag "all",
+           :access {:query nil,
+                    :roles {},
+                    :relation nil,
+                    :symbol nil},
+           :query nil,
+           :guards []}}
+   {:input [{:symbol "i_type", :type "text"}],
+    :return "jsonb",
+    :schema "core/application-support",
+    :id "currency_by_type",
+    :flags {:public true},
+    :view {:table "Currency",
+           :type "select",
+           :tag "by_type",
+           :access {:query nil,
+                    :roles {},
+                    :relation nil,
+                    :symbol nil},
+           :query {"type" "i_type"},
+           :guards []}}])]}
 (fact "collect views into views structure"
 
   (!.js
@@ -131,39 +128,39 @@
                                          "by_type" map?}
                                "return" {"default" map?}}}))
 
-^{:refer xt.lib.db.base-util/merge-views :added "4.0"}
+^{:refer xt.db.schema.base-util/merge-views :added "4.0"}
 (fact "merges multiple views together")
 
-^{:refer xt.lib.db.base-util/keepf-limit :added "4.0"}
+^{:refer xt.db.schema.base-util/keepf-limit :added "4.0"}
 (fact "keeps given limit"
 
   (!.js
    (ut/keepf-limit [1 2 3 4 5]
-	           xt/x:odd?
+                   xt/x:odd?
                    k/identity
                    3))
   => [1 3 5]
-
+  
   (!.lua
-   (ut/keepf-limit [1 2 3 4 5]
-	           xt/x:odd?
+    (ut/keepf-limit [1 2 3 4 5]
+                    xt/x:odd?
                    k/identity
                    3))
   => [1 3 5]
 
   (!.py
    (ut/keepf-limit [1 2 3 4 5]
-	           xt/x:odd?
+                   xt/x:odd?
                    k/identity
                    3))
   => [1 3 5])
 
-^{:refer xt.lib.db.base-util/lu-nested :added "4.0"}
+^{:refer xt.db.schema.base-util/lu-nested :added "4.0"}
 (fact "helper for lu-map"
 
   (!.js
-   (ut/lu-nested [{:id "1"}]
-                 (fn:> [e] e.id)))
+    (ut/lu-nested [{:id "1"}]
+                  (fn [e] (return (xt/x:get-key e "id")))))
   => {"1" {"id" "1"}}
 
   (!.lua
@@ -173,10 +170,10 @@
 
   (!.py
    (ut/lu-nested [{:id "1"}]
-                 (fn [e] (return (. e ["id"])))))
+                 (fn [e] (return (xt/x:get-key e "id")))))
   => {"1" {"id" "1"}})
 
-^{:refer xt.lib.db.base-util/lu-map :added "4.0"}
+^{:refer xt.db.schema.base-util/lu-map :added "4.0"}
 (fact "constructs a nested lu map of ids"
 
   (!.js [(ut/lu-map
@@ -189,11 +186,11 @@
       {"a" {"b" {"sub" {"d" {"id" "d"}, "c" {"id" "c"}}, "id" "b"}}}]
 
   (!.lua [(ut/lu-map
-           {:a [{:id "b"}]})
-          (ut/lu-map
-           {:a [{:id "b"
-                 :sub [{:id "c"}
-                       {:id "d"}]}]})])
+          {:a [{:id "b"}]})
+         (ut/lu-map
+          {:a [{:id "b"
+                :sub [{:id "c"}
+                      {:id "d"}]}]})])
   => [{"a" {"b" {"id" "b"}}}
       {"a" {"b" {"sub" {"d" {"id" "d"}, "c" {"id" "c"}}, "id" "b"}}}]
 
@@ -205,3 +202,15 @@
                       {:id "d"}]}]})])
   => [{"a" {"b" {"id" "b"}}}
       {"a" {"b" {"sub" {"d" {"id" "d"}, "c" {"id" "c"}}, "id" "b"}}}])
+
+^{:refer xt.db.schema.base-util/collect-routes-object :added "4.0"}
+(fact "collects routes from an object input")
+
+(comment
+
+  (s/run ['xt.db.schema.base-util])
+  (s/seedgen-benchadd '[xt.lang.spec] {:lang [:r] :write true})
+  (s/seedgen-benchadd '[xt.lang.spec] {:lang [:julia] :write true})
+  
+  (s/seedgen-langadd 'xt.db.schema.base-util {:lang [:lua :python] :write true})
+  (s/seedgen-langremove 'xt.db.schema.base-util {:lang [:lua :python] :write true}))

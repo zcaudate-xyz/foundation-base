@@ -60,7 +60,7 @@
 
 ^{:refer xt.lang.spec-base/x:get-idx :added "4.1"}
 (fact "reads the first indexed value"
-
+  
   (!.julia
     (xt/x:get-idx ["a" "b" "c"] (xt/x:offset 0)))
   => "a")

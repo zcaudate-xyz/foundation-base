@@ -46,6 +46,7 @@
 (declare dart-rewrite-statement)
 (declare dart-rewrite-statements)
 (declare dart-rewrite-conditional-expression)
+(declare rewrite-for-async-form)
 
 (defn- with-form-meta
   [source out]
@@ -164,7 +165,34 @@
     :?
     (rewrite-ternary-expression form grammar)
 
+    for:async
+    (rewrite-for-async-form form grammar)
+
     (rewrite-invoke-expression form grammar)))
+
+(defn- rewrite-for-async-form
+  [form grammar]
+  (let [[_ [[res err] statement] {:keys [success error finally]}] form
+        promise (list 'x:promise
+                      (list 'fn []
+                            (list 'return
+                                  (dart-rewrite-expression statement grammar))))
+        promise (list 'x:promise-then
+                      promise
+                      (list 'fn [res]
+                            (dart-rewrite-statement success grammar)))
+        promise (list 'x:promise-catch
+                      promise
+                      (list 'fn [err]
+                            (dart-rewrite-statement error grammar)))]
+    (with-form-meta
+      form
+      (if finally
+        (list 'x:promise-finally
+              promise
+              (list 'fn []
+                    (dart-rewrite-statement finally grammar)))
+        promise))))
 
 (defn- rewrite-conditional-expression-list
   [form grammar]
@@ -329,14 +357,15 @@
     (not (collection/form? form))
     (dart-rewrite-expression form grammar)
 
-    :else
-    (case (first form)
-      (do do*)      (rewrite-do-statement form grammar)
-      (var var* :=) (rewrite-var-statement form grammar)
-      return        (rewrite-return-statement form grammar)
-      if            (rewrite-if-statement form grammar)
-      when          (rewrite-when-statement form grammar)
-      while         (rewrite-while-statement form grammar)
+     :else
+     (case (first form)
+       (do do*)      (rewrite-do-statement form grammar)
+       (var var* :=) (rewrite-var-statement form grammar)
+       for:async     (rewrite-for-async-form form grammar)
+       return        (rewrite-return-statement form grammar)
+       if            (rewrite-if-statement form grammar)
+       when          (rewrite-when-statement form grammar)
+       while         (rewrite-while-statement form grammar)
       (defn defn- defgen)
       (rewrite-defn-statement form grammar)
       fn
