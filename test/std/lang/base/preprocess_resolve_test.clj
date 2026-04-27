@@ -73,6 +73,27 @@
                                identity))
   => '(fn [value] (return (quote value)))
 
+  (let [entry (impl-entry/create-macro
+               '(defmacro hello
+                  ([value]
+                   (list 'quote value)))
+               {:lang :lua
+                :module 'L.core
+                :namespace 'L.core
+                :standalone true})]
+    (process-namespaced-symbol 'u/hello
+                               {'L.core {:fragment {'hello entry}}}
+                               {:module {:id 'L.util
+                                         :link '{u L.core}}}
+                               (volatile! #{})
+                               (volatile! #{})
+                               (fn [form]
+                                 (if (and (list? form)
+                                          (= 'fn (first form)))
+                                   '(walked-standalone-fn)
+                                   form))))
+  => '(walked-standalone-fn)
+
   (process-namespaced-symbol 'u/identity-fn
                              (:modules prep/+book-min+)
                              {:module {:id 'L.util

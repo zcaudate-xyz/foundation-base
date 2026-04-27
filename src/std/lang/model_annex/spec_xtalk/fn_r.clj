@@ -33,11 +33,34 @@
 
 (defn r-tf-x-print
   ([[_ & args]]
-   (apply list 'print args)))
+   (let [out (cond (empty? args) nil
+                   (= 1 (count args)) (first args)
+                   :else (cons 'x:cat args))]
+     (template/$
+      (do (print ~out)
+          nil)))))
 
 (defn r-tf-x-shell
-  ([[_ s cm]]
-   (template/$ (system ~s))))
+  ([[_ s root cb]]
+   (template/$
+    (tryCatch
+     (block
+       (var command := (:? (x:nil? ~root)
+                           ~s
+                           (paste0 "cd " (shQuote ~root) " && " ~s)))
+       (var output := (system2 "sh" (c "-lc" command)
+                               :stdout true
+                               :stderr true))
+       (var status := (attr output "status"))
+       (var out := (paste output :collapse "\n"))
+       (if (is.null status)
+         (~cb nil out)
+         (~cb {:code status
+               :err out
+               :out out}
+              nil)))
+     :error (fn [err]
+              (~cb err nil))))))
 
 (defn r-tf-x-random
   [_]
@@ -83,7 +106,6 @@
    :x-random         {:macro #'r-tf-x-random  :emit :macro}
    :x-apply          {:macro #'r-tf-x-apply   :emit :macro}
    :x-print          {:macro #'r-tf-x-print         :emit :macro}
-   :x-shell          {:macro #'r-tf-x-shell         :emit :macro}
    :x-now-ms         {:default '(floor (* 1000 (as.numeric (Sys.time)))) :emit :unit}
    :x-type-native    {:macro #'r-tf-x-type-native    :emit :macro}
    :x-unpack         {:emit :throw}})
@@ -494,8 +516,20 @@
    (list 'paste arr :collapse s)))
 
 (defn r-tf-x-str-index-of
-  ([[_ s tok]]
-   (list 'x:get-idx (list 'gregexpr :text s :pattern tok) 1)))
+  ([[_ s tok & [start]]]
+   (template/$
+    (do (var local-start := (:? (or (is.null ~start)
+                                    (<= ~start 1))
+                                1
+                                ~start))
+        (var segment := (:? (<= local-start 1)
+                            ~s
+                            (substr ~s local-start (nchar ~s))))
+        (var idx := (regexpr ~tok segment :fixed true))
+        (:? (< idx 0)
+            idx
+            (+ (- local-start 1)
+               (- idx 1)))))))
 
 (defn r-tf-x-str-substring
   ([[_ s start & [end]]]
@@ -608,16 +642,20 @@
 (defn r-tf-x-return-wrap
   ([[_ f encode-fn]]
    (template/$
-     (do* (library "jsonlite")
-          (tryCatch
-           (block
-             (var out := (~f))
-             (~encode-fn out nil nil))
-           :error (fn [err]
-                    (toJSON {:type "error"
-                             :return "error"
-                            :value (toString err)}
-                           :auto-unbox true :null "null")))))))
+      (do* (library "jsonlite")
+           (tryCatch
+            (block
+              (var out := (~f))
+              (tryCatch
+               (block
+                 (~encode-fn out))
+               :error (fn [encode-err]
+                        (~encode-fn out nil nil))))
+            :error (fn [err]
+                     (toJSON {:type "error"
+                              :return "error"
+                             :value (toString err)}
+                            :auto-unbox true :null "null")))))))
 
 (defn r-tf-x-return-eval
   ([[_ s wrap-fn]]
@@ -630,13 +668,106 @@
    :x-return-wrap    {:macro #'r-tf-x-return-wrap     :emit :macro}
    :x-return-eval    {:macro #'r-tf-x-return-eval     :emit :macro}})
 
+(defn r-tf-x-bit-and
+  [[_ i1 i2]]
+  (list 'bitwAnd i1 i2))
+
+(defn r-tf-x-bit-or
+  [[_ i1 i2]]
+  (list 'bitwOr i1 i2))
+
+(defn r-tf-x-bit-lshift
+  [[_ x n]]
+  (list 'bitwShiftL x n))
+
+(defn r-tf-x-bit-rshift
+  [[_ x n]]
+  (list 'bitwShiftR x n))
+
+(defn r-tf-x-bit-xor
+  [[_ x n]]
+  (list 'bitwXor x n))
+
+(def +r-bit+
+  {:x-bit-and        {:macro #'r-tf-x-bit-and    :emit :macro}
+   :x-bit-or         {:macro #'r-tf-x-bit-or     :emit :macro}
+   :x-bit-lshift     {:macro #'r-tf-x-bit-lshift :emit :macro}
+   :x-bit-rshift     {:macro #'r-tf-x-bit-rshift :emit :macro}
+   :x-bit-xor        {:macro #'r-tf-x-bit-xor    :emit :macro}})
+
+;;
+;; SHELL
+;;
+
+(defn r-tf-x-pwd
+  [[_]]
+  (template/$
+   (:? (== "" (Sys.getenv "PWD" :unset ""))
+       (getwd)
+       (Sys.getenv "PWD" :unset ""))))
+
+(def +r-shell+
+  {:x-pwd            {:macro #'r-tf-x-pwd    :emit :macro}
+   :x-shell          {:macro #'r-tf-x-shell  :emit :macro
+                      :op-spec {:allow-blocks true}}})
+
+;;
+;; FILE
+;;
+
+(defn r-tf-x-file-resolve
+  [[_ root relpath]]
+  (template/$
+   (normalizePath
+    (:? (or (is.null ~root)
+            (grepl "^/" ~relpath))
+        ~relpath
+        (file.path ~root ~relpath)))))
+
+(defn r-tf-x-file-slurp
+  [[_ filename cb]]
+  (template/$
+   (tryCatch
+    (block
+      (var lines := (readLines ~filename :warn false))
+      (~cb nil (paste lines :collapse "\n")))
+    :error (fn [err]
+             (~cb err nil)))))
+
+(defn r-tf-x-file-spit
+  [[_ filename content cb]]
+  (template/$
+   (tryCatch
+    (block
+      (cat ~content :file ~filename :sep "")
+      (~cb nil ~filename))
+    :error (fn [err]
+             (~cb err nil)))))
+
+(def +r-file+
+  {:x-file-resolve   {:macro #'r-tf-x-file-resolve  :emit :macro}
+   :x-file-slurp     {:macro #'r-tf-x-file-slurp    :emit :macro
+                      :op-spec {:allow-blocks true}}
+   :x-file-spit      {:macro #'r-tf-x-file-spit     :emit :macro
+                      :op-spec {:allow-blocks true}}})
+
 (defn r-tf-x-socket-connect
-  ([[_ host port opts]]
-   (template/$ (do* (return (socketConnection :port ~port :blocking true))))))
+  ([[_ host port opts cb]]
+   (template/$
+    (tryCatch
+     (block
+       (var conn := (socketConnection :host ~host
+                                      :port ~port
+                                      :blocking true))
+       (~cb nil conn))
+     :error (fn [err]
+              (~cb err nil))))))
 
 (defn r-tf-x-socket-send
   ([[_ conn s]]
-   (template/$ (writeLines ~s ~conn :sep "\n"))))
+   (template/$
+    (do (writeLines ~s ~conn :sep "")
+        (flush ~conn)))))
 
 (defn r-tf-x-socket-close
   ([[_ conn]]
@@ -729,19 +860,22 @@
 
 (def +r+
   (merge +r-core+
-         +r-global+
-         +r-custom+
-         +r-math+
-         +r-type+
-         +r-lu+
-         +r-arr+
-         +r-str+
-         +r-js+
-         +r-return+
-         +r-socket+
-         +r-iter+
-         +r-thread+
-         +r-promise+))
+          +r-global+
+          +r-custom+
+          +r-math+
+          +r-bit+
+          +r-type+
+          +r-lu+
+          +r-arr+
+          +r-str+
+          +r-js+
+          +r-return+
+          +r-shell+
+          +r-file+
+          +r-socket+
+          +r-iter+
+          +r-thread+
+          +r-promise+))
 
 
 (comment

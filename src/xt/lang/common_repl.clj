@@ -30,7 +30,7 @@
   (var error-fn   (xt-lib/wrap-callback opts "error"))
   (var callback-fn
        (fn [err out]
-         (if err
+         (if (xt/x:not-nil? err)
            (return (error-fn err))
            (return (success-fn out)))))
   (return
@@ -65,15 +65,21 @@
   "helper function for `notify-socket-http`"
   {:added "4.0"}
   [conn host port opts output]
-  (var resolved-opts (:? (xt/x:nil? opts) {} opts))
-  (var path (xt/x:get-key resolved-opts "path"))
-  (var endpoint (:? (xt/x:nil? path) "/" path))
-  (var envelope (xt/x:cat "POST " endpoint " HTTP/1.0\r\n"
-                       "Host: " host ":"  (xt/x:to-string port) "\r\n"
-                       "Content-Length: " (xt/x:to-string (xt/x:len output)) "\r\n"
-                       "\r\n"
-                       output))
-  (xt-link/x:socket-send conn envelope)
+  (xt-link/x:socket-send
+   conn
+   (xt/x:cat "POST "
+             (:? (xt/x:nil? (:? (xt/x:nil? opts)
+                                nil
+                                (xt/x:get-key opts "path" nil)))
+                 "/"
+                 (:? (xt/x:nil? opts)
+                     nil
+                     (xt/x:get-key opts "path" nil)))
+             " HTTP/1.0\r\n"
+             "Host: " host ":"  (xt/x:to-string port) "\r\n"
+             "Content-Length: " (xt/x:to-string (xt/x:str-len output)) "\r\n"
+             "\r\n"
+             output))
   (return
    (xt-link/x:socket-close conn)))
 

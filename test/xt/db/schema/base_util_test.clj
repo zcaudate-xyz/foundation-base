@@ -147,12 +147,12 @@
                    k/identity
                    3))
   => [1 3 5]
-
+  
   (!.py
-   (ut/keepf-limit [1 2 3 4 5]
-                   xt/x:odd?
-                   k/identity
-                   3))
+    (ut/keepf-limit [1 2 3 4 5]
+                    xt/x:odd?
+                    k/identity
+                    3))
   => [1 3 5])
 
 ^{:refer xt.db.schema.base-util/lu-nested :added "4.0"}
@@ -210,7 +210,7 @@
 
   (s/run ['xt.db.schema.base-util])
   (s/seedgen-benchadd '[xt.lang.spec] {:lang [:r] :write true})
-  (s/seedgen-benchadd '[xt.lang.spec] {:lang [:julia] :write true})
+  (s/seedgen-benchadd '[xt.db.schema.base-util] {:lang [:julia] :write true})
   
   (s/seedgen-langadd 'xt.db.schema.base-util {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.db.schema.base-util {:lang [:lua :python] :write true}))

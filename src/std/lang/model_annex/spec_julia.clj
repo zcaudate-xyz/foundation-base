@@ -12,7 +12,8 @@
             [std.lang.model.spec-xtalk]
             [std.lang.model-annex.spec-xtalk.fn-julia :as fn]
             [std.lib.collection :as collection]
-            [std.lib.foundation :as f])
+            [std.lib.foundation :as f]
+            [std.lib.template :as template])
   (:refer-clojure :exclude [for import]))
 
 ;;
@@ -55,6 +56,23 @@
   (apply list 'for [e :in it]
          body))
 
+(defn tf-for-array
+  "for array transform"
+  {:added "4.0"}
+  [[_ [e arr] & body]]
+  (let [idx (gensym "idx__")]
+    (if (vector? e)
+      (let [[i v] e]
+        (template/$
+         (for [~idx :in (to 1 1 (length ~arr))]
+           (local ~i (- ~idx 1))
+           (local ~v (getindex ~arr ~idx))
+           ~@body)))
+      (template/$
+       (for [~idx :in (to 1 1 (length ~arr))]
+         (local ~e (getindex ~arr ~idx))
+         ~@body)))))
+
 (defn tf-for-index
   "for index transform"
   {:added "4.0"}
@@ -76,15 +94,18 @@
   "push! transform to avoid sanitization"
   {:added "4.0"}
   [[_ arr item]]
-  (list :% "push!(" arr ", " item ")"))
+  (list ':- "push!(" arr ", " item ")"))
 
 (defn emit-to
   "emits the range"
   {:added "4.0"}
   [[_ start step end] grammar mopts]
-  (if (= step 1)
-    (str start ":" end)
-    (str start ":" step ":" end)))
+  (let [start (common/*emit-fn* start grammar mopts)
+        step  (common/*emit-fn* step grammar mopts)
+        end   (common/*emit-fn* end grammar mopts)]
+    (if (= step "1")
+      (str start ":" end)
+      (str start ":" step ":" end))))
 
 (def +features+
   (-> (grammar/build :include [:builtin
@@ -113,15 +134,17 @@
                                :macro-xor])
       (merge (grammar/build-xtalk))
       (grammar/build:override
-       {:var    {:symbol '#{var*}}
-        :not    {:raw "!"}
-        :and    {:raw "&&"}
-        :or     {:raw "||"}
-        :neq    {:raw "!="}
-        :mod    {:raw "%"}
-        :pow    {:raw "^"}
-        :for-iter   {:macro #'tf-for-iter   :emit :macro}
-        :for-index  {:macro #'tf-for-index  :emit :macro}})
+        {:var    {:symbol '#{var*}}
+         :not    {:raw "!"}
+         :and    {:raw "&&"}
+         :or     {:raw "||"}
+         :neq    {:raw "!="}
+         :mod    {:raw "%"}
+         :pow    {:raw "^"}
+         :with-global {:value true :raw "XT_GLOBALS"}
+         :for-array  {:macro #'tf-for-array  :emit :macro}
+         :for-iter   {:macro #'tf-for-iter   :emit :macro}
+         :for-index  {:macro #'tf-for-index  :emit :macro}})
       (grammar/build:override fn/+julia+)
       (grammar/build:extend
        {:cat    {:op :cat    :symbol '#{cat}       :raw "*"   :emit :infix}

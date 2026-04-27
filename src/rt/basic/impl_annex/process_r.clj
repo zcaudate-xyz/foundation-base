@@ -83,12 +83,15 @@
 
 (def ^{:arglists '([port & [{:keys [host]}]])}
   default-basic-client
-  (let [bootstrap (->> ["library(jsonlite)"
-                        (impl/emit-entry-deps
-                         lib/return-eval
-                         {:lang :r
-                          :layout :flat})
-                        (impl/emit-as
+  (let [root      (or (System/getenv "PWD")
+                      (System/getProperty "user.dir"))
+        bootstrap (->> [(str "setwd(" (pr-str root) ")")
+                         "library(jsonlite)"
+                         (impl/emit-entry-deps
+                          lib/return-eval
+                          {:lang :r
+                           :layout :flat})
+                         (impl/emit-as
                          :r +client-basic+)]
                        (clojure.string/join "\n\n"))]
     (fn [port & [{:keys [host]}]]

@@ -87,13 +87,21 @@
   => [true false true false]
 
   (!.R
-   (xts/get-char "abc" (xt/x:offset 0)))
+    (xts/get-char "abc" (xt/x:offset 0)))
   => 97
 
   (!.R
-   [(xts/to-fixed 1.2 3)
-    (xts/trim " \n  hello \n  ")
-    (xts/trim-left "  hello  ")
+    (xt/x:nil? (xt/x:print "hello")))
+  => true
+
+  (!.R
+    (xt/x:str-index-of "hello/world" "/" (xt/x:offset 0)))
+  => 5
+
+  (!.R
+    [(xts/to-fixed 1.2 3)
+     (xts/trim " \n  hello \n  ")
+     (xts/trim-left "  hello  ")
     (xts/trim-right "  hello  ")])
   => ["1.200" "hello" "hello  " "  hello"]
 
@@ -106,9 +114,17 @@
   => {"return" "number", "key" "key-A", "id" "id-A", "value" 1, "type" "data"}
 
   (!.R
-   (xt/x:json-decode (k/return-wrap (fn [] (return 3)))))
+    (xt/x:json-decode (k/return-wrap (fn [] (return 3)))))
   => (contains {"return" "number", "value" 3, "type" "data"})
 
   (!.R
-   (xt/x:json-decode (k/return-eval "1+1")))
-  => {"return" "number", "value" 2, "type" "data"})
+    (xt/x:json-decode (k/return-eval "1+1")))
+  => {"return" "number", "value" 2, "type" "data"}
+
+  (!.R
+    [(xt/x:bit-and 6 3)
+     (xt/x:bit-or 6 3)
+     (xt/x:bit-lshift 3 2)
+     (xt/x:bit-rshift 12 2)
+     (xt/x:bit-xor 6 3)])
+  => [2 7 12 3 5])

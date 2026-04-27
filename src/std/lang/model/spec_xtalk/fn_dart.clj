@@ -482,7 +482,8 @@
   (template/$
    (. (. ~conn (flush))
       (then (fn [_]
-              (return (. ~conn (close))))))))
+              (. ~conn (destroy))
+              (return nil))))))
 
 (def +dart-socket+
   {:x-socket-connect {:macro #'dart-tf-x-socket-connect :emit :macro}

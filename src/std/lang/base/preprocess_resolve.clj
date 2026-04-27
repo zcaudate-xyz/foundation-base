@@ -101,13 +101,14 @@
 
           (or (collection/form? standalone)
               (symbol? standalone))
-           (walk-fn standalone)
+          (walk-fn standalone)
  
-           :else
-           (let [args (fragment-template-args form template)]
+          :else
+          (let [args (fragment-template-args form template)]
+            (walk-fn
              (list 'fn args
                    (list 'return
-                         (apply template args)))))))
+                         (apply template args))))))))
 
 (defn process-namespaced-symbol
   "process namespaced symbols"
