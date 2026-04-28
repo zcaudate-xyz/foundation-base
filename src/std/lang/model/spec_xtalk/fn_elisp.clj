@@ -44,7 +44,7 @@
   [[_ obj]]
   (list 'cond
         (list (list 'null obj)         "nil")
-        (list (list 'eq obj t)         "boolean")
+        (list (list 'eq obj 't)        "boolean")
         (list (list 'stringp obj)      "string")
         (list (list 'numberp obj)      "number")
         (list (list 'functionp obj)    "function")
@@ -52,7 +52,7 @@
         (list (list 'hash-table-p obj) "object")
         (list (list 'listp obj)        "list")
         (list (list 'symbolp obj)      "symbol")
-        (list t                        "unknown")))
+        (list 't                       "unknown")))
 
 (def +elisp-core+
   {:x-print       {:macro #'elisp-tf-x-print       :emit :macro :value true}
