@@ -1,33 +1,10 @@
-(ns xt.db.impl.cache-pull-test
+(ns xtbench.julia.db.impl.cache-pull-test
   (:require [net.http :as http]
             [std.json :as json]
             [std.lang :as l])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:lua :python]}}
-(l/script- :js
-  {:runtime :basic
-   :require [[xt.lang.common-repl :as repl]
-             [xt.lang.common-data :as xtd]
-             [xt.lang.common-trace :as trace]
-             [xt.db.impl.cache-util :as data]
-             [xt.db.impl.cache-pull :as q]
-             [xt.db.schema.base-flatten :as f]
-             [xt.lib.db.sql-util :as ut]
-             [xt.lib.db.sample-test :as sample]]})
-
-(l/script- :lua
-  {:runtime :basic
-   :require [[xt.lang.common-repl :as repl]
-             [xt.lang.common-data :as xtd]
-             [xt.lang.common-trace :as trace]
-             [xt.db.impl.cache-util :as data]
-             [xt.db.impl.cache-pull :as q]
-             [xt.db.schema.base-flatten :as f]
-             [xt.lib.db.sql-util :as ut]
-             [xt.lib.db.sample-test :as sample]]})
-
-(l/script- :python
+(l/script- :julia
   {:runtime :basic
    :require [[xt.lang.common-repl :as repl]
              [xt.lang.common-data :as xtd]
@@ -39,7 +16,7 @@
              [xt.lib.db.sample-test :as sample]]})
 
 (fact:global
- {:setup    [(l/rt:restart)]
+ {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
 (def +flattened+
@@ -212,7 +189,7 @@
 ^{:refer xt.db.impl.cache-pull/pull.control :added "4.0" :adopt true}
 (fact "gets a currency graph"
 
-  (!.js
+  (!.julia
     (var rows {})
     (data/merge-bulk rows (@! +flattened-full+) nil)
     (q/pull rows sample/Schema "Currency"
@@ -222,7 +199,7 @@
              :order-by ["id"]}))
   => [{"id" "XLM"} {"id" "XLM.T"}]
 
-  (!.js
+  (!.julia
     (var rows {})
     (data/merge-bulk rows (@! +flattened-full+) nil)
     (q/pull rows sample/Schema "Currency"
@@ -231,65 +208,7 @@
              :order-by ["id"]}))
   => [{"id" "STATS"} {"id" "USD"}]
 
-  (!.js
-    (var rows {})
-    (data/merge-bulk rows (@! +flattened-full+) nil)
-    (q/pull rows sample/Schema "Currency"
-            {:returning ["id"]
-             :limit 2
-             :order-by ["id"]
-             :order-sort "desc"}))
-  => [{"id" "XLM.T"} {"id" "XLM"}]
-
-  (!.lua
-    (var rows {})
-    (data/merge-bulk rows (@! +flattened-full+) nil)
-    (q/pull rows sample/Schema "Currency"
-            {:returning ["id"]
-             :limit 2
-             :offset 2
-             :order-by ["id"]}))
-  => [{"id" "XLM"} {"id" "XLM.T"}]
-
-  (!.lua
-    (var rows {})
-    (data/merge-bulk rows (@! +flattened-full+) nil)
-    (q/pull rows sample/Schema "Currency"
-            {:returning ["id"]
-             :limit 2
-             :order-by ["id"]}))
-  => [{"id" "STATS"} {"id" "USD"}]
-
-  (!.lua
-    (var rows {})
-    (data/merge-bulk rows (@! +flattened-full+) nil)
-    (q/pull rows sample/Schema "Currency"
-            {:returning ["id"]
-             :limit 2
-             :order-by ["id"]
-             :order-sort "desc"}))
-  => [{"id" "XLM.T"} {"id" "XLM"}]
-
-  (!.py
-    (var rows {})
-    (data/merge-bulk rows (@! +flattened-full+) nil)
-    (q/pull rows sample/Schema "Currency"
-            {:returning ["id"]
-             :limit 2
-             :offset 2
-             :order-by ["id"]}))
-  => [{"id" "XLM"} {"id" "XLM.T"}]
-
-  (!.py
-    (var rows {})
-    (data/merge-bulk rows (@! +flattened-full+) nil)
-    (q/pull rows sample/Schema "Currency"
-            {:returning ["id"]
-             :limit 2
-             :order-by ["id"]}))
-  => [{"id" "STATS"} {"id" "USD"}]
-
-  (!.py
+  (!.julia
     (var rows {})
     (data/merge-bulk rows (@! +flattened-full+) nil)
     (q/pull rows sample/Schema "Currency"
@@ -311,29 +230,7 @@
                 :in-any-order)}]))] :adopt true}
 (fact "gets a currency graph"
 
-  (!.js
-    (var rows {})
-    (data/merge-bulk rows (@! +flattened-full+) nil)
-    (q/pull rows
-            sample/Schema
-            "Wallet"
-            {:returning [["entries"
-                          [["asset" ["-/data"
-                                     ["currency"]]]]]]}))
-  => +check-pull-currency+
-
-  (!.lua
-    (var rows {})
-    (data/merge-bulk rows (@! +flattened-full+) nil)
-    (q/pull rows
-            sample/Schema
-            "Wallet"
-            {:returning [["entries"
-                          [["asset" ["-/data"
-                                     ["currency"]]]]]]}))
-  => +check-pull-currency+
-
-  (!.py
+  (!.julia
     (var rows {})
     (data/merge-bulk rows (@! +flattened-full+) nil)
     (q/pull rows
@@ -347,65 +244,21 @@
 ^{:refer xt.db.impl.cache-pull/check-in-clause :added "4.0"}
 (fact "emulates the sql `in` clause"
 
-  (!.js
-    (q/check-in-clause "a" [["a" "b"]]))
-  => true
-  
-  (!.lua
-    (q/check-in-clause "a" [["a" "b"]]))
-  => true
-  
-  (!.py
+  (!.julia
     (q/check-in-clause "a" [["a" "b"]]))
   => true)
 
 ^{:refer xt.db.impl.cache-pull/like-char-at :added "4.1"}
 (fact "gets the single char from a string"
 
-  (!.js
-    (q/like-char-at "abc" 1))
-  => "b"
-
-  (!.lua
-    (q/like-char-at "abc" 1))
-  => "b"
-
-  (!.py
+  (!.julia
     (q/like-char-at "abc" 1))
   => "b")
 
 ^{:refer xt.db.impl.cache-pull/check-like-clause :added "4.0"}
 (fact "emulates the sql `like` clause"
 
-  (!.js
-    [(q/check-like-clause "abc" "a%")
-     (q/check-like-clause "abc" "%c")
-     (q/check-like-clause "abc" "a_c")
-     (q/check-like-clause "abc" "a%d")
-     (q/check-like-clause "abc" "%%a%c%%")
-     (q/check-like-clause "a%b" "a\\%b")
-     (q/check-like-clause "a_b" "a\\_b")
-     (q/check-like-clause "a\\b" "a\\\\b")
-     (q/check-like-clause "%" "%_")
-     (q/check-like-clause nil "a%")
-     (q/check-like-clause "abc" nil)])
-  => [true true true false true true true true true false false]
-
-  (!.lua
-    [(q/check-like-clause "abc" "a%")
-     (q/check-like-clause "abc" "%c")
-     (q/check-like-clause "abc" "a_c")
-     (q/check-like-clause "abc" "a%d")
-     (q/check-like-clause "abc" "%%a%c%%")
-     (q/check-like-clause "a%b" "a\\%b")
-     (q/check-like-clause "a_b" "a\\_b")
-     (q/check-like-clause "a\\b" "a\\\\b")
-     (q/check-like-clause "%" "%_")
-     (q/check-like-clause nil "a%")
-     (q/check-like-clause "abc" nil)])
-  => [true true true false true true true true true false false]
-
-  (!.py
+  (!.julia
     [(q/check-like-clause "abc" "a%")
      (q/check-like-clause "abc" "%c")
      (q/check-like-clause "abc" "a_c")
@@ -422,21 +275,7 @@
 ^{:refer xt.db.impl.cache-pull/check-clause-value :added "4.0"}
 (fact "checks the clause within a record"
 
-  (!.js
-    (q/check-clause-value {:data {:name "abc"}}
-                          "data"
-                          "name"
-                          "abc"))
-  => true
-
-  (!.lua
-    (q/check-clause-value {:data {:name "abc"}}
-                          "data"
-                          "name"
-                          "abc"))
-  => true
-
-  (!.py
+  (!.julia
     (q/check-clause-value {:data {:name "abc"}}
                           "data"
                           "name"
@@ -446,23 +285,7 @@
 ^{:refer xt.db.impl.cache-pull/check-clause-function :added "4.0"}
 (fact "checks the clause for a function within a record"
 
-  (!.js
-    (q/check-clause-function {:data {:name "abc"}}
-                             "data"
-                             "name"
-                             q/check-like-clause
-                             ["a%"]))
-  => true
-
-  (!.lua
-    (q/check-clause-function {:data {:name "abc"}}
-                             "data"
-                             "name"
-                             q/check-like-clause
-                             ["a%"]))
-  => true
-
-  (!.py
+  (!.julia
     (q/check-clause-function {:data {:name "abc"}}
                              "data"
                              "name"
@@ -473,33 +296,7 @@
 ^{:refer xt.db.impl.cache-pull/pull-where-clause :added "4.0"}
 (fact "pull where clause"
 
-  (!.js
-    (var rows {})
-    (data/merge-bulk rows (@! +flattened-full+) nil)
-    (q/pull-where-clause rows
-                         sample/Schema
-                         "UserAccount"
-                         (xtd/get-in rows ["UserAccount"
-                                           "00000000-0000-0000-0000-000000000000"
-                                           "record"])
-                         q/pull-where
-                         "id"
-                         (fn:> [x] true)))
-
-  (!.lua
-    (var rows {})
-    (data/merge-bulk rows (@! +flattened-full+) nil)
-    (q/pull-where-clause rows
-                         sample/Schema
-                         "UserAccount"
-                         (xtd/get-in rows ["UserAccount"
-                                           "00000000-0000-0000-0000-000000000000"
-                                           "record"])
-                         q/pull-where
-                         "id"
-                         (fn:> [x] true)))
-
-  (!.py
+  (!.julia
     (var rows {})
     (data/merge-bulk rows (@! +flattened-full+) nil)
     (q/pull-where-clause rows
@@ -515,33 +312,7 @@
 ^{:refer xt.db.impl.cache-pull/pull-where :added "4.0"}
 (fact "clause for where construct"
 
-  (!.js
-    (var rows {})
-    (data/merge-bulk rows (@! +flattened-full+) nil)
-    [(q/pull-where rows sample/Schema "UserAccount"
-                   (fn:> [record table-key] true) {})
-     (q/pull-where rows sample/Schema  "UserAccount"
-                   {:nickname "hello"}
-                   {})
-     (q/pull-where rows sample/Schema  "UserAccount"
-                   {:nickname "hello"}
-                   {:data {:nickname "hello"}})])
-  => [true false true]
-
-  (!.lua
-    (var rows {})
-    (data/merge-bulk rows (@! +flattened-full+) nil)
-    [(q/pull-where rows sample/Schema "UserAccount"
-                   (fn:> [record table-key] true) {})
-     (q/pull-where rows sample/Schema  "UserAccount"
-                   {:nickname "hello"}
-                   {})
-     (q/pull-where rows sample/Schema  "UserAccount"
-                   {:nickname "hello"}
-                   {:data {:nickname "hello"}})])
-  => [true false true]
-
-  (!.py
+  (!.julia
     (var rows {})
     (data/merge-bulk rows (@! +flattened-full+) nil)
     [(q/pull-where rows sample/Schema "UserAccount"
@@ -557,7 +328,7 @@
 ^{:refer xt.db.impl.cache-pull/pull-return-clause :added "4.0"}
 (fact "pull return clause"
 
-  (!.js
+  (!.julia
     (var rows {})
     (data/merge-bulk rows (@! +flattened-full+) nil)
     (q/pull-return-clause rows
@@ -584,7 +355,7 @@
                    "first_name" "Root",
                    "language" "en"}]])
 
-  (!.js
+  (!.julia
     (var rows {})
     (data/merge-bulk rows (@! +flattened-full+) nil)
     (q/pull-return-clause rows
@@ -605,144 +376,12 @@
                                   "val" "profile"},
                            "cardinality" "many"}
                           [{:id "missing"} ["*/data"]]))
-  => (contains ["profile"])
-
-  (!.lua
-    (var rows {})
-    (data/merge-bulk rows (@! +flattened-full+) nil)
-    (q/pull-return-clause rows
-                          sample/Schema
-                          (xtd/get-in rows ["UserAccount"
-                                            "00000000-0000-0000-0000-000000000000"
-                                            "record"])
-                          q/pull-where
-                          q/pull-return
-                          {"ident" "profile",
-                           "type" "ref",
-                           "ref" {"key" "_account",
-                                  "rkey" "account",
-                                  "type" "reverse",
-                                  "rident" "account",
-                                  "rval" "account",
-                                  "ns" "UserProfile",
-                                  "val" "profile"},
-                           "cardinality" "many"}
-                          [{} ["*/data"]]))
-  => (contains-in
-      ["profile" [{"id" "c4643895-b0ce-44cc-b07b-2386bf18d43b",
-                   "last_name" "User",
-                   "first_name" "Root",
-                   "language" "en"}]])
-
-  (!.lua
-    (var rows {})
-    (data/merge-bulk rows (@! +flattened-full+) nil)
-    (q/pull-return-clause rows
-                          sample/Schema
-                          (xtd/get-in rows ["UserAccount"
-                                            "00000000-0000-0000-0000-000000000000"
-                                            "record"])
-                          q/pull-where
-                          q/pull-return
-                          {"ident" "profile",
-                           "type" "ref",
-                           "ref" {"key" "_account",
-                                  "rkey" "account",
-                                  "type" "reverse",
-                                  "rident" "account",
-                                  "rval" "account",
-                                  "ns" "UserProfile",
-                                  "val" "profile"},
-                           "cardinality" "many"}
-                          [{:id "missing"} ["*/data"]]))
-  => (contains ["profile"])
-
-  (!.py
-    (var rows {})
-    (data/merge-bulk rows (@! +flattened-full+) nil)
-    (q/pull-return-clause rows
-                          sample/Schema
-                          (xtd/get-in rows ["UserAccount"
-                                            "00000000-0000-0000-0000-000000000000"
-                                            "record"])
-                          q/pull-where
-                          q/pull-return
-                          {"ident" "profile",
-                           "type" "ref",
-                           "ref" {"key" "_account",
-                                  "rkey" "account",
-                                  "type" "reverse",
-                                  "rident" "account",
-                                  "rval" "account",
-                                  "ns" "UserProfile",
-                                  "val" "profile"},
-                           "cardinality" "many"}
-                          [{} ["*/data"]]))
-  => (contains-in
-      ["profile" [{"id" "c4643895-b0ce-44cc-b07b-2386bf18d43b",
-                   "last_name" "User",
-                   "first_name" "Root",
-                   "language" "en"}]])
-
-  (!.py
-    (var rows {})
-    (data/merge-bulk rows (@! +flattened-full+) nil)
-    (q/pull-return-clause rows
-                          sample/Schema
-                          (xtd/get-in rows ["UserAccount"
-                                            "00000000-0000-0000-0000-000000000000"
-                                            "record"])
-                          q/pull-where
-                          q/pull-return
-                          {"ident" "profile",
-                           "type" "ref",
-                           "ref" {"key" "_account",
-                                  "rkey" "account",
-                                  "type" "reverse",
-                                  "rident" "account",
-                                  "rval" "account",
-                                  "ns" "UserProfile",
-                                  "val" "profile"},
-                           "cardinality" "many"}
-                          [{:id "missing"} ["*/data"]]))
-  => ["profile" nil])
+  => (contains ["profile"]))
 
 ^{:refer xt.db.impl.cache-pull/pull-return :added "4.0"}
 (fact "return construct"
 
-  (!.js
-    (var rows {})
-    (data/merge-bulk rows (@! +flattened-full+) nil)
-    (q/pull-return rows
-                   sample/Schema
-                   "UserAccount"
-                   ["id" "nickname"
-                    ["profile"
-                     ["first_name" "last_name"]]]
-                   (xtd/get-in rows ["UserAccount"
-                                     "00000000-0000-0000-0000-000000000000"
-                                     "record"])))
-  => {"nickname" "root",
-      "profile" [{"last_name" "User", "first_name" "Root"}],
-      "id" "00000000-0000-0000-0000-000000000000"}
-
-  (!.lua
-    (var rows {})
-    (data/merge-bulk rows (@! +flattened-full+) nil)
-    (q/pull-return rows
-                   sample/Schema
-                   "UserAccount"
-                   ["id" "nickname"
-                    ["profile"
-                     ["first_name" "last_name"]]]
-                   (xtd/get-in rows ["UserAccount"
-                                     "00000000-0000-0000-0000-000000000000"
-                                     "record"])))
-  => {"nickname" "root",
-      "profile" [{"last_name" "User", "first_name" "Root"}],
-      "id" "00000000-0000-0000-0000-000000000000"}
-
-  (!.py
+  (!.julia
     (var rows {})
     (data/merge-bulk rows (@! +flattened-full+) nil)
     (q/pull-return rows
@@ -761,39 +400,7 @@
 ^{:refer xt.db.impl.cache-pull/pull :added "4.0"}
 (fact "pull data from database python profile full"
 
-  (!.js
-    (var rows {})
-    (data/merge-bulk rows (@! +flattened+) nil)
-    (q/pull rows sample/Schema "UserAccount"
-            {:returning ["id" "nickname"
-                         ["profile"
-                          ["*/data"]]]}))
-  => (contains-in
-      [{"nickname" "root",
-        "profile"
-        [{"id" "c4643895-b0ce-44cc-b07b-2386bf18d43b",
-          "last_name" "User",
-          "first_name" "Root",
-          "language" "en"}],
-        "id" "00000000-0000-0000-0000-000000000000"}])
-
-  (!.lua
-    (var rows {})
-    (data/merge-bulk rows (@! +flattened+) nil)
-    (q/pull rows sample/Schema "UserAccount"
-            {:returning ["id" "nickname"
-                         ["profile"
-                          ["*/data"]]]}))
-  => (contains-in
-      [{"nickname" "root",
-        "profile"
-        [{"id" "c4643895-b0ce-44cc-b07b-2386bf18d43b",
-          "last_name" "User",
-          "first_name" "Root",
-          "language" "en"}],
-        "id" "00000000-0000-0000-0000-000000000000"}])
-
-  (!.py
+  (!.julia
     (var rows {})
     (data/merge-bulk rows (@! +flattened+) nil)
     (q/pull rows sample/Schema "UserAccount"

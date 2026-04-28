@@ -1243,7 +1243,7 @@
                     :in-any-order)
               {"c4643895-b0ce-44cc-b07b-2386bf18d43b" true}]))]}
 (fact "adding bulk links from external data (to be doubly sure)"
-
+  
   (!.js
     (var flat (f/flatten sample/Schema
                          "UserAccount"

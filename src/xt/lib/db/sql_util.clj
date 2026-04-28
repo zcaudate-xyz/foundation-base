@@ -327,13 +327,18 @@
   "helper for encode-query-string"
   {:added "4.0"}
   ([params opts]
-   (var column-fn  (xt/x:get-key opts "column_fn" (fn [x] (return x))))
-   (var out := "")
-   (xt/for:object [[key v] params]
-     (when (< 0 (xt/x:len out))
-       (:= out (xt/x:cat out " AND ")))
-     (:= out (xt/x:cat out (-/encode-query-segment key v column-fn opts))))
-   (return out)))
+    (var column-fn  (xt/x:get-key opts "column_fn" (fn [x] (return x))))
+    (var sort-keys  (xt/x:get-key opts "sort_keys" true))
+    (var out := "")
+    (var query-pairs (xt/x:obj-pairs params))
+    (if sort-keys
+      (:= query-pairs (xtd/arr-sort query-pairs xt/x:first xt/x:str-comp)))
+    (xt/for:array [e query-pairs]
+      (var [key v] e)
+      (when (< 0 (xt/x:len out))
+        (:= out (xt/x:cat out " AND ")))
+      (:= out (xt/x:cat out (-/encode-query-segment key v column-fn opts))))
+    (return out)))
 
 (defn.xt encode-query-string
   "encodes a query string"

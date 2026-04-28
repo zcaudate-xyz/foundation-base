@@ -130,6 +130,7 @@
     (:= where-params [where-params]))
   (var clause-fn
        (fn [clause]
+         (var sort-keys (xt/x:get-key opts "sort_keys" true))
          (var pair-fn
               (fn [pair]
                 (return (-/select-where-pair
@@ -140,8 +141,11 @@
                          (+ indent 2)
                          opts
                          -/select-where))))
-         (var clause-arr (xt/x:arr-map (xt/x:obj-pairs clause)
-                                    pair-fn))
+         (var query-pairs (xt/x:obj-pairs clause))
+         (if sort-keys
+           (:= query-pairs (xtd/arr-sort query-pairs xt/x:first xt/x:str-comp)))
+         (var clause-arr (xt/x:arr-map query-pairs
+                                     pair-fn))
          (return (xt/x:str-join " AND " clause-arr))))
   (var where-arr  (-> (xt/x:arr-map where-params clause-fn)
                       (xt/x:arr-filter xtd/not-empty?)))
@@ -190,6 +194,7 @@
   (var data-params   (xt/x:get-key params "data"))
   (var link-params   (xt/x:get-key params "links"))
   (var custom-params (xt/x:get-key params "custom"))
+  (var sort-keys     (xt/x:get-key opts "sort_keys" true))
 
   (when (and (== 1 (xt/x:len custom-params))
              (== "sql/count"
@@ -198,6 +203,8 @@
     (return (return-count-fn)))  
   
   (var return-data   (xt/x:arr-map data-params format-fn))
+  (if sort-keys
+    (:= link-params (xtd/arr-sort link-params xt/x:first xt/x:str-comp)))
   (var return-links  (xt/x:arr-map link-params format-fn))
   (return  (return-join-fn
             (xtd/arr-mapcat [return-data

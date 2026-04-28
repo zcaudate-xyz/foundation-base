@@ -221,8 +221,46 @@
 (fact  "emulates the sql `like` clause"
 
   (!.js
-   (q/check-like-clause "abc" "a%"))
-  => true)
+   [(q/check-like-clause "abc" "a%")
+    (q/check-like-clause "abc" "%c")
+    (q/check-like-clause "abc" "a_c")
+    (q/check-like-clause "abc" "a%d")
+     (q/check-like-clause "abc" "%%a%c%%")
+     (q/check-like-clause "a%b" "a\\%b")
+     (q/check-like-clause "a_b" "a\\_b")
+     (q/check-like-clause "a\\b" "a\\\\b")
+     (q/check-like-clause "%" "%_")
+     (q/check-like-clause nil "a%")
+     (q/check-like-clause "abc" nil)])
+  => [true true true false true true true true true false false]
+
+  (!.lua
+   [(q/check-like-clause "abc" "a%")
+    (q/check-like-clause "abc" "%c")
+    (q/check-like-clause "abc" "a_c")
+    (q/check-like-clause "abc" "a%d")
+     (q/check-like-clause "abc" "%%a%c%%")
+     (q/check-like-clause "a%b" "a\\%b")
+     (q/check-like-clause "a_b" "a\\_b")
+     (q/check-like-clause "a\\b" "a\\\\b")
+     (q/check-like-clause "%" "%_")
+     (q/check-like-clause nil "a%")
+     (q/check-like-clause "abc" nil)])
+  => [true true true false true true true true true false false]
+
+  (!.py
+   [(q/check-like-clause "abc" "a%")
+    (q/check-like-clause "abc" "%c")
+    (q/check-like-clause "abc" "a_c")
+    (q/check-like-clause "abc" "a%d")
+     (q/check-like-clause "abc" "%%a%c%%")
+     (q/check-like-clause "a%b" "a\\%b")
+     (q/check-like-clause "a_b" "a\\_b")
+     (q/check-like-clause "a\\b" "a\\\\b")
+     (q/check-like-clause "%" "%_")
+     (q/check-like-clause nil "a%")
+     (q/check-like-clause "abc" nil)])
+  => [true true true false true true true true true false false])
 
 ^{:refer xt.lib.db.cache-pull/check-clause-value :added "4.0"}
 (fact "checks the clause within a record"

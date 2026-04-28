@@ -55,13 +55,13 @@
       "SELECT id FROM UserProfile"
       "WHERE account_id IN ("
       "  SELECT id FROM UserAccount"
-      "  WHERE id IN ("
+      "  WHERE is_official = TRUE AND id IN ("
       "    SELECT owner_id FROM Wallet"
       "    WHERE id IN ("
       "      SELECT wallet_id FROM WalletAsset"
       "      WHERE asset_id = 'XLM'"
       "    )"
-      "  ) AND is_official = TRUE"
+      "  )"
       ") AND first_name = 'hello'")
 
   (!.julia
@@ -76,10 +76,10 @@
       "SELECT id FROM Wallet"
       "WHERE owner_id IN ("
       "  SELECT id FROM UserAccount"
-      "  WHERE id IN ("
+      "  WHERE is_official = TRUE AND id IN ("
       "    SELECT account_id FROM UserProfile"
       "    WHERE first_name = 'hello'"
-      "  ) AND is_official = TRUE"
+      "  )"
       ")"))
 
 ^{:refer xt.db.schema.sql-graph/base-query-inputs :added "4.0"}

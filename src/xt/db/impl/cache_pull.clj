@@ -5,15 +5,8 @@
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-sort-by :as xtsb]
-             [xt.lib.db.base-util :as ut]
-             [xt.lib.db.base-scope :as scope]]})
-
-(l/script :js
-  {:require [[js.core :as j]
-             [xt.lib.db.base-util :as ut]
-             [xt.lib.db.base-scope :as scope]
-             [xt.lang.spec-base :as xt]
-             [xt.lang.common-data :as xtd]]})
+             [xt.db.schema.base-util :as ut]
+             [xt.db.schema.base-scope :as scope]]})
 
 (defn.xt check-in-clause
   "emulates the sql `in` clause"
@@ -22,23 +15,65 @@
   (return (xt/x:arr-some (xt/x:first expr)
                          (fn [e] (return (== e x))))))
 
-(defn.js check-like-clause
-  "emulates the sql `like` clause"
-  {:added "4.0"}
-  [x expr]
-  (return 
-   (. (new RegExp
-           (+ "^"
-              (-> expr
-                  (j/replaceAll "_" ".")
-                  (j/replaceAll "%" ".*"))
-              "$"))
-      (test x))))
+(defn.xt like-char-at
+  "gets a single character from a string"
+  {:added "4.1"}
+  [s i]
+  (return (xt/x:str-substring s
+                              (xt/x:offset i)
+                              (+ i 1))))
 
 (defn.xt check-like-clause
   "emulates the sql `like` clause"
   {:added "4.0"}
   [x expr]
+  (when (or (not (xt/x:is-string? x))
+            (not (xt/x:is-string? expr)))
+    (return false))
+  (var slen (xt/x:str-len x))
+  (var plen (xt/x:str-len expr))
+  (var sidx 0)
+  (var pidx 0)
+  (var star-pidx -1)
+  (var star-sidx -1)
+  (while (< sidx slen)
+    (var sch (-/like-char-at x sidx))
+    (var pch (:? (< pidx plen)
+                 (-/like-char-at expr pidx)
+                 nil))
+    (cond (and (== "\\" pch)
+               (< (+ pidx 1) plen)
+               (== sch (-/like-char-at expr (+ pidx 1))))
+          (do (:= sidx (+ sidx 1))
+              (:= pidx (+ pidx 2)))
+
+          (and (== "\\" pch)
+               (== sch "\\")
+               (== (+ pidx 1) plen))
+          (do (:= sidx (+ sidx 1))
+              (:= pidx (+ pidx 1)))
+
+          (== "%" pch)
+          (do (:= star-pidx pidx)
+              (:= star-sidx sidx)
+              (:= pidx (+ pidx 1)))
+
+          (or (== "_" pch)
+              (== sch pch))
+          (do (:= sidx (+ sidx 1))
+              (:= pidx (+ pidx 1)))
+
+          (< star-pidx 0)
+          (return false)
+
+          :else
+          (do (:= star-sidx (+ star-sidx 1))
+              (:= sidx star-sidx)
+              (:= pidx (+ star-pidx 1)))))
+  (while (< pidx plen)
+    (if (== "%" (-/like-char-at expr pidx))
+      (:= pidx (+ pidx 1))
+      (return false)))
   (return true))
 
 (def.xt PULL_LU
@@ -55,17 +90,16 @@
    "gte"  xt/x:gte
    "like" -/check-like-clause
    "in"   -/check-in-clause
-   "between"  (fn:> [x start-expr _and end-expr]
-                (and (>= x start-expr)
-                     (:? (== _and "and")
-                         (<= x end-expr)
-                         (<= x _and))))
+   "between"  (fn [x start-expr _and end-expr]
+                (return
+                 (and (>= x start-expr)
+                      (:? (== _and "and")
+                          (<= x end-expr)
+                          (<= x _and)))))
    "not_like" (fn:> [x expr] (not (-/check-like-clause x expr)))
    "not_in" (fn:> [x expr] (not (-/check-in-clause x expr)))
-   "is_null" xt/x:nil? #_(fn [x]
-               (xt/x:LOG! x)
-               (return (== nil x)))
-   "is_not_null"  xt/x:not-nil? #_(fn:> [x] (not= nil x))})
+   "is_null" xt/x:nil? 
+   "is_not_null"  xt/x:not-nil?})
 
 (defn.xt check-clause-value
   "checks the clause within a record"
@@ -97,13 +131,13 @@
               
               :else
               (return (xt/x:arr-some (xt/x:obj-keys (or (xtd/get-in record ["ref_links" key])
-                                                  {}))
-                                  (fn:> [v] (pred v (xt/x:unpack exprs))))))
+                                                        {}))
+                                     (fn:> [v] (pred v (xt/x:unpack exprs))))))
         
         (== ktype "reverse")
         (return (xt/x:arr-some (xt/x:obj-keys (or (xtd/get-in record ["rev_links" key])
-                                            {}))
-                            (fn:> [v] (pred v (xt/x:unpack exprs)))))))
+                                                  {}))
+                               (fn:> [v] (pred v (xt/x:unpack exprs)))))))
 
 (defn.xt pull-where-clause
   "pull where clause"
@@ -129,15 +163,15 @@
               #{ns type} ref 
               table-link (xt/x:get-key -/PULL_LU type)
               ids  (xt/x:obj-keys (or (xtd/get-in record [table-link key])
-                                   {}))
+                                      {}))
               records (-> (or (xt/x:get-key rows ns)
                               {})
                           (xtd/obj-pick ids)
                           (xt/x:obj-vals)
                           (xt/x:arr-map (fn:> [e] (xt/x:get-key e "record"))))
               found   (xt/x:arr-filter records
-                                    (fn:> [subrecord]
-                                      (where-fn rows schema ns clause subrecord)))]
+                                       (fn:> [subrecord]
+                                             (where-fn rows schema ns clause subrecord)))]
           (return (< 0 (xt/x:len found))))
         
         :else
@@ -181,10 +215,10 @@
   (var link-type (xt/x:get-key ref "type"))
   (var link-key ns)
   (var table-link (xt/x:get-key -/PULL_LU
-                             link-type))
+                                link-type))
   
   (var ids (xt/x:obj-keys (or (xtd/get-in record [table-link ident])
-                           {})))
+                              {})))
   (var entries (-> (or (xt/x:get-key rows link-key)
                        {})
                    (xtd/obj-pick ids)
@@ -192,8 +226,8 @@
   
   (var return-params (xt/x:last linked))
   (var where-params  (xt/x:arr-filter linked (fn [x]
-                                             (return (and (xt/x:is-object? x)
-                                                          (xtd/not-empty? x))))))
+                                               (return (and (xt/x:is-object? x)
+                                                            (xtd/not-empty? x))))))
   (var records [])
   (xt/for:array [e entries]
     (var linked-record (xt/x:get-key e "record"))

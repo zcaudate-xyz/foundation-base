@@ -328,8 +328,13 @@
   {:added "4.0"}
   ([params opts]
    (var column-fn  (xt/x:get-key opts "column_fn" (fn [x] (return x))))
+   (var sort-keys  (xt/x:get-key opts "sort_keys" true))
    (var out := "")
-   (xt/for:object [[key v] params]
+   (var query-pairs (xt/x:obj-pairs params))
+   (if sort-keys
+     (:= query-pairs (xtd/arr-sort query-pairs xt/x:first xt/x:str-comp)))
+   (xt/for:array [e query-pairs]
+     (var [key v] e)
      (when (< 0 (xt/x:len out))
        (:= out (xt/x:cat out " AND ")))
      (:= out (xt/x:cat out (-/encode-query-segment key v column-fn opts))))
@@ -339,24 +344,24 @@
   "encodes a query string"
   {:added "4.0"}
   ([params prefix opts]
-    (var out (-> (xtd/arrayify params)
-                 (xt/x:arr-map (fn:> [p] (-/encode-query-single-string p opts)))
-                 (xt/x:arr-filter (fn [e] (return (and (xt/x:not-nil? e)
-                                                       (< 0 (xt/x:len e))))))))
-    (var joined (xt/x:str-join " OR "
-                               (xt/x:arr-map out (fn:> [s] (xt/x:cat "(" s ")")))))
-    (cond (== 0 (xt/x:len out))
-          (return "")
+   (var out (-> (xtd/arrayify params)
+                (xt/x:arr-map (fn:> [p] (-/encode-query-single-string p opts)))
+                (xt/x:arr-filter (fn [e] (return (and (xt/x:not-nil? e)
+                                                      (< 0 (xt/x:len e))))))))
+   (var joined (xt/x:str-join " OR "
+                              (xt/x:arr-map out (fn:> [s] (xt/x:cat "(" s ")")))))
+   (cond (== 0 (xt/x:len out))
+         (return "")
 
-          (== 1 (xt/x:len out))
-          (return (:? (xtd/not-empty? prefix)
+         (== 1 (xt/x:len out))
+         (return (:? (xtd/not-empty? prefix)
                      (xt/x:cat prefix " " (xt/x:first out))
                      (xt/x:first out)))
 
-          :else
-          (return (:? (xtd/not-empty? prefix)
-                      (xt/x:cat prefix " " joined)
-                      joined)))))
+         :else
+         (return (:? (xtd/not-empty? prefix)
+                     (xt/x:cat prefix " " joined)
+                     joined)))))
 
 (defn.xt LIMIT
   "creates a LIMIT keyword"

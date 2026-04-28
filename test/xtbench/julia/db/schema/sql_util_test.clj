@@ -321,10 +321,7 @@
                                      :data {:a 1}}
                                     {:column-fn (fn:> [col]
                                                       (xt/x:cat "\"T\"." col))})])
-  => (contains-in
-      [""
-       (any "\"T\".name != 'hello' AND \"T\".data = '{\"a\":1}'"
-            "\"T\".data = '{\"a\":1}' AND \"T\".name != 'hello'")]))
+  => ["" "\"T\".data = '{\"a\":1}' AND \"T\".name != 'hello'"])
 
 ^{:refer xt.db.schema.sql-util/encode-query-string :added "4.0"}
 (fact "encodes a query string"

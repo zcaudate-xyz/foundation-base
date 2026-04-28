@@ -17,8 +17,7 @@
              [xt.db.helpers.data-main-test :as sample]]})
 
 (fact:global
- {:setup    [(l/rt:restart)
-             (l/rt:scaffold :js)]
+ {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.impl.cache-view/tree-base :added "4.0"}

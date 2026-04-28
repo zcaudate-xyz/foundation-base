@@ -9,8 +9,7 @@
              [xt.lib.db.base-scope :as scope]]})
 
 (l/script :js
-  {:require [[js.core :as j]
-             [xt.lib.db.base-util :as ut]
+  {:require [[xt.lib.db.base-util :as ut]
              [xt.lib.db.base-scope :as scope]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]]})
@@ -22,23 +21,65 @@
   (return (xt/x:arr-some (xt/x:first expr)
                          (fn [e] (return (== e x))))))
 
-(defn.js check-like-clause
-  "emulates the sql `like` clause"
-  {:added "4.0"}
-  [x expr]
-  (return 
-   (. (new RegExp
-           (+ "^"
-              (-> expr
-                  (j/replaceAll "_" ".")
-                  (j/replaceAll "%" ".*"))
-              "$"))
-      (test x))))
+(defn.xt like-char-at
+  "gets a single character from a string"
+  {:added "4.1"}
+  [s i]
+  (return (xt/x:str-substring s
+                              (xt/x:offset i)
+                              (+ i 1))))
 
 (defn.xt check-like-clause
   "emulates the sql `like` clause"
   {:added "4.0"}
   [x expr]
+  (when (or (not (xt/x:is-string? x))
+            (not (xt/x:is-string? expr)))
+    (return false))
+  (var slen (xt/x:str-len x))
+  (var plen (xt/x:str-len expr))
+  (var sidx 0)
+  (var pidx 0)
+  (var star-pidx -1)
+  (var star-sidx -1)
+  (while (< sidx slen)
+    (var sch (-/like-char-at x sidx))
+    (var pch (:? (< pidx plen)
+                 (-/like-char-at expr pidx)
+                 nil))
+    (cond (and (== "\\" pch)
+               (< (+ pidx 1) plen)
+               (== sch (-/like-char-at expr (+ pidx 1))))
+          (do (:= sidx (+ sidx 1))
+              (:= pidx (+ pidx 2)))
+
+          (and (== "\\" pch)
+               (== sch "\\")
+               (== (+ pidx 1) plen))
+          (do (:= sidx (+ sidx 1))
+              (:= pidx (+ pidx 1)))
+
+          (== "%" pch)
+          (do (:= star-pidx pidx)
+              (:= star-sidx sidx)
+              (:= pidx (+ pidx 1)))
+
+          (or (== "_" pch)
+              (== sch pch))
+          (do (:= sidx (+ sidx 1))
+              (:= pidx (+ pidx 1)))
+
+          (< star-pidx 0)
+          (return false)
+
+          :else
+          (do (:= star-sidx (+ star-sidx 1))
+              (:= sidx star-sidx)
+              (:= pidx (+ star-pidx 1)))))
+  (while (< pidx plen)
+    (if (== "%" (-/like-char-at expr pidx))
+      (:= pidx (+ pidx 1))
+      (return false)))
   (return true))
 
 (def.xt PULL_LU

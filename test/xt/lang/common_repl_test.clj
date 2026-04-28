@@ -178,7 +178,7 @@
             (:= (!:G fetch)
                 (. (require "node-fetch") default)))]}
 (fact "call a http notify function."
-
+  
   (notify/wait-on-call
    (fn [] (!.js
             (repl/notify-http "127.0.0.1" (@! (:http-port (l/default-notify)))
