@@ -207,14 +207,6 @@
     (hm/hashmap-lookup-key from-keyword (kw/keyword nil "dynamic") false)])
   => ["tagged" true])
 
-^{:refer xt.runtime.parser/read-delimited :added "4.1"}
-(fact "reads delimited forms into arrays"
-
-  (!.js
-   (var reader (rdr/create "1 2]"))
-   (p/read-delimited reader "]"))
-  => [1 2])
-
 ^{:refer xt.runtime.parser-common/read-string-body :added "4.1"}
 (fact "reads string bodies with simple escapes"
 
@@ -227,6 +219,128 @@
    (var reader (rdr/create "a\\n\\\"b\""))
    (pc/read-string-body reader))
   => "a\n\"b")
+
+(fact "rejects odd map forms"
+
+  (!.js
+   (p/read-map (rdr/create ":a 1 :b}")))
+  => (throws)
+
+  (!.lua
+   (p/read-map (rdr/create ":a 1 :b}")))
+  => (throws))
+
+(fact "reads var-quote and discard dispatch forms"
+
+  (!.js
+   (var quoted (list/list-to-array (p/read-dispatch (rdr/create "'hello"))))
+   (var out (p/read-dispatch (rdr/create "_hello world")))
+   [[(. (xt/x:first quoted) _name)
+     (. (xt/x:second quoted) _name)]
+     (. out _name)])
+  => [["var" "hello"] "world"])
+
+(fact "rejects unsupported dispatch macros"
+
+  (!.js
+   (p/read-dispatch (rdr/create "?x")))
+  => (throws)
+
+  (!.lua
+   (p/read-dispatch (rdr/create "?x")))
+  => (throws))
+
+(fact "rejects EOF for prefix reader syntax"
+
+  (!.js
+   (p/read (rdr/create "'")))
+  => (throws)
+
+  (!.js
+   (p/read (rdr/create "`")))
+  => (throws)
+
+  (!.js
+   (p/read (rdr/create "@")))
+  => (throws)
+
+  (!.js
+   (p/read (rdr/create "~")))
+  => (throws)
+
+  (!.js
+   (p/read (rdr/create "^:tag")))
+  => (throws)
+
+  (!.js
+   (p/read (rdr/create "#'")))
+  => (throws)
+
+  (!.js
+   (p/read (rdr/create "#_skip")))
+  => (throws))
+
+(fact "reads deref, unquote, syntax-quote, and dispatch reader syntax"
+
+  (!.js
+   (var syntax-out (list/list-to-array (p/read (rdr/create "`hello"))))
+   (var deref-out (list/list-to-array (p/read (rdr/create "@hello"))))
+   (var unquote-out (list/list-to-array (p/read (rdr/create "~hello"))))
+   (var splice-out (list/list-to-array (p/read (rdr/create "~@hello"))))
+   (var var-out (list/list-to-array (p/read (rdr/create "#'hello"))))
+   (var discard-out (p/read (rdr/create "#_hello world")))
+   [[(. (xt/x:first syntax-out) _name)
+      (. (xt/x:second syntax-out) _name)]
+     [(. (xt/x:first deref-out) _name)
+       (. (xt/x:second deref-out) _name)]
+    [(. (xt/x:first unquote-out) _name)
+     (. (xt/x:second unquote-out) _name)]
+     [(. (xt/x:first splice-out) _name)
+      (. (xt/x:second splice-out) _name)]
+     [(. (xt/x:first var-out) _name)
+      (. (xt/x:second var-out) _name)]
+     (. discard-out _name)])
+  => [["syntax-quote" "hello"]
+      ["deref" "hello"]
+      ["unquote" "hello"]
+      ["unquote-splicing" "hello"]
+      ["var" "hello"]
+      "world"])
+
+(fact "rejects unmatched delimiters"
+
+  (!.js
+   (p/read (rdr/create ")")))
+  => (throws)
+
+  (!.lua
+   (p/read (rdr/create ")")))
+  => (throws))
+
+(fact "returns nil for empty or comment-only strings"
+
+  (!.js
+   (== nil (p/read-string "  ; comment\n")))
+  => true)
+
+^{:refer xt.runtime.parser/read :added "4.1"}
+(fact "reads atom and collection forms from readers"
+
+  (!.js
+   (var list-out (p/read (rdr/create "(1 2 3)")))
+   (var vec-out (p/read (rdr/create "[1 2 3]")))
+   [(list/list-to-array list-out)
+     (. vec-out (to-array))
+     (p/read (rdr/create "true"))])
+  => [[1 2 3] [1 2 3] true])
+
+^{:refer xt.runtime.parser/read-delimited :added "4.1"}
+(fact "reads delimited forms into arrays"
+
+  (!.js
+   (var reader (rdr/create "1 2]"))
+   (p/read-delimited reader "]"))
+  => [1 2])
 
 ^{:refer xt.runtime.parser/read-list :added "4.1"}
 (fact "reads list forms"
@@ -251,16 +365,6 @@
     (hm/hashmap-lookup-key out (kw/keyword nil "a") "missing")
     (hm/hashmap-lookup-key out (kw/keyword nil "b") "missing")])
   => [2 1 2])
-
-(fact "rejects odd map forms"
-
-  (!.js
-   (p/read-map (rdr/create ":a 1 :b}")))
-  => (throws)
-
-  (!.lua
-   (p/read-map (rdr/create ":a 1 :b}")))
-  => (throws))
 
 ^{:refer xt.runtime.parser/read-set :added "4.1"}
 (fact "reads set forms"
@@ -356,104 +460,6 @@
     (hs/hashset-has? out (kw/keyword nil "b"))])
   => [2 true true])
 
-(fact "reads var-quote and discard dispatch forms"
-
-  (!.js
-   (var quoted (list/list-to-array (p/read-dispatch (rdr/create "'hello"))))
-   (var out (p/read-dispatch (rdr/create "_hello world")))
-   [[(. (xt/x:first quoted) _name)
-     (. (xt/x:second quoted) _name)]
-     (. out _name)])
-  => [["var" "hello"] "world"])
-
-(fact "rejects unsupported dispatch macros"
-
-  (!.js
-   (p/read-dispatch (rdr/create "?x")))
-  => (throws)
-
-  (!.lua
-   (p/read-dispatch (rdr/create "?x")))
-  => (throws))
-
-(fact "rejects EOF for prefix reader syntax"
-
-  (!.js
-   (p/read (rdr/create "'")))
-  => (throws)
-
-  (!.js
-   (p/read (rdr/create "`")))
-  => (throws)
-
-  (!.js
-   (p/read (rdr/create "@")))
-  => (throws)
-
-  (!.js
-   (p/read (rdr/create "~")))
-  => (throws)
-
-  (!.js
-   (p/read (rdr/create "^:tag")))
-  => (throws)
-
-  (!.js
-   (p/read (rdr/create "#'")))
-  => (throws)
-
-  (!.js
-   (p/read (rdr/create "#_skip")))
-  => (throws))
-
-^{:refer xt.runtime.parser/read :added "4.1"}
-(fact "reads atom and collection forms from readers"
-
-  (!.js
-   (var list-out (p/read (rdr/create "(1 2 3)")))
-   (var vec-out (p/read (rdr/create "[1 2 3]")))
-   [(list/list-to-array list-out)
-     (. vec-out (to-array))
-     (p/read (rdr/create "true"))])
-  => [[1 2 3] [1 2 3] true])
-
-(fact "reads deref, unquote, syntax-quote, and dispatch reader syntax"
-
-  (!.js
-   (var syntax-out (list/list-to-array (p/read (rdr/create "`hello"))))
-   (var deref-out (list/list-to-array (p/read (rdr/create "@hello"))))
-   (var unquote-out (list/list-to-array (p/read (rdr/create "~hello"))))
-   (var splice-out (list/list-to-array (p/read (rdr/create "~@hello"))))
-   (var var-out (list/list-to-array (p/read (rdr/create "#'hello"))))
-   (var discard-out (p/read (rdr/create "#_hello world")))
-   [[(. (xt/x:first syntax-out) _name)
-      (. (xt/x:second syntax-out) _name)]
-     [(. (xt/x:first deref-out) _name)
-       (. (xt/x:second deref-out) _name)]
-    [(. (xt/x:first unquote-out) _name)
-     (. (xt/x:second unquote-out) _name)]
-     [(. (xt/x:first splice-out) _name)
-      (. (xt/x:second splice-out) _name)]
-     [(. (xt/x:first var-out) _name)
-      (. (xt/x:second var-out) _name)]
-     (. discard-out _name)])
-  => [["syntax-quote" "hello"]
-      ["deref" "hello"]
-      ["unquote" "hello"]
-      ["unquote-splicing" "hello"]
-      ["var" "hello"]
-      "world"])
-
-(fact "rejects unmatched delimiters"
-
-  (!.js
-   (p/read (rdr/create ")")))
-  => (throws)
-
-  (!.lua
-   (p/read (rdr/create ")")))
-  => (throws))
-
 ^{:refer xt.runtime.parser/read-string :added "4.1"}
 (fact "reads forms directly from strings"
 
@@ -463,9 +469,3 @@
    [(. (syn/syntax out nil) (to-array))
     (. meta _size)])
   => [[1 2] 1])
-
-(fact "returns nil for empty or comment-only strings"
-
-  (!.js
-   (== nil (p/read-string "  ; comment\n")))
-  => true)

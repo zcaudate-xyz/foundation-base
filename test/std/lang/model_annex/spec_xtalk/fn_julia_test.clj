@@ -2,15 +2,40 @@
   (:use code.test)
   (:require [std.lang.model-annex.spec-xtalk.fn-julia :refer :all]))
 
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-free-infix :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-global-key :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-free-try-catch :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-free-iife :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-promise-native-check :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-promise-resolve-form :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-promise-reject-form :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-promise-wrap-expr :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-error-value-expr :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-shell-read-expr :added "4.1"}
+(fact "TODO")
+
 ^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-del :added "4.1"}
 (fact "deletes an element from a collection"
   (julia-tf-x-del '(:x-del obj))
   => '(delete! obj))
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-eval :added "4.1"}
-(fact "evaluates a string as Julia code"
-  (julia-tf-x-eval '(:x-eval "1 + 1"))
-  => '(eval (Meta.parse "1 + 1")))
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-get-key :added "4.1"}
 (fact "gets a value from a dict with an explicit or implicit default"
@@ -20,6 +45,11 @@
   (julia-tf-x-get-key '(:x-get-key obj key))
   => '(get obj key nil))
 
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-eval :added "4.1"}
+(fact "evaluates a string as Julia code"
+  (julia-tf-x-eval '(:x-eval "1 + 1"))
+  => '(eval (Meta.parse "1 + 1")))
+
 ^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-apply :added "4.1"}
 (fact "applies a function to a list of arguments"
   (julia-tf-x-apply '(:x-apply f args))
@@ -27,6 +57,9 @@
 
   (julia-tf-x-unpack '(:x-unpack args))
   => '(... args))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-unpack :added "4.1"}
+(fact "TODO")
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-type-native :added "4.1"}
 (fact "returns the native type of an object as a string"
@@ -86,6 +119,39 @@
   (julia-tf-x-is-array? '(:x-is-array? x))
   => '(isa x AbstractArray))
 
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-is-number? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-is-integer? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-is-boolean? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-is-function? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-is-object? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-is-array? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-lu-get :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-lu-create :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-lu-set :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-lu-del :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-lu-eq :added "4.1"}
+(fact "TODO")
+
 ^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-obj-keys :added "4.1"}
 (fact "returns object helpers"
   (julia-tf-x-obj-keys '(:x-obj-keys obj))
@@ -101,13 +167,28 @@
             (collect obj)))
 
   (julia-tf-x-obj-assign '(:x-obj-assign obj m))
-  => '(do
-        (var out obj)
-        (when (== out nil)
-          (:= out (Dict())))
-        (if (== m nil)
-          (return out)
-          (return (merge out m)))))
+  => '(:-
+       "(function()\n"
+       (%
+        (do
+          (var out (if (== obj nil) (Dict) (copy obj)))
+          (if
+           (not (== m nil))
+           (for
+            [pair :in (collect m)]
+            (:= (. out [(first pair)]) (last pair)))
+           nil)
+          (return out)))
+       "\nend)()"))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-obj-vals :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-obj-pairs :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-obj-assign :added "4.1"}
+(fact "TODO")
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-arr-slice :added "4.1"}
 (fact "returns array helpers"
@@ -123,6 +204,18 @@
   (julia-tf-x-arr-sort '(:x-arr-sort arr key-fn compare-fn))
   => '(:- "sort!(" (% arr) ", by = " (% key-fn) ", lt = " (% compare-fn) ")"))
 
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-arr-insert :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-arr-remove :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-arr-sort :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-arr-foldr :added "4.1"}
+(fact "TODO")
+
 ^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-str-char :added "4.1"}
 (fact "returns string helpers"
   (julia-tf-x-str-char '(:x-str-char s i))
@@ -132,27 +225,83 @@
   => '(join arr "-")
 
   (julia-tf-x-str-index-of '(:x-str-index-of s "abc"))
-  => '(:-
-       "begin\n"
-        "local idx = findnext("
-        (% "abc")
-        ", "
-        (% s)
-        ", "
-        (% (x:offset 0))
-        ")\n"
-        "if idx === nothing\n"
-        "  nothing\n"
-        "else\n"
-        "  (isa(idx, Integer) ? Int(idx) - 1 : Int(first(idx)) - 1)\n"
-        "end\n"
-        "end")
+  => '(do
+        (var start-idx (:? (or (== nil nil) (< nil 1)) 1 nil))
+        (var idx (findnext "abc" s start-idx))
+        (return
+         (:?
+          (== idx nothing)
+          -1
+          (:? (isa idx Integer) (Int idx) (Int (first idx))))))
 
   (julia-tf-x-str-substring '(:x-str-substring s start end))
-  => '(. s [(to start 1 end)])
+  => '(. s [(to (max 1 start) 1 end)])
 
   (julia-tf-x-str-replace '(:x-str-replace s "-" "/"))
   => '(replace s (=> "-" "/")))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-str-index-of :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-str-substring :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-str-join :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-str-replace :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-str-to-fixed :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-has-key? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-global-set :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-global-del :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-global-has? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-socket-connect :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-socket-send :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-socket-close :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-notify-http :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-iter-from-obj :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-iter-eq :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-iter-has? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-iter-native? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-shell :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-file-resolve :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-file-slurp :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-file-spit :added "4.1"}
+(fact "TODO")
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-return-encode :added "4.1"}
 (fact "encodes a return value with id and key"

@@ -3,17 +3,6 @@
             [rt.postgres.base.typed.typed-jsonb :as jsonb])
   (:use code.test))
 
-^{:refer rt.postgres.base.typed.typed-jsonb/infer-jsonb-arg-access-shape :added "4.1"}
-(fact "infer-jsonb-arg-access-shape infers keys from js-select"
-  (let [fn-def {:body-meta
-                {:raw-body '((fu/js-select m (js ["a" "b" "c"])))}} ; close maps
-        shape (jsonb/infer-jsonb-arg-access-shape 'm fn-def)]
-    (types/jsonb-shape? shape) => true
-    (contains? (:fields shape) :a) => true
-    (contains? (:fields shape) :b) => true
-    (contains? (:fields shape) :c) => true))
-
-
 ^{:refer rt.postgres.base.typed.typed-jsonb/symbol->field-key :added "4.1"}
 (fact "symbol->field-key converts symbols to field keywords"
   ;; Simple symbol
@@ -112,6 +101,43 @@
 
     ;; Nil for non-accessor
     (jsonb/access-descriptor ctx '(other-fn x)) => nil))
+
+^{:refer rt.postgres.base.typed.typed-jsonb/source-root-shape :added "4.1"}
+(fact "source-root-shape returns the root jsonb shape for a path"
+  (let [shape (types/make-jsonb-shape
+               {:id {:type :uuid :nullable? false}}
+               "User")
+        ctx (types/make-context {'m :jsonb}
+                                {'m shape}
+                                {'m (types/make-jsonb-path [] 'm)})]
+    (types/jsonb-shape? (jsonb/source-root-shape ctx (types/make-jsonb-path [:id] 'm))) => true))
+
+^{:refer rt.postgres.base.typed.typed-jsonb/source-field-info :added "4.1"}
+(fact "source-field-info uses source shapes when available"
+  (let [shape (types/make-jsonb-shape
+               {:id {:type :uuid :nullable? false}}
+               "User")
+        ctx (types/make-context {'m :jsonb}
+                                {'m shape}
+                                {'m (types/make-jsonb-path [] 'm)})
+        path (types/make-jsonb-path [:id] 'm)]
+    (jsonb/source-field-info ctx path :id :->) => {:type :uuid :nullable? false}
+    (jsonb/source-field-info ctx path :missing :->>) => {:type :text :nullable? true}))
+
+^{:refer rt.postgres.base.typed.typed-jsonb/js-select-shape :added "4.1"}
+(fact "js-select-shape projects selected fields from source shapes"
+  (let [shape (types/make-jsonb-shape
+               {:id {:type :uuid :nullable? false}
+                :name {:type :text :nullable? true}}
+               "User")
+        ctx (types/make-context {'m :jsonb}
+                                {'m shape}
+                                {'m (types/make-jsonb-path [] 'm)})]
+    (types/jsonb-shape? (jsonb/js-select-shape ctx '(js-select m (js ["id" "name"])))) => true
+    (get-in (jsonb/js-select-shape ctx '(js-select m (js ["id" "name"])))
+            [:fields :id :type]) => :uuid
+    (get-in (jsonb/js-select-shape ctx '(js-select m (js ["id" "name"])))
+            [:fields :name :type]) => :text))
 
 ^{:refer rt.postgres.base.typed.typed-jsonb/expr-jsonb-path :added "4.1"}
 (fact "expr-jsonb-path extracts JSONB path from expression"
@@ -289,40 +315,12 @@
     (let [ctx (types/make-context {})]
       (jsonb/scan-form ctx 'symbol) => ctx)))
 
-
-^{:refer rt.postgres.base.typed.typed-jsonb/source-root-shape :added "4.1"}
-(fact "source-root-shape returns the root jsonb shape for a path"
-  (let [shape (types/make-jsonb-shape
-               {:id {:type :uuid :nullable? false}}
-               "User")
-        ctx (types/make-context {'m :jsonb}
-                                {'m shape}
-                                {'m (types/make-jsonb-path [] 'm)})]
-    (types/jsonb-shape? (jsonb/source-root-shape ctx (types/make-jsonb-path [:id] 'm))) => true))
-
-^{:refer rt.postgres.base.typed.typed-jsonb/source-field-info :added "4.1"}
-(fact "source-field-info uses source shapes when available"
-  (let [shape (types/make-jsonb-shape
-               {:id {:type :uuid :nullable? false}}
-               "User")
-        ctx (types/make-context {'m :jsonb}
-                                {'m shape}
-                                {'m (types/make-jsonb-path [] 'm)})
-        path (types/make-jsonb-path [:id] 'm)]
-    (jsonb/source-field-info ctx path :id :->) => {:type :uuid :nullable? false}
-    (jsonb/source-field-info ctx path :missing :->>) => {:type :text :nullable? true}))
-
-^{:refer rt.postgres.base.typed.typed-jsonb/js-select-shape :added "4.1"}
-(fact "js-select-shape projects selected fields from source shapes"
-  (let [shape (types/make-jsonb-shape
-               {:id {:type :uuid :nullable? false}
-                :name {:type :text :nullable? true}}
-               "User")
-        ctx (types/make-context {'m :jsonb}
-                                {'m shape}
-                                {'m (types/make-jsonb-path [] 'm)})]
-    (types/jsonb-shape? (jsonb/js-select-shape ctx '(js-select m (js ["id" "name"])))) => true
-    (get-in (jsonb/js-select-shape ctx '(js-select m (js ["id" "name"])))
-            [:fields :id :type]) => :uuid
-    (get-in (jsonb/js-select-shape ctx '(js-select m (js ["id" "name"])))
-            [:fields :name :type]) => :text))
+^{:refer rt.postgres.base.typed.typed-jsonb/infer-jsonb-arg-access-shape :added "4.1"}
+(fact "infer-jsonb-arg-access-shape infers keys from js-select"
+  (let [fn-def {:body-meta
+                {:raw-body '((fu/js-select m (js ["a" "b" "c"])))}} ; close maps
+        shape (jsonb/infer-jsonb-arg-access-shape 'm fn-def)]
+    (types/jsonb-shape? shape) => true
+    (contains? (:fields shape) :a) => true
+    (contains? (:fields shape) :b) => true
+    (contains? (:fields shape) :c) => true))

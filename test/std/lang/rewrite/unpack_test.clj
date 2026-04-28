@@ -2,6 +2,15 @@
   (:use code.test)
   (:require [std.lang.rewrite.unpack :as unpack]))
 
+^{:refer std.lang.rewrite.unpack/unpack-form? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.rewrite.unpack/any-unpack? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.rewrite.unpack/rewrite-arg :added "4.1"}
+(fact "TODO")
+
 ^{:refer std.lang.rewrite.unpack/rewrite-args :added "4.1"}
 (fact "detects and rewrites unpack args with injected wrappers"
   [(unpack/unpack-form? '(x:unpack xs))

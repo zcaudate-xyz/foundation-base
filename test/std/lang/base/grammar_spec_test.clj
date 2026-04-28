@@ -29,20 +29,6 @@
   => '["" {} (([a] a)
               ([a b] (+ a b)))])
 
-^{:refer std.lang.base.grammar-spec/format-defn :added "3.0"}
-(fact "standardize defn forms"
-
-  (format-defn '(defn hello "hello" {:list 1} []))
-  => '[{:list 1, :doc "hello"} (defn hello [])])
-
-^{:refer std.lang.base.grammar-spec/tf-for-index :added "4.0"}
-(fact "default for-index transform"
-
-  (tf-for-index '(for:index
-                  [i [0 2 3]]))
-  => '(for [(var i := 0) (< i 2) (:= i (+ i 3))]))
-
-
 ^{:refer std.lang.base.grammar-spec/format-defn-mixins :added "4.1"}
 (fact "applies mixins from symbols, forms and maps in order"
   (binding [*symbol* 'hello]
@@ -57,3 +43,16 @@
        {:from-form hello}
        {:base true
         :from-map true}])
+
+^{:refer std.lang.base.grammar-spec/format-defn :added "3.0"}
+(fact "standardize defn forms"
+
+  (format-defn '(defn hello "hello" {:list 1} []))
+  => '[{:list 1, :doc "hello"} (defn hello [])])
+
+^{:refer std.lang.base.grammar-spec/tf-for-index :added "4.0"}
+(fact "default for-index transform"
+
+  (tf-for-index '(for:index
+                  [i [0 2 3]]))
+  => '(for [(var i := 0) (< i 2) (:= i (+ i 3))]))

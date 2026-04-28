@@ -85,6 +85,11 @@
                                         analyse-file
                                         analyse-source-code])}}))
 
+^{:refer code.framework/extract :added "4.0"}
+(fact "returns all vars in a given namespace"
+  (extract 'code.framework {:process identity} (project/file-lookup (project/project)) (project/project))
+  => string?)
+
 ^{:refer code.framework/var-function :added "3.0"}
 (fact "constructs a var, with or without namespace"
 
@@ -168,8 +173,3 @@
 
   (project/in-context (refactor-code {:edits []}))
   => {:changed [], :updated false, :verified true, :path "test/code/framework_test.clj"})
-
-^{:refer code.framework/extract :added "4.0"}
-(fact "returns all vars in a given namespace"
-  (extract 'code.framework {:process identity} (project/file-lookup (project/project)) (project/project))
-  => string?)

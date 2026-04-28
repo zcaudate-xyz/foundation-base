@@ -57,6 +57,17 @@
   => ["7" {2 2
            3 3}])
 
+^{:refer std.pipe.process/resolve-input :added "4.1"}
+(fact "resolves inputs for bulk execution"
+  (let [task {:item {:list (fn [_ _]
+                             [:alpha :beta :gamma])}}]
+    [(resolve-input task :list {} {} {})
+     (resolve-input task :a {} {} {})
+     (resolve-input task 42 {:bulk true} {} {})])
+  => [[[:alpha :beta :gamma] {:bulk true}]
+      [[:alpha] {:bulk true}]
+      [42 {:bulk true}]])
+
 ^{:refer std.pipe.process/invoke :added "4.1"}
 (fact "executes the task"
   (let [bulk-task (pipe/task :default "double"
@@ -80,14 +91,3 @@
 
     (invoke args-task 1 :args 5)
     => 6))
-
-^{:refer std.pipe.process/resolve-input :added "4.1"}
-(fact "resolves inputs for bulk execution"
-  (let [task {:item {:list (fn [_ _]
-                             [:alpha :beta :gamma])}}]
-    [(resolve-input task :list {} {} {})
-     (resolve-input task :a {} {} {})
-     (resolve-input task 42 {:bulk true} {} {})])
-  => [[[:alpha :beta :gamma] {:bulk true}]
-      [[:alpha] {:bulk true}]
-      [42 {:bulk true}]])

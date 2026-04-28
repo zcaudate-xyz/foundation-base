@@ -37,7 +37,6 @@
           (* n (fact (- n 1))))))
   (fact 3))" 500))
 
-
 ^{:refer std.vm.scheme-interpreter/block-zip :added "4.0"}
 (fact "creates a zipper for Scheme code"
   (let [root (parse/parse-string "(+ 1 2)")]
@@ -97,14 +96,6 @@
         res (scheme/apply-lambda lambda args)]
     (scheme/block-val (first (base/block-children res))) => '+))
 
-^{:refer std.vm.scheme-interpreter/reduce-expr :added "4.0"}
-(fact "reduces an expression"
-  (let [root (parse/parse-string "(+ 1 2)")
-        z (scheme/block-zip root)
-        z (scheme/find-redex z) ;; points to (+ 1 2)
-        nz (scheme/reduce-expr z)]
-    (scheme/block-val (zip/right-element nz)) => 3))
-
 ^{:refer std.vm.scheme-interpreter/find-redex :added "4.0"}
 (fact "finds the next reducible expression"
   (let [root (parse/parse-string "(+ (+ 1 2) 3)")
@@ -114,6 +105,14 @@
     (let [expr (zip/right-element rz)]
       (scheme/block-val (first (scheme/get-exprs expr))) => '+
       (scheme/block-val (second (scheme/get-exprs expr))) => 1)))
+
+^{:refer std.vm.scheme-interpreter/reduce-expr :added "4.0"}
+(fact "reduces an expression"
+  (let [root (parse/parse-string "(+ 1 2)")
+        z (scheme/block-zip root)
+        z (scheme/find-redex z) ;; points to (+ 1 2)
+        nz (scheme/reduce-expr z)]
+    (scheme/block-val (zip/right-element nz)) => 3))
 
 ^{:refer std.vm.scheme-interpreter/highlight :added "4.0"}
 (fact "highlights the current redex"
@@ -149,5 +148,3 @@
 ^{:refer std.vm.scheme-interpreter/run :added "4.0"}
 (fact "runs the full execution"
   (scheme/run "(+ 1 2)") => any)
-
-

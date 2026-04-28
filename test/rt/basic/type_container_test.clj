@@ -3,6 +3,9 @@
             [rt.basic.type-oneshot :as oneshot])
   (:use code.test))
 
+^{:refer rt.basic.type-container/start-container-process :added "4.1"}
+(fact "TODO")
+
 ^{:refer rt.basic.type-container/start-container :added "4.1"}
 (fact "start-container preserves explicit container exec"
 
@@ -23,3 +26,6 @@
      [:exec :image]))
   => {:exec ["sh" "-c"]
       :image "erlang:27-alpine"})
+
+^{:refer rt.basic.type-container/stop-container :added "4.1"}
+(fact "TODO")

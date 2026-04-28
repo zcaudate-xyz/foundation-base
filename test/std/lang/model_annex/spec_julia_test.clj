@@ -8,63 +8,6 @@
 
 (script/script- :julia)
 
-^{:refer std.lang.model-annex.spec-julia/tf-local :added "4.0"}
-(fact "a more flexible `var` replacement"
-
-  (tf-local '(local a 1))
-  => '(var* :local a := 1)
-
-  (tf-local '(local a := 1))
-  => '(var* :local a := 1))
-
-^{:refer std.lang.model-annex.spec-julia/julia-map-key :added "3.0"}
-(fact "custom julia map key"
-
-  (julia-map-key 123 +grammar+ {})
-  => "123"
-
-  (julia-map-key "123" +grammar+ {})
-  => "\"123\""
-
-
-  (julia-map-key "abc" +grammar+ {})
-  => "\"abc\""
-
-  (julia-map-key :abc +grammar+ {})
-  => "\"abc\"")
-
-^{:refer std.lang.model-annex.spec-julia/tf-for-index :added "4.0"}
-(fact "for index transform"
- 
-  (tf-for-index '(for:index [i [0 10 2]]
-                             i))
-  => '(for [i :in (to 0 2 10)] i))
-
-^{:refer std.lang.model-annex.spec-julia/julia-module-link :added "4.0"}
-(fact "gets the absolute julia based module"
-
-  (julia-module-link 'kmi.common {:root-ns 'kmi.hello})
-  => "./common"
-
-  (julia-module-link 'kmi.exchange
-                   {:root-ns 'kmi :target "src"})
-  => "./kmi/exchange")
-
-^{:refer std.lang.model-annex.spec-julia/tf-dict :added "4.0"}
-(fact "dict transform"
-
-  (tf-dict '(dict :a 1 :b 2))
-  => '(Dict (=> "a" 1) (=> "b" 2)))
-
-^{:refer std.lang.model-annex.spec-julia/julia-module-export :added "4.0"}
-(fact "outputs the julia module export form"
-
-  (julia-module-export 'kmi.common {:root-ns 'kmi.hello})
-  => nil
-
-  (julia-module-export {:code {'a {:op :defn} 'b {:op :def}}} {})
-  => anything #_(contains '(export (a b))))
-
 (fact "Basic Julia generation"
   (!.julia
    (var a 10)
@@ -129,7 +72,7 @@
   => "println(\"Hello\")"
 
   (!.julia (x:len [1 2 3]))
-  => "length([1,2,3])"
+  => "length(Any[1,2,3])"
 
   (!.julia (x:cat "a" "b"))
   => "\"a\" * \"b\""
@@ -153,11 +96,60 @@
   => "sin(1)"
 
   (!.julia (x:str-join ", " ["a" "b"]))
-  => "join([\"a\",\"b\"],\", \")"
+  => "join(Any[\"a\",\"b\"],\", \")"
 
   (!.julia (x:arr-push [1] 2))
-  => "push!([1],2)")
+  => "push!(Any[1],2)")
 
+^{:refer std.lang.model-annex.spec-julia/tf-local :added "4.0"}
+(fact "a more flexible `var` replacement"
+
+  (tf-local '(local a 1))
+  => '(var* :local a := 1)
+
+  (tf-local '(local a := 1))
+  => '(var* :local a := 1))
+
+^{:refer std.lang.model-annex.spec-julia/julia-map-key :added "3.0"}
+(fact "custom julia map key"
+
+  (julia-map-key 123 +grammar+ {})
+  => "123"
+
+  (julia-map-key "123" +grammar+ {})
+  => "\"123\""
+
+
+  (julia-map-key "abc" +grammar+ {})
+  => "\"abc\""
+
+  (julia-map-key :abc +grammar+ {})
+  => "\"abc\"")
+
+^{:refer std.lang.model-annex.spec-julia/julia-symbol-global :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-julia/tf-for-array :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-julia/tf-for-object :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-julia/tf-for-iter :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-julia/tf-for-index :added "4.0"}
+(fact "for index transform"
+ 
+  (tf-for-index '(for:index [i [0 10 2]]
+                             i))
+  => '(for [i :in (to 0 2 10)] i))
+
+^{:refer std.lang.model-annex.spec-julia/tf-dict :added "4.0"}
+(fact "dict transform"
+
+  (tf-dict '(dict :a 1 :b 2))
+  => '(Dict (=> "a" 1) (=> "b" 2)))
 
 ^{:refer std.lang.model-annex.spec-julia/emit-to :added "4.1"}
 (fact "emits a Julia range expression"
@@ -166,3 +158,22 @@
 
   (emit-to [:to 1 2 10] +grammar+ {})
   => "1:2:10")
+
+^{:refer std.lang.model-annex.spec-julia/julia-module-link :added "4.0"}
+(fact "gets the absolute julia based module"
+
+  (julia-module-link 'kmi.common {:root-ns 'kmi.hello})
+  => "./common"
+
+  (julia-module-link 'kmi.exchange
+                   {:root-ns 'kmi :target "src"})
+  => "./kmi/exchange")
+
+^{:refer std.lang.model-annex.spec-julia/julia-module-export :added "4.0"}
+(fact "outputs the julia module export form"
+
+  (julia-module-export 'kmi.common {:root-ns 'kmi.hello})
+  => nil
+
+  (julia-module-export {:code {'a {:op :defn} 'b {:op :def}}} {})
+  => anything #_(contains '(export (a b))))

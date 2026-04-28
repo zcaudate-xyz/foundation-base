@@ -5,6 +5,28 @@
 
 (def +ctx+ {:ns 'sample.route :aliases '{types xt.old.event-common}})
 
+(fact "parses multi-arity defmacro.xt forms"
+  (let [macro-def (parse-defmacro
+                   '(defmacro.xt ^{:standalone true}
+                      x:get-idx
+                      ([arr idx]
+                       (list (quote x:get-idx) arr idx))
+                      ([arr idx default]
+                       (list (quote x:get-idx) arr idx default)))
+                   'sample.route
+                   {})]
+    {:name (:name macro-def)
+     :inputs (mapv :name (:inputs macro-def))
+     :standalone (get-in macro-def [:body-meta :standalone])
+     :raw-body (:raw-body macro-def)})
+  => '{:name "x:get-idx"
+       :inputs [arr idx]
+       :standalone true
+       :raw-body [([arr idx]
+                   (list (quote x:get-idx) arr idx))
+                  ([arr idx default]
+                   (list (quote x:get-idx) arr idx default))]})
+
 ^{:refer std.lang.typed.xtalk-parse/read-forms :added "4.1"}
 (fact "reads forms from files"
   (pos? (count (read-forms "test/std/lang/model/spec_xtalk_typed_fixture.clj")))
@@ -114,6 +136,9 @@
   => '[[[x] ((+ x 1))]
        [(([x] (+ x 1))) ()]])
 
+^{:refer std.lang.typed.xtalk-parse/multi-callable-items? :added "4.1"}
+(fact "TODO")
+
 ^{:refer std.lang.typed.xtalk-parse/parse-defn :added "4.1"}
 (fact "parses defn.xt forms"
   (let [fn-def (parse-defn '(defn.xt ^{:- [:xt/maybe User]} find-user [UserMap users :xt/str id] (return id)) 'sample.route {})]
@@ -126,28 +151,6 @@
 (fact "parses defmacro.xt forms"
   (get-in (parse-defmacro '(defmacro.xt add [a b] (list '+ a b)) 'sample.route {}) [:body-meta :macro])
   => true)
-
-(fact "parses multi-arity defmacro.xt forms"
-  (let [macro-def (parse-defmacro
-                   '(defmacro.xt ^{:standalone true}
-                      x:get-idx
-                      ([arr idx]
-                       (list (quote x:get-idx) arr idx))
-                      ([arr idx default]
-                       (list (quote x:get-idx) arr idx default)))
-                   'sample.route
-                   {})]
-    {:name (:name macro-def)
-     :inputs (mapv :name (:inputs macro-def))
-     :standalone (get-in macro-def [:body-meta :standalone])
-     :raw-body (:raw-body macro-def)})
-  => '{:name "x:get-idx"
-       :inputs [arr idx]
-       :standalone true
-       :raw-body [([arr idx]
-                   (list (quote x:get-idx) arr idx))
-                  ([arr idx default]
-                   (list (quote x:get-idx) arr idx default))]})
 
 ^{:refer std.lang.typed.xtalk-parse/parse-defvalue :added "4.1"}
 (fact "parses def.xt forms"
@@ -192,6 +195,15 @@
      (= 3 (count (:specs analysis)))])
   => '[true true])
 
+^{:refer std.lang.typed.xtalk-parse/analyze-file-raw :added "4.1"}
+(fact "returns raw parsed map without spec attachment"
+  (let [result (analyze-file-raw "test/std/lang/model/spec_xtalk_typed_fixture.clj")]
+    [(map? result)
+     (:ns result)
+     (contains? result :specs)
+     (contains? result :functions)])
+  => [true 'std.lang.model.spec-xtalk-typed-fixture true true])
+
 ^{:refer std.lang.typed.xtalk-parse/analyze-file :added "4.1"}
 (fact "analyzes files into typed declarations"
   (:ns (analyze-file "test/std/lang/model/spec_xtalk_typed_fixture.clj"))
@@ -205,24 +217,14 @@
     (some? (types/get-function 'std.lang.model.spec-xtalk-typed-fixture/find-user)))
   => true)
 
-^{:refer std.lang.typed.xtalk-parse/analyze-namespace :added "4.1"}
-(fact "finds source files for namespaces"
-  (count (:functions (analyze-namespace 'std.lang.model.spec-xtalk-typed-fixture)))
-  => 3)
-
-
-^{:refer std.lang.typed.xtalk-parse/analyze-file-raw :added "4.1"}
-(fact "returns raw parsed map without spec attachment"
-  (let [result (analyze-file-raw "test/std/lang/model/spec_xtalk_typed_fixture.clj")]
-    [(map? result)
-     (:ns result)
-     (contains? result :specs)
-     (contains? result :functions)])
-  => [true 'std.lang.model.spec-xtalk-typed-fixture true true])
-
 ^{:refer std.lang.typed.xtalk-parse/analyze-namespace-raw :added "4.1"}
 (fact "looks up namespace source file and returns raw analysis"
   (let [result (analyze-namespace-raw 'std.lang.model.spec-xtalk-typed-fixture)]
     [(map? result)
      (:ns result)])
   => [true 'std.lang.model.spec-xtalk-typed-fixture])
+
+^{:refer std.lang.typed.xtalk-parse/analyze-namespace :added "4.1"}
+(fact "finds source files for namespaces"
+  (count (:functions (analyze-namespace 'std.lang.model.spec-xtalk-typed-fixture)))
+  => 3)

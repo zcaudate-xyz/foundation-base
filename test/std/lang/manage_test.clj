@@ -30,7 +30,6 @@
     (coll? result))
   => true)
 
-
 ^{:refer std.lang.manage/xtalk-model-inventory :added "4.1"}
 (fact "returns model inventory map"
   (map? (manage/xtalk-model-inventory))
@@ -54,6 +53,31 @@
 (fact "returns spec inventory map"
   (map? (manage/xtalk-spec-inventory))
   => true)
+
+^{:refer std.lang.manage/runtime-template-matrix :added "4.1"}
+(fact "runtime-template-matrix reports scaffold status for selected templates"
+  (let [{:keys [templates languages status summary lang-summary scaffold-summary]}
+        (manage/runtime-template-matrix {:nss '[xt.lang.common-iter-test
+                                               xt.lang.common-string-test
+                                               xt.lang.spec-base-test]
+                                         :langs [:js :lua :python :dart]})]
+    [(= (set templates)
+        #{'xt.lang.common-iter-test
+          'xt.lang.common-string-test
+          'xt.lang.spec-base-test})
+     (= languages [:dart :js :lua :python])
+     (= #{:ready :unsupported}
+        (set (for [source-ns templates
+                   lang languages]
+               (get-in status [source-ns lang :status]))))
+     (= (set (keys summary))
+        (set templates))
+     (= {:full 4 :partial 0 :stub 0 :unwritten 0 :unsupported 0 :scaffold-error 0 :diagnose-error 0}
+         (get summary 'xt.lang.common-iter-test))
+     (= {:full 1 :partial 0 :stub 0 :unwritten 0 :unsupported 0 :scaffold-error 0 :diagnose-error 0}
+         (get lang-summary :python))
+     (= 0 (get-in scaffold-summary ['xt.lang.spec-base-test :ready]))])
+  => [true true true true true true true])
 
 ^{:refer std.lang.manage/xtalk-language-status :added "4.1"}
 (fact "returns merged language status map"
@@ -90,32 +114,6 @@
   (task/task? manage/xtalk-test-status)
   => true)
 
-^{:refer std.lang.manage.xtalk-audit/xtalk-op-map :added "4.1"}
-(fact "audit functions can be used directly as 4-arity task fns"
-  [(vector? (audit/xtalk-categories nil nil nil nil))
-   (map? (audit/xtalk-op-map nil nil nil nil))
-   (vector? (audit/xtalk-symbols nil nil nil nil))
-   (vector? (audit/audit-languages nil {} nil nil))
-   (map? (audit/support-matrix nil {} nil nil))
-   (map? (audit/missing-by-language nil {} nil nil))
-   (map? (audit/missing-by-feature nil {} nil nil))
-   (string? (audit/visualize-support nil {} nil nil))]
-  => [true true true true true true true true])
-
-^{:refer std.lang.manage.xtalk-ops/generate-xtalk-ops :added "4.1"}
-(fact "ops generation supports direct task-style invocation"
-  (map? (xtalk-ops/generate-xtalk-ops nil {:write false} nil nil))
-  => true)
-
-^{:refer std.lang.manage.xtalk-scaffold/export-runtime-suite :added "4.1"}
-(fact "scaffold functions remain directly available after wrapper cleanup"
-  [(fn? scaffold/scaffold-xtalk-grammar-tests)
-   (fn? scaffold/separate-runtime-tests)
-   (fn? scaffold/scaffold-runtime-template)
-   (fn? scaffold/export-runtime-suite)
-   (fn? scaffold/compile-runtime-bulk)]
-  => [true true true true true])
-
 ^{:refer std.lang.manage/xtalk-categories :added "4.1"}
 (fact "xtalk-categories task is available"
   (task/task? manage/xtalk-categories)
@@ -145,31 +143,6 @@
 (fact "support-matrix task is available"
   (task/task? manage/support-matrix)
   => true)
-
-^{:refer std.lang.manage/runtime-template-matrix :added "4.1"}
-(fact "runtime-template-matrix reports scaffold status for selected templates"
-  (let [{:keys [templates languages status summary lang-summary scaffold-summary]}
-        (manage/runtime-template-matrix {:nss '[xt.lang.common-iter-test
-                                               xt.lang.common-string-test
-                                               xt.lang.spec-base-test]
-                                         :langs [:js :lua :python :dart]})]
-    [(= (set templates)
-        #{'xt.lang.common-iter-test
-          'xt.lang.common-string-test
-          'xt.lang.spec-base-test})
-     (= languages [:dart :js :lua :python])
-     (= #{:ready :unsupported}
-        (set (for [source-ns templates
-                   lang languages]
-               (get-in status [source-ns lang :status]))))
-     (= (set (keys summary))
-        (set templates))
-     (= {:full 4 :partial 0 :stub 0 :unwritten 0 :unsupported 0 :scaffold-error 0 :diagnose-error 0}
-         (get summary 'xt.lang.common-iter-test))
-     (= {:full 1 :partial 0 :stub 0 :unwritten 0 :unsupported 0 :scaffold-error 0 :diagnose-error 0}
-         (get lang-summary :python))
-     (= 0 (get-in scaffold-summary ['xt.lang.spec-base-test :ready]))])
-  => [true true true true true true true])
 
 ^{:refer std.lang.manage/missing-by-language :added "4.1"}
 (fact "missing-by-language task is available"
@@ -206,11 +179,28 @@
   (task/task? manage/scaffold-runtime-template)
   => true)
 
+^{:refer std.lang.manage/diagnose-runtime-generation :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/export-runtime-suite :added "4.1"}
+(fact "scaffold functions remain directly available after wrapper cleanup"
+  [(fn? scaffold/scaffold-xtalk-grammar-tests)
+   (fn? scaffold/separate-runtime-tests)
+   (fn? scaffold/scaffold-runtime-template)
+   (fn? scaffold/export-runtime-suite)
+   (fn? scaffold/compile-runtime-bulk)]
+  => [true true true true true])
 
 ^{:refer std.lang.manage/compile-runtime-bulk :added "4.1"}
 (fact "compile-runtime-bulk is a task for compiling runtime EDN suites"
   (task/task? manage/compile-runtime-bulk)
   => true)
+
+^{:refer std.lang.manage/xtlang-runtime-suite-sources :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage/compile-xtlang-runtime-bulk-suites :added "4.1"}
+(fact "TODO")
 
 ^{:refer std.lang.manage/-main :added "4.1"}
 (fact "main entry point lists available tasks when called with no args"

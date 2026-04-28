@@ -13,6 +13,42 @@
 (def +grammar+
   (grammar/grammar :test +reserved+ helper/+default+))
 
+(fact "namespaced standalone macros with block-valued targets are lowered in return position"
+  (let [grammar {:reserved {'x:notify-http {:emit :macro
+                                            :macro (fn [[_ host port value id key opts]]
+                                                     (list 'try
+                                                           (list 'fetch host port value id key opts)
+                                                           (list 'return ["async"])
+                                                           (list 'catch 'e
+                                                                 (list 'return ["unable to connect"]))))
+                                            :op-spec {:allow-blocks true}}}}
+        template-fn (fn [host port value id key opts]
+                      (list 'x:notify-http host port value id key opts))
+        modules {'U.notify {:fragment {'notify-http {:template template-fn
+                                                     :standalone true
+                                                     :form '(fn [host port value id key opts])}}}}
+        mopts '{:module {:id JS.core
+                         :link {u U.notify}}}]
+    (process-value-form
+     '(return (u/notify-http "127.0.0.1" 18130 "hello" "oneshot/abc" nil {}))
+     grammar
+     modules
+     mopts))
+  => '(try
+        (fetch "127.0.0.1" 18130 "hello" "oneshot/abc" nil {})
+        (return ["async"])
+        (catch e
+          (return ["unable to connect"]))))
+
+^{:refer std.lang.base.preprocess-value/value-block-entry :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.preprocess-value/expand-value-block :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.preprocess-value/resolve-block-form :added "4.1"}
+(fact "TODO")
+
 ^{:refer std.lang.base.preprocess-value/value-template-args :added "4.1"}
 (fact "derives template value args from arglists metadata"
   (value-template-args
@@ -121,30 +157,3 @@
                       (return tn))))
                 (return t))))
           obj)))
-
-(fact "namespaced standalone macros with block-valued targets are lowered in return position"
-  (let [grammar {:reserved {'x:notify-http {:emit :macro
-                                            :macro (fn [[_ host port value id key opts]]
-                                                     (list 'try
-                                                           (list 'fetch host port value id key opts)
-                                                           (list 'return ["async"])
-                                                           (list 'catch 'e
-                                                                 (list 'return ["unable to connect"]))))
-                                            :op-spec {:allow-blocks true}}}}
-        template-fn (fn [host port value id key opts]
-                      (list 'x:notify-http host port value id key opts))
-        modules {'U.notify {:fragment {'notify-http {:template template-fn
-                                                     :standalone true
-                                                     :form '(fn [host port value id key opts])}}}}
-        mopts '{:module {:id JS.core
-                         :link {u U.notify}}}]
-    (process-value-form
-     '(return (u/notify-http "127.0.0.1" 18130 "hello" "oneshot/abc" nil {}))
-     grammar
-     modules
-     mopts))
-  => '(try
-        (fetch "127.0.0.1" 18130 "hello" "oneshot/abc" nil {})
-        (return ["async"])
-        (catch e
-          (return ["unable to connect"]))))

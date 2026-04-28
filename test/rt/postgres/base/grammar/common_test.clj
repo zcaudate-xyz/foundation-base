@@ -16,6 +16,14 @@
   (common/pg-type-alias :numeric)
   => :numeric)
 
+^{:refer rt.postgres.base.grammar.common/pg-deftype-ref-name :added "4.1"}
+(fact "gets the ref name"
+  (common/pg-deftype-ref-name :user {:raw "user_id"})
+  => "user_id"
+
+  (common/pg-deftype-ref-name :user {})
+  => "user_id")
+
 ^{:refer rt.postgres.base.grammar.common/pg-sym-meta :added "4.0"}
 (fact "returns the sym meta"
 
@@ -33,6 +41,13 @@
 
   (common/pg-format '(def ^{:- [:int]} hello 1))
   => vector?)
+
+^{:refer rt.postgres.base.grammar.common/pg-policy-format :added "4.0"}
+(fact "formats a policy definition"
+
+  (common/pg-policy-format '(defpolicy hello [table] ()))
+  => '[{:doc "", :static/policy-name "hello - ", :static/policy-table nil, :static/policy-schema "table"}
+       (defpolicy hello "" [table] ())])
 
 ^{:refer rt.postgres.base.grammar.common/pg-hydrate-module-static :added "4.0"}
 (fact "gets the static module"
@@ -55,6 +70,12 @@
 
   (common/pg-string "'hello'")
   => "'''hello'''")
+
+^{:refer rt.postgres.base.grammar.common/pg-uuid :added "4.1"}
+(fact "constructs a pg uuid"
+
+  (common/pg-uuid "123")
+  => "'123'::uuid")
 
 ^{:refer rt.postgres.base.grammar.common/pg-map :added "4.0"}
 (fact "creates a postgres json object"
@@ -157,6 +178,11 @@
    '_ '(+ 1 2 3) '(+ 4 5 6))
   => '[:loop \\ (\| (do (+ 1 2 3) (+ 4 5 6))) \\ :end-loop])
 
+^{:refer rt.postgres.base.grammar.common/block-while-block :added "4.1"}
+(fact "emits while block"
+  (common/block-while-block '(= 1 1) '(do-something))
+  => '[:while (= 1 1) :loop \\ (\| (do (do-something))) \\ :end-loop \;])
+
 ^{:refer rt.postgres.base.grammar.common/block-case-block :added "4.0"}
 (fact "emits case block"
 
@@ -189,48 +215,6 @@
   (common/pg-defpolicy '(defpolicy hello [table] ()))
   => '(do [:drop-policy-if-exists #{"hello - "} :on table] [:create-policy #{"hello - "} :on table \\]))
 
-^{:refer rt.postgres.base.grammar.common/pg-defblock :added "4.0"}
-(fact "creates generic defblock"
-
-  (common/pg-defblock '(def ^{:static/return [:index]
-                              :static/schema "scratch"} hello []))
-  => '(do [:create :index (. #{"scratch"} #{"hello"})]))
-
-^{:refer rt.postgres.base.grammar.common/pg-policy-format :added "4.0"}
-(fact "formats a policy definition"
-
-  (common/pg-policy-format '(defpolicy hello [table] ()))
-  => '[{:doc "", :static/policy-name "hello - ", :static/policy-table nil, :static/policy-schema "table"}
-       (defpolicy hello "" [table] ())])
-
-^{:refer rt.postgres.base.grammar.common/pg-deftrigger :added "4.0"}
-(fact "deftrigger block"
-
-  (common/pg-deftrigger '(deftrigger hello [table] ()))
-  => '(do [:drop-trigger-if-exists hello :on table] [:create-trigger hello :on table \\]))
-
-^{:refer rt.postgres.base.grammar.common/pg-uuid :added "4.1"}
-(fact "constructs a pg uuid"
-
-  (common/pg-uuid "123")
-  => "'123'::uuid")
-
-
-
-
-^{:refer rt.postgres.base.grammar.common/pg-deftype-ref-name :added "4.1"}
-(fact "gets the ref name"
-  (common/pg-deftype-ref-name :user {:raw "user_id"})
-  => "user_id"
-
-  (common/pg-deftype-ref-name :user {})
-  => "user_id")
-
-^{:refer rt.postgres.base.grammar.common/block-while-block :added "4.1"}
-(fact "emits while block"
-  (common/block-while-block '(= 1 1) '(do-something))
-  => '[:while (= 1 1) :loop \\ (\| (do (do-something))) \\ :end-loop \;])
-
 ^{:refer rt.postgres.base.grammar.common/pg-publication-format :added "4.1"}
 (fact "formats publication"
   (common/pg-publication-format '(defpublication pub [:all]))
@@ -252,3 +236,16 @@
   (common/pg-defsubscription '(defsubscription sub ["conn" "pub"] {}))
   => '(do [:drop-subscription-if-exists sub]
           [:create-subscription sub :connection "conn" :publication "pub"]))
+
+^{:refer rt.postgres.base.grammar.common/pg-deftrigger :added "4.0"}
+(fact "deftrigger block"
+
+  (common/pg-deftrigger '(deftrigger hello [table] ()))
+  => '(do [:drop-trigger-if-exists hello :on table] [:create-trigger hello :on table \\]))
+
+^{:refer rt.postgres.base.grammar.common/pg-defblock :added "4.0"}
+(fact "creates generic defblock"
+
+  (common/pg-defblock '(def ^{:static/return [:index]
+                              :static/schema "scratch"} hello []))
+  => '(do [:create :index (. #{"scratch"} #{"hello"})]))

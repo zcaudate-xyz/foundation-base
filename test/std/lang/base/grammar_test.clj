@@ -9,6 +9,28 @@
   (gen-ops 'std.lang.base.grammar-spec "spec")
   => vector?)
 
+^{:refer std.lang.base.grammar/normalize-op-entry :added "4.1"}
+(fact "normalizes shared macro and hard-link defaults"
+  (normalize-op-entry
+   {:op :x-add
+    :emit :macro
+    :macro #'std.lang.base.grammar-xtalk/tf-add})
+  => (contains {:value/template #'std.lang.base.grammar-xtalk/tf-add
+                :value/standalone true})
+
+  (normalize-op-entry
+   {:op :prototype-create
+    :emit :macro
+    :macro #'std.lang.base.grammar-xtalk/tf-add})
+  => (contains {:value/template #'std.lang.base.grammar-xtalk/tf-add
+                :value/standalone true})
+
+  (normalize-op-entry
+   {:op :helper
+    :emit :hard-link
+    :raw 'xt.lang.common-data/obj-keys})
+  => (contains {:value/standalone 'xt.lang.common-data/obj-keys}))
+
 ^{:refer std.lang.base.grammar/collect-ops :added "4.0"}
 (fact "collects alll ops together"
 
@@ -84,10 +106,13 @@
   (ops-detail :macro-arrow)
   => map?)
 
-^{:refer std.lang.base.grammar/build :added "3.0"}
-(fact "selector for picking required ops in grammar"
+^{:refer std.lang.base.grammar/default-lookup :added "4.1"}
+(fact "TODO")
 
-  (build :include [:vars])
+^{:refer std.lang.base.grammar/build :added "4.1"}
+(fact "functional core ops are selected explicitly"
+
+  (build :include [:functional-core])
   => map?)
 
 ^{:refer std.lang.base.grammar/build-min :added "4.0"}
@@ -100,12 +125,6 @@
 (fact "xtalk ops"
 
   (build-xtalk)
-  => map?)
-
-^{:refer std.lang.base.grammar/build :added "4.1"}
-(fact "functional core ops are selected explicitly"
-
-  (build :include [:functional-core])
   => map?)
 
 ^{:refer std.lang.base.grammar/build:override :added "4.0"}
@@ -191,30 +210,3 @@
 (comment
   (./import)
   (./create-tests))
-
-
-^{:refer std.lang.base.grammar/normalize-op-entry :added "4.1"}
-(fact "normalizes shared macro and hard-link defaults"
-  (normalize-op-entry
-   {:op :x-add
-    :emit :macro
-    :macro #'std.lang.base.grammar-xtalk/tf-add})
-  => (contains {:value/template #'std.lang.base.grammar-xtalk/tf-add
-                :value/standalone true})
-
-  (normalize-op-entry
-   {:op :prototype-create
-    :emit :macro
-    :macro #'std.lang.base.grammar-xtalk/tf-add})
-  => (contains {:value/template #'std.lang.base.grammar-xtalk/tf-add
-                :value/standalone true})
-
-  (normalize-op-entry
-   {:op :helper
-    :emit :hard-link
-    :raw 'xt.lang.common-data/obj-keys})
-  => (contains {:value/standalone 'xt.lang.common-data/obj-keys}))
-
-
-^{:refer std.lang.base.grammar/default-lookup :added "4.1"}
-(fact "TODO")

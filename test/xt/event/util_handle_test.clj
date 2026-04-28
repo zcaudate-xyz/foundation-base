@@ -31,6 +31,9 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
+^{:refer xt.event.util-handle/incr-fn :added "4.1"}
+(fact "TODO")
+
 ^{:refer xt.event.util-handle/plugin-timing :added "4.1"}
 (fact "plugin timing"
   (!.js
@@ -51,22 +54,11 @@
                                :finally "C"}))
   => {"on_error" "B", "on_teardown" "C", "on_success" "A"})
 
-^{:refer xt.event.util-handle/run-handle :added "4.1"}
-(fact "resolves successful handle runs to a receipt"
-  (notify/wait-on :js
-    (var T (handle/new-handle (fn [] (return 1))
-                              [handle/plugin-counts
-                               handle/plugin-timing]
-                              {:delay 50}))
-    (spec-promise/x:promise-then
-     (handle/run-handle T [] nil)
-     (fn [receipt]
-       (repl/notify receipt))))
-  => (contains-in {"id" "id-0"
-                   "status" "success"
-                   "value" 1
-                   "counts" {"success" 1, "error" 0}
-                   "timing" {"start" number? "end" number?}}))
+^{:refer xt.event.util-handle/promise-wrap :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.event.util-handle/new-handle :added "4.1"}
+(fact "TODO")
 
 ^{:refer xt.event.util-handle/run-handle :added "4.1"}
 (fact "rejects failed handle runs with the receipt"

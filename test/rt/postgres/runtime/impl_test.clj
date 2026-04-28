@@ -17,8 +17,6 @@
    :require [[rt.postgres :as pg]
              [rt.postgres.test.scratch-v1 :as scratch]]})
 
-;; Removed global setup to avoid connection attempt
-
 ^{:refer rt.postgres.runtime.impl/t:select :added "4.0"
   :setup [(pg/t:delete scratch/Task)
           (pg/t:delete scratch/TaskCache)
@@ -117,6 +115,13 @@
                    {:where {:name "home"}})]))
   => "SELECT count(*) FROM \"scratch\".\"Task\"\nWHERE \"name\" = 'home'")
 
+^{:refer rt.postgres.runtime.impl/t:exists :added "4.0"}
+(fact "check existence of entry"
+  (l/with:emit
+    (l/emit-as :postgres
+               `[(pg/t:exists scratch/Task {:where {:id 1}})]))
+  => string?)
+
 ^{:refer rt.postgres.runtime.impl/t:delete :added "4.0"}
 (fact "flat delete"
 
@@ -195,12 +200,4 @@
     (l/emit-as :postgres
                `[(pg/t:fields scratch/Task
                    {:where {:name "home"}})]))
-  => string?)
-
-
-^{:refer rt.postgres.runtime.impl/t:exists :added "4.0"}
-(fact "check existence of entry"
-  (l/with:emit
-    (l/emit-as :postgres
-               `[(pg/t:exists scratch/Task {:where {:id 1}})]))
   => string?)

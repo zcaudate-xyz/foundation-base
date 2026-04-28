@@ -27,6 +27,30 @@
                   (l/rt:scaffold :js))]
     :teardown [(l/rt:stop)]})
 
+^{:refer js.lib.eth-lib/get-ethers :added "4.1"}
+(fact "TODO")
+
+^{:refer js.lib.eth-lib/verifyMessage :added "4.1"}
+(fact "TODO")
+
+^{:refer js.lib.eth-lib/parseUnits :added "4.1"}
+(fact "TODO")
+
+^{:refer js.lib.eth-lib/formatUnits :added "4.1"}
+(fact "TODO")
+
+^{:refer js.lib.eth-lib/keccak256 :added "4.1"}
+(fact "TODO")
+
+^{:refer js.lib.eth-lib/ripemd160 :added "4.1"}
+(fact "TODO")
+
+^{:refer js.lib.eth-lib/mnemonicToSeed :added "4.1"}
+(fact "TODO")
+
+^{:refer js.lib.eth-lib/to-bignum :added "4.1"}
+(fact "TODO")
+
 ^{:refer js.lib.eth-lib/to-bignum-pow10 :added "4.0" :unchecked true}
 (fact "number with base 10 exponent"
 

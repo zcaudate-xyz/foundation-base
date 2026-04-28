@@ -3,15 +3,6 @@
             [std.lang.model.spec-c :refer :all])
   (:use code.test))
 
-^{:refer std.lang.model.spec-c/tf-define :added "4.0"}
-(fact "not sure if this is needed (due to defmacro) but may be good for source to source"
-
-  (tf-define '(define A 1))
-  => '(:- "#define" A 1)
-
-  (tf-define '(define A [a b] (+ a b)))
-  => '(:- "#define" (:% A (quote (a b))) (+ a b)))
-
 (fact "emit basic C"
 
   (l/emit-as :c '[(define A 1)])
@@ -66,6 +57,20 @@
   (l/emit-as :c '[(sizeof x)])
   => "sizeof x")
 
+^{:refer std.lang.model.spec-c/tf-defn :added "4.1"}
+(fact "custom defn for C"
+
+  (tf-defn '(defn main [[:int argc] [:char** argv]] (return 0)))
+  => (contains '(:- "void" main (:c-args '([:int argc] [:char** argv])))))
+
+^{:refer std.lang.model.spec-c/tf-define :added "4.0"}
+(fact "not sure if this is needed (due to defmacro) but may be good for source to source"
+
+  (tf-define '(define A 1))
+  => '(:- "#define" A 1)
+
+  (tf-define '(define A [a b] (+ a b)))
+  => '(:- "#define" (:% A (quote (a b))) (+ a b)))
 
 ^{:refer std.lang.model.spec-c/tf-struct :added "4.1"}
 (fact "transforms struct definition"
@@ -88,31 +93,6 @@
   (tf-typedef '(typedef :int :my_int))
   => '(:- "typedef" :int "my_int;"))
 
-^{:refer std.lang.model.spec-c/c-fn-args :added "4.1"}
-(fact "custom C function arguments emission"
-
-  (c-fn-args '(quote [[:int argc] [:char** argv]]) nil nil)
-  => "(int argc, char** argv)")
-
-^{:refer std.lang.model.spec-c/tf-defn :added "4.1"}
-(fact "custom defn for C"
-
-  (tf-defn '(defn main [[:int argc] [:char** argv]] (return 0)))
-  => (contains '(:- "void" main (:c-args '([:int argc] [:char** argv])))))
-
-^{:refer std.lang.model.spec-c/tf-arrow :added "4.1"}
-(fact "transforms arrow ->"
-
-  (tf-arrow '(arrow ptr field))
-  => '(:% ptr (:- "->" field)))
-
-^{:refer std.lang.model.spec-c/tf-sizeof :added "4.1"}
-(fact "transforms sizeof"
-
-  (tf-sizeof '(sizeof x))
-  => '(:- "sizeof" x))
-
-
 ^{:refer std.lang.model.spec-c/to-c-type :added "4.1"}
 (fact "converts C type inputs"
   (to-c-type :int)
@@ -128,6 +108,12 @@
 (fact "sanitizes symbols for C identifiers"
   (c-sanitize 'hello-world/foo.bar)
   => "hello_world____foo_bar")
+
+^{:refer std.lang.model.spec-c/c-fn-args :added "4.1"}
+(fact "custom C function arguments emission"
+
+  (c-fn-args '(quote [[:int argc] [:char** argv]]) nil nil)
+  => "(int argc, char** argv)")
 
 ^{:refer std.lang.model.spec-c/emit-defn :added "4.1"}
 (fact "emits C functions directly"
@@ -145,3 +131,15 @@
    +grammar+
    {:module {:id 'math.core}})
   => "void math_core____add (int lhs, int rhs) {\n\n  return lhs + rhs;\n}")
+
+^{:refer std.lang.model.spec-c/tf-arrow :added "4.1"}
+(fact "transforms arrow ->"
+
+  (tf-arrow '(arrow ptr field))
+  => '(:% ptr (:- "->" field)))
+
+^{:refer std.lang.model.spec-c/tf-sizeof :added "4.1"}
+(fact "transforms sizeof"
+
+  (tf-sizeof '(sizeof x))
+  => '(:- "sizeof" x))

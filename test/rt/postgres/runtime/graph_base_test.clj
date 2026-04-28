@@ -148,6 +148,13 @@
                              \\ :where
                              {"id" [:eq "tasks-001"]}]]}])
 
+^{:refer rt.postgres.runtime.graph-base/exists-fn :added "4.0"}
+(fact "constructs exists-fn"
+  (l/with:macro-opts [(l/rt:macro-opts :postgres)]
+    (base/exists-fn 'scratch/TaskCache
+                    {:where {:tasks "tasks-001"}}))
+  => vector?)
+
 ^{:refer rt.postgres.runtime.graph-base/select-fn-raw :added "4.0"}
 (fact "constructs a select fn with prep"
 
@@ -230,11 +237,3 @@
 
 (comment
   (first (get-in -sch- [:TaskCache :tasks])))
-
-
-^{:refer rt.postgres.runtime.graph-base/exists-fn :added "4.0"}
-(fact "constructs exists-fn"
-  (l/with:macro-opts [(l/rt:macro-opts :postgres)]
-    (base/exists-fn 'scratch/TaskCache
-                    {:where {:tasks "tasks-001"}}))
-  => vector?)

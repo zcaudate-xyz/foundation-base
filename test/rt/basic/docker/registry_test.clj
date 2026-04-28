@@ -9,6 +9,12 @@
                  "install.packages('jsonlite')")
   => true)
 
+^{:refer rt.basic.docker.registry/registry-dockerfile-path :added "4.1"}
+(fact "resolves repo-local Dockerfile paths for each registered language"
+  (every? #(str/ends-with? (registry-dockerfile-path %) "/Dockerfile")
+          [:python :js :ruby :php :perl :lua :julia :r :erlang])
+  => true)
+
 ^{:refer rt.basic.docker.registry/registry-config :added "4.1"}
 (fact "returns runtime config for canonical basic images"
   [(-> (registry-config :python) :container :image)
@@ -47,10 +53,4 @@
            :julia
            :r
            :erlang])
-  => true)
-
-^{:refer rt.basic.docker.registry/registry-dockerfile-path :added "4.1"}
-(fact "resolves repo-local Dockerfile paths for each registered language"
-  (every? #(str/ends-with? (registry-dockerfile-path %) "/Dockerfile")
-          [:python :js :ruby :php :perl :lua :julia :r :erlang])
   => true)

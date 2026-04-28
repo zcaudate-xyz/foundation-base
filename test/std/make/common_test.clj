@@ -101,7 +101,6 @@
   (common/get-config-tag +demo-config+)
   => "test.demo-make")
 
-
 ^{:refer std.make.common/make-config-map :added "4.0"}
 (fact "creates a make-config map"
 
@@ -173,6 +172,9 @@
   => (contains-in
       [number? true]))
 
+^{:refer std.make.common/make-run-close :added "4.0"}
+(fact "closes the make run window")
+
 ^{:refer std.make.common/make-run-internal :added "4.0"}
 (fact "runs the make executable internal"
 
@@ -211,7 +213,3 @@
 
   (common/make-dir-exists? +demo-config+)
   => false)
-
-
-^{:refer std.make.common/make-run-close :added "4.0"}
-(fact "closes the make run window")

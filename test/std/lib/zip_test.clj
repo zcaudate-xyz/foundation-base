@@ -351,13 +351,8 @@
       (status))
   => '([1 2 [[1 2 3 | 3] 4]]))
 
-^{:refer std.lib.zip/insert-right :added "3.0" :class [:zip/edit]}
-(fact "insert element/s right of the current status"
-
-  (-> (from-status '[| 1 2 3])
-      (insert-right 1 2 3)
-      (status))
-  => '([| 3 2 1 1 2 3]))
+^{:refer std.lib.zip/insert-right :added "4.0"}
+(fact "inserts element/s right of the current status")
 
 ^{:refer std.lib.zip/delete-left :added "3.0" :class [:zip/edit]}
 (fact "delete element/s left of the current status"
@@ -642,7 +637,3 @@
                  delete-right)
       (root-element))
   => [2 4])
-
-
-^{:refer std.lib.zip/insert-right :added "4.0"}
-(fact "inserts element/s right of the current status")

@@ -40,6 +40,42 @@
     (xtt/eq-nested-loop {:a 1} {:a 2} xtt/eq-nested-obj xtt/eq-nested-arr nil)])
   => [true false])
 
+^{:refer xt.lang.common-tree/eq-shallow-raw :added "4.1"}
+(fact "basic shallow equality comparator"
+
+  (!.js [(xtt/eq-shallow-raw 1 1 nil nil nil)
+          (xtt/eq-shallow-raw 1 2 nil nil nil)])
+  => [true false]
+
+  (!.lua [(xtt/eq-shallow-raw 1 1 nil nil nil)
+          (xtt/eq-shallow-raw 1 2 nil nil nil)])
+  => [true false]
+
+  (!.py [(xtt/eq-shallow-raw 1 1 nil nil nil)
+          (xtt/eq-shallow-raw 1 2 nil nil nil)])
+  => [true false])
+
+^{:refer xt.lang.common-tree/eq-shallow :added "4.1"}
+(fact "checks for shallow equality"
+
+  (!.js
+   (var arr [1])
+   [(xtt/eq-shallow arr arr)
+    (xtt/eq-shallow [1] [1])])
+  => [true false]
+
+  (!.lua
+   (var arr [1])
+   [(xtt/eq-shallow arr arr)
+    (xtt/eq-shallow [1] [1])])
+  => [true false]
+
+  (!.py
+   (var arr [1])
+   [(xtt/eq-shallow arr arr)
+    (xtt/eq-shallow [1] [1])])
+  => [true false])
+
 ^{:refer xt.lang.common-tree/eq-nested-obj :added "4.1"}
 (fact "checks object equality"
 
@@ -99,42 +135,6 @@
     (xtt/eq-nested [1] [1])
     (xtt/eq-nested [1] [2])])
   => [true false true false])
-
-^{:refer xt.lang.common-tree/eq-shallow-raw :added "4.1"}
-(fact "basic shallow equality comparator"
-
-  (!.js [(xtt/eq-shallow-raw 1 1 nil nil nil)
-          (xtt/eq-shallow-raw 1 2 nil nil nil)])
-  => [true false]
-
-  (!.lua [(xtt/eq-shallow-raw 1 1 nil nil nil)
-          (xtt/eq-shallow-raw 1 2 nil nil nil)])
-  => [true false]
-
-  (!.py [(xtt/eq-shallow-raw 1 1 nil nil nil)
-          (xtt/eq-shallow-raw 1 2 nil nil nil)])
-  => [true false])
-
-^{:refer xt.lang.common-tree/eq-shallow :added "4.1"}
-(fact "checks for shallow equality"
-
-  (!.js
-   (var arr [1])
-   [(xtt/eq-shallow arr arr)
-    (xtt/eq-shallow [1] [1])])
-  => [true false]
-
-  (!.lua
-   (var arr [1])
-   [(xtt/eq-shallow arr arr)
-    (xtt/eq-shallow [1] [1])])
-  => [true false]
-
-  (!.py
-   (var arr [1])
-   [(xtt/eq-shallow arr arr)
-    (xtt/eq-shallow [1] [1])])
-  => [true false])
 
 ^{:refer xt.lang.common-tree/tree-walk :added "4.1"}
 (fact "walks over object"

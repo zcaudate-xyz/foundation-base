@@ -7,6 +7,32 @@
 
 (script/script- :lua)
 
+(fact "preserves multi-value returns during lua rewrite"
+  (rewrite/lua-rewrite-stage
+   '(return nil "OK")
+   {:grammar lua/+grammar+})
+  => '(return nil "OK")
+
+  (rewrite/lua-rewrite-stage
+   '(fn [cb]
+      (return nil "OK"))
+   {:grammar lua/+grammar+})
+  => '(fn [cb]
+        (return nil "OK"))
+
+  (let [out (l/emit-as :lua '[(fn [cb] (return nil "OK"))])]
+    (boolean (re-find #"return nil,\s*'OK'" out)))
+  => true)
+
+^{:refer std.lang.model.spec-lua.rewrite/lua-rewrite-form :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-lua.rewrite/lua-rewrite-statement :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-lua.rewrite/lua-rewrite-statements :added "4.1"}
+(fact "TODO")
+
 ^{:refer std.lang.model.spec-lua.rewrite/lua-rewrite-stage :added "4.1"}
 (fact "hoists named inline functions for lua"
   (rewrite/lua-rewrite-stage
@@ -44,20 +70,3 @@
     [(boolean (re-find #"hello\(inc_fn\)" out))
      (nil? (re-find #"hello\(function \(x\)" out))])
   => [true true])
-
-(fact "preserves multi-value returns during lua rewrite"
-  (rewrite/lua-rewrite-stage
-   '(return nil "OK")
-   {:grammar lua/+grammar+})
-  => '(return nil "OK")
-
-  (rewrite/lua-rewrite-stage
-   '(fn [cb]
-      (return nil "OK"))
-   {:grammar lua/+grammar+})
-  => '(fn [cb]
-        (return nil "OK"))
-
-  (let [out (l/emit-as :lua '[(fn [cb] (return nil "OK"))])]
-    (boolean (re-find #"return nil,\s*'OK'" out)))
-  => true)

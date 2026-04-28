@@ -1,8 +1,9 @@
 (ns std.lang.model.spec-dart.rewrite-test
   (:require [std.lang :as l]
-            [std.lang.model.spec-dart :as dart]
-            [std.lang.model.spec-dart.rewrite :as rewrite]
-            [std.string :as str])
+             [std.lang.model.spec-dart :as dart]
+             [std.lang.model.spec-dart.rewrite :as rewrite]
+             [xt.lang.common-data]
+             [std.string :as str])
   (:use code.test))
 
 (fact "rewrites value-default ors into dart:or"
@@ -182,3 +183,19 @@
      (not (str/includes? gen-out "(()"))
      (not (str/includes? loop-out "return var"))])
   => [true true true true true true true])
+
+
+^{:refer std.lang.model.spec-dart.rewrite/dart-rewrite-conditional-expression :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-dart.rewrite/dart-rewrite-expression :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-dart.rewrite/dart-rewrite-statement :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-dart.rewrite/dart-rewrite-statements :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-dart.rewrite/dart-rewrite-stage :added "4.1"}
+(fact "TODO")

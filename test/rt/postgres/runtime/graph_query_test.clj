@@ -60,6 +60,12 @@
                            (last (impl/prep-table 'scratch/Task true (l/rt:macro-opts :postgres))))
   => (throws))
 
+^{:refer rt.postgres.runtime.graph-query/reverse-keys :added "4.1"}
+(fact "reverse-keys returns reverse relation keys"
+  (q/reverse-keys {:tasks [{:ref {:type :reverse}}]
+                   :id    [{:ref {:type :forward}}]})
+  => #{:tasks})
+
 ^{:refer rt.postgres.runtime.graph-query/returning-all-markers :added "4.0"}
 (fact "returns all markers for return"
 
@@ -192,10 +198,3 @@
                                         \\ :where #{["cache_id" [:eq (. rt.postgres.test.scratch-v1/TaskCache #{"id"})]]}]
                                    \\ :select (jsonb-agg j-ret) :from j-ret])) :as #{"tasks"}])])
        :from rt.postgres.test.scratch-v1/TaskCache])
-
-
-^{:refer rt.postgres.runtime.graph-query/reverse-keys :added "4.1"}
-(fact "reverse-keys returns reverse relation keys"
-  (q/reverse-keys {:tasks [{:ref {:type :reverse}}]
-                   :id    [{:ref {:type :forward}}]})
-  => #{:tasks})

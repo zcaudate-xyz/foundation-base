@@ -18,41 +18,6 @@
   [{:output (str runtime-output ".artifact")
     :body (str main "::" runtime-body)}])
 
-^{:refer std.lang.base.compile/compile-script :added "4.0"}
-(fact "compiles a script"
-
-  (make/with:mock-compile
-    (compile-script {:lang :lua
-                     :root   ".build"
-                     :target "src"
-                     :file   "pkg/file.lua"
-                     :main   xt.lang.common-math/gcd
-                     :layout :flat
-                     :entry {:label true}}))
-  => [".build/src/pkg/file.lua"
-      "function gcd(a,b){\n  return (0 == b) ? a : gcd(b,a % b);\n}\n\nfunction gcd(a,b){\n  return (0 == b) ? a : gcd(b,a % b);\n}"])
-
-^{:refer std.lang.base.compile/compile-module-single :added "4.0"}
-(fact "compiles a single module"
-
-  (make/with:mock-compile
-    (compile-module-single
-     {:lang :lua
-      :root   ".build"
-      :target "src"
-      :file   "pkg/file.lua"
-      :main   'xt.lang.common-math
-      :layout :flat
-      :entry {:label true}
-      :emit  {:static {:header true}
-              :code {:transforms [(fn [out static]
-                                    (if (:header static)
-                                      (str "HEADER\n\n" out)
-                                      out))]}}}))
-  => (contains-in
-      [".build/src/pkg/file.lua"
-       string?]))
-
 (fact "compiles a single module with sidecar artifacts"
 
   (make/with:mock-compile
@@ -69,97 +34,19 @@
       [[".build/src/pkg/file.js" string?]
        [".build/src/pkg/file.d.ts" string?]]))
 
-^{:refer std.lang.base.compile/compile-module-graph :added "4.0"}
-(fact "compiles a module graph"
+^{:refer std.lang.base.compile/compile-script :added "4.0"}
+(fact "compiles a script"
 
   (make/with:mock-compile
-    (compile-module-graph
-     {:lang :lua
-      :root   ".build"
-      :target "src"
-      :file   "pkg/file.lua"
-      :main   'xt.lang.common-data
-      :layout :flat
-      :entry {:label true}}))
-  => (contains-in
-      {:files 1, :status :changed, :written [[string?]]}))
-
-^{:refer std.lang.base.compile/compile-module-directory :added "4.0"}
-(fact "compiles a directory"
-  (with-redefs [fs/select (constantly ["src/xt/lang/common_lib.clj"])
-                fs/file-namespace (constantly 'xt.lang.common-math)]
-    (make/with:mock-compile
-      (compile-module-directory
-       {:lang :lua
-        :root ".build"
-        :target "src"
-        :main 'xt.lang.common-math})))
-  => (contains {:files pos-int?}))
-
-^{:refer std.lang.base.compile/compile-module-schema :added "4.0"}
-(fact "compiles all namespaces into a single file (for sql)"
-
-  (make/with:mock-compile
-    (compile-module-schema
-     {:lang   :postgres
-      :root   ".build"
-      :target "src"
-      :file   "pkg/schema.sql"
-      :main   'rt.postgres.test.scratch-v1
-      :layout :flat
-      :entry {:label true}}))
-  => (contains-in [".build/src/pkg/schema.sql"
-                   string?]))
-
-
-^{:refer std.lang.base.compile/compile-module-directory-selected :added "4.0"}
-(fact "compiles the directory based on sorted imports"
-  (make/with:mock-compile
-    (compile-module-directory-selected
-      :directory
-      ['xt.lang.common-math]
-      {:lang :lua :main 'xt.lang.common-math :root ".build" :target "src"}))
-  => (contains {:files pos-int?})
-
-  (compile/with:mock-compile
-    (compile/with:compile-filter #{'xt.lang.common-math}
-      (compile-module-directory-selected
-       :directory
-       ['xt.lang.common-math 'xt.lang.common-data]
-       {:lang :lua :main 'xt.lang.common-math :root ".build" :target "src"})))
-  => (contains {:files 1})
-
-  (compile/with:mock-compile
-    (compile-module-directory-selected
-      :directory
-      ['xt.lang.common-data]
-      {:lang :js
-       :main 'xt.lang.common-data
-       :root ".build"
-       :target "src"
-       :emit {:artifacts [#'ts/module-dts-artifact]}}))
-  => (contains {:files pos-int?}))
-
-^{:refer std.lang.base.compile/compile-module-prep :added "4.0"}
-(fact "precs the single entry point setup"
-  (compile-module-prep {:lang :lua :main 'xt.lang.common-math})
-  => vector?)
-
-^{:refer std.lang.base.compile/compile-module-root :added "4.0"}
-(fact "compiles module.root"
-  (make/with:mock-compile
-    (compile-module-root
-     {:lang :lua
-       :root   ".build"
-       :target "src"
-       :main   'xt.lang.common-math}))
-  => (contains {:files pos-int?}))
-
-^{:refer std.lang.base.compile/compile-module-create-links :added "4.0"}
-(fact "creates links for modules"
-  (compile-module-create-links '[a.b a.c] 'a {})
-  => (contains {'a.b (contains {:label "b"}) 'a.c (contains {:label "c"})}))
-
+    (compile-script {:lang :lua
+                     :root   ".build"
+                     :target "src"
+                     :file   "pkg/file.lua"
+                     :main   xt.lang.common-math/gcd
+                     :layout :flat
+                     :entry {:label true}}))
+  => [".build/src/pkg/file.lua"
+      "function gcd(a,b){\n  return (0 == b) ? a : gcd(b,a % b);\n}\n\nfunction gcd(a,b){\n  return (0 == b) ? a : gcd(b,a % b);\n}"])
 
 ^{:refer std.lang.base.compile/resolve-artifact-producer :added "4.1"}
 (fact "resolves artifact producers from vars, symbols and functions"
@@ -194,3 +81,114 @@
        "pkg/file.js.artifact"]
       ["BODY"
        "demo.core::BODY"]])
+
+^{:refer std.lang.base.compile/compile-module-single :added "4.0"}
+(fact "compiles a single module"
+
+  (make/with:mock-compile
+    (compile-module-single
+     {:lang :lua
+      :root   ".build"
+      :target "src"
+      :file   "pkg/file.lua"
+      :main   'xt.lang.common-math
+      :layout :flat
+      :entry {:label true}
+      :emit  {:static {:header true}
+              :code {:transforms [(fn [out static]
+                                    (if (:header static)
+                                      (str "HEADER\n\n" out)
+                                      out))]}}}))
+  => (contains-in
+      [".build/src/pkg/file.lua"
+       string?]))
+
+^{:refer std.lang.base.compile/compile-module-create-links :added "4.0"}
+(fact "creates links for modules"
+  (compile-module-create-links '[a.b a.c] 'a {})
+  => (contains {'a.b (contains {:label "b"}) 'a.c (contains {:label "c"})}))
+
+^{:refer std.lang.base.compile/compile-module-directory-selected :added "4.0"}
+(fact "compiles the directory based on sorted imports"
+  (make/with:mock-compile
+    (compile-module-directory-selected
+      :directory
+      ['xt.lang.common-math]
+      {:lang :lua :main 'xt.lang.common-math :root ".build" :target "src"}))
+  => (contains {:files pos-int?})
+
+  (compile/with:mock-compile
+    (compile/with:compile-filter #{'xt.lang.common-math}
+      (compile-module-directory-selected
+       :directory
+       ['xt.lang.common-math 'xt.lang.common-data]
+       {:lang :lua :main 'xt.lang.common-math :root ".build" :target "src"})))
+  => (contains {:files 1})
+
+  (compile/with:mock-compile
+    (compile-module-directory-selected
+      :directory
+      ['xt.lang.common-data]
+      {:lang :js
+       :main 'xt.lang.common-data
+       :root ".build"
+       :target "src"
+       :emit {:artifacts [#'ts/module-dts-artifact]}}))
+  => (contains {:files pos-int?}))
+
+^{:refer std.lang.base.compile/compile-module-directory :added "4.0"}
+(fact "compiles a directory"
+  (with-redefs [fs/select (constantly ["src/xt/lang/common_lib.clj"])
+                fs/file-namespace (constantly 'xt.lang.common-math)]
+    (make/with:mock-compile
+      (compile-module-directory
+       {:lang :lua
+        :root ".build"
+        :target "src"
+        :main 'xt.lang.common-math})))
+  => (contains {:files pos-int?}))
+
+^{:refer std.lang.base.compile/compile-module-prep :added "4.0"}
+(fact "precs the single entry point setup"
+  (compile-module-prep {:lang :lua :main 'xt.lang.common-math})
+  => vector?)
+
+^{:refer std.lang.base.compile/compile-module-root :added "4.0"}
+(fact "compiles module.root"
+  (make/with:mock-compile
+    (compile-module-root
+     {:lang :lua
+       :root   ".build"
+       :target "src"
+       :main   'xt.lang.common-math}))
+  => (contains {:files pos-int?}))
+
+^{:refer std.lang.base.compile/compile-module-graph :added "4.0"}
+(fact "compiles a module graph"
+
+  (make/with:mock-compile
+    (compile-module-graph
+     {:lang :lua
+      :root   ".build"
+      :target "src"
+      :file   "pkg/file.lua"
+      :main   'xt.lang.common-data
+      :layout :flat
+      :entry {:label true}}))
+  => (contains-in
+      {:files 1, :status :changed, :written [[string?]]}))
+
+^{:refer std.lang.base.compile/compile-module-schema :added "4.0"}
+(fact "compiles all namespaces into a single file (for sql)"
+
+  (make/with:mock-compile
+    (compile-module-schema
+     {:lang   :postgres
+      :root   ".build"
+      :target "src"
+      :file   "pkg/schema.sql"
+      :main   'rt.postgres.test.scratch-v1
+      :layout :flat
+      :entry {:label true}}))
+  => (contains-in [".build/src/pkg/schema.sql"
+                   string?]))

@@ -81,9 +81,10 @@
 
 (def +features+
   (-> (grammar/build)
+      (merge (grammar/build-xtalk))
       (grammar/build:override
        {:var        {:symbol '#{var} :raw "var"}
-        :new        {:symbol '#{new} :raw "new" :emit :call}})
+         :new        {:symbol '#{new} :raw "new" :emit :call}})
       (grammar/build:override fn-go/+go+)
       (grammar/build:extend
        {:go-chan    {:op :go-chan    :symbol '#{chan} :raw "chan " :emit :pre}

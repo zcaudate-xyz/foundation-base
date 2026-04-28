@@ -5,6 +5,21 @@
 
 (fixtures/ensure-fixtures!)
 
+^{:refer rt.postgres.base.compile.server-db/collect-pg-ops :added "4.1"}
+(fact "collects postgres operations from form"
+  (collect-pg-ops '(pg/t:insert Task {:name "test"})) => #{:insert}
+
+  (collect-pg-ops '(pg/t:update Task {:name "test"} {:id 1})) => #{:update}
+
+  (collect-pg-ops '(pg/t:delete Task {:id 1})) => #{:delete}
+
+  (collect-pg-ops '(let [x 1] (pg/t:insert Task {:name "test"}))) => #{:insert}
+
+  (collect-pg-ops '(+ 1 2 3)) => #{}
+
+  (collect-pg-ops '(do (pg/t:insert Task {:name "a"})
+                       (pg/t:update Task {:name "b"} {:id 1}))) => #{:insert :update})
+
 ^{:refer rt.postgres.base.compile.server-db/infer-sync-spec :added "4.1"}
 (fact "infer-sync-spec respects the manual and off sync modes"
   (select-keys (infer-sync-spec fixtures/+manual-sync-fn+)
@@ -70,19 +85,3 @@
 (fact "list-targets exposes the supported db targets"
   (list-targets)
   => '(:supabase-db))
-
-
-^{:refer rt.postgres.base.compile.server-db/collect-pg-ops :added "4.1"}
-(fact "collects postgres operations from form"
-  (collect-pg-ops '(pg/t:insert Task {:name "test"})) => #{:insert}
-
-  (collect-pg-ops '(pg/t:update Task {:name "test"} {:id 1})) => #{:update}
-
-  (collect-pg-ops '(pg/t:delete Task {:id 1})) => #{:delete}
-
-  (collect-pg-ops '(let [x 1] (pg/t:insert Task {:name "test"}))) => #{:insert}
-
-  (collect-pg-ops '(+ 1 2 3)) => #{}
-
-  (collect-pg-ops '(do (pg/t:insert Task {:name "a"})
-                       (pg/t:update Task {:name "b"} {:id 1}))) => #{:insert :update})

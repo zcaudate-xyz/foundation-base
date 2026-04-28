@@ -153,6 +153,11 @@
                            :type {:kind :primitive :name :xt/str}})
   => "var default_id string")
 
+^{:refer std.lang.model.spec-go.typed/emitted-specs :added "4.1"}
+(fact "filters specs shadowed by callable and value declarations"
+  (mapv :name (emitted-specs sample-analysis))
+  => ["User" "UserMap"])
+
 ^{:refer std.lang.model.spec-go.typed/emit-analysis-declarations :added "4.1"}
 (fact "emits analysis declarations"
   (emit-analysis-declarations sample-analysis)
@@ -169,8 +174,3 @@
      (str/includes? out "type UserMap map[any]any")
      (str/includes? out "type find_user func(arg0 UserMap, arg1 string) *User")])
   => [true true true])
-
-^{:refer std.lang.model.spec-go.typed/emitted-specs :added "4.1"}
-(fact "filters specs shadowed by callable and value declarations"
-  (mapv :name (emitted-specs sample-analysis))
-  => ["User" "UserMap"])

@@ -18,30 +18,11 @@
   (default-oneshot-wrap "1")
   => string?)
 
-^{:refer rt.basic.impl.process-lua/default-body-transform :added "4.0"}
-(fact "transform code for return"
-
-  (default-body-transform [1 2 3] {})
-  => '(do
-        (defn OUT-FN [] (return [1 2 3]))
-        (return (OUT-FN)))
-
-  (default-body-transform [1 2 3] {:bulk true})
-  => '(do
-        (defn OUT-FN [] 1 2 (return 3))
-        (return (OUT-FN)))
-
-  (l/emit-as :lua [(default-body-transform '(do (defn add-10 [x] (return (+ x 10)))
-                                                (add-10 5))
-                                          {})])
-  => #"local function add_10\(x\)")
-
 ^{:refer rt.basic.impl.process-lua/default-basic-client :adopt true :added "4.0"}
 (fact "wraps with the eval wrapper"
 
   (default-basic-client 19000)
   => string?)
-
 
 ^{:refer rt.basic.impl.process-lua/default-body-wrap :added "4.1"}
 (fact "wraps forms in a local helper"
@@ -73,3 +54,21 @@
       meta
       :inner)
   => true)
+
+^{:refer rt.basic.impl.process-lua/default-body-transform :added "4.0"}
+(fact "transform code for return"
+
+  (default-body-transform [1 2 3] {})
+  => '(do
+        (defn OUT-FN [] (return [1 2 3]))
+        (return (OUT-FN)))
+
+  (default-body-transform [1 2 3] {:bulk true})
+  => '(do
+        (defn OUT-FN [] 1 2 (return 3))
+        (return (OUT-FN)))
+
+  (l/emit-as :lua [(default-body-transform '(do (defn add-10 [x] (return (+ x 10)))
+                                                (add-10 5))
+                                          {})])
+  => #"local function add_10\(x\)")

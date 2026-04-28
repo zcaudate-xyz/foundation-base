@@ -14,9 +14,9 @@
 (fact "Ruby Control Flow"
   (l/emit-as :ruby
    '[(if true
-      (puts "true")
-      (puts "false"))])
-  => "if true\n  puts \"true\"\nend\nelse\n  puts \"false\"\nend")
+       (puts "true")
+       (puts "false"))])
+  => "if true\n  puts \"true\"\nelse\n  puts \"false\"\nend")
 
 (fact "Ruby Functions"
   (l/emit-as :ruby
@@ -34,9 +34,9 @@
 (fact "Ruby String Operations"
   (l/emit-as :ruby
    '[(do
-      (var s "hello")
-      (puts (. s (upcase))))])
-  => "s = \"hello\"\nputs s.upcase()")
+       (var s "hello")
+       (puts (. s (upcase))))])
+  => "s = \"hello\"\nputs s.upcase")
 
 (fact "Ruby XTalk Support"
   (l/emit-as :ruby
@@ -45,11 +45,14 @@
       (x:cat "a" "b"))])
   => "puts \"hello\"\n\"a\" + \"b\"")
 
-^{:refer std.lang.model-annex.spec-ruby/ruby-defn :added "4.1"}
-(fact "emit ruby function definition"
-
-  (l/emit-as :ruby '[(defn add [a b] (return (+ a b)))])
-  => "def add(a,b)\n  return a + b\nend")
+(fact "Ruby invoke, spread, and range forms stay structural"
+  (l/emit-as :ruby
+   '[(do
+       (. obj (respond_to? :call))
+       (. f (call (:.. args)))
+       (. s [(to start -1)])
+       (. s [(to-e start stop)]))])
+  => "obj.respond_to?(:call)\nf.call(*args)\ns[start..-1]\ns[start...stop]")
 
 ^{:refer std.lang.model-annex.spec-ruby/ruby-symbol :added "4.1"}
 (fact "emit ruby symbol"
@@ -60,6 +63,9 @@
   => "a"
   (spec-ruby/ruby-symbol 'respond_to? spec-ruby/+grammar+ {})
   => "respond_to?")
+
+^{:refer std.lang.model-annex.spec-ruby/ruby-symbol-global :added "4.1"}
+(fact "TODO")
 
 ^{:refer std.lang.model-annex.spec-ruby/ruby-var :added "4.1"}
 (fact "emit ruby variable"
@@ -73,8 +79,56 @@
   (l/emit-as :ruby '[{:a 1 :b 2}])
   => "{:a => 1, :b => 2}")
 
+^{:refer std.lang.model-annex.spec-ruby/ruby-invoke-args :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-ruby/ruby-invoke :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-ruby/ruby-dot-entry :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-ruby/ruby-dot-string :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-ruby/ruby-dot :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-ruby/ruby-emit-range :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-ruby/rewrite-callable-body :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-ruby/rewrite-callable-form :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-ruby/rewrite-callable-forms :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-ruby/ruby-defn- :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-ruby/ruby-defn :added "4.1"}
+(fact "emit ruby function definition"
+
+  (l/emit-as :ruby '[(defn add [a b] (return (+ a b)))])
+  => "def add(a,b)\n  return a + b\nend")
+
 ^{:refer std.lang.model-annex.spec-ruby/ruby-fn :added "4.1"}
 (fact "basic transform for ruby blocks"
 
   (spec-ruby/ruby-fn '(fn [a] (+ a 1)))
-  => '(:- :lambda (quote [a]) "{" (+ a 1) "}"))
+  => '(:- "->(" "a" ") {\n" "(do (+ a 1))" "\n}"))
+
+^{:refer std.lang.model-annex.spec-ruby/tf-for-array :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-ruby/tf-for-object :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-ruby/tf-for-iter :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-ruby/tf-for-index :added "4.1"}
+(fact "TODO")

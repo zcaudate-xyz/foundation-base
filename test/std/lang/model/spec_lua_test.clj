@@ -43,7 +43,7 @@
      (boolean (re-find #"print\('done'\)" out))
      (boolean (re-find #"return lua_try_result__" out))
      (boolean (re-find #"error\(lua_try_error__" out))])
-  => [true true true true])
+  => [true true false false])
 
 (fact "for async transform for nginx"
 

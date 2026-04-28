@@ -27,18 +27,23 @@
        (filter (comp fact-block? :block))
        count))
 
-^{:refer code.manage.unit.isolate/failure-line :added "4.1"}
-(fact "normalises failure line formats"
-  (failure-line {:line 12})
-  => 12
+^{:refer code.manage.unit.isolate/unwrap-fact-block :added "4.1"}
+(fact "TODO")
 
-  (failure-line {:line {:row 8}})
-  => 8)
+^{:refer code.manage.unit.isolate/unwrap-meta-block :added "4.1"}
+(fact "TODO")
 
-^{:refer code.manage.unit.isolate/isolate-target-ns :added "4.1"}
-(fact "builds the suffixed target namespace"
-  (isolate-target-ns 'example.core-test "-fix")
-  => 'example.core-fix-test)
+^{:refer code.manage.unit.isolate/ns-block? :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.isolate/fact-block? :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.isolate/top-level-entries :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.isolate/rewrite-ns-form :added "4.1"}
+(fact "TODO")
 
 ^{:refer code.manage.unit.isolate/latest-run-file :added "4.1"}
 (fact "chooses the latest saved run file"
@@ -53,6 +58,12 @@
         (finally
           (fs/delete root))))
   => #".*run-2\.edn$")
+
+^{:refer code.manage.unit.isolate/sanitize-run-string :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.isolate/parse-run-string :added "4.1"}
+(fact "TODO")
 
 ^{:refer code.manage.unit.isolate/read-run-file :added "4.1"}
 (fact "reads legacy run reports with unreadable printed values"
@@ -80,6 +91,61 @@
       :error
       "#object[java.lang.Object 0x1 \"java.lang.Object@1\"]"
       "#<Wrapped@1: \"oops\">"])
+
+^{:refer code.manage.unit.isolate/failure-line :added "4.1"}
+(fact "normalises failure line formats"
+  (failure-line {:line 12})
+  => 12
+
+  (failure-line {:line {:row 8}})
+  => 8)
+
+^{:refer code.manage.unit.isolate/significant-entry? :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.isolate/arrow-entry? :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.isolate/next-significant-index :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.isolate/trim-right-void :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.isolate/find-example-end :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.isolate/entry-matches-line? :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.isolate/body-entries :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.isolate/fact-body-entries :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.isolate/example-ranges :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.isolate/selected-fact-body :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.isolate/isolate-fact-string :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.isolate/failing-entries :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.isolate/failure-function :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.isolate/failure-functions :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.isolate/isolate-target-ns :added "4.1"}
+(fact "builds the suffixed target namespace"
+  (isolate-target-ns 'example.core-test "-fix")
+  => 'example.core-fix-test)
 
 ^{:refer code.manage.unit.isolate/isolate-string :added "4.1"}
 (fact "keeps support forms and only the selected failing checks"

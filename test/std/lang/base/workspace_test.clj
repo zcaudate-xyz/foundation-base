@@ -16,6 +16,15 @@
   []
   (return (cl/noop)))
 
+^{:refer std.lang.base.workspace/rt-resolve :added "4.0"}
+(fact "resolves an rt given keyword"
+
+  (w/rt-resolve :xtalk)
+  => map?
+
+  (w/rt-resolve (w/rt-resolve :xtalk))
+  => map?)
+
 ^{:refer std.lang.base.workspace/sym-entry :added "4.0"}
 (fact "gets the entry using a symbol"
 
@@ -42,6 +51,10 @@
 
   (w/emit-ptr cl/noop)
   => string?)
+
+^{:refer std.lang.base.workspace/ptr-display-str :added "4.0"}
+(fact "copies pointer text to clipboard"
+  (w/ptr-display-str cl/noop) => string?)
 
 ^{:refer std.lang.base.workspace/ptr-clip :added "4.0"}
 (comment "copies pointer text to clipboard"
@@ -73,15 +86,6 @@
 (fact "calls teardown on pointer all dependencies"
   (w/ptr-teardown-deps cl/noop) => any?)
 
-^{:refer std.lang.base.workspace/rt-resolve :added "4.0"}
-(fact "resolves an rt given keyword"
-
-  (w/rt-resolve :xtalk)
-  => map?
-
-  (w/rt-resolve (w/rt-resolve :xtalk))
-  => map?)
-
 ^{:refer std.lang.base.workspace/emit-module :added "4.0"}
 (fact "emits the entire module"
 
@@ -101,6 +105,10 @@
   (w/rt:module (l/rt 'xt.lang.common-lib :xtalk))
   => map?)
 
+^{:refer std.lang.base.workspace/rt:module-meta :added "4.0"}
+(fact "gets the book module for a runtime"
+  (w/rt:module-meta :xtalk) => map?)
+
 ^{:refer std.lang.base.workspace/rt:module-purge :added "4.0"}
 (fact "purges the current workspace"
   (w/rt:module-purge (l/rt 'xt.lang.common-lib :xtalk)) => any?)
@@ -116,12 +124,3 @@
 ^{:refer std.lang.base.workspace/intern-macros :added "4.0"}
 (fact "interns all macros from one namespace to another"
   (w/intern-macros :xtalk 'xt.lang.common-lib) => map?)
-
-
-^{:refer std.lang.base.workspace/ptr-display-str :added "4.0"}
-(fact "copies pointer text to clipboard"
-  (w/ptr-display-str cl/noop) => string?)
-
-^{:refer std.lang.base.workspace/rt:module-meta :added "4.0"}
-(fact "gets the book module for a runtime"
-  (w/rt:module-meta :xtalk) => map?)

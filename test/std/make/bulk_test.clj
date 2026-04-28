@@ -25,18 +25,6 @@
   (bulk/make-bulk {:name "test" :configs {} :actions {}})
   => (contains {:built {} :bulked {} :total number?}))
 
-^{:refer std.make.bulk/make-bulk-gh-init :added "4.0"}
-(fact "make bulk init github"
-
-  (bulk/make-bulk-gh-init {})
-  => {})
-
-^{:refer std.make.bulk/make-bulk-gh-push :added "4.0"}
-(fact "make bulk push github"
-
-  (bulk/make-bulk-gh-push {})
-  => {})
-
 ^{:refer std.make.bulk/make-bulk-container-filter :added "4.0"}
 (fact "filters configs based on container membership"
 
@@ -48,3 +36,15 @@
 
   (bulk/make-bulk-container-build {} [])
   => (contains {:built {} :bulked {} :total number?}))
+
+^{:refer std.make.bulk/make-bulk-gh-init :added "4.0"}
+(fact "make bulk init github"
+
+  (bulk/make-bulk-gh-init {})
+  => {})
+
+^{:refer std.make.bulk/make-bulk-gh-push :added "4.0"}
+(fact "make bulk push github"
+
+  (bulk/make-bulk-gh-push {})
+  => {})

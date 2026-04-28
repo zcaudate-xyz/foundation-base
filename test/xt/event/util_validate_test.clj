@@ -31,14 +31,11 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.event.util-validate/create-result :added "4.1"}
-(fact "creates a pending validation result"
-  (!.js
-   (validate/create-result {:first [] :last []}))
-  => {"::" "validation.result"
-      "status" "pending"
-      "fields" {"first" {"status" "pending"}
-                "last" {"status" "pending"}}})
+^{:refer xt.event.util-validate/promise-wrap :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.event.util-validate/validate-step :added "4.1"}
+(fact "TODO")
 
 ^{:refer xt.event.util-validate/validate-field :added "4.1"}
 (fact "validates a field through ordered guards"
@@ -86,6 +83,9 @@
                          "id" "is-not-empty-2"
                          "data" "hello"
                          "message" "Must not be empty"}}})
+
+^{:refer xt.event.util-validate/validate-fields-loop :added "4.1"}
+(fact "TODO")
 
 ^{:refer xt.event.util-validate/validate-all :added "4.1"}
 (fact "validates all fields through a single promise chain"
@@ -135,3 +135,12 @@
                         "id" "is-not-empty"
                         "data" ""
                         "message" "Must not be empty"}}})
+
+^{:refer xt.event.util-validate/create-result :added "4.1"}
+(fact "creates a pending validation result"
+  (!.js
+   (validate/create-result {:first [] :last []}))
+  => {"::" "validation.result"
+      "status" "pending"
+      "fields" {"first" {"status" "pending"}
+                "last" {"status" "pending"}}})

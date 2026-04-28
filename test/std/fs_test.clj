@@ -28,14 +28,14 @@
        (take 2))
   => '(ns std.fs))
 
-^{:refer std.fs/file-namespace :added "3.0"}
-(fact "reads the namespace of the given path"
-
-  (file-namespace "src/std/fs.clj")
-  => 'std.fs)
-
 ^{:refer std.fs/get-namespace :added "4.0"}
 (fact "gets the namespace given forms"
 
   (get-namespace '[(ns hello)])
   => 'hello)
+
+^{:refer std.fs/file-namespace :added "3.0"}
+(fact "reads the namespace of the given path"
+
+  (file-namespace "src/std/fs.clj")
+  => 'std.fs)

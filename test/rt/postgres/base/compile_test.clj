@@ -54,27 +54,6 @@
   => {:id "u1"
       :db/sync {"UserAccount" [{:id "u1"}]}})
 
-^{:refer rt.postgres.base.compile/emit-target :added "4.1"}
-(fact "emit-target delegates to both split target namespaces"
-  (clojure.string/includes?
-   (compile/emit-target +shape-fn+ :supabase-db)
-   "create-user-sync")
-  => true
-
-  (clojure.string/includes?
-   (compile/emit-target +shape-fn+ :xtalk-contracts)
-   "create-user-contract")
-  => true)
-
-^{:refer rt.postgres.base.compile/list-targets :added "4.0"}
-(fact "compatibility facade lists and emits across both split namespaces"
-  (compile/list-targets)
-  => '(:supabase-db :xtalk-contracts)
-
-  (keys (compile/emit-targets +shape-fn+))
-  => '(:supabase-db :xtalk-contracts))
-
-
 ^{:refer rt.postgres.base.compile/target-entry :added "4.1"}
 (fact "target-entry dispatches to the split target namespaces"
   (select-keys (compile/target-entry +shape-fn+ :supabase-db)
@@ -87,6 +66,18 @@
   => {:target :xtalk-contracts
       :emitted-sym 'create-user-contract})
 
+^{:refer rt.postgres.base.compile/emit-target :added "4.1"}
+(fact "emit-target delegates to both split target namespaces"
+  (clojure.string/includes?
+   (compile/emit-target +shape-fn+ :supabase-db)
+   "create-user-sync")
+  => true
+
+  (clojure.string/includes?
+   (compile/emit-target +shape-fn+ :xtalk-contracts)
+   "create-user-contract")
+  => true)
+
 ^{:refer rt.postgres.base.compile/emit-targets :added "4.1"}
 (fact "emit-targets can be limited to a requested target subset"
   (keys (compile/emit-targets +shape-fn+ [:xtalk-contracts]))
@@ -94,3 +85,11 @@
 
   (keys (compile/emit-targets +shape-fn+ [:supabase-db]))
   => '(:supabase-db))
+
+^{:refer rt.postgres.base.compile/list-targets :added "4.0"}
+(fact "compatibility facade lists and emits across both split namespaces"
+  (compile/list-targets)
+  => '(:supabase-db :xtalk-contracts)
+
+  (keys (compile/emit-targets +shape-fn+))
+  => '(:supabase-db :xtalk-contracts))

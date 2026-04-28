@@ -6,6 +6,39 @@
 
 (script/script- :jq)
 
+(fact "basic emit tests"
+  (!.jq
+   (def foo [x]
+     (+ x 1)))
+  => "def foo(x): x + 1;"
+
+  (!.jq
+   (| . foo))
+  => ". | foo"
+
+  (!.jq
+   (if (> . 5)
+     "big"
+     "small"))
+  => "if . > 5 then \"big\" else \"small\" end"
+
+  (!.jq
+   (reduce inputs item 0
+     (+ . $item)))
+  => "reduce inputs as $item (0; . + $item)"
+
+  (!.jq
+   (try error .))
+  => "try error catch ."
+
+  (!.jq
+   (| (label out) (break out)))
+  => "label $out | break $out"
+
+  (!.jq
+   {:a 1 :b 2})
+  => "{\"a\":1,\"b\":2}")
+
 ^{:refer std.lang.model-annex.spec-jq/jq-args :added "4.0"}
 (fact "custom args for jq"
 
@@ -17,6 +50,11 @@
 
   (jq-invoke '(foo 1 2) +grammar+ {})
   => "foo(1; 2)")
+
+^{:refer std.lang.model-annex.spec-jq/jq-args-ast :added "4.1"}
+(fact "ast for args"
+  (jq-args-ast '(a b))
+  => '(:% (k:lparen) a (k:semi) b (k:rparen)))
 
 ^{:refer std.lang.model-annex.spec-jq/jq-defn :added "4.0"}
 (fact "transforms a function to allow for inputs"
@@ -35,6 +73,11 @@
 
   (jq-label '(label x))
   => '(:% (k:label) (k:space) (:$ x)))
+
+^{:refer std.lang.model-annex.spec-jq/jq-break :added "4.1"}
+(fact "jq break"
+  (jq-break '(break)) => '(k:break)
+  (jq-break '(break x)) => '(:% (k:break) (k:space) (:$ x)))
 
 ^{:refer std.lang.model-annex.spec-jq/jq-dot :added "4.0"}
 (fact "jq dot access"
@@ -74,46 +117,3 @@
   (jq-foreach '(foreach [1 2 3] x 0 (+ . $x) (* . 2)))
   => '(:% (k:foreach) (k:space) [1 2 3] (k:space) (k:as) (k:space) (:$ x) (k:space)
           (:% (k:lparen) (% 0) (k:semi) (k:space) (% (+ . $x)) (k:semi) (k:space) (% (* . 2)) (k:rparen))))
-
-^{:refer std.lang.model-annex.spec-jq/jq-args-ast :added "4.1"}
-(fact "ast for args"
-  (jq-args-ast '(a b))
-  => '(:% (k:lparen) a (k:semi) b (k:rparen)))
-
-^{:refer std.lang.model-annex.spec-jq/jq-break :added "4.1"}
-(fact "jq break"
-  (jq-break '(break)) => '(k:break)
-  (jq-break '(break x)) => '(:% (k:break) (k:space) (:$ x)))
-
-(fact "basic emit tests"
-  (!.jq
-   (def foo [x]
-     (+ x 1)))
-  => "def foo(x): x + 1;"
-
-  (!.jq
-   (| . foo))
-  => ". | foo"
-
-  (!.jq
-   (if (> . 5)
-     "big"
-     "small"))
-  => "if . > 5 then \"big\" else \"small\" end"
-
-  (!.jq
-   (reduce inputs item 0
-     (+ . $item)))
-  => "reduce inputs as $item (0; . + $item)"
-
-  (!.jq
-   (try error .))
-  => "try error catch ."
-
-  (!.jq
-   (| (label out) (break out)))
-  => "label $out | break $out"
-
-  (!.jq
-   {:a 1 :b 2})
-  => "{\"a\":1,\"b\":2}")

@@ -508,6 +508,9 @@
                    (return [(. e ["ident"]) cols]))))
   => [["profile" [{} ["first_name" "last_name"]]]])
 
+^{:refer xt.db.schema.base-scope/get-linked-tables-loop :added "4.1"}
+(fact "TODO")
+
 ^{:refer xt.db.schema.base-scope/get-linked-tables :added "4.0"}
 (fact "calculated linked tables given query"
 
@@ -669,7 +672,6 @@
                         {:id "E3"}]]]]
                     {}))
   => +account+)
-
 
 (comment
   (s/run ['xt.db.schema.base-scope])

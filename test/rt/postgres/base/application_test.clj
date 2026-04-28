@@ -3,6 +3,41 @@
             [std.lang :as l])
   (:use code.test))
 
+^{:refer rt.postgres.base.application/application-string :added "4.1"}
+(fact "generates a string representation of an application"
+  (application-string {:tables {'users/User {} 'posts/Post {}}})
+  => "#pg.app [2]\nposts/Post users/User\n"
+
+  (application-string {:tables {}})
+  => "#pg.app [0]\n\n")
+
+^{:refer rt.postgres.base.application/app-list-entries :added "4.1"}
+(fact "returns all table entry keys from an application"
+  (set (app-list-entries {:tables {'users/User {} 'posts/Post {}}}))
+  => '#{users/User posts/Post}
+
+  (app-list-entries {:tables {}})
+  => nil)
+
+^{:refer rt.postgres.base.application/app-get-entry :added "4.1"}
+(fact "retrieves a specific entry from the app schema tree"
+  (let [app {:schema {:tree {"users/User" {:id 1} "posts/Post" {:id 2}}}}]
+    (app-get-entry app "users/User"))
+  => {:id 1}
+
+  (app-get-entry {:schema {:tree {}}} "nonexistent")
+  => nil)
+
+^{:refer rt.postgres.base.application/app-get-deps :added "4.1"}
+(fact "extracts dependency namespaces from a table entry"
+  (let [app {:tables {'users/User [{:ref {:ns 'rt.postgres.base.grammar.types}}
+                                   {:ref {:ns 'rt.postgres.base.grammar.shapes}}]}}]
+    (app-get-deps app 'users/User))
+  => '#{rt.postgres.base.grammar.shapes}
+
+  (app-get-deps {:tables {}} 'nonexistent)
+  => #{})
+
 ^{:refer rt.postgres.base.application/app-modules :added "4.0"}
 (fact "checks for modules related to a given application"
 
@@ -17,6 +52,31 @@
   => map?
   (app-create-raw {} {} {:tables {'User :table} :enums {} :functions {}})
   => (contains {:typed {:tables {'User :table} :enums {} :functions {}}}))
+
+^{:refer rt.postgres.base.application/module-typed :added "4.1"}
+(fact "analyzes modules and returns merged typed information"
+  (let [modules [{:id 'test.module
+                  :code {:ns 'test.module
+                         :forms [{:op 'deftype
+                                  :static/schema-seed []
+                                  :ns 'test.module
+                                  :name 'User
+                                  :vec []}]}}]]
+    (module-typed modules))
+  => (contains {:tables map? :enums map? :functions map?}))
+
+^{:refer rt.postgres.base.application/app-create-typed :added "4.1"}
+(fact "creates typed information from tables and modules"
+  (let [tables {'users/User [{:type :text}]}
+        modules [{:id 'test.module
+                  :code {:ns 'test.module
+                         :forms [{:op 'deftype
+                                  :static/schema-seed []
+                                  :ns 'test.module
+                                  :name 'Post
+                                  :vec []}]}}]]
+    (app-create-typed tables modules))
+  => (contains {:tables map? :enums map? :functions map?}))
 
 ^{:refer rt.postgres.base.application/app-create :added "4.0"}
 (fact "makes the app graph schema"
@@ -94,64 +154,3 @@
       #(do (app-typed "test.postgres")
            (get-in @*applications* ["test.postgres" :typed]))))
   => {:typed true})
-
-
-^{:refer rt.postgres.base.application/application-string :added "4.1"}
-(fact "generates a string representation of an application"
-  (application-string {:tables {'users/User {} 'posts/Post {}}})
-  => "#pg.app [2]\nposts/Post users/User\n"
-
-  (application-string {:tables {}})
-  => "#pg.app [0]\n\n")
-
-^{:refer rt.postgres.base.application/app-list-entries :added "4.1"}
-(fact "returns all table entry keys from an application"
-  (set (app-list-entries {:tables {'users/User {} 'posts/Post {}}}))
-  => '#{users/User posts/Post}
-
-  (app-list-entries {:tables {}})
-  => nil)
-
-^{:refer rt.postgres.base.application/app-get-entry :added "4.1"}
-(fact "retrieves a specific entry from the app schema tree"
-  (let [app {:schema {:tree {"users/User" {:id 1} "posts/Post" {:id 2}}}}]
-    (app-get-entry app "users/User"))
-  => {:id 1}
-
-  (app-get-entry {:schema {:tree {}}} "nonexistent")
-  => nil)
-
-^{:refer rt.postgres.base.application/app-get-deps :added "4.1"}
-(fact "extracts dependency namespaces from a table entry"
-  (let [app {:tables {'users/User [{:ref {:ns 'rt.postgres.base.grammar.types}}
-                                   {:ref {:ns 'rt.postgres.base.grammar.shapes}}]}}]
-    (app-get-deps app 'users/User))
-  => '#{rt.postgres.base.grammar.shapes}
-
-  (app-get-deps {:tables {}} 'nonexistent)
-  => #{})
-
-^{:refer rt.postgres.base.application/module-typed :added "4.1"}
-(fact "analyzes modules and returns merged typed information"
-  (let [modules [{:id 'test.module
-                  :code {:ns 'test.module
-                         :forms [{:op 'deftype
-                                  :static/schema-seed []
-                                  :ns 'test.module
-                                  :name 'User
-                                  :vec []}]}}]]
-    (module-typed modules))
-  => (contains {:tables map? :enums map? :functions map?}))
-
-^{:refer rt.postgres.base.application/app-create-typed :added "4.1"}
-(fact "creates typed information from tables and modules"
-  (let [tables {'users/User [{:type :text}]}
-        modules [{:id 'test.module
-                  :code {:ns 'test.module
-                         :forms [{:op 'deftype
-                                  :static/schema-seed []
-                                  :ns 'test.module
-                                  :name 'Post
-                                  :vec []}]}}]]
-    (app-create-typed tables modules))
-  => (contains {:tables map? :enums map? :functions map?}))

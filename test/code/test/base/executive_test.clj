@@ -13,6 +13,39 @@
 (defn notify [data]
   (reset! context/*accumulator* data))
 
+^{:refer code.test.base.executive/report-edn-safe? :added "4.1"}
+(fact "TODO")
+
+^{:refer code.test.base.executive/report-edn :added "4.1"}
+(fact "TODO")
+
+^{:refer code.test.base.executive/report-file-path :added "4.1"}
+(fact "TODO")
+
+^{:refer code.test.base.executive/report->run-path :added "4.1"}
+(fact "TODO")
+
+^{:refer code.test.base.executive/run-file-path :added "4.1"}
+(fact "TODO")
+
+^{:refer code.test.base.executive/run-file-params :added "4.1"}
+(fact "TODO")
+
+^{:refer code.test.base.executive/run-file-form :added "4.1"}
+(fact "TODO")
+
+^{:refer code.test.base.executive/save-artifact :added "4.1"}
+(fact "TODO")
+
+^{:refer code.test.base.executive/artifact-notices :added "4.1"}
+(fact "TODO")
+
+^{:refer code.test.base.executive/save-report-paths :added "4.1"}
+(fact "TODO")
+
+^{:refer code.test.base.executive/announce-artifacts :added "4.1"}
+(fact "TODO")
+
 ^{:refer code.test.base.executive/accumulate :added "3.0"}
 (fact "accumulates test results from various facts and files into a single data structure"
 
@@ -49,60 +82,6 @@
                    "Summary"))
   => true)
 
-^{:refer code.test.base.executive/summarise-bulk :added "3.0"}
-(fact "creates a summary of all bulk results"
-
-  (binding [context/*print* #{:print-bulk}]
-    (clojure.string/includes? (env/with-out-str
-                     (executive/summarise-bulk nil {:id {:data {:passed [] :failed [] :throw [] :timeout []}}} nil))
-                    "Summary"))
-  => true)
-
-^{:refer code.test.base.executive/summarise-bulk :added "4.1"}
-(fact "aggregates detailed failures from wrapped namespace summaries"
-  (let [captured (atom nil)
-        summary-a (with-meta {:passed 2 :failed 1 :throw 0 :timeout 0}
-                    {:data {:passed [:ok-a :ok-b]
-                            :failed [{:meta {:line 10 :ns 'demo.alpha-test}}]
-                            :throw []
-                            :timeout []}})
-        summary-b (with-meta {:passed 1 :failed 0 :throw 1 :timeout 0}
-                    {:data {:passed [:ok-c]
-                            :failed []
-                            :throw [{:meta {:line 20 :ns 'demo.beta-test}}]
-                            :timeout []}})]
-    (binding [context/*settings* {:save-run false}]
-      (with-redefs [executive/save-report-paths (fn [items selector params]
-                                                  (reset! captured [items selector params])
-                                                  {})]
-        (executive/summarise-bulk nil
-                                  {'demo.alpha-test {:data summary-a}
-                                   'demo.beta-test  {:data summary-b}}
-                                  nil)
-        @captured)))
-  => [{:failed [{:meta {:line 10 :ns 'demo.alpha-test}}]
-       :throw [{:meta {:line 20 :ns 'demo.beta-test}}]
-       :timeout []}
-      ['demo.alpha-test 'demo.beta-test]
-      {:save-run false}])
-
-^{:refer code.test.base.executive/save-report :added "4.1"}
-(fact "saves the report to .hara/runs"
-  (let [prints (atom [])]
-    (with-redefs [std.fs/create-directory (fn [_] :created)
-                  clojure.core/spit (fn [_ _] :spit)
-                  std.print/println (fn [& args]
-                                      (swap! prints conj args))]
-      (executive/save-report {:failed [{:from :verify :data 1}]})
-      (-> @prints first first)))
-  => #"^Report saved to "
-
-  (with-redefs [std.fs/create-directory (fn [_] :created)
-                clojure.core/spit (fn [_ _] :spit)
-                std.print/println (fn [& _] :printed)]
-    (executive/save-report {:passed []}))
-  => nil)
-
 ^{:refer code.test.base.executive/save-report :added "4.1"}
 (fact "writes EDN-safe run reports"
   (let [report  (atom nil)
@@ -137,6 +116,34 @@
          (get-in entry [:actual :data 1 :tag])
          (get-in entry [:actual :data 1 :message])])))
   => [true "#<Wrapped@1: \"oops\">" :throwable "bad"])
+
+^{:refer code.test.base.executive/summarise-bulk :added "4.1"}
+(fact "aggregates detailed failures from wrapped namespace summaries"
+  (let [captured (atom nil)
+        summary-a (with-meta {:passed 2 :failed 1 :throw 0 :timeout 0}
+                    {:data {:passed [:ok-a :ok-b]
+                            :failed [{:meta {:line 10 :ns 'demo.alpha-test}}]
+                            :throw []
+                            :timeout []}})
+        summary-b (with-meta {:passed 1 :failed 0 :throw 1 :timeout 0}
+                    {:data {:passed [:ok-c]
+                            :failed []
+                            :throw [{:meta {:line 20 :ns 'demo.beta-test}}]
+                            :timeout []}})]
+    (binding [context/*settings* {:save-run false}]
+      (with-redefs [executive/save-report-paths (fn [items selector params]
+                                                  (reset! captured [items selector params])
+                                                  {})]
+        (executive/summarise-bulk nil
+                                  {'demo.alpha-test {:data summary-a}
+                                   'demo.beta-test  {:data summary-b}}
+                                  nil)
+        @captured)))
+  => [{:failed [{:meta {:line 10 :ns 'demo.alpha-test}}]
+       :throw [{:meta {:line 20 :ns 'demo.beta-test}}]
+       :timeout []}
+      ['demo.alpha-test 'demo.beta-test]
+      {:save-run false}])
 
 ^{:refer code.test.base.executive/unload-namespace :added "3.0"}
 (fact "unloads a given namespace for testing"

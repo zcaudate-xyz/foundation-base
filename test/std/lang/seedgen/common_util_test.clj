@@ -14,6 +14,9 @@
 ^{:refer std.lang.seedgen.common-util/seedgen-dispatch-map :added "4.1"}
 (fact "TODO")
 
+^{:refer std.lang.seedgen.common-util/seedgen-dispatch-tag-map :added "4.1"}
+(fact "TODO")
+
 ^{:refer std.lang.seedgen.common-util/seedgen-normalize-runtime-lang :added "4.1"}
 (fact "normalizes runtime tags to their installed language keys"
   (seedgen-normalize-runtime-lang :py)
@@ -36,6 +39,14 @@
   (seedgen-dispatch-tag :dart)
   => :dt)
 
+^{:refer std.lang.seedgen.common-util/seedgen-default-runtime :added "4.1"}
+(fact "returns the default runtime for generated script headers"
+  (seedgen-default-runtime :dart)
+  => :twostep
+
+  (seedgen-default-runtime :r)
+  => :basic)
+
 ^{:refer std.lang.seedgen.common-util/seedgen-dispatch-lang :added "4.1"}
 (fact "parses dispatch symbols back to their canonical runtime language"
   (seedgen-dispatch-lang '(!.R (+ 1 2 3)))
@@ -47,14 +58,6 @@
   (seedgen-dispatch-lang '(!.dt (+ 1 2 3)))
   => :dart)
 
-^{:refer std.lang.seedgen.common-util/seedgen-default-runtime :added "4.1"}
-(fact "returns the default runtime for generated script headers"
-  (seedgen-default-runtime :dart)
-  => :twostep
-
-  (seedgen-default-runtime :r)
-  => :basic)
-
 ^{:refer std.lang.seedgen.common-util/seedgen-runtime-reference-lang :added "4.1"}
 (fact "TODO")
 
@@ -62,6 +65,9 @@
 (fact "TODO")
 
 ^{:refer std.lang.seedgen.common-util/seedgen-fact-forms :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.seedgen.common-util/seedgen-base-config :added "4.1"}
 (fact "TODO")
 
 ^{:refer std.lang.seedgen.common-util/seedgen-lang-config :added "4.1"}
@@ -81,6 +87,9 @@
       :seedgen/check {:lua {:expect 6}}}))
   => {:python {:suppress true}
       :lua {:expect 6}})
+
+^{:refer std.lang.seedgen.common-util/seedgen-lang-entry :added "4.1"}
+(fact "TODO")
 
 ^{:refer std.lang.seedgen.common-util/seedgen-suppressed-langs :added "4.1"}
 (fact "collects suppressed seedgen languages from metadata"

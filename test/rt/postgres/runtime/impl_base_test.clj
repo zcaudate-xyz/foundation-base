@@ -18,6 +18,11 @@
           :profiles {:web  {:editable #{:create
                                         :modify}}}}])
 
+(def -tsch- (get-in (app/app "scratch")
+                    [:schema
+                     :tree
+                     :Task]))
+
 ^{:refer rt.postgres.runtime.impl-base/prep-entry :added "4.0"
   :setup [@Hello]}
 (fact "prepares data given an entry sym"
@@ -30,11 +35,6 @@
 
   (prep-table '-/Hello false (l/rt:macro-opts :postgres))
   => vector?)
-
-(def -tsch- (get-in (app/app "scratch")
-                    [:schema
-                     :tree
-                     :Task]))
 
 ^{:refer rt.postgres.runtime.impl-base/t-input-check :guard true :added "4.0"}
 (fact "passes the input if check is ok"
@@ -164,6 +164,17 @@
                           "cache_id" (:uuid hello)
                           "__deleted__" false))
 
+^{:refer rt.postgres.runtime.impl-base/t-returning-cols-default :added "4.0"}
+(fact "formats returning cols default"
+  (t-returning-cols-default [:id] t-key-attrs-fn)
+  => vector?)
+
+^{:refer rt.postgres.runtime.impl-base/t-join-target-sym :added "4.1"}
+(fact "t-join-target-sym builds a namespaced symbol from link info"
+  (t-join-target-sym {:module 'scratch :id 'Task}) => 'scratch/Task
+  (t-join-target-sym {:ns 'scratch :id 'Task}) => 'scratch/Task
+  (t-join-target-sym {:module 'scratch}) => nil)
+
 ^{:refer rt.postgres.runtime.impl-base/t-returning-cols :added "4.0"}
 (fact "formats returning cols given"
 
@@ -255,6 +266,22 @@
   (t-wrap-json '<FORM> :record 'js-agg 'output nil)
   => '[:with j-ret :as <FORM> \\ :select (js-agg j-ret) :from j-ret])
 
+^{:refer rt.postgres.runtime.impl-base/t-join-transform :added "4.1"}
+(fact "transforms join entries"
+
+  (let [out (t-join-transform {:task [{:type :ref :ref {:link {:ns "scratch" :id "Task"}}}]}
+                              [:task]
+                              "Hello"
+                              {})]
+    (first (first out)) => :left-join
+    (second (first out)) => 'scratch/Task))
+
+^{:refer rt.postgres.runtime.impl-base/t-wrap-join :added "4.1"}
+(fact "adds a `join` clause"
+
+  (t-wrap-join [] [[:left-join "target" :on [:= "s.id" "t.id"]]] {})
+  => [[:left-join "target" :on [:= "s.id" "t.id"]]])
+
 ^{:refer rt.postgres.runtime.impl-base/t-wrap-where :added "4.0"}
 (fact "adds a `where` clause"
 
@@ -313,39 +340,16 @@
   (t-wrap-group-by [] [#{"id"} #{"status"}] {})
   => [:group-by [#{"id"} #{"status"}]])
 
-^{:refer rt.postgres.runtime.impl-base/t-wrap-args :added "4.0"}
-(fact "adds `additional` args"
-  (t-wrap-args [] [:a] {})
-  => [:a])
-
-^{:refer rt.postgres.runtime.impl-base/t-returning-cols-default :added "4.0"}
-(fact "formats returning cols default"
-  (t-returning-cols-default [:id] t-key-attrs-fn)
-  => vector?)
-
-
-^{:refer rt.postgres.runtime.impl-base/t-wrap-join :added "4.1"}
-(fact "adds a `join` clause"
-
-  (t-wrap-join [] [[:left-join "target" :on [:= "s.id" "t.id"]]] {})
-  => [[:left-join "target" :on [:= "s.id" "t.id"]]])
-
 ^{:refer rt.postgres.runtime.impl-base/t-wrap-having :added "4.1"}
 (fact "adds a `having` clause"
 
   (t-wrap-having [] {:id 1} -tsch- {} {})
   => '[:having {"id" [:eq 1]}])
 
-^{:refer rt.postgres.runtime.impl-base/t-join-transform :added "4.1"}
-(fact "transforms join entries"
-
-  (let [out (t-join-transform {:task [{:type :ref :ref {:link {:ns "scratch" :id "Task"}}}]}
-                              [:task]
-                              "Hello"
-                              {})]
-    (first (first out)) => :left-join
-    (second (first out)) => 'scratch/Task))
-
+^{:refer rt.postgres.runtime.impl-base/t-wrap-args :added "4.0"}
+(fact "adds `additional` args"
+  (t-wrap-args [] [:a] {})
+  => [:a])
 
 ^{:refer rt.postgres.runtime.impl-base/t-wrap-lock :added "4.1"}
 (fact "adds lock clauses and optional newline separators"
@@ -354,10 +358,3 @@
 
   (t-wrap-lock [:select :*] [:share :nowait] {:newline true})
   => [:select :* \\ :for :share :nowait])
-
-
-^{:refer rt.postgres.runtime.impl-base/t-join-target-sym :added "4.1"}
-(fact "t-join-target-sym builds a namespaced symbol from link info"
-  (t-join-target-sym {:module 'scratch :id 'Task}) => 'scratch/Task
-  (t-join-target-sym {:ns 'scratch :id 'Task}) => 'scratch/Task
-  (t-join-target-sym {:module 'scratch}) => nil)

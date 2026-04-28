@@ -125,6 +125,42 @@
   (info-dispatch -d- nil) => map?
   (stop-dispatch -d-))
 
+^{:refer std.dispatch.hub/started?-dispatch :added "4.1"}
+(fact "checks if dispatch is started"
+  (def -d- (create-dispatch +test-config+))
+  (started?-dispatch -d-) => nil
+
+  (start-dispatch -d-)
+  (started?-dispatch -d-) => true
+  (stop-dispatch -d-))
+
+^{:refer std.dispatch.hub/stopped?-dispatch :added "4.1"}
+(fact "checks if dispatch is stopped"
+  (def -d- (create-dispatch +test-config+))
+  (stopped?-dispatch -d-) => true
+
+  (start-dispatch -d-)
+  (stopped?-dispatch -d-) => false
+  (stop-dispatch -d-))
+
+^{:refer std.dispatch.hub/health-dispatch :added "4.1"}
+(fact "returns health of dispatch"
+  (def -d- (create-dispatch +test-config+))
+  (health-dispatch -d-) => {:status :error}
+
+  (start-dispatch -d-)
+  (health-dispatch -d-) => map?
+  (stop-dispatch -d-))
+
+^{:refer std.dispatch.hub/props-dispatch :added "4.1"}
+(fact "returns props of dispatch"
+  (def -d- (create-dispatch +test-config+))
+  (props-dispatch -d-) => nil
+
+  (start-dispatch -d-)
+  (props-dispatch -d-) => map?
+  (stop-dispatch -d-))
+
 ^{:refer std.dispatch.hub/create-dispatch :added "3.0"}
 (fact "creates the hub executor"
 
@@ -197,40 +233,3 @@
   (submit-dispatch -e- 2)
   (submit-dispatch -e- 1)
   (submit-dispatch -e- 3))
-
-
-^{:refer std.dispatch.hub/started?-dispatch :added "4.1"}
-(fact "checks if dispatch is started"
-  (def -d- (create-dispatch +test-config+))
-  (started?-dispatch -d-) => nil
-
-  (start-dispatch -d-)
-  (started?-dispatch -d-) => true
-  (stop-dispatch -d-))
-
-^{:refer std.dispatch.hub/stopped?-dispatch :added "4.1"}
-(fact "checks if dispatch is stopped"
-  (def -d- (create-dispatch +test-config+))
-  (stopped?-dispatch -d-) => true
-
-  (start-dispatch -d-)
-  (stopped?-dispatch -d-) => false
-  (stop-dispatch -d-))
-
-^{:refer std.dispatch.hub/health-dispatch :added "4.1"}
-(fact "returns health of dispatch"
-  (def -d- (create-dispatch +test-config+))
-  (health-dispatch -d-) => {:status :error}
-
-  (start-dispatch -d-)
-  (health-dispatch -d-) => map?
-  (stop-dispatch -d-))
-
-^{:refer std.dispatch.hub/props-dispatch :added "4.1"}
-(fact "returns props of dispatch"
-  (def -d- (create-dispatch +test-config+))
-  (props-dispatch -d-) => nil
-
-  (start-dispatch -d-)
-  (props-dispatch -d-) => map?
-  (stop-dispatch -d-))

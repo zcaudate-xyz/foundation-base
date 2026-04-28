@@ -34,6 +34,9 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
+^{:refer xt.event.util-loader/promise-wrap :added "4.1"}
+(fact "TODO")
+
 ^{:refer xt.event.util-loader/new-task :added "4.1"}
 (fact "creates a new task"
   (set
@@ -71,6 +74,15 @@
      repl/notify))
   => "B")
 
+^{:refer xt.event.util-loader/task-unload :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.event.util-loader/new-loader-blank :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.event.util-loader/add-tasks :added "4.1"}
+(fact "TODO")
+
 ^{:refer xt.event.util-loader/new-loader :added "4.1"}
 (fact "creates a dependency-ordered loader"
   (!.js
@@ -84,6 +96,18 @@
   => (contains-in {"order" ["A" "B" "C"]
                    "incomplete" ["A" "B" "C"]
                    "waiting" ["A"]}))
+
+^{:refer xt.event.util-loader/list-loading :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.event.util-loader/list-completed :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.event.util-loader/list-incomplete :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.event.util-loader/list-waiting :added "4.1"}
+(fact "TODO")
 
 ^{:refer xt.event.util-loader/load-tasks-single :added "4.1"}
 (fact "loads a single task and updates loader state"
@@ -203,3 +227,6 @@
      (fn [_]
        (repl/notify (loader/list-completed instance)))))
   => ["A"])
+
+^{:refer xt.event.util-loader/unload-tasks :added "4.1"}
+(fact "TODO")

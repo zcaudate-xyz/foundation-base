@@ -14,6 +14,23 @@
        (into {}))
   => (contains {:status :success, :data 6, :form '(+ 1 2 3), :from :evaluate}))
 
+^{:refer code.test.base.process/infer-function :added "4.1"}
+(fact "infers the first non-wrapper function from nested forms"
+  [(infer-function '(let [x 1]
+                      (when true
+                        (demo/run x))))
+   (infer-function '(quote (demo/run x)))]
+  => '[demo/run nil])
+
+^{:refer code.test.base.process/attach-meta :added "3.0"}
+(fact "attaches metadata to the result"
+  (attach-meta {:status :success}
+               {:line 10}
+               '(xtgen/generate-common-lib {}))
+  => {:status :success
+      :meta {:line 10
+             :function 'xtgen/generate-common-lib}})
+
 ^{:refer code.test.base.process/process :added "3.0"}
 (fact "processes a form or a check"
 
@@ -43,23 +60,6 @@
                   :input  {:form '(+ 1 2 3)}
                   :output {:form 'even?}}))
   => true)
-
-^{:refer code.test.base.process/attach-meta :added "3.0"}
-(fact "attaches metadata to the result"
-  (attach-meta {:status :success}
-               {:line 10}
-               '(xtgen/generate-common-lib {}))
-  => {:status :success
-      :meta {:line 10
-             :function 'xtgen/generate-common-lib}})
-
-^{:refer code.test.base.process/infer-function :added "4.1"}
-(fact "infers the first non-wrapper function from nested forms"
-  [(infer-function '(let [x 1]
-                      (when true
-                        (demo/run x))))
-   (infer-function '(quote (demo/run x)))]
-  => '[demo/run nil])
 
 ^{:refer code.test.base.process/collect :added "3.0"}
 (fact "makes sure that all returned verified results are true"

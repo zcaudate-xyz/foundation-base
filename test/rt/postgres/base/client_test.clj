@@ -11,6 +11,12 @@
   ;; Only checking function existance/stub as we mock everything
   )
 
+^{:refer rt.postgres.base.client/rt-pg-string :added "4.1"}
+(fact "returns string representation of postgres runtime"
+  (let [pg (client/rt-postgres:create {})]
+    (client/rt-pg-string pg)
+    => string?))
+
 ^{:refer rt.postgres.base.client/rt-postgres:create :added "4.0"}
 (fact "creates a postgres runtime"
   (client/rt-postgres:create {})
@@ -44,10 +50,3 @@
     (with-redefs [conn/notify-create (fn [_ _] [:conn])]
       (client/rt-add-notify pg "id" {:channel "ch"})
       (client/rt-list-notify pg) => (contains ["id"]))))
-
-
-^{:refer rt.postgres.base.client/rt-pg-string :added "4.1"}
-(fact "returns string representation of postgres runtime"
-  (let [pg (client/rt-postgres:create {})]
-    (client/rt-pg-string pg)
-    => string?))

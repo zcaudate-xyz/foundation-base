@@ -76,6 +76,12 @@
                     :as other}]))))
   => "(fn [^{:readable-len 30} {:keys ^{:tag :vector, :readable-len 10, :spec {:columns 1}} [a b c d e], :as other}])")
 
+^{:refer std.block.layout/layout-annotate-svg-path :added "4.0"}
+(fact "parses the d string in svg path for better formatting"
+
+  (bind/layout-annotate-svg-path [:path {:d "M 10 10 L 20 20"}])
+  => (contains [:path (contains {:d ["M" "10" "10" "L" "20" "20"]})]))
+
 ^{:refer std.block.layout/layout-annotate :added "4.0"}
 (fact "adds metadata annotation to form"
 
@@ -236,10 +242,3 @@
    "                          [bindings]"
    "                          arg-spacing"
    "                          arg-blocks))))))"])
-
-
-^{:refer std.block.layout/layout-annotate-svg-path :added "4.0"}
-(fact "parses the d string in svg path for better formatting"
-
-  (bind/layout-annotate-svg-path [:path {:d "M 10 10 L 20 20"}])
-  => (contains [:path (contains {:d ["M" "10" "10" "L" "20" "20"]})]))

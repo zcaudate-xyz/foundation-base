@@ -4,6 +4,21 @@
             [std.lang.model.spec-xtalk.fn-python :refer :all])
   (:use code.test))
 
+^{:refer std.lang.model.spec-xtalk.fn-python/+python-promise+ :added "4.1"}
+(fact "promise delay hard-links through common-promise"
+  [(get-in +python-promise+ [:x-with-delay :raw])
+   (let [out (l/emit-as :python ['(python.core.common-promise/with-delay ms thunk)
+                                 '(python.core.common-promise/with-delay thunk ms)])]
+     [(boolean (re-find #"python\.core\.common_promise\.with_delay\(ms,\s*thunk\)" out))
+      (boolean (re-find #"python\.core\.common_promise\.with_delay\(thunk,\s*ms\)" out))])]
+  => ['python.core.common-promise/with-delay
+      [true true]])
+
+^{:refer std.lang.model.spec-xtalk.fn-python/+python-iter :added "4.1"}
+(fact "iter null"
+  (l/emit-as :python [(:default (:x-iter-null +python-iter+))])
+  => #"iter")
+
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-del :added "4.0"}
 (fact "deletes object"
   (l/emit-as :python [(python-tf-x-del '[_ obj])])
@@ -24,10 +39,27 @@
   (python-tf-x-get-key '[_ obj key default])
   => '(or (. obj (get key)) default))
 
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-has-key? :added "4.1"}
+(fact "has key"
+  (python-tf-x-has-key? '[_ obj key nil])
+  => '(not= nil (. obj (get key))))
+
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-err :added "4.0"}
 (fact "raises error"
   (python-tf-x-err '[_ "msg"])
   => '(throw (Exception "msg")))
+
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-ex-native? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-ex-new :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-ex-message :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-ex-data :added "4.1"}
+(fact "TODO")
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-eval :added "4.0"}
 (fact "evals"
@@ -48,11 +80,6 @@
 (fact "prints"
   (l/emit-as :python [(python-tf-x-print '[_ "hello"])])
   => #"print")
-
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-shell :added "4.0"}
-(fact "shell"
-  (l/emit-as :python [(python-tf-x-shell '[_ "ls" cm])])
-  => #"subprocess")
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-type-native :added "4.0"}
 (fact "type native"
@@ -294,6 +321,9 @@
   (l/emit-as :python [(python-tf-x-arr-insert '[_ arr 0 1])])
   => #"insert")
 
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-arr-remove :added "4.1"}
+(fact "TODO")
+
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-arr-sort :added "4.0"}
 (fact "arr sort"
   (l/emit-as :python [(python-tf-x-arr-sort '[_ arr k c])])
@@ -303,6 +333,12 @@
 (fact "arr str comp"
   (l/emit-as :python [(python-tf-x-str-comp '[_ a b])])
   => #"<")
+
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-arr-every :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-arr-some :added "4.1"}
+(fact "TODO")
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-str-char :added "4.0"}
 (fact "str char"
@@ -324,6 +360,9 @@
   (l/emit-as :python [(python-tf-x-str-index-of '[_ s "a"])])
   => #"find")
 
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-str-to-fixed :added "4.1"}
+(fact "TODO")
+
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-str-substring :added "4.0"}
 (fact "str substring"
   (l/emit-as :python [(python-tf-x-str-substring '[_ s 0 1])])
@@ -343,6 +382,21 @@
 (fact "str replace"
   (l/emit-as :python [(python-tf-x-str-replace '[_ s "a" "b"])])
   => #"replace")
+
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-str-trim :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-str-trim-left :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-str-trim-right :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-str-pad-left :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-str-pad-right :added "4.1"}
+(fact "TODO")
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-json-encode :added "4.0"}
 (fact "json encode"
@@ -389,23 +443,6 @@
   (l/emit-as :python [(python-tf-x-socket-close '[_ conn])])
   => #"close")
 
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-with-delay :added "4.1"}
-(fact "with delay"
-  (let [out (l/emit-as :python [(python-tf-x-with-delay '[_ ms thunk])])]
-    [(boolean (re-find #"sleep\(ms / 1000\.0\)" out))
-     (boolean (re-find #"return thunk\(\)" out))])
-  => [true true])
-
-^{:refer std.lang.model.spec-xtalk.fn-python/+python-promise+ :added "4.1"}
-(fact "promise delay hard-links through common-promise"
-  [(get-in +python-promise+ [:x-with-delay :raw])
-   (let [out (l/emit-as :python ['(python.core.common-promise/with-delay ms thunk)
-                                 '(python.core.common-promise/with-delay thunk ms)])]
-     [(boolean (re-find #"python\.core\.common_promise\.with_delay\(ms,\s*thunk\)" out))
-      (boolean (re-find #"python\.core\.common_promise\.with_delay\(thunk,\s*ms\)" out))])]
-  => ['python.core.common-promise/with-delay
-      [true true]])
-
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-iter-from-obj :added "4.0"}
 (fact "iter from obj"
   (l/emit-as :python [(python-tf-x-iter-from-obj '[_ obj])])
@@ -441,15 +478,21 @@
   (l/emit-as :python [(python-tf-x-iter-native? '[_ it])])
   => #"hasattr")
 
-^{:refer std.lang.model.spec-xtalk.fn-python/+python-iter :added "4.1"}
-(fact "iter null"
-  (l/emit-as :python [(:default (:x-iter-null +python-iter+))])
-  => #"iter")
-
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-with-delay :added "4.0"}
 (fact "with delay"
   (l/emit-as :python [(python-tf-x-with-delay '[_ thunk ms])])
   => #"sleep")
+
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-pwd :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-shell :added "4.0"}
+(fact "shell"
+  (l/emit-as :python [(python-tf-x-shell '[_ "ls" cm])])
+  => #"subprocess")
+
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-file-resolve :added "4.1"}
+(fact "TODO")
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-file-slurp :added "4.1"}
 (fact "slurp file"
@@ -460,8 +503,3 @@
 (fact "spit file"
   (comment (l/emit-as :python [(python-tf-x-file-spit '[_ filename s opts cb])])
             => nil?))
-
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-has-key? :added "4.1"}
-(fact "has key"
-  (python-tf-x-has-key? '[_ obj key nil])
-  => '(not= nil (. obj (get key))))

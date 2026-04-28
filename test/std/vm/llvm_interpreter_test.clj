@@ -29,6 +29,18 @@
   (llvm/block-val (parse/parse-string "a"))
   => 'a)
 
+^{:refer std.vm.llvm-interpreter/filter-valid :added "4.1"}
+(fact "filters out void, comment, linespace and linebreak blocks"
+  (let [blocks (parse/parse-string "(a b c)")]
+    (seq? (llvm/filter-valid blocks)))
+  => true
+
+  (let [blocks (parse/parse-string "(a b c)")]
+    (every? #(and (not= :void (base/block-type %))
+                  (not= :comment (base/block-type %)))
+            (llvm/filter-valid blocks)))
+  => true)
+
 ^{:refer std.vm.llvm-interpreter/instruction? :added "4.0"}
 (fact "checks if a block is an instruction"
   (llvm/instruction? (parse/parse-string "[add i32 1 2]"))
@@ -156,7 +168,6 @@
     (env/with-out-str (llvm/animate code 0))
     => (fn [s] (clojure.string/includes? s "Finished"))))
 
-
 (comment
 
   
@@ -182,16 +193,3 @@
     [ret i32 %cnt]))
 " 500))
 )
-
-
-^{:refer std.vm.llvm-interpreter/filter-valid :added "4.1"}
-(fact "filters out void, comment, linespace and linebreak blocks"
-  (let [blocks (parse/parse-string "(a b c)")]
-    (seq? (llvm/filter-valid blocks)))
-  => true
-
-  (let [blocks (parse/parse-string "(a b c)")]
-    (every? #(and (not= :void (base/block-type %))
-                  (not= :comment (base/block-type %)))
-            (llvm/filter-valid blocks)))
-  => true)

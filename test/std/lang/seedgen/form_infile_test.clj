@@ -5,6 +5,12 @@
             [std.lang.seedgen.common-infile :as common-infile]
             [std.lang.seedgen.form-infile :as form-infile]))
 
+^{:refer std.lang.seedgen.form-infile/root-script-meta-langs :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.seedgen.form-infile/render-top-level-target :added "4.1"}
+(fact "TODO")
+
 ^{:refer std.lang.seedgen.form-infile/seedgen-langadd :added "4.1" :timeout 300000}
 (fact "adds seedgen runtimes back from the seedgen root form"
   (let [tmp (java.io.File/createTempFile "seedgen-langadd" ".clj")
@@ -836,3 +842,6 @@
         (.delete tmp))))
   => "(ns sample.purge-test\n  (:use code.test)\n  (:require [std.lang :as l]))\n\n^{:seedgen/root {:all true, :langs [:lua :python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n(fact \"metadata branches\"\n\n  ^{:seedgen/base {:lua {:expect 6}}}\n  (!.js\n    (+ 1 2 3))\n  => 6\n\n  ^{:seedgen/base {:lua {:expect 6}}}\n  (!.python\n    (+ 1 2 3))\n  => 6)\n")
   )
+
+^{:refer std.lang.seedgen.form-infile/seedgen-langremove :added "4.1"}
+(fact "TODO")

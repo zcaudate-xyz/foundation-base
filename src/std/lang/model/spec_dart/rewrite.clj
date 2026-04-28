@@ -96,19 +96,9 @@
                         {:boolish-ops +dart-boolish-ops+
                          :dot-boolish-calls +dart-dot-boolish-calls+}))
 
-(defn- dart-wrap-truthy
-  [source form]
-  (let [value-sym (gensym "truthy_")]
-    (with-form-meta
-      source
-      (list (list 'fn [value-sym]
-                  (list 'return
-                        (truthy/truthy-check-form value-sym)))
-            form))))
-
 (defn- dart-truthy-form
   [source form]
-  (truthy/truthy-form source form dart-boolish-form? dart-wrap-truthy))
+  (truthy/truthy-form source form dart-boolish-form?))
 
 (defn- ensure-return
   [stmt]

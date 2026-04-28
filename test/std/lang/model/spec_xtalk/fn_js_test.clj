@@ -3,6 +3,18 @@
             [std.lang.model.spec-xtalk.fn-js :refer :all])
   (:use code.test))
 
+(fact "supports staged value-position lowering for native type"
+   (l/emit-as :js ['(fn [obj]
+                     (return (x:type-native obj)))])
+   => #"function \(obj\)\{[\s\S]*typeof obj[\s\S]*Array\.isArray\(obj\)"
+
+   (l/emit-as :js ['(fn [obj f g]
+                     (return (f (g (x:type-native obj)))))])
+   => #"return f\(g\(\(function \(value\)\{[\s\S]*typeof value[\s\S]*\}\)\(obj\)\)\);"
+
+   (l/emit-as :js ['x:type-native])
+   => #"function \(value\)\{[\s\S]*typeof value[\s\S]*Array\.isArray\(value\)")
+
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-len :added "4.0"}
 (fact "gets length"
   (l/emit-as :js [(js-tf-x-len '[_ arr])])
@@ -17,14 +29,6 @@
 (fact "applies function"
   (l/emit-as :js [(js-tf-x-apply '[_ f args])])
   => #"apply")
-
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-shell :added "4.0"}
-(fact "executes shell command"
-  (l/emit-as :js [(js-tf-x-shell '[_ "ls" opts cb])])
-  => #"child_process"
-
-  (l/emit-as :js [(js-tf-x-shell '[_ "ls" opts cb])])
-  => #"\[\"async\"\]")
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-random :added "4.0"}
 (fact "generates random number"
@@ -48,102 +52,22 @@
                 (if (== tn "Object") (return "object") (return tn))))
             (return t))))
 
- (fact "supports staged value-position lowering for native type"
-   (l/emit-as :js ['(fn [obj]
-                     (return (x:type-native obj)))])
-   => #"function \(obj\)\{[\s\S]*typeof obj[\s\S]*Array\.isArray\(obj\)"
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-ex-native? :added "4.1"}
+(fact "TODO")
 
-   (l/emit-as :js ['(fn [obj f g]
-                     (return (f (g (x:type-native obj)))))])
-   => #"return f\(g\(\(function \(value\)\{[\s\S]*typeof value[\s\S]*\}\)\(obj\)\)\);"
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-ex-new :added "4.1"}
+(fact "TODO")
 
-   (l/emit-as :js ['x:type-native])
-   => #"function \(value\)\{[\s\S]*typeof value[\s\S]*Array\.isArray\(value\)")
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-ex-message :added "4.1"}
+(fact "TODO")
 
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-ex-data :added "4.1"}
+(fact "TODO")
 
-(comment
-
-  ;; -------
-  ;; return case
-  (return (x:type-native obj))
-
-  ;;
-  (do (when (== obj nil) (return nil))
-      (var t := (typeof obj))
-      (if (== t "object")
-        (cond (Array.isArray obj)
-              (return "array")
-
-              :else
-              (do
-                (var tn := (. obj ["constructor"] ["name"]))
-                (if (== tn "Object")
-                  (return "object")
-                  (return tn))))
-        (return t)))
-  
-  ;; -------
-  ;; assign case
-  (var a (x:type-native obj))
-  (:= a  (x:type-native obj))
-
-  ;;
-  (var a nil)
-  (do (when (== obj nil) (return nil))
-      (var t := (typeof obj))
-      (if (== t "object")
-        (cond (Array.isArray obj)
-              (:= a "array")
-
-              :else
-              (do
-                (var tn := (. obj ["constructor"] ["name"]))
-                (if (== tn "Object")
-                  (:= a "object")
-                  (:= a tn))))
-        (:= a t)))
-
-  ;; -------
-  ;; general usage case
-  (f (g (x:type-native obj)))
-
-  (var type-native-fn
-       (fn type-native-lambda [obj]
-         (when (== obj nil) (return nil))
-         (var t := (typeof obj))
-         (if (== t "object")
-           (cond (Array.isArray obj)
-                 (return "array")
-
-                 :else
-                 (do
-                   (var tn := (. obj ["constructor"] ["name"]))
-                   (if (== tn "Object")
-                     (return "object")
-                     (return tn))))
-           (return t))))
-  (f (g (type-native-fn obj)))
-
-  ;; -------
-  ;; standalone
-  x:type-native
-
-  ;;
-  (fn type-native-lambda [obj]
-    (when (== obj nil) (return nil))
-    (var t := (typeof obj))
-    (if (== t "object")
-      (cond (Array.isArray obj)
-            (return "array")
-
-            :else
-            (do
-              (var tn := (. obj ["constructor"] ["name"]))
-              (if (== tn "Object")
-                (return "object")
-                (return tn))))
-      (return t)))
-  )
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-has-key? :added "4.1"}
+(fact "has key"
+  (l/emit-as :js [(js-tf-x-has-key? '[_ obj "k" nil])])
+  => #"\[\"k\"\]")
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-m-max :added "4.0"}
 (fact "gets max"
@@ -235,16 +159,6 @@
   (l/emit-as :js [(js-tf-x-obj-assign '[_ obj1 obj2])])
   => #"Object.assign")
 
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-arr-slice :added "4.0"}
-(fact "slices array"
-  (l/emit-as :js [(js-tf-x-arr-slice '[_ arr 0 1])])
-  => #"slice")
-
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-arr-reverse :added "4.0"}
-(fact "reverses array"
-  (l/emit-as :js [(js-tf-x-arr-reverse '[_ arr])])
-  => #"reverse")
-
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-arr-push :added "4.0"}
 (fact "pushes to array"
   (l/emit-as :js [(js-tf-x-arr-push '[_ arr 1])])
@@ -275,20 +189,25 @@
   (l/emit-as :js [(js-tf-x-arr-remove '[_ arr 0])])
   => #"splice")
 
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-arr-sort :added "4.0"}
-(fact "sorts array"
-  (l/emit-as :js [(js-tf-x-arr-sort '[_ arr key-fn comp-fn])])
-  => #"sort")
-
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-arr-clone :added "4.0"}
-(fact "clones array"
-  (l/emit-as :js [(js-tf-x-arr-clone '[_ arr])])
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-arr-slice :added "4.0"}
+(fact "slices array"
+  (l/emit-as :js [(js-tf-x-arr-slice '[_ arr 0 1])])
   => #"slice")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-arr-reverse :added "4.0"}
+(fact "reverses array"
+  (l/emit-as :js [(js-tf-x-arr-reverse '[_ arr])])
+  => #"reverse")
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-arr-concat :added "4.1"}
 (fact "concatenates into a new array"
   (l/emit-as :js [(js-tf-x-arr-concat '[_ arr other])])
   => #"concat")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-arr-clone :added "4.0"}
+(fact "clones array"
+  (l/emit-as :js [(js-tf-x-arr-clone '[_ arr])])
+  => #"slice")
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-arr-each :added "4.0"}
 (fact "iterates array"
@@ -330,10 +249,10 @@
   (l/emit-as :js [(js-tf-x-arr-find '[_ arr pred])])
   => #"findIndex")
 
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-str-comp :added "4.0"}
-(fact "compares strings"
-  (l/emit-as :js [(js-tf-x-str-comp '[_ a b])])
-  => #"localeCompare")
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-arr-sort :added "4.0"}
+(fact "sorts array"
+  (l/emit-as :js [(js-tf-x-arr-sort '[_ arr key-fn comp-fn])])
+  => #"sort")
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-str-char :added "4.0"}
 (fact "gets char"
@@ -395,6 +314,23 @@
   (l/emit-as :js [(js-tf-x-str-trim-right '[_ s])])
   => #"trimRight")
 
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-str-comp :added "4.0"}
+(fact "compares strings"
+  (l/emit-as :js [(js-tf-x-str-comp '[_ a b])])
+  => #"localeCompare")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-str-pad-left :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-str-pad-right :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-str-starts-with :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-str-ends-with :added "4.1"}
+(fact "TODO")
+
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-return-encode :added "4.0"}
 (fact "encodes return"
   (l/emit-as :js [(js-tf-x-return-encode '[_ out id key])])
@@ -424,6 +360,12 @@
 (fact "closes socket"
   (l/emit-as :js [(js-tf-x-socket-close '[_ conn])])
   => #"end")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-notify-http :added "4.0"}
+(fact "notify http"
+  (comment
+    (l/emit-as :js [(js-tf-x-notify-http '[_ host port value id key opts])])
+    => #"fetch"))
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-iter-from-obj :added "4.0"}
 (fact "iter from obj"
@@ -460,6 +402,40 @@
   (l/emit-as :js [(js-tf-x-iter-native? '[_ it])])
   => #"next")
 
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-with-delay :added "4.0"}
+(fact "with delay"
+  (l/emit-as :js [(js-tf-x-with-delay '[_ thunk 100])])
+  => #"setTimeout")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-promise :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-promise-then :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-promise-catch :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-promise-finally :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-promise-native? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-pwd :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-shell :added "4.0"}
+(fact "executes shell command"
+  (l/emit-as :js [(js-tf-x-shell '[_ "ls" opts cb])])
+  => #"child_process"
+
+  (l/emit-as :js [(js-tf-x-shell '[_ "ls" opts cb])])
+  => #"\[\"async\"\]")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-file-resolve :added "4.1"}
+(fact "TODO")
+
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-file-slurp :added "4.1"}
 (fact "slurp file"
   (l/emit-as :js [(js-tf-x-file-slurp '[_ filename opts cb])])
@@ -476,19 +452,86 @@
   (l/emit-as :js [(js-tf-x-file-spit '[_ filename s opts cb])])
   => #"\[\"async\"\]")
 
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-with-delay :added "4.0"}
-(fact "with delay"
-  (l/emit-as :js [(js-tf-x-with-delay '[_ thunk 100])])
-  => #"setTimeout")
+(comment
 
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-notify-http :added "4.0"}
-(fact "notify http"
-  (comment
-    (l/emit-as :js [(js-tf-x-notify-http '[_ host port value id key opts])])
-    => #"fetch"))
+  ;; -------
+  ;; return case
+  (return (x:type-native obj))
 
+  ;;
+  (do (when (== obj nil) (return nil))
+      (var t := (typeof obj))
+      (if (== t "object")
+        (cond (Array.isArray obj)
+              (return "array")
 
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-has-key? :added "4.1"}
-(fact "has key"
-  (l/emit-as :js [(js-tf-x-has-key? '[_ obj "k" nil])])
-  => #"\[\"k\"\]")
+              :else
+              (do
+                (var tn := (. obj ["constructor"] ["name"]))
+                (if (== tn "Object")
+                  (return "object")
+                  (return tn))))
+        (return t)))
+  
+  ;; -------
+  ;; assign case
+  (var a (x:type-native obj))
+  (:= a  (x:type-native obj))
+
+  ;;
+  (var a nil)
+  (do (when (== obj nil) (return nil))
+      (var t := (typeof obj))
+      (if (== t "object")
+        (cond (Array.isArray obj)
+              (:= a "array")
+
+              :else
+              (do
+                (var tn := (. obj ["constructor"] ["name"]))
+                (if (== tn "Object")
+                  (:= a "object")
+                  (:= a tn))))
+        (:= a t)))
+
+  ;; -------
+  ;; general usage case
+  (f (g (x:type-native obj)))
+
+  (var type-native-fn
+       (fn type-native-lambda [obj]
+         (when (== obj nil) (return nil))
+         (var t := (typeof obj))
+         (if (== t "object")
+           (cond (Array.isArray obj)
+                 (return "array")
+
+                 :else
+                 (do
+                   (var tn := (. obj ["constructor"] ["name"]))
+                   (if (== tn "Object")
+                     (return "object")
+                     (return tn))))
+           (return t))))
+  (f (g (type-native-fn obj)))
+
+  ;; -------
+  ;; standalone
+  x:type-native
+
+  ;;
+  (fn type-native-lambda [obj]
+    (when (== obj nil) (return nil))
+    (var t := (typeof obj))
+    (if (== t "object")
+      (cond (Array.isArray obj)
+            (return "array")
+
+            :else
+            (do
+              (var tn := (. obj ["constructor"] ["name"]))
+              (if (== tn "Object")
+                (return "object")
+                (return tn))))
+      (return t)))
+  )

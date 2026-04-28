@@ -3,6 +3,16 @@
   (:use code.test)
   (:refer-clojure :exclude [*ns* prn require ns pr with-out-str]))
 
+^{:refer std.lib.env/with-system :added "4.0"}
+(fact "executes body with system print"
+  (with-system (println "hello"))
+  => nil)
+
+^{:refer std.lib.env/with-out-str :added "4.0"}
+(fact "captures output to string using system print"
+  (with-out-str (print "hello"))
+  => "hello")
+
 ^{:refer std.lib.env/ns-sym :added "3.0"}
 (fact "returns the namespace symbol"
 
@@ -88,6 +98,11 @@
   (with-out-str (p "hello"))
   => "hello\n")
 
+^{:refer std.lib.env/pr :added "4.0"}
+(fact "shortcut to (local :print ...)"
+  (with-out-str (pr "hello"))
+  => "hello")
+
 ^{:refer std.lib.env/pp-str :added "4.0"}
 (fact "pretty prints a string"
   (pp-str {:a 1})
@@ -148,10 +163,22 @@
   (with-out-str (prf "hello"))
   => string?)
 
+^{:refer std.lib.env/prfn :added "4.1"}
+(fact "prints with formatting"
+  (with-out-str (prfn "hello"))
+  => string?
+  (with-out-str (prfn {:a 1}))
+  => string?)
+
 ^{:refer std.lib.env/meter :added "3.0"}
 (fact "measure and prints time taken for a form"
   (with-out-str (meter (+ 1 2)))
   => string?)
+
+^{:refer std.lib.env/wrap-print :added "4.0"}
+(fact "wraps a function to print its result"
+  ((wrap-print +) 1 2)
+  => 3)
 
 ^{:refer std.lib.env/meter-out :added "4.0"}
 (fact "measures and output meter"
@@ -184,7 +211,6 @@
   (match-filter 'hara 'spirit.common)
   => false)
 
-
 ^{:refer std.lib.env/dbg-print :added "4.0"}
 (fact "prints debug info with namespace and location"
   (with-out-str (dbg-print "hello" {:line 1 :column 1} "world"))
@@ -214,31 +240,3 @@
 (fact "removes filters from the debug allowlist"
   (dbg:remove-filters :test)
   => (complement #(contains? % :test)))
-
-^{:refer std.lib.env/with-system :added "4.0"}
-(fact "executes body with system print"
-  (with-system (println "hello"))
-  => nil)
-
-^{:refer std.lib.env/with-out-str :added "4.0"}
-(fact "captures output to string using system print"
-  (with-out-str (print "hello"))
-  => "hello")
-
-^{:refer std.lib.env/pr :added "4.0"}
-(fact "shortcut to (local :print ...)"
-  (with-out-str (pr "hello"))
-  => "hello")
-
-^{:refer std.lib.env/wrap-print :added "4.0"}
-(fact "wraps a function to print its result"
-  ((wrap-print +) 1 2)
-  => 3)
-
-
-^{:refer std.lib.env/prfn :added "4.1"}
-(fact "prints with formatting"
-  (with-out-str (prfn "hello"))
-  => string?
-  (with-out-str (prfn {:a 1}))
-  => string?)

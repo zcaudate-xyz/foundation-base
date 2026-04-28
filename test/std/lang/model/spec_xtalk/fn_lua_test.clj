@@ -4,6 +4,11 @@
             [std.lang.model.spec-xtalk.fn-lua :refer :all])
   (:use code.test))
 
+^{:refer std.lang.model.spec-xtalk.fn-lua/+lua-promise+ :added "4.1"}
+(fact "promise delay hard-links through common-promise"
+  (get-in +lua-promise+ [:x-with-delay :raw])
+  => 'lua.core.common-promise/with-delay)
+
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-del :added "4.0"}
 (fact "deletes object"
   (l/emit-as :lua [(lua-tf-x-del '[_ obj])])
@@ -29,10 +34,17 @@
   (l/emit-as :lua [(lua-tf-x-err '[_ "msg"])])
   => #"error")
 
-^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-shell :added "4.0"}
-(fact "shell"
-  (l/emit-as :lua [(lua-tf-x-shell '[_ "ls" cm])])
-  => #"io.popen")
+^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-ex-native? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-ex-new :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-ex-message :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-ex-data :added "4.1"}
+(fact "TODO")
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-hash-id :added "4.0"}
 (fact "hash id"
@@ -43,6 +55,11 @@
 (fact "type native"
   (l/emit-as :lua [(lua-tf-x-type-native '[_ obj])])
   => #"type")
+
+^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-has-key? :added "4.1"}
+(fact "has key"
+  (l/emit-as :lua [(lua-tf-x-has-key? '[_ obj "k" nil])])
+  => #"\['k'\]")
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-global-has? :added "4.0"}
 (fact "global has?"
@@ -59,15 +76,15 @@
   (l/emit-as :lua [(lua-tf-x-global-del '[_ sym])])
   => #"sym")
 
-^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-m-quot :added "4.0"}
-(fact "math quot"
-  (l/emit-as :lua [(lua-tf-x-m-quot '[_ 1 2])])
-  => #"math.floor")
-
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-m-mod :added "4.1"}
 (fact "math mod"
   (l/emit-as :lua [(lua-tf-x-m-mod '[_ 10 3])])
   => #"%")
+
+^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-m-quot :added "4.0"}
+(fact "math quot"
+  (l/emit-as :lua [(lua-tf-x-m-quot '[_ 1 2])])
+  => #"math.floor")
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-is-string? :added "4.0"}
 (fact "is string?"
@@ -245,6 +262,15 @@
   (l/emit-as :lua [(lua-tf-x-return-eval '[_ s wrap-fn])])
   => #(not (re-find #"unpack\(load_fn\(s\)\)" %)))
 
+^{:refer std.lang.model.spec-lua.variant-nginx/lua-tf-x-socket-connect :added "4.1"}
+(fact "nginx socket connect"
+  (let [out (l/emit-as :lua.nginx [(nginx/lua-tf-x-socket-connect '[_ host port opts cb])])]
+    [(boolean (re-find #"ngx\.socket\.tcp\(\)" out))
+     (boolean (re-find #"conn:connect\(host,\s*port\)" out))
+     (boolean (re-find #"return cb\(err,\s*nil\)" out))
+     (boolean (re-find #"return cb\(nil,\s*conn\)" out))])
+  => [true true true true])
+
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-socket-send :added "4.0"}
 (fact "socket send"
   (l/emit-as :lua [(lua-tf-x-socket-send '[_ conn s])])
@@ -290,15 +316,6 @@
   (l/emit-as :lua [(lua-tf-x-iter-native? '[_ it])])
   => #"type")
 
-^{:refer std.lang.model.spec-lua.variant-nginx/lua-tf-x-socket-connect :added "4.1"}
-(fact "nginx socket connect"
-  (let [out (l/emit-as :lua.nginx [(nginx/lua-tf-x-socket-connect '[_ host port opts cb])])]
-    [(boolean (re-find #"ngx\.socket\.tcp\(\)" out))
-     (boolean (re-find #"conn:connect\(host,\s*port\)" out))
-     (boolean (re-find #"return cb\(err,\s*nil\)" out))
-     (boolean (re-find #"return cb\(nil,\s*conn\)" out))])
-  => [true true true true])
-
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-with-delay :added "4.0"}
 (fact "with delay"
   (l/emit-as :lua [(lua-tf-x-with-delay '[_ ms thunk])])
@@ -307,12 +324,19 @@
   (l/emit-as :lua.nginx [(nginx/lua-tf-x-with-delay '[_ ms thunk])])
   => #"ngx.thread.spawn")
 
-^{:refer std.lang.model.spec-xtalk.fn-lua/+lua-promise+ :added "4.1"}
-(fact "promise delay hard-links through common-promise"
-  (get-in +lua-promise+ [:x-with-delay :raw])
-  => 'lua.core.common-promise/with-delay)
+^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-pwd :added "4.1"}
+(fact "TODO")
 
-^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-has-key? :added "4.1"}
-(fact "has key"
-  (l/emit-as :lua [(lua-tf-x-has-key? '[_ obj "k" nil])])
-  => #"\['k'\]")
+^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-shell :added "4.0"}
+(fact "shell"
+  (l/emit-as :lua [(lua-tf-x-shell '[_ "ls" cm])])
+  => #"io.popen")
+
+^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-file-resolve :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-file-slurp :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-file-spit :added "4.1"}
+(fact "TODO")

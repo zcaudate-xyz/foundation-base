@@ -154,3 +154,49 @@
   (!.js
    (forms/read-discard (rdr/create "skip") core/read))
   => (throws))
+
+
+^{:refer xt.runtime.parser-forms/read-delimited :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.parser-forms/read-list :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.parser-forms/read-vector :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.parser-forms/read-map :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.parser-forms/read-set :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.parser-forms/read-required :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.parser-forms/read-quote :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.parser-forms/read-syntax-quote :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.parser-forms/read-deref :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.parser-forms/read-unquote-splicing :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.parser-forms/read-unquote :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.parser-forms/read-meta :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.parser-forms/read-var-quote :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.parser-forms/read-discard :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.parser-forms/read-dispatch :added "4.1"}
+(fact "TODO")

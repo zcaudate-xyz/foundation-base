@@ -18,13 +18,6 @@
     (render-top-level 'foundation.code/guides {} lookup))
   => #"sidebar-link active")
 
-^{:refer code.doc.theme.foundation/render-page-meta :added "4.1"}
-(fact "renders metadata chips for the current page"
-  (let [lookup (constantly {:name "guides" :title "Guides" :subtitle "Patterns"})]
-    (render-page-meta 'foundation.code/guides {:project {:url "https://example.com/repo"
-                                                         :version "1.0.0"}} lookup))
-  => #"Repository")
-
 ^{:refer code.doc.theme.foundation/render-site-links :added "4.1"}
 (fact "renders page links for the home page"
   (let [lookup (with-meta (fn [_] {:name "index" :ns 'foundation.code})
@@ -32,6 +25,13 @@
                                             'guides {:title "Guides" :subtitle "Patterns"}}}})]
     (render-site-links 'foundation.code/index {} lookup))
   => #"site-link-card")
+
+^{:refer code.doc.theme.foundation/render-page-meta :added "4.1"}
+(fact "renders metadata chips for the current page"
+  (let [lookup (constantly {:name "guides" :title "Guides" :subtitle "Patterns"})]
+    (render-page-meta 'foundation.code/guides {:project {:url "https://example.com/repo"
+                                                         :version "1.0.0"}} lookup))
+  => #"Repository")
 
 ^{:refer code.doc.theme.foundation/render-article :added "4.1"}
 (fact "renders the individual page for the foundation theme"

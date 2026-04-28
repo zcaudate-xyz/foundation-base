@@ -170,29 +170,6 @@
                                                       "(+ 2 2)"]
                                                      :gaps-ok)}]))
 
-^{:refer code.doc.parse/parse-file :added "3.0"}
-(fact "parses the entire file"
-  (with-redefs [slurp (constantly "(+ 1 1)")
-                io/input-stream (fn [_] (java.io.ByteArrayInputStream. (.getBytes "")))]
-    (parse-file "foo.clj" {}))
-  => (contains [{:type :code :indentation 0 :code ["(+ 1 1)"]
-                 :line {:row 1 :col 1 :end-row 1 :end-col 8}}])
-
-  (with-redefs [slurp (constantly "# Chapter\n\ncontent\n\n## Section")]
-    (parse-file "foo.md" {}))
-  => (contains [{:type :chapter :title "Chapter"}
-                {:type :paragraph :text "\ncontent\n"}
-                {:type :section :title "Section"}]))
-
-^{:refer code.doc.parse/parse-markdown :added "3.0"}
-(fact "parses markdown into sections"
-  (parse-markdown "# Chapter\nText\n## Section\nMore text")
-  => (contains [{:type :chapter :title "Chapter"}
-                 {:type :paragraph :text "Text"}
-                 {:type :section :title "Section"}
-                 {:type :paragraph :text "More text"}]))
-
-
 ^{:refer code.doc.parse/parse-header :added "4.1"}
 (fact "parses heading ids"
   (parse-header "## Section {#section-id}")
@@ -205,11 +182,6 @@
       {:type :article :title "Hello"}
       ["# Heading"]])
 
-^{:refer code.doc.parse/parse-markdown-directive :added "4.1"}
-(fact "parses embedded markdown directives"
-  (parse-markdown-directive "[[:callout {:tone :info :title \"Hello\" :content \"World\"}]]")
-  => {:type :callout :tone :info :title "Hello" :content "World"})
-
 ^{:refer code.doc.parse/directive-line? :added "4.1"}
 (fact "detects embedded markdown directives"
   (directive-line? "[[:callout {:tone :info}]]")
@@ -217,6 +189,11 @@
 
   (directive-line? "plain text")
   => false)
+
+^{:refer code.doc.parse/parse-markdown-directive :added "4.1"}
+(fact "parses embedded markdown directives"
+  (parse-markdown-directive "[[:callout {:tone :info :title \"Hello\" :content \"World\"}]]")
+  => {:type :callout :tone :info :title "Hello" :content "World"})
 
 ^{:refer code.doc.parse/markdown-paragraph :added "4.1"}
 (fact "creates markdown paragraph elements"
@@ -238,3 +215,17 @@
       {:type :chapter :title "Heading" :tag "heading"}
       {:type :callout :tone :success :title "Nice" :content "Yep"}
       {:type :block :indentation 0 :lang "clojure" :code "(+ 1 1)"}])
+
+^{:refer code.doc.parse/parse-file :added "3.0"}
+(fact "parses the entire file"
+  (with-redefs [slurp (constantly "(+ 1 1)")
+                io/input-stream (fn [_] (java.io.ByteArrayInputStream. (.getBytes "")))]
+    (parse-file "foo.clj" {}))
+  => (contains [{:type :code :indentation 0 :code ["(+ 1 1)"]
+                 :line {:row 1 :col 1 :end-row 1 :end-col 8}}])
+
+  (with-redefs [slurp (constantly "# Chapter\n\ncontent\n\n## Section")]
+    (parse-file "foo.md" {}))
+  => (contains [{:type :chapter :title "Chapter"}
+                {:type :paragraph :text "\ncontent\n"}
+                {:type :section :title "Section"}]))

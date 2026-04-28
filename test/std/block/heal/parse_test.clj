@@ -144,6 +144,11 @@
   (parse/count-unescaped-quotes "test\\\"")
   => 0)
 
+^{:refer std.block.heal.parse/parse-lines-raw :added "4.0"}
+(fact "parses raw lines into a structure"
+  (parse/parse-lines-raw ["(def x 1)"])
+  => [{:type :code :line 1 :last-idx 8 :col 1 :char "(" :style :paren :action :open}])
+
 ^{:refer std.block.heal.parse/parse-lines :added "4.0"}
 (fact "parse lines"
 
@@ -330,9 +335,3 @@ that acts as a multi-line comment or docstring in other languages but not clojur
 
 
   )
-
-
-^{:refer std.block.heal.parse/parse-lines-raw :added "4.0"}
-(fact "parses raw lines into a structure"
-  (parse/parse-lines-raw ["(def x 1)"])
-  => [{:type :code :line 1 :last-idx 8 :col 1 :char "(" :style :paren :action :open}])

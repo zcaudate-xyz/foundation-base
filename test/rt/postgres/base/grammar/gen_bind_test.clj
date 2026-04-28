@@ -42,6 +42,26 @@
              (l/rt:scaffold :python)]
   :teardown [(l/rt:stop)]})
 
+^{:refer rt.postgres.base.grammar.gen-bind/to-lookup :added "4.1"}
+(fact "creates a lookup map from array"
+  (gen/to-lookup [:a :b :c]) => {:a true :b true :c true}
+
+  (gen/to-lookup []) => {}
+
+  (gen/to-lookup ["x" "y"]) => {"x" true "y" true})
+
+^{:refer rt.postgres.base.grammar.gen-bind/plain-symbol? :added "4.1"}
+(fact "checks if form is a plain symbol without namespace"
+  (gen/plain-symbol? 'foo) => true
+
+  (gen/plain-symbol? 'clojure.core/map) => false
+
+  (gen/plain-symbol? :keyword) => false
+
+  (gen/plain-symbol? "string") => false
+
+  (gen/plain-symbol? 123) => false)
+
 ^{:refer rt.postgres.base.grammar.gen-bind/transform-to-str :added "4.0"}
 (fact "transforms relevant forms to string"
 
@@ -394,24 +414,3 @@
        [divf rt.postgres.test.scratch-v1/divf]
        [insert-task rt.postgres.test.scratch-v1/insert-task]
        [insert-entry rt.postgres.test.scratch-v1/insert-entry]])
-
-
-^{:refer rt.postgres.base.grammar.gen-bind/to-lookup :added "4.1"}
-(fact "creates a lookup map from array"
-  (gen/to-lookup [:a :b :c]) => {:a true :b true :c true}
-
-  (gen/to-lookup []) => {}
-
-  (gen/to-lookup ["x" "y"]) => {"x" true "y" true})
-
-^{:refer rt.postgres.base.grammar.gen-bind/plain-symbol? :added "4.1"}
-(fact "checks if form is a plain symbol without namespace"
-  (gen/plain-symbol? 'foo) => true
-
-  (gen/plain-symbol? 'clojure.core/map) => false
-
-  (gen/plain-symbol? :keyword) => false
-
-  (gen/plain-symbol? "string") => false
-
-  (gen/plain-symbol? 123) => false)

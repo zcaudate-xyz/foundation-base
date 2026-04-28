@@ -6,6 +6,12 @@
 (defn emit-dart [form]
   (l/emit-as :dart [form]))
 
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-method0 :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-runtime-type-string :added "4.1"}
+(fact "TODO")
+
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-len :added "4.1"}
 (fact "gets length"
   (l/emit-as :dart [(dart-tf-x-len '[_ arr])])
@@ -31,16 +37,6 @@
   (l/emit-as :dart [(dart-tf-x-apply '[_ f args])])
   => #"Function\.apply")
 
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-eq :added "4.1"}
-(fact "iter equality stays as a returnable iife in function bodies"
-  (let [out (l/emit-as :dart ['(fn [it0 it1 eq-fn]
-                                 (return (x:iter-eq it0 it1 eq-fn)))])]
-    [(boolean (re-find #"return\s+\(\(\)\s*\{" out))
-     (boolean (re-find #"while\s*\(" out))
-     (boolean (re-find #"dart_callback__" out))
-     (boolean (re-find #"return while" out))])
-  => [true true false false])
-
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-now-ms :added "4.1"}
 (fact "gets current time in milliseconds"
   (l/emit-as :dart [(dart-tf-x-now-ms '[_])])
@@ -56,58 +52,6 @@
   (l/emit-as :dart [(dart-tf-x-type-native '[_ obj])])
   => #"runtimeType")
 
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-abs :added "4.1"}
-(fact "absolute value"
-  (l/emit-as :dart [(dart-tf-x-m-abs '[_ x])])
-  => #"\.abs")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-abs :added "4.1"}
-(fact "wraps negative literal receivers for no-arg methods"
-  (l/emit-as :dart [(dart-tf-x-m-abs '[_ -5])
-                    (dart-tf-x-m-ceil '[_ -1.2])
-                    (dart-tf-x-m-floor '[_ -1.2])])
-  => #"(?s)\(-5\)\.abs\(\).*\(-1\.2\)\.ceil\(\).*\(-1\.2\)\.floor\(\)")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-sin :added "4.1"}
-(fact "sine"
-  (l/emit-as :dart [(dart-tf-x-m-sin '[_ x])])
-  => #"math\.sin")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-sqrt :added "4.1"}
-(fact "square root"
-  (l/emit-as :dart [(dart-tf-x-m-sqrt '[_ x])])
-  => #"math\.sqrt")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-max :added "4.1"}
-(fact "maximum"
-  (l/emit-as :dart [(dart-tf-x-m-max '[_ a b])])
-  => #"math\.max")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-mod :added "4.1"}
-(fact "modulo"
-  (l/emit-as :dart [(dart-tf-x-m-mod '[_ a b])])
-  => #"%")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-pow :added "4.1"}
-(fact "power"
-  (l/emit-as :dart [(dart-tf-x-m-pow '[_ a b])])
-  => #"math\.pow")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-arr-pop-first :added "4.1"}
-(fact "pops first item from array"
-  (emit-dart (dart-tf-x-arr-pop-first '[_ arr]))
-  => #"removeAt\(0\)")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-del-key :added "4.1"}
-(fact "deletes key from map by key"
-  (emit-dart (dart-tf-x-del-key '[_ obj key]))
-  => #"remove\(key\)")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-lu-create :added "4.1"}
-(fact "creates a lookup map literal"
-  (emit-dart (dart-tf-x-lu-create '[_]))
-  => #"\{\}")
-
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-del :added "4.1"}
 (fact "deletes key from map"
   (l/emit-as :dart [(dart-tf-x-del '[_ obj key])])
@@ -118,35 +62,32 @@
   (l/emit-as :dart [(dart-tf-x-eval '[_ s])])
   => #"eval not supported")
 
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-shell :added "4.1"}
-(fact "shell uses Process.run"
-  (let [out (l/emit-as :dart [(dart-tf-x-shell '[_ s root cb])])]
-    [(boolean (re-find #"Process\.run" out))
-     (boolean (re-find #"cd " out))
-     (boolean (re-find #"stdout" out))
-     (boolean (re-find #"catchError" out))])
-  => [true true true true])
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-ex-native? :added "4.1"}
+(fact "TODO")
 
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-file-slurp :added "4.1"}
-(fact "file-slurp reads file content"
-  (let [out (l/emit-as :dart [(dart-tf-x-file-slurp '[_ filename cb])])]
-    [(boolean (re-find #"File\(filename\)" out))
-     (boolean (re-find #"readAsString" out))
-     (boolean (re-find #"catchError" out))])
-  => [true true true])
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-ex-new :added "4.1"}
+(fact "TODO")
 
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-file-spit :added "4.1"}
-(fact "file-spit writes file content"
-  (let [out (l/emit-as :dart [(dart-tf-x-file-spit '[_ filename s cb])])]
-    [(boolean (re-find #"File\(filename\)" out))
-     (boolean (re-find #"writeAsString" out))
-     (boolean (re-find #"catchError" out))])
-  => [true true true])
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-ex-message :added "4.1"}
+(fact "TODO")
 
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-with-delay :added "4.1"}
-(fact "delay future"
-  (l/emit-as :dart [(dart-tf-x-with-delay '[_ ms value])])
-  => #"Future\.delayed.*Duration.*milliseconds")
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-ex-data :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-has-key? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-del-key :added "4.1"}
+(fact "deletes key from map by key"
+  (emit-dart (dart-tf-x-del-key '[_ obj key]))
+  => #"remove\(key\)")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-abs :added "4.1"}
+(fact "wraps negative literal receivers for no-arg methods"
+  (l/emit-as :dart [(dart-tf-x-m-abs '[_ -5])
+                    (dart-tf-x-m-ceil '[_ -1.2])
+                    (dart-tf-x-m-floor '[_ -1.2])])
+  => #"(?s)\(-5\)\.abs\(\).*\(-1\.2\)\.ceil\(\).*\(-1\.2\)\.floor\(\)")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-ceil :added "4.1"}
 (fact "ceiling"
@@ -157,6 +98,11 @@
 (fact "floor"
   (emit-dart (dart-tf-x-m-floor '[_ x]))
   => #"\.floor")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-sin :added "4.1"}
+(fact "sine"
+  (l/emit-as :dart [(dart-tf-x-m-sin '[_ x])])
+  => #"math\.sin")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-cos :added "4.1"}
 (fact "cosine"
@@ -183,6 +129,11 @@
   (emit-dart (dart-tf-x-m-atan '[_ x]))
   => #"math\.atan")
 
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-sqrt :added "4.1"}
+(fact "square root"
+  (l/emit-as :dart [(dart-tf-x-m-sqrt '[_ x])])
+  => #"math\.sqrt")
+
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-exp :added "4.1"}
 (fact "exponential"
   (emit-dart (dart-tf-x-m-exp '[_ x]))
@@ -193,15 +144,42 @@
   (emit-dart (dart-tf-x-m-loge '[_ x]))
   => #"math\.log")
 
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-log10 :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-max :added "4.1"}
+(fact "maximum"
+  (l/emit-as :dart [(dart-tf-x-m-max '[_ a b])])
+  => #"math\.max")
+
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-min :added "4.1"}
 (fact "minimum"
   (emit-dart (dart-tf-x-m-min '[_ a b]))
   => #"math\.min")
 
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-mod :added "4.1"}
+(fact "modulo"
+  (l/emit-as :dart [(dart-tf-x-m-mod '[_ a b])])
+  => #"%")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-pow :added "4.1"}
+(fact "power"
+  (l/emit-as :dart [(dart-tf-x-m-pow '[_ a b])])
+  => #"math\.pow")
+
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-quot :added "4.1"}
 (fact "integer quotient"
   (emit-dart (dart-tf-x-m-quot '[_ a b]))
   => #"~/")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-cosh :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-sinh :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-tanh :added "4.1"}
+(fact "TODO")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-to-string :added "4.1"}
 (fact "converts to string"
@@ -212,6 +190,30 @@
 (fact "converts to number"
   (emit-dart (dart-tf-x-to-number '[_ x]))
   => #"num\.parse")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-is-string? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-is-number? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-is-integer? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-is-boolean? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-is-function? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-is-object? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-is-array? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-char :added "4.1"}
+(fact "TODO")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-split :added "4.1"}
 (fact "splits strings"
@@ -288,6 +290,17 @@
   (emit-dart (dart-tf-x-str-includes? '[_ s sub]))
   => #"contains")
 
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-lu-create :added "4.1"}
+(fact "creates a lookup map literal"
+  (emit-dart (dart-tf-x-lu-create '[_]))
+  => #"\{\}")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-lu-get :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-lu-set :added "4.1"}
+(fact "TODO")
+
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-lu-del :added "4.1"}
 (fact "deletes lookup values"
   (emit-dart (dart-tf-x-lu-del '[_ lu obj]))
@@ -298,10 +311,18 @@
   (emit-dart (dart-tf-x-arr-pop '[_ arr]))
   => #"removeLast")
 
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-arr-slice :added "4.1"}
+(fact "TODO")
+
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-arr-push-first :added "4.1"}
 (fact "pushes array items to the front"
   (emit-dart (dart-tf-x-arr-push-first '[_ arr item]))
   => #"insert")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-arr-pop-first :added "4.1"}
+(fact "pops first item from array"
+  (emit-dart (dart-tf-x-arr-pop-first '[_ arr]))
+  => #"removeAt\(0\)")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-arr-insert :added "4.1"}
 (fact "inserts array items"
@@ -318,6 +339,19 @@
   (emit-dart (dart-tf-x-arr-sort '[_ arr key-fn comp-fn]))
   => #"sort")
 
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-comp :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-eq :added "4.1"}
+(fact "iter equality stays as a returnable iife in function bodies"
+  (let [out (l/emit-as :dart ['(fn [it0 it1 eq-fn]
+                                 (return (x:iter-eq it0 it1 eq-fn)))])]
+    [(boolean (re-find #"return\s+\(\(\)\s*\{" out))
+     (boolean (re-find #"while\s*\(" out))
+     (boolean (re-find #"dart_callback__" out))
+     (boolean (re-find #"return while" out))])
+  => [true true false false])
+
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-from :added "4.1"}
 (fact "creates iterators"
   (emit-dart (dart-tf-x-iter-from '[_ x]))
@@ -328,10 +362,26 @@
   (emit-dart (dart-tf-x-iter-from-arr '[_ arr]))
   => #"iterator")
 
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-from-obj :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-has? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-native? :added "4.1"}
+(fact "TODO")
+
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-next :added "4.1"}
 (fact "gets iterator values"
   (emit-dart (dart-tf-x-iter-next '[_ iter]))
   => #"current")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-null :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-prototype-create :added "4.1"}
+(fact "TODO")
+
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-prototype-get :added "4.1"}
 (fact "gets runtime prototypes"
   (emit-dart (dart-tf-x-prototype-get '[_ obj]))
@@ -361,3 +411,66 @@
 (fact "eval return handling is not supported"
   (emit-dart (dart-tf-x-return-eval '[_ s wrap-fn]))
   => #"eval not supported in Dart")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-with-delay :added "4.1"}
+(fact "delay future"
+  (l/emit-as :dart [(dart-tf-x-with-delay '[_ ms value])])
+  => #"Future\.delayed.*Duration.*milliseconds")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-promise :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-promise-then :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-promise-catch :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-promise-finally :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-promise-native? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-socket-connect :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-socket-send :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-socket-close :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-notify-http :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-pwd :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-file-resolve :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-file-slurp :added "4.1"}
+(fact "file-slurp reads file content"
+  (let [out (l/emit-as :dart [(dart-tf-x-file-slurp '[_ filename cb])])]
+    [(boolean (re-find #"File\(filename\)" out))
+     (boolean (re-find #"readAsString" out))
+     (boolean (re-find #"catchError" out))])
+  => [true true true])
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-file-spit :added "4.1"}
+(fact "file-spit writes file content"
+  (let [out (l/emit-as :dart [(dart-tf-x-file-spit '[_ filename s cb])])]
+    [(boolean (re-find #"File\(filename\)" out))
+     (boolean (re-find #"writeAsString" out))
+     (boolean (re-find #"catchError" out))])
+  => [true true true])
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-shell :added "4.1"}
+(fact "shell uses Process.run"
+  (let [out (l/emit-as :dart [(dart-tf-x-shell '[_ s root cb])])]
+    [(boolean (re-find #"Process\.run" out))
+     (boolean (re-find #"cd " out))
+     (boolean (re-find #"stdout" out))
+     (boolean (re-find #"catchError" out))])
+  => [true true true true])

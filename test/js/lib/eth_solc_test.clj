@@ -22,6 +22,8 @@
              (l/rt:scaffold :js)]
   :teardown [(l/rt:stop)]})
 
+^{:refer js.lib.eth-solc/compile :added "4.1"}
+(fact "TODO")
 
 ^{:refer js.lib.eth-solc/contract-wrap-body :added "4.0" :unchecked true}
 (fact "wraps the body in a contract"

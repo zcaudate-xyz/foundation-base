@@ -30,6 +30,12 @@
   (g/sol-def '(def ^{:- [:uint]} a 1) g/+grammar+ {})
   => "uint a = 1;")
 
+^{:refer rt.solidity.grammar/sol-emit-block :added "4.1"}
+(fact "emits block with braces and binding"
+  (emit/with:emit
+    (g/sol-emit-block nil {:start "{" :end "}"} '((return 1)) g/+grammar+ {}))
+  => "{\n  return 1;\n}")
+
 ^{:refer rt.solidity.grammar/sol-fn-elements :added "4.0"}
 (fact "creates elements for function"
 
@@ -152,13 +158,6 @@
       "  function transfer(address to,uint value) external returns(bool);"
       "  function balanceOf(address owner) external view returns(uint);"
       "}"))
-
-
-^{:refer rt.solidity.grammar/sol-emit-block :added "4.1"}
-(fact "emits block with braces and binding"
-  (emit/with:emit
-    (g/sol-emit-block nil {:start "{" :end "}"} '((return 1)) g/+grammar+ {}))
-  => "{\n  return 1;\n}")
 
 ^{:refer rt.solidity.grammar/sol-emit-body :added "4.1"}
 (fact "emits body without extra braces"

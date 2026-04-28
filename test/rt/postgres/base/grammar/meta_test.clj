@@ -67,6 +67,16 @@
   (drop-extension :ext)
   => vector?)
 
+^{:refer rt.postgres.base.grammar.meta/has-policy :added "4.0"}
+(fact "checks that a policy exists"
+  (has-policy {:static/schema "s" :static/policy-name "p" :static/policy-table "t"})
+  => vector?)
+
+^{:refer rt.postgres.base.grammar.meta/drop-policy :added "4.0"}
+(fact "drops a policy"
+  (drop-policy {:static/schema "s" :static/policy-name "p" :static/policy-table "t"})
+  => vector?)
+
 ^{:refer rt.postgres.base.grammar.meta/get-schema-seed :added "4.0"}
 (fact "gets schema seed for a given module"
 
@@ -95,14 +105,3 @@
 
   (classify-ptr builtin/acosd)
   => '["acosd" "public" nil nil def$])
-
-
-^{:refer rt.postgres.base.grammar.meta/has-policy :added "4.0"}
-(fact "checks that a policy exists"
-  (has-policy {:static/schema "s" :static/policy-name "p" :static/policy-table "t"})
-  => vector?)
-
-^{:refer rt.postgres.base.grammar.meta/drop-policy :added "4.0"}
-(fact "drops a policy"
-  (drop-policy {:static/schema "s" :static/policy-name "p" :static/policy-table "t"})
-  => vector?)

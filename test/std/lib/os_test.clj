@@ -15,6 +15,11 @@
   (os) ;;"Mac OS X"
   => string?)
 
+^{:refer std.lib.os/os-arch :added "4.0"}
+(fact "returns the os architecture"
+  (os-arch)
+  => string?)
+
 ^{:refer std.lib.os/sh-wait :added "3.0"}
 (fact "waits for sh process to complete"
   (sh-wait (sh {:args ["ls"] :wait false}))
@@ -166,9 +171,3 @@
 
   (url-decode "http%3A%2F%2Fwww.goggle.com")
   => "http://www.goggle.com")
-
-
-^{:refer std.lib.os/os-arch :added "4.0"}
-(fact "returns the os architecture"
-  (os-arch)
-  => string?)

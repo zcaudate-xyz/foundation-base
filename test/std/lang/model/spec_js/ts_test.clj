@@ -39,6 +39,14 @@
              :name "DEFAULT_USER"
              :type {:kind :named :name 'sample.user/User}}]})
 
+(fact "does not duplicate same-name callable specs in declaration output"
+  (let [out (-> 'std.lang.model.spec-xtalk-typed-fixture
+                xtalk-parse/analyze-namespace
+                emit-analysis-declarations)]
+    [(count (re-seq #"export type find_user =" out))
+     (str/includes? out "export interface User")])
+  => [1 true])
+
 ^{:refer std.lang.model.spec-js.ts/valid-ts-ident? :added "4.1"}
 (fact "checks if string is valid TypeScript identifier"
   (valid-ts-ident? "hello")
@@ -158,7 +166,6 @@
   (emit-import-declaration 'my.ns ['other.ns ['other.ns/Type]])
   => "import type { Type as other_ns_Type } from \"./other/ns\";")
 
-
 ^{:refer std.lang.model.spec-js.ts/emit-imports :added "4.1"}
 (fact "emits grouped type imports"
   (emit-imports {:ns 'sample.user
@@ -211,6 +218,11 @@
                            :type {:kind :named :name 'sample.user/User}})
   => "export declare const DEFAULT_USER: User;")
 
+^{:refer std.lang.model.spec-js.ts/emitted-specs :added "4.1"}
+(fact "filters specs shadowed by callable and value declarations"
+  (mapv :name (emitted-specs sample-analysis))
+  => ["User" "UserMap"])
+
 ^{:refer std.lang.model.spec-js.ts/emit-analysis-declarations :added "4.1"}
 (fact "emits analysis declarations"
   (emit-analysis-declarations sample-analysis)
@@ -220,14 +232,6 @@
           "export type UserMap = Record<string, User>;\n\n"
           "export type find_user = (arg0: UserMap, arg1: string) => User | null;\n\n"
           "export declare const DEFAULT_USER: User;"))
-
-(fact "does not duplicate same-name callable specs in declaration output"
-  (let [out (-> 'std.lang.model.spec-xtalk-typed-fixture
-                xtalk-parse/analyze-namespace
-                emit-analysis-declarations)]
-    [(count (re-seq #"export type find_user =" out))
-     (str/includes? out "export interface User")])
-  => [1 true])
 
 ^{:refer std.lang.model.spec-js.ts/declaration-output-path :added "4.1"}
 (fact "maps runtime outputs to declaration sidecars"
@@ -255,9 +259,3 @@
      (str/includes? out "export type UserMap = Record<string, User>;")
      (str/includes? out "export type find_user =")])
   => [true true true])
-
-
-^{:refer std.lang.model.spec-js.ts/emitted-specs :added "4.1"}
-(fact "filters specs shadowed by callable and value declarations"
-  (mapv :name (emitted-specs sample-analysis))
-  => ["User" "UserMap"])

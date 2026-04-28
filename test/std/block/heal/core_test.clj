@@ -7,6 +7,151 @@
             [std.string.prose :as prose])
   (:use code.test))
 
+^{:refer std.block.heal.core/get-errored.more :added "4.0"}
+(fact "get errored more cases"
+
+  (level/get-errored
+   (slurp "test-data/std.block.heal/cases/005_example.block"))
+  => [{:errors
+       [{:char "{",
+         :line 12,
+         :col 8,
+         :type :open,
+         :style :curly,
+         :depth 0,
+         :index 0,
+         :correct? false}],
+       :lines
+       ["       {:id \"ui.sections/hero-gradient\""
+        "        :namespace \"ui.sections\""
+        "        :name \"HeroGradient\""
+        "        :description \"Hero section with gradient background\""
+        "        :stars 245"
+        "        :component"
+        "        (do {:id \"hero-section\""
+        "             :type \"Container\""
+        "             :label \"Hero Section\""
+        "             :libraryRef \"ui.sections/HeroGradient\""
+        "             :properties {:className \"bg-gradient-to-r from-purple-600 to-blue-600 text-white py-20 px-6\"}"
+        "             :children"
+        "             [(do {:id \"hero-content\""
+        "                   :type \"Container\""
+        "                   :label \"Hero Content\""
+        "                   :properties {:className \"max-w-4xl mx-auto text-center\"}"
+        "                   :children"
+        "                   [(do {:id \"hero-title\""
+        "                         :type \"Heading\""
+        "                         :label \"Title\""
+        "                         :properties {:children \"Build Amazing UIs\""
+        "                                      :className \"text-5xl font-bold mb-4\"}"
+        "                         :children []})"
+        "                    (do {:id \"hero-subtitle\""
+        "                         :type \"Text\""
+        "                         :label \"Subtitle\""
+        "                         :properties {:children \"Create beautiful interfaces with our component builder\""
+        "                                      :className \"text-xl mb-8 opacity-90\"}"
+        "                         :children []})"
+        "                    (do {:id \"hero-cta\""
+        "                         :type \"Button\""
+        "                         :label \"CTA Button\""
+        "                         :properties {:children \"Get Started\""
+        "                                      :className \"bg-white text-purple-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100\"}"
+        "                         :children []})]})]})"],
+       :at
+       {:lead {:char "{", :line 12, :col 8, :type :open, :style :curly},
+        :line [12 46],
+        :level 9,
+        :col 8,
+        :last true}}
+      {:errors
+       [{:char ")",
+         :line 403,
+         :col 89,
+         :type :close,
+         :style :paren,
+         :index 66,
+         :depth -1,
+         :correct? false}],
+       :lines
+       ["                          (. components (forEach (fn [comp]"
+        "                                                   (var parts (. comp.namespace (split \".\")))"
+        "                                                   (var current root)"
+        ""
+        "                                                   (. parts (forEach (fn [part index]"
+        "                                                                       (when (not (. current.children (has part)))"
+        "                                                                         (. current.children (set part"
+        "                                                                                                (do {:name part"
+        "                                                                                                     :fullPath (. (. parts (slice 0 (+ index 1))) (join \".\"))"
+        "                                                                                                     :components []"
+        "                                                                                                     :children (new Map())}))))"
+        "                                                                       (:= current (. current.children (get part))))))"
+        "                                                   (. current.components (push comp))))))"],
+       :at
+       {:lead
+        {:char "(", :line 391, :col 27, :type :open, :style :paren},
+        :line [391 403],
+        :level 15,
+        :col 27}}
+      {:errors
+       [{:char ")",
+         :line 532,
+         :col 31,
+         :type :close,
+         :style :paren,
+         :index 124,
+         :depth -1,
+         :correct? false}],
+       :lines
+       ["(defn.js LibraryComponentItem [{:# [comp depth onImportComponent onImportAndEdit]}]"
+        "  (var [isDragging drag]"
+        "    (dnd/useDrag (fn []"
+        "                   (return {:type \"LIBRARY_COMPONENT\""
+        "                            :item {:libraryComponent comp.component}"
+        "                            :collect (fn [monitor]"
+        "                                       (return {:isDragging (. monitor (isDragging))}))}))))"
+        ""
+        "  (var handleDoubleClick (fn []"
+        "                           (onImportAndEdit comp.component)))"
+        ""
+        "  (return"
+        "    [:div"
+        "      {:ref drag"
+        "       :onDoubleClick handleDoubleClick"
+        "       :className (+ \"flex items-start gap-2 py-2 px-2 hover:bg-[#323232] group cursor-grab \""
+        "                     (:? isDragging \"opacity-50 cursor-grabbing\" \"\"))"
+        "       :style {:paddingLeft (+ (* depth 12) 8 \"px\")}}"
+        "      [:% lc/FileCode {:className \"w-3 h-3 text-purple-400 mt-0.5 flex-shrink-0\"}]"
+        "      [:div {:className \"flex-1 min-w-0\"}"
+        "        [:div {:className \"flex items-center gap-2 mb-1\"}"
+        "          [:span {:className \"text-xs text-gray-300\"} comp.name]"
+        "          [:div {:className \"flex items-center gap-1 text-[10px] text-gray-500\"}"
+        "            [:% lc/Star {:className \"w-2.5 h-2.5 fill-current\"}]"
+        "            comp.stars]]"
+        "        [:p {:className \"text-[10px] text-gray-600 mb-1\"} comp.description]"
+        "        [:% fg/Button"
+        "          {:size \"sm\""
+        "           :onClick (fn [e]"
+        "                      (. e (stopPropagation))"
+        "                      (onImportComponent comp.component))"
+        "           :className \"h-5 text-[10px] px-2 bg-[#404040] hover:bg-[#4a4a4a] text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity\"}"
+        "          [:% lc/Download {:className \"w-2.5 h-2.5 mr-1\"}]"
+        "          \"Import\"]"
+        "        [:% fg/Button"
+        "          {:size \"sm\""
+        "           :onClick (fn [e]"
+        "                      (. e (stopPropagation))"
+        "                      (onImportAndEdit comp.component))"
+        "           :className \"h-5 text-[10px] px-2 bg-[#404040] hover:bg-[#4a4a4a] text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity\"}"
+        "          [:% lc/Download {:className \"w-2.5 h-2.5 mr-1\"}]"
+        "          \"Import & Edit\"]]])))"],
+       :at
+       {:lead
+        {:char "(", :line 491, :col 1, :type :open, :style :paren},
+        :line [491 532],
+        :level 10,
+        :col 1,
+        :last true}}])
+
 ^{:refer std.block.heal.core/group-min-col :added "4.0"}
 (fact "gets the minimum column"
 
@@ -167,7 +312,6 @@
          :level 0,
          :col 9,
          :last true}]}])
-
 
 ^{:refer std.block.heal.core/group-blocks-prep-entries :added "4.0"}
 (fact "prepares the block entries for a file"
@@ -374,6 +518,100 @@
       ""
       "(l/script :js"
       "  {:require [[js.react :as r]"])
+
+^{:refer std.block.heal.core/create-block-scan :added "4.1"}
+(fact "creates a scan window from the block bounds"
+  (let [lines ["(ab"
+               " cd)"]]
+    (level/create-block-scan
+     {:line [1 2]
+      :col 2
+      :last true}
+     lines))
+  => (contains {:line [1 2]
+                :col 2
+                :last true
+                :end-col nil
+                :offset 0
+                :snippet " ab\n cd)"}))
+
+^{:refer std.block.heal.core/tighter-scan? :added "4.1"}
+(fact "checks if a candidate scan window is narrower than the current one"
+  (let [content "(foo (+ 1 2) 3)"
+        lines   (clojure.string/split-lines content)
+        block   (first (level/group-blocks content))
+        scan    (level/create-block-scan block lines)]
+    (level/tighter-scan? scan [1 1] 5 12))
+  => true
+
+  (let [content "(foo (+ 1 2) 3)"
+        lines   (clojure.string/split-lines content)
+        block   (first (level/group-blocks content))
+        scan    (level/create-block-scan block lines)]
+    (level/tighter-scan? scan [1 1] 1 Integer/MAX_VALUE))
+  => false)
+
+^{:refer std.block.heal.core/create-close-hint-scan :added "4.1"}
+(fact "builds a tighter scan from a later correct close delimiter"
+  (let [content "(foo (+ 1 2] 3))"
+        lines   (clojure.string/split-lines content)
+        block   (first (level/group-blocks content))
+        scan    (level/create-block-scan block lines)
+        interim (std.block.heal.parse/parse (:snippet scan))
+        errors  (vec (filter (comp not :correct?) interim))]
+    (level/create-close-hint-scan
+     block lines scan interim errors))
+  => (contains
+      {:line [1 1]
+       :col 6
+       :end-col 15}))
+
+^{:refer std.block.heal.core/localize-close-hint-scan :added "4.1"}
+(fact "keeps the full scan when indentation already isolates a child block"
+  (let [content (prose/join-lines
+                 ["(foo"
+                  "  (bar baz qux]"
+                  "  zot))"])
+        lines   (clojure.string/split-lines content)
+        block   (-> (level/group-blocks content)
+                    first
+                    :children
+                    last)]
+    (level/localize-close-hint-scan block lines))
+  => (contains
+      {:scan (contains
+              {:line [2 2]
+               :col 3
+               :end-col nil})
+       :errors vector?})
+  (let [content (prose/join-lines
+                 ["(outer"
+                  "  (a 1)"
+                  "  ((b 2"
+                  "     [3 4])"
+                  "  (c 5))"])
+        lines   (clojure.string/split-lines content)
+        block   (first (level/group-blocks content))]
+    (level/localize-close-hint-scan block lines))
+  => (contains
+      {:scan (contains
+              {:line [1 5]
+               :col 1
+               :end-col nil})}))
+
+^{:refer std.block.heal.core/check-errored-suspect :added "4.0"}
+(fact "checks if a block is suspect based on leftover errors"
+  (let [content "(foo) (bar))"
+        lines   (clojure.string/split-lines content)]
+    (level/check-errored-suspect
+     (level/create-block-scan
+      {:line [1 1]
+       :col 1
+       :last true}
+      lines)
+     lines
+     [{:line 1 :col 12 :type :close}]))
+  => true)
 
 ^{:refer std.block.heal.core/get-errored-loop :added "4.0"}
 (fact "runs the check block loop"
@@ -714,150 +952,19 @@
      :level 0,
      :col 5}}])
 
-^{:refer std.block.heal.core/get-errored.more :added "4.0"}
-(fact "get errored more cases"
+^{:refer std.block.heal.core/heal-content-complex-edits :added "4.0"}
+(fact "handles complex edits for healing"
+  (level/heal-content-complex-edits
+   {:at {:lead {:style :paren}}}
+   [{:type :close :style :paren :depth -1}
+    {:type :open}
+    {:type :close}])
+  => vector?
 
-  (level/get-errored
-   (slurp "test-data/std.block.heal/cases/005_example.block"))
-  => [{:errors
-       [{:char "{",
-         :line 12,
-         :col 8,
-         :type :open,
-         :style :curly,
-         :depth 0,
-         :index 0,
-         :correct? false}],
-       :lines
-       ["       {:id \"ui.sections/hero-gradient\""
-        "        :namespace \"ui.sections\""
-        "        :name \"HeroGradient\""
-        "        :description \"Hero section with gradient background\""
-        "        :stars 245"
-        "        :component"
-        "        (do {:id \"hero-section\""
-        "             :type \"Container\""
-        "             :label \"Hero Section\""
-        "             :libraryRef \"ui.sections/HeroGradient\""
-        "             :properties {:className \"bg-gradient-to-r from-purple-600 to-blue-600 text-white py-20 px-6\"}"
-        "             :children"
-        "             [(do {:id \"hero-content\""
-        "                   :type \"Container\""
-        "                   :label \"Hero Content\""
-        "                   :properties {:className \"max-w-4xl mx-auto text-center\"}"
-        "                   :children"
-        "                   [(do {:id \"hero-title\""
-        "                         :type \"Heading\""
-        "                         :label \"Title\""
-        "                         :properties {:children \"Build Amazing UIs\""
-        "                                      :className \"text-5xl font-bold mb-4\"}"
-        "                         :children []})"
-        "                    (do {:id \"hero-subtitle\""
-        "                         :type \"Text\""
-        "                         :label \"Subtitle\""
-        "                         :properties {:children \"Create beautiful interfaces with our component builder\""
-        "                                      :className \"text-xl mb-8 opacity-90\"}"
-        "                         :children []})"
-        "                    (do {:id \"hero-cta\""
-        "                         :type \"Button\""
-        "                         :label \"CTA Button\""
-        "                         :properties {:children \"Get Started\""
-        "                                      :className \"bg-white text-purple-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100\"}"
-        "                         :children []})]})]})"],
-       :at
-       {:lead {:char "{", :line 12, :col 8, :type :open, :style :curly},
-        :line [12 46],
-        :level 9,
-        :col 8,
-        :last true}}
-      {:errors
-       [{:char ")",
-         :line 403,
-         :col 89,
-         :type :close,
-         :style :paren,
-         :index 66,
-         :depth -1,
-         :correct? false}],
-       :lines
-       ["                          (. components (forEach (fn [comp]"
-        "                                                   (var parts (. comp.namespace (split \".\")))"
-        "                                                   (var current root)"
-        ""
-        "                                                   (. parts (forEach (fn [part index]"
-        "                                                                       (when (not (. current.children (has part)))"
-        "                                                                         (. current.children (set part"
-        "                                                                                                (do {:name part"
-        "                                                                                                     :fullPath (. (. parts (slice 0 (+ index 1))) (join \".\"))"
-        "                                                                                                     :components []"
-        "                                                                                                     :children (new Map())}))))"
-        "                                                                       (:= current (. current.children (get part))))))"
-        "                                                   (. current.components (push comp))))))"],
-       :at
-       {:lead
-        {:char "(", :line 391, :col 27, :type :open, :style :paren},
-        :line [391 403],
-        :level 15,
-        :col 27}}
-      {:errors
-       [{:char ")",
-         :line 532,
-         :col 31,
-         :type :close,
-         :style :paren,
-         :index 124,
-         :depth -1,
-         :correct? false}],
-       :lines
-       ["(defn.js LibraryComponentItem [{:# [comp depth onImportComponent onImportAndEdit]}]"
-        "  (var [isDragging drag]"
-        "    (dnd/useDrag (fn []"
-        "                   (return {:type \"LIBRARY_COMPONENT\""
-        "                            :item {:libraryComponent comp.component}"
-        "                            :collect (fn [monitor]"
-        "                                       (return {:isDragging (. monitor (isDragging))}))}))))"
-        ""
-        "  (var handleDoubleClick (fn []"
-        "                           (onImportAndEdit comp.component)))"
-        ""
-        "  (return"
-        "    [:div"
-        "      {:ref drag"
-        "       :onDoubleClick handleDoubleClick"
-        "       :className (+ \"flex items-start gap-2 py-2 px-2 hover:bg-[#323232] group cursor-grab \""
-        "                     (:? isDragging \"opacity-50 cursor-grabbing\" \"\"))"
-        "       :style {:paddingLeft (+ (* depth 12) 8 \"px\")}}"
-        "      [:% lc/FileCode {:className \"w-3 h-3 text-purple-400 mt-0.5 flex-shrink-0\"}]"
-        "      [:div {:className \"flex-1 min-w-0\"}"
-        "        [:div {:className \"flex items-center gap-2 mb-1\"}"
-        "          [:span {:className \"text-xs text-gray-300\"} comp.name]"
-        "          [:div {:className \"flex items-center gap-1 text-[10px] text-gray-500\"}"
-        "            [:% lc/Star {:className \"w-2.5 h-2.5 fill-current\"}]"
-        "            comp.stars]]"
-        "        [:p {:className \"text-[10px] text-gray-600 mb-1\"} comp.description]"
-        "        [:% fg/Button"
-        "          {:size \"sm\""
-        "           :onClick (fn [e]"
-        "                      (. e (stopPropagation))"
-        "                      (onImportComponent comp.component))"
-        "           :className \"h-5 text-[10px] px-2 bg-[#404040] hover:bg-[#4a4a4a] text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity\"}"
-        "          [:% lc/Download {:className \"w-2.5 h-2.5 mr-1\"}]"
-        "          \"Import\"]"
-        "        [:% fg/Button"
-        "          {:size \"sm\""
-        "           :onClick (fn [e]"
-        "                      (. e (stopPropagation))"
-        "                      (onImportAndEdit comp.component))"
-        "           :className \"h-5 text-[10px] px-2 bg-[#404040] hover:bg-[#4a4a4a] text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity\"}"
-        "          [:% lc/Download {:className \"w-2.5 h-2.5 mr-1\"}]"
-        "          \"Import & Edit\"]]])))"],
-       :at
-       {:lead
-        {:char "(", :line 491, :col 1, :type :open, :style :paren},
-        :line [491 532],
-        :level 10,
-        :col 1,
-        :last true}}])
+  (level/heal-content-complex-edits
+   {:at {:lead {:style :paren}}}
+   [{:pair-id 1} {:pair-id 1}])
+  => seq?)
 
 ^{:refer std.block.heal.core/heal-content-single-pass :added "4.0"}
 (fact "heals the content in a single pass"
@@ -986,7 +1093,6 @@
                                   :position 1, :count 1},
        :revised {:lines ["    (+ 1) (+ 2)"], :position 1, :count 1}}])
 
-
 (comment
 
   ((level/wrap-print-diff level/heal-content)
@@ -1105,7 +1211,6 @@
          (catch Throwable t
            (env/p  f :FAILED)))))
 
-
 (comment
   (count
    (clojure.string/split-lines
@@ -1162,131 +1267,3 @@
    (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser.clj"))
   (get-errored
    (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser.clj")))
-
-
-^{:refer std.block.heal.core/check-errored-suspect :added "4.0"}
-(fact "checks if a block is suspect based on leftover errors"
-  (let [content "(foo) (bar))"
-        lines   (clojure.string/split-lines content)]
-    (level/check-errored-suspect
-     (level/create-block-scan
-      {:line [1 1]
-       :col 1
-       :last true}
-      lines)
-     lines
-     [{:line 1 :col 12 :type :close}]))
-  => true)
-
-^{:refer std.block.heal.core/create-close-hint-scan :added "4.1"}
-(fact "builds a tighter scan from a later correct close delimiter"
-  (let [content "(foo (+ 1 2] 3))"
-        lines   (clojure.string/split-lines content)
-        block   (first (level/group-blocks content))
-        scan    (level/create-block-scan block lines)
-        interim (std.block.heal.parse/parse (:snippet scan))
-        errors  (vec (filter (comp not :correct?) interim))]
-    (level/create-close-hint-scan
-     block lines scan interim errors))
-  => (contains
-      {:line [1 1]
-       :col 6
-       :end-col 15}))
-
-^{:refer std.block.heal.core/localize-close-hint-scan :added "4.1"}
-(fact "keeps the full scan when indentation already isolates a child block"
-  (let [content (prose/join-lines
-                 ["(foo"
-                  "  (bar baz qux]"
-                  "  zot))"])
-        lines   (clojure.string/split-lines content)
-        block   (-> (level/group-blocks content)
-                    first
-                    :children
-                    last)]
-    (level/localize-close-hint-scan block lines))
-  => (contains
-      {:scan (contains
-              {:line [2 2]
-               :col 3
-               :end-col nil})
-       :errors vector?})
-  (let [content (prose/join-lines
-                 ["(outer"
-                  "  (a 1)"
-                  "  ((b 2"
-                  "     [3 4])"
-                  "  (c 5))"])
-        lines   (clojure.string/split-lines content)
-        block   (first (level/group-blocks content))]
-    (level/localize-close-hint-scan block lines))
-  => (contains
-      {:scan (contains
-              {:line [1 5]
-               :col 1
-               :end-col nil})}))
-
-^{:refer std.block.heal.core/heal-content-complex-edits :added "4.0"}
-(fact "handles complex edits for healing"
-  (level/heal-content-complex-edits
-   {:at {:lead {:style :paren}}}
-   [{:type :close :style :paren :depth -1}
-    {:type :open}
-    {:type :close}])
-  => vector?
-
-  (level/heal-content-complex-edits
-   {:at {:lead {:style :paren}}}
-   [{:pair-id 1} {:pair-id 1}])
-  => seq?)
-
-
-^{:refer std.block.heal.core/create-block-scan :added "4.1"}
-(fact "creates a scan window from the block bounds"
-  (let [lines ["(ab"
-               " cd)"]]
-    (level/create-block-scan
-     {:line [1 2]
-      :col 2
-      :last true}
-     lines))
-  => (contains {:line [1 2]
-                :col 2
-                :last true
-                :end-col nil
-                :offset 0
-                :snippet " ab\n cd)"}))
-
-^{:refer std.block.heal.core/tighter-scan? :added "4.1"}
-(fact "checks whether a candidate scan is narrower"
-  (level/tighter-scan? {:line [1 3]
-                        :col 1
-                        :end-col 20}
-                       [2 2]
-                       4
-                       10)
-  => true
-
-  (level/tighter-scan? {:line [2 2]
-                        :col 4
-                        :end-col 10}
-                       [1 2]
-                       4
-                       10)
-  => false)
-
-^{:refer std.block.heal.core/tighter-scan? :added "4.1"}
-(fact "checks if a candidate scan window is narrower than the current one"
-  (let [content "(foo (+ 1 2) 3)"
-        lines   (clojure.string/split-lines content)
-        block   (first (level/group-blocks content))
-        scan    (level/create-block-scan block lines)]
-    (level/tighter-scan? scan [1 1] 5 12))
-  => true
-
-  (let [content "(foo (+ 1 2) 3)"
-        lines   (clojure.string/split-lines content)
-        block   (first (level/group-blocks content))
-        scan    (level/create-block-scan block lines)]
-    (level/tighter-scan? scan [1 1] 1 Integer/MAX_VALUE))
-  => false)

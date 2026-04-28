@@ -49,14 +49,6 @@
           (fn [err]
             (repl/notify {"error" err})))))))
 
-^{:refer js.cell/setup-service :added "4.1"}
-(fact "sets worker service and bindings over a cell link"
-  (node-worker-setup-check)
-  => {"service" {"dbs" {"main" {"kind" "cache"
-                                "id" "main"}}}
-      "bindings" {"orders" {"views" {"all" {"type" "select"}}}}})
-
-
 ^{:refer js.cell/SERVICE :added "4.1"}
 (fact "TODO")
 
@@ -83,6 +75,13 @@
 
 ^{:refer js.cell/actions-init :added "4.1"}
 (fact "TODO")
+
+^{:refer js.cell/setup-service :added "4.1"}
+(fact "sets worker service and bindings over a cell link"
+  (node-worker-setup-check)
+  => {"service" {"dbs" {"main" {"kind" "cache"
+                                "id" "main"}}}
+      "bindings" {"orders" {"views" {"all" {"type" "select"}}}}})
 
 ^{:refer js.cell/get-service :added "4.1"}
 (fact "TODO")

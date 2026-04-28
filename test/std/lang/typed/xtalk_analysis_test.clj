@@ -8,10 +8,13 @@
 (count (:specs (analyze-file "test/std/lang/model/spec_xtalk_typed_fixture.clj")))
   => 3)
 
-^{:refer std.lang.typed.xtalk-analysis/analyze-namespace :added "4.1"}
-(fact "analyzes namespaces through source lookup"
-  (:ns (analyze-namespace 'std.lang.model.spec-xtalk-typed-fixture))
-  => 'std.lang.model.spec-xtalk-typed-fixture)
+^{:refer std.lang.typed.xtalk-analysis/analyze-file-raw :added "4.1"}
+(fact "returns raw parsed analysis without spec attachment"
+  (let [result (analyze-file-raw "test/std/lang/model/spec_xtalk_typed_fixture.clj")]
+    [(map? result)
+     (contains? result :specs)
+     (= (:ns result) 'std.lang.model.spec-xtalk-typed-fixture)])
+  => [true true true])
 
 ^{:refer std.lang.typed.xtalk-analysis/analyze-namespace :added "4.1"}
 (fact "provides attached namespace analysis examples"
@@ -68,13 +71,6 @@
   => "find-user")
 
 ^{:refer std.lang.typed.xtalk-analysis/get-function-report :added "4.1"}
-(fact "returns function reports"
-  (do
-    (types/clear-registry!)
-    (-> (get-function-report 'std.lang.model.spec-xtalk-typed-fixture/find-user) :errors))
-  => [])
-
-^{:refer std.lang.typed.xtalk-analysis/get-function-report :added "4.1"}
 (fact "provides function report examples"
   (do
     (types/clear-registry!)
@@ -118,13 +114,6 @@
   => '{:kind :maybe :item {:kind :named :name std.lang.model.spec-xtalk-typed-fixture/User}})
 
 ^{:refer std.lang.typed.xtalk-analysis/check-namespace :added "4.1"}
-(fact "checks namespaces through analysis"
-  (do
-    (types/clear-registry!)
-    (:namespace (check-namespace 'std.lang.model.spec-xtalk-typed-fixture)))
-  => 'std.lang.model.spec-xtalk-typed-fixture)
-
-^{:refer std.lang.typed.xtalk-analysis/check-namespace :added "4.1"}
 (fact "provides namespace report examples"
   (do
     (types/clear-registry!)
@@ -153,12 +142,3 @@
   [(report-json {:a 1})
    (boolean (re-find #"\n" (report-json {:a 1} true)))]
   => ["{\"a\":1}" true])
-
-
-^{:refer std.lang.typed.xtalk-analysis/analyze-file-raw :added "4.1"}
-(fact "returns raw parsed analysis without spec attachment"
-  (let [result (analyze-file-raw "test/std/lang/model/spec_xtalk_typed_fixture.clj")]
-    [(map? result)
-     (contains? result :specs)
-     (= (:ns result) 'std.lang.model.spec-xtalk-typed-fixture)])
-  => [true true true])

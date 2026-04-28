@@ -171,3 +171,16 @@
     [[["eq" "hash"] {"eq" "eq" "hash" "hash"}]
      [["show"] {"show" "show"}]]))
   => {"eq" "eq" "hash" "hash" "show" "show"})
+
+
+^{:refer xt.runtime.interface-spec/proto-create :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.interface-spec/runtime-protocol :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.interface-spec/proto-group :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.interface-spec/proto-spec :added "4.1"}
+(fact "TODO")

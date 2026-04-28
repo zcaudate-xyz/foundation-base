@@ -31,3 +31,13 @@
   (!.js [(. (core/read-string "[1 2]") (to-array))
          (== nil (core/read-string "  ; comment\n"))])
   => [[1 2] true])
+
+
+^{:refer xt.runtime.parser-core/read :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.parser-core/read-delimited :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.parser-core/read-string :added "4.1"}
+(fact "TODO")

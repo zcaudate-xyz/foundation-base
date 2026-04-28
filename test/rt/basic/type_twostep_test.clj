@@ -13,6 +13,36 @@
 (def CANARY-RUSTC
   (common/program-exists? "rustc"))
 
+(fact "returns compile stderr when compilation fails"
+
+  (with-redefs [os/sh (fn [_] :compile)
+                os/sh-wait (fn [_] nil)
+                os/sh-output (fn [_] {:exit 1 :out "" :err "compile failed\n"})
+                spit (fn [& _] nil)
+                fs/parent (fn [_] "/tmp")
+                fs/file-name (fn [_] "tmp")
+                fs/delete (fn [& _] nil)]
+    (p/sh-exec ["cmd"] "body" {:extension "ext" :stderr true}))
+  => "compile failed")
+
+(^{:refer rt.basic.type-twostep-test/CANARY-GCC :guard true :adopt true :added "4.0"}
+ fact "runs a full compile and execution cycle for c twostep"
+
+  (p/raw-eval-twostep
+   (p/rt-twostep {:lang :c
+                  :program :gcc})
+   "#include <stdio.h>\nint main(){ printf(\"%d\", 2 + 3); return 0; }")
+  => "5")
+
+(^{:refer rt.basic.type-twostep-test/CANARY-RUSTC :guard true :adopt true :added "4.0"}
+ fact "runs a full compile and execution cycle for rust twostep"
+
+  (p/raw-eval-twostep
+   (p/rt-twostep {:lang :rust
+                  :program :rustc})
+   "fn main() { println!(\"{}\", 2 + 3); }")
+  => "5")
+
 ^{:refer rt.basic.type-twostep/sh-exec :added "4.0"}
 (fact "basic function for executing the compile and run process"
 
@@ -32,17 +62,14 @@
     (p/sh-exec ["cmd"] "body" {:extension "ext"}))
   => "ok")
 
-(fact "returns compile stderr when compilation fails"
+^{:refer rt.basic.type-twostep/local-exec-available? :added "4.1"}
+(fact "TODO")
 
-  (with-redefs [os/sh (fn [_] :compile)
-                os/sh-wait (fn [_] nil)
-                os/sh-output (fn [_] {:exit 1 :out "" :err "compile failed\n"})
-                spit (fn [& _] nil)
-                fs/parent (fn [_] "/tmp")
-                fs/file-name (fn [_] "tmp")
-                fs/delete (fn [& _] nil)]
-    (p/sh-exec ["cmd"] "body" {:extension "ext" :stderr true}))
-  => "compile failed")
+^{:refer rt.basic.type-twostep/sh-exec-docker :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.basic.type-twostep/sh-exec-portable :added "4.1"}
+(fact "TODO")
 
 ^{:refer rt.basic.type-twostep/raw-eval-twostep :added "4.0"}
 (fact "evaluates the twostep evaluation"
@@ -50,24 +77,6 @@
   (with-redefs [p/sh-exec (fn [_ _ _] "result")]
     (p/raw-eval-twostep {:exec [] :process {}} "body"))
   => "result")
-
-(^{:refer rt.basic.type-twostep-test/CANARY-GCC :guard true :adopt true :added "4.0"}
- fact "runs a full compile and execution cycle for c twostep"
-
-  (p/raw-eval-twostep
-   (p/rt-twostep {:lang :c
-                  :program :gcc})
-   "#include <stdio.h>\nint main(){ printf(\"%d\", 2 + 3); return 0; }")
-  => "5")
-
-(^{:refer rt.basic.type-twostep-test/CANARY-RUSTC :guard true :adopt true :added "4.0"}
- fact "runs a full compile and execution cycle for rust twostep"
-
-  (p/raw-eval-twostep
-   (p/rt-twostep {:lang :rust
-                  :program :rustc})
-   "fn main() { println!(\"{}\", 2 + 3); }")
-  => "5")
 
 ^{:refer rt.basic.type-twostep/invoke-ptr-twostep :added "4.0"}
 (fact "invokes twostep pointer")
@@ -95,13 +104,3 @@
   (with-redefs [p/rt-twostep:create (fn [m] m)]
     (p/rt-twostep {:a 1}))
   => {:a 1})
-
-
-^{:refer rt.basic.type-twostep/local-exec-available? :added "4.1"}
-(fact "TODO")
-
-^{:refer rt.basic.type-twostep/sh-exec-docker :added "4.1"}
-(fact "TODO")
-
-^{:refer rt.basic.type-twostep/sh-exec-portable :added "4.1"}
-(fact "TODO")

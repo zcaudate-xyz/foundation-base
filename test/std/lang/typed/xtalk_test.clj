@@ -131,6 +131,19 @@
   (count (:specs (analyze-file "test/std/lang/model/spec_xtalk_typed_fixture.clj")))
   => 3)
 
+^{:refer std.lang.typed.xtalk/analyze-file-raw :added "4.1"}
+(fact "delegates file-raw analysis to xtalk-parse"
+  (let [result (analyze-file-raw "test/std/lang/model/spec_xtalk_typed_fixture.clj")]
+    [(map? result)
+     (contains? result :specs)
+     (contains? result :functions)])
+  => [true true true])
+
+^{:refer std.lang.typed.xtalk/analyze-namespace :added "4.1"}
+(fact "analyzes namespaces through facade"
+  (:ns (analyze-namespace 'std.lang.model.spec-xtalk-typed-fixture))
+  => 'std.lang.model.spec-xtalk-typed-fixture)
+
 ^{:refer std.lang.typed.xtalk/analyze-namespace-raw :added "4.1"}
 (fact "exposes raw namespace analysis through facade"
   (->> (analyze-namespace-raw 'std.lang.model.spec-xtalk-typed-fixture)
@@ -139,11 +152,6 @@
        :output
        :name)
   => :xt/unknown)
-
-^{:refer std.lang.typed.xtalk/analyze-namespace :added "4.1"}
-(fact "analyzes namespaces through facade"
-  (:ns (analyze-namespace 'std.lang.model.spec-xtalk-typed-fixture))
-  => 'std.lang.model.spec-xtalk-typed-fixture)
 
 ^{:refer std.lang.typed.xtalk/analyze-and-register! :added "4.1"}
 (fact "registers namespaces through facade"
@@ -165,12 +173,3 @@
     (clear-registry!)
     (:namespace (check-namespace 'xt.old.event-route)))
   => 'xt.old.event-route)
-
-
-^{:refer std.lang.typed.xtalk/analyze-file-raw :added "4.1"}
-(fact "delegates file-raw analysis to xtalk-parse"
-  (let [result (analyze-file-raw "test/std/lang/model/spec_xtalk_typed_fixture.clj")]
-    [(map? result)
-     (contains? result :specs)
-     (contains? result :functions)])
-  => [true true true])

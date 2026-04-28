@@ -26,6 +26,11 @@
 ^{:refer code.test.task/run:load :added "3.0"}
 (fact "load test namespace")
 
+^{:refer code.test.task/run-errored :added "3.0" :class [:test/general]}
+(comment "runs only the tests that have errored"
+
+  (task/run-errored))
+
 ^{:refer code.test.task/print-options :added "3.0" :class [:test/general]}
 (fact "output options for test results"
 
@@ -48,8 +53,3 @@
 (comment "main entry point for leiningen"
 
   (task/-main))
-
-^{:refer code.test.task/run-errored :added "3.0" :class [:test/general]}
-(comment "runs only the tests that have errored"
-
-  (task/run-errored))

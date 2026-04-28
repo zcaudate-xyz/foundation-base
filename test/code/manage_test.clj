@@ -6,6 +6,14 @@
   (:use code.test)
   (:refer-clojure :exclude [import]))
 
+^{:refer code.manage/+tasks+ :added "4.1"}
+(fact "registers isolate, snapto and factcheck tasks in the available manage tasks"
+  [(task/task? (-> +tasks+ :isolate))
+   (task/task? (-> +tasks+ :snapto))
+   (task/task? (-> +tasks+ :factcheck-remove))
+   (task/task? (-> +tasks+ :factcheck-generate))]
+  => [true true true true])
+
 ^{:refer code.manage/analyse :added "3.0"}
 (fact "analyse either a source or test file"
 
@@ -16,6 +24,12 @@
   (analyse '#{code.manage} {:return :summary})
   ;; {:errors 0, :warnings 0, :items 1, :results 1, :total 16}
   => map?)
+
+^{:refer code.manage/extract :added "4.0"}
+(fact "returns the list of vars in a namespace"
+
+  (extract 'code.manage)
+  => string?)
 
 ^{:refer code.manage/vars :added "3.0"}
 (fact "returns the list of vars in a namespace"
@@ -50,6 +64,11 @@
                   {:print {:summary true :result true :item true :function true}
                    :transform #(str % "\n\n\n\nhello world")
                    :full true}))
+
+^{:refer code.manage/heal-code :added "4.1"}
+(fact "heal-code is a transform task for fixing code formatting"
+  (task/task? heal-code)
+  => true)
 
 ^{:refer code.manage/import :added "3.0"}
 (fact "import docstrings from tests"
@@ -131,6 +150,12 @@
 
   (arrange '[code.manage] {:print {:item true}
                            :write false}))
+
+^{:refer code.manage/factcheck-remove :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage/factcheck-generate :added "4.1"}
+(fact "TODO")
 
 ^{:refer code.manage/snapto :added "4.1"}
 (fact "formats fact tests into snap-to layout"
@@ -221,35 +246,11 @@
                {:var 'code.framework/analyse})
   => map?)
 
-^{:refer code.manage/extract :added "4.0"}
-(fact "returns the list of vars in a namespace"
-
-  (extract 'code.manage)
-  => string?)
-
-
 ^{:refer code.manage/require-file :added "4.0"}
 (fact "requires the file and returns public vars"
 
   (require-file 'code.manage)
   => (contains ['analyse 'extract 'vars] :in-any-order :gaps-ok))
-
-^{:refer code.manage/heal-code :added "4.1"}
-(fact "builds a transform task configured with std.block.heal"
-  (let [task (into {} heal-code)]
-    [(:template task)
-     (-> task :params :title)
-     (fn? (-> task :params :transform))
-     (-> task :params :no-analysis)])
-  => [:code.transform "HEAL CODE" true true])
-
-^{:refer code.manage/+tasks+ :added "4.1"}
-(fact "registers isolate, snapto and factcheck tasks in the available manage tasks"
-  [(task/task? (-> +tasks+ :isolate))
-   (task/task? (-> +tasks+ :snapto))
-   (task/task? (-> +tasks+ :factcheck-remove))
-   (task/task? (-> +tasks+ :factcheck-generate))]
-  => [true true true true])
 
 ^{:refer code.manage/-main :added "4.0"
   :timeout 1000}
@@ -261,7 +262,6 @@
 
   (code.manage/-main "vars" ":with" "code.manage" ":no-exit" "true")
   => anything)
-
 
 (comment
   ^{:refer code.manage/replace-usages :added "3.0"}
@@ -286,8 +286,6 @@
 
     (line-limit '[code.manage]
                 {:length 100})))
-
-
 
 (comment
   (code.manage/import {:write true}))
@@ -319,10 +317,3 @@
   (replace-usages '[jvm.classloader.url-classloader]
                   {:var 'hara.data.base.seq/object-of
                    :new 'element-at}))
-
-
-
-^{:refer code.manage/heal-code :added "4.1"}
-(fact "heal-code is a transform task for fixing code formatting"
-  (task/task? heal-code)
-  => true)

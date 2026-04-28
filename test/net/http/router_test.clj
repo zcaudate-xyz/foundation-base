@@ -10,12 +10,23 @@
    (compare-masks ["GET" "users"] ["GET" "*"])]
   => [1 -1])
 
+^{:refer net.http.router/split-path :added "4.0"}
+(fact "splits a path into components"
+  (split-path "GET /users/42")
+  => ["GET" "users" "42"])
+
 ^{:refer net.http.router/make-matcher :added "4.0"}
 (fact "Given set of routes, builds matcher structure."
   (make-matcher {"GET /users/*" :user
                  "GET /users" :users})
   => [[["GET" "users"] :users]
       [["GET" "users" "*"] :user]])
+
+^{:refer net.http.router/match-path :added "4.0"}
+(fact "checks if a path matches a mask"
+  [(match-path ["GET" "users" "*"] ["GET" "users" "42"])
+   (match-path ["GET" "**"] ["GET" "users" "42"])]
+  => [["42"] ["users/42"]])
 
 ^{:refer net.http.router/match-impl :added "4.0"}
 (fact "matches path against matcher structure"
@@ -48,14 +59,3 @@
   => [{:status 200
        :headers {"Content-Type" "text/html"}}
       "body"])
-
-^{:refer net.http.router/split-path :added "4.0"}
-(fact "splits a path into components"
-  (split-path "GET /users/42")
-  => ["GET" "users" "42"])
-
-^{:refer net.http.router/match-path :added "4.0"}
-(fact "checks if a path matches a mask"
-  [(match-path ["GET" "users" "*"] ["GET" "users" "42"])
-   (match-path ["GET" "**"] ["GET" "users" "42"])]
-  => [["42"] ["users/42"]])

@@ -44,6 +44,50 @@
   => '(do* (var j := 1)
            (:= j (+ j (1)))))
 
+^{:refer std.lang.base.emit-assign/assign-options :added "4.1"}
+(fact "gets assignment options from reserved entries and metadata"
+  (assign-options
+   (with-meta '(hello 1)
+     {:assign/template 'meta-sym})
+   {:reserved {'hello {:emit :macro
+                       :assign/template 'reserved-sym
+                       :assign/inline 'x.core/identity-fn}}})
+  => '{:assign/template meta-sym
+       :assign/inline x.core/identity-fn}
+
+  (assign-options
+   '(identity 1)
+   +grammar+)
+  => {})
+
+^{:refer std.lang.base.emit-assign/assign-value :added "4.1"}
+(fact "prepares assignment override payloads"
+  (assign-value 'a
+                (with-meta '(sym :as [1 2 3])
+                  {:assign/fn (fn [sym]
+                                (list sym :as [1 2 3]))})
+                +grammar+
+                {})
+  => [:raw '(a :as [1 2 3])]
+
+  (assign-value 'a
+                (with-meta '(sym :as [1 2 3])
+                  {:assign/template 'sym})
+                +grammar+
+                {})
+  => [:template '(a :as [1 2 3])]
+
+  (assign-value 'a
+                '(hello 1 2)
+                (assoc-in +grammar+
+                          [:reserved 'hello]
+                          {:emit :macro
+                           :macro (fn [_]
+                                    '(sym :as [1 2 3]))
+                           :assign/template 'sym})
+                {})
+  => [:template '(a :as [1 2 3])])
+
 ^{:refer std.lang.base.emit-assign/emit-def-assign :added "3.0"}
 (fact "emits a declare expression"
 
@@ -154,48 +198,3 @@
                                       :assign/template 'thread})
                            {})
   => "(a :as [1 2 3])")
-
-
-^{:refer std.lang.base.emit-assign/assign-options :added "4.1"}
-(fact "gets assignment options from reserved entries and metadata"
-  (assign-options
-   (with-meta '(hello 1)
-     {:assign/template 'meta-sym})
-   {:reserved {'hello {:emit :macro
-                       :assign/template 'reserved-sym
-                       :assign/inline 'x.core/identity-fn}}})
-  => '{:assign/template meta-sym
-       :assign/inline x.core/identity-fn}
-
-  (assign-options
-   '(identity 1)
-   +grammar+)
-  => {})
-
-^{:refer std.lang.base.emit-assign/assign-value :added "4.1"}
-(fact "prepares assignment override payloads"
-  (assign-value 'a
-                (with-meta '(sym :as [1 2 3])
-                  {:assign/fn (fn [sym]
-                                (list sym :as [1 2 3]))})
-                +grammar+
-                {})
-  => [:raw '(a :as [1 2 3])]
-
-  (assign-value 'a
-                (with-meta '(sym :as [1 2 3])
-                  {:assign/template 'sym})
-                +grammar+
-                {})
-  => [:template '(a :as [1 2 3])]
-
-  (assign-value 'a
-                '(hello 1 2)
-                (assoc-in +grammar+
-                          [:reserved 'hello]
-                          {:emit :macro
-                           :macro (fn [_]
-                                    '(sym :as [1 2 3]))
-                           :assign/template 'sym})
-                {})
-  => [:template '(a :as [1 2 3])])

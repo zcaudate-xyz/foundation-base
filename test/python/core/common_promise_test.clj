@@ -3,6 +3,33 @@
             [std.lang :as l])
   (:use code.test))
 
+^{:refer python.core.common-promise/promise-wrapper? :added "4.1"}
+(fact "TODO")
+
+^{:refer python.core.common-promise/promise-native? :added "4.1"}
+(fact "TODO")
+
+^{:refer python.core.common-promise/promise-reject :added "4.1"}
+(fact "TODO")
+
+^{:refer python.core.common-promise/promise-awaitable :added "4.1"}
+(fact "TODO")
+
+^{:refer python.core.common-promise/promise-wrap :added "4.1"}
+(fact "TODO")
+
+^{:refer python.core.common-promise/promise :added "4.1"}
+(fact "TODO")
+
+^{:refer python.core.common-promise/promise-then :added "4.1"}
+(fact "TODO")
+
+^{:refer python.core.common-promise/promise-catch :added "4.1"}
+(fact "TODO")
+
+^{:refer python.core.common-promise/promise-finally :added "4.1"}
+(fact "TODO")
+
 ^{:refer python.core.common-promise/with-delay :added "4.1"}
 (fact "python promise helpers compose delayed work through promise chains"
   (let [out (l/emit-as :python ['(python.core.common-promise/promise-then

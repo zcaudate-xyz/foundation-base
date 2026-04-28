@@ -66,16 +66,37 @@
       3 {:check false}
       4 {:check true}})
 
-^{:refer code.manage.unit.import/gather-fact :added "4.1"}
-(fact "imports only the intro by default"
-  (-> +fact-with-examples+
-      nav/parse-string
-      nav/down nav/right nav/down nav/right
-      gather-fact)
-  => (contains {:added "0.1"
-                :examples [0 2 3 :no-check 4]
-                :intro "Sample test program"
-                :test []}))
+^{:refer code.manage.unit.import/significant-block? :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.import/arrow-block? :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.import/next-significant-index :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.import/trim-right-void :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.import/strip-check :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.import/find-example-end :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.import/gather-selected-fact-body :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.import/gather-fact-body :added "4.1"}
+(fact "falls back to the full fact body when `*test-full*` is enabled"
+  (binding [common/*test-full* true]
+    (-> +fact-with-examples+
+        nav/parse-string
+        nav/down nav/right nav/down nav/right
+        gather-fact
+        (update-in [:test] docstring/->docstring)
+        :test))
+  => +full-docstring+)
 
 ^{:refer code.manage.unit.import/gather-fact :added "4.1"}
 (fact "filters imported fact examples using `:examples` metadata when enabled"
@@ -89,19 +110,17 @@
                 :examples [0 2 3 :no-check 4]
                 :test +selected-docstring+}))
 
-^{:refer code.manage.unit.import/gather-fact-body :added "4.1"}
-(fact "falls back to the full fact body when `*test-full*` is enabled"
-  (binding [common/*test-full* true]
-    (-> +fact-with-examples+
-        nav/parse-string
-        nav/down nav/right nav/down nav/right
-        gather-fact
-        (update-in [:test] docstring/->docstring)
-        :test))
-  => +full-docstring+)
+^{:refer code.manage.unit.import/analyse-fact-tests :added "4.1"}
+(fact "TODO")
 
 ^{:refer code.manage.unit.import/analyse-test-code :added "4.1"}
 (fact "does not copy `:examples` metadata into imported source metadata"
   (-> (analyse-test-code +fact-ns-with-examples+)
       (get-in '[example.core hello-world :meta]))
   => {:added "0.1"})
+
+^{:refer code.manage.unit.import/analyse :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.import/import :added "4.1"}
+(fact "TODO")

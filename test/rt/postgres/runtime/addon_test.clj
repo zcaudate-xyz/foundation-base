@@ -12,7 +12,6 @@
              [rt.postgres.test.scratch-v1 :as scratch]]
    :import [["pgcrypto"]]})
 
-;; Removed global setup to avoid connection attempt
 (fact:global
  {:setup    [(l/rt:restart)
              (l/rt:setup :postgres)
@@ -37,6 +36,12 @@
   (str (addon/id {:id "40ff7565-2f3d-4ac0-acb5-3527370eb646"}))
   => "40ff7565-2f3d-4ac0-acb5-3527370eb646")
 
+^{:refer rt.postgres.runtime.addon/name :added "4.0"}
+(fact "gets the name of a table"
+
+  (pg/name scratch/Task)
+  => "Task")
+
 ^{:refer rt.postgres.runtime.addon/full :added "4.0"}
 (fact "gets the full jsonb for table or function"
 
@@ -48,6 +53,12 @@
 
   (addon/full-str scratch/Task)
   => "[\"scratch\",\"Task\"]")
+
+^{:refer rt.postgres.runtime.addon/coord :added "4.0"}
+(fact "gets the coordinate of a row"
+
+  (addon/coord scratch/Task "id")
+  => ["scratch" "Task" "id"])
 
 ^{:refer rt.postgres.runtime.addon/rand-hex :added "4.0"}
 (fact "generates random hex"
@@ -111,6 +122,12 @@
           \\ :when (:% 3) :then (:% 4)
           \\ :end]))
 
+^{:refer rt.postgres.runtime.addon/get-stack-diagnostics :added "4.0"}
+(fact "gets the stack diagnostics"
+
+  (l/emit-as :postgres '[(rt.postgres/get-stack-diagnostics)])
+  => string?)
+
 ^{:refer rt.postgres.runtime.addon/field-id :added "4.0"}
 (fact "shorthand for getting the field-id for a linked map"
 
@@ -122,6 +139,12 @@
 
   (l/emit-as :postgres '[(rt.postgres/map:rel f rel)])
   => "jsonb_agg(f(o_ret)) FROM rel AS o_ret")
+
+^{:refer rt.postgres.runtime.addon/map:js-text :added "4.0"}
+(fact "maps across json"
+
+  (l/emit-as :postgres '[(rt.postgres/map:js-text f arr)])
+  => "coalesce(jsonb_agg(f(o_ret)),jsonb_build_array())\nFROM jsonb_array_elements_text(arr) AS o_ret")
 
 ^{:refer rt.postgres.runtime.addon/map:js :added "4.0"}
 (fact "basic map across json"
@@ -186,30 +209,6 @@
           (:integer b) 1]
       (:= a (+ a b))))
   => 0)
-
-^{:refer rt.postgres.runtime.addon/name :added "4.0"}
-(fact "gets the name of a table"
-
-  (pg/name scratch/Task)
-  => "Task")
-
-^{:refer rt.postgres.runtime.addon/coord :added "4.0"}
-(fact "gets the coordinate of a row"
-
-  (addon/coord scratch/Task "id")
-  => ["scratch" "Task" "id"])
-
-^{:refer rt.postgres.runtime.addon/get-stack-diagnostics :added "4.0"}
-(fact "gets the stack diagnostics"
-
-  (l/emit-as :postgres '[(rt.postgres/get-stack-diagnostics)])
-  => string?)
-
-^{:refer rt.postgres.runtime.addon/map:js-text :added "4.0"}
-(fact "maps across json"
-
-  (l/emit-as :postgres '[(rt.postgres/map:js-text f arr)])
-  => "coalesce(jsonb_agg(f(o_ret)),jsonb_build_array())\nFROM jsonb_array_elements_text(arr) AS o_ret")
 
 (comment
   (./import))

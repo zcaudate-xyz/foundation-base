@@ -53,6 +53,11 @@
   (php-tf-x-now-ms '(:x-now-ms))
   => '(* 1000 (microtime true)))
 
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-has-key? :added "4.1"}
+(fact "checks that array has key"
+  (php-tf-x-has-key? '(:x-has-key? obj k nil))
+  => '(array_key_exists k obj))
+
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-m-max :added "4.1"}
 (fact "returns maximum"
   (php-tf-x-m-max '(:x-m-max 1 2 3))
@@ -102,6 +107,21 @@
 (fact "checks if array"
   (php-tf-x-is-array? '(:x-is-array? x))
   => '(is_array x))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-lu-get :added "4.1"}
+(fact "gets lookup value via object id"
+  (php-tf-x-lu-get '(:x-lu-get lu obj))
+  => '(:% lu [(spl_object_id obj)]))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-lu-set :added "4.1"}
+(fact "sets lookup value via object id"
+  (php-tf-x-lu-set '(:x-lu-set lu obj gid))
+  => '(:= (:% lu [(spl_object_id obj)]) gid))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-lu-del :added "4.1"}
+(fact "deletes lookup value via object id"
+  (php-tf-x-lu-del '(:x-lu-del lu obj))
+  => '(unset (:% lu [(spl_object_id obj)])))
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-arr-push :added "4.1"}
 (fact "pushes to array"
@@ -153,11 +173,6 @@
   (php-tf-x-str-char '(:x-str-char s 0))
   => '(ord (substr s 0 1)))
 
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-str-format :added "4.1"}
-(fact "formats strings"
-  (php-tf-x-str-format '(:x-str-format "%s-%s" a b))
-  => '(sprintf "%s-%s" a b))
-
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-str-split :added "4.1"}
 (fact "splits string"
   (php-tf-x-str-split '(:x-str-split s ","))
@@ -172,6 +187,11 @@
 (fact "finds substring"
   (php-tf-x-str-index-of '(:x-str-index-of s "abc"))
   => '(strpos s "abc"))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-str-format :added "4.1"}
+(fact "formats strings"
+  (php-tf-x-str-format '(:x-str-format "%s-%s" a b))
+  => '(sprintf "%s-%s" a b))
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-str-substring :added "4.1"}
 (fact "extracts substring"
@@ -213,25 +233,10 @@
   (php-tf-x-str-trim-right '(:x-str-trim-right s))
   => '(rtrim s))
 
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-has-key? :added "4.1"}
-(fact "checks that array has key"
-  (php-tf-x-has-key? '(:x-has-key? obj k nil))
-  => '(array_key_exists k obj))
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-lu-get :added "4.1"}
-(fact "gets lookup value via object id"
-  (php-tf-x-lu-get '(:x-lu-get lu obj))
-  => '(:% lu [(spl_object_id obj)]))
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-lu-set :added "4.1"}
-(fact "sets lookup value via object id"
-  (php-tf-x-lu-set '(:x-lu-set lu obj gid))
-  => '(:= (:% lu [(spl_object_id obj)]) gid))
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-lu-del :added "4.1"}
-(fact "deletes lookup value via object id"
-  (php-tf-x-lu-del '(:x-lu-del lu obj))
-  => '(unset (:% lu [(spl_object_id obj)])))
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-iter-from-obj :added "4.1"}
+(fact "creates iterator from object pairs"
+  (l/emit-as :php [(php-tf-x-iter-from-obj '(:x-iter-from-obj obj))])
+  => #"array_keys")
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-iter-from-arr :added "4.1"}
 (fact "creates iterator from array"
@@ -242,11 +247,6 @@
 (fact "creates iterator from generic value"
   (php-tf-x-iter-from '(:x-iter-from obj))
   => 'obj)
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-iter-from-obj :added "4.1"}
-(fact "creates iterator from object pairs"
-  (l/emit-as :php [(php-tf-x-iter-from-obj '(:x-iter-from-obj obj))])
-  => #"array_keys")
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-iter-eq :added "4.1"}
 (fact "compares iterator values"
@@ -283,6 +283,17 @@
   (php-tf-x-socket-close '(:x-socket-close conn))
   => '(fclose conn))
 
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-with-delay :added "4.1"}
+(fact "with delay emits sleep"
+  (l/emit-as :php [(php-tf-x-with-delay '[_ thunk 10])])
+  => #"usleep")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-file-slurp :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-file-spit :added "4.1"}
+(fact "TODO")
+
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-return-encode :added "4.1"}
 (fact "return encode"
   (l/emit-as :php [(php-tf-x-return-encode '[_ out id key])])
@@ -297,8 +308,3 @@
 (fact "return eval"
   (l/emit-as :php [(php-tf-x-return-eval '[_ s wrap-fn])])
   => #"eval")
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-with-delay :added "4.1"}
-(fact "with delay emits sleep"
-  (l/emit-as :php [(php-tf-x-with-delay '[_ thunk 10])])
-  => #"usleep")

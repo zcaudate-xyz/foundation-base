@@ -56,13 +56,13 @@
 (fact "toggles print for all intermediate steps"
   (with:print-all *print*) => #{:input-form :raw-input :raw-output})
 
-^{:refer std.lang.base.pointer/with:rt :added "4.0"}
-(fact "forcibly applies a runtime"
-  (with:rt [1] std.lib.context.pointer/*runtime*) => 1)
-
 ^{:refer std.lang.base.pointer/with:rt-wrap :added "4.0"}
 (fact "wraps an additional function to the invoke function"
   (with:rt-wrap [inc] *rt-wrap*) => inc)
+
+^{:refer std.lang.base.pointer/with:rt :added "4.0"}
+(fact "forcibly applies a runtime"
+  (with:rt [1] std.lib.context.pointer/*runtime*) => 1)
 
 ^{:refer std.lang.base.pointer/with:input :added "4.0"}
 (fact "form to control `input` option"

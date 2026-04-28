@@ -3,6 +3,11 @@
             [std.lang.model-annex.spec-erlang :refer :all])
   (:use code.test))
 
+(fact "erlang data structures"
+  (l/emit-as :erlang
+    [[1 2 3]])
+  => "[1, 2, 3]")
+
 ^{:refer std.lang.model-annex.spec-erlang/to-erlang-var :added "4.1"}
 (fact "converts symbols to erlang vars"
   (to-erlang-var 'abc) => 'Abc
@@ -29,6 +34,11 @@
       (+ a b))])
   => "add(A, B) -> A + B.")
 
+^{:refer std.lang.model-annex.spec-erlang/emit-erlang-defn :added "4.1"}
+(fact "emits erlang function"
+  (emit-erlang-defn '(_ add [A B] [(+ A B)]))
+  => '(erl-raw "add(A, B) -> +AB."))
+
 ^{:refer std.lang.model-annex.spec-erlang/tf-erlang-case :added "4.1"}
 (fact "transforms case"
   (l/emit-as :erlang
@@ -37,11 +47,21 @@
         _ (* n (fact (- n 1))))])
   => "case n of 0 -> 1; _ -> n * fact(n - 1) end")
 
+^{:refer std.lang.model-annex.spec-erlang/emit-erlang-case :added "4.1"}
+(fact "emits erlang case"
+  (emit-erlang-case '(_ N ((0 1) (_ (* N (fact (- N 1)))))))
+  => '(erl-raw "case N of 0 -> 1; _ -> *Nfact-N1 end"))
+
 ^{:refer std.lang.model-annex.spec-erlang/tf-erlang-tuple :added "4.1"}
 (fact "transforms tuple"
   (l/emit-as :erlang
     ['(tuple 1 2)])
   => "{1, 2}")
+
+^{:refer std.lang.model-annex.spec-erlang/emit-erlang-tuple :added "4.1"}
+(fact "emits erlang tuple"
+  (emit-erlang-tuple '(_ 1 2))
+  => '(erl-raw "{1, 2}"))
 
 ^{:refer std.lang.model-annex.spec-erlang/emit-erlang-var :added "4.1"}
 (fact "emits var assignment"
@@ -54,23 +74,3 @@
   (l/emit-as :erlang
     [{:a 1 "b" 2}])
   => "#{a => 1, \"b\" => 2}")
-
-^{:refer std.lang.model-annex.spec-erlang/emit-erlang-defn :added "4.1"}
-(fact "emits erlang function"
-  (emit-erlang-defn '(_ add [A B] [(+ A B)]))
-  => '(erl-raw "add(A, B) -> +AB."))
-
-^{:refer std.lang.model-annex.spec-erlang/emit-erlang-case :added "4.1"}
-(fact "emits erlang case"
-  (emit-erlang-case '(_ N ((0 1) (_ (* N (fact (- N 1)))))))
-  => '(erl-raw "case N of 0 -> 1; _ -> *Nfact-N1 end"))
-
-^{:refer std.lang.model-annex.spec-erlang/emit-erlang-tuple :added "4.1"}
-(fact "emits erlang tuple"
-  (emit-erlang-tuple '(_ 1 2))
-  => '(erl-raw "{1, 2}"))
-
-(fact "erlang data structures"
-  (l/emit-as :erlang
-    [[1 2 3]])
-  => "[1, 2, 3]")

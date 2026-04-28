@@ -2,6 +2,24 @@
   (:use code.test)
   (:require [std.lang.rewrite.walk :as walk]))
 
+^{:refer std.lang.rewrite.walk/rewrite-coll :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.rewrite.walk/rewrite-map-entry :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.rewrite.walk/rewrite-map :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.rewrite.walk/rewrite-vector :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.rewrite.walk/rewrite-set :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.rewrite.walk/rewrite-map-form :added "4.1"}
+(fact "TODO")
+
 ^{:refer std.lang.rewrite.walk/rewrite-form :added "4.1"}
 (fact "rewrites vectors, sets and maps while preserving top-level metadata"
   (let [vec-form (with-meta ['a 1] {:line 10})

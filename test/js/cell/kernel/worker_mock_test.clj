@@ -16,6 +16,15 @@
               (l/rt:scaffold-imports :js)]
   :teardown  [(l/rt:stop)]})
 
+^{:refer js.cell.kernel.worker-mock/mock-worker-send :added "4.0" :unchecked true}
+(fact "sends a request to the mock worker"
+
+  (!.js
+   (var worker (worker-mock/mock-worker (fn [msg])))
+   ;; Returns undefined because no actions are registered
+   (worker-mock/mock-worker-send worker {"op" "eval" "body" "1 + 1"}))
+  => nil?)
+
 ^{:refer js.cell.kernel.worker-mock/mock-worker :added "4.0" :unchecked true}
 (fact "creates a new mock worker"
 
@@ -28,15 +37,6 @@
    ;; Return the messages array to verify
    messages)
   => [{"test" 1}])
-
-^{:refer js.cell.kernel.worker-mock/mock-worker-send :added "4.0" :unchecked true}
-(fact "sends a request to the mock worker"
-
-  (!.js
-   (var worker (worker-mock/mock-worker (fn [msg])))
-   ;; Returns undefined because no actions are registered
-   (worker-mock/mock-worker-send worker {"op" "eval" "body" "1 + 1"}))
-  => nil?)
 
 ^{:refer js.cell.kernel.worker-mock/create-worker :added "4.0" :unchecked true}
 (fact "initialises the mock worker"

@@ -26,6 +26,15 @@
   (play/play-url "hello")
   => #"http://127.0.0.1:\d+/hello")
 
+^{:refer js.cell.playground/play-script :added "4.0"}
+(fact "gets the script"
+
+  (play/play-script '[(+ 1 2 3)] true)
+  => "1 + 2 + 3;"
+
+  (play/play-script '[(+ 1 2 3)])
+  => "3ae0c35a0ad27c63af2003b2930f499e445694fb.js")
+
 ^{:refer js.cell.playground/play-page :added "4.0"}
 (fact "creates a page asset in the playground"
 
@@ -37,15 +46,6 @@
     page => string?
     (fs/exists? path) => true
     (play/play-url page) => #"http://127.0.0.1:\d+/e2e-.*\.html"))
-
-^{:refer js.cell.playground/play-script :added "4.0"}
-(fact "gets the script"
-
-  (play/play-script '[(+ 1 2 3)] true)
-  => "1 + 2 + 3;"
-
-  (play/play-script '[(+ 1 2 3)])
-  => "3ae0c35a0ad27c63af2003b2930f499e445694fb.js")
 
 ^{:refer js.cell.playground/play-worker :added "4.0"}
 (fact "constructs the play worker"

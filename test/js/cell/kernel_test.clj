@@ -95,6 +95,9 @@
   (cl/get-cell)
   => map?)
 
+^{:refer js.cell.kernel/call :added "4.1"}
+(fact "TODO")
+
 ^{:refer js.cell.kernel/fn-call-cell :added "4.0" :unchecked true}
 (fact "calls the cell in context"
 
@@ -659,7 +662,3 @@
 
 ^{:refer js.cell.kernel/list-raw-callbacks :added "4.0" :unchecked true}
 (fact "lists all raw calllbacks")
-
-
-^{:refer js.cell.kernel/call :added "4.1"}
-(fact "TODO")

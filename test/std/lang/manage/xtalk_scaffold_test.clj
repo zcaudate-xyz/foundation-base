@@ -322,6 +322,18 @@
       (finally
         (fs/delete root)))))
 
+^{:refer std.lang.manage.xtalk-scaffold/runtime-bench-ns? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/canonical-runtime-source-test-ns :added "4.1"}
+(fact "normalizes generated runtime namespaces back to canonical test namespaces"
+  [(canonical-runtime-source-test-ns 'xtbench.js.sample.base-lib-test)
+   (canonical-runtime-source-test-ns 'xt.sample.base-lib-js-test)
+   (canonical-runtime-source-test-ns 'xt.sample.base-lib-test)]
+  => '[xt.sample.base-lib-test
+       xt.sample.base-lib-test
+       xt.sample.base-lib-test])
+
 ^{:refer std.lang.manage.xtalk-scaffold/read-xtalk-ops :added "4.1"}
 (fact "reads xtalk ops from path"
   (fn? read-xtalk-ops)
@@ -412,754 +424,6 @@
   (runtime-dispatch-symbol :js)
   => '!.js)
 
-^{:refer std.lang.manage.xtalk-scaffold/runtime-lang-suffix :added "4.1"}
-(fact "returns runtime suffix"
-  (runtime-lang-suffix :ruby)
-  => "rb"
-
-  (runtime-lang-suffix :php)
-  => "php")
-
-^{:refer std.lang.manage.xtalk-scaffold/read-top-level-forms :added "4.1"}
-(fact "read-top-level-forms is callable"
-  (fn? read-top-level-forms)
-  => true)
-
-^{:refer std.lang.manage.xtalk-scaffold/runtime-expr-lang :added "4.1"}
-(fact "infers runtime from expression"
-  (runtime-expr-lang '(!.js (k/a)))
-  => :js)
-
-^{:refer std.lang.manage.xtalk-scaffold/fact-form? :added "4.1"}
-(fact "detects fact form"
-  (fact-form? '(fact "x" 1 => 1))
-  => true)
-
-^{:refer std.lang.manage.xtalk-scaffold/fact-global-form? :added "4.1"}
-(fact "detects fact:global form"
-  (fact-global-form? '(fact:global {:setup []}))
-  => true)
-
-^{:refer std.lang.manage.xtalk-scaffold/script-form? :added "4.1"}
-(fact "detects script form"
-  (script-form? '(l/script- :js {}))
-  => true)
-
-^{:refer std.lang.manage.xtalk-scaffold/expand-top-level-form :added "4.1"}
-(fact "expands do forms"
-  (expand-top-level-form '(do (a) (b)))
-  => '((a) (b)))
-
-^{:refer std.lang.manage.xtalk-scaffold/replace-ns-name :added "4.1"}
-(fact "replaces ns declaration symbol"
-  (second (replace-ns-name '(ns a.b (:use code.test)) 'x.y))
-  => 'x.y)
-
-^{:refer std.lang.manage.xtalk-scaffold/runtime-test-ns :added "4.1"}
-(fact "creates runtime test ns"
-  (runtime-test-ns 'xt.sample.base-lib-test :js)
-  => 'xtbench.js.sample.base-lib-test)
-
-^{:refer std.lang.manage.xtalk-scaffold/render-top-level-forms :added "4.1"}
-(fact "renders top-level forms"
-  (string? (render-top-level-forms '[(ns a.b) (def x 1)]))
-  => true
-
-  (let [out (render-top-level-forms
-             [(with-meta
-                '(fact "x"
-                   (!.js 1)
-                   => 1)
-                {:line 10
-                 :column 2
-                 :hidden true
-                 :refer (with-meta 'xt.lang.common-lib/identity
-                          {:line 9 :column 1})
-                 :added "4.1"})])]
-    [(str/includes? out ":line")
-     (str/includes? out ":column")
-     (str/includes? out ":refer xt.lang.common-lib/identity")
-     (str/includes? out ":added \"4.1\"")
-     (str/includes? out ":hidden true")])
-  => [false false true true true])
-
-^{:refer std.lang.manage.xtalk-scaffold/attach-leading-meta :added "4.1"}
-(fact "attaches leading metadata"
-  (meta (first (attach-leading-meta '((+ 1 2)) {:hidden true})))
-  => (contains {:hidden true}))
-
-^{:refer std.lang.manage.xtalk-scaffold/commented-form? :added "4.1"}
-(fact "detects commented forms by metadata"
-  (commented-form? (with-meta '(+ 1 2) {:comment true}))
-  => true
-
-  (commented-form? '(comment (+ 1 2)))
-  => true)
-
-^{:refer std.lang.manage.xtalk-scaffold/test-file-path :added "4.1"}
-(fact "builds a test file path"
-  (string? (test-file-path {:root "." :test-paths ["test"]} 'a.b-test))
-  => true
-
-  (str/ends-with? (test-file-path {:root "." :test-paths ["test"]}
-                                  'xtbench.js.sample.base-lib-test)
-                  "/test/xtbench/js/sample/base_lib_test.clj")
-  => true)
-
-^{:refer std.lang.manage.xtalk-scaffold/derived-test-file-path :added "4.1"}
-(fact "uses canonical xtbench paths for generated suites"
-  (str/ends-with? (derived-test-file-path {:root "." :test-paths ["test"]}
-                                          "test/xt/db/base_scope_test.clj"
-                                          'xt.old.db.base-scope-test
-                                          'xtbench.dart.db.base-scope-test)
-                  "/test/xtbench/dart/db/base_scope_test.clj")
-  => true
-
-  (str/ends-with? (derived-test-file-path {:root "." :test-paths ["test"]}
-                                          "test/xt/db/base_scope_test.clj"
-                                          'xt.old.db.base-scope-test
-                                          'xt.old.db.base-scope-test)
-                  "/test/xt/db/base_scope_test.clj")
-  => true)
-
-^{:refer std.lang.manage.xtalk-scaffold/infer-runtime-lang :added "4.1"}
-(fact "infers runtime language from forms"
-  (infer-runtime-lang '((l/script- :js {:runtime :basic})))
-  => :js)
-
-^{:refer std.lang.manage.xtalk-scaffold/runtime-script-langs :added "4.1"}
-(fact "collects distinct script languages from template forms"
-  (runtime-script-langs runtime-template-forms)
-  => [:js]
-
-  (set (runtime-script-langs runtime-test-forms))
-  => #{:js :lua})
-
-^{:refer std.lang.manage.xtalk-scaffold/single-runtime-template-lang :added "4.1"}
-(fact "detects single-runtime templates"
-  (single-runtime-template-lang runtime-template-forms)
-  => :js
-
-  (single-runtime-template-lang template-forms-with-helper-runtime)
-  => :js
-
-  (single-runtime-template-lang runtime-test-forms)
-  => nil)
-
-^{:refer std.lang.manage.xtalk-scaffold/infer-runtime-lang :added "4.1"}
-(fact "prefers explicitly marked template scripts over helper runtimes"
-  (infer-runtime-lang template-forms-with-helper-runtime)
-  => :js)
-
-^{:refer std.lang.manage.xtalk-scaffold/runtime-suffixed-test-ns? :added "4.1"}
-(fact "detects runtime suffixed test namespaces"
-  [(runtime-suffixed-test-ns? 'xt.sample.base-lib-js-test)
-   (runtime-suffixed-test-ns? 'xtbench.js.sample.base-lib-test)
-   (runtime-suffixed-test-ns? 'xt.sample.base-lib-test)
-   (runtime-suffixed-test-ns? 'xt.lang.common-lib-dt-test)]
-  => [true true false true])
-
-^{:refer std.lang.manage.xtalk-scaffold/runtime-template-supported? :added "4.1"}
-(fact "blocks twostep suite generation for runtime-coupled templates"
-  [(runtime-template-supported? canonical-runtime-template-forms :dart)
-      (runtime-template-supported? blocked-runtime-template-forms :dart)
-      (runtime-template-supported? runtime-test-forms :dart)
-      (runtime-template-supported? lua-specific-template-forms :lua)
-      (runtime-template-supported? lua-specific-template-forms :js)
-      (runtime-template-supported? js-sqlite-template-forms :lua)
-      (runtime-template-supported? js-sqlite-template-forms :python)
-      (runtime-template-supported? js-sqlite-template-forms :dart)]
-  => [true true false true false false false false])
-
-^{:refer std.lang.manage.xtalk-scaffold/replace-runtime-symbol :added "4.1"}
-(fact "replaces runtime dispatch symbol"
-  (replace-runtime-symbol '(!.js (k/a)) '!.js '!.lua)
-  => '(!.lua (k/a)))
-
-^{:refer std.lang.manage.xtalk-scaffold/replace-string-value :added "4.1"}
-(fact "replaces string value recursively"
-  (replace-string-value '{:a "x" :b ["x"]} "x" "y")
-  => '{:a "y" :b ["y"]})
-
-^{:refer std.lang.manage.xtalk-scaffold/transform-script-form :added "4.1"}
-(fact "transforms script form language"
-  (transform-script-form '(l/script- :js {:runtime :basic}) :js :lua)
-  => '(l/script- :lua {:runtime :basic}))
-
-^{:refer std.lang.manage.xtalk-scaffold/template-runtime-test-ns :added "4.1"}
-(fact "templates runtime test namespace"
-  (template-runtime-test-ns 'xtbench.js.sample.base-lib-test :js :rb)
-  => 'xtbench.rb.sample.base-lib-test)
-
-^{:refer std.lang.manage.xtalk-scaffold/template-runtime-test-forms :added "4.1"}
-(fact "templates a runtime test from js to ruby"
-  (let [out-forms (template-runtime-test-forms runtime-template-forms :js :ruby)
-        out (render-top-level-forms out-forms)]
-    [(= :rb (normalize-runtime-lang :ruby))
-      (= 'xtbench.rb.sample.base-lib-test
-         (second (first out-forms)))
-      (= :ruby (second (second out-forms)))
-      (str/includes? out "xtbench.rb.sample.base-lib-test")
-      (str/includes? out "(l/script- :ruby")
-      (str/includes? out "!.rb")
-      (not (str/includes? out "!.js"))
-      (str/includes? out ":refer xt.lang.common-lib/identity")])
-  => [true true true true true true true true])
-
-^{:refer std.lang.manage.xtalk-scaffold/template-runtime-test-forms :added "4.1"}
-(fact "retargets host-side runtime references in template output"
-  (let [out (render-top-level-forms
-             (template-runtime-test-forms blocked-runtime-template-forms :js :lua))]
-    [(str/includes? out "(notify/wait-on :lua ")
-     (not (str/includes? out "(notify/wait-on :js "))])
-  => [true true])
-
-^{:refer std.lang.manage.xtalk-scaffold/template-runtime-test-forms :added "4.1"}
-(fact "normalizes fact:global setup in template output"
-  (let [lua-out (render-top-level-forms
-                 (template-runtime-test-forms runtime-template-forms-with-setup :js :lua))]
-    [(not (str/includes? lua-out "(l/rt:scaffold"))
-     (str/includes? lua-out "(def +views+ (!.lua (v/example)))")])
-  => [true true])
-
-^{:refer std.lang.manage.xtalk-scaffold/template-runtime-test-forms :added "4.1"}
-(fact "drops skipped named helpers and their script requires in template output"
-  (let [py-out (render-top-level-forms
-                (template-runtime-test-forms template-forms-with-skippable-helper :js :python))]
-    [(str/includes? py-out "(l/script-\n :python")
-     (str/includes? py-out "[xt.lang.common-lib :as k]")
-     (not (str/includes? py-out "js.lib.driver-postgres"))
-     (not (str/includes? py-out "xt.old.sys.conn-dbsql"))
-     (not (str/includes? py-out "bootstrap-js"))])
-  => [true true true true true])
-
-^{:refer std.lang.manage.xtalk-scaffold/split-fact-form :added "4.1"}
-(fact "splits a mixed runtime fact form"
-  (let [{:keys [shared langs]} (split-fact-form '(fact "x" (!.js (k/a)) => 1 (!.lua (k/a)) => 1) [:js :lua])]
-    [(some? shared) (set (keys langs))])
-  => [true #{:js :lua}])
-
-^{:refer std.lang.manage.xtalk-scaffold/split-fact-form :added "4.1"}
-(fact "synthesizes missing runtime clauses from portable source clauses"
-  (let [{:keys [langs]} (split-fact-form '(fact "x" (!.js (k/a)) => 1 (!.lua (k/a)) => 1)
-                                         [:js :lua :python :dart])
-        py-out (render-top-level-forms [(get langs :python)])
-        dt-out (render-top-level-forms [(get langs :dart)])]
-    [(contains? langs :python)
-     (contains? langs :dart)
-     (str/includes? py-out "!.py")
-     (not (str/includes? py-out "!.js"))
-     (str/includes? dt-out "!.dt")
-     (not (str/includes? dt-out "!.lua"))])
-  => [true true true true true true])
-
-^{:refer std.lang.manage.xtalk-scaffold/split-fact-form :added "4.1"}
-(fact "does not synthesize from runtime-specific helper aliases"
-  (let [{:keys [langs]} (split-fact-form '(fact "x" (!.js (j/future-delayed [10] (return 1))) => 1)
-                                         [:js :python :dart])]
-    (set (keys langs)))
-  => #{:js})
-
-^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-test-forms :added "4.1"}
-(fact "retargets host-side runtime references in split output"
-  (let [{:keys [by-lang]} (separate-runtime-test-forms split-runtime-reference-forms [:js :lua])
-        js-out (render-top-level-forms (get by-lang :js))
-        lua-out (render-top-level-forms (get by-lang :lua))]
-    [(str/includes? js-out "(notify/wait-on :js)")
-     (not (str/includes? js-out "(notify/wait-on :lua)"))
-     (str/includes? js-out "(notify/captured :js)")
-     (not (str/includes? js-out "(notify/captured :lua)"))
-     (str/includes? js-out "(l/rt :js)")
-     (not (str/includes? js-out "(l/rt :lua)"))
-     (str/includes? lua-out "(notify/wait-on :lua)")
-     (not (str/includes? lua-out "(notify/wait-on :js)"))])
-  => [true true true true true true true true])
-
-^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-test-forms :added "4.1"}
-(fact "retargets metadata setup forms in split output"
-  (let [{:keys [by-lang]} (separate-runtime-test-forms metadata-setup-runtime-forms [:js :lua])
-        lua-out (render-top-level-forms (get by-lang :lua))]
-    [(str/includes? lua-out ":setup [(def +account+ (!.lua {:id 1}))]")
-     (not (str/includes? lua-out ":setup [(def +account+ (!.js {:id 1}))]"))])
-  => [true true])
-
-^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-test-forms :added "4.1"}
-(fact "does not synthesize split output when target runtime lacks required aliases"
-  (let [{:keys [by-lang]} (separate-runtime-test-forms alias-gated-runtime-forms [:js :lua])]
-    [(contains? by-lang :js)
-     (contains? by-lang :lua)])
-  => [true false])
-
-^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-test-forms :added "4.1"}
-(fact "synthesizes real base_scope facts for dart via fallback script aliases"
-  (let [forms (read-top-level-forms "test/xt/db/base_scope_test.clj")
-        {:keys [by-lang]} (separate-runtime-test-forms forms [:js :lua :python :dart])
-        dt-forms (get by-lang :dart)
-        dt-out (render-top-level-forms dt-forms)]
-    [(pos? (count (filter fact-form? dt-forms)))
-     (str/includes? dt-out "xtbench.dart.db.base-scope-test")
-     (str/includes? dt-out "!.dt")
-     (not (str/includes? dt-out "!.js"))
-     (str/includes? dt-out "xt.old.db.base-scope/get-tree")])
-  => [true true true true true])
-
-^{:refer std.lang.manage.xtalk-scaffold/classify-split-form :added "4.1"}
-(fact "classifies split-relevant forms"
-  [(classify-split-form '(fact:global {:setup [(l/rt:restart) (l/rt:scaffold :js)]}))
-   (classify-split-form '(def +views+ (!.js (k/example))))
-   (classify-split-form '(fact "x" (def +tables+ (!.js (k/example))) (!.lua (k/example)) => +tables+))]
-  => '[#{:fact-global}
-       #{:top-level-shared}
-       #{:runtime-fact :runtime-prefix}])
-
-^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-test-forms :added "4.1"}
-(fact "splits a multi-runtime test namespace into per-language forms"
-  (let [{:keys [shared by-lang]}
-        (separate-runtime-test-forms runtime-test-forms [:js :lua])
-        js-form (some #(when (= "identity function" (second %)) %) (get by-lang :js))
-        lua-form (some #(when (= "identity function" (second %)) %) (get by-lang :lua))
-        shared-out (render-top-level-forms shared)
-        js-out (render-top-level-forms (get by-lang :js))
-        lua-out (render-top-level-forms (get by-lang :lua))]
-    [(str/includes? shared-out "xt.sample.base-lib-test")
-     (str/includes? shared-out "(fact \"placeholder\")")
-      (not (str/includes? shared-out "wrapped runtime form"))
-      (str/includes? js-out "xtbench.js.sample.base-lib-test")
-      (str/includes? js-out "(l/script- :js")
-      (= true (:hidden (meta (nth js-form 2))))
-      (str/includes? js-out "!.js")
-      (not (str/includes? js-out "!.lua"))
-      (str/includes? js-out "wrapped runtime form")
-      (str/includes? js-out "vector runtime form")
-      (str/includes? lua-out "xtbench.lua.sample.base-lib-test")
-      (str/includes? lua-out "(l/script- :lua")
-      (= true (:hidden (meta (nth lua-form 2))))
-      (str/includes? lua-out "!.lua")
-      (not (str/includes? lua-out "!.js"))
-       (str/includes? lua-out "wrapped runtime form")
-       (str/includes? lua-out "vector runtime form")])
-  => [true true true true true true true true true true true true true true true true true])
-
-^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-test-forms :added "4.1"}
-(fact "preserves top-level helpers and normalizes split runtime output"
-  (let [{:keys [by-lang]}
-        (separate-runtime-test-forms runtime-test-forms-with-top-level [:js :lua])
-        js-out (render-top-level-forms (get by-lang :js))
-        lua-out (render-top-level-forms (get by-lang :lua))]
-    [(str/includes? js-out "(def +views+ (!.js (v/example)))")
-     (str/includes? lua-out "(def +views+ (!.lua (v/example)))")
-     (str/includes? js-out "(l/rt:scaffold :js)")
-     (not (str/includes? js-out "(l/rt:scaffold :lua)"))
-     (str/includes? lua-out "(l/rt:scaffold :lua)")
-     (not (str/includes? lua-out "(l/rt:scaffold :js)"))
-     (str/includes? lua-out "(def +tables+ (!.lua (v/example)))")
-     (not (str/includes? lua-out "(def +tables+ (!.js"))])
-  => [true true true true true true true true])
-
-^{:refer std.lang.manage.xtalk-scaffold/canonical-runtime-source-test-ns :added "4.1"}
-(fact "normalizes generated runtime namespaces back to canonical test namespaces"
-  [(canonical-runtime-source-test-ns 'xtbench.js.sample.base-lib-test)
-   (canonical-runtime-source-test-ns 'xt.sample.base-lib-js-test)
-   (canonical-runtime-source-test-ns 'xt.sample.base-lib-test)]
-  => '[xt.sample.base-lib-test
-       xt.sample.base-lib-test
-       xt.sample.base-lib-test])
-
-^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-tests :added "4.1"}
-(fact "separate-runtime-tests is callable"
-  (fn? separate-runtime-tests)
-  => true)
-
-^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-tests :added "4.1"}
-(fact "separate-runtime-tests does not overwrite the source seed by default"
-  (with-temp-runtime-suite-file
-    runtime-test-forms
-    (fn [path]
-      (let [before (slurp path)]
-       (separate-runtime-tests nil {:input-path path
-                                    :langs [:js :lua]
-                                    :write true})
-        (= before (slurp path)))))
-  => true)
-
-^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-tests :added "4.1"}
-(fact "separate-runtime-tests normalizes empty vector expectations for lua"
-  (with-temp-runtime-suite-file
-    lua-empty-vector-runtime-forms
-    (fn [path]
-      (let [{:keys [outputs]}
-            (separate-runtime-tests nil {:input-path path
-                                         :langs [:lua]
-                                         :write true})
-            lua-path (->> outputs
-                          (filter #(= :lua (:lang %)))
-                          first
-                          :path)
-            lua-output (slurp lua-path)]
-        (boolean (re-find #"\{\"queued\"\s+\{\}\}" lua-output)))))
-  => true)
-
-^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-tests :added "4.1"}
-(fact "separate-runtime-tests drops nil-valued lua map entries from expectations"
-  (with-temp-runtime-suite-file
-    lua-nil-map-runtime-forms
-    (fn [path]
-      (let [{:keys [outputs]}
-            (separate-runtime-tests nil {:input-path path
-                                         :langs [:lua]
-                                         :write true})
-            lua-path (->> outputs
-                          (filter #(= :lua (:lang %)))
-                          first
-                          :path)
-            lua-output (slurp lua-path)]
-        (and (str/includes? lua-output "{\"meta\" {\"listener/id\" \"b2\"}}")
-             (not (str/includes? lua-output "\"pred\" nil"))))))
-  => true)
-
-^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-tests :added "4.1"}
-(fact "separate-runtime-tests keeps foreign runtime prefixes out of other language outputs"
-  (with-temp-runtime-suite-file
-    foreign-prefix-runtime-forms
-    (fn [path]
-      (let [{:keys [outputs]}
-            (separate-runtime-tests nil {:input-path path
-                                         :langs [:js :lua]
-                                         :write true})
-            js-output (->> outputs
-                           (filter #(= :js (:lang %)))
-                           first
-                           :path
-                           slurp)
-            lua-output (->> outputs
-                            (filter #(= :lua (:lang %)))
-                            first
-                            :path
-                            slurp)]
-        [(not (str/includes? js-output "string.format"))
-         (= 1 (count (re-seq #"xt/x:json-encode 100000000000000000" js-output)))
-         (str/includes? lua-output "string.format")])))
-  => [true true true])
-
-^{:refer std.lang.manage.xtalk-scaffold/scaffold-runtime-template :added "4.1"}
-(fact "scaffold-runtime-template is callable"
-  (fn? scaffold-runtime-template)
-  => true)
-
-^{:refer std.lang.manage.xtalk-scaffold/scaffold-runtime-template :added "4.1"}
-(fact "scaffold-runtime-template supports input-path without :ns"
-  (with-temp-runtime-suite-file
-    runtime-template-forms
-    (fn [path]
-      (let [{:keys [source-ns target-ns from-lang lang content]}
-            (scaffold-runtime-template nil {:input-path path
-                                            :output-path (str path ".out")
-                                            :lang :lua})]
-        [source-ns
-         target-ns
-         from-lang
-         lang
-         (str/includes? content ":line")
-         (str/includes? content ":column")])))
-  => '[xtbench.js.sample.base-lib-test
-       xtbench.lua.sample.base-lib-test
-       :js
-       :lua
-        false
-        false])
-
-^{:refer std.lang.manage.xtalk-scaffold/scaffold-runtime-template :added "4.1"}
-(fact "scaffold-runtime-template preserves helper runtime configs on non-target scripts"
-  (with-temp-runtime-suite-file
-    template-forms-with-helper-runtime
-    (fn [path]
-      (let [{:keys [content]}
-            (scaffold-runtime-template nil {:input-path path
-                                            :output-path (str path ".out")
-                                            :lang :js})]
-        [(str/includes? content "(l/script-\n :postgres\n {:runtime :jdbc.client")
-         (str/includes? content "(l/script-\n :js\n {:runtime :basic") ])))
-  => [true true])
-
-^{:refer std.lang.manage.xtalk-scaffold/scaffold-runtime-template :added "4.1"}
-(fact "scaffold-runtime-template supports namespace patterns for batch generation"
-  (with-temp-xtlang-root
-    {"test/xt/lang/common_lib_test.clj" canonical-runtime-template-forms
-     "test/xt/lang/common_notify_test.clj" blocked-runtime-template-forms}
-    (fn [root]
-      (let [{:keys [pattern lang count outputs]}
-            (scaffold-runtime-template nil {:root root
-                                            :input-root "test/xt/lang"
-                                            :ns 'xt.lang.*
-                                            :lang :dart})]
-        [pattern
-         lang
-         count
-         (mapv :source-ns outputs)
-         (mapv :target-ns outputs)])))
-  => '["xt.lang.*"
-        :dart
-        1
-        [xt.sample.base-lib-test]
-        [xtbench.dart.sample.base-lib-test]])
-
-^{:refer std.lang.manage.xtalk-scaffold/scaffold-runtime-template :added "4.1"}
-(fact "scaffold-runtime-template preserves source formatting"
-  (with-temp-runtime-source-file
-    "(ns xtbench.js.sample.base-lib-test\n  (:require [std.lang :as l]\n            [xt.lang.common-lib :as k])\n  (:use code.test))\n\n(l/script- :js {:runtime :basic})\n\n(fact:global {:setup [(l/rt:restart)]})\n\n^{:refer xt.lang.common-lib/identity :added \"4.0\"}\n(fact \"identity function\"\n\n  (!.js (k/identity 1))\n  => 1)\n"
-    (fn [path]
-      (let [{:keys [content]}
-            (scaffold-runtime-template nil {:input-path path
-                                            :output-path (str path ".out")
-                                            :lang :lua})]
-        [(str/includes? content "(fact \"identity function\"\n\n  (!.lua (k/identity 1))\n  => 1)")
-         (str/includes? content "(l/script- :lua {:runtime :basic})")
-         (not (str/includes? content "(fact \"identity function\" (!.lua"))])))
-  => [true true true])
-
-^{:refer std.lang.manage.xtalk-scaffold/scaffold-runtime-template :added "4.1"}
-(fact "scaffold-runtime-template keeps the real common_lib seed scaffoldable for js and lua"
-  (let [{js-content :content
-         source-ns :source-ns
-         from-lang :from-lang
-         js-target-ns :target-ns}
-        (scaffold-runtime-template nil {:input-path "test/xt/lang/common_lib_test.clj"
-                                        :lang :js})
-        {lua-content :content
-         lua-target-ns :target-ns}
-        (scaffold-runtime-template nil {:input-path "test/xt/lang/common_lib_test.clj"
-                                        :lang :lua})]
-    [source-ns
-     from-lang
-     js-target-ns
-     (str/includes? js-content "xtbench.js.lang.common-lib-test")
-     (str/includes? js-content "xt.lang.common-lib/prototype-create")
-     (str/includes? js-content "(k/prototype-set a mt nil)")
-     lua-target-ns
-     (str/includes? lua-content "xtbench.lua.lang.common-lib-test")
-     (str/includes? js-content ":require [[xt.lang.common-lib :as k]]")
-     (str/includes? js-content "xt.lang.common-lib/type-native")
-     (str/includes? js-content "xt.lang.common-lib/wrap-callback")
-     (> (count (re-seq #"\(fact " js-content)) 20)])
-  => '[xt.lang.common-lib-test
-       :lua
-       xtbench.js.lang.common-lib-test
-       true
-       true
-       true
-       xtbench.lua.lang.common-lib-test
-       true
-       true
-       true
-       true
-       true])
-
-^{:refer std.lang.manage.xtalk-scaffold/scaffold-runtime-template :added "4.1"}
-(fact "scaffold-runtime-template renders the real common_lib seed for python and dart"
-  (let [{py-target-ns :target-ns
-         py-content :content}
-        (scaffold-runtime-template nil {:input-path "test/xt/lang/common_lib_test.clj"
-                                        :lang :python})
-        {dt-target-ns :target-ns
-         dt-content :content}
-        (scaffold-runtime-template nil {:input-path "test/xt/lang/common_lib_test.clj"
-                                        :lang :dart})]
-    [py-target-ns
-     (str/includes? py-content "xtbench.python.lang.common-lib-test")
-     (not (str/includes? py-content "xt.lang.common-lib/prototype-create"))
-     (not (str/includes? py-content "(k/prototype-set a mt nil)"))
-     dt-target-ns
-     (str/includes? dt-content "xtbench.dart.lang.common-lib-test")
-     (not (str/includes? dt-content "xt.lang.common-lib/prototype-create"))
-     (not (str/includes? dt-content "xt.lang.common-lib/prototype-set"))])
-  => '[xtbench.python.lang.common-lib-test
-       true
-       true
-       true
-       xtbench.dart.lang.common-lib-test
-       true
-       true
-       true])
-
-^{:refer std.lang.manage.xtalk-scaffold/scaffold-runtime-template :added "4.1"}
-(fact "scaffold-runtime-template drops unsupported common_data facts for python and dart"
-  (let [{py-target-ns :target-ns
-         py-content :content}
-        (scaffold-runtime-template nil {:input-path "test/xt/lang/common_data_test.clj"
-                                        :lang :python})
-        {dt-target-ns :target-ns
-         dt-content :content}
-        (scaffold-runtime-template nil {:input-path "test/xt/lang/common_data_test.clj"
-                                        :lang :dart})]
-    [py-target-ns
-     (str/includes? py-content "xtbench.python.lang.common-data-test")
-     (str/includes? py-content "xt.lang.common-data/from-flat")
-     (str/includes? py-content "xt.lang.common-data/memoize-key")
-     (not (str/includes? py-content ":lang-exceptions"))
-     dt-target-ns
-     (str/includes? dt-content "xtbench.dart.lang.common-data-test")
-     (not (str/includes? dt-content "xt.lang.common-data/arr-tail"))
-     (not (str/includes? dt-content "xt.lang.common-data/clone-nested"))
-     (not (str/includes? dt-content ":lang-exceptions"))])
-  => '[xtbench.python.lang.common-data-test
-        true
-        true
-        false
-        true
-        xtbench.dart.lang.common-data-test
-        true
-        true
-        true
-        true])
-
-^{:refer std.lang.manage.xtalk-scaffold/scaffold-runtime-template :added "4.1"}
-(fact "scaffold-runtime-template renders the real common_math seed for python and dart"
-  (let [{py-target-ns :target-ns
-         py-content :content}
-        (scaffold-runtime-template nil {:input-path "test/xt/lang/common_math_test.clj"
-                                        :lang :python})
-        {dt-target-ns :target-ns
-         dt-content :content}
-        (scaffold-runtime-template nil {:input-path "test/xt/lang/common_math_test.clj"
-                                        :lang :dart})]
-    [py-target-ns
-     (str/includes? py-content "xtbench.python.lang.common-math-test")
-     (str/includes? py-content "xt.lang.common-math/log10")
-     (str/includes? py-content "xt.lang.common-math/round")
-     dt-target-ns
-     (str/includes? dt-content "xtbench.dart.lang.common-math-test")
-     (str/includes? dt-content "xt.lang.common-math/log10")
-     (str/includes? dt-content "xt.lang.common-math/round")])
-  => '[xtbench.python.lang.common-math-test
-       true
-       true
-       true
-       xtbench.dart.lang.common-math-test
-       true
-       true
-       true])
-
-^{:refer std.lang.manage.xtalk-scaffold/diagnose-runtime-generation :added "4.1"}
-(fact "diagnoses split generation rewrites and expected outputs"
-  (with-temp-runtime-suite-file
-    runtime-test-forms-with-top-level
-    (fn [path]
-      (let [{:keys [mode expected-success? script-langs outputs warnings unsupported summary]}
-            (diagnose-runtime-generation nil {:input-path path
-                                              :langs [:js :lua]})]
-        [mode
-         expected-success?
-         script-langs
-         (mapv (juxt :lang :status :script-present :fact-count) outputs)
-         (set (map :code warnings))
-         unsupported
-         (:rewritten-count summary)])))
-  => '[:split
-       true
-       [:js :lua]
-       [[:js :expected-pass true 2]
-        [:lua :expected-pass true 2]]
-       #{:normalized-runtime-setup
-         :retargeted-top-level-runtime
-         :retargeted-runtime-prefix}
-       []
-       3])
-
-^{:refer std.lang.manage.xtalk-scaffold/diagnose-runtime-generation :added "4.1"}
-(fact "diagnoses unsupported split seed patterns"
-  (with-temp-runtime-suite-file
-    runtime-test-forms-with-unsupported
-    (fn [path]
-      (let [{:keys [mode expected-success? unsupported]}
-            (diagnose-runtime-generation nil {:input-path path
-                                              :langs [:js :lua]})]
-        [mode
-         expected-success?
-         (set (map :code unsupported))])))
-  => '[:split
-       false
-       #{:mixed-runtime-top-level
-         :mixed-runtime-assertion}])
-
-^{:refer std.lang.manage.xtalk-scaffold/diagnose-runtime-generation :added "4.1"}
-(fact "diagnoses blocked template generation for twostep runtimes"
-  (with-temp-runtime-suite-file
-    blocked-runtime-template-forms
-    (fn [path]
-      (let [{:keys [mode from-lang requested-lang expected-success? unsupported]}
-            (diagnose-runtime-generation nil {:input-path path
-                                              :lang :dart})]
-        [mode
-         from-lang
-         requested-lang
-         expected-success?
-         (mapv :code unsupported)
-         (-> unsupported first :blockers)])))
-  => '[:template
-        :js
-        :dart
-        true
-        []
-        nil])
-
-^{:refer std.lang.manage.xtalk-scaffold/diagnose-runtime-generation :added "4.1"}
-(fact "diagnoses the real common_lib seed as portable across generated runtimes"
-  (let [{:keys [mode from-lang requested-lang expected-success? eligible-langs unsupported]}
-        (diagnose-runtime-generation nil {:input-path "test/xt/lang/common_lib_test.clj"
-                                          :lang :js})]
-    [mode
-     from-lang
-     requested-lang
-     expected-success?
-     eligible-langs
-     unsupported])
-  => '[:template
-       :lua
-       :js
-       true
-       [:js :lua :python :r :php :dart]
-       []])
-
-^{:refer std.lang.manage.xtalk-scaffold/xtlang-runtime-suite-sources :added "4.1"}
-(fact "finds eligible xt.lang templates for twostep bulk compilation"
-  (with-temp-xtlang-root
-    {"test/xt/lang/common_lib_test.clj" canonical-runtime-template-forms
-     "test/xt/lang/common_notify_test.clj" blocked-runtime-template-forms
-     "test/xt/lang/common_lib_js_test.clj" runtime-template-forms}
-    (fn [root]
-      (let [sources (xtlang-runtime-suite-sources {:root root
-                                                   :input-root "test/xt/lang"
-                                                   :lang :dart})
-            summary (mapv (juxt :ns :from-lang :lang :runtime-type :check-mode) sources)]
-         [(= 2 (count sources))
-          (= '[[xt.sample.base-lib-test :lua :dart :twostep :batched]
-               [xt.sample.common-notify-test :js :dart :twostep :batched]]
-             summary)])))
-  => [true true])
-
-^{:refer std.lang.manage.xtalk-scaffold/compile-xtlang-runtime-bulk-suites :added "4.1"}
-(fact "exports and compiles eligible xt.lang templates into dart bulk payloads"
-  (with-temp-xtlang-root
-    {"test/xt/lang/common_lib_test.clj" canonical-runtime-template-forms
-     "test/xt/lang/common_notify_test.clj" blocked-runtime-template-forms}
-    (fn [root]
-      (let [{:keys [lang count outputs]}
-             (compile-xtlang-runtime-bulk-suites nil {:root root
-                                                      :input-root "test/xt/lang"
-                                                      :lang :dart})
-             summary (mapv (juxt :ns :from-lang :suite-count :bulk-count :runtime-type :check-mode)
-                           outputs)
-             output (first outputs)]
-        [(= :dart lang)
-         (= 2 count)
-         (= '[[xt.sample.base-lib-test :lua 2 2 :twostep :batched]
-              [xt.sample.common-notify-test :js 1 1 :twostep :batched]]
-            summary)
-         (str/ends-with? (:suite-path output) "_suite.edn")
-         (str/ends-with? (:bulk-path output) "-dt-bulk.edn")])))
-  => [true true true true true])
-
-
 ^{:refer std.lang.manage.xtalk-scaffold/runtime-type :added "4.1"}
 (fact "returns configured runtime implementation type"
   [(runtime-type :js)
@@ -1178,6 +442,14 @@
   => '{:batched [:dart]
        :realtime [:js :php :rb]})
 
+^{:refer std.lang.manage.xtalk-scaffold/runtime-lang-suffix :added "4.1"}
+(fact "returns runtime suffix"
+  (runtime-lang-suffix :ruby)
+  => "rb"
+
+  (runtime-lang-suffix :php)
+  => "php")
+
 ^{:refer std.lang.manage.xtalk-scaffold/canonical-suite-path :added "4.1"}
 (fact "derives the canonical suite path from a test file"
   (canonical-suite-path "test/xt/lang/common_lib_test.clj")
@@ -1187,6 +459,11 @@
 (fact "derives the per-language bulk suite path"
   (runtime-bulk-path "test/xt/lang/common_lib_suite.edn" :dart)
   => "test/xt/lang/common_lib_suite-dt-bulk.edn")
+
+^{:refer std.lang.manage.xtalk-scaffold/read-top-level-forms :added "4.1"}
+(fact "read-top-level-forms is callable"
+  (fn? read-top-level-forms)
+  => true)
 
 ^{:refer std.lang.manage.xtalk-scaffold/form-line-info :added "4.1"}
 (fact "extracts line and column metadata from forms"
@@ -1212,6 +489,9 @@
    (form-language-exceptions (with-meta '(+ 1 2) {:exceptions {:go {:expect 20}}}))]
   => '[{:dart {:skip true}}
        {:go {:expect 20}}])
+
+^{:refer std.lang.manage.xtalk-scaffold/form-skipped-for-lang? :added "4.1"}
+(fact "TODO")
 
 ^{:refer std.lang.manage.xtalk-scaffold/strip-runtime-dispatch :added "4.1"}
 (fact "removes runtime dispatch wrappers recursively"
@@ -1252,6 +532,18 @@
       '(+ 1 2)
       3
       {:dart {:expect 10}}])
+
+^{:refer std.lang.manage.xtalk-scaffold/source-test-ns-from-forms :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/namespace-pattern? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/namespace-pattern-regex :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/namespace-pattern-match? :added "4.1"}
+(fact "TODO")
 
 ^{:refer std.lang.manage.xtalk-scaffold/canonical-runtime-suite-forms :added "4.1"}
 (fact "converts runtime tests into canonical suite data"
@@ -1330,6 +622,252 @@
          count])))
   => [:dart :batched 3])
 
+^{:refer std.lang.manage.xtalk-scaffold/runtime-expr-lang :added "4.1"}
+(fact "infers runtime from expression"
+  (runtime-expr-lang '(!.js (k/a)))
+  => :js)
+
+^{:refer std.lang.manage.xtalk-scaffold/runtime-dispatch-langs :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/fact-form? :added "4.1"}
+(fact "detects fact form"
+  (fact-form? '(fact "x" 1 => 1))
+  => true)
+
+^{:refer std.lang.manage.xtalk-scaffold/runtime-dispatch-form? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/contains-runtime-dispatch-form? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/template-language-exception :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/apply-template-language-exception-expr :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/normalize-runtime-expect :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/apply-template-language-exceptions-fact :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/fact-global-form? :added "4.1"}
+(fact "detects fact:global form"
+  (fact-global-form? '(fact:global {:setup []}))
+  => true)
+
+^{:refer std.lang.manage.xtalk-scaffold/script-form? :added "4.1"}
+(fact "detects script form"
+  (script-form? '(l/script- :js {}))
+  => true)
+
+^{:refer std.lang.manage.xtalk-scaffold/expand-top-level-form :added "4.1"}
+(fact "expands do forms"
+  (expand-top-level-form '(do (a) (b)))
+  => '((a) (b)))
+
+^{:refer std.lang.manage.xtalk-scaffold/replace-ns-name :added "4.1"}
+(fact "replaces ns declaration symbol"
+  (second (replace-ns-name '(ns a.b (:use code.test)) 'x.y))
+  => 'x.y)
+
+^{:refer std.lang.manage.xtalk-scaffold/runtime-test-ns :added "4.1"}
+(fact "creates runtime test ns"
+  (runtime-test-ns 'xt.sample.base-lib-test :js)
+  => 'xtbench.js.sample.base-lib-test)
+
+^{:refer std.lang.manage.xtalk-scaffold/clean-render-meta-map :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/clean-render-iobj :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/clean-render-form :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/render-top-level-forms :added "4.1"}
+(fact "renders top-level forms"
+  (string? (render-top-level-forms '[(ns a.b) (def x 1)]))
+  => true
+
+  (let [out (render-top-level-forms
+             [(with-meta
+                '(fact "x"
+                   (!.js 1)
+                   => 1)
+                {:line 10
+                 :column 2
+                 :hidden true
+                 :refer (with-meta 'xt.lang.common-lib/identity
+                          {:line 9 :column 1})
+                 :added "4.1"})])]
+    [(str/includes? out ":line")
+     (str/includes? out ":column")
+     (str/includes? out ":refer xt.lang.common-lib/identity")
+     (str/includes? out ":added \"4.1\"")
+     (str/includes? out ":hidden true")])
+  => [false false true true true])
+
+^{:refer std.lang.manage.xtalk-scaffold/format-generated-namespace! :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/delete-skipped-top-level-forms :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/render-template-runtime-source :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/attach-leading-meta :added "4.1"}
+(fact "attaches leading metadata"
+  (meta (first (attach-leading-meta '((+ 1 2)) {:hidden true})))
+  => (contains {:hidden true}))
+
+^{:refer std.lang.manage.xtalk-scaffold/commented-form? :added "4.1"}
+(fact "detects commented forms by metadata"
+  (commented-form? (with-meta '(+ 1 2) {:comment true}))
+  => true
+
+  (commented-form? '(comment (+ 1 2)))
+  => true)
+
+^{:refer std.lang.manage.xtalk-scaffold/test-file-path :added "4.1"}
+(fact "builds a test file path"
+  (string? (test-file-path {:root "." :test-paths ["test"]} 'a.b-test))
+  => true
+
+  (str/ends-with? (test-file-path {:root "." :test-paths ["test"]}
+                                  'xtbench.js.sample.base-lib-test)
+                  "/test/xtbench/js/sample/base_lib_test.clj")
+  => true)
+
+^{:refer std.lang.manage.xtalk-scaffold/derived-test-file-path :added "4.1"}
+(fact "uses canonical xtbench paths for generated suites"
+  (str/ends-with? (derived-test-file-path {:root "." :test-paths ["test"]}
+                                          "test/xt/db/base_scope_test.clj"
+                                          'xt.old.db.base-scope-test
+                                          'xtbench.dart.db.base-scope-test)
+                  "/test/xtbench/dart/db/base_scope_test.clj")
+  => true
+
+  (str/ends-with? (derived-test-file-path {:root "." :test-paths ["test"]}
+                                          "test/xt/db/base_scope_test.clj"
+                                          'xt.old.db.base-scope-test
+                                          'xt.old.db.base-scope-test)
+                  "/test/xt/db/base_scope_test.clj")
+  => true)
+
+^{:refer std.lang.manage.xtalk-scaffold/infer-runtime-lang :added "4.1"}
+(fact "prefers explicitly marked template scripts over helper runtimes"
+  (infer-runtime-lang template-forms-with-helper-runtime)
+  => :js)
+
+^{:refer std.lang.manage.xtalk-scaffold/script-form-lang :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/template-script-form? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/runtime-script-forms :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/template-runtime-script-forms :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/require-entry-alias :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/script-form-aliases :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/runtime-script-aliases :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/runtime-script-langs :added "4.1"}
+(fact "collects distinct script languages from template forms"
+  (runtime-script-langs runtime-template-forms)
+  => [:js]
+
+  (set (runtime-script-langs runtime-test-forms))
+  => #{:js :lua})
+
+^{:refer std.lang.manage.xtalk-scaffold/single-runtime-template-lang :added "4.1"}
+(fact "detects single-runtime templates"
+  (single-runtime-template-lang runtime-template-forms)
+  => :js
+
+  (single-runtime-template-lang template-forms-with-helper-runtime)
+  => :js
+
+  (single-runtime-template-lang runtime-test-forms)
+  => nil)
+
+^{:refer std.lang.manage.xtalk-scaffold/runtime-suffixed-test-ns? :added "4.1"}
+(fact "detects runtime suffixed test namespaces"
+  [(runtime-suffixed-test-ns? 'xt.sample.base-lib-js-test)
+   (runtime-suffixed-test-ns? 'xtbench.js.sample.base-lib-test)
+   (runtime-suffixed-test-ns? 'xt.sample.base-lib-test)
+   (runtime-suffixed-test-ns? 'xt.lang.common-lib-dt-test)]
+  => [true true false true])
+
+^{:refer std.lang.manage.xtalk-scaffold/form-contains-symbol? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/twostep-runtime-blockers :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/runtime-template-supported? :added "4.1"}
+(fact "blocks twostep suite generation for runtime-coupled templates"
+  [(runtime-template-supported? canonical-runtime-template-forms :dart)
+      (runtime-template-supported? blocked-runtime-template-forms :dart)
+      (runtime-template-supported? runtime-test-forms :dart)
+      (runtime-template-supported? lua-specific-template-forms :lua)
+      (runtime-template-supported? lua-specific-template-forms :js)
+      (runtime-template-supported? js-sqlite-template-forms :lua)
+      (runtime-template-supported? js-sqlite-template-forms :python)
+      (runtime-template-supported? js-sqlite-template-forms :dart)]
+  => [true true false true false false false false])
+
+^{:refer std.lang.manage.xtalk-scaffold/runtime-setup-langs :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/template-runtime-blockers :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/replace-runtime-symbol :added "4.1"}
+(fact "replaces runtime dispatch symbol"
+  (replace-runtime-symbol '(!.js (k/a)) '!.js '!.lua)
+  => '(!.lua (k/a)))
+
+^{:refer std.lang.manage.xtalk-scaffold/retarget-runtime-dispatch :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/retarget-runtime-references :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/replace-string-value :added "4.1"}
+(fact "replaces string value recursively"
+  (replace-string-value '{:a "x" :b ["x"]} "x" "y")
+  => '{:a "y" :b ["y"]})
+
+^{:refer std.lang.manage.xtalk-scaffold/clause-has-unsafe-alias? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/portable-runtime-clauses? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/synthesize-runtime-clauses :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/preferred-runtime-script-form :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/transform-script-form :added "4.1"}
+(fact "transforms script form language"
+  (transform-script-form '(l/script- :js {:runtime :basic}) :js :lua)
+  => '(l/script- :lua {:runtime :basic}))
+
 ^{:refer std.lang.manage.xtalk-scaffold/transform-script-runtime :added "4.1"}
 (fact "updates script runtime options for the target language"
   [(transform-script-runtime '(l/script- :js {:runtime :basic :layout :flat}) :js)
@@ -1338,3 +876,198 @@
   => '[(l/script- :js {:runtime :basic :layout :flat})
        (l/script- :js {:runtime :basic :layout :flat})
        (l/script- :dart {:runtime :twostep :layout :flat})])
+
+^{:refer std.lang.manage.xtalk-scaffold/referenced-script-aliases :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/require-alias :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/prune-script-requires :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/normalize-runtime-setup-form :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/normalize-fact-global-form :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/retarget-form-metadata :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/classify-split-form :added "4.1"}
+(fact "classifies split-relevant forms"
+  [(classify-split-form '(fact:global {:setup [(l/rt:restart) (l/rt:scaffold :js)]}))
+   (classify-split-form '(def +views+ (!.js (k/example))))
+   (classify-split-form '(fact "x" (def +tables+ (!.js (k/example))) (!.lua (k/example)) => +tables+))]
+  => '[#{:fact-global}
+       #{:top-level-shared}
+       #{:runtime-fact :runtime-prefix}])
+
+^{:refer std.lang.manage.xtalk-scaffold/retarget-generated-form :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/template-runtime-test-ns :added "4.1"}
+(fact "templates runtime test namespace"
+  (template-runtime-test-ns 'xtbench.js.sample.base-lib-test :js :rb)
+  => 'xtbench.rb.sample.base-lib-test)
+
+^{:refer std.lang.manage.xtalk-scaffold/template-runtime-test-forms :added "4.1"}
+(fact "drops skipped named helpers and their script requires in template output"
+  (let [py-out (render-top-level-forms
+                (template-runtime-test-forms template-forms-with-skippable-helper :js :python))]
+    [(str/includes? py-out "(l/script-\n :python")
+     (str/includes? py-out "[xt.lang.common-lib :as k]")
+     (not (str/includes? py-out "js.lib.driver-postgres"))
+     (not (str/includes? py-out "xt.old.sys.conn-dbsql"))
+     (not (str/includes? py-out "bootstrap-js"))])
+  => [true true true true true])
+
+^{:refer std.lang.manage.xtalk-scaffold/split-fact-form :added "4.1"}
+(fact "does not synthesize from runtime-specific helper aliases"
+  (let [{:keys [langs]} (split-fact-form '(fact "x" (!.js (j/future-delayed [10] (return 1))) => 1)
+                                         [:js :python :dart])]
+    (set (keys langs)))
+  => #{:js})
+
+^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-test-forms :added "4.1"}
+(fact "preserves top-level helpers and normalizes split runtime output"
+  (let [{:keys [by-lang]}
+        (separate-runtime-test-forms runtime-test-forms-with-top-level [:js :lua])
+        js-out (render-top-level-forms (get by-lang :js))
+        lua-out (render-top-level-forms (get by-lang :lua))]
+    [(str/includes? js-out "(def +views+ (!.js (v/example)))")
+     (str/includes? lua-out "(def +views+ (!.lua (v/example)))")
+     (str/includes? js-out "(l/rt:scaffold :js)")
+     (not (str/includes? js-out "(l/rt:scaffold :lua)"))
+     (str/includes? lua-out "(l/rt:scaffold :lua)")
+     (not (str/includes? lua-out "(l/rt:scaffold :js)"))
+     (str/includes? lua-out "(def +tables+ (!.lua (v/example)))")
+     (not (str/includes? lua-out "(def +tables+ (!.js"))])
+  => [true true true true true true true true])
+
+^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-tests :added "4.1"}
+(fact "separate-runtime-tests keeps foreign runtime prefixes out of other language outputs"
+  (with-temp-runtime-suite-file
+    foreign-prefix-runtime-forms
+    (fn [path]
+      (let [{:keys [outputs]}
+            (separate-runtime-tests nil {:input-path path
+                                         :langs [:js :lua]
+                                         :write true})
+            js-output (->> outputs
+                           (filter #(= :js (:lang %)))
+                           first
+                           :path
+                           slurp)
+            lua-output (->> outputs
+                            (filter #(= :lua (:lang %)))
+                            first
+                            :path
+                            slurp)]
+        [(not (str/includes? js-output "string.format"))
+         (= 1 (count (re-seq #"xt/x:json-encode 100000000000000000" js-output)))
+         (str/includes? lua-output "string.format")])))
+  => [true true true])
+
+^{:refer std.lang.manage.xtalk-scaffold/fact-mixed-runtime-issues :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/split-form-diagnostic :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/diagnose-split-runtime-generation :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/scaffold-runtime-template-single :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/scaffold-runtime-template-pattern :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/scaffold-runtime-template :added "4.1"}
+(fact "scaffold-runtime-template renders the real common_math seed for python and dart"
+  (let [{py-target-ns :target-ns
+         py-content :content}
+        (scaffold-runtime-template nil {:input-path "test/xt/lang/common_math_test.clj"
+                                        :lang :python})
+        {dt-target-ns :target-ns
+         dt-content :content}
+        (scaffold-runtime-template nil {:input-path "test/xt/lang/common_math_test.clj"
+                                        :lang :dart})]
+    [py-target-ns
+     (str/includes? py-content "xtbench.python.lang.common-math-test")
+     (str/includes? py-content "xt.lang.common-math/log10")
+     (str/includes? py-content "xt.lang.common-math/round")
+     dt-target-ns
+     (str/includes? dt-content "xtbench.dart.lang.common-math-test")
+     (str/includes? dt-content "xt.lang.common-math/log10")
+     (str/includes? dt-content "xt.lang.common-math/round")])
+  => '[xtbench.python.lang.common-math-test
+       true
+       true
+       true
+       xtbench.dart.lang.common-math-test
+       true
+       true
+       true])
+
+^{:refer std.lang.manage.xtalk-scaffold/diagnose-template-runtime-generation :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage.xtalk-scaffold/diagnose-runtime-generation :added "4.1"}
+(fact "diagnoses the real common_lib seed as portable across generated runtimes"
+  (let [{:keys [mode from-lang requested-lang expected-success? eligible-langs unsupported]}
+        (diagnose-runtime-generation nil {:input-path "test/xt/lang/common_lib_test.clj"
+                                          :lang :js})]
+    [mode
+     from-lang
+     requested-lang
+     expected-success?
+     eligible-langs
+     unsupported])
+  => '[:template
+       :lua
+       :js
+       true
+       [:js :lua :python :r :php :dart]
+       []])
+
+^{:refer std.lang.manage.xtalk-scaffold/xtlang-runtime-suite-sources :added "4.1"}
+(fact "finds eligible xt.lang templates for twostep bulk compilation"
+  (with-temp-xtlang-root
+    {"test/xt/lang/common_lib_test.clj" canonical-runtime-template-forms
+     "test/xt/lang/common_notify_test.clj" blocked-runtime-template-forms
+     "test/xt/lang/common_lib_js_test.clj" runtime-template-forms}
+    (fn [root]
+      (let [sources (xtlang-runtime-suite-sources {:root root
+                                                   :input-root "test/xt/lang"
+                                                   :lang :dart})
+            summary (mapv (juxt :ns :from-lang :lang :runtime-type :check-mode) sources)]
+         [(= 2 (count sources))
+          (= '[[xt.sample.base-lib-test :lua :dart :twostep :batched]
+               [xt.sample.common-notify-test :js :dart :twostep :batched]]
+             summary)])))
+  => [true true])
+
+^{:refer std.lang.manage.xtalk-scaffold/compile-xtlang-runtime-bulk-suites :added "4.1"}
+(fact "exports and compiles eligible xt.lang templates into dart bulk payloads"
+  (with-temp-xtlang-root
+    {"test/xt/lang/common_lib_test.clj" canonical-runtime-template-forms
+     "test/xt/lang/common_notify_test.clj" blocked-runtime-template-forms}
+    (fn [root]
+      (let [{:keys [lang count outputs]}
+             (compile-xtlang-runtime-bulk-suites nil {:root root
+                                                      :input-root "test/xt/lang"
+                                                      :lang :dart})
+             summary (mapv (juxt :ns :from-lang :suite-count :bulk-count :runtime-type :check-mode)
+                           outputs)
+             output (first outputs)]
+        [(= :dart lang)
+         (= 2 count)
+         (= '[[xt.sample.base-lib-test :lua 2 2 :twostep :batched]
+              [xt.sample.common-notify-test :js 1 1 :twostep :batched]]
+            summary)
+         (str/ends-with? (:suite-path output) "_suite.edn")
+         (str/ends-with? (:bulk-path output) "-dt-bulk.edn")])))
+  => [true true true true true])

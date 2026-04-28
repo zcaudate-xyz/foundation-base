@@ -138,3 +138,7 @@
   (js-tf-for-iter '(for:iter [e iter]
                           e))
   => '(for [(var* :let e) :of (% iter)] e))
+
+
+^{:refer std.lang.model.spec-js/js-tf-prototype-create :added "4.1"}
+(fact "TODO")

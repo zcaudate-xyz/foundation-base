@@ -27,10 +27,54 @@
     (defn ^{:inner true}
       hello [x y] (+ x y))
     (hello 1 2))
-   => 3"
+  => 3"
   {:added "3.0"}
   ([[_ sym args & body]]
-   (list 'def sym (apply list 'fn args body))))
+   (list 'def sym (apply list 'fn (r-apply-optional-defaults sym args) body))))
+
+(defn- r-qualified-symbol
+  [sym]
+  (let [{:keys [module]} (preprocess/macro-opts)
+        module-id (:id module)]
+    (cond
+      (or (nil? sym)
+          (namespace sym)
+          (:inner (meta sym))
+          (nil? module-id))
+      sym
+
+      :else
+      (symbol (name module-id) (name sym)))))
+
+(defn- r-optional-input?
+  [input]
+  (= :maybe (get-in input [:type :kind])))
+
+(defn- r-apply-optional-defaults
+  [sym args]
+  (if-not (and sym (vector? args))
+    args
+    (try
+      (let [qualified      (r-qualified-symbol sym)
+            fn-def         (xtalk-analysis/resolve-function-def qualified)
+            inferred-count (when fn-def
+                             (count (take-while r-optional-input?
+                                                (reverse (:inputs fn-def)))))
+            optional-count (when (and inferred-count
+                                      (pos? inferred-count))
+                             inferred-count)]
+        (if (and optional-count (pos? optional-count))
+          (let [optional-args (take-last optional-count args)]
+            (if (not (neg? (collection/index-at #{:=} args)))
+              args
+              (vec
+               (concat (drop-last optional-count args)
+                       (mapcat (fn [arg]
+                                 [arg := nil])
+                               optional-args)))))
+          args))
+      (catch Throwable _
+        args))))
 
 (defn tf-infix-if
   "transform for infix if"

@@ -54,19 +54,6 @@
   (l/with:print [] (l/emit-as :lua '[(:= a 1)]))
   => "a = 1")
 
-^{:refer std.lang/rt:invoke :added "4.0"}
-(fact "rt:invoke"
-  (with-redefs [ut/lang-rt (fn [ns lang]
-                              [ns lang])
-                l/ptr (fn [lang m]
-                        [lang m])
-                std.lib.context.pointer/rt-invoke-ptr (fn [rt ptr code]
-                                                        [rt ptr code])]
-    (l/rt:invoke 'hello.core :lua '(+ 1 2)))
-  => [['hello.core :lua]
-      [:lua {:module 'hello.core}]
-      '(+ 1 2)])
-
 ^{:refer std.lang/rt:space :added "4.1"}
 (fact "rt:space"
   (with-redefs [space/space (fn [ns]
@@ -88,6 +75,19 @@
   (l/as-lua []) => {}
   (l/as-lua [1 2 [] 4]) => [1 2 {} 4]
   (l/as-lua {:a []}) => {:a {}})
+
+^{:refer std.lang/rt:invoke :added "4.0"}
+(fact "rt:invoke"
+  (with-redefs [ut/lang-rt (fn [ns lang]
+                              [ns lang])
+                l/ptr (fn [lang m]
+                        [lang m])
+                std.lib.context.pointer/rt-invoke-ptr (fn [rt ptr code]
+                                                        [rt ptr code])]
+    (l/rt:invoke 'hello.core :lua '(+ 1 2)))
+  => [['hello.core :lua]
+      [:lua {:module 'hello.core}]
+      '(+ 1 2)])
 
 ^{:refer std.lang/force-reload :added "4.1"}
 (fact "force-reload"

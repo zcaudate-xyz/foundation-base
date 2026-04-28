@@ -223,3 +223,16 @@
      (boolean (re-find #"Duration\(milliseconds:\s*100\s*\)" out))
      (boolean (re-find #"return \"ok\";" out))])
   => [true true true])
+
+
+^{:refer std.lang.model.spec-dart/tf-for-object :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-dart/tf-for-array :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-dart/tf-for-iter :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-dart/dart-tf-ternary :added "4.1"}
+(fact "TODO")

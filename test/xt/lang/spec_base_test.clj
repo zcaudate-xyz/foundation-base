@@ -547,6 +547,12 @@
     (err-fn))
   => (throws))
 
+^{:refer xt.lang.spec-base/x:ex-native? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.spec-base/x:ex :added "4.1"}
+(fact "TODO")
+
 ^{:refer xt.lang.spec-base/x:ex-new :added "4.1"}
 (fact "creates native exceptions with structured data"
 
@@ -576,6 +582,12 @@
         [(xt/x:ex-native? e)
          (xt/x:get-key (xt/x:ex-data e) "a")])))
   => [true 1])
+
+^{:refer xt.lang.spec-base/x:ex-message :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.spec-base/x:ex-data :added "4.1"}
+(fact "TODO")
 
 ^{:refer xt.lang.spec-base/x:type-native :added "4.1"}
 (fact "expands and emits the lua type helper"

@@ -55,8 +55,6 @@
   (impl/emit-script '(defn ^Int add [^Int x ^Int y] (+ x y)) {:lang :haskell})
   => "add :: Int -> Int -> Int\nadd x y = x + y")
 
-
-
 ^{:refer std.lang.model-annex.spec-haskell/haskell-vector :added "4.1"}
 (fact "TODO")
 
@@ -64,6 +62,9 @@
 (fact "TODO")
 
 ^{:refer std.lang.model-annex.spec-haskell/emit-indent-body :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-haskell/haskell-invoke :added "4.1"}
 (fact "TODO")
 
 ^{:refer std.lang.model-annex.spec-haskell/tf-defn :added "4.1"}
@@ -88,8 +89,4 @@
 (fact "TODO")
 
 ^{:refer std.lang.model-annex.spec-haskell/haskell-args :added "4.1"}
-(fact "TODO")
-
-
-^{:refer std.lang.model-annex.spec-haskell/haskell-invoke :added "4.1"}
 (fact "TODO")

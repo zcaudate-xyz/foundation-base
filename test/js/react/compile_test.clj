@@ -3,6 +3,18 @@
             [js.react.compile-components :as c])
   (:use code.test))
 
+^{:refer js.react.compile/get-registry :added "4.0" :unchecked true}
+(fact "gets the component registry")
+
+^{:refer js.react.compile/put-registry :added "4.0" :unchecked true}
+(fact "puts a component group into the registry")
+
+^{:refer js.react.compile/del-registry :added "4.0" :unchecked true}
+(fact "deletes a component group from the registry")
+
+^{:refer js.react.compile/get-default-components :added "4.0" :unchecked true}
+(fact "emits using a potentially cached entry")
+
 ^{:refer js.react.compile/check-valid-variables :added "4.0" :unchecked true}
 (fact "checks that all :var/<name> keywords have been defined"
 
@@ -74,6 +86,12 @@
       [:p {:name "hello"}
        [:a]]])
 
+^{:refer js.react.compile/compile-replace-actions :added "4.0" :unchecked true}
+(fact "compiles to react code")
+
+^{:refer js.react.compile/compile-triggers :added "4.0" :unchecked true}
+(fact "compiles to react code")
+
 ^{:refer js.react.compile/compile-layout :added "4.0" :unchecked true}
 (fact "compiles the ui"
 
@@ -128,22 +146,3 @@
                (+ dslCode htmlCode))
           (return [:div {:class ["p-8"]}
                    [:p {:name htmlCode} [:a]]])))
-
-
-^{:refer js.react.compile/get-registry :added "4.0" :unchecked true}
-(fact "gets the component registry")
-
-^{:refer js.react.compile/put-registry :added "4.0" :unchecked true}
-(fact "puts a component group into the registry")
-
-^{:refer js.react.compile/del-registry :added "4.0" :unchecked true}
-(fact "deletes a component group from the registry")
-
-^{:refer js.react.compile/get-default-components :added "4.0" :unchecked true}
-(fact "emits using a potentially cached entry")
-
-^{:refer js.react.compile/compile-replace-actions :added "4.0" :unchecked true}
-(fact "compiles to react code")
-
-^{:refer js.react.compile/compile-triggers :added "4.0" :unchecked true}
-(fact "compiles to react code")

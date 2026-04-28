@@ -8,6 +8,16 @@
 ^{:refer std.make.compile/with:mock-compile :added "4.0"}
 (fact "sets the mock output flag")
 
+^{:refer std.make.compile/with:compile-filter :added "4.1"}
+(fact "sets the compile filter binding for the body"
+  (with:compile-filter #(clojure.string/ends-with? % ".lua")
+    (fn? *compile-filter*))
+  => true
+
+  (with:compile-filter nil
+    (nil? *compile-filter*))
+  => true)
+
 ^{:refer std.make.compile/compile-fullbody :added "4.0"}
 (fact "helper function for compile methods"
 
@@ -29,12 +39,6 @@
    (compile-write "hello.txt" "HELLO"))
   => ["hello.txt" "HELLO"])
 
-^{:refer std.make.compile/compile-summarise :added "4.0"}
-(fact "summaries the output"
-
-  (compile-summarise [[:unchanged "hello.txt"]])
-  => {:files 1, :status :unchanged})
-
 ^{:refer std.make.compile/compile-result-seq :added "4.1"}
 (fact "normalizes nested compile results"
   (vec (compile-result-seq [[:unchanged "a.js"]
@@ -52,15 +56,11 @@
   => [["a.js" "A"]
       ["a.d.ts" "B"]])
 
-^{:refer std.make.compile/compile-resource :added "4.0"}
-(fact "copies resources to the build directory"
+^{:refer std.make.compile/compile-summarise :added "4.0"}
+(fact "summaries the output"
 
-  (with:mock-compile
-   (compile-resource
-    {:type :resource
-     :target "assets"
-     :main [["assets/std.make/tangle.sh" "tangle.make.sh"]]}))
-  => coll?)
+  (compile-summarise [[:unchanged "hello.txt"]])
+  => {:files 1, :status :unchanged})
 
 ^{:refer std.make.compile/compile-resource :added "4.0"}
 (fact "copies resources to the build directory"
@@ -71,6 +71,9 @@
      :target "assets"
      :main [["assets/std.make/tangle.sh" "tangle.make.sh"]]}))
   => coll?)
+
+^{:refer std.make.compile/compile-directory :added "4.0"}
+(fact "copies a directory to the build directory")
 
 ^{:refer std.make.compile/compile-custom :added "4.0"}
 (fact "creates a custom "
@@ -232,18 +235,3 @@
          :written (["<ROOT>/.build/blank" ""]
                    ["<ROOT>/.build/Makefile" "hello:\n\t1 2\n\nworld:\n\t1 2"]
                    ["<ROOT>/.build/package.json" "{\n  \"name\" : \"project\"\n}"])}))
-
-
-^{:refer std.make.compile/compile-directory :added "4.0"}
-(fact "copies a directory to the build directory")
-
-
-^{:refer std.make.compile/with:compile-filter :added "4.1"}
-(fact "sets the compile filter binding for the body"
-  (with:compile-filter #(clojure.string/ends-with? % ".lua")
-    (fn? *compile-filter*))
-  => true
-
-  (with:compile-filter nil
-    (nil? *compile-filter*))
-  => true)

@@ -101,6 +101,11 @@
   (spec-perl/perl-defn '(defn add [a b] (return (+ a b))))
   => (list :- "sub add {\nmy $a = shift;\nmy $b = shift;\n(do (return (+ a b)))\n}"))
 
+^{:refer std.lang.model-annex.spec-perl/perl-eval :added "4.1"}
+(fact "emits a Perl eval block"
+  (l/emit-as :perl '[(eval (do (print "hello")))])
+  => "eval {\nprint(\"hello\");\n}")
+
 ^{:refer std.lang.model-annex.spec-perl/perl-array :added "4.1"}
 (fact "emit perl array reference"
   (spec-perl/perl-array [1 2 3] spec-perl/+grammar+ {})
@@ -110,9 +115,3 @@
 (fact "emit perl hash reference"
   (spec-perl/perl-map {"a" 1 "b" 2} spec-perl/+grammar+ {})
   => "{\"a\" => 1, \"b\" => 2}")
-
-
-^{:refer std.lang.model-annex.spec-perl/perl-eval :added "4.1"}
-(fact "emits a Perl eval block"
-  (l/emit-as :perl '[(eval (do (print "hello")))])
-  => "eval {\nprint(\"hello\");\n}")

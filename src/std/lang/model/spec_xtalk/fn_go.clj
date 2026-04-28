@@ -18,10 +18,9 @@
   (apply list 'fmt.Println args))
 
 (def +go-core+
-  (add-sym
-   {:x-print          {:macro #'go-tf-x-print  :emit :macro :value true}
-    :x-len            {:macro #'go-tf-x-len    :emit :macro :value true}
-    :x-cat            {:macro #'go-tf-x-cat    :emit :macro :value true}}))
+  {:x-print          {:macro #'go-tf-x-print  :emit :macro :value true}
+   :x-len            {:macro #'go-tf-x-len    :emit :macro :value true}
+   :x-cat            {:macro #'go-tf-x-cat    :emit :macro :value true}})
 
 ;;
 ;; MATH
@@ -56,13 +55,12 @@
 (defn go-tf-x-str-trim [[_ s]] (list 'strings.TrimSpace s))
 
 (def +go-str+
-  (add-sym
-   {:x-str-split       {:macro #'go-tf-x-str-split      :emit :macro :value true}
-    :x-str-join        {:macro #'go-tf-x-str-join       :emit :macro :value true}
-    :x-str-index-of    {:macro #'go-tf-x-str-index-of   :emit :macro :value true}
-    :x-str-to-upper    {:macro #'go-tf-x-str-to-upper   :emit :macro :value true}
-    :x-str-to-lower    {:macro #'go-tf-x-str-to-lower   :emit :macro :value true}
-    :x-str-trim        {:macro #'go-tf-x-str-trim       :emit :macro :value true}}))
+  {:x-str-split       {:macro #'go-tf-x-str-split      :emit :macro :value true}
+   :x-str-join        {:macro #'go-tf-x-str-join       :emit :macro :value true}
+   :x-str-index-of    {:macro #'go-tf-x-str-index-of   :emit :macro :value true}
+   :x-str-to-upper    {:macro #'go-tf-x-str-to-upper   :emit :macro :value true}
+   :x-str-to-lower    {:macro #'go-tf-x-str-to-lower   :emit :macro :value true}
+   :x-str-trim        {:macro #'go-tf-x-str-trim       :emit :macro :value true}})
 
 ;;
 ;; ARR
@@ -73,8 +71,7 @@
   (list := arr (list 'append arr item)))
 
 (def +go-arr+
-  (add-sym
-   {:x-arr-push        {:macro #'go-tf-x-arr-push       :emit :macro}}))
+  {:x-arr-push        {:macro #'go-tf-x-arr-push       :emit :macro}})
 
 (def +go+
   (merge +go-core+

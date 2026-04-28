@@ -23,6 +23,42 @@
                         (get m k))])
              [:root :derived :scaffold])))
 
+^{:refer std.lang.seedgen.form-parse/class-empty :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.seedgen.form-parse/class-explicit :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.seedgen.form-parse/form-script? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.seedgen.form-parse/class-form :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.seedgen.form-parse/class-navs :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.seedgen.form-parse/class-merge :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.seedgen.form-parse/check-arrow? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.seedgen.form-parse/check-classify :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.seedgen.form-parse/fact-classify-meta :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.seedgen.form-parse/fact-config-nav :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.seedgen.form-parse/global-context :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.seedgen.form-parse/entry-enrich :added "4.1"}
+(fact "TODO")
+
 ^{:refer std.lang.seedgen.form-parse/seedgen-readforms :added "4.1"}
 (fact "returns globals and analyse entries in the train-002 seedgen shape"
   (let [output (project/in-context

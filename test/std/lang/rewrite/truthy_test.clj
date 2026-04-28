@@ -2,6 +2,9 @@
   (:use code.test)
   (:require [std.lang.rewrite.truthy :as truthy]))
 
+^{:refer std.lang.rewrite.truthy/dot-boolish-call? :added "4.1"}
+(fact "TODO")
+
 ^{:refer std.lang.rewrite.truthy/boolish-form? :added "4.1"}
 (fact "detects boolish forms with configurable rules"
   [(truthy/boolish-form? '(x:eq a b)
@@ -16,6 +19,12 @@
    (truthy/boolish-form? '(or a b)
                          {:boolish-ops '#{x:eq}})]
   => [true true true false])
+
+^{:refer std.lang.rewrite.truthy/truthy-check-form :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.rewrite.truthy/wrap-truthy-check :added "4.1"}
+(fact "TODO")
 
 ^{:refer std.lang.rewrite.truthy/truthy-form :added "4.1"}
 (fact "wraps non-bool forms with configurable truthy checks"

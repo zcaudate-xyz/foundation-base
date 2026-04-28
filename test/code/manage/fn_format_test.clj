@@ -4,16 +4,12 @@
             [std.lib.zip :as zip])
   (:use code.test))
 
-
-
 (fact "debug step-right"
   (let [nav (nav/parse-string "(defn foo [x] 1)")
         nav (nav/down nav)
         nav (zip/step-right nav)]
     (zip/step-right nav))
   => any)
-
-
 
 (fact "reproduce step-right failure"
   (let [nav (nav/parse-string "(defn foo [x] 1)")
@@ -28,34 +24,6 @@
     (println "DEBUG: nav after insert-right:" nav)
     (zip/step-right nav))
   => any)
-
-^{:refer code.manage.fn-format/list-transform :added "3.0"}
-
-
-^{:refer code.manage.fn-format/fn:list-forms :added "3.0"}
-(fact "query to find `defn` and `defmacro` forms with a vector"
-  (-> (nav/parse-string "(defn foo [x] 1)")
-      (fn:list-forms)
-      (nav/root-string))
-  => "(defn foo\n  ([x] 1))")
-
-^{:refer code.manage.fn-format/fn:defmethod-forms :added "3.0"}
-(fact "query to find `defmethod` forms with a vector"
-  (-> (nav/parse-string "(defmethod foo :x [y] 1)")
-      (fn:defmethod-forms)
-      (nav/root-string))
-  => "(defmethod foo :x\n  ([y] 1))")
-
-^{:refer code.manage.fn-format/fn-format :added "3.0"}
-(fact "function to refactor the arglist and body"
-  (with-redefs [code.framework/refactor-code (fn [ns params lookup project]
-                                               {:updated true})]
-    (fn-format 'code.manage.fn-format
-               {}
-               nil
-               nil))
-  => {:updated true})
-
 
 ^{:refer code.manage.fn-format/manual-step-right :added "4.1"}
 (fact "moves to the next sibling without using zip/step-right"
@@ -82,3 +50,20 @@
       list-transform
       nav/root-string)
   => "(defn foo\n  ([x] (+ x 1)))")
+
+^{:refer code.manage.fn-format/fn:defmethod-forms :added "3.0"}
+(fact "query to find `defmethod` forms with a vector"
+  (-> (nav/parse-string "(defmethod foo :x [y] 1)")
+      (fn:defmethod-forms)
+      (nav/root-string))
+  => "(defmethod foo :x\n  ([y] 1))")
+
+^{:refer code.manage.fn-format/fn-format :added "3.0"}
+(fact "function to refactor the arglist and body"
+  (with-redefs [code.framework/refactor-code (fn [ns params lookup project]
+                                               {:updated true})]
+    (fn-format 'code.manage.fn-format
+               {}
+               nil
+               nil))
+  => {:updated true})

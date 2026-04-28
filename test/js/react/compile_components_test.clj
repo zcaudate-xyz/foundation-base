@@ -153,6 +153,12 @@
      :transform transform-fn})
   => '(setHistoryIdx (transform-fn (base-fn dslCode))))
 
+^{:refer js.react.compile-components/compile-element-action-inc :added "4.0" :unchecked true}
+(fact "compiles the :%/set action")
+
+^{:refer js.react.compile-components/compile-element-action-dec :added "4.0" :unchecked true}
+(fact "compiles the :%/set action")
+
 ^{:refer js.react.compile-components/compile-element-action-set-async :added "4.0" :unchecked true}
 (fact "compiles the :%/set-async action"
 
@@ -286,10 +292,3 @@
      :ui/container [:div]
      :ui/text      [:p]})
    c/compile-element))
-
-
-^{:refer js.react.compile-components/compile-element-action-inc :added "4.0" :unchecked true}
-(fact "compiles the :%/set action")
-
-^{:refer js.react.compile-components/compile-element-action-dec :added "4.0" :unchecked true}
-(fact "compiles the :%/set action")

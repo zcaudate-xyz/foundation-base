@@ -15,6 +15,42 @@
        (finally
          (remove-ns (ns-name ~sym))))))
 
+(invoke/definvoke check
+  "check for namespace task group"
+  {:added "3.0"}
+  [:pipe {:template :namespace
+          :main {:fn (fn [input] (res/result {:status :return
+                                              :data [:ok]}))}
+          :params {:title "CHECK (task::namespace)"
+                   :print {:item true
+                           :result true
+                           :summary true}}
+          :item   {:output  :data}
+          :result {:keys    nil
+                   :output  :data
+                   :columns [{:key    :id
+                              :align  :left}
+                             {:key    :data
+                              :align  :left
+                              :length 80
+                              :color  #{:yellow}}]}
+          :summary nil}])
+
+(invoke/definvoke random-test
+  "check for namespace task group"
+  {:added "3.0"}
+  [:pipe {:template :namespace
+          :params {:title "RANDOM TEST (task::namespace)"
+                   :print {:item true
+                           :result true
+                           :summary true}}
+          :main {:fn (fn [input]
+                       (if (< 0.5 (rand))
+                         (res/result {:status ((fn [] (rand-nth [:info :warn :error :critical])))
+                                      :data   :message})
+                         (res/result {:status ((fn [] (rand-nth [:return :highlight])))
+                                      :data   (vec (range (rand-int 40)))})))}}])
+
 ^{:refer jvm.namespace/list-aliases :added "3.0"}
 (fact "namespace list all aliases task"
 
@@ -71,6 +107,13 @@
   ;;{:errors 0, :warnings 0, :items 5, :results 5, :total 43}
   => map?)
 
+^{:refer jvm.namespace/list-refers :added "3.0"}
+(fact "namespace list all refers task"
+
+  (ns/list-refers '[jvm.namespace] {:return :summary})
+  ;;{:errors 0, :warnings 0, :items 5, :results 5, :total 3149}
+  => map?)
+
 ^{:refer jvm.namespace/clear-interns :added "3.0"}
 (fact "clears all interned vars in the namespace"
   (with-temp-ns [tmp]
@@ -91,13 +134,6 @@
 
   (ns/list-publics '[jvm.namespace] {:return :summary})
   ;;{:errors 0, :warnings 0, :items 5, :results 5, :total 43}
-  => map?)
-
-^{:refer jvm.namespace/list-refers :added "3.0"}
-(fact "namespace list all refers task"
-
-  (ns/list-refers '[jvm.namespace] {:return :summary})
-  ;;{:errors 0, :warnings 0, :items 5, :results 5, :total 3149}
   => map?)
 
 ^{:refer jvm.namespace/clear :added "3.0"}
@@ -149,41 +185,11 @@
     (ns/unalias [(ns-name tmp)] :args '[something])
     => map?))
 
-(invoke/definvoke check
-  "check for namespace task group"
-  {:added "3.0"}
-  [:pipe {:template :namespace
-          :main {:fn (fn [input] (res/result {:status :return
-                                              :data [:ok]}))}
-          :params {:title "CHECK (task::namespace)"
-                   :print {:item true
-                           :result true
-                           :summary true}}
-          :item   {:output  :data}
-          :result {:keys    nil
-                   :output  :data
-                   :columns [{:key    :id
-                              :align  :left}
-                             {:key    :data
-                              :align  :left
-                              :length 80
-                              :color  #{:yellow}}]}
-          :summary nil}])
-
-(invoke/definvoke random-test
-  "check for namespace task group"
-  {:added "3.0"}
-  [:pipe {:template :namespace
-          :params {:title "RANDOM TEST (task::namespace)"
-                   :print {:item true
-                           :result true
-                           :summary true}}
-          :main {:fn (fn [input]
-                       (if (< 0.5 (rand))
-                         (res/result {:status ((fn [] (rand-nth [:info :warn :error :critical])))
-                                      :data   :message})
-                         (res/result {:status ((fn [] (rand-nth [:return :highlight])))
-                                      :data   (vec (range (rand-int 40)))})))}}])
+^{:refer jvm.namespace/reload-task :added "4.1"}
+(fact "reload task delegates to namespace reload"
+  (with-redefs [common/ns-reload identity]
+    (ns/reload-task '[jvm.namespace] {:return :summary}))
+  => map?)
 
 ^{:refer jvm.namespace/reload :added "3.0"}
 (fact "reloads all listed namespace aliases"
@@ -208,10 +214,3 @@
 
   (random-test '[hara])
   (check '[hara]))
-
-
-^{:refer jvm.namespace/reload-task :added "4.1"}
-(fact "reload task delegates to namespace reload"
-  (with-redefs [common/ns-reload identity]
-    (ns/reload-task '[jvm.namespace] {:return :summary}))
-  => map?)

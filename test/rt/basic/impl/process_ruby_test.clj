@@ -8,8 +8,9 @@
 (l/script- :ruby
   {:runtime :oneshot})
 
-(comment
-  (l/rt:restart))
+(fact:global
+ {:setup    [(l/annex:start-all)]
+  :teardown [(l/annex:stop-all)]})
 
 (def CANARY-RUBY
   (common/program-exists? "ruby"))
@@ -28,31 +29,10 @@
   (default-oneshot-wrap "1")
   => string?)
 
-
-
-
-(comment
-
-  (defn.rb add
-    []
-    (return (+ 1 2 3)))
-
-  (default-basic-client 1000 {:host "localhost"}))
-
-
 ^{:refer std.lang.base.runtime/return-wrap-invoke :added "4.1"}
 (fact "wraps forms for invoke"
   (rt/return-wrap-invoke '[1 2 3])
   => seq?)
-
-^{:refer rt.basic.impl.process-ruby/default-body-transform :added "4.1"}
-(fact "applies ruby return transform"
-  (default-body-transform '[1 2 3] {})
-  => '(do (:= OUT [1 2 3]))
-
-  (default-body-transform '[1 2 3] {:bulk true})
-  => '(do 1 2 (:= OUT 3)))
-
 
 ^{:refer rt.basic.impl.process-ruby/default-body-wrap :added "4.1"}
 (fact "TODO")
@@ -62,3 +42,22 @@
 
 ^{:refer rt.basic.impl.process-ruby/mark-inline-defs :added "4.1"}
 (fact "TODO")
+
+^{:refer rt.basic.impl.process-ruby/default-body-transform :added "4.1"}
+(fact "applies ruby return transform"
+  (default-body-transform '[1 2 3] {})
+  => '(do (:= OUT [1 2 3]))
+
+  (default-body-transform '[1 2 3] {:bulk true})
+  => '(do 1 2 (:= OUT 3)))
+
+(comment
+  (l/rt:restart))
+
+(comment
+
+  (defn.rb add
+    []
+    (return (+ 1 2 3)))
+
+  (default-basic-client 1000 {:host "localhost"}))

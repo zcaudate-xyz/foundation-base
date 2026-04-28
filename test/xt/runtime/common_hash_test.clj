@@ -130,22 +130,6 @@
     (hash/hash-boolean false)])
   => [1 -1])
 
-^{:refer xt.runtime.common-hash/hash-native :added "4.0"}
-(fact "hashes a value"
-
-  (!.js
-   (hash/hash-native (fn:>)))
-  => integer?
-
-  (!.lua
-   (hash/hash-native (fn:>)))
-  => integer?
-
-  (!.py
-   (hash/hash-native (fn:>)))
-  => integer?)
-
-
 ^{:refer xt.runtime.common-hash/native-type :added "4.1"}
 (fact "returns the runtime-native type tag"
 
@@ -196,3 +180,18 @@
    [(hash/native-class "abc")
     (hash/native-class {"::" "demo"})])
   => ["string" "demo"])
+
+^{:refer xt.runtime.common-hash/hash-native :added "4.0"}
+(fact "hashes a value"
+
+  (!.js
+   (hash/hash-native (fn:>)))
+  => integer?
+
+  (!.lua
+   (hash/hash-native (fn:>)))
+  => integer?
+
+  (!.py
+   (hash/hash-native (fn:>)))
+  => integer?)

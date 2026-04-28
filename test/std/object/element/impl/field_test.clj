@@ -3,6 +3,9 @@
             [std.object.query :as query])
   (:use code.test))
 
+^{:refer std.object.element.impl.field/patch-field :added "4.0"}
+(fact "removes final modifier from field")
+
 ^{:refer std.object.element.impl.field/arg-params :added "3.0"}
 (fact "arguments for getters and setters of fields"
 
@@ -33,6 +36,3 @@
 
 (comment
   (code.manage/import))
-
-^{:refer std.object.element.impl.field/patch-field :added "4.0"}
-(fact "removes final modifier from field")

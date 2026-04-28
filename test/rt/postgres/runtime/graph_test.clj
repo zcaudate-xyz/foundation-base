@@ -16,6 +16,11 @@
             :seed        ["scratch"]
             :all    {:schema   ["scratch"]}}})
 
+^{:refer rt.postgres.runtime.graph/g:where :added "4.0"}
+(fact "constructs the where clause"
+  (pg/g:where scratch/Task {:name "foo"})
+  => string?)
+
 ^{:refer rt.postgres.runtime.graph/g:id :added "4.0"}
 (fact "gets only id"
 
@@ -27,6 +32,11 @@
 (fact "gets only count"
 
   (pg/g:count scratch/Task)
+  => string?)
+
+^{:refer rt.postgres.runtime.graph/g:exists :added "4.0"}
+(fact "checks for existence"
+  (pg/g:exists scratch/Task {:where {:name "foo"}})
   => string?)
 
 ^{:refer rt.postgres.runtime.graph/g:select :added "4.0"}
@@ -108,15 +118,4 @@
       [-/task-basic]
       [-/task-by-name "hello"]
     {:limit 10})
-  => string?)
-
-
-^{:refer rt.postgres.runtime.graph/g:where :added "4.0"}
-(fact "constructs the where clause"
-  (pg/g:where scratch/Task {:name "foo"})
-  => string?)
-
-^{:refer rt.postgres.runtime.graph/g:exists :added "4.0"}
-(fact "checks for existence"
-  (pg/g:exists scratch/Task {:where {:name "foo"}})
   => string?)

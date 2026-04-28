@@ -35,6 +35,30 @@
        "  (:use code.test))\n\n"
        +right-fact+))
 
+^{:refer code.manage.unit.snapto/unwrap-fact-block :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.snapto/fact-block? :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.snapto/leading-indent :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.snapto/trim-indent :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.snapto/normalise-block-string :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.snapto/child-entries :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.snapto/entry-block :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.snapto/entry-col :added "4.1"}
+(fact "TODO")
+
 ^{:refer code.manage.unit.snapto/parse-body :added "4.1"}
 (fact "partitions a fact body into plain forms and expression/check pairs"
   (->> (parse-body (->> (block/parse-first "(fact \"hello\" (+ 1 1) (odd? 3) => true)")
@@ -52,12 +76,6 @@
        :expected "true"}])
 
 ^{:refer code.manage.unit.snapto/render-form :added "4.1"}
-(fact "TODO")
-
-^{:refer code.manage.unit.snapto/render-item :added "4.1"}
-(fact "TODO")
-
-^{:refer code.manage.unit.snapto/render-form :added "4.1"}
 (fact "preserves nested indentation relative to the form start"
   (let [entry (->> (block/parse-first "(fact \"iterates arrays in order\"\n  (!.js\n    (var out [])\n    out))")
                    child-entries
@@ -66,10 +84,8 @@
     (render-form entry))
   => "(!.js\n  (var out [])\n  out)")
 
-^{:refer code.manage.unit.snapto/snap-form-string :added "4.1"}
-(fact "formats a single fact form into snap-to layout"
-  (snap-form-string (block/parse-first +wrong-fact+))
-  => +right-fact+)
+^{:refer code.manage.unit.snapto/render-item :added "4.1"}
+(fact "TODO")
 
 ^{:refer code.manage.unit.snapto/snap-form-string :added "4.1"}
 (fact "does not add a blank line when the fact only has a docstring"

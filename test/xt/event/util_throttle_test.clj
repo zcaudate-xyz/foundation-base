@@ -86,6 +86,9 @@
       "queued" ["1"]
       "runs" [1 1]})
 
+^{:refer xt.event.util-throttle/throttle-waiting :added "4.1"}
+(fact "TODO")
+
 ^{:refer xt.event.util-throttle/throttle-active :added "4.1"}
 (fact "reports active and waiting ids"
   (notify/wait-on :js
@@ -107,3 +110,6 @@
     (throttle/throttle-run instance 3 nil))
   => [["1" "2" "3"]
       ["1" "2" "3"]])
+
+^{:refer xt.event.util-throttle/throttle-queued :added "4.1"}
+(fact "TODO")

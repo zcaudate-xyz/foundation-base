@@ -71,22 +71,22 @@
   (bulk-errors {:print {}} [[1 {:status :error}]])
   => [[1 {:status :error}]])
 
+^{:refer std.task.bulk/prepare-columns :added "4.0"}
+(fact "prepares columns for printing"
+  (prepare-columns [{:key :name}
+                    {:key :data}]
+                   [{:name "Chris"
+                     :data "1"}
+                    {:name "Bob"
+                     :data "100"}])
+  => [{:key :name, :id :name, :length 7}
+      {:key :data, :id :data, :length 5}])
+
 ^{:refer std.task.bulk/bulk-results :added "3.0"}
 (fact "outputs results that have been processed"
 
   (bulk-results +task+ {:print {}} [[1 {:status :return :data 1}]])
   => (every-pred not-empty (partial every? map?)))
-
-^{:refer std.task.bulk/bulk-summary :added "3.0"}
-(fact "outputs summary of processed results"
-
-  (bulk-summary +task+ {:print {}}
-                [[1 {:time 10 :status :return :data 1}]]
-                [{:data 1}]
-                []
-                []
-                100)
-  => map?)
 
 ^{:refer std.task.bulk/bulk-summary :added "4.1"}
 (fact "prints deferred summary notices after the summary output"
@@ -128,15 +128,3 @@
 
   (bulk +task+ bulk-test-fn [1 2 3] {:print {}} {} {} {})
   => map?)
-
-
-^{:refer std.task.bulk/prepare-columns :added "4.0"}
-(fact "prepares columns for printing"
-  (prepare-columns [{:key :name}
-                    {:key :data}]
-                   [{:name "Chris"
-                     :data "1"}
-                    {:name "Bob"
-                     :data "100"}])
-  => [{:key :name, :id :name, :length 7}
-      {:key :data, :id :data, :length 5}])

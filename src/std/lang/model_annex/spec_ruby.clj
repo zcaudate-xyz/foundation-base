@@ -59,17 +59,79 @@
 (defn ruby-map
   "emit ruby hash
    (l/emit-as :ruby '[{:a 1 :b 2}])
-   => \"{\\\"a\\\" => 1, \\\"b\\\" => 2}\""
+    => \"{\\\"a\\\" => 1, \\\"b\\\" => 2}\""
   {:added "4.1"}
   [m grammar mopts]
   (let [entries (map (fn [[k v]]
-                       (str (if (keyword? k)
-                              (str "\"" (name k) "\"")
-                              (common/*emit-fn* k grammar mopts))
+                       (str (common/*emit-fn* k grammar mopts)
                              " => "
                              (common/*emit-fn* v grammar mopts)))
-      m)]
+       m)]
     (str "{" (clojure.string/join ", " entries) "}")))
+
+(defn ruby-invoke-args
+  [args grammar mopts]
+  (clojure.string/join ","
+                       (map #(common/*emit-fn* % grammar mopts)
+                            args)))
+
+(defn ruby-invoke
+  [[f & args] grammar mopts]
+  (str (common/*emit-fn* f grammar mopts)
+       "("
+       (ruby-invoke-args args grammar mopts)
+       ")"))
+
+(defn ruby-dot-entry
+  [curr-str prop grammar mopts]
+  (cond
+    (vector? prop)
+    (do (assert (= 1 (count prop)) "Only one Ruby index")
+        (str curr-str
+             "["
+             (common/*emit-fn* (first prop) grammar mopts)
+             "]"))
+
+    (seq? prop)
+    (let [[method & args] prop
+          method-str (common/emit-symbol method grammar mopts)]
+      (if (empty? args)
+        (str curr-str "." method-str)
+        (str curr-str
+             "."
+             method-str
+             "("
+             (ruby-invoke-args args grammar mopts)
+             ")")))
+
+    :else
+    (str curr-str "."
+         (if (symbol? prop)
+           (common/emit-symbol prop grammar mopts)
+           (common/*emit-fn* prop grammar mopts)))))
+
+(defn ruby-dot-string
+  [obj props grammar mopts]
+  (reduce #(ruby-dot-entry %1 %2 grammar mopts)
+          (common/*emit-fn* obj grammar mopts)
+          props))
+
+(defn ruby-dot
+  [[_ obj & props]]
+  (let [grammar preprocess-base/*macro-grammar*
+        mopts   preprocess-base/*macro-opts*]
+    (list ':- (ruby-dot-string obj props grammar mopts))))
+
+(defn ruby-emit-range
+  [separator [_ start & more] grammar mopts]
+  (let [[step end] (if (= 2 (count more))
+                     more
+                     [1 (first more)])]
+    (assert end "Ruby range requires an end value")
+    (assert (= 1 step) "Ruby range does not support custom step values")
+    (str (common/*emit-fn* start grammar mopts)
+         separator
+         (common/*emit-fn* end grammar mopts))))
 
 (declare rewrite-callable-form)
 
@@ -259,41 +321,49 @@
   (-> (grammar/build :exclude [:pointer :block :data-range])
       (grammar/build:override
         {:var        {:macro #'ruby-var :emit :macro}
+         :index      {:macro #'ruby-dot :emit :macro}
          :for-object {:macro #'tf-for-object :emit :macro}
          :for-array  {:macro #'tf-for-array  :emit :macro}
          :for-iter   {:macro #'tf-for-iter   :emit :macro}
          :for-index  {:macro #'tf-for-index  :emit :macro}
          :defn       {:symbol #{'defn}   :macro #'ruby-defn :emit :macro}
          :defgen     {:symbol #{'defgen} :macro #'ruby-defn :emit :macro}
+         :spread     {:raw "*" :emit :pre}
          :with-global {:value true :raw "($__globals__ ||= {})"}
-          :and        {:raw "&&"}
-          :or         {:raw "||"}
-          :not        {:raw "!" :emit :prefix}
-          :eq         {:raw "=="}
-         :fn         {:macro  #'ruby-fn   :emit :macro}
-        :neq        {:raw "!="}
-        :gt         {:raw ">"}
-        :lt         {:raw "<"}
-        :gte        {:raw ">="}
+           :and        {:raw "&&"}
+           :or         {:raw "||"}
+           :not        {:raw "!" :emit :prefix}
+           :eq         {:raw "=="}
+          :pow        {:raw "**"}
+          :fn         {:macro  #'ruby-fn   :emit :macro}
+         :neq        {:raw "!="}
+         :gt         {:raw ">"}
+         :lt         {:raw "<"}
+         :gte        {:raw ">="}
         :lte        {:raw "<="}})
-       (grammar/build:override fn/+ruby+)
-       (grammar/build:extend
-        {:defn-      {:op :defn- :symbol #{'defn-} :type :block :emit #'ruby-defn-}
-         :assign     {:op :assign :symbol #{':=} :raw "=" :emit :infix}
-         :puts       {:op :puts :symbol #{'puts} :raw "puts" :emit :prefix}
-         :nil?       {:op :nil? :symbol #{'nil?} :raw "nil?" :emit :postfix}
-         :attr       {:op :attr :symbol #{'attr_accessor} :raw "attr_accessor" :emit :prefix}
-        :end        {:op :end  :symbol #{'end}  :raw "end"  :emit :token}})))
+        (grammar/build:override fn/+ruby+)
+        (grammar/build:extend
+         {:defn-      {:op :defn- :symbol #{'defn-} :type :block :emit #'ruby-defn-}
+          :assign     {:op :assign :symbol #{':=} :raw "=" :emit :infix}
+          :to         {:op :to :symbol #{'to} :emit (fn [form grammar mopts]
+                                                      (ruby-emit-range ".." form grammar mopts))}
+          :to-e       {:op :to-e :symbol #{'to-e} :emit (fn [form grammar mopts]
+                                                          (ruby-emit-range "..." form grammar mopts))}
+          :puts       {:op :puts :symbol #{'puts} :raw "puts" :emit :prefix}
+          :nil?       {:op :nil? :symbol #{'nil?} :raw "nil?" :emit :postfix}
+          :attr       {:op :attr :symbol #{'attr_accessor} :raw "attr_accessor" :emit :prefix}
+         :end        {:op :end  :symbol #{'end}  :raw "end"  :emit :token}})))
 
 (def +template+
   (->> {:banned #{}
          :allow   {:assign  #{:symbol}}
          :default {:common    {:statement ""}
                     :block     {:parameter {:start " " :end ""}
-                                :body      {:start "" :end "end" :append false}}
-                    :invoke    {:start "("}
-                    :function  {:raw "def"
-                                :body      {:start "" :end "end"}}}
+                                 :body      {:start "" :end "end" :append false}}
+                    :invoke    {:start "("
+                                :custom #'ruby-invoke}
+                     :function  {:raw "def"
+                                 :body      {:start "" :end "end"}}}
          :block   {:while     {:body {:start "" :end "end"}}
                    :branch    {:wrap {:start "" :end "end"}
                                :control {:default {:parameter {:start " " :end ""}

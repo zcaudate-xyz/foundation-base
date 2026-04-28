@@ -15,3 +15,7 @@
 
   (default-oneshot-wrap "1")
   => string?)
+
+
+^{:refer rt.basic.impl.process-js/node-path :added "4.1"}
+(fact "TODO")

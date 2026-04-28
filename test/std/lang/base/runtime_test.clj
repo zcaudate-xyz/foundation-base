@@ -101,6 +101,11 @@
 (fact "checks if object is default runtime"
   (rt/rt-default? (rt/rt-default {:lang :lua})) => true)
 
+^{:refer std.lang.base.runtime/rt-null :added "4.1"}
+(fact "creates a default null runtime"
+  (select-keys (rt/rt-null {}) [:lang])
+  => {:lang :null})
+
 ^{:refer std.lang.base.runtime/install-lang! :added "4.0"}
 (fact "installs a language within `std.lib.context`"
   (rt/install-lang! :lua) => (any map? vector?))
@@ -360,9 +365,3 @@
      :layout :full})
    'L.core)
   => '[[L.util "L_util____add_fn = nil\n\nL_util____sub_fn = nil"]])
-
-
-^{:refer std.lang.base.runtime/rt-null :added "4.1"}
-(fact "creates a default null runtime"
-  (select-keys (rt/rt-null {}) [:lang])
-  => {:lang :null})

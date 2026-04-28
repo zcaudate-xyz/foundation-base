@@ -224,6 +224,13 @@
                           (range 5)))
   => [1 2 3 4 5])
 
+^{:refer std.lib.stream/collect-persistent :added "4.1"}
+(fact "collects into a persistent collection"
+  (collect-persistent [] (i/i:map inc) (range 5))
+  => [1 2 3 4 5]
+  (collect-persistent #{} (i/i:map inc) (range 5))
+  => #{1 2 3 4 5})
+
 ^{:refer std.lib.stream/to-stream :added "3.0"}
 (fact "converts a seq to a stream")
 
@@ -268,11 +275,3 @@
   (take 5 (object-seq (volatile! -1)
                       #(vswap! % inc)))
   => '(0 1 2 3 4))
-
-
-^{:refer std.lib.stream/collect-persistent :added "4.1"}
-(fact "collects into a persistent collection"
-  (collect-persistent [] (i/i:map inc) (range 5))
-  => [1 2 3 4 5]
-  (collect-persistent #{} (i/i:map inc) (range 5))
-  => #{1 2 3 4 5})

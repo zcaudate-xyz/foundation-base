@@ -75,6 +75,17 @@
   (str (eval-raw +js+ "1 + 1"))
   => "2")
 
+^{:refer rt.graal/unwrap :added "4.1"}
+(fact "unwraps polyglot values to Clojure primitives"
+
+  (let [ctx (make-raw {:lang :js})]
+    [(unwrap (.eval ^Context ctx "js" "\"hello\""))
+     (unwrap (.eval ^Context ctx "js" "42"))
+     (unwrap (.eval ^Context ctx "js" "3.14"))
+     (unwrap (.eval ^Context ctx "js" "true"))
+     (unwrap (.eval ^Context ctx "js" "null"))])
+  => ["hello" 42 3.14 true nil])
+
 ^{:refer rt.graal/eval-graal :added "4.0"}
 (fact "evals body in the runtime"
 
@@ -117,15 +128,3 @@
 (fact "checks that object is a graal runtime"
   (rt-graal? (rt-graal:create {:lang :js}))
   => true)
-
-
-^{:refer rt.graal/unwrap :added "4.1"}
-(fact "unwraps polyglot values to Clojure primitives"
-
-  (let [ctx (make-raw {:lang :js})]
-    [(unwrap (.eval ^Context ctx "js" "\"hello\""))
-     (unwrap (.eval ^Context ctx "js" "42"))
-     (unwrap (.eval ^Context ctx "js" "3.14"))
-     (unwrap (.eval ^Context ctx "js" "true"))
-     (unwrap (.eval ^Context ctx "js" "null"))])
-  => ["hello" 42 3.14 true nil])

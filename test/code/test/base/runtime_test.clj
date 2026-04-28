@@ -158,6 +158,24 @@
     (rt/get-fact 'my.ns 'f1 :count))
   => 2)
 
+^{:refer code.test.base.runtime/eval-in-ns :added "4.1"}
+(fact "evaluates forms in the current or provided namespace"
+
+  (let [ns-sym (symbol (str "code.test.base.runtime-sandbox-" (gensym)))
+        sandbox (or (find-ns ns-sym)
+                    (create-ns ns-sym))
+        result (try
+                 (rt/eval-in-ns sandbox '(do (def answer 42)
+                                             [(clojure.core/boolean
+                                               (clojure.core/resolve 'answer))
+                                              answer]))
+                 (finally
+                   (remove-ns ns-sym)))]
+    [(rt/eval-in-ns nil '(+ 1 2))
+     (first result)
+     (second result)])
+  => [3 true 42])
+
 ^{:refer code.test.base.runtime/remove-fact :added "4.0"}
 (fact "removes a fact from namespace"
 
@@ -220,22 +238,3 @@
     (with-redefs [env/ns-sym (constantly 'my.ns)]
       (rt/run-op {:line 10} :setup?)))
   => true)
-
-
-^{:refer code.test.base.runtime/eval-in-ns :added "4.1"}
-(fact "evaluates forms in the current or provided namespace"
-
-  (let [ns-sym (symbol (str "code.test.base.runtime-sandbox-" (gensym)))
-        sandbox (or (find-ns ns-sym)
-                    (create-ns ns-sym))
-        result (try
-                 (rt/eval-in-ns sandbox '(do (def answer 42)
-                                             [(clojure.core/boolean
-                                               (clojure.core/resolve 'answer))
-                                              answer]))
-                 (finally
-                   (remove-ns ns-sym)))]
-    [(rt/eval-in-ns nil '(+ 1 2))
-     (first result)
-     (second result)])
-  => [3 true 42])

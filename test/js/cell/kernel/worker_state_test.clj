@@ -99,6 +99,9 @@
                   xt.lang.common-data/obj-keys))))
   => #{"onerror" "close" "postMessage" "addEventListener" "onmessage"})
 
+^{:refer js.cell.kernel.worker-state/fn-bind :added "4.1"}
+(fact "TODO")
+
 ^{:refer js.cell.kernel.worker-state/fn-trigger :added "4.0"}
 (fact "triggers an event"
 

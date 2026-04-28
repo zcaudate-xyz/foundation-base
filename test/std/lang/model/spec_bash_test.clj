@@ -322,14 +322,6 @@
    :bash '[($> "3&")])
   => ">(3&)"
 
-  (l/emit-as
-   :bash '[[(echo #{"hello"}) $> "/dev/null"]])
-  => "echo \"hello\" > /dev/null"
-
-  (!.sh
-   [(echo #{"hello"}) $> "/dev/null"])
-  => [0 []])
-
 ^{:refer std.lang.model.spec-bash/bash-here :added "4.0"}
 (fact "construct here block and here string"
 

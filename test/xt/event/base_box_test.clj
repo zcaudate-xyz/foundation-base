@@ -47,6 +47,12 @@
               "listener/type" "box"}
       "data" {"a" {"b" 3}}})
 
+^{:refer xt.event.base-box/get-data :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.event.base-box/set-data-raw :added "4.1"}
+(fact "TODO")
+
 ^{:refer xt.event.base-box/set-data :added "4.1"}
 (fact "updates and resets data"
   (!.js
@@ -58,6 +64,15 @@
   => [[] {"a" {"b" 2} "c" 3}
       [] {"a" {"b" 2}}])
 
+^{:refer xt.event.base-box/del-data-raw :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.event.base-box/del-data :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.event.base-box/reset-data :added "4.1"}
+(fact "TODO")
+
 ^{:refer xt.event.base-box/merge-data :added "4.1"}
 (fact "merges and appends data"
   (!.js
@@ -68,3 +83,6 @@
   => {"a" 1
       "b" [{"title" "Hello"}]
       "c" 3})
+
+^{:refer xt.event.base-box/append-data :added "4.1"}
+(fact "TODO")

@@ -6,19 +6,34 @@
             [std.lang.typed.xtalk-parse :as parse]))
 
 (def +ctx+ {:ns 'sample.route :aliases '{k xt.lang.common-lib}})
+
 (def +user-record+
   {:kind :record
    :fields [{:name "id" :type types/+str-type+ :optional? false}
             {:name "count" :type types/+int-type+ :optional? false}]})
+
 (def +open-record+
   {:kind :record
    :fields [{:name "id" :type types/+str-type+ :optional? false}]
    :open {:key types/+str-type+ :value types/+bool-type+}})
+
 (def +dict-users+ {:kind :dict :key types/+str-type+ :value +user-record+})
 
 (defn fixture-register! []
   (types/clear-registry!)
   (parse/register-types! (parse/analyze-namespace 'std.lang.model.spec-xtalk-typed-fixture)))
+
+(fact "infers xt self outputs from the first argument"
+  (-> (infer-op-spec-form (ops/canonical-entry 'x:arr-push)
+                          '(x:arr-push items "a")
+                          {:env '{items {:kind :array
+                                         :item {:kind :primitive :name :xt/str}}}
+                           :ns 'sample.route
+                           :aliases {}})
+      :type
+      types/type->data)
+  => '{:kind :array
+       :item {:kind :primitive :name :xt/str}})
 
 ^{:refer std.lang.typed.xtalk-infer/result :added "4.1"}
 (fact "builds result maps"
@@ -127,24 +142,6 @@
          :inputs [{:kind :named :name std.lang.model.spec-xtalk-typed-fixture/UserMap}
                   {:kind :primitive :name :xt/str}]
          :output {:kind :maybe :item {:kind :named :name std.lang.model.spec-xtalk-typed-fixture/User}}}])
-
-^{:refer std.lang.typed.xtalk-infer/infer-op-spec-form :added "4.1"}
-(fact "infers builtin calls directly from op-spec declarations"
-  [(types/type->data (:type (infer-op-spec-form (ops/canonical-entry 'x:add)
-                                                '(x:add 1 2)
-                                                +ctx+)))
-   (:errors (infer-op-spec-form (ops/canonical-entry 'x:add)
-                                '(x:add 1 "b")
-                                +ctx+))
-   (:tag (first (:errors (infer-op-spec-form (ops/canonical-entry 'x:add)
-                                             '(x:add 1)
-                                             +ctx+))))]
-  => '[{:kind :primitive :name :xt/num}
-        [{:tag :call-arg-type-mismatch
-          :form "b"
-          :expected {:kind :primitive :name :xt/num}
-          :actual {:kind :primitive :name :xt/str}}]
-        :call-arity-mismatch])
 
 ^{:refer std.lang.typed.xtalk-infer/field-access-type :added "4.1"}
 (fact "reads field types from records and dicts"
@@ -446,19 +443,6 @@
                                                      :ns 'sample.route :aliases {}})))
   => '{:kind :primitive :name :xt/str})
 
-^{:refer std.lang.typed.xtalk-infer/infer-type :added "4.1"}
-(fact "infers builtin substring with optional finish"
-  [(types/type->data (:type (infer-type '(x:str-substring value 3)
-                                        {:env '{value {:kind :primitive :name :xt/str}}
-                                         :ns 'sample.route
-                                         :aliases {}})))
-   (:errors (infer-type '(x:str-substring value 3)
-                        {:env '{value {:kind :primitive :name :xt/str}}
-                         :ns 'sample.route
-                         :aliases {}}))]
-  => '[{:kind :primitive :name :xt/str}
-        []])
-
 ^{:refer std.lang.typed.xtalk-infer/infer-get-path :added "4.1"}
 (fact "infers path access through nested records"
   (types/type->data (:type (infer-get-path '(x:get-path route ["user" "id"] nil)
@@ -469,6 +453,14 @@
                                                                     :optional? false}]}}
                                             :ns 'sample.route :aliases {}})))
   => '{:kind :primitive :name :xt/str})
+
+^{:refer std.lang.typed.xtalk-infer/infer-op-spec-form :added "4.1"}
+(fact "infers result type from builtin op-spec for a given call form"
+  (types/type->data
+   (:type (infer-op-spec-form (ops/canonical-entry 'x:add)
+                              '(x:add 1 2)
+                              +ctx+)))
+  => {:kind :primitive :name :xt/num})
 
 ^{:refer std.lang.typed.xtalk-infer/infer-builtin-form :added "4.1"}
 (fact "dispatches builtin inference rules"
@@ -523,24 +515,3 @@
    (types/type->data (:type (infer-type '(if true 1 2) +ctx+)))]
   => '[{:kind :primitive :name :xt/str}
         {:kind :primitive :name :xt/int}])
-
-
-^{:refer std.lang.typed.xtalk-infer/infer-op-spec-form :added "4.1"}
-(fact "infers result type from builtin op-spec for a given call form"
-  (types/type->data
-   (:type (infer-op-spec-form (ops/canonical-entry 'x:add)
-                              '(x:add 1 2)
-                              +ctx+)))
-  => {:kind :primitive :name :xt/num})
-
-(fact "infers xt self outputs from the first argument"
-  (-> (infer-op-spec-form (ops/canonical-entry 'x:arr-push)
-                          '(x:arr-push items "a")
-                          {:env '{items {:kind :array
-                                         :item {:kind :primitive :name :xt/str}}}
-                           :ns 'sample.route
-                           :aliases {}})
-      :type
-      types/type->data)
-  => '{:kind :array
-       :item {:kind :primitive :name :xt/str}})

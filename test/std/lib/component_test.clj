@@ -156,6 +156,18 @@
         (started? db))
   => true)
 
+^{:refer std.lib.component/with-lifecycle :added "4.1"}
+(fact "helper for lifecycle management"
+  (def out (atom []))
+  (with-lifecycle [a {:start (do (swap! out conj :start) :resource)
+                      :stop  (fn [x] (swap! out conj [:stop x]))}]
+    (swap! out conj [:body a])
+    :done)
+  => :done
+
+  @out
+  => [:start [:body :resource] [:stop :resource]])
+
 ^{:refer std.lib.component/wrap-start :added "4.0"}
 (fact "wraps the start function with more steps"
   ((wrap-start (fn [rt] (assoc rt :started true))
@@ -170,22 +182,8 @@
    {})
   => {:stopped true})
 
-
 (comment
   (./create-tests)
   (./import)
 
   (track/tracked [:test :db] stop))
-
-
-^{:refer std.lib.component/with-lifecycle :added "4.1"}
-(fact "helper for lifecycle management"
-  (def out (atom []))
-  (with-lifecycle [a {:start (do (swap! out conj :start) :resource)
-                      :stop  (fn [x] (swap! out conj [:stop x]))}]
-    (swap! out conj [:body a])
-    :done)
-  => :done
-
-  @out
-  => [:start [:body :resource] [:stop :resource]])

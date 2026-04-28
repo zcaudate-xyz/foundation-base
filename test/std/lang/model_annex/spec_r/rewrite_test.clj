@@ -5,6 +5,24 @@
             [std.lang.model-annex.spec-r.rewrite :as rewrite])
   (:use code.test))
 
+^{:refer std.lang.model-annex.spec-r/tf-defn :added "4.1"}
+(fact "applies inferred optional arguments during defn expansion"
+  (preprocess/with:macro-opts [{:module {:id 'xt.old.event-view}}]
+    (r/tf-defn '(defn get-output [view dest-key]
+                  (return dest-key))))
+  => '(def get-output
+        (fn [view dest-key := nil]
+          (return dest-key))))
+
+^{:refer std.lang.model-annex.spec-r.rewrite/r-rewrite-expression :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-r.rewrite/r-rewrite-statement :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-r.rewrite/r-rewrite-statements :added "4.1"}
+(fact "TODO")
+
 ^{:refer std.lang.model-annex.spec-r.rewrite/r-rewrite-stage :added "4.1"}
 (fact "rewrites defgen into an iterator-building defn"
   (let [out      (rewrite/r-rewrite-stage
@@ -33,12 +51,3 @@
      (= '(return (x:iter-from-arr ITER))
         (clojure.walk/prewalk-replace {iterator 'ITER} final))])
   => [true true true true true true true true])
-
-^{:refer std.lang.model-annex.spec-r/tf-defn :added "4.1"}
-(fact "applies inferred optional arguments during defn expansion"
-  (preprocess/with:macro-opts [{:module {:id 'xt.old.event-view}}]
-    (r/tf-defn '(defn get-output [view dest-key]
-                  (return dest-key))))
-  => '(def get-output
-        (fn [view dest-key := nil]
-          (return dest-key))))

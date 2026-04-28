@@ -57,7 +57,7 @@
 
 ^{:refer std.lang.model-annex.spec-circom/tf-pragma :added "4.1"}
 (fact "transforms pragma to circom pragma syntax"
-  (impl/emit-script '(pragma circom 2.0.0) {:lang :circom})
+  (impl/emit-script '(pragma circom |2.0.0|) {:lang :circom})
   => "pragma circom 2.0.0;")
 
 ^{:refer std.lang.model-annex.spec-circom/tf-include :added "4.1"}

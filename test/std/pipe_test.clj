@@ -32,15 +32,6 @@
 
   (+task+ 1) => 2)
 
-^{:refer std.pipe/invoke-intern-pipe :added "4.0"}
-(fact "creates a pipe task"
-
-  (invoke-intern-pipe nil '-task- {:main {:fn 'inc :argcount 1}} nil)
-  => '(def -task- (clojure.core/with-meta
-                    (std.pipe/task nil "-task-" {:main {:fn inc, :argcount 1}})
-                    {:doc nil, :arglists (quote ([& args]))})))
-
-
 ^{:refer std.pipe/pipe :added "4.1"}
 (fact "creates a pipe from tasks and executes it"
   (pipe [(task {:main {:fn inc :argcount 1}})
@@ -50,3 +41,11 @@
         1
         {:offset 4})
   => 6)
+
+^{:refer std.pipe/invoke-intern-pipe :added "4.0"}
+(fact "creates a pipe task"
+
+  (invoke-intern-pipe nil '-task- {:main {:fn 'inc :argcount 1}} nil)
+  => '(def -task- (clojure.core/with-meta
+                    (std.pipe/task nil "-task-" {:main {:fn inc, :argcount 1}})
+                    {:doc nil, :arglists (quote ([& args]))})))

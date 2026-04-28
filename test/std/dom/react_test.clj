@@ -5,6 +5,34 @@
             [std.dom.update :as update])
   (:use code.test))
 
+^{:refer std.dom.react/schedule-update :added "4.0"}
+(fact "schedules a component update"
+  (let [dom (base/dom-create :mock/label)]
+    (with-redefs [update/dom-refresh (constantly nil)]
+      (with-scheduler
+        (schedule-update dom)
+        (first @*scheduler*))))
+  => base/dom?)
+
+^{:refer std.dom.react/flush-updates :added "4.0"}
+(fact "flushes all pending updates"
+  (let [dom (base/dom-create :mock/label)]
+    (with-redefs [update/dom-refresh (constantly nil)]
+      (with-scheduler
+        (schedule-update dom)
+        (flush-updates)
+        @*scheduler*)))
+  => #{})
+
+^{:refer std.dom.react/with-scheduler :added "4.0"}
+(fact "executes body with a scheduler bound"
+  (let [dom (base/dom-create :mock/label)]
+    (with-redefs [update/dom-refresh (constantly nil)]
+      (with-scheduler
+        (schedule-update dom)
+        (count @*scheduler*))))
+  => 1)
+
 ^{:refer std.dom.react/reactive-pre-render :added "3.0"}
 (fact "sets up the react key and react store"
   
@@ -56,31 +84,3 @@
 
 (comment
   (./import))
-
-^{:refer std.dom.react/schedule-update :added "4.0"}
-(fact "schedules a component update"
-  (let [dom (base/dom-create :mock/label)]
-    (with-redefs [update/dom-refresh (constantly nil)]
-      (with-scheduler
-        (schedule-update dom)
-        (first @*scheduler*))))
-  => base/dom?)
-
-^{:refer std.dom.react/flush-updates :added "4.0"}
-(fact "flushes all pending updates"
-  (let [dom (base/dom-create :mock/label)]
-    (with-redefs [update/dom-refresh (constantly nil)]
-      (with-scheduler
-        (schedule-update dom)
-        (flush-updates)
-        @*scheduler*)))
-  => #{})
-
-^{:refer std.dom.react/with-scheduler :added "4.0"}
-(fact "executes body with a scheduler bound"
-  (let [dom (base/dom-create :mock/label)]
-    (with-redefs [update/dom-refresh (constantly nil)]
-      (with-scheduler
-        (schedule-update dom)
-        (count @*scheduler*))))
-  => 1)

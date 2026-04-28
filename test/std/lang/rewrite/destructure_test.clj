@@ -2,6 +2,15 @@
   (:use code.test)
   (:require [std.lang.rewrite.destructure :as destruct]))
 
+^{:refer std.lang.rewrite.destructure/destructure-target? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.rewrite.destructure/destructure-symbols :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.rewrite.destructure/destructure-value :added "4.1"}
+(fact "TODO")
+
 ^{:refer std.lang.rewrite.destructure/destructure-bindings :added "4.1"}
 (fact "builds sorted set destructuring bindings"
   [(destruct/destructure-target? '#{beta alpha})

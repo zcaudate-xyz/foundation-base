@@ -3,6 +3,13 @@
             [rt.postgres.test.scratch-v1 :as scratch])
   (:use code.test))
 
+^{:refer rt.postgres.base.grammar.common-tracker/tracker-string :added "4.1"}
+(fact "tracker-string formats tracker metadata"
+  (tracker/tracker-string {:name "Task"
+                           :in true
+                           :out true})
+  => "#pg.tracker [Task] {:in true, :out true}")
+
 ^{:refer rt.postgres.base.grammar.common-tracker/add-tracker :added "4.0"}
 (fact "call to adjust data to that of the tracker"
 
@@ -34,11 +41,3 @@
                         `scratch/Task
                         :update))
   => '{:op-updated (:->> op "id"), :time-updated (:->> op "time")})
-
-
-^{:refer rt.postgres.base.grammar.common-tracker/tracker-string :added "4.1"}
-(fact "tracker-string formats tracker metadata"
-  (tracker/tracker-string {:name "Task"
-                           :in true
-                           :out true})
-  => "#pg.tracker [Task] {:in true, :out true}")

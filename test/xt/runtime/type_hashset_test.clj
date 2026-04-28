@@ -25,108 +25,6 @@
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.runtime.type-hashset/hashset :added "4.1"}
-(fact "creates a hashset and removes duplicates"
-
-  (!.js
-   (var out (hs/hashset "a" "b" "a"))
-   [(. out _size)
-    (hs/hashset-has? out "a")
-    (hs/hashset-has? out "b")
-    (hs/hashset-has? out "c")])
-  => [2 true true false]
-
-  (!.lua
-   (var out (hs/hashset "a" "b" "a"))
-   [(. out _size)
-    (hs/hashset-has? out "a")
-    (hs/hashset-has? out "b")
-    (hs/hashset-has? out "c")])
-  => [2 true true false])
-
-^{:refer xt.runtime.type-hashset/hashset-find :added "4.1"}
-(fact "finds existing values and preserves nil members"
-
-  (!.js
-   (var out (-> hs/EMPTY_HASHSET
-                (hs/hashset-push nil)))
-   [(hs/hashset-has? out nil)
-    (== nil (hs/hashset-find out "missing"))])
-  => [true true]
-
-  (!.lua
-   (var out (-> hs/EMPTY_HASHSET
-                (hs/hashset-push nil)))
-   [(hs/hashset-has? out nil)
-    (== nil (hs/hashset-find out "missing"))])
-  => [true true])
-
-^{:refer xt.runtime.type-hashset/hashset-push :added "4.1"}
-(fact "keeps persistent updates immutable"
-
-  (!.js
-   (var s0 (hs/hashset "a"))
-   (var s1 (hs/hashset-push s0 "b"))
-   [(hs/hashset-has? s0 "b")
-    (hs/hashset-has? s1 "b")
-    (. s1 _size)])
-  => [false true 2]
-
-  (!.lua
-   (var s0 (hs/hashset "a"))
-   (var s1 (hs/hashset-push s0 "b"))
-   [(hs/hashset-has? s0 "b")
-    (hs/hashset-has? s1 "b")
-    (. s1 _size)])
-  => [false true 2])
-
-^{:refer xt.runtime.type-hashset/hashset-to-mutable! :added "4.1"}
-(fact "supports mutable edits and roundtrips back to persistent"
-
-  (!.js
-   (var out (-> (hs/hashset "a")
-                (hs/hashset-to-mutable!)
-                (hs/hashset-push! "b")
-                (hs/hashset-dissoc! "a")
-                (hs/hashset-to-persistent!)))
-   [(ic/is-persistent? out)
-    (hs/hashset-has? out "a")
-    (hs/hashset-has? out "b")
-    (. out _size)])
-  => [true false true 1]
-
-  (!.lua
-   (var out (-> (hs/hashset "a")
-                (hs/hashset-to-mutable!)
-                (hs/hashset-push! "b")
-                (hs/hashset-dissoc! "a")
-                (hs/hashset-to-persistent!)))
-   [(ic/is-persistent? out)
-    (hs/hashset-has? out "a")
-    (hs/hashset-has? out "b")
-    (. out _size)])
-  => [true false true 1])
-
-^{:refer xt.runtime.type-hashset/hashset-eq :added "4.1"}
-(fact "compares and hashes sets independent of insertion order"
-
-  (!.js
-   (var s1 (hs/hashset "a" "b"))
-   (var s2 (hs/hashset "b" "a"))
-   [(hs/hashset-eq s1 s2)
-    (== (. s1 (hash))
-        (. s2 (hash)))])
-  => [true true]
-
-  (!.lua
-   (var s1 (hs/hashset "a" "b"))
-   (var s2 (hs/hashset "b" "a"))
-   [(hs/hashset-eq s1 s2)
-    (== (. s1 (hash))
-        (. s2 (hash)))])
-  => [true true])
-
-
 ^{:refer xt.runtime.type-hashset/hashset-to-array :added "4.1"}
 (fact "converts the hashset to an array"
 
@@ -200,6 +98,33 @@
     (hs/hashset-is-editable (hs/hashset-empty-mutable))])
   => [false true])
 
+^{:refer xt.runtime.type-hashset/hashset-to-mutable! :added "4.1"}
+(fact "supports mutable edits and roundtrips back to persistent"
+
+  (!.js
+   (var out (-> (hs/hashset "a")
+                (hs/hashset-to-mutable!)
+                (hs/hashset-push! "b")
+                (hs/hashset-dissoc! "a")
+                (hs/hashset-to-persistent!)))
+   [(ic/is-persistent? out)
+    (hs/hashset-has? out "a")
+    (hs/hashset-has? out "b")
+    (. out _size)])
+  => [true false true 1]
+
+  (!.lua
+   (var out (-> (hs/hashset "a")
+                (hs/hashset-to-mutable!)
+                (hs/hashset-push! "b")
+                (hs/hashset-dissoc! "a")
+                (hs/hashset-to-persistent!)))
+   [(ic/is-persistent? out)
+    (hs/hashset-has? out "a")
+    (hs/hashset-has? out "b")
+    (. out _size)])
+  => [true false true 1])
+
 ^{:refer xt.runtime.type-hashset/hashset-to-persistent! :added "4.1"}
 (fact "converts a mutable hashset back into a persistent hashset"
 
@@ -221,6 +146,23 @@
     (hs/hashset-has? out "b")])
   => [false true])
 
+^{:refer xt.runtime.type-hashset/hashset-find :added "4.1"}
+(fact "finds existing values and preserves nil members"
+
+  (!.js
+   (var out (-> hs/EMPTY_HASHSET
+                (hs/hashset-push nil)))
+   [(hs/hashset-has? out nil)
+    (== nil (hs/hashset-find out "missing"))])
+  => [true true]
+
+  (!.lua
+   (var out (-> hs/EMPTY_HASHSET
+                (hs/hashset-push nil)))
+   [(hs/hashset-has? out nil)
+    (== nil (hs/hashset-find out "missing"))])
+  => [true true])
+
 ^{:refer xt.runtime.type-hashset/hashset-has? :added "4.1"}
 (fact "checks membership in the hashset"
 
@@ -233,6 +175,25 @@
    [(hs/hashset-has? (hs/hashset "a" "b") "a")
     (hs/hashset-has? (hs/hashset "a" "b") "c")])
   => [true false])
+
+^{:refer xt.runtime.type-hashset/hashset-push :added "4.1"}
+(fact "keeps persistent updates immutable"
+
+  (!.js
+   (var s0 (hs/hashset "a"))
+   (var s1 (hs/hashset-push s0 "b"))
+   [(hs/hashset-has? s0 "b")
+    (hs/hashset-has? s1 "b")
+    (. s1 _size)])
+  => [false true 2]
+
+  (!.lua
+   (var s0 (hs/hashset "a"))
+   (var s1 (hs/hashset-push s0 "b"))
+   [(hs/hashset-has? s0 "b")
+    (hs/hashset-has? s1 "b")
+    (. s1 _size)])
+  => [false true 2])
 
 ^{:refer xt.runtime.type-hashset/hashset-push! :added "4.1"}
 (fact "mutably adds values without growing for duplicates"
@@ -320,6 +281,25 @@
         (hs/hashset-hash s2))])
   => [true true])
 
+^{:refer xt.runtime.type-hashset/hashset-eq :added "4.1"}
+(fact "compares and hashes sets independent of insertion order"
+
+  (!.js
+   (var s1 (hs/hashset "a" "b"))
+   (var s2 (hs/hashset "b" "a"))
+   [(hs/hashset-eq s1 s2)
+    (== (. s1 (hash))
+        (. s2 (hash)))])
+  => [true true]
+
+  (!.lua
+   (var s1 (hs/hashset "a" "b"))
+   (var s2 (hs/hashset "b" "a"))
+   [(hs/hashset-eq s1 s2)
+    (== (. s1 (hash))
+        (. s2 (hash)))])
+  => [true true])
+
 ^{:refer xt.runtime.type-hashset/hashset-show :added "4.1"}
 (fact "shows the hashset as an EDN-like set string"
 
@@ -366,3 +346,22 @@
     (. out _size)
     (hs/hashset-show out)])
   => [true 0 "#{}"])
+
+^{:refer xt.runtime.type-hashset/hashset :added "4.1"}
+(fact "creates a hashset and removes duplicates"
+
+  (!.js
+   (var out (hs/hashset "a" "b" "a"))
+   [(. out _size)
+    (hs/hashset-has? out "a")
+    (hs/hashset-has? out "b")
+    (hs/hashset-has? out "c")])
+  => [2 true true false]
+
+  (!.lua
+   (var out (hs/hashset "a" "b" "a"))
+   [(. out _size)
+    (hs/hashset-has? out "a")
+    (hs/hashset-has? out "b")
+    (hs/hashset-has? out "c")])
+  => [2 true true false])

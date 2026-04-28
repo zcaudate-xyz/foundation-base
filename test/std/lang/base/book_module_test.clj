@@ -51,6 +51,18 @@
       'js.blessed.ui-core)))
   => '#{js.blessed.ui-style xt.lang.common-data xt.lang.common-lib js.react})
 
+^{:refer std.lang.base.book-module/module-deps-all :added "4.1"}
+(fact "gets all module dependencies including explicit links"
+  (module-deps-all
+   (book-module {:id 'L.nginx
+                 :lang :lua
+                 :link '{- L.nginx
+                         u L.core
+                         json L.json}
+                 :code '{identity {:deps #{L.core/add
+                                          L.json/parse}}}}))
+  => '#{L.core L.json})
+
 ^{:refer std.lang.base.book-module/module-deps-native :added "4.0"}
 (fact "gets the native link dependencies"
 
@@ -106,7 +118,6 @@
         js.core/max
         js.react/const})
 
-
 ^{:refer std.lang.base.book-module/module-entries :added "4.0"}
 (fact "creates an export entry for a module"
 
@@ -148,16 +159,3 @@
        [(:% \" convertPosition \") js.react/convertPosition]
        [(:% \" useChanging \") js.react/useChanging]
        [(:% \" useTree \") js.react/useTree]))
-
-
-^{:refer std.lang.base.book-module/module-deps-all :added "4.1"}
-(fact "gets all module dependencies including explicit links"
-  (module-deps-all
-   (book-module {:id 'L.nginx
-                 :lang :lua
-                 :link '{- L.nginx
-                         u L.core
-                         json L.json}
-                 :code '{identity {:deps #{L.core/add
-                                          L.json/parse}}}}))
-  => '#{L.core L.json})

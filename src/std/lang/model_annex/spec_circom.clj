@@ -9,7 +9,10 @@
             [std.lib.template :as template]))
 
 (defn format-string [x]
-  (if (string? x) (pr-str x) x))
+  (cond
+    (string? x) (pr-str x)
+    (symbol? x) (ut/sym-default-str x)
+    :else x))
 
 ;;
 ;; Transformations for Circom Constructs

@@ -22,6 +22,39 @@
  {:setup [(l/rt:restart)]
  :teardown [(l/rt:stop)]})
 
+^{:refer xt.lang.common-data/is-empty? :added "4.1"}
+(fact "checks that array is empty"
+
+  (!.js
+   [(xtd/is-empty? nil)
+    (xtd/is-empty? "")
+    (xtd/is-empty? "123")
+    (xtd/is-empty? [])
+    (xtd/is-empty? [1 2 3])
+    (xtd/is-empty? {})
+    (xtd/is-empty? {:a 1, :b 2})])
+  => [true true false true false true false]
+
+  (!.lua
+   [(xtd/is-empty? nil)
+    (xtd/is-empty? "")
+    (xtd/is-empty? "123")
+    (xtd/is-empty? [])
+    (xtd/is-empty? [1 2 3])
+    (xtd/is-empty? {})
+    (xtd/is-empty? {:a 1, :b 2})])
+  => [true true false true false true false]
+
+  (!.py
+   [(xtd/is-empty? nil)
+    (xtd/is-empty? "")
+    (xtd/is-empty? "123")
+    (xtd/is-empty? [])
+    (xtd/is-empty? [1 2 3])
+    (xtd/is-empty? {})
+    (xtd/is-empty? {:a 1, :b 2})])
+  => [true true false true false true false])
+
 ^{:refer xt.lang.common-data/not-empty? :added "4.1"}
 (fact "checks that array is not empty"
 
@@ -613,6 +646,78 @@
   (!.py (xtd/obj-first-val {:a 1}))
   => 1)
 
+^{:refer xt.lang.common-data/obj-keys :added "4.1"}
+(fact "gets keys of an object"
+
+  (!.js (xtd/obj-keys {:a 1, :b 2}))
+  => (just ["a" "b"] :in-any-order)
+
+  (!.lua (xtd/obj-keys {:a 1, :b 2}))
+  => (just ["a" "b"] :in-any-order)
+
+  (!.py (xtd/obj-keys {:a 1, :b 2}))
+  => (just ["a" "b"] :in-any-order))
+
+^{:refer xt.lang.common-data/obj-vals :added "4.1"}
+(fact "gets vals of an object"
+
+  (!.js (xtd/obj-vals {:a 1, :b 2}))
+  => (just [1 2] :in-any-order)
+
+  (!.lua (xtd/obj-vals {:a 1, :b 2}))
+  => (just [1 2] :in-any-order)
+
+  (!.py (xtd/obj-vals {:a 1, :b 2}))
+  => (just [1 2] :in-any-order))
+
+^{:refer xt.lang.common-data/obj-pairs :added "4.1"}
+(fact "creates entry pairs from object"
+
+  (!.js (xtd/obj-pairs {:a 1, :b 2}))
+  => (just [["a" 1] ["b" 2]] :in-any-order)
+
+  (!.lua (xtd/obj-pairs {:a 1, :b 2}))
+  => (just [["a" 1] ["b" 2]] :in-any-order)
+
+  (!.py (xtd/obj-pairs {:a 1, :b 2}))
+  => (just [["a" 1] ["b" 2]] :in-any-order))
+
+^{:refer xt.lang.common-data/obj-clone :added "4.1"}
+(fact "clones an object"
+
+  (!.js
+   (var src {:a 1})
+   (var out (xtd/obj-clone src))
+   (xt/x:set-key src "b" 2)
+   out)
+  => {"a" 1}
+
+  (!.lua
+   (var src {:a 1})
+   (var out (xtd/obj-clone src))
+   (xt/x:set-key src "b" 2)
+   out)
+  => {"a" 1}
+
+  (!.py
+   (var src {:a 1})
+   (var out (xtd/obj-clone src))
+   (xt/x:set-key src "b" 2)
+   out)
+  => {"a" 1})
+
+^{:refer xt.lang.common-data/obj-assign :added "4.1"}
+(fact "merges key value pairs from into another"
+
+  (!.js (xtd/obj-assign {:a 1} {:b 2}))
+  => {"a" 1, "b" 2}
+
+  (!.lua (xtd/obj-assign {:a 1} {:b 2}))
+  => {"a" 1, "b" 2}
+
+  (!.py (xtd/obj-assign {:a 1} {:b 2}))
+  => {"a" 1, "b" 2})
+
 ^{:refer xt.lang.common-data/obj-assign-nested :added "4.1"}
 (fact "merges objects at a nesting level"
 
@@ -648,6 +753,18 @@
     {:a 3, :c 4}
     (fn [x y] (return (+ x y)))))
   => {"a" 4, "b" 2, "c" 4})
+
+^{:refer xt.lang.common-data/obj-from-pairs :added "4.1"}
+(fact "creates an object from pairs"
+
+  (!.js (xtd/obj-from-pairs [["a" 1] ["b" 2]]))
+  => {"a" 1, "b" 2}
+
+  (!.lua (xtd/obj-from-pairs [["a" 1] ["b" 2]]))
+  => {"a" 1, "b" 2}
+
+  (!.py (xtd/obj-from-pairs [["a" 1] ["b" 2]]))
+  => {"a" 1, "b" 2})
 
 ^{:refer xt.lang.common-data/obj-del :added "4.1"}
 (fact "deletes multiple keys"
@@ -730,90 +847,6 @@
 
   (!.py (xtd/obj-nest ["a" "b"] 1))
   => {"a" {"b" 1}})
-
-^{:refer xt.lang.common-data/obj-keys :added "4.1"}
-(fact "gets keys of an object"
-
-  (!.js (xtd/obj-keys {:a 1, :b 2}))
-  => (just ["a" "b"] :in-any-order)
-
-  (!.lua (xtd/obj-keys {:a 1, :b 2}))
-  => (just ["a" "b"] :in-any-order)
-
-  (!.py (xtd/obj-keys {:a 1, :b 2}))
-  => (just ["a" "b"] :in-any-order))
-
-^{:refer xt.lang.common-data/obj-vals :added "4.1"}
-(fact "gets vals of an object"
-
-  (!.js (xtd/obj-vals {:a 1, :b 2}))
-  => (just [1 2] :in-any-order)
-
-  (!.lua (xtd/obj-vals {:a 1, :b 2}))
-  => (just [1 2] :in-any-order)
-
-  (!.py (xtd/obj-vals {:a 1, :b 2}))
-  => (just [1 2] :in-any-order))
-
-^{:refer xt.lang.common-data/obj-pairs :added "4.1"}
-(fact "creates entry pairs from object"
-
-  (!.js (xtd/obj-pairs {:a 1, :b 2}))
-  => (just [["a" 1] ["b" 2]] :in-any-order)
-
-  (!.lua (xtd/obj-pairs {:a 1, :b 2}))
-  => (just [["a" 1] ["b" 2]] :in-any-order)
-
-  (!.py (xtd/obj-pairs {:a 1, :b 2}))
-  => (just [["a" 1] ["b" 2]] :in-any-order))
-
-^{:refer xt.lang.common-data/obj-clone :added "4.1"}
-(fact "clones an object"
-
-  (!.js
-   (var src {:a 1})
-   (var out (xtd/obj-clone src))
-   (xt/x:set-key src "b" 2)
-   out)
-  => {"a" 1}
-
-  (!.lua
-   (var src {:a 1})
-   (var out (xtd/obj-clone src))
-   (xt/x:set-key src "b" 2)
-   out)
-  => {"a" 1}
-
-  (!.py
-   (var src {:a 1})
-   (var out (xtd/obj-clone src))
-   (xt/x:set-key src "b" 2)
-   out)
-  => {"a" 1})
-
-^{:refer xt.lang.common-data/obj-assign :added "4.1"}
-(fact "merges key value pairs from into another"
-
-  (!.js (xtd/obj-assign {:a 1} {:b 2}))
-  => {"a" 1, "b" 2}
-
-  (!.lua (xtd/obj-assign {:a 1} {:b 2}))
-  => {"a" 1, "b" 2}
-
-  (!.py (xtd/obj-assign {:a 1} {:b 2}))
-  => {"a" 1, "b" 2})
-
-^{:refer xt.lang.common-data/obj-from-pairs :added "4.1"}
-(fact "creates an object from pairs"
-
-  (!.js (xtd/obj-from-pairs [["a" 1] ["b" 2]]))
-  => {"a" 1, "b" 2}
-
-  (!.lua (xtd/obj-from-pairs [["a" 1] ["b" 2]]))
-  => {"a" 1, "b" 2}
-
-  (!.py (xtd/obj-from-pairs [["a" 1] ["b" 2]]))
-  => {"a" 1, "b" 2})
 
 ^{:refer xt.lang.common-data/get-in :added "4.1"}
 (fact "gets item in object"
@@ -942,6 +975,31 @@
 
   (!.py (xtd/to-flat [["a" 1] ["b" 2]]))
   => ["a" 1 "b" 2])
+
+^{:refer xt.lang.common-data/set-pair-step :added "4.1"}
+(fact "sets a pair into an object and returns it"
+
+  ^{:seedgen/base   {:r   {:suppress true}}}
+  (!.js
+    (var out {})
+    [(xt/x:get-key (xtd/set-pair-step out "a" 1) "a")
+     (xt/x:get-key (xtd/set-pair-step out "b" 2) "b")
+     out])
+  => [1 2 {"a" 1, "b" 2}]
+
+  (!.lua
+   (var out {})
+   [(xt/x:get-key (xtd/set-pair-step out "a" 1) "a")
+    (xt/x:get-key (xtd/set-pair-step out "b" 2) "b")
+    out])
+  => [1 2 {"a" 1, "b" 2}]
+
+  (!.py
+   (var out {})
+   [(xt/x:get-key (xtd/set-pair-step out "a" 1) "a")
+    (xt/x:get-key (xtd/set-pair-step out "b" 2) "b")
+    out])
+  => [1 2 {"a" 1, "b" 2}])
 
 ^{:refer xt.lang.common-data/from-flat :added "4.1"}
 (fact "creates object from flattened pair array"
@@ -1528,97 +1586,6 @@
    out)
   => {"a" {"b" 1}})
 
-^{:refer xt.lang.common-data/memoize-key :added "4.1"}
-(fact "memoize for functions of single argument"
-  
-  ^{:seedgen/base   {:r   {:suppress true}}}
-  (!.js
-    (var state {"n" 0})
-    (var f-raw (fn [x]
-                 (do
-                   (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
-                   (return (* x 10)))))
-    (var f (xtd/memoize-key f-raw))
-    [(f 2) (f 2) (f 3) (xt/x:get-key state "n")])
-  => [20 20 30 2]
-
-  (!.lua
-   (var state {"n" 0})
-   (var f-raw (fn [x]
-                (do
-                  (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
-                  (return (* x 10)))))
-   (var f (xtd/memoize-key f-raw))
-   [(f 2) (f 2) (f 3) (xt/x:get-key state "n")])
-  => [20 20 30 2]
-
-  (!.py
-   (var state {"n" 0})
-   (var f (xtd/memoize-key
-           (fn f-raw [x]
-             (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
-             (return (* x 10)))))
-   [(f 2) (f 2) (f 3) (xt/x:get-key state "n")])
-  => [20 20 30 2])
-
-^{:refer xt.lang.common-data/is-empty? :added "4.1"}
-(fact "checks that array is empty"
-
-  (!.js
-   [(xtd/is-empty? nil)
-    (xtd/is-empty? "")
-    (xtd/is-empty? "123")
-    (xtd/is-empty? [])
-    (xtd/is-empty? [1 2 3])
-    (xtd/is-empty? {})
-    (xtd/is-empty? {:a 1, :b 2})])
-  => [true true false true false true false]
-
-  (!.lua
-   [(xtd/is-empty? nil)
-    (xtd/is-empty? "")
-    (xtd/is-empty? "123")
-    (xtd/is-empty? [])
-    (xtd/is-empty? [1 2 3])
-    (xtd/is-empty? {})
-    (xtd/is-empty? {:a 1, :b 2})])
-  => [true true false true false true false]
-
-  (!.py
-   [(xtd/is-empty? nil)
-    (xtd/is-empty? "")
-    (xtd/is-empty? "123")
-    (xtd/is-empty? [])
-    (xtd/is-empty? [1 2 3])
-    (xtd/is-empty? {})
-    (xtd/is-empty? {:a 1, :b 2})])
-  => [true true false true false true false])
-
-^{:refer xt.lang.common-data/set-pair-step :added "4.1"}
-(fact "sets a pair into an object and returns it"
-
-  ^{:seedgen/base   {:r   {:suppress true}}}
-  (!.js
-    (var out {})
-    [(xt/x:get-key (xtd/set-pair-step out "a" 1) "a")
-     (xt/x:get-key (xtd/set-pair-step out "b" 2) "b")
-     out])
-  => [1 2 {"a" 1, "b" 2}]
-
-  (!.lua
-   (var out {})
-   [(xt/x:get-key (xtd/set-pair-step out "a" 1) "a")
-    (xt/x:get-key (xtd/set-pair-step out "b" 2) "b")
-    out])
-  => [1 2 {"a" 1, "b" 2}]
-
-  (!.py
-   (var out {})
-   [(xt/x:get-key (xtd/set-pair-step out "a" 1) "a")
-    (xt/x:get-key (xtd/set-pair-step out "b" 2) "b")
-    out])
-  => [1 2 {"a" 1, "b" 2}])
-
 ^{:refer xt.lang.common-data/memoize-key-step :added "4.1"}
 (fact "computes and caches a memoized value"
 
@@ -1670,6 +1637,39 @@
     (xt/x:get-key cache "a")
     (xt/x:get-key state "n")])
   => ["a-value" "a-value" 1])
+
+^{:refer xt.lang.common-data/memoize-key :added "4.1"}
+(fact "memoize for functions of single argument"
+  
+  ^{:seedgen/base   {:r   {:suppress true}}}
+  (!.js
+    (var state {"n" 0})
+    (var f-raw (fn [x]
+                 (do
+                   (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
+                   (return (* x 10)))))
+    (var f (xtd/memoize-key f-raw))
+    [(f 2) (f 2) (f 3) (xt/x:get-key state "n")])
+  => [20 20 30 2]
+
+  (!.lua
+   (var state {"n" 0})
+   (var f-raw (fn [x]
+                (do
+                  (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
+                  (return (* x 10)))))
+   (var f (xtd/memoize-key f-raw))
+   [(f 2) (f 2) (f 3) (xt/x:get-key state "n")])
+  => [20 20 30 2]
+
+  (!.py
+   (var state {"n" 0})
+   (var f (xtd/memoize-key
+           (fn f-raw [x]
+             (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
+             (return (* x 10)))))
+   [(f 2) (f 2) (f 3) (xt/x:get-key state "n")])
+  => [20 20 30 2])
 
 (comment
 

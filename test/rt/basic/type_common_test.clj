@@ -34,6 +34,36 @@
    [:lua :test.raw :default] {})
   => '([[:lua :test.raw :default] nil {}]))
 
+^{:refer rt.basic.type-common/available-runtimes :added "4.1"}
+(fact "lists installed runtimes for a language"
+  (with-redefs [std.lang.base.registry/+registry+
+                (atom {[:lua :oneshot] 'rt.basic.impl.process-lua
+                       [:lua :basic] 'rt.basic.impl.process-lua
+                       [:python :oneshot] 'rt.basic.impl.process-python})]
+    (available-runtimes :lua))
+  => [:basic :oneshot])
+
+^{:refer rt.basic.type-common/valid-context! :added "4.1"}
+(fact "asserts runtime context is valid"
+  (valid-context! :oneshot)
+  => nil?
+
+  (try (valid-context! :not-a-context)
+       (catch AssertionError e
+         true))
+  => true)
+
+^{:refer rt.basic.type-common/require-runtime! :added "4.0"}
+(fact "raises a clear error when a runtime has not been installed"
+  (try (get-options :missing.lang :twostep :default)
+       (catch clojure.lang.ExceptionInfo e
+         [(.getMessage e)
+          (select-keys (ex-data e) [:lang :runtime :available])]))
+  => ["Runtime not installed"
+      {:lang :missing.lang
+       :runtime :twostep
+       :available []}])
+
 ^{:refer rt.basic.type-common/program-exists? :added "4.0"}
 (fact  "checks if an executable exists"
 
@@ -84,34 +114,3 @@
 
   (get-options :lua :oneshot :luajit)
   => map?)
-
-^{:refer rt.basic.type-common/require-runtime! :added "4.0"}
-(fact "raises a clear error when a runtime has not been installed"
-  (try (get-options :missing.lang :twostep :default)
-       (catch clojure.lang.ExceptionInfo e
-         [(.getMessage e)
-          (select-keys (ex-data e) [:lang :runtime :available])]))
-  => ["Runtime not installed"
-      {:lang :missing.lang
-       :runtime :twostep
-       :available []}])
-
-
-^{:refer rt.basic.type-common/available-runtimes :added "4.1"}
-(fact "lists installed runtimes for a language"
-  (with-redefs [std.lang.base.registry/+registry+
-                (atom {[:lua :oneshot] 'rt.basic.impl.process-lua
-                       [:lua :basic] 'rt.basic.impl.process-lua
-                       [:python :oneshot] 'rt.basic.impl.process-python})]
-    (available-runtimes :lua))
-  => [:basic :oneshot])
-
-^{:refer rt.basic.type-common/valid-context! :added "4.1"}
-(fact "asserts runtime context is valid"
-  (valid-context! :oneshot)
-  => nil?
-
-  (try (valid-context! :not-a-context)
-       (catch AssertionError e
-         true))
-  => true)

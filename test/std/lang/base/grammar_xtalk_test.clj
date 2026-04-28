@@ -3,7 +3,33 @@
             [std.lang.base.grammar-xtalk :as xtalk :refer :all]
             [xtgen.lang :as xtgen])
   (:use code.test))
-;
+
+(fact "all xtalk grammar map entries expose op-spec contracts"
+  (vec
+   (for [[sym v] (sort-by key (ns-publics 'std.lang.base.grammar-xtalk))
+         :when (str/starts-with? (name sym) "+xt-")
+         entry @v
+         :when (and (map? entry)
+                    (not (:op-spec entry)))]
+     (:op entry)))
+  => [])
+
+(fact "common-lib generator emits the current macro wrapper"
+  (read-string
+   (xtgen/generate-common-lib
+    {:symbol  '[x:arr-push]
+     :op-spec {:arglists '([arr val])}}))
+  => '(defmacro.xt ^{:standalone true}
+        x:arr-push
+        [arr val]
+        (x:arr-push [arr val])))
+
+^{:refer std.lang.base.grammar-xtalk/tf-lt-string :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/tf-gt-string :added "4.1"}
+(fact "TODO")
+
 ^{:refer std.lang.base.grammar-xtalk/tf-throw :added "4.0"}
 (fact "wrapper for throw transform"
   (tf-throw '(x:throw "error"))
@@ -13,166 +39,6 @@
 (fact "wrapper for add transform"
   (tf-add '(x:add a b))
   => '(+ a b))
-
-^{:refer std.lang.base.grammar-xtalk/tf-first :added "4.1"}
-(fact "wrapper for first transform"
-  (tf-first '(x:first arr))
-  => '(x:get-idx arr (x:offset 0)))
-
-^{:refer std.lang.base.grammar-xtalk/tf-eq-nil? :added "4.0"}
-(fact "equals nil transform"
-  (tf-eq-nil? '(x:nil? a))
-  => '(== nil a))
-
-^{:refer std.lang.base.grammar-xtalk/tf-not-nil? :added "4.0"}
-(fact "not nil transform"
-  (tf-not-nil? '(x:not-nil? a))
-  => '(not= nil a))
-
-^{:refer std.lang.base.grammar-xtalk/tf-eq :added "4.1"}
-(fact "wrapper for eq transform"
-  (tf-eq '(x:eq a b))
-  => '(== a b))
-
-^{:refer std.lang.base.grammar-xtalk/tf-has-key? :added "4.0"}
-(fact "has key default transform"
-  (tf-has-key? '(x:has-key? obj "a"))
-  => '(not= (x:get-key obj "a") nil))
-
-^{:refer std.lang.base.grammar-xtalk/tf-get-path :added "4.0"}
-(fact "get-in transform"
-
-  (tf-get-path '(x:get-path obj ["a" "b" "c"]))
-  => '(. obj ["a"] ["b"] ["c"]))
-
-^{:refer std.lang.base.grammar-xtalk/tf-get-key :added "4.0"}
-(fact "get-key transform"
-
-  (tf-get-key '(x:get-key obj "a"))
-  => '(. obj ["a"])
-
-  (tf-get-key '(x:get-key obj "a" "DEFAULT"))
-  => '(:? (x:nil? (. obj ["a"])) "DEFAULT" (. obj ["a"])))
-
-^{:refer std.lang.base.grammar-xtalk/tf-set-key :added "4.0"}
-(fact "set-key transform"
-
-  (tf-set-key '(x:set-key obj "a" 1))
-  => '(:= (. obj ["a"]) 1))
-
-^{:refer std.lang.base.grammar-xtalk/tf-del-key :added "4.0"}
-(fact "del-key transform"
-
-  (tf-del-key '(x:del-key obj "a"))
-  => '(x:del (. obj ["a"])))
-
-^{:refer std.lang.base.grammar-xtalk/tf-copy-key :added "4.0"}
-(fact "copy-key transform"
-
-  (tf-copy-key '(x:copy-key obj src "a"))
-  => '(:= (. obj ["a"]) (. src ["a"]))
-
-  (tf-copy-key '(x:copy-key obj src ["a" "b"]))
-  => '(:= (. obj ["a"]) (. src ["b"])))
-
-^{:refer std.lang.base.grammar-xtalk/tf-grammar-offset :added "4.0"}
-(fact "del-key transform"
-
-  (tf-grammar-offset)
-  => 0)
-
-^{:refer std.lang.base.grammar-xtalk/tf-grammar-end-inclusive :added "4.0"}
-(fact "gets the end inclusive flag"
-
-  (tf-grammar-end-inclusive)
-  => nil)
-
-^{:refer std.lang.base.grammar-xtalk/tf-offset-base :added "4.0"}
-(fact "calculates the offset"
-
-  (tf-offset-base 1 'hello)
-  => '(+ hello 1)
-
-  (tf-offset-base 0 'hello)
-  => 'hello
-
-  (tf-offset-base 1 1)
-  => 2)
-
-^{:refer std.lang.base.grammar-xtalk/tf-offset :added "4.0"}
-(fact "gets the offset"
-  (tf-offset '(x:offset 10))
-  => 10)
-
-^{:refer std.lang.base.grammar-xtalk/tf-offset-rev :added "4.0"}
-(fact "gets the reverse offset"
-  (tf-offset-rev '(x:offset-rev 10))
-  => 9)
-
-^{:refer std.lang.base.grammar-xtalk/tf-offset-len :added "4.0"}
-(fact "gets the length offset"
-  (tf-offset-len '(x:offset-len 10))
-  => 9)
-
-^{:refer std.lang.base.grammar-xtalk/tf-offset-rlen :added "4.0"}
-(fact "gets the reverse length offset"
-  (tf-offset-rlen '(x:offset-rlen 10))
-  => 10)
-
-^{:refer std.lang.base.grammar-xtalk/tf-global-set :added "4.0"}
-(fact "default global set transform"
-
-  (tf-global-set '(x:global-set SYM 1))
-  => '(x:set-key !:G "SYM" 1))
-
-^{:refer std.lang.base.grammar-xtalk/tf-global-has? :added "4.0"}
-(fact  "default global has transform"
-
-  (tf-global-has? '(x:global-has SYM))
-  => '(not (x:nil? (x:get-key !:G "SYM"))))
-
-^{:refer std.lang.base.grammar-xtalk/tf-global-del :added "4.0"}
-(fact "default global del transform"
-
-  (tf-global-del '(x:global-del SYM))
-  => '(x:set-key !:G "SYM" nil))
-
-^{:refer std.lang.base.grammar-xtalk/tf-lu-eq :added "4.0"}
-(fact "lookup equals transform"
-
-  (tf-lu-eq '(x:lu-eq o1 o2))
-  => '(== o1 o2))
-
-^{:refer std.lang.base.grammar-xtalk/tf-bit-and :added "4.0"}
-(fact "bit and transform"
-
-  (tf-bit-and '(x:bit-and x y))
-  => '(b:& x y))
-
-^{:refer std.lang.base.grammar-xtalk/tf-bit-or :added "4.0"}
-(fact "bit or transform"
-
-  (tf-bit-or '(x:bit-or x y))
-  => '(b:| x y))
-
-^{:refer std.lang.base.grammar-xtalk/tf-bit-lshift :added "4.0"}
-(fact "bit left shift transform"
-
-  (tf-bit-lshift '(x:bit-lshift x y))
-  => '(b:<< x y))
-
-^{:refer std.lang.base.grammar-xtalk/tf-bit-rshift :added "4.0"}
-(fact "bit right shift transform"
-
-  (tf-bit-rshift '(x:bit-rshift x y))
-  => '(b:>> x y))
-
-^{:refer std.lang.base.grammar-xtalk/tf-bit-xor :added "4.0"}
-(fact "bit xor transform"
-
-  (tf-bit-xor '(x:bit-xor x y))
-  => '(b:xor x y))
-
 
 ^{:refer std.lang.base.grammar-xtalk/tf-sub :added "4.1"}
 (fact "wrapper for sub transform"
@@ -259,6 +125,106 @@
   (tf-odd? '(x:odd? a))
   => '(not (== 0 (mod a 2))))
 
+^{:refer std.lang.base.grammar-xtalk/tf-eq-nil? :added "4.0"}
+(fact "equals nil transform"
+  (tf-eq-nil? '(x:nil? a))
+  => '(== nil a))
+
+^{:refer std.lang.base.grammar-xtalk/tf-not-nil? :added "4.0"}
+(fact "not nil transform"
+  (tf-not-nil? '(x:not-nil? a))
+  => '(not= nil a))
+
+^{:refer std.lang.base.grammar-xtalk/tf-has-key? :added "4.0"}
+(fact "has key default transform"
+  (tf-has-key? '(x:has-key? obj "a"))
+  => '(not= (x:get-key obj "a") nil))
+
+^{:refer std.lang.base.grammar-xtalk/tf-get-path :added "4.0"}
+(fact "get-in transform"
+
+  (tf-get-path '(x:get-path obj ["a" "b" "c"]))
+  => '(. obj ["a"] ["b"] ["c"]))
+
+^{:refer std.lang.base.grammar-xtalk/tf-get-key :added "4.0"}
+(fact "get-key transform"
+
+  (tf-get-key '(x:get-key obj "a"))
+  => '(. obj ["a"])
+
+  (tf-get-key '(x:get-key obj "a" "DEFAULT"))
+  => '(:? (x:nil? (. obj ["a"])) "DEFAULT" (. obj ["a"])))
+
+^{:refer std.lang.base.grammar-xtalk/tf-set-key :added "4.0"}
+(fact "set-key transform"
+
+  (tf-set-key '(x:set-key obj "a" 1))
+  => '(:= (. obj ["a"]) 1))
+
+^{:refer std.lang.base.grammar-xtalk/tf-del-key :added "4.0"}
+(fact "del-key transform"
+
+  (tf-del-key '(x:del-key obj "a"))
+  => '(x:del (. obj ["a"])))
+
+^{:refer std.lang.base.grammar-xtalk/tf-copy-key :added "4.0"}
+(fact "copy-key transform"
+
+  (tf-copy-key '(x:copy-key obj src "a"))
+  => '(:= (. obj ["a"]) (. src ["a"]))
+
+  (tf-copy-key '(x:copy-key obj src ["a" "b"]))
+  => '(:= (. obj ["a"]) (. src ["b"])))
+
+^{:refer std.lang.base.grammar-xtalk/tf-grammar-offset :added "4.0"}
+(fact "del-key transform"
+
+  (tf-grammar-offset)
+  => 0)
+
+^{:refer std.lang.base.grammar-xtalk/tf-grammar-end-inclusive :added "4.0"}
+(fact "gets the end inclusive flag"
+
+  (tf-grammar-end-inclusive)
+  => nil)
+
+^{:refer std.lang.base.grammar-xtalk/tf-offset-base :added "4.0"}
+(fact "calculates the offset"
+
+  (tf-offset-base 1 'hello)
+  => '(+ hello 1)
+
+  (tf-offset-base 0 'hello)
+  => 'hello
+
+  (tf-offset-base 1 1)
+  => 2)
+
+^{:refer std.lang.base.grammar-xtalk/tf-offset :added "4.0"}
+(fact "gets the offset"
+  (tf-offset '(x:offset 10))
+  => 10)
+
+^{:refer std.lang.base.grammar-xtalk/tf-offset-rev :added "4.0"}
+(fact "gets the reverse offset"
+  (tf-offset-rev '(x:offset-rev 10))
+  => 9)
+
+^{:refer std.lang.base.grammar-xtalk/tf-offset-len :added "4.0"}
+(fact "gets the length offset"
+  (tf-offset-len '(x:offset-len 10))
+  => 9)
+
+^{:refer std.lang.base.grammar-xtalk/tf-offset-rlen :added "4.0"}
+(fact "gets the reverse length offset"
+  (tf-offset-rlen '(x:offset-rlen 10))
+  => 10)
+
+^{:refer std.lang.base.grammar-xtalk/tf-first :added "4.1"}
+(fact "wrapper for first transform"
+  (tf-first '(x:first arr))
+  => '(x:get-idx arr (x:offset 0)))
+
 ^{:refer std.lang.base.grammar-xtalk/tf-second :added "4.1"}
 (fact "gets the second element"
   (tf-second '(x:second arr))
@@ -284,30 +250,56 @@
   (tf-str-gt '(x:str-gt a b))
   => '(x:str-comp b a))
 
-(fact "all xtalk grammar map entries expose op-spec contracts"
-  (vec
-   (for [[sym v] (sort-by key (ns-publics 'std.lang.base.grammar-xtalk))
-         :when (str/starts-with? (name sym) "+xt-")
-         entry @v
-         :when (and (map? entry)
-                    (not (:op-spec entry)))]
-     (:op entry)))
-  => [])
+^{:refer std.lang.base.grammar-xtalk/tf-global-set :added "4.0"}
+(fact "default global set transform"
 
+  (tf-global-set '(x:global-set SYM 1))
+  => '(x:set-key !:G "SYM" 1))
 
-(fact "common-lib generator emits the current macro wrapper"
-  (read-string
-   (xtgen/generate-common-lib
-    {:symbol  '[x:arr-push]
-     :op-spec {:arglists '([arr val])}}))
-  => '(defmacro.xt ^{:standalone true}
-        x:arr-push
-        [arr val]
-        (x:arr-push [arr val])))
+^{:refer std.lang.base.grammar-xtalk/tf-global-has? :added "4.0"}
+(fact  "default global has transform"
 
+  (tf-global-has? '(x:global-has SYM))
+  => '(not (x:nil? (x:get-key !:G "SYM"))))
 
-^{:refer std.lang.base.grammar-xtalk/tf-lt-string :added "4.1"}
-(fact "TODO")
+^{:refer std.lang.base.grammar-xtalk/tf-global-del :added "4.0"}
+(fact "default global del transform"
 
-^{:refer std.lang.base.grammar-xtalk/tf-gt-string :added "4.1"}
-(fact "TODO")
+  (tf-global-del '(x:global-del SYM))
+  => '(x:set-key !:G "SYM" nil))
+
+^{:refer std.lang.base.grammar-xtalk/tf-lu-eq :added "4.0"}
+(fact "lookup equals transform"
+
+  (tf-lu-eq '(x:lu-eq o1 o2))
+  => '(== o1 o2))
+
+^{:refer std.lang.base.grammar-xtalk/tf-bit-and :added "4.0"}
+(fact "bit and transform"
+
+  (tf-bit-and '(x:bit-and x y))
+  => '(b:& x y))
+
+^{:refer std.lang.base.grammar-xtalk/tf-bit-or :added "4.0"}
+(fact "bit or transform"
+
+  (tf-bit-or '(x:bit-or x y))
+  => '(b:| x y))
+
+^{:refer std.lang.base.grammar-xtalk/tf-bit-lshift :added "4.0"}
+(fact "bit left shift transform"
+
+  (tf-bit-lshift '(x:bit-lshift x y))
+  => '(b:<< x y))
+
+^{:refer std.lang.base.grammar-xtalk/tf-bit-rshift :added "4.0"}
+(fact "bit right shift transform"
+
+  (tf-bit-rshift '(x:bit-rshift x y))
+  => '(b:>> x y))
+
+^{:refer std.lang.base.grammar-xtalk/tf-bit-xor :added "4.0"}
+(fact "bit xor transform"
+
+  (tf-bit-xor '(x:bit-xor x y))
+  => '(b:xor x y))

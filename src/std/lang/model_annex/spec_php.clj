@@ -133,27 +133,29 @@
 
 (def +features+
   (-> (grammar/build :exclude [:pointer :block :data-range])
-      (grammar/build:override
-       {:var        {:macro #'php-var :emit :macro}
-        :defn       {:macro #'php-defn :emit :macro}
-        :fn         {:macro #'php-defn- :emit :macro}
-        :index      {:macro #'php-dot :emit :macro}
+      (merge (grammar/build-xtalk))
+       (grammar/build:override
+        {:var        {:macro #'php-var :emit :macro}
+          :defn       {:macro #'php-defn :emit :macro}
+         :fn         {:macro #'php-defn- :emit :macro}
+         :index      {:macro #'php-dot :emit :macro}
         :new        {:macro #'php-new :emit :macro}
         :and        {:raw "&&"}
         :or         {:raw "||"}
         :not        {:raw "!"}
         :eq         {:raw "=="}
         :neq        {:raw "!="}
-        :gt         {:raw ">"}
-        :lt         {:raw "<"}
-        :gte        {:raw ">="}
-        :lte        {:raw "<="}})
-       (grammar/build:override fn/+php+)
+         :gt         {:raw ">"}
+         :lt         {:raw "<"}
+         :gte        {:raw ">="}
+         :lte        {:raw "<="}})
+       (grammar/build:override (dissoc fn/+php+ :x-str-format))
        (grammar/build:extend
-        {:phparray   {:op :phparray :symbol #{'array} :raw "array"}
-         :concat     {:op :concat :symbol #{'concat} :raw "." :emit :infix :value true}
-         :echo       {:op :echo :symbol #{'echo} :raw "echo" :emit :prefix}
-         :die        {:op :die  :symbol #{'die}  :raw "die"  :emit :prefix}})))
+         (merge (select-keys fn/+php+ [:x-str-format])
+                {:phparray   {:op :phparray :symbol #{'array} :raw "array"}
+                 :concat     {:op :concat :symbol #{'concat} :raw "." :emit :infix :value true}
+                 :echo       {:op :echo :symbol #{'echo} :raw "echo" :emit :prefix}
+                 :die        {:op :die  :symbol #{'die}  :raw "die"  :emit :prefix}}))))
 
 (def +template+
   (->> {:banned #{:keyword}

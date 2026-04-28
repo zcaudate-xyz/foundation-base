@@ -3,6 +3,27 @@
             [std.lang :as l])
   (:use code.test))
 
+^{:refer lua.core.common-promise/promise-native? :added "4.1"}
+(fact "TODO")
+
+^{:refer lua.core.common-promise/promise-resolve :added "4.1"}
+(fact "TODO")
+
+^{:refer lua.core.common-promise/promise-reject :added "4.1"}
+(fact "TODO")
+
+^{:refer lua.core.common-promise/promise :added "4.1"}
+(fact "TODO")
+
+^{:refer lua.core.common-promise/promise-then :added "4.1"}
+(fact "TODO")
+
+^{:refer lua.core.common-promise/promise-catch :added "4.1"}
+(fact "TODO")
+
+^{:refer lua.core.common-promise/promise-finally :added "4.1"}
+(fact "TODO")
+
 ^{:refer lua.core.common-promise/with-delay :added "4.1"}
 (fact "lua promise helpers compose delayed work through promise chains"
   (let [out (l/emit-as :lua ['(lua.core.common-promise/promise-then
