@@ -254,6 +254,19 @@
                   (let [out (snap/install-module snapshot lang module-id options)]
                     [out (first out)]))))
 
+(defn install-module-specialized!
+  "installs a specialized module clone into the library"
+  {:added "4.1"}
+  [lib lang source-id module-id options]
+  (wait-mutate! lib
+                (fn [snapshot]
+                  (let [out (snap/install-module-specialized snapshot
+                                                            lang
+                                                            source-id
+                                                            module-id
+                                                            options)]
+                    [out (first out)]))))
+
 (defn install-book!
   "installs a book to library"
   {:added "4.0"}

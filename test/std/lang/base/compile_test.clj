@@ -82,6 +82,45 @@
       ["BODY"
        "demo.core::BODY"]])
 
+^{:refer std.lang.base.compile/specialization-descriptor :added "4.1"}
+(fact "normalizes specialization descriptors"
+  (specialization-descriptor
+   {:lang :lua
+    :source-module 'source.core
+    :target-module 'target.core
+    :bindings {'cache 'backend.core}})
+  => (contains {:lang :lua
+                :source 'source.core
+                :target 'target.core
+                :bindings {'cache 'backend.core}
+                :compile-type :graph}))
+
+^{:refer std.lang.base.compile/compile-module-specialization :added "4.1"}
+(fact "installs a specialization before compiling"
+  (with-redefs [lib/install-module-specialized! (fn [_ lang source target opts]
+                                                  [lang source target opts])
+                compile-module-graph (fn [opts]
+                                       [:compiled opts])]
+    (compile-module-specialization
+     {:library :mock
+      :lang :lua
+      :source 'source.core
+      :target 'target.core
+      :bindings {'cache 'backend.core}
+      :root ".build"
+      :target-dir "src"}))
+  => [:compiled (contains {:lang :lua
+                           :main 'target.core})])
+
+^{:refer std.lang.base.compile/compile-module-specializations :added "4.1"}
+(fact "compiles batches of specialization descriptors"
+  (with-redefs [compile-module-specialization identity]
+    (compile-module-specializations [{:source 'a.core :target 'a.out}
+                                     {:source 'b.core :target 'b.out}]
+                                    {:lang :lua}))
+  => '[{:lang :lua :source a.core :target a.out}
+       {:lang :lua :source b.core :target b.out}])
+
 ^{:refer std.lang.base.compile/compile-module-single :added "4.0"}
 (fact "compiles a single module"
 

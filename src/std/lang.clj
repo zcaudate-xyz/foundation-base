@@ -117,12 +117,13 @@
 
  lib/get-book-raw
  lib/get-book
- lib/get-module
- lib/get-snapshot
- lib/delete-module!
- lib/delete-modules!
- lib/delete-entry!
- lib/purge-book!
+  lib/get-module
+  lib/get-snapshot
+  lib/delete-module!
+  lib/delete-modules!
+  lib/delete-entry!
+  lib/install-module-specialized!
+  lib/purge-book!
 
  lint/lint-set
  lint/lint-clear
@@ -160,12 +161,16 @@
  workspace/rt:scaffold-to
  workspace/rt:scaffold-imports
  workspace/rt:teardown
- workspace/rt:teardown-at
- workspace/rt:teardown-single
- workspace/rt:teardown-to
- workspace/intern-macros
- 
- [lib:overview manage/lib-overview]
+  workspace/rt:teardown-at
+  workspace/rt:teardown-single
+  workspace/rt:teardown-to
+  workspace/intern-macros
+
+  compile/specialization-descriptor
+  compile/compile-module-specialization
+  compile/compile-module-specializations
+  
+  [lib:overview manage/lib-overview]
  [lib:module   manage/lib-module-overview]
  [lib:entries  manage/lib-module-entries]
  [lib:purge    manage/lib-module-purge]

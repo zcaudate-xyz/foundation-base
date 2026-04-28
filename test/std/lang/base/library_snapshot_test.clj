@@ -265,6 +265,19 @@
                                   ["world" :as world]]})
   => vector?)
 
+^{:refer std.lang.base.library-snapshot/install-module-specialized :added "4.1"}
+(fact "adds a specialized module clone to the snapshot"
+  (let [[snapshot status module] (snap/install-module-specialized
+                                  prep/+snap+
+                                  :lua
+                                  'L.core
+                                  'L.core-specialized
+                                  {:bindings {'L.core 'L.util}})]
+    [status
+     (get-in snapshot [:lua :book :modules 'L.core-specialized :id])
+     (get-in module [:link '-])])
+  => [:new 'L.core-specialized 'L.core-specialized])
+
 ^{:refer std.lang.base.library-snapshot/install-book-update :added "4.0"}
 (fact "updates the book grammar, meta and parent"
   (snap/install-book-update prep/+snap+ {:lang :lua :grammar {:a 1} :meta {:a 1} :parent :x})
