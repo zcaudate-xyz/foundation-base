@@ -339,6 +339,6 @@
 
 (comment
   
-  (s/seedgen-benchadd '[xt.lang.parser-xml] {:lang [:lua :python] :write true})
+  (s/seedgen-benchadd '[xt.lang.parser-xml] {:lang [:dart :julia :ruby] :write true})
   (s/seedgen-langadd '[xt.lang.parser-xml] {:lang [:lua :python] :write true})
   (s/seedgen-langremove '[xt.lang.parser-xml] {:lang [:lua :python] :write true}))
