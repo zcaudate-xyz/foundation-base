@@ -10,7 +10,7 @@
 
 (fact "emits elisp data structures"
   (emit-elisp {:a 1 :b [2 3]} {})
-  => "(let ((__xt_tbl (make-hash-table :test 'equal))) (progn (puthash \"a\" 1 __xt_tbl) (puthash \"b\" [2 3] __xt_tbl) __xt_tbl))")
+  => "(let ((__xt_tbl (make-hash-table :test (quote equal)))) (progn (puthash \"a\" 1 __xt_tbl) (puthash \"b\" [2 3] __xt_tbl) __xt_tbl))")
 
 ^{:refer std.lang.model.spec-elisp/+book+ :added "4.1"}
 (fact "emits xtalk through the elisp backend"
