@@ -49,6 +49,7 @@
       :class
       :for
       :coroutine
+      :prototype
       :functional-core
       :macro
       :macro-arrow
@@ -101,10 +102,10 @@
   (build-xtalk)
   => map?)
 
-^{:refer std.lang.base.grammar/build-functional-core :added "4.1"}
-(fact "functional core ops"
+^{:refer std.lang.base.grammar/build :added "4.1"}
+(fact "functional core ops are selected explicitly"
 
-  (build-functional-core)
+  (build :include [:functional-core])
   => map?)
 
 ^{:refer std.lang.base.grammar/build:override :added "4.0"}

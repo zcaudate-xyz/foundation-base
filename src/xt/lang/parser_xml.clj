@@ -1,55 +1,5 @@
-(ns xt.lang.common-xml
+(ns xt.lang.parser-xml
   (:require [std.lang :as l]))
-
-;;
-;; LUA
-;;
-
-(l/script :lua
-  {:require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-data :as xtd]
-             [xt.lang.common-string :as xts]]})
-
-(defn.lua parse-xml-params
-  "parses the args"
-  {:added "4.0"}
-  [s]
-  (var params {})
-  (string.gsub s "([%-%w]+)=([\"'])(.-)%2"
-               (fn [w n a]
-                 (xt/x:set-key params w a)))
-  (return params))
-
-(defn.lua parse-xml-stack
-  "parses the xml into a ast stack"
-  {:added "4.0"}
-  [s]
-  (var output [])
-  (local '[ni c tag params empty])
-  (local '[i j] '[1 1])
-  
-  (while true
-    (:= '[ni j c tag params empty]
-        (string.find s "<(%/?)([%w:]+)(.-)(%/?)>" i))
-    (if (not ni) (break))
-    (local text  (xts/trim (string.sub s i (- ni 1))))
-    (local params-str (xts/trim params))
-    (var m {:tag tag})
-    (when (< 0 (xt/x:str-len params-str))
-      (xt/x:set-key m "params" (-/parse-xml-params params-str)))
-    (when (< 0 (xt/x:str-len text))
-      (xt/x:set-key m "text" text))
-    (when (== c "/")
-      (xt/x:set-key m "close" true))
-    (when (== empty "/")
-      (xt/x:set-key m "empty" true))
-    (xt/x:arr-push output m)
-    (:= i (+ j 1)))
-  (return output))
-
-;;
-;; XTALK
-;;
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]

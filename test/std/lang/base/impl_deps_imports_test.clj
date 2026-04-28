@@ -234,10 +234,11 @@
        :js)
      'js.react))
   => '{:native {"react" {:as React}, "react-dom/client" {:as ReactDOM}},
-       :direct #{xt.lang.common-data
-                 xt.lang.common-lib
-                 xt.lang.common-math
-                 xt.lang.common-string}}
+        :direct #{xt.lang.common-data
+                  xt.lang.common-lib
+                  xt.lang.common-math
+                  xt.lang.common-string
+                  xt.lang.common-tree}}
 
   (impl/with:library [+library-js-cloned+]
     (deps-imports/module-imports
@@ -301,18 +302,19 @@
        +library-js-cloned+
        :js)
      '[js.blessed.frame-console]))
-  => '{:all #{js.blessed.ui-style
-               js.blessed.ui-group
-               js.blessed.frame-console
-               xt.lang.common-sort-by
-               xt.lang.common-lib
-               xt.lang.common-data
-               xt.lang.common-math
-               xt.lang.common-string
-               js.react
-               js.blessed.ui-core}
-       :graph {js.blessed.frame-console  #{js.blessed.ui-core
-                                           js.blessed.ui-group
+   => '{:all #{js.blessed.ui-style
+                js.blessed.ui-group
+                js.blessed.frame-console
+                xt.lang.common-sort-by
+                xt.lang.common-lib
+                xt.lang.common-data
+                xt.lang.common-math
+                xt.lang.common-string
+                xt.lang.common-tree
+                js.react
+                js.blessed.ui-core}
+        :graph {js.blessed.frame-console  #{js.blessed.ui-core
+                                            js.blessed.ui-group
                                            xt.lang.common-data
                                            xt.lang.common-lib
                                            xt.lang.common-sort-by}
@@ -323,18 +325,21 @@
                                            }
                 xt.lang.common-sort-by    #{xt.lang.common-data}
                 xt.lang.common-lib        #{}
-                xt.lang.common-data       #{}
-                xt.lang.common-math       #{}
-                xt.lang.common-string     #{}
-               js.blessed.ui-core        #{js.blessed.ui-style
-                                           js.react
-                                           xt.lang.common-data
-                                           xt.lang.common-lib}
-               js.blessed.ui-style       #{xt.lang.common-data}
-               js.react                  #{xt.lang.common-data
-                                           xt.lang.common-lib
-                                           xt.lang.common-math
-                                           xt.lang.common-string}}}
+                 xt.lang.common-data       #{}
+                 xt.lang.common-math       #{}
+                 xt.lang.common-string     #{}
+                 xt.lang.common-tree       #{xt.lang.common-data
+                                             xt.lang.common-lib}
+                js.blessed.ui-core        #{js.blessed.ui-style
+                                            js.react
+                                            xt.lang.common-data
+                                            xt.lang.common-lib}
+                js.blessed.ui-style       #{xt.lang.common-data}
+                js.react                  #{xt.lang.common-data
+                                            xt.lang.common-lib
+                                            xt.lang.common-math
+                                            xt.lang.common-string
+                                            xt.lang.common-tree}}}
 
   (impl/with:library [+library-js-cloned+]
     (deps-imports/module-code-deps
@@ -343,18 +348,22 @@
        :js)
      '[js.react]))
   => '{:all #{js.react
-              xt.lang.common-data
-              xt.lang.common-lib
-              xt.lang.common-math
-              xt.lang.common-string},
-       :graph {js.react #{xt.lang.common-data
-                          xt.lang.common-lib
-                          xt.lang.common-math
-                          xt.lang.common-string},
-                 xt.lang.common-lib #{},
-                 xt.lang.common-data #{}
-                 xt.lang.common-math #{}
-                 xt.lang.common-string #{}}})
+               xt.lang.common-data
+               xt.lang.common-lib
+               xt.lang.common-math
+               xt.lang.common-string
+               xt.lang.common-tree},
+        :graph {js.react #{xt.lang.common-data
+                           xt.lang.common-lib
+                           xt.lang.common-math
+                           xt.lang.common-string
+                           xt.lang.common-tree},
+                  xt.lang.common-lib #{},
+                  xt.lang.common-data #{}
+                  xt.lang.common-math #{}
+                  xt.lang.common-string #{}
+                  xt.lang.common-tree #{xt.lang.common-data
+                                        xt.lang.common-lib}}})
 
 (comment
 

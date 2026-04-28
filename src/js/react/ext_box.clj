@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.old.event-box :as event-box] [js.react :as r] [js.core :as j]]})
+  {:require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-tree :as xtt] [xt.old.event-box :as event-box] [js.react :as r] [js.core :as j]]})
 
 (defn.js createBox
   "creates a box for react"
@@ -25,10 +25,10 @@
     (var listener-id (j/randomId 4))
     (event-box/add-listener box listener-id path
                              (fn [m]
-                               (setData (dataFn)))
+                                (setData (dataFn)))
                              meta)
     (var nData (dataFn))
-    (when (not (xtd/eq-nested data nData))
+    (when (not (xtt/eq-nested data nData))
       (setData nData))
     (return (fn [] (event-box/remove-listener box listener-id))))
   (return data))

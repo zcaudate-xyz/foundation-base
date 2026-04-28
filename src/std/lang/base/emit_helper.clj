@@ -234,22 +234,32 @@
              (recur (conj all curr) {:modifiers [] :symbol sym} more)
              (recur all (assoc curr :symbol sym) more))
 
-           (and (collection/form? sym)
-                (keyword? (first sym)))
-           (if (:symbol curr)
-             (recur (conj all curr) {:type   (butlast sym)
-                                     :symbol (last sym)}
-                    more)
-             (recur all (assoc curr
-                               :symbol sym
-                               :type   (butlast sym)
-                               :symbol (last sym))
-                    more))
+            (and (collection/form? sym)
+                 (keyword? (first sym)))
+            (if (:symbol curr)
+              (recur (conj all curr) {:type   (butlast sym)
+                                      :symbol (last sym)}
+                     more)
+              (recur all (assoc curr
+                                :symbol sym
+                                :type   (butlast sym)
+                                :symbol (last sym))
+                     more))
 
-           (or (keyword? sym) (vector? sym))
-           (if (:symbol curr)
-             (recur (conj all curr) {:modifiers [sym]} more)
-             (recur all (update curr :modifiers conj sym) more))
+            (and shorthand
+                 (:symbol curr)
+                 (empty? more)
+                 (or (vector? sym)
+                     (map? sym)
+                     (set? sym)))
+            (recur (conj all (assoc curr :value sym))
+                   {:modifiers []}
+                   more)
+
+            (or (keyword? sym) (vector? sym))
+            (if (:symbol curr)
+              (recur (conj all curr) {:modifiers [sym]} more)
+              (recur all (update curr :modifiers conj sym) more))
 
            (:symbol curr)
            (recur (conj all (assoc curr :value sym)) {:modifiers []} more)

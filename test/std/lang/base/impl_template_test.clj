@@ -105,13 +105,23 @@
 ^{:refer std.lang.base.impl-template/infer-static-template :added "4.1"}
 (fact "infers template restaging when a hard-link is used"
   (infer-static-template +template-parent-grammar+
+                         (:modules +template-helper-book+)
                          '(defn template-fn [value]
-                            (x:probe value)))
+                            (x:probe value))
+                         '{:lang :template
+                           :module {:id L.core
+                                    :alias {}
+                                    :link {- L.core}}})
   => true
 
   (infer-static-template +template-parent-grammar+
+                         (:modules +template-helper-book+)
                          '(defn plain-fn [value]
-                            (return value)))
+                            (return value))
+                         '{:lang :template
+                           :module {:id L.core
+                                    :alias {}
+                                    :link {- L.core}}})
   => false)
 
 ^{:refer std.lang.base.impl-template/create-code-state :added "4.1"}

@@ -296,7 +296,7 @@
        (fn [result]
          (var f (xt/x:get-key callbacks key))
          (if (xt/x:not-nil? f)
-           (return (f result))
+           (return (xt/x:apply f [result]))
            (return result))))
   (return result-fn))
 
@@ -324,5 +324,4 @@
   [s]
   (return
    (xt/x:return-eval s -/return-wrap)))
-
 

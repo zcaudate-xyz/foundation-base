@@ -209,17 +209,17 @@
         native-arr   (emit-module-setup-native-arr meta prep)
         link-arr     (emit-module-setup-link-arr meta prep)
         header-arr   (if (not (-> emit :header :suppress))
-                       (let [header-opts  (update mopts :emit merge (:header emit))]
-                         (keep (fn [entry]
-                                 (binding [*ns* (:namespace entry)]
-                                   (entry/emit-entry grammar entry header-opts)))
-                               header)))
+                        (let [header-opts  (update mopts :emit merge (:header emit))]
+                          (keep (fn [entry]
+                                  (binding [*ns* (the-ns (:namespace entry))]
+                                    (entry/emit-entry grammar entry header-opts)))
+                                header)))
         code-arr     (if (not (-> emit :code :suppress))
-                       (let [code-opts    (update mopts :emit merge (:code emit))]
-                         (keep (fn [entry]
-                                 (binding [*ns* (:namespace entry)]
-                                   (entry/emit-entry grammar entry code-opts)))
-                               code)))
+                        (let [code-opts    (update mopts :emit merge (:code emit))]
+                          (keep (fn [entry]
+                                  (binding [*ns* (the-ns (:namespace entry))]
+                                    (entry/emit-entry grammar entry code-opts)))
+                                code)))
         export-body  (emit-module-setup-export-body meta prep)]
     {:setup-body setup-body
      :native-arr native-arr

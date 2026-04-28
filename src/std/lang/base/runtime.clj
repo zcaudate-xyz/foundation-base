@@ -49,11 +49,13 @@
                            :layout  layout  
                            :emit    (merge emit
                                            {:transform (fn [args {:keys [bulk] :as mopts}]
-                                                         (if bulk
-                                                           (apply list 'do args)
-                                                           args))
-                                            :runtime
-                                            (assoc rt
+                                                          (if bulk
+                                                            (if (vector? args)
+                                                              (apply list 'do args)
+                                                              args)
+                                                            args))
+                                             :runtime
+                                             (assoc rt
                                                    :type (:runtime rt)
                                                    :namespace (env/ns-sym))})})))
 

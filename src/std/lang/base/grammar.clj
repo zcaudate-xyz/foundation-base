@@ -211,13 +211,13 @@
                            :control-general
                            :top-base
                            :top-global
-                           :macro]
-                          arr)))
+                            :macro]
+                           arr)))
 
 (defn build-xtalk
   "xtalk ops
  
-   (build-xtalk)
+    (build-xtalk)
    => map?"
   {:added "4.0"}
   []

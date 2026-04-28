@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [xt.old.event-form :as event-form] [js.react :as r] [js.core :as j] [xt.lang.common-data :as xtd] [xt.lang.spec-base :as xt]]})
+  {:require [[xt.lang.common-lib :as k] [xt.old.event-form :as event-form] [js.react :as r] [js.core :as j] [xt.lang.common-data :as xtd] [xt.lang.common-tree :as xtt] [xt.lang.spec-base :as xt]]})
 
 ;;
 ;; No Validation
@@ -108,11 +108,11 @@
                                (setResult nresult)
                                (r/curr:set passedRef npassed)))
                          
-                         :else
-                         (do (var nstatus (getStatus nresult))
-                              (when (not (xtd/eq-nested nstatus (r/curr statusRef)))
-                                (setResult nresult)
-                                (r/curr:set statusRef nstatus))))))))
+                          :else
+                          (do (var nstatus (getStatus nresult))
+                               (when (not (xtt/eq-nested nstatus (r/curr statusRef)))
+                                 (setResult nresult)
+                                 (r/curr:set statusRef nstatus))))))))
      meta)
     (return
      (fn []
