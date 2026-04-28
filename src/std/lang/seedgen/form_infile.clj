@@ -420,14 +420,29 @@
 (defn- apply-item-transform-form
   [s from to]
   (let [root     (nav/parse-root s)
-        expr-nav (nav/down root)
-        body-nav (some-> expr-nav form-common/nav-body)]
+         expr-nav (nav/down root)
+         body-nav (some-> expr-nav form-common/nav-body)]
     (if body-nav
-      (-> (query/modify body-nav
-                        [{:is from}]
-                        (fn [zloc]
-                          (nav/replace zloc to)))
-          nav/root-string)
+      (letfn [(next-after-subtree [zloc]
+                (loop [current zloc]
+                  (or (nav/right current)
+                      (let [parent (nav/up current)]
+                        (when (and parent
+                                   (not= parent current))
+                          (recur parent))))))
+              (next-preorder [zloc]
+                (or (nav/down zloc)
+                    (next-after-subtree zloc)))]
+        (loop [current body-nav]
+          (let [matched? (= from (nav/value current))
+                current  (if matched?
+                           (nav/replace current to)
+                           current)]
+            (if-let [next (if matched?
+                            (next-after-subtree current)
+                            (next-preorder current))]
+              (recur next)
+              (nav/root-string current)))))
       s)))
 
 (defn- apply-item-transform-string
