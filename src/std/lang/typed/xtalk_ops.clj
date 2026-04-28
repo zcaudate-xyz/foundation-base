@@ -1,11 +1,13 @@
 (ns std.lang.typed.xtalk-ops
   (:require [clojure.string :as str]
-            [std.lang.typed.xtalk-common :as types]
-            [std.lang.base.grammar-spec]
-            [std.lang.base.grammar-xtalk]))
+             [std.lang.typed.xtalk-common :as types]
+             [std.lang.base.grammar-macro]
+             [std.lang.base.grammar-spec]
+             [std.lang.base.grammar-xtalk]))
 
 (def +op-source-namespaces+
   '[std.lang.base.grammar-spec
+    std.lang.base.grammar-macro
     std.lang.base.grammar-xtalk])
 
 (def +legacy-op-aliases+

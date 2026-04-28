@@ -22,8 +22,9 @@
 
 ^{:refer std.lang.typed.xtalk-ops/builtin-entry :added "4.1"}
 (fact "looks up builtin entries"
-  (contains? (builtin-entry 'x:get-key) :symbol)
-  => true)
+  [(contains? (builtin-entry 'x:get-key) :symbol)
+   (contains? (builtin-entry 'if) :symbol)]
+  => [true true])
 
 ^{:refer std.lang.typed.xtalk-ops/canonical-entry :added "4.1"}
 (fact "augments entries with canonical symbol"

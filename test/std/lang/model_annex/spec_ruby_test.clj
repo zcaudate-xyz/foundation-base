@@ -57,7 +57,9 @@
   (spec-ruby/ruby-symbol :a spec-ruby/+grammar+ {})
   => ":a"
   (spec-ruby/ruby-symbol 'a spec-ruby/+grammar+ {})
-  => "a")
+  => "a"
+  (spec-ruby/ruby-symbol 'respond_to? spec-ruby/+grammar+ {})
+  => "respond_to?")
 
 ^{:refer std.lang.model-annex.spec-ruby/ruby-var :added "4.1"}
 (fact "emit ruby variable"

@@ -1,6 +1,10 @@
 (ns std.lang.model-annex.spec-xtalk.fn-ruby
   (:require [std.lib.template :as template]))
 
+(defn ruby-raw
+  [& parts]
+  (apply list ':- parts))
+
 ;;
 ;; CORE
 ;;
@@ -27,11 +31,19 @@
 
 (defn ruby-tf-x-del
   [[_ var]]
-  (list '= var nil))
+  (if (and (seq? var)
+           (= '. (first var))
+           (= 3 (count var))
+           (vector? (nth var 2))
+           (= 1 (count (nth var 2))))
+    (let [obj (second var)
+          k   (first (nth var 2))]
+      (ruby-raw "(" (list '% obj) ").delete(" (list '% k) ")"))
+    (list ':= var nil)))
 
 (defn ruby-tf-x-apply
   [[_ f args]]
-  (list '. f (list 'call (list '* args))))
+  (list '. f (list 'call (list :% (list ':- "*") args))))
 
 (defn ruby-tf-x-shell
   [[_ s opts]]
@@ -39,11 +51,13 @@
 
 (defn ruby-tf-x-type-native
   [[_ obj]]
-  (list '. obj 'class))
+  (ruby-raw "(" (list '% obj) ").is_a?(Array) ? \"array\" : ("
+            (list '% obj) ").is_a?(Hash) ? \"object\" : ("
+            (list '% obj) ").class.name.downcase"))
 
 (defn ruby-tf-x-unpack
   [[_ arr]]
-  (list '* arr))
+  (list :% (list ':- "*") arr))
 
 (def +ruby-core+
   {:x-cat            {:macro #'ruby-tf-x-cat  :emit :macro :value true}
@@ -63,11 +77,12 @@
 ;; MATH
 ;;
 
-(defn ruby-tf-x-m-mod   [[_ num denom]] (list '% num denom))
+(defn ruby-tf-x-m-abs   [[_ num]] (ruby-raw "(" (list '% num) ").abs"))
+(defn ruby-tf-x-m-mod   [[_ num denom]] (ruby-raw "(" (list '% num) " % " (list '% denom) ")"))
 
 (defn ruby-tf-x-m-max   [[_ & args]] (list '. (vec args) 'max))
 (defn ruby-tf-x-m-min   [[_ & args]] (list '. (vec args) 'min))
-(defn ruby-tf-x-m-pow   [[_ base exp]] (list '** base exp))
+(defn ruby-tf-x-m-pow   [[_ base exp]] (ruby-raw "(" (list '% base) " ** " (list '% exp) ")"))
 (defn ruby-tf-x-m-quot  [[_ num denom]] (list '. num (list 'div denom)))
 (defn ruby-tf-x-m-floor [[_ num]] (list '. num 'floor))
 (defn ruby-tf-x-m-ceil  [[_ num]] (list '. num 'ceil))
@@ -81,7 +96,7 @@
 (defn ruby-tf-x-m-log10 [[_ num]] (list 'Math.log10 num))
 
 (def +ruby-math+
-  {:x-m-abs           {:emit :alias :raw 'abs  :value true}
+  {:x-m-abs           {:macro #'ruby-tf-x-m-abs      :emit :macro}
    :x-m-cos           {:emit :alias :raw 'Math.cos  :value true}
    :x-m-exp           {:emit :alias :raw 'Math.exp  :value true}
    :x-m-loge          {:emit :alias :raw 'Math.log  :value true}
@@ -109,15 +124,15 @@
 
 (defn ruby-tf-x-is-string?
   [[_ e]]
-  (list '. e (list 'is_a? 'String)))
+  (ruby-raw "(" (list '% e) ").is_a?(String)"))
 
 (defn ruby-tf-x-is-number?
   [[_ e]]
-  (list '. e (list 'is_a? 'Numeric)))
+  (ruby-raw "(" (list '% e) ").is_a?(Numeric)"))
 
 (defn ruby-tf-x-is-integer?
   [[_ e]]
-  (list '. e (list 'is_a? 'Integer)))
+  (ruby-raw "(" (list '% e) ").is_a?(Integer)"))
 
 (defn ruby-tf-x-is-boolean?
   [[_ e]]
@@ -125,15 +140,15 @@
 
 (defn ruby-tf-x-is-object?
   [[_ e]]
-  (list '. e (list 'is_a? 'Object)))
+  (ruby-raw "(" (list '% e) ").is_a?(Hash)"))
 
 (defn ruby-tf-x-is-array?
   [[_ e]]
-  (list '. e (list 'is_a? 'Array)))
+  (ruby-raw "(" (list '% e) ").is_a?(Array)"))
 
 (defn ruby-tf-x-is-function?
   [[_ e]]
-  (list '. e (list 'respond_to? ':call)))
+  (ruby-raw "(" (list '% e) ").respond_to?(:call)"))
 
 (defn ruby-tf-x-to-string
   [[_ e]]
@@ -184,7 +199,25 @@
 
 (defn ruby-tf-x-arr-sort
   [[_ arr key-fn comp-fn]]
-  (list '. arr (list 'sort!))) ;; simplified
+  (let [tmp   (gensym "tmp__")
+        total (gensym "total__")
+        i     (gensym "i__")
+        j     (gensym "j__")
+        left  (gensym "left__")
+        right (gensym "right__")]
+    (template/$
+     (do (var ~total (. ~arr length))
+         (for:index [~i [0 (- ~total 1)]]
+           (for:index [~j [(+ ~i 1) ~total]]
+             (var ~left (. ~arr [~i]))
+             (var ~right (. ~arr [~j]))
+             (when (. ~comp-fn
+                      (call (. ~key-fn (call ~right))
+                            (. ~key-fn (call ~left))))
+               (var ~tmp ~left)
+               (:= (. ~arr [~i]) ~right)
+               (:= (. ~arr [~j]) ~tmp))))
+         (return ~arr)))))
 
 (defn ruby-tf-x-str-comp
   [[_ a b]]
@@ -218,9 +251,10 @@
 
 (defn ruby-tf-x-str-substring
   ([[_ s start & args]]
-   (if (empty? args)
-     (list '. s (list 'slice start))
-     (list '. s (list 'slice start (first args))))))
+    (if (empty? args)
+      (ruby-raw "(" (list '% s) ")[(" (list '% start) ")..-1]")
+      (let [end (first args)]
+        (ruby-raw "(" (list '% s) ")[(" (list '% start) ")..." (list '% end) "]")))))
 
 (defn ruby-tf-x-str-to-upper
   ([[_ s]]
@@ -232,7 +266,7 @@
 
 (defn ruby-tf-x-str-char
   ([[_ s i]]
-   (list 'ord (list '. s (list 'slice i 1)))))
+   (ruby-raw "(" (list '% s) ")[" (list '% i) "].ord")))
 
 (defn ruby-tf-x-str-replace
   ([[_ s tok replacement]]
@@ -260,11 +294,11 @@
 
 (defn ruby-tf-x-str-starts-with
   ([[_ s prefix]]
-   (list '. s (list 'start_with? prefix))))
+   (ruby-raw "(" (list '% s) ").start_with?(" (list '% prefix) ")")))
 
 (defn ruby-tf-x-str-ends-with
   ([[_ s suffix]]
-   (list '. s (list 'end_with? suffix))))
+   (ruby-raw "(" (list '% s) ").end_with?(" (list '% suffix) ")")))
 
 (def +ruby-str+
   {:x-str-split       {:macro #'ruby-tf-x-str-split      :emit :macro}
@@ -288,30 +322,39 @@
 
 (defn ruby-tf-x-lu-create
   [[_ & args]]
-  '{})
+  (ruby-raw "{}.compare_by_identity"))
+
+(defn ruby-tf-x-lu-eq
+  [[_ a b]]
+  (ruby-raw "(" (list '% a) ").equal?(" (list '% b) ")"))
 
 (defn ruby-tf-x-lu-get
   [[_ h k default]]
   (if default
-    (list '. h (list 'fetch k default))
-    (list '. h (list '[] k))))
+    (ruby-raw "(" (list '% h) ").key?(" (list '% k) ") ? ("
+              (list '% h) ")[" (list '% k) "] : "
+              (list '% default))
+    (ruby-raw "(" (list '% h) ")[" (list '% k) "]")))
 
 (defn ruby-tf-x-lu-set
   [[_ h k v]]
-  (list '= (list '. h (list '[] k)) v))
+  (ruby-raw "(" (list '% h) ")[" (list '% k) "] = " (list '% v)))
 
 (defn ruby-tf-x-lu-del
   [[_ h k]]
-  (list '. h (list 'delete k)))
+  (ruby-raw "(" (list '% h) ").delete(" (list '% k) ")"))
 
 (defn ruby-tf-x-has-key?
   [[_ obj key check]]
   (if (some? check)
-    (list '== check (list 'x:get-key obj key nil))
-    (list '. obj (list 'has_key? key))))
+    (ruby-raw "(" (list '% obj) ").key?(" (list '% key) ") && ("
+              (list '% obj) ")[" (list '% key) "] == "
+              (list '% check))
+    (ruby-raw "(" (list '% obj) ").key?(" (list '% key) ")")))
 
 (def +ruby-lu+
   {:x-lu-create        {:macro #'ruby-tf-x-lu-create      :emit :macro}
+   :x-lu-eq            {:macro #'ruby-tf-x-lu-eq          :emit :macro}
    :x-lu-get           {:macro #'ruby-tf-x-lu-get         :emit :macro}
    :x-lu-set           {:macro #'ruby-tf-x-lu-set         :emit :macro}
    :x-lu-del           {:macro #'ruby-tf-x-lu-del         :emit :macro}
@@ -381,47 +424,63 @@
 
 (defn ruby-tf-x-iter-from-obj
   [[_ obj]]
-  (list '. obj 'to_a))
+  (list :% (list '. obj 'to_a) (list ':- ".each")))
 
 (defn ruby-tf-x-iter-from-arr
   [[_ arr]]
-  arr)
+  (list :% arr (list ':- ".each")))
 
 (defn ruby-tf-x-iter-from
   [[_ obj]]
-  obj)
+  (list :% obj (list ':- ".each")))
 
 (defn ruby-tf-x-iter-eq
   [[_ it0 it1 eq-fn]]
-  (template/$
-   (if (!= (. ~it0 length) (. ~it1 length))
-     (return false)
-     (do (for [i (range 0 (. ~it0 length))]
-           (if (not (~eq-fn (:% ~it0 [i])
-                     (:% ~it1 [i])))
-             (return false)))
-         (return true)))))
+  (let [arr0 (gensym "arr0__")
+         arr1 (gensym "arr1__")
+         i    (gensym "i__")
+         same (gensym "same__")]
+    (template/$
+     (. (fn [~arr0 ~arr1]
+          (if (not= (. ~arr0 length) (. ~arr1 length))
+            (return false))
+          (var ~same true)
+          (var ~i 0)
+          (while (< ~i (. ~arr0 length))
+            (if (not (. ~eq-fn
+                         (call (. ~arr0 [~i])
+                               (. ~arr1 [~i]))))
+              (do (:= ~same false)
+                  (break)))
+            (:= ~i (+ ~i 1)))
+          (return ~same))
+         (call (. ~it0 to_a)
+               (. ~it1 to_a))))))
+
+(defn ruby-tf-x-iter-null
+  [[_]]
+  (list :% [] (list ':- ".each")))
 
 (defn ruby-tf-x-iter-next
   [[_ it]]
-  (list '. it 'shift))
+  (list '. it 'next))
 
 (defn ruby-tf-x-iter-has?
   [[_ obj]]
-  (list 'and
-        (list '. obj 'is_a? 'Array)
-        (list '> (list '. obj 'length) 0)))
+  (list 'or
+        (list :% obj (list ':- ".is_a?(Array)"))
+        (list :% obj (list ':- ".is_a?(Enumerator)"))))
 
 (defn ruby-tf-x-iter-native?
   [[_ it]]
-  (list '. it 'is_a? 'Array))
+  (list :% it (list ':- ".is_a?(Enumerator)")))
 
 (def +ruby-iter+
   {:x-iter-from-obj       {:macro #'ruby-tf-x-iter-from-obj       :emit :macro}
    :x-iter-from-arr       {:macro #'ruby-tf-x-iter-from-arr       :emit :macro}
    :x-iter-from           {:macro #'ruby-tf-x-iter-from           :emit :macro}
    :x-iter-eq             {:macro #'ruby-tf-x-iter-eq             :emit :macro}
-   :x-iter-null           {:default [] :emit :unit}
+   :x-iter-null           {:macro #'ruby-tf-x-iter-null           :emit :macro}
    :x-iter-next           {:macro #'ruby-tf-x-iter-next           :emit :macro}
    :x-iter-has?           {:macro #'ruby-tf-x-iter-has?           :emit :macro}
    :x-iter-native?        {:macro #'ruby-tf-x-iter-native?        :emit :macro}})
@@ -455,32 +514,52 @@
 
 (defn ruby-tf-x-return-encode
   ([[_ out id key]]
-   (template/$ (do (:- "require 'json'")
-                   (try
-                     (return (JSON.generate {:id  ~id
-                                             :key ~key
-                                             :type  "data"
-                                             :value  ~out}))
-                     (catch e
-                         (return (JSON.generate {:id ~id
-                                                 :key ~key
-                                                 :type  "raw"
-                                                 :value (. e (to_s))}))))))))
+    (template/$ (do (:- "require 'json'")
+                    (try
+                      (return (JSON.generate {:id  ~id
+                                              :key ~key
+                                              :type  "data"
+                                              :return (x:type-native ~out)
+                                              :value  ~out}))
+                      (catch e
+                          (return (JSON.generate {:id ~id
+                                                  :key ~key
+                                                  :type  "raw"
+                                                  :return "raw"
+                                                  :value (. e (to_s))}))))))))
 
 (defn ruby-tf-x-return-wrap
   ([[_ f encode-fn]]
-   (template/$ (do (:- "require 'json'")
-                   (try
-                     (:= out (. ~f (call)))
-                     (catch e
-                         (return (JSON.generate {:type "error"
-                                                 :value (. e (to_s))}))))
-                   (return (~encode-fn out nil nil))))))
+    (if (and (symbol? encode-fn)
+             (= "return-encode" (name encode-fn)))
+      (template/$ (do (:- "require 'json'")
+                      (try
+                        (:= out (. ~f (call)))
+                        (catch e
+                            (return (JSON.generate {:type "error"
+                                                    :value (. e (to_s))}))))
+                      (return (~encode-fn out nil nil))))
+      (template/$ (do (:- "require 'json'")
+                      (try
+                        (:= out (. ~f (call)))
+                        (catch e
+                            (return (JSON.generate {:type "error"
+                                                    :value (. e (to_s))}))))
+                      (var encoded nil)
+                      (if (== 1 (. ~encode-fn arity))
+                        (:= encoded (. ~encode-fn (call out)))
+                        (:= encoded (. ~encode-fn (call out nil nil))))
+                      (return encoded))))))
 
 (defn ruby-tf-x-return-eval
   ([[_ s wrap-fn]]
-   (template/$ (return (~wrap-fn (fn []
-                                   (return (eval ~s))))))))
+    (if (and (symbol? wrap-fn)
+             (= "return-wrap" (name wrap-fn)))
+      (template/$ (return (~wrap-fn (fn []
+                                      (return (eval ~s))))))
+      (template/$ (return (. ~wrap-fn
+                             (call (fn []
+                                     (return (eval ~s))))))))))
 
 (def +ruby-return+
   {:x-return-encode  {:macro #'ruby-tf-x-return-encode   :emit :macro

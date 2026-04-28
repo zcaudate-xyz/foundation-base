@@ -1,11 +1,6 @@
-(ns std.lang.rewrite.lift-named-lambda
-  (:require [std.lib.collection :as collection]))
-
-(defn with-form-meta
-  [source out]
-  (if (instance? clojure.lang.IObj out)
-    (with-meta out (meta source))
-    out))
+(ns std.lang.rewrite.fn
+  (:require [std.lang.rewrite.common :as common]
+            [std.lib.collection :as collection]))
 
 (defn do-form?
   [form]
@@ -44,41 +39,44 @@
         :else
         [(apply list 'do body)]))
 
+(defn rewrite-fn-form
+  ([form rewrite-statements]
+   (rewrite-fn-form form rewrite-statements {}))
+  ([form rewrite-statements {:keys [prepare-body include-name?]
+                             :or {prepare-body identity
+                                  include-name? true}}]
+   (let [[name args body] (fn-parts form)
+         body             (-> body
+                              rewrite-statements
+                              prepare-body
+                              splice-do*
+                              wrap-body)]
+     (common/with-form-meta form
+       (apply list 'fn
+              (concat (when (and include-name? name) [name])
+                      [args]
+                      body))))))
+
 (defn rewrite-fn-body
   [form rewrite-statements]
-  (let [[name args body] (fn-parts form)
-        body             (-> body
-                             rewrite-statements
-                             splice-do*
-                             wrap-body)]
-    (with-form-meta form
-      (apply list 'fn
-             (concat (when name [name])
-                     [args]
-                     body)))))
+  (rewrite-fn-form form rewrite-statements))
 
 (defn normalize-fn
   [form rewrite-statements]
-  (let [[_ args body] (fn-parts form)
-        body          (-> body
-                          rewrite-statements
-                          splice-do*
-                          wrap-body)]
-    (with-form-meta form
-      (apply list 'fn args body))))
+  (rewrite-fn-form form rewrite-statements {:include-name? false}))
 
 (defn lambda-compatible?
   ([form]
    (lambda-compatible? form nil))
   ([form block-form?]
    (let [[name _ body] (fn-parts form)
-          body-form     (first body)]
-      (and (nil? name)
-           (or (empty? body)
-               (and (= 1 (count body))
-                    (not (or (do-form? body-form)
-                             (and block-form?
-                                  (block-form? body-form))))))))))
+         body-form     (first body)]
+     (and (nil? name)
+          (or (empty? body)
+              (and (= 1 (count body))
+                   (not (or (do-form? body-form)
+                            (and block-form?
+                                 (block-form? body-form))))))))))
 
 (defn lift-named-lambda
   ([form rewrite-statements]

@@ -1,7 +1,12 @@
 (ns std.lang.model.spec-dart.rewrite
-  (:require [std.lang.rewrite.hoist :as hoist]
-            [std.lang.rewrite.lift-named-lambda :as lift]
-            [std.lib.collection :as collection]))
+  (:require [std.lang.rewrite.conditional :as condrw]
+             [std.lang.rewrite.hoist :as hoist]
+             [std.lang.rewrite.fn :as fnrw]
+             [std.lang.rewrite.statement :as stmt]
+             [std.lang.rewrite.truthy :as truthy]
+             [std.lang.rewrite.unpack :as unpack]
+             [std.lang.rewrite.walk :as walk]
+             [std.lib.collection :as collection]))
 
 (def ^:private +dart-rewriter+
   (hoist/create-rewriter
@@ -69,71 +74,41 @@
      defgen
      fn})
 
+(def ^:private +dart-dot-boolish-calls+
+  '#{contains
+     containsKey
+     endsWith
+     moveNext
+     startsWith})
+
 (declare dart-rewrite-expression)
 (declare dart-rewrite-statement)
 (declare dart-rewrite-statements)
 (declare dart-rewrite-conditional-expression)
 (declare rewrite-for-async-form)
 
-(defn- with-form-meta
-  [source out]
-  (lift/with-form-meta source out))
+(def ^:private with-form-meta
+  walk/with-form-meta)
 
-(defn- boolish-form?
+(defn- dart-boolish-form?
   [form]
-  (cond
-    (instance? Boolean form)
-    true
+  (truthy/boolish-form? form
+                        {:boolish-ops +dart-boolish-ops+
+                         :dot-boolish-calls +dart-dot-boolish-calls+}))
 
-    (and (collection/form? form)
-         (= '. (first form))
-         (collection/form? (nth form 2 nil))
-         (contains? '#{contains
-                       containsKey
-                       endsWith
-                       moveNext
-                       startsWith}
-                    (first (nth form 2))))
-    true
-
-    (and (collection/form? form)
-         (contains? +dart-boolish-ops+ (first form)))
-    true
-
-     :else
-     false))
-
-(defn- truthy-form
+(defn- dart-wrap-truthy
   [source form]
-  (if (boolish-form? form)
-    form
-    (let [value-sym (gensym "truthy_")]
-      (with-form-meta
-        source
-        (list (list 'fn [value-sym]
-                    (list 'return
-                          (list 'and
-                                (list 'x:not-nil? value-sym)
-                                (list 'not= false value-sym))))
-              form)))))
+  (let [value-sym (gensym "truthy_")]
+    (with-form-meta
+      source
+      (list (list 'fn [value-sym]
+                  (list 'return
+                        (truthy/truthy-check-form value-sym)))
+            form))))
 
-(defn- unpack-form?
-  [form]
-  (and (collection/form? form)
-       (= 'x:unpack (first form))
-       (= 2 (count form))))
-
-(defn- rewrite-expression-coll
-  [items grammar]
-  (map #(dart-rewrite-expression % grammar) items))
-
-(defn- rewrite-expression-map
-  [form grammar]
-  (into (empty form)
-        (map (fn [[k v]]
-               [(dart-rewrite-expression k grammar)
-                (dart-rewrite-expression v grammar)]))
-        form))
+(defn- dart-truthy-form
+  [source form]
+  (truthy/truthy-form source form dart-boolish-form? dart-wrap-truthy))
 
 (defn- ensure-return
   [stmt]
@@ -162,79 +137,42 @@
 
 (defn- rewrite-fn
   [form grammar]
-  (let [[name args body] (lift/fn-parts form)]
-    (with-form-meta
-      form
-      (apply list 'fn
-             (concat (when name [name])
-                     [args]
-                     (-> body
-                         (dart-rewrite-statements grammar)
-                         ensure-tail-return
-                         lift/splice-do*
-                         lift/wrap-body))))))
-
-(defn- rewrite-binding-vector
-  [binding grammar]
-  (if (and (vector? binding)
-           (<= 2 (count binding)))
-    (let [[lhs rhs & more] binding]
-      (with-form-meta
-        binding
-        (vec (concat [lhs (dart-rewrite-expression rhs grammar)]
-                     more))))
-    binding))
+  (fnrw/rewrite-fn-form form
+                        #(dart-rewrite-statements % grammar)
+                        {:prepare-body ensure-tail-return}))
 
 (defn- rewrite-for-statement
   [form grammar]
-  (let [[tag binding & body] form]
-    (with-form-meta
-      form
-      (apply list tag
-             (concat [(rewrite-binding-vector binding grammar)]
-                     (dart-rewrite-statements body grammar))))))
+  (stmt/rewrite-for-statement form
+                              #(walk/rewrite-binding-vector %
+                                                           (fn [v]
+                                                             (dart-rewrite-expression v grammar)))
+                              #(dart-rewrite-statements % grammar)))
 
 (defn- rewrite-cond-statement
   [form grammar]
-  (with-form-meta
-    form
-    (apply list 'cond
-           (mapcat (fn [[test body]]
-                     (if (= :else test)
-                       [test
-                        (dart-rewrite-statement body grammar)]
-                       [(dart-rewrite-conditional-expression test grammar)
-                        (dart-rewrite-statement body grammar)]))
-                   (partition 2 (rest form))))))
+  (stmt/rewrite-cond-statement form
+                               #(dart-rewrite-conditional-expression % grammar)
+                               #(dart-rewrite-statement % grammar)))
 
 (defn- rewrite-branch-control
   [form grammar]
-  (let [[tag & args] form]
-    (with-form-meta
-      form
-      (case tag
-        else
-        (apply list tag
-               (dart-rewrite-statements args grammar))
-
-        (let [[test & body] args]
-          (apply list tag
-                 (concat [(dart-rewrite-conditional-expression test grammar)]
-                         (dart-rewrite-statements body grammar))))))))
+  (stmt/rewrite-branch-control form
+                               #(dart-rewrite-conditional-expression % grammar)
+                               #(dart-rewrite-statements % grammar)))
 
 (defn- rewrite-branch-statement
   [form grammar]
-  (with-form-meta
-    form
-    (apply list 'br*
-           (map #(rewrite-branch-control % grammar) (rest form)))))
+  (stmt/rewrite-branch-statement form
+                                 #(rewrite-branch-control % grammar)))
 
 (defn- rewrite-or-expression
   [form grammar]
-  (let [args* (rewrite-expression-coll (rest form) grammar)]
+  (let [args* (walk/rewrite-coll (rest form)
+                                 #(dart-rewrite-expression % grammar))]
     (with-form-meta
       form
-      (apply list (if (every? boolish-form? args*)
+      (apply list (if (every? dart-boolish-form? args*)
                     'or
                     'dart:or)
              args*))))
@@ -247,7 +185,7 @@
         else*             (dart-rewrite-expression else grammar)]
     (with-form-meta
       form
-      (list (if (boolish-form? test*)
+      (list (if (dart-boolish-form? test*)
               :?
               'dart:ternary)
             test*
@@ -260,12 +198,12 @@
         head*       (if (collection/form? head)
                       (dart-rewrite-expression head grammar)
                       head)
-        unpack?     (some unpack-form? (rest form))
-        args*       (map (fn [arg]
-                           (if (unpack-form? arg)
-                             (list :.. (dart-rewrite-expression (second arg) grammar))
-                             (dart-rewrite-expression arg grammar)))
-                         (rest form))]
+        args        (rest form)
+        unpack?     (unpack/any-unpack? args)
+        args*       (unpack/rewrite-args args
+                                         #(dart-rewrite-expression % grammar)
+                                         identity
+                                         #(list :.. %))]
     (with-form-meta
       form
       (if unpack?
@@ -323,161 +261,64 @@
 
 (defn- rewrite-conditional-expression-list
   [form grammar]
-  (case (first form)
-    quote
-    form
-
-    fn
-    (rewrite-fn form grammar)
-
-    or
-    (with-form-meta
-      form
-      (apply list 'or
-             (map #(dart-rewrite-conditional-expression % grammar) (rest form))))
-
-    and
-    (with-form-meta
-      form
-      (apply list 'and
-             (map #(dart-rewrite-conditional-expression % grammar) (rest form))))
-
-    not
-    (with-form-meta
-      form
-      (list 'not
-            (dart-rewrite-conditional-expression (second form) grammar)))
-
-    :?
-    (let [[_ test then else] form]
-      (with-form-meta
-        form
-        (list :?
-              (dart-rewrite-conditional-expression test grammar)
-              (dart-rewrite-expression then grammar)
-              (dart-rewrite-expression else grammar))))
-
-    (let [head  (first form)
-          head* (if (collection/form? head)
-                  (dart-rewrite-expression head grammar)
-                  head)]
-      (with-form-meta
-        form
-        (apply list head*
-               (map #(dart-rewrite-expression % grammar) (rest form)))))))
+  (condrw/rewrite-conditional-expression-list
+   form
+   #(rewrite-fn % grammar)
+   #(dart-rewrite-conditional-expression % grammar)
+   #(dart-rewrite-expression % grammar)))
 
 (defn dart-rewrite-conditional-expression
   [form grammar]
-  (let [form* (cond
-                (collection/form? form)
-                (rewrite-conditional-expression-list form grammar)
-
-                (vector? form)
-                (with-form-meta form (vec (map #(dart-rewrite-expression % grammar) form)))
-
-                (set? form)
-                (with-form-meta form (set (map #(dart-rewrite-expression % grammar) form)))
-
-                (map? form)
-                (with-form-meta
-                  form
-                  (into (empty form)
-                        (map (fn [[k v]]
-                               [(dart-rewrite-expression k grammar)
-                                (dart-rewrite-expression v grammar)]))
-                        form))
-
-                :else
-                form)]
-    (truthy-form form form*)))
+  (condrw/rewrite-conditional-expression
+   form
+   #(rewrite-conditional-expression-list % grammar)
+   #(dart-rewrite-expression % grammar)
+   dart-truthy-form))
 
 (defn dart-rewrite-expression
   [form grammar]
-  (cond
-    (collection/form? form)
-    (rewrite-expression-list form grammar)
-
-    (vector? form)
-    (with-form-meta form (vec (rewrite-expression-coll form grammar)))
-
-    (set? form)
-    (with-form-meta form (set (rewrite-expression-coll form grammar)))
-
-    (map? form)
-    (with-form-meta form (rewrite-expression-map form grammar))
-
-    :else
-    form))
+  (walk/rewrite-form form
+                     #(rewrite-expression-list % grammar)
+                     #(dart-rewrite-expression % grammar)))
 
 (defn- rewrite-do-statement
   [form grammar]
-  (with-form-meta
-    form
-    (apply list (first form)
-           (-> form
-               rest
-               (dart-rewrite-statements grammar)
-               lift/splice-do*))))
+  (stmt/rewrite-do-statement form
+                             #(dart-rewrite-statements % grammar)))
 
 (defn- rewrite-var-statement
   [form grammar]
-  (let [[tag sym & args] form]
-    (if (empty? args)
-      form
-      (let [bound   (last args)
-            leading (butlast args)]
-        (with-form-meta
-          form
-          (apply list tag sym
-                 (concat leading
-                         [(dart-rewrite-expression bound grammar)])))))))
+  (stmt/rewrite-var-statement form
+                              #(dart-rewrite-expression % grammar)))
 
 (defn- rewrite-return-statement
   [form grammar]
-  (let [[tag & args] form]
-    (with-form-meta
-      form
-      (apply list tag
-             (map #(dart-rewrite-expression % grammar) args)))))
+  (stmt/rewrite-return-statement form
+                                 #(dart-rewrite-expression % grammar)))
 
 (defn- rewrite-if-statement
   [form grammar]
-  (let [[tag test then & [else]] form]
-    (with-form-meta
-      form
-      (apply list tag
-             (cond-> [(dart-rewrite-conditional-expression test grammar)
-                      (dart-rewrite-statement then grammar)]
-               else (conj (dart-rewrite-statement else grammar)))))))
+  (stmt/rewrite-if-statement form
+                             #(dart-rewrite-conditional-expression % grammar)
+                             #(dart-rewrite-statement % grammar)))
 
 (defn- rewrite-when-statement
   [form grammar]
-  (let [[tag test & body] form]
-    (with-form-meta
-      form
-      (apply list tag
-             (dart-rewrite-conditional-expression test grammar)
-             (dart-rewrite-statements body grammar)))))
+  (stmt/rewrite-when-statement form
+                               #(dart-rewrite-conditional-expression % grammar)
+                               #(dart-rewrite-statements % grammar)))
 
 (defn- rewrite-while-statement
   [form grammar]
-  (let [[tag test & body] form]
-    (with-form-meta
-      form
-      (apply list tag
-             (dart-rewrite-conditional-expression test grammar)
-             (dart-rewrite-statements body grammar)))))
+  (stmt/rewrite-while-statement form
+                                #(dart-rewrite-conditional-expression % grammar)
+                                #(dart-rewrite-statements % grammar)))
 
 (defn- rewrite-defn-statement
   [form grammar]
-  (let [[tag name args & body] form]
-    (with-form-meta
-      form
-      (apply list tag name args
-             (-> body
-                 (dart-rewrite-statements grammar)
-                 lift/splice-do*
-                 lift/wrap-body)))))
+  (stmt/rewrite-defn-statement form
+                               #(dart-rewrite-statements % grammar)
+                               ensure-tail-return))
 
 (defn dart-rewrite-statement
   [form grammar]

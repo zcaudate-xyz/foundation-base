@@ -39,6 +39,12 @@
    {:grammar dart/+grammar+})
   => '(var endpoint (dart:ternary path "/" path)))
 
+(fact "rewrites unpack invokes for Dart"
+  (rewrite/dart-rewrite-stage
+   '(return (f (x:unpack xs) y))
+   {:grammar dart/+grammar+})
+  => '(return (Function.apply f [(:.. xs) y])))
+
 (fact "keeps boolean ternaries intact"
   (rewrite/dart-rewrite-stage
    '(return (:? (x:not-nil? a) out {}))

@@ -5,6 +5,15 @@
   (:use code.test))
 
 ^{:refer std.lang.model.spec-python.rewrite/python-rewrite-stage :added "4.1"}
+(fact "lowers inline do returns after stage rewriting"
+  (rewrite/python-rewrite-stage
+   '(return (do (print "hello") (+ 1 2)))
+   nil)
+  => '(do*
+        (print "hello")
+        (return (+ 1 2))))
+
+^{:refer std.lang.model.spec-python.rewrite/python-rewrite-stage :added "4.1"}
 (fact "rewrites inline callback functions into prior bindings"
   (rewrite/python-rewrite-stage
    '(var f (xtd/memoize-key

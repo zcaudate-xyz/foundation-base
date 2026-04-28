@@ -64,6 +64,7 @@
   {:added "4.0"}
   [input mopts]
   (-> (normalize-forms input mopts)
+      (spec/rewrite-callable-forms)
       (mark-inline-defs)
       (default-body-wrap)))
 

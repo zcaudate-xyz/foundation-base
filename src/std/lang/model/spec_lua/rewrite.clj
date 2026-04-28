@@ -1,10 +1,10 @@
 (ns std.lang.model.spec-lua.rewrite
   (:require [std.lang.rewrite.hoist :as hoist]
-            [std.lang.rewrite.lift-named-lambda :as lift]))
+            [std.lang.rewrite.fn :as fnrw]))
 
 (defn- lua-lambda-compatible?
   [form _grammar]
-  (let [[name] (lift/fn-parts form)]
+  (let [[name] (fnrw/fn-parts form)]
     (nil? name)))
 
 (def ^:private +lua-rewriter+

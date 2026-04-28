@@ -1,21 +1,21 @@
-(ns std.lang.rewrite.lift-named-lambda-test
+(ns std.lang.rewrite.fn-test
   (:require [clojure.string :as str]
-            [std.lang.rewrite.lift-named-lambda :as lift])
+            [std.lang.rewrite.fn :as fnrw])
   (:use code.test))
 
 (defn- passthrough-rewrite
   [forms]
   forms)
 
-^{:refer std.lang.rewrite.lift-named-lambda/lambda-compatible? :added "4.1"}
+^{:refer std.lang.rewrite.fn/lambda-compatible? :added "4.1"}
 (fact "detects lambda-compatible function forms"
-  (lift/lambda-compatible? '(fn [x] (return x)))
+  (fnrw/lambda-compatible? '(fn [x] (return x)))
   => true
 
-  (lift/lambda-compatible? '(fn named [x] (return x)))
+  (fnrw/lambda-compatible? '(fn named [x] (return x)))
   => false
 
-  (lift/lambda-compatible? '(fn [x]
+  (fnrw/lambda-compatible? '(fn [x]
                               (if cond
                                 (return x)
                                 (return nil)))
@@ -24,12 +24,12 @@
                                  (= 'if (first form)))))
   => false
 
-  (lift/lambda-compatible? '(fn [x] (do (step x) (return x))))
+  (fnrw/lambda-compatible? '(fn [x] (do (step x) (return x))))
   => false)
 
-^{:refer std.lang.rewrite.lift-named-lambda/normalize-fn :added "4.1"}
+^{:refer std.lang.rewrite.fn/normalize-fn :added "4.1"}
 (fact "normalizes lifted functions to anonymous block bodies"
-  (lift/normalize-fn '(fn named [x]
+  (fnrw/normalize-fn '(fn named [x]
                         (step x)
                         (return x))
                      passthrough-rewrite)
@@ -38,14 +38,14 @@
           (step x)
           (return x))))
 
-^{:refer std.lang.rewrite.lift-named-lambda/lift-named-lambda :added "4.1"}
+^{:refer std.lang.rewrite.fn/lift-named-lambda :added "4.1"}
 (fact "lifts named lambdas into prior var bindings"
-  (lift/lift-named-lambda '(fn named [x] (return x))
+  (fnrw/lift-named-lambda '(fn named [x] (return x))
                           passthrough-rewrite
                           {:symbol-prefix "test_lambda__"})
   => '[[(var named (fn [x] (return x)))] named]
 
-  (let [[prefix sym] (lift/lift-named-lambda '(fn [x]
+  (let [[prefix sym] (fnrw/lift-named-lambda '(fn [x]
                                                 (return x))
                                              passthrough-rewrite
                                              {:symbol-prefix "test_lambda__"})]
@@ -55,3 +55,16 @@
      (= sym (second (first prefix)))
      (= '(fn [x] (return x)) (nth (first prefix) 2))])
   => [true true true true true])
+
+^{:refer std.lang.rewrite.fn/rewrite-fn-form :added "4.1"}
+(fact "rewrites function bodies with optional preparation"
+  (fnrw/rewrite-fn-form
+   '(fn named [x]
+      (step x)
+      (return x))
+   passthrough-rewrite
+   {:prepare-body reverse})
+  => '(fn named [x]
+        (do
+          (return x)
+          (step x))))

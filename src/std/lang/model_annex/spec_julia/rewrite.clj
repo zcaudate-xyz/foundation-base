@@ -1,8 +1,14 @@
 (ns std.lang.model-annex.spec-julia.rewrite
   (:require [std.lang.base.util :as ut]
-            [std.lang.rewrite.hoist :as hoist]
-            [std.lang.rewrite.lift-named-lambda :as lift]
-            [std.lib.collection :as collection]))
+              [std.lang.rewrite.conditional :as condrw]
+              [std.lang.rewrite.destructure :as destruct]
+              [std.lang.rewrite.hoist :as hoist]
+              [std.lang.rewrite.fn :as fnrw]
+              [std.lang.rewrite.statement :as stmt]
+              [std.lang.rewrite.truthy :as truthy]
+              [std.lang.rewrite.unpack :as unpack]
+              [std.lang.rewrite.walk :as walk]
+              [std.lib.collection :as collection]))
 
 (def ^:private +julia-rewriter+
   (hoist/create-rewriter
@@ -46,151 +52,54 @@
 (declare julia-rewrite-statements)
 (declare julia-rewrite-conditional-expression)
 
-(defn- with-form-meta
-  [source out]
-  (lift/with-form-meta source out))
+(def ^:private with-form-meta
+  walk/with-form-meta)
 
-(defn- boolish-form?
+(defn- julia-boolish-form?
   [form]
-  (cond
-    (instance? Boolean form)
-    true
+  (truthy/boolish-form? form
+                        {:boolish-ops +julia-boolish-ops+
+                         :recursive-not? true
+                         :recursive-and-or? true}))
 
-    (and (collection/form? form)
-         (= 'not (first form)))
-    (boolish-form? (second form))
-
-    (and (collection/form? form)
-         (#{'and 'or} (first form)))
-    (every? boolish-form? (rest form))
-
-    (and (collection/form? form)
-         (contains? +julia-boolish-ops+ (first form)))
-    true
-
-    :else
-    false))
-
-(defn- truthy-check-form
-  [value]
-  (list 'and
-        (list 'x:not-nil? value)
-        (list 'not= false value)))
-
-(defn- truthy-form
+(defn- julia-truthy-form
   [source form]
-  (if (boolish-form? form)
-    form
-    (with-form-meta
-      source
-      (truthy-check-form form))))
-
-(defn- truthy-or-form
-  [source value fallback]
-  (with-form-meta
-    source
-    (list :?
-          (truthy-check-form value)
-          value
-          fallback)))
-
-(defn- destructure-target?
-  [form]
-  (and (set? form)
-       (seq form)
-       (every? symbol? form)))
-
-(defn- destructure-symbols
-  [target]
-  (sort-by ut/sym-default-str target))
-
-(defn- destructure-value
-  [temp sym]
-  (list 'x:get-key temp (ut/sym-default-str sym) nil))
-
-(defn- rewrite-expression-coll
-  [items grammar]
-  (map #(julia-rewrite-expression % grammar) items))
-
-(defn- rewrite-expression-map
-  [form grammar]
-  (into (empty form)
-        (map (fn [[k v]]
-               [(julia-rewrite-expression k grammar)
-                (julia-rewrite-expression v grammar)]))
-        form))
+  (truthy/truthy-form source form julia-boolish-form?))
 
 (defn- rewrite-fn
   [form grammar]
-  (let [[name args body] (lift/fn-parts form)]
-    (with-form-meta
-      form
-      (apply list 'fn
-             (concat (when name [name])
-                     [args]
-                     (-> body
-                         (julia-rewrite-statements grammar)
-                         lift/splice-do*
-                         lift/wrap-body))))))
-
-(defn- rewrite-binding-vector
-  [binding grammar]
-  (if (and (vector? binding)
-           (<= 2 (count binding)))
-    (let [[lhs rhs & more] binding]
-      (with-form-meta
-        binding
-        (vec (concat [lhs (julia-rewrite-expression rhs grammar)]
-                     more))))
-    binding))
+  (fnrw/rewrite-fn-form form
+                        #(julia-rewrite-statements % grammar)))
 
 (defn- rewrite-for-statement
   [form grammar]
-  (let [[tag binding & body] form]
-    (with-form-meta
-      form
-      (apply list tag
-             (concat [(rewrite-binding-vector binding grammar)]
-                     (julia-rewrite-statements body grammar))))))
+  (stmt/rewrite-for-statement form
+                              #(walk/rewrite-binding-vector %
+                                                           (fn [v]
+                                                             (julia-rewrite-expression v grammar)))
+                              #(julia-rewrite-statements % grammar)))
 
 (defn- rewrite-cond-statement
   [form grammar]
-  (with-form-meta
-    form
-    (apply list 'cond
-           (mapcat (fn [[test body]]
-                     (if (= :else test)
-                       [test
-                        (julia-rewrite-statement body grammar)]
-                       [(julia-rewrite-conditional-expression test grammar)
-                        (julia-rewrite-statement body grammar)]))
-                   (partition 2 (rest form))))))
+  (stmt/rewrite-cond-statement form
+                               #(julia-rewrite-conditional-expression % grammar)
+                               #(julia-rewrite-statement % grammar)))
 
 (defn- rewrite-branch-control
   [form grammar]
-  (let [[tag & args] form]
-    (with-form-meta
-      form
-      (case tag
-        else
-        (apply list tag
-               (julia-rewrite-statements args grammar))
-
-        (let [[test & body] args]
-          (apply list tag
-                 (concat [(julia-rewrite-conditional-expression test grammar)]
-                         (julia-rewrite-statements body grammar))))))))
+  (stmt/rewrite-branch-control form
+                               #(julia-rewrite-conditional-expression % grammar)
+                               #(julia-rewrite-statements % grammar)))
 
 (defn- rewrite-branch-statement
   [form grammar]
-  (with-form-meta
-    form
-    (apply list 'br*
-           (map #(rewrite-branch-control % grammar) (rest form)))))
+  (stmt/rewrite-branch-statement form
+                                 #(rewrite-branch-control % grammar)))
 
 (defn- rewrite-or-expression
   [form grammar]
-  (let [args* (vec (rewrite-expression-coll (rest form) grammar))]
+  (let [args* (vec (walk/rewrite-coll (rest form)
+                                      #(julia-rewrite-expression % grammar)))]
     (cond
       (empty? args*)
       nil
@@ -198,14 +107,14 @@
       (= 1 (count args*))
       (first args*)
 
-      (every? boolish-form? args*)
+      (every? julia-boolish-form? args*)
       (with-form-meta
         form
         (apply list 'or args*))
 
       :else
       (reduce (fn [fallback value]
-                (truthy-or-form form value fallback))
+                (truthy/truthy-or-form form value fallback))
               (peek args*)
               (reverse (pop args*))))))
 
@@ -222,23 +131,16 @@
             then*
             else*))))
 
-(defn- unpack-form?
-  [form]
-  (and (collection/form? form)
-       (= 'x:unpack (first form))
-       (= 2 (count form))))
-
 (defn- rewrite-invoke-expression
   [form grammar]
   (let [head    (first form)
         head*   (if (collection/form? head)
                   (julia-rewrite-expression head grammar)
                   head)
-        args*   (map (fn [arg]
-                       (if (unpack-form? arg)
-                         (list '... (julia-rewrite-expression (second arg) grammar))
-                         (julia-rewrite-expression arg grammar)))
-                     (rest form))]
+        args*   (unpack/rewrite-args (rest form)
+                                     #(julia-rewrite-expression % grammar)
+                                     identity
+                                     #(list '... %))]
     (with-form-meta
       form
       (apply list head* args*))))
@@ -267,98 +169,34 @@
 
 (defn- rewrite-conditional-expression-list
   [form grammar]
-  (case (first form)
-    quote
-    form
-
-    fn
-    (rewrite-fn form grammar)
-
-    or
-    (with-form-meta
-      form
-      (apply list 'or
-             (map #(julia-rewrite-conditional-expression % grammar) (rest form))))
-
-    and
-    (with-form-meta
-      form
-      (apply list 'and
-             (map #(julia-rewrite-conditional-expression % grammar) (rest form))))
-
-    not
-    (with-form-meta
-      form
-      (list 'not
-            (julia-rewrite-conditional-expression (second form) grammar)))
-
-    :?
-    (let [[_ test then else] form]
-      (with-form-meta
-        form
-        (list :?
-              (julia-rewrite-conditional-expression test grammar)
-              (julia-rewrite-expression then grammar)
-              (julia-rewrite-expression else grammar))))
-
-    (let [head  (first form)
-          head* (if (collection/form? head)
-                  (julia-rewrite-expression head grammar)
-                  head)]
-      (with-form-meta
-        form
-        (apply list head*
-               (map #(julia-rewrite-expression % grammar) (rest form)))))))
+  (condrw/rewrite-conditional-expression-list
+   form
+   #(rewrite-fn % grammar)
+   #(julia-rewrite-conditional-expression % grammar)
+   #(julia-rewrite-expression % grammar)))
 
 (defn julia-rewrite-conditional-expression
   [form grammar]
-  (let [form* (cond
-                (collection/form? form)
-                (rewrite-conditional-expression-list form grammar)
-
-                (vector? form)
-                (with-form-meta form (vec (map #(julia-rewrite-expression % grammar) form)))
-
-                (set? form)
-                (with-form-meta form (set (map #(julia-rewrite-expression % grammar) form)))
-
-                (map? form)
-                (with-form-meta form (rewrite-expression-map form grammar))
-
-                :else
-                form)]
-    (truthy-form form form*)))
+  (condrw/rewrite-conditional-expression
+   form
+   #(rewrite-conditional-expression-list % grammar)
+   #(julia-rewrite-expression % grammar)
+   julia-truthy-form))
 
 (defn julia-rewrite-expression
   [form grammar]
-  (cond
-    (collection/form? form)
-    (rewrite-expression-list form grammar)
-
-    (vector? form)
-    (with-form-meta form (vec (rewrite-expression-coll form grammar)))
-
-    (set? form)
-    (with-form-meta form (set (rewrite-expression-coll form grammar)))
-
-    (map? form)
-    (with-form-meta form (rewrite-expression-map form grammar))
-
-    :else
-    form))
+  (walk/rewrite-form form
+                     #(rewrite-expression-list % grammar)
+                     #(julia-rewrite-expression % grammar)))
 
 (defn- rewrite-do-statement
   [form grammar]
-  (let [[tag & body] form
-        body (if (= 'do* (first body))
-               (rest body)
-               body)]
-    (with-form-meta
-      form
-      (apply list tag
-             (-> body
-                 (julia-rewrite-statements grammar)
-                 lift/splice-do*)))))
+  (stmt/rewrite-do-statement form
+                             #(julia-rewrite-statements % grammar)
+                             (fn [body]
+                               (if (= 'do* (first body))
+                                 (rest body)
+                                 body))))
 
 (defn- rewrite-destructuring-var
   [form grammar]
@@ -371,11 +209,11 @@
       form
       (apply list 'do*
              (concat [(apply list tag temp (concat leading [bound*]))]
-                     (map (fn [sym]
+                     (map (fn [[sym value]]
                             (apply list tag sym
                                    (concat leading
-                                           [(destructure-value temp sym)])))
-                          (destructure-symbols target)))))))
+                                           [value])))
+                          (destruct/destructure-bindings target temp ut/sym-default-str)))))))
 
 (defn- rewrite-var-statement
   [form grammar]
@@ -384,7 +222,7 @@
       (empty? args)
       form
 
-      (destructure-target? target)
+      (destruct/destructure-target? target)
       (rewrite-destructuring-var form grammar)
 
       :else
@@ -398,50 +236,31 @@
 
 (defn- rewrite-return-statement
   [form grammar]
-  (let [[tag & args] form]
-    (with-form-meta
-      form
-      (apply list tag
-             (map #(julia-rewrite-expression % grammar) args)))))
+  (stmt/rewrite-return-statement form
+                                 #(julia-rewrite-expression % grammar)))
 
 (defn- rewrite-if-statement
   [form grammar]
-  (let [[tag test then & [else]] form]
-    (with-form-meta
-      form
-      (apply list tag
-             (cond-> [(julia-rewrite-conditional-expression test grammar)
-                      (julia-rewrite-statement then grammar)]
-               else (conj (julia-rewrite-statement else grammar)))))))
+  (stmt/rewrite-if-statement form
+                             #(julia-rewrite-conditional-expression % grammar)
+                             #(julia-rewrite-statement % grammar)))
 
 (defn- rewrite-when-statement
   [form grammar]
-  (let [[tag test & body] form]
-    (with-form-meta
-      form
-      (apply list tag
-             (julia-rewrite-conditional-expression test grammar)
-             (julia-rewrite-statements body grammar)))))
+  (stmt/rewrite-when-statement form
+                               #(julia-rewrite-conditional-expression % grammar)
+                               #(julia-rewrite-statements % grammar)))
 
 (defn- rewrite-while-statement
   [form grammar]
-  (let [[tag test & body] form]
-    (with-form-meta
-      form
-      (apply list tag
-             (julia-rewrite-conditional-expression test grammar)
-             (julia-rewrite-statements body grammar)))))
+  (stmt/rewrite-while-statement form
+                                #(julia-rewrite-conditional-expression % grammar)
+                                #(julia-rewrite-statements % grammar)))
 
 (defn- rewrite-defn-statement
   [form grammar]
-  (let [[tag name args & body] form]
-    (with-form-meta
-      form
-      (apply list tag name args
-             (-> body
-                 (julia-rewrite-statements grammar)
-                 lift/splice-do*
-                 lift/wrap-body)))))
+  (stmt/rewrite-defn-statement form
+                               #(julia-rewrite-statements % grammar)))
 
 (defn julia-rewrite-statement
   [form grammar]
