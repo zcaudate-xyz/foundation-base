@@ -546,7 +546,7 @@
 
 (defn- render-target-runtime-items
   "Renders setup/teardown items for the requested languages while preserving
-    scaffold-only forms in their original position."
+   scaffold-only forms in their original position."
   [entry classification root-lang langs]
   (:rendered-items
    (reduce (fn [{:keys [rendered-items processed-langs]} item]
@@ -570,15 +570,18 @@
                     :processed-langs (into processed-langs (map first rendered))})
 
                  (some #{current-lang} langs)
-                 {:rendered-items (conj rendered-items (render-item-string item))
-                  :processed-langs (conj processed-langs current-lang)}
+                 (if (item-suppressed? entry item current-lang)
+                   {:rendered-items rendered-items
+                    :processed-langs processed-langs}
+                   {:rendered-items (conj rendered-items (render-item-string item))
+                    :processed-langs (conj processed-langs current-lang)})
 
                  :else
                  {:rendered-items rendered-items
                   :processed-langs processed-langs})
-               ;; Preserve scaffold-only forms that aren't language-specific.
-               {:rendered-items (conj rendered-items (render-item-string item))
-                :processed-langs processed-langs}))
+                ;; Preserve scaffold-only forms that aren't language-specific.
+                {:rendered-items (conj rendered-items (render-item-string item))
+                 :processed-langs processed-langs}))
            {:rendered-items []
             :processed-langs #{}}
            (classify-lang-items classification))))
@@ -590,25 +593,27 @@
                              sort-items
                              (group-by item-lang))
         root-snippets   (mapv render-check-clause root-checks)
-         extra-snippets
-         (mapcat (fn [lang]
-                   (let [existing       (vec (get derived-by-lang lang))
-                         eligible-roots (vec (remove #(item-suppressed? entry % lang) root-checks))
-                         generated      (map-indexed
-                                         (fn [idx root-item]
-                                           (if-let [item (nth existing idx nil)]
-                                             (render-check-clause item)
-                                             (when (contains? target-set lang)
-                                               (render-generated-check-clause
-                                                entry
-                                                root-item
-                                                lang))))
-                                         eligible-roots)
-                        trailing       (map render-check-clause
-                                            (drop (count eligible-roots) existing))]
-                    (concat (remove nil? generated)
-                            trailing)))
-                ordered-extra-langs)]
+        extra-snippets  (mapcat (fn [lang]
+                                  (let [existing       (->> (get derived-by-lang lang)
+                                                            (remove #(item-suppressed? entry % lang))
+                                                            vec)
+                                        eligible-roots (vec (remove #(item-suppressed? entry % lang)
+                                                                    root-checks))
+                                        generated      (map-indexed
+                                                        (fn [idx root-item]
+                                                          (if-let [item (nth existing idx nil)]
+                                                            (render-check-clause item)
+                                                            (when (contains? target-set lang)
+                                                              (render-generated-check-clause
+                                                               entry
+                                                               root-item
+                                                               lang))))
+                                                        eligible-roots)
+                                        trailing       (map render-check-clause
+                                                            (drop (count eligible-roots) existing))]
+                                    (concat (remove nil? generated)
+                                            trailing)))
+                                ordered-extra-langs)]
     (vec (concat root-snippets extra-snippets))))
 
 (defn- render-fact-string-add
@@ -858,7 +863,9 @@
                              (group-by item-lang))]
     (if (= lang root-lang)
       (mapv render-check-clause root-checks)
-      (let [existing       (vec (get derived-by-lang lang))
+      (let [existing       (->> (get derived-by-lang lang)
+                                (remove #(item-suppressed? entry % lang))
+                                vec)
             eligible-roots (vec (remove #(item-suppressed? entry % lang) root-checks))
             generated      (map-indexed
                             (fn [idx root-item]
@@ -876,10 +883,14 @@
   (let [runtime-items (runtime-item-map classification)
         target-item   (get runtime-items lang)
         root-item     (get runtime-items root-lang)]
-    (or (some-> target-item render-item-string)
-        (when (and root-item
-                   (not= lang root-lang))
-          (render-generated-item-string entry root-item lang)))))
+    (or (when (and target-item
+                   (or (= lang root-lang)
+                       (not (item-suppressed? entry target-item lang))))
+          (render-item-string target-item))
+         (when (and root-item
+                    (not= lang root-lang)
+                    (not (item-suppressed? entry root-item lang)))
+           (render-generated-item-string entry root-item lang)))))
 
 (defn- render-fact-string-target
   [entry root-lang lang]

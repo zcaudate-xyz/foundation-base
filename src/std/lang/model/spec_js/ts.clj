@@ -1,6 +1,6 @@
 (ns std.lang.model.spec-js.ts
   (:require [clojure.string :as str]
-            [std.lang.model.spec-xtalk.mixer :as mixer]
+            [std.lang.typed.xtalk-parse :as xtalk-parse]
             [std.lang.typed.xtalk-common :as types]))
 
 (declare emit-ts-type)
@@ -317,11 +317,11 @@
   [{:keys [main runtime-output]}]
   {:output (declaration-output-path runtime-output)
    :body   (-> main
-               mixer/mix-namespace
+               xtalk-parse/analyze-namespace
                emit-analysis-declarations)})
 
 (defn emit-namespace-declarations
   [ns-sym]
   (-> ns-sym
-      mixer/mix-namespace
+      xtalk-parse/analyze-namespace
       emit-analysis-declarations))

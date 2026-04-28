@@ -813,7 +813,6 @@
   (s/pedantic '[xt.db.impl.cache-pull])
   (s/run '[xt.db.impl.cache-pull])
   
-  
-  (s/seedgen-benchadd '[xt.db.impl.cache-pull] {:lang [:dart] :write true})
+  (s/seedgen-benchadd '[xt.db] {:lang [:dart :julia] :write true})
   (s/seedgen-langadd '[xt.db.impl.cache-pull] {:lang [:lua :python] :write true})
   (s/seedgen-langremove '[xt.db.impl.cache-pull] {:lang [:lua :python] :write true}))

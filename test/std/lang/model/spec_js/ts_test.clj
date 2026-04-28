@@ -1,8 +1,8 @@
 (ns std.lang.model.spec-js.ts-test
   (:use code.test)
   (:require [clojure.string :as str]
-            [std.lang.model.spec-js.ts :refer :all]
-            [std.lang.model.spec-xtalk.mixer :as mixer]))
+             [std.lang.model.spec-js.ts :refer :all]
+             [std.lang.typed.xtalk-parse :as xtalk-parse]))
 
 (def sample-analysis
   {:ns 'sample.user
@@ -223,7 +223,7 @@
 
 (fact "does not duplicate same-name callable specs in declaration output"
   (let [out (-> 'std.lang.model.spec-xtalk-typed-fixture
-                mixer/mix-namespace
+                xtalk-parse/analyze-namespace
                 emit-analysis-declarations)]
     [(count (re-seq #"export type find_user =" out))
      (str/includes? out "export interface User")])

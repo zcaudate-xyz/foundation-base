@@ -1,6 +1,6 @@
 (ns std.lang.model.spec-go.typed
   (:require [clojure.string :as str]
-            [std.lang.model.spec-xtalk.mixer :as mixer]))
+            [std.lang.typed.xtalk-parse :as xtalk-parse]))
 
 (declare emit-go-type)
 (declare lossy-go-type)
@@ -182,5 +182,5 @@
    (emit-namespace-declarations ns-sym {}))
   ([ns-sym opts]
    (-> ns-sym
-       mixer/mix-namespace
+       xtalk-parse/analyze-namespace
        (emit-analysis-declarations opts))))
