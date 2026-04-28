@@ -13,16 +13,16 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.common-notify/notify-ceremony :added "4.0"}
 (fact "creates the ceremony in order to get the port and method type"
 
   (notify/notify-ceremony (assoc (l/rt :julia)
                                  :type :basic))
-  => [(:id (l/rt :js))
+  => [(:id (l/rt :julia))
       (:socket-port (l/default-notify))
-      :js :socket
+      :julia :socket
       "127.0.0.1"
       {}])
 

@@ -10,7 +10,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.common-iter/iter-eq :added "4.1"}
 (fact "checks that two iterators are equal"

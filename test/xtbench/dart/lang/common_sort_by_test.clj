@@ -10,7 +10,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.common-sort-by/sort-by :added "4.1"}
 (fact "sorts string keys lexicographically"

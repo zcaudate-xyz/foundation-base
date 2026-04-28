@@ -8,7 +8,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.common-sort-topo/sort-edges-build :added "4.1"}
 (fact "builds an edge with links"

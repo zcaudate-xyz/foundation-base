@@ -10,7 +10,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.common-string/get-char :added "4.1"}
 (fact "gets a character code from string"
@@ -160,7 +160,7 @@
 
 ^{:refer xt.lang.common-string/split-long :added "4.1"
   :setup [(def +s+ (apply str (repeat 5 "1234567890")))
-          (def +out+ ["1234567890" "1234567890" "1234567890" "1234567890" "1234567890"])]}
+                   (def +out+ ["1234567890" "1234567890" "1234567890" "1234567890" "1234567890"])]}
 (fact "splits a long string"
 
   (!.julia (xts/split-long nil 10))

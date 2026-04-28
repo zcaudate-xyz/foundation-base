@@ -9,7 +9,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.common-space/xt-exists? :added "4.0"
   :setup [(l/rt:restart)]}

@@ -1,11 +1,11 @@
-(ns xtbench.dart.lang.spec-promise-test
+(ns xtbench.julia.lang.spec-promise-test
   (:require [std.lang :as l]
             [xt.lang.common-notify :as notify]
             [xt.lang.spec-base :as xt])
   (:use code.test))
 
-(l/script- :dart
-  {:runtime :twostep
+(l/script- :julia
+  {:runtime :basic
    :require [[xt.lang.spec-promise :as spec-promise]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]]})
@@ -17,7 +17,7 @@
 ^{:refer xt.lang.spec-promise/x:promise-then :added "4.1"}
 (fact "chains a resolved js promise"
 
-  (notify/wait-on :dart
+  (notify/wait-on :julia
     (spec-promise/x:promise-then
      (spec-promise/x:promise
       (fn []
@@ -29,7 +29,7 @@
 ^{:refer xt.lang.spec-promise/x:promise-catch :added "4.1"}
 (fact "recovers a rejected js promise"
 
-  (notify/wait-on :dart
+  (notify/wait-on :julia
     (spec-promise/x:promise-catch
      (spec-promise/x:promise
       (fn []
@@ -43,7 +43,7 @@
 ^{:refer xt.lang.spec-promise/x:promise-finally :added "4.1"}
 (fact "runs cleanup without changing the resolved value"
 
-  (notify/wait-on :dart
+  (notify/wait-on :julia
     (var out [])
     (spec-promise/x:promise-then
      (spec-promise/x:promise-finally
@@ -63,7 +63,7 @@
 ^{:refer xt.lang.spec-promise/x:promise-native? :added "4.1"}
 (fact "detects native js promises"
 
-  (!.dt
+  (!.julia
     (var p
          (spec-promise/x:promise
           (fn []
@@ -75,7 +75,7 @@
 ^{:refer xt.lang.spec-promise/x:with-delay :added "4.1"}
 (fact "delays asynchronous js computations"
 
-  (notify/wait-on :dart
+  (notify/wait-on :julia
     (spec-promise/x:with-delay 100
                                (fn []
                                  (repl/notify "OK"))))

@@ -14,7 +14,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.spec-base/for:array :added "4.1"}
 (fact "iterates arrays in order"

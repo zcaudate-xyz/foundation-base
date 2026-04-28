@@ -9,7 +9,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.common-tree/eq-nested-loop :added "4.1"}
 (fact "switch for nested check"

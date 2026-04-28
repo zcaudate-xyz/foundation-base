@@ -90,7 +90,7 @@
 
 ^{:refer xt.lang.spec-base/x:last :added "4.1"}
 (fact "gets the last array element"
-  
+
   (!.julia
     (xt/x:last ["a" "b" "c" "d"]))
   => "d")
@@ -98,8 +98,8 @@
 ^{:refer xt.lang.spec-base/x:second-last :added "4.1"}
 (fact "gets the element before the last"
 
-  ^*(!.julia
-      (xt/x:second-last ["a" "b" "c" "d"]))
+  (!.julia
+    (xt/x:second-last ["a" "b" "c" "d"]))
   => "c")
 
 ^{:refer xt.lang.spec-base/x:arr-remove :added "4.1"}
@@ -1050,11 +1050,11 @@
 (fact "encodes return payloads as json"
 
   (!.julia
-    (var encode-fn
-         (fn [value id key]
-           (return
-            (xt/x:return-encode value id key))))
-    (xt/x:json-decode (encode-fn {:a 1} "id" "key")))
+     (var encode-fn
+          (fn [value id key]
+            (return
+             (xt/x:return-encode value id key))))
+     (xt/x:json-decode (encode-fn {:a 1} "id" "key")))
   => {"return" "object", "key" "key", "id" "id", "value" {"a" 1}, "type" "data"}
 
   (!.julia
@@ -1092,26 +1092,26 @@
 (fact "evaluates code through wrapped return handlers"
 
   (!.julia
-    (var encode-fn
-         (fn [value id key]
-           (return
-            (xt/x:return-encode value id key))))
-    (var wrap-fn
-         (fn [gen-fn wrap-fn]
-           (return
-            (xt/x:return-wrap gen-fn wrap-fn))))
-    (var eval-fn
-         (fn [s re-wrap-fn]
-           (return
-            (xt/x:return-eval s re-wrap-fn))))
-    (xt/x:json-decode
-     (eval-fn "1 + 1"
-              (fn [f]
-                (return
-                 (wrap-fn f
-                          (fn [out]
-                            (return
-                             (encode-fn out "id-A" "key-B")))))))))
+   (var encode-fn
+        (fn [value id key]
+          (return
+           (xt/x:return-encode value id key))))
+   (var wrap-fn
+        (fn [gen-fn wrap-fn]
+          (return
+           (xt/x:return-wrap gen-fn wrap-fn))))
+   (var eval-fn
+        (fn [s re-wrap-fn]
+          (return
+           (xt/x:return-eval s re-wrap-fn))))
+   (xt/x:json-decode
+    (eval-fn "1 + 1"
+             (fn [f]
+               (return
+                (wrap-fn f
+                         (fn [out]
+                           (return
+                            (encode-fn out "id-A" "key-B")))))))))
   => (contains-in {"key" "key-B", "id" "id-A", "value" 2, "type" "data"}))
 
 ^{:refer xt.lang.spec-base/x:bit-and :added "4.1"}
@@ -1156,7 +1156,7 @@
          (fn []
            (xt/x:global-del COMMON_SPEC_GLOBAL)
            (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
-    
+                        
     [(set-fn)
      (!:G COMMON_SPEC_GLOBAL)
      (del-fn)])
@@ -1183,7 +1183,7 @@
          (fn []
            (xt/x:global-del COMMON_SPEC_GLOBAL)
            (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
-    
+                        
     [(set-fn)
      (del-fn)])
   => [true false])
@@ -1202,7 +1202,7 @@
 
   (!.julia
     (do:>
-     (x:throw "ERROW")))
+     (x:throw "THROW")))
   => (throws))
 
 ^{:refer xt.lang.spec-base/x:now-ms :added "4.1"}

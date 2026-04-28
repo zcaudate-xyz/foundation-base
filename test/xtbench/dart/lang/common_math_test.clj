@@ -9,7 +9,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.common-math/abs :added "4.1"}
 (fact "returns the absolute value"

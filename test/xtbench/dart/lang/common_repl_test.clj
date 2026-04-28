@@ -13,7 +13,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.common-repl/socket-connect :added "4.0"
   :setup [(l/rt:restart)]}
@@ -71,8 +71,8 @@
 
 ^{:refer xt.lang.common-repl/notify-http :added "4.0"
   :setup [(!.dt
-  (:= (!:G fetch)
-      (. (require "node-fetch") default)))]}
+            (:= (!:G fetch)
+                (. (require "node-fetch") default)))]}
 (fact "call a http notify function."
 
   (notify/wait-on-call

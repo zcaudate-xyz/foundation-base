@@ -9,7 +9,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.common-data/not-empty? :added "4.1"}
 (fact "checks that array is not empty"

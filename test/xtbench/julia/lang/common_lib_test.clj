@@ -9,7 +9,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.common-lib/type-native :added "4.1"}
 (fact "gets the native type"
