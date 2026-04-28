@@ -6,7 +6,7 @@
   {:require [[xt.lang.spec-base :as xt]
              [xt.db.schema.sql-util :as ut]
              [xt.db.schema.base-check :as check]
-             [xt.sys.conn-dbsql :as driver]]})
+             [xt.old.sys.conn-dbsql :as driver]]})
 
 (defn.xt decode-return
   "decodes the return value"

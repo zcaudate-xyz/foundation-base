@@ -9,7 +9,7 @@
    :config  {:exec ["resty" "--http-conf" (config/create-resty-params) "-e"]}
    :require [[lua.nginx :as n]
              [lua.nginx.task :as t]
-             [xt.sys.cache-common :as cache]]})
+             [xt.old.sys.cache-common :as cache]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]

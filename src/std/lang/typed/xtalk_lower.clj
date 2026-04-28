@@ -63,8 +63,8 @@
   {'xt.lang.common-lib/arrayify "arrayify"
    'xt.lang.common-lib/not-empty? "not-empty?"
    'xt.lang.common-lib/is-empty? "is-empty?"
-   'xt.lib.event-common/make-container "make-container"
-   'xt.lib.event-common/blank-container "blank-container"})
+   'xt.old.event-common/make-container "make-container"
+   'xt.old.event-common/blank-container "blank-container"})
 
 (defn lower-defaulted-target
   [target args]

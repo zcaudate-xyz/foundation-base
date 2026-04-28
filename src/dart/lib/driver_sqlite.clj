@@ -60,7 +60,7 @@
         (return []))))
 
 (defn.dt set-methods
-  "Attaches the DBSQL driver methods expected by `xt.sys.conn-dbsql`."
+  "Attaches the DBSQL driver methods expected by `xt.old.sys.conn-dbsql`."
   {:added "4.1"}
   [db]
   (var conn {"raw" db})

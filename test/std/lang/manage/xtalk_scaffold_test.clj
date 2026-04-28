@@ -47,7 +47,7 @@
   (read-string
    "[(ns xt.sample.base-view-test
         (:require [std.lang :as l]
-                  [xt.lib.db.base-view :as v])
+                  [xt.old.db.base-view :as v])
         (:use code.test))
       (l/script- :js {:runtime :basic})
       (l/script- :lua {:runtime :basic})
@@ -80,7 +80,7 @@
   (read-string
    "[(ns xtbench.js.sample.base-view-test
          (:require [std.lang :as l]
-                   [xt.lib.db.base-view :as v])
+                   [xt.old.db.base-view :as v])
          (:use code.test))
        (l/script- :js {:runtime :basic})
        (fact:global {:setup [(l/rt:restart)
@@ -154,7 +154,7 @@
    "[(ns xt.sample.sql-util-test
          (:require [std.lang :as l]
                    [xt.lang.spec-base :as xt]
-                   [xt.lib.db.sql-util :as ut])
+                   [xt.old.db.sql-util :as ut])
          (:use code.test))
        (l/script- :js {:runtime :basic})
        (l/script- :lua {:runtime :basic})
@@ -187,7 +187,7 @@
                    [xt.lang.common-notify :as notify])
          (:use code.test))
        (l/script- :js {:runtime :basic
-                       :require [[xt.sys.conn-dbsql :as dbsql]
+                       :require [[xt.old.sys.conn-dbsql :as dbsql]
                                  [js.lib.driver-sqlite :as js-sqlite]]})
        (fact \"sqlite helper\"
          (notify/wait-on :js
@@ -203,7 +203,7 @@
       ^{:xtalk/template true}
       (l/script- :js {:runtime :basic
                       :require [[xt.lang.common-lib :as k]
-                                [xt.sys.conn-dbsql :as dbsql]
+                                [xt.old.sys.conn-dbsql :as dbsql]
                                 [js.lib.driver-postgres :as js-postgres]]})
       (defn ^{:lang-exceptions {:python {:skip true}}}
         bootstrap-js
@@ -281,7 +281,7 @@
   (read-string
    "[(ns xt.sample.base-mixed-test
        (:require [std.lang :as l]
-                 [xt.lib.db.base-view :as v])
+                 [xt.old.db.base-view :as v])
        (:use code.test))
       (l/script- :js {:runtime :basic})
       (l/script- :lua {:runtime :basic})
@@ -510,15 +510,15 @@
 (fact "uses canonical xtbench paths for generated suites"
   (str/ends-with? (derived-test-file-path {:root "." :test-paths ["test"]}
                                           "test/xt/db/base_scope_test.clj"
-                                          'xt.lib.db.base-scope-test
+                                          'xt.old.db.base-scope-test
                                           'xtbench.dart.db.base-scope-test)
                   "/test/xtbench/dart/db/base_scope_test.clj")
   => true
 
   (str/ends-with? (derived-test-file-path {:root "." :test-paths ["test"]}
                                           "test/xt/db/base_scope_test.clj"
-                                          'xt.lib.db.base-scope-test
-                                          'xt.lib.db.base-scope-test)
+                                          'xt.old.db.base-scope-test
+                                          'xt.old.db.base-scope-test)
                   "/test/xt/db/base_scope_test.clj")
   => true)
 
@@ -629,7 +629,7 @@
     [(str/includes? py-out "(l/script-\n :python")
      (str/includes? py-out "[xt.lang.common-lib :as k]")
      (not (str/includes? py-out "js.lib.driver-postgres"))
-     (not (str/includes? py-out "xt.sys.conn-dbsql"))
+     (not (str/includes? py-out "xt.old.sys.conn-dbsql"))
      (not (str/includes? py-out "bootstrap-js"))])
   => [true true true true true])
 
@@ -700,7 +700,7 @@
      (str/includes? dt-out "xtbench.dart.db.base-scope-test")
      (str/includes? dt-out "!.dt")
      (not (str/includes? dt-out "!.js"))
-     (str/includes? dt-out "xt.lib.db.base-scope/get-tree")])
+     (str/includes? dt-out "xt.old.db.base-scope/get-tree")])
   => [true true true true true])
 
 ^{:refer std.lang.manage.xtalk-scaffold/classify-split-form :added "4.1"}

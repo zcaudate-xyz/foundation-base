@@ -91,8 +91,8 @@
 (fact "get-value returns value defs when present"
   (do
     (clear-registry!)
-    (analyze-and-register! 'xt.lib.db.base-scope)
-    (-> (get-value 'xt.lib.db.base-scope/Scopes) :name))
+    (analyze-and-register! 'xt.old.db.base-scope)
+    (-> (get-value 'xt.old.db.base-scope/Scopes) :name))
   => "Scopes")
 
 ^{:refer std.lang.typed.xtalk/list-specs :added "4.1"}
@@ -122,7 +122,7 @@
 (fact "lists values through facade"
   (do
     (clear-registry!)
-    (analyze-and-register! 'xt.lib.db.base-scope)
+    (analyze-and-register! 'xt.old.db.base-scope)
     (pos? (count (list-values))))
   => true)
 
@@ -163,8 +163,8 @@
 (fact "checks namespaces through facade"
   (do
     (clear-registry!)
-    (:namespace (check-namespace 'xt.lib.event-route)))
-  => 'xt.lib.event-route)
+    (:namespace (check-namespace 'xt.old.event-route)))
+  => 'xt.old.event-route)
 
 
 ^{:refer std.lang.typed.xtalk/analyze-file-raw :added "4.1"}

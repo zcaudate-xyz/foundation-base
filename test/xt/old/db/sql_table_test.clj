@@ -1,0 +1,197 @@
+(ns xt.old.db.sql-table-test
+  (:require [std.lang :as l]
+            [std.string.prose :as prose])
+  (:use code.test))
+
+(l/script- :js
+  {:runtime :basic
+   :require [[xt.old.db.base-schema :as sch]
+             [xt.old.db.base-flatten :as f]
+             [xt.old.db.cache-util :as cache-util]
+             [xt.old.db.sql-raw :as raw]
+             [xt.old.db.sql-graph :as graph]
+             [xt.old.db.sql-util :as ut]
+             [xt.lang.common-lib :as k]
+             [xt.old.db.sql-table :as table]
+             [xt.old.db.sample-test :as sample]]})
+
+(l/script- :lua
+  {:runtime :basic
+   :require [[xt.old.db.base-schema :as sch]
+             [xt.lang.common-lib :as k]
+             [xt.old.db.sql-util :as ut]
+             [xt.old.db.sql-table :as table]
+             [xt.old.db.sample-test :as sample]]})
+
+(l/script- :python
+  {:runtime :basic
+   :require [[xt.old.db.base-schema :as sch]
+             [xt.lang.common-lib :as k]
+             [xt.old.db.sql-util :as ut]
+             [xt.old.db.sql-table :as table]
+             [xt.old.db.sample-test :as sample]]})
+
+(fact:global
+ {:setup    [(l/rt:restart)
+             (do (l/rt:scaffold :js)
+                 (l/rt:scaffold :lua)
+                 (l/rt:scaffold :python)
+                 true)]
+  :teardown [(l/rt:stop)]})
+
+^{:refer xt.old.db.sql-table/table-update-single :added "4.0"}
+(fact "generates single update statement"
+
+  (!.js
+   (table/table-update-single sample/Schema
+                              "UserAccount"
+                              "AAA"
+                              {:password-hash "HELLO"}
+                              {}))
+  => "UPDATE UserAccount\n SET password_hash = 'HELLO'\n WHERE id = 'AAA';")
+
+^{:refer xt.old.db.sql-table/table-insert-single :added "4.0"}
+(fact "generates single insert statement"
+
+  (!.js
+   (table/table-insert-single sample/Schema
+                              "UserAccount"
+                              {:id "AAA" :password-hash "HELLO"}
+                              {}))
+  => "INSERT INTO UserAccount\n (id, password_hash)\n VALUES\n ('AAA','HELLO');")
+
+^{:refer xt.old.db.sql-table/table-delete-single :added "4.0"}
+(fact "generates single delete statement"
+
+  (!.js
+   (table/table-delete-single sample/Schema
+                              "UserAccount"
+                              "AAA"
+                              {}))
+  => "DELETE FROM UserAccount WHERE id = 'AAA';")
+
+^{:refer xt.old.db.sql-table/table-upsert-single :added "4.0"}
+(fact "generates single upsert statement"
+
+  (!.js
+   (table/table-upsert-single sample/Schema
+                              "UserAccount"
+                              {:id "AAA" :password-hash "HELLO"}
+                              {}))
+  => (prose/|
+      "INSERT INTO UserAccount"
+      " (id, password_hash)"
+      " VALUES"
+      " ('AAA','HELLO')"
+      "ON CONFLICT (id) DO UPDATE SET"
+      "password_hash=coalesce(\"excluded\".password_hash,password_hash);"))
+
+^{:refer xt.old.db.sql-table/table-filter-id :added "4.0"}
+(fact "predicate for flat entry")
+
+^{:refer xt.old.db.sql-table/table-get-data :added "4.0"}
+(fact "gets data flat entry")
+
+^{:refer xt.old.db.sql-table/table-emit-flat :added "4.0"}
+(fact "emit util for insert and upsert")
+
+^{:refer xt.old.db.sql-table/table-insert :added "4.0"
+  :setup [(def +inserts+
+            [(prose/|
+              "INSERT INTO UserAccount"
+              " (id, nickname, password_hash, password_salt, password_updated, is_super, is_suspended, is_official)"
+              " VALUES"
+              " ('00000000-0000-0000-0000-000000000000','root',NULL,NULL,'1630408723423619',TRUE,FALSE,FALSE);")
+             (prose/|
+              "INSERT INTO UserProfile"
+              " (id, account_id, first_name, last_name, city, state_id, country_id, about, language, detail)"
+              " VALUES"
+              " ('c4643895-b0ce-44cc-b07b-2386bf18d43b','00000000-0000-0000-0000-000000000000','Root','User',NULL,NULL,NULL,NULL,'en','{\"hello\":\"world\"}');")])]}
+(fact "creates an insert statement"
+
+  (!.js
+   (table/table-insert sample/Schema
+                       sample/SchemaLookup
+                       "UserAccount"
+                       sample/RootUser
+                       {}))
+
+  => +inserts+
+
+  (!.lua
+   (table/table-insert sample/Schema
+                       sample/SchemaLookup
+                       "UserAccount"
+                       sample/RootUser
+                       {}))
+  => vector?
+
+
+  (!.py
+   (table/table-insert sample/Schema
+                       sample/SchemaLookup
+                       "UserAccount"
+                       sample/RootUser
+                       {}))
+  => vector?)
+
+^{:refer xt.old.db.sql-table/table-upsert :added "4.0"
+  :setup [(def +upserts+
+            [(prose/|
+              "INSERT INTO UserAccount"
+              " (id, nickname, password_hash, password_salt, password_updated, is_super, is_suspended, is_official)"
+              " VALUES"
+              " ('00000000-0000-0000-0000-000000000000','root',NULL,NULL,'1630408723423619',TRUE,FALSE,FALSE)"
+              "ON CONFLICT (id) DO UPDATE SET"
+              "nickname=coalesce(\"excluded\".nickname,nickname),"
+              "password_hash=coalesce(\"excluded\".password_hash,password_hash),"
+              "password_salt=coalesce(\"excluded\".password_salt,password_salt),"
+              "password_updated=coalesce(\"excluded\".password_updated,password_updated),"
+              "is_super=coalesce(\"excluded\".is_super,is_super),"
+              "is_suspended=coalesce(\"excluded\".is_suspended,is_suspended),"
+              "is_official=coalesce(\"excluded\".is_official,is_official);")
+             (prose/|
+              "INSERT INTO UserProfile"
+              " (id, account_id, first_name, last_name, city, state_id, country_id, about, language, detail)"
+              " VALUES"
+              " ('c4643895-b0ce-44cc-b07b-2386bf18d43b','00000000-0000-0000-0000-000000000000','Root','User',NULL,NULL,NULL,NULL,'en','{\"hello\":\"world\"}')"
+              "ON CONFLICT (id) DO UPDATE SET"
+              "account_id=coalesce(\"excluded\".account_id,account_id),"
+              "first_name=coalesce(\"excluded\".first_name,first_name),"
+              "last_name=coalesce(\"excluded\".last_name,last_name),"
+              "city=coalesce(\"excluded\".city,city),"
+              "state_id=coalesce(\"excluded\".state_id,state_id),"
+              "country_id=coalesce(\"excluded\".country_id,country_id),"
+              "about=coalesce(\"excluded\".about,about),"
+              "language=coalesce(\"excluded\".language,language),"
+              "detail=coalesce(\"excluded\".detail,detail);")])]}
+(fact "generate upsert statement"
+
+  (!.js
+   (table/table-upsert sample/Schema
+                       sample/SchemaLookup
+                       "UserAccount"
+                       sample/RootUser
+                       {}))
+
+  => +upserts+
+
+  (!.lua
+   (table/table-upsert sample/Schema
+                       sample/SchemaLookup
+                       "UserAccount"
+                       sample/RootUser
+                       {}))
+  => vector?
+
+  (!.py
+   (table/table-upsert sample/Schema
+                       sample/SchemaLookup
+                       "UserAccount"
+                       sample/RootUser
+                       {}))
+  => vector?)
+
+(comment
+  (!.lua (tostring 1630408723423619))
+  )

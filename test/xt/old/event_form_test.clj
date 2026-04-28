@@ -1,0 +1,956 @@
+(ns xt.old.event-form-test
+  (:require [net.http :as http]
+            [std.json :as json]
+            [std.lang :as l]
+            [std.lang.interface.type-notify :as interface]
+            [xt.lang.common-notify :as notify])
+  (:use code.test))
+
+(l/script- :js
+  {:runtime :basic
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-repl :as repl]
+             [xt.old.event-form :as form]]})
+
+(l/script- :lua
+  {:runtime :basic
+   :config  {:program :resty}
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-repl :as repl]
+             [xt.old.event-form :as form]]})
+
+(l/script- :python
+  {:runtime :basic
+    :require [[xt.lang.common-lib :as k]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.spec-base :as xt]
+              [xt.lang.common-repl :as repl]
+              [xt.old.event-form :as form]]})
+
+(l/script- :dart
+  {:runtime :twostep
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-repl :as repl]
+             [xt.old.event-form :as form]]})
+
+(fact:global
+ {:setup    [(l/rt:restart)]
+  :teardown [(l/rt:stop)]})
+
+^{:refer xt.old.event-form/remove-listener :adopt true :added "4.0"}
+(fact "removes all listeners")
+
+^{:refer xt.old.event-form/list-listeners :adopt true :added "4.0"
+  :setup [(def +out+
+            (contains-in
+             [(contains ["a1" "b2" "c3"] :in-any-order)
+              {"callback" "<function>",
+               "pred" "<function>",
+               "meta"
+               {"listener/id" "b2",
+                "form/fields" ["login"],
+                "listener/type" "form"}}
+              (contains ["a1" "c3"] :in-any-order)]))]}
+(fact "lists all listeners"
+
+  (!.js
+   (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+   (form/add-listener f "a1" ["login"]  (fn:>) nil)
+   (form/add-listener f "b2" ["login"]  (fn:>) nil)
+   (form/add-listener f "c3" ["login"]  (fn:>) nil)
+   [(form/list-listeners f)
+    (xtd/tree-get-data (form/remove-listener f  "b2"))
+    (form/list-listeners f)])
+  => +out+
+
+  (!.lua
+   (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+   (form/add-listener f "a1" ["login"]  (fn:>) nil)
+   (form/add-listener f "b2" ["login"]  (fn:>) nil)
+   (form/add-listener f "c3" ["login"]  (fn:>) nil)
+   [(form/list-listeners f)
+    (xtd/tree-get-data (form/remove-listener f  "b2"))
+    (form/list-listeners f)])
+  => +out+
+
+  (!.py
+   (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+   (form/add-listener f "a1" ["login"]  (fn:>) nil)
+   (form/add-listener f "b2" ["login"]  (fn:>) nil)
+   (form/add-listener f "c3" ["login"]  (fn:>) nil)
+   [(form/list-listeners f)
+    (xtd/tree-get-data (form/remove-listener f  "b2"))
+    (form/list-listeners f)])
+  => +out+)
+
+^{:refer xt.old.event-form/make-form :added "4.0"
+  :setup [(def +out+
+            {"initial" "<function>",
+             "::" "event.form",
+             "listeners" {},
+             "validators"
+             {"login"
+              [["is-required" {"message" "Required field.", "check" "<function>"}]]},
+             "data" {"login" ""},
+             "result"
+             {"status" "pending",
+              "fields" {"login" {"status" "pending"}},
+              "::" "validation.result"}})]}
+(fact "creates a form"
+
+  (!.js
+   (xtd/tree-get-data
+    (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]})))
+  => +out+
+
+  (!.lua
+   (xtd/tree-get-data
+    (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]})))
+  => +out+
+
+  (!.py
+   (xtd/tree-get-data
+    (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]})))
+
+  => +out+)
+
+^{:refer xt.old.event-form/check-event :added "4.0"}
+(fact "checks that event needs to be processed"
+
+  (!.js
+   [(form/check-event {:fields ["a" "b" "c"]}
+                      ["a"])
+    (form/check-event {:fields ["a" "b" "c"]}
+                      [])
+    (form/check-event {:fields ["a" "b" "c"]}
+                      ["b" "d"])])
+  => [true false true]
+
+  (!.lua
+   [(form/check-event {:fields ["a" "b" "c"]}
+                      ["a"])
+    (form/check-event {:fields ["a" "b" "c"]}
+                      [])
+    (form/check-event {:fields ["a" "b" "c"]}
+                      ["b" "d"])])
+  => [true false true]
+
+  (!.py
+   [(form/check-event {:fields ["a" "b" "c"]}
+                      ["a"])
+    (form/check-event {:fields ["a" "b" "c"]}
+                      [])
+    (form/check-event {:fields ["a" "b" "c"]}
+                      ["b" "d"])])
+  => [true false true])
+
+^{:refer xt.old.event-form/add-listener :added "4.0"
+  :setup [(def +out+
+            {"type" "form.data",
+             "fields" ["login"],
+             "meta" {"listener/id" "abc",
+                     "form/fields" ["login"],
+                     "listener/type" "form"}})]}
+(fact "adds listener to a form"
+
+  ^{:lang-exceptions
+    {:dart
+     {:form (notify/wait-on-call
+             2000
+             (fn []
+               (!.dt
+                (var f (form/make-form
+                        (fn:> {:login ""})
+                        {:login [["is-required"
+                                  {:message "Required field."
+                                   :check  (fn [v rec]
+                                             (return (and (k/not-nil? v)
+                                                          (< 0 (xt/x:len v)))))}]]}))
+                (form/add-listener
+                 f "abc" ["login"]
+                 (fn [val]
+                   (return
+                    (repl/notify-socket
+                     "127.0.0.1"
+                     (@! (:socket-port (l/default-notify)))
+                     val
+                     (@! notify/*override-id*)
+                     nil
+                     {})))
+                 nil)
+                (form/set-field f "login" "test00001"))))}}}
+  (notify/wait-on :js
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "abc" ["login"]  (repl/>notify))
+    (form/set-field f "login" "test00001"))
+  => +out+
+
+  (notify/wait-on :lua
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "abc" ["login"]  (repl/>notify))
+    (form/set-field f "login" "test00001"))
+  => +out+
+
+  (notify/wait-on :python
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "abc" ["login"]  (repl/>notify) nil)
+    (form/set-field f "login" "test00001"))
+  => +out+)
+
+^{:refer xt.old.event-form/trigger-all :added "4.0"
+  :setup [(def +out+
+            {"type" "form.data",
+             "fields" ["login"],
+             "meta"
+             {"listener/id" "abc",
+              "form/fields" ["login"],
+              "listener/type" "form"}})]}
+(fact "triggers all fields"
+
+  ^{:lang-exceptions
+    {:dart
+     {:form (notify/wait-on-call
+             2000
+             (fn []
+               (!.dt
+                (var f (form/make-form
+                        (fn:> {:login ""})
+                        {:login [["is-required"
+                                  {:message "Required field."
+                                   :check  (fn [v rec]
+                                             (return (and (k/not-nil? v)
+                                                          (< 0 (xt/x:len v)))))}]]}))
+                (form/add-listener
+                 f "abc" ["login"]
+                 (fn [val]
+                   (return
+                    (repl/notify-socket
+                     "127.0.0.1"
+                     (@! (:socket-port (l/default-notify)))
+                     val
+                     (@! notify/*override-id*)
+                     nil
+                     {})))
+                 nil)
+                (form/trigger-all f "form.data"))))}}}
+  (notify/wait-on :js
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "abc" ["login"]  (repl/>notify) nil)
+    (form/trigger-all f "form.data"))
+  => +out+
+
+  (notify/wait-on :lua
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "abc" ["login"]  (repl/>notify) nil)
+    (form/trigger-all f "form.data"))
+  => +out+
+
+  (notify/wait-on :python
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "abc" ["login"]  (repl/>notify) nil)
+    (form/trigger-all f "form.data"))
+  => +out+)
+
+^{:refer xt.old.event-form/trigger-field :added "4.0"
+  :setup [(def +out+
+            {"type" "form.data",
+             "fields" ["login"],
+             "meta"
+             {"listener/id" "abc",
+              "form/fields" ["login"],
+              "listener/type" "form"}})]}
+(fact "triggers the callback"
+
+  ^{:lang-exceptions
+    {:dart
+     {:form (notify/wait-on-call
+             2000
+             (fn []
+               (!.dt
+                (var f (form/make-form
+                        (fn:> {:login ""})
+                        {:login [["is-required"
+                                  {:message "Required field."
+                                   :check  (fn [v rec]
+                                             (return (and (k/not-nil? v)
+                                                          (< 0 (xt/x:len v)))))}]]}))
+                (form/add-listener
+                 f "abc" ["login"]
+                 (fn [val]
+                   (return
+                    (repl/notify-socket
+                     "127.0.0.1"
+                     (@! (:socket-port (l/default-notify)))
+                     val
+                     (@! notify/*override-id*)
+                     nil
+                     {})))
+                 nil)
+                (form/trigger-field f "login" "form.data"))))}}}
+  (notify/wait-on :js
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "abc" ["login"]  (repl/>notify) nil)
+    (form/trigger-field f "login" "form.data"))
+  => +out+
+
+  (notify/wait-on :lua
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "abc" ["login"]  (repl/>notify) nil)
+    (form/trigger-field f "login" "form.data"))
+  => +out+
+
+  (notify/wait-on :python
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "abc" ["login"]  (repl/>notify) nil)
+    (form/trigger-field f "login" "form.data"))
+  => +out+)
+
+^{:refer xt.old.event-form/set-field :added "4.0"
+  :setup [(def +out+
+            {"type" "form.data",
+             "fields" ["login"],
+             "meta"
+             {"listener/id" "a1",
+              "form/fields" ["login"],
+              "listener/type" "form"}})]}
+(fact "sets the field"
+
+  (notify/wait-on :js
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "a1"  ["login"] (repl/>notify) nil)
+    (form/set-field f "login" "world"))
+  => +out+
+
+  (notify/wait-on :lua
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "a1"  ["login"] (repl/>notify) nil)
+    (form/set-field f "login" "world"))
+  => +out+
+
+  (notify/wait-on :python
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "a1"  ["login"] (repl/>notify) nil)
+    (form/set-field f "login" "world"))
+  => +out+)
+
+^{:refer xt.old.event-form/get-field :added "4.0"}
+(fact "gets the field")
+
+^{:refer xt.old.event-form/toggle-field :added "4.0"}
+(fact "toggles the field")
+
+^{:refer xt.old.event-form/field-fn :added "4.0"
+  :setup [(def +out+
+            {"type" "form.data",
+             "fields" ["login"],
+             "meta"
+             {"listener/id" "a1",
+              "form/fields" ["login"],
+              "listener/type" "form"}})]}
+(fact "constructs a field function"
+
+  (notify/wait-on :js
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "a1"  ["login"] (repl/>notify) nil)
+    ((form/field-fn f "login")  "world"))
+  => +out+
+
+  (notify/wait-on :lua
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "a1"  ["login"] (repl/>notify) nil)
+    ((form/field-fn f "login")  "world"))
+  => +out+
+
+  (notify/wait-on :python
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "a1"  ["login"] (repl/>notify) nil)
+    ((form/field-fn f "login")  "world"))
+  => +out+)
+
+^{:refer xt.old.event-form/get-result :added "4.0"}
+(fact "gets the validation result")
+
+^{:refer xt.old.event-form/get-field-result :added "4.0"}
+(fact "gets the validation status"
+
+  (!.js
+   (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+   (form/get-field-result f "login"))
+  => {"status" "pending"}
+
+  (!.lua
+   (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+   (form/get-field-result f "login"))
+  => {"status" "pending"}
+
+  (!.py
+   (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+   (form/get-field-result f "login"))
+  => {"status" "pending"})
+
+^{:refer xt.old.event-form/get-data :added "4.0"}
+(fact "gets the data")
+
+^{:refer xt.old.event-form/set-data :added "4.0"
+  :setup [(def +out+
+            {"type" "form.data",
+             "fields" ["login"],
+             "meta"
+             {"listener/id" "a1",
+              "form/fields" ["login"],
+              "listener/type" "form"}})]}
+(fact "sets the data directly"
+
+  (notify/wait-on :js
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "a1"  ["login"] (repl/>notify) nil)
+    (form/set-data f {:login "world"}))
+  => +out+
+
+  (notify/wait-on :lua
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "a1"  ["login"] (repl/>notify) nil)
+    (form/set-data f {:login "world"}))
+  => +out+
+
+  (notify/wait-on :python
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "a1"  ["login"] (repl/>notify) nil)
+    (form/set-data f {:login "world"}))
+  => +out+)
+
+^{:refer xt.old.event-form/reset-all-data :added "4.0"}
+(fact "resets all data"
+
+  (!.js
+   (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+   [(form/set-data f {:login "world"})
+    (form/reset-all-data f)])
+  => [[] []]
+
+  (!.lua
+   (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+   [(form/set-data f {:login "world"})
+    (form/reset-all-data f)])
+  => [{} {}]
+
+  (!.py
+   (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+   [(form/set-data f {:login "world"})
+    (form/reset-all-data f)])
+  => [[] []])
+
+^{:refer xt.old.event-form/reset-field-data :added "4.0"}
+(fact "reset field data"
+
+  (!.js
+   (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+   (form/set-data f {:login "world"})
+   (form/reset-field-data f "login")
+   (form/get-data f))
+  => {"login" ""}
+
+  (!.lua
+   (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+   (form/set-data f {:login "world"})
+   (form/reset-field-data f "login")
+   (form/get-data f))
+  => {"login" ""}
+
+  (!.py
+   (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+   (form/set-data f {:login "world"})
+   (form/reset-field-data f "login")
+   (form/get-data f))
+  => {"login" ""})
+
+^{:refer xt.old.event-form/validate-all :added "4.0"}
+(fact "validates all form"
+
+  (notify/wait-on :js
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/validate-all f (fn [field status] (return nil))
+                       (repl/>notify)))
+  => false
+
+  (notify/wait-on :lua
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/validate-all f (fn [field status] (return nil))
+                       (repl/>notify)))
+  => false
+
+  (notify/wait-on :python
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/validate-all f
+                       (fn [field status] (return nil))
+                       (fn [passed _]
+                         (repl/notify passed))))
+  => false)
+
+^{:refer xt.old.event-form/validate-field :added "4.0"
+  :setup [(def +out+
+            {"type" "form.validation",
+             "fields" ["login"],
+             "meta"
+             {"listener/id" "a1",
+              "listener/type" "form"
+              "form/fields" ["login"],}})]}
+(fact "validates form field"
+
+  (notify/wait-on :js
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "a1"  ["login"] (repl/>notify) nil)
+    (form/validate-field f "login" (fn [field status] (return nil)) nil))
+  => +out+
+
+  (notify/wait-on :lua
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "a1"  ["login"] (repl/>notify) nil)
+    (form/validate-field f "login" (fn [field status] (return nil)) nil))
+  => +out+)
+
+^{:refer xt.old.event-form/reset-field-validator :added "4.0"
+  :setup [(def +out+
+            {"type" "form.validation",
+             "fields" ["login"],
+             "meta"
+             {"listener/id" "a1",
+              "listener/type" "form"
+              "form/fields" ["login"],}})]}
+(fact "reset field validators"
+
+  (notify/wait-on :js
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "a1"  ["login"] (repl/>notify) nil)
+    (form/reset-field-validator f "login"))
+  => +out+
+
+  (notify/wait-on :lua
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "a1"  ["login"] (repl/>notify) nil)
+    (form/reset-field-validator f "login"))
+  => +out+)
+
+^{:refer xt.old.event-form/reset-all-validators :added "4.0"
+  :setup [(def +out+
+            {"type" "form.validation",
+             "fields" ["login"],
+             "meta"
+             {"listener/id" "a1",
+              "listener/type" "form"
+              "form/fields" ["login"],}})]}
+(fact "reset all field validators"
+
+  (notify/wait-on :js
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "a1"  ["login"] (repl/>notify) nil)
+    (form/reset-all-validators f))
+  => +out+
+
+  (notify/wait-on :lua
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "a1"  ["login"] (repl/>notify) nil)
+    (form/reset-all-validators f))
+  => +out+)
+
+^{:refer xt.old.event-form/reset-all :added "4.0"}
+(fact "resets data and validator result"
+
+  (notify/wait-on :js
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "a1"  ["login"] (repl/>notify) nil)
+    (form/reset-all f))
+  => (contains-in
+      {"fields" ["login"],
+       "meta"
+       {"listener/id" "a1",
+        "form/fields" ["login"],
+        "listener/type" "form"}}))
+
+^{:refer xt.old.event-form/check-field-passed :added "4.0"}
+(fact "checks that field has passed"
+
+  (notify/wait-on :js
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "a1" ["login"]
+                       (fn [_]
+                          (repl/notify (form/check-field-passed f "login"))))
+    (form/validate-all f nil nil))
+  => false
+
+  (notify/wait-on :lua
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "a1" ["login"]
+                       (fn [_]
+                          (repl/notify (form/check-field-passed f "login"))))
+    (form/validate-all f nil nil))
+  => false)
+
+^{:refer xt.old.event-form/check-field-errored :added "4.0"}
+(fact  "checks that field has passed"
+
+  (notify/wait-on :js
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "a1" ["login"]
+                       (fn [_]
+                          (repl/notify (form/check-field-errored f "login"))))
+    (form/validate-all f nil nil))
+  => true
+
+  (notify/wait-on :lua
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "a1" ["login"]
+                       (fn [_]
+                          (repl/notify (form/check-field-errored f "login"))))
+    (form/validate-all f nil nil))
+  => true)
+
+^{:refer xt.old.event-form/check-all-passed :added "4.0"}
+(fact "checks that all fields have passed"
+
+  (notify/wait-on :js
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "a1" ["login"]
+                       (fn [_]
+                          (repl/notify (form/check-all-passed f))))
+    (form/validate-all f nil nil))
+  => false
+
+  (notify/wait-on :lua
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "a1" ["login"]
+                       (fn [_]
+                          (repl/notify (form/check-all-passed f))))
+    (form/validate-all f nil nil))
+  => false)
+
+^{:refer xt.old.event-form/check-any-errored :added "4.0"}
+(fact  "checks that any fields have errored"
+
+  (notify/wait-on :js
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "a1" ["login"]
+                       (fn [_]
+                          (repl/notify (form/check-any-errored f))))
+   (form/validate-all f nil nil))
+  => true
+
+  (notify/wait-on :lua
+    (var f (form/make-form
+     (fn:> {:login ""})
+     {:login [["is-required"
+               {:message "Required field."
+                :check  (fn [v rec]
+                          (return (and (k/not-nil? v)
+                                       (< 0 (xt/x:len v)))))}]]}))
+    (form/add-listener f "a1" ["login"]
+                       (fn [_]
+                          (repl/notify (form/check-any-errored f))))
+   (form/validate-all f nil nil))
+  => true)

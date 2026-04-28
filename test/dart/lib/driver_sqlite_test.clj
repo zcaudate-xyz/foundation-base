@@ -6,7 +6,7 @@
 (l/script- :dart
   {:runtime :twostep
    :require [[dart.lib.driver-sqlite :as dart-sqlite]
-             [xt.sys.conn-dbsql :as dbsql]]})
+             [xt.old.sys.conn-dbsql :as dbsql]]})
 
 (def CANARY-DART
   (common/program-exists? "dart"))

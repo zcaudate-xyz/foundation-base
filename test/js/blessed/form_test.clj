@@ -11,7 +11,7 @@
               [js.blessed.ui-style :as ui-style]
               [js.blessed.ui-core :as ui-core]
               [js.lib.chalk :as chk]
-              [xt.lib.event-form :as base-form]]
+              [xt.old.event-form :as base-form]]
    :export  [MODULE]})
 
 

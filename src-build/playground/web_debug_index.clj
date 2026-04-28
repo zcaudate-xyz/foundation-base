@@ -18,7 +18,7 @@
              [js.lib.rn-expo :as x :include [:lib]]
              [xt.lang.common-lib :as k]
              [xt.lang.debug-client :as client]
-             [xt.lib.event-box :as base-box]]
+             [xt.old.event-box :as base-box]]
    :static {:export MODULE}})
 
 (defrun.js __import__

@@ -13,7 +13,7 @@
               [js.react :as r :include [:fn]]
               [js.react-native :as n :include [:fn]]
               [js.react.ext-view :as ext-view]
-              [xt.lib.event-view :as event-view]
+              [xt.old.event-view :as event-view]
               [xt.lang.common-data :as xtd]
               [xt.lang.common-lib :as k]]
    })

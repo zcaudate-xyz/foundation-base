@@ -3,37 +3,37 @@
             [rt.postgres.base.grammar.gen-bind :as gen]
             [rt.postgres.test.scratch-v1 :as scratch]
             [std.lang :as l]
-            [xt.lib.db.sample-data-test :as data]
-            [xt.lib.db.sample-user-test :as user])
+            [xt.old.db.sample-data-test :as data]
+            [xt.old.db.sample-user-test :as user])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lib.db.sql-graph :as g]
-             [xt.lib.db.sql-util :as ut]
-             [xt.lib.db.sql-raw :as raw]
+   :require [[xt.old.db.sql-graph :as g]
+             [xt.old.db.sql-util :as ut]
+             [xt.old.db.sql-raw :as raw]
              [xt.lang.common-lib :as k]
-             [xt.lib.db.base-schema :as sch]
-             [xt.lib.db.base-scope :as scope]
-             [xt.lib.db.sample-test :as sample]]})
+             [xt.old.db.base-schema :as sch]
+             [xt.old.db.base-scope :as scope]
+             [xt.old.db.sample-test :as sample]]})
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.lib.db.sql-graph :as g]
+   :require [[xt.old.db.sql-graph :as g]
              [xt.lang.common-lib :as k]
-             [xt.lib.db.sql-util :as ut]
-             [xt.lib.db.base-schema :as sch]
-             [xt.lib.db.base-scope :as scope]
-             [xt.lib.db.sample-test :as sample]]})
+             [xt.old.db.sql-util :as ut]
+             [xt.old.db.base-schema :as sch]
+             [xt.old.db.base-scope :as scope]
+             [xt.old.db.sample-test :as sample]]})
 
 (l/script- :python
   {:runtime :basic
-   :require [[xt.lib.db.sql-graph :as g]
+   :require [[xt.old.db.sql-graph :as g]
              [xt.lang.common-lib :as k]
-             [xt.lib.db.sql-util :as ut]
-             [xt.lib.db.base-schema :as sch]
-             [xt.lib.db.base-scope :as scope]
-             [xt.lib.db.sample-test :as sample]]})
+             [xt.old.db.sql-util :as ut]
+             [xt.old.db.base-schema :as sch]
+             [xt.old.db.base-scope :as scope]
+             [xt.old.db.sample-test :as sample]]})
 
 (fact:global
  {:setup    [(l/rt:restart)
@@ -258,7 +258,7 @@
 ^{:refer rt.postgres.base.grammar.gen-bind/bind-app :added "4.0"}
 (fact "gets the app interface given a name"
 
-  (gen/bind-app (pg/app "xt.lib.db.sample"))
+  (gen/bind-app (pg/app "xt.old.db.sample"))
   => {"RegionCity"
       {:schema "scratch-sample-db",
        :schema-primary {"type" "text", "id" "id"},
@@ -341,19 +341,19 @@
 ^{:refer rt.postgres.base.grammar.gen-bind/bind-schema :added "4.0"}
 (fact "binds a schema"
 
-  (gen/bind-schema (:schema (pg/app "xt.lib.db.sample")))
+  (gen/bind-schema (:schema (pg/app "xt.old.db.sample")))
   => map?)
 
 ^{:refer rt.postgres.base.grammar.gen-bind/list-view :added "4.0"}
 (fact "lists all views in the schema"
 
-  (gen/list-view 'xt.lib.db.sample-user-test :select)
+  (gen/list-view 'xt.old.db.sample-user-test :select)
   => vector?
 
-  (gen/list-view 'xt.lib.db.sample-user-test :return)
-  => '[[user-account-info xt.lib.db.sample-user-test/user-account-info]
-       [organisation-view-membership xt.lib.db.sample-user-test/organisation-view-membership]
-       [organisation-view-default xt.lib.db.sample-user-test/organisation-view-default]])
+  (gen/list-view 'xt.old.db.sample-user-test :return)
+  => '[[user-account-info xt.old.db.sample-user-test/user-account-info]
+       [organisation-view-membership xt.old.db.sample-user-test/organisation-view-membership]
+       [organisation-view-default xt.old.db.sample-user-test/organisation-view-default]])
 
 ^{:refer rt.postgres.base.grammar.gen-bind/list-api :added "4.0"}
 (fact "lists all apis"

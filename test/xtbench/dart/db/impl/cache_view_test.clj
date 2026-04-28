@@ -8,8 +8,8 @@
 (l/script- :dart
   {:runtime :twostep
    :require [[xt.db.impl.cache-view :as v]
-             [xt.lib.db.sql-util :as ut]
-             [xt.lib.db.sql-raw :as raw]
+             [xt.old.db.sql-util :as ut]
+             [xt.old.db.sql-raw :as raw]
              [xt.lang.common-lib :as k]
              [xt.db.schema.base-schema :as sch]
              [xt.db.schema.base-scope :as scope]

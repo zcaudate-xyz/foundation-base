@@ -8,7 +8,7 @@
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-repl :as repl]
-             [xt.lib.event-view :as event-view]
+             [xt.old.event-view :as event-view]
              [js.core :as j]
              [js.react.ext-view :as ext-view]]})
 

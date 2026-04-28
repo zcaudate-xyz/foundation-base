@@ -4,7 +4,7 @@
 
 (l/script :lua
   {:require [[xt.lang.common-lib :as k]
-             [xt.lib.event-log :as event-log]
+             [xt.old.event-log :as event-log]
              [lua.nginx :as n]
              [lua.nginx.task :as t]
              [lua.nginx.pusher :as push]

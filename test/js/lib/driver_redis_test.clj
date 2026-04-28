@@ -6,7 +6,7 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.sys.conn-redis :as redis]
+   :require [[xt.old.sys.conn-redis :as redis]
              [xt.lang.common-lib :as k]
              [xt.lang.common-repl :as repl]
              [js.lib.driver-redis :as js-driver]]})

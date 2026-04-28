@@ -12,8 +12,8 @@
              [xt.db.impl.cache-util :as data]
              [xt.db.impl.cache-pull :as q]
              [xt.db.schema.base-flatten :as f]
-             [xt.lib.db.sql-util :as ut]
-             [xt.lib.db.sample-test :as sample]]})
+             [xt.old.db.sql-util :as ut]
+             [xt.old.db.sample-test :as sample]]})
 
 (fact:global
  {:setup [(l/rt:restart)]

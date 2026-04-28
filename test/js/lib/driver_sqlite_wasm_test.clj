@@ -5,7 +5,7 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.sys.conn-dbsql :as dbsql]
+   :require [[xt.old.sys.conn-dbsql :as dbsql]
              [xt.lang.common-repl :as repl]
              [js.lib.driver-sqlite-wasm :as js-sqlite-wasm]]})
 

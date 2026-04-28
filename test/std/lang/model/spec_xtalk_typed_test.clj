@@ -33,14 +33,14 @@
 (fact "registry entries expose explicit declaration kinds"
   (typed/clear-registry!)
   (typed/analyze-and-register! 'xt.lang.spec-base)
-  (typed/analyze-and-register! 'xt.lib.db.base-scope)
+  (typed/analyze-and-register! 'xt.old.db.base-scope)
   [(-> (typed/get-entry 'xt.lang.spec-base/x:add)
        types/entry-kinds
        set)
    (types/declaration-kind (typed/get-macro 'xt.lang.spec-base/x:add))
-   (types/declaration-kind (typed/get-value 'xt.lib.db.base-scope/Scopes))
+   (types/declaration-kind (typed/get-value 'xt.old.db.base-scope/Scopes))
    (nil? (typed/get-type 'xt.lang.spec-base/x:add))
-   (= :value (-> (typed/get-entry 'xt.lib.db.base-scope/Scopes)
+   (= :value (-> (typed/get-entry 'xt.old.db.base-scope/Scopes)
                   types/entry-primary-kind))]
   => '[#{:macro :spec}
         :macro
@@ -484,7 +484,7 @@
        :macros
        count
        pos?)
-   (-> (parse/analyze-namespace 'xt.lib.db.base-scope)
+   (-> (parse/analyze-namespace 'xt.old.db.base-scope)
        :values
        count
        pos?)]
@@ -493,12 +493,12 @@
 (fact "registers macros and values in the typed registry"
   (typed/clear-registry!)
   (typed/analyze-and-register! 'xt.lang.spec-base)
-  (typed/analyze-and-register! 'xt.lib.db.base-scope)
+  (typed/analyze-and-register! 'xt.old.db.base-scope)
   [(some? (typed/get-macro 'xt.lang.spec-base/x:add))
    (true? (get-in (typed/get-macro 'xt.lang.spec-base/x:add) [:body-meta :macro]))
-   (some? (typed/get-value 'xt.lib.db.base-scope/Scopes))
-   (true? (get-in (typed/get-value 'xt.lib.db.base-scope/Scopes) [:body-meta :def]))
-   (some? (typed/get-declaration 'xt.lib.db.base-scope/Scopes :value))
+   (some? (typed/get-value 'xt.old.db.base-scope/Scopes))
+   (true? (get-in (typed/get-value 'xt.old.db.base-scope/Scopes) [:body-meta :def]))
+   (some? (typed/get-declaration 'xt.old.db.base-scope/Scopes :value))
    (pos? (count (typed/list-entries)))]
   => '[true true true true true true])
 
@@ -584,41 +584,41 @@
 
 (fact "analyzes event-common and event-form namespace specs"
   (typed/clear-registry!)
-  (typed/analyze-and-register! 'xt.lib.event-common)
-  (typed/analyze-and-register! 'xt.lib.event-form)
-  [(analysis/get-function-output-type 'xt.lib.event-common/blank-container)
-   (analysis/get-function-output-type 'xt.lib.event-common/add-listener)
-   (analysis/get-function-output-type 'xt.lib.event-form/make-form)
-   (analysis/get-function-output-type 'xt.lib.event-form/get-result)]
-  => '[{:kind :named :name xt.lib.event-common/EventContainer}
-       {:kind :named :name xt.lib.event-common/EventListenerEntry}
-       {:kind :named :name xt.lib.event-form/EventForm}
-       {:kind :named :name xt.lib.event-form/ValidationResult}])
+  (typed/analyze-and-register! 'xt.old.event-common)
+  (typed/analyze-and-register! 'xt.old.event-form)
+  [(analysis/get-function-output-type 'xt.old.event-common/blank-container)
+   (analysis/get-function-output-type 'xt.old.event-common/add-listener)
+   (analysis/get-function-output-type 'xt.old.event-form/make-form)
+   (analysis/get-function-output-type 'xt.old.event-form/get-result)]
+  => '[{:kind :named :name xt.old.event-common/EventContainer}
+       {:kind :named :name xt.old.event-common/EventListenerEntry}
+       {:kind :named :name xt.old.event-form/EventForm}
+       {:kind :named :name xt.old.event-form/ValidationResult}])
 
 (fact "analyzes event-route, event-view, and event-box namespace specs"
   (typed/clear-registry!)
-  (typed/analyze-and-register! 'xt.lib.event-route)
-  (typed/analyze-and-register! 'xt.lib.event-view)
-  (typed/analyze-and-register! 'xt.lib.event-box)
-  [(analysis/get-function-output-type 'xt.lib.event-route/make-route)
-   (analysis/get-function-output-type 'xt.lib.event-route/get-param)
-   (analysis/get-function-output-type 'xt.lib.event-view/create-view)
-   (analysis/get-function-output-type 'xt.lib.event-view/pipeline-prep)
-   (analysis/get-function-output-type 'xt.lib.event-box/make-box)]
-  => '[{:kind :named :name xt.lib.event-route/EventRoute}
+  (typed/analyze-and-register! 'xt.old.event-route)
+  (typed/analyze-and-register! 'xt.old.event-view)
+  (typed/analyze-and-register! 'xt.old.event-box)
+  [(analysis/get-function-output-type 'xt.old.event-route/make-route)
+   (analysis/get-function-output-type 'xt.old.event-route/get-param)
+   (analysis/get-function-output-type 'xt.old.event-view/create-view)
+   (analysis/get-function-output-type 'xt.old.event-view/pipeline-prep)
+   (analysis/get-function-output-type 'xt.old.event-box/make-box)]
+  => '[{:kind :named :name xt.old.event-route/EventRoute}
        {:kind :maybe
         :item {:kind :primitive :name :xt/str}}
-       {:kind :named :name xt.lib.event-view/EventView}
+       {:kind :named :name xt.old.event-view/EventView}
        {:kind :tuple
-        :types [{:kind :named :name xt.lib.event-view/ViewContext}
+        :types [{:kind :named :name xt.old.event-view/ViewContext}
                 {:kind :primitive :name :xt/bool}]}
-       {:kind :named :name xt.lib.event-box/EventBox}])
+       {:kind :named :name xt.old.event-box/EventBox}])
 
 (fact "check-namespace can analyze event-route without crashing"
   (typed/clear-registry!)
-  (-> (typed/check-namespace 'xt.lib.event-route)
+  (-> (typed/check-namespace 'xt.old.event-route)
       :namespace)
-  => 'xt.lib.event-route)
+  => 'xt.old.event-route)
 
 
 

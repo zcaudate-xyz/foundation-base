@@ -11,7 +11,7 @@
              [js.core :as j]
              [js.react :as r]
              [js.react-native :as n]
-             [xt.lib.event-animate :as event-animate]]
+             [xt.old.event-animate :as event-animate]]
    :import [["react-native" :as [* ReactNative]]]})
 
 (f/template-entries [l/tmpl-entry {:type :fragment

@@ -304,22 +304,22 @@
 
 ^{:refer std.lang.typed.xtalk-infer/infer-make-container :added "4.1"}
 (fact "infers make-container records"
-  (types/type->data (:type (infer-make-container '(xt.lib.event-common/make-container initializer "route" {:tag true})
+  (types/type->data (:type (infer-make-container '(xt.old.event-common/make-container initializer "route" {:tag true})
                                                  {:env '{initializer {:kind :fn :inputs [] :output {:kind :primitive :name :xt/int}}}
                                                   :ns 'sample.route :aliases {}})))
   => '{:kind :record
        :fields [{:name "::" :type {:kind :primitive :name :xt/str} :optional? false}
-                {:name "listeners" :type {:kind :named :name xt.lib.event-common/EventListenerMap} :optional? false}
+                {:name "listeners" :type {:kind :named :name xt.old.event-common/EventListenerMap} :optional? false}
                 {:name "data" :type {:kind :primitive :name :xt/int} :optional? false}
                 {:name "initial" :type {:kind :fn :inputs [] :output {:kind :primitive :name :xt/int}} :optional? false}
                 {:name "tag" :type {:kind :primitive :name :xt/bool} :optional? false}]})
 
 ^{:refer std.lang.typed.xtalk-infer/infer-blank-container :added "4.1"}
 (fact "infers blank-container records"
-  (types/type->data (:type (infer-blank-container '(xt.lib.event-common/blank-container "route" {:tag true}) +ctx+)))
+  (types/type->data (:type (infer-blank-container '(xt.old.event-common/blank-container "route" {:tag true}) +ctx+)))
   => '{:kind :record
        :fields [{:name "::" :type {:kind :primitive :name :xt/str} :optional? false}
-                {:name "listeners" :type {:kind :named :name xt.lib.event-common/EventListenerMap} :optional? false}
+                {:name "listeners" :type {:kind :named :name xt.old.event-common/EventListenerMap} :optional? false}
                 {:name "tag" :type {:kind :primitive :name :xt/bool} :optional? false}]})
 
 ^{:refer std.lang.typed.xtalk-infer/apply-default-type :added "4.1"}

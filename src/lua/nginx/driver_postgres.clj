@@ -1,6 +1,6 @@
 (ns lua.nginx.driver-postgres
   (:require [std.lang :as l]
-            [xt.sys.conn-dbsql :as dbsql]))
+            [xt.old.sys.conn-dbsql :as dbsql]))
 
 (l/script :lua.nginx
   {:import [["pgmoon" :as ngxpg]] :require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-space :as rt]]})

@@ -11,7 +11,7 @@
              [xt.lang.common-string :as str]
              [xt.db.schema.sql-util :as ut]
              [xt.db.schema.sql-manage :as manage]
-             [xt.lib.db.sample-test :as sample]]})
+             [xt.old.db.sample-test :as sample]]})
 
 (fact:global
  {:setup [(l/rt:restart)]

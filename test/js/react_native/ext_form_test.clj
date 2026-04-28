@@ -14,7 +14,7 @@
               [js.react-native :as n :include [:fn]]
               [js.react.ext-form :as ext-form]
               [xt.lang.spec-base :as xt]
-              [xt.lib.event-form :as event-form]]
+              [xt.old.event-form :as event-form]]
     })
 
 (def.js RegistraionValidation

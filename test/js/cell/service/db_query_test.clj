@@ -5,7 +5,7 @@
 (l/script- :js
   {:runtime :basic
    :require [[js.cell.service.db-query :as db-query]
-              [xt.lib.db :as xdb]
+              [xt.old.db :as xdb]
               [xt.lang.spec-base :as xt]
               [xt.lang.common-data :as xtd]]})
 

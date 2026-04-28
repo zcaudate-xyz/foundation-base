@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lib.event-log :as event-log]
+  {:require [[xt.old.event-log :as event-log]
              [js.react :as r]
              [js.core :as j]]})
 

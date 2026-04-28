@@ -89,7 +89,7 @@
                     #{})
 
 
-  (collect-sym-vars @xt.lib.event-common/add-listener)
+  (collect-sym-vars @xt.old.event-common/add-listener)
   (collect-sym-vars @xt.lang.common-repl/socket-connect)
 
   (get

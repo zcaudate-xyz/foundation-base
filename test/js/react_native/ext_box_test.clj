@@ -14,7 +14,7 @@
              [js.react :as r :include [:fn]]
              [js.react-native :as n :include [:fn]]
              [js.react.ext-box :as ext-box]
-             [xt.lib.event-box :as event-box]]
+             [xt.old.event-box :as event-box]]
    })
 
 ^{:refer js.react.ext-box/useBox :adopt true :added "4.0" :unchecked true}
