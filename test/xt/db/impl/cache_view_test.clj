@@ -1,10 +1,11 @@
 (ns xt.db.impl.cache-view-test
   (:require [rt.postgres :as pg]
             [std.lang :as l]
-            [xt.lib.db.sample-data-test :as data]
-            [xt.lib.db.sample-user-test :as user])
+            [xt.db.helpers.seed-system-test :as data]
+            [xt.db.helpers.seed-user-test :as user])
   (:use code.test))
 
+^{:seedgen/root {:all true, :langs [:lua :python]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.impl.cache-view :as v]
@@ -13,7 +14,7 @@
              [xt.lang.common-lib :as k]
              [xt.db.schema.base-schema :as sch]
              [xt.db.schema.base-scope :as scope]
-             [xt.lib.db.sample-test :as sample]]})
+             [xt.db.helpers.data-main-test :as sample]]})
 
 (fact:global
  {:setup    [(l/rt:restart)

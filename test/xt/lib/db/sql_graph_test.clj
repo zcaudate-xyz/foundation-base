@@ -259,10 +259,10 @@
       ")")
 
   (!.lua
-   (g/select-where sample/Schema
-                   "UserAccount"
-                   "id"
-                   {:profile {:first-name "hello"}}
+    (g/select-where sample/Schema
+                    "UserAccount"
+                    "id"
+                    {:profile {:first-name "hello"}}
                    0
                    {}))
   => (prose/|
@@ -273,9 +273,9 @@
       ")")
 
   (!.py
-   (g/select-where sample/Schema
-                   "UserAccount"
-                   "id"
+    (g/select-where sample/Schema
+                    "UserAccount"
+                    "id"
                    {:profile {:first-name "hello"
                               :last-name "hello"}}
                    0

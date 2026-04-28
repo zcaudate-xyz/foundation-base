@@ -3,6 +3,7 @@
             [std.string.prose :as prose])
   (:use code.test))
 
+^{:seedgen/root {:all true, :langs [:lua :python]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.schema.sql-raw :as raw]
@@ -35,7 +36,6 @@
   => ["DELETE FROM Currency WHERE id = 'XLM';"
       "DELETE FROM Currency WHERE id in ('XLM', 'USD');"]
 
-
   (!.lua
    [(raw/raw-delete "Currency"
                     {:id "XLM"}
@@ -45,7 +45,6 @@
                     {})])
   => ["DELETE FROM Currency WHERE id = 'XLM';"
       "DELETE FROM Currency WHERE id in ('XLM', 'USD');"]
-
 
   (!.py
    [(raw/raw-delete "Currency"
@@ -71,62 +70,72 @@
       " (id, name, type)"
       " VALUES\n ('XLM','XLM','crypto')"]
 
-  (!.js
+  (!.lua
    (raw/raw-insert-array "Currency"
                          ["id" "name" "type"]
                          [{:id "XLM"
                            :name "XLM"
-                           :type "crypto"}
-                          {:id "BTC"
-                           :name "BTC"
                            :type "crypto"}]
                          {}))
-  => ["INSERT INTO Currency" " (id, name, type)" " VALUES\n ('XLM','XLM','crypto'),\n ('BTC','BTC','crypto')"])
+  => ["INSERT INTO Currency"
+      " (id, name, type)"
+      " VALUES\n ('XLM','XLM','crypto')"]
+
+  (!.py
+   (raw/raw-insert-array "Currency"
+                         ["id" "name" "type"]
+                         [{:id "XLM"
+                           :name "XLM"
+                           :type "crypto"}]
+                         {}))
+  => ["INSERT INTO Currency"
+      " (id, name, type)"
+      " VALUES\n ('XLM','XLM','crypto')"])
 
 ^{:refer xt.db.schema.sql-raw/raw-insert :added "4.0"}
 (fact "encodes an insert query"
 
   (!.js
    (raw/raw-insert "Currency"
-                 ["id" "name" "type"]
-                 [{:id "XLM"
-                   :name "XLM"
-                   :type "crypto"}]
-                 {}))
+                   ["id" "name" "type"]
+                   [{:id "XLM"
+                     :name "XLM"
+                     :type "crypto"}]
+                   {}))
   => (prose/|
-   "INSERT INTO Currency"
-   " (id, name, type)"
-   " VALUES"
-   " ('XLM','XLM','crypto');")
+      "INSERT INTO Currency"
+      " (id, name, type)"
+      " VALUES"
+      " ('XLM','XLM','crypto');")
 
   (!.lua
    (raw/raw-insert "Currency"
-                 ["id" "name" "type"]
-                 [{:id "XLM"
-                   :name "XLM"
-                   :type "crypto"}]
-                 {}))
+                   ["id" "name" "type"]
+                   [{:id "XLM"
+                     :name "XLM"
+                     :type "crypto"}]
+                   {}))
   => (prose/|
-   "INSERT INTO Currency"
-   " (id, name, type)"
-   " VALUES"
-   " ('XLM','XLM','crypto');")
+      "INSERT INTO Currency"
+      " (id, name, type)"
+      " VALUES"
+      " ('XLM','XLM','crypto');")
 
   (!.py
    (raw/raw-insert "Currency"
-                 ["id" "name" "type"]
-                 [{:id "XLM"
-                   :name "XLM"
-                   :type "crypto"}]
-                 {}))
+                   ["id" "name" "type"]
+                   [{:id "XLM"
+                     :name "XLM"
+                     :type "crypto"}]
+                   {}))
   => (prose/|
-   "INSERT INTO Currency"
-   " (id, name, type)"
-   " VALUES"
-   " ('XLM','XLM','crypto');"))
+      "INSERT INTO Currency"
+      " (id, name, type)"
+      " VALUES"
+      " ('XLM','XLM','crypto');"))
 
 ^{:refer xt.db.schema.sql-raw/raw-upsert :added "4.0"}
-(fact  "encodes an upsert query"
+(fact "encodes an upsert query"
 
   (!.js
    (raw/raw-upsert "Currency"
@@ -179,7 +188,7 @@
       "name=coalesce(\"excluded\".name,name),"
       "type=coalesce(\"excluded\".type,type);"))
 
-^{:refer xt.db.schema.sql-raw/raw-upsert.more :adopt true :added "4.0"
+^{:refer xt.db.schema.sql-raw/raw-upsert.more :added "4.0"
   :setup [(def +input+
             (prose/|
              "INSERT INTO Currency"
@@ -189,8 +198,8 @@
              "ON CONFLICT (id) DO UPDATE SET"
              "name=coalesce(\"excluded\".name,name),"
              "type=coalesce(\"excluded\".type,type)"
-             "WHERE \"excluded\".time_updated < time_updated;"))]}
-(fact  "encodes an upsert query"
+             "WHERE \"excluded\".time_updated < time_updated;"))] :adopt true}
+(fact "encodes an upsert query"
 
   (!.js
    (raw/raw-upsert "Currency"
@@ -200,9 +209,7 @@
                      :name "XLM"
                      :type "crypto"}]
                    {:upsert-clause "\"excluded\".time_updated < time_updated"}))
-
   => +input+
-
 
   (!.lua
    (raw/raw-upsert "Currency"
@@ -229,23 +236,23 @@
 
   (!.js
    (raw/raw-update "Currency"
-                 {:id "XLM"}
-                 {:name "Stellar"}
-                 {}))
+                   {:id "XLM"}
+                   {:name "Stellar"}
+                   {}))
   => "UPDATE Currency\n SET name = 'Stellar'\n WHERE id = 'XLM';"
 
   (!.lua
    (raw/raw-update "Currency"
-                 {:id "XLM"}
-                 {:name "Stellar"}
-                 {}))
+                   {:id "XLM"}
+                   {:name "Stellar"}
+                   {}))
   => "UPDATE Currency\n SET name = 'Stellar'\n WHERE id = 'XLM';"
 
   (!.py
    (raw/raw-update "Currency"
-                 {:id "XLM"}
-                 {:name "Stellar"}
-                 {}))
+                   {:id "XLM"}
+                   {:name "Stellar"}
+                   {}))
   => "UPDATE Currency\n SET name = 'Stellar'\n WHERE id = 'XLM';")
 
 ^{:refer xt.db.schema.sql-raw/raw-select :added "4.0"}
@@ -265,7 +272,6 @@
                    {}))
   => "SELECT id, name, type\n  FROM Currency\n WHERE id = 'XLM';"
 
-
   (!.py
    (raw/raw-select "Currency"
                    {:id "XLM"}
@@ -276,3 +282,12 @@
 (comment
   (./import)
   )
+
+(comment
+  (s/pedantic ['xt.db.schema.sql-raw])
+  
+  (s/run ['xt.db.schema.sql-raw])
+  
+  (s/seedgen-benchadd   '[xt.db.schema.sql-raw] {:lang [:dart :julia] :write true})
+  (s/seedgen-langadd    '[xt.db.schema.sql-raw] {:lang [:lua :python] :write true})
+  (s/seedgen-langremove '[xt.db.schema.sql-raw] {:lang [:lua :python] :write true}))
