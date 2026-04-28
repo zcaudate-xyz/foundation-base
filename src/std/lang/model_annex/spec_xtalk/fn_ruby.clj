@@ -278,7 +278,6 @@
    :x-str-trim        {:macro #'ruby-tf-x-str-trim       :emit :macro}
    :x-str-trim-left   {:macro #'ruby-tf-x-str-trim-left  :emit :macro}
    :x-str-trim-right  {:macro #'ruby-tf-x-str-trim-right :emit :macro}
-   :x-str-format      {:macro #'ruby-tf-x-str-format     :emit :macro}
    :x-str-to-fixed    {:macro #'ruby-tf-x-str-to-fixed   :emit :macro}
    :x-str-starts-with {:macro #'ruby-tf-x-str-starts-with :emit :macro}
    :x-str-ends-with   {:macro #'ruby-tf-x-str-ends-with  :emit :macro}})
