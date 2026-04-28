@@ -1,4 +1,4 @@
-(ns xt.old.util-color-test
+(ns xt.lang.common-color-test
   (:require [std.json :as json]
             [std.lang :as l]
             [xt.lang.common-notify :as notify])
@@ -8,25 +8,25 @@
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-repl :as repl]
-             [xt.old.util-color :as color]]})
+             [xt.lang.common-color :as color]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-repl :as repl]
-             [xt.old.util-color :as color]]})
+             [xt.lang.common-color :as color]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-repl :as repl]
-             [xt.old.util-color :as color]]})
+             [xt.lang.common-color :as color]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.old.util-color/named->rgb :added "4.0"}
+^{:refer xt.lang.common-color/named->rgb :added "4.0"}
 (fact "named color to rgb"
 
   (!.js
@@ -47,7 +47,7 @@
     (color/named->rgb "WRONG")])
   => [[0 255 255] [255 0 255] [0 0 0]])
 
-^{:refer xt.old.util-color/hex->n :added "4.0"}
+^{:refer xt.lang.common-color/hex->n :added "4.0"}
 (fact "hex to rgb val"
 
   (!.js
@@ -77,7 +77,7 @@
     (color/hex->n "e")])
   => [0 1 2 10 0 14])
 
-^{:refer xt.old.util-color/n->hex :added "4.0"}
+^{:refer xt.lang.common-color/n->hex :added "4.0"}
 (fact "converts an rgb to hex"
 
   (!.js
@@ -101,7 +101,7 @@
     (color/n->hex -3)])
   => ["0D" "71" "00" "0D"])
 
-^{:refer xt.old.util-color/hex->rgb :added "4.0"}
+^{:refer xt.lang.common-color/hex->rgb :added "4.0"}
 (fact "converts a hex value to rgb array"
 
   (!.js
@@ -123,7 +123,7 @@
     (color/hex->rgb "#222222")])
   => [[170 170 170] [69 249 129] [34 34 34]])
 
-^{:refer xt.old.util-color/rgb->hex :added "4.0"}
+^{:refer xt.lang.common-color/rgb->hex :added "4.0"}
 (fact "converts rgb to hex"
 
   (!.js
@@ -144,10 +144,10 @@
     (color/rgb->hex (color/hex->rgb "#222222"))])
   => ["#AAAAAA" "#45F981" "#222222"])
 
-^{:refer xt.old.util-color/rgb->hue :added "4.0"}
+^{:refer xt.lang.common-color/rgb->hue :added "4.0"}
 (fact "helper function for rgb->hsl")
 
-^{:refer xt.old.util-color/rgb->hsl :added "4.0"}
+^{:refer xt.lang.common-color/rgb->hsl :added "4.0"}
 (fact "converts rgb to hsl"
 
   (!.js [(color/rgb->hsl [0 100 100])
@@ -187,13 +187,13 @@
       [60.0 100 25.098039215686274]
       [120.0 100 25.098039215686274]])
 
-^{:refer xt.old.util-color/hue->v :added "4.0"}
+^{:refer xt.lang.common-color/hue->v :added "4.0"}
 (fact "converts a hue to a value"
 
   (color/hue->v 20 30 0)
   => 20)
 
-^{:refer xt.old.util-color/hsl->rgb :added "4.0"}
+^{:refer xt.lang.common-color/hsl->rgb :added "4.0"}
 (fact "converts hsl to rgb"
 
   (!.js [(color/hsl->rgb (color/rgb->hsl [0 100 100] nil))
@@ -217,7 +217,7 @@
          (color/hsl->rgb (color/rgb->hsl [0 128 0] nil))])
   => [[0 100 100] [0 0 0] [255 255 255] [128 128 0] [0 128 0]])
 
-^{:refer xt.old.util-color/named->hsl :added "4.0"}
+^{:refer xt.lang.common-color/named->hsl :added "4.0"}
 (fact "converts a named color to hsl"
 
   ^{:lang-exceptions {:lua {:expect [0 67.924528301887 41.56862745098]}}}
@@ -225,14 +225,14 @@
    (color/named->hsl "firebrick"))
   => [0 67.9245283018868 41.568627450980394])
 
-^{:refer xt.old.util-color/named->hex :added "4.0"}
+^{:refer xt.lang.common-color/named->hex :added "4.0"}
 (fact "converts a named color to hex"
 
   (!.js
    (color/named->hex "firebrick"))
   => "#B22222")
 
-^{:refer xt.old.util-color/hex->hsl :added "4.0"}
+^{:refer xt.lang.common-color/hex->hsl :added "4.0"}
 (fact "converts a hex to hsl"
 
   ^{:lang-exceptions {:lua {:expect [0 67.924528301887 41.56862745098]}}}

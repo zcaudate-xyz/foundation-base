@@ -1,4 +1,4 @@
-(ns xt.old.util-xml
+(ns xt.lang.common-xml
   (:require [std.lang :as l]))
 
 ;;

@@ -1,24 +1,24 @@
-(ns xt.old.util-xml-test
+(ns xt.lang.common-xml-test
   (:require [std.lang :as l]
             [std.string.prose :as prose])
   (:use code.test))
 
 (l/script- :lua
-  {:runtime :basic
-   :require [[xt.old.util-xml :as xml]
-             [xt.lang.common-lib :as k]]})
+   {:runtime :basic
+    :require [[xt.lang.common-xml :as xml]
+              [xt.lang.common-lib :as k]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.old.util-xml/parse-xml-params :added "4.0"}
+^{:refer xt.lang.common-xml/parse-xml-params :added "4.0"}
 (fact "parses the args"
 
   (xml/parse-xml-params "a='123', b=\"456\" ")
   => {"a" "123", "b" "456"})
 
-^{:refer xt.old.util-xml/parse-xml-stack :added "4.0"}
+^{:refer xt.lang.common-xml/parse-xml-stack :added "4.0"}
 (fact "parses the xml into a ast stack"
 
   (xml/parse-xml-stack "<a/>")
@@ -56,10 +56,10 @@
       {"tag" "b", "text" "2", "close" true}
       {"tag" "a", "close" true}])
 
-^{:refer xt.old.util-xml/to-node-normalise :added "4.0"}
+^{:refer xt.lang.common-xml/to-node-normalise :added "4.0"}
 (fact "normalises the node for viewing")
 
-^{:refer xt.old.util-xml/to-node :added "4.0"}
+^{:refer xt.lang.common-xml/to-node :added "4.0"}
 (fact "transforms stack to node"
 
   (xml/to-node
@@ -107,7 +107,7 @@
                   {"children" ["2"], "tag" "b"}],
       "tag" "a"})
 
-^{:refer xt.old.util-xml/parse-xml :added "4.0"}
+^{:refer xt.lang.common-xml/parse-xml :added "4.0"}
 (fact "parses xml"
 
   (xml/parse-xml "<a/>")
@@ -131,7 +131,7 @@
   (xml/parse-xml "<a><b/><b>2</b></a>")
   => {"children" [{"tag" "b"} {"children" ["2"], "tag" "b"}], "tag" "a"})
 
-^{:refer xt.old.util-xml/to-tree :added "4.0"}
+^{:refer xt.lang.common-xml/to-tree :added "4.0"}
 (fact "to node to tree"
 
   (!.lua
@@ -182,7 +182,7 @@
        ["C3" "Tiga"]
        ["C4" ["C41" "Empat-Satu"]]]])
 
-^{:refer xt.old.util-xml/from-tree :added "4.0"}
+^{:refer xt.lang.common-xml/from-tree :added "4.0"}
 (fact "creates nodes from tree"
 
   (xml/from-tree
@@ -216,7 +216,7 @@
         "tag" "C"}],
       "tag" "helo:test"})
 
-^{:refer xt.old.util-xml/to-brief :added "4.0"}
+^{:refer xt.lang.common-xml/to-brief :added "4.0"}
 (fact "xml to a more readable form"
 
   (!.lua
@@ -268,14 +268,14 @@
        "requestid" "16FEAEEC2B5EF151",
        "code" "BucketAlreadyOwnedByYou"}})
 
-^{:refer xt.old.util-xml/to-string-params :added "4.0"}
+^{:refer xt.lang.common-xml/to-string-params :added "4.0"}
 (fact "to node params"
 
   (!.lua
    (xml/to-string-params (tab [:a 1])))
   => " a=1")
 
-^{:refer xt.old.util-xml/to-string :added "4.0"}
+^{:refer xt.lang.common-xml/to-string :added "4.0"}
 (fact "node to string"
 
   (!.lua

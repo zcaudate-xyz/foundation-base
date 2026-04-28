@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :lua
-  {:require [[lua.nginx.openssl :as ssl] [lua.nginx :as n] [lua.nginx.http-client :as http] [lua.core :as u] [xt.lang.common-lib :as k] [xt.old.util-xml :as xml] [xt.lang.common-data :as xtd] [xt.lang.spec-base :as xt]]})
+  {:require [[lua.nginx.openssl :as ssl] [lua.nginx :as n] [lua.nginx.http-client :as http] [lua.core :as u] [xt.lang.common-lib :as k] [xt.lang.common-xml :as xml] [xt.lang.common-data :as xtd] [xt.lang.spec-base :as xt]]})
 
 (def.lua AWS_ALGO "AWS4-HMAC-SHA256")
 
@@ -258,4 +258,3 @@
         :else
         (return
          (-/make-request-auth aws method route (or headers {}) (or body "") opts))))
-

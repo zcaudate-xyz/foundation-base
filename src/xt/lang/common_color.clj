@@ -1,4 +1,4 @@
-(ns xt.old.util-color
+(ns xt.lang.common-color
   (:require [std.lang :as l]))
 
 (l/script :xtalk
