@@ -61,9 +61,27 @@
 
 (defn ruby-tf-x-type-native
   [[_ obj]]
-  (ruby-raw "(" (list '% obj) ").is_a?(Array) ? \"array\" : ("
-            (list '% obj) ").is_a?(Hash) ? \"object\" : ("
-            (list '% obj) ").class.name.downcase"))
+  (ruby-raw
+   "begin\n"
+   "  __obj__ = " (list '% obj) "\n"
+   "  if __obj__.nil?\n"
+   "    nil\n"
+   "  elsif __obj__.is_a?(Array)\n"
+   "    \"array\"\n"
+   "  elsif __obj__.is_a?(Hash)\n"
+   "    \"object\"\n"
+   "  elsif __obj__.respond_to?(:call)\n"
+   "    \"function\"\n"
+   "  elsif __obj__.is_a?(TrueClass) || __obj__.is_a?(FalseClass)\n"
+   "    \"boolean\"\n"
+   "  elsif __obj__.is_a?(Numeric)\n"
+   "    \"number\"\n"
+   "  elsif __obj__.is_a?(String)\n"
+   "    \"string\"\n"
+   "  else\n"
+   "    __obj__.class.name.downcase\n"
+   "  end\n"
+   "end"))
 
 (defn ruby-tf-x-unpack
   [[_ arr]]
@@ -256,7 +274,7 @@
 
 (defn ruby-tf-x-str-index-of
   ([[_ s tok]]
-   (list '. s (list 'index tok))))
+   (ruby-raw "((idx = (" (list '% s) ").index(" (list '% tok) ")).nil? ? -1 : idx)")))
 
 (defn ruby-tf-x-str-substring
   ([[_ s start & args]]
@@ -299,7 +317,7 @@
 
 (defn ruby-tf-x-str-to-fixed
   ([[_ n digits]]
-   (list 'sprintf (str "%." digits "f") n)))
+   (ruby-raw "sprintf(\"%.\" + (" (list '% digits) ").to_s + \"f\", " (list '% n) ")")))
 
 (defn ruby-tf-x-str-starts-with
   ([[_ s prefix]]
@@ -331,7 +349,7 @@
 
 (defn ruby-tf-x-lu-create
   [[_ & args]]
-  (ruby-raw "{}.compare_by_identity"))
+  (ruby-raw "{}"))
 
 (defn ruby-tf-x-lu-eq
   [[_ a b]]
@@ -686,13 +704,19 @@
 
 (defn ruby-tf-x-notify-http
   [[_ host port value id key opts]]
-  (let [output (ruby-tf-x-return-encode `[_ ~value ~id ~key])]
+  (let [out-type (ruby-tf-x-type-native `[_ ~value])]
     (ruby-raw
      "begin\n"
+     "  require 'json'\n"
      "  require 'net/http'\n"
      "  path = (" (list '% opts) ").nil? ? nil : (" (list '% opts) ")[\"path\"]\n"
      "  path = path.nil? ? \"/\" : path\n"
-     "  Net::HTTP.new(" (list '% host) ", " (list '% port) ").post(path, " (list '% output) ")\n"
+     "  begin\n"
+     "    payload = JSON.generate({\"id\" => " (list '% id) ", \"key\" => " (list '% key) ", \"type\" => \"data\", \"return\" => " (list '% out-type) ", \"value\" => " (list '% value) "})\n"
+     "  rescue Exception => e\n"
+     "    payload = JSON.generate({\"id\" => " (list '% id) ", \"key\" => " (list '% key) ", \"type\" => \"raw\", \"return\" => \"raw\", \"value\" => e.to_s})\n"
+     "  end\n"
+     "  Net::HTTP.new(" (list '% host) ", " (list '% port) ").post(path, payload)\n"
      "  [\"async\"]\n"
      "rescue Exception => e\n"
      "  [\"unable to connect\", e.to_s]\n"

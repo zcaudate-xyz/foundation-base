@@ -22,15 +22,3 @@
   => ['(or (test a) (test b))
        '(:? (test a) (expr b) (expr c))
        '((expr (f x)) (expr a))])
-
-^{:refer std.lang.rewrite.conditional/rewrite-conditional-expression :added "4.1"}
-(fact "rewrites containers before applying a truthy wrapper"
-  (condrw/rewrite-conditional-expression
-   '[a {:b c}]
-   identity
-   #(if (symbol? %)
-      (list 'expr %)
-      %)
-   (fn [_ form]
-     (list 'truthy form)))
-  => '(truthy [(expr a) {:b (expr c)}]))

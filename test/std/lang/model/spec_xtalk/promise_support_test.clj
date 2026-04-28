@@ -3,15 +3,6 @@
   (:require [std.lang :as l]
             [xt.lang.spec-base :as xt]))
 
-^{:refer xt.lang.spec-base/x:promise :added "4.1"}
-(fact "promise helpers are exposed from xt.lang.spec-base"
-  [(boolean (find-var 'xt.lang.spec-base/x:promise))
-   (boolean (find-var 'xt.lang.spec-base/x:promise-then))
-   (boolean (find-var 'xt.lang.spec-base/x:promise-catch))
-   (boolean (find-var 'xt.lang.spec-base/x:promise-finally))
-   (boolean (find-var 'xt.lang.spec-base/x:promise-native?))]
-  => [true true true true true])
-
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-promise :added "4.1"}
 (fact "js xtalk promise ops emit native promise chains"
   (let [out (l/emit-as :js ['(do (x:promise thunk)

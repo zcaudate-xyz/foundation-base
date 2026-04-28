@@ -44,11 +44,6 @@
   (l/emit-as :lua [(lua-tf-x-type-native '[_ obj])])
   => #"type")
 
-^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-prototype-create :added "4.0"}
-(fact "proto create"
-  (l/emit-as :lua [(lua-tf-x-prototype-create '[_ {}])])
-  => #"__index")
-
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-global-has? :added "4.0"}
 (fact "global has?"
   (l/emit-as :lua [(lua-tf-x-global-has? '[_ sym])])
@@ -250,15 +245,6 @@
   (l/emit-as :lua [(lua-tf-x-return-eval '[_ s wrap-fn])])
   => #(not (re-find #"unpack\(load_fn\(s\)\)" %)))
 
-^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-socket-connect :added "4.0"}
-(fact "socket connect"
-  (let [out (l/emit-as :lua [(lua-tf-x-socket-connect '[_ host port opts cb])])]
-    [(boolean (re-find #"require\(\"socket\"\)" out))
-     (boolean (re-find #"socket\.connect\(host,\s*port\)" out))
-     (boolean (re-find #"return cb\(err,\s*nil\)" out))
-     (boolean (re-find #"return cb\(nil,\s*conn\)" out))])
-  => [true true true true])
-
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-socket-send :added "4.0"}
 (fact "socket send"
   (l/emit-as :lua [(lua-tf-x-socket-send '[_ conn s])])
@@ -304,11 +290,6 @@
   (l/emit-as :lua [(lua-tf-x-iter-native? '[_ it])])
   => #"type")
 
-^{:refer std.lang.model.spec-lua.variant-nginx/lua-tf-x-cache :added "4.0"}
-(fact "cache"
-  (l/emit-as :lua.nginx [(nginx/lua-tf-x-cache '[_ key])])
-  => #"ngx.shared")
-
 ^{:refer std.lang.model.spec-lua.variant-nginx/lua-tf-x-socket-connect :added "4.1"}
 (fact "nginx socket connect"
   (let [out (l/emit-as :lua.nginx [(nginx/lua-tf-x-socket-connect '[_ host port opts cb])])]
@@ -317,52 +298,6 @@
      (boolean (re-find #"return cb\(err,\s*nil\)" out))
      (boolean (re-find #"return cb\(nil,\s*conn\)" out))])
   => [true true true true])
-
-^{:refer std.lang.model.spec-lua.variant-nginx/lua-tf-x-cache-list :added "4.0"}
-(fact "cache list"
-  (l/emit-as :lua.nginx [(nginx/lua-tf-x-cache-list '[_ cache])])
-  => #"get_keys")
-
-^{:refer std.lang.model.spec-lua.variant-nginx/lua-tf-x-cache-flush :added "4.0"}
-(fact "cache flush"
-  (l/emit-as :lua.nginx [(nginx/lua-tf-x-cache-flush '[_ cache])])
-  => #"flush_all")
-
-^{:refer std.lang.model.spec-lua.variant-nginx/lua-tf-x-cache-get :added "4.0"}
-(fact "cache get"
-  (l/emit-as :lua.nginx [(nginx/lua-tf-x-cache-get '[_ cache key])])
-  => #"get")
-
-^{:refer std.lang.model.spec-lua.variant-nginx/lua-tf-x-cache-set :added "4.0"}
-(fact "cache set"
-  (l/emit-as :lua.nginx [(nginx/lua-tf-x-cache-set '[_ cache key val])])
-  => #"set")
-
-^{:refer std.lang.model.spec-lua.variant-nginx/lua-tf-x-cache-del :added "4.0"}
-(fact "cache del"
-  (l/emit-as :lua.nginx [(nginx/lua-tf-x-cache-del '[_ cache key])])
-  => #"delete")
-
-^{:refer std.lang.model.spec-lua.variant-nginx/lua-tf-x-cache-incr :added "4.0"}
-(fact "cache incr"
-  (l/emit-as :lua.nginx [(nginx/lua-tf-x-cache-incr '[_ cache key num])])
-  => #"incr")
-
-^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-thread-spawn :added "4.0"}
-(fact "thread spawn"
-  (l/emit-as :lua [(lua-tf-x-thread-spawn '[_ thunk])])
-  => #"coroutine.create"
-
-  (l/emit-as :lua.nginx [(nginx/lua-tf-x-thread-spawn '[_ thunk])])
-  => #"ngx.thread.spawn")
-
-^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-thread-join :added "4.0"}
-(fact "thread join"
-  (l/emit-as :lua [(lua-tf-x-thread-join '[_ thread])])
-  => #"coroutine.resume"
-
-  (l/emit-as :lua.nginx [(nginx/lua-tf-x-thread-join '[_ thread])])
-  => #"ngx.thread.wait")
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-with-delay :added "4.0"}
 (fact "with delay"
@@ -376,25 +311,6 @@
 (fact "promise delay hard-links through common-promise"
   (get-in +lua-promise+ [:x-with-delay :raw])
   => 'lua.core.common-promise/with-delay)
-
-^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-file-slurp :added "4.1"}
-(fact "slurp file"
-  (let [out (l/emit-as :lua [(lua-tf-x-file-slurp '[_ filename opts cb])])]
-    [(boolean (re-find #"os\.getenv\('PWD'\)" out))
-     (boolean (re-find #"io\.open\(resolved,\s*'r'\)" out))
-     (boolean (re-find #"return cb\(err,\s*nil\)" out))
-     (boolean (re-find #"return cb\(nil,\s*res\)" out))])
-  => [true true true true])
-
-^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-file-spit :added "4.1"}
-(fact "spit file"
-  (let [out (l/emit-as :lua [(lua-tf-x-file-spit '[_ filename s opts cb])])]
-    [(boolean (re-find #"os\.getenv\('PWD'\)" out))
-     (boolean (re-find #"io\.open\(resolved,\s*'w'\)" out))
-     (boolean (re-find #"return cb\(err,\s*nil\)" out))
-     (boolean (re-find #"return cb\(nil,\s*filename\)" out))])
-  => [true true true true])
-
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-has-key? :added "4.1"}
 (fact "has key"

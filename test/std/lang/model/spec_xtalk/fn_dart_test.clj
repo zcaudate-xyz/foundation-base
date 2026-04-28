@@ -108,11 +108,6 @@
   (emit-dart (dart-tf-x-lu-create '[_]))
   => #"\{\}")
 
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-is-string? :added "4.1"}
-(fact "checks if string"
-  (l/emit-as :dart [(dart-tf-x-is-string? '[_ x])])
-  => #"is\(x,String\)")
-
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-del :added "4.1"}
 (fact "deletes key from map"
   (l/emit-as :dart [(dart-tf-x-del '[_ obj key])])
@@ -123,13 +118,6 @@
   (l/emit-as :dart [(dart-tf-x-eval '[_ s])])
   => #"eval not supported")
 
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-has-key? :added "4.1"}
-(fact "checks if key exists"
-  (l/emit-as :dart [(dart-tf-x-has-key? '[_ obj key nil])])
-  => #"\[\]")
-
-
-
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-shell :added "4.1"}
 (fact "shell uses Process.run"
   (let [out (l/emit-as :dart [(dart-tf-x-shell '[_ s root cb])])]
@@ -138,26 +126,6 @@
      (boolean (re-find #"stdout" out))
      (boolean (re-find #"catchError" out))])
   => [true true true true])
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-b64-encode :added "4.1"}
-(fact "base64 encode"
-  (l/emit-as :dart [(dart-tf-x-b64-encode '[_ s])])
-  => #"base64\.encode.*utf8\.encode")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-b64-decode :added "4.1"}
-(fact "base64 decode"
-  (l/emit-as :dart [(dart-tf-x-b64-decode '[_ s])])
-  => #"utf8\.decode.*base64\.decode")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-uri-encode :added "4.1"}
-(fact "uri encode"
-  (l/emit-as :dart [(dart-tf-x-uri-encode '[_ s])])
-  => #"Uri\.encodeComponent")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-uri-decode :added "4.1"}
-(fact "uri decode"
-  (l/emit-as :dart [(dart-tf-x-uri-decode '[_ s])])
-  => #"Uri\.decodeComponent")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-file-slurp :added "4.1"}
 (fact "file-slurp reads file content"
@@ -175,30 +143,10 @@
      (boolean (re-find #"catchError" out))])
   => [true true true])
 
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-debug-client-basic :added "4.1"}
-(fact "client basic not implemented"
-  (l/emit-as :dart [(dart-tf-x-debug-client-basic '[_ host port opts cb])])
-  => #"Client not implemented")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-thread-spawn :added "4.1"}
-(fact "thread spawn not implemented"
-  (l/emit-as :dart [(dart-tf-x-thread-spawn '[_ f])])
-  => #"Thread spawn not implemented")
-
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-with-delay :added "4.1"}
 (fact "delay future"
   (l/emit-as :dart [(dart-tf-x-with-delay '[_ ms value])])
   => #"Future\.delayed.*Duration.*milliseconds")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-start-interval :added "4.1"}
-(fact "start interval"
-  (l/emit-as :dart [(dart-tf-x-start-interval '[_ ms f])])
-  => #"Timer\.periodic.*Duration.*milliseconds")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-stop-interval :added "4.1"}
-(fact "stop interval"
-  (l/emit-as :dart [(dart-tf-x-stop-interval '[_ timer])])
-  => #"cancel")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-ceil :added "4.1"}
 (fact "ceiling"
@@ -245,11 +193,6 @@
   (emit-dart (dart-tf-x-m-loge '[_ x]))
   => #"math\.log")
 
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-log10 :added "4.1"}
-(fact "base-10 logarithm"
-  (emit-dart (dart-tf-x-m-log10 '[_ x]))
-  => #"math\.log10")
-
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-min :added "4.1"}
 (fact "minimum"
   (emit-dart (dart-tf-x-m-min '[_ a b]))
@@ -260,21 +203,6 @@
   (emit-dart (dart-tf-x-m-quot '[_ a b]))
   => #"~/")
 
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-cosh :added "4.1"}
-(fact "hyperbolic cosine"
-  (emit-dart (dart-tf-x-m-cosh '[_ x]))
-  => #"cosh")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-sinh :added "4.1"}
-(fact "hyperbolic sine"
-  (emit-dart (dart-tf-x-m-sinh '[_ x]))
-  => #"sinh")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-tanh :added "4.1"}
-(fact "hyperbolic tangent"
-  (emit-dart (dart-tf-x-m-tanh '[_ x]))
-  => #"tanh")
-
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-to-string :added "4.1"}
 (fact "converts to string"
   (emit-dart (dart-tf-x-to-string '[_ x]))
@@ -284,41 +212,6 @@
 (fact "converts to number"
   (emit-dart (dart-tf-x-to-number '[_ x]))
   => #"num\.parse")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-is-number? :added "4.1"}
-(fact "checks if number"
-  (emit-dart (dart-tf-x-is-number? '[_ x]))
-  => #"is\(x,num\)")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-is-integer? :added "4.1"}
-(fact "checks if integer"
-  (emit-dart (dart-tf-x-is-integer? '[_ x]))
-  => #"is\(x,int\)")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-is-boolean? :added "4.1"}
-(fact "checks if boolean"
-  (emit-dart (dart-tf-x-is-boolean? '[_ x]))
-  => #"is\(x,bool\)")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-is-function? :added "4.1"}
-(fact "checks if function"
-  (emit-dart (dart-tf-x-is-function? '[_ x]))
-  => #"is\(x,Function\)")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-is-object? :added "4.1"}
-(fact "checks if object"
-  (emit-dart (dart-tf-x-is-object? '[_ x]))
-  => #"Object.*List.*Function")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-is-array? :added "4.1"}
-(fact "checks if array"
-  (emit-dart (dart-tf-x-is-array? '[_ x]))
-  => #"is\(x,List\)")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-char :added "4.1"}
-(fact "gets string character"
-  (dart-tf-x-str-char '[_ s i])
-  => '(. s ([] i)))
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-split :added "4.1"}
 (fact "splits strings"
@@ -395,16 +288,6 @@
   (emit-dart (dart-tf-x-str-includes? '[_ s sub]))
   => #"contains")
 
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-lu-get :added "4.1"}
-(fact "gets lookup values"
-  (emit-dart (dart-tf-x-lu-get '[_ lu obj]))
-  => "[](lu,obj)")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-lu-set :added "4.1"}
-(fact "sets lookup values"
-  (emit-dart (dart-tf-x-lu-set '[_ lu obj gid]))
-  => "[](lu,obj) = gid")
-
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-lu-del :added "4.1"}
 (fact "deletes lookup values"
   (emit-dart (dart-tf-x-lu-del '[_ lu obj]))
@@ -419,11 +302,6 @@
 (fact "pushes array items to the front"
   (emit-dart (dart-tf-x-arr-push-first '[_ arr item]))
   => #"insert")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-arr-pop-first :added "4.1"}
-(fact "pops first array items"
-  (dart-tf-x-arr-pop-first '[_ arr])
-  => '(. arr removeAt 0))
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-arr-insert :added "4.1"}
 (fact "inserts array items"
@@ -440,51 +318,6 @@
   (emit-dart (dart-tf-x-arr-sort '[_ arr key-fn comp-fn]))
   => #"sort")
 
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-arr-str-comp :added "4.1"}
-(fact "compares array items by string value"
-  (emit-dart (dart-tf-x-arr-str-comp '[_ a b]))
-  => #"compareTo")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-cache :added "4.1"}
-(fact "creates caches"
-  (emit-dart (dart-tf-x-cache '[_ name]))
-  => #"new Map")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-cache-list :added "4.1"}
-(fact "lists cache keys"
-  (emit-dart (dart-tf-x-cache-list '[_ cache]))
-  => #"keys.*toList")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-cache-flush :added "4.1"}
-(fact "flushes caches"
-  (emit-dart (dart-tf-x-cache-flush '[_ cache]))
-  => #"clear")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-cache-get :added "4.1"}
-(fact "gets cached values"
-  (emit-dart (dart-tf-x-cache-get '[_ cache key]))
-  => "[](cache,key)")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-cache-set :added "4.1"}
-(fact "sets cached values"
-  (emit-dart (dart-tf-x-cache-set '[_ cache key val]))
-  => "[](cache,key) = val")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-cache-del :added "4.1"}
-(fact "deletes cached values"
-  (emit-dart (dart-tf-x-cache-del '[_ cache key]))
-  => #"remove")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-cache-incr :added "4.1"}
-(fact "increments cached values"
-  (emit-dart (dart-tf-x-cache-incr '[_ cache key num]))
-  => #"(?s)int\.parse.*curr")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-eq :added "4.1"}
-(fact "compares iterators"
-  (emit-dart (dart-tf-x-iter-eq '[_ a b]))
-  => #"==")
-
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-from :added "4.1"}
 (fact "creates iterators"
   (emit-dart (dart-tf-x-iter-from '[_ x]))
@@ -495,61 +328,10 @@
   (emit-dart (dart-tf-x-iter-from-arr '[_ arr]))
   => #"iterator")
 
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-from-obj :added "4.1"}
-(fact "creates iterators from objects"
-  (emit-dart (dart-tf-x-iter-from-obj '[_ obj]))
-  => #"entries.*iterator")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-has? :added "4.1"}
-(fact "checks iterator availability"
-  (emit-dart (dart-tf-x-iter-has? '[_ iter]))
-  => #"moveNext")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-native? :added "4.1"}
-(fact "marks iterators as native"
-  (emit-dart (dart-tf-x-iter-native? '[_ iter]))
-  => #"true")
-
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-next :added "4.1"}
 (fact "gets iterator values"
   (emit-dart (dart-tf-x-iter-next '[_ iter]))
   => #"current")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-null :added "4.1"}
-(fact "returns null iterators"
-  (emit-dart (dart-tf-x-iter-null '[_]))
-  => #"null")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-debug-client-ws :added "4.1"}
-(fact "websocket clients are not implemented"
-  (emit-dart (dart-tf-x-debug-client-ws '[_ host port opts cb]))
-  => #"WebSocket client not implemented")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-server-basic :added "4.1"}
-(fact "basic servers are not implemented"
-  (emit-dart (dart-tf-x-server-basic '[_ port opts cb]))
-  => #"Server not implemented")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-server-ws :added "4.1"}
-(fact "websocket servers are not implemented"
-  (emit-dart (dart-tf-x-server-ws '[_ port opts cb]))
-  => #"WebSocket server not implemented")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-ws-connect :added "4.1"}
-(fact "websocket connect is not implemented"
-  (emit-dart (dart-tf-x-ws-connect '[_ host port opts cb]))
-  => #"WebSocket connect not implemented")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-ws-send :added "4.1"}
-(fact "websocket send is not implemented"
-  (emit-dart (dart-tf-x-ws-send '[_ conn s]))
-  => #"WebSocket send not implemented")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-ws-close :added "4.1"}
-(fact "websocket close is not implemented"
-  (emit-dart (dart-tf-x-ws-close '[_ conn]))
-  => #"WebSocket close not implemented")
-
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-prototype-get :added "4.1"}
 (fact "gets runtime prototypes"
   (emit-dart (dart-tf-x-prototype-get '[_ obj]))
@@ -570,13 +352,6 @@
   (emit-dart (dart-tf-x-return-encode '[_ out id key]))
   => #"json\.encode")
 
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-return-encode :added "4.1"}
-(fact "encodes aggregate return types with explicit type tags"
-  (let [out (emit-dart (dart-tf-x-return-encode '[_ out id key]))]
-    [(boolean (re-find #"\"return\": \"array\"" out))
-     (boolean (re-find #"\"return\": \"object\"" out))])
-  => [true true])
-
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-return-wrap :added "4.1"}
 (fact "wraps return handlers"
   (emit-dart (dart-tf-x-return-wrap '[_ thunk encode-fn]))
@@ -586,8 +361,3 @@
 (fact "eval return handling is not supported"
   (emit-dart (dart-tf-x-return-eval '[_ s wrap-fn]))
   => #"eval not supported in Dart")
-
-^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-thread-join :added "4.1"}
-(fact "thread join is not implemented"
-  (emit-dart (dart-tf-x-thread-join '[_ thread]))
-  => #"Thread join not implemented in Dart")

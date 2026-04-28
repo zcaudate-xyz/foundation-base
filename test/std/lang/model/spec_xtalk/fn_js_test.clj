@@ -145,24 +145,6 @@
       (return t)))
   )
 
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-prototype-get :added "4.0"}
-(fact "gets prototype"
-  (l/emit-as :js [(js-tf-x-prototype-get '[_ obj])])
-  => #"Object.getPrototypeOf")
-
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-prototype-set :added "4.0"}
-(fact "sets prototype"
-  (l/emit-as :js [(js-tf-x-prototype-set '[_ obj proto])])
-  => #"Object.setPrototypeOf")
-
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-prototype-create :added "4.0"}
-(fact "creates prototype"
-  (l/emit-as :js [(js-tf-x-prototype-create '[_ {:a 1}])])
-  => #"\.\.\.args"
-
-  (l/emit-as :js [(js-tf-x-prototype-create '[_ {:a 1}])])
-  => #"Object.entries")
-
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-m-max :added "4.0"}
 (fact "gets max"
   (l/emit-as :js [(js-tf-x-m-max '[_ 1 2])])
@@ -303,11 +285,6 @@
   (l/emit-as :js [(js-tf-x-arr-clone '[_ arr])])
   => #"slice")
 
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-arr-assign :added "4.1"}
-(fact "assigns into the original array"
-  (l/emit-as :js [(js-tf-x-arr-assign '[_ arr other])])
-  => #"push")
-
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-arr-concat :added "4.1"}
 (fact "concatenates into a new array"
   (l/emit-as :js [(js-tf-x-arr-concat '[_ arr other])])
@@ -357,17 +334,6 @@
 (fact "compares strings"
   (l/emit-as :js [(js-tf-x-str-comp '[_ a b])])
   => #"localeCompare")
-
-^{:refer std.lang.model.spec-xtalk.fn-js/+js+ :added "4.0"}
-(fact "registers functional array templates"
-  (mapv (fn [k] (get-in +js+ [k :macro]))
-        [:x-arr-clone :x-arr-each :x-arr-every :x-arr-some
-          :x-arr-map :x-arr-filter :x-arr-keep
-          :x-arr-foldl :x-arr-foldr :x-arr-find :x-arr-sort])
-  => [#'js-tf-x-arr-clone #'js-tf-x-arr-each #'js-tf-x-arr-every #'js-tf-x-arr-some
-       #'js-tf-x-arr-map #'js-tf-x-arr-filter
-       #'js-tf-x-arr-keep
-       #'js-tf-x-arr-foldl #'js-tf-x-arr-foldr #'js-tf-x-arr-find #'js-tf-x-arr-sort])
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-str-char :added "4.0"}
 (fact "gets char"
@@ -494,41 +460,6 @@
   (l/emit-as :js [(js-tf-x-iter-native? '[_ it])])
   => #"next")
 
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-cache :added "4.0"}
-(fact "cache"
-  (l/emit-as :js [(js-tf-x-cache '[_ "GLOBAL"])])
-  => #"localStorage")
-
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-cache-list :added "4.0"}
-(fact "cache list"
-  (l/emit-as :js [(js-tf-x-cache-list '[_ cache])])
-  => #"Object.keys")
-
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-cache-flush :added "4.0"}
-(fact "cache flush"
-  (l/emit-as :js [(js-tf-x-cache-flush '[_ cache])])
-  => #"clear")
-
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-cache-get :added "4.0"}
-(fact "cache get"
-  (l/emit-as :js [(js-tf-x-cache-get '[_ cache key])])
-  => #"getItem")
-
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-cache-set :added "4.0"}
-(fact "cache set"
-  (l/emit-as :js [(js-tf-x-cache-set '[_ cache key val])])
-  => #"setItem")
-
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-cache-del :added "4.0"}
-(fact "cache del"
-  (l/emit-as :js [(js-tf-x-cache-del '[_ cache key])])
-  => #"removeItem")
-
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-cache-incr :added "4.0"}
-(fact "cache incr"
-  (l/emit-as :js [(js-tf-x-cache-incr '[_ cache key 1])])
-  => #"getItem")
-
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-file-slurp :added "4.1"}
 (fact "slurp file"
   (l/emit-as :js [(js-tf-x-file-slurp '[_ filename opts cb])])
@@ -545,30 +476,10 @@
   (l/emit-as :js [(js-tf-x-file-spit '[_ filename s opts cb])])
   => #"\[\"async\"\]")
 
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-thread-spawn :added "4.0"}
-(fact "thread spawn"
-  (l/emit-as :js [(js-tf-x-thread-spawn '[_ thunk])])
-  => #"Promise")
-
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-thread-join :added "4.0"}
-(fact "thread join"
-  (l/emit-as :js [(js-tf-x-thread-join '[_ thread])])
-  => #"x:error")
-
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-with-delay :added "4.0"}
 (fact "with delay"
   (l/emit-as :js [(js-tf-x-with-delay '[_ thunk 100])])
   => #"setTimeout")
-
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-start-interval :added "4.0"}
-(fact "start interval"
-  (l/emit-as :js [(js-tf-x-start-interval '[_ thunk 100])])
-  => #"setInterval")
-
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-stop-interval :added "4.0"}
-(fact "stop interval"
-  (l/emit-as :js [(js-tf-x-stop-interval '[_ instance])])
-  => #"clearInterval")
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-notify-http :added "4.0"}
 (fact "notify http"

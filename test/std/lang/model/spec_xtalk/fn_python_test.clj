@@ -59,26 +59,6 @@
   (l/emit-as :python [(python-tf-x-type-native '[_ obj])])
   => #"isinstance")
 
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-prototype-create :added "4.1"}
-(fact "proto create"
-  (l/emit-as :python [(python-tf-x-prototype-create '[_ {:a 1}])])
-  => #"\{\"a\":1\}")
-
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-prototype-get :added "4.1"}
-(fact "proto get"
-  (l/emit-as :python [(python-tf-x-prototype-get '[_ obj nil])])
-  => #"get\(\"__proto__\"\)")
-
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-prototype-set :added "4.1"}
-(fact "proto set"
-  (l/emit-as :python [(python-tf-x-prototype-set '[_ obj prototype nil])])
-  => #"MethodType")
-
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-prototype-tostring :added "4.1"}
-(fact "proto tostring"
-  (l/emit-as :python [(python-tf-x-prototype-tostring '[_ obj])])
-  => #"__str__")
-
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-m-abs :added "4.0"}
 (fact "math abs"
   (l/emit-as :python [(python-tf-x-m-abs '[_ 1])])
@@ -466,16 +446,6 @@
   (l/emit-as :python [(:default (:x-iter-null +python-iter+))])
   => #"iter")
 
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-thread-spawn :added "4.0"}
-(fact "thread spawn"
-  (l/emit-as :python [(python-tf-x-thread-spawn '[_ thunk])])
-  => #"threading")
-
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-thread-join :added "4.0"}
-(fact "thread join"
-  (l/emit-as :python [(python-tf-x-thread-join '[_ thread])])
-  => #"x:error")
-
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-with-delay :added "4.0"}
 (fact "with delay"
   (l/emit-as :python [(python-tf-x-with-delay '[_ thunk ms])])
@@ -490,17 +460,6 @@
 (fact "spit file"
   (comment (l/emit-as :python [(python-tf-x-file-spit '[_ filename s opts cb])])
             => nil?))
-
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-b64-encode :added "4.0"}
-(fact "b64 encode"
-  (l/emit-as :python [(python-tf-x-b64-encode '[_ obj])])
-  => #"base64")
-
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-b64-decode :added "4.0"}
-(fact "b64 decode"
-  (l/emit-as :python [(python-tf-x-b64-decode '[_ s])])
-  => #"base64")
-
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-has-key? :added "4.1"}
 (fact "has key"

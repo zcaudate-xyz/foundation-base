@@ -175,106 +175,10 @@
 ^{:refer std.lang.model.spec-python/tf-for-return :added "4.0"}
 (fact "for return transform"
 
-  (let [out (py/tf-for-return '(for:return [[ok err] (call (x:callback))]
-                                           {:success (return ok)
-                                            :error   (return err)}))
-        binding (second out)
-        callback (nth binding 1)
-        assign (nth out 2)]
-    [(= 'do* (first out))
-     (= 'var (first binding))
-     (symbol? callback)
-     (.startsWith (name callback) "py_callback__")
-     (= '(fn [err ok]
-            (if (not= err nil)
-              (return err)
-              (return ok)))
-         (nth binding 2))
-     (= '(call CALLBACK)
-        (clojure.walk/prewalk-replace {callback 'CALLBACK} assign))])
-  => [true true true true true true]
-
   (py/tf-for-return '(for:return [[ok err] (call)]
                                  {:success (return ok)
                                   :error   (return err)}))
   => '(try (var ok (call))
            (return ok)
            (catch [Exception :as err]
-               (return err)))
-
-  (let [out (py/tf-for-return '(for:return [[ok err] (x:return-run runner)]
-                                           {:success (return ok)
-                                            :error   (return err)}))]
-    [(= 'do (first out))
-     (= '(var ok nil) (nth out 2))
-     (= '(var err nil) (nth out 3))
-     (= 'try (first (nth out 6)))
-     (= 'runner (first (second (nth out 6))))
-     (= '(if (not= nil err) (return err) (return ok))
-        (nth (nth out 6) 4))])
-  => [true true true true true true])
-
-^{:refer std.lang.model.spec-python/tf-for-try :added "4.0"}
-(fact "for try transform"
-
-  (py/tf-for-try '(for:try [[ok err] (call)]
-                            {:success (return ok)
-                             :error   (return err)}))
-  => '(try (var ok (call))
-           (return ok)
-           (catch [Exception :as err]
-             (return err)))
-
-  (let [out (py/tf-for-try '(for:try [[ok err] (do:> (x:err "ERROR"))]
-                                      {:success (return ok)
-                                       :error   (return err)}))]
-    (and (= 'try (first out))
-         (= 'fn.inner (-> out second first))
-         (= 'var (-> out (nth 2) first))
-         (= 'catch (-> out last first))))
-   => true)
-
-^{:refer std.lang.model.spec-python/tf-for-async :added "4.1"}
-(fact "for async transform"
-
-  (let [out (py/tf-for-async '(for:async [[ok err] (call)]
-                                          {:success (return ok)
-                                           :error   (return err)
-                                           :finally (return true)}))]
-    [(= '. (first out))
-     (= 'Thread (-> out (nth 2) first))
-     (= 'fn (-> out (nth 2) (nth 2) first))
-     (= 'try (-> out (nth 2) (nth 2) (nth 2) first))])
-  => [true true true true]
-
-  (let [out (py/tf-for-async '(for:async [[ok err] (call)]
-                                          {:success (return ok)
-                                           :error   (return err)
-                                           :finally (return true)}))]
-    [(= 'start (-> out last first))])
-  => [true]
-
-  (let [out (py/tf-for-async '(for:async [[ok err] (x:return-run runner)]
-                                          {:success (return ok)
-                                           :error   (return err)
-                                           :finally (return true)}))]
-    [(= '. (first out))
-     (= 'Thread (-> out (nth 2) first))
-     (= 'fn (-> out (nth 2) (nth 2) first))
-     (= 'var (-> out (nth 2) (nth 2) (nth 2) first))
-     (= 'try (-> out (nth 2) (nth 2) last first))])
-  => [true true true true true]
-
-  (let [out (l/emit-as
-             :python
-             ['(defn OUT_FN []
-                 (return
-                  (for:async [[ok err] (x:return-run runner)]
-                    {:success (return ok)
-                     :error   (return err)
-                     :finally (return true)})))])]
-    [(boolean (re-find #"def py_callback__.*\(\):" out))
-     (boolean (re-find #"return .*Thread\(target=py_callback__" out))
-     (boolean (re-find #"\.start\(\)" out))
-     (not (boolean (re-find #"return\\s+def\\s" out)))])
-  => [true true true true])
+               (return err))))

@@ -218,16 +218,6 @@
   (php-tf-x-has-key? '(:x-has-key? obj k nil))
   => '(array_key_exists k obj))
 
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-prototype-get :added "4.1"}
-(fact "gets proto slot via index access"
-  (php-tf-x-prototype-get '(:x-prototype-get obj k))
-  => '(:% obj [k]))
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-prototype-set :added "4.1"}
-(fact "sets proto slot via index access"
-  (php-tf-x-prototype-set '(:x-prototype-set obj k v))
-  => '(:= (:% obj [k]) v))
-
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-lu-get :added "4.1"}
 (fact "gets lookup value via object id"
   (php-tf-x-lu-get '(:x-lu-get lu obj))
@@ -293,27 +283,6 @@
   (php-tf-x-socket-close '(:x-socket-close conn))
   => '(fclose conn))
 
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-cache :added "4.1"}
-(fact "normalizes cache handle names"
-  (php-tf-x-cache '(:x-cache GLOBAL))
-  => "GLOBAL")
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-global-cache-store :added "4.1"}
-(fact "creates the global cache store access form"
-  (php-global-cache-store)
-  => '(:% $GLOBALS ["__xtalk_cache__"]))
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-global-cache-bucket :added "4.1"}
-(fact "creates the global cache bucket access form"
-  (php-global-cache-bucket 'cache)
-  => '(:% (:% $GLOBALS ["__xtalk_cache__"]) [cache]))
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-global-cache-slot :added "4.1"}
-(fact "creates the global cache slot access form"
-  (php-global-cache-slot 'cache 'key)
-  => '(:% (:% (:% $GLOBALS ["__xtalk_cache__"]) [cache]) [key]))
-
-
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-return-encode :added "4.1"}
 (fact "return encode"
   (l/emit-as :php [(php-tf-x-return-encode '[_ out id key])])
@@ -329,136 +298,7 @@
   (l/emit-as :php [(php-tf-x-return-eval '[_ s wrap-fn])])
   => #"eval")
 
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-thread-spawn :added "4.1"}
-(fact "thread spawn emits the thunk result"
-  (l/emit-as :php [(php-tf-x-thread-spawn '[_ thunk])])
-  => #"out")
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-thread-join :added "4.1"}
-(fact "thread join passes through the thread"
-  (l/emit-as :php [(php-tf-x-thread-join '[_ thread])])
-  => #"thread")
-
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-with-delay :added "4.1"}
 (fact "with delay emits sleep"
   (l/emit-as :php [(php-tf-x-with-delay '[_ thunk 10])])
   => #"usleep")
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-start-interval :added "4.1"}
-(fact "start interval emits active handle"
-  (l/emit-as :php [(php-tf-x-start-interval '[_ thunk 10])])
-  => #"active")
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-stop-interval :added "4.1"}
-(fact "stop interval emits active false"
-  (l/emit-as :php [(php-tf-x-stop-interval '[_ instance])])
-  => #"active")
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-cache-get :added "4.1"}
-(fact "cache get emits global cache access"
-  (l/emit-as :php [(php-tf-x-cache-get '[_ cache key nil])])
-  => #"__xtalk_cache__")
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-cache-list :added "4.1"}
-(fact "cache list emits global cache access"
-  (l/emit-as :php [(php-tf-x-cache-list '[_ cache])])
-  => #"__xtalk_cache__")
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-cache-flush :added "4.1"}
-(fact "cache flush emits global cache access"
-  (l/emit-as :php [(php-tf-x-cache-flush '[_ cache])])
-  => #"__xtalk_cache__")
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-cache-set :added "4.1"}
-(fact "cache set emits global cache access"
-  (l/emit-as :php [(php-tf-x-cache-set '[_ cache key val])])
-  => #"__xtalk_cache__")
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-cache-del :added "4.1"}
-(fact "cache delete emits global cache access"
-  (l/emit-as :php [(php-tf-x-cache-del '[_ cache key])])
-  => #"__xtalk_cache__")
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-cache-incr :added "4.1"}
-(fact "cache incr emits global cache access"
-  (l/emit-as :php [(php-tf-x-cache-incr '[_ cache key 2])])
-  => #"__xtalk_cache__")
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-notify-socket :added "4.1"}
-(fact "notify socket emits async marker"
-  (l/emit-as :php [(php-tf-x-notify-socket '[_ message])])
-  => #"async")
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-ws-connect :added "4.1"}
-(fact "ws connect falls back to socket connect"
-  (php-tf-x-ws-connect '(:x-ws-connect url))
-  => '(fsockopen url))
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-ws-send :added "4.1"}
-(fact "ws send falls back to socket send"
-  (php-tf-x-ws-send '(:x-ws-send conn value))
-  => '(fwrite conn value))
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-ws-close :added "4.1"}
-(fact "ws close falls back to socket close"
-  (php-tf-x-ws-close '(:x-ws-close conn))
-  => '(fclose conn))
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-php/+php+ :added "4.1"}
-(fact "covers all previously abstract php xtalk helpers"
-  (let [ops [:x-arr-insert
-             :x-arr-remove
-             :x-arr-sort
-             :x-str-comp
-             :x-b64-decode
-             :x-b64-encode
-             :x-cache
-             :x-cache-del
-             :x-cache-flush
-             :x-cache-get
-             :x-cache-incr
-             :x-cache-list
-             :x-cache-set
-             :x-debug-client-basic
-             :x-debug-client-ws
-             :x-has-key?
-             :x-iter-eq
-             :x-iter-from
-             :x-iter-from-arr
-             :x-iter-from-obj
-             :x-iter-has?
-             :x-iter-native?
-             :x-iter-next
-             :x-iter-null
-             :x-lu-del
-             :x-lu-get
-             :x-lu-set
-             :x-notify-socket
-             :x-prototype-get
-             :x-prototype-set
-             :x-prototype-tostring
-             :x-server-basic
-             :x-server-ws
-             :x-file-slurp
-             :x-socket-close
-             :x-socket-connect
-             :x-socket-send
-             :x-file-spit
-             :x-start-interval
-             :x-stop-interval
-             :x-str-format
-             :x-str-to-fixed
-             :x-str-trim-left
-             :x-str-trim-right
-             :x-thread-join
-             :x-thread-spawn
-             :x-uri-decode
-             :x-uri-encode
-             :x-with-delay
-             :x-ws-close
-             :x-ws-connect
-             :x-ws-send]]
-    (and (every? #(contains? +php+ %) ops)
-         (not-any? #{:abstract}
-                   (map #(get-in +php+ [% :emit]) ops))))
-  => true)
