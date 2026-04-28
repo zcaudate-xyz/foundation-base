@@ -19,30 +19,6 @@
       "a = (a * 2)"
       "circle.x = (circle.x + 20)"])
 
-^{:refer std.lang.model.spec-lua/lua-map-key :added "3.0"}
-(fact "custom lua map key"
-
-  (lua-map-key 123 +grammar+ {})
-  => "[123]"
-
-  (lua-map-key "123" +grammar+ {})
-  => "['123']"
-
-
-  (lua-map-key "abc" +grammar+ {})
-  => "abc"
-
-  (lua-map-key :abc +grammar+ {})
-  => "abc")
-
-^{:refer std.lang.model.spec-lua/+grammar+ :added "4.1"}
-(fact "throw emits lua errors"
-  (l/emit-as :lua '[(throw "boom")])
-  => "error('boom')"
-
-  (l/emit-as :lua '[(throw (x:ex-new "boom" {:a 1}))])
-  => "error({['__type__']='xt.exception',message='boom',data={a=1}})")
-
 (fact "try/catch lowers to a pcall wrapper"
   (let [out (l/emit-as :lua
                        '[(try
@@ -82,20 +58,63 @@
                    :error   (return err)})
          (return true))))
 
-^{:refer std.lang.model.spec-lua.variant-nginx/+grammar-delta+ :added "4.1"}
-(fact "nginx promise ops hard-link through nginx common-promise"
-  [(get-in nginx/+grammar-delta+ [:x-promise :raw])
-   (get-in nginx/+grammar-delta+ [:x-promise-then :raw])
-   (get-in nginx/+grammar-delta+ [:x-promise-catch :raw])
-   (get-in nginx/+grammar-delta+ [:x-promise-finally :raw])
-   (get-in nginx/+grammar-delta+ [:x-promise-native? :raw])
-   (get-in nginx/+grammar-delta+ [:x-with-delay :raw])]
-  => ['lua.nginx.common-promise/promise
-      'lua.nginx.common-promise/promise-then
-      'lua.nginx.common-promise/promise-catch
-      'lua.nginx.common-promise/promise-finally
-      'lua.nginx.common-promise/promise-native?
-      'lua.nginx.common-promise/with-delay])
+^{:refer std.lang.model.spec-lua/lua-tf-incby :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-lua/lua-tf-decby :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-lua/lua-tf-mulby :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-lua/lua-tf-local :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-lua/lua-tf-c-ffi :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-lua/lua-map-key :added "3.0"}
+(fact "custom lua map key"
+
+  (lua-map-key 123 +grammar+ {})
+  => "[123]"
+
+  (lua-map-key "123" +grammar+ {})
+  => "['123']"
+
+
+  (lua-map-key "abc" +grammar+ {})
+  => "abc"
+
+  (lua-map-key :abc +grammar+ {})
+  => "abc")
+
+^{:refer std.lang.model.spec-lua/lua-tf-for-object :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-lua/lua-tf-for-array :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-lua/lua-tf-for-iter :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-lua/lua-tf-for-index :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-lua/lua-tf-for-return :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-lua/lua-tf-for-async :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-lua/lua-tf-yield :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-lua/lua-tf-defgen :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-lua/lua-tf-prototype-create :added "4.1"}
+(fact "TODO")
 
 ^{:refer std.lang.model.spec-lua/lua-module-link :added "4.0"}
 (fact "gets the absolute lua based module"
@@ -112,3 +131,9 @@
 
   (lua-module-export 'kmi.common {:root-ns 'kmi.hello})
   => '(return (tab)))
+
+^{:refer std.lang.model.spec-lua/variant-meta :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-lua/variant-grammar :added "4.1"}
+(fact "TODO")

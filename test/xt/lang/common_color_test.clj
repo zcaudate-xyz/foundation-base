@@ -111,7 +111,6 @@
     (color/hex->rgb "#222222")])
   => [[170 170 170] [69 249 129] [34 34 34]]
 
-
   (!.lua
    [(color/hex->rgb "#aaa")
     (color/hex->rgb "#45f981")
@@ -148,45 +147,40 @@
 ^{:refer xt.lang.common-color/rgb->hue :added "4.0"}
 (fact "helper function for rgb->hsl")
 
-^{:refer xt.lang.common-color/rgb->hsl :added "4.0"}
+^{:refer xt.lang.common-color/rgb->hsl :added "4.0"
+  :setup [(def +out+
+            (contains-in
+             [[180 (approx 100) (approx 19.6078)]
+              [0 0 0]
+              [0 0 100]
+              [0 0 (approx 99.607)]
+              [60 100 (approx 25.098)]
+              [120 100 (approx 25.098)]]))]}
 (fact "converts rgb to hsl"
 
-  (!.js [(color/rgb->hsl [0 100 100])
-         (color/rgb->hsl [0 0 0])
-         (color/rgb->hsl [255 255 255])
-         (color/rgb->hsl [254 254 254])
-         (color/rgb->hsl [128 128 0])
-         (color/rgb->hsl [0 128 0])])
-  => [[180 99.99999999999999 19.607843137254903]
-      [0 0 0]
-      [0 0 100]
-      [0 0 99.6078431372549]
-      [60 100 25.098039215686274]
-      [120 100 25.098039215686274]]
+  (!.js [(color/rgb->hsl [0 100 100] nil)
+         (color/rgb->hsl [0 0 0] nil)
+         (color/rgb->hsl [255 255 255] nil)
+         (color/rgb->hsl [254 254 254] nil)
+         (color/rgb->hsl [128 128 0] nil)
+         (color/rgb->hsl [0 128 0] nil)])
+  => +out+
 
-
-  (!.lua [(color/rgb->hsl [0 100 100])
-          (color/rgb->hsl [0 0 0])
-          (color/rgb->hsl [255 255 255])
-          (color/rgb->hsl [128 128 0])
-          (color/rgb->hsl [0 128 0])])
-  => [[180 100 19.607843137255]
-      [0 0 0]
-      [0 0 100]
-      [60 100 25.098039215686]
-      [120 100 25.098039215686]]
-
+  (!.lua [(color/rgb->hsl [0 100 100] nil)
+         (color/rgb->hsl [0 0 0] nil)
+         (color/rgb->hsl [255 255 255] nil)
+         (color/rgb->hsl [254 254 254] nil)
+         (color/rgb->hsl [128 128 0] nil)
+         (color/rgb->hsl [0 128 0] nil)])
+  => +out+
 
   (!.py [(color/rgb->hsl [0 100 100] nil)
          (color/rgb->hsl [0 0 0] nil)
          (color/rgb->hsl [255 255 255] nil)
+         (color/rgb->hsl [254 254 254] nil)
          (color/rgb->hsl [128 128 0] nil)
          (color/rgb->hsl [0 128 0] nil)])
-  => [[180.0 99.99999999999999 19.607843137254903]
-      [0 0 0.0]
-      [0 0 100]
-      [60.0 100 25.098039215686274]
-      [120.0 100 25.098039215686274]])
+  => +out+)
 
 ^{:refer xt.lang.common-color/hue->v :added "4.0"}
 (fact "converts a hue to a value"
@@ -220,27 +214,50 @@
 
 ^{:refer xt.lang.common-color/named->hsl :added "4.0"}
 (fact "converts a named color to hsl"
- 
-  ^{:seedgen/base {:lua {:expect [0 67.924528301887 41.56862745098]}}}
+
   (!.js
-   (color/named->hsl "firebrick"))
-  => [0 67.9245283018868 41.568627450980394])
+    (color/named->hsl "firebrick"))
+  => (contains [0 (approx 67.9245) (approx 41.5686)])
+
+  (!.lua
+    (color/named->hsl "firebrick"))
+  => (contains [0 (approx 67.9245) (approx 41.5686)])
+
+  (!.py
+    (color/named->hsl "firebrick"))
+  => (contains [0 (approx 67.9245) (approx 41.5686)]))
 
 ^{:refer xt.lang.common-color/named->hex :added "4.0"}
 (fact "converts a named color to hex"
 
   (!.js
    (color/named->hex "firebrick"))
+  => "#B22222"
+
+  (!.lua
+   (color/named->hex "firebrick"))
+  => "#B22222"
+
+  (!.py
+   (color/named->hex "firebrick"))
   => "#B22222")
 
 ^{:refer xt.lang.common-color/hex->hsl :added "4.0"}
 (fact "converts a hex to hsl"
- 
-  ^{:seedgen/base {:lua {:expect [0 67.924528301887 41.56862745098]}}}
+
   (!.js
    (color/hex->hsl "#B22222"))
-  => [0 67.9245283018868 41.568627450980394])
+  => (contains [0 (approx 67.9245) (approx 41.5686)])
+
+  (!.lua
+   (color/hex->hsl "#B22222"))
+  => (contains [0 (approx 67.9245) (approx 41.5686)])
+
+  (!.py
+   (color/hex->hsl "#B22222"))
+  => (contains [0 (approx 67.9245) (approx 41.5686)]))
 
 (comment
-  (s/seedgen-langadd 'xt.lang.common-color {:lang [:lua :python] :write true})
+  (s/seedgen-benchadd '[xt.lang.common-color] {:lang [:dart :julia :ruby] :write true})
+  (s/seedgen-langadd '[xt.lang.common-color] {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.lang.common-color {:lang [:lua :python] :write true}))
