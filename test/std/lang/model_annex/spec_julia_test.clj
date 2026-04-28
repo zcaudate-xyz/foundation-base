@@ -1,5 +1,6 @@
 (ns std.lang.model-annex.spec-julia-test
   (:require [std.lang.base.script :as script]
+            [std.lang.model-annex.spec-julia.rewrite :as rewrite]
             [std.lang.base.util :as ut]
             [std.lang.model-annex.spec-julia :refer :all])
   (:refer-clojure :exclude [for import])
@@ -97,7 +98,31 @@
 
    (!.julia
     (delete! obj "a"))
-   => "delete!(obj,\"a\")")
+    => "delete!(obj,\"a\")")
+
+(fact "Julia staging rewrite normalizes truthy tests and set destructuring"
+  (let [out (rewrite/julia-rewrite-stage
+             '(when curr
+                (return curr))
+             {:grammar +grammar+})]
+    [(= 'when (first out))
+     (= '(and (x:not-nil? curr) (not= false curr))
+        (second out))
+     (= '(return curr) (nth out 2))])
+  => [true true true]
+
+  (let [out (rewrite/julia-rewrite-stage
+             '(var #{spaces watch} g)
+             {:grammar +grammar+})
+        [_ bind extract1 extract2] out
+        temp (second bind)]
+    [(= 'do* (first out))
+     (= 'var (first bind))
+     (symbol? temp)
+     (= 'g (last bind))
+     (= extract1 (list 'var 'spaces (list 'x:get-key temp "spaces" nil)))
+     (= extract2 (list 'var 'watch (list 'x:get-key temp "watch" nil)))])
+  => [true true true true true true])
 
 (fact "Xtalk Julia mappings"
   (!.julia (x:print "Hello"))

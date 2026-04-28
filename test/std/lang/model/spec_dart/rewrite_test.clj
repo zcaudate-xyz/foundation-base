@@ -68,14 +68,54 @@
           (return))))
    {:grammar dart/+grammar+})
   => '(defgen sample [n seq]
-       (do
-         (var i 0)
-         (for:iter [e seq]
-           (if (< i n)
-             (do
-               (:= i (+ i 1))
-               (yield e))
-             (return))))))
+        (do
+          (var i 0)
+          (for:iter [e seq]
+            (if (< i n)
+              (do
+                (:= i (+ i 1))
+                (yield e))
+              (return))))))
+
+(fact "rewrites explicit boolean control contexts"
+  (rewrite/dart-rewrite-stage
+   '(if curr
+      (return 1)
+      (return 2))
+   {:grammar dart/+grammar+})
+  => '(if (and (x:not-nil? curr)
+               (not= false curr))
+        (return 1)
+        (return 2))
+
+  (rewrite/dart-rewrite-stage
+   '(when curr
+      (return 1))
+   {:grammar dart/+grammar+})
+  => '(when (and (x:not-nil? curr)
+                 (not= false curr))
+        (return 1))
+
+  (rewrite/dart-rewrite-stage
+   '(while curr
+      (return 1))
+   {:grammar dart/+grammar+})
+  => '(while (and (x:not-nil? curr)
+                  (not= false curr))
+        (return 1))
+
+  (rewrite/dart-rewrite-stage
+   '(br* (if curr (return 1))
+         (elseif ready (return 2))
+         (else (return 3)))
+   {:grammar dart/+grammar+})
+  => '(br* (if (and (x:not-nil? curr)
+                    (not= false curr))
+             (return 1))
+          (elseif (and (x:not-nil? ready)
+                       (not= false ready))
+             (return 2))
+          (else (return 3))))
 
 (fact "adds dart-specific nil-coalesce ops"
   (dart/dart-tf-ternary '(dart:ternary a out {}))

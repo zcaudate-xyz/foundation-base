@@ -10,10 +10,11 @@
              [std.lang.base.script :as script]
              [std.lang.base.util :as ut]
              [std.lang.model.spec-xtalk]
+             [std.lang.model-annex.spec-julia.rewrite :as rewrite]
              [std.lang.model-annex.spec-xtalk.fn-julia :as fn]
-            [std.lib.collection :as collection]
-            [std.lib.foundation :as f]
-            [std.lib.template :as template])
+             [std.lib.collection :as collection]
+             [std.lib.foundation :as f]
+             [std.lib.template :as template])
   (:refer-clojure :exclude [for import]))
 
 ;;
@@ -192,18 +193,19 @@
                               :body      {:start "" :end "end"}}
                   :infix     {:if  {:check "&&" :then "||"}}
                   :global    {:reference nil}}
-        :token  {:nil       {:as "nothing"}
-                 :string    {:quote :double}
-                 :symbol    {:global #'julia-symbol-global
-                             :replace (assoc helper/+sym-replace+ \! "!")}}
-        :data   {:map-entry {:start ""  :end ""  :space "" :assign " => " :keyword :string
-                             :key-fn #'julia-map-key}
-                 :map       {:start "Dict(" :end ")"}
-                 :vector    {:start "Any[" :end "]" :space ", "}}
-        :block  {:for       {:body    {:start "" :end "end"}
-                             :parameter {:start " " :end "" :space " "}}
-                 :try      {:wrap    {:start "" :end "end"}
-                            :body    {:start "" :end ""}
+         :token  {:nil       {:as "nothing"}
+                  :string    {:quote :double}
+                  :symbol    {:global #'julia-symbol-global
+                              :replace (assoc helper/+sym-replace+ \! "!")}}
+         :data   {:map-entry {:start ""  :end ""  :space "" :assign " => " :keyword :string
+                              :key-fn #'julia-map-key}
+                  :map       {:start "Dict(" :end ")"}
+                  :vector    {:start "Any[" :end "]" :space ", "}}
+         :rewrite {:staging [#'rewrite/julia-rewrite-stage]}
+         :block  {:for       {:body    {:start "" :end "end"}
+                              :parameter {:start " " :end "" :space " "}}
+                  :try      {:wrap    {:start "" :end "end"}
+                             :body    {:start "" :end ""}
                             :control {:catch   {:raw "catch"
                                                 :parameter {:start " " :end ""}
                                                 :body {:start "" :end ""}}
