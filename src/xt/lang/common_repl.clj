@@ -131,34 +131,34 @@
   "creates the print op"
   {:added "4.0"}
   [value & [data]]
-  (notify-form "print" value {:data data}))
+  (xt.lang.common-repl/notify-form "print" value {:data data}))
 
 (defmacro.xt ^{:standalone true}
   capture
   "creats the capture op"
   {:added "4.0"}
   [value & [tag]]
-  (notify-form "capture" value {:tag tag}))
+  (xt.lang.common-repl/notify-form "capture" value {:tag tag}))
 
 (defmacro.xt ^{:standalone true}
   notify
   "sends a message to the notify server"
   {:added "4.0"}
   [value & [id tag]]
-  (notify-form (or id
-                   notify/*override-id*
-                   (f/error "No ID for Notify"))
-               value {:tag tag}))
+  (xt.lang.common-repl/notify-form (or id
+                                       xt.lang.common-notify/*override-id*
+                                       (std.lib.foundation/error "No ID for Notify"))
+                                   value {:tag tag}))
 
 (defmacro.xt ^{:standalone true}
   >notify
   "creates a callback function"
   {:added "4.0"}
   [& [f]]
-  (template/$ (fn [val]
-                (return (xt.lang.common-repl/notify ~(if f
-                                                     (list f 'val)
-                                                     'val))))))
+  (std.lib.template/$ (fn [val]
+                        (return (xt.lang.common-repl/notify ~(if f
+                                                             (list f 'val)
+                                                             'val))))))
 
 (defmacro.xt ^{:standalone true}
   <!

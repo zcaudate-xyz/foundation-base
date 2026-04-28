@@ -92,6 +92,36 @@
   [[_ s]]
   (list 'throw '"eval not supported in Dart"))
 
+(defn dart-tf-x-ex-native?
+  [[_ value]]
+  (list 'and
+        (list 'x:is-object? value)
+        (list '== "xt.exception" (list '. value ["__type__"]))))
+
+(defn dart-tf-x-ex-new
+  [[_ message & [data]]]
+  {"__type__" "xt.exception"
+   "message" message
+   "data" data})
+
+(defn dart-tf-x-ex-message
+  [[_ value]]
+  (list ':?
+        (list 'and
+              (list 'x:is-object? value)
+              (list '== "xt.exception" (list '. value ["__type__"])))
+        (list '. value ["message"])
+        nil))
+
+(defn dart-tf-x-ex-data
+  [[_ value]]
+  (list ':?
+        (list 'and
+              (list 'x:is-object? value)
+              (list '== "xt.exception" (list '. value ["__type__"])))
+        (list '. value ["data"])
+        nil))
+
 (defn dart-tf-x-has-key?
   [[_ obj key check]]
   (if (some? check)
@@ -109,11 +139,15 @@
    :x-len      {:macro #'dart-tf-x-len      :emit :macro :value true}
    :x-cat      {:macro #'dart-tf-x-cat      :emit :macro :value true}
    :x-apply    {:macro #'dart-tf-x-apply    :emit :macro}
-   :x-err      {:emit :alias :raw 'throw}
-   :x-now-ms   {:macro #'dart-tf-x-now-ms   :emit :macro}
-   :x-random   {:macro #'dart-tf-x-random   :emit :macro}
-   :x-type-native {:macro #'dart-tf-x-type-native :emit :macro}
-   :x-del      {:macro #'dart-tf-x-del      :emit :macro}
+    :x-err      {:emit :alias :raw 'throw}
+    :x-ex-native? {:macro #'dart-tf-x-ex-native? :emit :macro}
+    :x-ex-new   {:macro #'dart-tf-x-ex-new   :emit :macro}
+    :x-ex-message {:macro #'dart-tf-x-ex-message :emit :macro}
+    :x-ex-data  {:macro #'dart-tf-x-ex-data  :emit :macro}
+    :x-now-ms   {:macro #'dart-tf-x-now-ms   :emit :macro}
+    :x-random   {:macro #'dart-tf-x-random   :emit :macro}
+    :x-type-native {:macro #'dart-tf-x-type-native :emit :macro}
+    :x-del      {:macro #'dart-tf-x-del      :emit :macro}
    :x-eval     {:macro #'dart-tf-x-eval     :emit :macro}
    :x-has-key? {:macro #'dart-tf-x-has-key? :emit :macro}
    :x-del-key  {:macro #'dart-tf-x-del-key  :emit :macro}

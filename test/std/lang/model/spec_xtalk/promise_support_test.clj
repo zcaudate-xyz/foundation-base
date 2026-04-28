@@ -1,16 +1,104 @@
 (ns std.lang.model.spec-xtalk.promise-support-test
   (:use code.test)
   (:require [std.lang :as l]
-            [xt.lang.spec-base :as xt]))
+            [xt.lang.spec-base :as xt]
+            [xt.lang.spec-promise :as spec-promise]))
 
-^{:refer xt.lang.spec-base/x:promise :added "4.1"}
-(fact "promise helpers are exposed from xt.lang.spec-base"
-  [(boolean (find-var 'xt.lang.spec-base/x:promise))
-   (boolean (find-var 'xt.lang.spec-base/x:promise-then))
-   (boolean (find-var 'xt.lang.spec-base/x:promise-catch))
-   (boolean (find-var 'xt.lang.spec-base/x:promise-finally))
-   (boolean (find-var 'xt.lang.spec-base/x:promise-native?))]
+(l/script- :python
+  {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as spec-promise]
+             [python.core.common-promise]]})
+
+(l/script- :lua
+  {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as spec-promise]
+             [lua.core.common-promise]]})
+
+^{:refer xt.lang.spec-promise/x:promise :added "4.1"}
+(fact "promise helpers are exposed from xt.lang.spec-promise"
+  [(boolean (find-var 'xt.lang.spec-promise/x:promise))
+   (boolean (find-var 'xt.lang.spec-promise/x:promise-then))
+   (boolean (find-var 'xt.lang.spec-promise/x:promise-catch))
+   (boolean (find-var 'xt.lang.spec-promise/x:promise-finally))
+   (boolean (find-var 'xt.lang.spec-promise/x:promise-native?))]
   => [true true true true true])
+
+^{:refer xt.lang.spec-base/x:ex :added "4.1"}
+(fact "exception helpers are exposed from xt.lang.spec-base"
+  [(boolean (find-var 'xt.lang.spec-base/x:ex-native?))
+   (boolean (find-var 'xt.lang.spec-base/x:ex))
+   (boolean (find-var 'xt.lang.spec-base/x:ex-message))
+   (boolean (find-var 'xt.lang.spec-base/x:ex-data))]
+  => [true true true true])
+
+^{:refer xt.lang.spec-base/x:ex :added "4.1"}
+(fact "xtalk exception helpers emit catchable structured exceptions"
+  (let [js-out (l/emit-as :js ['(try
+                                 (throw (x:ex "boom" {:a 1}))
+                                 (catch e
+                                   (x:print (x:ex-message e))
+                                   (x:print (x:ex-data e))))])
+        py-out (l/emit-as :python ['(try
+                                     (throw (x:ex "boom" {:a 1}))
+                                     (catch [Exception :as e]
+                                       (x:print (x:ex-message e))
+                                       (x:print (x:ex-data e))))])
+        lua-out (l/emit-as :lua ['(try
+                                   (throw (x:ex "boom" {:a 1}))
+                                   (catch e
+                                     (x:print (x:ex-message e))
+                                     (x:print (x:ex-data e))))])]
+    [[(boolean (re-find #"Object\.assign\(new Error\(\"boom\"\)" js-out))
+      (boolean (re-find #"\[\"message\"\]" js-out))
+      (boolean (re-find #"\[\"data\"\]" js-out))
+      (boolean (re-find #"console\.log" js-out))]
+     [(boolean (re-find #"Exception\(\"boom\",\{\"a\":1\}\)" py-out))
+      (boolean (re-find #"e\.args\[0\]" py-out))
+      (boolean (re-find #"e\.args\[1\]" py-out))
+      (boolean (re-find #"print" py-out))]
+     [(boolean (re-find #"xt\.exception" lua-out))
+      (boolean (re-find #"\['message'\]" lua-out))
+      (boolean (re-find #"\['data'\]" lua-out))
+      (boolean (re-find #"print" lua-out))]])
+  => [[true true true true]
+      [true true true true]
+      [true true true true]])
+
+^{:refer xt.lang.spec-base/x:ex-data :added "4.1"}
+(fact "xtalk exception helpers compose with promise catches"
+  (let [js-out (l/emit-as :js ['(x:promise-catch
+                                  (x:promise (fn []
+                                               (throw (x:ex "boom" {:a 1}))))
+                                  (fn [err]
+                                    (x:print (x:ex-message err))
+                                    (x:print (x:ex-data err))))])
+        py-out (l/emit-as :python ['(x:promise-catch
+                                      (x:promise (fn []
+                                                   (throw (x:ex "boom" {:a 1}))))
+                                      (fn [err]
+                                        (x:print (x:ex-message err))
+                                        (x:print (x:ex-data err))))])
+        lua-out (l/emit-as :lua ['(x:promise-catch
+                                   (x:promise (fn []
+                                                (throw (x:ex "boom" {:a 1}))))
+                                   (fn [err]
+                                     (x:print (x:ex-message err))
+                                     (x:print (x:ex-data err))))])]
+    [[(boolean (re-find #"\.catch" js-out))
+      (boolean (re-find #"Object\.assign\(new Error\(\"boom\"\)" js-out))
+      (boolean (re-find #"\[\"message\"\]" js-out))
+      (boolean (re-find #"\[\"data\"\]" js-out))]
+     [(boolean (re-find #"promise_catch" py-out))
+      (boolean (re-find #"Exception\(\"boom\",\{\"a\":1\}\)" py-out))
+      (boolean (re-find #"err\.args\[0\]" py-out))
+      (boolean (re-find #"err\.args\[1\]" py-out))]
+     [(boolean (re-find #"promise_catch" lua-out))
+      (boolean (re-find #"xt\.exception" lua-out))
+      (boolean (re-find #"\['message'\]" lua-out))
+      (boolean (re-find #"\['data'\]" lua-out))]])
+  => [[true true true true]
+      [true true true true]
+      [true true true true]])
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-promise :added "4.1"}
 (fact "js xtalk promise ops emit native promise chains"

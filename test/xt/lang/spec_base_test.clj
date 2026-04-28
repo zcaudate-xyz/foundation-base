@@ -547,6 +547,36 @@
     (err-fn))
   => (throws))
 
+^{:refer xt.lang.spec-base/x:ex-new :added "4.1"}
+(fact "creates native exceptions with structured data"
+
+  (!.js
+    (try
+      (throw (xt/x:ex-new "ERR" {:a 1}))
+      (catch e
+        (xt/x:print (xt/x:ex-data e))
+        [(xt/x:ex-native? e)
+         (xt/x:get-key (xt/x:ex-data e) "a")])))
+  => [true 1]
+
+  (!.py
+    (try
+      (throw (xt/x:ex-new "ERR" {:a 1}))
+      (catch e
+        (xt/x:print (xt/x:ex-data e))
+        [(xt/x:ex-native? e)
+         (xt/x:get-key (xt/x:ex-data e) "a")])))
+  => [true 1]
+
+  (!.lua
+    (try
+      (throw (xt/x:ex-new "ERR" {:a 1}))
+      (catch e
+        (xt/x:print (xt/x:ex-data e))
+        [(xt/x:ex-native? e)
+         (xt/x:get-key (xt/x:ex-data e) "a")])))
+  => [true 1])
+
 ^{:refer xt.lang.spec-base/x:type-native :added "4.1"}
 (fact "expands and emits the lua type helper"
 

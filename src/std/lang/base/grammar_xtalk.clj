@@ -365,9 +365,22 @@
     :op-spec    {:arglists '([value])
                  :type [:fn [:xt/any] :xt/int]}}
    {:op :x-err            :symbol #{'x:err}             :emit :abstract
+     :op-spec    {:macro-only true
+                  :type [:fn [:xt/any] :xt/any]
+                  :arglists '([message])}}
+   {:op :x-ex-native?     :symbol #{'x:ex-native?}      :emit :abstract
+    :op-spec    {:type [:fn [:xt/any] :xt/bool]
+                 :arglists '([value])}}
+   {:op :x-ex-new         :symbol #{'x:ex 'x:ex-new}    :emit :abstract
     :op-spec    {:macro-only true
-                 :type [:fn [:xt/any] :xt/any]
-                 :arglists '([message])}}
+                 :type [:fn [:xt/str :xt/any] :xt/any]
+                 :arglists '([message] [message data])}}
+   {:op :x-ex-message     :symbol #{'x:ex-message}      :emit :abstract
+    :op-spec    {:type [:fn [:xt/any] :xt/any]
+                 :arglists '([value])}}
+   {:op :x-ex-data        :symbol #{'x:ex-data}         :emit :abstract
+    :op-spec    {:type [:fn [:xt/any] :xt/any]
+                 :arglists '([value])}}
    {:op :x-type-native    :symbol #{'x:type-native}     :emit :abstract
     :op-spec    {:allow-blocks true
                  :type [:fn [:xt/any] :xt/string]
@@ -937,4 +950,3 @@
 ;;
 ;; I've created additional x-pwd and x-file-resolve ops
 ;;
-
