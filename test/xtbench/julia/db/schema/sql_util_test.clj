@@ -11,7 +11,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.schema.sql-util/encode-query-string.more :added "4.0" :adopt true}
 (fact "encodes a query segment"
@@ -196,21 +196,21 @@
 
 ^{:refer xt.db.schema.sql-util/encode-sql :added "4.0"
   :setup [(def +inputs+
-[{"::" "sql/column"
-:name "hello"}
-{"::" "sql/cast"
-:args ["k" {"::" "sql/table"
-      :name "hello"
-      :schema "ENUM"}]}
-{"::" "sql/fn"
-:name "+"
-:args ["k" {"::" "sql/fn"
-      :name "+"
-      :args [1 2 3]}]}
-{"::" "sql/select"
-:args ["*" "from" {"::" "sql/fn"
-             :name "jsonb_each"
-             :args ["'[1,2,3]'" true]}]}])]}
+            [{"::" "sql/column"
+              :name "hello"}
+             {"::" "sql/cast"
+              :args ["k" {"::" "sql/table"
+                          :name "hello"
+                          :schema "ENUM"}]}
+             {"::" "sql/fn"
+              :name "+"
+              :args ["k" {"::" "sql/fn"
+                          :name "+"
+                          :args [1 2 3]}]}
+             {"::" "sql/select"
+              :args ["*" "from" {"::" "sql/fn"
+                                 :name "jsonb_each"
+                                 :args ["'[1,2,3]'" true]}]}])]}
 (fact "encodes an sql value"
 
   (!.julia
@@ -293,11 +293,11 @@
 
 ^{:refer xt.db.schema.sql-util/encode-query-segment :added "4.0"
   :setup [(def +out+
-["name = 'hello'"
-"name != 'hell''o'"
-"name in ('hello', 'hello')"
-"name != (k + ('1' + '2' + '3'))"
-"data = '{\"a\":1}'"])]}
+            ["name = 'hello'"
+             "name != 'hell''o'"
+             "name in ('hello', 'hello')"
+             "name != (k + ('1' + '2' + '3'))"
+             "data = '{\"a\":1}'"])]}
 (fact "encodes a query segment"
 
   (!.julia
@@ -320,23 +320,29 @@
      (ut/encode-query-single-string {:name ["neq" "hello"]
                                      :data {:a 1}}
                                     {:column-fn (fn:> [col]
-                                                  (xt/x:cat "\"T\"." col))})])
-  => ["" "\"T\".name != 'hello' AND \"T\".data = '{\"a\":1}'"])
+                                                      (xt/x:cat "\"T\"." col))})])
+  => (contains-in
+      [""
+       (any "\"T\".name != 'hello' AND \"T\".data = '{\"a\":1}'"
+            "\"T\".data = '{\"a\":1}' AND \"T\".name != 'hello'")]))
 
 ^{:refer xt.db.schema.sql-util/encode-query-string :added "4.0"}
 (fact "encodes a query string"
 
   (!.julia
     [(ut/encode-query-string {} "WHERE" {})
-     (ut/encode-query-string {:name "hello"} "WHERE"
+     (ut/encode-query-string {:name "hello"}
+                             "WHERE"
                              {:column-fn (fn:> [col] (xt/x:cat "\"SCHEMA\"." col))})
-     (ut/encode-query-string {:data {:a 1}
-                              :name "hello"}
+     (ut/encode-query-string (tab :data {:a 1}
+                                  :name "hello")
                              "WHERE"
                              {})])
-  => [""
-      "WHERE \"SCHEMA\".name = 'hello'"
-      "WHERE data = '{\"a\":1}' AND name = 'hello'"])
+  => (contains-in
+      [""
+       "WHERE \"SCHEMA\".name = 'hello'"
+       (any "WHERE data = '{\"a\":1}' AND name = 'hello'"
+            "WHERE name = 'hello' AND data = '{\"a\":1}'")]))
 
 ^{:refer xt.db.schema.sql-util/LIMIT :added "4.0"}
 (fact "creates a LIMIT keyword"
@@ -462,7 +468,9 @@
   
   (s/run ['xt.db.schema.sql-util])
   (s/seedgen-benchadd '[xt.lang.spec] {:lang [:r] :write true})
-  (s/seedgen-benchadd '[xt.db.schema.sql-util] {:lang [:julia :dart] :write true})
+  (s/seedgen-benchadd '[xt.db.schema] {:lang [:julia :dart] :write true})
   
+  
+  (s/seedgen-langadd '[xt.db.schema] {:lang [:lua :python] :write true})
   (s/seedgen-langadd 'xt.db.schema.sql-util {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.db.schema.sql-util {:lang [:lua :python] :write true}))

@@ -11,43 +11,43 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.schema.base-check/is-uuid? :added "4.0"}
 (fact "checks that a string input is a uuid"
 
   (!.julia
-   [(chk/is-uuid? "527a67de-a499-4c51-a435-953e3272b00d")
-    (chk/is-uuid? "527a67de-a499-4c51-a435-953e2b00d")])
+    [(chk/is-uuid? "527a67de-a499-4c51-a435-953e3272b00d")
+     (chk/is-uuid? "527a67de-a499-4c51-a435-953e2b00d")])
   => [true false])
 
 ^{:refer xt.db.schema.base-check/check-arg-type :added "4.0"}
 (fact "checks the arg type of an input"
 
   (!.julia
-   [(chk/check-arg-type "numeric" 1.0)
-    (chk/check-arg-type "integer" 1)
-    (chk/check-arg-type "jsonb" {:a 1 :b 2})
-    (chk/check-arg-type "citext" "hello")
-    (chk/check-arg-type "text" "hello")])
+    [(chk/check-arg-type "numeric" 1.0)
+     (chk/check-arg-type "integer" 1)
+     (chk/check-arg-type "jsonb" {:a 1 :b 2})
+     (chk/check-arg-type "citext" "hello")
+     (chk/check-arg-type "text" "hello")])
   => [true true true true true])
 
 ^{:refer xt.db.schema.base-check/check-args-type :added "4.0"}
 (fact "checks the arg type of inputs"
 
   (!.julia
-   (chk/check-args-type [1 2]
-                        [{:symbol "x", :type "numeric"}
-                         {:symbol "y", :type "numeric"}]))
+    (chk/check-args-type [1 2]
+                         [{:symbol "x", :type "numeric"}
+                          {:symbol "y", :type "numeric"}]))
   => [true])
 
 ^{:refer xt.db.schema.base-check/check-args-length :added "4.0"}
 (fact "checks that input and spec are of the same length"
 
   (!.julia
-   (chk/check-args-length [1 2]
-                          [{:symbol "x", :type "numeric"}
-                           {:symbol "y", :type "numeric"}]))
+    (chk/check-args-length [1 2]
+                           [{:symbol "x", :type "numeric"}
+                            {:symbol "y", :type "numeric"}]))
   => [true])
 
 (comment
