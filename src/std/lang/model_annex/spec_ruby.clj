@@ -4,9 +4,8 @@
              [std.lang.base.book :as book]
              [std.lang.base.emit :as emit]
              [std.lang.base.emit-common :as common]
-             [std.lang.base.emit-data :as data]
              [std.lang.base.emit-helper :as helper]
-             [std.lang.base.emit-preprocess :as preprocess] [std.lang.base.preprocess-base :as preprocess-base]
+             [std.lang.base.preprocess-base :as preprocess-base]
              [std.lang.base.emit-top-level :as top]
              [std.lang.base.grammar :as grammar]
              [std.lang.base.script :as script]
@@ -66,61 +65,33 @@
                        (str (common/*emit-fn* k grammar mopts)
                              " => "
                              (common/*emit-fn* v grammar mopts)))
-       m)]
+                      m)]
     (str "{" (clojure.string/join ", " entries) "}")))
 
-(defn ruby-invoke-args
-  [args grammar mopts]
-  (clojure.string/join ","
-                       (map #(common/*emit-fn* % grammar mopts)
-                            args)))
+(defn- callable-form?
+  [form]
+  (and (seq? form)
+       (#{'fn 'fn.inner} (first form))))
 
-(defn ruby-invoke
-  [[f & args] grammar mopts]
-  (str (common/*emit-fn* f grammar mopts)
-       "("
-       (ruby-invoke-args args grammar mopts)
-       ")"))
+(defn- ruby-zero-arg-call?
+  [prop]
+  (and (seq? prop)
+       (symbol? (first prop))
+       (not= 'call (first prop))
+       (empty? (rest prop))))
 
-(defn ruby-dot-entry
-  [curr-str prop grammar mopts]
-  (cond
-    (vector? prop)
-    (do (assert (= 1 (count prop)) "Only one Ruby index")
-        (str curr-str
-             "["
-             (common/*emit-fn* (first prop) grammar mopts)
-             "]"))
-
-    (seq? prop)
-    (let [[method & args] prop
-          method-str (common/emit-symbol method grammar mopts)]
-      (if (empty? args)
-        (str curr-str "." method-str)
-        (str curr-str
-             "."
-             method-str
-             "("
-             (ruby-invoke-args args grammar mopts)
-             ")")))
-
-    :else
-    (str curr-str "."
-         (if (symbol? prop)
-           (common/emit-symbol prop grammar mopts)
-           (common/*emit-fn* prop grammar mopts)))))
-
-(defn ruby-dot-string
-  [obj props grammar mopts]
-  (reduce #(ruby-dot-entry %1 %2 grammar mopts)
-          (common/*emit-fn* obj grammar mopts)
-          props))
+(defn- ruby-dot-entry
+  [prop grammar mopts]
+  (if (ruby-zero-arg-call? prop)
+    (str "." (common/emit-symbol (first prop) grammar mopts))
+    (common/emit-index-entry prop grammar mopts)))
 
 (defn ruby-dot
   [[_ obj & props]]
   (let [grammar preprocess-base/*macro-grammar*
         mopts   preprocess-base/*macro-opts*]
-    (list ':- (ruby-dot-string obj props grammar mopts))))
+    (list ':- (str (common/emit-wrapping obj grammar mopts)
+                   (apply str (map #(ruby-dot-entry % grammar mopts) props))))))
 
 (defn ruby-emit-range
   [separator [_ start & more] grammar mopts]
@@ -140,65 +111,62 @@
   (when (and (seq? form)
              (= 'var (first form))
              (symbol? (second form))
-             (seq? (last form))
-             (= 'fn (first (last form))))
+             (callable-form? (last form)))
     (second form)))
 
 (defn- collect-callable-vars
-  [forms]
-  (letfn [(walk [form]
-            (cond
-              (seq? form)
-              (let [head (first form)]
-                (cond
-                  (#{'fn 'fn.inner} head)
-                  #{}
+  [form]
+  (cond
+    (callable-form? form)
+    #{}
 
-                  :else
-                  (reduce set/union
-                          (cond-> #{}
-                            (callable-var-binding form)
-                            (conj (callable-var-binding form)))
-                          (map walk form))))
+    (seq? form)
+    (let [binding (callable-var-binding form)]
+      (cond-> (reduce set/union #{} (map collect-callable-vars form))
+        binding (conj binding)))
 
-              (vector? form)
-              (reduce set/union #{} (map walk form))
+    (vector? form)
+    (reduce set/union #{} (map collect-callable-vars form))
 
-              (map? form)
-              (reduce set/union #{} (mapcat walk form))
+    (map? form)
+    (reduce set/union #{} (map collect-callable-vars (mapcat identity form)))
 
-              (set? form)
-              (reduce set/union #{} (map walk form))
+    (set? form)
+    (reduce set/union #{} (map collect-callable-vars form))
 
-              :else
-              #{}))]
-    (reduce set/union #{} (map walk forms))))
+    :else
+    #{}))
 
 (defn rewrite-callable-body
   ([args body]
    (rewrite-callable-body #{} args body))
   ([inherited args body]
-   (let [callables (into (into (set inherited)
-                               (set (filter symbol? args)))
-                         (collect-callable-vars body))]
-    (mapv #(rewrite-callable-form % callables) body))))
+   (let [callables (into (set inherited)
+                         (concat (filter symbol? args)
+                                 (collect-callable-vars body)))]
+     (mapv #(rewrite-callable-form % callables) body))))
+
+(defn- ruby-global-const-access?
+  [form]
+  (and (seq? form)
+       (= '. (first form))
+       (= '!:G (second form))
+       (vector? (nth form 2 nil))
+       (= 1 (count (nth form 2)))
+       (symbol? (first (nth form 2)))
+       (re-matches #"[A-Z][A-Z0-9_]*"
+                   (name (first (nth form 2))))))
 
 (defn rewrite-callable-form
   [form callables]
   (cond
+    (ruby-global-const-access? form)
+    (list '. '!:G [(name (first (nth form 2)))])
+
     (seq? form)
     (let [head (first form)]
       (cond
-        (and (= '. head)
-             (= '!:G (second form))
-             (vector? (nth form 2 nil))
-             (= 1 (count (nth form 2)))
-             (symbol? (first (nth form 2)))
-             (re-matches #"[A-Z][A-Z0-9_]*"
-                         (name (first (nth form 2)))))
-        (list '. '!:G [(name (first (nth form 2)))])
-
-        (#{'fn 'fn.inner} head)
+        (callable-form? form)
         (let [[tag args & body] form]
           (apply list tag args (rewrite-callable-body callables args body)))
 
@@ -245,14 +213,12 @@
    (spec-ruby/ruby-fn '(fn [a] (+ a 1)))
    => '(fn.inner [a] (+ a 1))"
   {:added "4.1"}
-  ([[_ & args]]
-   (let [[args & body] args
-          body     (rewrite-callable-body args body)
-          grammar  preprocess-base/*macro-grammar*
-          mopts    preprocess-base/*macro-opts*
-          args-str (clojure.string/join ", "
-                                        (map #(common/*emit-fn* % grammar mopts)
-                                            args))
+  ([[_ args & body]]
+   (let [body     (rewrite-callable-body args body)
+         grammar  preprocess-base/*macro-grammar*
+         mopts    preprocess-base/*macro-opts*
+         args-str (clojure.string/join ", "
+                                       (common/emit-array args grammar mopts))
          body-str (common/*emit-fn* (cons 'do body) grammar mopts)]
      (list ':- "->(" args-str ") {\n" body-str "\n}"))))
 
@@ -360,9 +326,7 @@
          :default {:common    {:statement ""}
                     :block     {:parameter {:start " " :end ""}
                                  :body      {:start "" :end "end" :append false}}
-                    :invoke    {:start "("
-                                :custom #'ruby-invoke}
-                     :function  {:raw "def"
+                    :function  {:raw "def"
                                  :body      {:start "" :end "end"}}}
          :block   {:while     {:body {:start "" :end "end"}}
                    :branch    {:wrap {:start "" :end "end"}

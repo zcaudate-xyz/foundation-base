@@ -79,36 +79,6 @@
   (l/emit-as :ruby '[{:a 1 :b 2}])
   => "{:a => 1, :b => 2}")
 
-^{:refer std.lang.model-annex.spec-ruby/ruby-invoke-args :added "4.1"}
-(fact "TODO")
-
-^{:refer std.lang.model-annex.spec-ruby/ruby-invoke :added "4.1"}
-(fact "TODO")
-
-^{:refer std.lang.model-annex.spec-ruby/ruby-dot-entry :added "4.1"}
-(fact "TODO")
-
-^{:refer std.lang.model-annex.spec-ruby/ruby-dot-string :added "4.1"}
-(fact "TODO")
-
-^{:refer std.lang.model-annex.spec-ruby/ruby-dot :added "4.1"}
-(fact "TODO")
-
-^{:refer std.lang.model-annex.spec-ruby/ruby-emit-range :added "4.1"}
-(fact "TODO")
-
-^{:refer std.lang.model-annex.spec-ruby/rewrite-callable-body :added "4.1"}
-(fact "TODO")
-
-^{:refer std.lang.model-annex.spec-ruby/rewrite-callable-form :added "4.1"}
-(fact "TODO")
-
-^{:refer std.lang.model-annex.spec-ruby/rewrite-callable-forms :added "4.1"}
-(fact "TODO")
-
-^{:refer std.lang.model-annex.spec-ruby/ruby-defn- :added "4.1"}
-(fact "TODO")
-
 ^{:refer std.lang.model-annex.spec-ruby/ruby-defn :added "4.1"}
 (fact "emit ruby function definition"
 
@@ -120,15 +90,3 @@
 
   (spec-ruby/ruby-fn '(fn [a] (+ a 1)))
   => '(:- "->(" "a" ") {\n" "(do (+ a 1))" "\n}"))
-
-^{:refer std.lang.model-annex.spec-ruby/tf-for-array :added "4.1"}
-(fact "TODO")
-
-^{:refer std.lang.model-annex.spec-ruby/tf-for-object :added "4.1"}
-(fact "TODO")
-
-^{:refer std.lang.model-annex.spec-ruby/tf-for-iter :added "4.1"}
-(fact "TODO")
-
-^{:refer std.lang.model-annex.spec-ruby/tf-for-index :added "4.1"}
-(fact "TODO")

@@ -1,188 +1,513 @@
 (ns xt.lang.spec-primitive-test
   (:use code.test)
-  (:require [std.lang.typed.xtalk :as typed]
-            [xt.lang.spec-primitive]))
+  (:require [std.lang :as l]
+            [xt.lang.common-notify :as notify]
+            [xt.lang.spec-primitive :as primitive]))
 
+^{:seedgen/root {:all true, :langs [:python :lua]}}
+(l/script- :js
+  {:runtime :basic
+   :require [[xt.lang.common-repl :as repl]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as promise]
+             [xt.lang.spec-primitive :as primitive]]})
+
+(fact:global
+ {:setup [(l/rt:restart)]
+  :teardown [(l/rt:stop)]})
+
+(defn emit-js [form]
+  (l/emit-as :js [form]))
 
 ^{:refer xt.lang.spec-primitive/!:G :added "4.1"}
-(fact "TODO")
+(fact "reads and writes global values"
+  (!.js
+    (var prev (primitive/!:G __PRIMITIVE_TEST__))
+    (:= (primitive/!:G __PRIMITIVE_TEST__) "alpha")
+    (var out (primitive/!:G __PRIMITIVE_TEST__))
+    (:= (primitive/!:G __PRIMITIVE_TEST__) prev)
+    out)
+  => "alpha")
 
 ^{:refer xt.lang.spec-primitive/$ :added "4.1"}
-(fact "TODO")
+(fact "invokes static methods"
+  (!.js
+    (primitive/$ Math max 1 4 2))
+  => 4)
 
 ^{:refer xt.lang.spec-primitive/% :added "4.1"}
-(fact "TODO")
+(fact "emits internal expressions directly"
+  (!.js
+    (primitive/% [(primitive/+ 1 2) 4]))
+  => [3 4])
 
 ^{:refer xt.lang.spec-primitive/* :added "4.1"}
-(fact "TODO")
+(fact "multiplies values"
+  (!.js
+    (primitive/* 2 3 4))
+  => 24)
 
 ^{:refer xt.lang.spec-primitive/+ :added "4.1"}
-(fact "TODO")
+(fact "adds values"
+  (!.js
+    (primitive/+ 1 2 3 4))
+  => 10)
 
 ^{:refer xt.lang.spec-primitive/- :added "4.1"}
-(fact "TODO")
+(fact "subtracts values"
+  (!.js
+    [(primitive/- 10 3 2)
+     (primitive/- 5)])
+  => [5 -5])
 
-^{:refer xt.lang.spec-primitive/-%%- :added "4.1"}
-(fact "TODO")
+^{:refer xt.lang.spec-primitive/-%%- :added "4.1"
+  :seedgen/base {:all {:suppress true}}}
+(fact "emits inline source lines"
+  (emit-js '(-%%- ["const a = 1;" "const b = 2;"]))
+  => "const a = 1;\nconst b = 2;")
 
 ^{:refer xt.lang.spec-primitive/. :added "4.1"}
-(fact "TODO")
+(fact "indexes values"
+  (!.js
+    [(primitive/. {:a 1 :b 2} ["b"])
+     (primitive/. [1 2 3] [1])])
+  => [2 2])
 
 ^{:refer xt.lang.spec-primitive// :added "4.1"}
-(fact "TODO")
+(fact "divides values"
+  (!.js
+    [(primitive// 12 3)
+     (primitive// 20 5 2)])
+  => [4 2])
 
 ^{:refer xt.lang.spec-primitive/< :added "4.1"}
-(fact "TODO")
+(fact "compares less-than"
+  (!.js
+    [(primitive/< 1 2)
+     (primitive/< 2 1)])
+  => [true false])
 
 ^{:refer xt.lang.spec-primitive/<= :added "4.1"}
-(fact "TODO")
+(fact "compares less-than-or-equal"
+  (!.js
+    [(primitive/<= 2 2)
+     (primitive/<= 3 2)])
+  => [true false])
 
 ^{:refer xt.lang.spec-primitive/== :added "4.1"}
-(fact "TODO")
+(fact "compares equality"
+  (!.js
+    [(primitive/== 2 2)
+     (primitive/== 2 3)])
+  => [true false])
 
 ^{:refer xt.lang.spec-primitive/> :added "4.1"}
-(fact "TODO")
+(fact "compares greater-than"
+  (!.js
+    [(primitive/> 3 2)
+     (primitive/> 2 3)])
+  => [true false])
 
 ^{:refer xt.lang.spec-primitive/>= :added "4.1"}
-(fact "TODO")
+(fact "compares greater-than-or-equal"
+  (!.js
+    [(primitive/>= 3 3)
+     (primitive/>= 2 3)])
+  => [true false])
 
 ^{:refer xt.lang.spec-primitive/async :added "4.1"}
-(fact "TODO")
+(fact "creates async functions"
+  (notify/wait-on :js
+    (. ((primitive/async
+         (fn []
+           (return 5))))
+       (then (repl/>notify))))
+  => 5)
 
 ^{:refer xt.lang.spec-primitive/await :added "4.1"}
-(fact "TODO")
+(fact "awaits promise results"
+  (notify/wait-on :js
+    (promise/x:promise-then
+     ((primitive/async
+       (fn []
+         (return
+          (primitive/await
+           (promise/x:promise
+            (fn []
+              (return 7))))))))
+     (repl/>notify)))
+  => 7)
 
 ^{:refer xt.lang.spec-primitive/b:<< :added "4.1"}
-(fact "TODO")
+(fact "bit-shifts left"
+  (!.js
+    (primitive/b:<< 3 2))
+  => 12)
 
 ^{:refer xt.lang.spec-primitive/b:>> :added "4.1"}
-(fact "TODO")
+(fact "bit-shifts right"
+  (!.js
+    (primitive/b:>> 12 2))
+  => 3)
 
 ^{:refer xt.lang.spec-primitive/b:xor :added "4.1"}
-(fact "TODO")
+(fact "bitwise xors values"
+  (!.js
+    (primitive/b:xor 6 3))
+  => 5)
 
-^{:refer xt.lang.spec-primitive/block :added "4.1"}
-(fact "TODO")
+^{:refer xt.lang.spec-primitive/block :added "4.1"
+  :seedgen/base {:all {:suppress true}}}
+(fact "emits block wrappers"
+  (emit-js '(block (var x 2) (return (+ x 3))))
+  => "block(let x = 2,return x + 3)")
 
 ^{:refer xt.lang.spec-primitive/br* :added "4.1"}
-(fact "TODO")
+(fact "branches across control clauses"
+  (!.js
+    ((fn []
+       (primitive/br*
+         (if false
+           (return "no"))
+         (elseif (primitive/> 3 2)
+           (return "yes"))
+         (else
+           (return "fallback"))))))
+  => "yes")
 
 ^{:refer xt.lang.spec-primitive/break :added "4.1"}
-(fact "TODO")
+(fact "breaks out of loops"
+  (!.js
+    (var out [])
+    (primitive/for [(var i 0) (primitive/< i 5) [(:= i (primitive/+ i 1))]]
+      (when (primitive/== i 3)
+        (break))
+      (xt/x:arr-push out i))
+    out)
+  => [0 1 2])
 
 ^{:refer xt.lang.spec-primitive/do:> :added "4.1"}
-(fact "TODO")
+(fact "runs deferred blocks immediately"
+  (!.js
+    (primitive/do:>
+      1
+      2
+      (return 3)))
+  => 3)
 
-^{:refer xt.lang.spec-primitive/fn.inner :added "4.1"}
-(fact "TODO")
+^{:refer xt.lang.spec-primitive/fn.inner :added "4.1"
+  :seedgen/base {:all {:suppress true}}}
+(fact "emits method shorthand bodies"
+  (let [out (emit-js '(fn.inner hello [x] (return (+ x 1))))]
+    [(boolean (re-find #"hello\(x\)" out))
+     (boolean (re-find #"return x \+ 1;" out))])
+  => [true true])
 
 ^{:refer xt.lang.spec-primitive/fn:> :added "4.1"}
-(fact "TODO")
+(fact "creates arrow functions"
+  (!.js
+    ((primitive/fn:> [x]
+       (return (primitive/+ x 1)))
+     2))
+  => 3)
 
 ^{:refer xt.lang.spec-primitive/forange :added "4.1"}
-(fact "TODO")
+(fact "iterates numeric ranges"
+  (!.js
+    (var out [])
+    (primitive/forange [i 5]
+      (xt/x:arr-push out i))
+    out)
+  => [0 1 2 3 4])
 
-^{:refer xt.lang.spec-primitive/letrec :added "4.1"}
-(fact "TODO")
+^{:refer xt.lang.spec-primitive/letrec :added "4.1"
+  :seedgen/base {:all {:suppress true}}}
+(fact "emits recursive binding forms"
+  (emit-js '(letrec [id (fn [x] (return x))] (id 4)))
+  => (contains "letrec"))
 
-^{:refer xt.lang.spec-primitive/match :added "4.1"}
-(fact "TODO")
+^{:refer xt.lang.spec-primitive/match :added "4.1"
+  :seedgen/base {:all {:suppress true}}}
+(fact "emits match expressions"
+  (emit-js '(match x [1 "one"] [2 "two"] ["other"]))
+  => (contains "match("))
 
 ^{:refer xt.lang.spec-primitive/mod :added "4.1"}
-(fact "TODO")
+(fact "calculates modulo"
+  (!.js
+    (primitive/mod 17 5))
+  => 2)
 
 ^{:refer xt.lang.spec-primitive/new :added "4.1"}
-(fact "TODO")
+(fact "constructs new values"
+  (!.js
+    (var xs (primitive/new Array 1 2 3))
+    (primitive/. xs ["length"]))
+  => 3)
 
 ^{:refer xt.lang.spec-primitive/not= :added "4.1"}
-(fact "TODO")
+(fact "compares inequality"
+  (!.js
+    [(primitive/not= 2 3)
+     (primitive/not= 2 2)])
+  => [true false])
 
 ^{:refer xt.lang.spec-primitive/pow :added "4.1"}
-(fact "TODO")
+(fact "raises powers"
+  (!.js
+    (primitive/pow 2 5))
+  => 7)
 
 ^{:refer xt.lang.spec-primitive/return :added "4.1"}
-(fact "TODO")
+(fact "returns early from functions"
+  (!.js
+    ((fn []
+       (primitive/return 7)
+       9)))
+  => 7)
 
-^{:refer xt.lang.spec-primitive/super :added "4.1"}
-(fact "TODO")
+^{:refer xt.lang.spec-primitive/super :added "4.1"
+  :seedgen/base {:all {:suppress true}}}
+(fact "emits super calls"
+  (emit-js '(super "ping" 1))
+  => "super(\"ping\",1)")
 
 ^{:refer xt.lang.spec-primitive/switch :added "4.1"}
-(fact "TODO")
+(fact "switches across explicit cases"
+  (!.js
+    ((fn []
+       (primitive/switch [2]
+         (primitive/case [1]
+           (return "one"))
+         (primitive/case [2]
+           (return "two"))
+         (default
+           (return "other"))))))
+  => "two")
 
 ^{:refer xt.lang.spec-primitive/tab :added "4.1"}
-(fact "TODO")
+(fact "creates tables from pairs"
+  (!.js
+    (primitive/tab [:a 1]
+                   [:b 2]))
+  => {"a" 1
+      "b" 2})
 
 ^{:refer xt.lang.spec-primitive/this :added "4.1"}
-(fact "TODO")
+(fact "accesses the current receiver"
+  (!.js
+    (var obj {})
+    (:= (primitive/. obj ["value"]) 7)
+    (:= (primitive/. obj ["get"])
+        (fn []
+          (return (primitive/. this ["value"]))))
+    (. obj (get)))
+  => 7)
 
 ^{:refer xt.lang.spec-primitive/throw :added "4.1"}
-(fact "TODO")
+(fact "throws values"
+  (!.js
+    (primitive/do:>
+      (primitive/try
+        (primitive/throw "boom")
+        (catch err
+          (return err)))))
+  => "boom")
 
 ^{:refer xt.lang.spec-primitive/var :added "4.1"}
-(fact "TODO")
+(fact "declares variables"
+  (!.js
+    (primitive/do
+      (primitive/var total 3)
+      (:= total (primitive/+ total 4))
+      total))
+  => 7)
 
 ^{:refer xt.lang.spec-primitive/var.inner :added "4.1"}
-(fact "TODO")
+(fact "reassigns existing locals"
+  (!.js
+    ((fn []
+       (var total 1)
+       (primitive/var.inner total 4)
+       (return total))))
+  => 4)
 
 ^{:refer xt.lang.spec-primitive/xor :added "4.1"}
-(fact "TODO")
+(fact "computes logical xor"
+  (!.js
+    [(primitive/xor true false)
+     (primitive/xor true true)])
+  => [false true])
 
-^{:refer xt.lang.spec-primitive/yield :added "4.1"}
-(fact "TODO")
+^{:refer xt.lang.spec-primitive/yield :added "4.1"
+  :seedgen/base {:all {:suppress true}}}
+(fact "emits generator yields"
+  (emit-js '(yield 3))
+  => "yield 3")
 
 ^{:refer xt.lang.spec-primitive/-> :added "4.1"}
-(fact "TODO")
+(fact "threads the first argument"
+  (!.js
+    (primitive/-> 5
+                  (primitive/+ 2)
+                  (primitive/* 3)))
+  => 21)
 
 ^{:refer xt.lang.spec-primitive/->> :added "4.1"}
-(fact "TODO")
+(fact "threads the last argument"
+  (!.js
+    (primitive/->> 5
+                   (primitive/- 10)))
+  => 5)
 
 ^{:refer xt.lang.spec-primitive/and :added "4.1"}
-(fact "TODO")
+(fact "computes logical and"
+  (!.js
+    [(primitive/and true 1)
+     (primitive/and true false)])
+  => [1 false])
 
 ^{:refer xt.lang.spec-primitive/case :added "4.1"}
-(fact "TODO")
+(fact "expands high-level case branches"
+  (!.js
+    (primitive/do:>
+      (primitive/case 2
+        1 (return "one")
+        2 (return "two")
+        (return "fallback"))))
+  => "two")
 
 ^{:refer xt.lang.spec-primitive/comment :added "4.1"}
-(fact "TODO")
+(fact "discards commented forms"
+  (!.js
+    (primitive/do
+      (primitive/comment (primitive/throw "boom"))
+      1))
+  => 1)
 
 ^{:refer xt.lang.spec-primitive/cond :added "4.1"}
-(fact "TODO")
+(fact "selects the first matching branch"
+  (!.js
+    (primitive/do:>
+      (primitive/cond
+        false (return "a")
+        (primitive/< 1 2) (return "b")
+        :else (return "c"))))
+  => "b")
 
 ^{:refer xt.lang.spec-primitive/do :added "4.1"}
-(fact "TODO")
+(fact "runs sequential expressions"
+  (!.js
+    (primitive/do
+      (var out [])
+      (xt/x:arr-push out 1)
+      (xt/x:arr-push out 2)
+      out))
+  => [1 2])
 
-^{:refer xt.lang.spec-primitive/doto :added "4.1"}
-(fact "TODO")
+^{:refer xt.lang.spec-primitive/doto :added "4.1"
+  :seedgen/base {:all {:suppress true}}}
+(fact "threads a target through call forms"
+  (emit-js '(doto sym (. a) (b) (. c)))
+  => "sym.a;\nb(sym);\nsym.c;")
 
 ^{:refer xt.lang.spec-primitive/for :added "4.1"}
-(fact "TODO")
+(fact "runs explicit for loops"
+  (!.js
+    (var out [])
+    (primitive/for [(var i 0) (primitive/< i 3) [(:= i (primitive/+ i 1))]]
+      (xt/x:arr-push out i))
+    out)
+  => [0 1 2])
 
 ^{:refer xt.lang.spec-primitive/if :added "4.1"}
-(fact "TODO")
+(fact "selects between branches"
+  (!.js
+    (primitive/do:>
+      (primitive/if true
+        (return "yes")
+        (return "no"))))
+  => "yes")
 
 ^{:refer xt.lang.spec-primitive/let :added "4.1"}
-(fact "TODO")
+(fact "binds locals"
+  (!.js
+    (primitive/do:>
+      (primitive/let [a 2
+                      b 3]
+        (return (primitive/+ a b)))))
+  => 5)
 
-^{:refer xt.lang.spec-primitive/letfn :added "4.1"}
-(fact "TODO")
+^{:refer xt.lang.spec-primitive/letfn :added "4.1"
+  :seedgen/base {:all {:suppress true}}}
+(fact "emits local function bindings"
+  (emit-js '(letfn [(dbl [x] (return (+ x x)))] (dbl 3)))
+  => (contains "letfn"))
 
 ^{:refer xt.lang.spec-primitive/not :added "4.1"}
-(fact "TODO")
+(fact "negates truthiness"
+  (!.js
+    [(primitive/not true)
+     (primitive/not false)])
+  => [false true])
 
 ^{:refer xt.lang.spec-primitive/or :added "4.1"}
-(fact "TODO")
+(fact "computes logical or"
+  (!.js
+    [(primitive/or nil "fallback")
+     (primitive/or 1 2)])
+  => ["fallback" 1])
 
 ^{:refer xt.lang.spec-primitive/quote :added "4.1"}
-(fact "TODO")
+(fact "returns quoted literals"
+  (!.js
+    (primitive/quote {:a 1
+                      :b [2 3]}))
+  => {"a" 1
+      "b" [2 3]})
 
 ^{:refer xt.lang.spec-primitive/try :added "4.1"}
-(fact "TODO")
+(fact "runs catch and finally handlers"
+  (!.js
+    (primitive/do:>
+      (var out [])
+      (primitive/try
+        (primitive/throw "boom")
+        (catch err
+          (xt/x:arr-push out err))
+        (finally
+          (xt/x:arr-push out "done")))
+      (return out)))
+  => ["boom" "done"])
 
 ^{:refer xt.lang.spec-primitive/when :added "4.1"}
-(fact "TODO")
+(fact "runs truthy branches"
+  (!.js
+    (var out [])
+    (primitive/when true
+      (xt/x:arr-push out 1)
+      (xt/x:arr-push out 2))
+    out)
+  => [1 2])
 
 ^{:refer xt.lang.spec-primitive/while :added "4.1"}
-(fact "TODO")
+(fact "loops while conditions hold"
+  (!.js
+    (var i 0)
+    (var out [])
+    (primitive/while (primitive/< i 3)
+      (xt/x:arr-push out i)
+      (:= i (primitive/+ i 1)))
+    out)
+  => [0 1 2])
 
 ^{:refer xt.lang.spec-primitive/fn :added "4.1"}
-(fact "TODO")
+(fact "creates functions"
+  (!.js
+    ((primitive/fn [x]
+       (return (primitive/+ x 1)))
+     2))
+  => 3)
+
+(comment
+  (str/includes? (emit-js '(yield 3)) "yield"))
