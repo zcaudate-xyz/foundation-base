@@ -4,6 +4,7 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
+^{:seedgen/root {:all true, :langs [:lua :python]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
@@ -219,8 +220,8 @@
 
 ^{:refer xt.lang.common-color/named->hsl :added "4.0"}
 (fact "converts a named color to hsl"
-
-  ^{:lang-exceptions {:lua {:expect [0 67.924528301887 41.56862745098]}}}
+ 
+  ^{:seedgen/base {:lua {:expect [0 67.924528301887 41.56862745098]}}}
   (!.js
    (color/named->hsl "firebrick"))
   => [0 67.9245283018868 41.568627450980394])
@@ -234,8 +235,12 @@
 
 ^{:refer xt.lang.common-color/hex->hsl :added "4.0"}
 (fact "converts a hex to hsl"
-
-  ^{:lang-exceptions {:lua {:expect [0 67.924528301887 41.56862745098]}}}
+ 
+  ^{:seedgen/base {:lua {:expect [0 67.924528301887 41.56862745098]}}}
   (!.js
    (color/hex->hsl "#B22222"))
   => [0 67.9245283018868 41.568627450980394])
+
+(comment
+  (s/seedgen-langadd 'xt.lang.common-color {:lang [:lua :python] :write true})
+  (s/seedgen-langremove 'xt.lang.common-color {:lang [:lua :python] :write true}))

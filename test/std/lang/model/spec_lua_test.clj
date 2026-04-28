@@ -38,8 +38,37 @@
 ^{:refer std.lang.model.spec-lua/+grammar+ :added "4.1"}
 (fact "throw emits lua errors"
   (l/emit-as :lua '[(throw "boom")])
-  => "error('boom')")
-^{:refer std.lang.model.spec-lua.variant-nginx/tf-for-async :added "4.0"}
+  => "error('boom')"
+
+  (l/emit-as :lua '[(throw (x:ex-new "boom" {:a 1}))])
+  => "error({['__type__']='xt.exception',message='boom',data={a=1}})")
+
+(fact "try/catch lowers to a pcall wrapper"
+  (let [out (l/emit-as :lua
+                       '[(try
+                           (throw (x:ex-new "boom" {:a 1}))
+                           (catch e
+                             (x:print (x:ex-data e))))])]
+    [(boolean (re-find #"pcall\(function \(\)" out))
+     (boolean (re-find #"error\(\{\['__type__'\]='xt\.exception'" out))
+     (boolean (re-find #"local e =" out))
+     (boolean (re-find #"e\['data'\]" out))
+     (boolean (re-find #"print" out))])
+  => [true true true true true])
+
+(fact "try/finally preserves outer return flow"
+  (let [out (l/emit-as :lua
+                       '[(defn demo []
+                           (try
+                             (return 1)
+                             (finally
+                               (x:print "done"))))])]
+    [(boolean (re-find #"pcall\(function \(\)" out))
+     (boolean (re-find #"print\('done'\)" out))
+     (boolean (re-find #"return lua_try_result__" out))
+     (boolean (re-find #"error\(lua_try_error__" out))])
+  => [true true true true])
+
 (fact "for async transform for nginx"
 
   (nginx/tf-for-async '(for:async [[ok err] (call (x:callback))]
