@@ -31,8 +31,8 @@
   (var callback-fn
        (fn [err out]
          (if (xt/x:not-nil? err)
-           (return (error-fn err))
-           (return (success-fn out)))))
+           (return (xt/x:apply error-fn [err]))
+           (return (xt/x:apply success-fn [out])))))
   (return
    (-/socket-connect-base  host
                            port

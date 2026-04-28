@@ -5,6 +5,20 @@
   [& parts]
   (apply list ':- parts))
 
+(declare ruby-tf-x-return-encode)
+
+(def ^:private ruby-concurrent-promise-sym
+  (symbol "Concurrent::Promise"))
+
+(def ^:private ruby-concurrent-promise-new-sym
+  (symbol "Concurrent::Promise.new"))
+
+(defn ruby-concurrent-promise-run
+  [thunk]
+  (list '. (list '. (list ruby-concurrent-promise-new-sym thunk)
+                 (list 'execute))
+        (list 'wait)))
+
 ;;
 ;; CORE
 ;;
@@ -45,10 +59,6 @@
   [[_ f args]]
   (list '. f (list 'call (list :% (list ':- "*") args))))
 
-(defn ruby-tf-x-shell
-  [[_ s opts]]
-  (list (symbol "`") s))
-
 (defn ruby-tf-x-type-native
   [[_ obj]]
   (ruby-raw "(" (list '% obj) ").is_a?(Array) ? \"array\" : ("
@@ -69,7 +79,6 @@
    :x-now-ms         {:macro #'ruby-tf-x-now-ms :emit :macro}
    :x-del            {:macro #'ruby-tf-x-del   :emit :macro}
    :x-apply          {:macro #'ruby-tf-x-apply :emit :macro}
-   :x-shell          {:macro #'ruby-tf-x-shell :emit :macro}
    :x-type-native    {:macro #'ruby-tf-x-type-native :emit :macro}
    :x-unpack         {:macro #'ruby-tf-x-unpack :emit :macro}})
 
@@ -392,32 +401,194 @@
 ;; FILE
 ;;
 
+(defn ruby-tf-x-pwd
+  [[_]]
+  (ruby-raw "(ENV[\"PWD\"] || Dir.pwd)"))
+
+(defn ruby-tf-x-file-resolve
+  [[_ root path]]
+  (ruby-raw "File.expand_path(" (list '% path) ", " (list '% root) ")"))
+
 (defn ruby-tf-x-file-slurp
-  [[_ path opts cb]]
-  (list '. cb (list 'call nil (list '. 'File (list 'read path)))))
+  [[_ path & args]]
+  (case (count args)
+    1
+    (let [[cb] args]
+      (ruby-raw
+       "begin\n"
+       "  (" (list '% cb) ").call(nil, File.read(" (list '% path) "))\n"
+       "rescue Exception => e\n"
+       "  (" (list '% cb) ").call(e, nil)\n"
+       "end"))
+    2
+    (let [[success-fn error-fn] args]
+      (ruby-raw
+       "begin\n"
+       "  (" (list '% success-fn) ").call(File.read(" (list '% path) "))\n"
+       "rescue Exception => e\n"
+       "  (" (list '% error-fn) ").call(e)\n"
+       "end"))
+    (let [[_opts success-fn error-fn] args]
+      (ruby-raw
+       "begin\n"
+       "  (" (list '% success-fn) ").call(File.read(" (list '% path) "))\n"
+       "rescue Exception => e\n"
+       "  (" (list '% error-fn) ").call(e)\n"
+       "end"))))
 
 (defn ruby-tf-x-file-spit
-  [[_ path content opts cb]]
-  (list 'do
-        (list '. 'File (list 'write path content))
-        (list '. cb (list 'call nil path))))
+  [[_ path content & args]]
+  (case (count args)
+    1
+    (let [[cb] args]
+      (ruby-raw
+       "begin\n"
+       "  File.write(" (list '% path) ", " (list '% content) ")\n"
+       "  (" (list '% cb) ").call(nil, " (list '% path) ")\n"
+       "rescue Exception => e\n"
+       "  (" (list '% cb) ").call(e, nil)\n"
+       "end"))
+    2
+    (let [[success-fn error-fn] args]
+      (ruby-raw
+       "begin\n"
+       "  File.write(" (list '% path) ", " (list '% content) ")\n"
+       "  (" (list '% success-fn) ").call(" (list '% path) ")\n"
+       "rescue Exception => e\n"
+       "  (" (list '% error-fn) ").call(e)\n"
+       "end"))
+    (let [[_opts success-fn error-fn] args]
+      (ruby-raw
+       "begin\n"
+       "  File.write(" (list '% path) ", " (list '% content) ")\n"
+       "  (" (list '% success-fn) ").call(" (list '% path) ")\n"
+       "rescue Exception => e\n"
+       "  (" (list '% error-fn) ").call(e)\n"
+       "end"))))
+
+(defn ruby-tf-x-shell
+  [[_ s & args]]
+  (case (count args)
+    0
+    (list (symbol "`") s)
+    2
+    (let [[root cb] args]
+      (ruby-raw
+       "begin\n"
+       "  require 'open3'\n"
+       "  if (" (list '% root) ").nil? || (" (list '% root) ") == \"\"\n"
+       "    stdout, stderr, status = Open3.capture3(\"sh\", \"-lc\", " (list '% s) ")\n"
+       "  else\n"
+       "    stdout, stderr, status = Open3.capture3(\"sh\", \"-lc\", " (list '% s) ", chdir: " (list '% root) ")\n"
+       "  end\n"
+       "  if status.success?\n"
+       "    (" (list '% cb) ").call(nil, stdout)\n"
+       "  else\n"
+       "    (" (list '% cb) ").call({\"code\" => status.exitstatus, \"err\" => stderr, \"out\" => stdout}, nil)\n"
+       "  end\n"
+       "  [\"async\"]\n"
+       "rescue Exception => e\n"
+       "  (" (list '% cb) ").call(e, nil)\n"
+       "  [\"async\"]\n"
+       "end"))
+    (let [[root success-fn error-fn] args]
+      (ruby-raw
+       "begin\n"
+       "  require 'open3'\n"
+       "  if (" (list '% root) ").nil? || (" (list '% root) ") == \"\"\n"
+       "    stdout, stderr, status = Open3.capture3(\"sh\", \"-lc\", " (list '% s) ")\n"
+       "  else\n"
+       "    stdout, stderr, status = Open3.capture3(\"sh\", \"-lc\", " (list '% s) ", chdir: " (list '% root) ")\n"
+       "  end\n"
+       "  if status.success?\n"
+       "    (" (list '% success-fn) ").call(stdout)\n"
+       "  else\n"
+       "    (" (list '% error-fn) ").call({\"code\" => status.exitstatus, \"err\" => stderr, \"out\" => stdout})\n"
+       "  end\n"
+       "  [\"async\"]\n"
+       "rescue Exception => e\n"
+       "  (" (list '% error-fn) ").call(e)\n"
+       "  [\"async\"]\n"
+       "end"))))
 
 (def +ruby-file+
-  {:x-file-slurp      {:macro #'ruby-tf-x-file-slurp     :emit :macro}
-   :x-file-spit       {:macro #'ruby-tf-x-file-spit      :emit :macro}})
+  {:x-file-resolve    {:macro #'ruby-tf-x-file-resolve   :emit :macro}
+   :x-file-slurp      {:macro #'ruby-tf-x-file-slurp     :emit :macro
+                       :op-spec {:allow-blocks true}}
+   :x-file-spit       {:macro #'ruby-tf-x-file-spit      :emit :macro
+                       :op-spec {:allow-blocks true}}})
 
-;;
-;; THREAD
-;;
+(def +ruby-shell+
+  {:x-pwd             {:macro #'ruby-tf-x-pwd            :emit :macro}
+   :x-shell           {:macro #'ruby-tf-x-shell          :emit :macro
+                       :op-spec {:allow-blocks true}}})
+
+(defn ruby-tf-x-promise
+  [[_ thunk]]
+  (template/$
+   (do (:- "require 'concurrent-ruby'")
+       (return ~(ruby-concurrent-promise-run thunk)))))
+
+(defn ruby-tf-x-promise-then
+  [[_ promise thunk]]
+  (let [current (gensym "current__")]
+    (template/$
+     (do (:- "require 'concurrent-ruby'")
+         (var ~current ~promise)
+         (. ~current (wait))
+         (if (. ~current (rejected?))
+           (return ~current)
+           (return ~(ruby-concurrent-promise-run
+                     `(fn [] (. ~thunk (call (. ~current (value))))))))))))
+
+(defn ruby-tf-x-promise-catch
+  [[_ promise thunk]]
+  (let [current (gensym "current__")]
+    (template/$
+     (do (:- "require 'concurrent-ruby'")
+         (var ~current ~promise)
+         (. ~current (wait))
+         (if (not (. ~current (rejected?)))
+           (return ~current)
+           (return ~(ruby-concurrent-promise-run
+                     `(fn [] (. ~thunk (call (. ~current (reason))))))))))))
+
+(defn ruby-tf-x-promise-finally
+  [[_ promise thunk]]
+  (let [current (gensym "current__")
+        cleanup (gensym "cleanup__")]
+    (template/$
+     (do (:- "require 'concurrent-ruby'")
+         (var ~current ~promise)
+         (. ~current (wait))
+         (var ~cleanup ~(ruby-concurrent-promise-run
+                         `(fn [] (. ~thunk (call)))))
+         (if (. ~cleanup (rejected?))
+           (return ~cleanup)
+           (return ~current))))))
+
+(defn ruby-tf-x-promise-native?
+  [[_ value]]
+  (template/$
+   (do (:- "require 'concurrent-ruby'")
+       (return (. ~value (is_a? ~ruby-concurrent-promise-sym))))))
 
 (defn ruby-tf-x-with-delay
-  [[_ thunk ms]]
-  (list 'do
-        (list 'sleep (list '/ ms 1000.0))
-        (list '. thunk 'call)))
+  [[_ ms thunk]]
+  (template/$
+   (do (:- "require 'concurrent-ruby'")
+       (return ~(ruby-concurrent-promise-run
+                 `(fn []
+                    (sleep (/ ~ms 1000.0))
+                    (. ~thunk (call))))))))
 
-(def +ruby-thread+
-  {:x-with-delay      {:macro #'ruby-tf-x-with-delay     :emit :macro}})
+(def +ruby-promise+
+  {:x-promise          {:macro #'ruby-tf-x-promise         :emit :macro}
+   :x-promise-then     {:macro #'ruby-tf-x-promise-then    :emit :macro}
+   :x-promise-catch    {:macro #'ruby-tf-x-promise-catch   :emit :macro}
+   :x-promise-finally  {:macro #'ruby-tf-x-promise-finally :emit :macro}
+   :x-promise-native?  {:macro #'ruby-tf-x-promise-native? :emit :macro}
+   :x-with-delay       {:macro #'ruby-tf-x-with-delay      :emit :macro}})
 
 ;; ITER
 ;;
@@ -489,18 +660,23 @@
 ;;
 
 (defn ruby-tf-x-socket-connect
-  [[_ host & [port opts]]]
-  (if (some? port)
-    (list 'TCPSocket.new host port)
-    (list 'TCPSocket.new host)))
+  [[_ host port _opts cb]]
+  (ruby-raw
+   "begin\n"
+   "  require 'socket'\n"
+   "  conn = TCPSocket.new(" (list '% host) ", " (list '% port) ")\n"
+   "  (" (list '% cb) ").call(nil, conn)\n"
+   "rescue Exception => e\n"
+   "  (" (list '% cb) ").call(e, nil)\n"
+   "end"))
 
 (defn ruby-tf-x-socket-send
   [[_ conn value]]
-  (list '. conn 'puts value))
+  (list '. conn (list 'puts value)))
 
 (defn ruby-tf-x-socket-close
   [[_ conn]]
-  (list '. conn 'close))
+  (list '. conn (list 'close)))
 
 (def +ruby-network+
   {:x-socket-connect   {:macro #'ruby-tf-x-socket-connect   :emit :macro
@@ -508,25 +684,44 @@
    :x-socket-send      {:macro #'ruby-tf-x-socket-send      :emit :macro}
    :x-socket-close     {:macro #'ruby-tf-x-socket-close     :emit :macro}})
 
+(defn ruby-tf-x-notify-http
+  [[_ host port value id key opts]]
+  (let [output (ruby-tf-x-return-encode `[_ ~value ~id ~key])]
+    (ruby-raw
+     "begin\n"
+     "  require 'net/http'\n"
+     "  path = (" (list '% opts) ").nil? ? nil : (" (list '% opts) ")[\"path\"]\n"
+     "  path = path.nil? ? \"/\" : path\n"
+     "  Net::HTTP.new(" (list '% host) ", " (list '% port) ").post(path, " (list '% output) ")\n"
+     "  [\"async\"]\n"
+     "rescue Exception => e\n"
+     "  [\"unable to connect\", e.to_s]\n"
+     "end")))
+
+(def +ruby-http+
+  {:x-notify-http      {:macro #'ruby-tf-x-notify-http      :emit :macro
+                        :op-spec {:allow-blocks true}}})
+
 ;;
 ;; RETURN
 ;;
 
 (defn ruby-tf-x-return-encode
   ([[_ out id key]]
-    (template/$ (do (:- "require 'json'")
-                    (try
-                      (return (JSON.generate {:id  ~id
-                                              :key ~key
-                                              :type  "data"
-                                              :return (x:type-native ~out)
-                                              :value  ~out}))
-                      (catch e
-                          (return (JSON.generate {:id ~id
-                                                  :key ~key
-                                                  :type  "raw"
-                                                  :return "raw"
-                                                  :value (. e (to_s))}))))))))
+   (let [out-type (ruby-tf-x-type-native `[_ ~out])]
+     (template/$ (do (:- "require 'json'")
+                     (try
+                       (return (JSON.generate {:id  ~id
+                                               :key ~key
+                                               :type  "data"
+                                               :return ~out-type
+                                               :value  ~out}))
+                       (catch e
+                           (return (JSON.generate {:id ~id
+                                                   :key ~key
+                                                   :type  "raw"
+                                                   :return "raw"
+                                                   :value (. e (to_s))})))))))))
 
 (defn ruby-tf-x-return-wrap
   ([[_ f encode-fn]]
@@ -571,14 +766,16 @@
 
 (def +ruby+
   (merge +ruby-core+
-         +ruby-math+
-         +ruby-type+
-         +ruby-arr+
-         +ruby-str+
-         +ruby-lu+
-         +ruby-json+
-         +ruby-file+
-         +ruby-thread+
-         +ruby-iter+
-         +ruby-network+
-         +ruby-return+))
+          +ruby-math+
+          +ruby-type+
+          +ruby-arr+
+          +ruby-str+
+          +ruby-lu+
+          +ruby-json+
+          +ruby-shell+
+          +ruby-file+
+          +ruby-promise+
+          +ruby-iter+
+          +ruby-network+
+          +ruby-http+
+          +ruby-return+))

@@ -3,7 +3,7 @@
   (:use code.test))
 
 (l/script :js
-  {:require [[js.core :as j] [js.react :as r] [js.react-native :as n] [js.react-native.ui-tooltip :as ui-tooltip] [js.react.ext-view :as ext-view] [xt.lang.common-lib :as k] [xt.lang.common-data :as xtd]]})
+  {:require [[js.core :as j] [js.react :as r] [js.react-native :as n] [js.react-native.ui-tooltip :as ui-tooltip] [js.react.ext-view :as ext-view] [xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.common-tree :as xtt]]})
 
 (defn.js AutocompleteModal
   "creates the autocomplete modal display"
@@ -56,7 +56,7 @@
   (var refInput (r/ref))
   (r/watch [sourceInput isBusy]
     (when (and (not isBusy)
-               (not (xtd/eq-nested sourceInput (. refInput current))))
+               (not (xtt/eq-nested sourceInput (. refInput current))))
       (ext-view/refresh-args sourceView sourceInput)
       (r/curr:set refInput sourceInput)))
   (return

@@ -4,7 +4,7 @@
 
 (l/script :js
   {:import [["@tanstack/react-query" :as [* ReactQuery]]]
-   :require [[js.react :as r] [xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.spec-base :as xt] [xt.lang.common-sort-by :as xtsb]]})
+   :require [[js.react :as r] [xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.common-tree :as xtt] [xt.lang.spec-base :as xt] [xt.lang.common-sort-by :as xtsb]]})
 
 (f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ReactQuery"
@@ -148,10 +148,10 @@
                    input
                    refetch} (xtd/get-in queries [qkey]))
             (var ninput (xtd/obj-map params (fn [x] (return (xt/x:get-key x "value")))))
-            (cond (not (xtd/eq-nested ninput input))
+            (cond (not (xtt/eq-nested ninput input))
                   (setInput ninput)
                  
-                 q.refetch
+                  q.refetch
                  (do (refetch)))))
        [params-str])))
   (return queries))

@@ -178,7 +178,7 @@
                                       :macro-case
                                       :control-base
                                       :control-general])
-             (grammar/build-functional-core))
+             (grammar/build :include [:functional-core]))
       (grammar/build:override
        {:defn    {:macro #'tf-defn :emit :macro}
         :fn      {:macro #'tf-lambda :emit :macro}

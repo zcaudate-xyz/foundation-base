@@ -195,8 +195,7 @@
   [[_ sym & body] {return :-
                     :keys [standalone] :as meta}]
   (let [form (apply list 'fn body)
-        template (binding [*ns* (the-ns 'clojure.core)]
-                   (eval form))]
+        template (eval form)]
     (book/book-entry (merge {:op 'defmacro
                              :id sym
                              :form form

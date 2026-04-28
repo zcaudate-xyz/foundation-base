@@ -22,15 +22,15 @@
   "modifies entry if exists"
   {:added "4.0"}
   [rows table-key id f]
-  (let [entry (xtd/get-in rows [table-key id])]
-    (if (xt/x:not-nil? entry)
-      (let [#{record} entry
-            _ (f record)
-            new-entry {:t (xt/x:now-ms)
-                       :record record}]
+  (var entry (xtd/get-in rows [table-key id]))
+  (if (xt/x:not-nil? entry)
+    (do (var #{record} entry)
+        (f record)
+        (var new-entry {:t (xt/x:now-ms)
+                        :record record})
         (xtd/set-in rows [table-key id] new-entry)
         (return new-entry)))
-    (return entry)))
+  (return entry))
 
 (defn.xt merge-single
   "merges a single entry"
@@ -161,22 +161,22 @@
   "removes single link"
   {:added "4.0"}
   [rows schema table-key id field link-id]
-  (let [attrs  (-/get-link-attrs schema table-key field)
-        #{table-link
-          table-field
-          inverse-key
-          inverse-link
-          inverse-field} attrs 
-        l-arr [false false]
-        t-has-fn (fn [_] (:= (xt/x:first l-arr) true)) 
-        t-entry (-/remove-single-link-entry
-                 rows table-key id table-link table-field link-id
-                 t-has-fn)
-        i-has-fn (fn [_] (:= (xt/x:second l-arr) true)) 
-        i-entry (-/remove-single-link-entry
-                 rows inverse-key link-id inverse-link inverse-field id
-                 i-has-fn)]
-    (return l-arr)))
+  (var attrs  (-/get-link-attrs schema table-key field))
+  (var #{table-link
+         table-field
+         inverse-key
+         inverse-link
+         inverse-field} attrs)
+  (var l-arr [false false])
+  (var t-has-fn (fn [_] (:= (xt/x:first l-arr) true)))
+  (-/remove-single-link-entry
+   rows table-key id table-link table-field link-id
+   t-has-fn)
+  (var i-has-fn (fn [_] (:= (xt/x:second l-arr) true)))
+  (-/remove-single-link-entry
+   rows inverse-key link-id inverse-link inverse-field id
+   i-has-fn)
+  (return l-arr))
 
 (defn.xt remove-single
   "removes a single entry"

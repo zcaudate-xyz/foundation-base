@@ -49,12 +49,12 @@
   => #{:xtalk-common})
 
 ^{:refer std.lang.base.grammar-xtalk-system/xtalk-op-profiles :added "4.1"}
-(fact "includes promise ops in the language-specific profile"
+(fact "includes promise ops in the runtime-specific profile"
   (xtalk-op-profiles :x-promise)
-  => #{:xtalk-language-specific}
+  => #{:xtalk-runtime-specific}
 
   (xtalk-op-profiles :x-promise-native?)
-  => #{:xtalk-language-specific})
+  => #{:xtalk-runtime-specific})
 
 ^{:refer std.lang.base.grammar-xtalk-system/xtalk-op-entry :added "4.1"}
 (fact "returns the full xtalk entry for an op"

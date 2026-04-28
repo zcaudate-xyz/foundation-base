@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [xt.old.event-view :as event-view] [js.react :as r] [js.core :as j] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-trace :as trace]]})
+  {:require [[xt.lang.common-lib :as k] [xt.old.event-view :as event-view] [js.react :as r] [js.core :as j] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-tree :as xtt] [xt.lang.common-trace :as trace]]})
 
 (defn.js throttled-setter
   "creates a throttled setter which only updates after a delay"
@@ -183,7 +183,7 @@
                             (. event type))
                       (== (. event data type)
                           (or dest-key "output")))
-                  (not (xtd/eq-nested (r/curr resultRef)
+                  (not (xtt/eq-nested (r/curr resultRef)
                                      nresult)))
          #_(when (== "pending" (. event type))
            (trace/LOG! event))

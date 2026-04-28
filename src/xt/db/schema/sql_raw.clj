@@ -10,10 +10,11 @@
   {:added "4.0"}
   [table-name where-params opts]
   (var table-fn   (xt/x:get-key opts "table_fn" (fn [x] (return x))))
-  (var where-str  (:? (xt/x:nil? where-params) ""
-                      :else (ut/encode-query-string where-params
-                                                    "WHERE"
-                                                    opts)))
+  (var where-str  (:? (xt/x:nil? where-params)
+                      ""
+                      (ut/encode-query-string where-params
+                                              "WHERE"
+                                              opts)))
   (var out-arr    [(xt/x:cat "DELETE FROM " (table-fn table-name))])
   (when (< 0 (xt/x:len where-str))
     (xt/x:arr-push out-arr where-str))
@@ -78,14 +79,15 @@
   "encodes an update query"
   {:added "4.0"}
   ([table-name where-params data opts]
-   (var table-fn   (xt/x:get-key opts "table_fn" (fn [x] (return x))))
-   (var where-str  (:? (xt/x:nil? where-params) ""
-                       :else (ut/encode-query-string where-params
-                                                    "WHERE"
-                                                    opts)))
-   (var set-str    (ut/encode-query-string data
-                                          "SET"
-                                          opts))
+    (var table-fn   (xt/x:get-key opts "table_fn" (fn [x] (return x))))
+    (var where-str  (:? (xt/x:nil? where-params)
+                        ""
+                        (ut/encode-query-string where-params
+                                                "WHERE"
+                                                opts)))
+    (var set-str    (ut/encode-query-string data
+                                           "SET"
+                                           opts))
    (var out-arr    [(xt/x:cat "UPDATE " (table-fn table-name))
                     set-str
                     where-str])
@@ -95,19 +97,19 @@
   "encodes an select query"
   {:added "4.0"}
   ([table-name where-params return-params opts]
-   (var table-fn   (xt/x:get-key opts "table_fn" (fn [x] (return x))))
-   (var column-fn  (xt/x:get-key opts "column_fn" (fn [x] (return x))))
-   
-   (var return-str  (:? (xt/x:is-string? return-params)
-                        return-params
-                        (xt/x:str-join ", " (xt/x:arr-map return-params column-fn))))
-   (var where-str  (:? (xt/x:nil? where-params) ""
-                       :else (ut/encode-query-string where-params
-                                                     "WHERE"
-                                                     opts)))
-   (var out-arr    [(xt/x:cat "SELECT " return-str)
-                    (xt/x:cat " FROM "(table-fn table-name))])
+    (var table-fn   (xt/x:get-key opts "table_fn" (fn [x] (return x))))
+    (var column-fn  (xt/x:get-key opts "column_fn" (fn [x] (return x))))
+    
+    (var return-str  (:? (xt/x:is-string? return-params)
+                         return-params
+                         (xt/x:str-join ", " (xt/x:arr-map return-params column-fn))))
+    (var where-str  (:? (xt/x:nil? where-params)
+                        ""
+                        (ut/encode-query-string where-params
+                                                "WHERE"
+                                                opts)))
+    (var out-arr    [(xt/x:cat "SELECT " return-str)
+                     (xt/x:cat " FROM "(table-fn table-name))])
    (when (< 0 (xt/x:len where-str))
      (xt/x:arr-push out-arr where-str))
    (return (xt/x:cat (xt/x:str-join "\n " out-arr) ";"))))
-

@@ -8,34 +8,6 @@
   [x & more] (apply list (quote !:G) x more))
 
 (defmacro.xt ^{:standalone true} 
-  !:decorate
-  [x & more] (apply list (quote !:decorate) x more))
-
-(defmacro.xt ^{:standalone true} 
-  !:deref
-  [x & more] (apply list (quote !:deref) x more))
-
-(defmacro.xt ^{:standalone true} 
-  !:eval
-  [x & more] (apply list (quote !:eval) x more))
-
-(defmacro.xt ^{:standalone true} 
-  !:lang
-  [x & more] (apply list (quote !:lang) x more))
-
-(defmacro.xt ^{:standalone true} 
-  !:module
-  [x & more] (apply list (quote !:module) x more))
-
-(defmacro.xt ^{:standalone true} 
-  !:rand
-  [x & more] (apply list (quote !:rand) x more))
-
-(defmacro.xt ^{:standalone true} 
-  !:uuid
-  [x & more] (apply list (quote !:uuid) x more))
-
-(defmacro.xt ^{:standalone true} 
   $
   [x & more] (apply list (quote $) x more))
 
@@ -120,30 +92,6 @@
   [x & more] (apply list (quote break) x more))
 
 (defmacro.xt ^{:standalone true} 
-  defabstract
-  [x & more] (apply list (quote defabstract) x more))
-
-(defmacro.xt ^{:standalone true} 
-  defclass
-  [x & more] (apply list (quote defclass) x more))
-
-(defmacro.xt ^{:standalone true} 
-  defgen
-  [x & more] (apply list (quote defgen) x more))
-
-(defmacro.xt ^{:standalone true} 
-  defglobal
-  ([sym body] (list (quote defglobal) sym body)))
-
-(defmacro.xt ^{:standalone true} 
-  defrun
-  [x & more] (apply list (quote defrun) x more))
-
-(defmacro.xt ^{:standalone true} 
-  deftemp
-  ([sym body] (list (quote deftemp) sym body)))
-
-(defmacro.xt ^{:standalone true} 
   do:>
   [x & more] (apply list (quote do:>) x more))
 
@@ -154,22 +102,6 @@
 (defmacro.xt ^{:standalone true} 
   fn:>
   [x & more] (apply list (quote fn:>) x more))
-
-(defmacro.xt ^{:standalone true} 
-  for:array
-  [x & more] (apply list (quote for:array) x more))
-
-(defmacro.xt ^{:standalone true} 
-  for:index
-  [x & more] (apply list (quote for:index) x more))
-
-(defmacro.xt ^{:standalone true} 
-  for:iter
-  [x & more] (apply list (quote for:iter) x more))
-
-(defmacro.xt ^{:standalone true} 
-  for:object
-  [x & more] (apply list (quote for:object) x more))
 
 (defmacro.xt ^{:standalone true} 
   forange
@@ -198,22 +130,6 @@
 (defmacro.xt ^{:standalone true} 
   pow
   [x & more] (apply list (quote pow) x more))
-
-(defmacro.xt ^{:standalone true} 
-  proto:create
-  ([m] (list (quote proto:create) m)))
-
-(defmacro.xt ^{:standalone true} 
-  proto:get
-  ([obj] (list (quote proto:get) obj)))
-
-(defmacro.xt ^{:standalone true} 
-  proto:set
-  ([obj proto] (list (quote proto:set) obj proto)))
-
-(defmacro.xt ^{:standalone true} 
-  proto:tostring
-  ([] (list (quote proto:tostring))))
 
 (defmacro.xt ^{:standalone true} 
   return
@@ -280,24 +196,8 @@
   [x & more] (apply list (quote cond) x more))
 
 (defmacro.xt ^{:standalone true} 
-  def
-  ([sym body] (list (quote def) sym body)))
-
-(defmacro.xt ^{:standalone true} 
-  defn
-  [x & more] (apply list (quote defn) x more))
-
-(defmacro.xt ^{:standalone true} 
-  defn-
-  [x & more] (apply list (quote defn-) x more))
-
-(defmacro.xt ^{:standalone true} 
   do
   [x & more] (apply list (quote do) x more))
-
-(defmacro.xt ^{:standalone true} 
-  do*
-  [x & more] (apply list (quote do*) x more))
 
 (defmacro.xt ^{:standalone true} 
   doto

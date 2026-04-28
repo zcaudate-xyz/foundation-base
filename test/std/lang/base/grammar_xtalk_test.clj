@@ -29,10 +29,10 @@
   (tf-not-nil? '(x:not-nil? a))
   => '(not= nil a))
 
-^{:refer std.lang.base.grammar-xtalk/tf-prototype-create :added "4.0"}
-(fact "creates the prototype map"
-  (tf-prototype-create '(x:prototype-create {}))
-  => '(return {}))
+^{:refer std.lang.base.grammar-xtalk/tf-eq :added "4.1"}
+(fact "wrapper for eq transform"
+  (tf-eq '(x:eq a b))
+  => '(== a b))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-has-key? :added "4.0"}
 (fact "has key default transform"
