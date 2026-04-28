@@ -5,8 +5,7 @@
             [rt.basic.type-oneshot :as oneshot]
             [std.lang.base.impl :as impl]
             [std.lang.base.runtime :as rt]
-            [std.lang.model-annex.spec-php :as spec]
-            [xt.lang.common-lib :as lib]))
+            [std.lang.model-annex.spec-php :as spec]))
 
 (def +php-init+
   (common/put-program-options
@@ -34,15 +33,40 @@
        :php [(default-body-transform input mopts)])
       (str/replace #"(?s)<\?php\s*" "")
       (str/replace #"(?s)\s*\?>" "")
-      (str/replace #"\n+" " ")
-      (str/trim)))
+       (str/replace #"\n+" " ")
+       (str/trim)))
+
+(def +return-bootstrap+
+  (str/join
+   "\n"
+   ["function return_encode($out, $id, $key){"
+    "  try{"
+    "    return json_encode(['id' => $id, 'key' => $key, 'type' => 'data', 'value' => $out]);"
+    "  }"
+    "  catch(Exception $e){"
+    "    return json_encode(['id' => $id, 'key' => $key, 'type' => 'raw', 'value' => '' . $out]);"
+    "  }"
+    "}"
+    ""
+    "function return_wrap($f){"
+    "  try{"
+    "    $out = call_user_func_array($f, []);"
+    "  }"
+    "  catch(Exception $e){"
+    "    return json_encode(['type' => 'error', 'value' => '' . $e]);"
+    "  }"
+    "  return return_encode($out, null, null);"
+    "}"
+    ""
+    "function return_eval($s){"
+    "  return return_wrap(function () use ($s) {"
+    "    return eval($s);"
+    "  });"
+    "}"]))
 
 (def ^{:arglists '([body])}
   default-oneshot-wrap
-  (let [bootstrap  (impl/emit-entry-deps
-                    lib/return-eval
-                    {:lang :php
-                     :layout :flat})]
+  (let [bootstrap +return-bootstrap+]
     (fn [body]
       (let [body-source (str "return "
                              (php-body-source body {})
@@ -79,27 +103,27 @@
 ;;
 
 (def +client-basic+
-  [(list 'defn 'client-basic
-         ['host 'port 'opts]
-         (list 'let ['conn '(fsockopen host port)]
-               (list 'while '(not (feof conn))
-                     (list 'let ['line '(fgets conn)
-                                 'input '(json_decode line)]
-                           (list 'cond
-                                 '(== line "<PING>\n")
-                                 (list ':-)
-                                 'input
-                                 (list ':- "fwrite($conn, return_eval($input) . \"\\n\");"))))))])
+  (str/join
+   "\n"
+   ["function client_basic($host, $port, $opts){"
+    "  $conn = fsockopen($host, $port);"
+    "  while (!feof($conn)){"
+    "    $line = fgets($conn);"
+    "    if ($line === \"<PING>\\n\"){"
+    "      continue;"
+    "    }"
+    "    $input = json_decode($line);"
+    "    if ($input !== null){"
+    "      fwrite($conn, return_eval($input) . \"\\n\");"
+    "    }"
+    "  }"
+    "}"]))
 
 (def ^{:arglists '([port & [{:keys [host]}]])}
   default-basic-client
-  (let [bootstrap (->> [(impl/emit-entry-deps
-                         lib/return-eval
-                         {:lang :php
-                          :layout :flat})
-                         (impl/emit-as
-                          :php +client-basic+)]
-                        (str/join "\n\n"))]
+  (let [bootstrap (str +return-bootstrap+
+                       "\n\n"
+                       +client-basic+)]
     (fn [port & [{:keys [host]}]]
       (str bootstrap
            "\n\n"

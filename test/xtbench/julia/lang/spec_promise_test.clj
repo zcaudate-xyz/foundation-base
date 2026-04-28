@@ -27,18 +27,32 @@
   => 7)
 
 ^{:refer xt.lang.spec-promise/x:promise-catch :added "4.1"}
-(fact "recovers a rejected js promise"
+(fact "preserves xtalk exception data through promise rejection"
 
   (notify/wait-on :julia
     (spec-promise/x:promise-catch
      (spec-promise/x:promise
       (fn []
-        (do 
-          (x:err "boom"))))
+        (throw (xt/x:ex-new "boom" {:a 1}))))
      (fn [err]
-       (repl/notify "error")
-       (return err))))
-  => "error")
+       (xt/x:print (xt/x:ex-data err))
+       (repl/notify [(xt/x:ex-native? err)
+                     (xt/x:get-key (xt/x:ex-data err) "a")]))))
+  => [true 1])
+
+^{:refer xt.lang.spec-promise/x:promise-catch :added "4.1"}
+(fact "preserves xtalk exception data through promise rejection"
+
+  (notify/wait-on :julia
+    (spec-promise/x:promise-catch
+     (spec-promise/x:promise
+      (fn []
+        (throw (xt/x:ex-new "boom" {:a 1}))))
+     (fn [err]
+       (xt/x:print (xt/x:ex-data err))
+       (repl/notify [(xt/x:ex-native? err)
+                     (xt/x:get-key (xt/x:ex-data err) "a")]))))
+  => [true 1])
 
 ^{:refer xt.lang.spec-promise/x:promise-finally :added "4.1"}
 (fact "runs cleanup without changing the resolved value"

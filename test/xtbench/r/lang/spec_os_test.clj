@@ -12,7 +12,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.spec-os/x:pwd :added "4.1"}
 (fact "gets the current pwd"

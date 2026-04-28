@@ -202,6 +202,19 @@
     (err-fn))
   => (throws))
 
+^{:refer xt.lang.spec-base/x:ex-new :added "4.1"}
+(fact "creates native exceptions with structured data"
+
+  (notify/wait-on :julia
+    (do:>
+     (try
+       (throw (xt/x:ex-new "ERR" {:a 1}))
+       (catch e
+         (xt/x:print (xt/x:ex-data e))
+         (repl/notify [(xt/x:ex-native? e)
+                       (xt/x:get-key (xt/x:ex-data e) "a")])))))
+  => [true 1])
+
 ^{:refer xt.lang.spec-base/x:type-native :added "4.1"}
 (fact "expands and emits the lua type helper"
 
@@ -1050,11 +1063,11 @@
 (fact "encodes return payloads as json"
 
   (!.julia
-     (var encode-fn
-          (fn [value id key]
-            (return
-             (xt/x:return-encode value id key))))
-     (xt/x:json-decode (encode-fn {:a 1} "id" "key")))
+    (var encode-fn
+         (fn [value id key]
+           (return
+            (xt/x:return-encode value id key))))
+    (xt/x:json-decode (encode-fn {:a 1} "id" "key")))
   => {"return" "object", "key" "key", "id" "id", "value" {"a" 1}, "type" "data"}
 
   (!.julia
@@ -1092,26 +1105,26 @@
 (fact "evaluates code through wrapped return handlers"
 
   (!.julia
-   (var encode-fn
-        (fn [value id key]
-          (return
-           (xt/x:return-encode value id key))))
-   (var wrap-fn
-        (fn [gen-fn wrap-fn]
-          (return
-           (xt/x:return-wrap gen-fn wrap-fn))))
-   (var eval-fn
-        (fn [s re-wrap-fn]
-          (return
-           (xt/x:return-eval s re-wrap-fn))))
-   (xt/x:json-decode
-    (eval-fn "1 + 1"
-             (fn [f]
-               (return
-                (wrap-fn f
-                         (fn [out]
-                           (return
-                            (encode-fn out "id-A" "key-B")))))))))
+    (var encode-fn
+         (fn [value id key]
+           (return
+            (xt/x:return-encode value id key))))
+    (var wrap-fn
+         (fn [gen-fn wrap-fn]
+           (return
+            (xt/x:return-wrap gen-fn wrap-fn))))
+    (var eval-fn
+         (fn [s re-wrap-fn]
+           (return
+            (xt/x:return-eval s re-wrap-fn))))
+    (xt/x:json-decode
+     (eval-fn "1 + 1"
+              (fn [f]
+                (return
+                 (wrap-fn f
+                          (fn [out]
+                            (return
+                             (encode-fn out "id-A" "key-B")))))))))
   => (contains-in {"key" "key-B", "id" "id-A", "value" 2, "type" "data"}))
 
 ^{:refer xt.lang.spec-base/x:bit-and :added "4.1"}
@@ -1156,7 +1169,7 @@
          (fn []
            (xt/x:global-del COMMON_SPEC_GLOBAL)
            (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
-                        
+      
     [(set-fn)
      (!:G COMMON_SPEC_GLOBAL)
      (del-fn)])
@@ -1183,7 +1196,7 @@
          (fn []
            (xt/x:global-del COMMON_SPEC_GLOBAL)
            (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
-                        
+      
     [(set-fn)
      (del-fn)])
   => [true false])
@@ -1238,6 +1251,7 @@
 
   (code.manage/isolate 'xt.lang.spec-base-test {:suffix "-fix"})
   (s/seedgen-benchadd 'xt.lang.spec-base {:lang [:r :dart] :write true})
+  (s/seedgen-benchremove 'xt.lang.spec-base {:lang [:r :dart] :write true})
   (s/seedgen-langadd 'xt.lang.spec-base {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.lang.spec-base {:lang [:lua :python] :write true})
   

@@ -1,10 +1,10 @@
-(ns xtbench.ruby.lang.spec-promise-test
+(ns xtbench.r.lang.spec-promise-test
   (:require [std.lang :as l]
             [xt.lang.common-notify :as notify]
             [xt.lang.spec-base :as xt])
   (:use code.test))
 
-(l/script- :ruby
+(l/script- :r
   {:runtime :basic
    :require [[xt.lang.spec-promise :as spec-promise]
              [xt.lang.spec-base :as xt]
@@ -17,7 +17,7 @@
 ^{:refer xt.lang.spec-promise/x:promise-then :added "4.1"}
 (fact "chains a resolved js promise"
 
-  (notify/wait-on :ruby
+  (notify/wait-on :r
     (spec-promise/x:promise-then
      (spec-promise/x:promise
       (fn []
@@ -29,7 +29,7 @@
 ^{:refer xt.lang.spec-promise/x:promise-catch :added "4.1"}
 (fact "preserves xtalk exception data through promise rejection"
 
-  (notify/wait-on :ruby
+  (notify/wait-on :r
     (spec-promise/x:promise-catch
      (spec-promise/x:promise
       (fn []
@@ -43,7 +43,7 @@
 ^{:refer xt.lang.spec-promise/x:promise-catch :added "4.1"}
 (fact "preserves xtalk exception data through promise rejection"
 
-  (notify/wait-on :ruby
+  (notify/wait-on :r
     (spec-promise/x:promise-catch
      (spec-promise/x:promise
       (fn []
@@ -57,7 +57,7 @@
 ^{:refer xt.lang.spec-promise/x:promise-finally :added "4.1"}
 (fact "runs cleanup without changing the resolved value"
 
-  (notify/wait-on :ruby
+  (notify/wait-on :r
     (var out [])
     (spec-promise/x:promise-then
      (spec-promise/x:promise-finally
@@ -77,7 +77,7 @@
 ^{:refer xt.lang.spec-promise/x:promise-native? :added "4.1"}
 (fact "detects native js promises"
 
-  (!.rb
+  (!.R
     (var p
          (spec-promise/x:promise
           (fn []
@@ -89,7 +89,7 @@
 ^{:refer xt.lang.spec-promise/x:with-delay :added "4.1"}
 (fact "delays asynchronous js computations"
 
-  (notify/wait-on :ruby
+  (notify/wait-on :r
     (spec-promise/x:with-delay 100
                                (fn []
                                  (repl/notify "OK"))))
