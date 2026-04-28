@@ -16,6 +16,9 @@
   (normalize-dart-source "encode_bool(b) {\n  return \"TRUE\";\n}")
   => "encode_bool(b) {\n  return \"TRUE\";\n}"
 
+  (normalize-dart-source "swap_if_entry(rows, table_key, id, f) {\n  if(entry){\n    return new_entry\n  }\n  return entry\n}")
+  => "swap_if_entry(rows, table_key, id, f) {\n  if(entry){\n    return new_entry;\n  }\n  return entry;\n}"
+
   (normalize-dart-source "make_listener_entry(listener_id, listener_type, callback, meta, pred) {\n  return <dynamic, dynamic>{\n    \"callback\":callback,\n    \"pred\":pred,\n    \"meta\":xtd.obj_assign(\n        <dynamic, dynamic>{\"listener/id\":listener_id,\"listener/type\":listener_type},\n        meta\n      )\n  };\n}")
   => "make_listener_entry(listener_id, listener_type, callback, meta, pred) {\n  return <dynamic, dynamic>{\n    \"callback\":callback,\n    \"pred\":pred,\n    \"meta\":xtd.obj_assign(\n        <dynamic, dynamic>{\"listener/id\":listener_id,\"listener/type\":listener_type},\n        meta\n      )\n  };\n}")
 

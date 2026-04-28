@@ -90,9 +90,14 @@
                                              (not in-assign?))
                                         (str line ";")
 
-                                        ;; inside a brace block (map entries, function body)
-                                        in-brace?
-                                        line
+                                         ;; inside a brace block: map/object literals stay bare,
+                                         ;; function/control bodies still need statement terminators
+                                         in-brace?
+                                         (if (or in-assign?
+                                                 (pos? paren-depth)
+                                                 (pos? next-paren))
+                                           line
+                                           (str line ";"))
 
                                         ;; inside a multi-line paren/bracket expression
                                         (and (pos? paren-depth) (pos? next-paren))
