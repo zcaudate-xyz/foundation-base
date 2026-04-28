@@ -412,19 +412,20 @@
                    (b/put-module
                     (merge (b/get-module +sample+ 'L.core)
                            {:link '{- L.core
-                                    cache xt.protocol.cache}
+                                    cache example.xt.protocol.cache}
                             :internal '{L.core -
-                                        xt.protocol.cache cache}}))
+                                        example.xt.protocol.cache cache}}))
                    second)
         cloned (b/module-specialize source
                                     'L.core
                                     'L.alt
-                                    {:bindings {'xt.protocol.cache 'js.cache.localstore}})]
+                                    {:bindings {'example.xt.protocol.cache
+                                                'example.xt.cache.custom-cache}})]
     [(:id cloned)
      (:module (get-in cloned [:code 'identity-fn]))
      (:link cloned)])
   => ['L.alt 'L.alt '{- L.alt
-                      cache js.cache.localstore}])
+                      cache example.xt.cache.custom-cache}])
 
 ^{:refer std.lang.base.book/module-create :added "4.0"}
 (fact "creates a module given book and options"
