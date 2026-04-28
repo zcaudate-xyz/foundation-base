@@ -1,7 +1,8 @@
 (ns xtgen.gen-common-spec
-  (:require [std.string.prose :as prose]
-            [std.string.common :as str]
+  (:require [std.string.common :as str]
             [std.block.template :as gen]
+            [std.lang.base.grammar-macro :as grammar-macro]
+            [std.lang.base.grammar-spec :as grammar-spec]
             [std.lang.base.grammar-xtalk :as xtalk]))
 
 (defn xtalk-entries
@@ -42,14 +43,117 @@
           xtalk/+xt-lang-time+
           xtalk/+xt-lang-unpack+
           xtalk/+xt-lang-json+
-          xtalk/+xt-socket+
-          xtalk/+xt-notify-http+
-          
-          xtalk/+xt-runtime-file+
-          xtalk/+xt-runtime-shell+
-          xtalk/+xt-runtime-thread+
-          xtalk/+xt-runtime-b64+
-          xtalk/+xt-runtime-uri+]))
+           xtalk/+xt-socket+
+           xtalk/+xt-notify-http+
+           
+           xtalk/+xt-runtime-promise+
+           xtalk/+xt-runtime-file+
+           xtalk/+xt-runtime-shell+]))
+
+(def +primitive-source-namespaces+
+  '[std.lang.base.grammar-spec
+    std.lang.base.grammar-macro])
+
+(defn op-table-vars
+  ([ns-sym]
+   (op-table-vars ns-sym "+op-"))
+  ([ns-sym prefix]
+   (->> (ns-publics ns-sym)
+        (keep (fn [[sym v]]
+                (when (.startsWith (name sym) prefix)
+                  v))))))
+
+(defn op-entries
+  ([ns-sym]
+   (op-entries ns-sym "+op-"))
+  ([ns-sym prefix]
+   (->> (op-table-vars ns-sym prefix)
+        (mapcat (fn [v]
+                  (let [value @v]
+                    (if (sequential? value)
+                      value
+                      []))))
+        vec)))
+
+(defn entry-targets
+  [{:keys [target symbol]}]
+  (if target
+    [target]
+    (->> symbol
+         (filter (fn [sym]
+                   (and (symbol? sym)
+                        (not (#{"&" "as"} (name sym)))
+                        (not-any? #(.contains (name sym) %)
+                                  ["&" "|"]))))
+         (sort-by str)
+         vec)))
+
+(defn expand-entry-targets
+  [entry]
+  (mapv (fn [target]
+          (assoc entry :target target))
+        (entry-targets entry)))
+
+(defn entry-type-form
+  [{:keys [op-spec]}]
+  (or (:type op-spec)
+      (when (= 1 (count (:types op-spec)))
+        (first (:types op-spec)))))
+
+(defn entry-arglists
+  [{:keys [arglists op-spec]}]
+  (or (:arglists op-spec)
+      arglists))
+
+(defn literal-arglist?
+  [arglist]
+  (->> (tree-seq coll? seq arglist)
+       (remove coll?)
+       (not-any? #{'& :as})))
+
+(def +late-macro-targets+
+  '#{fn
+     def
+     defn
+     defn-
+     let
+     letfn
+     for
+     while
+     if
+     cond
+     when
+     case
+     do
+     do*
+     quote
+     comment
+     and
+     or
+     not
+     ->
+     ->>
+     doto
+     try})
+
+(defn entry-render-order
+  [{:keys [target]}]
+  [(cond
+     (= 'fn target) 2
+     (contains? +late-macro-targets+ target) 1
+     :else 0)
+   (str target)])
+
+(defn primitive-entries
+  []
+  (->> +primitive-source-namespaces+
+       (mapcat op-entries)
+       (mapcat expand-entry-targets)
+       (sort-by entry-render-order)
+       vec))
+
+(def +primitive-entries+
+  (primitive-entries))
 
 
 (def ^:private GENERATE_COMMON_FOR_TEMPLATE
@@ -131,9 +235,10 @@
 
 (defn generate-common-type-template
   [{:keys [op-spec] :as e}]
-  
-  {'target   (first (:symbol e))
-   'type     (:type op-spec)})
+  (when-let [type-form (entry-type-form e)]
+    {'target   (or (:target e)
+                   (first (entry-targets e)))
+     'type     type-form}))
 
 (def ^:private +generate-common-type+
   (gen/get-template GENERATE_COMMON_TYPE_TEMPLATE
@@ -141,7 +246,8 @@
 
 (defn generate-common-type
   [e]
-  (gen/fill-template +generate-common-type+ e))
+  (when-let [template-data (generate-common-type-template e)]
+    (gen/fill-template +generate-common-type+ template-data)))
 
 ;;
 ;; TMPL.MACROS
@@ -155,24 +261,34 @@
 
 (defn generate-common-macro-template
   [{:keys [op-spec] :as e}]
-  (let [target    (first (:symbol e))
-         {:keys [arglists
-                 variadic
-                allow-blocks]} op-spec
-        forms     (if variadic
+  (let [target    (or (:target e)
+                      (first (entry-targets e)))
+        arglists  (entry-arglists e)
+        variadic  (:variadic op-spec)
+        direct?   (and (seq arglists)
+                       (every? literal-arglist? arglists))
+        forms     (cond
+                    (and variadic (seq arglists))
                     (list (conj (first arglists)
                                 '& 'more)
-                          (apply list 'apply 'list (list 'quote target) (conj (first arglists) 'more)))
+                          (apply list 'apply 'list (list 'quote target)
+                                 (conj (first arglists) 'more)))
+
+                    direct?
                     (->> arglists
                          (map (fn [arglist]
                                 (list arglist
                                       (apply list 'list (list 'quote target) arglist))))
                          (interpose [(std.block/newline)])
                          (mapcat (fn [x]
-                                   (if (vector? x) x [x])))))]
-     {'target   target
-      'forms     forms
-      'standalone true}))
+                                   (if (vector? x) x [x]))))
+
+                    :else
+                    (list '[x & more]
+                          (list 'apply 'list (list 'quote target) 'x 'more)))]
+    {'target     target
+     'forms      forms
+     'standalone true}))
 
 (def ^:private +generate-common-macro+
   (gen/get-template GENERATE_COMMON_MACRO_TEMPLATE
@@ -204,8 +320,9 @@
 
 (defn generate-common-function-template
   [{:keys [op-spec] :as e}]
-  (let [target   (first (:symbol e))
-        arglist  (first (:arglists op-spec))
+  (let [target   (or (:target e)
+                     (first (entry-targets e)))
+        arglist  (first (entry-arglists e))
         form     (apply list 'list (list 'quote target) arglist)]
     {'arglist  arglist  
      'target   target
@@ -225,15 +342,51 @@
 ;; LANG.SPEC
 ;;
 
-(defn create-lang-common-spec
-  "Generate complete RPC file content for given namespaces"
+(defn namespace-source-path
   [namespace]
-  (spit "src/xt/lang/common_spec.clj"
-        (str/join "\n\n"
-                  (concat [(generate-common-ns-template 'xt.lang.spec-base)
-                           GENERATE_COMMON_FOR_TEMPLATE]
-                          (interleave (map generate-common-type +xtalk-entries+)
-                                      (map generate-common-macro +xtalk-entries+))))))
+  (str "src/"
+       (-> (str namespace)
+           (str/replace "." "/")
+           (str/replace "-" "_"))
+       ".clj"))
+
+(defn render-lang-spec
+  [namespace entries & [prelude]]
+  (str/join "\n\n"
+            (concat [(generate-common-ns-template namespace)]
+                    prelude
+                    (mapcat (fn [entry]
+                              (remove nil?
+                                      [(generate-common-type entry)
+                                       (generate-common-macro entry)]))
+                            entries))))
+
+(defn render-lang-common-spec
+  ([] (render-lang-common-spec 'xt.lang.spec-base))
+  ([namespace]
+   (render-lang-spec namespace
+                     +xtalk-entries+
+                     [GENERATE_COMMON_FOR_TEMPLATE])))
+
+(defn render-lang-primitive-spec
+  ([] (render-lang-primitive-spec 'xt.lang.spec-primitive))
+  ([namespace]
+   (render-lang-spec namespace
+                     +primitive-entries+)))
+
+(defn create-lang-common-spec
+  "Generate complete xtalk common spec file content."
+  ([] (create-lang-common-spec 'xt.lang.spec-base))
+  ([namespace]
+   (spit (namespace-source-path namespace)
+         (render-lang-common-spec namespace))))
+
+(defn create-lang-primitive-spec
+  "Generate the primitive xtalk spec layer from grammar spec and macro ops."
+  ([] (create-lang-primitive-spec 'xt.lang.spec-primitive))
+  ([namespace]
+   (spit (namespace-source-path namespace)
+         (render-lang-primitive-spec namespace))))
 
 
 
