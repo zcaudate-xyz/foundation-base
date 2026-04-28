@@ -250,8 +250,17 @@
                  (normalize-seedgen-lang-entry config)]))
          (into {}))
 
+     :else
+     {:all (normalize-seedgen-lang-entry base-config)}))
+
+(defn- normalize-seedgen-root-config
+  [root-config]
+  (cond
+    (map? root-config)
+    (normalize-seedgen-base-config (dissoc root-config :langs))
+
     :else
-    {:all (normalize-seedgen-lang-entry base-config)}))
+    (normalize-seedgen-base-config root-config)))
 
 (defn- merge-seedgen-configs
   [& configs]
@@ -305,6 +314,16 @@
 (defn seedgen-lang-entry
   [form lang]
   (let [config (seedgen-base-config form)
+        lang   (seedgen-normalize-runtime-lang lang)]
+    (merge (get config :all)
+           (get config lang))))
+
+(defn seedgen-root-entry
+  [form lang]
+  (let [config (some-> form
+                       meta
+                       :seedgen/root
+                       normalize-seedgen-root-config)
         lang   (seedgen-normalize-runtime-lang lang)]
     (merge (get config :all)
            (get config lang))))

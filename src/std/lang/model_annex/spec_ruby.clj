@@ -58,15 +58,30 @@
 (defn ruby-map
   "emit ruby hash
    (l/emit-as :ruby '[{:a 1 :b 2}])
-    => \"{\\\"a\\\" => 1, \\\"b\\\" => 2}\""
+     => \"{\\\"a\\\" => 1, \\\"b\\\" => 2}\""
   {:added "4.1"}
   [m grammar mopts]
   (let [entries (map (fn [[k v]]
-                       (str (common/*emit-fn* k grammar mopts)
-                             " => "
-                             (common/*emit-fn* v grammar mopts)))
-                      m)]
+                       (str (common/*emit-fn* (if (keyword? k)
+                                                (name k)
+                                                k)
+                                              grammar mopts)
+                              " => "
+                              (common/*emit-fn* v grammar mopts)))
+                       m)]
     (str "{" (clojure.string/join ", " entries) "}")))
+
+(defn ruby-emit-args
+  [args grammar mopts]
+  (str "("
+       (clojure.string/join ", "
+                            (common/emit-array args grammar mopts))
+       ")"))
+
+(defn ruby-invoke
+  [[f & args] grammar mopts]
+  (str (common/emit-wrapping f grammar mopts)
+       (ruby-emit-args args grammar mopts)))
 
 (defn- callable-form?
   [form]
@@ -82,8 +97,23 @@
 
 (defn- ruby-dot-entry
   [prop grammar mopts]
-  (if (ruby-zero-arg-call? prop)
+  (cond
+    (ruby-zero-arg-call? prop)
     (str "." (common/emit-symbol (first prop) grammar mopts))
+
+    (collection/form? prop)
+    (let [sym    (first prop)
+          sym    (if (string? sym) (symbol sym) sym)
+          _      (assert (symbol? sym))
+          braces (meta sym)]
+      (str "."
+           (common/emit-symbol sym grammar mopts)
+           (if (not-empty braces)
+             (common/*emit-fn* braces grammar mopts)
+             "")
+           (ruby-emit-args (rest prop) grammar mopts)))
+
+    :else
     (common/emit-index-entry prop grammar mopts)))
 
 (defn ruby-dot
@@ -295,10 +325,11 @@
          :defn       {:symbol #{'defn}   :macro #'ruby-defn :emit :macro}
          :defgen     {:symbol #{'defgen} :macro #'ruby-defn :emit :macro}
          :spread     {:raw "*" :emit :pre}
-         :with-global {:value true :raw "($__globals__ ||= {})"}
-           :and        {:raw "&&"}
-           :or         {:raw "||"}
-           :not        {:raw "!" :emit :prefix}
+          :with-global {:value true :raw "($__globals__ ||= {})"}
+           :throw      {:raw "raise" :emit :prefix}
+            :and        {:raw "&&"}
+            :or         {:raw "||"}
+            :not        {:raw "!" :emit :prefix}
            :eq         {:raw "=="}
           :pow        {:raw "**"}
           :fn         {:macro  #'ruby-fn   :emit :macro}
@@ -324,6 +355,7 @@
   (->> {:banned #{}
          :allow   {:assign  #{:symbol}}
          :default {:common    {:statement ""}
+                    :invoke    {:custom #'ruby-invoke}
                     :block     {:parameter {:start " " :end ""}
                                  :body      {:start "" :end "end" :append false}}
                     :function  {:raw "def"

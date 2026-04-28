@@ -1,13 +1,17 @@
 (ns xt.lang.spec-base-test
   (:use code.test)
   (:require [clojure.set :as set]
-            [std.lang :as l]
-            [xt.lang.common-notify :as notify]))
+  	    [std.lang :as l]
+            [xt.lang.common-notify :as notify]
+            [xt.lang.spec-promise :as spec-promise]))
 
-^{:seedgen/root {:all true, :langs [:python :lua]}}
+^{:seedgen/root {:all true, :langs [:python :lua]
+                 :lua     {:extra  [[lua.core.common-promise :as p]]}
+                 :python  {:extra  [[python.core.common-promise :as p]]}}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as spec-promise]
              [xt.lang.common-string :as xts]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-iter :as xti]
@@ -16,18 +20,22 @@
 (l/script- :python
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as spec-promise]
              [xt.lang.common-string :as xts]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-iter :as xti]
-             [xt.lang.common-repl :as repl]]})
+             [xt.lang.common-repl :as repl]
+             [python.core.common-promise]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as spec-promise]
              [xt.lang.common-string :as xts]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-iter :as xti]
-             [xt.lang.common-repl :as repl]]})
+             [xt.lang.common-repl :as repl]
+             [lua.core.common-promise]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -557,33 +565,36 @@
 (fact "creates native exceptions with structured data"
 
   (notify/wait-on :js
-    (do:>
-     (try
-       (throw (xt/x:ex-new "ERR" {:a 1}))
-       (catch e
-         (xt/x:print (xt/x:ex-data e))
-         (repl/notify [(xt/x:ex-native? e)
-                       (xt/x:get-key (xt/x:ex-data e) "a")])))))
+    (spec-promise/x:promise-catch
+     (spec-promise/x:promise
+      (fn []
+        (throw (xt/x:ex-new "ERR" {:a 1}))))
+     (fn [e]
+       (xt/x:print (xt/x:ex-data e))
+       (repl/notify [(xt/x:ex-native? e)
+                     (xt/x:get-key (xt/x:ex-data e) "a")]))))
   => [true 1]
 
   (notify/wait-on :python
-    (do:>
-     (try
-       (throw (xt/x:ex-new "ERR" {:a 1}))
-       (catch e
-         (xt/x:print (xt/x:ex-data e))
-         (repl/notify [(xt/x:ex-native? e)
-                       (xt/x:get-key (xt/x:ex-data e) "a")])))))
+    (spec-promise/x:promise-catch
+     (spec-promise/x:promise
+      (fn []
+        (throw (xt/x:ex-new "ERR" {:a 1}))))
+     (fn [e]
+       (xt/x:print (xt/x:ex-data e))
+       (repl/notify [(xt/x:ex-native? e)
+                     (xt/x:get-key (xt/x:ex-data e) "a")]))))
   => [true 1]
 
   (notify/wait-on :lua
-    (do:>
-     (try
-       (throw (xt/x:ex-new "ERR" {:a 1}))
-       (catch e
-         (xt/x:print (xt/x:ex-data e))
-         (repl/notify [(xt/x:ex-native? e)
-                       (xt/x:get-key (xt/x:ex-data e) "a")])))))
+    (spec-promise/x:promise-catch
+     (spec-promise/x:promise
+      (fn []
+        (throw (xt/x:ex-new "ERR" {:a 1}))))
+     (fn [e]
+       (xt/x:print (xt/x:ex-data e))
+       (repl/notify [(xt/x:ex-native? e)
+                     (xt/x:get-key (xt/x:ex-data e) "a")]))))
   => [true 1])
 
 ^{:refer xt.lang.spec-base/x:ex-message :added "4.1"}

@@ -44,6 +44,22 @@
        "  (!.js 1)\n"
        "  => 1)\n"))
 
+(def ^:private +seedgen-extra-source+
+  (str "(ns xt.sample.extra-test\n"
+       "  (:use code.test)\n"
+       "  (:require [std.lang :as l]))\n\n"
+       "^{:seedgen/root {:all true\n"
+       "                 :langs [:python]\n"
+       "                 :python {:extra [[python.core.common-promise :as p]]}}}\n"
+       "(l/script- :js\n"
+       "  {:runtime :basic\n"
+       "   :require [[xt.lang.spec-base :as xt]\n"
+       "             [xt.lang.common-repl :as repl]]})\n\n"
+       "^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n"
+       "(fact \"adds language extras\"\n"
+       "  (!.js (+ 1 2 3))\n"
+       "  => 6)\n"))
+
 (defn- seedgen-spacing-context
   [prefix]
   (let [root     (.toFile (java.nio.file.Files/createTempDirectory prefix
@@ -64,7 +80,7 @@
 (defn- seedgen-suppress-context
   [prefix]
   (let [root     (.toFile (java.nio.file.Files/createTempDirectory prefix
-                                                                  (make-array java.nio.file.attribute.FileAttribute 0)))
+                                                                   (make-array java.nio.file.attribute.FileAttribute 0)))
         test-dir (doto (java.io.File. root "test/xt/sample")
                    (.mkdirs))
         path     (.getAbsolutePath (java.io.File. test-dir "suppress_test.clj"))
@@ -75,6 +91,23 @@
     {:root root
      :path path
      :bench-path (.getAbsolutePath (java.io.File. root "test/xtbench/dart/sample/suppress_test.clj"))
+     :lookup lookup
+     :project project}))
+
+(defn- seedgen-extra-context
+  [prefix]
+  (let [root     (.toFile (java.nio.file.Files/createTempDirectory prefix
+                                                                  (make-array java.nio.file.attribute.FileAttribute 0)))
+        test-dir (doto (java.io.File. root "test/xt/sample")
+                   (.mkdirs))
+        path     (.getAbsolutePath (java.io.File. test-dir "extra_test.clj"))
+        lookup   {'xt.sample.extra-test path}
+        project  {:root (.getAbsolutePath root)
+                  :test-paths ["test"]}]
+    (spit path +seedgen-extra-source+)
+    {:root root
+     :path path
+     :bench-path (.getAbsolutePath (java.io.File. root "test/xtbench/python/sample/extra_test.clj"))
      :lookup lookup
      :project project}))
 
@@ -131,6 +164,22 @@
          (boolean (re-find +seedgen-teardown-spacing+ content))
          (boolean (re-find #"\(!\.dt 1\)" content))])
       (finally
+         (fs/delete root {:recursive true}))))
+  => [true true true])
+
+^{:refer std.lang.seedgen/seedgen-langadd :added "4.1"}
+(fact "langadd applies root-script extra requires for generated languages"
+  (let [{:keys [root path lookup project]} (seedgen-extra-context "seedgen-langadd-extra")]
+    (try
+      (form-infile/seedgen-langadd 'xt.sample.extra
+                                   {:lang [:python] :write true}
+                                   lookup
+                                   project)
+      (let [content (slurp path)]
+        [(boolean (re-find #"\(l/script- :python" content))
+         (boolean (re-find #"\[python\.core\.common-promise :as p\]" content))
+         (boolean (re-find #"\(!\.py \(\+ 1 2 3\)\)" content))])
+      (finally
         (fs/delete root {:recursive true}))))
   => [true true true])
 
@@ -180,6 +229,22 @@
         [(boolean (re-find +seedgen-setup-spacing+ content))
          (boolean (re-find +seedgen-teardown-spacing+ content))
          (boolean (re-find #"\(!\.dt 1\)" content))])
+      (finally
+         (fs/delete root {:recursive true}))))
+  => [true true true])
+
+^{:refer std.lang.seedgen/seedgen-benchadd :added "4.1"}
+(fact "benchadd applies root-script extra requires for generated bench namespaces"
+  (let [{:keys [root bench-path lookup project]} (seedgen-extra-context "seedgen-benchadd-extra")]
+    (try
+      (form-bench/seedgen-benchadd 'xt.sample.extra
+                                   {:lang [:python] :write true}
+                                   lookup
+                                   project)
+      (let [content (slurp bench-path)]
+        [(boolean (re-find #"\(l/script- :python" content))
+         (boolean (re-find #"\[python\.core\.common-promise :as p\]" content))
+         (boolean (re-find #"\(!\.py \(\+ 1 2 3\)\)" content))])
       (finally
         (fs/delete root {:recursive true}))))
   => [true true true])

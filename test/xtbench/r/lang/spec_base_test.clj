@@ -1,16 +1,18 @@
 (ns xtbench.r.lang.spec-base-test
   (:use code.test)
   (:require [clojure.set :as set]
-            [std.lang :as l]
-            [xt.lang.common-notify :as notify]))
+  	        [std.lang :as l]
+            [xt.lang.common-notify :as notify]
+            [xt.lang.spec-promise :as spec-promise]))
 
 (l/script- :r
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-string :as xts]
-             [xt.lang.common-data :as xtd]
-             [xt.lang.common-iter :as xti]
-             [xt.lang.common-repl :as repl]]})
+             [xt.lang.spec-promise :as spec-promise]
+              [xt.lang.common-string :as xts]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-iter :as xti]
+              [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -206,13 +208,14 @@
 (fact "creates native exceptions with structured data"
 
   (notify/wait-on :r
-    (do:>
-     (try
-       (throw (xt/x:ex-new "ERR" {:a 1}))
-       (catch e
-         (xt/x:print (xt/x:ex-data e))
-         (repl/notify [(xt/x:ex-native? e)
-                       (xt/x:get-key (xt/x:ex-data e) "a")])))))
+    (spec-promise/x:promise-catch
+     (spec-promise/x:promise
+      (fn []
+        (throw (xt/x:ex-new "ERR" {:a 1}))))
+     (fn [e]
+       (xt/x:print (xt/x:ex-data e))
+       (repl/notify [(xt/x:ex-native? e)
+                     (xt/x:get-key (xt/x:ex-data e) "a")]))))
   => [true 1])
 
 ^{:refer xt.lang.spec-base/x:type-native :added "4.1"}

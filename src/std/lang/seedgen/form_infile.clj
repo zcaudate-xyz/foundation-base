@@ -137,8 +137,99 @@
             (nav/replace (apply list (concat script-form [{:runtime target-runtime}])))
             nav/root-string)
 
-        :else
-        script-str))))
+         :else
+         script-str))))
+
+(defn- normalize-script-requires
+  [requires]
+  (cond
+    (vector? requires)
+    requires
+
+    (seq? requires)
+    (vec requires)
+
+    (nil? requires)
+    []
+
+    :else
+    [requires]))
+
+(defn- require-target
+  [require-spec]
+  (if (vector? require-spec)
+    (first require-spec)
+    require-spec))
+
+(defn- merge-script-requires
+  [current-requires extra-requires]
+  (let [current-requires (normalize-script-requires current-requires)
+        extra-requires   (normalize-script-requires extra-requires)
+        extra-by-target  (->> extra-requires
+                              (map (fn [require-spec]
+                                     [(require-target require-spec) require-spec]))
+                              (into {}))
+        seen             (volatile! #{})
+        current-merged   (mapv (fn [require-spec]
+                                 (let [target (require-target require-spec)]
+                                   (if-let [replacement (get extra-by-target target)]
+                                     (do
+                                       (vswap! seen conj target)
+                                       replacement)
+                                     require-spec)))
+                               current-requires)
+        extra-appended   (->> extra-requires
+                              (remove (fn [require-spec]
+                                        (contains? @seen (require-target require-spec))))
+                              vec)]
+    (vec (concat current-merged extra-appended))))
+
+(defn- root-script-extra-requires
+  [output lang]
+  (let [root-form (-> output
+                      (get-in [:globals :global-script :root])
+                      item-value)]
+    (-> (merge (common/seedgen-root-entry root-form lang)
+               (common/seedgen-lang-entry root-form lang))
+        :extra
+        normalize-script-requires)))
+
+(defn- augment-script-string
+  [script-str output lang]
+  (let [extra-requires (root-script-extra-requires output lang)]
+    (if (empty? extra-requires)
+      script-str
+      (let [root       (nav/parse-root script-str)
+            script-nav (nav/down root)
+            config-nav (some-> script-nav nav/down nav/right nav/right)
+            script-form (some-> script-nav nav/value)
+            next-config (-> (if (and config-nav
+                                     (map? (nav/value config-nav)))
+                              (nav/value config-nav)
+                              {})
+                            (update :require merge-script-requires extra-requires))]
+        (cond
+           (nil? script-nav)
+           script-str
+
+           (and config-nav
+                (map? (nav/value config-nav)))
+           (if-let [require-nav (form-common/nav-map-value config-nav :require)]
+             (-> require-nav
+                 (nav/replace (:require next-config))
+                 nav/root-string)
+             (-> config-nav
+                 (nav/replace next-config)
+                 nav/root-string))
+
+          (seq? script-form)
+          (let [[script-fn script & more] script-form]
+            (-> script-nav
+                (nav/replace (apply list script-fn script next-config more))
+                nav/root-string))
+
+          :else
+          script-str)))))
 
 (defn- replace-ns-name-string
   [ns-str new-ns]
@@ -755,17 +846,20 @@
                               (map item-line)
                               (map line-key)
                               set)
-        ordered-scripts  (->> stored-langs
-                              (filter #(or (contains? current-langs %)
-                                           (contains? target-set %)))
-                              vec)
-        add-script-strs  (mapv #(or (get existing-scripts %)
-                                    (replace-script-lang-string
-                                     (root-script-body-string output)
-                                     %))
-                               ordered-scripts)
-        root            (nav/parse-root text)
-        top-navs        (form-common/nav-top-levels root)]
+         ordered-scripts  (->> stored-langs
+                               (filter #(or (contains? current-langs %)
+                                            (contains? target-set %)))
+                               vec)
+         add-script-strs  (mapv #(augment-script-string
+                                  (or (get existing-scripts %)
+                                      (replace-script-lang-string
+                                       (root-script-body-string output)
+                                       %))
+                                  output
+                                  %)
+                                ordered-scripts)
+         root            (nav/parse-root text)
+         top-navs        (form-common/nav-top-levels root)]
     (str (str/join
           "\n\n"
           (mapcat (fn [zloc]
@@ -964,16 +1058,19 @@
                          (into {}))]
     (cond
       (= lang root-lang)
-      (root-script-body-string output)
+       (some-> (root-script-body-string output)
+               (augment-script-string output lang))
 
       (get derived-map lang)
       (some-> (get derived-map lang)
               item-string
-              unwrap-meta-string)
+              unwrap-meta-string
+              (augment-script-string output lang))
 
       :else
       (some-> (root-script-body-string output)
-              (replace-script-lang-string lang)))))
+              (replace-script-lang-string lang)
+              (augment-script-string output lang)))))
 
 (defn render-top-level-target
   [output text lang target-ns]

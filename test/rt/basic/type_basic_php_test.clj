@@ -62,5 +62,29 @@
           nil)
         (finally
           (component/stop rt))))
-    :php-unavailable)
+     :php-unavailable)
   => (any nil? :php-unavailable))
+
+^{:refer rt.basic.type-basic/invoke-ptr-basic :added "4.1"}
+(fact "php basic survives eval errors and continues serving requests"
+
+  (if CANARY-PHP
+    (let [rt (p/rt-basic {:lang :php
+                          :id "test-php-basic-error"
+                          :program :php})]
+      (try
+        (let [error-status (try
+                             (-> rt
+                                 (p/invoke-ptr-basic (ut/lang-pointer :php)
+                                                     ['(not_a_real_php_fn)]))
+                             :no-error
+                             (catch Throwable _
+                               :thrown))
+              value (-> rt
+                        (p/invoke-ptr-basic (ut/lang-pointer :php)
+                                            ['(+ 1 2 3)]))]
+          [error-status value])
+        (finally
+          (component/stop rt))))
+    :php-unavailable)
+  => (any [:thrown 6] :php-unavailable))

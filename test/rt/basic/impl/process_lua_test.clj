@@ -24,6 +24,15 @@
   (default-basic-client 19000)
   => string?)
 
+^{:refer rt.basic.impl.process-lua/make-bootstrap :added "4.1"}
+(fact "constructs shared bootstrap without swallowing client loop errors"
+  (let [out (make-bootstrap +client-basic+)]
+    [(boolean (re-find #"cjson = require" out))
+     (boolean (re-find #"local function return_eval" out))
+     (boolean (re-find #"local function client_basic" out))
+     (boolean (re-find #"(?s)client_basic\(host,port,opts\).*pcall\(function" out))])
+  => [true true true false])
+
 ^{:refer rt.basic.impl.process-lua/default-body-wrap :added "4.1"}
 (fact "wraps forms in a local helper"
   (default-body-wrap '[(defn add-10 [x] (return (+ x 10)))

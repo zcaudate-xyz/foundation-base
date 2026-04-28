@@ -38,6 +38,35 @@
   [_]
   '(rand))
 
+(defn ruby-tf-x-ex-native?
+  [[_ err]]
+  (list '. err (list 'is_a? 'Exception)))
+
+(defn ruby-tf-x-ex-new
+  [[_ message & [data]]]
+  (if (some? data)
+    (template/$
+     (. (fn []
+          (var err (. RuntimeError (new ~message)))
+          (. err (instance_variable_set "@xt_data" ~data))
+          (return err))
+        (call)))
+    (list '. 'RuntimeError (list 'new message))))
+
+(defn ruby-tf-x-ex-message
+  [[_ err]]
+  (template/$
+   (:? (x:ex-native? ~err)
+       (. ~err message)
+       nil)))
+
+(defn ruby-tf-x-ex-data
+  [[_ err]]
+  (template/$
+   (:? (x:ex-native? ~err)
+       (. ~err (instance_variable_get "@xt_data"))
+       nil)))
+
 (defn ruby-tf-x-now-ms
   [_]
   (list '. (list '* (list '. 'Time.now 'to_f) 1000) 'to_i))
@@ -89,7 +118,11 @@
 (def +ruby-core+
   {:x-cat            {:macro #'ruby-tf-x-cat  :emit :macro :value true}
    :x-len            {:macro #'ruby-tf-x-len  :emit :macro}
-   :x-err            {:emit :alias :raw 'raise}
+    :x-err            {:emit :alias :raw 'raise}
+   :x-ex-native?     {:macro #'ruby-tf-x-ex-native? :emit :macro}
+   :x-ex-new         {:macro #'ruby-tf-x-ex-new     :emit :macro}
+   :x-ex-message     {:macro #'ruby-tf-x-ex-message :emit :macro}
+   :x-ex-data        {:macro #'ruby-tf-x-ex-data    :emit :macro}
    :x-eval           {:emit :alias :raw 'eval}
    :x-print          {:macro #'ruby-tf-x-print :emit :macro :value true}
    :x-random         {:emit :alias :raw 'rand :value true}
@@ -355,23 +388,35 @@
 
 (defn ruby-tf-x-lu-eq
   [[_ a b]]
-  (list '. a (list 'equal? b)))
+  (list '== (list '. a 'object_id)
+        (list '. b 'object_id)))
 
 (defn ruby-tf-x-lu-get
   [[_ h k default]]
-  (if default
-    (list :? (list '. h (list 'key? k))
-          (list '. h [k])
-          default)
-    (list '. h [k])))
+  (let [key-id (list '. k 'object_id)]
+    (if default
+      (list :? (list '. h (list 'key? key-id))
+            (list '. h [key-id])
+            default)
+      (list '. h [key-id]))))
 
 (defn ruby-tf-x-lu-set
   [[_ h k v]]
-  (list ':= (list '. h [k]) v))
+  (list ':= (list '. h [(list '. k 'object_id)]) v))
 
 (defn ruby-tf-x-lu-del
   [[_ h k]]
-  (list '. h (list 'delete k)))
+  (list '. h (list 'delete (list '. k 'object_id))))
+
+(defn ruby-tf-x-obj-clone
+  [[_ obj]]
+  (template/$
+   (. (fn []
+        (if (or (. ~obj (is_a? Hash))
+                (. ~obj (is_a? Array)))
+          (return (. Marshal (load (. Marshal (dump ~obj)))))
+          (return ~obj)))
+      (call))))
 
 (defn ruby-tf-x-has-key?
   [[_ obj key check]]
@@ -387,7 +432,8 @@
    :x-lu-get           {:macro #'ruby-tf-x-lu-get         :emit :macro}
    :x-lu-set           {:macro #'ruby-tf-x-lu-set         :emit :macro}
    :x-lu-del           {:macro #'ruby-tf-x-lu-del         :emit :macro}
-   :x-has-key?         {:macro #'ruby-tf-x-has-key?       :emit :macro}})
+   :x-has-key?         {:macro #'ruby-tf-x-has-key?       :emit :macro}
+   :x-obj-clone        {:macro #'ruby-tf-x-obj-clone      :emit :macro}})
 
 ;;
 ;; JSON
@@ -550,63 +596,81 @@
 
 (defn ruby-tf-x-promise
   [[_ thunk]]
-  (template/$
-   (do (require "concurrent-ruby")
-       (return ~(ruby-concurrent-promise-run thunk)))))
+  (let [promise (gensym "promise__")]
+    (list '.
+          (list 'fn []
+                (list 'var promise {"__type__" "xt.promise"
+                                    "value" nil
+                                    "reason" nil})
+                (list 'try
+                      (list ':= (list '. promise ["value"])
+                            (list '. thunk (list 'call)))
+                      (list 'catch 'e
+                            (list ':= (list '. promise ["reason"]) 'e)))
+                (list 'return promise))
+          (list 'call))))
 
 (defn ruby-tf-x-promise-then
   [[_ promise thunk]]
-  (let [current (gensym "current__")]
-    (template/$
-     (do (require "concurrent-ruby")
-         (var ~current ~promise)
-         (. ~current wait)
-         (if (. ~current rejected?)
-           (return ~current)
-            (return ~(ruby-concurrent-promise-run
-                      `(fn [] (. ~thunk (call (. ~current value)))))))))))
+  (let [current     (gensym "current__")
+        next-thunk  (list 'fn []
+                          (list '. thunk
+                                (list 'call
+                                      (list '. current ["value"]))))
+        next-promise (list 'x:promise next-thunk)]
+    (list '.
+          (list 'fn []
+                (list 'var current promise)
+                (list 'if (list 'not (list '. (list '. current ["reason"]) 'nil?))
+                      (list 'return current)
+                      (list 'return next-promise)))
+          (list 'call))))
 
 (defn ruby-tf-x-promise-catch
   [[_ promise thunk]]
-  (let [current (gensym "current__")]
-    (template/$
-     (do (require "concurrent-ruby")
-         (var ~current ~promise)
-         (. ~current wait)
-         (if (not (. ~current rejected?))
-           (return ~current)
-            (return ~(ruby-concurrent-promise-run
-                      `(fn [] (. ~thunk (call (. ~current reason)))))))))))
+  (let [current      (gensym "current__")
+        next-thunk   (list 'fn []
+                           (list '. thunk
+                                 (list 'call
+                                       (list '. current ["reason"]))))
+        next-promise (list 'x:promise next-thunk)]
+    (list '.
+          (list 'fn []
+                (list 'var current promise)
+                (list 'if (list '. (list '. current ["reason"]) 'nil?)
+                      (list 'return current)
+                      (list 'return next-promise)))
+          (list 'call))))
 
 (defn ruby-tf-x-promise-finally
   [[_ promise thunk]]
   (let [current (gensym "current__")
-        cleanup (gensym "cleanup__")]
-    (template/$
-     (do (require "concurrent-ruby")
-         (var ~current ~promise)
-         (. ~current wait)
-         (var ~cleanup ~(ruby-concurrent-promise-run
-                         `(fn [] (. ~thunk call))))
-         (if (. ~cleanup rejected?)
-           (return ~cleanup)
-           (return ~current))))))
+        cleanup (gensym "cleanup__")
+        cleanup-thunk (list 'fn []
+                            (list '. thunk 'call))
+        cleanup-promise (list 'x:promise cleanup-thunk)]
+    (list '.
+          (list 'fn []
+                (list 'var current promise)
+                (list 'var cleanup cleanup-promise)
+                (list 'if (list 'not (list '. (list '. cleanup ["reason"]) 'nil?))
+                      (list 'return cleanup)
+                      (list 'return current)))
+          (list 'call))))
 
 (defn ruby-tf-x-promise-native?
   [[_ value]]
-  (let [promise-sym ruby-concurrent-promise-sym]
-    (template/$
-     (do (require "concurrent-ruby")
-         (return (. ~value (is_a? ~promise-sym)))))))
+  (template/$
+   (and (== "object" (x:type-native ~value))
+        (== "xt.promise" (. ~value ["__type__"])))))
 
 (defn ruby-tf-x-with-delay
   [[_ ms thunk]]
   (template/$
-   (do (require "concurrent-ruby")
-       (return ~(ruby-concurrent-promise-run
-                 `(fn []
-                     (sleep (/ ~ms 1000.0))
-                     (. ~thunk (call))))))))
+   (return (x:promise
+            (fn []
+              (sleep (/ ~ms 1000.0))
+              (. ~thunk (call)))))))
 
 (def +ruby-promise+
   {:x-promise          {:macro #'ruby-tf-x-promise         :emit :macro}

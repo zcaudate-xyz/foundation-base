@@ -20,6 +20,16 @@
     :php-unavailable)
   => (any 10 :php-unavailable))
 
+^{:refer rt.basic.impl-annex.process-php/default-oneshot-wrap :added "4.1"}
+(fact "captures php eval errors without crashing the wrapper"
+  (if CANARY-PHP
+    (let [out (-> (p/rt-oneshot {:lang :php})
+                  (p/raw-eval-oneshot (default-oneshot-wrap '(not_a_real_php_fn)))
+                  (json/read json/+keyword-mapper+))]
+      [(:type out) (string? (:value out))])
+    :php-unavailable)
+  => (any ["error" true] :php-unavailable))
+
 ^{:refer rt.basic.impl-annex.process-php/default-oneshot-wrap :added "4.0"}
 (fact "creates the oneshot bootstrap form"
 
@@ -35,10 +45,10 @@
   => '((quote ((fn [] 1 2 (return 3)))))
 
   (l/emit-as :php [(default-body-transform '[1 2 3] {})])
-  => "(function () {\nreturn [1, 2, 3];\n})()"
+  => #"\(function \(\)\{\s+return \[1,2,3\];\s+\}\)\(\)"
 
   (l/emit-as :php [(default-body-transform '[1 2 3] {:bulk true})])
-  => "(function () {\n1;\n2;\nreturn 3;\n})()")
+  => #"\(function \(\)\{\s+1;\s+2;\s+return 3;\s+\}\)\(\)")
 
 ^{:refer rt.basic.impl-annex.process-php/default-basic-client :added "4.0"}
 (fact "creates the basic client bootstrap"
