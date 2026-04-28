@@ -30,6 +30,36 @@
   [[_ msg]]
   (list 'throw (list 'Exception msg)))
 
+(defn python-tf-x-ex-native?
+  [[_ err]]
+  (list 'isinstance err 'BaseException))
+
+(defn python-tf-x-ex-new
+  [[_ message & [data]]]
+  (if (some? data)
+    (list 'Exception message data)
+    (list 'Exception message)))
+
+(defn python-tf-x-ex-message
+  [[_ err]]
+  (list ':?
+        (list 'isinstance err 'BaseException)
+        (list ':?
+              (list '> (list 'len (list '. err 'args)) 0)
+              (list '. (list '. err 'args) [0])
+              nil)
+        nil))
+
+(defn python-tf-x-ex-data
+  [[_ err]]
+  (list ':?
+        (list 'isinstance err 'BaseException)
+        (list ':?
+              (list '> (list 'len (list '. err 'args)) 1)
+              (list '. (list '. err 'args) [1])
+              nil)
+        nil))
+
 (defn python-tf-x-eval
   [[_ s]]
   (list 'eval s))
@@ -75,11 +105,15 @@
   {:x-del            {:macro #'python-tf-x-del    :emit :macro}
    :x-cat            {:macro #'python-tf-x-cat    :emit :macro}
    :x-len            {:macro #'python-tf-x-len    :emit :macro}
-   :x-err            {:macro #'python-tf-x-err     :emit :macro}
-   :x-eval           {:macro #'python-tf-x-eval    :emit :macro}
-   :x-apply          {:macro #'python-tf-x-apply   :emit :macro}
-   :x-unpack         {:raw :*  :emit :alias}
-   :x-random         {:macro #'python-tf-x-random  :emit :macro}
+    :x-err            {:macro #'python-tf-x-err     :emit :macro}
+    :x-ex-native?    {:macro #'python-tf-x-ex-native? :emit :macro}
+    :x-ex-new        {:macro #'python-tf-x-ex-new     :emit :macro}
+    :x-ex-message    {:macro #'python-tf-x-ex-message :emit :macro}
+    :x-ex-data       {:macro #'python-tf-x-ex-data    :emit :macro}
+    :x-eval           {:macro #'python-tf-x-eval    :emit :macro}
+    :x-apply          {:macro #'python-tf-x-apply   :emit :macro}
+    :x-unpack         {:raw :*  :emit :alias}
+    :x-random         {:macro #'python-tf-x-random  :emit :macro}
    :x-print          {:macro #'python-tf-x-print         :emit :macro}
    :x-now-ms         {:default '(round (* 1000 (. (__import__ "time") (time)))) :emit :unit}
    :x-type-native    {:macro #'python-tf-x-type-native   :emit :macro}})

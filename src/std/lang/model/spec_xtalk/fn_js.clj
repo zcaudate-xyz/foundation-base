@@ -36,7 +36,33 @@
                               (if (== tn "Object")
                                 (return "object")
                                 (return tn))))
-                    (return t)))))
+                     (return t)))))
+
+(defn js-tf-x-ex-native?
+  [[_ err]]
+  (list 'instanceof err 'Error))
+
+(defn js-tf-x-ex-new
+  [[_ message & [data]]]
+  (if (some? data)
+    (list 'Object.assign
+          (list 'new 'Error message)
+          {"data" data})
+    (list 'new 'Error message)))
+
+(defn js-tf-x-ex-message
+  [[_ err]]
+  (list ':?
+        (list 'instanceof err 'Error)
+        (list '. err ["message"])
+        nil))
+
+(defn js-tf-x-ex-data
+  [[_ err]]
+  (list ':?
+        (list 'instanceof err 'Error)
+        (list '. err ["data"])
+        nil))
 
 (defn js-tf-x-has-key?
   [[_ obj key check]]
@@ -53,11 +79,15 @@
    :x-err            {:emit :alias :raw 'throw}
    :x-eval           {:emit :alias :raw 'eval}
    :x-apply          {:macro #'js-tf-x-apply   :emit :macro}
-   :x-unpack         {:emit :alias :raw :..}
-   :x-print          {:emit :alias :raw 'console.log :value true}
-   :x-random         {:emit :alias :raw 'Math.random :value true}
-   :x-now-ms         {:emit :alias :raw 'Date.now}
-   :x-type-native    {:macro #'js-tf-x-type-native   :emit :macro}})
+    :x-unpack         {:emit :alias :raw :..}
+    :x-print          {:emit :alias :raw 'console.log :value true}
+    :x-random         {:emit :alias :raw 'Math.random :value true}
+    :x-now-ms         {:emit :alias :raw 'Date.now}
+    :x-ex-native?     {:macro #'js-tf-x-ex-native? :emit :macro}
+    :x-ex-new         {:macro #'js-tf-x-ex-new     :emit :macro}
+    :x-ex-message     {:macro #'js-tf-x-ex-message :emit :macro}
+    :x-ex-data        {:macro #'js-tf-x-ex-data    :emit :macro}
+    :x-type-native    {:macro #'js-tf-x-type-native   :emit :macro}})
 
 (def +js-global+
   {})

@@ -60,6 +60,18 @@
   (l/emit-as :dart ['(x:err "error")])
   => "throw \"error\"")
 
+(fact "xtalk exception helpers emit structured throw/catch for dart"
+  (let [out (l/emit-as :dart ['(try
+                                (throw (x:ex "error" {:a 1}))
+                                (catch e
+                                  (x:print (x:ex-message e))
+                                  (x:print (x:ex-data e))))])]
+    [(boolean (re-find #"xt\.exception" out))
+     (boolean (re-find #"\[\"message\"\]" out))
+     (boolean (re-find #"\[\"data\"\]" out))
+     (boolean (re-find #"print" out))])
+  => [true true true true])
+
 (fact "for:* transforms for dart"
   ^{:hidden true}
 

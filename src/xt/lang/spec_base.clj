@@ -209,6 +209,48 @@
   {:added "4.1"}
   ([message] (list (quote x:err) message)))
 
+(defspec.xt x:ex-native? [:fn [:xt/any] :xt/bool])
+
+(defmacro.xt ^{:standalone true}
+  x:ex-native?
+  "checks whether a value is a host-native exception value"
+  {:added "4.1"}
+  ([value] (list (quote x:ex-native?) value)))
+
+(defspec.xt x:ex [:fn [:xt/str :xt/any] :xt/any])
+
+(defspec.xt x:ex-new [:fn [:xt/str :xt/any] :xt/any])
+
+(defmacro.xt ^{:standalone true}
+  x:ex
+  "creates a host-native exception value carrying optional data"
+  {:added "4.1"}
+  ([message] (list (quote x:ex) message))
+  ([message data] (list (quote x:ex) message data)))
+
+(defmacro.xt ^{:standalone true}
+  x:ex-new
+  "creates a host-native exception value carrying optional data"
+  {:added "4.1"}
+  ([message] (list (quote x:ex) message))
+  ([message data] (list (quote x:ex) message data)))
+
+(defspec.xt x:ex-message [:fn [:xt/any] :xt/any])
+
+(defmacro.xt ^{:standalone true}
+  x:ex-message
+  "extracts the message from a host-native exception value"
+  {:added "4.1"}
+  ([value] (list (quote x:ex-message) value)))
+
+(defspec.xt x:ex-data [:fn [:xt/any] :xt/any])
+
+(defmacro.xt ^{:standalone true}
+  x:ex-data
+  "extracts structured data from a host-native exception value"
+  {:added "4.1"}
+  ([value] (list (quote x:ex-data) value)))
+
 (defspec.xt x:type-native [:fn [:xt/any] :xt/string])
 
 (defmacro.xt ^{:standalone true} 

@@ -28,6 +28,32 @@
     (template/$ (error (cjson.encode ~[s data])))
     (template/$ (error ~s))))
 
+(defn lua-tf-x-ex-native?
+  [[_ err]]
+  (template/$
+   (and (== "table" (type ~err))
+        (== "xt.exception" (. ~err ["__type__"])))))
+
+(defn lua-tf-x-ex-new
+  [[_ message & [data]]]
+  {"__type__" "xt.exception"
+   "message" message
+   "data" data})
+
+(defn lua-tf-x-ex-message
+  [[_ err]]
+  (template/$
+   (:? (x:ex-native? ~err)
+       (. ~err ["message"])
+       nil)))
+
+(defn lua-tf-x-ex-data
+  [[_ err]]
+  (template/$
+   (:? (x:ex-native? ~err)
+       (. ~err ["data"])
+       nil)))
+
 (defn lua-tf-x-hash-id
   [[_ obj]]
   (template/$ (return nil)))
@@ -51,11 +77,15 @@
   {:x-del            {:macro #'lua-tf-x-del  :emit :macro}
    :x-cat            {:macro #'lua-tf-x-cat  :emit :macro}
    :x-len            {:emit :alias :raw 'len}
-   :x-err            {:macro #'lua-tf-x-err    :emit :macro}
-   :x-eval           {:macro #'lua-tf-x-eval   :emit :macro}
-   :x-apply          {:macro #'lua-tf-x-apply  :emit :macro}
-   :x-unpack         {:emit :alias :raw 'unpack}
-   :x-print          {:emit :alias :raw 'print}
+    :x-err            {:macro #'lua-tf-x-err    :emit :macro}
+    :x-ex-native?     {:macro #'lua-tf-x-ex-native? :emit :macro}
+    :x-ex-new         {:macro #'lua-tf-x-ex-new     :emit :macro}
+    :x-ex-message     {:macro #'lua-tf-x-ex-message :emit :macro}
+    :x-ex-data        {:macro #'lua-tf-x-ex-data    :emit :macro}
+    :x-eval           {:macro #'lua-tf-x-eval   :emit :macro}
+    :x-apply          {:macro #'lua-tf-x-apply  :emit :macro}
+    :x-unpack         {:emit :alias :raw 'unpack}
+    :x-print          {:emit :alias :raw 'print}
    
    :x-random         {:emit :alias :raw 'math.random}
    :x-now-ms         {:default '(math.floor (* 1000 (os.time)))   :emit :unit}

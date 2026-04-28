@@ -179,9 +179,10 @@
                                :free-literal
                                :math
                                :compare
-                               :logic
-                               :return
-                               :data-table
+                                :logic
+                                :return
+                                :throw
+                                :data-table
                                :data-shortcuts
                                :vars
                                :fn
@@ -203,10 +204,11 @@
          :not        {:raw "not "}
          :and        {:raw "and"}
          :or         {:raw "or"}
+         :throw      {:raw "error" :emit :invoke}
          :neq        {:raw "~="}
-        :for-object {:macro #'lua-tf-for-object :emit :macro}
-        :for-array  {:macro #'lua-tf-for-array  :emit :macro}
-        :for-iter   {:macro #'lua-tf-for-iter   :emit :macro}
+         :for-object {:macro #'lua-tf-for-object :emit :macro}
+         :for-array  {:macro #'lua-tf-for-array  :emit :macro}
+         :for-iter   {:macro #'lua-tf-for-iter   :emit :macro}
         :for-index  {:macro #'lua-tf-for-index  :emit :macro}
         :defgen     {:macro #'lua-tf-defgen     :emit :macro}
         :yield      {:macro #'lua-tf-yield      :emit :macro}
