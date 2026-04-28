@@ -145,10 +145,15 @@
          (return (xt/x:str-join " AND " clause-arr))))
   (var where-arr  (-> (xt/x:arr-map where-params clause-fn)
                       (xt/x:arr-filter xtd/not-empty?)))
-  (var where-str  (:? (== 0 (xt/x:len where-arr)) ""
-                      (== 1 (xt/x:len where-arr)) (xt/x:first where-arr)
-                      :else (xt/x:str-join " OR "
-                                           (xt/x:arr-map where-arr (fn:> [s] (xt/x:cat "(" s ")"))))))
+  (var where-str "")
+  (when (== 1 (xt/x:len where-arr))
+    (:= where-str (xt/x:cat "" (xt/x:first where-arr))))
+  (when (< 1 (xt/x:len where-arr))
+    (:= where-str (xt/x:cat ""
+                            (xt/x:str-join " OR "
+                                           (xt/x:arr-map where-arr
+                                                         (fn:> [s]
+                                                           (xt/x:cat "(" s ")")))))))
   (var out-arr    [(xt/x:cat "SELECT " return-str)
                    (xt/x:cat " FROM "  (table-fn table-name))])
   (if (< 0 (xt/x:len where-str))

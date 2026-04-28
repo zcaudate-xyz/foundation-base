@@ -4,6 +4,7 @@
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
+             [xt.lang.common-tree :as xtt]
              [xt.db.schema.sql-graph :as sql-graph]
              [xt.db.schema.sql-util :as sql-util]
              [xt.db.schema.base-scope :as base-scope]]})
@@ -107,7 +108,7 @@
   (xt/for:array [[i e] input-spec]
     (:= (. arg-map [(xt/x:cat "{{" (. e ["symbol"]) "}}")])
         (. args [i])))
-  (var out (xtd/tree-walk tree
+  (var out (xtt/tree-walk tree
                    (fn [x] (return x))
                    (fn [x]
                      (return (:? (and (xt/x:is-string? x)

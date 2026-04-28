@@ -23,7 +23,7 @@
   {:added "4.0"}
   [rows table-key id f]
   (let [entry (xtd/get-in rows [table-key id])]
-    (if entry
+    (if (xt/x:not-nil? entry)
       (let [#{record} entry
             _ (f record)
             new-entry {:t (xt/x:now-ms)
@@ -118,21 +118,22 @@
   "find link attributes"
   {:added "4.0"}
   [schema table-key field]
-  (let [attr (xtd/get-in schema [table-key field "ref"])
-        _    (if (not attr)
-               (xt/x:err (xt/x:cat "Not a valid link type: " (xt/x:json-encode [table-key field]))))
-        #{ns rval} attr
-        link-type (xt/x:get-key attr "type")
-        [table-link
-         inverse-link] (xt/x:get-key {:reverse ["rev_links" "ref_links"]
-                                      :forward ["ref_links" "rev_links"]}
-                                     link-type)]
-    (return {:table-key     table-key
-             :table-link    table-link
-             :table-field   field
-             :inverse-key   ns
-             :inverse-link  inverse-link
-             :inverse-field rval})))
+  (var attr (xtd/get-in schema [table-key field "ref"]))
+  (when (xt/x:nil? attr)
+    (xt/x:err (xt/x:cat "Not a valid link type: " (xt/x:json-encode [table-key field]))))
+  (var link-ns (xt/x:get-key attr "ns"))
+  (var rval (xt/x:get-key attr "rval"))
+  (var link-type (xt/x:get-key attr "type"))
+  (var [table-link
+        inverse-link] (xt/x:get-key {:reverse ["rev_links" "ref_links"]
+                                     :forward ["ref_links" "rev_links"]}
+                                    link-type))
+  (return {:table-key     table-key
+           :table-link    table-link
+           :table-field   field
+           :inverse-key   link-ns
+           :inverse-link  inverse-link
+           :inverse-field rval}))
 
 ;;
 ;; REMOVE ENTRY
@@ -145,13 +146,15 @@
    table-link table-field link-id link-cb]
   (var remove-fn
        (fn [record]
-         (let [link (xt/x:get-key record table-link)
-               lrec (xt/x:get-key link table-field)]
-           (when (and lrec (xt/x:has-key? lrec link-id))
-             (xt/x:del-key lrec link-id)
-             (if (== 0 (xt/x:len (xt/x:obj-keys lrec)))
-               (xt/x:del-key link table-field))
-             (if link-cb (link-cb link-id))))))
+         (var link (xt/x:get-key record table-link))
+         (var lrec (xt/x:get-key link table-field))
+         (when (and (xt/x:not-nil? lrec)
+                    (xt/x:has-key? lrec link-id))
+           (xt/x:del-key lrec link-id)
+           (if (== 0 (xt/x:len (xt/x:obj-keys lrec)))
+             (xt/x:del-key link table-field))
+           (when (xt/x:not-nil? link-cb)
+             (link-cb link-id)))))
   (return (-/swap-if-entry rows table-key id remove-fn)))
 
 (defn.xt remove-single-link
@@ -180,7 +183,7 @@
   {:added "4.0"}
   [rows schema table-key id]
   (var entry (-/get-entry rows table-key id))
-  (when entry
+  (when (xt/x:not-nil? entry)
     (var rec (xt/x:get-key entry "record"))
     (var #{ref-links rev-links} rec)
     (var links (xt/x:arr-assign (xt/x:obj-pairs ref-links)
@@ -229,18 +232,19 @@
                (xt/x:set-key lrec link-id true)
 
                :else
-               (do (xt/for:object [[prev-id _] lrec]
-                     (-/remove-single-link-entry
-                      rows
-                      inverse-key
-                      prev-id
+                (do (xt/for:object [[prev-id _] lrec]
+                      (-/remove-single-link-entry
+                       rows
+                       inverse-key
+                       prev-id
                       "rev_links"
                       inverse-field
                       id
                       nil))
-                   (xt/x:set-key link table-field {link-id true})))
-         
-         (when link-cb (link-cb link-id))))
+                    (xt/x:set-key link table-field {link-id true})))
+          
+          (when (xt/x:not-nil? link-cb)
+            (link-cb link-id))))
   (return (-/swap-if-entry rows table-key id add-fn)))
 
 (defn.xt add-single-link

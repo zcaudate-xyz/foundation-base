@@ -184,34 +184,34 @@
                   (xtd/obj-from-pairs)))
   (var cols   (xt/x:get-key schema table-key))
   (return
-   (xtd/arr-keepf (xt/x:obj-vals cols)
-                  (fn:> [col] (xt/x:has-key? linked (xt/x:get-key col "ident")))
-                  (fn:> [col] [col (xt/x:get-key linked (xt/x:get-key col "ident"))]))))
+    (xtd/arr-keepf (xt/x:obj-vals cols)
+                   (fn:> [col] (xt/x:has-key? linked (xt/x:get-key col "ident")))
+                   (fn:> [col] [col (xt/x:get-key linked (xt/x:get-key col "ident"))]))))
+
+(defn.xt get-linked-tables-loop
+  "calculated linked tables given query"
+  {:added "4.0"}
+  [schema table-key returning acc]
+  (var linked := (-/get-link-columns schema table-key
+                                     (:? (xt/x:is-array? returning)
+                                         returning
+                                         [])))
+  (xt/x:set-key acc table-key true)
+  (xt/for:array [arr linked]
+    (var attr := (xt/x:first arr))
+    (var link-query := (xtd/second arr))
+    (var link-returning := (xtd/second link-query))
+    (-/get-linked-tables-loop schema
+                              (xt/x:get-path attr ["ref" "ns"])
+                              link-returning
+                              acc))
+  (return acc))
 
 (defn.xt get-linked-tables
   "calculated linked tables given query"
   {:added "4.0"}
   [schema table-key returning]
-  (var link-loop
-       (fn [table-key returning acc]
-         (var linked := (-/get-link-columns schema table-key
-                                            (:? (xt/x:is-array? returning)
-                                                returning
-                                                [])))
-         (var inner-loop
-              (fn [arr]
-                (var attr := (xt/x:first arr))
-                (var link-query := (xtd/second arr))
-                (var link-where := (xt/x:first link-query))
-                (var link-returning := (xtd/second link-query))
-                (link-loop (xt/x:get-path attr ["ref" "ns"])
-                           link-returning
-                           acc)))
-
-         (do (xt/x:set-key acc table-key true)
-             (xt/x:arr-each linked inner-loop))
-         (return acc)))
-  (return (link-loop table-key returning {})))
+  (return (-/get-linked-tables-loop schema table-key returning {})))
 
 (defn.xt as-where-input
   "when empty, returns an empty array"
