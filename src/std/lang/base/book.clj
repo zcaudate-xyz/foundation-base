@@ -314,6 +314,8 @@
   [require]
   (collection/map-juxt [first #(apply hash-map (cons :id %))] require))
 
+(declare module-create)
+
 (defn module-export-requires
   "reconstructs module requires from stored link metadata"
   {:added "4.1"}

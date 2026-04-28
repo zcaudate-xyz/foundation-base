@@ -8,6 +8,8 @@
 ^{:refer std.lang.base.library/install-module-specialized! :added "4.1"}
 (fact "supports multiple specialized brain-memory modules in the same library"
   (impl/with:library [(impl/clone-default-library)]
+    (require '[xt.lang.spec-base] :reload)
+    (require '[xt.lang.common-data] :reload)
     (require '[xt.protocol.cache] :reload)
     (require '[xt.feature.brain-memory] :reload)
     (require '[js.cache.localstore] :reload)
@@ -30,6 +32,8 @@
 ^{:refer std.lang.base.workspace/emit-module :added "4.1"}
 (fact "emits specialized brain-memory copies independently"
   (impl/with:library [(impl/clone-default-library)]
+    (require '[xt.lang.spec-base] :reload)
+    (require '[xt.lang.common-data] :reload)
     (require '[xt.protocol.cache] :reload)
     (require '[xt.feature.brain-memory] :reload)
     (require '[js.cache.localstore] :reload)
@@ -45,6 +49,7 @@
                                        'xt.feature.brain-memory
                                        'web-app-cache
                                        {:bindings {'xt.protocol.cache 'js.cache.cache-custom}})
-      [(workspace/emit-module (l/rt 'web-app :xtalk))
-       (workspace/emit-module (l/rt 'web-app-cache :xtalk))]))
-  => [string? string?])
+      (every? string?
+              [(workspace/emit-module :xtalk 'web-app)
+               (workspace/emit-module :xtalk 'web-app-cache)])))
+  => true)

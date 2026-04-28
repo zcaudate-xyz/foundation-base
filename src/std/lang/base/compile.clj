@@ -192,6 +192,9 @@
 (def +install-module-directory-fn+
   (compile/types-add :module.directory #'compile-module-directory))
 
+(declare compile-module-root
+         compile-module-graph)
+
 (defn specialization-descriptor
   "normalizes a module specialization descriptor"
   {:added "4.1"}
