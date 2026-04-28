@@ -556,7 +556,11 @@
   => (throws))
 
 ^{:refer xt.lang.spec-base/x:ex-native? :added "4.1"}
-(fact "TODO")
+(fact "TODO"
+
+  (!.js
+    (xt/x:ex-native? (xt/x:ex "hello" {:a 1})))
+  => true)
 
 ^{:refer xt.lang.spec-base/x:ex :added "4.1"}
 (fact "TODO")

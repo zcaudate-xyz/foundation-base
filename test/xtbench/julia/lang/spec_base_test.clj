@@ -1,7 +1,7 @@
 (ns xtbench.julia.lang.spec-base-test
   (:use code.test)
   (:require [clojure.set :as set]
-  	        [std.lang :as l]
+  	    [std.lang :as l]
             [xt.lang.common-notify :as notify]
             [xt.lang.spec-promise :as spec-promise]))
 
@@ -9,10 +9,10 @@
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as spec-promise]
-              [xt.lang.common-string :as xts]
-              [xt.lang.common-data :as xtd]
-              [xt.lang.common-iter :as xti]
-              [xt.lang.common-repl :as repl]]})
+             [xt.lang.common-string :as xts]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-iter :as xti]
+             [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -203,6 +203,13 @@
                   (xt/x:err "ERR")))
     (err-fn))
   => (throws))
+
+^{:refer xt.lang.spec-base/x:ex-native? :added "4.1"}
+(fact "TODO"
+
+  (!.julia
+    (xt/x:ex-native? (xt/x:ex "hello" {:a 1})))
+  => true)
 
 ^{:refer xt.lang.spec-base/x:ex-new :added "4.1"}
 (fact "creates native exceptions with structured data"

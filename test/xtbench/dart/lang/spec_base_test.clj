@@ -1,12 +1,14 @@
 (ns xtbench.dart.lang.spec-base-test
   (:use code.test)
   (:require [clojure.set :as set]
-            [std.lang :as l]
-            [xt.lang.common-notify :as notify]))
+  	    [std.lang :as l]
+            [xt.lang.common-notify :as notify]
+            [xt.lang.spec-promise :as spec-promise]))
 
 (l/script- :dart
   {:runtime :twostep
    :require [[xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as spec-promise]
              [xt.lang.common-string :as xts]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-iter :as xti]
@@ -201,6 +203,27 @@
                   (xt/x:err "ERR")))
     (err-fn))
   => (fn [out] (re-find #"ERR" (deref out))))
+
+^{:refer xt.lang.spec-base/x:ex-native? :added "4.1"}
+(fact "TODO"
+
+  (!.dt
+    (xt/x:ex-native? (xt/x:ex "hello" {:a 1})))
+  => true)
+
+^{:refer xt.lang.spec-base/x:ex-new :added "4.1"}
+(fact "creates native exceptions with structured data"
+
+  (notify/wait-on :dart
+    (spec-promise/x:promise-catch
+     (spec-promise/x:promise
+      (fn []
+        (throw (xt/x:ex-new "ERR" {:a 1}))))
+     (fn [e]
+       (xt/x:print (xt/x:ex-data e))
+       (repl/notify [(xt/x:ex-native? e)
+                     (xt/x:get-key (xt/x:ex-data e) "a")]))))
+  => [true 1])
 
 ^{:refer xt.lang.spec-base/x:type-native :added "4.1"}
 (fact "expands and emits the lua type helper"
@@ -1043,11 +1066,11 @@
 (fact "encodes return payloads as json"
 
   (!.dt
-     (var encode-fn
-          (fn [value id key]
-            (return
-             (xt/x:return-encode value id key))))
-     (xt/x:json-decode (encode-fn {:a 1} "id" "key")))
+    (var encode-fn
+         (fn [value id key]
+           (return
+            (xt/x:return-encode value id key))))
+    (xt/x:json-decode (encode-fn {:a 1} "id" "key")))
   => {"return" "object", "key" "key", "id" "id", "value" {"a" 1}, "type" "data"}
 
   (!.dt
@@ -1123,7 +1146,7 @@
          (fn []
            (xt/x:global-del COMMON_SPEC_GLOBAL)
            (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
-                        
+      
     [(set-fn)
      (!:G COMMON_SPEC_GLOBAL)
      (del-fn)])
@@ -1150,7 +1173,7 @@
          (fn []
            (xt/x:global-del COMMON_SPEC_GLOBAL)
            (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
-                        
+      
     [(set-fn)
      (del-fn)])
   => [true false])
@@ -1205,6 +1228,7 @@
 
   (code.manage/isolate 'xt.lang.spec-base-test {:suffix "-fix"})
   (s/seedgen-benchadd 'xt.lang.spec-base {:lang [:r :dart] :write true})
+  (s/seedgen-benchremove 'xt.lang.spec-base {:lang [:r :dart] :write true})
   (s/seedgen-langadd 'xt.lang.spec-base {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.lang.spec-base {:lang [:lua :python] :write true})
   
