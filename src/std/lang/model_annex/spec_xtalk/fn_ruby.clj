@@ -1,5 +1,7 @@
 (ns std.lang.model-annex.spec-xtalk.fn-ruby
-  (:require [std.lib.template :as template]))
+  (:require [std.lang.base.emit-common :as common]
+            [std.lang.base.preprocess-base :as preprocess-base]
+            [std.lib.template :as template]))
 
 (declare ruby-tf-x-return-encode)
 
@@ -424,6 +426,20 @@
   [[_ & args]]
   {})
 
+(defn- ruby-tf-x-lu-key
+  [k]
+  (template/$
+   (. (fn []
+        (if (or (. ~k nil?)
+                (. ~k (is_a? Numeric))
+                (. ~k (is_a? String))
+                (. ~k (is_a? Symbol))
+                (. ~k (is_a? TrueClass))
+                (. ~k (is_a? FalseClass)))
+          (return ~k)
+          (return (. ~k object_id))))
+      (call))))
+
 (defn ruby-tf-x-lu-eq
   [[_ a b]]
   (list '== (list '. a 'object_id)
@@ -431,7 +447,7 @@
 
 (defn ruby-tf-x-lu-get
   [[_ h k default]]
-  (let [key-id (list '. k 'object_id)]
+  (let [key-id (ruby-tf-x-lu-key k)]
     (if default
       (list :? (list '. h (list 'key? key-id))
             (list '. h [key-id])
@@ -440,11 +456,11 @@
 
 (defn ruby-tf-x-lu-set
   [[_ h k v]]
-  (list ':= (list '. h [(list '. k 'object_id)]) v))
+  (list ':= (list '. h [(ruby-tf-x-lu-key k)]) v))
 
 (defn ruby-tf-x-lu-del
   [[_ h k]]
-  (list '. h (list 'delete (list '. k 'object_id))))
+  (list '. h (list 'delete (ruby-tf-x-lu-key k))))
 
 (defn ruby-tf-x-obj-clone
   [[_ obj]]
@@ -778,10 +794,26 @@
   [[_ it]]
   (list '. it (list 'is_a? 'Enumerator)))
 
+(defn ruby-tf-x-iter-generator
+  [[_ thunk]]
+  (let [grammar  preprocess-base/*macro-grammar*
+        mopts    preprocess-base/*macro-opts*
+        iterator (gensym "__iter__")
+        thunk-str (common/emit-wrapping thunk grammar mopts)]
+    (list ':-
+          (str "Enumerator.new do |"
+               (common/*emit-fn* iterator grammar mopts)
+               "|\n  "
+               thunk-str
+               ".call("
+               (common/*emit-fn* iterator grammar mopts)
+               ")\nend"))))
+
 (def +ruby-iter+
   {:x-iter-from-obj       {:macro #'ruby-tf-x-iter-from-obj       :emit :macro}
    :x-iter-from-arr       {:macro #'ruby-tf-x-iter-from-arr       :emit :macro}
    :x-iter-from           {:macro #'ruby-tf-x-iter-from           :emit :macro}
+   :x-iter-generator      {:macro #'ruby-tf-x-iter-generator      :emit :macro}
    :x-iter-eq             {:macro #'ruby-tf-x-iter-eq             :emit :macro}
    :x-iter-null           {:macro #'ruby-tf-x-iter-null           :emit :macro}
    :x-iter-next           {:macro #'ruby-tf-x-iter-next           :emit :macro}
@@ -859,20 +891,29 @@
 
 (defn ruby-tf-x-return-encode
   ([[_ out id key]]
-    (let [out-type (ruby-tf-x-type-native `[_ ~out])]
-      (template/$ (do (require "json")
-                      (try
-                        (return (JSON.generate {:id  ~id
-                                                :key ~key
-                                                :type  "data"
-                                                :return ~out-type
-                                                :value  ~out}))
-                        (catch e
-                            (return (JSON.generate {:id ~id
-                                                    :key ~key
-                                                    :type  "raw"
-                                                    :return "raw"
-                                                    :value (. e to_s)})))))))))
+    (let [out-type (ruby-tf-x-type-native `[_ ~out])
+          payload  (gensym "payload__")
+          error    (gensym "error__")]
+       (template/$ (do (require "json")
+                       (var ~payload {:type "data"
+                                      :return ~out-type
+                                      :value ~out})
+                       (if (not (. ~id nil?))
+                         (:= (. ~payload ["id"]) ~id))
+                       (if (not (. ~key nil?))
+                         (:= (. ~payload ["key"]) ~key))
+                       (var ~error {:type "raw"
+                                    :return "raw"
+                                    :value nil})
+                       (if (not (. ~id nil?))
+                         (:= (. ~error ["id"]) ~id))
+                       (if (not (. ~key nil?))
+                         (:= (. ~error ["key"]) ~key))
+                       (try
+                         (return (JSON.generate ~payload))
+                         (catch e
+                           (:= (. ~error ["value"]) (. e to_s))
+                           (return (JSON.generate ~error)))))))))
 
 (defn ruby-tf-x-return-wrap
   ([[_ f encode-fn]]

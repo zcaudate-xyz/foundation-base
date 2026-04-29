@@ -7,16 +7,10 @@
 (l/script- :js
   {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.cell.kernel.inner-local :as inner-local] [xt.cell.kernel.inner-impl :as inner-impl] [xt.lang.common-repl :as repl] [js.core :as j]] :runtime :basic})
 
-(l/script- :lua
-  {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.cell.kernel.inner-local :as inner-local] [xt.cell.kernel.inner-impl :as inner-impl] [xt.lang.common-repl :as repl]] :runtime :basic})
-
-(l/script- :python
-  {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.cell.kernel.inner-local :as inner-local] [xt.cell.kernel.inner-impl :as inner-impl] [xt.lang.common-repl :as repl]] :runtime :basic})
-
 (fact:global
- {:setup    [(l/rt:restart)
-             (l/rt:scaffold-imports :js)]
-  :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)
+                 (l/rt:scaffold-imports :js)]
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.cell.kernel.inner-impl/worker-handle-async :added "4.0"}
 (fact "handles async tasks"
@@ -36,64 +30,12 @@
                 "status" "ok"
                 "body" ["pong" 1]})
 
-  (notify/wait-on :lua
-    (var worker {:postMessage (fn [msg] (repl/notify msg))})
-    (inner-impl/worker-handle-async
-     worker
-     (fn [ms]
-       (return (j/future-delayed [ms]
-                 (return ["pong" 1]))))
-     "call"
-     "async-1"
-     [10]))
-  => (contains {"op" "call"
-                "id" "async-1"
-                "status" "ok"
-                "body" ["pong" 1]})
-
-  (notify/wait-on :python
-    (var worker {:postMessage (fn [msg] (repl/notify msg))})
-    (inner-impl/worker-handle-async
-     worker
-     (fn [ms]
-       (return (j/future-delayed [ms]
-                 (return ["pong" 1]))))
-     "call"
-     "async-1"
-     [10]))
-  => (contains {"op" "call"
-                "id" "async-1"
-                "status" "ok"
-                "body" ["pong" 1]}))
+    )
 
 ^{:refer xt.cell.kernel.inner-impl/worker-process-eval :added "4.0"}
 (fact "processes eval requests"
 
   (!.js
-   (var messages [])
-   (var worker {:postMessage (fn [msg] (messages.push msg))})
-   (inner-impl/worker-process-eval
-    worker
-    {:op "eval" :id "test-1" :body "1 + 1"}
-    (fn [x] (return (worker.postMessage x))))
-   (xtd/first messages))
-  => (contains {"op" "eval"
-                "id" "test-1"
-                "status" "ok"})
-
-  (!.lua
-   (var messages [])
-   (var worker {:postMessage (fn [msg] (messages.push msg))})
-   (inner-impl/worker-process-eval
-    worker
-    {:op "eval" :id "test-1" :body "1 + 1"}
-    (fn [x] (return (worker.postMessage x))))
-   (xtd/first messages))
-  => (contains {"op" "eval"
-                "id" "test-1"
-                "status" "ok"})
-
-  (!.py
    (var messages [])
    (var worker {:postMessage (fn [msg] (messages.push msg))})
    (inner-impl/worker-process-eval
@@ -124,62 +66,6 @@
                 "status" "ok"})
 
   (!.js
-   (var messages [])
-   (var worker {:postMessage (fn [msg] (messages.push msg))
-                :actions {}})
-   (inner-impl/worker-process-action
-    worker
-    {:op "call" :id "test-3" :action "@missing/action"}
-    (fn [x] (return (worker.postMessage x))))
-   (xtd/first messages))
-  => (contains {"op" "call"
-                "id" "test-3"
-                "status" "error"})
-
-  (!.lua
-   (var messages [])
-   (var worker {:postMessage (fn [msg] (messages.push msg))
-                :actions {"@test/action" {:handler (fn [x] (return (+ x 10)))
-                                          :is-async false
-                                          :args ["x"]}}})
-   (inner-impl/worker-process-action
-    worker
-    {:op "call" :id "test-2" :action "@test/action" :body [5]}
-    (fn [x] (return (worker.postMessage x))))
-   (xtd/first messages))
-  => (contains {"op" "call"
-                "id" "test-2"
-                "status" "ok"})
-
-  (!.lua
-   (var messages [])
-   (var worker {:postMessage (fn [msg] (messages.push msg))
-                :actions {}})
-   (inner-impl/worker-process-action
-    worker
-    {:op "call" :id "test-3" :action "@missing/action"}
-    (fn [x] (return (worker.postMessage x))))
-   (xtd/first messages))
-  => (contains {"op" "call"
-                "id" "test-3"
-                "status" "error"})
-
-  (!.py
-   (var messages [])
-   (var worker {:postMessage (fn [msg] (messages.push msg))
-                :actions {"@test/action" {:handler (fn [x] (return (+ x 10)))
-                                          :is-async false
-                                          :args ["x"]}}})
-   (inner-impl/worker-process-action
-    worker
-    {:op "call" :id "test-2" :action "@test/action" :body [5]}
-    (fn [x] (return (worker.postMessage x))))
-   (xtd/first messages))
-  => (contains {"op" "call"
-                "id" "test-2"
-                "status" "ok"})
-
-  (!.py
    (var messages [])
    (var worker {:postMessage (fn [msg] (messages.push msg))
                 :actions {}})
@@ -224,68 +110,6 @@
     {:op "unknown" :id "test-3"})
    (xtd/first messages))
   => (contains {"op" "unknown"
-                "status" "error"})
-
-  (!.lua
-   (var messages [])
-   (var worker {:postMessage (fn [msg] (messages.push msg))})
-   (inner-impl/worker-process
-    worker
-    {:op "eval" :id "test-1" :body "1 + 1"})
-   (xtd/first messages))
-  => (contains {"op" "eval"
-                "status" "ok"})
-
-  (!.lua
-   (var messages [])
-   (var worker {:postMessage (fn [msg] (messages.push msg))})
-   (inner-local/actions-init {} worker)
-   (inner-impl/worker-process
-    worker
-    {:op "call" :id "test-2" :action "@worker/ping"})
-   (xtd/first messages))
-  => (contains {"op" "call"
-                "status" "ok"})
-
-  (!.lua
-   (var messages [])
-   (var worker {:postMessage (fn [msg] (messages.push msg))})
-   (inner-impl/worker-process
-    worker
-    {:op "unknown" :id "test-3"})
-   (xtd/first messages))
-  => (contains {"op" "unknown"
-                "status" "error"})
-
-  (!.py
-   (var messages [])
-   (var worker {:postMessage (fn [msg] (messages.push msg))})
-   (inner-impl/worker-process
-    worker
-    {:op "eval" :id "test-1" :body "1 + 1"})
-   (xtd/first messages))
-  => (contains {"op" "eval"
-                "status" "ok"})
-
-  (!.py
-   (var messages [])
-   (var worker {:postMessage (fn [msg] (messages.push msg))})
-   (inner-local/actions-init {} worker)
-   (inner-impl/worker-process
-    worker
-    {:op "call" :id "test-2" :action "@worker/ping"})
-   (xtd/first messages))
-  => (contains {"op" "call"
-                "status" "ok"})
-
-  (!.py
-   (var messages [])
-   (var worker {:postMessage (fn [msg] (messages.push msg))})
-   (inner-impl/worker-process
-    worker
-    {:op "unknown" :id "test-3"})
-   (xtd/first messages))
-  => (contains {"op" "unknown"
                 "status" "error"}))
 
 ^{:refer xt.cell.kernel.inner-impl/worker-init :added "4.0"}
@@ -304,60 +128,12 @@
                                     (worker.listeners.push listener))})
    (inner-impl/worker-init worker k/identity)
    (xt/x:len worker.listeners))
-  => 1
-
-  (!.lua
-   (var worker {:listeners []
-                :addEventListener (fn [event listener capture]
-                                    (worker.listeners.push listener))})
-   (inner-impl/worker-init worker k/identity))
-  => true
-
-  (!.lua
-   (var worker {:listeners []
-                :addEventListener (fn [event listener capture]
-                                    (worker.listeners.push listener))})
-   (inner-impl/worker-init worker k/identity)
-   (xt/x:len worker.listeners))
-  => 1
-
-  (!.py
-   (var worker {:listeners []
-                :addEventListener (fn [event listener capture]
-                                    (worker.listeners.push listener))})
-   (inner-impl/worker-init worker k/identity))
-  => true
-
-  (!.py
-   (var worker {:listeners []
-                :addEventListener (fn [event listener capture]
-                                    (worker.listeners.push listener))})
-   (inner-impl/worker-init worker k/identity)
-   (xt/x:len worker.listeners))
   => 1)
 
 ^{:refer xt.cell.kernel.inner-impl/worker-init-signal :added "4.0"}
 (fact "posts an init message"
 
   (!.js
-   (var messages [])
-   (var worker {:postMessage (fn [msg] (messages.push msg))})
-   (inner-impl/worker-init-signal worker {:done true})
-   (xtd/first messages))
-  => (contains {"op" "stream"
-                "signal" "@worker/::INIT"
-                "body" {"done" true}})
-
-  (!.lua
-   (var messages [])
-   (var worker {:postMessage (fn [msg] (messages.push msg))})
-   (inner-impl/worker-init-signal worker {:done true})
-   (xtd/first messages))
-  => (contains {"op" "stream"
-                "signal" "@worker/::INIT"
-                "body" {"done" true}})
-
-  (!.py
    (var messages [])
    (var worker {:postMessage (fn [msg] (messages.push msg))})
    (inner-impl/worker-init-signal worker {:done true})

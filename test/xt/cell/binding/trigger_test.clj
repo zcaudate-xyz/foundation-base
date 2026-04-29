@@ -16,8 +16,8 @@
    :require [[xt.cell.binding.trigger :as binding-trigger]]})
 
 (fact:global
- {:setup    [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 (def +prepared+
   {"model_id" "orders"

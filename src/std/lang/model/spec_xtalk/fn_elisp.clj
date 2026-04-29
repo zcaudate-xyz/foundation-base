@@ -360,7 +360,7 @@
                   other)
             target)
       (list 'let
-            [[target obj]]
+            [target obj]
             (list 'maphash
                   (list 'lambda '(k v) (list 'puthash 'k 'v target))
                   other)
@@ -482,6 +482,13 @@
             arr)
       expr)))
 
+(defn elisp-tf-x-arr-some
+  [[_ arr pred]]
+  (list 'if
+        (list 'seq-some pred (elisp-vector->list arr))
+        't
+        nil))
+
 (def +elisp-array+
   {:x-get-idx        {:macro #'elisp-tf-x-get-idx        :emit :macro :value true}
    :x-set-idx        {:macro #'elisp-tf-x-set-idx        :emit :macro}
@@ -495,7 +502,8 @@
    :x-arr-pop-first  {:macro #'elisp-tf-x-arr-pop-first  :emit :macro :value true}
    :x-arr-insert     {:macro #'elisp-tf-x-arr-insert     :emit :macro :value true}
    :x-arr-remove     {:macro #'elisp-tf-x-arr-remove     :emit :macro :value true}
-   :x-arr-assign     {:macro #'elisp-tf-x-arr-assign     :emit :macro :value true}})
+   :x-arr-assign     {:macro #'elisp-tf-x-arr-assign     :emit :macro :value true}
+   :x-arr-some       {:macro #'elisp-tf-x-arr-some       :emit :macro :value true}})
 
 ;;
 ;; STRING
@@ -697,10 +705,10 @@
 (defn elisp-tf-x-json-decode
   [[_ expr]]
   (list 'json-parse-string expr
-        :object-type (list 'intern "hash-table")
-        :array-type (list 'intern "vector")
+        :object-type (list 'quote 'hash-table)
+        :array-type (list 'quote 'array)
         :null-object nil
-        :false-object (list 'intern ":false")))
+        :false-object :false))
 
 (defn elisp-tf-x-return-encode
   [[_ out id key]]

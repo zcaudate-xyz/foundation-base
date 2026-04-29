@@ -78,6 +78,17 @@
                             (common/emit-array args grammar mopts))
        ")"))
 
+(defn ruby-div
+  [[_ a b & more] grammar mopts]
+  (let [start (str (common/emit-wrapping a grammar mopts)
+                   ".fdiv("
+                   (common/*emit-fn* b grammar mopts)
+                   ")")]
+    (reduce (fn [acc arg]
+              (str acc " / " (common/emit-wrapping arg grammar mopts)))
+            start
+            more)))
+
 (defn- ruby-callable-form?
   [form]
   (cond
@@ -101,9 +112,10 @@
   [[f & args] grammar mopts]
   (let [target (common/emit-wrapping f grammar mopts)]
     (str target
-         (when (ruby-callable-form? f)
-           ".call")
-         (ruby-emit-args args grammar mopts))))
+         (when (or (ruby-callable-form? f)
+                   (seq? f))
+            ".call")
+          (ruby-emit-args args grammar mopts))))
 
 (defn- ruby-zero-arg-call?
   [prop]
@@ -246,31 +258,36 @@
          :defn       {:symbol #{'defn}   :macro #'ruby-defn :emit :macro}
          :defgen     {:symbol #{'defgen} :macro #'ruby-defn :emit :macro}
          :spread     {:raw "*" :emit :pre}
-          :with-global {:value true :raw "($__globals__ ||= {})"}
-           :throw      {:raw "raise" :emit :prefix}
+           :with-global {:value true :raw "($__globals__ ||= {})"}
+            :throw      {:raw "raise" :emit :prefix}
             :and        {:raw "&&"}
             :or         {:raw "||"}
             :not        {:raw "!" :emit :prefix}
            :eq         {:raw "=="}
           :pow        {:raw "**"}
           :fn         {:macro  #'ruby-fn   :emit :macro}
-         :neq        {:raw "!="}
-         :gt         {:raw ">"}
-         :lt         {:raw "<"}
-         :gte        {:raw ">="}
-        :lte        {:raw "<="}})
+          :neq        {:raw "!="}
+          :gt         {:raw ">"}
+          :lt         {:raw "<"}
+          :div        {:emit #'ruby-div}
+          :gte        {:raw ">="}
+         :lte        {:raw "<="}})
         (grammar/build:override fn/+ruby+)
         (grammar/build:extend
          {:defn-      {:op :defn- :symbol #{'defn-} :type :block :emit #'ruby-defn-}
-          :assign     {:op :assign :symbol #{':=} :raw "=" :emit :infix}
-          :to         {:op :to :symbol #{'to} :emit (fn [form grammar mopts]
-                                                      (ruby-emit-range ".." form grammar mopts))}
-          :to-e       {:op :to-e :symbol #{'to-e} :emit (fn [form grammar mopts]
-                                                          (ruby-emit-range "..." form grammar mopts))}
-          :puts       {:op :puts :symbol #{'puts} :raw "puts" :emit :prefix}
-          :nil?       {:op :nil? :symbol #{'nil?} :raw "nil?" :emit :postfix}
-          :attr       {:op :attr :symbol #{'attr_accessor} :raw "attr_accessor" :emit :prefix}
-         :end        {:op :end  :symbol #{'end}  :raw "end"  :emit :token}})))
+           :assign     {:op :assign :symbol #{':=} :raw "=" :emit :infix}
+           :to         {:op :to :symbol #{'to} :emit (fn [form grammar mopts]
+                                                       (ruby-emit-range ".." form grammar mopts))}
+           :to-e       {:op :to-e :symbol #{'to-e} :emit (fn [form grammar mopts]
+                                                           (ruby-emit-range "..." form grammar mopts))}
+           :x-iter-generator {:op :x-iter-generator
+                              :symbol #{'x:iter-generator}
+                              :macro #'fn/ruby-tf-x-iter-generator
+                              :emit :macro}
+           :puts       {:op :puts :symbol #{'puts} :raw "puts" :emit :prefix}
+           :nil?       {:op :nil? :symbol #{'nil?} :raw "nil?" :emit :postfix}
+           :attr       {:op :attr :symbol #{'attr_accessor} :raw "attr_accessor" :emit :prefix}
+          :end        {:op :end  :symbol #{'end}  :raw "end"  :emit :token}})))
 
 (def +template+
   (->> {:banned #{}
@@ -295,14 +312,15 @@
                                                    :body {:start "" :end ""}}
                                          :finally {:raw "ensure"
                                                    :body {:start "" :end ""}}}}}
-         :token   {:nil       {:as "nil"}
-                   :boolean   {:as (fn [b] (if b "true" "false"))}
-                   :string    {:quote :double}
-                    :symbol    {:custom #'ruby-symbol
-                                :global #'ruby-symbol-global
-                                :replace (assoc helper/+sym-replace+ \? "?")}}
-         :data    {:vector    {:start "[" :end "]" :space ""}
-                   :map       {:custom #'ruby-map}}
+          :token   {:nil       {:as "nil"}
+                    :boolean   {:as (fn [b] (if b "true" "false"))}
+                    :string    {:quote :double}
+                     :symbol    {:custom #'ruby-symbol
+                                 :global #'ruby-symbol-global
+                                 :replace (assoc helper/+sym-replace+ \? "?")}}
+          :data    {:vector    {:start "[" :end "]" :space ""}
+                    :map-entry {:assign " => " :space " " :keyword :string}
+                    :map       {:custom #'ruby-map}}
          :rewrite {:staging [#'rewrite/ruby-rewrite-stage]}
          :function {:defn      {:raw "def"
                                 :body      {:start "" :end "end"}}}

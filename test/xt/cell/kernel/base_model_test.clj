@@ -3,7 +3,7 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:lua :python]}}
+^{:seedgen/root {:all true}}
 (l/script- :xtalk
   {:require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
@@ -19,16 +19,10 @@
 (l/script- :js
   {:require [[xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.common-space :as rt :with [defsingleton.js]] [xt.old.event-view :as base-view] [xt.cell.kernel.base-link :as base-link] [xt.cell.kernel.base-link-local :as base-link-local] [xt.cell.kernel.base-model :as base-model] [xt.cell.kernel.base-impl :as base-impl] [xt.cell.kernel.inner-impl :as inner-impl] [xt.cell.kernel.inner-mock :as inner-mock] [xt.lang.common-repl :as repl] [js.core :as j]] :runtime :basic})
 
-(l/script- :lua
-  {:require [[xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.common-space :as rt :with [defsingleton.xt]] [xt.old.event-view :as base-view] [xt.cell.kernel.base-link :as base-link] [xt.cell.kernel.base-link-local :as base-link-local] [xt.cell.kernel.base-model :as base-model] [xt.cell.kernel.base-impl :as base-impl] [xt.cell.kernel.inner-impl :as inner-impl] [xt.cell.kernel.inner-mock :as inner-mock] [xt.lang.common-repl :as repl]] :runtime :basic})
-
-(l/script- :python
-  {:require [[xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.common-space :as rt :with [defsingleton.xt]] [xt.old.event-view :as base-view] [xt.cell.kernel.base-link :as base-link] [xt.cell.kernel.base-link-local :as base-link-local] [xt.cell.kernel.base-model :as base-model] [xt.cell.kernel.base-impl :as base-impl] [xt.cell.kernel.inner-impl :as inner-impl] [xt.cell.kernel.inner-mock :as inner-mock] [xt.lang.common-repl :as repl]] :runtime :basic})
-
 (fact:global
-  {:setup    [(do (l/rt:restart)
-                  (l/rt:scaffold-imports :js))]
-   :teardown  [(l/rt:stop)]})
+ {:setup [(do (l/rt:restart)
+          (l/rt:scaffold-imports :js))]
+ :teardown [(l/rt:stop)]})
 
 (defsingleton.xt CELL
   []
@@ -54,9 +48,9 @@
 
 ^{:refer xt.cell.kernel.base-model/wrap-cell-args :added "4.0"
   :setup [(fact:global :setup)
-          (notify/wait-on :js
-            (. (-/reset-cell) ["init"]
-               (then (repl/>notify))))]}
+                   (notify/wait-on :js
+                     (. (-/reset-cell) ["init"]
+                        (then (repl/>notify))))]}
 (fact "puts the cell as first argument"
 
   (j/<!
@@ -80,14 +74,6 @@
 
   (!.js
    (base-model/prep-view (-/CELL) "hello" "ping" {}))
-  => vector?
-
-  (!.lua
-   (base-model/prep-view (-/CELL) "hello" "ping" {}))
-  => vector?
-
-  (!.py
-   (base-model/prep-view (-/CELL) "hello" "ping" {}))
   => vector?)
 
 ^{:refer xt.cell.kernel.base-model/get-view-dependents :added "4.0"}
@@ -99,44 +85,12 @@
               "test/util"   {:deps {"test/common" {"b2" {"c3" true}}}}}}
     "test/common" "b2"))
   => {"test/common" ["a1"],
-      "test/util" ["c3"]}
-
-  (!.lua
-   (base-model/get-view-dependents
-    {:models {"test/common" {:deps {"test/common" {"b2" {"a1" true}}}}
-              "test/util"   {:deps {"test/common" {"b2" {"c3" true}}}}}}
-    "test/common" "b2"))
-  => {"test/common" ["a1"],
-      "test/util" ["c3"]}
-
-  (!.py
-   (base-model/get-view-dependents
-    {:models {"test/common" {:deps {"test/common" {"b2" {"a1" true}}}}
-              "test/util"   {:deps {"test/common" {"b2" {"c3" true}}}}}}
-    "test/common" "b2"))
-  => {"test/common" ["a1"],
       "test/util" ["c3"]})
 
 ^{:refer xt.cell.kernel.base-model/get-model-dependents :added "4.0"}
 (fact "gets all dependents for a model"
 
   (!.js
-   (base-model/get-model-dependents
-    {:models {"test/common" {:deps {"test/common" {"b2" {"a1" true}}}}
-              "test/util"   {:deps {"test/common" {"b2" {"c3" true}}}}}}
-    "test/common"))
-  => {"test/common" true,
-      "test/util" true}
-
-  (!.lua
-   (base-model/get-model-dependents
-    {:models {"test/common" {:deps {"test/common" {"b2" {"a1" true}}}}
-              "test/util"   {:deps {"test/common" {"b2" {"c3" true}}}}}}
-    "test/common"))
-  => {"test/common" true,
-      "test/util" true}
-
-  (!.py
    (base-model/get-model-dependents
     {:models {"test/common" {:deps {"test/common" {"b2" {"a1" true}}}}
               "test/util"   {:deps {"test/common" {"b2" {"c3" true}}}}}}
@@ -158,45 +112,19 @@
      (fn [cell model-id view-id refresh]
        (called.push [model-id view-id])))
     called])
-  => [{"ok" true} [["hello" "ping"]]]
-
-  (!.lua
-   (var called [])
-   (var acc {"ok" true})
-   (var context {:acc acc
-                 :cell {:id "cell"}
-                 :path ["hello" "ping"]})
-   [(base-model/run-tail-call
-     context
-     (fn [cell model-id view-id refresh]
-       (called.push [model-id view-id])))
-    called])
-  => [{"ok" true} [["hello" "ping"]]]
-
-  (!.py
-   (var called [])
-   (var acc {"ok" true})
-   (var context {:acc acc
-                 :cell {:id "cell"}
-                 :path ["hello" "ping"]})
-   [(base-model/run-tail-call
-     context
-     (fn [cell model-id view-id refresh]
-       (called.push [model-id view-id])))
-    called])
   => [{"ok" true} [["hello" "ping"]]])
 
 ^{:refer xt.cell.kernel.base-model/run-remote :added "4.0"
   :setup [(fact:global :setup)
-          (notify/wait-on :js
-            (. (-/reset-cell) ["init"]
-               (then (repl/>notify))))
-          (j/<! (. (base-model/add-model (-/CELL)
-                                         "hello"
-                                         {:echo-async {:handler base-link-local/echo
-                                                       :remoteHandler base-link-local/echo-async
-                                                       :defaultArgs ["hello" 100]}})
-                   ["init"]))]}
+                   (notify/wait-on :js
+                     (. (-/reset-cell) ["init"]
+                        (then (repl/>notify))))
+                   (j/<! (. (base-model/add-model (-/CELL)
+                                                  "hello"
+                                                  {:echo-async {:handler base-link-local/echo
+                                                                :remoteHandler base-link-local/echo-async
+                                                                :defaultArgs ["hello" 100]}})
+                            ["init"]))]}
 (fact "runs the remote function"
 
   (j/<!
@@ -213,15 +141,15 @@
 
 ^{:refer xt.cell.kernel.base-model/remote-call :added "4.0"
   :setup [(fact:global :setup)
-          (notify/wait-on :js
-            (. (-/reset-cell) ["init"]
-               (then (repl/>notify))))
-          (j/<! (. (base-model/add-model (-/CELL)
-                                         "hello"
-                                         {:echo-async {:handler base-link-local/echo
-                                                       :remoteHandler base-link-local/echo-async
-                                                       :defaultArgs ["hello" 100]}})
-                   ["init"]))]}
+                   (notify/wait-on :js
+                     (. (-/reset-cell) ["init"]
+                        (then (repl/>notify))))
+                   (j/<! (. (base-model/add-model (-/CELL)
+                                                  "hello"
+                                                  {:echo-async {:handler base-link-local/echo
+                                                                :remoteHandler base-link-local/echo-async
+                                                                :defaultArgs ["hello" 100]}})
+                            ["init"]))]}
 (fact "runs the remote call"
 
   (j/<!
@@ -235,14 +163,14 @@
 
 ^{:refer xt.cell.kernel.base-model/run-refresh :added "4.0"
   :setup [(fact:global :setup)
-          (notify/wait-on :js
-            (. (-/reset-cell) ["init"]
-               (then (repl/>notify))))
-          (j/<! (. (base-model/add-model (-/CELL)
-                                         "hello"
-                                         {:ping {:handler base-link-local/ping
-                                                 :defaultArgs []}})
-                   ["init"]))]}
+                   (notify/wait-on :js
+                     (. (-/reset-cell) ["init"]
+                        (then (repl/>notify))))
+                   (j/<! (. (base-model/add-model (-/CELL)
+                                                  "hello"
+                                                  {:ping {:handler base-link-local/ping
+                                                          :defaultArgs []}})
+                            ["init"]))]}
 (fact "helper function for refresh"
 
   (j/<!
@@ -289,47 +217,27 @@
      (. view ["output"] ["current"])))
 
   (def +res+
-    (!.lua
-     (var [model view] (base-impl/view-ensure (-/CELL) "hello" "ping1"))
-     (. view ["output"] ["current"])))
-
-  (!.lua
-   (base-model/refresh-view-dependents (-/CELL)
-                                       "hello"
-                                       "ping"))
-  => {"hello" ["ping1"]}
+    )
 
   (def +res2+
-    (!.lua
-     (var [model view] (base-impl/view-ensure (-/CELL) "hello" "ping1"))
-     (. view ["output"] ["current"])))
+    )
 
   (def +res+
-    (!.py
-     (var [model view] (base-impl/view-ensure (-/CELL) "hello" "ping1"))
-     (. view ["output"] ["current"])))
-
-  (!.py
-   (base-model/refresh-view-dependents (-/CELL)
-                                       "hello"
-                                       "ping"))
-  => {"hello" ["ping1"]}
+    )
 
   (def +res2+
-    (!.py
-     (var [model view] (base-impl/view-ensure (-/CELL) "hello" "ping1"))
-     (. view ["output"] ["current"]))))
+    ))
 
 ^{:refer xt.cell.kernel.base-model/refresh-view :added "4.0"
   :setup [(fact:global :setup)
-          (notify/wait-on :js
-            (. (-/reset-cell) ["init"]
-               (then (repl/>notify))))
-          (j/<! (. (base-model/add-model (-/CELL)
-                                         "hello"
-                                         {:echo-async {:handler base-link-local/echo-async
-                                                       :defaultArgs ["hello" 100]}})
-                   ["init"]))]}
+                   (notify/wait-on :js
+                     (. (-/reset-cell) ["init"]
+                        (then (repl/>notify))))
+                   (j/<! (. (base-model/add-model (-/CELL)
+                                                  "hello"
+                                                  {:echo-async {:handler base-link-local/echo-async
+                                                                :defaultArgs ["hello" 100]}})
+                            ["init"]))]}
 (fact "refreshes a view"
 
   (j/<! (base-model/refresh-view
@@ -343,15 +251,15 @@
 
 ^{:refer xt.cell.kernel.base-model/refresh-view-remote :added "4.0"
   :setup [(fact:global :setup)
-          (notify/wait-on :js
-            (. (-/reset-cell) ["init"]
-               (then (repl/>notify))))
-          (j/<! (. (base-model/add-model (-/CELL)
-                                         "hello"
-                                         {:echo-async {:handler base-link-local/echo
-                                                       :remoteHandler base-link-local/echo-async
-                                                       :defaultArgs ["hello" 100]}})
-                   ["init"]))]}
+                   (notify/wait-on :js
+                     (. (-/reset-cell) ["init"]
+                        (then (repl/>notify))))
+                   (j/<! (. (base-model/add-model (-/CELL)
+                                                  "hello"
+                                                  {:echo-async {:handler base-link-local/echo
+                                                                :remoteHandler base-link-local/echo-async
+                                                                :defaultArgs ["hello" 100]}})
+                            ["init"]))]}
 (fact "refreshes view remotely"
 
   (j/<! (base-model/refresh-view-remote
@@ -389,38 +297,30 @@
      (. view ["output"] ["current"])))
 
   (def +res3+
-    (!.lua
-     (var [model view] (base-impl/view-ensure (-/CELL) "hello" "ping1"))
-     (. view ["output"] ["current"])))
+    )
 
   (def +res4+
-    (!.lua
-     (var [model view] (base-impl/view-ensure (-/CELL) "hello" "ping1"))
-     (. view ["output"] ["current"])))
+    )
 
   (def +res3+
-    (!.py
-     (var [model view] (base-impl/view-ensure (-/CELL) "hello" "ping1"))
-     (. view ["output"] ["current"])))
+    )
 
   (def +res4+
-    (!.py
-     (var [model view] (base-impl/view-ensure (-/CELL) "hello" "ping1"))
-     (. view ["output"] ["current"]))))
+    ))
 
 ^{:refer xt.cell.kernel.base-model/refresh-model :added "4.0"
   :setup [(fact:global :setup)
-          (notify/wait-on :js
-            (. (-/reset-cell) ["init"]
-               (then (repl/>notify))))
-          (j/<! (. (base-model/add-model (-/CELL)
-                                         "hello"
-                                         {:ping {:handler base-link-local/ping
-                                                 :defaultArgs []}
-                                          :ping1 {:handler base-link-local/ping
-                                                  :defaultArgs []
-                                                  :deps ["ping"]}})
-                   ["init"]))]}
+                   (notify/wait-on :js
+                     (. (-/reset-cell) ["init"]
+                        (then (repl/>notify))))
+                   (j/<! (. (base-model/add-model (-/CELL)
+                                                  "hello"
+                                                  {:ping {:handler base-link-local/ping
+                                                          :defaultArgs []}
+                                                   :ping1 {:handler base-link-local/ping
+                                                           :defaultArgs []
+                                                           :deps ["ping"]}})
+                            ["init"]))]}
 (fact "refreshes a model"
 
   (j/<!
@@ -445,20 +345,6 @@
 (fact "gets model dependencies"
 
   (!.js
-   (base-model/get-model-deps
-    "hello"
-    {:ping {}
-     :ping1 {:deps ["ping"]}}))
-  => {"hello" {"ping" {"ping1" true}}}
-
-  (!.lua
-   (base-model/get-model-deps
-    "hello"
-    {:ping {}
-     :ping1 {:deps ["ping"]}}))
-  => {"hello" {"ping" {"ping1" true}}}
-
-  (!.py
    (base-model/get-model-deps
     "hello"
     {:ping {}
@@ -494,54 +380,6 @@
      {:ping {}
       :ping1 {:deps ["ping2"]}})
     (-/CELL)))
-  => [["hello" "ping2"]]
-
-  (!.lua
-   (base-model/get-unknown-deps
-    "hello"
-    {:ping {}
-     :ping1 {:deps ["ping"]}}
-    (base-model/get-model-deps
-     "hello"
-     {:ping {}
-      :ping1 {:deps ["ping"]}})
-    (-/CELL)))
-  => []
-
-  (!.lua
-   (base-model/get-unknown-deps
-    "hello"
-    {:ping {}
-     :ping1 {:deps ["ping"]}}
-    (base-model/get-model-deps
-     "hello"
-     {:ping {}
-      :ping1 {:deps ["ping2"]}})
-    (-/CELL)))
-  => [["hello" "ping2"]]
-
-  (!.py
-   (base-model/get-unknown-deps
-    "hello"
-    {:ping {}
-     :ping1 {:deps ["ping"]}}
-    (base-model/get-model-deps
-     "hello"
-     {:ping {}
-      :ping1 {:deps ["ping"]}})
-    (-/CELL)))
-  => []
-
-  (!.py
-   (base-model/get-unknown-deps
-    "hello"
-    {:ping {}
-     :ping1 {:deps ["ping"]}}
-    (base-model/get-model-deps
-     "hello"
-     {:ping {}
-      :ping1 {:deps ["ping2"]}})
-    (-/CELL)))
   => [["hello" "ping2"]])
 
 ^{:refer xt.cell.kernel.base-model/create-throttle :added "4.0"
@@ -556,20 +394,6 @@
     (-/CELL)
     "hello"
     nil))
-  => {"queued" {}, "active" {}}
-
-  (!.lua
-   (base-model/create-throttle
-    (-/CELL)
-    "hello"
-    nil))
-  => {"queued" {}, "active" {}}
-
-  (!.py
-   (base-model/create-throttle
-    (-/CELL)
-    "hello"
-    nil))
   => {"queued" {}, "active" {}})
 
 ^{:refer xt.cell.kernel.base-model/create-view :added "4.0"
@@ -580,40 +404,6 @@
 (fact "creates a view"
 
   (!.js
-   (base-model/create-view
-    (-/CELL)
-    "hello"
-    "ping"
-    {:handler base-link-local/ping
-     :defaultArgs []}))
-  => (contains-in
-      {"::" "event.view",
-       "input" {"current" {"data" []}, "updated" integer?},
-       "output" {"elapsed" nil, "current" nil, "updated" nil},
-       "pipeline" {"remote" {}, "main" {}},
-       "options" {},
-       "listeners"
-       {"@/cell"
-        {"meta" {"listener/id" "@/cell", "listener/type" "view"}}}})
-
-  (!.lua
-   (base-model/create-view
-    (-/CELL)
-    "hello"
-    "ping"
-    {:handler base-link-local/ping
-     :defaultArgs []}))
-  => (contains-in
-      {"::" "event.view",
-       "input" {"current" {"data" []}, "updated" integer?},
-       "output" {"elapsed" nil, "current" nil, "updated" nil},
-       "pipeline" {"remote" {}, "main" {}},
-       "options" {},
-       "listeners"
-       {"@/cell"
-        {"meta" {"listener/id" "@/cell", "listener/type" "view"}}}})
-
-  (!.py
    (base-model/create-view
     (-/CELL)
     "hello"
@@ -657,57 +447,13 @@
          {"@/cell"
           {"meta" {"listener/id" "@/cell", "listener/type" "view"}}}}},
        "deps" {},
-       "throttle" {"queued" {}, "active" {}}})
-
-  (!.lua
-   (base-model/add-model-attach
-    (-/CELL)
-    "hello"
-    {:echo-async {:handler base-link-local/echo-async
-                  :defaultArgs ["hello" 100]}}))
-  => (contains-in
-      {"name" "hello",
-       "views"
-       {"echo_async"
-        {"::" "event.view",
-         "pipeline" {"remote" {}, "main" {}},
-         "options" {},
-         "input" {"current" {"data" ["hello" 100]},
-                  "updated" integer?},
-         "output" {"elapsed" nil, "current" nil, "updated" nil},
-         "listeners"
-         {"@/cell"
-          {"meta" {"listener/id" "@/cell", "listener/type" "view"}}}}},
-       "deps" {},
-       "throttle" {"queued" {}, "active" {}}})
-
-  (!.py
-   (base-model/add-model-attach
-    (-/CELL)
-    "hello"
-    {:echo-async {:handler base-link-local/echo-async
-                  :defaultArgs ["hello" 100]}}))
-  => (contains-in
-      {"name" "hello",
-       "views"
-       {"echo_async"
-        {"::" "event.view",
-         "pipeline" {"remote" {}, "main" {}},
-         "options" {},
-         "input" {"current" {"data" ["hello" 100]},
-                  "updated" integer?},
-         "output" {"elapsed" nil, "current" nil, "updated" nil},
-         "listeners"
-         {"@/cell"
-          {"meta" {"listener/id" "@/cell", "listener/type" "view"}}}}},
-       "deps" {},
        "throttle" {"queued" {}, "active" {}}}))
 
 ^{:refer xt.cell.kernel.base-model/add-model :added "4.0"
   :setup [(fact:global :setup)
-          (notify/wait-on :js
-            (. (-/reset-cell) ["init"]
-               (then (repl/>notify))))]}
+                   (notify/wait-on :js
+                     (. (-/reset-cell) ["init"]
+                        (then (repl/>notify))))]}
 (fact "adds a model"
 
   (j/<!
@@ -783,54 +529,6 @@
           {"meta" {"listener/id" "@/cell", "listener/type" "view"}}}}},
        "deps" {},
        "init" {},
-       "throttle" {"queued" {}, "active" {}}})
-
-  (!.lua
-   (base-model/remove-model
-    (-/CELL)
-    "hello"))
-  => (contains-in
-      {"name" "hello",
-       "views"
-       {"echo_async"
-        {"::" "event.view",
-         "output"
-         {"elapsed" integer?
-          "current" ["hello" integer?]
-          "updated" integer?},
-         "pipeline" {"remote" {}, "main" {}},
-         "input"
-         {"current" {"data" ["hello" 100]}, "updated" integer?},
-         "options" {},
-         "listeners"
-         {"@/cell"
-          {"meta" {"listener/id" "@/cell", "listener/type" "view"}}}}},
-       "deps" {},
-       "init" {},
-       "throttle" {"queued" {}, "active" {}}})
-
-  (!.py
-   (base-model/remove-model
-    (-/CELL)
-    "hello"))
-  => (contains-in
-      {"name" "hello",
-       "views"
-       {"echo_async"
-        {"::" "event.view",
-         "output"
-         {"elapsed" integer?
-          "current" ["hello" integer?]
-          "updated" integer?},
-         "pipeline" {"remote" {}, "main" {}},
-         "input"
-         {"current" {"data" ["hello" 100]}, "updated" integer?},
-         "options" {},
-         "listeners"
-         {"@/cell"
-          {"meta" {"listener/id" "@/cell", "listener/type" "view"}}}}},
-       "deps" {},
-       "init" {},
        "throttle" {"queued" {}, "active" {}}}))
 
 ^{:refer xt.cell.kernel.base-model/remove-view :added "4.0"
@@ -859,51 +557,21 @@
                  "updated" integer?},
        "listeners"
        {"@/cell"
-        {"meta" {"listener/id" "@/cell", "listener/type" "view"}}}})
-
-  (!.lua
-   (base-model/remove-view
-    (-/CELL) "hello" "echo_async"))
-  => (contains-in
-      {"::" "event.view",
-       "pipeline" {"remote" {}, "main" {}},
-       "options" {},
-       "input" {"current" {"data" ["hello" 100]}, "updated" integer?},
-       "output" {"elapsed" integer?
-                 "current" ["hello" integer?]
-                 "updated" integer?},
-       "listeners"
-       {"@/cell"
-        {"meta" {"listener/id" "@/cell", "listener/type" "view"}}}})
-
-  (!.py
-   (base-model/remove-view
-    (-/CELL) "hello" "echo_async"))
-  => (contains-in
-      {"::" "event.view",
-       "pipeline" {"remote" {}, "main" {}},
-       "options" {},
-       "input" {"current" {"data" ["hello" 100]}, "updated" integer?},
-       "output" {"elapsed" integer?
-                 "current" ["hello" integer?]
-                 "updated" integer?},
-       "listeners"
-       {"@/cell"
         {"meta" {"listener/id" "@/cell", "listener/type" "view"}}}}))
 
 ^{:refer xt.cell.kernel.base-model/model-update :added "4.0"
   :setup [(fact:global :setup)
-          (notify/wait-on :js
-            (. (-/reset-cell) ["init"]
-               (then (repl/>notify))))
-          (j/<! (. (base-model/add-model (-/CELL)
-                                         "hello"
-                                         {:ping {:handler base-link-local/ping
-                                                 :defaultArgs []}
-                                          :ping1 {:handler base-link-local/ping
-                                                  :defaultArgs []
-                                                  :deps ["ping"]}})
-                   ["init"]))]}
+                   (notify/wait-on :js
+                     (. (-/reset-cell) ["init"]
+                        (then (repl/>notify))))
+                   (j/<! (. (base-model/add-model (-/CELL)
+                                                  "hello"
+                                                  {:ping {:handler base-link-local/ping
+                                                          :defaultArgs []}
+                                                   :ping1 {:handler base-link-local/ping
+                                                           :defaultArgs []
+                                                           :deps ["ping"]}})
+                            ["init"]))]}
 (fact "updates a model"
 
   (j/<!
@@ -927,14 +595,14 @@
 
 ^{:refer xt.cell.kernel.base-model/view-update :added "4.0"
   :setup [(fact:global :setup)
-          (notify/wait-on :js
-            (. (-/reset-cell) ["init"]
-               (then (repl/>notify))))
-          (j/<! (. (base-model/add-model (-/CELL)
-                                         "hello"
-                                         {:ping {:handler base-link-local/ping
-                                                 :defaultArgs []}})
-                   ["init"]))]}
+                   (notify/wait-on :js
+                     (. (-/reset-cell) ["init"]
+                        (then (repl/>notify))))
+                   (j/<! (. (base-model/add-model (-/CELL)
+                                                  "hello"
+                                                  {:ping {:handler base-link-local/ping
+                                                          :defaultArgs []}})
+                            ["init"]))]}
 (fact "updates a view"
 
   (j/<!
@@ -952,14 +620,14 @@
 
 ^{:refer xt.cell.kernel.base-model/view-set-input :added "4.0"
   :setup [(fact:global :setup)
-          (notify/wait-on :js
-            (. (-/reset-cell) ["init"]
-               (then (repl/>notify))))
-          (j/<! (. (base-model/add-model (-/CELL)
-                                         "hello"
-                                         {:ping {:handler base-link-local/echo
-                                                 :defaultArgs ["foo"]}})
-                   ["init"]))]}
+                   (notify/wait-on :js
+                     (. (-/reset-cell) ["init"]
+                        (then (repl/>notify))))
+                   (j/<! (. (base-model/add-model (-/CELL)
+                                                  "hello"
+                                                  {:ping {:handler base-link-local/echo
+                                                          :defaultArgs ["foo"]}})
+                            ["init"]))]}
 (fact "sets view input"
 
   (j/<!
@@ -993,24 +661,6 @@
                                     ["hello"])
                                  "hello"
                                  {}))
-  => ["ping"]
-
-  (!.lua
-   (base-model/trigger-model-raw (-/CELL)
-                                 (. (-/CELL)
-                                    ["models"]
-                                    ["hello"])
-                                 "hello"
-                                 {}))
-  => ["ping"]
-
-  (!.py
-   (base-model/trigger-model-raw (-/CELL)
-                                 (. (-/CELL)
-                                    ["models"]
-                                    ["hello"])
-                                 "hello"
-                                 {}))
   => ["ping"])
 
 ^{:refer xt.cell.kernel.base-model/trigger-model :added "4.0"
@@ -1027,20 +677,6 @@
 (fact "triggers a model"
 
   (!.js
-   (base-model/trigger-model (-/CELL)
-                             "hello"
-                             "hello"
-                             {}))
-  => ["ping"]
-
-  (!.lua
-   (base-model/trigger-model (-/CELL)
-                             "hello"
-                             "hello"
-                             {}))
-  => ["ping"]
-
-  (!.py
    (base-model/trigger-model (-/CELL)
                              "hello"
                              "hello"
@@ -1075,35 +711,7 @@
        "pre" [false],
        "::" "view.run"})
 
-  (notify/wait-on :lua
-    (. (base-model/trigger-view (-/CELL)
-                                "hello"
-                                "ping"
-                                "hello"
-                                {})
-       [0]
-       (then (repl/>notify))))
-  => (contains-in
-      {"path" ["hello" "ping"],
-       "post" [false],
-       "main" [true ["foo" integer?]],
-       "pre" [false],
-       "::" "view.run"})
-
-  (notify/wait-on :python
-    (. (base-model/trigger-view (-/CELL)
-                                "hello"
-                                "ping"
-                                "hello"
-                                {})
-       [0]
-       (then (repl/>notify))))
-  => (contains-in
-      {"path" ["hello" "ping"],
-       "post" [false],
-       "main" [true ["foo" integer?]],
-       "pre" [false],
-       "::" "view.run"}))
+    )
 
 ^{:refer xt.cell.kernel.base-model/trigger-all :added "4.0"
   :setup [(fact:global :setup)
@@ -1122,18 +730,6 @@
    (base-model/trigger-all (-/CELL)
                            "hello"
                            {:a 1}))
-  => {"hello" ["ping"]}
-
-  (!.lua
-   (base-model/trigger-all (-/CELL)
-                           "hello"
-                           {:a 1}))
-  => {"hello" ["ping"]}
-
-  (!.py
-   (base-model/trigger-all (-/CELL)
-                           "hello"
-                           {:a 1}))
   => {"hello" ["ping"]})
 
 ^{:refer xt.cell.kernel.base-model/add-raw-callback :added "4.0"
@@ -1145,14 +741,6 @@
 
   (!.js
    (base-model/add-raw-callback (-/CELL)))
-  => vector?
-
-  (!.lua
-   (base-model/add-raw-callback (-/CELL)))
-  => vector?
-
-  (!.py
-   (base-model/add-raw-callback (-/CELL)))
   => vector?)
 
 ^{:refer xt.cell.kernel.base-model/remove-raw-callback :added "4.0"
@@ -1161,21 +749,9 @@
                      (. (-/reset-cell) ["init"]
                         (then (repl/>notify))))
                    (!.js
-                    (base-model/add-raw-callback (-/CELL)))
-                   (!.lua
-                    (base-model/add-raw-callback (-/CELL)))
-                   (!.py
                     (base-model/add-raw-callback (-/CELL)))]}
 (fact "removes a raw callback"
 
   (!.js
-   (base-model/remove-raw-callback (-/CELL)))
-  => vector?
-
-  (!.lua
-   (base-model/remove-raw-callback (-/CELL)))
-  => vector?
-
-  (!.py
    (base-model/remove-raw-callback (-/CELL)))
   => vector?)

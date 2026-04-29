@@ -16,8 +16,8 @@
    :require [[xt.cell.service :as service]]})
 
 (fact:global
- {:setup    [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.cell.service/service? :added "4.1"}
 (fact "checks whether a value is a service registry"

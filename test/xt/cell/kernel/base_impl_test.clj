@@ -3,7 +3,7 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:lua :python]}}
+^{:seedgen/root {:all true}}
 (l/script- :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
@@ -16,16 +16,10 @@
 (l/script- :js
   {:require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.cell.kernel.base-link :as base-link] [xt.cell.kernel.base-link-local :as base-link-local] [xt.cell.kernel.base-impl :as base-impl] [xt.cell.kernel.inner-impl :as inner-impl] [xt.cell.kernel.inner-mock :as inner-mock] [xt.lang.common-repl :as repl] [js.core :as j]] :runtime :basic})
 
-(l/script- :lua
-  {:require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.cell.kernel.base-link :as base-link] [xt.cell.kernel.base-link-local :as base-link-local] [xt.cell.kernel.base-impl :as base-impl] [xt.cell.kernel.inner-impl :as inner-impl] [xt.cell.kernel.inner-mock :as inner-mock] [xt.lang.common-repl :as repl]] :runtime :basic})
-
-(l/script- :python
-  {:require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.cell.kernel.base-link :as base-link] [xt.cell.kernel.base-link-local :as base-link-local] [xt.cell.kernel.base-impl :as base-impl] [xt.cell.kernel.inner-impl :as inner-impl] [xt.cell.kernel.inner-mock :as inner-mock] [xt.lang.common-repl :as repl]] :runtime :basic})
-
 (fact:global
- {:setup    [(l/rt:restart)
-             (l/rt:scaffold-imports :js)]
-  :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)
+                 (l/rt:scaffold-imports :js)]
+ :teardown [(l/rt:stop)]})
 
 (defn.xt make-link
   []
@@ -57,32 +51,7 @@
     (. INIT ["current"]
        (then (repl/>notify))))
   => true
-
-  (set
-   (!.lua
-    (xtd/obj-keys
-     (base-impl/new-cell-init))))
-  => #{"resolve" "current" "reject"}
-
-  (notify/wait-on :lua
-    (:= (!:G INIT) (base-impl/new-cell-init))
-    ((. INIT ["resolve"]) true)
-    (. INIT ["current"]
-       (then (repl/>notify))))
-  => true
-
-  (set
-   (!.py
-    (xtd/obj-keys
-     (base-impl/new-cell-init))))
-  => #{"resolve" "current" "reject"}
-
-  (notify/wait-on :python
-    (:= (!:G INIT) (base-impl/new-cell-init))
-    ((. INIT ["resolve"]) true)
-    (. INIT ["current"]
-       (then (repl/>notify))))
-  => true)
+  )
 
 ^{:refer xt.cell.kernel.base-impl/new-cell :added "4.0"}
 (fact "creates a cell record and resolves init on worker init"
@@ -95,40 +64,12 @@
 
   (!.js
    (xt/x:get-key (-/make-cell) "::"))
-  => "cell"
-
-  (notify/wait-on :lua
-    (var cell (-/make-cell))
-    (. cell ["init"]
-       (then (repl/>notify))))
-  => true
-
-  (!.lua
-   (xt/x:get-key (-/make-cell) "::"))
-  => "cell"
-
-  (notify/wait-on :python
-    (var cell (-/make-cell))
-    (. cell ["init"]
-       (then (repl/>notify))))
-  => true
-
-  (!.py
-   (xt/x:get-key (-/make-cell) "::"))
   => "cell")
 
 ^{:refer xt.cell.kernel.base-impl/list-models :added "4.0"}
 (fact "lists models on a fresh cell"
 
   (!.js
-   (base-impl/list-models (-/make-cell)))
-  => []
-
-  (!.lua
-   (base-impl/list-models (-/make-cell)))
-  => []
-
-  (!.py
    (base-impl/list-models (-/make-cell)))
   => [])
 
@@ -154,14 +95,6 @@
 
   (!.js
    (base-impl/model-get (-/make-cell) "missing"))
-  => nil
-
-  (!.lua
-   (base-impl/model-get (-/make-cell) "missing"))
-  => nil
-
-  (!.py
-   (base-impl/model-get (-/make-cell) "missing"))
   => nil)
 
 ^{:refer xt.cell.kernel.base-impl/model-ensure :added "4.0"}
@@ -169,38 +102,12 @@
 
   (!.js
    (base-impl/model-ensure (-/make-cell) "missing"))
-  => (throws)
-
-  (!.lua
-   (base-impl/model-ensure (-/make-cell) "missing"))
-  => (throws)
-
-  (!.py
-   (base-impl/model-ensure (-/make-cell) "missing"))
   => (throws))
 
 ^{:refer xt.cell.kernel.base-impl/view-access :added "4.0"}
 (fact "returns nil for a missing view"
 
   (!.js
-   (base-impl/view-access (-/make-cell)
-                          "missing"
-                          "echo"
-                          (fn [view]
-                            (return true))
-                          []))
-  => nil
-
-  (!.lua
-   (base-impl/view-access (-/make-cell)
-                          "missing"
-                          "echo"
-                          (fn [view]
-                            (return true))
-                          []))
-  => nil
-
-  (!.py
    (base-impl/view-access (-/make-cell)
                           "missing"
                           "echo"
@@ -238,68 +145,6 @@
   => map?
 
   (!.js
-   (var cell (-/make-cell))
-   (base-impl/add-listener cell ["hello" "echo"] "@react/1234" (fn:>) nil nil)
-   (base-impl/trigger-listeners cell ["hello" "echo"] {}))
-  => ["@react/1234"]
-
-  (!.lua
-   (var cell (-/make-cell))
-   (base-impl/add-listener cell
-                           ["hello" "echo"]
-                           "@react/1234"
-                           (fn:> [event]
-                             (. event ["path"]))
-                           nil
-                           nil)
-   (base-impl/list-listeners cell ["hello" "echo"]))
-  => ["@react/1234"]
-
-  (!.lua
-   (var cell (-/make-cell))
-   (base-impl/add-listener cell ["hello" "echo"] "@react/1234" (fn:>) nil nil)
-   (base-impl/add-listener cell ["hello" "echo"] "@react/5678" (fn:>) nil nil)
-   (base-impl/list-all-listeners cell))
-  => {"hello" {"echo" ["@react/1234" "@react/5678"]}}
-
-  (!.lua
-   (var cell (-/make-cell))
-   (base-impl/add-listener cell ["hello" "echo"] "@react/1234" (fn:>) nil nil)
-   (base-impl/remove-listener cell ["hello" "echo"] "@react/1234"))
-  => map?
-
-  (!.lua
-   (var cell (-/make-cell))
-   (base-impl/add-listener cell ["hello" "echo"] "@react/1234" (fn:>) nil nil)
-   (base-impl/trigger-listeners cell ["hello" "echo"] {}))
-  => ["@react/1234"]
-
-  (!.py
-   (var cell (-/make-cell))
-   (base-impl/add-listener cell
-                           ["hello" "echo"]
-                           "@react/1234"
-                           (fn:> [event]
-                             (. event ["path"]))
-                           nil
-                           nil)
-   (base-impl/list-listeners cell ["hello" "echo"]))
-  => ["@react/1234"]
-
-  (!.py
-   (var cell (-/make-cell))
-   (base-impl/add-listener cell ["hello" "echo"] "@react/1234" (fn:>) nil nil)
-   (base-impl/add-listener cell ["hello" "echo"] "@react/5678" (fn:>) nil nil)
-   (base-impl/list-all-listeners cell))
-  => {"hello" {"echo" ["@react/1234" "@react/5678"]}}
-
-  (!.py
-   (var cell (-/make-cell))
-   (base-impl/add-listener cell ["hello" "echo"] "@react/1234" (fn:>) nil nil)
-   (base-impl/remove-listener cell ["hello" "echo"] "@react/1234"))
-  => map?
-
-  (!.py
    (var cell (-/make-cell))
    (base-impl/add-listener cell ["hello" "echo"] "@react/1234" (fn:>) nil nil)
    (base-impl/trigger-listeners cell ["hello" "echo"] {}))

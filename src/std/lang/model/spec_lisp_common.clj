@@ -7,7 +7,8 @@
 (defn prepare-top-level
   {:added "4.1"}
   [begin-sym form]
-  (if (vector? form)
+  (if (and (vector? form)
+           (:bulk (meta form)))
     (if (= 1 (count form))
       (first form)
       (cons begin-sym form))

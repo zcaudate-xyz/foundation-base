@@ -2,7 +2,7 @@
   (:require [std.lang :as l])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:lua :python]}}
+^{:seedgen/root {:all true, :langs [:lua :python :js]}}
 (l/script- :xtalk
   {:require [[xt.lang.common-lib :as k]
              [xt.lang.spec-base :as xt]
@@ -15,15 +15,9 @@
 (l/script- :js
   {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-space :as rt :with [defsingleton.js]] [xt.cell :as cell] [xt.cell.kernel.base-link :as base-link] [xt.cell.kernel.inner-mock :as inner-mock] [js.core :as j]] :runtime :basic})
 
-(l/script- :lua
-  {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-space :as rt :with [defsingleton.xt]] [xt.cell :as cell] [xt.cell.kernel.base-link :as base-link] [xt.cell.kernel.inner-mock :as inner-mock]] :runtime :basic})
-
-(l/script- :python
-  {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-space :as rt :with [defsingleton.xt]] [xt.cell :as cell] [xt.cell.kernel.base-link :as base-link] [xt.cell.kernel.inner-mock :as inner-mock]] :runtime :basic})
-
 (fact:global
-  {:setup    [(l/rt:restart)]
-   :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 (defn.xt make-link
   []
@@ -44,14 +38,6 @@
 
   (!.js
    (cell/SERVICE))
-  => nil
-
-  (!.lua
-   (cell/SERVICE))
-  => nil
-
-  (!.py
-   (cell/SERVICE))
   => nil)
 
 ^{:refer xt.cell/BINDINGS :added "4.1"}
@@ -59,28 +45,12 @@
 
   (!.js
    (cell/BINDINGS))
-  => {}
-
-  (!.lua
-   (cell/BINDINGS))
-  => {}
-
-  (!.py
-   (cell/BINDINGS))
   => {})
 
 ^{:refer xt.cell/fn-setup-service :added "4.1"}
 (fact "stores the worker service registry in global state"
 
   (!.js
-   (cell/fn-setup-service {"dbs" {"local" {"kind" "cache"}}}))
-  => {"dbs" {"local" {"kind" "cache"}}}
-
-  (!.lua
-   (cell/fn-setup-service {"dbs" {"local" {"kind" "cache"}}}))
-  => {"dbs" {"local" {"kind" "cache"}}}
-
-  (!.py
    (cell/fn-setup-service {"dbs" {"local" {"kind" "cache"}}}))
   => {"dbs" {"local" {"kind" "cache"}}})
 
@@ -90,16 +60,6 @@
   (!.js
    (cell/fn-setup-service {"dbs" {"local" {"kind" "cache"}}})
    (cell/fn-get-service))
-  => {"dbs" {"local" {"kind" "cache"}}}
-
-  (!.lua
-   (cell/fn-setup-service {"dbs" {"local" {"kind" "cache"}}})
-   (cell/fn-get-service))
-  => {"dbs" {"local" {"kind" "cache"}}}
-
-  (!.py
-   (cell/fn-setup-service {"dbs" {"local" {"kind" "cache"}}})
-   (cell/fn-get-service))
   => {"dbs" {"local" {"kind" "cache"}}})
 
 ^{:refer xt.cell/fn-setup-bindings :added "4.1"}
@@ -107,30 +67,12 @@
 
   (!.js
    (cell/fn-setup-bindings {"orders" {"list" {}}}))
-  => {"orders" {"list" {}}}
-
-  (!.lua
-   (cell/fn-setup-bindings {"orders" {"list" {}}}))
-  => {"orders" {"list" {}}}
-
-  (!.py
-   (cell/fn-setup-bindings {"orders" {"list" {}}}))
   => {"orders" {"list" {}}})
 
 ^{:refer xt.cell/fn-get-bindings :added "4.1"}
 (fact "returns the previously stored worker bindings registry"
 
   (!.js
-   (cell/fn-setup-bindings {"orders" {"list" {}}})
-   (cell/fn-get-bindings))
-  => {"orders" {"list" {}}}
-
-  (!.lua
-   (cell/fn-setup-bindings {"orders" {"list" {}}})
-   (cell/fn-get-bindings))
-  => {"orders" {"list" {}}}
-
-  (!.py
    (cell/fn-setup-bindings {"orders" {"list" {}}})
    (cell/fn-get-bindings))
   => {"orders" {"list" {}}})
@@ -143,20 +85,6 @@
   => ["@cell/setup-service"
       "@cell/get-service"
       "@cell/setup-bindings"
-      "@cell/get-bindings"]
-
-  (!.lua
-   (xtd/obj-keys (cell/actions-cell)))
-  => ["@cell/setup-service"
-      "@cell/get-service"
-      "@cell/setup-bindings"
-      "@cell/get-bindings"]
-
-  (!.py
-   (xtd/obj-keys (cell/actions-cell)))
-  => ["@cell/setup-service"
-      "@cell/get-service"
-      "@cell/setup-bindings"
       "@cell/get-bindings"])
 
 ^{:refer xt.cell/actions-baseline :added "4.1"}
@@ -165,42 +93,12 @@
   (!.js
    [(xt/x:has-key? (cell/actions-baseline) "@cell/setup-service")
     (xt/x:has-key? (cell/actions-baseline) "@worker/ping")])
-  => [true true]
-
-  (!.lua
-   [(xt/x:has-key? (cell/actions-baseline) "@cell/setup-service")
-    (xt/x:has-key? (cell/actions-baseline) "@worker/ping")])
-  => [true true]
-
-  (!.py
-   [(xt/x:has-key? (cell/actions-baseline) "@cell/setup-service")
-    (xt/x:has-key? (cell/actions-baseline) "@worker/ping")])
   => [true true])
 
 ^{:refer xt.cell/actions-init :added "4.1"}
 (fact "installs cell actions into a worker action table"
 
   (!.js
-   (var worker (inner-mock/create-worker nil {} true))
-    (cell/actions-init {"@custom/action" {:handler (fn [x] (return x))
-                                         :is_async false
-                                         :args ["x"]}}
-                      worker)
-   [(xt/x:has-key? (. worker ["actions"]) "@cell/setup-service")
-    (xt/x:has-key? (. worker ["actions"]) "@custom/action")])
-  => [true true]
-
-  (!.lua
-   (var worker (inner-mock/create-worker nil {} true))
-    (cell/actions-init {"@custom/action" {:handler (fn [x] (return x))
-                                         :is_async false
-                                         :args ["x"]}}
-                      worker)
-   [(xt/x:has-key? (. worker ["actions"]) "@cell/setup-service")
-    (xt/x:has-key? (. worker ["actions"]) "@custom/action")])
-  => [true true]
-
-  (!.py
    (var worker (inner-mock/create-worker nil {} true))
     (cell/actions-init {"@custom/action" {:handler (fn [x] (return x))
                                          :is_async false
@@ -225,16 +123,6 @@
   (!.js
    (-/LINK-reset (-/make-link))
    true)
-  => true
-
-  (!.lua
-   (-/LINK-reset (-/make-link))
-   true)
-  => true
-
-  (!.py
-   (-/LINK-reset (-/make-link))
-   true)
   => true)
 
 ^{:refer xt.cell/setup-bindings :added "4.1"}
@@ -250,16 +138,6 @@
 (fact "gets the worker bindings registry over a link transport"
 
   (!.js
-   (-/LINK-reset (-/make-link))
-   true)
-  => true
-
-  (!.lua
-   (-/LINK-reset (-/make-link))
-   true)
-  => true
-
-  (!.py
    (-/LINK-reset (-/make-link))
    true)
   => true)

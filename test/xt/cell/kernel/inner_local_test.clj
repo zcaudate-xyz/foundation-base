@@ -6,16 +6,10 @@
 (l/script- :js
   {:require [[xt.lang.spec-base :as xt] [xt.cell.kernel.inner-state :as inner-state] [xt.cell.kernel.inner-local :as inner-local] [js.core :as j]] :runtime :basic})
 
-(l/script- :lua
-  {:require [[xt.lang.spec-base :as xt] [xt.cell.kernel.inner-state :as inner-state] [xt.cell.kernel.inner-local :as inner-local]] :runtime :basic})
-
-(l/script- :python
-  {:require [[xt.lang.spec-base :as xt] [xt.cell.kernel.inner-state :as inner-state] [xt.cell.kernel.inner-local :as inner-local]] :runtime :basic})
-
 (fact:global
- {:setup    [(l/rt:restart)
-             (l/rt:scaffold-imports :js)]
-  :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)
+                 (l/rt:scaffold-imports :js)]
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.cell.kernel.inner-local/actions-baseline :added "4.0"}
 (fact "returns the base actions"
@@ -33,36 +27,6 @@
 
   (!.js (xt/x:get-key (inner-local/actions-baseline) "@worker/ping.async"))
   => (contains {"is_async" true
-                "args" ["ms"]})
-
-  (!.lua (inner-local/actions-baseline))
-  => map?
-
-  (!.lua (xt/x:get-key (inner-local/actions-baseline) "@worker/ping"))
-  => (contains {"is_async" false
-                "args" []})
-
-  (!.lua (xt/x:get-key (inner-local/actions-baseline) "@worker/echo"))
-  => (contains {"is_async" false
-                "args" ["arg"]})
-
-  (!.lua (xt/x:get-key (inner-local/actions-baseline) "@worker/ping.async"))
-  => (contains {"is_async" true
-                "args" ["ms"]})
-
-  (!.py (inner-local/actions-baseline))
-  => map?
-
-  (!.py (xt/x:get-key (inner-local/actions-baseline) "@worker/ping"))
-  => (contains {"is_async" false
-                "args" []})
-
-  (!.py (xt/x:get-key (inner-local/actions-baseline) "@worker/echo"))
-  => (contains {"is_async" false
-                "args" ["arg"]})
-
-  (!.py (xt/x:get-key (inner-local/actions-baseline) "@worker/ping.async"))
-  => (contains {"is_async" true
                 "args" ["ms"]}))
 
 ^{:refer xt.cell.kernel.inner-local/actions-init :added "4.0"}
@@ -76,26 +40,6 @@
   (!.js
    (inner-local/actions-init {"@custom/action" {"handler" j/identity}} nil)
    (xt/x:has-key? (inner-state/WORKER_ACTIONS) "@custom/action"))
-  => true
-
-  (!.lua
-   (inner-local/actions-init {"@custom/action" {}} nil)
-   (xt/x:has-key? (inner-state/WORKER_ACTIONS) "@worker/ping"))
-  => true
-
-  (!.lua
-   (inner-local/actions-init {"@custom/action" {"handler" j/identity}} nil)
-   (xt/x:has-key? (inner-state/WORKER_ACTIONS) "@custom/action"))
-  => true
-
-  (!.py
-   (inner-local/actions-init {"@custom/action" {}} nil)
-   (xt/x:has-key? (inner-state/WORKER_ACTIONS) "@worker/ping"))
-  => true
-
-  (!.py
-   (inner-local/actions-init {"@custom/action" {"handler" j/identity}} nil)
-   (xt/x:has-key? (inner-state/WORKER_ACTIONS) "@custom/action"))
   => true)
 
 ^{:refer xt.cell.kernel.inner-local/tmpl-baseline-action :added "4.0"}
@@ -105,10 +49,10 @@
                 @xt.cell.kernel.inner-state/fn-ping)]
     (first result)
     => "@worker/ping"
-    
+        
     (get (second result) :is-async)
     => false
-    
+        
     (get-in (second result) [:handler])
     => 'xt.cell.kernel.inner-state/fn-ping)
 
@@ -116,7 +60,7 @@
                 @xt.cell.kernel.inner-state/fn-trigger)]
     (first result)
     => "@worker/trigger"
-    
+        
     (get-in (second result) [:handler])
     => '(xt.cell.kernel.inner-state/fn-self
          xt.cell.kernel.inner-state/fn-trigger)))

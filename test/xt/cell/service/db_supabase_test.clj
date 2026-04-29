@@ -6,15 +6,9 @@
 (l/script- :js
   {:require [[xt.cell.service.db-supabase :as db-supabase] [xt.lang.common-data :as xtd]] :runtime :basic})
 
-(l/script- :lua
-  {:require [[xt.cell.service.db-supabase :as db-supabase] [xt.lang.common-data :as xtd]] :runtime :basic})
-
-(l/script- :python
-  {:require [[xt.cell.service.db-supabase :as db-supabase] [xt.lang.common-data :as xtd]] :runtime :basic})
-
 (fact:global
- {:setup    [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 (def +db+
   {"schema"
@@ -63,40 +57,12 @@
                                        (return [true compiled]))}))
    [(db-supabase/supabase-capable? db)
     (db-supabase/supabase-capable? (@! +db+))])
-  => [true false]
-
-  (!.lua
-   (var db (xtd/obj-assign (@! +db+)
-                          {"execute" (fn [compiled _]
-                                       (return [true compiled]))}))
-   [(db-supabase/supabase-capable? db)
-    (db-supabase/supabase-capable? (@! +db+))])
-  => [true false]
-
-  (!.py
-   (var db (xtd/obj-assign (@! +db+)
-                          {"execute" (fn [compiled _]
-                                       (return [true compiled]))}))
-   [(db-supabase/supabase-capable? db)
-    (db-supabase/supabase-capable? (@! +db+))])
   => [true false])
 
 ^{:refer xt.cell.service.db-supabase/compile-select-item :added "4.1"}
 (fact "compiles individual return entries to Supabase select syntax"
 
   (!.js
-   [(db-supabase/compile-select-item "status")
-    (db-supabase/compile-select-item ["account" ["nickname"]])])
-  => ["status"
-      "account(nickname)"]
-
-  (!.lua
-   [(db-supabase/compile-select-item "status")
-    (db-supabase/compile-select-item ["account" ["nickname"]])])
-  => ["status"
-      "account(nickname)"]
-
-  (!.py
    [(db-supabase/compile-select-item "status")
     (db-supabase/compile-select-item ["account" ["nickname"]])])
   => ["status"
@@ -109,50 +75,12 @@
    (db-supabase/compile-select
     ["status"
      ["account" ["nickname"]]]))
-  => "status,account(nickname)"
-
-  (!.lua
-   (db-supabase/compile-select
-    ["status"
-     ["account" ["nickname"]]]))
-  => "status,account(nickname)"
-
-  (!.py
-   (db-supabase/compile-select
-    ["status"
-     ["account" ["nickname"]]]))
   => "status,account(nickname)")
 
 ^{:refer xt.cell.service.db-supabase/compile-filters-into :added "4.1"}
 (fact "compiles nested where clauses into Supabase filter descriptors"
 
   (!.js
-   (db-supabase/compile-filters-into
-    ""
-    {"account" {"id" "acct-1"}
-     "status" "open"}
-    []))
-  => [{"path" "account.id"
-       "op" "eq"
-       "value" "acct-1"}
-      {"path" "status"
-       "op" "eq"
-       "value" "open"}]
-
-  (!.lua
-   (db-supabase/compile-filters-into
-    ""
-    {"account" {"id" "acct-1"}
-     "status" "open"}
-    []))
-  => [{"path" "account.id"
-       "op" "eq"
-       "value" "acct-1"}
-      {"path" "status"
-       "op" "eq"
-       "value" "open"}]
-
-  (!.py
    (db-supabase/compile-filters-into
     ""
     {"account" {"id" "acct-1"}
@@ -180,72 +108,12 @@
       "select" "status,account(nickname)"
       "filters" [{"path" "account.id"
                   "op" "eq"
-                  "value" "acct-1"}]}
-
-  (!.lua
-   (db-supabase/compile-query
-    (@! +db+)
-    ["Order"
-     {"account" {"id" "acct-1"}}
-     ["status"
-      ["account" ["nickname"]]]]
-    {}))
-  => {"table" "Order"
-      "select" "status,account(nickname)"
-      "filters" [{"path" "account.id"
-                  "op" "eq"
-                  "value" "acct-1"}]}
-
-  (!.py
-   (db-supabase/compile-query
-    (@! +db+)
-    ["Order"
-     {"account" {"id" "acct-1"}}
-     ["status"
-      ["account" ["nickname"]]]]
-    {}))
-  => {"table" "Order"
-      "select" "status,account(nickname)"
-      "filters" [{"path" "account.id"
-                  "op" "eq"
                   "value" "acct-1"}]})
 
 ^{:refer xt.cell.service.db-supabase/execute-query :added "4.1"}
 (fact "executes a compiled query via the injected executor"
 
   (!.js
-   (db-supabase/execute-query
-    {"execute" (fn [compiled _]
-                 (return [true compiled]))}
-    ["Order"
-     {"account" {"id" "acct-1"}}
-     ["status"
-      ["account" ["nickname"]]]]
-    {}))
-  => [true
-      {"table" "Order"
-       "select" "status,account(nickname)"
-       "filters" [{"path" "account.id"
-                   "op" "eq"
-                   "value" "acct-1"}]}]
-
-  (!.lua
-   (db-supabase/execute-query
-    {"execute" (fn [compiled _]
-                 (return [true compiled]))}
-    ["Order"
-     {"account" {"id" "acct-1"}}
-     ["status"
-      ["account" ["nickname"]]]]
-    {}))
-  => [true
-      {"table" "Order"
-       "select" "status,account(nickname)"
-       "filters" [{"path" "account.id"
-                   "op" "eq"
-                   "value" "acct-1"}]}]
-
-  (!.py
    (db-supabase/execute-query
     {"execute" (fn [compiled _]
                  (return [true compiled]))}
@@ -285,92 +153,12 @@
       {"status" "error"
        "tag" "mapped/error"
        "data" {"status" "error"
-               "tag" "supabase/fail"}}]
-
-  (!.lua
-   [(db-supabase/map-supabase-error
-     (@! +db+)
-     {"status" "error"
-      "tag" "supabase/fail"}
-     {})
-    (db-supabase/map-supabase-error
-     {"map_error" (fn [error _]
-                    (return {"status" "error"
-                             "tag" "mapped/error"
-                             "data" error}))}
-     {"status" "error"
-      "tag" "supabase/fail"}
-     {})])
-  => [{"status" "error"
-       "tag" "db/supabase-query-failed"
-       "data" {"status" "error"
-               "tag" "supabase/fail"}}
-      {"status" "error"
-       "tag" "mapped/error"
-       "data" {"status" "error"
-               "tag" "supabase/fail"}}]
-
-  (!.py
-   [(db-supabase/map-supabase-error
-     (@! +db+)
-     {"status" "error"
-      "tag" "supabase/fail"}
-     {})
-    (db-supabase/map-supabase-error
-     {"map_error" (fn [error _]
-                    (return {"status" "error"
-                             "tag" "mapped/error"
-                             "data" error}))}
-     {"status" "error"
-      "tag" "supabase/fail"}
-     {})])
-  => [{"status" "error"
-       "tag" "db/supabase-query-failed"
-       "data" {"status" "error"
-               "tag" "supabase/fail"}}
-      {"status" "error"
-       "tag" "mapped/error"
-       "data" {"status" "error"
                "tag" "supabase/fail"}}])
 
 ^{:refer xt.cell.service.db-supabase/run-supabase-query :added "4.1"}
 (fact "prepares, compiles, and executes a Supabase query"
 
   (!.js
-   (var db (xtd/obj-assign (@! +db+)
-                          {"execute" (fn [compiled _]
-                                       (return [true compiled]))}))
-   (db-supabase/run-supabase-query
-    db
-    {:table "Order"
-     :select-method "by_account"
-     :return-method "default"}
-    {"args" ["acct-1"]}))
-  => [true
-      {"table" "Order"
-       "select" "status,account(nickname)"
-       "filters" [{"path" "account.id"
-                   "op" "eq"
-                   "value" "acct-1"}]}]
-
-  (!.lua
-   (var db (xtd/obj-assign (@! +db+)
-                          {"execute" (fn [compiled _]
-                                       (return [true compiled]))}))
-   (db-supabase/run-supabase-query
-    db
-    {:table "Order"
-     :select-method "by_account"
-     :return-method "default"}
-    {"args" ["acct-1"]}))
-  => [true
-      {"table" "Order"
-       "select" "status,account(nickname)"
-       "filters" [{"path" "account.id"
-                   "op" "eq"
-                   "value" "acct-1"}]}]
-
-  (!.py
    (var db (xtd/obj-assign (@! +db+)
                           {"execute" (fn [compiled _]
                                        (return [true compiled]))}))

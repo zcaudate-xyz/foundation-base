@@ -7,31 +7,15 @@
 (l/script- :js
   {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.cell.kernel.inner-mock :as inner-mock] [xt.lang.common-repl :as repl]] :runtime :basic})
 
-(l/script- :lua
-  {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.cell.kernel.inner-mock :as inner-mock] [xt.lang.common-repl :as repl]] :runtime :basic})
-
-(l/script- :python
-  {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.cell.kernel.inner-mock :as inner-mock] [xt.lang.common-repl :as repl]] :runtime :basic})
-
 (fact:global
- {:setup    [(l/rt:restart)
-             (l/rt:scaffold-imports :js)]
-  :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)
+                 (l/rt:scaffold-imports :js)]
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.cell.kernel.inner-mock/mock-worker-send :added "4.0"}
 (fact "sends a request to the mock worker"
 
   (!.js
-   (var worker (inner-mock/mock-worker (fn [msg])))
-   (inner-mock/mock-worker-send worker {"op" "eval" "body" "1 + 1"}))
-  => nil?
-
-  (!.lua
-   (var worker (inner-mock/mock-worker (fn [msg])))
-   (inner-mock/mock-worker-send worker {"op" "eval" "body" "1 + 1"}))
-  => nil?
-
-  (!.py
    (var worker (inner-mock/mock-worker (fn [msg])))
    (inner-mock/mock-worker-send worker {"op" "eval" "body" "1 + 1"}))
   => nil?)
@@ -40,22 +24,6 @@
 (fact "creates a mock worker"
 
   (!.js
-   (var messages [])
-   (var worker (inner-mock/mock-worker
-                (fn [msg] (messages.push msg))))
-   (worker.postMessage {"test" 1})
-   messages)
-  => [{"test" 1}]
-
-  (!.lua
-   (var messages [])
-   (var worker (inner-mock/mock-worker
-                (fn [msg] (messages.push msg))))
-   (worker.postMessage {"test" 1})
-   messages)
-  => [{"test" 1}]
-
-  (!.py
    (var messages [])
    (var worker (inner-mock/mock-worker
                 (fn [msg] (messages.push msg))))
@@ -86,42 +54,4 @@
       "op" "stream"
       "signal" "@worker/::INIT"}
 
-  (!.lua
-   (var worker (inner-mock/create-worker
-                (fn [msg])
-                {}
-                true))
-   (xt/x:get-key worker "::"))
-  => "worker.mock"
-
-  (!.lua
-   (var worker (inner-mock/create-worker k/identity {} true))
-   (k/is-function? (xt/x:get-key worker "postMessage")))
-  => true
-
-  (notify/wait-on :lua
-    (inner-mock/create-worker (repl/>notify) {} false))
-  => {"body" {"done" true}
-      "status" "ok"
-      "op" "stream"
-      "signal" "@worker/::INIT"}
-
-  (!.py
-   (var worker (inner-mock/create-worker
-                (fn [msg])
-                {}
-                true))
-   (xt/x:get-key worker "::"))
-  => "worker.mock"
-
-  (!.py
-   (var worker (inner-mock/create-worker k/identity {} true))
-   (k/is-function? (xt/x:get-key worker "postMessage")))
-  => true
-
-  (notify/wait-on :python
-    (inner-mock/create-worker (repl/>notify) {} false))
-  => {"body" {"done" true}
-      "status" "ok"
-      "op" "stream"
-      "signal" "@worker/::INIT"})
+    )

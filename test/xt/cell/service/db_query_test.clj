@@ -6,15 +6,9 @@
 (l/script- :js
   {:require [[xt.cell.service.db-query :as db-query] [xt.old.db :as xdb] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]] :runtime :basic})
 
-(l/script- :lua
-  {:require [[xt.cell.service.db-query :as db-query] [xt.old.db :as xdb] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]] :runtime :basic})
-
-(l/script- :python
-  {:require [[xt.cell.service.db-query :as db-query] [xt.old.db :as xdb] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]] :runtime :basic})
-
 (fact:global
- {:setup    [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 (def +db+
   {"schema"
@@ -78,16 +72,6 @@
   (!.js
    [(db-query/query-capable? (@! +db+))
     (db-query/query-capable? {})])
-  => [true false]
-
-  (!.lua
-   [(db-query/query-capable? (@! +db+))
-    (db-query/query-capable? {})])
-  => [true false]
-
-  (!.py
-   [(db-query/query-capable? (@! +db+))
-    (db-query/query-capable? {})])
   => [true false])
 
 ^{:refer xt.cell.service.db-query/view-local-transform :added "4.1"}
@@ -99,58 +83,12 @@
                        "__deleted__" true}}
      "input" []}))
   => {"view" {"query" {"status" "open"}}
-      "input" []}
-
-  (!.lua
-   (db-query/view-local-transform
-    {"view" {"query" {"status" "open"
-                       "__deleted__" true}}
-     "input" []}))
-  => {"view" {"query" {"status" "open"}}
-      "input" []}
-
-  (!.py
-   (db-query/view-local-transform
-    {"view" {"query" {"status" "open"
-                       "__deleted__" true}}
-     "input" []}))
-  => {"view" {"query" {"status" "open"}}
       "input" []})
 
 ^{:refer xt.cell.service.db-query/query-check :added "4.1"}
 (fact "checks argument length and type against a view entry"
 
   (!.js
-   [(db-query/query-check
-     {"input" [{"symbol" "i_account_id", "type" "text"}]}
-     ["acct-1"]
-     false)
-    (db-query/query-check
-     {"input" [{"symbol" "i_account_id", "type" "text"}]}
-     [1]
-     false)])
-  => [[true]
-      [false {"status" "error"
-              "tag" "net/arg-typecheck-failed"
-              "data" {"input" 1
-                      "spec" {"symbol" "i_account_id", "type" "text"}}}]]
-
-  (!.lua
-   [(db-query/query-check
-     {"input" [{"symbol" "i_account_id", "type" "text"}]}
-     ["acct-1"]
-     false)
-    (db-query/query-check
-     {"input" [{"symbol" "i_account_id", "type" "text"}]}
-     [1]
-     false)])
-  => [[true]
-      [false {"status" "error"
-              "tag" "net/arg-typecheck-failed"
-              "data" {"input" 1
-                      "spec" {"symbol" "i_account_id", "type" "text"}}}]]
-
-  (!.py
    [(db-query/query-check
      {"input" [{"symbol" "i_account_id", "type" "text"}]}
      ["acct-1"]
@@ -179,76 +117,12 @@
       "select_method" "by_account"
       "select_args" ["acct-1"]
       "return_method" "default"
-      "return_args" []}
-
-  (!.lua
-   (db-query/normalize-query
-    (@! +db+)
-    {:table "Order"
-     :select-method "by_account"
-     :return-method "default"}
-    {:args ["acct-1"]}))
-  => {"table" "Order"
-      "select_method" "by_account"
-      "select_args" ["acct-1"]
-      "return_method" "default"
-      "return_args" []}
-
-  (!.py
-   (db-query/normalize-query
-    (@! +db+)
-    {:table "Order"
-     :select-method "by_account"
-     :return-method "default"}
-    {:args ["acct-1"]}))
-  => {"table" "Order"
-      "select_method" "by_account"
-      "select_args" ["acct-1"]
-      "return_method" "default"
       "return_args" []})
 
 ^{:refer xt.cell.service.db-query/prepare-query :added "4.1"}
 (fact "prepares a cache-view query tree from the descriptor"
 
   (!.js
-   (var [ok tree] (db-query/prepare-query
-                   (@! +db+)
-                   {:table "Order"
-                    :select-method "by_account"
-                    :return-method "default"}
-                   {:args ["acct-1"]}))
-   [ok
-     (xt/x:first tree)
-     (xtd/get-in tree [1 "account" "id"])
-     (xtd/last tree)])
-  => [true
-      "Order"
-      "acct-1"
-      ["status"
-       ["account"
-        ["nickname"
-         ["profile" ["display_name"]]]]]]
-
-  (!.lua
-   (var [ok tree] (db-query/prepare-query
-                   (@! +db+)
-                   {:table "Order"
-                    :select-method "by_account"
-                    :return-method "default"}
-                   {:args ["acct-1"]}))
-   [ok
-     (xt/x:first tree)
-     (xtd/get-in tree [1 "account" "id"])
-     (xtd/last tree)])
-  => [true
-      "Order"
-      "acct-1"
-      ["status"
-       ["account"
-        ["nickname"
-         ["profile" ["display_name"]]]]]]
-
-  (!.py
    (var [ok tree] (db-query/prepare-query
                    (@! +db+)
                    {:table "Order"
@@ -310,162 +184,12 @@
       true
       [{"status" "open"
         "account" [{"nickname" "primary"
-                    "profile" [{"display_name" "Alpha"}]}]}]]
-
-  (!.lua
-   (var desc (@! +db+))
-   (var local-db (xdb/db-create {"::" "db.cache"}
-                                 (xt/x:get-key desc "schema")
-                                (@! +lookup+)
-                                nil))
-   (xdb/sync-event local-db
-                   ["add"
-                    {"Profile" [{"id" "profile-1"
-                                 "display_name" "Alpha"}
-                                {"id" "profile-2"
-                                 "display_name" "Beta"}]
-                     "Account" [{"id" "acct-1"
-                                 "nickname" "primary"
-                                 "profile_id" "profile-1"}
-                                {"id" "acct-2"
-                                 "nickname" "backup"
-                                 "profile_id" "profile-2"}]
-                     "Order" [{"id" "ord-1"
-                               "status" "open"
-                               "account_id" "acct-1"}
-                              {"id" "ord-2"
-                               "status" "closed"
-                               "account_id" "acct-2"}]}])
-   (var [ok plan] (db-query/prepare-query
-                   desc
-                   {:table "Order"
-                    :select-method "by_account"
-                    :return-method "default"}
-                   {:args ["acct-1"]}))
-   (var [e-ok result] (db-query/execute-query desc
-                                              plan
-                                              {:db local-db}))
-   [ok
-    e-ok
-    result])
-  => [true
-      true
-      [{"status" "open"
-        "account" [{"nickname" "primary"
-                    "profile" [{"display_name" "Alpha"}]}]}]]
-
-  (!.py
-   (var desc (@! +db+))
-   (var local-db (xdb/db-create {"::" "db.cache"}
-                                 (xt/x:get-key desc "schema")
-                                (@! +lookup+)
-                                nil))
-   (xdb/sync-event local-db
-                   ["add"
-                    {"Profile" [{"id" "profile-1"
-                                 "display_name" "Alpha"}
-                                {"id" "profile-2"
-                                 "display_name" "Beta"}]
-                     "Account" [{"id" "acct-1"
-                                 "nickname" "primary"
-                                 "profile_id" "profile-1"}
-                                {"id" "acct-2"
-                                 "nickname" "backup"
-                                 "profile_id" "profile-2"}]
-                     "Order" [{"id" "ord-1"
-                               "status" "open"
-                               "account_id" "acct-1"}
-                              {"id" "ord-2"
-                               "status" "closed"
-                               "account_id" "acct-2"}]}])
-   (var [ok plan] (db-query/prepare-query
-                   desc
-                   {:table "Order"
-                    :select-method "by_account"
-                    :return-method "default"}
-                   {:args ["acct-1"]}))
-   (var [e-ok result] (db-query/execute-query desc
-                                              plan
-                                              {:db local-db}))
-   [ok
-    e-ok
-    result])
-  => [true
-      true
-      [{"status" "open"
-        "account" [{"nickname" "primary"
                     "profile" [{"display_name" "Alpha"}]}]}]])
 
 ^{:refer xt.cell.service.db-query/run-query :added "4.1"}
 (fact "prepares and executes a local cache query"
 
   (!.js
-   (var desc (@! +db+))
-   (var local-db (xdb/db-create {"::" "db.cache"}
-                                 (xt/x:get-key desc "schema")
-                                (@! +lookup+)
-                                nil))
-   (xdb/sync-event local-db
-                   ["add"
-                    {"Profile" [{"id" "profile-1"
-                                 "display_name" "Alpha"}]
-                     "Account" [{"id" "acct-1"
-                                 "nickname" "primary"
-                                 "profile_id" "profile-1"}]
-                     "Order" [{"id" "ord-1"
-                               "status" "open"
-                               "account_id" "acct-1"}]}])
-   [(db-query/run-query desc
-                        {:table "Order"
-                         :select-method "by_account"
-                         :return-method "default"}
-                        {:args ["acct-1"]
-                         :db local-db})
-    (db-query/run-query desc
-                        {:table "Order"
-                         :select-method "by_account"}
-                        {:args ["acct-1"]})])
-  => [[true
-       [{"status" "open"
-         "account" [{"nickname" "primary"
-                     "profile" [{"display_name" "Alpha"}]}]}]]
-      [false {"status" "error"
-              "tag" "db/local-db-not-provided"}]]
-
-  (!.lua
-   (var desc (@! +db+))
-   (var local-db (xdb/db-create {"::" "db.cache"}
-                                 (xt/x:get-key desc "schema")
-                                (@! +lookup+)
-                                nil))
-   (xdb/sync-event local-db
-                   ["add"
-                    {"Profile" [{"id" "profile-1"
-                                 "display_name" "Alpha"}]
-                     "Account" [{"id" "acct-1"
-                                 "nickname" "primary"
-                                 "profile_id" "profile-1"}]
-                     "Order" [{"id" "ord-1"
-                               "status" "open"
-                               "account_id" "acct-1"}]}])
-   [(db-query/run-query desc
-                        {:table "Order"
-                         :select-method "by_account"
-                         :return-method "default"}
-                        {:args ["acct-1"]
-                         :db local-db})
-    (db-query/run-query desc
-                        {:table "Order"
-                         :select-method "by_account"}
-                        {:args ["acct-1"]})])
-  => [[true
-       [{"status" "open"
-         "account" [{"nickname" "primary"
-                     "profile" [{"display_name" "Alpha"}]}]}]]
-      [false {"status" "error"
-              "tag" "db/local-db-not-provided"}]]
-
-  (!.py
    (var desc (@! +db+))
    (var local-db (xdb/db-create {"::" "db.cache"}
                                  (xt/x:get-key desc "schema")
