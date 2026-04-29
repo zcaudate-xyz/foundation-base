@@ -88,8 +88,12 @@
         current (nav/down root)]
     (if-let [mnav (some-> current form-common/nav-meta)]
       (let [m      (nav/value mnav)
-            next-m (dissoc m :seedgen/lang :seedgen/base :seedgen/check)]
+            next-m (when (map? m)
+                     (dissoc m :seedgen/lang :seedgen/base :seedgen/check))]
         (cond
+          (not (map? m))
+          s
+
           (= m next-m)
           s
 
@@ -97,9 +101,9 @@
           (-> current form-common/nav-body nav/block block/block-string)
 
           :else
-          (-> mnav
-              (nav/replace next-m)
-              nav/root-string)))
+           (-> mnav
+               (nav/replace next-m)
+               nav/root-string)))
       s)))
 
 (defn- replace-script-lang-string

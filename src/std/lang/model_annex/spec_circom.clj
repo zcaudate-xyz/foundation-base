@@ -11,7 +11,10 @@
 (defn format-string [x]
   (cond
     (string? x) (pr-str x)
-    (symbol? x) (ut/sym-default-str x)
+    (symbol? x) (let [out (ut/sym-default-str x)]
+                  (if-let [[_ inner] (re-matches #"\|(.*)\|" out)]
+                    inner
+                    out))
     :else x))
 
 ;;

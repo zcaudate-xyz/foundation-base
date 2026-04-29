@@ -321,6 +321,7 @@
   (l/emit-as
    :bash '[($> "3&")])
   => ">(3&)"
+  )
 
 ^{:refer std.lang.model.spec-bash/bash-here :added "4.0"}
 (fact "construct here block and here string"

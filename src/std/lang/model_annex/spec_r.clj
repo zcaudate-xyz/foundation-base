@@ -17,6 +17,8 @@
             [std.lib.collection :as collection]
             [std.lib.template :as template]))
 
+(declare r-apply-optional-defaults)
+
 (defn tf-defn
   "function declaration for python
  

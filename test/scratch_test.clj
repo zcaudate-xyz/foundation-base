@@ -69,7 +69,6 @@
      std.lang.model.spec-rust
      std.log.match
      std.lang.base.grammar-xtalk
-     std.lang.dev
      std.lang.base.impl
      std.lib.transform.base.type-check
      std.log.common

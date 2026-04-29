@@ -29,7 +29,7 @@
    '[(do
       (var arr [1 2 3])
       (var m {:a 1 :b 2}))])
-  => "arr = [1,2,3]\nm = {:a => 1, :b => 2}")
+  => "arr = [1,2,3]\nm = {\"a\" => 1, \"b\" => 2}")
 
 (fact "Ruby String Operations"
   (l/emit-as :ruby
@@ -77,7 +77,7 @@
 (fact "emit ruby hash"
 
   (l/emit-as :ruby '[{:a 1 :b 2}])
-  => "{:a => 1, :b => 2}")
+  => "{\"a\" => 1, \"b\" => 2}")
 
 ^{:refer std.lang.model-annex.spec-ruby/ruby-defn :added "4.1"}
 (fact "emit ruby function definition"

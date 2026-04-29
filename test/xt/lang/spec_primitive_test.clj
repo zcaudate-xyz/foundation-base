@@ -909,7 +909,7 @@
        (return (+ x 1)))
      2))
   => 3
-
+  
   (!.lua
     ((fn [x]
        (return (+ x 1)))
@@ -921,6 +921,7 @@
   (s/snapto)
   (s/run '[xt.lang.spec-primitive])
   (s/run '[xt.lang])
-  (s/seedgen-benchadd '[xt.lang.spec] {:lang [:r :php :dart :julia] :write true})
+  (s/seedgen-benchadd '[xt.lang.spec] {:lang [:r :php :ruby :dart :julia] :write true})
+  (s/seedgen-benchremove '[xt.lang.spec-primitive] {:lang [:r :php :ruby :dart :julia :scheme :elisp] :write true})
   (s/seedgen-langadd  '[xt.lang.spec-primitive] {:lang [:lua :python] :write true})
   (s/seedgen-langremove '[xt.lang.spec-primitive] {:lang [:lua :python] :write true}))

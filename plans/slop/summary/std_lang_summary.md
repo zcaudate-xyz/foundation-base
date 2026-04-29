@@ -685,14 +685,6 @@ This sub-namespace provides functions for managing the language workspace, inclu
 *   **`multistage-tmpl`**: Template for multistage functions.
 *   **`intern-macros`**: Interns macros from one namespace to another.
 
-### `std.lang.dev` (Development Utilities)
-
-This sub-namespace provides utilities specifically for development, such as reloading language specifications.
-
-**Key Functions:**
-
-*   **`reload-specs`**: Reloads language specifications.
-
 ### `std.lang.interface.type-notify` (Notification Server)
 
 This sub-namespace implements a notification server that allows language runtimes to send messages back to the Clojure host, enabling real-time feedback and event handling.

@@ -6,35 +6,48 @@
              [std.lang.base.impl-entry :as entry]
              [std.lang.base.library-snapshot :as snap]
              [std.lang.base.library-snapshot-prep-test :as lprep]
-             [std.lib.env :as env])
+              [std.lib.env :as env])
   (:use code.test))
+
+(defn make-entry
+  []
+  (entry/create-code-base
+   '(defn add-fn
+      [a b]
+      (return (-/add a (-/add a 1))))
+   {:lang :lua
+    :namespace 'L.core
+    :module 'L.core}
+   @emit/+test-grammar+))
 
 (fact "hydrate hooks can enrich the returned entry"
 
-  (-> (entry/create-code-hydrate +entry+
-                                 (assoc (get-in @emit/+test-grammar+ [:reserved 'defn])
-                                        :hydrate-hook (fn [entry]
-                                                        (assoc entry :probe/value true)))
-                                 @emit/+test-grammar+
-                                 (:modules prep/+book-min+)
-                                 '{:id L.core
-                                   :alias {}
-                                   :link  {- L.core}})
-      :probe/value)
+  (let [entry (make-entry)]
+    (-> (entry/create-code-hydrate entry
+                                   (assoc (get-in @emit/+test-grammar+ [:reserved 'defn])
+                                          :hydrate-hook (fn [entry]
+                                                          (assoc entry :probe/value true)))
+                                   @emit/+test-grammar+
+                                   (:modules prep/+book-min+)
+                                   '{:id L.core
+                                     :alias {}
+                                     :link  {- L.core}})
+        :probe/value))
   => true)
 
 (fact "xtalk metadata is derived from the hydrated form"
 
-  (-> (entry/create-code-hydrate
-       (assoc +entry+ :form-input '(do raw))
-       {:hydrate (fn [_ _ _]
-                   [nil '(do (x:nil? data))])}
-       @emit/+test-grammar+
-       (:modules prep/+book-min+)
-       '{:id L.core
-         :alias {}
-         :link  {- L.core}})
-      (select-keys [:xtalk-ops :xtalk-profiles :polyfill-modules]))
+  (let [entry (make-entry)]
+    (-> (entry/create-code-hydrate
+         (assoc entry :form-input '(do raw))
+         {:hydrate (fn [_ _ _]
+                     [nil '(do (x:nil? data))])}
+         @emit/+test-grammar+
+         (:modules prep/+book-min+)
+         '{:id L.core
+           :alias {}
+           :link  {- L.core}})
+        (select-keys [:xtalk-ops :xtalk-profiles :polyfill-modules])))
   => '{:xtalk-ops #{:x-nil?}
        :xtalk-profiles #{:xtalk-common}
        :polyfill-modules #{}})

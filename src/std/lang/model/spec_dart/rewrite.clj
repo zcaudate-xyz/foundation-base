@@ -86,6 +86,7 @@
 (declare dart-rewrite-statements)
 (declare dart-rewrite-conditional-expression)
 (declare rewrite-for-async-form)
+(declare rewrite-fn)
 
 (def ^:private with-form-meta
   walk/with-form-meta)
@@ -94,11 +95,37 @@
   [form]
   (truthy/boolish-form? form
                         {:boolish-ops +dart-boolish-ops+
-                         :dot-boolish-calls +dart-dot-boolish-calls+}))
+                          :dot-boolish-calls +dart-dot-boolish-calls+}))
+
+(defn- simple-truthy-source?
+  [form]
+  (or (symbol? form)
+      (keyword? form)
+      (string? form)
+      (number? form)
+      (boolean? form)
+      (nil? form)))
+
+(defn- dart-wrap-truthy-check
+  [source form grammar]
+  (if (simple-truthy-source? form)
+    (truthy/wrap-truthy-check source form)
+    (let [value (gensym "dart_truthy__")]
+      (with-form-meta
+        source
+        (list (rewrite-fn
+               (list 'fn []
+                     (list 'var value form)
+                     (list 'return
+                           (truthy/truthy-check-form value)))
+               grammar))))))
 
 (defn- dart-truthy-form
-  [source form]
-  (truthy/truthy-form source form dart-boolish-form?))
+  [source form grammar]
+  (truthy/truthy-form source
+                      form
+                      dart-boolish-form?
+                      #(dart-wrap-truthy-check %1 %2 grammar)))
 
 (defn- ensure-return
   [stmt]
@@ -263,7 +290,7 @@
    form
    #(rewrite-conditional-expression-list % grammar)
    #(dart-rewrite-expression % grammar)
-   dart-truthy-form))
+   #(dart-truthy-form %1 %2 grammar)))
 
 (defn dart-rewrite-expression
   [form grammar]
@@ -343,6 +370,10 @@
   [form {:keys [grammar] :as opts}]
   (let [form ((:rewrite-stage +dart-rewriter+) form opts)]
     (cond
+      (and (collection/form? form)
+           (#{'do 'do*} (first form)))
+      (dart-rewrite-expression form grammar)
+
       (collection/form? form)
       (dart-rewrite-statement form grammar)
 

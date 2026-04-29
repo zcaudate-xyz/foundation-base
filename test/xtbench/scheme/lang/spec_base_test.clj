@@ -1,11 +1,11 @@
-(ns xtbench.ruby.lang.spec-base-test
+(ns xtbench.scheme.lang.spec-base-test
   (:use code.test)
   (:require [clojure.set :as set]
   	    [std.lang :as l]
             [xt.lang.common-notify :as notify]
             [xt.lang.spec-promise :as spec-promise]))
 
-(l/script- :ruby
+(l/script- :scheme
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as spec-promise]
@@ -21,7 +21,7 @@
 ^{:refer xt.lang.spec-base/for:array :added "4.1"}
 (fact "iterates arrays in order"
 
-  (!.rb
+  (!.scheme
     (var out [])
     (xt/for:array [e [1 2 3 4]]
       (when (> e 3)
@@ -33,7 +33,7 @@
 ^{:refer xt.lang.spec-base/for:object :added "4.1"}
 (fact "iterates object key value pairs"
 
-  (!.rb
+  (!.scheme
     (var out [])
     (xt/for:object [[k v] {:a 1 :b 2}]
       (xt/x:arr-push out [k v]))
@@ -43,7 +43,7 @@
 ^{:refer xt.lang.spec-base/for:index :added "4.1"}
 (fact "iterates a numeric range"
 
-  (!.rb
+  (!.scheme
     (var out [])
     (xt/for:index [i [0 (xt/x:offset-rlen 4) 2]]
       (xt/x:arr-push out i))
@@ -53,7 +53,7 @@
 ^{:refer xt.lang.spec-base/for:iter :added "4.1"}
 (fact "expands to the canonical iterator form"
 
-  (!.rb
+  (!.scheme
     (var out [])
     (xt/for:iter [e (xt/x:iter-from-arr [1 2 3])]
       (xt/x:arr-push out e))
@@ -63,14 +63,14 @@
 ^{:refer xt.lang.spec-base/x:get-idx :added "4.1"}
 (fact "reads the first indexed value"
 
-  (!.rb
+  (!.scheme
     (xt/x:get-idx ["a" "b" "c"] (xt/x:offset 0)))
   => "a")
 
 ^{:refer xt.lang.spec-base/x:set-idx :added "4.1"}
 (fact "writes an indexed value"
 
-  (!.rb
+  (!.scheme
     (var out ["a" "b" "c"])
     (xt/x:set-idx out (xt/x:offset 1) "B")
     out)
@@ -79,35 +79,35 @@
 ^{:refer xt.lang.spec-base/x:first :added "4.1"}
 (fact "gets the first array element"
 
-  (!.rb
+  (!.scheme
     (xt/x:first ["a" "b" "c"]))
   => "a")
 
 ^{:refer xt.lang.spec-base/x:second :added "4.1"}
 (fact "gets the second array element"
 
-  (!.rb
+  (!.scheme
     (xt/x:second ["a" "b" "c"]))
   => "b")
 
 ^{:refer xt.lang.spec-base/x:last :added "4.1"}
 (fact "gets the last array element"
 
-  (!.rb
+  (!.scheme
     (xt/x:last ["a" "b" "c" "d"]))
   => "d")
 
 ^{:refer xt.lang.spec-base/x:second-last :added "4.1"}
 (fact "gets the element before the last"
 
-  (!.rb
+  (!.scheme
     (xt/x:second-last ["a" "b" "c" "d"]))
   => "c")
 
 ^{:refer xt.lang.spec-base/x:arr-remove :added "4.1"}
 (fact "removes an element from an array"
 
-  (!.rb
+  (!.scheme
     (do (var out ["a" "b" "c" "d"])
         (xt/x:arr-remove out 1)
         out))
@@ -116,7 +116,7 @@
 ^{:refer xt.lang.spec-base/x:arr-push :added "4.1"}
 (fact "pushes an element onto an array"
 
-  (!.rb
+  (!.scheme
     (var out ["a" "b" "c"])
     (xt/x:arr-push out "D")
     out)
@@ -125,7 +125,7 @@
 ^{:refer xt.lang.spec-base/x:arr-pop :added "4.1"}
 (fact "pops the last element from an array"
 
-  (!.rb
+  (!.scheme
     (var out ["a" "b" "c" "d"])
     [(xt/x:arr-pop out) out])
   => ["d" ["a" "b" "c"]])
@@ -133,7 +133,7 @@
 ^{:refer xt.lang.spec-base/x:arr-push-first :added "4.1"}
 (fact "pushes an element to the front of an array"
 
-  (!.rb
+  (!.scheme
     (var out ["a" "b" "c"])
     (xt/x:arr-push-first out "D")
     out)
@@ -142,7 +142,7 @@
 ^{:refer xt.lang.spec-base/x:arr-pop-first :added "4.1"}
 (fact "pops the first element from an array"
 
-  (!.rb
+  (!.scheme
     (var out ["a" "b" "c" "d"])
     [(xt/x:arr-pop-first out) out])
   => ["a" ["b" "c" "d"]])
@@ -150,7 +150,7 @@
 ^{:refer xt.lang.spec-base/x:arr-insert :added "4.1"}
 (fact "inserts an element into an array"
 
-  (!.rb
+  (!.scheme
     (var out ["a" "b" "c"])
     (xt/x:arr-insert out (xt/x:offset 1) "D")
     out)
@@ -159,7 +159,7 @@
 ^{:refer xt.lang.spec-base/x:arr-slice :added "4.1"}
 (fact "slices a range from an array"
 
-  (!.rb
+  (!.scheme
     (xt/x:arr-slice ["a" "b" "c" "d" "e"]
                     1
                     3))
@@ -168,14 +168,14 @@
 ^{:refer xt.lang.spec-base/x:arr-reverse :added "4.1"}
 (fact "reverses an array"
 
-  (!.rb
+  (!.scheme
     (xt/x:arr-reverse ["a" "b" "c"]))
   => ["c" "b" "a"])
 
 ^{:refer xt.lang.spec-base/x:del :added "4.1"}
 (fact "expands and emits a lua delete form"
 
-  (!.rb
+  (!.scheme
     (var out {:a 1 :b 2})
     (xt/x:del (. out ["a"]))
     out)
@@ -184,21 +184,21 @@
 ^{:refer xt.lang.spec-base/x:cat :added "4.1"}
 (fact "concatenates strings"
 
-  (!.rb
+  (!.scheme
     (xt/x:cat "hello" "-" "world"))
   => "hello-world")
 
 ^{:refer xt.lang.spec-base/x:len :added "4.1"}
 (fact "gets the collection length"
 
-  (!.rb
+  (!.scheme
     (xt/x:len ["a" "b" "c"]))
   => 3)
 
 ^{:refer xt.lang.spec-base/x:err :added "4.1"}
 (fact "expands and emits a lua error form"
 
-  (!.rb
+  (!.scheme
     (var err-fn (fn []
                   (xt/x:err "ERR")))
     (err-fn))
@@ -207,14 +207,14 @@
 ^{:refer xt.lang.spec-base/x:ex-native? :added "4.1"}
 (fact "TODO"
 
-  (!.rb
+  (!.scheme
     (xt/x:ex-native? (xt/x:ex "hello" {:a 1})))
   => true)
 
 ^{:refer xt.lang.spec-base/x:ex-new :added "4.1"}
 (fact "creates native exceptions with structured data"
 
-  (notify/wait-on :ruby
+  (notify/wait-on :scheme
     (spec-promise/x:promise-catch
      (spec-promise/x:promise
       (fn []
@@ -228,7 +228,7 @@
 ^{:refer xt.lang.spec-base/x:type-native :added "4.1"}
 (fact "expands and emits the lua type helper"
 
-  (!.rb
+  (!.scheme
     (var type-fn (fn [obj]
                    (return
                     (xt/x:type-native obj))))
@@ -240,35 +240,35 @@
 ^{:refer xt.lang.spec-base/x:offset :added "4.1"}
 (fact "uses the grammar base offset"
 
-  (!.rb    
+  (!.scheme    
     (xt/x:offset 10))
   => 10)
 
 ^{:refer xt.lang.spec-base/x:offset-rev :added "4.1"}
 (fact "uses the reverse grammar offset"
 
-  (!.rb
+  (!.scheme
     (xt/x:offset-rev 10))
   => 9)
 
 ^{:refer xt.lang.spec-base/x:offset-len :added "4.1"}
 (fact "uses the length grammar offset"
 
-  (!.rb
+  (!.scheme
     (xt/x:offset-len 10))
   => 9)
 
 ^{:refer xt.lang.spec-base/x:offset-rlen :added "4.1"}
 (fact "uses the reverse length grammar offset"
 
-  (!.rb
+  (!.scheme
     (xt/x:offset-rlen 10))
   => 10)
 
 ^{:refer xt.lang.spec-base/x:lu-create :added "4.1"}
 (fact "creates a lookup table wrapper"
 
-  (!.rb
+  (!.scheme
     (var lu (xt/x:lu-create))
     (var lu-A1 {"A" "A"})
     (var lu-A2 {"A" "A"})
@@ -281,7 +281,7 @@
 ^{:refer xt.lang.spec-base/x:lu-eq :added "4.1"}
 (fact "compares lookup keys using lua identity"
 
-  (!.rb
+  (!.scheme
     (var obj-a {:id 1})
     (var obj-b {:id 1})
     [(xt/x:lu-eq obj-a obj-a)
@@ -292,7 +292,7 @@
 ^{:refer xt.lang.spec-base/x:lu-get :added "4.1"}
 (fact "reads values from a lookup table"
 
-  (!.rb
+  (!.scheme
     (var lu (xt/x:lu-create))
     (var lu-key {:id 1})
     (xt/x:lu-set lu lu-key "value")
@@ -302,7 +302,7 @@
 ^{:refer xt.lang.spec-base/x:lu-set :added "4.1"}
 (fact "writes values into a lookup table"
 
-  (!.rb
+  (!.scheme
     (var lu (xt/x:lu-create))
     (var lu-key {:id 1})
     (xt/x:lu-set lu lu-key "value")
@@ -312,7 +312,7 @@
 ^{:refer xt.lang.spec-base/x:lu-del :added "4.1"}
 (fact "removes values from a lookup table"
 
-  (!.rb
+  (!.scheme
     (var lu (xt/x:lu-create))
     (var lu-key {:id 1})
     (xt/x:lu-set lu lu-key "value")
@@ -323,273 +323,273 @@
 ^{:refer xt.lang.spec-base/x:m-abs :added "4.1"}
 (fact "computes absolute values"
 
-  (!.rb (xt/x:m-abs -3))
+  (!.scheme (xt/x:m-abs -3))
   => 3)
 
 ^{:refer xt.lang.spec-base/x:m-acos :added "4.1"}
 (fact "computes inverse cosine"
 
-  (!.rb (xt/x:m-acos 1))
+  (!.scheme (xt/x:m-acos 1))
   => (approx 0))
 
 ^{:refer xt.lang.spec-base/x:m-asin :added "4.1"}
 (fact "computes inverse sine"
 
-  (!.rb (xt/x:m-asin 0))
+  (!.scheme (xt/x:m-asin 0))
   => (approx 0))
 
 ^{:refer xt.lang.spec-base/x:m-atan :added "4.1"}
 (fact "computes inverse tangent"
 
-  (!.rb (xt/x:m-atan 0))
+  (!.scheme (xt/x:m-atan 0))
   => (approx 0))
 
 ^{:refer xt.lang.spec-base/x:m-ceil :added "4.1"}
 (fact "rounds numbers upward"
 
-  (!.rb (xt/x:m-ceil 1.2))
+  (!.scheme (xt/x:m-ceil 1.2))
   => 2)
 
 ^{:refer xt.lang.spec-base/x:m-cos :added "4.1"}
 (fact "computes cosine"
 
-  (!.rb (xt/x:m-cos 0))
+  (!.scheme (xt/x:m-cos 0))
   => (approx 1))
 
 ^{:refer xt.lang.spec-base/x:m-cosh :added "4.1"}
 (fact "computes hyperbolic cosine"
 
-  (!.rb (xt/x:m-cosh 0))
+  (!.scheme (xt/x:m-cosh 0))
   => (approx 1))
 
 ^{:refer xt.lang.spec-base/x:m-exp :added "4.1"}
 (fact "computes the exponential function"
 
-  (!.rb (xt/x:m-exp 0))
+  (!.scheme (xt/x:m-exp 0))
   => (approx 1))
 
 ^{:refer xt.lang.spec-base/x:m-floor :added "4.1"}
 (fact "rounds numbers downward"
 
-  (!.rb (xt/x:m-floor 1.8))
+  (!.scheme (xt/x:m-floor 1.8))
   => 1)
 
 ^{:refer xt.lang.spec-base/x:m-loge :added "4.1"}
 (fact "computes the natural logarithm"
 
-  (!.rb (xt/x:m-loge 1))
+  (!.scheme (xt/x:m-loge 1))
   => (approx 0))
 
 ^{:refer xt.lang.spec-base/x:m-log10 :added "4.1"}
 (fact "computes the base-10 logarithm"
 
-  (!.rb (xt/x:m-log10 100))
+  (!.scheme (xt/x:m-log10 100))
   => (approx 2))
 
 ^{:refer xt.lang.spec-base/x:m-max :added "4.1"}
 (fact "computes the maximum value"
 
-  (!.rb (xt/x:m-max 3 5))
+  (!.scheme (xt/x:m-max 3 5))
   => 5)
 
 ^{:refer xt.lang.spec-base/x:m-mod :added "4.1"}
 (fact "computes modulo values"
 
-  (!.rb (xt/x:m-mod 10 3))
+  (!.scheme (xt/x:m-mod 10 3))
   => 1)
 
 ^{:refer xt.lang.spec-base/x:m-min :added "4.1"}
 (fact "computes the minimum value"
 
-  (!.rb (xt/x:m-min 3 5))
+  (!.scheme (xt/x:m-min 3 5))
   => 3)
 
 ^{:refer xt.lang.spec-base/x:m-pow :added "4.1"}
 (fact "raises numbers to a power"
 
-  (!.rb (xt/x:m-pow 2 4))
+  (!.scheme (xt/x:m-pow 2 4))
   => 16)
 
 ^{:refer xt.lang.spec-base/x:m-quot :added "4.1"}
 (fact "computes integer quotients"
 
-  (!.rb (xt/x:m-quot 7 2))
+  (!.scheme (xt/x:m-quot 7 2))
   => 3)
 
 ^{:refer xt.lang.spec-base/x:m-sin :added "4.1"}
 (fact "computes sine"
 
-  (!.rb (xt/x:m-sin 0))
+  (!.scheme (xt/x:m-sin 0))
   => (approx 0))
 
 ^{:refer xt.lang.spec-base/x:m-sinh :added "4.1"}
 (fact "computes hyperbolic sine"
 
-  (!.rb (xt/x:m-sinh 0))
+  (!.scheme (xt/x:m-sinh 0))
   => (approx 0))
 
 ^{:refer xt.lang.spec-base/x:m-sqrt :added "4.1"}
 (fact "computes square roots"
 
-  (!.rb (xt/x:m-sqrt 9))
+  (!.scheme (xt/x:m-sqrt 9))
   => (approx 3))
 
 ^{:refer xt.lang.spec-base/x:m-tan :added "4.1"}
 (fact "computes tangent"
 
-  (!.rb (xt/x:m-tan 0))
+  (!.scheme (xt/x:m-tan 0))
   => (approx 0))
 
 ^{:refer xt.lang.spec-base/x:m-tanh :added "4.1"}
 (fact "computes hyperbolic tangent"
 
-  (!.rb (xt/x:m-tanh 0))
+  (!.scheme (xt/x:m-tanh 0))
   => (approx 0))
 
 ^{:refer xt.lang.spec-base/x:not-nil? :added "4.1"}
 (fact "checks for non-nil values"
 
-  (!.rb
+  (!.scheme
     (xt/x:not-nil? 0))
   => true)
 
 ^{:refer xt.lang.spec-base/x:nil? :added "4.1"}
 (fact "checks for nil values"
 
-  (!.rb
+  (!.scheme
     (xt/x:nil? nil))
   => true)
 
 ^{:refer xt.lang.spec-base/x:add :added "4.1"}
 (fact "adds numbers"
 
-  (!.rb
+  (!.scheme
     (xt/x:add 1 2 3))
   => 6)
 
 ^{:refer xt.lang.spec-base/x:sub :added "4.1"}
 (fact "subtracts numbers"
 
-  (!.rb
+  (!.scheme
     (xt/x:sub 10 3 2))
   => 5)
 
 ^{:refer xt.lang.spec-base/x:mul :added "4.1"}
 (fact "multiplies numbers"
 
-  (!.rb
+  (!.scheme
     (xt/x:mul 2 3 4))
   => 24)
 
 ^{:refer xt.lang.spec-base/x:div :added "4.1"}
 (fact "divides numbers"
 
-  (!.rb
+  (!.scheme
     (xt/x:div 20 5))
   => (approx 4))
 
 ^{:refer xt.lang.spec-base/x:neg :added "4.1"}
 (fact "negates a number"
 
-  (!.rb
+  (!.scheme
     (xt/x:neg 2))
   => -2)
 
 ^{:refer xt.lang.spec-base/x:inc :added "4.1"}
 (fact "increments a number"
 
-  (!.rb
+  (!.scheme
     (xt/x:inc 2))
   => 3)
 
 ^{:refer xt.lang.spec-base/x:dec :added "4.1"}
 (fact "decrements a number"
 
-  (!.rb
+  (!.scheme
     (xt/x:dec 2))
   => 1)
 
 ^{:refer xt.lang.spec-base/x:zero? :added "4.1"}
 (fact "checks whether a number is zero"
 
-  (!.rb
+  (!.scheme
     (xt/x:zero? 0))
   => true)
 
 ^{:refer xt.lang.spec-base/x:pos? :added "4.1"}
 (fact "checks whether a number is positive"
 
-  (!.rb
+  (!.scheme
     (xt/x:pos? 2))
   => true)
 
 ^{:refer xt.lang.spec-base/x:neg? :added "4.1"}
 (fact "checks whether a number is negative"
 
-  (!.rb
+  (!.scheme
     (xt/x:neg? -2))
   => true)
 
 ^{:refer xt.lang.spec-base/x:even? :added "4.1"}
 (fact "checks whether a number is even"
 
-  (!.rb
+  (!.scheme
     (xt/x:even? 4))
   => true)
 
 ^{:refer xt.lang.spec-base/x:odd? :added "4.1"}
 (fact "checks whether a number is odd"
 
-  (!.rb
+  (!.scheme
     (xt/x:odd? 5))
   => true)
 
 ^{:refer xt.lang.spec-base/x:eq :added "4.1"}
 (fact "checks equality"
 
-  (!.rb
+  (!.scheme
     (xt/x:eq 2 2))
   => true)
 
 ^{:refer xt.lang.spec-base/x:neq :added "4.1"}
 (fact "checks inequality"
 
-  (!.rb
+  (!.scheme
     (xt/x:neq 2 3))
   => true)
 
 ^{:refer xt.lang.spec-base/x:lt :added "4.1"}
 (fact "checks less than"
 
-  (!.rb
+  (!.scheme
     (xt/x:lt 2 3))
   => true)
 
 ^{:refer xt.lang.spec-base/x:lte :added "4.1"}
 (fact "checks less than or equal"
 
-  (!.rb
+  (!.scheme
     (xt/x:lte 3 3))
   => true)
 
 ^{:refer xt.lang.spec-base/x:gt :added "4.1"}
 (fact "checks greater than"
 
-  (!.rb
+  (!.scheme
     (xt/x:gt 4 3))
   => true)
 
 ^{:refer xt.lang.spec-base/x:gte :added "4.1"}
 (fact "checks greater than or equal"
 
-  (!.rb
+  (!.scheme
     (xt/x:gte 4 4))
   => true)
 
 ^{:refer xt.lang.spec-base/x:has-key? :added "4.1"}
 (fact "checks whether an object has a key"
 
-  (!.rb
+  (!.scheme
     (var obj {:a 1})
     (xt/x:has-key? obj "a"))
   => true)
@@ -597,7 +597,7 @@
 ^{:refer xt.lang.spec-base/x:del-key :added "4.1"}
 (fact "deletes keys from objects"
 
-  (!.rb
+  (!.scheme
     (var out {:a 1 :b 2})
     (xt/x:del-key out "a")
     out)
@@ -606,21 +606,21 @@
 ^{:refer xt.lang.spec-base/x:get-key :added "4.1"}
 (fact "gets a value by key with a fallback"
 
-  (!.rb
+  (!.scheme
     (xt/x:get-key {} "missing" "fallback"))
   => "fallback")
 
 ^{:refer xt.lang.spec-base/x:get-path :added "4.1"}
 (fact "gets a nested value by path"
 
-  (!.rb
+  (!.scheme
     (xt/x:get-path {:nested {:b 2}} ["nested" "b"]))
   => 2)
 
 ^{:refer xt.lang.spec-base/x:set-key :added "4.1"}
 (fact "sets a key on an object"
 
-  (!.rb
+  (!.scheme
     (var out {:a 1})
     (xt/x:set-key out "b" 2)
     out)
@@ -629,7 +629,7 @@
 ^{:refer xt.lang.spec-base/x:copy-key :added "4.1"}
 (fact "copies a key from another object"
 
-  (!.rb
+  (!.scheme
     (var out {:a 1})
     (xt/x:copy-key out {:a 9} ["c" "a"])
     out)
@@ -638,28 +638,28 @@
 ^{:refer xt.lang.spec-base/x:obj-keys :added "4.1"}
 (fact "lists object keys"
 
-  (!.rb
+  (!.scheme
     (xt/x:obj-keys {:a 1 :b 2}))
   => (just ["a" "b"] :in-any-order))
 
 ^{:refer xt.lang.spec-base/x:obj-vals :added "4.1"}
 (fact "lists object values"
 
-  (!.rb
+  (!.scheme
     (xt/x:obj-vals {:a 1 :b 2}))
   => (just [1 2] :in-any-order))
 
 ^{:refer xt.lang.spec-base/x:obj-pairs :added "4.1"}
 (fact "lists object pairs"
 
-  (!.rb
+  (!.scheme
     (xt/x:obj-pairs {:a 1 :b 2}))
   => (just [["a" 1] ["b" 2]] :in-any-order))
 
 ^{:refer xt.lang.spec-base/x:obj-clone :added "4.1"}
 (fact "clones an object"
 
-  (!.rb
+  (!.scheme
     (var src {:a 1})
     (var out (xt/x:obj-clone src))
     (xt/x:set-key src "b" 2)
@@ -669,158 +669,158 @@
 ^{:refer xt.lang.spec-base/x:obj-assign :added "4.1"}
 (fact "assigns object keys"
 
-  (!.rb
+  (!.scheme
     (xt/x:obj-assign {:a 1} {:b 2}))
   => {"a" 1, "b" 2})
 
 ^{:refer xt.lang.spec-base/x:to-string :added "4.1"}
 (fact "converts a value to a string"
 
-  (!.rb
+  (!.scheme
     (xt/x:to-string 12))
   => "12")
 
 ^{:refer xt.lang.spec-base/x:to-number :added "4.1"}
 (fact "converts a string to a number"
 
-  (!.rb
+  (!.scheme
     (xt/x:to-number "12.5"))
   => 12.5)
 
 ^{:refer xt.lang.spec-base/x:is-string? :added "4.1"}
 (fact "recognises strings"
 
-  (!.rb
+  (!.scheme
     (xt/x:is-string? "abc"))
   => true)
 
 ^{:refer xt.lang.spec-base/x:is-number? :added "4.1"}
 (fact "recognises numbers"
 
-  (!.rb
+  (!.scheme
     (xt/x:is-number? 1.5))
   => true)
 
 ^{:refer xt.lang.spec-base/x:is-integer? :added "4.1"}
 (fact "recognises integers"
 
-  (!.rb
+  (!.scheme
     (xt/x:is-integer? 2))
   => true)
 
 ^{:refer xt.lang.spec-base/x:is-boolean? :added "4.1"}
 (fact "recognises booleans"
 
-  (!.rb
+  (!.scheme
     (xt/x:is-boolean? true))
   => true)
 
 ^{:refer xt.lang.spec-base/x:is-object? :added "4.1"}
 (fact "recognises objects"
 
-  (!.rb
+  (!.scheme
     (xt/x:is-object? {:a 1}))
   => true)
 
 ^{:refer xt.lang.spec-base/x:is-array? :added "4.1"}
 (fact "recognises arrays"
 
-  (!.rb
+  (!.scheme
     (xt/x:is-array? [1 2]))
   => true)
 
 ^{:refer xt.lang.spec-base/x:print :added "4.1"}
 (fact "expands and emits a lua print form"
 
-  (!.rb
+  (!.scheme
     (xt/x:nil? (xt/x:print "hello")))
   => true)
 
 ^{:refer xt.lang.spec-base/x:str-len :added "4.1"}
 (fact "gets the string length"
 
-  (!.rb
+  (!.scheme
     (xt/x:str-len "hello"))
   => 5)
 
 ^{:refer xt.lang.spec-base/x:str-comp :added "4.1"}
 (fact "compares strings by sort order"
 
-  (!.rb (xt/x:str-comp "abc" "abd"))
+  (!.scheme (xt/x:str-comp "abc" "abd"))
   => true)
 
 ^{:refer xt.lang.spec-base/x:str-lt :added "4.1"}
 (fact "checks whether one string sorts before another"
 
-  (!.rb (xt/x:str-lt "abc" "abd"))
+  (!.scheme (xt/x:str-lt "abc" "abd"))
   => true)
 
 ^{:refer xt.lang.spec-base/x:str-gt :added "4.1"}
 (fact "checks whether one string sorts after another"
 
-  (!.rb (xt/x:str-gt "abd" "abc"))
+  (!.scheme (xt/x:str-gt "abd" "abc"))
   => true)
 
 ^{:refer xt.lang.spec-base/x:str-pad-left :added "4.1"}
 (fact "pads a string on the left"
 
-  (!.rb
+  (!.scheme
     (xt/x:str-pad-left "7" 3 "0"))
   => "007")
 
 ^{:refer xt.lang.spec-base/x:str-pad-right :added "4.1"}
 (fact "pads a string on the right"
 
-  (!.rb
+  (!.scheme
     (xt/x:str-pad-right "7" 3 "0"))
   => "700")
 
 ^{:refer xt.lang.spec-base/x:str-starts-with :added "4.1"}
 (fact "checks the string prefix"
 
-  (!.rb
+  (!.scheme
     (xt/x:str-starts-with "hello" "he"))
   => true)
 
 ^{:refer xt.lang.spec-base/x:str-ends-with :added "4.1"}
 (fact "checks the string suffix"
 
-  (!.rb
+  (!.scheme
     (xt/x:str-ends-with "hello" "lo"))
   => true)
 
 ^{:refer xt.lang.spec-base/x:str-char :added "4.1"}
 (fact "gets the character code at an index"
 
-  (!.rb
+  (!.scheme
     (xt/x:str-char "abc" (xt/x:offset 1)))
   => 98)
 
 ^{:refer xt.lang.spec-base/x:str-split :added "4.1"}
 (fact "splits a string"
 
-  (!.rb
+  (!.scheme
     (xt/x:str-split "a/b/c" "/"))
   => ["a" "b" "c"])
 
 ^{:refer xt.lang.spec-base/x:str-join :added "4.1"}
 (fact "joins string parts"
 
-  (!.rb
+  (!.scheme
     (xt/x:str-join "-" ["a" "b" "c"]))
   => "a-b-c")
 
 ^{:refer xt.lang.spec-base/x:str-index-of :added "4.1"}
 (fact "finds the index of a substring"
 
-  (!.rb
+  (!.scheme
     (xt/x:str-index-of "hello/world" "/" (xt/x:offset 0)))
   => 5)
 
 ^{:refer xt.lang.spec-base/x:str-substring :added "4.1"}
 (fact "gets a substring"
 
-  (!.rb
+  (!.scheme
     [(xt/x:str-substring "hello/world" (xt/x:offset 3))
      (xt/x:str-substring "hello/world" (xt/x:offset 3) 8)])
   => ["lo/world" "lo/wo"])
@@ -828,52 +828,52 @@
 ^{:refer xt.lang.spec-base/x:str-to-upper :added "4.1"}
 (fact "converts a string to upper case"
 
-  (!.rb
+  (!.scheme
     (xt/x:str-to-upper "hello"))
   => "HELLO")
 
 ^{:refer xt.lang.spec-base/x:str-to-lower :added "4.1"}
 (fact "converts a string to lower case"
 
-  (!.rb
+  (!.scheme
     (xt/x:str-to-lower "HELLO"))
   => "hello")
 
 ^{:refer xt.lang.spec-base/x:str-to-fixed :added "4.1"}
 (fact "formats a number with fixed decimals"
 
-  (!.rb
+  (!.scheme
     (xt/x:str-to-fixed 1.2 2))
   => "1.20")
 
 ^{:refer xt.lang.spec-base/x:str-replace :added "4.1"}
 (fact "replaces matching substrings"
 
-  (!.rb (xt/x:str-replace "hello-world" "-" "/"))
+  (!.scheme (xt/x:str-replace "hello-world" "-" "/"))
   => "hello/world")
 
 ^{:refer xt.lang.spec-base/x:str-trim :added "4.1"}
 (fact "trims whitespace from both sides"
 
-  (!.rb (xt/x:str-trim "  hello  "))
+  (!.scheme (xt/x:str-trim "  hello  "))
   => "hello")
 
 ^{:refer xt.lang.spec-base/x:str-trim-left :added "4.1"}
 (fact "trims whitespace from the left side"
 
-  (!.rb (xt/x:str-trim-left "  hello"))
+  (!.scheme (xt/x:str-trim-left "  hello"))
   => "hello")
 
 ^{:refer xt.lang.spec-base/x:str-trim-right :added "4.1"}
 (fact "trims whitespace from the right side"
 
-  (!.rb (xt/x:str-trim-right "hello  "))
+  (!.scheme (xt/x:str-trim-right "hello  "))
   => "hello")
 
 ^{:refer xt.lang.spec-base/x:arr-sort :added "4.1"}
 (fact "sorts arrays using key and compare functions"
 
-  (!.rb
+  (!.scheme
     (var out [{:id 3} {:id 1} {:id 2}])
     (xt/x:arr-sort out
                    (fn [e] (return (xt/x:get-key e "id")))
@@ -884,7 +884,7 @@
 ^{:refer xt.lang.spec-base/x:arr-clone :added "4.1"}
 (fact "clones an array"
 
-  (!.rb
+  (!.scheme
     (var src [1 2])
     (var out (xt/x:arr-clone src))
     (xt/x:arr-push src 3)
@@ -894,7 +894,7 @@
 ^{:refer xt.lang.spec-base/x:arr-each :added "4.1"}
 (fact "iterates each element in an array"
 
-  (!.rb
+  (!.scheme
     (var out [])
     (xt/x:arr-each [1 2 3]
                    (fn [e]
@@ -905,7 +905,7 @@
 ^{:refer xt.lang.spec-base/x:arr-every :added "4.1"}
 (fact "checks whether every array element matches a predicate"
 
-  (!.rb
+  (!.scheme
     (xt/x:arr-every [2 4 6]
                     (fn [e] (return (xt/x:even? e)))))
   => true)
@@ -913,7 +913,7 @@
 ^{:refer xt.lang.spec-base/x:arr-some :added "4.1"}
 (fact "checks whether any array element matches a predicate"
 
-  (!.rb
+  (!.scheme
     (xt/x:arr-some [1 3 4]
                    (fn [e] (return (xt/x:even? e)))))
   => true)
@@ -921,14 +921,14 @@
 ^{:refer xt.lang.spec-base/x:arr-map :added "4.1"}
 (fact "maps an array"
 
-  (!.rb
+  (!.scheme
     (xt/x:arr-map [1 2 3] (fn [e] (return (* e 2)))))
   => [2 4 6])
 
 ^{:refer xt.lang.spec-base/x:arr-assign :added "4.1"}
 (fact "appends one array to another"
 
-  (!.rb
+  (!.scheme
     (var out  [1 2])
     (xt/x:arr-assign out [3 4])
     out)
@@ -937,7 +937,7 @@
 ^{:refer xt.lang.spec-base/x:arr-concat :added "4.1"}
 (fact "concatenates arrays into a new array"
 
-  (!.rb
+  (!.scheme
     (var src [1 2])
     [(xt/x:arr-concat src [3 4]) src])
   => [[1 2 3 4] [1 2]])
@@ -945,14 +945,14 @@
 ^{:refer xt.lang.spec-base/x:arr-filter :added "4.1"}
 (fact "filters an array"
 
-  (!.rb
+  (!.scheme
     (xt/x:arr-filter [2 3 4 5] (fn [e] (return (xt/x:even? e)))))
   => [2 4])
 
 ^{:refer xt.lang.spec-base/x:arr-foldl :added "4.1"}
 (fact "folds arrays from the left"
 
-  (!.rb
+  (!.scheme
     (xt/x:arr-foldl [1 2 3 4 5]
                     (fn [out e] (return (+ out e)))
                     0))
@@ -961,7 +961,7 @@
 ^{:refer xt.lang.spec-base/x:arr-foldr :added "4.1"}
 (fact "folds arrays from the right"
 
-  (!.rb
+  (!.scheme
     (xt/x:arr-foldr ["a" "b" "c" "d" "e"]
                     (fn [out e] (return (xt/x:cat out e)))
                     ""))
@@ -970,21 +970,21 @@
 ^{:refer xt.lang.spec-base/x:is-function? :added "4.1"}
 (fact "recognises function values"
 
-  (!.rb
+  (!.scheme
     (xt/x:is-function? (fn [x] (return x))))
   => true)
 
 ^{:refer xt.lang.spec-base/x:eval :added "4.1"}
 (fact "evaluates javascript expressions"
 
-  (!.rb
+  (!.scheme
     (xt/x:eval "1 + 1"))
   => 2)
 
 ^{:refer xt.lang.spec-base/x:apply :added "4.1"}
 (fact "applies array arguments to functions"
 
-  (!.rb
+  (!.scheme
     (xt/x:apply (fn [a b c]
                   (return (+ a b c)))
                 [1 2 3]))
@@ -993,7 +993,7 @@
 ^{:refer xt.lang.spec-base/x:iter-from-obj :added "4.1"}
 (fact "creates iterators over object pairs"
 
-  (!.rb
+  (!.scheme
     (var out [])
     (xt/for:iter [e (xt/x:iter-from-obj {:a 1 :b 2})]
       (xt/x:arr-push out e))
@@ -1003,7 +1003,7 @@
 ^{:refer xt.lang.spec-base/x:iter-from-arr :added "4.1"}
 (fact "creates iterators over arrays"
 
-  (!.rb
+  (!.scheme
     (var out [])
     (xt/for:iter [e (xt/x:iter-from-arr [1 2 3])]
       (xt/x:arr-push out e))
@@ -1013,7 +1013,7 @@
 ^{:refer xt.lang.spec-base/x:iter-from :added "4.1"}
 (fact "creates generic iterators from iterable values"
 
-  (!.rb
+  (!.scheme
     (var out [])
     (xt/for:iter [e (xt/x:iter-from [2 4 6])]
       (xt/x:arr-push out e))
@@ -1023,7 +1023,7 @@
 ^{:refer xt.lang.spec-base/x:iter-eq :added "4.1"}
 (fact "checks iterator equality in js"
 
-  (!.rb
+  (!.scheme
     (var eq-fn (fn [it0 it1 eq-fn]
                  (return
                   (xt/x:iter-eq it0 it1 eq-fn))))
@@ -1040,7 +1040,7 @@
 ^{:refer xt.lang.spec-base/x:iter-null :added "4.1"}
 (fact "creates empty iterators"
 
-  (!.rb
+  (!.scheme
     (var it (xt/x:iter-null))
     (xt/x:iter-native? it))
   => true)
@@ -1048,7 +1048,7 @@
 ^{:refer xt.lang.spec-base/x:iter-next :added "4.1"}
 (fact "advances iterators"
 
-  (!.rb
+  (!.scheme
     (var it (xt/x:iter-from-arr [1 2 3]))
     (xt/x:iter-native? it))
   => true)
@@ -1056,7 +1056,7 @@
 ^{:refer xt.lang.spec-base/x:iter-has? :added "4.1"}
 (fact "checks whether values are iterable"
 
-  (!.rb
+  (!.scheme
     [(xt/x:iter-has? [1 2 3])
      (xt/x:iter-has? {:a 1})])
   => [true false])
@@ -1064,7 +1064,7 @@
 ^{:refer xt.lang.spec-base/x:iter-native? :added "4.1"}
 (fact "checks whether values are iterator instances"
 
-  (!.rb
+  (!.scheme
     [(xt/x:iter-native? (xt/x:iter-from-arr [1 2 3]))
      (xt/x:iter-native? [1 2 3])])
   => [true false])
@@ -1072,7 +1072,7 @@
 ^{:refer xt.lang.spec-base/x:return-encode :added "4.1"}
 (fact "encodes return payloads as json"
 
-  (!.rb
+  (!.scheme
     (var encode-fn
          (fn [value id key]
            (return
@@ -1080,7 +1080,7 @@
     (xt/x:json-decode (encode-fn {:a 1} "id" "key")))
   => {"return" "object", "key" "key", "id" "id", "value" {"a" 1}, "type" "data"}
 
-  (!.rb
+  (!.scheme
     (var encode-fn
          (fn [value id key]
            (return
@@ -1091,7 +1091,7 @@
 ^{:refer xt.lang.spec-base/x:return-wrap :added "4.1"}
 (fact "wraps return values through encoder functions"
 
-  (!.rb
+  (!.scheme
     (var encode-fn
          (fn [value id key]
            (return
@@ -1114,7 +1114,7 @@
 ^{:refer xt.lang.spec-base/x:return-eval :added "4.1"}
 (fact "evaluates code through wrapped return handlers"
 
-  (!.rb
+  (!.scheme
     (var encode-fn
          (fn [value id key]
            (return
@@ -1140,37 +1140,37 @@
 ^{:refer xt.lang.spec-base/x:bit-and :added "4.1"}
 (fact "computes bitwise and"
 
-  (!.rb (xt/x:bit-and 6 3))
+  (!.scheme (xt/x:bit-and 6 3))
   => 2)
 
 ^{:refer xt.lang.spec-base/x:bit-or :added "4.1"}
 (fact "computes bitwise or"
 
-  (!.rb (xt/x:bit-or 6 3))
+  (!.scheme (xt/x:bit-or 6 3))
   => 7)
 
 ^{:refer xt.lang.spec-base/x:bit-lshift :added "4.1"}
 (fact "computes bitwise left shifts"
 
-  (!.rb (xt/x:bit-lshift 3 2))
+  (!.scheme (xt/x:bit-lshift 3 2))
   => 12)
 
 ^{:refer xt.lang.spec-base/x:bit-rshift :added "4.1"}
 (fact "computes bitwise right shifts"
 
-  (!.rb (xt/x:bit-rshift 12 2))
+  (!.scheme (xt/x:bit-rshift 12 2))
   => 3)
 
 ^{:refer xt.lang.spec-base/x:bit-xor :added "4.1"}
 (fact "computes bitwise xor"
 
-  (!.rb (xt/x:bit-xor 6 3))
+  (!.scheme (xt/x:bit-xor 6 3))
   => 5)
 
 ^{:refer xt.lang.spec-base/x:global-set :added "4.1"}
 (fact "writes values to the shared global map"
 
-  (!.rb
+  (!.scheme
     (var set-fn
          (fn []
            (xt/x:global-set COMMON_SPEC_GLOBAL 1)
@@ -1188,7 +1188,7 @@
 ^{:refer xt.lang.spec-base/x:global-del :added "4.1"}
 (fact "removes values from the shared global map"
 
-  (!.rb
+  (!.scheme
     (xt/x:global-set COMMON_SPEC_DELETE 1)
     (xt/x:global-del COMMON_SPEC_DELETE)
     (!:G COMMON_SPEC_DELETE))
@@ -1197,7 +1197,7 @@
 ^{:refer xt.lang.spec-base/x:global-has? :added "4.1"}
 (fact "checks whether the shared global map contains a value"
 
-  (!.rb
+  (!.scheme
     (var set-fn
          (fn []
            (xt/x:global-set COMMON_SPEC_GLOBAL 1)
@@ -1214,7 +1214,7 @@
 ^{:refer xt.lang.spec-base/x:random :added "4.1"}
 (fact "returns javascript random values"
 
-  (!.rb
+  (!.scheme
     (var out (xt/x:random))
     (and (>= out 0)
          (< out 1)))
@@ -1223,7 +1223,7 @@
 ^{:refer xt.lang.spec-base/x:throw :added "4.1"}
 (fact "expands to the canonical throw form"
 
-  (!.rb
+  (!.scheme
     (do:>
      (x:throw "THROW")))
   => (throws))
@@ -1231,14 +1231,14 @@
 ^{:refer xt.lang.spec-base/x:now-ms :added "4.1"}
 (fact "expands and emits a millisecond time expression"
 
-  (!.rb
+  (!.scheme
     (> (xt/x:now-ms) 0))
   => true)
 
 ^{:refer xt.lang.spec-base/x:unpack :added "4.1"}
 (fact "spreads arrays into positional arguments"
 
-  (!.rb
+  (!.scheme
     (var add-args
          (fn [a b c]
            (return (+ a b c))))
@@ -1248,13 +1248,13 @@
 ^{:refer xt.lang.spec-base/x:json-encode :added "4.1"}
 (fact "encodes lua data structures as json"
 
-  (!.rb (xt/x:json-encode {:a 1}))
+  (!.scheme (xt/x:json-encode {:a 1}))
   => #"\{\"a\":\s*1\}")
 
 ^{:refer xt.lang.spec-base/x:json-decode :added "4.1"}
 (fact "decodes json strings into lua data structures"
 
-  (!.rb (xt/x:json-decode "{\"a\":1}"))
+  (!.scheme (xt/x:json-decode "{\"a\":1}"))
   => {"a" 1})
 
 (comment

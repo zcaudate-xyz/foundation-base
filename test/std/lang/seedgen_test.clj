@@ -60,6 +60,17 @@
        "  (!.js (+ 1 2 3))\n"
        "  => 6)\n"))
 
+(def ^:private +seedgen-meta-shorthand-source+
+  (str "(ns xt.sample.meta-test\n"
+       "  (:use code.test)\n"
+       "  (:require [std.lang :as l]))\n\n"
+       "^{:seedgen/root {:all true}}\n"
+       "(l/script- :js {:runtime :basic})\n\n"
+       "^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n"
+       "(fact \"preserves shorthand metadata\"\n"
+       "  ^*(!.js (+ 1 2 3))\n"
+       "  => 6)\n"))
+
 (defn- seedgen-spacing-context
   [prefix]
   (let [root     (.toFile (java.nio.file.Files/createTempDirectory prefix
@@ -264,6 +275,28 @@
       (finally
         (fs/delete root {:recursive true}))))
   => [false true true])
+
+^{:refer std.lang.seedgen/seedgen-benchadd :added "4.1"}
+(fact "benchadd preserves shorthand metadata on generated runtime checks"
+  (let [root     (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-meta"
+                                                                   (make-array java.nio.file.attribute.FileAttribute 0)))
+        test-dir (doto (java.io.File. root "test/xt/sample")
+                   (.mkdirs))
+        path     (.getAbsolutePath (java.io.File. test-dir "meta_test.clj"))
+        bench-path (.getAbsolutePath (java.io.File. root "test/xtbench/dart/sample/meta_test.clj"))
+        lookup   {'xt.sample.meta-test path}
+        project  {:root (.getAbsolutePath root)
+                  :test-paths ["test"]}]
+    (try
+      (spit path +seedgen-meta-shorthand-source+)
+      (form-bench/seedgen-benchadd 'xt.sample.meta
+                                   {:lang [:dart] :write true}
+                                   lookup
+                                   project)
+      (slurp bench-path)
+      (finally
+        (fs/delete root {:recursive true}))))
+  => #"(?ms)\^\*\(!\.dt \(\+ 1 2 3\)\)")
 
 ^{:refer std.lang.seedgen/seedgen-benchremove :added "4.1"}
 (fact "TODO")

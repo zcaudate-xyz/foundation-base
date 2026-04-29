@@ -5,7 +5,7 @@
             [std.lang.model-annex.spec-circom :refer :all]))
 
 ^{:refer std.lang.model-annex.spec-circom/format-string :added "4.1"}
-(fact "returns pr-str for strings and identity for other values"
+(fact "returns readable output for strings, symbols, and other values"
   (format-string "hello")
   => "\"hello\""
 
@@ -13,7 +13,7 @@
   => 42
 
   (format-string 'x)
-  => 'x)
+  => "x")
 
 ^{:refer std.lang.model-annex.spec-circom/tf-template :added "4.1"}
 (fact "transforms template definition to circom template syntax"
