@@ -18,9 +18,10 @@
   [body-form]
   (str/join
    "\n"
-   ["(progn"
-    "  (require 'json)"
-    "  (defun xt-json-normalize (x)"
+    ["(progn"
+     "  (require 'json)"
+     "  (defvar __xt_globals__ (make-hash-table :test 'equal))"
+     "  (defun xt-json-normalize (x)"
     "    (cond"
     "      ((null x) :null)"
     "      ((vectorp x)"
