@@ -1,4 +1,4 @@
-(ns xt.event.util-loader
+(ns xt.event.util-task
   (:require [std.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk

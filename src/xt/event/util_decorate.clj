@@ -1,4 +1,4 @@
-(ns xt.event.util-handle
+(ns xt.event.util-decorate
   (:require [std.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk

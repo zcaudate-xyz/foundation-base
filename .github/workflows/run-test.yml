@@ -124,6 +124,51 @@ jobs:
           POSTGRES_USER: postgres
         ports:
           - 5432:5432
+
+  run-xtbench-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - lang: dart
+            image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-dart:ci
+          - lang: js
+            image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-js:ci
+          - lang: julia
+            image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-julia:ci
+          - lang: lua
+            image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-lua:ci
+          - lang: r
+            image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-r:ci
+          - lang: ruby
+            image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-ruby:ci
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Run xtbench tests - ${{ matrix.lang }}
+        run: >
+          docker run --network host
+          -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
+          -v /var/run/docker.sock:/var/run/docker.sock
+          -v $(pwd):$(pwd)
+          -w $(pwd)
+          ${{ matrix.image }}
+          lein test :with xtbench.${{ matrix.lang }}
+
+    services:
+      postgres:
+        image: ghcr.io/zcaudate-xyz/infra-db:main
+        env:
+          POSTGRES_DB: test
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
           
   run-indigo-tests:
     runs-on: ubuntu-latest
