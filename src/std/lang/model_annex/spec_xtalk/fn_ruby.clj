@@ -346,17 +346,19 @@
 
 (defn ruby-tf-x-str-index-of
   ([[_ s tok]]
-   (let [idx (gensym "idx__")]
-     (template/$
-      (do (var ~idx (. ~s (index ~tok)))
-          (return (:? (. ~idx nil?) -1 ~idx)))))))
+    (let [idx (gensym "idx__")]
+      (template/$
+       (. (fn []
+            (var ~idx (. ~s (index ~tok)))
+            (return (:? (. ~idx nil?) -1 ~idx)))
+          (call))))))
 
 (defn ruby-tf-x-str-substring
   ([[_ s start & args]]
-   (if (empty? args)
-     (list '. s [(list 'to start -1)])
-     (let [stop (first args)]
-       (list '. s [(list 'to-e start stop)])))))
+    (if (empty? args)
+      (list '. s (list 'slice start (list '. s 'length)))
+      (let [stop (first args)]
+        (list '. s (list 'slice start (list '- stop start)))))))
 
 (defn ruby-tf-x-str-to-upper
   ([[_ s]]

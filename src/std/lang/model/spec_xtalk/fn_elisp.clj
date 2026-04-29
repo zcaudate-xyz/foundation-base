@@ -82,7 +82,7 @@
 
 (defn elisp-tf-x-random
   [_]
-  '(random t))
+  '(/ (float (random 1000000)) 1000000.0))
 
 (defn elisp-tf-x-now-ms
   [_]
@@ -489,6 +489,72 @@
         't
         nil))
 
+(defn elisp-tf-x-arr-each
+  [[_ arr f]]
+  (list 'progn
+        (list 'mapc
+              (list 'lambda '(e)
+                    (list 'funcall f 'e))
+              (elisp-vector->list arr))
+        arr))
+
+(defn elisp-tf-x-arr-every
+  [[_ arr pred]]
+  (list 'if
+        (list 'seq-every-p
+              (list 'lambda '(e)
+                    (list 'funcall pred 'e))
+              (elisp-vector->list arr))
+        't
+        nil))
+
+(defn elisp-tf-x-arr-map
+  [[_ arr f]]
+  (list 'vconcat
+        (list 'mapcar
+              (list 'lambda '(e)
+                    (list 'funcall f 'e))
+              (elisp-vector->list arr))))
+
+(defn elisp-tf-x-arr-filter
+  [[_ arr pred]]
+  (list 'vconcat
+        (list 'seq-filter
+              (list 'lambda '(e)
+                    (list 'funcall pred 'e))
+              (elisp-vector->list arr))))
+
+(defn elisp-tf-x-arr-foldl
+  [[_ arr f init]]
+  (list 'seq-reduce
+        (list 'lambda '(acc e)
+              (list 'funcall f 'acc 'e))
+        (elisp-vector->list arr)
+        init))
+
+(defn elisp-tf-x-arr-foldr
+  [[_ arr f init]]
+  (list 'seq-reduce
+        (list 'lambda '(acc e)
+              (list 'funcall f 'acc 'e))
+        (list 'reverse (elisp-vector->list arr))
+        init))
+
+(defn elisp-tf-x-arr-sort
+  [[_ arr key-fn comp-fn]]
+  (let [sorted (list 'vconcat
+                     (list 'sort
+                           (elisp-vector->list arr)
+                           (list 'lambda '(a b)
+                                 (list 'funcall comp-fn
+                                       (list 'funcall key-fn 'a)
+                                       (list 'funcall key-fn 'b)))))]
+    (if (symbol? arr)
+      (list 'progn
+            (list 'setq arr sorted)
+            arr)
+      sorted)))
+
 (def +elisp-array+
   {:x-get-idx        {:macro #'elisp-tf-x-get-idx        :emit :macro :value true}
    :x-set-idx        {:macro #'elisp-tf-x-set-idx        :emit :macro}
@@ -503,7 +569,14 @@
    :x-arr-insert     {:macro #'elisp-tf-x-arr-insert     :emit :macro :value true}
    :x-arr-remove     {:macro #'elisp-tf-x-arr-remove     :emit :macro :value true}
    :x-arr-assign     {:macro #'elisp-tf-x-arr-assign     :emit :macro :value true}
-   :x-arr-some       {:macro #'elisp-tf-x-arr-some       :emit :macro :value true}})
+   :x-arr-some       {:macro #'elisp-tf-x-arr-some       :emit :macro :value true}
+   :x-arr-each       {:macro #'elisp-tf-x-arr-each       :emit :macro :value true}
+   :x-arr-every      {:macro #'elisp-tf-x-arr-every      :emit :macro :value true}
+   :x-arr-map        {:macro #'elisp-tf-x-arr-map        :emit :macro :value true}
+   :x-arr-filter     {:macro #'elisp-tf-x-arr-filter     :emit :macro :value true}
+   :x-arr-foldl      {:macro #'elisp-tf-x-arr-foldl      :emit :macro :value true}
+   :x-arr-foldr      {:macro #'elisp-tf-x-arr-foldr      :emit :macro :value true}
+   :x-arr-sort       {:macro #'elisp-tf-x-arr-sort       :emit :macro :value true}})
 
 ;;
 ;; STRING
@@ -734,7 +807,7 @@
 (defn elisp-tf-x-return-wrap
   [[_ f encode-fn]]
   (list 'condition-case 'err
-        (list 'funcall encode-fn (list 'funcall f) nil nil)
+        (list 'funcall encode-fn (list 'funcall f))
         (list 'error
               (list 'json-serialize
                     (list 'list
@@ -824,22 +897,34 @@
 (defn elisp-tf-x-iter-eq
   [[_ it0 it1 eq-fn]]
   (list 'do
+        (list 'var 'cmp eq-fn)
         (list 'var 'result 't)
-        (list 'while 'result
+        (list 'var 'done nil)
+        (list 'while (list 'not 'done)
               (list 'do
                     (list 'var 'x0 (list 'x:iter-next it0))
                     (list 'var 'x1 (list 'x:iter-next it1))
                     (list 'if
                           (list 'equal 'x0 "__xt_iter_end__")
-                          (list ':= 'result (list 'equal 'x1 "__xt_iter_end__"))
+                          (list 'do
+                                (list ':= 'result (list 'equal 'x1 "__xt_iter_end__"))
+                                (list ':= 'done 't))
                           (list 'if
                                 (list 'equal 'x1 "__xt_iter_end__")
-                                (list ':= 'result nil)
-                                (list 'if
-                                      (list 'not (list 'funcall eq-fn 'x0 'x1))
+                                (list 'do
                                       (list ':= 'result nil)
+                                      (list ':= 'done 't))
+                                (list 'if
+                                      (list 'not (list 'funcall 'cmp 'x0 'x1))
+                                      (list 'do
+                                            (list ':= 'result nil)
+                                            (list ':= 'done 't))
                                       nil)))))
         'result))
+
+(defn elisp-tf-x-iter-null
+  [_]
+  '(vector "__xt_iter__" [] 0))
 
 (defn elisp-tf-x-iter-has?
   [[_ obj]]
@@ -859,7 +944,7 @@
    :x-iter-from-arr {:macro #'elisp-tf-x-iter-from-arr :emit :macro :value true}
    :x-iter-from     {:macro #'elisp-tf-x-iter-from     :emit :macro :value true}
    :x-iter-eq       {:macro #'elisp-tf-x-iter-eq       :emit :macro :value true}
-   :x-iter-null     {:default '(vector "__xt_iter__" [] 0) :emit :unit}
+   :x-iter-null     {:macro #'elisp-tf-x-iter-null     :emit :macro :value true}
     :x-iter-next     {:macro #'elisp-tf-x-iter-next     :emit :macro :value true}
     :x-iter-has?     {:macro #'elisp-tf-x-iter-has?     :emit :macro :value true}
     :x-iter-native?  {:macro #'elisp-tf-x-iter-native?  :emit :macro :value true}})

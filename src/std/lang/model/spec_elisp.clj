@@ -172,14 +172,7 @@
 
 (defn- elisp-function-prologue
   [args]
-  (->> args
-       (filter #(and (symbol? %)
-                     (not= '_ %)))
-       (mapv (fn [sym]
-               (list 'if
-                     (list 'functionp sym)
-                     (list 'fset (list 'intern (name sym)) sym)
-                     nil)))))
+  [])
 
 (def +elisp-transform-config+
   {:begin 'progn

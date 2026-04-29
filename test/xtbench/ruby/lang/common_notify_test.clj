@@ -20,9 +20,9 @@
 
   (notify/notify-ceremony (assoc (l/rt :ruby)
                                  :type :basic))
-  => [(:id (l/rt :js))
+  => [(:id (l/rt :ruby))
       (:socket-port (l/default-notify))
-      :js :socket
+      :ruby :socket
       "127.0.0.1"
       {}])
 

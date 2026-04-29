@@ -232,9 +232,11 @@
                                       (list 'begin
                                             (list 'vector-set! obj key value)
                                             obj))))
-   :global-symbol '__xt_globals__
-   :global-read-form (fn [global key]
-                       (list 'hash-ref global key))
+    :global-symbol '__xt_globals__
+    :global-read-form (fn [global key]
+                        (list 'hash-ref global
+                              (if (symbol? key) (name key) key)
+                              false))
    :global-write-form (fn [global key value]
                         (list 'begin
                               (list 'hash-set! global key value)

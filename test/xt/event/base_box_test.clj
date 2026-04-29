@@ -51,10 +51,30 @@
       "data" {"a" {"b" 3}}})
 
 ^{:refer xt.event.base-box/get-data :added "4.1"}
-(fact "TODO")
+(fact "gets root and nested data"
+
+  (!.js
+   (var b (box/make-box (fn:> {:a {:b 2}
+                               :items [1 2]})))
+   [(box/get-data b nil)
+    (box/get-data b ["a" "b"])
+    (box/get-data b "items")])
+  => [{"a" {"b" 2}
+       "items" [1 2]}
+      2
+      [1 2]])
 
 ^{:refer xt.event.base-box/set-data-raw :added "4.1"}
-(fact "TODO")
+(fact "sets box data without triggering listeners"
+
+  (!.js
+   (var b (box/make-box (fn:> {:a {:b 2}})))
+   [(do (box/set-data-raw b ["a" "b"] 3)
+        (box/get-data b []))
+    (do (box/set-data-raw b [] {:z 1})
+        (box/get-data b []))])
+  => [{"a" {"b" 3}}
+      {"z" 1}])
 
 ^{:refer xt.event.base-box/set-data :added "4.1"}
 (fact "updates and resets data"
@@ -69,13 +89,35 @@
       [] {"a" {"b" 2}}])
 
 ^{:refer xt.event.base-box/del-data-raw :added "4.1"}
-(fact "TODO")
+(fact "removes data without notifying listeners"
+
+  (!.js
+   (var b (box/make-box (fn:> {:a {:b 2}})))
+   [(box/del-data-raw b ["a" "b"])
+    (box/get-data b [])])
+  => [true {"a" {}}])
 
 ^{:refer xt.event.base-box/del-data :added "4.1"}
-(fact "TODO")
+(fact "removes data and returns triggered listener ids"
+
+  (!.js
+   (var b (box/make-box (fn:> {:a {:b 2}})))
+   [(box/del-data b ["a" "b"])
+    (box/get-data b [])])
+  => [[] {"a" {}}])
 
 ^{:refer xt.event.base-box/reset-data :added "4.1"}
-(fact "TODO")
+(fact "resets the box back to its initial value"
+
+  (!.js
+   (var b (box/make-box (fn:> {:a {:b 2}})))
+   [(box/set-data b "c" 3)
+    (box/get-data b [])
+    (box/reset-data b)
+    (box/get-data b [])])
+  => [[] {"a" {"b" 2}
+          "c" 3}
+      [] {"a" {"b" 2}}])
 
 ^{:refer xt.event.base-box/merge-data :added "4.1"}
 (fact "merges and appends data"
@@ -90,4 +132,12 @@
       "c" 3})
 
 ^{:refer xt.event.base-box/append-data :added "4.1"}
-(fact "TODO")
+(fact "appends a value onto an array path"
+
+  (!.js
+   (var b (box/make-box (fn:> {:a []})))
+   (box/append-data b ["a"] {:title "Hello"
+                             :body "World"})
+   (box/get-data b []))
+  => {"a" [{"title" "Hello"
+            "body" "World"}]})

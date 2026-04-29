@@ -23,7 +23,15 @@
     => \"a\""
   {:added "4.1"}
   [sym grammar mopts]
-  (let [sym-name (when (symbol? sym) (name sym))]
+  (let [reserved #{"BEGIN" "END" "alias" "and" "begin" "break" "case" "class"
+                   "def" "defined?" "do" "else" "elsif" "end" "ensure" "false"
+                   "for" "if" "in" "module" "next" "nil" "not" "or" "redo"
+                   "rescue" "retry" "return" "self" "super" "then" "true"
+                   "undef" "unless" "until" "when" "while" "yield"}
+        sym-name (when (symbol? sym) (name sym))
+        local-name (when sym-name
+                     (cond-> (clojure.string/replace sym-name "-" "_")
+                       (contains? reserved sym-name) (str "_")))]
     (cond (keyword? sym)
           (str ":" (name sym))
 
@@ -35,10 +43,19 @@
 
           (and (symbol? sym)
                (nil? (namespace sym)))
-          (clojure.string/replace sym-name "-" "_")
+          local-name
 
           :else
           (common/emit-symbol sym grammar mopts))))
+
+(defn ruby-method-ref
+  [[_ sym]]
+  (let [grammar preprocess-base/*macro-grammar*
+        mopts   preprocess-base/*macro-opts*]
+    (list ':-
+          (str "method(:"
+               (common/emit-symbol sym grammar mopts)
+               ")"))))
 
 (defn ruby-symbol-global
   [key _grammar _mopts]
@@ -124,11 +141,17 @@
        (not= 'call (first prop))
        (empty? (rest prop))))
 
+(defn- ruby-method-name
+  [sym grammar mopts]
+  (if (= '<< sym)
+    "<<"
+    (common/emit-symbol sym grammar mopts)))
+
 (defn- ruby-dot-entry
   [prop grammar mopts]
   (cond
     (ruby-zero-arg-call? prop)
-    (str "." (common/emit-symbol (first prop) grammar mopts))
+    (str "." (ruby-method-name (first prop) grammar mopts))
 
     (collection/form? prop)
     (let [sym    (first prop)
@@ -136,10 +159,10 @@
           _      (assert (symbol? sym))
           braces (meta sym)]
       (str "."
-           (common/emit-symbol sym grammar mopts)
+           (ruby-method-name sym grammar mopts)
            (if (not-empty braces)
-             (common/*emit-fn* braces grammar mopts)
-             "")
+              (common/*emit-fn* braces grammar mopts)
+              "")
            (ruby-emit-args (rest prop) grammar mopts)))
 
     :else
@@ -171,39 +194,57 @@
   [[_ sym args & body]]
   (list* 'defn- sym args (rewrite/rewrite-callable-body args body)))
 
+(defn ruby-defgen
+  [[_ sym args & body]]
+  (let [iterator (gensym "__iter__")]
+    (list 'defn- sym args
+          (list 'return
+                (list 'x:iter-generator
+                      (apply list 'fn [iterator]
+                             (rewrite/ruby-rewrite-generator-body args body iterator)))))))
+
 (defn ruby-fn
   "basic transform for ruby blocks
    (spec-ruby/ruby-fn '(fn [a] (+ a 1)))
-   => '(fn.inner [a] (+ a 1))"
+    => '(fn.inner [a] (+ a 1))"
   {:added "4.1"}
-  ([[_ args & body]]
-   (let [body     (rewrite/rewrite-callable-body args body)
-          grammar  preprocess-base/*macro-grammar*
-          mopts    preprocess-base/*macro-opts*
-          args-str (clojure.string/join ", "
-                                        (common/emit-array args grammar mopts))
-         body-str (common/*emit-fn* (cons 'do body) grammar mopts)]
-     (list ':- "->(" args-str ") {\n" body-str "\n}"))))
+  ([[_ & more]]
+   (let [[args body] (if (symbol? (first more))
+                       [(second more) (drop 2 more)]
+                       [(first more) (rest more)])
+         body     (rewrite/rewrite-callable-body args body)
+           grammar  preprocess-base/*macro-grammar*
+           mopts    preprocess-base/*macro-opts*
+           args-str (clojure.string/join ", "
+                                         (common/emit-array args grammar mopts))
+          body-str (common/*emit-fn* (cons 'do body) grammar mopts)]
+      (list ':- "->(" args-str ") {\n" body-str "\n}"))))
 
 (defn tf-for-array
   "transform for `for:array`"
   {:added "4.1"}
   [[_ [e arr] & body]]
-  (if (vector? e)
-    (let [[i v] e]
-      (template/$
-       (do (var ~i 0)
-           (while (< ~i (. ~arr length))
-             (var ~v (. ~arr [~i]))
-             ~@body
-             (:= ~i (+ ~i 1))))))
-    (let [idx (gensym "idx__")]
-      (template/$
-       (do (var ~idx 0)
-           (while (< ~idx (. ~arr length))
-             (var ~e (. ~arr [~idx]))
-             ~@body
-             (:= ~idx (+ ~idx 1))))))))
+  (let [arr*  (gensym "arr__")
+        bound (if (vector? e) e [e])
+        bound (vec (remove #{'_} bound))
+        body  (rewrite/rewrite-callable-body bound body)]
+    (if (vector? e)
+      (let [[i v] e]
+        (template/$
+         (do (var ~arr* ~arr)
+             (var ~i 0)
+             (while (< ~i (. ~arr* length))
+               (var ~v (. ~arr* [~i]))
+               ~@body
+               (:= ~i (+ ~i 1))))))
+      (let [idx (gensym "idx__")]
+        (template/$
+         (do (var ~arr* ~arr)
+             (var ~idx 0)
+             (while (< ~idx (. ~arr* length))
+               (var ~e (. ~arr* [~idx]))
+               ~@body
+               (:= ~idx (+ ~idx 1)))))))))
 
 (defn tf-for-object
   "transform for `for:object`"
@@ -211,7 +252,9 @@
   [[_ [[k v] m] & body]]
   (let [keys (gensym "keys__")
         idx  (gensym "idx__")
-        key  (if (= k '_) (gensym "key__") k)]
+        key  (if (= k '_) (gensym "key__") k)
+        bound (vec (remove #{'_} [key v]))
+        body  (rewrite/rewrite-callable-body bound body)]
     (template/$
      (do (var ~keys (. ~m keys))
          (var ~idx 0)
@@ -227,9 +270,11 @@
   "transform for `for:iter`"
   {:added "4.1"}
   [[_ [e it] & body]]
-  (apply list 'for [e :in it]
-         (or (not-empty body)
-             ['(nil)])))
+  (let [bound (vec (remove #{'_} [e]))
+        body  (rewrite/rewrite-callable-body bound body)]
+    (apply list 'for [e :in it]
+           (or (not-empty body)
+               [nil]))))
 
 (defn tf-for-index
   "transform for `for:index`"
@@ -255,8 +300,8 @@
          :for-array  {:macro #'tf-for-array  :emit :macro}
          :for-iter   {:macro #'tf-for-iter   :emit :macro}
          :for-index  {:macro #'tf-for-index  :emit :macro}
-         :defn       {:symbol #{'defn}   :macro #'ruby-defn :emit :macro}
-         :defgen     {:symbol #{'defgen} :macro #'ruby-defn :emit :macro}
+         :defn       {:symbol #{'defn}   :macro #'ruby-defn   :emit :macro}
+         :defgen     {:symbol #{'defgen} :macro #'ruby-defgen :emit :macro}
          :spread     {:raw "*" :emit :pre}
            :with-global {:value true :raw "($__globals__ ||= {})"}
             :throw      {:raw "raise" :emit :prefix}
@@ -280,6 +325,10 @@
                                                        (ruby-emit-range ".." form grammar mopts))}
            :to-e       {:op :to-e :symbol #{'to-e} :emit (fn [form grammar mopts]
                                                            (ruby-emit-range "..." form grammar mopts))}
+           :ruby-method-ref {:op :ruby-method-ref
+                             :symbol #{'ruby-method-ref}
+                             :macro #'ruby-method-ref
+                             :emit :macro}
            :x-iter-generator {:op :x-iter-generator
                               :symbol #{'x:iter-generator}
                               :macro #'fn/ruby-tf-x-iter-generator

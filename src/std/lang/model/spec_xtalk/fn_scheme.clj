@@ -20,6 +20,12 @@
         (list 'vector->list value)
         value))
 
+(defn scheme-if-chain
+  [pairs fallback]
+  (if-let [[[test expr] & more] (seq pairs)]
+    (list 'if test expr (scheme-if-chain more fallback))
+    fallback))
+
 ;;
 ;; CORE
 ;;
@@ -44,9 +50,11 @@
 (defn scheme-tf-x-print
   [[_ & args]]
   (scheme-begin
-   (map (fn [arg]
-          (list 'display arg))
-        args)))
+   (concat
+    (map (fn [arg]
+           (list 'display arg))
+         args)
+    [false])))
 
 (defn scheme-tf-x-len
   [[_ obj]]
@@ -67,7 +75,7 @@
 
 (defn scheme-tf-x-apply
   [[_ f args]]
-  (list 'apply f args))
+  (list 'apply f (scheme-vector->list args)))
 
 (defn scheme-tf-x-err
   [[_ s & [data]]]
@@ -77,11 +85,27 @@
 
 (defn scheme-tf-x-eval
   [[_ s]]
-  (list 'eval s))
+  (list 'do
+        (list 'var 'parts (list 'string-split s))
+        (list 'var 'parsed (list 'string->number s))
+        (scheme-if-chain
+         [[(list 'number? 'parsed) 'parsed]
+          [(list '= (list 'length 'parts) 3)
+           (list 'do
+                 (list 'var 'a (list 'string->number (list 'car 'parts)))
+                 (list 'var 'op (list 'cadr 'parts))
+                 (list 'var 'b (list 'string->number (list 'caddr 'parts)))
+                 (scheme-if-chain
+                  [[(list 'equal? 'op "+") (list '+ 'a 'b)]
+                   [(list 'equal? 'op "-") (list '- 'a 'b)]
+                   [(list 'equal? 'op "*") (list '* 'a 'b)]
+                   [(list 'equal? 'op "/") (list '/ 'a 'b)]]
+                  s))]]
+         s)))
 
 (defn scheme-tf-x-random
   [_]
-  '(random))
+  '(/ (random 1000000) 1000000.0))
 
 (defn scheme-tf-x-now-ms
   [_]
@@ -109,50 +133,50 @@
 
 (defn scheme-tf-x-ex-message
   [[_ err]]
-  (list 'cond
-        (list (list 'exn:fail? err)
-              (list 'exn-message err))
-        (list (list 'and
-                    (list 'hash? err)
-                    (list 'equal? "xt.exception"
-                          (list 'hash-ref err "__type__" nil)))
-              (list 'hash-ref err "message" nil))
-        (list (list 'and
-                    (list 'pair? err)
-                    (list 'hash? (list 'second err))
-                    (list 'equal? "xt.exception"
-                          (list 'hash-ref (list 'second err) "__type__" nil)))
-              (list 'hash-ref (list 'second err) "message" nil))
-        (list 'else nil)))
+  (scheme-if-chain
+   [[(list 'exn:fail? err)
+     (list 'exn-message err)]
+    [(list 'and
+           (list 'hash? err)
+           (list 'equal? "xt.exception"
+                 (list 'hash-ref err "__type__" nil)))
+     (list 'hash-ref err "message" nil)]
+    [(list 'and
+           (list 'pair? err)
+           (list 'hash? (list 'second err))
+           (list 'equal? "xt.exception"
+                 (list 'hash-ref (list 'second err) "__type__" nil)))
+     (list 'hash-ref (list 'second err) "message" nil)]]
+   nil))
 
 (defn scheme-tf-x-ex-data
   [[_ err]]
-  (list 'cond
-        (list (list 'and
-                    (list 'hash? err)
-                    (list 'equal? "xt.exception"
-                          (list 'hash-ref err "__type__" nil)))
-              (list 'hash-ref err "data" nil))
-        (list (list 'and
-                    (list 'pair? err)
-                    (list 'hash? (list 'second err))
-                    (list 'equal? "xt.exception"
-                          (list 'hash-ref (list 'second err) "__type__" nil)))
-              (list 'hash-ref (list 'second err) "data" nil))
-        (list 'else nil)))
+  (scheme-if-chain
+   [[(list 'and
+           (list 'hash? err)
+           (list 'equal? "xt.exception"
+                 (list 'hash-ref err "__type__" nil)))
+     (list 'hash-ref err "data" nil)]
+    [(list 'and
+           (list 'pair? err)
+           (list 'hash? (list 'second err))
+           (list 'equal? "xt.exception"
+                 (list 'hash-ref (list 'second err) "__type__" nil)))
+     (list 'hash-ref (list 'second err) "data" nil)]]
+   nil))
 
 (defn scheme-tf-x-type-native
   [[_ obj]]
-  (list 'cond
-        (list (list 'null? obj)      "nil")
-        (list (list 'string? obj)    "string")
-        (list (list 'number? obj)    "number")
-        (list (list 'boolean? obj)   "boolean")
-        (list (list 'procedure? obj) "function")
-        (list (list 'vector? obj)    "array")
-        (list (list 'hash? obj)      "object")
-        (list (list 'pair? obj)      "list")
-        (list 'else                  "unknown")))
+  (scheme-if-chain
+   [[(list 'null? obj)      "nil"]
+    [(list 'string? obj)    "string"]
+    [(list 'number? obj)    "number"]
+    [(list 'boolean? obj)   "boolean"]
+    [(list 'procedure? obj) "function"]
+    [(list 'vector? obj)    "array"]
+    [(list 'hash? obj)      "object"]
+    [(list 'pair? obj)      "list"]]
+   "unknown"))
 
 (def +scheme-core+
   {:x-del         {:macro #'scheme-tf-x-del         :emit :macro}
@@ -259,7 +283,7 @@
 
 (defn scheme-tf-x-lu-get
   [[_ lu obj]]
-  (list 'hash-ref lu obj nil))
+  (list 'hash-ref lu obj (list 'list)))
 
 (defn scheme-tf-x-lu-set
   [[_ lu obj gid]]
@@ -273,11 +297,16 @@
         (list 'hash-remove! lu obj)
         lu))
 
+(defn scheme-tf-x-lu-eq
+  [[_ a b]]
+  (list 'eq? a b))
+
 (def +scheme-lu+
   {:x-lu-create {:macro #'scheme-tf-x-lu-create :emit :macro :value true}
    :x-lu-get    {:macro #'scheme-tf-x-lu-get    :emit :macro :value true}
    :x-lu-set    {:macro #'scheme-tf-x-lu-set    :emit :macro}
-   :x-lu-del    {:macro #'scheme-tf-x-lu-del    :emit :macro}})
+   :x-lu-del    {:macro #'scheme-tf-x-lu-del    :emit :macro}
+   :x-lu-eq     {:macro #'scheme-tf-x-lu-eq     :emit :macro :value true}})
 
 ;;
 ;; OBJECT
@@ -351,12 +380,20 @@
 
 (defn scheme-tf-x-obj-assign
   [[_ obj other]]
-  (list 'begin
-        (list 'for
-              (list (list (list 'k 'v)
-                          (list 'in-hash other)))
-              (list 'hash-set! obj 'k 'v))
-        obj))
+  (if (symbol? obj)
+    (list 'begin
+          (list 'for
+                (list (list (list 'k 'v)
+                            (list 'in-hash other)))
+                (list 'hash-set! obj 'k 'v))
+          obj)
+    (list 'do
+          (list 'var 'out (list 'make-hash (list 'hash->list obj)))
+          (list 'for
+                (list (list (list 'k 'v)
+                            (list 'in-hash other)))
+                (list 'hash-set! 'out 'k 'v))
+          'out)))
 
 (def +scheme-object+
   {:x-get-key    {:macro #'scheme-tf-x-get-key    :emit :macro :value true}
@@ -465,6 +502,75 @@
             arr)
       expr)))
 
+(defn scheme-tf-x-arr-assign
+  [[_ arr other]]
+  (let [expr (list 'vector-append arr other)]
+    (if (symbol? arr)
+      (list 'begin
+            (list 'set! arr expr)
+            arr)
+      expr)))
+
+(defn scheme-tf-x-arr-each
+  [[_ arr f]]
+  (list 'begin
+        (list 'for
+              (list (list 'e (list 'in-vector arr)))
+              (list f 'e))
+        arr))
+
+(defn scheme-tf-x-arr-every
+  [[_ arr pred]]
+  (list 'for/and
+        (list (list 'e (list 'in-vector arr)))
+        (list pred 'e)))
+
+(defn scheme-tf-x-arr-some
+  [[_ arr pred]]
+  (list 'for/or
+        (list (list 'e (list 'in-vector arr)))
+        (list pred 'e)))
+
+(defn scheme-tf-x-arr-map
+  [[_ arr f]]
+  (list 'for/vector
+        (list (list 'e (list 'in-vector arr)))
+        (list f 'e)))
+
+(defn scheme-tf-x-arr-filter
+  [[_ arr pred]]
+  (list 'list->vector
+        (list 'filter pred (list 'vector->list arr))))
+
+(defn scheme-tf-x-arr-foldl
+  [[_ arr f init]]
+  (list 'for/fold
+        (list (list 'out init))
+        (list (list 'e (list 'in-vector arr)))
+        (list f 'out 'e)))
+
+(defn scheme-tf-x-arr-foldr
+  [[_ arr f init]]
+  (list 'for/fold
+        (list (list 'out init))
+        (list (list 'e (list 'in-list (list 'reverse (list 'vector->list arr)))))
+        (list f 'out 'e)))
+
+(defn scheme-tf-x-arr-sort
+  [[_ arr key-fn comp-fn]]
+  (let [expr (list 'list->vector
+                   (list 'sort
+                         (list 'vector->list arr)
+                         (list 'lambda '(a b)
+                               (list comp-fn
+                                     (list key-fn 'a)
+                                     (list key-fn 'b)))))]
+    (if (symbol? arr)
+      (list 'begin
+            (list 'set! arr expr)
+            arr)
+      expr)))
+
 (def +scheme-array+
   {:x-get-idx        {:macro #'scheme-tf-x-get-idx        :emit :macro :value true}
    :x-set-idx        {:macro #'scheme-tf-x-set-idx        :emit :macro}
@@ -477,7 +583,16 @@
    :x-arr-push-first {:macro #'scheme-tf-x-arr-push-first :emit :macro :value true}
    :x-arr-pop-first  {:macro #'scheme-tf-x-arr-pop-first  :emit :macro :value true}
    :x-arr-insert     {:macro #'scheme-tf-x-arr-insert     :emit :macro :value true}
-   :x-arr-remove     {:macro #'scheme-tf-x-arr-remove     :emit :macro :value true}})
+   :x-arr-remove     {:macro #'scheme-tf-x-arr-remove     :emit :macro :value true}
+   :x-arr-assign     {:macro #'scheme-tf-x-arr-assign     :emit :macro :value true}
+   :x-arr-each       {:macro #'scheme-tf-x-arr-each       :emit :macro :value true}
+   :x-arr-every      {:macro #'scheme-tf-x-arr-every      :emit :macro :value true}
+   :x-arr-some       {:macro #'scheme-tf-x-arr-some       :emit :macro :value true}
+   :x-arr-map        {:macro #'scheme-tf-x-arr-map        :emit :macro :value true}
+   :x-arr-filter     {:macro #'scheme-tf-x-arr-filter     :emit :macro :value true}
+   :x-arr-foldl      {:macro #'scheme-tf-x-arr-foldl      :emit :macro :value true}
+   :x-arr-foldr      {:macro #'scheme-tf-x-arr-foldr      :emit :macro :value true}
+   :x-arr-sort       {:macro #'scheme-tf-x-arr-sort       :emit :macro :value true}})
 
 ;;
 ;; STRING
@@ -491,6 +606,10 @@
   [[_ s i]]
   (list 'char->integer (list 'string-ref s i)))
 
+(defn scheme-tf-x-str-len
+  [[_ s]]
+  (list 'string-length s))
+
 (defn scheme-tf-x-str-split
   [[_ s sep]]
   (list 'list->vector (list 'string-split s sep)))
@@ -502,13 +621,17 @@
 (defn scheme-tf-x-str-index-of
   [[_ s tok start]]
   (let [start (or start 0)]
-    (list 'let
-          (list (list 'offset start)
-                (list 'sub (list 'substring s start))
-                (list 'pos (list 'string-contains (list 'substring s start) tok)))
+    (list 'do
+          (list 'var 'offset start)
+          (list 'var 'sub (list 'substring s start))
+          (list 'var 'matches
+                (list 'regexp-match-positions
+                      (list 'regexp-quote tok)
+                      'sub))
           (list 'if
-                'pos
-                (list '+ 'offset 'pos)
+                'matches
+                (list '+ 'offset
+                      (list 'car (list 'car 'matches)))
                 -1))))
 
 (defn scheme-tf-x-str-substring
@@ -547,23 +670,44 @@
 
 (defn scheme-tf-x-str-pad-left
   [[_ s n ch]]
-  (list 'string-pad s n (list 'string-ref ch 0)))
+  (list 'if
+        (list '>= (list 'string-length s) n)
+        s
+        (list 'string-append
+              (list 'make-string (list '- n (list 'string-length s))
+                    (list 'string-ref ch 0))
+              s)))
 
 (defn scheme-tf-x-str-pad-right
   [[_ s n ch]]
-  (list 'string-pad-right s n (list 'string-ref ch 0)))
+  (list 'if
+        (list '>= (list 'string-length s) n)
+        s
+        (list 'string-append
+              s
+              (list 'make-string (list '- n (list 'string-length s))
+                    (list 'string-ref ch 0)))))
 
 (defn scheme-tf-x-str-starts-with
   [[_ s prefix]]
-  (list 'string-prefix? prefix s))
+  (list 'and
+        (list '<= (list 'string-length prefix) (list 'string-length s))
+        (list 'equal? prefix
+              (list 'substring s 0 (list 'string-length prefix)))))
 
 (defn scheme-tf-x-str-ends-with
   [[_ s suffix]]
-  (list 'string-suffix? suffix s))
+  (list 'and
+        (list '<= (list 'string-length suffix) (list 'string-length s))
+        (list 'equal? suffix
+              (list 'substring s
+                    (list '- (list 'string-length s)
+                          (list 'string-length suffix))))))
 
 (def +scheme-string+
   {:x-str-comp        {:macro #'scheme-tf-x-str-comp        :emit :macro :value true}
    :x-str-char        {:macro #'scheme-tf-x-str-char        :emit :macro :value true}
+   :x-str-len         {:macro #'scheme-tf-x-str-len         :emit :macro :value true}
    :x-str-split       {:macro #'scheme-tf-x-str-split       :emit :macro :value true}
    :x-str-join        {:macro #'scheme-tf-x-str-join        :emit :macro :value true}
    :x-str-index-of    {:macro #'scheme-tf-x-str-index-of    :emit :macro :value true}
@@ -592,18 +736,31 @@
 (defn scheme-tf-x-m-min   [[_ & args]] (apply list 'min args))
 (defn scheme-tf-x-m-mod   [[_ n d]] (list 'modulo n d))
 (defn scheme-tf-x-m-quot  [[_ n d]] (list 'inexact->exact (list 'floor (list '/ n d))))
-(defn scheme-tf-x-m-floor [[_ n]] (list 'floor n))
-(defn scheme-tf-x-m-ceil  [[_ n]] (list 'ceiling n))
+(defn scheme-tf-x-m-floor [[_ n]] (list 'inexact->exact (list 'floor n)))
+(defn scheme-tf-x-m-ceil  [[_ n]] (list 'inexact->exact (list 'ceiling n)))
 (defn scheme-tf-x-m-cos   [[_ n]] (list 'cos n))
-(defn scheme-tf-x-m-cosh  [[_ n]] (list 'cosh n))
+(defn scheme-tf-x-m-cosh  [[_ n]]
+  (list '/
+        (list '+
+              (list 'exp n)
+              (list 'exp (list '- n)))
+        2.0))
 (defn scheme-tf-x-m-exp   [[_ n]] (list 'exp n))
 (defn scheme-tf-x-m-loge  [[_ n]] (list 'log n))
 (defn scheme-tf-x-m-log10 [[_ n]] (list '/ (list 'log n) (list 'log 10)))
 (defn scheme-tf-x-m-sin   [[_ n]] (list 'sin n))
-(defn scheme-tf-x-m-sinh  [[_ n]] (list 'sinh n))
+(defn scheme-tf-x-m-sinh  [[_ n]]
+  (list '/
+        (list '-
+              (list 'exp n)
+              (list 'exp (list '- n)))
+        2.0))
 (defn scheme-tf-x-m-sqrt  [[_ n]] (list 'sqrt n))
 (defn scheme-tf-x-m-tan   [[_ n]] (list 'tan n))
-(defn scheme-tf-x-m-tanh  [[_ n]] (list 'tanh n))
+(defn scheme-tf-x-m-tanh  [[_ n]]
+  (list '/
+        (list 'x:m-sinh n)
+        (list 'x:m-cosh n)))
 (defn scheme-tf-x-m-pow   [[_ b e]] (list 'expt b e))
 
 (def +scheme-math+
@@ -678,11 +835,11 @@
 
 (defn scheme-tf-x-return-wrap
   [[_ callback encode-fn]]
-  (list 'encode-fn callback))
+  (list encode-fn (list callback)))
 
 (defn scheme-tf-x-return-eval
   [[_ expr wrap-fn]]
-  (list 'wrap-fn (list 'lambda '() (list 'eval expr))))
+  (list wrap-fn (list 'lambda '() (list 'x:eval expr))))
 
 (def +scheme-json+
   {:x-json-encode   {:macro #'scheme-tf-x-json-encode   :emit :macro :value true}
@@ -731,21 +888,32 @@
   [[_ it0 it1 eq-fn]]
   (list 'do
         (list 'var 'result true)
-        (apply list 'while 'result
-               [(list 'var 'x0 (list 'x:iter-next it0))
-                (list 'var 'x1 (list 'x:iter-next it1))
-                (list 'if
-                      (list 'equal? 'x0 "__xt_iter_end__")
-                      (list ':= 'result (list 'equal? 'x1 "__xt_iter_end__"))
-                      (list 'if
-                            (list 'equal? 'x1 "__xt_iter_end__")
-                            (list ':= 'result false)
-                            (list 'if
-                                  (list 'not (list eq-fn 'x0 'x1))
-                                  (list ':= 'result false)
-                                  nil)))]
-               )
+        (list 'var 'done false)
+        (list 'while (list 'not 'done)
+              (list 'do
+                    (list 'var 'x0 (list 'x:iter-next it0))
+                    (list 'var 'x1 (list 'x:iter-next it1))
+                    (list 'if
+                          (list 'equal? 'x0 "__xt_iter_end__")
+                          (list 'do
+                                (list ':= 'result (list 'equal? 'x1 "__xt_iter_end__"))
+                                (list ':= 'done true))
+                          (list 'if
+                                (list 'equal? 'x1 "__xt_iter_end__")
+                                (list 'do
+                                      (list ':= 'result false)
+                                      (list ':= 'done true))
+                                (list 'if
+                                      (list 'not (list eq-fn 'x0 'x1))
+                                      (list 'do
+                                            (list ':= 'result false)
+                                            (list ':= 'done true))
+                                      nil)))))
         'result))
+
+(defn scheme-tf-x-iter-null
+  [_]
+  '(vector "__xt_iter__" (vector) (box 0)))
 
 (defn scheme-tf-x-iter-has?
   [[_ obj]]
@@ -765,10 +933,50 @@
    :x-iter-from-arr {:macro #'scheme-tf-x-iter-from-arr :emit :macro :value true}
    :x-iter-from     {:macro #'scheme-tf-x-iter-from     :emit :macro :value true}
    :x-iter-eq       {:macro #'scheme-tf-x-iter-eq       :emit :macro :value true}
-   :x-iter-null     {:default '(vector "__xt_iter__" #() (box 0)) :emit :unit}
+   :x-iter-null     {:macro #'scheme-tf-x-iter-null     :emit :macro :value true}
    :x-iter-next     {:macro #'scheme-tf-x-iter-next     :emit :macro :value true}
    :x-iter-has?     {:macro #'scheme-tf-x-iter-has?     :emit :macro :value true}
    :x-iter-native?  {:macro #'scheme-tf-x-iter-native?  :emit :macro :value true}})
+
+(defn scheme-tf-x-promise
+  [[_ thunk]]
+  thunk)
+
+(defn scheme-tf-x-promise-then
+  [[_ promise thunk]]
+  (list 'let
+        (list (list 'out (list promise)))
+        (list thunk 'out)))
+
+(defn scheme-tf-x-promise-catch
+  [[_ promise thunk]]
+  (list 'with-handlers
+        (list (list (list 'lambda '(e) true)
+                    thunk))
+        (list promise)))
+
+(defn scheme-tf-x-promise-finally
+  [[_ promise thunk]]
+  (list 'dynamic-wind
+        (list 'lambda '() (list 'void))
+        (list 'lambda '() (list promise))
+        (list 'lambda '() (list thunk))))
+
+(defn scheme-tf-x-promise-native?
+  [[_ value]]
+  (list 'procedure? value))
+
+(defn scheme-tf-x-with-delay
+  [[_ _ms thunk]]
+  (list thunk))
+
+(def +scheme-promise+
+  {:x-promise         {:macro #'scheme-tf-x-promise         :emit :macro :value true}
+   :x-promise-then    {:macro #'scheme-tf-x-promise-then    :emit :macro :value true}
+   :x-promise-catch   {:macro #'scheme-tf-x-promise-catch   :emit :macro :value true}
+   :x-promise-finally {:macro #'scheme-tf-x-promise-finally :emit :macro :value true}
+   :x-promise-native? {:macro #'scheme-tf-x-promise-native? :emit :macro :value true}
+   :x-with-delay      {:macro #'scheme-tf-x-with-delay      :emit :macro :value true}})
 
 (def +scheme+
   (merge +scheme-core+
@@ -781,4 +989,5 @@
          +scheme-math+
          +scheme-bit+
          +scheme-json+
-         +scheme-iter+))
+         +scheme-iter+
+         +scheme-promise+))

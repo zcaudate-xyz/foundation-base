@@ -91,8 +91,9 @@
   {:added "4.1"}
   [sym]
   (var idx (xt/x:str-index-of sym "/"))
-  (return  (xt/x:str-substring sym
-                               (xt/x:offset (- idx (xt/x:offset-len))))))
+  (if (< 0 idx)
+    (return (xt/x:last (xt/x:str-split sym "/")))
+    (return sym)))
 
 (defn.xt sym-ns
   "gets the namespace part of the sym"
@@ -100,7 +101,7 @@
   [sym]
   (var idx (xt/x:str-index-of sym "/"))
   (if (< 0 idx)
-    (return (xt/x:str-substring sym 0 (- idx (xt/x:offset))))
+    (return (xt/x:first (xt/x:str-split sym "/")))
     (return nil)))
 
 (defn.xt sym-pair
