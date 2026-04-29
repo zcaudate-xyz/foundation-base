@@ -3,10 +3,10 @@
 
 (l/script :xtalk
   {:require [[xt.lang.common-space :as rt :with [defsingleton.xt]]
-             [xt.lang.common-async :as async]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
+             [xt.lang.spec-promise :as spec-promise]
              [xt.event.base-view :as event-view]
              [xt.cell.kernel.base-link :as raw]
              [xt.cell.kernel.base-impl :as impl-common]
@@ -447,7 +447,7 @@
   "sets all model inputs to nil"
   {:added "4.0"}
   [model-id ctx]
-  (return (async/promise-all
+  (return (spec-promise/x:promise-all
            (xt/x:arr-map (-/list-views model-id ctx)
                          (fn [k]
                            (return (-/nil-view [model-id k] ctx)))))))

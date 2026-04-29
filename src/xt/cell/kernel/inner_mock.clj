@@ -6,7 +6,7 @@
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as k]
              [xt.lang.common-trace :as trace]
-             [xt.lang.common-async :as async]
+             [xt.lang.spec-promise :as spec-promise]
              [xt.cell.kernel.inner-local :as inner-local]
              [xt.cell.kernel.inner-impl :as inner-impl]]})
 
@@ -55,9 +55,9 @@
                        (listener event))))
    (var postRequest (fn [request]
                       (return
-                       (async/promise-run
+                       (spec-promise/x:promise
                         (fn []
-                          (return (-/mock-worker-send worker request)))))))
+                           (return (-/mock-worker-send worker request)))))))
   (xt/x:obj-assign worker #{postMessage
                             postRequest})
   (return worker))
@@ -69,7 +69,8 @@
   (var worker (-/mock-worker listener))
   (inner-local/actions-init (or actions {}) worker)
   (when (not suppress)
-    (async/promise-next
+    (spec-promise/x:with-delay
+     0
      (fn []
-       (return (inner-impl/worker-init-signal worker {:done true})))))
+        (return (inner-impl/worker-init-signal worker {:done true})))))
   (return worker))

@@ -5,9 +5,9 @@
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as k]
-             [xt.lang.common-async :as async]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-trace :as trace]
+             [xt.lang.spec-promise :as spec-promise]
              [xt.event.util-throttle :as th]
              [xt.event.base-view :as event-view]
              [xt.cell.kernel.base-link :as link]
@@ -165,7 +165,18 @@
               [(-/throttle-entry-promise entry)
                (xt/x:get-key entry "started")])))
 
-(def.xt async-fn async/async-fn)
+(defn.xt async-fn
+  "adapts a handler function to the event-view async pipeline contract"
+  {:added "4.1"}
+  [handler-fn context #{success error}]
+  (return
+   (spec-promise/x:promise-catch
+    (spec-promise/x:promise-then
+     (spec-promise/x:promise
+      (fn []
+        (return (handler-fn context))))
+     success)
+    error)))
 
 (defn.xt prep-view
   "prepares params of views"
@@ -292,7 +303,7 @@
   (xt/for:object [[dmodel-id dview-ids] dependents]
     (xt/for:array [dview-id dview-ids]
       (xt/x:arr-push out (-/refresh-view cell dmodel-id dview-id {} refresh-deps-fn))))
-  (return (async/promise-all out)))
+  (return (spec-promise/x:promise-all out)))
 
 (defn.xt refresh-model
   "refreshes the model"
@@ -304,7 +315,7 @@
     (var [path context disabled]
          (-/prep-view cell model-id view-id {:event event}))
     (xt/x:arr-push running (-/run-refresh context disabled path refresh-deps-fn)))
-  (return (async/promise-all running)))
+  (return (spec-promise/x:promise-all running)))
 
 
 (defn.xt get-model-deps
@@ -458,7 +469,7 @@
   (xt/for:object [[view-id _] views]
     (xt/x:arr-push out [view-id (-/throttle-entry-promise
                                  (th/throttle-run throttle view-id [(or ?event {})]))]))
-  (return (. (async/promise-all (xt/x:arr-map out xt/x:second))
+  (return (. (spec-promise/x:promise-all (xt/x:arr-map out xt/x:second))
              (then (fn [arr]
                      (return (xtd/arr-zip (xt/x:arr-map out xt/x:first)
                                           arr)))))))
