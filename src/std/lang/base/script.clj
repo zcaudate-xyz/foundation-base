@@ -115,6 +115,33 @@
                     as)
                   source-id)))))
 
+(defn script-specialize-merge-contracts
+  [lang module-id contracts specialize]
+  (reduce-kv (fn [out source {:keys [backend bindings]}]
+               (reduce-kv (fn [out contract target-backend]
+                            (if-let [{prev-backend :backend
+                                      prev-source :source}
+                                     (get out contract)]
+                              (do (when (not= prev-backend target-backend)
+                                    (f/error "Conflicting specialization contract backend in script namespace"
+                                             {:lang lang
+                                              :module module-id
+                                              :contract contract
+                                              :source source
+                                              :backend target-backend
+                                              :previous-source prev-source
+                                              :previous-backend prev-backend}))
+                                  out)
+                              (assoc out
+                                     contract
+                                     {:backend target-backend
+                                      :source source
+                                      :declared-backend backend})))
+                          out
+                          (or bindings {})))
+             (or contracts {})
+             (or specialize {})))
+
 (defn script-specialize-require
   [lang module-id library require-spec]
   (let [[source & args] require-spec
@@ -177,22 +204,34 @@
   [lang module-id config library]
   (let [{:keys [require]
          :as config} config
-        {:keys [requires specialize]}
-        (reduce (fn [{:keys [requires specialize]} require-spec]
-                  (let [{:keys [require-spec]
-                         :as out}
-                        (script-specialize-require lang
-                                                   module-id
-                                                   library
-                                                   require-spec)]
-                    {:requires (conj requires require-spec)
-                     :specialize (merge specialize
-                                        (:specialize out))}))
-                {:requires []
-                 :specialize (or (:specialize config) {})}
-                require)]
-    (cond-> (assoc config :require requires)
-      (seq specialize) (assoc :specialize specialize))))
+         {:keys [requires specialize]}
+         (reduce (fn [{:keys [requires specialize contracts]} require-spec]
+                   (let [{:keys [require-spec]
+                          :as out}
+                         (script-specialize-require lang
+                                                    module-id
+                                                    library
+                                                    require-spec)
+                         specialize-out (:specialize out)
+                         contracts-out  (script-specialize-merge-contracts
+                                         lang
+                                         module-id
+                                         contracts
+                                         specialize-out)]
+                     {:requires (conj requires require-spec)
+                      :specialize (merge specialize
+                                         specialize-out)
+                      :contracts contracts-out}))
+                 {:requires []
+                  :specialize (or (:specialize config) {})
+                  :contracts (script-specialize-merge-contracts
+                              lang
+                              module-id
+                              {}
+                              (or (:specialize config) {}))}
+                 require)]
+     (cond-> (assoc config :require requires)
+       (seq specialize) (assoc :specialize specialize))))
 
 
 ;; script-base

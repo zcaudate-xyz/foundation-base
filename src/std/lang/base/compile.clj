@@ -124,6 +124,36 @@
                    link-opts)]))
        (into {})))
 
+(defn compile-module-directory-specialization-conflicts
+  [book modules]
+  (reduce (fn [out module-id]
+            (if-let [module (book/get-module book module-id)]
+              (reduce-kv (fn [out source {:keys [bindings backend]}]
+                           (reduce-kv (fn [out contract target-backend]
+                                        (let [target-backend (or target-backend backend)]
+                                          (if-let [prev (get out contract)]
+                                            (do (when (not= (:backend prev) target-backend)
+                                                  (f/error "Conflicting specialization contract backend in module.directory build"
+                                                           {:contract contract
+                                                            :module module-id
+                                                            :source source
+                                                            :backend target-backend
+                                                            :previous-module (:module prev)
+                                                            :previous-source (:source prev)
+                                                            :previous-backend (:backend prev)}))
+                                                out)
+                                            (assoc out contract
+                                                   {:backend target-backend
+                                                    :module module-id
+                                                    :source source}))))
+                                      out
+                                      (or bindings {})))
+                         out
+                         (or (:specialize module) {}))
+              out))
+          {}
+          modules))
+
 (defn compile-module-directory-selected
   "compiles the directory based on sorted imports"
   {:added "4.0"}
@@ -142,11 +172,11 @@
                                      (:all (deps-imports/module-code-deps book [ns])))
                                    ns-selected)
                            (set)
-                           (filter (comp not ns-has?))))
-        links      (compile-module-create-links
-                    (concat ns-selected
-                            ns-extras)
-                    main
+                            (filter (comp not ns-has?))))
+         links      (compile-module-create-links
+                     (concat ns-selected
+                             ns-extras)
+                     main
                     (:link (:code emit)))
         root-path  (if (empty? target)
                      root
@@ -159,19 +189,23 @@
                                       :links links}}]
                        (compile-module-single
                         (-> opts
-                            (assoc :layout :module
-                                   :main ns
-                                   :snapshot snapshot
-                                   :output (str (fs/path (str root-path "/" (get-in links [ns :path])))))
-                            (update :emit merge emit-opts)))))
+                             (assoc :layout :module
+                                    :main ns
+                                    :snapshot snapshot
+                                    :output (str (fs/path (str root-path "/" (get-in links [ns :path])))))
+                             (update :emit merge emit-opts)))))
 
-        ns-compile (if compile/*compile-filter*
-                     (filter compile/*compile-filter* (concat ns-selected ns-extras))
-                     (concat ns-selected ns-extras))
+         ns-compile (if compile/*compile-filter*
+                      (filter compile/*compile-filter* (concat ns-selected ns-extras))
+                      (concat ns-selected ns-extras))
+         _         (when (= :directory type)
+                     (compile-module-directory-specialization-conflicts
+                      book
+                      ns-compile))
 
-        ;; generate for all namespaces
-        files  (mapcat (comp compile/compile-result-seq compile-fn) ns-compile)]
-    (compile/compile-summarise files)))
+         ;; generate for all namespaces
+         files  (mapcat (comp compile/compile-result-seq compile-fn) ns-compile)]
+     (compile/compile-summarise files)))
 
 (defn compile-module-directory
   "compiles a directory"

@@ -28,7 +28,18 @@
                            :js
                            'example.js.cache.invalid
                            {:implements 'example.xt.protocol.cache})
-      (lib/validate-module-implements (lib/get-snapshot library)
-                                      :js
-                                      'example.js.cache.invalid)))
+       (lib/validate-module-implements (lib/get-snapshot library)
+                                       :js
+                                       'example.js.cache.invalid)))
+  => (throws))
+
+(fact "rejects script namespaces that bind one contract to different backends"
+  (impl/with:library [(impl/clone-default-library)]
+    (require '[xt.lang.spec-base] :reload)
+    (require '[js.core] :reload)
+    (require '[example.xt.protocol.cache])
+    (require '[example.xt.feature.memory-brain])
+    (require '[example.js.cache.localstore])
+    (require '[example.js.cache.redis])
+    (require '[example.brain-conflict] :reload))
   => (throws))
