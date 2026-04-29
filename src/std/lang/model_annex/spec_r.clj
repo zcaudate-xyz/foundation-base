@@ -197,7 +197,7 @@
 
 (def +template+
   (->> {:banned #{:set :keyword}
-        :allow  {:assign #{:symbol :vector :map :set}}
+        :allow  {:assign #{:symbol}}
         :highlight '#{block}
         :default {:comment   {:prefix "#"}
                   :common    {:apply "$" :assign "<-"}

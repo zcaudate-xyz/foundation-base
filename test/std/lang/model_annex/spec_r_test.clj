@@ -1,9 +1,11 @@
 (ns std.lang.model-annex.spec-r-test
   (:require [clojure.walk :as walk]
             [std.lang :as l]
-             [std.lang.base.book :as book]
-             [std.lang.model-annex.spec-r.rewrite :as rewrite]
-             [std.lang.model-annex.spec-r :refer :all])
+            [std.lang.base.impl :as impl]
+            [std.lang.base.runtime :as rt]
+            [std.lang.base.book :as book]
+            [std.lang.model-annex.spec-r.rewrite :as rewrite]
+            [std.lang.model-annex.spec-r :refer :all])
   (:use code.test))
 
 (fact "Preliminary Checks"
@@ -21,7 +23,22 @@
 
   (l/emit-as :R '[(. ["a" "b" "c"] [2])])
   => "list('a','b','c')[[2]]"
+
+  (l/emit-as :R '[(var out [1 2 3])])
+  => "out <- list(1,2,3)"
+
+  (l/emit-as :R '[(var out {:a 1})])
+  => "out <- list(a=1)"
 )
+
+(fact "script emission does not introduce stray commas in R runtime wrappers"
+  (impl/emit-script (with-meta '[(var out [1 2 3])
+                                 out]
+                      {:bulk true})
+                    {:lang :r
+                     :book +book+
+                     :emit {:body {:transform #'rt/return-transform}}})
+  => "(function (){\n  out <- list(1,2,3);\n  return(out);\n})()")
 
 ^{:refer std.lang.model-annex.spec-r/tf-defn :added "3.0"}
 (fact "function declaration for R"
