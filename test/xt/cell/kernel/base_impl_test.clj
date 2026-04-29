@@ -17,8 +17,7 @@
   {:require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.cell.kernel.base-link :as base-link] [xt.cell.kernel.base-link-local :as base-link-local] [xt.cell.kernel.base-impl :as base-impl] [xt.cell.kernel.inner-impl :as inner-impl] [xt.cell.kernel.inner-mock :as inner-mock] [xt.lang.common-repl :as repl] [js.core :as j]] :runtime :basic})
 
 (fact:global
- {:setup [(l/rt:restart)
-                 (l/rt:scaffold-imports :js)]
+ {:setup [(l/rt:restart)]
  :teardown [(l/rt:stop)]})
 
 (defn.xt make-link
@@ -46,12 +45,11 @@
   => #{"resolve" "current" "reject"}
 
   (notify/wait-on :js
-    (:= (!:G INIT) (base-impl/new-cell-init))
-    ((. INIT ["resolve"]) true)
-    (. INIT ["current"]
-       (then (repl/>notify))))
-  => true
-  )
+                  (:= (!:G INIT) (base-impl/new-cell-init))
+                  ((. INIT ["resolve"]) true)
+                  (. INIT ["current"]
+                     (then (repl/>notify))))
+  => true)
 
 ^{:refer xt.cell.kernel.base-impl/new-cell :added "4.0"}
 (fact "creates a cell record and resolves init on worker init"
@@ -149,7 +147,6 @@
    (base-impl/add-listener cell ["hello" "echo"] "@react/1234" (fn:>) nil nil)
    (base-impl/trigger-listeners cell ["hello" "echo"] {}))
   => ["@react/1234"])
-
 
 ^{:refer xt.cell.kernel.base-impl/list-views :added "4.1"}
 (fact "TODO")

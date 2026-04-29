@@ -87,7 +87,27 @@
       "runs" [1 1]})
 
 ^{:refer xt.event.util-throttle/throttle-waiting :added "4.1"}
-(fact "TODO")
+(fact "returns the union of active and queued ids"
+  (set
+   (!.js
+    (throttle/throttle-waiting
+     {"active" {"1" {} "2" {}}
+      "queued" {"2" {} "3" {}}})))
+  => #{"1" "2" "3"}
+
+  (set
+   (!.lua
+    (throttle/throttle-waiting
+     {"active" {"1" {} "2" {}}
+      "queued" {"2" {} "3" {}}})))
+  => #{"1" "2" "3"}
+
+  (set
+   (!.py
+    (throttle/throttle-waiting
+     {"active" {"1" {} "2" {}}
+      "queued" {"2" {} "3" {}}})))
+  => #{"1" "2" "3"})
 
 ^{:refer xt.event.util-throttle/throttle-active :added "4.1"}
 (fact "reports active and waiting ids"
@@ -112,4 +132,21 @@
       ["1" "2" "3"]])
 
 ^{:refer xt.event.util-throttle/throttle-queued :added "4.1"}
-(fact "TODO")
+(fact "returns only queued ids"
+  (set
+   (!.js
+    (throttle/throttle-queued
+     {"queued" {"1" {} "3" {}}})))
+  => #{"1" "3"}
+
+  (set
+   (!.lua
+    (throttle/throttle-queued
+     {"queued" {"1" {} "3" {}}})))
+  => #{"1" "3"}
+
+  (set
+   (!.py
+    (throttle/throttle-queued
+     {"queued" {"1" {} "3" {}}})))
+  => #{"1" "3"})

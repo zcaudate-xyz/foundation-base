@@ -318,10 +318,11 @@
                             (and (= 1 (count args))
                                  (unpack-form? (first args))
                                  (not (contains? #{'return 'begin 'do 'quote 'fn 'fn:> 'defn 'defgen
-                                                   'let 'while 'br* 'try 'do:> 'not= '==
-                                                   'nil?}
-                                                 op)))
-                            (transform (list 'x:apply op (second (first args))))
+                                                    'let 'while 'br* 'try 'do:> 'not= '==
+                                                    'nil?}
+                                                  op)))
+                            (transform (expand-form reserved
+                                                    (list 'x:apply op (second (first args)))))
 
                             :else
                             (case op

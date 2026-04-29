@@ -75,10 +75,12 @@
   ([args body]
    (rewrite-callable-body #{} args body))
   ([inherited args body]
-   (let [callables (into (set inherited)
-                         (concat (filter symbol? args)
-                                 (collect-callable-vars body)))]
+    (let [callables (into (set inherited)
+                          (concat (filter symbol? args)
+                                  (collect-callable-vars body)))]
       (mapv #(rewrite-callable-form % callables) body))))
+
+(declare rewrite-callable-value)
 
 (defn- destructuring-var-form?
   [form]
@@ -108,8 +110,14 @@
        (vector? (nth form 2 nil))
        (= 1 (count (nth form 2)))
        (symbol? (first (nth form 2)))
-       (re-matches #"[A-Z][A-Z0-9_]*"
-                   (name (first (nth form 2))))))
+        (re-matches #"[A-Z][A-Z0-9_]*"
+                    (name (first (nth form 2))))))
+
+(defn- ruby-constant-symbol?
+  [form]
+  (and (symbol? form)
+       (namespace form)
+       (re-matches #"[A-Z][A-Z0-9_]*" (name form))))
 
 (defn rewrite-callable-form
   [form callables]
@@ -127,33 +135,52 @@
     (let [head (first form)]
       (cond
         (callable-form? form)
-        (let [[tag args & body] form]
-          (apply list tag args (rewrite-callable-body callables args body)))
+        (let [[tag & more] form
+              [name args body] (if (symbol? (first more))
+                                 [(first more) (second more) (drop 2 more)]
+                                 [nil (first more) (rest more)])]
+          (apply list tag
+                 (concat (when name [name])
+                         [args]
+                         (rewrite-callable-body callables args body))))
 
         (and (symbol? head)
              (contains? callables head))
         (list '. head
               (apply list 'call
-                     (map #(rewrite-callable-form % callables)
+                     (map #(rewrite-callable-value % callables)
                           (rest form))))
 
         :else
-        (apply list (map #(rewrite-callable-form % callables) form))))
+        (let [head* (if (seq? head)
+                      (rewrite-callable-form head callables)
+                      head)]
+          (apply list head*
+                 (map #(rewrite-callable-value % callables)
+                      (rest form))))))
 
     (vector? form)
-    (mapv #(rewrite-callable-form % callables) form)
+    (mapv #(rewrite-callable-value % callables) form)
 
     (map? form)
     (into {} (map (fn [[k v]]
-                    [(rewrite-callable-form k callables)
-                     (rewrite-callable-form v callables)]))
+                    [(rewrite-callable-value k callables)
+                     (rewrite-callable-value v callables)]))
           form)
 
     (set? form)
-    (set (map #(rewrite-callable-form % callables) form))
+    (set (map #(rewrite-callable-value % callables) form))
 
     :else
     form))
+
+(defn rewrite-callable-value
+  [form callables]
+  (if (and (symbol? form)
+           (namespace form)
+           (not (ruby-constant-symbol? form)))
+    (list 'ruby-method-ref form)
+    (rewrite-callable-form form callables)))
 
 (defn- iterator-symbol
   [sym]
@@ -162,12 +189,14 @@
 
 (declare rewrite-generator-form)
 
-(defn- rewrite-generator-body
+(defn ruby-rewrite-generator-body
   [args body iterator]
   (let [callables (into #{}
                         (concat (filter symbol? args)
                                 (collect-callable-vars body)))]
     (mapv #(rewrite-generator-form % iterator callables) body)))
+
+(declare rewrite-generator-value)
 
 (defn- rewrite-generator-form
   [form iterator callables]
@@ -186,37 +215,56 @@
     (let [head (first form)]
       (cond
         (callable-form? form)
-        (let [[tag args & body] form]
-          (apply list tag args (rewrite-callable-body callables args body)))
+        (let [[tag & more] form
+              [name args body] (if (symbol? (first more))
+                                 [(first more) (second more) (drop 2 more)]
+                                 [nil (first more) (rest more)])]
+          (apply list tag
+                 (concat (when name [name])
+                         [args]
+                         (rewrite-callable-body callables args body))))
 
         (= 'yield head)
         (list '. iterator
-              (list '<< (rewrite-generator-form (second form) iterator callables)))
+              (list '<< (rewrite-generator-value (second form) iterator callables)))
 
         (and (symbol? head)
              (contains? callables head))
         (list '. head
-              (apply list 'call
-                     (map #(rewrite-generator-form % iterator callables)
-                          (rest form))))
+               (apply list 'call
+                      (map #(rewrite-generator-value % iterator callables)
+                           (rest form))))
 
         :else
-        (apply list (map #(rewrite-generator-form % iterator callables) form))))
+        (let [head* (if (seq? head)
+                      (rewrite-generator-form head iterator callables)
+                      head)]
+          (apply list head*
+                 (map #(rewrite-generator-value % iterator callables)
+                       (rest form))))))
 
     (vector? form)
-    (mapv #(rewrite-generator-form % iterator callables) form)
+    (mapv #(rewrite-generator-value % iterator callables) form)
 
     (map? form)
     (into {} (map (fn [[k v]]
-                    [(rewrite-generator-form k iterator callables)
-                     (rewrite-generator-form v iterator callables)]))
+                    [(rewrite-generator-value k iterator callables)
+                     (rewrite-generator-value v iterator callables)]))
           form)
 
     (set? form)
-    (set (map #(rewrite-generator-form % iterator callables) form))
+    (set (map #(rewrite-generator-value % iterator callables) form))
 
     :else
     form))
+
+(defn- rewrite-generator-value
+  [form iterator callables]
+  (if (and (symbol? form)
+           (namespace form)
+           (not (ruby-constant-symbol? form)))
+    (list 'ruby-method-ref form)
+    (rewrite-generator-form form iterator callables)))
 
 (defn- rewrite-defgen
   [form]
@@ -228,7 +276,7 @@
             (list 'return
                   (list 'x:iter-generator
                         (apply list 'fn [iterator]
-                               (rewrite-generator-body args body iterator))))))))
+                               (ruby-rewrite-generator-body args body iterator))))))))
 
 (defn- rewrite-runtime-form
   [form callables]
@@ -262,25 +310,22 @@
   (boolean (get-in mopts [:emit :body :transform])))
 
 (defn- rewrite-runtime-forms
-  [forms]
-  (-> forms
-      rewrite-callable-forms
-      mark-inline-defs))
+  [forms opts]
+  (cond-> (rewrite-callable-forms forms)
+    (runtime-eval? opts) mark-inline-defs))
 
 (defn ruby-rewrite-stage
   [form opts]
-  (if-not (runtime-eval? opts)
-    form
-    (cond
-      (vector? form)
-      (common/with-form-meta form (rewrite-runtime-forms form))
+  (cond
+    (vector? form)
+    (common/with-form-meta form (rewrite-runtime-forms form opts))
 
-      (and (seq? form)
-           (#{'do 'do*} (first form)))
-      (common/with-form-meta form
-        (apply list (first form)
-               (rewrite-runtime-forms (vec (rest form)))))
+    (and (seq? form)
+         (#{'do 'do*} (first form)))
+    (common/with-form-meta form
+      (apply list (first form)
+             (rewrite-runtime-forms (vec (rest form)) opts)))
 
-      :else
-      (common/with-form-meta form
-        (first (rewrite-runtime-forms [form]))))))
+    :else
+    (common/with-form-meta form
+      (first (rewrite-runtime-forms [form] opts)))))
