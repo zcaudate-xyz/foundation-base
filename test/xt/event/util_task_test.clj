@@ -19,7 +19,7 @@
              [xt.lang.spec-promise :as spec-promise]
              [xt.lang.common-repl :as repl]
              [xt.event.util-task :as loader]
-             [python.core.common-promise]]})
+             [python.core.common-promise :as py-promise]]})
 
 (l/script- :lua
   {:runtime :basic
@@ -28,7 +28,7 @@
              [xt.lang.spec-promise :as spec-promise]
              [xt.lang.common-repl :as repl]
              [xt.event.util-task :as loader]
-             [lua.core.common-promise]]})
+             [lua.core.common-promise :as lua-promise]]})
 
 (fact:global
  {:setup [(l/rt:restart)]

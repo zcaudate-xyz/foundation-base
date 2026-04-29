@@ -161,10 +161,11 @@
   "lists incomplete ids"
   {:added "4.1"}
   [loader]
-  (var #{tasks completed} loader)
+  (var #{tasks completed order} loader)
   (var out [])
-  (xt/for:object [[id task] tasks]
-    (when (not= true (xt/x:get-key completed id))
+  (xt/for:array [id order]
+    (when (and (xt/x:not-nil? (xt/x:get-key tasks id))
+               (not= true (xt/x:get-key completed id)))
       (xt/x:arr-push out id)))
   (return out))
 
@@ -172,14 +173,16 @@
   "lists ids whose dependencies are satisfied"
   {:added "4.1"}
   [loader]
-  (var #{tasks loading completed} loader)
+  (var #{tasks loading completed order} loader)
   (var out [])
-  (xt/for:object [[id task] tasks]
-    (when (and (not= true (xt/x:get-key loading id))
+  (xt/for:array [id order]
+    (var task (xt/x:get-key tasks id))
+    (when (and (xt/x:not-nil? task)
+               (not= true (xt/x:get-key loading id))
                (not= true (xt/x:get-key completed id))
                (xt/x:arr-every (xt/x:get-key task "deps")
-                               (fn [dep-id]
-                                 (return (== true (xt/x:get-key completed dep-id))))))
+                                (fn [dep-id]
+                                  (return (== true (xt/x:get-key completed dep-id))))))
       (xt/x:arr-push out id)))
   (return out))
 

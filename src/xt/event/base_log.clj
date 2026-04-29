@@ -59,7 +59,7 @@
   [log n]
   (var #{processed} log)
   (var total (xt/x:len processed))
-  (return (xtd/arr-rslice processed
+  (return (xt/x:arr-slice processed
                           (xt/x:m-max 0 (- total n))
                           total)))
 

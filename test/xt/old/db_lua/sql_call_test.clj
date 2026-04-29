@@ -9,7 +9,7 @@
    :config {:dbname "test-scratch"}
    :require [[rt.postgres.test.scratch-v1 :as scratch]]})
 
-(l/script- :lua
+(l/script- :lua.nginx
   {:runtime :basic
    :config {:program :resty}
    :require [[xt.lang.spec-base :as xt]
@@ -63,7 +63,7 @@
    (var q  (call/call-format-query (@! (pg/bind-function scratch/addf))
                                    [10 20]))
    (. conn (query q)))
-  => [{"addf" 30}])
+  => 30)
 
 ^{:refer xt.old.db.sql-call/call-raw :added "4.0"}
 (fact "calls a database function"

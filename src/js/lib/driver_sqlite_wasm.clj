@@ -56,11 +56,12 @@
   "connects to an embedded sqlite-wasm database"
   {:added "4.1"}
   [m callback]
-  (:= callback (or callback ut/pass-callback))
   (var init-module (or (. sqlite3InitModule ["default"])
                        sqlite3InitModule))
-  (return (. (init-module)
-             (then (fn [sqlite3]
-                     (return (callback nil (-/make-instance sqlite3 m))))
-                   (fn [err]
-                     (return (callback err nil)))))))
+  (var promise
+       (. (init-module)
+          (then (fn [sqlite3]
+                  (return (-/make-instance sqlite3 m))))))
+  (if callback
+    (return (ut/wrap-callback promise callback))
+    (return promise)))

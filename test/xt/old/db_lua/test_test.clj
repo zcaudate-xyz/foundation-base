@@ -3,7 +3,7 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-(l/script- :lua
+(l/script- :lua.nginx
   {:runtime :basic
    :config {:program :resty}
    :require [[xt.old.db :as impl]
@@ -25,12 +25,13 @@
   []
   (!.lua
    (var ngxsqlite (require "lsqlite3"))
+   (var instance (dbsql/connect {:constructor lua-sqlite/connect-constructor
+                                 :memory true}))
    (:= (!:G DBSQL) (impl/db-create {"::" "db.sql"
-                                    :constructor lua-sqlite/connect-constructor
-                                    :memory true}
-                                   sample/Schema
-                                   sample/SchemaLookup
-                                   (ut/sqlite-opts nil)))
+                                    :instance instance}
+                                    sample/Schema
+                                    sample/SchemaLookup
+                                    (ut/sqlite-opts nil)))
    (dbsql/query-sync (xt/x:get-key DBSQL "instance")
                      (str/join "\n\n"
                              (manage/table-create-all
@@ -45,8 +46,8 @@
 
 (fact:global
  {:setup    [(l/rt:restart)
-             (do (l/rt:scaffold :lua)
-                 true)
+             (do (l/rt:scaffold :lua.nginx)
+                  true)
              (bootstrap-lua)]
   :teardown [(l/rt:stop)]})
 

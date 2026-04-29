@@ -3,7 +3,7 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-(l/script- :lua
+(l/script- :lua.nginx
   {:runtime :basic
    :require [[xt.lang.common-repl :as repl]
              [xt.lang.common-string :as str]
@@ -27,7 +27,7 @@
  {:setup    [(l/rt:restart)
              (!.lua
               (:= (!:G ngxsqlite) (require "lsqlite3")))
-             (l/rt:scaffold :lua)
+             (l/rt:scaffold :lua.nginx)
              (reset-lua)]
   :teardown [(l/rt:stop)]})
 

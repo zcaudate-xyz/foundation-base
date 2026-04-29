@@ -3,9 +3,9 @@
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-async :as async]
-             [xt.cell.kernel.base-util :as util]
+  {:require [[xt.cell.kernel.base-util :as util]
              [xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as spec-promise]
              [xt.lang.common-space :as rt :with [defsingleton.xt]]]})
 
 
@@ -154,7 +154,7 @@
   "triggers an event after a delay"
   {:added "4.0"}
   [worker op signal status body ms]
-  (return (async/promise-delay
+  (return (spec-promise/x:with-delay
            ms
            (fn []
              (return (-/fn-trigger worker op signal status body))))))
@@ -244,7 +244,7 @@
   "pings after a delay"
   {:added "4.0"}
   [ms]
-  (return (async/promise-delay
+  (return (spec-promise/x:with-delay
            ms
            (fn []
              (return (-/fn-ping))))))
@@ -264,7 +264,7 @@
   "echos the first arg after delay"
   {:added "4.0"}
   [arg ms]
-  (return (async/promise-delay
+  (return (spec-promise/x:with-delay
            ms
            (fn []
              (return (-/fn-echo arg))))))
@@ -284,7 +284,7 @@
   "throws an error after delay"
   {:added "4.0"}
   [ms]
-  (return (async/promise-delay
+  (return (spec-promise/x:with-delay
            ms
            (fn []
              (return (-/fn-error))))))

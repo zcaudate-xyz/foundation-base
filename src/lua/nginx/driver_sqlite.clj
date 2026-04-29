@@ -1,7 +1,6 @@
 (ns lua.nginx.driver-sqlite
   (:require [std.lang :as l]
-             [std.lib.foundation :as f]
-             [xt.old.sys.conn-dbsql :as dbsql]))
+             [std.lib.foundation :as f]))
 
 (l/script :lua.nginx
   {:import [["lsqlite3" :as ngxsqlite]] :require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]]})

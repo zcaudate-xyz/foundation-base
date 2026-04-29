@@ -2,7 +2,10 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.spec-base :as xt]]})
+  {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as promise]
+             [lua.nginx.common-promise]
+             [xt.runtime.type-sql-connection :as sqlrt]]})
 
 (defn.xt wrap-callback
   [callbacks key]
@@ -22,50 +25,87 @@
   [m cb]
   (when (xt/x:nil? m)
     (:= m {}))
-  (var constructor (xt/x:get-key m "constructor"))
-  (var success-fn (-/wrap-callback cb "success"))
-  (var error-fn   (-/wrap-callback cb "error"))
-  (xt/for:return [[conn err] (constructor m (xt/x:callback))]
-    {:success (return (success-fn conn))
-     :error   (return (error-fn err))
-     :final   true}))
+  (if (xt/x:nil? cb)
+    (if (sqlrt/legacy-driver? m)
+      (do (var constructor (xt/x:get-key m "constructor"))
+          (var out (constructor m nil))
+          (if (promise/x:promise-native? out)
+            (return
+             (promise/x:promise-then out
+                                     (fn [conn]
+                                       (return (sqlrt/connection-coerce conn)))))
+            (return (sqlrt/connection-coerce out))))
+      (return
+       (sqlrt/driver-connect
+        (sqlrt/driver-coerce m)
+        m)))
+    (do (var success-fn (-/wrap-callback cb "success"))
+        (var error-fn   (-/wrap-callback cb "error"))
+        (var promise
+             (sqlrt/driver-connect
+              (sqlrt/driver-coerce m)
+              m))
+        (return
+         (promise/x:promise-catch
+          (promise/x:promise-then promise
+                                  (fn [conn]
+                                    (return (success-fn conn))))
+          (fn [err]
+            (return (error-fn err))))))))
 
 (defn.xt disconnect
   "disconnects form database"
   {:added "4.0"}
   [conn cb]
-  (var disconnect-fn (xt/x:get-key conn "::disconnect"))
-  (var success-fn (-/wrap-callback cb "success"))
-  (var error-fn   (-/wrap-callback cb "error"))
-  (xt/for:return [[res err] (disconnect-fn (xt/x:callback))]
-    {:success (return (success-fn res))
-     :error   (return (error-fn err))
-     :final   true}))
+  (var out (sqlrt/connection-disconnect
+            (sqlrt/connection-coerce conn)))
+  (if (xt/x:nil? cb)
+    (return out)
+    (do (var success-fn (-/wrap-callback cb "success"))
+        (var error-fn   (-/wrap-callback cb "error"))
+        (if (promise/x:promise-native? out)
+          (return
+           (promise/x:promise-catch
+            (promise/x:promise-then out
+                                    (fn [res]
+                                      (return (success-fn res))))
+            (fn [err]
+              (return (error-fn err)))))
+          (return (success-fn out))))))
 
 (defn.xt query-base
   "calls query without the wrapper"
   {:added "4.0"}
   [conn raw]
-  (var query-fn (xt/x:get-key conn "::query"))
-  (return (query-fn raw)))
+  (return (sqlrt/connection-query
+           (sqlrt/connection-coerce conn)
+           raw)))
 
 (defn.xt query
   "sends a query"
   {:added "4.0"}
   [conn raw cb]
-  (var query-fn (xt/x:get-key conn "::query"))
-  (var success-fn (-/wrap-callback cb "success"))
-  (var error-fn   (-/wrap-callback cb "error"))
-  (xt/for:return [[res err] (query-fn raw (xt/x:callback))]
-    {:success (return (success-fn res))
-     :error   (return (error-fn err))
-     :final   true}))
+  (var out (sqlrt/connection-query
+            (sqlrt/connection-coerce conn)
+            raw))
+  (if (xt/x:nil? cb)
+    (return out)
+    (do (var success-fn (-/wrap-callback cb "success"))
+        (var error-fn   (-/wrap-callback cb "error"))
+        (if (promise/x:promise-native? out)
+          (return
+           (promise/x:promise-catch
+            (promise/x:promise-then out
+                                    (fn [res]
+                                      (return (success-fn res))))
+            (fn [err]
+              (return (error-fn err)))))
+          (return (success-fn out))))))
 
 (defn.xt query-sync
   "sends a synchronous query"
   {:added "4.0"}
   [conn raw]
-  (var query-fn (xt/x:get-key conn "::query_sync"))
-  (when (xt/x:nil? query-fn)
-    (:= query-fn (xt/x:get-key conn "::query")))
-  (return (query-fn raw)))
+  (return (sqlrt/connection-query-sync
+           (sqlrt/connection-coerce conn)
+           raw)))

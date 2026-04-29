@@ -130,10 +130,16 @@
   (return
    {:callback callback
      :pred pred
-            :meta (xt/x:obj-assign
-                   {:listener/id   listener-id
-                    :listener/type listener-type}
-                   meta)}))
+             :meta (xt/x:obj-assign
+                    {:listener/id   listener-id
+                     :listener/type listener-type}
+                    meta)}))
+
+(defn.xt listener-entry?
+  "checks whether a listeners map value is a plain listener entry"
+  {:added "4.1"}
+  [entry]
+  (return (xt/x:is-function? (xt/x:get-key entry "callback"))))
 
 (defn.xt arrayify-path
   "normalizes event path-like inputs, treating empty objects as empty arrays"
@@ -151,9 +157,15 @@
   "clears all listeners"
   {:added "4.0"}
   [container]
-  (var #{listeners} container)
-  (xt/x:set-key container "listeners" {})
-  (return listeners))
+   (var #{listeners} container)
+   (var cleared {})
+   (var kept {})
+   (xt/for:object [[id entry] listeners]
+     (if (-/listener-entry? entry)
+       (xt/x:set-key cleared id entry)
+       (xt/x:set-key kept id entry)))
+   (xt/x:set-key container "listeners" kept)
+   (return cleared))
 
 (defn.xt add-listener
   "adds a listener to container"
@@ -170,6 +182,8 @@
   [container listener-id]
   (var #{listeners} container)
   (var entry (xt/x:get-key listeners listener-id))
+  (when (not (-/listener-entry? entry))
+    (return nil))
   (xt/x:del-key listeners listener-id)
   (return entry))
 
@@ -178,7 +192,11 @@
   {:added "4.0"}
   [container]
   (var #{listeners} container)
-  (return (xt/x:obj-keys listeners)))
+  (var out [])
+  (xt/for:object [[id entry] listeners]
+    (when (-/listener-entry? entry)
+      (xt/x:arr-push out id)))
+  (return out))
 
 (defn.xt list-listener-types
   "lists listeners by their type"
@@ -187,13 +205,14 @@
   (var #{listeners} container)
   (var out {})
   (xt/for:object [[id listener-entry] listeners]
-    (var #{meta} listener-entry)
-    (var t   (xt/x:get-key meta "listener/type"))
-    (var arr (xt/x:get-key out t))
-    (when (xt/x:nil? arr)
-      (:= arr [])
-      (xt/x:set-key out t arr))
-    (xt/x:arr-push arr id))
+    (when (-/listener-entry? listener-entry)
+      (var #{meta} listener-entry)
+      (var t   (xt/x:get-key meta "listener/type"))
+      (var arr (xt/x:get-key out t))
+      (when (xt/x:nil? arr)
+        (:= arr [])
+        (xt/x:set-key out t arr))
+      (xt/x:arr-push arr id)))
   (return out))
 
 (defn.xt trigger-entry
@@ -219,8 +238,9 @@
   (var #{listeners} container)
   (var triggered [])
   (xt/for:object [[id entry] listeners]
-    (-/trigger-entry entry event)
-    (xt/x:arr-push triggered id))
+    (when (-/listener-entry? entry)
+      (-/trigger-entry entry event)
+      (xt/x:arr-push triggered id)))
   (return triggered))
 
 
@@ -247,7 +267,8 @@
   [container key listener-id]
   (var #{listeners} container)
   (var group (xt/x:get-key listeners key))
-  (when (xt/x:nil? group)
+  (when (or (xt/x:nil? group)
+            (-/listener-entry? group))
     (return nil))
   (var entry (xt/x:get-key group listener-id))
   (xt/x:del-key group listener-id)
@@ -261,7 +282,8 @@
   [container key]
   (var #{listeners} container)
   (var group (xt/x:get-key listeners key))
-  (when (xt/x:nil? group)
+  (when (or (xt/x:nil? group)
+            (-/listener-entry? group))
     (return []))
   (return (xt/x:obj-keys group)))
 
@@ -270,11 +292,11 @@
   {:added "4.0"}
   [container]
   (var #{listeners} container)
-  (return
-   (xtd/arr-juxt (xt/x:obj-keys listeners)
-                 (fn [x] (return x))
-                 (fn [key]
-                   (return (-/list-keyed-listeners container key))))))
+  (var out {})
+  (xt/for:object [[key group] listeners]
+    (when (not (-/listener-entry? group))
+      (xt/x:set-key out key (-/list-keyed-listeners container key))))
+  (return out))
 
 (defn.xt trigger-keyed-listeners
   "triggers listeners under a key"
@@ -285,7 +307,8 @@
   (var #{listeners} container)
   (var group (xt/x:get-key listeners key))
   (var triggered [])
-  (when (xt/x:not-nil? group)
+  (when (and (xt/x:not-nil? group)
+             (not (-/listener-entry? group)))
     (xt/for:object [[id entry] group]
       (-/trigger-entry entry event)
       (xt/x:arr-push triggered id)))

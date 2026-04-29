@@ -34,6 +34,7 @@
 (fact "posts encoded values through fetch"
 
   (notify/wait-on-call
+   5000
    (fn [] (!.scheme
             (var notify-fn
                  (fn [host port value id key opts]
