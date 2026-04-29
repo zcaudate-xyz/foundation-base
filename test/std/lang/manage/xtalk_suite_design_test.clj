@@ -1,44 +1,21 @@
 (ns std.lang.manage.xtalk-suite-design-test
-  (:require [clojure.string :as str]
-            [std.lang.manage :as manage]
-            [std.lang.manage.xtalk-scaffold :as scaffold])
+  (:require [std.lang.manage :as manage]
+            [std.lang.runtime-meta :as runtime])
   (:use code.test))
 
-(def runtime-template-forms
-  (read-string
-   "[(ns xt.lang.common-lib-js-test
-       (:require [std.lang :as l]
-                 [xt.lang.common-lib :as k])
-       (:use code.test))
-      (l/script- :js {:runtime :basic})
-      (fact \"identity function\"
-        (!.js (k/identity 1))
-        => 1)]"))
-
-^{:refer std.lang.manage.xtalk-scaffold/runtime-type :added "4.1"}
+^{:refer std.lang.runtime-meta/runtime-type :added "4.1"}
 (fact "runtime config distinguishes fast and batched xt suite strategies"
-  [(scaffold/runtime-type :js)
-   (scaffold/runtime-check-mode :js)
-   (scaffold/runtime-type :dart)
-   (scaffold/runtime-check-mode :dart)
-   (scaffold/runtime-suite-groups [:js :dart :go])]
+  [(runtime/runtime-type :js)
+   (runtime/runtime-check-mode :js)
+   (runtime/runtime-type :dart)
+   (runtime/runtime-check-mode :dart)
+   (runtime/runtime-suite-groups [:js :dart :go])]
   => [:basic
       :realtime
       :twostep
       :batched
       {:batched [:dart :go]
        :realtime [:js]}])
-
-^{:refer std.lang.manage.xtalk-scaffold/template-runtime-test-forms :added "4.1"}
-(fact "templating a common js runtime suite to dart keeps the twostep runtime"
-  (let [out-forms (scaffold/template-runtime-test-forms runtime-template-forms :js :dart)
-        out (scaffold/render-top-level-forms out-forms)]
-    [(= 'xtbench.dart.lang.common-lib-test
-        (second (first out-forms)))
-     (str/includes? out "(l/script- :dart {:runtime :twostep})")
-     (str/includes? out "!.dt")
-     (not (str/includes? out "!.js"))])
-  => [true true true true])
 
 ^{:refer std.lang.manage/xtalk-runtime-inventory :added "4.1"}
 (fact "runtime inventory exposes suite strategy for slow xt runtimes"

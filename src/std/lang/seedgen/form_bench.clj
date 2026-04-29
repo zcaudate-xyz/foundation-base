@@ -139,7 +139,7 @@
 (comment
 
   ;; ** seed-bench-list
-  ;; should list a namespace for creation, like std.lang.manage/scaffold-runtime-template but going with the std.lang.seedgen.* pipeline
+  ;; should list a namespace for creation using the std.lang.seedgen.* pipeline
 
   ;; {:rename '{xt  [xtbench :lang]}}
   ;; means that xt.sample.train-001-test

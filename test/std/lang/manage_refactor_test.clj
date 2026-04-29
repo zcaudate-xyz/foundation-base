@@ -1,8 +1,7 @@
 (ns std.lang.manage-refactor-test
   (:require [std.lang.manage :as manage]
             [std.lang.manage.xtalk-audit :as audit]
-            [std.lang.manage.xtalk-ops :as xtalk-ops]
-            [std.lang.manage.xtalk-scaffold :as scaffold])
+            [std.lang.manage.xtalk-ops :as xtalk-ops])
   (:use code.test))
 
 ^{:refer std.lang.manage.xtalk-audit/xtalk-op-map :added "4.1"}
@@ -18,14 +17,9 @@
   => [true true true true true true true true])
 
 ^{:refer std.lang.manage.xtalk-ops/generate-xtalk-ops :added "4.1"}
-(fact "direct ops and scaffold functions remain callable in task-style arity"
-  [(map? (xtalk-ops/generate-xtalk-ops nil {:write false} nil nil))
-   (fn? scaffold/scaffold-xtalk-grammar-tests)
-   (fn? scaffold/separate-runtime-tests)
-   (fn? scaffold/scaffold-runtime-template)
-   (fn? scaffold/export-runtime-suite)
-   (fn? scaffold/compile-runtime-bulk)]
-  => [true true true true true true])
+(fact "direct ops functions remain callable in task-style arity"
+  (map? (xtalk-ops/generate-xtalk-ops nil {:write false} nil nil))
+  => true)
 
 ^{:refer std.lang.manage/xtalk-op-map :added "4.1"}
 (fact "std.lang.manage tasks still run after wrapper cleanup"

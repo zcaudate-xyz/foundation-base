@@ -2,7 +2,7 @@
   (:require [std.fs :as fs]
               [std.lang.base.impl :as lang.impl]
               [std.lang.base.library :as lang.lib]
-              [std.lang.manage.xtalk-scaffold :as xtalk-scaffold]))
+              [std.lang.runtime-meta :as runtime]))
 
 ;; --------------------------------------------------
 ;; script form discovery
@@ -73,20 +73,20 @@
 
 (defn- runtime-config-dispatch-map
   []
-  (->> xtalk-scaffold/+runtime-lang-config+
+  (->> runtime/+runtime-lang-config+
        vals
        (keep (fn [{:keys [script dispatch]}]
-               (when (and script dispatch)
-                 [(subs (name dispatch) 2) script])))
+                (when (and script dispatch)
+                  [(subs (name dispatch) 2) script])))
        (into {})))
 
 (defn- runtime-config-dispatch-tag-map
   []
-  (->> xtalk-scaffold/+runtime-lang-config+
+  (->> runtime/+runtime-lang-config+
        vals
        (keep (fn [{:keys [script dispatch]}]
                (when (and script dispatch)
-                 [script (keyword (subs (name dispatch) 2))])))
+                  [script (keyword (subs (name dispatch) 2))])))
        (into {})))
 
 (defn- snapshot-runtime-dispatch-map
@@ -147,8 +147,8 @@
   (let [lang (seedgen-normalize-runtime-lang lang)]
     (some (fn [{:keys [script runtime]}]
             (when (= script lang)
-              runtime))
-          (vals xtalk-scaffold/+runtime-lang-config+))))
+               runtime))
+          (vals runtime/+runtime-lang-config+))))
 
 (defn seedgen-dispatch-lang
   [form]
