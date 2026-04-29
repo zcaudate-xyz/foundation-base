@@ -3,7 +3,8 @@
   (:refer-clojure :exclude [get set]))
 
 (l/script :xtalk
-  {:require [[xt.lang.spec-base :as xt]]})
+  {:implements example.xt.protocol.cache
+   :require [[xt.lang.spec-base :as xt]]})
 
 (defn.xt get
   "xtalk example cache lookup"

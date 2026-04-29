@@ -5,13 +5,13 @@
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]]})
 
-(defn.xt get
+(defabstract.xt get
   "abstract cache lookup for the example contract"
   {:added "4.1"}
   [cache key]
   (xt/x:err "example.xt.protocol.cache/get is abstract"))
 
-(defn.xt set
+(defabstract.xt set
   "abstract cache write for the example contract"
   {:added "4.1"}
   [cache key value]

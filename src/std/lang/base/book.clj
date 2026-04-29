@@ -316,6 +316,26 @@
 
 (declare module-create)
 
+(defn module-normalize-implements
+  "normalizes module contracts into a vector of symbols"
+  {:added "4.1"}
+  [implements]
+  (cond
+    (nil? implements)
+    []
+
+    (symbol? implements)
+    [implements]
+
+    (sequential? implements)
+    (vec implements)
+
+    (set? implements)
+    (vec (sort implements))
+
+    :else
+    [implements]))
+
 (defn module-export-requires
   "reconstructs module requires from stored link metadata"
   {:added "4.1"}
@@ -431,7 +451,9 @@
                     (module-specialize-entry source-id target-id entry))
                   (:fragment source))]
     (merge base
-           (select-keys source [:display])
+           (select-keys source [:display
+                                :implements
+                                :specialize])
            {:code code
             :fragment fragment})))
 
@@ -446,10 +468,13 @@
                                                             :module module-id}))
          {:keys [require
                  require-impl
+                 implements
+                 specialize
                  import alias
                  export file
                  static]} options
          requires  (module-create-requires require)
+         implements (module-normalize-implements implements)
          internal (-> (collection/map-entries (fn [[id {:keys [as]}]] [id (or as id)])
                                      requires)
                       (assoc module-id '-))
@@ -495,6 +520,8 @@
                           :native     native
                           :native-lu  native-lu
                           :require-impl require-impl
+                          :implements implements
+                          :specialize (or specialize {})
                           :includes   includes
 
                           :static static}))))

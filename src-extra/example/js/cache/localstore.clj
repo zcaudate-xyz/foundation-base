@@ -2,7 +2,8 @@
   (:require [std.lang :as l])
   (:refer-clojure :exclude [get set]))
 
-(l/script :js)
+(l/script :js
+  {:implements example.xt.protocol.cache})
 
 (defn.js get
   "javascript example cache lookup"
