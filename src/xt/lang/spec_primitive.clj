@@ -129,7 +129,7 @@
 
 (defmacro.xt ^{:standalone true} 
   pow
-  [x & more] (apply list (quote pow) x more))
+  [x & more] (apply list (quote xt.lang.spec-base/x:m-pow) x more))
 
 (defmacro.xt ^{:standalone true} 
   return

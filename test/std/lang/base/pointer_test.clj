@@ -148,7 +148,7 @@
                                        :library +library-ext+})
                      []
                      {:layout :full})
-  => "1\n2\n3"
+  => #"1;?\n2;?\n3;?"
 
   (ptr-invoke-script (ut/lang-pointer :lua
                                       {:module 'L.core
