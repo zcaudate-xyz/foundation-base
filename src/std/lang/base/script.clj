@@ -38,6 +38,8 @@
 
    ;; top-level
    :require
+   :implements
+   :specialize
    :import
    :macro-only
    :bundle
@@ -63,21 +65,25 @@
 (defn script-ns-import
   "imports the namespace and sets a primary flag"
   {:added "4.0"}
-  ([{:keys [require require-impl] :as config}]
+  ([{:keys [require require-impl implements] :as config}]
    (let [current (env/ns-sym)]
-     (alias '- current)
-     (->> require-impl
-          (mapv (fn [ns] (clojure.core/require ns :reload))))
-     (->> require
-          (keep (fn [[ns & {:keys [as with primary]}]]
-                  (clojure.core/require
-                   (cond-> [ns]
-                     as    (conj :as (if (vector? as)
-                                       (last as)
-                                       as))
-                     with  (conj :refer with)))
-                  (if primary ns)))
-          set))))
+      (alias '- current)
+      (->> require-impl
+           (mapv (fn [ns] (clojure.core/require ns :reload))))
+      (->> (book/module-normalize-implements implements)
+           (mapv (fn [ns] (clojure.core/require ns :reload))))
+       (->> require
+            (keep (fn [[ns & {:keys [as with primary]}]]
+                   (when (symbol? with)
+                     (clojure.core/require with :reload))
+                   (clojure.core/require
+                    (cond-> [ns]
+                      as    (conj :as (if (vector? as)
+                                        (last as)
+                                        as))
+                      (coll? with)  (conj :refer with)))
+                   (if primary ns)))
+           set))))
 
 (defn script-macro-import
   "import macros into the namespace"
@@ -95,9 +101,98 @@
                                           (set (concat (keys (ns-refers curr))
                                                        (keys (ns-interns curr)))))
          refers (clojure.set/difference ids ignore)]
-     (when-let [mns (some-> syms first ut/sym-module)]
-       (refer mns :only (vec refers)))
-     [refers ids])))
+      (when-let [mns (some-> syms first ut/sym-module)]
+        (refer mns :only (vec refers)))
+      [refers ids])))
+
+(defn script-require-target-id
+  [module-id source-id as]
+  (symbol
+   (str module-id
+        "."
+        (name (or (if (vector? as)
+                    (last as)
+                    as)
+                  source-id)))))
+
+(defn script-specialize-require
+  [lang module-id library require-spec]
+  (let [[source & args] require-spec
+        {:keys [as with]
+         :as opts} (apply hash-map args)]
+    (if (symbol? with)
+      (let [snapshot (lib/get-snapshot library)
+            [source-lang source-module] (or (lib/snapshot-find-module snapshot source)
+                                            (f/error "Specialization source module not found"
+                                                     {:lang lang
+                                                      :module module-id
+                                                      :source source
+                                                      :backend with}))
+            [backend-lang backend-module] (or (lib/snapshot-find-module snapshot with)
+                                              (f/error "Specialization backend module not found"
+                                                       {:lang lang
+                                                        :module module-id
+                                                        :source source
+                                                        :backend with}))
+            _            (lib/validate-module-implements snapshot
+                                                         backend-lang
+                                                         with)
+            implements (vec (:implements backend-module))
+            bindings   (->> implements
+                            (filter (set (vals (:link source-module))))
+                            (map (fn [contract]
+                                   [contract with]))
+                            (into {}))
+            _          (when (empty? bindings)
+                         (f/error "Backend does not implement a contract required by source module"
+                                  {:lang lang
+                                   :module module-id
+                                   :source source
+                                   :backend with
+                                   :implements implements
+                                   :requires (sort (vals (:link source-module)))}))
+            target-id  (when (= source-lang backend-lang)
+                         (script-require-target-id module-id source as))
+            specialize {source {:backend with
+                                :bindings bindings
+                                :contracts (vec (keys bindings))
+                                :source-lang source-lang
+                                :backend-lang backend-lang
+                                :target target-id}}]
+        (when target-id
+          (lib/install-module-specialized! library
+                                           source-lang
+                                           source
+                                           target-id
+                                           {:bindings bindings}))
+        {:require-spec (if target-id
+                         (vec (concat [target-id]
+                                      (mapcat identity (dissoc opts :with))))
+                         require-spec)
+         :specialize specialize})
+      {:require-spec require-spec
+       :specialize {}})))
+
+(defn script-specialize-config
+  [lang module-id config library]
+  (let [{:keys [require]
+         :as config} config
+        {:keys [requires specialize]}
+        (reduce (fn [{:keys [requires specialize]} require-spec]
+                  (let [{:keys [require-spec]
+                         :as out}
+                        (script-specialize-require lang
+                                                   module-id
+                                                   library
+                                                   require-spec)]
+                    {:requires (conj requires require-spec)
+                     :specialize (merge specialize
+                                        (:specialize out))}))
+                {:requires []
+                 :specialize (or (:specialize config) {})}
+                require)]
+    (cond-> (assoc config :require requires)
+      (seq specialize) (assoc :specialize specialize))))
 
 
 ;; script-base
@@ -121,11 +216,12 @@
   {:added "4.0"}
   ([lang module-id config lib]
    (let [primary    (script-ns-import config)
-         config     (update config :emit (fnil eval {}))
-         [snapshot] (lib/install-module! lib lang module-id (dissoc config
-                                                                    :runtime
-                                                                    :config
-                                                                    :layout
+          config     (update config :emit (fnil eval {}))
+          config     (script-specialize-config lang module-id config lib)
+          [snapshot] (lib/install-module! lib lang module-id (dissoc config
+                                                                     :runtime
+                                                                     :config
+                                                                     :layout
                                                                     :emit))
          book    (snap/get-book-raw snapshot lang)
          module  (get-in book [:modules module-id])

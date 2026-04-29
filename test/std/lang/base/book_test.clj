@@ -398,6 +398,35 @@
   (b/module-create-requires '[[L.core :as u]])
   => '{L.core {:as u, :id L.core}})
 
+^{:refer std.lang.base.book/module-export-requires :added "4.1"}
+(fact "reconstructs module requires from stored link metadata"
+  (b/module-export-requires
+   (b/module-create +book+
+                    'L.util
+                    '{:require [[L.core :as u :include true]]}))
+  => '[[L.core :as u :include true]])
+
+^{:refer std.lang.base.book/module-specialize :added "4.1"}
+(fact "clones a module under a new id with rewritten links"
+  (let [source (-> +sample+
+                   (b/put-module
+                    (merge (b/get-module +sample+ 'L.core)
+                           {:link '{- L.core
+                                    cache example.xt.protocol.cache}
+                            :internal '{L.core -
+                                        example.xt.protocol.cache cache}}))
+                   second)
+        cloned (b/module-specialize source
+                                    'L.core
+                                    'L.alt
+                                    {:bindings {'example.xt.protocol.cache
+                                                'example.xt.cache.custom-cache}})]
+    [(:id cloned)
+     (:module (get-in cloned [:code 'identity-fn]))
+     (:link cloned)])
+  => ['L.alt 'L.alt '{- L.alt
+                      cache example.xt.cache.custom-cache}])
+
 ^{:refer std.lang.base.book/module-create :added "4.0"}
 (fact "creates a module given book and options"
 

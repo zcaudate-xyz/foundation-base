@@ -260,7 +260,24 @@
                         snapshot
                         (assoc snapshot lang {:id lang
                                               :book new-book}))]
-     [new-snapshot status changes])))
+      [new-snapshot status changes])))
+
+(defn install-module-specialized
+  "clones a source module under a new module id with rewritten links"
+  {:added "4.1"}
+  [snapshot lang source-id module-id options]
+  (let [book       (get-book-raw snapshot lang)
+        specialized (book/module-specialize book source-id module-id options)
+        [new-book status changes] (if (book/has-module? book module-id)
+                                    (install-module-update book specialized)
+                                    [(second (book/set-module book specialized))
+                                     :new
+                                     specialized])
+        new-snapshot (if (= status :no-change)
+                       snapshot
+                       (assoc snapshot lang {:id lang
+                                             :book new-book}))]
+    [new-snapshot status changes]))
 
 ;;
 ;;

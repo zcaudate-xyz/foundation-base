@@ -192,6 +192,68 @@
 (def +install-module-directory-fn+
   (compile/types-add :module.directory #'compile-module-directory))
 
+(declare compile-module-root
+         compile-module-graph)
+
+(defn specialization-descriptor
+  "normalizes a module specialization descriptor"
+  {:added "4.1"}
+  [{:keys [bindings compile-type descriptor lang runtime source source-module target target-module]
+    :as m}]
+  (let [m      (merge descriptor m)
+        source (or source source-module)
+        target (or target target-module)]
+    (or source
+        (f/error "Specialization source required" {:input m}))
+    (or target
+        (f/error "Specialization target required" {:input m}))
+    (assoc m
+           :lang lang
+           :runtime runtime
+           :source source
+           :target target
+           :bindings (or bindings {})
+           :compile-type (or compile-type :graph))))
+
+(defn compile-module-specialization
+  "installs and compiles a specialized module descriptor"
+  {:added "4.1"}
+  [descriptor]
+  (let [{:keys [bindings compile-type lang library source target]
+         :as descriptor} (specialization-descriptor descriptor)
+        library  (or library (impl/default-library))
+        _        (lib/install-module-specialized! library
+                                                  lang
+                                                  source
+                                                  target
+                                                  {:bindings bindings})
+        compile-fn (case compile-type
+                     :single #'compile-module-single
+                     :root   #'compile-module-root
+                     :directory #'compile-module-directory
+                     #'compile-module-graph)]
+    (compile-fn (-> descriptor
+                    (dissoc :bindings
+                            :compile-type
+                            :descriptor
+                            :library
+                            :runtime
+                            :source
+                            :source-module
+                            :target
+                            :target-module)
+                    (assoc :main target)))))
+
+(defn compile-module-specializations
+  "installs and compiles a batch of module specialization descriptors"
+  {:added "4.1"}
+  ([descriptors]
+   (compile-module-specializations descriptors {}))
+  ([descriptors opts]
+   (mapv (fn [descriptor]
+           (compile-module-specialization (merge opts descriptor)))
+         descriptors)))
+
 
 ;;
 ;; ROOT

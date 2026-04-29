@@ -1,5 +1,6 @@
 (ns std.lang.base.library
-  (:require [std.concurrent :as cc]
+  (:require [clojure.string :as str]
+            [std.concurrent :as cc]
             [std.lang.base.book :as b]
             [std.lang.base.book-entry :as e]
             [std.lang.base.book-module :as m]
@@ -69,6 +70,83 @@
   {:added "4.0"}
   [lib]
   (wait-apply lib identity))
+
+(defn snapshot-find-module
+  "finds a module anywhere in the merged library snapshot"
+  {:added "4.1"}
+  [snapshot module-id]
+  (some (fn [[lang {:keys [book]}]]
+          (when-let [module (b/get-module book module-id)]
+            [lang module]))
+        snapshot))
+
+(defn entry-arity
+  "returns the arity of an entry from its input form when available"
+  {:added "4.1"}
+  [{:keys [form-input]}]
+  (some->> (rest form-input)
+           (some #(if (vector? %) %))
+           count))
+
+(defn entry-abstract?
+  "checks if an entry was declared with `defabstract`"
+  {:added "4.1"}
+  [{:keys [form-input]}]
+  (and (seq? form-input)
+       (symbol? (first form-input))
+       (str/starts-with? (name (first form-input))
+                         "defabstract")))
+
+(defn validate-module-implements
+  "checks that a module satisfies all declared abstract contracts"
+  {:added "4.1"}
+  [snapshot lang module-id]
+  (when-let [module (b/get-module (snap/get-book snapshot lang)
+                                  module-id)]
+    (doseq [contract-id (:implements module)]
+      (let [[contract-lang contract] (or (snapshot-find-module snapshot contract-id)
+                                         (f/error "Implemented contract not found"
+                                                  {:lang lang
+                                                   :module module-id
+                                                   :contract contract-id}))
+            contract-entries (let [entries (->> (:code contract)
+                                                vals
+                                                (filter entry-abstract?)
+                                                vec)]
+                               (if (empty? entries)
+                                 (->> (:code contract)
+                                      vals
+                                      vec)
+                                 entries))
+            impl-code (:code module)
+            missing (->> contract-entries
+                         (keep (fn [{:keys [id]}]
+                                 (when-not (contains? impl-code id)
+                                   id)))
+                         sort
+                         vec)
+            mismatched (->> contract-entries
+                            (keep (fn [{:keys [id] :as expected}]
+                                    (when-let [actual (get impl-code id)]
+                                      (let [expected-arity (entry-arity expected)
+                                            actual-arity   (entry-arity actual)]
+                                        (when (and expected-arity
+                                                   actual-arity
+                                                   (not= expected-arity actual-arity))
+                                          {:id id
+                                           :expected expected-arity
+                                           :actual actual-arity})))))
+                            vec)]
+        (when (or (seq missing)
+                  (seq mismatched))
+          (f/error "Module does not satisfy abstract contract"
+                   {:lang lang
+                    :module module-id
+                    :contract contract-id
+                    :contract-lang contract-lang
+                    :missing missing
+                    :mismatched mismatched})))))
+  true)
 
 (defn get-book
   "gets a book from library"
@@ -252,6 +330,19 @@
   (wait-mutate! lib
                 (fn [snapshot]
                   (let [out (snap/install-module snapshot lang module-id options)]
+                    [out (first out)]))))
+
+(defn install-module-specialized!
+  "installs a specialized module clone into the library"
+  {:added "4.1"}
+  [lib lang source-id module-id options]
+  (wait-mutate! lib
+                (fn [snapshot]
+                  (let [out (snap/install-module-specialized snapshot
+                                                             lang
+                                                             source-id
+                                                             module-id
+                                                             options)]
                     [out (first out)]))))
 
 (defn install-book!

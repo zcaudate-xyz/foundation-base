@@ -24,20 +24,22 @@
 ;;
 
 (impl/defimpl BookModule [;; required
-                     lang
-                     id
-                     
-                     ;; dependency management
-                     alias         ;; map of shortcuts to packages (both external and internal)
-                     link          ;; map of internal dependencies
-                     native        ;; packages that are native to the workspace runtime
-                     native-lu     ;; lookup for native imports
-                     internal      ;; set of required packages
-                     
-                     ;; actual code
-                     
-                     fragment   ;; macros
-                     code       ;; main code
+                      lang
+                      id
+                      
+                      ;; dependency management
+                      alias         ;; map of shortcuts to packages (both external and internal)
+                      link          ;; map of internal dependencies
+                      native        ;; packages that are native to the workspace runtime
+                      native-lu     ;; lookup for native imports
+                      internal      ;; set of required packages
+                      implements    ;; abstract contracts implemented by the module
+                      specialize    ;; declarative backend bindings for linked modules
+                      
+                      ;; actual code
+                      
+                      fragment   ;; macros
+                      code       ;; main code
                      includes   ;; included modules
 
                      ;; misc (for adding additional data not related to runtime)
@@ -60,27 +62,31 @@
             alias
             link
             internal
-            native
-            native-lu
-            require-impl
-            
-            fragment
-            code
-            includes
+             native
+             native-lu
+             require-impl
+             implements
+             specialize
+             
+             fragment
+             code
+             includes
 
             static
             display] :as m}]
    (assert (not= nil lang) "Module :lang required")
    (assert (not= nil id)   "Module :id Required")
    (map->BookModule (merge { ;; Link
-                            :alias {}
-                            :link {}
-                            :native {}
-                            :require-impl []
-
-                            ;; Code
-                            :fragment {}
-                            :code {}
+                             :alias {}
+                             :link {}
+                             :native {}
+                             :require-impl []
+                             :implements []
+                             :specialize {}
+ 
+                             ;; Code
+                             :fragment {}
+                             :code {}
                             :includes #{}
 
                             ;; Misc

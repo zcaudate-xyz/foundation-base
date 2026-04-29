@@ -1,15 +1,16 @@
 (ns std.lang.base.book
   (:require [clojure.set]
             [clojure.string]
-            [std.lang.base.book-entry :as entry]
-            [std.lang.base.book-meta :as meta]
-            [std.lang.base.book-module :as module]
-            [std.lang.base.util :as ut]
-            [std.lib.atom :as atom]
-            [std.lib.collection :as collection]
-            [std.lib.foundation :as f]
-            [std.lib.impl :as impl]
-            [std.protocol.deps :as protocol.deps]))
+             [std.lang.base.book-entry :as entry]
+             [std.lang.base.book-meta :as meta]
+             [std.lang.base.book-module :as module]
+             [std.lang.base.util :as ut]
+             [std.lib.atom :as atom]
+             [std.lib.collection :as collection]
+             [std.lib.foundation :as f]
+             [std.lib.impl :as impl]
+             [std.lib.walk :as walk]
+             [std.protocol.deps :as protocol.deps]))
 
 (f/intern-in module/book-module
              module/book-module?
@@ -313,6 +314,149 @@
   [require]
   (collection/map-juxt [first #(apply hash-map (cons :id %))] require))
 
+(declare module-create)
+
+(defn module-normalize-implements
+  "normalizes module contracts into a vector of symbols"
+  {:added "4.1"}
+  [implements]
+  (cond
+    (nil? implements)
+    []
+
+    (symbol? implements)
+    [implements]
+
+    (sequential? implements)
+    (vec implements)
+
+    (set? implements)
+    (vec (sort implements))
+
+    :else
+    [implements]))
+
+(defn module-export-requires
+  "reconstructs module requires from stored link metadata"
+  {:added "4.1"}
+  [module]
+  (->> (:link module)
+       (remove (fn [[alias _]]
+                 (= alias '-)))
+       (mapv (fn [[alias dep]]
+               (cond-> [dep :as alias]
+                 ((or (:includes module #{}) dep) dep) (conj :include true))))
+       (sort-by first)))
+
+(defn module-export-imports
+  "reconstructs native imports from stored module metadata"
+  {:added "4.1"}
+  [module]
+  (->> (:native module)
+       (mapv (fn [[name opts]]
+               (let [{:keys [bundle]
+                      :as opts} opts
+                     bundle (some->> bundle
+                                     (mapv (fn [[bundle-name bundle-opts]]
+                                             (vec (concat [bundle-name]
+                                                          (mapcat identity bundle-opts)))))
+                                     not-empty)]
+                 (vec (concat [name]
+                              (mapcat identity (cond-> (dissoc opts :bundle)
+                                                 bundle (assoc :bundle bundle))))))))
+       (sort-by first)))
+
+(defn module-specialize-symbol
+  "rewrites self references from one module to another"
+  {:added "4.1"}
+  [source-id target-id sym]
+  (if (and (symbol? sym)
+           (= (namespace sym) (str source-id)))
+    (symbol (str target-id)
+            (name sym))
+    sym))
+
+(defn module-specialize-form
+  "rewrites self references inside an entry form"
+  {:added "4.1"}
+  [source-id target-id form]
+  (walk/postwalk (fn [x]
+                   (module-specialize-symbol source-id target-id x))
+                 form))
+
+(defn module-specialize-entry
+  "clones an entry into a new module"
+  {:added "4.1"}
+  [source-id target-id entry]
+  (let [rewrite-form (fn [form]
+                       (if (nil? form)
+                         nil
+                         (module-specialize-form source-id target-id form)))
+        rewrite-deps (fn [deps]
+                       (when deps
+                         (->> deps
+                              (map #(module-specialize-symbol source-id target-id %))
+                              set)))]
+    (cond-> (assoc entry :module target-id)
+      true             (update :form rewrite-form)
+      (:form-input entry) (update :form-input rewrite-form)
+      (:standalone entry) (update :standalone rewrite-form)
+      (:deps entry)       (assoc :deps (rewrite-deps (:deps entry)))
+      (:deps-fragment entry) (assoc :deps-fragment (rewrite-deps (:deps-fragment entry))))))
+
+(defn module-specialize-bindings
+  "normalizes specialization bindings keyed by alias or module id"
+  {:added "4.1"}
+  [module bindings]
+  (reduce-kv (fn [out k v]
+               (cond
+                 (contains? (:internal module) k)
+                 (assoc out k v)
+
+                 (contains? (:link module) k)
+                 (assoc out (get (:link module) k) v)
+
+                 :else
+                 (assoc out k v)))
+             {}
+             (or bindings {})))
+
+(defn module-specialize
+  "clones a module under a new module id with rewritten link metadata"
+  {:added "4.1"}
+  [{:keys [lang] :as book} source-id target-id & [{:keys [bindings]
+                                                   :as _opts}]]
+  (let [source   (or (get-module book source-id)
+                     (f/error "Source module not found"
+                              {:lang lang
+                               :source source-id
+                               :available (keys (:modules book))}))
+        bindings (module-specialize-bindings source bindings)
+        require  (->> (module-export-requires source)
+                      (mapv (fn [[dep & args]]
+                              (vec (concat [(get bindings dep dep)] args)))))
+        base     (module-create book
+                                target-id
+                                {:require      require
+                                 :require-impl (:require-impl source)
+                                 :import       (module-export-imports source)
+                                 :export       (module-specialize-form source-id target-id (:export source))
+                                 :static       (:static source)})
+        code     (collection/map-vals
+                  (fn [entry]
+                    (module-specialize-entry source-id target-id entry))
+                  (:code source))
+        fragment (collection/map-vals
+                  (fn [entry]
+                    (module-specialize-entry source-id target-id entry))
+                  (:fragment source))]
+    (merge base
+           (select-keys source [:display
+                                :implements
+                                :specialize])
+           {:code code
+            :fragment fragment})))
+
 (defn module-create
   "creates a module given book and options"
   {:added "4.0"}
@@ -324,10 +468,13 @@
                                                             :module module-id}))
          {:keys [require
                  require-impl
+                 implements
+                 specialize
                  import alias
                  export file
                  static]} options
          requires  (module-create-requires require)
+         implements (module-normalize-implements implements)
          internal (-> (collection/map-entries (fn [[id {:keys [as]}]] [id (or as id)])
                                      requires)
                       (assoc module-id '-))
@@ -373,6 +520,8 @@
                           :native     native
                           :native-lu  native-lu
                           :require-impl require-impl
+                          :implements implements
+                          :specialize (or specialize {})
                           :includes   includes
 
                           :static static}))))
