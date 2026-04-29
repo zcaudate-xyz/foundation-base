@@ -17,17 +17,17 @@
 
 (defn assert-ruby-syntax!
   [form]
-  (let [tmp  (java.io.File/createTempFile "ruby-promise-" ".rb")
-        code (l/emit-as :ruby [form])]
+  (let [tmp (java.io.File/createTempFile "ruby-promise-" ".rb")]
     (try
-      (spit tmp code)
-      (let [result (shell/sh "ruby" "-c" (.getAbsolutePath tmp))]
-        (when-not (zero? (:exit result))
-          (throw (ex-info "Invalid emitted Ruby"
-                          {:form form
-                           :code code
-                           :result result}))))
-      code
+      (let [code (l/emit-as :ruby [form])]
+        (spit tmp code)
+        (let [result (shell/sh "ruby" "-c" (.getAbsolutePath tmp))]
+          (when-not (zero? (:exit result))
+            (throw (ex-info "Invalid emitted Ruby"
+                            {:form form
+                             :code code
+                             :result result}))))
+        code)
       (finally
         (.delete tmp)))))
 
