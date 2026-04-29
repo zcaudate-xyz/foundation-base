@@ -1,5 +1,6 @@
 (ns xtbench.ruby.lang.spec-promise-test
-  (:require [std.lang :as l]
+  (:require [clojure.java.shell :as shell]
+            [std.lang :as l]
             [xt.lang.common-notify :as notify]
             [xt.lang.spec-base :as xt])
   (:use code.test))
@@ -13,6 +14,22 @@
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
+
+(defn assert-ruby-syntax!
+  [form]
+  (let [tmp  (java.io.File/createTempFile "ruby-promise-" ".rb")
+        code (l/emit-as :ruby [form])]
+    (try
+      (spit tmp code)
+      (let [result (shell/sh "ruby" "-c" (.getAbsolutePath tmp))]
+        (when-not (zero? (:exit result))
+          (throw (ex-info "Invalid emitted Ruby"
+                          {:form form
+                           :code code
+                           :result result}))))
+      code
+      (finally
+        (.delete tmp)))))
 
 ^{:refer xt.lang.spec-promise/x:promise-then :added "4.1"}
 (fact "chains a resolved js promise"
@@ -88,6 +105,13 @@
 
 ^{:refer xt.lang.spec-promise/x:with-delay :added "4.1"}
 (fact "delays asynchronous js computations"
+
+  (boolean
+   (assert-ruby-syntax!
+    (spec-promise/x:with-delay 100
+                               '(fn []
+                                  (return "OK")))))
+  => true
 
   (notify/wait-on :ruby
     (spec-promise/x:with-delay 100
