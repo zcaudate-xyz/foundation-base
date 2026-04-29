@@ -8,7 +8,6 @@
              [std.lang.base.impl :as impl]
              [std.lang.base.runtime :as rt]
              [std.lang.model.spec-lua :as spec]
-             [std.lib.collection :as collection]
              [std.lib.env :as env]
              [std.lib.os :as os]
              [xt.lang.common-lib :as lib]))
@@ -112,21 +111,6 @@
   [input mopts]
   (rt/normalize-body-forms input mopts))
 
-(defn mark-inline-defs
-  "marks inline `defn` forms as inner so Lua emits local helper definitions."
-  {:added "4.1"}
-  [forms]
-  (map (fn [form]
-         (if (and (collection/form? form)
-                  (= 'defn (first form))
-                  (symbol? (second form)))
-           (apply list 'defn
-                  (with-meta (second form)
-                    (assoc (meta (second form)) :inner true))
-                  (drop 2 form))
-           form))
-       forms))
-
 (defn default-body-transform
   "transform code for return
  
@@ -138,7 +122,6 @@
   {:added "4.0"}
   [input mopts]
   (-> (normalize-forms input mopts)
-      (mark-inline-defs)
       (default-body-wrap)))
 
 (def ^{:arglists '([body])}

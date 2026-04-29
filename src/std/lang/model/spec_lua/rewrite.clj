@@ -22,6 +22,10 @@
 
 (def ^:dynamic *lua-grammar* nil)
 
+(defn- runtime-eval?
+  [{:keys [mopts]}]
+  (boolean (get-in mopts [:emit :body :transform])))
+
 (declare lua-rewrite-statement)
 (declare lua-rewrite-statements)
 (declare lua-rewrite-form)
@@ -51,6 +55,32 @@
 (defn- lua-try-thunk
   [body]
   (apply list 'fn [] body))
+
+(defn- lua-mark-inline-def
+  [form]
+  (if (and (collection/form? form)
+           (= 'defn (first form))
+           (symbol? (second form)))
+    (apply list 'defn
+           (with-meta (second form)
+             (assoc (meta (second form)) :inner true))
+           (drop 2 form))
+    form))
+
+(defn- lua-mark-runtime-defs
+  [form]
+  (cond
+    (vector? form)
+    (with-form-meta form (mapv lua-mark-inline-def form))
+
+    (and (collection/form? form)
+         (#{'do 'do*} (first form)))
+    (with-form-meta form
+      (apply list (first form)
+             (map lua-mark-inline-def (rest form))))
+
+    :else
+    (lua-mark-inline-def form)))
 
 (defn- lua-pcall-bind
   [bindings thunk]
@@ -172,4 +202,7 @@
 (defn lua-rewrite-stage
   [form {:keys [grammar] :as opts}]
   (binding [*lua-grammar* grammar]
-    (lua-rewrite-form ((:rewrite-stage +lua-rewriter+) form opts))))
+    (let [form (lua-rewrite-form ((:rewrite-stage +lua-rewriter+) form opts))]
+      (if (runtime-eval? opts)
+        (lua-mark-runtime-defs form)
+        form))))

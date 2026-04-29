@@ -70,3 +70,20 @@
     [(boolean (re-find #"hello\(inc_fn\)" out))
      (nil? (re-find #"hello\(function \(x\)" out))])
   => [true true])
+
+^{:refer std.lang.model.spec-lua.rewrite/lua-rewrite-stage :added "4.1"}
+(fact "marks runtime-eval helper defs as inner for lua without affecting normal staging"
+  (let [plain (rewrite/lua-rewrite-stage
+               '(do
+                  (defn helper [] (return 1))
+                  (helper))
+               {:grammar lua/+grammar+})
+        evald (rewrite/lua-rewrite-stage
+               '(do
+                  (defn helper [] (return 1))
+                  (helper))
+               {:grammar lua/+grammar+
+                :mopts {:emit {:body {:transform identity}}}})]
+    [(boolean (-> plain second second meta :inner))
+     (boolean (-> evald second second meta :inner))])
+  => [false true])
