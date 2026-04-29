@@ -35,25 +35,24 @@
 (fact "default server instructions advertise the project-specific autopilot tools"
   [(re-find #"code-test" (server/default-instructions))
    (re-find #"code-manage" (server/default-instructions))
-   (re-find #"std-lang-manage" (server/default-instructions))
+   (re-find #"lang-emit-as" (server/default-instructions))
    (re-find #"code-maven" (server/default-instructions))]
-  => ["code-test" "code-manage" "std-lang-manage" "code-maven"])
+  => ["code-test" "code-manage" "lang-emit-as" "code-maven"])
 
 ^{:refer code.mcp.server/default-tools :added "4.1"}
 (fact "default server tools include expected tool names"
   (->> (server/default-tools)
        (map :name)
        set)
-  => #{"echo" "ping"
-       "clj-eval"
-       "code-test"
-       "code-manage"
-       "jvm-namespace"
-       "std-lang-manage"
-       "lang-emit-as" "std-lang-list" "std-lang-modules"
-       "code-doc-init" "code-doc-deploy" "code-doc-publish"
-       "code-maven"
-       "form-heal-list-edits" "form-heal-get-dsl-deps" "form-heal-refactor-directory"})
+   => #{"echo" "ping"
+        "clj-eval"
+        "code-test"
+        "code-manage"
+        "jvm-namespace"
+        "lang-emit-as" "std-lang-list" "std-lang-modules"
+        "code-doc-init" "code-doc-deploy" "code-doc-publish"
+        "code-maven"
+        "form-heal-list-edits" "form-heal-get-dsl-deps" "form-heal-refactor-directory"})
 
 ^{:refer code.mcp.server/create-server :added "4.0"}
 (fact "creates a server instance through base server"
