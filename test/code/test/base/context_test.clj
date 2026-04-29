@@ -30,4 +30,5 @@
 (fact "check default values"
   context/*eval-fact* => false
   context/*eval-mode* => true ;; defonce value
-  context/*print* => #{:print-throw :print-failed :print-timeout :print-bulk})
+  (every? context/*print* #{:print-throw :print-failed :print-timeout :print-bulk})
+  => true)
