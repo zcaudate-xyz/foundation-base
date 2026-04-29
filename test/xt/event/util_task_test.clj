@@ -203,3 +203,31 @@
      (fn [_]
        (repl/notify (loader/list-completed instance)))))
   => ["A"])
+
+
+^{:refer xt.event.util-task/promise-wrap :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.event.util-task/task-unload :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.event.util-task/new-loader-blank :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.event.util-task/add-tasks :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.event.util-task/list-loading :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.event.util-task/list-completed :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.event.util-task/list-incomplete :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.event.util-task/list-waiting :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.event.util-task/unload-tasks :added "4.1"}
+(fact "TODO")

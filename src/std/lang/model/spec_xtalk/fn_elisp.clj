@@ -705,8 +705,8 @@
 (defn elisp-tf-x-json-decode
   [[_ expr]]
   (list 'json-parse-string expr
-        :object-type (list 'quote 'hash-table)
-        :array-type (list 'quote 'array)
+        :object-type (list 'intern "hash-table")
+        :array-type (list 'intern "array")
         :null-object nil
         :false-object :false))
 

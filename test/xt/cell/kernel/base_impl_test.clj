@@ -149,3 +149,22 @@
    (base-impl/add-listener cell ["hello" "echo"] "@react/1234" (fn:>) nil nil)
    (base-impl/trigger-listeners cell ["hello" "echo"] {}))
   => ["@react/1234"])
+
+
+^{:refer xt.cell.kernel.base-impl/list-views :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.cell.kernel.base-impl/view-ensure :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.cell.kernel.base-impl/remove-listener :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.cell.kernel.base-impl/list-listeners :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.cell.kernel.base-impl/list-all-listeners :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.cell.kernel.base-impl/trigger-listeners :added "4.1"}
+(fact "TODO")

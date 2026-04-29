@@ -813,7 +813,6 @@
   {:x-iter-from-obj       {:macro #'ruby-tf-x-iter-from-obj       :emit :macro}
    :x-iter-from-arr       {:macro #'ruby-tf-x-iter-from-arr       :emit :macro}
    :x-iter-from           {:macro #'ruby-tf-x-iter-from           :emit :macro}
-   :x-iter-generator      {:macro #'ruby-tf-x-iter-generator      :emit :macro}
    :x-iter-eq             {:macro #'ruby-tf-x-iter-eq             :emit :macro}
    :x-iter-null           {:macro #'ruby-tf-x-iter-null           :emit :macro}
    :x-iter-next           {:macro #'ruby-tf-x-iter-next           :emit :macro}

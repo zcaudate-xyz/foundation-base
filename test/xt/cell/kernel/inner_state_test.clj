@@ -291,3 +291,7 @@
   (j/<! (. (inner-state/fn-error-async 10)
            (catch j/identity)))
   => (contains ["error"]))
+
+
+^{:refer xt.cell.kernel.inner-state/fn-self :added "4.1"}
+(fact "TODO")

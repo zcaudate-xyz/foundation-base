@@ -755,3 +755,10 @@
   (!.js
    (base-model/remove-raw-callback (-/CELL)))
   => vector?)
+
+
+^{:refer xt.cell.kernel.base-model/throttle-entry-promise :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.cell.kernel.base-model/throttle-entry :added "4.1"}
+(fact "TODO")
