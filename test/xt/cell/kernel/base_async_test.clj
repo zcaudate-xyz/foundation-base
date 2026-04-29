@@ -8,10 +8,10 @@
   {:require [[xt.cell.kernel.base-async :as base-async]]})
 
 (l/script- :js
-  {:require [[xt.cell.kernel.base-async :as base-async]
+  {:runtime :basic
+   :require [[xt.cell.kernel.base-async :as base-async]
              [xt.lang.common-repl :as repl]
-             [js.core :as j]]
-   :runtime :basic})
+             [js.core :as j]]})
 
 (fact:global
  {:setup [(l/rt:restart)

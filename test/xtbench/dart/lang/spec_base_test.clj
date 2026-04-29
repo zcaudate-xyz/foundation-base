@@ -1,9 +1,9 @@
 (ns xtbench.dart.lang.spec-base-test
   (:use code.test)
-  (:require [clojure.set           :as set]
-            [std.lang              :as l]
+  (:require [clojure.set :as set]
+            [std.lang :as l]
             [xt.lang.common-notify :as notify]
-            [xt.lang.spec-promise  :as spec-promise]))
+            [xt.lang.spec-promise :as spec-promise]))
 
 (l/script- :dart
   {:runtime :twostep
@@ -1146,7 +1146,7 @@
          (fn []
            (xt/x:global-del COMMON_SPEC_GLOBAL)
            (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
-      
+        
     [(set-fn)
      (!:G COMMON_SPEC_GLOBAL)
      (del-fn)])
@@ -1173,7 +1173,7 @@
          (fn []
            (xt/x:global-del COMMON_SPEC_GLOBAL)
            (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
-      
+        
     [(set-fn)
      (del-fn)])
   => [true false])

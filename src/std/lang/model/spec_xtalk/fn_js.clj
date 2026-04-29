@@ -619,11 +619,11 @@
                          (. (new Promise
                                  (fn [inner-resolve]
                                    (inner-resolve (~thunk))))
-                            (then  (fn [value]
-                                     (resolve value)))
-                            (catch (fn [err]
-                                     (reject error)))))
-                       ~ms))))))
+                             (then  (fn [value]
+                                      (resolve value)))
+                             (catch (fn [err]
+                                      (reject err)))))
+                        ~ms))))))
 
 (defn js-tf-x-promise
   [[_ thunk]]

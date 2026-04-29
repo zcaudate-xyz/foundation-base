@@ -1,4 +1,4 @@
-(ns xt.lang.base-lib
+(ns xt.old.base-lib
   (:require [std.lang :as l]
             [std.lang.typed.xtalk :refer [defspec.xt]]
             [std.lib.env :as env]

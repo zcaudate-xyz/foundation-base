@@ -4,7 +4,10 @@
 
 ^{:seedgen/root {:all true, :langs [:lua :python]}}
 (l/script- :js
-  {:require [[xt.cell.binding :as binding] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]] :runtime :basic})
+  {:runtime :basic
+   :require [[xt.cell.binding :as binding]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]]})
 
 (fact:global
  {:setup [(l/rt:restart)]

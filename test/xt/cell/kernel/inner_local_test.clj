@@ -4,7 +4,11 @@
 
 ^{:seedgen/root {:all true, :langs [:lua :python]}}
 (l/script- :js
-  {:require [[xt.lang.spec-base :as xt] [xt.cell.kernel.inner-state :as inner-state] [xt.cell.kernel.inner-local :as inner-local] [js.core :as j]] :runtime :basic})
+  {:runtime :basic
+   :require [[xt.lang.spec-base :as xt]
+             [xt.cell.kernel.inner-state :as inner-state]
+             [xt.cell.kernel.inner-local :as inner-local]
+             [js.core :as j]]})
 
 (fact:global
  {:setup [(l/rt:restart)
@@ -49,10 +53,10 @@
                 @xt.cell.kernel.inner-state/fn-ping)]
     (first result)
     => "@worker/ping"
-        
+            
     (get (second result) :is-async)
     => false
-        
+            
     (get-in (second result) [:handler])
     => 'xt.cell.kernel.inner-state/fn-ping)
 
@@ -60,7 +64,7 @@
                 @xt.cell.kernel.inner-state/fn-trigger)]
     (first result)
     => "@worker/trigger"
-        
+            
     (get-in (second result) [:handler])
     => '(xt.cell.kernel.inner-state/fn-self
          xt.cell.kernel.inner-state/fn-trigger)))

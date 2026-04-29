@@ -178,7 +178,7 @@
             (:= (!:G fetch)
                 (. (require "node-fetch") default)))]}
 (fact "call a http notify function."
-  
+
   (notify/wait-on-call
    (fn [] (!.js
             (repl/notify-http "127.0.0.1" (@! (:http-port (l/default-notify)))
@@ -235,7 +235,7 @@
 
 ^{:refer xt.lang.common-repl/<! :added "4.0"}
 (fact "creates a callback map"
-  
+
   (notify/wait-on :js
     ((. (repl/<!)
        ["success"]) 1))
@@ -245,7 +245,7 @@
     ((. (repl/<!)
        ["success"]) 1))
   => 1
-  
+
   (notify/wait-on :python
     ((. (repl/<!)
        ["success"]) 1))

@@ -124,7 +124,7 @@
               ["UserAccount" "select" "by_organisation"]]
              :in-any-order))]}
 (fact "gets all methods for views"
-  
+
   (!.js
     (v/all-methods (ut/collect-views (@! +views+))))
   => +all-methods-check+

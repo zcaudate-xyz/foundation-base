@@ -281,7 +281,6 @@
       "_root" {"children" [], "::" "vector.node"},
       "_shift" 5}
 
-
   (!.lua
    (v/vector-create (node/node-create nil [])
                     0

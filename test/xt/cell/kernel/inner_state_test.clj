@@ -12,7 +12,14 @@
              [xt.cell.kernel.inner-mock :as inner-mock]]})
 
 (l/script- :js
-  {:require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.cell.kernel.inner-state :as inner-state] [xt.cell.kernel.inner-local :as inner-local] [xt.cell.kernel.inner-mock :as inner-mock] [xt.lang.common-repl :as repl] [js.core :as j]] :runtime :basic})
+  {:runtime :basic
+   :require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.cell.kernel.inner-state :as inner-state]
+             [xt.cell.kernel.inner-local :as inner-local]
+             [xt.cell.kernel.inner-mock :as inner-mock]
+             [xt.lang.common-repl :as repl]
+             [js.core :as j]]})
 
 (fact:global
  {:setup [(l/rt:restart)
@@ -105,9 +112,7 @@
   => {"body" {"a" 1}
       "status" "ok"
       "op" "stream"
-      "signal" "hello"}
-
-    )
+      "signal" "hello"})
 
 ^{:refer xt.cell.kernel.inner-state/fn-trigger-async :added "4.0"}
 (fact "triggers an event after a delay"
@@ -123,9 +128,7 @@
   => {"body" {"a" 1}
       "status" "ok"
       "op" "stream"
-      "signal" "hello"}
-
-    )
+      "signal" "hello"})
 
 ^{:refer xt.cell.kernel.inner-state/fn-set-state :added "4.0"}
 (fact "updates worker state and can emit state events"
@@ -291,7 +294,6 @@
   (j/<! (. (inner-state/fn-error-async 10)
            (catch j/identity)))
   => (contains ["error"]))
-
 
 ^{:refer xt.cell.kernel.inner-state/fn-self :added "4.1"}
 (fact "applies arguments along with the worker self"

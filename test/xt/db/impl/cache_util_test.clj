@@ -765,7 +765,7 @@
                      (. ["record"])
                      (xtd/clone-nested)
                      (xtd/set-in ["data" "nickname"] "hello")))
-    
+      
     (data/get-changed-single rows
                              "UserAccount" "00000000-0000-0000-0000-000000000000"
                              changed))
@@ -782,7 +782,7 @@
                      (. ["record"])
                      (xtd/clone-nested)
                      (xtd/set-in ["data" "nickname"] "hello")))
-    
+      
     (data/get-changed-single rows
                              "UserAccount" "00000000-0000-0000-0000-000000000000"
                              changed))
@@ -799,7 +799,7 @@
                      (. ["record"])
                      (xtd/clone-nested)
                      (xtd/set-in ["data" "nickname"] "hello")))
-    
+      
     (data/get-changed-single rows
                              "UserAccount" "00000000-0000-0000-0000-000000000000"
                              changed))
@@ -1243,7 +1243,7 @@
                     :in-any-order)
               {"c4643895-b0ce-44cc-b07b-2386bf18d43b" true}]))]}
 (fact "adding bulk links from external data (to be doubly sure)"
-  
+
   (!.js
     (var flat (f/flatten sample/Schema
                          "UserAccount"
@@ -1283,7 +1283,7 @@
                        "rev_links"
                        "profile"])])
   => +account-add-bulk-links-check+
-  
+
   (!.py
     (var flat (f/flatten sample/Schema
                          "UserAccount"

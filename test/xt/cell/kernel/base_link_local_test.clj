@@ -10,7 +10,12 @@
              [xt.cell.kernel.base-link-local :as base-link-local]]})
 
 (l/script- :js
-  {:require [[xt.lang.common-lib :as k] [xt.cell.kernel.base-link :as base-link] [xt.cell.kernel.base-link-local :as base-link-local] [xt.lang.common-repl :as repl] [js.core :as j]] :runtime :basic})
+  {:runtime :basic
+   :require [[xt.lang.common-lib :as k]
+             [xt.cell.kernel.base-link :as base-link]
+             [xt.cell.kernel.base-link-local :as base-link-local]
+             [xt.lang.common-repl :as repl]
+             [js.core :as j]]})
 
 (fact:global
  {:setup [(l/rt:restart)
@@ -48,9 +53,7 @@
   => {"body" "hello"
       "status" "ok"
       "op" "stream"
-      "signal" "hello"}
-
-    )
+      "signal" "hello"})
 
 ^{:refer xt.cell.kernel.base-link-local/trigger-async :added "4.0"}
 (fact "performs async trigger calls"
@@ -73,9 +76,7 @@
   => {"body" "hello"
       "status" "ok"
       "op" "stream"
-      "signal" "hello"}
-
-    )
+      "signal" "hello"})
 
 ^{:refer xt.cell.kernel.base-link-local/set-final-status :added "4.0"}
 (fact "forwards set-final-status"
@@ -90,9 +91,7 @@
                        "body" {"eval" true "final" true}}))))
     (. (base-link-local/set-final-status link true)
        (then (repl/>notify))))
-  => {"eval" true "final" true}
-
-    )
+  => {"eval" true "final" true})
 
 ^{:refer xt.cell.kernel.base-link-local/get-final-status :added "4.0"}
 (fact "forwards get-final-status"
@@ -107,9 +106,7 @@
                        "body" true}))))
     (. (base-link-local/get-final-status link)
        (then (repl/>notify))))
-  => true
-
-    )
+  => true)
 
 ^{:refer xt.cell.kernel.base-link-local/set-eval-status :added "4.0"}
 (fact "forwards set-eval-status"
@@ -124,9 +121,7 @@
                        "body" {"eval" false}}))))
     (. (base-link-local/set-eval-status link false true)
        (then (repl/>notify))))
-  => {"eval" false}
-
-    )
+  => {"eval" false})
 
 ^{:refer xt.cell.kernel.base-link-local/get-eval-status :added "4.0"}
 (fact "forwards get-eval-status"
@@ -141,9 +136,7 @@
                        "body" false}))))
     (. (base-link-local/get-eval-status link)
        (then (repl/>notify))))
-  => false
-
-    )
+  => false)
 
 ^{:refer xt.cell.kernel.base-link-local/get-action-list :added "4.0"}
 (fact "forwards get-action-list"
@@ -164,9 +157,7 @@
   => ["@worker/ping"
       "@worker/ping.async"
       "@worker/echo"
-      "@worker/error.async"]
-
-    )
+      "@worker/error.async"])
 
 ^{:refer xt.cell.kernel.base-link-local/get-action-entry :added "4.0"}
 (fact "forwards get-action-entry"
@@ -181,9 +172,7 @@
                        "body" {"args" ["arg"] "is_async" false}}))))
     (. (base-link-local/get-action-entry link "@worker/echo")
        (then (repl/>notify))))
-  => {"args" ["arg"] "is_async" false}
-
-    )
+  => {"args" ["arg"] "is_async" false})
 
 ^{:refer xt.cell.kernel.base-link-local/ping :added "4.0"}
 (fact "forwards ping"
@@ -198,9 +187,7 @@
                        "body" ["pong" 1]}))))
     (. (base-link-local/ping link)
        (then (repl/>notify))))
-  => ["pong" 1]
-
-    )
+  => ["pong" 1])
 
 ^{:refer xt.cell.kernel.base-link-local/ping-async :added "4.0"}
 (fact "forwards ping.async"
@@ -216,9 +203,7 @@
                          "body" ["pong" 1]})))))
     (. (base-link-local/ping-async link 100)
        (then (repl/>notify))))
-  => ["pong" 1]
-
-    )
+  => ["pong" 1])
 
 ^{:refer xt.cell.kernel.base-link-local/echo :added "4.0"}
 (fact "forwards echo"
@@ -233,9 +218,7 @@
                        "body" ["hello" 1]}))))
     (. (base-link-local/echo link "hello")
        (then (repl/>notify))))
-  => ["hello" 1]
-
-    )
+  => ["hello" 1])
 
 ^{:refer xt.cell.kernel.base-link-local/echo-async :added "4.0"}
 (fact "forwards echo.async"
@@ -251,9 +234,7 @@
                          "body" ["hello" 1]})))))
     (. (base-link-local/echo-async link "hello" 100)
        (then (repl/>notify))))
-  => ["hello" 1]
-
-    )
+  => ["hello" 1])
 
 ^{:refer xt.cell.kernel.base-link-local/error :added "4.0"}
 (fact "forwards error responses"
@@ -273,9 +254,7 @@
       {"body" ["error" 1]
        "action" "@worker/error"
        "status" "error"
-       "op" "call"})
-
-    )
+       "op" "call"}))
 
 ^{:refer xt.cell.kernel.base-link-local/error-async :added "4.0"}
 (fact "forwards async error responses"
@@ -296,9 +275,7 @@
       {"body" ["error" 1]
        "action" "@worker/error.async"
        "status" "error"
-       "op" "call"})
-
-    )
+       "op" "call"}))
 
 ^{:refer xt.cell.kernel.base-link-local/tmpl-link-action :added "4.0"}
 (fact "templates a link action wrapper"

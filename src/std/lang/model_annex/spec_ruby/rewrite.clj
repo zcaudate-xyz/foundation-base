@@ -9,14 +9,26 @@
   (and (seq? form)
        (#{'fn 'fn.inner} (first form))))
 
+(declare vector-destructure-target?)
 (declare rewrite-callable-form)
 
-(defn- callable-var-binding
+(defn- callable-var-bindings
   [form]
   (when (and (seq? form)
-             (= 'var (first form))
-             (symbol? (second form)))
-     (second form)))
+             (= 'var (first form)))
+    (let [target (second form)]
+      (cond
+        (symbol? target)
+        #{target}
+
+        (destruct/destructure-target? target)
+        (into #{} (destruct/destructure-symbols target ut/sym-default-str))
+
+        (vector-destructure-target? target)
+        (into #{} (remove #{'_} target))
+
+        :else
+        nil))))
 
 (defn- vector-destructure-target?
   [target]
@@ -55,9 +67,9 @@
     #{}
 
     (seq? form)
-    (let [binding (callable-var-binding form)]
+    (let [bindings (callable-var-bindings form)]
       (cond-> (reduce set/union #{} (map collect-callable-vars form))
-        binding (conj binding)))
+        bindings (set/union bindings)))
 
     (vector? form)
     (reduce set/union #{} (map collect-callable-vars form))

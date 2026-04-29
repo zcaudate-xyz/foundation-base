@@ -771,7 +771,7 @@
                                     {:column-fn (fn:> [col]
                                                       (xt/x:cat "\"T\"." col))})])
   => ["" "\"T\".data = '{\"a\":1}' AND \"T\".name != 'hello'"]
-  
+
   (!.lua
     [(ut/encode-query-single-string {} {})
      (ut/encode-query-single-string {:name ["neq" "hello"]

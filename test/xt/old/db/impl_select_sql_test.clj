@@ -88,6 +88,7 @@
                     :python {:skip true}
                     :dart {:skip true}}}
 (fact "builds select queries"
+
   (graph/select sample-scratch/Schema
                 ["Entry"
                  ["name"
@@ -102,6 +103,7 @@
                     :python {:skip true}
                     :dart {:skip true}}}
 (fact "runs select queries against scratch db"
+
   (notify/wait-on :js
     (dbsql/query CONN
                  (graph/select sample-scratch/Schema

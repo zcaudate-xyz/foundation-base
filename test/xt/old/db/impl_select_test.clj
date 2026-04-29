@@ -5,7 +5,7 @@
 
 (l/script- :postgres
   {:runtime :jdbc.client
-   :config  {:dbname "test-scratch"}
+   :config {:dbname "test-scratch"}
    :require [[rt.postgres.test.scratch-v1 :as scratch]
              [rt.postgres :as pg]]})
 
@@ -29,4 +29,3 @@
              (l/rt:setup-to :postgres)
              (l/rt:scaffold :js)]
   :teardown [(l/rt:stop)]})
-

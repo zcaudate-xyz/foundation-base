@@ -1,7 +1,7 @@
 (ns xt.lang.spec-base-test
   (:use code.test)
   (:require [clojure.set :as set]
-  	    [std.lang :as l]
+            [std.lang :as l]
             [xt.lang.common-notify :as notify]
             [xt.lang.spec-promise :as spec-promise]))
 
@@ -43,7 +43,7 @@
 
 ^{:refer xt.lang.spec-base/for:array :added "4.1"}
 (fact "iterates arrays in order"
-  
+
   (!.js
     (var out [])
     (xt/for:array [e [1 2 3 4]]
@@ -533,10 +533,10 @@
 
 ^{:refer xt.lang.spec-base/x:err :added "4.1"}
 (fact "expands and emits a lua error form"
-  
+
   ^{:seedgen/base {:dart {:expect (fn [out]
                                     (re-find #"ERR" @out))}}}
-
+  
   (!.js
     (var err-fn (fn []
                   (xt/x:err "ERR")))
@@ -2242,7 +2242,7 @@
 (fact "evaluates javascript expressions"
 
   ^{:seedgen/base {:dart {:suppress true}}}
-  
+    
   (!.js
     (xt/x:eval "1 + 1"))
   => 2
@@ -2401,12 +2401,12 @@
     (var it (xt/x:iter-null))
     (xt/x:iter-native? it))
   => true
-  
+
   (!.py
     (var it (xt/x:iter-null))
     (xt/x:iter-native? it))
   => true
-  
+
   (!.lua
     (var it (xt/x:iter-null))
     (xt/x:iter-native? it))
@@ -2611,7 +2611,7 @@
          (fn []
            (xt/x:global-del COMMON_SPEC_GLOBAL)
            (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
-    
+      
     [(set-fn)
      (!:G COMMON_SPEC_GLOBAL)
      (del-fn)])
@@ -2626,7 +2626,7 @@
          (fn []
            (xt/x:global-del COMMON_SPEC_GLOBAL)
            (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
-    
+      
     [(set-fn)
      (!:G COMMON_SPEC_GLOBAL)
      (del-fn)])
@@ -2641,7 +2641,7 @@
          (fn []
            (xt/x:global-del COMMON_SPEC_GLOBAL)
            (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
-    
+      
     [(set-fn)
      (!:G COMMON_SPEC_GLOBAL)
      (del-fn)])
@@ -2680,7 +2680,7 @@
          (fn []
            (xt/x:global-del COMMON_SPEC_GLOBAL)
            (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
-    
+      
     [(set-fn)
      (del-fn)])
   => [true false]
@@ -2694,7 +2694,7 @@
          (fn []
            (xt/x:global-del COMMON_SPEC_GLOBAL)
            (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
-    
+      
     [(set-fn)
      (del-fn)])
   => [true false]
@@ -2708,7 +2708,7 @@
          (fn []
            (xt/x:global-del COMMON_SPEC_GLOBAL)
            (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
-    
+      
     [(set-fn)
      (del-fn)])
   => [true false])
@@ -2739,7 +2739,7 @@
 
   ^{:seedgen/base {:dart {:expect (fn [out]
                                     (re-find #"THROW" @out))}}}
-
+  
   (!.js
     (do:>
      (x:throw "THROW")))

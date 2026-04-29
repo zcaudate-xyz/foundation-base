@@ -95,7 +95,6 @@
                   {}))
   => +tree+
 
-
   (!.lua
    (v/tree-return sample/Schema
                        (@! +return+)
@@ -123,7 +122,6 @@
 	               "data" ["id"]}]
 	             "SELECT id FROM Organisation"]) ]}
 (fact "provides a view select query"
-
 
   (!.js
    [(v/query-select sample/Schema
@@ -190,7 +188,6 @@
                  (ut/LIMIT 20)
                  (ut/ORDER-BY ["name"])]
                 {}))
-
   => +out+
 
   (!.lua
@@ -230,7 +227,6 @@
   (!.js
    (v/tree-control-array {:limit 20
                           :order-by ["name"]}))
-
   => +out+
 
   (!.lua
@@ -353,8 +349,6 @@
                   (@! +select+)
                   {}
                   {}))
-
-
   => +tree+
 
   (!.lua
@@ -451,7 +445,6 @@
                    {}))
   => +tree+
 
-
   (!.lua
    (v/tree-combined sample/Schema
                    (@! +select+)
@@ -497,7 +490,6 @@
    (v/query-fill-input tree ["<ORG-ID>"] (. entry ["input"]) false))
   => +out+)
 
-
 ^{:refer xt.old.db.sql-view/query-select :added "4.0"
   :setup [(def +select+
             (pg/bind-view data/currency-all-crypto))
@@ -522,7 +514,6 @@
                     {}
                     false)])
   => +out+
-
 
   (!.js
    (v/query-select sample/Schema
@@ -694,7 +685,6 @@
                         {}
                         false))
   => "SELECT id, description FROM Currency\n  WHERE id in ('STATS', 'USD')"
-
 
   (!.py
    (v/query-return-bulk sample/Schema

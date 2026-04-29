@@ -7,21 +7,21 @@
   {:runtime :basic
    :config {:program :resty}
    :require [[xt.old.db.impl-cache :as impl-cache]
-              [xt.lang.common-lib :as k]
-              [xt.lang.common-data :as xtd]
-              [xt.lang.common-repl :as repl]
-              [xt.old.db.base-flatten :as f]
-              [xt.old.db.cache-util :as ut]
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-repl :as repl]
+             [xt.old.db.base-flatten :as f]
+             [xt.old.db.cache-util :as ut]
              [xt.old.db.sample-test :as sample]]})
 
 (l/script- :js
   {:runtime :basic
    :require [[xt.old.db.impl-cache :as impl-cache]
-              [xt.lang.common-lib :as k]
-              [xt.lang.common-data :as xtd]
-              [xt.lang.common-repl :as repl]
-              [xt.old.db.base-flatten :as f]
-              [xt.old.db.cache-util :as ut]
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-repl :as repl]
+             [xt.old.db.base-flatten :as f]
+             [xt.old.db.cache-util :as ut]
              [xt.old.db.sample-test :as sample]]})
 
 (fact:global
@@ -35,7 +35,6 @@
                  (!.lua (:= (!:G INSTANCE)
                             {:rows {}})))]
   :teardown [(l/rt:stop)]})
-
 
 ^{:refer xt.old.db.impl-cache/cache-process-event-remove.lua :adopt true :added "4.0"
   :setup [(!.lua
@@ -172,7 +171,7 @@
           sample/Schema
           sample/SchemaLookup
           nil)
-
+  
          (impl-cache/cache-pull-sync INSTANCE
                                      sample/Schema
                                      ["Currency"
@@ -196,7 +195,6 @@
   => (contains [#{{"id" "USD"} {"id" "XLM.T"} {"id" "STATS"} {"id" "XLM"}}
                 +account+])
 
-
   [(set (!.lua
          (impl-cache/cache-process-event-sync
           INSTANCE
@@ -205,7 +203,7 @@
           sample/Schema
           sample/SchemaLookup
           nil)
-
+  
          (impl-cache/cache-pull-sync INSTANCE
                                      sample/Schema
                                      ["Currency"
@@ -231,8 +229,8 @@
 ^{:refer xt.old.db.impl-cache/cache-delete-sync :added "4.0"}
 (fact "deletes sync data from cache db")
 
-
 {:refer xt.old.db.impl-cache/cache-pull-sync :added "4.0"}
+
 (fact "sample of different types of pull"
 
   (!.js
@@ -243,7 +241,6 @@
                                 ["id"]]
                                nil))
   => [{"id" "STATS"}]
-
 
   (!.js
    (impl-cache/cache-pull-sync INSTANCE
@@ -265,7 +262,6 @@
                                nil))
   => [{"id" "00000000-0000-0000-0000-000000000000"}]
 
-
   (!.js
    (impl-cache/cache-pull-sync INSTANCE
                                sample/Schema
@@ -282,7 +278,6 @@
        "is_suspended" false,
        "password_updated" 1630408723423619,
        "is_super" true}])
-
 
 ^{:refer xt.old.db.impl-cache/cache-clear :added "4.0"}
 (fact "clears the cache")

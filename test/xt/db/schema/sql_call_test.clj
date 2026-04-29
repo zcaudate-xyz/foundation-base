@@ -6,7 +6,7 @@
 
 (l/script- :postgres
   {:runtime :jdbc.client
-   :config  {:dbname "test-scratch"}
+   :config {:dbname "test-scratch"}
    :require [[rt.postgres.test.scratch-v1 :as scratch]]})
 
 ^{:xtalk/template true}

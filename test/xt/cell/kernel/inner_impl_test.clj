@@ -5,7 +5,14 @@
 
 ^{:seedgen/root {:all true, :langs [:lua :python]}}
 (l/script- :js
-  {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.cell.kernel.inner-local :as inner-local] [xt.cell.kernel.inner-impl :as inner-impl] [xt.lang.common-repl :as repl] [js.core :as j]] :runtime :basic})
+  {:runtime :basic
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.cell.kernel.inner-local :as inner-local]
+             [xt.cell.kernel.inner-impl :as inner-impl]
+             [xt.lang.common-repl :as repl]
+             [js.core :as j]]})
 
 (fact:global
  {:setup [(l/rt:restart)
@@ -28,9 +35,7 @@
   => (contains {"op" "call"
                 "id" "async-1"
                 "status" "ok"
-                "body" ["pong" 1]})
-
-    )
+                "body" ["pong" 1]}))
 
 ^{:refer xt.cell.kernel.inner-impl/worker-process-eval :added "4.0"}
 (fact "processes eval requests"

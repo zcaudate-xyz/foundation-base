@@ -5,7 +5,7 @@
 
 (l/script- :lua
   {:runtime :basic
-   :config  {:program :resty}
+   :config {:program :resty}
    :require [[xt.old.db.base-schema :as sch]
              [xt.lang.common-lib :as k]
              [xt.old.db.sql-util :as ut]

@@ -12,7 +12,13 @@
              [xt.cell.kernel.inner-mock :as inner-mock]]})
 
 (l/script- :js
-  {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.cell.kernel.base-link :as base-link] [xt.cell.kernel.base-link-local :as base-link-local] [xt.cell.kernel.inner-mock :as inner-mock] [xt.lang.common-repl :as repl]] :runtime :basic})
+  {:runtime :basic
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]
+             [xt.cell.kernel.base-link :as base-link]
+             [xt.cell.kernel.base-link-local :as base-link-local]
+             [xt.cell.kernel.inner-mock :as inner-mock]
+             [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup [(l/rt:restart)
@@ -120,9 +126,7 @@
                              :action "@worker/ping.async"
                              :body [100]})
        (then (repl/>notify))))
-  => (contains ["pong" integer?])
-
-        )
+  => (contains ["pong" integer?]))
 
 ^{:refer xt.cell.kernel.base-link/link-active :added "4.0"}
 (fact "tracks active calls on the link"
@@ -201,6 +205,4 @@
       {"body" ["error" integer?]
        "action" "@worker/error.async"
        "status" "error"
-       "op" "call"})
-
-        )
+       "op" "call"}))

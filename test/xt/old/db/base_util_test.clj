@@ -139,21 +139,21 @@
 
   (!.js
    (ut/keepf-limit [1 2 3 4 5]
-	           xt/x:odd?
+            xt/x:odd?
                    k/identity
                    3))
   => [1 3 5]
 
   (!.lua
    (ut/keepf-limit [1 2 3 4 5]
-	           xt/x:odd?
+            xt/x:odd?
                    k/identity
                    3))
   => [1 3 5]
 
   (!.py
    (ut/keepf-limit [1 2 3 4 5]
-	           xt/x:odd?
+            xt/x:odd?
                    k/identity
                    3))
   => [1 3 5])

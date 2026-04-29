@@ -3,7 +3,7 @@
   (:require [std.lang :as l]))
 
 (l/script- :dart
-  {:runtime :twostep,
+  {:runtime :twostep
    :require [[xt.lang.common-tree :as xtt]
              [xt.lang.spec-base :as xt]]})
 
@@ -17,6 +17,22 @@
   (!.dt
    [(xtt/eq-nested-loop {:a 1} {:a 1} xtt/eq-nested-obj xtt/eq-nested-arr nil)
     (xtt/eq-nested-loop {:a 1} {:a 2} xtt/eq-nested-obj xtt/eq-nested-arr nil)])
+  => [true false])
+
+^{:refer xt.lang.common-tree/eq-shallow-raw :added "4.1"}
+(fact "basic shallow equality comparator"
+
+  (!.dt [(xtt/eq-shallow-raw 1 1 nil nil nil)
+          (xtt/eq-shallow-raw 1 2 nil nil nil)])
+  => [true false])
+
+^{:refer xt.lang.common-tree/eq-shallow :added "4.1"}
+(fact "checks for shallow equality"
+
+  (!.dt
+   (var arr [1])
+   [(xtt/eq-shallow arr arr)
+    (xtt/eq-shallow [1] [1])])
   => [true false])
 
 ^{:refer xt.lang.common-tree/eq-nested-obj :added "4.1"}
@@ -44,22 +60,6 @@
     (xtt/eq-nested [1] [1])
     (xtt/eq-nested [1] [2])])
   => [true false true false])
-
-^{:refer xt.lang.common-tree/eq-shallow-raw :added "4.1"}
-(fact "basic shallow equality comparator"
-
-  (!.dt [(xtt/eq-shallow-raw 1 1 nil nil nil)
-          (xtt/eq-shallow-raw 1 2 nil nil nil)])
-  => [true false])
-
-^{:refer xt.lang.common-tree/eq-shallow :added "4.1"}
-(fact "checks for shallow equality"
-
-  (!.dt
-   (var arr [1])
-   [(xtt/eq-shallow arr arr)
-    (xtt/eq-shallow [1] [1])])
-  => [true false])
 
 ^{:refer xt.lang.common-tree/tree-walk :added "4.1"}
 (fact "walks over object"

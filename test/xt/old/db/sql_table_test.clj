@@ -115,7 +115,6 @@
                        "UserAccount"
                        sample/RootUser
                        {}))
-
   => +inserts+
 
   (!.lua
@@ -125,7 +124,6 @@
                        sample/RootUser
                        {}))
   => vector?
-
 
   (!.py
    (table/table-insert sample/Schema
@@ -173,7 +171,6 @@
                        "UserAccount"
                        sample/RootUser
                        {}))
-
   => +upserts+
 
   (!.lua

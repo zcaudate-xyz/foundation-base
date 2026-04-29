@@ -3,13 +3,26 @@
   (:use code.test))
 
 (l/script- :dart
-  {:runtime :twostep,
+  {:runtime :twostep
    :require [[xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
+
+^{:refer xt.lang.common-data/is-empty? :added "4.1"}
+(fact "checks that array is empty"
+
+  (!.dt
+   [(xtd/is-empty? nil)
+    (xtd/is-empty? "")
+    (xtd/is-empty? "123")
+    (xtd/is-empty? [])
+    (xtd/is-empty? [1 2 3])
+    (xtd/is-empty? {})
+    (xtd/is-empty? {:a 1, :b 2})])
+  => [true true false true false true false])
 
 ^{:refer xt.lang.common-data/not-empty? :added "4.1"}
 (fact "checks that array is not empty"
@@ -284,11 +297,57 @@
   (!.dt (xtd/obj-first-val {:a 1}))
   => 1)
 
+^{:refer xt.lang.common-data/obj-keys :added "4.1"}
+(fact "gets keys of an object"
+
+  (!.dt (xtd/obj-keys {:a 1, :b 2}))
+  => (just ["a" "b"] :in-any-order))
+
+^{:refer xt.lang.common-data/obj-vals :added "4.1"}
+(fact "gets vals of an object"
+
+  (!.dt (xtd/obj-vals {:a 1, :b 2}))
+  => (just [1 2] :in-any-order))
+
+^{:refer xt.lang.common-data/obj-pairs :added "4.1"}
+(fact "creates entry pairs from object"
+
+  (!.dt (xtd/obj-pairs {:a 1, :b 2}))
+  => (just [["a" 1] ["b" 2]] :in-any-order))
+
+^{:refer xt.lang.common-data/obj-clone :added "4.1"}
+(fact "clones an object"
+
+  (!.dt
+   (var src {:a 1})
+   (var out (xtd/obj-clone src))
+   (xt/x:set-key src "b" 2)
+   out)
+  => {"a" 1})
+
+^{:refer xt.lang.common-data/obj-assign :added "4.1"}
+(fact "merges key value pairs from into another"
+
+  (!.dt (xtd/obj-assign {:a 1} {:b 2}))
+  => {"a" 1, "b" 2}
+
+  (!.dt
+   (var out {})
+   [(xtd/obj-assign out {:a 1})
+    out])
+  => [{"a" 1} {"a" 1}])
+
 ^{:refer xt.lang.common-data/obj-assign-nested :added "4.1"}
 (fact "merges objects at a nesting level"
 
   (!.dt (xtd/obj-assign-nested {:a {:b 1}} {:a {:c 2}}))
-  => {"a" {"b" 1, "c" 2}})
+  => {"a" {"b" 1, "c" 2}}
+
+  (!.dt
+   (var out {})
+   [(xtd/obj-assign-nested out {:a {:c 2}})
+    out])
+  => [{"a" {"c" 2}} {"a" {"c" 2}}])
 
 ^{:refer xt.lang.common-data/obj-assign-with :added "4.1"}
 (fact "merges second into first given a function"
@@ -299,6 +358,12 @@
     {:a 3, :c 4}
     (fn [x y] (return (+ x y)))))
   => {"a" 4, "b" 2, "c" 4})
+
+^{:refer xt.lang.common-data/obj-from-pairs :added "4.1"}
+(fact "creates an object from pairs"
+
+  (!.dt (xtd/obj-from-pairs [["a" 1] ["b" 2]]))
+  => {"a" 1, "b" 2})
 
 ^{:refer xt.lang.common-data/obj-del :added "4.1"}
 (fact "deletes multiple keys"
@@ -338,46 +403,6 @@
 
   (!.dt (xtd/obj-nest ["a" "b"] 1))
   => {"a" {"b" 1}})
-
-^{:refer xt.lang.common-data/obj-keys :added "4.1"}
-(fact "gets keys of an object"
-
-  (!.dt (xtd/obj-keys {:a 1, :b 2}))
-  => (just ["a" "b"] :in-any-order))
-
-^{:refer xt.lang.common-data/obj-vals :added "4.1"}
-(fact "gets vals of an object"
-
-  (!.dt (xtd/obj-vals {:a 1, :b 2}))
-  => (just [1 2] :in-any-order))
-
-^{:refer xt.lang.common-data/obj-pairs :added "4.1"}
-(fact "creates entry pairs from object"
-
-  (!.dt (xtd/obj-pairs {:a 1, :b 2}))
-  => (just [["a" 1] ["b" 2]] :in-any-order))
-
-^{:refer xt.lang.common-data/obj-clone :added "4.1"}
-(fact "clones an object"
-
-  (!.dt
-   (var src {:a 1})
-   (var out (xtd/obj-clone src))
-   (xt/x:set-key src "b" 2)
-   out)
-  => {"a" 1})
-
-^{:refer xt.lang.common-data/obj-assign :added "4.1"}
-(fact "merges key value pairs from into another"
-
-  (!.dt (xtd/obj-assign {:a 1} {:b 2}))
-  => {"a" 1, "b" 2})
-
-^{:refer xt.lang.common-data/obj-from-pairs :added "4.1"}
-(fact "creates an object from pairs"
-
-  (!.dt (xtd/obj-from-pairs [["a" 1] ["b" 2]]))
-  => {"a" 1, "b" 2})
 
 ^{:refer xt.lang.common-data/get-in :added "4.1"}
 (fact "gets item in object"
@@ -434,6 +459,16 @@
 
   (!.dt (xtd/to-flat [["a" 1] ["b" 2]]))
   => ["a" 1 "b" 2])
+
+^{:refer xt.lang.common-data/set-pair-step :added "4.1"}
+(fact "sets a pair into an object and returns it"
+
+  (!.dt
+    (var out {})
+    [(xt/x:get-key (xtd/set-pair-step out "a" 1) "a")
+     (xt/x:get-key (xtd/set-pair-step out "b" 2) "b")
+     out])
+  => [1 2 {"a" 1, "b" 2}])
 
 ^{:refer xt.lang.common-data/from-flat :added "4.1"}
 (fact "creates object from flattened pair array"
@@ -686,42 +721,6 @@
    out)
   => {"a" {"b" 1}})
 
-^{:refer xt.lang.common-data/memoize-key :added "4.1"}
-(fact "memoize for functions of single argument"
-
-  (!.dt
-    (var state {"n" 0})
-    (var f-raw (fn [x]
-                 (do
-                   (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
-                   (return (* x 10)))))
-    (var f (xtd/memoize-key f-raw))
-    [(f 2) (f 2) (f 3) (xt/x:get-key state "n")])
-  => [20 20 30 2])
-
-^{:refer xt.lang.common-data/is-empty? :added "4.1"}
-(fact "checks that array is empty"
-
-  (!.dt
-   [(xtd/is-empty? nil)
-    (xtd/is-empty? "")
-    (xtd/is-empty? "123")
-    (xtd/is-empty? [])
-    (xtd/is-empty? [1 2 3])
-    (xtd/is-empty? {})
-    (xtd/is-empty? {:a 1, :b 2})])
-  => [true true false true false true false])
-
-^{:refer xt.lang.common-data/set-pair-step :added "4.1"}
-(fact "sets a pair into an object and returns it"
-
-  (!.dt
-    (var out {})
-    [(xt/x:get-key (xtd/set-pair-step out "a" 1) "a")
-     (xt/x:get-key (xtd/set-pair-step out "b" 2) "b")
-     out])
-  => [1 2 {"a" 1, "b" 2}])
-
 ^{:refer xt.lang.common-data/memoize-key-step :added "4.1"}
 (fact "computes and caches a memoized value"
 
@@ -740,6 +739,19 @@
     (xt/x:get-key cache "a")
     (xt/x:get-key state "n")])
   => ["a-value" "a-value" 1])
+
+^{:refer xt.lang.common-data/memoize-key :added "4.1"}
+(fact "memoize for functions of single argument"
+
+  (!.dt
+    (var state {"n" 0})
+    (var f-raw (fn [x]
+                 (do
+                   (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
+                   (return (* x 10)))))
+    (var f (xtd/memoize-key f-raw))
+    [(f 2) (f 2) (f 3) (xt/x:get-key state "n")])
+  => [20 20 30 2])
 
 (comment
 

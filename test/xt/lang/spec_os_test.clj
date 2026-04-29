@@ -29,7 +29,7 @@
 
 ^{:refer xt.lang.spec-os/x:pwd :added "4.1"}
 (fact "gets the current pwd"
-  
+
   (!.js
     (spec-os/x:pwd))
   => string?
@@ -80,7 +80,7 @@
 
 ^{:refer xt.lang.spec-os/x:file-resolve :added "4.1"}
 (fact "file-resolve"
-  
+
   (!.js
     (var resolve-fn
          (fn [path]
@@ -108,7 +108,6 @@
 ^{:refer xt.lang.spec-os/x:file-slurp :added "4.1"}
 (fact "reads file content through callbacks"
 
-  
   (notify/wait-on :js
     (var slurp-fn
          (fn [path cb]
@@ -159,7 +158,6 @@
                            (repl/notify out))))))
   => "hello world"
 
-  
   (notify/wait-on :lua
     (var spit-fn
          (fn [path content cb]

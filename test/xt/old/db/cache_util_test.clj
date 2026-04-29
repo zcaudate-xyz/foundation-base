@@ -363,7 +363,7 @@
                     (. ["record"])
                     (xtd/clone-nested)
                     (xtd/set-in ["data" "nickname"] "hello")))
-
+  
    (data/get-changed-single rows
                             "UserAccount" "00000000-0000-0000-0000-000000000000"
                             changed))
@@ -376,7 +376,7 @@
                     (. ["record"])
                     (xtd/clone-nested)
                     (xtd/set-in ["data" "nickname"] "hello")))
-
+  
    (data/get-changed-single rows
                             "UserAccount" "00000000-0000-0000-0000-000000000000"
                             changed))
@@ -389,7 +389,7 @@
                     (. ["record"])
                     (xtd/clone-nested)
                     (xtd/set-in ["data" "nickname"] "hello")))
-
+  
    (data/get-changed-single rows
                             "UserAccount" "00000000-0000-0000-0000-000000000000"
                             changed))
@@ -509,7 +509,6 @@
                        "UserAccount"
                        "00000000-0000-0000-0000-000000000000"))
   => vector?
-
 
   (!.py
    (var rows {})

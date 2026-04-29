@@ -1,6 +1,6 @@
 (ns xt.old.db.sample-data-test
   (:require [rt.postgres :as pg
-             :refer [defsel.pg defret.pg]]
+               :refer [defsel.pg defret.pg]]
             [std.lang :as l]
             [std.lib.foundation :as f]))
 
@@ -108,11 +108,6 @@
   [:citext i-country-id]
   #{:*/data})
 
-
-;;
-;; CURRENCY
-;;
-
 (defsel.pg ^{:- [-/Currency]
              :scope #{:public}
              :api/view true}
@@ -157,10 +152,6 @@
   [:citext i-currency-id]
   #{:id :description})
 
-;;
-;; COUNTRY
-;;
-
 (defsel.pg ^{:- [-/RegionCountry]
              :scope #{:public}
              :args [:text i-name]
@@ -186,11 +177,6 @@
   [:citext i-country-id]
   #{:*/info})
 
-
-;;
-;; STATE
-;;
-
 (defsel.pg ^{:- [-/RegionState]
              :scope #{:public}
              :args [:citext i-country-id]
@@ -210,10 +196,6 @@
   region-state-info
   [:citext i-state-id]
   #{:*/info})
-
-;;
-;; CITY
-;;
 
 (defsel.pg ^{:- [-/RegionCity]
              :scope #{:public}
@@ -298,4 +280,3 @@
    
   (f/template-entries [bind-route]
     +route-entries+))
-

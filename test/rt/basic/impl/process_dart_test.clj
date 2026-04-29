@@ -1,7 +1,8 @@
 (ns rt.basic.impl.process-dart-test
   (:require [clojure.string :as str]
-            [rt.basic.impl.process-dart :refer :all]
-            [std.lib.os :as os])
+             [rt.basic.impl.process-dart :refer :all]
+             [std.lang :as l]
+             [std.lib.os :as os])
   (:use code.test))
 
 ^{:refer rt.basic.impl.process-dart/normalize-dart-source :added "4.1"}
@@ -52,15 +53,32 @@
   (-> (transform-form ['(notify 1) '(return-wrap (fn:> 1))] {}) pr-str)
   => #"await"
 
-  (-> (transform-form ['(return-wrap (fn:> 1))] {}) pr-str)
-  => #"runtimeType"
+  (l/emit-as :dart [(transform-form ['(return-wrap (fn:> 1))] {})])
+  => #"return_wrap"
 
   (str/includes? (pr-str (transform-form ['(for [(var i := 0) (< i 10) (:++ i)]
                                            (notify i))
-                                         '(+ 1 2)]
-                                        {}))
+                                          '(+ 1 2)]
+                                         {}))
                  "await for")
-  => false)
+  => false
+
+  (let [out (l/emit-as :dart [(transform-form ['(do (var b 1)
+                                                     [b])]
+                                                   {})])]
+    [(boolean (re-find #"Future\.sync\(thunk_" out))
+     (boolean (re-find #"var b = 1;" out))
+     (boolean (re-find #"return \[b\];" out))
+     (boolean (re-find #"return \(\) \{" out))])
+  => [true true true false]
+
+  (let [out (l/emit-as :dart [(transform-form ['[(+ 1 2)
+                                                  (+ 3 4)]]
+                                                {})])]
+    [(boolean (re-find #"var out_.*await Future\.sync" out))
+     (boolean (re-find #"return \[1 \+ 2,3 \+ 4\];" out))
+     (boolean (re-find #"await Future\.sync\(\) \{" out))])
+  => [true true false])
 
 
 ^{:refer rt.basic.impl.process-dart/dart-package-imports :added "4.1"}

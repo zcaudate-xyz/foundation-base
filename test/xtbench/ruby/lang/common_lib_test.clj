@@ -314,16 +314,17 @@
   => {"return" "number", "value" 2, "type" "data"})
 
 (comment
+  (s/snapto '[xt.cell])
   
   (s/seedgen-benchadd '[xt.lang.spec] {:lang [:r] :write true})
   (s/seedgen-benchadd '[xt.lang.spec-base] {:lang [:r] :write true})
-  (s/seedgen-benchadd '[xt.lang.common] {:lang [:dart :julia] :write true})
+  (s/seedgen-benchadd '[xt.lang] {:lang [:dart :ruby] :write true})
   (s/seedgen-benchadd '[xt.lang.spec] {:lang [:dart :julia] :write true})
   
   (s/seedgen-benchadd '[xt.db] {:lang [:dart :julia] :write true})
   
   (s/seedgen-benchadd '[xt.lang.spec] {:lang [:dart] :write true})
   (s/seedgen-benchadd '[xt.lang.common] {:lang [:dart] :write true})
-  
+  (s/seedgen-benchadd '[xt.lang] {:lang [:ruby] :write true})
   (s/seedgen-langadd 'xt.lang.common-lib {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.lang.common-lib {:lang [:lua :python] :write true}))

@@ -14,7 +14,7 @@
 ^{:refer xt.lang.spec-base/for:array :added "4.1"
   :setup [(!.js (+ 1 2 3 ))]}
 (fact "iterates arrays in order"
-  
+
   (!.js
     (var out [])
     (xt/for:array [e [1 2 3 4]]
@@ -23,7 +23,6 @@
       (xt/x:arr-push out e))
     out)
   => [1 2 3])
-
 
 (comment
 

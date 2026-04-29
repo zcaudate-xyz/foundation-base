@@ -13,7 +13,7 @@
 
 (l/script- :lua
   {:runtime :basic
-   :config  {:program :resty}
+   :config {:program :resty}
    :require [[xt.lang.common-lib :as k]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
@@ -58,8 +58,11 @@
 (fact "validates a single field"
 
   ;;
+
   ;; SINGLE ENTRY
+
   ;;
+
   (notify/wait-on :js
     (var data {:first "hello"})
    (var validators {:first    [["is-not-empty" {:message "Must not be empty"
@@ -91,8 +94,11 @@
   => {"status" "pending", "fields" {"first" {"status" "ok"}}, "::" "validation.result"}
 
   ;;
+
   ;; MULTI ENTRY
+
   ;;
+
   (notify/wait-on :js
    (var data {:first "hello"})
    (var validators {:first    [["is-not-empty1" {:message "Must not be empty"
@@ -149,7 +155,9 @@
   => {"status" "pending", "fields" {"first" {"status" "ok"}}, "::" "validation.result"}
 
   ;;
+
   ;; ERROR ENTRY
+
   ;;
 
   (notify/wait-on :js
@@ -199,7 +207,6 @@
                          "id" "is-not-empty1", "status"
                          "errored", "data" "hello"}},
       "::" "validation.result"})
-
 
 ^{:refer xt.old.util-validate/validate-all :added "4.0"}
 (fact "validates all data"

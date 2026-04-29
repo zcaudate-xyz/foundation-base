@@ -69,10 +69,7 @@
             {}))))
   => "hello")
 
-^{:refer xt.lang.common-repl/notify-http :added "4.0"
-  :setup [(!.dt
-            (:= (!:G fetch)
-                (. (require "node-fetch") default)))]}
+^{:refer xt.lang.common-repl/notify-http :added "4.0"}
 (fact "call a http notify function."
 
   (notify/wait-on-call

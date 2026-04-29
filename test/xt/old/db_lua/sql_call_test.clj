@@ -6,12 +6,12 @@
 
 (l/script- :postgres
   {:runtime :jdbc.client
-   :config  {:dbname "test-scratch"}
+   :config {:dbname "test-scratch"}
    :require [[rt.postgres.test.scratch-v1 :as scratch]]})
 
 (l/script- :lua
   {:runtime :basic
-   :config  {:program :resty}
+   :config {:program :resty}
    :require [[xt.lang.spec-base :as xt]
              [xt.old.db.sql-call :as call]
              [xt.old.sys.conn-dbsql :as driver]

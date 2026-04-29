@@ -4,7 +4,10 @@
 
 ^{:seedgen/root {:all true, :langs [:lua :python]}}
 (l/script- :js
-  {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.cell.kernel.base-util :as base-util]] :runtime :basic})
+  {:runtime :basic
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]
+             [xt.cell.kernel.base-util :as base-util]]})
 
 (fact:global
  {:setup [(l/rt:restart)

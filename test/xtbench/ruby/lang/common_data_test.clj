@@ -3,7 +3,7 @@
   (:use code.test))
 
 (l/script- :ruby
-  {:runtime :basic,
+  {:runtime :basic
    :require [[xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]]})
 

@@ -4,17 +4,17 @@
 
 ^{:seedgen/root {:all true, :langs [:lua :python]}}
 (l/script- :js
-  {:runtime :basic,
+  {:runtime :basic
    :require [[xt.lang.common-tree :as xtt]
              [xt.lang.spec-base :as xt]]})
 
 (l/script- :lua
-  {:runtime :basic,
+  {:runtime :basic
    :require [[xt.lang.common-tree :as xtt]
              [xt.lang.spec-base :as xt]]})
 
 (l/script- :python
-  {:runtime :basic,
+  {:runtime :basic
    :require [[xt.lang.common-tree :as xtt]
              [xt.lang.spec-base :as xt]]})
 
@@ -187,7 +187,7 @@
                                :name "doctor"
                                :heal (fn [])}}))
   => {"job" {"name" "doctor", "heal" "<function>", "patients" [[1 "alice"] [1 "body"]]}, "name" "hello"}
-  
+
   (!.py
     (xtt/tree-get-data {:name "hello"
                         :job  {:patients [[1 "alice"]

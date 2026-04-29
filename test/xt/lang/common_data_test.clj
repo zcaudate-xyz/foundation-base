@@ -4,17 +4,17 @@
 
 ^{:seedgen/root {:all true, :langs [:lua :python]}}
 (l/script- :js
-  {:runtime :basic,
+  {:runtime :basic
    :require [[xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]]})
 
 (l/script- :lua
-  {:runtime :basic,
+  {:runtime :basic
    :require [[xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]]})
 
 (l/script- :python
-  {:runtime :basic,
+  {:runtime :basic
    :require [[xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]]})
 
@@ -1676,7 +1676,7 @@
 
 ^{:refer xt.lang.common-data/memoize-key :added "4.1"}
 (fact "memoize for functions of single argument"
-  
+
   ^{:seedgen/base   {:r   {:suppress true}}}
   (!.js
     (var state {"n" 0})

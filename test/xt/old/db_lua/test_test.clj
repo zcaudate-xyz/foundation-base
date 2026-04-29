@@ -7,11 +7,11 @@
   {:runtime :basic
    :config {:program :resty}
    :require [[xt.old.db :as impl]
-              [xt.lang.common-lib :as k]
-              [xt.lang.common-data :as xtd]
-              [xt.lang.spec-base :as xt]
-              [xt.lang.common-string :as str]
-              [xt.lang.common-repl :as repl]
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-string :as str]
+             [xt.lang.common-repl :as repl]
              [xt.old.sys.conn-dbsql :as dbsql]
              [xt.old.db.base-flatten :as f]
              [xt.old.db.sql-util :as ut]
@@ -72,5 +72,3 @@
                   k/lt)])
   => [["UserAccount" "UserProfile"]
       ["UserAccount" "UserProfile"]])
-
-;; Additional tests would go here, with only (!.lua ...) assertions

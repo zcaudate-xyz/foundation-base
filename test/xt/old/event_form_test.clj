@@ -16,7 +16,7 @@
 
 (l/script- :lua
   {:runtime :basic
-   :config  {:program :resty}
+   :config {:program :resty}
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
@@ -25,11 +25,11 @@
 
 (l/script- :python
   {:runtime :basic
-    :require [[xt.lang.common-lib :as k]
-              [xt.lang.common-data :as xtd]
-              [xt.lang.spec-base :as xt]
-              [xt.lang.common-repl :as repl]
-              [xt.old.event-form :as form]]})
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-repl :as repl]
+             [xt.old.event-form :as form]]})
 
 (l/script- :dart
   {:runtime :twostep
@@ -153,7 +153,6 @@
                 :check  (fn [v rec]
                           (return (and (k/not-nil? v)
                                        (< 0 (xt/x:len v)))))}]]})))
-
   => +out+)
 
 ^{:refer xt.old.event-form/check-event :added "4.0"}
@@ -863,7 +862,7 @@
   => false)
 
 ^{:refer xt.old.event-form/check-field-errored :added "4.0"}
-(fact  "checks that field has passed"
+(fact "checks that field has passed"
 
   (notify/wait-on :js
     (var f (form/make-form
@@ -925,7 +924,7 @@
   => false)
 
 ^{:refer xt.old.event-form/check-any-errored :added "4.0"}
-(fact  "checks that any fields have errored"
+(fact "checks that any fields have errored"
 
   (notify/wait-on :js
     (var f (form/make-form

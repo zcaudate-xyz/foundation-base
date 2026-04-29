@@ -1,7 +1,7 @@
 (ns xt.old.util-http-test
   (:require [net.http :as nhttp]
             [org.httpkit.server :as server]
-   	        [rt.nginx :as nginx]
+            [rt.nginx :as nginx]
             [std.lib.component :as component]
             [std.lib.network :as network]
             [std.lib.os :as os]
@@ -20,6 +20,7 @@
              [lua.nginx :as n]]})
 
 (defonce +test-http+ (atom nil))
+
 (defonce +es-ready+ (atom false))
 
 (def CANARY-NGINX
@@ -79,14 +80,21 @@
 
 ^{:refer xt.old.util-http/CANARY :adopt true :added "4.0"}
 (fact "tests that scaffold is working"
+
   true
   => true)
 
 ^{:refer xt.old.util-http/fetch-call :added "4.0"}
 (fact "completes a http call with options"
+
   ;;
 
-  #_#_#_
+  #_
+
+  #_
+
+  #_
+
   (notify/wait-on :js
     (-> (http/fetch-call (+ "http://127.0.0.1:"
                             (:port @+test-http+))
@@ -124,7 +132,6 @@
 
 ^{:refer xt.old.util-http/ws-send :added "4.0"}
 (fact "sends text through websocket")
-
 
 (comment
 

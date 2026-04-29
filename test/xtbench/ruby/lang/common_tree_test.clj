@@ -3,7 +3,7 @@
   (:require [std.lang :as l]))
 
 (l/script- :ruby
-  {:runtime :basic,
+  {:runtime :basic
    :require [[xt.lang.common-tree :as xtt]
              [xt.lang.spec-base :as xt]]})
 

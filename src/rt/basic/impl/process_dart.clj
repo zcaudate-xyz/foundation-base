@@ -364,10 +364,7 @@
   "Transforms forms into a standalone Dart `main` function."
   {:added "4.1"}
   [forms opts]
-  (let [forms (if (symbol? (first forms))
-                [forms]
-                forms)
-        out-sym (gensym "out_")
+  (let [out-sym (gensym "out_")
         async-statement-op? (fn [head]
                               (when (instance? clojure.lang.Named head)
                                 (contains? #{"notify"
@@ -380,11 +377,44 @@
                                              "x:file-slurp"
                                              "x:file-spit"
                                              "x:with-delay"}
-                                           (name head))))
+                                            (name head))))
         statement-op? '#{:- := var return break throw
                           do do* if for while try
                           for:index for:array for:object for:iter
                           xt/for:index xt/for:array xt/for:object xt/for:iter}
+        zero-arg-fn-form? (fn [form]
+                            (and (seq? form)
+                                 (= 'fn (first form))
+                                 (let [[_ maybe-name maybe-args] form
+                                       args (if (vector? maybe-name)
+                                              maybe-name
+                                              maybe-args)]
+                                   (and (vector? args)
+                                        (empty? args)))))
+        top-level-vector-forms? (fn [forms]
+                                  (or (= 1 (count forms))
+                                      (some (fn [form]
+                                              (and (seq? form)
+                                                   (let [head (first form)]
+                                                     (or (= 'return-wrap head)
+                                                         (statement-op? head)
+                                                         (async-statement-op? head)))))
+                                            forms)))
+        forms (cond (nil? forms)
+                    []
+
+                    (vector? forms)
+                    (if (top-level-vector-forms? forms)
+                      forms
+                      [forms])
+
+                    (or (map? forms)
+                        (set? forms)
+                        (symbol? (first forms)))
+                    [forms]
+
+                    :else
+                    forms)
         forms (letfn [(track-form [form]
                       (cond
                         (seq? form)
@@ -473,15 +503,26 @@
                                             (list 'return form)))))
         await-form (fn [form]
                      (if (and (seq? form)
-                                 (statement-op? (first form)))
-                          form
-                          (await-sync-form form)))
+                                  (statement-op? (first form)))
+                           form
+                           (await-sync-form form)))
         last-form (last forms)
+        thunk-sym (gensym "thunk_")
         last-body (if (and (seq? last-form)
                            (= '__track (first last-form)))
                     [last-form
                      (list 'var out-sym nil)]
-                    [(list 'var out-sym (await-sync-form last-form))])
+                    [(list 'var thunk-sym
+                           (if (zero-arg-fn-form? last-form)
+                             last-form
+                             (list 'fn '[]
+                                   (if (and (seq? last-form)
+                                            (#{'do 'do*} (first last-form)))
+                                     last-form
+                                     (list 'return last-form)))))
+                     (list 'var out-sym
+                           (list 'await
+                                 (list 'Future.sync thunk-sym)))])
         out-json (list 'jsonEncode out-sym)
         body  (concat '[do]
                       '[(var __tasks__ (:- "<Future>[]"))

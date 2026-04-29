@@ -16,9 +16,9 @@
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
-              [xt.lang.spec-base :as xt]
-              [xt.old.event-log :as log]
-              [xt.lang.common-repl :as repl]]})
+             [xt.lang.spec-base :as xt]
+             [xt.old.event-log :as log]
+             [xt.lang.common-repl :as repl]]})
 
 (l/script- :python
   {:runtime :basic
@@ -70,16 +70,16 @@
 ^{:refer xt.old.event-log/queue-entry :added "4.0"}
 (fact "queues a log entry"
 
-   (!.js
-    (var l (log/new-log {}))
-
-    (xt/for:index [i [0 10]]
-      (log/queue-entry l {:id (xt/x:cat "id-" (xt/x:to-string i))}
-                       (fn [x _] (return (xt/x:get-key x "id")))
-                       k/identity
-                       1))
-   (log/clear-cache l 100000)
-   l)
+  (!.js
+   (var l (log/new-log {}))
+  
+   (xt/for:index [i [0 10]]
+     (log/queue-entry l {:id (xt/x:cat "id-" (xt/x:to-string i))}
+                      (fn [x _] (return (xt/x:get-key x "id")))
+                      k/identity
+                      1))
+  (log/clear-cache l 100000)
+  l)
   => {"callback" nil,
       "maximum" 100,
       "cache" {},
@@ -99,10 +99,9 @@
       "last" 100000,
       "listeners" {}}
 
-
   (!.lua
    (var l (log/new-log {}))
-
+  
     (xt/for:index [i [0 9]]
       (log/queue-entry l {:id (xt/x:cat "id-" (xt/x:to-string i))}
                        (fn [x _] (return (xt/x:get-key x "id")))
@@ -192,7 +191,6 @@
      l
      "test1"))
   => {"pred" nil, "meta" {"listener/id" "test1", "listener/type" "log"}}
-
 
   (!.js
    (var l (log/new-log {}))

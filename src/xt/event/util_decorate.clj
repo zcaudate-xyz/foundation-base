@@ -90,10 +90,11 @@
   "adapts a cb map to the handle callback"
   {:added "4.1"}
   [cb]
-  (:= cb (:? (xt/x:nil? cb) {} cb))
-  (return {:on-success (xt/x:get-key cb "success")
-           :on-error (xt/x:get-key cb "error")
-           :on-teardown (xt/x:get-key cb "finally")}))
+  (when (xt/x:nil? cb)
+    (:= cb {}))
+  (return {:on-success (xt/x:get-key cb "success" nil)
+           :on-error (xt/x:get-key cb "error" nil)
+           :on-teardown (xt/x:get-key cb "finally" nil)}))
 
 (defn.xt promise-wrap
   "normalises a value into the host promise interface"
