@@ -26,9 +26,14 @@
    forms remain callable within the same eval scope."
   {:added "4.0"}
   [forms]
-  (cons 'do
-        (concat (butlast forms)
-                [(list ':= 'OUT (last forms))])))
+  (let [tail (last forms)
+        tail (if (and (seq? tail)
+                      (= 'return (first tail)))
+               (second tail)
+               tail)]
+    (cons 'do
+          (concat (butlast forms)
+                  [(list ':= 'OUT tail)]))))
 
 (defn normalize-forms
   "normalizes runtime input into a flat sequence of Ruby statements."

@@ -170,18 +170,31 @@
   [form]
   (common/expand-form +reserved+ form))
 
+(defn- elisp-function-prologue
+  [args]
+  (->> args
+       (filter #(and (symbol? %)
+                     (not= '_ %)))
+       (mapv (fn [sym]
+               (list 'if
+                     (list 'functionp sym)
+                     (list 'fset (list 'intern (name sym)) sym)
+                     nil)))))
+
 (def +elisp-transform-config+
   {:begin 'progn
-   :reserved +reserved+
+    :reserved +reserved+
    :lambda-form (fn [args body]
-                  (list* 'lambda
-                         (apply list args)
-                         body))
-   :defn-form (fn [sym args body]
-                (list* 'defun
-                       sym
-                       (apply list args)
-                       body))
+                   (list* 'lambda
+                          (apply list args)
+                          (concat (elisp-function-prologue args)
+                                  body)))
+    :defn-form (fn [sym args body]
+                 (list* 'defun
+                        sym
+                        (apply list args)
+                        (concat (elisp-function-prologue args)
+                                body)))
    :let-form (fn [bindings body]
                (list* 'let (apply list bindings) body))
    :while-form (fn [test body]

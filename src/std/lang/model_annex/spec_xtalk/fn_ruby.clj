@@ -256,6 +256,39 @@
   [[_ arr idx]]
   (list '. arr (list 'delete_at idx)))
 
+(defn ruby-tf-x-arr-clone
+  [[_ arr]]
+  (list '. arr (list 'dup)))
+
+(defn ruby-tf-x-arr-each
+  [[_ arr f]]
+  (let [idx   (gensym "idx__")
+        total (gensym "total__")]
+    (template/$
+     (. (fn []
+          (var ~total (. ~arr length))
+          (var ~idx 0)
+          (while (< ~idx ~total)
+            (. ~f (call (. ~arr [~idx])))
+            (:= ~idx (+ ~idx 1)))
+          (return true))
+        (call)))))
+
+(defn ruby-tf-x-arr-every
+  [[_ arr pred]]
+  (let [idx   (gensym "idx__")
+        total (gensym "total__")]
+    (template/$
+     (. (fn []
+          (var ~total (. ~arr length))
+          (var ~idx 0)
+          (while (< ~idx ~total)
+            (if (not (. ~pred (call (. ~arr [~idx]))))
+              (return false))
+            (:= ~idx (+ ~idx 1)))
+          (return true))
+        (call)))))
+
 (defn ruby-tf-x-arr-sort
   [[_ arr key-fn comp-fn]]
   (let [tmp   (gensym "tmp__")
@@ -265,18 +298,20 @@
         left  (gensym "left__")
         right (gensym "right__")]
     (template/$
-     (do (var ~total (. ~arr length))
-         (for:index [~i [0 (- ~total 1)]]
-           (for:index [~j [(+ ~i 1) ~total]]
-             (var ~left (. ~arr [~i]))
-             (var ~right (. ~arr [~j]))
-             (when (. ~comp-fn
-                      (call (. ~key-fn (call ~right))
-                            (. ~key-fn (call ~left))))
-               (var ~tmp ~left)
-               (:= (. ~arr [~i]) ~right)
-               (:= (. ~arr [~j]) ~tmp))))
-         (return ~arr)))))
+     (. (fn []
+          (var ~total (. ~arr length))
+          (for:index [~i [0 (- ~total 1)]]
+            (for:index [~j [(+ ~i 1) ~total]]
+              (var ~left (. ~arr [~i]))
+              (var ~right (. ~arr [~j]))
+              (when (. ~comp-fn
+                       (call (. ~key-fn (call ~right))
+                             (. ~key-fn (call ~left))))
+                (var ~tmp ~left)
+                (:= (. ~arr [~i]) ~right)
+                (:= (. ~arr [~j]) ~tmp))))
+          (return ~arr))
+        (call)))))
 
 (defn ruby-tf-x-str-comp
   [[_ a b]]
@@ -289,6 +324,9 @@
    :x-arr-pop-first   {:macro #'ruby-tf-x-arr-pop-first  :emit :macro}
    :x-arr-remove      {:macro #'ruby-tf-x-arr-remove     :emit :macro}
    :x-arr-insert      {:macro #'ruby-tf-x-arr-insert     :emit :macro}
+   :x-arr-clone       {:macro #'ruby-tf-x-arr-clone      :emit :macro}
+   :x-arr-each        {:macro #'ruby-tf-x-arr-each       :emit :macro}
+   :x-arr-every       {:macro #'ruby-tf-x-arr-every      :emit :macro}
    :x-arr-sort        {:macro #'ruby-tf-x-arr-sort       :emit :macro}
    :x-str-comp        {:macro #'ruby-tf-x-str-comp       :emit :macro}})
 
@@ -535,45 +573,49 @@
     (list (symbol "`") s)
     2
     (let [[root cb] args
+          current-root (gensym "root__")
           result (gensym "result__")
           stdout (gensym "stdout__")
           stderr (gensym "stderr__")
           status (gensym "status__")]
       (template/$
        (do (require "open3")
+           (var ~current-root ~root)
            (try
-             (var ~result (if (or (. ~root nil?) (== ~root ""))
-                            (. Open3 (capture3 "sh" "-lc" ~s))
-                            (. Open3 (capture3 "sh" "-lc" ~s {:chdir ~root}))))
+             (var ~result (if (or (. ~current-root nil?) (== ~current-root ""))
+                             (. Open3 (capture3 "sh" "-lc" ~s))
+                             (:- "Open3.capture3(\"sh\", \"-lc\", " ~s ", chdir: " ~current-root ")")))
              (var ~stdout (. ~result [0]))
              (var ~stderr (. ~result [1]))
              (var ~status (. ~result [2]))
              (if (. ~status success?)
-               (. ~cb (call nil ~stdout))
+                (. ~cb (call nil ~stdout))
                (. ~cb (call {:code (. ~status exitstatus)
                              :err ~stderr
                              :out ~stdout}
                             nil)))
              (return ["async"])
-             (catch e
-               (. ~cb (call e nil))
-               (return ["async"]))))))
+              (catch e
+                (. ~cb (call e nil))
+                (return ["async"]))))))
     (let [[root success-fn error-fn] args
+          current-root (gensym "root__")
           result (gensym "result__")
           stdout (gensym "stdout__")
           stderr (gensym "stderr__")
           status (gensym "status__")]
       (template/$
        (do (require "open3")
+           (var ~current-root ~root)
            (try
-             (var ~result (if (or (. ~root nil?) (== ~root ""))
-                            (. Open3 (capture3 "sh" "-lc" ~s))
-                            (. Open3 (capture3 "sh" "-lc" ~s {:chdir ~root}))))
+             (var ~result (if (or (. ~current-root nil?) (== ~current-root ""))
+                             (. Open3 (capture3 "sh" "-lc" ~s))
+                             (:- "Open3.capture3(\"sh\", \"-lc\", " ~s ", chdir: " ~current-root ")")))
              (var ~stdout (. ~result [0]))
              (var ~stderr (. ~result [1]))
              (var ~status (. ~result [2]))
              (if (. ~status success?)
-               (. ~success-fn (call ~stdout))
+                (. ~success-fn (call ~stdout))
                (. ~error-fn (call {:code (. ~status exitstatus)
                                    :err ~stderr
                                    :out ~stdout})))
@@ -667,10 +709,10 @@
 (defn ruby-tf-x-with-delay
   [[_ ms thunk]]
   (template/$
-   (return (x:promise
-            (fn []
-              (sleep (/ ~ms 1000.0))
-              (. ~thunk (call)))))))
+   (x:promise
+    (fn []
+      (sleep (/ ~ms 1000.0))
+      (. ~thunk (call))))))
 
 (def +ruby-promise+
   {:x-promise          {:macro #'ruby-tf-x-promise         :emit :macro}

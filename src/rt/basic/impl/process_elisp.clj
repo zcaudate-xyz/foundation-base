@@ -70,7 +70,7 @@
      "  (defun xt-eval-source (s)"
      "    (let ((result :null))"
      "      (dolist (form (xt-read-all s) result)"
-     "        (setq result (eval form)))))"
+     "        (setq result (eval form t)))))"
      "  (defun xt-promise-create ()"
      "    (vector \"__xt_promise__\" \"pending\" nil nil nil nil))"
      "  (defun xt-promise-native-p (value)"

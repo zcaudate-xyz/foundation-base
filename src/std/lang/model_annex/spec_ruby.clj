@@ -78,10 +78,32 @@
                             (common/emit-array args grammar mopts))
        ")"))
 
+(defn- ruby-callable-form?
+  [form]
+  (cond
+    (and (seq? form)
+         (#{'fn 'fn.inner} (first form)))
+    true
+
+    (and (seq? form)
+         (= 'quote (first form))
+         (= 2 (count form)))
+    (ruby-callable-form? (second form))
+
+    (and (seq? form)
+         (= 1 (count form)))
+    (ruby-callable-form? (first form))
+
+    :else
+    false))
+
 (defn ruby-invoke
   [[f & args] grammar mopts]
-  (str (common/emit-wrapping f grammar mopts)
-       (ruby-emit-args args grammar mopts)))
+  (let [target (common/emit-wrapping f grammar mopts)]
+    (str target
+         (when (ruby-callable-form? f)
+           ".call")
+         (ruby-emit-args args grammar mopts))))
 
 (defn- ruby-zero-arg-call?
   [prop]
@@ -267,10 +289,12 @@
                                          :elseif  {:raw "elsif"}
                                          :else    {:raw "else"}}}
                    :try      {:raw  "begin"
-                              :wrap {:start "" :end "end"}
-                              :body {:start "" :end ""}
-                              :control {:catch  {:raw  "rescue Exception =>"
-                                                 :body {:start "" :end ""}}}}}
+                               :wrap {:start "" :end "end"}
+                               :body {:start "" :end ""}
+                               :control {:catch   {:raw  "rescue Exception =>"
+                                                   :body {:start "" :end ""}}
+                                         :finally {:raw "ensure"
+                                                   :body {:start "" :end ""}}}}}
          :token   {:nil       {:as "nil"}
                    :boolean   {:as (fn [b] (if b "true" "false"))}
                    :string    {:quote :double}

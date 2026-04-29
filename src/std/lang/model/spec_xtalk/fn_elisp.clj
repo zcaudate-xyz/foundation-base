@@ -73,7 +73,12 @@
 
 (defn elisp-tf-x-eval
   [[_ s]]
-  (list 'eval s))
+  (list 'let
+        ['out (list 'calc-eval s)]
+        (list 'if
+              (list 'string-match-p "^-?[0-9]+\\(?:\\.[0-9]+\\)?$" 'out)
+              (list 'string-to-number 'out)
+              'out)))
 
 (defn elisp-tf-x-random
   [_]
@@ -347,11 +352,19 @@
 
 (defn elisp-tf-x-obj-assign
   [[_ obj other]]
-  (list 'progn
-        (list 'maphash
-              (list 'lambda '(k v) (list 'puthash 'k 'v obj))
-              other)
-        obj))
+  (let [target (if (symbol? obj) obj (gensym "obj__"))]
+    (if (symbol? obj)
+      (list 'progn
+            (list 'maphash
+                  (list 'lambda '(k v) (list 'puthash 'k 'v target))
+                  other)
+            target)
+      (list 'let
+            [[target obj]]
+            (list 'maphash
+                  (list 'lambda '(k v) (list 'puthash 'k 'v target))
+                  other)
+            target))))
 
 (def +elisp-object+
   {:x-get-key    {:macro #'elisp-tf-x-get-key    :emit :macro :value true}
@@ -460,6 +473,15 @@
             arr)
       expr)))
 
+(defn elisp-tf-x-arr-assign
+  [[_ arr other]]
+  (let [expr (list 'vconcat arr other)]
+    (if (symbol? arr)
+      (list 'progn
+            (list 'setq arr expr)
+            arr)
+      expr)))
+
 (def +elisp-array+
   {:x-get-idx        {:macro #'elisp-tf-x-get-idx        :emit :macro :value true}
    :x-set-idx        {:macro #'elisp-tf-x-set-idx        :emit :macro}
@@ -472,7 +494,8 @@
    :x-arr-push-first {:macro #'elisp-tf-x-arr-push-first :emit :macro :value true}
    :x-arr-pop-first  {:macro #'elisp-tf-x-arr-pop-first  :emit :macro :value true}
    :x-arr-insert     {:macro #'elisp-tf-x-arr-insert     :emit :macro :value true}
-   :x-arr-remove     {:macro #'elisp-tf-x-arr-remove     :emit :macro :value true}})
+   :x-arr-remove     {:macro #'elisp-tf-x-arr-remove     :emit :macro :value true}
+   :x-arr-assign     {:macro #'elisp-tf-x-arr-assign     :emit :macro :value true}})
 
 ;;
 ;; STRING
@@ -496,7 +519,10 @@
 
 (defn elisp-tf-x-str-join
   [[_ sep coll]]
-  (list 'mapconcat 'identity (elisp-vector->list coll) sep))
+  (list 'mapconcat
+        (list 'lambda '(x) 'x)
+        (elisp-vector->list coll)
+        sep))
 
 (defn elisp-tf-x-str-index-of
   [[_ s tok start]]
@@ -881,11 +907,20 @@
 
 (defn elisp-tf-x-socket-send
   [[_ conn s]]
-  (list 'process-send-string conn s))
+  (list 'do
+        (list 'process-send-string conn s)
+        (list 'accept-process-output conn 0 50)
+        conn))
 
 (defn elisp-tf-x-socket-close
   [[_ conn]]
-  (list 'delete-process conn))
+  (list 'when
+        (list 'process-live-p conn)
+        (list 'do
+              (list 'ignore-errors
+                    (list 'process-send-eof conn))
+              (list 'accept-process-output conn 0 50)
+              (list 'delete-process conn))))
 
 (def +elisp-socket+
   {:x-socket-connect {:macro #'elisp-tf-x-socket-connect :emit :macro :value true}

@@ -255,7 +255,7 @@
 
 (defn scheme-tf-x-lu-create
   [_]
-  '(make-hash))
+  '(make-hasheq))
 
 (defn scheme-tf-x-lu-get
   [[_ lu obj]]
@@ -333,16 +333,16 @@
   [[_ obj]]
   (list 'list->vector
         (list 'for/list
-              (list (vector (vector 'k 'v)
-                            (list 'in-hash obj)))
+              (list (list (list 'k 'v)
+                          (list 'in-hash obj)))
               'v)))
 
 (defn scheme-tf-x-obj-pairs
   [[_ obj]]
   (list 'list->vector
         (list 'for/list
-              (list (vector (vector 'k 'v)
-                            (list 'in-hash obj)))
+              (list (list (list 'k 'v)
+                          (list 'in-hash obj)))
               (list 'vector 'k 'v))))
 
 (defn scheme-tf-x-obj-clone
@@ -353,8 +353,8 @@
   [[_ obj other]]
   (list 'begin
         (list 'for
-              (list (vector (vector 'k 'v)
-                            (list 'in-hash other)))
+              (list (list (list 'k 'v)
+                          (list 'in-hash other)))
               (list 'hash-set! obj 'k 'v))
         obj))
 
