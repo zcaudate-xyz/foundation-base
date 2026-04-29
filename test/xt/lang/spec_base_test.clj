@@ -147,45 +147,68 @@
 (fact "retrieves the attached prototype object"
 
   ^{:seedgen/base {:all    {:suppress true}
-                   :lua    {:suppress false}}}
+                   :lua    {:suppress false}
+                   :python {:suppress false}}}
   (!.js
     (var obj {})
     (var proto (xt/proto:create {:label "proto"}))
     (xt/proto:set obj proto)
-    (xt/x:obj-keys  (xt/proto:get obj)))
+    (var attached (xt/proto:get obj))
+    (xtd/obj-keys attached))
   => (contains ["label"])
 
   (!.lua
     (var obj {})
     (var proto (xt/proto:create {:label "proto"}))
     (xt/proto:set obj proto)
-    (xt/x:obj-keys  (xt/proto:get obj)))
+    (var attached (xt/proto:get obj))
+    (xtd/obj-keys attached))
+  => (contains ["label"])
+
+  (!.py
+    (var obj {})
+    (var proto (xt/proto:create {:label "proto"}))
+    (xt/proto:set obj proto)
+    (var attached (xt/proto:get obj))
+    (xtd/obj-keys attached))
   => (contains ["label"]))
 
 ^{:refer xt.lang.spec-base/proto:set :added "4.1"}
 (fact "attaches the prototype object"
 
   ^{:seedgen/base {:all    {:suppress true}
-                   :lua    {:suppress false}}}
+                   :lua    {:suppress false}
+                   :python {:suppress false}}}
   (!.js
     (var obj {})
     (var proto (xt/proto:create {:label "proto"}))
     (xt/proto:set obj proto)
-    (xt/x:obj-keys  (xt/proto:get obj)))
+    (var attached (xt/proto:get obj))
+    (xtd/obj-keys attached))
   => (contains ["label"])
 
   (!.lua
     (var obj {})
     (var proto (xt/proto:create {:label "proto"}))
     (xt/proto:set obj proto)
-    (xt/x:obj-keys  (xt/proto:get obj)))
+    (var attached (xt/proto:get obj))
+    (xtd/obj-keys attached))
+  => (contains ["label"])
+
+  (!.py
+    (var obj {})
+    (var proto (xt/proto:create {:label "proto"}))
+    (xt/proto:set obj proto)
+    (var attached (xt/proto:get obj))
+    (xtd/obj-keys attached))
   => (contains ["label"]))
 
 ^{:refer xt.lang.spec-base/proto:create :added "4.1"}
 (fact "creates prototypes with self-bound methods"
 
   ^{:seedgen/base {:all    {:suppress true}
-                   :lua    {:suppress false}}}
+                   :lua    {:suppress false}
+                   :python {:suppress false}}}
   (!.js
     (var prototype-fn
          (fn [m]
@@ -212,7 +235,51 @@
     (xt/proto:set obj proto)
     (:= (. obj ["name"]) "alpha")
     (. obj (describe "!")))
+  => "alpha!"
+
+  (!.py
+    (var proto
+         (xt/proto:create
+          {"describe" (fn [curr suffix]
+                        (return (xt/x:cat (. curr ["name"]) suffix)))}))
+    (var obj {})
+    (xt/proto:set obj proto)
+    (:= (. obj ["name"]) "alpha")
+    ((xt/proto:method obj "describe") obj "!"))
   => "alpha!")
+
+^{:refer xt.lang.spec-base/proto:method :added "4.1"}
+(fact "looks up methods with object-first protocol fallback"
+
+  (!.js
+    (var proto (xt/proto:create
+                {"describe" (fn [curr suffix]
+                              (return (xt/x:cat (. curr ["name"]) suffix)))}))
+    (var obj {"name" "alpha"})
+    (xt/proto:set obj proto)
+    [((xt/proto:method obj "describe") obj "!")
+     (xt/x:nil? (xt/proto:method obj "missing"))])
+  => ["alpha!" true]
+
+  (!.lua
+    (var proto (xt/proto:create
+                {"describe" (fn [curr suffix]
+                              (return (xt/x:cat (. curr ["name"]) suffix)))}))
+    (var obj {"name" "alpha"})
+    (xt/proto:set obj proto)
+    [((xt/proto:method obj "describe") obj "!")
+     (xt/x:nil? (xt/proto:method obj "missing"))])
+  => ["alpha!" true]
+
+  (!.py
+    (var proto (xt/proto:create
+                {"describe" (fn [curr suffix]
+                              (return (xt/x:cat (. curr ["name"]) suffix)))}))
+    (var obj {"name" "alpha"})
+    (xt/proto:set obj proto)
+    [((xt/proto:method obj "describe") obj "!")
+     (xt/x:nil? (xt/proto:method obj "missing"))])
+  => ["alpha!" true])
 
 ^{:refer xt.lang.spec-base/proto:tostring :added "4.1"}
 (fact "returns the native string hook key"

@@ -55,6 +55,14 @@
   {:added "4.1"}
   ([m] (list (quote proto:create) m)))
 
+(defspec.xt proto:method nil)
+
+(defmacro.xt ^{:standalone true}
+  proto:method
+  "looks up a key on an object, falling back to its attached protocol"
+  {:added "4.1"}
+  ([obj key] (list (quote proto:method) obj key)))
+
 (defspec.xt proto:tostring nil)
 
 (defmacro.xt ^{:standalone true} 

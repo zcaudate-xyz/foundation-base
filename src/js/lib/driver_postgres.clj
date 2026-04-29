@@ -4,7 +4,7 @@
   (:refer-clojure :exclude [print send]))
 
 (l/script :js
-  {:import [["pg" :as [* Postgres]]] :require [[xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.common-space :as rt] [js.core.util :as ut] [xt.lang.spec-base :as xt] [xt.runtime.type-sql-connection :as sqlrt]]})
+  {:import [["pg" :as [* Postgres]]] :require [[xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.common-space :as rt] [js.core.util :as ut] [xt.lang.spec-base :as xt] [xt.lib.sql-connection :as sqlrt]]})
 
 (defn.js default-env
   "gets the default env"

@@ -3,8 +3,8 @@
 
 (l/script :dart
   {:require [[xt.lang.spec-base :as xt]
-             [xt.runtime.type-sql-connection :as sqlrt]]
-   :import [["package:sqlite3/sqlite3.dart" :as sqlite]]})
+             [xt.lib.sql-connection :as sqlrt]]
+    :import [["package:sqlite3/sqlite3.dart" :as sqlite]]})
 
 (defn.dt query-returns-rows?
   "Checks whether a query should be executed with `select`."
@@ -61,7 +61,7 @@
         (return []))))
 
 (defn.dt set-methods
-  "Attaches the DBSQL driver methods expected by `xt.old.sys.conn-dbsql`."
+  "Attaches convenience SQL methods directly to the wrapped sqlite connection."
   {:added "4.1"}
   [db]
   (var conn {"raw" db})

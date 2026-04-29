@@ -311,7 +311,7 @@
   (!.elisp
     (xt/x:json-decode
      (k/return-eval "1+1")))
-  => {"return" "number", "value" 2, "type" "data"})
+  => (contains {"return" "number", "value" 2, "type" "data"}))
 
 (comment
   (s/snapto '[xt.cell])

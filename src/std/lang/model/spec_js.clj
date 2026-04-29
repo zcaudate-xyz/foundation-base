@@ -191,8 +191,18 @@
               (fn [...args]
                 (return 
                  (f this ...args))))
-          (:= (. out [k]) f)))
+           (:= (. out [k]) f)))
        (return out))))
+
+(defn js-tf-prototype-method
+  [[_ obj key]]
+  (let [value (list 'x:get-key obj key nil)]
+    (list ':?
+          (list 'x:is-function? value)
+          (list 'fn ['self 'a 'b 'c 'd]
+                (list 'return
+                      (list '. value (list 'call 'self 'a 'b 'c 'd))))
+          value)))
 
 (def +features+
   (-> (grammar/build :exclude [:pointer
@@ -207,12 +217,13 @@
         :defclass    {:macro  #'js-defclass    :emit :macro}
         :for-object  {:macro  #'js-tf-for-object  :emit :macro}
         :for-array   {:macro  #'js-tf-for-array   :emit :macro}
-        :for-iter    {:macro  #'js-tf-for-iter    :emit :macro}
-        :prototype-get       {:emit :alias :raw 'Object.getPrototypeOf}
-        :prototype-set       {:emit :alias :raw 'Object.setPrototypeOf}
-        :prototype-create    {:macro #'js-tf-prototype-create  :emit :macro
-                              :op-spec {:allow-blocks true}}
-        :prototype-tostring  {:emit :unit  :default "toString"}})
+         :for-iter    {:macro  #'js-tf-for-iter    :emit :macro}
+         :prototype-get       {:emit :alias :raw 'Object.getPrototypeOf}
+         :prototype-set       {:emit :alias :raw 'Object.setPrototypeOf}
+         :prototype-create    {:macro #'js-tf-prototype-create  :emit :macro
+                               :op-spec {:allow-blocks true}}
+         :prototype-method    {:macro #'js-tf-prototype-method  :emit :macro}
+         :prototype-tostring  {:emit :unit  :default "toString"}})
       (grammar/build:override fn/+js+)
       (grammar/build:extend
        {:property   {:op :property  :symbol  '#{property}   :assign ":" :raw "property" :value true :emit :def-assign}

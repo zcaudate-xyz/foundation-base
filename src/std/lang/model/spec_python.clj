@@ -221,6 +221,29 @@
                    ~success
                    (catch [Exception :as ~err] ~error))))
 
+(defn python-tf-prototype-create
+  [[_ m]]
+  m)
+
+(defn python-tf-prototype-get
+  [[_ obj]]
+  (list 'x:get-key obj "_xt_proto" nil))
+
+(defn python-tf-prototype-set
+  [[_ obj prototype]]
+  (list 'or
+        (list '. obj (list '__setitem__ "_xt_proto" prototype))
+        obj))
+
+(defn python-tf-prototype-method
+  [[_ obj key]]
+  (let [direct (list 'x:get-key obj key nil)
+        proto  (list 'or (list 'proto:get obj) {})]
+    (list ':?
+          (list 'not= nil direct)
+          direct
+          (list 'x:get-key proto key nil))))
+
 
 (def +features+
   (-> (grammar/build :exclude [:pointer
@@ -237,14 +260,20 @@
         :defgen      {:symbol #{'defgen} :macro #'python-defn :emit :macro}
         :fn.inner    {:macro #'python-defn :emit :macro}
         :with-global {:value true :raw "globals()"}
-        :defclass    {:macro  #'python-defclass :emit :macro}
-        :for-object  {:macro #'tf-for-object :emit :macro}
-        :for-array   {:macro #'tf-for-array  :emit :macro}
-        :for-iter    {:macro #'tf-for-iter   :emit :macro}
-        :for-index   {:macro #'tf-for-index  :emit :macro}})
-      (grammar/build:override fn/+python+)
-      (grammar/build:extend
-       {:defn-     {:op :defn-   :symbol #{'defn-}  :type :block :emit #'python-defn-}
+         :defclass    {:macro  #'python-defclass :emit :macro}
+         :for-object  {:macro #'tf-for-object :emit :macro}
+         :for-array   {:macro #'tf-for-array  :emit :macro}
+         :for-iter    {:macro #'tf-for-iter   :emit :macro}
+         :for-index   {:macro #'tf-for-index  :emit :macro}
+         :prototype-get       {:macro #'python-tf-prototype-get     :emit :macro}
+         :prototype-set       {:macro #'python-tf-prototype-set     :emit :macro}
+         :prototype-create    {:macro #'python-tf-prototype-create  :emit :macro
+                               :op-spec {:allow-blocks true}}
+         :prototype-method    {:macro #'python-tf-prototype-method  :emit :macro}
+         :prototype-tostring  {:emit :unit :default "__str__"}})
+       (grammar/build:override fn/+python+)
+       (grammar/build:extend
+        {:defn-     {:op :defn-   :symbol #{'defn-}  :type :block :emit #'python-defn-}
         :var-let   {:op :var-let :symbol #{'var}  :macro #'python-var :emit :macro}
         :unarr     {:op :unarr   :symbol #{:*}    :raw "*"    :emit :pre}
         :undict    {:op :undict  :symbol #{:**}   :raw "**"   :emit :pre}

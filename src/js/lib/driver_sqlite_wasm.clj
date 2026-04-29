@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:import [["@sqlite.org/sqlite-wasm" :as sqlite3InitModule]] :require [[xt.lang.spec-base :as xt] [js.core.util :as ut] [xt.runtime.type-sql-connection :as sqlrt]]})
+  {:import [["@sqlite.org/sqlite-wasm" :as sqlite3InitModule]] :require [[xt.lang.spec-base :as xt] [js.core.util :as ut] [xt.lib.sql-connection :as sqlrt]]})
 
 (defn.js raw-query
   "raw query for sqlite-wasm results"

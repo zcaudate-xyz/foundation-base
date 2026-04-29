@@ -170,6 +170,14 @@
        (:= (. mt __index) mt)
        (return mt))))
 
+(defn lua-tf-prototype-method
+  [[_ obj key]]
+  (let [direct   (list 'x:get-key obj key nil)
+        value    (list ':? (list 'not= nil direct)
+                       direct
+                       (list 'x:get-key (list 'proto:get obj) key nil))]
+    value))
+
 (def +features+
   (-> (grammar/build :include [:builtin
                                :builtin-global
@@ -211,12 +219,13 @@
          :for-iter   {:macro #'lua-tf-for-iter   :emit :macro}
         :for-index  {:macro #'lua-tf-for-index  :emit :macro}
         :defgen     {:macro #'lua-tf-defgen     :emit :macro}
-        :yield      {:macro #'lua-tf-yield      :emit :macro}
-        :prototype-get       {:emit :alias :raw 'getmetatable}
-        :prototype-set       {:emit :alias :raw 'setmetatable}
-        :prototype-create    {:macro #'lua-tf-prototype-create  :emit :macro
-                              :op-spec {:allow-blocks true}}
-        :prototype-tostring  {:emit :unit  :default "__tostring"}})
+         :yield      {:macro #'lua-tf-yield      :emit :macro}
+         :prototype-get       {:emit :alias :raw 'getmetatable}
+         :prototype-set       {:emit :alias :raw 'setmetatable}
+         :prototype-create    {:macro #'lua-tf-prototype-create  :emit :macro
+                               :op-spec {:allow-blocks true}}
+         :prototype-method    {:macro #'lua-tf-prototype-method  :emit :macro}
+         :prototype-tostring  {:emit :unit  :default "__tostring"}})
       (grammar/build:override fn/+lua+)
       (grammar/build:extend
        {:cat    {:op :cat    :symbol '#{cat}       :raw ".."   :emit :infix}
