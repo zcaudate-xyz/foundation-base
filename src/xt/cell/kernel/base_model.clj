@@ -8,7 +8,7 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.common-trace :as trace]
              [xt.event.util-throttle :as th]
-             [xt.old.event-view :as event-view]
+             [xt.event.base-view :as event-view]
              [xt.cell.kernel.base-async :as async]
              [xt.cell.kernel.base-link :as link]
              [xt.cell.kernel.base-util :as util]

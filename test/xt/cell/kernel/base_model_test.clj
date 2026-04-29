@@ -7,8 +7,9 @@
 (l/script- :xtalk
   {:require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-space :as rt :with [defsingleton.xt]]
-             [xt.old.event-view :as base-view]
+             [xt.event.base-view :as base-view]
              [xt.cell.kernel.base-link :as base-link]
              [xt.cell.kernel.base-link-local :as base-link-local]
              [xt.cell.kernel.base-model :as base-model]
@@ -17,7 +18,7 @@
              [xt.cell.kernel.inner-mock :as inner-mock]]})
 
 (l/script- :js
-  {:require [[xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.common-space :as rt :with [defsingleton.js]] [xt.old.event-view :as base-view] [xt.cell.kernel.base-link :as base-link] [xt.cell.kernel.base-link-local :as base-link-local] [xt.cell.kernel.base-model :as base-model] [xt.cell.kernel.base-impl :as base-impl] [xt.cell.kernel.inner-impl :as inner-impl] [xt.cell.kernel.inner-mock :as inner-mock] [xt.lang.common-repl :as repl] [js.core :as j]] :runtime :basic})
+  {:require [[xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.spec-base :as xt] [xt.lang.common-space :as rt :with [defsingleton.js]] [xt.event.base-view :as base-view] [xt.cell.kernel.base-link :as base-link] [xt.cell.kernel.base-link-local :as base-link-local] [xt.cell.kernel.base-model :as base-model] [xt.cell.kernel.base-impl :as base-impl] [xt.cell.kernel.inner-impl :as inner-impl] [xt.cell.kernel.inner-mock :as inner-mock] [xt.lang.common-repl :as repl] [js.core :as j]] :runtime :basic})
 
 (fact:global
  {:setup [(do (l/rt:restart)

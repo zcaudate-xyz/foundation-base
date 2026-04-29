@@ -13,7 +13,7 @@
    :require [[js.react :as r :include [:fn]]
              [js.react-native :as n :include [:fn]]
              [js.react.ext-route :as ext-route]
-             [xt.old.event-route :as event-route]]
+             [xt.event.base-route :as event-route]]
    })
 
 ^{:refer js.react.ext-route/useRouteSegment :adopt true :added "4.0" :unchecked true}

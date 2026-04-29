@@ -14,7 +14,7 @@
               [js.react :as r :include [:fn]]
               [js.react-native :as n :include [:fn]]
               [js.react-native.animate :as a]
-              [xt.old.event-animate :as event-animate]
+              [xt.event.base-animate :as event-animate]
               [xt.lang.spec-base :as xt]
               [xt.lang.common-lib :as k]]
    })

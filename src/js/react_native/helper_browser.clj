@@ -4,7 +4,7 @@
 (l/script :js
   {:require [[xt.lang.common-lib :as k]
              [xt.lang.common-string :as str]
-             [xt.old.event-route :as event-route]
+             [xt.event.base-route :as event-route]
              [js.react :as r]
              [js.react-native :as n]
              [js.react.ext-route :as ext-route]]})
@@ -58,4 +58,3 @@
   (var route (event-route/make-route (-/getHashRoute)))
   (event-route/set-param route key value path)
   (:= window.location.hash (+ "/" (event-route/get-url route))))
-

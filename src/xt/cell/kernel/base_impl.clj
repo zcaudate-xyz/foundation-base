@@ -3,7 +3,7 @@
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
-  {:require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.old.event-common :as event-common] [xt.cell.kernel.base-link :as link] [xt.cell.kernel.base-util :as util]]})
+  {:require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.event.base-listener :as event-common] [xt.cell.kernel.base-link :as link] [xt.cell.kernel.base-util :as util]]})
 
 (defspec.xt new-cell-init
   [:fn [] xt.cell.kernel.spec/CellInit])

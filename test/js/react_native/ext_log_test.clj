@@ -14,7 +14,7 @@
               [js.react :as r :include [:fn]]
               [js.react-native :as n :include [:fn]]
               [js.react.ext-log :as ext-log]
-              [xt.old.event-log :as event-log]]
+              [xt.event.base-log :as event-log]]
     })
 
 ^{:refer js.react.ext-log/listenLogLatest :adopt true :added "4.0" :unchecked true}

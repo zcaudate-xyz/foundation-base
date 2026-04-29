@@ -650,8 +650,12 @@
        :item type})))
 
 (defn infer-make-container
-  [[_ initial-expr type-expr opts-expr] ctx]
-  (let [initial-out (infer-type initial-expr ctx)
+  [[op initial-expr type-expr opts-expr] ctx]
+  (let [listener-map-name (case op
+                            xt.event.base-listener/make-container
+                            'xt.event.base-listener/EventListenerMap
+                            'xt.old.event-common/EventListenerMap)
+        initial-out (infer-type initial-expr ctx)
         type-out (infer-type type-expr ctx)
         opts-out (infer-type opts-expr ctx)
         initial-type (resolve-type (:type initial-out) ctx)
@@ -671,12 +675,12 @@
 
                     :else
                     initial-type)
-        base-fields [{:name "::" :type (:type type-out) :optional? false}
-                     {:name "listeners"
-                      :type {:kind :named
-                             :name 'xt.old.event-common/EventListenerMap}
-                      :optional? false}
-                     {:name "data" :type data-type :optional? false}
+         base-fields [{:name "::" :type (:type type-out) :optional? false}
+                      {:name "listeners"
+                       :type {:kind :named
+                              :name listener-map-name}
+                       :optional? false}
+                      {:name "data" :type data-type :optional? false}
                      {:name "initial"
                       :type {:kind :fn
                              :inputs []
@@ -691,15 +695,19 @@
             (merge-errors initial-out type-out opts-out))))
 
 (defn infer-blank-container
-  [[_ type-expr opts-expr] ctx]
-  (let [type-out (infer-type type-expr ctx)
+  [[op type-expr opts-expr] ctx]
+  (let [listener-map-name (case op
+                            xt.event.base-listener/blank-container
+                            'xt.event.base-listener/EventListenerMap
+                            'xt.old.event-common/EventListenerMap)
+        type-out (infer-type type-expr ctx)
         opts-out (infer-type opts-expr ctx)
         opts-type (resolve-type (:type opts-out) ctx)
         base-fields [{:name "::" :type (:type type-out) :optional? false}
-                     {:name "listeners"
-                      :type {:kind :named
-                             :name 'xt.old.event-common/EventListenerMap}
-                      :optional? false}]
+                      {:name "listeners"
+                       :type {:kind :named
+                              :name listener-map-name}
+                       :optional? false}]
         extra-fields (if (= :record (:kind opts-type))
                        (:fields opts-type)
                        [])
@@ -1160,6 +1168,9 @@
                                                  arg-type (arrayify-type (:type arg-out) ctx)]
                                              (result arg-type
                                                      (:errors arg-out)))
+                 xt.event.base-listener/blank-container (infer-blank-container form ctx)
+                 xt.event.base-listener/make-container (infer-make-container form ctx)
+                 xt.old.event-common/blank-container (infer-blank-container form ctx)
                  xt.old.event-common/make-container (infer-make-container form ctx)
                  (if (keyword? op)
                    (infer-keyword-call form ctx)

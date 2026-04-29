@@ -2,9 +2,9 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.old.event-log :as event-log]
-             [js.react :as r]
-             [js.core :as j]]})
+  {:require [[xt.event.base-log :as event-log]
+              [js.react :as r]
+              [js.core :as j]]})
 
 (defn.js makeLog
   "creates a log for react"
@@ -27,4 +27,3 @@
      meta)
     (return (fn [] (event-log/remove-listener log listener-id))))
   (return latest))
-

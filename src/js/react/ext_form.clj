@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [xt.old.event-form :as event-form] [js.react :as r] [js.core :as j] [xt.lang.common-data :as xtd] [xt.lang.common-tree :as xtt] [xt.lang.spec-base :as xt]]})
+  {:require [[xt.lang.common-lib :as k] [xt.event.base-form :as event-form] [js.react :as r] [js.core :as j] [xt.lang.common-data :as xtd] [xt.lang.common-tree :as xtt] [xt.lang.spec-base :as xt]]})
 
 ;;
 ;; No Validation

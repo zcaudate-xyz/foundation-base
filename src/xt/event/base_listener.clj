@@ -1,4 +1,4 @@
-(ns xt.old.event-common
+(ns xt.event.base-listener
   (:require [std.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
