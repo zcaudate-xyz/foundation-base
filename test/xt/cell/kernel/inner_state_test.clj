@@ -294,4 +294,12 @@
 
 
 ^{:refer xt.cell.kernel.inner-state/fn-self :added "4.1"}
-(fact "TODO")
+(fact "applies arguments along with the worker self"
+
+  (!.js
+   (xt/x:set-key globalThis "self" {"id" "w1"})
+   ((inner-state/fn-self
+     (fn [worker x]
+       (return [(. worker ["id"]) x])))
+    "hello"))
+  => ["w1" "hello"])

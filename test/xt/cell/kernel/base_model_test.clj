@@ -758,7 +758,29 @@
 
 
 ^{:refer xt.cell.kernel.base-model/throttle-entry-promise :added "4.1"}
-(fact "TODO")
+(fact "normalises legacy and map throttle entries to their promise"
+
+  (j/<! (base-model/throttle-entry-promise
+         [(. Promise (resolve "legacy")) 10]))
+  => "legacy"
+
+  (j/<! (base-model/throttle-entry-promise
+         {"promise" (. Promise (resolve "mapped"))
+          "started" 20}))
+  => "mapped")
 
 ^{:refer xt.cell.kernel.base-model/throttle-entry :added "4.1"}
-(fact "TODO")
+(fact "normalises throttle entries to the legacy [promise started] shape"
+
+  (j/<! (xt/x:first
+         (base-model/throttle-entry
+          {"promise" (. Promise (resolve "mapped"))
+           "started" 20})))
+  => "mapped"
+
+  (!.js
+   (xt/x:second
+    (base-model/throttle-entry
+     {"promise" (. Promise (resolve "mapped"))
+      "started" 20})))
+  => 20)

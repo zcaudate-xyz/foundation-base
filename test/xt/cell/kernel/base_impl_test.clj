@@ -9,12 +9,13 @@
              [xt.lang.common-data :as xtd]
              [xt.cell.kernel.base-link :as base-link]
              [xt.cell.kernel.base-link-local :as base-link-local]
+             [xt.cell.kernel.base-model :as base-model]
              [xt.cell.kernel.base-impl :as base-impl]
              [xt.cell.kernel.inner-impl :as inner-impl]
              [xt.cell.kernel.inner-mock :as inner-mock]]})
 
 (l/script- :js
-  {:require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.cell.kernel.base-link :as base-link] [xt.cell.kernel.base-link-local :as base-link-local] [xt.cell.kernel.base-impl :as base-impl] [xt.cell.kernel.inner-impl :as inner-impl] [xt.cell.kernel.inner-mock :as inner-mock] [xt.lang.common-repl :as repl] [js.core :as j]] :runtime :basic})
+  {:require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.cell.kernel.base-link :as base-link] [xt.cell.kernel.base-link-local :as base-link-local] [xt.cell.kernel.base-model :as base-model] [xt.cell.kernel.base-impl :as base-impl] [xt.cell.kernel.inner-impl :as inner-impl] [xt.cell.kernel.inner-mock :as inner-mock] [xt.lang.common-repl :as repl] [js.core :as j]] :runtime :basic})
 
 (fact:global
  {:setup [(l/rt:restart)
@@ -35,6 +36,14 @@
   (var cell (base-impl/new-cell link))
   (inner-impl/worker-init-signal (. link ["worker"]) {:done true})
   (return cell))
+
+(defn.xt make-cell-with-model
+  [views]
+  (var cell (-/make-cell))
+  (return (. (base-model/add-model cell "hello" views)
+             ["init"]
+             (then (fn []
+                     (return cell))))))
 
 ^{:refer xt.cell.kernel.base-impl/new-cell-init :added "4.0"}
 (fact "creates a record for asynchronous resolve"
@@ -152,19 +161,70 @@
 
 
 ^{:refer xt.cell.kernel.base-impl/list-views :added "4.1"}
-(fact "TODO")
+(fact "lists views attached to a model"
+
+  (notify/wait-on :js
+    (. (-/make-cell-with-model
+        {:echo {:handler base-link-local/echo
+                :defaultArgs ["hello"]}})
+       (then (fn [cell]
+               (repl/notify
+                (base-impl/list-views cell "hello"))))))
+  => ["echo"])
 
 ^{:refer xt.cell.kernel.base-impl/view-ensure :added "4.1"}
-(fact "TODO")
+(fact "returns the model and view pair for an existing view"
+
+  (notify/wait-on :js
+    (. (-/make-cell-with-model
+        {:echo {:handler base-link-local/echo
+                :defaultArgs ["hello"]}})
+       (then (fn [cell]
+               (repl/notify
+                (base-impl/view-ensure cell "hello" "echo"))))))
+  => (contains [map? map?]))
 
 ^{:refer xt.cell.kernel.base-impl/remove-listener :added "4.1"}
-(fact "TODO")
+(fact "removes a keyed listener from a path"
+
+  (!.js
+   (var cell (-/make-cell))
+   (base-impl/add-listener cell ["hello" "echo"] "@react/1234" (fn:>) nil nil)
+   (base-impl/remove-listener cell ["hello" "echo"] "@react/1234"))
+  => (contains-in {"meta" {"listener/id" "@react/1234"
+                           "listener/type" "cell"}})
+
+  (!.js
+   (var cell (-/make-cell))
+   (base-impl/add-listener cell ["hello" "echo"] "@react/1234" (fn:>) nil nil)
+   (base-impl/remove-listener cell ["hello" "echo"] "@react/1234")
+   (base-impl/list-listeners cell ["hello" "echo"]))
+  => [])
 
 ^{:refer xt.cell.kernel.base-impl/list-listeners :added "4.1"}
-(fact "TODO")
+(fact "lists listener ids for a single view path"
+
+  (!.js
+   (var cell (-/make-cell))
+   (base-impl/add-listener cell ["hello" "echo"] "@react/1234" (fn:>) nil nil)
+   (base-impl/list-listeners cell ["hello" "echo"]))
+  => ["@react/1234"])
 
 ^{:refer xt.cell.kernel.base-impl/list-all-listeners :added "4.1"}
-(fact "TODO")
+(fact "lists all listener ids grouped by model and view"
+
+  (!.js
+   (var cell (-/make-cell))
+   (base-impl/add-listener cell ["hello" "echo"] "@react/1234" (fn:>) nil nil)
+   (base-impl/add-listener cell ["hello" "echo"] "@react/5678" (fn:>) nil nil)
+   (base-impl/list-all-listeners cell))
+  => {"hello" {"echo" ["@react/1234" "@react/5678"]}})
 
 ^{:refer xt.cell.kernel.base-impl/trigger-listeners :added "4.1"}
-(fact "TODO")
+(fact "triggers listener callbacks registered on a path"
+
+  (!.js
+   (var cell (-/make-cell))
+   (base-impl/add-listener cell ["hello" "echo"] "@react/1234" (fn:>) nil nil)
+   (base-impl/trigger-listeners cell ["hello" "echo"] {}))
+  => ["@react/1234"])
