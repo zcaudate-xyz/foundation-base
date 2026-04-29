@@ -1,6 +1,7 @@
 (ns xtbench.ruby.lang.spec-primitive-test
   (:use code.test)
-  (:require [std.lang :as l]
+  (:require [clojure.java.shell :as shell]
+            [std.lang :as l]
             [xt.lang.common-notify :as notify]
             [xt.lang.spec-primitive :as primitive]))
 
@@ -14,6 +15,22 @@
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
+
+(defn assert-ruby-syntax!
+  [form]
+  (let [tmp (java.io.File/createTempFile "ruby-emitter-" ".rb")]
+    (try
+      (let [code (l/emit-as :ruby [form])]
+        (spit tmp code)
+        (let [result (shell/sh "ruby" "-c" (.getAbsolutePath tmp))]
+          (when-not (zero? (:exit result))
+            (throw (ex-info "Invalid emitted Ruby"
+                            {:form form
+                             :code code
+                             :result result}))))
+        code)
+      (finally
+        (.delete tmp)))))
 
 ^{:refer xt.lang.spec-primitive/!:G :added "4.1"}
 (fact "reads and writes global values"
@@ -169,6 +186,52 @@
 
 ^{:refer xt.lang.spec-primitive/fn:> :added "4.1"}
 (fact "creates arrow functions"
+
+  [(boolean (assert-ruby-syntax!
+             '((fn:> [x]
+                (return (+ x 1)))
+              2)))
+   (boolean (assert-ruby-syntax!
+             '((fn []
+                (br*
+                  (if false
+                    (return "no"))
+                  (elseif (> 3 2)
+                    (return "yes"))
+                  (else
+                    (return "fallback")))))))
+   (boolean (assert-ruby-syntax!
+             '(do:>
+               (var a 1)
+               (var b 2)
+               (return (+ a b)))))
+   (boolean (assert-ruby-syntax!
+             '(do:>
+               (cond
+                 false (return "a")
+                 (< 1 2) (return "b")
+                 :else (return "c")))))
+   (boolean (assert-ruby-syntax!
+             '(do:>
+               (if true
+                 (return "yes")
+                 (return "no")))))
+   (boolean (assert-ruby-syntax!
+             '(do:>
+               (let [a 2
+                      b 3]
+                 (return (+ a b))))))
+   (boolean (assert-ruby-syntax!
+             '(do
+                (var out [])
+                (try
+                  (throw "boom")
+                  (catch err
+                    (x:arr-push out err))
+                  (finally
+                    (x:arr-push out "done")))
+                (return out))))]
+  => [true true true true true true true]
 
   (!.rb
     ((fn:> [x]

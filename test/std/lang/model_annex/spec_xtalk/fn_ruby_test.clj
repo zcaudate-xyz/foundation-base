@@ -30,7 +30,18 @@
     (str/includes? (slurp "src/std/lang/model_annex/spec_xtalk/fn_ruby.clj")
                    (str "ruby" "-raw"))]
   => ['(. e (respond_to? :call))
-      '(:= (. h [(. k object_id)]) v)
+      '(:=
+        (. h [(. (fn []
+                   (if (or (. k nil?)
+                           (. k (is_a? Numeric))
+                           (. k (is_a? String))
+                           (. k (is_a? Symbol))
+                           (. k (is_a? TrueClass))
+                           (. k (is_a? FalseClass)))
+                     (return k)
+                     (return (. k object_id))))
+                 (call))])
+        v)
       '(== (. a object_id) (. b object_id))
       '(or (. ENV ["PWD"]) (. Dir pwd))
       '(:.. arr)
