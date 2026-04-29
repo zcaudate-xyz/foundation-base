@@ -4,7 +4,10 @@
 
 ^{:seedgen/root {:all true, :langs [:lua :python]}}
 (l/script- :js
-  {:require [[xt.cell.service.db-view :as db-view] [xt.lang.common-data :as xtd] [xt.lang.common-lib :as k]] :runtime :basic})
+  {:runtime :basic
+   :require [[xt.cell.service.db-view :as db-view]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-lib :as k]]})
 
 (fact:global
  {:setup [(l/rt:restart)]

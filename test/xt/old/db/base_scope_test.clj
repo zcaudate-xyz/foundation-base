@@ -5,32 +5,32 @@
 (l/script- :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-              [xt.old.db.base-scope :as scope]
-              [xt.old.db.sample-test :as sample]]})
+             [xt.old.db.base-scope :as scope]
+             [xt.old.db.sample-test :as sample]]})
 
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-              [xt.old.db.base-scope :as scope]
-              [xt.old.db.sample-test :as sample]
-              [xt.old.db.sql-util :as ut]]})
+             [xt.old.db.base-scope :as scope]
+             [xt.old.db.sample-test :as sample]
+             [xt.old.db.sql-util :as ut]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-              [xt.old.db.base-scope :as scope]
-              [xt.old.db.sample-test :as sample]
-              [xt.old.db.sql-util :as ut]]})
+             [xt.old.db.base-scope :as scope]
+             [xt.old.db.sample-test :as sample]
+             [xt.old.db.sql-util :as ut]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-              [xt.old.db.base-scope :as scope]
-              [xt.old.db.sample-test :as sample]
-              [xt.old.db.sql-util :as ut]]})
+             [xt.old.db.base-scope :as scope]
+             [xt.old.db.sample-test :as sample]
+             [xt.old.db.sql-util :as ut]]})
 
 (fact:global
  {:setup    [(l/rt:restart)
@@ -95,9 +95,9 @@
                       {}))
   => ["UserAccount"
       {"custom" [],
-    "where" [{"id" "zcaudate"}],
-    "links"
-    [["profile"
+     "where" [{"id" "zcaudate"}],
+     "links"
+     [["profile"
       "reverse"
       ["UserProfile"
        {"custom" [],
@@ -113,14 +113,13 @@
          "country_id"
          "about"
          "language"]}]]],
-    "data"
-    ["id"
+     "data"
+     ["id"
      "nickname"
      "password_updated"
      "is_super"
      "is_suspended"
      "is_official"]}]
-
 
   (!.py
    (scope/get-tree sample/Schema
@@ -215,7 +214,6 @@
 
 ^{:refer xt.old.db.base-scope/get-link-standard.more :adopt true :added "4.0"}
 (fact "classifies the link"
-
 
   (!.js
    (xtd/arr-map (scope/get-link-columns sample/Schema
@@ -350,7 +348,7 @@
        "-/id" true}])
 
 ^{:refer xt.old.db.base-scope/filter-plain-key :added "4.0"}
-(fact  "converts _id tags to standard keys"
+(fact "converts _id tags to standard keys"
 
   (!.js
    [(scope/filter-plain-key "hello")
@@ -402,7 +400,6 @@
           (fn:> [e] (. e ["ident"]))))
   => +out+
 
-
   (!.lua
    (xtd/arr-map (scope/get-data-columns sample/Schema
                                       "UserAccount"
@@ -429,7 +426,7 @@
                                       "UserProfile"
                                       ["*/standard"])
           (fn:> [e] (. e ["ident"]))))
-  =>  +out+)
+  => +out+)
 
 ^{:refer xt.old.db.base-scope/get-link-standard :added "4.0"}
 (fact "classifies the link"
@@ -456,14 +453,12 @@
                            {}))
   => {"UserProfile" true, "UserAccount" true}
 
-
   (!.lua
    (scope/get-query-tables sample/Schema
                            "UserAccount"
                            {:profile {}}
                            {}))
   => {"UserProfile" true, "UserAccount" true}
-
 
   (!.py
    (scope/get-query-tables sample/Schema

@@ -8,22 +8,22 @@
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
-              [xt.lang.common-repl :as repl]
-              [xt.old.event-box :as box]]})
+             [xt.lang.common-repl :as repl]
+             [xt.old.event-box :as box]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
-              [xt.lang.common-repl :as repl]
-              [xt.old.event-box :as box]]})
+             [xt.lang.common-repl :as repl]
+             [xt.old.event-box :as box]]})
 
 (l/script- :python
   {:runtime :basic
-    :require [[xt.lang.common-lib :as k]
-               [xt.lang.common-data :as xtd]
-                [xt.lang.common-repl :as repl]
-                [xt.old.event-box :as box]]})
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-repl :as repl]
+             [xt.old.event-box :as box]]})
 
 (l/script- :dart
   {:runtime :twostep
@@ -71,7 +71,6 @@
                      ["a" "b" "c"])])
   => [true true false false]
 
-
   (!.lua
    [(box/check-event {:path ["a" "b"]}
                      [])
@@ -82,7 +81,6 @@
     (box/check-event {:path ["a" "b"]}
                      ["a" "b" "c"])])
   => [true true false false]
-
 
   (!.py
    [(box/check-event {:path ["a" "b"]}
@@ -213,6 +211,7 @@
      (box/get-data b [])
      (box/reset-data b)
      (box/get-data b [])])
+
   [[] {"a" {"b" 2}, "c" 3}
    [] {"a" {"b" 2}}])
 

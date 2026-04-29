@@ -1,21 +1,21 @@
 (ns xt.old.sys.conn-dbsql-test
   (:require [rt.basic.type-common :as common]
             [std.lang :as l]
-             [xt.lang.common-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :lua
   {:runtime :basic
-   :config  {:program :resty}
+   :config {:program :resty}
    :require [[xt.old.sys.conn-dbsql :as dbsql]
              [lua.nginx.driver-postgres :as lua-postgres]]})
 
 (l/script- :js
   {:runtime :basic
    :require [[xt.old.sys.conn-dbsql :as dbsql]
-              [xt.lang.common-repl :as repl]
-              [js.lib.driver-postgres :as js-postgres]
-              [js.lib.driver-sqlite :as js-sqlite]]})
+             [xt.lang.common-repl :as repl]
+             [js.lib.driver-postgres :as js-postgres]
+             [js.lib.driver-sqlite :as js-sqlite]]})
 
 (l/script- :dart
   {:runtime :twostep
@@ -42,7 +42,6 @@
                    {:success (fn [conn]
                                (dbsql/query conn "SELECT 1;"
                                             (repl/<!)))}))
-
   => (any 1 [{"?column?" 1}])
 
   (notify/wait-on :js
@@ -64,6 +63,7 @@
 
 ^{:refer xt.old.sys.conn-dbsql/disconnect :added "4.0"}
 (fact "disconnects form database"
+
   (if CANARY-DART
     (!.dt
       (var conn (dbsql/connect {:constructor dart-sqlite/connect-constructor
@@ -82,6 +82,7 @@
 
 ^{:refer xt.old.sys.conn-dbsql/query-sync :added "4.0"}
 (fact "sends a synchronous query"
+
   (if CANARY-DART
     (!.dt
       (var conn (dbsql/connect {:constructor dart-sqlite/connect-constructor
@@ -93,7 +94,6 @@
     :dart-unavailable)
   => (any "alpha"
           :dart-unavailable))
-
 
 ^{:refer xt.old.sys.conn-dbsql/wrap-callback :added "4.1"}
 (fact "TODO")

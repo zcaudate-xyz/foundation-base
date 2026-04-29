@@ -115,6 +115,7 @@
 (fact "encodes a value to sql"
 
   (!.js (xt/x:json-encode 100000000000000000))
+
   (!.lua (xt/x:json-encode 100000000000000000))
 
   (!.lua
@@ -520,7 +521,6 @@
              "data = '{\"a\":1}'"])]}
 (fact "encodes a query segment"
 
-
   (!.js
    [(ut/encode-query-segment "name" "hello" k/identity {})
     (ut/encode-query-segment "name" ["neq" "hell'o"] k/identity {})
@@ -583,7 +583,6 @@
                              :name "hello"}
                            "WHERE"
                            {})])
-
   => [""
       "WHERE \"SCHEMA\".name = 'hello'"
       "WHERE data = '{\"a\":1}' AND name = 'hello'"]

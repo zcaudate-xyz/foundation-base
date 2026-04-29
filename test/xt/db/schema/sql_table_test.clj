@@ -232,7 +232,7 @@
                        sample/RootUser
                        {}))
   => +upserts+
-  
+
   (!.lua
    (table/table-upsert sample/Schema
                        sample/SchemaLookup

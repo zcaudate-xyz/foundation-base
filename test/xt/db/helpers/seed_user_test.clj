@@ -126,9 +126,6 @@
    :owner        {:type :ref :ref {:ns -/UserAccount}
                   :sql {:cascade true}}])
 
-
-
-
 (deftype.pg
   OrganisationAccess
   [:id            {:type :uuid :primary true
@@ -143,7 +140,6 @@
                           :cascade true}}
    :role          {:type :text :required true
                    :sql  {:default "member"}}])
-
 
 (defn.pg organisation-assert-is-member
   [:uuid i-account-id :uuid i-organisation-id]

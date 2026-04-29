@@ -5,19 +5,19 @@
 
 ^{:seedgen/root {:all true, :langs [:python :lua]}}
 (l/script- :js
- {:runtime :basic,
-  :require [[xt.lang.common-string :as xts]
-            [xt.lang.spec-base :as xt]]})
+  {:runtime :basic
+   :require [[xt.lang.common-string :as xts]
+             [xt.lang.spec-base :as xt]]})
 
 (l/script- :python
- {:runtime :basic,
-  :require [[xt.lang.common-string :as xts]
-            [xt.lang.spec-base :as xt]]})
+  {:runtime :basic
+   :require [[xt.lang.common-string :as xts]
+             [xt.lang.spec-base :as xt]]})
 
 (l/script- :lua
- {:runtime :basic,
-  :require [[xt.lang.common-string :as xts]
-            [xt.lang.spec-base :as xt]]})
+  {:runtime :basic
+   :require [[xt.lang.common-string :as xts]
+             [xt.lang.spec-base :as xt]]})
 
 (fact:global
  {:setup [(l/rt:restart)]

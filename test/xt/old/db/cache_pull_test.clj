@@ -38,6 +38,7 @@
              [xt.old.db.sample-test :as sample]]})
 
 (def +flattened+ nil)
+
 (def +flattened-full+ nil)
 
 (fact:global
@@ -184,7 +185,6 @@
             {"asset" [{"currency" [{"id" "XLM.T"}]}]}]
            :in-any-order)}]}])
 
-
   (!.py
    (var rows {})
    (data/merge-bulk rows (@! +flattened-full+) nil)
@@ -218,7 +218,7 @@
    (q/check-in-clause "a" [["a" "b"]])))
 
 ^{:refer xt.old.db.cache-pull/check-like-clause :added "4.0"}
-(fact  "emulates the sql `like` clause"
+(fact "emulates the sql `like` clause"
 
   (!.js
    [(q/check-like-clause "abc" "a%")

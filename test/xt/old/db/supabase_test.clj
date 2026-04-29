@@ -38,7 +38,6 @@
                                  (repl/notify true)
                                  (catch e (repl/notify e))))})))
 
-
 (def +usd-snake+
   {"id" "USD"
    "name" "US Dollar"
@@ -94,10 +93,6 @@
      "new" {"id" "USD2" "name" "US Dollar 2"}}))
   => [["remove" {"Currency" [{"id" "USD"}]}]
       ["add" {"Currency" [{"id" "USD2" "name" "US Dollar 2"}]}]])
-
-;;
-;; Integration: apply to sqlite-backed xt.old.db
-;;
 
 ^{:refer xt.old.db.supabase/apply-payload :added "4.1.3"}
 (fact "applies supabase payload to local xt.old.db (sqlite)"
@@ -169,7 +164,6 @@
    (detach-fn)
    rows)
   => [{"id" "USD"}])
-
 
 ^{:refer xt.old.db.supabase/snake->kebab :added "4.1"}
 (fact "TODO")

@@ -4,9 +4,9 @@
             [std.string.prose :as prose]))
 
 (l/script- :ruby
- {:runtime :basic,
-  :require [[xt.lang.common-string :as xts]
-            [xt.lang.spec-base :as xt]]})
+  {:runtime :basic
+   :require [[xt.lang.common-string :as xts]
+             [xt.lang.spec-base :as xt]]})
 
 (fact:global
  {:setup [(l/rt:restart)]

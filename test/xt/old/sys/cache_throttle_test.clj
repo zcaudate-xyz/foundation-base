@@ -19,19 +19,19 @@
   {:runtime :basic
    :require [[xt.lang.common-data :as xtd]
              [xt.lang.common-lib :as k]
-              [xt.lang.common-repl :as repl]
-              [xt.old.sys.cache-throttle :as throttle]
-              [xt.old.sys.cache-common :as cache]
-              [js.core :as j]]})
+             [xt.lang.common-repl :as repl]
+             [xt.old.sys.cache-throttle :as throttle]
+             [xt.old.sys.cache-common :as cache]
+             [js.core :as j]]})
 
 (l/script- :lua
   {:runtime :basic
-    :config  {:exec ["resty" "--http-conf" "client_body_buffer_size 1m;\nvariables_hash_max_size 2048;\nvariables_hash_bucket_size 128;\nlua_shared_dict GLOBAL 20k;\nlua_shared_dict WS_DEBUG 20k;\nlua_shared_dict ES_DEBUG 20k;" "-e"]}
+   :config {:exec ["resty" "--http-conf" "client_body_buffer_size 1m;\nvariables_hash_max_size 2048;\nvariables_hash_bucket_size 128;\nlua_shared_dict GLOBAL 20k;\nlua_shared_dict WS_DEBUG 20k;\nlua_shared_dict ES_DEBUG 20k;" "-e"]}
    :require [[xt.lang.common-data :as xtd]
              [xt.lang.common-lib :as k]
-              [xt.old.sys.cache-throttle :as throttle]
-              [xt.old.sys.cache-common :as cache]
-              [lua.nginx :as n]]})
+             [xt.old.sys.cache-throttle :as throttle]
+             [xt.old.sys.cache-common :as cache]
+             [lua.nginx :as n]]})
 
 (fact:global
   {:setup    [(l/rt:restart)

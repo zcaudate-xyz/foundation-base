@@ -6,28 +6,28 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.runtime.interface-common :as v]
-              [xt.lang.common-lib :as k]
-              [xt.lang.common-iter :as it]
-              [xt.lang.common-repl :as repl]
-              [xt.runtime.type-hashmap :as hm]
-              [xt.runtime.type-keyword :as kw]
-              [xt.runtime.type-symbol :as sym]
-              [xt.runtime.type-list :as list]
-              [xt.runtime.type-syntax :as syn]
-              [xt.runtime.type-vector :as vec]]})
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-iter :as it]
+             [xt.lang.common-repl :as repl]
+             [xt.runtime.type-hashmap :as hm]
+             [xt.runtime.type-keyword :as kw]
+             [xt.runtime.type-symbol :as sym]
+             [xt.runtime.type-list :as list]
+             [xt.runtime.type-syntax :as syn]
+             [xt.runtime.type-vector :as vec]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.runtime.interface-common :as v]
-              [xt.lang.common-lib :as k]
-              [xt.lang.common-iter :as it]
-              [xt.lang.common-repl :as repl]
-              [xt.runtime.type-hashmap :as hm]
-              [xt.runtime.type-keyword :as kw]
-              [xt.runtime.type-symbol :as sym]
-              [xt.runtime.type-list :as list]
-              [xt.runtime.type-syntax :as syn]
-              [xt.runtime.type-vector :as vec]]})
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-iter :as it]
+             [xt.lang.common-repl :as repl]
+             [xt.runtime.type-hashmap :as hm]
+             [xt.runtime.type-keyword :as kw]
+             [xt.runtime.type-symbol :as sym]
+             [xt.runtime.type-list :as list]
+             [xt.runtime.type-syntax :as syn]
+             [xt.runtime.type-vector :as vec]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -279,7 +279,7 @@
   => [true true false])
 
 ^{:refer xt.runtime.interface-common/is-mutable? :added "4.0"}
-(fact  "checks if collection is mutable"
+(fact "checks if collection is mutable"
 
   (!.js
    [(v/is-mutable? (list/list))

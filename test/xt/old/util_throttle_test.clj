@@ -13,7 +13,7 @@
 
 (l/script- :lua
   {:runtime :basic
-   :config  {:program :resty}
+   :config {:program :resty}
    :require [[xt.lang.common-lib :as k]
              [xt.lang.spec-base :as xt]
              [xt.old.util-throttle :as throttle]
@@ -49,6 +49,7 @@
 
 ^{:refer xt.old.util-throttle/throttle-run-async :added "4.0"}
 (fact "runs an async throttle"
+
   (notify/wait-on :js
     (var out [])
     (var handler
@@ -93,8 +94,11 @@
 
 ^{:refer xt.old.util-throttle/throttle-run :added "4.0"}
 (fact "throttles a function so that it only runs a single thread"
+
   ;;
+
   ;; JS
+
   ;;
 
   (notify/wait-on :js
@@ -121,7 +125,9 @@
   => [1 1]
 
   ;;
+
   ;; LUA
+
   ;;
 
   (notify/wait-on :lua
@@ -170,6 +176,7 @@
 
 ^{:refer xt.old.util-throttle/throttle-active :added "4.0"}
 (fact "gets the active ids in a throttle"
+
   (notify/wait-on :js
     (var throttle)
     (var handler
@@ -191,7 +198,6 @@
     (throttle/throttle-run throttle 3))
   => [["1" "2" "3"]
       ["1" "2" "3"]]
-
 
   (notify/wait-on :lua
     (var throttle)

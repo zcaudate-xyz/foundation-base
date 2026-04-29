@@ -24,14 +24,14 @@
 
 (l/script- :lua
   {:runtime :basic
-   :config  {:exec ["resty" "--http-conf" "client_body_buffer_size 1m;\nvariables_hash_max_size 2048;\nvariables_hash_bucket_size 128;\nlua_shared_dict GLOBAL 20k;\nlua_shared_dict WS_DEBUG 20k;\nlua_shared_dict ES_DEBUG 20k;" "-e"]
-               #_#_
-               :container {:group "test"
-                           :image "python"
-                         :runtime :basic
-                         :exec ["python" "-c"]
-                         #_#_:bootstrap (fn [port opts]
-                                          "1+1")}}
+   :config {:exec ["resty" "--http-conf" "client_body_buffer_size 1m;\nvariables_hash_max_size 2048;\nvariables_hash_bucket_size 128;\nlua_shared_dict GLOBAL 20k;\nlua_shared_dict WS_DEBUG 20k;\nlua_shared_dict ES_DEBUG 20k;" "-e"]
+              #_#_
+              :container {:group "test"
+                          :image "python"
+                        :runtime :basic
+                        :exec ["python" "-c"]
+                        #_#_:bootstrap (fn [port opts]
+                                         "1+1")}}
    :require [[xt.old.sys.cache-queue :as queue]
              [xt.old.sys.cache-common :as cache]]})
 
@@ -96,7 +96,7 @@
          (queue/group-setup cache
                       "main"
                       "g1")
-
+  
          [(queue/queue-meta cache)
           (queue/queue-groupcount cache "main")])
   => [{"main" {"size" 5}} 2]
@@ -114,7 +114,7 @@
          (queue/group-setup cache
                             "main"
                             "g1")
-
+  
          [(queue/queue-meta cache)
           (queue/queue-groupcount cache "main")])
   => [{"main" {"size" 5}} 2])

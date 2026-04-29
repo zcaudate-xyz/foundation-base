@@ -217,6 +217,5 @@
 ^{:refer xt.old.db/add-view-trigger :added "4.0"}
 (fact "adds a view trigger to the db")
 
-
 ^{:refer xt.old.db/get-dbtype :added "4.1"}
 (fact "TODO")

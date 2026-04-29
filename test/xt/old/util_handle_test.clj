@@ -13,7 +13,7 @@
 
 (l/script- :lua
   {:runtime :basic
-   :config  {:program :resty}
+   :config {:program :resty}
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
@@ -38,6 +38,7 @@
   (!.js
    (handle/plugin-timing {}))
   => {"output" {}, "name" "timing"}
+
   (!.lua
    (xtd/tree-get-spec (handle/plugin-timing {})))
   => {"on_setup" "function", "output" {}, "on_reset" "function", "name" "string", "on_teardown" "function"})
@@ -65,6 +66,7 @@
                                :error   "B"
                                :finally "C"}))
   => {"on_error" "B", "on_teardown" "C", "on_success" "A"}
+
   (!.lua
    (handle/to-handle-callback {:success "A"
                                :error   "B"
@@ -99,7 +101,6 @@
 
 ^{:refer xt.old.util-handle/run-handle :added "4.0"}
 (fact "runs a handle")
-
 
 ^{:refer xt.old.util-handle/incr-fn :added "4.1"}
 (fact "TODO")

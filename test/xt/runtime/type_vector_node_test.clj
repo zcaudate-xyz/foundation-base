@@ -93,7 +93,7 @@
        "::" "vector.node"}))
 
 ^{:refer xt.runtime.type-vector-node/node-editable :added "4.0"}
-(fact  "creates an editable node"
+(fact "creates an editable node"
 
   (!.js
    (var node (node/node-create 1 [1 2 3 4]))

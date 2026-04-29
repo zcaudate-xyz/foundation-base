@@ -6,7 +6,7 @@
 
 (l/script- :js
   {:runtime :oneshot
-   :config  {:program :nodejs}
+   :config {:program :nodejs}
    :require [[xt.old.db.base-check :as chk]
              [xt.lang.common-lib :as k]]})
 
@@ -73,7 +73,6 @@
                         [{:symbol "x", :type "numeric"}
                          {:symbol "y", :type "numeric"}]))
   => [true]
-
 
   (!.lua
    (chk/check-args-type [1 2]

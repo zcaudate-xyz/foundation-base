@@ -4,9 +4,9 @@
             [std.string.prose :as prose]))
 
 (l/script- :dart
- {:runtime :twostep,
-  :require [[xt.lang.common-string :as xts]
-            [xt.lang.spec-base :as xt]]})
+  {:runtime :twostep
+   :require [[xt.lang.common-string :as xts]
+             [xt.lang.spec-base :as xt]]})
 
 (fact:global
  {:setup [(l/rt:restart)]

@@ -1,4 +1,4 @@
-(ns xt.lang.impl-bitop-test
+(ns xt.old.impl-bitop-test
   (:use code.test)
   (:require [xt.lang.impl-bitop :refer :all]))
 

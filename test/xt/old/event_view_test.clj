@@ -14,29 +14,29 @@
 
 (l/script- :lua
   {:runtime :basic
-   :config  {:program :resty}
+   :config {:program :resty}
    :require [[xt.lang.common-lib :as k]
-              [xt.lang.spec-base :as xt]
-               [xt.lang.common-data :as xtd]
-                [xt.lang.common-repl :as repl]
-                [xt.old.event-view :as view]
-                [lua.nginx :as n]]})
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-repl :as repl]
+             [xt.old.event-view :as view]
+             [lua.nginx :as n]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
              [xt.lang.spec-base :as xt]
-              [xt.lang.common-data :as xtd]
-               [xt.lang.common-repl :as repl]
-               [xt.old.event-view :as view]]})
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-repl :as repl]
+             [xt.old.event-view :as view]]})
 
 (l/script- :dart
   {:runtime :twostep
    :require [[xt.lang.common-lib :as k]
              [xt.lang.spec-base :as xt]
-              [xt.lang.common-data :as xtd]
-              [xt.lang.common-repl :as repl]
-              [xt.old.event-view :as view]]})
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-repl :as repl]
+             [xt.old.event-view :as view]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -301,7 +301,6 @@
       "options" {},
       "listeners" {}}
 
-
   (!.lua
    (xtd/tree-get-data
     (view/create-view
@@ -350,29 +349,29 @@
 ^{:refer xt.old.event-view/view-context :added "4.0"}
 (fact "gets the view-context"
 
-    ^{:lang-exceptions
-      {:dart
-       {:form (!.dt
-               (var v (view/create-view
-                       (fn:> [x] {:value x})
-                       {}
-                       [3]
-                       {:value 0}
-                       nil
-                       nil))
-               (view/init-view v)
-               [(xt/x:has-key? (view/view-context v) "view")
-                (xt/x:has-key? (view/view-context v) "input")])
-        :expect [true true]}}}
+  ^{:lang-exceptions
+    {:dart
+     {:form (!.dt
+             (var v (view/create-view
+                     (fn:> [x] {:value x})
+                     {}
+                     [3]
+                     {:value 0}
+                     nil
+                     nil))
+             (view/init-view v)
+             [(xt/x:has-key? (view/view-context v) "view")
+              (xt/x:has-key? (view/view-context v) "input")])
+      :expect [true true]}}}
   (!.js
-   (var v (view/create-view
-           (fn:> [x] {:value x})
-           {}
-           [3]
-           {:value 0}))
-   (view/init-view v)
-   [(xt/x:has-key? (view/view-context v) "view")
-    (xt/x:has-key? (view/view-context v) "input")])
+  (var v (view/create-view
+         (fn:> [x] {:value x})
+         {}
+         [3]
+         {:value 0}))
+  (view/init-view v)
+  [(xt/x:has-key? (view/view-context v) "view")
+  (xt/x:has-key? (view/view-context v) "input")])
   => [true true]
 
   (set (!.lua
@@ -388,33 +387,33 @@
 ^{:refer xt.old.event-view/add-listener :added "4.0"}
 (fact "adds a listener to the view"
 
-   ^{:lang-exceptions
-     {:dart
-       {:form (!.dt
-               (var out nil)
-               (var v (view/create-view
-                       (fn:> [x] {:value x})
-                       {}
-                       [3]
-                       {:value 0}
-                       nil
-                       nil))
-               (view/add-listener v "a1"
-                                  (fn [res]
-                                    (:= out (xtd/tree-get-data res))
-                                    (return nil))
-                                  nil
-                                  nil)
-               (view/trigger-listeners v "output" {:value 0})
-               out)}}}
+  ^{:lang-exceptions
+    {:dart
+      {:form (!.dt
+              (var out nil)
+              (var v (view/create-view
+                      (fn:> [x] {:value x})
+                      {}
+                      [3]
+                      {:value 0}
+                      nil
+                      nil))
+              (view/add-listener v "a1"
+                                 (fn [res]
+                                   (:= out (xtd/tree-get-data res))
+                                   (return nil))
+                                 nil
+                                 nil)
+              (view/trigger-listeners v "output" {:value 0})
+              out)}}}
   (notify/wait-on :js
-    (var v (view/create-view
-            (fn:> [x] {:value x})
-            {}
-            [3]
-            {:value 0}))
-    (view/add-listener v "a1" (repl/>notify))
-    (view/trigger-listeners v "output" {:value 0}))
+   (var v (view/create-view
+           (fn:> [x] {:value x})
+           {}
+           [3]
+           {:value 0}))
+   (view/add-listener v "a1" (repl/>notify))
+   (view/trigger-listeners v "output" {:value 0}))
   => {"type" "output", "meta" {"listener/id" "a1", "listener/type" "view"}, "data" {"value" 0}}
 
   (notify/wait-on :lua
@@ -433,28 +432,28 @@
 ^{:refer xt.old.event-view/get-input :added "4.0"}
 (fact "gets the view input record"
 
-    ^{:lang-exceptions
-      {:dart
-       {:form (!.dt
-               (do
-                 (var v (view/create-view
-                         (fn:> [x] {:value x})
-                         {}
-                         [3]
-                         {:value 0}
-                         nil
-                         nil))
-                 (view/init-view v)
-                 (xtd/tree-get-data (view/get-input v))))
-        :expect (contains-in {"current" {"data" [3]}, "updated" integer?})}}}
+  ^{:lang-exceptions
+    {:dart
+     {:form (!.dt
+             (do
+               (var v (view/create-view
+                       (fn:> [x] {:value x})
+                       {}
+                       [3]
+                       {:value 0}
+                       nil
+                       nil))
+               (view/init-view v)
+               (xtd/tree-get-data (view/get-input v))))
+      :expect (contains-in {"current" {"data" [3]}, "updated" integer?})}}}
   (!.js
-   (var v (view/create-view
-     (fn:> [x] {:value x})
-    {}
-    [3]
-    {:value 0}))
-   (view/init-view v)
-   (view/get-input v))
+  (var v (view/create-view
+   (fn:> [x] {:value x})
+  {}
+  [3]
+  {:value 0}))
+  (view/init-view v)
+  (view/get-input v))
   => (contains-in {"current" {"data" [3]}, "updated" integer?})
 
   (!.lua
@@ -471,28 +470,28 @@
 ^{:refer xt.old.event-view/get-output :added "4.0"}
 (fact "gets the view output record"
 
-    ^{:lang-exceptions
-      {:dart
-       {:form (!.dt
-               (do
-                 (var v (view/create-view
-                         (fn:> [x] {:value x})
-                         {}
-                         [3]
-                         {:value 0}
-                         nil
-                         nil))
-                 (view/init-view v)
-                 (xtd/tree-get-data (view/get-output v nil))))
-        :expect {"type" "output" "elapsed" nil, "current" nil, "updated" nil}}}}
+  ^{:lang-exceptions
+    {:dart
+     {:form (!.dt
+             (do
+               (var v (view/create-view
+                       (fn:> [x] {:value x})
+                       {}
+                       [3]
+                       {:value 0}
+                       nil
+                       nil))
+               (view/init-view v)
+               (xtd/tree-get-data (view/get-output v nil))))
+      :expect {"type" "output" "elapsed" nil, "current" nil, "updated" nil}}}}
   (!.js
-   (var v (view/create-view
-     (fn:> [x] {:value x})
-    {}
-    [3]
-    {:value 0}))
-   (view/init-view v)
-   (view/get-output v))
+  (var v (view/create-view
+   (fn:> [x] {:value x})
+  {}
+  [3]
+  {:value 0}))
+  (view/init-view v)
+  (view/get-output v))
   => {"type" "output" "elapsed" nil, "current" nil, "updated" nil}
 
   (!.lua
@@ -530,37 +529,37 @@
 ^{:refer xt.old.event-view/set-input :added "4.0"}
 (fact "sets the input"
 
-   ^{:lang-exceptions
-     {:dart
-      {:form (notify/wait-on-call
-              2000
-              (fn []
-                (!.dt
-                 (var out nil)
-                 (var v (view/create-view
-                         (fn:> [x] {:value x})
-                         {}
-                        [3]
-                        {:value 0}
-                        nil
-                        nil))
-                 (view/add-listener
-                  v "a1"
-                  (fn [res]
-                    (:= out (xtd/tree-get-data res))
-                    (return nil))
-                   nil
-                   nil)
-                  (view/set-input v 1)
-                  out)))}}}
+  ^{:lang-exceptions
+    {:dart
+     {:form (notify/wait-on-call
+             2000
+             (fn []
+               (!.dt
+                (var out nil)
+                (var v (view/create-view
+                        (fn:> [x] {:value x})
+                        {}
+                       [3]
+                       {:value 0}
+                       nil
+                       nil))
+                (view/add-listener
+                 v "a1"
+                 (fn [res]
+                   (:= out (xtd/tree-get-data res))
+                   (return nil))
+                  nil
+                  nil)
+                 (view/set-input v 1)
+                 out)))}}}
   (notify/wait-on :js
-    (var v (view/create-view
-    (fn:> [x] {:value x})
-    {}
-    [3]
-    {:value 0}))
-    (view/add-listener v "a1" (repl/>notify))
-    (view/set-input v 1))
+   (var v (view/create-view
+   (fn:> [x] {:value x})
+   {}
+   [3]
+   {:value 0}))
+   (view/add-listener v "a1" (repl/>notify))
+   (view/set-input v 1))
   => (contains-in
       {"type" "view.input",
        "meta" {"listener/id" "a1", "listener/type" "view"},
@@ -583,37 +582,37 @@
 ^{:refer xt.old.event-view/set-output :added "4.0"}
 (fact "sets the output"
 
-   ^{:lang-exceptions
-     {:dart
-      {:form (notify/wait-on-call
-              2000
-              (fn []
-                (!.dt
-                 (var out nil)
-                 (var v (view/create-view
-                         (fn:> [x] {:value x})
-                         {}
-                         [3]
-                         {:value 0}
-                         nil
-                         nil))
-                 (view/add-listener
-                  v "a1"
-                  (fn [res]
-                    (:= out (xtd/tree-get-data res))
-                    (return nil))
-                  nil
-                  nil)
-                 (view/set-output v 1 nil nil nil nil)
-                 out)))}}}
+  ^{:lang-exceptions
+    {:dart
+     {:form (notify/wait-on-call
+             2000
+             (fn []
+               (!.dt
+                (var out nil)
+                (var v (view/create-view
+                        (fn:> [x] {:value x})
+                        {}
+                        [3]
+                        {:value 0}
+                        nil
+                        nil))
+                (view/add-listener
+                 v "a1"
+                 (fn [res]
+                   (:= out (xtd/tree-get-data res))
+                   (return nil))
+                 nil
+                 nil)
+                (view/set-output v 1 nil nil nil nil)
+                out)))}}}
   (notify/wait-on :js
-    (var v (view/create-view
-    (fn:> [x] {:value x})
-    {}
-    [3]
-    {:value 0}))
-    (view/add-listener v "a1" (repl/>notify))
-    (view/set-output v 1 nil))
+   (var v (view/create-view
+   (fn:> [x] {:value x})
+   {}
+   [3]
+   {:value 0}))
+   (view/add-listener v "a1" (repl/>notify))
+   (view/set-output v 1 nil))
   => (contains-in
       {"type" "view.output",
        "meta" {"listener/id" "a1", "listener/type" "view"},
@@ -782,7 +781,6 @@
       "remote" [true {"value" 3}],
       "post" [false],}
 
-
   (!.lua
    (var v (view/create-view
             nil
@@ -852,7 +850,6 @@
       "pre" [false]
       "sync" [true {"value" 3}],
       "post" [false],}
-
 
   (!.lua
    (var v (view/create-view

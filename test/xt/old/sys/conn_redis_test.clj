@@ -7,7 +7,7 @@
 
 (l/script- :lua
   {:runtime :basic
-   :config  {:program :resty}
+   :config {:program :resty}
    :require [[xt.old.sys.conn-redis :as redis]
              [lua.nginx.driver-redis :as lua-driver]
              [xt.lang.common-repl :as repl]]})
@@ -32,7 +32,9 @@
 (fact "connects to a datasource"
 
   ;;
+
   ;; LUA
+
   ;;
 
   (!.lua
@@ -50,7 +52,9 @@
   => "hello"
 
   ;;
+
   ;; JS
+
   ;;
 
   (notify/wait-on :js
@@ -88,7 +92,7 @@
       (:= (!:G conn) (redis/connect {:constructor js-driver/connect-constructor
                                      :port 17001}
                                     (repl/<!))))
-
+  
     [(notify/wait-on :js
        (redis/exec conn "ping" [] (repl/<!)))
      (notify/wait-on :js
@@ -176,7 +180,6 @@
                      []
                      {})])
   => [1 0 nil nil 1 "hello"]
-
 
   (do
     (notify/wait-on :js

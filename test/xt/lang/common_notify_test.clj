@@ -38,10 +38,13 @@
 ^{:refer xt.lang.common-notify/notify-ceremony :added "4.0"}
 (fact "creates the ceremony in order to get the port and method type"
 
-  ^{:seedgen/base    {:lua     {:transform {:js :lua}}
-                      :python  {:transform {:js :python}}
-                      :r       {:transform {:js :r}}
-                      :dart    {:transform {:js :dart}}
+  ^{:seedgen/base    {:lua     {:transform  {:js :lua}}
+                      :scheme  {:transform  {:js :scheme}}
+                      :elisp   {:transform  {:js :elisp}}
+                      :python  {:transform  {:js :python}}
+                      :r       {:transform  {:js :r}}
+                      :php     {:transform  {:js :php}}
+                      :dart    {:transform  {:js :dart}}
                       :julia    {:transform {:js :julia}}}}
   (notify/notify-ceremony (assoc (l/rt :js)
                                  :type :basic))
@@ -98,7 +101,7 @@
   (notify/wait-on :lua
     (repl/notify 1))
   => 1
-  
+
   (notify/wait-on :python
     (repl/notify 1))
   => 1)

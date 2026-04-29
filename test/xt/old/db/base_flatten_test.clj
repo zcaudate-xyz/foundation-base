@@ -6,25 +6,25 @@
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-              [xt.old.db.base-flatten :as f]
-              [xt.old.db.base-schema :as sch]
-              [xt.old.db.sample-test :as sample]]})
+             [xt.old.db.base-flatten :as f]
+             [xt.old.db.base-schema :as sch]
+             [xt.old.db.sample-test :as sample]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-              [xt.old.db.base-flatten :as f]
-              [xt.old.db.base-schema :as sch]
-              [xt.old.db.sample-test :as sample]]})
+             [xt.old.db.base-flatten :as f]
+             [xt.old.db.base-schema :as sch]
+             [xt.old.db.sample-test :as sample]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-              [xt.old.db.base-flatten :as f]
-              [xt.old.db.base-schema :as sch]
-              [xt.old.db.sample-test :as sample]]})
+             [xt.old.db.base-flatten :as f]
+             [xt.old.db.base-schema :as sch]
+             [xt.old.db.sample-test :as sample]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -143,8 +143,6 @@
                        {}
                        {})
        (xt/x:get-key "table_map")))
-
-
   => +table-map-account+
 
   (!.py
@@ -495,6 +493,3 @@
   (./import)
   (./create-tests)
   )
-
-
-

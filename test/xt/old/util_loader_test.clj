@@ -14,7 +14,7 @@
 
 (l/script- :lua
   {:runtime :basic
-   :config  {:program :resty}
+   :config {:program :resty}
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
@@ -261,7 +261,6 @@
                               nil))
   => ["A" true]
 
-
   (notify/wait-on :js
     (var loader (loader/new-loader [(loader/new-task
                                      "A" [] []
@@ -274,7 +273,6 @@
                               nil
                               nil))
   => ["A" true]
-
 
   (notify/wait-on :lua
     (var loader (loader/new-loader [(loader/new-task
@@ -334,7 +332,6 @@
                           (repl/notify
                            (loader/list-completed loader))))))
   => #{"C" "B" "A"}
-
 
   ;; WITH SLEEP
 

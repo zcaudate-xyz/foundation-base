@@ -350,11 +350,11 @@
   (!.js
     (q/check-in-clause "a" [["a" "b"]]))
   => true
-  
+
   (!.lua
     (q/check-in-clause "a" [["a" "b"]]))
   => true
-  
+
   (!.py
     (q/check-in-clause "a" [["a" "b"]]))
   => true)

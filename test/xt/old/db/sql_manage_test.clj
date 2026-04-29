@@ -9,18 +9,18 @@
    :require [[xt.old.db.base-schema :as sch]
              [xt.old.db.base-flatten :as f]
              [xt.old.db.cache-util :as cache-util]
-              [xt.old.db.sql-raw :as raw]
-              [xt.old.db.sql-graph :as graph]
-              [xt.old.db.sql-util :as ut]
-              [xt.old.db.sql-manage :as manage]
-              [xt.old.db.sql-table :as table]
-              [xt.old.db.sample-test :as sample]
-              [xt.lang.spec-base :as xt]
-              [xt.lang.common-data :as xtd]
-              [xt.lang.common-string :as str]
-              [xt.lang.common-repl :as repl]
-              [xt.old.sys.conn-dbsql :as dbsql]
-              [js.lib.driver-sqlite :as js-sqlite]]})
+             [xt.old.db.sql-raw :as raw]
+             [xt.old.db.sql-graph :as graph]
+             [xt.old.db.sql-util :as ut]
+             [xt.old.db.sql-manage :as manage]
+             [xt.old.db.sql-table :as table]
+             [xt.old.db.sample-test :as sample]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-string :as str]
+             [xt.lang.common-repl :as repl]
+             [xt.old.sys.conn-dbsql :as dbsql]
+             [js.lib.driver-sqlite :as js-sqlite]]})
 
 (l/script- :lua
   {:runtime :basic
@@ -252,7 +252,6 @@
   => ["\"id\" text PRIMARY KEY"
       "\"id\" citext PRIMARY KEY"]
 
-
   (!.js
    [(manage/table-create-column sample/Schema
                                 (xtd/get-in sample/Schema
@@ -265,7 +264,6 @@
   => ["\"account_id\" text REFERENCES \"UserAccount\""
       "\"account_id\" uuid REFERENCES \"scratch-sample-db\".\"UserAccount\""]
 
-
   (!.lua
    [(manage/table-create-column sample/Schema
                                 (xtd/get-in sample/Schema
@@ -277,8 +275,6 @@
                                 (ut/postgres-opts sample/SchemaLookup))])
   => ["\"account_id\" text REFERENCES \"UserAccount\""
       "\"account_id\" uuid REFERENCES \"scratch-sample-db\".\"UserAccount\""]
-
-
 
   (!.py
    [(manage/table-create-column sample/Schema
@@ -414,7 +410,6 @@
    (manage/table-drop-all sample/Schema
                           sample/SchemaLookup
                           (ut/sqlite-opts nil)))
-
 
   (!.lua
    (manage/table-drop-all sample/Schema

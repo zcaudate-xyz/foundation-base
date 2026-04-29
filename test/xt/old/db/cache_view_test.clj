@@ -21,7 +21,7 @@
   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.old.db.cache-view/tree-base :added "4.0"}
-(fact  "creates a tree base"
+(fact "creates a tree base"
 
   (!.js
    (v/tree-base sample/Schema
@@ -74,7 +74,6 @@
                     []))
   => ["Currency" {"type" "fiat"} ["*/data"]]
 
-
   (!.js
    (v/tree-combined sample/Schema
                     (@! (pg/bind-view user/user-account-by-organisation))
@@ -110,7 +109,7 @@
   => ["UserAccount" {"id" "USER-0"} [["profile" ["*/standard"]] "nickname" "id"]])
 
 ^{:refer xt.old.db.cache-view/query-return-bulk :added "4.0"}
-(fact  "tree for query-return"
+(fact "tree for query-return"
 
   (!.js
    (v/query-return-bulk

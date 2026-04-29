@@ -21,6 +21,7 @@
                     :python {:skip true}
                     :lua {:skip true}}}
 (fact "runs a minimal xt.old.db sqlite flow on Dart"
+
   (if CANARY-DART
     [(!.dt
        (var conn (dbsql/connect {:constructor dart-sqlite/connect-constructor

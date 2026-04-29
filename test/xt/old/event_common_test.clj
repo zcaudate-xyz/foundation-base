@@ -10,22 +10,22 @@
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
-              [xt.old.event-common :as event]
-              [xt.lang.common-repl :as repl]]})
+             [xt.old.event-common :as event]
+             [xt.lang.common-repl :as repl]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
-              [xt.old.event-common :as event]
-              [xt.lang.common-repl :as repl]]})
+             [xt.old.event-common :as event]
+             [xt.lang.common-repl :as repl]]})
 
 (l/script- :python
   {:runtime :basic
-    :require [[xt.lang.common-lib :as k]
-               [xt.lang.common-data :as xtd]
-                [xt.old.event-common :as event]
-                [xt.lang.common-repl :as repl]]})
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+             [xt.old.event-common :as event]
+             [xt.lang.common-repl :as repl]]})
 
 (l/script- :dart
   {:runtime :twostep
@@ -144,7 +144,6 @@
        "listener/type" "custom"},
       "data" "hello"}
 
-
   (notify/wait-on :lua
     (var c (event/make-container
             (fn:> 1)
@@ -236,7 +235,6 @@
        "pred" nil,
        "meta" {"listener/id" "b2", "listener/type" "custom"}}
       ["a1" "c3"]]
-
 
   (!.lua
    (var c (event/make-container
@@ -529,7 +527,7 @@
    (event/add-keyed-listener
     c
     "key/common"
-
+  
     "b2"
     "custom"
     (fn:>)

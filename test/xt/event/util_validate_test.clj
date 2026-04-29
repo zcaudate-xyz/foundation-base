@@ -7,8 +7,8 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
-              [xt.lang.spec-promise :as spec-promise]
-              [xt.lang.common-repl :as repl]
+             [xt.lang.spec-promise :as spec-promise]
+             [xt.lang.common-repl :as repl]
              [xt.event.util-validate :as validate]]})
 
 (l/script- :python
@@ -33,6 +33,7 @@
 
 ^{:refer xt.event.util-validate/promise-wrap :added "4.1"}
 (fact "wraps raw values through the promise interface"
+
   (!.js
    (xt/x:is-function? validate/promise-wrap))
   => true
@@ -45,6 +46,7 @@
 
 ^{:refer xt.event.util-validate/validate-step :added "4.1"}
 (fact "validates a single guard and marks the field"
+
   (notify/wait-on :js
     (var data {:first "hello"})
     (var guards [["is-not-empty" {:message "Must not be empty"
@@ -59,6 +61,7 @@
 
 ^{:refer xt.event.util-validate/validate-field :added "4.1"}
 (fact "validates a field through ordered guards"
+
   (notify/wait-on :js
     (var data {:first "hello"})
     (var check-async
@@ -106,6 +109,7 @@
 
 ^{:refer xt.event.util-validate/validate-fields-loop :added "4.1"}
 (fact "walks fields through a single validation promise chain"
+
   (notify/wait-on :js
     (var data {:first "hello"
                :last "world"})
@@ -149,6 +153,7 @@
 
 ^{:refer xt.event.util-validate/validate-all :added "4.1"}
 (fact "validates all fields through a single promise chain"
+
   (notify/wait-on :js
     (var data {:first "hello"
                :last "world"})
@@ -198,6 +203,7 @@
 
 ^{:refer xt.event.util-validate/create-result :added "4.1"}
 (fact "creates a pending validation result"
+
   (!.js
    (validate/create-result {:first [] :last []}))
   => {"::" "validation.result"

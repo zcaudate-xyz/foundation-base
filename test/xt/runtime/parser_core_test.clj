@@ -32,7 +32,6 @@
          (== nil (core/read-string "  ; comment\n"))])
   => [[1 2] true])
 
-
 ^{:refer xt.runtime.parser-core/read :added "4.1"}
 (fact "TODO")
 

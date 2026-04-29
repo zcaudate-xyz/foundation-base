@@ -29,7 +29,6 @@
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-
 ^{:refer xt.old.event-animate/new-derived :added "4.0"}
 (fact "creates a new derived value"
 
@@ -191,7 +190,7 @@
           (var #{a b} e)
           (var #{c} b)
           (return {:style {:opacity (+ a c)}})))
-
+  
     (base-animate/listen-map
      mock/MOCK
      ref
@@ -209,7 +208,7 @@
           (var #{a b} e)
           (var #{c} b)
           (return {:style {:opacity (+ a c)}})))
-
+  
     (base-animate/listen-map
      mock/MOCK
      ref
@@ -325,9 +324,9 @@
       (mock/get-value indicator)
       (trigger-fn false)
       (mock/get-value indicator)])
-   => [0 {"running" false, "queued" []}
-       1 {"running" false, "queued" []}
-       0]
+  => [0 {"running" false, "queued" []}
+      1 {"running" false, "queued" []}
+      0]
 
   (!.py
    (var progress-fn (fn [_] (return nil)))
@@ -349,7 +348,7 @@
       0])
 
 ^{:refer xt.old.event-animate/make-linear-indicator :added "4.0"}
-(fact  "makes a linear indicator"
+(fact "makes a linear indicator"
 
   ^{:lang-exceptions {:dart {:expect [1
                                       {"running" false, "queued" [], "animation" nil}
@@ -363,7 +362,7 @@
            (:= (. prev ["current"])
                v)))
     (var progress-fn (fn [_] (return nil)))
-
+  
     (var t (base-animate/make-linear-indicator
             mock/MOCK
             1
@@ -379,7 +378,7 @@
      (mock/get-value indicator)
      (trigger-fn 8)
      (mock/get-value indicator)])
-   => [1 {"running" false, "queued" []} 3 {"running" false, "queued" []} 8]
+  => [1 {"running" false, "queued" []} 3 {"running" false, "queued" []} 8]
 
   (!.lua
     (var prev {:current 1})
@@ -388,7 +387,7 @@
            (:= (. prev ["current"])
                v)))
     (var progress-fn (fn [_] (return nil)))
-
+  
     (var t (base-animate/make-linear-indicator
             mock/MOCK
             1
@@ -404,7 +403,7 @@
      (mock/get-value indicator)
      (trigger-fn 8)
      (mock/get-value indicator)])
-   => [1 {"running" false, "queued" {}} 3 {"running" false, "queued" {}} 8]
+  => [1 {"running" false, "queued" {}} 3 {"running" false, "queued" {}} 8]
 
   (!.py
    (var prev {:current 1})
@@ -463,7 +462,7 @@
      (mock/get-value indicator)
      (trigger-fn 7)
      (mock/get-value indicator)])
-   => [1 {"running" false, "queued" []} 1 {"running" false, "queued" []} -13]
+  => [1 {"running" false, "queued" []} 1 {"running" false, "queued" []} -13]
 
   (!.lua
     (var prev {:current 1})
@@ -488,7 +487,7 @@
      (mock/get-value indicator)
      (trigger-fn 7)
      (mock/get-value indicator)])
-   => [1 {"running" false, "queued" {}} 1 {"running" false, "queued" {}} -13]
+  => [1 {"running" false, "queued" {}} 1 {"running" false, "queued" {}} -13]
 
   (!.py
    (var prev {:current 1})

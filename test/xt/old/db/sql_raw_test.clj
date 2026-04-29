@@ -35,7 +35,6 @@
   => ["DELETE FROM Currency WHERE id = 'XLM';"
       "DELETE FROM Currency WHERE id in ('XLM', 'USD');"]
 
-
   (!.lua
    [(raw/raw-delete "Currency"
                     {:id "XLM"}
@@ -45,7 +44,6 @@
                     {})])
   => ["DELETE FROM Currency WHERE id = 'XLM';"
       "DELETE FROM Currency WHERE id in ('XLM', 'USD');"]
-
 
   (!.py
    [(raw/raw-delete "Currency"
@@ -94,10 +92,10 @@
                    :type "crypto"}]
                  {}))
   => (prose/|
-   "INSERT INTO Currency"
-   " (id, name, type)"
-   " VALUES"
-   " ('XLM','XLM','crypto');")
+     "INSERT INTO Currency"
+     " (id, name, type)"
+     " VALUES"
+     " ('XLM','XLM','crypto');")
 
   (!.lua
    (raw/raw-insert "Currency"
@@ -107,10 +105,10 @@
                    :type "crypto"}]
                  {}))
   => (prose/|
-   "INSERT INTO Currency"
-   " (id, name, type)"
-   " VALUES"
-   " ('XLM','XLM','crypto');")
+     "INSERT INTO Currency"
+     " (id, name, type)"
+     " VALUES"
+     " ('XLM','XLM','crypto');")
 
   (!.py
    (raw/raw-insert "Currency"
@@ -120,13 +118,13 @@
                    :type "crypto"}]
                  {}))
   => (prose/|
-   "INSERT INTO Currency"
-   " (id, name, type)"
-   " VALUES"
-   " ('XLM','XLM','crypto');"))
+     "INSERT INTO Currency"
+     " (id, name, type)"
+     " VALUES"
+     " ('XLM','XLM','crypto');"))
 
 ^{:refer xt.old.db.sql-raw/raw-upsert :added "4.0"}
-(fact  "encodes an upsert query"
+(fact "encodes an upsert query"
 
   (!.js
    (raw/raw-upsert "Currency"
@@ -190,7 +188,7 @@
              "name=coalesce(\"excluded\".name,name),"
              "type=coalesce(\"excluded\".type,type)"
              "WHERE \"excluded\".time_updated < time_updated;"))]}
-(fact  "encodes an upsert query"
+(fact "encodes an upsert query"
 
   (!.js
    (raw/raw-upsert "Currency"
@@ -200,9 +198,7 @@
                      :name "XLM"
                      :type "crypto"}]
                    {:upsert-clause "\"excluded\".time_updated < time_updated"}))
-
   => +input+
-
 
   (!.lua
    (raw/raw-upsert "Currency"
@@ -264,7 +260,6 @@
                    ["id" "name" "type"]
                    {}))
   => "SELECT id, name, type\n  FROM Currency\n WHERE id = 'XLM';"
-
 
   (!.py
    (raw/raw-select "Currency"

@@ -95,7 +95,6 @@
         (sch/create-rev-keys sample/Schema "UserAccount")))
   => #{"organisations" "profile" "privileges" "organisation_accesses" "wallets" "notification"}
 
-
   (set (!.lua
         (sch/create-rev-keys sample/Schema "UserAccount")))
   => #{"organisations" "profile" "privileges" "organisation_accesses" "wallets" "notification"}
@@ -153,7 +152,6 @@
 
   (!.js
    (sch/create-all-keys sample/Schema "Wallet"))
-
   => +all-wallet+
 
   (!.lua
@@ -222,7 +220,6 @@
 (fact "get all keys"
 
   (!.js (sch/get-all-keys sample/Schema "Organisation"))
-
   => +all-org+
 
   (!.lua (sch/get-all-keys sample/Schema "Organisation"))
@@ -299,7 +296,6 @@
 
   (!.js (sch/table-columns sample/Schema "UserProfile"))
   => +out+
-
 
   (!.lua (sch/table-columns sample/Schema "UserProfile"))
   => +out+

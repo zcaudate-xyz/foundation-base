@@ -13,7 +13,15 @@
              [xt.cell.kernel.inner-mock :as inner-mock]]})
 
 (l/script- :js
-  {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-space :as rt :with [defsingleton.js]] [xt.cell :as cell] [xt.cell.kernel.base-link :as base-link] [xt.cell.kernel.inner-mock :as inner-mock] [js.core :as j]] :runtime :basic})
+  {:runtime :basic
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-space :as rt :with [defsingleton.js]]
+             [xt.cell :as cell]
+             [xt.cell.kernel.base-link :as base-link]
+             [xt.cell.kernel.inner-mock :as inner-mock]
+             [js.core :as j]]})
 
 (fact:global
  {:setup [(l/rt:restart)]

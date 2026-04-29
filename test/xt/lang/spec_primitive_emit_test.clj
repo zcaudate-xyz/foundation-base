@@ -5,6 +5,7 @@
   (:use code.test))
 
 (fact "lowers primitive pow to backend math helpers instead of raw `^`"
+
   [(boolean (re-find #"Math\.pow"
                      (l/emit-as :js ['(xt.lang.spec-primitive/pow 2 5)])))
    (boolean (re-find #"\*\*"

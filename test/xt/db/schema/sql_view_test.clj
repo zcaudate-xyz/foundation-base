@@ -781,7 +781,7 @@
                        {}
                        false)])
   => +out+
-  
+
   (!.lua
     [(v/query-combined sample/Schema
                        (@! +select+)

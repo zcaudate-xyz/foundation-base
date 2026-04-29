@@ -7,8 +7,8 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
-              [xt.lang.spec-promise :as spec-promise]
-              [xt.lang.common-repl :as repl]
+             [xt.lang.spec-promise :as spec-promise]
+             [xt.lang.common-repl :as repl]
              [xt.event.util-throttle :as throttle]]})
 
 (l/script- :python
@@ -33,6 +33,7 @@
 
 ^{:refer xt.event.util-throttle/throttle-create :added "4.1"}
 (fact "creates a throttle"
+
   (set
    (!.js
     (xt/x:obj-keys
@@ -43,6 +44,7 @@
 
 ^{:refer xt.event.util-throttle/throttle-run-async :added "4.1"}
 (fact "runs a throttled handler once"
+
   (notify/wait-on :js
     (var out [])
     (var handler
@@ -59,6 +61,7 @@
 
 ^{:refer xt.event.util-throttle/throttle-run :added "4.1"}
 (fact "queues a single rerun per id"
+
   (notify/wait-on :js
     (var out [])
     (var queued nil)
@@ -88,6 +91,7 @@
 
 ^{:refer xt.event.util-throttle/throttle-waiting :added "4.1"}
 (fact "returns the union of active and queued ids"
+
   (set
    (!.js
     (throttle/throttle-waiting
@@ -111,6 +115,7 @@
 
 ^{:refer xt.event.util-throttle/throttle-active :added "4.1"}
 (fact "reports active and waiting ids"
+
   (notify/wait-on :js
     (var instance)
     (var handler
@@ -133,6 +138,7 @@
 
 ^{:refer xt.event.util-throttle/throttle-queued :added "4.1"}
 (fact "returns only queued ids"
+
   (set
    (!.js
     (throttle/throttle-queued

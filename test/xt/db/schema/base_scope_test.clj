@@ -141,7 +141,7 @@
                      ["profile" [{:name "hello"}] ["*/default"]]]
                     {}))
   => +account+
-  
+
   (!.lua
     (scope/get-tree sample/Schema
                     "UserProfile"
@@ -487,7 +487,7 @@
                    (var [e cols] out)
                    (return [(. e ["ident"]) cols]))))
   => [["profile" [{} ["first_name" "last_name"]]]]
-  
+
   (!.lua
     (xtd/arr-map (scope/get-link-columns sample/Schema
                                          "UserAccount"

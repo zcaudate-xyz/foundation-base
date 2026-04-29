@@ -20,7 +20,6 @@
 (fact "creates a view template"
 
   (bind/tmpl-view '[currency-all sample-data/currency-all])
-
   => '(def.xt currency-all
         {:input [],
          :return "jsonb",
@@ -41,7 +40,6 @@
 
   (bind/view-list)
   => vector?)
-
 
 ^{:refer xt.old.db.gen-bind/route-map :added "4.0"}
 (fact "returns a map of routes")

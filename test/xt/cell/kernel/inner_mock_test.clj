@@ -5,7 +5,11 @@
 
 ^{:seedgen/root {:all true, :langs [:lua :python]}}
 (l/script- :js
-  {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.cell.kernel.inner-mock :as inner-mock] [xt.lang.common-repl :as repl]] :runtime :basic})
+  {:runtime :basic
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]
+             [xt.cell.kernel.inner-mock :as inner-mock]
+             [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup [(l/rt:restart)
@@ -52,6 +56,4 @@
   => {"body" {"done" true}
       "status" "ok"
       "op" "stream"
-      "signal" "@worker/::INIT"}
-
-    )
+      "signal" "@worker/::INIT"})

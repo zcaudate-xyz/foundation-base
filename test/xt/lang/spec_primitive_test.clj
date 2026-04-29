@@ -301,7 +301,7 @@
 
 ^{:refer xt.lang.spec-primitive/br* :added "4.1"}
 (fact "branches across control clauses"
-  
+
   (!.js
     ((fn []
        (br*
@@ -545,7 +545,6 @@
         (catch err
           (return err)))))
   => "boom")
-
 
 ^{:refer xt.lang.spec-primitive/xor :added "4.1"}
 (fact "computes logical xor"
@@ -909,7 +908,7 @@
        (return (+ x 1)))
      2))
   => 3
-  
+
   (!.lua
     ((fn [x]
        (return (+ x 1)))

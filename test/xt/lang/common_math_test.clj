@@ -237,7 +237,7 @@
 
 ^{:refer xt.lang.common-math/mod :added "4.1"}
 (fact "returns the modulo"
-      
+
   ^{:seedgen/base  {:all     {:expect [1 4]}}}
   (!.js
     [(xtm/mod 10 3)
@@ -553,7 +553,6 @@
     (xtm/clamp 0 10 7)
     (xtm/clamp 0 10 12)])
   => [0 7 10])
-
 
 (comment
   (s/seedgen-benchadd 'xt.lang.common-math {:lang [:r] :write true})

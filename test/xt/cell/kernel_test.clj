@@ -15,7 +15,16 @@
              [xt.cell.kernel :as cl]]})
 
 (l/script- :js
-  {:require [[xt.lang.spec-base :as xt] [xt.lang.common-lib :as k] [xt.old.event-view :as base-view] [xt.cell.kernel.base-impl :as impl-common] [xt.cell.kernel.base-link-local :as link-fn] [xt.cell.kernel.inner-impl :as inner-impl] [xt.cell.kernel.inner-mock :as inner-mock] [xt.cell.kernel :as cl] [xt.lang.common-repl :as repl]] :runtime :basic})
+  {:runtime :basic
+   :require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-lib :as k]
+             [xt.old.event-view :as base-view]
+             [xt.cell.kernel.base-impl :as impl-common]
+             [xt.cell.kernel.base-link-local :as link-fn]
+             [xt.cell.kernel.inner-impl :as inner-impl]
+             [xt.cell.kernel.inner-mock :as inner-mock]
+             [xt.cell.kernel :as cl]
+             [xt.lang.common-repl :as repl]]})
 
 (defn.xt reset-cell
   []
@@ -115,9 +124,7 @@
                  :action "@worker/ping.async"
                  :body [50]})
        (then (repl/>notify))))
-  => (contains ["pong" integer?])
-
-    )
+  => (contains ["pong" integer?]))
 
 ^{:refer xt.cell.kernel/fn-call-cell :added "4.1"
   :setup [(fact:global :setup)
@@ -232,9 +239,7 @@
         "post" [false]
         "main" [true ["HELLO" integer?]]
         "pre" [false]
-        "::" "view.run"}})
-
-    )
+        "::" "view.run"}}))
 
 ^{:refer xt.cell.kernel/view-val :added "4.1"
   :setup [(fact:global :setup)
@@ -315,9 +320,7 @@
   (notify/wait-on :js
     (. (cl/get-for ["hello" "echo"] [0])
        (then (repl/>notify))))
-  => "WORLD"
-
-                )
+  => "WORLD")
 
 ^{:refer xt.cell.kernel/add-listener :added "4.1"
   :setup [(fact:global :setup)
@@ -383,7 +386,6 @@
   (!.js
    (cl/remove-raw-callback "@/TEST"))
   => vector?)
-
 
 ^{:refer xt.cell.kernel/GD :added "4.1"
   :setup [(fact:global :setup)

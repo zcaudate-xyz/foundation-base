@@ -150,7 +150,7 @@
      (fn [value]
        (return (repl/notify [out value])))))
   => [["then" "finally"] 7]
-  
+
   (notify/wait-on :python
     (var out [])
     (spec-promise/x:promise-then

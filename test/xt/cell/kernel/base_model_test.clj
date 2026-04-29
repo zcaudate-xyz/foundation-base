@@ -17,7 +17,19 @@
              [xt.cell.kernel.inner-mock :as inner-mock]]})
 
 (l/script- :js
-  {:require [[xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.common-space :as rt :with [defsingleton.js]] [xt.old.event-view :as base-view] [xt.cell.kernel.base-link :as base-link] [xt.cell.kernel.base-link-local :as base-link-local] [xt.cell.kernel.base-model :as base-model] [xt.cell.kernel.base-impl :as base-impl] [xt.cell.kernel.inner-impl :as inner-impl] [xt.cell.kernel.inner-mock :as inner-mock] [xt.lang.common-repl :as repl] [js.core :as j]] :runtime :basic})
+  {:runtime :basic
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-space :as rt :with [defsingleton.js]]
+             [xt.old.event-view :as base-view]
+             [xt.cell.kernel.base-link :as base-link]
+             [xt.cell.kernel.base-link-local :as base-link-local]
+             [xt.cell.kernel.base-model :as base-model]
+             [xt.cell.kernel.base-impl :as base-impl]
+             [xt.cell.kernel.inner-impl :as inner-impl]
+             [xt.cell.kernel.inner-mock :as inner-mock]
+             [xt.lang.common-repl :as repl]
+             [js.core :as j]]})
 
 (fact:global
  {:setup [(do (l/rt:restart)
@@ -709,9 +721,7 @@
        "post" [false],
        "main" [true ["foo" integer?]],
        "pre" [false],
-       "::" "view.run"})
-
-    )
+       "::" "view.run"}))
 
 ^{:refer xt.cell.kernel.base-model/trigger-all :added "4.0"
   :setup [(fact:global :setup)
@@ -755,7 +765,6 @@
   (!.js
    (base-model/remove-raw-callback (-/CELL)))
   => vector?)
-
 
 ^{:refer xt.cell.kernel.base-model/throttle-entry-promise :added "4.1"}
 (fact "normalises legacy and map throttle entries to their promise"

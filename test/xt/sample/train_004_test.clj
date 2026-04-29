@@ -23,11 +23,6 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-
-;; EXAMPLE A --------------------
-;; (seedgen/langadd {:lang :python}) should generate
-
-;; BEFORE
 ^{:refer xt.lang.spec-base/example-a :added "4.1"}
 (fact "muliple checks are also allowed"
 
@@ -44,8 +39,6 @@
                 [1 2 3 4]))
   => 10)
 
-
-;; AFTER
 ^{:refer xt.lang.spec-base/example-a :added "4.1"}
 (fact "muliple checks are also allowed"
 
@@ -62,19 +55,12 @@
                 [1 2 3 4]))
   => 10
 
-
   (!.py
     (xt/x:apply (fn [a b c]
                   (return (+ a b c)))
                 [1 2 3]))
   => 6)
 
-
-
-;; EXAMPLE B --------------------
-;; (seedgen/langadd {:lang [:lua :python]}) should generate
-
-;; BEFORE
 ^{:refer xt.lang.spec-base/example-b :added "4.1"}
 (fact "forms can be suppressed"
 
@@ -91,8 +77,6 @@
                 [1 2 3 4]))
   => 10)
 
-
-;; AFTER
 ^{:refer xt.lang.spec-base/example-b :added "4.1"}
 (fact "forms can be suppressed"
 
@@ -120,18 +104,13 @@
                   (return (+ a b c d)))
                 [1 2 3 4]))
   => 10
-  
+
   (!.py
     (xt/x:apply (fn [a b c]
                   (return (+ a b c)))
                 [1 2 3]))
   => 6)
 
-
-;; EXAMPLE C --------------------
-;; (seedgen/langadd {:lang [:python :lua]}) should generate
-
-;; BEFORE
 ^{:refer xt.lang.spec-base/example-c :added "4.1"}
 (fact "order is important"
 
@@ -139,15 +118,12 @@
     (repl/notify 1))
   => 1)
 
-
-;; AFTER
 ^{:refer xt.lang.spec-base/example-c :added "4.1"}
 (fact "order is important"
 
   (notify/wait-on :js
     (repl/notify 1))
   => 1
-
 
   (notify/wait-on :python
     (repl/notify 1))
@@ -157,12 +133,6 @@
     (repl/notify 1))
   => 1)
 
-
-
-;; EXAMPLE D --------------------
-;; (seedgen/langadd {:lang [:lua :python]}) should generate
-
-;; BEFORE
 ^{:refer xt.lang.spec-base/example-d :added "4.1"}
 (fact "any form is allowed with :seedgen/base meta"
 
@@ -173,8 +143,6 @@
      (repl/notify 1))]
   => [1 1])
 
-
-;; AFTER
 ^{:refer xt.lang.spec-base/example-d :added "4.1"}
 (fact "any form is allowed with :seedgen/base meta"
 
@@ -191,20 +159,12 @@
      (repl/notify 1))]
   => [1 1]
 
-
   [(!.py 1)
    (inc 0)
    (notify/wait-on :python
      (repl/notify 1))]
   => [1 1])
 
-
-
-
-;; EXAMPLE E --------------------
-;; (seedgen/langadd {:lang [:lua :python]}) should generate
-
-;; BEFORE
 ^{:refer xt.lang.spec-base/example-e :added "4.1"}
 (fact "seed meta can be mixed and matched"
 
@@ -216,8 +176,6 @@
   (identity (!.js 2))
   => 2)
 
-
-;; AFTER
 ^{:refer xt.lang.spec-base/example-e :added "4.1"}
 (fact "seed meta can be mixed and matched"
 
@@ -238,12 +196,6 @@
   (identity (!.py 1))
   => 1)
 
-
-
-;; EXAMPLE F --------------------
-;; (seedgen/langadd {:lang [:lua :python]}) should generate
-
-;; BEFORE
 ^{:refer xt.lang.spec-base/example-f :added "4.1"}
 (fact "expect can be customised"
 
@@ -252,11 +204,8 @@
     (xt/x:offset 10))
   => 10)
 
-
-;; AFTER
 ^{:refer xt.lang.spec-base/example-f :added "4.1"}
 (fact "expect can be customised"
-
 
   ^{:seedgen/base    {:lua  {:expect 11}}}
   (!.js    
@@ -271,13 +220,6 @@
     (xt/x:offset 10))
   => python)
 
-
-
-
-;; EXAMPLE Fa --------------------
-;; (seedgen/langadd {:lang [:lua :python]}) should generate
-
-;; BEFORE
 ^{:refer xt.lang.spec-base/example-fa :added "4.1"}
 (fact "expect can be customised"
 
@@ -286,11 +228,8 @@
     (xt/x:offset 10))
   => 10)
 
-
-;; AFTER
 ^{:refer xt.lang.spec-base/example-fa :added "4.1"}
 (fact "expect can be customised"
-
 
   ^{:seedgen/base    {:lua  {:input (xt/x:offest
                                      9)}}}
@@ -307,13 +246,6 @@
     (xt/x:offset 10))
   => 10)
 
-
-
-
-;; EXAMPLE G --------------------
-;; (seedgen/langadd {:lang [:lua :python]}) should generate
-
-;; BEFORE
 ^{:refer xt.lang.spec-base/example-g :added "4.1"
   :setup [^{:seedgen/base      {:lua   {:input
                                         (!.lua
@@ -333,7 +265,6 @@
      (repl/notify 1))]
   => [1 1])
 
-;; AFTER
 ^{:refer xt.lang.spec-base/example-g :added "4.1"}
 (fact "any form is allowed with :seedgen/base meta"
 
@@ -349,7 +280,6 @@
    (notify/wait-on :lua
      (repl/notify 1))]
   => [1 1]
-
 
   [(!.py 1)
    (inc 0)

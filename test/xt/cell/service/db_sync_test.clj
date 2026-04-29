@@ -4,7 +4,11 @@
 
 ^{:seedgen/root {:all true, :langs [:lua :python]}}
 (l/script- :js
-  {:require [[xt.cell.service.db-sync :as db-sync] [xt.old.db :as xdb] [xt.lang.spec-base :as xt] [xt.lang.common-lib :as k]] :runtime :basic})
+  {:runtime :basic
+   :require [[xt.cell.service.db-sync :as db-sync]
+             [xt.old.db :as xdb]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-lib :as k]]})
 
 (fact:global
  {:setup [(l/rt:restart)]

@@ -9,20 +9,20 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-data :as xtd]
-              [xt.old.db.base-view :as v]
-              [xt.old.db.base-util :as ut]]})
+             [xt.old.db.base-view :as v]
+             [xt.old.db.base-util :as ut]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.common-data :as xtd]
-              [xt.old.db.base-view :as v]
-              [xt.old.db.base-util :as ut]]})
+             [xt.old.db.base-view :as v]
+             [xt.old.db.base-util :as ut]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.lang.common-data :as xtd]
-              [xt.old.db.base-view :as v]
-              [xt.old.db.base-util :as ut]]})
+             [xt.old.db.base-view :as v]
+             [xt.old.db.base-util :as ut]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
