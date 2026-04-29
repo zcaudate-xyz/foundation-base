@@ -14,6 +14,7 @@
 
 ^{:refer xt.event.base-box/make-box :added "4.1"}
 (fact "creates an explicit event box"
+
   (!.js
    (var b (box/make-box (fn:> {:a 1})))
    [(. b ["::"])
@@ -23,6 +24,7 @@
 
 ^{:refer xt.event.base-box/check-event :added "4.1"}
 (fact "checks path matches"
+
   (!.js
    [(box/check-event {:path ["a" "b"]} [])
     (box/check-event {:path ["a" "b"]} ["a"])
@@ -32,6 +34,7 @@
 
 ^{:refer xt.event.base-box/add-listener :added "4.1"}
 (fact "triggers listeners for matching paths"
+
   (notify/wait-on :js
     (var b (box/make-box (fn:> {:a {:b 2}})))
     (box/add-listener b
@@ -55,6 +58,7 @@
 
 ^{:refer xt.event.base-box/set-data :added "4.1"}
 (fact "updates and resets data"
+
   (!.js
    (var b (box/make-box (fn:> {:a {:b 2}})))
    [(box/set-data b "c" 3)
@@ -75,6 +79,7 @@
 
 ^{:refer xt.event.base-box/merge-data :added "4.1"}
 (fact "merges and appends data"
+
   (!.js
    (var b (box/make-box (fn:> {:a 1 :b []})))
    (box/merge-data b [] {:c 3})

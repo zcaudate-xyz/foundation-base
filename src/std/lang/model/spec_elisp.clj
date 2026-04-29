@@ -3,6 +3,7 @@
             [std.lang.base.book :as book]
             [std.lang.base.grammar :as grammar]
             [std.lang.base.script :as script]
+            [std.lang.model.spec-xtalk]
             [std.lang.model.spec-xtalk.fn-elisp :as fn]
             [std.lib.collection :as collection]))
 
@@ -14,8 +15,6 @@
 
 (def +reserved+
   (grammar/to-reserved +features+))
-
-(declare elisp-expand)
 
 (defn elisp-expand
   [form]
@@ -180,7 +179,7 @@
       (emit-elisp-form)))
 
 (def +grammar+
-  (grammar/grammar :el
+  (grammar/grammar :elisp
     +reserved+
     {:emit #'emit-elisp}))
 

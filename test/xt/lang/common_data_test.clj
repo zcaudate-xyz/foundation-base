@@ -712,11 +712,29 @@
   (!.js (xtd/obj-assign {:a 1} {:b 2}))
   => {"a" 1, "b" 2}
 
+  (!.js
+   (var out {})
+   [(xtd/obj-assign out {:a 1})
+    out])
+  => [{"a" 1} {"a" 1}]
+
   (!.lua (xtd/obj-assign {:a 1} {:b 2}))
   => {"a" 1, "b" 2}
 
+  (!.lua
+   (var out {})
+   [(xtd/obj-assign out {:a 1})
+    out])
+  => [{"a" 1} {"a" 1}]
+
   (!.py (xtd/obj-assign {:a 1} {:b 2}))
-  => {"a" 1, "b" 2})
+  => {"a" 1, "b" 2}
+
+  (!.py
+   (var out {})
+   [(xtd/obj-assign out {:a 1})
+    out])
+  => [{"a" 1} {"a" 1}])
 
 ^{:refer xt.lang.common-data/obj-assign-nested :added "4.1"}
 (fact "merges objects at a nesting level"
@@ -724,11 +742,29 @@
   (!.js (xtd/obj-assign-nested {:a {:b 1}} {:a {:c 2}}))
   => {"a" {"b" 1, "c" 2}}
 
+  (!.js
+   (var out {})
+   [(xtd/obj-assign-nested out {:a {:c 2}})
+    out])
+  => [{"a" {"c" 2}} {"a" {"c" 2}}]
+
   (!.lua (xtd/obj-assign-nested {:a {:b 1}} {:a {:c 2}}))
   => {"a" {"b" 1, "c" 2}}
 
+  (!.lua
+   (var out {})
+   [(xtd/obj-assign-nested out {:a {:c 2}})
+    out])
+  => [{"a" {"c" 2}} {"a" {"c" 2}}]
+
   (!.py (xtd/obj-assign-nested {:a {:b 1}} {:a {:c 2}}))
-  => {"a" {"b" 1, "c" 2}})
+  => {"a" {"b" 1, "c" 2}}
+
+  (!.py
+   (var out {})
+   [(xtd/obj-assign-nested out {:a {:c 2}})
+    out])
+  => [{"a" {"c" 2}} {"a" {"c" 2}}])
 
 ^{:refer xt.lang.common-data/obj-assign-with :added "4.1"}
 (fact "merges second into first given a function"

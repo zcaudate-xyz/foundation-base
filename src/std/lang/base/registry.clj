@@ -51,6 +51,12 @@
          [:python :remote-port]        'rt.basic.impl.process-python
          [:python :remote-ws]          'rt.basic.impl.process-python
 
+         [:scheme :oneshot]            'rt.basic.impl.process-scheme
+         [:scheme :basic]              'rt.basic.impl.process-scheme
+
+         [:elisp  :oneshot]            'rt.basic.impl.process-elisp
+         [:elisp  :basic]              'rt.basic.impl.process-elisp
+
          [:ruby   :oneshot]            'rt.basic.impl.process-ruby
          [:ruby   :basic]              'rt.basic.impl.process-ruby
 
@@ -119,6 +125,9 @@
                                         :book '+book+
                                         :parent :lua}
          [:python   :default]          {:ns 'std.lang.model.spec-python
+                                        :book '+book+
+                                        :parent :xtalk}
+         [:elisp    :default]          {:ns 'std.lang.model.spec-elisp
                                         :book '+book+
                                         :parent :xtalk}
          [:scheme   :default]          {:ns 'std.lang.model.spec-scheme

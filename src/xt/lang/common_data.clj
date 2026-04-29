@@ -438,7 +438,8 @@
   "merges key value pairs from into another"
   {:added "4.0"}
   [obj m]
-  (:= obj (or obj {}))
+  (when (xt/x:nil? obj)
+    (:= obj {}))
   (if (xt/x:not-nil? m)
     (xt/for:object [[k v] m]
       (xt/x:set-key obj k v)))
@@ -448,7 +449,8 @@
   "merges objects at a nesting level"
   {:added "4.0"}
   ([obj m]
-   (:= obj (or obj {}))
+   (when (xt/x:nil? obj)
+     (:= obj {}))
    (when (xt/x:not-nil? m)
      (xt/for:object [[k mv] m]
        (var v (xt/x:get-key obj k))
