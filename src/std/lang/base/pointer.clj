@@ -113,6 +113,30 @@
   ([ptr tag]
    (vec (cons tag [(ut/sym-full ptr) (:section ptr)]))))
 
+(defn free-form
+  "normalizes free-pointer body forms into a canonical pointer form"
+  {:added "4.1"}
+  [body]
+  (let [forms (if (vector? body) body (vec body))]
+    (case (count forms)
+      0 '(do)
+      1 (first forms)
+      (apply list 'do forms))))
+
+(defn free-form-body
+  "returns the body forms for a canonical free-pointer form"
+  {:added "4.1"}
+  [form]
+  (cond (nil? form)
+        []
+
+        (and (collection/form? form)
+             (= 'do (first form)))
+        (rest form)
+
+        :else
+        [form]))
+
 (defn ptr-deref
   "gets the entry or the free pointer data"
   {:added "4.0"}
@@ -204,11 +228,14 @@
   [ptr args meta]
   (let [meta (ptr-invoke-meta ptr meta)]
     (binding [impl/*print-form* (:input-form *print*)]
-      (cond (:id ptr)
+      (cond (:form ptr)
+            (impl/emit-str (:form ptr) meta)
+
+            (:id ptr)
             (let [entry (-> (snap/get-book (:snapshot meta)
                                            :lang)
-                            
-                            (book/get-base-entry (:module ptr)
+                             
+                             (book/get-base-entry (:module ptr)
                                                  (:id ptr)
                                                  (:section ptr)))]
               (if (= :defrun (:op-key entry))

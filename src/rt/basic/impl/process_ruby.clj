@@ -5,8 +5,6 @@
              [rt.basic.type-oneshot :as oneshot]
              [std.lang.base.impl :as impl]
              [std.lang.base.runtime :as rt]
-             [std.lang.model-annex.spec-ruby :as spec]
-             [std.lib.collection :as collection]
              [xt.lang.common-lib :as lib]))
 
 (def +ruby-init+
@@ -35,37 +33,14 @@
 (defn normalize-forms
   "normalizes runtime input into a flat sequence of Ruby statements."
   {:added "4.1"}
-  [input {:keys [bulk]}]
-  (let [forms (if bulk input [input])]
-    (if (and (= 1 (count forms))
-             (collection/form? (first forms))
-             (= 'do (ffirst forms)))
-      (rest (first forms))
-      forms)))
-
-(defn mark-inline-defs
-  "marks inline `defn` forms as inner so Ruby does not namespace-qualify
-   helper definitions created within a runtime eval body."
-  {:added "4.1"}
-  [forms]
-  (map (fn [form]
-         (if (and (collection/form? form)
-                  (= 'defn (first form))
-                  (symbol? (second form)))
-           (apply list 'defn
-                  (with-meta (second form)
-                    (assoc (meta (second form)) :inner true))
-                  (drop 2 form))
-           form))
-       forms))
+  [input mopts]
+  (rt/normalize-body-forms input mopts))
 
 (defn default-body-transform
   "standard ruby transforms"
   {:added "4.0"}
   [input mopts]
   (-> (normalize-forms input mopts)
-      (spec/rewrite-callable-forms)
-      (mark-inline-defs)
       (default-body-wrap)))
 
 (def ^{:arglists '([body])}

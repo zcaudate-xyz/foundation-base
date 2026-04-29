@@ -328,7 +328,23 @@
   => "1\n2\n3"
 
   (macro/intern-!-fn :js [1 2 3] {})
-  => "1;\n2;\n3;")
+  => "1;\n2;\n3;"
+
+  (with-redefs [std.lib.context.pointer/rt-invoke-ptr (fn [_ ptr args]
+                                                        [(select-keys ptr [:lang :form])
+                                                         args])]
+    (macro/intern-!-fn :lua [1 2 3] {}))
+  => [{:lang :lua
+       :form '(do 1 2 3)}
+      []]
+
+  (with-redefs [std.lib.context.pointer/rt-invoke-ptr (fn [_ ptr args]
+                                                        [(select-keys ptr [:lang :form])
+                                                         args])]
+    (macro/intern-!-fn :lua ['(+ 1 2)] {}))
+  => [{:lang :lua
+       :form '(+ 1 2)}
+      []])
 
 ^{:refer std.lang.base.script-macro/intern-! :added "4.0"}
 (fact "interns a macro for free evalutation"

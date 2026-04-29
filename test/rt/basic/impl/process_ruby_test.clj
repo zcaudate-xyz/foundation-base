@@ -59,10 +59,25 @@
 (fact "TODO")
 
 ^{:refer rt.basic.impl.process-ruby/normalize-forms :added "4.1"}
-(fact "TODO")
+(fact "normalizes a top-level do body"
+  (normalize-forms '(do (defn add-10 [x] (return (+ x 10)))
+                        (add-10 5))
+                   {})
+  => '((defn add-10 [x] (return (+ x 10)))
+       (add-10 5))
+
+  (normalize-forms '[1 2 3] {:bulk true})
+  => '[1 2 3])
 
 ^{:refer rt.basic.impl.process-ruby/mark-inline-defs :added "4.1"}
-(fact "TODO")
+(fact "marks inline defs as inner"
+  (-> (mark-inline-defs '((defn add-10 [x] (return (+ x 10)))
+                          (add-10 5)))
+      first
+      second
+      meta
+      :inner)
+  => true)
 
 ^{:refer rt.basic.impl.process-ruby/default-body-transform :added "4.1"}
 (fact "applies ruby return transform"
@@ -70,6 +85,9 @@
   => '(do (:= OUT [1 2 3]))
 
   (default-body-transform '[1 2 3] {:bulk true})
+  => '(do 1 2 (:= OUT 3))
+
+  (default-body-transform '(do 1 2 3) {})
   => '(do 1 2 (:= OUT 3)))
 
 (comment

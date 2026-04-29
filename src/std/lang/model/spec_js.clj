@@ -12,6 +12,7 @@
             [std.lang.base.grammar-spec :as spec]
             [std.lang.base.script :as script]
             [std.lang.base.util :as ut]
+            [std.lang.model.spec-js.rewrite :as rewrite]
             [std.lang.model.spec-js.jsx :as jsx]
             [std.lang.model.spec-js.meta :as meta]
             [std.lang.model.spec-js.qml :as qml]
@@ -236,14 +237,15 @@
                    :regex     {:custom #'js-regex}
                    :string    {}
                    :symbol    {:global #'js-symbol-global}}
-        :block    {:for       {:parameter {:sep ";"}}}
-        :data     {:vector    {:custom #'js-vector}
-                   :set       {:custom #'js-set}
-                   :map       {:custom #'js-map}
-                   :map-entry {:key-fn #'js-map-key}}
-        :function {:defgen    {:raw "function*"}
-                   :fn.inner  {:raw ""}}
-        :define   {:defglobal {:raw ""}
+         :block    {:for       {:parameter {:sep ";"}}}
+         :data     {:vector    {:custom #'js-vector}
+                    :set       {:custom #'js-set}
+                    :map       {:custom #'js-map}
+                    :map-entry {:key-fn #'js-map-key}}
+         :rewrite  {:staging [#'rewrite/js-rewrite-stage]}
+         :function {:defgen    {:raw "function*"}
+                    :fn.inner  {:raw ""}}
+         :define   {:defglobal {:raw ""}
                    :def       {:raw "var"}
                    :declare   {:raw "var"}}
         :xtalk    {:notify    {:custom true}}}
