@@ -4,7 +4,7 @@
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-             [xt.old.event-common :as event-common]]})
+             [xt.event.base-listener :as event-common]]})
 
 (defspec.xt BoxPath
   [:xt/array :xt/any])

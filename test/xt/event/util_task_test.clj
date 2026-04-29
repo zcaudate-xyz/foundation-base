@@ -54,7 +54,7 @@
        "A" [] []
        {:load-fn (fn []
                    (return "A"))}))
-     repl/notify))
+     (repl/>notify)))
   => "A"
 
   (notify/wait-on :js
@@ -68,7 +68,7 @@
                     (return (== "B" res)))
         :load-fn (fn []
                    (return "A"))}))
-     repl/notify))
+     (repl/>notify)))
   => "B")
 
 ^{:refer xt.event.util-task/new-loader :added "4.1"}
@@ -210,7 +210,7 @@
   (notify/wait-on :js
     (spec-promise/x:promise-then
      (loader/promise-wrap "A")
-     repl/notify))
+     (repl/>notify)))
   => "A"
 
   (notify/wait-on :js
@@ -219,7 +219,7 @@
       (spec-promise/x:promise
        (fn []
          (return "B"))))
-     repl/notify))
+     (repl/>notify)))
   => "B")
 
 ^{:refer xt.event.util-task/task-unload :added "4.1"}
@@ -232,7 +232,7 @@
        {:get-fn (fn [] (return "loaded"))
         :check-fn (fn [res] (return (== res "loaded")))
         :unload-fn (fn [] (return "gone"))}))
-     repl/notify))
+     (repl/>notify)))
   => true
 
   (notify/wait-on :js
@@ -243,7 +243,7 @@
        {:get-fn (fn [] (return nil))
         :check-fn (fn [res] (return (== res "loaded")))
         :unload-fn (fn [] (return "gone"))}))
-     repl/notify))
+     (repl/>notify)))
   => false)
 
 ^{:refer xt.event.util-task/new-loader-blank :added "4.1"}

@@ -1,19 +1,20 @@
 (ns std.lang.model-annex.spec-ruby
   (:require [clojure.string]
-             [std.lang.base.book :as book]
-             [std.lang.base.emit :as emit]
-             [std.lang.base.emit-common :as common]
+              [std.lang.base.book :as book]
+              [std.lang.base.emit :as emit]
+              [std.lang.base.emit-common :as common]
              [std.lang.base.emit-helper :as helper]
              [std.lang.base.preprocess-base :as preprocess-base]
              [std.lang.base.emit-top-level :as top]
              [std.lang.base.grammar :as grammar]
-             [std.lang.base.script :as script]
-             [std.lang.base.util :as ut]
-             [std.lang.model.spec-xtalk]
-             [std.lang.model-annex.spec-ruby.rewrite :as rewrite]
-             [std.lang.model-annex.spec-xtalk.fn-ruby :as fn]
-             [std.lib.collection :as collection]
-             [std.lib.template :as template]))
+              [std.lang.base.script :as script]
+              [std.lang.base.util :as ut]
+              [std.lang.model.spec-xtalk]
+              [std.lang.model-annex.spec-ruby.rewrite :as rewrite]
+              [std.lang.model-annex.spec-xtalk.fn-ruby :as fn]
+              [std.lib.collection :as collection]
+              [std.lib.foundation :as f]
+              [std.lib.template :as template]))
 
 (defn ruby-symbol
   "emit ruby symbol
@@ -75,17 +76,17 @@
 (defn ruby-map
   "emit ruby hash
    (l/emit-as :ruby '[{:a 1 :b 2}])
-     => \"{\\\"a\\\" => 1, \\\"b\\\" => 2}\""
+      => \"{\\\"a\\\" => 1, \\\"b\\\" => 2}\""
   {:added "4.1"}
   [m grammar mopts]
   (let [entries (map (fn [[k v]]
-                       (str (common/*emit-fn* (if (keyword? k)
-                                                (name k)
-                                                k)
-                                              grammar mopts)
-                              " => "
-                              (common/*emit-fn* v grammar mopts)))
-                       m)]
+                        (str (common/*emit-fn* (if (keyword? k)
+                                                 (f/strn k)
+                                                 k)
+                                               grammar mopts)
+                               " => "
+                               (common/*emit-fn* v grammar mopts)))
+                        m)]
     (str "{" (clojure.string/join ", " entries) "}")))
 
 (defn ruby-emit-args

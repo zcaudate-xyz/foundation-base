@@ -83,7 +83,7 @@
   (notify/wait-on :js
     (spec-promise/x:promise-then
      (decorate/promise-wrap 42)
-     repl/notify))
+     (repl/>notify)))
   => 42)
 
 ^{:refer xt.event.util-decorate/new-handle :added "4.1"}
@@ -116,7 +116,7 @@
           {:delay 10}))
     (spec-promise/x:promise-then
      (decorate/run-handle handle [] nil)
-     repl/notify))
+     (repl/>notify)))
   => (contains {"id" "id-0"
                 "status" "success"
                 "value" 1

@@ -53,11 +53,10 @@
   "normalises a value into a host promise"
   {:added "4.1"}
   [value]
-  (return (:? (spec-promise/x:promise-native? value)
-              value
-              (spec-promise/x:promise
-               (fn []
-                 (return value))))))
+  (return
+   (spec-promise/x:promise
+    (fn []
+      (return value)))))
 
 (defn.xt new-task
   "creates a new task"
@@ -254,7 +253,7 @@
          (when (== 0 (xt/x:len ids))
            (return (-/promise-wrap out)))
          (var id (xt/x:first ids))
-         (var rest (xt/x:arr-slice ids 1))
+          (var rest (xt/x:arr-slice ids 1 (xt/x:len ids)))
          (when (not= true (xt/x:get-key completed id))
            (return (unload-loop rest out)))
          (xt/x:del-key completed id)
