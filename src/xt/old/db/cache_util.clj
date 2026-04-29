@@ -3,7 +3,8 @@
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-data :as xtd]]})
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-tree :as xtt]]})
 
 (defn.xt has-entry
   "checks if entry exists"
@@ -95,7 +96,7 @@
         (return record)
 
         :else
-        (return (xtd/tree-diff-nested (xt/x:get-key curr "record")
+        (return (xtt/tree-diff-nested (xt/x:get-key curr "record")
                                       record))))
 
 (defn.xt has-changed-single

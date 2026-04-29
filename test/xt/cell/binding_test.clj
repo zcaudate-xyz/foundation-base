@@ -2,12 +2,15 @@
   (:require [std.lang :as l])
   (:use code.test))
 
-^{:seedgen/root {:all true}}
+^{:seedgen/root {:all true, :langs [:lua :python]}}
 (l/script- :js
-  {:runtime :basic
-   :require [[xt.cell.binding :as binding]
-             [xt.lang.spec-base :as xt]
-             [xt.lang.common-data :as xtd]]})
+  {:require [[xt.cell.binding :as binding] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]] :runtime :basic})
+
+(l/script- :lua
+  {:require [[xt.cell.binding :as binding] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]] :runtime :basic})
+
+(l/script- :python
+  {:require [[xt.cell.binding :as binding] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]] :runtime :basic})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -50,12 +53,94 @@
        {"status" "error"
         "tag" "xt.cell.binding/db-not-found"
         "data" {"section" "query"
+                "db" "missing"}}]]
+
+  (!.lua
+   [(binding/resolve-section
+     (@! +service+)
+     {"query" {"db" "local-cache"
+               "table" "Order"}}
+     "query"
+     {"model-id" "orders"
+      "view-id" "list"})
+    (binding/resolve-section
+     (@! +service+)
+     {"query" {"db" "missing"}}
+     "query"
+     {})])
+  => [[true
+       {"db" {"kind" "cache"}
+        "table" "Order"}]
+      [false
+       {"status" "error"
+        "tag" "xt.cell.binding/db-not-found"
+        "data" {"section" "query"
+                "db" "missing"}}]]
+
+  (!.py
+   [(binding/resolve-section
+     (@! +service+)
+     {"query" {"db" "local-cache"
+               "table" "Order"}}
+     "query"
+     {"model-id" "orders"
+      "view-id" "list"})
+    (binding/resolve-section
+     (@! +service+)
+     {"query" {"db" "missing"}}
+     "query"
+     {})])
+  => [[true
+       {"db" {"kind" "cache"}
+        "table" "Order"}]
+      [false
+       {"status" "error"
+        "tag" "xt.cell.binding/db-not-found"
+        "data" {"section" "query"
                 "db" "missing"}}]])
 
 ^{:refer xt.cell.binding/prepare-view :added "4.1"}
 (fact "prepares a view descriptor with resolved service references"
 
   (!.js
+   (binding/prepare-view
+    (@! +service+)
+    "orders"
+    "list"
+    (xtd/get-in (@! +bindings+) ["orders" "list"])))
+  => [true
+      {"model_id" "orders"
+       "view_id" "list"
+       "query" {"db" {"kind" "cache"}
+                "table" "Order"}
+       "remote" {"db" {"kind" "remote"}
+                 "target" "server-rpc"}
+       "sync" nil
+       "stream" nil
+       "resolve" {"policy" "replace"}
+       "deps" [["accounts" "current"]]
+       "options" {}}]
+
+  (!.lua
+   (binding/prepare-view
+    (@! +service+)
+    "orders"
+    "list"
+    (xtd/get-in (@! +bindings+) ["orders" "list"])))
+  => [true
+      {"model_id" "orders"
+       "view_id" "list"
+       "query" {"db" {"kind" "cache"}
+                "table" "Order"}
+       "remote" {"db" {"kind" "remote"}
+                 "target" "server-rpc"}
+       "sync" nil
+       "stream" nil
+       "resolve" {"policy" "replace"}
+       "deps" [["accounts" "current"]]
+       "options" {}}]
+
+  (!.py
    (binding/prepare-view
     (@! +service+)
     "orders"
@@ -88,12 +173,60 @@
                 "db_kind" (xtd/get-in prepared ["query" "db" "kind"])}))))
   => [true
       {"list" {"path" ["orders" "list"]
+               "db_kind" "cache"}}]
+
+  (!.lua
+   (binding/compile-model
+    (@! +service+)
+    "orders"
+     (xt/x:get-key (@! +bindings+) "orders")
+     (fn [prepared]
+       (return {"path" [(xt/x:get-key prepared "model_id")
+                        (xt/x:get-key prepared "view_id")]
+                "db_kind" (xtd/get-in prepared ["query" "db" "kind"])}))))
+  => [true
+      {"list" {"path" ["orders" "list"]
+               "db_kind" "cache"}}]
+
+  (!.py
+   (binding/compile-model
+    (@! +service+)
+    "orders"
+     (xt/x:get-key (@! +bindings+) "orders")
+     (fn [prepared]
+       (return {"path" [(xt/x:get-key prepared "model_id")
+                        (xt/x:get-key prepared "view_id")]
+                "db_kind" (xtd/get-in prepared ["query" "db" "kind"])}))))
+  => [true
+      {"list" {"path" ["orders" "list"]
                "db_kind" "cache"}}])
 
 ^{:refer xt.cell.binding/compile-bindings :added "4.1"}
 (fact "compiles all models with a provided compiler"
 
   (!.js
+   (binding/compile-bindings
+    (@! +service+)
+     (@! +bindings+)
+     (fn [prepared]
+       (return {"path" [(xt/x:get-key prepared "model_id")
+                        (xt/x:get-key prepared "view_id")]}))))
+  => [true
+      {"orders"
+       {"list" {"path" ["orders" "list"]}}}]
+
+  (!.lua
+   (binding/compile-bindings
+    (@! +service+)
+     (@! +bindings+)
+     (fn [prepared]
+       (return {"path" [(xt/x:get-key prepared "model_id")
+                        (xt/x:get-key prepared "view_id")]}))))
+  => [true
+      {"orders"
+       {"list" {"path" ["orders" "list"]}}}]
+
+  (!.py
    (binding/compile-bindings
     (@! +service+)
      (@! +bindings+)

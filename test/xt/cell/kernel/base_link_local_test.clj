@@ -3,21 +3,27 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-^{:seedgen/root {:all true}}
-(l/script- :js
-  {:runtime :basic
-   :require [[xt.lang.common-lib :as k]
-             [xt.lang.common-repl :as repl]
-             [js.core :as j]
+^{:seedgen/root {:all true, :langs [:lua :python]}}
+(l/script- :xtalk
+  {:require [[xt.lang.common-lib :as k]
              [xt.cell.kernel.base-link :as base-link]
              [xt.cell.kernel.base-link-local :as base-link-local]]})
+
+(l/script- :js
+  {:require [[xt.lang.common-lib :as k] [xt.cell.kernel.base-link :as base-link] [xt.cell.kernel.base-link-local :as base-link-local] [xt.lang.common-repl :as repl] [js.core :as j]] :runtime :basic})
+
+(l/script- :lua
+  {:require [[xt.lang.common-lib :as k] [xt.cell.kernel.base-link :as base-link] [xt.cell.kernel.base-link-local :as base-link-local] [xt.lang.common-repl :as repl]] :runtime :basic})
+
+(l/script- :python
+  {:require [[xt.lang.common-lib :as k] [xt.cell.kernel.base-link :as base-link] [xt.cell.kernel.base-link-local :as base-link-local] [xt.lang.common-repl :as repl]] :runtime :basic})
 
 (fact:global
   {:setup    [(l/rt:restart)
               (l/rt:scaffold-imports :js)]
    :teardown [(l/rt:stop)]})
 
-(defn.js make-link
+(defn.xt make-link
   [handler]
   (return
    (base-link/link-create
@@ -32,6 +38,44 @@
 (fact "performs trigger calls"
 
   (notify/wait-on :js
+    (var link
+         (-/make-link
+          (fn [listener input]
+            (listener {"op" "stream"
+                       "signal" "hello"
+                       "status" "ok"
+                       "body" "hello"})
+            (listener {"op" "call"
+                       "id" input.id
+                       "status" "ok"
+                       "body" nil}))))
+    (base-link/add-callback link "test" "hello" (repl/>notify))
+    (base-link-local/trigger link "stream" "hello" "ok" "hello"))
+  => {"body" "hello"
+      "status" "ok"
+      "op" "stream"
+      "signal" "hello"}
+
+  (notify/wait-on :lua
+    (var link
+         (-/make-link
+          (fn [listener input]
+            (listener {"op" "stream"
+                       "signal" "hello"
+                       "status" "ok"
+                       "body" "hello"})
+            (listener {"op" "call"
+                       "id" input.id
+                       "status" "ok"
+                       "body" nil}))))
+    (base-link/add-callback link "test" "hello" (repl/>notify))
+    (base-link-local/trigger link "stream" "hello" "ok" "hello"))
+  => {"body" "hello"
+      "status" "ok"
+      "op" "stream"
+      "signal" "hello"}
+
+  (notify/wait-on :python
     (var link
          (-/make-link
           (fn [listener input]
@@ -71,12 +115,76 @@
   => {"body" "hello"
       "status" "ok"
       "op" "stream"
+      "signal" "hello"}
+
+  (notify/wait-on :lua
+    (var link
+         (-/make-link
+          (fn [listener input]
+            (j/future-delayed [10]
+              (listener {"op" "stream"
+                         "signal" "hello"
+                         "status" "ok"
+                         "body" "hello"})
+              (listener {"op" "call"
+                         "id" input.id
+                         "status" "ok"
+                         "body" nil})))))
+    (base-link/add-callback link "test" "hello" (repl/>notify))
+    (base-link-local/trigger-async link "stream" "hello" "ok" "hello" 100))
+  => {"body" "hello"
+      "status" "ok"
+      "op" "stream"
+      "signal" "hello"}
+
+  (notify/wait-on :python
+    (var link
+         (-/make-link
+          (fn [listener input]
+            (j/future-delayed [10]
+              (listener {"op" "stream"
+                         "signal" "hello"
+                         "status" "ok"
+                         "body" "hello"})
+              (listener {"op" "call"
+                         "id" input.id
+                         "status" "ok"
+                         "body" nil})))))
+    (base-link/add-callback link "test" "hello" (repl/>notify))
+    (base-link-local/trigger-async link "stream" "hello" "ok" "hello" 100))
+  => {"body" "hello"
+      "status" "ok"
+      "op" "stream"
       "signal" "hello"})
 
 ^{:refer xt.cell.kernel.base-link-local/set-final-status :added "4.0"}
 (fact "forwards set-final-status"
 
   (notify/wait-on :js
+    (var link
+         (-/make-link
+          (fn [listener input]
+            (listener {"op" "call"
+                       "id" input.id
+                       "status" "ok"
+                       "body" {"eval" true "final" true}}))))
+    (. (base-link-local/set-final-status link true)
+       (then (repl/>notify))))
+  => {"eval" true "final" true}
+
+  (notify/wait-on :lua
+    (var link
+         (-/make-link
+          (fn [listener input]
+            (listener {"op" "call"
+                       "id" input.id
+                       "status" "ok"
+                       "body" {"eval" true "final" true}}))))
+    (. (base-link-local/set-final-status link true)
+       (then (repl/>notify))))
+  => {"eval" true "final" true}
+
+  (notify/wait-on :python
     (var link
          (-/make-link
           (fn [listener input]
@@ -101,6 +209,30 @@
                        "body" true}))))
     (. (base-link-local/get-final-status link)
        (then (repl/>notify))))
+  => true
+
+  (notify/wait-on :lua
+    (var link
+         (-/make-link
+          (fn [listener input]
+            (listener {"op" "call"
+                       "id" input.id
+                       "status" "ok"
+                       "body" true}))))
+    (. (base-link-local/get-final-status link)
+       (then (repl/>notify))))
+  => true
+
+  (notify/wait-on :python
+    (var link
+         (-/make-link
+          (fn [listener input]
+            (listener {"op" "call"
+                       "id" input.id
+                       "status" "ok"
+                       "body" true}))))
+    (. (base-link-local/get-final-status link)
+       (then (repl/>notify))))
   => true)
 
 ^{:refer xt.cell.kernel.base-link-local/set-eval-status :added "4.0"}
@@ -116,12 +248,60 @@
                        "body" {"eval" false}}))))
     (. (base-link-local/set-eval-status link false true)
        (then (repl/>notify))))
+  => {"eval" false}
+
+  (notify/wait-on :lua
+    (var link
+         (-/make-link
+          (fn [listener input]
+            (listener {"op" "call"
+                       "id" input.id
+                       "status" "ok"
+                       "body" {"eval" false}}))))
+    (. (base-link-local/set-eval-status link false true)
+       (then (repl/>notify))))
+  => {"eval" false}
+
+  (notify/wait-on :python
+    (var link
+         (-/make-link
+          (fn [listener input]
+            (listener {"op" "call"
+                       "id" input.id
+                       "status" "ok"
+                       "body" {"eval" false}}))))
+    (. (base-link-local/set-eval-status link false true)
+       (then (repl/>notify))))
   => {"eval" false})
 
 ^{:refer xt.cell.kernel.base-link-local/get-eval-status :added "4.0"}
 (fact "forwards get-eval-status"
 
   (notify/wait-on :js
+    (var link
+         (-/make-link
+          (fn [listener input]
+            (listener {"op" "call"
+                       "id" input.id
+                       "status" "ok"
+                       "body" false}))))
+    (. (base-link-local/get-eval-status link)
+       (then (repl/>notify))))
+  => false
+
+  (notify/wait-on :lua
+    (var link
+         (-/make-link
+          (fn [listener input]
+            (listener {"op" "call"
+                       "id" input.id
+                       "status" "ok"
+                       "body" false}))))
+    (. (base-link-local/get-eval-status link)
+       (then (repl/>notify))))
+  => false
+
+  (notify/wait-on :python
     (var link
          (-/make-link
           (fn [listener input]
@@ -152,6 +332,42 @@
   => ["@worker/ping"
       "@worker/ping.async"
       "@worker/echo"
+      "@worker/error.async"]
+
+  (notify/wait-on :lua
+    (var link
+         (-/make-link
+          (fn [listener input]
+            (listener {"op" "call"
+                       "id" input.id
+                       "status" "ok"
+                       "body" ["@worker/ping"
+                               "@worker/ping.async"
+                               "@worker/echo"
+                               "@worker/error.async"]}))))
+    (. (base-link-local/get-action-list link)
+       (then (repl/>notify))))
+  => ["@worker/ping"
+      "@worker/ping.async"
+      "@worker/echo"
+      "@worker/error.async"]
+
+  (notify/wait-on :python
+    (var link
+         (-/make-link
+          (fn [listener input]
+            (listener {"op" "call"
+                       "id" input.id
+                       "status" "ok"
+                       "body" ["@worker/ping"
+                               "@worker/ping.async"
+                               "@worker/echo"
+                               "@worker/error.async"]}))))
+    (. (base-link-local/get-action-list link)
+       (then (repl/>notify))))
+  => ["@worker/ping"
+      "@worker/ping.async"
+      "@worker/echo"
       "@worker/error.async"])
 
 ^{:refer xt.cell.kernel.base-link-local/get-action-entry :added "4.0"}
@@ -167,12 +383,60 @@
                        "body" {"args" ["arg"] "is_async" false}}))))
     (. (base-link-local/get-action-entry link "@worker/echo")
        (then (repl/>notify))))
+  => {"args" ["arg"] "is_async" false}
+
+  (notify/wait-on :lua
+    (var link
+         (-/make-link
+          (fn [listener input]
+            (listener {"op" "call"
+                       "id" input.id
+                       "status" "ok"
+                       "body" {"args" ["arg"] "is_async" false}}))))
+    (. (base-link-local/get-action-entry link "@worker/echo")
+       (then (repl/>notify))))
+  => {"args" ["arg"] "is_async" false}
+
+  (notify/wait-on :python
+    (var link
+         (-/make-link
+          (fn [listener input]
+            (listener {"op" "call"
+                       "id" input.id
+                       "status" "ok"
+                       "body" {"args" ["arg"] "is_async" false}}))))
+    (. (base-link-local/get-action-entry link "@worker/echo")
+       (then (repl/>notify))))
   => {"args" ["arg"] "is_async" false})
 
 ^{:refer xt.cell.kernel.base-link-local/ping :added "4.0"}
 (fact "forwards ping"
 
   (notify/wait-on :js
+    (var link
+         (-/make-link
+          (fn [listener input]
+            (listener {"op" "call"
+                       "id" input.id
+                       "status" "ok"
+                       "body" ["pong" 1]}))))
+    (. (base-link-local/ping link)
+       (then (repl/>notify))))
+  => ["pong" 1]
+
+  (notify/wait-on :lua
+    (var link
+         (-/make-link
+          (fn [listener input]
+            (listener {"op" "call"
+                       "id" input.id
+                       "status" "ok"
+                       "body" ["pong" 1]}))))
+    (. (base-link-local/ping link)
+       (then (repl/>notify))))
+  => ["pong" 1]
+
+  (notify/wait-on :python
     (var link
          (-/make-link
           (fn [listener input]
@@ -198,12 +462,62 @@
                          "body" ["pong" 1]})))))
     (. (base-link-local/ping-async link 100)
        (then (repl/>notify))))
+  => ["pong" 1]
+
+  (notify/wait-on :lua
+    (var link
+         (-/make-link
+          (fn [listener input]
+            (j/future-delayed [10]
+              (listener {"op" "call"
+                         "id" input.id
+                         "status" "ok"
+                         "body" ["pong" 1]})))))
+    (. (base-link-local/ping-async link 100)
+       (then (repl/>notify))))
+  => ["pong" 1]
+
+  (notify/wait-on :python
+    (var link
+         (-/make-link
+          (fn [listener input]
+            (j/future-delayed [10]
+              (listener {"op" "call"
+                         "id" input.id
+                         "status" "ok"
+                         "body" ["pong" 1]})))))
+    (. (base-link-local/ping-async link 100)
+       (then (repl/>notify))))
   => ["pong" 1])
 
 ^{:refer xt.cell.kernel.base-link-local/echo :added "4.0"}
 (fact "forwards echo"
 
   (notify/wait-on :js
+    (var link
+         (-/make-link
+          (fn [listener input]
+            (listener {"op" "call"
+                       "id" input.id
+                       "status" "ok"
+                       "body" ["hello" 1]}))))
+    (. (base-link-local/echo link "hello")
+       (then (repl/>notify))))
+  => ["hello" 1]
+
+  (notify/wait-on :lua
+    (var link
+         (-/make-link
+          (fn [listener input]
+            (listener {"op" "call"
+                       "id" input.id
+                       "status" "ok"
+                       "body" ["hello" 1]}))))
+    (. (base-link-local/echo link "hello")
+       (then (repl/>notify))))
+  => ["hello" 1]
+
+  (notify/wait-on :python
     (var link
          (-/make-link
           (fn [listener input]
@@ -229,12 +543,72 @@
                          "body" ["hello" 1]})))))
     (. (base-link-local/echo-async link "hello" 100)
        (then (repl/>notify))))
+  => ["hello" 1]
+
+  (notify/wait-on :lua
+    (var link
+         (-/make-link
+          (fn [listener input]
+            (j/future-delayed [10]
+              (listener {"op" "call"
+                         "id" input.id
+                         "status" "ok"
+                         "body" ["hello" 1]})))))
+    (. (base-link-local/echo-async link "hello" 100)
+       (then (repl/>notify))))
+  => ["hello" 1]
+
+  (notify/wait-on :python
+    (var link
+         (-/make-link
+          (fn [listener input]
+            (j/future-delayed [10]
+              (listener {"op" "call"
+                         "id" input.id
+                         "status" "ok"
+                         "body" ["hello" 1]})))))
+    (. (base-link-local/echo-async link "hello" 100)
+       (then (repl/>notify))))
   => ["hello" 1])
 
 ^{:refer xt.cell.kernel.base-link-local/error :added "4.0"}
 (fact "forwards error responses"
 
   (notify/wait-on :js
+    (var link
+         (-/make-link
+          (fn [listener input]
+            (listener {"op" "call"
+                       "id" input.id
+                       "status" "error"
+                       "body" ["error" 1]
+                       "action" "@worker/error"}))))
+    (. (base-link-local/error link)
+       (catch (repl/>notify))))
+  => (contains-in
+      {"body" ["error" 1]
+       "action" "@worker/error"
+       "status" "error"
+       "op" "call"})
+
+  (notify/wait-on :lua
+    (var link
+         (-/make-link
+          (fn [listener input]
+            (listener {"op" "call"
+                       "id" input.id
+                       "status" "error"
+                       "body" ["error" 1]
+                       "action" "@worker/error"}))))
+    (. (base-link-local/error link)
+       (catch (repl/>notify))))
+  => (contains-in
+      {"body" ["error" 1]
+       "action" "@worker/error"
+       "status" "error"
+       "op" "call"})
+
+  (notify/wait-on :python
     (var link
          (-/make-link
           (fn [listener input]
@@ -270,6 +644,42 @@
       {"body" ["error" 1]
        "action" "@worker/error.async"
        "status" "error"
+       "op" "call"})
+
+  (notify/wait-on :lua
+    (var link
+         (-/make-link
+          (fn [listener input]
+            (j/future-delayed [10]
+              (listener {"op" "call"
+                         "id" input.id
+                         "status" "error"
+                         "body" ["error" 1]
+                         "action" "@worker/error.async"})))))
+    (. (base-link-local/error-async link 100)
+       (catch (repl/>notify))))
+  => (contains-in
+      {"body" ["error" 1]
+       "action" "@worker/error.async"
+       "status" "error"
+       "op" "call"})
+
+  (notify/wait-on :python
+    (var link
+         (-/make-link
+          (fn [listener input]
+            (j/future-delayed [10]
+              (listener {"op" "call"
+                         "id" input.id
+                         "status" "error"
+                         "body" ["error" 1]
+                         "action" "@worker/error.async"})))))
+    (. (base-link-local/error-async link 100)
+       (catch (repl/>notify))))
+  => (contains-in
+      {"body" ["error" 1]
+       "action" "@worker/error.async"
+       "status" "error"
        "op" "call"}))
 
 ^{:refer xt.cell.kernel.base-link-local/tmpl-link-action :added "4.0"}
@@ -277,4 +687,4 @@
 
   (base-link-local/tmpl-link-action
    '[trigger xt.cell.kernel.inner-state/fn-trigger])
-  => (contains '(defn.js trigger)))
+  => (contains '(defn.xt trigger)))

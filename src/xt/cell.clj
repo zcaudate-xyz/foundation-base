@@ -1,27 +1,27 @@
 (ns xt.cell
   (:require [std.lang :as l]))
 
-(l/script :js
+(l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
-              [xt.lang.common-space :as rt :with [defsingleton.js]]
+              [xt.lang.common-space :as rt :with [defsingleton.xt]]
               [xt.cell.kernel :as kernel]
               [xt.cell.kernel.inner-local :as inner-local]]})
 
-(defsingleton.js ^{:ns "@worker"}
+(defsingleton.xt ^{:ns "@worker"}
   SERVICE
   "gets the current service registry"
   {:added "4.1"}
   []
   (return nil))
 
-(defsingleton.js ^{:ns "@worker"}
+(defsingleton.xt ^{:ns "@worker"}
   BINDINGS
   "gets the current bindings registry"
   {:added "4.1"}
   []
   (return {}))
 
-(defn.js ^{:cell/action "@cell/setup-service"
+(defn.xt ^{:cell/action "@cell/setup-service"
            :cell/static true}
   fn-setup-service
   "stores the current worker service registry"
@@ -30,7 +30,7 @@
   (x:global-set __CELL_SERVICE service)
   (return (!:G __CELL_SERVICE)))
 
-(defn.js ^{:cell/action "@cell/get-service"
+(defn.xt ^{:cell/action "@cell/get-service"
            :cell/static true}
   fn-get-service
   "gets the current worker service registry"
@@ -40,7 +40,7 @@
               (!:G __CELL_SERVICE)
               nil)))
 
-(defn.js ^{:cell/action "@cell/setup-bindings"
+(defn.xt ^{:cell/action "@cell/setup-bindings"
            :cell/static true}
   fn-setup-bindings
   "stores the current worker bindings registry"
@@ -49,7 +49,7 @@
   (x:global-set __CELL_BINDINGS bindings)
   (return (!:G __CELL_BINDINGS)))
 
-(defn.js ^{:cell/action "@cell/get-bindings"
+(defn.xt ^{:cell/action "@cell/get-bindings"
            :cell/static true}
   fn-get-bindings
   "gets the current worker bindings registry"
@@ -59,7 +59,7 @@
               (!:G __CELL_BINDINGS)
               {})))
 
-(defn.js actions-cell
+(defn.xt actions-cell
   "returns the xt.cell worker setup actions"
   {:added "4.1"}
   []
@@ -82,14 +82,14 @@
         :is-async false
         :args []}])))
 
-(defn.js actions-baseline
+(defn.xt actions-baseline
   "returns worker baseline actions with xt.cell setup helpers"
   {:added "4.1"}
   []
   (return (xt/x:obj-assign (inner-local/actions-baseline)
                            (-/actions-cell))))
 
-(defn.js actions-init
+(defn.xt actions-init
   "initialises worker baseline actions with xt.cell setup helpers"
   {:added "4.1"}
   [actions worker]
@@ -97,7 +97,7 @@
                                                       (or actions {}))
                                      worker)))
 
-(defn.js setup-service
+(defn.xt setup-service
   "sets the worker service registry over the cell or link"
   {:added "4.1"}
   [client service]
@@ -106,7 +106,7 @@
                         :action "@cell/setup-service"
                         :body [service]})))
 
-(defn.js get-service
+(defn.xt get-service
   "gets the worker service registry over the cell or link"
   {:added "4.1"}
   [client]
@@ -115,7 +115,7 @@
                         :action "@cell/get-service"
                         :body []})))
 
-(defn.js setup-bindings
+(defn.xt setup-bindings
   "sets the worker bindings registry over the cell or link"
   {:added "4.1"}
   [client bindings]
@@ -124,7 +124,7 @@
                         :action "@cell/setup-bindings"
                         :body [bindings]})))
 
-(defn.js get-bindings
+(defn.xt get-bindings
   "gets the worker bindings registry over the cell or link"
   {:added "4.1"}
   [client]
@@ -133,126 +133,126 @@
                         :action "@cell/get-bindings"
                         :body []})))
 
-(def.js make-cell kernel/make-cell)
+(def.xt make-cell kernel/make-cell)
 
-(def.js GD kernel/GD)
+(def.xt GD kernel/GD)
 
-(def.js GD-reset kernel/GD-reset)
+(def.xt GD-reset kernel/GD-reset)
 
-(def.js GX kernel/GX)
+(def.xt GX kernel/GX)
 
-(def.js GX-reset kernel/GX-reset)
+(def.xt GX-reset kernel/GX-reset)
 
-(def.js GX-val kernel/GX-val)
+(def.xt GX-val kernel/GX-val)
 
-(def.js GX-set kernel/GX-set)
+(def.xt GX-set kernel/GX-set)
 
-(def.js get-cell kernel/get-cell)
+(def.xt get-cell kernel/get-cell)
 
-(def.js call kernel/call)
+(def.xt call kernel/call)
 
-(def.js fn-call-cell kernel/fn-call-cell)
+(def.xt fn-call-cell kernel/fn-call-cell)
 
-(def.js fn-call-model kernel/fn-call-model)
+(def.xt fn-call-model kernel/fn-call-model)
 
-(def.js fn-call-view kernel/fn-call-view)
+(def.xt fn-call-view kernel/fn-call-view)
 
-(def.js fn-access-cell kernel/fn-access-cell)
+(def.xt fn-access-cell kernel/fn-access-cell)
 
-(def.js fn-access-model kernel/fn-access-model)
+(def.xt fn-access-model kernel/fn-access-model)
 
-(def.js fn-access-view kernel/fn-access-view)
+(def.xt fn-access-view kernel/fn-access-view)
 
-(def.js list-models kernel/list-models)
+(def.xt list-models kernel/list-models)
 
-(def.js list-views kernel/list-views)
+(def.xt list-views kernel/list-views)
 
-(def.js get-model kernel/get-model)
+(def.xt get-model kernel/get-model)
 
-(def.js get-view kernel/get-view)
+(def.xt get-view kernel/get-view)
 
-(def.js cell-vals kernel/cell-vals)
+(def.xt cell-vals kernel/cell-vals)
 
-(def.js cell-outputs kernel/cell-outputs)
+(def.xt cell-outputs kernel/cell-outputs)
 
-(def.js cell-inputs kernel/cell-inputs)
+(def.xt cell-inputs kernel/cell-inputs)
 
-(def.js cell-trigger kernel/cell-trigger)
+(def.xt cell-trigger kernel/cell-trigger)
 
-(def.js model-outputs kernel/model-outputs)
+(def.xt model-outputs kernel/model-outputs)
 
-(def.js model-vals kernel/model-vals)
+(def.xt model-vals kernel/model-vals)
 
-(def.js model-is-errored kernel/model-is-errored)
+(def.xt model-is-errored kernel/model-is-errored)
 
-(def.js model-is-pending kernel/model-is-pending)
+(def.xt model-is-pending kernel/model-is-pending)
 
-(def.js add-model-attach kernel/add-model-attach)
+(def.xt add-model-attach kernel/add-model-attach)
 
-(def.js add-model kernel/add-model)
+(def.xt add-model kernel/add-model)
 
-(def.js remove-model kernel/remove-model)
+(def.xt remove-model kernel/remove-model)
 
-(def.js model-update kernel/model-update)
+(def.xt model-update kernel/model-update)
 
-(def.js model-trigger kernel/model-trigger)
+(def.xt model-trigger kernel/model-trigger)
 
-(def.js view-success kernel/view-success)
+(def.xt view-success kernel/view-success)
 
-(def.js view-val kernel/view-val)
+(def.xt view-val kernel/view-val)
 
-(def.js view-get-input kernel/view-get-input)
+(def.xt view-get-input kernel/view-get-input)
 
-(def.js view-get-output kernel/view-get-output)
+(def.xt view-get-output kernel/view-get-output)
 
-(def.js view-set-val kernel/view-set-val)
+(def.xt view-set-val kernel/view-set-val)
 
-(def.js view-get-time-updated kernel/view-get-time-updated)
+(def.xt view-get-time-updated kernel/view-get-time-updated)
 
-(def.js view-is-errored kernel/view-is-errored)
+(def.xt view-is-errored kernel/view-is-errored)
 
-(def.js view-is-pending kernel/view-is-pending)
+(def.xt view-is-pending kernel/view-is-pending)
 
-(def.js view-get-time-elapsed kernel/view-get-time-elapsed)
+(def.xt view-get-time-elapsed kernel/view-get-time-elapsed)
 
-(def.js view-set-input kernel/view-set-input)
+(def.xt view-set-input kernel/view-set-input)
 
-(def.js view-refresh kernel/view-refresh)
+(def.xt view-refresh kernel/view-refresh)
 
-(def.js view-update kernel/view-update)
+(def.xt view-update kernel/view-update)
 
-(def.js view-ensure kernel/view-ensure)
+(def.xt view-ensure kernel/view-ensure)
 
-(def.js view-call-remote kernel/view-call-remote)
+(def.xt view-call-remote kernel/view-call-remote)
 
-(def.js view-refresh-remote kernel/view-refresh-remote)
+(def.xt view-refresh-remote kernel/view-refresh-remote)
 
-(def.js view-trigger kernel/view-trigger)
+(def.xt view-trigger kernel/view-trigger)
 
-(def.js view-for kernel/view-for)
+(def.xt view-for kernel/view-for)
 
-(def.js view-for-input kernel/view-for-input)
+(def.xt view-for-input kernel/view-for-input)
 
-(def.js get-val kernel/get-val)
+(def.xt get-val kernel/get-val)
 
-(def.js get-for kernel/get-for)
+(def.xt get-for kernel/get-for)
 
-(def.js nil-view kernel/nil-view)
+(def.xt nil-view kernel/nil-view)
 
-(def.js nil-model kernel/nil-model)
+(def.xt nil-model kernel/nil-model)
 
-(def.js clear-listeners kernel/clear-listeners)
+(def.xt clear-listeners kernel/clear-listeners)
 
-(def.js add-listener kernel/add-listener)
+(def.xt add-listener kernel/add-listener)
 
-(def.js remove-listener kernel/remove-listener)
+(def.xt remove-listener kernel/remove-listener)
 
-(def.js list-listeners kernel/list-listeners)
+(def.xt list-listeners kernel/list-listeners)
 
-(def.js list-all-listeners kernel/list-all-listeners)
+(def.xt list-all-listeners kernel/list-all-listeners)
 
-(def.js add-raw-callback kernel/add-raw-callback)
+(def.xt add-raw-callback kernel/add-raw-callback)
 
-(def.js remove-raw-callback kernel/remove-raw-callback)
+(def.xt remove-raw-callback kernel/remove-raw-callback)
 
-(def.js list-raw-callbacks kernel/list-raw-callbacks)
+(def.xt list-raw-callbacks kernel/list-raw-callbacks)

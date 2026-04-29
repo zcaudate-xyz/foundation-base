@@ -3,8 +3,9 @@
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-data :as xtd]
-             [xt.old.db.base-scope :as base-scope]]})
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-tree :as xtt]
+              [xt.old.db.base-scope :as base-scope]]})
 
 (defn.xt tree-base
   "creates a tree base"
@@ -65,13 +66,13 @@
   (xt/for:array [[i e] input-spec]
     (:= (. arg-map [(xt/x:cat "{{" (. e ["symbol"]) "}}")])
         (. args [i])))
-  (var out (xtd/tree-walk tree
-                   (fn [x] (return x))
-                   (fn [x]
-                     (return (:? (and (xt/x:is-string? x)
-                                      (xt/x:has-key? arg-map x))
-                                 (xt/x:get-key arg-map x)
-                                 x)))))
+  (var out (xtt/tree-walk tree
+                    (fn [x] (return x))
+                    (fn [x]
+                      (return (:? (and (xt/x:is-string? x)
+                                       (xt/x:has-key? arg-map x))
+                                  (xt/x:get-key arg-map x)
+                                  x)))))
   (return out))
 
 (defn.xt query-select

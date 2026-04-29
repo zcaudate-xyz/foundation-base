@@ -2,12 +2,15 @@
   (:require [std.lang :as l])
   (:use code.test))
 
-^{:seedgen/root {:all true}}
+^{:seedgen/root {:all true, :langs [:lua :python]}}
 (l/script- :js
-  {:runtime :basic
-   :require [[xt.cell.service.db-view :as db-view]
-             [xt.lang.common-data :as xtd]
-             [xt.lang.common-lib :as k]]})
+  {:require [[xt.cell.service.db-view :as db-view] [xt.lang.common-data :as xtd] [xt.lang.common-lib :as k]] :runtime :basic})
+
+(l/script- :lua
+  {:require [[xt.cell.service.db-view :as db-view] [xt.lang.common-data :as xtd] [xt.lang.common-lib :as k]] :runtime :basic})
+
+(l/script- :python
+  {:require [[xt.cell.service.db-view :as db-view] [xt.lang.common-data :as xtd] [xt.lang.common-lib :as k]] :runtime :basic})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -67,12 +70,28 @@
 
   (!.js
    (xtd/obj-keys (db-view/get-views (@! +db+))))
+  => ["Order"]
+
+  (!.lua
+   (xtd/obj-keys (db-view/get-views (@! +db+))))
+  => ["Order"]
+
+  (!.py
+   (xtd/obj-keys (db-view/get-views (@! +db+))))
   => ["Order"])
 
 ^{:refer xt.cell.service.db-view/get-schema :added "4.1"}
 (fact "gets the db schema"
 
   (!.js
+   (xtd/obj-keys (db-view/get-schema (@! +db+))))
+  => ["Order" "Account" "Profile"]
+
+  (!.lua
+   (xtd/obj-keys (db-view/get-schema (@! +db+))))
+  => ["Order" "Account" "Profile"]
+
+  (!.py
    (xtd/obj-keys (db-view/get-schema (@! +db+))))
   => ["Order" "Account" "Profile"])
 
@@ -90,12 +109,54 @@
               "type" "return",
               "query" ["status"],
               "access" {"roles" {}},
+              "guards" []}}
+
+  (!.lua
+   (db-view/view-query-return-entry "Order"
+                                    ["status" ["account" ["nickname"]]]
+                                    true))
+  => {"input" [],
+      "return" "jsonb",
+      "flags" {},
+      "view" {"table" "Order",
+              "type" "return",
+              "query" ["status"],
+              "access" {"roles" {}},
+              "guards" []}}
+
+  (!.py
+   (db-view/view-query-return-entry "Order"
+                                    ["status" ["account" ["nickname"]]]
+                                    true))
+  => {"input" [],
+      "return" "jsonb",
+      "flags" {},
+      "view" {"table" "Order",
+              "type" "return",
+              "query" ["status"],
+              "access" {"roles" {}},
               "guards" []}})
 
 ^{:refer xt.cell.service.db-view/view-query-return-combined :added "4.1"}
 (fact "creates the combined return entry for `return-query` key"
 
   (!.js
+   (db-view/view-query-return-combined
+    "Order"
+    {"view" {"query" ["status"]}}
+    ["id" ["account" ["nickname"]]]
+    true))
+  => {"view" {"query" ["status" "id"]}}
+
+  (!.lua
+   (db-view/view-query-return-combined
+    "Order"
+    {"view" {"query" ["status"]}}
+    ["id" ["account" ["nickname"]]]
+    true))
+  => {"view" {"query" ["status" "id"]}}
+
+  (!.py
    (db-view/view-query-return-combined
     "Order"
     {"view" {"query" ["status"]}}
@@ -135,12 +196,94 @@
                               "type" "return",
                               "query" ["status" "id"],
                               "access" {"roles" {}},
+                              "guards" []}}}
+
+  (!.lua
+   (db-view/view-query-entries
+    (@! +db+)
+    "Order"
+    {:select-method "by_account"
+     :return-method "default"}
+    false))
+  => (contains-in
+      {"select_entry" {"view" {"table" "Order"
+                               "type" "select"
+                               "tag" "by_account"}}
+       "return_entry" {"view" {"table" "Order"
+                               "type" "return"
+                               "tag" "default"}}})
+
+  (!.lua
+   (db-view/view-query-entries
+    (@! +db+)
+    "Order"
+    {:return-query ["status" "id"]}
+    false))
+  => {"select_entry" nil
+      "return_entry" {"input" [],
+                      "return" "jsonb",
+                      "flags" {},
+                      "view" {"table" "Order",
+                              "type" "return",
+                              "query" ["status" "id"],
+                              "access" {"roles" {}},
+                              "guards" []}}}
+
+  (!.py
+   (db-view/view-query-entries
+    (@! +db+)
+    "Order"
+    {:select-method "by_account"
+     :return-method "default"}
+    false))
+  => (contains-in
+      {"select_entry" {"view" {"table" "Order"
+                               "type" "select"
+                               "tag" "by_account"}}
+       "return_entry" {"view" {"table" "Order"
+                               "type" "return"
+                               "tag" "default"}}})
+
+  (!.py
+   (db-view/view-query-entries
+    (@! +db+)
+    "Order"
+    {:return-query ["status" "id"]}
+    false))
+  => {"select_entry" nil
+      "return_entry" {"input" [],
+                      "return" "jsonb",
+                      "flags" {},
+                      "view" {"table" "Order",
+                              "type" "return",
+                              "query" ["status" "id"],
+                              "access" {"roles" {}},
                               "guards" []}}})
 
 ^{:refer xt.cell.service.db-view/view-triggers :added "4.1"}
 (fact "gets the triggers for a given view"
 
   (!.js
+   (db-view/view-triggers
+    (@! +db+)
+    "Order"
+    {:select-method "by_account"
+     :return-method "default"}))
+  => {"Order" true
+      "Account" true
+      "Profile" true}
+
+  (!.lua
+   (db-view/view-triggers
+    (@! +db+)
+    "Order"
+    {:select-method "by_account"
+     :return-method "default"}))
+  => {"Order" true
+      "Account" true
+      "Profile" true}
+
+  (!.py
    (db-view/view-triggers
     (@! +db+)
     "Order"
@@ -157,12 +300,32 @@
    (db-view/view-overview (@! +db+)))
   => {"Order"
       {"return" ["default"],
+       "select" ["by_account"]}}
+
+  (!.lua
+   (db-view/view-overview (@! +db+)))
+  => {"Order"
+      {"return" ["default"],
+       "select" ["by_account"]}}
+
+  (!.py
+   (db-view/view-overview (@! +db+)))
+  => {"Order"
+      {"return" ["default"],
        "select" ["by_account"]}})
 
 ^{:refer xt.cell.service.db-view/view-tables :added "4.1"}
 (fact "gets the view tables"
 
   (!.js
+   (db-view/view-tables (@! +db+)))
+  => ["Order"]
+
+  (!.lua
+   (db-view/view-tables (@! +db+)))
+  => ["Order"]
+
+  (!.py
    (db-view/view-tables (@! +db+)))
   => ["Order"])
 
@@ -172,12 +335,44 @@
   (!.js
    (db-view/view-methods (@! +db+) "Order"))
   => {"return" ["default"],
+      "select" ["by_account"]}
+
+  (!.lua
+   (db-view/view-methods (@! +db+) "Order"))
+  => {"return" ["default"],
+      "select" ["by_account"]}
+
+  (!.py
+   (db-view/view-methods (@! +db+) "Order"))
+  => {"return" ["default"],
       "select" ["by_account"]})
 
 ^{:refer xt.cell.service.db-view/view-detail :added "4.1"}
 (fact "gets the view detail"
 
   (!.js
+   (db-view/view-detail (@! +db+) "Order" "select" "by_account"))
+  => {"input" [{"symbol" "i_account_id", "type" "text"}]
+      "return" "jsonb"
+      "view" {"table" "Order",
+              "type" "select",
+              "tag" "by_account",
+              "access" {"roles" {}},
+              "guards" [],
+              "query" {"account" {"id" "{{i_account_id}}"}}}}
+
+  (!.lua
+   (db-view/view-detail (@! +db+) "Order" "select" "by_account"))
+  => {"input" [{"symbol" "i_account_id", "type" "text"}]
+      "return" "jsonb"
+      "view" {"table" "Order",
+              "type" "select",
+              "tag" "by_account",
+              "access" {"roles" {}},
+              "guards" [],
+              "query" {"account" {"id" "{{i_account_id}}"}}}}
+
+  (!.py
    (db-view/view-detail (@! +db+) "Order" "select" "by_account"))
   => {"input" [{"symbol" "i_account_id", "type" "text"}]
       "return" "jsonb"

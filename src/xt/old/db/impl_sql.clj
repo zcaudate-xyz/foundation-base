@@ -1,14 +1,14 @@
-(ns xt.lib.db.impl-sql
+(ns xt.old.db.impl-sql
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lib.db.base-flatten :as f]
-             [xt.lib.db.base-schema :as base-schema]
-             [xt.lib.db.base-scope :as scope]
+  {:require [[xt.old.db.base-flatten :as f]
+             [xt.old.db.base-schema :as base-schema]
+             [xt.old.db.base-scope :as scope]
              [xt.old.sys.conn-dbsql :as conn-dbsql]
-             [xt.lib.db.sql-graph :as sql-graph]
-             [xt.lib.db.sql-table :as sql-table]
-             [xt.lib.db.sql-raw :as raw]
+             [xt.old.db.sql-graph :as sql-graph]
+             [xt.old.db.sql-table :as sql-table]
+             [xt.old.db.sql-raw :as raw]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]]})
 

@@ -2,8 +2,16 @@
   (:require [std.lang :as l])
   (:use code.test))
 
-^{:seedgen/root {:all true}}
+^{:seedgen/root {:all true, :langs [:lua :python]}}
 (l/script- :js
+  {:runtime :oneshot
+   :require [[xt.cell.service :as service]]})
+
+(l/script- :lua
+  {:runtime :basic
+   :require [[xt.cell.service :as service]]})
+
+(l/script- :python
   {:runtime :basic
    :require [[xt.cell.service :as service]]})
 
@@ -17,12 +25,32 @@
   (!.js
    [(service/service? {"dbs" {}})
     (service/service? {})])
+  => [true false]
+
+  (!.lua
+   [(service/service? {"dbs" {}})
+    (service/service? {})])
+  => [true false]
+
+  (!.py
+   [(service/service? {"dbs" {}})
+    (service/service? {})])
   => [true false])
 
 ^{:refer xt.cell.service/create-service :added "4.1"}
 (fact "creates a service registry"
 
   (!.js
+   (service/create-service
+    {"local-cache" {"kind" "cache"}}))
+  => {"dbs" {"local-cache" {"kind" "cache"}}}
+
+  (!.lua
+   (service/create-service
+    {"local-cache" {"kind" "cache"}}))
+  => {"dbs" {"local-cache" {"kind" "cache"}}}
+
+  (!.py
    (service/create-service
     {"local-cache" {"kind" "cache"}}))
   => {"dbs" {"local-cache" {"kind" "cache"}}})
@@ -33,12 +61,34 @@
   (!.js
    (service/get-dbs
     {"dbs" {"local-cache" {"kind" "cache"}}}))
+  => {"local-cache" {"kind" "cache"}}
+
+  (!.lua
+   (service/get-dbs
+    {"dbs" {"local-cache" {"kind" "cache"}}}))
+  => {"local-cache" {"kind" "cache"}}
+
+  (!.py
+   (service/get-dbs
+    {"dbs" {"local-cache" {"kind" "cache"}}}))
   => {"local-cache" {"kind" "cache"}})
 
 ^{:refer xt.cell.service/get-db :added "4.1"}
 (fact "gets a named db from the registry"
 
   (!.js
+   (service/get-db
+    {"dbs" {"local-cache" {"kind" "cache"}}}
+    "local-cache"))
+  => {"kind" "cache"}
+
+  (!.lua
+   (service/get-db
+    {"dbs" {"local-cache" {"kind" "cache"}}}
+    "local-cache"))
+  => {"kind" "cache"}
+
+  (!.py
    (service/get-db
     {"dbs" {"local-cache" {"kind" "cache"}}}
     "local-cache"))
@@ -53,12 +103,62 @@
     "server-rpc"
     {"kind" "remote"}))
   => {"dbs" {"local-cache" {"kind" "cache"}
+             "server-rpc" {"kind" "remote"}}}
+
+  (!.lua
+   (service/assoc-db
+    {"dbs" {"local-cache" {"kind" "cache"}}}
+    "server-rpc"
+    {"kind" "remote"}))
+  => {"dbs" {"local-cache" {"kind" "cache"}
+             "server-rpc" {"kind" "remote"}}}
+
+  (!.py
+   (service/assoc-db
+    {"dbs" {"local-cache" {"kind" "cache"}}}
+    "server-rpc"
+    {"kind" "remote"}))
+  => {"dbs" {"local-cache" {"kind" "cache"}
              "server-rpc" {"kind" "remote"}}})
 
 ^{:refer xt.cell.service/resolve-db :added "4.1"}
 (fact "resolves db references from descriptors and context"
 
   (!.js
+   [(service/resolve-db
+     {"dbs" {"local-cache" {"kind" "cache"}}}
+     {"db" "local-cache"}
+     {})
+    (service/resolve-db
+     {"dbs" {"local-cache" {"kind" "cache"}}}
+     {"db" {"kind" "inline"}}
+     {})
+    (service/resolve-db
+     {"dbs" {"local-cache" {"kind" "cache"}}}
+     {}
+     {"db" "local-cache"})])
+  => [{"kind" "cache"}
+      {"kind" "inline"}
+      {"kind" "cache"}]
+
+  (!.lua
+   [(service/resolve-db
+     {"dbs" {"local-cache" {"kind" "cache"}}}
+     {"db" "local-cache"}
+     {})
+    (service/resolve-db
+     {"dbs" {"local-cache" {"kind" "cache"}}}
+     {"db" {"kind" "inline"}}
+     {})
+    (service/resolve-db
+     {"dbs" {"local-cache" {"kind" "cache"}}}
+     {}
+     {"db" "local-cache"})])
+  => [{"kind" "cache"}
+      {"kind" "inline"}
+      {"kind" "cache"}]
+
+  (!.py
    [(service/resolve-db
      {"dbs" {"local-cache" {"kind" "cache"}}}
      {"db" "local-cache"}

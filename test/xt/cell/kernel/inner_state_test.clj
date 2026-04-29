@@ -3,23 +3,29 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-^{:seedgen/root {:all true}}
-(l/script- :js
-  {:runtime :basic
-   :require [[xt.lang.spec-base :as xt]
+^{:seedgen/root {:all true, :langs [:lua :python]}}
+(l/script- :xtalk
+  {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-             [xt.lang.common-repl :as repl]
-             [js.core :as j]
              [xt.cell.kernel.inner-state :as inner-state]
              [xt.cell.kernel.inner-local :as inner-local]
              [xt.cell.kernel.inner-mock :as inner-mock]]})
+
+(l/script- :js
+  {:require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.cell.kernel.inner-state :as inner-state] [xt.cell.kernel.inner-local :as inner-local] [xt.cell.kernel.inner-mock :as inner-mock] [xt.lang.common-repl :as repl] [js.core :as j]] :runtime :basic})
+
+(l/script- :lua
+  {:require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.cell.kernel.inner-state :as inner-state] [xt.cell.kernel.inner-local :as inner-local] [xt.cell.kernel.inner-mock :as inner-mock] [xt.lang.common-repl :as repl]] :runtime :basic})
+
+(l/script- :python
+  {:require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.cell.kernel.inner-state :as inner-state] [xt.cell.kernel.inner-local :as inner-local] [xt.cell.kernel.inner-mock :as inner-mock] [xt.lang.common-repl :as repl]] :runtime :basic})
 
 (fact:global
  {:setup    [(l/rt:restart)
              (l/rt:scaffold-imports :js)]
   :teardown [(l/rt:stop)]})
 
-(defn.js reset-inner-state
+(defn.xt reset-inner-state
   []
   (inner-state/WORKER_STATE-reset {"eval" true})
   (inner-state/WORKER_ACTIONS-reset {})
@@ -31,12 +37,32 @@
   (!.js
    (-/reset-inner-state)
    (inner-state/WORKER_STATE))
+  => {"eval" true}
+
+  (!.lua
+   (-/reset-inner-state)
+   (inner-state/WORKER_STATE))
+  => {"eval" true}
+
+  (!.py
+   (-/reset-inner-state)
+   (inner-state/WORKER_STATE))
   => {"eval" true})
 
 ^{:refer xt.cell.kernel.inner-state/WORKER_ACTIONS :added "4.0"}
 (fact "gets worker actions"
 
   (!.js
+   (-/reset-inner-state)
+   (inner-state/WORKER_ACTIONS))
+  => {}
+
+  (!.lua
+   (-/reset-inner-state)
+   (inner-state/WORKER_ACTIONS))
+  => {}
+
+  (!.py
    (-/reset-inner-state)
    (inner-state/WORKER_ACTIONS))
   => {})
@@ -52,6 +78,26 @@
   (!.js
    (-/reset-inner-state)
    (inner-state/get-state {}))
+  => {"eval" true}
+
+  (!.lua
+   (-/reset-inner-state)
+   (inner-state/get-state nil))
+  => {"eval" true}
+
+  (!.lua
+   (-/reset-inner-state)
+   (inner-state/get-state {}))
+  => {"eval" true}
+
+  (!.py
+   (-/reset-inner-state)
+   (inner-state/get-state nil))
+  => {"eval" true}
+
+  (!.py
+   (-/reset-inner-state)
+   (inner-state/get-state {}))
   => {"eval" true})
 
 ^{:refer xt.cell.kernel.inner-state/get-actions :added "4.0"}
@@ -63,6 +109,24 @@
   => {}
 
   (!.js
+   (inner-state/get-actions {"actions" {"@test/action" {}}}))
+  => {"@test/action" {}}
+
+  (!.lua
+   (-/reset-inner-state)
+   (inner-state/get-actions nil))
+  => {}
+
+  (!.lua
+   (inner-state/get-actions {"actions" {"@test/action" {}}}))
+  => {"@test/action" {}}
+
+  (!.py
+   (-/reset-inner-state)
+   (inner-state/get-actions nil))
+  => {}
+
+  (!.py
    (inner-state/get-actions {"actions" {"@test/action" {}}}))
   => {"@test/action" {}})
 
@@ -80,12 +144,52 @@
    (-/reset-inner-state)
    (inner-state/set-actions {"@global/action" {}} nil)
    (xt/x:has-key? (inner-state/WORKER_ACTIONS) "@global/action"))
+  => true
+
+  (!.lua
+   (-/reset-inner-state)
+   (var worker {})
+   (inner-state/set-actions {"@test/action" {}} worker)
+   (xt/x:get-key worker "actions"))
+  => {"@test/action" {}}
+
+  (!.lua
+   (-/reset-inner-state)
+   (inner-state/set-actions {"@global/action" {}} nil)
+   (xt/x:has-key? (inner-state/WORKER_ACTIONS) "@global/action"))
+  => true
+
+  (!.py
+   (-/reset-inner-state)
+   (var worker {})
+   (inner-state/set-actions {"@test/action" {}} worker)
+   (xt/x:get-key worker "actions"))
+  => {"@test/action" {}}
+
+  (!.py
+   (-/reset-inner-state)
+   (inner-state/set-actions {"@global/action" {}} nil)
+   (xt/x:has-key? (inner-state/WORKER_ACTIONS) "@global/action"))
   => true)
 
 ^{:refer xt.cell.kernel.inner-state/fn-bind :added "4.0"}
 (fact "binds a worker instance into a handler"
 
   (!.js
+   ((inner-state/fn-bind {"id" "w1"}
+                          (fn [worker x]
+                            (return [(. worker ["id"]) x])))
+    "hello"))
+  => ["w1" "hello"]
+
+  (!.lua
+   ((inner-state/fn-bind {"id" "w1"}
+                          (fn [worker x]
+                            (return [(. worker ["id"]) x])))
+    "hello"))
+  => ["w1" "hello"]
+
+  (!.py
    ((inner-state/fn-bind {"id" "w1"}
                           (fn [worker x]
                             (return [(. worker ["id"]) x])))
@@ -105,12 +209,62 @@
   => {"body" {"a" 1}
       "status" "ok"
       "op" "stream"
+      "signal" "hello"}
+
+  (notify/wait-on :lua
+    (inner-state/fn-trigger
+     (inner-mock/mock-worker (repl/>notify))
+     "stream"
+     "hello"
+     "ok"
+     {:a 1}))
+  => {"body" {"a" 1}
+      "status" "ok"
+      "op" "stream"
+      "signal" "hello"}
+
+  (notify/wait-on :python
+    (inner-state/fn-trigger
+     (inner-mock/mock-worker (repl/>notify))
+     "stream"
+     "hello"
+     "ok"
+     {:a 1}))
+  => {"body" {"a" 1}
+      "status" "ok"
+      "op" "stream"
       "signal" "hello"})
 
 ^{:refer xt.cell.kernel.inner-state/fn-trigger-async :added "4.0"}
 (fact "triggers an event after a delay"
 
   (notify/wait-on :js
+    (inner-state/fn-trigger-async
+     (inner-mock/mock-worker (repl/>notify))
+     "stream"
+     "hello"
+     "ok"
+     {:a 1}
+     50))
+  => {"body" {"a" 1}
+      "status" "ok"
+      "op" "stream"
+      "signal" "hello"}
+
+  (notify/wait-on :lua
+    (inner-state/fn-trigger-async
+     (inner-mock/mock-worker (repl/>notify))
+     "stream"
+     "hello"
+     "ok"
+     {:a 1}
+     50))
+  => {"body" {"a" 1}
+      "status" "ok"
+      "op" "stream"
+      "signal" "hello"}
+
+  (notify/wait-on :python
     (inner-state/fn-trigger-async
      (inner-mock/mock-worker (repl/>notify))
      "stream"
@@ -149,6 +303,56 @@
   => {"body" {"eval" true "final" false}
       "status" "ok"
       "op" "stream"
+      "signal" "@worker/::STATE"}
+
+  (!.lua
+   (-/reset-inner-state)
+   (inner-state/fn-set-state
+    (inner-mock/mock-worker (fn [msg]))
+    (inner-state/WORKER_STATE)
+    (fn [state]
+      (xt/x:set-key state "final" false))
+    true))
+  => {"eval" true "final" false}
+
+  (!.lua
+   (-/reset-inner-state)
+   (var messages [])
+   (inner-state/fn-set-state
+    (inner-mock/mock-worker (fn [msg] (messages.push msg)))
+    (inner-state/WORKER_STATE)
+    (fn [state]
+      (xt/x:set-key state "final" false))
+    false)
+   (xtd/first messages))
+  => {"body" {"eval" true "final" false}
+      "status" "ok"
+      "op" "stream"
+      "signal" "@worker/::STATE"}
+
+  (!.py
+   (-/reset-inner-state)
+   (inner-state/fn-set-state
+    (inner-mock/mock-worker (fn [msg]))
+    (inner-state/WORKER_STATE)
+    (fn [state]
+      (xt/x:set-key state "final" false))
+    true))
+  => {"eval" true "final" false}
+
+  (!.py
+   (-/reset-inner-state)
+   (var messages [])
+   (inner-state/fn-set-state
+    (inner-mock/mock-worker (fn [msg] (messages.push msg)))
+    (inner-state/WORKER_STATE)
+    (fn [state]
+      (xt/x:set-key state "final" false))
+    false)
+   (xtd/first messages))
+  => {"body" {"eval" true "final" false}
+      "status" "ok"
+      "op" "stream"
       "signal" "@worker/::STATE"})
 
 ^{:refer xt.cell.kernel.inner-state/fn-set-final-status :added "4.0"}
@@ -171,6 +375,44 @@
   => {"body" {"eval" true "final" true}
       "status" "ok"
       "op" "stream"
+      "signal" "@worker/::STATE"}
+
+  (!.lua
+   (-/reset-inner-state)
+   (inner-state/fn-set-final-status
+    (inner-mock/mock-worker (fn [msg]))
+    true))
+  => {"eval" true "final" true}
+
+  (!.lua
+   (-/reset-inner-state)
+   (var messages [])
+   (inner-state/fn-set-final-status
+    (inner-mock/mock-worker (fn [msg] (messages.push msg)))
+    false)
+   (xtd/first messages))
+  => {"body" {"eval" true "final" true}
+      "status" "ok"
+      "op" "stream"
+      "signal" "@worker/::STATE"}
+
+  (!.py
+   (-/reset-inner-state)
+   (inner-state/fn-set-final-status
+    (inner-mock/mock-worker (fn [msg]))
+    true))
+  => {"eval" true "final" true}
+
+  (!.py
+   (-/reset-inner-state)
+   (var messages [])
+   (inner-state/fn-set-final-status
+    (inner-mock/mock-worker (fn [msg] (messages.push msg)))
+    false)
+   (xtd/first messages))
+  => {"body" {"eval" true "final" true}
+      "status" "ok"
+      "op" "stream"
       "signal" "@worker/::STATE"})
 
 ^{:refer xt.cell.kernel.inner-state/fn-get-final-status :added "4.0"}
@@ -182,6 +424,32 @@
   => nil
 
   (!.js
+   (-/reset-inner-state)
+   (inner-state/fn-set-final-status
+    (inner-mock/mock-worker (fn [msg]))
+    true)
+   (inner-state/fn-get-final-status nil))
+  => true
+
+  (!.lua
+   (-/reset-inner-state)
+   (inner-state/fn-get-final-status nil))
+  => nil
+
+  (!.lua
+   (-/reset-inner-state)
+   (inner-state/fn-set-final-status
+    (inner-mock/mock-worker (fn [msg]))
+    true)
+   (inner-state/fn-get-final-status nil))
+  => true
+
+  (!.py
+   (-/reset-inner-state)
+   (inner-state/fn-get-final-status nil))
+  => nil
+
+  (!.py
    (-/reset-inner-state)
    (inner-state/fn-set-final-status
     (inner-mock/mock-worker (fn [msg]))
@@ -211,6 +479,48 @@
   => {"body" {"eval" false}
       "status" "ok"
       "op" "stream"
+      "signal" "@worker/::STATE"}
+
+  (!.lua
+   (-/reset-inner-state)
+   (inner-state/fn-set-eval-status
+    (inner-mock/mock-worker (fn [msg]))
+    false
+    true))
+  => {"eval" false}
+
+  (!.lua
+   (-/reset-inner-state)
+   (var messages [])
+   (inner-state/fn-set-eval-status
+    (inner-mock/mock-worker (fn [msg] (messages.push msg)))
+    false
+    false)
+   (xtd/first messages))
+  => {"body" {"eval" false}
+      "status" "ok"
+      "op" "stream"
+      "signal" "@worker/::STATE"}
+
+  (!.py
+   (-/reset-inner-state)
+   (inner-state/fn-set-eval-status
+    (inner-mock/mock-worker (fn [msg]))
+    false
+    true))
+  => {"eval" false}
+
+  (!.py
+   (-/reset-inner-state)
+   (var messages [])
+   (inner-state/fn-set-eval-status
+    (inner-mock/mock-worker (fn [msg] (messages.push msg)))
+    false
+    false)
+   (xtd/first messages))
+  => {"body" {"eval" false}
+      "status" "ok"
+      "op" "stream"
       "signal" "@worker/::STATE"})
 
 ^{:refer xt.cell.kernel.inner-state/fn-get-eval-status :added "4.0"}
@@ -228,12 +538,52 @@
     false
     true)
    (inner-state/fn-get-eval-status))
+  => false
+
+  (!.lua
+   (-/reset-inner-state)
+   (inner-state/fn-get-eval-status))
+  => true
+
+  (!.lua
+   (-/reset-inner-state)
+   (inner-state/fn-set-eval-status
+    (inner-mock/mock-worker (fn [msg]))
+    false
+    true)
+   (inner-state/fn-get-eval-status))
+  => false
+
+  (!.py
+   (-/reset-inner-state)
+   (inner-state/fn-get-eval-status))
+  => true
+
+  (!.py
+   (-/reset-inner-state)
+   (inner-state/fn-set-eval-status
+    (inner-mock/mock-worker (fn [msg]))
+    false
+    true)
+   (inner-state/fn-get-eval-status))
   => false)
 
 ^{:refer xt.cell.kernel.inner-state/fn-get-action-list :added "4.0"}
 (fact "lists registered actions"
 
   (!.js
+   (-/reset-inner-state)
+   (inner-local/actions-init {} nil)
+   (xt/x:len (inner-state/fn-get-action-list)))
+  => integer?
+
+  (!.lua
+   (-/reset-inner-state)
+   (inner-local/actions-init {} nil)
+   (xt/x:len (inner-state/fn-get-action-list)))
+  => integer?
+
+  (!.py
    (-/reset-inner-state)
    (inner-local/actions-init {} nil)
    (xt/x:len (inner-state/fn-get-action-list)))
@@ -246,12 +596,32 @@
    (-/reset-inner-state)
    (inner-local/actions-init {} nil)
    (inner-state/fn-get-action-entry "@worker/ping"))
+  => (contains {"is_async" false "args" []})
+
+  (!.lua
+   (-/reset-inner-state)
+   (inner-local/actions-init {} nil)
+   (inner-state/fn-get-action-entry "@worker/ping"))
+  => (contains {"is_async" false "args" []})
+
+  (!.py
+   (-/reset-inner-state)
+   (inner-local/actions-init {} nil)
+   (inner-state/fn-get-action-entry "@worker/ping"))
   => (contains {"is_async" false "args" []}))
 
 ^{:refer xt.cell.kernel.inner-state/fn-ping :added "4.0"}
 (fact "pings the worker"
 
   (!.js
+   (inner-state/fn-ping))
+  => (contains ["pong" integer?])
+
+  (!.lua
+   (inner-state/fn-ping))
+  => (contains ["pong" integer?])
+
+  (!.py
    (inner-state/fn-ping))
   => (contains ["pong" integer?]))
 
@@ -266,6 +636,14 @@
 
   (!.js
    (inner-state/fn-echo "hello"))
+  => (contains ["hello" integer?])
+
+  (!.lua
+   (inner-state/fn-echo "hello"))
+  => (contains ["hello" integer?])
+
+  (!.py
+   (inner-state/fn-echo "hello"))
   => (contains ["hello" integer?]))
 
 ^{:refer xt.cell.kernel.inner-state/fn-echo-async :added "4.0"}
@@ -278,6 +656,14 @@
 (fact "throws an error"
 
   (!.js
+   (inner-state/fn-error))
+  => (throws)
+
+  (!.lua
+   (inner-state/fn-error))
+  => (throws)
+
+  (!.py
    (inner-state/fn-error))
   => (throws))
 

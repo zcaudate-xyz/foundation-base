@@ -9,7 +9,7 @@
              [xt.old.db.cache-util :as cache-util]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-             [xt.old.util-throttle :as th]]})
+             [xt.event.util-throttle :as th]]})
 
 (defn.xt cache-process-event-sync
   "processes event sync data from database"
@@ -75,4 +75,3 @@
   [cache]
   (xt/x:set-key cache "rows" {})
   (return true))
-

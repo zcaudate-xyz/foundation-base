@@ -1,16 +1,22 @@
-(ns xt.lib.db
+(ns xt.old.db
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lib.db.base-flatten :as f]
-             [xt.lib.db.base-schema :as base-schema]
-             [xt.lib.db.base-scope :as scope]
-             [xt.lib.db.impl-cache :as impl-cache]
-             [xt.lib.db.impl-sql :as impl-sql]
+  {:require [[xt.old.db.base-flatten :as f]
+             [xt.old.db.base-schema :as base-schema]
+             [xt.old.db.base-scope :as scope]
+             [xt.old.db.impl-cache :as impl-cache]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-             [xt.lib.util-throttle :as th]
-             [xt.old.sys.conn-dbsql :as conn-dbsql]]})
+             [xt.event.util-throttle :as th]]})
+
+(defn.xt unsupported-sql
+  "signals that the legacy sql backend is unavailable in this codepath"
+  {:added "4.1"}
+  [op]
+  (xt/x:throw {:status "error"
+               :tag "db/sql-not-available"
+               :data {:op op}}))
 
 (def.xt IMPL
   {"db.cache" {:create  (fn:> {:rows {}})
@@ -18,11 +24,16 @@
                :remove  impl-cache/cache-process-event-remove
                :pull-sync    impl-cache/cache-pull-sync
                :delete-sync  impl-cache/cache-delete-sync}
-   "db.sql"   {:create  conn-dbsql/connect
-               :add     impl-sql/sql-process-event-sync
-               :remove  impl-sql/sql-process-event-remove
-               :pull-sync    impl-sql/sql-pull-sync
-               :delete-sync  impl-sql/sql-delete-sync}})
+   "db.sql"   {:create  (fn [m]
+                          (return (-/unsupported-sql "create")))
+               :add     (fn [instance tag data schema lookup opts]
+                          (return (-/unsupported-sql "add")))
+               :remove  (fn [instance tag data schema lookup opts]
+                          (return (-/unsupported-sql "remove")))
+               :pull-sync    (fn [instance schema tree opts]
+                               (return (-/unsupported-sql "pull-sync")))
+               :delete-sync  (fn [instance schema table-name ids opts]
+                               (return (-/unsupported-sql "delete-sync")))}})
 
 (defn.xt get-dbtype
   [db]
@@ -51,9 +62,7 @@
     (when update?
       (xt/x:arr-push out id)
       (if (xt/x:get-key trigger "async")
-        (xt/for:async [[ok err] (callback db trigger)]
-          {:success (return ok)
-           :error   (return err)})
+        (callback db trigger)
         (callback db trigger))))
   (return out))
 
@@ -141,10 +150,8 @@
   {:added "4.0"}
   [db raw-input]
   (var dbtype (-/get-dbtype db))
-  (var #{instance} db)
   (when (== dbtype "db.sql")
-    (return (conn-dbsql/query-sync instance
-                                   raw-input))))
+    (return (-/unsupported-sql "exec-sync"))))
 
 (defn.xt db-pull-sync
   "runs a pull statement"
@@ -153,7 +160,7 @@
   (var dbtype (-/get-dbtype db))
   (var #{instance opts} db)
   (cond (== dbtype "db.sql")
-        (return (impl-sql/sql-pull-sync instance schema tree opts))
+        (return (-/unsupported-sql "pull-sync"))
 
         (== dbtype "db.cache")
         (return (impl-cache/cache-pull-sync instance schema tree opts))))
@@ -165,8 +172,8 @@
   (var dbtype (-/get-dbtype db))
   (var #{instance opts} db)
   (cond (== dbtype "db.sql")
-        (return (impl-sql/sql-delete-sync instance schema table-name ids opts))
-        
+        (return (-/unsupported-sql "delete-sync"))
+         
         (== dbtype "db.cache")
         (return (impl-cache/cache-delete-sync instance schema table-name ids opts))))
 
@@ -177,8 +184,8 @@
   (var dbtype (-/get-dbtype db))
   (var #{instance opts} db)
   (cond (== dbtype "db.sql")
-        (return (impl-sql/sql-clear instance))
-        
+        (return (-/unsupported-sql "clear"))
+         
         (== dbtype "db.cache")
         (return (impl-cache/cache-clear instance))))
 
@@ -200,4 +207,3 @@
                          {:id id
                           :listen listen
                           :callback callback})))
-

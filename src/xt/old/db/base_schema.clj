@@ -101,7 +101,7 @@
   ([schema table-name]
    (var ref-ks := (-/create-ref-keys  schema table-name))
    (var ref-id-ks := (-> (xt/x:arr-map ref-ks (fn:> [k] [(xt/x:cat k "_id") k]))
-                         (xt/x:obj-from-pairs)))
+                         (xtd/obj-from-pairs)))
    (return {:data     (-/create-data-keys schema table-name)
             :ref      ref-ks
             :ref-id   ref-id-ks

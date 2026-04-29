@@ -10,9 +10,10 @@
 
 (l/script :js
   {:require [[xt.old.db.base-util :as ut]
-             [xt.old.db.base-scope :as scope]
-             [xt.lang.spec-base :as xt]
-             [xt.lang.common-data :as xtd]]})
+              [xt.old.db.base-scope :as scope]
+              [xt.lang.spec-base :as xt]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-sort-by :as xtsb]]})
 
 (defn.xt check-in-clause
   "emulates the sql `in` clause"

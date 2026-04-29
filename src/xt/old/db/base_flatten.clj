@@ -23,7 +23,7 @@
                (fn:> [v]
                      (:? (xt/x:is-array? v)
                          (-> (xt/x:arr-map v link-fn)
-                             (xt/x:obj-from-pairs))
+                             (xtd/obj-from-pairs))
                          nil)))))
 
 (defn.xt flatten-merge

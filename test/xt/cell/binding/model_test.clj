@@ -2,14 +2,15 @@
   (:require [std.lang :as l])
   (:use code.test))
 
-^{:seedgen/root {:all true}}
+^{:seedgen/root {:all true, :langs [:lua :python]}}
 (l/script- :js
-  {:runtime :basic
-   :require [[xt.cell.binding :as binding]
-              [xt.cell.binding.model :as binding-model]
-              [xt.old.db :as xdb]
-              [xt.lang.spec-base :as xt]
-              [xt.lang.common-data :as xtd]]})
+  {:require [[xt.cell.binding :as binding] [xt.cell.binding.model :as binding-model] [xt.old.db :as xdb] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]] :runtime :basic})
+
+(l/script- :lua
+  {:require [[xt.cell.binding :as binding] [xt.cell.binding.model :as binding-model] [xt.old.db :as xdb] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]] :runtime :basic})
+
+(l/script- :python
+  {:require [[xt.cell.binding :as binding] [xt.cell.binding.model :as binding-model] [xt.old.db :as xdb] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]] :runtime :basic})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -53,6 +54,18 @@
    [(binding-model/unwrap-result [true {"value" 1}])
     (binding-model/unwrap-result [true 2])])
   => [{"value" 1}
+      2]
+
+  (!.lua
+   [(binding-model/unwrap-result [true {"value" 1}])
+    (binding-model/unwrap-result [true 2])])
+  => [{"value" 1}
+      2]
+
+  (!.py
+   [(binding-model/unwrap-result [true {"value" 1}])
+    (binding-model/unwrap-result [true 2])])
+  => [{"value" 1}
       2])
 
 ^{:refer xt.cell.binding.model/make-view-context :added "4.1"}
@@ -69,12 +82,96 @@
       "db" {"kind" "cache"}
       "link" {"id" "link-1"}
       "model-id" "orders"
+      "view-id" "list"}
+
+  (!.lua
+   (binding-model/make-view-context
+    {"model_id" "orders"
+     "view_id" "list"}
+    {"kind" "cache"}
+    {"id" "link-1"}
+    ["open"]))
+  => {"args" ["open"]
+      "db" {"kind" "cache"}
+      "link" {"id" "link-1"}
+      "model-id" "orders"
+      "view-id" "list"}
+
+  (!.py
+   (binding-model/make-view-context
+    {"model_id" "orders"
+     "view_id" "list"}
+    {"kind" "cache"}
+    {"id" "link-1"}
+    ["open"]))
+  => {"args" ["open"]
+      "db" {"kind" "cache"}
+      "link" {"id" "link-1"}
+      "model-id" "orders"
       "view-id" "list"})
 
 ^{:refer xt.cell.binding.model/compile-main-handler :added "4.1"}
 (fact "compiles a local query handler"
 
   (!.js
+   (var schema (@! +schema+))
+   (var views (@! +views+))
+    (var local-db (xtd/obj-assign
+                   (xdb/db-create {"::" "db.cache"} schema (@! +lookup+) nil)
+                   {"schema" schema
+                    "views" views}))
+   (xdb/sync-event local-db
+                   ["add"
+                    {"Order" [{"id" "ord-1"
+                               "status" "open"}
+                              {"id" "ord-2"
+                               "status" "closed"}]}])
+   (var service {"dbs" {"local-cache" local-db}})
+   (var [ok prepared] (binding/prepare-view
+                       service
+                       "orders"
+                        "list"
+                        {"query" {"db" "local-cache"
+                                  "table" "Order"
+                                  "select_method" "by_status"
+                                  "return_method" "summary"}}))
+   (var handler (binding-model/compile-main-handler prepared))
+   [ok
+    (handler {"id" "link-1"} "open")])
+  => [true
+      [{"id" "ord-1"
+        "status" "open"}]]
+
+  (!.lua
+   (var schema (@! +schema+))
+   (var views (@! +views+))
+    (var local-db (xtd/obj-assign
+                   (xdb/db-create {"::" "db.cache"} schema (@! +lookup+) nil)
+                   {"schema" schema
+                    "views" views}))
+   (xdb/sync-event local-db
+                   ["add"
+                    {"Order" [{"id" "ord-1"
+                               "status" "open"}
+                              {"id" "ord-2"
+                               "status" "closed"}]}])
+   (var service {"dbs" {"local-cache" local-db}})
+   (var [ok prepared] (binding/prepare-view
+                       service
+                       "orders"
+                        "list"
+                        {"query" {"db" "local-cache"
+                                  "table" "Order"
+                                  "select_method" "by_status"
+                                  "return_method" "summary"}}))
+   (var handler (binding-model/compile-main-handler prepared))
+   [ok
+    (handler {"id" "link-1"} "open")])
+  => [true
+      [{"id" "ord-1"
+        "status" "open"}]]
+
+  (!.py
    (var schema (@! +schema+))
    (var views (@! +views+))
     (var local-db (xtd/obj-assign
@@ -131,6 +228,60 @@
        "select" "id,status"
        "filters" [{"path" "status"
                    "op" "eq"
+                   "value" "open"}]}]
+
+  (!.lua
+   (var schema (@! +schema+))
+   (var views (@! +views+))
+   (var supabase-db {"schema" schema
+                     "views" views
+                     "execute" (fn [compiled _]
+                                 (return [true compiled]))})
+   (var service {"dbs" {"supabase-main" supabase-db}})
+   (var [ok prepared] (binding/prepare-view
+                       service
+                       "orders"
+                        "list"
+                        {"query" {"db" "supabase-main"
+                                  "table" "Order"
+                                  "select_method" "by_status"
+                                  "return_method" "summary"
+                                  "target" "supabase"}}))
+   (var handler (binding-model/compile-remote-handler prepared))
+   [ok
+    (handler {"id" "link-1"} "open")])
+  => [true
+      {"table" "Order"
+       "select" "id,status"
+       "filters" [{"path" "status"
+                   "op" "eq"
+                   "value" "open"}]}]
+
+  (!.py
+   (var schema (@! +schema+))
+   (var views (@! +views+))
+   (var supabase-db {"schema" schema
+                     "views" views
+                     "execute" (fn [compiled _]
+                                 (return [true compiled]))})
+   (var service {"dbs" {"supabase-main" supabase-db}})
+   (var [ok prepared] (binding/prepare-view
+                       service
+                       "orders"
+                        "list"
+                        {"query" {"db" "supabase-main"
+                                  "table" "Order"
+                                  "select_method" "by_status"
+                                  "return_method" "summary"
+                                  "target" "supabase"}}))
+   (var handler (binding-model/compile-remote-handler prepared))
+   [ok
+    (handler {"id" "link-1"} "open")])
+  => [true
+      {"table" "Order"
+       "select" "id,status"
+       "filters" [{"path" "status"
+                   "op" "eq"
                    "value" "open"}]}])
 
 ^{:refer xt.cell.binding.model/compile-sync-pipeline :added "4.1"}
@@ -158,12 +309,120 @@
       {"result" {"db/sync" {"Order" [{"id" "ord-1"
                                       "status" "open"}]}}
        "update" {"type" "sync"
+                 "body" {"db/sync" {"Order" ["ord-1"]}}}}]
+
+  (!.lua
+   (var schema (@! +schema+))
+   (var views (@! +views+))
+    (var local-db (xtd/obj-assign
+                   (xdb/db-create {"::" "db.cache"} schema (@! +lookup+) nil)
+                   {"schema" schema
+                    "views" views}))
+   (var service {"dbs" {"local-cache" local-db}})
+   (var [ok prepared] (binding/prepare-view
+                       service
+                       "orders"
+                       "save"
+                       {"sync" {"db" "local-cache"
+                                "sync" {"Order" [{"id" "ord-1"
+                                                  "status" "open"}]}}}))
+   (var pipeline (binding-model/compile-sync-pipeline prepared))
+   [ok
+     ((xtd/get-in pipeline ["sync" "handler"]) {"id" "link-1"})])
+  => [true
+      {"result" {"db/sync" {"Order" [{"id" "ord-1"
+                                      "status" "open"}]}}
+       "update" {"type" "sync"
+                 "body" {"db/sync" {"Order" ["ord-1"]}}}}]
+
+  (!.py
+   (var schema (@! +schema+))
+   (var views (@! +views+))
+    (var local-db (xtd/obj-assign
+                   (xdb/db-create {"::" "db.cache"} schema (@! +lookup+) nil)
+                   {"schema" schema
+                    "views" views}))
+   (var service {"dbs" {"local-cache" local-db}})
+   (var [ok prepared] (binding/prepare-view
+                       service
+                       "orders"
+                       "save"
+                       {"sync" {"db" "local-cache"
+                                "sync" {"Order" [{"id" "ord-1"
+                                                  "status" "open"}]}}}))
+   (var pipeline (binding-model/compile-sync-pipeline prepared))
+   [ok
+     ((xtd/get-in pipeline ["sync" "handler"]) {"id" "link-1"})])
+  => [true
+      {"result" {"db/sync" {"Order" [{"id" "ord-1"
+                                      "status" "open"}]}}
+       "update" {"type" "sync"
                  "body" {"db/sync" {"Order" ["ord-1"]}}}}])
 
 ^{:refer xt.cell.binding.model/compile-view-spec :added "4.1"}
 (fact "compiles a prepared descriptor into a kernel view spec"
 
   (!.js
+   (var schema (@! +schema+))
+   (var views (@! +views+))
+    (var local-db (xtd/obj-assign
+                   (xdb/db-create {"::" "db.cache"} schema (@! +lookup+) nil)
+                   {"schema" schema
+                    "views" views}))
+   (var service {"dbs" {"local-cache" local-db}})
+   (var [ok prepared] (binding/prepare-view
+                       service
+                       "orders"
+                       "list"
+                       {"query" {"db" "local-cache"
+                                 "table" "Order"
+                                 "select_method" "by_status"
+                                 "return_method" "summary"}
+                        "deps" [["accounts" "current"]]
+                        "resolve" {"policy" "replace"}}))
+   (var spec (binding-model/compile-view-spec prepared))
+   [ok
+     (xt/x:is-function? (xt/x:get-key spec "handler"))
+     (xt/x:get-key spec "deps")
+     (xtd/get-in spec ["options" "context" "modelId"])
+     (xtd/get-in spec ["options" "context" "resolve"])])
+  => [true
+      true
+      [["accounts" "current"]]
+      "orders"
+      {"policy" "replace"}]
+
+  (!.lua
+   (var schema (@! +schema+))
+   (var views (@! +views+))
+    (var local-db (xtd/obj-assign
+                   (xdb/db-create {"::" "db.cache"} schema (@! +lookup+) nil)
+                   {"schema" schema
+                    "views" views}))
+   (var service {"dbs" {"local-cache" local-db}})
+   (var [ok prepared] (binding/prepare-view
+                       service
+                       "orders"
+                       "list"
+                       {"query" {"db" "local-cache"
+                                 "table" "Order"
+                                 "select_method" "by_status"
+                                 "return_method" "summary"}
+                        "deps" [["accounts" "current"]]
+                        "resolve" {"policy" "replace"}}))
+   (var spec (binding-model/compile-view-spec prepared))
+   [ok
+     (xt/x:is-function? (xt/x:get-key spec "handler"))
+     (xt/x:get-key spec "deps")
+     (xtd/get-in spec ["options" "context" "modelId"])
+     (xtd/get-in spec ["options" "context" "resolve"])])
+  => [true
+      true
+      [["accounts" "current"]]
+      "orders"
+      {"policy" "replace"}]
+
+  (!.py
    (var schema (@! +schema+))
    (var views (@! +views+))
     (var local-db (xtd/obj-assign

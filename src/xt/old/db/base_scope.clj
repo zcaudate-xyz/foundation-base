@@ -6,8 +6,9 @@
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-data :as xtd]
-             [xt.lang.common-string :as xts]]})
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-tree :as xtt]
+              [xt.lang.common-string :as xts]]})
 
 (def +scope+ (collection/map-entries
               (fn [[k v]]
@@ -32,8 +33,8 @@
   (xt/for:array [e-0 arr-0]
     (xt/for:array [e-1 arr-1]
       (xt/x:arr-push out (xtd/obj-assign-nested
-                          (xtd/tree-walk e-0 (fn [x] (return x)) (fn [x] (return x)))
-                          (xtd/tree-walk e-1 (fn [x] (return x)) (fn [x] (return x)))))))
+                          (xtt/tree-walk e-0 (fn [x] (return x)) (fn [x] (return x)))
+                          (xtt/tree-walk e-1 (fn [x] (return x)) (fn [x] (return x)))))))
   (return out))
 
 (defn.xt filter-scope
@@ -136,7 +137,7 @@
   [schema table-key ks]
   (var link-arr (xt/x:arr-filter ks xt/x:is-array?))
   (var linked (-> (xt/x:arr-map link-arr -/get-link-standard)
-                  (xt/x:obj-from-pairs)))
+                  (xtd/obj-from-pairs)))
   (var cols   (xt/x:get-key schema table-key))
   (return
    (xtd/arr-keepf (xt/x:obj-vals cols)

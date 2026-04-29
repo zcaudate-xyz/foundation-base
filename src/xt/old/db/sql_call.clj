@@ -1,11 +1,11 @@
-(ns xt.lib.db.sql-call
+(ns xt.old.db.sql-call
   (:require [std.lang :as l]
             [std.lib.foundation :as f]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
-             [xt.lib.db.sql-util :as ut]
-             [xt.lib.db.base-check :as check]
+             [xt.old.db.sql-util :as ut]
+             [xt.old.db.base-check :as check]
              [xt.old.sys.conn-dbsql :as driver]]})
 
 (defn.xt decode-return
