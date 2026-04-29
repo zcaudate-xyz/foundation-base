@@ -957,6 +957,10 @@
   [[_ thunk]]
   (list 'xt-promise thunk))
 
+(defn elisp-tf-x-promise-all
+  [[_ promises]]
+  (list 'xt-promise-all promises))
+
 (defn elisp-tf-x-promise-then
   [[_ promise thunk]]
   (list 'xt-promise-then promise thunk))
@@ -979,6 +983,7 @@
 
 (def +elisp-promise+
   {:x-promise          {:macro #'elisp-tf-x-promise          :emit :macro :value true}
+   :x-promise-all      {:macro #'elisp-tf-x-promise-all      :emit :macro :value true}
    :x-promise-then     {:macro #'elisp-tf-x-promise-then     :emit :macro :value true}
    :x-promise-catch    {:macro #'elisp-tf-x-promise-catch    :emit :macro :value true}
    :x-promise-finally  {:macro #'elisp-tf-x-promise-finally  :emit :macro :value true}
@@ -1020,6 +1025,144 @@
    :x-socket-send    {:macro #'elisp-tf-x-socket-send    :emit :macro :value true}
    :x-socket-close   {:macro #'elisp-tf-x-socket-close   :emit :macro :value true}})
 
+;;
+;; HTTP
+;;
+
+(defn elisp-tf-x-notify-http
+  [[_ host port value id key opts]]
+  (let [path-sym     (gensym "path__")
+        scheme-sym   (gensym "scheme__")
+        url-sym      (gensym "url__")
+        payload-sym  (gensym "payload__")
+        exit-sym     (gensym "exit__")]
+    (list 'condition-case 'err
+          (list 'let*
+                (list (list path-sym (list 'or
+                                           (list 'and opts
+                                                 (list 'gethash "path" opts))
+                                           "/"))
+                      (list scheme-sym (list 'or
+                                             (list 'and opts
+                                                   (list 'gethash "scheme" opts))
+                                             "http"))
+                      (list url-sym (list 'concat
+                                          scheme-sym
+                                          "://"
+                                          host
+                                          ":"
+                                          (list 'format "%s" port)
+                                          path-sym))
+                      (list payload-sym (list 'return-encode value id key)))
+                (list 'if
+                      (list 'not (list 'equal scheme-sym "http"))
+                      (list 'vector "unable to connect")
+                      (list 'with-temp-buffer
+                            (list 'setq exit-sym
+                                  (list 'call-process
+                                        "curl"
+                                        nil
+                                        't
+                                        nil
+                                        "-sS"
+                                        "-X"
+                                        "POST"
+                                        "-H"
+                                        "Content-Type: application/json"
+                                        "--data-binary"
+                                        payload-sym
+                                        url-sym))
+                            (list 'if
+                                  (list 'equal exit-sym 0)
+                                  (list 'vector "async")
+                                  (list 'vector "unable to connect")))))
+          (list 'error
+                (list 'vector "unable to connect")))))
+
+(def +elisp-http+
+  {:x-notify-http {:macro #'elisp-tf-x-notify-http :emit :macro
+                   :value/standalone true
+                   :op-spec {:allow-blocks true}}})
+
+;;
+;; SHELL
+;;
+
+(defn elisp-tf-x-pwd
+  [[_]]
+  (list 'directory-file-name 'default-directory))
+
+(defn elisp-tf-x-shell
+  [[_ s root cb]]
+  (let [exit-sym (gensym "exit__")
+        out-sym  (gensym "out__")
+        err-sym  (gensym "err__")
+        obj-sym  (gensym "obj__")]
+    (list 'condition-case err-sym
+          (list 'let
+                (list (list 'default-directory (list 'or root 'default-directory)))
+                (list 'with-temp-buffer
+                      (list 'let*
+                            (list (list exit-sym
+                                        (list 'call-process-shell-command s nil 't nil))
+                                  (list out-sym
+                                        (list 'buffer-string)))
+                            (list 'if
+                                  (list 'equal exit-sym 0)
+                                  (list 'funcall cb nil out-sym)
+                                  (list 'let
+                                        (list (list obj-sym
+                                                    (list 'make-hash-table :test (list 'intern "equal"))))
+                                        (list 'puthash "code" exit-sym obj-sym)
+                                        (list 'puthash "err" out-sym obj-sym)
+                                        (list 'puthash "out" out-sym obj-sym)
+                                        (list 'funcall cb obj-sym nil))))))
+          (list 'error
+                (list 'funcall cb err-sym nil)))))
+
+(def +elisp-shell+
+  {:x-pwd   {:macro #'elisp-tf-x-pwd   :emit :macro}
+   :x-shell {:macro #'elisp-tf-x-shell :emit :macro
+             :op-spec {:allow-blocks true}}})
+
+;;
+;; FILE
+;;
+
+(defn elisp-tf-x-file-resolve
+  [[_ root path]]
+  (list 'expand-file-name path root))
+
+(defn elisp-tf-x-file-slurp
+  [[_ path cb]]
+  (list 'condition-case 'err
+        (list 'with-temp-buffer
+              (list 'insert-file-contents path)
+              (list 'funcall cb nil (list 'buffer-string)))
+        (list 'error
+              (list 'funcall cb 'err nil))))
+
+(defn elisp-tf-x-file-spit
+  [[_ path content cb]]
+  (let [dir-sym (gensym "dir__")]
+    (list 'condition-case 'err
+          (list 'let
+                (list (list dir-sym (list 'file-name-directory path)))
+                (list 'when dir-sym
+                      (list 'make-directory dir-sym 't))
+                (list 'with-temp-file path
+                      (list 'insert (list 'format "%s" content)))
+                (list 'funcall cb nil path))
+          (list 'error
+                (list 'funcall cb 'err nil)))))
+
+(def +elisp-file+
+  {:x-file-resolve {:macro #'elisp-tf-x-file-resolve :emit :macro}
+   :x-file-slurp   {:macro #'elisp-tf-x-file-slurp   :emit :macro
+                    :op-spec {:allow-blocks true}}
+   :x-file-spit    {:macro #'elisp-tf-x-file-spit    :emit :macro
+                    :op-spec {:allow-blocks true}}})
+
 (def +elisp+
   (merge +elisp-core+
          +elisp-global+
@@ -1033,4 +1176,7 @@
          +elisp-bit+
          +elisp-iter+
          +elisp-promise+
-         +elisp-socket+))
+         +elisp-socket+
+         +elisp-http+
+         +elisp-shell+
+         +elisp-file+))

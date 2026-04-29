@@ -3,7 +3,12 @@
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
-  {:require [[xt.lang.spec-base :as xt] [xt.lang.common-lib :as k] [xt.lang.common-trace :as trace] [xt.cell.kernel.base-async :as async] [xt.cell.kernel.inner-local :as inner-local] [xt.cell.kernel.inner-impl :as inner-impl]]})
+  {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-trace :as trace]
+             [xt.lang.common-async :as async]
+             [xt.cell.kernel.inner-local :as inner-local]
+             [xt.cell.kernel.inner-impl :as inner-impl]]})
 
 
 (defspec.xt mock-worker-send

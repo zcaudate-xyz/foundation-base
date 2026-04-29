@@ -266,7 +266,7 @@
      (loader/load-tasks instance nil nil)
      (fn [_]
        (repl/notify (loader/list-completed instance)))))
-
+  
   (set
    (notify/wait-on :js
      (var instance
@@ -923,7 +923,7 @@
       "completed" []})
 
 (comment
-  (s/snapto)
+  
   
   (s/seedgen-benchadd '[xt.event.util-task] {:lang [:ruby :dart] :write true})
   (s/seedgen-langadd '[xt.event.util-task]  {:lang [:lua :python] :write true})

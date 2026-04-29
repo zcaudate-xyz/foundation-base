@@ -912,6 +912,9 @@
   [{:op :x-promise          :symbol #{'x:promise}          :emit :abstract
     :op-spec {:arglists '([thunk])
               :type [:fn [[:xt/fn]] :xt/promise]}}
+   {:op :x-promise-all      :symbol #{'x:promise-all}      :emit :abstract
+    :op-spec {:arglists '([promises])
+              :type [:fn [[:xt/array :xt/any]] :xt/promise]}}
    {:op :x-promise-then     :symbol #{'x:promise-then}     :emit :abstract
     :op-spec {:arglists '([promise thunk])
               :type [:fn [:xt/promise [:xt/fn]] :xt/promise]}}

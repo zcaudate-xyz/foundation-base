@@ -631,6 +631,10 @@
    (. (. Promise (resolve))
       (then ~thunk))))
 
+(defn js-tf-x-promise-all
+  [[_ promises]]
+  (list '. 'Promise (list 'all promises)))
+
 (defn js-tf-x-promise-then
   [[_ promise thunk]]
   (list '. promise (list 'then thunk)))
@@ -649,6 +653,7 @@
 
 (def +js-promise+
   {:x-promise          {:macro #'js-tf-x-promise          :emit :macro}
+   :x-promise-all      {:macro #'js-tf-x-promise-all      :emit :macro}
    :x-promise-then     {:macro #'js-tf-x-promise-then     :emit :macro}
    :x-promise-catch    {:macro #'js-tf-x-promise-catch    :emit :macro}
    :x-promise-finally  {:macro #'js-tf-x-promise-finally  :emit :macro}

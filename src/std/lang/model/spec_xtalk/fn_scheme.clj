@@ -942,6 +942,15 @@
   [[_ thunk]]
   thunk)
 
+(defn scheme-tf-x-promise-all
+  [[_ promises]]
+  (list 'map
+        (list 'lambda '(promise)
+              (list 'if (list 'procedure? 'promise)
+                    (list 'promise)
+                    'promise))
+        promises))
+
 (defn scheme-tf-x-promise-then
   [[_ promise thunk]]
   (list 'let
@@ -972,6 +981,7 @@
 
 (def +scheme-promise+
   {:x-promise         {:macro #'scheme-tf-x-promise         :emit :macro :value true}
+   :x-promise-all     {:macro #'scheme-tf-x-promise-all     :emit :macro :value true}
    :x-promise-then    {:macro #'scheme-tf-x-promise-then    :emit :macro :value true}
    :x-promise-catch   {:macro #'scheme-tf-x-promise-catch   :emit :macro :value true}
    :x-promise-finally {:macro #'scheme-tf-x-promise-finally :emit :macro :value true}

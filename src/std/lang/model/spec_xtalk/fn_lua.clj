@@ -561,6 +561,7 @@
 
 (def +lua-promise+
   {:x-promise          {:emit :hard-link :raw 'lua.core.common-promise/promise}
+   :x-promise-all      {:emit :hard-link :raw 'lua.core.common-promise/promise-all}
    :x-promise-then     {:emit :hard-link :raw 'lua.core.common-promise/promise-then}
    :x-promise-catch    {:emit :hard-link :raw 'lua.core.common-promise/promise-catch}
    :x-promise-finally  {:emit :hard-link :raw 'lua.core.common-promise/promise-finally}

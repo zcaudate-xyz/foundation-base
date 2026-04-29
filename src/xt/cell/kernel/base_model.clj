@@ -5,11 +5,11 @@
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as k]
+             [xt.lang.common-async :as async]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-trace :as trace]
              [xt.event.util-throttle :as th]
              [xt.event.base-view :as event-view]
-             [xt.cell.kernel.base-async :as async]
              [xt.cell.kernel.base-link :as link]
              [xt.cell.kernel.base-util :as util]
              [xt.cell.kernel.base-impl :as impl]]})

@@ -228,7 +228,7 @@
 
 ^{:refer xt.event.util-decorate/run-handle :added "4.1"}
 (fact "runs a handle and resolves a receipt with plugin output"
-
+  
   (notify/wait-on :js
     (var handle
          (decorate/new-handle

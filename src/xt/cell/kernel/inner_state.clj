@@ -3,7 +3,10 @@
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
-  {:require [[xt.cell.kernel.base-async :as async] [xt.cell.kernel.base-util :as util] [xt.lang.spec-base :as xt] [xt.lang.common-space :as rt :with [defsingleton.xt]]]})
+  {:require [[xt.lang.common-async :as async]
+             [xt.cell.kernel.base-util :as util]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-space :as rt :with [defsingleton.xt]]]})
 
 
 (defspec.xt WORKER_STATE

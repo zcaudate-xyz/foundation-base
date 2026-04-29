@@ -3,7 +3,7 @@
   (:refer-clojure :exclude [promise]))
 
 (l/script :lua
-  {})
+  {:require [[xt.lang.spec-base :as xt]]})
 
 (defn.lua promise-native?
   "checks whether the value is a native runtime promise wrapper"
@@ -38,6 +38,19 @@
   (if (. out [1])
     (return (-/promise-resolve (. out [2])))
     (return (-/promise-reject (. out [2])))))
+
+(defn.lua promise-all
+  "waits for all values in an array and short-circuits on rejection"
+  {:added "4.1"}
+  [promises]
+  (:= promises (:? (== nil promises) [] promises))
+  (var out [])
+  (xt/for:array [value promises]
+    (var current (-/promise-resolve value))
+    (if (== "rejected" (. current ["status"]))
+      (return current))
+    (table.insert out (. current ["value"])))
+  (return (-/promise-resolve out)))
 
 (defn.lua promise-then
   "applies a continuation to resolved promises"

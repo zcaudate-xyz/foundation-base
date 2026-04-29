@@ -11,6 +11,14 @@
   {:added "4.1"}
   ([thunk] (list (quote x:promise) thunk)))
 
+(defspec.xt x:promise-all [:fn [[:xt/array :xt/any]] :xt/promise])
+
+(defmacro.xt ^{:standalone true}
+  x:promise-all
+  "waits for all values in an array of host promises"
+  {:added "4.1"}
+  ([promises] (list (quote x:promise-all) promises)))
+
 (defspec.xt x:promise-then [:fn [:xt/promise [:xt/fn]] :xt/promise])
 
 (defmacro.xt ^{:standalone true}

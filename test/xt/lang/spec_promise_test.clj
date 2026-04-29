@@ -59,6 +59,45 @@
        (repl/notify (+ value 2)))))
   => 7)
 
+^{:refer xt.lang.spec-promise/x:promise-all :added "4.1"}
+(fact "waits for all promise values in order"
+
+  (notify/wait-on :js
+    (spec-promise/x:promise-then
+     (spec-promise/x:promise-all
+      [(spec-promise/x:promise
+        (fn []
+          (return "a")))
+       (spec-promise/x:promise
+        (fn []
+          (return "b")))])
+     (repl/>notify)))
+  => ["a" "b"]
+
+  (notify/wait-on :python
+    (spec-promise/x:promise-then
+     (spec-promise/x:promise-all
+      [(spec-promise/x:promise
+        (fn []
+          (return "a")))
+       (spec-promise/x:promise
+        (fn []
+          (return "b")))])
+     (repl/>notify)))
+  => ["a" "b"]
+
+  (notify/wait-on :lua
+    (spec-promise/x:promise-then
+     (spec-promise/x:promise-all
+      [(spec-promise/x:promise
+        (fn []
+          (return "a")))
+       (spec-promise/x:promise
+        (fn []
+          (return "b")))])
+     (repl/>notify)))
+  => ["a" "b"])
+
 ^{:refer xt.lang.spec-promise/x:promise-catch :added "4.1"}
 (fact "recovers a rejected js promise"
 

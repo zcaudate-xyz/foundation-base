@@ -6,24 +6,36 @@
             [std.lang.base.runtime :as rt]
             [std.lang.model.spec-elisp :as spec]))
 
+(defn elisp-root
+  []
+  (or (System/getenv "PWD")
+      (System/getProperty "user.dir")))
+
 (def +elisp-init+
   (common/put-program-options
-   :elisp {:default {:oneshot :emacs
-                     :basic   :emacs}
-           :env     {:emacs {:exec  "emacs"
-                             :flags {:oneshot ["--quick" "--batch" "--eval"]
-                                     :basic   ["--quick" "--batch" "--eval"]}}}}))
+   :elisp (let [root (elisp-root)]
+            {:default {:oneshot :emacs
+                       :basic   :emacs}
+             :env     {:emacs {:exec  "emacs"
+                               :root  root
+                               :env   {"PWD" root}
+                               :flags {:oneshot ["--quick" "--batch" "--eval"]
+                                       :basic   ["--quick" "--batch" "--eval"]}}}})))
 
 (defn- elisp-bootstrap
   [body-form]
   (str/join
    "\n"
-     ["(progn"
-      "  (require 'json)"
-      "  (require 'seq)"
-      "  (require 'subr-x)"
-      "  (require 'calc)"
-      "  (defvar __xt_globals__ (make-hash-table :test 'equal))"
+      ["(progn"
+       "  (require 'json)"
+       "  (require 'seq)"
+       "  (require 'subr-x)"
+       "  (require 'calc)"
+       "  (require 'url)"
+       "  (require 'url-http)"
+       (str "  (defconst __xt_root__ " (pr-str (elisp-root)) ")")
+       "  (setq default-directory (file-name-as-directory __xt_root__))"
+       "  (defvar __xt_globals__ (make-hash-table :test 'equal))"
      "  (defun __xt_xor__ (a b)"
      "    (if a"
      "      b"
@@ -121,6 +133,37 @@
      "        (error"
      "         (xt-promise-reject! promise err)))"
      "      promise))"
+     "  (defun xt-promise-all (promises)"
+     "    (let ((next (xt-promise-create))"
+     "          (remaining (length promises))"
+     "          (index 0)"
+     "          (results (make-vector (length promises) nil))"
+     "          (done nil))"
+     "      (if (equal remaining 0)"
+     "          (xt-promise-resolve! next results)"
+     "        (while (< index remaining)"
+     "          (let* ((current-index index)"
+     "                 (current (elt promises index))"
+     "                 (promise (if (xt-promise-native-p current)"
+     "                              current"
+     "                            (xt-promise (lambda () current)))))"
+     "            (xt-promise-then"
+     "             promise"
+     "             (lambda (value)"
+     "               (unless done"
+     "                 (aset results current-index value)"
+     "                 (setq remaining (- remaining 1))"
+     "                 (when (equal remaining 0)"
+     "                   (setq done t)"
+     "                   (xt-promise-resolve! next results)))))"
+     "            (xt-promise-catch"
+     "             promise"
+     "             (lambda (err)"
+     "               (unless done"
+     "                 (setq done t)"
+     "                 (xt-promise-reject! next err)))))"
+     "          (setq index (+ index 1))))"
+     "      next))"
      "  (defun xt-promise-then (promise thunk)"
      "    (let ((next (xt-promise-create)))"
      "      (let ((on-success (lambda (value)"

@@ -32,18 +32,17 @@
 
 ^{:refer xt.lang.spec-link/x:notify-http :added "4.1"}
 (fact "posts encoded values through fetch"
-
-  (notify/wait-on-call
-   (fn [] (!.elisp
-            (var notify-fn
-                 (fn [host port value id key opts]
-                   (return
-                    (spec-link/x:notify-http host port value id key opts))))
-            (notify-fn "127.0.0.1" (@! (:http-port (l/default-notify)))
-                       "hello"
-                       (@! notify/*override-id*)
-                       nil
-                       {}))))
+ 
+  (notify/wait-on [:elisp 5000]
+    (var notify-fn
+         (fn [host port value id key opts]
+           (return
+            (spec-link/x:notify-http host port value id key opts))))
+    (notify-fn "127.0.0.1" (@! (:http-port (l/default-notify)))
+               "hello"
+               (@! notify/*override-id*)
+               nil
+               {}))
   => "hello")
 
 (comment

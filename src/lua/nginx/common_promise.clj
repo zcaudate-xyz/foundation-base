@@ -3,7 +3,7 @@
   (:refer-clojure :exclude [promise]))
 
 (l/script :lua.nginx
-  {})
+  {:require [[xt.lang.spec-base :as xt]]})
 
 (defn.lua promise-wrapper?
   "checks whether the value is a native runtime promise wrapper"
@@ -81,6 +81,22 @@
   [thunk]
   (return (-/promise-pending
            (ngx.thread.spawn thunk))))
+
+(defn.lua promise-all
+  "waits for all values in an array and preserves nginx async chaining"
+  {:added "4.1"}
+  [promises]
+  (return (-/promise-pending
+           (ngx.thread.spawn
+            (fn []
+              (:= promises (:? (== nil promises) [] promises))
+              (var out [])
+              (xt/for:array [value promises]
+                (var current (-/promise-await value))
+                (if (== "rejected" (. current ["status"]))
+                  (return current))
+                (table.insert out (. current ["value"])))
+              (return out))))))
 
 (defn.lua promise-then
   "applies a continuation to resolved promises while preserving async chaining"

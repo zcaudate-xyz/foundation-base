@@ -3,6 +3,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.common-space :as rt :with [defsingleton.xt]]
+             [xt.lang.common-async :as async]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
@@ -446,9 +447,10 @@
   "sets all model inputs to nil"
   {:added "4.0"}
   [model-id ctx]
-  (return (. Promise (all (xt/x:arr-map (-/list-views model-id ctx)
-                                        (fn [k]
-                                          (return (-/nil-view [model-id k] ctx))))))))
+  (return (async/promise-all
+           (xt/x:arr-map (-/list-views model-id ctx)
+                         (fn [k]
+                           (return (-/nil-view [model-id k] ctx)))))))
 
 ;;
 ;; LISTENERS

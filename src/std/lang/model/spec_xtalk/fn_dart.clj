@@ -465,6 +465,11 @@
   [[_ thunk]]
   (list 'Future.sync thunk))
 
+(defn dart-tf-x-promise-all
+  [[_ promises]]
+  (template/$
+   (Future.wait ~promises)))
+
 (defn dart-tf-x-promise-then
   [[_ promise thunk]]
   (list '. promise (list 'then thunk)))
@@ -493,6 +498,7 @@
 
 (def +dart-promise+
   {:x-promise          {:macro #'dart-tf-x-promise          :emit :macro}
+   :x-promise-all      {:macro #'dart-tf-x-promise-all      :emit :macro}
    :x-promise-then     {:macro #'dart-tf-x-promise-then     :emit :macro}
    :x-promise-catch    {:macro #'dart-tf-x-promise-catch    :emit :macro}
    :x-promise-finally  {:macro #'dart-tf-x-promise-finally  :emit :macro}

@@ -670,6 +670,29 @@
                 (list 'return promise))
           (list 'call))))
 
+(defn ruby-tf-x-promise-all
+  [[_ promises]]
+  (let [items   (gensym "items__")
+        total   (gensym "total__")
+        idx     (gensym "idx__")
+        current (gensym "current__")
+        out     (gensym "out__")]
+    (template/$
+     (. (fn [~items]
+          (var ~total (. ~items length))
+          (var ~idx 0)
+          (var ~out [])
+          (while (< ~idx ~total)
+            (var ~current (. ~items [~idx]))
+            (if (not (x:promise-native? ~current))
+              (:= ~current (x:promise (fn [] (return ~current)))))
+            (if (not (. (. ~current ["reason"]) nil?))
+              (return ~current))
+            (. ~out (push (. ~current ["value"])))
+            (:= ~idx (+ ~idx 1)))
+          (return (x:promise (fn [] (return ~out)))))
+         (call ~promises)))))
+
 (defn ruby-tf-x-promise-then
   [[_ promise thunk]]
   (let [current     (gensym "current__")
@@ -734,6 +757,7 @@
 
 (def +ruby-promise+
   {:x-promise          {:macro #'ruby-tf-x-promise         :emit :macro}
+   :x-promise-all      {:macro #'ruby-tf-x-promise-all     :emit :macro}
    :x-promise-then     {:macro #'ruby-tf-x-promise-then    :emit :macro}
    :x-promise-catch    {:macro #'ruby-tf-x-promise-catch   :emit :macro}
    :x-promise-finally  {:macro #'ruby-tf-x-promise-finally :emit :macro}

@@ -75,6 +75,21 @@
     (catch [Exception :as e]
       (return (-/promise-reject e)))))
 
+(defn.py promise-all
+  "waits for all values in an array and short-circuits on rejection"
+  {:added "4.1"}
+  [promises]
+  (:= promises (:? (== nil promises) [] promises))
+  (var out [])
+  (var i 0)
+  (while (< i (len promises))
+    (var current (-/promise-wrap (. promises [i])))
+    (if (== "rejected" (. current ["status"]))
+      (return current))
+    (. out (append (. current ["value"])))
+    (:= i (+ i 1)))
+  (return (-/promise-wrap out)))
+
 (defn.py promise-then
   "applies a continuation to resolved promises, adopting awaitables when needed"
   {:added "4.1"}
