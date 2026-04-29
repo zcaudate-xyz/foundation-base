@@ -4,7 +4,7 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-(l/script- :lua
+(l/script- :lua.nginx
   {:runtime :basic
    :config {:program :resty}
    :require [[xt.old.db.base-schema :as sch]
@@ -19,7 +19,7 @@
 
 (fact:global
  {:setup    [(l/rt:restart)
-             (l/rt:scaffold :lua)]
+             (l/rt:scaffold :lua.nginx)]
   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.old.db-lua.impl-select-view-test/CONNECTION :adopt true :added "4.0"}

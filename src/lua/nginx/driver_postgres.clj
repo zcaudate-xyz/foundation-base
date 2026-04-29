@@ -1,6 +1,5 @@
 (ns lua.nginx.driver-postgres
-  (:require [std.lang :as l]
-            [xt.old.sys.conn-dbsql :as dbsql]))
+  (:require [std.lang :as l]))
 
 (l/script :lua.nginx
   {:import [["pgmoon" :as ngxpg]] :require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-space :as rt]]})
@@ -117,17 +116,17 @@
          ["type_deserializers"]
          ["string"])
       cjson.encode)
-  (:= (. conn
-         ["parse_error"])
-      (fn [self err] (return (-/db-error err
-                                         (. env ["dev"])
-                                         (. opts query)))))
-  (local '[ok err] (. conn (connect)))
-  (when (not ok) (return nil err))
-  
-  (:= (. conn ["::disconnect"])
-      (fn []
-        (return (. conn (disconnect)))))
+   (:= (. conn
+          ["parse_error"])
+       (fn [self err] (return (-/db-error err
+                                          (. env ["dev"])
+                                          (. opts query)))))
+   (local '[ok err] (. conn (connect)))
+   (when (not ok) (xt/x:err err))
+   
+   (:= (. conn ["::disconnect"])
+       (fn []
+         (return (. conn (disconnect)))))
   (:= (. conn ["::query"])
       (fn [query]
         (xt/x:set-key opts "query" query)

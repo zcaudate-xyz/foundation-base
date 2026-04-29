@@ -29,10 +29,11 @@
 
 (defn.xt incr-fn
   []
-  (var i -1)
+  (var state {:value -1})
   (var next-id-fn
        (fn []
-         (:= i (+ i 1))
+         (var i (+ 1 (xt/x:get-key state "value")))
+         (xt/x:set-key state "value" i)
          (return (xt/x:cat "id-" (xt/x:to-string i)))))
   (return next-id-fn))
 

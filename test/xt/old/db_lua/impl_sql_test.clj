@@ -4,7 +4,7 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-(l/script- :lua
+(l/script- :lua.nginx
   {:runtime :basic
    :config {:program :resty}
    :require [[xt.old.db.impl-sql :as impl-sql]
@@ -43,8 +43,8 @@
 
 (fact:global
  {:setup    [(l/rt:restart)
-             (do (l/rt:scaffold :lua)
-                 true)
+             (do (l/rt:scaffold :lua.nginx)
+                  true)
              (bootstrap-lua)]
   :teardown [(l/rt:stop)]})
 

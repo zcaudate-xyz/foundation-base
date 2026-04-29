@@ -99,6 +99,12 @@
     (if memory
       (:= db (sqlite.sqlite3.openInMemory))
       (:= db (sqlite.sqlite3.open filename)))
-    (return (-/callback-return callback nil (-/set-methods db)))
+    (var conn (-/set-methods db))
+    (if (xt/x:not-nil? callback)
+      (return (-/callback-return callback nil conn))
+      (return (Future.sync (fn []
+                             (return conn)))))
     (catch err
-      (return (-/callback-return callback err nil)))))
+      (if (xt/x:not-nil? callback)
+        (return (-/callback-return callback err nil))
+        (return (Future.error err))))))

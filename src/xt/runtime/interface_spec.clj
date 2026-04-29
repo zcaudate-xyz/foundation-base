@@ -59,6 +59,8 @@
   {:added "4.1"}
   [obj protocol]
   (when protocol
+    (when (xt/x:nil? (xt/x:get-key protocol "__index"))
+      (:= protocol (-/proto-create protocol)))
     (setmetatable obj protocol))
   (return obj))
 
@@ -77,6 +79,30 @@
 
 (defn.py runtime-protocol
   "gets runtime dispatch from a managed Python object"
+  {:added "4.1"}
+  [obj]
+  (return (xt/x:get-key obj "_rt_protocol")))
+
+(l/script :dart
+  {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-iter :as it]]})
+
+(defn.dt proto-create
+  "creates a protocol map for Dart-managed objects"
+  {:added "4.1"}
+  [spec-map]
+  (return spec-map))
+
+(defn.dt runtime-attach
+  "attaches runtime dispatch for Dart-managed objects"
+  {:added "4.1"}
+  [obj protocol]
+  (when protocol
+    (xt/x:set-key obj "_rt_protocol" protocol))
+  (return obj))
+
+(defn.dt runtime-protocol
+  "gets runtime dispatch from a managed Dart object"
   {:added "4.1"}
   [obj]
   (return (xt/x:get-key obj "_rt_protocol")))

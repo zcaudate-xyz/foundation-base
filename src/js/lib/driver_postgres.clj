@@ -64,13 +64,14 @@
   "constructs the postgres instance"
   {:added "4.0"}
   [m callback]
-  (:= callback (or callback ut/pass-callback))
   (var env (xtd/obj-assign (-/default-env)
                           m))
   (var conn (new -/Client env))
-  
-  (. conn
-     (connect)
-     (then (fn [] (callback nil conn))
-           (fn [err] (callback err nil))))
-  (return (-/set-methods conn)))
+  (:= conn (-/set-methods conn))
+  (var promise
+       (. (. conn (connect))
+          (then (fn []
+                  (return conn)))))
+  (if callback
+    (return (ut/wrap-callback promise callback))
+    (return promise)))
