@@ -35,6 +35,23 @@
        "  (:use code.test))\n\n"
        +right-fact+))
 
+(def +wrong-source-file+
+  (str "(ns hello\n"
+       " (:require [js.cell.service :as service] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]))\n\n"
+       "(l/script :xtalk\n"
+       "  {:export [MODULE] :require [[js.cell.service :as service] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]]})"))
+
+(def +right-source-file+
+  (str "(ns hello\n"
+       "  (:require [js.cell.service :as service]\n"
+       "            [xt.lang.spec-base :as xt]\n"
+       "            [xt.lang.common-data :as xtd]))\n\n"
+       "(l/script :xtalk\n"
+       "  {:require [[js.cell.service :as service]\n"
+       "             [xt.lang.spec-base :as xt]\n"
+       "             [xt.lang.common-data :as xtd]]\n"
+       "   :export [MODULE]})"))
+
 ^{:refer code.manage.unit.snapto/unwrap-fact-block :added "4.1"}
 (fact "TODO")
 
@@ -98,6 +115,10 @@
         expected "^{:refer xt.old.db.base-util/collect-routes,\n  :added \"4.0\",\n  :setup\n  [(def +routes+\n     [{:id \"ping\"}])\n   (def +result+\n     (contains-in {\"api/ping\" {:id \"ping\"}}))]}\n(fact \"collect routes\"\n\n  ^{:hidden true}\n  (!.lua (ut/collect-routes (@! +routes+) \"db\"))\n  => +result+)"]
     (snap-block-string (block/parse-first source))
     => expected))
+
+(fact "formats ns and l/script* forms"
+  (snapto-string +wrong-source-file+)
+  => +right-source-file+)
 
 ^{:refer code.manage.unit.snapto/snapto-string :added "4.1"}
 (fact "formats all top-level fact forms in a test file"

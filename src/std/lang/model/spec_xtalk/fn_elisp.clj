@@ -678,24 +678,24 @@
 
 (defn elisp-tf-x-return-encode
   [[_ out id key]]
-  (list 'do
-        (list 'var 'ts (list 'x:type-native out))
+  (list 'let
+        ['ts (list 'x:type-native out)]
         (list 'condition-case 'err
               (list 'json-serialize
                     (list 'list
-                          (list 'cons "id" id)
-                          (list 'cons "key" key)
-                          (list 'cons "type" "data")
-                          (list 'cons "return" 'ts)
-                          (list 'cons "value" (list 'xt-json-normalize out))))
+                          (list 'cons (list 'intern "id") id)
+                          (list 'cons (list 'intern "key") key)
+                          (list 'cons (list 'intern "type") "data")
+                          (list 'cons (list 'intern "return") 'ts)
+                          (list 'cons (list 'intern "value") (list 'xt-json-normalize out))))
               (list 'error
                     (list 'json-serialize
                           (list 'list
-                                (list 'cons "id" id)
-                                (list 'cons "key" key)
-                                (list 'cons "type" "raw")
-                                (list 'cons "return" 'ts)
-                                (list 'cons "value" (list 'format "%S" out))))))))
+                                (list 'cons (list 'intern "id") id)
+                                (list 'cons (list 'intern "key") key)
+                                (list 'cons (list 'intern "type") "raw")
+                                (list 'cons (list 'intern "return") 'ts)
+                                (list 'cons (list 'intern "value") (list 'format "%S" out))))))))
 
 (defn elisp-tf-x-return-wrap
   [[_ f encode-fn]]
@@ -704,8 +704,8 @@
         (list 'error
               (list 'json-serialize
                     (list 'list
-                          (list 'cons "type" "error")
-                          (list 'cons "value" (list 'error-message-string 'err)))))))
+                          (list 'cons (list 'intern "type") "error")
+                          (list 'cons (list 'intern "value") (list 'error-message-string 'err)))))))
 
 (defn elisp-tf-x-return-eval
   [[_ s wrap-fn]]

@@ -2,6 +2,7 @@
   (:require [std.lang :as l])
   (:use code.test))
 
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
     :require [[xt.lang.common-lib :as k]
@@ -11,7 +12,7 @@
               [js.core :as j]
               [xt.cell :as cell]
              [xt.cell.kernel.base-link :as base-link]
-             [xt.cell.kernel.worker-mock :as worker-mock]]})
+             [xt.cell.kernel.inner-mock :as inner-mock]]})
 
 (fact:global
   {:setup    [(l/rt:restart)]
@@ -23,7 +24,7 @@
    (base-link/link-create
     {:create-fn
      (fn [listener]
-       (var worker (worker-mock/create-worker listener {} true))
+       (var worker (inner-mock/create-worker listener {} true))
        (cell/actions-init {} worker)
        (return worker))})))
 
@@ -97,7 +98,7 @@
 (fact "installs cell actions into a worker action table"
 
   (!.js
-   (var worker (worker-mock/create-worker nil {} true))
+   (var worker (inner-mock/create-worker nil {} true))
     (cell/actions-init {"@custom/action" {:handler (fn [x] (return x))
                                          :is_async false
                                          :args ["x"]}}
