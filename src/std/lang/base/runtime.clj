@@ -7,6 +7,7 @@
             [std.lang.base.impl :as impl]
             [std.lang.base.impl-deps :as deps]
             [std.lang.base.impl-lifecycle :as lifecycle]
+            [std.lang.base.book-module :as book-module]
             [std.lang.base.library :as lib]
             [std.lang.base.library-snapshot :as snap]
             [std.lang.base.pointer :as ptr]
@@ -308,9 +309,25 @@
   {:added "4.0"}
   [{:keys [id layout lang module library lifecycle emit] :as rt}]
   (let [library  (or library (impl/runtime-library))
-        snapshot (lib/get-snapshot library)
-        book     (snap/get-book snapshot lang)
-        module   (get-in book [:modules module])]
+        module-id module
+        [snapshot book module]
+        (loop [snapshot (lib/get-snapshot library)
+               book     (snap/get-book snapshot lang)
+               module   (get-in book [:modules module-id])]
+          (let [missing (when module
+                          (->> (book-module/module-deps-code book module)
+                               (remove #(get-in book [:modules %]))
+                               seq))]
+            (if (seq missing)
+              (do (impl/with:library [library]
+                    (doseq [dep missing]
+                      (require dep)))
+                  (let [snapshot (lib/get-snapshot library)
+                        book     (snap/get-book snapshot lang)]
+                    (recur snapshot
+                           book
+                           (get-in book [:modules module-id]))))
+              [snapshot book module])))]
     (merge {:layout layout
             :book book
             :lang lang

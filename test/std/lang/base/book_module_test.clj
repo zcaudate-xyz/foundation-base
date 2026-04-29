@@ -46,10 +46,27 @@
   (impl/with:library [+library+]
     (module-deps-code
      (l/get-module
-      +library+
-      :js
-      'js.blessed.ui-core)))
-  => '#{js.blessed.ui-style xt.lang.common-data xt.lang.common-lib js.react})
+       +library+
+       :js
+       'js.blessed.ui-core)))
+  => '#{js.blessed.ui-style xt.lang.common-data xt.lang.common-lib js.react}
+
+  (-> (book-module {:id 'demo.promise
+                    :lang :python
+                    :code '{promise-wrap {:deps #{}
+                                          :polyfill-modules #{python.core.common-promise}}}})
+      (module-deps-code))
+  => '#{python.core.common-promise}
+
+  (module-deps-code
+   {:grammar {:reserved '{x:promise {:op :x-promise
+                                     :emit :hard-link
+                                     :raw python.core.common-promise/promise}}}}
+   (book-module {:id 'demo.promise
+                 :lang :python
+                 :code '{promise-wrap {:deps #{}
+                                       :xtalk-ops #{:x-promise}}}}))
+  => '#{python.core.common-promise})
 
 ^{:refer std.lang.base.book-module/module-deps-all :added "4.1"}
 (fact "gets all module dependencies including explicit links"

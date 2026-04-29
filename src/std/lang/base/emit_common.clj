@@ -440,16 +440,16 @@
    (emit-symbol-classify 't.n/hello {:module {:alias '{t table}}})
    => '[:unknown t.n]"
   {:added "3.0"}
-  ([sym {:keys [lang module entry book snapshot] :as mopts}]
-   (cond (not (namespace sym))
-         [:unknown nil]
+  ([sym {:keys [module entry book] :as mopts}]
+    (cond (not (namespace sym))
+          [:unknown nil]
 
-         :else
-         (let [[sym-ns sym-id] (ut/sym-pair sym)]
-           (or (if-let [ns (get (:alias module) sym-ns)]
-                 [:alias ns])
+          :else
+          (let [[sym-ns sym-id] (ut/sym-pair sym)]
+            (or (if-let [ns (get (:alias module) sym-ns)]
+                  [:alias ns])
                
-               (let [link-ns (or (if (get (:internal module)
+                (let [link-ns (or (if (get (:internal module)
                                           sym-ns)
                                    sym-ns)
                                  
@@ -457,19 +457,15 @@
                                          (= (:module entry) sym-ns))
                                    sym-ns)
 
-                                 (get (:link module) sym-ns))
-                     sym-ns  (or link-ns sym-ns) 
-                     ext-module (if book
-                                  (get-in book [:modules sym-ns])
-                                  (get-in snapshot [lang :book :modules sym-ns]))]
-                 (cond (and (not link-ns)
-                            (not ext-module)) nil
+                                  (get (:link module) sym-ns))
+                      sym-ns  (or link-ns sym-ns)
+                      ext-module (and book
+                                      (get-in book [:modules sym-ns]))]
+                  (cond (= :defglobal (get-in ext-module [:code sym-id :op-key]))
+                         [:global sym-ns]
 
-                       (= :defglobal (get-in ext-module [:code sym-id :op-key]))
-                       [:global sym-ns]
-
-                       (or (= (:id module) sym-ns)
-                           (= (:module entry) sym-ns))
+                        (or (= (:id module) sym-ns)
+                            (= (:module entry) sym-ns))
                        [:self sym-ns]
                        
                        :else

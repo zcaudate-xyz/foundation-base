@@ -1,9 +1,11 @@
 (ns std.lang.base.impl-deps-imports-test
-  (:require [xt.lang.common-data]
+  (:require [python.core.common-promise]
+             [xt.lang.common-data]
              [xt.lang.common-lib]
              [js.blessed]
              [js.react]
              [std.lang.base.book :as b]
+             [std.lang.base.book-module :as module]
             [std.lang.base.emit-prep-js-test :as prep-js]
             [std.lang.base.emit-prep-lua-test :as prep-lua]
             [std.lang.base.impl :as impl]
@@ -25,7 +27,19 @@
       (require '[js.blessed.ui-core] :reload)
       (require '[js.blessed.frame-status] :reload)
       (require '[js.blessed.frame-console] :reload)
-      (require '[xt.lang.common-lib] :reload))
+       (require '[xt.lang.common-lib] :reload))
+    lib))
+
+(def +library-python-polyfill+
+  (let [lib (impl/clone-default-library)]
+    (impl/with:library [lib]
+      (require '[python.core.common-promise] :reload)
+      (lib/add-module! lib
+                       (module/book-module
+                        {:lang :python
+                         :id 'demo.promise
+                         :code '{demo-wrap {:deps #{}
+                                            :xtalk-ops #{:x-promise}}}})))
     lib))
 
 (def +library-lua+
@@ -176,28 +190,32 @@
   (dissoc (lib/get-module +library-js+ :js 'JS.app)
           :fragment :code)
   => '{:require-impl nil,
-       :static nil,
-       :includes #{},
-       :native-lu {},
-       :internal {JS.ui ui, JS.app -},
-       :lang :js,
-       :alias {},
-       :native {},
-       :link {ui JS.ui, - JS.app},
-      :id JS.app,
+        :static nil,
+        :specialize {},
+        :includes #{},
+        :native-lu {},
+        :internal {JS.ui ui, JS.app -},
+        :implements [],
+        :lang :js,
+        :alias {},
+        :native {},
+        :link {ui JS.ui, - JS.app},
+       :id JS.app,
        :display :default}
 
   (dissoc (lib/get-module +library-js+ :js 'JS.ui)
           :fragment :code)
   => '{:require-impl nil,
-       :static nil,
-       :includes #{},
-       :native-lu {Puck "@measured/puck",
-                   Radix "@radix-ui/themes"},
-       :internal {JS.ui -},
-       :lang :js,
-       :alias {Puck Puck, Radix Radix},
-       :native
+        :static nil,
+        :specialize {},
+        :includes #{},
+        :native-lu {Puck "@measured/puck",
+                    Radix "@radix-ui/themes"},
+        :internal {JS.ui -},
+        :implements [],
+        :lang :js,
+        :alias {Puck Puck, Radix Radix},
+        :native
        {"@measured/puck" {:as [* Puck]},
         "@radix-ui/themes"
         {:as [* Radix], :bundle {"@radix-ui/themes/styles.css" {}}}},
@@ -299,8 +317,8 @@
   (impl/with:library [+library-js-cloned+]
     (deps-imports/module-code-deps
      (lib/get-book
-       +library-js-cloned+
-       :js)
+        +library-js-cloned+
+        :js)
      '[js.blessed.frame-console]))
    => '{:all #{js.blessed.ui-style
                 js.blessed.ui-group
@@ -352,18 +370,29 @@
                xt.lang.common-lib
                xt.lang.common-math
                xt.lang.common-string
-               xt.lang.common-tree},
-        :graph {js.react #{xt.lang.common-data
-                           xt.lang.common-lib
-                           xt.lang.common-math
-                           xt.lang.common-string
-                           xt.lang.common-tree},
-                  xt.lang.common-lib #{},
-                  xt.lang.common-data #{}
-                  xt.lang.common-math #{}
-                  xt.lang.common-string #{}
-                  xt.lang.common-tree #{xt.lang.common-data
-                                        xt.lang.common-lib}}})
+                xt.lang.common-tree},
+         :graph {js.react #{xt.lang.common-data
+                            xt.lang.common-lib
+                            xt.lang.common-math
+                            xt.lang.common-string
+                            xt.lang.common-tree},
+                   xt.lang.common-lib #{},
+                   xt.lang.common-data #{}
+                   xt.lang.common-math #{}
+                   xt.lang.common-string #{}
+                   xt.lang.common-tree #{xt.lang.common-data
+                                        xt.lang.common-lib}}}
+
+  (impl/with:library [+library-python-polyfill+]
+    (deps-imports/module-code-deps
+     (lib/get-book
+      +library-python-polyfill+
+      :python)
+     '[demo.promise]))
+  => '{:all #{demo.promise
+              python.core.common-promise}
+       :graph {demo.promise #{python.core.common-promise}
+               python.core.common-promise #{}}})
 
 (comment
 

@@ -266,11 +266,12 @@
          module  (get-in book [:modules module-id])
          macros  (script-macro-import book)]
      (merge (:config config)
-            {:module module-id
-             :module/internal (get module :internal)
-             :module/primary primary}
-            (select-keys config [:layout
-                                 :emit])))))
+            {:library lib
+             :module module-id
+              :module/internal (get module :internal)
+              :module/primary primary}
+             (select-keys config [:layout
+                                  :emit])))))
 
 (defn script-fn
   "calls the regular setup script for the namespace"

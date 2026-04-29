@@ -98,19 +98,46 @@
   "gets dependencies for a given module"
   {:added "4.0"}
   ([module]
-   (let [entries (vals (:code module))]
-     (disj (apply set/union
-                  (map (fn [e]
-                         (set (map (comp symbol namespace) (:deps e))))
-                       entries))
-           (:id module)))))
+    (module-deps-code nil module))
+   ([book module]
+    (let [reserved (or (-> book :grammar :reserved) {})
+          polyfill-modules
+          (fn [entry]
+            (set/union
+             (or (:polyfill-modules entry) #{})
+             (->> (:xtalk-ops entry)
+                  (mapcat (fn [op-id]
+                            (keep (fn [{reserved-op :op
+                                        :keys [emit raw]}]
+                                    (when (and (= op-id reserved-op)
+                                               (= :hard-link emit)
+                                               (symbol? raw)
+                                               (namespace raw))
+                                      (symbol (namespace raw))))
+                                  (vals reserved))))
+                  set)))
+          entries (vals (:code module))]
+      (disj (apply set/union
+                   #{}
+                   (map (fn [e]
+                          (set/union
+                           (->> (:deps e)
+                                (keep (fn [sym]
+                                        (when-let [ns (namespace sym)]
+                                          (symbol ns))))
+                                set)
+                           (polyfill-modules e)))
+                        entries))
+            (:id module)))))
 
 (defn module-deps-all
   "gets dependencies for a given module (including explicit links)"
   {:added "4.0"}
   ([module]
-   (disj (set/union (module-deps-code module)
-                  (set (vals (:link module))))
+   (module-deps-all nil module))
+  ([book module]
+   (disj (set/union (module-deps-code book module)
+                    (set (vals (:link module))))
          (:id module))))
 
 (defn module-deps-native

@@ -202,14 +202,15 @@
                      (get-in book [:modules (:module ptr)]))
         
         module   (if-let [internal (-> emit :runtime :module/internal)]
-                   (assoc module
-                          :link (collection/transpose internal)
-                          :internal internal)
-                   module)]
+                   (-> module
+                       (update :link merge (collection/transpose internal))
+                       (update :internal merge internal))
+                    module)]
     (assoc meta
-           :lang lang
-           :snapshot snapshot
-           :module module)))
+            :lang lang
+            :book book
+            :snapshot snapshot
+            :module module)))
 
 (defn rt-macro-opts
   "creates the default macro-opts for a runtime"

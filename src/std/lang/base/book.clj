@@ -81,7 +81,7 @@
   ([{:keys [modules] :as book} id]
    (if (namespace id)
      (get-code-deps book id)
-     (module/module-deps-all (get modules id)))))
+      (module/module-deps-all book (get modules id)))))
 
 (defn get-deps-native
   "get dependencies for a given id"

@@ -80,7 +80,7 @@
   {:added "4.0"}
   [book module-id]
   (let [module    (b/get-module book module-id)
-        links     (module/module-deps-code module)
+        links     (module/module-deps-code book module)
         entries   (vals (:code module))]
     {:native (script-imports book entries)
      :direct links}))
@@ -91,17 +91,17 @@
   ([book module-ids]
    (module-code-deps book module-ids {:all #{} :graph {}}))
   ([book module-ids deps]
-   (let [submap (collection/map-juxt [identity
-                             (comp set
-                                   module/module-deps-code
-                                   (partial b/get-module book))]
-                            module-ids)
-         ndeps  (-> deps
-                    (update :graph merge submap)
+    (let [submap (collection/map-juxt [identity
+                             (fn [module-id]
+                               (->> (b/get-module book module-id)
+                                    (module/module-deps-code book)
+                                    set))]
+                             module-ids)
+          ndeps  (-> deps
+                     (update :graph merge submap)
                     (update :all into (concat module-ids)))
          nids  (set/difference (apply set/union (vals (:graph ndeps)))
                                (:all ndeps))]
      (if (not-empty nids)
        (module-code-deps book nids ndeps)
        ndeps))))
-
