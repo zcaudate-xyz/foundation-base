@@ -144,12 +144,15 @@
   "interns a free pointer macro"
   {:added "4.0"}
   [lang args {:keys [input raw debug clip] :as meta}]
-  (let [{:keys [module] :as rt} (ut/lang-rt lang)]
+  (let [{:keys [module] :as rt} (ut/lang-rt lang)
+        ptr (ut/lang-pointer lang {:module module
+                                   :form (ptr/free-form args)})]
     (call-thunk meta
                 (fn []
                   (std.lib.context.pointer/rt-invoke-ptr
                    rt
-                   (ut/lang-pointer lang {:module module}) args)))))
+                    ptr
+                    [])))))
 
 (defn intern-!
   "interns a macro for free evalutation"

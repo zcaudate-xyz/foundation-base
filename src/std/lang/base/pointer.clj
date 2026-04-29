@@ -113,6 +113,30 @@
   ([ptr tag]
    (vec (cons tag [(ut/sym-full ptr) (:section ptr)]))))
 
+(defn free-form
+  "normalizes free-pointer body forms into a canonical pointer form"
+  {:added "4.1"}
+  [body]
+  (let [forms (if (vector? body) body (vec body))]
+    (case (count forms)
+      0 '(do)
+      1 (first forms)
+      (apply list 'do forms))))
+
+(defn free-form-body
+  "returns the body forms for a canonical free-pointer form"
+  {:added "4.1"}
+  [form]
+  (cond (nil? form)
+        []
+
+        (and (collection/form? form)
+             (= 'do (first form)))
+        (rest form)
+
+        :else
+        [form]))
+
 (defn ptr-deref
   "gets the entry or the free pointer data"
   {:added "4.0"}

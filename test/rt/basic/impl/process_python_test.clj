@@ -69,4 +69,17 @@
               (return 3)
               (catch Exception (:= err (. traceback (format-exc)))))
             (throw (Exception err)))
+          (:= (. (globals) ["OUT"]) (OUT-FN)))
+
+  (default-body-transform '(do 1 2 3) {})
+  => '(do (defn OUT-FN
+            []
+            (:- :import traceback)
+            (var err)
+            (try
+              1
+              2
+              (return 3)
+              (catch Exception (:= err (. traceback (format-exc)))))
+            (throw (Exception err)))
           (:= (. (globals) ["OUT"]) (OUT-FN))))

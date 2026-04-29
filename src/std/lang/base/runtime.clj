@@ -254,12 +254,20 @@
   [forms]
   (template/$ ('((fn [] ~@forms)))))
 
+(defn normalize-body-forms
+  "normalizes runtime eval input into a flat sequence of body forms"
+  {:added "4.1"}
+  [input {:keys [bulk] :as mopts}]
+  (if bulk
+    input
+    (ptr/free-form-body input)))
+
 (defn return-transform
   "standard return transform"
   {:added "4.0"}
   [input {:keys [bulk] :as mopts} & [{:keys [wrap-fn
                                              format-fn]}]]
-  (let [forms (if bulk input [input])
+  (let [forms (normalize-body-forms input mopts)
         wrap-fn   (or wrap-fn
                       return-wrap-invoke)
         format-fn (or format-fn

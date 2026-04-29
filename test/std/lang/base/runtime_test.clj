@@ -139,11 +139,25 @@
   (rt/return-wrap-invoke '[1 2 (:= x 3)])
   => '((quote ((fn [] 1 2 (:= x 3))))))
 
+^{:refer std.lang.base.runtime/normalize-body-forms :added "4.1"}
+(fact "normalizes runtime eval input into body forms"
+  (rt/normalize-body-forms '(do 1 2 (:= x 3)) {})
+  => '(1 2 (:= x 3))
+
+  (rt/normalize-body-forms '(+ 1 2) {})
+  => '((+ 1 2))
+
+  (rt/normalize-body-forms '[1 2 (:= x 3)] {:bulk true})
+  => '[1 2 (:= x 3)])
+
 ^{:refer std.lang.base.runtime/return-transform :added "4.0"}
 (fact "standard return transform"
 
   (rt/return-transform '[1 2 (:= x 3)] {})
   => '((quote ((fn [] (return [1 2 (:= x 3)])))))
+
+  (rt/return-transform '(do 1 2 (:= x 3)) {})
+  => '((quote ((fn [] 1 2 (:= x 3)))))
 
   (rt/return-transform '[1 2 (:= x 3)] {:bulk true})
   => '((quote ((fn [] 1 2 (:= x 3))))))

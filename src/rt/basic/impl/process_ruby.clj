@@ -35,13 +35,8 @@
 (defn normalize-forms
   "normalizes runtime input into a flat sequence of Ruby statements."
   {:added "4.1"}
-  [input {:keys [bulk]}]
-  (let [forms (if bulk input [input])]
-    (if (and (= 1 (count forms))
-             (collection/form? (first forms))
-             (= 'do (ffirst forms)))
-      (rest (first forms))
-      forms)))
+  [input mopts]
+  (rt/normalize-body-forms input mopts))
 
 (defn mark-inline-defs
   "marks inline `defn` forms as inner so Ruby does not namespace-qualify

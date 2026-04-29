@@ -90,8 +90,18 @@
   (ptr-deref +ptr+)
   => book/book-entry?
 
-  (ptr-deref (dissoc +ptr+ :id))
-  => map?)
+   (ptr-deref (dissoc +ptr+ :id))
+   => map?)
+
+^{:refer std.lang.base.pointer/free-form :added "4.1"}
+(fact "normalizes free-pointer bodies"
+  (free-form [1 2 3]) => '(do 1 2 3)
+  (free-form '[(+ 1 2)]) => '(+ 1 2))
+
+^{:refer std.lang.base.pointer/free-form-body :added "4.1"}
+(fact "expands canonical free-pointer forms into body forms"
+  (free-form-body '(do 1 2 3)) => '(1 2 3)
+  (free-form-body '(+ 1 2)) => '((+ 1 2)))
 
 ^{:refer std.lang.base.pointer/ptr-display :added "4.0"}
 (fact "emits the display string for pointer"
@@ -131,6 +141,14 @@
 
   (ptr-invoke-script +ptr+ [1 2] {:layout :full})
   => "1 + 2"
+
+  (ptr-invoke-script (ut/lang-pointer :lua
+                                      {:module 'L.core
+                                       :form '(do 1 2 3)
+                                       :library +library-ext+})
+                     []
+                     {:layout :full})
+  => "1\n2\n3"
 
   (ptr-invoke-script (ut/lang-pointer :lua
                                       {:module 'L.core
