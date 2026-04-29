@@ -831,7 +831,7 @@
 
 (defn scheme-tf-x-return-encode
   [[_ out id key]]
-  (list 'return-encode out id key))
+  (list 'xt-return-encode out id key))
 
 (defn scheme-tf-x-return-wrap
   [[_ callback encode-fn]]
@@ -978,6 +978,37 @@
    :x-promise-native? {:macro #'scheme-tf-x-promise-native? :emit :macro :value true}
    :x-with-delay      {:macro #'scheme-tf-x-with-delay      :emit :macro :value true}})
 
+(defn scheme-tf-x-socket-connect
+  [[_ host port _opts cb]]
+  (list 'with-handlers
+        (list (list (list 'lambda '(e) true)
+                    (list 'lambda '(e)
+                          (list cb 'e false))))
+        (list 'let-values
+              (list (list (list 'in 'out)
+                          (list 'tcp-connect host port)))
+              (list cb false (list 'vector 'in 'out))))
+  )
+
+(defn scheme-tf-x-socket-send
+  [[_ conn s]]
+  (list 'begin
+        (list 'display s (list 'vector-ref conn 1))
+        (list 'flush-output (list 'vector-ref conn 1))
+        conn))
+
+(defn scheme-tf-x-socket-close
+  [[_ conn]]
+  (list 'begin
+        (list 'close-input-port (list 'vector-ref conn 0))
+        (list 'close-output-port (list 'vector-ref conn 1))
+        false))
+
+(def +scheme-socket+
+  {:x-socket-connect {:macro #'scheme-tf-x-socket-connect :emit :macro :value true}
+   :x-socket-send    {:macro #'scheme-tf-x-socket-send    :emit :macro :value true}
+   :x-socket-close   {:macro #'scheme-tf-x-socket-close   :emit :macro :value true}})
+
 (def +scheme+
   (merge +scheme-core+
          +scheme-global+
@@ -990,4 +1021,5 @@
          +scheme-bit+
          +scheme-json+
          +scheme-iter+
-         +scheme-promise+))
+         +scheme-promise+
+         +scheme-socket+))

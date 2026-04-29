@@ -202,13 +202,13 @@
                                         catch-form (if (= 1 (count (:body catch)))
                                                      (first (:body catch))
                                                      (cons 'progn (:body catch)))]
-                                    (list 'condition-case raw-sym
-                                          body-form
-                                          (list 'error
-                                                (list 'do
-                                                      (list 'var bind-sym
-                                                            (list 'error-message-string raw-sym))
-                                                      catch-form))))
+                                     (list 'condition-case raw-sym
+                                           body-form
+                                           (list 'error
+                                                 (list 'let
+                                                       (list (list bind-sym
+                                                                   (list 'error-message-string raw-sym)))
+                                                       catch-form))))
                                   body-form)]
                  (if (seq finally)
                    (list* 'unwind-protect caught finally)

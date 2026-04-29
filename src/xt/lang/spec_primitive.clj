@@ -1,5 +1,6 @@
 (ns xt.lang.spec-primitive
-  (:require [std.lang :as l :refer [defspec.xt]]))
+  (:require [std.lang :as l :refer [defspec.xt]])
+  (:refer-clojure :exclude [* + - / < <= == > >= await break mod not= return -> ->> and case comment cond doto for let letfn not or when while]))
 
 (l/script :xtalk)
 

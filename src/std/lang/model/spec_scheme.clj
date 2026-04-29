@@ -46,8 +46,11 @@
 
 (defn scheme-tf-throw
   [[_ x]]
-  (if (and (collection/form? x)
-           (contains? #{'x:ex 'x:ex-new} (first x)))
+  (if (or (map? x)
+          (and (collection/form? x)
+               (let [op (first x)]
+                 (and (symbol? op)
+                      (contains? #{"x:ex" "x:ex-new"} (name op))))))
     (list 'raise x)
     (list 'error x)))
 
@@ -184,13 +187,16 @@
                                                      (cons 'begin (:body catch)))]
                                     (list 'with-handlers
                                           (list (list (list 'lambda (list raw-sym) true)
-                                                      (list 'lambda
-                                                            (list raw-sym)
-                                                            (list 'let
-                                                                  (list (list bind-sym
-                                                                              raw-sym))
-                                                                  catch-form))))
-                                          body-form))
+                                                       (list 'lambda
+                                                             (list raw-sym)
+                                                             (list 'let
+                                                                   (list (list bind-sym
+                                                                               (list 'if
+                                                                                     (list 'exn:fail? raw-sym)
+                                                                                     (list 'exn-message raw-sym)
+                                                                                     raw-sym)))
+                                                                   catch-form))))
+                                           body-form))
                                   body-form)]
                  (if (seq finally)
                    (list 'dynamic-wind
@@ -236,7 +242,7 @@
     :global-read-form (fn [global key]
                         (list 'hash-ref global
                               (if (symbol? key) (name key) key)
-                              false))
+                              (list 'quote 'null)))
    :global-write-form (fn [global key value]
                         (list 'begin
                               (list 'hash-set! global key value)
@@ -278,7 +284,12 @@
         (string? form)   (pr-str form)
         (keyword? form)  (pr-str (name form))
         (number? form)   (str form)
-        (symbol? form)   (str form)
+        (symbol? form)   (let [ns (namespace form)]
+                           (if (and ns
+                                    (or (= ns "-")
+                                        (.contains ns ".")))
+                             (name form)
+                             (str form)))
         (map? form)      (emit-scheme-map form)
         (vector? form)   (emit-scheme-coll "(vector " ")" form)
         (set? form)      (emit-scheme-coll "(set" ")" form)

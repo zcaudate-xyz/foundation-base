@@ -195,24 +195,26 @@
   "renders items with aligned continuation"
   {:added "4.1"}
   ([prefix items suffix separator]
+   (render-prefixed-items prefix items suffix separator render-form))
+  ([prefix items suffix separator render-item-fn]
    (if-let [items (seq items)]
-     (let [align     (+ (count prefix)
-                        (count separator))
-           first-str (render-form (first items))
-           rest-strs (rest items)]
-       (str prefix
-            separator
-            (prose/indent-rest first-str align)
-            (when (seq rest-strs)
-              (str "\n"
-                   (->> rest-strs
-                        (map (fn [item]
-                               (str (spaces align)
-                                    (prose/indent-rest (render-form item)
-                                                       align))))
-                        (str/join "\n"))))
-            suffix))
-     (str prefix suffix))))
+      (let [align     (+ (count prefix)
+                         (count separator))
+            first-str (render-item-fn (first items))
+            rest-strs (rest items)]
+        (str prefix
+             separator
+             (prose/indent-rest first-str align)
+             (when (seq rest-strs)
+               (str "\n"
+                    (->> rest-strs
+                         (map (fn [item]
+                                (str (spaces align)
+                                     (prose/indent-rest (render-item-fn item)
+                                                        align))))
+                         (str/join "\n"))))
+             suffix))
+      (str prefix suffix))))
 
 (defn parse-map-pairs
   "partitions map entries into key/value pairs"
@@ -297,10 +299,39 @@
          children   (child-entries block)
          [op & more] children]
      (if op
-       (render-prefixed-items (str "(" (block/string (entry-block op)))
-                              more
-                              ")"
-                              " ")
+       (let [op-block (entry-block op)
+             prefix   (str "(" (block/string op-block))
+             render-require-entry
+             (let [width (->> more
+                              (keep (fn [entry]
+                                      (let [block (entry-block entry)]
+                                        (when (= :vector (block/tag block))
+                                          (some->> (first (child-entries block))
+                                                   render-form
+                                                   count)))))
+                              (reduce max 0))]
+               (fn [entry]
+                 (let [block (entry-block entry)]
+                   (if (= :vector (block/tag block))
+                     (let [[lib & mods] (child-entries block)
+                           lib-str       (some-> lib render-form)
+                           mods-str      (seq (map render-form mods))]
+                       (cond
+                         (nil? lib-str)
+                         (render-form entry)
+
+                         mods-str
+                         (str "[" lib-str
+                              (spaces (+ 1 (- width (count lib-str))))
+                              (str/join " " mods-str)
+                              "]")
+
+                         :else
+                         (str "[" lib-str "]")))
+                     (render-form entry)))))]
+         (if (= :require (block/value op-block))
+           (render-prefixed-items prefix more ")" " " render-require-entry)
+           (render-prefixed-items prefix more ")" " ")))
        (render-form form)))))
 
 (defn render-item

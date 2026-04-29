@@ -1,7 +1,7 @@
 (ns code.manage.unit.snapto-test
   (:require [code.manage.unit.snapto :refer :all]
-            [code.project :as project]
-            [std.block :as block])
+            [code.project            :as project]
+            [std.block               :as block])
   (:use code.test))
 
 (def +wrong-fact+
@@ -43,8 +43,8 @@
 
 (def +right-source-file+
   (str "(ns hello\n"
-       "  (:require [js.cell.service :as service]\n"
-       "            [xt.lang.spec-base :as xt]\n"
+       "  (:require [js.cell.service     :as service]\n"
+       "            [xt.lang.spec-base   :as xt]\n"
        "            [xt.lang.common-data :as xtd]))\n\n"
        "(l/script :xtalk\n"
        "  {:require [[js.cell.service :as service]\n"
