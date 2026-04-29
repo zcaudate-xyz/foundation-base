@@ -385,12 +385,17 @@
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-prototype-get :added "4.1"}
 (fact "gets runtime prototypes"
   (emit-dart (dart-tf-x-prototype-get '[_ obj]))
-  => #"runtimeType")
+  => #"obj\[\"_xt_proto\"\]")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-prototype-set :added "4.1"}
-(fact "setting prototypes is not supported"
+(fact "stores attached protocol metadata"
   (emit-dart (dart-tf-x-prototype-set '[_ obj prototype]))
-  => #"Proto set not supported in Dart")
+  => #"obj\[\"_xt_proto\"\] = prototype")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-prototype-method :added "4.1"}
+(fact "creates direct runtime method lookups"
+  (emit-dart (dart-tf-x-prototype-method '[_ obj key]))
+  => #"(?s)direct.*obj\[key\].*proto.*obj\[\"_xt_proto\"\].*proto.*\[key\]")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-prototype-tostring :added "4.1"}
 (fact "stringifies prototypes"

@@ -4,9 +4,10 @@
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as spec-promise]
              [xt.old.db.sql-util :as ut]
              [xt.old.db.base-check :as check]
-             [xt.old.sys.conn-dbsql :as driver]]})
+             [xt.lib.sql-connection :as sql]]})
 
 (defn.xt decode-return
   "decodes the return value"
@@ -50,7 +51,7 @@
 (defn.xt call-raw
   "calls a database function"
   {:added "4.0"}
-  [conn spec args cb]
+  [conn spec args]
   (var targs (xt/x:get-key spec "input"))
   (var [l-ok l-err] (check/check-args-length args targs))
   (when (not l-ok)
@@ -71,13 +72,18 @@
                :else
                (return val))))
   (var error-fn
-       (fn [err]
-         (xt/x:err (xt/x:cat "ERR: - " (xt/x:json-encode err)))))
-  (return (driver/query conn q
-                        (xt/x:obj-assign
-                         {:success  success-fn
-                          :error    error-fn}
-                         cb))))
+        (fn [err]
+          (xt/x:err (xt/x:cat "ERR: - " (xt/x:json-encode err)))))
+  (try
+    (var out (sql/query conn q))
+    (if (spec-promise/x:promise-native? out)
+      (return
+       (spec-promise/x:promise-catch
+        (spec-promise/x:promise-then out success-fn)
+        error-fn))
+      (return (success-fn out)))
+    (catch err
+      (return (error-fn err)))))
 
 (defn.xt call-api
   "results an api style result"
@@ -106,11 +112,17 @@
                   (if (. err ["status"])
                     (return (xt/x:json-encode err))
                     (return (xt/x:json-encode {:status "error"
-                                          :data err})))))
-  (return (driver/query
-           conn q
-           {:success  success-fn
-            :error    error-fn})))
+                                           :data err})))))
+  (try
+    (var out (sql/query conn q))
+    (if (spec-promise/x:promise-native? out)
+      (return
+       (spec-promise/x:promise-catch
+        (spec-promise/x:promise-then out success-fn)
+        error-fn))
+      (return (success-fn out)))
+    (catch err
+      (return (error-fn err)))))
 
 (comment
   (./create-tests)

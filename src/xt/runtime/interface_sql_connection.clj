@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.runtime.interface-spec :as spec]]})
+  {:require [[xt.lang.common-protocol :as proto]]})
 
 (def.xt ISqlConnectionDriver
   ["connect"])
@@ -13,7 +13,7 @@
    "query_sync"])
 
 (def.xt ISqlRuntimeDriver
-  (spec/iface-combine [-/ISqlConnectionDriver]))
+  (proto/iface-combine [-/ISqlConnectionDriver]))
 
 (def.xt ISqlRuntimeConnection
-  (spec/iface-combine [-/ISqlConnection]))
+  (proto/iface-combine [-/ISqlConnection]))

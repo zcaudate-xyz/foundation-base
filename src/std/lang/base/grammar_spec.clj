@@ -310,10 +310,12 @@
 
 (def +op-prototype+
   [{:op :prototype-get       :symbol #{'proto:get}       :emit :abstract
-    :op-spec {:arglists '([obj])}}
+     :op-spec {:arglists '([obj])}}
    {:op :prototype-set       :symbol #{'proto:set}       :emit :abstract
-    :op-spec {:arglists '([obj proto])}}
+     :op-spec {:arglists '([obj proto])}}
    {:op :prototype-create    :symbol #{'proto:create}    :emit :abstract
-    :op-spec {:arglists '([m])}}
+     :op-spec {:arglists '([m])}}
+   {:op :prototype-method    :symbol #{'proto:method}    :emit :abstract
+     :op-spec {:arglists '([obj key])}}
    {:op :prototype-tostring  :symbol #{'proto:tostring}  :emit :abstract
-    :op-spec {:arglists '([])}}])
+     :op-spec {:arglists '([])}}])

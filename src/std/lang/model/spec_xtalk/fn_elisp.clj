@@ -65,6 +65,13 @@
   [[_ f args]]
   (list 'apply f (elisp-vector->list args)))
 
+(defn elisp-tf-x-div
+  [[_ a b & more]]
+  (reduce (fn [acc v]
+            (list '/ acc v))
+          (list '/ (list 'float a) b)
+          more))
+
 (defn elisp-tf-x-err
   [[_ s & [data]]]
   (if (some? data)
@@ -142,6 +149,7 @@
    :x-print       {:macro #'elisp-tf-x-print       :emit :macro :value true}
    :x-len         {:macro #'elisp-tf-x-len         :emit :macro :value true}
    :x-cat         {:macro #'elisp-tf-x-cat         :emit :macro :value true}
+   :x-div         {:macro #'elisp-tf-x-div         :emit :macro :value true}
    :x-apply       {:macro #'elisp-tf-x-apply       :emit :macro}
    :x-err         {:macro #'elisp-tf-x-err         :emit :macro}
    :x-eval        {:macro #'elisp-tf-x-eval        :emit :macro}
@@ -619,8 +627,8 @@
 (defn elisp-tf-x-str-substring
   [[_ s start & [end]]]
   (if (some? end)
-    (list 'substring s start end)
-    (list 'substring s start)))
+    (list 'substring-no-properties s start end)
+    (list 'substring-no-properties s start)))
 
 (defn elisp-tf-x-str-to-upper
   [[_ s]]

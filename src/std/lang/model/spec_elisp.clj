@@ -1,11 +1,12 @@
 (ns std.lang.model.spec-elisp
   (:require [clojure.string :as str]
-            [std.lang.base.book :as book]
-            [std.lang.base.grammar :as grammar]
-            [std.lang.base.script :as script]
-            [std.lang.model.spec-lisp-common :as common]
-            [std.lang.model.spec-xtalk]
-            [std.lang.model.spec-xtalk.fn-elisp :as fn]
+             [std.lang.base.book :as book]
+             [std.lang.base.emit-common :as emit-common]
+             [std.lang.base.grammar :as grammar]
+             [std.lang.base.script :as script]
+             [std.lang.model.spec-lisp-common :as common]
+             [std.lang.model.spec-xtalk]
+             [std.lang.model.spec-xtalk.fn-elisp :as fn]
             [std.lib.collection :as collection]))
 
 (defn elisp-tf-break
@@ -170,6 +171,68 @@
   [form]
   (common/expand-form +reserved+ form))
 
+(defn elisp-invoke
+  [[sym & args :as form] grammar mopts]
+  (let [{:keys [keyword-fn]} (get-in grammar [:default :invoke])]
+    (cond (keyword? sym)
+          (cond keyword-fn
+                (keyword-fn form grammar mopts)
+
+                (namespace sym)
+                (emit-common/emit-invoke-static form grammar mopts)
+
+                :else
+                (emit-common/emit-invoke-typecast form grammar mopts))
+
+          (symbol? sym)
+          (emit-common/emit-invoke-raw
+           (emit-common/emit-wrapping sym grammar mopts)
+           args
+           grammar
+           mopts)
+
+          :else
+          (emit-common/emit-invoke-raw "funcall" (cons sym args) grammar mopts))))
+
+(defn elisp-normalize-funcalls
+  [form]
+  (cond (collection/form? form)
+        (let [head (first form)]
+          (if (= 'let head)
+            (let [bindings (second form)
+                  body     (drop 2 form)]
+              (list* 'let
+                     (apply list
+                            (map (fn [binding]
+                                   (if (and (collection/form? binding)
+                                            (= 2 (count binding)))
+                                     (list (first binding)
+                                           (elisp-normalize-funcalls (second binding)))
+                                     (elisp-normalize-funcalls binding)))
+                                 bindings))
+                     (map elisp-normalize-funcalls body)))
+            (let [items (apply list (map elisp-normalize-funcalls form))
+                  head  (first items)]
+              (if (collection/form? head)
+                (apply list 'funcall items)
+                items))))
+
+        (vector? form)
+        (mapv elisp-normalize-funcalls form)
+
+        (map? form)
+        (into (empty form)
+              (map (fn [[k v]]
+                     [(elisp-normalize-funcalls k)
+                      (elisp-normalize-funcalls v)]))
+              form)
+
+        (set? form)
+        (set (map elisp-normalize-funcalls form))
+
+        :else
+        form))
+
 (defn- elisp-function-prologue
   [args]
   [])
@@ -313,12 +376,14 @@
   (-> (common/prepare-top-level 'progn form)
       (elisp-expand)
       (elisp-transform)
+      (elisp-normalize-funcalls)
       (emit-elisp-form)))
 
 (def +grammar+
   (grammar/grammar :elisp
     +reserved+
-    {:emit #'emit-elisp}))
+    {:default {:invoke {:custom #'elisp-invoke}}
+     :emit #'emit-elisp}))
 
 (def +meta+ (book/book-meta {}))
 

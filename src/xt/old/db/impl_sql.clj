@@ -5,7 +5,7 @@
   {:require [[xt.old.db.base-flatten :as f]
              [xt.old.db.base-schema :as base-schema]
              [xt.old.db.base-scope :as scope]
-             [xt.old.sys.conn-dbsql :as conn-dbsql]
+             [xt.lib.sql-connection :as sql]
              [xt.old.db.sql-graph :as sql-graph]
              [xt.old.db.sql-table :as sql-table]
              [xt.old.db.sql-raw :as raw]
@@ -28,12 +28,12 @@
                    sql-table/table-emit-upsert
                    schema lookup flat opts))
   (cond (== tag "input")
-        (return (xt/x:str-join "\n\n" statements))
+         (return (xt/x:str-join "\n\n" statements))
 
-        :else
-        (do (conn-dbsql/query-sync instance 
-                                   (xt/x:str-join "\n\n" statements))
-            (return (xt/x:obj-keys flat)))))
+         :else
+         (do (sql/query-sync instance
+                             (xt/x:str-join "\n\n" statements))
+             (return (xt/x:obj-keys flat)))))
 
 (defn.xt sql-process-event-remove
   "removes data from database"
@@ -50,19 +50,19 @@
          (return (-/sql-gen-delete table-name ids opts))))
   (var statements (xtd/arr-mapcat ordered emit-fn))
   (cond (== tag "input")
-        (return (xt/x:str-join "\n\n" statements))
+         (return (xt/x:str-join "\n\n" statements))
 
-        :else
-        (do (conn-dbsql/query-sync instance 
-                                   (xt/x:str-join "\n\n" statements))
-            (return (xt/x:obj-keys flat)))))
+         :else
+         (do (sql/query-sync instance
+                             (xt/x:str-join "\n\n" statements))
+             (return (xt/x:obj-keys flat)))))
 
 
 (defn.xt sql-pull-sync
   "runs a pull statement"
   {:added "4.0"}
   [instance schema tree opts]
-  (var output (conn-dbsql/query-sync
+  (var output (sql/query-sync
                instance
                (sql-graph/select schema tree opts)))
   (return (xt/x:json-decode (:? (xt/x:is-string? output)
@@ -73,7 +73,7 @@
   "deletes sync data from sql db"
   {:added "4.0"}
   [instance schema table-name ids opts]
-  (return (conn-dbsql/query-sync
+  (return (sql/query-sync
            instance
            (xt/x:str-join "\n\n" (-/sql-gen-delete table-name ids opts)))))
 

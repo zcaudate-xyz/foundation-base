@@ -97,6 +97,17 @@
   [[_ f args]]
   (list 'apply f (scheme-vector->list args)))
 
+(defn scheme-tf-x-div
+  [[_ a b & more]]
+  (let [expr (reduce (fn [acc v]
+                       (list '/ acc v))
+                     (list '/ a b)
+                     more)]
+    (list 'if
+          (list 'integer? expr)
+          expr
+          (list 'exact->inexact expr))))
+
 (defn scheme-tf-x-err
   [[_ s & [data]]]
   (if (some? data)
@@ -108,8 +119,23 @@
   (list 'do
         (list 'var 'parts (list 'string-split s))
         (list 'var 'parsed (list 'string->number s))
+        (list 'var 'compact
+              (list 'regexp-match
+                    (list 'pregexp "^\\s*(-?[0-9]+(?:\\.[0-9]+)?)([+\\-*/])(-?[0-9]+(?:\\.[0-9]+)?)\\s*$")
+                    s))
         (scheme-if-chain
          [[(list 'number? 'parsed) 'parsed]
+          ['compact
+           (list 'do
+                 (list 'var 'a (list 'string->number (list 'cadr 'compact)))
+                 (list 'var 'op (list 'caddr 'compact))
+                 (list 'var 'b (list 'string->number (list 'cadddr 'compact)))
+                 (scheme-if-chain
+                  [[(list 'equal? 'op "+") (list '+ 'a 'b)]
+                   [(list 'equal? 'op "-") (list '- 'a 'b)]
+                   [(list 'equal? 'op "*") (list '* 'a 'b)]
+                   [(list 'equal? 'op "/") (list '/ 'a 'b)]]
+                  s))]
           [(list '= (list 'length 'parts) 3)
            (list 'do
                  (list 'var 'a (list 'string->number (list 'car 'parts)))
@@ -203,6 +229,7 @@
    :x-print       {:macro #'scheme-tf-x-print       :emit :macro :value true}
    :x-len         {:macro #'scheme-tf-x-len         :emit :macro :value true}
    :x-cat         {:macro #'scheme-tf-x-cat         :emit :macro :value true}
+   :x-div         {:macro #'scheme-tf-x-div         :emit :macro :value true}
    :x-apply       {:macro #'scheme-tf-x-apply       :emit :macro}
    :x-err         {:macro #'scheme-tf-x-err         :emit :macro}
    :x-eval        {:macro #'scheme-tf-x-eval        :emit :macro}
@@ -335,7 +362,7 @@
 (defn scheme-tf-x-get-key
   [[_ obj key default]]
   (if (some? default)
-    (list 'hash-ref obj key default)
+    (list 'hash-ref obj key (list 'lambda '() default))
     (list 'hash-ref obj key)))
 
 (defn scheme-tf-x-get-path
@@ -643,7 +670,7 @@
   (let [start (or start 0)]
     (list 'do
           (list 'var 'offset start)
-          (list 'var 'sub (list 'substring s start))
+          (list 'var 'sub (list 'xt-string-substring s start (list 'string-length s)))
           (list 'var 'matches
                 (list 'regexp-match-positions
                       (list 'regexp-quote tok)
@@ -657,8 +684,8 @@
 (defn scheme-tf-x-str-substring
   [[_ s start & [end]]]
   (if (some? end)
-    (list 'substring s start end)
-    (list 'substring s start)))
+    (list 'xt-string-substring s start end)
+    (list 'xt-string-substring s start (list 'string-length s))))
 
 (defn scheme-tf-x-str-to-upper
   [[_ s]]
@@ -682,11 +709,11 @@
 
 (defn scheme-tf-x-str-trim-left
   [[_ s]]
-  (list 'string-trim s))
+  (list 'regexp-replace (list 'pregexp "^\\s+") s ""))
 
 (defn scheme-tf-x-str-trim-right
   [[_ s]]
-  (list 'string-trim s))
+  (list 'regexp-replace (list 'pregexp "\\s+$") s ""))
 
 (defn scheme-tf-x-str-pad-left
   [[_ s n ch]]
@@ -713,16 +740,17 @@
   (list 'and
         (list '<= (list 'string-length prefix) (list 'string-length s))
         (list 'equal? prefix
-              (list 'substring s 0 (list 'string-length prefix)))))
+              (list 'xt-string-substring s 0 (list 'string-length prefix)))))
 
 (defn scheme-tf-x-str-ends-with
   [[_ s suffix]]
   (list 'and
         (list '<= (list 'string-length suffix) (list 'string-length s))
         (list 'equal? suffix
-              (list 'substring s
+              (list 'xt-string-substring s
                     (list '- (list 'string-length s)
-                          (list 'string-length suffix))))))
+                          (list 'string-length suffix))
+                    (list 'string-length s)))))
 
 (def +scheme-string+
   {:x-str-comp        {:macro #'scheme-tf-x-str-comp        :emit :macro :value true}
