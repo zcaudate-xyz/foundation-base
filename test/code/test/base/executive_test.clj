@@ -75,12 +75,11 @@
 
 ^{:refer code.test.base.executive/summarise :added "3.0"}
 (fact "creates a summary of given results"
-
-  (binding [context/*print* #{:print-bulk}]
-    (clojure.string/includes? (env/with-out-str
-                     (executive/summarise {:passed [] :failed [] :throw [] :timeout []}))
-                   "Summary"))
-  => true)
+  (executive/summarise {:passed [] :failed [] :throw [] :timeout []})
+  => (contains {:passed 0
+                :failed 0
+                :throw 0
+                :timeout 0}))
 
 ^{:refer code.test.base.executive/save-report :added "4.1"}
 (fact "writes EDN-safe run reports"

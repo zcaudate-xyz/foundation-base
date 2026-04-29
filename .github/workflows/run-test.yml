@@ -48,6 +48,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Install JS parser dependencies
+        working-directory: src-training/scripts/js_parser
+        run: npm ci
         
       - name: Run Tests - code
         run: >
