@@ -3,6 +3,7 @@
             [std.lang.base.book :as book]
             [std.lang.base.grammar :as grammar]
             [std.lang.base.script :as script]
+            [std.lang.model.spec-xtalk]
             [std.lang.model.spec-xtalk.fn-scheme :as fn]
             [std.lib.collection :as collection]))
 
@@ -14,8 +15,6 @@
 
 (def +reserved+
   (grammar/to-reserved +features+))
-
-(declare scheme-expand)
 
 (defn scheme-expand
   [form]
@@ -176,7 +175,7 @@
       (emit-scheme-form)))
 
 (def +grammar+
-  (grammar/grammar :scm
+  (grammar/grammar :scheme
     +reserved+
     {:emit #'emit-scheme}))
 

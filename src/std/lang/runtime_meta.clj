@@ -16,6 +16,16 @@
             :suffix "python"
             :runtime :basic
             :check-mode :realtime}
+   :scheme {:script :scheme
+            :dispatch '!.scheme
+            :suffix "scheme"
+            :runtime :basic
+            :check-mode :realtime}
+   :elisp  {:script :elisp
+            :dispatch '!.elisp
+            :suffix "elisp"
+            :runtime :basic
+            :check-mode :realtime}
    :r      {:script :r
             :dispatch '!.R
             :suffix "r"
@@ -46,7 +56,7 @@
   {:ruby :rb})
 
 (def +runtime-executable-langs+
-  #{:js :lua :python :r :rb :php})
+  #{:js :lua :python :scheme :elisp :r :rb :php})
 
 (def +runtime-langs+
   (->> (keys +runtime-lang-config+)
