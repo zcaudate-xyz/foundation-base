@@ -1,7 +1,8 @@
 (ns xt.old.sys.conn-dbsql-test
   (:require [rt.basic.type-common :as common]
              [std.lang :as l]
-             [xt.lang.common-notify :as notify])
+             [xt.lang.common-notify :as notify]
+             [xt.lang.spec-promise :as spec-promise])
   (:use code.test))
 
 (l/script- :lua.nginx
@@ -39,37 +40,38 @@
 
   (notify/wait-on :lua.nginx
     (spec-promise/x:promise-then
-     (dbsql/connect {:constructor lua-postgres/connect-constructor})
+     (dbsql/connect (lua-postgres/driver) {})
+     (fn [conn]
+        (repl/notify
+         (dbsql/query conn "SELECT 1;")))))
+  => 1
+
+  (notify/wait-on :js
+    (spec-promise/x:promise-then
+     (dbsql/connect (js-postgres/driver) {})
+     (fn [conn]
+       (spec-promise/x:promise-then
+        (dbsql/query conn "SELECT 1;")
+        (fn [out]
+          (repl/notify out))))))
+  => (any 1 [{"?column?" 1}])
+
+  (notify/wait-on :js
+    (spec-promise/x:promise-then
+     (dbsql/connect (js-sqlite/driver) {})
      (fn [conn]
        (repl/notify
         (dbsql/query conn "SELECT 1;")))))
   => 1
 
-  (notify/wait-on :js
-    (spec-promise/x:promise-then
-     (dbsql/connect {:constructor js-postgres/connect-constructor})
-     (fn [conn]
-       (dbsql/query conn "SELECT 1;"
-                    (repl/<!)))))
-  => (any 1 [{"?column?" 1}])
-
-  (notify/wait-on :js
-    (spec-promise/x:promise-then
-     (dbsql/connect {:constructor js-sqlite/connect-constructor})
-     (fn [conn]
-       (dbsql/query conn "SELECT 1;"
-                    (repl/<!)))))
-  => 1
-
   (if CANARY-DART
     (notify/wait-on :dart
       (spec-promise/x:promise-then
-       (dbsql/connect {:constructor dart-sqlite/connect-constructor
-                        :memory true}
-                      nil)
+       (dbsql/connect (dart-sqlite/driver)
+                      {:memory true})
        (fn [conn]
-         (repl/notify
-          (dbsql/query-sync conn "SELECT 1;")))))
+          (repl/notify
+           (dbsql/query-sync conn "SELECT 1;")))))
     :dart-unavailable)
   => (any 1
           :dart-unavailable))
@@ -80,13 +82,12 @@
   (if CANARY-DART
     (notify/wait-on :dart
       (spec-promise/x:promise-then
-       (dbsql/connect {:constructor dart-sqlite/connect-constructor
-                        :memory true}
-                      nil)
+       (dbsql/connect (dart-sqlite/driver)
+                      {:memory true})
        (fn [conn]
-         (repl/notify
-          (dbsql/disconnect conn nil)))))
-    :dart-unavailable)
+          (repl/notify
+           (dbsql/disconnect conn)))))
+     :dart-unavailable)
   => (any true
           :dart-unavailable))
 
@@ -102,17 +103,13 @@
   (if CANARY-DART
     (notify/wait-on :dart
       (spec-promise/x:promise-then
-       (dbsql/connect {:constructor dart-sqlite/connect-constructor
-                        :memory true}
-                      nil)
+       (dbsql/connect (dart-sqlite/driver)
+                      {:memory true})
        (fn [conn]
-         (dbsql/query conn "CREATE TABLE test (id INTEGER, name TEXT);" nil)
-         (dbsql/query conn "INSERT INTO test (id, name) VALUES (1, 'alpha');" nil)
-         (repl/notify
-          (dbsql/query-sync conn "SELECT name FROM test;")))))
-    :dart-unavailable)
+          (dbsql/query conn "CREATE TABLE test (id INTEGER, name TEXT);")
+          (dbsql/query conn "INSERT INTO test (id, name) VALUES (1, 'alpha');")
+          (repl/notify
+           (dbsql/query-sync conn "SELECT name FROM test;")))))
+     :dart-unavailable)
   => (any "alpha"
           :dart-unavailable))
-
-^{:refer xt.old.sys.conn-dbsql/wrap-callback :added "4.1"}
-(fact "TODO")

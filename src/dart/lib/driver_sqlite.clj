@@ -2,7 +2,8 @@
   (:require [std.lang :as l]))
 
 (l/script :dart
-  {:require [[xt.lang.spec-base :as xt]]
+  {:require [[xt.lang.spec-base :as xt]
+             [xt.runtime.type-sql-connection :as sqlrt]]
    :import [["package:sqlite3/sqlite3.dart" :as sqlite]]})
 
 (defn.dt query-returns-rows?
@@ -84,6 +85,18 @@
         (return conn)))
   (return conn))
 
+(defn.dt wrap-connection
+  [conn]
+  (return
+   (sqlrt/connection-create
+    conn
+    {"disconnect" (fn [raw]
+                    (return ((xt/x:get-key raw "::disconnect") nil)))
+     "query" (fn [raw query]
+               (return ((xt/x:get-key raw "::query") query nil)))
+     "query_sync" (fn [raw query]
+                    (return ((xt/x:get-key raw "::query_sync") query)))})))
+
 (defn.dt ^{:static/override true} connect-constructor
   "Connects to a SQLite database through `package:sqlite3`."
   {:added "4.1"}
@@ -108,3 +121,54 @@
       (if (xt/x:not-nil? callback)
         (return (-/callback-return callback err nil))
         (return (Future.error err))))))
+
+(defn.dt driver
+  []
+  (return
+   (sqlrt/driver-create
+    {"connect" (fn [m]
+                 (when (xt/x:nil? m)
+                   (:= m {}))
+                 (var memory (xt/x:get-key m "memory"))
+                 (var filename (xt/x:get-key m "filename"))
+                 (when (xt/x:nil? filename)
+                   (:= filename "sqlite.db"))
+                 (return
+                  (Future.sync
+                   (fn []
+                     (var db nil)
+                     (if memory
+                       (:= db (sqlite.sqlite3.openInMemory))
+                       (:= db (sqlite.sqlite3.open filename)))
+                     (var run-query
+                          (fn [query]
+                            (if (-/query-returns-rows? query)
+                              (do (var result (. db (select query)))
+                                  (var columns (. result columnNames))
+                                  (var values nil)
+                                  (:= values [])
+                                  (xt/for:iter [row (xt/x:iter-from result)]
+                                    (var row-values nil)
+                                    (:= row-values [])
+                                    (xt/for:array [[i _] columns]
+                                      (xt/x:arr-push row-values (. row [i])))
+                                    (xt/x:arr-push values row-values))
+                                  (when (and (== 1 (xt/x:len values))
+                                             (== 1 (xt/x:len (. values [0]))))
+                                    (return (. values [0] [0])))
+                                  (if (> (xt/x:len columns) 0)
+                                    (return [{"columns" columns
+                                              "values" values}]))
+                                  (return values))
+                              (do (. db (execute query))
+                                  (return [])))))
+                     (return
+                      (sqlrt/connection-create
+                       db
+                       {"disconnect" (fn [raw]
+                                       (. raw (dispose))
+                                       (return true))
+                        "query" (fn [raw query]
+                                  (return (run-query query)))
+                        "query_sync" (fn [raw query]
+                                       (return (run-query query)))}))))))})))

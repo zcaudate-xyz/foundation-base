@@ -69,15 +69,15 @@
 (fact "calls a database function"
 
   (notify/wait-on :js
-    (driver/connect {:constructor js-postgres/connect-constructor
-                     :database "test-scratch"}
-                    {:success
-                     (fn [conn]
-                       (. (call/call-raw
-                           conn
-                           (@! (pg/bind-function scratch/addf))
-                           [10 20])
-                          (then (repl/>notify))))}))
+    (. (driver/connect (js-postgres/driver)
+                       {:database "test-scratch"})
+       (then
+        (fn [conn]
+          (. (call/call-raw
+              conn
+              (@! (pg/bind-function scratch/addf))
+              [10 20])
+             (then (repl/>notify))))))
   => "30")
 
 ^{:refer xt.db.schema.sql-call/call-api
@@ -88,12 +88,12 @@
 (fact "results an api style result"
 
   (notify/wait-on :js
-    (driver/connect {:constructor js-postgres/connect-constructor
-                     :database "test-scratch"}
-                    {:success
-                     (fn [conn]
-                       (. (call/call-api conn
-                                         (@! (pg/bind-function scratch/addf))
-                                         [10 20])
-                          (then (repl/>notify))))}))
+    (. (driver/connect (js-postgres/driver)
+                       {:database "test-scratch"})
+       (then
+        (fn [conn]
+          (. (call/call-api conn
+                            (@! (pg/bind-function scratch/addf))
+                            [10 20])
+             (then (repl/>notify))))))
   => "{\"status\": \"ok\", \"data\":\"30\"}")

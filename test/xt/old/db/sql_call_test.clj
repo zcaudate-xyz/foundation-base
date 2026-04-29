@@ -1,8 +1,9 @@
 (ns xt.old.db.sql-call-test
   (:use code.test)
   (:require [rt.postgres :as pg]
-            [std.lang :as l]
-            [xt.lang.common-notify :as notify]))
+             [std.lang :as l]
+            [xt.lang.common-notify :as notify]
+            [xt.lang.spec-promise :as spec-promise]))
 
 (l/script- :postgres
   {:runtime :jdbc.client
@@ -13,6 +14,7 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as spec-promise]
              [xt.lang.common-repl :as repl]
              [xt.old.db.sql-call :as call]
              [xt.old.sys.conn-dbsql :as driver]
@@ -69,15 +71,15 @@
 (fact "calls a database function"
 
   (notify/wait-on :js
-    (driver/connect {:constructor js-postgres/connect-constructor
-                     :database "test-scratch"}
-                    {:success
-                     (fn [conn]
-                       (. (call/call-raw
-                           conn
-                           (@! (pg/bind-function scratch/addf))
-                           [10 20])
-                          (then (repl/>notify))))}))
+    (spec-promise/x:promise-then
+      (driver/connect (js-postgres/driver)
+                      {:database "test-scratch"})
+      (fn [conn]
+        (. (call/call-raw
+            conn
+            (@! (pg/bind-function scratch/addf))
+            [10 20])
+           (then (repl/>notify))))))
   => "30")
 
 ^{:refer xt.old.db.sql-call/call-api
@@ -88,12 +90,12 @@
 (fact "results an api style result"
 
   (notify/wait-on :js
-    (driver/connect {:constructor js-postgres/connect-constructor
-                     :database "test-scratch"}
-                    {:success
-                     (fn [conn]
-                       (. (call/call-api conn
-                                         (@! (pg/bind-function scratch/addf))
-                                         [10 20])
-                          (then (repl/>notify))))}))
+    (spec-promise/x:promise-then
+      (driver/connect (js-postgres/driver)
+                      {:database "test-scratch"})
+      (fn [conn]
+        (. (call/call-api conn
+                          (@! (pg/bind-function scratch/addf))
+                          [10 20])
+           (then (repl/>notify)))))
   => "{\"status\": \"ok\", \"data\":\"30\"}")

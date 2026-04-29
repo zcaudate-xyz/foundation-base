@@ -29,9 +29,8 @@
     [(notify/wait-on
       :dart
       (spec-promise/x:promise-then
-       (dbsql/connect {:constructor dart-sqlite/connect-constructor
-                       :memory true}
-                      nil)
+       (dbsql/connect (dart-sqlite/driver)
+                      {:memory true})
        (fn [conn]
          (dbsql/query-sync conn
                            (str/join "\n\n"
@@ -50,9 +49,8 @@
      (notify/wait-on
       :dart
       (spec-promise/x:promise-then
-       (dbsql/connect {:constructor dart-sqlite/connect-constructor
-                       :memory true}
-                      nil)
+       (dbsql/connect (dart-sqlite/driver)
+                      {:memory true})
        (fn [conn]
          (dbsql/query-sync conn
                            (str/join "\n\n"

@@ -23,17 +23,18 @@
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.runtime.type-sql-connection/connection-legacy :added "4.1"}
-(fact "wraps legacy SQL connection maps with runtime dispatch"
+^{:refer xt.runtime.type-sql-connection/connection-create :added "4.1"}
+(fact "wraps fresh SQL connection implementations with runtime dispatch"
 
   (!.js
-   (var conn (sqlrt/connection-legacy
-              {"::query" (fn [query callback]
-                           (return 1))
-               "::query_sync" (fn [query]
-                                 (return 2))
-               "::disconnect" (fn [callback]
-                                  (return true))}))
+   (var conn (sqlrt/connection-create
+              {"tag" "raw"}
+              {"query" (fn [raw query]
+                         (return 1))
+               "query_sync" (fn [raw query]
+                              (return 2))
+               "disconnect" (fn [raw]
+                              (return true))}))
     [(sqlrt/connection? conn)
      (sqlrt/connection-query conn "SELECT 1;")
      (sqlrt/connection-query-sync conn "SELECT 2;")
@@ -41,13 +42,14 @@
   => [true 1 2 true]
 
   (!.lua
-   (var conn (sqlrt/connection-legacy
-              {"::query" (fn [query callback]
-                           (return 1))
-               "::query_sync" (fn [query]
-                                 (return 2))
-               "::disconnect" (fn [callback]
-                                  (return true))}))
+   (var conn (sqlrt/connection-create
+              {"tag" "raw"}
+              {"query" (fn [raw query]
+                         (return 1))
+               "query_sync" (fn [raw query]
+                              (return 2))
+               "disconnect" (fn [raw]
+                              (return true))}))
     [(sqlrt/connection? conn)
      (sqlrt/connection-query conn "SELECT 1;")
      (sqlrt/connection-query-sync conn "SELECT 2;")
@@ -56,13 +58,14 @@
 
   (if CANARY-DART
     (!.dt
-      (var conn (sqlrt/connection-legacy
-                 {"::query" (fn [query callback]
-                              (return 1))
-                  "::query_sync" (fn [query]
-                                    (return 2))
-                  "::disconnect" (fn [callback]
-                                    (return true))}))
+      (var conn (sqlrt/connection-create
+                 {"tag" "raw"}
+                 {"query" (fn [raw query]
+                            (return 1))
+                  "query_sync" (fn [raw query]
+                                 (return 2))
+                  "disconnect" (fn [raw]
+                                 (return true))}))
       [(sqlrt/connection? conn)
        (sqlrt/connection-query conn "SELECT 1;")
        (sqlrt/connection-query-sync conn "SELECT 2;")

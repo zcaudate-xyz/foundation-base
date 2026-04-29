@@ -1,14 +1,16 @@
 (ns js.lib.driver-postgres-test
   (:require [std.lang :as l]
-            [xt.lang.common-notify :as notify])
+            [xt.lang.common-notify :as notify]
+            [xt.lang.spec-promise :as spec-promise])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
    :require [[xt.old.sys.conn-dbsql :as dbsql]
-             [xt.lang.common-lib :as k]
-             [xt.lang.common-repl :as repl]
-             [js.lib.driver-postgres :as js-postgres]]})
+             [xt.lang.spec-promise :as spec-promise]
+              [xt.lang.common-lib :as k]
+              [xt.lang.common-repl :as repl]
+              [js.lib.driver-postgres :as js-postgres]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -24,7 +26,7 @@
 (fact "sets the methods for the object")
 
 ^{:refer js.lib.driver-postgres/connect-constructor :added "4.0" :unchecked true}
-(fact "constructs the postgres instance"
+ (fact "constructs the postgres instance"
  
   (!.js
    (== "Promise"
@@ -35,12 +37,16 @@
 
 
   (do (notify/wait-on [:js 5000]
-        (dbsql/connect {:constructor js-postgres/connect-constructor}
-                       {:success (fn [conn]
-                                   (:= (!:G CONN) conn)
-                                   (repl/notify true))}))
+        (spec-promise/x:promise-then
+         (dbsql/connect (js-postgres/driver) {})
+         (fn [conn]
+           (:= (!:G CONN) conn)
+           (repl/notify true))))
       (notify/wait-on :js
-        (dbsql/query (!:G CONN) "SELECT 1;" (repl/<!))))
+        (spec-promise/x:promise-then
+         (dbsql/query (!:G CONN) "SELECT 1;")
+         (fn [out]
+           (repl/notify out)))))
   => (any nil 1 [{"?column?" 1}]))
 
 (comment

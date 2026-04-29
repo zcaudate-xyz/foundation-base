@@ -1,9 +1,9 @@
 (ns xtbench.scheme.lang.spec-base-test
   (:use code.test)
-  (:require [clojure.set           :as set]
-            [std.lang              :as l]
+  (:require [clojure.set :as set]
+            [std.lang :as l]
             [xt.lang.common-notify :as notify]
-            [xt.lang.spec-promise  :as spec-promise]))
+            [xt.lang.spec-promise :as spec-promise]))
 
 (l/script- :scheme
   {:runtime :basic

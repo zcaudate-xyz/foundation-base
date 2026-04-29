@@ -25,10 +25,10 @@
   []
   (!.lua
    (var ngxsqlite (require "lsqlite3"))
-   (:= (!:G INSTANCE) (dbsql/connect {:constructor lua-sqlite/connect-constructor
-                                      :memory true}))
+   (:= (!:G INSTANCE) (dbsql/connect (lua-sqlite/driver)
+                                     {:memory true}))
    (dbsql/query-sync INSTANCE
-                     (str/join "\n\n"
+                      (str/join "\n\n"
                              (manage/table-create-all
                               sample/Schema
                               sample/SchemaLookup
@@ -53,8 +53,7 @@
 
   (!.lua
    [(dbsql/query INSTANCE
-                 "SELECT 1;"
-                 nil)
+                 "SELECT 1;")
      (xtd/arr-sort
        (xtd/obj-keys
         (f/flatten-bulk sample/Schema

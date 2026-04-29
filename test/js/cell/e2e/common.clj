@@ -325,8 +325,7 @@
 (defn.js connect-sqlite
   [callback]
   (return
-   (dbsql/connect {:constructor sqlite-wasm/connect-constructor}
-                  callback)))
+   (dbsql/connect (sqlite-wasm/driver) {})))
 
 (defn.js sqlite-exec
   [conn raw]

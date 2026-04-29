@@ -1032,50 +1032,7 @@
 
 (defn scheme-tf-x-notify-http
   [[_ host port value id key opts]]
-  (let [path-sym    (gensym "path__")
-        scheme-sym  (gensym "scheme__")
-        url-sym     (gensym "url__")
-        payload-sym (gensym "payload__")
-        ok-sym      (gensym "ok__")
-        out-sym     (gensym "out__")
-        err-sym     (gensym "err__")]
-    (list 'with-handlers
-          (list (list (list 'lambda '(e) true)
-                      (list 'lambda '(e)
-                            (list 'vector "unable to connect"))))
-          (list 'let*
-                (list (list path-sym (list 'if
-                                           opts
-                                           (list 'hash-ref opts "path" "/")
-                                           "/"))
-                      (list scheme-sym (list 'if
-                                             opts
-                                             (list 'hash-ref opts "scheme" "http")
-                                             "http"))
-                      (list url-sym (list 'string-append
-                                          scheme-sym
-                                          "://"
-                                          host
-                                          ":"
-                                          (list 'format "~a" port)
-                                          path-sym))
-                      (list payload-sym (list 'xt-return-encode value id key))
-                      (list out-sym (list 'open-output-string))
-                      (list err-sym (list 'open-output-string))
-                      (list ok-sym
-                            (list 'parameterize
-                                  (list (list 'current-output-port out-sym)
-                                        (list 'current-error-port err-sym))
-                                  (list 'system* "curl"
-                                        "-sS"
-                                        "-X" "POST"
-                                        "-H" "Content-Type: application/json"
-                                        "--data-binary" payload-sym
-                                        url-sym))))
-                (list 'if
-                      (list 'and ok-sym (list 'equal? scheme-sym "http"))
-                      (list 'vector "async")
-                      (list 'vector "unable to connect"))))))
+  (list 'xt-notify-http host port value id key opts))
 
 (def +scheme-http+
   {:x-notify-http {:macro #'scheme-tf-x-notify-http :emit :macro
@@ -1088,50 +1045,11 @@
 
 (defn scheme-tf-x-pwd
   [[_]]
-  (let [out (gensym "out__")
-        len (gensym "len__")]
-    (list 'let*
-          (list (list out (list 'path->string (list 'simplify-path (list 'current-directory))))
-                (list len (list 'string-length out)))
-          (list 'if
-                (list 'and
-                      (list '> len 1)
-                      (list 'equal? "/" (list 'substring out (list '- len 1) len)))
-                (list 'substring out 0 (list '- len 1))
-                out))))
+  '(xt-pwd))
 
 (defn scheme-tf-x-shell
   [[_ s root cb]]
-  (let [dir-sym (gensym "dir__")
-        out-sym (gensym "out__")
-        err-sym (gensym "err__")
-        ok-sym  (gensym "ok__")
-        obj-sym (gensym "obj__")]
-    (list 'with-handlers
-          (list (list (list 'lambda '(e) true)
-                      (list 'lambda '(e)
-                            (list cb 'e false))))
-          (list 'let*
-                (list (list dir-sym (list 'if root
-                                          (list 'string->path root)
-                                          (list 'current-directory)))
-                      (list out-sym (list 'open-output-string))
-                      (list err-sym (list 'open-output-string))
-                      (list ok-sym
-                            (list 'parameterize
-                                  (list (list 'current-directory dir-sym)
-                                        (list 'current-output-port out-sym)
-                                        (list 'current-error-port err-sym))
-                                  (list 'system* "/bin/sh" "-lc" s))))
-                (list 'if
-                      ok-sym
-                      (list cb false (list 'get-output-string out-sym))
-                      (list 'let
-                            (list (list obj-sym (list 'make-hash)))
-                            (list 'hash-set! obj-sym "code" 1)
-                            (list 'hash-set! obj-sym "err" (list 'get-output-string err-sym))
-                            (list 'hash-set! obj-sym "out" (list 'get-output-string out-sym))
-                            (list cb obj-sym false)))))))
+  (list 'xt-shell s root cb))
 
 (def +scheme-shell+
   {:x-pwd   {:macro #'scheme-tf-x-pwd   :emit :macro :value true}
@@ -1144,51 +1062,15 @@
 
 (defn scheme-tf-x-file-resolve
   [[_ root path]]
-  (let [root-sym (gensym "root__")
-        path-sym (gensym "path__")]
-    (list 'let*
-          (list (list root-sym (list 'if root
-                                     (list 'string->path root)
-                                     (list 'current-directory)))
-                (list path-sym (list 'string->path path)))
-          (list 'path->string
-                (list 'simplify-path
-                      (list 'if
-                            (list 'absolute-path? path-sym)
-                            path-sym
-                            (list 'build-path root-sym path-sym)))))))
+  (list 'xt-file-resolve root path))
 
 (defn scheme-tf-x-file-slurp
   [[_ path cb]]
-  (let [path-sym (gensym "path__")]
-    (list 'with-handlers
-          (list (list (list 'lambda '(e) true)
-                      (list 'lambda '(e)
-                            (list cb 'e false))))
-          (list 'let
-                (list (list path-sym (list 'string->path path)))
-                (list cb false (list 'call-with-input-file path-sym 'port->string))))))
+  (list 'xt-file-slurp path cb))
 
 (defn scheme-tf-x-file-spit
   [[_ path content cb]]
-  (let [path-sym (gensym "path__")
-        dir-sym  (gensym "dir__")]
-    (list 'with-handlers
-          (list (list (list 'lambda '(e) true)
-                      (list 'lambda '(e)
-                            (list cb 'e false))))
-          (list 'let*
-                (list (list path-sym (list 'string->path path))
-                      (list dir-sym (list 'path-only path-sym)))
-                (list 'when dir-sym
-                      (list 'make-directory* dir-sym))
-                (list 'when (list 'file-exists? path-sym)
-                      (list 'delete-file path-sym))
-                (list 'call-with-output-file
-                      path-sym
-                      (list 'lambda '(out)
-                            (list 'display content 'out)))
-                (list cb false path)))))
+  (list 'xt-file-spit path content cb))
 
 (def +scheme-file+
   {:x-file-resolve {:macro #'scheme-tf-x-file-resolve :emit :macro :value true}

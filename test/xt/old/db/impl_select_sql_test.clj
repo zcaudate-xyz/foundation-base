@@ -1,12 +1,14 @@
 (ns xt.old.db.impl-select-sql-test
   (:require [std.lang :as l]
-            [xt.lang.common-notify :as notify])
+            [xt.lang.common-notify :as notify]
+            [xt.lang.spec-promise :as spec-promise])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
    :require [[xt.old.db.base-schema :as sch]
              [xt.lang.common-lib :as k]
+             [xt.lang.spec-promise :as spec-promise]
              [xt.old.db.sql-util :as ut]
              [xt.old.db.sql-graph :as graph]
              [xt.old.db.sql-raw :as raw]
@@ -22,11 +24,12 @@
   bootstrap-js
   []
   (notify/wait-on [:js 5000]
-    (dbsql/connect {:constructor js-postgres/connect-constructor
-                    :database "test-scratch"}
-                   {:success (fn [conn]
-                               (:= (!:G CONN) conn)
-                               (repl/notify true))})))
+    (spec-promise/x:promise-then
+      (dbsql/connect (js-postgres/driver)
+                     {:database "test-scratch"})
+      (fn [conn]
+        (:= (!:G CONN) conn)
+        (repl/notify true)))))
 
 (fact:global
  ^{:lang-exceptions {:lua {:skip true}
@@ -35,34 +38,38 @@
  {:setup    [(l/rt:restart)
               (l/rt:scaffold :js)
               (bootstrap-js)
-             (notify/wait-on :js
-               (dbsql/query CONN
-                            "CREATE SCHEMA IF NOT EXISTS \"scratch\";"
-                            (repl/<!)))
-             (notify/wait-on :js
-               (dbsql/query CONN
-                            (manage/table-create
-                             sample-scratch/Schema
-                             "Entry"
-                             (ut/postgres-opts {"Entry" {"schema" "scratch"}}))
-                            (repl/<!)))
-             (notify/wait-on :js
-               (dbsql/query CONN
-                            "DELETE FROM \"scratch\".\"Entry\";"
-                            (repl/<!)))
-             (notify/wait-on :js
-               (dbsql/query CONN
-                            (raw/raw-insert
-                             "Entry"
-                             ["id" "name" "tags"]
-                             [{"id" "00000000-0000-0000-0000-000000000001"
-                               "name" "A-1"
-                               "tags" []}
-                              {"id" "00000000-0000-0000-0000-000000000002"
-                               "name" "A-2"
-                               "tags" []}]
-                             (ut/postgres-opts {"Entry" {"schema" "scratch"}}))
-                            (repl/<!)))]
+              (notify/wait-on :js
+                (spec-promise/x:promise-then
+                  (dbsql/query CONN
+                               "CREATE SCHEMA IF NOT EXISTS \"scratch\";")
+                  repl/notify))
+              (notify/wait-on :js
+                (spec-promise/x:promise-then
+                  (dbsql/query CONN
+                               (manage/table-create
+                                sample-scratch/Schema
+                                "Entry"
+                                (ut/postgres-opts {"Entry" {"schema" "scratch"}})))
+                  repl/notify))
+              (notify/wait-on :js
+                (spec-promise/x:promise-then
+                  (dbsql/query CONN
+                               "DELETE FROM \"scratch\".\"Entry\";")
+                  repl/notify))
+              (notify/wait-on :js
+                (spec-promise/x:promise-then
+                  (dbsql/query CONN
+                               (raw/raw-insert
+                                "Entry"
+                                ["id" "name" "tags"]
+                                [{"id" "00000000-0000-0000-0000-000000000001"
+                                  "name" "A-1"
+                                  "tags" []}
+                                 {"id" "00000000-0000-0000-0000-000000000002"
+                                  "name" "A-2"
+                                  "tags" []}]
+                                (ut/postgres-opts {"Entry" {"schema" "scratch"}})))
+                  repl/notify))]
   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.old.db.impl-select-sql-test/CONNECTION
@@ -74,7 +81,9 @@
 (fact "CONNECTED"
 
   (notify/wait-on :js
-    (dbsql/query CONN "SELECT 1;" (repl/<!)))
+    (spec-promise/x:promise-then
+      (dbsql/query CONN "SELECT 1;")
+      repl/notify))
   => (any nil 1 [{"?column?" 1}])
 
   (notify/wait-on :js

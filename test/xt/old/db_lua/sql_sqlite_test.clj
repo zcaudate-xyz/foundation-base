@@ -19,8 +19,8 @@
 (defn reset-lua
   []
   (!.lua
-   (:= (!:G DB) (dbsql/connect {:constructor lua-sqlite/connect-constructor
-                                :memory true}))
+   (:= (!:G DB) (dbsql/connect (lua-sqlite/driver)
+                               {:memory true}))
    DB))
 
 (fact:global
@@ -35,8 +35,8 @@
 (fact "connects to an embedded sqlite file"
 
   (!.lua
-   (var conn (dbsql/connect {:constructor lua-sqlite/connect-constructor
-                             :memory true}))
+   (var conn (dbsql/connect (lua-sqlite/driver)
+                            {:memory true}))
    (dbsql/query conn "SELECT 1;"))
   => 1)
 

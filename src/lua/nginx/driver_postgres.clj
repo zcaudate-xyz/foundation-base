@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :lua.nginx
-  {:import [["pgmoon" :as ngxpg]] :require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-space :as rt]]})
+  {:import [["pgmoon" :as ngxpg]] :require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-space :as rt] [xt.runtime.type-sql-connection :as sqlrt]]})
 
 (defn.lua default-env
   "gets the default env"
@@ -132,6 +132,28 @@
         (xt/x:set-key opts "query" query)
         (return (-/raw-query conn query))))
   (return conn))
+
+(defn.lua wrap-connection
+  [conn]
+  (return
+   (sqlrt/connection-create
+    conn
+    {"disconnect" (fn [raw]
+                    (var disconnect-fn (xt/x:get-key raw "::disconnect"))
+                    (return (disconnect-fn)))
+     "query" (fn [raw query]
+               (var query-fn (xt/x:get-key raw "::query"))
+               (return (query-fn query)))
+     "query_sync" (fn [raw query]
+                    (xt/x:err "Not Allowed"))})))
+
+(defn.lua driver
+  []
+  (return
+   (sqlrt/driver-create
+    {"connect" (fn [m]
+                 (return (-/wrap-connection
+                          (-/connect-constructor m))))})))
 
 (comment
   (./create-tests))

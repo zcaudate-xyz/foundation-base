@@ -1,13 +1,15 @@
 (ns js.lib.driver-sqlite-wasm-test
   (:require [std.lang :as l]
-            [xt.lang.common-notify :as notify])
+            [xt.lang.common-notify :as notify]
+            [xt.lang.spec-promise :as spec-promise])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
    :require [[xt.old.sys.conn-dbsql :as dbsql]
-             [xt.lang.common-repl :as repl]
-             [js.lib.driver-sqlite-wasm :as js-sqlite-wasm]]})
+             [xt.lang.spec-promise :as spec-promise]
+              [xt.lang.common-repl :as repl]
+              [js.lib.driver-sqlite-wasm :as js-sqlite-wasm]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -26,8 +28,9 @@
 (fact "connects to an embedded sqlite-wasm database"
 
   (notify/wait-on :js
-    (dbsql/connect {:constructor js-sqlite-wasm/connect-constructor}
-                   {:success (fn [conn]
-                               (dbsql/query conn "SELECT 1;"
-                                            (repl/<!)))}))
+    (spec-promise/x:promise-then
+     (dbsql/connect (js-sqlite-wasm/driver) {})
+     (fn [conn]
+       (repl/notify
+        (dbsql/query conn "SELECT 1;")))))
   => 1)

@@ -19,24 +19,24 @@
 (defn bootstrap-js
   []
   (notify/wait-on [:js 2000]
-    (dbsql/connect {:constructor js-sqlite/connect-constructor}
-                   {:success (fn [conn]
-                               (try
-                                 (:= (!:G DBSQL)
-                                     (xdb/db-create
-                                      {"::" "db.sql"
-                                       :instance conn}
-                                      sample/Schema
-                                      sample/SchemaLookup
-                                      (ut/sqlite-opts nil)))
-                                 (dbsql/query-sync (xt/x:get-key DBSQL "instance")
-                                                   (str/join "\n\n"
-                                                             (manage/table-create-all
-                                                              sample/Schema
-                                                              sample/SchemaLookup
-                                                              (ut/sqlite-opts nil))))
-                                 (repl/notify true)
-                                 (catch e (repl/notify e))))})))
+    (. (dbsql/connect (js-sqlite/driver) {})
+       (then (fn [conn]
+               (try
+                 (:= (!:G DBSQL)
+                     (xdb/db-create
+                      {"::" "db.sql"
+                       :instance conn}
+                      sample/Schema
+                      sample/SchemaLookup
+                      (ut/sqlite-opts nil)))
+                 (dbsql/query-sync (xt/x:get-key DBSQL "instance")
+                                   (str/join "\n\n"
+                                             (manage/table-create-all
+                                              sample/Schema
+                                              sample/SchemaLookup
+                                              (ut/sqlite-opts nil))))
+                 (repl/notify true)
+                 (catch e (repl/notify e))))))))
 
 (def +usd-snake+
   {"id" "USD"

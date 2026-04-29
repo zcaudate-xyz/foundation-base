@@ -3,7 +3,7 @@
              [std.lib.foundation :as f]))
 
 (l/script :lua.nginx
-  {:import [["lsqlite3" :as ngxsqlite]] :require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]]})
+  {:import [["lsqlite3" :as ngxsqlite]] :require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.runtime.type-sql-connection :as sqlrt]]})
 
 (f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ngxsqlite"
@@ -75,3 +75,26 @@
       (fn [query]
         (return (-/raw-query instance query))))
   (return conn))
+
+(defn.lua wrap-connection
+  [conn]
+  (return
+   (sqlrt/connection-create
+    conn
+    {"disconnect" (fn [raw]
+                    (var disconnect-fn (xt/x:get-key raw "::disconnect"))
+                    (return (disconnect-fn)))
+     "query" (fn [raw query]
+               (var query-fn (xt/x:get-key raw "::query"))
+               (return (query-fn query)))
+     "query_sync" (fn [raw query]
+                    (var query-sync-fn (xt/x:get-key raw "::query_sync"))
+                    (return (query-sync-fn query)))})))
+
+(defn.lua driver
+  []
+  (return
+   (sqlrt/driver-create
+    {"connect" (fn [m]
+                 (return (-/wrap-connection
+                          (-/connect-constructor m))))})))

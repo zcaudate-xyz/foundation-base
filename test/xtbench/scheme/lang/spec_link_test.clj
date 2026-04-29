@@ -5,7 +5,7 @@
             [xt.lang.common-notify :as notify]))
 
 (l/script- :scheme
-  {:runtime :oneshot
+  {:runtime :basic
    :require [[xt.lang.spec-link :as spec-link]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]]})
@@ -34,7 +34,6 @@
 (fact "posts encoded values through fetch"
 
   (notify/wait-on-call
-   5000
    (fn [] (!.scheme
             (var notify-fn
                  (fn [host port value id key opts]

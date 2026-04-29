@@ -1,13 +1,15 @@
 (ns xt.old.db.impl-select-view-test
   (:require [std.lang :as l]
-            [std.string.prose :as prose]
-            [xt.lang.common-notify :as notify])
+             [std.string.prose :as prose]
+            [xt.lang.common-notify :as notify]
+            [xt.lang.spec-promise :as spec-promise])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
    :require [[xt.old.db.base-schema :as sch]
              [xt.lang.common-lib :as k]
+             [xt.lang.spec-promise :as spec-promise]
              [xt.old.db.sql-util :as ut]
              [xt.old.db.sql-graph :as graph]
              [xt.old.db.sql-view :as view]
@@ -23,11 +25,12 @@
   bootstrap-js
   []
   (notify/wait-on [:js 5000]
-    (dbsql/connect {:constructor js-postgres/connect-constructor
-                    :database "test-scratch"}
-                   {:success (fn [conn]
-                               (:= (!:G CONN) conn)
-                               (repl/notify true))})))
+    (spec-promise/x:promise-then
+      (dbsql/connect (js-postgres/driver)
+                     {:database "test-scratch"})
+      (fn [conn]
+        (:= (!:G CONN) conn)
+        (repl/notify true)))))
 
 (fact:global
  ^{:lang-exceptions {:lua {:skip true}
@@ -47,7 +50,9 @@
 (fact "CONNECTED"
 
   (notify/wait-on :js
-    (dbsql/query CONN "SELECT 1;" (repl/<!)))
+    (spec-promise/x:promise-then
+      (dbsql/query CONN "SELECT 1;")
+      repl/notify))
   => (any nil 1 [{"?column?" 1}]))
 
 ^{:refer xt.old.db.impl-select-view-test/VIEW-QUERY

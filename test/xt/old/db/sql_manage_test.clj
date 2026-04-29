@@ -53,10 +53,10 @@
 (fact "workflow for sqlite-wasm"
 
   (notify/wait-on :js
-   (dbsql/connect {:constructor js-sqlite/connect-constructor}
-                  {:success (fn [conn]
-                              (:= (!:G DB) conn)
-                              (repl/notify true))}))
+   (. (dbsql/connect (js-sqlite/driver) {})
+      (then (fn [conn]
+              (:= (!:G DB) conn)
+              (repl/notify true)))))
   => true
 
   (!.js

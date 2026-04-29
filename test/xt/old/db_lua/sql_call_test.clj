@@ -58,8 +58,8 @@
   => "SELECT \"scratch\".divf('1', '2');"
 
   (!.lua
-   (var conn (driver/connect {:constructor lua-postgres/connect-constructor
-                              :database "test-scratch"}))
+   (var conn (driver/connect (lua-postgres/driver)
+                             {:database "test-scratch"}))
    (var q  (call/call-format-query (@! (pg/bind-function scratch/addf))
                                    [10 20]))
    (. conn (query q)))
@@ -69,8 +69,8 @@
 (fact "calls a database function"
 
   (!.lua
-   (var conn (driver/connect {:constructor lua-postgres/connect-constructor
-                              :database "test-scratch"}))
+   (var conn (driver/connect (lua-postgres/driver)
+                             {:database "test-scratch"}))
    (xt/x:json-decode
     (call/call-raw conn
                    (@! (pg/bind-function scratch/addf))
@@ -81,8 +81,8 @@
 (fact "results an api style result"
 
   (!.lua
-   (var conn (driver/connect {:constructor lua-postgres/connect-constructor
-                              :database "test-scratch"}))
+   (var conn (driver/connect (lua-postgres/driver)
+                             {:database "test-scratch"}))
    (xt/x:json-decode
     (call/call-api conn
                    (@! (pg/bind-function scratch/addf))

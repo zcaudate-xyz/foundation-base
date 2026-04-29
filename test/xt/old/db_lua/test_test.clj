@@ -25,8 +25,8 @@
   []
   (!.lua
    (var ngxsqlite (require "lsqlite3"))
-   (var instance (dbsql/connect {:constructor lua-sqlite/connect-constructor
-                                 :memory true}))
+   (var instance (dbsql/connect (lua-sqlite/driver)
+                                {:memory true}))
    (:= (!:G DBSQL) (impl/db-create {"::" "db.sql"
                                     :instance instance}
                                     sample/Schema
