@@ -994,7 +994,7 @@
 (defn scheme-tf-x-async-run
   [[_ thunk]]
   (template/$
-   (xt-promise ~thunk)))
+   (thread ~thunk)))
 
 (defn scheme-tf-x-promise-all
   [[_ promises]]

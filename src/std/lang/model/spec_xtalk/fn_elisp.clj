@@ -969,7 +969,7 @@
 (defn elisp-tf-x-async-run
   [[_ thunk]]
   (template/$
-   (xt-promise ~thunk)))
+   (make-thread ~thunk)))
 
 (defn elisp-tf-x-promise-all
   [[_ promises]]

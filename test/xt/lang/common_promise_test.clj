@@ -32,6 +32,33 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
+^{:refer xt.lang.common-promise/promise-native? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-promise/make-resolve-state :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-promise/make-rejected-state :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-promise/make-pending-state :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-promise/internal-settle-action :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-promise/internal-link-action :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-promise/internal-adopt-action :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-promise/internal-drive-action :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-promise/promise :added "4.1"}
+(fact "TODO")
+
 ^{:refer xt.lang.common-promise/promise-run :added "4.1"}
 (fact "common promise helpers use the :: xt.promise wrapper"
   (!.js
@@ -60,6 +87,7 @@
 
 ^{:refer xt.lang.common-promise/promise-then :added "4.1"}
 (fact "common promise helpers resolve delayed async work through the wrapper"
+
   (notify/wait-on :js
     (common-promise/promise-then
      (common-promise/promise
@@ -83,6 +111,12 @@
                                   (return 5)))
      (repl/>notify)))
   => 5)
+
+^{:refer xt.lang.common-promise/promise-catch :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-promise/promise-all :added "4.1"}
+(fact "TODO")
 
 ^{:refer xt.lang.common-promise/promise-finally :added "4.1"}
 (fact "common promise helpers preserve errors and cleanup order"

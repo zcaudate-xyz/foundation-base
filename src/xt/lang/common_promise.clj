@@ -1,19 +1,9 @@
 (ns xt.lang.common-promise
-  (:require [std.lang :as l :refer [defspec.xt]]
-            [xt.lang.spec-promise :as spec-promise])
+  (:require [std.lang :as l :refer [defspec.xt]])
   (:refer-clojure :exclude [promise]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]]})
-
-(declare promise-finish!
-         promise-resolve!
-         promise-reject!
-         promise-apply-resolve!
-         promise-apply-reject!
-         promise-dispatch!
-         promise-subscribe!
-         promise-adopt!)
 
 (defspec.xt promise-native? [:fn [:xt/any] :xt/bool])
 
@@ -24,7 +14,7 @@
   (return (and (xt/x:is-object? value)
                (== "xt.promise" (xt/x:get-key value "::")))))
 
-(defn.xt promise-resolve
+(defn.xt make-resolve-state
   "creates a resolved common promise wrapper"
   {:added "4.1"}
   [value]
@@ -32,138 +22,101 @@
            "status" "resolved"
            "value" value}))
 
-(defn.xt promise-reject
-  "creates a rejected common promise wrapper"
+(defn.xt make-rejected-state
+  "creates a cancelled common promise wrapper"
   {:added "4.1"}
   [err]
   (return {"::" "xt.promise"
            "status" "rejected"
            "error" err}))
 
-(defn.xt promise-pending
+(defn.xt make-pending-state
   "creates a pending common promise wrapper"
   {:added "4.1"}
-  [async]
+  [is-async]
   (return {"::" "xt.promise"
-            "status" "pending"
-            "async" async
-            "children" []}))
+           "status" "pending"
+           "is_async" is-async
+           "children" []}))
 
-(defspec.xt promise-finish! [:fn [:xt/any :xt/str :xt/any] :xt/any])
-
-(defspec.xt promise-resolve! [:fn [:xt/any :xt/any] :xt/any])
-
-(defspec.xt promise-reject! [:fn [:xt/any :xt/any] :xt/any])
-
-(defspec.xt promise-apply-resolve!
-  [:fn [:xt/any [:xt/maybe [:xt/fn]] :xt/any] :xt/any])
-
-(defspec.xt promise-apply-reject!
-  [:fn [:xt/any [:xt/maybe [:xt/fn]] :xt/any] :xt/any])
-
-(defspec.xt promise-dispatch! [:fn [:xt/any :xt/any] :xt/any])
-
-(defspec.xt promise-subscribe!
-  [:fn [:xt/any :xt/any [:xt/maybe [:xt/fn]] [:xt/maybe [:xt/fn]]] :xt/any])
-
-(defspec.xt promise-adopt! [:fn [:xt/any :xt/any] :xt/any])
-
-(defn.xt promise-finish-fn
+(defn.xt internal-settle-action
   "settles a common promise wrapper and dispatches any children"
   {:added "4.1"}
-  [p status payload children-fn]
+  [p status payload drive-fn]
   (when (== "pending" (xt/x:get-key p "status"))
     (xt/x:set-key p "status" status)
     (if (== "rejected" status)
       (do (xt/x:set-key p "error" payload)
           (xt/x:set-key p "value" nil))
       (do (xt/x:set-key p "value" payload)
-          (xt/x:set-key p "error" nil)))
+           (xt/x:set-key p "error" nil)))
     (var children (xt/x:get-key p "children"))
     (xt/x:set-key p "children" [])
     (xt/for:array [entry children]
-      (children-fn p entry)))
+      (drive-fn p entry)))
   (return p))
 
-(defn.xt promise-resolve-fn
-  "settles a promise as resolved"
-  {:added "4.1"}
-  [p value children-fn]
-  (return (-/promise-finish-fn p "resolved" value children-fn)))
-
-(defn.xt promise-reject-fn
-  "settles a promise as rejected"
-  {:added "4.1"}
-  [p error children-fn]
-  (return (-/promise-finish-fn p "rejected" error children-fn)))
-
-(defn.xt promise-apply-resolve!
-  "applies a success callback or forwards the resolved value"
-  {:added "4.1"}
-  [target thunk value children-fn]
-  (if (xt/x:nil? thunk)
-    (return (-/promise-resolve-fn target value children-fn))
-    (try
-      (return (-/promise-adopt-fn target (thunk value) children-fn))
-      (catch err
-        (return (-/promise-reject-fn target err children-fn))))))
-
-(defn.xt promise-apply-reject!
-  "applies an error callback or forwards the rejection"
-  {:added "4.1"}
-  [target thunk err]
-  (if (xt/x:nil? thunk)
-    (return (-/promise-reject! target err))
-    (try
-      (return (-/promise-adopt! target (thunk err)))
-      (catch inner-err
-        (return (-/promise-reject! target inner-err))))))
-
-(defn.xt promise-dispatch!
-  "dispatches a settled parent promise to a subscribed child"
-  {:added "4.1"}
-  [promise entry]
-  (var status (xt/x:get-key promise "status"))
-  (var child (xt/x:get-key entry "child"))
-  (var on-resolve (xt/x:get-key entry "resolve"))
-  (var on-reject (xt/x:get-key entry "reject"))
-  (if (== "rejected" status)
-    (return (-/promise-apply-reject! child on-reject (xt/x:get-key promise "error")))
-    (return (-/promise-apply-resolve! child on-resolve (xt/x:get-key promise "value")))))
-
-(defn.xt promise-subscribe!
+(defn.xt internal-link-action
   "subscribes a child promise to a parent promise"
   {:added "4.1"}
-  [promise child on-resolve on-reject]
+  [promise child on-resolve on-reject drive-fn]
   (var status (xt/x:get-key promise "status"))
   (if (== "pending" status)
     (do (xt/x:arr-push
          (xt/x:get-key promise "children")
          {"child" child
-          "resolve" on-resolve
-          "reject" on-reject})
+           "resolve" on-resolve
+           "reject" on-reject})
         (return child))
-    (return (-/promise-dispatch!
+    (return (drive-fn
              promise
              {"child" child
               "resolve" on-resolve
               "reject" on-reject}))))
 
-(defn.xt promise-adopt!
+(defn.xt internal-adopt-action
   "adopts either a raw value or another common promise"
   {:added "4.1"}
-  [target value]
+  [target value drive-fn]
   (if (-/promise-native? value)
     (do (var status (xt/x:get-key value "status"))
         (cond (== "pending" status)
-              (return (-/promise-subscribe! value target nil nil))
+              (return (-/internal-link-action value target nil nil drive-fn))
 
               (== "rejected" status)
-              (return (-/promise-reject! target (xt/x:get-key value "error")))
+              (return (-/internal-settle-action
+                       target
+                       "rejected"
+                       (xt/x:get-key value "error")
+                       drive-fn))
 
               :else
-              (return (-/promise-resolve! target (xt/x:get-key value "value")))))
-    (return (-/promise-resolve! target value))))
+              (return (-/internal-settle-action
+                       target
+                       "resolved"
+                       (xt/x:get-key value "value")
+                       drive-fn))))
+    (return (-/internal-settle-action target "resolved" value drive-fn))))
+
+(defn.xt internal-drive-action
+  "dispatches a settled parent promise to a subscribed child"
+  {:added "4.1"}
+  [promise entry drive-fn]
+  (var status (xt/x:get-key promise "status"))
+  (var child (xt/x:get-key entry "child"))
+  (var rejected? (== "rejected" status))
+  (var thunk (xt/x:get-key entry (:? rejected? "reject" "resolve")))
+  (var payload (xt/x:get-key promise (:? rejected? "error" "value")))
+  (if (xt/x:nil? thunk)
+    (return (-/internal-settle-action
+             child
+             (:? rejected? "rejected" "resolved")
+             payload
+             drive-fn))
+    (try
+      (return (-/internal-adopt-action child (thunk payload) drive-fn))
+      (catch err
+        (return (-/internal-settle-action child "rejected" err drive-fn))))))
 
 (defspec.xt promise [:fn [[:xt/fn]] :xt/promise])
 
@@ -171,20 +124,20 @@
   "wraps thunk execution in the common xt.promise model"
   {:added "4.1"}
   [thunk]
-  (var out (-/promise-pending nil))
+  (var out (-/make-pending-state nil))
   (try
     (xt/x:set-key
      out
-     "async"
+     "is_async"
      (xt/x:async-run
       (fn []
         (try
-          (return (-/promise-adopt! out (thunk)))
+          (return (-/internal-adopt-action out (thunk) -/internal-drive-action))
           (catch err
-            (return (-/promise-reject! out err)))))))
+            (return (-/internal-settle-action out "rejected" err -/internal-drive-action)))))))
     (return out)
     (catch err
-      (return (-/promise-reject err)))))
+        (return (-/make-rejected-state err)))))
 
 (defspec.xt promise-run [:fn [:xt/any] :xt/promise])
 
@@ -194,7 +147,7 @@
   [value]
   (if (-/promise-native? value)
     (return value)
-    (return (-/promise-resolve value))))
+    (return (-/make-resolve-state value))))
 
 (defspec.xt promise-then [:fn [:xt/promise [:xt/fn]] :xt/promise])
 
@@ -203,8 +156,8 @@
   {:added "4.1"}
   [promise thunk]
   (var current (-/promise-run promise))
-  (var child (-/promise-pending nil))
-  (return (-/promise-subscribe! current child thunk nil)))
+  (var child (-/make-pending-state nil))
+  (return (-/internal-link-action current child thunk nil -/internal-drive-action)))
 
 (defspec.xt promise-catch [:fn [:xt/promise [:xt/fn]] :xt/promise])
 
@@ -213,8 +166,8 @@
   {:added "4.1"}
   [promise thunk]
   (var current (-/promise-run promise))
-  (var child (-/promise-pending nil))
-  (return (-/promise-subscribe! current child nil thunk)))
+  (var child (-/make-pending-state nil))
+  (return (-/internal-link-action current child nil thunk -/internal-drive-action)))
 
 (defspec.xt promise-all [:fn [[:xt/array :xt/any]] :xt/promise])
 

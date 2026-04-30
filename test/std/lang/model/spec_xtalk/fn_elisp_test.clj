@@ -20,9 +20,9 @@
       'xt.lang.common-promise/promise-native?])
 
 ^{:refer std.lang.model.spec-xtalk.fn-elisp/elisp-tf-x-async-run :added "4.1"}
-(fact "elisp async run emits via the local xt-promise template"
+(fact "elisp async run emits a lower-level thread primitive"
   (l/emit-as :elisp [(elisp-tf-x-async-run '[_ thunk])])
-  => #"xt-promise")
+  => #"make-thread")
 
 ^{:refer std.lang.model.spec-xtalk.fn-elisp/elisp-tf-x-print :added "4.1"}
 (fact "prints values"
