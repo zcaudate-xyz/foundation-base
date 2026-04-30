@@ -1,31 +1,7 @@
 (ns std.lang.base.impl-template
-  (:require [std.lang.base.emit-preprocess :as preprocess] [std.lang.base.preprocess-base :as preprocess-base]
-            [std.lang.base.preprocess-resolve :as resolve]
+  (:require [std.lang.base.emit-preprocess :as preprocess]
             [std.lang.base.emit-rewrite :as rewrite]
-            [std.lang.base.grammar-xtalk-system :as xtalk-system]
-            [std.lib.collection :as collection]
-            [std.lib.walk :as walk]))
-
-(defn infer-static-template
-  "determines whether any hydrated form head resolves to a hard-link or linked fragment template"
-  {:added "4.1"}
-  [grammar modules form mopts]
-  (let [template? (volatile! false)]
-    (walk/prewalk
-     (fn [x]
-        (when (and (collection/form? x)
-                   (symbol? (first x))
-                   (or (= :hard-link (get-in grammar [:reserved (first x) :emit]))
-                       (when-let [fragment (and modules
-                                                (namespace (first x))
-                                                (resolve/get-fragment (first x)
-                                                                      modules
-                                                                      mopts))]
-                         (:template fragment))))
-          (vreset! template? true))
-        x)
-      form)
-     @template?))
+            [std.lang.base.grammar-xtalk-system :as xtalk-system]))
 
 (defn create-code-state
   "hydrates and stages a code entry for the current grammar"
@@ -59,22 +35,19 @@
      :form form-rewrite
      :deps deps
      :deps-fragment deps-fragment
-      :deps-native deps-native
-      :xtalk-ops ops
-      :xtalk-profiles profiles
-      :polyfill-modules polyfill-modules
-      :static/template (or (:static/template entry)
-                           (infer-static-template grammar modules form-hydrate context))}))
+     :deps-native deps-native
+     :xtalk-ops ops
+     :xtalk-profiles profiles
+     :polyfill-modules polyfill-modules}))
 
 (defn cached-code-state
-  "restages a template entry for the current language, using the per-entry cache when available"
+  "restages a code entry for the current language, using the per-entry cache when available"
   {:added "4.1"}
   [entry reserved grammar modules & [mopts]]
   (let [lang     (or (:lang mopts) (:lang entry))
-        compute  #(create-code-state entry reserved grammar modules mopts)
-        cache    (:static/template.cache entry)]
-    (if (and (:static/template entry)
-             cache
+         compute  #(create-code-state entry reserved grammar modules mopts)
+        cache    (:static/code.cache entry)]
+    (if (and cache
              lang)
       (get (swap! cache
                   (fn [m]
@@ -85,7 +58,7 @@
       (compute))))
 
 (defn cached-entry-deps
-  "restages a template entry and returns its current code dependencies for the book language"
+  "restages a code entry and returns its current code dependencies for the book language"
   {:added "4.1"}
   [{:keys [modules grammar lang]} entry]
   (let [reserved (get-in grammar [:reserved (:op entry)])]

@@ -1,9 +1,10 @@
 (ns std.lang.base.book
   (:require [clojure.set]
-            [clojure.string]
+             [clojure.string]
              [std.lang.base.book-entry :as entry]
              [std.lang.base.book-meta :as meta]
              [std.lang.base.book-module :as module]
+             [std.lang.base.impl-template :as impl-template]
              [std.lang.base.util :as ut]
              [std.lib.atom :as atom]
              [std.lib.collection :as collection]
@@ -65,15 +66,11 @@
    (get modules id)))
 
 (defn get-code-deps
-  "gets `:deps` or, for templates, delegates restaging through the impl layer"
+  "gets code dependencies via the per-language restaging cache"
   {:added "4.0"}
   ([book id]
-    (let [entry (get-code-entry book id)]
-      (if-not (:static/template entry)
-        (:deps entry)
-        ((requiring-resolve 'std.lang.base.impl-template/cached-entry-deps)
-         book
-         entry)))))
+   (let [entry (get-code-entry book id)]
+     (impl-template/cached-entry-deps book entry))))
 
 (defn get-deps
   "get dependencies for a given id"
@@ -393,11 +390,14 @@
                          nil
                          (module-specialize-form source-id target-id form)))
         rewrite-deps (fn [deps]
-                       (when deps
-                         (->> deps
-                              (map #(module-specialize-symbol source-id target-id %))
-                              set)))]
-    (cond-> (assoc entry :module target-id)
+                        (when deps
+                          (->> deps
+                               (map #(module-specialize-symbol source-id target-id %))
+                               set)))]
+    (cond-> (-> entry
+                (assoc :module target-id)
+                (dissoc :static/code.cache
+                        :static/template.cache))
       true             (update :form rewrite-form)
       (:form-input entry) (update :form-input rewrite-form)
       (:standalone entry) (update :standalone rewrite-form)

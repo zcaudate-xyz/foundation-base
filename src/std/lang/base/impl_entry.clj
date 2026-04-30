@@ -92,7 +92,7 @@
   "hydrates the forms"
   {:added "4.0"}
   ([entry reserved grammar modules & [mopts]]
-   (let [{:keys [hydrate-hook]} reserved
+    (let [{:keys [hydrate-hook]} reserved
           {:keys [hmeta
                   form
                   deps
@@ -100,11 +100,10 @@
                   deps-native
                   xtalk-ops
                   xtalk-profiles
-                  polyfill-modules]
-           template? :static/template}
-          (impl-template/create-code-state entry
-                                           reserved
-                                           grammar
+                  polyfill-modules]}
+           (impl-template/create-code-state entry
+                                            reserved
+                                            grammar
                                            modules
                                            mopts)
          entry (merge (assoc entry
@@ -114,17 +113,15 @@
                               :deps-native   deps-native
                               :xtalk-ops xtalk-ops
                               :xtalk-profiles xtalk-profiles
-                              :polyfill-modules polyfill-modules
-                              :static/template template?)
-                       hmeta
-                       *extra*)
-         entry (cond-> entry
-                 (and (:static/template entry)
-                      (not (:static/template.cache entry)))
-                 (assoc :static/template.cache (atom {})))
-         entry (if hydrate-hook
-                 (or (hydrate-hook entry) entry)
-                 entry)]
+                              :polyfill-modules polyfill-modules)
+                        hmeta
+                        *extra*)
+          entry (cond-> entry
+                  (not (:static/code.cache entry))
+                  (assoc :static/code.cache (atom {})))
+          entry (if hydrate-hook
+                  (or (hydrate-hook entry) entry)
+                  entry)]
       entry)))
 
 (defn create-code
@@ -253,23 +250,22 @@
                       (:modules book)
                       (get-in mopts [:snapshot lang :book :modules]))
           reserved (get-in grammar [:reserved (:op entry)])
-          entry   (if (and (:static/template entry)
-                           reserved
+          entry   (if (and reserved
                            modules)
-                     (merge entry
-                            (select-keys
-                             (impl-template/cached-code-state entry
+                      (merge entry
+                             (select-keys
+                              (impl-template/cached-code-state entry
                                                               reserved
                                                               grammar
                                                               modules
                                                               (assoc mopts :lang lang))
-                             [:form
-                              :deps
-                              :deps-fragment
-                             :deps-native
-                             :xtalk-ops
-                             :xtalk-profiles
-                             :polyfill-modules]))
+                              [:form
+                               :deps
+                               :deps-fragment
+                               :deps-native
+                               :xtalk-ops
+                               :xtalk-profiles
+                               :polyfill-modules]))
                     entry)
           {:keys [form]}  entry
           form (if (:transform emit)
@@ -345,11 +341,10 @@
                                     :module (get-in book [:modules module]))))
                       mopts)
             {:keys [label trim cache]} emit
-            body (cond (or *cache-none*
-                           (:static/no-cache entry)
-                           (:static/template entry)
-                           (= cache :none))
-                       (emit-entry-raw grammar entry mopts)
+             body (cond (or *cache-none*
+                            (:static/no-cache entry)
+                            (= cache :none))
+                        (emit-entry-raw grammar entry mopts)
                       
                       :else
                       (binding [std.lib.invoke/*force* (or *cache-force* (= cache :force))]
