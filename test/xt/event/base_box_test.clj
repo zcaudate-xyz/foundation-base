@@ -60,30 +60,36 @@
     (box/add-listener b
                       "abc"
                       ["a"]
-                      (repl/>notify)
+                      (fn [id data t meta]
+                        (repl/notify {"id" id "data" data "t" t "meta" meta}))
                       nil)
     (box/set-data b ["a" "b"] 3))
-  => {"path" ["a" "b"]
-      "value" 3
+  => {"id" "abc"
+      "data" {"path" ["a" "b"]
+              "value" 3
+              "data" {"a" {"b" 3}}}
+      "t" nil
       "meta" {"box/path" ["a"]
               "listener/id" "abc"
-              "listener/type" "box"}
-      "data" {"a" {"b" 3}}}
+              "listener/type" "box"}}
 
   (notify/wait-on :python
     (var b (box/make-box (fn:> {:a {:b 2}})))
     (box/add-listener b
                       "abc"
                       ["a"]
-                      (repl/>notify)
+                      (fn [id data t meta]
+                        (repl/notify {"id" id "data" data "t" t "meta" meta}))
                       nil)
     (box/set-data b ["a" "b"] 3))
-  => {"path" ["a" "b"]
-      "value" 3
+  => {"id" "abc"
+      "data" {"path" ["a" "b"]
+              "value" 3
+              "data" {"a" {"b" 3}}}
+      "t" nil
       "meta" {"box/path" ["a"]
               "listener/id" "abc"
-              "listener/type" "box"}
-      "data" {"a" {"b" 3}}})
+              "listener/type" "box"}})
 
 ^{:refer xt.event.base-box/get-data :added "4.1"}
 (fact "gets root and nested data"

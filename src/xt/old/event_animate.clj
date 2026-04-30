@@ -7,6 +7,25 @@
              [xt.lang.common-math :as xtm]
              [xt.lang.common-data :as xtd]]})
 
+(defn.xt check-arity-mismatch?
+  "checks for a host predicate arity mismatch"
+  {:added "4.1"}
+  [err]
+  (var message (. err (toString)))
+  (return (and (xt/x:not-nil? message)
+               (. message (contains "Closure call with mismatched arguments")))))
+
+(defn.xt invoke-check-fn
+  "invokes a predicate while preserving zero-arg compatibility"
+  {:added "4.1"}
+  [check-fn value]
+  (try
+    (return (check-fn value))
+    (catch err
+      (if (-/check-arity-mismatch? err)
+        (return (check-fn))
+        (xt/x:throw err)))))
+
 (defn.xt new-derived
   "creates a new derived value"
   {:added "4.0"}
@@ -392,11 +411,11 @@
   (var indicator (create-val initial))
   (var trigger-fn
        (fn [value]
-          (var should-run true)
-          (when (xt/x:not-nil? check-fn)
-            (var check-out (check-fn value))
-            (:= should-run (and (xt/x:not-nil? check-out)
-                                (not= false check-out))))
+           (var should-run true)
+           (when (xt/x:not-nil? check-fn)
+             (var check-out (-/invoke-check-fn check-fn value))
+             (:= should-run (and (xt/x:not-nil? check-out)
+                                 (not= false check-out))))
           (when should-run
             (var t-fn (create-transition indicator
                                          tparams
@@ -450,11 +469,11 @@
   (var indicator (create-val initial))
   (var trigger-fn
        (fn [value]
-          (var should-run true)
-          (when (xt/x:not-nil? check-fn)
-            (var check-out (check-fn value))
-            (:= should-run (and (xt/x:not-nil? check-out)
-                                (not= false check-out))))
+           (var should-run true)
+           (when (xt/x:not-nil? check-fn)
+             (var check-out (-/invoke-check-fn check-fn value))
+             (:= should-run (and (xt/x:not-nil? check-out)
+                                 (not= false check-out))))
           (when should-run
             (var pval (get-prev))
             (var modulo-val modulo)

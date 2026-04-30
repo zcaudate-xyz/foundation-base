@@ -283,6 +283,27 @@
     (xt/proto:tostring))
   => "__tostring")
 
+^{:refer xt.lang.spec-base/x:async-run :added "4.1"}
+(fact "runs an async thunk"
+
+  (notify/wait-on :js
+    (xt/x:async-run
+     (fn []
+       (repl/notify "hello"))))
+  => "hello"
+
+  (notify/wait-on :python
+    (xt/x:async-run
+     (fn []
+       (repl/notify "hello"))))
+  => "hello"
+
+  (notify/wait-on :lua
+    (xt/x:async-run
+     (fn []
+       (repl/notify "hello"))))
+  => "hello")
+
 ^{:refer xt.lang.spec-base/x:get-idx :added "4.1"}
 (fact "reads the first indexed value"
 

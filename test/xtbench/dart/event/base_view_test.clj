@@ -9,35 +9,44 @@
                [xt.lang.spec-base :as xt]]})
 
   (defn.xt make-basic-view []
-    (return
+   (return
      (view/create-view
       (fn:> [x] {:value x})
       {}
       [3]
-      {:value 0})))
+      {:value 0}
+      nil
+      nil)))
 
   (defn.xt make-processed-view []
-    (return
+   (return
      (view/create-view
       (fn:> [x] x)
       {}
       [3]
       1
-      (fn [x] (return (+ x 10))))))
+      (fn [x] (return (+ x 10)))
+      nil)))
 
   (defn.xt make-remote-view []
-    (return
+   (return
      (view/create-view
       nil
       {:remote {:handler (fn:> [x] {:value x})}}
-      [3])))
+      [3]
+      nil
+      nil
+      nil)))
 
   (defn.xt make-sync-view []
-    (return
+   (return
      (view/create-view
       nil
       {:sync {:handler (fn:> [x] {:value x})}}
-      [3])))
+      [3]
+      nil
+      nil
+      nil)))
 
   (defn.xt success-async
     [handler-fn context cb]
@@ -74,9 +83,11 @@
             (fn:> [x] {:value x})
             {}
             [3]
-            {:value 0}))
-    (view/add-listener v "a1" (fn:>) nil nil)
-    (view/add-listener v "b2" (fn:>) nil nil)
+            {:value 0}
+            nil
+            nil))
+    (view/add-listener v "a1" (fn:> [_ _ _ _] nil) nil nil)
+    (view/add-listener v "b2" (fn:> [_ _ _ _] nil) nil nil)
     [(view/get-output v)
      (view/list-listeners v)
      (. (view/remove-listener v "b2") ["meta"])
@@ -124,13 +135,15 @@
   (!.dt
     (var v (-/make-basic-view))
     (var out nil)
-    (view/add-listener v "a1" (fn [e] (:= out e)) nil nil)
+    (view/add-listener v "a1" (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil nil)
     (view/trigger-listeners v "output" {:value 0})
     out)
-  => {"data" {"value" 0}
+  => {"id" "a1"
+      "data" {"data" {"value" 0}
+              "type" "output"}
+      "t" nil
       "meta" {"listener/id" "a1"
-              "listener/type" "view"}
-      "type" "output"})
+              "listener/type" "view"}})
 
 ^{:refer xt.event.base-view/trigger-listeners :added "4.1"}
 (fact "triggers all registered view listeners"
@@ -138,8 +151,8 @@
   (!.dt
     (var v (-/make-basic-view))
     (var calls [])
-    (view/add-listener v "a1" (fn [e] (xt/x:arr-push calls "a1")) nil nil)
-    (view/add-listener v "b2" (fn [e] (xt/x:arr-push calls "b2")) nil nil)
+    (view/add-listener v "a1" (fn [id data t meta] (xt/x:arr-push calls "a1")) nil nil)
+    (view/add-listener v "b2" (fn [id data t meta] (xt/x:arr-push calls "b2")) nil nil)
     [(view/trigger-listeners v "output" {:value 0})
      calls])
   => (just-in
@@ -244,7 +257,7 @@
   (!.dt
     (var v (-/make-basic-view))
     (var out nil)
-    (view/add-listener v "a1" (fn [e] (:= out e)) nil nil)
+    (view/add-listener v "a1" (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil nil)
     (view/set-input v {:data [1]})
     [out
      (. (view/get-input v) ["current"])])
@@ -263,7 +276,7 @@
   (!.dt
     (var v (-/make-basic-view))
     (var out nil)
-    (view/add-listener v "a1" (fn [e] (:= out e)) nil nil)
+    (view/add-listener v "a1" (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil nil)
     (view/set-output v 1 nil nil nil nil)
     [out
      (view/get-current v)])

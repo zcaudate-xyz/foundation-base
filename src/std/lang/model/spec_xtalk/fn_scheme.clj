@@ -1,5 +1,6 @@
 (ns std.lang.model.spec-xtalk.fn-scheme
-  (:require [std.lib.collection :as collection]))
+  (:require [std.lib.collection :as collection]
+            [std.lib.template :as template]))
 
 (defn scheme-begin
   [forms]
@@ -990,6 +991,11 @@
   [[_ thunk]]
   (list 'xt-promise thunk))
 
+(defn scheme-tf-x-async-run
+  [[_ thunk]]
+  (template/$
+   (xt-promise ~thunk)))
+
 (defn scheme-tf-x-promise-all
   [[_ promises]]
   (list 'xt-promise-all promises))
@@ -1015,12 +1021,13 @@
   (list 'xt-with-delay ms thunk))
 
 (def +scheme-promise+
-  {:x-promise         {:macro #'scheme-tf-x-promise         :emit :macro :value true}
-   :x-promise-all     {:macro #'scheme-tf-x-promise-all     :emit :macro :value true}
-   :x-promise-then    {:macro #'scheme-tf-x-promise-then    :emit :macro :value true}
-   :x-promise-catch   {:macro #'scheme-tf-x-promise-catch   :emit :macro :value true}
-   :x-promise-finally {:macro #'scheme-tf-x-promise-finally :emit :macro :value true}
-   :x-promise-native? {:macro #'scheme-tf-x-promise-native? :emit :macro :value true}
+  {:x-async-run       {:macro #'scheme-tf-x-async-run       :emit :macro :value true}
+   :x-promise         {:emit :hard-link :raw 'xt.lang.common-promise/promise}
+   :x-promise-all     {:emit :hard-link :raw 'xt.lang.common-promise/promise-all}
+   :x-promise-then    {:emit :hard-link :raw 'xt.lang.common-promise/promise-then}
+   :x-promise-catch   {:emit :hard-link :raw 'xt.lang.common-promise/promise-catch}
+   :x-promise-finally {:emit :hard-link :raw 'xt.lang.common-promise/promise-finally}
+   :x-promise-native? {:emit :hard-link :raw 'xt.lang.common-promise/promise-native?}
    :x-with-delay      {:macro #'scheme-tf-x-with-delay      :emit :macro :value true}})
 
 (defn scheme-tf-x-socket-connect

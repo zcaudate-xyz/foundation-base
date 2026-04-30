@@ -479,6 +479,10 @@
               (return (Future.sync (fn []
                                      (return (~thunk))))))))))
 
+(defn dart-tf-x-async-run
+  [[_ thunk]]
+  (list 'Future.sync thunk))
+
 (defn dart-tf-x-promise
   [[_ thunk]]
   (list 'Future.sync thunk))
@@ -521,7 +525,8 @@
                 (list '. rtype-expr (list 'startsWith "Future<"))))))
 
 (def +dart-promise+
-  {:x-promise          {:macro #'dart-tf-x-promise          :emit :macro}
+  {:x-async-run        {:macro #'dart-tf-x-async-run        :emit :macro}
+   :x-promise          {:macro #'dart-tf-x-promise          :emit :macro}
    :x-promise-all      {:macro #'dart-tf-x-promise-all      :emit :macro}
    :x-promise-then     {:macro #'dart-tf-x-promise-then     :emit :macro}
    :x-promise-catch    {:macro #'dart-tf-x-promise-catch    :emit :macro}

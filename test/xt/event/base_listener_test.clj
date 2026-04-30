@@ -46,14 +46,14 @@
     (event/add-listener c
                         "a1"
                         "custom"
-                        (fn [e]
+                        (fn [id data t meta]
                           (xt/x:arr-push calls "a1"))
                         {:label "one"}
                         nil)
     (event/add-listener c
                         "b2"
                         "custom"
-                        (fn [e]
+                        (fn [id data t meta]
                           (xt/x:arr-push calls "b2"))
                         nil
                         (fn [e]
@@ -62,7 +62,7 @@
                               "group"
                               "k1"
                               "custom"
-                              (fn [e]
+                              (fn [id data t meta]
                                 (xt/x:arr-push calls "k1"))
                               {:label "group"}
                               nil)
@@ -107,14 +107,14 @@
     (event/add-listener c
                         "a1"
                         "custom"
-                        (fn [e]
+                        (fn [id data t meta]
                           (xt/x:arr-push calls "a1"))
                         {:label "one"}
                         nil)
     (event/add-listener c
                         "b2"
                         "custom"
-                        (fn [e]
+                        (fn [id data t meta]
                           (xt/x:arr-push calls "b2"))
                         nil
                         (fn [e]
@@ -123,7 +123,7 @@
                               "group"
                               "k1"
                               "custom"
-                              (fn [e]
+                              (fn [id data t meta]
                                 (xt/x:arr-push calls "k1"))
                               {:label "group"}
                               nil)
@@ -217,8 +217,8 @@
          (event/make-listener-entry
           "a1"
           "custom"
-          (fn [e]
-            (return e))
+          (fn [id data t meta]
+            (return data))
           {:label "hello"}
           (fn [e]
             (return (xt/x:get-key e "ok")))))
@@ -236,8 +236,8 @@
          (event/make-listener-entry
           "a1"
           "custom"
-          (fn [e]
-            (return e))
+          (fn [id data t meta]
+            (return data))
           {:label "hello"}
           (fn [e]
             (return (xt/x:get-key e "ok")))))
@@ -255,8 +255,8 @@
 
   (!.js
     (var c (event/blank-container "custom.container" {}))
-    (event/add-listener c "a1" "custom" (fn:> "a1") nil nil)
-    (event/add-listener c "b2" "custom" (fn:> "b2") nil nil)
+    (event/add-listener c "a1" "custom" (fn:> [_ _ _ _] "a1") nil nil)
+    (event/add-listener c "b2" "custom" (fn:> [_ _ _ _] "b2") nil nil)
     [(xt/x:obj-keys (event/clear-listeners c))
      (event/list-listeners c)])
   => (just-in [(just ["a1" "b2"] :in-any-order)
@@ -264,8 +264,8 @@
 
   (!.py
     (var c (event/blank-container "custom.container" {}))
-    (event/add-listener c "a1" "custom" (fn:> "a1") nil nil)
-    (event/add-listener c "b2" "custom" (fn:> "b2") nil nil)
+    (event/add-listener c "a1" "custom" (fn:> [_ _ _ _] "a1") nil nil)
+    (event/add-listener c "b2" "custom" (fn:> [_ _ _ _] "b2") nil nil)
     [(xt/x:obj-keys (event/clear-listeners c))
      (event/list-listeners c)])
   => (just-in [(just ["a1" "b2"] :in-any-order)
@@ -276,7 +276,7 @@
 
   (!.js
     (var c (event/blank-container "custom.container" {}))
-    (event/add-listener c "a1" "custom" (fn:> "a1") {:label "one"} nil)
+    (event/add-listener c "a1" "custom" (fn:> [_ _ _ _] "a1") {:label "one"} nil)
     [(. (event/remove-listener c "a1") ["meta"])
      (event/remove-listener c "missing")
      (event/list-listeners c)])
@@ -288,7 +288,7 @@
 
   (!.py
     (var c (event/blank-container "custom.container" {}))
-    (event/add-listener c "a1" "custom" (fn:> "a1") {:label "one"} nil)
+    (event/add-listener c "a1" "custom" (fn:> [_ _ _ _] "a1") {:label "one"} nil)
     [(. (event/remove-listener c "a1") ["meta"])
      (event/remove-listener c "missing")
      (event/list-listeners c)])
@@ -303,15 +303,15 @@
 
   (!.js
     (var c (event/blank-container "custom.container" {}))
-    (event/add-listener c "a1" "custom" (fn:> "a1") nil nil)
-    (event/add-listener c "b2" "custom" (fn:> "b2") nil nil)
+    (event/add-listener c "a1" "custom" (fn:> [_ _ _ _] "a1") nil nil)
+    (event/add-listener c "b2" "custom" (fn:> [_ _ _ _] "b2") nil nil)
     (event/list-listeners c))
   => (just ["a1" "b2"] :in-any-order)
 
   (!.py
     (var c (event/blank-container "custom.container" {}))
-    (event/add-listener c "a1" "custom" (fn:> "a1") nil nil)
-    (event/add-listener c "b2" "custom" (fn:> "b2") nil nil)
+    (event/add-listener c "a1" "custom" (fn:> [_ _ _ _] "a1") nil nil)
+    (event/add-listener c "b2" "custom" (fn:> [_ _ _ _] "b2") nil nil)
     (event/list-listeners c))
   => (just ["a1" "b2"] :in-any-order))
 
@@ -320,16 +320,16 @@
 
   (!.js
     (var c (event/blank-container "custom.container" {}))
-    (event/add-listener c "a1" "custom" (fn:> "a1") nil nil)
-    (event/add-listener c "b2" "route" (fn:> "b2") nil nil)
+    (event/add-listener c "a1" "custom" (fn:> [_ _ _ _] "a1") nil nil)
+    (event/add-listener c "b2" "route" (fn:> [_ _ _ _] "b2") nil nil)
     (event/list-listener-types c))
   => {"custom" ["a1"]
       "route" ["b2"]}
 
   (!.py
     (var c (event/blank-container "custom.container" {}))
-    (event/add-listener c "a1" "custom" (fn:> "a1") nil nil)
-    (event/add-listener c "b2" "route" (fn:> "b2") nil nil)
+    (event/add-listener c "a1" "custom" (fn:> [_ _ _ _] "a1") nil nil)
+    (event/add-listener c "b2" "route" (fn:> [_ _ _ _] "b2") nil nil)
     (event/list-listener-types c))
   => {"custom" ["a1"]
       "route" ["b2"]})
@@ -343,16 +343,19 @@
      (event/make-listener-entry
       "a1"
       "custom"
-      (fn [e]
-        (:= out (. e ["meta"])))
+      (fn [id data t meta]
+        (:= out {"id" id "data" data "t" t "meta" meta}))
       {:label "hello"}
       nil)
      {:meta {:base true}})
     out)
-  => {"base" true
-      "label" "hello"
-      "listener/id" "a1"
-      "listener/type" "custom"}
+  => {"id" "a1"
+      "data" {}
+      "t" nil
+      "meta" {"base" true
+              "label" "hello"
+              "listener/id" "a1"
+              "listener/type" "custom"}}
 
   (!.py
     (var out nil)
@@ -360,16 +363,19 @@
      (event/make-listener-entry
       "a1"
       "custom"
-      (fn [e]
-        (:= out (. e ["meta"])))
+      (fn [id data t meta]
+        (:= out {"id" id "data" data "t" t "meta" meta}))
       {:label "hello"}
       nil)
      {:meta {:base true}})
     out)
-  => {"base" true
-      "label" "hello"
-      "listener/id" "a1"
-      "listener/type" "custom"})
+  => {"id" "a1"
+      "data" {}
+      "t" nil
+      "meta" {"base" true
+              "label" "hello"
+              "listener/id" "a1"
+              "listener/type" "custom"}})
 
 ^{:refer xt.event.base-listener/trigger-listeners :added "4.1"}
 (fact "triggers all non-keyed listeners"
@@ -379,14 +385,14 @@
     (var calls [])
     (event/add-listener
      c "a1" "custom"
-     (fn [e]
-       (xt/x:arr-push calls "a1"))
+     (fn [id data t meta]
+        (xt/x:arr-push calls "a1"))
      nil
      nil)
     (event/add-listener
      c "b2" "custom"
-     (fn [e]
-       (xt/x:arr-push calls "b2"))
+     (fn [id data t meta]
+        (xt/x:arr-push calls "b2"))
      nil
      (fn [e]
        (return (xt/x:get-key e "ok"))))
@@ -400,14 +406,14 @@
     (var calls [])
     (event/add-listener
      c "a1" "custom"
-     (fn [e]
-       (xt/x:arr-push calls "a1"))
+     (fn [id data t meta]
+        (xt/x:arr-push calls "a1"))
      nil
      nil)
     (event/add-listener
      c "b2" "custom"
-     (fn [e]
-       (xt/x:arr-push calls "b2"))
+     (fn [id data t meta]
+        (xt/x:arr-push calls "b2"))
      nil
      (fn [e]
        (return (xt/x:get-key e "ok"))))
@@ -425,7 +431,7 @@
         "group"
         "k1"
         "custom"
-        (fn:> "k1")
+        (fn:> [_ _ _ _] "k1")
         {:label "hello"}
         nil)
        ["meta"]))
@@ -439,7 +445,7 @@
         "group"
         "k1"
         "custom"
-        (fn:> "k1")
+        (fn:> [_ _ _ _] "k1")
         {:label "hello"}
         nil)
        ["meta"]))
@@ -452,7 +458,7 @@
 
   (!.js
     (var c (event/blank-container "custom.container" {}))
-    (event/add-keyed-listener c "group" "k1" "custom" (fn:> "k1") nil nil)
+    (event/add-keyed-listener c "group" "k1" "custom" (fn:> [_ _ _ _] "k1") nil nil)
     [(. (event/remove-keyed-listener c "group" "k1") ["meta"])
      (event/remove-keyed-listener c "group" "missing")
      (event/all-keyed-listeners c)])
@@ -463,7 +469,7 @@
 
   (!.py
     (var c (event/blank-container "custom.container" {}))
-    (event/add-keyed-listener c "group" "k1" "custom" (fn:> "k1") nil nil)
+    (event/add-keyed-listener c "group" "k1" "custom" (fn:> [_ _ _ _] "k1") nil nil)
     [(. (event/remove-keyed-listener c "group" "k1") ["meta"])
      (event/remove-keyed-listener c "group" "missing")
      (event/all-keyed-listeners c)])
@@ -477,8 +483,8 @@
 
   (!.js
     (var c (event/blank-container "custom.container" {}))
-    (event/add-keyed-listener c "group" "k1" "custom" (fn:> "k1") nil nil)
-    (event/add-keyed-listener c "group" "k2" "custom" (fn:> "k2") nil nil)
+    (event/add-keyed-listener c "group" "k1" "custom" (fn:> [_ _ _ _] "k1") nil nil)
+    (event/add-keyed-listener c "group" "k2" "custom" (fn:> [_ _ _ _] "k2") nil nil)
     [(event/list-keyed-listeners c "group")
      (event/list-keyed-listeners c "missing")])
   => (just-in [(just ["k1" "k2"] :in-any-order)
@@ -486,8 +492,8 @@
 
   (!.py
     (var c (event/blank-container "custom.container" {}))
-    (event/add-keyed-listener c "group" "k1" "custom" (fn:> "k1") nil nil)
-    (event/add-keyed-listener c "group" "k2" "custom" (fn:> "k2") nil nil)
+    (event/add-keyed-listener c "group" "k1" "custom" (fn:> [_ _ _ _] "k1") nil nil)
+    (event/add-keyed-listener c "group" "k2" "custom" (fn:> [_ _ _ _] "k2") nil nil)
     [(event/list-keyed-listeners c "group")
      (event/list-keyed-listeners c "missing")])
   => (just-in [(just ["k1" "k2"] :in-any-order)
@@ -498,16 +504,16 @@
 
   (!.js
     (var c (event/blank-container "custom.container" {}))
-    (event/add-keyed-listener c "group-a" "k1" "custom" (fn:> "k1") nil nil)
-    (event/add-keyed-listener c "group-b" "k2" "custom" (fn:> "k2") nil nil)
+    (event/add-keyed-listener c "group-a" "k1" "custom" (fn:> [_ _ _ _] "k1") nil nil)
+    (event/add-keyed-listener c "group-b" "k2" "custom" (fn:> [_ _ _ _] "k2") nil nil)
     (event/all-keyed-listeners c))
   => {"group-a" ["k1"]
       "group-b" ["k2"]}
 
   (!.py
     (var c (event/blank-container "custom.container" {}))
-    (event/add-keyed-listener c "group-a" "k1" "custom" (fn:> "k1") nil nil)
-    (event/add-keyed-listener c "group-b" "k2" "custom" (fn:> "k2") nil nil)
+    (event/add-keyed-listener c "group-a" "k1" "custom" (fn:> [_ _ _ _] "k1") nil nil)
+    (event/add-keyed-listener c "group-b" "k2" "custom" (fn:> [_ _ _ _] "k2") nil nil)
     (event/all-keyed-listeners c))
   => {"group-a" ["k1"]
       "group-b" ["k2"]})
@@ -520,18 +526,18 @@
     (var calls [])
     (event/add-keyed-listener
      c "group-a" "k1" "custom"
-     (fn [e]
-       (xt/x:arr-push calls "k1"))
+      (fn [id data t meta]
+        (xt/x:arr-push calls "k1"))
      nil nil)
     (event/add-keyed-listener
      c "group-a" "k2" "custom"
-     (fn [e]
-       (xt/x:arr-push calls "k2"))
+      (fn [id data t meta]
+        (xt/x:arr-push calls "k2"))
      nil nil)
     (event/add-keyed-listener
      c "group-b" "k3" "custom"
-     (fn [e]
-       (xt/x:arr-push calls "k3"))
+      (fn [id data t meta]
+        (xt/x:arr-push calls "k3"))
      nil nil)
     [(event/trigger-keyed-listeners c "group-a" {:ok true})
      calls])
@@ -543,18 +549,18 @@
     (var calls [])
     (event/add-keyed-listener
      c "group-a" "k1" "custom"
-     (fn [e]
-       (xt/x:arr-push calls "k1"))
+      (fn [id data t meta]
+        (xt/x:arr-push calls "k1"))
      nil nil)
     (event/add-keyed-listener
      c "group-a" "k2" "custom"
-     (fn [e]
-       (xt/x:arr-push calls "k2"))
+      (fn [id data t meta]
+        (xt/x:arr-push calls "k2"))
      nil nil)
     (event/add-keyed-listener
      c "group-b" "k3" "custom"
-     (fn [e]
-       (xt/x:arr-push calls "k3"))
+      (fn [id data t meta]
+        (xt/x:arr-push calls "k3"))
      nil nil)
     [(event/trigger-keyed-listeners c "group-a" {:ok true})
      calls])

@@ -57,8 +57,8 @@
 
   (!.dt
    (var l (log/new-log {}))
-   (log/add-listener l "a1" (fn:>) nil)
-   (log/add-listener l "b2" (fn:>) nil)
+   (log/add-listener l "a1" (fn:> [_ _ _ _] nil) nil)
+   (log/add-listener l "b2" (fn:> [_ _ _ _] nil) nil)
    [(log/list-listeners l)
     (. (log/remove-listener l "b2") ["meta"])
     (log/list-listeners l)])

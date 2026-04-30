@@ -86,11 +86,11 @@
      form
      listener-id
      fields
-     (fn [m]
-       (var #{type meta} m)
-       (when (-/checkPrint meta)
-         (console.log "PRINTFORM" (getData)
-                      meta))
+     (fn [id data t meta]
+       (var #{type} data)
+        (when (-/checkPrint meta)
+          (console.log "PRINTFORM" (getData)
+                       meta))
        
        (cond (and (== type "form.data")
                   getData)

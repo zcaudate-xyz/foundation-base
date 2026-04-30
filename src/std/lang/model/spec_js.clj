@@ -168,10 +168,10 @@
   (if (vector? e)
     (let [[i v] e]
       (template/$ (for [(var* :let ~i := 0) (< ~i (. ~arr length)) (:++ ~i)]
-             (var* :let ~v (. ~arr [~i]))
-             ~@body)))
+                    (var* :let ~v (. ~arr [~i]))
+                    ~@body)))
     (template/$ (for [(var* :let ~e) :of (% ~arr)]
-           ~@body))))
+                  ~@body))))
 
 (defn js-tf-for-iter
   "custom for:iter code"
@@ -191,7 +191,7 @@
               (fn [...args]
                 (return 
                  (f this ...args))))
-           (:= (. out [k]) f)))
+          (:= (. out [k]) f)))
        (return out))))
 
 (defn js-tf-prototype-method
@@ -217,13 +217,13 @@
         :defclass    {:macro  #'js-defclass    :emit :macro}
         :for-object  {:macro  #'js-tf-for-object  :emit :macro}
         :for-array   {:macro  #'js-tf-for-array   :emit :macro}
-         :for-iter    {:macro  #'js-tf-for-iter    :emit :macro}
-         :prototype-get       {:emit :alias :raw 'Object.getPrototypeOf}
-         :prototype-set       {:emit :alias :raw 'Object.setPrototypeOf}
-         :prototype-create    {:macro #'js-tf-prototype-create  :emit :macro
-                               :op-spec {:allow-blocks true}}
-         :prototype-method    {:macro #'js-tf-prototype-method  :emit :macro}
-         :prototype-tostring  {:emit :unit  :default "toString"}})
+        :for-iter    {:macro  #'js-tf-for-iter    :emit :macro}
+        :prototype-get       {:emit :alias :raw 'Object.getPrototypeOf}
+        :prototype-set       {:emit :alias :raw 'Object.setPrototypeOf}
+        :prototype-create    {:macro #'js-tf-prototype-create  :emit :macro
+                              :op-spec {:allow-blocks true}}
+        :prototype-method    {:macro #'js-tf-prototype-method  :emit :macro}
+        :prototype-tostring  {:emit :unit  :default "toString"}})
       (grammar/build:override fn/+js+)
       (grammar/build:extend
        {:property   {:op :property  :symbol  '#{property}   :assign ":" :raw "property" :value true :emit :def-assign}
@@ -248,15 +248,15 @@
                    :regex     {:custom #'js-regex}
                    :string    {}
                    :symbol    {:global #'js-symbol-global}}
-         :block    {:for       {:parameter {:sep ";"}}}
-         :data     {:vector    {:custom #'js-vector}
-                    :set       {:custom #'js-set}
-                    :map       {:custom #'js-map}
-                    :map-entry {:key-fn #'js-map-key}}
-         :rewrite  {:staging [#'rewrite/js-rewrite-stage]}
-         :function {:defgen    {:raw "function*"}
-                    :fn.inner  {:raw ""}}
-         :define   {:defglobal {:raw ""}
+        :block    {:for       {:parameter {:sep ";"}}}
+        :data     {:vector    {:custom #'js-vector}
+                   :set       {:custom #'js-set}
+                   :map       {:custom #'js-map}
+                   :map-entry {:key-fn #'js-map-key}}
+        :rewrite  {:staging [#'rewrite/js-rewrite-stage]}
+        :function {:defgen    {:raw "function*"}
+                   :fn.inner  {:raw ""}}
+        :define   {:defglobal {:raw ""}
                    :def       {:raw "var"}
                    :declare   {:raw "var"}}
         :xtalk    {:notify    {:custom true}}}

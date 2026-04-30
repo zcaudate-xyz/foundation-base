@@ -4,6 +4,7 @@
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
+             [xt.lang.spec-promise :as spec-promise]
              [xt.event.base-listener :as event-common]
              [xt.event.util-validate :as validate]]})
 
@@ -44,7 +45,7 @@
   [:fn [EventForm
         :xt/str
         [:or :xt/str [:xt/array :xt/str]]
-        [:fn [FormEvent] :xt/any]
+        xt.event.base-listener/EventListenerCallback
         [:xt/maybe xt.event.base-listener/EventListenerMeta]]
        xt.event.base-listener/EventListenerEntry])
 
@@ -262,21 +263,19 @@
   (var #{validators
          data
          result} form)
-  (var hook-status-fn
-       (fn [field status]
-         (when hook-fn
-           (hook-fn field status))))
-  (var complete-validation-fn
-       (fn [passed res]
-         (-/trigger-all form "form.validation")
-         (when complete-fn
-           (complete-fn passed res))))
   (return
-   (validate/validate-all data
-                          validators
-                          result
-                          hook-status-fn
-                          complete-validation-fn)))
+   (spec-promise/x:promise-then
+    (validate/validate-all data
+                           validators
+                           result
+                           hook-fn
+                           nil)
+    (fn [res]
+      (-/trigger-all form "form.validation")
+      (when complete-fn
+        (complete-fn (== "ok" (xt/x:get-key res "status"))
+                     res))
+      (return res)))))
 
 (defn.xt validate-field
   "validates form field"
@@ -285,18 +284,21 @@
   (var #{validators
          data
          result} form)
-  (var complete-field-fn
-       (fn [passed status]
-         (-/trigger-field form field "form.validation")
-         (when complete-fn
-           (complete-fn passed status))))
   (return
-   (validate/validate-field data
-                            field
-                            validators
-                            result
-                            hook-fn
-                            complete-field-fn)))
+   (spec-promise/x:promise-then
+    (validate/validate-field data
+                             field
+                             validators
+                             result
+                             hook-fn
+                             nil)
+    (fn [res]
+      (-/trigger-field form field "form.validation")
+      (when complete-fn
+        (complete-fn (== "ok" (xtd/get-in (. res ["fields"])
+                                          [field "status"]))
+                     res))
+      (return res))))))
 
 (defn.xt reset-field-validator
   "reset field validators"

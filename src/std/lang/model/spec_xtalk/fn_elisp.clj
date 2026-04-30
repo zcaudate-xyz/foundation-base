@@ -1,5 +1,6 @@
 (ns std.lang.model.spec-xtalk.fn-elisp
-  (:require [std.lib.collection :as collection]))
+  (:require [std.lib.collection :as collection]
+            [std.lib.template :as template]))
 
 (defn elisp-begin
   [forms]
@@ -953,9 +954,9 @@
    :x-iter-from     {:macro #'elisp-tf-x-iter-from     :emit :macro :value true}
    :x-iter-eq       {:macro #'elisp-tf-x-iter-eq       :emit :macro :value true}
    :x-iter-null     {:macro #'elisp-tf-x-iter-null     :emit :macro :value true}
-    :x-iter-next     {:macro #'elisp-tf-x-iter-next     :emit :macro :value true}
-    :x-iter-has?     {:macro #'elisp-tf-x-iter-has?     :emit :macro :value true}
-    :x-iter-native?  {:macro #'elisp-tf-x-iter-native?  :emit :macro :value true}})
+   :x-iter-next     {:macro #'elisp-tf-x-iter-next     :emit :macro :value true}
+   :x-iter-has?     {:macro #'elisp-tf-x-iter-has?     :emit :macro :value true}
+   :x-iter-native?  {:macro #'elisp-tf-x-iter-native?  :emit :macro :value true}})
 
 ;;
 ;; PROMISE
@@ -964,6 +965,11 @@
 (defn elisp-tf-x-promise
   [[_ thunk]]
   (list 'xt-promise thunk))
+
+(defn elisp-tf-x-async-run
+  [[_ thunk]]
+  (template/$
+   (xt-promise ~thunk)))
 
 (defn elisp-tf-x-promise-all
   [[_ promises]]
@@ -990,12 +996,13 @@
   (list 'xt-with-delay ms thunk))
 
 (def +elisp-promise+
-  {:x-promise          {:macro #'elisp-tf-x-promise          :emit :macro :value true}
-   :x-promise-all      {:macro #'elisp-tf-x-promise-all      :emit :macro :value true}
-   :x-promise-then     {:macro #'elisp-tf-x-promise-then     :emit :macro :value true}
-   :x-promise-catch    {:macro #'elisp-tf-x-promise-catch    :emit :macro :value true}
-   :x-promise-finally  {:macro #'elisp-tf-x-promise-finally  :emit :macro :value true}
-   :x-promise-native?  {:macro #'elisp-tf-x-promise-native?  :emit :macro :value true}
+  {:x-async-run        {:macro #'elisp-tf-x-async-run        :emit :macro :value true}
+   :x-promise          {:emit :hard-link :raw 'xt.lang.common-promise/promise}
+   :x-promise-all      {:emit :hard-link :raw 'xt.lang.common-promise/promise-all}
+   :x-promise-then     {:emit :hard-link :raw 'xt.lang.common-promise/promise-then}
+   :x-promise-catch    {:emit :hard-link :raw 'xt.lang.common-promise/promise-catch}
+   :x-promise-finally  {:emit :hard-link :raw 'xt.lang.common-promise/promise-finally}
+   :x-promise-native?  {:emit :hard-link :raw 'xt.lang.common-promise/promise-native?}
    :x-with-delay       {:macro #'elisp-tf-x-with-delay       :emit :macro :value true}})
 
 ;;

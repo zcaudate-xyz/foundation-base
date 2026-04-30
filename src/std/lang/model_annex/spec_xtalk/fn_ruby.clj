@@ -551,11 +551,25 @@
   [[_ obj]]
   (template/$
    (. (fn []
-        (if (or (. ~obj (is_a? Hash))
-                (. ~obj (is_a? Array)))
-          (return (. Marshal (load (. Marshal (dump ~obj)))))
-          (return ~obj)))
-      (call))))
+        (var clone-fn nil)
+        (:= clone-fn
+            (fn [value]
+              (cond (. value (is_a? Hash))
+                    (do (var out {})
+                        (for:object [[k v] value]
+                          (x:set-key out k (. clone-fn (call v))))
+                        (return out))
+
+                    (. value (is_a? Array))
+                    (do (var out [])
+                        (for:array [entry value]
+                          (x:arr-push out (. clone-fn (call entry))))
+                        (return out))
+
+                    :else
+                    (return value))))
+        (return (. clone-fn (call ~obj))))
+       (call))))
 
 (defn ruby-tf-x-has-key?
   [[_ obj key check]]

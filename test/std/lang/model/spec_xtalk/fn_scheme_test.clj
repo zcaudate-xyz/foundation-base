@@ -1,8 +1,28 @@
 (ns std.lang.model.spec-xtalk.fn-scheme-test
   (:require [std.lang :as l]
-            [std.lang.model.spec-scheme]
-            [std.lang.model.spec-xtalk.fn-scheme :refer :all])
+             [std.lang.model.spec-scheme]
+             [std.lang.model.spec-xtalk.fn-scheme :refer :all])
   (:use code.test))
+
+^{:refer std.lang.model.spec-xtalk.fn-scheme/+scheme-promise+ :added "4.1"}
+(fact "scheme async run stays local while promise ops hard-link to common-promise"
+  [(get-in +scheme-promise+ [:x-async-run :macro])
+   (get-in +scheme-promise+ [:x-promise :raw])
+   (get-in +scheme-promise+ [:x-promise-then :raw])
+   (get-in +scheme-promise+ [:x-promise-catch :raw])
+   (get-in +scheme-promise+ [:x-promise-finally :raw])
+   (get-in +scheme-promise+ [:x-promise-native? :raw])]
+  => [#'scheme-tf-x-async-run
+      'xt.lang.common-promise/promise
+      'xt.lang.common-promise/promise-then
+      'xt.lang.common-promise/promise-catch
+      'xt.lang.common-promise/promise-finally
+      'xt.lang.common-promise/promise-native?])
+
+^{:refer std.lang.model.spec-xtalk.fn-scheme/scheme-tf-x-async-run :added "4.1"}
+(fact "scheme async run emits via the local xt-promise template"
+  (l/emit-as :scheme [(scheme-tf-x-async-run '[_ thunk])])
+  => #"xt-promise")
 
 ^{:refer std.lang.model.spec-xtalk.fn-scheme/scheme-tf-x-print :added "4.1"}
 (fact "prints values"

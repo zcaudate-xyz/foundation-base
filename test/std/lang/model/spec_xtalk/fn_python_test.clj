@@ -5,14 +5,9 @@
   (:use code.test))
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/+python-promise+ :added "4.1"}
-(fact "promise delay hard-links through common-promise"
-  [(get-in +python-promise+ [:x-with-delay :raw])
-   (let [out (l/emit-as :python ['(python.core.common-promise/with-delay ms thunk)
-                                 '(python.core.common-promise/with-delay thunk ms)])]
-     [(boolean (re-find #"python\.core\.common_promise\.with_delay\(ms,\s*thunk\)" out))
-      (boolean (re-find #"python\.core\.common_promise\.with_delay\(thunk,\s*ms\)" out))])]
-  => ['python.core.common-promise/with-delay
-      [true true]])
+(fact "async run emits a host thread start"
+  (l/emit-as :python [(python-tf-x-async-run '[_ thunk])])
+  => #"(?s)threading.*Thread.*target")
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/+python-iter :added "4.1"}
 (fact "iter null"

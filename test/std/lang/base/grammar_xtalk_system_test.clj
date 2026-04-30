@@ -78,9 +78,10 @@
 ^{:refer std.lang.base.grammar-xtalk-system/xtalk-symbol-entry :added "4.1"}
 (fact "maps promise symbols back to xtalk entries"
   (-> (xtalk-symbol-entry 'x:promise)
-      (select-keys [:op :emit]))
+      (select-keys [:op :emit :raw]))
   => '{:op :x-promise
-       :emit :abstract})
+       :emit :hard-link
+       :raw xt.lang.common-promise/promise})
 
 ^{:refer std.lang.base.grammar-xtalk-system/xtalk-op-requires :added "4.1"}
 (fact "returns direct required xtalk ops"

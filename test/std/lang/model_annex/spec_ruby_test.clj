@@ -76,15 +76,22 @@
    #{})
   => '(xt/x:get-key xt.db.schema.base-scope/Scopes s))
 
-(fact "Ruby destructuring preserves hyphenated map keys"
+(fact "Ruby destructuring normalizes xtalk keys to Ruby hash keys"
   (let [out (rewrite/rewrite-callable-form
              '(var #{order-by} opts)
              #{})]
     [(= 'do* (first out))
      (boolean (re-matches #"ruby_destructure__.*"
                           (str (nth (second out) 1))))
-     (nth (nth (nth out 2) 2) 2)])
-  => [true true "order-by"])
+      (nth (nth (nth out 2) 2) 2)])
+  => [true true "order_by"]
+
+  (l/emit-as :ruby
+   '[(var #{check-disabled id-fn} pipeline)])
+  => (fn [s]
+       (and (string? s)
+            (re-find #"check_disabled = .*\[\"check_disabled\"\]" s)
+            (re-find #"id_fn = .*\[\"id_fn\"\]" s))))
 
 (fact "Ruby x:has-key? guards nil receivers"
   (fn-ruby/ruby-tf-x-has-key? '(x:has-key? obj "a"))
@@ -115,8 +122,18 @@
   => '(do
         (when (== nil obj)
           (:= obj {}))
-        (:= (. obj ["a"]) 1)
-        obj))
+         (:= (. obj ["a"]) 1)
+         obj))
+
+(fact "Ruby x:obj-clone avoids Marshal-based cloning"
+  (l/emit-as :ruby
+   '[(x:obj-clone obj)])
+  => (fn [s]
+       (and (string? s)
+            (not (re-find #"Marshal" s))
+            (re-find #"clone_fn" s)
+            (re-find #"is_a\?\(Hash\)" s)
+            (re-find #"is_a\?\(Array\)" s))))
 
 (fact "Ruby for:object guards nil receivers"
   (l/emit-as :ruby
@@ -179,13 +196,13 @@
      (nth (nth (nth out 2) 2) 2)
      (nth (nth out 3) 1)
      (nth (nth (nth out 3) 2) 2)])
-  => '[do* true a-var "a-var" b-var "b-var"]
+  => '[do* true a-var "a_var" b-var "b_var"]
 
   (l/emit-as :ruby ['(var #{a-var b-var} opts)])
   => (fn [s]
        (and (string? s)
-            (re-find #"a_var = .*\[\"a-var\"\]" s)
-            (re-find #"b_var = .*\[\"b-var\"\]" s))))
+            (re-find #"a_var = .*\[\"a_var\"\]" s)
+            (re-find #"b_var = .*\[\"b_var\"\]" s))))
 
 ^{:refer std.lang.model-annex.spec-ruby/ruby-map :added "4.1"}
 (fact "emit ruby hash"

@@ -662,6 +662,13 @@
 ;; ASYNC
 ;;
 
+(defn python-tf-x-async-run
+  [[_ thunk]]
+  (template/$
+   (do (. (__import__ "threading")
+          (Thread :target ~thunk)
+          (start)))))
+
 (defn python-tf-x-with-delay
   ([[_ ms thunk]]
    (template/$
@@ -670,14 +677,7 @@
         (return (~thunk))))))
 
 (def +python-promise+
-  {:x-async-run        {:emit :hard-link :raw 'python.core.common-promise/async-run}
-   :x-async-bind       {:emit :hard-link :raw 'python.core.common-promise/async-bind}
-   :x-promise          {:emit :hard-link :raw 'python.core.common-promise/promise}
-   :x-promise-all      {:emit :hard-link :raw 'python.core.common-promise/promise-all}
-   :x-promise-then     {:emit :hard-link :raw 'python.core.common-promise/promise-then}
-   :x-promise-catch    {:emit :hard-link :raw 'python.core.common-promise/promise-catch}
-   :x-promise-finally  {:emit :hard-link :raw 'python.core.common-promise/promise-finally}
-   :x-promise-native?  {:emit :hard-link :raw 'python.core.common-promise/promise-native?}
+  {:x-async-run        {:macro #'python-tf-x-async-run      :emit :macro}
    :x-with-delay       {:emit :hard-link :raw 'python.core.common-promise/with-delay}})
 
 

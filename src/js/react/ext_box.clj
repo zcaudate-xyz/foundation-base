@@ -24,9 +24,9 @@
   (r/watch [path-str]
     (var listener-id (j/randomId 4))
     (event-box/add-listener box listener-id path
-                             (fn [m]
-                                (setData (dataFn)))
-                             meta)
+                             (fn [_ _ _ _]
+                               (setData (dataFn)))
+                              meta)
     (var nData (dataFn))
     (when (not (xtt/eq-nested data nData))
       (setData nData))
@@ -65,9 +65,9 @@
      box
      listener-id
      path
-     (fn [#{data}]
-       (j/future
-         (. localStorage (setItem storage-key (JSON.stringify data)))))))
+      (fn [_ payload _ _]
+        (j/future
+          (. localStorage (setItem storage-key (JSON.stringify (. payload ["data"]))))))))
   (return box))
 
 (def.js listenBox -/useListenBox)

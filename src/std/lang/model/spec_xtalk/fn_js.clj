@@ -36,7 +36,7 @@
                               (if (== tn "Object")
                                 (return "object")
                                 (return tn))))
-                     (return t)))))
+                    (return t)))))
 
 (defn js-tf-x-ex-native?
   [[_ err]]
@@ -79,15 +79,15 @@
    :x-err            {:emit :alias :raw 'throw}
    :x-eval           {:emit :alias :raw 'eval}
    :x-apply          {:macro #'js-tf-x-apply   :emit :macro}
-    :x-unpack         {:emit :alias :raw :..}
-    :x-print          {:emit :alias :raw 'console.log :value true}
-    :x-random         {:emit :alias :raw 'Math.random :value true}
-    :x-now-ms         {:emit :alias :raw 'Date.now}
-    :x-ex-native?     {:macro #'js-tf-x-ex-native? :emit :macro}
-    :x-ex-new         {:macro #'js-tf-x-ex-new     :emit :macro}
-    :x-ex-message     {:macro #'js-tf-x-ex-message :emit :macro}
-    :x-ex-data        {:macro #'js-tf-x-ex-data    :emit :macro}
-    :x-type-native    {:macro #'js-tf-x-type-native   :emit :macro}})
+   :x-unpack         {:emit :alias :raw :..}
+   :x-print          {:emit :alias :raw 'console.log :value true}
+   :x-random         {:emit :alias :raw 'Math.random :value true}
+   :x-now-ms         {:emit :alias :raw 'Date.now}
+   :x-ex-native?     {:macro #'js-tf-x-ex-native? :emit :macro}
+   :x-ex-new         {:macro #'js-tf-x-ex-new     :emit :macro}
+   :x-ex-message     {:macro #'js-tf-x-ex-message :emit :macro}
+   :x-ex-data        {:macro #'js-tf-x-ex-data    :emit :macro}
+   :x-type-native    {:macro #'js-tf-x-type-native   :emit :macro}})
 
 (def +js-global+
   {})
@@ -610,6 +610,12 @@
 ;; PROMISE
 ;;
 
+(defn js-tf-x-async-run
+  [[_ thunk]]
+  (template/$
+   (. (. Promise (resolve))
+      (then ~thunk))))
+
 (defn js-tf-x-with-delay
   ([[_  ms thunk]]
    (template/$
@@ -619,11 +625,11 @@
                          (. (new Promise
                                  (fn [inner-resolve]
                                    (inner-resolve (~thunk))))
-                             (then  (fn [value]
-                                      (resolve value)))
-                             (catch (fn [err]
-                                      (reject err)))))
-                        ~ms))))))
+                            (then  (fn [value]
+                                     (resolve value)))
+                            (catch (fn [err]
+                                     (reject err)))))
+                       ~ms))))))
 
 (defn js-tf-x-promise
   [[_ thunk]]
@@ -652,7 +658,8 @@
   (list 'instanceof value 'Promise))
 
 (def +js-promise+
-  {:x-promise          {:macro #'js-tf-x-promise          :emit :macro}
+  {:x-async-run        {:macro #'js-tf-x-async-run        :emit :macro}
+   :x-promise          {:macro #'js-tf-x-promise          :emit :macro}
    :x-promise-all      {:macro #'js-tf-x-promise-all      :emit :macro}
    :x-promise-then     {:macro #'js-tf-x-promise-then     :emit :macro}
    :x-promise-catch    {:macro #'js-tf-x-promise-catch    :emit :macro}
@@ -713,9 +720,9 @@
   (template/$
    (do (. (require "fs")
           (writeFile  ~filename
-                     ~content
-                     "utf-8"
-                     ~cb))
+                      ~content
+                      "utf-8"
+                      ~cb))
        (return ["async"]))))
 
 (def +js-file+

@@ -398,9 +398,13 @@
   (event-view/add-listener
    view
    "@/cell"
-   (fn [event]
-     (return (impl/trigger-listeners cell [model-id view-id] event))))
-  (return view))
+   (fn [id data t meta]
+     (return
+      (impl/trigger-listeners
+       cell [model-id view-id]
+       (xt/x:obj-assign (xt/x:obj-clone data)
+                        {:meta meta})))))
+   (return view))
 
 (defn.xt add-model-attach
   "adds model statically"

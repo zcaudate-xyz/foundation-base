@@ -3,38 +3,12 @@
             [std.lang :as l])
   (:use code.test))
 
-^{:refer python.core.common-promise/promise-wrapper? :added "4.1"}
-(fact "TODO")
-
-^{:refer python.core.common-promise/promise-native? :added "4.1"}
-(fact "TODO")
-
-^{:refer python.core.common-promise/promise-reject :added "4.1"}
-(fact "TODO")
-
-^{:refer python.core.common-promise/promise-awaitable :added "4.1"}
-(fact "TODO")
-
-^{:refer python.core.common-promise/promise-wrap :added "4.1"}
-(fact "TODO")
-
-^{:refer python.core.common-promise/promise :added "4.1"}
-(fact "TODO")
-
-^{:refer python.core.common-promise/promise-then :added "4.1"}
-(fact "TODO")
-
-^{:refer python.core.common-promise/promise-catch :added "4.1"}
-(fact "TODO")
-
-^{:refer python.core.common-promise/promise-finally :added "4.1"}
-(fact "TODO")
-
-^{:refer python.core.common-promise/with-delay :added "4.1"}
-(fact "python promise helpers compose delayed work through promise chains"
-  (let [out (l/emit-as :python ['(python.core.common-promise/promise-then
-                                 (python.core.common-promise/with-delay ms thunk)
-                                 on_value)])]
-    [(boolean (re-find #"python\.core\.common_promise\.promise_then" out))
+^{:refer python.core.common-promise/async-run :added "4.1"}
+(fact "python common promise helpers emit low-level async operations"
+  (let [out (l/emit-as :python ['(do (python.core.common-promise/async-run thunk)
+                                     (python.core.common-promise/async-bind handle on_value on_error)
+                                     (python.core.common-promise/with-delay ms thunk))])]
+    [(boolean (re-find #"python\.core\.common_promise\.async_run\(thunk\)" out))
+     (boolean (re-find #"python\.core\.common_promise\.async_bind\(handle,\s*on_value,\s*on_error\)" out))
      (boolean (re-find #"python\.core\.common_promise\.with_delay\(ms,\s*thunk\)" out))])
-  => [true true])
+  => [true true true])

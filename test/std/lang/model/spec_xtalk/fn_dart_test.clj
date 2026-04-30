@@ -422,6 +422,11 @@
   (l/emit-as :dart [(dart-tf-x-with-delay '[_ ms value])])
   => #"Future\.delayed.*Duration.*milliseconds")
 
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-async-run :added "4.1"}
+(fact "async run emits a native future start"
+  (l/emit-as :dart [(dart-tf-x-async-run '[_ thunk])])
+  => #"Future\.sync\(thunk\)")
+
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-promise :added "4.1"}
 (fact "TODO")
 

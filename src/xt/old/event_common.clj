@@ -144,8 +144,27 @@
   (when (or (xt/x:nil? x)
             (and (xt/x:is-object? x)
                  (xtd/is-empty? x)))
-    (return []))
-  (return [x]))
+     (return []))
+   (return [x]))
+
+(defn.xt callback-arity-mismatch?
+  "checks for a host callback arity mismatch"
+  {:added "4.1"}
+  [err]
+  (var message (. err (toString)))
+  (return (and (xt/x:not-nil? message)
+               (. message (contains "Closure call with mismatched arguments")))))
+
+(defn.xt invoke-callback
+  "invokes a callback while preserving zero-arg compatibility"
+  {:added "4.1"}
+  [callback event]
+  (try
+    (return (callback event))
+    (catch err
+      (if (-/callback-arity-mismatch? err)
+        (return (callback))
+        (xt/x:throw err)))))
 
 (defn.xt clear-listeners
   "clears all listeners"
@@ -206,9 +225,12 @@
     (var nmeta (xt/x:obj-assign (or (xt/x:get-key event "meta")
                                     {})
                                 meta))
-    (callback (xt/x:obj-assign
-               (xt/x:obj-clone event)
-               {:meta nmeta}))))
+    (return
+     (-/invoke-callback
+      callback
+      (xt/x:obj-assign
+       (xt/x:obj-clone event)
+       {:meta nmeta})))))
 
 (defn.xt trigger-listeners
   "triggers listeners given event"

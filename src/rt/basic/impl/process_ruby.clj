@@ -55,10 +55,11 @@
                     {:lang :ruby
                      :layout :flat})]
     (fn [body]
-      (str bootstrap
-           "\n\n"
-           (impl/emit-as
-            :ruby [(list 'puts (list 'return-eval body))])))))
+      (let [out (str bootstrap
+                     "\n\n"
+                     (impl/emit-as
+                      :ruby [(list 'puts (list 'return-eval body))]))]
+        out))))
 
 (def +ruby-oneshot-config+
   (common/set-context-options

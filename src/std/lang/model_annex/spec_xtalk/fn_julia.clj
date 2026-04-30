@@ -540,12 +540,12 @@
 
 
 (def +python-promise+
-  {:x-promise          {:emit :hard-link :raw 'python.core.common-promise/promise}
-   :x-promise-all      {:emit :hard-link :raw 'python.core.common-promise/promise-all}
-   :x-promise-then     {:emit :hard-link :raw 'python.core.common-promise/promise-then}
-   :x-promise-catch    {:emit :hard-link :raw 'python.core.common-promise/promise-catch}
-   :x-promise-finally  {:emit :hard-link :raw 'python.core.common-promise/promise-finally}
-   :x-promise-native?  {:emit :hard-link :raw 'python.core.common-promise/promise-native?}
+  {:x-promise          {:emit :hard-link :raw 'xt.lang.common-promise/promise}
+   :x-promise-all      {:emit :hard-link :raw 'xt.lang.common-promise/promise-all}
+   :x-promise-then     {:emit :hard-link :raw 'xt.lang.common-promise/promise-then}
+   :x-promise-catch    {:emit :hard-link :raw 'xt.lang.common-promise/promise-catch}
+   :x-promise-finally  {:emit :hard-link :raw 'xt.lang.common-promise/promise-finally}
+   :x-promise-native?  {:emit :hard-link :raw 'xt.lang.common-promise/promise-native?}
    :x-with-delay       {:emit :hard-link :raw 'python.core.common-promise/with-delay}})
 
 

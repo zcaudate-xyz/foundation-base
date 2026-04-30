@@ -407,6 +407,11 @@
   (l/emit-as :js [(js-tf-x-with-delay '[_ thunk 100])])
   => #"setTimeout")
 
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-async-run :added "4.1"}
+(fact "async run emits a native promise start"
+  (l/emit-as :js [(js-tf-x-async-run '[_ thunk])])
+  => #"(?s)Promise\.resolve\(\).*then\(thunk\)")
+
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-promise :added "4.1"}
 (fact "TODO")
 

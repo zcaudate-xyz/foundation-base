@@ -5,9 +5,9 @@
   (:use code.test))
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/+lua-promise+ :added "4.1"}
-(fact "promise delay hard-links through common-promise"
-  (get-in +lua-promise+ [:x-with-delay :raw])
-  => 'lua.core.common-promise/with-delay)
+(fact "async run emits a coroutine start"
+  (l/emit-as :lua [(lua-tf-x-async-run '[_ thunk])])
+  => #"(?s)coroutine\.create.*coroutine\.resume")
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-del :added "4.0"}
 (fact "deletes object"

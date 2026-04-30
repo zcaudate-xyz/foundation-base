@@ -62,8 +62,8 @@
    (form/add-listener f
                       "a1"
                       ["login"]
-                      (fn [e]
-                        (xt/x:arr-push calls "a1"))
+                       (fn [id data t meta]
+                         (xt/x:arr-push calls "a1"))
                       nil)
    (form/set-field f "login" "user")
    [(form/list-listeners f)
@@ -88,14 +88,16 @@
   (!.dt
    (var f (-/make-login-form))
    (var out nil)
-   (form/add-listener f "abc" ["login"] (fn [e] (:= out e)) nil)
+   (form/add-listener f "abc" ["login"] (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil)
    (form/set-field f "login" "test00001")
    out)
-  => {"fields" ["login"]
+  => {"id" "abc"
+      "data" {"fields" ["login"]
+              "type" "form.data"}
+      "t" nil
       "meta" {"form/fields" ["login"]
               "listener/id" "abc"
-              "listener/type" "form"}
-      "type" "form.data"})
+              "listener/type" "form"}})
 
 ^{:refer xt.event.base-form/trigger-all :added "4.1"}
 (fact "triggers listeners for all fields"
@@ -103,14 +105,16 @@
   (!.dt
    (var f (-/make-login-form))
    (var out nil)
-   (form/add-listener f "abc" ["login"] (fn [e] (:= out e)) nil)
+   (form/add-listener f "abc" ["login"] (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil)
    (form/trigger-all f "form.data")
    out)
-  => {"fields" ["login"]
+  => {"id" "abc"
+      "data" {"fields" ["login"]
+              "type" "form.data"}
+      "t" nil
       "meta" {"form/fields" ["login"]
               "listener/id" "abc"
-              "listener/type" "form"}
-      "type" "form.data"})
+              "listener/type" "form"}})
 
 ^{:refer xt.event.base-form/trigger-field :added "4.1"}
 (fact "triggers listeners for a single field"
@@ -118,21 +122,23 @@
   (!.dt
    (var f (-/make-login-form))
    (var out nil)
-   (form/add-listener f "abc" ["login"] (fn [e] (:= out e)) nil)
+   (form/add-listener f "abc" ["login"] (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil)
    (form/trigger-field f "login" "form.data")
    out)
-  => {"fields" ["login"]
+  => {"id" "abc"
+      "data" {"fields" ["login"]
+              "type" "form.data"}
+      "t" nil
       "meta" {"form/fields" ["login"]
               "listener/id" "abc"
-              "listener/type" "form"}
-      "type" "form.data"})
+              "listener/type" "form"}})
 
 ^{:refer xt.event.base-form/set-field :added "4.1"}
 (fact "sets a form field and returns triggered ids"
 
   (!.dt
    (var f (-/make-login-form))
-   (form/add-listener f "a1" ["login"] (fn:> nil) nil)
+   (form/add-listener f "a1" ["login"] (fn:> [_ _ _ _] nil) nil)
    [(form/set-field f "login" "world")
     (form/get-field f "login")])
   => [["a1"] "world"])
@@ -160,7 +166,7 @@
 
   (!.dt
    (var f (-/make-login-form))
-   (form/add-listener f "a1" ["login"] (fn:> nil) nil)
+   (form/add-listener f "a1" ["login"] (fn:> [_ _ _ _] nil) nil)
    [((form/field-fn f "login") "world")
     (form/get-field f "login")])
   => [["a1"] "world"])
@@ -194,7 +200,7 @@
   (!.dt
    (var f (-/make-login-form))
    (var out nil)
-   (form/add-listener f "a1" ["login"] (fn [e] (:= out e)) nil)
+   (form/add-listener f "a1" ["login"] (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil)
    (form/set-data f {:login "world"})
    [out (form/get-data f)])
   => [{"fields" ["login"]
@@ -246,17 +252,19 @@
     (var f (-/make-login-form))
     (form/add-listener
      f "a1" ["login"]
-     (fn [e]
-       (repl/notify
-        [e
-         (form/get-field-result f "login")]))
+     (fn [id data t meta]
+        (repl/notify
+         [{"id" id "data" data "t" t "meta" meta}
+          (form/get-field-result f "login")]))
      nil)
     (form/validate-field f "login" (fn [field status] (return nil)) nil))
-  => [{"fields" ["login"]
+  => [{"id" "a1"
+       "data" {"fields" ["login"]
+               "type" "form.validation"}
+       "t" nil
        "meta" {"form/fields" ["login"]
                "listener/id" "a1"
-               "listener/type" "form"}
-       "type" "form.validation"}
+               "listener/type" "form"}}
       {"data" ""
        "id" "is-required"
        "message" "Required field."
@@ -268,21 +276,23 @@
   (!.dt
    (var f (-/make-login-form))
    (var out nil)
-   (form/add-listener f "a1" ["login"] (fn [e] (:= out e)) nil)
+   (form/add-listener f "a1" ["login"] (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil)
    (form/reset-field-validator f "login")
    out)
-  => {"fields" ["login"]
+  => {"id" "a1"
+      "data" {"fields" ["login"]
+              "type" "form.validation"}
+      "t" nil
       "meta" {"form/fields" ["login"]
               "listener/id" "a1"
-              "listener/type" "form"}
-      "type" "form.validation"})
+              "listener/type" "form"}})
 
 ^{:refer xt.event.base-form/reset-all-validators :added "4.1"}
 (fact "resets all validator state"
 
   (!.dt
    (var f (-/make-login-form))
-   (form/add-listener f "a1" ["login"] (fn:> nil) nil)
+   (form/add-listener f "a1" ["login"] (fn:> [_ _ _ _] nil) nil)
    (form/reset-all-validators f)
    (form/get-result f))
   => {"::" "validation.result"

@@ -1,18 +1,19 @@
 (ns std.lang.model-annex.spec-ruby
   (:require [clojure.string]
-               [std.lang.base.book :as book]
-               [std.lang.base.emit :as emit]
-               [std.lang.base.emit-common :as common]
-              [std.lang.base.emit-helper :as helper]
-              [std.lang.base.preprocess-base :as preprocess-base]
-              [std.lang.base.emit-top-level :as top]
-              [std.lang.base.grammar :as grammar]
-               [std.lang.base.script :as script]
-               [std.lang.base.util :as ut]
-               [std.lang.rewrite.destructure :as destruct]
-               [std.lang.model.spec-xtalk]
-               [std.lang.model-annex.spec-ruby.rewrite :as rewrite]
-               [std.lang.model-annex.spec-xtalk.fn-ruby :as fn]
+                [std.lang.base.book :as book]
+                [std.lang.base.emit :as emit]
+                [std.lang.base.emit-common :as common]
+               [std.lang.base.emit-helper :as helper]
+               [std.lang.base.preprocess-base :as preprocess-base]
+               [std.lang.base.emit-top-level :as top]
+               [std.lang.base.grammar :as grammar]
+                [std.lang.base.script :as script]
+                [std.lang.typed.xtalk-analysis :as xtalk-analysis]
+                [std.lang.base.util :as ut]
+                [std.lang.rewrite.destructure :as destruct]
+                [std.lang.model.spec-xtalk]
+                [std.lang.model-annex.spec-ruby.rewrite :as rewrite]
+                [std.lang.model-annex.spec-xtalk.fn-ruby :as fn]
                [std.lib.collection :as collection]
                [std.lib.foundation :as f]
               [std.lib.template :as template]))
@@ -47,8 +48,59 @@
                (nil? (namespace sym)))
           local-name
 
-          :else
-          (common/emit-symbol sym grammar mopts))))
+           :else
+           (common/emit-symbol sym grammar mopts))))
+
+(defn ruby-destructure-key
+  "normalizes xtalk destructuring keys to the Ruby hash key format"
+  {:added "4.1"}
+  [sym]
+  (-> (name sym)
+      (clojure.string/replace "-" "_")))
+
+(defn- ruby-qualified-symbol
+  [sym]
+  (let [{:keys [module]} (preprocess-base/macro-opts)
+        module-id (:id module)]
+    (cond
+      (or (nil? sym)
+          (namespace sym)
+          (:inner (meta sym))
+          (nil? module-id))
+      sym
+
+      :else
+      (symbol (name module-id) (name sym)))))
+
+(defn- ruby-optional-input?
+  [input]
+  (= :maybe (get-in input [:type :kind])))
+
+(defn- ruby-apply-optional-defaults
+  [sym args]
+  (if-not (and sym (vector? args))
+    args
+    (try
+      (let [qualified      (ruby-qualified-symbol sym)
+            fn-def         (xtalk-analysis/resolve-function-def qualified)
+            inferred-count (when fn-def
+                             (count (take-while ruby-optional-input?
+                                                (reverse (:inputs fn-def)))))
+            optional-count (when (and inferred-count
+                                      (pos? inferred-count))
+                             inferred-count)]
+        (if (and optional-count (pos? optional-count))
+          (let [optional-args (take-last optional-count args)]
+            (if (not (neg? (collection/index-at #{:=} args)))
+              args
+              (vec
+               (concat (drop-last optional-count args)
+                       (mapcat (fn [arg]
+                                 [arg := nil])
+                               optional-args)))))
+          args))
+      (catch Throwable _
+        args))))
 
 (defn ruby-method-ref
   [[_ sym]]
@@ -81,13 +133,13 @@
   [[_ sym & args]]
   (let [bound (last args)]
     (cond
-      (destruct/destructure-target? sym)
-      (let [temp (gensym "ruby_var__")]
-        (apply list 'do*
-               (cons (list ':= temp bound)
-                     (map (fn [[target value]]
-                            (list ':= target value))
-                          (destruct/destructure-bindings sym temp name)))))
+       (destruct/destructure-target? sym)
+       (let [temp (gensym "ruby_var__")]
+         (apply list 'do*
+                (cons (list ':= temp bound)
+                      (map (fn [[target value]]
+                             (list ':= target value))
+                           (destruct/destructure-bindings sym temp ruby-destructure-key)))))
 
       (and (vector? sym)
            (seq sym)
@@ -218,7 +270,12 @@
 
 (defn ruby-defn-
   [form grammar mopts]
-  (top/emit-top-level :defn form grammar mopts))
+  (let [[tag name args & more] form]
+    (top/emit-top-level
+     :defn
+     (list* tag name (ruby-apply-optional-defaults name args) more)
+     grammar
+     mopts)))
 
 (defn ruby-defn
   [[_ sym args & body]]

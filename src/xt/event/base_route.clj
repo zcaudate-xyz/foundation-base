@@ -92,7 +92,7 @@
 (defspec.xt add-url-listener
   [:fn [EventRoute
         :xt/str
-        [:fn [RouteEvent] :xt/any]
+        xt.event.base-listener/EventListenerCallback
         [:xt/maybe xt.event.base-listener/EventListenerMeta]]
        xt.event.base-listener/EventListenerEntry])
 
@@ -100,7 +100,7 @@
   [:fn [EventRoute
         RoutePath
         :xt/str
-        [:fn [RouteEvent] :xt/any]
+        xt.event.base-listener/EventListenerCallback
         [:xt/maybe xt.event.base-listener/EventListenerMeta]]
        xt.event.base-listener/EventListenerEntry])
 
@@ -108,7 +108,7 @@
   [:fn [EventRoute
         :xt/str
         :xt/str
-        [:fn [RouteEvent] :xt/any]
+        xt.event.base-listener/EventListenerCallback
         [:xt/maybe xt.event.base-listener/EventListenerMeta]]
        xt.event.base-listener/EventListenerEntry])
 
@@ -117,7 +117,7 @@
         RoutePath
         :xt/str
         :xt/str
-        [:fn [RouteEvent] :xt/any]
+        xt.event.base-listener/EventListenerCallback
         [:xt/maybe xt.event.base-listener/EventListenerMeta]]
        xt.event.base-listener/EventListenerEntry])
 
@@ -263,11 +263,11 @@
   "gets diff between params"
   {:added "4.0"}
   [ptree ntree path]
-  (var path* path)
-  (when (xt/x:nil? path*)
-    (:= path* []))
-  (var pparams (-/path-params-from-tree ptree path*))
-  (var nparams (-/path-params-from-tree ntree path*))
+  (var path-arr path)
+  (when (xt/x:nil? path-arr)
+    (:= path-arr []))
+  (var pparams (-/path-params-from-tree ptree path-arr))
+  (var nparams (-/path-params-from-tree ntree path-arr))
   (return (-/changed-params-raw pparams nparams)))
 
 (defn.xt changed-path-raw
@@ -417,13 +417,17 @@
                     (xt/x:get-key (. event ["params"])
                                   param))))))))
 
-(def.xt ^{:arglists '([route listener-id])}
-  remove-listener
-  event-common/remove-listener)
+(defn.xt remove-listener
+  "removes a listener from the route"
+  {:added "4.0"}
+  [route listener-id]
+  (return (event-common/remove-listener route listener-id)))
 
-(def.xt ^{:arglists '([route])}
-  list-listeners
-  event-common/list-listeners)
+(defn.xt list-listeners
+  "lists all route listeners"
+  {:added "4.0"}
+  [route]
+  (return (event-common/list-listeners route)))
 
 (defn.xt set-url
   "sets the url for a route"
@@ -572,7 +576,7 @@
   {:added "4.0"}
   [route url]
   (xt/x:set-key route "history" [])
-  (var url* (:? (xt/x:nil? url) "" url))
+  (var route-url (:? (xt/x:nil? url) "" url))
   (xt/x:set-key route "tree"
-                (-/interim-to-tree (-/interim-from-url url*) true))
-  (-/set-url route url* true))
+                (-/interim-to-tree (-/interim-from-url route-url) true))
+  (-/set-url route route-url true))

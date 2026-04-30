@@ -100,6 +100,25 @@
       [true true true true]
       [true true true true]])
 
+^{:refer xt.lang.spec-base/x:async-run :added "4.1"}
+(fact "xtalk async primitives emit host async operations"
+  (let [js-out (l/emit-as :js ['(x:async-run thunk)])
+        dart-out (l/emit-as :dart ['(x:async-run thunk)])
+        py-out (l/emit-as :python ['(x:async-run thunk)])
+        lua-out (l/emit-as :lua ['(x:async-run thunk)])]
+    [[(boolean (re-find #"Promise\.resolve\(\)" js-out))
+      (boolean (re-find #"\.then\(thunk\)" js-out))]
+     [(boolean (re-find #"Future\.sync\(thunk\)" dart-out))]
+     [(boolean (re-find #"threading" py-out))
+      (boolean (re-find #"Thread" py-out))
+      (boolean (re-find #"target=thunk|:target thunk" py-out))]
+     [(boolean (re-find #"coroutine\.create" lua-out))
+      (boolean (re-find #"coroutine\.resume" lua-out))]])
+  => [[true true]
+      [true]
+      [true true true]
+      [true true]])
+
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-promise :added "4.1"}
 (fact "js xtalk promise ops emit native promise chains"
   (let [out (l/emit-as :js ['(do (x:promise thunk)

@@ -355,9 +355,14 @@
   (event-view/add-listener
    view
    "@/cell"
-   (fn [event]
-     (return (impl/trigger-listeners cell [model-id view-id] event))))
-  (return view))
+   (fn [id data t meta]
+     (return
+      (impl/trigger-listeners
+       cell [model-id view-id]
+       (j/assign {}
+                 data
+                 {:meta meta})))))
+   (return view))
 
 (defn.js add-model-attach
   "adds model statically"

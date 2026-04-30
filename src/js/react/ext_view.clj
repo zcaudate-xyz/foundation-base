@@ -172,13 +172,15 @@
          resultPrint} (or meta {}))
   (r/init []
     (var listener-id (j/randomId 4))
-    (event-view/add-listener
-     view
-     listener-id
-     (fn [event]
-       (var nresult (getResult))
-       (when (and (or (k/nil? resultTag)
-                      (== resultTag (. event data tag)))
+     (event-view/add-listener
+      view
+      listener-id
+      (fn [id data t meta]
+        (var event (xtd/obj-clone data))
+        (xt/x:set-key event "meta" meta)
+        (var nresult (getResult))
+        (when (and (or (k/nil? resultTag)
+                       (== resultTag (. event data tag)))
                   (or (not= "view.output"
                             (. event type))
                       (== (. event data type)
@@ -262,13 +264,13 @@
     (var [setThrottled throttle] (-/throttled-setter setResult delay))
     (event-view/add-listener
      view
-     listener-id
-     (fn []
-       (var nresult (getResult))
-       (when (not (== (r/curr resultRef)
+      listener-id
+       (fn [_ _ _ _]
+         (var nresult (getResult))
+         (when (not (== (r/curr resultRef)
                       nresult))
-         (setThrottled nresult)))
-     meta
+           (setThrottled nresult)))
+      meta
      (fn [event]
        (return (== "view.output"
                    (. event ["type"])))))

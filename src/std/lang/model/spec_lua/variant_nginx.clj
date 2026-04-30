@@ -41,6 +41,10 @@
                             (list 'var 'f := thunk)
                             (list 'return (list 'f))))))
 
+(defn lua-tf-x-async-run
+  [[_ thunk]]
+  (list 'ngx.thread.spawn thunk))
+
 (def +meta-delta+
   "Nginx-specific metadata overrides layered onto base Lua."
   {})
@@ -49,14 +53,7 @@
   "Nginx-specific grammar overrides layered onto base Lua."
   {:for-async      {:macro #'tf-for-async :emit :macro}
    :x-socket-connect {:macro #'lua-tf-x-socket-connect :emit :macro}
-   :x-async-run      {:emit :hard-link :raw 'lua.nginx.common-promise/async-run}
-   :x-async-bind     {:emit :hard-link :raw 'lua.nginx.common-promise/async-bind}
-   :x-promise        {:emit :hard-link :raw 'lua.nginx.common-promise/promise}
-   :x-promise-all    {:emit :hard-link :raw 'lua.nginx.common-promise/promise-all}
-   :x-promise-then   {:emit :hard-link :raw 'lua.nginx.common-promise/promise-then}
-   :x-promise-catch  {:emit :hard-link :raw 'lua.nginx.common-promise/promise-catch}
-   :x-promise-finally {:emit :hard-link :raw 'lua.nginx.common-promise/promise-finally}
-   :x-promise-native? {:emit :hard-link :raw 'lua.nginx.common-promise/promise-native?}
+   :x-async-run      {:macro #'lua-tf-x-async-run :emit :macro}
    :x-with-delay     {:emit :hard-link :raw 'lua.nginx.common-promise/with-delay}
    :x-b64-decode     {:emit :alias :raw 'ngx.decode-base64}
    :x-b64-encode     {:emit :alias :raw 'ngx.encode-base64}

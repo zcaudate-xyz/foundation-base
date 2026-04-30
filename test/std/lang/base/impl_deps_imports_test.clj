@@ -1,5 +1,6 @@
 (ns std.lang.base.impl-deps-imports-test
   (:require [python.core.common-promise]
+             [xt.lang.common-promise]
              [xt.lang.common-data]
              [xt.lang.common-lib]
              [js.blessed]

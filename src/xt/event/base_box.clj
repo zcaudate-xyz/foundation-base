@@ -39,7 +39,7 @@
   [:fn [EventBox
         :xt/str
         BoxPath
-        [:fn [BoxEvent] :xt/any]
+        xt.event.base-listener/EventListenerCallback
         [:xt/maybe xt.event.base-listener/EventListenerMeta]]
        xt.event.base-listener/EventListenerEntry])
 

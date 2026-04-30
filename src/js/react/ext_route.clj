@@ -19,7 +19,7 @@
   (r/init []
     (var listener-id (j/randomId 4))
     (event-route/add-url-listener
-     route listener-id (fn:> (changeTree getFn)))
+     route listener-id (fn:> [_ _ _ _] (changeTree getFn)))
     (return (fn:> (event-route/remove-listener route listener-id))))
   (return tree))
 
@@ -32,7 +32,7 @@
   (r/init []
     (var listener-id (j/randomId 4))
     (event-route/add-url-listener
-     route listener-id (fn:> (changeUrl getFn)))
+     route listener-id (fn:> [_ _ _ _] (changeUrl getFn)))
     (return (fn:> (event-route/remove-listener route listener-id))))
   (return url))
 
@@ -56,8 +56,8 @@
   (r/watch [path]
     (event-route/add-path-listener
      route path listener-id
-     (fn:> (changeSegment (or (event-route/get-segment route path)
-                              defaultSegment))))
+     (fn:> [_ _ _ _] (changeSegment (or (event-route/get-segment route path)
+                                        defaultSegment))))
     (return (fn:> (event-route/remove-listener route listener-id))))
   
   (return segment))
@@ -88,8 +88,8 @@
   (r/watch [param]
     (event-route/add-param-listener
      route param listener-id
-     (fn:> (changeValue (or (event-route/get-param route param)
-                            defaultVal))))
+     (fn:> [_ _ _ _] (changeValue (or (event-route/get-param route param)
+                                      defaultVal))))
     (return (fn:> (event-route/remove-listener route listener-id))))
   (return value))
 

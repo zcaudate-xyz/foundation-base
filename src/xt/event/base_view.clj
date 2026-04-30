@@ -75,7 +75,7 @@
 (defspec.xt add-listener
   [:fn [EventView
         :xt/str
-        [:fn [ViewEvent] :xt/any]
+        xt.event.base-listener/EventListenerCallback
         [:xt/maybe xt.event.base-listener/EventListenerMeta]
         [:xt/maybe [:fn [ViewEvent] :xt/bool]]]
        xt.event.base-listener/EventListenerEntry])
@@ -286,13 +286,17 @@
     meta
     pred)))
 
-(def.xt ^{:arglists '([view listener-id])}
-  remove-listener
-  event-common/remove-listener)
+(defn.xt remove-listener
+  "removes a listener from the view"
+  {:added "4.0"}
+  [view listener-id]
+  (return (event-common/remove-listener view listener-id)))
 
-(def.xt ^{:arglists '([view])}
-  list-listeners
-  event-common/list-listeners)
+(defn.xt list-listeners
+  "lists all view listeners"
+  {:added "4.0"}
+  [view]
+  (return (event-common/list-listeners view)))
 
 (defn.xt trigger-listeners
   "triggers listeners to activate"
@@ -320,7 +324,7 @@
   {:added "4.0"}
   [view]
   (var #{input} view)
-  (var out (xt/x:obj-clone input))
+  (var out (xtd/obj-clone input))
   (xt/x:del-key out "default")
   (return out))
 
@@ -330,7 +334,7 @@
   [view dest-key]
   (when (xt/x:nil? dest-key)
     (:= dest-key "output"))
-  (var out (xt/x:obj-clone (. view [dest-key])))
+  (var out (xtd/obj-clone (. view [dest-key])))
   (xt/x:del-key out "process")
   (xt/x:del-key out "default")
   (return out))
@@ -413,7 +417,7 @@
   (xt/x:obj-assign input {:current current
                           :updated (xt/x:now-ms)})
   (-/trigger-listeners view "view.input" (-/get-input view))
-  (return input))
+  (return (-/get-input view)))
 
 (defn.xt set-output
   "sets the output"
@@ -457,7 +461,7 @@
     (when (xt/x:has-key? output "disabled")
       (xt/x:del-key output "disabled")))
   (-/trigger-listeners view "view.disabled" (-/get-output view dest-key))
-  (return output))
+  (return (-/get-output view dest-key)))
 
 (defn.xt set-pending
   "sets the output pending time"
@@ -471,7 +475,7 @@
     (when (xt/x:has-key? output "pending")
       (xt/x:del-key output "pending")))
   (-/trigger-listeners view "view.pending" (-/get-output view dest-key))
-  (return output))
+  (return (-/get-output view dest-key)))
 
 (defn.xt set-elapsed
   "sets the output elapsed time"
@@ -485,7 +489,7 @@
     (when (xt/x:has-key? output "elapsed")
       (xt/x:del-key output "elapsed")))
   (-/trigger-listeners view "view.elapsed" (-/get-output view dest-key))
-  (return output))
+  (return (-/get-output view dest-key)))
 
 (defn.xt init-view
   "initialises view"
@@ -536,9 +540,9 @@
   (var process (xtd/get-in view [dest-key
                                  "process"]))
   (var record (xt/x:get-key acc tag))
-  (var update? nil)
+  (var should-update nil)
   (when (< 0 (xt/x:len record))
-    (:= update? (. record [0])))
+    (:= should-update (. record [0])))
   (var current nil)
   (when (< 1 (xt/x:len record))
     (:= current (. record [1])))
@@ -549,7 +553,7 @@
     (:= current ((xtd/get-in view [dest-key
                                    "default"]))))
   
-  (when update?
+  (when should-update
     (var output current)
     (when (not errored)
       (:= output (process current)))
@@ -589,15 +593,17 @@
   (var result-fn   (fn [res]
                      (:= (. acc [tag]) [true res])
                      (return (hook-fn acc tag))))
-  (var handler-fn (fn [_] (return nil)))
-  (var success-fn skipped-fn)
-  (when (and (not disabled)
-             (xt/x:is-function? handler)
-             (or (xt/x:nil? guard)
-                 (xt/x:get-key skip-guard tag)
-                 (guard context acc)))
-    (:= handler-fn (wrapper handler))
-    (:= success-fn result-fn))
+  (var handler-fn nil)
+  (var success-fn nil)
+  (if (and (not disabled)
+           (xt/x:is-function? handler)
+           (or (xt/x:nil? guard)
+               (xt/x:get-key skip-guard tag)
+               (guard context acc)))
+    (do (:= handler-fn (wrapper handler))
+        (:= success-fn result-fn))
+    (do (:= handler-fn (fn [_] (return nil)))
+        (:= success-fn skipped-fn)))
   (return
    (async-fn handler-fn context
              {"success" success-fn

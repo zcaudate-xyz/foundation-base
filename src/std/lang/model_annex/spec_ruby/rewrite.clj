@@ -1,5 +1,6 @@
 (ns std.lang.model-annex.spec-ruby.rewrite
   (:require [clojure.set :as set]
+            [clojure.string :as string]
             [std.lang.base.util :as ut]
             [std.lang.rewrite.common :as common]
             [std.lang.rewrite.destructure :as destruct]))
@@ -52,7 +53,10 @@
   [target temp]
   (cond
     (destruct/destructure-target? target)
-    (destruct/destructure-bindings target temp name)
+    (destruct/destructure-bindings target temp
+                                   (fn [sym]
+                                     (-> (name sym)
+                                         (string/replace "-" "_"))))
 
     (vector-destructure-target? target)
     (vector-destructure-bindings target temp)

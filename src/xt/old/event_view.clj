@@ -583,15 +583,17 @@
   (var result-fn   (fn [res]
                      (:= (. acc [tag]) [true res])
                      (return (hook-fn acc tag))))
-  (var handler-fn (fn [_] (return nil)))
-  (var success-fn skipped-fn)
-  (when (and (not disabled)
-             (xt/x:is-function? handler)
-             (or (xt/x:nil? guard)
-                 (xt/x:get-key skip-guard tag)
-                 (guard context acc)))
-    (:= handler-fn (wrapper handler))
-    (:= success-fn result-fn))
+  (var handler-fn nil)
+  (var success-fn nil)
+  (if (and (not disabled)
+           (xt/x:is-function? handler)
+           (or (xt/x:nil? guard)
+               (xt/x:get-key skip-guard tag)
+               (guard context acc)))
+    (do (:= handler-fn (wrapper handler))
+        (:= success-fn result-fn))
+    (do (:= handler-fn (fn [_] (return nil)))
+        (:= success-fn skipped-fn)))
   (return
    (async-fn handler-fn context
              {"success" success-fn

@@ -1,8 +1,28 @@
 (ns std.lang.model.spec-xtalk.fn-elisp-test
   (:require [std.lang :as l]
-            [std.lang.model.spec-elisp]
-            [std.lang.model.spec-xtalk.fn-elisp :refer :all])
+             [std.lang.model.spec-elisp]
+             [std.lang.model.spec-xtalk.fn-elisp :refer :all])
   (:use code.test))
+
+^{:refer std.lang.model.spec-xtalk.fn-elisp/+elisp-promise+ :added "4.1"}
+(fact "elisp async run stays local while promise ops hard-link to common-promise"
+  [(get-in +elisp-promise+ [:x-async-run :macro])
+   (get-in +elisp-promise+ [:x-promise :raw])
+   (get-in +elisp-promise+ [:x-promise-then :raw])
+   (get-in +elisp-promise+ [:x-promise-catch :raw])
+   (get-in +elisp-promise+ [:x-promise-finally :raw])
+   (get-in +elisp-promise+ [:x-promise-native? :raw])]
+  => [#'elisp-tf-x-async-run
+      'xt.lang.common-promise/promise
+      'xt.lang.common-promise/promise-then
+      'xt.lang.common-promise/promise-catch
+      'xt.lang.common-promise/promise-finally
+      'xt.lang.common-promise/promise-native?])
+
+^{:refer std.lang.model.spec-xtalk.fn-elisp/elisp-tf-x-async-run :added "4.1"}
+(fact "elisp async run emits via the local xt-promise template"
+  (l/emit-as :elisp [(elisp-tf-x-async-run '[_ thunk])])
+  => #"xt-promise")
 
 ^{:refer std.lang.model.spec-xtalk.fn-elisp/elisp-tf-x-print :added "4.1"}
 (fact "prints values"

@@ -11,9 +11,12 @@
 (defspec.xt EventListenerMeta
   :xt/any)
 
+(defspec.xt EventListenerCallback
+  [:fn [:xt/str :xt/any [:xt/maybe :xt/any] EventListenerMeta] :xt/any])
+
 (defspec.xt EventListenerEntry
   [:xt/record
-   ["callback" [:fn [:xt/any] :xt/any]]
+   ["callback" EventListenerCallback]
    ["meta" EventListenerMeta]
    ["pred" [:xt/maybe [:fn [:xt/any] :xt/bool]]]])
 
@@ -39,7 +42,7 @@
 
 (defspec.xt make-listener-entry
   [:fn [:xt/str :xt/str
-        [:fn [:xt/any] :xt/any]
+        EventListenerCallback
         [:xt/maybe EventListenerMeta]
         [:xt/maybe [:fn [:xt/any] :xt/bool]]]
        EventListenerEntry])
@@ -54,7 +57,7 @@
   [:fn [EventContainer
         :xt/str
         :xt/str
-        [:fn [:xt/any] :xt/any]
+        EventListenerCallback
         [:xt/maybe EventListenerMeta]
         [:xt/maybe [:fn [:xt/any] :xt/bool]]]
        EventListenerEntry])
@@ -79,7 +82,7 @@
         :xt/str
         :xt/str
         :xt/str
-        [:fn [:xt/any] :xt/any]
+        EventListenerCallback
         [:xt/maybe EventListenerMeta]
         [:xt/maybe [:fn [:xt/any] :xt/bool]]]
        EventListenerEntry])
@@ -129,11 +132,11 @@
   [listener-id listener-type callback meta pred]
   (return
    {:callback callback
-     :pred pred
-             :meta (xt/x:obj-assign
-                    {:listener/id   listener-id
-                     :listener/type listener-type}
-                    meta)}))
+    :pred pred
+    :meta (xt/x:obj-assign
+           {:listener/id   listener-id
+            :listener/type listener-type}
+           meta)}))
 
 (defn.xt listener-entry?
   "checks whether a listeners map value is a plain listener entry"
@@ -153,6 +156,29 @@
                  (xtd/is-empty? x)))
     (return []))
   (return [x]))
+
+(defn.xt callback-data
+  "normalizes event payload for callback consumers"
+  {:added "4.1"}
+  [event]
+  (when (not (xt/x:is-object? event))
+    (return event))
+  (var out (xt/x:obj-clone event))
+  (when (xt/x:has-key? out "meta")
+    (xt/x:del-key out "meta"))
+  (return out))
+
+(defn.xt callback-time
+  "extracts an event timestamp when present"
+  {:added "4.1"}
+  [event]
+  (when (not (xt/x:is-object? event))
+    (return nil))
+  (when (xt/x:has-key? event "time")
+    (return (xt/x:get-key event "time")))
+  (when (xt/x:has-key? event "t")
+    (return (xt/x:get-key event "t")))
+  (return nil))
 
 (defn.xt clear-listeners
   "clears all listeners"
@@ -226,9 +252,13 @@
     (var nmeta (xt/x:obj-assign (or (xt/x:get-key event "meta")
                                     {})
                                 meta))
-    (callback (xt/x:obj-assign
-               (xt/x:obj-clone event)
-               {:meta nmeta}))))
+    (var listener-id (xt/x:get-key meta "listener/id"))
+    (return
+     (callback
+      listener-id
+      (-/callback-data event)
+      (-/callback-time event)
+      nmeta))))
 
 (defn.xt trigger-listeners
   "triggers listeners given event"

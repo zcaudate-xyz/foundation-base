@@ -548,9 +548,15 @@
    :x-iter-eq             {:macro #'lua-tf-x-iter-eq             :emit :macro
                            :op-spec {:allow-blocks true}}
    :x-iter-null           {:default '(coroutine.wrap (fn [])) :emit :unit}
-   :x-iter-next           {:macro #'lua-tf-x-iter-next           :emit :macro}
-   :x-iter-has?           {:macro #'lua-tf-x-iter-has?           :emit :macro}
-   :x-iter-native?        {:macro #'lua-tf-x-iter-native?        :emit :macro}})
+    :x-iter-next           {:macro #'lua-tf-x-iter-next           :emit :macro}
+    :x-iter-has?           {:macro #'lua-tf-x-iter-has?           :emit :macro}
+    :x-iter-native?        {:macro #'lua-tf-x-iter-native?        :emit :macro}})
+
+(defn lua-tf-x-async-run
+  [[_ thunk]]
+  (template/$
+   (coroutine.resume
+    (coroutine.create ~thunk))))
 
 (defn lua-tf-x-with-delay
   ([[_ ms thunk]]
@@ -560,14 +566,7 @@
         (return (~thunk))))))
 
 (def +lua-promise+
-  {:x-async-run        {:emit :hard-link :raw 'lua.core.common-promise/async-run}
-   :x-async-bind       {:emit :hard-link :raw 'lua.core.common-promise/async-bind}
-   :x-promise          {:emit :hard-link :raw 'lua.core.common-promise/promise}
-   :x-promise-all      {:emit :hard-link :raw 'lua.core.common-promise/promise-all}
-   :x-promise-then     {:emit :hard-link :raw 'lua.core.common-promise/promise-then}
-   :x-promise-catch    {:emit :hard-link :raw 'lua.core.common-promise/promise-catch}
-   :x-promise-finally  {:emit :hard-link :raw 'lua.core.common-promise/promise-finally}
-   :x-promise-native?  {:emit :hard-link :raw 'lua.core.common-promise/promise-native?}
+  {:x-async-run        {:macro #'lua-tf-x-async-run         :emit :macro}
    :x-with-delay       {:emit :hard-link :raw 'lua.core.common-promise/with-delay}})
 
 (defn lua-tf-x-pwd

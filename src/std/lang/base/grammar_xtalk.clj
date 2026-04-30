@@ -911,26 +911,29 @@
 (def +xt-runtime-promise+
   [{:op :x-async-run        :symbol #{'x:async-run}        :emit :abstract
     :op-spec {:arglists '([thunk])
-              :type [:fn [[:xt/fn]] :xt/promise]}}
-   {:op :x-async-bind       :symbol #{'x:async-bind}       :emit :abstract
-    :op-spec {:arglists '([promise success error])
-              :type [:fn [:xt/promise :xt/any :xt/any] :xt/promise]}}
-   {:op :x-promise          :symbol #{'x:promise}          :emit :abstract
+              :type [:fn [[:xt/fn]] :xt/any]}}
+   {:op :x-promise          :symbol #{'x:promise}          :emit :hard-link
+    :raw 'xt.lang.common-promise/promise
     :op-spec {:arglists '([thunk])
               :type [:fn [[:xt/fn]] :xt/promise]}}
-   {:op :x-promise-all      :symbol #{'x:promise-all}      :emit :abstract
+   {:op :x-promise-all      :symbol #{'x:promise-all}      :emit :hard-link
+    :raw 'xt.lang.common-promise/promise-all
     :op-spec {:arglists '([promises])
               :type [:fn [[:xt/array :xt/any]] :xt/promise]}}
-   {:op :x-promise-then     :symbol #{'x:promise-then}     :emit :abstract
+   {:op :x-promise-then     :symbol #{'x:promise-then}     :emit :hard-link
+    :raw 'xt.lang.common-promise/promise-then
     :op-spec {:arglists '([promise thunk])
               :type [:fn [:xt/promise [:xt/fn]] :xt/promise]}}
-   {:op :x-promise-catch    :symbol #{'x:promise-catch}    :emit :abstract
+   {:op :x-promise-catch    :symbol #{'x:promise-catch}    :emit :hard-link
+    :raw 'xt.lang.common-promise/promise-catch
     :op-spec {:arglists '([promise thunk])
               :type [:fn [:xt/promise [:xt/fn]] :xt/promise]}}
-   {:op :x-promise-finally  :symbol #{'x:promise-finally}  :emit :abstract
+   {:op :x-promise-finally  :symbol #{'x:promise-finally}  :emit :hard-link
+    :raw 'xt.lang.common-promise/promise-finally
     :op-spec {:arglists '([promise thunk])
               :type [:fn [:xt/promise [:xt/fn]] :xt/promise]}}
-   {:op :x-promise-native?  :symbol #{'x:promise-native?}  :emit :abstract
+   {:op :x-promise-native?  :symbol #{'x:promise-native?}  :emit :hard-link
+    :raw 'xt.lang.common-promise/promise-native?
     :op-spec {:arglists '([x])
               :type [:fn [:xt/any] :xt/bool]}}
    {:op :x-with-delay  :symbol #{'x:with-delay}  :emit :abstract

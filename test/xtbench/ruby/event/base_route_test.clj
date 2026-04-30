@@ -45,8 +45,8 @@
          (route/add-url-listener
           r
           "a1"
-          (fn [e]
-            (xt/x:arr-push calls (xt/x:get-key e "type")))
+          (fn [id data t meta]
+            (xt/x:arr-push calls (xt/x:get-key data "type")))
           nil))
    (route/set-url r "hello/world?auth=sign_out")
    (:= removed (route/remove-listener r "a1"))
@@ -214,7 +214,7 @@
    (. (route/add-url-listener
        (route/make-route "hello")
        "a1"
-       (fn:> nil)
+       (fn:> [_ _ _ _] nil)
        {:label "hello"})
       ["meta"]))
   => {"label" "hello"
@@ -229,7 +229,7 @@
        (route/make-route "hello")
        ["hello"]
        "a1"
-       (fn:> nil)
+       (fn:> [_ _ _ _] nil)
        {:label "hello"})
       ["meta"]))
   => {"label" "hello"
@@ -245,7 +245,7 @@
        (route/make-route "hello")
        "auth"
        "a1"
-       (fn:> nil)
+       (fn:> [_ _ _ _] nil)
        {:label "hello"})
       ["meta"]))
   => {"label" "hello"
@@ -262,7 +262,7 @@
        ["hello"]
        "auth"
        "a1"
-       (fn:> nil)
+       (fn:> [_ _ _ _] nil)
        {:label "hello"})
       ["meta"]))
   => {"label" "hello"
@@ -277,10 +277,10 @@
   (!.rb
    (var r (route/make-route "hello?auth=sign_in"))
    (var calls [])
-   (route/add-url-listener r "url" (fn [e] (xt/x:arr-push calls (. e ["type"]))) nil)
-   (route/add-path-listener r ["hello"] "path" (fn [e] (xt/x:arr-push calls "path")) nil)
-   (route/add-param-listener r "auth" "param" (fn [e] (xt/x:arr-push calls "param")) nil)
-   (route/add-full-listener r ["hello"] "auth" "full" (fn [e] (xt/x:arr-push calls "full")) nil)
+   (route/add-url-listener r "url" (fn [id data t meta] (xt/x:arr-push calls (. data ["type"]))) nil)
+   (route/add-path-listener r ["hello"] "path" (fn [id data t meta] (xt/x:arr-push calls "path")) nil)
+   (route/add-param-listener r "auth" "param" (fn [id data t meta] (xt/x:arr-push calls "param")) nil)
+   (route/add-full-listener r ["hello"] "auth" "full" (fn [id data t meta] (xt/x:arr-push calls "full")) nil)
    [(route/set-url r "hello/world?auth=sign_out")
     (route/get-url r)
     calls])
@@ -295,10 +295,10 @@
   (!.rb
    (var r (route/make-route "hello?auth=sign_in"))
    (var calls [])
-   (route/add-url-listener r "url" (fn [e] (xt/x:arr-push calls (. e ["type"]))) nil)
-   (route/add-path-listener r [] "path" (fn [e] (xt/x:arr-push calls "path")) nil)
-   (route/add-param-listener r "auth" "param" (fn [e] (xt/x:arr-push calls "param")) nil)
-   (route/add-full-listener r [] "auth" "full" (fn [e] (xt/x:arr-push calls "full")) nil)
+   (route/add-url-listener r "url" (fn [id data t meta] (xt/x:arr-push calls (. data ["type"]))) nil)
+   (route/add-path-listener r [] "path" (fn [id data t meta] (xt/x:arr-push calls "path")) nil)
+   (route/add-param-listener r "auth" "param" (fn [id data t meta] (xt/x:arr-push calls "param")) nil)
+   (route/add-full-listener r [] "auth" "full" (fn [id data t meta] (xt/x:arr-push calls "full")) nil)
    [(route/set-path r ["world"] {"auth" "sign_out"})
     (route/get-url r)
     calls])
@@ -313,7 +313,7 @@
   (!.rb
    (var r (route/make-route "hello/world"))
    (var calls [])
-   (route/add-path-listener r ["hello"] "path" (fn [e] (xt/x:arr-push calls (. e ["type"]))) nil)
+   (route/add-path-listener r ["hello"] "path" (fn [id data t meta] (xt/x:arr-push calls (. data ["type"]))) nil)
    [(route/set-segment r ["hello"] "there")
     (route/get-url r)
     calls])
@@ -327,7 +327,7 @@
   (!.rb
    (var r (route/make-route "hello"))
    (var calls [])
-   (route/add-param-listener r "auth" "param" (fn [e] (xt/x:arr-push calls (. e ["type"]))) nil)
+   (route/add-param-listener r "auth" "param" (fn [id data t meta] (xt/x:arr-push calls (. data ["type"]))) nil)
    [(route/set-param r "auth" "sign_in" nil)
     (route/get-url r)
     (route/get-param r "auth" nil)
