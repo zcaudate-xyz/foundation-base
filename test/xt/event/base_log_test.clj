@@ -9,7 +9,7 @@
              [xt.lang.spec-base :as xt]
              [xt.event.base-log :as log]]})
 
-(l/script- :lua
+(l/script- :python
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
              [xt.lang.spec-base :as xt]
@@ -22,50 +22,13 @@
              [xt.event.base-log :as log]]})
 
 (fact:global
- {:setup    [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.event.base-log/queue-entry :added "4.1"}
 (fact "queues and slices log entries"
 
   (!.js
-   (var l (log/new-log {}))
-   (log/queue-entry l {:id "id-0"}
-                    (fn [x _]
-                      (return (xt/x:get-key x "id")))
-                    k/identity
-                    1)
-   (log/queue-entry l {:id "id-1"}
-                    (fn [x _]
-                      (return (xt/x:get-key x "id")))
-                    k/identity
-                    1)
-   (log/queue-entry l {:id "id-2"}
-                    (fn [x _]
-                      (return (xt/x:get-key x "id")))
-                    k/identity
-                    1)
-   [(log/get-count l)
-    (log/get-last l)
-    (log/get-head l 2)
-    (log/get-tail l 2)
-    (log/get-slice l 1 3)
-    (log/clear l)
-    (log/get-count l)])
-  => [3
-      {"id" "id-2"}
-      [{"id" "id-0"}
-       {"id" "id-1"}]
-      [{"id" "id-1"}
-       {"id" "id-2"}]
-      [{"id" "id-1"}
-       {"id" "id-2"}]
-      [{"id" "id-0"}
-       {"id" "id-1"}
-       {"id" "id-2"}]
-      0]
-
-  (!.lua
    (var l (log/new-log {}))
    (log/queue-entry l {:id "id-0"}
                     (fn [x _]
@@ -155,19 +118,6 @@
         "listener/type" "log"}
        ["a1"]])
 
-  (!.lua
-   (var l (log/new-log {}))
-   (log/add-listener l "a1" (fn:>) nil)
-   (log/add-listener l "b2" (fn:>) nil)
-   [(log/list-listeners l)
-    (. (log/remove-listener l "b2") ["meta"])
-    (log/list-listeners l)])
-  => (just-in
-      [(just ["a1" "b2"] :in-any-order)
-       {"listener/id" "b2"
-        "listener/type" "log"}
-       ["a1"]])
-
   (!.py
    (var l (log/new-log {}))
    (log/add-listener l "a1" (fn:>) nil)
@@ -185,16 +135,6 @@
 (fact "creates a new log container"
 
   (!.js
-   (var l (log/new-log {:interval 10
-                        :maximum 5}))
-   [(. l ["::"])
-    (. l ["interval"])
-    (. l ["maximum"])
-    (. l ["callback"])
-    (log/get-count l)])
-  => ["event.log" 10 5 nil 0]
-
-  (!.lua
    (var l (log/new-log {:interval 10
                         :maximum 5}))
    [(. l ["::"])
@@ -223,12 +163,6 @@
                               {"id" "b"}]})))
   => 2
 
-  (!.lua
-   (log/get-count
-    (log/new-log {:processed [{"id" "a"}
-                              {"id" "b"}]})))
-  => 2
-
   (!.py
    (log/get-count
     (log/new-log {:processed [{"id" "a"}
@@ -239,12 +173,6 @@
 (fact "returns the last processed entry"
 
   (!.js
-   (log/get-last
-    (log/new-log {:processed [{"id" "a"}
-                              {"id" "b"}]})))
-  => {"id" "b"}
-
-  (!.lua
    (log/get-last
     (log/new-log {:processed [{"id" "a"}
                               {"id" "b"}]})))
@@ -268,15 +196,6 @@
   => [{"id" "a"}
       {"id" "b"}]
 
-  (!.lua
-   (log/get-head
-    (log/new-log {:processed [{"id" "a"}
-                              {"id" "b"}
-                              {"id" "c"}]})
-    2))
-  => [{"id" "a"}
-      {"id" "b"}]
-
   (!.py
    (log/get-head
     (log/new-log {:processed [{"id" "a"}
@@ -290,16 +209,6 @@
 (fact "filters processed entries"
 
   (!.js
-   (log/get-filtered
-    (log/new-log {:processed [{"id" "a" "keep" true}
-                              {"id" "b" "keep" false}
-                              {"id" "c" "keep" true}]})
-    (fn [entry]
-      (return (xt/x:get-key entry "keep")))))
-  => [{"id" "a" "keep" true}
-      {"id" "c" "keep" true}]
-
-  (!.lua
    (log/get-filtered
     (log/new-log {:processed [{"id" "a" "keep" true}
                               {"id" "b" "keep" false}
@@ -331,15 +240,6 @@
   => [{"id" "b"}
       {"id" "c"}]
 
-  (!.lua
-   (log/get-tail
-    (log/new-log {:processed [{"id" "a"}
-                              {"id" "b"}
-                              {"id" "c"}]})
-    2))
-  => [{"id" "b"}
-      {"id" "c"}]
-
   (!.py
    (log/get-tail
     (log/new-log {:processed [{"id" "a"}
@@ -353,16 +253,6 @@
 (fact "returns a bounded slice"
 
   (!.js
-   (log/get-slice
-    (log/new-log {:processed [{"id" "a"}
-                              {"id" "b"}
-                              {"id" "c"}]})
-    1
-    3))
-  => [{"id" "b"}
-      {"id" "c"}]
-
-  (!.lua
    (log/get-slice
     (log/new-log {:processed [{"id" "a"}
                               {"id" "b"}
@@ -394,15 +284,6 @@
        {"id" "b"}]
       0]
 
-  (!.lua
-   (var l (log/new-log {:processed [{"id" "a"}
-                                    {"id" "b"}]}))
-   [(log/clear l)
-    (log/get-count l)])
-  => [[{"id" "a"}
-       {"id" "b"}]
-      0]
-
   (!.py
    (var l (log/new-log {:processed [{"id" "a"}
                                     {"id" "b"}]}))
@@ -416,17 +297,6 @@
 (fact "evicts stale cache keys"
 
   (!.js
-   (var l (log/new-log {:interval 10
-                        :cache {"a" 0
-                                "b" 15}}))
-   [(log/clear-cache l 20)
-    (xt/x:obj-keys (. l ["cache"]))
-    (. l ["last"])])
-  => [["a"]
-      ["b"]
-      20]
-
-  (!.lua
    (var l (log/new-log {:interval 10
                         :cache {"a" 0
                                 "b" 15}}))

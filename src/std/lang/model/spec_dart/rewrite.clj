@@ -1,16 +1,18 @@
 (ns std.lang.model.spec-dart.rewrite
   (:require [std.lang.rewrite.conditional :as condrw]
-             [std.lang.rewrite.hoist :as hoist]
-             [std.lang.rewrite.fn :as fnrw]
-             [std.lang.rewrite.statement :as stmt]
-             [std.lang.rewrite.truthy :as truthy]
-             [std.lang.rewrite.unpack :as unpack]
-             [std.lang.rewrite.walk :as walk]
-             [std.lib.collection :as collection]))
+              [std.lang.rewrite.hoist :as hoist]
+              [std.lang.rewrite.fn :as fnrw]
+              [std.lang.rewrite.statement :as stmt]
+              [std.lang.typed.xtalk-analysis :as xtalk-analysis]
+              [std.lang.rewrite.truthy :as truthy]
+              [std.lang.rewrite.unpack :as unpack]
+              [std.lang.rewrite.walk :as walk]
+              [std.lib.collection :as collection]))
 
 (def ^:private +dart-rewriter+
   (hoist/create-rewriter
-   {:symbol-prefix "dart_callback__"}))
+   {:symbol-prefix "dart_callback__"
+    :lambda-compatible? (fn [_ _] true)}))
 
 (def ^:private +dart-boolish-ops+
   '#{and
@@ -90,6 +92,33 @@
 
 (def ^:private with-form-meta
   walk/with-form-meta)
+
+(defn- dart-optional-input?
+  [input]
+  (= :maybe (get-in input [:type :kind])))
+
+(defn- dart-pad-optional-args
+  [head args]
+  (if-not (symbol? head)
+    args
+    (try
+      (let [fn-def (xtalk-analysis/resolve-function-def head)
+            optional-count (some->> fn-def
+                                    :inputs
+                                    reverse
+                                    (take-while dart-optional-input?)
+                                    count)
+            missing-count  (when fn-def
+                             (- (count (:inputs fn-def))
+                                (count args)))]
+        (if (and fn-def
+                 (pos? optional-count)
+                 (pos? missing-count)
+                 (<= missing-count optional-count))
+          (concat args (repeat missing-count nil))
+          args))
+      (catch Throwable _
+        args))))
 
 (defn- dart-boolish-form?
   [form]
@@ -194,6 +223,49 @@
                     'dart:or)
              args*))))
 
+(defn- rewrite-and-step
+  [source lhs rhs grammar]
+  (if (simple-truthy-source? lhs)
+    (with-form-meta
+      source
+      (list ':?
+            (dart-truthy-form source lhs grammar)
+            rhs
+            lhs))
+    (let [value (gensym "dart_and__")]
+      (with-form-meta
+        source
+        (list (rewrite-fn
+               (list 'fn []
+                     (list 'var value lhs)
+                     (list 'return
+                           (list ':?
+                                 (truthy/truthy-check-form value)
+                                 rhs
+                                 value)))
+               grammar))))))
+
+(defn- rewrite-and-expression
+  [form grammar]
+  (let [args* (walk/rewrite-coll (rest form)
+                                 #(dart-rewrite-expression % grammar))]
+    (with-form-meta
+      form
+      (cond
+        (empty? args*)
+        true
+
+        (= 1 (count args*))
+        (first args*)
+
+        (every? dart-boolish-form? args*)
+        (apply list 'and args*)
+
+        :else
+        (reduce #(rewrite-and-step form %1 %2 grammar)
+                (first args*)
+                (rest args*))))))
+
 (defn- rewrite-ternary-expression
   [form grammar]
   (let [[_ test then else] form
@@ -217,6 +289,9 @@
                       head)
         args        (rest form)
         unpack?     (unpack/any-unpack? args)
+        args        (if unpack?
+                      args
+                      (dart-pad-optional-args head args))
         args*       (unpack/rewrite-args args
                                          #(dart-rewrite-expression % grammar)
                                          identity
@@ -240,6 +315,9 @@
 
     fn
     (rewrite-fn form grammar)
+
+    and
+    (rewrite-and-expression form grammar)
 
     or
     (rewrite-or-expression form grammar)
@@ -300,7 +378,10 @@
 
 (defn- rewrite-do-statement
   [form grammar]
-  (stmt/rewrite-do-statement form
+  (stmt/rewrite-do-statement (if (= 'do* (first form))
+                               (with-form-meta form
+                                 (apply list 'do (rest form)))
+                               form)
                              #(dart-rewrite-statements % grammar)))
 
 (defn- rewrite-var-statement

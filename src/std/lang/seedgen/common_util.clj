@@ -202,6 +202,12 @@
          sort
          vec)))
 
+(defn seedgen-form-lang
+  [form]
+  (let [langs (seedgen-runtime-dispatch-langs form)]
+    (when (= 1 (count langs))
+      (first langs))))
+
 ;; --------------------------------------------------
 ;; fact coverage inspection
 ;; --------------------------------------------------

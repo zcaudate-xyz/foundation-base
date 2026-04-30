@@ -1,6 +1,7 @@
 (ns std.lang.model.spec-dart-test
   (:require [std.lang :as l]
-            [std.lang.model.spec-dart :as spec-dart])
+            [std.lang.model.spec-dart :as spec-dart]
+            [xt.event.base-route])
   (:use code.test))
 
 (fact "basic dart emission"
@@ -33,6 +34,34 @@
   (l/emit-as :dart ['(x:arr-push items 1)])
   => "items.add(1)")
 
+(fact "dart pads omitted trailing xt maybe args at call sites"
+  (let [out (l/emit-as :dart ['(xt.event.base-route/path-to-tree ["hello" "world"])])]
+    [(boolean (re-find #"path_to_tree" out))
+     (boolean (re-find #"\[\"hello\",\"world\"\],null\)" out))])
+  => [true true])
+
+(fact "dart preserves xt truthiness for and expressions"
+  (let [out (l/emit-as :dart ['(and true 1)])]
+    [(boolean (re-find #"\? 1 : true" out))
+     (boolean (re-find #"&& 1" out))])
+  => [true false])
+
+(fact "dart routes pow through math.pow"
+  (l/emit-as :dart ['(pow 2 5)])
+  => "math.pow(2,5)")
+
+(fact "dart do* statements retain return terminators in function bodies"
+  (boolean
+   (re-find #"return a \+ 3;"
+            (l/emit-as :dart ['(fn [] (do* (var a 2) (return (+ a 3))))])))
+  => true)
+
+(fact "dart let expansion keeps return terminators in function bodies"
+  (boolean
+   (re-find #"return a \+ b;"
+            (l/emit-as :dart ['(fn [] (let [a 2 b 3] (return (+ a b))))])))
+  => true)
+
 (fact "dart truthy rewrites evaluate expressions once"
   (let [out (l/emit-as :dart ['(if (not (probe value))
                                  1
@@ -55,6 +84,12 @@
 
   (spec-dart/dart-map-key '(+ a 1) spec-dart/+grammar+ {})
   => "a + 1")
+
+(fact "dart inline fn emission drops expression names"
+  (let [out (l/emit-as :dart ['(fn inc-fn [x] (return x))])]
+    [(boolean (re-find #"inc_fn" out))
+     (boolean (re-find #"\(x\) \{" out))])
+  => [false true])
 
 (fact "xtalk error throws"
   (l/emit-as :dart ['(x:err "error")])

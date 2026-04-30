@@ -95,6 +95,27 @@
     (fn [_]
       (return true)))))
 
+(defn.xt unload-tasks-loop
+  "internal recursive helper for unloading completed tasks"
+  {:added "4.1"}
+  [tasks completed ids out hook-fn]
+  (when (== 0 (xt/x:len ids))
+    (return (spec-promise/x:promise-run out)))
+  (var id (xt/x:first ids))
+  (var rest (xt/x:arr-slice ids 1 (xt/x:len ids)))
+  (when (not= true (xt/x:get-key completed id))
+    (return (-/unload-tasks-loop tasks completed rest out hook-fn)))
+  (xt/x:del-key completed id)
+  (var task (xt/x:get-key tasks id))
+  (return
+   (spec-promise/x:promise-then
+    (-/task-unload task)
+    (fn [unloaded]
+      (when (xt/x:not-nil? hook-fn)
+        (hook-fn id unloaded))
+      (xt/x:arr-push out [id unloaded])
+      (return (-/unload-tasks-loop tasks completed rest out hook-fn))))))
+
 (defn.xt new-loader-blank
   "creates a blank loader"
   {:added "4.1"}
@@ -240,22 +261,4 @@
   [loader hook-fn]
   (var #{order completed tasks} loader)
   (var rorder (xt/x:arr-reverse order))
-  (var unload-loop
-       (fn [ids out]
-         (when (== 0 (xt/x:len ids))
-           (return (spec-promise/x:promise-run out)))
-         (var id (xt/x:first ids))
-          (var rest (xt/x:arr-slice ids 1 (xt/x:len ids)))
-         (when (not= true (xt/x:get-key completed id))
-           (return (unload-loop rest out)))
-         (xt/x:del-key completed id)
-         (var task (xt/x:get-key tasks id))
-         (return
-          (spec-promise/x:promise-then
-           (-/task-unload task)
-           (fn [unloaded]
-             (when (xt/x:not-nil? hook-fn)
-               (hook-fn id unloaded))
-             (xt/x:arr-push out [id unloaded])
-             (return (unload-loop rest out)))))))
-  (return (unload-loop rorder [])))
+  (return (-/unload-tasks-loop tasks completed rorder [] hook-fn)))

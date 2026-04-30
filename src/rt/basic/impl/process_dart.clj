@@ -364,7 +364,9 @@
   "Transforms forms into a standalone Dart `main` function."
   {:added "4.1"}
   [forms opts]
-  (let [out-sym (gensym "out_")
+  (let [bulk? (or (:bulk opts)
+                  (-> forms meta :bulk))
+        out-sym (gensym "out_")
         async-statement-op? (fn [head]
                               (when (instance? clojure.lang.Named head)
                                 (contains? #{"notify"
@@ -386,35 +388,21 @@
                             (and (seq? form)
                                  (= 'fn (first form))
                                  (let [[_ maybe-name maybe-args] form
-                                       args (if (vector? maybe-name)
-                                              maybe-name
-                                              maybe-args)]
-                                   (and (vector? args)
-                                        (empty? args)))))
-        top-level-vector-forms? (fn [forms]
-                                  (or (= 1 (count forms))
-                                      (some (fn [form]
-                                              (and (seq? form)
-                                                   (let [head (first form)]
-                                                     (or (= 'return-wrap head)
-                                                         (statement-op? head)
-                                                         (async-statement-op? head)))))
-                                            forms)))
+                                        args (if (vector? maybe-name)
+                                               maybe-name
+                                               maybe-args)]
+                                    (and (vector? args)
+                                         (empty? args)))))
         forms (cond (nil? forms)
                     []
 
-                    (vector? forms)
-                    (if (top-level-vector-forms? forms)
+                    bulk?
+                    (if (vector? forms)
                       forms
-                      [forms])
-
-                    (or (map? forms)
-                        (set? forms)
-                        (symbol? (first forms)))
-                    [forms]
+                      (vec forms))
 
                     :else
-                    forms)
+                    [forms])
         forms (letfn [(track-form [form]
                       (cond
                         (seq? form)
@@ -496,47 +484,125 @@
                                              (list 'return form*))))
                            form*)))]
                 (map track-statement forms))
+        lift-expression
+        (letfn [(lift-statement-form [form]
+                  (let [[stmts expr] (lift-expression form)]
+                    (cond-> (vec stmts)
+                      (some? expr) (conj expr))))
+                (materialize-child [form]
+                  (let [[stmts expr] (lift-expression form)]
+                    (if (seq stmts)
+                      (let [sym (gensym "expr_")]
+                        [(into (vec stmts)
+                               [(list 'var sym expr)])
+                         sym])
+                      [[] expr])))
+                (lift-map-entry [[k v]]
+                  (let [[k-stmts k-expr] (materialize-child k)
+                        [v-stmts v-expr] (materialize-child v)]
+                    [(into (vec k-stmts) v-stmts)
+                     [k-expr v-expr]]))
+                (lift-expression [form]
+                  (cond
+                    (seq? form)
+                    (let [head (first form)]
+                      (case head
+                        quote [[] form]
+                        fn [[] form]
+                        do
+                        (let [body (rest form)]
+                          (if (empty? body)
+                            [[] nil]
+                            (let [stmts (mapcat lift-statement-form (butlast body))
+                                  [last-stmts last-expr] (lift-expression (last body))]
+                              [(into (vec stmts) last-stmts)
+                               last-expr])))
+                        do*
+                        (let [body (rest form)]
+                          (if (empty? body)
+                            [[] nil]
+                            (let [stmts (mapcat lift-statement-form (butlast body))
+                                  [last-stmts last-expr] (lift-expression (last body))]
+                              [(into (vec stmts) last-stmts)
+                               last-expr])))
+                        (let [parts (map materialize-child (rest form))]
+                          [(mapcat first parts)
+                           (apply list head (map second parts))])))
+
+                    (vector? form)
+                    (let [parts (map materialize-child form)]
+                      [(mapcat first parts)
+                       (mapv second parts)])
+
+                    (map? form)
+                    (let [parts (map lift-map-entry form)]
+                      [(mapcat first parts)
+                       (into (empty form) (map second parts))])
+
+                    (set? form)
+                    (let [parts (map materialize-child form)]
+                      [(mapcat first parts)
+                       (set (map second parts))])
+
+                    :else
+                    [[] form]))]
+          lift-expression)
         await-sync-form (fn [form]
-                          (list 'await
-                                (list 'Future.sync
-                                      (list 'fn '[]
-                                            (list 'return form)))))
+                          (let [[stmts expr] (lift-expression form)
+                                thunk-body (if (seq stmts)
+                                             (apply list 'do (concat stmts [(list 'return expr)]))
+                                             (list 'return expr))]
+                            (list 'await
+                                  (list 'Future.sync
+                                        (list 'fn '[]
+                                              thunk-body)))))
         await-form (fn [form]
                      (if (and (seq? form)
-                                  (statement-op? (first form)))
+                                   (statement-op? (first form)))
                            form
                            (await-sync-form form)))
-        last-form (last forms)
-        thunk-sym (gensym "thunk_")
-        last-body (if (and (seq? last-form)
-                           (= '__track (first last-form)))
-                    [last-form
-                     (list 'var out-sym nil)]
-                    [(list 'var thunk-sym
-                           (if (zero-arg-fn-form? last-form)
-                             last-form
-                             (list 'fn '[]
-                                   (if (and (seq? last-form)
-                                            (#{'do 'do*} (first last-form)))
-                                     last-form
-                                     (list 'return last-form)))))
-                     (list 'var out-sym
-                           (list 'await
-                                 (list 'Future.sync thunk-sym)))])
-        out-json (list 'jsonEncode out-sym)
-        body  (concat '[do]
-                      '[(var __tasks__ (:- "<Future>[]"))
-                         (var __track (fn [task]
-                                        (. __tasks__ (add task))
-                                        (return task)))]
+         last-form (last forms)
+         [last-stmts last-expr] (lift-expression last-form)
+         thunk-sym (gensym "thunk_")
+         out-json-sym (gensym "out_json_")
+         last-body (if (and (seq? last-form)
+                            (= '__track (first last-form)))
+                     [last-form
+                      (list 'var out-sym nil)]
+                     [(list 'var thunk-sym
+                            (if (zero-arg-fn-form? last-form)
+                              last-form
+                              (list 'fn '[]
+                                    (if (seq last-stmts)
+                                      (apply list 'do (concat last-stmts [(list 'return last-expr)]))
+                                      (list 'return last-expr)))))
+                      (list 'var out-sym
+                            (list 'await
+                                  (list 'Future.sync thunk-sym)))])
+         body  (concat '[do]
+                       '[(var __tasks__ (:- "<Future>[]"))
+                          (var __track (fn [task]
+                                         (. __tasks__ (add task))
+                                         (return task)))]
                         (map await-form (butlast forms))
                         last-body
-                       ['(var __task_idx 0)
-                        '(while (< __task_idx (. __tasks__ length))
-                           (var __pending := (. __tasks__ (sublist __task_idx)))
-                           (:= __task_idx (. __tasks__ length))
-                          (await (Future.wait __pending)))
-                        (list 'print out-json)])]
+                        ['(var __task_idx 0)
+                         '(while (< __task_idx (. __tasks__ length))
+                            (var __pending := (. __tasks__ (sublist __task_idx)))
+                            (:= __task_idx (. __tasks__ length))
+                           (await (Future.wait __pending)))
+                         (list 'var out-json-sym nil)
+                         (list 'try
+                               (list ':= out-json-sym
+                                     (list 'jsonEncode out-sym))
+                               (list 'catch 'err
+                                     (list ':= out-json-sym
+                                           (list 'jsonEncode
+                                                 (list ':?
+                                                       (list '== nil out-sym)
+                                                       nil
+                                                       (list '. out-sym '(toString)))))))
+                         (list 'print out-json-sym)])]
     `(:- "final __globals__ = <dynamic, dynamic>{};\n\n"
           "Future<void> main() async {\n "
            ~body

@@ -363,7 +363,7 @@
     route listener-id "route.url"
     callback
     meta
-    (fn:> true))))
+    (fn:> [event] true))))
 
 (defn.xt add-path-listener
   "adds a path listener"

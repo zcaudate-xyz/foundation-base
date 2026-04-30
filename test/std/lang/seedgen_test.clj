@@ -71,6 +71,19 @@
        "  ^*(!.js (+ 1 2 3))\n"
        "  => 6)\n"))
 
+(def ^:private +seedgen-wait-source+
+  (str "(ns xt.sample.wait-test\n"
+       "  (:use code.test)\n"
+       "  (:require [std.lang :as l]\n"
+       "            [xt.lang.common-notify :as notify]))\n\n"
+       "^{:seedgen/root {:all true}}\n"
+       "(l/script- :js {:runtime :basic})\n\n"
+       "^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n"
+       "(fact \"removes wrapped runtime checks\"\n"
+       "  (notify/wait-on :js\n"
+       "    42)\n"
+       "  => 42)\n"))
+
 (defn- seedgen-spacing-context
   [prefix]
   (let [root     (.toFile (java.nio.file.Files/createTempDirectory prefix
@@ -108,7 +121,7 @@
 (defn- seedgen-extra-context
   [prefix]
   (let [root     (.toFile (java.nio.file.Files/createTempDirectory prefix
-                                                                  (make-array java.nio.file.attribute.FileAttribute 0)))
+                                                                   (make-array java.nio.file.attribute.FileAttribute 0)))
         test-dir (doto (java.io.File. root "test/xt/sample")
                    (.mkdirs))
         path     (.getAbsolutePath (java.io.File. test-dir "extra_test.clj"))
@@ -119,6 +132,22 @@
     {:root root
      :path path
      :bench-path (.getAbsolutePath (java.io.File. root "test/xtbench/python/sample/extra_test.clj"))
+     :lookup lookup
+     :project project}))
+
+(defn- seedgen-wait-context
+  [prefix]
+  (let [root     (.toFile (java.nio.file.Files/createTempDirectory prefix
+                                                                   (make-array java.nio.file.attribute.FileAttribute 0)))
+        test-dir (doto (java.io.File. root "test/xt/sample")
+                   (.mkdirs))
+        path     (.getAbsolutePath (java.io.File. test-dir "wait_test.clj"))
+        lookup   {'xt.sample.wait-test path}
+        project  {:root (.getAbsolutePath root)
+                  :test-paths ["test"]}]
+    (spit path +seedgen-wait-source+)
+    {:root root
+     :path path
      :lookup lookup
      :project project}))
 
@@ -160,7 +189,28 @@
                 :total number?}))
 
 ^{:refer std.lang.seedgen/seedgen-langremove :added "4.1"}
-(fact "TODO")
+(fact "langremove removes wrapped runtime checks added by langadd"
+  (let [{:keys [root path lookup project]} (seedgen-wait-context "seedgen-langremove-wait")]
+    (try
+      (form-infile/seedgen-langadd 'xt.sample.wait
+                                   {:lang [:python :lua] :write true}
+                                   lookup
+                                   project)
+      (form-infile/seedgen-langremove 'xt.sample.wait
+                                      {:lang [:python :lua] :write true}
+                                      lookup
+                                      project)
+      (let [content (slurp path)]
+        [(boolean (re-find #"\(l/script- :js" content))
+         (boolean (re-find #"notify/wait-on :js" content))
+         (boolean (re-find #":langs" content))
+         (boolean (re-find #"\(l/script- :python" content))
+         (boolean (re-find #"\(l/script- :lua" content))
+         (boolean (re-find #"notify/wait-on :python" content))
+         (boolean (re-find #"notify/wait-on :lua" content))])
+      (finally
+        (fs/delete root {:recursive true}))))
+  => [true true false false false false false])
 
 ^{:refer std.lang.seedgen/seedgen-langadd :added "4.1"}
 (fact "langadd preserves multiline setup and teardown indentation"

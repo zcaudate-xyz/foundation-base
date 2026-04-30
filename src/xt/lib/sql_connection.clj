@@ -4,7 +4,6 @@
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [lua.nginx.common-promise]
              [xt.lang.common-protocol :as proto]
              [xt.protocol.sql-connection :as sql-if]]})
 

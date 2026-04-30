@@ -43,6 +43,7 @@
                       :elisp   {:transform  {:js :elisp}}
                       :python  {:transform  {:js :python}}
                       :r       {:transform  {:js :r}}
+                      :ruby    {:transform  {:js :ruby}}
                       :php     {:transform  {:js :php}}
                       :dart    {:transform  {:js :dart}}
                       :julia    {:transform {:js :julia}}}}

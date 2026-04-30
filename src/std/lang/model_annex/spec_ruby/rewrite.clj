@@ -52,7 +52,7 @@
   [target temp]
   (cond
     (destruct/destructure-target? target)
-    (destruct/destructure-bindings target temp ut/sym-default-str)
+    (destruct/destructure-bindings target temp name)
 
     (vector-destructure-target? target)
     (vector-destructure-bindings target temp)
@@ -129,11 +129,19 @@
   [form]
   (and (symbol? form)
        (namespace form)
-       (re-matches #"[A-Z][A-Z0-9_]*" (name form))))
+        (re-matches #"[A-Z][A-Za-z0-9_]*" (name form))))
+
+(defn- ruby-method-ref-form?
+  [form]
+  (and (seq? form)
+       (= 'ruby-method-ref (first form))))
 
 (defn rewrite-callable-form
   [form callables]
   (cond
+    (ruby-method-ref-form? form)
+    form
+
     (ruby-global-const-access? form)
     (list '. '!:G [(name (first (nth form 2)))])
 
@@ -213,6 +221,9 @@
 (defn- rewrite-generator-form
   [form iterator callables]
   (cond
+    (ruby-method-ref-form? form)
+    form
+
     (ruby-global-const-access? form)
     (list '. '!:G [(name (first (nth form 2)))])
 

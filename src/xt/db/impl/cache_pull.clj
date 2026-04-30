@@ -279,7 +279,15 @@
   {:added "4.0"}
   [rows schema table-key opts]
   (:= opts (or opts {}))
-  (var #{id where returning limit order-by order-sort offset single as-map} opts)
+  (var id         (xt/x:get-key opts "id"))
+  (var where      (xt/x:get-key opts "where"))
+  (var returning  (xt/x:get-key opts "returning"))
+  (var limit      (xt/x:get-key opts "limit"))
+  (var order-by   (xt/x:get-key opts "order_by"))
+  (var order-sort (xt/x:get-key opts "order_sort"))
+  (var offset     (xt/x:get-key opts "offset"))
+  (var single     (xt/x:get-key opts "single"))
+  (var as-map     (xt/x:get-key opts "as_map"))
   (var pred-fn  (fn [e]
                   (var #{record} e)
                   (return (-/pull-where rows schema table-key where record))))

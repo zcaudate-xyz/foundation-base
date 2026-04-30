@@ -150,6 +150,26 @@
      (= '(var data
               (xtd/tree-get-data
                {:heal CALLBACK}))
+         (clojure.walk/prewalk-replace {callback 'CALLBACK} assign))])
+  => [true true true true true])
+
+^{:refer std.lang.model.spec-python.rewrite/python-rewrite-stage :added "4.1"}
+(fact "hoists callbacks whose macros lower to assignment statements"
+  (let [out (rewrite/python-rewrite-stage
+             '(var data
+                   {:set_props (fn [elem props]
+                                 (xt/x:set-key elem "props" props))})
+             {:grammar py/+grammar+})
+        [_ binding assign] out
+        callback          (second binding)]
+    [(= 'do* (first out))
+     (symbol? callback)
+     (.startsWith (name callback) "py_callback__")
+     (= '(fn [elem props]
+           (xt/x:set-key elem "props" props))
+        (nth binding 2))
+     (= '(var data
+              {:set_props CALLBACK})
         (clojure.walk/prewalk-replace {callback 'CALLBACK} assign))])
   => [true true true true true])
 

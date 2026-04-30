@@ -1,6 +1,5 @@
 (ns xtbench.ruby.lang.spec-promise-test
-  (:require [clojure.java.shell :as shell]
-            [std.lang :as l]
+  (:require [std.lang :as l]
             [xt.lang.common-notify :as notify]
             [xt.lang.spec-base :as xt])
   (:use code.test))
@@ -15,21 +14,38 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-(defn assert-ruby-syntax!
-  [form]
-  (let [tmp (java.io.File/createTempFile "ruby-promise-" ".rb")]
-    (try
-      (let [code (l/emit-as :ruby [form])]
-        (spit tmp code)
-        (let [result (shell/sh "ruby" "-c" (.getAbsolutePath tmp))]
-          (when-not (zero? (:exit result))
-            (throw (ex-info "Invalid emitted Ruby"
-                            {:form form
-                             :code code
-                             :result result}))))
-        code)
-      (finally
-        (.delete tmp)))))
+^{:refer xt.lang.spec-promise/x:promise-run :added "4.1"}
+(fact "wraps raw values and preserves resolved results"
+
+  (notify/wait-on :ruby
+    (spec-promise/x:promise-then
+     (spec-promise/x:promise-run "A")
+     (repl/>notify)))
+  => "A"
+
+  (notify/wait-on :ruby
+    (spec-promise/x:promise-then
+     (spec-promise/x:promise-run
+      (spec-promise/x:promise
+       (fn []
+         (return "B"))))
+     (repl/>notify)))
+  => "B")
+
+^{:refer xt.lang.spec-promise/x:promise-all :added "4.1"}
+(fact "waits for all promise values in order"
+
+  (notify/wait-on :ruby
+    (spec-promise/x:promise-then
+     (spec-promise/x:promise-all
+      [(spec-promise/x:promise
+        (fn []
+          (return "a")))
+       (spec-promise/x:promise
+        (fn []
+          (return "b")))])
+     (repl/>notify)))
+  => ["a" "b"])
 
 ^{:refer xt.lang.spec-promise/x:promise-then :added "4.1"}
 (fact "chains a resolved js promise"
@@ -50,21 +66,7 @@
     (spec-promise/x:promise-catch
      (spec-promise/x:promise
       (fn []
-        (throw (xt/x:ex-new "boom" {:a 1}))))
-     (fn [err]
-       (xt/x:print (xt/x:ex-data err))
-       (repl/notify [(xt/x:ex-native? err)
-                     (xt/x:get-key (xt/x:ex-data err) "a")]))))
-  => [true 1])
-
-^{:refer xt.lang.spec-promise/x:promise-catch :added "4.1"}
-(fact "preserves xtalk exception data through promise rejection"
-
-  (notify/wait-on :ruby
-    (spec-promise/x:promise-catch
-     (spec-promise/x:promise
-      (fn []
-        (throw (xt/x:ex-new "boom" {:a 1}))))
+        (throw (xt/x:ex "boom" {:a 1}))))
      (fn [err]
        (xt/x:print (xt/x:ex-data err))
        (repl/notify [(xt/x:ex-native? err)
@@ -105,13 +107,6 @@
 
 ^{:refer xt.lang.spec-promise/x:with-delay :added "4.1"}
 (fact "delays asynchronous js computations"
-
-  (boolean
-   (assert-ruby-syntax!
-    (spec-promise/x:with-delay 100
-                               '(fn []
-                                  (return "OK")))))
-  => true
 
   (notify/wait-on :ruby
     (spec-promise/x:with-delay 100

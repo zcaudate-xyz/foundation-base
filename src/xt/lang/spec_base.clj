@@ -31,6 +31,51 @@
   ([[e it] & body]
    (apply list 'for:iter [e it] body)))
 
+(defmacro.xt ^{:style/indent 1}
+  return-run
+  "expands to the canonical callback-to-return wrapper"
+  {:added "4.1"}
+  ([[resolve reject] & body]
+   (list 'x:return-run
+         (clojure.core/apply list 'fn [resolve reject] body))))
+
+(defmacro.xt ^{:style/indent 1}
+  for:return
+  "expands to the canonical callback result contract"
+  {:added "4.1"}
+  ([[[ok err] statement] {:keys [success error final]}]
+   (list 'for:return [[ok err] statement]
+         {:success success
+          :error error
+          :final final})))
+
+(defmacro.xt ^{:style/indent 1}
+  for:try
+  "expands to a callback result contract without a finalizer"
+  {:added "4.1"}
+  ([[[ok err] statement] {:keys [success error]}]
+   (list 'for:try [[ok err] statement]
+         {:success success
+          :error error})))
+
+(defmacro.xt ^{:style/indent 1}
+  for:async
+  "expands to the async callback result contract"
+  {:added "4.1"}
+  ([[[ok err] statement] {:keys [success error finally]}]
+   (list 'for:async [[ok err] statement]
+         {:success success
+          :error error
+          :finally finally})))
+
+(defspec.xt x:callback nil)
+
+(defmacro.xt ^{:standalone true}
+  x:callback
+  "creates the canonical callback placeholder for xtalk async contracts"
+  {:added "4.1"}
+  ([] (list (quote x:callback))))
+
 (defspec.xt proto:get nil)
 
 (defmacro.xt ^{:standalone true} 

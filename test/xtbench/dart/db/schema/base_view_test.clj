@@ -1,7 +1,6 @@
 (ns xtbench.dart.db.schema.base-view-test
   (:require [rt.postgres :as pg]
             [std.lang :as l]
-            [xt.old.db.gen-bind :as bind]
             [xt.db.helpers.seed-system-test :as data]
             [xt.db.helpers.seed-user-test :as user])
   (:use code.test))

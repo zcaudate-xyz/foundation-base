@@ -1,16 +1,16 @@
 (ns std.lang.model.spec-dart
   (:require [std.lang.base.book :as book]
-            [std.lang.base.emit :as emit]
-            [std.lang.base.emit-common :as common]
-            [std.lang.base.emit-data :as data]
+             [std.lang.base.emit :as emit]
+             [std.lang.base.emit-common :as common]
+             [std.lang.base.emit-data :as data]
             [std.lang.base.grammar :as grammar]
-            [std.lang.base.script :as script]
-            [std.lang.base.util :as ut]
-            [std.lang.model.spec-xtalk]
-            [std.lang.model.spec-dart.rewrite :as rewrite]
-            [std.lang.model.spec-xtalk.fn-dart :as fn-dart]
-            [std.lib.collection :as collection]
-            [std.lib.template :as template]))
+             [std.lang.base.script :as script]
+             [std.lang.base.util :as ut]
+             [std.lang.model.spec-xtalk]
+             [std.lang.model.spec-dart.rewrite :as rewrite]
+             [std.lang.model.spec-xtalk.fn-dart :as fn-dart]
+             [std.lib.collection :as collection]
+             [std.lib.template :as template]))
 
 (defn dart-map-key
   [key grammar mopts]
@@ -29,6 +29,12 @@
 (defn- dart-symbol-global
   [key _grammar _mopts]
   (list '. '__globals__ [(ut/sym-default-str key)]))
+
+(defn dart-fn
+  [[_ & args]]
+  (if (symbol? (first args))
+    (apply list 'fn.inner (rest args))
+    (apply list 'fn.inner args)))
 
 (defn dart-var
   "Normalizes Dart `var` declarations so values always lower through `var* :=`.
@@ -54,8 +60,20 @@
                       (list 'var* sym := (list '. bound [(ut/sym-default-str sym)])))
                     (sort-by ut/sym-default-str decl)))
 
-        :else
-        (list 'var* decl := bound)))))
+         :else
+         (list 'var* decl := bound)))))
+
+(defn dart-tf-let-bind
+  "Expands let bindings into a Dart statement block so trailing returns keep
+   their statement terminators inside emitted function bodies."
+  {:added "4.1"}
+  [[_ bindings & body]]
+  `(~'do ~@(map (fn [[sym val]]
+                  (if (= '_ sym)
+                    val
+                    `(~'var ~sym := ~val)))
+                (partition 2 bindings))
+    ~@body))
 
 (defn tf-for-object
   "for object transform"
@@ -117,11 +135,14 @@
   (-> (grammar/build :exclude [:pointer
                                :block
                                :data-set])
-       (grammar/build:override
-        {:var         {:symbol '#{var*} :raw "var"}
-          :defn        {:symbol '#{defn}}
-          :new         {:symbol '#{new} :raw "new" :emit :new}
-          :for-object  {:macro #'tf-for-object :emit :macro}
+        (grammar/build:override
+          {:fn          {:macro #'dart-fn :emit :macro}
+           :var         {:symbol '#{var*} :raw "var"}
+           :let-bind    {:macro #'dart-tf-let-bind :emit :macro}
+           :pow         {:emit :alias :raw 'math.pow :value true}
+            :defn        {:symbol '#{defn}}
+           :new         {:symbol '#{new} :raw "new" :emit :new}
+           :for-object  {:macro #'tf-for-object :emit :macro}
          :for-array   {:macro #'tf-for-array  :emit :macro}
          :for-iter    {:macro #'tf-for-iter   :emit :macro}
          :with-global {:value true :raw "__globals__"}})

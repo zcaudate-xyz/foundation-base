@@ -81,6 +81,19 @@
      (boolean (re-find #"tmp = 1" out))
      (boolean (re-find #"return tmp" out))
      (boolean (re-find #"data = \{\"heal\":py_callback__" out))])
+   => [true true true true])
+
+^{:refer std.lang.model.spec-python/python-fn :added "4.1"}
+(fact "lifts callbacks that lower to Python assignment statements"
+
+  (let [out (l/emit-as
+             :python '[(var data
+                            {:set_props (fn [elem props]
+                                          (x:set-key elem "props" props))})])]
+    [(boolean (re-find #"def py_callback__.*\(elem,props\):" out))
+     (boolean (re-find #"elem\[\"props\"\] = props" out))
+     (boolean (re-find #"data = \{\"set_props\":py_callback__" out))
+     (not (boolean (re-find #"lambda elem,props : elem\[\"props\"\] = props" out)))])
   => [true true true true])
 
 ^{:refer std.lang.model.spec-python/python-defclass :added "4.0"}

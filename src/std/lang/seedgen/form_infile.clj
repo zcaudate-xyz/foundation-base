@@ -64,7 +64,7 @@
 
 (defn- item-lang
   [item]
-  (some-> item item-value common/seedgen-dispatch-lang))
+  (some-> item item-value common/seedgen-form-lang))
 
 (defn- sort-items
   [items]
@@ -798,21 +798,28 @@
          ")")))
 
 (defn- update-root-script-string
-  [output]
+  [output target-set]
   (let [root-entry  (get-in output [:globals :global-script :root])
-        root-form   (some-> root-entry item-value)
-        current-str (item-string root-entry)
-        known-langs (->> (concat (or (root-script-meta-langs output) [])
-                                 (get-in output [:globals :lang :derived]))
-                         distinct
-                         vec)]
+         root-form   (some-> root-entry item-value)
+         current-str (item-string root-entry)
+         known-langs (->> (concat (or (root-script-meta-langs output) [])
+                                  (get-in output [:globals :lang :derived]))
+                          distinct
+                          (remove (set target-set))
+                          vec)]
     (if (empty? known-langs)
-      current-str
+      (let [root-meta (some-> root-form meta :seedgen/root)]
+        (if (contains? root-meta :langs)
+          (str "^{:seedgen/root "
+               (pr-str (dissoc root-meta :langs))
+               "}\n"
+               (unwrap-meta-string current-str))
+          current-str))
       (str "^{:seedgen/root "
            (pr-str (assoc (:seedgen/root (meta root-form))
                           :langs known-langs))
-           "}\n"
-           (unwrap-meta-string current-str)))))
+            "}\n"
+            (unwrap-meta-string current-str)))))
 
 (defn- script-string-map
   [output]
@@ -931,7 +938,7 @@
                                     (first (nav/value body)))]
                       (cond
                         (= line root-script-line)
-                        [(update-root-script-string output)]
+                         [(update-root-script-string output target-set)]
 
                         (contains? derived-line->lang line)
                         (if (contains? target-set (get derived-line->lang line))

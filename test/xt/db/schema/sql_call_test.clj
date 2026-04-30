@@ -77,7 +77,7 @@
               conn
               (@! (pg/bind-function scratch/addf))
               [10 20])
-             (then (repl/>notify))))))
+             (then (repl/>notify)))))))
   => "30")
 
 ^{:refer xt.db.schema.sql-call/call-api
@@ -92,8 +92,8 @@
                        {:database "test-scratch"})
        (then
         (fn [conn]
-          (. (call/call-api conn
-                            (@! (pg/bind-function scratch/addf))
-                            [10 20])
-             (then (repl/>notify))))))
+           (. (call/call-api conn
+                             (@! (pg/bind-function scratch/addf))
+                             [10 20])
+             (then (repl/>notify)))))))
   => "{\"status\": \"ok\", \"data\":\"30\"}")

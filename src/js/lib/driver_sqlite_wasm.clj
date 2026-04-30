@@ -2,7 +2,10 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:import [["@sqlite.org/sqlite-wasm" :as sqlite3InitModule]] :require [[xt.lang.spec-base :as xt] [js.core.util :as ut] [xt.lib.sql-connection :as sqlrt]]})
+  {:require [[xt.lang.spec-base :as xt]
+             [js.core.util :as ut]
+             [xt.lib.sql-connection :as sqlrt]]
+   :import [["@sqlite.org/sqlite-wasm" :as sqlite3InitModule]]})
 
 (defn.js raw-query
   "raw query for sqlite-wasm results"
@@ -84,39 +87,6 @@
   (return
    (sqlrt/driver-create
     {"connect" (fn [m]
-                 (var init-module (or (. sqlite3InitModule ["default"])
-                                      sqlite3InitModule))
                  (return
-                  (. (init-module)
-                     (then
-                      (fn [sqlite3]
-                        (var config (or m {}))
-                        (var filename (or (xt/x:get-key config "filename")
-                                          ":memory:"))
-                        (var flags (or (xt/x:get-key config "flags")
-                                       "c"))
-                        (var db (new (. sqlite3 ["oo1"] ["DB"]) filename flags))
-                        (var run-query
-                             (fn [query]
-                               (var columns [])
-                               (var values (. db (exec {:sql query
-                                                        :rowMode "array"
-                                                        :columnNames columns
-                                                        :returnValue "resultRows"})))
-                               (when (and (== 1 (xt/x:len values))
-                                          (== 1 (xt/x:len (. values [0]))))
-                                 (return (. values [0] [0])))
-                               (return (:? (xt/x:len columns)
-                                           [{"columns" columns
-                                             "values" values}]
-                                           values))))
-                        (return
-                         (sqlrt/connection-create
-                          db
-                          {"disconnect" (fn [raw]
-                                          (. raw (close))
-                                          (return true))
-                           "query" (fn [raw query]
-                                     (return (run-query query)))
-                           "query_sync" (fn [raw query]
-                                          (return (run-query query)))}))))))})))
+                  (. (-/connect-constructor m)
+                     (then -/wrap-connection))))})))

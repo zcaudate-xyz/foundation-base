@@ -3,7 +3,7 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:python :lua]}}
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -18,21 +18,11 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-promise :as spec-promise]
              [xt.lang.common-repl :as repl]
-             [xt.event.util-task :as loader]
-             [python.core.common-promise :as py-promise]]})
-
-(l/script- :lua
-  {:runtime :basic
-   :require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-data :as xtd]
-             [xt.lang.spec-promise :as spec-promise]
-             [xt.lang.common-repl :as repl]
-             [xt.event.util-task :as loader]
-             [lua.core.common-promise :as lua-promise]]})
+             [xt.event.util-task :as loader]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.event.util-task/new-task :added "4.1"}
 (fact "creates a new task"
@@ -48,15 +38,6 @@
 
   (set
    (!.py
-    (xt/x:obj-keys
-     (loader/new-task
-      "A" [] []
-      {:load-fn (fn []
-                  (return "A"))}))))
-  => #{"args" "id" "load_fn" "deps" "::"}
-
-  (set
-   (!.lua
     (xt/x:obj-keys
      (loader/new-task
       "A" [] []
@@ -113,30 +94,6 @@
         :load-fn (fn []
                    (return "A"))}))
      (repl/>notify)))
-  => "B"
-
-  (notify/wait-on :lua
-    (spec-promise/x:promise-then
-     (loader/task-load
-      (loader/new-task
-       "A" [] []
-       {:load-fn (fn []
-                   (return "A"))}))
-     (repl/>notify)))
-  => "A"
-
-  (notify/wait-on :lua
-    (spec-promise/x:promise-then
-     (loader/task-load
-      (loader/new-task
-       "A" [] []
-       {:get-fn (fn []
-                  (return "B"))
-        :check-fn (fn [res]
-                    (return (== "B" res)))
-        :load-fn (fn []
-                   (return "A"))}))
-     (repl/>notify)))
   => "B")
 
 ^{:refer xt.event.util-task/new-loader :added "4.1"}
@@ -155,18 +112,6 @@
                    "waiting" ["A"]})
 
   (!.py
-   (var instance (loader/new-loader
-                  [(loader/new-task "A" [] [] {:load-fn (fn [] (return "A"))})
-                   (loader/new-task "B" ["A"] [] {:load-fn (fn [] (return "B"))})
-                   (loader/new-task "C" ["B"] [] {:load-fn (fn [] (return "C"))})]))
-   {"order" (. instance ["order"])
-    "incomplete" (loader/list-incomplete instance)
-    "waiting" (loader/list-waiting instance)})
-  => (contains-in {"order" ["A" "B" "C"]
-                   "incomplete" ["A" "B" "C"]
-                   "waiting" ["A"]})
-
-  (!.lua
    (var instance (loader/new-loader
                   [(loader/new-task "A" [] [] {:load-fn (fn [] (return "A"))})
                    (loader/new-task "B" ["A"] [] {:load-fn (fn [] (return "B"))})
@@ -199,23 +144,6 @@
       "completed" ["A"]}
 
   (notify/wait-on :python
-    (var instance
-         (loader/new-loader
-          [(loader/new-task "A" [] [] {:load-fn (fn [] (return "A"))})]))
-    (loader/load-tasks-single
-     instance
-     "A"
-     (fn [id done]
-       (repl/notify {"id" id
-                     "done" done
-                     "completed" (loader/list-completed instance)}))
-     nil
-     nil))
-  => {"id" "A"
-      "done" true
-      "completed" ["A"]}
-
-  (notify/wait-on :lua
     (var instance
          (loader/new-loader
           [(loader/new-task "A" [] [] {:load-fn (fn [] (return "A"))})]))
@@ -266,7 +194,7 @@
      (loader/load-tasks instance nil nil)
      (fn [_]
        (repl/notify (loader/list-completed instance)))))
-  
+
   (set
    (notify/wait-on :js
      (var instance
@@ -418,108 +346,7 @@
                           (spec-promise/x:with-delay
                            50
                            (fn []
-                             (return
-                              (py-promise/promise-reject
-                               (Exception "B")))))))})
-           (loader/new-task
-            "C" ["B"] []
-            {:load-fn (fn []
-                        (return
-                         (spec-promise/x:with-delay
-                          50
-                          (fn []
-                            (return "C")))))})]))
-    (spec-promise/x:promise-catch
-     (loader/load-tasks instance nil nil)
-     (fn [_]
-       (repl/notify (loader/list-completed instance)))))
-  => ["A"]
-
-  (notify/wait-on :lua
-    (var instance
-         (loader/new-loader
-          [(loader/new-task
-            "A" [] []
-            {:load-fn (fn []
-                        (return
-                         (spec-promise/x:with-delay
-                          50
-                          (fn []
-                            (return "A")))))})
-           (loader/new-task
-            "B" ["A"] []
-            {:load-fn (fn []
-                        (return
-                         (spec-promise/x:with-delay
-                          50
-                          (fn []
-                            (return "B")))))})
-           (loader/new-task
-            "C" ["B"] []
-            {:load-fn (fn []
-                        (return
-                         (spec-promise/x:with-delay
-                          50
-                          (fn []
-                            (return "C")))))})]))
-    (spec-promise/x:promise-then
-     (loader/load-tasks instance nil nil)
-     (fn [_]
-       (repl/notify (loader/list-completed instance)))))
-
-  (set
-   (notify/wait-on :lua
-     (var instance
-          (loader/new-loader
-           [(loader/new-task
-             "A" [] []
-             {:load-fn (fn []
-                         (return
-                          (spec-promise/x:with-delay
-                           50
-                           (fn []
-                             (return "A")))))})
-            (loader/new-task
-             "B" ["A"] []
-             {:load-fn (fn []
-                         (return
-                          (spec-promise/x:with-delay
-                           50
-                           (fn []
-                             (return "B")))))})
-            (loader/new-task
-             "C" ["B"] []
-             {:load-fn (fn []
-                         (return
-                          (spec-promise/x:with-delay
-                           50
-                           (fn []
-                             (return "C")))))})]))
-     (spec-promise/x:promise-then
-      (loader/load-tasks instance nil nil)
-      (fn [_]
-        (repl/notify (loader/list-completed instance))))))
-  => #{"A" "B" "C"}
-
-  (notify/wait-on :lua
-    (var instance
-         (loader/new-loader
-          [(loader/new-task
-            "A" [] []
-            {:load-fn (fn []
-                        (return
-                         (spec-promise/x:with-delay
-                          50
-                          (fn []
-                            (return "A")))))})
-           (loader/new-task
-            "B" ["A"] []
-            {:load-fn (fn []
-                        (return
-                         (spec-promise/x:with-delay
-                          50
-                          (fn []
-                            (xt/x:err "B")))))})
+                             (xt/x:err "B")))))})
            (loader/new-task
             "C" ["B"] []
             {:load-fn (fn []
@@ -559,21 +386,6 @@
   => "A"
 
   (notify/wait-on :python
-    (spec-promise/x:promise-then
-     (spec-promise/x:promise-run
-      (spec-promise/x:promise
-       (fn []
-         (return "B"))))
-     (repl/>notify)))
-  => "B"
-
-  (notify/wait-on :lua
-    (spec-promise/x:promise-then
-     (spec-promise/x:promise-run "A")
-     (repl/>notify)))
-  => "A"
-
-  (notify/wait-on :lua
     (spec-promise/x:promise-then
      (spec-promise/x:promise-run
       (spec-promise/x:promise
@@ -627,28 +439,6 @@
         :check-fn (fn [res] (return (== res "loaded")))
         :unload-fn (fn [] (return "gone"))}))
      (repl/>notify)))
-  => false
-
-  (notify/wait-on :lua
-    (spec-promise/x:promise-then
-     (loader/task-unload
-      (loader/new-task
-       "A" [] []
-       {:get-fn (fn [] (return "loaded"))
-        :check-fn (fn [res] (return (== res "loaded")))
-        :unload-fn (fn [] (return "gone"))}))
-     (repl/>notify)))
-  => true
-
-  (notify/wait-on :lua
-    (spec-promise/x:promise-then
-     (loader/task-unload
-      (loader/new-task
-       "A" [] []
-       {:get-fn (fn [] (return nil))
-        :check-fn (fn [res] (return (== res "loaded")))
-        :unload-fn (fn [] (return "gone"))}))
-     (repl/>notify)))
   => false)
 
 ^{:refer xt.event.util-task/new-loader-blank :added "4.1"}
@@ -670,14 +460,6 @@
       "loading" {}
       "errored" nil
       "order" []
-      "tasks" {}}
-
-  (!.lua
-   (loader/new-loader-blank))
-  => {"::" "loader"
-      "completed" {}
-      "loading" {}
-      "order" {}
       "tasks" {}})
 
 ^{:refer xt.event.util-task/add-tasks :added "4.1"}
@@ -703,20 +485,6 @@
    {"order" (. instance ["order"])
     "tasks" (xt/x:obj-keys (. instance ["tasks"]))})
   => {"order" ["A" "B"]
-      "tasks" ["A" "B"]}
-
-  (!.lua
-   (var instance
-        (loader/add-tasks
-         (loader/new-loader-blank)
-         [(loader/new-task "A" [] [] {:load-fn (fn [] (return "A"))})
-          (loader/new-task "B" ["A"] [] {:load-fn (fn [] (return "B"))})]))
-   {"order" (. instance ["order"])
-    "tasks" (xtd/arr-sort (xt/x:obj-keys (. instance ["tasks"]))
-                          (fn [e]
-                            (return e))
-                          xt/x:str-comp)})
-  => {"order" ["A" "B"]
       "tasks" ["A" "B"]})
 
 ^{:refer xt.event.util-task/list-loading :added "4.1"}
@@ -736,14 +504,6 @@
     (xt/x:set-key (. instance ["loading"]) "A" true)
     (xt/x:set-key (. instance ["loading"]) "B" true)
     (loader/list-loading instance)))
-  => #{"A" "B"}
-
-  (set
-   (!.lua
-    (var instance (loader/new-loader-blank))
-    (xt/x:set-key (. instance ["loading"]) "A" true)
-    (xt/x:set-key (. instance ["loading"]) "B" true)
-    (loader/list-loading instance)))
   => #{"A" "B"})
 
 ^{:refer xt.event.util-task/list-completed :added "4.1"}
@@ -759,14 +519,6 @@
 
   (set
    (!.py
-    (var instance (loader/new-loader-blank))
-    (xt/x:set-key (. instance ["completed"]) "A" true)
-    (xt/x:set-key (. instance ["completed"]) "B" true)
-    (loader/list-completed instance)))
-  => #{"A" "B"}
-
-  (set
-   (!.lua
     (var instance (loader/new-loader-blank))
     (xt/x:set-key (. instance ["completed"]) "A" true)
     (xt/x:set-key (. instance ["completed"]) "B" true)
@@ -796,17 +548,6 @@
            (loader/new-task "C" ["B"] [] {:load-fn (fn [] (return "C"))})]))
     (xt/x:set-key (. instance ["completed"]) "A" true)
     (loader/list-incomplete instance)))
-  => #{"B" "C"}
-
-  (set
-   (!.lua
-    (var instance
-         (loader/new-loader
-          [(loader/new-task "A" [] [] {:load-fn (fn [] (return "A"))})
-           (loader/new-task "B" ["A"] [] {:load-fn (fn [] (return "B"))})
-           (loader/new-task "C" ["B"] [] {:load-fn (fn [] (return "C"))})]))
-    (xt/x:set-key (. instance ["completed"]) "A" true)
-    (loader/list-incomplete instance)))
   => #{"B" "C"})
 
 ^{:refer xt.event.util-task/list-waiting :added "4.1"}
@@ -825,17 +566,6 @@
 
   (set
    (!.py
-    (var instance
-         (loader/new-loader
-          [(loader/new-task "A" [] [] {:load-fn (fn [] (return "A"))})
-           (loader/new-task "B" ["A"] [] {:load-fn (fn [] (return "B"))})
-           (loader/new-task "C" ["B"] [] {:load-fn (fn [] (return "C"))})]))
-    (xt/x:set-key (. instance ["completed"]) "A" true)
-    (loader/list-waiting instance)))
-  => #{"B"}
-
-  (set
-   (!.lua
     (var instance
          (loader/new-loader
           [(loader/new-task "A" [] [] {:load-fn (fn [] (return "A"))})
@@ -898,33 +628,7 @@
                 ["A" true]]
       "seen" [["B" true]
               ["A" true]]
-      "completed" []}
-
-  (notify/wait-on :lua
-    (var seen [])
-    (var instance
-         (loader/new-loader
-          [(loader/new-task "A" [] []
-                            {:unload-no-check true
-                             :unload-fn (fn [] (return nil))})
-           (loader/new-task "B" ["A"] []
-                            {:unload-no-check true
-                             :unload-fn (fn [] (return nil))})]))
-    (xt/x:set-key (. instance ["completed"]) "A" true)
-    (xt/x:set-key (. instance ["completed"]) "B" true)
-    (spec-promise/x:promise-then
-     (loader/unload-tasks instance
-                          (fn [id unloaded]
-                            (x:arr-push seen [id unloaded])))
-     (fn [result]
-       (repl/notify {"result" result
-                     "seen" seen
-                     "completed" (loader/list-completed instance)}))))
-  => {"result" [["B" true]
-                ["A" true]]
-      "seen" [["B" true]
-              ["A" true]]
-      "completed" {}})
+      "completed" []})
 
 (comment
   (s/snapto)
@@ -932,4 +636,5 @@
   
   (s/seedgen-benchadd '[xt.event.util-task] {:lang [:ruby :dart] :write true})
   (s/seedgen-langadd '[xt.event.util-task]  {:lang [:lua :python] :write true})
+  (s/seedgen-langremove '[xt.event]  {:lang [:lua :python] :write true})
   (s/seedgen-langremove '[xt.event.util-task]  {:lang [:lua :python] :write true}))

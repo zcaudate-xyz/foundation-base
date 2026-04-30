@@ -6,11 +6,11 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.old.sys.conn-dbsql :as dbsql]
-             [xt.lang.spec-promise :as spec-promise]
-              [xt.lang.common-lib :as k]
-              [xt.lang.common-repl :as repl]
-              [js.lib.driver-sqlite :as js-sqlite]]})
+   :require [[xt.lib.sql-connection :as sql]
+              [xt.lang.spec-promise :as spec-promise]
+               [xt.lang.common-lib :as k]
+               [xt.lang.common-repl :as repl]
+               [js.lib.driver-sqlite :as js-sqlite]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -30,8 +30,8 @@
 
   (notify/wait-on :js
     (spec-promise/x:promise-then
-     (dbsql/connect (js-sqlite/driver) {})
+     (sql/connect (js-sqlite/driver) {})
      (fn [conn]
-       (repl/notify
-        (dbsql/query conn "SELECT 1;")))))
+        (repl/notify
+         (sql/query conn "SELECT 1;")))))
   => 1)

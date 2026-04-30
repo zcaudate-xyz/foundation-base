@@ -109,7 +109,7 @@
 
 (defn item-lang
   [item]
-  (some-> item item-value common/seedgen-dispatch-lang))
+  (some-> item item-value common/seedgen-form-lang))
 
 (defn item-sort
   [items]

@@ -4,7 +4,13 @@
   (:refer-clojure :exclude [print send]))
 
 (l/script :js
-  {:import [["pg" :as [* Postgres]]] :require [[xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.common-space :as rt] [js.core.util :as ut] [xt.lang.spec-base :as xt] [xt.lib.sql-connection :as sqlrt]]})
+  {:require [[xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-space :as rt]
+             [js.core.util :as ut]
+             [xt.lang.spec-base :as xt]
+             [xt.lib.sql-connection :as sqlrt]]
+   :import [["pg" :as [* Postgres]]]})
 
 (defn.js default-env
   "gets the default env"
@@ -70,10 +76,10 @@
     conn
     {"disconnect" (fn [raw]
                     (return (. raw (end))))
-     "query" (fn [raw input]
-               (return
-                (. (. raw (query input))
-                   (then -/normalise-query-output))))
+     "query"      (fn [raw input]
+                    (return
+                     (. (. raw (query input))
+                        (then -/normalise-query-output))))
      "query_sync" (fn [raw input]
                     (throw "Not Allowed"))})))
 
@@ -99,33 +105,6 @@
    (sqlrt/driver-create
     {"connect"
      (fn [m]
-       (var env (xtd/obj-assign
-                 (or (rt/xt-config "js.lib.driver-postgres")
-                     {:host     "127.0.0.1"
-                      :port     "5432"
-                      :user     "postgres"
-                      :password "postgres"
-                      :database "test"})
-                 m))
-       (var conn (new -/Client env))
        (return
-        (. (. conn (connect))
-           (then
-            (fn []
-              (return
-               (sqlrt/connection-create
-                conn
-                {"disconnect" (fn [raw]
-                                (return (. raw (end))))
-                 "query" (fn [raw input]
-                           (return
-                            (. (. raw (query input))
-                               (then
-                                (fn [res]
-                                  (var #{rows} res)
-                                  (if (and (== 1 rows.length)
-                                           (== 1 (xt/x:len (xtd/obj-keys (xtd/first rows)))))
-                                    (return (xtd/obj-first-val (xtd/first rows)))
-                                    (return rows)))))
-                 "query_sync" (fn [raw input]
-                                (throw "Not Allowed"))}))))))})))
+        (. (-/connect-constructor m)
+           (then -/wrap-connection))))})))

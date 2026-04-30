@@ -76,12 +76,12 @@
 (defn ruby-map
   "emit ruby hash
    (l/emit-as :ruby '[{:a 1 :b 2}])
-      => \"{\\\"a\\\" => 1, \\\"b\\\" => 2}\""
+       => \"{\\\"a\\\" => 1, \\\"b\\\" => 2}\""
   {:added "4.1"}
   [m grammar mopts]
   (let [entries (map (fn [[k v]]
                         (str (common/*emit-fn* (if (keyword? k)
-                                                 (f/strn k)
+                                                 (ut/sym-default-str k)
                                                  k)
                                                grammar mopts)
                                " => "

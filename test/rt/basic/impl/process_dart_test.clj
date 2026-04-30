@@ -44,40 +44,49 @@
 
 ^{:refer rt.basic.impl.process-dart/transform-form :added "4.1"}
 (fact "wraps forms in standalone dart main"
-  (-> (transform-form ['(+ 1 2)] {}) pr-str)
+  (-> (transform-form ['(+ 1 2)] {:bulk true}) pr-str)
   => #"Future<void> main\(\) async"
 
-  (-> (transform-form ['(+ 1 2)] {}) pr-str)
+  (-> (transform-form ['(+ 1 2)] {:bulk true}) pr-str)
   => #"print"
 
-  (-> (transform-form ['(notify 1) '(return-wrap (fn:> 1))] {}) pr-str)
+  (-> (transform-form ['(notify 1) '(return-wrap (fn:> 1))] {:bulk true}) pr-str)
   => #"await"
 
-  (l/emit-as :dart [(transform-form ['(return-wrap (fn:> 1))] {})])
+  (l/emit-as :dart [(transform-form ['(return-wrap (fn:> 1))] {:bulk true})])
   => #"return_wrap"
 
   (str/includes? (pr-str (transform-form ['(for [(var i := 0) (< i 10) (:++ i)]
-                                           (notify i))
-                                          '(+ 1 2)]
-                                         {}))
+                                            (notify i))
+                                           '(+ 1 2)]
+                                          {:bulk true}))
                  "await for")
   => false
 
   (let [out (l/emit-as :dart [(transform-form ['(do (var b 1)
-                                                     [b])]
-                                                   {})])]
+                                                      [b])]
+                                                    {:bulk true})])]
     [(boolean (re-find #"Future\.sync\(thunk_" out))
      (boolean (re-find #"var b = 1;" out))
      (boolean (re-find #"return \[b\];" out))
      (boolean (re-find #"return \(\) \{" out))])
   => [true true true false]
 
-  (let [out (l/emit-as :dart [(transform-form ['[(+ 1 2)
-                                                  (+ 3 4)]]
-                                                {})])]
+  (let [out (l/emit-as :dart [(transform-form '[(+ 1 2)
+                                                 (+ 3 4)]
+                                               {})])]
     [(boolean (re-find #"var out_.*await Future\.sync" out))
      (boolean (re-find #"return \[1 \+ 2,3 \+ 4\];" out))
      (boolean (re-find #"await Future\.sync\(\) \{" out))])
+  => [true true false]
+
+  (let [out (l/emit-as :dart [(transform-form '[[(do (var b 1)
+                                                      b)
+                                                     (+ 1 2)]]
+                                                {})])]
+    [(boolean (re-find #"var b = 1;" out))
+     (boolean (re-find #"var expr_\d+ = b;" out))
+     (boolean (re-find #"return \[\(do" out))])
   => [true true false])
 
 

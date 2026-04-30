@@ -60,6 +60,19 @@
     out)
   => [1 2 3])
 
+^{:refer xt.lang.spec-base/proto:method :added "4.1"}
+(fact "looks up methods with object-first protocol fallback"
+
+  (!.rb
+    (var proto (xt/proto:create
+                {"describe" (fn [curr suffix]
+                              (return (xt/x:cat (. curr ["name"]) suffix)))}))
+    (var obj {"name" "alpha"})
+    (xt/proto:set obj proto)
+    [((xt/proto:method obj "describe") obj "!")
+     (xt/x:nil? (xt/proto:method obj "missing"))])
+  => ["alpha!" true])
+
 ^{:refer xt.lang.spec-base/x:get-idx :added "4.1"}
 (fact "reads the first indexed value"
 
@@ -205,25 +218,42 @@
   => (throws))
 
 ^{:refer xt.lang.spec-base/x:ex-native? :added "4.1"}
-(fact "TODO"
+(fact "check is exception is native"
 
   (!.rb
-    (xt/x:ex-native? (xt/x:ex "hello" {:a 1})))
+    (var e (xt/x:ex "hello" {:a 1}))
+    (xt/x:ex-native? e))
   => true)
 
-^{:refer xt.lang.spec-base/x:ex-new :added "4.1"}
+^{:refer xt.lang.spec-base/x:ex :added "4.1"}
 (fact "creates native exceptions with structured data"
 
   (notify/wait-on :ruby
     (spec-promise/x:promise-catch
      (spec-promise/x:promise
       (fn []
-        (throw (xt/x:ex-new "ERR" {:a 1}))))
+        (throw (xt/x:ex "ERR" {:a 1}))))
      (fn [e]
        (xt/x:print (xt/x:ex-data e))
        (repl/notify [(xt/x:ex-native? e)
                      (xt/x:get-key (xt/x:ex-data e) "a")]))))
   => [true 1])
+
+^{:refer xt.lang.spec-base/x:ex-message :added "4.1"}
+(fact "TODO"
+
+  (!.rb
+    (var e (xt/x:ex "hello" {:a 1}))
+    (xt/x:ex-message e))
+  => "hello")
+
+^{:refer xt.lang.spec-base/x:ex-data :added "4.1"}
+(fact "TODO"
+
+  (!.rb
+    (var e (xt/x:ex "hello" {:a 1}))
+    (xt/x:ex-data e))
+  => {"a" 1})
 
 ^{:refer xt.lang.spec-base/x:type-native :added "4.1"}
 (fact "expands and emits the lua type helper"
@@ -1179,7 +1209,7 @@
          (fn []
            (xt/x:global-del COMMON_SPEC_GLOBAL)
            (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
-        
+                
     [(set-fn)
      (!:G COMMON_SPEC_GLOBAL)
      (del-fn)])
@@ -1206,7 +1236,7 @@
          (fn []
            (xt/x:global-del COMMON_SPEC_GLOBAL)
            (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
-        
+                
     [(set-fn)
      (del-fn)])
   => [true false])
@@ -1258,8 +1288,10 @@
   => {"a" 1})
 
 (comment
-
+  
   (code.manage/isolate 'xt.lang.spec-base-test {:suffix "-fix"})
+  
+  (s/run '[xt.lang.spec-base])
   (s/seedgen-benchadd 'xt.lang.spec-base {:lang [:r :dart] :write true})
   (s/seedgen-benchremove 'xt.lang.spec-base {:lang [:r :dart] :write true})
   (s/seedgen-langadd 'xt.lang.spec-base {:lang [:lua :python] :write true})

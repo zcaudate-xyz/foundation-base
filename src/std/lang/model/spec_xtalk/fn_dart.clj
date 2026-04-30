@@ -303,7 +303,7 @@
    :x-m-max    {:macro #'dart-tf-x-m-max    :emit :macro}
    :x-m-min    {:macro #'dart-tf-x-m-min    :emit :macro}
    :x-m-mod    {:macro #'dart-tf-x-m-mod    :emit :macro}
-   :x-m-pow    {:emit :alias :raw 'math.pow}
+   :x-m-pow    {:macro #'dart-tf-x-m-pow    :emit :macro}
    :x-m-quot   {:macro #'dart-tf-x-m-quot   :emit :macro}
    :x-m-cosh   {:macro #'dart-tf-x-m-cosh   :emit :macro}
    :x-m-sinh   {:macro #'dart-tf-x-m-sinh   :emit :macro}
@@ -473,9 +473,11 @@
 (defn dart-tf-x-with-delay
   [[_ ms thunk]]
   (template/$
-   (Future.delayed
-     (:- "Duration(milliseconds: " ~ms ")")
-     (fn [] (return (~thunk))))))
+   (. (Future.delayed
+       (:- "Duration(milliseconds: " ~ms ")"))
+      (then (fn [_]
+              (return (Future.sync (fn []
+                                     (return (~thunk))))))))))
 
 (defn dart-tf-x-promise
   [[_ thunk]]
@@ -488,16 +490,22 @@
 
 (defn dart-tf-x-promise-then
   [[_ promise thunk]]
-  (list '. promise (list 'then thunk)))
+  (template/$
+   (. ~promise
+      (then (fn [value]
+              (return (Future.sync (fn []
+                                     (return (~thunk value))))))))))
 
 (defn dart-tf-x-promise-catch
   [[_ promise thunk]]
   (template/$
    (. (. ~promise
-         (then (fn [value]
-                 (var out value)
-                 (return out))))
-      (catchError ~thunk))))
+          (then (fn [value]
+                  (var out value)
+                  (return out))))
+      (catchError (fn [err]
+                    (return (Future.sync (fn []
+                                           (return (~thunk err))))))))))
 
 (defn dart-tf-x-promise-finally
   [[_ promise thunk]]

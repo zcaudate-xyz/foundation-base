@@ -29,6 +29,15 @@
 (def ^:private +python-lambda-disallowed-ops+
   #{:throw})
 
+(defn- python-lambda-entry
+  [form grammar]
+  (when (collection/form? form)
+    (let [op (first form)]
+      (or (get-in grammar [:reserved op])
+          (when (and (symbol? op)
+                     (namespace op))
+            (get-in grammar [:reserved (symbol (name op))]))))))
+
 (declare python-lambda-compatible?)
 
 (defn- python-lambda-expr?
@@ -68,11 +77,19 @@
         (python-lambda-compatible? form grammar)
 
         (collection/form? form)
-        (let [entry (get-in grammar [:reserved (first form)])]
-          (and (not (contains? +python-lambda-disallowed-ops+ (:op entry)))
-               (not (contains? +python-lambda-disallowed-types+ (:type entry)))
-               (not (contains? +python-lambda-disallowed-emits+ (:emit entry)))
-               (every? #(python-lambda-expr? % grammar) (rest form))))
+        (let [entry (python-lambda-entry form grammar)]
+          (if-let [macro-fn (:macro entry)]
+            (let [expanded (macro-fn form)]
+              (if (= expanded form)
+                (and (not (contains? +python-lambda-disallowed-ops+ (:op entry)))
+                     (not (contains? +python-lambda-disallowed-types+ (:type entry)))
+                     (not (contains? +python-lambda-disallowed-emits+ (:emit entry)))
+                     (every? #(python-lambda-expr? % grammar) (rest form)))
+                (python-lambda-expr? expanded grammar)))
+            (and (not (contains? +python-lambda-disallowed-ops+ (:op entry)))
+                 (not (contains? +python-lambda-disallowed-types+ (:type entry)))
+                 (not (contains? +python-lambda-disallowed-emits+ (:emit entry)))
+                 (every? #(python-lambda-expr? % grammar) (rest form)))))
 
         :else
         true))

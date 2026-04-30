@@ -440,7 +440,33 @@
                 (. ~k (is_a? FalseClass)))
           (return ~k)
           (return (. ~k object_id))))
-      (call))))
+       (call))))
+
+(defn ruby-tf-x-get-key
+  [form]
+  (let [[_ obj key & [default]] form
+        val (list '. obj [key])]
+    (if (> (count form) 3)
+      (list :?
+            (list '== nil obj)
+            default
+            (list :?
+                  (list '== nil val)
+                  default
+                  val))
+      val)))
+
+(defn ruby-tf-x-set-key
+  [[_ obj key value]]
+  (if (symbol? obj)
+    (list 'do
+          (list 'when (list '== nil obj)
+                (list ':= obj {}))
+          (list ':= (list '. obj [key]) value)
+          obj)
+    (list 'do
+          (list ':= (list '. obj [key]) value)
+          obj)))
 
 (defn ruby-tf-x-lu-eq
   [[_ a b]]
@@ -478,12 +504,17 @@
   [[_ obj key check]]
   (if (some? check)
     (list 'and
+          (list 'not= nil obj)
           (list '. obj (list 'key? key))
           (list '== (list '. obj [key]) check))
-    (list '. obj (list 'key? key))))
+    (list 'and
+          (list 'not= nil obj)
+          (list '. obj (list 'key? key)))))
 
 (def +ruby-lu+
-  {:x-lu-create        {:macro #'ruby-tf-x-lu-create      :emit :macro}
+  {:x-get-key          {:macro #'ruby-tf-x-get-key        :emit :macro}
+   :x-set-key          {:macro #'ruby-tf-x-set-key        :emit :macro}
+   :x-lu-create        {:macro #'ruby-tf-x-lu-create      :emit :macro}
    :x-lu-eq            {:macro #'ruby-tf-x-lu-eq          :emit :macro}
    :x-lu-get           {:macro #'ruby-tf-x-lu-get         :emit :macro}
    :x-lu-set           {:macro #'ruby-tf-x-lu-set         :emit :macro}

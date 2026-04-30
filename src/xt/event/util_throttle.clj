@@ -38,6 +38,7 @@
   {:added "4.1"}
   [throttle id args]
   (var #{active queued handler} throttle)
+  (var key (xt/x:to-string id))
   (:= args (:? (xt/x:nil? args) [] args))
   (var inputs [id])
   (xt/x:arr-assign inputs args)
@@ -49,11 +50,11 @@
    (spec-promise/x:promise-finally
     base-promise
     (fn []
-      (xt/x:del-key active id)
-      (var qentry (xt/x:get-key queued id))
+      (xt/x:del-key active key)
+      (var qentry (xt/x:get-key queued key))
       (when (xt/x:not-nil? qentry)
-        (xt/x:set-key active id qentry)
-        (xt/x:del-key queued id)
+        (xt/x:set-key active key qentry)
+        (xt/x:del-key queued key)
         (-/throttle-run-async throttle
                               id
                               (xt/x:get-key qentry "args")))))))
@@ -63,22 +64,23 @@
   {:added "4.1"}
   [throttle id args]
   (var #{active queued now-fn} throttle)
+  (var key (xt/x:to-string id))
   (:= args (:? (xt/x:nil? args) [] args))
-  (var qentry (xt/x:get-key queued id))
+  (var qentry (xt/x:get-key queued key))
   (when (xt/x:not-nil? qentry)
     (return qentry))
-  (var aentry (xt/x:get-key active id))
+  (var aentry (xt/x:get-key active key))
   (when (xt/x:not-nil? aentry)
     (:= qentry {:promise (xt/x:get-key aentry "promise")
                 :started (now-fn)
                 :args (xt/x:get-key aentry "args")})
-    (xt/x:set-key queued id qentry)
+    (xt/x:set-key queued key qentry)
     (return qentry))
   (var promise (-/throttle-run-async throttle id args))
   (:= aentry {:promise promise
               :started (now-fn)
               :args args})
-  (xt/x:set-key active id aentry)
+  (xt/x:set-key active key aentry)
   (return aentry))
 
 (defn.xt throttle-waiting

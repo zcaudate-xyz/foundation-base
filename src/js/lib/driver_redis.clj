@@ -25,7 +25,6 @@
   "creates a connection"
   {:added "4.0"}
   [m callback]
-  (:= callback (or callback ut/pass-callback))
   (var #{host port} m)
   (var url (+ "redis://"
               (or host "127.0.0.1")
@@ -39,10 +38,12 @@
                                   (or callback ut/pass-callback)))))
   (:= (. conn ["::exec"])
       (fn [command args callback]
-        (return (ut/wrap-callback (. conn (sendCommand [command (:.. args)] callback))
+        (return (ut/wrap-callback (. conn (sendCommand [command (:.. args)]))
                                   (or callback ut/pass-callback)))))
-  (. conn
-     (connect)
-     (then (fn [] (callback nil conn))))
-  (return conn))
-
+  (var promise
+       (. (. conn (connect))
+          (then (fn []
+                  (return conn)))))
+  (if callback
+    (return (ut/wrap-callback promise callback))
+    (return promise)))
