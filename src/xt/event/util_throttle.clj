@@ -39,9 +39,10 @@
   [throttle id args]
   (var #{active queued handler} throttle)
   (var key (xt/x:to-string id))
-  (:= args (:? (xt/x:nil? args) [] args))
+  (:= args (xtd/arrayify args))
   (var inputs [id])
-  (xt/x:arr-assign inputs args)
+  (xt/for:array [arg args]
+    (xt/x:arr-push inputs arg))
   (var base-promise
        (spec-promise/x:promise
         (fn []
@@ -65,7 +66,7 @@
   [throttle id args]
   (var #{active queued now-fn} throttle)
   (var key (xt/x:to-string id))
-  (:= args (:? (xt/x:nil? args) [] args))
+  (:= args (xtd/arrayify args))
   (var qentry (xt/x:get-key queued key))
   (when (xt/x:not-nil? qentry)
     (return qentry))

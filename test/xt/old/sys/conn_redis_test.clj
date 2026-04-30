@@ -61,16 +61,16 @@
     (redis/connect {:constructor js-driver/connect-constructor
                     :port 17001}
                    {:success (fn [conn]
-                               (redis/exec conn "ping" []
-                                           (repl/<!)))}))
+                                 (redis/exec conn "ping" []
+                                            (repl/<!)))}))
   => "PONG"
 
   (notify/wait-on :js
     (redis/connect {:constructor js-driver/connect-constructor
                     :port 17001}
                    {:success (fn [conn]
-                               (redis/exec conn "echo" ["hello"]
-                                           (repl/<!)))}))
+                                 (redis/exec conn "echo" ["hello"]
+                                            (repl/<!)))}))
   => "hello")
 
 ^{:refer xt.old.sys.conn-redis/disconnect :added "4.0"}
@@ -121,8 +121,8 @@
         (redis/connect {:constructor js-driver/connect-constructor
                         :port 17001}
                        {:success (fn [conn]
-                                   (redis/exec conn "publish" ["__TEST__" "123"]
-                                               (repl/<!)))}))
+                                    (redis/exec conn "publish" ["__TEST__" "123"]
+                                                (repl/<!)))}))
       @*res*
       (deref *res* 1000 :timeout))
   => ["message" "__TEST__" "123"])
@@ -148,8 +148,8 @@
         (redis/connect {:constructor js-driver/connect-constructor
                         :port 17001}
                        {:success (fn [conn]
-                                   (redis/exec conn "publish" ["__TEST__" "123"]
-                                               (repl/<!)))}))
+                                    (redis/exec conn "publish" ["__TEST__" "123"]
+                                                (repl/<!)))}))
       @*res*
       (deref *res* 1000 :timeout))
   => ["pmessage" "*" "__TEST__" "123"])

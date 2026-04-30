@@ -417,8 +417,66 @@
    :x-str-trim-left   {:macro #'ruby-tf-x-str-trim-left  :emit :macro}
    :x-str-trim-right  {:macro #'ruby-tf-x-str-trim-right :emit :macro}
    :x-str-to-fixed    {:macro #'ruby-tf-x-str-to-fixed   :emit :macro}
-   :x-str-starts-with {:macro #'ruby-tf-x-str-starts-with :emit :macro}
-   :x-str-ends-with   {:macro #'ruby-tf-x-str-ends-with  :emit :macro}})
+    :x-str-starts-with {:macro #'ruby-tf-x-str-starts-with :emit :macro}
+    :x-str-ends-with   {:macro #'ruby-tf-x-str-ends-with  :emit :macro}})
+
+;;
+;; GLOBAL
+;;
+
+(defn ruby-tf-x-global-set
+  [[_ key value]]
+  (list ':= (list '. '!:G [(str key)]) value))
+
+(defn ruby-tf-x-global-del
+  [[_ key]]
+  (list ':= (list '. '!:G [(str key)]) nil))
+
+(defn ruby-tf-x-global-has?
+  [[_ key]]
+  (list 'not (list 'x:nil? (list '. '!:G [(str key)]))))
+
+(def +ruby-global+
+  {:x-global-set  {:macro #'ruby-tf-x-global-set  :emit :macro}
+   :x-global-del  {:macro #'ruby-tf-x-global-del  :emit :macro}
+   :x-global-has? {:macro #'ruby-tf-x-global-has? :emit :macro}})
+
+;;
+;; PROTOTYPE
+;;
+
+(defn ruby-tf-prototype-create
+  [[_ m]]
+  m)
+
+(defn ruby-tf-prototype-get
+  [[_ obj]]
+  (list 'x:get-key obj "_xt_proto" nil))
+
+(defn ruby-tf-prototype-set
+  [[_ obj prototype]]
+  (template/$
+   (. (fn []
+        (x:set-key ~obj "_xt_proto" ~prototype)
+        (return ~obj))
+      (call))))
+
+(defn ruby-tf-prototype-method
+  [[_ obj key]]
+  (let [direct (list 'x:get-key obj key nil)
+        proto  (list 'or (list 'proto:get obj) {})]
+    (list ':?
+          (list 'not= nil direct)
+          direct
+          (list 'x:get-key proto key nil))))
+
+(def +ruby-proto+
+  {:prototype-create   {:macro #'ruby-tf-prototype-create :emit :macro
+                        :op-spec {:allow-blocks true}}
+   :prototype-get      {:macro #'ruby-tf-prototype-get    :emit :macro}
+   :prototype-set      {:macro #'ruby-tf-prototype-set    :emit :macro}
+   :prototype-method   {:macro #'ruby-tf-prototype-method :emit :macro}
+   :prototype-tostring {:emit :unit :default "to_s"}})
 
 ;;
 ;; LOOKUP
@@ -445,16 +503,15 @@
 (defn ruby-tf-x-get-key
   [form]
   (let [[_ obj key & [default]] form
-        val (list '. obj [key])]
-    (if (> (count form) 3)
-      (list :?
-            (list '== nil obj)
-            default
-            (list :?
-                  (list '== nil val)
-                  default
-                  val))
-      val)))
+        val (list '. obj [key])
+        fallback (if (> (count form) 3) default nil)]
+    (list :?
+          (list '== nil obj)
+          fallback
+          (list :?
+                (list '== nil val)
+                fallback
+                val))))
 
 (defn ruby-tf-x-set-key
   [[_ obj key value]]
@@ -687,19 +744,22 @@
 
 (defn ruby-tf-x-promise
   [[_ thunk]]
-  (let [promise (gensym "promise__")]
-    (list '.
-          (list 'fn []
-                (list 'var promise {"__type__" "xt.promise"
-                                    "value" nil
-                                    "reason" nil})
-                (list 'try
-                      (list ':= (list '. promise ["value"])
-                            (list '. thunk (list 'call)))
-                      (list 'catch 'e
-                            (list ':= (list '. promise ["reason"]) 'e)))
-                (list 'return promise))
-          (list 'call))))
+  (let [promise (gensym "promise__")
+        result  (gensym "result__")]
+    (template/$
+     (. (fn []
+          (var ~promise {"__type__" "xt.promise"
+                         "value" nil
+                         "reason" nil})
+          (try
+            (var ~result (. ~thunk (call)))
+            (if (x:promise-native? ~result)
+              (return ~result))
+            (:= (. ~promise ["value"]) ~result)
+            (catch e
+              (:= (. ~promise ["reason"]) e)))
+          (return ~promise))
+        (call)))))
 
 (defn ruby-tf-x-promise-all
   [[_ promises]]
@@ -1027,6 +1087,8 @@
           +ruby-type+
           +ruby-arr+
           +ruby-str+
+          +ruby-global+
+          +ruby-proto+
           +ruby-lu+
           +ruby-json+
           +ruby-shell+

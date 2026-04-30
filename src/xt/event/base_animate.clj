@@ -234,6 +234,10 @@
   {:added "4.0"}
   [impl progressing progress-fn]
   (var #{queued}  progressing)
+  (when (== 0 (xt/x:len queued))
+    (return (-/animate-chained-cleanup impl
+                                       progressing
+                                       progress-fn)))
   (var queued-fn  (xt/x:first queued))
   (when (xt/x:nil? queued-fn)
     (return (-/animate-chained-cleanup impl
@@ -286,10 +290,11 @@
              (when (xt/x:not-nil? anim)
                (xt/x:obj-assign progressing {:running  true
                                              :animation anim})))
-          
-          (and (== type "chained-one")
-               (xt/x:not-nil? (xt/x:first queued)))
-          (return progressing)
+           
+           (and (== type "chained-one")
+                (< 0 (xt/x:len queued))
+                (xt/x:not-nil? (xt/x:first queued)))
+           (return progressing)
          
          :else
          (xt/x:arr-push queued animate-fn))

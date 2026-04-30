@@ -50,21 +50,34 @@
   "creates the scaffolding for the runtime eval to work"
   {:added "4.0"}
   [forms]
-  (list 'do
-        (list 'defn (with-meta 'OUT-FN
-                      {:inner true})
-              []
-              '(:- :import traceback)
-              '(var err)
-              (concat
-               '[try]
-               (butlast forms)
-               [(list 'return (last forms))
-                '(catch Exception
-                     (:= err (. traceback (format-exc))))])
-              '(throw (Exception err)))
-        '(:= (. (globals) ["OUT"])
-             (OUT-FN))))
+  (let [last-form (last forms)
+        return-form (cond (and (seq? last-form)
+                               (= ':= (first last-form)))
+                          (let [[_ lhs] last-form]
+                            (list 'do last-form (list 'return lhs)))
+
+                          (and (seq? last-form)
+                               (= 'var (first last-form)))
+                          (let [[_ lhs] last-form]
+                            (list 'do last-form (list 'return lhs)))
+
+                          :else
+                          (last (rt/return-format [last-form] '#{:- return break throw})))
+        forms (concat (butlast forms) [return-form])]
+    (list 'do
+          (list 'defn (with-meta 'OUT-FN
+                        {:inner true})
+                []
+                '(:- :import traceback)
+                '(var err)
+                (concat
+                 '[try]
+                 forms
+                 ['(catch Exception
+                      (:= err (. traceback (format-exc))))])
+                '(throw (Exception err)))
+          '(:= (. (globals) ["OUT"])
+               (OUT-FN)))))
 
 (defn default-body-transform
   "standard python transforms"

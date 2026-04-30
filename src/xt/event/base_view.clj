@@ -320,7 +320,9 @@
   {:added "4.0"}
   [view]
   (var #{input} view)
-  (return input))
+  (var out (xt/x:obj-clone input))
+  (xt/x:del-key out "default")
+  (return out))
 
 (defn.xt get-output
   "gets the view output record"
@@ -328,7 +330,10 @@
   [view dest-key]
   (when (xt/x:nil? dest-key)
     (:= dest-key "output"))
-  (return (. view [dest-key])))
+  (var out (xt/x:obj-clone (. view [dest-key])))
+  (xt/x:del-key out "process")
+  (xt/x:del-key out "default")
+  (return out))
 
 (defn.xt get-current
   "gets the current view output"
@@ -392,7 +397,7 @@
     (:= dest-key "output"))
   (var output (. view [dest-key]))
   (var #{process} output)
-  (if (== true (. output ["errored"]))
+  (if (== true (xt/x:get-key output "errored"))
     (return (process ((. output ["default"]))))
     (do (var current (. output ["current"]))
         (when (xt/x:nil? current)
@@ -407,7 +412,7 @@
          callback} view)
   (xt/x:obj-assign input {:current current
                           :updated (xt/x:now-ms)})
-  (-/trigger-listeners view "view.input" input)
+  (-/trigger-listeners view "view.input" (-/get-input view))
   (return input))
 
 (defn.xt set-output
@@ -434,9 +439,9 @@
                        (xtd/arrayify current)))
             (xt/x:set-key output "current" next))
 
-        :else
-        (xt/x:set-key output "current" current))
-  (-/trigger-listeners view "view.output" output)
+         :else
+         (xt/x:set-key output "current" current))
+  (-/trigger-listeners view "view.output" (-/get-output view dest-key))
   (return current))
 
 (defn.xt set-output-disabled
@@ -451,7 +456,7 @@
     (xt/x:set-key output "disabled" value)
     (when (xt/x:has-key? output "disabled")
       (xt/x:del-key output "disabled")))
-  (-/trigger-listeners view "view.disabled" value)
+  (-/trigger-listeners view "view.disabled" (-/get-output view dest-key))
   (return output))
 
 (defn.xt set-pending
@@ -465,7 +470,7 @@
     (xt/x:set-key output "pending" value)
     (when (xt/x:has-key? output "pending")
       (xt/x:del-key output "pending")))
-  (-/trigger-listeners view "view.pending" value)
+  (-/trigger-listeners view "view.pending" (-/get-output view dest-key))
   (return output))
 
 (defn.xt set-elapsed
@@ -479,7 +484,7 @@
     (xt/x:set-key output "elapsed" value)
     (when (xt/x:has-key? output "elapsed")
       (xt/x:del-key output "elapsed")))
-  (-/trigger-listeners view "view.elapsed" value)
+  (-/trigger-listeners view "view.elapsed" (-/get-output view dest-key))
   (return output))
 
 (defn.xt init-view
@@ -560,11 +565,12 @@
   "calls the pipeline with async function"
   {:added "4.0"}
   [context tag disabled async-fn hook-fn skip-guard]
-  (var identity-fn (fn [x] (return x)))
+  (var identity-hook (fn [acc _tag] (return acc)))
+  (var identity-wrapper (fn [handler] (return handler)))
   (when (xt/x:nil? skip-guard)
     (:= skip-guard {}))
   (when (xt/x:nil? hook-fn)
-    (:= hook-fn identity-fn))
+    (:= hook-fn identity-hook))
   (var #{cell model view args acc} context)
   (var #{pipeline} view)
   (var stage (xt/x:get-key pipeline tag))
@@ -572,7 +578,7 @@
     (:= stage {}))
   (var #{handler guard wrapper} stage)
   (when (xt/x:nil? wrapper)
-    (:= wrapper identity-fn))
+    (:= wrapper identity-wrapper))
   (var error-fn   (fn [err]
                     (:= (. acc [tag]) [true err true])
                     (:= (. acc ["error"]) true)

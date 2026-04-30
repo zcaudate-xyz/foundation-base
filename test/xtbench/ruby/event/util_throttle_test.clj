@@ -116,6 +116,7 @@
 
 (comment
   (s/snapto)
+  (s/run '[xt.event.util-throttle])
   
   (s/seedgen-benchadd '[xt.event.util-throttle] {:lang [:ruby :dart] :write true})
   (s/seedgen-langadd '[xt.event.util-throttle]  {:lang [:lua :python] :write true})

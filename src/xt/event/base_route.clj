@@ -222,14 +222,12 @@
   "gets path params from tree"
   {:added "4.0"}
   [tree path]
-  (return
-   (:? (xt/x:nil? (-> tree
-                      (xt/x:get-key "params")
-                      (xt/x:get-key (xt/x:json-encode path))))
-       {}
-       (-> tree
-           (xt/x:get-key "params")
-           (xt/x:get-key (xt/x:json-encode path))))))
+  (var params (-> tree
+                  (xt/x:get-key "params")
+                  (xt/x:get-key (xt/x:json-encode path))))
+  (when (xt/x:nil? params)
+    (:= params {}))
+  (return params))
 
 (defn.xt interim-from-tree
   "converts interim from tree"

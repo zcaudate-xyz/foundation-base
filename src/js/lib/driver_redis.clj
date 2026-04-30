@@ -4,8 +4,10 @@
   (:refer-clojure :exclude [print send]))
 
 (l/script :js
-  {:require [[js.core.util :as ut]]
-   :import  [["redis" :as [* Redis]]]})
+  {:require [[xt.lang.spec-base :as xt]
+             [js.core.util :as ut]
+             [xt.lib.redis-connection :as redisrt]]
+    :import  [["redis" :as [* Redis]]]})
 
 (f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "Redis"
@@ -21,6 +23,17 @@
    AggregateError
    addCommand])
 
+(defn.js wrap-connection
+  [conn]
+  (return
+   (redisrt/connection-create
+     conn
+     {"disconnect" (fn [raw]
+                      (return (. raw (quit))))
+       "exec"       (fn [raw command args]
+                      (var input (xt/x:arr-assign [command] args))
+                      (return (. raw (sendCommand input))))})))
+
 (defn.js connect-constructor
   "creates a connection"
   {:added "4.0"}
@@ -31,15 +44,19 @@
               ":"
               (or port "6379")))
   (var conn (-/createClient {:url url}))
-  
   (:= (. conn ["::disconnect"])
       (fn [callback]
-        (return (ut/wrap-callback (. conn (quit))
-                                  (or callback ut/pass-callback)))))
+        (return
+         (ut/wrap-callback
+          (. conn (quit))
+          (or callback ut/pass-callback)))))
   (:= (. conn ["::exec"])
       (fn [command args callback]
-        (return (ut/wrap-callback (. conn (sendCommand [command (:.. args)]))
-                                  (or callback ut/pass-callback)))))
+        (var input (xt/x:arr-assign [command] args))
+        (var promise (. conn (sendCommand input)))
+        (if callback
+          (return (ut/wrap-callback promise callback))
+          (return promise))))
   (var promise
        (. (. conn (connect))
           (then (fn []
@@ -47,3 +64,14 @@
   (if callback
     (return (ut/wrap-callback promise callback))
     (return promise)))
+
+(defn.js driver
+  []
+  (return
+   (redisrt/driver-create
+    {"connect"
+     (fn [m]
+       (return
+        (. (-/connect-constructor m)
+           (then (fn [conn]
+                   (return (-/wrap-connection conn)))))))})))

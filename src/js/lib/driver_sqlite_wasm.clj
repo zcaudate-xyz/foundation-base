@@ -24,24 +24,6 @@
                 "values"  values}]
               values)))
 
-(defn.js set-methods
-  "sets the query and disconnect methods"
-  {:added "4.1"}
-  [db]
-  (:= (. db ["::disconnect"])
-      (fn [callback]
-        (:= callback (or callback ut/pass-callback))
-        (. db (close))
-        (return (callback nil true))))
-  (:= (. db ["::query"])
-      (fn [query callback]
-        (:= callback (or callback ut/pass-callback))
-        (return (callback nil (-/raw-query db query)))))
-  (:= (. db ["::query_sync"])
-      (fn [query]
-        (return (-/raw-query db query))))
-  (return db))
-
 (defn.js wrap-connection
   [db]
   (return
@@ -65,7 +47,7 @@
   (var flags (or (xt/x:get-key config "flags")
                  "c"))
   (var conn (new (. sqlite3 ["oo1"] ["DB"]) filename flags))
-  (return (-/set-methods conn)))
+  (return conn))
 
 (defn.js ^{:static/override true}
   connect-constructor

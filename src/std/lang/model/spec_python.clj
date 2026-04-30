@@ -1,6 +1,7 @@
 (ns std.lang.model.spec-python
-  (:require [std.lang.base.book :as book]
-	    [std.lang.base.emit :as emit]
+  (:require [clojure.string :as string]
+            [std.lang.base.book :as book]
+ 	    [std.lang.base.emit :as emit]
             [std.lang.base.emit-common :as common]
             [std.lang.base.emit-data :as data]
             [std.lang.base.emit-helper :as helper]
@@ -90,14 +91,117 @@
       (list 'quote body)
       body)))
 
+(defn- python-plain-symbol?
+  [sym]
+  (and (symbol? sym)
+       (nil? (namespace sym))))
+
+(defn- python-binding-symbols
+  [form]
+  (cond (python-plain-symbol? form)
+        #{form}
+
+        (vector? form)
+        (into #{} (mapcat python-binding-symbols) form)
+
+        (set? form)
+        (into #{} (mapcat python-binding-symbols) form)
+
+        (map? form)
+        (into #{} (mapcat python-binding-symbols) (vals form))
+
+        :else
+        #{}))
+
+(defn- python-scope-form?
+  [form]
+  (and (collection/form? form)
+       (contains? '#{fn fn.inner defn defn- defgen} (first form))))
+
+(defn- python-local-symbols
+  [form]
+  (cond (python-scope-form? form)
+        #{}
+
+        (and (collection/form? form)
+             (= 'quote (first form)))
+        #{}
+
+        (and (collection/form? form)
+             (contains? '#{var var*} (first form)))
+        (python-binding-symbols (second form))
+
+        (collection/form? form)
+        (into #{} (mapcat python-local-symbols) form)
+
+        (vector? form)
+        (into #{} (mapcat python-local-symbols) form)
+
+        (set? form)
+        (into #{} (mapcat python-local-symbols) form)
+
+        (map? form)
+        (into #{} (mapcat python-local-symbols) (concat (keys form) (vals form)))
+
+        :else
+        #{}))
+
+(defn- python-assigned-symbols
+  [form]
+  (cond (python-scope-form? form)
+        #{}
+
+        (and (collection/form? form)
+             (= 'quote (first form)))
+        #{}
+
+        (and (collection/form? form)
+             (= ':= (first form)))
+        (python-binding-symbols (second form))
+
+        (collection/form? form)
+        (into #{} (mapcat python-assigned-symbols) form)
+
+        (vector? form)
+        (into #{} (mapcat python-assigned-symbols) form)
+
+        (set? form)
+        (into #{} (mapcat python-assigned-symbols) form)
+
+        (map? form)
+        (into #{} (mapcat python-assigned-symbols) (concat (keys form) (vals form)))
+
+        :else
+        #{}))
+
+(defn- python-prepend-nonlocals
+  [name args body]
+  (if-not (:inner (meta name))
+    body
+    (let [arg-syms    (python-binding-symbols args)
+          local-syms  (into arg-syms (mapcat python-local-symbols) body)
+          assigned    (into #{} (mapcat python-assigned-symbols) body)
+          nonlocals   (->> assigned
+                           (remove local-syms)
+                           (sort-by clojure.core/str))]
+      (if (empty? nonlocals)
+        body
+        (cons (apply list 'nonlocal nonlocals) body)))))
+
+(defn python-emit-nonlocal
+  [[_ & syms] grammar mopts]
+  (str "nonlocal "
+       (string/join ", " (map #(common/*emit-fn* % grammar mopts) syms))))
+
 (defn python-defn-
   "hidden function without decorators"
   {:added "4.0"}
   [form grammar mopts]
-  (let [[tag name args & more] form]
+  (let [[tag name args & more] form
+        more (python-prepend-nonlocals name args more)]
     (top/emit-top-level
      :defn
-     (list* tag name (python-apply-optional-defaults name args) more)
+      (list* tag name (python-apply-optional-defaults name args) more)
      grammar
      mopts)))
 
@@ -131,11 +235,14 @@
          
          :else
          (let [[args body] args]
+           (let [args (if (empty? args)
+                        [(list ':* '__args)]
+                        args)]
            (apply list :- :lambda
                   (concat (if (not-empty args)
-                            [(list 'quote args) ":"]
-                            [":"])
-                          [(python-lambda-body body)]))))))
+                              [(list 'quote args) ":"]
+                              [":"])
+                           [(python-lambda-body body)])))))))
 
 (defn python-defclass
   "emits a defclass template for python"
@@ -280,8 +387,9 @@
         :del       {:op :del     :symbol #{'del}  :raw "del"  :emit :prefix}
         :pass      {:op :pass    :symbol #{'pass} :raw "pass" :emit :return :type :special}
         :nan       {:op :nan     :symbol #{'NaN}  :raw "NaN"  :value true :emit :throw}
-        :with      {:op :with    :symbol #{'with} :type :block
-                    :block  {:main #{:parameter :body}}}})))
+         :nonlocal  {:op :nonlocal :symbol #{'nonlocal} :emit #'python-emit-nonlocal}
+         :with      {:op :with    :symbol #{'with} :type :block
+                     :block  {:main #{:parameter :body}}}})))
 
 (def +template+
   (->> {:banned #{:keyword}

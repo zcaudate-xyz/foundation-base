@@ -1,19 +1,20 @@
 (ns std.lang.model-annex.spec-ruby
   (:require [clojure.string]
-              [std.lang.base.book :as book]
-              [std.lang.base.emit :as emit]
-              [std.lang.base.emit-common :as common]
-             [std.lang.base.emit-helper :as helper]
-             [std.lang.base.preprocess-base :as preprocess-base]
-             [std.lang.base.emit-top-level :as top]
-             [std.lang.base.grammar :as grammar]
-              [std.lang.base.script :as script]
-              [std.lang.base.util :as ut]
-              [std.lang.model.spec-xtalk]
-              [std.lang.model-annex.spec-ruby.rewrite :as rewrite]
-              [std.lang.model-annex.spec-xtalk.fn-ruby :as fn]
-              [std.lib.collection :as collection]
-              [std.lib.foundation :as f]
+               [std.lang.base.book :as book]
+               [std.lang.base.emit :as emit]
+               [std.lang.base.emit-common :as common]
+              [std.lang.base.emit-helper :as helper]
+              [std.lang.base.preprocess-base :as preprocess-base]
+              [std.lang.base.emit-top-level :as top]
+              [std.lang.base.grammar :as grammar]
+               [std.lang.base.script :as script]
+               [std.lang.base.util :as ut]
+               [std.lang.rewrite.destructure :as destruct]
+               [std.lang.model.spec-xtalk]
+               [std.lang.model-annex.spec-ruby.rewrite :as rewrite]
+               [std.lang.model-annex.spec-xtalk.fn-ruby :as fn]
+               [std.lib.collection :as collection]
+               [std.lib.foundation :as f]
               [std.lib.template :as template]))
 
 (defn ruby-symbol
@@ -65,13 +66,41 @@
       globals
       (list '. globals [(ut/sym-default-str key)]))))
 
+(defn- ruby-vector-destructure-bindings
+  [target temp]
+  (keep-indexed (fn [idx sym]
+                  (when (not= '_ sym)
+                    [sym (list 'x:get-idx temp (list 'x:offset idx) nil)]))
+                target))
+
 (defn ruby-var
   "emit ruby variable
    (spec-ruby/ruby-var '(var a 1))
-    => '(:= a 1)"
+     => '(:= a 1)"
   {:added "4.1"}
   [[_ sym & args]]
-  (list ':= sym (last args)))
+  (let [bound (last args)]
+    (cond
+      (destruct/destructure-target? sym)
+      (let [temp (gensym "ruby_var__")]
+        (apply list 'do*
+               (cons (list ':= temp bound)
+                     (map (fn [[target value]]
+                            (list ':= target value))
+                          (destruct/destructure-bindings sym temp name)))))
+
+      (and (vector? sym)
+           (seq sym)
+           (every? symbol? sym))
+      (let [temp (gensym "ruby_var__")]
+        (apply list 'do*
+               (cons (list ':= temp bound)
+                     (map (fn [[target value]]
+                            (list ':= target value))
+                          (ruby-vector-destructure-bindings sym temp)))))
+
+      :else
+      (list ':= sym bound))))
 
 (defn ruby-map
   "emit ruby hash
@@ -251,21 +280,23 @@
   "transform for `for:object`"
   {:added "4.1"}
   [[_ [[k v] m] & body]]
-  (let [keys (gensym "keys__")
-        idx  (gensym "idx__")
-        key  (if (= k '_) (gensym "key__") k)
-        bound (vec (remove #{'_} [key v]))
-        body  (rewrite/rewrite-callable-body bound body)]
+  (let [obj  (gensym "obj__")
+        keys (gensym "keys__")
+         idx  (gensym "idx__")
+         key  (if (= k '_) (gensym "key__") k)
+         bound (vec (remove #{'_} [key v]))
+         body  (rewrite/rewrite-callable-body bound body)]
     (template/$
-     (do (var ~keys (. ~m keys))
-         (var ~idx 0)
-         (while (< ~idx (. ~keys length))
-           (var ~key (. ~keys [~idx]))
-           ~@(if (not= v '_)
-               [(list 'var v (list '. m [key]))]
-               [])
-           ~@body
-           (:= ~idx (+ ~idx 1)))))))
+     (do (var ~obj (or ~m {}))
+         (var ~keys (. ~obj keys))
+          (var ~idx 0)
+          (while (< ~idx (. ~keys length))
+            (var ~key (. ~keys [~idx]))
+            ~@(if (not= v '_)
+                [(list 'var v (list '. obj [key]))]
+                [])
+            ~@body
+            (:= ~idx (+ ~idx 1)))))))
 
 (defn tf-for-iter
   "transform for `for:iter`"

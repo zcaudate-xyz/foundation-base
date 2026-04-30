@@ -66,6 +66,42 @@
                "status" "resolved"
                "value" value}))))
 
+(defn.py promise-await
+  "waits for pending runtime promises and normalises awaitables"
+  {:added "4.1"}
+  [value]
+  (var current (-/promise-wrap value))
+  (when (== "pending" (. current ["status"]))
+    (var thread (. current (get "thread")))
+    (when (not= nil thread)
+      (. thread (join))))
+  (return current))
+
+(defn.py promise-pending
+  "creates a pending promise backed by a Python thread"
+  {:added "4.1"}
+  [thunk]
+  (var wrapper {"__type__" "xt.promise"
+                "status" "pending"
+                "value" nil
+                "error" nil})
+  (var runner
+       (fn []
+         (try
+           (var current (-/promise-await (thunk)))
+           (. wrapper (__setitem__ "status" (. current ["status"])))
+           (if (== "rejected" (. current ["status"]))
+             (. wrapper (__setitem__ "error" (. current ["error"])))
+             (. wrapper (__setitem__ "value" (. current ["value"]))))
+           (catch [Exception :as e]
+             (. wrapper (__setitem__ "status" "rejected"))
+             (. wrapper (__setitem__ "error" e))))))
+  (var thread (. (__import__ "threading")
+                 (Thread :target runner)))
+  (. wrapper (__setitem__ "thread" thread))
+  (. thread (start))
+  (return wrapper))
+
 (defn.py promise
   "executes a thunk and captures either its value or error as a promise"
   {:added "4.1"}
@@ -80,53 +116,64 @@
   {:added "4.1"}
   [promises]
   (:= promises (:? (== nil promises) [] promises))
-  (var out [])
-  (var i 0)
-  (while (< i (len promises))
-    (var current (-/promise-wrap (. promises [i])))
-    (if (== "rejected" (. current ["status"]))
-      (return current))
-    (. out (append (. current ["value"])))
-    (:= i (+ i 1)))
-  (return (-/promise-wrap out)))
+  (return
+   (-/promise-pending
+    (fn []
+      (var out [])
+      (var i 0)
+      (while (< i (len promises))
+        (var current (-/promise-await (. promises [i])))
+        (if (== "rejected" (. current ["status"]))
+          (return current))
+        (. out (append (. current ["value"])))
+        (:= i (+ i 1)))
+      (return out)))))
 
 (defn.py promise-then
   "applies a continuation to resolved promises, adopting awaitables when needed"
   {:added "4.1"}
   [promise thunk]
-  (var current (-/promise-wrap promise))
-  (if (== "rejected" (. current ["status"]))
-    (return current)
-    (try
-      (return (-/promise-wrap (thunk (. current ["value"]))))
-      (catch [Exception :as e]
-        (return (-/promise-reject e))))))
+  (return
+   (-/promise-pending
+    (fn []
+      (var current (-/promise-await promise))
+      (if (== "rejected" (. current ["status"]))
+        (return current)
+        (try
+          (return (thunk (. current ["value"])))
+          (catch [Exception :as e]
+            (return (-/promise-reject e)))))))))
 
 (defn.py promise-catch
   "applies a continuation to rejected promises, adopting awaitables when needed"
   {:added "4.1"}
   [promise thunk]
-  (var current (-/promise-wrap promise))
-  (if (not= "rejected" (. current ["status"]))
-    (return current)
-    (try
-      (return (-/promise-wrap (thunk (. current ["error"]))))
-      (catch [Exception :as e]
-        (return (-/promise-reject e))))))
+  (return
+   (-/promise-pending
+    (fn []
+      (var current (-/promise-await promise))
+      (if (not= "rejected" (. current ["status"]))
+        (return current)
+        (try
+          (return (thunk (. current ["error"])))
+          (catch [Exception :as e]
+            (return (-/promise-reject e)))))))))
 
 (defn.py promise-finally
   "runs a finalizer and preserves the original promise unless the finalizer fails"
   {:added "4.1"}
   [promise thunk]
-  (var current (-/promise-wrap promise))
-  (try
-    (var cleanup-value (thunk))
-    (var cleanup (-/promise-wrap cleanup-value))
-    (if (== "rejected" (. cleanup ["status"]))
-       (return cleanup)
-       (return current))
-     (catch [Exception :as e]
-       (return (-/promise-reject e)))))
+  (return
+   (-/promise-pending
+    (fn []
+      (var current (-/promise-await promise))
+      (try
+        (var cleanup (-/promise-await (thunk)))
+        (if (== "rejected" (. cleanup ["status"]))
+          (return cleanup)
+          (return current))
+        (catch [Exception :as e]
+          (return (-/promise-reject e))))))))
 
 (defn.py with-delay
   "sleeps before invoking a thunk, returning a promise and accepting either (ms thunk) or (thunk ms)"
@@ -134,8 +181,9 @@
   [a b]
   (var thunk (:? (callable a) a b))
   (var ms (:? (callable a) b a))
-  (return (-/promise
-           (fn []
-             (. (__import__ "time")
-                (sleep (/ ms 1000.0)))
-             (return (thunk))))))
+  (return
+   (-/promise-pending
+    (fn []
+      (. (__import__ "time")
+         (sleep (/ ms 1000.0)))
+      (return (thunk))))))

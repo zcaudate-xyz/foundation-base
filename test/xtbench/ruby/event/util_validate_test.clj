@@ -192,6 +192,8 @@
   (s/snapto)
   (s/run '[xt.event.util-validate])
   
+  (s/seedgen-langremove '[xt.event.util-] {:lang [:lua] :write true})
+  
   (s/seedgen-benchadd '[xt.event.util-validate] {:lang [:ruby :dart] :write true})
   (s/seedgen-langadd '[xt.event.util-validate]  {:lang [:lua :python] :write true})
   (s/seedgen-langremove '[xt.event.util-validate]  {:lang [:lua :python] :write true}))

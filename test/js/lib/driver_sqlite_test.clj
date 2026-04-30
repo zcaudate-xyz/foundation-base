@@ -19,9 +19,6 @@
 ^{:refer js.lib.driver-sqlite/raw-query :added "4.0" :unchecked true}
 (fact "raw query for sql lite results")
 
-^{:refer js.lib.driver-sqlite/set-methods :added "4.0" :unchecked true}
-(fact "sets the query and disconnect methods")
-
 ^{:refer js.lib.driver-sqlite/make-instance :added "4.0" :unchecked true}
 (fact "creates a instance once SQL is loaded")
 

@@ -18,9 +18,6 @@
 ^{:refer js.lib.driver-sqlite-wasm/raw-query :added "4.1" :unchecked true}
 (fact "raw query for sqlite-wasm results")
 
-^{:refer js.lib.driver-sqlite-wasm/set-methods :added "4.1" :unchecked true}
-(fact "sets the query and disconnect methods")
-
 ^{:refer js.lib.driver-sqlite-wasm/make-instance :added "4.1" :unchecked true}
 (fact "creates an sqlite-wasm instance once sqlite3 is loaded")
 

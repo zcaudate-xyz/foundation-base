@@ -77,12 +77,14 @@
   => '(xt/x:get-key xt.db.schema.base-scope/Scopes s))
 
 (fact "Ruby destructuring preserves hyphenated map keys"
-  (rewrite/rewrite-callable-form
-   '(var #{order-by} opts)
-   #{})
-  => '(do*
-        (var ruby_destructure__ opts)
-        (var order-by (x:get-key ruby_destructure__ "order-by" nil))))
+  (let [out (rewrite/rewrite-callable-form
+             '(var #{order-by} opts)
+             #{})]
+    [(= 'do* (first out))
+     (boolean (re-matches #"ruby_destructure__.*"
+                          (str (nth (second out) 1))))
+     (nth (nth (nth out 2) 2) 2)])
+  => [true true "order-by"])
 
 (fact "Ruby x:has-key? guards nil receivers"
   (fn-ruby/ruby-tf-x-has-key? '(x:has-key? obj "a"))
@@ -95,6 +97,13 @@
            (== (. obj ["a"]) 1)))
 
 (fact "Ruby x:get-key and x:set-key guard nil receivers"
+  (fn-ruby/ruby-tf-x-get-key '(x:get-key obj "a"))
+  => '(:? (== nil obj)
+          nil
+          (:? (== nil (. obj ["a"]))
+              nil
+              (. obj ["a"])))
+
   (fn-ruby/ruby-tf-x-get-key '(x:get-key obj "a" nil))
   => '(:? (== nil obj)
           nil
@@ -109,6 +118,35 @@
         (:= (. obj ["a"]) 1)
         obj))
 
+(fact "Ruby for:object guards nil receivers"
+  (l/emit-as :ruby
+   '[(for:object [[k v] obj]
+       (puts k)
+       (puts v))])
+  => #"obj__.* = \(obj \|\| \{\}\)\nkeys__.* = obj__.*\.keys")
+
+(fact "Ruby x:global helpers write through !:G without assigning to the globals expression"
+  (fn-ruby/ruby-tf-x-global-set '(x:global-set XT 1))
+  => '(:= (. !:G ["XT"]) 1)
+
+  (fn-ruby/ruby-tf-x-global-del '(x:global-del XT))
+  => '(:= (. !:G ["XT"]) nil)
+
+  (fn-ruby/ruby-tf-x-global-has? '(x:global-has? XT))
+  => '(not (x:nil? (. !:G ["XT"]))))
+
+(fact "Ruby prototype helpers use the _xt_proto fallback layout"
+  (fn-ruby/ruby-tf-prototype-create '(proto:create {"describe" 1}))
+  => '{"describe" 1}
+
+  (fn-ruby/ruby-tf-prototype-get '(proto:get obj))
+  => '(x:get-key obj "_xt_proto" nil)
+
+  (fn-ruby/ruby-tf-prototype-method '(proto:method obj "describe"))
+  => '(:? (not= nil (x:get-key obj "describe" nil))
+          (x:get-key obj "describe" nil)
+          (x:get-key (or (proto:get obj) {}) "describe" nil)))
+
 ^{:refer std.lang.model-annex.spec-ruby/ruby-symbol :added "4.1"}
 (fact "emit ruby symbol"
 
@@ -120,13 +158,34 @@
   => "respond_to?")
 
 ^{:refer std.lang.model-annex.spec-ruby/ruby-symbol-global :added "4.1"}
-(fact "TODO")
+(fact "emit ruby global symbol"
+
+  (spec-ruby/ruby-symbol-global '!:G spec-ruby/+grammar+ {})
+  => '(:- "($__globals__ ||= {})")
+
+  (spec-ruby/ruby-symbol-global 'XT spec-ruby/+grammar+ {})
+  => '(. (:- "($__globals__ ||= {})") ["XT"]))
 
 ^{:refer std.lang.model-annex.spec-ruby/ruby-var :added "4.1"}
 (fact "emit ruby variable"
-
+ 
   (spec-ruby/ruby-var '(var a 1))
-  => '(:= a 1))
+  => '(:= a 1)
+
+  (let [out (spec-ruby/ruby-var '(var #{a-var b-var} opts))]
+    [(first out)
+     (symbol? (nth (second out) 1))
+     (nth (nth out 2) 1)
+     (nth (nth (nth out 2) 2) 2)
+     (nth (nth out 3) 1)
+     (nth (nth (nth out 3) 2) 2)])
+  => '[do* true a-var "a-var" b-var "b-var"]
+
+  (l/emit-as :ruby ['(var #{a-var b-var} opts)])
+  => (fn [s]
+       (and (string? s)
+            (re-find #"a_var = .*\[\"a-var\"\]" s)
+            (re-find #"b_var = .*\[\"b-var\"\]" s))))
 
 ^{:refer std.lang.model-annex.spec-ruby/ruby-map :added "4.1"}
 (fact "emit ruby hash"

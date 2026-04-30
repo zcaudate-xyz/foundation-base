@@ -114,8 +114,8 @@
                                     "elapsed" integer?})}))
 
 (comment
-  (s/snapto '[xt.cell])
+  (s/snapto)
   
-  (s/seedgen-benchadd '[xt.event.base-box] {:lang [:ruby :dart] :write true})
-  (s/seedgen-langadd '[xt.event.base-box]  {:lang [:lua :python] :write true})
-  (s/seedgen-langremove '[xt.event.base-box]  {:lang [:lua :python] :write true}))
+  (s/seedgen-benchadd '[xt.event.util-decorate] {:lang [:ruby :dart] :write true})
+  (s/seedgen-langadd '[xt.event.util-decorate]  {:lang [:lua :python] :write true})
+  (s/seedgen-langremove '[xt.event.util-decorate]  {:lang [:lua :python] :write true}))

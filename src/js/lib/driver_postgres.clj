@@ -31,10 +31,8 @@
   (rt/xt-config-set "js.lib.driver-postgres" env)
   (return env))
 
-(f/template-entries [l/tmpl-entry {:type :fragment
-                                   :base "Postgres"
-                                   :tag "js"}]
-  [Client])
+
+(def$.js Client Postgres.Client)
 
 (defn.js normalise-query-output
   [res]
@@ -43,31 +41,6 @@
            (== 1 (xt/x:len (xtd/obj-keys (xtd/first rows)))))
     (return (xtd/obj-first-val (xtd/first rows)))
     (return rows)))
-
-(defn.js set-methods
-  "sets the methods for the object"
-  {:added "4.0"}
-  [conn]
-  (:= (. conn ["::disconnect"])
-      (fn [callback]
-        (:= callback (or callback ut/pass-callback))
-        (return (ut/wrap-callback (. conn (end))
-                                  callback))))
-  (:= (. conn ["::query"])
-      (fn [input callback]
-        (:= callback (or callback ut/pass-callback))
-        (return
-         (ut/wrap-callback
-          (. conn (query input))
-          (fn [err res]
-            (when err
-              (return (callback err nil)))
-            (return (callback nil
-                              (-/normalise-query-output res))))))))
-  (:= (. conn ["::query_sync"])
-      (fn [query]
-        (throw "Not Allowed")))
-  (return conn))
 
 (defn.js wrap-connection
   [conn]
@@ -90,7 +63,6 @@
   (var env (xtd/obj-assign (-/default-env)
                           m))
   (var conn (new -/Client env))
-  (:= conn (-/set-methods conn))
   (var promise
        (. (. conn (connect))
           (then (fn []

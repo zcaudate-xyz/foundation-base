@@ -94,10 +94,13 @@
     (return out))
   
   (xt/x:set-key log "last" t)
+  (var stale [])
   (xt/for:object [[k kt] cache]
     (when (< interval (- t kt))
-      (xt/x:del-key cache k)
-      (xt/x:arr-push out k)))
+      (xt/x:arr-push stale k)))
+  (xt/for:array [k stale]
+    (xt/x:del-key cache k)
+    (xt/x:arr-push out k))
   (return out))
 
 
