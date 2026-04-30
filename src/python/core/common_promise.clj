@@ -11,7 +11,7 @@
   {:added "4.1"}
   [value]
   (return (and (isinstance value dict)
-               (== "xt.promise" (. value ["__type__"])))))
+               (== "xt.promise" (. value (get "__type__"))))))
 
 (defn.py promise-native?
   "checks whether the value can be treated as a promise-like value"

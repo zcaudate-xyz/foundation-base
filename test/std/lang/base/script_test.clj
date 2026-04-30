@@ -1,15 +1,17 @@
 (ns std.lang.base.script-test
   (:require [lua.core]
-            [std.lang :as l]
-            [std.lang.base.book :as book]
-            [std.lang.base.emit-prep-lua-test :as prep-lua]
-            [std.lang.base.impl :as impl]
-            [std.lang.base.library :as lib]
-            [std.lang.base.library-snapshot :as snap]
-            [std.lang.base.runtime :as rt]
-            [std.lang.base.script :as script]
-            [std.lang.model.spec-lua :as lua]
-            [std.lib.env :as env])
+             [std.lang :as l]
+             [std.lang.base.book :as book]
+             [std.lang.base.emit-prep-lua-test :as prep-lua]
+             [std.lang.base.impl :as impl]
+             [std.lang.base.library :as lib]
+             [std.lang.base.library-snapshot :as snap]
+             [std.lang.base.runtime :as rt]
+             [std.lang.base.script :as script]
+             [std.lang.model.spec-js :as js]
+             [std.lang.model.spec-lua :as lua]
+             [std.lang.model.spec-xtalk :as xtalk]
+             [std.lib.env :as env])
   (:use code.test))
 
 (def +library+
@@ -35,6 +37,19 @@
   (impl/with:library [+library+]
     (script/script-ns-import {:require '[[xt.lang.common-data :as xtd :primary true]]}))
   => '#{xt.lang.common-data})
+
+(fact "reloads required modules into the active library when they are missing"
+
+  (let [xlib (lib/library:create {})]
+    (impl/with:library [xlib]
+      (script/install xtalk/+book+)
+      (script/install js/+book+)
+      (script/script-ns-import :js {:require '[[xt.lang.spec-base :as xt]]})
+      (-> (lib/get-module xlib :js 'xt.lang.spec-base)
+          :fragment
+          not-empty
+          boolean)))
+  => true)
 
 ^{:refer std.lang.base.script/script-macro-import :added "4.0"}
 (fact "import macros into the namespace"

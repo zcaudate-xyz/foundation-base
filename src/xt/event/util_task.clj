@@ -7,9 +7,6 @@
              [xt.lang.common-sort-topo :as xtst]
              [xt.lang.spec-promise :as spec-promise]]})
 
-(defspec.xt promise-wrap
-  [:fn [:xt/any] :xt/promise])
-
 (defspec.xt new-task
   [:fn [:xt/any [:xt/array :xt/any] [:xt/maybe :xt/any] [:xt/maybe :xt/any]] :xt/any])
 
@@ -49,15 +46,6 @@
 (defspec.xt unload-tasks
   [:fn [:xt/any [:xt/maybe [:fn [:xt/any :xt/any] :xt/any]]] :xt/promise])
 
-(defn.xt promise-wrap
-  "normalises a value into a host promise"
-  {:added "4.1"}
-  [value]
-  (return
-   (spec-promise/x:promise
-    (fn []
-      (return value)))))
-
 (defn.xt new-task
   "creates a new task"
   {:added "4.1"}
@@ -83,11 +71,11 @@
     (var check (:? (xt/x:is-function? check-fn)
                    (check-fn curr)))
     (when (== true check)
-      (return (-/promise-wrap curr))))
+      (return (spec-promise/x:promise-run curr))))
   (when (xt/x:is-function? args)
     (:= args (args)))
   (:= args (:? (xt/x:nil? args) [] args))
-  (return (-/promise-wrap (xt/x:apply load-fn args))))
+  (return (spec-promise/x:promise-run (xt/x:apply load-fn args))))
 
 (defn.xt task-unload
   "unloads a task and resolves to whether unload happened"
@@ -100,10 +88,10 @@
     (var check (:? (xt/x:is-function? check-fn)
                    (check-fn curr)))
     (when (not= true check)
-      (return (-/promise-wrap false))))
+      (return (spec-promise/x:promise-run false))))
   (return
    (spec-promise/x:promise-then
-    (-/promise-wrap (unload-fn))
+    (spec-promise/x:promise-run (unload-fn))
     (fn [_]
       (return true)))))
 
@@ -194,25 +182,25 @@
   (var task (xt/x:get-key tasks id))
   (xt/x:set-key loading id true)
   (return
-   (spec-promise/x:promise-catch
-    (spec-promise/x:promise-then
+   (spec-promise/x:promise-then
+    (spec-promise/x:promise-catch
      (-/task-load task)
-     (fn [res]
+     (fn [err]
        (xt/x:del-key loading id)
-       (xt/x:set-key completed id true)
+       (xt/x:set-key loader "errored" id)
        (when (xt/x:not-nil? hook-fn)
-         (hook-fn id true))
-       (return (:? (xt/x:not-nil? loop-fn)
-                   (loop-fn loader hook-fn complete-fn)
-                   res))))
-    (fn [err]
+         (hook-fn id false))
+       (when (xt/x:not-nil? complete-fn)
+         (complete-fn err))
+       (xt/x:throw err)))
+    (fn [res]
       (xt/x:del-key loading id)
-      (xt/x:set-key loader "errored" id)
+      (xt/x:set-key completed id true)
       (when (xt/x:not-nil? hook-fn)
-        (hook-fn id false))
-      (when (xt/x:not-nil? complete-fn)
-        (complete-fn err))
-      (xt/x:throw err)))))
+        (hook-fn id true))
+      (return (:? (xt/x:not-nil? loop-fn)
+                  (loop-fn loader hook-fn complete-fn)
+                  res))))))
 
 (defn.xt load-tasks
   "loads tasks in dependency order and resolves when the loader settles"
@@ -220,10 +208,11 @@
   [loader hook-fn complete-fn]
   (var #{errored order} loader)
   (when (xt/x:not-nil? errored)
+    (var reject-fn
+         (fn []
+           (xt/x:throw (xt/x:cat "ERR - Task Errored - " errored))))
     (return
-     (spec-promise/x:promise
-      (fn []
-        (xt/x:throw (xt/x:cat "ERR - Task Errored - " errored))))))
+     (spec-promise/x:promise reject-fn)))
   (var waiting (-/list-waiting loader))
   (when (< 0 (xt/x:len waiting))
     (var waiting-lu (xtd/arr-juxt waiting
@@ -242,8 +231,8 @@
   (when (== 0 (xt/x:len incomplete))
     (when (xt/x:not-nil? complete-fn)
       (complete-fn true))
-    (return (-/promise-wrap loader)))
-  (return (-/promise-wrap loader)))
+    (return (spec-promise/x:promise-run loader)))
+  (return (spec-promise/x:promise-run loader)))
 
 (defn.xt unload-tasks
   "unloads completed tasks in reverse dependency order"
@@ -254,7 +243,7 @@
   (var unload-loop
        (fn [ids out]
          (when (== 0 (xt/x:len ids))
-           (return (-/promise-wrap out)))
+           (return (spec-promise/x:promise-run out)))
          (var id (xt/x:first ids))
           (var rest (xt/x:arr-slice ids 1 (xt/x:len ids)))
          (when (not= true (xt/x:get-key completed id))

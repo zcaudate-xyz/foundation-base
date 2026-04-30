@@ -18,9 +18,6 @@
 (defspec.xt to-handle-callback
   [:fn [[:xt/maybe :xt/any]] :xt/any])
 
-(defspec.xt promise-wrap
-  [:fn [:xt/any] :xt/promise])
-
 (defspec.xt new-handle
   [:fn [[:fn [:xt/any] :xt/any] [:xt/array [:fn [:xt/any] :xt/any]] [:xt/maybe :xt/any]] :xt/any])
 
@@ -97,15 +94,6 @@
            :on-error (xt/x:get-key cb "error" nil)
            :on-teardown (xt/x:get-key cb "finally" nil)}))
 
-(defn.xt promise-wrap
-  "normalises a value into the host promise interface"
-  {:added "4.1"}
-  [value]
-  (return
-   (spec-promise/x:promise
-    (fn []
-      (return value)))))
-
 (defn.xt new-handle
   "creates a new handle"
   {:added "4.1"}
@@ -116,14 +104,18 @@
          id-fn
          delay
          name} opts)
-  (:= id-fn (:? (xt/x:nil? id-fn) (-/incr-fn) id-fn))
-  (:= create-fn (:? (xt/x:nil? create-fn) (fn [x] (return x)) create-fn))
+  (when (xt/x:nil? id-fn)
+    (:= id-fn (-/incr-fn)))
+  (when (xt/x:nil? create-fn)
+    (:= create-fn (fn [x] (return x))))
+  (when (xt/x:nil? delay)
+    (:= delay 0))
   (var handle (create-fn {"::" "handle"
                           :name name
                           :id-fn id-fn
                           :wrap-fn wrap-fn
                           :handler handler
-                          :delay (:? (xt/x:nil? delay) 0 delay)}))
+                          :delay delay}))
   (var plugins (xt/x:arr-map plugin-fns
                              (fn [f]
                                (return (f handle)))))
@@ -135,11 +127,13 @@
   {:added "4.1"}
   [handle args tcb]
   (var #{handler wrap-fn delay id-fn plugins} handle)
-  (:= args (:? (xt/x:nil? args) [] args))
-  (var tcbs (xt/x:arr-assign (xt/x:arr-clone plugins)
-                             (:? (xt/x:nil? tcb) []
-                                 (xt/x:is-array? tcb) tcb
-                                 :else [tcb])))
+  (when (xt/x:nil? args)
+    (:= args []))
+  (var tcbs (xt/x:arr-clone plugins))
+  (when (xt/x:not-nil? tcb)
+    (if (xt/x:is-array? tcb)
+      (xt/x:arr-assign tcbs tcb)
+      (xt/x:arr-push tcbs tcb)))
   (when (xt/x:is-function? delay)
     (:= delay (delay)))
   (var receipt {:id (id-fn)})
@@ -181,19 +175,20 @@
                (xt/x:set-key receipt "status" "success")
                (xt/x:set-key receipt "value" ret)
                (return receipt)))
-            (fn [err]
-              (xt/for:array [cb tcbs]
-                (var on-error (xt/x:get-key cb "on_error"))
-                (when (xt/x:not-nil? on-error)
-                  (on-error err)))
-              (xt/x:set-key receipt "status" "error")
-              (xt/x:set-key receipt "error" err)
-              (return
-               (spec-promise/x:promise
-                (fn []
-                  (xt/x:throw receipt))))))
-           teardown-fn))))
-  (var proc (:? (xt/x:not-nil? wrap-fn)
-                (wrap-fn run-fn args receipt handle)
-                (run-fn)))
-  (return (-/promise-wrap proc)))
+             (fn [err]
+               (xt/for:array [cb tcbs]
+                 (var on-error (xt/x:get-key cb "on_error"))
+                 (when (xt/x:not-nil? on-error)
+                   (on-error err)))
+               (xt/x:set-key receipt "status" "error")
+               (xt/x:set-key receipt "error" err)
+               (var reject-fn
+                    (fn []
+                      (xt/x:throw receipt)))
+               (return
+                (spec-promise/x:promise reject-fn))))
+            teardown-fn))))
+   (var proc (:? (xt/x:not-nil? wrap-fn)
+                 (wrap-fn run-fn args receipt handle)
+                 (run-fn)))
+   (return (spec-promise/x:promise-run proc)))

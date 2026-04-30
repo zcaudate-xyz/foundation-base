@@ -62,28 +62,51 @@
    ;; unique
    :id])
 
+(defn- script-module-loaded?
+  [library lang module-id]
+  (boolean
+   (when (and library lang module-id
+              (lib/get-book library lang))
+     (let [module (lib/get-module library lang module-id)]
+       (or (not-empty (:code module))
+           (not-empty (:fragment module)))))))
+
+(defn- script-require-form
+  [ns as with]
+  (cond-> [ns]
+    as          (conj :as (if (vector? as)
+                            (last as)
+                            as))
+    (coll? with) (conj :refer with)))
+
+(defn- script-require-entry
+  [library lang [ns & {:keys [as with primary]}]]
+  (when (symbol? with)
+    (clojure.core/require with :reload))
+  (let [libspec  (script-require-form ns as with)
+        reload?  (and (symbol? ns)
+                      (not (script-module-loaded? library lang ns)))]
+    (if reload?
+      (clojure.core/require libspec :reload)
+      (clojure.core/require libspec))
+    (when primary ns)))
+
 (defn script-ns-import
   "imports the namespace and sets a primary flag"
   {:added "4.0"}
-  ([{:keys [require require-impl implements] :as config}]
-   (let [current (env/ns-sym)]
-      (alias '- current)
-      (->> require-impl
-           (mapv (fn [ns] (clojure.core/require ns :reload))))
-      (->> (book/module-normalize-implements implements)
-           (mapv (fn [ns] (clojure.core/require ns :reload))))
-       (->> require
-            (keep (fn [[ns & {:keys [as with primary]}]]
-                   (when (symbol? with)
-                     (clojure.core/require with :reload))
-                   (clojure.core/require
-                    (cond-> [ns]
-                      as    (conj :as (if (vector? as)
-                                        (last as)
-                                        as))
-                      (coll? with)  (conj :refer with)))
-                   (if primary ns)))
-           set))))
+  ([{:keys [lang] :as config}]
+   (script-ns-import lang config))
+  ([lang {:keys [require require-impl implements] :as config}]
+   (let [current (env/ns-sym)
+         library (impl/runtime-library)]
+     (alias '- current)
+     (->> require-impl
+          (mapv (fn [ns] (clojure.core/require ns :reload))))
+     (->> (book/module-normalize-implements implements)
+          (mapv (fn [ns] (clojure.core/require ns :reload))))
+     (->> require
+          (keep (partial script-require-entry library lang))
+          set))))
 
 (defn script-macro-import
   "import macros into the namespace"
@@ -254,24 +277,24 @@
   "setup for the runtime"
   {:added "4.0"}
   ([lang module-id config lib]
-   (let [primary    (script-ns-import config)
-          config     (update config :emit (fnil eval {}))
-          config     (script-specialize-config lang module-id config lib)
-          [snapshot] (lib/install-module! lib lang module-id (dissoc config
-                                                                     :runtime
-                                                                     :config
-                                                                     :layout
+   (let [primary    (script-ns-import lang config)
+         config     (update config :emit (fnil eval {}))
+         config     (script-specialize-config lang module-id config lib)
+         [snapshot] (lib/install-module! lib lang module-id (dissoc config
+                                                                    :runtime
+                                                                    :config
+                                                                    :layout
                                                                     :emit))
-         book    (snap/get-book-raw snapshot lang)
-         module  (get-in book [:modules module-id])
-         macros  (script-macro-import book)]
+         book       (snap/get-book-raw snapshot lang)
+         module     (get-in book [:modules module-id])
+         macros     (script-macro-import book)]
      (merge (:config config)
             {:library lib
              :module module-id
-              :module/internal (get module :internal)
-              :module/primary primary}
-             (select-keys config [:layout
-                                  :emit])))))
+             :module/internal (get module :internal)
+             :module/primary primary}
+            (select-keys config [:layout
+                                 :emit])))))
 
 (defn script-fn
   "calls the regular setup script for the namespace"

@@ -17,9 +17,6 @@
    ["status" :xt/str]
    ["fields" [:xt/dict :xt/str ValidationFieldResult]]])
 
-(defspec.xt promise-wrap
-  [:fn [:xt/any] :xt/promise])
-
 (defspec.xt create-result
   [:fn [[:xt/dict :xt/str :xt/any]] ValidationResult])
 
@@ -34,15 +31,6 @@
 
 (defspec.xt validate-all
   [:fn [:xt/any [:xt/dict :xt/str :xt/any] ValidationResult :xt/any :xt/any] :xt/promise])
-
-(defn.xt promise-wrap
-  "normalises a value into a host promise"
-  {:added "4.1"}
-  [value]
-  (return
-   (spec-promise/x:promise
-    (fn []
-      (return value)))))
 
 (defn.xt validate-step
   "validates a single step"
@@ -68,7 +56,7 @@
             (return
              (spec-promise/x:promise-catch
               (spec-promise/x:promise-then
-               (-/promise-wrap (check (xt/x:get-key form field) form))
+               (spec-promise/x:promise-run (check (xt/x:get-key form field) form))
                (fn [ok]
                  (cond (== ok false)
                        (return (error-fn))
@@ -98,7 +86,7 @@
               (xt/x:obj-assign entry {:status "ok"}))
             (when (xt/x:not-nil? complete-fn)
               (complete-fn true result))
-            (return (-/promise-wrap result)))))
+            (return (spec-promise/x:promise-run result)))))
 
 (defn.xt validate-field
   "validates a single field"
@@ -120,12 +108,12 @@
   (when (== "errored" (xt/x:get-key result "status"))
     (when (xt/x:not-nil? complete-fn)
       (complete-fn false result))
-    (return (-/promise-wrap result)))
+    (return (spec-promise/x:promise-run result)))
   (when (>= index (xt/x:len fields))
     (xt/x:set-key result "status" "ok")
     (when (xt/x:not-nil? complete-fn)
       (complete-fn true result))
-    (return (-/promise-wrap result)))
+    (return (spec-promise/x:promise-run result)))
   (var field (xt/x:get-idx fields index))
   (return
    (spec-promise/x:promise-then

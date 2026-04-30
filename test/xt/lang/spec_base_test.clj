@@ -6,8 +6,8 @@
             [xt.lang.spec-promise :as spec-promise]))
 
 ^{:seedgen/root {:all true, :langs [:python :lua]
-                 :lua     {:extra  [[lua.core.common-promise :as p]]}
-                 :python  {:extra  [[python.core.common-promise :as p]]}}}
+                 :lua     {:extra  [[lua.core.common-promise :as lua-promise]]}
+                 :python  {:extra  [[python.core.common-promise :as py-promise]]}}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -19,23 +19,11 @@
 
 (l/script- :python
   {:runtime :basic
-   :require [[xt.lang.spec-base :as xt]
-             [xt.lang.spec-promise :as spec-promise]
-             [xt.lang.common-string :as xts]
-             [xt.lang.common-data :as xtd]
-             [xt.lang.common-iter :as xti]
-             [xt.lang.common-repl :as repl]
-             [python.core.common-promise]]})
+   :require [[xt.lang.spec-base :as xt] [xt.lang.spec-promise :as spec-promise] [xt.lang.common-string :as xts] [xt.lang.common-data :as xtd] [xt.lang.common-iter :as xti] [xt.lang.common-repl :as repl] [python.core.common-promise :as py-promise]]})
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.lang.spec-base :as xt]
-             [xt.lang.spec-promise :as spec-promise]
-             [xt.lang.common-string :as xts]
-             [xt.lang.common-data :as xtd]
-             [xt.lang.common-iter :as xti]
-             [xt.lang.common-repl :as repl]
-             [lua.core.common-promise]]})
+   :require [[xt.lang.spec-base :as xt] [xt.lang.spec-promise :as spec-promise] [xt.lang.common-string :as xts] [xt.lang.common-data :as xtd] [xt.lang.common-iter :as xti] [xt.lang.common-repl :as repl] [lua.core.common-promise :as lua-promise]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -157,7 +145,7 @@
     (xtd/obj-keys attached))
   => (contains ["label"])
 
-  (!.lua
+  (!.py
     (var obj {})
     (var proto (xt/proto:create {:label "proto"}))
     (xt/proto:set obj proto)
@@ -165,7 +153,7 @@
     (xtd/obj-keys attached))
   => (contains ["label"])
 
-  (!.py
+  (!.lua
     (var obj {})
     (var proto (xt/proto:create {:label "proto"}))
     (xt/proto:set obj proto)
@@ -187,7 +175,7 @@
     (xtd/obj-keys attached))
   => (contains ["label"])
 
-  (!.lua
+  (!.py
     (var obj {})
     (var proto (xt/proto:create {:label "proto"}))
     (xt/proto:set obj proto)
@@ -195,7 +183,7 @@
     (xtd/obj-keys attached))
   => (contains ["label"])
 
-  (!.py
+  (!.lua
     (var obj {})
     (var proto (xt/proto:create {:label "proto"}))
     (xt/proto:set obj proto)
@@ -223,6 +211,17 @@
     (. obj (describe "!")))
   => "alpha!"
 
+  (!.py
+    (var proto
+         (xt/proto:create
+          {"describe" (fn [curr suffix]
+                        (return (xt/x:cat (. curr ["name"]) suffix)))}))
+    (var obj {})
+    (xt/proto:set obj proto)
+    (:= (. obj ["name"]) "alpha")
+    ((xt/proto:method obj "describe") obj "!"))
+  => "alpha!"
+
   (!.lua
     (var prototype-fn
          (fn [m]
@@ -235,17 +234,6 @@
     (xt/proto:set obj proto)
     (:= (. obj ["name"]) "alpha")
     (. obj (describe "!")))
-  => "alpha!"
-
-  (!.py
-    (var proto
-         (xt/proto:create
-          {"describe" (fn [curr suffix]
-                        (return (xt/x:cat (. curr ["name"]) suffix)))}))
-    (var obj {})
-    (xt/proto:set obj proto)
-    (:= (. obj ["name"]) "alpha")
-    ((xt/proto:method obj "describe") obj "!"))
   => "alpha!")
 
 ^{:refer xt.lang.spec-base/proto:method :added "4.1"}
@@ -261,7 +249,7 @@
      (xt/x:nil? (xt/proto:method obj "missing"))])
   => ["alpha!" true]
 
-  (!.lua
+  (!.py
     (var proto (xt/proto:create
                 {"describe" (fn [curr suffix]
                               (return (xt/x:cat (. curr ["name"]) suffix)))}))
@@ -271,7 +259,7 @@
      (xt/x:nil? (xt/proto:method obj "missing"))])
   => ["alpha!" true]
 
-  (!.py
+  (!.lua
     (var proto (xt/proto:create
                 {"describe" (fn [curr suffix]
                               (return (xt/x:cat (. curr ["name"]) suffix)))}))
@@ -603,7 +591,7 @@
 
   ^{:seedgen/base {:dart {:expect (fn [out]
                                     (re-find #"ERR" @out))}}}
-  
+          
   (!.js
     (var err-fn (fn []
                   (xt/x:err "ERR")))
@@ -623,23 +611,31 @@
   => (throws))
 
 ^{:refer xt.lang.spec-base/x:ex-native? :added "4.1"}
-(fact "TODO"
+(fact "check is exception is native"
 
   (!.js
-    (xt/x:ex-native? (xt/x:ex "hello" {:a 1})))
+    (var e (xt/x:ex "hello" {:a 1}))
+    (xt/x:ex-native? e))
+  => true
+
+  (!.py
+    (var e (xt/x:ex "hello" {:a 1}))
+    (xt/x:ex-native? e))
+  => true
+
+  (!.lua
+    (var e (xt/x:ex "hello" {:a 1}))
+    (xt/x:ex-native? e))
   => true)
 
 ^{:refer xt.lang.spec-base/x:ex :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.lang.spec-base/x:ex-new :added "4.1"}
 (fact "creates native exceptions with structured data"
 
   (notify/wait-on :js
     (spec-promise/x:promise-catch
      (spec-promise/x:promise
       (fn []
-        (throw (xt/x:ex-new "ERR" {:a 1}))))
+        (throw (xt/x:ex "ERR" {:a 1}))))
      (fn [e]
        (xt/x:print (xt/x:ex-data e))
        (repl/notify [(xt/x:ex-native? e)
@@ -650,7 +646,7 @@
     (spec-promise/x:promise-catch
      (spec-promise/x:promise
       (fn []
-        (throw (xt/x:ex-new "ERR" {:a 1}))))
+        (throw (xt/x:ex "ERR" {:a 1}))))
      (fn [e]
        (xt/x:print (xt/x:ex-data e))
        (repl/notify [(xt/x:ex-native? e)
@@ -661,7 +657,7 @@
     (spec-promise/x:promise-catch
      (spec-promise/x:promise
       (fn []
-        (throw (xt/x:ex-new "ERR" {:a 1}))))
+        (throw (xt/x:ex "ERR" {:a 1}))))
      (fn [e]
        (xt/x:print (xt/x:ex-data e))
        (repl/notify [(xt/x:ex-native? e)
@@ -669,10 +665,40 @@
   => [true 1])
 
 ^{:refer xt.lang.spec-base/x:ex-message :added "4.1"}
-(fact "TODO")
+(fact "TODO"
+
+  (!.js
+    (var e (xt/x:ex "hello" {:a 1}))
+    (xt/x:ex-message e))
+  => "hello"
+
+  (!.py
+    (var e (xt/x:ex "hello" {:a 1}))
+    (xt/x:ex-message e))
+  => "hello"
+
+  (!.lua
+    (var e (xt/x:ex "hello" {:a 1}))
+    (xt/x:ex-message e))
+  => "hello")
 
 ^{:refer xt.lang.spec-base/x:ex-data :added "4.1"}
-(fact "TODO")
+(fact "TODO"
+
+  (!.js
+    (var e (xt/x:ex "hello" {:a 1}))
+    (xt/x:ex-data e))
+  => {"a" 1}
+
+  (!.py
+    (var e (xt/x:ex "hello" {:a 1}))
+    (xt/x:ex-data e))
+  => {"a" 1}
+
+  (!.lua
+    (var e (xt/x:ex "hello" {:a 1}))
+    (xt/x:ex-data e))
+  => {"a" 1})
 
 ^{:refer xt.lang.spec-base/x:type-native :added "4.1"}
 (fact "expands and emits the lua type helper"
@@ -685,7 +711,25 @@
     [(type-fn {})
      (type-fn [])
      (type-fn [1])])
-  => ["object" "array" "array"])
+  => ["object" "array" "array"]
+
+  (!.py
+    (var type-fn (fn [obj]
+                   (return
+                    (xt/x:type-native obj))))
+    [(type-fn {})
+     (type-fn [])
+     (type-fn [1])])
+  => ["object" "array" "array"]
+
+  (!.lua
+    (var type-fn (fn [obj]
+                   (return
+                    (xt/x:type-native obj))))
+    [(type-fn {})
+     (type-fn [])
+     (type-fn [1])])
+  => ["object" "object" "array"])
 
 ^{:refer xt.lang.spec-base/x:offset :added "4.1"}
 (fact "uses the grammar base offset"
@@ -2309,7 +2353,7 @@
 (fact "evaluates javascript expressions"
 
   ^{:seedgen/base {:dart {:suppress true}}}
-    
+            
   (!.js
     (xt/x:eval "1 + 1"))
   => 2
@@ -2551,6 +2595,38 @@
            (return
             (xt/x:return-encode value id key))))
     (xt/x:json-decode (encode-fn "hello" "id" "key")))
+  => {"return" "string", "key" "key", "id" "id", "value" "hello", "type" "data"}
+
+  (!.py
+    (var encode-fn
+         (fn [value id key]
+           (return
+            (xt/x:return-encode value id key))))
+    (xt/x:json-decode (encode-fn {:a 1} "id" "key")))
+  => {"return" "object", "key" "key", "id" "id", "value" {"a" 1}, "type" "data"}
+
+  (!.py
+    (var encode-fn
+         (fn [value id key]
+           (return
+            (xt/x:return-encode value id key))))
+    (xt/x:json-decode (encode-fn "hello" "id" "key")))
+  => {"return" "string", "key" "key", "id" "id", "value" "hello", "type" "data"}
+
+  (!.lua
+    (var encode-fn
+         (fn [value id key]
+           (return
+            (xt/x:return-encode value id key))))
+    (xt/x:json-decode (encode-fn {:a 1} "id" "key")))
+  => {"return" "object", "key" "key", "id" "id", "value" {"a" 1}, "type" "data"}
+
+  (!.lua
+    (var encode-fn
+         (fn [value id key]
+           (return
+            (xt/x:return-encode value id key))))
+    (xt/x:json-decode (encode-fn "hello" "id" "key")))
   => {"return" "string", "key" "key", "id" "id", "value" "hello", "type" "data"})
 
 ^{:refer xt.lang.spec-base/x:return-wrap :added "4.1"}
@@ -2558,6 +2634,26 @@
 
   ^{:seedgen/base   {:python {:suppress true}}}
   (!.js
+    (var encode-fn
+         (fn [value id key]
+           (return
+            (xt/x:return-encode value id key))))
+    (var wrap-fn
+         (fn [gen-fn wrap-fn]
+           (return
+            (xt/x:return-wrap gen-fn wrap-fn))))
+    (xt/x:json-decode
+     (wrap-fn (fn []
+                (return 3))
+              (fn [out]
+                (return
+                 (encode-fn out "id-A" "key-B"))))))
+  => (contains {"id" "id-A"
+                "key" "key-B"
+                "type" "data"
+                "value" 3})
+
+  (!.lua
     (var encode-fn
          (fn [value id key]
            (return
@@ -2598,6 +2694,29 @@
             (xt/x:return-eval s re-wrap-fn))))
     (xt/x:json-decode
      (eval-fn "1 + 1"
+              (fn [f]
+                (return
+                 (wrap-fn f
+                          (fn [out]
+                            (return
+                             (encode-fn out "id-A" "key-B")))))))))
+  => (contains-in {"key" "key-B", "id" "id-A", "value" 2, "type" "data"})
+
+  (!.lua
+    (var encode-fn
+         (fn [value id key]
+           (return
+            (xt/x:return-encode value id key))))
+    (var wrap-fn
+         (fn [gen-fn wrap-fn]
+           (return
+            (xt/x:return-wrap gen-fn wrap-fn))))
+    (var eval-fn
+         (fn [s re-wrap-fn]
+           (return
+            (xt/x:return-eval s re-wrap-fn))))
+    (xt/x:json-decode
+     (eval-fn "return 1 + 1"
               (fn [f]
                 (return
                  (wrap-fn f
@@ -2678,7 +2797,7 @@
          (fn []
            (xt/x:global-del COMMON_SPEC_GLOBAL)
            (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
-      
+              
     [(set-fn)
      (!:G COMMON_SPEC_GLOBAL)
      (del-fn)])
@@ -2693,7 +2812,7 @@
          (fn []
            (xt/x:global-del COMMON_SPEC_GLOBAL)
            (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
-      
+              
     [(set-fn)
      (!:G COMMON_SPEC_GLOBAL)
      (del-fn)])
@@ -2708,7 +2827,7 @@
          (fn []
            (xt/x:global-del COMMON_SPEC_GLOBAL)
            (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
-      
+              
     [(set-fn)
      (!:G COMMON_SPEC_GLOBAL)
      (del-fn)])
@@ -2747,7 +2866,7 @@
          (fn []
            (xt/x:global-del COMMON_SPEC_GLOBAL)
            (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
-      
+              
     [(set-fn)
      (del-fn)])
   => [true false]
@@ -2761,7 +2880,7 @@
          (fn []
            (xt/x:global-del COMMON_SPEC_GLOBAL)
            (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
-      
+              
     [(set-fn)
      (del-fn)])
   => [true false]
@@ -2775,7 +2894,7 @@
          (fn []
            (xt/x:global-del COMMON_SPEC_GLOBAL)
            (return (xt/x:global-has? COMMON_SPEC_GLOBAL))))
-      
+              
     [(set-fn)
      (del-fn)])
   => [true false])
@@ -2806,7 +2925,7 @@
 
   ^{:seedgen/base {:dart {:expect (fn [out]
                                     (re-find #"THROW" @out))}}}
-  
+          
   (!.js
     (do:>
      (x:throw "THROW")))
@@ -2886,8 +3005,10 @@
   => {"a" 1})
 
 (comment
-
+  
   (code.manage/isolate 'xt.lang.spec-base-test {:suffix "-fix"})
+  
+  (s/run '[xt.lang.spec-base])
   (s/seedgen-benchadd 'xt.lang.spec-base {:lang [:r :dart] :write true})
   (s/seedgen-benchremove 'xt.lang.spec-base {:lang [:r :dart] :write true})
   (s/seedgen-langadd 'xt.lang.spec-base {:lang [:lua :python] :write true})

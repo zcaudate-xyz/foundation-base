@@ -313,13 +313,13 @@
                           (fn []
                             (return "A")))))})
            (loader/new-task
-            "B" ["A"] []
-            {:load-fn (fn []
-                        (return
-                         (spec-promise/x:with-delay
-                          50
-                          (fn []
-                            (xt/x:err "B")))))})
+             "B" ["A"] []
+             {:load-fn (fn []
+                         (return
+                          (spec-promise/x:with-delay
+                           50
+                           (fn []
+                             (xt/x:err "B")))))})
            (loader/new-task
             "C" ["B"] []
             {:load-fn (fn []
@@ -412,13 +412,15 @@
                           (fn []
                             (return "A")))))})
            (loader/new-task
-            "B" ["A"] []
-            {:load-fn (fn []
-                        (return
-                         (spec-promise/x:with-delay
-                          50
-                          (fn []
-                            (xt/x:err "B")))))})
+             "B" ["A"] []
+             {:load-fn (fn []
+                         (return
+                          (spec-promise/x:with-delay
+                           50
+                           (fn []
+                             (return
+                              (py-promise/promise-reject
+                               (Exception "B")))))))})
            (loader/new-task
             "C" ["B"] []
             {:load-fn (fn []
@@ -532,18 +534,18 @@
        (repl/notify (loader/list-completed instance)))))
   => ["A"])
 
-^{:refer xt.event.util-task/promise-wrap :added "4.1"}
+^{:refer xt.lang.spec-promise/x:promise-run :added "4.1"}
 (fact "wraps raw values and preserves resolved results"
 
   (notify/wait-on :js
     (spec-promise/x:promise-then
-     (loader/promise-wrap "A")
+     (spec-promise/x:promise-run "A")
      (repl/>notify)))
   => "A"
 
   (notify/wait-on :js
     (spec-promise/x:promise-then
-     (loader/promise-wrap
+     (spec-promise/x:promise-run
       (spec-promise/x:promise
        (fn []
          (return "B"))))
@@ -552,13 +554,13 @@
 
   (notify/wait-on :python
     (spec-promise/x:promise-then
-     (loader/promise-wrap "A")
+     (spec-promise/x:promise-run "A")
      (repl/>notify)))
   => "A"
 
   (notify/wait-on :python
     (spec-promise/x:promise-then
-     (loader/promise-wrap
+     (spec-promise/x:promise-run
       (spec-promise/x:promise
        (fn []
          (return "B"))))
@@ -567,13 +569,13 @@
 
   (notify/wait-on :lua
     (spec-promise/x:promise-then
-     (loader/promise-wrap "A")
+     (spec-promise/x:promise-run "A")
      (repl/>notify)))
   => "A"
 
   (notify/wait-on :lua
     (spec-promise/x:promise-then
-     (loader/promise-wrap
+     (spec-promise/x:promise-run
       (spec-promise/x:promise
        (fn []
          (return "B"))))
@@ -675,8 +677,7 @@
   => {"::" "loader"
       "completed" {}
       "loading" {}
-      "errored" nil
-      "order" []
+      "order" {}
       "tasks" {}})
 
 ^{:refer xt.event.util-task/add-tasks :added "4.1"}
@@ -711,7 +712,10 @@
          [(loader/new-task "A" [] [] {:load-fn (fn [] (return "A"))})
           (loader/new-task "B" ["A"] [] {:load-fn (fn [] (return "B"))})]))
    {"order" (. instance ["order"])
-    "tasks" (xt/x:obj-keys (. instance ["tasks"]))})
+    "tasks" (xtd/arr-sort (xt/x:obj-keys (. instance ["tasks"]))
+                          (fn [e]
+                            (return e))
+                          xt/x:str-comp)})
   => {"order" ["A" "B"]
       "tasks" ["A" "B"]})
 
@@ -920,10 +924,11 @@
                 ["A" true]]
       "seen" [["B" true]
               ["A" true]]
-      "completed" []})
+      "completed" {}})
 
 (comment
-  
+  (s/snapto)
+  (s/run '[xt.event.util-task])
   
   (s/seedgen-benchadd '[xt.event.util-task] {:lang [:ruby :dart] :write true})
   (s/seedgen-langadd '[xt.event.util-task]  {:lang [:lua :python] :write true})

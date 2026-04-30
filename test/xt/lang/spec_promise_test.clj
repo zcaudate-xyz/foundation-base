@@ -29,35 +29,56 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.lang.spec-promise/x:promise-then :added "4.1"}
-(fact "chains a resolved js promise"
+^{:refer xt.lang.spec-promise/x:promise :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.spec-promise/x:promise-run :added "4.1"}
+(fact "wraps raw values and preserves resolved results"
 
   (notify/wait-on :js
     (spec-promise/x:promise-then
-     (spec-promise/x:promise
-      (fn []
-        (return 5)))
-     (fn [value]
-       (repl/notify (+ value 2)))))
-  => 7
+     (spec-promise/x:promise-run "A")
+     (repl/>notify)))
+  => "A"
+
+  (notify/wait-on :js
+    (spec-promise/x:promise-then
+     (spec-promise/x:promise-run
+      (spec-promise/x:promise
+       (fn []
+         (return "B"))))
+     (repl/>notify)))
+  => "B"
 
   (notify/wait-on :python
     (spec-promise/x:promise-then
-     (spec-promise/x:promise
-      (fn []
-        (return 5)))
-     (fn [value]
-       (repl/notify (+ value 2)))))
-  => 7
+     (spec-promise/x:promise-run "A")
+     (repl/>notify)))
+  => "A"
+
+  (notify/wait-on :python
+    (spec-promise/x:promise-then
+     (spec-promise/x:promise-run
+      (spec-promise/x:promise
+       (fn []
+         (return "B"))))
+     (repl/>notify)))
+  => "B"
 
   (notify/wait-on :lua
     (spec-promise/x:promise-then
-     (spec-promise/x:promise
-      (fn []
-        (return 5)))
-     (fn [value]
-       (repl/notify (+ value 2)))))
-  => 7)
+     (spec-promise/x:promise-run "A")
+     (repl/>notify)))
+  => "A"
+
+  (notify/wait-on :lua
+    (spec-promise/x:promise-then
+     (spec-promise/x:promise-run
+      (spec-promise/x:promise
+       (fn []
+         (return "B"))))
+     (repl/>notify)))
+  => "B")
 
 ^{:refer xt.lang.spec-promise/x:promise-all :added "4.1"}
 (fact "waits for all promise values in order"
@@ -98,41 +119,35 @@
      (repl/>notify)))
   => ["a" "b"])
 
-^{:refer xt.lang.spec-promise/x:promise-catch :added "4.1"}
-(fact "recovers a rejected js promise"
+^{:refer xt.lang.spec-promise/x:promise-then :added "4.1"}
+(fact "chains a resolved js promise"
 
   (notify/wait-on :js
-    (spec-promise/x:promise-catch
+    (spec-promise/x:promise-then
      (spec-promise/x:promise
       (fn []
-        (do 
-          (x:err "boom"))))
-     (fn [err]
-       (repl/notify "error")
-       (return err))))
-  => "error"
+        (return 5)))
+     (fn [value]
+       (repl/notify (+ value 2)))))
+  => 7
 
   (notify/wait-on :python
-    (spec-promise/x:promise-catch
+    (spec-promise/x:promise-then
      (spec-promise/x:promise
       (fn []
-        (do 
-          (x:err "boom"))))
-     (fn [err]
-       (repl/notify "error")
-       (return err))))
-  => "error"
+        (return 5)))
+     (fn [value]
+       (repl/notify (+ value 2)))))
+  => 7
 
   (notify/wait-on :lua
-    (spec-promise/x:promise-catch
+    (spec-promise/x:promise-then
      (spec-promise/x:promise
       (fn []
-        (do 
-          (x:err "boom"))))
-     (fn [err]
-        (repl/notify "error")
-        (return err))))
-  => "error")
+        (return 5)))
+     (fn [value]
+       (repl/notify (+ value 2)))))
+  => 7)
 
 ^{:refer xt.lang.spec-promise/x:promise-catch :added "4.1"}
 (fact "preserves xtalk exception data through promise rejection"
@@ -141,7 +156,7 @@
     (spec-promise/x:promise-catch
      (spec-promise/x:promise
       (fn []
-        (throw (xt/x:ex-new "boom" {:a 1}))))
+        (throw (xt/x:ex "boom" {:a 1}))))
      (fn [err]
        (xt/x:print (xt/x:ex-data err))
        (repl/notify [(xt/x:ex-native? err)
@@ -152,7 +167,7 @@
     (spec-promise/x:promise-catch
      (spec-promise/x:promise
       (fn []
-        (throw (xt/x:ex-new "boom" {:a 1}))))
+        (throw (xt/x:ex "boom" {:a 1}))))
      (fn [err]
        (xt/x:print (xt/x:ex-data err))
        (repl/notify [(xt/x:ex-native? err)
@@ -163,7 +178,7 @@
     (spec-promise/x:promise-catch
      (spec-promise/x:promise
       (fn []
-        (throw (xt/x:ex-new "boom" {:a 1}))))
+        (throw (xt/x:ex "boom" {:a 1}))))
      (fn [err]
        (xt/x:print (xt/x:ex-data err))
        (repl/notify [(xt/x:ex-native? err)

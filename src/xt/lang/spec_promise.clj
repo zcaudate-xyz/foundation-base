@@ -13,6 +13,17 @@
   {:added "4.1"}
   ([thunk] (list (quote x:promise) thunk)))
 
+(defspec.xt x:promise-run [:fn [:xt/any] :xt/promise])
+
+(defmacro.xt ^{:standalone true}
+  x:promise-run
+  "normalises a value into a host promise"
+  {:added "4.1"}
+  [value]
+  (list 'xt.lang.spec-promise/x:promise
+        (list 'fn []
+              (list 'return value))))
+
 (defspec.xt x:promise-all [:fn [[:xt/array :xt/any]] :xt/promise])
 
 (defmacro.xt ^{:standalone true}
@@ -52,7 +63,6 @@
   "checks whether a value is already a native host promise"
   {:added "4.1"}
   ([value] (list (quote x:promise-native?) value)))
-
 
 (defspec.xt x:with-delay [:fn [[:xt/fn] :xt/int] :xt/any])
 

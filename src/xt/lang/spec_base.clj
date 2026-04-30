@@ -227,8 +227,6 @@
 
 (defspec.xt x:ex [:fn [:xt/str :xt/any] :xt/any])
 
-(defspec.xt x:ex-new [:fn [:xt/str :xt/any] :xt/any])
-
 (defmacro.xt ^{:standalone true}
   x:ex
   "creates a host-native exception value carrying optional data"
@@ -236,12 +234,6 @@
   ([message] (list (quote x:ex) message))
   ([message data] (list (quote x:ex) message data)))
 
-(defmacro.xt ^{:standalone true}
-  x:ex-new
-  "creates a host-native exception value carrying optional data"
-  {:added "4.1"}
-  ([message] (list (quote x:ex) message))
-  ([message data] (list (quote x:ex) message data)))
 
 (defspec.xt x:ex-message [:fn [:xt/any] :xt/any])
 

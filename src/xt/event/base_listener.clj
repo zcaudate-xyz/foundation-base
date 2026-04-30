@@ -139,7 +139,8 @@
   "checks whether a listeners map value is a plain listener entry"
   {:added "4.1"}
   [entry]
-  (return (xt/x:is-function? (xt/x:get-key entry "callback"))))
+  (return (and (xt/x:not-nil? entry)
+               (xt/x:is-function? (xt/x:get-key entry "callback")))))
 
 (defn.xt arrayify-path
   "normalizes event path-like inputs, treating empty objects as empty arrays"

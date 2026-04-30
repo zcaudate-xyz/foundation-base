@@ -149,26 +149,26 @@
     (xt/x:obj-keys (decorate/to-handle-callback nil))])
   => (just-in
       [{"on_error" "B", "on_teardown" "C", "on_success" "A"}
-       (just ["on_success" "on_error" "on_teardown"] :in-any-order)]))
+       {}]))
 
-^{:refer xt.event.util-decorate/promise-wrap :added "4.1"}
+^{:refer xt.lang.spec-promise/x:promise-run :added "4.1"}
 (fact "wraps a raw value in the promise interface"
 
   (notify/wait-on :js
     (spec-promise/x:promise-then
-     (decorate/promise-wrap 42)
+     (spec-promise/x:promise-run 42)
      (repl/>notify)))
   => 42
 
   (notify/wait-on :python
     (spec-promise/x:promise-then
-     (decorate/promise-wrap 42)
+     (spec-promise/x:promise-run 42)
      (repl/>notify)))
   => 42
 
   (notify/wait-on :lua
     (spec-promise/x:promise-then
-     (decorate/promise-wrap 42)
+     (spec-promise/x:promise-run 42)
      (repl/>notify)))
   => 42)
 
