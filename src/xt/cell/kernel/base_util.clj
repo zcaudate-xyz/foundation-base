@@ -52,9 +52,9 @@
   [:fn [:xt/str :xt/any]
    xt.cell.kernel.spec/ResponseFrame])
 
-(def$.xt EV_INIT    "@worker/::INIT")
+(def$.xt EV_INIT    "@cell/::INIT")
 
-(def$.xt EV_STATE   "@worker/::STATE")
+(def$.xt EV_STATE   "@cell/::STATE")
 
 (defn.xt rand-id
   "prepares a rand-id"

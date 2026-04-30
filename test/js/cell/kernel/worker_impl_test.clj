@@ -105,7 +105,7 @@
     (worker-local/actions-init {} worker)
    (worker-impl/worker-process
      worker
-     {:op "call" :id "test-2" :action "@worker/ping"})
+     {:op "call" :id "test-2" :action "@cell/ping"})
     (xtd/first messages))
   => (contains {"op" "call"
                 "status" "ok"})
@@ -149,5 +149,5 @@
    (worker-impl/worker-init-signal worker {:done true})
    (xtd/first messages))
   => (contains {"op" "stream"
-                "signal" "@worker/::INIT"
+                "signal" "@cell/::INIT"
                 "body" {"done" true}}))

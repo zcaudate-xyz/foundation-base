@@ -32,6 +32,52 @@
 ^{:refer xt.lang.spec-promise/x:promise :added "4.1"}
 (fact "TODO")
 
+^{:refer xt.lang.spec-promise/x:async-run :added "4.1"}
+(fact "runs thunks in the host async model"
+
+  (notify/wait-on :python
+    (spec-promise/x:async-bind
+     (spec-promise/x:async-run
+      (fn []
+        (return 5)))
+     (repl/>notify)
+     nil))
+  => 5
+
+  (notify/wait-on :lua
+    (spec-promise/x:async-bind
+     (spec-promise/x:async-run
+      (fn []
+        (return 5)))
+     (repl/>notify)
+     nil))
+  => 5)
+
+^{:refer xt.lang.spec-promise/x:async-bind :added "4.1"}
+(fact "binds success and error continuations onto host promises"
+
+  (notify/wait-on :python
+    (spec-promise/x:async-bind
+     (spec-promise/x:async-run
+      (fn []
+        (throw (xt/x:ex "boom" {:a 1}))))
+     nil
+     (fn [err]
+       (repl/notify [(xt/x:ex-native? err)
+                     (xt/x:get-key (xt/x:ex-data err) "a")]))))
+  => [true 1]
+
+  (notify/wait-on :lua
+    (spec-promise/x:async-bind
+     (spec-promise/x:async-run
+      (fn []
+        (throw (xt/x:ex "boom" {:a 1}))))
+     nil
+     (fn [err]
+       (repl/notify [(xt/x:ex-native? err)
+                     (xt/x:get-key (xt/x:ex-data err) "a")]))))
+  => [true 1])
+
 ^{:refer xt.lang.spec-promise/x:promise-run :added "4.1"}
 (fact "wraps raw values and preserves resolved results"
 

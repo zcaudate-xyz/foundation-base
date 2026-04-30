@@ -148,16 +148,16 @@
             (listener {"op" "call"
                        "id" input.id
                        "status" "ok"
-                       "body" ["@worker/ping"
-                               "@worker/ping.async"
-                               "@worker/echo"
-                               "@worker/error.async"]}))))
+                       "body" ["@cell/ping"
+                               "@cell/ping.async"
+                               "@cell/echo"
+                               "@cell/error.async"]}))))
     (. (base-link-local/get-action-list link)
        (then (repl/>notify))))
-  => ["@worker/ping"
-      "@worker/ping.async"
-      "@worker/echo"
-      "@worker/error.async"])
+  => ["@cell/ping"
+      "@cell/ping.async"
+      "@cell/echo"
+      "@cell/error.async"])
 
 ^{:refer xt.cell.kernel.base-link-local/get-action-entry :added "4.0"}
 (fact "forwards get-action-entry"
@@ -170,7 +170,7 @@
                        "id" input.id
                        "status" "ok"
                        "body" {"args" ["arg"] "is_async" false}}))))
-    (. (base-link-local/get-action-entry link "@worker/echo")
+    (. (base-link-local/get-action-entry link "@cell/echo")
        (then (repl/>notify))))
   => {"args" ["arg"] "is_async" false})
 
@@ -247,12 +247,12 @@
                        "id" input.id
                        "status" "error"
                        "body" ["error" 1]
-                       "action" "@worker/error"}))))
+                       "action" "@cell/error"}))))
     (. (base-link-local/error link)
        (catch (repl/>notify))))
   => (contains-in
       {"body" ["error" 1]
-       "action" "@worker/error"
+       "action" "@cell/error"
        "status" "error"
        "op" "call"}))
 
@@ -268,12 +268,12 @@
                          "id" input.id
                          "status" "error"
                          "body" ["error" 1]
-                         "action" "@worker/error.async"})))))
+                         "action" "@cell/error.async"})))))
     (. (base-link-local/error-async link 100)
        (catch (repl/>notify))))
   => (contains-in
       {"body" ["error" 1]
-       "action" "@worker/error.async"
+       "action" "@cell/error.async"
        "status" "error"
        "op" "call"}))
 

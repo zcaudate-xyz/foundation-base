@@ -670,7 +670,9 @@
         (return (~thunk))))))
 
 (def +python-promise+
-  {:x-promise          {:emit :hard-link :raw 'python.core.common-promise/promise}
+  {:x-async-run        {:emit :hard-link :raw 'python.core.common-promise/async-run}
+   :x-async-bind       {:emit :hard-link :raw 'python.core.common-promise/async-bind}
+   :x-promise          {:emit :hard-link :raw 'python.core.common-promise/promise}
    :x-promise-all      {:emit :hard-link :raw 'python.core.common-promise/promise-all}
    :x-promise-then     {:emit :hard-link :raw 'python.core.common-promise/promise-then}
    :x-promise-catch    {:emit :hard-link :raw 'python.core.common-promise/promise-catch}

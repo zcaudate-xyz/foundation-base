@@ -75,7 +75,7 @@
 (defspec.xt fn-error-async
   [:fn [:xt/int] :xt/any])
 
-(defsingleton.js ^{:ns "@worker"}
+(defsingleton.js ^{:ns "@cell"}
   WORKER_STATE
   "gets worker state
  
@@ -85,7 +85,7 @@
   []
   (return  {:eval true}))
 
-(defsingleton.js ^{:ns "@worker"}
+(defsingleton.js ^{:ns "@cell"}
   WORKER_ACTIONS
   "gets worker actions
  
@@ -133,7 +133,7 @@
   (return (fn [...args]
             (return (f worker ...args)))))
 
-(defn.js ^{:cell/action "@worker/trigger"
+(defn.js ^{:cell/action "@cell/trigger"
            :cell/static false}
   fn-trigger
   "triggers an event"
@@ -144,7 +144,7 @@
                                  :status status
                                  :body body})))
 
-(defn.js ^{:cell/action "@worker/trigger-async"
+(defn.js ^{:cell/action "@cell/trigger-async"
            :cell/static false
            :cell/is-async  true}
   fn-trigger-async
@@ -167,7 +167,7 @@
               (j/postMessage worker (util/resp-stream util/EV_STATE state)))
             (return state))))
 
-(defn.js ^{:cell/action "@worker/set-final-status"
+(defn.js ^{:cell/action "@cell/set-final-status"
            :cell/static false}
   fn-set-final-status
   "sets the worker state to final"
@@ -179,7 +179,7 @@
                             (xt/x:set-key state "final" true))
                           suppress)))
 
-(defn.js ^{:cell/action "@worker/get-final-status"
+(defn.js ^{:cell/action "@cell/get-final-status"
            :cell/static false}
   fn-get-final-status
   "gets the final status"
@@ -187,7 +187,7 @@
   [worker]
   (return (. (-/WORKER_STATE) ["final"])))
 
-(defn.js ^{:cell/action "@worker/set-eval-status"
+(defn.js ^{:cell/action "@cell/set-eval-status"
            :cell/static false}
   fn-set-eval-status
   "enables eval"
@@ -199,7 +199,7 @@
                             (xt/x:set-key state "eval" status))
                           suppress)))
 
-(defn.js ^{:cell/action "@worker/get-eval-status"
+(defn.js ^{:cell/action "@cell/get-eval-status"
            :cell/static true}
   fn-get-eval-status
   "gets the eval status"
@@ -207,7 +207,7 @@
   []
   (return (. (-/WORKER_STATE) ["eval"])))
 
-(defn.js ^{:cell/action "@worker/get-action-list"
+(defn.js ^{:cell/action "@cell/get-action-list"
            :cell/static true}
   fn-get-action-list
   "gets the actions list"
@@ -215,7 +215,7 @@
   []
   (return (Object.keys (-/WORKER_ACTIONS))))
 
-(defn.js ^{:cell/action "@worker/get-action-entry"
+(defn.js ^{:cell/action "@cell/get-action-entry"
            :cell/static true}
   fn-get-action-entry
   "gets a action entry"
@@ -224,7 +224,7 @@
   (return (. (-/WORKER_ACTIONS)
              [name])))
 
-(defn.js ^{:cell/action "@worker/ping"
+(defn.js ^{:cell/action "@cell/ping"
            :cell/static true}
   fn-ping
   "pings the worker"
@@ -232,7 +232,7 @@
   []
   (return ["pong" (xt/x:now-ms)]))
 
-(defn.js ^{:cell/action "@worker/ping.async"
+(defn.js ^{:cell/action "@cell/ping.async"
            :cell/static true
            :cell/is-async  true}
   fn-ping-async
@@ -242,7 +242,7 @@
   (return (j/future-delayed [ms]
             (return (-/fn-ping)))))
 
-(defn.js ^{:cell/action "@worker/echo"
+(defn.js ^{:cell/action "@cell/echo"
            :cell/static true}
   fn-echo
   "echos the first arg"
@@ -250,7 +250,7 @@
   [arg]
   (return [arg (xt/x:now-ms)]))
 
-(defn.js ^{:cell/action "@worker/echo.async"
+(defn.js ^{:cell/action "@cell/echo.async"
            :cell/static true
            :cell/is-async  true}
   fn-echo-async
@@ -260,7 +260,7 @@
   (return(j/future-delayed [ms]
            (return (-/fn-echo arg)))))
 
-(defn.js ^{:cell/action "@worker/error"
+(defn.js ^{:cell/action "@cell/error"
            :cell/static true}
   fn-error
   "throws an error"
@@ -268,7 +268,7 @@
   []
   (throw ["error" (xt/x:now-ms)]))
 
-(defn.js ^{:cell/action "@worker/error.async"
+(defn.js ^{:cell/action "@cell/error.async"
            :cell/static true
            :cell/is-async  true}
   fn-error-async

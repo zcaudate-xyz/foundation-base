@@ -56,7 +56,7 @@
   [:xt/record
    ["::" :xt/str]
    ["id" :xt/str]
-   ["worker" :xt/any]
+   ["inner" :xt/any]
    ["active" ActiveCallMap]
    ["callbacks" LinkCallbackMap]])
 
@@ -110,21 +110,21 @@
    ["models" ModelMap]
    ["init" :xt/any]])
 
-(defspec.xt WorkerState
+(defspec.xt InnerState
   [:xt/record
    ["eval" :xt/bool]
    ["final" [:xt/maybe :xt/bool]]])
 
-(defspec.xt WorkerActionEntry
+(defspec.xt InnerActionEntry
   [:xt/record
    ["handler" :xt/any]
    ["is_async" :xt/bool]
    ["args" StringList]])
 
-(defspec.xt WorkerActionMap
-  [:xt/dict :xt/str WorkerActionEntry])
+(defspec.xt InnerActionMap
+  [:xt/dict :xt/str InnerActionEntry])
 
-(defspec.xt MockWorkerRecord
+(defspec.xt MockInnerRecord
   [:xt/record
    ["::" :xt/str]
    ["listeners" AnyList]

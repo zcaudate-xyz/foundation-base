@@ -170,7 +170,7 @@
           false))
     (worker-impl/worker-process worker {:op "call"
                                      :id "id-action"
-                                     :action "@worker/ping"
+                                     :action "@cell/ping"
                                      :body []}))
   => (contains-in {"body" ["pong" integer?], "id" "id-action", "status" "ok", "op" "call"})
 
@@ -194,7 +194,7 @@
                false))
     (worker-impl/worker-process worker {:op "call"
                                       :id "id-action"
-                                      :action "@worker/ping.async"
+                                      :action "@cell/ping.async"
                                       :body [100]}))
   => (contains-in {"body" ["pong" integer?], "id" "id-action", "status" "ok", "op" "call"}))
 
@@ -238,7 +238,7 @@
                false))
     (worker-impl/worker-init-signal worker {:done true}))
   => {"op" "stream",
-      "signal" "@worker/::INIT",
+      "signal" "@cell/::INIT",
       "status" "ok",
       "body" {"done" true}})
 

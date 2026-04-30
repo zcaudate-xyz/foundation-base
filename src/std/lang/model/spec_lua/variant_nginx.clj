@@ -49,6 +49,8 @@
   "Nginx-specific grammar overrides layered onto base Lua."
   {:for-async      {:macro #'tf-for-async :emit :macro}
    :x-socket-connect {:macro #'lua-tf-x-socket-connect :emit :macro}
+   :x-async-run      {:emit :hard-link :raw 'lua.nginx.common-promise/async-run}
+   :x-async-bind     {:emit :hard-link :raw 'lua.nginx.common-promise/async-bind}
    :x-promise        {:emit :hard-link :raw 'lua.nginx.common-promise/promise}
    :x-promise-all    {:emit :hard-link :raw 'lua.nginx.common-promise/promise-all}
    :x-promise-then   {:emit :hard-link :raw 'lua.nginx.common-promise/promise-then}

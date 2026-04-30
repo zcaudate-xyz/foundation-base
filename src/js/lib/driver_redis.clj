@@ -44,19 +44,6 @@
               ":"
               (or port "6379")))
   (var conn (-/createClient {:url url}))
-  (:= (. conn ["::disconnect"])
-      (fn [callback]
-        (return
-         (ut/wrap-callback
-          (. conn (quit))
-          (or callback ut/pass-callback)))))
-  (:= (. conn ["::exec"])
-      (fn [command args callback]
-        (var input (xt/x:arr-assign [command] args))
-        (var promise (. conn (sendCommand input)))
-        (if callback
-          (return (ut/wrap-callback promise callback))
-          (return promise))))
   (var promise
        (. (. conn (connect))
           (then (fn []

@@ -130,7 +130,7 @@
           (notify/wait-on :js
             (. (cl/add-model "hello"
                              {:echo  {:handler link-fn/echo
-                                      :trigger {"@worker/::INIT" false}
+                                      :trigger {"@cell/::INIT" false}
                                       :defaultArgs ["HELLO"]}})
                ["init"]
                (then (repl/>notify))))]}
@@ -153,7 +153,7 @@
           (notify/wait-on :js
             (. (cl/add-model "hello"
                              {:echo  {:handler link-fn/echo
-                                      :trigger {"@worker/::INIT" false}
+                                      :trigger {"@cell/::INIT" false}
                                       :defaultArgs ["HELLO"]}})
                ["init"]
                (then (repl/>notify))))]}

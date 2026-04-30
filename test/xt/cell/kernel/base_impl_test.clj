@@ -96,14 +96,14 @@
   (j/<!
    (base-impl/call (-/make-cell)
                    {:op "call"
-                    :action "@worker/echo"
+                    :action "@cell/echo"
                     :body ["hello"]}))
   => (contains ["hello" integer?])
 
   (j/<!
    (base-impl/call (-/make-link)
                    {:op "call"
-                    :action "@worker/echo"
+                    :action "@cell/echo"
                     :body ["hello"]}))
   => (contains ["hello" integer?]))
 

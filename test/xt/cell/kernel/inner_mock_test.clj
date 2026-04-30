@@ -56,4 +56,4 @@
   => {"body" {"done" true}
       "status" "ok"
       "op" "stream"
-      "signal" "@worker/::INIT"})
+      "signal" "@cell/::INIT"})

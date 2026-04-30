@@ -123,7 +123,7 @@
   (notify/wait-on :js
     (var link (-/make-link))
     (. (base-link/call link {:op "call"
-                             :action "@worker/ping.async"
+                             :action "@cell/ping.async"
                              :body [100]})
        (then (repl/>notify))))
   => (contains ["pong" integer?]))
@@ -135,21 +135,21 @@
    (!.js
     (var link (-/make-link))
     (base-link/call link {:op "call"
-                          :action "@worker/ping.async"
+                          :action "@cell/ping.async"
                           :body [100]})
     (base-link/link-active link)))
   => (contains-in
-      [{"input" {"body" [100] "action" "@worker/ping.async" "op" "call"}}])
+      [{"input" {"body" [100] "action" "@cell/ping.async" "op" "call"}}])
 
   (vals
    )
   => (contains-in
-      [{"input" {"body" [100] "action" "@worker/ping.async" "op" "call"}}])
+      [{"input" {"body" [100] "action" "@cell/ping.async" "op" "call"}}])
 
   (vals
    )
   => (contains-in
-      [{"input" {"body" [100] "action" "@worker/ping.async" "op" "call"}}]))
+      [{"input" {"body" [100] "action" "@cell/ping.async" "op" "call"}}]))
 
 ^{:refer xt.cell.kernel.base-link/add-callback :added "4.0"}
 (fact "adds a callback to the link"
@@ -203,6 +203,6 @@
        (catch (repl/>notify))))
   => (contains-in
       {"body" ["error" integer?]
-       "action" "@worker/error.async"
+       "action" "@cell/error.async"
        "status" "error"
        "op" "call"}))

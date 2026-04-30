@@ -909,7 +909,13 @@
 ;;
 
 (def +xt-runtime-promise+
-  [{:op :x-promise          :symbol #{'x:promise}          :emit :abstract
+  [{:op :x-async-run        :symbol #{'x:async-run}        :emit :abstract
+    :op-spec {:arglists '([thunk])
+              :type [:fn [[:xt/fn]] :xt/promise]}}
+   {:op :x-async-bind       :symbol #{'x:async-bind}       :emit :abstract
+    :op-spec {:arglists '([promise success error])
+              :type [:fn [:xt/promise :xt/any :xt/any] :xt/promise]}}
+   {:op :x-promise          :symbol #{'x:promise}          :emit :abstract
     :op-spec {:arglists '([thunk])
               :type [:fn [[:xt/fn]] :xt/promise]}}
    {:op :x-promise-all      :symbol #{'x:promise-all}      :emit :abstract

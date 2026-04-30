@@ -7,14 +7,14 @@
               [xt.cell.kernel :as kernel]
               [xt.cell.kernel.inner-local :as inner-local]]})
 
-(defsingleton.xt ^{:ns "@worker"}
+(defsingleton.xt ^{:ns "@cell"}
   SERVICE
   "gets the current service registry"
   {:added "4.1"}
   []
   (return nil))
 
-(defsingleton.xt ^{:ns "@worker"}
+(defsingleton.xt ^{:ns "@cell"}
   BINDINGS
   "gets the current bindings registry"
   {:added "4.1"}

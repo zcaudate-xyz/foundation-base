@@ -18,13 +18,13 @@
 (fact "event constant for init"
 
   (!.js base-util/EV_INIT)
-  => "@worker/::INIT")
+  => "@cell/::INIT")
 
 ^{:refer xt.cell.kernel.base-util/EV_STATE :added "4.0"}
 (fact "event constant for state"
 
   (!.js base-util/EV_STATE)
-  => "@worker/::STATE")
+  => "@cell/::STATE")
 
 ^{:refer xt.cell.kernel.base-util/rand-id :added "4.0"}
 (fact "prepares a random id"
@@ -83,8 +83,8 @@
 ^{:refer xt.cell.kernel.base-util/req-call :added "4.0"}
 (fact "constructs a call request"
 
-  (!.js (base-util/req-call "@worker/ping" []))
-  => {"op" "call" "action" "@worker/ping" "body" []})
+  (!.js (base-util/req-call "@cell/ping" []))
+  => {"op" "call" "action" "@cell/ping" "body" []})
 
 ^{:refer xt.cell.kernel.base-util/req-eval :added "4.0"}
 (fact "constructs an eval request"
@@ -110,5 +110,5 @@
 ^{:refer xt.cell.kernel.base-util/resp-stream :added "4.0"}
 (fact "constructs a stream response"
 
-  (!.js (base-util/resp-stream "@worker/::STATE" {"eval" true}))
-  => {"op" "stream" "status" "ok" "signal" "@worker/::STATE" "body" {"eval" true}})
+  (!.js (base-util/resp-stream "@cell/::STATE" {"eval" true}))
+  => {"op" "stream" "status" "ok" "signal" "@cell/::STATE" "body" {"eval" true}})

@@ -78,7 +78,7 @@
   => {"body" {"eval" true, "final" false},
       "status" "ok",
       "op" "stream",
-      "signal" "@worker/::STATE"})
+      "signal" "@cell/::STATE"})
 
 ^{:refer js.cell.kernel.worker-state/fn-final-set :adopt true :added "4.0"
   :setup [(!.js
@@ -92,7 +92,7 @@
   => {"body" {"eval" true, "final" true},
       "status" "ok",
       "op" "stream",
-      "signal" "@worker/::STATE"})
+      "signal" "@cell/::STATE"})
 
 ^{:refer js.cell.kernel.worker-state/fn-final-status :adopt true :added "4.0"
   :setup [(!.js
@@ -116,7 +116,7 @@
   => {"body" {"eval" true, "final" false},
       "status" "ok",
       "op" "stream",
-      "signal" "@worker/::STATE"})
+      "signal" "@cell/::STATE"})
 
 ^{:refer js.cell.kernel.worker-state/fn-eval-disable :adopt true :added "4.0"
   :setup [(!.js
@@ -131,7 +131,7 @@
   => {"body" {"eval" false, "final" false},
       "status" "ok",
       "op" "stream",
-      "signal" "@worker/::STATE"})
+      "signal" "@cell/::STATE"})
 
 ^{:refer js.cell.kernel.worker-state/fn-eval-status :adopt true :added "4.0"}
 (fact "gets the eval status"
@@ -208,7 +208,7 @@
   (notify/wait-on :js
     (worker-mock/create-worker (repl/>notify)
                              {}))
-  => {"body" {"done" true}, "status" "ok", "op" "stream", "signal" "@worker/::INIT"})
+  => {"body" {"done" true}, "status" "ok", "op" "stream", "signal" "@cell/::INIT"})
 
 ^{:refer js.cell.kernel.worker-mock/worker-process :adopt true :added "4.0"
   :setup [(l/rt:restart)]}
@@ -217,7 +217,7 @@
   (notify/wait-on :js
     (worker-mock/create-worker (repl/>notify)
                              {}))
-  => {"body" {"done" true}, "status" "ok", "op" "stream", "signal" "@worker/::INIT"}
+  => {"body" {"done" true}, "status" "ok", "op" "stream", "signal" "@cell/::INIT"}
 
   (notify/wait-on :js
     (var mock (worker-mock/create-worker (repl/>notify)
@@ -247,7 +247,7 @@
                                        true))
     (worker-mock/mock-worker-send mock {:op "call"
                                         :id "id-action"
-                                        :action "@worker/ping.async"
+                                        :action "@cell/ping.async"
                                         :body [100]}))
 
   => (contains-in

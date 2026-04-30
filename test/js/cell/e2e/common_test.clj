@@ -230,7 +230,7 @@
           (then (fn [rows]
                   (. (cl/call remote-cell
                               {:op "call"
-                               :action "@worker/ping"
+                               :action "@cell/ping"
                                :body []})
                      (then (fn [pong]
                              (repl/notify {"rows" rows

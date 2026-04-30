@@ -4,14 +4,14 @@
 (l/script :js
   {:require [[xt.lang.common-runtime :as rt :with [defvar.js]] [xt.lang.spec-base :as xt] [js.cell.kernel :as kernel] [js.cell.kernel.base-link-local :as base-link-local] [js.cell.kernel.worker-local :as worker-local] [js.cell.kernel.worker-state :as worker-state]]})
 
-(defsingleton.js ^{:ns "@worker"}
+(defsingleton.js ^{:ns "@cell"}
   SERVICE
   "gets the current service registry"
   {:added "4.0"}
   []
   (return nil))
 
-(defsingleton.js ^{:ns "@worker"}
+(defsingleton.js ^{:ns "@cell"}
   BINDINGS
   "gets the current bindings registry"
   {:added "4.0"}

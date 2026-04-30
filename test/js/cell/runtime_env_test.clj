@@ -44,7 +44,7 @@
             "has-setup-service" (xt/x:not-nil? (. worker.actions ["@cell/setup-service"]))}))
   => (contains-in {"listeners" 1
                    "has-setup-service" true
-                   "message" {"signal" "@worker/::INIT"
+                   "message" {"signal" "@cell/::INIT"
                               "body" {"done" true}}}))
 
 ^{:refer js.cell.runtime.env-node/runtime-init :added "4.0"}
@@ -66,7 +66,7 @@
             "has-setup-service" (xt/x:not-nil? (. worker.actions ["@cell/setup-service"]))}))
   => (contains-in {"listeners" 1
                    "has-setup-service" true
-                   "message" {"signal" "@worker/::INIT"
+                   "message" {"signal" "@cell/::INIT"
                               "body" {"done" true}}}))
 
 ^{:refer js.cell.runtime.env-webworker/runtime-init :added "4.0"}
@@ -85,7 +85,7 @@
    (:= (!:G self) previous-self)
    (return out))
   => (contains-in {"listeners" 1
-                   "message" {"signal" "@worker/::INIT"
+                   "message" {"signal" "@cell/::INIT"
                               "body" {"done" true}}}))
 
 ^{:refer js.cell.runtime.env-sharedworker/init-port :added "4.0"}
@@ -103,7 +103,7 @@
             "has-setup-service" (xt/x:not-nil? (. port.actions ["@cell/setup-service"]))}))
   => (contains-in {"listeners" 1
                    "has-setup-service" true
-                   "message" {"signal" "@worker/::INIT"
+                   "message" {"signal" "@cell/::INIT"
                               "body" {"done" true}}}))
 
 ^{:refer js.cell.runtime.env-sharedworker/runtime-init :added "4.0"}
@@ -128,5 +128,5 @@
    (return out))
   => (contains-in {"listeners" 1
                    "starts" 1
-                   "message" {"signal" "@worker/::INIT"
+                   "message" {"signal" "@cell/::INIT"
                               "body" {"done" true}}}))

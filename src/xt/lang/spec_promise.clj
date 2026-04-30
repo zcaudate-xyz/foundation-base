@@ -5,6 +5,23 @@
 
 (l/script :xtalk)
 
+(defspec.xt x:async-run [:fn [[:xt/fn]] :xt/promise])
+
+(defmacro.xt ^{:standalone true}
+  x:async-run
+  "executes a thunk in the host async model and adopts its result"
+  {:added "4.1"}
+  ([thunk] (list (quote x:async-run) thunk)))
+
+(defspec.xt x:async-bind [:fn [:xt/promise :xt/any :xt/any] :xt/promise])
+
+(defmacro.xt ^{:standalone true}
+  x:async-bind
+  "binds success and error continuations onto a host promise"
+  {:added "4.1"}
+  ([promise success error]
+   (list (quote x:async-bind) promise success error)))
+
 (defspec.xt x:promise [:fn [[:xt/fn]] :xt/promise])
 
 (defmacro.xt ^{:standalone true}

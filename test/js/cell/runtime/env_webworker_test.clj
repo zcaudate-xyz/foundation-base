@@ -24,7 +24,7 @@
    (return {"listeners" (xt/x:len worker.listeners)
             "message" (xt/x:first messages)}))
   => (contains-in {"listeners" 1
-                   "message" {"signal" "@worker/::INIT"
+                   "message" {"signal" "@cell/::INIT"
                               "body" {"done" true}}}))
 
 ^{:refer js.cell.runtime.env-webworker/runtime-init :added "4.1"}
@@ -43,5 +43,5 @@
    (:= (!:G self) previous-self)
    (return out))
   => (contains-in {"listeners" 1
-                   "message" {"signal" "@worker/::INIT"
+                   "message" {"signal" "@cell/::INIT"
                               "body" {"done" true}}}))

@@ -91,7 +91,7 @@
        (catch (repl/>notify))))
   => (contains-in
       {"body" ["error" integer?],
-       "action" "@worker/error",
+       "action" "@cell/error",
        "status" "error",
        "op" "call"}))
 
@@ -123,14 +123,14 @@
   (j/<!
    (base-impl/call (-/CELL)
                    {:op "call"
-                    :action "@worker/echo"
+                    :action "@cell/echo"
                     :body ["hello"]}))
   => (contains ["hello" integer?])
 
   (j/<!
    (base-impl/call (. (-/CELL) ["link"])
                    {:op "call"
-                    :action "@worker/echo"
+                    :action "@cell/echo"
                     :body ["hello"]}))
   => (contains ["hello" integer?]))
 

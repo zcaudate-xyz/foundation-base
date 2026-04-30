@@ -23,64 +23,64 @@
   ;; (@! (cons 'tab +baselines+))
   (return
    (tab
-     ["@worker/trigger"
+     ["@cell/trigger"
       {:handler
        (bind-handler xt.cell.kernel.inner-state/fn-trigger),
        :is-async false,
        :args ["op" "signal" "status" "body"]}]
-     ["@worker/trigger-async"
+     ["@cell/trigger-async"
       {:handler
        (bind-handler xt.cell.kernel.inner-state/fn-trigger-async),
        :is-async true,
        :args ["op" "signal" "status" "body" "ms"]}]
-     ["@worker/set-final-status"
+     ["@cell/set-final-status"
       {:handler
        (bind-handler xt.cell.kernel.inner-state/fn-set-final-status),
        :is-async false,
        :args ["suppress"]}]
-     ["@worker/get-final-status"
+     ["@cell/get-final-status"
       {:handler
        (bind-handler xt.cell.kernel.inner-state/fn-get-final-status),
        :is-async false,
        :args []}]
-     ["@worker/set-eval-status"
+     ["@cell/set-eval-status"
       {:handler
        (bind-handler xt.cell.kernel.inner-state/fn-set-eval-status),
        :is-async false,
        :args ["status" "suppress"]}]
-    ["@worker/get-eval-status"
+    ["@cell/get-eval-status"
      {:handler xt.cell.kernel.inner-state/fn-get-eval-status,
       :is-async false,
       :args []}]
-    ["@worker/get-action-list"
+    ["@cell/get-action-list"
      {:handler xt.cell.kernel.inner-state/fn-get-action-list,
       :is-async false,
       :args []}]
-    ["@worker/get-action-entry"
+    ["@cell/get-action-entry"
      {:handler xt.cell.kernel.inner-state/fn-get-action-entry,
       :is-async false,
       :args ["name"]}]
-    ["@worker/ping"
+    ["@cell/ping"
      {:handler xt.cell.kernel.inner-state/fn-ping,
       :is-async false,
       :args []}]
-    ["@worker/ping.async"
+    ["@cell/ping.async"
      {:handler xt.cell.kernel.inner-state/fn-ping-async,
       :is-async true,
       :args ["ms"]}]
-    ["@worker/echo"
+    ["@cell/echo"
      {:handler xt.cell.kernel.inner-state/fn-echo,
       :is-async false,
       :args ["arg"]}]
-    ["@worker/echo.async"
+    ["@cell/echo.async"
      {:handler xt.cell.kernel.inner-state/fn-echo-async,
       :is-async true,
       :args ["arg" "ms"]}]
-    ["@worker/error"
+    ["@cell/error"
      {:handler xt.cell.kernel.inner-state/fn-error,
       :is-async false,
       :args []}]
-    ["@worker/error.async"
+    ["@cell/error.async"
      {:handler xt.cell.kernel.inner-state/fn-error-async,
       :is-async true,
       :args ["ms"]}])))

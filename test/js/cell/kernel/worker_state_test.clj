@@ -145,7 +145,7 @@
   => {"body" {"eval" true},
       "status" "ok",
       "op" "stream",
-      "signal" "@worker/::STATE"})
+      "signal" "@cell/::STATE"})
 
 ^{:refer js.cell.kernel.worker-state/fn-set-final-status :added "4.0"}
 (fact "sets the worker state to final"
@@ -160,7 +160,7 @@
   => {"body" {"eval" true, "final" true},
       "status" "ok",
       "op" "stream",
-      "signal" "@worker/::STATE"})
+      "signal" "@cell/::STATE"})
 
 ^{:refer js.cell.kernel.worker-state/fn-get-final-status :added "4.0"}
 (fact "gets the final status"
@@ -185,7 +185,7 @@
   (eval-worker (js.cell.kernel.worker-state/fn-set-eval-status
                 self)
                nil true true)
-  => {"body" {}, "status" "ok", "op" "stream", "signal" "@worker/::STATE"})
+  => {"body" {}, "status" "ok", "op" "stream", "signal" "@cell/::STATE"})
 
 ^{:refer js.cell.kernel.worker-state/fn-get-eval-status :added "4.0"}
 (fact "gets the eval status"

@@ -28,24 +28,24 @@
 
 (defn.xt reset-inner-state
   []
-  (inner-state/WORKER_STATE-reset {"eval" true})
-  (inner-state/WORKER_ACTIONS-reset {})
+  (inner-state/INNER_STATE-reset {"eval" true})
+  (inner-state/INNER_ACTIONS-reset {})
   (return true))
 
-^{:refer xt.cell.kernel.inner-state/WORKER_STATE :added "4.0"}
-(fact "gets worker state"
+^{:refer xt.cell.kernel.inner-state/INNER_STATE :added "4.0"}
+(fact "gets inner state"
 
   (!.js
    (-/reset-inner-state)
-   (inner-state/WORKER_STATE))
+   (inner-state/INNER_STATE))
   => {"eval" true})
 
-^{:refer xt.cell.kernel.inner-state/WORKER_ACTIONS :added "4.0"}
-(fact "gets worker actions"
+^{:refer xt.cell.kernel.inner-state/INNER_ACTIONS :added "4.0"}
+(fact "gets inner actions"
 
   (!.js
    (-/reset-inner-state)
-   (inner-state/WORKER_ACTIONS))
+   (inner-state/INNER_ACTIONS))
   => {})
 
 ^{:refer xt.cell.kernel.inner-state/get-state :added "4.0"}
@@ -62,7 +62,7 @@
   => {"eval" true})
 
 ^{:refer xt.cell.kernel.inner-state/get-actions :added "4.0"}
-(fact "gets worker actions from the worker or singleton"
+(fact "gets inner actions from the inner or singleton"
 
   (!.js
    (-/reset-inner-state)
@@ -74,37 +74,37 @@
   => {"@test/action" {}})
 
 ^{:refer xt.cell.kernel.inner-state/set-actions :added "4.0"}
-(fact "sets actions on a worker or in global state"
+(fact "sets actions on a inner or in global state"
 
   (!.js
    (-/reset-inner-state)
-   (var worker {})
-   (inner-state/set-actions {"@test/action" {}} worker)
-   (xt/x:get-key worker "actions"))
+   (var inner {})
+   (inner-state/set-actions {"@test/action" {}} inner)
+   (xt/x:get-key inner "actions"))
   => {"@test/action" {}}
 
   (!.js
    (-/reset-inner-state)
    (inner-state/set-actions {"@global/action" {}} nil)
-   (xt/x:has-key? (inner-state/WORKER_ACTIONS) "@global/action"))
+   (xt/x:has-key? (inner-state/INNER_ACTIONS) "@global/action"))
   => true)
 
 ^{:refer xt.cell.kernel.inner-state/fn-bind :added "4.0"}
-(fact "binds a worker instance into a handler"
+(fact "binds a inner instance into a handler"
 
   (!.js
    ((inner-state/fn-bind {"id" "w1"}
-                          (fn [worker x]
-                            (return [(. worker ["id"]) x])))
+                          (fn [inner x]
+                            (return [(. inner ["id"]) x])))
     "hello"))
   => ["w1" "hello"])
 
 ^{:refer xt.cell.kernel.inner-state/fn-trigger :added "4.0"}
-(fact "triggers an event on a worker"
+(fact "triggers an event on a inner"
 
   (notify/wait-on :js
     (inner-state/fn-trigger
-     (inner-mock/mock-worker (repl/>notify))
+     (inner-mock/mock-inner (repl/>notify))
      "stream"
      "hello"
      "ok"
@@ -119,7 +119,7 @@
 
   (notify/wait-on :js
     (inner-state/fn-trigger-async
-     (inner-mock/mock-worker (repl/>notify))
+     (inner-mock/mock-inner (repl/>notify))
      "stream"
      "hello"
      "ok"
@@ -131,13 +131,13 @@
       "signal" "hello"})
 
 ^{:refer xt.cell.kernel.inner-state/fn-set-state :added "4.0"}
-(fact "updates worker state and can emit state events"
+(fact "updates inner state and can emit state events"
 
   (!.js
    (-/reset-inner-state)
    (inner-state/fn-set-state
-    (inner-mock/mock-worker (fn [msg]))
-    (inner-state/WORKER_STATE)
+    (inner-mock/mock-inner (fn [msg]))
+    (inner-state/INNER_STATE)
     (fn [state]
       (xt/x:set-key state "final" false))
     true))
@@ -147,8 +147,8 @@
    (-/reset-inner-state)
    (var messages [])
    (inner-state/fn-set-state
-    (inner-mock/mock-worker (fn [msg] (messages.push msg)))
-    (inner-state/WORKER_STATE)
+    (inner-mock/mock-inner (fn [msg] (messages.push msg)))
+    (inner-state/INNER_STATE)
     (fn [state]
       (xt/x:set-key state "final" false))
     false)
@@ -156,15 +156,15 @@
   => {"body" {"eval" true "final" false}
       "status" "ok"
       "op" "stream"
-      "signal" "@worker/::STATE"})
+      "signal" "@cell/::STATE"})
 
 ^{:refer xt.cell.kernel.inner-state/fn-set-final-status :added "4.0"}
-(fact "sets the worker state to final"
+(fact "sets the inner state to final"
 
   (!.js
    (-/reset-inner-state)
    (inner-state/fn-set-final-status
-    (inner-mock/mock-worker (fn [msg]))
+    (inner-mock/mock-inner (fn [msg]))
     true))
   => {"eval" true "final" true}
 
@@ -172,13 +172,13 @@
    (-/reset-inner-state)
    (var messages [])
    (inner-state/fn-set-final-status
-    (inner-mock/mock-worker (fn [msg] (messages.push msg)))
+    (inner-mock/mock-inner (fn [msg] (messages.push msg)))
     false)
    (xtd/first messages))
   => {"body" {"eval" true "final" true}
       "status" "ok"
       "op" "stream"
-      "signal" "@worker/::STATE"})
+      "signal" "@cell/::STATE"})
 
 ^{:refer xt.cell.kernel.inner-state/fn-get-final-status :added "4.0"}
 (fact "gets the final status"
@@ -191,7 +191,7 @@
   (!.js
    (-/reset-inner-state)
    (inner-state/fn-set-final-status
-    (inner-mock/mock-worker (fn [msg]))
+    (inner-mock/mock-inner (fn [msg]))
     true)
    (inner-state/fn-get-final-status nil))
   => true)
@@ -202,7 +202,7 @@
   (!.js
    (-/reset-inner-state)
    (inner-state/fn-set-eval-status
-    (inner-mock/mock-worker (fn [msg]))
+    (inner-mock/mock-inner (fn [msg]))
     false
     true))
   => {"eval" false}
@@ -211,14 +211,14 @@
    (-/reset-inner-state)
    (var messages [])
    (inner-state/fn-set-eval-status
-    (inner-mock/mock-worker (fn [msg] (messages.push msg)))
+    (inner-mock/mock-inner (fn [msg] (messages.push msg)))
     false
     false)
    (xtd/first messages))
   => {"body" {"eval" false}
       "status" "ok"
       "op" "stream"
-      "signal" "@worker/::STATE"})
+      "signal" "@cell/::STATE"})
 
 ^{:refer xt.cell.kernel.inner-state/fn-get-eval-status :added "4.0"}
 (fact "gets the eval status"
@@ -231,7 +231,7 @@
   (!.js
    (-/reset-inner-state)
    (inner-state/fn-set-eval-status
-    (inner-mock/mock-worker (fn [msg]))
+    (inner-mock/mock-inner (fn [msg]))
     false
     true)
    (inner-state/fn-get-eval-status))
@@ -252,11 +252,11 @@
   (!.js
    (-/reset-inner-state)
    (inner-local/actions-init {} nil)
-   (inner-state/fn-get-action-entry "@worker/ping"))
+   (inner-state/fn-get-action-entry "@cell/ping"))
   => (contains {"is_async" false "args" []}))
 
 ^{:refer xt.cell.kernel.inner-state/fn-ping :added "4.0"}
-(fact "pings the worker"
+(fact "pings the inner"
 
   (!.js
    (inner-state/fn-ping))
@@ -296,12 +296,12 @@
   => (contains ["error"]))
 
 ^{:refer xt.cell.kernel.inner-state/fn-self :added "4.1"}
-(fact "applies arguments along with the worker self"
+(fact "applies arguments along with the inner self"
 
   (!.js
    (xt/x:set-key globalThis "self" {"id" "w1"})
    ((inner-state/fn-self
-     (fn [worker x]
-       (return [(. worker ["id"]) x])))
+     (fn [inner x]
+       (return [(. inner ["id"]) x])))
     "hello"))
   => ["w1" "hello"])

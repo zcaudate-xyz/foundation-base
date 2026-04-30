@@ -75,12 +75,34 @@
       (return (-/promise-settle current "resolved" out)))
     (return (-/promise-settle current "rejected" out))))
 
-(defn.lua promise
+(defn.lua async-run
   "executes a thunk in an nginx light thread and returns a pending promise"
   {:added "4.1"}
   [thunk]
   (return (-/promise-pending
            (ngx.thread.spawn thunk))))
+
+(defn.lua async-bind
+  "binds success and error continuations onto a promise-like value"
+  {:added "4.1"}
+  [promise on-resolve on-reject]
+  (return (-/promise-pending
+           (ngx.thread.spawn
+            (fn []
+              (var current (-/promise-await promise))
+              (if (== "rejected" (. current ["status"]))
+                (if (== nil on-reject)
+                  (return current)
+                  (return (on-reject (. current ["error"]))))
+                (if (== nil on-resolve)
+                  (return current)
+                  (return (on-resolve (. current ["value"]))))))))))
+
+(defn.lua promise
+  "executes a thunk in an nginx light thread and returns a pending promise"
+  {:added "4.1"}
+  [thunk]
+  (return (-/async-run thunk)))
 
 (defn.lua promise-all
   "waits for all values in an array and preserves nginx async chaining"
@@ -102,25 +124,13 @@
   "applies a continuation to resolved promises while preserving async chaining"
   {:added "4.1"}
   [promise thunk]
-  (return (-/promise-pending
-           (ngx.thread.spawn
-            (fn []
-              (var current (-/promise-await promise))
-              (if (== "rejected" (. current ["status"]))
-                (return current)
-                (return (thunk (. current ["value"])))))))))
+  (return (-/async-bind promise thunk nil)))
 
 (defn.lua promise-catch
   "applies a continuation to rejected promises while preserving async chaining"
   {:added "4.1"}
   [promise thunk]
-  (return (-/promise-pending
-           (ngx.thread.spawn
-            (fn []
-              (var current (-/promise-await promise))
-              (if (not= "rejected" (. current ["status"]))
-                (return current)
-                (return (thunk (. current ["error"])))))))))
+  (return (-/async-bind promise nil thunk)))
 
 (defn.lua promise-finally
   "runs a finalizer and preserves the original promise unless cleanup rejects"

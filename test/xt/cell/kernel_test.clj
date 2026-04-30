@@ -121,7 +121,7 @@
   (notify/wait-on :js
     (. (cl/call (cl/GD)
                 {:op "call"
-                 :action "@worker/ping.async"
+                 :action "@cell/ping.async"
                  :body [50]})
        (then (repl/>notify))))
   => (contains ["pong" integer?]))
@@ -452,7 +452,7 @@
   (notify/wait-on :js
     (. (cl/call (cl/GD)
                 {:op "call"
-                 :action "@worker/ping.async"
+                 :action "@cell/ping.async"
                  :body [10]})
        (then (repl/>notify))))
   => (contains ["pong" integer?]))

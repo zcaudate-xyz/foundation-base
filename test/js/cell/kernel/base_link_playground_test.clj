@@ -109,7 +109,7 @@
     (base-link-local/ping-async link 100)
     (base-link/link-active link)))
   => (contains-in
-      [{"input" {"body" [100], "action" "@worker/ping.async", "op" "call"}}]))
+      [{"input" {"body" [100], "action" "@cell/ping.async", "op" "call"}}]))
 
 ^{:refer js.cell.kernel.base-link-eval/wait-post :added "4.0"}
 (fact "posts directly to the playground worker"

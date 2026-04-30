@@ -102,7 +102,7 @@
   (. thread (start))
   (return wrapper))
 
-(defn.py promise
+(defn.py async-run
   "executes a thunk and captures either its value or error as a promise"
   {:added "4.1"}
   [thunk]
@@ -110,6 +110,34 @@
     (return (-/promise-wrap (thunk)))
     (catch [Exception :as e]
       (return (-/promise-reject e)))))
+
+(defn.py async-bind
+  "binds success and error continuations onto a promise-like value"
+  {:added "4.1"}
+  [promise on-resolve on-reject]
+  (return
+   (-/promise-pending
+    (fn []
+      (var current (-/promise-await promise))
+      (if (== "rejected" (. current ["status"]))
+        (if (== nil on-reject)
+          (return current)
+          (try
+            (return (on-reject (. current ["error"])))
+            (catch [Exception :as e]
+              (return (-/promise-reject e)))))
+        (if (== nil on-resolve)
+          (return current)
+          (try
+            (return (on-resolve (. current ["value"])))
+            (catch [Exception :as e]
+              (return (-/promise-reject e))))))))))
+
+(defn.py promise
+  "executes a thunk and captures either its value or error as a promise"
+  {:added "4.1"}
+  [thunk]
+  (return (-/async-run thunk)))
 
 (defn.py promise-all
   "waits for all values in an array and short-circuits on rejection"
@@ -133,31 +161,13 @@
   "applies a continuation to resolved promises, adopting awaitables when needed"
   {:added "4.1"}
   [promise thunk]
-  (return
-   (-/promise-pending
-    (fn []
-      (var current (-/promise-await promise))
-      (if (== "rejected" (. current ["status"]))
-        (return current)
-        (try
-          (return (thunk (. current ["value"])))
-          (catch [Exception :as e]
-            (return (-/promise-reject e)))))))))
+  (return (-/async-bind promise thunk nil)))
 
 (defn.py promise-catch
   "applies a continuation to rejected promises, adopting awaitables when needed"
   {:added "4.1"}
   [promise thunk]
-  (return
-   (-/promise-pending
-    (fn []
-      (var current (-/promise-await promise))
-      (if (not= "rejected" (. current ["status"]))
-        (return current)
-        (try
-          (return (thunk (. current ["error"])))
-          (catch [Exception :as e]
-            (return (-/promise-reject e)))))))))
+  (return (-/async-bind promise nil thunk)))
 
 (defn.py promise-finally
   "runs a finalizer and preserves the original promise unless the finalizer fails"

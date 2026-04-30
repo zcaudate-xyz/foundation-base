@@ -100,7 +100,7 @@
 
   (!.js
    [(xt/x:has-key? (cell/actions-baseline) "@cell/setup-service")
-    (xt/x:has-key? (cell/actions-baseline) "@worker/ping")])
+    (xt/x:has-key? (cell/actions-baseline) "@cell/ping")])
   => [true true])
 
 ^{:refer xt.cell/actions-init :added "4.1"}

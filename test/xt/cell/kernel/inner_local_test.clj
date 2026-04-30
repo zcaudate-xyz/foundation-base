@@ -21,15 +21,15 @@
   (!.js (inner-local/actions-baseline))
   => map?
 
-  (!.js (xt/x:get-key (inner-local/actions-baseline) "@worker/ping"))
+  (!.js (xt/x:get-key (inner-local/actions-baseline) "@cell/ping"))
   => (contains {"is_async" false
                 "args" []})
 
-  (!.js (xt/x:get-key (inner-local/actions-baseline) "@worker/echo"))
+  (!.js (xt/x:get-key (inner-local/actions-baseline) "@cell/echo"))
   => (contains {"is_async" false
                 "args" ["arg"]})
 
-  (!.js (xt/x:get-key (inner-local/actions-baseline) "@worker/ping.async"))
+  (!.js (xt/x:get-key (inner-local/actions-baseline) "@cell/ping.async"))
   => (contains {"is_async" true
                 "args" ["ms"]}))
 
@@ -38,7 +38,7 @@
 
   (!.js
    (inner-local/actions-init {"@custom/action" {}} nil)
-   (xt/x:has-key? (inner-state/WORKER_ACTIONS) "@worker/ping"))
+   (xt/x:has-key? (inner-state/WORKER_ACTIONS) "@cell/ping"))
   => true
 
   (!.js
@@ -52,7 +52,7 @@
   (let [result (inner-local/tmpl-baseline-action
                 @xt.cell.kernel.inner-state/fn-ping)]
     (first result)
-    => "@worker/ping"
+    => "@cell/ping"
             
     (get (second result) :is-async)
     => false
@@ -63,7 +63,7 @@
   (let [result (inner-local/tmpl-baseline-action
                 @xt.cell.kernel.inner-state/fn-trigger)]
     (first result)
-    => "@worker/trigger"
+    => "@cell/trigger"
             
     (get-in (second result) [:handler])
     => '(xt.cell.kernel.inner-state/fn-self

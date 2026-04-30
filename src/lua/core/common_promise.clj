@@ -30,7 +30,7 @@
            "status" "rejected"
            "error" err}))
 
-(defn.lua promise
+(defn.lua async-run
   "executes a thunk and captures either its value or error as a promise"
   {:added "4.1"}
   [thunk]
@@ -38,6 +38,31 @@
   (if (. out [1])
     (return (-/promise-resolve (. out [2])))
     (return (-/promise-reject (. out [2])))))
+
+(defn.lua async-bind
+  "binds success and error continuations onto a promise-like value"
+  {:added "4.1"}
+  [promise on-resolve on-reject]
+  (var current (-/promise-resolve promise))
+  (if (== "rejected" (. current ["status"]))
+    (if (== nil on-reject)
+      (return current)
+      (do (var out [(pcall on-reject (. current ["error"]))])
+          (if (. out [1])
+            (return (-/promise-resolve (. out [2])))
+            (return (-/promise-reject (. out [2]))))))
+    (if (== nil on-resolve)
+      (return current)
+      (do (var out [(pcall on-resolve (. current ["value"]))])
+          (if (. out [1])
+            (return (-/promise-resolve (. out [2])))
+            (return (-/promise-reject (. out [2]))))))))
+
+(defn.lua promise
+  "executes a thunk and captures either its value or error as a promise"
+  {:added "4.1"}
+  [thunk]
+  (return (-/async-run thunk)))
 
 (defn.lua promise-all
   "waits for all values in an array and short-circuits on rejection"
@@ -56,25 +81,13 @@
   "applies a continuation to resolved promises"
   {:added "4.1"}
   [promise thunk]
-  (var current (-/promise-resolve promise))
-  (if (== "rejected" (. current ["status"]))
-    (return current)
-    (do (var out [(pcall thunk (. current ["value"]))])
-        (if (. out [1])
-          (return (-/promise-resolve (. out [2])))
-          (return (-/promise-reject (. out [2])))))))
+  (return (-/async-bind promise thunk nil)))
 
 (defn.lua promise-catch
   "applies a continuation to rejected promises"
   {:added "4.1"}
   [promise thunk]
-  (var current (-/promise-resolve promise))
-  (if (not= "rejected" (. current ["status"]))
-    (return current)
-    (do (var out [(pcall thunk (. current ["error"]))])
-        (if (. out [1])
-          (return (-/promise-resolve (. out [2])))
-          (return (-/promise-reject (. out [2])))))))
+  (return (-/async-bind promise nil thunk)))
 
 (defn.lua promise-finally
   "runs a finalizer and preserves the original promise unless the finalizer fails"

@@ -475,7 +475,7 @@
         "pre" [false],
         "main" [true
                 {"body" ["error" integer?],
-                 "action" "@worker/error.async",
+                 "action" "@cell/error.async",
                  "id" string?,
                  "status" "error",
                  "input" [100],

@@ -49,9 +49,9 @@
   [:fn [:xt/str :xt/any]
    js.cell.kernel.spec/ResponseFrame])
 
-(def$.js EV_INIT    "@worker/::INIT")
+(def$.js EV_INIT    "@cell/::INIT")
 
-(def$.js EV_STATE   "@worker/::STATE")
+(def$.js EV_STATE   "@cell/::STATE")
 
 (defn.js rand-id
   "prepares a rand-id"

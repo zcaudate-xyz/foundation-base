@@ -25,7 +25,7 @@
    (return {"listeners" (xt/x:len port.listeners)
             "message" (xt/x:first messages)}))
   => (contains-in {"listeners" 1
-                   "message" {"signal" "@worker/::INIT"
+                   "message" {"signal" "@cell/::INIT"
                               "body" {"done" true}}}))
 
 ^{:refer js.cell.runtime.env-sharedworker/runtime-init :added "4.1"}
@@ -50,5 +50,5 @@
    (return out))
   => (contains-in {"listeners" 1
                    "starts" 1
-                   "message" {"signal" "@worker/::INIT"
+                   "message" {"signal" "@cell/::INIT"
                               "body" {"done" true}}}))

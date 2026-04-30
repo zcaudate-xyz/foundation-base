@@ -58,7 +58,7 @@
    (xt.cell.kernel.base-link/call
     link
     {:op "call",
-     :action "@worker/trigger",
+     :action "@cell/trigger",
      :body [op signal status body]})))
 
 (defn.xt
@@ -68,7 +68,7 @@
    (xt.cell.kernel.base-link/call
     link
     {:op "call",
-     :action "@worker/trigger-async",
+     :action "@cell/trigger-async",
      :body [op signal status body ms]})))
 
 (defn.xt
@@ -78,7 +78,7 @@
    (xt.cell.kernel.base-link/call
     link
     {:op "call",
-     :action "@worker/set-final-status",
+     :action "@cell/set-final-status",
      :body [suppress]})))
 
 (defn.xt
@@ -87,7 +87,7 @@
   (return
    (xt.cell.kernel.base-link/call
     link
-    {:op "call", :action "@worker/get-final-status", :body []})))
+    {:op "call", :action "@cell/get-final-status", :body []})))
 
 (defn.xt
   set-eval-status
@@ -96,7 +96,7 @@
    (xt.cell.kernel.base-link/call
     link
     {:op "call",
-     :action "@worker/set-eval-status",
+     :action "@cell/set-eval-status",
      :body [status suppress]})))
 
 (defn.xt
@@ -105,7 +105,7 @@
   (return
    (xt.cell.kernel.base-link/call
     link
-    {:op "call", :action "@worker/get-eval-status", :body []})))
+    {:op "call", :action "@cell/get-eval-status", :body []})))
 
 (defn.xt
   get-action-list
@@ -113,7 +113,7 @@
   (return
    (xt.cell.kernel.base-link/call
     link
-    {:op "call", :action "@worker/get-action-list", :body []})))
+    {:op "call", :action "@cell/get-action-list", :body []})))
 
 (defn.xt
   get-action-entry
@@ -122,7 +122,7 @@
    (xt.cell.kernel.base-link/call
     link
     {:op "call",
-     :action "@worker/get-action-entry",
+     :action "@cell/get-action-entry",
      :body [name]})))
 
 (defn.xt
@@ -131,7 +131,7 @@
   (return
    (xt.cell.kernel.base-link/call
     link
-    {:op "call", :action "@worker/ping", :body []})))
+    {:op "call", :action "@cell/ping", :body []})))
 
 (defn.xt
   ping-async
@@ -139,7 +139,7 @@
   (return
    (xt.cell.kernel.base-link/call
     link
-    {:op "call", :action "@worker/ping.async", :body [ms]})))
+    {:op "call", :action "@cell/ping.async", :body [ms]})))
 
 (defn.xt
   echo
@@ -147,7 +147,7 @@
   (return
    (xt.cell.kernel.base-link/call
     link
-    {:op "call", :action "@worker/echo", :body [arg]})))
+    {:op "call", :action "@cell/echo", :body [arg]})))
 
 (defn.xt
   echo-async
@@ -155,7 +155,7 @@
   (return
    (xt.cell.kernel.base-link/call
     link
-    {:op "call", :action "@worker/echo.async", :body [arg ms]})))
+    {:op "call", :action "@cell/echo.async", :body [arg ms]})))
 
 (defn.xt
   error
@@ -163,7 +163,7 @@
   (return
    (xt.cell.kernel.base-link/call
     link
-    {:op "call", :action "@worker/error", :body []})))
+    {:op "call", :action "@cell/error", :body []})))
 
 (defn.xt
   error-async
@@ -171,7 +171,7 @@
   (return
    (xt.cell.kernel.base-link/call
     link
-    {:op "call", :action "@worker/error.async", :body [ms]})))
+    {:op "call", :action "@cell/error.async", :body [ms]})))
 
 
 ;;

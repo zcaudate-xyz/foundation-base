@@ -20,18 +20,18 @@
   (!.js (worker-local/actions-baseline))
   => map?
 
-  ;; Check that @worker/ping action exists with correct structure
-  (!.js (xt/x:get-key (worker-local/actions-baseline) "@worker/ping"))
+  ;; Check that @cell/ping action exists with correct structure
+  (!.js (xt/x:get-key (worker-local/actions-baseline) "@cell/ping"))
   => (contains {"is_async" false
                 "args" []})
 
-  ;; Check that @worker/echo action exists
-  (!.js (xt/x:get-key (worker-local/actions-baseline) "@worker/echo"))
+  ;; Check that @cell/echo action exists
+  (!.js (xt/x:get-key (worker-local/actions-baseline) "@cell/echo"))
   => (contains {"is_async" false
                 "args" ["arg"]})
 
-  ;; Check that @worker/ping.async action exists and is async
-  (!.js (xt/x:get-key (worker-local/actions-baseline) "@worker/ping.async"))
+  ;; Check that @cell/ping.async action exists and is async
+  (!.js (xt/x:get-key (worker-local/actions-baseline) "@cell/ping.async"))
   => (contains {"is_async" true
                 "args" ["ms"]}))
 
@@ -42,7 +42,7 @@
   (!.js
    (worker-local/actions-init {"@custom/action" {}} nil)
    ;; Check that baseline actions are registered
-   (xt/x:has-key? (worker-state/WORKER_ACTIONS) "@worker/ping"))
+   (xt/x:has-key? (worker-state/WORKER_ACTIONS) "@cell/ping"))
   => true
 
   ;; Check that custom action is also registered
@@ -58,7 +58,7 @@
   (let [result (worker-local/tmpl-baseline-action
                 @js.cell.kernel.worker-state/fn-ping)]
     (first result)
-    => "@worker/ping"
+    => "@cell/ping"
 
     (get (second result) :is-async)
     => false
@@ -70,7 +70,7 @@
   (let [result (worker-local/tmpl-baseline-action
                 @js.cell.kernel.worker-state/fn-trigger)]
     (first result)
-    => "@worker/trigger"
+    => "@cell/trigger"
 
     ;; Handler should be wrapped with fn-self
     (get-in (second result) [:handler])
