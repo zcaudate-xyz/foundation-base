@@ -53,7 +53,7 @@
     (var children (xt/x:get-key p "children"))
     (xt/x:set-key p "children" [])
     (xt/for:array [entry children]
-      (drive-fn p entry)))
+      (drive-fn p entry drive-fn)))
   (return p))
 
 (defn.xt internal-link-action
@@ -72,7 +72,8 @@
              promise
              {"child" child
               "resolve" on-resolve
-              "reject" on-reject}))))
+              "reject" on-reject}
+             drive-fn))))
 
 (defn.xt internal-adopt-action
   "adopts either a raw value or another common promise"
@@ -191,9 +192,25 @@
                (return nil))))))))
   (return
    (-/promise-then
-    chain
-    (fn [_]
-      (return out)))))
+     chain
+     (fn [_]
+       (return out)))))
+
+(defspec.xt with-delay [:fn [:xt/any :xt/any] :xt/promise])
+
+(defn.xt with-delay
+  "delays thunk execution inside the common xt.promise model"
+  {:added "4.1"}
+  [a b]
+  (var thunk (:? (xt/x:is-function? a) a b))
+  (var ms (:? (xt/x:is-function? a) b a))
+  (return
+   (-/promise
+    (fn []
+      (var start (xt/x:now-ms))
+      (while (< (- (xt/x:now-ms) start) ms)
+        (:= start start))
+      (return (thunk))))))
 
 (defspec.xt promise-finally [:fn [:xt/promise [:xt/fn]] :xt/promise])
 
@@ -217,6 +234,6 @@
         (-/promise-then
          (-/promise thunk)
          (fn [_]
-           (throw err)))
+           (return (-/make-rejected-state err))))
         (fn [cleanup-err]
-          (throw cleanup-err))))))))
+          (return (-/make-rejected-state cleanup-err)))))))))

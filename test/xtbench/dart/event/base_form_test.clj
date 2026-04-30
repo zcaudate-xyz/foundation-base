@@ -62,8 +62,8 @@
    (form/add-listener f
                       "a1"
                       ["login"]
-                       (fn [id data t meta]
-                         (xt/x:arr-push calls "a1"))
+                      (fn [id data t meta]
+                        (xt/x:arr-push calls "a1"))
                       nil)
    (form/set-field f "login" "user")
    [(form/list-listeners f)
@@ -138,7 +138,7 @@
 
   (!.dt
    (var f (-/make-login-form))
-   (form/add-listener f "a1" ["login"] (fn:> [_ _ _ _] nil) nil)
+   (form/add-listener f "a1" ["login"] (fn:> [id data t meta] nil) nil)
    [(form/set-field f "login" "world")
     (form/get-field f "login")])
   => [["a1"] "world"])
@@ -166,7 +166,7 @@
 
   (!.dt
    (var f (-/make-login-form))
-   (form/add-listener f "a1" ["login"] (fn:> [_ _ _ _] nil) nil)
+   (form/add-listener f "a1" ["login"] (fn:> [id data t meta] nil) nil)
    [((form/field-fn f "login") "world")
     (form/get-field f "login")])
   => [["a1"] "world"])
@@ -203,11 +203,13 @@
    (form/add-listener f "a1" ["login"] (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil)
    (form/set-data f {:login "world"})
    [out (form/get-data f)])
-  => [{"fields" ["login"]
+  => [{"id" "a1"
+       "data" {"fields" ["login"]
+               "type" "form.data"}
+       "t" nil
        "meta" {"form/fields" ["login"]
                "listener/id" "a1"
-               "listener/type" "form"}
-       "type" "form.data"}
+               "listener/type" "form"}}
       {"login" "world"}])
 
 ^{:refer xt.event.base-form/reset-all-data :added "4.1"}
@@ -292,7 +294,7 @@
 
   (!.dt
    (var f (-/make-login-form))
-   (form/add-listener f "a1" ["login"] (fn:> [_ _ _ _] nil) nil)
+   (form/add-listener f "a1" ["login"] (fn:> [id data t meta] nil) nil)
    (form/reset-all-validators f)
    (form/get-result f))
   => {"::" "validation.result"

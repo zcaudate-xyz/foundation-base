@@ -103,8 +103,8 @@
             {:value 0}
             nil
             nil))
-    (view/add-listener v "a1" (fn:> [_ _ _ _] nil) nil nil)
-    (view/add-listener v "b2" (fn:> [_ _ _ _] nil) nil nil)
+    (view/add-listener v "a1" (fn:> [id data t meta] nil) nil nil)
+    (view/add-listener v "b2" (fn:> [id data t meta] nil) nil nil)
     [(view/get-output v)
      (view/list-listeners v)
      (. (view/remove-listener v "b2") ["meta"])
@@ -125,8 +125,8 @@
             {}
             [3]
             {:value 0}))
-    (view/add-listener v "a1" (fn:> [_ _ _ _] nil) nil nil)
-    (view/add-listener v "b2" (fn:> [_ _ _ _] nil) nil nil)
+    (view/add-listener v "a1" (fn:> [id data t meta] nil) nil nil)
+    (view/add-listener v "b2" (fn:> [id data t meta] nil) nil nil)
     [(view/get-output v)
      (view/list-listeners v)
      (. (view/remove-listener v "b2") ["meta"])
@@ -408,13 +408,15 @@
     [out
      (. (view/get-input v) ["current"])])
   => (just-in
-      [(contains-in
-        {"data" {"current" {"data" [1]}
-                 "updated" integer?}
-         "meta" {"listener/id" "a1"
-                 "listener/type" "view"}
-         "type" "view.input"})
-       {"data" [1]}])
+       [(contains-in
+         {"id" "a1"
+          "t" nil
+          "meta" {"listener/id" "a1"
+                  "listener/type" "view"}
+          "data" {"type" "view.input"
+                  "data" {"current" {"data" [1]}
+                          "updated" integer?}}})
+        {"data" [1]}])
 
   (!.py
     (var v (-/make-basic-view))
@@ -424,13 +426,15 @@
     [out
      (. (view/get-input v) ["current"])])
   => (just-in
-      [(contains-in
-        {"data" {"current" {"data" [1]}
-                 "updated" integer?}
-         "meta" {"listener/id" "a1"
-                 "listener/type" "view"}
-         "type" "view.input"})
-       {"data" [1]}]))
+       [(contains-in
+         {"id" "a1"
+          "t" nil
+          "meta" {"listener/id" "a1"
+                  "listener/type" "view"}
+          "data" {"type" "view.input"
+                  "data" {"current" {"data" [1]}
+                          "updated" integer?}}})
+        {"data" [1]}]))
 
 ^{:refer xt.event.base-view/set-output :added "4.1"}
 (fact "sets output and notifies listeners"
@@ -443,16 +447,18 @@
     [out
      (view/get-current v)])
   => (just-in
-      [(contains-in
-        {"data" {"current" 1
-                 "elapsed" nil
-                 "tag" nil
-                 "type" "output"
-                 "updated" integer?}
-         "meta" {"listener/id" "a1"
-                 "listener/type" "view"}
-         "type" "view.output"})
-       1])
+       [(contains-in
+         {"id" "a1"
+          "t" nil
+          "meta" {"listener/id" "a1"
+                  "listener/type" "view"}
+          "data" {"type" "view.output"
+                  "data" {"current" 1
+                          "elapsed" nil
+                          "tag" nil
+                          "type" "output"
+                          "updated" integer?}}})
+        1])
 
   (!.py
     (var v (-/make-basic-view))
@@ -462,16 +468,18 @@
     [out
      (view/get-current v)])
   => (just-in
-      [(contains-in
-        {"data" {"current" 1
-                 "elapsed" nil
-                 "tag" nil
-                 "type" "output"
-                 "updated" integer?}
-         "meta" {"listener/id" "a1"
-                 "listener/type" "view"}
-         "type" "view.output"})
-       1]))
+       [(contains-in
+         {"id" "a1"
+          "t" nil
+          "meta" {"listener/id" "a1"
+                  "listener/type" "view"}
+          "data" {"type" "view.output"
+                  "data" {"current" 1
+                          "elapsed" nil
+                          "tag" nil
+                          "type" "output"
+                          "updated" integer?}}})
+        1]))
 
 ^{:refer xt.event.base-view/set-output-disabled :added "4.1"}
 (fact "sets the output disabled flag"

@@ -677,6 +677,6 @@
   
   (s/run ['xt.db.schema.sql-graph])
   
-  (s/seedgen-benchadd   '[xt.db.schema.sql-graph] {:lang [:dart :julia] :write true})
+  (s/seedgen-benchadd   '[xt.db.schema.sql-graph] {:lang [:ruby :dart :julia] :write true})
   (s/seedgen-langadd    '[xt.db.schema.sql-graph] {:lang [:lua :python] :write true})
   (s/seedgen-langremove '[xt.db.schema.sql-graph] {:lang [:lua :python] :write true}))

@@ -12,7 +12,7 @@
   :xt/any)
 
 (defspec.xt EventListenerCallback
-  [:fn [:xt/str :xt/any [:xt/maybe :xt/any] EventListenerMeta] :xt/any])
+  [:fn [EventPayload] :xt/any])
 
 (defspec.xt EventListenerEntry
   [:xt/record

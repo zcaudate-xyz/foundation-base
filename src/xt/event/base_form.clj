@@ -298,7 +298,7 @@
         (complete-fn (== "ok" (xtd/get-in (. res ["fields"])
                                           [field "status"]))
                      res))
-      (return res))))))
+      (return res)))))
 
 (defn.xt reset-field-validator
   "reset field validators"

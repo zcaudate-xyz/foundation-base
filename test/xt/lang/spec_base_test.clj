@@ -6,8 +6,8 @@
             [xt.lang.spec-promise :as spec-promise]))
 
 ^{:seedgen/root {:all true, :langs [:python :lua]
-                 :lua     {:extra  [[lua.core.common-promise :as lua-promise]]}
-                 :python  {:extra  [[python.core.common-promise :as py-promise]]}}}
+                 :lua     {:extra  [[xt.lang.common-promise :as lua-promise]]}
+                 :python  {:extra  [[xt.lang.common-promise :as py-promise]]}}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -19,11 +19,11 @@
 
 (l/script- :python
   {:runtime :basic
-   :require [[xt.lang.spec-base :as xt] [xt.lang.spec-promise :as spec-promise] [xt.lang.common-string :as xts] [xt.lang.common-data :as xtd] [xt.lang.common-iter :as xti] [xt.lang.common-repl :as repl] [python.core.common-promise :as py-promise]]})
+   :require [[xt.lang.spec-base :as xt] [xt.lang.spec-promise :as spec-promise] [xt.lang.common-string :as xts] [xt.lang.common-data :as xtd] [xt.lang.common-iter :as xti] [xt.lang.common-repl :as repl] [xt.lang.common-promise :as py-promise]]})
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.lang.spec-base :as xt] [xt.lang.spec-promise :as spec-promise] [xt.lang.common-string :as xts] [xt.lang.common-data :as xtd] [xt.lang.common-iter :as xti] [xt.lang.common-repl :as repl] [lua.core.common-promise :as lua-promise]]})
+   :require [[xt.lang.spec-base :as xt] [xt.lang.spec-promise :as spec-promise] [xt.lang.common-string :as xts] [xt.lang.common-data :as xtd] [xt.lang.common-iter :as xti] [xt.lang.common-repl :as repl] [xt.lang.common-promise :as lua-promise]]})
 
 (fact:global
  {:setup [(l/rt:restart)]

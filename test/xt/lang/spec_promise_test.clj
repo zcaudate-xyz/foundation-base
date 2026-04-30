@@ -16,14 +16,14 @@
    :require [[xt.lang.spec-promise :as spec-promise]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
-             [python.core.common-promise]]})
+             [xt.lang.common-promise]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.spec-promise :as spec-promise]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
-             [lua.core.common-promise]]})
+             [xt.lang.common-promise]]})
 
 (fact:global
  {:setup [(l/rt:restart)]

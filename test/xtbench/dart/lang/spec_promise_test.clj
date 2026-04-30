@@ -14,6 +14,16 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
+^{:refer xt.lang.spec-base/x:async-run :added "4.1"}
+(fact "runs thunks in the host async model"
+
+  (notify/wait-on :dart
+    (do (xt/x:async-run
+         (fn []
+           (repl/notify 5)))
+        nil))
+  => 5)
+
 ^{:refer xt.lang.spec-promise/x:promise-run :added "4.1"}
 (fact "wraps raw values and preserves resolved results"
 

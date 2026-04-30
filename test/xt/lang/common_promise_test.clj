@@ -17,16 +17,14 @@
    :require [[xt.lang.common-promise :as common-promise]
               [xt.lang.common-repl :as repl]
               [xt.lang.spec-promise :as spec-promise]
-              [xt.lang.spec-base :as xt]
-              [lua.core.common-promise]]})
+              [xt.lang.spec-base :as xt]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.lang.common-promise :as common-promise]
               [xt.lang.common-repl :as repl]
               [xt.lang.spec-promise :as spec-promise]
-              [xt.lang.spec-base :as xt]
-              [python.core.common-promise]]})
+              [xt.lang.spec-base :as xt]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -98,17 +96,17 @@
 
   (notify/wait-on :python
     (common-promise/promise-then
-     (common-promise/with-delay 10
-                                (fn []
-                                  (return 5)))
+     (common-promise/promise
+      (fn []
+        (return 5)))
      (repl/>notify)))
   => 5
 
   (notify/wait-on :lua
     (common-promise/promise-then
-     (common-promise/with-delay 10
-                                (fn []
-                                  (return 5)))
+     (common-promise/promise
+      (fn []
+        (return 5)))
      (repl/>notify)))
   => 5)
 
@@ -120,6 +118,7 @@
 
 ^{:refer xt.lang.common-promise/promise-finally :added "4.1"}
 (fact "common promise helpers preserve errors and cleanup order"
+  
   (notify/wait-on :js
     (var out [])
     (common-promise/promise-catch
@@ -135,6 +134,7 @@
                      (xt/x:get-key (xt/x:ex-data err) "a")]))))
   => [["finally"] true 1]
 
+  
   (notify/wait-on :python
     (var out [])
     (common-promise/promise-catch
@@ -149,7 +149,7 @@
                      (xt/x:ex-native? err)
                      (xt/x:get-key (xt/x:ex-data err) "a")]))))
   => [["finally"] true 1]
-
+  
   (notify/wait-on :lua
     (var out [])
     (common-promise/promise-catch

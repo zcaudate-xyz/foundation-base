@@ -1,7 +1,6 @@
 (ns xt.lang.spec-promise
-  (:require [lua.core.common-promise]
-            [python.core.common-promise]
-            [std.lang :as l :refer [defspec.xt]]))
+  (:require [std.lang :as l :refer [defspec.xt]]
+            [xt.lang.common-promise]))
 
 (l/script :xtalk)
 

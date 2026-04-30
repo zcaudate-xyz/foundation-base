@@ -368,7 +368,7 @@
    (. (route/add-url-listener
        (route/make-route "hello")
        "a1"
-       (fn:> [_ _ _ _] nil)
+       (fn:> [id data t meta] nil)
        {:label "hello"})
       ["meta"]))
   => {"label" "hello"
@@ -379,7 +379,7 @@
    (. (route/add-url-listener
        (route/make-route "hello")
        "a1"
-       (fn:> [_ _ _ _] nil)
+       (fn:> [id data t meta] nil)
        {:label "hello"})
       ["meta"]))
   => {"label" "hello"
@@ -394,7 +394,7 @@
        (route/make-route "hello")
        ["hello"]
        "a1"
-       (fn:> [_ _ _ _] nil)
+       (fn:> [id data t meta] nil)
        {:label "hello"})
       ["meta"]))
   => {"label" "hello"
@@ -407,7 +407,7 @@
        (route/make-route "hello")
        ["hello"]
        "a1"
-       (fn:> [_ _ _ _] nil)
+       (fn:> [id data t meta] nil)
        {:label "hello"})
       ["meta"]))
   => {"label" "hello"
@@ -423,7 +423,7 @@
        (route/make-route "hello")
        "auth"
        "a1"
-       (fn:> [_ _ _ _] nil)
+       (fn:> [id data t meta] nil)
        {:label "hello"})
       ["meta"]))
   => {"label" "hello"
@@ -436,7 +436,7 @@
        (route/make-route "hello")
        "auth"
        "a1"
-       (fn:> [_ _ _ _] nil)
+       (fn:> [id data t meta] nil)
        {:label "hello"})
       ["meta"]))
   => {"label" "hello"
@@ -453,7 +453,7 @@
        ["hello"]
        "auth"
        "a1"
-       (fn:> [_ _ _ _] nil)
+       (fn:> [id data t meta] nil)
        {:label "hello"})
       ["meta"]))
   => {"label" "hello"
@@ -468,7 +468,7 @@
        ["hello"]
        "auth"
        "a1"
-       (fn:> [_ _ _ _] nil)
+       (fn:> [id data t meta] nil)
        {:label "hello"})
       ["meta"]))
   => {"label" "hello"

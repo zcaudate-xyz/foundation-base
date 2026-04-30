@@ -73,6 +73,15 @@
      (xt/x:nil? (xt/proto:method obj "missing"))])
   => ["alpha!" true])
 
+^{:refer xt.lang.spec-base/x:async-run :added "4.1"}
+(fact "runs an async thunk"
+
+  (notify/wait-on :dart
+    (xt/x:async-run
+     (fn []
+       (repl/notify "hello"))))
+  => "hello")
+
 ^{:refer xt.lang.spec-base/x:get-idx :added "4.1"}
 (fact "reads the first indexed value"
 
