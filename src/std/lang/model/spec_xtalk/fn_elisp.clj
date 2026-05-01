@@ -251,7 +251,7 @@
 
 (defn elisp-tf-x-lu-create
   [_]
-  (list 'make-hash-table :test (list 'intern "eq")))
+  (list 'make-hash-table :test (list 'intern "equal")))
 
 (defn elisp-tf-x-lu-eq
   [[_ x y]]
@@ -329,7 +329,13 @@
 (defn elisp-tf-x-copy-key
   [[_ dst src key]]
   (if (vector? key)
-    (list 'x:set-key dst (first key) (list 'x:get-key src (second key) nil))
+    (list 'x:set-key
+          dst
+          (first key)
+          (list 'if
+                (list 'vectorp src)
+                (list 'x:get-idx src (second key) nil)
+                (list 'x:get-key src (second key) nil)))
     (list 'x:set-key dst key (list 'x:get-key src key nil))))
 
 (defn elisp-tf-x-obj-keys

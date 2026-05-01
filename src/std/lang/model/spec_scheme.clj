@@ -170,20 +170,20 @@
 
  (def +scheme-transform-config+
    {:begin 'begin
-    :reserved +reserved+
-   :def-form (fn [sym value]
-               (list 'define sym value))
-   :lambda-form (fn [args body]
-                   (let [body (if (seq body)
-                                body
-                                ['(void)])]
-                     (list* 'lambda
-                            (apply list args)
-                            body)))
-    :defn-form (fn [sym args body]
-                 (list* 'define
-                        (list* sym args)
-                       body))
+     :reserved +reserved+
+    :def-form (fn [sym value]
+                (list 'define sym value))
+    :lambda-form (fn [args body]
+                    (let [body (if (seq body)
+                                 body
+                                 ['(void)])]
+                      (list* 'lambda
+                             (apply list args)
+                             body)))
+     :defn-form (fn [sym args body]
+                  (list* 'define
+                         (list* sym args)
+                        body))
     :let-form (fn [bindings body]
                 (list* 'let* (apply list bindings) body))
    :while-form (fn [test body]

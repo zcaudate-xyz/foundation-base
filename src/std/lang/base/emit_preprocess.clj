@@ -13,6 +13,7 @@
   base/with:macro-opts
   input/to-input-form
   input/to-input
+  input/eval-template-forms
   value/value-template-args
   value/value-standalone
   resolve/process-namespaced-resolve

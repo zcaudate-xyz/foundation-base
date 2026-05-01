@@ -187,9 +187,13 @@
 ;; LISTENER
 ;;
 
-(def.xt ^{:arglists '([cell])}
-  clear-listeners
-  event-common/clear-listeners)
+(defn.xt clear-listeners
+  "clears grouped listeners from a cell"
+  {:added "4.1"}
+  [cell]
+  (var cleared (event-common/all-keyed-listeners cell))
+  (xt/x:set-key cell "listeners" {})
+  (return cleared))
 
 (defn.xt add-listener
   "add listener to cell"
@@ -198,7 +202,15 @@
   (var view-key (xt/x:json-encode path))
   (return
    (event-common/add-keyed-listener
-    cell view-key listener-id "cell" f meta pred)))
+    cell view-key listener-id "cell"
+    (fn [id data t meta]
+      (var event (xt/x:obj-assign {} (or data {})))
+      (xt/x:set-key event "meta" meta)
+      (when (xt/x:not-nil? t)
+        (xt/x:set-key event "time" t))
+      (return (f event)))
+    meta
+    pred)))
 
 (defn.xt remove-listener
   "remove listeners from cell"

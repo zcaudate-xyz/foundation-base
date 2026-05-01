@@ -1059,45 +1059,52 @@
 
 (defn ruby-tf-x-return-wrap
   ([[_ f encode-fn]]
+   (let [result  (gensym "result__")
+         encoded (gensym "encoded__")]
      (if (and (symbol? encode-fn)
               (= "return-encode" (name encode-fn)))
-       (template/$ (do (require "json")
-                       (try
-                         (:= out (if (. ~f (is_a? Proc))
-                                   (. ~f (call))
-                                   ~f))
-                          (catch e
-                              (return (JSON.generate {:type "error"
-                                                      :value (. e to_s)}))))
-                        (return (~encode-fn out nil nil))))
-        (template/$ (do (require "json")
-                        (try
-                         (:= out (if (. ~f (is_a? Proc))
-                                   (. ~f (call))
-                                   ~f))
-                          (catch e
-                              (return (JSON.generate {:type "error"
-                                                      :value (. e to_s)}))))
-                        (var encoded nil)
-                        (if (== 1 (. ~encode-fn arity))
-                          (:= encoded (. ~encode-fn (call out)))
-                        (:= encoded (. ~encode-fn (call out nil nil))))
-                      (return encoded))))))
+       (template/$
+        (do (require "json")
+            (try
+              (:= ~result (if (. ~f (is_a? Proc))
+                            (. ~f (call))
+                            ~f))
+              (catch e
+                (return (JSON.generate {:type "error"
+                                        :value (. e to_s)}))))
+            (return (~encode-fn ~result nil nil))))
+       (template/$
+        (do (require "json")
+            (try
+              (:= ~result (if (. ~f (is_a? Proc))
+                            (. ~f (call))
+                            ~f))
+              (catch e
+                (return (JSON.generate {:type "error"
+                                        :value (. e to_s)}))))
+            (var ~encoded nil)
+            (if (== 1 (. ~encode-fn arity))
+              (:= ~encoded (. ~encode-fn (call ~result)))
+              (:= ~encoded (. ~encode-fn (call ~result nil nil))))
+            (return ~encoded)))))))
 
 (defn ruby-tf-x-return-eval
   ([[_ s wrap-fn]]
-    (if (and (symbol? wrap-fn)
-             (= "return-wrap" (name wrap-fn)))
-      (template/$ (do (require "json")
-                      (try
-                        (:= out (eval ~s))
-                        (return (~wrap-fn out))
-                        (catch e
-                            (return (JSON.generate {:type "error"
-                                                    :value (. e to_s)}))))))
-       (template/$ (return (. ~wrap-fn
-                              (call (fn []
-                                      (return (eval ~s))))))))))
+   (let [result (gensym "result__")]
+     (if (and (symbol? wrap-fn)
+              (= "return-wrap" (name wrap-fn)))
+       (template/$
+        (do (require "json")
+            (try
+              (:= ~result (eval ~s))
+              (return (~wrap-fn ~result))
+              (catch e
+                (return (JSON.generate {:type "error"
+                                        :value (. e to_s)}))))))
+       (template/$
+        (return (. ~wrap-fn
+                   (call (fn []
+                           (return (eval ~s)))))))))))
 
 (def +ruby-return+
   {:x-return-encode  {:macro #'ruby-tf-x-return-encode   :emit :macro

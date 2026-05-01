@@ -160,9 +160,13 @@
               (do (when (or (== token ":")
                             (== token ":/"))
                     (rdr/throw-reader reader (xt/x:cat "Invalid token: " token)))
-                  (var [ns name] (xts/sym-pair (xt/x:str-substring token (xt/x:offset 1))))
+                  (var pair (xts/sym-pair (xt/x:str-substring token (xt/x:offset 1))))
+                  (var ns (xt/x:get-idx pair 0))
+                  (var name (xt/x:get-idx pair 1))
                   (return (kw/keyword ns name)))
-              (do (var [ns name] (xts/sym-pair token))
+              (do (var pair (xts/sym-pair token))
+                  (var ns (xt/x:get-idx pair 0))
+                  (var name (xt/x:get-idx pair 1))
                   (return (sym/symbol ns name)))))))
 
 (defn.xt normalise-meta

@@ -171,6 +171,7 @@
             def-form
             lambda-form
             defn-form
+            return-form
             let-form
             while-form
             ternary-form
@@ -332,9 +333,12 @@
 
                             :else
                             (case op
-                              return (if (= 1 (count args))
-                                       (transform (first args))
-                                       (begin-form (mapv transform args)))
+                              return (let [value (if (= 1 (count args))
+                                                   (transform (first args))
+                                                   (begin-form (mapv transform args)))]
+                                       (if return-form
+                                         (return-form value)
+                                         value))
                               begin  (if (= op begin)
                                        (begin-form (transform-body args))
                                        +not-found+)
@@ -371,7 +375,9 @@
                                                   (transform-body (rest args)))
                                :?     (ternary-expr (transform (first args))
                                                     (transform (second args))
-                                                    (transform (nth args 2)))
+                                                    (if (< 2 (count args))
+                                                      (transform (nth args 2))
+                                                      nil))
                                br*    (branch-form args)
                                try    (let [{:keys [body catch finally]} (split-try-clauses args)]
                                         (try-form (transform-body body)

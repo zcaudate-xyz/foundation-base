@@ -155,7 +155,38 @@
     :namespace 'L.core
     :module 'L.core})
   => (contains [{:a 1, :doc "hello"}
-                b/book-entry?]))
+                b/book-entry?])
+
+  (def template-sum {:sum 3})
+  (def +template-sum+ {:sum 4})
+
+  (let [[_ entry]
+        (entry/create-code-raw
+         '(defn add-fn
+            [a b]
+            (return (@! template-sum)))
+         (get-in @emit/+test-grammar+ [:reserved 'defn])
+         {:lang :lua
+          :namespace 'L.core
+          :module 'L.core})]
+    (:form-input entry))
+   => '(defn add-fn
+         [a b]
+        (return {:sum 3}))
+
+  (let [[_ entry]
+        (entry/create-code-raw
+         '(defn add-fn
+            [a b]
+            (return @+template-sum+))
+         (get-in @emit/+test-grammar+ [:reserved 'defn])
+         {:lang :lua
+          :namespace 'L.core
+          :module 'L.core})]
+    (:form-input entry))
+  => '(defn add-fn
+        [a b]
+        (return {:sum 4})))
 
 ^{:refer std.lang.base.impl-entry/create-code-base :added "4.0"}
 (fact "creates the base code entry"

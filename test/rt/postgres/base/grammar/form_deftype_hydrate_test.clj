@@ -38,6 +38,20 @@
     #(pg-deftype-hydrate-check-link {}
                                     {:module 'demo :id 'Task :section :code}
                                     :table))
+  => true
+
+  (with-redefs [resolve (fn [sym]
+                          (when (= sym 'demo/Task)
+                            (atom {:id 'Task
+                                   :module 'demo
+                                   :lang :postgres
+                                   :section :code
+                                   :static/dbtype :table})))
+                std.lang.base.library-snapshot/get-book (fn [_ _] {:modules {}})
+                std.lang.base.book/get-base-entry (constantly nil)]
+    (pg-deftype-hydrate-check-link {}
+                                    {:module 'demo :id 'Task :section :code}
+                                    :table))
   => true)
 
 ^{:refer rt.postgres.base.grammar.form-deftype-hydrate/pg-deftype-hydrate-link :added "4.1"}
@@ -46,14 +60,22 @@
     #(pg-deftype-hydrate-link 'Task {:id 'demo} {:ns '-/Task}))
   => [{:section :code
        :lang :postgres
-       :module 'demo
-       :id 'Task}
+        :module 'demo
+        :id 'Task}
       false]
 
   (with-demo-links
+    #(pg-deftype-hydrate-link 'Task {:id 'demo} {:ns '-/Status}))
+  => [{:section :code
+       :lang :postgres
+       :module 'demo
+       :id 'Status}
+      false]
+ 
+  (with-demo-links
     #(pg-deftype-hydrate-link 'Task {:id 'demo} {:ns 'demo/Task}))
   => [{:id 'Task
-       :module 'demo
+        :module 'demo
        :lang :postgres
        :section :code}
       true])
@@ -114,6 +136,17 @@
     #(pg-deftype-hydrate-process-enum
       :status
       {:type :enum :enum {:ns 'demo/Status}}
+      (fn [_] [{:module 'demo :id 'Status :section :code} true])
+      {}))
+  => [:status
+      {:type :enum
+        :enum {:ns 'demo/Status}}]
+
+  (with-demo-links
+    #(pg-deftype-hydrate-process-enum
+      :status
+      {:type :enum :enum {:ns '-/Status}}
+      (fn [_] [{:module 'demo :id 'Status :section :code} false])
       {}))
   => [:status
       {:type :enum
@@ -126,10 +159,11 @@
       :status
       {:type :enum :enum {:ns 'demo/Status}}
       {:snapshot {}
-       :capture (volatile! [])}))
+       :resolve-link-fn (fn [_] [{:module 'demo :id 'Status :section :code} true])
+        :capture (volatile! [])}))
   => [:status
       {:type :enum
-       :enum {:ns 'demo/Status}}])
+        :enum {:ns 'demo/Status}}])
 
 ^{:refer rt.postgres.base.grammar.form-deftype-hydrate/pg-deftype-hydrate-spec :added "4.1"}
 (fact "pg-deftype-hydrate-spec hydrates each attribute in order"

@@ -107,33 +107,38 @@
   "gets cell actions"
   {:added "4.0"}
   [inner]
-  (return (or (and inner (. inner actions))
-              (-/INNER_ACTIONS))))
+  (when (xt/x:not-nil? inner)
+    (var actions (xt/x:get-key inner "actions"))
+    (when (xt/x:not-nil? actions)
+      (return actions)))
+  (return (-/INNER_ACTIONS)))
 
 (defn.xt set-actions
   "initiates the base actions"
   {:added "4.0"}
   [actions inner]
-  (cond inner
-        (do (xt/x:set-key inner "actions" actions)
-            (return inner))
-        
-        :else
-        (return (-/INNER_ACTIONS-reset actions))))
+  (if (xt/x:not-nil? inner)
+    (do (xt/x:set-key inner "actions" actions)
+        (return inner))
+    (return (-/INNER_ACTIONS-reset actions))))
 
 (defn.xt fn-self
   "applies arguments along with `self`"
   {:added "4.0"}
   [f]
-  (return (fn [...args]
-            (return (f self ...args)))))
+  (return (fn [...]
+            (var args (xt/x:arr-clone [...]))
+            (xt/x:arr-push-first args self)
+            (return (xt/x:apply f args)))))
 
 (defn.xt fn-bind
   "applies arguments along with an explicit inner instance"
   {:added "4.0"}
   [inner f]
-  (return (fn [...args]
-            (return (f inner ...args)))))
+  (return (fn [...]
+            (var args (xt/x:arr-clone [...]))
+            (xt/x:arr-push-first args inner)
+            (return (xt/x:apply f args)))))
 
 (defn.xt ^{:cell/action "@cell/trigger"
            :cell/static false}
@@ -189,7 +194,7 @@
   "gets the final status"
   {:added "4.0"}
   [inner]
-  (return (. (-/INNER_STATE) ["final"])))
+  (return (xt/x:get-key (-/INNER_STATE) "final")))
 
 (defn.xt ^{:cell/action "@cell/set-eval-status"
            :cell/static false}
@@ -209,7 +214,7 @@
   "gets the eval status"
   {:added "4.0"}
   []
-  (return (. (-/INNER_STATE) ["eval"])))
+  (return (xt/x:get-key (-/INNER_STATE) "eval")))
 
 (defn.xt ^{:cell/action "@cell/get-action-list"
            :cell/static true}
@@ -225,8 +230,7 @@
   "gets a action entry"
   {:added "4.0"}
   [name]
-  (return (. (-/INNER_ACTIONS)
-             [name])))
+  (return (xt/x:get-key (-/INNER_ACTIONS) name)))
 
 (defn.xt ^{:cell/action "@cell/ping"
            :cell/static true}

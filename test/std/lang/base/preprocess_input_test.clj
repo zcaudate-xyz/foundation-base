@@ -35,3 +35,22 @@
   (binding [preprocess-base/*macro-splice* true]
     (to-input '(do (~! [1 2 3 4]))))
   => '(do 1 2 3 4))
+
+^{:refer std.lang.base.preprocess-input/eval-template-forms :added "4.1"}
+(fact "eagerly resolves template forms in persisted input"
+  (def hello {:a 1})
+  (def +hello+ {:b 2})
+
+  (eval-template-forms '(do (!:template hello)
+                            (!:template (+ 1 2 3))))
+  => '(do {:a 1}
+          6)
+
+  (eval-template-forms '(do (!:eval +hello+)))
+  => '(do {:b 2})
+
+  (eval-template-forms '(do (!:template (+ a b))))
+  => '(do (!:template (+ a b)))
+
+  (eval-template-forms '(do (!:eval (+ 1 2 3))))
+  => '(do (!:eval (+ 1 2 3))))

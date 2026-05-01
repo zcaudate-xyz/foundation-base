@@ -1,8 +1,8 @@
 (ns std.lang.base.preprocess-input
   (:require [clojure.string]
-            [std.lang.base.preprocess-base :as preprocess-base]
-            [std.lang.base.util :as ut]
-            [std.lib.collection :as collection]
+             [std.lang.base.preprocess-base :as preprocess-base]
+             [std.lang.base.util :as ut]
+             [std.lib.collection :as collection]
             [std.lib.context.pointer :as ptr]
             [std.lib.foundation :as f]
             [std.lib.walk :as walk]))
@@ -72,5 +72,38 @@
 
                               (collection/form? x)
                               (to-input-form x))
-                        x))
-                  raw)))
+                         x))
+                   raw)))
+
+(defn eval-template-forms
+  "eagerly resolves persisted host-evaluable forms in form-input"
+  {:added "4.1"}
+  [form]
+  (letfn [(template-evaluable? [expr]
+            (let [blocked (volatile! false)]
+              (walk/prewalk (fn [x]
+                              (when (and (symbol? x)
+                                         (nil? (namespace x))
+                                         (not (special-symbol? x))
+                                         (not (resolve x)))
+                                 (vreset! blocked true))
+                              x)
+                            expr)
+              (not @blocked)))
+          (persisted-eval? [x]
+            (and (collection/form? x)
+                 (= '!:eval (first x))
+                 (not (collection/form? (second x)))
+                 (template-evaluable? (second x))))]
+    (walk/postwalk (fn [x]
+                     (cond (and (collection/form? x)
+                                (= '!:template (first x))
+                                (template-evaluable? (second x)))
+                           (eval-template-forms (eval (second x)))
+
+                           (persisted-eval? x)
+                           (eval-template-forms (eval (second x)))
+
+                           :else
+                           x))
+                    form)))

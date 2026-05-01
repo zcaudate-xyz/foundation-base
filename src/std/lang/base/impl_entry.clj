@@ -57,7 +57,9 @@
          [tmeta form]  (if format
                          (format form-raw)
                          [nil form-raw])
-         form-input (preprocess/to-input form)
+         form-input (-> form
+                        preprocess/to-input
+                        preprocess/eval-template-forms)
          entry (book/book-entry (merge {:op op
                                         :op-key (:op reserved)
                                         :id (cond (vector? sym)

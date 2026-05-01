@@ -344,19 +344,29 @@
  (def +elisp-transform-config+
    {:begin 'progn
      :reserved +reserved+
-    :def-form (fn [sym value]
-                (list 'setq sym value))
-    :lambda-form (fn [args body]
-                    (list* 'lambda
-                           (apply list args)
-                          (concat (elisp-function-prologue args)
-                                  body)))
-    :defn-form (fn [sym args body]
-                 (list* 'defun
-                        sym
-                        (apply list args)
-                        (concat (elisp-function-prologue args)
-                                body)))
+     :def-form (fn [sym value]
+                 (list 'progn
+                       (list 'defvar sym nil)
+                       (list 'setq sym value)))
+     :return-form (fn [value]
+                    (list 'throw (list 'quote '__xt_return__) value))
+     :lambda-form (fn [args body]
+                     (list* 'lambda
+                            (apply list args)
+                            (concat (elisp-function-prologue args)
+                                    [(list 'catch (list 'quote '__xt_return__)
+                                           (if (= 1 (count body))
+                                             (first body)
+                                             (cons 'progn body)))])))
+     :defn-form (fn [sym args body]
+                  (list* 'defun
+                         sym
+                         (apply list args)
+                         (concat (elisp-function-prologue args)
+                                 [(list 'catch (list 'quote '__xt_return__)
+                                        (if (= 1 (count body))
+                                          (first body)
+                                          (cons 'progn body)))])))
    :let-form (fn [bindings body]
                (list* 'let* (apply list bindings) body))
    :while-form (fn [test body]

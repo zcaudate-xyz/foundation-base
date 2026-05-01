@@ -327,7 +327,7 @@
 
 (defn scheme-tf-x-lu-create
   [_]
-  '(make-hasheq))
+  '(make-hash))
 
 (defn scheme-tf-x-lu-get
   [[_ lu obj]]
@@ -399,7 +399,13 @@
 (defn scheme-tf-x-copy-key
   [[_ dst src key]]
   (if (vector? key)
-    (list 'x:set-key dst (first key) (list 'x:get-key src (second key) nil))
+    (list 'x:set-key
+          dst
+          (first key)
+          (list 'if
+                (list 'vector? src)
+                (list 'x:get-idx src (second key) nil)
+                (list 'x:get-key src (second key) nil)))
     (list 'x:set-key dst key (list 'x:get-key src key nil))))
 
 (defn scheme-tf-x-obj-keys
