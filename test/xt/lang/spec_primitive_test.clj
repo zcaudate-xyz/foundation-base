@@ -305,34 +305,34 @@
   (!.js
     ((fn []
        (br*
-         (if false
-           (return "no"))
-         (elseif (> 3 2)
-           (return "yes"))
-         (else
-           (return "fallback"))))))
+        (if false
+          (return "no"))
+        (elseif (> 3 2)
+                (return "yes"))
+        (else
+         (return "fallback"))))))
   => "yes"
 
   (!.py
     ((fn []
        (br*
-         (if false
-           (return "no"))
-         (elseif (> 3 2)
-           (return "yes"))
-         (else
-           (return "fallback"))))))
+        (if false
+          (return "no"))
+        (elseif (> 3 2)
+                (return "yes"))
+        (else
+         (return "fallback"))))))
   => "yes"
 
   (!.lua
     ((fn []
        (br*
-         (if false
-           (return "no"))
-         (elseif (> 3 2)
-           (return "yes"))
-         (else
-           (return "fallback"))))))
+        (if false
+          (return "no"))
+        (elseif (> 3 2)
+                (return "yes"))
+        (else
+         (return "fallback"))))))
   => "yes")
 
 ^{:refer xt.lang.spec-primitive/break :added "4.1"}
@@ -342,9 +342,9 @@
     (var out [])
     (var entries [0 1 2 3 4 5])
     (for:array [i entries]
-      (when (== i 3)
-        (break))
-      (xt/x:arr-push out i))
+               (when (== i 3)
+                 (break))
+               (xt/x:arr-push out i))
     out)
   => [0 1 2]
 
@@ -352,9 +352,9 @@
     (var out [])
     (var entries [0 1 2 3 4 5])
     (for:array [i entries]
-      (when (== i 3)
-        (break))
-      (xt/x:arr-push out i))
+               (when (== i 3)
+                 (break))
+               (xt/x:arr-push out i))
     out)
   => [0 1 2]
 
@@ -362,9 +362,9 @@
     (var out [])
     (var entries [0 1 2 3 4 5])
     (for:array [i entries]
-      (when (== i 3)
-        (break))
-      (xt/x:arr-push out i))
+               (when (== i 3)
+                 (break))
+               (xt/x:arr-push out i))
     out)
   => [0 1 2])
 
@@ -378,7 +378,7 @@
      (return (+ a b))))
   => 3
 
-  ^*(!.py
+  (!.py
     (do:>
      (var a 1)
      (var b 2)
@@ -397,19 +397,19 @@
 
   (!.js
     ((fn:> [x]
-       (return (+ x 1)))
+           (return (+ x 1)))
      2))
   => 3
 
-  ^*(!.py
+  (!.py
     ((fn:> [x]
-       (return (+ x 1)))
+           (return (+ x 1)))
      2))
   => 3
 
   (!.lua
     ((fn:> [x]
-       (return (+ x 1)))
+           (return (+ x 1)))
      2))
   => 3)
 
@@ -458,11 +458,11 @@
 ^{:refer xt.lang.spec-primitive/pow :added "4.1"}
 (fact "raises powers"
 
-  ^*(!.js
+  (!.js
     (pow 2 5))
   => 32
 
-  ^*(!.py
+  (!.py
     (pow 2 5))
   => 32
 
@@ -477,12 +477,12 @@
   (!.js
     ((fn []
        (switch [2]
-                         (case [1]
-                           (return "one"))
-                         (case [2]
-                           (return "two"))
-                         (default
-                          (return "other"))))))
+               (case [1]
+                 (return "one"))
+               (case [2]
+                 (return "two"))
+               (default
+                (return "other"))))))
   => "two")
 
 ^{:refer xt.lang.spec-primitive/tab :added "4.1"}
@@ -490,19 +490,19 @@
 
   (!.js
     (tab [:a 1]
-                   [:b 2]))
+         [:b 2]))
   => {"a" 1
       "b" 2}
 
   (!.py
     (tab [:a 1]
-                   [:b 2]))
+         [:b 2]))
   => {"a" 1
       "b" 2}
 
   (!.lua
     (tab [:a 1]
-                   [:b 2]))
+         [:b 2]))
   => {"a" 1
       "b" 2})
 
@@ -524,26 +524,26 @@
 
   (!.js
     (do:>
-      (try
-        (throw "boom")
-        (catch err
-          (return err)))))
+     (try
+       (throw "boom")
+       (catch err
+           (return err)))))
   => "boom"
 
   (!.py
     (do:>
-      (try
-        (throw "boom")
-        (catch err
-          (return err)))))
+     (try
+       (throw "boom")
+       (catch err
+           (return err)))))
   => "boom"
 
   (!.lua
     (do:>
-      (try
-        (throw "boom")
-        (catch err
-          (return err)))))
+     (try
+       (throw "boom")
+       (catch err
+           (return err)))))
   => "boom")
 
 ^{:refer xt.lang.spec-primitive/xor :added "4.1"}
@@ -569,20 +569,20 @@
 
   (!.js
     (-> 5
-                  (+ 2)
-                  (* 3)))
+        (+ 2)
+        (* 3)))
   => 21
 
   (!.py
     (-> 5
-                  (+ 2)
-                  (* 3)))
+        (+ 2)
+        (* 3)))
   => 21
 
   (!.lua
     (-> 5
-                  (+ 2)
-                  (* 3)))
+        (+ 2)
+        (* 3)))
   => 21)
 
 ^{:refer xt.lang.spec-primitive/->> :added "4.1"}
@@ -590,17 +590,17 @@
 
   (!.js
     (->> 5
-                   (- 10)))
+         (- 10)))
   => 5
 
   (!.py
     (->> 5
-                   (- 10)))
+         (- 10)))
   => 5
 
   (!.lua
     (->> 5
-                   (- 10)))
+         (- 10)))
   => 5)
 
 ^{:refer xt.lang.spec-primitive/and :added "4.1"}
@@ -647,26 +647,26 @@
 
   (!.js
     (do:>
-      (cond
-        false (return "a")
-        (< 1 2) (return "b")
-        :else (return "c"))))
+     (cond
+       false (return "a")
+       (< 1 2) (return "b")
+       :else (return "c"))))
   => "b"
 
   (!.py
     (do:>
-      (cond
-        false (return "a")
-        (< 1 2) (return "b")
-        :else (return "c"))))
+     (cond
+       false (return "a")
+       (< 1 2) (return "b")
+       :else (return "c"))))
   => "b"
 
   (!.lua
     (do:>
-      (cond
-        false (return "a")
-        (< 1 2) (return "b")
-        :else (return "c"))))
+     (cond
+       false (return "a")
+       (< 1 2) (return "b")
+       :else (return "c"))))
   => "b")
 
 ^{:refer xt.lang.spec-primitive/do :added "4.1"}
@@ -701,23 +701,23 @@
 
   (!.js
     (do:>
-      (if true
-        (return "yes")
-        (return "no"))))
+     (if true
+       (return "yes")
+       (return "no"))))
   => "yes"
 
   (!.py
     (do:>
-      (if true
-        (return "yes")
-        (return "no"))))
+     (if true
+       (return "yes")
+       (return "no"))))
   => "yes"
 
   (!.lua
     (do:>
-      (if true
-        (return "yes")
-        (return "no"))))
+     (if true
+       (return "yes")
+       (return "no"))))
   => "yes")
 
 ^{:refer xt.lang.spec-primitive/let :added "4.1"}
@@ -725,23 +725,23 @@
 
   (!.js
     (do:>
-      (let [a 2
-                      b 3]
-        (return (+ a b)))))
+     (let [a 2
+           b 3]
+       (return (+ a b)))))
   => 5
 
   (!.py
     (do:>
-      (let [a 2
-                      b 3]
-        (return (+ a b)))))
+     (let [a 2
+           b 3]
+       (return (+ a b)))))
   => 5
 
   (!.lua
     (do:>
-      (let [a 2
-                      b 3]
-        (return (+ a b)))))
+     (let [a 2
+           b 3]
+       (return (+ a b)))))
   => 5)
 
 ^{:refer xt.lang.spec-primitive/not :added "4.1"}
@@ -785,19 +785,19 @@
 
   (!.js
     (quote {:a 1
-                      :b [2 3]}))
+            :b [2 3]}))
   => {"a" 1
       "b" [2 3]}
 
   (!.py
     (quote {:a 1
-                      :b [2 3]}))
+            :b [2 3]}))
   => {"a" 1
       "b" [2 3]}
 
   (!.lua
     (quote {:a 1
-                      :b [2 3]}))
+            :b [2 3]}))
   => {"a" 1
       "b" [2 3]})
 
@@ -815,7 +815,7 @@
     (return out))
   => ["boom" "done"]
 
-  ^*(!.py
+  (!.py
     (var out [])
     (try
       (throw "boom")
@@ -826,15 +826,15 @@
     (return out))
   => ["boom" "done"]
 
-  ^*(!.lua
-      (var out [])
-      (try
-        (throw "boom")
-        (catch err
-            (xt/x:arr-push out err))
-        (finally
-          (xt/x:arr-push out "done")))
-      (return out))
+  (!.lua
+    (var out [])
+    (try
+      (throw "boom")
+      (catch err
+          (xt/x:arr-push out err))
+      (finally
+        (xt/x:arr-push out "done")))
+    (return out))
   => ["boom" "done"])
 
 ^{:refer xt.lang.spec-primitive/when :added "4.1"}
