@@ -285,7 +285,7 @@
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-with-delay :added "4.1"}
 (fact "with delay emits sleep"
-  (l/emit-as :php [(php-tf-x-with-delay '[_ thunk 10])])
+  (l/emit-as :php [(php-tf-x-with-delay '[_ 10 thunk])])
   => #"usleep")
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-file-slurp :added "4.1"}

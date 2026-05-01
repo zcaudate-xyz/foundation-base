@@ -317,6 +317,7 @@
   
   (s/seedgen-benchadd '[xt.lang.spec] {:lang [:dart] :write true})
   (s/seedgen-benchadd '[xt.lang] {:lang [:dart :elisp :scheme] :write true})
+  (s/seedgen-benchremove '[xt.lang] {:lang [:elisp :scheme] :write true})
   (s/seedgen-benchadd '[xt.lang] {:lang [:ruby] :write true})
   (s/seedgen-langadd 'xt.lang.common-lib {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.lang.common-lib {:lang [:lua :python] :write true}))

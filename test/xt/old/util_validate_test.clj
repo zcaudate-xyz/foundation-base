@@ -106,18 +106,18 @@
                                                                            (< 0 (xt/x:len v))))}]
                                 ["is-not-empty2" {:message "Must not be empty"
                                                   :check (fn:> [v rec]
-                                                           (xt/x:with-delay
-                                                            (fn:> []
-                                                              (and (k/not-nil? v)
-                                                                   (< 0 (xt/x:len v))))
-                                                            100))}]
+                                                            (xt/x:with-delay
+                                                             100
+                                                             (fn:> []
+                                                               (and (k/not-nil? v)
+                                                                    (< 0 (xt/x:len v))))))}]
                                 ["is-not-empty3" {:message "Must not be empty"
                                                   :check (fn:> [v rec]
-                                                           (xt/x:with-delay
-                                                            (fn:> []
-                                                              (and (k/not-nil? v)
-                                                                   (< 0 (xt/x:len v))))
-                                                            100))}]]})
+                                                            (xt/x:with-delay
+                                                             100
+                                                             (fn:> []
+                                                               (and (k/not-nil? v)
+                                                                    (< 0 (xt/x:len v))))))}]]})
    (var result (validate/create-result validators))
    (-> (validate/validate-field data
                                 "first"
@@ -164,11 +164,11 @@
    (var data {:first "hello"})
     (var validators {:first  [["is-not-empty0" {:message "Must not be empty"
                                                 :check (fn:> [v rec]
-                                                         (xt/x:with-delay
-                                                          (fn:> []
-                                                            (and (k/not-nil? v)
-                                                                 (< 0 (xt/x:len v))))
-                                                          100))}]
+                                                          (xt/x:with-delay
+                                                           100
+                                                           (fn:> []
+                                                             (and (k/not-nil? v)
+                                                                  (< 0 (xt/x:len v))))))}]
                              ["is-not-empty1" {:message "Must not be empty"
                                                :check (fn:> [v rec] false)}]]})
    (var result (validate/create-result validators))
@@ -221,18 +221,18 @@
                                                                (< 0 (xt/x:len v))))}]]
           :last     [["is-not-empty" {:message "Must not be empty"
                                       :check (fn:> [v rec]
-                                               (xt/x:with-delay
-                                                (fn:> []
-                                                  (and (k/not-nil? v)
-                                                       (< 0 (xt/x:len v))))
-                                                100))}]]
+                                                (xt/x:with-delay
+                                                 100
+                                                 (fn:> []
+                                                   (and (k/not-nil? v)
+                                                        (< 0 (xt/x:len v))))))}]]
           :email    [["is-not-empty" {:message "Must not be empty"
                                       :check (fn:> [v rec]
-                                               (xt/x:with-delay
-                                                (fn:> []
-                                                  (and (k/not-nil? v)
-                                                       (< 0 (xt/x:len v))))
-                                                100))}]]})
+                                                (xt/x:with-delay
+                                                 100
+                                                 (fn:> []
+                                                   (and (k/not-nil? v)
+                                                        (< 0 (xt/x:len v))))))}]]})
    (:= (!:G result) (validate/create-result validators))
    (validate/validate-all data validators result
                           nil

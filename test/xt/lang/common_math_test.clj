@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [std.lang :as l]))
 
-^{:seedgen/root {:all true, :langs [:lua :python]}}
+^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-math :as xtm]

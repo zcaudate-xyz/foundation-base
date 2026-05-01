@@ -4,7 +4,7 @@
             [std.lang :as l])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:lua :python]}}
+^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
   {:runtime :oneshot
    :require [[xt.db.schema.base-check :as chk]

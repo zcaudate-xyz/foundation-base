@@ -2,7 +2,7 @@
   (:require [std.lang :as l])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:lua :python]}}
+^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.cell.service.db-query :as db-query]

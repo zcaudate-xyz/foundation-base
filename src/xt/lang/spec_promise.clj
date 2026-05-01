@@ -63,7 +63,7 @@
   {:added "4.1"}
   ([value] (list (quote x:promise-native?) value)))
 
-(defspec.xt x:with-delay [:fn [[:xt/fn] :xt/int] :xt/any])
+(defspec.xt x:with-delay [:fn [:xt/int [:xt/fn]] :xt/any])
 
 (defmacro.xt ^{:standalone true}
   x:with-delay

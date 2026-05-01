@@ -5,7 +5,7 @@
             [xt.db.helpers.seed-user-test :as user])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:lua :python]}}
+^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-data :as xtd]

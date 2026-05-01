@@ -4,7 +4,7 @@
             [std.lang :as l]
             [xt.lang.common-notify :as notify]))
 
-^{:seedgen/root {:all true, :langs [:lua :python]}}
+^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-repl :as repl]

@@ -3,7 +3,7 @@
             [std.string.prose :as prose])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:lua :python]}}
+^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.parser-xml :as xml]

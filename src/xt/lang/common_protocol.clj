@@ -34,9 +34,8 @@
     (var spec-map (xt/x:second entry))
     (xt/for:array [key required]
       (when (xt/x:nil? (xt/x:get-key spec-map key))
-        (xt/x:err
-         (xt/x:cat "NOT VALID."
-                   (xt/x:json-encode {:required key
-                                      :actual (xtd/obj-keys spec-map)})))))
+        (throw (xt/x:ex "Invalid Key"
+                        {:required key
+                         :actual (xtd/obj-keys spec-map)}))))
     (:= acc (xt/x:obj-assign acc spec-map)))
   (return acc))

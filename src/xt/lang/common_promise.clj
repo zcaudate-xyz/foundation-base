@@ -196,14 +196,12 @@
      (fn [_]
        (return out)))))
 
-(defspec.xt with-delay [:fn [:xt/any :xt/any] :xt/promise])
+(defspec.xt with-delay [:fn [:xt/int [:xt/fn]] :xt/promise])
 
 (defn.xt with-delay
   "delays thunk execution inside the common xt.promise model"
   {:added "4.1"}
-  [a b]
-  (var thunk (:? (xt/x:is-function? a) a b))
-  (var ms (:? (xt/x:is-function? a) b a))
+  [ms thunk]
   (return
    (-/promise
     (fn []

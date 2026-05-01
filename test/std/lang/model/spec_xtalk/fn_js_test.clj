@@ -404,7 +404,7 @@
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-with-delay :added "4.0"}
 (fact "with delay"
-  (l/emit-as :js [(js-tf-x-with-delay '[_ thunk 100])])
+  (l/emit-as :js [(js-tf-x-with-delay '[_ 100 thunk])])
   => #"setTimeout")
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-async-run :added "4.1"}

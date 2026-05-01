@@ -84,7 +84,7 @@
           (var delayed-fn
                (fn []
                  (x:arr-push (!:G THROTTLE_OUT) i)))
-          (xt/x:with-delay delayed-fn 100)))
+           (xt/x:with-delay 100 delayed-fn)))
     (var throttle (throttle/throttle-create handler nil))
     (throttle/throttle-run-async throttle 1 nil))
 
@@ -156,7 +156,7 @@
           (var delayed-fn
                (fn []
                  (x:arr-push (!:G THROTTLE_OUT) i)))
-          (xt/x:with-delay delayed-fn 100)))
+           (xt/x:with-delay 100 delayed-fn)))
     (var throttle (throttle/throttle-create handler nil))
     (throttle/throttle-run throttle 1 nil)
    (throttle/throttle-run throttle 1 nil)
@@ -221,7 +221,7 @@
         (fn [i]
           (var delayed-fn
                (fn [] nil))
-          (xt/x:with-delay delayed-fn (:? (== i 1) 100 300))))
+           (xt/x:with-delay (:? (== i 1) 100 300) delayed-fn)))
     (:= throttle (throttle/throttle-create handler nil))
     (:= (!:G THROTTLE_STATE) throttle)
    (throttle/throttle-run throttle 1 nil)

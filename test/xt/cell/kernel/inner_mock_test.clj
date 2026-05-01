@@ -3,7 +3,7 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:lua :python]}}
+^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
@@ -13,7 +13,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)
-                 (l/rt:scaffold-imports :js)]
+          (l/rt:scaffold-imports :js)]
  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.cell.kernel.inner-mock/mock-worker-send :added "4.0"}

@@ -3,7 +3,7 @@
             [std.string.prose :as prose])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:lua :python]}}
+^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.schema.sql-graph :as g]
@@ -677,6 +677,6 @@
   
   (s/run ['xt.db.schema.sql-graph])
   
-  (s/seedgen-benchadd   '[xt.db.schema.sql-graph] {:lang [:ruby :dart :julia] :write true})
+  (s/seedgen-benchadd   '[xt.db xt.lang xt.event] {:lang [:ruby :dart :elisp] :write true})
   (s/seedgen-langadd    '[xt.db.schema.sql-graph] {:lang [:lua :python] :write true})
   (s/seedgen-langremove '[xt.db.schema.sql-graph] {:lang [:lua :python] :write true}))

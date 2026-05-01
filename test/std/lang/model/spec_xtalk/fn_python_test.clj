@@ -486,7 +486,7 @@
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-with-delay :added "4.0"}
 (fact "with delay"
-  (l/emit-as :python [(python-tf-x-with-delay '[_ thunk ms])])
+  (l/emit-as :python [(python-tf-x-with-delay '[_ ms thunk])])
   => #"sleep")
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-pwd :added "4.1"}

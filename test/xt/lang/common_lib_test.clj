@@ -2,7 +2,7 @@
   (:require [std.lang :as l])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:lua :python]}}
+^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
@@ -704,6 +704,7 @@
   
   (s/seedgen-benchadd '[xt.lang.spec] {:lang [:dart] :write true})
   (s/seedgen-benchadd '[xt.lang] {:lang [:dart :elisp :scheme] :write true})
+  (s/seedgen-benchremove '[xt.lang] {:lang [:elisp :scheme] :write true})
   (s/seedgen-benchadd '[xt.lang] {:lang [:ruby] :write true})
   (s/seedgen-langadd 'xt.lang.common-lib {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.lang.common-lib {:lang [:lua :python] :write true}))

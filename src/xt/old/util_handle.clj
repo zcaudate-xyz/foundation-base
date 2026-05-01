@@ -145,7 +145,7 @@
                (do (var delayed-run-fn
                         (fn []
                           (return (call-fn))))
-                   (xt/x:with-delay delayed-run-fn delay))
+                    (xt/x:with-delay delay delayed-run-fn))
                 (return (call-fn)))))
   (var proc (:? (xt/x:not-nil? wrap-fn)
                 (wrap-fn run-fn args receipt handle)

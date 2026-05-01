@@ -261,7 +261,7 @@
   [:fn [AnyArray] AnyDict])
 
 (defspec.xt with-delay
-  [:fn [[:fn [] :xt/any] :xt/num] :xt/any])
+  [:fn [:xt/num [:fn [] :xt/any]] :xt/any])
 
 ;;
 ;; TYPE
@@ -1902,8 +1902,8 @@
 (defn.xt with-delay
   "sets a delay"
   {:added "4.0"}
-  ([thunk ms]
-   (xt/x:with-delay thunk ms)))
+  ([ms thunk]
+   (xt/x:with-delay ms thunk)))
 
 ;;
 ;; METADATA

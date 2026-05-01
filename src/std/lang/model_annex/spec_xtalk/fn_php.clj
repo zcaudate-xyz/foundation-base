@@ -394,7 +394,7 @@
 ;;
 
 (defn php-tf-x-with-delay
-  [[_ thunk ms]]
+  [[_ ms thunk]]
   (template/$
    (do (usleep (* ~ms 1000))
        (return (~thunk)))))

@@ -146,12 +146,10 @@
                 (return current)))))))
 
 (defn.lua with-delay
-  "sleeps before invoking a thunk, returning a promise and accepting either (ms thunk) or (thunk ms)"
+  "sleeps before invoking a thunk, returning a promise with ms first"
   {:added "4.1"}
-  [a b]
-  (var thunk (:? (== "function" (type a)) a b))
-  (var ms (:? (== "function" (type a)) b a))
+  [ms thunk]
   (return (-/promise
            (fn []
-             (ngx.sleep (/ ms 1000.0))
-             (return (thunk))))))
+              (ngx.sleep (/ ms 1000.0))
+              (return (thunk))))))

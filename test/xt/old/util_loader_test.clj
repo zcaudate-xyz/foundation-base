@@ -341,15 +341,15 @@
                            [(loader/new-task
                              "A" [] []
                              {:load-fn (fn []
-                                         (return (xt/x:with-delay (fn [] (return "A")) 100)))})
+                                         (return (xt/x:with-delay 100 (fn [] (return "A"))))})
                             (loader/new-task
                              "B" ["A"] []
                              {:load-fn (fn []
-                                         (return (xt/x:with-delay (fn [] (return "B")) 100)))})
+                                         (return (xt/x:with-delay 100 (fn [] (return "B"))))})
                             (loader/new-task
                              "C" ["B"] []
                              {:load-fn (fn []
-                                         (return (xt/x:with-delay (fn [] (return "C")) 100)))})]))
+                                         (return (xt/x:with-delay 100 (fn [] (return "C"))))})]))
          (loader/load-tasks loader
                             nil
                             (fn []
@@ -389,15 +389,15 @@
                       [(loader/new-task
                         "A" [] []
                         {:load-fn (fn []
-                                    (return (xt/x:with-delay (fn [] (return "A")) 100)))})
+                                     (return (xt/x:with-delay 100 (fn [] (return "A"))))})
                        (loader/new-task
                         "B" ["A"] []
                         {:load-fn (fn []
-                                    (return (xt/x:with-delay (fn [] (throw "B")) 100)))})
+                                     (return (xt/x:with-delay 100 (fn [] (throw "B"))))})
                        (loader/new-task
                         "C" ["B"] []
                         {:load-fn (fn []
-                                    (return (xt/x:with-delay (fn [] (return "C")) 100)))})]))
+                                     (return (xt/x:with-delay 100 (fn [] (return "C"))))})]))
     (loader/load-tasks loader
                        nil
                        (fn []
@@ -440,21 +440,18 @@
                        [(loader/new-task
                           "A" [] []
                            {:load-fn (fn []
-                                      (return (xt/x:with-delay (fn []
-                                                                 (:= (!:G A) (xt/x:now-ms)))
-                                                               100)))})
+                                       (return (xt/x:with-delay 100 (fn []
+                                                                      (:= (!:G A) (xt/x:now-ms))))))})
                         (loader/new-task
                           "B" ["A"] []
                            {:load-fn (fn []
-                                      (return (xt/x:with-delay (fn []
-                                                                 (:= (!:G B) (xt/x:now-ms)))
-                                                               100)))})
+                                       (return (xt/x:with-delay 100 (fn []
+                                                                      (:= (!:G B) (xt/x:now-ms))))))})
                         (loader/new-task
                           "C" ["B"] []
                            {:load-fn (fn []
-                                      (return (xt/x:with-delay (fn []
-                                                                 (:= (!:G C) (xt/x:now-ms)))
-                                                               100)))})]))
+                                       (return (xt/x:with-delay 100 (fn []
+                                                                      (:= (!:G C) (xt/x:now-ms))))))})]))
     (loader/load-tasks loader
                         nil
                         (fn []
