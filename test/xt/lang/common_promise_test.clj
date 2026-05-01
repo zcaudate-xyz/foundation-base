@@ -164,3 +164,22 @@
                      (xt/x:ex-native? err)
                      (xt/x:get-key (xt/x:ex-data err) "a")]))))
   => [["finally"] true 1])
+
+
+^{:refer xt.lang.common-promise/with-delay :added "4.1"}
+(fact "delays thunk execution for both supported argument orders"
+  (notify/wait-on :js
+    (common-promise/promise-then
+     (common-promise/with-delay 10
+                                (fn []
+                                  (return "ms-first")))
+     (repl/>notify)))
+  => "ms-first"
+
+  (notify/wait-on :js
+    (common-promise/promise-then
+     (common-promise/with-delay (fn []
+                                  (return "fn-first"))
+                                10)
+     (repl/>notify)))
+  => "fn-first")

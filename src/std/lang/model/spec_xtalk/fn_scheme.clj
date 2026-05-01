@@ -987,6 +987,29 @@
    :x-iter-has?     {:macro #'scheme-tf-x-iter-has?     :emit :macro :value true}
    :x-iter-native?  {:macro #'scheme-tf-x-iter-native?  :emit :macro :value true}})
 
+(defn scheme-tf-x-prototype-create
+  [[_ m]]
+  (list 'xt-proto-create m))
+
+(defn scheme-tf-x-prototype-get
+  [[_ obj]]
+  (list 'xt-proto-get obj))
+
+(defn scheme-tf-x-prototype-set
+  [[_ obj prototype]]
+  (list 'xt-proto-set obj prototype))
+
+(defn scheme-tf-x-prototype-method
+  [[_ obj key]]
+  (list 'xt-proto-method obj key))
+
+(def +scheme-proto+
+  {:prototype-create {:macro #'scheme-tf-x-prototype-create :emit :macro
+                      :op-spec {:allow-blocks true}}
+   :prototype-get    {:macro #'scheme-tf-x-prototype-get    :emit :macro}
+   :prototype-set    {:macro #'scheme-tf-x-prototype-set    :emit :macro}
+   :prototype-method {:macro #'scheme-tf-x-prototype-method :emit :macro}})
+
 (defn scheme-tf-x-promise
   [[_ thunk]]
   (list 'xt-promise thunk))
@@ -1022,12 +1045,12 @@
 
 (def +scheme-promise+
   {:x-async-run       {:macro #'scheme-tf-x-async-run       :emit :macro :value true}
-   :x-promise         {:emit :hard-link :raw 'xt.lang.common-promise/promise}
-   :x-promise-all     {:emit :hard-link :raw 'xt.lang.common-promise/promise-all}
-   :x-promise-then    {:emit :hard-link :raw 'xt.lang.common-promise/promise-then}
-   :x-promise-catch   {:emit :hard-link :raw 'xt.lang.common-promise/promise-catch}
-   :x-promise-finally {:emit :hard-link :raw 'xt.lang.common-promise/promise-finally}
-   :x-promise-native? {:emit :hard-link :raw 'xt.lang.common-promise/promise-native?}
+   :x-promise         {:macro #'scheme-tf-x-promise         :emit :macro}
+   :x-promise-all     {:macro #'scheme-tf-x-promise-all     :emit :macro}
+   :x-promise-then    {:macro #'scheme-tf-x-promise-then    :emit :macro}
+   :x-promise-catch   {:macro #'scheme-tf-x-promise-catch   :emit :macro}
+   :x-promise-finally {:macro #'scheme-tf-x-promise-finally :emit :macro}
+   :x-promise-native? {:macro #'scheme-tf-x-promise-native? :emit :macro}
    :x-with-delay      {:macro #'scheme-tf-x-with-delay      :emit :macro :value true}})
 
 (defn scheme-tf-x-socket-connect

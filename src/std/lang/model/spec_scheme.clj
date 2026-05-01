@@ -143,7 +143,15 @@
    :for-array  {:op :for-array   :symbol #{'for:array}   :macro #'scheme-tf-for-array  :emit :macro}
    :for-object {:op :for-object  :symbol #{'for:object}  :macro #'scheme-tf-for-object :emit :macro}
    :for-iter   {:op :for-iter    :symbol #{'for:iter}    :macro #'scheme-tf-for-iter   :emit :macro}
-   :for-index  {:op :for-index   :symbol #{'for:index}   :macro #'scheme-tf-for-index  :emit :macro}})
+   :for-index  {:op :for-index   :symbol #{'for:index}   :macro #'scheme-tf-for-index  :emit :macro}
+   :prototype-create {:op :prototype-create :symbol #{'proto:create}
+                      :macro #'fn/scheme-tf-x-prototype-create :emit :macro}
+   :prototype-get    {:op :prototype-get    :symbol #{'proto:get}
+                      :macro #'fn/scheme-tf-x-prototype-get    :emit :macro}
+   :prototype-set    {:op :prototype-set    :symbol #{'proto:set}
+                      :macro #'fn/scheme-tf-x-prototype-set    :emit :macro}
+   :prototype-method {:op :prototype-method :symbol #{'proto:method}
+                      :macro #'fn/scheme-tf-x-prototype-method :emit :macro}})
 
 (def +features+
   (-> (grammar/build-min [:coroutine

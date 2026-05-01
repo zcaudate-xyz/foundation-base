@@ -756,6 +756,16 @@
    :x-shell           {:macro #'ruby-tf-x-shell          :emit :macro
                        :op-spec {:allow-blocks true}}})
 
+(defn ruby-tf-x-async-run
+  [[_ thunk]]
+  (let [grammar   preprocess-base/*macro-grammar*
+        mopts     preprocess-base/*macro-opts*
+        thunk-str (common/emit-wrapping thunk grammar mopts)]
+    (list ':-
+          (str "Thread.new do\n  "
+               thunk-str
+               ".call\nend"))))
+
 (defn ruby-tf-x-promise
   [[_ thunk]]
   (let [promise (gensym "promise__")
@@ -800,11 +810,11 @@
 
 (defn ruby-tf-x-promise-then
   [[_ promise thunk]]
-  (let [current     (gensym "current__")
-        next-thunk  (list 'fn []
-                          (list '. thunk
-                                (list 'call
-                                      (list '. current ["value"]))))
+  (let [current      (gensym "current__")
+        next-thunk   (list 'fn []
+                           (list '. thunk
+                                 (list 'call
+                                       (list '. current ["value"]))))
         next-promise (list 'x:promise next-thunk)]
     (list '.
           (list 'fn []
@@ -832,10 +842,10 @@
 
 (defn ruby-tf-x-promise-finally
   [[_ promise thunk]]
-  (let [current (gensym "current__")
-        cleanup (gensym "cleanup__")
-        cleanup-thunk (list 'fn []
-                            (list '. thunk 'call))
+  (let [current         (gensym "current__")
+        cleanup         (gensym "cleanup__")
+        cleanup-thunk   (list 'fn []
+                              (list '. thunk 'call))
         cleanup-promise (list 'x:promise cleanup-thunk)]
     (list '.
           (list 'fn []
@@ -861,13 +871,15 @@
       (. ~thunk (call))))))
 
 (def +ruby-promise+
-  {:x-promise          {:macro #'ruby-tf-x-promise         :emit :macro}
+  {:x-async-run        {:macro #'ruby-tf-x-async-run       :emit :macro}
+   :x-promise          {:macro #'ruby-tf-x-promise         :emit :macro}
    :x-promise-all      {:macro #'ruby-tf-x-promise-all     :emit :macro}
    :x-promise-then     {:macro #'ruby-tf-x-promise-then    :emit :macro}
    :x-promise-catch    {:macro #'ruby-tf-x-promise-catch   :emit :macro}
    :x-promise-finally  {:macro #'ruby-tf-x-promise-finally :emit :macro}
    :x-promise-native?  {:macro #'ruby-tf-x-promise-native? :emit :macro}
    :x-with-delay       {:macro #'ruby-tf-x-with-delay      :emit :macro}})
+
 
 ;; ITER
 ;;
@@ -1021,27 +1033,27 @@
 
 (defn ruby-tf-x-return-encode
   ([[_ out id key]]
-    (let [out-type (ruby-tf-x-type-native `[_ ~out])
-          payload  (gensym "payload__")
-          error    (gensym "error__")]
-       (template/$ (do (require "json")
-                       (var ~payload {:type "data"
-                                      :return ~out-type
-                                      :value ~out})
-                       (if (not (. ~id nil?))
-                         (:= (. ~payload ["id"]) ~id))
-                       (if (not (. ~key nil?))
-                         (:= (. ~payload ["key"]) ~key))
-                       (var ~error {:type "raw"
-                                    :return "raw"
-                                    :value nil})
-                       (if (not (. ~id nil?))
-                         (:= (. ~error ["id"]) ~id))
-                       (if (not (. ~key nil?))
-                         (:= (. ~error ["key"]) ~key))
-                       (try
-                         (return (JSON.generate ~payload))
-                         (catch e
+   (let [out-type (ruby-tf-x-type-native `[_ ~out])
+         payload  (gensym "payload__")
+         error    (gensym "error__")]
+     (template/$ (do (require "json")
+                     (var ~payload {:type "data"
+                                    :return ~out-type
+                                    :value ~out})
+                     (if (not (. ~id nil?))
+                       (:= (. ~payload ["id"]) ~id))
+                     (if (not (. ~key nil?))
+                       (:= (. ~payload ["key"]) ~key))
+                     (var ~error {:type "raw"
+                                  :return "raw"
+                                  :value nil})
+                     (if (not (. ~id nil?))
+                       (:= (. ~error ["id"]) ~id))
+                     (if (not (. ~key nil?))
+                       (:= (. ~error ["key"]) ~key))
+                     (try
+                       (return (JSON.generate ~payload))
+                       (catch e
                            (:= (. ~error ["value"]) (. e to_s))
                            (return (JSON.generate ~error)))))))))
 

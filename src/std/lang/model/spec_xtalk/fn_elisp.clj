@@ -958,6 +958,29 @@
    :x-iter-has?     {:macro #'elisp-tf-x-iter-has?     :emit :macro :value true}
    :x-iter-native?  {:macro #'elisp-tf-x-iter-native?  :emit :macro :value true}})
 
+(defn elisp-tf-x-prototype-create
+  [[_ m]]
+  (list 'xt-proto-create m))
+
+(defn elisp-tf-x-prototype-get
+  [[_ obj]]
+  (list 'xt-proto-get obj))
+
+(defn elisp-tf-x-prototype-set
+  [[_ obj prototype]]
+  (list 'xt-proto-set obj prototype))
+
+(defn elisp-tf-x-prototype-method
+  [[_ obj key]]
+  (list 'xt-proto-method obj key))
+
+(def +elisp-proto+
+  {:prototype-create {:macro #'elisp-tf-x-prototype-create :emit :macro
+                      :op-spec {:allow-blocks true}}
+   :prototype-get    {:macro #'elisp-tf-x-prototype-get    :emit :macro}
+   :prototype-set    {:macro #'elisp-tf-x-prototype-set    :emit :macro}
+   :prototype-method {:macro #'elisp-tf-x-prototype-method :emit :macro}})
+
 ;;
 ;; PROMISE
 ;;
@@ -997,12 +1020,12 @@
 
 (def +elisp-promise+
   {:x-async-run        {:macro #'elisp-tf-x-async-run        :emit :macro :value true}
-   :x-promise          {:emit :hard-link :raw 'xt.lang.common-promise/promise}
-   :x-promise-all      {:emit :hard-link :raw 'xt.lang.common-promise/promise-all}
-   :x-promise-then     {:emit :hard-link :raw 'xt.lang.common-promise/promise-then}
-   :x-promise-catch    {:emit :hard-link :raw 'xt.lang.common-promise/promise-catch}
-   :x-promise-finally  {:emit :hard-link :raw 'xt.lang.common-promise/promise-finally}
-   :x-promise-native?  {:emit :hard-link :raw 'xt.lang.common-promise/promise-native?}
+   :x-promise          {:macro #'elisp-tf-x-promise          :emit :macro}
+   :x-promise-all      {:macro #'elisp-tf-x-promise-all      :emit :macro}
+   :x-promise-then     {:macro #'elisp-tf-x-promise-then     :emit :macro}
+   :x-promise-catch    {:macro #'elisp-tf-x-promise-catch    :emit :macro}
+   :x-promise-finally  {:macro #'elisp-tf-x-promise-finally  :emit :macro}
+   :x-promise-native?  {:macro #'elisp-tf-x-promise-native?  :emit :macro}
    :x-with-delay       {:macro #'elisp-tf-x-with-delay       :emit :macro :value true}})
 
 ;;

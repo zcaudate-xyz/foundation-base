@@ -51,10 +51,12 @@
 
 (def ^:private +dart-statement-heads+
   '#{do
-     do*
-     var
-     var*
-     :=
+      do*
+      let
+      let*
+      var
+      var*
+      :=
      return
      if
      cond
@@ -180,6 +182,20 @@
     (concat (butlast stmts)
             [(ensure-return (last stmts))])
     stmts))
+
+(defn- dart-normalize-let
+  [form]
+  (let [[_ bindings & body] form]
+    (with-form-meta
+      form
+      (apply list
+             'do
+             (concat (map (fn [[sym val]]
+                            (if (= '_ sym)
+                              val
+                              (list 'var sym := val)))
+                          (partition 2 bindings))
+                     body)))))
 
 (defn- rewrite-fn
   [form grammar]
@@ -313,6 +329,9 @@
       form
       (list (rewrite-fn (apply list 'fn '[] (rest form)) grammar)))
 
+    (let let*)
+    (dart-rewrite-expression (dart-normalize-let form) grammar)
+
     fn
     (rewrite-fn form grammar)
 
@@ -426,10 +445,11 @@
 
      :else
      (case (first form)
-        (do do*)      (rewrite-do-statement form grammar)
-        (var var* :=) (rewrite-var-statement form grammar)
-        cond          (rewrite-cond-statement form grammar)
-        br*           (rewrite-branch-statement form grammar)
+         (do do*)      (rewrite-do-statement form grammar)
+         (let let*)    (dart-rewrite-statement (dart-normalize-let form) grammar)
+         (var var* :=) (rewrite-var-statement form grammar)
+         cond          (rewrite-cond-statement form grammar)
+         br*           (rewrite-branch-statement form grammar)
         (for:index for:object for:array for:iter)
         (rewrite-for-statement form grammar)
         for:async     (rewrite-for-async-form form grammar)

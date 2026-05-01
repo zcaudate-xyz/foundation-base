@@ -14,17 +14,33 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.lang.spec-promise/x:promise-then :added "4.1"}
-(fact "chains a resolved js promise"
+^{:refer xt.lang.spec-base/x:async-run :added "4.1"}
+(fact "runs thunks in the host async model"
+
+  (notify/wait-on :scheme
+    (do (xt/x:async-run
+         (fn []
+           (repl/notify 5)))
+        nil))
+  => 5)
+
+^{:refer xt.lang.spec-promise/x:promise-run :added "4.1"}
+(fact "wraps raw values and preserves resolved results"
 
   (notify/wait-on :scheme
     (spec-promise/x:promise-then
-     (spec-promise/x:promise
-      (fn []
-        (return 5)))
-     (fn [value]
-       (repl/notify (+ value 2)))))
-  => 7)
+     (spec-promise/x:promise-run "A")
+     (repl/>notify)))
+  => "A"
+
+  (notify/wait-on :scheme
+    (spec-promise/x:promise-then
+     (spec-promise/x:promise-run
+      (spec-promise/x:promise
+       (fn []
+         (return "B"))))
+     (repl/>notify)))
+  => "B")
 
 ^{:refer xt.lang.spec-promise/x:promise-all :added "4.1"}
 (fact "waits for all promise values in order"
@@ -41,6 +57,18 @@
      (repl/>notify)))
   => ["a" "b"])
 
+^{:refer xt.lang.spec-promise/x:promise-then :added "4.1"}
+(fact "chains a resolved js promise"
+
+  (notify/wait-on :scheme
+    (spec-promise/x:promise-then
+     (spec-promise/x:promise
+      (fn []
+        (return 5)))
+     (fn [value]
+       (repl/notify (+ value 2)))))
+  => 7)
+
 ^{:refer xt.lang.spec-promise/x:promise-catch :added "4.1"}
 (fact "preserves xtalk exception data through promise rejection"
 
@@ -48,21 +76,7 @@
     (spec-promise/x:promise-catch
      (spec-promise/x:promise
       (fn []
-        (throw (xt/x:ex-new "boom" {:a 1}))))
-     (fn [err]
-       (xt/x:print (xt/x:ex-data err))
-       (repl/notify [(xt/x:ex-native? err)
-                     (xt/x:get-key (xt/x:ex-data err) "a")]))))
-  => [true 1])
-
-^{:refer xt.lang.spec-promise/x:promise-catch :added "4.1"}
-(fact "preserves xtalk exception data through promise rejection"
-
-  (notify/wait-on :scheme
-    (spec-promise/x:promise-catch
-     (spec-promise/x:promise
-      (fn []
-        (throw (xt/x:ex-new "boom" {:a 1}))))
+        (throw (xt/x:ex "boom" {:a 1}))))
      (fn [err]
        (xt/x:print (xt/x:ex-data err))
        (repl/notify [(xt/x:ex-native? err)

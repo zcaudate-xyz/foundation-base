@@ -154,7 +154,15 @@
    :for-array  {:op :for-array   :symbol #{'for:array}   :macro #'elisp-tf-for-array  :emit :macro}
    :for-object {:op :for-object  :symbol #{'for:object}  :macro #'elisp-tf-for-object :emit :macro}
    :for-iter   {:op :for-iter    :symbol #{'for:iter}    :macro #'elisp-tf-for-iter   :emit :macro}
-   :for-index  {:op :for-index   :symbol #{'for:index}   :macro #'elisp-tf-for-index  :emit :macro}})
+   :for-index  {:op :for-index   :symbol #{'for:index}   :macro #'elisp-tf-for-index  :emit :macro}
+   :prototype-create {:op :prototype-create :symbol #{'proto:create}
+                      :macro #'fn/elisp-tf-x-prototype-create :emit :macro}
+   :prototype-get    {:op :prototype-get    :symbol #{'proto:get}
+                      :macro #'fn/elisp-tf-x-prototype-get    :emit :macro}
+   :prototype-set    {:op :prototype-set    :symbol #{'proto:set}
+                      :macro #'fn/elisp-tf-x-prototype-set    :emit :macro}
+   :prototype-method {:op :prototype-method :symbol #{'proto:method}
+                      :macro #'fn/elisp-tf-x-prototype-method :emit :macro}})
 
 (def +features+
   (-> (grammar/build-min [:coroutine
