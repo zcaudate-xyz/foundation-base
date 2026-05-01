@@ -46,18 +46,19 @@
 
   (impl/with:library [+library+]
     (module-deps-code
+     (l/get-book +library+ :js)
      (l/get-module
-       +library+
-       :js
-       'js.blessed.ui-core)))
+      +library+
+      :js
+      'js.blessed.ui-core)))
   => '#{js.blessed.ui-style xt.lang.common-data xt.lang.common-lib js.react}
 
   (-> (book-module {:id 'demo.promise
                     :lang :python
                     :code '{promise-wrap {:deps #{}
-                                          :polyfill-modules #{python.core.common-promise}}}})
+                                          :polyfill-modules #{xt.lang.common-promise}}}})
       (module-deps-code))
-  => '#{python.core.common-promise}
+  => '#{xt.lang.common-promise}
 
   (module-deps-code
    {:grammar {:reserved '{x:promise {:op :x-promise
@@ -86,6 +87,7 @@
 
   (impl/with:library [+library+]
     (module-deps-native
+     (std.lang/get-book +library+ :js)
      (std.lang/get-module
       +library+
       :js
@@ -97,6 +99,7 @@
 
   (impl/with:library [+library+]
     (module-deps-fragment
+     (std.lang/get-book +library+ :js)
      (std.lang/get-module
       +library+
       :js

@@ -1,6 +1,5 @@
 (ns std.lang.base.impl-deps-imports-test
-  (:require [python.core.common-promise]
-             [xt.lang.common-promise]
+  (:require [xt.lang.common-promise]
              [xt.lang.common-data]
              [xt.lang.common-lib]
              [js.blessed]
@@ -34,7 +33,7 @@
 (def +library-python-polyfill+
   (let [lib (impl/clone-default-library)]
     (impl/with:library [lib]
-      (require '[python.core.common-promise] :reload)
+      (require '[xt.lang.common-promise] :reload)
       (lib/add-module! lib
                        (module/book-module
                         {:lang :python
@@ -391,9 +390,9 @@
       :python)
      '[demo.promise]))
   => '{:all #{demo.promise
-              python.core.common-promise}
-       :graph {demo.promise #{python.core.common-promise}
-               python.core.common-promise #{}}})
+              xt.lang.common-promise}
+       :graph {demo.promise #{xt.lang.common-promise}
+               xt.lang.common-promise #{}}})
 
 (comment
 
