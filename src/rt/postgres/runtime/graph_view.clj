@@ -1,5 +1,6 @@
 (ns rt.postgres.runtime.graph-view
-  (:require [rt.postgres.runtime.graph-base :as base]
+  (:require [rt.postgres.base.grammar.common :as common]
+            [rt.postgres.runtime.graph-base :as base]
             [rt.postgres.runtime.graph-query :as query]
             [std.lang :as l]
             [std.lang.base.emit-preprocess :as preprocess] [std.lang.base.preprocess-base :as preprocess-base]
@@ -38,14 +39,30 @@
   "gets the primary key of a schema"
   {:added "4.0"}
   [table-sym]
-  (let [table-key  (keyword (name table-sym))]
-    (->> @@(resolve table-sym)
-         :static/schema-seed
-         :tree
-         table-key
-         (keep (fn [[k [{:keys [primary type]}]]]
-                 (if primary type)))
-         (first))))
+  (let [table-key (keyword (name table-sym))
+        book      (l/get-book (l/runtime-library) :postgres)
+        link      (some-> (resolve table-sym)
+                          deref
+                          (select-keys [:module :id :section :lang]))
+        [_ entry] (if (seq link)
+                    (common/pg-resolve-entry link {:book book
+                                                   :lang :postgres})
+                    [book nil])
+        primary   (:static/schema-primary entry)]
+    (cond (map? primary)
+          (:type primary)
+
+          (vector? primary)
+          (or (:type (first (filter #(= (:id %) :id) primary)))
+              (:type (first primary)))
+
+          :else
+          (->> (:static/schema-seed entry)
+               :tree
+               table-key
+               (keep (fn [[_ [{:keys [primary type]}]]]
+                       (when primary type)))
+               first))))
 
 (defn lead-symbol
   "gets the lead symbol"

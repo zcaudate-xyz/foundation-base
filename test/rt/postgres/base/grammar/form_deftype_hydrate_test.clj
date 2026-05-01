@@ -8,10 +8,20 @@
   (with-redefs [resolve (fn [sym]
                           (cond
                             (= sym 'demo/Task)
-                            (atom {:id 'Task :module 'demo :lang :postgres :section :code})
+                            (atom {:id 'Task
+                                   :module 'demo
+                                   :lang :postgres
+                                   :section :code
+                                   :op-key :deftype
+                                   :static/dbtype :table})
 
                             (= sym 'demo/Status)
-                            (atom {:id 'Status :module 'demo :lang :postgres :section :code})
+                            (atom {:id 'Status
+                                   :module 'demo
+                                   :lang :postgres
+                                   :section :code
+                                   :op-key :defenum
+                                   :static/dbtype :enum})
 
                             (= sym 'clojure.core/inc)
                             #'clojure.core/inc))
@@ -36,6 +46,7 @@
 (fact "pg-deftype-hydrate-check-link validates snapshot links"
   (with-demo-links
     #(pg-deftype-hydrate-check-link {}
+                                    nil
                                     {:module 'demo :id 'Task :section :code}
                                     :table))
   => true
@@ -47,9 +58,10 @@
                                    :lang :postgres
                                    :section :code
                                    :static/dbtype :table})))
-                std.lang.base.library-snapshot/get-book (fn [_ _] {:modules {}})
-                std.lang.base.book/get-base-entry (constantly nil)]
+                 std.lang.base.library-snapshot/get-book (fn [_ _] {:modules {}})
+                 std.lang.base.book/get-base-entry (constantly nil)]
     (pg-deftype-hydrate-check-link {}
+                                    nil
                                     {:module 'demo :id 'Task :section :code}
                                     :table))
   => true)
@@ -85,7 +97,8 @@
   (with-demo-links
     #(pg-deftype-hydrate-process-sql {:process ['clojure.core/inc]}
                                      :id
-                                     {:sql {}}))
+                                     {:sql {}}
+                                     nil))
   => {:process ['clojure.core/inc]})
 
 ^{:refer rt.postgres.base.grammar.form-deftype-hydrate/pg-deftype-hydrate-process-foreign :added "4.1"}
@@ -94,7 +107,8 @@
     #(pg-deftype-hydrate-process-foreign
       {:task {:ns 'demo/Task}}
       (fn [_] [{:module 'demo :id 'Task :section :code} true])
-      {}))
+      {}
+      {:id 'demo}))
   => {:task {:ns :Task
              :link {:module 'demo
                     :id 'Task
@@ -104,9 +118,10 @@
 (fact "pg-deftype-hydrate-process-ref supports vector and linked refs"
   (pg-deftype-hydrate-process-ref
    :task
-   {:ref ["public" "Task" :uuid {:label "Task"}]}
-   (fn [_] nil)
-   {})
+    {:ref ["public" "Task" :uuid {:label "Task"}]}
+    (fn [_] nil)
+    {}
+    nil)
   => [:task
       {:type :ref
        :required true
@@ -122,7 +137,8 @@
       :task
       {:type :ref :ref {:ns 'demo/Task}}
       (fn [_] [{:module 'demo :id 'Task :section :code} true])
-      {}))
+      {}
+      {:id 'demo}))
   => [:task
       {:type :ref
        :ref {:ns :Task
@@ -137,20 +153,22 @@
       :status
       {:type :enum :enum {:ns 'demo/Status}}
       (fn [_] [{:module 'demo :id 'Status :section :code} true])
-      {}))
+      {}
+      {:id 'demo}))
   => [:status
       {:type :enum
-        :enum {:ns 'demo/Status}}]
+         :enum {:ns 'demo/Status}}]
 
   (with-demo-links
     #(pg-deftype-hydrate-process-enum
       :status
       {:type :enum :enum {:ns '-/Status}}
       (fn [_] [{:module 'demo :id 'Status :section :code} false])
-      {}))
+      {}
+      {:id 'demo}))
   => [:status
       {:type :enum
-       :enum {:ns 'demo/Status}}])
+        :enum {:ns 'demo/Status}}])
 
 ^{:refer rt.postgres.base.grammar.form-deftype-hydrate/pg-deftype-hydrate-attr :added "4.1"}
 (fact "pg-deftype-hydrate-attr delegates enum attrs to the enum processor"
@@ -159,8 +177,9 @@
       :status
       {:type :enum :enum {:ns 'demo/Status}}
       {:snapshot {}
-       :resolve-link-fn (fn [_] [{:module 'demo :id 'Status :section :code} true])
-        :capture (volatile! [])}))
+       :module {:id 'demo}
+        :resolve-link-fn (fn [_] [{:module 'demo :id 'Status :section :code} true])
+         :capture (volatile! [])}))
   => [:status
       {:type :enum
         :enum {:ns 'demo/Status}}])
@@ -174,10 +193,11 @@
        :status {:type :enum :enum {:ns 'demo/Status}}]
       {:resolve-link-fn (fn [ref]
                           (if (= 'demo/Task (get-in ref [:ns]))
-                            [{:module 'demo :id 'Task :section :code} true]
-                            [{:module 'demo :id 'Status :section :code} true]))
-       :snapshot {}
-       :capture (volatile! [])}))
+                             [{:module 'demo :id 'Task :section :code} true]
+                             [{:module 'demo :id 'Status :section :code} true]))
+        :snapshot {}
+        :module {:id 'demo}
+        :capture (volatile! [])}))
   => [:id {:type :uuid :primary true}
       :task {:type :ref
              :ref {:ns :Task

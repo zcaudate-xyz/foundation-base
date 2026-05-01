@@ -45,18 +45,22 @@
 (defn pg-deftype-hydrate-process-sql
   "processes the sql attribute"
   {:added "4.0"}
-  ([sql k attrs]
+  ([sql k attrs module]
    (if (:process sql)
-     (assoc sql :process
-            (walk/prewalk
-             (fn [x]
-               (if (symbol? x)
-                 (f/var-sym (or (resolve x)
-                                (f/error "Cannot resolve symbol"
-                                         {:symbol x
-                                          :col k
-                                          :attrs attrs})))
-                 x))
+      (assoc sql :process
+             (walk/prewalk
+              (fn [x]
+                (if (symbol? x)
+                  (f/var-sym (or (and (= "-" (namespace x))
+                                      module
+                                      (resolve (common/pg-link-symbol {:module (:id module)
+                                                                       :id (symbol (name x))})))
+                                 (resolve x)
+                                 (f/error "Cannot resolve symbol"
+                                          {:symbol x
+                                           :col k
+                                           :attrs attrs})))
+                  x))
              (:process sql)))
      sql)))
 
@@ -111,7 +115,7 @@
   {:added "4.0"}
   ([k {:keys [type primary ref sql scope foreign] :as attrs}
     {:keys [resolve-link-fn snapshot module capture] :as mopts}]
-   (let [sql     (if sql (pg-deftype-hydrate-process-sql sql k attrs))
+   (let [sql     (if sql (pg-deftype-hydrate-process-sql sql k attrs module))
          foreign (if foreign (pg-deftype-hydrate-process-foreign foreign resolve-link-fn snapshot module))
          attrs   (cond-> attrs
                     sql (assoc :sql sql)

@@ -42,20 +42,17 @@
                                                  snapshot]
                                           :as mopts}]
   (let [{:keys [ident type ref unique]} attrs
-        {:keys [link]} ref
-        k     (keyword (name ident))
-        nstr  (ut/sym-default-str (or (:name params)
-                                      (name ident)))
-        table-sym (ut/sym-full entry)
+         {:keys [link]} ref
+         k     (keyword (name ident))
+         nstr  (ut/sym-default-str (or (:name params)
+                                       (name ident)))
+         table-sym (ut/sym-full entry)
         query (case (:type ref)
                 :forward {:id (table-col-token table-sym k)}
                 :reverse {(:rval ref) (table-id-token table-sym)})
-        nentry (book/get-base-entry book
-                                    (:module link)
-                                    (:id link)
-                                    (:section link))
-        ntsch   (get-in schema [:tree (keyword (name (:id link)))])
-        where-clause (cond (nil? where) query
+         [_ nentry] (common/pg-resolve-entry link mopts)
+         ntsch   (get-in schema [:tree (keyword (name (:id link)))])
+         where-clause (cond (nil? where) query
 
                            (clojure.set/intersection (set (keys where))
                                            (set (keys query)))
@@ -183,5 +180,4 @@
 (comment
   (./create-tests)
   (./import))
-
 

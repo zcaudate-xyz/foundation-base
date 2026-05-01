@@ -30,13 +30,19 @@
     ;; With group -> No :references
     (sut/pg-deftype-col-fn [:a {:type :ref
                                 :ref {:ns :N :group :g
-                                      :link {:id :Target :lang :postgres}}}] {})
+                                      :link {:id :Target
+                                             :module 'demo
+                                             :section :code
+                                             :lang :postgres}}}] {:snapshot {}})
     => [#{"a_id"} :uuid]
 
     ;; Without group -> Has :references
     (let [res (sut/pg-deftype-col-fn [:a {:type :ref
                                           :ref {:ns :N
-                                                :link {:id :Target :lang :postgres}}}] {})]
+                                                :link {:id :Target
+                                                       :module 'demo
+                                                       :section :code
+                                                       :lang :postgres}}}] {:snapshot {}})]
       (count res) => 4
       (let [refs (last res)]
         (first refs) => (list (list 'token #{"N"} "public") #{"id"})))))
@@ -48,8 +54,8 @@
 
     ;; Case 1: Composite FK via :group
     (let [res (sut/pg-deftype-foreigns 'tbl
-                                       [[:a {:type :ref :ref {:ns :N :group :g :link {:id :Target :lang :postgres}}}]
-                                        [:b {:type :ref :ref {:ns :N :group :g :link {:id :Target :lang :postgres} :column :other}}]]
+                                       [[:a {:type :ref :ref {:ns :N :group :g :link {:id :Target :module 'demo :section :code :lang :postgres}}}]
+                                        [:b {:type :ref :ref {:ns :N :group :g :link {:id :Target :module 'demo :section :code :lang :postgres} :column :other}}]]
                                        {:snapshot {}})
           def (first res)]
       (count res) => 1
@@ -63,9 +69,9 @@
     ;; Case 2: Mixed :ref and :foreign
     (let [res (sut/pg-deftype-foreigns 'tbl
                                        [[:type {:type :text
-                                                :foreign {:g1 {:ns :N :group :g1 :column :type :link {:id :Target :lang :postgres}}}}]
+                                                :foreign {:g1 {:ns :N :group :g1 :column :type :link {:id :Target :module 'demo :section :code :lang :postgres}}}}]
                                         [:ref_id {:type :ref
-                                                  :ref {:ns :N :group :g1 :link {:id :Target :lang :postgres}
+                                                  :ref {:ns :N :group :g1 :link {:id :Target :module 'demo :section :code :lang :postgres}
                                                         :raw "custom_id"}}]]
                                        {:snapshot {}})
           def (first res)]

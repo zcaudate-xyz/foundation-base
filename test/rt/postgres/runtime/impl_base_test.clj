@@ -30,11 +30,57 @@
   (second (prep-entry '-/Hello (l/rt:macro-opts :postgres)))
   => book/book-entry?)
 
+(fact "prep-entry prefers the live current-module entry"
+  (with-redefs [std.lang.base.emit-common/emit-symbol-classify (fn [_ _] [:self '-])
+                rt.postgres.base.grammar.common/pg-resolve-entry
+                (fn [_ _]
+                  [{:modules {}}
+                   {:id 'Hello
+                    :module 'demo
+                    :lang :postgres
+                    :section :code
+                    :static/schema-seed {:vec [:Hello [:id {:type :uuid :primary true}]]}}])]
+    (second (prep-entry '-/Hello {:lang :postgres
+                                  :snapshot {}
+                                  :module {:id 'demo
+                                           :code {'Hello {:id 'Hello}}}})))
+  => (contains {:id 'Hello
+                :lang :postgres
+                :section :code}))
+
 ^{:refer rt.postgres.runtime.impl-base/prep-table :added "4.0"}
 (fact "prepares data related to the table sym"
 
   (prep-table '-/Hello false (l/rt:macro-opts :postgres))
   => vector?)
+
+(fact "prep-table overlays module tables onto the application view"
+  (with-redefs [std.lang.base.emit-common/emit-symbol-classify (fn [_ _] [:self '-])
+                rt.postgres.base.grammar.common/pg-resolve-entry
+                (fn [_ _]
+                  [{:modules {}}
+                   {:id 'Entry
+                    :module 'demo
+                    :lang :postgres
+                    :section :code
+                    :static/application ["demo"]
+                    :static/schema-seed {:vec [:Entry [:id {:type :uuid :primary true}]]}}])
+                app/app (fn [_]
+                          {:tables {}
+                           :pointers {}})]
+    (let [module {:id 'demo
+                  :code {'Entry {:id 'Entry
+                                 :module 'demo
+                                 :lang :postgres
+                                 :section :code
+                                 :static/application ["demo"]
+                                 :static/schema-seed {:vec [:Entry [:id {:type :uuid :primary true}]]}}}}
+          [_ tsch mopts] (prep-table '-/Entry true {:lang :postgres
+                                                    :snapshot {}
+                                                    :module module})]
+      [(contains? tsch :id)
+       (contains? (-> mopts :application :pointers) 'Entry)]))
+  => [true true])
 
 ^{:refer rt.postgres.runtime.impl-base/t-input-check :guard true :added "4.0"}
 (fact "passes the input if check is ok"

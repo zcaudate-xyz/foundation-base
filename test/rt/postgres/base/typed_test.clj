@@ -8,7 +8,7 @@
 
 ^{:refer rt.postgres.base.typed/analyze-file :added "4.1"}
 (fact "analyze-file returns structure with tables, enums, and functions"
-  (let [result (typed-analysis/analyze-file "src/rt/postgres/grammar/typed_common.clj")]
+  (let [result (typed-analysis/analyze-file "src/rt/postgres/base/typed/typed_common.clj")]
     (contains? result :tables) => true
     (contains? result :enums) => true
     (contains? result :functions) => true))

@@ -206,11 +206,15 @@
   "invokes a block"
   {:added "4.0"}
   [{:keys [instance] :as pg} ptr args]
-  (let [results (->> args
+  (let [forms   (if (and (:form ptr)
+                         (empty? args))
+                  (ptr/free-form-body (:form ptr))
+                  args)
+        results (->> forms
                      (mapcat (fn [form]
                                (cond (and (list? form)
                                           (= 'let (first form)))
-                                     (invoke-ptr-pg-transform :let form)
+                                      (invoke-ptr-pg-transform :let form)
 
                                      (and (list? form)
                                           (= 'try (first form)))

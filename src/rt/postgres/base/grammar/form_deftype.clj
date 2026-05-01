@@ -40,12 +40,11 @@
   {:added "4.0"}
   ([col {:keys [ns link current column] :as m :or {column :id}} {:keys [snapshot] :as mopts}]
    (let [{:keys [lang module section id]} link
-         book   (snap/get-book snapshot lang)
-         r-en   (book/get-base-entry book module id section)
-         {:keys [type]
-          :as r-ref}  (f/-> (nth (:form r-en) 2)
-          (apply hash-map %)
-          (get column)
+         [_ r-en] (common/pg-resolve-entry link mopts)
+          {:keys [type]
+           :as r-ref}  (f/-> (nth (:form r-en) 2)
+           (apply hash-map %)
+           (get column)
           (or {:type :uuid}))]
      [(pg-deftype-ref-name col m)
       [(common/pg-type-alias type)]
@@ -222,14 +221,12 @@
          _ (when (not (apply = (map :ns entries)))
              (f/error "All entries in a foreign group must point to same namespace" {:group group :entries entries}))
 
-         {:keys [link]} sample
-         book (if (and link (:snapshot mopts))
-                (snap/get-book (:snapshot mopts) (:lang link)))
-         r-en (if book
-                (book/get-base-entry book (:module link) (:id link) (:section link)))
+          {:keys [link]} sample
+          [_ r-en] (if link
+                     (common/pg-resolve-entry link mopts))
 
-         remote-schema (:static/schema r-en)
-         remote-table (name (:id link))
+          remote-schema (:static/schema r-en)
+          remote-table (name (:id link))
 
          local-cols  (map (comp symbol :local-col) entries)
          remote-cols (map (comp symbol name :remote-col) entries)

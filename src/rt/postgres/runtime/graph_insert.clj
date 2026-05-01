@@ -1,9 +1,10 @@
 (ns rt.postgres.runtime.graph-insert
   (:require [clojure.string]
-            [rt.postgres.base.application :as app]
-            [rt.postgres.runtime.graph-walk :as walk]
-            [rt.postgres.runtime.impl-base :as base]
-            [rt.postgres.runtime.impl-insert :as insert]
+             [rt.postgres.base.application :as app]
+             [rt.postgres.base.grammar.common :as common]
+             [rt.postgres.runtime.graph-walk :as walk]
+             [rt.postgres.runtime.impl-base :as base]
+             [rt.postgres.runtime.impl-insert :as insert]
             [std.lang :as l]
             [std.lang.base.book :as book]
             [std.lang.base.emit-preprocess :as preprocess] [std.lang.base.preprocess-base :as preprocess-base]
@@ -114,16 +115,13 @@
          data   (->> (walk/flatten-data data schema)
                      (sort-by (comp (:lu application) first)))
          ddecl  (mapcat (fn [[k arr]]
-                          (let [tsch   (get-in schema [:tree k])
-                                ptr    (get-in application [:pointers (symbol (name k))])
-                                entry (book/get-base-entry book
-                                                           (:module ptr)
-                                                           (:id ptr)
-                                                           (:section ptr))
-                                {:static/keys [tracker]} entry]
-                            (mapcat (fn [m]
-                                      (let [gid   (get lu-data (get m :id))
-                                            gsym  (gid-syms gid)]
+                           (let [tsch   (get-in schema [:tree k])
+                                 ptr    (get-in application [:pointers (symbol (name k))])
+                                 [_ entry] (common/pg-resolve-entry ptr mopts)
+                                 {:static/keys [tracker]} entry]
+                             (mapcat (fn [m]
+                                       (let [gid   (get lu-data (get m :id))
+                                             gsym  (gid-syms gid)]
                                         [gsym (insert/t-insert-raw
                                                [entry tsch mopts]
                                                m
@@ -157,11 +155,13 @@
   "constructs insert form with prep"
   {:added "4.0"}
   ([[entry tsch mopts] data params]
-   (let [{:static/keys [application]} entry
-         mopts (cond-> mopts
-                 application (assoc :application (app/app (first application))))
-         {:keys [schema]} mopts
-         kspec  (keyword (name (:id entry)))
+    (let [{:static/keys [application]} entry
+          mopts (cond-> mopts
+                  (and application
+                       (nil? (:application mopts)))
+                  (assoc :application (app/app (first application))))
+          {:keys [schema]} mopts
+          kspec  (keyword (name (:id entry)))
          
          data  (-> {kspec data}
                    (walk/link-data schema))]

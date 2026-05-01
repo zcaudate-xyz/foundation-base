@@ -1,8 +1,8 @@
 (ns rt.postgres.runtime.impl-base
   (:require [rt.postgres.base.grammar.common :as common]
+            [rt.postgres.base.grammar.form-deftype-hydrate :as form-deftype-hydrate]
             [rt.postgres.base.application :as app]
             [std.lang :as l]
-            [std.lang.base.book :as book]
             [std.lang.base.emit-common :as emit-common]
             [std.lang.base.emit-data :as emit-data]
             [std.lang.base.library-snapshot :as snap]
@@ -17,41 +17,143 @@
 ;; PREP
 ;;
 
+(defn- module-table-entries
+  [module]
+  (->> (:code module)
+       vals
+       (map (fn [entry]
+              (or (and (:static/schema-seed entry)
+                       entry)
+                  (some-> entry
+                          (select-keys [:module :id])
+                          common/pg-link-symbol
+                          resolve
+                          deref))))
+       (filter :static/schema-seed)))
+
+(defn- module-application-view
+  [module app-name]
+  (let [entries   (module-table-entries module)
+        current   (when app-name
+                    (app/app app-name))
+        tables    (merge (:tables current)
+                         (->> entries
+                              (mapcat (comp :vec :static/schema-seed))
+                              (partition 2)
+                              (map (fn [[k v]]
+                                     [(symbol (f/strn k)) v]))
+                              (into {})))
+        pointers  (merge (:pointers current)
+                         (into {}
+                               (map (fn [entry]
+                                      [(:id entry)
+                                       (select-keys entry [:id :module :lang :section])])
+                                    entries)))]
+    (when (or current
+              (seq entries))
+      (app/app-create-raw tables
+                          pointers
+                          (:typed current)))))
+
+(defn- ensure-table-entry-static
+  [book entry {:keys [module snapshot] :as mopts}]
+  (cond (nil? entry)
+        nil
+
+        (not= :table (:static/dbtype entry))
+        entry
+
+        (or (:static/schema-seed entry)
+            (:static/schema-primary entry)
+            (:static/application entry))
+        entry
+
+        (nil? book)
+        entry
+
+        :else
+        (let [entry-module (or (and module
+                                    (= (:id module) (:module entry))
+                                    module)
+                                (get-in book [:modules (:module entry)]))
+              [hmeta _] (form-deftype-hydrate/pg-deftype-hydrate (:form-input entry)
+                                                                 (:grammar book)
+                                                                 {:module entry-module
+                                                                  :book book
+                                                                  :snapshot snapshot})
+              entry'    (merge entry hmeta)]
+          (if (or (:static/schema-seed entry')
+                  (:static/application entry'))
+            entry'
+            (f/error "Table hydrate did not produce schema metadata."
+                     {:entry (:id entry)
+                      :module (:module entry)
+                      :entry-module (:id entry-module)
+                      :hmeta hmeta})))))
+
 (defn prep-entry
   "prepares data given an entry sym"
   {:added "4.0"}
   [sym {:keys [lang module snapshot] :as mopts}]
   (let [[type sym-module] (emit-common/emit-symbol-classify sym mopts)
-        sym-module  (cond (not sym-module)  (f/error "No module entry for sym" {:input sym})
-                          (= '- sym-module) (:id module)
-                          :else sym-module)
-        sym-id (symbol (name sym))
-        book   (snap/get-book snapshot lang)
-        entry  (or (book/get-base-entry book
-                                        sym-module
-                                        sym-id
-                                        :code)
-                   (f/error "No entry found:" {:input sym-id
-                                               :type type
-                                               :module sym-module}))]
-    [book entry]))
+         sym-id      (symbol (name sym))
+         local-entry (and (= '- sym-module)
+                          (some-> sym-id resolve deref))
+         sym-module  (cond local-entry (:module local-entry)
+                           (not sym-module)  (f/error "No module entry for sym" {:input sym})
+                           (= '- sym-module) (:id module)
+                           :else sym-module)
+         book        (or (and snapshot
+                              (snap/get-book snapshot lang))
+                         (l/get-book (l/runtime-library) lang))
+         [book entry] (if local-entry
+                        [book local-entry]
+                        (common/pg-resolve-entry {:lang lang
+                                                  :module sym-module
+                                                  :id sym-id
+                                                  :section :code}
+                                                 (assoc mopts :book book)))
+         entry  (ensure-table-entry-static book entry mopts)
+         entry  (or entry
+                    (f/error "No entry found:" {:input sym-id
+                                                :type type
+                                                :module sym-module}))]
+     [book entry]))
 
 (defn prep-table
   "prepares data related to the table sym"
   {:added "4.0"}
-  ([sym full {:keys [lang snapshot] :as mopts}]
+  ([sym full {:keys [lang snapshot module] :as mopts}]
    (if *skip-checks*
-     [{:id sym} {} (snap/get-book snapshot lang)]
-     (let [[book entry]  (prep-entry sym mopts)
-           {:keys [op]
-            :static/keys [application schema dbtype schema-seed]} entry
-           schema  (if (or (not full)
-                           (not application))
-                     schema-seed
-                     (:schema (app/app (first application))))
-           tsch    (get-in schema [:tree (keyword (name sym))])]
-       [entry tsch (merge mopts {:schema schema
-                                 :book book})]))))
+      [{:id sym} {} (snap/get-book snapshot lang)]
+      (let [[book entry]  (prep-entry sym mopts)
+            {:keys [op]
+             :static/keys [application schema dbtype schema-seed]} entry
+            app-view (module-application-view module
+                                              (first application))
+            schema  (cond (not full)
+                          (or schema-seed
+                              (:schema app-view))
+
+                          (not application)
+                          (or (:schema app-view)
+                              schema-seed)
+
+                          :else
+                          (or (:schema app-view)
+                              schema-seed))
+            tsch    (get-in schema [:tree (keyword (name sym))])
+            _       (or tsch
+                        (f/error "Table not found in schema."
+                                 {:sym sym
+                                  :entry (:id entry)
+                                  :module (:module entry)
+                                  :current-module (:id module)
+                                  :application application
+                                  :schema-keys (keys (:tree schema))}))]
+        [entry tsch (merge mopts {:schema schema
+                                  :book book
+                                  :application app-view})]))))
 
 
 ;;
@@ -122,26 +224,24 @@
   "builds a js val given input"
   {:added "4.0"}
   ([tsch k v
-    {:keys [coalesce] :as params}
-    {:keys [book] :as mopts}]
-   (let [[{:keys [type sql] :as attrs}] (get tsch k)
-         enum-fn (fn [v {:keys [enum]}]
-                   (cond (and (collection/form? v)
-                              (= (first v) '++))
+     {:keys [coalesce] :as params}
+     {:keys [book] :as mopts}]
+    (let [[{:keys [type sql] :as attrs}] (get tsch k)
+          enum-fn (fn [v {:keys [enum]}]
+                    (cond (and (collection/form? v)
+                               (= (first v) '++))
                          v
                          
-                         :else
-                         (list '++ v (:ns enum))))
-         out (cond (= :ref type)
-                   (let [{:keys [link]} (:ref attrs)
-                         entry  (book/get-base-entry book
-                                                     (:module link)
-                                                     (:id link)
-                                                     :code)
-                         rattrs (:static/schema-primary entry)
-                         rattrs (if (vector? rattrs)
-                                  (or (first (filter #(= (:id %) :id) rattrs))
-                                      (first rattrs))
+                          :else
+                          (list '++ v (:ns enum))))
+          out (cond (= :ref type)
+                    (let [{:keys [link]} (:ref attrs)
+                          [_ entry] (common/pg-resolve-entry link mopts)
+                          entry (ensure-table-entry-static book entry mopts)
+                          rattrs (:static/schema-primary entry)
+                          rattrs (if (vector? rattrs)
+                                   (or (first (filter #(= (:id %) :id) rattrs))
+                                       (first rattrs))
                                   rattrs)]
                      (if (= :enum (:type rattrs))
                        (enum-fn v rattrs)
@@ -199,13 +299,17 @@
   ([tsch k sym]
    (let [[{:keys [type] :as spec}] (get tsch k)]
      
-     (cond (#{:ref} type)
-           (let [tkey  (-> spec :ref :link :id name keyword)
-                 entry (l/get-entry (-> spec :ref :link))
-                 id-type (-> entry :static/schema-seed :tree tkey :id (get 0) :type)]
-             (list id-type
-                   (list 'coalesce
-                         (list :->> sym (str (ut/sym-default-str k) "_id"))
+      (cond (#{:ref} type)
+            (let [tkey  (-> spec :ref :link :id name keyword)
+                  book  (l/get-book (l/runtime-library) :postgres)
+                  [_ entry] (common/pg-resolve-entry (-> spec :ref :link)
+                                                     {:book book
+                                                      :lang :postgres})
+                  entry (ensure-table-entry-static book entry {:lang :postgres})
+                  id-type (-> entry :static/schema-seed :tree tkey :id (get 0) :type)]
+              (list id-type
+                    (list 'coalesce
+                          (list :->> sym (str (ut/sym-default-str k) "_id"))
                          (list :->> (list :-> sym (ut/sym-default-str k))
                                "id"))))
            

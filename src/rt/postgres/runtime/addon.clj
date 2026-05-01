@@ -10,6 +10,14 @@
   rt.postgres
   {:macro-only true})
 
+(defn- resolved-entry
+  [table]
+  (let [ptr  (deref (resolve table))
+        book (l/get-book (l/runtime-library) :postgres)
+        [_ entry] (common/pg-resolve-entry ptr {:book book
+                                                :lang :postgres})]
+    entry))
+
 (defmacro.pg ^{:- [:block]}
   exec
   "executes an sql statement"
@@ -35,18 +43,18 @@
   "gets the name of a table"
   {:added "4.0"}
   ([table]
-   (let [entry (deref (deref (resolve table)))]
-     (str (:id entry)))))
+   (let [entry (resolved-entry table)]
+      (str (:id entry)))))
 
 (defmacro.pg ^{:- [:jsonb]}
   full
   "gets the full jsonb for table or function"
   {:added "4.0"}
   ([table]
-   (let [entry (deref (deref (resolve table)))]
-     (json/write
-      [(:static/schema entry)
-       (str (:id entry))]))))
+   (let [entry (resolved-entry table)]
+      (json/write
+       [(:static/schema entry)
+        (str (:id entry))]))))
 
 (defn full-str
   "gets the full json str form table or function"
@@ -60,10 +68,10 @@
   "gets the coordinate of a row"
   {:added "4.0"}
   ([table row-id]
-   (let [entry (deref (deref (resolve table)))]
-     (list 'jsonb-build-array
-           (:static/schema entry)
-           (str (:id entry))
+   (let [entry (resolved-entry table)]
+      (list 'jsonb-build-array
+            (:static/schema entry)
+            (str (:id entry))
            row-id))))
 
 (defmacro.pg ^{:- [:text]}
@@ -261,4 +269,3 @@
     (do ~@forms)
     :END
     :$$ :LANGUAGE "plpgsql"])
-

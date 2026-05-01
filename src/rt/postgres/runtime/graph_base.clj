@@ -43,17 +43,14 @@
                (vector? (:id v)))
           [k (:id v)]
           
-          :else
-          (let [{:keys [ref]} attrs
-                {:keys [type link rval]} (or ref (f/error "Not found." {:attrs attrs}))
-                nspec-sym (ut/sym-full link)
-                nentry (book/get-base-entry book
-                                            (:module link)
-                                            (:id link)
-                                            (:section link))
-                ntsch   (get-in schema [:tree (keyword (name (:id link)))])]
-            (cond (= :reverse type)
-                  [:id [:in (main/t-select-raw
+           :else
+           (let [{:keys [ref]} attrs
+                 {:keys [type link rval]} (or ref (f/error "Not found." {:attrs attrs}))
+                 nspec-sym (ut/sym-full link)
+                 [_ nentry] (common/pg-resolve-entry link mopts)
+                 ntsch   (get-in schema [:tree (keyword (name (:id link)))])]
+             (cond (= :reverse type)
+                   [:id [:in (main/t-select-raw
                              [nentry ntsch mopts]
                              {:returning #{rval} 
                               :where (where-fn ntsch v mopts)

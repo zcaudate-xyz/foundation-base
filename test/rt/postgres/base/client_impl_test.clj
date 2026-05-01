@@ -194,7 +194,13 @@
                                    '[(let [(:integer a) 1
                                            (:integer b) 2]
                                        (return (+ a b)))])
-  => 3)
+  => 3
+
+  (client-impl/invoke-ptr-pg-block -pg-
+                                   (ut/lang-pointer :postgres
+                                                    {:form '(+ 1 2 3)})
+                                   [])
+  => 6)
 
 ^{:refer rt.postgres.base.client-impl/invoke-ptr-pg :added "4.0"
   :setup [(def -pg- (client/rt-postgres {:dbname "test-scratch"}))]
@@ -207,6 +213,12 @@
   (client-impl/invoke-ptr-pg -pg-
                              (ut/lang-pointer :postgres)
                              '[(let [(:integer a) 1
-                                     (:integer b) 2]
-                                 (return (+ a b)))])
-  => 3)
+                                      (:integer b) 2]
+                                  (return (+ a b)))])
+  => 3
+
+  (client-impl/invoke-ptr-pg -pg-
+                             (ut/lang-pointer :postgres
+                                              {:form '(+ 1 2 3)})
+                             [])
+  => 6)

@@ -1,13 +1,15 @@
 (ns rt.postgres.base.grammar.gen-bind
   (:require [clojure.string]
-            [rt.postgres.base.grammar.common :as common]
-            [rt.postgres.base.application :as app]
-            [std.lang :as l]
-            [std.lib.collection :as collection]
-            [std.lib.deps :as deps]
-            [std.lib.foundation :as f]
-            [std.lib.walk :as walk]
-            [std.string.case :as case]))
+             [rt.postgres.base.grammar.common :as common]
+             [rt.postgres.base.application :as app]
+             [std.lang :as l]
+             [std.lang.base.book :as book]
+             [std.lang.base.util :as ut]
+             [std.lib.collection :as collection]
+             [std.lib.deps :as deps]
+             [std.lib.foundation :as f]
+             [std.lib.walk :as walk]
+             [std.string.case :as case]))
 
 (defn to-lookup
   [arr]
@@ -18,6 +20,20 @@
   (and (symbol? form)
        (not (namespace form))))
 
+(defn bind-entry
+  "gets a materialized postgres code entry when available"
+  {:added "4.1"}
+  [ptr]
+  (let [entry (l/get-entry ptr)]
+    (if (and (= :postgres (:lang entry))
+             (= :code (:section entry))
+             (:module entry)
+             (:id entry))
+      (or (book/get-code-entry-view (l/get-book (l/runtime-library) :postgres)
+                                    (ut/sym-full entry))
+          entry)
+      entry)))
+
 (defn transform-to-str
   "transforms relevant forms to string"
   {:added "4.0"}
@@ -27,12 +43,17 @@
             (boolean? x))
         x
 
-        (symbol? x)
-        (cond (namespace x)
-              (let [entry @@(resolve x)]
-                {"::" (str "sql/" (name (:op-key entry)))
-                 :schema (:static/schema entry)
-                 :name (name (:id entry))})
+         (symbol? x)
+         (cond (namespace x)
+               (let [entry (or (some-> (resolve x)
+                                       deref
+                                       bind-entry)
+                               (f/suppress
+                                (book/get-code-entry-view (l/get-book (l/runtime-library) :postgres)
+                                                          x)))]
+                 {"::" (str "sql/" (name (:op-key entry)))
+                  :schema (:static/schema entry)
+                  :name (name (:id entry))})
               
               :else
               (l/sym-default-str (name x)))
@@ -173,7 +194,7 @@
   "generates the type signatures for a pg function"
   {:added "4.0"}
   [ptr]
-  (let [entry  (l/get-entry ptr)
+  (let [entry  (bind-entry ptr)
         events (select-keys entry [:api/mq.event
                                    :api/ui.event])]
     (-> (select-keys entry
@@ -202,7 +223,7 @@
   "generates the view interface"
   {:added "4.0"}
   [ptr & [opts]]
-  (let [entry (l/get-entry ptr)
+  (let [entry (bind-entry ptr)
         {:keys [table type guards autos scope query query-base args] :as view} (:static/view entry)
         {:keys [id] :as m} (bind-function ptr)
         
@@ -232,7 +253,7 @@
   "gets the table interface"
   {:added "4.0"}
   [ptr & [update-key]]
-  (let [{:keys [id] :as entry} (l/get-entry ptr)
+  (let [{:keys [id] :as entry} (bind-entry ptr)
         schema-seed (:static/schema-seed entry)
         schema-update (if update-key
                         (-> schema-seed
@@ -258,11 +279,11 @@
                                        (l/get-book (l/default-library)
                                                    :postgres)
                                        (dedupe (map :module (vals pointers)))))
-                             (range))
-        entries (->> (mapv l/get-entry (vals pointers))
-                     (sort-by (fn [{:keys [module line]}]
-                                [(module-lu module) line]))
-                     (filter identity))]
+                              (range))
+        entries (->> (mapv bind-entry (vals pointers))
+                      (sort-by (fn [{:keys [module line]}]
+                                 [(module-lu module) line]))
+                      (filter identity))]
     (->> (map-indexed (fn [pos {:keys [id] :as entry}]
                         [(name id) (assoc (bind-table entry update-key)
                                           :position pos)])

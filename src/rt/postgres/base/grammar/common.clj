@@ -10,6 +10,7 @@
             [std.lang.base.emit-preprocess :as preprocess] [std.lang.base.preprocess-base :as preprocess-base]
             [std.lang.base.grammar :as grammar]
             [std.lang.base.grammar-spec :as grammar-spec]
+            [std.lang.base.impl-template :as impl-template]
             [std.lang.base.library-snapshot :as snap]
             [std.lang.base.pointer :as ptr]
             [std.lang.base.script :as script]
@@ -138,23 +139,68 @@
   "resolves a postgres link against the live module first, then the snapshot book, then vars"
   {:added "4.1"}
   [link {:keys [book snapshot module lang] :as _mopts}]
-  (let [lang   (or lang
-                   (:lang link)
-                   :postgres)
-        book   (or book
-                   (and snapshot
-                        (snap/get-book snapshot lang)))
-        entry  (or (and (pg-current-module-link? module link)
-                        (get-in module [:code (:id link)]))
-                   (and book
-                        (book/get-base-entry book
-                                             (:module link)
-                                             (:id link)
-                                             (:section link)))
-                   (some-> link
-                           pg-link-symbol
-                           resolve
-                           deref))]
+  (let [lang          (or lang
+                          (:lang link)
+                          :postgres)
+        book          (or book
+                          (and snapshot
+                               (snap/get-book snapshot lang)))
+        normalize-entry (fn [entry]
+                          (cond (nil? entry) nil
+                                (book/book-entry? entry) entry
+                                (or (:context entry)
+                                    (:context/fn entry))
+                                (ptr/get-entry entry)
+                                :else entry))
+        module-id      (or (:id module) module)
+        current-entry  (or (when (and book
+                                      module-id
+                                      (pg-current-module-link? module link))
+                             (some-> (book/get-code-entry-view book
+                                                               (ut/sym-full module-id
+                                                                            (:id link)))
+                                     normalize-entry))
+                           (when-let [entry (and (pg-current-module-link? module link)
+                                                 (get-in module [:code (:id link)]))]
+                             (when (map? entry)
+                               (normalize-entry entry))))
+        snapshot-entry (some->> (and book
+                                     (book/get-base-entry book
+                                                          (:module link)
+                                                          (:id link)
+                                                          (:section link)))
+                                normalize-entry)
+        resolved-entry (some-> link
+                               pg-link-symbol
+                               resolve
+                               deref
+                               normalize-entry)
+        complete?     (fn [entry]
+                        (or (:static/schema-seed entry)
+                            (:static/schema-primary entry)
+                            (:static/application entry)))
+        materialize   (fn [entry entry-module]
+                        (cond (nil? entry) nil
+                              (complete? entry) entry
+                              (nil? book) entry
+                              :else
+                              (impl-template/materialize-code-entry book
+                                                                    (dissoc entry :static/code.cache)
+                                                                    {:lang lang
+                                                                     :module (or entry-module
+                                                                                 (get-in book [:modules (:module entry)]))})))
+        current-entry (materialize current-entry module)
+        snapshot-entry (materialize snapshot-entry
+                                    (get-in book [:modules (:module link)]))
+        entry         (or (and current-entry
+                               (complete? current-entry)
+                               current-entry)
+                          (and snapshot-entry
+                               (complete? snapshot-entry)
+                               snapshot-entry)
+                          resolved-entry
+                          snapshot-entry
+                          current-entry)]
     [book entry]))
 
 (defn pg-string
@@ -306,19 +352,18 @@
   {:added "4.0"}
   ([sym mopts]
    (let [{:keys [lang snapshot]} mopts
-         book (snap/get-book snapshot lang)
-         [sym-module sym-id] (ut/sym-pair sym)
-         module (book/get-module book sym-module)
-         {:keys [section] :as e} (or (get-in module [:code sym-id])
-                                     (get-in module [:fragment sym-id])
-                                     (f/error "Token Not found."
-                                              {:input sym
-                                               :module sym-module
-                                               :sym-id sym-id
-                                               :opts mopts}))]
-     (case section
-       :fragment (:form e)
-       :code (pg-entry-token e)))))
+          book (snap/get-book snapshot lang)
+          [sym-module sym-id] (ut/sym-pair sym)
+          {:keys [section] :as e} (or (book/get-code-entry-view book sym)
+                                      (get-in (book/get-module book sym-module) [:fragment sym-id])
+                                      (f/error "Token Not found."
+                                               {:input sym
+                                                :module sym-module
+                                                :sym-id sym-id
+                                                :opts mopts}))]
+      (case section
+        :fragment (:form e)
+        :code (pg-entry-token e)))))
 
 (defn pg-linked
   "emits the linked symbol"

@@ -5,7 +5,7 @@
 
 ^{:refer rt.postgres.base.typed.typed-parse/read-forms :added "0.1"}
 (fact "read-forms reads top-level forms from a file"
-  (let [forms (parse/read-forms "src/rt/postgres/grammar/typed_common.clj")]
+  (let [forms (parse/read-forms "src/rt/postgres/base/typed/typed_common.clj")]
     (vector? forms) => true))
 
 ^{:refer rt.postgres.base.typed.typed-parse/deftype? :added "0.1"}
@@ -203,7 +203,7 @@
 
 ^{:refer rt.postgres.base.typed.typed-parse/analyze-file :added "0.1"}
 (fact "analyze-file returns structure with all type definitions"
-  (let [result (parse/analyze-file "src/rt/postgres/grammar/typed_common.clj")]
+  (let [result (parse/analyze-file "src/rt/postgres/base/typed/typed_common.clj")]
     (contains? result :tables) => true
     (contains? result :enums) => true
     (contains? result :functions) => true))
