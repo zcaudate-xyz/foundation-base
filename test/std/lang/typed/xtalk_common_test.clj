@@ -245,8 +245,8 @@
 ^{:refer std.lang.typed.xtalk-common/resolve-type-symbol :added "4.1"}
 (fact "resolves aliased and local type symbols"
   [(resolve-type-symbol 'User {:ns 'sample.route :aliases {}})
-   (resolve-type-symbol 'types/EventMap {:ns 'sample.route :aliases '{types xt.old.event-common}})]
-  => '[sample.route/User xt.old.event-common/EventMap])
+   (resolve-type-symbol 'types/EventMap {:ns 'sample.route :aliases '{types xt.event.base-listener}})]
+  => '[sample.route/User xt.event.base-listener/EventMap])
 
 ^{:refer std.lang.typed.xtalk-common/normalize-record-field :added "4.1"}
 (fact "normalizes record field definitions"
@@ -257,8 +257,8 @@
 
 ^{:refer std.lang.typed.xtalk-common/normalize-apply-target :added "4.1"}
 (fact "normalizes apply targets"
-  (normalize-apply-target 'types/EventMap {:ns 'sample.route :aliases '{types xt.old.event-common}})
-  => 'xt.old.event-common/EventMap)
+  (normalize-apply-target 'types/EventMap {:ns 'sample.route :aliases '{types xt.event.base-listener}})
+  => 'xt.event.base-listener/EventMap)
 
 ^{:refer std.lang.typed.xtalk-common/normalize-type :added "4.1"}
 (fact "normalizes xt type forms"

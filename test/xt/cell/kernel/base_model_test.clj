@@ -19,13 +19,14 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.common-lib :as k]
-             [xt.lang.common-data :as xtd]
-             [xt.lang.common-space :as rt :with [defsingleton.js]]
-             [xt.old.event-view :as base-view]
-             [xt.cell.kernel.base-link :as base-link]
-             [xt.cell.kernel.base-link-local :as base-link-local]
-             [xt.cell.kernel.base-model :as base-model]
+   :require [[xt.lang.spec-base :as xt]
+              [xt.lang.common-lib :as k]
+               [xt.lang.common-data :as xtd]
+               [xt.lang.common-space :as rt :with [defsingleton.js]]
+               [xt.event.base-view :as base-view]
+              [xt.cell.kernel.base-link :as base-link]
+              [xt.cell.kernel.base-link-local :as base-link-local]
+              [xt.cell.kernel.base-model :as base-model]
              [xt.cell.kernel.base-impl :as base-impl]
              [xt.cell.kernel.inner-impl :as inner-impl]
              [xt.cell.kernel.inner-mock :as inner-mock]

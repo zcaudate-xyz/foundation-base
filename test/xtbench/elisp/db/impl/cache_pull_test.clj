@@ -1,7 +1,8 @@
 (ns xtbench.elisp.db.impl.cache-pull-test
   (:require [net.http :as http]
             [std.json :as json]
-            [std.lang :as l])
+            [std.lang :as l]
+            [rt.postgres :as pg])
   (:use code.test))
 
 (l/script- :elisp
@@ -12,12 +13,14 @@
              [xt.db.impl.cache-util :as data]
              [xt.db.impl.cache-pull :as q]
              [xt.db.schema.base-flatten :as f]
-             [xt.old.db.sql-util :as ut]
-             [xt.old.db.sample-test :as sample]]})
+             [xt.db.schema.sql-util :as ut]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
+
+(def +app+ (pg/app "xt.db.helpers.sample"))
+(def +schema+ (pg/bind-schema (:schema +app+)))
 
 (def +flattened+
   {"UserProfile"
@@ -192,7 +195,7 @@
   (!.elisp
     (var rows {})
     (data/merge-bulk rows (@! +flattened-full+) nil)
-    (q/pull rows sample/Schema "Currency"
+    (q/pull rows (@! +schema+) "Currency"
             {:returning ["id"]
              :limit 2
              :offset 2
@@ -202,7 +205,7 @@
   (!.elisp
     (var rows {})
     (data/merge-bulk rows (@! +flattened-full+) nil)
-    (q/pull rows sample/Schema "Currency"
+    (q/pull rows (@! +schema+) "Currency"
             {:returning ["id"]
              :limit 2
              :order-by ["id"]}))
@@ -211,7 +214,7 @@
   (!.elisp
     (var rows {})
     (data/merge-bulk rows (@! +flattened-full+) nil)
-    (q/pull rows sample/Schema "Currency"
+    (q/pull rows (@! +schema+) "Currency"
             {:returning ["id"]
              :limit 2
              :order-by ["id"]
@@ -234,7 +237,7 @@
     (var rows {})
     (data/merge-bulk rows (@! +flattened-full+) nil)
     (q/pull rows
-            sample/Schema
+            (@! +schema+)
             "Wallet"
             {:returning [["entries"
                           [["asset" ["-/data"
@@ -300,7 +303,7 @@
     (var rows {})
     (data/merge-bulk rows (@! +flattened-full+) nil)
     (q/pull-where-clause rows
-                         sample/Schema
+                         (@! +schema+)
                          "UserAccount"
                          (xtd/get-in rows ["UserAccount"
                                            "00000000-0000-0000-0000-000000000000"
@@ -315,12 +318,12 @@
   (!.elisp
     (var rows {})
     (data/merge-bulk rows (@! +flattened-full+) nil)
-    [(q/pull-where rows sample/Schema "UserAccount"
+    [(q/pull-where rows (@! +schema+) "UserAccount"
                    (fn:> [record table-key] true) {})
-     (q/pull-where rows sample/Schema  "UserAccount"
+     (q/pull-where rows (@! +schema+)  "UserAccount"
                    {:nickname "hello"}
                    {})
-     (q/pull-where rows sample/Schema  "UserAccount"
+     (q/pull-where rows (@! +schema+)  "UserAccount"
                    {:nickname "hello"}
                    {:data {:nickname "hello"}})])
   => [true false true])
@@ -332,7 +335,7 @@
     (var rows {})
     (data/merge-bulk rows (@! +flattened-full+) nil)
     (q/pull-return-clause rows
-                          sample/Schema
+                          (@! +schema+)
                           (xtd/get-in rows ["UserAccount"
                                             "00000000-0000-0000-0000-000000000000"
                                             "record"])
@@ -359,7 +362,7 @@
     (var rows {})
     (data/merge-bulk rows (@! +flattened-full+) nil)
     (q/pull-return-clause rows
-                          sample/Schema
+                          (@! +schema+)
                           (xtd/get-in rows ["UserAccount"
                                             "00000000-0000-0000-0000-000000000000"
                                             "record"])
@@ -385,7 +388,7 @@
     (var rows {})
     (data/merge-bulk rows (@! +flattened-full+) nil)
     (q/pull-return rows
-                   sample/Schema
+                   (@! +schema+)
                    "UserAccount"
                    ["id" "nickname"
                     ["profile"
@@ -403,7 +406,7 @@
   (!.elisp
     (var rows {})
     (data/merge-bulk rows (@! +flattened+) nil)
-    (q/pull rows sample/Schema "UserAccount"
+    (q/pull rows (@! +schema+) "UserAccount"
             {:returning ["id" "nickname"
                          ["profile"
                           ["*/data"]]]}))

@@ -74,6 +74,9 @@
   [s]
   (some-> s nav/parse-root nav/down nav/block))
 
+(declare multiline-indent-prefix)
+(declare render-map-entry)
+
 (defn- unwrap-meta-string
   [s]
   (let [root    (nav/parse-root s)
@@ -198,36 +201,76 @@
         :extra
         normalize-script-requires)))
 
+(defn- render-script-require-string
+  [requires]
+  (let [items (mapv pr-str (normalize-script-requires requires))]
+    (cond
+      (empty? items)
+      "[]"
+
+      (= 1 (count items))
+      (str "[" (first items) "]")
+
+      :else
+      (str "[" (first items)
+           "\n"
+           (str/join "\n" (rest items))
+           "]"))))
+
+(defn- render-script-config-string
+  [current-str config]
+  (let [entry-prefix (multiline-indent-prefix current-str "   ")
+        entries      (mapv (fn [[k v]]
+                             [k (if (= :require k)
+                                  (render-script-require-string v)
+                                  (pr-str v))])
+                           config)]
+    (if (empty? entries)
+      "{}"
+      (str "{"
+           (loop [[[k rendered] & more] entries
+                  out nil]
+             (let [indent (if out
+                            (count entry-prefix)
+                            1)
+                   piece  (render-map-entry indent k rendered)
+                   out    (if out
+                            (str out "\n" entry-prefix piece)
+                            piece)]
+               (if more
+                 (recur more out)
+                 out)))
+           "}"))))
+
 (defn- augment-script-string
   [script-str output lang]
   (let [extra-requires (root-script-extra-requires output lang)]
     (if (empty? extra-requires)
       script-str
       (let [root       (nav/parse-root script-str)
-            script-nav (nav/down root)
-            config-nav (some-> script-nav nav/down nav/right nav/right)
-            script-form (some-> script-nav nav/value)
-            next-config (-> (if (and config-nav
-                                     (map? (nav/value config-nav)))
-                              (nav/value config-nav)
-                              {})
-                            (update :require merge-script-requires extra-requires))]
-        (cond
-           (nil? script-nav)
-           script-str
+             script-nav (nav/down root)
+             config-nav (some-> script-nav nav/down nav/right nav/right)
+             script-form (some-> script-nav nav/value)
+             current-config-str (some-> config-nav nav/block block/block-string)
+             next-config (-> (if (and config-nav
+                                      (map? (nav/value config-nav)))
+                               (nav/value config-nav)
+                               {})
+                             (update :require merge-script-requires extra-requires))]
+         (cond
+            (nil? script-nav)
+            script-str
 
-           (and config-nav
-                (map? (nav/value config-nav)))
-           (if-let [require-nav (form-common/nav-map-value config-nav :require)]
-             (-> require-nav
-                 (nav/replace (:require next-config))
-                 nav/root-string)
-             (-> config-nav
-                 (nav/replace next-config)
-                 nav/root-string))
+            (and config-nav
+                 (map? (nav/value config-nav)))
+            (-> config-nav
+                (nav/replace (parse-first-block
+                              (render-script-config-string current-config-str
+                                                           next-config)))
+                nav/root-string)
 
-          (seq? script-form)
-          (let [[script-fn script & more] script-form]
+           (seq? script-form)
+           (let [[script-fn script & more] script-form]
             (-> script-nav
                 (nav/replace (apply list script-fn script next-config more))
                 nav/root-string))
@@ -328,6 +371,13 @@
              (#{\space \tab} (.charAt line i)))
       (recur (inc i))
       i)))
+
+(defn- multiline-indent-prefix
+  [s default-prefix]
+  (let [[_ line & _] (str/split-lines (or s ""))]
+    (if line
+      (subs line 0 (leading-indent line))
+      default-prefix)))
 
 (defn- trim-indent
   [^String line n]

@@ -64,9 +64,7 @@
    'xt.lang.common-lib/not-empty? "not-empty?"
    'xt.lang.common-lib/is-empty? "is-empty?"
    'xt.event.base-listener/make-container "make-container"
-   'xt.event.base-listener/blank-container "blank-container"
-   'xt.old.event-common/make-container "make-container"
-   'xt.old.event-common/blank-container "blank-container"})
+   'xt.event.base-listener/blank-container "blank-container"})
 
 (defn lower-defaulted-target
   [target args]

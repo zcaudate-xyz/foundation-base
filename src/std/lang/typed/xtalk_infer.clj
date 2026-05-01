@@ -651,10 +651,7 @@
 
 (defn infer-make-container
   [[op initial-expr type-expr opts-expr] ctx]
-  (let [listener-map-name (case op
-                            xt.event.base-listener/make-container
-                            'xt.event.base-listener/EventListenerMap
-                            'xt.old.event-common/EventListenerMap)
+  (let [listener-map-name 'xt.event.base-listener/EventListenerMap
         initial-out (infer-type initial-expr ctx)
         type-out (infer-type type-expr ctx)
         opts-out (infer-type opts-expr ctx)
@@ -696,10 +693,7 @@
 
 (defn infer-blank-container
   [[op type-expr opts-expr] ctx]
-  (let [listener-map-name (case op
-                            xt.event.base-listener/blank-container
-                            'xt.event.base-listener/EventListenerMap
-                            'xt.old.event-common/EventListenerMap)
+  (let [listener-map-name 'xt.event.base-listener/EventListenerMap
         type-out (infer-type type-expr ctx)
         opts-out (infer-type opts-expr ctx)
         opts-type (resolve-type (:type opts-out) ctx)
@@ -1170,8 +1164,6 @@
                                                      (:errors arg-out)))
                  xt.event.base-listener/blank-container (infer-blank-container form ctx)
                  xt.event.base-listener/make-container (infer-make-container form ctx)
-                 xt.old.event-common/blank-container (infer-blank-container form ctx)
-                 xt.old.event-common/make-container (infer-make-container form ctx)
                  (if (keyword? op)
                    (infer-keyword-call form ctx)
                    (infer-function-call form ctx))))))))

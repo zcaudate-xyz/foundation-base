@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:export [MODULE] :require [[js.cell.service.db-view :as db-view] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.old.db :as xdb] [xt.old.db.base-check :as check] [xt.old.db.cache-view :as cache-view]]})
+  {:export [MODULE] :require [[js.cell.service.db-view :as db-view] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-tree :as xtt] [xt.db :as xdb] [xt.db.schema.base-check :as check] [xt.db.impl.cache-view :as cache-view]]})
 
 (defn.xt query-capable?
   "checks that the db descriptor can prepare queries"
@@ -19,7 +19,7 @@
   (when (xt/x:nil? view-entry)
     (return nil))
   (var #{view} view-entry)
-  (var tview (xtd/tree-walk view
+  (var tview (xtt/tree-walk view
                             (fn [res]
                               (return (:? (xt/x:is-array? res)
                                           (xt/x:arr-filter res

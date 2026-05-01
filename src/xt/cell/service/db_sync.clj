@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:export [MODULE] :require [[xt.cell.service.db-view :as db-view] [xt.old.db :as xdb] [xt.old.db.base-flatten :as flatten] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]]})
+  {:export [MODULE] :require [[xt.cell.service.db-view :as db-view] [xt.db :as xdb] [xt.db.schema.base-flatten :as flatten] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]]})
 
 (defn.xt sync-capable?
   "checks that the db descriptor can process sync requests"

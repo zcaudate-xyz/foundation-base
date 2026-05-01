@@ -4,7 +4,7 @@
             [js.cell.runtime.emit :as emit]
             [std.lib.template :as template]
             [std.lang :as l]
-            [xt.old.db :as xdb]
+               [xt.db :as xdb]
             [xt.lang.spec-base :as xt]
             [xt.lang.common-data :as xtd]))
 
@@ -58,12 +58,12 @@
               [js.cell.service.db-query :as db-query]
               [js.cell.service.db-sync :as db-sync]
               [js.lib.driver-sqlite-wasm :as sqlite-wasm]
-              [xt.old.db :as xdb]
+               [xt.db :as xdb]
               [xt.lang.spec-base :as xt]
               [xt.lang.common-data :as xtd]
               [xt.lang.common-space :as rt :with [defsingleton.js]]
-              [xt.old.event-view :as event-view]
-              [xt.old.sys.conn-dbsql :as dbsql]]})
+              [xt.event.base-view :as event-view]
+              [xt.lib.sql-connection :as dbsql]]})
 
 (defn node-remote-script
   []
@@ -98,13 +98,13 @@
                                "query" ["id" "status"]}}}}})
         (:= existing-db
             (xt.lang.common-data/obj-assign
-             (xt.old.db/db-create {"::" "db.cache"}
+             (xt.db/db-create {"::" "db.cache"}
                               schema
                               {"Order" {"position" 0}}
                               nil)
              {"schema" schema
               "views" views}))
-        (xt.old.db/sync-event existing-db
+        (xt.db/sync-event existing-db
                           ["add"
                            {"Order" [{"id" "ord-1" "status" "open"}
                                      {"id" "ord-2" "status" "closed"}]}])
@@ -113,7 +113,7 @@
        {"@e2e/query"
         {"handler"
          (fn [query-plan]
-           (var rows (xt.old.db/db-pull-sync
+           (var rows (xt.db/db-pull-sync
                       (!:G __E2E_REMOTE_DB)
                       {"Order"
                        {"id" {"ident" "id" "type" "text" "order" 0}
@@ -132,7 +132,7 @@
            (var db-sync (xt.lang.spec-base/x:get-key sync-request "db/sync"))
            (when (and (xt.lang.spec-base/x:is-object? db-sync)
                       (xt.lang.common-data/not-empty? db-sync))
-             (xt.old.db/sync-event (!:G __E2E_REMOTE_DB) ["add" db-sync]))
+              (xt.db/sync-event (!:G __E2E_REMOTE_DB) ["add" db-sync]))
            (return sync-request))
          "is_async" false
          "args" ["sync_request"]}}
@@ -174,13 +174,13 @@
                                "query" ["id" "status"]}}}}})
         (:= existing-db
             (xt.lang.common-data/obj-assign
-             (xt.old.db/db-create {"::" "db.cache"}
+             (xt.db/db-create {"::" "db.cache"}
                               schema
                               {"Order" {"position" 0}}
                               nil)
              {"schema" schema
               "views" views}))
-        (xt.old.db/sync-event existing-db
+        (xt.db/sync-event existing-db
                           ["add"
                            {"Order" [{"id" "ord-1" "status" "open"}
                                      {"id" "ord-2" "status" "closed"}]}])
@@ -191,7 +191,7 @@
         {"@e2e/query"
          {"handler"
           (fn [query-plan]
-            (var rows (xt.old.db/db-pull-sync
+            (var rows (xt.db/db-pull-sync
                        (!:G __E2E_REMOTE_DB)
                        {"Order"
                         {"id" {"ident" "id" "type" "text" "order" 0}
@@ -210,7 +210,7 @@
             (var db-sync (xt.lang.spec-base/x:get-key sync-request "db/sync"))
             (when (and (xt.lang.spec-base/x:is-object? db-sync)
                        (xt.lang.common-data/not-empty? db-sync))
-              (xt.old.db/sync-event (!:G __E2E_REMOTE_DB) ["add" db-sync]))
+              (xt.db/sync-event (!:G __E2E_REMOTE_DB) ["add" db-sync]))
             (return sync-request))
           "is_async" false
           "args" ["sync_request"]}})

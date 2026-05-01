@@ -8,6 +8,11 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.event.base-route :as route]]})
 
+(l/script- :lua
+  {:runtime :basic
+   :require [[xt.lang.spec-base :as xt]
+             [xt.event.base-route :as route]]})
+
 (l/script- :python
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -21,6 +26,25 @@
 (fact "converts between url and tree forms"
 
   (!.js
+   [(route/interim-from-url "hello/world?id=1&type=name")
+    (route/interim-to-url {"params" {"[]" {"id" "1"}}
+                           "path" []})
+    (route/path-to-tree ["hello" "world"])
+    (route/path-from-tree {"[]" "hello"
+                           "[\"hello\"]" "world"})
+    (route/changed-params-raw {"id" "1" "type" "name"}
+                              {"type" "hello"})])
+  => [{"params" {"[\"hello\",\"world\"]" {"id" "1"
+                                          "type" "name"}}
+       "path" ["hello" "world"]}
+      "?id=1"
+      {"[]" "hello"
+       "[\"hello\"]" "world"}
+      ["hello" "world"]
+      {"id" true
+       "type" true}]
+
+  (!.lua
    [(route/interim-from-url "hello/world?id=1&type=name")
     (route/interim-to-url {"params" {"[]" {"id" "1"}}
                            "path" []})
@@ -62,6 +86,43 @@
 (fact "tracks route state and listeners"
 
   (!.js
+   (var r (route/make-route "hello?auth=sign_in"))
+   (var calls [])
+   (var removed nil)
+   (var missing nil)
+   (var entry
+         (route/add-url-listener
+          r
+          "a1"
+          (fn [id data t meta]
+            (xt/x:arr-push calls (xt/x:get-key data "type")))
+          nil))
+   (route/set-url r "hello/world?auth=sign_out")
+   (:= removed (route/remove-listener r "a1"))
+   (:= missing (route/remove-listener r "missing"))
+   [(. r ["::"])
+    (route/get-url (route/make-route "hello?auth=sign_in"))
+    (route/get-segment (route/make-route "hello?auth=sign_in") [])
+    (route/get-param (route/make-route "hello?auth=sign_in") "auth" nil)
+    (route/get-all-params (route/make-route "hello?auth=sign_in") [])
+    [(. entry ["meta"] ["listener/id"])
+     (. entry ["meta"] ["listener/type"])]
+    ["a1"]
+    calls
+    [(. removed ["meta"] ["listener/id"])
+     missing]])
+  => (just-in
+      ["event.route"
+       "hello?auth=sign_in"
+       "hello"
+       "sign_in"
+       {}
+       ["a1" "route.url"]
+       (just ["a1"] :in-any-order)
+       ["route.url"]
+       ["a1" nil]])
+
+  (!.lua
    (var r (route/make-route "hello?auth=sign_in"))
    (var calls [])
    (var removed nil)
@@ -144,6 +205,12 @@
      "path" ["hello"]}))
   => "hello?id=1"
 
+  (!.lua
+   (route/interim-to-url
+    {"params" {"[\"hello\"]" {"id" "1"}}
+     "path" ["hello"]}))
+  => "hello?id=1"
+
   (!.py
    (route/interim-to-url
     {"params" {"[\"hello\"]" {"id" "1"}}
@@ -159,6 +226,12 @@
       "[\"hello\"]" "world"
       "[\"hello\",\"world\"]" nil}
 
+  (!.lua
+   (route/path-to-tree ["hello" "world"] true))
+  => {"[]" "hello"
+      "[\"hello\"]" "world"
+      "[\"hello\",\"world\"]" nil}
+
   (!.py
    (route/path-to-tree ["hello" "world"] true))
   => {"[]" "hello"
@@ -169,6 +242,15 @@
 (fact "converts interim data to a tree"
 
   (!.js
+   (route/interim-to-tree
+    {"params" {"[\"hello\"]" {"id" "1"}}
+     "path" ["hello"]}
+    true))
+  => {"[]" "hello"
+      "[\"hello\"]" nil
+      "params" {"[\"hello\"]" {"id" "1"}}}
+
+  (!.lua
    (route/interim-to-tree
     {"params" {"[\"hello\"]" {"id" "1"}}
      "path" ["hello"]}
@@ -195,6 +277,12 @@
      "[\"hello\"]" "world"}))
   => ["hello" "world"]
 
+  (!.lua
+   (route/path-from-tree
+    {"[]" "hello"
+     "[\"hello\"]" "world"}))
+  => ["hello" "world"]
+
   (!.py
    (route/path-from-tree
     {"[]" "hello"
@@ -210,6 +298,12 @@
     ["hello"]))
   => {"id" "1"}
 
+  (!.lua
+   (route/path-params-from-tree
+    {"params" {"[\"hello\"]" {"id" "1"}}}
+    ["hello"]))
+  => {"id" "1"}
+
   (!.py
    (route/path-params-from-tree
     {"params" {"[\"hello\"]" {"id" "1"}}}
@@ -220,6 +314,14 @@
 (fact "converts a tree back to interim form"
 
   (!.js
+   (route/interim-from-tree
+    {"[]" "hello"
+     "[\"hello\"]" nil
+     "params" {"[\"hello\"]" {"id" "1"}}}))
+  => {"params" {"[\"hello\"]" {"id" "1"}}
+      "path" ["hello"]}
+
+  (!.lua
    (route/interim-from-tree
     {"[]" "hello"
      "[\"hello\"]" nil
@@ -245,6 +347,13 @@
   => {"id" true
       "type" true}
 
+  (!.lua
+   (route/changed-params-raw
+    {"id" "1" "type" "name"}
+    {"type" "hello"}))
+  => {"id" true
+      "type" true}
+
   (!.py
    (route/changed-params-raw
     {"id" "1" "type" "name"}
@@ -256,6 +365,13 @@
 (fact "diffs scoped route params"
 
   (!.js
+   (route/changed-params
+    {"params" {"[\"hello\"]" {"id" "1"}}}
+    {"params" {"[\"hello\"]" {"id" "2"}}}
+    ["hello"]))
+  => {"id" true}
+
+  (!.lua
    (route/changed-params
     {"params" {"[\"hello\"]" {"id" "1"}}}
     {"params" {"[\"hello\"]" {"id" "2"}}}
@@ -278,6 +394,12 @@
     ["hello" "world"]))
   => {"[\"hello\"]" true}
 
+  (!.lua
+   (route/changed-path-raw
+    ["hello"]
+    ["hello" "world"]))
+  => {"[\"hello\"]" true}
+
   (!.py
    (route/changed-path-raw
     ["hello"]
@@ -288,6 +410,13 @@
 (fact "diffs route paths from trees"
 
   (!.js
+   (route/changed-path
+    {"[]" "hello"}
+    {"[]" "hello"
+     "[\"hello\"]" "world"}))
+  => {"[\"hello\"]" true}
+
+  (!.lua
    (route/changed-path
     {"[]" "hello"}
     {"[]" "hello"
@@ -309,6 +438,11 @@
     (route/make-route "hello/world?id=1")))
   => "hello/world?id=1"
 
+  (!.lua
+   (route/get-url
+    (route/make-route "hello/world?id=1")))
+  => "hello/world?id=1"
+
   (!.py
    (route/get-url
     (route/make-route "hello/world?id=1")))
@@ -318,6 +452,12 @@
 (fact "gets route segments by path"
 
   (!.js
+   (var r (route/make-route "hello/world"))
+   [(route/get-segment r [])
+    (route/get-segment r ["hello"])])
+  => ["hello" "world"]
+
+  (!.lua
    (var r (route/make-route "hello/world"))
    [(route/get-segment r [])
     (route/get-segment r ["hello"])])
@@ -339,6 +479,13 @@
     nil))
   => "sign_in"
 
+  (!.lua
+   (route/get-param
+    (route/make-route "hello?auth=sign_in")
+    "auth"
+    nil))
+  => "sign_in"
+
   (!.py
    (route/get-param
     (route/make-route "hello?auth=sign_in")
@@ -350,6 +497,12 @@
 (fact "gets all params for the current path"
 
   (!.js
+   (route/get-all-params
+    (route/make-route "hello?auth=sign_in")
+    nil))
+  => {"auth" "sign_in"}
+
+  (!.lua
    (route/get-all-params
     (route/make-route "hello?auth=sign_in")
     nil))
@@ -375,6 +528,17 @@
       "listener/id" "a1"
       "listener/type" "route.url"}
 
+  (!.lua
+   (. (route/add-url-listener
+       (route/make-route "hello")
+       "a1"
+       (fn:> [id data t meta] nil)
+       {:label "hello"})
+      ["meta"]))
+  => {"label" "hello"
+      "listener/id" "a1"
+      "listener/type" "route.url"}
+
   (!.py
    (. (route/add-url-listener
        (route/make-route "hello")
@@ -390,6 +554,19 @@
 (fact "adds a path listener entry"
 
   (!.js
+   (. (route/add-path-listener
+       (route/make-route "hello")
+       ["hello"]
+       "a1"
+       (fn:> [id data t meta] nil)
+       {:label "hello"})
+      ["meta"]))
+  => {"label" "hello"
+      "listener/id" "a1"
+      "listener/type" "route.path"
+      "route/path" ["hello"]}
+
+  (!.lua
    (. (route/add-path-listener
        (route/make-route "hello")
        ["hello"]
@@ -431,6 +608,19 @@
       "listener/type" "route.param"
       "route/param" "auth"}
 
+  (!.lua
+   (. (route/add-param-listener
+       (route/make-route "hello")
+       "auth"
+       "a1"
+       (fn:> [id data t meta] nil)
+       {:label "hello"})
+      ["meta"]))
+  => {"label" "hello"
+      "listener/id" "a1"
+      "listener/type" "route.param"
+      "route/param" "auth"}
+
   (!.py
    (. (route/add-param-listener
        (route/make-route "hello")
@@ -448,6 +638,21 @@
 (fact "adds a full route listener entry"
 
   (!.js
+   (. (route/add-full-listener
+       (route/make-route "hello")
+       ["hello"]
+       "auth"
+       "a1"
+       (fn:> [id data t meta] nil)
+       {:label "hello"})
+      ["meta"]))
+  => {"label" "hello"
+      "listener/id" "a1"
+      "listener/type" "route.full"
+      "route/param" "auth"
+      "route/path" ["hello"]}
+
+  (!.lua
    (. (route/add-full-listener
        (route/make-route "hello")
        ["hello"]
@@ -495,6 +700,21 @@
        "hello/world?auth=sign_out"
        (just ["route.url" "path" "param" "full"] :in-any-order)])
 
+  (!.lua
+   (var r (route/make-route "hello?auth=sign_in"))
+   (var calls [])
+   (route/add-url-listener r "url" (fn [id data t meta] (xt/x:arr-push calls (. data ["type"]))) nil)
+   (route/add-path-listener r ["hello"] "path" (fn [id data t meta] (xt/x:arr-push calls "path")) nil)
+   (route/add-param-listener r "auth" "param" (fn [id data t meta] (xt/x:arr-push calls "param")) nil)
+   (route/add-full-listener r ["hello"] "auth" "full" (fn [id data t meta] (xt/x:arr-push calls "full")) nil)
+   [(route/set-url r "hello/world?auth=sign_out")
+    (route/get-url r)
+    calls])
+  => (just-in
+      [(just ["url" "path" "param" "full"] :in-any-order)
+       "hello/world?auth=sign_out"
+       (just ["route.url" "path" "param" "full"] :in-any-order)])
+
   (!.py
    (var r (route/make-route "hello?auth=sign_in"))
    (var calls [])
@@ -514,6 +734,21 @@
 (fact "updates the path and scoped params"
 
   (!.js
+   (var r (route/make-route "hello?auth=sign_in"))
+   (var calls [])
+   (route/add-url-listener r "url" (fn [id data t meta] (xt/x:arr-push calls (. data ["type"]))) nil)
+   (route/add-path-listener r [] "path" (fn [id data t meta] (xt/x:arr-push calls "path")) nil)
+   (route/add-param-listener r "auth" "param" (fn [id data t meta] (xt/x:arr-push calls "param")) nil)
+   (route/add-full-listener r [] "auth" "full" (fn [id data t meta] (xt/x:arr-push calls "full")) nil)
+   [(route/set-path r ["world"] {"auth" "sign_out"})
+    (route/get-url r)
+    calls])
+  => (just-in
+      [(just ["url" "path" "param" "full"] :in-any-order)
+       "world?auth=sign_out"
+       (just ["route.path" "path" "param" "full"] :in-any-order)])
+
+  (!.lua
    (var r (route/make-route "hello?auth=sign_in"))
    (var calls [])
    (route/add-url-listener r "url" (fn [id data t meta] (xt/x:arr-push calls (. data ["type"]))) nil)
@@ -557,6 +792,17 @@
       "hello/there"
       ["route.path"]]
 
+  (!.lua
+   (var r (route/make-route "hello/world"))
+   (var calls [])
+   (route/add-path-listener r ["hello"] "path" (fn [id data t meta] (xt/x:arr-push calls (. data ["type"]))) nil)
+   [(route/set-segment r ["hello"] "there")
+    (route/get-url r)
+    calls])
+  => [["path"]
+      "hello/there"
+      ["route.path"]]
+
   (!.py
    (var r (route/make-route "hello/world"))
    (var calls [])
@@ -572,6 +818,19 @@
 (fact "updates a scoped route param"
 
   (!.js
+   (var r (route/make-route "hello"))
+   (var calls [])
+   (route/add-param-listener r "auth" "param" (fn [id data t meta] (xt/x:arr-push calls (. data ["type"]))) nil)
+   [(route/set-param r "auth" "sign_in" nil)
+    (route/get-url r)
+    (route/get-param r "auth" nil)
+    calls])
+  => [["param"]
+      "hello?auth=sign_in"
+      "sign_in"
+      ["route.params"]]
+
+  (!.lua
    (var r (route/make-route "hello"))
    (var calls [])
    (route/add-param-listener r "auth" "param" (fn [id data t meta] (xt/x:arr-push calls (. data ["type"]))) nil)
@@ -601,6 +860,15 @@
 (fact "resets route state and history"
 
   (!.js
+   (var r (route/make-route "hello/world?auth=sign_in"))
+   (route/set-param r "type" "name" nil)
+   (route/reset-route r "index")
+   [(route/get-url r)
+    (. r ["history"])])
+  => ["index"
+      ["index"]]
+
+  (!.lua
    (var r (route/make-route "hello/world?auth=sign_in"))
    (route/set-param r "type" "name" nil)
    (route/reset-route r "index")

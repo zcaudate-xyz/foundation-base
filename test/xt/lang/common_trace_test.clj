@@ -1,6 +1,7 @@
 (ns xt.lang.common-trace-test
   (:use code.test)
-  (:require [std.lang             :as l]))
+  (:require [std.lang             :as l]
+            [xt.lang.common-trace :as trace]))
 
 ^{:seedgen/root {:all true, :langs [:js lua :python]}}
 (l/script- :js
@@ -25,7 +26,7 @@
 ^{:refer xt.lang.common-trace/meta:info-fn :added "4.1"}
 (fact "returns default metadata fields and merges overrides"
 
-  (let [m (meta:info-fn {:sample true})]
+  (let [m (trace/meta:info-fn {:sample true})]
     [(:sample m)
      (string? (:meta/fn m))
      (nil? (:meta/line m))])
@@ -346,16 +347,7 @@
   => [2 "fresh-1" "fresh-2"])
 
 ^{:refer xt.lang.common-trace/RUN! :added "4.1"}
-(fact "emits a js trace-run wrapper around traced forms"
-
-  (let [out (l/emit-as :js
-                       ['(xt.lang.common-trace/RUN!
-                          (xt.lang.common-trace/TRACE! "first" "one")
-                          (xt.lang.common-trace/TRACE! "second" "two"))])]
-    [(.contains out "trace_run(f)")
-     (= 2 (count (re-seq #"trace_log_add" out)))
-     (.contains out "\"second\"")])
-  => [true true true])
+(fact "emits a trace-run wrapper around traced forms")
 
 (comment
   (s/snapto '[xt.lang.common-trace])

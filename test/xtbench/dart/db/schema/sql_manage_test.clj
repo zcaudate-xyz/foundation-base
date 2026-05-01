@@ -1,5 +1,6 @@
 (ns xtbench.dart.db.schema.sql-manage-test
-  (:require [std.lang :as l]
+  (:require [rt.postgres :as pg]
+            [std.lang :as l]
             [std.string.prose :as prose])
   (:use code.test))
 
@@ -10,12 +11,15 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.common-string :as str]
              [xt.db.schema.sql-util :as ut]
-             [xt.db.schema.sql-manage :as manage]
-             [xt.old.db.sample-test :as sample]]})
+             [xt.db.schema.sql-manage :as manage]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
+
+(def +app+ (pg/app "xt.db.helpers.sample"))
+(def +schema+ (pg/bind-schema (:schema +app+)))
+(def +lookup+ (pg/bind-app +app+))
 
 (def +table-all+
   (mapv prose/join-lines
@@ -135,26 +139,26 @@
 (fact "column creation function"
 
   (!.dt
-   [(manage/table-create-column sample/Schema
-                                (xtd/get-in sample/Schema
+   [(manage/table-create-column (@! +schema+)
+                                (xtd/get-in (@! +schema+)
                                           ["Currency" "id"])
                                 (ut/sqlite-opts nil))
-    (manage/table-create-column sample/Schema
-                                (xtd/get-in sample/Schema
+    (manage/table-create-column (@! +schema+)
+                                (xtd/get-in (@! +schema+)
                                           ["Currency" "id"])
-                                (ut/postgres-opts sample/SchemaLookup))])
+                                (ut/postgres-opts (@! +lookup+)))])
   => ["\"id\" text PRIMARY KEY"
       "\"id\" citext PRIMARY KEY"]
 
   (!.dt
-   [(manage/table-create-column sample/Schema
-                                (xtd/get-in sample/Schema
+   [(manage/table-create-column (@! +schema+)
+                                (xtd/get-in (@! +schema+)
                                           ["UserProfile" "account"])
                                 (ut/sqlite-opts nil))
-    (manage/table-create-column sample/Schema
-                                (xtd/get-in sample/Schema
+    (manage/table-create-column (@! +schema+)
+                                (xtd/get-in (@! +schema+)
                                           ["UserProfile" "account"])
-                                (ut/postgres-opts sample/SchemaLookup))])
+                                (ut/postgres-opts (@! +lookup+)))])
   => ["\"account_id\" text REFERENCES \"UserAccount\""
       "\"account_id\" uuid REFERENCES \"scratch-sample-db\".\"UserAccount\""])
 
@@ -188,10 +192,10 @@
 (fact "emits a table create string"
 
   (!.dt
-   [(manage/table-create sample/Schema
+   [(manage/table-create (@! +schema+)
                          "Currency"
                          (ut/sqlite-opts nil))
-    (manage/table-create sample/Schema
+    (manage/table-create (@! +schema+)
                          "UserProfile"
                          (ut/sqlite-opts nil))])
   => [+currency-table+
@@ -201,8 +205,8 @@
 (fact "creates all tables from schema"
 
   (!.dt
-    (manage/table-create-all sample/Schema
-                             sample/SchemaLookup
+    (manage/table-create-all (@! +schema+)
+                             (@! +lookup+)
                              (ut/sqlite-opts nil)))
   => +table-all+)
 
@@ -210,7 +214,7 @@
 (fact "creates a table statement"
 
   (!.dt
-   (manage/table-drop sample/Schema
+   (manage/table-drop (@! +schema+)
                       "Currency"
                       (ut/sqlite-opts nil)))
   => "DROP TABLE IF EXISTS \"Currency\";")
@@ -233,8 +237,8 @@
 (fact "drops all tables"
 
   (!.dt
-   (manage/table-drop-all sample/Schema
-                          sample/SchemaLookup
+   (manage/table-drop-all (@! +schema+)
+                          (@! +lookup+)
                           (ut/sqlite-opts nil)))
   => +drop-all+)
 

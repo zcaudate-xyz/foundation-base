@@ -3,7 +3,7 @@
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :js
-  {:require [[js.core :as j] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-trace :as trace]]})
+  {:require [[js.core :as j] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-tree :as xtt] [xt.lang.common-trace :as trace]]})
 
 
 (defspec.xt EV_INIT :xt/str)
@@ -91,7 +91,7 @@
   "encodes functions in data tree"
   {:added "4.0"}
   [arg]
-  (return (xtd/tree-walk arg
+  (return (xtt/tree-walk arg
                          (fn [x]
                            (if (xt/x:is-function? x)
                              (return ["fn" (xt/x:to-string x)])
@@ -102,7 +102,7 @@
   "decodes function in data tree"
   {:added "4.0"}
   [arg]
-  (return (xtd/tree-walk arg
+  (return (xtt/tree-walk arg
                          (fn [x]
                            (if (and (xt/x:is-array? x)
                                     (== 2 (xt/x:len x))

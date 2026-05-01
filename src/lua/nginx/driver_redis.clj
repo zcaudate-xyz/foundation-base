@@ -1,10 +1,12 @@
 (ns lua.nginx.driver-redis
   (:require [std.lang :as l]
-            [std.lib.foundation :as f]))
+             [std.lib.foundation :as f]))
 
 (l/script :lua.nginx
   {:import [["resty.redis" :as ngxredis]
-            ["resty.redis" :as ngxredis]]})
+            ["resty.redis" :as ngxredis]]
+   :require [[xt.lang.spec-base :as xt]
+             [xt.lib.redis-connection :as redisrt]]})
 
 (f/template-entries [l/tmpl-macro {:base "redis"
                                    :inst "rds"
@@ -44,8 +46,28 @@
                     [command]))
           (when f
             (return (f conn (unpack args))))))
-    (return conn))
+     (return conn))
   (return nil err))
+
+(defn.lua wrap-connection
+  [conn]
+  (return
+   (redisrt/connection-create
+    conn
+    {"disconnect" (fn [raw]
+                    (var disconnect-fn (xt/x:get-key raw "::disconnect"))
+                    (return (disconnect-fn)))
+     "exec"       (fn [raw command args]
+                    (var exec-fn (xt/x:get-key raw "::exec"))
+                    (return (exec-fn command args)))})))
+
+(defn.lua driver
+  []
+  (return
+   (redisrt/driver-create
+    {"connect" (fn [m]
+                 (return (-/wrap-connection
+                          (-/connect-constructor m))))})))
 
 (comment
   (./create-tests)

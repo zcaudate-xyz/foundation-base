@@ -8,7 +8,7 @@
    :config {:program :resty}
    :require [[xt.lang.common-lib :as k]
              [lua.nginx.driver-sqlite :as lua-sqlite]
-             [xt.old.sys.conn-dbsql :as driver]]})
+             [xt.lib.sql-connection :as driver]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]

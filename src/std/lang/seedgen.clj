@@ -54,6 +54,14 @@
        (map :ns)
        vec))
 
+(defn- seedgen-test-namespaces
+  [lookup _]
+  (->> lookup
+       keys
+       (filter #(= % (project/test-ns %)))
+       sort
+       vec))
+
 (defn- seedgen-benchadd-summary
   [ns params lookup project]
   (let [output (form-bench/seedgen-benchadd ns params lookup project)]
@@ -160,7 +168,7 @@
                    :parallel true
                    :print {:function true}}
           :main {:fn #'form-infile/seedgen-langremove}
-          :item {:list (fn [lookup _] (sort (keys lookup)))
+          :item {:list seedgen-test-namespaces
                  :pre project/sym-name
                  :display (template/empty-result :changed :info :no-change)}
           :result (assoc (template/code-transform-result :changed)
@@ -182,7 +190,7 @@
                    :parallel true
                    :print {:function true}}
           :main {:fn #'form-infile/seedgen-langadd}
-          :item {:list (fn [lookup _] (sort (keys lookup)))
+          :item {:list seedgen-test-namespaces
                  :pre project/sym-name
                  :display (template/empty-result :changed :info :no-change)}
           :result (template/code-transform-result :changed)}])
@@ -207,7 +215,7 @@
                    :parallel true
                    :print {:function true}}
           :main {:fn #'seedgen-benchadd-summary}
-          :item {:list (fn [lookup _] (sort (keys lookup)))
+          :item {:list seedgen-test-namespaces
                  :pre project/sym-name
                  :display (template/empty-result :new :info :no-new)}
           :result (assoc (template/code-transform-result :new)
@@ -231,7 +239,7 @@
                    :parallel true
                    :print {:function true}}
           :main {:fn #'seedgen-benchremove-summary}
-          :item {:list (fn [lookup _] (sort (keys lookup)))
+          :item {:list seedgen-test-namespaces
                  :pre project/sym-name
                  :display (template/empty-result :changed :info :no-change)}
           :result (assoc (template/code-transform-result :changed)

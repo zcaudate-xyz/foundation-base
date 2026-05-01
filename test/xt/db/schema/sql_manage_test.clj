@@ -12,7 +12,7 @@
              [xt.lang.common-string :as str]
              [xt.db.schema.sql-util :as ut]
              [xt.db.schema.sql-manage :as manage]
-             [xt.old.db.sample-test :as sample]]})
+             [xt.db.helpers.data-main-test :as sample]]})
 
 (l/script- :lua
   {:runtime :basic
@@ -22,7 +22,7 @@
              [xt.lang.common-string :as str]
              [xt.db.schema.sql-util :as ut]
              [xt.db.schema.sql-manage :as manage]
-             [xt.old.db.sample-test :as sample]]})
+             [xt.db.helpers.data-main-test :as sample]]})
 
 (l/script- :python
   {:runtime :basic
@@ -32,7 +32,7 @@
              [xt.lang.common-string :as str]
              [xt.db.schema.sql-util :as ut]
              [xt.db.schema.sql-manage :as manage]
-             [xt.old.db.sample-test :as sample]]})
+             [xt.db.helpers.data-main-test :as sample]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]

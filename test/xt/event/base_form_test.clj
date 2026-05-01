@@ -26,9 +26,15 @@
       (fn:> {:flag false})
       {:flag []}))))
 
-
 ^{:seedgen/root {:all true}}
 (l/script- :js
+  {:runtime :basic
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-repl :as repl]
+             [xt.lang.spec-base :as xt]
+              [xt.event.base-form :as form]]})
+
+(l/script- :lua
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-repl :as repl]
@@ -46,12 +52,16 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-
-
 ^{:refer xt.event.base-form/check-event :added "4.1"}
 (fact "checks field overlap"
 
   (!.js
+   [(form/check-event {:fields ["a" "b" "c"]} ["a"])
+    (form/check-event {:fields ["a" "b" "c"]} [])
+    (form/check-event {:fields ["a" "b" "c"]} ["b" "d"])])
+  => [true false true]
+
+  (!.lua
    [(form/check-event {:fields ["a" "b" "c"]} ["a"])
     (form/check-event {:fields ["a" "b" "c"]} [])
     (form/check-event {:fields ["a" "b" "c"]} ["b" "d"])])
@@ -67,6 +77,39 @@
 (fact "manages form data and listeners"
 
   (!.js
+   (var f (form/make-form
+           (fn:> {:login ""})
+           {:login [["is-required"
+                     {:message "Required field."
+                      :check (fn [v rec]
+                               (return
+                                (and (k/not-nil? v)
+                                     (< 0 (xt/x:len v)))))}]]}))
+   (var calls [])
+   (form/add-listener f
+                      "a1"
+                      ["login"]
+                      (fn [id data t meta]
+                        (xt/x:arr-push calls "a1"))
+                      nil)
+   (form/set-field f "login" "user")
+   [(form/list-listeners f)
+    calls
+    (form/get-field f "login")
+    (form/get-data f)
+    (. (form/remove-listener f "a1") ["meta"])
+    (form/list-listeners f)])
+  => (just-in
+      [["a1"]
+       ["a1"]
+       "user"
+       {"login" "user"}
+       {"listener/id" "a1"
+        "listener/type" "form"
+        "form/fields" ["login"]}
+       []])
+
+  (!.lua
    (var f (form/make-form
            (fn:> {:login ""})
            {:login [["is-required"
@@ -149,6 +192,20 @@
               "listener/id" "abc"
               "listener/type" "form"}}
 
+  (!.lua
+   (var f (-/make-login-form))
+   (var out nil)
+   (form/add-listener f "abc" ["login"] (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil)
+   (form/set-field f "login" "test00001")
+   out)
+  => {"id" "abc"
+      "data" {"fields" ["login"]
+              "type" "form.data"}
+      "t" nil
+      "meta" {"form/fields" ["login"]
+              "listener/id" "abc"
+              "listener/type" "form"}}
+
   (!.py
    (var f (-/make-login-form))
    (var out nil)
@@ -167,6 +224,20 @@
 (fact "triggers listeners for all fields"
 
   (!.js
+   (var f (-/make-login-form))
+   (var out nil)
+   (form/add-listener f "abc" ["login"] (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil)
+   (form/trigger-all f "form.data")
+   out)
+  => {"id" "abc"
+      "data" {"fields" ["login"]
+              "type" "form.data"}
+      "t" nil
+      "meta" {"form/fields" ["login"]
+              "listener/id" "abc"
+              "listener/type" "form"}}
+
+  (!.lua
    (var f (-/make-login-form))
    (var out nil)
    (form/add-listener f "abc" ["login"] (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil)
@@ -211,6 +282,20 @@
               "listener/id" "abc"
               "listener/type" "form"}}
 
+  (!.lua
+   (var f (-/make-login-form))
+   (var out nil)
+   (form/add-listener f "abc" ["login"] (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil)
+   (form/trigger-field f "login" "form.data")
+   out)
+  => {"id" "abc"
+      "data" {"fields" ["login"]
+              "type" "form.data"}
+      "t" nil
+      "meta" {"form/fields" ["login"]
+              "listener/id" "abc"
+              "listener/type" "form"}}
+
   (!.py
    (var f (-/make-login-form))
    (var out nil)
@@ -235,6 +320,13 @@
     (form/get-field f "login")])
   => [["a1"] "world"]
 
+  (!.lua
+   (var f (-/make-login-form))
+   (form/add-listener f "a1" ["login"] (fn:> [id data t meta] nil) nil)
+   [(form/set-field f "login" "world")
+    (form/get-field f "login")])
+  => [["a1"] "world"]
+
   (!.py
    (var f (-/make-login-form))
    (form/add-listener f "a1" ["login"] (fn:> [id data t meta] nil) nil)
@@ -246,6 +338,12 @@
 (fact "gets the current field value"
 
   (!.js
+   (var f (-/make-login-form))
+   (form/set-field f "login" "world")
+   (form/get-field f "login"))
+  => "world"
+
+  (!.lua
    (var f (-/make-login-form))
    (form/set-field f "login" "world")
    (form/get-field f "login"))
@@ -266,6 +364,12 @@
    (form/get-field f "flag"))
   => true
 
+  (!.lua
+   (var f (-/make-flag-form))
+   (form/toggle-field f "flag")
+   (form/get-field f "flag"))
+  => true
+
   (!.py
    (var f (-/make-flag-form))
    (form/toggle-field f "flag")
@@ -276,6 +380,13 @@
 (fact "builds a setter function for a field"
 
   (!.js
+   (var f (-/make-login-form))
+   (form/add-listener f "a1" ["login"] (fn:> [id data t meta] nil) nil)
+   [((form/field-fn f "login") "world")
+    (form/get-field f "login")])
+  => [["a1"] "world"]
+
+  (!.lua
    (var f (-/make-login-form))
    (form/add-listener f "a1" ["login"] (fn:> [id data t meta] nil) nil)
    [((form/field-fn f "login") "world")
@@ -298,6 +409,12 @@
       "fields" {"login" {"status" "pending"}}
       "status" "pending"}
 
+  (!.lua
+   (form/get-result (-/make-login-form)))
+  => {"::" "validation.result"
+      "fields" {"login" {"status" "pending"}}
+      "status" "pending"}
+
   (!.py
    (form/get-result (-/make-login-form)))
   => {"::" "validation.result"
@@ -308,6 +425,10 @@
 (fact "gets a single field validation result"
 
   (!.js
+   (form/get-field-result (-/make-login-form) "login"))
+  => {"status" "pending"}
+
+  (!.lua
    (form/get-field-result (-/make-login-form) "login"))
   => {"status" "pending"}
 
@@ -322,6 +443,10 @@
    (form/get-data (-/make-login-form)))
   => {"login" ""}
 
+  (!.lua
+   (form/get-data (-/make-login-form)))
+  => {"login" ""}
+
   (!.py
    (form/get-data (-/make-login-form)))
   => {"login" ""})
@@ -330,6 +455,21 @@
 (fact "sets form data directly"
 
   (!.js
+   (var f (-/make-login-form))
+   (var out nil)
+   (form/add-listener f "a1" ["login"] (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil)
+   (form/set-data f {:login "world"})
+   [out (form/get-data f)])
+  => [{"id" "a1"
+       "data" {"fields" ["login"]
+               "type" "form.data"}
+       "t" nil
+       "meta" {"form/fields" ["login"]
+               "listener/id" "a1"
+               "listener/type" "form"}}
+      {"login" "world"}]
+
+  (!.lua
    (var f (-/make-login-form))
    (var out nil)
    (form/add-listener f "a1" ["login"] (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil)
@@ -369,6 +509,13 @@
     (form/get-data f)])
   => [[] {"login" ""}]
 
+  (!.lua
+   (var f (-/make-login-form))
+   (form/set-data f {:login "world"})
+   [(form/reset-all-data f)
+    (form/get-data f)])
+  => [[] {"login" ""}]
+
   (!.py
    (var f (-/make-login-form))
    (form/set-data f {:login "world"})
@@ -380,6 +527,13 @@
 (fact "resets a single field to its initial value"
 
   (!.js
+   (var f (-/make-login-form))
+   (form/set-data f {:login "world"})
+   (form/reset-field-data f "login")
+   (form/get-data f))
+  => {"login" ""}
+
+  (!.lua
    (var f (-/make-login-form))
    (form/set-data f {:login "world"})
    (form/reset-field-data f "login")
@@ -408,6 +562,18 @@
          (form/check-any-errored f)]))))
   => [false "errored" true]
 
+  (notify/wait-on :lua
+    (var f (-/make-login-form))
+    (form/validate-all
+     f
+     (fn [field status] (return nil))
+     (fn [ok res]
+       (repl/notify
+        [ok
+         (. (form/get-result f) ["status"])
+         (form/check-any-errored f)]))))
+  => [false "errored" true]
+
   (notify/wait-on :python
     (var f (-/make-login-form))
     (form/validate-all
@@ -424,6 +590,28 @@
 (fact "validates one field and triggers validation listeners"
 
   (notify/wait-on :js
+    (var f (-/make-login-form))
+    (form/add-listener
+     f "a1" ["login"]
+     (fn [id data t meta]
+        (repl/notify
+         [{"id" id "data" data "t" t "meta" meta}
+          (form/get-field-result f "login")]))
+     nil)
+    (form/validate-field f "login" (fn [field status] (return nil)) nil))
+  => [{"id" "a1"
+       "data" {"fields" ["login"]
+               "type" "form.validation"}
+       "t" nil
+       "meta" {"form/fields" ["login"]
+               "listener/id" "a1"
+               "listener/type" "form"}}
+      {"data" ""
+       "id" "is-required"
+       "message" "Required field."
+       "status" "errored"}]
+
+  (notify/wait-on :lua
     (var f (-/make-login-form))
     (form/add-listener
      f "a1" ["login"]
@@ -484,6 +672,20 @@
               "listener/id" "a1"
               "listener/type" "form"}}
 
+  (!.lua
+   (var f (-/make-login-form))
+   (var out nil)
+   (form/add-listener f "a1" ["login"] (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil)
+   (form/reset-field-validator f "login")
+   out)
+  => {"id" "a1"
+      "data" {"fields" ["login"]
+              "type" "form.validation"}
+      "t" nil
+      "meta" {"form/fields" ["login"]
+              "listener/id" "a1"
+              "listener/type" "form"}}
+
   (!.py
    (var f (-/make-login-form))
    (var out nil)
@@ -510,6 +712,15 @@
       "fields" {"login" {"status" "pending"}}
       "status" "pending"}
 
+  (!.lua
+   (var f (-/make-login-form))
+   (form/add-listener f "a1" ["login"] (fn:> [id data t meta] nil) nil)
+   (form/reset-all-validators f)
+   (form/get-result f))
+  => {"::" "validation.result"
+      "fields" {"login" {"status" "pending"}}
+      "status" "pending"}
+
   (!.py
    (var f (-/make-login-form))
    (form/add-listener f "a1" ["login"] (fn:> [id data t meta] nil) nil)
@@ -523,6 +734,17 @@
 (fact "resets both data and validation state"
 
   (!.js
+   (var f (-/make-login-form))
+   (form/set-data f {:login "world"})
+   (form/reset-all f)
+   [(form/get-data f)
+    (form/get-result f)])
+  => [{"login" ""}
+      {"::" "validation.result"
+       "fields" {"login" {"status" "pending"}}
+       "status" "pending"}]
+
+  (!.lua
    (var f (-/make-login-form))
    (form/set-data f {:login "world"})
    (form/reset-all f)
@@ -556,6 +778,15 @@
        (repl/notify (form/check-field-passed f "login")))))
   => true
 
+  (notify/wait-on :lua
+    (var f (-/make-login-form))
+    (form/set-field f "login" "world")
+    (form/validate-all
+     f nil
+     (fn [ok res]
+       (repl/notify (form/check-field-passed f "login")))))
+  => true
+
   (notify/wait-on :python
     (var f (-/make-login-form))
     (form/set-field f "login" "world")
@@ -569,6 +800,14 @@
 (fact "checks whether a field errored"
 
   (notify/wait-on :js
+    (var f (-/make-login-form))
+    (form/validate-all
+     f nil
+     (fn [ok res]
+       (repl/notify (form/check-field-errored f "login")))))
+  => true
+
+  (notify/wait-on :lua
     (var f (-/make-login-form))
     (form/validate-all
      f nil
@@ -596,6 +835,15 @@
        (repl/notify (form/check-all-passed f)))))
   => true
 
+  (notify/wait-on :lua
+    (var f (-/make-login-form))
+    (form/set-field f "login" "world")
+    (form/validate-all
+     f nil
+     (fn [ok res]
+       (repl/notify (form/check-all-passed f)))))
+  => true
+
   (notify/wait-on :python
     (var f (-/make-login-form))
     (form/set-field f "login" "world")
@@ -609,6 +857,14 @@
 (fact "checks whether any field errored"
 
   (notify/wait-on :js
+    (var f (-/make-login-form))
+    (form/validate-all
+     f nil
+     (fn [ok res]
+       (repl/notify (form/check-any-errored f)))))
+  => true
+
+  (notify/wait-on :lua
     (var f (-/make-login-form))
     (form/validate-all
      f nil

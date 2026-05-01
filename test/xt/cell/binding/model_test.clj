@@ -7,7 +7,7 @@
   {:runtime :basic
    :require [[xt.cell.binding :as binding]
              [xt.cell.binding.model :as binding-model]
-             [xt.old.db :as xdb]
+             [xt.db :as xdb]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]]})
 

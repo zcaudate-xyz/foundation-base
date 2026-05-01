@@ -3,7 +3,7 @@
   (:require [std.lang.typed.xtalk-common :as types]
             [std.lang.typed.xtalk-parse :refer :all]))
 
-(def +ctx+ {:ns 'sample.route :aliases '{types xt.old.event-common}})
+(def +ctx+ {:ns 'sample.route :aliases '{types xt.event.base-listener}})
 
 (fact "parses multi-arity defmacro.xt forms"
   (let [macro-def (parse-defmacro
@@ -71,9 +71,9 @@
 ^{:refer std.lang.typed.xtalk-parse/extract-aliases :added "4.1"}
 (fact "extracts aliases from require vectors"
   (extract-aliases '[[xt.lang.common-lib :as k]
-                     [xt.old.event-common :as event-common]])
+                     [xt.event.base-listener :as event-common]])
   => '{k xt.lang.common-lib
-       event-common xt.old.event-common})
+       event-common xt.event.base-listener})
 
 ^{:refer std.lang.typed.xtalk-parse/extract-ns-aliases :added "4.1"}
 (fact "extracts aliases from ns forms"

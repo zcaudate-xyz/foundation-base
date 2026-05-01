@@ -9,6 +9,11 @@
    :require [[xt.lang.common-repl :as repl]
              [xt.event.base-box :as box]]})
 
+(l/script- :lua
+  {:runtime :basic
+   :require [[xt.lang.common-repl :as repl]
+             [xt.event.base-box :as box]]})
+
 (l/script- :python
   {:runtime :basic
    :require [[xt.lang.common-repl :as repl]
@@ -22,6 +27,13 @@
 (fact "creates an explicit event box"
 
   (!.js
+   (var b (box/make-box (fn:> {:a 1})))
+   [(. b ["::"])
+    (. b ["listeners"])
+    (box/get-data b [])])
+  => ["event.box" {} {"a" 1}]
+
+  (!.lua
    (var b (box/make-box (fn:> {:a 1})))
    [(. b ["::"])
     (. b ["listeners"])
@@ -45,6 +57,13 @@
     (box/check-event {:path ["a" "b"]} ["a" "b" "c"])])
   => [true true false false]
 
+  (!.lua
+   [(box/check-event {:path ["a" "b"]} [])
+    (box/check-event {:path ["a" "b"]} ["a"])
+    (box/check-event {:path ["a" "b"]} ["a" "c"])
+    (box/check-event {:path ["a" "b"]} ["a" "b" "c"])])
+  => [true true false false]
+
   (!.py
    [(box/check-event {:path ["a" "b"]} [])
     (box/check-event {:path ["a" "b"]} ["a"])
@@ -56,6 +75,24 @@
 (fact "triggers listeners for matching paths"
 
   (notify/wait-on :js
+    (var b (box/make-box (fn:> {:a {:b 2}})))
+    (box/add-listener b
+                      "abc"
+                      ["a"]
+                      (fn [id data t meta]
+                        (repl/notify {"id" id "data" data "t" t "meta" meta}))
+                      nil)
+    (box/set-data b ["a" "b"] 3))
+  => {"id" "abc"
+      "data" {"path" ["a" "b"]
+              "value" 3
+              "data" {"a" {"b" 3}}}
+      "t" nil
+      "meta" {"box/path" ["a"]
+              "listener/id" "abc"
+              "listener/type" "box"}}
+
+  (notify/wait-on :lua
     (var b (box/make-box (fn:> {:a {:b 2}})))
     (box/add-listener b
                       "abc"
@@ -105,6 +142,17 @@
       2
       [1 2]]
 
+  (!.lua
+   (var b (box/make-box (fn:> {:a {:b 2}
+                               :items [1 2]})))
+   [(box/get-data b nil)
+    (box/get-data b ["a" "b"])
+    (box/get-data b "items")])
+  => [{"a" {"b" 2}
+       "items" [1 2]}
+      2
+      [1 2]]
+
   (!.py
    (var b (box/make-box (fn:> {:a {:b 2}
                                :items [1 2]})))
@@ -125,6 +173,12 @@
     (box/get-data b []))
   => {"a" {"b" 3}}
 
+  (!.lua
+    (var b (box/make-box (fn:> {:a {:b 2}})))
+    (box/set-data-raw b ["a" "b"] 3)
+    (box/get-data b []))
+  => {"a" {"b" 3}}
+
   (!.py
     (var b (box/make-box (fn:> {:a {:b 2}})))
     (box/set-data-raw b ["a" "b"] 3)
@@ -135,6 +189,16 @@
 (fact "updates and resets data"
 
   (!.js
+   (var b (box/make-box (fn:> {:a {:b 2}})))
+   [(box/set-data b "c" 3)
+    (box/get-data b [])
+    (box/reset-data b)
+    (box/get-data b [])])
+  => (just-in
+      [empty? {"a" {"b" 2} "c" 3}
+       empty? {"a" {"b" 2}}])
+
+  (!.lua
    (var b (box/make-box (fn:> {:a {:b 2}})))
    [(box/set-data b "c" 3)
     (box/get-data b [])
@@ -163,6 +227,12 @@
     (box/get-data b [])])
   => [true {"a" {}}]
 
+  (!.lua
+   (var b (box/make-box (fn:> {:a {:b 2}})))
+   [(box/del-data-raw b ["a" "b"])
+    (box/get-data b [])])
+  => [true {"a" {}}]
+
   (!.py
    (var b (box/make-box (fn:> {:a {:b 2}})))
    [(box/del-data-raw b ["a" "b"])
@@ -173,6 +243,13 @@
 (fact "removes data and returns triggered listener ids"
 
   (!.js
+   (var b (box/make-box (fn:> {:a {:b 2}})))
+   [(box/del-data b ["a" "b"])
+    (box/get-data b [])])
+  => (just-in
+      [empty? {"a" {}}])
+
+  (!.lua
    (var b (box/make-box (fn:> {:a {:b 2}})))
    [(box/del-data b ["a" "b"])
     (box/get-data b [])])
@@ -190,6 +267,17 @@
 (fact "resets the box back to its initial value"
 
   (!.js
+   (var b (box/make-box (fn:> {:a {:b 2}})))
+   [(box/set-data b "c" 3)
+    (box/get-data b [])
+    (box/reset-data b)
+    (box/get-data b [])])
+  => (just-in
+      [empty? {"a" {"b" 2}
+               "c" 3}
+       empty? {"a" {"b" 2}}])
+
+  (!.lua
    (var b (box/make-box (fn:> {:a {:b 2}})))
    [(box/set-data b "c" 3)
     (box/get-data b [])
@@ -223,6 +311,15 @@
       "b" [{"title" "Hello"}]
       "c" 3}
 
+  (!.lua
+   (var b (box/make-box (fn:> {:a 1 :b []})))
+   (box/merge-data b [] {:c 3})
+   (box/append-data b ["b"] {:title "Hello"})
+   (box/get-data b []))
+  => {"a" 1
+      "b" [{"title" "Hello"}]
+      "c" 3}
+
   (!.py
    (var b (box/make-box (fn:> {:a 1 :b []})))
    (box/merge-data b [] {:c 3})
@@ -236,6 +333,14 @@
 (fact "appends a value onto an array path"
 
   (!.js
+   (var b (box/make-box (fn:> {:a []})))
+   (box/append-data b ["a"] {:title "Hello"
+                             :body "World"})
+   (box/get-data b []))
+  => {"a" [{"title" "Hello"
+            "body" "World"}]}
+
+  (!.lua
    (var b (box/make-box (fn:> {:a []})))
    (box/append-data b ["a"] {:title "Hello"
                              :body "World"})

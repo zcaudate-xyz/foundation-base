@@ -17,11 +17,11 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-lib :as k]
-             [xt.old.event-view :as base-view]
-             [xt.cell.kernel.base-impl :as impl-common]
-             [xt.cell.kernel.base-link-local :as link-fn]
-             [xt.cell.kernel.inner-impl :as inner-impl]
+              [xt.lang.common-lib :as k]
+              [xt.event.base-view :as base-view]
+              [xt.cell.kernel.base-impl :as impl-common]
+              [xt.cell.kernel.base-link-local :as link-fn]
+              [xt.cell.kernel.inner-impl :as inner-impl]
              [xt.cell.kernel.inner-mock :as inner-mock]
              [xt.cell.kernel :as cl]
              [xt.lang.common-repl :as repl]]})

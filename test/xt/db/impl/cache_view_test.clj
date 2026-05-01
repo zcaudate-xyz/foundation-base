@@ -9,8 +9,8 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.impl.cache-view :as v]
-             [xt.old.db.sql-util :as ut]
-             [xt.old.db.sql-raw :as raw]
+             [xt.db.schema.sql-util :as ut]
+             [xt.db.schema.sql-raw :as raw]
              [xt.lang.common-lib :as k]
              [xt.db.schema.base-schema :as sch]
              [xt.db.schema.base-scope :as scope]

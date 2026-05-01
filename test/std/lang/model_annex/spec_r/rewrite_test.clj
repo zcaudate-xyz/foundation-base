@@ -7,7 +7,7 @@
 
 ^{:refer std.lang.model-annex.spec-r/tf-defn :added "4.1"}
 (fact "applies inferred optional arguments during defn expansion"
-  (preprocess/with:macro-opts [{:module {:id 'xt.old.event-view}}]
+  (preprocess/with:macro-opts [{:module {:id 'xt.event.base-view}}]
     (r/tf-defn '(defn get-output [view dest-key]
                   (return dest-key))))
   => '(def get-output

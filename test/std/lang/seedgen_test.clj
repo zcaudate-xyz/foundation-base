@@ -60,6 +60,9 @@
        "  (!.js (+ 1 2 3))\n"
        "  => 6)\n"))
 
+(def ^:private +seedgen-extra-require-format+
+  #"(?ms):require \[\[xt\.lang\.spec-base :as xt\]\n\s+\[xt\.lang\.common-repl :as repl\]\n\s+\[python\.core\.common-promise :as p\]\]")
+
 (def ^:private +seedgen-meta-shorthand-source+
   (str "(ns xt.sample.meta-test\n"
        "  (:use code.test)\n"
@@ -83,6 +86,26 @@
        "  (notify/wait-on :js\n"
        "    42)\n"
        "  => 42)\n"))
+
+(def ^:private +seedgen-selector-source+
+  "(ns xt.sample.selector)\n")
+
+(def ^:private +seedgen-selector-test-source+
+  (str "(ns xt.sample.selector-test\n"
+       "  (:use code.test)\n"
+       "  (:require [std.lang :as l]))\n\n"
+       "^{:seedgen/root {:all true}}\n"
+       "(l/script- :js {:runtime :basic})\n\n"
+       "^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n"
+       "(fact \"selector sample\"\n"
+       "  (!.js (+ 1 2 3))\n"
+       "  => 6)\n"))
+
+(def ^:private +seedgen-quiet-print+
+  {:function false
+   :item false
+   :result false
+   :summary false})
 
 (defn- seedgen-spacing-context
   [prefix]
@@ -148,6 +171,29 @@
     (spit path +seedgen-wait-source+)
     {:root root
      :path path
+     :lookup lookup
+     :project project}))
+
+(defn- seedgen-selector-context
+  [prefix]
+  (let [root      (.toFile (java.nio.file.Files/createTempDirectory prefix
+                                                                    (make-array java.nio.file.attribute.FileAttribute 0)))
+        src-dir   (doto (java.io.File. root "src/xt/sample")
+                    (.mkdirs))
+        test-dir  (doto (java.io.File. root "test/xt/sample")
+                    (.mkdirs))
+        src-path  (.getAbsolutePath (java.io.File. src-dir "selector.clj"))
+        test-path (.getAbsolutePath (java.io.File. test-dir "selector_test.clj"))
+        lookup    {'xt.sample.selector src-path
+                   'xt.sample.selector-test test-path}
+        project   {:root (.getAbsolutePath root)
+                   :source-paths ["src"]
+                   :test-paths ["test"]}]
+    (spit src-path +seedgen-selector-source+)
+    (spit test-path +seedgen-selector-test-source+)
+    {:root root
+     :src-path src-path
+     :test-path test-path
      :lookup lookup
      :project project}))
 
@@ -238,11 +284,72 @@
                                    project)
       (let [content (slurp path)]
         [(boolean (re-find #"\(l/script- :python" content))
-         (boolean (re-find #"\[python\.core\.common-promise :as p\]" content))
+         (boolean (re-find +seedgen-extra-require-format+ content))
          (boolean (re-find #"\(!\.py \(\+ 1 2 3\)\)" content))])
       (finally
-        (fs/delete root {:recursive true}))))
+         (fs/delete root {:recursive true}))))
   => [true true true])
+
+^{:refer std.lang.seedgen/seedgen-langadd :added "4.1"}
+(fact "bulk seedgen tasks only return test namespaces"
+  (let [{:keys [root lookup project]} (seedgen-selector-context "seedgen-task-selector")]
+    (try
+      (let [langadd-keys (-> (seedgen-langadd '[xt.sample.selector]
+                                              {:lang [:dart]
+                                               :return :results
+                                               :print +seedgen-quiet-print+}
+                                              lookup
+                                              project)
+                             keys
+                             sort
+                             vec)
+            benchadd-keys (-> (seedgen-benchadd '[xt.sample.selector]
+                                                {:lang [:dart]
+                                                 :rename '{xt [xtbench :lang]}
+                                                 :return :results
+                                                 :print +seedgen-quiet-print+}
+                                                lookup
+                                                project)
+                              keys
+                              sort
+                              vec)
+            _ (form-infile/seedgen-langadd 'xt.sample.selector
+                                           {:lang [:dart] :write true}
+                                           lookup
+                                           project)
+            _ (form-bench/seedgen-benchadd 'xt.sample.selector
+                                           {:lang [:dart]
+                                            :rename '{xt [xtbench :lang]}
+                                            :write true}
+                                           lookup
+                                           project)]
+        [langadd-keys
+         benchadd-keys
+         (-> (seedgen-langremove '[xt.sample.selector]
+                                 {:lang [:dart]
+                                  :return :results
+                                  :print +seedgen-quiet-print+}
+                                 lookup
+                                 project)
+             keys
+             sort
+             vec)
+         (-> (seedgen-benchremove '[xt.sample.selector]
+                                  {:lang [:dart]
+                                   :rename '{xt [xtbench :lang]}
+                                   :return :results
+                                   :print +seedgen-quiet-print+}
+                                  lookup
+                                  project)
+             keys
+             sort
+             vec)])
+      (finally
+        (fs/delete root {:recursive true}))))
+  => ['[xt.sample.selector-test]
+      '[xt.sample.selector-test]
+      '[xt.sample.selector-test]
+      '[xt.sample.selector-test]])
 
 ^{:refer std.lang.seedgen/seedgen-benchadd :added "4.1"}
 (fact "benchadd summary reports generated function refs while counting target namespaces"
@@ -304,10 +411,10 @@
                                    project)
       (let [content (slurp bench-path)]
         [(boolean (re-find #"\(l/script- :python" content))
-         (boolean (re-find #"\[python\.core\.common-promise :as p\]" content))
+         (boolean (re-find +seedgen-extra-require-format+ content))
          (boolean (re-find #"\(!\.py \(\+ 1 2 3\)\)" content))])
       (finally
-        (fs/delete root {:recursive true}))))
+         (fs/delete root {:recursive true}))))
   => [true true true])
 
 ^{:refer std.lang.seedgen/seedgen-benchadd :added "4.1"}
