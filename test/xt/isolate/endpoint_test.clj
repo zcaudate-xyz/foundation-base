@@ -1,6 +1,5 @@
 (ns xt.isolate.endpoint-test
-  (:require [std.lang :as l]
-            [xt.lang.common-notify :as notify])
+  (:require [std.lang :as l])
   (:use code.test))
 
 ^{:seedgen/root {:all true, :langs [:lua :python]}}
@@ -9,8 +8,7 @@
    :require [[xt.lang.common-lib :as k]
              [xt.lang.spec-base :as xt]
              [xt.isolate.endpoint :as endpoint]
-             [xt.isolate.mock :as mock]
-             [xt.lang.common-repl :as repl]]})
+             [xt.isolate.mock :as mock]]})
 
 (fact:global
  {:setup [(l/rt:restart)
@@ -70,26 +68,43 @@
 ^{:refer xt.isolate.endpoint/endpoint-process :added "4.0"}
 (fact "processes an incoming request frame dispatching by op"
 
-  (notify/wait-on :js
-    (var isolate (mock/create-endpoint (repl/>notify) {} true))
-    (endpoint/endpoint-process isolate {:op "call" :id "x1" :route "@isolate/ping" :body []}))
-  => (contains {"op" "call"
-                "id" "x1"
-                "status" "ok"})
+  (!.js
+   (var events [])
+   (var isolate (mock/create-endpoint
+                 (fn [e] (events.push e))
+                 {}
+                 true))
+   (endpoint/endpoint-process isolate {:op "call"
+                                       :id "x1"
+                                       :route "@isolate/ping"
+                                       :body []})
+   (k/select-keys (xt/x:first events) ["op" "id" "status"]))
+  => {"op" "call" "id" "x1" "status" "ok"}
 
-  (notify/wait-on :js
-    (var isolate (mock/create-endpoint (repl/>notify) {} true))
-    (endpoint/endpoint-process isolate {:op "call" :id "x2" :route "@isolate/unknown" :body []}))
-  => (contains {"op" "call"
-                "id" "x2"
-                "status" "error"}))
+  (!.js
+   (var events [])
+   (var isolate (mock/create-endpoint
+                 (fn [e] (events.push e))
+                 {}
+                 true))
+   (endpoint/endpoint-process isolate {:op "call"
+                                       :id "x2"
+                                       :route "@isolate/unknown"
+                                       :body []})
+   (k/select-keys (xt/x:first events) ["op" "id" "status"]))
+  => {"op" "call" "id" "x2" "status" "error"})
 
 ^{:refer xt.isolate.endpoint/endpoint-init-signal :added "4.0"}
 (fact "emits the init event to signal that the endpoint is ready"
 
-  (notify/wait-on :js
-    (var isolate (mock/create-endpoint (repl/>notify) {} true))
-    (endpoint/endpoint-init-signal isolate {:done true}))
+  (!.js
+   (var events [])
+   (var isolate (mock/create-endpoint
+                 (fn [e] (events.push e))
+                 {}
+                 true))
+   (endpoint/endpoint-init-signal isolate {:done true})
+   (xt/x:first events))
   => {"body" {"done" true}
       "status" "ok"
       "op" "stream"
@@ -125,9 +140,26 @@
 (fact "lists available route names"
 
   (!.js
+   (k/in-array? "@isolate/ping"
+                (endpoint/fn-get-route-list)))
+  => true)
+
+^{:refer xt.isolate.endpoint/fn-set-eval :added "4.0"}
+(fact "enables or disables eval in the isolate"
+
+  (!.js
+   (var events [])
+   (var isolate (mock/create-endpoint
+                 (fn [e] (events.push e))
+                 {}
+                 true))
+   (endpoint/fn-set-eval isolate false false)
+   (endpoint/fn-get-eval))
+  => false
+
+  ;; reset for subsequent tests
+  (!.js
    (var isolate (mock/create-endpoint nil {} true))
-   (xt/x:has-key?
-    (tab (:.. (xt/for:array [r (endpoint/fn-get-route-list)]
-                (return [r true]))))
-    "@isolate/ping"))
+   (endpoint/fn-set-eval isolate true false)
+   (endpoint/fn-get-eval))
   => true)

@@ -66,4 +66,4 @@
   (!.js
    (var t (transport/transport-make (fn [f]) (fn [h]) nil))
    (transport/transport-close t))
-  => nil?)
+  => nil)

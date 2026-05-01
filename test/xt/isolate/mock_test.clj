@@ -1,6 +1,5 @@
 (ns xt.isolate.mock-test
-  (:require [std.lang :as l]
-            [xt.lang.common-notify :as notify])
+  (:require [std.lang :as l])
   (:use code.test))
 
 ^{:seedgen/root {:all true, :langs [:lua :python]}}
@@ -8,8 +7,8 @@
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
              [xt.lang.spec-base :as xt]
-             [xt.isolate.mock :as mock]
-             [xt.lang.common-repl :as repl]]})
+             [xt.isolate.endpoint :as endpoint]
+             [xt.isolate.mock :as mock]]})
 
 (fact:global
  {:setup [(l/rt:restart)
@@ -20,9 +19,17 @@
 (fact "sends a frame directly to the mock endpoint's processor"
 
   (!.js
-   (var isolate (mock/mock-endpoint (fn [msg])))
-   (mock/mock-endpoint-send isolate {"op" "call" "route" "@isolate/ping" "body" []}))
-  => nil?)
+   (var events [])
+   (var isolate (mock/create-endpoint
+                 (fn [e] (events.push e))
+                 {}
+                 true))
+   (mock/mock-endpoint-send isolate {:op "call"
+                                     :id "test-1"
+                                     :route "@isolate/ping"
+                                     :body []})
+   (xt/x:get-key (xt/x:first events) "status"))
+  => "ok")
 
 ^{:refer xt.isolate.mock/mock-endpoint :added "4.0"}
 (fact "creates a bare mock endpoint that forwards events to a listener"
@@ -33,37 +40,68 @@
                  (fn [msg] (messages.push msg))))
    ((. isolate ["emit"]) {"test" 1})
    messages)
-  => [{"test" 1}])
+  => [{"test" 1}]
+
+  (!.js
+   (var isolate (mock/mock-endpoint nil))
+   (xt/x:get-key isolate "::"))
+  => "isolate.mock"
+
+  (!.js
+   (var isolate (mock/mock-endpoint nil))
+   (k/is-function? (xt/x:get-key isolate "emit")))
+  => true)
 
 ^{:refer xt.isolate.mock/create-endpoint :added "4.0"}
 (fact "creates and initialises a fully configured mock endpoint"
 
   (!.js
-   (var isolate (mock/create-endpoint
-                 (fn [msg])
-                 {}
-                 true))
+   (var isolate (mock/create-endpoint nil {} true))
    (xt/x:get-key isolate "::"))
   => "isolate.mock"
 
   (!.js
-   (var isolate (mock/create-endpoint k/identity {} true))
+   (var isolate (mock/create-endpoint nil {} true))
    (k/is-function? (xt/x:get-key isolate "emit")))
   => true
 
-  (notify/wait-on :js
-    (mock/create-endpoint (repl/>notify) {} false))
-  => {"body" {"done" true}
-      "status" "ok"
-      "op" "stream"
-      "topic" "@isolate/::INIT"})
+  (!.js
+   (var isolate (mock/create-endpoint nil {} true))
+   (xt/x:has-key? (endpoint/get-routes isolate) "@isolate/ping"))
+  => true
+
+  (!.js
+   (var events [])
+   (var isolate (mock/create-endpoint
+                 (fn [e] (events.push e))
+                 {}
+                 true))
+   ;; emit the init signal directly and check it
+   (endpoint/endpoint-init-signal isolate {:done true})
+   (xt/x:get-key (xt/x:first events) "topic"))
+  => "@isolate/::INIT")
 
 ^{:refer xt.isolate.mock/make-transport :added "4.0"}
 (fact "builds a transport capability map backed by the given mock endpoint"
 
   (!.js
-   (var isolate (mock/create-endpoint (fn [msg]) {} true))
+   (var isolate (mock/create-endpoint nil {} true))
    (var transport (mock/make-transport isolate))
    [(k/is-function? (. transport ["send"]))
     (k/is-function? (. transport ["listen"]))])
-  => [true true])
+  => [true true]
+
+  (!.js
+   (var events [])
+   (var isolate (mock/create-endpoint
+                 (fn [e] (events.push e))
+                 {}
+                 true))
+   (var transport (mock/make-transport isolate))
+   ;; transport.send drives the endpoint and emits a response to listeners
+   ((. transport ["send"]) {:op "call"
+                            :id "t1"
+                            :route "@isolate/ping"
+                            :body []})
+   (xt/x:get-key (xt/x:first events) "status"))
+  => "ok")

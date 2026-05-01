@@ -71,7 +71,7 @@
   "creates a transport capability map from send/listen/close functions"
   {:added "4.0"}
   [send listen close]
-  (var t {:send listen :listen listen})
+  (var t {:send send :listen listen})
   (xt/x:set-key t "send"   send)
   (xt/x:set-key t "listen" listen)
   (when close
