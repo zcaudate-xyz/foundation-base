@@ -112,11 +112,50 @@
   {:added "4.0"}
   ([[op sym & body] grammar mopts]
    (let [reserved (collection/qualified-keys (get-in grammar [:reserved op])
-                                    :static)
-         static (merge (pg-hydrate-module-static (:module mopts))
-                       reserved)]
-     [static (apply list op (with-meta sym (merge (meta sym) static))
-                    body)])))
+                                     :static)
+          static (merge (pg-hydrate-module-static (:module mopts))
+                        reserved)]
+      [static (apply list op (with-meta sym (merge (meta sym) static))
+                     body)])))
+
+(defn pg-current-module-link?
+  "checks whether a link points to the active module"
+  {:added "4.1"}
+  [current-module {:keys [module]}]
+  (and current-module
+       module
+       (= (:id current-module) module)))
+
+(defn pg-link-symbol
+  "creates a fully qualified symbol for a link"
+  {:added "4.1"}
+  [{:keys [module id]}]
+  (when (and module id)
+    (ut/sym-full (symbol (name module))
+                 (symbol (name id)))))
+
+(defn pg-resolve-entry
+  "resolves a postgres link against the live module first, then the snapshot book, then vars"
+  {:added "4.1"}
+  [link {:keys [book snapshot module lang] :as _mopts}]
+  (let [lang   (or lang
+                   (:lang link)
+                   :postgres)
+        book   (or book
+                   (and snapshot
+                        (snap/get-book snapshot lang)))
+        entry  (or (and (pg-current-module-link? module link)
+                        (get-in module [:code (:id link)]))
+                   (and book
+                        (book/get-base-entry book
+                                             (:module link)
+                                             (:id link)
+                                             (:section link)))
+                   (some-> link
+                           pg-link-symbol
+                           resolve
+                           deref))]
+    [book entry]))
 
 (defn pg-string
   "constructs a pg string"

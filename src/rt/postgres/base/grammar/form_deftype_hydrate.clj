@@ -12,13 +12,13 @@
 (defn pg-deftype-hydrate-check-link
   "checks a link making sure it exists and is correct type"
   {:added "4.0"}
-  [snapshot link type]
-  (let [book (snap/get-book snapshot :postgres)
+  [snapshot module link type]
+  (let [[book entry] (common/pg-resolve-entry link
+                                              {:snapshot snapshot
+                                               :module module
+                                               :lang :postgres})
         {:static/keys [dbtype]
-         :as entry}  (book/get-base-entry book
-                                          (:module link)
-                                          (:id link)
-                                          (:section link))]
+         :as entry}  entry]
     (cond (not entry)
           (f/error "Entry not found." {:input link})
 
@@ -32,15 +32,14 @@
   "resolves the link for hydration"
   {:added "4.0"}
   ([sym module {:keys [ns] :as ref}]
-   (if (and (= "-" (namespace ns))
-            (= (name sym) (name ns)))
-     [{:section :code
-       :lang  :postgres
-       :module (:id module)
-       :id (symbol (name sym))} false]
-     [(select-keys @(or (resolve ns)
-                        (f/error "Not found" {:input ref}))
-                   [:id :module :lang :section])
+   (if (= "-" (namespace ns))
+      [{:section :code
+        :lang  :postgres
+        :module (:id module)
+        :id (symbol (name ns))} false]
+      [(select-keys @(or (resolve ns)
+                         (f/error "Not found" {:input ref}))
+                    [:id :module :lang :section])
       true])))
 
 (defn pg-deftype-hydrate-process-sql
@@ -64,25 +63,25 @@
 (defn pg-deftype-hydrate-process-foreign
   "processes the foreign attribute"
   {:added "4.0"}
-  ([foreign resolve-link-fn snapshot]
+  ([foreign resolve-link-fn snapshot module]
    (collection/map-vals (fn [f-spec]
-                 (if (:ns f-spec)
-                   (let [[link check] (resolve-link-fn f-spec)]
-                     (when (and check
-                                (not (:self f-spec)))
-                       (pg-deftype-hydrate-check-link snapshot link :table))
-                     (merge f-spec {:ns (keyword (name (:ns f-spec)))
-                                    :link link}))
-                   f-spec))
-               foreign)))
+                  (if (:ns f-spec)
+                    (let [[link check] (resolve-link-fn f-spec)]
+                      (when (and check
+                                 (not (:self f-spec)))
+                        (pg-deftype-hydrate-check-link snapshot module link :table))
+                      (merge f-spec {:ns (keyword (name (:ns f-spec)))
+                                     :link link}))
+                    f-spec))
+                foreign)))
 
 (defn pg-deftype-hydrate-process-ref
   "processes the ref type"
   {:added "4.0"}
-  ([k {:keys [ref] :as attrs} resolve-link-fn snapshot]
+  ([k {:keys [ref] :as attrs} resolve-link-fn snapshot module]
    (cond (vector? ref)
-         [k {:type :ref,
-             :required true,
+          [k {:type :ref,
+              :required true,
              :ref (merge {:ns  (str (first ref) "." (second ref))
                           :current {:id (second ref)
                                     :schema (first ref)
@@ -90,47 +89,44 @@
                          (nth ref 3))
              :scope :-/ref}]
 
-         :else
-         (let [[link check] (resolve-link-fn ref)
-               attrs (update attrs :ref
-                             merge {:ns   (keyword (name (:ns ref)))
-                                    :link link})
-               _ (if check (pg-deftype-hydrate-check-link snapshot link :table))]
-           [k attrs]))))
+          :else
+          (let [[link check] (resolve-link-fn ref)
+                attrs (update attrs :ref
+                              merge {:ns   (keyword (name (:ns ref)))
+                                     :link link})
+                _ (if check (pg-deftype-hydrate-check-link snapshot module link :table))]
+            [k attrs]))))
 
 (defn pg-deftype-hydrate-process-enum
   "processes the enum type"
   {:added "4.0"}
-  ([k attrs snapshot]
-   (let [enum-var  (or (resolve (-> attrs :enum :ns))
-                       (f/error "Not found" {:input (:enum attrs)}))
-         link      (select-keys @enum-var
-                                [:id :module :lang :section])
-         _ (pg-deftype-hydrate-check-link snapshot link :enum)
-         attrs (assoc-in attrs [:enum :ns] (ut/sym-full link))]
-     [k attrs])))
+  ([k attrs resolve-link-fn snapshot module]
+   (let [[link check] (resolve-link-fn (:enum attrs))
+         _ (if check (pg-deftype-hydrate-check-link snapshot module link :enum))
+          attrs (assoc-in attrs [:enum :ns] (ut/sym-full link))]
+      [k attrs])))
 
 (defn pg-deftype-hydrate-attr
   "hydrates a single attribute"
   {:added "4.0"}
   ([k {:keys [type primary ref sql scope foreign] :as attrs}
-    {:keys [resolve-link-fn snapshot capture] :as mopts}]
+    {:keys [resolve-link-fn snapshot module capture] :as mopts}]
    (let [sql     (if sql (pg-deftype-hydrate-process-sql sql k attrs))
-         foreign (if foreign (pg-deftype-hydrate-process-foreign foreign resolve-link-fn snapshot))
+         foreign (if foreign (pg-deftype-hydrate-process-foreign foreign resolve-link-fn snapshot module))
          attrs   (cond-> attrs
-                   sql (assoc :sql sql)
-                   foreign (assoc :foreign foreign))]
-     (if primary
-       (vswap! capture conj (assoc (select-keys attrs [:type :enum :ref])
-                                   :id k)))
-     (cond (= :ref type)
-           (pg-deftype-hydrate-process-ref k attrs resolve-link-fn snapshot)
+                    sql (assoc :sql sql)
+                    foreign (assoc :foreign foreign))]
+      (if primary
+        (vswap! capture conj (assoc (select-keys attrs [:type :enum :ref])
+                                    :id k)))
+      (cond (= :ref type)
+            (pg-deftype-hydrate-process-ref k attrs resolve-link-fn snapshot module)
 
-           (= :enum type)
-           (pg-deftype-hydrate-process-enum k attrs snapshot)
+            (= :enum type)
+            (pg-deftype-hydrate-process-enum k attrs resolve-link-fn snapshot module)
 
-           :else
-           [k attrs]))))
+            :else
+            [k attrs]))))
 
 (defn pg-deftype-hydrate-spec
   "hydrates the spec"
@@ -149,11 +145,12 @@
                                          snapshot]
                                   :as mopts}]
    (let [resolve-link-fn (partial pg-deftype-hydrate-link sym module)
-         capture (volatile! [])
-         spec    (pg-deftype-hydrate-spec spec {:resolve-link-fn resolve-link-fn
-                                                :snapshot snapshot
-                                                :capture capture})
-         presch  (schema/schema [(keyword (str sym)) spec])
+          capture (volatile! [])
+          spec    (pg-deftype-hydrate-spec spec {:resolve-link-fn resolve-link-fn
+                                                 :snapshot snapshot
+                                                 :module module
+                                                 :capture capture})
+          presch  (schema/schema [(keyword (str sym)) spec])
          hmeta   (assoc (common/pg-hydrate-module-static module)
                         :static/schema-seed presch
                         :static/schema-primary (cond (empty? @capture)
