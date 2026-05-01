@@ -3,7 +3,7 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-^{:seedgen/root {:all true}}
+^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-repl :as repl]
@@ -74,6 +74,13 @@
 ^{:refer xt.event.base-box/add-listener :added "4.1"}
 (fact "triggers listeners for matching paths"
 
+  ^{:seedgen/base {:lua {:expect {"id" "abc"
+                                  "data" {"path" ["a" "b"]
+                                          "value" 3
+                                          "data" {"a" {"b" 3}}}
+                                  "meta" {"box/path" ["a"]
+                                          "listener/id" "abc"
+                                          "listener/type" "box"}}}}}
   (notify/wait-on :js
     (var b (box/make-box (fn:> {:a {:b 2}})))
     (box/add-listener b
@@ -101,14 +108,7 @@
                         (repl/notify {"id" id "data" data "t" t "meta" meta}))
                       nil)
     (box/set-data b ["a" "b"] 3))
-  => {"id" "abc"
-      "data" {"path" ["a" "b"]
-              "value" 3
-              "data" {"a" {"b" 3}}}
-      "t" nil
-      "meta" {"box/path" ["a"]
-              "listener/id" "abc"
-              "listener/type" "box"}}
+  => {"id" "abc", "meta" {"listener/id" "abc", "listener/type" "box", "box/path" ["a"]}, "data" {"path" ["a" "b"], "value" 3, "data" {"a" {"b" 3}}}}
 
   (notify/wait-on :python
     (var b (box/make-box (fn:> {:a {:b 2}})))

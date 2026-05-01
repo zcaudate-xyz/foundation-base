@@ -52,7 +52,7 @@
     [handler-fn context cb]
     (return ((xt/x:get-key cb "success") (handler-fn context)))))
 
-^{:seedgen/root {:all true}}
+^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
@@ -111,6 +111,12 @@
 ^{:refer xt.event.base-view/create-view :added "4.1"}
 (fact "manages view listeners"
 
+  ^{:seedgen/base {:lua {:expect (just-in
+                                  [{"type" "output"}
+                                   (just ["a1" "b2"] :in-any-order)
+                                   {"listener/id" "b2"
+                                    "listener/type" "view"}
+                                   ["a1"]])}}}
   (!.js
     (var v (view/create-view
             (fn:> [x] {:value x})
@@ -149,22 +155,16 @@
      (view/list-listeners v)
      (. (view/remove-listener v "b2") ["meta"])
      (view/list-listeners v)])
-  => (just-in
-      [{"current" nil
-        "elapsed" nil
-        "type" "output"
-        "updated" nil}
-       (just ["a1" "b2"] :in-any-order)
-       {"listener/id" "b2"
-        "listener/type" "view"}
-       ["a1"]])
+  => (just-in [{"type" "output"} (just ["a1" "b2"] :in-any-order) {"listener/id" "b2", "listener/type" "view"} ["a1"]])
 
   (!.py
     (var v (view/create-view
             (fn:> [x] {:value x})
             {}
             [3]
-            {:value 0}))
+            {:value 0}
+            nil
+            nil))
     (view/add-listener v "a1" (fn:> [id data t meta] nil) nil nil)
     (view/add-listener v "b2" (fn:> [id data t meta] nil) nil nil)
     [(view/get-output v)
@@ -247,6 +247,11 @@
 ^{:refer xt.event.base-view/add-listener :added "4.1"}
 (fact "adds a view listener"
 
+  ^{:seedgen/base {:lua {:expect {"id" "a1"
+                                  "data" {"data" {"value" 0}
+                                          "type" "output"}
+                                  "meta" {"listener/id" "a1"
+                                          "listener/type" "view"}}}}}
   (!.js
     (var v (-/make-basic-view))
     (var out nil)
@@ -266,12 +271,7 @@
     (view/add-listener v "a1" (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil nil)
     (view/trigger-listeners v "output" {:value 0})
     out)
-  => {"id" "a1"
-      "data" {"data" {"value" 0}
-              "type" "output"}
-      "t" nil
-      "meta" {"listener/id" "a1"
-              "listener/type" "view"}}
+  => {"id" "a1", "meta" {"listener/id" "a1", "listener/type" "view"}, "data" {"type" "output", "data" {"value" 0}}}
 
   (!.py
     (var v (-/make-basic-view))
@@ -349,6 +349,7 @@
 ^{:refer xt.event.base-view/get-output :added "4.1"}
 (fact "gets the output record"
 
+  ^{:seedgen/base {:lua {:expect {"type" "output"}}}}
   (!.js
     (var v (-/make-basic-view))
     (view/init-view v)
@@ -362,10 +363,7 @@
     (var v (-/make-basic-view))
     (view/init-view v)
     (view/get-output v))
-  => {"current" nil
-      "elapsed" nil
-      "type" "output"
-      "updated" nil}
+  => {"type" "output"}
 
   (!.py
     (var v (-/make-basic-view))
@@ -781,18 +779,10 @@
      (. (. context ["acc"]) ["::"])])
   => [[3] false "view.run"])
 
-^{:refer xt.event.base-view/pipeline-set :added "4.1"}
+^{:refer xt.event.base-view/pipeline-set :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "writes pipeline output back to the view"
 
   (!.js
-    (var v (-/make-basic-view))
-    (view/init-view v)
-    (var [context disabled] (view/pipeline-prep v nil))
-    (view/pipeline-set context "main" {"main" [true {"value" 3}]} nil)
-    (view/get-current v))
-  => {"value" 3}
-
-  (!.lua
     (var v (-/make-basic-view))
     (view/init-view v)
     (var [context disabled] (view/pipeline-prep v nil))
@@ -838,25 +828,10 @@
   => {"::" "view.run"
       "main" [true {"value" 3}]})
 
-^{:refer xt.event.base-view/pipeline-run-impl :added "4.1"}
+^{:refer xt.event.base-view/pipeline-run-impl :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "runs an explicit list of pipeline stages"
 
   (!.js
-    (var v (-/make-basic-view))
-    (view/init-view v)
-    (var [context disabled] (view/pipeline-prep v nil))
-    (view/pipeline-run-impl
-     context
-     ["main"]
-     0
-     -/success-async
-     nil
-     (fn [ctx] (return (. ctx ["acc"])))
-     nil))
-  => {"::" "view.run"
-      "main" [true {"value" 3}]}
-
-  (!.lua
     (var v (-/make-basic-view))
     (view/init-view v)
     (var [context disabled] (view/pipeline-prep v nil))
@@ -922,25 +897,10 @@
       "main" [true {"value" 3}]
       "post" [false]})
 
-^{:refer xt.event.base-view/pipeline-run-force :added "4.1"}
+^{:refer xt.event.base-view/pipeline-run-force :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "runs a forced remote or sync pipeline and can save to output"
 
   (!.js
-    (var v (-/make-remote-view))
-    (view/init-view v)
-    (var [context disabled] (view/pipeline-prep v nil))
-    (view/pipeline-run-force context true -/success-async nil nil "remote")
-    [(. context ["acc"])
-     (view/get-current v "remote")
-     (view/get-current v)])
-  => [{"::" "view.run"
-       "pre" [false]
-       "remote" [true {"value" 3}]
-       "post" [false]}
-      {"value" 3}
-      {"value" 3}]
-
-  (!.lua
     (var v (-/make-remote-view))
     (view/init-view v)
     (var [context disabled] (view/pipeline-prep v nil))

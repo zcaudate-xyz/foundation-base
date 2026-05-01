@@ -49,7 +49,7 @@
        "  (:use code.test)\n"
        "  (:require [std.lang :as l]))\n\n"
        "^{:seedgen/root {:all true\n"
-       "                 :langs [:python]\n"
+       "                 :langs [:js :lua :python]\n"
        "                 :python {:extra [[xt.lang.common-promise :as p]]}}}\n"
        "(l/script- :js\n"
        "  {:runtime :basic\n"

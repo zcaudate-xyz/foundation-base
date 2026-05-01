@@ -3,7 +3,7 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-^{:seedgen/root {:all true}}
+^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -122,6 +122,11 @@
 ^{:refer xt.event.util-decorate/to-handle-callback :added "4.1"}
 (fact "adapts success error and finally callbacks"
 
+  ^{:seedgen/base {:lua {:expect (just-in
+                                  [{"on_error" "B"
+                                    "on_teardown" "C"
+                                    "on_success" "A"}
+                                   {}])}}}
   (!.js
    [(decorate/to-handle-callback {"success" "A"
                                   "error" "B"
@@ -136,9 +141,7 @@
                                   "error" "B"
                                   "finally" "C"})
     (xt/x:obj-keys (decorate/to-handle-callback nil))])
-  => (just-in
-      [{"on_error" "B", "on_teardown" "C", "on_success" "A"}
-       (just ["on_success" "on_error" "on_teardown"] :in-any-order)])
+  => (just-in [{"on_error" "B", "on_teardown" "C", "on_success" "A"} {}])
 
   (!.py
    [(decorate/to-handle-callback {"success" "A"

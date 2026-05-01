@@ -626,6 +626,13 @@
           :langs
           normalize-target-langs))
 
+(defn- root-script-target-langs
+  [output]
+  (let [root-lang (get-in output [:globals :lang :root])]
+    (->> (root-script-meta-langs output)
+         (remove #{root-lang})
+         vec)))
+
 (defn- keep-target-items
   [classification lang]
   (->> (form-common/item-classify-langs classification)
@@ -850,26 +857,27 @@
 (defn- update-root-script-string
   [output target-set]
   (let [root-entry  (get-in output [:globals :global-script :root])
-         root-form   (some-> root-entry item-value)
-         current-str (item-string root-entry)
-         known-langs (->> (concat (or (root-script-meta-langs output) [])
-                                  (get-in output [:globals :lang :derived]))
-                          distinct
-                          (remove (set target-set))
-                          vec)]
-    (if (empty? known-langs)
-      (let [root-meta (some-> root-form meta :seedgen/root)]
-        (if (contains? root-meta :langs)
-          (str "^{:seedgen/root "
-               (pr-str (dissoc root-meta :langs))
-               "}\n"
-               (unwrap-meta-string current-str))
-          current-str))
+        root-form   (some-> root-entry item-value)
+        current-str (item-string root-entry)
+        root-meta   (some-> root-form meta :seedgen/root)
+        known-langs (->> (concat (or (root-script-meta-langs output) [])
+                                 (get-in output [:globals :lang :derived]))
+                         distinct
+                         (remove (set target-set))
+                         vec)]
+    (cond
+      ;; Preserve user-authored root language declarations verbatim.
+      (contains? root-meta :langs)
+      current-str
+
+      (empty? known-langs)
+      current-str
+
+      :else
       (str "^{:seedgen/root "
-           (pr-str (assoc (:seedgen/root (meta root-form))
-                          :langs known-langs))
-            "}\n"
-            (unwrap-meta-string current-str)))))
+           (pr-str (assoc root-meta :langs known-langs))
+           "}\n"
+           (unwrap-meta-string current-str)))))
 
 (defn- script-string-map
   [output]
@@ -890,11 +898,13 @@
 (defn- render-top-level-add
   [output text target-lang]
   (let [root-entry       (get-in output [:globals :global-script :root])
-        root-lang        (get-in output [:globals :lang :root])
-        stored-langs     (or (root-script-meta-langs output) target-lang [])
-        current-langs    (set (get-in output [:globals :lang :derived]))
-        target-set       (set (or target-lang stored-langs []))
-        existing-scripts (script-string-map output)
+         root-lang        (get-in output [:globals :lang :root])
+         stored-langs     (or (not-empty (root-script-target-langs output))
+                              target-lang
+                              [])
+         current-langs    (set (get-in output [:globals :lang :derived]))
+         target-set       (set (or target-lang stored-langs []))
+         existing-scripts (script-string-map output)
         fact-entries     (->> (get output :entries)
                               vals
                               (mapcat vals))
@@ -1203,14 +1213,14 @@
        (res/result {:status :error
                     :data :no-test-file})
 
-       :else
-       (let [output      (seed-readforms/seedgen-readforms ns {} lookup project)
-             root-lang   (get-in output [:globals :lang :root])
-             stored-langs (or (root-script-meta-langs output)
-                              [])
-             target-lang (or (normalize-target-langs (:lang params))
-                             stored-langs
-                             [])]
+        :else
+        (let [output      (seed-readforms/seedgen-readforms ns {} lookup project)
+              root-lang   (get-in output [:globals :lang :root])
+              stored-langs (or (not-empty (root-script-target-langs output))
+                               [])
+              target-lang (or (normalize-target-langs (:lang params))
+                              stored-langs
+                              [])]
          (cond
            (res/result? output)
            output

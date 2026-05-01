@@ -1,6 +1,5 @@
 (ns xt.lang.common-sort-topo
-  (:require [std.lang :as l :refer [defspec.xt]]
-            [xt.lang.common-data :as common-data]))
+  (:require [std.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]]})
@@ -66,4 +65,10 @@
     (var deps (xt/x:second link))
     (xt/for:array [d deps]
       (xt/x:arr-push edges [root d])))
-  (return (xt/x:arr-reverse (-/sort-edges edges))))
+  (var sorted (-/sort-edges edges))
+  (var out [])
+  (xt/for:index [i [(xt/x:len sorted)
+                    (xt/x:offset)
+                    -1]]
+    (xt/x:arr-push out (xt/x:get-idx sorted (xt/x:offset-rev i))))
+  (return out))

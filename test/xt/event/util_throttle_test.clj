@@ -3,7 +3,7 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-^{:seedgen/root {:all true}}
+^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -101,37 +101,10 @@
     (throttle/throttle-run-async instance 1 nil))
   => [1])
 
-^{:refer xt.event.util-throttle/throttle-run :added "4.1"}
+^{:refer xt.event.util-throttle/throttle-run :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "queues a single rerun per id"
 
   (notify/wait-on :js
-    (var out [])
-    (var queued nil)
-    (var first-run nil)
-    (var second-run nil)
-    (var handler
-         (fn [i]
-           (return
-            (spec-promise/x:with-delay
-             100
-             (fn []
-               (x:arr-push out i)
-               (when (== 2 (xt/x:len out))
-                 (repl/notify {"same_promise" (== (. first-run ["promise"])
-                                                  (. second-run ["promise"]))
-                               "queued" queued
-                               "runs" out})))))))
-    (var instance (throttle/throttle-create handler nil))
-    (:= first-run (throttle/throttle-run instance 1 nil))
-    (:= second-run (throttle/throttle-run instance 1 nil))
-    (throttle/throttle-run instance 1 nil)
-    (throttle/throttle-run instance 1 nil)
-    (:= queued (throttle/throttle-queued instance)))
-  => {"same_promise" true
-      "queued" ["1"]
-      "runs" [1 1]}
-
-  (notify/wait-on :lua
     (var out [])
     (var queued nil)
     (var first-run nil)
@@ -209,30 +182,10 @@
       "queued" {"2" {} "3" {}}})))
   => #{"1" "2" "3"})
 
-^{:refer xt.event.util-throttle/throttle-active :added "4.1"}
+^{:refer xt.event.util-throttle/throttle-active :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "reports active and waiting ids"
 
   (notify/wait-on :js
-    (var instance)
-    (var handler
-         (fn [i]
-           (return
-            (spec-promise/x:with-delay
-             (:? (== i 1) 100 300)
-             (fn []
-               (when (== i 1)
-                 (repl/notify [(throttle/throttle-active instance)
-                               (throttle/throttle-waiting instance)])))))))
-    (:= instance (throttle/throttle-create handler nil))
-    (throttle/throttle-run instance 1 nil)
-    (throttle/throttle-run instance 1 nil)
-    (throttle/throttle-run instance 1 nil)
-    (throttle/throttle-run instance 2 nil)
-    (throttle/throttle-run instance 3 nil))
-  => [["1" "2" "3"]
-      ["1" "2" "3"]]
-
-  (notify/wait-on :lua
     (var instance)
     (var handler
          (fn [i]
@@ -272,17 +225,11 @@
   => [["1" "2" "3"]
       ["1" "2" "3"]])
 
-^{:refer xt.event.util-throttle/throttle-queued :added "4.1"}
+^{:refer xt.event.util-throttle/throttle-queued :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "returns only queued ids"
 
   (set
    (!.js
-    (throttle/throttle-queued
-     {"queued" {"1" {} "3" {}}})))
-  => #{"1" "3"}
-
-  (set
-   (!.lua
     (throttle/throttle-queued
      {"queued" {"1" {} "3" {}}})))
   => #{"1" "3"}

@@ -2,7 +2,7 @@
   (:require [std.lang :as l])
   (:use code.test))
 
-^{:seedgen/root {:all true}}
+^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -25,6 +25,7 @@
 ^{:refer xt.event.base-listener/arrayify-path :added "4.1"}
 (fact "normalizes listener paths"
 
+  ^{:seedgen/base {:lua {:expect [{} {} ["a"] ["a"]]}}}
   (!.js
     [(event/arrayify-path nil)
      (event/arrayify-path {})
@@ -37,7 +38,7 @@
      (event/arrayify-path {})
      (event/arrayify-path "a")
      (event/arrayify-path ["a"])])
-  => [[] [] ["a"] ["a"]]
+  => [{} {} ["a"] ["a"]]
 
   (!.py
     [(event/arrayify-path nil)
@@ -49,6 +50,24 @@
 ^{:refer xt.event.base-listener/add-listener :added "4.1"}
 (fact "manages listeners and keyed listeners"
 
+  ^{:seedgen/base {:lua {:expect (just-in
+                                  ["custom.container"
+                                   {"hello" "world"}
+                                   (just ["a1" "b2"] :in-any-order)
+                                   {"custom" (just ["a1" "b2"] :in-any-order)}
+                                   ["k1"]
+                                   {"group" ["k1"]}
+                                   (just ["a1" "b2"] :in-any-order)
+                                   ["k1"]
+                                   ["a1" "b2" "k1"]
+                                   {"listener/id" "a1"
+                                    "listener/type" "custom"
+                                    "label" "one"}
+                                   {"listener/id" "k1"
+                                    "listener/type" "custom"
+                                    "label" "group"}
+                                   ["b2"]
+                                   {}])}}}
   (!.js
     (var c (event/make-container
             (fn:> {:hello "world"})
@@ -152,24 +171,7 @@
      (. (event/remove-keyed-listener c "group" "k1") ["meta"])
      (xt/x:obj-keys (event/clear-listeners c))
      (event/list-listeners c)])
-  => (just-in
-      ["custom.container"
-       {"hello" "world"}
-       (just ["a1" "b2"] :in-any-order)
-       {"custom" (just ["a1" "b2"] :in-any-order)}
-       ["k1"]
-       {"group" ["k1"]}
-       (just ["a1" "b2"] :in-any-order)
-       ["k1"]
-       ["a1" "b2" "k1"]
-       {"listener/id" "a1"
-        "listener/type" "custom"
-        "label" "one"}
-       {"listener/id" "k1"
-        "listener/type" "custom"
-        "label" "group"}
-       ["b2"]
-       []])
+  => (just-in ["custom.container" {"hello" "world"} (just ["a1" "b2"] :in-any-order) {"custom" (just ["a1" "b2"] :in-any-order)} ["k1"] {"group" ["k1"]} (just ["a1" "b2"] :in-any-order) ["k1"] ["a1" "b2" "k1"] {"listener/id" "a1", "label" "one", "listener/type" "custom"} {"listener/id" "k1", "label" "group", "listener/type" "custom"} ["b2"] {}])
 
   (!.py
     (var c (event/make-container
@@ -367,6 +369,9 @@
 ^{:refer xt.event.base-listener/clear-listeners :added "4.1"}
 (fact "clears non-keyed listeners"
 
+  ^{:seedgen/base {:lua {:expect (just-in
+                                  [(just ["a1" "b2"] :in-any-order)
+                                   {}])}}}
   (!.js
     (var c (event/blank-container "custom.container" {}))
     (event/add-listener c "a1" "custom" (fn:> [id data t meta] "a1") nil nil)
@@ -382,8 +387,7 @@
     (event/add-listener c "b2" "custom" (fn:> [id data t meta] "b2") nil nil)
     [(xt/x:obj-keys (event/clear-listeners c))
      (event/list-listeners c)])
-  => (just-in [(just ["a1" "b2"] :in-any-order)
-               []])
+  => (just-in [(just ["a1" "b2"] :in-any-order) {}])
 
   (!.py
     (var c (event/blank-container "custom.container" {}))
@@ -397,6 +401,11 @@
 ^{:refer xt.event.base-listener/remove-listener :added "4.1"}
 (fact "removes a listener by id"
 
+  ^{:seedgen/base {:lua {:expect [{"label" "one"
+                                   "listener/id" "a1"
+                                   "listener/type" "custom"}
+                                  nil
+                                  {}]}}}
   (!.js
     (var c (event/blank-container "custom.container" {}))
     (event/add-listener c "a1" "custom" (fn:> [id data t meta] "a1") {:label "one"} nil)
@@ -415,11 +424,7 @@
     [(. (event/remove-listener c "a1") ["meta"])
      (event/remove-listener c "missing")
      (event/list-listeners c)])
-  => [{"label" "one"
-       "listener/id" "a1"
-       "listener/type" "custom"}
-      nil
-      []]
+  => [{"listener/id" "a1", "label" "one", "listener/type" "custom"} nil {}]
 
   (!.py
     (var c (event/blank-container "custom.container" {}))
@@ -487,6 +492,12 @@
 ^{:refer xt.event.base-listener/trigger-entry :added "4.1"}
 (fact "merges listener metadata into the event"
 
+  ^{:seedgen/base {:lua {:expect {"id" "a1"
+                                  "data" {}
+                                  "meta" {"base" true
+                                          "label" "hello"
+                                          "listener/id" "a1"
+                                          "listener/type" "custom"}}}}}
   (!.js
     (var out nil)
     (event/trigger-entry
@@ -519,13 +530,7 @@
       nil)
      {:meta {:base true}})
     out)
-  => {"id" "a1"
-      "data" {}
-      "t" nil
-      "meta" {"base" true
-              "label" "hello"
-              "listener/id" "a1"
-              "listener/type" "custom"}}
+  => {"id" "a1", "meta" {"listener/id" "a1", "label" "hello", "base" true, "listener/type" "custom"}, "data" {}}
 
   (!.py
     (var out nil)
@@ -550,6 +555,9 @@
 ^{:refer xt.event.base-listener/trigger-listeners :added "4.1"}
 (fact "triggers all non-keyed listeners"
 
+  ^{:seedgen/base {:lua {:expect (just-in
+                                  [(just ["a1" "b2"] :in-any-order)
+                                   ["b2" "a1"]])}}}
   (!.js
     (var c (event/blank-container "custom.container" {}))
     (var calls [])
@@ -589,8 +597,7 @@
        (return (xt/x:get-key e "ok"))))
     [(event/trigger-listeners c {:ok true})
      calls])
-  => (just-in [(just ["a1" "b2"] :in-any-order)
-               ["a1" "b2"]])
+  => (just-in [(just ["a1" "b2"] :in-any-order) ["b2" "a1"]])
 
   (!.py
     (var c (event/blank-container "custom.container" {}))
@@ -697,6 +704,9 @@
 ^{:refer xt.event.base-listener/list-keyed-listeners :added "4.1"}
 (fact "lists keyed listeners for a group"
 
+  ^{:seedgen/base {:lua {:expect (just-in
+                                  [(just ["k1" "k2"] :in-any-order)
+                                   {}])}}}
   (!.js
     (var c (event/blank-container "custom.container" {}))
     (event/add-keyed-listener c "group" "k1" "custom" (fn:> [id data t meta] "k1") nil nil)
@@ -712,8 +722,7 @@
     (event/add-keyed-listener c "group" "k2" "custom" (fn:> [id data t meta] "k2") nil nil)
     [(event/list-keyed-listeners c "group")
      (event/list-keyed-listeners c "missing")])
-  => (just-in [(just ["k1" "k2"] :in-any-order)
-               []])
+  => (just-in [(just ["k1" "k2"] :in-any-order) {}])
 
   (!.py
     (var c (event/blank-container "custom.container" {}))

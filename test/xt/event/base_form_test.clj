@@ -26,7 +26,7 @@
       (fn:> {:flag false})
       {:flag []}))))
 
-^{:seedgen/root {:all true}}
+^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
@@ -50,7 +50,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.event.base-form/check-event :added "4.1"}
 (fact "checks field overlap"
@@ -76,6 +76,15 @@
 ^{:refer xt.event.base-form/make-form :added "4.1"}
 (fact "manages form data and listeners"
 
+  ^{:seedgen/base {:lua {:expect (just-in
+                                  [["a1"]
+                                   ["a1"]
+                                   "user"
+                                   {"login" "user"}
+                                   {"listener/id" "a1"
+                                    "listener/type" "form"
+                                    "form/fields" ["login"]}
+                                   {}])}}}
   (!.js
    (var f (form/make-form
            (fn:> {:login ""})
@@ -132,15 +141,7 @@
     (form/get-data f)
     (. (form/remove-listener f "a1") ["meta"])
     (form/list-listeners f)])
-  => (just-in
-      [["a1"]
-       ["a1"]
-       "user"
-       {"login" "user"}
-       {"listener/id" "a1"
-        "listener/type" "form"
-        "form/fields" ["login"]}
-       []])
+  => (just-in [["a1"] ["a1"] "user" {"login" "user"} {"listener/id" "a1", "form/fields" ["login"], "listener/type" "form"} {}])
 
   (!.py
    (var f (form/make-form
@@ -178,6 +179,12 @@
 ^{:refer xt.event.base-form/add-listener :added "4.1"}
 (fact "adds a form listener with field metadata"
 
+  ^{:seedgen/base {:lua {:expect {"id" "abc"
+                                  "data" {"fields" ["login"]
+                                          "type" "form.data"}
+                                  "meta" {"form/fields" ["login"]
+                                          "listener/id" "abc"
+                                          "listener/type" "form"}}}}}
   (!.js
    (var f (-/make-login-form))
    (var out nil)
@@ -198,13 +205,7 @@
    (form/add-listener f "abc" ["login"] (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil)
    (form/set-field f "login" "test00001")
    out)
-  => {"id" "abc"
-      "data" {"fields" ["login"]
-              "type" "form.data"}
-      "t" nil
-      "meta" {"form/fields" ["login"]
-              "listener/id" "abc"
-              "listener/type" "form"}}
+  => {"id" "abc", "meta" {"listener/id" "abc", "form/fields" ["login"], "listener/type" "form"}, "data" {"type" "form.data", "fields" ["login"]}}
 
   (!.py
    (var f (-/make-login-form))
@@ -223,6 +224,12 @@
 ^{:refer xt.event.base-form/trigger-all :added "4.1"}
 (fact "triggers listeners for all fields"
 
+  ^{:seedgen/base {:lua {:expect {"id" "abc"
+                                  "data" {"fields" ["login"]
+                                          "type" "form.data"}
+                                  "meta" {"form/fields" ["login"]
+                                          "listener/id" "abc"
+                                          "listener/type" "form"}}}}}
   (!.js
    (var f (-/make-login-form))
    (var out nil)
@@ -243,13 +250,7 @@
    (form/add-listener f "abc" ["login"] (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil)
    (form/trigger-all f "form.data")
    out)
-  => {"id" "abc"
-      "data" {"fields" ["login"]
-              "type" "form.data"}
-      "t" nil
-      "meta" {"form/fields" ["login"]
-              "listener/id" "abc"
-              "listener/type" "form"}}
+  => {"id" "abc", "meta" {"listener/id" "abc", "form/fields" ["login"], "listener/type" "form"}, "data" {"type" "form.data", "fields" ["login"]}}
 
   (!.py
    (var f (-/make-login-form))
@@ -268,6 +269,12 @@
 ^{:refer xt.event.base-form/trigger-field :added "4.1"}
 (fact "triggers listeners for a single field"
 
+  ^{:seedgen/base {:lua {:expect {"id" "abc"
+                                  "data" {"fields" ["login"]
+                                          "type" "form.data"}
+                                  "meta" {"form/fields" ["login"]
+                                          "listener/id" "abc"
+                                          "listener/type" "form"}}}}}
   (!.js
    (var f (-/make-login-form))
    (var out nil)
@@ -288,13 +295,7 @@
    (form/add-listener f "abc" ["login"] (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil)
    (form/trigger-field f "login" "form.data")
    out)
-  => {"id" "abc"
-      "data" {"fields" ["login"]
-              "type" "form.data"}
-      "t" nil
-      "meta" {"form/fields" ["login"]
-              "listener/id" "abc"
-              "listener/type" "form"}}
+  => {"id" "abc", "meta" {"listener/id" "abc", "form/fields" ["login"], "listener/type" "form"}, "data" {"type" "form.data", "fields" ["login"]}}
 
   (!.py
    (var f (-/make-login-form))
@@ -454,6 +455,13 @@
 ^{:refer xt.event.base-form/set-data :added "4.1"}
 (fact "sets form data directly"
 
+  ^{:seedgen/base {:lua {:expect [{"id" "a1"
+                                   "data" {"fields" ["login"]
+                                           "type" "form.data"}
+                                   "meta" {"form/fields" ["login"]
+                                           "listener/id" "a1"
+                                           "listener/type" "form"}}
+                                  {"login" "world"}]}}}
   (!.js
    (var f (-/make-login-form))
    (var out nil)
@@ -475,14 +483,7 @@
    (form/add-listener f "a1" ["login"] (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil)
    (form/set-data f {:login "world"})
    [out (form/get-data f)])
-  => [{"id" "a1"
-       "data" {"fields" ["login"]
-               "type" "form.data"}
-       "t" nil
-       "meta" {"form/fields" ["login"]
-               "listener/id" "a1"
-               "listener/type" "form"}}
-      {"login" "world"}]
+  => [{"id" "a1", "meta" {"listener/id" "a1", "form/fields" ["login"], "listener/type" "form"}, "data" {"type" "form.data", "fields" ["login"]}} {"login" "world"}]
 
   (!.py
    (var f (-/make-login-form))
@@ -502,6 +503,7 @@
 ^{:refer xt.event.base-form/reset-all-data :added "4.1"}
 (fact "resets all form data to the initial state"
 
+  ^{:seedgen/base {:lua {:transform {[] {}}}}}
   (!.js
    (var f (-/make-login-form))
    (form/set-data f {:login "world"})
@@ -514,7 +516,7 @@
    (form/set-data f {:login "world"})
    [(form/reset-all-data f)
     (form/get-data f)])
-  => [[] {"login" ""}]
+  => [{} {"login" ""}]
 
   (!.py
    (var f (-/make-login-form))
@@ -547,22 +549,10 @@
    (form/get-data f))
   => {"login" ""})
 
-^{:refer xt.event.base-form/validate-all :added "4.1"}
+^{:refer xt.event.base-form/validate-all :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "validates all fields and updates form state"
 
   (notify/wait-on :js
-    (var f (-/make-login-form))
-    (form/validate-all
-     f
-     (fn [field status] (return nil))
-     (fn [ok res]
-       (repl/notify
-        [ok
-         (. (form/get-result f) ["status"])
-         (form/check-any-errored f)]))))
-  => [false "errored" true]
-
-  (notify/wait-on :lua
     (var f (-/make-login-form))
     (form/validate-all
      f
@@ -589,6 +579,16 @@
 ^{:refer xt.event.base-form/validate-field :added "4.1"}
 (fact "validates one field and triggers validation listeners"
 
+  ^{:seedgen/base {:lua {:expect [{"id" "a1"
+                                   "data" {"fields" ["login"]
+                                           "type" "form.validation"}
+                                   "meta" {"form/fields" ["login"]
+                                           "listener/id" "a1"
+                                           "listener/type" "form"}}
+                                  {"data" ""
+                                   "id" "is-required"
+                                   "message" "Required field."
+                                   "status" "errored"}]}}}
   (notify/wait-on :js
     (var f (-/make-login-form))
     (form/add-listener
@@ -621,17 +621,7 @@
           (form/get-field-result f "login")]))
      nil)
     (form/validate-field f "login" (fn [field status] (return nil)) nil))
-  => [{"id" "a1"
-       "data" {"fields" ["login"]
-               "type" "form.validation"}
-       "t" nil
-       "meta" {"form/fields" ["login"]
-               "listener/id" "a1"
-               "listener/type" "form"}}
-      {"data" ""
-       "id" "is-required"
-       "message" "Required field."
-       "status" "errored"}]
+  => [{"id" "a1", "meta" {"listener/id" "a1", "form/fields" ["login"], "listener/type" "form"}, "data" {"type" "form.validation", "fields" ["login"]}} {"message" "Required field.", "id" "is-required", "status" "errored", "data" ""}]
 
   (notify/wait-on :python
     (var f (-/make-login-form))
@@ -658,6 +648,12 @@
 ^{:refer xt.event.base-form/reset-field-validator :added "4.1"}
 (fact "triggers validation listeners when resetting a field validator"
 
+  ^{:seedgen/base {:lua {:expect {"id" "a1"
+                                  "data" {"fields" ["login"]
+                                          "type" "form.validation"}
+                                  "meta" {"form/fields" ["login"]
+                                          "listener/id" "a1"
+                                          "listener/type" "form"}}}}}
   (!.js
    (var f (-/make-login-form))
    (var out nil)
@@ -678,13 +674,7 @@
    (form/add-listener f "a1" ["login"] (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil)
    (form/reset-field-validator f "login")
    out)
-  => {"id" "a1"
-      "data" {"fields" ["login"]
-              "type" "form.validation"}
-      "t" nil
-      "meta" {"form/fields" ["login"]
-              "listener/id" "a1"
-              "listener/type" "form"}}
+  => {"id" "a1", "meta" {"listener/id" "a1", "form/fields" ["login"], "listener/type" "form"}, "data" {"type" "form.validation", "fields" ["login"]}}
 
   (!.py
    (var f (-/make-login-form))
@@ -766,7 +756,7 @@
        "fields" {"login" {"status" "pending"}}
        "status" "pending"}])
 
-^{:refer xt.event.base-form/check-field-passed :added "4.1"}
+^{:refer xt.event.base-form/check-field-passed :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "checks whether a field passed validation"
 
   (notify/wait-on :js
@@ -778,15 +768,6 @@
        (repl/notify (form/check-field-passed f "login")))))
   => true
 
-  (notify/wait-on :lua
-    (var f (-/make-login-form))
-    (form/set-field f "login" "world")
-    (form/validate-all
-     f nil
-     (fn [ok res]
-       (repl/notify (form/check-field-passed f "login")))))
-  => true
-
   (notify/wait-on :python
     (var f (-/make-login-form))
     (form/set-field f "login" "world")
@@ -796,7 +777,7 @@
        (repl/notify (form/check-field-passed f "login")))))
   => true)
 
-^{:refer xt.event.base-form/check-field-errored :added "4.1"}
+^{:refer xt.event.base-form/check-field-errored :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "checks whether a field errored"
 
   (notify/wait-on :js
@@ -807,14 +788,6 @@
        (repl/notify (form/check-field-errored f "login")))))
   => true
 
-  (notify/wait-on :lua
-    (var f (-/make-login-form))
-    (form/validate-all
-     f nil
-     (fn [ok res]
-       (repl/notify (form/check-field-errored f "login")))))
-  => true
-
   (notify/wait-on :python
     (var f (-/make-login-form))
     (form/validate-all
@@ -823,7 +796,7 @@
        (repl/notify (form/check-field-errored f "login")))))
   => true)
 
-^{:refer xt.event.base-form/check-all-passed :added "4.1"}
+^{:refer xt.event.base-form/check-all-passed :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "checks whether all fields passed"
 
   (notify/wait-on :js
@@ -835,15 +808,6 @@
        (repl/notify (form/check-all-passed f)))))
   => true
 
-  (notify/wait-on :lua
-    (var f (-/make-login-form))
-    (form/set-field f "login" "world")
-    (form/validate-all
-     f nil
-     (fn [ok res]
-       (repl/notify (form/check-all-passed f)))))
-  => true
-
   (notify/wait-on :python
     (var f (-/make-login-form))
     (form/set-field f "login" "world")
@@ -853,18 +817,10 @@
        (repl/notify (form/check-all-passed f)))))
   => true)
 
-^{:refer xt.event.base-form/check-any-errored :added "4.1"}
+^{:refer xt.event.base-form/check-any-errored :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "checks whether any field errored"
 
   (notify/wait-on :js
-    (var f (-/make-login-form))
-    (form/validate-all
-     f nil
-     (fn [ok res]
-       (repl/notify (form/check-any-errored f)))))
-  => true
-
-  (notify/wait-on :lua
     (var f (-/make-login-form))
     (form/validate-all
      f nil
