@@ -1,5 +1,8 @@
 (ns std.lang.base.book-module
   (:require [clojure.set :as set]
+            [clojure.string :as string]
+            [std.lang.base.impl-template :as impl-template]
+            [std.lib.foundation :as f]
             [std.lib.collection :as collection]
             [std.lib.impl :as impl]))
 
@@ -91,8 +94,98 @@
 
                             ;; Misc
                             :static {}
-                            :display :default}
+                             :display :default}
                            m))))
+
+(defn polyfill-default-alias
+  "returns the default alias for a derived polyfill module"
+  {:added "4.1"}
+  [module-id]
+  (let [suffix (-> (name module-id)
+                   (string/replace #"^common-" "")
+                   (string/replace #"^polyfill-" ""))]
+    (symbol (str "polyfill-" suffix))))
+
+(defn- module-materialized-code
+  [book module]
+  (if book
+    (let [module-view (assoc module :display :brief)
+          lang        (:lang module)]
+      (collection/map-vals
+       (fn [entry]
+         (impl-template/materialize-code-entry book
+                                               entry
+                                               {:lang lang
+                                                :module module-view}))
+       (:code module)))
+    (:code module)))
+
+(defn- module-add-polyfill-link
+  [module dep]
+  (let [existing-alias (get (:internal module) dep)
+        alias          (or existing-alias
+                           (polyfill-default-alias dep))
+        link-target     (get (:link module) alias)
+        alias-target    (get (:alias module) alias)]
+    (when (and link-target
+               (not= link-target dep))
+      (f/error "Derived polyfill alias conflicts with existing link"
+               {:module (:id module)
+                :alias alias
+                :current link-target
+                :polyfill dep}))
+    (when (and alias-target
+               (not= alias-target dep))
+      (f/error "Derived polyfill alias conflicts with existing alias"
+               {:module (:id module)
+                :alias alias
+                :current alias-target
+                :polyfill dep}))
+    (-> module
+        (update :link assoc alias dep)
+        (update :internal assoc dep alias)
+        (update :alias assoc alias dep))))
+
+(defn module-derived-view
+  "returns a compilation view of the module with materialized code and derived polyfill links"
+  {:added "4.1"}
+  ([book module]
+   (let [code      (module-materialized-code book module)
+         polyfills (->> (vals code)
+                        (mapcat (fn [entry]
+                                  (or (:polyfill-modules entry) #{})))
+                        set
+                        sort)
+         module    (assoc module :code code)]
+     (reduce (fn [module dep]
+               (cond
+                 (= dep (:id module))
+                 module
+
+                 (contains? (:internal module) dep)
+                 module
+
+                 (not (get-in book [:modules dep]))
+                 (f/error "Derived polyfill module not found"
+                          {:module (:id module)
+                           :polyfill dep
+                           :available (keys (:modules book))})
+
+                 :else
+                  (module-add-polyfill-link module dep)))
+              module
+              polyfills))))
+
+(defn resolve-module-view
+  "resolves a module id or module map to the derived per-language compilation view"
+  {:added "4.1"}
+  [book module]
+  (when module
+    (let [module (if (symbol? module)
+                   (get-in book [:modules module])
+                   module)]
+      (when module
+        (module-derived-view book module)))))
 
 (defn module-deps-code
   "gets dependencies for a given module"
@@ -100,7 +193,10 @@
   ([module]
     (module-deps-code nil module))
    ([book module]
-    (let [reserved (or (-> book :grammar :reserved) {})
+    (let [module   (if book
+                     (module-derived-view book module)
+                     module)
+          reserved (or (-> book :grammar :reserved) {})
           polyfill-modules
           (fn [entry]
             (set/union
@@ -136,9 +232,12 @@
   ([module]
    (module-deps-all nil module))
   ([book module]
-   (disj (set/union (module-deps-code book module)
-                    (set (vals (:link module))))
-         (:id module))))
+   (let [module (if book
+                  (module-derived-view book module)
+                  module)]
+     (disj (set/union (module-deps-code book module)
+                      (set (vals (:link module))))
+           (:id module)))))
 
 (defn module-deps-native
   "gets dependencies for a given module"
@@ -149,7 +248,11 @@
             set/union
             (keep (fn [e]
                     (not-empty (:deps-native e)))
-                  entries)))))
+                  entries))))
+  ([book module]
+   (module-deps-native (if book
+                         (module-derived-view book module)
+                         module))))
 
 (defn module-deps-fragment
   "gets dependencies for a given module"
@@ -157,7 +260,11 @@
   ([module]
    (let [entries (vals (:code module))]
      (apply set/union
-            (map :deps-fragment entries)))))
+            (map :deps-fragment entries))))
+  ([book module]
+   (module-deps-fragment (if book
+                            (module-derived-view book module)
+                            module))))
 
 (defn module-entries
   [module filter-keys]

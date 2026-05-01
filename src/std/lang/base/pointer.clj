@@ -3,6 +3,7 @@
             [std.json :as json]
             [std.lang.base.book :as book]
             [std.lang.base.book-entry :as e]
+            [std.lang.base.book-module :as module]
             [std.lang.base.emit :as emit]
             [std.lang.base.emit-common :as common]
             [std.lang.base.impl :as impl]
@@ -198,8 +199,10 @@
         snapshot (cond-> (lib/get-snapshot library)
                    module (-> (snap/set-module module) second)) 
         book     (snap/get-book snapshot lang)
-        module   (or module
-                     (get-in book [:modules (:module ptr)]))
+        module   (module/resolve-module-view
+                  book
+                  (or module
+                      (:module ptr)))
         
         module   (if-let [internal (-> emit :runtime :module/internal)]
                    (-> module

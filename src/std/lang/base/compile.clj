@@ -24,20 +24,24 @@
 (defn compile-script
   "compiles a script"
   {:added "4.0"}
-  [{:keys [header footer main root target name file] :as opts}]
-  (let [opts  (merge {:layout :flat
-                      :entry {:label true}}
-                     opts)
-        entry (compile/compile-resolve main)
-        _ (if (not (book/book-entry? entry))
-            (f/error "Not a library entry" {:main main}))
-        meta   (ptr/ptr-invoke-meta entry
-                                    (select-keys opts [:layout
-                                                       :emit]))
-        body   (impl/emit-script (:form entry) meta)
-        full   (compile/compile-fullbody body opts)
-        output (compile/compile-out-path opts)]
-    (compile/compile-write output full)))
+   [{:keys [header footer main root target name file] :as opts}]
+   (let [opts  (merge {:layout :flat
+                       :entry {:label true}}
+                      opts)
+         entry (compile/compile-resolve main)
+         _ (if (not (book/book-entry? entry))
+             (f/error "Not a library entry" {:main main}))
+         meta   (ptr/ptr-invoke-meta entry
+                                     (select-keys opts [:layout
+                                                        :emit]))
+         entry  (if (:form entry)
+                  entry
+                  (book/get-code-entry-view (:book meta)
+                                            (ut/sym-full entry)))
+         body   (impl/emit-script (:form entry) meta)
+         full   (compile/compile-fullbody body opts)
+         output (compile/compile-out-path opts)]
+     (compile/compile-write output full)))
 
 (def +install-script-fn+
   (compile/types-add :script #'compile-script))

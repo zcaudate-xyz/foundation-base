@@ -1,14 +1,29 @@
 (ns std.lang.base.impl-template
   (:require [std.lang.base.emit-preprocess :as preprocess]
-            [std.lang.base.emit-rewrite :as rewrite]
-            [std.lang.base.grammar-xtalk-system :as xtalk-system]))
+             [std.lang.base.emit-rewrite :as rewrite]
+             [std.lang.base.grammar-xtalk-system :as xtalk-system]))
+
+(def +code-state-keys+
+  [:form
+   :deps
+   :deps-fragment
+   :deps-native
+   :xtalk-ops
+   :xtalk-profiles
+   :polyfill-modules])
+
+(defn entry-reserved
+  "gets the reserved grammar entry for a code entry"
+  {:added "4.1"}
+  [grammar entry]
+  (get-in grammar [:reserved (:op entry)]))
 
 (defn create-code-state
   "hydrates and stages a code entry for the current grammar"
   {:added "4.1"}
   [entry reserved grammar modules & [mopts]]
-  (let [module (or (get modules (:module entry))
-                   (:module mopts))
+  (let [module (or (:module mopts)
+                   (get modules (:module entry)))
         module (cond-> module
                  (map? module) (assoc :display :brief))
         context (merge {:module module
@@ -55,13 +70,40 @@
                       m
                       (assoc m lang (compute)))))
            lang)
-      (compute))))
+       (compute))))
+
+(defn materialize-code-entry
+  "materializes a code entry for the target language using the cached code state"
+  {:added "4.1"}
+  ([{:keys [grammar modules lang] :as book} entry]
+   (materialize-code-entry book entry {}))
+  ([{:keys [grammar modules lang] :as _book} entry mopts]
+   (let [reserved (entry-reserved grammar entry)
+         mopts    (merge {:lang   (or (:lang mopts) lang)
+                          :module (or (:module mopts)
+                                      (get modules (:module entry)))}
+                         mopts)]
+     (if (and reserved modules)
+       (let [{:keys [hydrate-hook]} reserved
+             {:keys [hmeta]
+              :as state} (cached-code-state entry
+                                            reserved
+                                            grammar
+                                            modules
+                                            mopts)
+             entry (merge entry
+                          (dissoc state :hmeta)
+                          hmeta)]
+         (if hydrate-hook
+           (or (hydrate-hook entry) entry)
+           entry))
+       entry))))
 
 (defn cached-entry-deps
   "restages a code entry and returns its current code dependencies for the book language"
   {:added "4.1"}
   [{:keys [modules grammar lang]} entry]
-  (let [reserved (get-in grammar [:reserved (:op entry)])]
+  (let [reserved (entry-reserved grammar entry)]
     (:deps (cached-code-state entry
                               reserved
                               grammar

@@ -166,19 +166,15 @@
                        :snapshot shadow-snapshot
                        :module (book/get-module book module)}
                       mopts)
-        entry  (if (= section :fragment)
-                 (entry/create-fragment-hydrate entry
-                                                grammar
-                                                modules
-                                                mopts)
-                 
-                 (entry/create-code-hydrate entry
-                                            (get-in grammar [:reserved (:op entry)])
-                                            grammar
-                                            modules
-                                            mopts))]
-    (atom/update-diff snapshot [lang :book]
-                      book/set-entry entry)))
+         entry  (if (= section :fragment)
+                  (entry/create-fragment-hydrate entry
+                                                 grammar
+                                                 modules
+                                                 mopts)
+                  
+                  (entry/prepare-code-entry entry))]
+     (atom/update-diff snapshot [lang :book]
+                       book/set-entry entry)))
 
 (defn set-entries
   "sets an entry in the snapshot"

@@ -84,9 +84,12 @@
    (let [[args & exprs] (if (= 1 (count more))
                           [[] (first more)]
                           more)
-         final   (last exprs)
-         body    (butlast exprs)]
-     `(~'fn ~args ~@body (~'return ~final)))))
+          final   (last exprs)
+          body    (butlast exprs)]
+      `(~'fn ~args ~@body ~@(if (and (seq? final)
+                                     (= 'return (first final)))
+                              [final]
+                              `[(~'return ~final)])))))
 
 (defn tf-tcond
   "transforms the ternary cond
@@ -105,12 +108,14 @@
 
 (defn tf-xor
   "transforms to xor using ternary if
- 
-   (tf-xor '(xor a b))
-   => '(:? a b (not b))"
+  
+    (tf-xor '(xor a b))
+    => '(== (not (not a)) (not (not b)))"
   {:added "4.0"}
   ([[_ a b]]
-   (list :? a b (list 'not b))))
+   (list '==
+         (list 'not (list 'not a))
+         (list 'not (list 'not b)))))
 
 (defn tf-doto
   "basic transformation for `doto` syntax"
@@ -123,13 +128,13 @@
 
 (defn tf-do-arrow
   "do:> transformation
- 
-   (tf-do-arrow '(do:>
-                  1 2 (return 3)))
-   => '((quote ((fn [] 1 2 (return 3)))))"
+  
+    (tf-do-arrow '(do:>
+                   1 2 (return 3)))
+    => '((fn [] 1 2 (return 3)))"
   {:added "4.0"}
   ([[_ & body]]
-   `('((~'fn [] ~@body)))))
+   `((~'fn [] ~@body))))
 
 (defn tf-forange
   "creates the forange form

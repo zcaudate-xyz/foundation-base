@@ -72,6 +72,13 @@
    (let [entry (get-code-entry book id)]
      (impl-template/cached-entry-deps book entry))))
 
+(defn get-code-entry-view
+  "gets a code entry materialized for the current book language"
+  {:added "4.1"}
+  ([book id]
+   (impl-template/materialize-code-entry book
+                                         (get-code-entry book id))))
+
 (defn get-deps
   "get dependencies for a given id"
   {:added "4.0"}
@@ -85,8 +92,8 @@
   {:added "4.0"}
   ([{:keys [modules] :as book} id]
    (if (namespace id)
-     (:deps-native (get-code-entry book id))
-     (module/module-deps-native (get modules id)))))
+       (:deps-native (get-code-entry-view book id))
+      (module/module-deps-native book (get modules id)))))
 
 (defn list-entries
   "lists entries for a given symbol"

@@ -1,5 +1,6 @@
 (ns std.lang.base.impl
   (:require [clojure.string]
+             [std.lang.base.book-module :as book-module]
              [std.lang.base.emit :as emit]
              [std.lang.base.emit-common :as emit-common]
              [std.lang.base.emit-preprocess :as preprocess] [std.lang.base.preprocess-base :as preprocess-base]
@@ -96,16 +97,19 @@
    (emit-options {:lang :lua})
    => vector?"
   {:added "4.0"}
-  [{:keys [lang library snapshot emit] :as meta}]
-  (let [meta (merge (select-keys (preprocess/macro-opts)
-                                 [:library :snapshot :module :layout])
-                    meta)
-        {:keys [lang library snapshot emit]} meta
-        _ (assert (identity lang) "Lang Required")
-        [snapshot book] (emit-options-raw library snapshot lang)]
-    (emit/prep-options (assoc meta
-                              :book book
-                              :snapshot snapshot))))
+   [{:keys [lang library snapshot emit] :as meta}]
+   (let [meta (merge (select-keys (preprocess/macro-opts)
+                                  [:library :snapshot :module :layout])
+                     meta)
+         {:keys [lang library snapshot emit]} meta
+         _ (assert (identity lang) "Lang Required")
+         [snapshot book] (emit-options-raw library snapshot lang)
+         module          (book-module/resolve-module-view book (:module meta))
+         meta            (cond-> meta
+                           module (assoc :module module))]
+     (emit/prep-options (assoc meta
+                               :book book
+                               :snapshot snapshot))))
 
 (defn to-form
   "input to form"

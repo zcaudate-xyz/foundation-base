@@ -1,19 +1,28 @@
 (ns std.lang.base.impl-deps-imports
   (:require [clojure.set :as set]
-            [std.lang.base.book :as b]
-            [std.lang.base.book-module :as module]
-            [std.lang.base.impl-entry :as entry]
-            [std.lang.base.util :as ut]
-            [std.lib.collection :as collection]))
+             [std.lang.base.book :as b]
+             [std.lang.base.book-module :as module]
+             [std.lang.base.impl-entry :as entry]
+             [std.lang.base.impl-template :as impl-template]
+             [std.lang.base.util :as ut]
+             [std.lib.collection :as collection]))
+
+(defn- materialize-import-entry
+  [book entry]
+  (if (= :code (:section entry))
+    (impl-template/materialize-code-entry book entry)
+    entry))
 
 (defn get-entry-imports
   "gets all fragment imports from code entries"
   {:added "4.0"}
-  [entries]
-  (->> entries
-       (filter (comp not-empty :deps-native))
-       (map (juxt ut/sym-full :deps-native))
-       (into {})))
+  ([entries]
+   (->> entries
+        (filter (comp not-empty :deps-native))
+        (map (juxt ut/sym-full :deps-native))
+        (into {})))
+  ([book entries]
+   (get-entry-imports (map (partial materialize-import-entry book) entries))))
 
 (defn get-namespace-imports
   "merges imports for both fragment and code entries"
@@ -35,9 +44,10 @@
   ([book entries]
    (get-fragment-deps book entries #{}))
   ([book entries seen]
-   (let [fragments (->> (map :deps-fragment entries)
-                        (apply set/union)
-                        (filter (comp not seen)))]
+   (let [entries    (map (partial materialize-import-entry book) entries)
+         fragments (->> (map :deps-fragment entries)
+                         (apply set/union)
+                         (filter (comp not seen)))]
      (if (empty? fragments)
        seen
        (get-fragment-deps
@@ -59,10 +69,10 @@
   {:added "4.0"}
   [book entries]
   (let [fragments (get-fragment-deps book entries)
-        fentries  (map #(b/get-fragment-entry book %) fragments)
-        fnatives  (get-entry-imports fentries)
-        natives   (get-entry-imports entries)]
-    (get-namespace-imports (concat natives fnatives))))
+         fentries  (map #(b/get-fragment-entry book %) fragments)
+         fnatives  (get-entry-imports book fentries)
+         natives   (get-entry-imports book entries)]
+     (get-namespace-imports (concat natives fnatives))))
 
 (defn script-imports
   "gets the ns imports for a script"
@@ -79,11 +89,12 @@
   "gets the ns imports for a script"
   {:added "4.0"}
   [book module-id]
-  (let [module    (b/get-module book module-id)
-        links     (module/module-deps-code book module)
-        entries   (vals (:code module))]
-    {:native (script-imports book entries)
-     :direct links}))
+  (let [module    (module/module-derived-view book
+                                              (b/get-module book module-id))
+         links     (module/module-deps-code book module)
+         entries   (vals (:code module))]
+     {:native (script-imports book entries)
+      :direct links}))
 
 (defn module-code-deps
   "resolves all dependencies"

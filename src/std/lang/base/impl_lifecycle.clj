@@ -22,9 +22,10 @@
   (let [_ (assert lang "Lang required.")
         [stage grammar book namespace mopts] (impl/emit-options (merge {:layout :module}
                                                                        meta))
-        module (get-in book [:modules module-id])]
-    [[stage grammar book namespace (assoc mopts :module module)]
-     (deps/collect-module book module)]))
+        module (module/module-derived-view book
+                                          (get-in book [:modules module-id]))]
+     [[stage grammar book namespace (assoc mopts :module module)]
+      (deps/collect-module book module)]))
 
 ;;
 ;; SETUP

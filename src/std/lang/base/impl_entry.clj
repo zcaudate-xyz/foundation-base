@@ -119,10 +119,19 @@
           entry (cond-> entry
                   (not (:static/code.cache entry))
                   (assoc :static/code.cache (atom {})))
-          entry (if hydrate-hook
-                  (or (hydrate-hook entry) entry)
-                  entry)]
-      entry)))
+           entry (if hydrate-hook
+                   (or (hydrate-hook entry) entry)
+                   entry)]
+       entry)))
+
+(defn prepare-code-entry
+  "prepares a raw code entry for storage without eager hydration"
+  {:added "4.1"}
+  [entry]
+  (let [entry (merge entry *extra*)]
+    (cond-> entry
+      (not (:static/code.cache entry))
+      (assoc :static/code.cache (atom {})))))
 
 (defn create-code
   "creates the code entry"
@@ -252,20 +261,11 @@
           reserved (get-in grammar [:reserved (:op entry)])
           entry   (if (and reserved
                            modules)
-                      (merge entry
-                             (select-keys
-                              (impl-template/cached-code-state entry
-                                                              reserved
-                                                              grammar
-                                                              modules
-                                                              (assoc mopts :lang lang))
-                              [:form
-                               :deps
-                               :deps-fragment
-                               :deps-native
-                               :xtalk-ops
-                               :xtalk-profiles
-                               :polyfill-modules]))
+                    (impl-template/materialize-code-entry {:grammar grammar
+                                                           :modules modules
+                                                           :lang lang}
+                                                          entry
+                                                          (assoc mopts :lang lang))
                     entry)
           {:keys [form]}  entry
           form (if (:transform emit)

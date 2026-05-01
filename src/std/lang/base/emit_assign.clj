@@ -1,13 +1,14 @@
 (ns std.lang.base.emit-assign
   (:require [clojure.string]
-            [std.lang.base.emit-block :as block]
-            [std.lang.base.emit-common :as common]
-            [std.lang.base.emit-data :as data]
-            [std.lang.base.emit-fn :as fn]
-            [std.lang.base.emit-helper :as helper]
-            [std.lang.base.emit-preprocess :as preprocess] [std.lang.base.preprocess-base :as preprocess-base]
-            [std.lang.base.util :as ut]
-            [std.lib.collection :as collection]
+             [std.lang.base.emit-block :as block]
+             [std.lang.base.emit-common :as common]
+             [std.lang.base.emit-data :as data]
+             [std.lang.base.emit-fn :as fn]
+             [std.lang.base.emit-helper :as helper]
+             [std.lang.base.impl-template :as impl-template]
+             [std.lang.base.emit-preprocess :as preprocess] [std.lang.base.preprocess-base :as preprocess-base]
+             [std.lang.base.util :as ut]
+             [std.lib.collection :as collection]
             [std.lib.env :as env]
             [std.lib.foundation :as f]
             [std.lib.walk :as walk]))
@@ -38,7 +39,12 @@
   [sym [link & input] grammar {:keys [lang book snapshot] :as mopts}]
   (let [[link-module link-id] (ut/sym-pair link)
         book     (or book (get-in snapshot [lang :book]))
-        entry    (or (get-in book [:modules link-module :code link-id])
+        entry    (or (when-let [entry (get-in book [:modules link-module :code link-id])]
+                       (impl-template/materialize-code-entry book
+                                                             entry
+                                                             {:lang lang
+                                                              :module (or (:module mopts)
+                                                                          (get-in book [:modules link-module]))}))
                      (f/error "Cannot find entry" {:lang  lang
                                                    :input link}))
         _        (or (empty? (:deps entry))
