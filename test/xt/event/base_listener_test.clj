@@ -20,7 +20,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.event.base-listener/arrayify-path :added "4.1"}
 (fact "normalizes listener paths"
@@ -564,13 +564,13 @@
     (event/add-listener
      c "a1" "custom"
      (fn [id data t meta]
-        (xt/x:arr-push calls "a1"))
+       (xt/x:arr-push calls "a1"))
      nil
      nil)
     (event/add-listener
      c "b2" "custom"
      (fn [id data t meta]
-        (xt/x:arr-push calls "b2"))
+       (xt/x:arr-push calls "b2"))
      nil
      (fn [e]
        (return (xt/x:get-key e "ok"))))
@@ -585,13 +585,13 @@
     (event/add-listener
      c "a1" "custom"
      (fn [id data t meta]
-        (xt/x:arr-push calls "a1"))
+       (xt/x:arr-push calls "a1"))
      nil
      nil)
     (event/add-listener
      c "b2" "custom"
      (fn [id data t meta]
-        (xt/x:arr-push calls "b2"))
+       (xt/x:arr-push calls "b2"))
      nil
      (fn [e]
        (return (xt/x:get-key e "ok"))))
@@ -605,13 +605,13 @@
     (event/add-listener
      c "a1" "custom"
      (fn [id data t meta]
-        (xt/x:arr-push calls "a1"))
+       (xt/x:arr-push calls "a1"))
      nil
      nil)
     (event/add-listener
      c "b2" "custom"
      (fn [id data t meta]
-        (xt/x:arr-push calls "b2"))
+       (xt/x:arr-push calls "b2"))
      nil
      (fn [e]
        (return (xt/x:get-key e "ok"))))
@@ -768,69 +768,69 @@
     (var calls [])
     (event/add-keyed-listener
      c "group-a" "k1" "custom"
-      (fn [id data t meta]
-        (xt/x:arr-push calls "k1"))
+     (fn [id data t meta]
+       (xt/x:arr-push calls "k1"))
      nil nil)
     (event/add-keyed-listener
      c "group-a" "k2" "custom"
-      (fn [id data t meta]
-        (xt/x:arr-push calls "k2"))
+     (fn [id data t meta]
+       (xt/x:arr-push calls "k2"))
      nil nil)
     (event/add-keyed-listener
      c "group-b" "k3" "custom"
-      (fn [id data t meta]
-        (xt/x:arr-push calls "k3"))
+     (fn [id data t meta]
+       (xt/x:arr-push calls "k3"))
      nil nil)
     [(event/trigger-keyed-listeners c "group-a" {:ok true})
      calls])
   => (just-in [(just ["k1" "k2"] :in-any-order)
-               ["k1" "k2"]])
+               (just ["k1" "k2"] :in-any-order)])
 
   (!.lua
     (var c (event/blank-container "custom.container" {}))
     (var calls [])
     (event/add-keyed-listener
      c "group-a" "k1" "custom"
-      (fn [id data t meta]
-        (xt/x:arr-push calls "k1"))
+     (fn [id data t meta]
+       (xt/x:arr-push calls "k1"))
      nil nil)
     (event/add-keyed-listener
      c "group-a" "k2" "custom"
-      (fn [id data t meta]
-        (xt/x:arr-push calls "k2"))
+     (fn [id data t meta]
+       (xt/x:arr-push calls "k2"))
      nil nil)
     (event/add-keyed-listener
      c "group-b" "k3" "custom"
-      (fn [id data t meta]
-        (xt/x:arr-push calls "k3"))
+     (fn [id data t meta]
+       (xt/x:arr-push calls "k3"))
      nil nil)
     [(event/trigger-keyed-listeners c "group-a" {:ok true})
      calls])
   => (just-in [(just ["k1" "k2"] :in-any-order)
-               ["k1" "k2"]])
+               (just ["k1" "k2"] :in-any-order)])
 
   (!.py
     (var c (event/blank-container "custom.container" {}))
     (var calls [])
     (event/add-keyed-listener
      c "group-a" "k1" "custom"
-      (fn [id data t meta]
-        (xt/x:arr-push calls "k1"))
+     (fn [id data t meta]
+       (xt/x:arr-push calls "k1"))
      nil nil)
     (event/add-keyed-listener
      c "group-a" "k2" "custom"
-      (fn [id data t meta]
-        (xt/x:arr-push calls "k2"))
+     (fn [id data t meta]
+       (xt/x:arr-push calls "k2"))
      nil nil)
     (event/add-keyed-listener
      c "group-b" "k3" "custom"
-      (fn [id data t meta]
-        (xt/x:arr-push calls "k3"))
+     (fn [id data t meta]
+       (xt/x:arr-push calls "k3"))
      nil nil)
     [(event/trigger-keyed-listeners c "group-a" {:ok true})
      calls])
   => (just-in [(just ["k1" "k2"] :in-any-order)
-               ["k1" "k2"]]))
+               (just ["k1" "k2"] :in-any-order)]))
 
 (comment
   (s/snapto '[xt.event.base-listener])

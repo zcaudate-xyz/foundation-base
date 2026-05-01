@@ -10,7 +10,6 @@
              [xt.cell.kernel.inner-local :as inner-local]
              [xt.cell.kernel.inner-impl :as inner-impl]]})
 
-
 (defspec.xt mock-worker-send
   [:fn [xt.cell.kernel.spec/MockWorkerRecord [:or :xt/str xt.cell.kernel.spec/RequestFrame]]
    :xt/any])
@@ -58,8 +57,8 @@
                        (spec-promise/x:promise
                         (fn []
                            (return (-/mock-worker-send worker request)))))))
-  (xt/x:obj-assign worker #{postMessage
-                            postRequest})
+  (xt/x:obj-assign worker {"postMessage" postMessage
+                           "postRequest" postRequest})
   (return worker))
 
 (defn.xt create-worker

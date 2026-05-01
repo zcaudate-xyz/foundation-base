@@ -331,7 +331,7 @@
 
 (defn scheme-tf-x-lu-get
   [[_ lu obj]]
-  (list 'hash-ref lu obj (list 'list)))
+  (list 'hash-ref lu obj nil))
 
 (defn scheme-tf-x-lu-set
   [[_ lu obj gid]]
@@ -364,7 +364,7 @@
   [[_ obj key default]]
   (if (some? default)
     (list 'hash-ref obj key (list 'lambda '() default))
-    (list 'hash-ref obj key)))
+    (list 'hash-ref obj key nil)))
 
 (defn scheme-tf-x-get-path
   [[_ obj path default]]

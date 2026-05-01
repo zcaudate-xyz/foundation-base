@@ -16,3 +16,9 @@
 (fact "emits xtalk through the scheme backend"
   (l/emit-as :scheme '[(x:print (x:cat "a" "b"))])
   => "(display (string-append \"a\" \"b\"))")
+
+(fact "emits named and empty lambdas through the scheme backend"
+  [(emit-scheme '(fn named [x] (return x)) {})
+   (emit-scheme '(fn []) {})]
+  => ["(lambda (x) x)"
+      "(lambda () (void))"])

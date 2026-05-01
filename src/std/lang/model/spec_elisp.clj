@@ -199,58 +199,156 @@
            grammar
            mopts)
 
-          :else
-          (emit-common/emit-invoke-raw "funcall" (cons sym args) grammar mopts))))
+           :else
+           (emit-common/emit-invoke-raw "funcall" (cons sym args) grammar mopts))))
 
-(defn elisp-normalize-funcalls
+(defn- elisp-collect-defuns
   [form]
-  (cond (collection/form? form)
+  (letfn [(collect [form]
+            (cond (collection/form? form)
+                  (let [head   (first form)
+                        nested (mapcat collect form)]
+                    (if (= 'defun head)
+                      (cons (second form) nested)
+                      nested))
+
+                  (vector? form)
+                  (mapcat collect form)
+
+                  (map? form)
+                  (mapcat collect (mapcat identity form))
+
+                  (set? form)
+                  (mapcat collect form)
+
+                  :else
+                  []))]
+    (set (collect form))))
+
+(defn- elisp-function-value
+  [sym known-defuns locals]
+  (cond (contains? locals sym)
+        sym
+
+        (or (namespace sym)
+            (contains? known-defuns sym))
+        (list 'symbol-function (list 'quote sym))
+
+        :else
+        sym))
+
+(declare elisp-normalize-funcalls*)
+
+(defn- elisp-normalize-let-bindings
+  [bindings known-defuns locals]
+  (loop [bindings bindings
+         scope locals
+         out []]
+    (if (empty? bindings)
+      [(apply list out) scope]
+      (let [binding (first bindings)]
+        (if (and (collection/form? binding)
+                 (= 2 (count binding)))
+          (let [sym   (first binding)
+                value (elisp-normalize-funcalls* (second binding) known-defuns scope)]
+            (recur (rest bindings)
+                   (conj scope sym)
+                   (conj out (list sym value))))
+          (recur (rest bindings)
+                 scope
+                 (conj out (elisp-normalize-funcalls* binding known-defuns scope))))))))
+
+(defn- elisp-normalize-funcalls*
+  [form known-defuns locals]
+  (cond (symbol? form)
+        (elisp-function-value form known-defuns locals)
+
+        (collection/form? form)
         (let [head (first form)]
-          (if (= 'let head)
-            (let [bindings (second form)
-                  body     (drop 2 form)]
-              (list* 'let
-                     (apply list
-                            (map (fn [binding]
-                                   (if (and (collection/form? binding)
-                                            (= 2 (count binding)))
-                                     (list (first binding)
-                                           (elisp-normalize-funcalls (second binding)))
-                                     (elisp-normalize-funcalls binding)))
-                                 bindings))
-                     (map elisp-normalize-funcalls body)))
-            (let [items (apply list (map elisp-normalize-funcalls form))
-                  head  (first items)]
-              (if (collection/form? head)
-                (apply list 'funcall items)
-                items))))
+          (cond (contains? #{'quote 'function} head)
+                form
+
+                (contains? #{'let 'let*} head)
+                (let [bindings         (second form)
+                      body             (drop 2 form)
+                      [bindings scope] (elisp-normalize-let-bindings bindings
+                                                                     known-defuns
+                                                                     locals)]
+                  (list* head
+                         bindings
+                         (map #(elisp-normalize-funcalls* % known-defuns scope) body)))
+
+                (= 'lambda head)
+                (let [args  (second form)
+                      scope (into locals args)
+                      body  (drop 2 form)]
+                  (list* 'lambda
+                         (apply list args)
+                         (map #(elisp-normalize-funcalls* % known-defuns scope) body)))
+
+                (= 'defun head)
+                (let [sym   (second form)
+                      args  (nth form 2)
+                      scope (into locals args)
+                      body  (drop 3 form)]
+                  (list* 'defun
+                         sym
+                         (apply list args)
+                         (map #(elisp-normalize-funcalls* % known-defuns scope) body)))
+
+                (= 'setq head)
+                (list* 'setq
+                       (mapcat (fn [[sym value]]
+                                 [sym (elisp-normalize-funcalls* value known-defuns locals)])
+                               (partition 2 (rest form))))
+
+                :else
+                (let [norm-head (if (collection/form? head)
+                                  (elisp-normalize-funcalls* head known-defuns locals)
+                                  head)
+                      norm-args (map #(elisp-normalize-funcalls* % known-defuns locals)
+                                     (rest form))
+                      items     (cons norm-head norm-args)]
+                  (if (or (collection/form? norm-head)
+                          (and (symbol? norm-head)
+                               (contains? locals norm-head)))
+                    (apply list 'funcall items)
+                    (apply list items)))))
 
         (vector? form)
-        (mapv elisp-normalize-funcalls form)
+        (mapv #(elisp-normalize-funcalls* % known-defuns locals) form)
 
         (map? form)
         (into (empty form)
               (map (fn [[k v]]
-                     [(elisp-normalize-funcalls k)
-                      (elisp-normalize-funcalls v)]))
+                     [(elisp-normalize-funcalls* k known-defuns locals)
+                      (elisp-normalize-funcalls* v known-defuns locals)]))
               form)
 
         (set? form)
-        (set (map elisp-normalize-funcalls form))
+        (set (map #(elisp-normalize-funcalls* % known-defuns locals) form))
 
         :else
         form))
+
+(defn elisp-normalize-funcalls
+  [form]
+  (elisp-normalize-funcalls* form
+                             (elisp-collect-defuns form)
+                             #{}))
 
 (defn- elisp-function-prologue
   [args]
   [])
 
-(def +elisp-transform-config+
-  {:begin 'progn
-    :reserved +reserved+
-   :lambda-form (fn [args body]
-                   (list* 'lambda
-                          (apply list args)
+ (def +elisp-transform-config+
+   {:begin 'progn
+     :reserved +reserved+
+    :def-form (fn [sym value]
+                (list 'setq sym value))
+    :lambda-form (fn [args body]
+                    (list* 'lambda
+                           (apply list args)
                           (concat (elisp-function-prologue args)
                                   body)))
     :defn-form (fn [sym args body]
@@ -260,7 +358,7 @@
                         (concat (elisp-function-prologue args)
                                 body)))
    :let-form (fn [bindings body]
-               (list* 'let (apply list bindings) body))
+               (list* 'let* (apply list bindings) body))
    :while-form (fn [test body]
                  (list* 'while test body))
    :try-form (fn [body catch finally]

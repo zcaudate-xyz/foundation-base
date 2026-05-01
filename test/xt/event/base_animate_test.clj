@@ -281,33 +281,42 @@
                           [empty? "b" false]
                           [["b"] "c" {"::" "observed", "value" 2, "listeners" empty?}]]))]}
 (fact "collects animated map paths recursively"
-
+  
   ^{:seedgen/base {:lua {:expect (l/as-lua +out+)}}}
   (!.js
-    (base-animate/get-map-paths-inner
-     mock/MOCK
-     {:a (mock/new-observed 1)
-      :b {:c (mock/new-observed 2)}}
-     []
-     []))
+    (xtd/arr-sort
+     (base-animate/get-map-paths-inner
+      mock/MOCK
+      {:a (mock/new-observed 1)
+       :b {:c (mock/new-observed 2)}}
+      []
+      [])
+     xtd/second
+     xt/x:str-lt))
   => +out+
-
+  
   (!.lua
-    (base-animate/get-map-paths-inner
-     mock/MOCK
-     {:a (mock/new-observed 1)
-      :b {:c (mock/new-observed 2)}}
-     []
-     []))
+    (xtd/arr-sort
+     (base-animate/get-map-paths-inner
+      mock/MOCK
+      {:a (mock/new-observed 1)
+       :b {:c (mock/new-observed 2)}}
+      []
+      [])
+     xtd/second
+     xt/x:str-lt))
   => +out+
 
   (!.py
-    (base-animate/get-map-paths-inner
-     mock/MOCK
-     {:a (mock/new-observed 1)
-      :b {:c (mock/new-observed 2)}}
-     []
-     []))
+    (xtd/arr-sort
+     (base-animate/get-map-paths-inner
+      mock/MOCK
+      {:a (mock/new-observed 1)
+       :b {:c (mock/new-observed 2)}}
+      []
+      [])
+     xtd/second
+     xt/x:str-lt))
   => +out+)
 
 ^{:refer xt.event.base-animate/get-map-paths :added "4.1"

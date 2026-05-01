@@ -12,6 +12,20 @@
   [obj]
   (dart-method0 (list '. obj 'runtimeType) 'toString))
 
+(defn dart-is-map
+  [obj]
+  (list :% (list :- "(") obj (list :- " is Map)")))
+
+(defn dart-map-get
+  [obj key]
+  (list :% (list :- "((") obj (list :- (str " as Map)[\"" key "\"])"))))
+
+(defn dart-xt-exception?
+  [obj]
+  (list 'and
+        (dart-is-map obj)
+        (list '== "xt.exception" (dart-map-get obj "__type__"))))
+
 (defn dart-tf-x-len
   [[_ arr]]
   (list '. arr 'length))
@@ -94,9 +108,7 @@
 
 (defn dart-tf-x-ex-native?
   [[_ value]]
-  (list 'and
-        (list 'x:is-object? value)
-        (list '== "xt.exception" (list '. value ["__type__"]))))
+  (dart-xt-exception? value))
 
 (defn dart-tf-x-ex-new
   [[_ message & [data]]]
@@ -107,19 +119,15 @@
 (defn dart-tf-x-ex-message
   [[_ value]]
   (list ':?
-        (list 'and
-              (list 'x:is-object? value)
-              (list '== "xt.exception" (list '. value ["__type__"])))
-        (list '. value ["message"])
+        (dart-xt-exception? value)
+        (dart-map-get value "message")
         nil))
 
 (defn dart-tf-x-ex-data
   [[_ value]]
   (list ':?
-        (list 'and
-              (list 'x:is-object? value)
-              (list '== "xt.exception" (list '. value ["__type__"])))
-        (list '. value ["data"])
+        (dart-xt-exception? value)
+        (dart-map-get value "data")
         nil))
 
 (defn dart-tf-x-has-key?

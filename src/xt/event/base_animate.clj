@@ -201,12 +201,12 @@
   (when (and running
              (xt/x:not-nil? animation))
     (stop-transition animation)
-    (xt/x:obj-assign progressing {:running false
-                                  :animation nil}))
+    (xt/x:obj-assign progressing {:running false})
+    (xt/x:set-key progressing "animation" nil))
   (var finish-fn
        (fn [finished]
-         (xt/x:obj-assign progressing {:running false
-                                       :animation nil})
+         (xt/x:obj-assign progressing {:running false})
+         (xt/x:set-key progressing "animation" nil)
          (when (xt/x:not-nil? progress-fn)
            (progress-fn {:status "stopped"
                          :finished finished}))))
@@ -224,10 +224,12 @@
   "runs with cleanup"
   {:added "4.0"}
   [impl progressing progress-fn]
-  (var out (xt/x:obj-assign progressing (-/new-progressing)))
+  (xt/x:obj-assign progressing {:running false
+                                :queued  []})
+  (xt/x:set-key progressing "animation" nil)
   (when (xt/x:not-nil? progress-fn)
     (progress-fn {:status "cleanup"}))
-  (return out))
+  (return progressing))
 
 (defn.xt animate-chained-one
   "runs with single chain"

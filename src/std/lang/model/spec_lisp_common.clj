@@ -166,32 +166,38 @@
 
 (defn transform-form
   {:added "4.1"}
-  [{:keys [begin
-           reserved
-           lambda-form
-           defn-form
-           let-form
-           while-form
-           try-form
-           not-equal-form
-           equal-form
-           nil-form
-           assign-symbol-form
-           index-read-form
-           index-write-form
-           global-symbol
-           global-read-form
-           global-write-form]
-    :as config}
-   form]
-  (letfn [(begin-form [forms]
-            (cond (empty? forms) nil
-                  (= 1 (count forms)) (first forms)
-                  :else (cons begin forms)))
-          (var-form? [form]
-            (and (collection/form? form)
-                 (let [{:keys [emit]} (get reserved (first form))]
-                   (= :def-assign emit))))
+   [{:keys [begin
+            reserved
+            def-form
+            lambda-form
+            defn-form
+            let-form
+            while-form
+            ternary-form
+            try-form
+            not-equal-form
+            equal-form
+            nil-form
+            assign-symbol-form
+            index-read-form
+            index-write-form
+            global-symbol
+            global-read-form
+            global-write-form]
+     :as config}
+    form]
+   (letfn [(begin-form [forms]
+             (cond (empty? forms) nil
+                   (= 1 (count forms)) (first forms)
+                   :else (cons begin forms)))
+           (ternary-expr [test then else]
+             (if ternary-form
+               (ternary-form test then else)
+               (list 'if test then else)))
+           (var-form? [form]
+             (and (collection/form? form)
+                  (let [{:keys [emit]} (get reserved (first form))]
+                    (= :def-assign emit))))
            (index-prop [prop]
              (cond (symbol? prop)
                    [(key-literal prop) :key]
@@ -336,13 +342,23 @@
                               quote  (if (= 1 (count args))
                                        (transform (first args))
                                        +not-found+)
-                              fn     (lambda-form (second form)
-                                                  (transform-body (drop 2 form)))
-                              fn:>   (lambda-form (second form)
-                                                  (transform-body (drop 2 form)))
-                              defn   (defn-form (second form)
-                                                (nth form 2)
-                                                (transform-body (drop 3 form)))
+                              fn     (let [[_ maybe-name maybe-args & more] form
+                                           named? (symbol? maybe-name)
+                                           args   (if named? maybe-args maybe-name)
+                                           body   (if named? more (drop 2 form))]
+                                       (lambda-form args
+                                                    (transform-body body)))
+                              fn:>   (let [[_ maybe-name maybe-args & more] form
+                                           named? (symbol? maybe-name)
+                                           args   (if named? maybe-args maybe-name)
+                                           body   (if named? more (drop 2 form))]
+                                       (lambda-form args
+                                                    (transform-body body)))
+                               def    (def-form (second form)
+                                                (transform (nth form 2)))
+                               defn   (defn-form (second form)
+                                                 (nth form 2)
+                                                 (transform-body (drop 3 form)))
                               defgen (defn-form (second form)
                                                 (nth form 2)
                                                 (transform-body (drop 3 form)))
@@ -351,12 +367,15 @@
                                            (mapv (fn [[sym value]]
                                                    (list sym (transform value)))))
                                       (transform-body (drop 2 form)))
-                              while  (while-form (transform (first args))
-                                                 (transform-body (rest args)))
-                              br*    (branch-form args)
-                              try    (let [{:keys [body catch finally]} (split-try-clauses args)]
-                                       (try-form (transform-body body)
-                                                 (when catch
+                               while  (while-form (transform (first args))
+                                                  (transform-body (rest args)))
+                               :?     (ternary-expr (transform (first args))
+                                                    (transform (second args))
+                                                    (transform (nth args 2)))
+                               br*    (branch-form args)
+                               try    (let [{:keys [body catch finally]} (split-try-clauses args)]
+                                        (try-form (transform-body body)
+                                                  (when catch
                                                    {:sym  (second catch)
                                                     :body (transform-body (drop 2 catch))})
                                                  (when finally
@@ -390,11 +409,14 @@
                            (global-read (first args))
 
                            :table
-                           (into {}
-                                (map (fn [entry]
-                                       [(key-literal (first entry))
-                                        (transform (second entry))]))
-                                args)
+                           (let [entries (if (every? vector? args)
+                                           args
+                                           (partition 2 args))]
+                             (into {}
+                                   (map (fn [[k v]]
+                                          [(key-literal k)
+                                           (transform v)]))
+                                   entries))
 
                            :discard
                            nil

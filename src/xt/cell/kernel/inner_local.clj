@@ -3,8 +3,9 @@
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
-  {:require [[xt.cell.kernel.base-util :as util] [xt.cell.kernel.inner-state :as state] [xt.lang.spec-base :as xt] [xt.lang.common-space :as rt :with [defsingleton.xt]]]})
-
+  {:require [[xt.cell.kernel.base-util :as util]
+             [xt.cell.kernel.inner-state :as state]
+             [xt.lang.spec-base :as xt]]})
 
 (defspec.xt actions-baseline
   [:fn [[:xt/maybe :xt/any]] xt.cell.kernel.spec/WorkerActionMap])
@@ -94,26 +95,28 @@
                                        (or actions {}))
                        worker)))
 
-;;
-;; Generation Template
-;;
 
-(defn tmpl-baseline-action
-  "templates a baseline function"
-  {:added "4.0"}
-  [entry]
-  (let [{:cell/keys [action static is-async]} (meta (second (:form entry)))
-        handler (cond->> (l/sym-full entry)
-                  (not static) (list `state/fn-self))
-        args    (nth (:form entry) 2)]
-    [action {:handler handler
-             :is-async (true? is-async)
-             :args  (mapv str (if static
-                                args
-                                (rest args)))}]))
+(comment
+  ;;
+  ;; Generation Template
+  ;;
 
-(def +baselines+
-  (mapv tmpl-baseline-action
-        (l/module-entries :xtalk 'xt.cell.kernel.inner-state
-                          (fn [entry]
-                            (:cell/action (meta (second (:form entry))))))))
+  (defn tmpl-baseline-action
+    "templates a baseline function"
+    {:added "4.0"}
+    [entry]
+    (let [{:cell/keys [action static is-async]} (meta (second (:form entry)))
+          handler (cond->> (l/sym-full entry)
+                    (not static) (list `state/fn-self))
+          args    (nth (:form entry) 2)]
+      [action {:handler handler
+               :is-async (true? is-async)
+               :args  (mapv str (if static
+                                  args
+                                  (rest args)))}]))
+
+  (def +baselines+
+    (mapv tmpl-baseline-action
+          (l/module-entries :xtalk 'xt.cell.kernel.inner-state
+                            (fn [entry]
+                              (:cell/action (meta (second (:form entry)))))))))

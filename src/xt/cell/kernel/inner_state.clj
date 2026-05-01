@@ -8,7 +8,6 @@
              [xt.lang.spec-promise :as spec-promise]
              [xt.lang.common-space :as rt :with [defsingleton.xt]]]})
 
-
 (defspec.xt INNER_STATE
   [:fn [] xt.cell.kernel.spec/InnerState])
 

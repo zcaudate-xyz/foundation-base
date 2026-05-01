@@ -168,19 +168,24 @@
   [form]
   (common/expand-form +reserved+ form))
 
-(def +scheme-transform-config+
-  {:begin 'begin
-   :reserved +reserved+
+ (def +scheme-transform-config+
+   {:begin 'begin
+    :reserved +reserved+
+   :def-form (fn [sym value]
+               (list 'define sym value))
    :lambda-form (fn [args body]
-                  (list* 'lambda
-                         (apply list args)
-                         body))
-   :defn-form (fn [sym args body]
-                (list* 'define
-                       (list* sym args)
+                   (let [body (if (seq body)
+                                body
+                                ['(void)])]
+                     (list* 'lambda
+                            (apply list args)
+                            body)))
+    :defn-form (fn [sym args body]
+                 (list* 'define
+                        (list* sym args)
                        body))
-   :let-form (fn [bindings body]
-               (list* 'let (apply list bindings) body))
+    :let-form (fn [bindings body]
+                (list* 'let* (apply list bindings) body))
    :while-form (fn [test body]
                  (list* 'while test body))
     :try-form (fn [body catch finally]
@@ -224,11 +229,11 @@
                          (list 'set! sym value))
    :index-read-form (fn [obj key kind]
                       (case kind
-                        :key (list 'hash-ref obj key)
+                        :key (list 'hash-ref obj key nil)
                         :idx (list 'vector-ref obj key)
                         :auto (list 'if
                                     (list 'hash? obj)
-                                    (list 'hash-ref obj key)
+                                    (list 'hash-ref obj key nil)
                                     (list 'vector-ref obj key))))
     :index-write-form (fn [obj key value kind]
                         (case kind
@@ -250,7 +255,7 @@
     :global-read-form (fn [global key]
                         (list 'hash-ref global
                               (if (symbol? key) (name key) key)
-                              (list 'quote 'null)))
+                              nil))
    :global-write-form (fn [global key value]
                         (list 'begin
                               (list 'hash-set! global key value)

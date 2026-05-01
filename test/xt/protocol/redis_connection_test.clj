@@ -1,23 +1,19 @@
 (ns xt.protocol.redis-connection-test
-  (:require [rt.basic.type-common :as common]
-            [std.lang :as l])
-  (:use code.test))
+  (:use code.test)
+  (:require [std.lang :as l]))
 
+^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.protocol.redis-connection :as redisp]]})
 
 (l/script- :lua
   {:runtime :basic
-   :config {:program :resty}
    :require [[xt.protocol.redis-connection :as redisp]]})
 
-(l/script- :dart
-  {:runtime :twostep
+(l/script- :python
+  {:runtime :basic
    :require [[xt.protocol.redis-connection :as redisp]]})
-
-(def CANARY-DART
-  (common/program-exists? "dart"))
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -25,6 +21,7 @@
 
 ^{:refer xt.protocol.redis-connection/IRedisConnectionDriver :added "4.1"}
 (fact "defines the Redis connection protocol surfaces"
+
   (!.js
     [redisp/IRedisConnectionDriver
      redisp/IRedisConnection
@@ -45,15 +42,18 @@
       ["connect"]
       ["disconnect" "exec"]]
 
-  (if CANARY-DART
-    (!.dt
-      [redisp/IRedisConnectionDriver
-       redisp/IRedisConnection
-       redisp/IRedisRuntimeDriver
-       redisp/IRedisRuntimeConnection])
-    :dart-unavailable)
-  => (any [["connect"]
-           ["disconnect" "exec"]
-           ["connect"]
-           ["disconnect" "exec"]]
-          :dart-unavailable))
+  (!.py
+    [redisp/IRedisConnectionDriver
+     redisp/IRedisConnection
+     redisp/IRedisRuntimeDriver
+     redisp/IRedisRuntimeConnection])
+  => [["connect"]
+      ["disconnect" "exec"]
+      ["connect"]
+      ["disconnect" "exec"]])
+
+(comment
+  (s/snapto '[xt.protocol.redis-connection])
+  
+  (s/seedgen-langadd '[xt.protocol.redis-connection] {:lang [:lua :python] :write true})
+  (s/seedgen-langremove '[xt.protocol.redis-connection] {:lang [:lua :python] :write true}))
