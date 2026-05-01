@@ -1,6 +1,6 @@
 (ns rt.basic.impl.process-python
   (:require [clojure.string]
-            [python.core.common-promise]
+            [xt.lang.common-promise]
             [rt.basic.type-basic :as basic]
             [rt.basic.type-common :as common]
             [rt.basic.type-oneshot :as oneshot]

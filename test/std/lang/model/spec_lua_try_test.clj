@@ -7,8 +7,8 @@
 (fact "lua throw emits native lua errors for strings and structured exceptions"
   [(l/emit-as :lua '[(throw "boom")])
    (l/emit-as :lua '[(throw (x:ex "boom" {:a 1}))])]
-  => ["error('boom')"
-      "error({['__type__']='xt.exception',message='boom',data={a=1}})"])
+  => ["error('boom',0)"
+      "error({['__type__']='xt.exception',message='boom',data={a=1}},0)"])
 
 ^{:refer std.lang.model.spec-lua.rewrite/lua-rewrite-stage :added "4.1"}
 (fact "lua try/catch lowers to a pcall wrapper for xt exceptions"
@@ -19,7 +19,7 @@
                              (x:print (x:ex-message e))
                              (x:print (x:ex-data e))))])]
     [(boolean (re-find #"pcall\(function \(\)" out))
-     (boolean (re-find #"error\(\{\['__type__'\]='xt\.exception'" out))
+     (boolean (re-find #"error\(\{\['__type__'\]='xt\.exception'.*,0\)" out))
      (boolean (re-find #"'xt\.exception' == .*?\['__type__'\]" out))
      (boolean (re-find #"local e =" out))
      (boolean (re-find #"e\['message'\]" out))
@@ -28,14 +28,14 @@
   => [true true true true true true true])
 
 ^{:refer std.lang.model.spec-lua.rewrite/lua-rewrite-stage :added "4.1"}
-(fact "lua sync catch only intercepts xt-style exceptions"
+(fact "lua sync catch preserves plain thrown payloads through pcall"
   (let [out (l/emit-as :lua
                        '[(try
                            (throw "boom")
                            (catch e
-                             (x:print (x:ex-data e))))])]
-    [(boolean (re-find #"'xt\.exception' == .*?\['__type__'\]" out))
-     (boolean (re-find #"error\('boom'\)" out))
+                              (x:print (x:ex-data e))))])]
+    [(boolean (re-find #"local e = lua_try_body_value__" out))
+     (boolean (re-find #"error\('boom',0\)" out))
      (boolean (re-find #"error\(lua_try_value__" out))])
   => [true true true])
 

@@ -1,6 +1,7 @@
 (ns std.lang.model.spec-python.rewrite
   (:require [std.lang.rewrite.hoist :as hoist]
-            [std.lang.rewrite.inline-do :as inline]
+  	    [std.lang.rewrite.inline-do :as inline]
+            [std.lang.rewrite.walk :as walk]
             [std.lib.collection :as collection]))
 
 (def ^:private +python-lambda-disallowed-emits+
@@ -108,8 +109,11 @@
 (def ^:private +python-rewriter+
   (hoist/create-rewriter
    {:fn-tags #{'fn 'fn.inner}
-    :symbol-prefix "py_callback__"
-    :lambda-compatible? python-lambda-compatible?}))
+     :symbol-prefix "py_callback__"
+     :lambda-compatible? python-lambda-compatible?}))
+
+(def ^:private with-form-meta
+  walk/with-form-meta)
 
 (def python-rewrite-expression
   (:rewrite-expression +python-rewriter+))
@@ -120,7 +124,113 @@
 (def python-rewrite-statements
   (:rewrite-statements +python-rewriter+))
 
+(declare python-normalize-form)
+
+(defn- python-handler-form?
+  [tag form]
+  (and (collection/form? form)
+       (= tag (first form))))
+
+(defn- python-value-catch-binding?
+  [binding]
+  (and (symbol? binding)
+       (not (re-find #"^[A-Z]" (name binding)))))
+
+(defn- python-catch-binding
+  [binding err-sym]
+  (with-form-meta binding
+    ['Exception :as err-sym]))
+
+(defn- python-catch-value
+  [err-sym]
+  (list ':?
+        (list 'hasattr err-sym "__xt_value__")
+        (list '. err-sym '__xt_value__)
+        err-sym))
+
+(defn- python-rewrite-throw
+  [form]
+  (let [[_ value] form
+        value (python-normalize-form value)
+        value-sym (gensym "py_throw_value__")
+        err-sym (gensym "py_throw_err__")
+        native? (list 'isinstance value-sym 'BaseException)]
+    (with-form-meta form
+      (list 'do
+            (list 'var value-sym ':= value)
+            (list 'var err-sym ':=
+                  (list ':? native?
+                        value-sym
+                        (list 'Exception value-sym)))
+            (list 'when
+                  (list 'not native?)
+                  (list 'setattr err-sym "__xt_value__" value-sym))
+            (list 'throw err-sym)))))
+
+(defn- python-rewrite-handler
+  [form]
+  (case (first form)
+    catch
+    (let [[_ binding & body] form]
+      (if (python-value-catch-binding? binding)
+        (let [err-sym (gensym "py_catch_err__")]
+          (with-form-meta form
+            (apply list 'catch
+                   (python-catch-binding binding err-sym)
+                   (concat [(list 'var binding ':=
+                                  (python-catch-value err-sym))]
+                           (map python-normalize-form body)))))
+        (with-form-meta form
+          (apply list 'catch
+                 binding
+                 (map python-normalize-form body)))))
+
+    finally
+    (with-form-meta form
+      (apply list 'finally
+             (map python-normalize-form (rest form))))
+
+    form))
+
+(defn- python-rewrite-try
+  [form]
+  (let [[_ & items] form
+        [body handlers] (split-with (fn [x]
+                                      (not (or (python-handler-form? 'catch x)
+                                               (python-handler-form? 'finally x))))
+                                    items)]
+    (with-form-meta form
+      (apply list 'try
+             (concat (map python-normalize-form body)
+                     (map python-rewrite-handler handlers))))))
+
+(defn- python-rewrite-list
+  [form]
+  (cond
+    (not (collection/form? form))
+    form
+
+    (= 'quote (first form))
+    form
+
+    (= 'throw (first form))
+    (python-rewrite-throw form)
+
+    (= 'try (first form))
+    (python-rewrite-try form)
+
+    :else
+    (with-form-meta form
+      (apply list (map python-normalize-form form)))))
+
+(defn python-normalize-form
+  [form]
+  (walk/rewrite-form form
+                     python-rewrite-list
+                     python-normalize-form))
+
 (defn python-rewrite-stage
   [form opts]
   (-> ((:rewrite-stage +python-rewriter+) form opts)
+      (python-normalize-form)
       (inline/rewrite-inline-do)))

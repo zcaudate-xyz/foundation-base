@@ -50,7 +50,7 @@
        "  (:require [std.lang :as l]))\n\n"
        "^{:seedgen/root {:all true\n"
        "                 :langs [:python]\n"
-       "                 :python {:extra [[python.core.common-promise :as p]]}}}\n"
+       "                 :python {:extra [[xt.lang.common-promise :as p]]}}}\n"
        "(l/script- :js\n"
        "  {:runtime :basic\n"
        "   :require [[xt.lang.spec-base :as xt]\n"

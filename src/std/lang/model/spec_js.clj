@@ -209,11 +209,12 @@
                                :block
                                :data-range
                                :functional-core])
-      (grammar/build:override
-       {:var         {:symbol '#{var*}}
-        :mul         {:value true}
-        :defn        {:symbol '#{defn defn- defelem}}
-        :with-global {:value true :raw "globalThis"}
+       (grammar/build:override
+        {:var         {:symbol '#{var*}}
+         :pow         {:raw "Math.pow" :emit :invoke}
+         :mul         {:value true}
+         :defn        {:symbol '#{defn defn- defelem}}
+         :with-global {:value true :raw "globalThis"}
         :defclass    {:macro  #'js-defclass    :emit :macro}
         :for-object  {:macro  #'js-tf-for-object  :emit :macro}
         :for-array   {:macro  #'js-tf-for-array   :emit :macro}

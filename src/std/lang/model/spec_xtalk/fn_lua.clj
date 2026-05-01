@@ -567,7 +567,7 @@
 
 (def +lua-promise+
   {:x-async-run        {:macro #'lua-tf-x-async-run         :emit :macro}
-   :x-with-delay       {:emit :hard-link :raw 'lua.core.common-promise/with-delay}})
+   :x-with-delay       {:emit :hard-link :raw 'xt.lang.common-promise/with-delay}})
 
 (defn lua-tf-x-pwd
   [[_]]

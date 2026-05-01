@@ -1,6 +1,6 @@
 (ns std.lang.model.spec-xtalk.fn-python-test
   (:require [std.lang :as l]
-            [python.core.common-promise]
+            [xt.lang.common-promise]
             [std.lang.model.spec-xtalk.fn-python :refer :all])
   (:use code.test))
 
@@ -43,6 +43,17 @@
 (fact "raises error"
   (python-tf-x-err '[_ "msg"])
   => '(throw (Exception "msg")))
+
+^{:refer xt.lang.spec-primitive/throw :added "4.1"}
+(fact "normalizes thrown values and catch bindings"
+  (let [out (l/emit-as :python ['(do:>
+                                  (try
+                                    (throw "boom")
+                                    (catch err
+                                      (return err))))])]
+    [(boolean (re-find #"(?s)raise .*Exception" out))
+     (boolean (re-find #"except Exception as err:" out))])
+  => [true true])
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-ex-native? :added "4.1"}
 (fact "TODO")

@@ -155,6 +155,12 @@
   [[_ e]]
   (list 'coroutine.yield e))
 
+(defn lua-tf-throw
+  "preserves the raw thrown payload through pcall"
+  {:added "4.1"}
+  [[_ value]]
+  (list 'error value 0))
+
 (defn lua-tf-defgen
   "defgen transform"
   {:added "4.0"}
@@ -207,12 +213,12 @@
                                :macro-let
                                :macro-xor])
       (merge (grammar/build-xtalk))
-       (grammar/build:override
+        (grammar/build:override
         {:var        {:symbol '#{var*}}
          :not        {:raw "not "}
          :and        {:raw "and"}
          :or         {:raw "or"}
-         :throw      {:raw "error" :emit :invoke}
+         :throw      {:macro #'lua-tf-throw :emit :macro}
          :neq        {:raw "~="}
          :for-object {:macro #'lua-tf-for-object :emit :macro}
          :for-array  {:macro #'lua-tf-for-array  :emit :macro}

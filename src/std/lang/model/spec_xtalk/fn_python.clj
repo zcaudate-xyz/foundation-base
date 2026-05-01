@@ -678,7 +678,7 @@
 
 (def +python-promise+
   {:x-async-run        {:macro #'python-tf-x-async-run      :emit :macro}
-   :x-with-delay       {:emit :hard-link :raw 'python.core.common-promise/with-delay}})
+   :x-with-delay       {:emit :hard-link :raw 'xt.lang.common-promise/with-delay}})
 
 
 

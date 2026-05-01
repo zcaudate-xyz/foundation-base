@@ -546,7 +546,7 @@
    :x-promise-catch    {:emit :hard-link :raw 'xt.lang.common-promise/promise-catch}
    :x-promise-finally  {:emit :hard-link :raw 'xt.lang.common-promise/promise-finally}
    :x-promise-native?  {:emit :hard-link :raw 'xt.lang.common-promise/promise-native?}
-   :x-with-delay       {:emit :hard-link :raw 'python.core.common-promise/with-delay}})
+   :x-with-delay       {:emit :hard-link :raw 'xt.lang.common-promise/with-delay}})
 
 
 ;;

@@ -7,12 +7,12 @@
 (l/script- :python
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as spec-promise]
-             [python.core.common-promise]]})
+             [xt.lang.common-promise]]})
 
 (l/script- :lua
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as spec-promise]
-             [lua.core.common-promise]]})
+             [xt.lang.common-promise]]})
 
 ^{:refer xt.lang.spec-promise/x:promise :added "4.1"}
 (fact "promise helpers are exposed from xt.lang.spec-promise"

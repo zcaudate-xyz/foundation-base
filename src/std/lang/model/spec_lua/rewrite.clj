@@ -99,9 +99,7 @@
 
 (defn- lua-catch-guard
   [body-ok body-value]
-  (list 'and
-        (list 'not body-ok)
-        (list 'x:ex-native? body-value)))
+  (list 'not body-ok))
 
 (defn- lua-catch-branch
   [{:keys [body-ok body-value ok value catch-ok catch-value catch-sym catch-body]}]
