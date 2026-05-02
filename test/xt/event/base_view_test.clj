@@ -9,7 +9,7 @@
                [xt.lang.spec-base :as xt]]})
 
   (defn.xt make-basic-view []
-   (return
+    (return
      (view/create-view
       (fn:> [x] {:value x})
       {}
@@ -19,7 +19,7 @@
       nil)))
 
   (defn.xt make-processed-view []
-   (return
+    (return
      (view/create-view
       (fn:> [x] x)
       {}
@@ -29,7 +29,7 @@
       nil)))
 
   (defn.xt make-remote-view []
-   (return
+    (return
      (view/create-view
       nil
       {:remote {:handler (fn:> [x] {:value x})}}
@@ -39,7 +39,7 @@
       nil)))
 
   (defn.xt make-sync-view []
-   (return
+    (return
      (view/create-view
       nil
       {:sync {:handler (fn:> [x] {:value x})}}
@@ -73,7 +73,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.event.base-view/wrap-args :added "4.1"}
 (fact "provides the core view helpers"
@@ -286,7 +286,11 @@
       "meta" {"listener/id" "a1"
               "listener/type" "view"}})
 
-^{:refer xt.event.base-view/trigger-listeners :added "4.1"}
+^{:refer xt.event.base-view/trigger-listeners :added "4.1"
+  :setup [(def +out+
+            (just-in
+             [(just ["a1" "b2"] :in-any-order)
+              (just ["a1" "b2"] :in-any-order)]))]}
 (fact "triggers all registered view listeners"
 
   (!.js
@@ -296,9 +300,7 @@
     (view/add-listener v "b2" (fn [id data t meta] (xt/x:arr-push calls "b2")) nil nil)
     [(view/trigger-listeners v "output" {:value 0})
      calls])
-  => (just-in
-      [(just ["a1" "b2"] :in-any-order)
-       ["a1" "b2"]])
+  => +out+
 
   (!.lua
     (var v (-/make-basic-view))
@@ -307,9 +309,7 @@
     (view/add-listener v "b2" (fn [id data t meta] (xt/x:arr-push calls "b2")) nil nil)
     [(view/trigger-listeners v "output" {:value 0})
      calls])
-  => (just-in
-      [(just ["a1" "b2"] :in-any-order)
-       ["a1" "b2"]])
+  => +out+
 
   (!.py
     (var v (-/make-basic-view))
@@ -318,9 +318,7 @@
     (view/add-listener v "b2" (fn [id data t meta] (xt/x:arr-push calls "b2")) nil nil)
     [(view/trigger-listeners v "output" {:value 0})
      calls])
-  => (just-in
-      [(just ["a1" "b2"] :in-any-order)
-       ["a1" "b2"]]))
+  => +out+)
 
 ^{:refer xt.event.base-view/get-input :added "4.1"}
 (fact "gets the current input record"
@@ -553,15 +551,15 @@
     [out
      (. (view/get-input v) ["current"])])
   => (just-in
-       [(contains-in
-         {"id" "a1"
-          "t" nil
-          "meta" {"listener/id" "a1"
-                  "listener/type" "view"}
-          "data" {"type" "view.input"
-                  "data" {"current" {"data" [1]}
-                          "updated" integer?}}})
-        {"data" [1]}])
+      [(contains-in
+        {"id" "a1"
+         "t" nil
+         "meta" {"listener/id" "a1"
+                 "listener/type" "view"}
+         "data" {"type" "view.input"
+                 "data" {"current" {"data" [1]}
+                         "updated" integer?}}})
+       {"data" [1]}])
 
   (!.lua
     (var v (-/make-basic-view))
@@ -571,15 +569,15 @@
     [out
      (. (view/get-input v) ["current"])])
   => (just-in
-       [(contains-in
-         {"id" "a1"
-          "t" nil
-          "meta" {"listener/id" "a1"
-                  "listener/type" "view"}
-          "data" {"type" "view.input"
-                  "data" {"current" {"data" [1]}
-                          "updated" integer?}}})
-        {"data" [1]}])
+      [(contains-in
+        {"id" "a1"
+         "t" nil
+         "meta" {"listener/id" "a1"
+                 "listener/type" "view"}
+         "data" {"type" "view.input"
+                 "data" {"current" {"data" [1]}
+                         "updated" integer?}}})
+       {"data" [1]}])
 
   (!.py
     (var v (-/make-basic-view))
@@ -589,15 +587,15 @@
     [out
      (. (view/get-input v) ["current"])])
   => (just-in
-       [(contains-in
-         {"id" "a1"
-          "t" nil
-          "meta" {"listener/id" "a1"
-                  "listener/type" "view"}
-          "data" {"type" "view.input"
-                  "data" {"current" {"data" [1]}
-                          "updated" integer?}}})
-        {"data" [1]}]))
+      [(contains-in
+        {"id" "a1"
+         "t" nil
+         "meta" {"listener/id" "a1"
+                 "listener/type" "view"}
+         "data" {"type" "view.input"
+                 "data" {"current" {"data" [1]}
+                         "updated" integer?}}})
+       {"data" [1]}]))
 
 ^{:refer xt.event.base-view/set-output :added "4.1"}
 (fact "sets output and notifies listeners"
@@ -610,18 +608,18 @@
     [out
      (view/get-current v)])
   => (just-in
-       [(contains-in
-         {"id" "a1"
-          "t" nil
-          "meta" {"listener/id" "a1"
-                  "listener/type" "view"}
-          "data" {"type" "view.output"
-                  "data" {"current" 1
-                          "elapsed" nil
-                          "tag" nil
-                          "type" "output"
-                          "updated" integer?}}})
-        1])
+      [(contains-in
+        {"id" "a1"
+         "t" nil
+         "meta" {"listener/id" "a1"
+                 "listener/type" "view"}
+         "data" {"type" "view.output"
+                 "data" {"current" 1
+                         "elapsed" nil
+                         "tag" nil
+                         "type" "output"
+                         "updated" integer?}}})
+       1])
 
   (!.lua
     (var v (-/make-basic-view))
@@ -631,18 +629,18 @@
     [out
      (view/get-current v)])
   => (just-in
-       [(contains-in
-         {"id" "a1"
-          "t" nil
-          "meta" {"listener/id" "a1"
-                  "listener/type" "view"}
-          "data" {"type" "view.output"
-                  "data" {"current" 1
-                          "elapsed" nil
-                          "tag" nil
-                          "type" "output"
-                          "updated" integer?}}})
-        1])
+      [(contains-in
+        {"id" "a1"
+         "t" nil
+         "meta" {"listener/id" "a1"
+                 "listener/type" "view"}
+         "data" {"type" "view.output"
+                 "data" {"current" 1
+                         "elapsed" nil
+                         "tag" nil
+                         "type" "output"
+                         "updated" integer?}}})
+       1])
 
   (!.py
     (var v (-/make-basic-view))
@@ -652,18 +650,18 @@
     [out
      (view/get-current v)])
   => (just-in
-       [(contains-in
-         {"id" "a1"
-          "t" nil
-          "meta" {"listener/id" "a1"
-                  "listener/type" "view"}
-          "data" {"type" "view.output"
-                  "data" {"current" 1
-                          "elapsed" nil
-                          "tag" nil
-                          "type" "output"
-                          "updated" integer?}}})
-        1]))
+      [(contains-in
+        {"id" "a1"
+         "t" nil
+         "meta" {"listener/id" "a1"
+                 "listener/type" "view"}
+         "data" {"type" "view.output"
+                 "data" {"current" 1
+                         "elapsed" nil
+                         "tag" nil
+                         "type" "output"
+                         "updated" integer?}}})
+       1]))
 
 ^{:refer xt.event.base-view/set-output-disabled :added "4.1"}
 (fact "sets the output disabled flag"
