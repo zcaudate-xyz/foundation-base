@@ -77,11 +77,10 @@
                                  :alias {}
                                  :link {- L.core}})))
 
-(fact "hard-link usage is inferred as :static/template during hydration"
+(fact "hard-link usage is reflected in hydrated deps and form"
 
-  (select-keys +template-parent-entry+ [:static/template :deps :form])
-  => '{:static/template true
-       :deps #{L.core/probe-hard-link}
+(select-keys +template-parent-entry+ [:deps :form])
+  => '{:deps #{L.core/probe-hard-link}
        :form (defn template-fn [value] (L.core/probe-hard-link value))})
 
 (fact "template entries restage for child deps and child emit"
@@ -101,29 +100,6 @@
   => '[#{}
         "function template_fn(value){\n  return value;\n}"])
 
-
-^{:refer std.lang.base.impl-template/infer-static-template :added "4.1"}
-(fact "infers template restaging when a hard-link is used"
-  (infer-static-template +template-parent-grammar+
-                         (:modules +template-helper-book+)
-                         '(defn template-fn [value]
-                            (x:probe value))
-                         '{:lang :template
-                           :module {:id L.core
-                                    :alias {}
-                                    :link {- L.core}}})
-  => true
-
-  (infer-static-template +template-parent-grammar+
-                         (:modules +template-helper-book+)
-                         '(defn plain-fn [value]
-                            (return value))
-                         '{:lang :template
-                           :module {:id L.core
-                                    :alias {}
-                                    :link {- L.core}}})
-  => false)
-
 ^{:refer std.lang.base.impl-template/create-code-state :added "4.1"}
 (fact "hydrates and stages a code entry for the current grammar"
   (select-keys
@@ -131,28 +107,26 @@
                               :hmeta
                               :deps
                               :deps-fragment
-                              :deps-native
-                              :xtalk-ops
-                              :xtalk-profiles
-                              :polyfill-modules
-                              :static/template
-                              :form)
+                               :deps-native
+                               :xtalk-ops
+                               :xtalk-profiles
+                               :polyfill-modules
+                               :form)
                       (get-in +template-parent-grammar+ [:reserved 'defn])
                       +template-parent-grammar+
                       (:modules +template-helper-book+)
                       '{:lang :template
-                        :module {:id L.core
-                                 :alias {}
-                                 :link {- L.core}}})
-   [:form :deps :deps-fragment :deps-native :xtalk-ops :xtalk-profiles :polyfill-modules :static/template])
+                         :module {:id L.core
+                                  :alias {}
+                                  :link {- L.core}}})
+   [:form :deps :deps-fragment :deps-native :xtalk-ops :xtalk-profiles :polyfill-modules])
   => '{:form (defn template-fn [value] (L.core/probe-hard-link value))
        :deps #{L.core/probe-hard-link}
        :deps-fragment #{}
        :deps-native {}
        :xtalk-ops #{}
        :xtalk-profiles #{}
-       :polyfill-modules #{}
-       :static/template true})
+       :polyfill-modules #{}})
 
 ^{:refer std.lang.base.impl-template/cached-code-state :added "4.1"}
 (fact "restages template entries using the per-entry cache"
@@ -161,14 +135,13 @@
                       (get-in +template-parent-grammar+ [:reserved 'defn])
                       +template-parent-grammar+
                       (:modules +template-helper-book+)
-                      '{:lang :template
-                        :module {:id L.core
-                                 :alias {}
-                                 :link {- L.core}}})
-   [:form :deps :static/template])
+                       '{:lang :template
+                         :module {:id L.core
+                                  :alias {}
+                                  :link {- L.core}}})
+   [:form :deps])
   => '{:form (defn template-fn [value] (return value))
-       :deps #{}
-       :static/template true})
+       :deps #{}})
 
 ^{:refer std.lang.base.impl-template/cached-entry-deps :added "4.1"}
 (fact "returns restaged code dependencies for the current language"

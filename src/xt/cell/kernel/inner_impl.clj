@@ -3,7 +3,12 @@
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
-  {:require [[xt.lang.spec-base :as xt] [xt.lang.common-trace :as trace] [xt.lang.common-lib :as lib] [xt.cell.kernel.base-util :as util] [xt.cell.kernel.inner-state :as inner-state]]})
+  {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-trace :as trace]
+             [xt.lang.common-lib :as lib]
+             [xt.lang.spec-promise :as spec-promise]
+             [xt.cell.kernel.base-util :as util]
+             [xt.cell.kernel.inner-state :as inner-state]]})
 
 (defspec.xt worker-handle-async
   [:fn [:xt/any [:fn [xt.cell.kernel.spec/AnyList] :xt/any]
@@ -41,26 +46,33 @@
 (defn.xt worker-handle-async
   "worker function for handling async tasks"
   {:added "4.0"}
-  [worker f op id body]
-  (return (. (f (:.. body))
-             (then  (fn [ret]
-                      (. worker (postMessage (util/resp-ok op id (util/arg-encode ret))))))
-             (catch (fn [ret]
-                      (when (. ret ["stack"])
-                        (trace/TRACE! (. ret ["stack"]) "ERR"))
-                       
-                      (. worker (postMessage (util/resp-error op id ret))))))))
+  [worker f op id args]
+  (var promise (spec-promise/x:promise-run (xt/x:apply f args)))
+  (return
+   (spec-promise/x:promise-catch
+    (spec-promise/x:promise-then
+     promise
+     (fn [ret]
+       (var postMessage (xt/x:get-key worker "postMessage"))
+       (return (xt/x:apply postMessage [(util/resp-ok op id (util/arg-encode ret))]))))
+    (fn [ret]
+      (var stack (xt/x:get-key ret "stack"))
+      (when stack
+        (trace/TRACE! stack "ERR"))
+      (var postMessage (xt/x:get-key worker "postMessage"))
+      (return (xt/x:apply postMessage [(util/resp-error op id ret)]))))))
 
 (defn.xt worker-process-eval
   [worker input post-fn]
   (var #{op id body action} input)
   (when (== false (. (inner-state/get-state worker)
                      ["eval"]))
-    (. worker (postMessage (util/resp-error op id "Not enabled - EVAL"))))
+    (var postMessage (xt/x:get-key worker "postMessage"))
+    (xt/x:apply postMessage [(util/resp-error op id "Not enabled - EVAL")]))
   (var out (lib/return-eval body))
-  (var f (:? (. input ["async"])
+  (var f (:? (xt/x:get-key input "async")
              lib/identity
-              post-fn))
+               post-fn))
   (return (f (util/resp-ok op id out))))
 
 (defn.xt worker-process-action
@@ -69,8 +81,10 @@
   (var action-entry  (. (inner-state/get-actions worker)
                         [action]))
   (when (== nil action-entry)
-    (return (. worker (postMessage (util/resp-error op id (xt/x:cat "action not found - " action))))))
+    (var postMessage (xt/x:get-key worker "postMessage"))
+    (return (xt/x:apply postMessage [(util/resp-error op id (xt/x:cat "action not found - " action))])))
             
+  (var action-static (xt/x:get-key action-entry "static"))
   (var action-async  (. action-entry ["is_async"]))
   (var action-fn     (. action-entry ["handler"]))
   (var f   (:? action-async
@@ -79,9 +93,12 @@
   
   (try
     (:= body (util/arg-decode (or body [])))
+    (var invoke-args (xt/x:arr-clone body))
+    (when (== false action-static)
+      (xt/x:arr-push-first invoke-args worker))
     (var out (:? action-async
-                 (-/worker-handle-async worker action-fn op id body)
-                 (action-fn (:.. body))))
+                 (-/worker-handle-async worker action-fn op id invoke-args)
+                 (xt/x:apply action-fn invoke-args)))
     (return (f (util/resp-ok op id (util/arg-encode out))))
     (catch err
         (return (f (util/resp-error op id err))))))
@@ -91,7 +108,9 @@
   {:added "4.0"}
   [worker input]
   (var #{op} input)
-  (var post-fn (fn [x] (return (. worker (postMessage x)))))
+  (var post-fn (fn [x]
+                 (var postMessage (xt/x:get-key worker "postMessage"))
+                 (return (xt/x:apply postMessage [x]))))
   (cond (== op "eval")
         (return
          (-/worker-process-eval worker input post-fn))
@@ -127,4 +146,5 @@
   "posts an init message"
   {:added "4.0"}
   [worker body]
-  (return (. worker (postMessage (util/resp-stream util/EV_INIT body)))))
+  (var postMessage (xt/x:get-key worker "postMessage"))
+  (return (xt/x:apply postMessage [(util/resp-stream util/EV_INIT body)])))

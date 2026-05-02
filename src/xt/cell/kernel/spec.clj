@@ -118,6 +118,7 @@
 (defspec.xt InnerActionEntry
   [:xt/record
    ["handler" :xt/any]
+   ["static" [:xt/maybe :xt/bool]]
    ["is_async" :xt/bool]
    ["args" StringList]])
 

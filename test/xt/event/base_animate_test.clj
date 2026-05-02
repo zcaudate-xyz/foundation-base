@@ -935,7 +935,7 @@
             "cancel"
             (base-animate/new-progressing)
             nil
-            (fn:> true)))
+            (fn [_] (return true))))
     (var #{indicator trigger-fn} t)
     [(mock/get-value indicator)
      (trigger-fn 3)
@@ -965,7 +965,7 @@
             "cancel"
             (base-animate/new-progressing)
             nil
-            (fn:> true)))
+            (fn [_] (return true))))
     (var #{indicator trigger-fn} t)
     [(mock/get-value indicator)
      (trigger-fn 3)
@@ -995,7 +995,7 @@
             "cancel"
             (base-animate/new-progressing)
             nil
-            (fn:> true)))
+            (fn [_] (return true))))
     (var #{indicator trigger-fn} t)
     [(mock/get-value indicator)
      (trigger-fn 3)
@@ -1113,7 +1113,7 @@
             10
             (base-animate/new-progressing)
             nil
-            (fn:> true)))
+            (fn [_] (return true))))
     (var #{indicator trigger-fn} t)
     [(mock/get-value indicator)
      (trigger-fn 3)
@@ -1144,7 +1144,7 @@
             10
             (base-animate/new-progressing)
             nil
-            (fn:> true)))
+            (fn [_] (return true))))
     (var #{indicator trigger-fn} t)
     [(mock/get-value indicator)
      (trigger-fn 3)
@@ -1175,7 +1175,7 @@
             10
             (base-animate/new-progressing)
             nil
-            (fn:> true)))
+            (fn [_] (return true))))
     (var #{indicator trigger-fn} t)
     [(mock/get-value indicator)
      (trigger-fn 3)

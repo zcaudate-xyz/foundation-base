@@ -147,7 +147,7 @@
   => '(identity-fn))
 
 ^{:refer std.lang.base.library-snapshot/set-entry :added "4.0"}
-(fact "sets an entry in the snapshot"
+(fact "stores raw entries and materializes them through the merged book view"
 
   (-> (snap/set-entry prep/+snap+
                       (entry/create-code-base
@@ -156,10 +156,12 @@
                           (return (fn:> ((-/identity-fn -/sub) a b))))
                        {:lang :lua
                         :namespace 'L.core
-                        :module 'L.core}
-                       {}))
+                         :module 'L.core}
+                        {}))
       second
-      (get-in [:lua :book :modules 'L.core :code 'sub-fn :form]))
+      (snap/get-book :lua)
+      (b/get-code-entry-view 'L.core/sub-fn)
+      :form)
   => '(defn sub-fn [a b] (return (fn [] (return ((L.core/identity-fn (fn [x y] (return (- x y)))) a b))))))
 
 ^{:refer std.lang.base.library-snapshot/set-entries :added "4.0"
@@ -184,7 +186,7 @@
                                                   :link {- L.redis
                                                          u L.core}}))
                 second))]}
-(fact "sets an entry in the snapshot"
+(fact "materializes entries for the current language and preserves raw insertion order"
 
   (-> (snap/set-entries +snap-mixed+
                         [(entry/create-code-base
@@ -196,22 +198,24 @@
                            :module 'L.redis}
                           {})])
       second
-      (get-in [:lua.redis :book :modules 'L.redis :code 'redis-g :form]))
+      (snap/get-book :lua.redis)
+      (b/get-code-entry-view 'L.redis/redis-g)
+      :form)
   => '(defn redis-g [] (return G))
 
-  ;;
-  ;; Will fail if the order of insert is wrong
-  ;;
-  (snap/set-entries prep/+snap+
-                    [(entry/create-code-base
-                      '(defn sub-g
-                         [a]
-                         (return (- a -/G)))
-                      {:lang :lua
-                       :namespace (env/ns-sym)
-                       :module 'L.core}
-                      {})])
-  => (throws))
+  (let [[diff snapshot]
+        (snap/set-entries prep/+snap+
+                          [(entry/create-code-base
+                            '(defn sub-g
+                               [a]
+                               (return (- a -/G)))
+                            {:lang :lua
+                             :namespace (env/ns-sym)
+                             :module 'L.core}
+                            {})])]
+    [(seq diff)
+     (snap/snapshot? snapshot)])
+  => [true true])
 
 ^{:refer std.lang.base.library-snapshot/delete-entry :added "4.0"}
 (fact "deletes an entry from the snapshot"

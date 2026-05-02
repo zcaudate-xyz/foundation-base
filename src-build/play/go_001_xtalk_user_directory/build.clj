@@ -1,7 +1,7 @@
 (ns play.go-001-xtalk-user-directory.build
   (:use [code.test :exclude [-main]])
   (:require [std.lang.model.spec-go.typed :as go-typed]
-            [std.lang.model.spec-xtalk.mixer :as mixer]
+            [std.lang.typed.xtalk :as xtalk]
             [std.make :as make :refer [def.make]]
             [play.go-001-xtalk-user-directory.main :as main]))
 
@@ -32,7 +32,7 @@
 (defn go-source
   [_]
   (-> +main-file+
-      mixer/mix-file
+      xtalk/analyze-file
       go-typed/emit-analysis-declarations))
 
 (def.make PROJECT

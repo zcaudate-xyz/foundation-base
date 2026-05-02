@@ -188,110 +188,86 @@
     (xt/x:has-key? (inner-state/INNER_ACTIONS) "@global/action"))
   => true)
 
-^{:refer xt.cell.kernel.inner-state/fn-bind :added "4.0"}
-(fact "binds a inner instance into a handler"
-
-  (!.js
-    ((inner-state/fn-bind {"id" "w1"}
-                          (fn [inner x]
-                            (return [(. inner ["id"]) x])))
-     "hello"))
-  => ["w1" "hello"]
-
-  (!.lua
-    ((inner-state/fn-bind {"id" "w1"}
-                          (fn [inner x]
-                            (return [(. inner ["id"]) x])))
-     "hello"))
-  => ["w1" "hello"]
-
-  (!.py
-    ((inner-state/fn-bind {"id" "w1"}
-                          (fn [inner x]
-                            (return [(. inner ["id"]) x])))
-     "hello"))
-  => ["w1" "hello"])
-
 ^{:refer xt.cell.kernel.inner-state/fn-trigger :added "4.0"}
 (fact "triggers an event on a inner"
 
-  (notify/wait-on :js
+  (!.js
+    (var messages [])
     (inner-state/fn-trigger
-     (inner-mock/mock-worker (repl/>notify))
+     (inner-mock/mock-worker (fn [msg] (messages.push msg)))
      "stream"
      "hello"
      "ok"
-     {:a 1}))
-  => {"body" {"a" 1}
-      "status" "ok"
-      "op" "stream"
-      "signal" "hello"}
+     {:a 1})
+    [(xt/x:get-key (xtd/first messages) "signal")
+     (xt/x:get-key (xt/x:get-key (xtd/first messages) "body") "a")])
+  => ["hello" 1]
 
-  (notify/wait-on :lua
+  (!.lua
+    (var messages [])
     (inner-state/fn-trigger
-     (inner-mock/mock-worker (repl/>notify))
+     (inner-mock/mock-worker (fn [msg] (xt/x:arr-push messages msg)))
      "stream"
      "hello"
      "ok"
-     {:a 1}))
-  => {"body" {"a" 1}
-      "status" "ok"
-      "op" "stream"
-      "signal" "hello"}
+     {:a 1})
+    [(xt/x:get-key (xtd/first messages) "signal")
+     (xt/x:get-key (xt/x:get-key (xtd/first messages) "body") "a")])
+  => ["hello" 1]
 
-  (notify/wait-on :python
+  (!.py
+    (var messages [])
     (inner-state/fn-trigger
-     (inner-mock/mock-worker (repl/>notify))
+     (inner-mock/mock-worker (fn [msg] (xt/x:arr-push messages msg)))
      "stream"
      "hello"
      "ok"
-     {:a 1}))
-  => {"body" {"a" 1}
-      "status" "ok"
-      "op" "stream"
-      "signal" "hello"})
+     {:a 1})
+    [(xt/x:get-key (xtd/first messages) "signal")
+     (xt/x:get-key (xt/x:get-key (xtd/first messages) "body") "a")])
+  => ["hello" 1])
 
 ^{:refer xt.cell.kernel.inner-state/fn-trigger-async :added "4.0"}
 (fact "triggers an event after a delay"
 
   (notify/wait-on :js
     (inner-state/fn-trigger-async
-     (inner-mock/mock-worker (repl/>notify))
+     (inner-mock/mock-worker
+      (fn [msg]
+        (repl/notify [(xt/x:get-key msg "signal")
+                      (xt/x:get-key (xt/x:get-key msg "body") "a")])))
      "stream"
      "hello"
      "ok"
      {:a 1}
      50))
-  => {"body" {"a" 1}
-      "status" "ok"
-      "op" "stream"
-      "signal" "hello"}
+  => ["hello" 1]
 
   (notify/wait-on :lua
     (inner-state/fn-trigger-async
-     (inner-mock/mock-worker (repl/>notify))
+     (inner-mock/mock-worker
+      (fn [msg]
+        (repl/notify [(xt/x:get-key msg "signal")
+                      (xt/x:get-key (xt/x:get-key msg "body") "a")])))
      "stream"
      "hello"
      "ok"
      {:a 1}
      50))
-  => {"body" {"a" 1}
-      "status" "ok"
-      "op" "stream"
-      "signal" "hello"}
+  => ["hello" 1]
 
   (notify/wait-on :python
     (inner-state/fn-trigger-async
-     (inner-mock/mock-worker (repl/>notify))
+     (inner-mock/mock-worker
+      (fn [msg]
+        (repl/notify [(xt/x:get-key msg "signal")
+                      (xt/x:get-key (xt/x:get-key msg "body") "a")])))
      "stream"
      "hello"
      "ok"
      {:a 1}
      50))
-  => {"body" {"a" 1}
-      "status" "ok"
-      "op" "stream"
-      "signal" "hello"})
+  => ["hello" 1])
 
 ^{:refer xt.cell.kernel.inner-state/fn-set-state :added "4.0"}
 (fact "updates inner state and can emit state events"
@@ -335,7 +311,7 @@
     (-/reset-inner-state)
     (var messages [])
     (inner-state/fn-set-state
-     (inner-mock/mock-worker (fn [msg] (messages.push msg)))
+     (inner-mock/mock-worker (fn [msg] (xt/x:arr-push messages msg)))
      (inner-state/INNER_STATE)
      (fn [state]
        (xt/x:set-key state "final" false))
@@ -360,7 +336,7 @@
     (-/reset-inner-state)
     (var messages [])
     (inner-state/fn-set-state
-     (inner-mock/mock-worker (fn [msg] (messages.push msg)))
+     (inner-mock/mock-worker (fn [msg] (xt/x:arr-push messages msg)))
      (inner-state/INNER_STATE)
      (fn [state]
        (xt/x:set-key state "final" false))
@@ -404,7 +380,7 @@
     (-/reset-inner-state)
     (var messages [])
     (inner-state/fn-set-final-status
-     (inner-mock/mock-worker (fn [msg] (messages.push msg)))
+     (inner-mock/mock-worker (fn [msg] (xt/x:arr-push messages msg)))
      false)
     (xtd/first messages))
   => {"body" {"eval" true "final" true}
@@ -423,7 +399,7 @@
     (-/reset-inner-state)
     (var messages [])
     (inner-state/fn-set-final-status
-     (inner-mock/mock-worker (fn [msg] (messages.push msg)))
+     (inner-mock/mock-worker (fn [msg] (xt/x:arr-push messages msg)))
      false)
     (xtd/first messages))
   => {"body" {"eval" true "final" true}
@@ -509,7 +485,7 @@
     (-/reset-inner-state)
     (var messages [])
     (inner-state/fn-set-eval-status
-     (inner-mock/mock-worker (fn [msg] (messages.push msg)))
+     (inner-mock/mock-worker (fn [msg] (xt/x:arr-push messages msg)))
      false
      false)
     (xtd/first messages))
@@ -530,7 +506,7 @@
     (-/reset-inner-state)
     (var messages [])
     (inner-state/fn-set-eval-status
-     (inner-mock/mock-worker (fn [msg] (messages.push msg)))
+     (inner-mock/mock-worker (fn [msg] (xt/x:arr-push messages msg)))
      false
      false)
     (xtd/first messages))
@@ -612,19 +588,19 @@
     (-/reset-inner-state)
     (inner-local/actions-init {} nil)
     (inner-state/fn-get-action-entry "@cell/ping"))
-  => (contains {"is_async" false "args" []})
+  => (contains {"static" true "is_async" false "args" []})
 
   (!.lua
     (-/reset-inner-state)
     (inner-local/actions-init {} nil)
-    (inner-state/fn-get-action-entry "@cell/ping"))
-  => (contains {"is_async" false "args" []})
+    (xt/x:get-key (inner-state/fn-get-action-entry "@cell/ping") "is_async"))
+  => false
 
   (!.py
     (-/reset-inner-state)
     (inner-local/actions-init {} nil)
-    (inner-state/fn-get-action-entry "@cell/ping"))
-  => (contains {"is_async" false "args" []}))
+    (xt/x:get-key (inner-state/fn-get-action-entry "@cell/ping") "args"))
+  => [])
 
 ^{:refer xt.cell.kernel.inner-state/fn-ping :added "4.0"}
 (fact "pings the inner"
@@ -689,33 +665,6 @@
   (j/<! (. (inner-state/fn-error-async 10)
            (catch j/identity)))
   => (contains ["error"]))
-
-^{:refer xt.cell.kernel.inner-state/fn-self :added "4.1"}
-(fact "applies arguments along with the inner self"
-
-  (!.js
-    (xt/x:set-key globalThis "self" {"id" "w1"})
-    ((inner-state/fn-self
-      (fn [inner x]
-        (return [(. inner ["id"]) x])))
-     "hello"))
-  => ["w1" "hello"]
-
-  (!.lua
-    (xt/x:set-key globalThis "self" {"id" "w1"})
-    ((inner-state/fn-self
-      (fn [inner x]
-        (return [(. inner ["id"]) x])))
-     "hello"))
-  => ["w1" "hello"]
-
-  (!.py
-    (xt/x:set-key globalThis "self" {"id" "w1"})
-    ((inner-state/fn-self
-      (fn [inner x]
-        (return [(. inner ["id"]) x])))
-     "hello"))
-  => ["w1" "hello"])
 
 (comment
   (s/snapto '[xt.cell.kernel.inner-state])

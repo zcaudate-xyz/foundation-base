@@ -61,16 +61,16 @@
   (!.lua
    (var messages [])
    (var worker (inner-mock/mock-worker
-                (fn [msg] (messages.push msg))))
-   (worker.postMessage {"test" 1})
+                (fn [msg] (xt/x:arr-push messages msg))))
+    ((xt/x:get-key worker "postMessage") {"test" 1})
    messages)
   => [{"test" 1}]
 
   (!.py
    (var messages [])
    (var worker (inner-mock/mock-worker
-                (fn [msg] (messages.push msg))))
-   (worker.postMessage {"test" 1})
+                (fn [msg] (xt/x:arr-push messages msg))))
+    ((xt/x:get-key worker "postMessage") {"test" 1})
    messages)
   => [{"test" 1}])
 

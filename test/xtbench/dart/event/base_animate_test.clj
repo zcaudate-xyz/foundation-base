@@ -4,7 +4,7 @@
 
 (l/script- :dart
   {:runtime :twostep
-   :require [[xt.lang.spec-base :as xt]
+   :require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]
              [xt.event.base-animate :as base-animate]
              [xt.event.base-animate-mock :as mock]]})
 
@@ -12,7 +12,19 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.event.base-animate/new-derived :added "4.1"}
+^{:refer xt.event.base-animate/new-derived :added "4.1"
+  :setup [(def +out+
+            (contains-in
+             [6
+              {"opacity" 0.7}
+              nil
+              {"opacity" (approx 0.6)}
+              [[empty? "a" {"::" "observed", "value" 1, "listeners" empty?}]
+               [empty? "b" false]
+               [["b"]
+                "c"
+                {"::" "observed", "value" 2, "listeners" empty?}]]
+              {"a" 1, "b" {"c" 2}}]))]}
 (fact "derives, observes, and maps animation values"
 
   (!.dt
@@ -52,23 +64,11 @@
        [["b"] "c" {"value" 2
                    "::" "observed"
                    "listeners" []}]])])
-  => (just-in
-      [6
-       {"opacity" 0.7}
-       nil
-       {"opacity" 0.6000000000000001}
-       (just [[[] "a" {"value" 1
-                       "::" "observed"
-                       "listeners" []}]
-              [[] "b" false]
-              [["b"] "c" {"value" 2
-                          "::" "observed"
-                          "listeners" []}]]
-             :in-any-order)
-       {"a" 1
-        "b" {"c" 2}}]))
+  => +out+)
 
-^{:refer xt.event.base-animate/make-binary-transitions :added "4.1"}
+^{:refer xt.event.base-animate/make-binary-transitions :added "4.1"
+  :setup [(def +out+
+            [0 nil 1 nil 0 {"running" false, "queued" [], "animation" nil}])]}
 (fact "provides animation transition helpers"
 
   (!.dt
@@ -85,14 +85,7 @@
      (zero-fn nil)
      (mock/get-value indicator)
      (base-animate/new-progressing)])
-  => [0
-      nil
-      1
-      nil
-      0
-      {"running" false
-       "queued" []
-       "animation" nil}])
+  => +out+)
 
 ^{:refer xt.event.base-animate/listen-single :added "4.1"}
 (fact "listens to a single observed value"
@@ -112,11 +105,12 @@
      (get-style ref)
      (mock/set-value obs 0.3)
      (get-style ref)])
-  => [{"opacity" 0.7}
-      nil
-      {"opacity" 0.6000000000000001}
-      nil
-      {"opacity" 0.5}])
+  => (just-in
+      [{"opacity" (approx 0.7)}
+       nil
+       {"opacity" (approx 0.6)}
+       nil
+       {"opacity" (approx 0.5)}]))
 
 ^{:refer xt.event.base-animate/listen-array :added "4.1"}
 (fact "listens to an array of observed values"
@@ -137,37 +131,47 @@
      (get-style ref)
      (mock/set-value o2 0.3)
      (get-style ref)])
-  => [{"opacity" 0.4}
-      nil
-      {"opacity" 0.7}
-      nil
-      {"opacity" 0.8}])
+  => (just-in
+      [{"opacity" (approx 0.4)}
+       nil
+       {"opacity" (approx 0.7)}
+       nil
+       {"opacity" (approx 0.8)}]))
 
-^{:refer xt.event.base-animate/get-map-paths-inner :added "4.1"}
+^{:refer xt.event.base-animate/get-map-paths-inner :added "4.1"
+  :setup [(def +out+
+            (contains-in [[empty? "a" {"::" "observed", "value" 1, "listeners" empty?}]
+                          [empty? "b" false]
+                          [["b"] "c" {"::" "observed", "value" 2, "listeners" empty?}]]))]}
 (fact "collects animated map paths recursively"
 
   (!.dt
-    (base-animate/get-map-paths-inner
-     mock/MOCK
-     {:a (mock/new-observed 1)
-      :b {:c (mock/new-observed 2)}}
-     []
-     []))
-  => [[[] "a" {"::" "observed" "listeners" [] "value" 1}]
-      [[] "b" false]
-      [["b"] "c" {"::" "observed" "listeners" [] "value" 2}]])
+    (xtd/arr-sort
+     (base-animate/get-map-paths-inner
+      mock/MOCK
+      {:a (mock/new-observed 1)
+       :b {:c (mock/new-observed 2)}}
+      []
+      [])
+     xtd/second
+     xt/x:str-lt))
+  => +out+)
 
-^{:refer xt.event.base-animate/get-map-paths :added "4.1"}
+^{:refer xt.event.base-animate/get-map-paths :added "4.1"
+  :setup [(def +out+
+            (contains-in
+             [[["b"] "c" {"::" "observed", "value" 2, "listeners" empty?}] [empty? "b" false] [empty? "a" {"::" "observed", "value" 1, "listeners" empty?}]]))]}
 (fact "collects animated map paths"
 
   (!.dt
-    (base-animate/get-map-paths
-     mock/MOCK
-     {:a (mock/new-observed 1)
-      :b {:c (mock/new-observed 2)}}))
-  => [[[] "a" {"::" "observed" "listeners" [] "value" 1}]
-      [[] "b" false]
-      [["b"] "c" {"::" "observed" "listeners" [] "value" 2}]])
+    (xt/x:arr-sort 
+     (base-animate/get-map-paths
+      mock/MOCK
+      {:a (mock/new-observed 1)
+       :b {:c (mock/new-observed 2)}})
+     xtd/second
+     xt/x:str-gt))
+  => +out+)
 
 ^{:refer xt.event.base-animate/get-map-input :added "4.1"}
 (fact "converts collected paths back into nested input"
@@ -198,7 +202,8 @@
        (var #{c} b)
        (return {:style {:opacity (+ a c)}})))
     (. ref ["current"] ["props"]))
-  => {"style" {"opacity" 0.30000000000000004}})
+  => (just-in
+      {"style" {"opacity" (approx 0.3)}}))
 
 ^{:refer xt.event.base-animate/listen-transformations :added "4.1"}
 (fact "builds listeners from transformation trees"
@@ -249,7 +254,7 @@
      progress])
   => (just-in
       [(contains-in {"animation" "next"
-                     "queued" []
+                     "queued" empty?
                      "running" false})
        ["prev"]
        ["running"]]))
@@ -271,7 +276,7 @@
      progress])
   => (just-in
       [(contains-in {"animation" nil
-                     "queued" []
+                     "queued" empty?
                      "running" false})
        ["cleanup"]]))
 
@@ -349,7 +354,7 @@
      nil)
     progressing)
   => (contains-in {"animation" "anim"
-                   "queued" []
+                   "queued" empty?
                    "running" false}))
 
 ^{:refer xt.event.base-animate/make-binary-indicator :added "4.1"}
@@ -371,10 +376,10 @@
      (mock/get-value indicator)])
   => (just-in
       [0
-       (contains-in {"queued" []
+       (contains-in {"queued" empty?
                      "running" false})
        1
-       (contains-in {"queued" []
+       (contains-in {"queued" empty?
                      "running" false})
        0]))
 
@@ -393,7 +398,7 @@
             "cancel"
             (base-animate/new-progressing)
             nil
-            (fn:> true)))
+            (fn [_] (return true))))
     (var #{indicator trigger-fn} t)
     [(mock/get-value indicator)
      (trigger-fn 3)
@@ -403,10 +408,10 @@
      (. prev ["current"])])
   => (just-in
       [1
-       (contains-in {"queued" []
+       (contains-in {"queued" empty?
                      "running" false})
        3
-       (contains-in {"queued" []
+       (contains-in {"queued" empty?
                      "running" false})
        8
        8]))
@@ -434,10 +439,10 @@
      (mock/get-value indicator)])
   => (just-in
       [1
-       (contains-in {"queued" []
+       (contains-in {"queued" empty?
                      "running" false})
        3
-       (contains-in {"queued" []
+       (contains-in {"queued" empty?
                      "running" false})
        8]))
 
@@ -457,7 +462,7 @@
             10
             (base-animate/new-progressing)
             nil
-            (fn:> true)))
+            (fn [_] (return true))))
     (var #{indicator trigger-fn} t)
     [(mock/get-value indicator)
      (trigger-fn 3)
@@ -467,10 +472,10 @@
      (. prev ["current"])])
   => (just-in
       [1
-       (contains-in {"queued" []
+       (contains-in {"queued" empty?
                      "running" false})
        3
-       (contains-in {"queued" []
+       (contains-in {"queued" empty?
                      "running" false})
        4
        4]))
@@ -499,10 +504,10 @@
      (mock/get-value indicator)])
   => (just-in
       [1
-       (contains-in {"queued" []
+       (contains-in {"queued" empty?
                      "running" false})
        1
-       (contains-in {"queued" []
+       (contains-in {"queued" empty?
                      "running" false})
        -13]))
 

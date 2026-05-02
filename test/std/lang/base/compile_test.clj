@@ -97,20 +97,25 @@
 
 ^{:refer std.lang.base.compile/compile-module-specialization :added "4.1"}
 (fact "installs a specialization before compiling"
-  (with-redefs [lib/install-module-specialized! (fn [_ lang source target opts]
-                                                  [lang source target opts])
-                compile-module-graph (fn [opts]
-                                       [:compiled opts])]
-    (compile-module-specialization
-     {:library :mock
-      :lang :lua
-      :source 'source.core
-      :target 'target.core
-      :bindings {'cache 'backend.core}
-      :root ".build"
-      :target-dir "src"}))
-  => [:compiled (contains {:lang :lua
-                           :main 'target.core})])
+  (let [[status opts]
+        (with-redefs [lib/install-module-specialized! (fn [_ lang source target opts]
+                                                        [lang source target opts])
+                      compile-module-graph (fn [opts]
+                                             [:compiled opts])]
+          (compile-module-specialization
+           {:library :mock
+            :lang :lua
+            :source 'source.core
+            :target 'target.core
+            :bindings {'cache 'backend.core}
+            :root ".build"
+            :target-dir "src"}))]
+    [status
+     (:lang opts)
+     (:main opts)
+     (:root opts)
+     (:target-dir opts)])
+  => '[:compiled :lua target.core ".build" "src"])
 
 ^{:refer std.lang.base.compile/compile-module-specializations :added "4.1"}
 (fact "compiles batches of specialization descriptors"

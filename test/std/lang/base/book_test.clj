@@ -1,6 +1,7 @@
 (ns std.lang.base.book-test
   (:require [std.lang.base.book :as b]
-            [std.lang.base.book-entry :as entry]
+  	        [std.lang.base.book-entry :as entry]
+            [std.lang.base.impl-entry :as impl-entry]
             [std.lang.base.book-meta :as meta]
             [std.lang.base.book-module :as module]
             [std.lang.base.emit-common :as common]
@@ -102,17 +103,15 @@
   => module/book-module?)
 
 ^{:refer std.lang.base.book/get-code-deps :added "4.0"}
-(fact "gets `:deps` or if a `:static/template` calculate dependencies"
+(fact "gets dependencies for a materialized code entry"
   (-> (b/set-entry +sample+
-                   (entry/book-entry {:lang :lua
-                                      :id 'inc-fn
-                                      :module 'L.core
-                                      :section :code
-                                      :form '(defn inc-fn [x] (return (+ 1 x)))
-                                      :form-input '(defn inc-fn [x] (return (+ 1 x)))
-                                      :deps '#{L.core/identity-fn}
-                                      :namespace 'L.core
-                                      :declared false}))
+                   (impl-entry/create-code
+                    '(defn inc-fn [x]
+                       (return (L.core/identity-fn x)))
+                    {:lang :lua
+                     :namespace 'L.core
+                     :module 'L.core}
+                    +sample+))
       second
       (b/get-code-deps 'L.core/inc-fn))
   => '#{L.core/identity-fn})
@@ -401,14 +400,23 @@
 ^{:refer std.lang.base.book/module-export-requires :added "4.1"}
 (fact "reconstructs module requires from stored link metadata"
   (b/module-export-requires
-   (b/module-create +book+
-                    'L.util
-                    '{:require [[L.core :as u :include true]]}))
+   (module/book-module
+    '{:id L.util
+      :lang :lua
+      :link {- L.util
+             u L.core}
+      :includes #{L.core}}))
   => '[[L.core :as u :include true]])
 
 ^{:refer std.lang.base.book/module-specialize :added "4.1"}
 (fact "clones a module under a new id with rewritten links"
   (let [source (-> +sample+
+                   (b/set-module
+                    (module/book-module
+                     '{:id example.xt.cache.custom-cache
+                       :lang :lua
+                       :link {- example.xt.cache.custom-cache}}))
+                   second
                    (b/put-module
                     (merge (b/get-module +sample+ 'L.core)
                            {:link '{- L.core

@@ -17,74 +17,83 @@
   "returns the base actions"
   {:added "4.0"}
   [worker]
-  (var bind-handler (fn [f]
-                      (return (:? worker
-                                  (state/fn-bind worker f)
-                                  (state/fn-self f)))))
-  ;; (@! (cons 'tab +baselines+))
   (return
    (tab
-     ["@cell/trigger"
-      {:handler
-       (bind-handler xt.cell.kernel.inner-state/fn-trigger),
-       :is-async false,
-       :args ["op" "signal" "status" "body"]}]
-     ["@cell/trigger-async"
-      {:handler
-       (bind-handler xt.cell.kernel.inner-state/fn-trigger-async),
-       :is-async true,
-       :args ["op" "signal" "status" "body" "ms"]}]
-     ["@cell/set-final-status"
-      {:handler
-       (bind-handler xt.cell.kernel.inner-state/fn-set-final-status),
-       :is-async false,
-       :args ["suppress"]}]
-     ["@cell/get-final-status"
-      {:handler
-       (bind-handler xt.cell.kernel.inner-state/fn-get-final-status),
+      ["@cell/trigger"
+       {:handler
+        xt.cell.kernel.inner-state/fn-trigger,
+        :static false,
+        :is-async false,
+        :args ["op" "signal" "status" "body"]}]
+      ["@cell/trigger-async"
+       {:handler
+        xt.cell.kernel.inner-state/fn-trigger-async,
+        :static false,
+        :is-async true,
+        :args ["op" "signal" "status" "body" "ms"]}]
+      ["@cell/set-final-status"
+       {:handler
+        xt.cell.kernel.inner-state/fn-set-final-status,
+        :static false,
+        :is-async false,
+        :args ["suppress"]}]
+      ["@cell/get-final-status"
+       {:handler
+        xt.cell.kernel.inner-state/fn-get-final-status,
+        :static false,
+        :is-async false,
+        :args []}]
+      ["@cell/set-eval-status"
+       {:handler
+        xt.cell.kernel.inner-state/fn-set-eval-status,
+        :static false,
+        :is-async false,
+        :args ["status" "suppress"]}]
+     ["@cell/get-eval-status"
+      {:handler xt.cell.kernel.inner-state/fn-get-eval-status,
+       :static true,
        :is-async false,
        :args []}]
-     ["@cell/set-eval-status"
-      {:handler
-       (bind-handler xt.cell.kernel.inner-state/fn-set-eval-status),
+     ["@cell/get-action-list"
+      {:handler xt.cell.kernel.inner-state/fn-get-action-list,
+       :static true,
        :is-async false,
-       :args ["status" "suppress"]}]
-    ["@cell/get-eval-status"
-     {:handler xt.cell.kernel.inner-state/fn-get-eval-status,
-      :is-async false,
-      :args []}]
-    ["@cell/get-action-list"
-     {:handler xt.cell.kernel.inner-state/fn-get-action-list,
-      :is-async false,
-      :args []}]
-    ["@cell/get-action-entry"
-     {:handler xt.cell.kernel.inner-state/fn-get-action-entry,
-      :is-async false,
-      :args ["name"]}]
-    ["@cell/ping"
-     {:handler xt.cell.kernel.inner-state/fn-ping,
-      :is-async false,
-      :args []}]
-    ["@cell/ping.async"
-     {:handler xt.cell.kernel.inner-state/fn-ping-async,
-      :is-async true,
-      :args ["ms"]}]
-    ["@cell/echo"
-     {:handler xt.cell.kernel.inner-state/fn-echo,
-      :is-async false,
-      :args ["arg"]}]
-    ["@cell/echo.async"
-     {:handler xt.cell.kernel.inner-state/fn-echo-async,
-      :is-async true,
-      :args ["arg" "ms"]}]
-    ["@cell/error"
-     {:handler xt.cell.kernel.inner-state/fn-error,
-      :is-async false,
-      :args []}]
-    ["@cell/error.async"
-     {:handler xt.cell.kernel.inner-state/fn-error-async,
-      :is-async true,
-      :args ["ms"]}])))
+       :args []}]
+     ["@cell/get-action-entry"
+      {:handler xt.cell.kernel.inner-state/fn-get-action-entry,
+       :static true,
+       :is-async false,
+       :args ["name"]}]
+     ["@cell/ping"
+      {:handler xt.cell.kernel.inner-state/fn-ping,
+       :static true,
+       :is-async false,
+       :args []}]
+     ["@cell/ping.async"
+      {:handler xt.cell.kernel.inner-state/fn-ping-async,
+       :static true,
+       :is-async true,
+       :args ["ms"]}]
+     ["@cell/echo"
+      {:handler xt.cell.kernel.inner-state/fn-echo,
+       :static true,
+       :is-async false,
+       :args ["arg"]}]
+     ["@cell/echo.async"
+      {:handler xt.cell.kernel.inner-state/fn-echo-async,
+       :static true,
+       :is-async true,
+       :args ["arg" "ms"]}]
+     ["@cell/error"
+      {:handler xt.cell.kernel.inner-state/fn-error,
+       :static true,
+       :is-async false,
+       :args []}]
+     ["@cell/error.async"
+      {:handler xt.cell.kernel.inner-state/fn-error-async,
+       :static true,
+       :is-async true,
+       :args ["ms"]}])))
 
 (defn.xt actions-init
   "initiates the base actions"
@@ -106,14 +115,13 @@
     {:added "4.0"}
     [entry]
     (let [{:cell/keys [action static is-async]} (meta (second (:form entry)))
-          handler (cond->> (l/sym-full entry)
-                    (not static) (list `state/fn-self))
           args    (nth (:form entry) 2)]
-      [action {:handler handler
+      [action {:handler (l/sym-full entry)
+               :static (true? static)
                :is-async (true? is-async)
-               :args  (mapv str (if static
-                                  args
-                                  (rest args)))}]))
+                :args  (mapv str (if static
+                                   args
+                                   (rest args)))}]))
 
   (def +baselines+
     (mapv tmpl-baseline-action

@@ -1,9 +1,9 @@
 (ns play.ts-001-single-source-user-directory.build
   (:use [code.test :exclude [-main]])
   (:require [std.make :as make :refer [def.make]]
-            [std.lang.model.spec-js.ts :as ts]
-            [std.lang.model.spec-xtalk.mixer :as mixer]
-            [play.ts-001-single-source-user-directory.main :as main]))
+             [std.lang.model.spec-js.ts :as ts]
+             [std.lang.typed.xtalk :as xtalk]
+             [play.ts-001-single-source-user-directory.main :as main]))
 
 (def +gitignore+
   ["node_modules"])
@@ -39,7 +39,7 @@
   [{:keys [runtime-output]}]
   {:output (ts/declaration-output-path runtime-output)
    :body   (-> +main-file+
-               mixer/mix-file
+               xtalk/analyze-file
                ts/emit-analysis-declarations)})
 
 (def.make PROJECT

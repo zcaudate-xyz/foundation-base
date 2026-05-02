@@ -23,12 +23,6 @@
 (defspec.xt set-actions
   [:fn [xt.cell.kernel.spec/InnerActionMap [:xt/maybe :xt/any]] :xt/any])
 
-(defspec.xt fn-self
-  [:fn [[:fn [:xt/any] :xt/any]] :xt/any])
-
-(defspec.xt fn-bind
-  [:fn [:xt/any [:fn [:xt/any] :xt/any]] :xt/any])
-
 (defspec.xt fn-trigger
   [:fn [:xt/any :xt/str :xt/str :xt/str :xt/any] :xt/any])
 
@@ -122,34 +116,17 @@
         (return inner))
     (return (-/INNER_ACTIONS-reset actions))))
 
-(defn.xt fn-self
-  "applies arguments along with `self`"
-  {:added "4.0"}
-  [f]
-  (return (fn [...]
-            (var args (xt/x:arr-clone [...]))
-            (xt/x:arr-push-first args self)
-            (return (xt/x:apply f args)))))
-
-(defn.xt fn-bind
-  "applies arguments along with an explicit inner instance"
-  {:added "4.0"}
-  [inner f]
-  (return (fn [...]
-            (var args (xt/x:arr-clone [...]))
-            (xt/x:arr-push-first args inner)
-            (return (xt/x:apply f args)))))
-
 (defn.xt ^{:cell/action "@cell/trigger"
-           :cell/static false}
+            :cell/static false}
   fn-trigger
   "triggers an event"
   {:added "4.0"}
   [inner op signal status body]
-  (return (. inner (postMessage {:op op
-                                  :signal signal
-                                  :status status
-                                  :body body}))))
+  (var postMessage (xt/x:get-key inner "postMessage"))
+  (return (xt/x:apply postMessage [{:op op
+                                    :signal signal
+                                    :status status
+                                    :body body}])))
 
 (defn.xt ^{:cell/action "@cell/trigger-async"
            :cell/static false
@@ -173,8 +150,9 @@
          :else
          (do (set-fn state)
              (when (not suppress)
-               (. inner (postMessage (util/resp-stream util/EV_STATE state))))
-             (return state))))
+               (var postMessage (xt/x:get-key inner "postMessage"))
+               (xt/x:apply postMessage [(util/resp-stream util/EV_STATE state)]))
+              (return state))))
 
 (defn.xt ^{:cell/action "@cell/set-final-status"
            :cell/static false}

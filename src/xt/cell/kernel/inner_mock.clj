@@ -36,7 +36,10 @@
           
           :else
           (inner-impl/worker-process mock message))
-    (catch e (trace/TRACE! (. e ["stack"]) "SEND.ERROR"))))
+    (catch e
+      (var stack (xt/x:get-key e "stack"))
+      (when stack
+        (trace/TRACE! stack "SEND.ERROR")))))
 
 (defn.xt mock-worker
   "creates a new mock worker

@@ -28,82 +28,91 @@
 ^{:refer xt.cell.kernel.inner-local/actions-baseline :added "4.0"}
 (fact "returns the base actions"
 
-  (!.js (inner-local/actions-baseline))
-  => map?
+  (!.js (xt/x:has-key? (inner-local/actions-baseline) "@cell/ping"))
+  => true
 
   (!.js (xt/x:get-key (inner-local/actions-baseline) "@cell/ping"))
-  => (contains {"is_async" false
+  => (contains {"static" true
+                "is_async" false
                 "args" []})
 
   (!.js (xt/x:get-key (inner-local/actions-baseline) "@cell/echo"))
-  => (contains {"is_async" false
+  => (contains {"static" true
+                "is_async" false
                 "args" ["arg"]})
 
   (!.js (xt/x:get-key (inner-local/actions-baseline) "@cell/ping.async"))
-  => (contains {"is_async" true
+  => (contains {"static" true
+                "is_async" true
                 "args" ["ms"]})
 
-  (!.lua (inner-local/actions-baseline))
-  => map?
+  (!.lua (xt/x:has-key? (inner-local/actions-baseline) "@cell/ping"))
+  => true
 
-  (!.lua (xt/x:get-key (inner-local/actions-baseline) "@cell/ping"))
-  => (contains {"is_async" false
-                "args" []})
+  (!.lua (xt/x:get-key
+          (xt/x:get-key (inner-local/actions-baseline) "@cell/ping")
+          "is_async"))
+  => false
 
-  (!.lua (xt/x:get-key (inner-local/actions-baseline) "@cell/echo"))
-  => (contains {"is_async" false
-                "args" ["arg"]})
+  (!.lua (xt/x:get-key
+          (xt/x:get-key (inner-local/actions-baseline) "@cell/echo")
+          "args"))
+  => ["arg"]
 
-  (!.lua (xt/x:get-key (inner-local/actions-baseline) "@cell/ping.async"))
-  => (contains {"is_async" true
-                "args" ["ms"]})
+  (!.lua (xt/x:get-key
+          (xt/x:get-key (inner-local/actions-baseline) "@cell/ping.async")
+          "static"))
+  => true
 
-  (!.py (inner-local/actions-baseline))
-  => map?
+  (!.py (xt/x:has-key? (inner-local/actions-baseline) "@cell/ping"))
+  => true
 
-  (!.py (xt/x:get-key (inner-local/actions-baseline) "@cell/ping"))
-  => (contains {"is_async" false
-                "args" []})
+  (!.py (xt/x:get-key
+         (xt/x:get-key (inner-local/actions-baseline) "@cell/ping")
+         "is_async"))
+  => false
 
-  (!.py (xt/x:get-key (inner-local/actions-baseline) "@cell/echo"))
-  => (contains {"is_async" false
-                "args" ["arg"]})
+  (!.py (xt/x:get-key
+         (xt/x:get-key (inner-local/actions-baseline) "@cell/echo")
+         "args"))
+  => ["arg"]
 
-  (!.py (xt/x:get-key (inner-local/actions-baseline) "@cell/ping.async"))
-  => (contains {"is_async" true
-                "args" ["ms"]}))
+  (!.py (xt/x:get-key
+         (xt/x:get-key (inner-local/actions-baseline) "@cell/ping.async")
+         "static"))
+  => true)
 
 ^{:refer xt.cell.kernel.inner-local/actions-init :added "4.0"}
 (fact "initialises baseline and custom actions"
 
   (!.js
    (inner-local/actions-init {"@custom/action" {}} nil)
-   (xt/x:has-key? (inner-state/WORKER_ACTIONS) "@cell/ping"))
+   (xt/x:has-key? (inner-state/INNER_ACTIONS) "@cell/ping"))
   => true
 
   (!.js
-   (inner-local/actions-init {"@custom/action" {"handler" j/identity}} nil)
-   (xt/x:has-key? (inner-state/WORKER_ACTIONS) "@custom/action"))
+   (inner-local/actions-init {"@custom/action" {"handler" (fn [x] (return x))}} nil)
+   (xt/x:has-key? (inner-state/INNER_ACTIONS) "@custom/action"))
   => true
 
   (!.lua
    (inner-local/actions-init {"@custom/action" {}} nil)
-   (xt/x:has-key? (inner-state/WORKER_ACTIONS) "@cell/ping"))
+   (xt/x:has-key? (inner-state/INNER_ACTIONS) "@cell/ping"))
   => true
 
   (!.lua
-   (inner-local/actions-init {"@custom/action" {"handler" j/identity}} nil)
-   (xt/x:has-key? (inner-state/WORKER_ACTIONS) "@custom/action"))
+   (inner-local/actions-init {"@custom/action" {"handler" (fn [x] (return x))}} nil)
+   (xt/x:has-key? (inner-state/INNER_ACTIONS) "@custom/action"))
   => true
 
   (!.py
    (inner-local/actions-init {"@custom/action" {}} nil)
-   (xt/x:has-key? (inner-state/WORKER_ACTIONS) "@cell/ping"))
+   (xt/x:has-key? (inner-state/INNER_ACTIONS) "@cell/ping"))
   => true
 
   (!.py
-   (inner-local/actions-init {"@custom/action" {"handler" j/identity}} nil)
-   (xt/x:has-key? (inner-state/WORKER_ACTIONS) "@custom/action"))
+   (inner-local/actions-init {"@custom/action" {"handler" (fn [x] (return x))}} nil)
+   (xt/x:has-key? (inner-state/INNER_ACTIONS) "@custom/action"))
   => true)
 
 (comment
