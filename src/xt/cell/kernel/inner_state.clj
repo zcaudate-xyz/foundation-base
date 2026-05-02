@@ -6,7 +6,7 @@
   {:require [[xt.cell.kernel.base-util :as util]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as spec-promise]
-             [xt.lang.common-space :as rt :with [defsingleton.xt]]]})
+             [xt.lang.common-resource :as rt :with [defsingleton.xt]]]})
 
 (defspec.xt INNER_STATE
   [:fn [] xt.cell.kernel.spec/InnerState])

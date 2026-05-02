@@ -3,7 +3,7 @@
              [std.lib.foundation :as f]))
 
 (l/script :lua.nginx
-  {:import [["lsqlite3" :as ngxsqlite]] :require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lib.sql-connection :as sqlrt]]})
+  {:import [["lsqlite3" :as ngxsqlite]] :require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lib.connection-sql :as sqlrt]]})
 
 (f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ngxsqlite"

@@ -3,7 +3,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
-              [xt.lang.common-space :as rt :with [defsingleton.xt]]
+              [xt.lang.common-resource :as rt :with [defsingleton.xt]]
               [xt.cell.kernel :as kernel]
               [xt.cell.kernel.inner-local :as inner-local]]})
 

@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-space :as rt :with [defsingleton.xt]]
+  {:require [[xt.lang.common-resource :as rt :with [defsingleton.xt]]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]

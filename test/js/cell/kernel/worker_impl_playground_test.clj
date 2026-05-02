@@ -11,7 +11,7 @@
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
               [xt.lang.common-repl :as repl]
-              [xt.lang.common-space :as rt]
+              [xt.lang.common-resource :as rt]
               [js.cell.kernel.worker-impl :as worker-impl]
               [js.cell.kernel.worker-local :as worker-local]
               [js.cell.kernel.worker-mock :as worker-mock]

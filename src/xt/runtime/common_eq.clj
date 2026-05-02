@@ -7,5 +7,5 @@
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-space :as rt]]})
+             [xt.lang.common-resource :as rt]]})
 

@@ -4,7 +4,7 @@
 (l/script :python
   {:require [[xt.lang.spec-base :as xt]
              [python.core.system :as pysys]
-             [xt.lib.sql-connection :as sqlrt]]})
+             [xt.lib.connection-sql :as sqlrt]]})
 
 (defn.py query-returns-rows?
   "Checks whether a query should return row data."

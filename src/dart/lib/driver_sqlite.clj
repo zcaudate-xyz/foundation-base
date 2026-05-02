@@ -3,7 +3,7 @@
 
 (l/script :dart
   {:require [[xt.lang.spec-base :as xt]
-             [xt.lib.sql-connection :as sqlrt]]
+             [xt.lib.connection-sql :as sqlrt]]
     :import [["package:sqlite3/sqlite3.dart" :as sqlite]]})
 
 (defn.dt query-returns-rows?

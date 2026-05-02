@@ -10,7 +10,7 @@
    :require [[dart.lib.driver-sqlite :as dart-sqlite]
              [xt.lang.spec-promise :as spec-promise]
              [xt.lang.common-repl :as repl]
-             [xt.lib.sql-connection :as dbsql]]})
+             [xt.lib.connection-sql :as dbsql]]})
 
 (def CANARY-DART
   (common/program-exists? "dart"))

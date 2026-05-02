@@ -3,10 +3,10 @@
 
 (l/script :python
   {:require [[xt.lang.common-data :as xtd]
-             [xt.lang.common-space :as rt]
+             [xt.lang.common-resource :as rt]
              [xt.lang.spec-base :as xt]
              [python.core.system :as pysys]
-             [xt.lib.sql-connection :as sqlrt]]})
+             [xt.lib.connection-sql :as sqlrt]]})
 
 (defn.py default-env
   "Gets the default postgres env."

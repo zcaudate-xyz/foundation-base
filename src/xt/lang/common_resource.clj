@@ -1,4 +1,4 @@
-(ns xt.lang.common-space
+(ns xt.lang.common-resource
   (:require [std.lang :as l]
              [std.lang.typed.xtalk :refer [defspec.xt]]
              [std.lib.env :as env]
@@ -448,7 +448,7 @@
     (template/$ [(~def-sym ~(with-meta sym-id (merge (meta &form)
                                               (meta sym-id)))
              []
-             (return (xt.lang.common-space/xt-item-get
+             (return (xt.lang.common-resource/xt-item-get
                       ~sym-ns
                       ~sym-key
                       (fn ~@more))))
@@ -456,7 +456,7 @@
                         (merge (meta &form)
                                (meta sym-id)))
             [val]
-            (return (xt.lang.common-space/xt-var-set
+            (return (xt.lang.common-resource/xt-var-set
                      ~(str sym-ns "/" sym-key)
                      val)))])))
 

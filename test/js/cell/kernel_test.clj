@@ -27,7 +27,7 @@
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
                [xt.lang.common-repl :as repl]
-               [xt.lang.common-space :as rt]
+               [xt.lang.common-resource :as rt]
                [xt.event.base-view :as base-view]
                [js.cell.kernel.worker-impl :as internal]
                [js.cell.kernel.base-link :as link-raw]

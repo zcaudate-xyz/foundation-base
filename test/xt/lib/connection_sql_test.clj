@@ -1,4 +1,4 @@
-(ns xt.lib.sql-connection-test
+(ns xt.lib.connection-sql-test
   (:use code.test)
   (:require [rt.basic.type-common  :as common]
             [std.lang              :as l]
@@ -10,27 +10,27 @@
    :require [[xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as xt-promise]
-             [xt.lib.sql-connection :as sql]]})
+             [xt.lib.connection-sql :as sql]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as xt-promise]
-             [xt.lib.sql-connection :as sql]]})
+             [xt.lib.connection-sql :as sql]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as xt-promise]
-             [xt.lib.sql-connection :as sql]]})
+             [xt.lib.connection-sql :as sql]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.lib.sql-connection/connection-create :added "4.1"}
+^{:refer xt.lib.connection-sql/connection-create :added "4.1"}
 (fact "wraps SQL connection implementations with protocol-backed dispatch"
 
   (!.js
@@ -78,7 +78,7 @@
      (sql/disconnect conn)])
   => [true 1 2 true])
 
-^{:refer xt.lib.sql-connection/driver? :added "4.1"}
+^{:refer xt.lib.connection-sql/driver? :added "4.1"}
 (fact "identifies wrapped sql drivers"
 
   (!.js
@@ -138,7 +138,7 @@
      (sql/driver? nil)])
   => [true false false])
 
-^{:refer xt.lib.sql-connection/connection? :added "4.1"}
+^{:refer xt.lib.connection-sql/connection? :added "4.1"}
 (fact "identifies wrapped sql connections"
 
   (!.js
@@ -186,7 +186,7 @@
      (sql/connection? nil)])
   => [true false false])
 
-^{:refer xt.lib.sql-connection/ensure-promise :added "4.1"}
+^{:refer xt.lib.connection-sql/ensure-promise :added "4.1"}
 (fact "normalises sql values into host promises"
 
   (!.js
@@ -234,7 +234,7 @@
      (repl/>notify)))
   => 5)
 
-^{:refer xt.lib.sql-connection/require-driver :added "4.1"}
+^{:refer xt.lib.connection-sql/require-driver :added "4.1"}
 (fact "requires wrapped sql drivers"
 
   (!.js
@@ -291,7 +291,7 @@
      (xt/x:get-key (sql/require-driver driver) "::")])
   => [true "sql.connection.driver"])
 
-^{:refer xt.lib.sql-connection/require-connection :added "4.1"}
+^{:refer xt.lib.connection-sql/require-connection :added "4.1"}
 (fact "requires wrapped sql connections"
 
   (!.js
@@ -336,7 +336,7 @@
      (xt/x:get-key (sql/require-connection conn) "::")])
   => [true "sql.connection"])
 
-^{:refer xt.lib.sql-connection/driver-create :added "4.1"}
+^{:refer xt.lib.connection-sql/driver-create :added "4.1"}
 (fact "wraps sql driver implementations"
 
   (!.js
@@ -387,7 +387,7 @@
      (sql/driver-create impl)))
   => true)
 
-^{:refer xt.lib.sql-connection/connect :added "4.1"}
+^{:refer xt.lib.connection-sql/connect :added "4.1"}
 (fact "connects through wrapped sql drivers"
 
   (notify/wait-on :js
@@ -453,7 +453,7 @@
                      (sql/disconnect conn)]))))
   => [true "sqlite://connect"])
 
-^{:refer xt.lib.sql-connection/disconnect :added "4.1"}
+^{:refer xt.lib.connection-sql/disconnect :added "4.1"}
 (fact "disconnects through wrapped sql connections"
 
   (!.js
@@ -495,7 +495,7 @@
     (sql/disconnect conn))
   => "raw")
 
-^{:refer xt.lib.sql-connection/query :added "4.1"}
+^{:refer xt.lib.connection-sql/query :added "4.1"}
 (fact "queries through wrapped sql connections"
 
   (!.js
@@ -537,7 +537,7 @@
     (sql/query conn "SELECT 1;"))
   => ["SELECT 1;" "raw"])
 
-^{:refer xt.lib.sql-connection/query-sync :added "4.1"}
+^{:refer xt.lib.connection-sql/query-sync :added "4.1"}
 (fact "runs sync queries through wrapped sql connections"
 
   (!.js
@@ -580,7 +580,7 @@
   => ["SELECT 2;" "raw"])
 
 (comment
-  (s/snapto '[xt.lib.sql-connection])
+  (s/snapto '[xt.lib.connection-sql])
   
-  (s/seedgen-langadd '[xt.lib.sql-connection] {:lang [:lua :python] :write true})
-  (s/seedgen-langremove '[xt.lib.sql-connection] {:lang [:lua :python] :write true}))
+  (s/seedgen-langadd '[xt.lib.connection-sql] {:lang [:lua :python] :write true})
+  (s/seedgen-langremove '[xt.lib.connection-sql] {:lang [:lua :python] :write true}))

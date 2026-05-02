@@ -3,14 +3,22 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-^{:seedgen/root {:all true}}
-(l/script- :xtalk
-  {:require [[xt.lang.common-lib :as k]
-             [xt.lang.spec-base :as xt]
-             [xt.cell.kernel.base-link :as base-link]
-             [xt.cell.kernel.base-link-local :as base-link-local]
-             [xt.cell.kernel.inner-mock :as inner-mock]]})
+(do (l/script- :xtalk
+      {:require [[xt.lang.common-lib :as k]
+                 [xt.lang.spec-base :as xt]
+                 [xt.cell.kernel.base-link :as base-link]
+                 [xt.cell.kernel.base-link-local :as base-link-local]
+                 [xt.cell.kernel.inner-mock :as inner-mock]]})
+    (defn.xt make-link
+      []
+      (return
+       (base-link/link-create
+        {:create-fn
+     (fn:> [listener]
+           (inner-mock/create-worker listener {} true))}))))
 
+
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
@@ -22,16 +30,10 @@
 
 (fact:global
  {:setup [(l/rt:restart)
-                 (l/rt:scaffold-imports :js)]
+          (l/rt:scaffold-imports :js)]
  :teardown [(l/rt:stop)]})
 
-(defn.xt make-link
-  []
-  (return
-   (base-link/link-create
-    {:create-fn
-     (fn:> [listener]
-       (inner-mock/create-worker listener {} true))})))
+
 
 ^{:refer xt.cell.kernel.base-link/link-listener-call :added "4.0"}
 (fact "resolves a call to the link"

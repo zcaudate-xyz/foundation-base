@@ -7,7 +7,7 @@
   (l/script- :xtalk
     {:require [[xt.event.base-view :as view]
                [xt.lang.spec-base :as xt]]})
-
+  
   (defn.xt make-basic-view []
     (return
      (view/create-view
@@ -17,7 +17,7 @@
       {:value 0}
       nil
       nil)))
-
+  
   (defn.xt make-processed-view []
     (return
      (view/create-view
@@ -27,7 +27,7 @@
       1
       (fn [x] (return (+ x 10)))
       nil)))
-
+  
   (defn.xt make-remote-view []
     (return
      (view/create-view
@@ -37,7 +37,7 @@
       nil
       nil
       nil)))
-
+  
   (defn.xt make-sync-view []
     (return
      (view/create-view

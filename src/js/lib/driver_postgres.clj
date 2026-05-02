@@ -6,10 +6,10 @@
 (l/script :js
   {:require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
-             [xt.lang.common-space :as rt]
+             [xt.lang.common-resource :as rt]
              [js.core.util :as ut]
              [xt.lang.spec-base :as xt]
-             [xt.lib.sql-connection :as sqlrt]]
+             [xt.lib.connection-sql :as sqlrt]]
    :import [["pg" :as [* Postgres]]]})
 
 (defn.js default-env

@@ -6,7 +6,7 @@
    {:require [[js.core :as j]
               [xt.lang.common-data :as d]
               [xt.lang.spec-base :as x]
-              [xt.lang.common-space :as rt :with [defsingleton.js]]]
+              [xt.lang.common-resource :as rt :with [defsingleton.js]]]
     :import  [["fastify" :as Fastify]]})
 
 (defsingleton.js current-servers

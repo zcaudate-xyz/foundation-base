@@ -7,7 +7,7 @@
   {:require [[xt.lang.common-lib :as k]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-             [xt.lang.common-space :as rt :with [defsingleton.xt]]
+             [xt.lang.common-resource :as rt :with [defsingleton.xt]]
              [xt.cell :as cell]
              [xt.cell.kernel.base-link :as base-link]
              [xt.cell.kernel.inner-mock :as inner-mock]]})
@@ -17,7 +17,7 @@
    :require [[xt.lang.common-lib :as k]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-             [xt.lang.common-space :as rt :with [defsingleton.js]]
+             [xt.lang.common-resource :as rt :with [defsingleton.js]]
              [xt.cell :as cell]
              [xt.cell.kernel.base-link :as base-link]
              [xt.cell.kernel.inner-mock :as inner-mock]

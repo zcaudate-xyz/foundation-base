@@ -1,26 +1,26 @@
-(ns xt.lang.common-space-test
+(ns xt.lang.common-resource-test
   (:use code.test)
   (:require [std.lang :as l]
-            [xt.lang.common-space :as rt]))
+            [xt.lang.common-resource :as rt]))
 
 ^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.common-space :as rt]]})
+   :require [[xt.lang.common-resource :as rt]]})
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.lang.common-space :as rt]]})
+   :require [[xt.lang.common-resource :as rt]]})
 
 (l/script- :python
   {:runtime :basic
-   :require [[xt.lang.common-space :as rt]]})
+   :require [[xt.lang.common-resource :as rt]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
  :teardown [(l/rt:stop)]})
 
-^{:refer xt.lang.common-space/xt-exists? :added "4.0"
+^{:refer xt.lang.common-resource/xt-exists? :added "4.0"
   :setup [(l/rt:restart)]}
 (fact "checks that the xt map exists"
 
@@ -42,7 +42,7 @@
     (rt/xt-exists?)])
   => (contains-in [false {"config" {}, "spaces" {}, "::" "xt"} true]))
 
-^{:refer xt.lang.common-space/xt-create :added "4.0"}
+^{:refer xt.lang.common-resource/xt-create :added "4.0"}
 (fact "creates an empty xt structure"
 
   (!.js
@@ -66,7 +66,7 @@
   => (contains-in [{"config" {}, "spaces" {}, "::" "xt"}
                    nil]))
 
-^{:refer xt.lang.common-space/xt-ensure :added "4.1"}
+^{:refer xt.lang.common-resource/xt-ensure :added "4.1"}
 (fact "makes sure the xt state is alive"
 
   (!.js
@@ -84,7 +84,7 @@
    (rt/xt-ensure))
   => (contains-in {"config" {}, "spaces" {}, "::" "xt"}))
 
-^{:refer xt.lang.common-space/xt-current :added "4.0"}
+^{:refer xt.lang.common-resource/xt-current :added "4.0"}
 (fact "gets the current xt"
 
   (!.js
@@ -102,7 +102,7 @@
    (rt/xt-current))
   => nil)
 
-^{:refer xt.lang.common-space/xt-purge :added "4.0"}
+^{:refer xt.lang.common-resource/xt-purge :added "4.0"}
 (fact "empties the current xt"
 
   (!.js
@@ -126,7 +126,7 @@
   => (contains-in [{"config" {}, "spaces" {}, "::" "xt"}
                     "NA"]))
 
-^{:refer xt.lang.common-space/xt-purge-config :added "4.0"}
+^{:refer xt.lang.common-resource/xt-purge-config :added "4.0"}
 (fact "clears all `:config` entries"
 
   (!.js
@@ -159,7 +159,7 @@
                 [true {"test.module" {"host" "127.0.0.1"}}]
                 empty?]))
 
-^{:refer xt.lang.common-space/xt-purge-spaces :added "4.0"}
+^{:refer xt.lang.common-resource/xt-purge-spaces :added "4.0"}
 (fact "clears all `:spaces` entries"
 
   (!.js
@@ -192,7 +192,7 @@
                 [true {"test.module" {"hello" {"value" {"a" 1}, "watch" {}}}}]
                 empty?]))
 
-^{:refer xt.lang.common-space/xt-lookup-id :added "4.0"}
+^{:refer xt.lang.common-resource/xt-lookup-id :added "4.0"}
 (fact "gets the runtime id for pointer-like objects"
 
   (!.js
@@ -207,7 +207,7 @@
    (rt/xt-lookup-id {}))
   => integer?)
 
-^{:refer xt.lang.common-space/xt-config-list :added "4.0"}
+^{:refer xt.lang.common-resource/xt-config-list :added "4.0"}
 (fact "lists all config entries in the xt"
 
   (!.js
@@ -231,7 +231,7 @@
     (rt/xt-config-list))
   => (just ["test.one" "test.two"] :in-any-order))
 
-^{:refer xt.lang.common-space/xt-config-set :added "4.0"}
+^{:refer xt.lang.common-resource/xt-config-set :added "4.0"}
 (fact "sets the config for a module"
 
   (!.js
@@ -255,7 +255,7 @@
     (rt/xt-config-list)])
   => (contains-in [[true] ["test.module"]]))
 
-^{:refer xt.lang.common-space/xt-config-del :added "4.0"}
+^{:refer xt.lang.common-resource/xt-config-del :added "4.0"}
 (fact "deletes a single xt config entry"
 
   (!.js
@@ -291,7 +291,7 @@
        [true {"host" "127.0.0.1", "port" 1234}]
        "NA"]))
 
-^{:refer xt.lang.common-space/xt-config :added "4.0"}
+^{:refer xt.lang.common-resource/xt-config :added "4.0"}
 (fact "gets a config entry"
 
   (!.js
@@ -315,7 +315,7 @@
    (rt/xt-config "test.module"))
   => {"host" "127.0.0.1", "port" 1234})
 
-^{:refer xt.lang.common-space/xt-space-list :added "4.0"}
+^{:refer xt.lang.common-resource/xt-space-list :added "4.0"}
 (fact "lists all spaces in the xt"
 
   (!.js
@@ -336,7 +336,7 @@
    (rt/xt-space-list))
   => ["test.module"])
 
-^{:refer xt.lang.common-space/xt-space-del :added "4.0"}
+^{:refer xt.lang.common-resource/xt-space-del :added "4.0"}
 (fact "deletes a space"
 
   (!.js
@@ -363,7 +363,7 @@
   => (contains-in [[true {"hello" {"value" {"a" 1}, "watch" {}}}]
                    empty?]))
 
-^{:refer xt.lang.common-space/xt-space :added "4.0"}
+^{:refer xt.lang.common-resource/xt-space :added "4.0"}
 (fact "gets a space"
 
   (!.js
@@ -384,7 +384,7 @@
    (rt/xt-space "test.module"))
   => {"hello" {"value" {"a" 1, "b" 2}, "watch" {}}})
 
-^{:refer xt.lang.common-space/xt-space-clear :added "4.0"}
+^{:refer xt.lang.common-resource/xt-space-clear :added "4.0"}
 (fact "clears all items in the space"
 
   (!.js
@@ -411,7 +411,7 @@
   => [[true {"hello" {"value" 42, "watch" {}}}]
       {}])
 
-^{:refer xt.lang.common-space/xt-item-del :added "4.0"}
+^{:refer xt.lang.common-resource/xt-item-del :added "4.0"}
 (fact "deletes a single item in the space"
 
   (!.js
@@ -438,7 +438,7 @@
   => [[true {"value" 42, "watch" {}}]
       true])
 
-^{:refer xt.lang.common-space/xt-item-trigger :added "4.0"}
+^{:refer xt.lang.common-resource/xt-item-trigger :added "4.0"}
 (fact "triggers as item"
 
   (!.js
@@ -471,7 +471,7 @@
    (rt/xt-item-trigger "test.module" "hello"))
   => ["main"])
 
-^{:refer xt.lang.common-space/xt-item-set :added "4.0"}
+^{:refer xt.lang.common-resource/xt-item-set :added "4.0"}
 (fact "sets a single item in the space"
 
   (!.js
@@ -495,7 +495,7 @@
   => [[true {"value" 42, "watch" {}}]
       42])
 
-^{:refer xt.lang.common-space/xt-item :added "4.0"}
+^{:refer xt.lang.common-resource/xt-item :added "4.0"}
 (fact "gets an xt item by module and key"
 
   (!.js
@@ -516,7 +516,7 @@
    (rt/xt-item "test.module" "hello"))
   => {"a" 1})
 
-^{:refer xt.lang.common-space/xt-item-get :added "4.0"}
+^{:refer xt.lang.common-resource/xt-item-get :added "4.0"}
 (fact "gets an xt item or sets a default if not exist"
 
   (!.js
@@ -537,7 +537,7 @@
     (rt/xt-item-get "test.module" "hello" (fn [] (return 2)))])
   => [1 1])
 
-^{:refer xt.lang.common-space/xt-var-entry :added "4.0"}
+^{:refer xt.lang.common-resource/xt-var-entry :added "4.0"}
 (fact "gets the var entry"
 
   (!.js
@@ -558,7 +558,7 @@
    (rt/xt-var-entry "test.module/hello"))
   => {"value" 42, "watch" {}})
 
-^{:refer xt.lang.common-space/xt-var :added "4.0"}
+^{:refer xt.lang.common-resource/xt-var :added "4.0"}
 (fact "gets an xt item"
 
   (!.js
@@ -579,7 +579,7 @@
    (rt/xt-var "test.module/hello"))
   => {"a" 1})
 
-^{:refer xt.lang.common-space/xt-var-set :added "4.0"}
+^{:refer xt.lang.common-resource/xt-var-set :added "4.0"}
 (fact "sets the var"
 
   (!.js
@@ -609,7 +609,7 @@
       [true {"value" 42, "watch" {}}]
       true])
 
-^{:refer xt.lang.common-space/xt-var-trigger :added "4.0"}
+^{:refer xt.lang.common-resource/xt-var-trigger :added "4.0"}
 (fact "triggers the var"
 
   (!.js
@@ -642,7 +642,7 @@
    (rt/xt-var-trigger "test.module/hello"))
   => ["main"])
 
-^{:refer xt.lang.common-space/xt-add-watch :added "4.0"}
+^{:refer xt.lang.common-resource/xt-add-watch :added "4.0"}
 (fact "adds a watch"
 
   (!.js
@@ -678,7 +678,7 @@
   => [true
       ["main"]])
 
-^{:refer xt.lang.common-space/xt-remove-watch :added "4.0"}
+^{:refer xt.lang.common-resource/xt-remove-watch :added "4.0"}
 (fact "removes a watch"
 
   (!.js
@@ -714,7 +714,7 @@
     (rt/xt-var-trigger "test.module/hello")])
   => (contains [true empty?]))
 
-^{:refer xt.lang.common-space/defsingleton-fn :added "4.0"}
+^{:refer xt.lang.common-resource/defsingleton-fn :added "4.0"}
 (fact "helper function for defsingleton macros"
 
   (let [out (rt/defsingleton-fn '(rt/defsingleton.js JS_SAMPLE [] (return 1))
@@ -730,7 +730,7 @@
      (-> out second second)])
   => '[defn.js JS_SAMPLE defn.js JS_SAMPLE-reset])
 
-^{:refer xt.lang.common-space/defsingleton.xt :added "4.0"}
+^{:refer xt.lang.common-resource/defsingleton.xt :added "4.0"}
 (fact "shortcut for a xt getter and a reset var"
 
   (let [out (macroexpand-1 '(rt/defsingleton.xt XT_SAMPLE [] (return 1)))]
@@ -739,7 +739,7 @@
      (-> out second second)])
   => '[defn.xt XT_SAMPLE XT_SAMPLE-reset])
 
-^{:refer xt.lang.common-space/defsingleton.js :added "4.0"}
+^{:refer xt.lang.common-resource/defsingleton.js :added "4.0"}
 (fact "shortcut for a js getter and a reset var"
 
   (let [out (macroexpand-1 '(rt/defsingleton.js JS_SAMPLE [] (return 1)))]
@@ -748,7 +748,7 @@
      (-> out second second)])
   => '[defn.js JS_SAMPLE JS_SAMPLE-reset])
 
-^{:refer xt.lang.common-space/defsingleton.lua :added "4.0"}
+^{:refer xt.lang.common-resource/defsingleton.lua :added "4.0"}
 (fact "shortcut for a lua getter and a reset var"
 
   (let [out (macroexpand-1 '(rt/defsingleton.lua LUA_SAMPLE [] (return 1)))]
@@ -757,7 +757,7 @@
      (-> out second second)])
   => '[defn.lua LUA_SAMPLE LUA_SAMPLE-reset])
 
-^{:refer xt.lang.common-space/defsingleton.py :added "4.0"}
+^{:refer xt.lang.common-resource/defsingleton.py :added "4.0"}
 (fact "shortcut for a python getter and a reset var"
 
   (let [out (macroexpand-1 '(rt/defsingleton.py PY_SAMPLE [] (return 1)))]
@@ -767,5 +767,5 @@
   => '[defn.python PY_SAMPLE PY_SAMPLE-reset])
 
 (comment
-  (s/seedgen-langadd 'xt.lang.common-space {:lang [:lua :python] :write true})
-  (s/seedgen-langremove 'xt.lang.common-space {:lang [:lua :python] :write true}))
+  (s/seedgen-langadd 'xt.lang.common-resource {:lang [:lua :python] :write true})
+  (s/seedgen-langremove 'xt.lang.common-resource {:lang [:lua :python] :write true}))

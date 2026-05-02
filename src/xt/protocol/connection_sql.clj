@@ -1,4 +1,4 @@
-(ns xt.protocol.sql-connection
+(ns xt.protocol.connection-sql
   (:require [std.lang :as l]))
 
 (l/script :xtalk

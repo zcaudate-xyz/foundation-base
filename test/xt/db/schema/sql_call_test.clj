@@ -15,7 +15,7 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.db.schema.sql-call :as call]
-             [xt.lib.sql-connection :as driver]
+             [xt.lib.connection-sql :as driver]
              [js.lib.driver-postgres :as js-postgres]]})
 
 (fact:global

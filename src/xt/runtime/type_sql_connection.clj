@@ -1,9 +1,9 @@
-(ns xt.runtime.type-sql-connection
+(ns xt.runtime.type-connection-sql
   (:require [std.lang :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
-             [xt.lib.sql-connection :as sql]]})
+             [xt.lib.connection-sql :as sql]]})
 
 (defn.xt driver?
   "checks if a value is a wrapped runtime sql driver"
