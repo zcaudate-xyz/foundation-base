@@ -1,94 +1,94 @@
 (ns hara.lang.base.registry)
 
 (def +registry+
-  (atom {[:postgres :default]          'rt.postgres.base.grammar
-         [:postgres :jdbc]             'rt.postgres.base.client
-         [:postgres :jdbc.client]      'rt.postgres.base.client
+  (atom {[:postgres :default]          'hara.rt.postgres.base.grammar
+         [:postgres :jdbc]             'hara.rt.postgres.base.client
+         [:postgres :jdbc.client]      'hara.rt.postgres.base.client
          
-         [:solidity :default]          'rt.solidity.grammar
+         [:solidity :default]          'hara.rt.solidity.grammar
 	 
-	 [:bash   :oneshot]            'rt.basic.impl.process-bash
-	 [:bash   :basic]              'rt.shell
-	 [:bash   :remote]             'rt.shell
+         [:bash   :oneshot]            'hara.rt.basic.impl.process-bash
+         [:bash   :basic]              'hara.rt.shell
+         [:bash   :remote]             'hara.rt.shell
          
-         [:lua    :oneshot]            'rt.basic.impl.process-lua
-         [:lua    :basic]              'rt.basic.impl.process-lua
-         [:lua    :interactive]        'rt.basic.impl.process-lua
-         [:lua    :websocket]          'rt.basic.impl.process-lua
-         [:lua    :nginx]              'rt.nginx
-         [:lua    :nginx.instance]     'rt.nginx
-         [:lua    :redis]              'rt.redis
-         [:lua.redis :default]         'rt.redis
-         [:lua.redis :redis]           'rt.redis
-         [:lua.nginx :oneshot]         'rt.basic.impl.process-lua
-         [:lua.nginx :basic]           'rt.basic.impl.process-lua
-         [:lua.nginx :interactive]     'rt.basic.impl.process-lua
-         [:lua.nginx :websocket]       'rt.basic.impl.process-lua
-         [:lua.nginx :nginx]           'rt.nginx
-         [:lua.nginx :nginx.instance]  'rt.nginx
-         [:lua.nginx :remote-port]     'rt.basic.impl.process-lua
-         [:lua.nginx :remote-ws]       'rt.basic.impl.process-lua
-         [:lua    :remote-port]        'rt.basic.impl.process-lua
-         [:lua    :remote-ws]          'rt.basic.impl.process-lua
+         [:lua    :oneshot]            'hara.rt.basic.impl.process-lua
+         [:lua    :basic]              'hara.rt.basic.impl.process-lua
+         [:lua    :interactive]        'hara.rt.basic.impl.process-lua
+         [:lua    :websocket]          'hara.rt.basic.impl.process-lua
+         [:lua    :nginx]              'hara.rt.nginx
+         [:lua    :nginx.instance]     'hara.rt.nginx
+         [:lua    :redis]              'hara.rt.redis
+         [:lua.redis :default]         'hara.rt.redis
+         [:lua.redis :redis]           'hara.rt.redis
+         [:lua.nginx :oneshot]         'hara.rt.basic.impl.process-lua
+         [:lua.nginx :basic]           'hara.rt.basic.impl.process-lua
+         [:lua.nginx :interactive]     'hara.rt.basic.impl.process-lua
+         [:lua.nginx :websocket]       'hara.rt.basic.impl.process-lua
+         [:lua.nginx :nginx]           'hara.rt.nginx
+         [:lua.nginx :nginx.instance]  'hara.rt.nginx
+         [:lua.nginx :remote-port]     'hara.rt.basic.impl.process-lua
+         [:lua.nginx :remote-ws]       'hara.rt.basic.impl.process-lua
+         [:lua    :remote-port]        'hara.rt.basic.impl.process-lua
+         [:lua    :remote-ws]          'hara.rt.basic.impl.process-lua
          
-         [:js     :oneshot]            'rt.basic.impl.process-js
-         [:js     :basic]              'rt.basic.impl.process-js
-         [:js     :interactive]        'rt.basic.impl.process-js
-         [:js     :websocket]          'rt.basic.impl.process-js
-         [:js     :javafx]             'rt.javafx
-         [:js     :graal]              'rt.graal
-         [:js     :browser]            'rt.browser
-         [:js     :remote-port]        'rt.basic.impl.process-js
-         [:js     :remote-ws]          'rt.basic.impl.process-js
+         [:js     :oneshot]            'hara.rt.basic.impl.process-js
+         [:js     :basic]              'hara.rt.basic.impl.process-js
+         [:js     :interactive]        'hara.rt.basic.impl.process-js
+         [:js     :websocket]          'hara.rt.basic.impl.process-js
+         [:js     :javafx]             'hara.rt.javafx
+         [:js     :graal]              'hara.rt.graal
+         [:js     :browser]            'hara.rt.browser
+         [:js     :remote-port]        'hara.rt.basic.impl.process-js
+         [:js     :remote-ws]          'hara.rt.basic.impl.process-js
          
-         [:python :oneshot]            'rt.basic.impl.process-python
-         [:python :basic]              'rt.basic.impl.process-python
-         [:python :interactive]        'rt.basic.impl.process-python
-         [:python :websocket]          'rt.basic.impl.process-python
-         [:python :graal]              'rt.graal
-         [:python :jep]                'rt.jep
-         [:python :libpython]          'rt.libpython
-         [:python :remote-port]        'rt.basic.impl.process-python
-         [:python :remote-ws]          'rt.basic.impl.process-python
+         [:python :oneshot]            'hara.rt.basic.impl.process-python
+         [:python :basic]              'hara.rt.basic.impl.process-python
+         [:python :interactive]        'hara.rt.basic.impl.process-python
+         [:python :websocket]          'hara.rt.basic.impl.process-python
+         [:python :graal]              'hara.rt.graal
+         [:python :jep]                'hara.rt.jep
+         [:python :libpython]          'hara.rt.libpython
+         [:python :remote-port]        'hara.rt.basic.impl.process-python
+         [:python :remote-ws]          'hara.rt.basic.impl.process-python
 
-         [:scheme :oneshot]            'rt.basic.impl.process-scheme
-         [:scheme :basic]              'rt.basic.impl.process-scheme
+         [:scheme :oneshot]            'hara.rt.basic.impl.process-scheme
+         [:scheme :basic]              'hara.rt.basic.impl.process-scheme
 
-         [:elisp  :oneshot]            'rt.basic.impl.process-elisp
-         [:elisp  :basic]              'rt.basic.impl.process-elisp
+         [:elisp  :oneshot]            'hara.rt.basic.impl.process-elisp
+         [:elisp  :basic]              'hara.rt.basic.impl.process-elisp
 
-         [:ruby   :oneshot]            'rt.basic.impl.process-ruby
-         [:ruby   :basic]              'rt.basic.impl.process-ruby
+         [:ruby   :oneshot]            'hara.rt.basic.impl.process-ruby
+         [:ruby   :basic]              'hara.rt.basic.impl.process-ruby
 
-         [:perl   :oneshot]            'rt.basic.impl-annex.process-perl
-         [:perl   :basic]              'rt.basic.impl-annex.process-perl
+         [:perl   :oneshot]            'hara.rt.basic.impl-annex.process-perl
+         [:perl   :basic]              'hara.rt.basic.impl-annex.process-perl
 
-         [:php    :oneshot]            'rt.basic.impl-annex.process-php
-         [:php    :basic]              'rt.basic.impl-annex.process-php
+         [:php    :oneshot]            'hara.rt.basic.impl-annex.process-php
+         [:php    :basic]              'hara.rt.basic.impl-annex.process-php
          
-         [:r      :oneshot]            'rt.basic.impl-annex.process-r
-         [:r      :basic]              'rt.basic.impl-annex.process-r
+         [:r      :oneshot]            'hara.rt.basic.impl-annex.process-r
+         [:r      :basic]              'hara.rt.basic.impl-annex.process-r
 
-         [:julia  :oneshot]            'rt.basic.impl-annex.process-julia
-         [:julia  :basic]              'rt.basic.impl-annex.process-julia
+         [:julia  :oneshot]            'hara.rt.basic.impl-annex.process-julia
+         [:julia  :basic]              'hara.rt.basic.impl-annex.process-julia
 
-         [:erlang :oneshot]            'rt.basic.impl-annex.process-erlang
-         [:erlang :basic]              'rt.basic.impl-annex.process-erlang
- 
-         [:haskell :twostep]           'rt.basic.impl-annex.process-haskell
-         [:lean    :twostep]           'rt.basic.impl-annex.process-lean
-         [:ocaml   :twostep]           'rt.basic.impl-annex.process-ocaml
- 
-         [:rust   :twostep]            'rt.basic.impl-annex.process-rust
+         [:erlang :oneshot]            'hara.rt.basic.impl-annex.process-erlang
+         [:erlang :basic]              'hara.rt.basic.impl-annex.process-erlang
          
-         [:c      :jocl]               'rt.jocl
-	 [:c      :oneshot]            'rt.basic.impl.process-c
-         [:c      :twostep]            'rt.basic.impl.process-c
+         [:haskell :twostep]           'hara.rt.basic.impl-annex.process-haskell
+         [:lean    :twostep]           'hara.rt.basic.impl-annex.process-lean
+         [:ocaml   :twostep]           'hara.rt.basic.impl-annex.process-ocaml
+         
+         [:rust   :twostep]            'hara.rt.basic.impl-annex.process-rust
+         
+         [:c      :jocl]               'hara.rt.jocl
+         [:c      :oneshot]            'hara.rt.basic.impl.process-c
+         [:c      :twostep]            'hara.rt.basic.impl.process-c
 
-         [:dart   :twostep]            'rt.basic.impl.process-dart
-         [:go     :twostep]            'rt.basic.impl.process-go
+         [:dart   :twostep]            'hara.rt.basic.impl.process-dart
+         [:go     :twostep]            'hara.rt.basic.impl.process-go
 	 
-         [:xtalk  :oneshot]            'rt.basic.impl.process-xtalk}))
+         [:xtalk  :oneshot]            'hara.rt.basic.impl.process-xtalk}))
 
 (def +book-registry+
   (atom {[:xtalk    :default]          {:ns 'hara.lang.model.spec-xtalk
@@ -133,10 +133,10 @@
          [:scheme   :default]          {:ns 'hara.lang.model.spec-scheme
                                         :book '+book+
                                         :parent :xtalk}
-
-         [:postgres :default]          {:ns 'rt.postgres.base.grammar
+         
+         [:postgres :default]          {:ns 'hara.rt.postgres.base.grammar
                                         :book '+book+}
-         [:solidity :default]          {:ns 'rt.solidity.grammar
+         [:solidity :default]          {:ns 'hara.rt.solidity.grammar
                                         :book '+book+}
 
          [:circom   :default]          {:ns 'hara.lang.model-annex.spec-circom

@@ -24,7 +24,7 @@
   [& [address rt]]
   (let [address   (or address
                       (compile-common/get-contract-address (rt-get-id rt)))
-        [type id] (get @rt.solidity.env-ganache/+contracts+ address)]
+        [type id] (get @hara.rt.solidity.env-ganache/+contracts+ address)]
     (assoc (get-in @compile-common/+compiled+
                    (cond-> [type id]
                      (= type :module) (conj (boolean compile-common/*open-methods*))))
