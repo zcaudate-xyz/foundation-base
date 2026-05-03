@@ -7,7 +7,7 @@
              [xt.lang.spec-promise :as spec-promise]
              [xt.db.schema.sql-util :as ut]
              [xt.db.schema.base-check :as check]
-             [xt.lib.connection-sql :as sql]]})
+             [xt.protocol.impl.connection-sql :as sql]]})
 
 (defn.xt decode-return
   "decodes the return value"

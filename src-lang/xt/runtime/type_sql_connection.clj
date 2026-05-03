@@ -3,7 +3,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
-             [xt.lib.connection-sql :as sql]]})
+             [xt.protocol.impl.connection-sql :as sql]]})
 
 (defn.xt driver?
   "checks if a value is a wrapped runtime sql driver"

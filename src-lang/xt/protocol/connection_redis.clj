@@ -1,4 +1,4 @@
-(ns xt.protocol.redis-connection
+(ns xt.protocol.connection-redis
   (:require [hara.lang :as l]))
 
 (l/script :xtalk

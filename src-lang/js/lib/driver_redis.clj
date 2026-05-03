@@ -6,7 +6,7 @@
 (l/script :js
   {:require [[xt.lang.spec-base :as xt]
              [js.core.util :as ut]
-             [xt.lib.redis-connection :as redisrt]]
+             [xt.protocol.impl.redis-connection :as redisrt]]
     :import  [["redis" :as [* Redis]]]})
 
 (f/template-entries [l/tmpl-entry {:type :fragment

@@ -6,7 +6,7 @@
              [xt.lang.common-resource :as rt]
              [xt.lang.spec-base :as xt]
              [python.core.system :as pysys]
-             [xt.lib.connection-sql :as sqlrt]]})
+             [xt.protocol.impl.connection-sql :as sqlrt]]})
 
 (defn.py default-env
   "Gets the default postgres env."

@@ -5,7 +5,7 @@
   {:import [["@sqlite.org/sqlite-wasm" :as sqlite3InitModule]]
    :require [[xt.lang.spec-base :as xt]
              [js.core.util :as ut]
-             [xt.lib.connection-sql :as sqlrt]]})
+             [xt.protocol.impl.connection-sql :as sqlrt]]})
 
 (defn.js raw-query
   "raw query for sqlite-wasm results"

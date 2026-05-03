@@ -5,7 +5,7 @@
   {:require [[xt.db.schema.base-flatten :as f]
              [xt.db.schema.base-schema :as base-schema]
              [xt.db.schema.base-scope :as scope]
-             [xt.lib.connection-sql :as sql]
+             [xt.protocol.impl.connection-sql :as sql]
              [xt.db.schema.sql-graph :as sql-graph]
              [xt.db.schema.sql-table :as sql-table]
              [xt.db.schema.sql-raw :as raw]

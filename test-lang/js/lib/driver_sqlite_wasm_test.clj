@@ -6,7 +6,7 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lib.connection-sql :as sql]
+   :require [[xt.protocol.impl.connection-sql :as sql]
               [xt.lang.spec-promise :as spec-promise]
                [xt.lang.common-repl :as repl]
                [js.lib.driver-sqlite-wasm :as js-sqlite-wasm]]})

@@ -6,7 +6,7 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lib.redis-connection :as redis]
+   :require [[xt.protocol.impl.redis-connection :as redis]
              [xt.lang.spec-base :as xt]
                [xt.lang.common-lib :as k]
                [xt.lang.common-repl :as repl]

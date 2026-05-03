@@ -2,7 +2,9 @@
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
-  {:export [MODULE] :require [[xt.cell.service :as service] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]]})
+  {:require [[xt.cell.service :as service]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]]})
 
 (defn.xt resolve-section
   "resolves a named db inside a descriptor section"
@@ -80,5 +82,3 @@
       (return [ok compiled-model]))
     (xt/x:set-key out model-id compiled-model))
   (return [true out]))
-
-(def.xt MODULE (!:module))

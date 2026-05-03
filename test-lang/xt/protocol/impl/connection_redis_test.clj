@@ -1,4 +1,4 @@
-(ns xt.lib.redis-connection-test
+(ns xt.protocol.impl.redis-connection-test
   (:use code.test)
   (:require [hara.rt.basic.type-common  :as common]
             [hara.lang              :as l]
@@ -10,27 +10,27 @@
    :require [[xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.lib.redis-connection :as redis]]})
+             [xt.protocol.impl.redis-connection :as redis]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.lib.redis-connection :as redis]]})
+             [xt.protocol.impl.redis-connection :as redis]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.lib.redis-connection :as redis]]})
+             [xt.protocol.impl.redis-connection :as redis]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.lib.redis-connection/connection-create :added "4.1"}
+^{:refer xt.protocol.impl.redis-connection/connection-create :added "4.1"}
 (fact "wraps Redis connection implementations with protocol-backed dispatch"
 
   (!.js
@@ -69,7 +69,7 @@
     (redis/disconnect conn)])
   => [true 1 true])
 
-^{:refer xt.lib.redis-connection/driver? :added "4.1"}
+^{:refer xt.protocol.impl.redis-connection/driver? :added "4.1"}
 (fact "identifies wrapped redis drivers"
 
   (!.js
@@ -123,7 +123,7 @@
     (redis/driver? nil)])
   => [true false false])
 
-^{:refer xt.lib.redis-connection/connection? :added "4.1"}
+^{:refer xt.protocol.impl.redis-connection/connection? :added "4.1"}
 (fact "identifies wrapped redis connections"
 
   (!.js
@@ -165,7 +165,7 @@
     (redis/connection? nil)])
   => [true false false])
 
-^{:refer xt.lib.redis-connection/ensure-promise :added "4.1"}
+^{:refer xt.protocol.impl.redis-connection/ensure-promise :added "4.1"}
 (fact "normalises redis values into host promises"
 
   (!.js
@@ -213,7 +213,7 @@
      (repl/>notify)))
   => 5)
 
-^{:refer xt.lib.redis-connection/require-driver :added "4.1"}
+^{:refer xt.protocol.impl.redis-connection/require-driver :added "4.1"}
 (fact "requires wrapped redis drivers"
 
   (!.js
@@ -264,7 +264,7 @@
     (xt/x:get-key (redis/require-driver driver) "::")])
   => [true "redis.connection.driver"])
 
-^{:refer xt.lib.redis-connection/require-connection :added "4.1"}
+^{:refer xt.protocol.impl.redis-connection/require-connection :added "4.1"}
 (fact "requires wrapped redis connections"
 
   (!.js
@@ -303,7 +303,7 @@
     (xt/x:get-key (redis/require-connection conn) "::")])
   => [true "redis.connection"])
 
-^{:refer xt.lib.redis-connection/driver-create :added "4.1"}
+^{:refer xt.protocol.impl.redis-connection/driver-create :added "4.1"}
 (fact "wraps redis driver implementations"
 
   (!.js
@@ -348,7 +348,7 @@
     (redis/driver-create impl)))
   => true)
 
-^{:refer xt.lib.redis-connection/connect :added "4.1"}
+^{:refer xt.protocol.impl.redis-connection/connect :added "4.1"}
 (fact "connects through wrapped redis drivers"
 
   (notify/wait-on :js
@@ -408,7 +408,7 @@
                      (redis/disconnect conn)]))))
   => [true "redis://connect"])
 
-^{:refer xt.lib.redis-connection/disconnect :added "4.1"}
+^{:refer xt.protocol.impl.redis-connection/disconnect :added "4.1"}
 (fact "disconnects through wrapped redis connections"
 
   (!.js
@@ -444,7 +444,7 @@
    (redis/disconnect conn))
   => "raw")
 
-^{:refer xt.lib.redis-connection/exec :added "4.1"}
+^{:refer xt.protocol.impl.redis-connection/exec :added "4.1"}
 (fact "executes commands through wrapped redis connections"
 
   (!.js
@@ -481,7 +481,7 @@
   => ["PING" ["A"] "raw"])
 
 (comment
-  (s/snapto '[xt.lib.redis-connection])
+  (s/snapto '[xt.protocol.impl.redis-connection])
   
-  (s/seedgen-langadd '[xt.lib.redis-connection] {:lang [:lua :python] :write true})
-  (s/seedgen-langremove '[xt.lib.redis-connection] {:lang [:lua :python] :write true}))
+  (s/seedgen-langadd '[xt.protocol.impl.redis-connection] {:lang [:lua :python] :write true})
+  (s/seedgen-langremove '[xt.protocol.impl.redis-connection] {:lang [:lua :python] :write true}))

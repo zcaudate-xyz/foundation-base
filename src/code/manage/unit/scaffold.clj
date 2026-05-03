@@ -30,19 +30,21 @@
 
 (defn new-filename
   "creates a new file based on test namespace
- 
-   (new-filename 'lucid.hello-test (project/project) false)
-   => (str (fs/path \"test/lucid/hello_test.clj\"))"
+  
+    (new-filename 'lucid.hello-test (project/project) false)
+    => (str (fs/path \"test/lucid/hello_test.clj\"))"
   {:added "3.0"}
   ([test-ns project write]
+   (new-filename nil test-ns project write))
+  ([path test-ns project write]
    (let [extension (project/file-suffix)
          path (format "%s/%s/%s"
                       (:root project)
-                      (first (:test-paths project))
+                      (project/test-root path project)
                       (-> test-ns str ^String (munge) (.replaceAll "\\." "/") (str extension)))]
-     (when write
-       (fs/create-directory (fs/parent path)))
-     path)))
+      (when write
+        (fs/create-directory (fs/parent path)))
+      path)))
 
 (defn scaffold-new
   "creates a completely new scaffold"

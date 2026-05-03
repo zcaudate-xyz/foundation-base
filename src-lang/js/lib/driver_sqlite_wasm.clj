@@ -4,7 +4,7 @@
 (l/script :js
   {:require [[xt.lang.spec-base :as xt]
              [js.core.util :as ut]
-             [xt.lib.connection-sql :as sqlrt]]
+             [xt.protocol.impl.connection-sql :as sqlrt]]
    :import [["@sqlite.org/sqlite-wasm" :as sqlite3InitModule]]})
 
 (defn.js raw-query

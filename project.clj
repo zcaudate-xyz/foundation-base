@@ -194,7 +194,8 @@
                                       (require '[std.lib :as h])
                                       (catch Throwable t (.printStackTrace t)))]}}
   #_#_:repositories [["atlassian" "https://maven.artifacts.atlassian.com/"]]
-  :source-paths      ["src" "src-extra" "src-extra/mcp-clj" "src-training"]
+  :source-paths      ["src" "src-lang" "src-extra" "src-extra/mcp-clj" "src-training"]
+  :test-paths        ["test" "test-lang"]
   :resource-paths    ["resources" "src-build" "src-extra" "src-doc" "test-data" "test-code"]
   :java-source-paths ["src-java" "test-java"]
   :java-output-path  "target/classes"

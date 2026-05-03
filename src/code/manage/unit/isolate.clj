@@ -367,14 +367,14 @@
            (res/result {:status :info
                         :data :no-failures})
 
-           :else
-           (let [target-ns   (isolate-target-ns test-ns (or suffix "-isolated"))
-                 target-file (scaffold/new-filename target-ns project write)
-                 revised     (isolate-string (slurp test-file)
-                                            target-ns
-                                            target-lines)
-                 result      (base/transform-code target-ns
-                                                  (assoc params
+            :else
+            (let [target-ns   (isolate-target-ns test-ns (or suffix "-isolated"))
+                  target-file (scaffold/new-filename test-file target-ns project write)
+                  revised     (isolate-string (slurp test-file)
+                                             target-ns
+                                             target-lines)
+                  result      (base/transform-code target-ns
+                                                   (assoc params
                                                          :no-analysis true
                                                          :transform (constantly revised)
                                                          :verify {:parse block/parse-root})

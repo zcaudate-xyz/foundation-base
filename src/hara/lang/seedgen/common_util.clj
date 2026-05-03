@@ -23,11 +23,11 @@
                                          (= :require (first %)))
                                 %)
                              (nnext ns-form))
-        hara.lang-alias (some #(require-alias % 'hara.lang)
+        hara-lang-alias (some #(require-alias % 'hara.lang)
                              (rest require-clause))]
     (cond-> #{'hara.lang/script-}
-      hara.lang-alias
-      (conj (symbol (str hara.lang-alias) "script-")))))
+      hara-lang-alias
+      (conj (symbol (str hara-lang-alias) "script-")))))
 
 (defn seedgen-root-langs
   [test-file include-root?]

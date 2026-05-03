@@ -252,16 +252,16 @@
              (res/result {:status :info
                           :data :no-source-vars})
 
-             :else
-             (let [transform-fn (if test-file
-                                  (fn [original] (scaffold/scaffold-append original source-ns new-vars version))
-                                  (fn [_] (scaffold/scaffold-new source-ns test-ns source-vars version)))
-                   [original test-file]  (if test-file
-                                           [(slurp test-file) test-file]
-                                           ["" (scaffold/new-filename test-ns project write)])
-                   params (assoc params :transform transform-fn)
-                   result (base/transform-code test-ns params (assoc lookup test-ns test-file) project)]
-               (assoc result :new (vec new-vars))))))))
+              :else
+              (let [transform-fn (if test-file
+                                   (fn [original] (scaffold/scaffold-append original source-ns new-vars version))
+                                   (fn [_] (scaffold/scaffold-new source-ns test-ns source-vars version)))
+                    [original test-file]  (if test-file
+                                            [(slurp test-file) test-file]
+                                            ["" (scaffold/new-filename source-file test-ns project write)])
+                    params (assoc params :transform transform-fn)
+                    result (base/transform-code test-ns params (assoc lookup test-ns test-file) project)]
+                (assoc result :new (vec new-vars))))))))
 
 (defn arrange
   "arranges the test code to be in the same order as the source code

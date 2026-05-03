@@ -6,7 +6,7 @@
   {:import [["resty.redis" :as ngxredis]
             ["resty.redis" :as ngxredis]]
    :require [[xt.lang.spec-base :as xt]
-             [xt.lib.redis-connection :as redisrt]]})
+             [xt.protocol.impl.redis-connection :as redisrt]]})
 
 (f/template-entries [l/tmpl-macro {:base "redis"
                                    :inst "rds"

@@ -9,7 +9,7 @@
              [xt.lang.common-resource :as rt]
              [js.core.util :as ut]
              [xt.lang.spec-base :as xt]
-             [xt.lib.connection-sql :as sqlrt]]
+             [xt.protocol.impl.connection-sql :as sqlrt]]
    :import [["pg" :as [* Postgres]]]})
 
 (defn.js default-env

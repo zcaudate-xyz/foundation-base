@@ -1,5 +1,6 @@
 (ns code.project
-  (:require [code.project.common :as common]
+  (:require [clojure.string :as str]
+            [code.project.common :as common]
             [code.project.lein :as lein]
             [code.project.shadow :as shadow]
             [std.fs :as fs]
@@ -100,28 +101,61 @@
 
 (defn lookup-path
   "looks up the path given the `ns`
- 
+  
    (lookup-path (h/ns-sym))"
   {:added "3.0"}
   ([ns]
    (get @common/*lookup* ns)))
 
+(defn- relative-root-path
+  ([path project]
+   (when (and path (:root project))
+     (str (fs/relativize (:root project) path)))))
+
+(defn- matching-root
+  ([path roots project]
+   (let [^String relative (relative-root-path path project)]
+     (when relative
+       (->> roots
+            (filter (fn [root]
+                      (let [^String root (str root)]
+                        (or (= relative root)
+                            (.startsWith relative (str root "/"))))))
+            (sort-by count >)
+            first)))))
+
+(defn test-root
+  "returns the preferred test root for a path within the project"
+  {:added "4.1"}
+  ([path project]
+   (let [test-paths   (or (:test-paths project) ["test"])
+         current-test (matching-root path test-paths project)
+         source-root  (matching-root path (:source-paths project) project)
+         source-test  (when source-root
+                        (let [candidate (str/replace source-root #"^src" "test")]
+                          (when ((set test-paths) candidate)
+                            candidate)))]
+     (or current-test
+         source-test
+         (first test-paths)))))
+
 (defn get-path
   "gets the path given the `ns`
-   
-   (reset! code.project.common/*lookup* {})
-   (get-path (h/ns-sym))
-   => \"test/code/project_test.clj\""
+    
+    (reset! code.project.common/*lookup* {})
+    (get-path (h/ns-sym))
+    => \"test/code/project_test.clj\""
   {:added "4.0"}
   ([ns & [project]]
-   (or (get @common/*lookup* ns)
-       (some (fn [root]
-               (second 
-                (lookup-ns
-                 (str root "/" (fs/ns->file ns) ".clj"))))
-             (concat
-              (or (:source-paths project) ["src"])
-              (or (:test-paths project)   ["test"]))))))
+   (let [project (or project (project))]
+     (or (get @common/*lookup* ns)
+        (some (fn [root]
+                (second 
+                 (lookup-ns
+                  (str root "/" (fs/ns->file ns) ".clj"))))
+              (concat
+               (or (:source-paths project) ["src"])
+               (or (:test-paths project)   ["test"])))))))
 
 (defn all-files
   "returns all the clojure files in a directory
@@ -252,19 +286,22 @@
 
 (defmacro in-context
   "creates a local context for executing code functions
- 
-   (in-context ((fn [current params _ project]
-                  current)))
+  
+    (in-context ((fn [current params _ project]
+                   current)))
    => 'code.project-test"
   {:added "3.0"}
   ([[func & args]]
-   (let [project `(project)
-         lookup  `(all-files ["src" "test"] {} ~'project)
-         current `(.getName *ns*)
-         params  `{}]
-     (case (count args)
-       0  `(let [~'project ~project]
-             (~func ~current ~params ~lookup ~'project))
+    (let [project `(project)
+          lookup  `(all-files (concat (:source-paths ~'project)
+                                      (:test-paths ~'project))
+                              {}
+                              ~'project)
+          current `(.getName *ns*)
+          params  `{}]
+      (case (count args)
+        0  `(let [~'project ~project]
+              (~func ~current ~params ~lookup ~'project))
        1   (if (map? (first args))
              `(let [~'project ~project]
                 (~func ~current ~(first args) ~lookup ~'project))
@@ -277,12 +314,11 @@
 
 (defn code-files
   "returns only the code files for the current project
- 
-   (code-files)"
+  
+    (code-files)"
   {:added "3.0"}
   ([]
-   (all-files (concat (:test-paths common/+defaults+)
-                      (:source-paths common/+defaults+)))))
+   (file-lookup (project))))
 
 (defn code-path
   "returns the path of the code

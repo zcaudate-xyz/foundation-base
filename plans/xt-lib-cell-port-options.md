@@ -1,4 +1,4 @@
-# `xt.lib.cell` Port Plan (Task-First)
+# `xt.protocol.impl.cell` Port Plan (Task-First)
 
 ## Scope
 

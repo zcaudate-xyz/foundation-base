@@ -1,5 +1,5 @@
 (ns xt.lang.spec-base
-  (:require [std.lang :as l :refer [defspec.xt]]))
+  (:require [hara.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk)
 

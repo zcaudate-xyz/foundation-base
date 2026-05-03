@@ -57,6 +57,13 @@
   (get-path (env/ns-sym))
   => "test/code/project_test.clj")
 
+^{:refer code.project/get-path :added "4.1"
+  :setup [(reset! code.project.common/*lookup* {})]}
+(fact "uses configured project roots when resolving namespaces"
+
+  (get-path 'xt.cell.service.util-hello)
+  => "src-lang/xt/cell/service/util_hello.clj")
+
 ^{:refer code.project/all-files :added "3.0"}
 (fact "returns all the clojure files in a directory"
 
@@ -127,7 +134,8 @@
 (fact "returns only the code files for the current project"
 
   (code-files)
-  => (contains {'code.project any}))
+  => (contains {'code.project any
+                'xt.cell.service.util-hello "src-lang/xt/cell/service/util_hello.clj"}))
 
 ^{:refer code.project/code-path :added "3.0"}
 (fact "returns the path of the code"

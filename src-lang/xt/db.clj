@@ -6,7 +6,7 @@
              [xt.db.schema.base-scope :as scope]
              [xt.db.impl.cache :as impl-cache]
              [xt.db.impl.sql :as impl-sql]
-             [xt.lib.connection-sql :as sql]
+             [xt.protocol.impl.connection-sql :as sql]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.event.util-throttle :as th]]})

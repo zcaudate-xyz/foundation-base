@@ -63,7 +63,7 @@
               [xt.lang.common-data :as xtd]
               [xt.lang.common-resource :as rt :with [defsingleton.js]]
               [xt.event.base-view :as event-view]
-              [xt.lib.connection-sql :as dbsql]]})
+              [xt.protocol.impl.connection-sql :as dbsql]]})
 
 (defn node-remote-script
   []
