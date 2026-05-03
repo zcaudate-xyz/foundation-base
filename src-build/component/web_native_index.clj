@@ -1,5 +1,5 @@
 (ns component.web-native-index
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [std.lib :as h]
             [std.string :as str]
             [net.http :as http]))

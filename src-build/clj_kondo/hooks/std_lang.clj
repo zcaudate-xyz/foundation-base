@@ -1,4 +1,4 @@
-(ns clj-kondo.hooks.std-lang
+(ns clj-kondo.hooks.hara.lang
   (:require [clj-kondo.hooks-api :as api]))
 
 

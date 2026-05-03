@@ -1,5 +1,5 @@
 (ns example.xt.cache.custom-cache
-  (:require [std.lang :as l])
+  (:require [hara.lang :as l])
   (:refer-clojure :exclude [get set]))
 
 (l/script :xtalk

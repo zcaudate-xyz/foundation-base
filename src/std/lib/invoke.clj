@@ -373,7 +373,7 @@
 (def +default-fn+
   '{:function   {:ns std.lib.lamdba}
     :predicate  {:ns std.lib.lamdba}
-    :scala      {:ns std.lang.scala.function}})
+    :scala      {:ns hara.lang.scala.function}})
 
 (defn fn-body
   "creates a function body

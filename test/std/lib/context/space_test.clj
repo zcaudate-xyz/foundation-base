@@ -116,7 +116,7 @@
   space-context-set
   (space:rt-get rt:scratch :lang/lua)
   (reg/registry-list)
-  (space-rt (space 'std.lang.codegen.form-test)
+  (space-rt (space 'hara.lang.codegen.form-test)
             :lang/start)
 
   (rt:current)

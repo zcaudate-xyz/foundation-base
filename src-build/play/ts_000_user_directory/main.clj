@@ -1,5 +1,5 @@
 (ns play.ts-000-user-directory.main
-  (:require [std.lang :as l]))
+  (:require [hara.lang :as l]))
 
 (l/script :js)
 

@@ -1,6 +1,6 @@
 (ns component.build-native-index
   (:use code.test)
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [std.lib :as h]
             [std.string :as str]
             [std.make :as make :refer [def.make]]

@@ -1,7 +1,7 @@
 (ns scripts.generate-quality-training
   "Generates scored training data with quality metrics.
    Validates through round-trip translation."
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [clojure.string :as str])
   (:use code.test))
 

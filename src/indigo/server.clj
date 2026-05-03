@@ -72,7 +72,7 @@
       "clj/file-content"          (endpoint #'api-browser/get-file-content :path)
       "clj/delete-path"           (endpoint #'api-browser/delete-path :path)
 
-      ;; Std Lang
+      ;; hara.lang
       "lang/namespaces"           (endpoint #'api-browser/list-namespaces [:lang "js"])
       "lang/components"           (endpoint #'api-browser/list-components [:lang "js"] :ns)
       "lang/component-preview"    (endpoint #'api-browser/component-preview [:lang "js"] :ns :component)

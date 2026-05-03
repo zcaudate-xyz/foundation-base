@@ -1,6 +1,6 @@
 (ns play.go-000-user-directory.main
-  (:require [std.lang :as l]
-            [std.lang.model.spec-go]))
+  (:require [hara.lang :as l]
+            [hara.lang.model.spec-go]))
 
 (l/script :go)
 

@@ -2,7 +2,7 @@
   (:require [code.mcp.base.server :as base-server]
             [code.mcp.server :as server]
             [code.mcp.tool.basic :as basic]
-            [code.mcp.tool.std-lang :as std-lang])
+            [code.mcp.tool.hara.lang :as hara.lang])
   (:use code.test))
 
 ^{:refer code.mcp.tool.basic/echo-fn :added "4.0"}
@@ -17,17 +17,17 @@
   => {:content [{:type "text" :text "ping"}]
       :isError false})
 
-^{:refer code.mcp.tool.std-lang/lang-emit-as-safe :added "4.0"}
+^{:refer code.mcp.tool.hara.lang/lang-emit-as-safe :added "4.0"}
 (fact "safely emits code"
-  (std-lang/lang-emit-as-safe :lua "(+ 1 2)")
+  (hara.lang/lang-emit-as-safe :lua "(+ 1 2)")
   => "1 + 2"
 
-  (std-lang/lang-emit-as-safe :js "(+ 1 2)")
+  (hara.lang/lang-emit-as-safe :js "(+ 1 2)")
   => "1 + 2")
 
-^{:refer code.mcp.tool.std-lang/lang-emit-as-fn :added "4.0"}
+^{:refer code.mcp.tool.hara.lang/lang-emit-as-fn :added "4.0"}
 (fact "tool wrapper for emit"
-  (std-lang/lang-emit-as-fn nil {:type "lua" :code "(+ 1 2)"})
+  (hara.lang/lang-emit-as-fn nil {:type "lua" :code "(+ 1 2)"})
   => {:content [{:type "text" :text "1 + 2"}]
       :isError false})
 
@@ -49,7 +49,7 @@
         "code-test"
         "code-manage"
         "jvm-namespace"
-        "lang-emit-as" "std-lang-list" "std-lang-modules"
+        "lang-emit-as" "hara.lang-list" "hara.lang-modules"
         "code-doc-init" "code-doc-deploy" "code-doc-publish"
         "code-maven"
         "form-heal-list-edits" "form-heal-get-dsl-deps" "form-heal-refactor-directory"})

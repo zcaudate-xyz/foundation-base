@@ -1,5 +1,5 @@
 (ns play.c-000-pthreads-hello.main
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [std.lib :as h]
             [std.string :as str]))
 

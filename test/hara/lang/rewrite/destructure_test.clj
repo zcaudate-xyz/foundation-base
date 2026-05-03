@@ -1,0 +1,25 @@
+(ns hara.lang.rewrite.destructure-test
+  (:use code.test)
+  (:require [hara.lang.rewrite.destructure :as destruct]))
+
+^{:refer hara.lang.rewrite.destructure/destructure-target? :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.lang.rewrite.destructure/destructure-symbols :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.lang.rewrite.destructure/destructure-value :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.lang.rewrite.destructure/destructure-bindings :added "4.1"}
+(fact "builds sorted set destructuring bindings"
+  [(destruct/destructure-target? '#{beta alpha})
+   (destruct/destructure-target? '[beta alpha])
+   (vec (destruct/destructure-bindings '#{beta alpha} 'TMP))
+   (vec (destruct/destructure-bindings '#{beta alpha} 'TMP #(str "key/" (name %))))]
+  => [true
+      false
+      '[[alpha (x:get-key TMP "alpha" nil)]
+        [beta (x:get-key TMP "beta" nil)]]
+      '[[alpha (x:get-key TMP "key/alpha" nil)]
+        [beta (x:get-key TMP "key/beta" nil)]]])

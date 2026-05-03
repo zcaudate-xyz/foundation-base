@@ -14,7 +14,7 @@
    example is validated through round-trip translation.
    
    Usage: lein exec -p src-training/scripts/generate_scored_training_data.clj [count]"
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [std.json :as json]
             [clojure.string :as str]
             [clojure.java.io :as io]

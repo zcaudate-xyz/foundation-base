@@ -1,17 +1,17 @@
 (ns scripts.generate-grammar-training
-  "Generates training data based on std.lang formal grammar specifications.
+  "Generates training data based on hara.lang formal grammar specifications.
    
    This creates examples from:
-   - std.lang.base.grammar-spec (+op-math+, +op-compare+, +op-logic+, etc.)
-   - std.lang.base.grammar-macro (+op-macro+, if/when/cond transformations)
-   - std.lang.base.grammar-xtalk (x:* primitives)
+   - hara.lang.base.grammar-spec (+op-math+, +op-compare+, +op-logic+, etc.)
+   - hara.lang.base.grammar-macro (+op-macro+, if/when/cond transformations)
+   - hara.lang.base.grammar-xtalk (x:* primitives)
    
    Usage: lein exec -p src-training/scripts/generate_grammar_training.clj"
   (:require [clojure.string :as str]))
 
 ;; ============================================================
 ;; GRAMMAR SPEC TRAINING PAIRS
-;; Based on std.lang.base.grammar-spec
+;; Based on hara.lang.base.grammar-spec
 ;; ============================================================
 
 (def +grammar-spec-pairs+
@@ -356,7 +356,7 @@
 
 ;; ============================================================
 ;; GRAMMAR MACRO TRAINING PAIRS
-;; Based on std.lang.base.grammar-macro
+;; Based on hara.lang.base.grammar-macro
 ;; ============================================================
 
 (def +grammar-macro-pairs+
@@ -492,7 +492,7 @@
 
 ;; ============================================================
 ;; GRAMMAR XTALK TRAINING PAIRS
-;; Based on std.lang.base.grammar-xtalk
+;; Based on hara.lang.base.grammar-xtalk
 ;; ============================================================
 
 (def +grammar-xtalk-pairs+
@@ -680,7 +680,7 @@
     :subcategory "defn.js"
     :operator "defn.js"
     :spec "+op-top-base+ :defn with lang suffix"
-    :xtalk-module (str "(ns my.mod (:require [std.lang :as l]))\n\n"
+    :xtalk-module (str "(ns my.mod (:require [hara.lang :as l]))\n\n"
                        "(l/script :js {:require []})\n\n"
                        "(defn.js greet [name]\n"
                        "  (return (x:cat \"Hello \" name)))")
@@ -851,7 +851,7 @@
     ;; Print header
     (println "╔════════════════════════════════════════════════════════════════╗")
     (println "║        GRAMMAR BIBLE - 1000 PAIRS GENERATED                   ║")
-    (println "║   Based on std.lang formal grammar specifications             ║")
+    (println "║   Based on hara.lang formal grammar specifications             ║")
     (println "╚════════════════════════════════════════════════════════════════╝")
     
     (println (str "\n✓ Generated: " (count pairs) " training pairs"))

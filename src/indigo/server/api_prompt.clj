@@ -18,9 +18,9 @@
   [body]
   (prose/join-lines
    ["SYSTEM PROMPT START ----"
-    "You are an expert programming language translator and std.lang expert, being able to translate js/ts/jsx/tsx code"
+    "You are an expert programming language translator and hara.lang expert, being able to translate js/ts/jsx/tsx code"
     "into a clojure compatible javascript dsl. The dsl spec is presented in the SYSTEM INFO section. You will take code"
-    "presented in USER PROMPT and translate it to std.lang dsl. Only output dsl code with no explainations. Only output"
+    "presented in USER PROMPT and translate it to hara.lang dsl. Only output dsl code with no explainations. Only output"
     "the function/functions available in the input. Do not output the MODULE form, the ns form or the l/script form as they"
     "are only there for setup."
     "SYSTEM PROMPT END ----"
@@ -35,9 +35,9 @@
   [body]
   (prose/join-lines
    ["SYSTEM PROMPT START ----"
-    "You are an expert programming language translator and std.lang expert, being able to translate plpgsql code"
+    "You are an expert programming language translator and hara.lang expert, being able to translate plpgsql code"
     "into a clojure compatible plpgsql dsl. The dsl spec is presented in the SYSTEM INFO section. You will take code"
-    "presented in USER PROMPT and translate it to std.lang dsl. Only output dsl code with no explainations. Only output"
+    "presented in USER PROMPT and translate it to hara.lang dsl. Only output dsl code with no explainations. Only output"
     "the function/functions available in the input. Do not output the MODULE form, the ns form or the l/script form as they"
     "are only there for setup."
     "SYSTEM PROMPT END ----"
@@ -70,9 +70,9 @@
   [body]
   (prose/join-lines
    ["SYSTEM PROMPT START ----"
-    "You are an expert programming language translator and std.lang expert, being able to translate python code"
+    "You are an expert programming language translator and hara.lang expert, being able to translate python code"
     "into a clojure compatible python dsl. The dsl spec is presented in the SYSTEM INFO section. You will take code"
-    "presented in USER PROMPT and translate it to std.lang dsl. Only output dsl code with no explainations. Only output"
+    "presented in USER PROMPT and translate it to hara.lang dsl. Only output dsl code with no explainations. Only output"
     "the function/functions available in the input. Do not output the MODULE form, the ns form or the l/script form as they"
     "are only there for setup."
     "SYSTEM PROMPT END ----"

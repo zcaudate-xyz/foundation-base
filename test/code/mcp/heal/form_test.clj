@@ -28,7 +28,7 @@
 ^{:refer code.mcp.heal.form/get-dsl-deps-fn :added "4.1"}
 (fact "gets the dsl dependencies"
 
-  (get-dsl-deps-fn "(ns my.ns (:require [std.lang :as l] [std.lib :as h])) (l/script :lua {:require [[xt.lang.common-lib :as k]]})")
+  (get-dsl-deps-fn "(ns my.ns (:require [hara.lang :as l] [std.lib :as h])) (l/script :lua {:require [[xt.lang.common-lib :as k]]})")
   => {:ns 'my.ns :deps #{'xt.lang.common-lib}})
 
 ^{:refer code.mcp.heal.form/load-file-fn :added "4.1"}

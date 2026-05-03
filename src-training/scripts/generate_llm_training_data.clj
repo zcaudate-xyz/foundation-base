@@ -1,5 +1,5 @@
 (ns scripts.generate-llm-training-data
-  "Comprehensive LLM training data generator for std.lang.
+  "Comprehensive LLM training data generator for hara.lang.
    
    Generates organized, LLM-compatible training datasets:
    - JSONL format (standard)
@@ -10,7 +10,7 @@
    Organizes by category for easy filtering and curriculum learning.
    
    Usage: lein exec -p src-training/scripts/generate_llm_training_data.clj [options]"
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [std.json :as json]
             [clojure.string :as str]
             [clojure.java.io :as io])
@@ -283,7 +283,7 @@
 
 (defn to-sharegpt-format [pair idx]
   "ShareGPT conversational format"
-  {:id (str "std-lang-" idx)
+  {:id (str "hara.lang-" idx)
    :conversations
    [{:from "human"
      :value (str (:instruction pair) "\n\n" (:xtalk pair))}
@@ -383,7 +383,7 @@
                       :splits (zipmap (keys splits) (map count (vals splits)))
                       :formats (:formats +config+)
                       :categories (frequencies (map :type pairs))
-                      :description "std.lang control flow training data"}]
+                      :description "hara.lang control flow training data"}]
         (spit (str base-dir "/metadata.json") (json/write-pp metadata))
         (println (str "\n✓ Metadata: " base-dir "/metadata.json")))
       
@@ -416,7 +416,7 @@
     
     (println "╔════════════════════════════════════════════════════════════════╗")
     (println "║     LLM TRAINING DATA GENERATOR                              ║")
-    (println "║     std.lang Control Flow → Multi-Format Dataset            ║")
+    (println "║     hara.lang Control Flow → Multi-Format Dataset            ║")
     (println "╚════════════════════════════════════════════════════════════════╝")
     
     ;; Initialize runtimes

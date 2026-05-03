@@ -8,7 +8,7 @@
      lein repl
      (load-file \"src-training/scripts/generate_training_pairs.clj\")
      (generate-1000-pairs)"
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [std.lib.json :as json]
             [clojure.string :as str]
             [xt.lang.base-lib :as k])

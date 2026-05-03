@@ -3,7 +3,7 @@
    from xtalk specs using l/emit-as for multi-target code generation.
    
    Usage: lein exec -p src-training/scripts/rosetta_forge.clj"
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [std.lib.json :as json]
             [clojure.string :as str])
   (:use code.test))

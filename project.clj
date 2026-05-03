@@ -101,18 +101,18 @@
    ;; math.infix
    [org.scijava/parsington "3.1.0"]
 
-   ;; rt.basic
+   ;; hara.rt.basic
    [http-kit "2.8.0"]
 
-   ;; rt.graal
+   ;; hara.rt.graal
    [org.graalvm.polyglot/polyglot "24.1.0"]
    [org.graalvm.js/js-language "24.1.0"]
    [commons-io/commons-io "2.15.1"]
 
-   ;; rt.jep
+   ;; hara.rt.jep
    [black.ninia/jep "4.3.1"]
 
-   ;; rt.libpython
+   ;; hara.rt.libpython
    [clj-python/libpython-clj "2.026"]
 
    ;; std.pretty

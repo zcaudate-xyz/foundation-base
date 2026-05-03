@@ -1,5 +1,5 @@
 (ns std.make.compile-test
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [std.make.compile :refer :all]
             [std.string.prose :as prose])
   (:use code.test)

@@ -1,10 +1,10 @@
 (ns web3.lib.example-counter-test
-  (:require [std.lang :as l])
+  (:require [hara.lang :as l])
   (:use code.test))
 
 (l/script- :solidity
   {:runtime :web3
-   :require [[rt.solidity :as s]
+   :require [[hara.rt.solidity :as s]
              [web3.lib.example-counter :as counter]]})
 
 (fact:global

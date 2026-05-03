@@ -45,7 +45,7 @@
 (defn build-prep
   "prepares the build
  
-   (build-prep 'std.lang)
+   (build-prep 'hara.lang)
    => vector?"
   {:added "4.0"}
   ([ns]
@@ -100,10 +100,10 @@
 
 
 (comment
-  (build-output {:ns 'std.lang
+  (build-output {:ns 'hara.lang
                  :root ".build"
-                 :build "std.lang"})
-  (build-output 'std.lang)
+                 :build "hara.lang"})
+  (build-output 'hara.lang)
   (build-clean 'app.jvm.resp-repl.main)
   
   (build-output 'app.jvm.resp-repl.main)

@@ -3,7 +3,7 @@
    
    Validates that xtalk code works on ALL three platforms.
    This proves 'write once, run anywhere' capability."
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [std.json :as json]
             [clojure.string :as str]
             [clojure.java.io :as io])

@@ -8,7 +8,7 @@
             [code.mcp.tool.code-test :as code-test]
             [code.mcp.tool.form-heal :as form-heal]
             [code.mcp.tool.jvm-namespace :as jvm-namespace]
-            [code.mcp.tool.std-lang :as std-lang]))
+            [code.mcp.tool.hara.lang :as hara.lang]))
 
 (defonce *server* (atom nil))
 
@@ -18,7 +18,7 @@
        "- Use `code-test` for targeted `code.test` runs, namespace reloads, or rerunning errored tests.\n"
        "- Use `code-manage` for repository maintenance, scaffolding, grep/refactor, and namespace hygiene tasks.\n"
        "- Use `jvm-namespace` for live namespace inspection, reloads, clearing aliases/mappings, and in-memory inspection.\n"
-       "- Use `lang-emit-as` and `std-lang-*` for language inventories, emit probes, and module inspection.\n"
+       "- Use `lang-emit-as` and `hara.lang-*` for language inventories, emit probes, and module inspection.\n"
        "- Use `code-doc-*` for documentation template init/deploy/publish workflows.\n"
        "- Use `code-maven` for linkage, packaging, install, and deploy-oriented automation.\n"
        "- Use `clj-eval` only for focused probes that are not already covered by a higher-level project tool.\n\n"
@@ -33,9 +33,9 @@
    code-test/code-test-tool
    code-manage/manage-tool
    jvm-namespace/jvm-namespace-tool
-   std-lang/lang-emit-as-tool
-   std-lang/list-languages-tool
-   std-lang/list-modules-tool
+   hara.lang/lang-emit-as-tool
+   hara.lang/list-languages-tool
+   hara.lang/list-modules-tool
    code-doc/init-template-tool
    code-doc/deploy-template-tool
    code-doc/publish-tool

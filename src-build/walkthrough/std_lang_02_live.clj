@@ -1,7 +1,7 @@
-(ns walkthrough.std-lang-02-live
+(ns walkthrough.hara.lang-02-live
   ;; Will will create a multi lang environment
   (:use code.test)
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [std.lib :as h]
             [std.string :as str]))
 

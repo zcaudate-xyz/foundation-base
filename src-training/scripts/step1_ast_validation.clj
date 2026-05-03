@@ -1,6 +1,6 @@
 (ns scripts.step1-ast-validation
   "Step 1: AST Validation System - Simplified Working Version"
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [std.json :as json]
             [clojure.string :as str]
             [clojure.java.io :as io])

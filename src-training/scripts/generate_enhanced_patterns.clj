@@ -1,5 +1,5 @@
 (ns scripts.generate-enhanced-patterns
-  "Generates enhanced training data using std.lang grammar specifications.
+  "Generates enhanced training data using hara.lang grammar specifications.
    
    Features:
    1. Type-consistent expression generation
@@ -9,7 +9,7 @@
    5. AST validation for semantic equivalence
    
    Usage: lein exec -p src-training/scripts/generate_enhanced_patterns.clj [count]"
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [std.json :as json]
             [clojure.string :as str]
             [std.lib :refer [definvoke]]
@@ -122,7 +122,7 @@
       
       (catch Exception e
         (println (str "\n✗ Error: " (.getMessage e)))
-        (println "Make sure std.lang is properly loaded.")))))
+        (println "Make sure hara.lang is properly loaded.")))))
 
 ;; Run
 (apply -main (rest *command-line-args*))

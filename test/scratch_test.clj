@@ -9,35 +9,35 @@
 
   (vec 
    (sort
-    '(std.lang.base.manage
+    '(hara.lang.base.manage
      std.image.base.display
-     std.lang.base.emit-data
+     hara.lang.base.emit-data
      std.pretty.protocol
      std.pretty.edn
      std.dispatch.hub
      std.concurrent.thread
      std.vm.llvm-interpreter
-     std.lang.base.script-control
+     hara.lang.base.script-control
      std.dom.event
      std.make.project
      std.object.element
      std.dom.type
-     std.lang.base.util
+     hara.lang.base.util
      std.object.query.order
      std.dom.sync
      std.protocol.deps
      std.scheduler.spawn
      std.dispatch
-     std.lang.base.emit-fn
+     hara.lang.base.emit-fn
      std.lib.zip
      std.vm.forth-interpreter
-     std.lang.base.script-annex
-     std.lang.interface.type-shared
+     hara.lang.base.script-annex
+     hara.lang.interface.type-shared
      std.lib.system.scaffold
      std.protocol.state
      std.object.element.impl.type
      std.log.form
-     std.lang.model.spec-js.jsx
+     hara.lang.model.spec-js.jsx
      std.lib.system.type
      std.concurrent.relay.transport
      std.task.bulk
@@ -47,37 +47,37 @@
      std.pretty.dispatch
      std.object.framework.struct
      std.block.heal.edit
-     std.lang
-     std.lang.base.emit-block
+     hara.lang
+     hara.lang.base.emit-block
      std.block.editor
-     std.lang.base.runtime
+     hara.lang.base.runtime
      std.lib.signal
      std.concurrent.print
      std.block.heal.parse
-     std.lang.interface.type-notify
+     hara.lang.interface.type-notify
      std.concurrent.relay
-     std.lang.base.script-lint
+     hara.lang.base.script-lint
      std.make.bulk
      std.concurrent.bus
-     std.lang.model.spec-scheme
+     hara.lang.model.spec-scheme
      std.block.heal.indent
      std.lib.os
-     std.lang.base.script
+     hara.lang.base.script
      std.lib.resource
-     std.lang.base.workspace
+     hara.lang.base.workspace
      std.protocol.string
-     std.lang.model.spec-rust
+     hara.lang.model.spec-rust
      std.log.match
-     std.lang.base.grammar-xtalk
-     std.lang.base.impl
+     hara.lang.base.grammar-xtalk
+     hara.lang.base.impl
      std.lib.transform.base.type-check
      std.log.common
-     std.lang.base.emit-common
+     hara.lang.base.emit-common
      std.vm.jvm-interpreter
      std.make.makefile
      std.object.query
      std.make.common
-     std.lang.base.compile
+     hara.lang.base.compile
      std.task
      std.make.readme
      std.tailwind
@@ -86,26 +86,26 @@
      std.fs.api
      std.make.compile
      std.lib.trace
-     std.lang.base.pointer
+     hara.lang.base.pointer
      std.pretty
-     std.lang.base.library
-     std.lang.base.impl-entry
-     std.lang.base.emit-preprocess
+     hara.lang.base.library
+     hara.lang.base.impl-entry
+     hara.lang.base.emit-preprocess
      std.object.element.common
      std.object.element.impl.multi
      std.text.diff
      std.dispatch.common
      std.protocol.wire
-     std.lang.model.spec-js.html
-     std.lang.model.spec-js.meta
+     hara.lang.model.spec-js.html
+     hara.lang.model.spec-js.meta
      std.block.heal.filename
-     std.lang.model.spec-js.qml
-     std.lang.base.runtime-proxy
+     hara.lang.model.spec-js.qml
+     hara.lang.base.runtime-proxy
      std.object.framework.access
      std.object.framework.print
      std.lib.stream
      std.protocol.invoke
-     std.lang.base.emit-helper
+     hara.lang.base.emit-helper
      std.dispatch.queue
      std.html
      std.concurrent.request
@@ -115,23 +115,23 @@
      std.dom.invoke
      std.concurrent.request-apply
      std.timeseries.range
-     std.lang.base.grammar-macro
+     hara.lang.base.grammar-macro
      std.concurrent.queue
      std.fs.walk
      std.concurrent.executor
      std.dispatch.board
-     std.lang.model.spec-xtalk.fn-python
+     hara.lang.model.spec-xtalk.fn-python
      std.vm.scheme-interpreter
      std.image
-     std.lang.base.script-macro
+     hara.lang.base.script-macro
      std.protocol.log
-     std.lang.model.spec-bash
+     hara.lang.model.spec-bash
      std.dom.react
      std.lib.memoize
-     std.lang.base.library-snapshot
+     hara.lang.base.library-snapshot
      std.block.heal.core
      std.concurrent.atom
-     std.lang.model.spec-xtalk.fn-js
+     hara.lang.model.spec-xtalk.fn-js
      std.object.framework
      std.fs.attribute
      std.tailwind.analysis
@@ -144,13 +144,13 @@
      std.json
      std.protocol.dispatch
      std.print.progress
-     std.lang.model.spec-js
+     hara.lang.model.spec-js
      std.object.element.class
      std.task.process
      std.math.markov
      std.lib.walk
-     std.lang.base.impl-lifecycle
-     std.lang.model.spec-xtalk.fn-lua
+     hara.lang.base.impl-lifecycle
+     hara.lang.model.spec-xtalk.fn-lua
      std.make.github)))
   
    )

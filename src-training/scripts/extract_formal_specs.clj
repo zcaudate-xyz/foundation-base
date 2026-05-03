@@ -1,11 +1,11 @@
 (ns scripts.extract-formal-specs
-  "Extracts complete formal specifications from std.lang for training data.
+  "Extracts complete formal specifications from hara.lang for training data.
    
    Sources:
-   - std.lang.base.grammar-spec (+op-* definitions)
-   - std.lang.base.grammar-macro (macro transformations)
-   - std.lang.base.grammar-xtalk (xtalk transforms)
-   - std.lang.model.spec-* (language-specific specs)
+   - hara.lang.base.grammar-spec (+op-* definitions)
+   - hara.lang.base.grammar-macro (macro transformations)
+   - hara.lang.base.grammar-xtalk (xtalk transforms)
+   - hara.lang.model.spec-* (language-specific specs)
    
    Usage: lein exec -p src-training/scripts/extract_formal_specs.clj"
   (:require [clojure.string :as str]
@@ -18,7 +18,7 @@
 (defn read-grammar-spec-file
   "Reads the grammar-spec file and extracts +op-* definitions"
   []
-  (let [content (slurp "src/std/lang/base/grammar_spec.clj")
+  (let [content (slurp "src/hara.lang/base/grammar_spec.clj")
         ;; Extract def forms for +op-* variables
         op-defs (re-seq #"\(def\s+\+op-([\w-]+\+)\s+\[([^\]]*)\]" content)]
     (into {}
@@ -33,13 +33,13 @@
 ;; ============================================================
 
 (def +complete-specs+
-  "Complete registry of all std.lang specifications"
+  "Complete registry of all hara.lang specifications"
   {
    ;; =========================================================
    ;; GRAMMAR-SPEC
    ;; =========================================================
    :grammar-spec
-   {:source "std.lang.base.grammar-spec"
+   {:source "hara.lang.base.grammar-spec"
     :categories
     {:builtin
      {:spec "+op-builtin+"
@@ -190,7 +190,7 @@
    ;; GRAMMAR-MACRO
    ;; =========================================================
    :grammar-macro
-   {:source "std.lang.base.grammar-macro"
+   {:source "hara.lang.base.grammar-macro"
     :macros
     [{:macro "if" :symbol "if" :emit :macro :fn "tf-if" :type :block
       :transform "(if cond then else) => (br* (if cond then) (else else))"}
@@ -221,7 +221,7 @@
    ;; GRAMMAR-XTALK
    ;; =========================================================
    :grammar-xtalk
-   {:source "std.lang.base.grammar-xtalk"
+   {:source "hara.lang.base.grammar-xtalk"
     :transforms
     [{:name "tf-throw" :form "(throw obj)" :expands-to "(throw obj)"}
      {:name "tf-eq-nil?" :form "(x:nil? obj)" :expands-to "(== nil obj)"}
@@ -249,7 +249,7 @@
    ;; XTALK PRIMITIVES (from spec-xtalk/fn-*.clj)
    ;; =========================================================
    :xtalk-primitives
-   {:source "std.lang.model.spec-xtalk"
+   {:source "hara.lang.model.spec-xtalk"
     :categories
     {:core
      {:primitives [:x-del :x-cat :x-len :x-err :x-eval :x-apply :x-unpack
@@ -352,19 +352,19 @@
    ;; LANGUAGE-SPECIFIC SPECS
    ;; =========================================================
    :language-specs
-   {:js {:source "std.lang.model.spec-js"
-         :file "src/std/lang/model/spec_js.clj"
+   {:js {:source "hara.lang.model.spec-js"
+         :file "src/hara.lang/model/spec_js.clj"
          :includes [:spec-js/jsx :spec-js/meta :spec-js/qml]
          :features [:js-core :js-proto :js-math :js-type :js-lu :js-obj :js-arr :js-str :js-json]}
-    :python {:source "std.lang.model.spec-python"
-             :file "src/std/lang/model/spec_python.clj"
+    :python {:source "hara.lang.model.spec-python"
+             :file "src/hara.lang/model/spec_python.clj"
              :features [:py-core :py-math :py-type :py-obj :py-arr :py-str]}
-    :lua {:source "std.lang.model.spec-lua"
-          :file "src/std/lang/model/spec_lua.clj"
+    :lua {:source "hara.lang.model.spec-lua"
+          :file "src/hara.lang/model/spec_lua.clj"
           :features [:lua-core :lua-math :lua-type :lua-obj :lua-arr :lua-str]}
-    :xtalk {:source "std.lang.model.spec-xtalk"
-            :file "src/std/lang/model/spec_xtalk.clj"
-            :annex "std.lang.model.spec-xtalk"
+    :xtalk {:source "hara.lang.model.spec-xtalk"
+            :file "src/hara.lang/model/spec_xtalk.clj"
+            :annex "hara.lang.model.spec-xtalk"
             :features [:+features+ :+grammar+ :+meta+ :+book+ :+init+]}}})
 
 ;; ============================================================
@@ -490,16 +490,16 @@
                              (group-by :emit_type)
                              (sort-by #(count (second %)) >))))
          "\n\nSource Files Referenced:\n"
-         "  - std.lang.base.grammar-spec\n"
-         "  - std.lang.base.grammar-macro\n"
-         "  - std.lang.base.grammar-xtalk\n"
-         "  - std.lang.model.spec-js\n"
-         "  - std.lang.model.spec-python\n"
-         "  - std.lang.model.spec-lua\n"
-         "  - std.lang.model.spec-xtalk\n"
-         "  - std.lang.model.spec-xtalk.fn-js\n"
-         "  - std.lang.model.spec-xtalk.fn-python\n"
-         "  - std.lang.model.spec-xtalk.fn-lua\n")))
+         "  - hara.lang.base.grammar-spec\n"
+         "  - hara.lang.base.grammar-macro\n"
+         "  - hara.lang.base.grammar-xtalk\n"
+         "  - hara.lang.model.spec-js\n"
+         "  - hara.lang.model.spec-python\n"
+         "  - hara.lang.model.spec-lua\n"
+         "  - hara.lang.model.spec-xtalk\n"
+         "  - hara.lang.model.spec-xtalk.fn-js\n"
+         "  - hara.lang.model.spec-xtalk.fn-python\n"
+         "  - hara.lang.model.spec-xtalk.fn-lua\n")))
 
 ;; ============================================================
 ;; MAIN
@@ -509,7 +509,7 @@
   [& args]
   (println "╔════════════════════════════════════════════════════════════════╗")
   (println "║     EXTRACTING FORMAL SPECIFICATIONS FOR TRAINING             ║")
-  (println "║     std.lang Grammar, Macros, and Xtalk Primitives           ║")
+  (println "║     hara.lang Grammar, Macros, and Xtalk Primitives           ║")
   (println "╚════════════════════════════════════════════════════════════════╝")
   
   (let [pairs (generate-all-pairs)

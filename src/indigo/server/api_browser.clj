@@ -7,8 +7,8 @@
             [code.test.base.runtime :as rt]
             [std.block :as block]
             [std.block.layout :as layout]
-            [std.lang :as l]
-            [std.lang.base.book :as book]
+            [hara.lang :as l]
+            [hara.lang.base.book :as book]
             [std.lib.env :as env]))
 
 ;; Existing endpoints -------------------------------------------------------
@@ -205,7 +205,7 @@
 ;; New endpoints -----------------------------------------------------------
 
 (defn list-libraries
-  "returns the set of languages for which a std.lang library is available"
+  "returns the set of languages for which a hara.lang library is available"
   {:added "4.0"}
   []
   (let [libs (l/default-library)]

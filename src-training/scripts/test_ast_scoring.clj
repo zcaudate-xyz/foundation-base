@@ -1,6 +1,6 @@
 (ns scripts.test-ast-scoring
   "Simple test to prove AST-based scoring concept"
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [std.json :as json]
             [clojure.string :as str]
             [clojure.java.io :as io]

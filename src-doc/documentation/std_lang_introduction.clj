@@ -1,13 +1,13 @@
-(ns documentation.std-lang-introduction)
+(ns documentation.hara.lang-introduction)
 
 [[:hero {:title "Introduction"
          :subtitle "Understanding the book, the grammar, and the runtime model."
-         :lead "`std.lang` is best understood as a **language-oriented templating system** built for real multi-language applications. It stores code in a reusable intermediate form, emits that form through a target grammar, and can then hand the result to a matching runtime."
+         :lead "`hara.lang` is best understood as a **language-oriented templating system** built for real multi-language applications. It stores code in a reusable intermediate form, emits that form through a target grammar, and can then hand the result to a matching runtime."
          :badges ["Book model" "Grammar model" "Shared DSL"]}]]
 
 [[:chapter {:title "The core idea"}]]
 
-"Instead of writing and maintaining every target language by hand, `std.lang` lets you author code in a Lisp DSL and describe each target language as a grammar. That grammar controls **how forms are emitted**, **which macros expand**, **which operators exist**, and **what dependencies or native fragments are required**."
+"Instead of writing and maintaining every target language by hand, `hara.lang` lets you author code in a Lisp DSL and describe each target language as a grammar. That grammar controls **how forms are emitted**, **which macros expand**, **which operators exist**, and **what dependencies or native fragments are required**."
 
 [[:card-grid {:items [{:meta "Book"
                        :title "A language is a structured library"
@@ -21,7 +21,7 @@
 
 [[:chapter {:title "Why not just transpile?"}]]
 
-"Straight transpilation is usually about **converting one source language into one target language**. `std.lang` aims at a broader problem: **shared authoring and maintenance across many targets and runtimes**."
+"Straight transpilation is usually about **converting one source language into one target language**. `hara.lang` aims at a broader problem: **shared authoring and maintenance across many targets and runtimes**."
 
 [[:callout {:tone :success
             :title "The leverage point"

@@ -1,18 +1,18 @@
 (ns scripts.generate-control-flow-training
-  "Generates training data for std.lang control flow constructs.
+  "Generates training data for hara.lang control flow constructs.
    
    Focus: Grammar operators (if/when/cond/for/while/try/etc.)
    NOT library calls (no k/* functions)
    
    Usage: lein exec -p src-training/scripts/generate_control_flow_training.clj [count]"
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [std.json :as json]
             [clojure.string :as str])
   (:use code.test))
 
 ;; ============================================================
 ;; CONTROL FLOW FORM GENERATORS
-;; Based on std.lang.base.grammar-spec +op-control-* definitions
+;; Based on hara.lang.base.grammar-spec +op-control-* definitions
 ;; ============================================================
 
 (def +comparison-ops+
@@ -399,7 +399,7 @@
       
       (catch Exception e
         (println (str "\n✗ Error: " (.getMessage e)))
-        (println "Make sure std.lang is properly loaded.")))))
+        (println "Make sure hara.lang is properly loaded.")))))
 
 ;; Run
 (apply -main *command-line-args*)

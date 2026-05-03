@@ -1,5 +1,5 @@
 (ns kmi.queue.stream
-  (:require [std.lang :as l]))
+  (:require [hara.lang :as l]))
 
 (l/script :lua
   {:require [[xt.lang.spec-base :as xt]

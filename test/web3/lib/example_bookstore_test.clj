@@ -1,11 +1,11 @@
 (ns web3.lib.example-bookstore-test
-  (:require [rt.solidity]
-            [std.lang :as l])
+  (:require [hara.rt.solidity]
+            [hara.lang :as l])
   (:use code.test))
 
 (l/script- :solidity
   {:runtime :web3
-   :require [[rt.solidity :as s]
+   :require [[hara.rt.solidity :as s]
              [web3.lib.example-bookstore :as book]]})
 
 (fact:global

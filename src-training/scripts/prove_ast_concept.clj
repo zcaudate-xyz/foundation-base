@@ -2,7 +2,7 @@
   "Proof of concept: AST-based vs String-based scoring
    
    This demonstrates why AST comparison is superior using simple examples."
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [std.json :as json]
             [clojure.string :as str])
   (:use code.test))

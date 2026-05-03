@@ -1,0 +1,99 @@
+(ns xt.db.schema.sql-call-test
+  (:use code.test)
+  (:require [hara.rt.postgres :as pg]
+            [hara.lang :as l]
+            [xt.lang.common-notify :as notify]))
+
+(l/script- :postgres
+  {:runtime :jdbc.client
+   :config {:dbname "test-scratch"}
+   :require [[hara.rt.postgres.test.scratch-v1 :as scratch]]})
+
+^{:xtalk/template true}
+(l/script- :js
+  {:runtime :basic
+   :require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-repl :as repl]
+             [xt.db.schema.sql-call :as call]
+             [xt.lib.connection-sql :as driver]
+             [js.lib.driver-postgres :as js-postgres]]})
+
+(fact:global
+ {:setup    [(l/rt:restart)
+             (l/rt:setup :postgres)]
+  :teardown [(l/rt:teardown :postgres)
+             (l/rt:stop)]})
+
+^{:refer xt.db.schema.sql-call/decode-return :added "4.0"}
+(fact "decodes the return value"
+
+  (!.js
+   (call/decode-return (xt/x:json-encode
+                        {:status "ok"
+                         :data 1})
+                       nil))
+  => 1
+
+  ^{:lang-exceptions {:dart {:skip true}}}
+  (!.js
+   (call/decode-return (xt/x:json-encode
+                        {:status "error"
+                         :data "NOT VALID"})
+                       nil))
+  => (throws))
+
+^{:refer xt.db.schema.sql-call/call-format-input :added "4.0"}
+(fact "formats the inputs"
+
+  (!.js
+   (call/call-format-input {:input [{:type "numeric"}
+                                    {:type "jsonb"}]}
+                           [1
+                            ["hello"]]))
+  => ["'1'" "'[\"hello\"]'"])
+
+^{:refer xt.db.schema.sql-call/call-format-query :added "4.0"}
+(fact "formats a query"
+
+  (!.js
+   (call/call-format-query
+    (@! (pg/bind-function scratch/divf))
+    [1 2]))
+  => "SELECT \"scratch\".divf('1', '2');")
+
+^{:refer xt.db.schema.sql-call/call-raw
+  :added "4.0"
+  :lang-exceptions {:lua {:skip true}
+                    :python {:skip true}
+                    :dart {:skip true}}}
+(fact "calls a database function"
+
+  (notify/wait-on :js
+    (. (driver/connect (js-postgres/driver)
+                       {:database "test-scratch"})
+       (then
+        (fn [conn]
+          (. (call/call-raw
+              conn
+              (@! (pg/bind-function scratch/addf))
+              [10 20])
+             (then (repl/>notify)))))))
+  => "30")
+
+^{:refer xt.db.schema.sql-call/call-api
+  :added "4.0"
+  :lang-exceptions {:lua {:skip true}
+                    :python {:skip true}
+                    :dart {:skip true}}}
+(fact "results an api style result"
+
+  (notify/wait-on :js
+    (. (driver/connect (js-postgres/driver)
+                       {:database "test-scratch"})
+       (then
+        (fn [conn]
+           (. (call/call-api conn
+                             (@! (pg/bind-function scratch/addf))
+                             [10 20])
+             (then (repl/>notify)))))))
+  => "{\"status\": \"ok\", \"data\":\"30\"}")

@@ -1,9 +1,9 @@
 (ns example.xt.feature.memory-brain-test
-  (:require [std.lang.base.impl :as impl]
-            [std.lang.base.library :as lib])
+  (:require [hara.lang.base.impl :as impl]
+            [hara.lang.base.library :as lib])
   (:use code.test))
 
-^{:refer std.lang.base.library/install-module-specialized! :added "4.1"}
+^{:refer hara.lang.base.library/install-module-specialized! :added "4.1"}
 (fact "specializes the xtalk example feature against the xtalk example cache"
   (impl/with:library [(impl/clone-default-library)]
     (require '[xt.lang.spec-base] :reload)

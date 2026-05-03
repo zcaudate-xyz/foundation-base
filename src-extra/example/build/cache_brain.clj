@@ -1,5 +1,5 @@
 (ns example.build.cache-brain
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [std.make :as make :refer [def.make]]))
 
 (def +brain-specializations+

@@ -1,5 +1,5 @@
 (ns play.go-001-xtalk-user-directory.main
-  (:require [std.lang :as l :refer [defspec.xt]]))
+  (:require [hara.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.common-data :as common-data]]})

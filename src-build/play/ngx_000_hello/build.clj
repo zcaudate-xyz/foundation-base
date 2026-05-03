@@ -1,6 +1,6 @@
 (ns play.ngx-000-hello.build
   (:use [code.test :exclude [-main]])
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [std.lib :as h]
             [std.make :as make :refer [def.make]]
             [play.ngx-000-hello.main :as main]))

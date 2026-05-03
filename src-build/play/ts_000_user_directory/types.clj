@@ -1,6 +1,6 @@
 (ns play.ts-000-user-directory.types
-  (:require [std.lang :as l]
-            [std.lang.typed.xtalk :refer [defspec.xt]]))
+  (:require [hara.lang :as l]
+            [hara.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.common-lib :as k]]})

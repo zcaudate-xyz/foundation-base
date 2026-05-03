@@ -1,7 +1,7 @@
 (ns indigo.build.build-vite
   (:require [std.block.heal.core :as heal]
             [std.fs :as fs]
-            [std.lang :as l]
+            [hara.lang :as l]
             [std.lib.env :as env]
             [std.lib.os :as os]
             [std.make :as make :refer [def.make]]

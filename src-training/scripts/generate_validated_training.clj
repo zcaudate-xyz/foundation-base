@@ -3,7 +3,7 @@
    emitting them to JS/Python, and validating with :basic runtime.
    
    Usage: lein exec -p src-training/scripts/generate_validated_training.clj [count]"
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [std.lib.json :as json]
             [clojure.string :as str])
   (:use code.test))
@@ -282,7 +282,7 @@
       
       (catch Exception e
         (println (str "\n✗ Error initializing runtimes: " (.getMessage e)))
-        (println "Make sure you're running in a REPL or environment with std.lang loaded.")))))
+        (println "Make sure you're running in a REPL or environment with hara.lang loaded.")))))
 
 ;; Run if executed directly
 (apply -main *command-line-args*)

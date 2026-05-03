@@ -1,5 +1,5 @@
 (ns example.brain-local
-  (:require [std.lang :as l]))
+  (:require [hara.lang :as l]))
 
 (l/script :xtalk
   {:require [[example.xt.feature.memory-brain :as brain

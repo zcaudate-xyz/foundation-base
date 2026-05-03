@@ -7,7 +7,7 @@
    - JSONL serialization
    - Console formatting
    - File output helpers"
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [std.json :as json]
             [clojure.string :as str]))
 
@@ -86,7 +86,7 @@
 ;; ============================================================
 
 (defn init-runtimes
-  "Initialize std.lang runtimes for JS and Python.
+  "Initialize hara.lang runtimes for JS and Python.
    Call this before emitting code."
   []
   (l/script- :js {:runtime :basic})

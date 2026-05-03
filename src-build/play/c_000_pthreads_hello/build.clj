@@ -1,6 +1,6 @@
 (ns play.c-000-pthreads-hello.build
   (:use [code.test :exclude [-main]])
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [std.lib :as h]
             [std.make :as make :refer [def.make]]
             [play.c-000-pthreads-hello.main :as main]))

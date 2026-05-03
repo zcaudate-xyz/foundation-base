@@ -1,7 +1,7 @@
 (ns std.tailwind.analysis
-  (:require [std.lang :as l]
-            [std.lang.base.book :as book]
-            [std.lang.base.library :as lib]
+  (:require [hara.lang :as l]
+            [hara.lang.base.book :as book]
+            [hara.lang.base.library :as lib]
             [std.lib.walk :as walk]
             [std.tailwind :as tailwind]))
 

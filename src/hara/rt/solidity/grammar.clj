@@ -1,0 +1,447 @@
+(ns hara.rt.solidity.grammar
+  (:require [clojure.string]
+            [hara.lang.base.book :as book]
+            [hara.lang.base.emit :as emit]
+            [hara.lang.base.emit-block :as emit-block]
+            [hara.lang.base.emit-common :as emit-common]
+            [hara.lang.base.emit-fn :as emit-fn]
+            [hara.lang.base.emit-helper :as helper]
+            [hara.lang.base.grammar :as grammar]
+            [hara.lang.base.grammar-spec :as grammar-spec]
+            [hara.lang.base.script :as script]
+            [hara.lang.base.util :as ut]
+            [std.lib.collection :as collection]
+            [std.lib.foundation :as f]
+            [std.lib.template :as template]
+            [std.string.common :as common]
+            [std.string.prose :as prose])
+  (:refer-clojure :exclude [require]))
+
+(def +visibility+
+  [:public
+   :private
+   :external
+   :internal])
+
+(def +modifiers+
+  [:pure
+   :view
+   :payable
+   :constant
+   :immutable
+   :anonymous
+   :indexed
+   :virtual
+   :override])
+
+(def +types+
+  [:uint
+   :bool
+   :address
+   :bytes32])
+
+(defn sol-util-types
+  "format sol types"
+  {:added "4.0"}
+  [v]
+  (cond (or (keyword? v)
+            (vector? v)
+            (string? v))
+        (f/strn v)
+        
+        :else v))
+
+(defn sol-map-key
+  "formats sol map key"
+  {:added "4.0"}
+  ([key grammar mopts]
+   (common/replace-all
+    (f/strn key)
+    "-"
+    "_")))
+
+(defn sol-keyword-fn
+  "no typecast, straight forward print"
+  {:added "4.0"}
+  [form grammar mopts]
+  (emit-common/*emit-fn* (apply list :- form) grammar mopts))
+
+(defn sol-def
+  "creates a definition string"
+  {:added "4.0"}
+  [[_ sym & [value]] grammar mopts]
+  (let [typestr  (emit-fn/emit-fn-type sym nil grammar mopts)]
+    (str typestr " " (emit-common/*emit-fn* sym grammar mopts)
+         (if value
+           (str " = " (emit-common/*emit-fn* value grammar mopts))
+           "")
+         ";")))
+
+(defn sol-emit-block
+  "emits block with braces and binding"
+  {:added "4.0"}
+  [key block body grammar mopts]
+  (binding [emit-common/*emit-fn* emit/emit-main-loop]
+    (emit-block/emit-block-body key block body grammar mopts)))
+
+(defn sol-fn-elements
+  "creates elements for function"
+  {:added "4.0"}
+  [sym args body grammar mopts]
+  (let [block    (emit-fn/emit-fn-block :defn grammar)
+        typestr  (emit-fn/emit-fn-type sym nil grammar mopts) 
+        preamble (emit-fn/emit-fn-preamble [:defn sym args]
+                                           grammar
+                                           mopts)
+        codebody (sol-emit-block nil block body grammar mopts)]
+    [typestr preamble codebody]))
+
+(defn sol-emit-returns
+  "emits returns"
+  {:added "4.0"}
+  [[_ returns] grammar mopts]
+  (emit-common/*emit-fn*
+   (list 'returns
+         (cond (and (list? returns)
+                    (= 'quote (first returns)))
+               (list 'quote (vec (second returns)))
+               
+               (vector? returns)
+               (apply list :- returns)
+
+               :else (list :- returns)))
+   grammar mopts))
+
+(defn sol-defn
+  "creates def contstructor form"
+  {:added "4.0"}
+  [[_ sym args & body :as form] grammar mopts]
+  (let [{:static/keys [returns
+                       modifiers]} (meta sym)
+        [typestr preamble codebody] (sol-fn-elements sym args body grammar mopts)
+        modstr (if modifiers
+                 (clojure.string/join " " (map f/strn modifiers)))]
+    (clojure.string/join " " (filter not-empty ["function" preamble typestr modstr
+                                     (if returns
+                                       (sol-emit-returns [nil returns] grammar mopts))
+                                     codebody]))))
+
+(defn sol-defconstructor
+  "creates the constructor"
+  {:added "4.0"}
+  [[_ sym args & body :as form] grammar mopts]
+  (let [[typestr preamble codebody] (sol-fn-elements 'constructor args body grammar mopts)]
+    (clojure.string/join " " (filter not-empty [preamble typestr codebody]))))
+
+(defn sol-defevent
+  "creates an event"
+  {:added "4.0"}
+  [[_ sym & args] grammar mopts]
+  (let [preamble (emit-fn/emit-fn-preamble [:defn sym (vec (mapcat identity args))]
+                                           grammar
+                                           mopts)]
+    (str "event " preamble ";")))
+
+(defn sol-tf-var-ext
+  "transforms a var"
+  {:added "4.0"}
+  [[_ sym & args]]
+  (if (list? sym)
+    (if (= 'quote (first sym))
+      (list := (list :- sym) (last args))
+      (list := (apply list :- sym) (last args)))
+    (apply list 'var* sym args)))
+
+(defn sol-tf-mapping
+  "transforms mapping call"
+  {:added "4.0"}
+  [[_ [from to]]]
+  (list 'mapping (list :- from "=>" to)))
+
+(defn sol-defstruct
+  "transforms a defstruct call"
+  {:added "4.0"}
+  [[_ sym & args]]
+  (let [vars (map #(apply list 'var %) args)]
+    (list :% (list :- "struct" sym) (list :- "{\n")
+          (list \| (apply list 'do vars))
+          (list :- "\n}"))))
+
+(defn sol-defaddress
+  "transforms a defaddress call"
+  {:added "4.0"}
+  [[_ sym value]]
+  (let [modifiers (mapv sol-util-types (:- (meta sym)))]
+    (list :% (apply list :- "address"
+                    (cond-> (conj modifiers sym)
+                      value (conj value)))
+          \;)))
+
+(defn sol-defenum
+  "transforms a defenum call"
+  {:added "4.0"}
+  [[_ sym values]]
+  (list :% (list :- "enum" sym
+                 (list :- "{")
+                 (list 'quote (vec values))
+                 (list :- "}"))))
+
+(defn sol-defmapping
+  "transforms a mapping call"
+  {:added "4.0"}
+  [[_ sym [from to]]]
+  (let [modifiers (mapv sol-util-types (:- (meta sym)))]
+    (list :% (apply list :- (list :mapping [from to])
+                    (conj modifiers sym))
+          \;)))
+
+(defn sol-definterface
+  "transforms a definterface call"
+  {:added "4.0"}
+  [[_ sym body] grammar mopts]
+  (let [fn-stct (fn [sym args]
+                  (str "struct " sym " {\n"
+                       (prose/indent (clojure.string/join "\n"
+                                             (map (fn [arr]
+                                                    (str (clojure.string/join " " (map f/strn arr))
+                                                         ";"))
+                                                  args))
+                                   2)
+                       "\n}"))
+        fn-enum (fn [sym args]
+                  (str "enum " sym " { " (clojure.string/join ", " (map f/strn args)) " }"))
+        fn-func (fn [sym args]
+                  (let [{:static/keys [returns]} (meta sym)
+                        [typestr preamble _] (sol-fn-elements sym args body grammar mopts)]
+                    (clojure.string/join " " (filter not-empty ["function" preamble typestr
+                                                     (str (if returns
+                                                            (sol-emit-returns [nil returns] grammar mopts))
+                                                          ";")]))))
+        fns (->> (partition 2 body)
+                 (map (fn [[sym args]]
+                        (case (:type (meta sym))
+                          :struct (fn-stct sym args)
+                          :enum   (fn-enum sym args)
+                          (fn-func sym args))))
+                 (clojure.string/join "\n"))]
+    (str "interface " sym " {\n"
+         (prose/indent fns 2)
+         "\n}")))
+
+(defn sol-emit-body
+  "emits body without extra braces"
+  {:added "4.0"}
+  [body grammar mopts]
+  (let [grammar (collection/merge-nested grammar
+                                {:default {:block {:body {:start "" :end ""}}}})]
+    (sol-emit-block nil nil body grammar mopts)))
+
+(defn sol-defcontract
+  "creates a contract"
+  {:added "4.0"}
+  [[_ sym & body] grammar mopts]
+  (let [is-clause (if-let [is (:is (meta sym))]
+                    (str " is " (clojure.string/join ", " (map f/strn is)))
+                    "")]
+    (str "contract " sym is-clause " {\n"
+         (sol-emit-body body grammar mopts)
+         "\n}")))
+
+(defn sol-deflibrary
+  "creates a library"
+  {:added "4.0"}
+  [[_ sym & body] grammar mopts]
+  (str "library " sym " {\n"
+       (sol-emit-body body grammar mopts)
+       "\n}"))
+
+(defn sol-deferror
+  "creates an error definition"
+  {:added "4.0"}
+  [[_ sym args] grammar mopts]
+  (let [preamble (emit-fn/emit-fn-preamble [:defn sym args] grammar mopts)]
+    (str "error " preamble ";")))
+
+(defn sol-defmodifier
+  "creates a modifier"
+  {:added "4.0"}
+  [[_ sym args & body] grammar mopts]
+  (let [preamble (emit-fn/emit-fn-preamble [:defn sym args] grammar mopts)
+        codebody (sol-emit-block nil nil body grammar mopts)]
+    (str "modifier " preamble " " codebody)))
+
+(defn sol-unchecked
+  "unchecked block"
+  {:added "4.0"}
+  [[_ & body] grammar mopts]
+  (str "unchecked {\n"
+       (sol-emit-body body grammar mopts)
+       "\n}"))
+
+(defn sol-emit-let
+  "emits a let binding"
+  {:added "4.0"}
+  [[_ & args] grammar mopts]
+  (str "let " (clojure.string/join " " (map #(emit-common/*emit-fn* % grammar mopts) args))))
+
+(defn sol-assembly
+  "assembly block"
+  {:added "4.0"}
+  [[_ & body] grammar mopts]
+  (let [grammar (collection/merge-nested grammar
+                                {:reserved '{let {:emit #'sol-emit-let}
+                                             :=  {:emit :token :raw ":="}}})]
+    (str "assembly {\n"
+         (sol-emit-body body grammar mopts)
+         "\n}")))
+
+(defn sol-emit-statement
+  "emit statement"
+  {:added "4.0"}
+  [[_ form] grammar mopts]
+  (str "emit " (emit-common/*emit-fn* form grammar mopts)))
+
+(def +features+
+  (-> (grammar/build :include [:builtin
+                               :builtin-global
+                               :builtin-module
+                               :builtin-helper
+                               :free-control
+                               :free-literal
+                               :math
+                               :compare
+                               :counter
+                               :class
+                               :bit
+                               :logic
+                               :return
+                               :data-table
+                               :data-shortcuts
+                               :vars
+                               :fn
+                               :control-base
+                               :control-general
+                               :top-base
+                               :top-global
+                               :top-declare
+                               :for
+                               :coroutine
+                               :macro
+                               :macro-arrow
+                               :macro-let
+                               :macro-xor
+                               :macro-forange
+                               :macro-case])
+      (grammar/build:override
+       {:var       {:symbol '#{var*}}
+        :defn      {:emit    #'sol-defn
+                    :static/type :function}
+        :def       {:emit    #'sol-def}})
+      
+      (grammar/build:extend
+       {:delete    {:op :delete  :symbol  '#{delete} :raw "delete" :emit :prefix}
+        :emit      {:op :emit    :symbol  '#{emit}
+                    :emit    #'sol-emit-statement
+                    :type :statement}
+        :mapping   {:op :mapping  :symbol #{:mapping}
+                    :macro #'sol-tf-mapping :emit :macro}
+        :blank     {:op :blank    :symbol  '#{_} :raw "_"
+                    :value true :emit :raw}})
+      
+      (grammar/build:extend
+       {:defcontract    {:op :defcontract :symbol '#{defcontract}
+                         :type :def :section :header
+                         :emit   #'sol-defcontract
+                         :static/type :contract}
+
+        :deflibrary     {:op :deflibrary :symbol '#{deflibrary}
+                         :type :def :section :header
+                         :emit   #'sol-deflibrary
+                         :static/type :library}
+
+        :deferror       {:op :deferror :symbol '#{deferror}
+                         :type :def :section :header
+                         :emit   #'sol-deferror
+                         :static/type :error}
+
+        :defmodifier    {:op :defmodifier :symbol '#{defmodifier}
+                         :type :def :section :code
+                         :emit   #'sol-defmodifier
+                         :static/type :modifier}
+
+        :unchecked      {:op :unchecked :symbol '#{unchecked}
+                         :type :statement
+                         :emit #'sol-unchecked}
+
+        :assembly       {:op :assembly :symbol '#{assembly}
+                         :type :statement
+                         :emit #'sol-assembly}
+
+        :definterface   {:op :definterface :symbol '#{definterface}
+                         :type :def :section :header
+                         :emit   #'sol-definterface
+                         :static/type :interface}
+        :defconstructor {:op :defcontructor :symbol '#{defconstructor}
+                         :type :def :section :code
+                         :emit    #'sol-defconstructor
+                         :static/type :contructor}
+        :defstruct   {:op :defstruct :symbol '#{defstruct}
+                      :type :def :section :code :emit :macro
+                      :macro  #'sol-defstruct
+                      :static/type :struct}
+        :defevent    {:op :defevent :symbol '#{defevent}
+                      :type :def :section :code
+                      :emit    #'sol-defevent
+                      :static/type :event}
+        :defenum     {:op :defenum :symbol '#{defenum}
+                      :type :def :section :code :emit :macro
+                      :macro  #'sol-defenum
+                      :static/type :enum}
+        :defaddress   {:op :defaddress :symbol '#{defaddress}
+                       :type :def :section :code :emit :macro
+                       :macro   #'sol-defaddress
+                       :static/type :address}
+
+        :defmapping   {:op :defmapping :symbol '#{defmapping}
+                       :type :def :section :code :emit :macro
+                       :macro   #'sol-defmapping
+                       :static/type :mapping}
+        
+        :var-ext     {:op :var-ext   :symbol '#{var}
+                      :macro  #'sol-tf-var-ext :emit :macro}})))
+
+(def +template+
+  (->> {:banned #{}
+        :highlight '#{return break}
+        :default {:modifier  {:vector-last false}
+                  :function  {:raw ""}
+                  :invoke    {:keyword-fn #'sol-keyword-fn}}
+        :token   {:keyword    {:custom (fn [x]
+                                         (f/strn x))}
+                  :symbol     {:replace {\: "__"}}}
+        :data    {:map-entry {:space " " :key-fn #'sol-map-key}
+                  :free       {:start ""  :end "" :sep ", "}
+                  :tuple     {:start "(" :end ")" :sep ", "}}
+        :block  {:for       {:parameter {:sep ","}}}
+        :define {:def       {:raw ""}}}
+       (collection/merge-nested (emit/default-grammar))))
+
+(def +grammar+
+  (grammar/grammar :sol
+    (grammar/to-reserved +features+)
+    +template+))
+
+(def +meta+
+  (book/book-meta
+   {:module-current   (fn [])
+    :module-import    (fn [name _ opts]  
+                        (template/$ (:- "#include" ~name)))
+    :module-export    (fn [{:keys [as refer]} opts])}))
+
+(def +book+
+  (book/book {:lang :solidity
+              :meta +meta+
+              :grammar +grammar+}))
+
+(def +init+
+  (script/install +book+))

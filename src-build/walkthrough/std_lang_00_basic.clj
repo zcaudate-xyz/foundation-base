@@ -1,8 +1,8 @@
-(ns walkthrough.std-lang-00-basic
-  ;; Welcome to the basic std.lang tutorial.
+(ns walkthrough.hara.lang-00-basic
+  ;; Welcome to the basic hara.lang tutorial.
   ;; We will go through how to write and link code together
   (:use code.test)
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [std.lib :as h]))
 
 ;;
@@ -41,7 +41,7 @@
   ^:hidden
   
   (def.js a (+ 1 2 3))
-  => #'walkthrough.std-lang-00-basic/a
+  => #'walkthrough.hara.lang-00-basic/a
 
   (!.js -/a)
   => "a;"
@@ -53,12 +53,12 @@
   => {:context :lang/js
       :lang :js
       :id 'a
-      :module 'walkthrough.std-lang-00-basic
+      :module 'walkthrough.hara.lang-00-basic
       :section :code
-      :context/fn #'std.lang.base.util/lang-rt-default}
+      :context/fn #'hara.lang.base.util/lang-rt-default}
 
   (type @a)
-  => std.lang.base.book_entry.BookEntry
+  => hara.lang.base.book_entry.BookEntry
   
   (into {} @a)
   => (contains-in
@@ -68,13 +68,13 @@
        :standalone nil
        :template nil
        :op 'def
-       :module 'walkthrough.std-lang-00-basic
+       :module 'walkthrough.hara.lang-00-basic
        :lang :js
        :id 'a
        :declared nil
        :display :default
        :form '(def a (+ 1 2 3))
-       :namespace 'walkthrough.std-lang-00-basic
+       :namespace 'walkthrough.hara.lang-00-basic
        :deps #{}}))
 
 ;;
@@ -87,7 +87,7 @@
   (defn.js hello
     [a b]
     (return (+ a b)))
-  => #'walkthrough.std-lang-00-basic/hello
+  => #'walkthrough.hara.lang-00-basic/hello
 
   (hello 1 2)
   => "hello(1,2)"
@@ -103,9 +103,9 @@
   => {:context :lang/js
       :lang :js
       :id 'hello
-      :module 'walkthrough.std-lang-00-basic
+      :module 'walkthrough.hara.lang-00-basic
       :section :code
-      :context/fn #'std.lang.base.util/lang-rt-default}
+      :context/fn #'hara.lang.base.util/lang-rt-default}
 
   (into {} @hello)
   => (contains-in
@@ -115,14 +115,14 @@
        :standalone nil
        :template nil
        :op 'defn
-       :module 'walkthrough.std-lang-00-basic
+       :module 'walkthrough.hara.lang-00-basic
        :lang :js
        :id 'hello
        :declared nil
        :display :default
        :form '(defn hello [a b] (return (+ a b)))
        :doc ""
-       :namespace 'walkthrough.std-lang-00-basic
+       :namespace 'walkthrough.hara.lang-00-basic
        :deps #{}}))
 
 
@@ -137,7 +137,7 @@
   (defn.js world
     [c]
     (return (k/abs (+ (-/hello) -/a c))))
-  => #'walkthrough.std-lang-00-basic/world
+  => #'walkthrough.hara.lang-00-basic/world
 
   (world -10)
   => "world(-10)"
@@ -154,7 +154,7 @@
        :standalone nil
        :template nil
        :op 'defn
-       :module 'walkthrough.std-lang-00-basic
+       :module 'walkthrough.hara.lang-00-basic
        :lang :js
        :id 'world
        :declared nil
@@ -164,14 +164,14 @@
                 (return
                  (x:m-abs
                   (+
-                  (walkthrough.std-lang-00-basic/hello)
-                  walkthrough.std-lang-00-basic/a
+                  (walkthrough.hara.lang-00-basic/hello)
+                  walkthrough.hara.lang-00-basic/a
                   c))))
        :doc ""
-       :namespace 'walkthrough.std-lang-00-basic
+       :namespace 'walkthrough.hara.lang-00-basic
        :deps
-       '#{walkthrough.std-lang-00-basic/hello
-          walkthrough.std-lang-00-basic/a}}))
+       '#{walkthrough.hara.lang-00-basic/hello
+          walkthrough.hara.lang-00-basic/a}}))
 
 ;;
 ;; def$.js saves a `:fragment` entry in the book
@@ -192,7 +192,7 @@
        :standalone nil,
        :template nil,
        :op 'def$,
-       :module 'walkthrough.std-lang-00-basic,
+       :module 'walkthrough.hara.lang-00-basic,
        :lang :js,
        :priority nil,
        :id 'hello-fragment,
@@ -200,7 +200,7 @@
        :declared nil,
        :display :default,
        :form '(+ 1 2 3),
-       :namespace 'walkthrough.std-lang-00-basic,
+       :namespace 'walkthrough.hara.lang-00-basic,
        :deps nil}))
 
 
@@ -224,7 +224,7 @@
        :standalone nil,
        :template fn?,
        :op 'defmacro,
-       :module 'walkthrough.std-lang-00-basic,
+       :module 'walkthrough.hara.lang-00-basic,
        :lang :js,
        :priority nil,
        :id 'double-add,
@@ -232,5 +232,5 @@
        :declared nil,
        :display :default,
        :form '(fn [a b] (list '+ a a b b)),
-       :namespace 'walkthrough.std-lang-00-basic,
+       :namespace 'walkthrough.hara.lang-00-basic,
        :deps nil}))

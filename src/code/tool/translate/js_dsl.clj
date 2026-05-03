@@ -471,7 +471,7 @@
                         (seq import-entries) (assoc :import import-entries))]
 
     (list (list 'ns ns-name
-                '(:require [std.lang :as l]
+                '(:require [hara.lang :as l]
                            [std.lib :as h]))
 
           (apply list 'l/script :js

@@ -2,7 +2,7 @@
   (:require [code.tool.translate.js-dsl :as sut]
             [std.fs :as fs]
             [std.json :as json]
-            [std.lang :as l]
+            [hara.lang :as l]
             [std.lib.env :as env])
   (:use code.test))
 

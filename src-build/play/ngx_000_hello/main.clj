@@ -1,5 +1,5 @@
 (ns play.ngx-000-hello.main
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [std.lib :as h]))
 
 (l/script :lua

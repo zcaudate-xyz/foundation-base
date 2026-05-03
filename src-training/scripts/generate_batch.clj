@@ -8,7 +8,7 @@
    Example:
      lein exec -p src-training/scripts/generate_batch.clj 10 control-flow
      lein exec -p src-training/scripts/generate_batch.clj 5 all"
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [std.json :as json]
             [clojure.string :as str]
             [training.util :as tu]
@@ -20,7 +20,7 @@
 ;; ============================================================
 
 (defn init-runtimes
-  "Initialize std.lang runtimes"
+  "Initialize hara.lang runtimes"
   []
   (tu/init-runtimes))
 

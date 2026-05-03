@@ -3,7 +3,7 @@
    Generates training pairs by directly using l/emit-as on xtalk forms.
    
    Usage: lein exec -p src-training/scripts/rosetta_forge_simple.clj [count] [output-file]"
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [std.lib.json :as json]
             [clojure.string :as str])
   (:use code.test))

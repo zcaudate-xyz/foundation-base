@@ -41,7 +41,7 @@
           (clojure.string/join "\n\t" (map prose/write-line commands))))))
 
 (defn write
-  "link to `std.lang.compile/compile-ext-fn`"
+  "link to `hara.lang.compile/compile-ext-fn`"
   {:added "4.0"}
   ([v]
    (let [[headers & targets] (if (map? (first v))

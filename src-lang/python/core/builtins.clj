@@ -1,0 +1,19 @@
+(ns python.core.builtins
+  (:require [hara.lang :as l])
+  (:refer-clojure :exclude [eval]))
+
+(l/script :python
+  python.core
+  {})
+
+(def$.py ^{:arglists '([])} globals globals)
+
+(def$.py ^{:arglists '([])} locals locals)
+
+(def$.py ^{:arglists '([s & [globals locals]])} exec exec)
+
+(def$.py ^{:arglists '([s & [globals locals]])} eval eval)
+
+(def$.py ^{:arglists '([dict k])} hasattr hasattr)
+
+(def$.py ^{:arglists '([dict k])} getattr getattr)

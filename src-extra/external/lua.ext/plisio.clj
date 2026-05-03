@@ -1,5 +1,5 @@
 (ns lua.ext.plisio
-  (:require [std.lang :as l]))
+  (:require [hara.lang :as l]))
 
 (l/script :lua
   {:require [[lua.nginx.http-client :as http]

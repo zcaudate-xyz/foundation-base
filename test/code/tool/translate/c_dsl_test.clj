@@ -1,7 +1,7 @@
 (ns code.tool.translate.c-dsl-test
   (:require [code.tool.translate.c-dsl :as c-dsl]
-            [std.lang :as l]
-            [std.lang.model.spec-c :as c])
+            [hara.lang :as l]
+            [hara.lang.model.spec-c :as c])
   (:use code.test))
 
 (fact "Translate basic function declaration"

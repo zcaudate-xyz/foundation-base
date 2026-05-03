@@ -1,5 +1,5 @@
 (ns example.python.cache.redis
-  (:require [std.lang :as l])
+  (:require [hara.lang :as l])
   (:refer-clojure :exclude [get set]))
 
 (l/script :python

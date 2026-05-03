@@ -2,7 +2,7 @@
   (:require [clojure.string]
             [std.block.layout :as layout]
             [std.fs :as fs]
-            [std.lang :as l]
+            [hara.lang :as l]
             [std.string.common :as common]
             [std.string.prose :as prose]))
 
@@ -82,15 +82,15 @@
 
 
 (def +meta+
-  ["# **std.lang (JS) DSL Specification**"
+  ["# **hara.lang (JS) DSL Specification**"
    ""
    "**Objective:** This document defines the syntax, conventions, and"
    " constraints for writing code using the Clojure-based Javascript DSL (JS DSL),"
-   " based on the std.lang transpiler"
+   " based on the hara.lang transpiler"
    ""
    "The dsl format is given as <DESC>\\n %JS ^: <E1> ^: <E2> %DSL ^: <T1> ^: <T2>"
    "where ^: is the start of a new line with a colon. This gives the spec for how to translate"
-   "JS code to std.lang DSL. please follow the patterns, including precidence of "
+   "JS code to hara.lang DSL. please follow the patterns, including precidence of "
    ""
    "For each of the code patterns in the JS section, translate to the DSL pattern, if"
    "there are multiple variations of DSL code, pick the DSL first over the rest."
@@ -287,16 +287,16 @@
   (spit "/Users/zcaudate/Development/greenways/Szncampaigncenter/translate_dsl.md"
         (create-spec))
   
-  "Given the spec in @translate_dsl, translate src/App.jsx and all files in src/components/** to the std.lang dsl to src-translated. follow the original directory layout. please generate file in compilation order"
+  "Given the spec in @translate_dsl, translate src/App.jsx and all files in src/components/** to the hara.lang dsl to src-translated. follow the original directory layout. please generate file in compilation order"
 
-  "Given the spec in @translate_dsl, translate src/App.jsx and all files in src/components/** and src/lib/** to the std.lang dsl to src-translated. follow the original directory layout. look at the dependency map for the project and generate file in compilation order from least dependent to most"
+  "Given the spec in @translate_dsl, translate src/App.jsx and all files in src/components/** and src/lib/** to the hara.lang dsl to src-translated. follow the original directory layout. look at the dependency map for the project and generate file in compilation order from least dependent to most"
 
 
-  "Given the spec in @translate_dsl, translate src/App.jsx and all files in src/lib/** and src/components/* to the std.lang dsl to src-translated. follow the original directory layout and do not translate the subdirectories. look at the dependency map for the project and generate file in compilation order from least dependent to most"
+  "Given the spec in @translate_dsl, translate src/App.jsx and all files in src/lib/** and src/components/* to the hara.lang dsl to src-translated. follow the original directory layout and do not translate the subdirectories. look at the dependency map for the project and generate file in compilation order from least dependent to most"
 
-  "Given the spec in @translate_dsl, translate src/App.jsx and all files in src/lib/** and src/components/* (DO NOT FOLLOW SUBDIRECTORIES) to the std.lang dsl to src-translated. DO NOT translate src/components/ui/* follow the original directory layout.  generate file in compilation order from least dependent to most"
+  "Given the spec in @translate_dsl, translate src/App.jsx and all files in src/lib/** and src/components/* (DO NOT FOLLOW SUBDIRECTORIES) to the hara.lang dsl to src-translated. DO NOT translate src/components/ui/* follow the original directory layout.  generate file in compilation order from least dependent to most"
 
-  "Given the spec in @translate_dsl, translate src/App.jsx and all files in src/lib/** and src/components/* (DO NOT FOLLOW SUBDIRECTORIES) to the std.lang dsl to src-translated. DO NOT translate src/components/ui/* follow the original directory layout. "
+  "Given the spec in @translate_dsl, translate src/App.jsx and all files in src/lib/** and src/components/* (DO NOT FOLLOW SUBDIRECTORIES) to the hara.lang dsl to src-translated. DO NOT translate src/components/ui/* follow the original directory layout. "
   
   "I'd like to package exports in src/ui/components/* into a single .tsx file"
   )

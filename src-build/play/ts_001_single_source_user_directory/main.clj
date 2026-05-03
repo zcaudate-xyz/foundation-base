@@ -1,8 +1,8 @@
 (ns play.ts-001-single-source-user-directory.main
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [xt.lang.common-lib]
             [xt.lang.common-data]
-            [std.lang.typed.xtalk :refer [defspec.xt]]))
+            [hara.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.common-lib :as k]

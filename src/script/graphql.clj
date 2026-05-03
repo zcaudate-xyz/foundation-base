@@ -1,3 +1,3 @@
 (ns script.graphql
-  (:require [std.lang :as l])
+  (:require [hara.lang :as l])
   (:refer-clojure :exclude [flush]))

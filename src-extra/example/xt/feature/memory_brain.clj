@@ -1,5 +1,5 @@
 (ns example.xt.feature.memory-brain
-  (:require [std.lang :as l]))
+  (:require [hara.lang :as l]))
 
 (l/script :xtalk
   {:require [[example.xt.protocol.cache :as cache]]})

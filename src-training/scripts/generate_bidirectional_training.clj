@@ -1,5 +1,5 @@
 (ns scripts.generate-bidirectional-training
-  "Bidirectional LLM training data generator for std.lang.
+  "Bidirectional LLM training data generator for hara.lang.
    
    Supports BOTH directions:
    1. Forward:  xtalk DSL → Python/JS (compilation)
@@ -11,7 +11,7 @@
    Organized for curriculum learning and multi-task training.
    
    Usage: lein exec -p src-training/scripts/generate_bidirectional_training.clj [count]"
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [std.json :as json]
             [clojure.string :as str]
             [clojure.java.io :as io]
@@ -356,7 +356,7 @@
 
 (defn to-sharegpt-forward [pair idx]
   "ShareGPT format for forward direction"
-  {:id (str "std-lang-fwd-" idx)
+  {:id (str "hara.lang-fwd-" idx)
    :conversations
    [{:from "human"
      :value (str (:instruction (:forward pair)) "\n\n```xtalk\n" 
@@ -373,7 +373,7 @@
                  (:backward-py pair)
                  (:backward-js pair))
         lang-name (if (= lang :python) "Python" "JavaScript")]
-    {:id (str "std-lang-bwd-" lang "-" idx)
+    {:id (str "hara.lang-bwd-" lang "-" idx)
      :conversations
      [{:from "human"
        :value (str (:instruction sample) "\n\n```" (name lang) "\n" 
@@ -485,7 +485,7 @@
                       :source_languages [:xtalk :python :javascript]
                       :target_languages [:xtalk :python :javascript]
                       :formats (:formats +config+)
-                      :description "Bidirectional std.lang training data for LLMs"
+                      :description "Bidirectional hara.lang training data for LLMs"
                       :forward_samples (* (count pairs) 1)
                       :backward_samples (* (count pairs) 2)
                       :total_training_samples (* (count pairs) 3)}]

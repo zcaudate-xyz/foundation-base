@@ -1,5 +1,5 @@
 (ns play.ngx-001-eval.main
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [std.lib :as h]
             [std.string :as str]
             [net.http :as http]
@@ -52,7 +52,7 @@
                                '(lua.nginx/http-echo-ws))]]]]))]]]])
 
 (comment
-  (rt.nginx/error-logs))
+  (hara.rt.nginx/error-logs))
 
 
 (comment

@@ -1,11 +1,11 @@
 (ns web3.lib.example-erc20-source-test
-  (:require [rt.solidity.env-ganache :as env]
-            [std.lang :as l])
+  (:require [hara.rt.solidity.env-ganache :as env]
+            [hara.lang :as l])
   (:use code.test))
 
 (l/script :solidity
   {:runtime :web3
-   :require [[rt.solidity :as s]
+   :require [[hara.rt.solidity :as s]
              [web3.lib.example-erc20-source :as source]
              [web3.lib.example-erc20 :as erc20]]})
 

@@ -1,0 +1,65 @@
+(ns hara.lang.typed.xtalk-lower-test
+  (:use code.test)
+  (:require [hara.lang.typed.xtalk-lower :refer :all]))
+
+(def +ctx+ {:ns 'sample.route :aliases '{k xt.lang.common-lib}})
+
+^{:refer hara.lang.typed.xtalk-lower/intrinsic-sym :added "4.1"}
+(fact "builds intrinsic symbols"
+  (intrinsic-sym "arrayify")
+  => 'hara.lang.typed.xtalk-intrinsic/arrayify)
+
+^{:refer hara.lang.typed.xtalk-lower/resolve-op :added "4.1"}
+(fact "resolves aliases and local symbols"
+  [(resolve-op 'k/get-key +ctx+)
+   (resolve-op '-/route +ctx+)]
+  => '[xt.lang.common-lib/get-key sample.route/route])
+
+^{:refer hara.lang.typed.xtalk-lower/lower-dot :added "4.1"}
+(fact "lowers dot access to key and path helpers"
+  [(lower-dot '(. route ["tree"]))
+   (lower-dot '(. route "tree" "leaf"))]
+  => '[(x:get-key route "tree")
+       (x:get-path route ["tree" "leaf"] nil)])
+
+^{:refer hara.lang.typed.xtalk-lower/lower-fn-shorthand :added "4.1"}
+(fact "lowers fn:> shorthands"
+  [(lower-fn-shorthand '(fn:>))
+   (lower-fn-shorthand '(fn:> [x] x))
+   (lower-fn-shorthand '(fn:> "ok"))]
+  => '[(hara.lang.typed.xtalk-intrinsic/const-fn nil)
+       (fn [x] x)
+       (hara.lang.typed.xtalk-intrinsic/const-fn "ok")])
+
+^{:refer hara.lang.typed.xtalk-lower/lower-defaulted-target :added "4.1"}
+(fact "applies defaulted targets"
+  (lower-defaulted-target 'x:get-key '[obj "k" "fallback"])
+  => '(x:get-key obj "k" "fallback"))
+
+^{:refer hara.lang.typed.xtalk-lower/lower-offset-index :added "4.1"}
+(fact "builds offset index lookups"
+  [(lower-offset-index '[items] 0)
+   (lower-offset-index '[items] 2)]
+  => '[(x:get-idx items (x:offset))
+       (x:get-idx items (x:offset 2))])
+
+^{:refer hara.lang.typed.xtalk-lower/lower-list :added "4.1"}
+(fact "lowers wrapper calls to canonical forms"
+  [(lower-list '(k/get-key route "tree") +ctx+)
+   (lower-list '(x:get-key route "leaf") +ctx+)
+   (lower-list '(k/first items) +ctx+)
+   (lower-list '(x:second items) +ctx+)
+   (lower-list '(k/not-empty? items) +ctx+)]
+  => '[(x:get-key route "tree" nil)
+       (x:get-key route "leaf" nil)
+       (x:get-idx items (x:offset))
+       (x:get-idx items (x:offset 1))
+       (hara.lang.typed.xtalk-intrinsic/not-empty? items)])
+
+^{:refer hara.lang.typed.xtalk-lower/lower-form :added "4.1"}
+(fact "recursively lowers nested forms"
+  (lower-form '{:route (x:get-key data "tree")
+                :paths [(x:second items)]}
+              +ctx+)
+  => '{:route (x:get-key data "tree" nil)
+       :paths [(x:get-idx items (x:offset 1))]})

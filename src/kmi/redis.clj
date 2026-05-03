@@ -1,5 +1,5 @@
 (ns kmi.redis
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [std.lib.foundation :as f]
             [std.lib.template :as template])
   (:refer-clojure :exclude [eval sort sync keys get set type time]))

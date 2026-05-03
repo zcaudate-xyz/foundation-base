@@ -1,7 +1,7 @@
 (ns std.tailwind.analysis-test
   (:require [clojure.string]
             [code.test :refer :all]
-            [std.lang.base.book :as book]
+            [hara.lang.base.book :as book]
             [std.tailwind.analysis :refer :all]))
 
 (fact "find-returns"

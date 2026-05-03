@@ -1,5 +1,5 @@
 (ns component.web-native
-  (:require [std.lang :as  l]
+  (:require [hara.lang :as  l]
             [std.lib :as h]))
 
 (l/script :js

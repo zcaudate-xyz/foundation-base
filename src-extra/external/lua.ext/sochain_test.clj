@@ -1,6 +1,6 @@
 (ns lua.ext.sochain-test
   (:require [std.json :as json]
-            [std.lang :as l]
+            [hara.lang :as l]
             [xt.lang.common-notify :as notify])
   (:use code.test))
 

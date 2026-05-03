@@ -1,11 +1,11 @@
 (ns play.ngx-001-eval.build
   (:use [code.test :exclude [-main]])
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [std.lib :as h]
             [std.make :as make :refer [def.make]]
             [std.string :as str]
             [play.ngx-001-eval.main :as main]
-            [rt.nginx :as nginx]))
+            [hara.rt.nginx :as nginx]))
 
 (def.make PROJECT
   {:github   {:repo "zcaudate/play.ngx-001-eval"

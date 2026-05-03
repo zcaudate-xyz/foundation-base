@@ -12,4 +12,4 @@
 (fact "emits all makefile targets")
 
 ^{:refer std.make.makefile/write :added "4.0"}
-(fact "link to `std.lang.compile/compile-ext-fn`")
+(fact "link to `hara.lang.compile/compile-ext-fn`")

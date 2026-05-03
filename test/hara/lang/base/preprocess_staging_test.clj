@@ -1,0 +1,316 @@
+(ns hara.lang.base.preprocess-staging-test
+  (:use code.test)
+  (:require [hara.lang.base.emit-helper :as helper]
+            [hara.lang.base.emit-prep-lua-test :as prep]
+            [hara.lang.base.grammar :as grammar]
+            [hara.lang.base.preprocess-staging :refer :all]
+            [hara.lang.model.spec-js :as js]))
+
+(def +reserved+
+  (-> (grammar/build)
+      (grammar/to-reserved)))
+
+(def +grammar+
+  (grammar/grammar :test +reserved+ helper/+default+))
+
+^{:refer hara.lang.base.preprocess-staging/to-staging-form :added "4.1"}
+(fact "different staging forms"
+  (to-staging-form '(!:template (+ 1 2 3))
+                   nil
+                   (:modules prep/+book-min+)
+                   '{:module {:link {u L.core}}}
+                   nil
+                   identity)
+  => 6
+
+  @(to-staging-form '(!:eval (+ 1 2 3))
+                    nil
+                    (:modules prep/+book-min+)
+                    '{:module {:link {u L.core}}}
+                    nil
+                    identity)
+  => '(!:eval (+ 1 2 3))
+
+  (to-staging-form '(hello 1 2 3)
+                   {:reserved {'hello {:type :template
+                                       :macro (fn [[_ & args]]
+                                                (cons '+ (concat args args)))}}}
+                   (:modules prep/+book-min+)
+                   '{:module {:link {u L.core}}}
+                   nil
+                   identity)
+  => '(+ 1 2 3 1 2 3)
+
+  (to-staging-form '(hello 1 2 3)
+                   {:reserved {'hello {:emit :hard-link
+                                       :raw 'world}}}
+                   (:modules prep/+book-min+)
+                   '{:module {:link {u L.core}}}
+                   nil
+                   identity)
+  => '(world 1 2 3))
+
+(fact "staging failures include macro context"
+  (try
+    (to-staging-form (with-meta '(hello 1 2 3) {:line 21})
+                     {:reserved {'hello {:type :template
+                                         :macro (fn [_]
+                                                  (throw (ex-info "boom" {:probe true})))}}}
+                     (:modules prep/+book-min+)
+                     '{:lang :lua
+                       :module {:id L.core
+                                :link {u L.core}}}
+                     nil
+                     identity)
+    nil
+    (catch Throwable t
+      (select-keys (ex-data t)
+                   [:probe
+                    :hara.lang/phase
+                    :hara.lang/subsystem
+                    :hara.lang/lang
+                    :hara.lang/line
+                    :hara.lang/module
+                    :hara.lang/symbol
+                    :hara.lang/form])))
+  => '{:probe true
+        :hara.lang/phase :staging/reserved-template
+        :hara.lang/subsystem :hara.lang/reserved-template
+        :hara.lang/lang :lua
+        :hara.lang/line 21
+        :hara.lang/module L.core
+        :hara.lang/symbol hello
+        :hara.lang/form (hello 1 2 3)})
+
+(fact "reserved template heads expand before value-position fragments"
+  (to-staging-form '(-> xs (u/filter odd?))
+                   {:reserved {'-> {:type :template
+                                    :macro macroexpand-1}}}
+                   '{L.core {:fragment {filter {:id 'filter
+                                               :module L.core
+                                               :template (fn [arr pred]
+                                                           (list 'filter arr pred))
+                                               :form '(fn [arr pred])}}}}
+                   '{:module {:id L.current
+                              :link {u L.core}}}
+                   nil
+                   identity)
+  => '(u/filter xs odd?))
+
+^{:refer hara.lang.base.preprocess-staging/to-staging :added "4.1"}
+(fact "converts the stage"
+  (to-staging '(u/add (u/identity-fn 1) 2)
+              nil
+              (:modules prep/+book-min+)
+              '{:module {:link {u L.core}}})
+  => '[(+ (L.core/identity-fn 1) 2) #{L.core/identity-fn} #{L.core/add} {}]
+
+  (to-staging '(u/sub (u/add (u/identity-fn 1) 2)
+                      (-/hello))
+              nil
+              (:modules prep/+book-min+)
+              '{:entry {:id hello}
+                :module {:id L.util
+                         :link {u L.core}}})
+  => '[(- (+ (L.core/identity-fn 1) 2) (L.util/hello))
+       #{L.core/identity-fn}
+       #{L.core/add L.core/sub}
+       {}]
+
+  ((juxt identity
+         (comp #(select-keys % [:assign/inline])
+               meta
+               last
+               first))
+   (to-staging '(var a := (u/identity-fn 1) :inline)
+               {:reserved {'var {:emit :def-assign}}}
+               (:modules prep/+book-min+)
+               '{:module {:link {u L.core}}}))
+  => '[[(var a := (L.core/identity-fn 1)) #{} #{} {}] #:assign{:inline true}]
+
+  (let [[form deps deps-fragment deps-native]
+        (to-staging '(var a ^:inline (u/identity-fn 1))
+                    {:reserved {'var {:emit :def-assign}}}
+                    (:modules prep/+book-min+)
+                    '{:module {:link {u L.core}}})]
+    [form
+     deps
+     deps-fragment
+     deps-native
+     (select-keys (meta (last form))
+                  [:inline :assign/inline])])
+  => '[(var a (L.core/identity-fn 1))
+       #{}
+       #{}
+       {}
+       {:inline true
+        :assign/inline true}]
+
+  (first
+   (to-staging '(var a := (x:type-native obj))
+               js/+grammar+
+               {}
+               '{:module {:id JS.core
+                          :link {- JS.core}}}))
+  => '(do
+        (var* :let a := nil)
+        (do
+          (when (== obj nil)
+            (return nil))
+          (var t := (typeof obj))
+          (if (== t "object")
+            (cond
+              (Array.isArray obj)
+              (:= a "array")
+              :else
+              (do
+                (var tn := (. obj ["constructor"] ["name"]))
+                (if (== tn "Object")
+                  (:= a "object")
+                  (:= a tn))))
+            (:= a t))))
+
+  (first
+   (to-staging '(:= a (x:type-native obj))
+               js/+grammar+
+               {}
+               '{:module {:id JS.core
+                          :link {- JS.core}}}))
+  => '(do
+        (when (== obj nil)
+          (return nil))
+        (var t := (typeof obj))
+        (if (== t "object")
+          (cond
+            (Array.isArray obj)
+            (:= a "array")
+            :else
+            (do
+              (var tn := (. obj ["constructor"] ["name"]))
+              (if (== tn "Object")
+                (:= a "object")
+                (:= a tn))))
+          (:= a t)))
+
+  (to-staging 'x:add
+              +grammar+
+              {}
+              '{:module {:id L.core
+                         :link {}}})
+  => '[(fn [x y] (return (+ x y))) #{} #{} {}]
+
+  (first
+   (to-staging '(return (x:type-native obj))
+               js/+grammar+
+               {}
+               '{:module {:id JS.core
+                          :link {- JS.core}}}))
+  => '(do
+        (when (== obj nil)
+          (return nil))
+        (var t := (typeof obj))
+        (if (== t "object")
+          (cond
+            (Array.isArray obj)
+            (return "array")
+            :else
+            (do
+              (var tn := (. obj ["constructor"] ["name"]))
+              (if (== tn "Object")
+                (return "object")
+                (return tn))))
+          (return t)))
+
+  (first
+   (to-staging '(f (g (x:type-native obj)))
+               js/+grammar+
+               {}
+               '{:module {:id JS.core
+                          :link {- JS.core}}}))
+  => '(f (g ((fn [value]
+               (do
+                 (when (== value nil)
+                   (return nil))
+                 (var t := (typeof value))
+                 (if (== t "object")
+                   (cond
+                     (Array.isArray value)
+                     (return "array")
+                     :else
+                     (do
+                       (var tn := (. value ["constructor"] ["name"]))
+                       (if (== tn "Object")
+                         (return "object")
+                         (return tn))))
+                   (return t))))
+             obj)))
+
+  (to-staging 'x:type-native
+              js/+grammar+
+              {}
+              '{:module {:id JS.core
+                         :link {- JS.core}}})
+  => '[(fn [value]
+         (do
+           (when (== value nil)
+             (return nil))
+           (var t := (typeof value))
+           (if (== t "object")
+             (cond
+               (Array.isArray value)
+               (return "array")
+               :else
+               (do
+                 (var tn := (. value ["constructor"] ["name"]))
+                 (if (== tn "Object")
+                   (return "object")
+                   (return tn))))
+             (return t))))
+       #{} #{} {}])
+
+(fact "language macro form heads do not recurse during staging"
+  (first
+   (to-staging '(do (for:object [[k v] obj]
+                        (return false)))
+               js/+grammar+
+               {}
+               '{:module {:id JS.core
+                          :link {- JS.core}}}))
+  => '(do (for:object [[k v] obj]
+          (return false))))
+
+(fact "core macros remain deferred during staging"
+  (first
+   (to-staging '(if check
+                  (return a)
+                  (return b))
+               js/+grammar+
+               {}
+               '{:module {:id JS.core
+                          :link {- JS.core}}}))
+  => '(if check
+        (return a)
+        (return b)))
+
+(fact "xtalk operator heads remain in-place inside forms"
+  (first
+   (to-staging '(do (x:set-key obj
+                               (x:arr-first e)
+                               (x:arr-second e))
+                    (return obj))
+               +grammar+
+               {}
+               '{:module {:id xt.lang.common-lib
+                          :link {- xt.lang.common-lib}}}))
+  => '(do (x:set-key obj
+                     (x:arr-first e)
+                     (x:arr-second e))
+          (return obj)))
+
+^{:refer hara.lang.base.preprocess-staging/to-resolve :added "4.1"}
+(fact "resolves only the code symbols (no macroexpansion)"
+  (to-resolve '(u/add (u/identity-fn 1) 2)
+              nil
+              (:modules prep/+book-min+)
+              '{:module {:link {u L.core}}})
+  => '(L.core/add (L.core/identity-fn 1) 2))

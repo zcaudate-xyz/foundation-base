@@ -95,5 +95,5 @@
 (fact "translates entire file structure"
 
   (js-dsl/translate-file {:type "File" :program {:body [{:type "VariableDeclaration" :kind "const" :declarations [{:id {:type "Identifier" :name "x"} :init {:type "NumericLiteral" :value 1}}]}]}} 'my.ns)
-  => '((ns my.ns (:require [std.lang :as l] [std.lib :as h]))
+  => '((ns my.ns (:require [hara.lang :as l] [std.lib :as h]))
        (l/script :js {} (var (x 1)))))
