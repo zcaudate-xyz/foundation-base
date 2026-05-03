@@ -32,14 +32,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         
-      - name: Run Tests - std, math, net and script
+      - name: Run Tests - std, script, math, net
         run: >
           docker run --network host 
           -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
           -v /var/run/docker.sock:/var/run/docker.sock 
           -v $(pwd):$(pwd) 
           -w $(pwd) 
-          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein test :with "[std math net script]" 
+          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein test :with "[std script math net]" 
           
   run-code-tests:
     runs-on: ubuntu-latest
@@ -109,14 +109,42 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         
-      - name: Run Tests - rt, xtalk
+      - name: Run Tests - rt
         run: >
           docker run --network host 
           -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
           -v /var/run/docker.sock:/var/run/docker.sock 
           -v $(pwd):$(pwd) 
           -w $(pwd) 
-          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein test :with "[rt, xtalk]"
+          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein test :with "[rt]"
+        
+    services:
+      postgres:
+        image: ghcr.io/zcaudate-xyz/infra-db:main
+        env:
+          POSTGRES_DB: test
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+
+  run-xtalk-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Run Tests - xtalk
+        run: >
+          docker run --network host 
+          -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
+          -v /var/run/docker.sock:/var/run/docker.sock 
+          -v $(pwd):$(pwd) 
+          -w $(pwd) 
+          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein test :with "[xtalk]"
         
     services:
       postgres:

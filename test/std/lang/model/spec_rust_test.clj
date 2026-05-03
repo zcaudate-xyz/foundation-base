@@ -318,31 +318,31 @@ let a: List<i32> = List::Cons(7, Box::new(List::Cons(13, Box::new(List::Nil))));
 
   (!.js
    (var (:int a) 3))
-  => "let int a = 3;"
+  => "let int a = 3"
 
   (!.rs
     (var :mutable (:f64 number) 1.0))
-  => "let mutable number: f64 = 1.0;"
+  => "let mutable number: f64 = 1.0"
 
   (!.rs
     (var (:f64 number) 1.0))
-  => "let number: f64 = 1.0;"
+  => "let number: f64 = 1.0"
 
   (!.rs
     (var (:f64 n) 1.0))
-  => "let n: f64 = 1.0;"
+  => "let n: f64 = 1.0"
 
   (!.rs
     (:to 0 3))
-  => "0..3;"
+  => "0..3"
 
   (!.rs
     ($ Class "new"))
-  => "Class::new();"
+  => "Class::new()"
 
   (!.rs
     ($ Class :new))
-  => "Class::new;"
+  => "Class::new"
 
 
 

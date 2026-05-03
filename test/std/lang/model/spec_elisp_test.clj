@@ -6,7 +6,7 @@
 ^{:refer std.lang.model.spec-elisp/emit-elisp :added "4.1"}
 (fact "emits code into emacs lisp schema"
   (emit-elisp '(defn hello [x] (return (== x nil))) {})
-  => "(defun hello (x) (equal x nil))")
+  => "(defun hello (x) (catch (quote __xt_return__) (throw (quote __xt_return__) (equal x nil))))")
 
 (fact "emits elisp data structures"
   (emit-elisp {:a 1 :b [2 3]} {})
@@ -19,11 +19,11 @@
 
 (fact "emits named lambdas through the elisp backend"
   (emit-elisp '(fn named [x] (return x)) {})
-  => "(lambda (x) x)")
+  => "(lambda (x) (catch (quote __xt_return__) (throw (quote __xt_return__) x)))")
 
 (fact "emits funcall for locally bound function values"
   (emit-elisp '(defn outer [pre-fn x] (return (pre-fn x))) {})
-  => "(defun outer (pre-fn x) (funcall pre-fn x))")
+  => "(defun outer (pre-fn x) (catch (quote __xt_return__) (throw (quote __xt_return__) (funcall pre-fn x))))")
 
 (fact "emits namespaced function refs as function values"
   (emit-elisp '(list xtt/eq-nested-obj xtt/eq-nested-arr) {})

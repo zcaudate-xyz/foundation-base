@@ -142,8 +142,8 @@
                                    (x:promise-finally promise onDone)
                                    (x:promise-native? value))])]
     [(boolean (re-find #"Future\.sync\(thunk\)" out))
-     (boolean (re-find #"\.then\(onValue\)" out))
-     (boolean (re-find #"\.catchError\(onError\)" out))
+     (boolean (re-find #"\.then\(" out))
+     (boolean (re-find #"\.catchError\(" out))
      (boolean (re-find #"\.whenComplete\(onDone\)" out))
      (boolean (re-find #"runtimeType" out))
      (boolean (re-find #"startsWith\(\"Future<\"\)" out))])

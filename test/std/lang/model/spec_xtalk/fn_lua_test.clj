@@ -7,7 +7,7 @@
 ^{:refer std.lang.model.spec-xtalk.fn-lua/+lua-promise+ :added "4.1"}
 (fact "async run emits a coroutine start"
   (l/emit-as :lua [(lua-tf-x-async-run '[_ thunk])])
-  => #"(?s)coroutine\.create.*coroutine\.resume")
+  => #"coroutine\.resume\(coroutine\.create\(thunk\)\)")
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-del :added "4.0"}
 (fact "deletes object"

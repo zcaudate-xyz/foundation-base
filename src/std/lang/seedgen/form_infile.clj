@@ -633,6 +633,17 @@
          (remove #{root-lang})
          vec)))
 
+(defn- root-script-declared-langs
+  [output extra-langs]
+  (let [root-lang (get-in output [:globals :lang :root])]
+    (->> (concat [root-lang]
+                 (or (root-script-meta-langs output) [])
+                 (get-in output [:globals :lang :derived])
+                 extra-langs)
+         (keep identity)
+         distinct
+         vec)))
+
 (defn- keep-target-items
   [classification lang]
   (->> (form-common/item-classify-langs classification)
@@ -855,22 +866,18 @@
          ")")))
 
 (defn- update-root-script-string
-  [output target-set]
+  [output extra-langs]
   (let [root-entry  (get-in output [:globals :global-script :root])
-        root-form   (some-> root-entry item-value)
-        current-str (item-string root-entry)
-        root-meta   (some-> root-form meta :seedgen/root)
-        known-langs (->> (concat (or (root-script-meta-langs output) [])
-                                 (get-in output [:globals :lang :derived]))
-                         distinct
-                         (remove (set target-set))
-                         vec)]
+         root-form   (some-> root-entry item-value)
+         current-str (item-string root-entry)
+         root-meta   (some-> root-form meta :seedgen/root)
+         known-langs (root-script-declared-langs output extra-langs)]
     (cond
-      ;; Preserve user-authored root language declarations verbatim.
-      (contains? root-meta :langs)
+      (or (nil? root-meta)
+          (<= (count known-langs) 1))
       current-str
-
-      (empty? known-langs)
+      
+      (= known-langs (vec (or (:langs root-meta) [])))
       current-str
 
       :else
@@ -938,9 +945,10 @@
                           current  (block/block-string (nav/block zloc))
                           form     (nav/value zloc)
                           refer    (:refer (meta form))]
-                      (cond
-                        (= line root-script-line)
-                        (into [current] add-script-strs)
+                       (cond
+                         (= line root-script-line)
+                         (into [(update-root-script-string output ordered-scripts)]
+                               add-script-strs)
 
                         (contains? derived-lines line)
                         []
@@ -996,9 +1004,9 @@
                           refer   (:refer (meta form))
                           head    (when (seq? (nav/value body))
                                     (first (nav/value body)))]
-                      (cond
-                        (= line root-script-line)
-                         [(update-root-script-string output target-set)]
+                       (cond
+                         (= line root-script-line)
+                          [(update-root-script-string output nil)]
 
                         (contains? derived-line->lang line)
                         (if (contains? target-set (get derived-line->lang line))

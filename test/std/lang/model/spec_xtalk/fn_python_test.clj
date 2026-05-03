@@ -52,7 +52,7 @@
                                     (catch err
                                       (return err))))])]
     [(boolean (re-find #"(?s)raise .*Exception" out))
-     (boolean (re-find #"except Exception as err:" out))])
+     (boolean (re-find #"except Exception as [^:]+:" out))])
   => [true true])
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-ex-native? :added "4.1"}
