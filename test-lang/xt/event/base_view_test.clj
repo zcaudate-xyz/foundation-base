@@ -108,6 +108,45 @@
      (view/parse-args {:input {:data [1 2 3]}})])
   => [1 true false true [1 2 3]])
 
+^{:refer xt.event.base-view/check-disabled :added "4.1"}
+(fact "checks disabled state from view context"
+
+  (!.js
+    [(view/check-disabled {})
+     (view/check-disabled {:input {:data [3]}})
+     (view/check-disabled {:input {:data [3]
+                                   :disabled true}})])
+  => [true false true]
+
+  (!.lua
+    [(view/check-disabled {})
+     (view/check-disabled {:input {:data [3]}})
+     (view/check-disabled {:input {:data [3]
+                                   :disabled true}})])
+  => [true false true]
+
+  (!.py
+    [(view/check-disabled {})
+     (view/check-disabled {:input {:data [3]}})
+     (view/check-disabled {:input {:data [3]
+                                   :disabled true}})])
+  => [true false true])
+
+^{:refer xt.event.base-view/parse-args :added "4.1"}
+(fact "parses arguments from input data"
+
+  (!.js
+    (view/parse-args {:input {:data [1 2 3]}}))
+  => [1 2 3]
+
+  (!.lua
+    (view/parse-args {:input {:data [1 2 3]}}))
+  => [1 2 3]
+
+  (!.py
+    (view/parse-args {:input {:data [1 2 3]}}))
+  => [1 2 3])
+
 ^{:refer xt.event.base-view/create-view :added "4.1"}
 (fact "manages view listeners"
 
@@ -181,45 +220,6 @@
         "listener/type" "view"}
        ["a1"]]))
 
-^{:refer xt.event.base-view/check-disabled :added "4.1"}
-(fact "checks disabled state from view context"
-
-  (!.js
-    [(view/check-disabled {})
-     (view/check-disabled {:input {:data [3]}})
-     (view/check-disabled {:input {:data [3]
-                                   :disabled true}})])
-  => [true false true]
-
-  (!.lua
-    [(view/check-disabled {})
-     (view/check-disabled {:input {:data [3]}})
-     (view/check-disabled {:input {:data [3]
-                                   :disabled true}})])
-  => [true false true]
-
-  (!.py
-    [(view/check-disabled {})
-     (view/check-disabled {:input {:data [3]}})
-     (view/check-disabled {:input {:data [3]
-                                   :disabled true}})])
-  => [true false true])
-
-^{:refer xt.event.base-view/parse-args :added "4.1"}
-(fact "parses arguments from input data"
-
-  (!.js
-    (view/parse-args {:input {:data [1 2 3]}}))
-  => [1 2 3]
-
-  (!.lua
-    (view/parse-args {:input {:data [1 2 3]}}))
-  => [1 2 3]
-
-  (!.py
-    (view/parse-args {:input {:data [1 2 3]}}))
-  => [1 2 3])
-
 ^{:refer xt.event.base-view/view-context :added "4.1"}
 (fact "builds a view context with view and input"
 
@@ -285,6 +285,12 @@
       "t" nil
       "meta" {"listener/id" "a1"
               "listener/type" "view"}})
+
+^{:refer xt.event.base-view/remove-listener :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.event.base-view/list-listeners :added "4.1"}
+(fact "TODO")
 
 ^{:refer xt.event.base-view/trigger-listeners :added "4.1"
   :setup [(def +out+

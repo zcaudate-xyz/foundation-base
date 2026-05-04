@@ -80,60 +80,6 @@
                    "listeners" []}]])])
   => +out+)
 
-^{:refer xt.event.base-animate/make-binary-transitions :added "4.1"
-  :setup [(def +out+
-            [0 nil 1 nil 0 {"running" false, "queued" [], "animation" nil}])]}
-(fact "provides animation transition helpers"
-
-  ^{:seedgen/base  {:lua {:transform {+out+ (l/as-lua +out+)}}}}
-  (!.js
-    (var t (base-animate/make-binary-transitions
-            mock/MOCK
-            false
-            {}))
-    (var #{indicator
-           zero-fn
-           one-fn} t)
-    [(mock/get-value indicator)
-     (one-fn nil)
-     (mock/get-value indicator)
-     (zero-fn nil)
-     (mock/get-value indicator)
-     (base-animate/new-progressing)])
-  => +out+
-
-  (!.lua
-    (var t (base-animate/make-binary-transitions
-            mock/MOCK
-            false
-            {}))
-    (var #{indicator
-           zero-fn
-           one-fn} t)
-    [(mock/get-value indicator)
-     (one-fn nil)
-     (mock/get-value indicator)
-     (zero-fn nil)
-     (mock/get-value indicator)
-     (base-animate/new-progressing)])
-  => (l/as-lua +out+)
-
-  (!.py
-    (var t (base-animate/make-binary-transitions
-            mock/MOCK
-            false
-            {}))
-    (var #{indicator
-           zero-fn
-           one-fn} t)
-    [(mock/get-value indicator)
-     (one-fn nil)
-     (mock/get-value indicator)
-     (zero-fn nil)
-     (mock/get-value indicator)
-     (base-animate/new-progressing)])
-  => +out+)
-
 ^{:refer xt.event.base-animate/listen-single :added "4.1"}
 (fact "listens to a single observed value"
 
@@ -847,6 +793,60 @@
   => (contains-in {"animation" "anim"
                    "queued" []
                    "running" false}))
+
+^{:refer xt.event.base-animate/make-binary-transitions :added "4.1"
+  :setup [(def +out+
+            [0 nil 1 nil 0 {"running" false, "queued" [], "animation" nil}])]}
+(fact "provides animation transition helpers"
+
+  ^{:seedgen/base  {:lua {:transform {+out+ (l/as-lua +out+)}}}}
+  (!.js
+    (var t (base-animate/make-binary-transitions
+            mock/MOCK
+            false
+            {}))
+    (var #{indicator
+           zero-fn
+           one-fn} t)
+    [(mock/get-value indicator)
+     (one-fn nil)
+     (mock/get-value indicator)
+     (zero-fn nil)
+     (mock/get-value indicator)
+     (base-animate/new-progressing)])
+  => +out+
+
+  (!.lua
+    (var t (base-animate/make-binary-transitions
+            mock/MOCK
+            false
+            {}))
+    (var #{indicator
+           zero-fn
+           one-fn} t)
+    [(mock/get-value indicator)
+     (one-fn nil)
+     (mock/get-value indicator)
+     (zero-fn nil)
+     (mock/get-value indicator)
+     (base-animate/new-progressing)])
+  => (l/as-lua +out+)
+
+  (!.py
+    (var t (base-animate/make-binary-transitions
+            mock/MOCK
+            false
+            {}))
+    (var #{indicator
+           zero-fn
+           one-fn} t)
+    [(mock/get-value indicator)
+     (one-fn nil)
+     (mock/get-value indicator)
+     (zero-fn nil)
+     (mock/get-value indicator)
+     (base-animate/new-progressing)])
+  => +out+)
 
 ^{:refer xt.event.base-animate/make-binary-indicator :added "4.1"}
 (fact "creates a binary indicator trigger"

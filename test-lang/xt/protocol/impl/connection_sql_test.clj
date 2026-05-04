@@ -30,54 +30,6 @@
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.protocol.impl.connection-sql/connection-create :added "4.1"}
-(fact "wraps SQL connection implementations with protocol-backed dispatch"
-
-  (!.js
-    (var conn (sql/connection-create
-               {"tag"         "raw"}
-               {"query"       (fn [raw query]
-                                (return 1))
-                "query_sync"  (fn [raw query]
-                                (return 2))
-                "disconnect"  (fn [raw]
-                                (return true))}))
-    [(sql/connection? conn)
-     (sql/query conn "SELECT 1;")
-     (sql/query-sync conn "SELECT 2;")
-     (sql/disconnect conn)])
-  => [true 1 2 true]
-
-  (!.lua
-    (var conn (sql/connection-create
-               {"tag"         "raw"}
-               {"query"       (fn [raw query]
-                                (return 1))
-                "query_sync"  (fn [raw query]
-                                (return 2))
-                "disconnect"  (fn [raw]
-                                (return true))}))
-    [(sql/connection? conn)
-     (sql/query conn "SELECT 1;")
-     (sql/query-sync conn "SELECT 2;")
-     (sql/disconnect conn)])
-  => [true 1 2 true]
-
-  (!.py
-    (var conn (sql/connection-create
-               {"tag"         "raw"}
-               {"query"       (fn [raw query]
-                                (return 1))
-                "query_sync"  (fn [raw query]
-                                (return 2))
-                "disconnect"  (fn [raw]
-                                (return true))}))
-    [(sql/connection? conn)
-     (sql/query conn "SELECT 1;")
-     (sql/query-sync conn "SELECT 2;")
-     (sql/disconnect conn)])
-  => [true 1 2 true])
-
 ^{:refer xt.protocol.impl.connection-sql/driver? :added "4.1"}
 (fact "identifies wrapped sql drivers"
 
@@ -335,6 +287,54 @@
     [(sql/connection? (sql/require-connection conn))
      (xt/x:get-key (sql/require-connection conn) "::")])
   => [true "sql.connection"])
+
+^{:refer xt.protocol.impl.connection-sql/connection-create :added "4.1"}
+(fact "wraps SQL connection implementations with protocol-backed dispatch"
+
+  (!.js
+    (var conn (sql/connection-create
+               {"tag"         "raw"}
+               {"query"       (fn [raw query]
+                                (return 1))
+                "query_sync"  (fn [raw query]
+                                (return 2))
+                "disconnect"  (fn [raw]
+                                (return true))}))
+    [(sql/connection? conn)
+     (sql/query conn "SELECT 1;")
+     (sql/query-sync conn "SELECT 2;")
+     (sql/disconnect conn)])
+  => [true 1 2 true]
+
+  (!.lua
+    (var conn (sql/connection-create
+               {"tag"         "raw"}
+               {"query"       (fn [raw query]
+                                (return 1))
+                "query_sync"  (fn [raw query]
+                                (return 2))
+                "disconnect"  (fn [raw]
+                                (return true))}))
+    [(sql/connection? conn)
+     (sql/query conn "SELECT 1;")
+     (sql/query-sync conn "SELECT 2;")
+     (sql/disconnect conn)])
+  => [true 1 2 true]
+
+  (!.py
+    (var conn (sql/connection-create
+               {"tag"         "raw"}
+               {"query"       (fn [raw query]
+                                (return 1))
+                "query_sync"  (fn [raw query]
+                                (return 2))
+                "disconnect"  (fn [raw]
+                                (return true))}))
+    [(sql/connection? conn)
+     (sql/query conn "SELECT 1;")
+     (sql/query-sync conn "SELECT 2;")
+     (sql/disconnect conn)])
+  => [true 1 2 true])
 
 ^{:refer xt.protocol.impl.connection-sql/driver-create :added "4.1"}
 (fact "wraps sql driver implementations"

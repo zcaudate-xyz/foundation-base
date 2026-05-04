@@ -16,6 +16,24 @@
  {:setup [(l/rt:restart)]
  :teardown [(l/rt:stop)]})
 
+^{:refer xt.lang.spec-promise/x:promise-run :added "4.1"}
+(fact "wraps raw values and preserves resolved results"
+
+  (notify/wait-on :js
+    (spec-promise/x:promise-then
+     (spec-promise/x:promise-run "A")
+     (repl/>notify)))
+  => "A"
+
+  (notify/wait-on :js
+    (spec-promise/x:promise-then
+     (spec-promise/x:promise-run
+      (spec-promise/x:promise
+       (fn []
+         (return "B"))))
+     (repl/>notify)))
+  => "B")
+
 ^{:refer xt.event.util-task/new-task :added "4.1"}
 (fact "creates a new task"
 
@@ -55,6 +73,60 @@
      (repl/>notify)))
   => "B")
 
+^{:refer xt.event.util-task/task-unload :added "4.1"}
+(fact "unloads only tasks that currently pass their unload check"
+
+  (notify/wait-on :js
+    (spec-promise/x:promise-then
+     (loader/task-unload
+      (loader/new-task
+       "A" [] []
+       {:get-fn (fn [] (return "loaded"))
+        :check-fn (fn [res] (return (== res "loaded")))
+        :unload-fn (fn [] (return "gone"))}))
+     (repl/>notify)))
+  => true
+
+  (notify/wait-on :js
+    (spec-promise/x:promise-then
+     (loader/task-unload
+      (loader/new-task
+       "A" [] []
+       {:get-fn (fn [] (return nil))
+        :check-fn (fn [res] (return (== res "loaded")))
+        :unload-fn (fn [] (return "gone"))}))
+     (repl/>notify)))
+  => false)
+
+^{:refer xt.event.util-task/unload-tasks-loop :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.event.util-task/new-loader-blank :added "4.1" :seedgen/base {:lua {:suppress true}}}
+(fact "creates an empty loader state"
+
+  (!.js
+   (loader/new-loader-blank))
+  => {"::" "loader"
+      "completed" {}
+      "loading" {}
+      "errored" nil
+      "order" []
+      "tasks" {}})
+
+^{:refer xt.event.util-task/add-tasks :added "4.1" :seedgen/base {:lua {:suppress true}}}
+(fact "adds tasks and recalculates dependency order"
+
+  (!.js
+   (var instance
+        (loader/add-tasks
+         (loader/new-loader-blank)
+         [(loader/new-task "A" [] [] {:load-fn (fn [] (return "A"))})
+          (loader/new-task "B" ["A"] [] {:load-fn (fn [] (return "B"))})]))
+   {"order" (. instance ["order"])
+    "tasks" (xt/x:obj-keys (. instance ["tasks"]))})
+  => {"order" ["A" "B"]
+      "tasks" ["A" "B"]})
+
 ^{:refer xt.event.util-task/new-loader :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "creates a dependency-ordered loader"
 
@@ -69,6 +141,56 @@
   => (contains-in {"order" ["A" "B" "C"]
                    "incomplete" ["A" "B" "C"]
                    "waiting" ["A"]}))
+
+^{:refer xt.event.util-task/list-loading :added "4.1"}
+(fact "lists all currently loading task ids"
+
+  (set
+   (!.js
+    (var instance (loader/new-loader-blank))
+    (xt/x:set-key (. instance ["loading"]) "A" true)
+    (xt/x:set-key (. instance ["loading"]) "B" true)
+    (loader/list-loading instance)))
+  => #{"A" "B"})
+
+^{:refer xt.event.util-task/list-completed :added "4.1"}
+(fact "lists all completed task ids"
+
+  (set
+   (!.js
+    (var instance (loader/new-loader-blank))
+    (xt/x:set-key (. instance ["completed"]) "A" true)
+    (xt/x:set-key (. instance ["completed"]) "B" true)
+    (loader/list-completed instance)))
+  => #{"A" "B"})
+
+^{:refer xt.event.util-task/list-incomplete :added "4.1" :seedgen/base {:lua {:suppress true}}}
+(fact "lists tasks that have not completed yet"
+
+  (set
+   (!.js
+    (var instance
+         (loader/new-loader
+          [(loader/new-task "A" [] [] {:load-fn (fn [] (return "A"))})
+           (loader/new-task "B" ["A"] [] {:load-fn (fn [] (return "B"))})
+           (loader/new-task "C" ["B"] [] {:load-fn (fn [] (return "C"))})]))
+    (xt/x:set-key (. instance ["completed"]) "A" true)
+    (loader/list-incomplete instance)))
+  => #{"B" "C"})
+
+^{:refer xt.event.util-task/list-waiting :added "4.1" :seedgen/base {:lua {:suppress true}}}
+(fact "lists tasks whose dependencies are satisfied"
+
+  (set
+   (!.js
+    (var instance
+         (loader/new-loader
+          [(loader/new-task "A" [] [] {:load-fn (fn [] (return "A"))})
+           (loader/new-task "B" ["A"] [] {:load-fn (fn [] (return "B"))})
+           (loader/new-task "C" ["B"] [] {:load-fn (fn [] (return "C"))})]))
+    (xt/x:set-key (. instance ["completed"]) "A" true)
+    (loader/list-waiting instance)))
+  => #{"B"})
 
 ^{:refer xt.event.util-task/load-tasks-single :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "loads a single task and updates loader state"
@@ -191,125 +313,6 @@
      (fn [_]
        (repl/notify (loader/list-completed instance)))))
   => ["A"])
-
-^{:refer xt.lang.spec-promise/x:promise-run :added "4.1"}
-(fact "wraps raw values and preserves resolved results"
-
-  (notify/wait-on :js
-    (spec-promise/x:promise-then
-     (spec-promise/x:promise-run "A")
-     (repl/>notify)))
-  => "A"
-
-  (notify/wait-on :js
-    (spec-promise/x:promise-then
-     (spec-promise/x:promise-run
-      (spec-promise/x:promise
-       (fn []
-         (return "B"))))
-     (repl/>notify)))
-  => "B")
-
-^{:refer xt.event.util-task/task-unload :added "4.1"}
-(fact "unloads only tasks that currently pass their unload check"
-
-  (notify/wait-on :js
-    (spec-promise/x:promise-then
-     (loader/task-unload
-      (loader/new-task
-       "A" [] []
-       {:get-fn (fn [] (return "loaded"))
-        :check-fn (fn [res] (return (== res "loaded")))
-        :unload-fn (fn [] (return "gone"))}))
-     (repl/>notify)))
-  => true
-
-  (notify/wait-on :js
-    (spec-promise/x:promise-then
-     (loader/task-unload
-      (loader/new-task
-       "A" [] []
-       {:get-fn (fn [] (return nil))
-        :check-fn (fn [res] (return (== res "loaded")))
-        :unload-fn (fn [] (return "gone"))}))
-     (repl/>notify)))
-  => false)
-
-^{:refer xt.event.util-task/new-loader-blank :added "4.1" :seedgen/base {:lua {:suppress true}}}
-(fact "creates an empty loader state"
-
-  (!.js
-   (loader/new-loader-blank))
-  => {"::" "loader"
-      "completed" {}
-      "loading" {}
-      "errored" nil
-      "order" []
-      "tasks" {}})
-
-^{:refer xt.event.util-task/add-tasks :added "4.1" :seedgen/base {:lua {:suppress true}}}
-(fact "adds tasks and recalculates dependency order"
-
-  (!.js
-   (var instance
-        (loader/add-tasks
-         (loader/new-loader-blank)
-         [(loader/new-task "A" [] [] {:load-fn (fn [] (return "A"))})
-          (loader/new-task "B" ["A"] [] {:load-fn (fn [] (return "B"))})]))
-   {"order" (. instance ["order"])
-    "tasks" (xt/x:obj-keys (. instance ["tasks"]))})
-  => {"order" ["A" "B"]
-      "tasks" ["A" "B"]})
-
-^{:refer xt.event.util-task/list-loading :added "4.1"}
-(fact "lists all currently loading task ids"
-
-  (set
-   (!.js
-    (var instance (loader/new-loader-blank))
-    (xt/x:set-key (. instance ["loading"]) "A" true)
-    (xt/x:set-key (. instance ["loading"]) "B" true)
-    (loader/list-loading instance)))
-  => #{"A" "B"})
-
-^{:refer xt.event.util-task/list-completed :added "4.1"}
-(fact "lists all completed task ids"
-
-  (set
-   (!.js
-    (var instance (loader/new-loader-blank))
-    (xt/x:set-key (. instance ["completed"]) "A" true)
-    (xt/x:set-key (. instance ["completed"]) "B" true)
-    (loader/list-completed instance)))
-  => #{"A" "B"})
-
-^{:refer xt.event.util-task/list-incomplete :added "4.1" :seedgen/base {:lua {:suppress true}}}
-(fact "lists tasks that have not completed yet"
-
-  (set
-   (!.js
-    (var instance
-         (loader/new-loader
-          [(loader/new-task "A" [] [] {:load-fn (fn [] (return "A"))})
-           (loader/new-task "B" ["A"] [] {:load-fn (fn [] (return "B"))})
-           (loader/new-task "C" ["B"] [] {:load-fn (fn [] (return "C"))})]))
-    (xt/x:set-key (. instance ["completed"]) "A" true)
-    (loader/list-incomplete instance)))
-  => #{"B" "C"})
-
-^{:refer xt.event.util-task/list-waiting :added "4.1" :seedgen/base {:lua {:suppress true}}}
-(fact "lists tasks whose dependencies are satisfied"
-
-  (set
-   (!.js
-    (var instance
-         (loader/new-loader
-          [(loader/new-task "A" [] [] {:load-fn (fn [] (return "A"))})
-           (loader/new-task "B" ["A"] [] {:load-fn (fn [] (return "B"))})
-           (loader/new-task "C" ["B"] [] {:load-fn (fn [] (return "C"))})]))
-    (xt/x:set-key (. instance ["completed"]) "A" true)
-    (loader/list-waiting instance)))
-  => #{"B"})
 
 ^{:refer xt.event.util-task/unload-tasks :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "unloads completed tasks in reverse dependency order"

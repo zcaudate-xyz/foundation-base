@@ -52,27 +52,6 @@
  {:setup [(l/rt:restart)]
  :teardown [(l/rt:stop)]})
 
-^{:refer xt.event.base-form/check-event :added "4.1"}
-(fact "checks field overlap"
-
-  (!.js
-   [(form/check-event {:fields ["a" "b" "c"]} ["a"])
-    (form/check-event {:fields ["a" "b" "c"]} [])
-    (form/check-event {:fields ["a" "b" "c"]} ["b" "d"])])
-  => [true false true]
-
-  (!.lua
-   [(form/check-event {:fields ["a" "b" "c"]} ["a"])
-    (form/check-event {:fields ["a" "b" "c"]} [])
-    (form/check-event {:fields ["a" "b" "c"]} ["b" "d"])])
-  => [true false true]
-
-  (!.py
-   [(form/check-event {:fields ["a" "b" "c"]} ["a"])
-    (form/check-event {:fields ["a" "b" "c"]} [])
-    (form/check-event {:fields ["a" "b" "c"]} ["b" "d"])])
-  => [true false true])
-
 ^{:refer xt.event.base-form/make-form :added "4.1"}
 (fact "manages form data and listeners"
 
@@ -175,6 +154,27 @@
         "listener/type" "form"
         "form/fields" ["login"]}
        []]))
+
+^{:refer xt.event.base-form/check-event :added "4.1"}
+(fact "checks field overlap"
+
+  (!.js
+   [(form/check-event {:fields ["a" "b" "c"]} ["a"])
+    (form/check-event {:fields ["a" "b" "c"]} [])
+    (form/check-event {:fields ["a" "b" "c"]} ["b" "d"])])
+  => [true false true]
+
+  (!.lua
+   [(form/check-event {:fields ["a" "b" "c"]} ["a"])
+    (form/check-event {:fields ["a" "b" "c"]} [])
+    (form/check-event {:fields ["a" "b" "c"]} ["b" "d"])])
+  => [true false true]
+
+  (!.py
+   [(form/check-event {:fields ["a" "b" "c"]} ["a"])
+    (form/check-event {:fields ["a" "b" "c"]} [])
+    (form/check-event {:fields ["a" "b" "c"]} ["b" "d"])])
+  => [true false true])
 
 ^{:refer xt.event.base-form/add-listener :added "4.1"}
 (fact "adds a form listener with field metadata"

@@ -58,83 +58,6 @@
       {"id" true
        "type" true}])
 
-^{:refer xt.event.base-route/make-route :added "4.1" :seedgen/base {:lua {:suppress true}}}
-(fact "tracks route state and listeners"
-
-  (!.js
-   (var r (route/make-route "hello?auth=sign_in"))
-   (var calls [])
-   (var removed nil)
-   (var missing nil)
-   (var entry
-         (route/add-url-listener
-          r
-          "a1"
-          (fn [id data t meta]
-            (xt/x:arr-push calls (xt/x:get-key data "type")))
-          nil))
-   (route/set-url r "hello/world?auth=sign_out")
-   (:= removed (route/remove-listener r "a1"))
-   (:= missing (route/remove-listener r "missing"))
-   [(. r ["::"])
-    (route/get-url (route/make-route "hello?auth=sign_in"))
-    (route/get-segment (route/make-route "hello?auth=sign_in") [])
-    (route/get-param (route/make-route "hello?auth=sign_in") "auth" nil)
-    (route/get-all-params (route/make-route "hello?auth=sign_in") [])
-    [(. entry ["meta"] ["listener/id"])
-     (. entry ["meta"] ["listener/type"])]
-    ["a1"]
-    calls
-    [(. removed ["meta"] ["listener/id"])
-     missing]])
-  => (just-in
-      ["event.route"
-       "hello?auth=sign_in"
-       "hello"
-       "sign_in"
-       {}
-       ["a1" "route.url"]
-       (just ["a1"] :in-any-order)
-       ["route.url"]
-       ["a1" nil]])
-
-  (!.py
-   (var r (route/make-route "hello?auth=sign_in"))
-   (var calls [])
-   (var removed nil)
-   (var missing nil)
-   (var entry
-         (route/add-url-listener
-          r
-          "a1"
-          (fn [id data t meta]
-            (xt/x:arr-push calls (xt/x:get-key data "type")))
-          nil))
-   (route/set-url r "hello/world?auth=sign_out")
-   (:= removed (route/remove-listener r "a1"))
-   (:= missing (route/remove-listener r "missing"))
-   [(. r ["::"])
-    (route/get-url (route/make-route "hello?auth=sign_in"))
-    (route/get-segment (route/make-route "hello?auth=sign_in") [])
-    (route/get-param (route/make-route "hello?auth=sign_in") "auth" nil)
-    (route/get-all-params (route/make-route "hello?auth=sign_in") [])
-    [(. entry ["meta"] ["listener/id"])
-     (. entry ["meta"] ["listener/type"])]
-    ["a1"]
-    calls
-    [(. removed ["meta"] ["listener/id"])
-     missing]])
-  => (just-in
-      ["event.route"
-       "hello?auth=sign_in"
-       "hello"
-       "sign_in"
-       {}
-       ["a1" "route.url"]
-       (just ["a1"] :in-any-order)
-       ["route.url"]
-       ["a1" nil]]))
-
 ^{:refer xt.event.base-route/interim-to-url :added "4.1"}
 (fact "converts interim to url"
 
@@ -361,6 +284,83 @@
     nil))
   => {"auth" "sign_in"})
 
+^{:refer xt.event.base-route/make-route :added "4.1" :seedgen/base {:lua {:suppress true}}}
+(fact "tracks route state and listeners"
+
+  (!.js
+   (var r (route/make-route "hello?auth=sign_in"))
+   (var calls [])
+   (var removed nil)
+   (var missing nil)
+   (var entry
+         (route/add-url-listener
+          r
+          "a1"
+          (fn [id data t meta]
+            (xt/x:arr-push calls (xt/x:get-key data "type")))
+          nil))
+   (route/set-url r "hello/world?auth=sign_out")
+   (:= removed (route/remove-listener r "a1"))
+   (:= missing (route/remove-listener r "missing"))
+   [(. r ["::"])
+    (route/get-url (route/make-route "hello?auth=sign_in"))
+    (route/get-segment (route/make-route "hello?auth=sign_in") [])
+    (route/get-param (route/make-route "hello?auth=sign_in") "auth" nil)
+    (route/get-all-params (route/make-route "hello?auth=sign_in") [])
+    [(. entry ["meta"] ["listener/id"])
+     (. entry ["meta"] ["listener/type"])]
+    ["a1"]
+    calls
+    [(. removed ["meta"] ["listener/id"])
+     missing]])
+  => (just-in
+      ["event.route"
+       "hello?auth=sign_in"
+       "hello"
+       "sign_in"
+       {}
+       ["a1" "route.url"]
+       (just ["a1"] :in-any-order)
+       ["route.url"]
+       ["a1" nil]])
+
+  (!.py
+   (var r (route/make-route "hello?auth=sign_in"))
+   (var calls [])
+   (var removed nil)
+   (var missing nil)
+   (var entry
+         (route/add-url-listener
+          r
+          "a1"
+          (fn [id data t meta]
+            (xt/x:arr-push calls (xt/x:get-key data "type")))
+          nil))
+   (route/set-url r "hello/world?auth=sign_out")
+   (:= removed (route/remove-listener r "a1"))
+   (:= missing (route/remove-listener r "missing"))
+   [(. r ["::"])
+    (route/get-url (route/make-route "hello?auth=sign_in"))
+    (route/get-segment (route/make-route "hello?auth=sign_in") [])
+    (route/get-param (route/make-route "hello?auth=sign_in") "auth" nil)
+    (route/get-all-params (route/make-route "hello?auth=sign_in") [])
+    [(. entry ["meta"] ["listener/id"])
+     (. entry ["meta"] ["listener/type"])]
+    ["a1"]
+    calls
+    [(. removed ["meta"] ["listener/id"])
+     missing]])
+  => (just-in
+      ["event.route"
+       "hello?auth=sign_in"
+       "hello"
+       "sign_in"
+       {}
+       ["a1" "route.url"]
+       (just ["a1"] :in-any-order)
+       ["route.url"]
+       ["a1" nil]]))
+
 ^{:refer xt.event.base-route/add-url-listener :added "4.1"}
 (fact "adds a url listener entry"
 
@@ -476,6 +476,12 @@
       "listener/type" "route.full"
       "route/param" "auth"
       "route/path" ["hello"]})
+
+^{:refer xt.event.base-route/remove-listener :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.event.base-route/list-listeners :added "4.1"}
+(fact "TODO")
 
 ^{:refer xt.event.base-route/set-url :added "4.1"}
 (fact "updates the full route url and notifies listeners"
