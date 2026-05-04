@@ -1,6 +1,5 @@
 (ns xt.event.node-space
-  (:require [hara.lang :as l]
-            [hara.lang.typed.xtalk :refer [defspec.xt]]))
+  (:require [hara.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]

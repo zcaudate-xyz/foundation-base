@@ -133,10 +133,10 @@
              :scope #{:public}
              :args [:citext i-iso]
              :api/view true}
-  currency-by-country {:id [:in (hara.runtime.postgres/t:select xt.db.helpers.seed-system-test/RegionCountry
-                                  {:returning  (hara.runtime.postgres/jsonb-object-keys #{"currencies"})
-                                   :where {:id i-iso}
-                                   :as :raw})]})
+  currency-by-country {:id [:in [:select (jsonb-object-keys #{"currencies"})
+                                 :from -/RegionCountry
+                                 :where {:id i-iso}
+                                 :as :raw]]})
 
 (defret.pg ^{:- [-/Currency]
              :scope #{:public}

@@ -1,14 +1,16 @@
 (ns hara.runtime.solidity.client-test
   (:require [hara.runtime.basic :as basic]
-            [hara.runtime.basic.server-basic :as server]
-            [hara.runtime.solidity.client :as client]
-            [hara.runtime.solidity.compile-common :as compile-common]
-            [hara.runtime.solidity.compile-deploy :as deploy]
-            [hara.runtime.solidity.compile-node :as compile-node]
-            [hara.runtime.solidity.compile-solc :as solc]
-            [hara.runtime.solidity.env-ganache :as env]
-            [hara.lang :as l]
-            [std.lib.component :as component])
+             [hara.runtime.basic.server-basic :as server]
+             [hara.runtime.solidity.client :as client]
+             [hara.runtime.solidity.compile-common :as compile-common]
+             [hara.runtime.solidity.compile-deploy :as deploy]
+             [hara.runtime.solidity.compile-node :as compile-node]
+             [hara.runtime.solidity.compile-solc :as solc]
+             [hara.runtime.solidity.env-ganache :as env]
+             [hara.lang :as l]
+             [std.lib.template :as template]
+             [std.lib.component :as component]
+             [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :solidity
@@ -33,8 +35,18 @@
 
 ^{:refer hara.runtime.solidity.client/create-web3-node :added "4.0"}
 (fact "creates the node runtime"
-  ;; Complex setup
-  )
+  (let [calls (atom [])]
+    (with-redefs [basic/rt-basic (fn [_] :rt-node)
+                  notify/wait-on-fn (fn [rt form timeout]
+                                      (swap! calls conj [rt form timeout])
+                                      :ok)]
+      (client/create-web3-node {:id "id" :lang :solidity}))
+    => :rt-node
+
+    @calls
+    => [[:rt-node
+         (template/$ [(:= (!:G solc) (require "solc"))])
+         5000]]))
 
 ^{:refer hara.runtime.solidity.client/start-web3 :added "4.0"}
 (fact "starts the solidity rt"

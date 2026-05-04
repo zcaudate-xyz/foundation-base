@@ -5,7 +5,8 @@
 ^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.db.instance.supabase :as supabase]]})
+   :require [[xt.lang.spec-base :as xt]
+             [xt.db.instance.supabase :as supabase]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -23,8 +24,9 @@
 
   (!.js
    [(supabase/supabase-capable? {"execute" (fn [_compiled _opts] (return [true true]))})
+    (supabase/supabase-capable? {"supabase" {"from" (fn [_table] (return {}))}})
     (supabase/supabase-capable? {})])
-  => [true false])
+  => [true true false])
 
 ^{:refer xt.db.instance.supabase/compile-select-item :added "4.1"}
 (fact "compiles nested return entries to PostgREST select syntax"
@@ -156,8 +158,51 @@
      {"account" {"id" "acct-1"}}
      ["status"
       ["account" ["nickname"]]]]
-    {}))
+     {}))
   => {"status" "error"
       "tag" "db/supabase-query-failed"
       "data" {"status" "error"
-              "tag" "supabase/fail"}})
+              "tag" "supabase/fail"}}
+
+  (!.js
+   (var calls [])
+   (var query nil)
+   (:= query {"select" (fn [cols]
+                         (xt/x:arr-push calls ["select" cols])
+                         (return query))
+              "eq" (fn [path value]
+                     (xt/x:arr-push calls ["eq" path value])
+                     (return query))
+              "in" (fn [path value]
+                     (xt/x:arr-push calls ["in" path value])
+                     (return query))
+              "then" (fn [f]
+                       (xt/x:arr-push calls ["then"])
+                       (return (f {"data" [{"id" "ord-1"
+                                            "status" "open"}]})))})
+   (var schema-client {"from" (fn [table]
+                                (xt/x:arr-push calls ["from" table])
+                                (return query))})
+   (var client {"schema" (fn [schema-name]
+                           (xt/x:arr-push calls ["schema" schema-name])
+                           (return schema-client))})
+   (var out
+        (supabase/supabase-pull-sync
+         {"supabase" client
+          "schema-name" "api"}
+         nil
+         ["Order"
+          {"account" {"id" "acct-1"}
+           "id" ["in" [["ord-1" "ord-2"]]]}
+          ["status"
+           ["account" ["nickname"]]]]
+         {}))
+   [out calls])
+  => [[{"id" "ord-1"
+        "status" "open"}]
+      [["schema" "api"]
+       ["from" "Order"]
+       ["select" "status,account(nickname)"]
+       ["eq" "account.id" "acct-1"]
+       ["in" "id" ["ord-1" "ord-2"]]
+       ["then"]]])

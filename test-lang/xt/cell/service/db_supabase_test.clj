@@ -6,6 +6,7 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.cell.service.db-supabase :as db-supabase]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]]})
 
 (fact:global
@@ -117,19 +118,45 @@
 
   (!.js
    (db-supabase/execute-query
-    {"execute" (fn [compiled _]
-                 (return [true compiled]))}
+     {"execute" (fn [compiled _]
+                  (return [true compiled]))}
+    ["Order"
+     {"account" {"id" "acct-1"}}
+     ["status"
+       ["account" ["nickname"]]]]
+     {}))
+  => [true
+      {"table" "Order"
+       "select" "status,account(nickname)"
+       "filters" [{"path" "account.id"
+                    "op" "eq"
+                    "value" "acct-1"}]}]
+
+  (!.js
+   (var calls [])
+   (var query nil)
+   (:= query {"select" (fn [cols]
+                         (xt/x:arr-push calls ["select" cols])
+                         (return query))
+              "eq" (fn [path value]
+                     (xt/x:arr-push calls ["eq" path value])
+                     (return query))
+              "then" (fn [f]
+                       (xt/x:arr-push calls ["then"])
+                       (return (f {"data" [{"id" "ord-1"
+                                            "status" "open"}]})))})
+   (var client {"from" (fn [table]
+                         (xt/x:arr-push calls ["from" table])
+                         (return query))})
+   (db-supabase/execute-query
+    (xtd/obj-assign (@! +db+) {"supabase" client})
     ["Order"
      {"account" {"id" "acct-1"}}
      ["status"
       ["account" ["nickname"]]]]
     {}))
-  => [true
-      {"table" "Order"
-       "select" "status,account(nickname)"
-       "filters" [{"path" "account.id"
-                   "op" "eq"
-                   "value" "acct-1"}]}])
+  => [true [{"id" "ord-1"
+             "status" "open"}]])
 
 ^{:refer xt.cell.service.db-supabase/map-supabase-error :added "4.1"}
 (fact "maps execution errors into the local error contract"

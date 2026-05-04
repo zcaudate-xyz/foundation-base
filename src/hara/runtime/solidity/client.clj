@@ -57,7 +57,7 @@
                   :runtime :basic
                   :layout :full})
         url     (common/get-url rt)
-        form  (template/$ [(:= solc (require "solc"))])
+        form  (template/$ [(:= (!:G solc) (require "solc"))])
         _     (notify/wait-on-fn rt-node form 5000)]
     rt-node))
 

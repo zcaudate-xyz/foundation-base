@@ -1,8 +1,8 @@
 (ns xt.db.instance.sql-js-test
   (:require [hara.lang :as l]
-             [std.string.prose :as prose]
-             [xt.lang.common-notify :as notify]
-             [xt.lang.spec-promise :as spec-promise])
+              [std.string.prose :as prose]
+              [xt.lang.common-notify :as notify]
+              [xt.lang.spec-promise :as spec-promise])
   (:use code.test))
 
 ^{:seedgen/scaffold {:all true}}
@@ -16,27 +16,6 @@
                [xt.db.text.sql-raw :as raw]
                [xt.db.text.sql-manage :as manage]
                [xt.db.helpers.data-main-test :as sample]]})
-
-  (defn.xt bootstrap-instance
-    [driver opts]
-    (return
-     (spec-promise/x:promise-then
-      (dbsql/connect driver opts)
-      (fn [conn]
-        (:= (!:G INSTANCE) conn)
-        (dbsql/query-sync INSTANCE
-                          (str/join "\n\n"
-                                    (manage/table-create-all
-                                     sample/Schema
-                                     sample/SchemaLookup
-                                     (ut/sqlite-opts nil))))
-        (dbsql/query-sync INSTANCE
-                          (raw/raw-insert "Currency"
-                                          ["id" "type" "symbol" "native" "decimal"
-                                           "name" "plural" "description"]
-                                          (@! sample/+currency+)
-                                          (ut/sqlite-opts nil)))
-        (repl/notify true))))))
 
 ^{:seedgen/root {:all true}}
 (l/script- :js
@@ -84,8 +63,77 @@
              [xt.db.text.sql-util :as ut]
              [xt.db.text.sql-raw :as raw]
              [xt.db.text.sql-manage :as manage]
-             [xt.db.helpers.data-main-test :as sample]
-             [python.lib.driver-sqlite :as py-sqlite]]})
+              [xt.db.helpers.data-main-test :as sample]
+              [python.lib.driver-sqlite :as py-sqlite]]})
+
+(defn bootstrap-js
+  []
+  (notify/wait-on [:js 2000]
+    (. (dbsql/connect (js-sqlite/driver) {})
+       (then (fn [conn]
+               (try
+                 (:= (!:G INSTANCE) conn)
+                 (dbsql/query-sync INSTANCE
+                                   (str/join "\n\n"
+                                             (manage/table-create-all
+                                              sample/Schema
+                                              sample/SchemaLookup
+                                              (ut/sqlite-opts nil))))
+                 (dbsql/query-sync INSTANCE
+                                   (raw/raw-insert "Currency"
+                                                   ["id" "type" "symbol" "native" "decimal"
+                                                    "name" "plural" "description"]
+                                                   (@! sample/+currency+)
+                                                   (ut/sqlite-opts nil)))
+                 (repl/notify true)
+                 (catch e
+                   (repl/notify e))))))))
+
+(defn bootstrap-lua
+  []
+  (notify/wait-on [:lua.nginx 2000]
+    (. (dbsql/connect (lua-sqlite/driver) {:memory true})
+       (then (fn [conn]
+               (try
+                 (:= (!:G INSTANCE) conn)
+                 (dbsql/query-sync INSTANCE
+                                   (str/join "\n\n"
+                                             (manage/table-create-all
+                                              sample/Schema
+                                              sample/SchemaLookup
+                                              (ut/sqlite-opts nil))))
+                 (dbsql/query-sync INSTANCE
+                                   (raw/raw-insert "Currency"
+                                                   ["id" "type" "symbol" "native" "decimal"
+                                                    "name" "plural" "description"]
+                                                   (@! sample/+currency+)
+                                                   (ut/sqlite-opts nil)))
+                 (repl/notify true)
+                 (catch e
+                   (repl/notify e))))))))
+
+(defn bootstrap-python
+  []
+  (notify/wait-on [:python 2000]
+    (. (dbsql/connect (py-sqlite/driver) {})
+       (then (fn [conn]
+               (try
+                 (:= (!:G INSTANCE) conn)
+                 (dbsql/query-sync INSTANCE
+                                   (str/join "\n\n"
+                                             (manage/table-create-all
+                                              sample/Schema
+                                              sample/SchemaLookup
+                                              (ut/sqlite-opts nil))))
+                 (dbsql/query-sync INSTANCE
+                                   (raw/raw-insert "Currency"
+                                                   ["id" "type" "symbol" "native" "decimal"
+                                                    "name" "plural" "description"]
+                                                   (@! sample/+currency+)
+                                                   (ut/sqlite-opts nil)))
+                 (repl/notify true)
+                 (catch e
+                   (repl/notify e))))))))
 
 (fact:global
  {:setup    [(l/rt:restart)
@@ -95,18 +143,9 @@
                                                   true)}}}
              (do (l/rt:scaffold :js)
                  true)
-             ^{:seedgen/base {:lua {:input (notify/wait-on [:lua.nginx 2000]
-                                             (-/bootstrap-instance
-                                              (lua-sqlite/driver)
-                                              {:memory true}))}
-                              :python {:input (notify/wait-on [:python 2000]
-                                                (-/bootstrap-instance
-                                                 (py-sqlite/driver)
-                                                 {}))}}}
-             (notify/wait-on [:js 2000]
-               (-/bootstrap-instance
-                (js-sqlite/driver)
-                {}))]
+             ^{:seedgen/base {:lua {:input (bootstrap-lua)}
+                               :python {:input (bootstrap-python)}}}
+             (bootstrap-js)]
   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.instance.sql/sql-gen-delete :added "4.0"}
@@ -136,9 +175,9 @@
 
   (!.js
    (impl-sql/sql-pull-sync
-    INSTANCE
-    sample/Schema
-    ["UserAccount"
+     INSTANCE
+     sample/Schema
+     ["UserAccount"
      ["nickname"
       ["profile"
        ["first_name"]]]]
@@ -178,6 +217,7 @@
     ["UserAccount"
      ["nickname"
       ["profile"
-       ["first_name"]]]]
-    (ut/sqlite-opts nil)))
-  => empty?)
+        ["first_name"]]]]
+     (ut/sqlite-opts nil)))
+   => empty?)
+)

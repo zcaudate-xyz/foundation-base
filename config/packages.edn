@@ -633,7 +633,7 @@
 
  xyz.zcaudate/xtalk.runtime
  {:description "xtalk language"
-  :include [[xt.runtime     :complete]]}
+  :include [[kmi.lang     :complete]]}
  
  xyz.zcaudate/xtalk.system
  {:description "xtalk language"
