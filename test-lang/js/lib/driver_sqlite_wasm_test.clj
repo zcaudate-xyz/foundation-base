@@ -18,6 +18,9 @@
 ^{:refer js.lib.driver-sqlite-wasm/raw-query :added "4.1" :unchecked true}
 (fact "raw query for sqlite-wasm results")
 
+^{:refer js.lib.driver-sqlite-wasm/wrap-connection :added "4.1"}
+(fact "TODO")
+
 ^{:refer js.lib.driver-sqlite-wasm/make-instance :added "4.1" :unchecked true}
 (fact "creates an sqlite-wasm instance once sqlite3 is loaded")
 
@@ -31,3 +34,6 @@
         (repl/notify
          (sql/query conn "SELECT 1;")))))
   => 1)
+
+^{:refer js.lib.driver-sqlite-wasm/driver :added "4.1"}
+(fact "TODO")

@@ -16,3 +16,10 @@
 
 ^{:refer lua.nginx.driver-postgres/connect-constructor :added "4.0"}
 (fact "connects to postgres")
+
+
+^{:refer lua.nginx.driver-postgres/wrap-connection :added "4.1"}
+(fact "TODO")
+
+^{:refer lua.nginx.driver-postgres/driver :added "4.1"}
+(fact "TODO")

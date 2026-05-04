@@ -67,3 +67,10 @@
    (local conn (lua-sqlite/connect-constructor {:memory true}))
    (driver/query conn "select 1;"))
   => 1)
+
+
+^{:refer lua.nginx.driver-sqlite/wrap-connection :added "4.1"}
+(fact "TODO")
+
+^{:refer lua.nginx.driver-sqlite/driver :added "4.1"}
+(fact "TODO")

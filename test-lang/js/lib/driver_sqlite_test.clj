@@ -19,6 +19,9 @@
 ^{:refer js.lib.driver-sqlite/raw-query :added "4.0" :unchecked true}
 (fact "raw query for sql lite results")
 
+^{:refer js.lib.driver-sqlite/wrap-connection :added "4.1"}
+(fact "TODO")
+
 ^{:refer js.lib.driver-sqlite/make-instance :added "4.0" :unchecked true}
 (fact "creates a instance once SQL is loaded")
 
@@ -32,3 +35,6 @@
         (repl/notify
          (sql/query conn "SELECT 1;")))))
   => 1)
+
+^{:refer js.lib.driver-sqlite/driver :added "4.1"}
+(fact "TODO")
