@@ -101,9 +101,9 @@
     (counter/m:dec-counter0)
     (counter/m:get-counter0))]
   => (contains-in
-      [[(approx 0.07 0.02) 1]
-       [(approx 0.04 0.02) 0]
-       [(approx 0.04 0.02) 0]]))
+      [[(approx 0.06 0.03) 1]
+       [(approx 0.03 0.03) 0]
+       [(approx 0.02 0.03) 0]]))
 
 ^{:refer web3.lib.example-counter/m:dec-counter1 :added "4.0"}
 (fact "decrements counter 1")
@@ -126,7 +126,7 @@
     (do (counter/m:inc-both)
         (counter/m:get-counter1)))]
   => (contains-in
-      [[(approx 0.1 0.02) 1]
+      [[(approx 0.08 0.04) 1]
        [(approx 0.05 0.02) 2]
        [(approx 0.05 0.02) 3]
        [(approx 0.05 0.02) 4]]))
@@ -149,7 +149,7 @@
     (do (counter/m:add-both 10)
         (counter/m:get-counter1)))]
   => (contains-in
-      [[(approx 0.1 0.02) 10]
+      [[(approx 0.08 0.04) 10]
        [(approx 0.05 0.02) 20]
        [(approx 0.05 0.02) 30]
        [(approx 0.05 0.02) 40]]))

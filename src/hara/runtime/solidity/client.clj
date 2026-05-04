@@ -118,16 +118,16 @@
 
                        :else
                        (node/rt-get-contract))
-        
         fn-name  (contract-fn-name ptr)
+        spec     (first (filter #(-> (get % "name")
+                                     (= fn-name))
+                                (:abi contract)))
         to-string?  (invoke-ptr-web3-check contract fn-name args)
-        {:keys [form]} @ptr
         node-id (:id (:node rt))
-        readonly? (or (not (= 'defn (first form)))
-                      (some #{:view :pure}
-                            (:- (meta (second (:form @ptr))))))
-        
-        
+        readonly? (#{"view" "pure"}
+                   (or (get spec "stateMutability")
+                       (when (get spec "constant")
+                         "view")))
         form-call (list `eth-bench/contract-run
                         (common/get-url rt)
                         (common/get-caller-private-key node-id)

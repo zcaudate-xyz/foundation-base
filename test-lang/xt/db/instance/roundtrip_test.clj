@@ -5,7 +5,7 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.cell.service.db-query :as db-query]
+   :require [[js.cell.service.db-query :as db-query]
              [xt.db.helpers.data-main-test :as sample]
              [xt.db.instance :as xdb]
              [xt.db.instance.supabase :as supabase]

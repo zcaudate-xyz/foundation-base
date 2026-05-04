@@ -4,8 +4,8 @@
             [lib.postgres.connection :as conn]
             [hara.runtime.postgres.base.client :as client]
             [hara.runtime.postgres.base.client-impl :as client-impl]
-            [hara.runtime.postgres.runtime.addon :as addon]
-            [hara.runtime.postgres.runtime.builtin :as builtin]
+            [postgres.core.addon :as addon]
+            [postgres.core.builtin :as builtin]
             [hara.runtime.postgres.test.scratch-v1 :as scratch]
             [hara.common.util :as ut]
             [std.lib.component :as component])

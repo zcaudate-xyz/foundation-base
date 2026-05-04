@@ -3,7 +3,7 @@
             [std.lib.env :as env]))
 
 (l/script :solidity
-  {:require [[hara.runtime.solidity :as s]]})
+  {:require [[hara.runtime.solidity.script.builtin :as s]]})
 
 
 ;;
@@ -128,10 +128,11 @@
   {:added "4.0"}
   [:address to
    :uint256 amount]
-  (var '((:bool success) _) (. (payable to)
-                               (^{:value amount}
-                                call "")
-                               ))
+  (:= '((:bool success)
+        (:bytes :memory payload))
+      (. (payable to)
+         (^{:value amount}
+          call "")))
   (s/require success "Payment failed")
   (return true))
 

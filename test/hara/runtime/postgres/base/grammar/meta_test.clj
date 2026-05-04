@@ -1,6 +1,6 @@
 (ns hara.runtime.postgres.base.grammar.meta-test
   (:require [hara.runtime.postgres.base.grammar.meta :refer :all]
-            [hara.runtime.postgres.runtime.builtin :as builtin]
+            [postgres.core.builtin :as builtin]
             [hara.lang :as l])
   (:use code.test))
 

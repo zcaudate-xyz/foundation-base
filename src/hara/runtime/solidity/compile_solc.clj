@@ -1,5 +1,6 @@
 (ns hara.runtime.solidity.compile-solc
   (:require [clojure.string]
+            [hara.lang.book-module :as book-module]
             [js.core :as j]
             [js.lib.eth-solc :as eth-solc]
             [hara.runtime.basic :as basic]
@@ -114,14 +115,14 @@
   (let [m   (or m
                 (let [ns (.getName *ns*)]
                   (if-let [v (resolve (symbol (str ns) "+default-contract+"))]
-                    @v
-                    {:ns ns :name "Test" :file "test.sol"})))
-        module  (l/get-module (l/runtime-library)
-                              :solidity
-                              (:ns m))
+                     @v
+                     {:ns ns :name "Test" :file "test.sol"})))
+        book    (l/get-book (l/runtime-library) :solidity)
+        module  (book-module/resolve-module-view book
+                                                 (:ns m))
         entries    (sort-by
-                    :line
-                    (vals (:code module)))
+                     :line
+                     (vals (:code module)))
         entries    (cond common/*open-methods*
                          (map compile-ptr-prep-open-method entries)
 

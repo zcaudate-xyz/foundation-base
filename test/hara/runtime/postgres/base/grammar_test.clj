@@ -9,7 +9,7 @@
   {:runtime :jdbc.client
    :config  {:dbname "test-scratch"}
    :require [[hara.runtime.postgres :as pg]
-             [hara.runtime.postgres.runtime.system :as sys]
+             [postgres.core.system :as sys]
              [hara.runtime.postgres.test.scratch-v1 :as scratch]]})
 
 (fact:global

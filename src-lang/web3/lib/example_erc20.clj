@@ -4,8 +4,8 @@
             [std.lib.env :as env]))
 
 (l/script :solidity
-  {:require [[hara.runtime.solidity :as s]]
-   :static  {:contract ["ExampleSample"]}})
+  {:require [[hara.runtime.solidity.script.builtin :as s]]
+    :static  {:contract ["ExampleSample"]}})
 
 (definterface.sol IERC20
   [^{:- [:external]

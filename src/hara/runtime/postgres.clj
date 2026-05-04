@@ -5,20 +5,20 @@
             [hara.runtime.postgres.base.grammar.gen-bind]
             [hara.runtime.postgres.base.grammar.entity :as entity]
             [hara.runtime.postgres.base.application :as app]
-            [hara.runtime.postgres.runtime.addon]
-            [hara.runtime.postgres.runtime.builtin]
-            [hara.runtime.postgres.runtime.graph]
-            [hara.runtime.postgres.runtime.graph-view :as graph-view]
-            [hara.runtime.postgres.runtime.impl]
+            [postgres.core.addon]
+            [postgres.core.builtin]
+            [postgres.core.graph]
+            [postgres.core.graph-view :as graph-view]
+            [postgres.core.impl]
             [hara.lang :as l]
             [std.lib.foundation :as f])
   (:refer-clojure :exclude [abs concat replace reverse mod name case drop update format
                             assert repeat bit-and bit-or count max min]))
 
-(f/intern-all hara.runtime.postgres.runtime.builtin
-              hara.runtime.postgres.runtime.addon
-              hara.runtime.postgres.runtime.impl
-              hara.runtime.postgres.runtime.graph
+(f/intern-all postgres.core.builtin
+              postgres.core.addon
+              postgres.core.impl
+              postgres.core.graph
               hara.runtime.postgres.base.grammar.gen-bind)
 
 (f/intern-in client/rt-add-notify

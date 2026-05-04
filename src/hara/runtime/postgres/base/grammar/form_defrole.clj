@@ -1,6 +1,6 @@
 (ns hara.runtime.postgres.base.grammar.form-defrole
   (:require [hara.runtime.postgres.base.grammar.common :as common]
-            [hara.runtime.postgres.runtime.impl-base :as base]
+            [postgres.core.impl-base :as base]
             [hara.lang :as l]
             [hara.common.util :as ut]
             [std.lib.foundation :as f]))

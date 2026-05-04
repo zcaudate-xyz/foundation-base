@@ -183,7 +183,10 @@
    (var schema-client {"from" (fn [table]
                                 (xt/x:arr-push calls ["from" table])
                                 (return query))})
-   (var client {"schema" (fn [schema-name]
+   (var client {"from" (fn [table]
+                         (xt/x:arr-push calls ["from/root" table])
+                         (return query))
+                "schema" (fn [schema-name]
                            (xt/x:arr-push calls ["schema" schema-name])
                            (return schema-client))})
    (var out

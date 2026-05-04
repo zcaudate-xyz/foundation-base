@@ -6,7 +6,7 @@
 
 (l/script :js
   {:require [[xt.lang.common-lib :as k]
-              [xt.lang.common-data :as xtd]
+              [xt.lang.common-tree :as xtt]
               [js.core :as j]]})
 
 (defn.js get-ethers
@@ -271,10 +271,10 @@
   (var normalize
        (fn:> [value]
          (return
-          (xtd/tree-walk value
-                        (fn:> [o]
-                           (return
-                            (:? (== "bigint"
+           (xtt/tree-walk value
+                         (fn:> [o]
+                            (return
+                             (:? (== "bigint"
                                     (k/type-native o))
                                 (j/toString o)
                                 (:? (== "BigNumber"

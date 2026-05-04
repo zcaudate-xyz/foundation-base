@@ -1,7 +1,7 @@
 (ns hara.runtime.postgres.base.grammar.common-test
   (:require [hara.runtime.postgres.base.grammar :as g]
             [hara.runtime.postgres.base.grammar.common :as common]
-            [hara.runtime.postgres.runtime.builtin :as builtin]
+            [postgres.core.builtin :as builtin]
             [hara.runtime.postgres.test.scratch-v1 :as scratch]
             [hara.lang :as l]
             [hara.common.emit-common :as emit-common])
