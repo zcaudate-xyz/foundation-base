@@ -1,6 +1,6 @@
 (ns js.cell.kernel.worker-impl
   (:require [hara.lang :as l]
-            [hara.typed.xtalk :refer [defspec.xt]]))
+            [hara.typed :refer [defspec.xt]]))
 
 (l/script :js
   {:require [[js.core :as j] [xt.lang.spec-base :as xt] [xt.lang.common-trace :as trace] [xt.lang.common-lib :as lib] [js.cell.kernel.base-util :as util] [js.cell.kernel.worker-state :as worker-state]]})

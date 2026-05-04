@@ -11,3 +11,7 @@
                [:tag :build])
   => {:tag "example.cache-brain"
       :build ".build/example-cache-brain"})
+
+
+^{:refer example.build.cache-brain/emit-specialization-manifest :added "4.1"}
+(fact "TODO")

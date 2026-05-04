@@ -19,25 +19,6 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.protocol.impl.type-pubsub/pubsub-runtime-create :added "4.1"}
-(fact "creates wrapped pubsub runtimes"
-
-  (!.js
-    (var runtime
-         (pub/pubsub-runtime-create
-          {:publish (fn [node space signal data meta]
-                      (return signal))
-           :receive_publish (fn [node frame ctx]
-                              (return frame))
-           :subscribe (fn [node space signal subscription-id meta]
-                        (return subscription-id))
-           :unsubscribe (fn [node space signal subscription-id meta]
-                          (return subscription-id))
-           :list_subscriptions (fn [node space signal]
-                                 (return [signal]))}))
-    (. runtime ["::"]))
-  => "type.pubsub")
-
 ^{:refer xt.protocol.impl.type-pubsub/pubsub-runtime? :added "4.1"}
 (fact "checks pubsub runtime wrappers"
 
@@ -75,6 +56,25 @@
            :list_subscriptions (fn [node space signal]
                                  (return [signal]))}))
     (. (pub/require-pubsub-runtime runtime) ["::"]))
+  => "type.pubsub")
+
+^{:refer xt.protocol.impl.type-pubsub/pubsub-runtime-create :added "4.1"}
+(fact "creates wrapped pubsub runtimes"
+
+  (!.js
+    (var runtime
+         (pub/pubsub-runtime-create
+          {:publish (fn [node space signal data meta]
+                      (return signal))
+           :receive_publish (fn [node frame ctx]
+                              (return frame))
+           :subscribe (fn [node space signal subscription-id meta]
+                        (return subscription-id))
+           :unsubscribe (fn [node space signal subscription-id meta]
+                          (return subscription-id))
+           :list_subscriptions (fn [node space signal]
+                                 (return [signal]))}))
+    (. runtime ["::"]))
   => "type.pubsub")
 
 ^{:refer xt.protocol.impl.type-pubsub/publish :added "4.1"}

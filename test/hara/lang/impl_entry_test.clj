@@ -234,6 +234,9 @@
       :form)
   => '(defn add-fn [a b] (return (+ a (+ a 1)))))
 
+^{:refer hara.lang.impl-entry/prepare-code-entry :added "4.1"}
+(fact "TODO")
+
 ^{:refer hara.lang.impl-entry/create-code :added "4.0"}
 (fact "creates the code entry"
 

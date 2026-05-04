@@ -110,10 +110,16 @@
 ^{:refer hara.model.spec-lua/lua-tf-yield :added "4.1"}
 (fact "TODO")
 
+^{:refer hara.model.spec-lua/lua-tf-throw :added "4.1"}
+(fact "TODO")
+
 ^{:refer hara.model.spec-lua/lua-tf-defgen :added "4.1"}
 (fact "TODO")
 
 ^{:refer hara.model.spec-lua/lua-tf-prototype-create :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.spec-lua/lua-tf-prototype-method :added "4.1"}
 (fact "TODO")
 
 ^{:refer hara.model.spec-lua/lua-module-link :added "4.0"}

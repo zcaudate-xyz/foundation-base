@@ -1,6 +1,6 @@
 (ns hara.model.spec-xtalk-typed-test
   (:require [clojure.string]
-   [hara.typed.xtalk :as typed]
+   [hara.typed :as typed]
    [hara.typed.xtalk-analysis :as analysis]
    [hara.typed.xtalk-common :as types]
    [hara.typed.xtalk-infer :as infer]

@@ -84,15 +84,6 @@
   (ptr-tag +ptr+ :lib)
   => '[:lib L.core/add :fragment])
 
-^{:refer hara.lang.pointer/ptr-deref :added "4.0"}
-(fact "gets the entry or the free pointer data"
-
-  (ptr-deref +ptr+)
-  => book/book-entry?
-
-   (ptr-deref (dissoc +ptr+ :id))
-   => map?)
-
 ^{:refer hara.lang.pointer/free-form :added "4.1"}
 (fact "normalizes free-pointer bodies"
   (free-form [1 2 3]) => '(do 1 2 3)
@@ -102,6 +93,15 @@
 (fact "expands canonical free-pointer forms into body forms"
   (free-form-body '(do 1 2 3)) => '(1 2 3)
   (free-form-body '(+ 1 2)) => '((+ 1 2)))
+
+^{:refer hara.lang.pointer/ptr-deref :added "4.0"}
+(fact "gets the entry or the free pointer data"
+
+  (ptr-deref +ptr+)
+  => book/book-entry?
+
+   (ptr-deref (dissoc +ptr+ :id))
+   => map?)
 
 ^{:refer hara.lang.pointer/ptr-display :added "4.0"}
 (fact "emits the display string for pointer"

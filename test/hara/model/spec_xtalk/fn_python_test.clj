@@ -14,6 +14,17 @@
   (l/emit-as :python [(:default (:x-iter-null +python-iter+))])
   => #"iter")
 
+^{:refer xt.lang.spec-primitive/throw :added "4.1"}
+(fact "normalizes thrown values and catch bindings"
+  (let [out (l/emit-as :python ['(do:>
+                                  (try
+                                    (throw "boom")
+                                    (catch err
+                                      (return err))))])]
+    [(boolean (re-find #"(?s)raise .*Exception" out))
+     (boolean (re-find #"except Exception as [^:]+:" out))])
+  => [true true])
+
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-del :added "4.0"}
 (fact "deletes object"
   (l/emit-as :python [(python-tf-x-del '[_ obj])])
@@ -43,17 +54,6 @@
 (fact "raises error"
   (python-tf-x-err '[_ "msg"])
   => '(throw (Exception "msg")))
-
-^{:refer xt.lang.spec-primitive/throw :added "4.1"}
-(fact "normalizes thrown values and catch bindings"
-  (let [out (l/emit-as :python ['(do:>
-                                  (try
-                                    (throw "boom")
-                                    (catch err
-                                      (return err))))])]
-    [(boolean (re-find #"(?s)raise .*Exception" out))
-     (boolean (re-find #"except Exception as [^:]+:" out))])
-  => [true true])
 
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-ex-native? :added "4.1"}
 (fact "TODO")
@@ -483,6 +483,9 @@
 (fact "iter native?"
   (l/emit-as :python [(python-tf-x-iter-native? '[_ it])])
   => #"hasattr")
+
+^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-async-run :added "4.1"}
+(fact "TODO")
 
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-with-delay :added "4.0"}
 (fact "with delay"

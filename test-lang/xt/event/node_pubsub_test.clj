@@ -16,30 +16,6 @@
  {:setup [(l/rt:restart)]
  :teardown [(l/rt:stop)]})
 
-^{:refer xt.event.node-pubsub/receive-publish :added "4.1"}
-(fact "dispatches stream frames to shared triggers"
-
-  (!.js
-    (var n (node/node-create {}))
-    (node/register-trigger
-     n
-     "event/updated"
-     (fn [space stream node]
-       (node/set-space-state node
-                             (. space ["id"])
-                             (. stream ["data"]))
-       (return true))
-     nil)
-    (pubsub/receive-publish
-     n
-     (frame/stream-frame "room/a"
-                         "event/updated"
-                         {:value 9}
-                         nil
-                         nil))
-    [(. (node/get-space-state n "room/a") ["value"])])
-  => [9])
-
 ^{:refer xt.event.node-pubsub/subscribe :added "4.1"}
 (fact "constructs a subscription frame for the transport"
 
@@ -89,3 +65,27 @@
                          nil))
     calls)
   => [["room/a" 3]])
+
+^{:refer xt.event.node-pubsub/receive-publish :added "4.1"}
+(fact "dispatches stream frames to shared triggers"
+
+  (!.js
+    (var n (node/node-create {}))
+    (node/register-trigger
+     n
+     "event/updated"
+     (fn [space stream node]
+       (node/set-space-state node
+                             (. space ["id"])
+                             (. stream ["data"]))
+       (return true))
+     nil)
+    (pubsub/receive-publish
+     n
+     (frame/stream-frame "room/a"
+                         "event/updated"
+                         {:value 9}
+                         nil
+                         nil))
+    [(. (node/get-space-state n "room/a") ["value"])])
+  => [9])

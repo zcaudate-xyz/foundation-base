@@ -17,6 +17,9 @@
     (jep-bootstrap))
   => "path/to/jep")
 
+^{:refer hara.runtime.jep.bootstrap/jep-available? :added "4.1"}
+(fact "TODO")
+
 ^{:refer hara.runtime.jep.bootstrap/init-paths :added "3.0"}
 (fact "sets the path of the jep interpreter"
   ;; Cannot mock static methods directly

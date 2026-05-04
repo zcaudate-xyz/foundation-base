@@ -174,6 +174,12 @@
   (spec-ruby/ruby-symbol 'respond_to? spec-ruby/+grammar+ {})
   => "respond_to?")
 
+^{:refer hara.model.annex.spec-ruby/ruby-destructure-key :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.annex.spec-ruby/ruby-method-ref :added "4.1"}
+(fact "TODO")
+
 ^{:refer hara.model.annex.spec-ruby/ruby-symbol-global :added "4.1"}
 (fact "emit ruby global symbol"
 
@@ -213,14 +219,47 @@
   (l/emit-as :ruby '[{:ref-links {} :first-name "Root"}])
   => "{\"ref_links\" => {}, \"first_name\" => \"Root\"}")
 
+^{:refer hara.model.annex.spec-ruby/ruby-emit-args :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.annex.spec-ruby/ruby-div :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.annex.spec-ruby/ruby-invoke :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.annex.spec-ruby/ruby-dot :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.annex.spec-ruby/ruby-emit-range :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.annex.spec-ruby/ruby-defn- :added "4.1"}
+(fact "TODO")
+
 ^{:refer hara.model.annex.spec-ruby/ruby-defn :added "4.1"}
 (fact "emit ruby function definition"
 
   (l/emit-as :ruby '[(defn add [a b] (return (+ a b)))])
   => "def add(a,b)\n  return a + b\nend")
 
+^{:refer hara.model.annex.spec-ruby/ruby-defgen :added "4.1"}
+(fact "TODO")
+
 ^{:refer hara.model.annex.spec-ruby/ruby-fn :added "4.1"}
 (fact "basic transform for ruby blocks"
 
   (spec-ruby/ruby-fn '(fn [a] (+ a 1)))
   => '(:- "->(" "a" ") {\n" "(do (+ a 1))" "\n}"))
+
+^{:refer hara.model.annex.spec-ruby/tf-for-array :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.annex.spec-ruby/tf-for-object :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.annex.spec-ruby/tf-for-iter :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.annex.spec-ruby/tf-for-index :added "4.1"}
+(fact "TODO")

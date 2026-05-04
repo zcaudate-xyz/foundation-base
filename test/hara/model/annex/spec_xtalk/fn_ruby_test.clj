@@ -76,6 +76,18 @@
 ^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-random :added "4.1"}
 (fact "TODO")
 
+^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-ex-native? :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-ex-new :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-ex-message :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-ex-data :added "4.1"}
+(fact "TODO")
+
 ^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-now-ms :added "4.1"}
 (fact "TODO")
 
@@ -196,6 +208,15 @@
 ^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-arr-remove :added "4.1"}
 (fact "TODO")
 
+^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-arr-clone :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-arr-each :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-arr-every :added "4.1"}
+(fact "TODO")
+
 ^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-arr-sort :added "4.1"}
 (fact "TODO")
 
@@ -247,7 +268,34 @@
 ^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-str-ends-with :added "4.1"}
 (fact "TODO")
 
+^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-global-set :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-global-del :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-global-has? :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-prototype-create :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-prototype-get :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-prototype-set :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-prototype-method :added "4.1"}
+(fact "TODO")
+
 ^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-lu-create :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-get-key :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-set-key :added "4.1"}
 (fact "TODO")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-lu-eq :added "4.1"}
@@ -260,6 +308,9 @@
 (fact "TODO")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-lu-del :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-obj-clone :added "4.1"}
 (fact "TODO")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-has-key? :added "4.1"}
@@ -303,7 +354,13 @@
      (boolean (re-find #"Net::HTTP\.new" notify-out))])
   => [true true true true true])
 
+^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-async-run :added "4.1"}
+(fact "TODO")
+
 ^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-promise :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-promise-all :added "4.1"}
 (fact "TODO")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-promise-then :added "4.1"}
@@ -345,6 +402,9 @@
 (fact "TODO")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-iter-native? :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-iter-generator :added "4.1"}
 (fact "TODO")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-socket-connect :added "4.1"}

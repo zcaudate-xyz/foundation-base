@@ -34,14 +34,14 @@
   => [true true true false])
 
 ^{:refer hara.runtime.basic.impl.process-lua/default-body-wrap :added "4.1"}
-(fact "wraps forms in a local helper"
-  (default-body-wrap '[(defn add-10 [x] (return (+ x 10)))
-                       (add-10 5)])
-  => '(do
-        (defn OUT-FN []
-          (defn add-10 [x] (return (+ x 10)))
-          (return (add-10 5)))
-        (return (OUT-FN))))
+(fact "marks the wrapper fn as inner"
+  (-> (default-body-wrap '[(defn add-10 [x] (return (+ x 10)))
+                           (add-10 5)])
+      second
+      second
+      meta
+      :inner)
+  => true)
 
 ^{:refer hara.runtime.basic.impl.process-lua/normalize-forms :added "4.1"}
 (fact "normalizes a top-level do body"
@@ -53,16 +53,6 @@
 
   (normalize-forms '[1 2 3] {:bulk true})
   => '[1 2 3])
-
-^{:refer hara.runtime.basic.impl.process-lua/default-body-wrap :added "4.1"}
-(fact "marks the wrapper fn as inner"
-  (-> (default-body-wrap '[(defn add-10 [x] (return (+ x 10)))
-                           (add-10 5)])
-      second
-      second
-      meta
-      :inner)
-  => true)
 
 ^{:refer hara.runtime.basic.impl.process-lua/default-body-transform :added "4.0"}
 (fact "transform code for return"

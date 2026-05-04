@@ -64,6 +64,9 @@
 ^{:refer hara.seedgen.common-util/seedgen-runtime-dispatch-langs :added "4.1"}
 (fact "TODO")
 
+^{:refer hara.seedgen.common-util/seedgen-form-lang :added "4.1"}
+(fact "TODO")
+
 ^{:refer hara.seedgen.common-util/seedgen-fact-forms :added "4.1"}
 (fact "TODO")
 
@@ -89,6 +92,9 @@
       :lua {:expect 6}})
 
 ^{:refer hara.seedgen.common-util/seedgen-lang-entry :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.seedgen.common-util/seedgen-root-entry :added "4.1"}
 (fact "TODO")
 
 ^{:refer hara.seedgen.common-util/seedgen-suppressed-langs :added "4.1"}

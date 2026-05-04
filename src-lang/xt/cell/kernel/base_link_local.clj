@@ -1,7 +1,7 @@
 (ns xt.cell.kernel.base-link-local
   (:require [xt.cell.kernel.inner-local :as inner-local]
             [hara.lang :as l]
-            [hara.typed.xtalk :refer [defspec.xt]]
+            [hara.typed :refer [defspec.xt]]
             [std.lib.foundation :as f]
             [std.string.wrap]))
 

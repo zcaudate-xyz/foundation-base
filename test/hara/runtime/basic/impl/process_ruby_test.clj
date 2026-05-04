@@ -56,9 +56,9 @@
   => '(fn [x & more] (return (+ x & more))))
 
 ^{:refer hara.runtime.basic.impl.process-ruby/default-body-wrap :added "4.1"}
-(fact "wraps forms in an OUT assignment"
+(fact "assigns the final expression to OUT"
   (default-body-wrap '((defn add-10 [x] (return (+ x 10)))
-                       (return (add-10 5))))
+                       (add-10 5)))
   => '(do
         (defn add-10 [x] (return (+ x 10)))
         (:= OUT (add-10 5))))
@@ -73,14 +73,6 @@
 
   (normalize-forms '[1 2 3] {:bulk true})
   => '[1 2 3])
-
-^{:refer hara.runtime.basic.impl.process-ruby/default-body-wrap :added "4.1"}
-(fact "assigns the final expression to OUT"
-  (default-body-wrap '((defn add-10 [x] (return (+ x 10)))
-                       (add-10 5)))
-  => '(do
-        (defn add-10 [x] (return (+ x 10)))
-        (:= OUT (add-10 5))))
 
 ^{:refer hara.runtime.basic.impl.process-ruby/default-body-transform :added "4.1"}
 (fact "applies ruby return transform"

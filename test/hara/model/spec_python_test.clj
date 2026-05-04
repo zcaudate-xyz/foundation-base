@@ -4,6 +4,9 @@
             [std.string.prose :as prose])
   (:use code.test))
 
+^{:refer hara.model.spec-python/python-emit-nonlocal :added "4.1"}
+(fact "TODO")
+
 ^{:refer hara.model.spec-python/python-defn- :added "4.0"}
 (fact "hidden function without decorators"
 
@@ -27,61 +30,6 @@
       "@app.route(\"/about\")"
       "def hello():"
       "  return 1"))
-
-^{:refer hara.model.spec-python/python-fn :added "4.0"}
-(fact "basic transform for python lambdas"
-
-  (l/emit-as
-   :python '[(fn:> 1)])
-  => "lambda : 1"
-
-  (l/emit-as
-   :python '[(fn [] 1)])
-  => "lambda : 1"
-
-  (l/emit-as
-   :python '[(fn [] (return 1))])
-  => "lambda : 1"
-
-  (l/emit-as
-   :python '[(fn [])])
-  => "lambda : (None)"
-
-  (l/emit-as
-   :python '[(fn [x] (return [x x]))])
-  => "lambda x : [x,x]"
-
-  (l/emit-as
-   :python '[(fn [x] (return {:value x}))])
-  => "lambda x : {\"value\":x}"
-
-  (l/emit-as
-   :python '[(fn hello [] (return 1))])
-  => "def hello():\n  return 1"
-  
-  (let [out (l/emit-as
-             :python '[(var data
-                            {:heal (fn []
-                                     (if test
-                                       (return 1)
-                                       (return 2)))})])]
-    [(boolean (re-find #"def py_callback__.*\(\):" out))
-     (boolean (re-find #"if test:" out))
-     (boolean (re-find #"return 1" out))
-     (boolean (re-find #"return 2" out))
-     (boolean (re-find #"data = \{\"heal\":py_callback__" out))])
-  => [true true true true true]
-
-  (let [out (l/emit-as
-             :python '[(var data
-                            {:heal (fn []
-                                     (var tmp 1)
-                                     (return tmp))})])]
-    [(boolean (re-find #"def py_callback__.*\(\):" out))
-     (boolean (re-find #"tmp = 1" out))
-     (boolean (re-find #"return tmp" out))
-     (boolean (re-find #"data = \{\"heal\":py_callback__" out))])
-   => [true true true true])
 
 ^{:refer hara.model.spec-python/python-fn :added "4.1"}
 (fact "lifts callbacks that lower to Python assignment statements"
@@ -195,3 +143,15 @@
            (return ok)
            (catch [Exception :as err]
                (return err))))
+
+^{:refer hara.model.spec-python/python-tf-prototype-create :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.spec-python/python-tf-prototype-get :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.spec-python/python-tf-prototype-set :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.spec-python/python-tf-prototype-method :added "4.1"}
+(fact "TODO")

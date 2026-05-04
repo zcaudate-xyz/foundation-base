@@ -54,6 +54,12 @@
              (bootstrap-js)]
   :teardown [(l/rt:stop)]})
 
+^{:refer xt.db.supabase/snake->kebab :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.supabase/normalize-row :added "4.1"}
+(fact "TODO")
+
 ^{:refer xt.db.supabase/payload->xdb-events :added "4.1.3"}
 (fact "translates canonical supabase payloads to xt.db events"
 

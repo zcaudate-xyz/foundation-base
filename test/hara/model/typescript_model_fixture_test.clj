@@ -1,5 +1,5 @@
 (ns hara.model.typescript-model-fixture-test
-  (:require [hara.typed.xtalk :as typed]
+  (:require [hara.typed :as typed]
             [hara.typed.xtalk-common :as types]
             [hara.model.typescript-model-fixture])
   (:use code.test))

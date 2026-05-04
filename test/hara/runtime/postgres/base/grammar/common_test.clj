@@ -62,6 +62,15 @@
   (common/pg-hydrate '(defn foo [] 1) {} {:module {:static {:application "app" :all {:schema ["schema"]}}}})
   => vector?)
 
+^{:refer hara.runtime.postgres.base.grammar.common/pg-current-module-link? :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.postgres.base.grammar.common/pg-link-symbol :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.postgres.base.grammar.common/pg-resolve-entry :added "4.1"}
+(fact "TODO")
+
 ^{:refer hara.runtime.postgres.base.grammar.common/pg-string :added "4.0"}
 (fact "constructs a pg string"
 

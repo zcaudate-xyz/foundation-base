@@ -76,15 +76,6 @@
      (boolean (re-find #"globalThis" out))])
   => [true false])
 
-^{:refer hara.model.spec-dart/dart-map-key :added "4.1"}
-(fact "emits map keys for dart"
-
-  (spec-dart/dart-map-key :hello spec-dart/+grammar+ {})
-  => "\"hello\""
-
-  (spec-dart/dart-map-key '(+ a 1) spec-dart/+grammar+ {})
-  => "a + 1")
-
 (fact "dart inline fn emission drops expression names"
   (let [out (l/emit-as :dart ['(fn inc-fn [x] (return x))])]
     [(boolean (re-find #"inc_fn" out))
@@ -193,29 +184,6 @@
      (boolean (re-find #"var e = arr_.*\[i\];" out))])
   => [true true true])
 
-^{:refer hara.model.spec-dart/dart-var :added "4.1"}
-(fact "transforms var destructuring for dart"
-
-  (let [[op init a b] (spec-dart/dart-var '(var [a b] expr))]
-    [op
-     (and (= 'var* (first init)) (= 'expr (last init)))
-     (= a (list 'var* 'a := (list '. (second init) [0])))
-     (= b (list 'var* 'b := (list '. (second init) [1])))])
-  => ['do* true true true]
-
-  (spec-dart/dart-var '(var #{id} data-obj))
-  => '(do* (var* id := (. data-obj ["id"])))
-
-  (let [result (spec-dart/dart-var '(var #{name args} v))]
-    [(first result) (count result)])
-  => ['do* 3]
-
-  (spec-dart/dart-var '(var x 42))
-  => '(var* x := 42)
-
-  (spec-dart/dart-var '(var entry))
-  => '(var* entry))
-
 (fact "dart var destructuring emission"
 
   (l/emit-as :dart ['(var [a b] expr)])
@@ -259,6 +227,43 @@
      (boolean (re-find #"return \"ok\";" out))])
   => [true true true])
 
+^{:refer hara.model.spec-dart/dart-map-key :added "4.1"}
+(fact "emits map keys for dart"
+
+  (spec-dart/dart-map-key :hello spec-dart/+grammar+ {})
+  => "\"hello\""
+
+  (spec-dart/dart-map-key '(+ a 1) spec-dart/+grammar+ {})
+  => "a + 1")
+
+^{:refer hara.model.spec-dart/dart-fn :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.spec-dart/dart-var :added "4.1"}
+(fact "transforms var destructuring for dart"
+
+  (let [[op init a b] (spec-dart/dart-var '(var [a b] expr))]
+    [op
+     (and (= 'var* (first init)) (= 'expr (last init)))
+     (= a (list 'var* 'a := (list '. (second init) [0])))
+     (= b (list 'var* 'b := (list '. (second init) [1])))])
+  => ['do* true true true]
+
+  (spec-dart/dart-var '(var #{id} data-obj))
+  => '(do* (var* id := (. data-obj ["id"])))
+
+  (let [result (spec-dart/dart-var '(var #{name args} v))]
+    [(first result) (count result)])
+  => ['do* 3]
+
+  (spec-dart/dart-var '(var x 42))
+  => '(var* x := 42)
+
+  (spec-dart/dart-var '(var entry))
+  => '(var* entry))
+
+^{:refer hara.model.spec-dart/dart-tf-let-bind :added "4.1"}
+(fact "TODO")
 
 ^{:refer hara.model.spec-dart/tf-for-object :added "4.1"}
 (fact "TODO")

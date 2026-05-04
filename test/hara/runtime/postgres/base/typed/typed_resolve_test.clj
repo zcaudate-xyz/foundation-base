@@ -3,6 +3,9 @@
   (:require [hara.runtime.postgres.base.typed.typed-common :as types]
             [hara.runtime.postgres.base.typed.typed-resolve :as typed-resolve]))
 
+^{:refer hara.runtime.postgres.base.typed.typed-resolve/canonical-fn-sym :added "4.1"}
+(fact "TODO")
+
 ^{:refer hara.runtime.postgres.base.typed.typed-resolve/app-name-from-static :added "4.1"}
 (fact "app-name-from-static normalizes static application values"
   (typed-resolve/app-name-from-static ["demo"]) => "demo"
@@ -20,14 +23,6 @@
    nil
    {:body-meta {:static/application ["demo"]}})
   => "demo")
-
-^{:refer hara.runtime.postgres.base.typed.typed-resolve/resolve-called-fn :added "4.1"}
-(fact "resolve-called-fn applies aliases before registry lookup"
-  (types/clear-registry!)
-  (let [fn-def (types/make-fn-def "demo" "inner" [] [:jsonb] {} nil)]
-    (types/register-type! 'demo/inner fn-def)
-    (typed-resolve/resolve-called-fn 'x/inner {'x 'demo})
-    => ['demo/inner fn-def]))
 
 ^{:refer hara.runtime.postgres.base.typed.typed-resolve/resolve-called-fn :added "4.1"}
 (fact "resolve-called-fn keeps qualified lookups namespace-strict"

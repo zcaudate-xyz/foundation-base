@@ -13,3 +13,7 @@
 (fact "scheme basic runtime evaluates simple expressions"
   (!.scheme (+ 1 2))
   => 3)
+
+
+^{:refer hara.runtime.basic.impl.process-scheme/scheme-root :added "4.1"}
+(fact "TODO")

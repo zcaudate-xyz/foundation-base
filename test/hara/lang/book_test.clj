@@ -116,6 +116,9 @@
       (b/get-code-deps 'L.core/inc-fn))
   => '#{L.core/identity-fn})
 
+^{:refer hara.lang.book/get-code-entry-view :added "4.1"}
+(fact "TODO")
+
 ^{:refer hara.lang.book/get-deps :added "4.0"}
 (fact "get dependencies for a given id"
 
@@ -397,6 +400,9 @@
   (b/module-create-requires '[[L.core :as u]])
   => '{L.core {:as u, :id L.core}})
 
+^{:refer hara.lang.book/module-normalize-implements :added "4.1"}
+(fact "TODO")
+
 ^{:refer hara.lang.book/module-export-requires :added "4.1"}
 (fact "reconstructs module requires from stored link metadata"
   (b/module-export-requires
@@ -407,6 +413,21 @@
              u L.core}
       :includes #{L.core}}))
   => '[[L.core :as u :include true]])
+
+^{:refer hara.lang.book/module-export-imports :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.lang.book/module-specialize-symbol :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.lang.book/module-specialize-form :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.lang.book/module-specialize-entry :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.lang.book/module-specialize-bindings :added "4.1"}
+(fact "TODO")
 
 ^{:refer hara.lang.book/module-specialize :added "4.1"}
 (fact "clones a module under a new id with rewritten links"

@@ -28,6 +28,15 @@
                 :code   '{identity {}}})
   => book-module?)
 
+^{:refer hara.lang.book-module/polyfill-default-alias :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.lang.book-module/module-derived-view :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.lang.book-module/resolve-module-view :added "4.1"}
+(fact "TODO")
+
 ^{:refer hara.lang.book-module/module-deps-code :added "4.0"}
 (fact "gets the code link dependencies"
 

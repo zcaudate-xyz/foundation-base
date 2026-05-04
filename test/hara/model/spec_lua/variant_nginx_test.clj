@@ -10,3 +10,6 @@
 
 ^{:refer hara.model.spec-lua.variant-nginx/lua-tf-x-with-delay :added "4.1"}
 (fact "TODO")
+
+^{:refer hara.model.spec-lua.variant-nginx/lua-tf-x-async-run :added "4.1"}
+(fact "TODO")

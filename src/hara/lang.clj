@@ -25,7 +25,7 @@
             [hara.lang.workspace :as workspace]
             [hara.lang.type-notify :as notify]
             [hara.lang.type-shared :as shared]
-            [hara.typed.xtalk :as xtalk]
+            [hara.typed :as xtalk]
             [hara.model.spec-xtalk]
             [hara.model.spec-bash]
             [hara.model.spec-c]

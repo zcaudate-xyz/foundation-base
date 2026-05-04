@@ -52,10 +52,26 @@
        "             [xt.lang.common-data :as xtd]]\n"
        "   :export [MODULE]})"))
 
+(fact "formats ns and l/script* forms"
+  (snapto-string +wrong-source-file+)
+  => +right-source-file+)
+
 ^{:refer code.manage.unit.snapto/unwrap-fact-block :added "4.1"}
 (fact "TODO")
 
+^{:refer code.manage.unit.snapto/spaces :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.snapto/form-op :added "4.1"}
+(fact "TODO")
+
 ^{:refer code.manage.unit.snapto/fact-block? :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.snapto/ns-block? :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.snapto/script-block? :added "4.1"}
 (fact "TODO")
 
 ^{:refer code.manage.unit.snapto/leading-indent :added "4.1"}
@@ -101,7 +117,34 @@
     (render-form entry))
   => "(!.js\n  (var out [])\n  out)")
 
+^{:refer code.manage.unit.snapto/render-prefixed-items :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.snapto/parse-map-pairs :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.snapto/script-option-rank :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.snapto/render-script-value :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.snapto/render-script-map-pair :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.snapto/render-script-map :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.snapto/render-ns-clause :added "4.1"}
+(fact "TODO")
+
 ^{:refer code.manage.unit.snapto/render-item :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.snapto/snap-ns-string :added "4.1"}
+(fact "TODO")
+
+^{:refer code.manage.unit.snapto/snap-script-string :added "4.1"}
 (fact "TODO")
 
 ^{:refer code.manage.unit.snapto/snap-form-string :added "4.1"}
@@ -115,10 +158,6 @@
         expected "^{:refer xt.db.schema.base-util/collect-routes,\n  :added \"4.0\",\n  :setup\n  [(def +routes+\n     [{:id \"ping\"}])\n   (def +result+\n     (contains-in {\"api/ping\" {:id \"ping\"}}))]}\n(fact \"collect routes\"\n\n  ^{:hidden true}\n  (!.lua (ut/collect-routes (@! +routes+) \"db\"))\n  => +result+)"]
     (snap-block-string (block/parse-first source))
     => expected))
-
-(fact "formats ns and l/script* forms"
-  (snapto-string +wrong-source-file+)
-  => +right-source-file+)
 
 ^{:refer code.manage.unit.snapto/snapto-string :added "4.1"}
 (fact "formats all top-level fact forms in a test file"

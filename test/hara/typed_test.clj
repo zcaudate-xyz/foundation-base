@@ -1,6 +1,6 @@
 (ns hara.typed.xtalk-test
   (:use code.test)
-  (:require [hara.typed.xtalk :refer :all]
+  (:require [hara.typed :refer :all]
             [hara.typed.xtalk-common :as types]))
 
 (defn fixture-register! []

@@ -7,6 +7,33 @@
    :input '(x:get-key obj "a")
    :expect {:xtalk '(. obj ["a"])}})
 
+(fact "runtime inventory exposes suite strategy for slow xt runtimes"
+  (select-keys (get (runtime-inventory {:langs [:dart :js]})
+                    :dart)
+               [:runtime?
+                :runtime-executable?
+                :runtime-type
+                :runtime-check-mode])
+  => {:runtime? true
+      :runtime-executable? false
+      :runtime-type :twostep
+      :runtime-check-mode :batched})
+
+(fact "preserves authored canonical cases when regenerating inventory"
+  (let [entry (some #(when (= :x-get-key (:op %)) %)
+                    (inventory-entries
+                     {:existing [{:op :x-get-key
+                                  :doc "get-key transform"
+                                  :cases [+canonical-case+]}]}))]
+    (select-keys entry [:doc :cases]))
+  => {:doc "get-key transform"
+      :cases [+canonical-case+]})
+
+^{:refer hara.seedgen.common-xtalk/grammar-entries :added "4.1"}
+(fact "returns grammar xtalk entries"
+  (vector? (grammar-entries))
+  => true)
+
 ^{:refer hara.seedgen.common-xtalk/categories :added "4.1"}
 (fact "returns xtalk categories"
   (vector? (categories))
@@ -42,6 +69,13 @@
   (keyword? (feature-status :js 'x:get-key))
   => true)
 
+^{:refer hara.seedgen.common-xtalk/support :added "4.1"}
+(fact "support returns expected map keys"
+  (-> (support)
+      (keys)
+      set)
+  => #{:languages :features :status :summary})
+
 ^{:refer hara.seedgen.common-xtalk/model-inventory :added "4.1"}
 (fact "returns xtalk model inventory"
   (map? (model-inventory))
@@ -76,25 +110,6 @@
   (map? (coverage-summary))
   => true)
 
-(fact "runtime inventory exposes suite strategy for slow xt runtimes"
-  (select-keys (get (runtime-inventory {:langs [:dart :js]})
-                    :dart)
-               [:runtime?
-                :runtime-executable?
-                :runtime-type
-                :runtime-check-mode])
-  => {:runtime? true
-      :runtime-executable? false
-      :runtime-type :twostep
-      :runtime-check-mode :batched})
-
-^{:refer hara.seedgen.common-xtalk/support :added "4.1"}
-(fact "support returns expected map keys"
-  (-> (support)
-      (keys)
-      set)
-  => #{:languages :features :status :summary})
-
 ^{:refer hara.seedgen.common-xtalk/missing-by-language :added "4.1"}
 (fact "missing-by-language returns map"
   (map? (missing-by-language))
@@ -105,14 +120,9 @@
   (map? (missing-by-feature))
   => true)
 
-^{:refer hara.seedgen.common-xtalk/render-support :added "4.1"}
-(fact "render-support returns printable output"
-  (string? (render-support))
-  => true)
-
-^{:refer hara.seedgen.common-xtalk/grammar-entries :added "4.1"}
-(fact "returns grammar xtalk entries"
-  (vector? (grammar-entries))
+^{:refer hara.seedgen.common-xtalk/inventory-path :added "4.1"}
+(fact "builds ops path"
+  (string? (inventory-path {:project {:root "."}}))
   => true)
 
 ^{:refer hara.seedgen.common-xtalk/read-inventory :added "4.1"}
@@ -131,21 +141,6 @@
       :macro 'hara.common.grammar-xtalk/tf-get-key
       :emit :macro})
 
-(fact "preserves authored canonical cases when regenerating inventory"
-  (let [entry (some #(when (= :x-get-key (:op %)) %)
-                    (inventory-entries
-                     {:existing [{:op :x-get-key
-                                  :doc "get-key transform"
-                                  :cases [+canonical-case+]}]}))]
-    (select-keys entry [:doc :cases]))
-  => {:doc "get-key transform"
-      :cases [+canonical-case+]})
-
-^{:refer hara.seedgen.common-xtalk/inventory-path :added "4.1"}
-(fact "builds ops path"
-  (string? (inventory-path {:project {:root "."}}))
-  => true)
-
 ^{:refer hara.seedgen.common-xtalk/render-inventory :added "4.1"}
 (fact "renders entries as string"
   (string? (render-inventory [{:op :x}]))
@@ -154,4 +149,9 @@
 ^{:refer hara.seedgen.common-xtalk/generate-inventory :added "4.1"}
 (fact "generates xtalk ops inventory"
   (map? (generate-inventory {:write false}))
+  => true)
+
+^{:refer hara.seedgen.common-xtalk/render-support :added "4.1"}
+(fact "render-support returns printable output"
+  (string? (render-support))
   => true)

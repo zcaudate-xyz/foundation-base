@@ -1,4 +1,4 @@
-(ns hara.typed.xtalk
+(ns hara.typed
   (:require [hara.typed.xtalk-analysis :as analysis]
             [hara.typed.xtalk-common :as types]
             [hara.typed.xtalk-parse :as parse]))

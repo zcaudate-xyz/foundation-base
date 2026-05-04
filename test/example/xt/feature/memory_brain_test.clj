@@ -20,3 +20,10 @@
       (get-in (lib/get-module library :xtalk 'example.xt.feature.memory-brain-custom)
               [:link 'cache])))
   => 'example.xt.cache.custom-cache)
+
+
+^{:refer example.xt.feature.memory-brain/memory-get :added "4.1"}
+(fact "TODO")
+
+^{:refer example.xt.feature.memory-brain/memory-set :added "4.1"}
+(fact "TODO")

@@ -1,6 +1,6 @@
 (ns js.cell.kernel.worker-mock
   (:require [hara.lang :as l]
-            [hara.typed.xtalk :refer [defspec.xt]]))
+            [hara.typed :refer [defspec.xt]]))
 
 (l/script :js
   {:require [[js.core :as j] [xt.lang.spec-base :as xt] [xt.lang.common-trace :as trace] [js.cell.kernel.worker-local :as worker-local] [js.cell.kernel.worker-impl :as worker-impl]]})

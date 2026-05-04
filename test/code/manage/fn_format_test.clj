@@ -51,6 +51,9 @@
       nav/root-string)
   => "(defn foo\n  ([x] (+ x 1)))")
 
+^{:refer code.manage.fn-format/fn:list-forms :added "4.1"}
+(fact "TODO")
+
 ^{:refer code.manage.fn-format/fn:defmethod-forms :added "3.0"}
 (fact "query to find `defmethod` forms with a vector"
   (-> (nav/parse-string "(defmethod foo :x [y] 1)")

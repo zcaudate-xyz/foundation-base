@@ -74,6 +74,37 @@
      :args ["hello"]}))
   => (contains ["hello" integer?]))
 
+^{:refer xt.cell.kernel.base-model/throttle-entry-promise :added "4.1"}
+(fact "normalises legacy and map throttle entries to their promise"
+
+  (j/<! (base-model/throttle-entry-promise
+         [(. Promise (resolve "legacy")) 10]))
+  => "legacy"
+
+  (j/<! (base-model/throttle-entry-promise
+         {"promise" (. Promise (resolve "mapped"))
+          "started" 20}))
+  => "mapped")
+
+^{:refer xt.cell.kernel.base-model/throttle-entry :added "4.1"}
+(fact "normalises throttle entries to the legacy [promise started] shape"
+
+  (j/<! (xt/x:first
+         (base-model/throttle-entry
+          {"promise" (. Promise (resolve "mapped"))
+           "started" 20})))
+  => "mapped"
+
+  (!.js
+   (xt/x:second
+    (base-model/throttle-entry
+     {"promise" (. Promise (resolve "mapped"))
+      "started" 20})))
+  => 20)
+
+^{:refer xt.cell.kernel.base-model/async-fn :added "4.1"}
+(fact "TODO")
+
 ^{:refer xt.cell.kernel.base-model/prep-view :added "4.0"
   :setup [(fact:global :setup)
                    (notify/wait-on :js
@@ -767,31 +798,3 @@
   (!.js
    (base-model/remove-raw-callback (-/CELL)))
   => vector?)
-
-^{:refer xt.cell.kernel.base-model/throttle-entry-promise :added "4.1"}
-(fact "normalises legacy and map throttle entries to their promise"
-
-  (j/<! (base-model/throttle-entry-promise
-         [(. Promise (resolve "legacy")) 10]))
-  => "legacy"
-
-  (j/<! (base-model/throttle-entry-promise
-         {"promise" (. Promise (resolve "mapped"))
-          "started" 20}))
-  => "mapped")
-
-^{:refer xt.cell.kernel.base-model/throttle-entry :added "4.1"}
-(fact "normalises throttle entries to the legacy [promise started] shape"
-
-  (j/<! (xt/x:first
-         (base-model/throttle-entry
-          {"promise" (. Promise (resolve "mapped"))
-           "started" 20})))
-  => "mapped"
-
-  (!.js
-   (xt/x:second
-    (base-model/throttle-entry
-     {"promise" (. Promise (resolve "mapped"))
-      "started" 20})))
-  => 20)

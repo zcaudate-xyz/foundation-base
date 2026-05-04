@@ -12,6 +12,15 @@
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-runtime-type-string :added "4.1"}
 (fact "TODO")
 
+^{:refer hara.model.spec-xtalk.fn-dart/dart-is-map :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.spec-xtalk.fn-dart/dart-map-get :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.spec-xtalk.fn-dart/dart-xt-exception? :added "4.1"}
+(fact "TODO")
+
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-len :added "4.1"}
 (fact "gets length"
   (l/emit-as :dart [(dart-tf-x-len '[_ arr])])
@@ -428,6 +437,9 @@
   => #"Future\.sync\(thunk\)")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-promise :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-promise-all :added "4.1"}
 (fact "TODO")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-promise-then :added "4.1"}

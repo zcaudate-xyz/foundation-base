@@ -62,6 +62,9 @@
 
   (gen/plain-symbol? 123) => false)
 
+^{:refer hara.runtime.postgres.base.grammar.gen-bind/bind-entry :added "4.1"}
+(fact "TODO")
+
 ^{:refer hara.runtime.postgres.base.grammar.gen-bind/transform-to-str :added "4.0"}
 (fact "transforms relevant forms to string"
 

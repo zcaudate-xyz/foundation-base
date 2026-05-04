@@ -1,6 +1,6 @@
 (ns js.cell.kernel.worker-local
   (:require [hara.lang :as l]
-            [hara.typed.xtalk :refer [defspec.xt]]))
+            [hara.typed :refer [defspec.xt]]))
 
 (l/script :js
   {:require [[js.core :as j] [js.cell.kernel.base-util :as util] [js.cell.kernel.worker-state :as state] [xt.lang.spec-base :as xt] [xt.lang.common-resource :as rt :with [defsingleton.js]]]})

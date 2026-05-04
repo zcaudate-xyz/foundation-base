@@ -1,6 +1,6 @@
 (ns xt.lang.common-repl
   (:require [hara.lang :as l]
-            [hara.typed.xtalk :refer [defspec.xt]]
+            [hara.typed :refer [defspec.xt]]
             [std.lib.foundation :as f]
             [std.lib.template :as template]
             [xt.lang.common-notify :as notify])

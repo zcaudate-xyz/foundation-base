@@ -316,6 +316,9 @@
   (l/emit-as :lua [(lua-tf-x-iter-native? '[_ it])])
   => #"type")
 
+^{:refer hara.model.spec-xtalk.fn-lua/lua-tf-x-async-run :added "4.1"}
+(fact "TODO")
+
 ^{:refer hara.model.spec-xtalk.fn-lua/lua-tf-x-with-delay :added "4.0"}
 (fact "with delay"
   (l/emit-as :lua [(lua-tf-x-with-delay '[_ ms thunk])])

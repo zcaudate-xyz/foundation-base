@@ -11,6 +11,27 @@
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
+^{:refer xt.event.node-frame/rand-id :added "4.1"}
+(fact "creates ids with the requested prefix"
+
+  (!.js
+    (var id (frame/rand-id "sub-" 4))
+    [(. id ["length"])
+     (xt/x:is-string? id)])
+  => [8 true])
+
+^{:refer xt.event.node-frame/frame :added "4.1"}
+(fact "defaults meta and space when building frames directly"
+
+  (!.js
+    (var base (frame/frame "request" "req-1" nil nil {:action "echo"}))
+    (var err  (frame/response-error-frame "req-1" "space/a" {:message "boom"} nil))
+    [(. base ["space"])
+     (. base ["meta"])
+     (. err ["status"])
+     (. err ["error"] ["message"])])
+  => ["$node" {} "error" "boom"])
+
 ^{:refer xt.event.node-frame/request-frame :added "4.1"}
 (fact "constructs request, response, and stream frames"
 
@@ -58,27 +79,6 @@
       "event/updated"
       true
       true])
-
-^{:refer xt.event.node-frame/frame :added "4.1"}
-(fact "defaults meta and space when building frames directly"
-
-  (!.js
-    (var base (frame/frame "request" "req-1" nil nil {:action "echo"}))
-    (var err  (frame/response-error-frame "req-1" "space/a" {:message "boom"} nil))
-    [(. base ["space"])
-     (. base ["meta"])
-     (. err ["status"])
-     (. err ["error"] ["message"])])
-  => ["$node" {} "error" "boom"])
-
-^{:refer xt.event.node-frame/rand-id :added "4.1"}
-(fact "creates ids with the requested prefix"
-
-  (!.js
-    (var id (frame/rand-id "sub-" 4))
-    [(. id ["length"])
-     (xt/x:is-string? id)])
-  => [8 true])
 
 ^{:refer xt.event.node-frame/response-frame :added "4.1"}
 (fact "constructs raw response frames with reply ids"

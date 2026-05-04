@@ -26,24 +26,17 @@
      (. unsub ["id"])])
   => ["subscribe" "room/a" "event/ping" "tab" "unsubscribe" "sub-a"])
 
-^{:refer xt.event.node-router/add-subscription :added "4.1"}
-(fact "stores and removes raw router subscription entries"
+^{:refer xt.event.node-router/unsubscribe-frame :added "4.1"}
+(fact "constructs unsubscribe control frames"
 
   (!.js
-    (var n (node/node-create {}))
-    (router/register-connection n "peer-a" nil)
-    (router/add-subscription n "peer-a" "room/a" "event/ping" "sub-a" {:via "tab"})
-    (var before
-      (xt/x:get-key
-       (xt/x:get-key
-        (xt/x:get-key (router/get-subscriptions n) "room/a")
-        "event/ping")
-       "peer-a"))
-    (router/remove-subscription n "peer-a" "room/a" "event/ping")
-    [(. before ["id"])
-     (. before ["meta"] ["via"])
-     (router/list-subscriptions n "room/a" "event/ping")])
-  => ["sub-a" "tab" []])
+    (var frame (router/unsubscribe-frame nil "event/ping" nil {:via "tab"}))
+    [(. frame ["kind"])
+     (. frame ["space"])
+     (. frame ["signal"])
+     (. frame ["meta"] ["via"])
+     (xt/x:is-string? (. frame ["id"]))])
+  => ["unsubscribe" "$node" "event/ping" "tab" true])
 
 ^{:refer xt.event.node-router/ensure-router :added "4.1"}
 (fact "creates router state and signal tables on demand"
@@ -58,18 +51,6 @@
   => [["connections" "subscriptions"]
       ["event/ping"]
       {}])
-
-^{:refer xt.event.node-router/unsubscribe-frame :added "4.1"}
-(fact "constructs unsubscribe control frames"
-
-  (!.js
-    (var frame (router/unsubscribe-frame nil "event/ping" nil {:via "tab"}))
-    [(. frame ["kind"])
-     (. frame ["space"])
-     (. frame ["signal"])
-     (. frame ["meta"] ["via"])
-     (xt/x:is-string? (. frame ["id"]))])
-  => ["unsubscribe" "$node" "event/ping" "tab" true])
 
 ^{:refer xt.event.node-router/get-connections :added "4.1"}
 (fact "exposes router connection state"
@@ -158,6 +139,25 @@
     [(. (router/get-subscriptions n) ["room/a"] ["event/ping"])
      signal-subs])
   => [{} {}])
+
+^{:refer xt.event.node-router/add-subscription :added "4.1"}
+(fact "stores and removes raw router subscription entries"
+
+  (!.js
+    (var n (node/node-create {}))
+    (router/register-connection n "peer-a" nil)
+    (router/add-subscription n "peer-a" "room/a" "event/ping" "sub-a" {:via "tab"})
+    (var before
+      (xt/x:get-key
+       (xt/x:get-key
+        (xt/x:get-key (router/get-subscriptions n) "room/a")
+        "event/ping")
+       "peer-a"))
+    (router/remove-subscription n "peer-a" "room/a" "event/ping")
+    [(. before ["id"])
+     (. before ["meta"] ["via"])
+     (router/list-subscriptions n "room/a" "event/ping")])
+  => ["sub-a" "tab" []])
 
 ^{:refer xt.event.node-router/remove-subscription :added "4.1"}
 (fact "removes router subscription entries"

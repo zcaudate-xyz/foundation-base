@@ -23,6 +23,25 @@
   {:runtime :oneshot
    :require [[xt.lang.common-data :as xtd]]})
 
+(fact "reloads required modules into the active library when they are missing"
+
+  (let [xlib (lib/library:create {})]
+    (impl/with:library [xlib]
+      (script/install xtalk/+book+)
+      (script/install js/+book+)
+      (script/script-ns-import :js {:require '[[xt.lang.spec-base :as xt]]})
+      (-> (lib/get-module xlib :js 'xt.lang.spec-base)
+          :fragment
+          not-empty
+          boolean)))
+  => true)
+
+(fact "allows books without any exported macros"
+
+  (script/script-macro-import {:macros []
+                               :highlights []})
+  => '[#{} #{}])
+
 ^{:refer hara.lang.script/install :added "4.0"}
 (fact "installs a language"
 
@@ -38,19 +57,6 @@
     (script/script-ns-import {:require '[[xt.lang.common-data :as xtd :primary true]]}))
   => '#{xt.lang.common-data})
 
-(fact "reloads required modules into the active library when they are missing"
-
-  (let [xlib (lib/library:create {})]
-    (impl/with:library [xlib]
-      (script/install xtalk/+book+)
-      (script/install js/+book+)
-      (script/script-ns-import :js {:require '[[xt.lang.spec-base :as xt]]})
-      (-> (lib/get-module xlib :js 'xt.lang.spec-base)
-          :fragment
-          not-empty
-          boolean)))
-  => true)
-
 ^{:refer hara.lang.script/script-macro-import :added "4.0"}
 (fact "import macros into the namespace"
 
@@ -59,12 +65,17 @@
                                             :lua)))
   => vector?)
 
-(fact "allows books without any exported macros"
+^{:refer hara.lang.script/script-require-target-id :added "4.1"}
+(fact "TODO")
 
-  (script/script-macro-import {:macros []
-                               :highlights []})
-  => '[#{} #{}])
+^{:refer hara.lang.script/script-specialize-merge-contracts :added "4.1"}
+(fact "TODO")
 
+^{:refer hara.lang.script/script-specialize-require :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.lang.script/script-specialize-config :added "4.1"}
+(fact "TODO")
 
 ^{:refer hara.lang.script/script-fn-base :added "4.0"}
 (fact "setup for the runtime"

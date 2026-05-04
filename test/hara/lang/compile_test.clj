@@ -82,6 +82,75 @@
       ["BODY"
        "demo.core::BODY"]])
 
+^{:refer hara.lang.compile/compile-module-single :added "4.0"}
+(fact "compiles a single module"
+
+  (make/with:mock-compile
+    (compile-module-single
+     {:lang :lua
+      :root   ".build"
+      :target "src"
+      :file   "pkg/file.lua"
+      :main   'xt.lang.common-math
+      :layout :flat
+      :entry {:label true}
+      :emit  {:static {:header true}
+              :code {:transforms [(fn [out static]
+                                    (if (:header static)
+                                      (str "HEADER\n\n" out)
+                                      out))]}}}))
+  => (contains-in
+      [".build/src/pkg/file.lua"
+       string?]))
+
+^{:refer hara.lang.compile/compile-module-create-links :added "4.0"}
+(fact "creates links for modules"
+  (compile-module-create-links '[a.b a.c] 'a {})
+  => (contains {'a.b (contains {:label "b"}) 'a.c (contains {:label "c"})}))
+
+^{:refer hara.lang.compile/compile-module-directory-specialization-conflicts :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.lang.compile/compile-module-directory-selected :added "4.0"}
+(fact "compiles the directory based on sorted imports"
+  (make/with:mock-compile
+    (compile-module-directory-selected
+      :directory
+      ['xt.lang.common-math]
+      {:lang :lua :main 'xt.lang.common-math :root ".build" :target "src"}))
+  => (contains {:files pos-int?})
+
+  (compile/with:mock-compile
+    (compile/with:compile-filter #{'xt.lang.common-math}
+      (compile-module-directory-selected
+       :directory
+       ['xt.lang.common-math 'xt.lang.common-data]
+       {:lang :lua :main 'xt.lang.common-math :root ".build" :target "src"})))
+  => (contains {:files 1})
+
+  (compile/with:mock-compile
+    (compile-module-directory-selected
+      :directory
+      ['xt.lang.common-data]
+      {:lang :js
+       :main 'xt.lang.common-data
+       :root ".build"
+       :target "src"
+       :emit {:artifacts [#'ts/module-dts-artifact]}}))
+  => (contains {:files pos-int?}))
+
+^{:refer hara.lang.compile/compile-module-directory :added "4.0"}
+(fact "compiles a directory"
+  (with-redefs [fs/select (constantly ["src/xt/lang/common_lib.clj"])
+                fs/file-namespace (constantly 'xt.lang.common-math)]
+    (make/with:mock-compile
+      (compile-module-directory
+       {:lang :lua
+        :root ".build"
+        :target "src"
+        :main 'xt.lang.common-math})))
+  => (contains {:files pos-int?}))
+
 ^{:refer hara.lang.compile/specialization-descriptor :added "4.1"}
 (fact "normalizes specialization descriptors"
   (specialization-descriptor
@@ -125,72 +194,6 @@
                                     {:lang :lua}))
   => '[{:lang :lua :source a.core :target a.out}
        {:lang :lua :source b.core :target b.out}])
-
-^{:refer hara.lang.compile/compile-module-single :added "4.0"}
-(fact "compiles a single module"
-
-  (make/with:mock-compile
-    (compile-module-single
-     {:lang :lua
-      :root   ".build"
-      :target "src"
-      :file   "pkg/file.lua"
-      :main   'xt.lang.common-math
-      :layout :flat
-      :entry {:label true}
-      :emit  {:static {:header true}
-              :code {:transforms [(fn [out static]
-                                    (if (:header static)
-                                      (str "HEADER\n\n" out)
-                                      out))]}}}))
-  => (contains-in
-      [".build/src/pkg/file.lua"
-       string?]))
-
-^{:refer hara.lang.compile/compile-module-create-links :added "4.0"}
-(fact "creates links for modules"
-  (compile-module-create-links '[a.b a.c] 'a {})
-  => (contains {'a.b (contains {:label "b"}) 'a.c (contains {:label "c"})}))
-
-^{:refer hara.lang.compile/compile-module-directory-selected :added "4.0"}
-(fact "compiles the directory based on sorted imports"
-  (make/with:mock-compile
-    (compile-module-directory-selected
-      :directory
-      ['xt.lang.common-math]
-      {:lang :lua :main 'xt.lang.common-math :root ".build" :target "src"}))
-  => (contains {:files pos-int?})
-
-  (compile/with:mock-compile
-    (compile/with:compile-filter #{'xt.lang.common-math}
-      (compile-module-directory-selected
-       :directory
-       ['xt.lang.common-math 'xt.lang.common-data]
-       {:lang :lua :main 'xt.lang.common-math :root ".build" :target "src"})))
-  => (contains {:files 1})
-
-  (compile/with:mock-compile
-    (compile-module-directory-selected
-      :directory
-      ['xt.lang.common-data]
-      {:lang :js
-       :main 'xt.lang.common-data
-       :root ".build"
-       :target "src"
-       :emit {:artifacts [#'ts/module-dts-artifact]}}))
-  => (contains {:files pos-int?}))
-
-^{:refer hara.lang.compile/compile-module-directory :added "4.0"}
-(fact "compiles a directory"
-  (with-redefs [fs/select (constantly ["src/xt/lang/common_lib.clj"])
-                fs/file-namespace (constantly 'xt.lang.common-math)]
-    (make/with:mock-compile
-      (compile-module-directory
-       {:lang :lua
-        :root ".build"
-        :target "src"
-        :main 'xt.lang.common-math})))
-  => (contains {:files pos-int?}))
 
 ^{:refer hara.lang.compile/compile-module-prep :added "4.0"}
 (fact "precs the single entry point setup"

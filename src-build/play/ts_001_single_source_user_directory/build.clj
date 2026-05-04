@@ -2,7 +2,7 @@
   (:use [code.test :exclude [-main]])
   (:require [std.make :as make :refer [def.make]]
              [hara.model.spec-js.ts :as ts]
-             [hara.typed.xtalk :as xtalk]
+             [hara.typed :as xtalk]
              [play.ts-001-single-source-user-directory.main :as main]))
 
 (def +gitignore+

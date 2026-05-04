@@ -16,42 +16,12 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.event.node-request/invoke-handler :added "4.1"}
-(fact "invokes shared handlers against the selected space"
+^{:refer xt.event.node-request/ensure-promise :added "4.1"}
+(fact "normalises raw values to promises"
 
   (!.js
-    (var n (node/node-create {}))
-    (var calls [])
-    (node/register-handler
-     n
-     "echo"
-     (fn [space args request node]
-       (xt/x:arr-push calls
-                      [(. space ["id"])
-                       args
-                       (. request ["action"])])
-       (return {:space (. space ["id"])
-                :args args
-                :action (. request ["action"])}))
-     nil)
-    (var out
-      (req/invoke-handler
-       n
-       (frame/request-frame "room/a" "echo" [1 2] nil)))
-    [(promise/x:promise-native? out)
-     calls])
-  => [true
-      [["room/a" [1 2] "echo"]]]
-
-  (!.js
-    (var out
-      (req/response-body
-       (frame/response-ok-frame "req-1"
-                                "room/a"
-                                {:ok true}
-                                nil)))
-    [(promise/x:promise-native? out)])
-   => [true])
+    [(promise/x:promise-native? (req/ensure-promise {:ok true}))])
+  => [true])
 
 ^{:refer xt.event.node-request/add-pending :added "4.1"}
 (fact "tracks and settles pending request entries"
@@ -125,6 +95,43 @@
      (xt/x:obj-keys (. n ["pending"]))])
   => [true [true] []])
 
+^{:refer xt.event.node-request/invoke-handler :added "4.1"}
+(fact "invokes shared handlers against the selected space"
+
+  (!.js
+    (var n (node/node-create {}))
+    (var calls [])
+    (node/register-handler
+     n
+     "echo"
+     (fn [space args request node]
+       (xt/x:arr-push calls
+                      [(. space ["id"])
+                       args
+                       (. request ["action"])])
+       (return {:space (. space ["id"])
+                :args args
+                :action (. request ["action"])}))
+     nil)
+    (var out
+      (req/invoke-handler
+       n
+       (frame/request-frame "room/a" "echo" [1 2] nil)))
+    [(promise/x:promise-native? out)
+     calls])
+  => [true
+      [["room/a" [1 2] "echo"]]]
+
+  (!.js
+    (var out
+      (req/response-body
+       (frame/response-ok-frame "req-1"
+                                "room/a"
+                                {:ok true}
+                                nil)))
+    [(promise/x:promise-native? out)])
+   => [true])
+
 ^{:refer xt.event.node-request/response-body :added "4.1"}
 (fact "normalises ok responses into promise results"
 
@@ -132,11 +139,4 @@
     [(promise/x:promise-native?
       (req/response-body
        (frame/response-ok-frame "req-1" "room/a" {:ok true} nil)))])
-  => [true])
-
-^{:refer xt.event.node-request/ensure-promise :added "4.1"}
-(fact "normalises raw values to promises"
-
-  (!.js
-    [(promise/x:promise-native? (req/ensure-promise {:ok true}))])
   => [true])

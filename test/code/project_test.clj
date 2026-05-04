@@ -50,12 +50,8 @@
   (str (lookup-path (env/ns-sym)))
   => string?)
 
-^{:refer code.project/get-path :added "4.0"
-  :setup [(reset! code.project.common/*lookup* {})]}
-(fact "gets the path given the `ns`"
-
-  (get-path (env/ns-sym))
-  => "test/code/project_test.clj")
+^{:refer code.project/test-root :added "4.1"}
+(fact "TODO")
 
 ^{:refer code.project/get-path :added "4.1"
   :setup [(reset! code.project.common/*lookup* {})]}

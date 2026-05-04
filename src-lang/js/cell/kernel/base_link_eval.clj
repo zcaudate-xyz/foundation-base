@@ -1,6 +1,6 @@
 (ns js.cell.kernel.base-link-eval
   (:require [hara.lang :as l]
-            [hara.typed.xtalk :refer [defspec.xt]]
+            [hara.typed :refer [defspec.xt]]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
             [std.lib.walk :as walk]

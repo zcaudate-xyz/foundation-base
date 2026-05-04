@@ -6,15 +6,6 @@
 ^{:refer code.test.task/run:interrupt :added "4.0"}
 (fact "interrupts the test")
 
-^{:refer code.test.task/run :added "3.0" :class [:test/general]}
-(fact "executes all tests, optionally filtering by list or specific namespace"
-
-  (task/run :list)
-
-  (task/run 'std.lib.foundation)
-  ;; {:files 1, :thrown 0, :facts 8, :checks 18, :passed 18, :failed 0}
-  => map?)
-
 ^{:refer code.test.task/resolve-files :added "4.1"}
 (fact "resolves source and test file paths to test namespaces"
 
@@ -28,6 +19,15 @@
                       (project/project))
   => ['code.project-test
       'code.test.task-test])
+
+^{:refer code.test.task/run :added "3.0" :class [:test/general]}
+(fact "executes all tests, optionally filtering by list or specific namespace"
+
+  (task/run :list)
+
+  (task/run 'std.lib.foundation)
+  ;; {:files 1, :thrown 0, :facts 8, :checks 18, :passed 18, :failed 0}
+  => map?)
 
 ^{:refer code.test.task/run:current :added "4.0"}
 (fact "runs the current namespace")

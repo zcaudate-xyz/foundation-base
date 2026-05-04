@@ -19,25 +19,6 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.protocol.impl.type-request/request-runtime-create :added "4.1"}
-(fact "creates wrapped request runtimes"
-
-  (!.js
-    (var runtime
-         (req/request-runtime-create
-          {:request (fn [node space action args meta]
-                      (return {:space space}))
-           :receive_request (fn [node frame ctx]
-                              (return frame))
-           :receive_response (fn [node frame]
-                               (return frame))
-           :respond_ok (fn [node request data meta ctx]
-                         (return data))
-           :respond_error (fn [node request error meta ctx]
-                            (return error))}))
-    (. runtime ["::"]))
-  => "type.request")
-
 ^{:refer xt.protocol.impl.type-request/request-runtime? :added "4.1"}
 (fact "checks request runtime wrappers"
 
@@ -75,6 +56,25 @@
            :respond_error (fn [node request error meta ctx]
                             (return error))}))
     (. (req/require-request-runtime runtime) ["::"]))
+  => "type.request")
+
+^{:refer xt.protocol.impl.type-request/request-runtime-create :added "4.1"}
+(fact "creates wrapped request runtimes"
+
+  (!.js
+    (var runtime
+         (req/request-runtime-create
+          {:request (fn [node space action args meta]
+                      (return {:space space}))
+           :receive_request (fn [node frame ctx]
+                              (return frame))
+           :receive_response (fn [node frame]
+                               (return frame))
+           :respond_ok (fn [node request data meta ctx]
+                         (return data))
+           :respond_error (fn [node request error meta ctx]
+                            (return error))}))
+    (. runtime ["::"]))
   => "type.request")
 
 ^{:refer xt.protocol.impl.type-request/request :added "4.1"}

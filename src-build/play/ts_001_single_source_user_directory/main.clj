@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]
             [xt.lang.common-lib]
             [xt.lang.common-data]
-            [hara.typed.xtalk :refer [defspec.xt]]))
+            [hara.typed :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.common-lib :as k]

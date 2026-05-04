@@ -100,6 +100,9 @@
   => '[#{}
         "function template_fn(value){\n  return value;\n}"])
 
+^{:refer hara.common.emit-template/entry-reserved :added "4.1"}
+(fact "TODO")
+
 ^{:refer hara.common.emit-template/create-code-state :added "4.1"}
 (fact "hydrates and stages a code entry for the current grammar"
   (select-keys
@@ -142,6 +145,9 @@
    [:form :deps])
   => '{:form (defn template-fn [value] (return value))
        :deps #{}})
+
+^{:refer hara.common.emit-template/materialize-code-entry :added "4.1"}
+(fact "TODO")
 
 ^{:refer hara.common.emit-template/cached-entry-deps :added "4.1"}
 (fact "returns restaged code dependencies for the current language"

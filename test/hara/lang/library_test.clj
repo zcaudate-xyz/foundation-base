@@ -60,6 +60,18 @@
   (lib/get-snapshot +library+)
   => snap/snapshot?)
 
+^{:refer hara.lang.library/snapshot-find-module :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.lang.library/entry-arity :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.lang.library/entry-abstract? :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.lang.library/validate-module-implements :added "4.1"}
+(fact "TODO")
+
 ^{:refer hara.lang.library/get-book :added "4.0"}
 (fact "gets a book from library"
 
@@ -225,6 +237,9 @@
                        :lua 'L.util
                        {})
   => coll?)
+
+^{:refer hara.lang.library/install-module-specialized! :added "4.1"}
+(fact "TODO")
 
 ^{:refer hara.lang.library/install-book! :added "4.0"
   :setup [(lib/delete-book! +library+ :lua.redis)]}

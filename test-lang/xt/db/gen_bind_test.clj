@@ -28,6 +28,9 @@
          :view
          {:table "Currency", :type "select", :tag "all", :query nil}}))
 
+^{:refer xt.db.gen-bind/route-map :added "4.0"}
+(fact "returns a map of routes")
+
 ^{:refer xt.db.gen-bind/route-list :added "4.0"}
 (fact "lists all routes"
 
@@ -39,6 +42,3 @@
 
   (bind/view-list)
   => vector?)
-
-^{:refer xt.db.gen-bind/route-map :added "4.0"}
-(fact "returns a map of routes")

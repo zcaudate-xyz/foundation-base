@@ -121,6 +121,30 @@
    (base-impl/model-ensure (-/make-cell) "missing"))
   => (throws))
 
+^{:refer xt.cell.kernel.base-impl/list-views :added "4.1"}
+(fact "lists views attached to a model"
+
+  (notify/wait-on :js
+    (. (-/make-cell-with-model
+        {:echo {:handler base-link-local/echo
+                :defaultArgs ["hello"]}})
+       (then (fn [cell]
+               (repl/notify
+                (base-impl/list-views cell "hello"))))))
+  => ["echo"])
+
+^{:refer xt.cell.kernel.base-impl/view-ensure :added "4.1"}
+(fact "returns the model and view pair for an existing view"
+
+  (notify/wait-on :js
+    (. (-/make-cell-with-model
+        {:echo {:handler base-link-local/echo
+                :defaultArgs ["hello"]}})
+       (then (fn [cell]
+               (repl/notify
+                (base-impl/view-ensure cell "hello" "echo"))))))
+  => (contains [map? map?]))
+
 ^{:refer xt.cell.kernel.base-impl/view-access :added "4.0"}
 (fact "returns nil for a missing view"
 
@@ -132,6 +156,9 @@
                             (return true))
                           []))
   => nil)
+
+^{:refer xt.cell.kernel.base-impl/clear-listeners :added "4.1"}
+(fact "TODO")
 
 ^{:refer xt.cell.kernel.base-impl/add-listener :added "4.0"}
 (fact "adds, lists, removes, and triggers keyed listeners on a cell"
@@ -166,30 +193,6 @@
    (base-impl/add-listener cell ["hello" "echo"] "@react/1234" (fn:>) nil nil)
    (base-impl/trigger-listeners cell ["hello" "echo"] {}))
   => ["@react/1234"])
-
-^{:refer xt.cell.kernel.base-impl/list-views :added "4.1"}
-(fact "lists views attached to a model"
-
-  (notify/wait-on :js
-    (. (-/make-cell-with-model
-        {:echo {:handler base-link-local/echo
-                :defaultArgs ["hello"]}})
-       (then (fn [cell]
-               (repl/notify
-                (base-impl/list-views cell "hello"))))))
-  => ["echo"])
-
-^{:refer xt.cell.kernel.base-impl/view-ensure :added "4.1"}
-(fact "returns the model and view pair for an existing view"
-
-  (notify/wait-on :js
-    (. (-/make-cell-with-model
-        {:echo {:handler base-link-local/echo
-                :defaultArgs ["hello"]}})
-       (then (fn [cell]
-               (repl/notify
-                (base-impl/view-ensure cell "hello" "echo"))))))
-  => (contains [map? map?]))
 
 ^{:refer xt.cell.kernel.base-impl/remove-listener :added "4.1"}
 (fact "removes a keyed listener from a path"
