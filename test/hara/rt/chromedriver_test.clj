@@ -1,6 +1,6 @@
-(ns hara.rt.chromedriver-test
+(ns hara.runtime.chromedriver-test
   (:use code.test)
-  (:require [hara.rt.chromedriver :as chromedriver]
+  (:require [hara.runtime.chromedriver :as chromedriver]
             [hara.lang :as l]
             [std.lib :as h]
             [xt.lang.common-lib :as k]
@@ -23,13 +23,13 @@
           (l/rt:scaffold-imports :js)]
   :teardown [(l/rt:stop)]})
 
-^{:refer hara.rt.chromedriver-test/browser-eval :added "4.0"}
+^{:refer hara.runtime.chromedriver-test/browser-eval :added "4.0"}
 (fact "chromedriver evaluates !.js expressions"
 
   (!.js (+ 1 2 3))
   => 6)
 
-^{:refer hara.rt.chromedriver/goto :added "4.0"
+^{:refer hara.runtime.chromedriver/goto :added "4.0"
   :setup [(def +browser+ (chromedriver/browser {:port 19222}))]
   :teardown [(h/stop +browser+)]}
 (fact "goto a given page"

@@ -5,7 +5,7 @@
 
 (defn fixture-register! []
   (clear-registry!)
-  (analyze-and-register! 'hara.lang.model.spec-xtalk-typed-fixture))
+  (analyze-and-register! 'hara.model.spec-xtalk-typed-fixture))
 
 ^{:refer hara.lang.typed.xtalk/namespace-aliases :added "4.1"}
 (fact "extracts namespace alias maps"
@@ -48,35 +48,35 @@
 (fact "get-type returns primary declarations"
   (do
     (fixture-register!)
-    (-> (get-type 'hara.lang.model.spec-xtalk-typed-fixture/User) :name))
+    (-> (get-type 'hara.model.spec-xtalk-typed-fixture/User) :name))
   => "User")
 
 ^{:refer hara.lang.typed.xtalk/get-entry :added "4.1"}
 (fact "get-entry returns registry entries"
   (do
     (fixture-register!)
-    (some? (get-entry 'hara.lang.model.spec-xtalk-typed-fixture/find-user)))
+    (some? (get-entry 'hara.model.spec-xtalk-typed-fixture/find-user)))
   => true)
 
 ^{:refer hara.lang.typed.xtalk/get-declaration :added "4.1"}
 (fact "get-declaration returns specific declarations"
   (do
     (fixture-register!)
-    (-> (get-declaration 'hara.lang.model.spec-xtalk-typed-fixture/find-user :fn) :name))
+    (-> (get-declaration 'hara.model.spec-xtalk-typed-fixture/find-user :fn) :name))
   => "find-user")
 
 ^{:refer hara.lang.typed.xtalk/get-spec :added "4.1"}
 (fact "get-spec returns spec defs"
   (do
     (fixture-register!)
-    (-> (get-spec 'hara.lang.model.spec-xtalk-typed-fixture/UserMap) :name))
+    (-> (get-spec 'hara.model.spec-xtalk-typed-fixture/UserMap) :name))
   => "UserMap")
 
 ^{:refer hara.lang.typed.xtalk/get-function :added "4.1"}
 (fact "get-function returns parsed fn defs"
   (do
     (fixture-register!)
-    (-> (get-function 'hara.lang.model.spec-xtalk-typed-fixture/find-user) :name))
+    (-> (get-function 'hara.model.spec-xtalk-typed-fixture/find-user) :name))
   => "find-user")
 
 ^{:refer hara.lang.typed.xtalk/get-macro :added "4.1"}
@@ -141,12 +141,12 @@
 
 ^{:refer hara.lang.typed.xtalk/analyze-namespace :added "4.1"}
 (fact "analyzes namespaces through facade"
-  (:ns (analyze-namespace 'hara.lang.model.spec-xtalk-typed-fixture))
-  => 'hara.lang.model.spec-xtalk-typed-fixture)
+  (:ns (analyze-namespace 'hara.model.spec-xtalk-typed-fixture))
+  => 'hara.model.spec-xtalk-typed-fixture)
 
 ^{:refer hara.lang.typed.xtalk/analyze-namespace-raw :added "4.1"}
 (fact "exposes raw namespace analysis through facade"
-  (->> (analyze-namespace-raw 'hara.lang.model.spec-xtalk-typed-fixture)
+  (->> (analyze-namespace-raw 'hara.model.spec-xtalk-typed-fixture)
        :functions
        (some #(when (= "find-user" (:name %)) %))
        :output
@@ -157,14 +157,14 @@
 (fact "registers namespaces through facade"
   (do
     (clear-registry!)
-    (some? (analyze-and-register! 'hara.lang.model.spec-xtalk-typed-fixture)))
+    (some? (analyze-and-register! 'hara.model.spec-xtalk-typed-fixture)))
   => true)
 
 ^{:refer hara.lang.typed.xtalk/check-function :added "4.1"}
 (fact "checks functions through facade"
   (do
     (clear-registry!)
-    (-> (check-function 'hara.lang.model.spec-xtalk-typed-fixture/find-user) :errors))
+    (-> (check-function 'hara.model.spec-xtalk-typed-fixture/find-user) :errors))
   => [])
 
 ^{:refer hara.lang.typed.xtalk/check-namespace :added "4.1"}

@@ -1,10 +1,10 @@
-(ns hara.lang.base.preprocess-value-test
+(ns hara.common.preprocess-value-test
   (:use code.test)
-  (:require [hara.lang.base.emit-helper :as helper]
-            [hara.lang.base.grammar :as grammar]
-            [hara.lang.base.preprocess-value :refer :all]
-            [hara.lang.model.spec-js :as js]
-            [hara.lang.model.spec-lua :as lua]))
+  (:require [hara.common.emit-helper :as helper]
+            [hara.common.grammar :as grammar]
+            [hara.common.preprocess-value :refer :all]
+            [hara.model.spec-js :as js]
+            [hara.model.spec-lua :as lua]))
 
 (def +reserved+
   (-> (grammar/build)
@@ -40,16 +40,16 @@
         (catch e
           (return ["unable to connect"]))))
 
-^{:refer hara.lang.base.preprocess-value/value-block-entry :added "4.1"}
+^{:refer hara.common.preprocess-value/value-block-entry :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.base.preprocess-value/expand-value-block :added "4.1"}
+^{:refer hara.common.preprocess-value/expand-value-block :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.base.preprocess-value/resolve-block-form :added "4.1"}
+^{:refer hara.common.preprocess-value/resolve-block-form :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.base.preprocess-value/value-template-args :added "4.1"}
+^{:refer hara.common.preprocess-value/value-template-args :added "4.1"}
 (fact "derives template value args from arglists metadata"
   (value-template-args
    (with-meta
@@ -70,7 +70,7 @@
      {:arglists '([ctx a b & more])}))
   => '[x y])
 
-^{:refer hara.lang.base.preprocess-value/value-standalone :added "4.1"}
+^{:refer hara.common.preprocess-value/value-standalone :added "4.1"}
 (fact "callable xtalk intrinsics use shared value-standalone compilation"
   (value-standalone 'x:add +grammar+)
   => '(fn [x y] (return (+ x y)))
@@ -96,7 +96,7 @@
                                         :value/standalone true}}})
   => '(fn [a b] (return (+ a b))))
 
-^{:refer hara.lang.base.preprocess-value/process-value-form :added "4.1"}
+^{:refer hara.common.preprocess-value/process-value-form :added "4.1"}
 (fact "block-valued xtalk macros are lowered in value positions"
   (value-standalone 'x:type-native js/+grammar+)
   => '(fn [value]

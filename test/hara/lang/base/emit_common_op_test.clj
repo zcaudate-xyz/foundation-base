@@ -1,7 +1,7 @@
-(ns hara.lang.base.emit-common-op-test
-  (:require [hara.lang.base.emit-common :as common :refer :all]
-            [hara.lang.base.emit-helper :as helper]
-            [hara.lang.base.grammar :as grammar])
+(ns hara.common.emit-common-op-test
+  (:require [hara.common.emit-common :as common :refer :all]
+            [hara.common.emit-helper :as helper]
+            [hara.common.grammar :as grammar])
   (:use code.test))
 
 (def +reserved+
@@ -11,7 +11,7 @@
 (def +grammar+
   (grammar/grammar :test +reserved+ helper/+default+))
 
-^{:refer hara.lang.base.emit-common/emit-common-loop :adopt true :added "4.0"}
+^{:refer hara.common.emit-common/emit-common-loop :adopt true :added "4.0"}
 (fact "emit raw ops"
 
   [:discard]
@@ -227,7 +227,7 @@
   => (throws))
 
 
-^{:refer hara.lang.base.emit-common/emit-common :adopt true :added "4.0"}
+^{:refer hara.common.emit-common/emit-common :adopt true :added "4.0"}
 (fact "emit main raw"
 
   [:discard]

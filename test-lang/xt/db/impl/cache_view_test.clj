@@ -1,5 +1,5 @@
 (ns xt.db.impl.cache-view-test
-  (:require [hara.rt.postgres :as pg]
+  (:require [hara.runtime.postgres :as pg]
             [hara.lang :as l]
             [xt.db.helpers.seed-system-test :as data]
             [xt.db.helpers.seed-user-test :as user])

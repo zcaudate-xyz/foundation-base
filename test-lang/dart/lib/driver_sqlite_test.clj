@@ -1,5 +1,5 @@
 (ns dart.lib.driver-sqlite-test
-  (:require [hara.rt.basic.type-common :as common]
+  (:require [hara.runtime.basic.type-common :as common]
              [hara.lang :as l]
              [xt.lang.common-notify :as notify]
              [xt.lang.spec-promise :as spec-promise])

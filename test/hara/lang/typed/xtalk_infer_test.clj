@@ -21,7 +21,7 @@
 
 (defn fixture-register! []
   (types/clear-registry!)
-  (parse/register-types! (parse/analyze-namespace 'hara.lang.model.spec-xtalk-typed-fixture)))
+  (parse/register-types! (parse/analyze-namespace 'hara.model.spec-xtalk-typed-fixture)))
 
 (fact "infers xt self outputs from the first argument"
   (-> (infer-op-spec-form (ops/canonical-entry 'x:arr-push)
@@ -60,7 +60,7 @@
 (fact "resolves named specs from the registry"
   (do
     (fixture-register!)
-    (types/type->data (resolve-type {:kind :named :name 'hara.lang.model.spec-xtalk-typed-fixture/User} +ctx+)))
+    (types/type->data (resolve-type {:kind :named :name 'hara.model.spec-xtalk-typed-fixture/User} +ctx+)))
   => '{:kind :record
        :fields [{:name "id" :type {:kind :primitive :name :xt/str} :optional? false}
                 {:name "name" :type {:kind :primitive :name :xt/str} :optional? false}]})
@@ -123,7 +123,7 @@
 (fact "registers functions lazily from namespaces"
   (do
     (types/clear-registry!)
-    (:name (maybe-register-function! 'hara.lang.model.spec-xtalk-typed-fixture/find-user)))
+    (:name (maybe-register-function! 'hara.model.spec-xtalk-typed-fixture/find-user)))
   => "find-user")
 
 ^{:refer hara.lang.typed.xtalk-infer/lookup-symbol-type :added "4.1"}
@@ -132,16 +132,16 @@
     (fixture-register!)
     [(lookup-symbol-type 'user-id {:env '{user-id {:kind :primitive :name :xt/str}} :ns 'sample.route :aliases {}})
      (types/type->data (lookup-symbol-type 'x:add +ctx+))
-     (types/type->data (lookup-symbol-type 'hara.lang.model.spec-xtalk-typed-fixture/find-user +ctx+))])
+     (types/type->data (lookup-symbol-type 'hara.model.spec-xtalk-typed-fixture/find-user +ctx+))])
   => '[{:kind :primitive :name :xt/str}
         {:kind :fn
          :inputs [{:kind :primitive :name :xt/num}
                   {:kind :primitive :name :xt/num}]
          :output {:kind :primitive :name :xt/num}}
         {:kind :fn
-         :inputs [{:kind :named :name hara.lang.model.spec-xtalk-typed-fixture/UserMap}
+         :inputs [{:kind :named :name hara.model.spec-xtalk-typed-fixture/UserMap}
                   {:kind :primitive :name :xt/str}]
-         :output {:kind :maybe :item {:kind :named :name hara.lang.model.spec-xtalk-typed-fixture/User}}}])
+         :output {:kind :maybe :item {:kind :named :name hara.model.spec-xtalk-typed-fixture/User}}}])
 
 ^{:refer hara.lang.typed.xtalk-infer/field-access-type :added "4.1"}
 (fact "reads field types from records and dicts"

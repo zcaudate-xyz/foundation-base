@@ -1,6 +1,6 @@
-(ns hara.rt.basic.impl-annex.process-haskell-test
+(ns hara.runtime.basic.impl-annex.process-haskell-test
   (:use code.test)
-  (:require [hara.rt.basic.impl-annex.process-haskell :refer :all]))
+  (:require [hara.runtime.basic.impl-annex.process-haskell :refer :all]))
 
-^{:refer hara.rt.basic.impl-annex.process-haskell/transform-form :added "4.1"}
+^{:refer hara.runtime.basic.impl-annex.process-haskell/transform-form :added "4.1"}
 (fact "TODO")

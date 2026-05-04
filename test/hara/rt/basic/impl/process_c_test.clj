@@ -1,6 +1,6 @@
-(ns hara.rt.basic.impl.process-c-test
-  (:require [hara.rt.basic.impl.process-c :refer :all]
-            [hara.rt.basic.type-common :as common]
+(ns hara.runtime.basic.impl.process-c-test
+  (:require [hara.runtime.basic.impl.process-c :refer :all]
+            [hara.runtime.basic.type-common :as common]
             [hara.lang :as l])
   (:use code.test))
 
@@ -33,7 +33,7 @@
 (def CANARY-TCC
   (common/program-exists? "tcc"))
 
-^{:refer hara.rt.basic.impl.process-c-test/CANARY-TCC :guard true :adopt true :added "4.0"}
+^{:refer hara.runtime.basic.impl.process-c-test/CANARY-TCC :guard true :adopt true :added "4.0"}
 (fact "EVALUATE tcc in c"
 
   (str (!.c (printf "hello world")))
@@ -63,7 +63,7 @@
     (-/main))]
   => [-7 -7])
 
-^{:refer hara.rt.basic.impl.process-c/get-format-string :added "4.0"}
+^{:refer hara.runtime.basic.impl.process-c/get-format-string :added "4.0"}
 (fact "gets the format string given entry"
 
   (get-format-string @hello)
@@ -72,15 +72,15 @@
   (get-format-string @add)
   => "%d")
 
-^{:refer hara.rt.basic.impl.process-c/transform-form-format :added "4.0"}
+^{:refer hara.runtime.basic.impl.process-c/transform-form-format :added "4.0"}
 (fact "formats the form"
 
   (transform-form-format `-/add
                          {:emit {:input {:pointer -/add
                                          :args [1 2]}}})
-  => '(printf "%d" (hara.rt.basic.impl.process-c-test/add 1 2)))
+  => '(printf "%d" (hara.runtime.basic.impl.process-c-test/add 1 2)))
 
-^{:refer hara.rt.basic.impl.process-c/transform-form :added "4.0"}
+^{:refer hara.runtime.basic.impl.process-c/transform-form :added "4.0"}
 (fact "transforms the form for tcc output"
 
   (transform-form '[(printf "hello world")] {})

@@ -1,12 +1,12 @@
 (ns hara.lang.base.impl-deps
   (:require [clojure.set :as set]
             [hara.lang.base.book :as b]
-            [hara.lang.base.emit :as emit]
-            [hara.lang.base.emit-preprocess :as preprocess] [hara.lang.base.preprocess-base :as preprocess-base]
-            [hara.lang.base.emit-rewrite :as rewrite]
+            [hara.common.emit :as emit]
+            [hara.common.emit-preprocess :as preprocess] [hara.common.preprocess-base :as preprocess-base]
+            [hara.common.emit-rewrite :as rewrite]
             [hara.lang.base.impl-deps-imports :as imports]
             [hara.lang.base.impl-entry :as entry]
-            [hara.lang.base.util :as ut]
+            [hara.common.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.deps :as deps]
             [std.lib.foundation :as f]))

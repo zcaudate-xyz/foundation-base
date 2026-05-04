@@ -1,8 +1,8 @@
-(ns hara.lang.base.emit-fn-op-test
-  (:require [hara.lang.base.emit-common :as common]
-            [hara.lang.base.emit-fn :as fn]
-            [hara.lang.base.emit-helper :as helper]
-            [hara.lang.base.grammar :as grammar]
+(ns hara.common.emit-fn-op-test
+  (:require [hara.common.emit-common :as common]
+            [hara.common.emit-fn :as fn]
+            [hara.common.emit-helper :as helper]
+            [hara.common.grammar :as grammar]
             [std.string.prose :as prose])
   (:use code.test))
 
@@ -13,7 +13,7 @@
 (def +grammar+
   (grammar/grammar :test +reserved+ helper/+default+))
 
-^{:refer hara.lang.base.emit-block/test-fn-emit.fn :adopt true :added "4.0"}
+^{:refer hara.common.emit-block/test-fn-emit.fn :adopt true :added "4.0"}
 (fact "emit do*"
 
   (fn/test-fn-loop '(fn [] (return (+ a 1)))
@@ -45,7 +45,7 @@
       "  return a + 1;"
       "}"))
 
-^{:refer hara.lang.base.emit-block/test-fn-emit.name :adopt true :added "4.0"}
+^{:refer hara.common.emit-block/test-fn-emit.name :adopt true :added "4.0"}
 (fact "emit do*"
 
   (fn/test-fn-loop '(fn hello [a := 1

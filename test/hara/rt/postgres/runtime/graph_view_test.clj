@@ -1,22 +1,22 @@
-(ns hara.rt.postgres.runtime.graph-view-test
-  (:require [hara.rt.postgres.base.application :as app]
-            [hara.rt.postgres.runtime.graph-view :as view]
-            [hara.rt.postgres.runtime.impl-base :as impl]
-            [hara.rt.postgres.test.scratch-v1 :as scratch]
+(ns hara.runtime.postgres.runtime.graph-view-test
+  (:require [hara.runtime.postgres.base.application :as app]
+            [hara.runtime.postgres.runtime.graph-view :as view]
+            [hara.runtime.postgres.runtime.impl-base :as impl]
+            [hara.runtime.postgres.test.scratch-v1 :as scratch]
             [hara.lang :as l]
             [std.lib.schema :as schema])
   (:use code.test))
 
 (l/script- :postgres
-  {:require [[hara.rt.postgres.test.scratch-v1 :as scratch]]
+  {:require [[hara.runtime.postgres.test.scratch-v1 :as scratch]]
    :static {:application ["scratch"]
             :seed        ["scratch"]
             :all    {:schema   ["scratch"]}}})
 
-^{:refer hara.rt.postgres.runtime.graph-view/make-view-prep :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.graph-view/make-view-prep :added "4.0"}
 (fact "preps view access")
 
-^{:refer hara.rt.postgres.runtime.graph-view/primary-key :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.graph-view/primary-key :added "4.0"}
 (fact "gets the primary key of a schema"
 
   (view/primary-key 'scratch/Task)
@@ -25,16 +25,16 @@
   (view/primary-key 'scratch/TaskCache)
   => :uuid)
 
-^{:refer hara.rt.postgres.runtime.graph-view/lead-symbol :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.graph-view/lead-symbol :added "4.0"}
 (fact "gets the lead symbol"
 
   (view/lead-symbol '[:uuid i-account-id])
   => 'i-account-id)
 
-^{:refer hara.rt.postgres.runtime.graph-view/defsel-fn :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.graph-view/defsel-fn :added "4.0"}
 (fact "the defsel generator function")
 
-^{:refer hara.rt.postgres.runtime.graph-view/defsel.pg :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.graph-view/defsel.pg :added "4.0"}
 (fact "creates a select function"
 
   ;;
@@ -50,7 +50,7 @@
 
   (:static/view @rt.postgres.runtime.graph-view-test/task-by-name)
   => '{:args [:name i-name],
-      :table hara.rt.postgres.test.scratch-v1/Task,
+      :table hara.runtime.postgres.test.scratch-v1/Task,
       :key :Task,
       :type :select,
       :scope #{:public},
@@ -60,10 +60,10 @@
       :query {"name" [:eq i-name]},
       :autos nil})
 
-^{:refer hara.rt.postgres.runtime.graph-view/defret-fn :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.graph-view/defret-fn :added "4.0"}
 (fact "the defref generator function")
 
-^{:refer hara.rt.postgres.runtime.graph-view/defret.pg :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.graph-view/defret.pg :added "4.0"}
 (fact "creates a returns function"
 
   (view/defret.pg ^{:- [scratch/Task]}
@@ -74,7 +74,7 @@
 
   (:static/view @rt.postgres.runtime.graph-view-test/task-basic)
   => '{:args [:uuid i-task-id],
-       :table hara.rt.postgres.test.scratch-v1/Task,
+       :table hara.runtime.postgres.test.scratch-v1/Task,
        :key :Task,
        :type :return,
        :scope nil,
@@ -83,18 +83,18 @@
        :query #{:*/data},
        :autos nil})
 
-^{:refer hara.rt.postgres.runtime.graph-view/view-fn :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.graph-view/view-fn :added "4.0"}
 (fact "constructs a view function"
 
   (view/view-fn '[-/task-basic]
                 '[-/task-by-name "hello"]
                 {:limit 10})
-  => '[hara.rt.postgres.test.scratch-v1/Task
+  => '[hara.runtime.postgres.test.scratch-v1/Task
        {:where {"name" [:eq "hello"]},
         :returning #{:*/data},
         :limit 10}])
 
-^{:refer hara.rt.postgres.runtime.graph-view/view :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.graph-view/view :added "4.0"}
 (fact "view macro"
 
   (macroexpand-1
@@ -103,7 +103,7 @@
      [-/task-by-name "hello"]
      {:limit 10}))
   => '[:with j-ret :as [:select (--- [#{"id"} #{"status"} #{"name"} #{"time_created"} #{"time_updated"}])
-                        :from hara.rt.postgres.test.scratch-v1/Task \\ :where {"name" [:eq "hello"]}
+                        :from hara.runtime.postgres.test.scratch-v1/Task \\ :where {"name" [:eq "hello"]}
                         \\ :limit 10]
        \\ :select (jsonb-agg j-ret) :from j-ret])
 

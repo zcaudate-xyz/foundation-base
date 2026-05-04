@@ -1,17 +1,17 @@
-(ns hara.rt.postgres.base.client-impl-test
+(ns hara.runtime.postgres.base.client-impl-test
   (:require [lib.jdbc :as jdbc]
             [lib.postgres :as base]
             [lib.postgres.connection :as conn]
-            [hara.rt.postgres.base.client :as client]
-            [hara.rt.postgres.base.client-impl :as client-impl]
-            [hara.rt.postgres.runtime.addon :as addon]
-            [hara.rt.postgres.runtime.builtin :as builtin]
-            [hara.rt.postgres.test.scratch-v1 :as scratch]
-            [hara.lang.base.util :as ut]
+            [hara.runtime.postgres.base.client :as client]
+            [hara.runtime.postgres.base.client-impl :as client-impl]
+            [hara.runtime.postgres.runtime.addon :as addon]
+            [hara.runtime.postgres.runtime.builtin :as builtin]
+            [hara.runtime.postgres.test.scratch-v1 :as scratch]
+            [hara.common.util :as ut]
             [std.lib.component :as component])
   (:use code.test))
 
-^{:refer hara.rt.postgres.base.client-impl/raw-eval-pg-return :added "4.0"}
+^{:refer hara.runtime.postgres.base.client-impl/raw-eval-pg-return :added "4.0"}
 (fact "returns a regularised result"
 
   (client-impl/raw-eval-pg-return [{:pg_jit_available true}])
@@ -20,7 +20,7 @@
   (client-impl/raw-eval-pg-return [{:result "{\"a\": 1}"}])
   => {:a 1})
 
-^{:refer hara.rt.postgres.base.client-impl/raw-eval-pg :added "4.0"
+^{:refer hara.runtime.postgres.base.client-impl/raw-eval-pg :added "4.0"
   :setup [(def -pg- (client/rt-postgres {:dbname "test-scratch"
                                          :temp :create}))]
   :teardown (component/stop -pg-)}
@@ -30,7 +30,7 @@
     (client-impl/raw-eval-pg -pg- "select 1;"))
   => [{:?column? 1}])
 
-^{:refer hara.rt.postgres.base.client-impl/init-ptr-pg :added "4.0"
+^{:refer hara.runtime.postgres.base.client-impl/init-ptr-pg :added "4.0"
   :setup [(def -pg- (client/rt-postgres {:dbname "test-scratch"
                                          :mode :dev}))]
   :teardown (component/stop -pg-)}
@@ -39,7 +39,7 @@
   (do (client-impl/init-ptr-pg -pg- scratch/addf))
   => anything)
 
-^{:refer hara.rt.postgres.base.client-impl/prepend-select-check-form :added "4.0"}
+^{:refer hara.runtime.postgres.base.client-impl/prepend-select-check-form :added "4.0"}
 (fact "checks if form needs a `SELECT` prepended"
 
   (client-impl/prepend-select-check builtin/acos
@@ -86,13 +86,13 @@
                              [[:anything]])
   => false)
 
-^{:refer hara.rt.postgres.base.client-impl/prepend-select-check :added "4.0"}
+^{:refer hara.runtime.postgres.base.client-impl/prepend-select-check :added "4.0"}
 (fact "checks if values needs a `SELECT` prepended"
 
   (client-impl/prepend-select-check builtin/cot [40])
   => true)
 
-^{:refer hara.rt.postgres.base.client-impl/invoke-ptr-pg-single :added "4.0"
+^{:refer hara.runtime.postgres.base.client-impl/invoke-ptr-pg-single :added "4.0"
   :setup [(def -pg- (client/rt-postgres {:dbname "test-scratch"}))]
   :teardown (component/stop -pg-)}
 (fact "invokes single "
@@ -102,21 +102,21 @@
                                     '[(+ 1 2)])
   => 3)
 
-^{:refer hara.rt.postgres.base.client-impl/invoke-ptr-pg-transform-let-fn :added "4.0"}
+^{:refer hara.runtime.postgres.base.client-impl/invoke-ptr-pg-transform-let-fn :added "4.0"}
 (fact "transforms the let form"
 
   (client-impl/invoke-ptr-pg-transform-let-fn
    'form)
   => '[:DO :$$ :BEGIN \\ (\| (do [:LOOP \\ (\| (do form [:exit])) \\ :END-LOOP])) \\ :END :$$ :LANGUAGE "plpgsql"])
 
-^{:refer hara.rt.postgres.base.client-impl/invoke-ptr-pg-transform-try-fn :added "4.0"}
+^{:refer hara.runtime.postgres.base.client-impl/invoke-ptr-pg-transform-try-fn :added "4.0"}
 (fact "transforms the try form"
 
   (client-impl/invoke-ptr-pg-transform-try-fn
    'form)
   => [:DO :$$ :DECLARE '(\| (do [e_code text] [e_msg text] [e_detail text] [e_hint text] [e_context text])) 'form :$$ :LANGUAGE "plpgsql"])
 
-^{:refer hara.rt.postgres.base.client-impl/invoke-ptr-pg-transform-prep :added "4.0"}
+^{:refer hara.runtime.postgres.base.client-impl/invoke-ptr-pg-transform-prep :added "4.0"}
 (fact "transforms a form"
 
   (client-impl/invoke-ptr-pg-transform-prep
@@ -127,7 +127,7 @@
    false)
   => '[(try (do [:perform (set_config "temp.out" (:text (+ a b c)) false)]) (catch others (do [:perform (set_config "temp.out" (:text 1) false)]))) true])
 
-^{:refer hara.rt.postgres.base.client-impl/invoke-ptr-pg-transform :added "4.0"}
+^{:refer hara.runtime.postgres.base.client-impl/invoke-ptr-pg-transform :added "4.0"}
 (fact "transforms a let and try form"
 
   (client-impl/invoke-ptr-pg-transform
@@ -184,7 +184,7 @@
         false]
        [[:select (current-setting "temp.out" false)] true]])
 
-^{:refer hara.rt.postgres.base.client-impl/invoke-ptr-pg-block :added "4.0"
+^{:refer hara.runtime.postgres.base.client-impl/invoke-ptr-pg-block :added "4.0"
   :setup [(def -pg- (client/rt-postgres {:dbname "test-scratch"}))]
   :teardown (component/stop -pg-)}
 (fact "invokes a block"
@@ -202,7 +202,7 @@
                                    [])
   => 6)
 
-^{:refer hara.rt.postgres.base.client-impl/invoke-ptr-pg :added "4.0"
+^{:refer hara.runtime.postgres.base.client-impl/invoke-ptr-pg :added "4.0"
   :setup [(def -pg- (client/rt-postgres {:dbname "test-scratch"}))]
   :teardown (component/stop -pg-)}
 (fact "invokes a pointer in runtime"

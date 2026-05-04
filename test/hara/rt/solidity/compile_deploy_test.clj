@@ -1,9 +1,9 @@
-(ns hara.rt.solidity.compile-deploy-test
-  (:require [hara.rt.solidity.client :as client]
-            [hara.rt.solidity.compile-common :as compile-common]
-            [hara.rt.solidity.compile-deploy :as deploy]
-            [hara.rt.solidity.compile-solc :as compile]
-            [hara.rt.solidity.env-ganache :as env]
+(ns hara.runtime.solidity.compile-deploy-test
+  (:require [hara.runtime.solidity.client :as client]
+            [hara.runtime.solidity.compile-common :as compile-common]
+            [hara.runtime.solidity.compile-deploy :as deploy]
+            [hara.runtime.solidity.compile-solc :as compile]
+            [hara.runtime.solidity.env-ganache :as env]
             [hara.lang :as l]
             [std.lib.component :as component]
             [web3.lib.example-erc20 :as example-erc20])
@@ -11,7 +11,7 @@
 
 (l/script- :solidity
   {:config  {:mode :clean}
-   :require [[hara.rt.solidity :as s]]})
+   :require [[hara.runtime.solidity :as s]]})
 
 (defn.sol ^{:- [:pure :internal]
             :static/returns [:string :memory]}
@@ -24,7 +24,7 @@
   :teardown [(l/rt:stop)
              (env/stop-ganache-server)]})
 
-^{:refer hara.rt.solidity.compile-deploy/deploy-base :added "4.0"
+^{:refer hara.runtime.solidity.compile-deploy/deploy-base :added "4.0"
   :setup    [(def +rt+
                (compile/compile-rt-prep))
              (compile/compile-rt-eval
@@ -40,7 +40,7 @@
   => (contains-in
       {"status" true, "contractAddress" string?}))
 
-^{:refer hara.rt.solidity.compile-deploy/deploy-pointer :added "4.0"
+^{:refer hara.runtime.solidity.compile-deploy/deploy-pointer :added "4.0"
   :setup    [(def +rt+
                (compile/compile-rt-prep))
              (compile/compile-rt-eval
@@ -62,7 +62,7 @@
   => (contains-in
       {"status" true, "contractAddress" string?}))
 
-^{:refer hara.rt.solidity.compile-deploy/deploy-module :added "4.0"
+^{:refer hara.runtime.solidity.compile-deploy/deploy-module :added "4.0"
   :setup    [(def +rt+
                (compile/compile-rt-prep))
              (compile/compile-rt-eval

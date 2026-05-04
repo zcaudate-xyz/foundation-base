@@ -1,8 +1,8 @@
-(ns hara.lang.base.emit-block-op-test
-  (:require [hara.lang.base.emit-block :as block]
-            [hara.lang.base.emit-common :as common]
-            [hara.lang.base.emit-helper :as helper]
-            [hara.lang.base.grammar :as grammar]
+(ns hara.common.emit-block-op-test
+  (:require [hara.common.emit-block :as block]
+            [hara.common.emit-common :as common]
+            [hara.common.emit-helper :as helper]
+            [hara.common.grammar :as grammar]
             [std.string.prose :as prose])
   (:use code.test))
 
@@ -13,7 +13,7 @@
 (def +grammar+
   (grammar/grammar :test +reserved+ helper/+default+))
 
-^{:refer hara.lang.base.emit-block/test-block-loop.do :adopt true :added "4.0"}
+^{:refer hara.common.emit-block/test-block-loop.do :adopt true :added "4.0"}
 (fact "emit do"
 
   (block/test-block-loop '(do (+ 1 2 3)
@@ -35,7 +35,7 @@
                            {})
   => "1 2 3\nhello\n4 + 5 + 6;")
 
-^{:refer hara.lang.base.emit-block/test-block-loop.do* :adopt true :added "4.0"}
+^{:refer hara.common.emit-block/test-block-loop.do* :adopt true :added "4.0"}
 (fact "emit do*"
 
   (block/test-block-loop '(do* (+ 1 2 3)
@@ -50,7 +50,7 @@
                            {})
   => "1 + 2 + 3;\n4 + 5 + 6")
 
-^{:refer hara.lang.base.emit-block/test-block-loop.for :adopt true :added "4.0"}
+^{:refer hara.common.emit-block/test-block-loop.for :adopt true :added "4.0"}
 (fact "emit for"
 
   (block/test-block-loop '(for [(:= i 0)
@@ -76,7 +76,7 @@
       "}"))
 
 
-^{:refer hara.lang.base.emit-block/test-block-loop.forange
+^{:refer hara.common.emit-block/test-block-loop.forange
   :adopt true :added "4.0"}
 (fact "emit forange"
 
@@ -85,7 +85,7 @@
                                {})
   => "(for [(var i 0) (< i 10) [(:= i (+ i 1))]] (print i))")
 
-^{:refer hara.lang.base.emit-block/test-block-loop.if :adopt true :added "4.0"}
+^{:refer hara.common.emit-block/test-block-loop.if :adopt true :added "4.0"}
 (fact "emit if"
 
   (block/test-block-loop '(if (< i 1)
@@ -109,7 +109,7 @@
        "  x = 1;"
        "}"))
 
-^{:refer hara.lang.base.emit-block/test-block-loop.when :adopt true :added "4.0"}
+^{:refer hara.common.emit-block/test-block-loop.when :adopt true :added "4.0"}
 (fact "emit if"
 
   (block/test-block-loop '(when (< i 1)
@@ -130,7 +130,7 @@
       "  return y;"
       "}"))
 
-^{:refer hara.lang.base.emit-block/test-block-loop.switch :adopt true :added "4.0"}
+^{:refer hara.common.emit-block/test-block-loop.switch :adopt true :added "4.0"}
 (fact "emit switch"
 
   (block/test-block-loop '(case hello
@@ -159,7 +159,7 @@
    "    3;"
    "}"))
 
-^{:refer hara.lang.base.emit-block/test-block-loop.block :adopt true :added "4.0"}
+^{:refer hara.common.emit-block/test-block-loop.block :adopt true :added "4.0"}
 (fact "emit block"
 
   (block/test-block-loop '(block
@@ -181,7 +181,7 @@
       "  }"
       "}"))
 
-^{:refer hara.lang.base.emit-block/test-block-loop.try :adopt true :added "4.0"}
+^{:refer hara.common.emit-block/test-block-loop.try :adopt true :added "4.0"}
 (fact "emit try"
 
   (block/test-block-loop '(try

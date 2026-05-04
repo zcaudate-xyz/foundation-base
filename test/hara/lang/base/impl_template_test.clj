@@ -1,9 +1,9 @@
-(ns hara.lang.base.impl-template-test
+(ns hara.common.emit-template-test
   (:require [hara.lang.base.book :as b]
-             [hara.lang.base.emit-helper :as helper]
-             [hara.lang.base.emit-prep-lua-test :as prep]
-             [hara.lang.base.grammar :as grammar]
-             [hara.lang.base.impl-template :refer :all]
+             [hara.common.emit-helper :as helper]
+             [hara.common.emit-prep-lua-test :as prep]
+             [hara.common.grammar :as grammar]
+             [hara.common.emit-template :refer :all]
              [hara.lang.base.impl-entry :as entry]
              [std.lib.env :as env])
   (:use code.test))
@@ -100,7 +100,7 @@
   => '[#{}
         "function template_fn(value){\n  return value;\n}"])
 
-^{:refer hara.lang.base.impl-template/create-code-state :added "4.1"}
+^{:refer hara.common.emit-template/create-code-state :added "4.1"}
 (fact "hydrates and stages a code entry for the current grammar"
   (select-keys
    (create-code-state (dissoc +template-parent-entry+
@@ -128,7 +128,7 @@
        :xtalk-profiles #{}
        :polyfill-modules #{}})
 
-^{:refer hara.lang.base.impl-template/cached-code-state :added "4.1"}
+^{:refer hara.common.emit-template/cached-code-state :added "4.1"}
 (fact "restages template entries using the per-entry cache"
   (select-keys
    (cached-code-state +template-parent-entry+
@@ -143,7 +143,7 @@
   => '{:form (defn template-fn [value] (return value))
        :deps #{}})
 
-^{:refer hara.lang.base.impl-template/cached-entry-deps :added "4.1"}
+^{:refer hara.common.emit-template/cached-entry-deps :added "4.1"}
 (fact "returns restaged code dependencies for the current language"
   (cached-entry-deps {:modules (:modules +template-helper-book+)
                       :grammar +template-parent-grammar+

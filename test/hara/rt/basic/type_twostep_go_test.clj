@@ -1,6 +1,6 @@
-(ns hara.rt.basic.type-twostep-go-test
+(ns hara.runtime.basic.type-twostep-go-test
   (:use code.test)
-  (:require [hara.rt.basic.type-common :as common]
+  (:require [hara.runtime.basic.type-common :as common]
             [hara.lang :as l]))
 
 (l/script- :go

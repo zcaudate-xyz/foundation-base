@@ -8,12 +8,12 @@
 
 ^{:refer xtgen.gen-common-spec/op-table-vars :added "4.1"}
 (fact "finds grammar op table vars"
-  (pos? (count (op-table-vars 'hara.lang.base.grammar-spec)))
+  (pos? (count (op-table-vars 'hara.common.grammar-spec)))
   => true)
 
 ^{:refer xtgen.gen-common-spec/expand-entry-targets :added "4.1"}
 (fact "expands alias-bearing grammar entries into explicit targets"
-  (->> (op-entries 'hara.lang.base.grammar-spec)
+  (->> (op-entries 'hara.common.grammar-spec)
        (filter #(= :defn (:op %)))
        first
        expand-entry-targets

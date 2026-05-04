@@ -1,9 +1,9 @@
-(ns hara.lang.seedgen.form-bench-test
+(ns hara.seedgen.form-bench-test
   (:use code.test)
   (:require [std.fs :as fs]
-            [hara.lang.seedgen.form-bench :as form-bench]))
+            [hara.seedgen.form-bench :as form-bench]))
 
-^{:refer hara.lang.seedgen.form-bench/seedgen-benchlist :added "4.1"}
+^{:refer hara.seedgen.form-bench/seedgen-benchlist :added "4.1"}
 (fact "derives bench namespaces from the seedgen root and requested runtimes"
   (let [tmp (java.io.File/createTempFile "seedgen-benchlist" ".clj")
         path (.getAbsolutePath tmp)
@@ -54,7 +54,7 @@
       (finally
         (.delete tmp)))))
 
-^{:refer hara.lang.seedgen.form-bench/seedgen-benchadd :added "4.1"}
+^{:refer hara.seedgen.form-bench/seedgen-benchadd :added "4.1"}
 (fact "creates bench files for the requested runtimes"
   (let [root   (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd"
                                                                  (make-array java.nio.file.attribute.FileAttribute 0)))
@@ -98,7 +98,7 @@
       true
       [true true true]])
 
-^{:refer hara.lang.seedgen.form-bench/seedgen-benchadd :added "4.1"}
+^{:refer hara.seedgen.form-bench/seedgen-benchadd :added "4.1"}
 (fact "preserves fact layout when generating bench files"
   (let [root    (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-format"
                                                                   (make-array java.nio.file.attribute.FileAttribute 0)))
@@ -133,7 +133,7 @@
        (fs/delete root {:recursive true}))))
   => "(ns samplebench.python.sample.format-test\n  (:use code.test)\n  (:require [hara.lang :as l]))\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n(fact \"runtime branches\"\n\n  (!.python\n    (+ 1 2 3))\n  => 6)\n")
 
-^{:refer hara.lang.seedgen.form-bench/seedgen-benchadd :added "4.1"}
+^{:refer hara.seedgen.form-bench/seedgen-benchadd :added "4.1"}
 (fact "generates standalone bench namespaces using the langadd runtime derivation rules"
   (let [root    (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-derived"
                                                                   (make-array java.nio.file.attribute.FileAttribute 0)))
@@ -167,7 +167,7 @@
         (fs/delete root {:recursive true}))))
   => "(ns samplebench.lua.sample.derived-test\n  (:use code.test)\n  (:require [hara.lang :as l]\n            [xt.lang.spec-base :as xt]))\n\n(l/script- :lua {:runtime :basic})\n\n^{:refer xt.lang.spec-base/example-f :added \"4.1\"}\n(fact \"expect can be customised\"\n\n  (!.lua\n    (xt/x:offset 10))\n  => 11)\n")
 
-^{:refer hara.lang.seedgen.form-bench/seedgen-benchadd :added "4.1"}
+^{:refer hara.seedgen.form-bench/seedgen-benchadd :added "4.1"}
 (fact "renders bench setup outcomes using unified seedgen base overrides"
   (let [root    (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-setup"
                                                                   (make-array java.nio.file.attribute.FileAttribute 0)))
@@ -200,7 +200,7 @@
         (fs/delete root {:recursive true}))))
   => "(ns samplebench.lua.sample.setup-test\n  (:use code.test)\n  (:require [hara.lang :as l]))\n\n(l/script- :lua {:runtime :basic})\n\n^{:refer xt.lang.spec-base/example-g :added \"4.1\"\n  :setup [(!.lua (setup-lua))]}\n(fact \"setup bench outcomes\"\n\n  (!.lua 1)\n  => 1)\n")
 
-^{:refer hara.lang.seedgen.form-bench/seedgen-benchadd :added "4.1"}
+^{:refer hara.seedgen.form-bench/seedgen-benchadd :added "4.1"}
 (fact "renders global fact setup and teardown in bench targets"
   (let [root    (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-global"
                                                                   (make-array java.nio.file.attribute.FileAttribute 0)))
@@ -242,7 +242,7 @@
        :updated true}
       [true true true]])
 
-^{:refer hara.lang.seedgen.form-bench/seedgen-benchremove :added "4.1"}
+^{:refer hara.seedgen.form-bench/seedgen-benchremove :added "4.1"}
 (fact "removes selected bench files while preserving other runtimes"
   (let [root   (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchremove"
                                                                  (make-array java.nio.file.attribute.FileAttribute 0)))
@@ -290,7 +290,7 @@
         false
         true])
 
-^{:refer hara.lang.seedgen.form-bench/seedgen-benchremove :added "4.1"}
+^{:refer hara.seedgen.form-bench/seedgen-benchremove :added "4.1"}
 (fact "removes explicitly requested bench runtimes even when they are not present in the seed source"
   (let [root    (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchremove-explicit"
                                                                   (make-array java.nio.file.attribute.FileAttribute 0)))

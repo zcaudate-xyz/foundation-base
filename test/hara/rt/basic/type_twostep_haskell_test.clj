@@ -1,10 +1,10 @@
-(ns hara.rt.basic.type-twostep-haskell-test
+(ns hara.runtime.basic.type-twostep-haskell-test
   (:use code.test)
-  (:require [hara.rt.basic.impl-annex.process-haskell]
-            [hara.rt.basic.type-common :as common]
+  (:require [hara.runtime.basic.impl-annex.process-haskell]
+            [hara.runtime.basic.type-common :as common]
             [hara.lang :as l]))
 
-(do hara.rt.basic.impl-annex.process-haskell/+haskell-twostep+)
+(do hara.runtime.basic.impl-annex.process-haskell/+haskell-twostep+)
 
 (l/script- :haskell
   {:runtime :twostep})

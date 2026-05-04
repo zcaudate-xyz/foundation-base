@@ -5,7 +5,7 @@
              [hara.lang.base.library :as lib]
              [hara.lang.base.library-snapshot :as snap]
              [hara.lang.base.runtime :as rt]
-            [hara.lang.base.util :as ut]
+            [hara.common.util :as ut]
             [std.lib.atom :as atom]
             [std.lib.collection :as collection]
             [std.lib.component :as component]

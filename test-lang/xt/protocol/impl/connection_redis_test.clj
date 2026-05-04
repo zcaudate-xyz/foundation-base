@@ -1,6 +1,6 @@
 (ns xt.protocol.impl.redis-connection-test
   (:use code.test)
-  (:require [hara.rt.basic.type-common  :as common]
+  (:require [hara.runtime.basic.type-common  :as common]
             [hara.lang              :as l]
             [xt.lang.common-notify :as notify]))
 

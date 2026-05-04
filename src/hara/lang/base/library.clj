@@ -6,7 +6,7 @@
             [hara.lang.base.book-module :as m]
             [hara.lang.base.impl-entry :as entry]
             [hara.lang.base.library-snapshot :as snap]
-            [hara.lang.base.util :as ut]
+            [hara.common.util :as ut]
             [std.lib.atom :as atom]
             [std.lib.collection :as collection]
             [std.lib.component :as component]

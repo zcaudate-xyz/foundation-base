@@ -2,7 +2,7 @@
   (:require [clojure.string]
             [hara.lang.base.impl :as impl]
             [hara.lang.base.library :as lib]
-            [hara.lang.base.util :as ut]
+            [hara.common.util :as ut]
             [hara.lang.base.workspace :as workspace]
             [std.lib.collection :as collection]
             [std.lib.env :as env]
@@ -268,9 +268,9 @@
           :main    {:fn  #'lib-module-purge-fn}}])
 
 (comment (comment
-           (lib-module-purge '[hara.rt.postgres])
-           (do (./reset '[hara.rt.postgres])
-               (require '[hara.rt.postgres])
+           (lib-module-purge '[hara.runtime.postgres])
+           (do (./reset '[hara.runtime.postgres])
+               (require '[hara.runtime.postgres])
                (lib-overview '[:postgres]))
            (lib-module-entries '[statsdb])
            (lib-module-purge '[statsdb])

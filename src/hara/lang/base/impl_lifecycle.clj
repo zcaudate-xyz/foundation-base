@@ -4,11 +4,11 @@
             [hara.lang.base.book :as book]
             [hara.lang.base.book-module :as module]
             [hara.lang.base.compile-links :as links]
-            [hara.lang.base.emit :as emit]
+            [hara.common.emit :as emit]
             [hara.lang.base.impl :as impl]
             [hara.lang.base.impl-deps :as deps]
             [hara.lang.base.impl-entry :as entry]
-            [hara.lang.base.util :as ut]
+            [hara.common.util :as ut]
             [std.lib.env :as env]
             [std.lib.foundation :as f]))
 

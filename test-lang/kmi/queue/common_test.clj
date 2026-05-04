@@ -1,5 +1,5 @@
 (ns kmi.queue.common-test
-  (:require [hara.rt.redis]
+  (:require [hara.runtime.redis]
             [hara.lang :as l]
             [std.lib.network :as network])
   (:use code.test))

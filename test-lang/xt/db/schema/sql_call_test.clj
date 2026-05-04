@@ -1,13 +1,13 @@
 (ns xt.db.schema.sql-call-test
   (:use code.test)
-  (:require [hara.rt.postgres :as pg]
+  (:require [hara.runtime.postgres :as pg]
             [hara.lang :as l]
             [xt.lang.common-notify :as notify]))
 
 (l/script- :postgres
   {:runtime :jdbc.client
    :config {:dbname "test-scratch"}
-   :require [[hara.rt.postgres.test.scratch-v1 :as scratch]]})
+   :require [[hara.runtime.postgres.test.scratch-v1 :as scratch]]})
 
 ^{:xtalk/template true}
 (l/script- :js

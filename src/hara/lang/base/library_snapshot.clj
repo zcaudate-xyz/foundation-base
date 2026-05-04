@@ -1,7 +1,7 @@
 (ns hara.lang.base.library-snapshot
   (:require [hara.lang.base.book :as book]
             [hara.lang.base.impl-entry :as entry]
-            [hara.lang.base.util :as ut]
+            [hara.common.util :as ut]
             [std.lib.atom :as atom]
             [std.lib.collection :as collection]
             [std.lib.env :as env]

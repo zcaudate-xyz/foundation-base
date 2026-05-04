@@ -1,6 +1,6 @@
-(ns hara.rt.postgres.base.grammar.form-deftype-composite-test
-  (:require [hara.rt.postgres.base.grammar.common :as common]
-            [hara.rt.postgres.base.grammar.form-deftype :as sut]
+(ns hara.runtime.postgres.base.grammar.form-deftype-composite-test
+  (:require [hara.runtime.postgres.base.grammar.common :as common]
+            [hara.runtime.postgres.base.grammar.form-deftype :as sut]
             [hara.lang.base.book :as book]
             [hara.lang.base.library-snapshot :as snap])
   (:use code.test))

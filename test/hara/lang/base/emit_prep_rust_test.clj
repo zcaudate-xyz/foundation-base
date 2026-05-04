@@ -1,10 +1,10 @@
-(ns hara.lang.base.emit-prep-rust-test
+(ns hara.common.emit-prep-rust-test
   (:require [hara.lang.base.book :as b]
-            [hara.lang.base.emit-common :as common]
-            [hara.lang.base.emit-helper :as helper]
-            [hara.lang.base.grammar :as grammar]
-            [hara.lang.base.util :as ut]
-            [hara.lang.model-annex.spec-rust :as rust]
+            [hara.common.emit-common :as common]
+            [hara.common.emit-helper :as helper]
+            [hara.common.grammar :as grammar]
+            [hara.common.util :as ut]
+            [hara.model.annex.spec-rust :as rust]
             [std.lib.env :as env])
   (:use code.test))
 

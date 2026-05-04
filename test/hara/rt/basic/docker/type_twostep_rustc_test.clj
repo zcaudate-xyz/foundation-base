@@ -1,8 +1,8 @@
-(ns hara.rt.basic.docker.type-twostep-rustc-test
+(ns hara.runtime.basic.docker.type-twostep-rustc-test
   (:use code.test)
-  (:require [hara.rt.basic.impl-annex.process-rust]
-            [hara.rt.basic.type-common :as common]
-            [hara.rt.basic.type-twostep :as twostep]
+  (:require [hara.runtime.basic.impl-annex.process-rust]
+            [hara.runtime.basic.type-common :as common]
+            [hara.runtime.basic.type-twostep :as twostep]
             [hara.lang :as l]))
 
 (l/script- :rust

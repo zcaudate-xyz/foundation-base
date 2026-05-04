@@ -1,0 +1,163 @@
+(ns hara.model.annex.spec-erlang
+  (:require [clojure.string]
+            [hara.lang.base.book :as book]
+            [hara.common.emit :as emit]
+            [hara.common.emit-common :as common]
+            [hara.common.emit-preprocess :as preprocess] [hara.common.preprocess-base :as preprocess-base]
+            [hara.common.grammar :as grammar]
+            [hara.lang.base.script :as script]
+            [hara.common.util :as ut]
+            [hara.model.spec-xtalk]
+            [hara.model.annex.spec-xtalk.fn-erlang :as fn]
+            [std.lib.collection :as collection]
+            [std.lib.walk :as walk]))
+
+;;
+;; UTILS
+;;
+
+(defn to-erlang-var [sym]
+  (if (symbol? sym)
+    (let [s (name sym)]
+      (if (re-find #"^[a-z]" s)
+        (symbol (str (clojure.string/upper-case (subs s 0 1)) (subs s 1)))
+        sym))
+    sym))
+
+(defn capitalize-locals [form locals]
+  (if (empty? locals)
+    form
+    (walk/postwalk (fn [x]
+                  (if (and (symbol? x) (locals x))
+                    (to-erlang-var x)
+                    x))
+                form)))
+
+(defn emit-ast [form]
+  (common/emit-common form
+                      preprocess-base/*macro-grammar*
+                      preprocess-base/*macro-opts*))
+
+(defn wrap-raw [s]
+  (list 'erl-raw s))
+
+;;
+;; LANG
+;;
+
+(defn tf-erlang-defn
+  "transforms defn to erlang function definition"
+  [[_ sym args & body]]
+  (let [name (ut/sym-default-str sym)
+        locals (set (filter symbol? args))
+        erl-args (map to-erlang-var args)
+        erl-body (map #(capitalize-locals % locals) body)]
+    (list 'defn- sym (vec erl-args) erl-body)))
+
+(defn emit-erlang-defn
+  "emits erlang function"
+  [[_ sym params body]]
+  (wrap-raw
+   (str (ut/sym-default-str sym)
+        "("
+        (clojure.string/join ", " (map emit-ast params))
+        ") -> "
+        (clojure.string/join ", " (map emit-ast body))
+        ".")))
+
+(defn tf-erlang-case
+  "transforms case"
+  [[_ expr & clauses]]
+  (let [pairs (partition 2 clauses)]
+    (list 'case* expr pairs)))
+
+(defn emit-erlang-case
+  "emits erlang case"
+  [[_ expr clauses]]
+  (wrap-raw
+   (str "case " (emit-ast expr) " of "
+        (clojure.string/join "; "
+                  (map (fn [[pat body]]
+                         (str (emit-ast pat) " -> " (emit-ast body)))
+                       clauses))
+        " end")))
+
+(defn tf-erlang-tuple
+  "transforms tuple"
+  [[_ & elements]]
+  (cons 'tuple* elements))
+
+(defn emit-erlang-tuple
+  "emits erlang tuple"
+  [[_ & elements]]
+  (wrap-raw
+   (str "{" (clojure.string/join ", " (map emit-ast elements)) "}")))
+
+(defn emit-erlang-var
+  "emits var assignment"
+  [[_ sym _ val]]
+  (wrap-raw
+   (str (emit-ast (to-erlang-var sym)) " = " (emit-ast val))))
+
+(def +features+
+  (-> (grammar/build :include [:builtin :math :compare :logic :control-base])
+      (merge (grammar/build-xtalk))
+      (grammar/build:extend
+       {:erl-raw {:op :erl-raw :symbol #{'erl-raw} :type :token}
+        :defn   {:macro #'tf-erlang-defn :emit :macro :symbol #{'defn}}
+        :case   {:macro #'tf-erlang-case :emit :macro :symbol #{'case}}
+        :tuple  {:macro #'tf-erlang-tuple :emit :macro :symbol #{'tuple}}
+        :var    {:symbol #{'var} :emit :macro :macro #'emit-erlang-var}
+        :eq-exact {:raw "=:="}
+        :defn- {:op :defn- :symbol #{'defn-} :emit :macro :macro #'emit-erlang-defn}
+        :case* {:op :case* :symbol #{'case*} :emit :macro :macro #'emit-erlang-case}
+        :tuple* {:op :tuple* :symbol #{'tuple*} :emit :macro :macro #'emit-erlang-tuple}
+        :send  {:op :send :symbol #{'send '!} :raw "!" :emit :infix}})
+      (grammar/build:override fn/+erlang+)
+      (grammar/build:override
+       {:and    {:raw "and"}
+        :or     {:raw "or"}
+        :not    {:raw "not"}
+        :eq     {:raw "=="}
+        :neq    {:raw "/="}
+        :mod    {:raw "rem"}})))
+
+(defn erlang-map-key
+  "custom erlang map key"
+  [key grammar mopts]
+  (cond (keyword? key) (name key)
+        (string? key) (str "\"" key "\"")
+        :else (common/emit-common key grammar mopts)))
+
+(def +template+
+  (->> {:default {:comment   {:prefix "%"}
+                  :common    {:statement "" :apply "(" :sep ", "}
+                  :block     {:body {:start "" :end "" :sep ", "}}}
+        :token   {:nil       {:as "undefined"}
+                  :boolean   {:as identity}
+                  :string    {:quote :double}
+                  :symbol    {}
+                  :erl-raw   {:as second}}
+        :data    {:vector    {:start "[" :end "]" :space ""}
+                  :map       {:start "#{" :end "}" :space "" :assign " => " :key-fn #'erlang-map-key}
+                  :map-entry {:start "" :end "" :space "" :assign " => " :key-fn #'erlang-map-key}
+                  :set       {:start "#{" :end "}" :space "" :assign " => "}}
+        :function {:defn     {:raw ""}}}
+       (collection/merge-nested (emit/default-grammar))))
+
+(def +grammar+
+  (grammar/grammar :erlang
+    (grammar/to-reserved +features+)
+    +template+))
+
+(def +meta+
+  (book/book-meta {}))
+
+(def +book+
+  (book/book {:lang :erlang
+              :parent :xtalk
+              :meta +meta+
+              :grammar +grammar+}))
+
+(def +init+
+  (script/install +book+))

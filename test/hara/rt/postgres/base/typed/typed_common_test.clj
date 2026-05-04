@@ -1,88 +1,88 @@
-(ns hara.rt.postgres.base.typed.typed-common-test
+(ns hara.runtime.postgres.base.typed.typed-common-test
   (:use code.test)
-  (:require [hara.rt.postgres.base.typed.typed-common :as types]))
+  (:require [hara.runtime.postgres.base.typed.typed-common :as types]))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/normalize-key :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/normalize-key :added "0.1"}
 (fact "normalize-key converts keys to consistent format"
   (types/normalize-key :id) => "id"
   (types/normalize-key "name") => "name"
   (types/normalize-key 'handle) => "handle")
 
-^{:refer hara.rt.postgres.base.typed.typed-common/emitted-key :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/emitted-key :added "4.1"}
 (fact "emitted-key preserves strings and normalizes structured keys"
   (types/emitted-key :foo-bar) => "foo_bar"
   (types/emitted-key 'foo-bar) => "foo_bar"
   (types/emitted-key "literal-key") => "literal-key"
   (types/emitted-key 42) => "42")
 
-^{:refer hara.rt.postgres.base.typed.typed-common/typescript-key :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/typescript-key :added "4.1"}
 (fact "typescript-key quotes invalid property names and preserves identifiers"
   (types/typescript-key :foo-bar) => "foo_bar"
   (types/typescript-key '_value) => "_value"
   (types/typescript-key "two words") => "\"two words\"")
 
-^{:refer hara.rt.postgres.base.typed.typed-common/type-ref? :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/type-ref? :added "0.1"}
 (fact "type-ref? returns true for TypeRef records"
   (types/type-ref? (types/make-type-ref :primitive nil :uuid)) => true
   (types/type-ref? :uuid) => false
   (types/type-ref? nil) => false
   (types/type-ref? {}) => false)
 
-^{:refer hara.rt.postgres.base.typed.typed-common/table-def? :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/table-def? :added "0.1"}
 (fact "table-def? returns true for TableDef records"
   (types/table-def? (types/make-table-def :core "User" [] :id)) => true
   (types/table-def? {}) => false
   (types/table-def? nil) => false)
 
-^{:refer hara.rt.postgres.base.typed.typed-common/enum-def? :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/enum-def? :added "0.1"}
 (fact "enum-def? returns true for EnumDef records"
   (types/enum-def? (types/make-enum-def :test "Status" #{:active} nil)) => true
   (types/enum-def? {}) => false
   (types/enum-def? nil) => false)
 
-^{:refer hara.rt.postgres.base.typed.typed-common/fn-def? :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/fn-def? :added "0.1"}
 (fact "fn-def? returns true for FnDef records"
   (types/fn-def? (types/make-fn-def :core "get-user" [] :jsonb {} nil)) => true
   (types/fn-def? {}) => false
   (types/fn-def? nil) => false)
 
-^{:refer hara.rt.postgres.base.typed.typed-common/jsonb-shape? :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/jsonb-shape? :added "0.1"}
 (fact "jsonb-shape? returns true for JsonbShape records"
   (types/jsonb-shape? (types/make-jsonb-shape {"id" :uuid})) => true
   (types/jsonb-shape? {}) => false
   (types/jsonb-shape? nil) => false)
 
-^{:refer hara.rt.postgres.base.typed.typed-common/jsonb-path? :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/jsonb-path? :added "4.1"}
 (fact "jsonb-path? recognizes JsonbPath records"
   (types/jsonb-path? (types/make-jsonb-path [:profile] 'm)) => true
   (types/jsonb-path? {:segments [:profile] :root-var 'm}) => false)
 
-^{:refer hara.rt.postgres.base.typed.typed-common/jsonb-merge? :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/jsonb-merge? :added "0.1"}
 (fact "jsonb-merge? returns true for JsonbMerge records"
   (let [s1 (types/make-jsonb-shape {"id" :uuid})
         s2 (types/make-jsonb-shape {"name" :text})]
     (types/jsonb-merge? (types/make-jsonb-merge s1 s2)) => true
     (types/jsonb-merge? s1) => false))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/jsonb-array? :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/jsonb-array? :added "0.1"}
 (fact "jsonb-array? returns true for JsonbArray records"
   (types/jsonb-array? (types/make-jsonb-array :uuid)) => true
   (types/jsonb-array? []) => false
   (types/jsonb-array? nil) => false)
 
-^{:refer hara.rt.postgres.base.typed.typed-common/type-union? :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/type-union? :added "0.1"}
 (fact "type-union? returns true for TypeUnion records"
   (types/type-union? (types/make-type-union [:uuid :text])) => true
   (types/type-union? #{:uuid :text}) => false
   (types/type-union? nil) => false)
 
-^{:refer hara.rt.postgres.base.typed.typed-common/binding-context? :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/binding-context? :added "0.1"}
 (fact "binding-context? returns true for BindingContext records"
   (types/binding-context? (types/make-context)) => true
   (types/binding-context? {:bindings {}}) => false
   (types/binding-context? nil) => false)
 
-^{:refer hara.rt.postgres.base.typed.typed-common/primitive? :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/primitive? :added "0.1"}
 (fact "primitive? returns true for primitive type keywords"
   (types/primitive? :uuid) => true
   (types/primitive? :text) => true
@@ -92,25 +92,25 @@
   (types/primitive? :unknown) => false
   (types/primitive? nil) => false)
 
-^{:refer hara.rt.postgres.base.typed.typed-common/table? :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/table? :added "0.1"}
 (fact "table? returns true for table type refs"
   (types/table? (types/make-type-ref :table :core "User")) => true
   (types/table? (types/make-type-ref :enum :core "Status")) => false
   (types/table? :table) => false)
 
-^{:refer hara.rt.postgres.base.typed.typed-common/enum? :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/enum? :added "0.1"}
 (fact "enum? returns true for enum type refs"
   (types/enum? (types/make-type-ref :enum :core "Status")) => true
   (types/enum? (types/make-type-ref :table :core "User")) => false
   (types/enum? :enum) => false)
 
-^{:refer hara.rt.postgres.base.typed.typed-common/ref? :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/ref? :added "0.1"}
 (fact "ref? returns true for ref type refs"
   (types/ref? (types/make-type-ref :ref nil "User")) => true
   (types/ref? (types/make-type-ref :table :core "User")) => false
   (types/ref? :ref) => false)
 
-^{:refer hara.rt.postgres.base.typed.typed-common/valid-key? :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/valid-key? :added "4.1"}
 (fact "valid-key? checks if a key is a valid namespaced symbol"
 
   ;; Valid namespaced symbol - returns truthy (seq of name chars)
@@ -136,7 +136,7 @@
   ;; Empty namespace - invalid
   (types/valid-key? (symbol "" "name")) => false)
 
-^{:refer hara.rt.postgres.base.typed.typed-common/register-type! :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/register-type! :added "0.1"}
 (fact "register-type! validates that keys are namespaced symbols"
   ;; Valid namespaced symbols should work
   (types/register-type! 'test/ValidType (types/make-type-ref :primitive nil :test))
@@ -161,33 +161,33 @@
   ;; Cleanup
   (types/clear-registry!))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/get-type :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/get-type :added "0.1"}
 (fact "get-type returns nil for non-existent types"
   (types/clear-registry!)
   (types/get-type 'NonExistentType) => nil)
 
-^{:refer hara.rt.postgres.base.typed.typed-common/clear-registry! :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/clear-registry! :added "0.1"}
 (fact "clear-registry! empties the type registry"
   (types/clear-registry!)
   (types/register-type! 'test/TestType (types/make-type-ref :primitive nil :test))
   (types/clear-registry!)
   (types/get-type 'test/TestType) => nil)
 
-^{:refer hara.rt.postgres.base.typed.typed-common/type-key :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/type-key :added "4.1"}
 (fact "type-key returns stable symbol keys for typed defs"
   (types/type-key (types/make-table-def "test.ns" "User" [] :id))
   => 'test.ns/User
   (types/type-key (types/make-enum-def nil "Status" #{:active} nil))
   => 'Status)
 
-^{:refer hara.rt.postgres.base.typed.typed-common/empty-typed :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/empty-typed :added "4.1"}
 (fact "empty-typed returns the canonical empty payload"
   (types/empty-typed)
   => {:tables {}
       :enums {}
       :functions {}})
 
-^{:refer hara.rt.postgres.base.typed.typed-common/add-typed :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/add-typed :added "4.1"}
 (fact "add-typed stores table, enum, and function defs by stable key"
   (let [table (types/make-table-def "demo" "User" [] :id)
         enum (types/make-enum-def "demo" "Status" #{:active} nil)
@@ -196,7 +196,7 @@
     (keys (:enums (types/add-typed (types/empty-typed) enum))) => ['demo/Status]
     (keys (:functions (types/add-typed (types/empty-typed) fn-def))) => ['demo/get-user]))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/analysis->typed :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/analysis->typed :added "4.1"}
 (fact "analysis->typed normalizes analysis vectors into keyed maps"
   (let [payload (types/analysis->typed
                  {:tables [(types/make-table-def "test.ns" "User" [] :id)]
@@ -206,7 +206,7 @@
     (keys (:enums payload)) => '(test.ns/Status)
     (keys (:functions payload)) => '(test.ns/create-user)))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/merge-typed :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/merge-typed :added "4.1"}
 (fact "merge-typed merges app payload fragments by category"
   (types/merge-typed {:tables {'a/Table :table} :enums {} :functions {}}
                      {:tables {} :enums {'a/Status :enum} :functions {'a/do-work :fn}})
@@ -214,7 +214,7 @@
       :enums {'a/Status :enum}
       :functions {'a/do-work :fn}})
 
-^{:refer hara.rt.postgres.base.typed.typed-common/make-type-ref :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/make-type-ref :added "0.1"}
 (fact "make-type-ref creates TypeRef with various arities"
   ;; arity 1 - just kind
   (let [t1 (types/make-type-ref :primitive)]
@@ -231,7 +231,7 @@
     (:kind t3) => :enum
     (:constraints t3) => {:values #{"active" "inactive"}}))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/make-enum-def :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/make-enum-def :added "0.1"}
 (fact "make-enum-def creates EnumDef with set of values"
   (let [e (types/make-enum-def :test "Status" #{:active :inactive} nil)]
     (:ns e) => :test
@@ -241,7 +241,7 @@
   (let [e (types/make-enum-def :test "Type" [:a :b :c] nil)]
     (:values e) => #{:a :b :c}))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/make-column-def :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/make-column-def :added "0.1"}
 (fact "make-column-def creates ColumnDef with various arities"
   ;; arity 2 - name and type
   (let [c (types/make-column-def :handle :citext)]
@@ -254,7 +254,7 @@
     (:required c) => true
     (:unique c) => true))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/make-table-def :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/make-table-def :added "0.1"}
 (fact "make-table-def creates TableDef with various arities"
   ;; arity 4 - basic table
   (let [columns [(types/make-column-def :id :uuid)
@@ -269,7 +269,7 @@
     (:addons t) => {:audit true}
     (:entity-meta t) => {:entity :user}))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/make-fn-def :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/make-fn-def :added "0.1"}
 (fact "make-fn-def creates FnDef"
   (let [f (types/make-fn-def :core "get-user" [:uuid :jsonb] :jsonb {:async true} nil)]
     (:ns f) => :core
@@ -278,7 +278,7 @@
     (:output f) => :jsonb
     (:body-meta f) => {:async true}))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/make-jsonb-shape :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/make-jsonb-shape :added "0.1"}
 (fact "make-jsonb-shape creates shape with unified fields and various arities"
   ;; arity 1 - fields only
   (let [s (types/make-jsonb-shape {"id" :uuid})]
@@ -296,7 +296,7 @@
   (let [s (types/make-jsonb-shape {"id" :uuid} :User :high true)]
     (:nullable? s) => true))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/make-jsonb-merge :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/make-jsonb-merge :added "0.1"}
 (fact "make-jsonb-merge creates JsonbMerge from two shapes"
   (let [s1 (types/make-jsonb-shape {"id" :uuid} :User)
         s2 (types/make-jsonb-shape {"name" :text} :Profile)
@@ -304,14 +304,14 @@
     (:left m) => s1
     (:right m) => s2))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/make-jsonb-array :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/make-jsonb-array :added "0.1"}
 (fact "make-jsonb-array creates JsonbArray"
   (let [a (types/make-jsonb-array :uuid)]
     (:element-type a) => :uuid)
   (let [a (types/make-jsonb-array (types/make-type-ref :table nil "User"))]
     (:name (:element-type a)) => "User"))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/make-type-union :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/make-type-union :added "0.1"}
 (fact "make-type-union creates TypeUnion with deduplicated types"
   (let [u (types/make-type-union [:uuid :text])]
     (set (:types u)) => #{:uuid :text})
@@ -319,21 +319,21 @@
   (let [u (types/make-type-union [:uuid :uuid :text])]
     (count (:types u)) => 2))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/make-jsonb-path :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/make-jsonb-path :added "0.1"}
 (fact "make-jsonb-path creates path with various arities"
   (types/make-jsonb-path ["data" "items"])
   => (contains {:segments ["data" "items"] :root-var nil})
   (types/make-jsonb-path ["data" "items"] 'input)
   => (contains {:segments ["data" "items"] :root-var 'input}))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/make-jsonb-inference :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/make-jsonb-inference :added "0.1"}
 (fact "make-jsonb-inference creates JsonbInference"
   (let [i (types/make-jsonb-inference {:fields {}} {:x :uuid} #{:merge})]
     (:return-shape i) => {:fields {}}
     (:intermediate-vars i) => {:x :uuid}
     (:operations-detected i) => #{:merge}))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/make-context :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/make-context :added "0.1"}
 (fact "make-context creates BindingContext with various arities"
   ;; arity 0
   (types/make-context) => (contains {:bindings {} :jsonb-shapes {} :jsonb-paths {} :parent nil})
@@ -345,18 +345,18 @@
   (types/make-context {:x :uuid} {:x {:fields {}}} {:x {:segments ["x"]}})
   => (contains {:bindings {:x :uuid} :jsonb-shapes {:x {:fields {}}} :jsonb-paths {:x {:segments ["x"]}}}))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/push-scope :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/push-scope :added "0.1"}
 (fact "push-scope creates a new child context"
   (let [ctx (types/make-context {:x :uuid})]
     (types/push-scope ctx) => (contains {:parent ctx :bindings {}})))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/pop-scope :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/pop-scope :added "0.1"}
 (fact "pop-scope returns the parent context"
   (let [parent (types/make-context {:x :uuid})
         child (types/push-scope parent)]
     (types/pop-scope child) => parent))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/add-binding :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/add-binding :added "0.1"}
 (fact "add-binding adds a variable binding to the context"
   (let [ctx (types/make-context)]
     (types/add-binding ctx 'user :uuid))
@@ -365,7 +365,7 @@
     (types/add-binding ctx 'user :uuid :shape (types/make-jsonb-shape {"id" :uuid})))
   => (contains-in {:bindings {'user :uuid} :jsonb-shapes {'user {:fields {"id" :uuid}}}}))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/lookup-binding :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/lookup-binding :added "0.1"}
 (fact "lookup-binding finds binding in context or parents"
   (let [ctx (types/add-binding (types/make-context) 'user :uuid)]
     (types/lookup-binding ctx 'user) => :uuid)
@@ -375,7 +375,7 @@
   (let [ctx (types/make-context)]
     (types/lookup-binding ctx 'missing) => nil))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/get-var-shape :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/get-var-shape :added "0.1"}
 (fact "get-var-shape finds shape in context or parents"
   (let [shape (types/make-jsonb-shape {"id" :uuid})
         ctx (types/set-var-shape (types/make-context) 'user shape)]
@@ -385,13 +385,13 @@
         child (types/push-scope parent)]
     (types/get-var-shape child 'user) => shape))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/set-var-shape :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/set-var-shape :added "0.1"}
 (fact "set-var-shape sets shape for variable"
   (let [shape (types/make-jsonb-shape {"id" :uuid})
         ctx (types/set-var-shape (types/make-context) 'user shape)]
     (get-in ctx [:jsonb-shapes 'user]) => shape))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/get-var-path :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/get-var-path :added "4.1"}
 (fact "get-var-path resolves paths from the current scope or parent scopes"
   (let [path   (types/make-jsonb-path [:profile :name] 'm)
         parent (types/set-var-path (types/make-context) 'v-name path)
@@ -399,17 +399,17 @@
     (types/get-var-path child 'v-name) => path
     (types/get-var-path child 'missing) => nil))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/set-var-path :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/set-var-path :added "4.1"}
 (fact "set-var-path stores a jsonb path for a variable"
   (let [path (types/make-jsonb-path [:profile] 'm)
         ctx  (types/set-var-path (types/make-context) 'o-profile path)]
     (get-in ctx [:jsonb-paths 'o-profile]) => path))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/empty-jsonb-shape :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/empty-jsonb-shape :added "0.1"}
 (fact "empty-jsonb-shape creates empty shape with low confidence"
   (types/empty-jsonb-shape) => (contains {:fields {} :source-table nil :confidence :low :nullable? false}))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/shape-at-path :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/shape-at-path :added "4.1"}
 (fact "shape-at-path resolves nested shapes and bare jsonb leaves"
   (let [profile-shape (types/make-jsonb-shape {:name {:type :text}})
         root-shape    (types/make-jsonb-shape {:profile {:type :jsonb
@@ -420,7 +420,7 @@
     (types/shape-at-path root-shape [:detail]) => (types/empty-jsonb-shape)
     (types/shape-at-path root-shape [:missing]) => nil))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/add-key :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/add-key :added "0.1"}
 (fact "add-key adds a key with its type to shape"
   (let [shape (types/make-jsonb-shape {"id" :uuid})]
     (types/add-key shape "name" :text))
@@ -429,19 +429,19 @@
     (types/add-key shape "status" :boolean))
   => (contains {:fields {"status" :boolean}}))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/get-key-type :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/get-key-type :added "0.1"}
 (fact "get-key-type returns type for existing key or nil"
   (let [shape (types/make-jsonb-shape {"id" :uuid "name" :text})]
     (types/get-key-type shape "id") => :uuid
     (types/get-key-type shape "missing") => nil))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/has-key? :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/has-key? :added "0.1"}
 (fact "has-key? checks if key exists in shape"
   (let [shape (types/make-jsonb-shape {"id" :uuid "name" :text})]
     (types/has-key? shape "id") => true
     (types/has-key? shape "missing") => false))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/merge-shapes :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/merge-shapes :added "0.1"}
 (fact "merge-shapes combines two shapes and takes minimum confidence"
   ;; basic merge
   (let [shape1 (types/make-jsonb-shape {"id" :uuid} :source1 :high)
@@ -460,7 +460,7 @@
     (types/merge-shapes nil shape1) => shape1
     (types/merge-shapes nil nil) => nil))
 
-^{:refer hara.rt.postgres.base.typed.typed-common/flatten-shape :added "0.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-common/flatten-shape :added "0.1"}
 (fact "flatten-shape merges JsonbShape and JsonbMerge into a single map"
   ;; simple shape
   (let [s (types/make-jsonb-shape {"id" :uuid} :User)]

@@ -1,6 +1,6 @@
-(ns hara.lang.model.spec-python-optional-test
+(ns hara.model.spec-python-optional-test
   (:require [hara.lang :as l]
-            [hara.lang.base.emit-preprocess :as preprocess] [hara.lang.base.preprocess-base :as preprocess-base])
+            [hara.common.emit-preprocess :as preprocess] [hara.common.preprocess-base :as preprocess-base])
   (:use code.test))
 
 (fact "python emission inherits module context for optional xtalk args"

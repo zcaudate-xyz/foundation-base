@@ -1,10 +1,10 @@
-(ns hara.lang.base.preprocess-staging-test
+(ns hara.common.preprocess-staging-test
   (:use code.test)
-  (:require [hara.lang.base.emit-helper :as helper]
-            [hara.lang.base.emit-prep-lua-test :as prep]
-            [hara.lang.base.grammar :as grammar]
-            [hara.lang.base.preprocess-staging :refer :all]
-            [hara.lang.model.spec-js :as js]))
+  (:require [hara.common.emit-helper :as helper]
+            [hara.common.emit-prep-lua-test :as prep]
+            [hara.common.grammar :as grammar]
+            [hara.common.preprocess-staging :refer :all]
+            [hara.model.spec-js :as js]))
 
 (def +reserved+
   (-> (grammar/build)
@@ -13,7 +13,7 @@
 (def +grammar+
   (grammar/grammar :test +reserved+ helper/+default+))
 
-^{:refer hara.lang.base.preprocess-staging/to-staging-form :added "4.1"}
+^{:refer hara.common.preprocess-staging/to-staging-form :added "4.1"}
 (fact "different staging forms"
   (to-staging-form '(!:template (+ 1 2 3))
                    nil
@@ -66,21 +66,21 @@
     (catch Throwable t
       (select-keys (ex-data t)
                    [:probe
-                    :hara.lang/phase
-                    :hara.lang/subsystem
-                    :hara.lang/lang
-                    :hara.lang/line
-                    :hara.lang/module
-                    :hara.lang/symbol
-                    :hara.lang/form])))
+                    :hara/phase
+                    :hara/subsystem
+                    :hara/lang
+                    :hara/line
+                    :hara/module
+                    :hara/symbol
+                    :hara/form])))
   => '{:probe true
-        :hara.lang/phase :staging/reserved-template
-        :hara.lang/subsystem :hara.lang/reserved-template
-        :hara.lang/lang :lua
-        :hara.lang/line 21
-        :hara.lang/module L.core
-        :hara.lang/symbol hello
-        :hara.lang/form (hello 1 2 3)})
+        :hara/phase :staging/reserved-template
+        :hara/subsystem :hara/reserved-template
+        :hara/lang :lua
+        :hara/line 21
+        :hara/module L.core
+        :hara/symbol hello
+        :hara/form (hello 1 2 3)})
 
 (fact "reserved template heads expand before value-position fragments"
   (to-staging-form '(-> xs (u/filter odd?))
@@ -97,7 +97,7 @@
                    identity)
   => '(u/filter xs odd?))
 
-^{:refer hara.lang.base.preprocess-staging/to-staging :added "4.1"}
+^{:refer hara.common.preprocess-staging/to-staging :added "4.1"}
 (fact "converts the stage"
   (to-staging '(u/add (u/identity-fn 1) 2)
               nil
@@ -307,7 +307,7 @@
                      (x:arr-second e))
           (return obj)))
 
-^{:refer hara.lang.base.preprocess-staging/to-resolve :added "4.1"}
+^{:refer hara.common.preprocess-staging/to-resolve :added "4.1"}
 (fact "resolves only the code symbols (no macroexpansion)"
   (to-resolve '(u/add (u/identity-fn 1) 2)
               nil

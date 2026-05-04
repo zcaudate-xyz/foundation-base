@@ -1,14 +1,14 @@
 (ns hara.lang.base.runtime-test
   (:require [std.json :as json]
             [hara.lang.base.book :as book]
-            [hara.lang.base.emit-prep-lua-test :as prep]
+            [hara.common.emit-prep-lua-test :as prep]
             [hara.lang.base.impl-deps :as deps]
             [hara.lang.base.impl-entry :as entry]
             [hara.lang.base.library :as lib]
             [hara.lang.base.library-snapshot :as snap]
             [hara.lang.base.pointer :as ptr :refer :all]
             [hara.lang.base.runtime :as rt]
-            [hara.lang.base.util :as ut]
+            [hara.common.util :as ut]
             [std.lib.deps]
             [std.lib.env :as env]
             [std.lib.resource :as resource])

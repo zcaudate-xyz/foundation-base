@@ -1,7 +1,7 @@
-(ns hara.rt.postgres.base.grammar.gen-bind-test
-  (:require [hara.rt.postgres :as pg]
-            [hara.rt.postgres.base.grammar.gen-bind :as gen]
-            [hara.rt.postgres.test.scratch-v1 :as scratch]
+(ns hara.runtime.postgres.base.grammar.gen-bind-test
+  (:require [hara.runtime.postgres :as pg]
+            [hara.runtime.postgres.base.grammar.gen-bind :as gen]
+            [hara.runtime.postgres.test.scratch-v1 :as scratch]
             [hara.lang :as l]
             [xt.db.helpers.seed-system-test :as data]
             [xt.db.helpers.seed-user-test :as user])
@@ -42,7 +42,7 @@
              (l/rt:scaffold :python)]
   :teardown [(l/rt:stop)]})
 
-^{:refer hara.rt.postgres.base.grammar.gen-bind/to-lookup :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.gen-bind/to-lookup :added "4.1"}
 (fact "creates a lookup map from array"
   (gen/to-lookup [:a :b :c]) => {:a true :b true :c true}
 
@@ -50,7 +50,7 @@
 
   (gen/to-lookup ["x" "y"]) => {"x" true "y" true})
 
-^{:refer hara.rt.postgres.base.grammar.gen-bind/plain-symbol? :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.gen-bind/plain-symbol? :added "4.1"}
 (fact "checks if form is a plain symbol without namespace"
   (gen/plain-symbol? 'foo) => true
 
@@ -62,7 +62,7 @@
 
   (gen/plain-symbol? 123) => false)
 
-^{:refer hara.rt.postgres.base.grammar.gen-bind/transform-to-str :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.gen-bind/transform-to-str :added "4.0"}
 (fact "transforms relevant forms to string"
 
   (gen/transform-to-str 'scratch/Task)
@@ -74,7 +74,7 @@
   (gen/transform-to-str [1 2 3])
   => [1 2 3])
 
-^{:refer hara.rt.postgres.base.grammar.gen-bind/transform-query-or :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.gen-bind/transform-query-or :added "4.0"}
 (fact "transforms a setvec form"
 
   (gen/transform-query-or
@@ -85,7 +85,7 @@
       :id "hello"]})
   => [{:name "hello", :id "hello"} {:name "hello", :id "hello"}])
 
-^{:refer hara.rt.postgres.base.grammar.gen-bind/transform-query-classify :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.gen-bind/transform-query-classify :added "4.0"}
 (fact "transform function and quote representations"
 
   (gen/transform-query-classify
@@ -100,7 +100,7 @@
    '[:select * :from scratch/Task])
   => '{"::" "sql/select", :args [* :from scratch/Task]})
 
-^{:refer hara.rt.postgres.base.grammar.gen-bind/transform-query :added "4.0"
+^{:refer hara.runtime.postgres.base.grammar.gen-bind/transform-query :added "4.0"
   :setup [(def +query-json+
             ["UserAccount"
              {"custom" [],
@@ -173,13 +173,13 @@
     {}))
   => +query-json+)
 
-^{:refer hara.rt.postgres.base.grammar.gen-bind/transform-schema :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.gen-bind/transform-schema :added "4.0"}
 (fact "transforms the schema"
 
   (gen/transform-schema (:tree (:schema sample/+app+)))
   => map?)
 
-^{:refer hara.rt.postgres.base.grammar.gen-bind/bind-function :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.gen-bind/bind-function :added "4.0"}
 (fact "generates the type signatures for a pg function"
 
   (gen/bind-function scratch/ping)
@@ -197,7 +197,7 @@
   => {:input [{:symbol "input", :type "jsonb"}],
       :return "jsonb", :schema "scratch", :id "echo", :flags {}})
 
-^{:refer hara.rt.postgres.base.grammar.gen-bind/bind-view-guards :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.gen-bind/bind-view-guards :added "4.0"}
 (fact "gets more guards"
 
   (gen/bind-view-guards (:guards (:static/view @user/user-account-by-organisation)))
@@ -211,7 +211,7 @@
         :flags {}},
        :args ["{{<%>}}" "{{i_organisation_id}}"]}])
 
-^{:refer hara.rt.postgres.base.grammar.gen-bind/bind-view :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.gen-bind/bind-view :added "4.0"}
 (fact "generates the view interface"
 
   (gen/bind-view data/currency-all-fiat)
@@ -266,7 +266,7 @@
        {"organisation_accesses"
         {"organisation" "{{i_organisation_id}}"}}}})
 
-^{:refer hara.rt.postgres.base.grammar.gen-bind/bind-table :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.gen-bind/bind-table :added "4.0"}
 (fact "gets the table interface"
 
   (gen/bind-table data/Currency)
@@ -275,7 +275,7 @@
       :public true,
       :schema-update false})
 
-^{:refer hara.rt.postgres.base.grammar.gen-bind/bind-app :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.gen-bind/bind-app :added "4.0"}
 (fact "gets the app interface given a name"
 
   (gen/bind-app (pg/app "test-db-helpers"))
@@ -358,13 +358,13 @@
        :schema-update false,
        :position 10}})
 
-^{:refer hara.rt.postgres.base.grammar.gen-bind/bind-schema :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.gen-bind/bind-schema :added "4.0"}
 (fact "binds a schema"
 
   (gen/bind-schema (:schema (pg/app "test-db-helpers")))
   => map?)
 
-^{:refer hara.rt.postgres.base.grammar.gen-bind/list-view :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.gen-bind/list-view :added "4.0"}
 (fact "lists all views in the schema"
 
   (gen/list-view 'xt.db.helpers.seed-user-test :select)
@@ -375,42 +375,42 @@
        [organisation-view-membership xt.db.helpers.seed-user-test/organisation-view-membership]
        [organisation-view-default xt.db.helpers.seed-user-test/organisation-view-default]])
 
-^{:refer hara.rt.postgres.base.grammar.gen-bind/list-api :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.gen-bind/list-api :added "4.0"}
 (fact "lists all apis"
 
   (gen/list-api 'rt.postgres.test.scratch-v1)
-  => '[[ping hara.rt.postgres.test.scratch-v1/ping]
-       [ping-ok hara.rt.postgres.test.scratch-v1/ping-ok]
-       [echo hara.rt.postgres.test.scratch-v1/echo]])
+  => '[[ping hara.runtime.postgres.test.scratch-v1/ping]
+       [ping-ok hara.runtime.postgres.test.scratch-v1/ping-ok]
+       [echo hara.runtime.postgres.test.scratch-v1/echo]])
 
-^{:refer hara.rt.postgres.base.grammar.gen-bind/list-debug :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.gen-bind/list-debug :added "4.0"}
 (fact  "lists all debug apis"
 
   (gen/list-debug 'rt.postgres.test.scratch-v1)
-  => '[[as-array hara.rt.postgres.test.scratch-v1/as-array]
-       [as-upper hara.rt.postgres.test.scratch-v1/as-upper]
-       [addf hara.rt.postgres.test.scratch-v1/addf]
-       [subf hara.rt.postgres.test.scratch-v1/subf]
-       [mulf hara.rt.postgres.test.scratch-v1/mulf]
-       [divf hara.rt.postgres.test.scratch-v1/divf]
-       [insert-task hara.rt.postgres.test.scratch-v1/insert-task]
-       [insert-entry hara.rt.postgres.test.scratch-v1/insert-entry]])
+  => '[[as-array hara.runtime.postgres.test.scratch-v1/as-array]
+       [as-upper hara.runtime.postgres.test.scratch-v1/as-upper]
+       [addf hara.runtime.postgres.test.scratch-v1/addf]
+       [subf hara.runtime.postgres.test.scratch-v1/subf]
+       [mulf hara.runtime.postgres.test.scratch-v1/mulf]
+       [divf hara.runtime.postgres.test.scratch-v1/divf]
+       [insert-task hara.runtime.postgres.test.scratch-v1/insert-task]
+       [insert-entry hara.runtime.postgres.test.scratch-v1/insert-entry]])
 
-^{:refer hara.rt.postgres.base.grammar.gen-bind/list-all :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.gen-bind/list-all :added "4.0"}
 (fact "lists all function forms"
 
   (gen/list-all 'rt.postgres.test.scratch-v1)
-  => '[[as-array hara.rt.postgres.test.scratch-v1/as-array]
-       [entry-all hara.rt.postgres.test.scratch-v1/entry-all]
-       [entry-by-name hara.rt.postgres.test.scratch-v1/entry-by-name]
-       [entry-default hara.rt.postgres.test.scratch-v1/entry-default]
-       [as-upper hara.rt.postgres.test.scratch-v1/as-upper]
-       [ping hara.rt.postgres.test.scratch-v1/ping]
-       [ping-ok hara.rt.postgres.test.scratch-v1/ping-ok]
-       [echo hara.rt.postgres.test.scratch-v1/echo]
-       [addf hara.rt.postgres.test.scratch-v1/addf]
-       [subf hara.rt.postgres.test.scratch-v1/subf]
-       [mulf hara.rt.postgres.test.scratch-v1/mulf]
-       [divf hara.rt.postgres.test.scratch-v1/divf]
-       [insert-task hara.rt.postgres.test.scratch-v1/insert-task]
-       [insert-entry hara.rt.postgres.test.scratch-v1/insert-entry]])
+  => '[[as-array hara.runtime.postgres.test.scratch-v1/as-array]
+       [entry-all hara.runtime.postgres.test.scratch-v1/entry-all]
+       [entry-by-name hara.runtime.postgres.test.scratch-v1/entry-by-name]
+       [entry-default hara.runtime.postgres.test.scratch-v1/entry-default]
+       [as-upper hara.runtime.postgres.test.scratch-v1/as-upper]
+       [ping hara.runtime.postgres.test.scratch-v1/ping]
+       [ping-ok hara.runtime.postgres.test.scratch-v1/ping-ok]
+       [echo hara.runtime.postgres.test.scratch-v1/echo]
+       [addf hara.runtime.postgres.test.scratch-v1/addf]
+       [subf hara.runtime.postgres.test.scratch-v1/subf]
+       [mulf hara.runtime.postgres.test.scratch-v1/mulf]
+       [divf hara.runtime.postgres.test.scratch-v1/divf]
+       [insert-task hara.runtime.postgres.test.scratch-v1/insert-task]
+       [insert-entry hara.runtime.postgres.test.scratch-v1/insert-entry]])

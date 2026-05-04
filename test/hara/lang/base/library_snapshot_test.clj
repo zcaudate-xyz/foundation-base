@@ -6,7 +6,7 @@
             [hara.lang.base.impl-entry :as entry]
             [hara.lang.base.library-snapshot :as snap]
             [hara.lang.base.library-snapshot-prep-test :as prep]
-            [hara.lang.model.spec-lua :as lua]
+            [hara.model.spec-lua :as lua]
             [std.lib.deps :as deps]
             [std.lib.env :as env])
   (:use code.test))

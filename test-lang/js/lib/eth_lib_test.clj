@@ -1,7 +1,7 @@
 (ns js.lib.eth-lib-test
-  (:require [hara.rt.solidity :as s]
-            [hara.rt.solidity.compile-solc :as compile-solc]
-            [hara.rt.solidity.env-ganache :as env-ganache]
+  (:require [hara.runtime.solidity :as s]
+            [hara.runtime.solidity.compile-solc :as compile-solc]
+            [hara.runtime.solidity.env-ganache :as env-ganache]
             [hara.lang :as l]
             [web3.lib.example-counter :as example-counter]
             [xt.lang.common-notify :as notify])

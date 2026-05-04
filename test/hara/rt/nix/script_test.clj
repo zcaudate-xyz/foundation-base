@@ -1,8 +1,8 @@
-(ns hara.rt.nix.script-test
-  (:require [hara.rt.nix.script :refer :all])
+(ns hara.runtime.nix.script-test
+  (:require [hara.runtime.nix.script :refer :all])
   (:use code.test))
 
-^{:refer hara.rt.nix.script/emit-nix :added "4.0"}
+^{:refer hara.runtime.nix.script/emit-nix :added "4.0"}
 (fact "emits a nix config"
   (emit-nix {:a 1})
   => "{\n  a = 1;\n}\n"
@@ -19,7 +19,7 @@
   (emit-nix {:nested {:a 1}})
   => "{\n  nested = {\n    a = 1;\n  };\n}\n")
 
-^{:refer hara.rt.nix.script/write :added "4.0"}
+^{:refer hara.runtime.nix.script/write :added "4.0"}
 (fact "link to `std.make.compile`"
   (write {:boot.loader.systemd-boot.enable true
           :boot.loader.efi.canTouchEfiVariables true
@@ -32,7 +32,7 @@
           "  networking.hostName = \"nixos\";\n"
           "}\n"))
 
-^{:refer hara.rt.nix.script/write-fn :added "4.0"}
+^{:refer hara.runtime.nix.script/write-fn :added "4.0"}
 (fact "emits a nix module function"
   (write [:fn [:config :pkgs :...]
           {:home.username "alice"
@@ -65,7 +65,7 @@
           "  };\n"
           "}\n"))
 
-^{:refer hara.rt.nix.script/write-full :added "4.0"}
+^{:refer hara.runtime.nix.script/write-full :added "4.0"}
 (fact "emits a full nixos config"
   (write [:fn [:config :pkgs :...]
           {:imports [[:path "./hardware-configuration.nix"]]

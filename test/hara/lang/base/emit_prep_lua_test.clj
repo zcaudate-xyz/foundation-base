@@ -1,10 +1,10 @@
-(ns hara.lang.base.emit-prep-lua-test
+(ns hara.common.emit-prep-lua-test
   (:require [hara.lang.base.book :as b]
-            [hara.lang.base.emit-common :as common]
-            [hara.lang.base.emit-helper :as helper]
-            [hara.lang.base.grammar :as grammar]
-            [hara.lang.base.util :as ut]
-            [hara.lang.model.spec-lua :as lua]
+            [hara.common.emit-common :as common]
+            [hara.common.emit-helper :as helper]
+            [hara.common.grammar :as grammar]
+            [hara.common.util :as ut]
+            [hara.model.spec-lua :as lua]
             [std.lib.env :as env])
   (:use code.test))
 

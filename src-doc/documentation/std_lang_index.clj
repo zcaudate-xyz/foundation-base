@@ -32,4 +32,4 @@
 [[:demo {:title "The authoring model in one screen"
           :content "A `script` establishes the language context, while emission turns a shared form model into target syntax."
           :lang "clojure"
-          :code "(require '[hara.lang :as l]\n         '[hara.lang.model.spec-js :as js])\n\n(l/emit-as :js '(+ 1 2 3))\n;; => \"1 + 2 + 3\""}]]
+          :code "(require '[hara.lang :as l]\n         '[hara.model.spec-js :as js])\n\n(l/emit-as :js '(+ 1 2 3))\n;; => \"1 + 2 + 3\""}]]

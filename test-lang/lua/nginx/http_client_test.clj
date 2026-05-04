@@ -1,5 +1,5 @@
 (ns lua.nginx.http-client-test
-  (:require [hara.rt.nginx]
+  (:require [hara.runtime.nginx]
             [std.json :as json]
             [hara.lang :as l])
   (:use code.test))

@@ -1,17 +1,17 @@
-(ns hara.lang.seedgen.form-infile-test
+(ns hara.seedgen.form-infile-test
   (:use code.test)
   (:require [clojure.string :as str]
-            [hara.lang.seedgen.common-util :as common]
-            [hara.lang.seedgen.common-infile :as common-infile]
-            [hara.lang.seedgen.form-infile :as form-infile]))
+            [hara.seedgen.common-util :as common]
+            [hara.seedgen.common-infile :as common-infile]
+            [hara.seedgen.form-infile :as form-infile]))
 
-^{:refer hara.lang.seedgen.form-infile/root-script-meta-langs :added "4.1"}
+^{:refer hara.seedgen.form-infile/root-script-meta-langs :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.seedgen.form-infile/render-top-level-target :added "4.1"}
+^{:refer hara.seedgen.form-infile/render-top-level-target :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.seedgen.form-infile/seedgen-langadd :added "4.1" :timeout 300000}
+^{:refer hara.seedgen.form-infile/seedgen-langadd :added "4.1" :timeout 300000}
 (fact "adds seedgen runtimes back from the seedgen root form"
   (let [tmp (java.io.File/createTempFile "seedgen-langadd" ".clj")
         path (.getAbsolutePath tmp)
@@ -681,7 +681,7 @@
         (.delete tmp))))
   => [true true true true true]
 
-^{:refer hara.lang.seedgen.form-infile/seedgen-langremove :added "4.1"}
+^{:refer hara.seedgen.form-infile/seedgen-langremove :added "4.1"}
 (fact "purges targeted seedgen runtimes while preserving the seedgen root"
   (let [tmp (java.io.File/createTempFile "seedgen-langremove" ".clj")
         path (.getAbsolutePath tmp)
@@ -843,5 +843,5 @@
   => "(ns sample.purge-test\n  (:use code.test)\n  (:require [hara.lang :as l]))\n\n^{:seedgen/root {:all true, :langs [:js :lua :python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n(fact \"metadata branches\"\n\n  ^{:seedgen/base {:lua {:expect 6}}}\n  (!.js\n    (+ 1 2 3))\n  => 6\n\n  ^{:seedgen/base {:lua {:expect 6}}}\n  (!.python\n    (+ 1 2 3))\n  => 6)\n")
   )
 
-^{:refer hara.lang.seedgen.form-infile/seedgen-langremove :added "4.1"}
+^{:refer hara.seedgen.form-infile/seedgen-langremove :added "4.1"}
 (fact "TODO")

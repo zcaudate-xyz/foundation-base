@@ -1,7 +1,7 @@
-(ns hara.rt.basic.impl.process-ruby-test
-  (:require [hara.rt.basic.impl.process-ruby :refer :all]
-              [hara.rt.basic.type-common :as common]
-              [hara.lang.base.preprocess-staging :as staging]
+(ns hara.runtime.basic.impl.process-ruby-test
+  (:require [hara.runtime.basic.impl.process-ruby :refer :all]
+              [hara.runtime.basic.type-common :as common]
+              [hara.common.preprocess-staging :as staging]
               [hara.lang.base.runtime :as rt]
               [hara.lang :as l]
               [xt.lang.spec-primitive :as primitive])
@@ -18,7 +18,7 @@
 (def CANARY-RUBY
   (common/program-exists? "ruby"))
 
-^{:refer hara.rt.basic.impl.process-ruby/CANARY :adopt true :added "4.0"}
+^{:refer hara.runtime.basic.impl.process-ruby/CANARY :adopt true :added "4.0"}
 (fact "EVALUATE ruby code"
 
   (if CANARY-RUBY
@@ -43,7 +43,7 @@
   (rt/return-wrap-invoke '[1 2 3])
   => seq?)
 
-^{:refer hara.lang.base.preprocess-staging/to-staging :added "4.1"}
+^{:refer hara.common.preprocess-staging/to-staging :added "4.1"}
 (fact "keeps standalone primitive operators in reserved form during ruby staging"
   (let [book (l/get-book (l/default-library) :ruby)]
     (first
@@ -55,10 +55,10 @@
                                    :link {'xt.lang.spec-primitive 'xt.lang.spec-primitive}}})))
   => '+)
 
-^{:refer hara.rt.basic.impl.process-ruby/default-body-wrap :added "4.1"}
+^{:refer hara.runtime.basic.impl.process-ruby/default-body-wrap :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.rt.basic.impl.process-ruby/normalize-forms :added "4.1"}
+^{:refer hara.runtime.basic.impl.process-ruby/normalize-forms :added "4.1"}
 (fact "normalizes a top-level do body"
   (normalize-forms '(do (defn add-10 [x] (return (+ x 10)))
                         (add-10 5))
@@ -69,7 +69,7 @@
   (normalize-forms '[1 2 3] {:bulk true})
   => '[1 2 3])
 
-^{:refer hara.rt.basic.impl.process-ruby/mark-inline-defs :added "4.1"}
+^{:refer hara.runtime.basic.impl.process-ruby/mark-inline-defs :added "4.1"}
 (fact "marks inline defs as inner"
   (-> (mark-inline-defs '((defn add-10 [x] (return (+ x 10)))
                           (add-10 5)))
@@ -79,7 +79,7 @@
       :inner)
   => true)
 
-^{:refer hara.rt.basic.impl.process-ruby/default-body-transform :added "4.1"}
+^{:refer hara.runtime.basic.impl.process-ruby/default-body-transform :added "4.1"}
 (fact "applies ruby return transform"
   (default-body-transform '[1 2 3] {})
   => '(do (:= OUT [1 2 3]))

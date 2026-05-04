@@ -1,6 +1,6 @@
 (ns hara.lang.base.script-macro
-  (:require [hara.lang.base.emit :as emit]
-            [hara.lang.base.emit-preprocess :as preprocess] [hara.lang.base.preprocess-base :as preprocess-base]
+  (:require [hara.common.emit :as emit]
+            [hara.common.emit-preprocess :as preprocess] [hara.common.preprocess-base :as preprocess-base]
             [hara.lang.base.impl :as impl]
             [hara.lang.base.impl-entry :as entry]
             [hara.lang.base.library :as lib]
@@ -8,7 +8,7 @@
             [hara.lang.base.script-annex :as annex]
             [hara.lang.base.script-control :as control]
             [hara.lang.base.script-lint :as lint]
-            [hara.lang.base.util :as ut]
+            [hara.common.util :as ut]
             [std.lib.context.pointer]
             [std.lib.context.space :as space]
             [std.lib.env :as env]
@@ -370,4 +370,4 @@
   (space/space:context-unset (ut/lang-context :bash))
   (hara.lang/with-trace
     (hara.lang/with:input
-        (hara.rt.shell/man:ptr :man))))
+        (hara.runtime.shell/man:ptr :man))))

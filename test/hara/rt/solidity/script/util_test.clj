@@ -1,11 +1,11 @@
-(ns hara.rt.solidity.script.util-test
-  (:require [hara.rt.solidity.env-ganache :as env]
+(ns hara.runtime.solidity.script.util-test
+  (:require [hara.runtime.solidity.env-ganache :as env]
             [hara.lang :as l])
   (:use code.test))
 
 (l/script- :solidity
   {:runtime :web3
-   :require [[hara.rt.solidity :as s]]})
+   :require [[hara.runtime.solidity :as s]]})
 
 (fact:global
  {:setup    [(l/rt:restart)
@@ -13,7 +13,7 @@
   :teardown [(l/rt:stop)
              (env/stop-ganache-server)]})
 
-^{:refer hara.rt.solidity.script.util/ut:str-comp :added "4.0"}
+^{:refer hara.runtime.solidity.script.util/ut:str-comp :added "4.0"}
 (fact "compares two strings together"
 
   (s/with:temp

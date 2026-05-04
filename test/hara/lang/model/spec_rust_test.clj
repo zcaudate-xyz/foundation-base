@@ -1,9 +1,9 @@
-(ns hara.lang.model-annex.spec-rust-test
+(ns hara.model.annex.spec-rust-test
   (:require [std.fs :as fs]
             [hara.lang :as l]
             [hara.lang.base.script :as script]
-            [hara.lang.base.util :as ut]
-            [hara.lang.model-annex.spec-rust :refer :all]
+            [hara.common.util :as ut]
+            [hara.model.annex.spec-rust :refer :all]
             [std.lib.os :as os]
             [std.string.prose :as prose])
   (:use code.test))
@@ -543,29 +543,29 @@ fn main() {
   )
 
 
-^{:refer hara.lang.model-annex.spec-rust/rst-typesystem :added "4.0"}
+^{:refer hara.model.annex.spec-rust/rst-typesystem :added "4.0"}
 (fact "emits rust typesystem syntax")
 
-^{:refer hara.lang.model-annex.spec-rust/rst-vector :added "4.0"}
+^{:refer hara.model.annex.spec-rust/rst-vector :added "4.0"}
 (fact "emits rust vector syntax")
 
-^{:refer hara.lang.model-annex.spec-rust/rst-attributes :added "4.0"}
+^{:refer hara.model.annex.spec-rust/rst-attributes :added "4.0"}
 (fact "emits rust attributes")
 
-^{:refer hara.lang.model-annex.spec-rust/rst-defenum :added "4.0"}
+^{:refer hara.model.annex.spec-rust/rst-defenum :added "4.0"}
 (fact "emits rust enum definition")
 
-^{:refer hara.lang.model-annex.spec-rust/rst-deftrait :added "4.0"}
+^{:refer hara.model.annex.spec-rust/rst-deftrait :added "4.0"}
 (fact "emits rust trait definition")
 
-^{:refer hara.lang.model-annex.spec-rust/rst-defimpl :added "4.0"}
+^{:refer hara.model.annex.spec-rust/rst-defimpl :added "4.0"}
 (fact "emits rust impl definition")
 
-^{:refer hara.lang.model-annex.spec-rust/rst-new :added "4.0"}
+^{:refer hara.model.annex.spec-rust/rst-new :added "4.0"}
 (fact "emits rust new expression")
 
-^{:refer hara.lang.model-annex.spec-rust/rst-exec :added "4.0"}
+^{:refer hara.model.annex.spec-rust/rst-exec :added "4.0"}
 (fact "emits rust exec block")
 
-^{:refer hara.lang.model-annex.spec-rust/rst-defstruct :added "4.0"}
+^{:refer hara.model.annex.spec-rust/rst-defstruct :added "4.0"}
 (fact "emits rust struct definition")

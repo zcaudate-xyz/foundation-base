@@ -107,16 +107,16 @@
           code.manage/transform-code
           code.manage/snapto
 
-          hara.lang.seedgen/seedgen-list
-          hara.lang.seedgen/seedgen-incomplete
-          hara.lang.seedgen/seedgen-benchadd
-          hara.lang.seedgen/seedgen-benchremove
-          hara.lang.seedgen/seedgen-benchlist
-          hara.lang.seedgen/seedgen-benchadd
-          hara.lang.seedgen/seedgen-root
-          hara.lang.seedgen/seedgen-langadd
-          hara.lang.seedgen/seedgen-langremove
-          hara.lang.seedgen/seedgen-readforms
+          hara.seedgen/seedgen-list
+          hara.seedgen/seedgen-incomplete
+          hara.seedgen/seedgen-benchadd
+          hara.seedgen/seedgen-benchremove
+          hara.seedgen/seedgen-benchlist
+          hara.seedgen/seedgen-benchadd
+          hara.seedgen/seedgen-root
+          hara.seedgen/seedgen-langadd
+          hara.seedgen/seedgen-langremove
+          hara.seedgen/seedgen-readforms
           
           code.doc/publish
           code.doc/init-template

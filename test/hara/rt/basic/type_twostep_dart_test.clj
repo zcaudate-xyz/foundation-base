@@ -1,6 +1,6 @@
-(ns hara.rt.basic.type-twostep-dart-test
+(ns hara.runtime.basic.type-twostep-dart-test
   (:use code.test)
-  (:require [hara.rt.basic.type-common :as common]
+  (:require [hara.runtime.basic.type-common :as common]
             [hara.lang :as l]))
 
 (l/script- :dart

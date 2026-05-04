@@ -1,8 +1,8 @@
-(ns hara.rt.postgres.base.grammar.entity-test
+(ns hara.runtime.postgres.base.grammar.entity-test
   (:use code.test)
-  (:require [hara.rt.postgres.base.grammar.entity :as et :refer :all]
-            [hara.rt.postgres.base.grammar.entity-util :as ut]
-            [hara.lang.base.grammar-spec :as grammar-spec]
+  (:require [hara.runtime.postgres.base.grammar.entity :as et :refer :all]
+            [hara.runtime.postgres.base.grammar.entity-util :as ut]
+            [hara.common.grammar-spec :as grammar-spec]
             [std.lib.env :as env]))
 
 (def +reduced-target+
@@ -74,44 +74,44 @@
     => {:class-table {:foreign {:rev {:ns 'Rev :column :class-context}}}
         :class-link {:foreign {:rev {:ns 'Rev :column :class-table}}}}))
 
-^{:refer hara.rt.postgres.base.grammar.entity/parse-class :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.entity/parse-class :added "4.1"}
 (fact "parse-class splits class depth and role"
   (et/parse-class :1d/base) => [1 :base]
   (et/parse-class :2d/entry) => [2 :entry]
   (et/parse-class :none) => [nil :none])
 
-^{:refer hara.rt.postgres.base.grammar.entity/basis-for :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.entity/basis-for :added "4.1"}
 (fact "basis-for maps class tuples to support sets"
   (et/basis-for [1 :base] :minimal) => #{:table :id}
   (et/basis-for [1 :entry] :expanded) => #{:table :context :link}
   (et/basis-for [0 :entry] :expanded) => #{:table :context})
 
-^{:refer hara.rt.postgres.base.grammar.entity/local-support-columns :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.entity/local-support-columns :added "4.1"}
 (fact "local-support-columns selects the local columns needed for a relation"
   (et/local-support-columns [1 :base] :minimal :addon) => [:class-table]
   (et/local-support-columns [1 :entry] :expanded :addon) => [:class-table :class-link]
   (et/local-support-columns [2 :base] :minimal :entity) => [:class-table :class-context])
 
-^{:refer hara.rt.postgres.base.grammar.entity/target-support-columns :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.entity/target-support-columns :added "4.1"}
 (fact "target-support-columns depend only on target depth"
   (et/target-support-columns [0 :base]) => []
   (et/target-support-columns [1 :base]) => [:class-table]
   (et/target-support-columns [2 :base]) => [:class-table :class-context])
 
-^{:refer hara.rt.postgres.base.grammar.entity/project-support-columns :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.entity/project-support-columns :added "4.1"}
 (fact "project-support-columns zips local and remote support columns"
   (et/project-support-columns :entity [1 :entry] :expanded [1 :base])
   => {:class-table :class-table}
   (et/project-support-columns :link [1 :entry] :minimal [1 :base])
   => {:class-table :class-table})
 
-^{:refer hara.rt.postgres.base.grammar.entity/column->coord :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.entity/column->coord :added "4.1"}
 (fact "column->coord maps structural columns back to their coordinates"
   (et/column->coord :class-table) => :table
   (et/column->coord :class-context) => :context
   (et/column->coord :unknown) => nil)
 
-^{:refer hara.rt.postgres.base.grammar.entity/required-basis-for-plan :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.entity/required-basis-for-plan :added "4.1"}
 (fact "required-basis-for-plan extracts the required basis coordinates"
   (et/required-basis-for-plan {:class-table {:foreign {:rev {:ns 'Rev}}}
                                :class-context {:foreign {:rev {:ns 'Rev}}}
@@ -119,17 +119,17 @@
                                :class-ref {:foreign {:social {:ns 'Social}}}})
   => #{:table :context :link :id})
 
-^{:refer hara.rt.postgres.base.grammar.entity/allowed-target? :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.entity/allowed-target? :added "4.1"}
 (fact "allowed-target? checks relation compatibility"
   (et/allowed-target? :entity [1 :entry] [1 :base]) => true
   (et/allowed-target? :addons [1 :base] [2 :entry]) => false)
 
-^{:refer hara.rt.postgres.base.grammar.entity/public-input->basis :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.entity/public-input->basis :added "4.1"}
 (fact "public-input->basis uses provided bases or derives the expanded set"
   (et/public-input->basis {:basis #{:table :id}}) => #{:table :id}
   (et/public-input->basis {:class :1d/base}) => #{:table :context :id})
 
-^{:refer hara.rt.postgres.base.grammar.entity/target-info :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.entity/target-info :added "4.1"}
 (fact "target-info resolves input metadata from references"
   (with-test-entity-v2
     (et/target-info 'Rev)
@@ -137,7 +137,7 @@
         :tuple [2 :base]
         :basis #{:table :context :id}}))
 
-^{:refer hara.rt.postgres.base.grammar.entity/E-check-input :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.entity/E-check-input :added "4.1"}
 (fact "checks entity-v2 input"
   (E-check-input {:class :1d/base})
   => {:class :1d/base}
@@ -151,12 +151,12 @@
   (E-check-input {:class :0d/data})
   => (throws))
 
-^{:refer hara.rt.postgres.base.grammar.entity/E-known-addon-keys :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.entity/E-known-addon-keys :added "4.1"}
 (fact "E-known-addon-keys reads the registered application addon set"
   (with-test-entity-v2
     (et/E-known-addon-keys :app) => #{:rev :social :detail}))
 
-^{:refer hara.rt.postgres.base.grammar.entity/E-addon-bool-shorthand :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.entity/E-addon-bool-shorthand :added "4.1"}
 (fact "E-addon-bool-shorthand folds addon booleans into :addons"
   (with-test-entity-v2
     (et/E-addon-bool-shorthand {:application :app
@@ -167,7 +167,7 @@
         :name "x"
         :addons [:rev]}))
 
-^{:refer hara.rt.postgres.base.grammar.entity/E-addon-columns-single :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.entity/E-addon-columns-single :added "4.1"}
 (fact "normalizes keyword, vector, and map addon declarations"
   (with-test-entity-v2
     (E-addon-columns-single :rev)
@@ -193,14 +193,14 @@
                 :ref {:ns 'Rev}}
         :priority 77}))
 
-^{:refer hara.rt.postgres.base.grammar.entity/basis-kind-for :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.entity/basis-kind-for :added "4.1"}
 (fact "basis-kind-for distinguishes minimal and expanded bases"
   (et/basis-kind-for {:class :1d/base
                       :basis #{:table :id}}) => :minimal
   (et/basis-kind-for {:class :1d/base
                       :basis #{:table :context :id}}) => :expanded)
 
-^{:refer hara.rt.postgres.base.grammar.entity/plan-addon-relation :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.entity/plan-addon-relation :added "4.1"}
 (fact "plan-addon-relation projects addon refs onto support columns"
   (with-test-entity-v2
     (et/plan-addon-relation {:class :1d/entry
@@ -214,7 +214,7 @@
         :class-link {:foreign {:rev {:ns 'Rev
                                      :column :class-table}}}}))
 
-^{:refer hara.rt.postgres.base.grammar.entity/plan-entity-relation :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.entity/plan-entity-relation :added "4.1"}
 (fact "plan-entity-relation builds the base entity relation map"
   (with-test-entity-v2
     (et/plan-entity-relation {:class :1d/base
@@ -230,7 +230,7 @@
                  :sql {:cascade true
                        :unique ["social"]}}}))
 
-^{:refer hara.rt.postgres.base.grammar.entity/plan-link-relation :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.entity/plan-link-relation :added "4.1"}
 (fact "plan-link-relation builds the link relation map"
   (with-test-entity-v2
     (et/plan-link-relation {:class :1d/entry
@@ -244,12 +244,12 @@
                  :sql {:cascade true
                        :unique ["social"]}}}))
 
-^{:refer hara.rt.postgres.base.grammar.entity/coordinate-column :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.entity/coordinate-column :added "4.1"}
 (fact "coordinate-column maps coordinates to generated columns"
   (et/coordinate-column "schema" :table) => (ut/type-class "schema" 1)
   (et/coordinate-column "schema" :id) => (ut/type-class-ref {:sql {:unique ["class"]}} 4))
 
-^{:refer hara.rt.postgres.base.grammar.entity/E-class-columns :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.entity/E-class-columns :added "4.1"}
 (fact "emits structural class columns from the resolved basis"
   (let [base-cols (E-class-columns {:class :1d/base
                                     :basis #{:table :id}
@@ -286,7 +286,7 @@
         :scope :-/hidden
         :generated "Scoped"}))
 
-^{:refer hara.rt.postgres.base.grammar.entity/E-basis-compatible? :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.entity/E-basis-compatible? :added "4.1"}
 (fact "E-basis-compatible? validates relation compatibility for a basis"
   (with-test-entity-v2
     (et/E-basis-compatible? {:class :1d/entry
@@ -295,14 +295,14 @@
                             #{:table})
     => true))
 
-^{:refer hara.rt.postgres.base.grammar.entity/E-resolve-basis :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.entity/E-resolve-basis :added "4.1"}
 (fact "E-resolve-basis picks the narrowest compatible basis"
   (with-test-entity-v2
     (et/E-resolve-basis {:class :1d/base}) => #{:table :id}
     (et/E-resolve-basis {:class :1d/base
                          :addons [:rev]}) => #{:table :context :id}))
 
-^{:refer hara.rt.postgres.base.grammar.entity/E-addon-columns :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.entity/E-addon-columns :added "4.1"}
 (fact "splits addon payload fields from projected support-column wiring"
   (with-test-entity-v2
     (let [[addon-cols addon-class-cols]
@@ -322,7 +322,7 @@
       => {:class-table {:foreign {:rev {:ns 'Rev :column :class-context}}}
           :class-link {:foreign {:rev {:ns 'Rev :column :class-table}}}})))
 
-^{:refer hara.rt.postgres.base.grammar.entity/E-class-merge :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.entity/E-class-merge :added "4.1"}
 (fact "propagates discovered uniqueness onto structural coordinates"
   (let [one-d (E-class-merge {:class :1d/entry
                               :basis #{:table}}
@@ -351,7 +351,7 @@
     (get-in two-d [:class-context :sql :unique])
     => ["rev"]))
 
-^{:refer hara.rt.postgres.base.grammar.entity/E-main-track :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.entity/E-main-track :added "4.1"}
 (fact "selects id and tracking defaults from the public role"
   (let [[entry-id entry-cols entry-track]
         (E-main-track {:class :1d/entry
@@ -377,7 +377,7 @@
     log-track
     => (ut/get-tracking :track/log)))
 
-^{:refer hara.rt.postgres.base.grammar.entity/E-main :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.entity/E-main :added "4.1"}
 (fact "builds the final entity payload from a resolved basis"
   (with-test-entity-v2
     (let [out (E-main {:class :1d/entry
@@ -414,7 +414,7 @@
            :time-created
            :time-updated})))
 
-^{:refer hara.rt.postgres.base.grammar.entity/E-main-spec :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.entity/E-main-spec :added "4.1"}
 (fact "handles main spec addons the same way as v1"
   (with-redefs [grammar-spec/*symbol* 'Sym
                 env/ns-sym (constantly 'ns)
@@ -422,7 +422,7 @@
     (E-main-spec {:spec/addon {:key :k :priority 10}})
     => [:k {:type :ref :required true :priority nil :ref {:ns 'ns/Sym}} 10]))
 
-^{:refer hara.rt.postgres.base.grammar.entity/E :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.entity/E :added "4.1"}
 (fact "upgrades to expanded contextual projections when needed"
   (with-test-entity-v2
     (let [entry-cols (map first (:raw (E {:class :1d/entry

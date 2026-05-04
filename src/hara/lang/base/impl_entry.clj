@@ -1,11 +1,11 @@
 (ns hara.lang.base.impl-entry
   (:require [hara.lang.base.book :as book]
-             [hara.lang.base.impl-template :as impl-template]
-             [hara.lang.base.emit :as emit]
-             [hara.lang.base.emit-preprocess :as preprocess] [hara.lang.base.preprocess-base :as preprocess-base]
-             [hara.lang.base.grammar-xtalk-system :as xtalk-system]
-             [hara.lang.base.provenance :as provenance]
-             [hara.lang.base.util :as ut]
+             [hara.common.emit-template :as impl-template]
+             [hara.common.emit :as emit]
+             [hara.common.emit-preprocess :as preprocess] [hara.common.preprocess-base :as preprocess-base]
+             [hara.common.grammar-xtalk-system :as xtalk-system]
+             [hara.common.provenance :as provenance]
+             [hara.common.util :as ut]
              [std.lib.collection :as collection]
              [std.lib.env :as env]
              [std.lib.foundation :as f]
@@ -276,13 +276,13 @@
           mopts (-> mopts
                     (assoc :entry (assoc entry :display :brief))
                     (provenance/with-provenance
-                      {:hara.lang/phase :emit/entry
-                       :hara.lang/subsystem :hara.lang.base.impl-entry/emit-entry-raw
-                       :hara.lang/form form
-                       :hara.lang/lang lang
-                       :hara.lang/module (:module entry)
-                       :hara.lang/namespace (:namespace entry)
-                       :hara.lang/entry (ut/entry-summary entry)}))]
+                      {:hara/phase :emit/entry
+                       :hara/subsystem :hara.lang.base.impl-entry/emit-entry-raw
+                       :hara/form form
+                       :hara/lang lang
+                       :hara/module (:module entry)
+                       :hara/namespace (:namespace entry)
+                       :hara/entry (ut/entry-summary entry)}))]
       (binding [preprocess-base/*macro-opts* mopts
                 preprocess-base/*macro-grammar* grammar]
         (try
@@ -295,7 +295,7 @@
             (env/pp  form)
             (ut/throw-with-context
              "hara.lang entry emit failed"
-             (:hara.lang/provenance mopts)
+             (:hara/provenance mopts)
              t)))))))
 
 (def +cached-emit-keys+

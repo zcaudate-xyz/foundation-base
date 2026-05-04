@@ -1,4 +1,4 @@
-(ns hara.lang.model.typescript-model-fixture
+(ns hara.model.typescript-model-fixture
   (:require [hara.lang :as l]
             [hara.lang.typed.xtalk :refer [defspec.xt]]))
 

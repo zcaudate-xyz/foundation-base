@@ -12,7 +12,7 @@
 
 ;; ============================================================
 ;; CONTROL FLOW FORM GENERATORS
-;; Based on hara.lang.base.grammar-spec +op-control-* definitions
+;; Based on hara.common.grammar-spec +op-control-* definitions
 ;; ============================================================
 
 (def +comparison-ops+

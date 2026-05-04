@@ -1,11 +1,11 @@
-(ns hara.rt.postgres.base.grammar.form-defconst-test
-  (:require [hara.rt.postgres.base.grammar :as g]
-            [hara.rt.postgres.base.grammar.form-defconst :as form]
-            [hara.rt.postgres.test.scratch-v1 :as scratch]
+(ns hara.runtime.postgres.base.grammar.form-defconst-test
+  (:require [hara.runtime.postgres.base.grammar :as g]
+            [hara.runtime.postgres.base.grammar.form-defconst :as form]
+            [hara.runtime.postgres.test.scratch-v1 :as scratch]
             [hara.lang :as l])
   (:use code.test))
 
-^{:refer hara.rt.postgres.base.grammar.form-defconst/pg-defconst-hydrate :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.form-defconst/pg-defconst-hydrate :added "4.0"}
 (fact "creates the "
 
   (def -out-
@@ -26,7 +26,7 @@
   -out-
   => vector?)
 
-^{:refer hara.rt.postgres.base.grammar.form-defconst/pg-defconst :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.form-defconst/pg-defconst :added "4.0"}
 (fact "emits the static form"
 
   (form/pg-defconst
@@ -35,7 +35,7 @@
        (let
            [o-track {}]
          [:insert-into
-          hara.rt.postgres.test.scratch-v1/Task
+          hara.runtime.postgres.test.scratch-v1/Task
           (>-<
            [#{"id"}
             #{"status"}
@@ -48,7 +48,7 @@
           :values
           (>-<
            [(:uuid "hello-0")
-            (++ "ok" hara.rt.postgres.test.scratch-v1/EnumStatus)
+            (++ "ok" hara.runtime.postgres.test.scratch-v1/EnumStatus)
             (:text "hello")
             (:uuid "cache-001")
             (:uuid (:->> o-track "id"))

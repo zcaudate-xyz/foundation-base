@@ -1,11 +1,11 @@
-(ns hara.rt.basic.impl.process-dart-test
+(ns hara.runtime.basic.impl.process-dart-test
   (:require [clojure.string :as str]
-             [hara.rt.basic.impl.process-dart :refer :all]
+             [hara.runtime.basic.impl.process-dart :refer :all]
              [hara.lang :as l]
              [std.lib.os :as os])
   (:use code.test))
 
-^{:refer hara.rt.basic.impl.process-dart/normalize-dart-source :added "4.1"}
+^{:refer hara.runtime.basic.impl.process-dart/normalize-dart-source :added "4.1"}
 (fact "preserves multiline call continuations when normalizing dart"
 
   (normalize-dart-source "void main() {\n  print(\n    foo(1)\n  )\n}")
@@ -26,13 +26,13 @@
   (normalize-dart-source "xt.lang.common_data.arr_sort(xt.lang.event_log.list_listeners(xt.lang.event_log.new_log(<dynamic, dynamic>{\n  \"listeners\":<dynamic, dynamic>{\n    \"test1\":(id, data, t) {\n      \n    },\n    \"test2\":(id, data, t) {\n      \n    }\n  }\n})),xt.lang.common_lib.identity,(x, y) {\n  return (x).toString().compareTo((y).toString()) < 0;\n})")
   => "xt.lang.common_data.arr_sort(xt.lang.event_log.list_listeners(xt.lang.event_log.new_log(<dynamic, dynamic>{\n  \"listeners\":<dynamic, dynamic>{\n    \"test1\":(id, data, t) {\n      \n    },\n    \"test2\":(id, data, t) {\n      \n    }\n  }\n})),xt.lang.common_lib.identity,(x, y) {\n  return (x).toString().compareTo((y).toString()) < 0;\n});"
 
-^{:refer hara.rt.basic.impl.process-dart/ensure-dart-imports :added "4.1"}
+^{:refer hara.runtime.basic.impl.process-dart/ensure-dart-imports :added "4.1"}
 (fact "hoists required Dart imports for standalone scripts"
   (ensure-dart-imports "void main() {\n  print(math.max(1, 2));\n  print(jsonEncode({\"a\": 1}));\n}")
   => "import 'dart:convert';\nimport 'dart:math' as math;\n\nvoid main() {\n  print(math.max(1, 2));\n  print(jsonEncode({\"a\": 1}));\n}")
 
 
-^{:refer hara.rt.basic.impl.process-dart/sh-exec-dart :added "4.1"}
+^{:refer hara.runtime.basic.impl.process-dart/sh-exec-dart :added "4.1"}
 (fact "executes dart twostep pipeline"
   (with-redefs [os/sh (fn [_] {:pid 1})
                 os/sh-wait (fn [_] nil)
@@ -42,7 +42,7 @@
                    :output-flag "-o"}))
   => "42")
 
-^{:refer hara.rt.basic.impl.process-dart/transform-form :added "4.1"}
+^{:refer hara.runtime.basic.impl.process-dart/transform-form :added "4.1"}
 (fact "wraps forms in standalone dart main"
   (-> (transform-form ['(+ 1 2)] {:bulk true}) pr-str)
   => #"Future<void> main\(\) async"
@@ -90,14 +90,14 @@
   => [true true false])
 
 
-^{:refer hara.rt.basic.impl.process-dart/dart-package-imports :added "4.1"}
+^{:refer hara.runtime.basic.impl.process-dart/dart-package-imports :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.rt.basic.impl.process-dart/dart-package-root :added "4.1"}
+^{:refer hara.runtime.basic.impl.process-dart/dart-package-root :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.rt.basic.impl.process-dart/dart-pubspec :added "4.1"}
+^{:refer hara.runtime.basic.impl.process-dart/dart-pubspec :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.rt.basic.impl.process-dart/ensure-dart-package-context :added "4.1"}
+^{:refer hara.runtime.basic.impl.process-dart/ensure-dart-package-context :added "4.1"}
 (fact "TODO")

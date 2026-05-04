@@ -5,7 +5,7 @@
             [hara.lang.typed.xtalk-parse :as parse]))
 
 (defn fixture-analysis []
-  (parse/analyze-namespace 'hara.lang.model.spec-xtalk-typed-fixture))
+  (parse/analyze-namespace 'hara.model.spec-xtalk-typed-fixture))
 
 (defn fixture-function [name]
   (some #(when (= name (:name %)) %) (:functions (fixture-analysis))))
@@ -32,8 +32,8 @@
     (types/clear-registry!)
     (parse/register-types! (fixture-analysis))
     [(-> (check-function (fixture-function "find-user")) :function)
-     (-> (check-function 'hara.lang.model.spec-xtalk-typed-fixture/find-user) :function)
+     (-> (check-function 'hara.model.spec-xtalk-typed-fixture/find-user) :function)
      (nil? (check-function 'sample.route/missing))])
-  => '[hara.lang.model.spec-xtalk-typed-fixture/find-user
-        hara.lang.model.spec-xtalk-typed-fixture/find-user
+  => '[hara.model.spec-xtalk-typed-fixture/find-user
+        hara.model.spec-xtalk-typed-fixture/find-user
         true])

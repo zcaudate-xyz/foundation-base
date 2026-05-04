@@ -29,7 +29,7 @@
   (gen/fill-template +generate-common-lib+ e))
 
 (comment
-  [hara.lang.base.grammar-xtalk :as xtalk]
+  [hara.common.grammar-xtalk :as xtalk]
   (gen/fill-template +generate-common-lib+
-                     (first hara.lang.base.grammar-xtalk/+xt-common-array+))
+                     (first hara.common.grammar-xtalk/+xt-common-array+))
   )

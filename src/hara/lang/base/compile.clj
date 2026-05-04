@@ -3,7 +3,7 @@
             [std.fs :as fs]
             [hara.lang.base.book :as book]
             [hara.lang.base.compile-links :as links]
-            [hara.lang.base.emit :as emit]
+            [hara.common.emit :as emit]
             [hara.lang.base.impl :as impl]
             [hara.lang.base.impl-deps :as deps]
             [hara.lang.base.impl-deps-imports :as deps-imports]
@@ -11,7 +11,7 @@
             [hara.lang.base.library :as lib]
             [hara.lang.base.library-snapshot :as snap]
             [hara.lang.base.pointer :as ptr]
-            [hara.lang.base.util :as ut]
+            [hara.common.util :as ut]
             [std.lib.deps]
             [std.lib.foundation :as f]
             [std.make.compile :as compile]))

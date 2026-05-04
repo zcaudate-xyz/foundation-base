@@ -1,7 +1,7 @@
 (ns play.ts-001-single-source-user-directory.build
   (:use [code.test :exclude [-main]])
   (:require [std.make :as make :refer [def.make]]
-             [hara.lang.model.spec-js.ts :as ts]
+             [hara.model.spec-js.ts :as ts]
              [hara.lang.typed.xtalk :as xtalk]
              [play.ts-001-single-source-user-directory.main :as main]))
 

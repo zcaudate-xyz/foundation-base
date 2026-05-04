@@ -1,8 +1,8 @@
-(ns hara.lang.model.spec-js.rewrite-test
-  (:require [hara.lang.model.spec-js.rewrite :as rewrite])
+(ns hara.model.spec-js.rewrite-test
+  (:require [hara.model.spec-js.rewrite :as rewrite])
   (:use code.test))
 
-^{:refer hara.lang.model.spec-js.rewrite/js-rewrite-stage :added "4.1"}
+^{:refer hara.model.spec-js.rewrite/js-rewrite-stage :added "4.1"}
 (fact "keeps JavaScript staging stable when no JS-specific lowering is required"
   (rewrite/js-rewrite-stage
    '(do

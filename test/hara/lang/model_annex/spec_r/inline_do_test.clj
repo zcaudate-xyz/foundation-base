@@ -1,8 +1,8 @@
-(ns hara.lang.model-annex.spec-r.inline-do-test
+(ns hara.model.annex.spec-r.inline-do-test
   (:use code.test)
-  (:require [hara.lang.model-annex.spec-r.rewrite :as rewrite]))
+  (:require [hara.model.annex.spec-r.rewrite :as rewrite]))
 
-^{:refer hara.lang.model-annex.spec-r.rewrite/r-rewrite-stage :added "4.1"}
+^{:refer hara.model.annex.spec-r.rewrite/r-rewrite-stage :added "4.1"}
 (fact "lowers inline do returns after stage rewriting"
   (rewrite/r-rewrite-stage
    '(return (do (print 1) (+ 1 2)))

@@ -1,12 +1,12 @@
-(ns hara.lang.model.spec-js.meta-test
+(ns hara.model.spec-js.meta-test
   (:require [hara.lang :as l]
-            [hara.lang.model.spec-js.meta :refer :all])
+            [hara.model.spec-js.meta :refer :all])
   (:use code.test))
 
-^{:refer hara.lang.model.spec-js.meta/js-module-import-async :added "4.0"}
+^{:refer hara.model.spec-js.meta/js-module-import-async :added "4.0"}
 (fact "helper for import")
 
-^{:refer hara.lang.model.spec-js.meta/js-module-import :added "4.0"}
+^{:refer hara.model.spec-js.meta/js-module-import :added "4.0"}
 (fact "outputs the js module import from"
 
   (js-module-import 'react '{:as React} {})
@@ -29,7 +29,7 @@
                              :refer [hello world]} {:emit {:lang/format :global}})
   => '(Object.defineProperty !:G "React" {:value (require "react")}))
 
-^{:refer hara.lang.model.spec-js.meta/js-module-export :added "4.0"}
+^{:refer hara.model.spec-js.meta/js-module-export :added "4.0"}
 (fact "outputs the js module export form"
 
   (js-module-export '{} {:emit {:lang/export true}})
@@ -38,7 +38,7 @@
   (js-module-export '{} {:emit {:lang/format :commonjs}})
   => '(:= module.exports (tab)))
 
-^{:refer hara.lang.model.spec-js.meta/js-module-link :added "4.0"}
+^{:refer hara.model.spec-js.meta/js-module-link :added "4.0"}
 (fact "gets the relative js based module"
 
   (js-module-link 'kmi.common {:base 'kmi.hello})
@@ -57,5 +57,5 @@
                     {:base 'kmi.other.main :target "src"})
   => "../../js/core")
 
-^{:refer hara.lang.model.spec-js.meta/js-transform-entry :added "4.0"}
+^{:refer hara.model.spec-js.meta/js-transform-entry :added "4.0"}
 (fact "function for transforming :type :module entries")

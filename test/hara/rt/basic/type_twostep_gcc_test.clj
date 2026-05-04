@@ -1,6 +1,6 @@
-(ns hara.rt.basic.type-twostep-gcc-test
+(ns hara.runtime.basic.type-twostep-gcc-test
   (:use code.test)
-  (:require [hara.rt.basic.type-common :as common]
+  (:require [hara.runtime.basic.type-common :as common]
             [hara.lang :as l]))
 
 (l/script- :c

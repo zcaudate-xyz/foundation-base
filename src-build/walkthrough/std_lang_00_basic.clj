@@ -55,7 +55,7 @@
       :id 'a
       :module 'walkthrough.hara.lang-00-basic
       :section :code
-      :context/fn #'hara.lang.base.util/lang-rt-default}
+      :context/fn #'hara.common.util/lang-rt-default}
 
   (type @a)
   => hara.lang.base.book_entry.BookEntry
@@ -105,7 +105,7 @@
       :id 'hello
       :module 'walkthrough.hara.lang-00-basic
       :section :code
-      :context/fn #'hara.lang.base.util/lang-rt-default}
+      :context/fn #'hara.common.util/lang-rt-default}
 
   (into {} @hello)
   => (contains-in

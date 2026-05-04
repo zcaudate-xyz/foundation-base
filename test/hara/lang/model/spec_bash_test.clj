@@ -1,6 +1,6 @@
-(ns hara.lang.model.spec-bash-test
+(ns hara.model.spec-bash-test
   (:require [hara.lang :as l]
-            [hara.lang.model.spec-bash :refer :all]
+            [hara.model.spec-bash :refer :all]
             [std.string.prose :as prose])
   (:use code.test))
 
@@ -23,13 +23,13 @@
   (!.sh [ls "-a" "-l"])
   => (contains-in [0 [string?]]))
 
-^{:refer hara.lang.model.spec-bash/PLAYGROUND :adopt true :added "4.0"
-  :setup [(hara.lang.interface.type-notify/clear-sink (l/default-notify)
+^{:refer hara.model.spec-bash/PLAYGROUND :adopt true :added "4.0"
+  :setup [(hara.lang.base.type-notify/clear-sink (l/default-notify)
                                                       "test")]}
 (fact "various features"
 
   ;; NOTIFY
-  (do (def +p+ (hara.lang.interface.type-notify/watch-oneshot (l/default-notify)
+  (do (def +p+ (hara.lang.base.type-notify/watch-oneshot (l/default-notify)
                                                              100
                                                              "test"))
 
@@ -113,13 +113,13 @@
        (echo #{"again"})))
   => [0 ["world"]])
 
-^{:refer hara.lang.model.spec-bash/bash-quote-item :added "4.0"}
+^{:refer hara.model.spec-bash/bash-quote-item :added "4.0"}
 (fact "quotes an item"
 
   (bash-quote-item "hello" +grammar+ {})
   => "\"\\\"hello\\\"\"")
 
-^{:refer hara.lang.model.spec-bash/bash-set :added "4.0"}
+^{:refer hara.model.spec-bash/bash-set :added "4.0"}
 (fact "quotes a string value"
 
   (bash-set #{"hello"} +grammar+ {})
@@ -128,7 +128,7 @@
   (!.sh (echo #{"hello"}))
   => [0 ["hello"]])
 
-^{:refer hara.lang.model.spec-bash/bash-quote :added "4.0"}
+^{:refer hara.model.spec-bash/bash-quote :added "4.0"}
 (fact "quotes a string value"
 
   (bash-quote '(quote "hello") +grammar+ {})
@@ -137,13 +137,13 @@
   (!.sh (echo '"hello"))
   => [0 ["hello"]])
 
-^{:refer hara.lang.model.spec-bash/bash-dash-param :added "4.0"}
+^{:refer hara.model.spec-bash/bash-dash-param :added "4.0"}
 (fact "if keyword, replace `:` with `-`"
 
   (bash-dash-param :hello)
   => "-hello")
 
-^{:refer hara.lang.model.spec-bash/bash-map :added "4.0"}
+^{:refer hara.model.spec-bash/bash-map :added "4.0"}
 (fact "outputs a map"
 
   (bash-map {:hello 1
@@ -160,7 +160,7 @@
          | (bc)])
   => [0 ["65535"]])
 
-^{:refer hara.lang.model.spec-bash/bash-invoke :added "4.0"}
+^{:refer hara.model.spec-bash/bash-invoke :added "4.0"}
 (fact "outputs an invocation (same as vector)"
 
   (bash-invoke '(ls {:l true}) +grammar+ {})
@@ -185,13 +185,13 @@
   (!.sh (expr (- 1 3)))
   => [0 ["-2"]])
 
-^{:refer hara.lang.model.spec-bash/bash-assign :added "4.0"}
+^{:refer hara.model.spec-bash/bash-assign :added "4.0"}
 (fact "outputs an assignment"
 
   (bash-assign '(:= a 1) +grammar+ {})
   => "a=1")
 
-^{:refer hara.lang.model.spec-bash/bash-var :added "4.0"}
+^{:refer hara.model.spec-bash/bash-var :added "4.0"}
 (fact "transforms to var"
 
   (bash-var '(var a 1))
@@ -216,7 +216,7 @@
         (hello))
   => [0 ["1"]])
 
-^{:refer hara.lang.model.spec-bash/bash-defn :added "4.0"}
+^{:refer hara.model.spec-bash/bash-defn :added "4.0"}
 (fact "transforms a function to allow for inputs"
 
   (bash-defn '(defn hello [a b]
@@ -246,7 +246,7 @@
                2))
   => [0 ["3 2"]])
 
-^{:refer hara.lang.model.spec-bash/bash-defn- :added "4.0"}
+^{:refer hara.model.spec-bash/bash-defn- :added "4.0"}
 (fact "emits a non paramerised version"
 
   (l/emit-as
@@ -265,7 +265,7 @@
         (hello))
   => [0 ["world"]])
 
-^{:refer hara.lang.model.spec-bash/bash-expand :added "4.0"}
+^{:refer hara.model.spec-bash/bash-expand :added "4.0"}
 (fact "brace expansion syntax"
 
   (bash-expand '(:$ hello))
@@ -274,7 +274,7 @@
   (!.sh (echo (:$ BASH_VERSION)))
   => (contains-in [0 [string?]]))
 
-^{:refer hara.lang.model.spec-bash/bash-subshell :added "4.0"}
+^{:refer hara.model.spec-bash/bash-subshell :added "4.0"}
 (fact "brace subshell syntax"
 
   (bash-subshell '($ hello))
@@ -283,7 +283,7 @@
   (!.sh (echo ($ (expr (+ 1 2 3)))))
   => [0 ["6"]])
 
-^{:refer hara.lang.model.spec-bash/bash-test :added "4.0"}
+^{:refer hara.model.spec-bash/bash-test :added "4.0"}
 (fact "constructs test syntax"
 
   (bash-test '(:test (1 -ne 10)))
@@ -298,7 +298,7 @@
           (echo "world")))
   => [0 ["world"]])
 
-^{:refer hara.lang.model.spec-bash/bash-pipeleft :added "4.0"}
+^{:refer hara.model.spec-bash/bash-pipeleft :added "4.0"}
 (fact "constructs pipeleft syntax"
 
   (bash-pipeleft '(echo (<$ (echo "hello"))))
@@ -312,7 +312,7 @@
    (echo (<$ (echo #{"hello"}))))
   => (contains-in [0 [#"/dev/fd"]]))
 
-^{:refer hara.lang.model.spec-bash/bash-piperight :added "4.0"}
+^{:refer hara.model.spec-bash/bash-piperight :added "4.0"}
 (fact "constructs pipeleft syntax"
 
   (bash-piperight '($> (echo "hello")))
@@ -323,7 +323,7 @@
   => ">(3&)"
   )
 
-^{:refer hara.lang.model.spec-bash/bash-here :added "4.0"}
+^{:refer hara.model.spec-bash/bash-here :added "4.0"}
 (fact "construct here block and here string"
 
   (l/emit-as
@@ -346,7 +346,7 @@
   (!.sh (cat (<< "HERE IS INPUT")))
   => [0 ["HERE IS INPUT"]])
 
-^{:refer hara.lang.model.spec-bash/bash-check-fn :added "4.0"}
+^{:refer hara.model.spec-bash/bash-check-fn :added "4.0"}
 (fact "custom check for vectors"
 
   (bash-check-fn [1 :ne 10])
@@ -355,7 +355,7 @@
   (bash-check-fn '(hello world))
   => '(hello world))
 
-^{:refer hara.lang.model.spec-bash/bash-when :added "4.0"}
+^{:refer hara.model.spec-bash/bash-when :added "4.0"}
 (fact "when support for custom vectors"
 
   (l/emit-as
@@ -377,7 +377,7 @@
           (echo "hello")))
   => [0 ["hello" "hello"]])
 
-^{:refer hara.lang.model.spec-bash/bash-if :added "4.0"}
+^{:refer hara.model.spec-bash/bash-if :added "4.0"}
 (fact "if support for custom vectors"
 
   (l/emit-as
@@ -396,7 +396,7 @@
           (echo "world")))
   => [0 ["world"]])
 
-^{:refer hara.lang.model.spec-bash/bash-cond :added "4.0"}
+^{:refer hara.model.spec-bash/bash-cond :added "4.0"}
 (fact "cond support for custom vectors"
 
   (l/emit-as

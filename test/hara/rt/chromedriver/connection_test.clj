@@ -1,7 +1,7 @@
-(ns hara.rt.chromedriver.connection-test
+(ns hara.runtime.chromedriver.connection-test
   (:use code.test)
-  (:require [hara.rt.chromedriver.connection :as conn]
-            [hara.rt.chromedriver.impl :as impl]
+  (:require [hara.runtime.chromedriver.connection :as conn]
+            [hara.runtime.chromedriver.impl :as impl]
             [std.lib :as h]))
 
 (defonce +scaffold+ (atom nil))
@@ -40,13 +40,13 @@
  {:setup [(restart-scaffold)]
   :teardown [(stop-scaffold)]})
 
-^{:refer hara.rt.chromedriver.connection/gen-id :added "4.0"}
+^{:refer hara.runtime.chromedriver.connection/gen-id :added "4.0"}
 (fact "generates an id"
 
   (conn/gen-id {})
   => integer?)
 
-^{:refer hara.rt.chromedriver.connection/send :added "4.0"
+^{:refer hara.runtime.chromedriver.connection/send :added "4.0"
   :setup [(def +conn+
             (conn/conn-create {:port (:port (start-scaffold))}))]
   :teardown [(conn/conn-close +conn+)]}
@@ -62,13 +62,13 @@
               {:targetId (:target-id +conn+)})
   => nil?)
 
-^{:refer hara.rt.chromedriver.connection/ws-url :added "4.0"}
+^{:refer hara.runtime.chromedriver.connection/ws-url :added "4.0"}
 (fact "gets the ws-url"
 
   (conn/ws-url {:port (:port (start-scaffold))})
   => string?)
 
-^{:refer hara.rt.chromedriver.connection/conn-process :added "4.0"}
+^{:refer hara.runtime.chromedriver.connection/conn-process :added "4.0"}
 (fact "processes the return call"
 
   (conn/conn-process (atom {})
@@ -76,7 +76,7 @@
                                       :result [1 2 3 4]}))
   => [nil [1 2 3 4]])
 
-^{:refer hara.rt.chromedriver.connection/conn-attach :added "4.0"
+^{:refer hara.runtime.chromedriver.connection/conn-attach :added "4.0"
   :setup [(def +conn+
             (conn/conn-create {:attach false
                                :port (:port (start-scaffold))}))]
@@ -97,10 +97,10 @@
               {})
   => (contains {"targetInfos" vector?}))
 
-^{:refer hara.rt.chromedriver.connection/conn-create-raw :added "4.0"}
+^{:refer hara.runtime.chromedriver.connection/conn-create-raw :added "4.0"}
 (fact "connection function (can error on OSX)")
 
-^{:refer hara.rt.chromedriver.connection/conn-create :added "4.0"
+^{:refer hara.runtime.chromedriver.connection/conn-create :added "4.0"
   :setup [(def +conn+
             (conn/conn-create {:port (:port (start-scaffold))
                                :attach :new}))
@@ -150,5 +150,5 @@
                   "Target.getTargetInfo"))
   => (contains-in {"targetInfo" {"attached" true}}))
 
-^{:refer hara.rt.chromedriver.connection/conn-close :added "4.0"}
+^{:refer hara.runtime.chromedriver.connection/conn-close :added "4.0"}
 (fact "closes the target and disconnects the devtools connection")

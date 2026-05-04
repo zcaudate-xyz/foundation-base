@@ -1,11 +1,11 @@
-(ns hara.lang.model-annex.spec-r.rewrite-test
+(ns hara.model.annex.spec-r.rewrite-test
   (:require [clojure.walk]
-            [hara.lang.base.emit-preprocess :as preprocess]
-            [hara.lang.model-annex.spec-r :as r]
-            [hara.lang.model-annex.spec-r.rewrite :as rewrite])
+            [hara.common.emit-preprocess :as preprocess]
+            [hara.model.annex.spec-r :as r]
+            [hara.model.annex.spec-r.rewrite :as rewrite])
   (:use code.test))
 
-^{:refer hara.lang.model-annex.spec-r/tf-defn :added "4.1"}
+^{:refer hara.model.annex.spec-r/tf-defn :added "4.1"}
 (fact "applies inferred optional arguments during defn expansion"
   (preprocess/with:macro-opts [{:module {:id 'xt.event.base-view}}]
     (r/tf-defn '(defn get-output [view dest-key]
@@ -14,16 +14,16 @@
         (fn [view dest-key := nil]
           (return dest-key))))
 
-^{:refer hara.lang.model-annex.spec-r.rewrite/r-rewrite-expression :added "4.1"}
+^{:refer hara.model.annex.spec-r.rewrite/r-rewrite-expression :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-r.rewrite/r-rewrite-statement :added "4.1"}
+^{:refer hara.model.annex.spec-r.rewrite/r-rewrite-statement :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-r.rewrite/r-rewrite-statements :added "4.1"}
+^{:refer hara.model.annex.spec-r.rewrite/r-rewrite-statements :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-r.rewrite/r-rewrite-stage :added "4.1"}
+^{:refer hara.model.annex.spec-r.rewrite/r-rewrite-stage :added "4.1"}
 (fact "rewrites defgen into an iterator-building defn"
   (let [out      (rewrite/r-rewrite-stage
                   '(defgen hello [xs]

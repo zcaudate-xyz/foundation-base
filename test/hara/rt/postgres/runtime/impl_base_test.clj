@@ -1,14 +1,14 @@
-(ns hara.rt.postgres.runtime.impl-base-test
-  (:require [hara.rt.postgres]
-            [hara.rt.postgres.base.application :as app]
-            [hara.rt.postgres.runtime.impl-base :refer :all]
-            [hara.rt.postgres.test.scratch-v1 :as scratch]
+(ns hara.runtime.postgres.runtime.impl-base-test
+  (:require [hara.runtime.postgres]
+            [hara.runtime.postgres.base.application :as app]
+            [hara.runtime.postgres.runtime.impl-base :refer :all]
+            [hara.runtime.postgres.test.scratch-v1 :as scratch]
             [hara.lang :as l]
             [hara.lang.base.book :as book])
   (:use code.test))
 
 (l/script- :postgres
-  {:require [[hara.rt.postgres.test.scratch-v1 :as scratch]]
+  {:require [[hara.runtime.postgres.test.scratch-v1 :as scratch]]
    :static {:application ["scratch"]
             :all    {:schema   ["scratch"]}}})
 
@@ -23,7 +23,7 @@
                      :tree
                      :Task]))
 
-^{:refer hara.rt.postgres.runtime.impl-base/prep-entry :added "4.0"
+^{:refer hara.runtime.postgres.runtime.impl-base/prep-entry :added "4.0"
   :setup [@Hello]}
 (fact "prepares data given an entry sym"
 
@@ -31,8 +31,8 @@
   => book/book-entry?)
 
 (fact "prep-entry prefers the live current-module entry"
-  (with-redefs [hara.lang.base.emit-common/emit-symbol-classify (fn [_ _] [:self '-])
-                hara.rt.postgres.base.grammar.common/pg-resolve-entry
+  (with-redefs [hara.common.emit-common/emit-symbol-classify (fn [_ _] [:self '-])
+                hara.runtime.postgres.base.grammar.common/pg-resolve-entry
                 (fn [_ _]
                   [{:modules {}}
                    {:id 'Hello
@@ -48,15 +48,15 @@
                 :lang :postgres
                 :section :code}))
 
-^{:refer hara.rt.postgres.runtime.impl-base/prep-table :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl-base/prep-table :added "4.0"}
 (fact "prepares data related to the table sym"
 
   (prep-table '-/Hello false (l/rt:macro-opts :postgres))
   => vector?)
 
 (fact "prep-table overlays module tables onto the application view"
-  (with-redefs [hara.lang.base.emit-common/emit-symbol-classify (fn [_ _] [:self '-])
-                hara.rt.postgres.base.grammar.common/pg-resolve-entry
+  (with-redefs [hara.common.emit-common/emit-symbol-classify (fn [_ _] [:self '-])
+                hara.runtime.postgres.base.grammar.common/pg-resolve-entry
                 (fn [_ _]
                   [{:modules {}}
                    {:id 'Entry
@@ -82,7 +82,7 @@
        (contains? (-> mopts :application :pointers) 'Entry)]))
   => [true true])
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-input-check :guard true :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-input-check :guard true :added "4.0"}
 (fact "passes the input if check is ok"
 
   (t-input-check (get-in (app/app "scratch")
@@ -108,14 +108,14 @@
                    :cache hello})
   => map?)
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-input-collect :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-input-collect :added "4.0"}
 (fact "adds schema info to keys of map"
 
   (t-input-collect -tsch-
                    '{:status a})
   => (contains {:status (contains ['a map?])}))
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-val-process :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-val-process :added "4.0"}
 (fact "allows additional filters to be added"
 
   (t-val-process [['add 5]
@@ -123,12 +123,12 @@
                  'i)
   => '(sub (add i 5) 5))
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-val-fn :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-val-fn :added "4.0"}
 (fact "builds a js val given input"
 
   (t-val-fn -tsch-
             :status 'a {} {})
-  => '(++ a hara.rt.postgres.test.scratch-v1/EnumStatus)
+  => '(++ a hara.runtime.postgres.test.scratch-v1/EnumStatus)
 
   (t-val-fn -tsch-
             :cache 'a {}
@@ -147,7 +147,7 @@
                 {:book {}}))
     => '(:uuid "some-uuid")))
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-key-attrs-fn :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-key-attrs-fn :added "4.0"}
 (fact "builds a js key"
 
   (t-key-attrs-fn [:cache  (get -tsch- :cache)])
@@ -156,7 +156,7 @@
   (t-key-attrs-fn [:id  (get -tsch- :id)])
   => "id")
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-key-fn :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-key-fn :added "4.0"}
 (fact "builds a js key"
 
   (t-key-fn -tsch-
@@ -167,7 +167,7 @@
             :id)
   => "id")
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-sym-fn :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-sym-fn :added "4.0"}
 (fact "builds a json access form"
 
   (t-sym-fn -tsch-
@@ -180,7 +180,7 @@
             'e)
   => '(:uuid (:->> e "id")))
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-build-js-map :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-build-js-map :added "4.0"}
 (fact "builds a js map"
 
   (t-build-js-map -tsch-
@@ -190,13 +190,13 @@
                                      :cache hello})
                   {:coalesce true}
                   (last (prep-table 'scratch/Task true (l/rt:macro-opts :postgres))))
-  => '(jsonb-build-object "id" (hara.rt.postgres/uuid-generate-v4)
-                          "status" (++ a hara.rt.postgres.test.scratch-v1/EnumStatus)
+  => '(jsonb-build-object "id" (hara.runtime.postgres/uuid-generate-v4)
+                          "status" (++ a hara.runtime.postgres.test.scratch-v1/EnumStatus)
                           "name" (:text "hello")
                           "cache_id" (:uuid hello)
                           "__deleted__" false))
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-create-fn :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-create-fn :added "4.0"}
 (fact "the flat create-fn"
 
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
@@ -204,24 +204,24 @@
                                  :name "hello"
                                  :cache hello}
                  {:coalesce true}))
-  => '(jsonb-build-object "id" (hara.rt.postgres/uuid-generate-v4)
-                          "status" (++ a hara.rt.postgres.test.scratch-v1/EnumStatus)
+  => '(jsonb-build-object "id" (hara.runtime.postgres/uuid-generate-v4)
+                          "status" (++ a hara.runtime.postgres.test.scratch-v1/EnumStatus)
                           "name" (:text "hello")
                           "cache_id" (:uuid hello)
                           "__deleted__" false))
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-returning-cols-default :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-returning-cols-default :added "4.0"}
 (fact "formats returning cols default"
   (t-returning-cols-default [:id] t-key-attrs-fn)
   => vector?)
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-join-target-sym :added "4.1"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-join-target-sym :added "4.1"}
 (fact "t-join-target-sym builds a namespaced symbol from link info"
   (t-join-target-sym {:module 'scratch :id 'Task}) => 'scratch/Task
   (t-join-target-sym {:ns 'scratch :id 'Task}) => 'scratch/Task
   (t-join-target-sym {:module 'scratch}) => nil)
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-returning-cols :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-returning-cols :added "4.0"}
 (fact "formats returning cols given"
 
   (t-returning-cols -tsch-
@@ -244,7 +244,7 @@
                     t-key-attrs-fn)
   => [#{"hello_id"}])
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-returning :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-returning :added "4.0"}
 (fact "formats the returning expression"
 
   (t-returning -tsch-
@@ -266,13 +266,13 @@
                               :as hello}})
   => '(--- [#{"id"} [(concat #{id} "-" #{time}) :as hello]]))
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-where-hashvec-transform :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-where-hashvec-transform :added "4.0"}
 (fact "transforms entries"
 
   (t-where-hashvec-transform [[:id 1] [:cache 1]] identity)
   => #{[:id 1 :or :cache 1]})
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-where-hashvec :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-where-hashvec :added "4.0"}
 (fact "function for where transform"
 
   (t-where-hashvec #{[:simple-id [:eq 1]]}
@@ -286,7 +286,7 @@
                    identity)
   => #{[:simple 1 :and :hello 1 :or :id 1]})
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-where-transform :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-where-transform :added "4.0"}
 (fact "creates a where transform"
 
   (t-where-transform -tsch- {:id 1} {})
@@ -300,7 +300,7 @@
                                :cache 1]} {})
   => #{["id" [:eq 1] :or "cache_id" [:eq 1]]})
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-wrap-json :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-wrap-json :added "4.0"}
 (fact "wraps a json return to the statement"
 
   (t-wrap-json '<FORM> :json 'js-agg 'output nil)
@@ -312,7 +312,7 @@
   (t-wrap-json '<FORM> :record 'js-agg 'output nil)
   => '[:with j-ret :as <FORM> \\ :select (js-agg j-ret) :from j-ret])
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-join-transform :added "4.1"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-join-transform :added "4.1"}
 (fact "transforms join entries"
 
   (let [out (t-join-transform {:task [{:type :ref :ref {:link {:ns "scratch" :id "Task"}}}]}
@@ -322,13 +322,13 @@
     (first (first out)) => :left-join
     (second (first out)) => 'scratch/Task))
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-wrap-join :added "4.1"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-wrap-join :added "4.1"}
 (fact "adds a `join` clause"
 
   (t-wrap-join [] [[:left-join "target" :on [:= "s.id" "t.id"]]] {})
   => [[:left-join "target" :on [:= "s.id" "t.id"]]])
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-wrap-where :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-wrap-where :added "4.0"}
 (fact "adds a `where` clause"
 
   (t-wrap-where []
@@ -338,7 +338,7 @@
                 {})
   => '[:where {"id" [:eq 1]}])
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-wrap-order-by :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-wrap-order-by :added "4.0"}
 (fact "adds an `order-by` clause"
 
   (t-wrap-order-by []
@@ -347,7 +347,7 @@
                    {})
   => '[:order-by (quote [#{"id"} #{"status"}])])
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-wrap-order-sort :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-wrap-order-sort :added "4.0"}
 (fact "determines asc or desc key"
 
   (t-wrap-order-sort []
@@ -356,48 +356,48 @@
                      {})
   => '[:asc])
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-wrap-limit :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-wrap-limit :added "4.0"}
 (fact "adds a `limit` clause"
 
   (t-wrap-limit [] 10 {})
   => [:limit 10])
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-wrap-offset :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-wrap-offset :added "4.0"}
 (fact "adds a `offset` clause"
 
   (t-wrap-offset [] 10 {})
   => [:offset 10])
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-wrap-into :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-wrap-into :added "4.0"}
 (fact "adds `into` clause"
 
   (t-wrap-into [] 'hello {})
   => '[:into hello])
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-wrap-returning :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-wrap-returning :added "4.0"}
 (fact "adds `returning` clause"
 
   (t-wrap-returning [] [#{"id"} #{"status"}] {})
   => [:returning [#{"id"} #{"status"}]])
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-wrap-group-by :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-wrap-group-by :added "4.0"}
 (fact "adds `group-by` clause"
 
   (t-wrap-group-by [] [#{"id"} #{"status"}] {})
   => [:group-by [#{"id"} #{"status"}]])
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-wrap-having :added "4.1"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-wrap-having :added "4.1"}
 (fact "adds a `having` clause"
 
   (t-wrap-having [] {:id 1} -tsch- {} {})
   => '[:having {"id" [:eq 1]}])
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-wrap-args :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-wrap-args :added "4.0"}
 (fact "adds `additional` args"
   (t-wrap-args [] [:a] {})
   => [:a])
 
-^{:refer hara.rt.postgres.runtime.impl-base/t-wrap-lock :added "4.1"}
+^{:refer hara.runtime.postgres.runtime.impl-base/t-wrap-lock :added "4.1"}
 (fact "adds lock clauses and optional newline separators"
   (t-wrap-lock [] [:update] {})
   => [:for :update]

@@ -1,24 +1,24 @@
-(ns hara.rt.basic.type-websocket-test
-  (:require [hara.rt.basic.server-websocket :as ws]
-            [hara.rt.basic.type-basic :as basic]
-            [hara.rt.basic.type-common :as common]
-            [hara.rt.basic.type-websocket :refer :all]
+(ns hara.runtime.basic.type-websocket-test
+  (:require [hara.runtime.basic.server-websocket :as ws]
+            [hara.runtime.basic.type-basic :as basic]
+            [hara.runtime.basic.type-common :as common]
+            [hara.runtime.basic.type-websocket :refer :all]
             [std.lib.component :as component])
   (:use code.test))
 
-^{:refer hara.rt.basic.type-websocket/start-websocket :added "4.0"}
+^{:refer hara.runtime.basic.type-websocket/start-websocket :added "4.0"}
 (fact "starts bench and server for websocket runtime"
   (with-redefs [basic/start-basic (fn [rt f] (assoc rt :started true))]
     (start-websocket {:id "test" :lang :js}))
   => (contains {:started true}))
 
-^{:refer hara.rt.basic.type-websocket/rt-websocket:create :added "4.0"}
+^{:refer hara.runtime.basic.type-websocket/rt-websocket:create :added "4.0"}
 (fact "creates a websocket runtime"
   (with-redefs [common/get-options (fn [& _] {})]
     (rt-websocket:create {:lang :js}))
   => map?)
 
-^{:refer hara.rt.basic.type-websocket/rt-websocket :added "4.0"}
+^{:refer hara.runtime.basic.type-websocket/rt-websocket :added "4.0"}
 (fact "creates and start a websocket runtime"
   (with-redefs [rt-websocket:create (fn [m] m)
                 component/start (fn [m] (assoc m :started true))]

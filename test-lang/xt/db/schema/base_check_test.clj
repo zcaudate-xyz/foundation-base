@@ -1,6 +1,6 @@
 (ns xt.db.schema.base-check-test
-  (:require [hara.rt.postgres :as pg]
-            [hara.rt.postgres.test.scratch-v1 :as scratch]
+  (:require [hara.runtime.postgres :as pg]
+            [hara.runtime.postgres.test.scratch-v1 :as scratch]
             [hara.lang :as l])
   (:use code.test))
 

@@ -1,8 +1,8 @@
-(ns hara.lang.seedgen-test
+(ns hara.seedgen-test
   (:require [std.fs :as fs]
-            [hara.lang.seedgen.form-bench :as form-bench]
-            [hara.lang.seedgen.form-infile :as form-infile]
-            [hara.lang.seedgen :refer :all])
+            [hara.seedgen.form-bench :as form-bench]
+            [hara.seedgen.form-infile :as form-infile]
+            [hara.seedgen :refer :all])
   (:use code.test))
 
 (def ^:private +seedgen-spacing-source+
@@ -197,7 +197,7 @@
      :lookup lookup
      :project project}))
 
-^{:refer hara.lang.seedgen/seedgen-root :added "4.1"}
+^{:refer hara.seedgen/seedgen-root :added "4.1"}
 (fact "runs the public root lookup task without crashing on scalar results"
   (seedgen-root '[xt.sample])
 
@@ -208,10 +208,10 @@
                 :results number?
                 :total number?}))
 
-^{:refer hara.lang.seedgen/seedgen-list :added "4.1"}
+^{:refer hara.seedgen/seedgen-list :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.seedgen/seedgen-readforms :added "4.1"}
+^{:refer hara.seedgen/seedgen-readforms :added "4.1"}
 (fact "returns summary information for public seedgen readforms analysis"
   (seedgen-readforms '[xt.sample.train-002] {:return :summary})
   => (contains {:errors 0
@@ -220,10 +220,10 @@
                 :results 1
                 :total number?}))
 
-^{:refer hara.lang.seedgen/seedgen-benchlist :added "4.1"}
+^{:refer hara.seedgen/seedgen-benchlist :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.seedgen/seedgen-incomplete :added "4.1"}
+^{:refer hara.seedgen/seedgen-incomplete :added "4.1"}
 (fact "returns summary information for incomplete seedgen tasks"
   (seedgen-incomplete '[xt.sample] {:print {:result true :summary true}})
 
@@ -234,7 +234,7 @@
                 :results number?
                 :total number?}))
 
-^{:refer hara.lang.seedgen/seedgen-langremove :added "4.1"}
+^{:refer hara.seedgen/seedgen-langremove :added "4.1"}
 (fact "langremove removes wrapped runtime checks added by langadd"
   (let [{:keys [root path lookup project]} (seedgen-wait-context "seedgen-langremove-wait")]
     (try
@@ -258,7 +258,7 @@
         (fs/delete root {:recursive true}))))
   => [true true false false false false false])
 
-^{:refer hara.lang.seedgen/seedgen-langadd :added "4.1"}
+^{:refer hara.seedgen/seedgen-langadd :added "4.1"}
 (fact "langadd preserves multiline setup and teardown indentation"
   (let [{:keys [root path lookup project]} (seedgen-spacing-context "seedgen-langadd-spacing")]
     (try
@@ -274,7 +274,7 @@
          (fs/delete root {:recursive true}))))
   => [true true true])
 
-^{:refer hara.lang.seedgen/seedgen-langadd :added "4.1"}
+^{:refer hara.seedgen/seedgen-langadd :added "4.1"}
 (fact "langadd applies root-script extra requires for generated languages"
   (let [{:keys [root path lookup project]} (seedgen-extra-context "seedgen-langadd-extra")]
     (try
@@ -290,7 +290,7 @@
          (fs/delete root {:recursive true}))))
   => [true true true])
 
-^{:refer hara.lang.seedgen/seedgen-langadd :added "4.1"}
+^{:refer hara.seedgen/seedgen-langadd :added "4.1"}
 (fact "bulk seedgen tasks only return test namespaces"
   (let [{:keys [root lookup project]} (seedgen-selector-context "seedgen-task-selector")]
     (try
@@ -351,7 +351,7 @@
       '[xt.sample.selector-test]
       '[xt.sample.selector-test]])
 
-^{:refer hara.lang.seedgen/seedgen-benchadd :added "4.1"}
+^{:refer hara.seedgen/seedgen-benchadd :added "4.1"}
 (fact "benchadd summary reports generated function refs while counting target namespaces"
   (let [root    (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-summary"
                                                                   (make-array java.nio.file.attribute.FileAttribute 0)))
@@ -371,7 +371,7 @@
                       "(fact \"summary branches\"\n"
                       "  (!.js (+ 1 2 3))\n"
                       "  => 6)\n"))
-      (let [output (#'hara.lang.seedgen/seedgen-benchadd-summary
+      (let [output (#'hara.seedgen/seedgen-benchadd-summary
                     'xt.sample.summary-test
                     {:rename '{xt [samplebench :lang]}
                      :lang [:python]
@@ -385,7 +385,7 @@
   => ['[example.A]
       '[samplebench.python.sample.summary-test]])
 
-^{:refer hara.lang.seedgen/seedgen-benchadd :added "4.1"}
+^{:refer hara.seedgen/seedgen-benchadd :added "4.1"}
 (fact "benchadd preserves multiline setup and teardown indentation"
   (let [{:keys [root bench-path lookup project]} (seedgen-spacing-context "seedgen-benchadd-spacing")]
     (try
@@ -401,7 +401,7 @@
          (fs/delete root {:recursive true}))))
   => [true true true])
 
-^{:refer hara.lang.seedgen/seedgen-benchadd :added "4.1"}
+^{:refer hara.seedgen/seedgen-benchadd :added "4.1"}
 (fact "benchadd applies root-script extra requires for generated bench namespaces"
   (let [{:keys [root bench-path lookup project]} (seedgen-extra-context "seedgen-benchadd-extra")]
     (try
@@ -417,7 +417,7 @@
          (fs/delete root {:recursive true}))))
   => [true true true])
 
-^{:refer hara.lang.seedgen/seedgen-benchadd :added "4.1"}
+^{:refer hara.seedgen/seedgen-benchadd :added "4.1"}
 (fact "benchadd skips suppressed setup items when generating bench files"
   (let [{:keys [root bench-path lookup project]} (seedgen-suppress-context "seedgen-benchadd-suppress")]
     (try
@@ -433,7 +433,7 @@
         (fs/delete root {:recursive true}))))
   => [false true true])
 
-^{:refer hara.lang.seedgen/seedgen-benchadd :added "4.1"}
+^{:refer hara.seedgen/seedgen-benchadd :added "4.1"}
 (fact "benchadd preserves shorthand metadata on generated runtime checks"
   (let [root     (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-meta"
                                                                    (make-array java.nio.file.attribute.FileAttribute 0)))
@@ -455,5 +455,5 @@
         (fs/delete root {:recursive true}))))
   => #"(?ms)\^\*\(!\.dt \(\+ 1 2 3\)\)")
 
-^{:refer hara.lang.seedgen/seedgen-benchremove :added "4.1"}
+^{:refer hara.seedgen/seedgen-benchremove :added "4.1"}
 (fact "TODO")

@@ -1,9 +1,9 @@
-(ns hara.lang.model.spec-go-typed-test
+(ns hara.model.spec-go-typed-test
   (:require [clojure.string :as str]
-            [hara.lang.model.spec-go.typed :as go-typed])
+            [hara.model.spec-go.typed :as go-typed])
   (:use code.test))
 
-^{:refer hara.lang.model.spec-go.typed/emit-go-type :added "4.1"}
+^{:refer hara.model.spec-go.typed/emit-go-type :added "4.1"}
 (fact "maps xtalk primitive and container types to go"
   [(go-typed/emit-go-type {:kind :primitive :name :xt/str} nil)
    (go-typed/emit-go-type {:kind :array
@@ -20,7 +20,7 @@
                            :item {:kind :named :name 'sample.user/User}} 'sample.user)]
   => ["string" "[]int" "map[any]any" "map[string]any" "*User"])
 
-^{:refer hara.lang.model.spec-go.typed/emit-analysis-declarations :added "4.1"}
+^{:refer hara.model.spec-go.typed/emit-analysis-declarations :added "4.1"}
 (fact "emits spec/function/value declarations in go syntax"
   (go-typed/emit-analysis-declarations
    {:specs [{:ns "sample.user"
@@ -51,7 +51,7 @@
 
 (fact "can emit declarations from typed fixture namespace"
   (let [out (go-typed/emit-namespace-declarations
-             'hara.lang.model.spec-xtalk-typed-fixture)]
+             'hara.model.spec-xtalk-typed-fixture)]
     [(str/includes? out "type User map[string]any")
      (str/includes? out "type UserMap map[any]any")
      (str/includes? out "type find_user func(arg0 UserMap, arg1 string) *User")])

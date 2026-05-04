@@ -1,4 +1,4 @@
-(ns hara.lang.model.spec-xtalk-typed-test
+(ns hara.model.spec-xtalk-typed-test
   (:require [clojure.string]
    [hara.lang.typed.xtalk :as typed]
    [hara.lang.typed.xtalk-analysis :as analysis]
@@ -7,7 +7,7 @@
    [hara.lang.typed.xtalk-lower :as lower]
    [hara.lang.typed.xtalk-ops :as ops]
    [hara.lang.typed.xtalk-parse :as parse]
-   [hara.lang.model.spec-js.ts :as ts])
+   [hara.model.spec-js.ts :as ts])
   (:use code.test))
 
 (fact "normalizes xtalk type forms"
@@ -25,7 +25,7 @@
 (fact "defspec.xt registers a spec declaration"
   (typed/clear-registry!)
   (eval '(hara.lang.typed.xtalk/defspec.xt LocalId :xt/str))
-  (-> (typed/get-spec 'hara.lang.model.spec-xtalk-typed-test/LocalId)
+  (-> (typed/get-spec 'hara.model.spec-xtalk-typed-test/LocalId)
       :type
       types/type->data)
   => {:kind :primitive :name :xt/str})
@@ -52,7 +52,7 @@
   (typed/clear-registry!)
   (eval '(hara.lang.typed.xtalk/defspec.xt AliasMaybeFixture
            [:xt/maybe types/User]))
-  (-> (typed/get-spec 'hara.lang.model.spec-xtalk-typed-test/AliasMaybeFixture)
+  (-> (typed/get-spec 'hara.model.spec-xtalk-typed-test/AliasMaybeFixture)
       :type
       types/type->data)
   => '{:kind :maybe
@@ -380,17 +380,17 @@
   => true)
 
 (fact "parses defspec.xt and merges function signatures"
-  (let [analysis (parse/analyze-namespace 'hara.lang.model.spec-xtalk-typed-fixture)
+  (let [analysis (parse/analyze-namespace 'hara.model.spec-xtalk-typed-fixture)
         fn-def (some #(when (= "find-user" (:name %)) %)
                      (:functions analysis))]
     {:spec-count (count (:specs analysis))
      :input-types (mapv (comp types/type->data :type) (:inputs fn-def))
      :output (types/type->data (:output fn-def))})
   => '{:spec-count 3
-       :input-types [{:kind :named :name hara.lang.model.spec-xtalk-typed-fixture/UserMap}
+       :input-types [{:kind :named :name hara.model.spec-xtalk-typed-fixture/UserMap}
                      {:kind :primitive :name :xt/str}]
         :output {:kind :maybe
-                 :item {:kind :named :name hara.lang.model.spec-xtalk-typed-fixture/User}}})
+                 :item {:kind :named :name hara.model.spec-xtalk-typed-fixture/User}}})
 
 (fact "parses single-clause multi-arity forms tolerantly"
   (let [fn-def (parse/parse-defn
@@ -503,7 +503,7 @@
   => '[true true true true true true])
 
 (fact "emits TypeScript declarations from xtalk specs"
-  (let [out (ts/emit-namespace-declarations 'hara.lang.model.spec-xtalk-typed-fixture)]
+  (let [out (ts/emit-namespace-declarations 'hara.model.spec-xtalk-typed-fixture)]
     [(clojure.string/includes? out "export interface User")
      (clojure.string/includes? out "export type UserMap = Record<string, User>;")
      (clojure.string/includes? out "export type find_user = (arg0: UserMap, arg1: string) => User | null;")
@@ -553,21 +553,21 @@
 
 (fact "checks valid xtalk functions"
   (typed/clear-registry!)
-  (typed/analyze-and-register! 'hara.lang.model.spec-xtalk-typed-fixture)
-  (-> (typed/check-function 'hara.lang.model.spec-xtalk-typed-fixture/find-user)
+  (typed/analyze-and-register! 'hara.model.spec-xtalk-typed-fixture)
+  (-> (typed/check-function 'hara.model.spec-xtalk-typed-fixture/find-user)
       (select-keys [:return :errors]))
   => '{:return {:kind :maybe
-                :item {:kind :named :name hara.lang.model.spec-xtalk-typed-fixture/User}}
+                :item {:kind :named :name hara.model.spec-xtalk-typed-fixture/User}}
        :errors []})
 
 (fact "reports return and call mismatches"
   (typed/clear-registry!)
-  (typed/analyze-and-register! 'hara.lang.model.spec-xtalk-typed-fixture)
-  [(-> (typed/check-function 'hara.lang.model.spec-xtalk-typed-fixture/wrong-user-name)
+  (typed/analyze-and-register! 'hara.model.spec-xtalk-typed-fixture)
+  [(-> (typed/check-function 'hara.model.spec-xtalk-typed-fixture/wrong-user-name)
        :errors
        first
        :tag)
-   (-> (typed/check-function 'hara.lang.model.spec-xtalk-typed-fixture/find-user-wrong-key)
+   (-> (typed/check-function 'hara.model.spec-xtalk-typed-fixture/find-user-wrong-key)
        :errors
        first
        :tag)]
@@ -575,12 +575,12 @@
 
 (fact "exposes typed analysis helpers"
   (typed/clear-registry!)
-  (typed/analyze-and-register! 'hara.lang.model.spec-xtalk-typed-fixture)
-  [(analysis/get-function-input-type 'hara.lang.model.spec-xtalk-typed-fixture/find-user 'id)
-   (analysis/get-function-output-type 'hara.lang.model.spec-xtalk-typed-fixture/find-user)]
+  (typed/analyze-and-register! 'hara.model.spec-xtalk-typed-fixture)
+  [(analysis/get-function-input-type 'hara.model.spec-xtalk-typed-fixture/find-user 'id)
+   (analysis/get-function-output-type 'hara.model.spec-xtalk-typed-fixture/find-user)]
   => '[{:kind :primitive :name :xt/str}
        {:kind :maybe
-        :item {:kind :named :name hara.lang.model.spec-xtalk-typed-fixture/User}}])
+        :item {:kind :named :name hara.model.spec-xtalk-typed-fixture/User}}])
 
 (fact "analyzes event-common and event-form namespace specs"
   (typed/clear-registry!)

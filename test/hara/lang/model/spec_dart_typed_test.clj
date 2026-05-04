@@ -1,9 +1,9 @@
-(ns hara.lang.model.spec-dart-typed-test
+(ns hara.model.spec-dart-typed-test
   (:require [clojure.string :as str]
-            [hara.lang.model.spec-dart.typed :as dart-typed])
+            [hara.model.spec-dart.typed :as dart-typed])
   (:use code.test))
 
-^{:refer hara.lang.model.spec-dart.typed/emit-dart-type :added "4.1"}
+^{:refer hara.model.spec-dart.typed/emit-dart-type :added "4.1"}
 (fact "maps xtalk primitive and container types to dart"
   [(dart-typed/emit-dart-type {:kind :primitive :name :xt/str} nil)
    (dart-typed/emit-dart-type {:kind :array
@@ -15,7 +15,7 @@
                                :item {:kind :named :name 'sample.user/User}} 'sample.user)]
   => ["String" "List<int>" "Map<String, double>" "User?"])
 
-^{:refer hara.lang.model.spec-dart.typed/emit-analysis-declarations :added "4.1"}
+^{:refer hara.model.spec-dart.typed/emit-analysis-declarations :added "4.1"}
 (fact "emits spec/function/value declarations in dart syntax"
   (dart-typed/emit-analysis-declarations
    {:specs [{:ns "sample.user"
@@ -49,7 +49,7 @@
 
 (fact "can emit declarations from typed fixture namespace"
   (let [out (dart-typed/emit-namespace-declarations
-             'hara.lang.model.spec-xtalk-typed-fixture)]
+             'hara.model.spec-xtalk-typed-fixture)]
     [(str/includes? out "class User")
      (str/includes? out "typedef UserMap = Map<String, User>")
      (str/includes? out "typedef FindUser = User? Function")])

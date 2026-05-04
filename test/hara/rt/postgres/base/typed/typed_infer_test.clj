@@ -1,6 +1,6 @@
-(ns hara.rt.postgres.base.typed.typed-infer-test
-  (:require [hara.rt.postgres.base.typed.typed-infer :refer :all]
-            [hara.rt.postgres.base.typed.typed-common :as types])
+(ns hara.runtime.postgres.base.typed.typed-infer-test
+  (:require [hara.runtime.postgres.base.typed.typed-infer :refer :all]
+            [hara.runtime.postgres.base.typed.typed-common :as types])
   (:use code.test))
 
 (defn- entry-table
@@ -13,7 +13,7 @@
     (types/make-column-def :name (types/make-type-ref :primitive nil :text))]
    :id))
 
-^{:refer hara.rt.postgres.base.typed.typed-infer/select-shape-columns :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-infer/select-shape-columns :added "4.1"}
 (fact "select-shape-columns keeps only requested fields"
   (let [shape (types/make-jsonb-shape
                {:id {:type :uuid}
@@ -23,7 +23,7 @@
             [:fields]) => {:id {:type :uuid}}
     (select-shape-columns shape nil) => shape))
 
-^{:refer hara.rt.postgres.base.typed.typed-infer/resolve-table-def :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-infer/resolve-table-def :added "4.1"}
 (fact "resolve-table-def resolves table defs from the registry"
   (types/clear-registry!)
   (let [table (entry-table)]
@@ -31,24 +31,24 @@
     (resolve-table-def 'Entry) => table
     (resolve-table-def :Entry) => table))
 
-^{:refer hara.rt.postgres.base.typed.typed-infer/form-uses-tracked? :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-infer/form-uses-tracked? :added "4.1"}
 (fact "form-uses-tracked? detects tracked symbols anywhere in a form"
   (form-uses-tracked? '(let [x y] {:value x}) #{'y}) => true
   (form-uses-tracked? '(let [x z] {:value x}) #{'y}) => false)
 
-^{:refer hara.rt.postgres.base.typed.typed-infer/form-uses-track-param? :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-infer/form-uses-track-param? :added "4.1"}
 (fact "form-uses-track-param? detects nested :track maps"
   (form-uses-track-param? '(pg/t:insert -/Entry {:track o-op}) #{'o-op}) => true
   (form-uses-track-param? '(pg/t:insert -/Entry {:set {:name o-op}}) #{'o-op}) => false)
 
-^{:refer hara.rt.postgres.base.typed.typed-infer/find-table-op-in-body :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-infer/find-table-op-in-body :added "4.1"}
 (fact "find-table-op-in-body returns nil for a plain insert form"
   (find-table-op-in-body
    '((pg/t:insert -/Entry {:name x}))
    '-/Entry)
   => nil)
 
-^{:refer hara.rt.postgres.base.typed.typed-infer/find-table-update-spec-in-body :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-infer/find-table-update-spec-in-body :added "4.1"}
 (fact "find-table-update-spec-in-body returns the update spec"
   (find-table-update-spec-in-body
    '((pg/t:update -/Entry {:set {:tags x}
@@ -59,7 +59,7 @@
       :set {:tags 'x}
       :op 'pg/t:update})
 
-^{:refer hara.rt.postgres.base.typed.typed-infer/find-table-track-spec-in-body :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-infer/find-table-track-spec-in-body :added "4.1"}
 (fact "find-table-track-spec-in-body returns the track spec"
   (find-table-track-spec-in-body
    '((pg/t:insert -/Entry {:track o-op}))
@@ -68,7 +68,7 @@
       :track 'o-op
       :op 'pg/t:insert})
 
-^{:refer hara.rt.postgres.base.typed.typed-infer/infer-jsonb-arg-access-shape :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-infer/infer-jsonb-arg-access-shape :added "4.1"}
 (fact "infer-jsonb-arg-access-shape infers shapes from js-select access"
   (let [fn-def (types/make-fn-def
                 "demo"
@@ -86,7 +86,7 @@
     (get-in (infer-jsonb-arg-access-shape 'm fn-def seed-shape)
             [:fields :name :type]) => :text))
 
-^{:refer hara.rt.postgres.base.typed.typed-infer/infer-jsonb-arg-table-shape* :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-infer/infer-jsonb-arg-table-shape* :added "4.1"}
 (fact "infer-jsonb-arg-table-shape* projects table updates"
   (types/clear-registry!)
   (let [table (entry-table)
@@ -102,7 +102,7 @@
     (set (keys (:fields (infer-jsonb-arg-table-shape* 'm fn-def #{}))))
     => #{:tags}))
 
-^{:refer hara.rt.postgres.base.typed.typed-infer/infer-jsonb-arg-shape :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-infer/infer-jsonb-arg-shape :added "4.1"}
 (fact "infer-jsonb-arg-shape returns the inferred table shape"
   (types/clear-registry!)
   (let [table (entry-table)
@@ -117,7 +117,7 @@
     (types/register-type! '-/Entry table)
     (contains? (:fields (infer-jsonb-arg-shape 'm fn-def)) :tags) => true))
 
-^{:refer hara.rt.postgres.base.typed.typed-infer/infer-jsonb-arg-shape* :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-infer/infer-jsonb-arg-shape* :added "4.1"}
 (fact "infer-jsonb-arg-shape* respects :track and still returns shapes otherwise"
   (types/clear-registry!)
   (let [table (entry-table)

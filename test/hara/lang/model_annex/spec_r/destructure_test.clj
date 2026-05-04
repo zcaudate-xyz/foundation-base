@@ -1,8 +1,8 @@
-(ns hara.lang.model-annex.spec-r.destructure-test
+(ns hara.model.annex.spec-r.destructure-test
   (:use code.test)
-  (:require [hara.lang.model-annex.spec-r.rewrite :as rewrite]))
+  (:require [hara.model.annex.spec-r.rewrite :as rewrite]))
 
-^{:refer hara.lang.model-annex.spec-r.rewrite/r-rewrite-stage :added "4.1"}
+^{:refer hara.model.annex.spec-r.rewrite/r-rewrite-stage :added "4.1"}
 (fact "rewrites set destructuring lets for R"
   (let [out (rewrite/r-rewrite-stage
              '(let [#{path} opts

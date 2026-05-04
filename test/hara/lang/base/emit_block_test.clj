@@ -1,8 +1,8 @@
-(ns hara.lang.base.emit-block-test
-  (:require [hara.lang.base.emit-block :refer :all]
-            [hara.lang.base.emit-common :as common]
-            [hara.lang.base.emit-helper :as helper]
-            [hara.lang.base.grammar :as grammar]
+(ns hara.common.emit-block-test
+  (:require [hara.common.emit-block :refer :all]
+            [hara.common.emit-common :as common]
+            [hara.common.emit-helper :as helper]
+            [hara.common.grammar :as grammar]
             [std.string.prose :as prose])
   (:use code.test))
 
@@ -13,27 +13,27 @@
 (def +grammar+
   (grammar/grammar :test +reserved+ helper/+default+))
 
-^{:refer hara.lang.base.emit-block/emit-statement :added "3.0"}
+^{:refer hara.common.emit-block/emit-statement :added "3.0"}
 (fact "emits a statement given grammar"
 
   (binding [common/*emit-fn* common/emit-common]
     (emit-statement '(+ 1 2) +grammar+ {}))
   => "1 + 2;")
 
-^{:refer hara.lang.base.emit-block/emit-do :added "3.0"}
+^{:refer hara.common.emit-block/emit-do :added "3.0"}
 (fact "emits a do block"
 
   (binding [common/*emit-fn* common/emit-common]
     (emit-do '((add 1 2) (add 3 4)) +grammar+ {}))
   => "add(1,2);\nadd(3,4);")
 
-^{:refer hara.lang.base.emit-block/emit-do* :added "3.0"}
+^{:refer hara.common.emit-block/emit-do* :added "3.0"}
 (fact "like do but removes the statment at the end, useful for macros"
   (binding [common/*emit-fn* common/emit-common]
     (emit-do* '((add 1 2) (add 3 4)) +grammar+ {}))
   => "add(1,2);\nadd(3,4)")
 
-^{:refer hara.lang.base.emit-block/block-options :added "3.0"}
+^{:refer hara.common.emit-block/block-options :added "3.0"}
 (fact "gets the block options"
 
   (block-options :for {:parameter {:space "|"}} :parameter +grammar+)
@@ -51,7 +51,7 @@
       :namespace ".",
       :range ":"})
 
-^{:refer hara.lang.base.emit-block/emit-block-body :added "3.0"}
+^{:refer hara.common.emit-block/emit-block-body :added "3.0"}
 (fact "helper to emit a block body"
 
   (emit-block-body :while
@@ -66,7 +66,7 @@
                    "  (add 1 2 3);"
                    "}"))
 
-^{:refer hara.lang.base.emit-block/parse-params :added "3.0"}
+^{:refer hara.common.emit-block/parse-params :added "3.0"}
 (fact "parses params for a block"
 
   (parse-params '[i v :in (pairs)])
@@ -75,13 +75,13 @@
   (parse-params '(< x 1))
   => '[:raw (< x 1)])
 
-^{:refer hara.lang.base.emit-block/emit-params-statement :added "3.0"}
+^{:refer hara.common.emit-block/emit-params-statement :added "3.0"}
 (fact "emits the params for statement"
 
   (emit-params-statement :for {} '[i v :in (pairs x)] +grammar+ {})
   => "i, v in (pairs x)")
 
-^{:refer hara.lang.base.emit-block/emit-params :added "3.0"}
+^{:refer hara.common.emit-block/emit-params :added "3.0"}
 (fact "constructs string to for loop args"
 
   (emit-params :for {:parameter {:sep ";" :space " "}}
@@ -96,7 +96,7 @@
                {})
   => "((:= i 1), (:= j 0); (< (* i j) 1); (inc i), (inc j))")
 
-^{:refer hara.lang.base.emit-block/emit-block-control :added "3.0"}
+^{:refer hara.common.emit-block/emit-block-control :added "3.0"}
 (fact "emits a control form code"
 
   (emit-block-controls :catch
@@ -106,7 +106,7 @@
                        +grammar+ {})
   => "\ncatch(e){\n  (print e);\n}")
 
-^{:refer hara.lang.base.emit-block/emit-block-controls :added "3.0"}
+^{:refer hara.common.emit-block/emit-block-controls :added "3.0"}
 (fact "emits control blocks for a form"
 
   (emit-block-controls :catch
@@ -125,7 +125,7 @@
              "  123;"
              "}"))
 
-^{:refer hara.lang.base.emit-block/emit-block-setup :added "4.0"}
+^{:refer hara.common.emit-block/emit-block-setup :added "4.0"}
 (fact "parses main and control blocks"
 
   (emit-block-setup :br
@@ -146,7 +146,7 @@
         :else [(else (pr 8))]}
        nil])
 
-^{:refer hara.lang.base.emit-block/emit-block-inner :added "4.0"}
+^{:refer hara.common.emit-block/emit-block-inner :added "4.0"}
 (fact "returns the inner block"
 
   (emit-block-inner :switch
@@ -170,7 +170,7 @@
       "    (return X);"
       "}"))
 
-^{:refer hara.lang.base.emit-block/emit-block-standard :added "3.0"}
+^{:refer hara.common.emit-block/emit-block-standard :added "3.0"}
 (fact "emits a generic block"
 
   (binding [common/*emit-fn* common/emit-common]
@@ -205,7 +205,7 @@
       "  pr(8);"
       "}"))
 
-^{:refer hara.lang.base.emit-block/emit-block :added "3.0"}
+^{:refer hara.common.emit-block/emit-block :added "3.0"}
 (fact "emits a minimal block expression"
 
   (emit-block :while
@@ -221,12 +221,12 @@
    "}"))
 
 
-^{:refer hara.lang.base.emit-block/test-block-loop :added "4.0"}
+^{:refer hara.common.emit-block/test-block-loop :added "4.0"}
 (fact "emits with blocks"
   (test-block-loop '(+ 1 2) +grammar+ {})
   => "1 + 2")
 
-^{:refer hara.lang.base.emit-block/test-block-emit :added "4.0"}
+^{:refer hara.common.emit-block/test-block-emit :added "4.0"}
 (fact "emit with blocks"
   (test-block-emit '(+ 1 2) +grammar+ {})
   => "1 + 2")

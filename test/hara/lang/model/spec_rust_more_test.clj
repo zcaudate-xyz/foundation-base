@@ -1,9 +1,9 @@
-(ns hara.lang.model-annex.spec-rust-more-test
+(ns hara.model.annex.spec-rust-more-test
   (:require [std.fs :as fs]
             [hara.lang :as l]
             [hara.lang.base.script :as script]
-            [hara.lang.base.util :as ut]
-            [hara.lang.model-annex.spec-rust :refer :all])
+            [hara.common.util :as ut]
+            [hara.model.annex.spec-rust :refer :all])
   (:use code.test))
 
 (script/script- :rust

@@ -1,6 +1,6 @@
 (ns kmi.redis-test
   (:require [lib.redis.bench :as bench]
-            [hara.rt.redis]
+            [hara.runtime.redis]
             [hara.lang :as l])
   (:use code.test))
 

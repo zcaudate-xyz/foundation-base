@@ -1,6 +1,6 @@
 (ns hara.lang.base.script-def
   (:require [clojure.string]
-            [hara.lang.base.util :as ut]
+            [hara.common.util :as ut]
             [std.lib.foundation :as f]))
 
 (defn tmpl-entry

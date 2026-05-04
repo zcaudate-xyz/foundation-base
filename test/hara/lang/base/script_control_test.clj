@@ -2,8 +2,8 @@
   (:require [hara.lang :as l]
             [hara.lang.base.runtime :as rt]
             [hara.lang.base.script-control :refer :all]
-            [hara.lang.base.util :as ut]
-            [hara.lang.model.spec-lua]
+            [hara.common.util :as ut]
+            [hara.model.spec-lua]
             [std.lib.context.registry :as reg]
             [std.lib.context.space :as space])
   (:use code.test))

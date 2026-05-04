@@ -1,8 +1,8 @@
-(ns hara.lang.model.spec-lua.rewrite-test
+(ns hara.model.spec-lua.rewrite-test
   (:require [hara.lang :as l]
             [hara.lang.base.script :as script]
-            [hara.lang.model.spec-lua :as lua]
-            [hara.lang.model.spec-lua.rewrite :as rewrite])
+            [hara.model.spec-lua :as lua]
+            [hara.model.spec-lua.rewrite :as rewrite])
   (:use code.test))
 
 (script/script- :lua)
@@ -24,16 +24,16 @@
     (boolean (re-find #"return nil,\s*'OK'" out)))
   => true)
 
-^{:refer hara.lang.model.spec-lua.rewrite/lua-rewrite-form :added "4.1"}
+^{:refer hara.model.spec-lua.rewrite/lua-rewrite-form :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model.spec-lua.rewrite/lua-rewrite-statement :added "4.1"}
+^{:refer hara.model.spec-lua.rewrite/lua-rewrite-statement :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model.spec-lua.rewrite/lua-rewrite-statements :added "4.1"}
+^{:refer hara.model.spec-lua.rewrite/lua-rewrite-statements :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model.spec-lua.rewrite/lua-rewrite-stage :added "4.1"}
+^{:refer hara.model.spec-lua.rewrite/lua-rewrite-stage :added "4.1"}
 (fact "hoists named inline functions for lua"
   (rewrite/lua-rewrite-stage
    '(var out
@@ -71,7 +71,7 @@
      (nil? (re-find #"hello\(function \(x\)" out))])
   => [true true])
 
-^{:refer hara.lang.model.spec-lua.rewrite/lua-rewrite-stage :added "4.1"}
+^{:refer hara.model.spec-lua.rewrite/lua-rewrite-stage :added "4.1"}
 (fact "marks runtime-eval helper defs as inner for lua without affecting normal staging"
   (let [plain (rewrite/lua-rewrite-stage
                '(do

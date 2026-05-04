@@ -1,7 +1,7 @@
-(ns hara.lang.model.spec-go.typed-test
+(ns hara.model.spec-go.typed-test
   (:use code.test)
   (:require [clojure.string :as str]
-            [hara.lang.model.spec-go.typed :refer :all]))
+            [hara.model.spec-go.typed :refer :all]))
 
 (def sample-current-ns 'sample.user)
 
@@ -50,32 +50,32 @@
              :name "default-id"
              :type {:kind :primitive :name :xt/str}}]})
 
-^{:refer hara.lang.model.spec-go.typed/sanitize-ident :added "4.1"}
+^{:refer hara.model.spec-go.typed/sanitize-ident :added "4.1"}
 (fact "sanitizes go identifiers"
   [(sanitize-ident "hello-world")
    (sanitize-ident "123hello")]
   => ["hello_world" "_123hello"])
 
-^{:refer hara.lang.model.spec-go.typed/capitalize-ident :added "4.1"}
+^{:refer hara.model.spec-go.typed/capitalize-ident :added "4.1"}
 (fact "capitalizes go identifiers"
   [(capitalize-ident "display-name")
    (capitalize-ident "")]
   => ["Display_name" "X"])
 
-^{:refer hara.lang.model.spec-go.typed/named-go-ident :added "4.1"}
+^{:refer hara.model.spec-go.typed/named-go-ident :added "4.1"}
 (fact "creates named go identifiers"
   [(named-go-ident 'sample.user/User sample-current-ns)
    (named-go-ident 'other.ns/User sample-current-ns)
    (named-go-ident "user-map" sample-current-ns)]
   => ["User" "other_ns_User" "user_map"])
 
-^{:refer hara.lang.model.spec-go.typed/maybe-go-type :added "4.1"}
+^{:refer hara.model.spec-go.typed/maybe-go-type :added "4.1"}
 (fact "converts maybe types to go pointer types"
   [(maybe-go-type {:kind :named :name 'sample.user/User} sample-current-ns)
    (maybe-go-type {:kind :primitive :name :xt/str} sample-current-ns)]
   => ["*User" "any"])
 
-^{:refer hara.lang.model.spec-go.typed/lossy-go-type :added "4.1"}
+^{:refer hara.model.spec-go.typed/lossy-go-type :added "4.1"}
 (fact "handles lossy go types"
   [(lossy-go-type :union)
    (binding [*emit-options* {:strict? true
@@ -87,7 +87,7 @@
          true)))]
   => ["any" true])
 
-^{:refer hara.lang.model.spec-go.typed/emit-go-type :added "4.1"}
+^{:refer hara.model.spec-go.typed/emit-go-type :added "4.1"}
 (fact "emits go types"
   [(emit-go-type {:kind :primitive :name :xt/str} nil)
    (emit-go-type {:kind :array
@@ -100,7 +100,7 @@
    (emit-go-type {:kind :maybe :item sample-user-type} sample-current-ns)]
   => ["string" "[]int" "map[string]any" "*User"])
 
-^{:refer hara.lang.model.spec-go.typed/emit-struct-field :added "4.1"}
+^{:refer hara.model.spec-go.typed/emit-struct-field :added "4.1"}
 (fact "emits struct fields"
   [(emit-struct-field {:name "id"
                        :type {:kind :primitive :name :xt/str}
@@ -114,7 +114,7 @@
   => ["  Id string `json:\"id\"`"
       "  Display_name string `json:\"display-name\"`"])
 
-^{:refer hara.lang.model.spec-go.typed/emit-struct-type :added "4.1"}
+^{:refer hara.model.spec-go.typed/emit-struct-type :added "4.1"}
 (fact "emits struct types"
   (emit-struct-type sample-record-type sample-current-ns)
   => (str "struct {\n"
@@ -122,7 +122,7 @@
           "  Display_name string `json:\"display-name\"`\n"
           "}"))
 
-^{:refer hara.lang.model.spec-go.typed/emit-spec-declaration :added "4.1"}
+^{:refer hara.model.spec-go.typed/emit-spec-declaration :added "4.1"}
 (fact "emits spec declarations"
   [(emit-spec-declaration {:ns "sample.user"
                            :name "User"
@@ -135,7 +135,7 @@
   => ["type User map[string]any"
       "type UserMap map[any]any"])
 
-^{:refer hara.lang.model.spec-go.typed/emit-function-declaration :added "4.1"}
+^{:refer hara.model.spec-go.typed/emit-function-declaration :added "4.1"}
 (fact "emits function declarations"
   (emit-function-declaration {:ns "sample.user"
                               :name "lookupUser"
@@ -146,19 +146,19 @@
                               :output {:kind :maybe :item sample-user-type}})
   => "type lookupUser func(arg0 UserMap, arg1 string) *User")
 
-^{:refer hara.lang.model.spec-go.typed/emit-value-declaration :added "4.1"}
+^{:refer hara.model.spec-go.typed/emit-value-declaration :added "4.1"}
 (fact "emits value declarations"
   (emit-value-declaration {:ns "sample.user"
                            :name "default-id"
                            :type {:kind :primitive :name :xt/str}})
   => "var default_id string")
 
-^{:refer hara.lang.model.spec-go.typed/emitted-specs :added "4.1"}
+^{:refer hara.model.spec-go.typed/emitted-specs :added "4.1"}
 (fact "filters specs shadowed by callable and value declarations"
   (mapv :name (emitted-specs sample-analysis))
   => ["User" "UserMap"])
 
-^{:refer hara.lang.model.spec-go.typed/emit-analysis-declarations :added "4.1"}
+^{:refer hara.model.spec-go.typed/emit-analysis-declarations :added "4.1"}
 (fact "emits analysis declarations"
   (emit-analysis-declarations sample-analysis)
   => (str "type User map[string]any\n\n"
@@ -167,9 +167,9 @@
           "var DEFAULT_PAGE_SIZE int\n\n"
           "var default_id string"))
 
-^{:refer hara.lang.model.spec-go.typed/emit-namespace-declarations :added "4.1"}
+^{:refer hara.model.spec-go.typed/emit-namespace-declarations :added "4.1"}
 (fact "emits namespace declarations"
-  (let [out (emit-namespace-declarations 'hara.lang.model.spec-xtalk-typed-fixture)]
+  (let [out (emit-namespace-declarations 'hara.model.spec-xtalk-typed-fixture)]
     [(str/includes? out "type User map[string]any")
      (str/includes? out "type UserMap map[any]any")
      (str/includes? out "type find_user func(arg0 UserMap, arg1 string) *User")])

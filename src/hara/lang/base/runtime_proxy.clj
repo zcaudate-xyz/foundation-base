@@ -1,5 +1,5 @@
 (ns hara.lang.base.runtime-proxy
-  (:require [hara.lang.base.util :as ut]
+  (:require [hara.common.util :as ut]
             [std.lib.context.space :as space]
             [std.protocol.component :as protocol.component]
             [std.protocol.context :as protocol.context]))

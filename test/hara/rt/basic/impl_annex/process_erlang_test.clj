@@ -1,10 +1,10 @@
-(ns hara.rt.basic.impl-annex.process-erlang-test
+(ns hara.runtime.basic.impl-annex.process-erlang-test
   (:require [clojure.string :as str]
-            [hara.rt.basic.impl-annex.process-erlang :refer :all]
+            [hara.runtime.basic.impl-annex.process-erlang :refer :all]
             [hara.lang :as l])
   (:use code.test))
 
-^{:refer hara.rt.basic.impl-annex.process-erlang/default-body-transform :added "4.1"}
+^{:refer hara.runtime.basic.impl-annex.process-erlang/default-body-transform :added "4.1"}
 (fact "applies return-transform for erlang"
   (default-body-transform '[1 2 3] {})
   => '[1 2 3]
@@ -12,7 +12,7 @@
   (default-body-transform '[1 2 3] {:bulk true})
   => 3)
 
-^{:refer hara.rt.basic.impl-annex.process-erlang/erlang-basic-client-forms :added "4.1"}
+^{:refer hara.runtime.basic.impl-annex.process-erlang/erlang-basic-client-forms :added "4.1"}
 (fact "builds erlang basic client forms from the erlang emitter"
   [(-> (erlang-basic-client-forms "127.0.0.1" 4567)
        count)

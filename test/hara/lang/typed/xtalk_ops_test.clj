@@ -5,7 +5,7 @@
 
 ^{:refer hara.lang.typed.xtalk-ops/op-table-vars :added "4.1"}
 (fact "finds grammar op table vars"
-  (pos? (count (op-table-vars 'hara.lang.base.grammar-spec)))
+  (pos? (count (op-table-vars 'hara.common.grammar-spec)))
   => true)
 
 ^{:refer hara.lang.typed.xtalk-ops/op-entries :added "4.1"}

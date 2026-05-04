@@ -1,9 +1,9 @@
-(ns hara.lang.model-annex.spec-haskell-test
+(ns hara.model.annex.spec-haskell-test
   (:require [hara.lang.base.impl :as impl]
-            [hara.lang.model-annex.spec-haskell :as spec-haskell])
+            [hara.model.annex.spec-haskell :as spec-haskell])
   (:use code.test))
 
-^{:refer hara.lang.model-annex.spec-haskell/CANARY :adopt true :added "4.1"}
+^{:refer hara.model.annex.spec-haskell/CANARY :adopt true :added "4.1"}
 (fact "basic emit"
 
   (impl/emit-script '(defn hello [x] x) {:lang :haskell})
@@ -49,44 +49,44 @@
   (impl/emit-as :haskell ['[:> Map String Int]])
   => "Map String Int")
 
-^{:refer hara.lang.model-annex.spec-haskell/haskell-typesystem :added "4.1"}
+^{:refer hara.model.annex.spec-haskell/haskell-typesystem :added "4.1"}
 (fact "defn with type hint"
 
   (impl/emit-script '(defn ^Int add [^Int x ^Int y] (+ x y)) {:lang :haskell})
   => "add :: Int -> Int -> Int\nadd x y = x + y")
 
-^{:refer hara.lang.model-annex.spec-haskell/haskell-vector :added "4.1"}
+^{:refer hara.model.annex.spec-haskell/haskell-vector :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-haskell/emit-raw-str :added "4.1"}
+^{:refer hara.model.annex.spec-haskell/emit-raw-str :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-haskell/emit-indent-body :added "4.1"}
+^{:refer hara.model.annex.spec-haskell/emit-indent-body :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-haskell/haskell-invoke :added "4.1"}
+^{:refer hara.model.annex.spec-haskell/haskell-invoke :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-haskell/tf-defn :added "4.1"}
+^{:refer hara.model.annex.spec-haskell/tf-defn :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-haskell/parse-match-clauses :added "4.1"}
+^{:refer hara.model.annex.spec-haskell/parse-match-clauses :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-haskell/tf-match :added "4.1"}
+^{:refer hara.model.annex.spec-haskell/tf-match :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-haskell/tf-if :added "4.1"}
+^{:refer hara.model.annex.spec-haskell/tf-if :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-haskell/tf-letrec :added "4.1"}
+^{:refer hara.model.annex.spec-haskell/tf-letrec :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-haskell/tf-lambda :added "4.1"}
+^{:refer hara.model.annex.spec-haskell/tf-lambda :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-haskell/tf-do :added "4.1"}
+^{:refer hara.model.annex.spec-haskell/tf-do :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-haskell/haskell-args :added "4.1"}
+^{:refer hara.model.annex.spec-haskell/haskell-args :added "4.1"}
 (fact "TODO")

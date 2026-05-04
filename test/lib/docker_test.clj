@@ -159,7 +159,7 @@
                                         "POSTGRES_USER" "postgres"}
                           :cmd    ["postgres"]}}
      :import  [["redis"]]
-     :require [[hara.rt.postgres :as pg]
+     :require [[hara.runtime.postgres :as pg]
                [statsdb.core.account-base :as account-base]
                [statsdb.core.application :as app]
                [statsdb.core.infra-mq :as infra-mq]
@@ -204,7 +204,7 @@
   (common/start-container
    {:id "node"
     :image  "tahto/kmi.ui:16"
-    :cmd    ["node" "-e" (hara.rt.basic.impl.process-js/default-basic-client
+    :cmd    ["node" "-e" (hara.runtime.basic.impl.process-js/default-basic-client
                           45325
                           {:host "host.docker.internal"})]})
   
@@ -284,11 +284,11 @@
                [xt.lang.common-lib :as k]]})
   
   (lib.docker/start-container
-   (assoc hara.rt.basic.type-container/*container*
+   (assoc hara.runtime.basic.type-container/*container*
           :remove false))
 
 
-  hara.rt.basic.type-container/*container*
+  hara.runtime.basic.type-container/*container*
   
   
   (!.lua

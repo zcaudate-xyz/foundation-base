@@ -1,5 +1,5 @@
 (ns lua.nginx.task-test
-  (:require [hara.rt.nginx.config :as config]
+  (:require [hara.runtime.nginx.config :as config]
             [std.json :as json]
             [hara.lang :as l])
   (:use code.test))

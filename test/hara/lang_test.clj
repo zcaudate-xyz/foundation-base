@@ -2,14 +2,14 @@
   (:require [hara.lang :as l]
             [hara.lang.base.book :as book]
             [hara.lang.base.book-meta :as meta]
-            [hara.lang.base.emit-helper :as helper]
-            [hara.lang.base.grammar :as grammar]
+            [hara.common.emit-helper :as helper]
+            [hara.common.grammar :as grammar]
             [hara.lang.base.impl-entry :as entry]
             [hara.lang.base.library :as lib]
             [hara.lang.base.library-snapshot :as snap]
             [hara.lang.base.pointer :as ptr]
             [hara.lang.base.runtime :as rt]
-            [hara.lang.base.util :as ut]
+            [hara.common.util :as ut]
             [std.lib.context.space :as space]
             [std.lib.template :as template])
   (:use code.test))

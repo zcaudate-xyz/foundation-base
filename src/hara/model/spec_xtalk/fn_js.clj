@@ -1,0 +1,755 @@
+(ns hara.model.spec-xtalk.fn-js
+  (:require [std.lib.foundation :as f]
+            [std.lib.template :as template]))
+
+;;
+;; CORE
+;;
+
+(defn js-tf-x-len
+  [[_ arr]]
+  (list '. arr 'length))
+
+(defn js-tf-x-cat
+  [[_ & args]]
+  (apply list '+ args))
+
+(defn js-tf-x-apply
+  [[_ f args]]
+  (list '. f (list 'apply nil args)))
+
+(defn js-tf-x-random
+  [_]
+  '(Math.random))
+
+(defn js-tf-x-type-native
+  [[_ obj]]
+  (template/$ (do (when (== ~obj nil)
+                    (return nil))
+                  (var t := (typeof ~obj))
+                  (if (== t "object")
+                    (cond (Array.isArray ~obj)
+                          (return "array")
+                          
+                          :else
+                          (do (var tn := (. ~obj ["constructor"] ["name"]))
+                              (if (== tn "Object")
+                                (return "object")
+                                (return tn))))
+                    (return t)))))
+
+(defn js-tf-x-ex-native?
+  [[_ err]]
+  (list 'instanceof err 'Error))
+
+(defn js-tf-x-ex-new
+  [[_ message & [data]]]
+  (if (some? data)
+    (list 'Object.assign
+          (list 'new 'Error message)
+          {"data" data})
+    (list 'new 'Error message)))
+
+(defn js-tf-x-ex-message
+  [[_ err]]
+  (list ':?
+        (list 'instanceof err 'Error)
+        (list '. err ["message"])
+        nil))
+
+(defn js-tf-x-ex-data
+  [[_ err]]
+  (list ':?
+        (list 'instanceof err 'Error)
+        (list '. err ["data"])
+        nil))
+
+(defn js-tf-x-has-key?
+  [[_ obj key check]]
+  (if (some? check)
+    (list '== check (list 'x:get-key obj key nil))
+    (list 'not= nil (list '. obj [key]))))
+
+
+(def +js-core+
+  {:x-del            {:emit :alias :raw 'delete}
+   :x-cat            {:macro #'js-tf-x-cat  :emit :macro :value true
+                      :raw "(function (...args) {return args.join('')})"}
+   :x-len            {:macro #'js-tf-x-len  :emit :macro}
+   :x-err            {:emit :alias :raw 'throw}
+   :x-eval           {:emit :alias :raw 'eval}
+   :x-apply          {:macro #'js-tf-x-apply   :emit :macro}
+   :x-unpack         {:emit :alias :raw :..}
+   :x-print          {:emit :alias :raw 'console.log :value true}
+   :x-random         {:emit :alias :raw 'Math.random :value true}
+   :x-now-ms         {:emit :alias :raw 'Date.now}
+   :x-ex-native?     {:macro #'js-tf-x-ex-native? :emit :macro}
+   :x-ex-new         {:macro #'js-tf-x-ex-new     :emit :macro}
+   :x-ex-message     {:macro #'js-tf-x-ex-message :emit :macro}
+   :x-ex-data        {:macro #'js-tf-x-ex-data    :emit :macro}
+   :x-type-native    {:macro #'js-tf-x-type-native   :emit :macro}})
+
+(def +js-global+
+  {})
+
+(def +js-custom+
+  {:x-has-key?       {:macro #'js-tf-x-has-key? :emit :macro}})
+
+;;
+;; MATH
+;;
+
+(defn js-tf-x-m-max   [[_ & args]] (apply list 'Math.max args))
+(defn js-tf-x-m-min   [[_ & args]] (apply list 'Math.min args))
+(defn js-tf-x-m-mod   [[_ num denom]] (list 'mod num denom))
+(defn js-tf-x-m-quot  [[_ num denom]] (list 'Math.floor (list '/  num denom)))
+
+(def +js-math+
+  {:x-m-abs           {:emit :alias :raw 'Math.abs  :value true}
+   :x-m-acos          {:emit :alias :raw 'Math.acos :value true}
+   :x-m-asin          {:emit :alias :raw 'Math.asin :value true}
+   :x-m-atan          {:emit :alias :raw 'Math.atan :value true}
+   :x-m-ceil          {:emit :alias :raw 'Math.ceil :value true}
+   :x-m-cos           {:emit :alias :raw 'Math.cos  :value true}
+   :x-m-cosh          {:emit :alias :raw 'Math.cosh :value true}
+   :x-m-exp           {:emit :alias :raw 'Math.exp  :value true}
+   :x-m-floor         {:emit :alias :raw 'Math.floor :value true}
+   :x-m-loge          {:emit :alias :raw 'Math.log  :value true}
+   :x-m-log10         {:emit :alias :raw 'Math.log10 :value true}
+   :x-m-max           {:macro #'js-tf-x-m-max,      :raw 'Math.max :emit :macro :value true}
+   :x-m-min           {:macro #'js-tf-x-m-min,      :raw 'Math.min :emit :macro :value true}
+   :x-m-mod           {:macro #'js-tf-x-m-mod,      :emit :macro}
+   :x-m-pow           {:emit :alias :raw 'Math.pow  :value true}
+   :x-m-quot          {:macro #'js-tf-x-m-quot,                :emit :macro}
+   :x-m-sin           {:emit :alias :raw 'Math.sin  :value true}
+   :x-m-sinh          {:emit :alias :raw 'Math.sinh :value true}
+   :x-m-sqrt          {:emit :alias :raw 'Math.sqrt :value true}
+   :x-m-tan           {:emit :alias :raw 'Math.tan  :value true}
+   :x-m-tanh          {:emit :alias :raw 'Math.tanh :value true}})
+
+;;
+;; TYPE
+;;
+
+(defn js-tf-x-is-string?
+  [[_ e]]
+  (list '== "string" (list 'typeof e)))
+
+(defn js-tf-x-is-number?
+  [[_ e]]
+  (list '== "number" (list 'typeof e)))
+
+(defn js-tf-x-is-integer?
+  [[_ e]]
+  (list 'Number.isInteger e))
+
+(defn js-tf-x-is-boolean?
+  [[_ e]]
+  (list '== "boolean" (list 'typeof e)))
+
+(defn js-tf-x-is-object?
+  [[_ e]]
+  (list 'and
+        (list 'not= nil e)
+        (list '== "object" (list 'typeof e))
+        (list 'not (list 'Array.isArray e))))
+
+(defn js-tf-x-is-function?
+  [[_ e]]
+  (list '== "function" (list 'typeof e)))
+
+(def +js-type+
+  {:x-to-string      {:emit :alias :raw 'String}
+   :x-to-number      {:emit :alias :raw 'Number}
+   :x-is-string?     {:macro #'js-tf-x-is-string? :emit :macro}
+   :x-is-number?     {:macro #'js-tf-x-is-number? :emit :macro}
+   :x-is-integer?    {:macro #'js-tf-x-is-integer? :emit :macro}
+   :x-is-boolean?    {:macro #'js-tf-x-is-boolean? :emit :macro}
+   :x-is-function?   {:macro #'js-tf-x-is-function? :emit :macro}
+   :x-is-object?     {:macro #'js-tf-x-is-object? :emit :macro}
+   :x-is-array?      {:emit :alias :raw 'Array.isArray}})
+
+;;
+;; LU
+;;
+
+(defn js-tf-x-lu-get
+  "converts map to array"
+  {:added "4.0"}
+  ([[_ lu obj]]
+   (template/$ (. ~lu (get ~obj)))))
+
+(defn js-tf-x-lu-set
+  "converts map to array"
+  {:added "4.0"}
+  ([[_ lu obj gid]]
+   (template/$ (. ~lu (set ~obj ~gid)))))
+
+(defn js-tf-x-lu-del
+  "converts map to array"
+  {:added "4.0"}
+  ([[_ lu obj]]
+   (template/$ (. ~lu (delete ~obj)))))
+
+(def +js-lu+
+  {:x-lu-create      {:emit :unit :default '(new Map)}
+   :x-lu-get         {:macro #'js-tf-x-lu-get :emit :macro}
+   :x-lu-set         {:macro #'js-tf-x-lu-set :emit :macro}
+   :x-lu-del         {:macro #'js-tf-x-lu-del :emit :macro}})
+
+(defn js-tf-x-obj-keys
+  [[_ obj]]
+  (list 'Object.keys obj))
+
+(defn js-tf-x-obj-vals
+  [[_ obj]]
+  (list 'Object.values obj))
+
+(defn js-tf-x-obj-pairs
+  "converts map to array"
+  {:added "4.0"}
+  ([[_ m]]
+   (list 'Object.entries m)))
+
+(defn js-tf-x-obj-clone
+  [[_ m]]
+  (list 'Object.assign {} m))
+
+(defn js-tf-x-obj-assign
+  [[_ obj m]]
+  (list 'Object.assign obj m))
+
+(def +js-obj+
+  {:x-obj-keys      {:macro #'js-tf-x-obj-keys    :emit :macro  :type :template}
+   :x-obj-vals      {:macro #'js-tf-x-obj-vals    :emit :macro  :type :template}
+   :x-obj-pairs     {:macro #'js-tf-x-obj-pairs   :emit :macro  :type :template}
+   :x-obj-clone     {:macro #'js-tf-x-obj-clone   :emit :macro  :type :template}
+   :x-obj-assign    {:macro #'js-tf-x-obj-assign  :emit :macro  :type :template}})
+
+;;
+;; ARR
+;;
+
+
+(defn js-tf-x-arr-push
+  [[_ arr item]]
+  (list '. arr (list 'push item)))
+
+(defn js-tf-x-arr-pop
+  [[_ arr]]
+  (list '. arr (list 'pop)))
+
+(defn js-tf-x-arr-push-first
+  [[_ arr item]]
+  (list '. arr (list 'unshift item)))
+
+(defn js-tf-x-arr-pop-first
+  [[_ arr]]
+  (list '. arr (list 'shift)))
+
+(defn js-tf-x-arr-insert
+  [[_ arr idx e]]
+  (list '. arr (list 'splice idx 0 e)))
+
+(defn js-tf-x-arr-remove
+  [[_ arr idx]]
+  (list '. arr (list 'splice idx 1)))
+
+
+(defn js-tf-x-arr-slice
+  [[_ arr start end]]
+  (list '. arr (list 'slice start end)))
+
+(defn js-tf-x-arr-reverse
+  [[_ arr]]
+  (list '. arr (list 'slice) (list 'reverse)))
+
+(defn js-tf-x-arr-concat
+  [[_ arr other]]
+  (list '. arr (list 'concat other)))
+
+(def +js-arr+
+  {:x-arr-slice       {:macro #'js-tf-x-arr-slice      :emit :macro   :type :template}
+   :x-arr-reverse     {:macro #'js-tf-x-arr-reverse    :emit :macro   :type :template}
+   :x-arr-push        {:macro #'js-tf-x-arr-push       :emit :macro   :type :template}
+   :x-arr-pop         {:macro #'js-tf-x-arr-pop        :emit :macro   :type :template}
+   :x-arr-push-first  {:macro #'js-tf-x-arr-push-first :emit :macro   :type :template}
+   :x-arr-pop-first   {:macro #'js-tf-x-arr-pop-first  :emit :macro   :type :template}
+   :x-arr-remove      {:macro #'js-tf-x-arr-remove     :emit :macro   :type :template}
+   :x-arr-insert      {:macro #'js-tf-x-arr-insert     :emit :macro   :type :template}
+   :x-arr-concat      {:macro #'js-tf-x-arr-concat     :emit :macro   :type :template}})
+
+(defn js-tf-x-arr-clone
+  [[_ arr]]
+  (list '. arr (list 'slice)))
+
+(defn js-tf-x-arr-each
+  [[_ arr f]]
+  (list '. arr (list 'forEach f)))
+
+(defn js-tf-x-arr-every
+  [[_ arr pred]]
+  (list '. arr (list 'every pred)))
+
+(defn js-tf-x-arr-some
+  [[_ arr pred]]
+  (list '. arr (list 'some pred)))
+
+(defn js-tf-x-arr-map
+  [[_ arr f]]
+  (list '. arr (list 'map f)))
+
+(defn js-tf-x-arr-filter
+  [[_ arr pred]]
+  (list '. arr (list 'filter pred)))
+
+(defn js-tf-x-arr-foldl
+  [[_ arr f init]]
+  (list '. arr (list 'reduce f init)))
+
+(defn js-tf-x-arr-foldr
+  [[_ arr f init]]
+  (list '. arr (list 'reduceRight f init)))
+
+(defn js-tf-x-arr-find
+  [[_ arr pred]]
+  (list '. arr (list 'findIndex pred)))
+
+(defn js-tf-x-arr-sort
+  [[_ arr key-fn comp-fn]]
+  (list '. arr (list 'sort
+                     (template/$ (fn [a b]
+                                   (return (:? (~comp-fn
+                                                (~key-fn a)
+                                                (~key-fn b))
+                                               -1 1)))))))
+
+(def +js-arr-functional+
+  {:x-arr-clone    {:macro #'js-tf-x-arr-clone    :emit :macro   :type :template}
+   :x-arr-each     {:macro #'js-tf-x-arr-each     :emit :macro   :type :template}
+   :x-arr-every    {:macro #'js-tf-x-arr-every    :emit :macro   :type :template}
+   :x-arr-some     {:macro #'js-tf-x-arr-some     :emit :macro   :type :template}
+   :x-arr-map      {:macro #'js-tf-x-arr-map      :emit :macro   :type :template}
+   :x-arr-filter   {:macro #'js-tf-x-arr-filter   :emit :macro   :type :template}
+   :x-arr-foldl    {:macro #'js-tf-x-arr-foldl    :emit :macro   :type :template}
+   :x-arr-foldr    {:macro #'js-tf-x-arr-foldr    :emit :macro   :type :template}
+   :x-arr-find     {:macro #'js-tf-x-arr-find     :emit :macro   :type :template}
+   #_#_:x-arr-sort     {:macro #'js-tf-x-arr-sort     :emit :macro   :type :template}})
+
+
+
+()
+;;
+;; STRING
+;;
+
+(defn js-tf-x-str-char
+  ([[_ s i]]
+   (list '. s (list 'charCodeAt i))))
+
+(defn js-tf-x-str-split
+  ([[_ s tok]]
+   (list '. s (list 'split tok))))
+
+(defn js-tf-x-str-join
+  ([[_ s arr]]
+   (list '. arr (list 'join s))))
+
+(defn js-tf-x-str-index-of
+  ([[_ s tok]]
+   (list '. s (list 'indexOf tok))))
+
+(defn js-tf-x-str-substring
+  ([[_ s start & args]]
+   (list '. s (apply list 'substring start args))))
+
+(defn js-tf-x-str-to-upper
+  ([[_ s]]
+   (list '. s '(toUpperCase))))
+
+(defn js-tf-x-str-to-lower
+  ([[_ s]]
+   (list '. s '(toLowerCase))))
+
+(defn js-tf-x-str-to-fixed
+  ([[_ n digits]]
+   (list '. n (list 'toFixed digits))))
+
+(defn js-tf-x-str-replace
+  ([[_ s tok replacement]]
+   (list '. s (list 'replace (list 'new 'RegExp tok "g") replacement))))
+
+(defn js-tf-x-str-trim
+  ([[_ s]]
+   (list '. s (list 'trim))))
+
+(defn js-tf-x-str-trim-left
+  ([[_ s]]
+   (list '. s (list 'trimLeft))))
+
+(defn js-tf-x-str-trim-right
+  ([[_ s]]
+   (list '. s (list 'trimRight))))
+
+(defn js-tf-x-str-comp
+  [[_ a b]]
+  (list '> 0 (list '. a (list 'localeCompare b))))
+
+(defn js-tf-x-str-pad-left
+  ([[_ s n ch]]
+   (list '. s (list 'padStart n ch))))
+
+(defn js-tf-x-str-pad-right
+  ([[_ s n ch]]
+   (list '. s (list 'padEnd n ch))))
+
+(defn js-tf-x-str-starts-with
+  ([[_ s prefix]]
+   (list '. s (list 'startsWith prefix))))
+
+(defn js-tf-x-str-ends-with
+  ([[_ s suffix]]
+   (list '. s (list 'endsWith suffix))))
+
+(def +js-str+
+  {:x-str-char        {:macro #'js-tf-x-str-char       :emit :macro}
+   :x-str-split       {:macro #'js-tf-x-str-split      :emit :macro}
+   :x-str-join        {:macro #'js-tf-x-str-join       :emit :macro}
+   :x-str-index-of    {:macro #'js-tf-x-str-index-of   :emit :macro}
+   :x-str-substring   {:macro #'js-tf-x-str-substring  :emit :macro}
+   :x-str-to-upper    {:macro #'js-tf-x-str-to-upper   :emit :macro}
+   :x-str-to-lower    {:macro #'js-tf-x-str-to-lower   :emit :macro}
+   :x-str-to-fixed    {:macro #'js-tf-x-str-to-fixed   :emit :macro}
+   :x-str-replace     {:macro #'js-tf-x-str-replace    :emit :macro}
+   :x-str-trim        {:macro #'js-tf-x-str-trim       :emit :macro}
+   :x-str-trim-left   {:macro #'js-tf-x-str-trim-left  :emit :macro}
+   :x-str-trim-right  {:macro #'js-tf-x-str-trim-right :emit :macro}
+   :x-str-comp        {:macro #'js-tf-x-str-comp       :emit :macro}
+   :x-str-pad-left    {:macro #'js-tf-x-str-pad-left   :emit :macro}
+   :x-str-pad-right   {:macro #'js-tf-x-str-pad-right  :emit :macro}
+   :x-str-starts-with {:macro #'js-tf-x-str-starts-with :emit :macro}
+   :x-str-ends-with   {:macro #'js-tf-x-str-ends-with   :emit :macro}})
+
+;;
+;; JSON
+;;
+
+(def +js-js+
+  {:x-json-encode      {:emit :alias :raw 'JSON.stringify}
+   :x-json-decode      {:emit :alias :raw 'JSON.parse}})
+
+;;
+;; COM
+;;
+
+(defn js-tf-x-return-encode
+  ([[_ out id key]]
+   (template/$
+    (do (var type-fn (fn [obj]
+                       (when (== obj nil)
+                         (return nil))
+                       (var t := (typeof obj))
+                       (if (== t "object")
+                         (cond (Array.isArray obj)
+                               (return "array")
+                               
+                               :else
+                               (do (var tn := (. obj ["constructor"] ["name"]))
+                                   (if (== tn "Object")
+                                     (return "object")
+                                     (return tn))))
+                         (return t))))
+        (var ts (type-fn ~out))
+        (cond (== "function" ts)
+              (return (JSON.stringify {:id     ~id
+                                       :key    ~key
+                                       :type   "raw"
+                                       :return "function"
+                                       :value  (. ~out (toString))}))
+              
+              
+              (not= "object" ts)
+              (return (JSON.stringify {:id     ~id
+                                       :key    ~key
+                                       :type "data"
+                                       :return ts
+                                       :value ~out}))
+
+              (== nil ~out)
+              (return (JSON.stringify {:id     ~id
+                                       :key    ~key
+                                       :type "data"
+                                       :return "nil"
+                                       :value ~out}))
+              
+              :else
+              (try
+                (return (JSON.stringify {:id     ~id
+                                         :key    ~key
+                                         :type   "data"
+                                         :return ts
+                                         :value ~out}))
+                (catch e (return (JSON.stringify {:id     id
+                                                  :key    key
+                                                  :type   "raw"
+                                                  :return ts
+                                                  :value (. ~out (toString))})))))))))
+
+(defn js-tf-x-return-wrap
+  ([[_ f encode-fn]]
+   (template/$
+    (try (var out := (~f))
+         (return (~encode-fn  out))
+         (catch e (let [err (:? (== "string" (typeof e)) e {:message (. e ["message"]) :stack (. e ["stack"])})]
+                    (return (JSON.stringify {:type "error"
+                                             :value err}))))))))
+
+(defn js-tf-x-return-eval
+  ([[_ s wrap-fn]]
+   (template/$ (return (~wrap-fn
+                        (fn []
+                          (return (eval ~s))))))))
+
+(def +js-return+
+  {:x-return-encode  {:macro #'js-tf-x-return-encode   :emit :macro
+                      :op-spec {:allow-blocks true}}
+   :x-return-wrap    {:macro #'js-tf-x-return-wrap     :emit :macro
+                      :op-spec {:allow-blocks true}}
+   :x-return-eval    {:macro #'js-tf-x-return-eval     :emit :macro
+                      :op-spec {:allow-blocks true}}})
+
+(defn js-tf-x-socket-connect
+  ([[_ host port opts cb]]
+   (template/$ (do* (var net (eval "require('net')"))
+                    (var conn (new net.Socket))
+                    (return (conn.connect
+                             ~port ~host (fn []
+                                           (~cb nil conn))))))))
+
+(defn js-tf-x-socket-send
+  ([[_ conn s]]
+   (template/$ (. ~conn (write ~s)))))
+
+(defn js-tf-x-socket-close
+  ([[_ conn]]
+   (template/$ (. ~conn (end)))))
+
+(def +js-socket+
+  {:x-socket-connect {:macro #'js-tf-x-socket-connect :emit :macro
+                      :op-spec {:allow-blocks true}}
+   :x-socket-send    {:macro #'js-tf-x-socket-send    :emit :macro}
+   :x-socket-close   {:macro #'js-tf-x-socket-close   :emit :macro}})
+
+(defn js-tf-x-notify-http
+  ([[_ host port value id key opts]]
+   (template/$
+    (try
+      (var #{path scheme} (or ~opts {}))
+      (fetch (+ (or scheme "http") "://" ~host ":" ~port "/" (or path ""))
+             {:method "POST"
+              :body (xt.lang.common-lib/return-encode ~value ~id ~key)})
+      (return ["async"])
+      (catch e (return ["unable to connect"]))))))
+
+(def +js-http+
+  {:x-notify-http   {:macro #'js-tf-x-notify-http    :emit :macro   :type :template
+                     :op-spec {:allow-blocks true}}})
+
+;;
+;; ITER
+;;
+
+(defn js-tf-x-iter-from-obj
+  ([[_ obj]]
+   (list (list '. (list 'Object.entries obj) '[Symbol.iterator]))))
+
+(defn js-tf-x-iter-from-arr
+  ([[_ arr]]
+   (list (list '. arr '[Symbol.iterator]))))
+
+(defn js-tf-x-iter-from
+  ([[_ obj]]
+   (list (list '. obj '[Symbol.iterator]))))
+
+(defn js-tf-x-iter-eq
+  ([[_ it0 it1 eq-fn]]
+   (template/$ (do (for [:let x0 :of ~it0]
+                     (var r1 (. ~it1 (next)))
+                     (cond (. r1 done)
+                           (return false)
+
+                           (not (~eq-fn x0 (. r1 value)))
+                           (return false)))
+                   (return (. ~it1 (next) done))))))
+
+(defn js-tf-x-iter-next
+  ([[_ it]]
+   (list '. it (list 'next))))
+
+(defn js-tf-x-iter-has?
+  ([[_ obj]]
+   (list 'not= nil (list '. obj '[Symbol.iterator]))))
+
+(defn js-tf-x-iter-native?
+  ([[_ it]]
+   (list '== "function" (list 'typeof (list '. it ["next"])))))
+
+(def +js-iter+
+  {:x-iter-from-obj    {:macro #'js-tf-x-iter-from-obj       :emit :macro}
+   :x-iter-from-arr    {:macro #'js-tf-x-iter-from-arr       :emit :macro}
+   :x-iter-from        {:macro #'js-tf-x-iter-from           :emit :macro}
+   :x-iter-eq          {:macro #'js-tf-x-iter-eq             :emit :macro
+                        :op-spec {:allow-blocks true}}
+   :x-iter-null        {:default '((. [] [Symbol.iterator])) :emit :unit}
+   :x-iter-next        {:macro #'js-tf-x-iter-next           :emit :macro}
+   :x-iter-has?        {:macro #'js-tf-x-iter-has?           :emit :macro}
+   :x-iter-native?     {:macro #'js-tf-x-iter-native?        :emit :macro}})
+
+
+;;
+;; PROMISE
+;;
+
+(defn js-tf-x-async-run
+  [[_ thunk]]
+  (template/$
+   (. (. Promise (resolve))
+      (then ~thunk))))
+
+(defn js-tf-x-with-delay
+  ([[_  ms thunk]]
+   (template/$
+    (new Promise
+         (fn [resolve reject]
+           (setTimeout (fn []
+                         (. (new Promise
+                                 (fn [inner-resolve]
+                                   (inner-resolve (~thunk))))
+                            (then  (fn [value]
+                                     (resolve value)))
+                            (catch (fn [err]
+                                     (reject err)))))
+                       ~ms))))))
+
+(defn js-tf-x-promise
+  [[_ thunk]]
+  (template/$
+   (. (. Promise (resolve))
+      (then ~thunk))))
+
+(defn js-tf-x-promise-all
+  [[_ promises]]
+  (list '. 'Promise (list 'all promises)))
+
+(defn js-tf-x-promise-then
+  [[_ promise thunk]]
+  (list '. promise (list 'then thunk)))
+
+(defn js-tf-x-promise-catch
+  [[_ promise thunk]]
+  (list '. promise (list 'catch thunk)))
+
+(defn js-tf-x-promise-finally
+  [[_ promise thunk]]
+  (list '. promise (list 'finally thunk)))
+
+(defn js-tf-x-promise-native?
+  [[_ value]]
+  (list 'instanceof value 'Promise))
+
+(def +js-promise+
+  {:x-async-run        {:macro #'js-tf-x-async-run        :emit :macro}
+   :x-promise          {:macro #'js-tf-x-promise          :emit :macro}
+   :x-promise-all      {:macro #'js-tf-x-promise-all      :emit :macro}
+   :x-promise-then     {:macro #'js-tf-x-promise-then     :emit :macro}
+   :x-promise-catch    {:macro #'js-tf-x-promise-catch    :emit :macro}
+   :x-promise-finally  {:macro #'js-tf-x-promise-finally  :emit :macro}
+   :x-promise-native?  {:macro #'js-tf-x-promise-native?  :emit :macro}
+   :x-with-delay       {:macro #'js-tf-x-with-delay     :emit :macro}})
+
+
+
+;;
+;; SHELL
+;;
+
+(defn js-tf-x-pwd
+  [[_]]
+  '(or (. process env ["PWD"])
+       (. process (cwd))))
+
+(defn js-tf-x-shell
+  ([[_ s root cb]]
+   (template/$
+    (do (. (require "child_process")
+           (exec ~s {:cwd ~root}
+                 (fn [err stdout stderr]
+                   (if err
+                     (return (~cb {:code (. err ["code"])
+                                   :err stderr
+                                   :out stdout}
+                              nil))
+                     (return (~cb nil stdout))))))
+        (return ["async"])))))
+
+(def +js-shell+
+  {:x-pwd            {:macro #'js-tf-x-pwd    :emit :macro}
+   :x-shell          {:macro #'js-tf-x-shell  :emit :macro}})
+
+;;
+;; FILE
+;;
+
+(defn js-tf-x-file-resolve
+  [[_ root path]]
+  (template/$
+   (. (require "path")
+      (resolve ~root ~path))))
+
+(defn js-tf-x-file-slurp
+  [[_ filename cb]]
+  (template/$
+   (do (. (require "fs")
+          (readFile ~filename
+                    "utf-8"
+                    ~cb))
+       (return ["async"]))))
+
+(defn js-tf-x-file-spit
+  [[_ filename content cb]]
+  (template/$
+   (do (. (require "fs")
+          (writeFile  ~filename
+                      ~content
+                      "utf-8"
+                      ~cb))
+       (return ["async"]))))
+
+(def +js-file+
+  {:x-file-resolve   {:macro #'js-tf-x-file-resolve  :emit :macro}
+   :x-file-slurp     {:macro #'js-tf-x-file-slurp    :emit :macro
+                      :op-spec {:allow-blocks true}}
+   :x-file-spit      {:macro #'js-tf-x-file-spit     :emit :macro
+                      :op-spec {:allow-blocks true}}})
+
+
+
+(def +js+
+  (merge +js-core+
+         +js-global+
+         +js-custom+
+         +js-math+
+         +js-type+
+         +js-lu+
+         +js-obj+
+         +js-arr+
+         +js-arr-functional+
+         +js-str+
+         +js-js+
+         +js-return+
+         +js-socket+
+         +js-http+
+         +js-iter+
+         +js-promise+
+         +js-shell+
+         +js-file+))

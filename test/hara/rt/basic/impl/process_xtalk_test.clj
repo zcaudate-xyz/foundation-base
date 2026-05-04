@@ -1,8 +1,8 @@
-(ns hara.rt.basic.impl.process-xtalk-test
-  (:require [hara.rt.basic.impl.process-xtalk :refer :all])
+(ns hara.runtime.basic.impl.process-xtalk-test
+  (:require [hara.runtime.basic.impl.process-xtalk :refer :all])
   (:use code.test))
 
-^{:refer hara.rt.basic.impl.process-xtalk/read-output :added "4.0"}
+^{:refer hara.runtime.basic.impl.process-xtalk/read-output :added "4.0"}
 (fact "read output for scheme"
 
   (read-output {:out "#t"})
@@ -17,7 +17,7 @@
   (read-output {:out "invalid"})
   => 'invalid)
 
-^{:refer hara.rt.basic.impl.process-xtalk/transform-form :added "4.0"}
+^{:refer hara.runtime.basic.impl.process-xtalk/transform-form :added "4.0"}
 (fact "transforms output from shell"
 
   (transform-form '((+ 1 2)) {:bulk true})

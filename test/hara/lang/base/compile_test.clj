@@ -1,13 +1,13 @@
 (ns hara.lang.base.compile-test
   (:require [xt.lang.common-data]
              [xt.lang.common-lib]
-             [hara.rt.postgres.test.scratch-v1 :as scratch]
+             [hara.runtime.postgres.test.scratch-v1 :as scratch]
              [std.fs :as fs]
              [hara.lang.base.compile :refer :all]
              [hara.lang.base.impl :as impl]
              [hara.lang.base.library :as lib]
              [hara.lang.base.library-snapshot :as snap]
-             [hara.lang.model.spec-js.ts :as ts]
+             [hara.model.spec-js.ts :as ts]
              [std.make :as make]
              [std.make.compile :as compile]
              [xt.lang.common-math :as math])

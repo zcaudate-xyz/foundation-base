@@ -1,6 +1,6 @@
-(ns hara.rt.basic.impl-annex.process-rust-test
-  (:require [hara.rt.basic.impl-annex.process-rust :refer :all]
-            [hara.rt.basic.type-common :as common]
+(ns hara.runtime.basic.impl-annex.process-rust-test
+  (:require [hara.runtime.basic.impl-annex.process-rust :refer :all]
+            [hara.runtime.basic.type-common :as common]
             [hara.lang :as l])
   (:use code.test))
 
@@ -21,7 +21,7 @@
 (def CANARY-RUSTC
   (common/program-exists? "rustc"))
 
-^{:refer hara.rt.basic.impl-annex.process-rust/transform-form :added "4.0"}
+^{:refer hara.runtime.basic.impl-annex.process-rust/transform-form :added "4.0"}
 (fact "transforms the rust form"
 
   (transform-form '[(+ 1 2 3)]
@@ -29,14 +29,14 @@
                   )
   => '(:- "fn main() {\n " (do ((:- "println!") "{}" (+ 1 2 3))) "\n}"))
 
-^{:refer hara.rt.basic.impl-annex.process-rust-test/CANARY-RUSTC :guard true :adopt true :added "4.0"}
+^{:refer hara.runtime.basic.impl-annex.process-rust-test/CANARY-RUSTC :guard true :adopt true :added "4.0"}
 (fact "evaluates rust code through the twostep runtime"
 
    (!.rs
     (+ 1 2 3))
    => 6)
 
-^{:refer hara.rt.basic.impl-annex.process-rust-test/CANARY-RUSTC :guard true :adopt true :added "4.0"}
+^{:refer hara.runtime.basic.impl-annex.process-rust-test/CANARY-RUSTC :guard true :adopt true :added "4.0"}
 (fact "twostep evaluates direct pointer calls in the script environment"
 
   [(-/add1 10)

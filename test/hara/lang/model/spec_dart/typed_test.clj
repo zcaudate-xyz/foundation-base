@@ -1,7 +1,7 @@
-(ns hara.lang.model.spec-dart.typed-test
+(ns hara.model.spec-dart.typed-test
   (:use code.test)
   (:require [clojure.string :as str]
-            [hara.lang.model.spec-dart.typed :refer :all]))
+            [hara.model.spec-dart.typed :refer :all]))
 
 (def sample-current-ns 'sample.user)
 
@@ -38,32 +38,32 @@
              :name "default-id"
              :type {:kind :primitive :name :xt/str}}]})
 
-^{:refer hara.lang.model.spec-dart.typed/sanitize-ident :added "4.1"}
+^{:refer hara.model.spec-dart.typed/sanitize-ident :added "4.1"}
 (fact "sanitizes dart identifiers"
   [(sanitize-ident "hello-world")
    (sanitize-ident "123hello")]
   => ["hello_world" "_123hello"])
 
-^{:refer hara.lang.model.spec-dart.typed/lower-camel :added "4.1"}
+^{:refer hara.model.spec-dart.typed/lower-camel :added "4.1"}
 (fact "converts identifiers to lower camel case"
   [(lower-camel "display-name")
    (lower-camel "UserMap")]
   => ["displayName" "userMap"])
 
-^{:refer hara.lang.model.spec-dart.typed/upper-camel :added "4.1"}
+^{:refer hara.model.spec-dart.typed/upper-camel :added "4.1"}
 (fact "converts identifiers to upper camel case"
   [(upper-camel "display-name")
    (upper-camel "userMap")]
   => ["DisplayName" "UserMap"])
 
-^{:refer hara.lang.model.spec-dart.typed/named-dart-ident :added "4.1"}
+^{:refer hara.model.spec-dart.typed/named-dart-ident :added "4.1"}
 (fact "creates named dart identifiers"
   [(named-dart-ident 'sample.user/User sample-current-ns)
    (named-dart-ident 'other.ns/User sample-current-ns)
    (named-dart-ident "user-map" sample-current-ns)]
   => ["User" "OtherNsUser" "UserMap"])
 
-^{:refer hara.lang.model.spec-dart.typed/emit-dart-type :added "4.1"}
+^{:refer hara.model.spec-dart.typed/emit-dart-type :added "4.1"}
 (fact "emits dart types"
   [(emit-dart-type {:kind :primitive :name :xt/str} nil)
    (emit-dart-type {:kind :array
@@ -75,7 +75,7 @@
                     :item sample-user-type} sample-current-ns)]
   => ["String" "List<int>" "Map<String, double>" "User?"])
 
-^{:refer hara.lang.model.spec-dart.typed/lossy-dart-type :added "4.1"}
+^{:refer hara.model.spec-dart.typed/lossy-dart-type :added "4.1"}
 (fact "handles lossy dart types"
   [(lossy-dart-type :union)
    (binding [*emit-options* {:strict? true
@@ -87,7 +87,7 @@
          true)))]
   => ["Object?" true])
 
-^{:refer hara.lang.model.spec-dart.typed/maybe-unwrapped :added "4.1"}
+^{:refer hara.model.spec-dart.typed/maybe-unwrapped :added "4.1"}
 (fact "unwraps maybe types for optional fields"
   [(maybe-unwrapped {:kind :maybe
                      :item {:kind :primitive :name :xt/str}}
@@ -98,7 +98,7 @@
   => [{:kind :primitive :name :xt/str}
       {:kind :maybe :item {:kind :primitive :name :xt/str}}])
 
-^{:refer hara.lang.model.spec-dart.typed/emit-class-field :added "4.1"}
+^{:refer hara.model.spec-dart.typed/emit-class-field :added "4.1"}
 (fact "emits class fields"
   [(emit-class-field {:name "id"
                       :type {:kind :primitive :name :xt/str}
@@ -112,12 +112,12 @@
   => ["  final String id;"
       "  final String? displayName;"])
 
-^{:refer hara.lang.model.spec-dart.typed/emit-class-constructor :added "4.1"}
+^{:refer hara.model.spec-dart.typed/emit-class-constructor :added "4.1"}
 (fact "emits class constructors"
   (emit-class-constructor "User" (:fields sample-record-type))
   => "  const User({required this.id, this.displayName});")
 
-^{:refer hara.lang.model.spec-dart.typed/emit-record-class :added "4.1"}
+^{:refer hara.model.spec-dart.typed/emit-record-class :added "4.1"}
 (fact "emits record classes"
   (emit-record-class "User" sample-record-type sample-current-ns)
   => (str "class User {\n"
@@ -126,7 +126,7 @@
           "  const User({required this.id, this.displayName});\n"
           "}"))
 
-^{:refer hara.lang.model.spec-dart.typed/emit-spec-declaration :added "4.1"}
+^{:refer hara.model.spec-dart.typed/emit-spec-declaration :added "4.1"}
 (fact "emits spec declarations"
   [(emit-spec-declaration {:ns "sample.user"
                            :name "User"
@@ -143,7 +143,7 @@
            "}")
       "typedef UserMap = Map<String, User>;"])
 
-^{:refer hara.lang.model.spec-dart.typed/emit-function-declaration :added "4.1"}
+^{:refer hara.model.spec-dart.typed/emit-function-declaration :added "4.1"}
 (fact "emits function declarations"
   (emit-function-declaration {:ns "sample.user"
                               :name "find-user"
@@ -154,14 +154,14 @@
                               :output {:kind :maybe :item sample-user-type}})
   => "typedef FindUser = User? Function(UserMap arg0, String arg1);")
 
-^{:refer hara.lang.model.spec-dart.typed/emit-value-declaration :added "4.1"}
+^{:refer hara.model.spec-dart.typed/emit-value-declaration :added "4.1"}
 (fact "emits value declarations"
   (emit-value-declaration {:ns "sample.user"
                            :name "default-id"
                            :type {:kind :primitive :name :xt/str}})
   => "late final String defaultId;")
 
-^{:refer hara.lang.model.spec-dart.typed/emit-analysis-declarations :added "4.1"}
+^{:refer hara.model.spec-dart.typed/emit-analysis-declarations :added "4.1"}
 (fact "emits analysis declarations"
   (emit-analysis-declarations sample-analysis)
   => (str "class User {\n"
@@ -173,9 +173,9 @@
           "typedef FindUser = User? Function(UserMap arg0, String arg1);\n\n"
           "late final String defaultId;"))
 
-^{:refer hara.lang.model.spec-dart.typed/emit-namespace-declarations :added "4.1"}
+^{:refer hara.model.spec-dart.typed/emit-namespace-declarations :added "4.1"}
 (fact "emits namespace declarations"
-  (let [out (emit-namespace-declarations 'hara.lang.model.spec-xtalk-typed-fixture)]
+  (let [out (emit-namespace-declarations 'hara.model.spec-xtalk-typed-fixture)]
     [(str/includes? out "class User")
      (str/includes? out "typedef UserMap = Map<String, User>")
      (str/includes? out "typedef FindUser = User? Function")])

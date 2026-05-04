@@ -1,11 +1,11 @@
-(ns hara.lang.base.emit-prep-js-test
+(ns hara.common.emit-prep-js-test
   (:require [hara.lang.base.book :as b]
-            [hara.lang.base.emit-common :as common]
-            [hara.lang.base.emit-helper :as helper]
-            [hara.lang.base.grammar :as grammar]
-            [hara.lang.base.util :as ut]
-            [hara.lang.model.spec-js :as js]
-            [hara.lang.model.spec-js.meta :as js-meta]
+            [hara.common.emit-common :as common]
+            [hara.common.emit-helper :as helper]
+            [hara.common.grammar :as grammar]
+            [hara.common.util :as ut]
+            [hara.model.spec-js :as js]
+            [hara.model.spec-js.meta :as js-meta]
             [std.lib.env :as env])
   (:use code.test))
 

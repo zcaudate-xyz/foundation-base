@@ -1,11 +1,11 @@
-(ns hara.rt.basic.docker.type-twostep-haskell-test
+(ns hara.runtime.basic.docker.type-twostep-haskell-test
   (:use code.test)
-  (:require [hara.rt.basic.impl-annex.process-haskell]
-            [hara.rt.basic.type-common :as common]
-            [hara.rt.basic.type-twostep :as twostep]
+  (:require [hara.runtime.basic.impl-annex.process-haskell]
+            [hara.runtime.basic.type-common :as common]
+            [hara.runtime.basic.type-twostep :as twostep]
             [hara.lang :as l]))
 
-(do hara.rt.basic.impl-annex.process-haskell/+haskell-twostep+)
+(do hara.runtime.basic.impl-annex.process-haskell/+haskell-twostep+)
 
 (l/script- :haskell
   {:runtime :twostep

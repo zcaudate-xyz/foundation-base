@@ -5,7 +5,7 @@
             [hara.lang.base.pointer :as ptr]
             [hara.lang.base.runtime :as rt]
             [hara.lang.base.script-macro :as macro]
-            [hara.lang.model.spec-xtalk :as xtalk])
+            [hara.model.spec-xtalk :as xtalk])
   (:use code.test))
 
 (rt/install-lang! :xtalk)
@@ -27,15 +27,15 @@
     nil
     (catch Throwable t
       (let [data (ex-data t)]
-        {:phase     (:hara.lang/phase data)
-         :subsystem (:hara.lang/subsystem data)
-         :module    (:hara.lang/module data)
-         :entry     (-> data :hara.lang/entry :symbol)
-         :line      (:hara.lang/line data)
-         :form      (:hara.lang/form data)
-         :stack     (mapv (juxt :hara.lang/phase
-                                :hara.lang/subsystem)
-                          (:hara.lang/provenance-stack data))}))))
+        {:phase     (:hara/phase data)
+         :subsystem (:hara/subsystem data)
+         :module    (:hara/module data)
+         :entry     (-> data :hara/entry :symbol)
+         :line      (:hara/line data)
+         :form      (:hara/form data)
+         :stack     (mapv (juxt :hara/phase
+                                :hara/subsystem)
+                          (:hara/provenance-stack data))}))))
 
 (fact "defn.xt failures report provenance for abstract calls"
 
@@ -65,12 +65,12 @@
          [(first (:stack out))
           (last (:stack out))]])))
   => '[{:phase :emit/form
-        :subsystem :hara.lang.base.emit-top-level/emit-form
+        :subsystem :hara.common.emit-top-level/emit-form
         :module xt.lang.common-lib
         :entry xt.lang.common-lib/fail-type-native
         :line 320
         :form (x:type-native obj)}
-       [[:emit/form :hara.lang.base.emit-top-level/emit-form]
+       [[:emit/form :hara.common.emit-top-level/emit-form]
         [:emit/entry :hara.lang.base.impl-entry/emit-entry-raw]]])
 
 (fact "defn.xt failures keep entry provenance when nested forms explode"
@@ -106,10 +106,10 @@
          [(first (:stack out))
           (last (:stack out))]])))
   => '[{:phase :emit/form
-        :subsystem :hara.lang.base.emit-top-level/emit-form
+        :subsystem :hara.common.emit-top-level/emit-form
         :module xt.lang.common-lib
         :entry xt.lang.common-lib/fail-arr-push
         :line 340
         :form (x:arr-push out (f e))}
-       [[:emit/form :hara.lang.base.emit-top-level/emit-form]
+       [[:emit/form :hara.common.emit-top-level/emit-form]
         [:emit/entry :hara.lang.base.impl-entry/emit-entry-raw]]])

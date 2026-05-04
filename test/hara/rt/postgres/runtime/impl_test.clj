@@ -1,10 +1,10 @@
-(ns hara.rt.postgres.runtime.impl-test
-  (:require [hara.rt.postgres :as pg]
-            [hara.rt.postgres.base.application :as app]
-            [hara.rt.postgres.base.grammar.common-tracker :as tracker]
-            [hara.rt.postgres.runtime.impl :as impl]
-            [hara.rt.postgres.runtime.impl-main :as main]
-            [hara.rt.postgres.test.scratch-v1 :as scratch]
+(ns hara.runtime.postgres.runtime.impl-test
+  (:require [hara.runtime.postgres :as pg]
+            [hara.runtime.postgres.base.application :as app]
+            [hara.runtime.postgres.base.grammar.common-tracker :as tracker]
+            [hara.runtime.postgres.runtime.impl :as impl]
+            [hara.runtime.postgres.runtime.impl-main :as main]
+            [hara.runtime.postgres.test.scratch-v1 :as scratch]
             [hara.lang :as l]
             [hara.lang.base.book :as book]
             [std.lib.collection :as collection]
@@ -14,10 +14,10 @@
 (l/script- :postgres
   {:runtime :jdbc.client
    :config  {:dbname "test-scratch"}
-   :require [[hara.rt.postgres :as pg]
-             [hara.rt.postgres.test.scratch-v1 :as scratch]]})
+   :require [[hara.runtime.postgres :as pg]
+             [hara.runtime.postgres.test.scratch-v1 :as scratch]]})
 
-^{:refer hara.rt.postgres.runtime.impl/t:select :added "4.0"
+^{:refer hara.runtime.postgres.runtime.impl/t:select :added "4.0"
   :setup [(pg/t:delete scratch/Task)
           (pg/t:delete scratch/TaskCache)
           (pg/t:insert scratch/TaskCache
@@ -78,7 +78,7 @@
                `[(pg/t:select scratch/Task {:for [:update :skip-locked]})]))
   => "WITH j_ret AS (  \n  SELECT \"id\",\"status\",\"name\",\"cache_id\",\"time_created\",\"time_updated\" FROM \"scratch\".\"Task\"\n  FOR UPDATE SKIP LOCKED)\nSELECT jsonb_agg(j_ret) FROM j_ret")
 
-^{:refer hara.rt.postgres.runtime.impl/t:get-field :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl/t:get-field :added "4.0"}
 (fact "gets single field"
 
   (l/with:emit
@@ -88,7 +88,7 @@
                     :returning :name})]))
   => "SELECT \"name\" FROM \"scratch\".\"Task\"\nWHERE \"id\" = '1'\nLIMIT 1")
 
-^{:refer hara.rt.postgres.runtime.impl/t:get :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl/t:get :added "4.0"}
 (fact "get single entry"
 
   (l/with:emit
@@ -97,7 +97,7 @@
                    {:where {:id "1"}})]))
   => "WITH j_ret AS (  \n  SELECT \"id\",\"status\",\"name\",\"cache_id\",\"time_created\",\"time_updated\" FROM \"scratch\".\"Task\"\n  WHERE \"id\" = '1'\n  LIMIT 1)\nSELECT to_jsonb(j_ret) FROM j_ret")
 
-^{:refer hara.rt.postgres.runtime.impl/t:id :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl/t:id :added "4.0"}
 (fact "get id entry"
 
   (l/with:emit
@@ -106,7 +106,7 @@
                    {:where {:name "home"}})]))
   => "SELECT \"id\" FROM \"scratch\".\"Task\"\nWHERE \"name\" = 'home'\nLIMIT 1")
 
-^{:refer hara.rt.postgres.runtime.impl/t:count :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl/t:count :added "4.0"}
 (fact "get count entry"
 
   (l/with:emit
@@ -115,14 +115,14 @@
                    {:where {:name "home"}})]))
   => "SELECT count(*) FROM \"scratch\".\"Task\"\nWHERE \"name\" = 'home'")
 
-^{:refer hara.rt.postgres.runtime.impl/t:exists :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl/t:exists :added "4.0"}
 (fact "check existence of entry"
   (l/with:emit
     (l/emit-as :postgres
                `[(pg/t:exists scratch/Task {:where {:id 1}})]))
   => string?)
 
-^{:refer hara.rt.postgres.runtime.impl/t:delete :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl/t:delete :added "4.0"}
 (fact "flat delete"
 
   (l/with:emit
@@ -131,7 +131,7 @@
                    {:where {:name "home"}})]))
   => "WITH j_ret AS (  \n  DELETE FROM \"scratch\".\"Task\" WHERE \"name\" = 'home'\n  RETURNING\n    \"id\",\n    \"status\",\n    \"name\",\n    \"cache_id\",\n    \"op_created\",\n    \"op_updated\",\n    \"time_created\",\n    \"time_updated\")\nSELECT jsonb_agg(j_ret) FROM j_ret")
 
-^{:refer hara.rt.postgres.runtime.impl/t:insert :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl/t:insert :added "4.0"}
 (fact "flat insert"
 
   (l/with:emit
@@ -141,7 +141,7 @@
                    {:track :ignore})]))
   => "WITH j_ret AS (INSERT INTO \"scratch\".\"TaskCache\" () VALUES () RETURNING \"id\",\"time_created\",\"time_updated\")\nSELECT to_jsonb(j_ret) FROM j_ret")
 
-^{:refer hara.rt.postgres.runtime.impl/t:insert! :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl/t:insert! :added "4.0"}
 (fact "inserts without o-op"
 
   (l/with:emit
@@ -151,7 +151,7 @@
                    {})]))
   => "WITH j_ret AS (INSERT INTO \"scratch\".\"TaskCache\" () VALUES () RETURNING \"id\",\"time_created\",\"time_updated\")\nSELECT to_jsonb(j_ret) FROM j_ret")
 
-^{:refer hara.rt.postgres.runtime.impl/t:upsert :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl/t:upsert :added "4.0"}
 (fact "flat upsert"
 
   (l/with:emit
@@ -161,7 +161,7 @@
                    {:track :ignore})]))
   => "WITH j_ret AS (INSERT INTO \"scratch\".\"TaskCache\" () VALUES () ON CONFLICT (\"id\") DO UPDATE SET () = row() RETURNING \"id\",\"time_created\",\"time_updated\")\nSELECT to_jsonb(j_ret) FROM j_ret")
 
-^{:refer hara.rt.postgres.runtime.impl/t:update :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl/t:update :added "4.0"}
 (fact "flat update"
 
   (l/with:emit
@@ -172,7 +172,7 @@
                     :track :ignore})]))
   => "WITH j_ret AS (  \n  UPDATE \"scratch\".\"Task\" SET \"name\" = ('hello')::TEXT WHERE \"name\" = 'home'\n  RETURNING \"id\",\"status\",\"name\",\"cache_id\",\"time_created\",\"time_updated\")\nSELECT jsonb_agg(j_ret) FROM j_ret")
 
-^{:refer hara.rt.postgres.runtime.impl/t:update! :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl/t:update! :added "4.0"}
 (fact "updates with o-op"
 
   (l/with:emit
@@ -182,7 +182,7 @@
                     :set {:name "hello"}})]))
   => "UPDATE \"scratch\".\"Task\" SET \"name\" = ('hello')::TEXT WHERE \"name\" = 'home'")
 
-^{:refer hara.rt.postgres.runtime.impl/t:modify :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl/t:modify :added "4.0"}
 (fact "flat modify"
 
   (l/with:emit
@@ -193,7 +193,7 @@
                     :track :ignore})]))
   => "DECLARE\n  u_ret \"scratch\".\"Task\";\nBEGIN\n  UPDATE \"scratch\".\"Task\" SET \"name\" = ('hello')::TEXT WHERE \"name\" = 'home'\n  RETURNING * INTO u_ret;\n  IF not exists(SELECT u_ret) THEN\n    RAISE EXCEPTION 'Record Not Found';\n  END IF;\nEND;")
 
-^{:refer hara.rt.postgres.runtime.impl/t:fields :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.impl/t:fields :added "4.0"}
 (fact "gets the fields"
 
   (l/with:emit

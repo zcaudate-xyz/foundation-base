@@ -1,9 +1,9 @@
-(ns hara.lang.model.spec-elisp-test
+(ns hara.model.spec-elisp-test
   (:require [hara.lang :as l]
-            [hara.lang.model.spec-elisp :refer :all])
+            [hara.model.spec-elisp :refer :all])
   (:use code.test))
 
-^{:refer hara.lang.model.spec-elisp/emit-elisp :added "4.1"}
+^{:refer hara.model.spec-elisp/emit-elisp :added "4.1"}
 (fact "emits code into emacs lisp schema"
   (emit-elisp '(defn hello [x] (return (== x nil))) {})
   => "(defun hello (x) (catch (quote __xt_return__) (throw (quote __xt_return__) (equal x nil))))")
@@ -12,7 +12,7 @@
   (emit-elisp {:a 1 :b [2 3]} {})
   => "(let ((__xt_tbl (make-hash-table :test (quote equal)))) (progn (puthash \"a\" 1 __xt_tbl) (puthash \"b\" (vector 2 3) __xt_tbl) __xt_tbl))")
 
-^{:refer hara.lang.model.spec-elisp/+book+ :added "4.1"}
+^{:refer hara.model.spec-elisp/+book+ :added "4.1"}
 (fact "emits xtalk through the elisp backend"
   (l/emit-as :elisp '[(x:print (x:cat "a" "b"))])
   => "(progn (princ (concat \"a\" \"b\")) nil)")

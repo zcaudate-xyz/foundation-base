@@ -1,12 +1,12 @@
-(ns hara.rt.postgres.base.compile.json-openapi-test
-  (:require [hara.rt.postgres.base.compile.json-openapi :as compile.openapi]
-            [hara.rt.postgres.base.typed.typed-common :as types]
-            [hara.rt.postgres.base.typed.typed-parse :as parse]
-            [hara.rt.postgres.base.typed.typed-common-test]
-            [hara.rt.postgres.test.scratch-v2])
+(ns hara.runtime.postgres.base.compile.json-openapi-test
+  (:require [hara.runtime.postgres.base.compile.json-openapi :as compile.openapi]
+            [hara.runtime.postgres.base.typed.typed-common :as types]
+            [hara.runtime.postgres.base.typed.typed-parse :as parse]
+            [hara.runtime.postgres.base.typed.typed-common-test]
+            [hara.runtime.postgres.test.scratch-v2])
   (:use code.test))
 
-^{:refer hara.rt.postgres.base.compile.json-openapi/field->openapi :added "4.1"}
+^{:refer hara.runtime.postgres.base.compile.json-openapi/field->openapi :added "4.1"}
 (fact "converts field info to OpenAPI schema"
   (let [field-info {:type :uuid :nullable? false}]
     (compile.openapi/field->openapi field-info) => {:type "string" :format "uuid"})
@@ -23,7 +23,7 @@
   (let [field-info {:is-ref? true}]
     (compile.openapi/field->openapi field-info) => {:type "string" :format "uuid"}))
 
-^{:refer hara.rt.postgres.base.compile.json-openapi/shape->openapi :added "0.1"}
+^{:refer hara.runtime.postgres.base.compile.json-openapi/shape->openapi :added "0.1"}
 (fact "shape->openapi preserves raw string keys"
   (let [shape (types/make-jsonb-shape {"db/sync" {:type :jsonb
                                                   :shape (types/make-jsonb-shape {"UserProfile" {:type :array
@@ -35,7 +35,7 @@
     (contains? (get-in result [:properties "db/sync" :properties]) "UserProfile") => true
     (contains? (:properties result) "db_sync") => false))
 
-^{:refer hara.rt.postgres.base.compile.json-openapi/arg->openapi :added "4.1"}
+^{:refer hara.runtime.postgres.base.compile.json-openapi/arg->openapi :added "4.1"}
 (fact "converts function argument to OpenAPI parameter"
   (types/clear-registry!)
   (let [arg {:name 'm :type :text}
@@ -50,7 +50,7 @@
         fn-def {:inputs [arg]}]
     (compile.openapi/arg->openapi arg fn-def) => vector?))
 
-^{:refer hara.rt.postgres.base.compile.json-openapi/fn->openapi :added "0.1"}
+^{:refer hara.runtime.postgres.base.compile.json-openapi/fn->openapi :added "0.1"}
 (fact "fn->openapi retains track args in request body"
   (let [form '(defn.pg ^{:%% :sql :- Task}
                 insert-task
@@ -63,7 +63,7 @@
         request-schema (get-in openapi [:requestBody :content "application/json" :schema])]
     (contains? (:properties request-schema) "o_op") => true))
 
-^{:refer hara.rt.postgres.base.compile.json-openapi/generate-openapi :added "0.1"}
+^{:refer hara.runtime.postgres.base.compile.json-openapi/generate-openapi :added "0.1"}
 (fact "generate-openapi response schemas are valid"
   (let [spec (compile.openapi/generate-openapi 'rt.postgres.test.scratch-v2 (constantly true))
         paths (:paths spec)]

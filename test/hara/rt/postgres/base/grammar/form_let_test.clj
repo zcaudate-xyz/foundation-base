@@ -1,12 +1,12 @@
-(ns hara.rt.postgres.base.grammar.form-let-test
+(ns hara.runtime.postgres.base.grammar.form-let-test
   (:require [clojure.string]
-            [hara.rt.postgres.base.grammar.common :as common]
-            [hara.rt.postgres.base.grammar.form-let :refer :all]
+            [hara.runtime.postgres.base.grammar.common :as common]
+            [hara.runtime.postgres.base.grammar.form-let :refer :all]
             [hara.lang :as l]
-            [hara.lang.base.emit-common :as emit-common])
+            [hara.common.emit-common :as emit-common])
   (:use code.test))
 
-^{:refer hara.rt.postgres.base.grammar.form-let/pg-tf-let-block :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.form-let/pg-tf-let-block :added "4.0"}
 (fact "transforms a let block call"
 
   (pg-tf-let-block '(let:block {:name hello
@@ -21,7 +21,7 @@
            \\ (\| (do (return (+ v m))))
            \\ :end]))
 
-^{:refer hara.rt.postgres.base.grammar.form-let/pg-tf-let-assign :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.form-let/pg-tf-let-assign :added "4.0"}
 (fact "create assignment statments for let form"
 
   (pg-tf-let-assign '[sym (hello)])
@@ -30,7 +30,7 @@
   (pg-tf-let-assign '[sym [:select * :from table]])
   => '[[:select * :from table :into sym]])
 
-^{:refer hara.rt.postgres.base.grammar.form-let/pg-tf-let-check-body :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.form-let/pg-tf-let-check-body :added "4.0"}
 (fact "checks if variables are in scope"
   (pg-tf-let-check-body '#{a} '(do (:= a 1)))
   => nil
@@ -50,7 +50,7 @@
     (catch Throwable e (clojure.string/includes? (str e) "Unknown symbols in form")))
   => true)
 
-^{:refer hara.rt.postgres.base.grammar.form-let/pg-tf-let :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.form-let/pg-tf-let :added "4.0"}
 (fact "creates a let form"
 
   (pg-tf-let '(let [(:int a) 1
@@ -72,32 +72,32 @@
                   (return (+ a b)))))
   => '(do [:declare \\ (\| (do (var :int a))) \\ :begin \\ (\| (do (:= a 1) (let [(:int b) 2] (return (+ a b))))) \\ :end]))
 
-^{:refer hara.rt.postgres.base.grammar.form-let/pg-do-block :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.form-let/pg-do-block :added "4.0"}
 (fact "emits a block with let usage"
   (with-redefs [emit-common/*emit-fn* (fn [& _] "block")]
     (pg-do-block '(do:block (let [a 1] (return a))) nil nil))
   => "block")
 
-^{:refer hara.rt.postgres.base.grammar.form-let/pg-do-suppress :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.form-let/pg-do-suppress :added "4.0"}
 (fact "emits a suppress block with let ussage"
   (with-redefs [emit-common/*emit-fn* (fn [& _] "block")]
     (pg-do-suppress '(do:block (let [a 1] (return a))) nil nil))
   => "block")
 
 
-^{:refer hara.rt.postgres.base.grammar.form-let/pg-loop-block :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.form-let/pg-loop-block :added "4.0"}
 (fact "creates a loop block"
   (with-redefs [emit-common/*emit-fn* (fn [& _] "block")]
     (pg-loop-block '(loop [] (let [a 1] (return a))) nil nil))
   => "block")
 
-^{:refer hara.rt.postgres.base.grammar.form-let/pg-while-block :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.form-let/pg-while-block :added "4.0"}
 (fact "creates a while block"
   (with-redefs [emit-common/*emit-fn* (fn [& _] "block")]
     (pg-while-block '(while (true) (let [a 1] (return a))) nil nil))
   => "block")
 
-^{:refer hara.rt.postgres.base.grammar.form-let/pg-case-block :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.form-let/pg-case-block :added "4.0"}
 (fact "creates a case block"
   (with-redefs [emit-common/*emit-fn* (fn [& _] "block")]
     (pg-case-block '(case type "a" "b") nil nil))

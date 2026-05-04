@@ -1,8 +1,8 @@
-(ns hara.lang.model.spec-js-play-test
+(ns hara.model.spec-js-play-test
   (:use code.test)
   (:require [clojure.string :as str]
              [hara.lang.typed.xtalk-parse :as xtalk-parse]
-             [hara.lang.model.spec-js.ts :as ts]))
+             [hara.model.spec-js.ts :as ts]))
 
 (def +typescript-model-fixture+
   "test/hara.lang/model/typescript_model_fixture.clj")

@@ -1,8 +1,8 @@
-(ns hara.rt.basic.impl-annex.process-julia-test
-  (:require [hara.rt.basic.impl-annex.process-julia :refer :all])
+(ns hara.runtime.basic.impl-annex.process-julia-test
+  (:require [hara.runtime.basic.impl-annex.process-julia :refer :all])
   (:use code.test))
 
-^{:refer hara.rt.basic.impl-annex.process-julia/default-body-wrap :added "4.1"}
+^{:refer hara.runtime.basic.impl-annex.process-julia/default-body-wrap :added "4.1"}
 (fact "creates julia return wrapper"
   (default-body-wrap '[1 2 3])
   => '(do
@@ -12,7 +12,7 @@
           (return 3))
         (:= OUT (OUT-FN))))
 
-^{:refer hara.rt.basic.impl-annex.process-julia/default-body-transform :added "4.1"}
+^{:refer hara.runtime.basic.impl-annex.process-julia/default-body-transform :added "4.1"}
 (fact "standard julia transforms"
   (default-body-transform '[1 2 3] {})
   => '(do

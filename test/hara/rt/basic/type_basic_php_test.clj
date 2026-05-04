@@ -1,11 +1,11 @@
-(ns hara.rt.basic.type-basic-php-test
+(ns hara.runtime.basic.type-basic-php-test
   (:use code.test)
-  (:require [hara.rt.basic.impl-annex.process-php]
-            [hara.rt.basic.type-basic :as p]
-            [hara.rt.basic.type-common :as common]
+  (:require [hara.runtime.basic.impl-annex.process-php]
+            [hara.runtime.basic.type-basic :as p]
+            [hara.runtime.basic.type-common :as common]
             [hara.lang :as l]
             [hara.lang.base.pointer :as ptr]
-            [hara.lang.base.util :as ut]
+            [hara.common.util :as ut]
             [std.lib.component :as component]))
 
 (l/script+ [:php.0 :php]
@@ -18,7 +18,7 @@
 (def CANARY-PHP
   (common/program-exists? "php"))
 
-^{:refer hara.rt.basic.type-basic-php-test/CANARY-PHP :adopt true :added "4.1"}
+^{:refer hara.runtime.basic.type-basic-php-test/CANARY-PHP :adopt true :added "4.1"}
 (fact "php basic can return values"
   (if CANARY-PHP
     [(l/! [:php.0]
@@ -36,7 +36,7 @@
   => (any [6 16 36 30]
            :php-unavailable))
 
-^{:refer hara.rt.basic.type-basic/invoke-ptr-basic :added "4.1"}
+^{:refer hara.runtime.basic.type-basic/invoke-ptr-basic :added "4.1"}
 (fact "php basic emits executable input and decodes output"
 
   (if CANARY-PHP
@@ -65,7 +65,7 @@
      :php-unavailable)
   => (any nil? :php-unavailable))
 
-^{:refer hara.rt.basic.type-basic/invoke-ptr-basic :added "4.1"}
+^{:refer hara.runtime.basic.type-basic/invoke-ptr-basic :added "4.1"}
 (fact "php basic survives eval errors and continues serving requests"
 
   (if CANARY-PHP

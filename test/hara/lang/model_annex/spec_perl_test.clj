@@ -1,6 +1,6 @@
-(ns hara.lang.model-annex.spec-perl-test
+(ns hara.model.annex.spec-perl-test
   (:require [hara.lang :as l]
-            [hara.lang.model-annex.spec-perl :as spec-perl])
+            [hara.model.annex.spec-perl :as spec-perl])
   (:use code.test))
 
 (l/script :perl)
@@ -74,44 +74,44 @@
       (x:str-join "," arr))])
   => "split(\",\", \"a,b\");\nuc(\"a\");\njoin(\",\", $arr);")
 
-^{:refer hara.lang.model-annex.spec-perl/perl-var :added "4.1"}
+^{:refer hara.model.annex.spec-perl/perl-var :added "4.1"}
 (fact "emit perl variable declaration"
   (spec-perl/perl-var '(var a 10))
   => '(:- "my $a = 10"))
 
-^{:refer hara.lang.model-annex.spec-perl/perl-symbol :added "4.1"}
+^{:refer hara.model.annex.spec-perl/perl-symbol :added "4.1"}
 (fact "emit perl symbol with $ prefix if it's a variable"
   (spec-perl/perl-symbol 'a spec-perl/+grammar+ {})
   => "$a"
   (spec-perl/perl-symbol 'a spec-perl/+grammar+ {:perl/func true})
   => "a")
 
-^{:refer hara.lang.model-annex.spec-perl/perl-invoke-args :added "4.1"}
+^{:refer hara.model.annex.spec-perl/perl-invoke-args :added "4.1"}
 (fact "emit perl invoke args"
   (spec-perl/perl-invoke-args '[1 2] spec-perl/+grammar+ {})
   => "1, 2")
 
-^{:refer hara.lang.model-annex.spec-perl/perl-invoke :added "4.1"}
+^{:refer hara.model.annex.spec-perl/perl-invoke :added "4.1"}
 (fact "emit perl function call"
   (spec-perl/perl-invoke '(f 1 2) spec-perl/+grammar+ {})
   => "f(1, 2)")
 
-^{:refer hara.lang.model-annex.spec-perl/perl-defn :added "4.1"}
+^{:refer hara.model.annex.spec-perl/perl-defn :added "4.1"}
 (fact "emit perl subroutine definition"
   (spec-perl/perl-defn '(defn add [a b] (return (+ a b))))
   => (list :- "sub add {\nmy $a = shift;\nmy $b = shift;\n(do (return (+ a b)))\n}"))
 
-^{:refer hara.lang.model-annex.spec-perl/perl-eval :added "4.1"}
+^{:refer hara.model.annex.spec-perl/perl-eval :added "4.1"}
 (fact "emits a Perl eval block"
   (l/emit-as :perl '[(eval (do (print "hello")))])
   => "eval {\nprint(\"hello\");\n}")
 
-^{:refer hara.lang.model-annex.spec-perl/perl-array :added "4.1"}
+^{:refer hara.model.annex.spec-perl/perl-array :added "4.1"}
 (fact "emit perl array reference"
   (spec-perl/perl-array [1 2 3] spec-perl/+grammar+ {})
   => "[1, 2, 3]")
 
-^{:refer hara.lang.model-annex.spec-perl/perl-map :added "4.1"}
+^{:refer hara.model.annex.spec-perl/perl-map :added "4.1"}
 (fact "emit perl hash reference"
   (spec-perl/perl-map {"a" 1 "b" 2} spec-perl/+grammar+ {})
   => "{\"a\" => 1, \"b\" => 2}")

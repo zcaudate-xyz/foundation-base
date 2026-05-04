@@ -1,12 +1,12 @@
-(ns hara.rt.basic.type-container-test
-  (:require [hara.rt.basic.type-container :as container]
-            [hara.rt.basic.type-oneshot :as oneshot])
+(ns hara.runtime.basic.type-container-test
+  (:require [hara.runtime.basic.type-container :as container]
+            [hara.runtime.basic.type-oneshot :as oneshot])
   (:use code.test))
 
-^{:refer hara.rt.basic.type-container/start-container-process :added "4.1"}
+^{:refer hara.runtime.basic.type-container/start-container-process :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.rt.basic.type-container/start-container :added "4.1"}
+^{:refer hara.runtime.basic.type-container/start-container :added "4.1"}
 (fact "start-container preserves explicit container exec"
 
   (with-redefs [oneshot/rt-oneshot-setup (fn [& _]
@@ -27,5 +27,5 @@
   => {:exec ["sh" "-c"]
       :image "erlang:27-alpine"})
 
-^{:refer hara.rt.basic.type-container/stop-container :added "4.1"}
+^{:refer hara.runtime.basic.type-container/stop-container :added "4.1"}
 (fact "TODO")

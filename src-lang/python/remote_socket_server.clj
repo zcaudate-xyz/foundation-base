@@ -90,7 +90,7 @@
   @(std.concurrent/send +r+
                         (std.json/write
                          (hara.lang/emit-script
-                          (hara.rt.basic.impl.process-python/default-body-wrap
+                          (hara.runtime.basic.impl.process-python/default-body-wrap
                            '[(:- :import bpy)
                              (bpy.ops.object.select_all :action "SELECT")
                              ])
@@ -99,7 +99,7 @@
   @(std.concurrent/send +r+
                         (std.json/write
                          (hara.lang/emit-script
-                          (hara.rt.basic.impl.process-python/default-body-wrap
+                          (hara.runtime.basic.impl.process-python/default-body-wrap
                            '[(:- :import bpy)
                              (bpy.msgbus.publish_rna :key "hello")
                              ])

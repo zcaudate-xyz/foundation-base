@@ -1,9 +1,9 @@
-(ns hara.lang.model-annex.spec-lean-test
+(ns hara.model.annex.spec-lean-test
   (:require [hara.lang.base.impl :as impl]
-            [hara.lang.model-annex.spec-lean :as spec-lean])
+            [hara.model.annex.spec-lean :as spec-lean])
   (:use code.test))
 
-^{:refer hara.lang.model-annex.spec-lean/CANARY :adopt true :added "4.1"}
+^{:refer hara.model.annex.spec-lean/CANARY :adopt true :added "4.1"}
 (fact "basic emit"
   (impl/emit-script '(defn hello [x] x) {:lang :lean})
   => "def hello x := x"
@@ -25,41 +25,41 @@
   => "fun x => x + 1")
 
 
-^{:refer hara.lang.model-annex.spec-lean/emit-raw-str :added "4.1"}
+^{:refer hara.model.annex.spec-lean/emit-raw-str :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-lean/emit-indent-body :added "4.1"}
+^{:refer hara.model.annex.spec-lean/emit-indent-body :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-lean/lean-args :added "4.1"}
+^{:refer hara.model.annex.spec-lean/lean-args :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-lean/lean-invoke :added "4.1"}
+^{:refer hara.model.annex.spec-lean/lean-invoke :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-lean/parse-match-clauses :added "4.1"}
+^{:refer hara.model.annex.spec-lean/parse-match-clauses :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-lean/catch-all-pattern? :added "4.1"}
+^{:refer hara.model.annex.spec-lean/catch-all-pattern? :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-lean/guarded-body :added "4.1"}
+^{:refer hara.model.annex.spec-lean/guarded-body :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-lean/match-form :added "4.1"}
+^{:refer hara.model.annex.spec-lean/match-form :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-lean/tf-defn :added "4.1"}
+^{:refer hara.model.annex.spec-lean/tf-defn :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-lean/tf-match :added "4.1"}
+^{:refer hara.model.annex.spec-lean/tf-match :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-lean/tf-if :added "4.1"}
+^{:refer hara.model.annex.spec-lean/tf-if :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-lean/tf-letrec :added "4.1"}
+^{:refer hara.model.annex.spec-lean/tf-letrec :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-lean/tf-lambda :added "4.1"}
+^{:refer hara.model.annex.spec-lean/tf-lambda :added "4.1"}
 (fact "TODO")

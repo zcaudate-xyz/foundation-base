@@ -1,24 +1,24 @@
-(ns hara.rt.postgres.base.grammar-test
+(ns hara.runtime.postgres.base.grammar-test
   (:use code.test)
-  (:require [hara.rt.postgres :as pg]
-            [hara.rt.postgres.base.grammar :refer :all]
-            [hara.rt.postgres.test.scratch-v1 :as scratch]
+  (:require [hara.runtime.postgres :as pg]
+            [hara.runtime.postgres.base.grammar :refer :all]
+            [hara.runtime.postgres.test.scratch-v1 :as scratch]
             [hara.lang :as l]))
 
 (l/script- :postgres
   {:runtime :jdbc.client
    :config  {:dbname "test-scratch"}
-   :require [[hara.rt.postgres :as pg]
-             [hara.rt.postgres.runtime.system :as sys]
-             [hara.rt.postgres.test.scratch-v1 :as scratch]]})
+   :require [[hara.runtime.postgres :as pg]
+             [hara.runtime.postgres.runtime.system :as sys]
+             [hara.runtime.postgres.test.scratch-v1 :as scratch]]})
 
 (fact:global
  {:setup    [(l/rt:restart)
-             (hara.rt.postgres/exec [:create-schema :if-not-exists :scratch])
+             (hara.runtime.postgres/exec [:create-schema :if-not-exists :scratch])
              (l/rt:setup :postgres)]
   :teardown [(l/rt:stop)]})
 
-^{:refer hara.rt.postgres.base.grammar/CANARY :adopt true :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar/CANARY :adopt true :added "4.0"}
 (fact "stops the postgres runtime"
 
   (try
@@ -31,7 +31,7 @@
       (throw t)))
   => 3M)
 
-^{:refer hara.rt.postgres.base.grammar/CANARY.select :adopt true :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar/CANARY.select :adopt true :added "4.0"}
 (fact "BASIC SELECT"
 
   (!.pg
@@ -65,7 +65,7 @@
     :cross-join (unnest (array "X" "Y")) b])
   => '("(A,X)" "(A,Y)" "(B,X)" "(B,Y)"))
 
-^{:refer hara.rt.postgres.base.grammar/CANARY.json :adopt true :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar/CANARY.json :adopt true :added "4.0"}
 (fact "BASIC JSON SELECT"
 
   (!.pg
@@ -108,18 +108,18 @@
   => #{{"id" "a", "data" 2}
        {"id" "a", "data" 1}})
 
-^{:refer hara.rt.postgres.base.grammar/pg-tf-free-data :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar/pg-tf-free-data :added "4.1"}
 (fact "transforms free data form to quoted structure"
   (pg-tf-free-data ['>-> '[[a b] [c d]]])
   => '(quote ((quote [[a b] [c d]]))))
 
-^{:refer hara.rt.postgres.base.grammar/pg-tf-free-vec :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar/pg-tf-free-vec :added "4.1"}
 (fact "transforms free vec form to quoted vector"
   (pg-tf-free-vec ['--- '[a b c]]) => '(quote [a b c])
 
   (pg-tf-free-vec ['--- '[1 2 3]]) => '(quote [1 2 3]))
 
-^{:refer hara.rt.postgres.base.grammar/pg-vector :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar/pg-vector :added "4.1"}
 (fact "handles array with js meta by emitting through pg-tf-js"
   (pg-vector [1 2 3] {} {})
   => "1 2 3"

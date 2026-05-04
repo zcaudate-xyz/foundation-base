@@ -1,11 +1,11 @@
-(ns hara.rt.postgres.base.compile.server-db-test
-  (:require [hara.rt.postgres.base.compile-test :as fixtures]
-            [hara.rt.postgres.base.compile.server-db :refer :all])
+(ns hara.runtime.postgres.base.compile.server-db-test
+  (:require [hara.runtime.postgres.base.compile-test :as fixtures]
+            [hara.runtime.postgres.base.compile.server-db :refer :all])
   (:use code.test))
 
 (fixtures/ensure-fixtures!)
 
-^{:refer hara.rt.postgres.base.compile.server-db/collect-pg-ops :added "4.1"}
+^{:refer hara.runtime.postgres.base.compile.server-db/collect-pg-ops :added "4.1"}
 (fact "collects postgres operations from form"
   (collect-pg-ops '(pg/t:insert Task {:name "test"})) => #{:insert}
 
@@ -20,7 +20,7 @@
   (collect-pg-ops '(do (pg/t:insert Task {:name "a"})
                        (pg/t:update Task {:name "b"} {:id 1}))) => #{:insert :update})
 
-^{:refer hara.rt.postgres.base.compile.server-db/infer-sync-spec :added "4.1"}
+^{:refer hara.runtime.postgres.base.compile.server-db/infer-sync-spec :added "4.1"}
 (fact "infer-sync-spec respects the manual and off sync modes"
   (select-keys (infer-sync-spec fixtures/+manual-sync-fn+)
                [:mode :mutating? :tables])
@@ -34,7 +34,7 @@
       :mutating? false
       :tables ["UserAccount"]})
 
-^{:refer hara.rt.postgres.base.compile.server-db/db-sync-merge :added "4.1"}
+^{:refer hara.runtime.postgres.base.compile.server-db/db-sync-merge :added "4.1"}
 (fact "db-sync-merge leaves nil outputs and existing sync payloads unchanged"
   (db-sync-merge nil ["UserAccount"])
   => nil
@@ -44,7 +44,7 @@
   => {:id "u1"
       :db/sync {"UserAccount" [{:id "u1"}]}})
 
-^{:refer hara.rt.postgres.base.compile.server-db/supabase-db-input :added "4.1"}
+^{:refer hara.runtime.postgres.base.compile.server-db/supabase-db-input :added "4.1"}
 (fact "supabase-db-input prepares wrapper input for generation"
   (supabase-db-input
    {:wrapper-sym 'create-user-manual-sync
@@ -58,7 +58,7 @@
       'sync-fn 'rt.postgres.base.compile.server-db/db-sync-merge
       'tables ["UserAccount" "UserProfile"]})
 
-^{:refer hara.rt.postgres.base.compile.server-db/target-entry :added "4.1"}
+^{:refer hara.runtime.postgres.base.compile.server-db/target-entry :added "4.1"}
 (fact "target-entry creates the emitted symbol for db targets"
   (select-keys (target-entry fixtures/+shape-fn+ :supabase-db)
                [:target :emitted-sym :fn-def])
@@ -66,14 +66,14 @@
       :emitted-sym 'create-user-sync
       :fn-def fixtures/+shape-fn+})
 
-^{:refer hara.rt.postgres.base.compile.server-db/emit-target :added "4.1"}
+^{:refer hara.runtime.postgres.base.compile.server-db/emit-target :added "4.1"}
 (fact "emit-target renders a db wrapper when sync is enabled"
   (clojure.string/includes?
    (emit-target fixtures/+manual-sync-fn+ :supabase-db)
    "create-user-manual-sync")
   => true)
 
-^{:refer hara.rt.postgres.base.compile.server-db/emit-targets :added "4.1"}
+^{:refer hara.runtime.postgres.base.compile.server-db/emit-targets :added "4.1"}
 (fact "emit-targets renders the configured db targets"
   (keys (emit-targets fixtures/+manual-sync-fn+))
   => '(:supabase-db)
@@ -81,7 +81,7 @@
   (emit-targets fixtures/+manual-sync-fn+ [:supabase-db])
   => (contains {:supabase-db string?}))
 
-^{:refer hara.rt.postgres.base.compile.server-db/list-targets :added "4.1"}
+^{:refer hara.runtime.postgres.base.compile.server-db/list-targets :added "4.1"}
 (fact "list-targets exposes the supported db targets"
   (list-targets)
   => '(:supabase-db))

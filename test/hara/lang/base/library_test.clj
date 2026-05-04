@@ -3,14 +3,14 @@
             [hara.lang.base.book-entry :as entry]
             [hara.lang.base.book-meta :as meta]
             [hara.lang.base.book-module :as module]
-            [hara.lang.base.emit-common :as common]
-            [hara.lang.base.emit-helper :as helper]
-            [hara.lang.base.grammar :as grammar]
+            [hara.common.emit-common :as common]
+            [hara.common.emit-helper :as helper]
+            [hara.common.grammar :as grammar]
             [hara.lang.base.library :as lib]
             [hara.lang.base.library-snapshot :as snap]
             [hara.lang.base.library-snapshot-prep-test :as prep]
-            [hara.lang.base.util :as ut]
-            [hara.lang.model.spec-lua :as lua]
+            [hara.common.util :as ut]
+            [hara.model.spec-lua :as lua]
             [std.lib.atom :as atom]
             [std.lib.deps :as deps]
             [std.lib.env :as env])
@@ -270,7 +270,7 @@
   (atom/swap-return! (:instance +lib+)
     (fn [snapshot]
       [nil (snap/add-book snapshot
-                          hara.lang.base.emit-prep-lua-test/+book-min+)]))
+                          hara.common.emit-prep-lua-test/+book-min+)]))
 
   ((:dispatch +lib+) (entry/create-fragment
                       '(def$ G G)

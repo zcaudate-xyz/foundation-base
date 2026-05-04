@@ -1,9 +1,9 @@
-(ns hara.lang.model-annex.spec-ocaml-test
+(ns hara.model.annex.spec-ocaml-test
   (:require [hara.lang.base.impl :as impl]
-            [hara.lang.model-annex.spec-ocaml :as spec-ocaml])
+            [hara.model.annex.spec-ocaml :as spec-ocaml])
   (:use code.test))
 
-^{:refer hara.lang.model-annex.spec-ocaml/CANARY :adopt true :added "4.1"}
+^{:refer hara.model.annex.spec-ocaml/CANARY :adopt true :added "4.1"}
 (fact "basic emit"
   (impl/emit-script '(defn hello [x] x) {:lang :ocaml})
   => "let rec hello x = x"
@@ -30,38 +30,38 @@
   => "fun x -> x + 1")
 
 
-^{:refer hara.lang.model-annex.spec-ocaml/emit-raw-str :added "4.1"}
+^{:refer hara.model.annex.spec-ocaml/emit-raw-str :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-ocaml/emit-indent-body :added "4.1"}
+^{:refer hara.model.annex.spec-ocaml/emit-indent-body :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-ocaml/emit-lines-with :added "4.1"}
+^{:refer hara.model.annex.spec-ocaml/emit-lines-with :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-ocaml/ml-invoke :added "4.1"}
+^{:refer hara.model.annex.spec-ocaml/ml-invoke :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-ocaml/ml-args :added "4.1"}
+^{:refer hara.model.annex.spec-ocaml/ml-args :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-ocaml/parse-match-clauses :added "4.1"}
+^{:refer hara.model.annex.spec-ocaml/parse-match-clauses :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-ocaml/body-expr :added "4.1"}
+^{:refer hara.model.annex.spec-ocaml/body-expr :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-ocaml/tf-defn :added "4.1"}
+^{:refer hara.model.annex.spec-ocaml/tf-defn :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-ocaml/tf-match :added "4.1"}
+^{:refer hara.model.annex.spec-ocaml/tf-match :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-ocaml/tf-if :added "4.1"}
+^{:refer hara.model.annex.spec-ocaml/tf-if :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-ocaml/tf-letrec :added "4.1"}
+^{:refer hara.model.annex.spec-ocaml/tf-letrec :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model-annex.spec-ocaml/tf-lambda :added "4.1"}
+^{:refer hara.model.annex.spec-ocaml/tf-lambda :added "4.1"}
 (fact "TODO")

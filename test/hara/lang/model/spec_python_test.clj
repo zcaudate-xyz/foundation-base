@@ -1,17 +1,17 @@
-(ns hara.lang.model.spec-python-test
+(ns hara.model.spec-python-test
   (:require [hara.lang :as l]
-            [hara.lang.model.spec-python :as py]
+            [hara.model.spec-python :as py]
             [std.string.prose :as prose])
   (:use code.test))
 
-^{:refer hara.lang.model.spec-python/python-defn- :added "4.0"}
+^{:refer hara.model.spec-python/python-defn- :added "4.0"}
 (fact "hidden function without decorators"
 
   (l/emit-as
    :python '[(defn- hello [] (return 1))])
   => "def hello():\n  return 1")
 
-^{:refer hara.lang.model.spec-python/python-defn :added "4.0"}
+^{:refer hara.model.spec-python/python-defn :added "4.0"}
 (fact "creates a defn function for python"
 
   (l/emit-as
@@ -28,7 +28,7 @@
       "def hello():"
       "  return 1"))
 
-^{:refer hara.lang.model.spec-python/python-fn :added "4.0"}
+^{:refer hara.model.spec-python/python-fn :added "4.0"}
 (fact "basic transform for python lambdas"
 
   (l/emit-as
@@ -83,7 +83,7 @@
      (boolean (re-find #"data = \{\"heal\":py_callback__" out))])
    => [true true true true])
 
-^{:refer hara.lang.model.spec-python/python-fn :added "4.1"}
+^{:refer hara.model.spec-python/python-fn :added "4.1"}
 (fact "lifts callbacks that lower to Python assignment statements"
 
   (let [out (l/emit-as
@@ -96,7 +96,7 @@
      (not (boolean (re-find #"lambda elem,props : elem\[\"props\"\] = props" out)))])
   => [true true true true])
 
-^{:refer hara.lang.model.spec-python/python-defclass :added "4.0"}
+^{:refer hara.model.spec-python/python-defclass :added "4.0"}
 (fact "emits a defclass template for python"
 
   (l/emit-as
@@ -140,7 +140,7 @@
      (boolean (re-find #"return \{\"FINISHED\"\}" out))])
   => [true true true true true true true true])
 
-^{:refer hara.lang.model.spec-python/python-var :added "4.0"}
+^{:refer hara.model.spec-python/python-var :added "4.0"}
 (fact "var -> fn.inner shorthand"
 
   (py/python-var '(var hello (fn [x] x)))
@@ -152,7 +152,7 @@
   (py/python-var '(var hello))
   => '(var* hello := nil))
 
-^{:refer hara.lang.model.spec-python/tf-for-object :added "4.0"}
+^{:refer hara.model.spec-python/tf-for-object :added "4.0"}
 (fact "for object loop"
 
   (py/tf-for-object '(for:object [[k v] arr]
@@ -160,7 +160,7 @@
 
   => '(for [[k v] :in (. arr (items))] [k v]))
 
-^{:refer hara.lang.model.spec-python/tf-for-array :added "4.0"}
+^{:refer hara.model.spec-python/tf-for-array :added "4.0"}
 (fact  "for array loop"
 
   (py/tf-for-array '(for:array [[i e] arr]
@@ -171,21 +171,21 @@
                                e))
   => '(for [e :in arr] e))
 
-^{:refer hara.lang.model.spec-python/tf-for-iter :added "4.0"}
+^{:refer hara.model.spec-python/tf-for-iter :added "4.0"}
 (fact "for iter loop"
 
   (py/tf-for-array '(for:iter [e it]
                                e))
   => '(for [e :in it] e))
 
-^{:refer hara.lang.model.spec-python/tf-for-index :added "4.0"}
+^{:refer hara.model.spec-python/tf-for-index :added "4.0"}
 (fact "for index transform"
 
   (py/tf-for-index '(for:index [i [0 2 10]]
                                i))
   => '(for [i :in (range 0 2 10)] i))
 
-^{:refer hara.lang.model.spec-python/tf-for-return :added "4.0"}
+^{:refer hara.model.spec-python/tf-for-return :added "4.0"}
 (fact "for return transform"
 
   (py/tf-for-return '(for:return [[ok err] (call)]

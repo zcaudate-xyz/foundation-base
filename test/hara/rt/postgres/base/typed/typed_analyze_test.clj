@@ -1,8 +1,8 @@
-(ns hara.rt.postgres.base.typed.typed-analyze-test
+(ns hara.runtime.postgres.base.typed.typed-analyze-test
   (:require [clojure.string :as str]
-            [hara.rt.postgres.base.typed.typed-analyze :as analyze]
-            [hara.rt.postgres.base.typed.typed-common :as types]
-            [hara.rt.postgres.base.typed.typed-parse :as parse])
+            [hara.runtime.postgres.base.typed.typed-analyze :as analyze]
+            [hara.runtime.postgres.base.typed.typed-common :as types]
+            [hara.runtime.postgres.base.typed.typed-parse :as parse])
   (:use code.test))
 
 (defn- get-scratch-fn
@@ -13,7 +13,7 @@
     (some #(when (= (name sym) (:name %)) %)
           (:functions analysis))))
 
-^{:refer hara.rt.postgres.base.typed.typed-analyze/resolve-table :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-analyze/resolve-table :added "4.1"}
 (fact "resolve-table finds table definitions from symbols and keywords"
   (types/clear-registry!)
   (let [table-def (types/make-table-def "test.ns" "User" [] :id)]
@@ -31,7 +31,7 @@
     ;; Returns nil for unknown table
     (analyze/resolve-table 'UnknownTable) => nil))
 
-^{:refer hara.rt.postgres.base.typed.typed-analyze/register-call-analyzer! :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-analyze/register-call-analyzer! :added "4.1"}
 (fact "call analyzers can specialize a resolved function call"
   (types/clear-registry!)
   (analyze/reset-cache!)
@@ -58,7 +58,7 @@
     (get-in result [:shape :fields :hello :type]) => :text
     (get-in result [:shape :fields :plugin-added :type]) => :text))
 
-^{:refer hara.rt.postgres.base.typed.typed-analyze/projected-js-select-shape :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-analyze/projected-js-select-shape :added "4.1"}
 (fact "projected-js-select-shape projects fields from the analyzed source"
   (let [shape (types/make-jsonb-shape
                {:id {:type :uuid :nullable? false}
@@ -73,7 +73,7 @@
     (get-in (analyze/projected-js-select-shape ctx 'm '(js ["id" "name"]))
             [:fields :name :type]) => :text))
 
-^{:refer hara.rt.postgres.base.typed.typed-analyze/analyzed->shape :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-analyze/analyzed->shape :added "4.1"}
 (fact "analyzed->shape extracts JsonbShape from analyzed values"
   (let [shape (types/make-jsonb-shape {:id {:type :uuid}} "User")]
     ;; From shaped result
@@ -85,7 +85,7 @@
     ;; Returns nil for non-shaped values
     (analyze/analyzed->shape {:kind :primitive :type :uuid}) => nil))
 
-^{:refer hara.rt.postgres.base.typed.typed-analyze/analyzed->field-info :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-analyze/analyzed->field-info :added "4.1"}
 (fact "analyzed->field-info extracts field info from analyzed values"
   (let [shape (types/make-jsonb-shape {:id {:type :uuid}} "User")]
     ;; From shaped result
@@ -104,13 +104,13 @@
     (analyze/analyzed->field-info {:kind :array :element-type {:kind :primitive :type :uuid}})
     => {:type :array :items {:type :uuid}}))
 
-^{:refer hara.rt.postgres.base.typed.typed-analyze/value->field-info :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-analyze/value->field-info :added "4.1"}
 (fact "value->field-info is an alias for analyzed->field-info"
   (let [shape (types/make-jsonb-shape {:id {:type :uuid}})]
     (analyze/value->field-info {:kind :shaped :shape shape})
     => {:type :jsonb :shape shape}))
 
-^{:refer hara.rt.postgres.base.typed.typed-analyze/merge-analyzed-shapes :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-analyze/merge-analyzed-shapes :added "4.1"}
 (fact "merge-analyzed-shapes combines multiple analyzed values into one shape"
   (let [shape1 (types/make-jsonb-shape {:id {:type :uuid}})
         shape2 (types/make-jsonb-shape {:name {:type :text}})]
@@ -127,7 +127,7 @@
     ;; Returns nil when no shapes found
     (analyze/merge-analyzed-shapes [{:kind :primitive :type :uuid}]) => nil))
 
-^{:refer hara.rt.postgres.base.typed.typed-analyze/analyze-symbol-set :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-analyze/analyze-symbol-set :added "4.1"}
 (fact "analyze-symbol-set turns all-symbol sets into keyed jsonb shapes"
   (let [u1-shape (types/make-jsonb-shape {:id {:type :uuid}} "User")
         u2-shape (types/make-jsonb-shape {:name {:type :text}} "User")
@@ -141,7 +141,7 @@
     (get-in result [:fields :u1 :shape :fields :id :type]) => :uuid
     (get-in result [:fields :u2 :shape :fields :name :type]) => :text))
 
-^{:refer hara.rt.postgres.base.typed.typed-analyze/merge-array-element-types :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-analyze/merge-array-element-types :added "4.1"}
 (fact "merge-array-element-types combines array element types"
   ;; Merges two shapes
   (let [shape1 (types/make-jsonb-shape {:id {:type :uuid}})
@@ -165,7 +165,7 @@
                 {:kind :primitive :type :text})]
     (:kind result) => :union))
 
-^{:refer hara.rt.postgres.base.typed.typed-analyze/literal-map-key :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-analyze/literal-map-key :added "4.1"}
 (fact "literal-map-key normalizes keys for map literals"
   ;; String keys preserved
   (analyze/literal-map-key "literal-key") => "literal-key"
@@ -180,7 +180,7 @@
   ;; Other values passed through
   (analyze/literal-map-key 42) => 42)
 
-^{:refer hara.rt.postgres.base.typed.typed-analyze/resolve-called-fn :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-analyze/resolve-called-fn :added "4.1"}
 (fact "resolve-called-fn resolves function references with aliases"
   (types/clear-registry!)
   (let [fn-def (types/make-fn-def "test.ns" "my-fn" [] :jsonb {} nil)]
@@ -199,7 +199,7 @@
     (let [[resolved fn-result] (analyze/resolve-called-fn 'unknown/fn {})]
       fn-result => nil)))
 
-^{:refer hara.rt.postgres.base.typed.typed-analyze/analyze-table-op :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-analyze/analyze-table-op :added "4.1"}
 (fact "analyze-table-op returns appropriate shape for table operations"
   (types/clear-registry!)
   (let [table-def (types/make-table-def "test.ns" "Entry"
@@ -226,7 +226,7 @@
       ;; Count returns integer
       (:type (analyze/analyze-table-op 'pg/t:count ['test.ns/Entry] ctx)) => :integer)))
 
-^{:refer hara.rt.postgres.base.typed.typed-analyze/analyze-jsonb-merge :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-analyze/analyze-jsonb-merge :added "4.1"}
 (fact "analyze-jsonb-merge combines shapes from merge arguments"
   (let [ctx (types/make-context)]
     ;; Merges map literals
@@ -239,7 +239,7 @@
       (:kind result) => :shaped
       (:op result) => :merge)))
 
-^{:refer hara.rt.postgres.base.typed.typed-analyze/analyze-jsonb-access :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-analyze/analyze-jsonb-access :added "4.1"}
 (fact "analyze-jsonb-access analyzes JSONB field access operators"
   (let [ctx (types/make-context {'m :jsonb}
                                 {'m (types/make-jsonb-shape {:data {:type :jsonb}})}
@@ -253,7 +253,7 @@
     (let [result (analyze/analyze-jsonb-access :->> '(m "name") ctx)]
       (:type result) => :text)))
 
-^{:refer hara.rt.postgres.base.typed.typed-analyze/analyze-jsonb-accessor-expr :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-analyze/analyze-jsonb-accessor-expr :added "4.1"}
 (fact "analyze-jsonb-accessor-expr analyzes JSONB accessor expressions"
   (let [shape (types/make-jsonb-shape {:organisation {:type :uuid}})
         ctx (types/make-context {'m :jsonb}
@@ -264,7 +264,7 @@
       (or (nil? result)
           (= (:kind result) :field-access)) => true)))
 
-^{:refer hara.rt.postgres.base.typed.typed-analyze/analyze-let :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-analyze/analyze-let :added "4.1"}
 (fact "analyze-let analyzes let bindings and body"
   
   (let [ctx (types/make-context)
@@ -280,7 +280,7 @@
     result)
   => :jsonb)
 
-^{:refer hara.rt.postgres.base.typed.typed-analyze/analyze-control-flow :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-analyze/analyze-control-flow :added "4.1"}
 (fact "analyze-control-flow analyzes conditional expressions"
   (let [ctx (types/make-context)]
     ;; If with different map shapes returns union
@@ -297,7 +297,7 @@
     (let [result (analyze/analyze-control-flow '(when true {:x 1}) ctx)]
       (:kind result) => :literal)))
 
-^{:refer hara.rt.postgres.base.typed.typed-analyze/analyze-expr :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-analyze/analyze-expr :added "4.1"}
 (fact "analyze-expr keeps merge behavior for mixed sets"
   (let [u1-shape (types/make-jsonb-shape {:id {:type :uuid}} "User")
         ctx (types/make-context {'v-u1 :jsonb}
@@ -308,27 +308,27 @@
     (get-in result [:shape :fields :extra :type]) => :text
     (get-in result [:shape :fields :u1]) => nil))
 
-^{:refer hara.rt.postgres.base.typed.typed-analyze/infer-return-type :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-analyze/infer-return-type :added "4.1"}
 (fact "infer-return-type auto-registers referenced function namespaces"
   (types/clear-registry!)
   (let [form '(defn.pg
                 call-insert
                 [:text i-name :jsonb i-tags :jsonb o-op]
-                (hara.rt.postgres.test.scratch-v2/insert-entry i-name i-tags o-op))
+                (hara.runtime.postgres.test.scratch-v2/insert-entry i-name i-tags o-op))
         fn-def (parse/parse-defn form "test.ns" nil)]
     (types/register-type! 'test.ns/call-insert fn-def)
     (let [result (analyze/infer-return-type fn-def)]
       (types/jsonb-shape? result) => true
       (:source-table result) => "Entry")))
 
-^{:refer hara.rt.postgres.base.typed.typed-analyze/reset-cache! :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-analyze/reset-cache! :added "4.1"}
 (fact "reset-cache! clears the infer cache"
   (reset! analyze/*infer-cache* {'demo/test {:kind :primitive}})
   (analyze/reset-cache!)
   @analyze/*infer-cache*
   => {})
 
-^{:refer hara.rt.postgres.base.typed.typed-analyze/cached-infer :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-analyze/cached-infer :added "4.1"}
 (fact "cached-infer memoizes function inference by namespace and name"
   (types/clear-registry!)
   (let [analysis (-> 'rt.postgres.test.scratch-v2
@@ -341,7 +341,7 @@
     (keys @analyze/*infer-cache*))
   => ['rt.postgres.test.scratch-v2/insert-entry])
 
-^{:refer hara.rt.postgres.base.typed.typed-analyze/normalize-table-name :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-analyze/normalize-table-name :added "4.1"}
 (fact "normalize-table-name extracts table name from expressions"
   ;; Symbol
   (analyze/normalize-table-name 'User) => "User"
@@ -355,7 +355,7 @@
   ;; Nil for invalid
   (analyze/normalize-table-name 123) => nil)
 
-^{:refer hara.rt.postgres.base.typed.typed-analyze/detect-operations :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-analyze/detect-operations :added "4.1"}
 (fact "detect-operations follows nested function calls"
   (types/clear-registry!)
   (let [user-table (types/make-table-def "test" "User"
@@ -409,7 +409,7 @@
       (set (map :op ops)) => #{:update :insert}
       (set (map :table ops)) => #{"User"})))
 
-^{:refer hara.rt.postgres.base.typed.typed-analyze/json-safe :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-analyze/json-safe :added "4.1"}
 (fact "json-safe normalizes nested keywords, symbols, and sets"
   (analyze/json-safe {:a :kw
                       :b 'sym
@@ -420,7 +420,7 @@
       :c [1 2]
       :d {"inner" "v"}})
 
-^{:refer hara.rt.postgres.base.typed.typed-analyze/inferred->report :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-analyze/inferred->report :added "4.1"}
 (fact "inferred->report converts inferred types to JSON-friendly format"
   ;; JsonbShape
   (let [shape (types/make-jsonb-shape {:id {:type :uuid}} "User")
@@ -446,7 +446,7 @@
   ;; Nil
   (analyze/inferred->report nil) => nil)
 
-^{:refer hara.rt.postgres.base.typed.typed-analyze/infer-report :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-analyze/infer-report :added "4.1"}
 (fact "infer-report groups nested operations by type"
   (types/clear-registry!)
   (let [user-table (types/make-table-def "test" "User"
@@ -504,7 +504,7 @@
       (get-in report [:analysis :operations-by-type "insert" 0 :operation 0]) => "pg/t:insert"
       (get-in report [:analysis :operations-by-type "insert" 0 :operation 1]) => "User")))
 
-^{:refer hara.rt.postgres.base.typed.typed-analyze/report-json :added "4.1"}
+^{:refer hara.runtime.postgres.base.typed.typed-analyze/report-json :added "4.1"}
 (fact "report-json serializes a report"
   (let [output (analyze/report-json
                 (analyze/infer-report (get-scratch-fn 'insert-entry))

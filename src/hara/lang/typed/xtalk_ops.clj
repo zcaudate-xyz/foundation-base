@@ -1,14 +1,14 @@
 (ns hara.lang.typed.xtalk-ops
   (:require [clojure.string :as str]
              [hara.lang.typed.xtalk-common :as types]
-             [hara.lang.base.grammar-macro]
-             [hara.lang.base.grammar-spec]
-             [hara.lang.base.grammar-xtalk]))
+             [hara.common.grammar-macro]
+             [hara.common.grammar-spec]
+             [hara.common.grammar-xtalk]))
 
 (def +op-source-namespaces+
-  '[hara.lang.base.grammar-spec
-    hara.lang.base.grammar-macro
-    hara.lang.base.grammar-xtalk])
+  '[hara.common.grammar-spec
+    hara.common.grammar-macro
+    hara.common.grammar-xtalk])
 
 (def +legacy-op-aliases+
   '{xt.lang.common-lib/len x:len

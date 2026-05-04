@@ -1,9 +1,9 @@
-(ns hara.rt.postgres.base.grammar.form-deftype-test
-  (:require [hara.rt.postgres.base.grammar :as g]
-            [hara.rt.postgres.base.grammar.common :as common]
-            [hara.rt.postgres.base.grammar.form-deftype :refer :all]
-            [hara.rt.postgres.base.grammar.form-deftype-hydrate :as hydrate]
-            [hara.rt.postgres.test.scratch-v1 :as scratch]
+(ns hara.runtime.postgres.base.grammar.form-deftype-test
+  (:require [hara.runtime.postgres.base.grammar :as g]
+            [hara.runtime.postgres.base.grammar.common :as common]
+            [hara.runtime.postgres.base.grammar.form-deftype :refer :all]
+            [hara.runtime.postgres.base.grammar.form-deftype-hydrate :as hydrate]
+            [hara.runtime.postgres.test.scratch-v1 :as scratch]
             [hara.lang :as l]
             [hara.lang.base.book :as book]
             [hara.lang.base.library-snapshot :as snap])
@@ -12,14 +12,14 @@
 (def +fragment-sample+
   [:a {:type :int} :b {:type :text}])
 
-^{:refer hara.rt.postgres.base.grammar.form-deftype/pg-deftype-enum-col :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.form-deftype/pg-deftype-enum-col :added "4.0"}
 (fact "creates the enum column"
 
   (with-redefs [common/pg-linked-token (fn [& _] '(:enum))]
     (pg-deftype-enum-col [:col :attr] {} {}))
   => '[:col (:enum)])
 
-^{:refer hara.rt.postgres.base.grammar.form-deftype/pg-deftype-ref-link :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.form-deftype/pg-deftype-ref-link :added "4.0"}
 (fact "creates the ref entry for"
   (with-redefs [snap/get-book (constantly {})
                 book/get-base-entry (constantly {:form [nil nil [:id {:type :uuid}]]
@@ -27,20 +27,20 @@
     (pg-deftype-ref-link :col {:ns :User :link {:id :User :lang :postgres :module :user}} {}))
   => (fn [[n t r]] (and (= n "col_id") (= t [:uuid]) (vector? r))))
 
-^{:refer hara.rt.postgres.base.grammar.form-deftype/pg-deftype-ref-current :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.form-deftype/pg-deftype-ref-current :added "4.0"}
 (fact "creates the ref entry for "
 
   (pg-deftype-ref-current :col {:current {:id "id" :schema "schema" :type :uuid}} {})
   => '["col_id" [:uuid] [((. #{"schema"} #{"id"}) #{"id"})]])
 
-^{:refer hara.rt.postgres.base.grammar.form-deftype/pg-deftype-ref :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.form-deftype/pg-deftype-ref :added "4.0"}
 (fact "creates the ref entry"
   (with-redefs [pg-deftype-ref-current (fn [& _] :current)
                 pg-deftype-ref-link    (fn [& _] :link)]
     (pg-deftype-ref :col {:current {}} {}) => :current
     (pg-deftype-ref :col {} {}) => :link))
 
-^{:refer hara.rt.postgres.base.grammar.form-deftype/pg-deftype-col-sql :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.form-deftype/pg-deftype-col-sql :added "4.0"}
 (fact "formats the sql on deftype"
 
   (pg-deftype-col-sql [] {:cascade true :default 1})
@@ -49,7 +49,7 @@
   (pg-deftype-col-sql [] {:generated '(* w h)})
   => [:generated :always :as (list 'quote (list '(* w h))) :stored])
 
-^{:refer hara.rt.postgres.base.grammar.form-deftype/pg-deftype-col-fn :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.form-deftype/pg-deftype-col-fn :added "4.0"}
 (fact "formats the column on deftype"
 
   (with-redefs [common/pg-type-alias (fn [x] x)]
@@ -80,24 +80,24 @@
           {})))
   => (fn [s] (contains? s :on-delete-cascade)))
 
-^{:refer hara.rt.postgres.base.grammar.form-deftype/pg-deftype-uniques :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.form-deftype/pg-deftype-uniques :added "4.0"}
 (fact "collect unique keys on deftype"
 
   (pg-deftype-uniques [[:col {:type :text :sql {:unique true}}]])
   => '[(% [:unique (quote (#{"col"}))])])
 
-^{:refer hara.rt.postgres.base.grammar.form-deftype/pg-deftype-primaries :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.form-deftype/pg-deftype-primaries :added "4.1"}
 (fact "extracts primary keys for table definition"
   (pg-deftype-primaries [{:id :a :type :int} {:id :b :type :int}])
   => [(list :- [:primary-key '(quote (a b))])])
 
-^{:refer hara.rt.postgres.base.grammar.form-deftype/pg-deftype-indexes :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.form-deftype/pg-deftype-indexes :added "4.0"}
 (fact "create index statements"
 
   (pg-deftype-indexes [[:col {:type :text :sql {:index true}}]] "table")
   => '[(% [:create-index :on "table" (quote (#{"col"}))])])
 
-^{:refer hara.rt.postgres.base.grammar.form-deftype/pg-deftype-foreign-groups :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.form-deftype/pg-deftype-foreign-groups :added "4.1"}
 (fact "collects foreign key groups"
 
   (pg-deftype-foreign-groups
@@ -111,7 +111,7 @@
            :sql {:cascade true}}]])
   => (contains {:rev (contains [(contains {:cascade true})])}))
 
-^{:refer hara.rt.postgres.base.grammar.form-deftype/pg-deftype-gen-constraint :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.form-deftype/pg-deftype-gen-constraint :added "4.1"}
 (fact "generates a foreign key constraint"
 
   (pg-deftype-gen-constraint
@@ -129,7 +129,7 @@
     (some #{:on-delete-cascade} (second res)))
   => :on-delete-cascade)
 
-^{:refer hara.rt.postgres.base.grammar.form-deftype/pg-deftype-foreigns :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.form-deftype/pg-deftype-foreigns :added "4.1"}
 (fact "creates foreign key constraints"
   (with-redefs [snap/get-book (constantly {})
                 book/get-base-entry (constantly {:static/schema "s" :form [nil nil [:id {:type :uuid}]]})]
@@ -145,7 +145,7 @@
               (= token #{"user"})
               (= rcols ''(id uid))))))
 
-^{:refer hara.rt.postgres.base.grammar.form-deftype/pg-deftype-spec-normalize :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.form-deftype/pg-deftype-spec-normalize :added "4.1"}
 (fact "normalizes the spec, inferring groups"
   (let [spec [[:class       {:foreign {:rev {:ns :Rev :column :class :link {:id :Rev}}}}]
               [:class-table {:foreign {:rev {:ns :Rev :column :class-table :link {:id :Rev}}}}]
@@ -153,7 +153,7 @@
     (second (last (pg-deftype-spec-normalize spec))))
   => (contains {:ref (contains {:group :rev})}))
 
-^{:refer hara.rt.postgres.base.grammar.form-deftype/pg-deftype-partition :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.form-deftype/pg-deftype-partition :added "4.1"}
 (fact "creates partition by statement"
 
   (pg-deftype-partition {:partition-by [:range :abc-def]}
@@ -187,7 +187,7 @@
                                             [[:class {:type :text}]])
     => (throws)))
 
-^{:refer hara.rt.postgres.base.grammar.form-deftype/pg-deftype :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.form-deftype/pg-deftype :added "4.0"}
 (fact "creates a deftype statement"
 
   (with-redefs [common/pg-full-token (fn [s sch] (str sch "." s))]
@@ -211,7 +211,7 @@
     => [:create-table :if-not-exists '(. #{"schema_type_impl"} #{"t__$DEFAULT"})
         :partition-of "s.t" :default]))
 
-^{:refer hara.rt.postgres.base.grammar.form-deftype/pg-deftype-format-fragment :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.form-deftype/pg-deftype-format-fragment :added "4.1"}
 (fact "parses the fragment contained by the symbol"
   (pg-deftype-format-fragment 'rt.postgres.base.grammar.form-deftype-test/+fragment-sample+)
   => '(:a {:type :int} :b {:type :text})
@@ -219,7 +219,7 @@
   (pg-deftype-format-fragment ['rt.postgres.base.grammar.form-deftype-test/+fragment-sample+ :a {:c :d}])
   => '(:a {:type :int, :c :d} :b {:type :text}))
 
-^{:refer hara.rt.postgres.base.grammar.form-deftype/pg-deftype-format-generated :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.form-deftype/pg-deftype-format-generated :added "4.1"}
 (fact "processes generated columns"
   (pg-deftype-format-generated {:type :int :generated '(* 2 x)})
   => {:type :int :ignore true :sql {:raw [:generated :always :as '(quote ((* 2 x))) :stored]}}
@@ -227,7 +227,7 @@
   (pg-deftype-format-generated {:type :enum :generated :A :enum {:ns :E}})
   => {:type :enum :enum {:ns :E} :ignore true :sql {:raw [:generated :always :as '(quote ((++ :A :E))) :stored]}})
 
-^{:refer hara.rt.postgres.base.grammar.form-deftype/pg-deftype-format-raw :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.form-deftype/pg-deftype-format-raw :added "4.1"}
 (fact "processes the type definition"
   (pg-deftype-format-raw [:a {:type :int}] {:raw ['rt.postgres.base.grammar.form-deftype-test/+fragment-sample+]})
   => (contains ['(:a {:type :int} :b {:type :text} :a {:type :int}) map?])
@@ -235,7 +235,7 @@
   (first (pg-deftype-format-raw [:a {:type :int :priority 100} :b {:type :int :priority 10}] {:raw []}))
   => [:b {:type :int :priority 10} :a {:type :int :priority 100}])
 
-^{:refer hara.rt.postgres.base.grammar.form-deftype/pg-deftype-format :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.form-deftype/pg-deftype-format :added "4.0"}
 (fact "formats an input form"
 
   (pg-deftype-format '(deftype t [:a {:type :int}] {}))

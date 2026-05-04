@@ -1,7 +1,7 @@
-(ns hara.lang.model.spec-xtalk-optional-test
+(ns hara.model.spec-xtalk-optional-test
   (:require [hara.lang :as l]
-            [hara.lang.model.spec-xtalk.fn-js :refer [js-tf-x-str-substring]]
-            [hara.lang.model.spec-xtalk.fn-python :refer [python-tf-x-str-substring]])
+            [hara.model.spec-xtalk.fn-js :refer [js-tf-x-str-substring]]
+            [hara.model.spec-xtalk.fn-python :refer [python-tf-x-str-substring]])
   (:use code.test))
 
 (fact "js substring emits open-ended ranges"

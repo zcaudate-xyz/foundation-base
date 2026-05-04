@@ -1,8 +1,8 @@
-(ns hara.rt.postgres.runtime.graph-insert-test
-  (:require [hara.rt.postgres.base.application :as app]
-            [hara.rt.postgres.runtime.graph-insert :as insert]
-            [hara.rt.postgres.runtime.impl-base :as impl]
-            [hara.rt.postgres.test.scratch-v1 :as scratch]
+(ns hara.runtime.postgres.runtime.graph-insert-test
+  (:require [hara.runtime.postgres.base.application :as app]
+            [hara.runtime.postgres.runtime.graph-insert :as insert]
+            [hara.runtime.postgres.runtime.impl-base :as impl]
+            [hara.runtime.postgres.test.scratch-v1 :as scratch]
             [hara.lang :as l]
             [std.lib.collection :as collection]
             [std.lib.schema :as schema]
@@ -10,12 +10,12 @@
   (:use code.test))
 
 (l/script- :postgres
-  {:require [[hara.rt.postgres.test.scratch-v1 :as scratch]]
+  {:require [[hara.runtime.postgres.test.scratch-v1 :as scratch]]
    :static {:application ["scratch"]
             :seed        ["scratch"]
             :all    {:schema   ["scratch"]}}})
 
-^{:refer hara.rt.postgres.runtime.graph-insert/insert-walk-ids :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.graph-insert/insert-walk-ids :added "4.0"}
 (fact "inserts walk ids to the entries"
 
   (let [output (volatile! #{})]
@@ -40,7 +40,7 @@
        #:walk{:id 0, :data true}
        #:walk{:id 3}})
 
-^{:refer hara.rt.postgres.runtime.graph-insert/insert-generate-graph-tree :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.graph-insert/insert-generate-graph-tree :added "4.0"}
 (fact "generates a graph tree from nodes"
 
   (insert/insert-generate-graph-tree
@@ -65,7 +65,7 @@
                  :id ?id-01}]}}
        {3 {}, 4 {}, 2 [3 4], 1 {:tasks 2}}])
 
-^{:refer hara.rt.postgres.runtime.graph-insert/insert-associate-graph-data :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.graph-insert/insert-associate-graph-data :added "4.0"}
 (fact "associate nodes wit h graph data"
 
   (apply insert/insert-associate-graph-data
@@ -83,7 +83,7 @@
        {3 gid_3, 4 gid_4, 2 gid_2, 1 gid_1}
        {?id-00 3, ?id-01 4, "hello" 1}])
 
-^{:refer hara.rt.postgres.runtime.graph-insert/insert-gen-sql :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.graph-insert/insert-gen-sql :added "4.0"}
 (fact "generates sql given graph"
 
   (insert/insert-gen-sql
@@ -100,7 +100,7 @@
           :application (app/app "scratch")))
   => collection/form?)
 
-^{:refer hara.rt.postgres.runtime.graph-insert/insert-fn-raw :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.graph-insert/insert-fn-raw :added "4.0"}
 (fact "constructs insert form with prep"
 
   (insert/insert-fn-raw
@@ -109,7 +109,7 @@
    {:track 'o-op})
   => collection/form?)
 
-^{:refer hara.rt.postgres.runtime.graph-insert/insert-fn :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.graph-insert/insert-fn :added "4.0"}
 (fact "constructs insert form"
 
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
@@ -123,7 +123,7 @@
   => collection/form?)
 
 
-^{:refer hara.rt.postgres.runtime.graph-insert/insert-fn.assign :adopt true :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.graph-insert/insert-fn.assign :adopt true :added "4.0"}
 (fact "constructs insert form with assignment"
 
   ((-> (l/with:macro-opts [(l/rt:macro-opts :postgres)]

@@ -1,16 +1,16 @@
-(ns hara.rt.postgres.base.grammar.form-vec-test
-  (:require [hara.rt.postgres.base.grammar :as g]
-            [hara.rt.postgres.base.grammar.form-vec :refer :all]
+(ns hara.runtime.postgres.base.grammar.form-vec-test
+  (:require [hara.runtime.postgres.base.grammar :as g]
+            [hara.runtime.postgres.base.grammar.form-vec :refer :all]
             [hara.lang :as l])
   (:use code.test))
 
-^{:refer hara.rt.postgres.base.grammar.form-vec/pg-section-query-pair :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.form-vec/pg-section-query-pair :added "4.0"}
 (fact "converts to a pair expression"
 
   (pg-section-query-pair '[a [:neq (+ 1 2)]])
   => '(a (:- "!=") (+ 1 2)))
 
-^{:refer hara.rt.postgres.base.grammar.form-vec/pg-section-query-set-and :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.form-vec/pg-section-query-set-and :added "4.0"}
 (fact "sets up the query string only for and"
 
   (l/with:emit
@@ -18,7 +18,7 @@
                              g/+grammar+ {}))
   => "(a = 1 AND b = 2)")
 
-^{:refer hara.rt.postgres.base.grammar.form-vec/pg-section-query-set :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.form-vec/pg-section-query-set :added "4.0"}
 (fact "sets up the query string"
 
   (l/with:emit
@@ -32,14 +32,14 @@
                          g/+grammar+ {}))
   => "(a = 1 AND b = 2)\nOR (  \n  c = 3\n  AND\n  d = 4)")
 
-^{:refer hara.rt.postgres.base.grammar.form-vec/pg-section-query-map :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.form-vec/pg-section-query-map :added "4.0"}
 (fact "query string"
 
   (l/with:emit
    (pg-section-query-map {"a" 1} g/+grammar+ {}))
   => "\"a\" = 1")
 
-^{:refer hara.rt.postgres.base.grammar.form-vec/pg-section-fn :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.form-vec/pg-section-fn :added "4.0"}
 (fact "rendering function for a section entry"
 
   (l/with:emit
@@ -48,7 +48,7 @@
                   {}))
   => "(a = 1 AND b = 2)\nOR (  \n  c = 3\n  AND\n  d = 4)")
 
-^{:refer hara.rt.postgres.base.grammar.form-vec/pg-section :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.form-vec/pg-section :added "4.0"}
 (fact "rendering function for entire section"
 
   (l/with:emit

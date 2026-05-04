@@ -1,8 +1,8 @@
-(ns hara.lang.model-annex.spec-ruby-test
+(ns hara.model.annex.spec-ruby-test
   (:require [hara.lang :as l]
-            [hara.lang.model-annex.spec-ruby :as spec-ruby]
-            [hara.lang.model-annex.spec-ruby.rewrite :as rewrite]
-            [hara.lang.model-annex.spec-xtalk.fn-ruby :as fn-ruby])
+            [hara.model.annex.spec-ruby :as spec-ruby]
+            [hara.model.annex.spec-ruby.rewrite :as rewrite]
+            [hara.model.annex.spec-xtalk.fn-ruby :as fn-ruby])
   (:use code.test))
 
 (fact "Ruby Basic Emit"
@@ -164,7 +164,7 @@
           (x:get-key obj "describe" nil)
           (x:get-key (or (proto:get obj) {}) "describe" nil)))
 
-^{:refer hara.lang.model-annex.spec-ruby/ruby-symbol :added "4.1"}
+^{:refer hara.model.annex.spec-ruby/ruby-symbol :added "4.1"}
 (fact "emit ruby symbol"
 
   (spec-ruby/ruby-symbol :a spec-ruby/+grammar+ {})
@@ -174,7 +174,7 @@
   (spec-ruby/ruby-symbol 'respond_to? spec-ruby/+grammar+ {})
   => "respond_to?")
 
-^{:refer hara.lang.model-annex.spec-ruby/ruby-symbol-global :added "4.1"}
+^{:refer hara.model.annex.spec-ruby/ruby-symbol-global :added "4.1"}
 (fact "emit ruby global symbol"
 
   (spec-ruby/ruby-symbol-global '!:G spec-ruby/+grammar+ {})
@@ -183,7 +183,7 @@
   (spec-ruby/ruby-symbol-global 'XT spec-ruby/+grammar+ {})
   => '(. (:- "($__globals__ ||= {})") ["XT"]))
 
-^{:refer hara.lang.model-annex.spec-ruby/ruby-var :added "4.1"}
+^{:refer hara.model.annex.spec-ruby/ruby-var :added "4.1"}
 (fact "emit ruby variable"
  
   (spec-ruby/ruby-var '(var a 1))
@@ -204,7 +204,7 @@
             (re-find #"a_var = .*\[\"a_var\"\]" s)
             (re-find #"b_var = .*\[\"b_var\"\]" s))))
 
-^{:refer hara.lang.model-annex.spec-ruby/ruby-map :added "4.1"}
+^{:refer hara.model.annex.spec-ruby/ruby-map :added "4.1"}
 (fact "emit ruby hash"
 
   (l/emit-as :ruby '[{:a 1 :b 2}])
@@ -213,13 +213,13 @@
   (l/emit-as :ruby '[{:ref-links {} :first-name "Root"}])
   => "{\"ref_links\" => {}, \"first_name\" => \"Root\"}")
 
-^{:refer hara.lang.model-annex.spec-ruby/ruby-defn :added "4.1"}
+^{:refer hara.model.annex.spec-ruby/ruby-defn :added "4.1"}
 (fact "emit ruby function definition"
 
   (l/emit-as :ruby '[(defn add [a b] (return (+ a b)))])
   => "def add(a,b)\n  return a + b\nend")
 
-^{:refer hara.lang.model-annex.spec-ruby/ruby-fn :added "4.1"}
+^{:refer hara.model.annex.spec-ruby/ruby-fn :added "4.1"}
 (fact "basic transform for ruby blocks"
 
   (spec-ruby/ruby-fn '(fn [a] (+ a 1)))

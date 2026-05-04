@@ -1,5 +1,5 @@
-(ns hara.lang.base.preprocess-test
+(ns hara.common.preprocess-test
   (:use code.test)
   (:require [code.manage :as s]))
 
-(s/incomplete '[hara.lang.base.preprocess])
+(s/incomplete '[hara.common.preprocess])

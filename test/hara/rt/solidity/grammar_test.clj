@@ -1,42 +1,42 @@
-(ns hara.rt.solidity.grammar-test
-  (:require [hara.rt.solidity.grammar :as g]
+(ns hara.runtime.solidity.grammar-test
+  (:require [hara.runtime.solidity.grammar :as g]
             [hara.lang :as l]
-            [hara.lang.base.emit :as emit]
+            [hara.common.emit :as emit]
             [std.string.prose :as prose])
   (:use code.test))
 
-^{:refer hara.rt.solidity.grammar/sol-util-types :added "4.0"}
+^{:refer hara.runtime.solidity.grammar/sol-util-types :added "4.0"}
 (fact "format sol types"
 
   (g/sol-util-types :hello)
   => "hello")
 
-^{:refer hara.rt.solidity.grammar/sol-map-key :added "4.0"}
+^{:refer hara.runtime.solidity.grammar/sol-map-key :added "4.0"}
 (fact "formats sol map key"
 
   (g/sol-map-key :hello g/+grammar+ {})
   => "hello")
 
-^{:refer hara.rt.solidity.grammar/sol-keyword-fn :added "4.0"}
+^{:refer hara.runtime.solidity.grammar/sol-keyword-fn :added "4.0"}
 (fact "no typecast, straight forward print"
 
   (emit/with:emit
    (g/sol-keyword-fn '(:int hello) g/+grammar+ {}))
   => "int hello")
 
-^{:refer hara.rt.solidity.grammar/sol-def :added "4.0"}
+^{:refer hara.runtime.solidity.grammar/sol-def :added "4.0"}
 (fact "creates a definition string"
 
   (g/sol-def '(def ^{:- [:uint]} a 1) g/+grammar+ {})
   => "uint a = 1;")
 
-^{:refer hara.rt.solidity.grammar/sol-emit-block :added "4.1"}
+^{:refer hara.runtime.solidity.grammar/sol-emit-block :added "4.1"}
 (fact "emits block with braces and binding"
   (emit/with:emit
     (g/sol-emit-block nil {:start "{" :end "}"} '((return 1)) g/+grammar+ {}))
   => "{\n  return 1;\n}")
 
-^{:refer hara.rt.solidity.grammar/sol-fn-elements :added "4.0"}
+^{:refer hara.runtime.solidity.grammar/sol-fn-elements :added "4.0"}
 (fact "creates elements for function"
 
   (g/sol-fn-elements 'hello '[:uint b :uint c]
@@ -45,7 +45,7 @@
                      {})
   => ["" "hello(uint b,uint c)" "{\n  return b + c;\n}"])
 
-^{:refer hara.rt.solidity.grammar/sol-emit-returns :added "4.0"}
+^{:refer hara.runtime.solidity.grammar/sol-emit-returns :added "4.0"}
 (fact "emits returns"
 
   (emit/with:emit
@@ -55,7 +55,7 @@
     {}))
   => "returns(uint)")
 
-^{:refer hara.rt.solidity.grammar/sol-defn :added "4.0"}
+^{:refer hara.runtime.solidity.grammar/sol-defn :added "4.0"}
 (fact "creates def contstructor form"
 
   (emit/with:emit
@@ -67,7 +67,7 @@
                {}))
   => "function hello(uint b,uint c) pure returns(uint) {\n  return b + c;\n}")
 
-^{:refer hara.rt.solidity.grammar/sol-defconstructor :added "4.0"}
+^{:refer hara.runtime.solidity.grammar/sol-defconstructor :added "4.0"}
 (fact "creates the constructor"
 
   (emit/with:emit
@@ -78,7 +78,7 @@
                          {}))
   => "constructor(uint b,uint c) {\n  return b + c;\n}")
 
-^{:refer hara.rt.solidity.grammar/sol-defevent :added "4.0"}
+^{:refer hara.runtime.solidity.grammar/sol-defevent :added "4.0"}
 (fact "creates an event"
 
   (g/sol-defevent '(defevent LOG
@@ -88,7 +88,7 @@
                   {})
   => "event LOG(address indexed sender,string message);")
 
-^{:refer hara.rt.solidity.grammar/sol-tf-var-ext :added "4.0"}
+^{:refer hara.runtime.solidity.grammar/sol-tf-var-ext :added "4.0"}
 (fact "transforms a var"
 
   (g/sol-tf-var-ext
@@ -101,14 +101,14 @@
    '(var (:uint i) hello))
   => '(:= (:- :uint i) hello))
 
-^{:refer hara.rt.solidity.grammar/sol-tf-mapping :added "4.0"}
+^{:refer hara.runtime.solidity.grammar/sol-tf-mapping :added "4.0"}
 (fact "transforms mapping call"
 
   (g/sol-tf-mapping
    '(:mapping [:address :uint]))
   => '(mapping (:- :address "=>" :uint)))
 
-^{:refer hara.rt.solidity.grammar/sol-defstruct :added "4.0"}
+^{:refer hara.runtime.solidity.grammar/sol-defstruct :added "4.0"}
 (fact "transforms a defstruct call"
 
   (g/sol-defstruct
@@ -117,28 +117,28 @@
       [:uint b]))
   => '(:% (:- "struct" HELLO) (:- "{\n") (\| (do (var :uint a) (var :uint b))) (:- "\n}")))
 
-^{:refer hara.rt.solidity.grammar/sol-defaddress :added "4.0"}
+^{:refer hara.runtime.solidity.grammar/sol-defaddress :added "4.0"}
 (fact "transforms a defaddress call"
 
   (g/sol-defaddress
    '(defaddress ^{:- [:public]} HELLO owner))
   => '(:% (:- "address" "public" HELLO owner) \;))
 
-^{:refer hara.rt.solidity.grammar/sol-defenum :added "4.0"}
+^{:refer hara.runtime.solidity.grammar/sol-defenum :added "4.0"}
 (fact "transforms a defenum call"
 
   (g/sol-defenum
    '(defenum Types [A B C]))
   => '(:% (:- "enum" Types (:- "{") (quote [A B C]) (:- "}"))))
 
-^{:refer hara.rt.solidity.grammar/sol-defmapping :added "4.0"}
+^{:refer hara.runtime.solidity.grammar/sol-defmapping :added "4.0"}
 (fact "transforms a mapping call"
 
   (g/sol-defmapping
    '(defmapping Types [A B]))
   => '(:% (:- (:mapping [A B]) Types) \;))
 
-^{:refer hara.rt.solidity.grammar/sol-definterface :added "4.0"}
+^{:refer hara.runtime.solidity.grammar/sol-definterface :added "4.0"}
 (fact "transforms a definterface call"
 
   (emit/with:emit
@@ -159,55 +159,55 @@
       "  function balanceOf(address owner) external view returns(uint);"
       "}"))
 
-^{:refer hara.rt.solidity.grammar/sol-emit-body :added "4.1"}
+^{:refer hara.runtime.solidity.grammar/sol-emit-body :added "4.1"}
 (fact "emits body without extra braces"
   (emit/with:emit
     (g/sol-emit-body '((return 1)) g/+grammar+ {}))
   => "\n  return 1;\n")
 
-^{:refer hara.rt.solidity.grammar/sol-defcontract :added "4.1"}
+^{:refer hara.runtime.solidity.grammar/sol-defcontract :added "4.1"}
 (fact "creates a contract"
   (emit/with:emit
     (g/sol-defcontract '(defcontract MyContract (var :uint a)) g/+grammar+ {}))
   => "contract MyContract {\n\n  uint a;\n\n}")
 
-^{:refer hara.rt.solidity.grammar/sol-deflibrary :added "4.1"}
+^{:refer hara.runtime.solidity.grammar/sol-deflibrary :added "4.1"}
 (fact "creates a library"
   (emit/with:emit
     (g/sol-deflibrary '(deflibrary MyLib (var :uint a)) g/+grammar+ {}))
   => "library MyLib {\n\n  uint a;\n\n}")
 
-^{:refer hara.rt.solidity.grammar/sol-deferror :added "4.1"}
+^{:refer hara.runtime.solidity.grammar/sol-deferror :added "4.1"}
 (fact "creates an error definition"
   (emit/with:emit
     (g/sol-deferror '(deferror MyError [:uint code]) g/+grammar+ {}))
   => "error MyError(uint code);")
 
-^{:refer hara.rt.solidity.grammar/sol-defmodifier :added "4.1"}
+^{:refer hara.runtime.solidity.grammar/sol-defmodifier :added "4.1"}
 (fact "creates a modifier"
   (emit/with:emit
     (g/sol-defmodifier '(defmodifier onlyOwner [] (require (== msg.sender owner))) g/+grammar+ {}))
   => "modifier onlyOwner() {\n  require(msg.sender == owner);\n}")
 
-^{:refer hara.rt.solidity.grammar/sol-unchecked :added "4.1"}
+^{:refer hara.runtime.solidity.grammar/sol-unchecked :added "4.1"}
 (fact "unchecked block"
   (emit/with:emit
     (g/sol-unchecked '((:= a (+ a 1))) g/+grammar+ {}))
   => "unchecked {\n\n  \n\n}")
 
-^{:refer hara.rt.solidity.grammar/sol-emit-let :added "4.1"}
+^{:refer hara.runtime.solidity.grammar/sol-emit-let :added "4.1"}
 (fact "emits a let binding"
   (emit/with:emit
     (g/sol-emit-let '(:= a 1) g/+grammar+ {}))
   => "let a 1")
 
-^{:refer hara.rt.solidity.grammar/sol-assembly :added "4.1"}
+^{:refer hara.runtime.solidity.grammar/sol-assembly :added "4.1"}
 (fact "assembly block"
   (emit/with:emit
     (g/sol-assembly '((let := a 1)) g/+grammar+ {}))
   => "assembly {\n\n  \n\n}")
 
-^{:refer hara.rt.solidity.grammar/sol-emit-statement :added "4.1"}
+^{:refer hara.runtime.solidity.grammar/sol-emit-statement :added "4.1"}
 (fact "emit statement"
   (emit/with:emit
     (g/sol-emit-statement '(:emit (MyEvent 1)) g/+grammar+ {}))

@@ -1,8 +1,8 @@
-(ns hara.rt.basic.type-basic-julia-test
+(ns hara.runtime.basic.type-basic-julia-test
   (:use code.test)
-  (:require [hara.rt.basic.type-common :as common]
+  (:require [hara.runtime.basic.type-common :as common]
             [hara.lang.base.script :as script]
-            [hara.lang.model-annex.spec-julia :refer :all]))
+            [hara.model.annex.spec-julia :refer :all]))
 
 (script/script- :julia
   {:runtime :basic})

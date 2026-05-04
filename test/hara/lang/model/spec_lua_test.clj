@@ -1,14 +1,14 @@
-(ns hara.lang.model.spec-lua-test
+(ns hara.model.spec-lua-test
   (:require [hara.lang :as l]
              [hara.lang.base.script :as script]
-             [hara.lang.base.util :as ut]
-             [hara.lang.model.spec-lua :refer :all]
-             [hara.lang.model.spec-lua.variant-nginx :as nginx])
+             [hara.common.util :as ut]
+             [hara.model.spec-lua :refer :all]
+             [hara.model.spec-lua.variant-nginx :as nginx])
   (:use code.test))
 
 (script/script- :lua)
 
-^{:refer hara.lang.model.spec-lua/tf-counter :added "4.1"}
+^{:refer hara.model.spec-lua/tf-counter :added "4.1"}
 (fact "compound assignment lowers to valid lua assignments"
   [(l/emit-as :lua '[(:+= a 2)])
    (l/emit-as :lua '[(:-= a 2)])
@@ -58,22 +58,22 @@
                    :error   (return err)})
          (return true))))
 
-^{:refer hara.lang.model.spec-lua/lua-tf-incby :added "4.1"}
+^{:refer hara.model.spec-lua/lua-tf-incby :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model.spec-lua/lua-tf-decby :added "4.1"}
+^{:refer hara.model.spec-lua/lua-tf-decby :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model.spec-lua/lua-tf-mulby :added "4.1"}
+^{:refer hara.model.spec-lua/lua-tf-mulby :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model.spec-lua/lua-tf-local :added "4.1"}
+^{:refer hara.model.spec-lua/lua-tf-local :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model.spec-lua/lua-tf-c-ffi :added "4.1"}
+^{:refer hara.model.spec-lua/lua-tf-c-ffi :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model.spec-lua/lua-map-key :added "3.0"}
+^{:refer hara.model.spec-lua/lua-map-key :added "3.0"}
 (fact "custom lua map key"
 
   (lua-map-key 123 +grammar+ {})
@@ -89,34 +89,34 @@
   (lua-map-key :abc +grammar+ {})
   => "abc")
 
-^{:refer hara.lang.model.spec-lua/lua-tf-for-object :added "4.1"}
+^{:refer hara.model.spec-lua/lua-tf-for-object :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model.spec-lua/lua-tf-for-array :added "4.1"}
+^{:refer hara.model.spec-lua/lua-tf-for-array :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model.spec-lua/lua-tf-for-iter :added "4.1"}
+^{:refer hara.model.spec-lua/lua-tf-for-iter :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model.spec-lua/lua-tf-for-index :added "4.1"}
+^{:refer hara.model.spec-lua/lua-tf-for-index :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model.spec-lua/lua-tf-for-return :added "4.1"}
+^{:refer hara.model.spec-lua/lua-tf-for-return :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model.spec-lua/lua-tf-for-async :added "4.1"}
+^{:refer hara.model.spec-lua/lua-tf-for-async :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model.spec-lua/lua-tf-yield :added "4.1"}
+^{:refer hara.model.spec-lua/lua-tf-yield :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model.spec-lua/lua-tf-defgen :added "4.1"}
+^{:refer hara.model.spec-lua/lua-tf-defgen :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model.spec-lua/lua-tf-prototype-create :added "4.1"}
+^{:refer hara.model.spec-lua/lua-tf-prototype-create :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model.spec-lua/lua-module-link :added "4.0"}
+^{:refer hara.model.spec-lua/lua-module-link :added "4.0"}
 (fact "gets the absolute lua based module"
 
   (lua-module-link 'kmi.common {:root-ns 'kmi.hello})
@@ -126,14 +126,14 @@
                    {:root-ns 'kmi :target "src"})
   => "./kmi/exchange")
 
-^{:refer hara.lang.model.spec-lua/lua-module-export :added "4.0"}
+^{:refer hara.model.spec-lua/lua-module-export :added "4.0"}
 (fact "outputs the lua module export form"
 
   (lua-module-export 'kmi.common {:root-ns 'kmi.hello})
   => '(return (tab)))
 
-^{:refer hara.lang.model.spec-lua/variant-meta :added "4.1"}
+^{:refer hara.model.spec-lua/variant-meta :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model.spec-lua/variant-grammar :added "4.1"}
+^{:refer hara.model.spec-lua/variant-grammar :added "4.1"}
 (fact "TODO")

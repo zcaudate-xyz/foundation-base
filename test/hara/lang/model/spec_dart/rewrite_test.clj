@@ -1,7 +1,7 @@
-(ns hara.lang.model.spec-dart.rewrite-test
+(ns hara.model.spec-dart.rewrite-test
   (:require [hara.lang :as l]
-             [hara.lang.model.spec-dart :as dart]
-             [hara.lang.model.spec-dart.rewrite :as rewrite]
+             [hara.model.spec-dart :as dart]
+             [hara.model.spec-dart.rewrite :as rewrite]
              [xt.lang.common-data]
              [std.string :as str])
   (:use code.test))
@@ -185,17 +185,17 @@
   => [true true true true true true true])
 
 
-^{:refer hara.lang.model.spec-dart.rewrite/dart-rewrite-conditional-expression :added "4.1"}
+^{:refer hara.model.spec-dart.rewrite/dart-rewrite-conditional-expression :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model.spec-dart.rewrite/dart-rewrite-expression :added "4.1"}
+^{:refer hara.model.spec-dart.rewrite/dart-rewrite-expression :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model.spec-dart.rewrite/dart-rewrite-statement :added "4.1"}
+^{:refer hara.model.spec-dart.rewrite/dart-rewrite-statement :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model.spec-dart.rewrite/dart-rewrite-statements :added "4.1"}
+^{:refer hara.model.spec-dart.rewrite/dart-rewrite-statements :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model.spec-dart.rewrite/dart-rewrite-stage :added "4.1"}
+^{:refer hara.model.spec-dart.rewrite/dart-rewrite-stage :added "4.1"}
 (fact "TODO")

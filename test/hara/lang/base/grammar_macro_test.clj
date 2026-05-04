@@ -1,25 +1,25 @@
-(ns hara.lang.base.grammar-macro-test
-  (:require [hara.lang.base.grammar-macro :refer :all])
+(ns hara.common.grammar-macro-test
+  (:require [hara.common.grammar-macro :refer :all])
   (:use code.test))
 
-^{:refer hara.lang.base.grammar-macro/tf-macroexpand :added "3.0"}
+^{:refer hara.common.grammar-macro/tf-macroexpand :added "3.0"}
 (fact "macroexpands the current form"
   (tf-macroexpand '(-> 1 (inc)))
   => '(inc 1))
 
-^{:refer hara.lang.base.grammar-macro/tf-when :added "3.0"}
+^{:refer hara.common.grammar-macro/tf-when :added "3.0"}
 (fact "transforms `when` to branch"
 
   (tf-when '(when true :A :B :C))
   => '(br* (if true :A :B :C)))
 
-^{:refer hara.lang.base.grammar-macro/tf-if :added "3.0"}
+^{:refer hara.common.grammar-macro/tf-if :added "3.0"}
 (fact "transforms `if` to branch"
 
   (tf-if '(if true :A :B))
   => '(br* (if true :A) (else :B)))
 
-^{:refer hara.lang.base.grammar-macro/tf-cond :added "3.0"}
+^{:refer hara.common.grammar-macro/tf-cond :added "3.0"}
 (fact "transforms `cond` to branch"
   (tf-cond '(cond true :A false :B))
   => '(br* (if true :A) (elseif false :B))
@@ -27,7 +27,7 @@
   (tf-cond '(cond true :A false :B :else :C))
   => '(br* (if true :A) (elseif false :B) (else :C)))
 
-^{:refer hara.lang.base.grammar-macro/tf-let-bind :added "4.0"}
+^{:refer hara.common.grammar-macro/tf-let-bind :added "4.0"}
 (fact "converts to a statement"
 
   (tf-let-bind '(let [#{x} 1 b 2]
@@ -36,7 +36,7 @@
            (var b := 2)
            (return (+ x b))))
 
-^{:refer hara.lang.base.grammar-macro/tf-case :added "4.0"}
+^{:refer hara.common.grammar-macro/tf-case :added "4.0"}
 (fact "transforms the case statement to switch representation"
 
   (tf-case '(case (type obj)
@@ -49,25 +49,25 @@
        (case [:B] (return B))
        (default (return X))))
 
-^{:refer hara.lang.base.grammar-macro/tf-lambda-arrow :added "4.0"}
+^{:refer hara.common.grammar-macro/tf-lambda-arrow :added "4.0"}
 (fact "generalized lambda transformation"
 
   (tf-lambda-arrow '(fn:> [e] e))
   => '(fn [e] (return e)))
 
-^{:refer hara.lang.base.grammar-macro/tf-tcond :added "4.0"}
+^{:refer hara.common.grammar-macro/tf-tcond :added "4.0"}
 (fact "transforms the ternary cond"
 
   (tf-tcond '(:?> :a a :b b :else c))
   => '(:? :a [a (:? :b [b c])]))
 
-^{:refer hara.lang.base.grammar-macro/tf-xor :added "4.0"}
+^{:refer hara.common.grammar-macro/tf-xor :added "4.0"}
 (fact "transforms to xor using ternary if"
 
   (tf-xor '(xor a b))
   => '(:? a b (not b)))
 
-^{:refer hara.lang.base.grammar-macro/tf-doto :added "4.0"}
+^{:refer hara.common.grammar-macro/tf-doto :added "4.0"}
 (fact "basic transformation for `doto` syntax"
 
   (tf-doto '(doto sym
@@ -76,14 +76,14 @@
               (. c)))
   => '(do (. sym a) (b sym) (. sym c)))
 
-^{:refer hara.lang.base.grammar-macro/tf-do-arrow :added "4.0"}
+^{:refer hara.common.grammar-macro/tf-do-arrow :added "4.0"}
 (fact "do:> transformation"
 
   (tf-do-arrow '(do:>
                  1 2 (return 3)))
   => '((quote ((fn [] 1 2 (return 3))))))
 
-^{:refer hara.lang.base.grammar-macro/tf-forange :added "4.0"}
+^{:refer hara.common.grammar-macro/tf-forange :added "4.0"}
 (fact "creates the forange form"
 
   (tf-forange '(forange [i 10] (print i)))

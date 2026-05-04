@@ -1,5 +1,5 @@
 (ns hara.lang.base.book-entry
-  (:require [hara.lang.base.util :as ut]
+  (:require [hara.common.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.impl :as impl]))
 

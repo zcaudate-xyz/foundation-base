@@ -2,7 +2,7 @@
   (:require [xt.lang.common-data]
             [xt.lang.common-lib]
             [hara.lang :as l]
-             [hara.lang.base.emit-prep-lua-test :as prep-lua]
+             [hara.common.emit-prep-lua-test :as prep-lua]
              [hara.lang.base.impl :as impl]
              [hara.lang.base.library :as lib]
              [hara.lang.base.library-snapshot :as snap]

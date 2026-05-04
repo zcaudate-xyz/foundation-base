@@ -2,6 +2,6 @@
   (:require [hara.lang :as l]))
 
 (l/script :solidity
-  {:require [[hara.rt.solidity :as s]]
+  {:require [[hara.runtime.solidity :as s]]
    :static  {:contract ["ERC20Basic"]}})
 

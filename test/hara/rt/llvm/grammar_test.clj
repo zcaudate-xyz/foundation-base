@@ -1,5 +1,5 @@
-(ns hara.rt.llvm.grammar-test
-  (:require [hara.rt.llvm.grammar :refer :all]
+(ns hara.runtime.llvm.grammar-test
+  (:require [hara.runtime.llvm.grammar :refer :all]
             [hara.lang :as l]
             [std.lib.atom :as atom]
             [std.lib.context.registry :as registry])
@@ -15,7 +15,7 @@
                                                                    :config {}}}})]
                       [new-reg new-reg]))))
 
-^{:refer hara.rt.llvm.grammar/tf-define :added "4.1"}
+^{:refer hara.runtime.llvm.grammar/tf-define :added "4.1"}
 (fact "transforms llvm define"
   (l/emit-as :llvm
     ['(define i32 main [i32 %argc ptr %argv]
@@ -24,14 +24,14 @@
       (ret i32 %1))])
   => "define i32 main(i32 %argc, ptr %argv) { \n  entry:\n  %1 = add i32 %argc, 1\n  ret i32 %1 \n}")
 
-^{:refer hara.rt.llvm.grammar/tf-declare :added "4.1"}
+^{:refer hara.runtime.llvm.grammar/tf-declare :added "4.1"}
 (fact "transforms llvm declare"
   (l/emit-as :llvm
              ['(declare i32 printf [ptr i32])])
   
   => "declare i32 printf(ptr, i32)")
 
-^{:refer hara.rt.llvm.grammar/tf-alloca :added "4.1"}
+^{:refer hara.runtime.llvm.grammar/tf-alloca :added "4.1"}
 (fact "memory ops"
   (l/emit-as :llvm
     ['(define i32 test_mem []
@@ -42,19 +42,19 @@
       (ret i32 %val))])
   => "define i32 test_mem() { \n  entry:\n  %ptr = alloca i32\n  store i32 42, ptr %ptr\n  %val = load i32, ptr %ptr\n  ret i32 %val \n}")
 
-^{:refer hara.rt.llvm.grammar/tf-label :added "4.1"}
+^{:refer hara.runtime.llvm.grammar/tf-label :added "4.1"}
 (fact "transforms label"
   (l/emit-as :llvm
    ['(label entry)])
   => "entry:")
 
-^{:refer hara.rt.llvm.grammar/tf-ret :added "4.1"}
+^{:refer hara.runtime.llvm.grammar/tf-ret :added "4.1"}
 (fact "transforms ret"
   (l/emit-as :llvm
    ['(ret i32 0)])
   => "ret i32 0"
 
-^{:refer hara.rt.llvm.grammar/tf-call :added "4.1"}
+^{:refer hara.runtime.llvm.grammar/tf-call :added "4.1"}
 (fact "call"
   (l/emit-as :llvm
     ['(declare i32 printf [ptr i32])
@@ -65,19 +65,19 @@
         (ret i32 0))])
   => "declare i32 printf(ptr, i32)\n\ndefine i32 call_test() { \n  entry:\n  call i32 printf(ptr str, i32 123)\n  ret i32 0 \n}")
 
-^{:refer hara.rt.llvm.grammar/tf-declare :added "4.1"}
+^{:refer hara.runtime.llvm.grammar/tf-declare :added "4.1"}
 (fact "transforms llvm declare"
   (l/emit-as :llvm
    ['(declare i32 printf [ptr i32])])
   => "declare i32 printf(ptr, i32)")
 
-^{:refer hara.rt.llvm.grammar/tf-label :added "4.1"}
+^{:refer hara.runtime.llvm.grammar/tf-label :added "4.1"}
 (fact "transforms label"
   (l/emit-as :llvm
    ['(label entry)])
   => "entry:")
 
-^{:refer hara.rt.llvm.grammar/tf-ret :added "4.1"}
+^{:refer hara.runtime.llvm.grammar/tf-ret :added "4.1"}
 (fact "transforms ret"
   (l/emit-as :llvm
    ['(ret i32 0)])
@@ -86,25 +86,25 @@
    ['(ret void)])
   => "ret void")
 
-^{:refer hara.rt.llvm.grammar/tf-assign :added "4.1"}
+^{:refer hara.runtime.llvm.grammar/tf-assign :added "4.1"}
 (fact "transforms assignment"
   (l/emit-as :llvm
    ['(:= %1 2)])
   => "%1 = 2")
 
-^{:refer hara.rt.llvm.grammar/tf-inst-bin :added "4.1"}
+^{:refer hara.runtime.llvm.grammar/tf-inst-bin :added "4.1"}
 (fact "helper for binary instructions"
   (l/emit-as :llvm
    ['(add i32 1 2)])
   => "add i32 1, 2")
 
-^{:refer hara.rt.llvm.grammar/tf-icmp :added "4.1"}
+^{:refer hara.runtime.llvm.grammar/tf-icmp :added "4.1"}
 (fact "transforms icmp"
   (l/emit-as :llvm
    ['(icmp eq i32 %a %b)])
   => "icmp eq i32 %a, %b")
 
-^{:refer hara.rt.llvm.grammar/tf-br :added "4.1"}
+^{:refer hara.runtime.llvm.grammar/tf-br :added "4.1"}
 (fact "transforms br"
   (l/emit-as :llvm
    ['(br %label)])
@@ -114,25 +114,25 @@
    ['(br %cond %label_true %label_false)])
   => "br i1 %cond, label %label_true, label %label_false")
 
-^{:refer hara.rt.llvm.grammar/tf-call :added "4.1"}
+^{:refer hara.runtime.llvm.grammar/tf-call :added "4.1"}
 (fact "transforms call"
   (l/emit-as :llvm
    ['(call i32 printf [[ptr str] [i32 123]])])
   => "call i32 printf(ptr str, i32 123)")
 
-^{:refer hara.rt.llvm.grammar/tf-alloca :added "4.1"}
+^{:refer hara.runtime.llvm.grammar/tf-alloca :added "4.1"}
 (fact "transforms alloca"
   (l/emit-as :llvm
    ['(alloca i32)])
   => "alloca i32")
 
-^{:refer hara.rt.llvm.grammar/tf-store :added "4.1"}
+^{:refer hara.runtime.llvm.grammar/tf-store :added "4.1"}
 (fact "transforms store"
   (l/emit-as :llvm
    ['(store i32 42 ptr %ptr)])
   => "store i32 42, ptr %ptr")
 
-^{:refer hara.rt.llvm.grammar/tf-load :added "4.1"}
+^{:refer hara.runtime.llvm.grammar/tf-load :added "4.1"}
 (fact "transforms load"
   (l/emit-as :llvm
    ['(load i32 ptr %ptr)])

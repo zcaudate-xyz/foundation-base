@@ -6,15 +6,15 @@
              [js.react]
              [hara.lang.base.book :as b]
              [hara.lang.base.book-module :as module]
-            [hara.lang.base.emit-prep-js-test :as prep-js]
-            [hara.lang.base.emit-prep-lua-test :as prep-lua]
+            [hara.common.emit-prep-js-test :as prep-js]
+            [hara.common.emit-prep-lua-test :as prep-lua]
             [hara.lang.base.impl :as impl]
             [hara.lang.base.impl-deps :as deps]
              [hara.lang.base.impl-deps-imports :as deps-imports]
              [hara.lang.base.impl-entry :as entry]
              [hara.lang.base.library :as lib]
              [hara.lang.base.library-snapshot :as snap]
-             [hara.lang.model.spec-lua :as lua])
+             [hara.model.spec-lua :as lua])
   (:use code.test))
 
 (def +library-js-cloned+

@@ -1,8 +1,8 @@
 (ns hara.lang.base.impl-entry-test
   (:require [hara.lang.base.book :as b]
               [hara.lang.base.book-entry :as e]
-             [hara.lang.base.emit :as emit]
-             [hara.lang.base.emit-prep-lua-test :as prep]
+             [hara.common.emit :as emit]
+             [hara.common.emit-prep-lua-test :as prep]
              [hara.lang.base.impl-entry :as entry]
              [hara.lang.base.library-snapshot :as snap]
              [hara.lang.base.library-snapshot-prep-test :as lprep]
@@ -79,22 +79,22 @@
       (catch Throwable t
         (let [data (ex-data t)]
           {:probe (:probe data)
-           :phase (:hara.lang/phase data)
-           :subsystem (:hara.lang/subsystem data)
-           :lang (:hara.lang/lang data)
-           :module (:hara.lang/module data)
-           :entry (-> data :hara.lang/entry :symbol)
-           :line (:hara.lang/line data)
-           :stack (mapv (juxt :hara.lang/phase :hara.lang/subsystem)
-                        (:hara.lang/provenance-stack data))}))))
+           :phase (:hara/phase data)
+           :subsystem (:hara/subsystem data)
+           :lang (:hara/lang data)
+           :module (:hara/module data)
+           :entry (-> data :hara/entry :symbol)
+           :line (:hara/line data)
+           :stack (mapv (juxt :hara/phase :hara/subsystem)
+                        (:hara/provenance-stack data))}))))
   => '{:probe true
         :phase :emit/form
-        :subsystem :hara.lang.base.emit-top-level/emit-form
+        :subsystem :hara.common.emit-top-level/emit-form
         :lang :lua
         :module L.core
         :entry L.core/explode-fn
         :line 42
-        :stack [[:emit/form :hara.lang.base.emit-top-level/emit-form]
+        :stack [[:emit/form :hara.common.emit-top-level/emit-form]
                 [:emit/entry :hara.lang.base.impl-entry/emit-entry-raw]]})
 
 (fact "emits template entries using merged parent modules from the snapshot"

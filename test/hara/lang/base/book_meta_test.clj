@@ -1,6 +1,6 @@
 (ns hara.lang.base.book-meta-test
   (:require [hara.lang.base.book-meta :refer :all]
-            [hara.lang.base.util :as ut]
+            [hara.common.util :as ut]
             [std.lib.template :as template])
   (:use code.test))
 

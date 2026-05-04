@@ -1,10 +1,10 @@
 (ns hara.lang.base.impl-deps-test
-  (:require [hara.lang.base.emit-prep-lua-test :as prep]
+  (:require [hara.common.emit-prep-lua-test :as prep]
             [hara.lang.base.impl-deps :as deps]
             [hara.lang.base.impl-entry :as entry]
             [hara.lang.base.library :as lib]
             [hara.lang.base.library-snapshot :as snap]
-            [hara.lang.model.spec-lua :as lua])
+            [hara.model.spec-lua :as lua])
   (:use code.test))
 
 (def +library-ext+

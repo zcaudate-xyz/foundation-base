@@ -2,16 +2,16 @@
   "Generates training data based on hara.lang formal grammar specifications.
    
    This creates examples from:
-   - hara.lang.base.grammar-spec (+op-math+, +op-compare+, +op-logic+, etc.)
-   - hara.lang.base.grammar-macro (+op-macro+, if/when/cond transformations)
-   - hara.lang.base.grammar-xtalk (x:* primitives)
+   - hara.common.grammar-spec (+op-math+, +op-compare+, +op-logic+, etc.)
+   - hara.common.grammar-macro (+op-macro+, if/when/cond transformations)
+   - hara.common.grammar-xtalk (x:* primitives)
    
    Usage: lein exec -p src-training/scripts/generate_grammar_training.clj"
   (:require [clojure.string :as str]))
 
 ;; ============================================================
 ;; GRAMMAR SPEC TRAINING PAIRS
-;; Based on hara.lang.base.grammar-spec
+;; Based on hara.common.grammar-spec
 ;; ============================================================
 
 (def +grammar-spec-pairs+
@@ -356,7 +356,7 @@
 
 ;; ============================================================
 ;; GRAMMAR MACRO TRAINING PAIRS
-;; Based on hara.lang.base.grammar-macro
+;; Based on hara.common.grammar-macro
 ;; ============================================================
 
 (def +grammar-macro-pairs+
@@ -492,7 +492,7 @@
 
 ;; ============================================================
 ;; GRAMMAR XTALK TRAINING PAIRS
-;; Based on hara.lang.base.grammar-xtalk
+;; Based on hara.common.grammar-xtalk
 ;; ============================================================
 
 (def +grammar-xtalk-pairs+

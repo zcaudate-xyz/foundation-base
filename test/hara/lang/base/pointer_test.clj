@@ -1,12 +1,12 @@
 (ns hara.lang.base.pointer-test
   (:require [std.json :as json]
             [hara.lang.base.book :as book]
-            [hara.lang.base.emit-prep-lua-test :as prep]
+            [hara.common.emit-prep-lua-test :as prep]
             [hara.lang.base.impl-entry :as entry]
             [hara.lang.base.library :as lib]
             [hara.lang.base.library-snapshot :as snap]
             [hara.lang.base.pointer :refer :all]
-            [hara.lang.base.util :as ut]
+            [hara.common.util :as ut]
             [std.lib.foundation :as f]
             [std.string.prose :as prose])
   (:use code.test))

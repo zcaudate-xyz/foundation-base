@@ -1,11 +1,11 @@
-(ns hara.rt.postgres.base.grammar.form-defn-test
-  (:require [hara.rt.postgres.base.grammar :as g]
-            [hara.rt.postgres.base.grammar.form-defn :refer :all]
+(ns hara.runtime.postgres.base.grammar.form-defn-test
+  (:require [hara.runtime.postgres.base.grammar :as g]
+            [hara.runtime.postgres.base.grammar.form-defn :refer :all]
             [hara.lang :as l]
             [std.string.prose :as prose])
   (:use code.test))
 
-^{:refer hara.rt.postgres.base.grammar.form-defn/pg-defn-format :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.form-defn/pg-defn-format :added "4.0"}
 (fact "formats a defn form"
 
   (pg-defn-format
@@ -21,7 +21,7 @@
        :static/input []}
       (defn hello [] (return 1))])
 
-^{:refer hara.rt.postgres.base.grammar.form-defn/pg-defn :added "4.0"}
+^{:refer hara.runtime.postgres.base.grammar.form-defn/pg-defn :added "4.0"}
 (fact "creates the complete defn"
 
   (l/with:emit

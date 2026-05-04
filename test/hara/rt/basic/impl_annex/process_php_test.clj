@@ -1,7 +1,7 @@
-(ns hara.rt.basic.impl-annex.process-php-test
-  (:require [hara.rt.basic.impl-annex.process-php :refer :all]
-            [hara.rt.basic.type-common :as common]
-            [hara.rt.basic.type-oneshot :as p]
+(ns hara.runtime.basic.impl-annex.process-php-test
+  (:require [hara.runtime.basic.impl-annex.process-php :refer :all]
+            [hara.runtime.basic.type-common :as common]
+            [hara.runtime.basic.type-oneshot :as p]
             [std.json :as json]
             [hara.lang :as l])
   (:use code.test))
@@ -9,7 +9,7 @@
 (def CANARY-PHP
   (common/program-exists? "php"))
 
-^{:refer hara.rt.basic.impl-annex.process-php-test/CANARY-PHP :adopt true :added "4.0"}
+^{:refer hara.runtime.basic.impl-annex.process-php-test/CANARY-PHP :adopt true :added "4.0"}
 (fact "EVALUATE php code"
 
   (if CANARY-PHP
@@ -20,7 +20,7 @@
     :php-unavailable)
   => (any 10 :php-unavailable))
 
-^{:refer hara.rt.basic.impl-annex.process-php/default-oneshot-wrap :added "4.1"}
+^{:refer hara.runtime.basic.impl-annex.process-php/default-oneshot-wrap :added "4.1"}
 (fact "captures php eval errors without crashing the wrapper"
   (if CANARY-PHP
     (let [out (-> (p/rt-oneshot {:lang :php})
@@ -30,13 +30,13 @@
     :php-unavailable)
   => (any ["error" true] :php-unavailable))
 
-^{:refer hara.rt.basic.impl-annex.process-php/default-oneshot-wrap :added "4.0"}
+^{:refer hara.runtime.basic.impl-annex.process-php/default-oneshot-wrap :added "4.0"}
 (fact "creates the oneshot bootstrap form"
 
   (default-oneshot-wrap 1)
   => string?)
 
-^{:refer hara.rt.basic.impl-annex.process-php/default-body-transform :added "4.1"}
+^{:refer hara.runtime.basic.impl-annex.process-php/default-body-transform :added "4.1"}
 (fact "transforms oneshot forms for return-eval"
   (default-body-transform '[1 2 3] {})
   => '((quote ((fn [] (return [1 2 3])))))
@@ -50,15 +50,15 @@
   (l/emit-as :php [(default-body-transform '[1 2 3] {:bulk true})])
   => #"\(function \(\)\{\s+1;\s+2;\s+return 3;\s+\}\)\(\)")
 
-^{:refer hara.rt.basic.impl-annex.process-php/default-basic-client :added "4.0"}
+^{:refer hara.runtime.basic.impl-annex.process-php/default-basic-client :added "4.0"}
 (fact "creates the basic client bootstrap"
 
   (default-basic-client 19000)
   => string?)
 
 
-^{:refer hara.rt.basic.impl-annex.process-php/php-body-source :added "4.1"}
+^{:refer hara.runtime.basic.impl-annex.process-php/php-body-source :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.rt.basic.impl-annex.process-php/default-basic-body-transform :added "4.1"}
+^{:refer hara.runtime.basic.impl-annex.process-php/default-basic-body-transform :added "4.1"}
 (fact "TODO")

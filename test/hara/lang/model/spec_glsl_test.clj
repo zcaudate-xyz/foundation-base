@@ -1,9 +1,9 @@
-(ns hara.lang.model.spec-glsl-test
+(ns hara.model.spec-glsl-test
   (:require [hara.lang :as l]
             [std.string.prose :as prose])
   (:use code.test))
 
-^{:refer hara.lang.model.spec-glsl/CANARY :adopt true :added "4.0"}
+^{:refer hara.model.spec-glsl/CANARY :adopt true :added "4.0"}
 (fact "top-level definition for shaders"
 
   (l/emit-as

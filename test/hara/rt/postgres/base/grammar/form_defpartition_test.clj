@@ -1,22 +1,22 @@
-(ns hara.rt.postgres.base.grammar.form-defpartition-test
-  (:require [hara.rt.postgres.base.grammar.common :as common]
-            [hara.rt.postgres.base.grammar.form-defpartition :as form-defpartition])
+(ns hara.runtime.postgres.base.grammar.form-defpartition-test
+  (:require [hara.runtime.postgres.base.grammar.common :as common]
+            [hara.runtime.postgres.base.grammar.form-defpartition :as form-defpartition])
   (:use code.test))
 
-^{:refer hara.rt.postgres.base.grammar.form-defpartition/pg-partition-name :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.form-defpartition/pg-partition-name :added "4.1"}
 (fact "constructs partition name"
 
   (form-defpartition/pg-partition-name "table" "val" ["stack"])
   => "table__stack__val")
 
-^{:refer hara.rt.postgres.base.grammar.form-defpartition/pg-partition-def :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.form-defpartition/pg-partition-def :added "4.1"}
 (fact "recursive definition for partition"
 
   (form-defpartition/pg-partition-def 'parent "base" {:use :col :in ["a"]} [] [])
   => '([:create-table :if-not-exists #{"base__a"} :partition-of #{"parent"} :for :values :in (quote ("a"))]))
 
 
-^{:refer hara.rt.postgres.base.grammar.form-defpartition/pg-defpartition :added "4.1"}
+^{:refer hara.runtime.postgres.base.grammar.form-defpartition/pg-defpartition :added "4.1"}
 (fact "defpartition block"
 
   (form-defpartition/pg-defpartition '(defpartition part [parent] [{:use :col :in ["a"]}]))

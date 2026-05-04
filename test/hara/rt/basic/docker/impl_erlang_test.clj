@@ -1,6 +1,6 @@
-(ns hara.rt.basic.docker.impl-erlang-test
-  (:require [hara.rt.basic.docker.registry :as registry]
-            [hara.rt.basic.type-common :as common]
+(ns hara.runtime.basic.docker.impl-erlang-test
+  (:require [hara.runtime.basic.docker.registry :as registry]
+            [hara.runtime.basic.type-common :as common]
             [hara.lang :as l]
             [hara.lang.base.script :as script])
   (:use code.test))
@@ -13,7 +13,7 @@
 ;; Bootstrap connects back to the JVM via host.docker.internal:<port>.
 ;;
 ;; Image: foundation-base/rt-basic-erlang:latest
-;; Run with: RT_BASIC_DOCKER_TESTS=true lein test :only hara.rt.basic.docker.impl-erlang-test
+;; Run with: RT_BASIC_DOCKER_TESTS=true lein test :only hara.runtime.basic.docker.impl-erlang-test
 ;;
 
 (def CANARY-DOCKER
@@ -29,7 +29,7 @@
  {:setup    [(when CANARY-DOCKER (l/annex:start-all))]
   :teardown [(when CANARY-DOCKER (l/annex:stop-all))]})
 
-^{:refer hara.rt.basic.docker.impl-erlang-test/CANARY-DOCKER :adopt true :added "4.0"}
+^{:refer hara.runtime.basic.docker.impl-erlang-test/CANARY-DOCKER :adopt true :added "4.0"}
 (fact "erlang :basic evaluates arithmetic expressions in docker"
   (if CANARY-DOCKER
     [(l/! [:erl.docker]
@@ -44,7 +44,7 @@
   => (any [6 42 99]
           :docker-unavailable))
 
-^{:refer hara.rt.basic.docker.impl-erlang-test/CANARY-DOCKER :adopt true :added "4.0"}
+^{:refer hara.runtime.basic.docker.impl-erlang-test/CANARY-DOCKER :adopt true :added "4.0"}
 (fact "erlang docker container evaluates list and stdlib operations"
   (if CANARY-DOCKER
     [(l/! [:erl.docker]

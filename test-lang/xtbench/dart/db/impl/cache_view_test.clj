@@ -1,5 +1,5 @@
 (ns xtbench.dart.db.impl.cache-view-test
-  (:require [hara.rt.postgres :as pg]
+  (:require [hara.runtime.postgres :as pg]
             [hara.lang :as l])
   (:use code.test))
 

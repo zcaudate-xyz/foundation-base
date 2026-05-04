@@ -1,5 +1,5 @@
-(ns hara.rt.basic.impl-annex.process-perl-test
-  (:require [hara.rt.basic.impl-annex.process-perl :refer :all]
+(ns hara.runtime.basic.impl-annex.process-perl-test
+  (:require [hara.runtime.basic.impl-annex.process-perl :refer :all]
             [std.concurrent :as cc]
             [hara.lang :as l])
   (:use code.test))
@@ -11,7 +11,7 @@
  {:setup    [(l/annex:start-all)]
   :teardown [(l/annex:stop-all)]})
 
-^{:refer hara.rt.basic.impl-annex.process-perl/CANARY :adopt true :added "4.0"}
+^{:refer hara.runtime.basic.impl-annex.process-perl/CANARY :adopt true :added "4.0"}
 (fact "EVALUATE perl code"
   ^:unchecked
 
@@ -19,7 +19,7 @@
   => 10)
 
 
-^{:refer hara.rt.basic.impl-annex.process-perl/default-body-transform :added "4.1"}
+^{:refer hara.runtime.basic.impl-annex.process-perl/default-body-transform :added "4.1"}
 (fact "transforms oneshot forms for return-eval"
   (default-body-transform '[1 2 3] {})
   => '[1 2 3]
@@ -27,13 +27,13 @@
   (default-body-transform '[1 2 3] {:bulk true})
   => '(do 1 2 3))
 
-^{:refer hara.rt.basic.impl-annex.process-perl/perl-body-wrap :added "4.1"}
+^{:refer hara.runtime.basic.impl-annex.process-perl/perl-body-wrap :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.rt.basic.impl-annex.process-perl/default-basic-body-transform :added "4.1"}
+^{:refer hara.runtime.basic.impl-annex.process-perl/default-basic-body-transform :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.rt.basic.impl-annex.process-perl/default-basic-client :added "4.1"}
+^{:refer hara.runtime.basic.impl-annex.process-perl/default-basic-client :added "4.1"}
 (fact "builds perl basic client source from perl forms"
   [(-> (default-basic-client 4567 {:host "127.0.0.1"})
        (clojure.string/includes? "use IO::Socket::INET;"))

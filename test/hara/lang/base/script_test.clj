@@ -2,15 +2,15 @@
   (:require [lua.core]
              [hara.lang :as l]
              [hara.lang.base.book :as book]
-             [hara.lang.base.emit-prep-lua-test :as prep-lua]
+             [hara.common.emit-prep-lua-test :as prep-lua]
              [hara.lang.base.impl :as impl]
              [hara.lang.base.library :as lib]
              [hara.lang.base.library-snapshot :as snap]
              [hara.lang.base.runtime :as rt]
              [hara.lang.base.script :as script]
-             [hara.lang.model.spec-js :as js]
-             [hara.lang.model.spec-lua :as lua]
-             [hara.lang.model.spec-xtalk :as xtalk]
+             [hara.model.spec-js :as js]
+             [hara.model.spec-lua :as lua]
+             [hara.model.spec-xtalk :as xtalk]
              [std.lib.env :as env])
   (:use code.test))
 
@@ -27,7 +27,7 @@
 (fact "installs a language"
 
   (impl/with:library [+library+]
-    (binding [*ns* (the-ns 'hara.lang.model.spec-lua)]
+    (binding [*ns* (the-ns 'hara.model.spec-lua)]
       (script/install lua/+book+)))
   => vector?)
 

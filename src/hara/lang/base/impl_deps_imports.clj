@@ -3,8 +3,8 @@
              [hara.lang.base.book :as b]
              [hara.lang.base.book-module :as module]
              [hara.lang.base.impl-entry :as entry]
-             [hara.lang.base.impl-template :as impl-template]
-             [hara.lang.base.util :as ut]
+             [hara.common.emit-template :as impl-template]
+             [hara.common.util :as ut]
              [std.lib.collection :as collection]))
 
 (defn- materialize-import-entry

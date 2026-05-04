@@ -4,10 +4,10 @@
             [hara.lang.base.impl-entry :as impl-entry]
             [hara.lang.base.book-meta :as meta]
             [hara.lang.base.book-module :as module]
-            [hara.lang.base.emit-common :as common]
-            [hara.lang.base.emit-helper :as helper]
-            [hara.lang.base.grammar :as grammar]
-            [hara.lang.base.util :as ut]
+            [hara.common.emit-common :as common]
+            [hara.common.emit-helper :as helper]
+            [hara.common.grammar :as grammar]
+            [hara.common.util :as ut]
             [std.lib.template :as template])
   (:use code.test))
 

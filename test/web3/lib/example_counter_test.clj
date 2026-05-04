@@ -4,7 +4,7 @@
 
 (l/script- :solidity
   {:runtime :web3
-   :require [[hara.rt.solidity :as s]
+   :require [[hara.runtime.solidity :as s]
              [web3.lib.example-counter :as counter]]})
 
 (fact:global

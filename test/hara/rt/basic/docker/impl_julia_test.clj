@@ -1,7 +1,7 @@
-(ns hara.rt.basic.docker.impl-julia-test
-  (:require [hara.rt.basic.docker.registry :as registry]
-            [hara.rt.basic.impl-annex.process-julia]
-            [hara.rt.basic.type-common :as common]
+(ns hara.runtime.basic.docker.impl-julia-test
+  (:require [hara.runtime.basic.docker.registry :as registry]
+            [hara.runtime.basic.impl-annex.process-julia]
+            [hara.runtime.basic.type-common :as common]
             [hara.lang :as l]
             [hara.lang.base.script :as script])
   (:use code.test))
@@ -9,13 +9,13 @@
 ;;
 ;; Julia basic runtime in a Docker container.
 ;;
-;; Uses the project-owned hara.rt.basic Julia image with JSON preinstalled.
+;; Uses the project-owned hara.runtime.basic Julia image with JSON preinstalled.
 ;;
 ;; The bootstrap connects back to the JVM socket server via
 ;; host.docker.internal:<port>, running the eval loop with JSON + Sockets.
 ;;
 ;; Image: foundation-base/rt-basic-julia:latest
-;; Run with: RT_BASIC_DOCKER_TESTS=true lein test :only hara.rt.basic.docker.impl-julia-test
+;; Run with: RT_BASIC_DOCKER_TESTS=true lein test :only hara.runtime.basic.docker.impl-julia-test
 ;;
 
 (def CANARY-DOCKER
@@ -31,7 +31,7 @@
  {:setup    [(when CANARY-DOCKER (l/annex:start-all))]
   :teardown [(when CANARY-DOCKER (l/annex:stop-all))]})
 
-^{:refer hara.rt.basic.docker.impl-julia-test/CANARY-DOCKER :adopt true :added "4.0"}
+^{:refer hara.runtime.basic.docker.impl-julia-test/CANARY-DOCKER :adopt true :added "4.0"}
 (fact "julia :basic evaluates arithmetic expressions in docker"
   (if CANARY-DOCKER
     [(l/! [:jl.docker]
@@ -46,7 +46,7 @@
   => (any [6 81 42]
           :docker-unavailable))
 
-^{:refer hara.rt.basic.docker.impl-julia-test/CANARY-DOCKER :adopt true :added "4.0"}
+^{:refer hara.runtime.basic.docker.impl-julia-test/CANARY-DOCKER :adopt true :added "4.0"}
 (fact "julia docker container defines and calls inline functions"
   (if CANARY-DOCKER
     [(l/! [:jl.docker]
@@ -60,7 +60,7 @@
   => (any [15 42]
           :docker-unavailable))
 
-^{:refer hara.rt.basic.docker.impl-julia-test/CANARY-DOCKER :adopt true :added "4.0"}
+^{:refer hara.runtime.basic.docker.impl-julia-test/CANARY-DOCKER :adopt true :added "4.0"}
 (fact "julia docker container handles recursive inline functions"
   (if CANARY-DOCKER
     (l/! [:jl.docker]

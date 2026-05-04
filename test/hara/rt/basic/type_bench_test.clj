@@ -1,22 +1,22 @@
-(ns hara.rt.basic.type-bench-test
-  (:require [hara.rt.basic.type-bench :refer :all]
-            [hara.rt.basic.type-oneshot :as oneshot]
+(ns hara.runtime.basic.type-bench-test
+  (:require [hara.runtime.basic.type-bench :refer :all]
+            [hara.runtime.basic.type-oneshot :as oneshot]
             [std.fs :as fs]
             [std.lib.network :as network])
   (:use code.test))
 
-^{:refer hara.rt.basic.type-bench/bench? :added "4.0"}
+^{:refer hara.runtime.basic.type-bench/bench? :added "4.0"}
 (fact "checks if object is a bench"
   (bench? (map->RuntimeBench {}))
   => true)
 
-^{:refer hara.rt.basic.type-bench/get-bench :added "4.0"}
+^{:refer hara.runtime.basic.type-bench/get-bench :added "4.0"}
 (fact "gets an active bench given port"
-  (with-redefs [hara.rt.basic.type-bench/*active* (atom {1234 :bench})]
+  (with-redefs [hara.runtime.basic.type-bench/*active* (atom {1234 :bench})]
     (get-bench 1234))
   => :bench)
 
-^{:refer hara.rt.basic.type-bench/create-bench-process :added "4.0"}
+^{:refer hara.runtime.basic.type-bench/create-bench-process :added "4.0"}
 (fact "creates the bench process"
   (let [port (network/port:check-available 0)
         p (create-bench-process
@@ -29,7 +29,7 @@
       (finally
         (stop-bench-process port)))))
 
-^{:refer hara.rt.basic.type-bench/start-bench-process :added "4.0"}
+^{:refer hara.runtime.basic.type-bench/start-bench-process :added "4.0"}
 (fact "starts a bench process"
 
   (start-bench-process :python
@@ -42,20 +42,20 @@
   (stop-bench-process 0)
   => (any bench? nil?))
 
-^{:refer hara.rt.basic.type-bench/stop-bench-process :added "4.0"}
+^{:refer hara.runtime.basic.type-bench/stop-bench-process :added "4.0"}
 (fact "stops the bench process"
-  (with-redefs [hara.rt.basic.type-bench/*active* (atom {1234 {:process nil}})]
+  (with-redefs [hara.runtime.basic.type-bench/*active* (atom {1234 {:process nil}})]
     (stop-bench-process 1234))
   => map?)
 
-^{:refer hara.rt.basic.type-bench/start-bench :added "4.0"}
+^{:refer hara.runtime.basic.type-bench/start-bench :added "4.0"}
 (fact "starts a test bench process"
   (with-redefs [oneshot/rt-oneshot-setup (fn [& _] [:program {:exec "echo"} ["echo"]])
-                hara.rt.basic.type-bench/start-bench-process (fn [& _] :started)]
+                hara.runtime.basic.type-bench/start-bench-process (fn [& _] :started)]
     (start-bench :python {:program :python} 1234 {}))
   => :started)
 
-^{:refer hara.rt.basic.type-bench/stop-bench :added "4.0"}
+^{:refer hara.runtime.basic.type-bench/stop-bench :added "4.0"}
 (fact "stops a test bench process"
   (with-redefs [stop-bench-process (fn [_] :stopped)
                 fs/delete (fn [_] nil)]

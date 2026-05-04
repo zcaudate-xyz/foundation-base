@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]
             [hara.lang.base.runtime :as rt]
             [hara.lang.base.runtime-proxy :as p]
-            [hara.lang.base.util :as ut])
+            [hara.common.util :as ut])
   (:use code.test))
 
 ^{:refer hara.lang.base.runtime-proxy/proxy-get-rt :added "4.0"}

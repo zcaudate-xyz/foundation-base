@@ -1,7 +1,7 @@
 (ns hara.lang.base.impl-test
   (:require [clojure.string]
             [hara.lang.base.book :as book]
-            [hara.lang.base.emit-prep-lua-test :as prep]
+            [hara.common.emit-prep-lua-test :as prep]
             [hara.lang.base.impl :refer :all]
             [hara.lang.base.impl-deps :as deps]
             [hara.lang.base.impl-entry :as entry]
@@ -155,33 +155,33 @@
        (catch Throwable t
          (select-keys (ex-data t)
                       [:probe
-                       :hara.lang/phase
-                       :hara.lang/subsystem
-                       :hara.lang/lang
-                       :hara.lang/module
-                       :hara.lang/form
-                       :hara.lang/provenance-stack]))))
+                       :hara/phase
+                       :hara/subsystem
+                       :hara/lang
+                       :hara/module
+                       :hara/form
+                       :hara/provenance-stack]))))
   => '{:probe true
-        :hara.lang/phase :emit/form
-        :hara.lang/subsystem :hara.lang.base.emit-top-level/emit-form
-        :hara.lang/lang :lua
-        :hara.lang/module L.core
-        :hara.lang/form (boom-op 1 2 3)
-        :hara.lang/provenance-stack [{:hara.lang/phase :emit/form
-                                     :hara.lang/subsystem :hara.lang.base.emit-top-level/emit-form
-                                     :hara.lang/lang :lua
-                                     :hara.lang/module L.core
-                                     :hara.lang/namespace hara.lang.base.impl-test
-                                     :hara.lang/line 19
-                                     :hara.lang/form (boom-op 1 2 3)
-                                     :hara.lang/symbol boom-op}
-                                    {:hara.lang/phase :emit/direct
-                                     :hara.lang/subsystem :hara.lang.base.impl/emit-direct
-                                     :hara.lang/lang :lua
-                                     :hara.lang/module L.core
-                                     :hara.lang/namespace hara.lang.base.impl-test
-                                     :hara.lang/line 19
-                                     :hara.lang/form (boom-op 1 2 3)}]})
+        :hara/phase :emit/form
+        :hara/subsystem :hara.common.emit-top-level/emit-form
+        :hara/lang :lua
+        :hara/module L.core
+        :hara/form (boom-op 1 2 3)
+        :hara/provenance-stack [{:hara/phase :emit/form
+                                     :hara/subsystem :hara.common.emit-top-level/emit-form
+                                     :hara/lang :lua
+                                     :hara/module L.core
+                                     :hara/namespace hara.lang.base.impl-test
+                                     :hara/line 19
+                                     :hara/form (boom-op 1 2 3)
+                                     :hara/symbol boom-op}
+                                    {:hara/phase :emit/direct
+                                     :hara/subsystem :hara.lang.base.impl/emit-direct
+                                     :hara/lang :lua
+                                     :hara/module L.core
+                                     :hara/namespace hara.lang.base.impl-test
+                                     :hara/line 19
+                                     :hara/form (boom-op 1 2 3)}]})
 
 ^{:refer hara.lang.base.impl/emit-str :added "4.0"}
 (fact  "converts to an output string"

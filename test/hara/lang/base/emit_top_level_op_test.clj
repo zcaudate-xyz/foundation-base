@@ -1,9 +1,9 @@
-(ns hara.lang.base.emit-top-level-op-test
-  (:require [hara.lang.base.emit :as emit]
-            [hara.lang.base.emit-common :as common]
-            [hara.lang.base.emit-helper :as helper]
-            [hara.lang.base.emit-top-level :as top-level]
-            [hara.lang.base.grammar :as grammar])
+(ns hara.common.emit-top-level-op-test
+  (:require [hara.common.emit :as emit]
+            [hara.common.emit-common :as common]
+            [hara.common.emit-helper :as helper]
+            [hara.common.emit-top-level :as top-level]
+            [hara.common.grammar :as grammar])
   (:use code.test))
 
 (def +reserved+
@@ -13,7 +13,7 @@
 (def +grammar+
   (grammar/grammar :test +reserved+ helper/+default+))
 
-^{:refer hara.lang.base.emit/emit-main :adopt true :added "4.0"}
+^{:refer hara.common.emit/emit-main :adopt true :added "4.0"}
 (fact "emit do"
 
   (emit/emit-main '(defn hello []

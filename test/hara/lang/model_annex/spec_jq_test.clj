@@ -1,6 +1,6 @@
-(ns hara.lang.model-annex.spec-jq-test
+(ns hara.model.annex.spec-jq-test
   (:require [hara.lang.base.script :as script]
-            [hara.lang.model-annex.spec-jq :refer :all])
+            [hara.model.annex.spec-jq :refer :all])
   (:refer-clojure :exclude [reduce])
   (:use code.test))
 
@@ -39,47 +39,47 @@
    {:a 1 :b 2})
   => "{\"a\":1,\"b\":2}")
 
-^{:refer hara.lang.model-annex.spec-jq/jq-args :added "4.0"}
+^{:refer hara.model.annex.spec-jq/jq-args :added "4.0"}
 (fact "custom args for jq"
 
   (jq-args '(1 2 3) +grammar+ {})
   => "(1; 2; 3)")
 
-^{:refer hara.lang.model-annex.spec-jq/jq-invoke :added "4.0"}
+^{:refer hara.model.annex.spec-jq/jq-invoke :added "4.0"}
 (fact "outputs an invocation (same as vector)"
 
   (jq-invoke '(foo 1 2) +grammar+ {})
   => "foo(1; 2)")
 
-^{:refer hara.lang.model-annex.spec-jq/jq-args-ast :added "4.1"}
+^{:refer hara.model.annex.spec-jq/jq-args-ast :added "4.1"}
 (fact "ast for args"
   (jq-args-ast '(a b))
   => '(:% (k:lparen) a (k:semi) b (k:rparen)))
 
-^{:refer hara.lang.model-annex.spec-jq/jq-defn :added "4.0"}
+^{:refer hara.model.annex.spec-jq/jq-defn :added "4.0"}
 (fact "transforms a function to allow for inputs"
 
   (jq-defn '(defn foo [x] x))
   => '(:% (k:def) (k:space) foo (:% (k:lparen) x (k:rparen)) (k:colon) (k:space) (do x) (k:semi)))
 
-^{:refer hara.lang.model-annex.spec-jq/jq-as :added "4.0"}
+^{:refer hara.model.annex.spec-jq/jq-as :added "4.0"}
 (fact "jq variable binding"
 
   (jq-as '(as x))
   => '(:% (k:as) (k:space) (:$ x)))
 
-^{:refer hara.lang.model-annex.spec-jq/jq-label :added "4.0"}
+^{:refer hara.model.annex.spec-jq/jq-label :added "4.0"}
 (fact "jq label"
 
   (jq-label '(label x))
   => '(:% (k:label) (k:space) (:$ x)))
 
-^{:refer hara.lang.model-annex.spec-jq/jq-break :added "4.1"}
+^{:refer hara.model.annex.spec-jq/jq-break :added "4.1"}
 (fact "jq break"
   (jq-break '(break)) => '(k:break)
   (jq-break '(break x)) => '(:% (k:break) (k:space) (:$ x)))
 
-^{:refer hara.lang.model-annex.spec-jq/jq-dot :added "4.0"}
+^{:refer hara.model.annex.spec-jq/jq-dot :added "4.0"}
 (fact "jq dot access"
 
   (jq-dot '(. foo) +grammar+ {})
@@ -88,26 +88,26 @@
   (jq-dot '(. "foo") +grammar+ {})
   => '(:% "." "[" "foo" "]"))
 
-^{:refer hara.lang.model-annex.spec-jq/jq-try :added "4.0"}
+^{:refer hara.model.annex.spec-jq/jq-try :added "4.0"}
 (fact "jq try/catch"
 
   (jq-try '(try (error "a") (error "b")))
   => '(:% (k:try) (k:space) (error "a") (k:space) (k:catch) (k:space) (error "b")))
 
-^{:refer hara.lang.model-annex.spec-jq/jq-if :added "4.0"}
+^{:refer hara.model.annex.spec-jq/jq-if :added "4.0"}
 (fact "jq if/then/else"
 
   (jq-if '(if true "yes" "no"))
   => '(:% (k:if) (k:space) true (k:space) (k:then) (k:space) "yes" (k:space) (k:else) (k:space) "no" (k:space) (k:end)))
 
-^{:refer hara.lang.model-annex.spec-jq/jq-reduce :added "4.0"}
+^{:refer hara.model.annex.spec-jq/jq-reduce :added "4.0"}
 (fact "jq reduce"
 
   (jq-reduce '(reduce [1 2 3] x 0 (+ . $x)))
   => '(:% (k:reduce) (k:space) [1 2 3] (k:space) (k:as) (k:space) (:$ x) (k:space)
           (:% (k:lparen) (% 0) (k:semi) (k:space) (% (+ . $x)) (k:rparen))))
 
-^{:refer hara.lang.model-annex.spec-jq/jq-foreach :added "4.0"}
+^{:refer hara.model.annex.spec-jq/jq-foreach :added "4.0"}
 (fact "jq foreach"
 
   (jq-foreach '(foreach [1 2 3] x 0 (+ . $x)))

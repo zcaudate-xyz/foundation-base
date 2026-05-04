@@ -1,8 +1,8 @@
-(ns hara.lang.base.emit-fn-test
-  (:require [hara.lang.base.emit-common :as common]
-            [hara.lang.base.emit-fn :refer :all]
-            [hara.lang.base.emit-helper :as helper]
-            [hara.lang.base.grammar :as grammar]
+(ns hara.common.emit-fn-test
+  (:require [hara.common.emit-common :as common]
+            [hara.common.emit-fn :refer :all]
+            [hara.common.emit-helper :as helper]
+            [hara.common.grammar :as grammar]
             [std.string.prose :as prose])
   (:use code.test))
 
@@ -13,7 +13,7 @@
 (def +grammar+
   (grammar/grammar :test +reserved+ helper/+default+))
 
-^{:refer hara.lang.base.emit-fn/emit-input-default :added "3.0"}
+^{:refer hara.common.emit-fn/emit-input-default :added "3.0"}
 (fact "create input arg strings"
 
   (-> (helper/emit-typed-args '(:int i := 9, :const :int j := 10)
@@ -42,17 +42,17 @@
    "=" {} {})
   => "#{key url} = 10")
 
-^{:refer hara.lang.base.emit-fn/emit-hint-type :added "4.0"}
+^{:refer hara.common.emit-fn/emit-hint-type :added "4.0"}
 (fact "emits the return type"
   (emit-hint-type {} (with-meta 'hello {:- [:char]}) nil +grammar+ {})
   => "char")
 
-^{:refer hara.lang.base.emit-fn/emit-def-type :added "4.0"}
+^{:refer hara.common.emit-fn/emit-def-type :added "4.0"}
 (fact "emits the def type"
   (emit-def-type (with-meta 'hello {:- [:char]}) nil +grammar+ {})
   => "char")
 
-^{:refer hara.lang.base.emit-fn/emit-fn-type :added "3.0"}
+^{:refer hara.common.emit-fn/emit-fn-type :added "3.0"}
 (fact "returns the function type"
 
   (emit-fn-type (with-meta 'hello {:- [:char]}) nil
@@ -65,7 +65,7 @@
                 {})
   => "function")
 
-^{:refer hara.lang.base.emit-fn/emit-fn-block :added "4.0"}
+^{:refer hara.common.emit-fn/emit-fn-block :added "4.0"}
 (fact "gets the block options for a given grammar"
 
   (emit-fn-block :default +grammar+)
@@ -73,7 +73,7 @@
       :args {:start "(", :end ")", :space ""},
       :body {:start "{", :end "}"}})
 
-^{:refer hara.lang.base.emit-fn/emit-fn-preamble-args :added "4.0"}
+^{:refer hara.common.emit-fn/emit-fn-preamble-args :added "4.0"}
 (fact "constructs the function preamble args"
 
   (emit-fn-preamble-args :defn '[:int i 9, :const :int j 10]
@@ -82,7 +82,7 @@
                          {})
   => '("int i = 9" "const int j = 10"))
 
-^{:refer hara.lang.base.emit-fn/emit-fn-preamble :added "4.0"}
+^{:refer hara.common.emit-fn/emit-fn-preamble :added "4.0"}
 (fact "constructs the function preamble"
 
   (emit-fn-preamble [:defn 'sym '[:int i 9, :const :int j 10]]
@@ -91,7 +91,7 @@
                     {})
   => "sym(int i = 9,const int j = 10)")
 
-^{:refer hara.lang.base.emit-fn/emit-fn :added "3.0"}
+^{:refer hara.common.emit-fn/emit-fn :added "3.0"}
 (fact "emits a function template"
 
   (binding [common/*emit-fn* test-fn-emit]
@@ -108,12 +108,12 @@
       "  }"
       "}"))
 
-^{:refer hara.lang.base.emit-fn/test-fn-loop :added "4.0"}
+^{:refer hara.common.emit-fn/test-fn-loop :added "4.0"}
 (fact "add blocks, fn, var and const to emit"
   (test-fn-loop '(+ 1 2) +grammar+ {})
   => "1 + 2")
 
-^{:refer hara.lang.base.emit-fn/test-fn-emit :added "4.0"}
+^{:refer hara.common.emit-fn/test-fn-emit :added "4.0"}
 (fact  "add blocks, fn, var and const to emit"
   (test-fn-emit '(+ 1 2) +grammar+ {})
   => "1 + 2")

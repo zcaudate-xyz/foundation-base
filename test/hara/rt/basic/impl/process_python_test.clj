@@ -1,5 +1,5 @@
-(ns hara.rt.basic.impl.process-python-test
-  (:require [hara.rt.basic.impl.process-python :refer :all]
+(ns hara.runtime.basic.impl.process-python-test
+  (:require [hara.runtime.basic.impl.process-python :refer :all]
             [std.concurrent :as cc]
             [hara.lang :as l])
   (:use code.test))
@@ -14,7 +14,7 @@
  {:setup    [(l/annex:start-all)]
   :teardown [(l/annex:stop-all)]})
 
-^{:refer hara.rt.basic.impl.process-python/CANARY :adopt true :added "4.0"}
+^{:refer hara.runtime.basic.impl.process-python/CANARY :adopt true :added "4.0"}
 (fact "EVALUATE python code"
 
   (!.py (+ 1 2 3 4))
@@ -24,13 +24,13 @@
     (+ 1 2 3 4))
   => 10)
 
-^{:refer hara.rt.basic.impl.process-python/default-oneshot-wrap :adopt true :added "4.0"}
+^{:refer hara.runtime.basic.impl.process-python/default-oneshot-wrap :adopt true :added "4.0"}
 (fact "creates the ws client connect code"
 
   (default-oneshot-wrap 1)
   => string?)
 
-^{:refer hara.rt.basic.impl.process-python/default-body-wrap :added "4.0"}
+^{:refer hara.runtime.basic.impl.process-python/default-body-wrap :added "4.0"}
 (fact "creates the scaffolding for the runtime eval to work"
 
   (default-body-wrap ['(+ 1 2 3)])
@@ -44,7 +44,7 @@
             (throw (Exception err)))
           (:= (. (globals) ["OUT"]) (OUT-FN))))
 
-^{:refer hara.rt.basic.impl.process-python/default-body-transform :added "4.0"}
+^{:refer hara.runtime.basic.impl.process-python/default-body-transform :added "4.0"}
 (fact "standard python transforms"
 
   (default-body-transform '[1 2 3] {})

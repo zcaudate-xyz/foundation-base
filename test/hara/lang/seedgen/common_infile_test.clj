@@ -1,9 +1,9 @@
-(ns hara.lang.seedgen.common-infile-test
+(ns hara.seedgen.common-infile-test
   (:use code.test)
   (:require [code.project :as project]
-            [hara.lang.seedgen.common-infile :as seed-infile]))
+            [hara.seedgen.common-infile :as seed-infile]))
 
-^{:refer hara.lang.seedgen.common-infile/seedgen-root :added "4.1"}
+^{:refer hara.seedgen.common-infile/seedgen-root :added "4.1"}
 (fact "returns an explicit error result when the test file is missing"
   (project/in-context
    (seed-infile/seedgen-root 'xt.sample.train-001-test {}))
@@ -14,7 +14,7 @@
   => (contains {:status :error
                 :data :no-test-file}))
 
-^{:refer hara.lang.seedgen.common-infile/seedgen-list :added "4.1"}
+^{:refer hara.seedgen.common-infile/seedgen-list :added "4.1"}
 (fact "returns an empty list when a test file only declares the seedgen root"
   (project/in-context
    (seed-infile/seedgen-list 'xt.sample.train-001-test {}))
@@ -36,7 +36,7 @@
         (.delete tmp))))
   => [:lua :python])
 
-^{:refer hara.lang.seedgen.common-infile/seedgen-incomplete :added "4.1"}
+^{:refer hara.seedgen.common-infile/seedgen-incomplete :added "4.1"}
 (fact "reports facts that are not covered by the seedgen root language"
   (let [tmp (java.io.File/createTempFile "seedgen-incomplete" ".clj")
         path (.getAbsolutePath tmp)

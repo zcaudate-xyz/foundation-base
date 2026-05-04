@@ -1,12 +1,12 @@
-(ns hara.lang.base.emit-special-test
-  (:require [hara.lang.base.emit-common :as common]
-            [hara.lang.base.emit-helper :as helper]
-            [hara.lang.base.emit-prep-lua-test :as prep]
-            [hara.lang.base.emit-special :refer :all]
+(ns hara.common.emit-special-test
+  (:require [hara.common.emit-common :as common]
+            [hara.common.emit-helper :as helper]
+            [hara.common.emit-prep-lua-test :as prep]
+            [hara.common.emit-special :refer :all]
             [hara.lang.base.impl-entry :as entry]
             [hara.lang.base.library :as lib]
             [hara.lang.base.library-snapshot :as snap]
-            [hara.lang.model.spec-lua :as lua]
+            [hara.model.spec-lua :as lua]
             [std.lib.env :as env])
   (:use code.test))
 
@@ -37,7 +37,7 @@
        :module 'L.util}
       {}))))
 
-^{:refer hara.lang.base.emit-special/emit-with-module-all-ids :added "4.0"}
+^{:refer hara.common.emit-special/emit-with-module-all-ids :added "4.0"}
 (fact "emits the module given snapshot in opts"
 
   (set
@@ -47,7 +47,7 @@
                              identity))
   => '#{add-fn sub-fn})
 
-^{:refer hara.lang.base.emit-special/emit-with-module :added "4.0"}
+^{:refer hara.common.emit-special/emit-with-module :added "4.0"}
 (fact "emits the module given snapshot in opts"
 
   (emit-with-module nil nil '(module :lua L.util)
@@ -64,7 +64,7 @@
                        :layout :full}))
   => "{\"sub_fn\":L_util____sub_fn,\"add_fn\":L_util____add_fn}")
 
-^{:refer hara.lang.base.emit-special/emit-with-preprocess :added "4.0"}
+^{:refer hara.common.emit-special/emit-with-preprocess :added "4.0"}
 (fact "emits an eval form"
 
   (emit-with-preprocess '(L.core/sub 1 2)
@@ -75,7 +75,7 @@
   => "(- 1 2)")
 
 
-^{:refer hara.lang.base.emit-special/emit-with-eval :added "4.0"}
+^{:refer hara.common.emit-special/emit-with-eval :added "4.0"}
 (fact "emits an eval form"
 
   (emit-with-eval nil nil
@@ -103,7 +103,7 @@
                      :snapshot (lib/get-snapshot +library-ext+)}))
   => "1 + 2 + 3")
 
-^{:refer hara.lang.base.emit-special/emit-with-deref :added "4.0"}
+^{:refer hara.common.emit-special/emit-with-deref :added "4.0"}
 (fact "emits an embedded var"
 
   (def hello 1)
@@ -124,7 +124,7 @@
                     :snapshot (lib/get-snapshot +library-ext+)})
   => "(- 1 2)")
 
-^{:refer hara.lang.base.emit-special/emit-with-lang :added "4.0"}
+^{:refer hara.common.emit-special/emit-with-lang :added "4.0"}
 (fact "emits an embedded eval"
 
   (emit-with-lang nil nil '(!:lang {:lang :lua} (+ @1 2 3))
@@ -139,7 +139,7 @@
                     {:snapshot (lib/get-snapshot +library-ext+)}))
   => "1 + 2 + 3")
 
-^{:refer hara.lang.base.emit-special/test-special-loop :added "4.0"}
+^{:refer hara.common.emit-special/test-special-loop :added "4.0"}
 (fact "test step for special ops"
 
   (test-special-loop '(!:lang {:lang :lua} (+ @1 2 3))
@@ -147,7 +147,7 @@
                            {:snapshot (lib/get-snapshot +library-ext+)})
   => "(+ (!:eval 1) 2 3)")
 
-^{:refer hara.lang.base.emit-special/test-special-emit :added "4.0"}
+^{:refer hara.common.emit-special/test-special-emit :added "4.0"}
 (fact "test function for special ops"
 
   (test-special-emit '(!:lang {:lang :lua} (+ @1 2 3))

@@ -1,6 +1,6 @@
-(ns hara.lang.model.spec-dart-test
+(ns hara.model.spec-dart-test
   (:require [hara.lang :as l]
-            [hara.lang.model.spec-dart :as spec-dart]
+            [hara.model.spec-dart :as spec-dart]
             [xt.event.base-route])
   (:use code.test))
 
@@ -76,7 +76,7 @@
      (boolean (re-find #"globalThis" out))])
   => [true false])
 
-^{:refer hara.lang.model.spec-dart/dart-map-key :added "4.1"}
+^{:refer hara.model.spec-dart/dart-map-key :added "4.1"}
 (fact "emits map keys for dart"
 
   (spec-dart/dart-map-key :hello spec-dart/+grammar+ {})
@@ -193,7 +193,7 @@
      (boolean (re-find #"var e = arr_.*\[i\];" out))])
   => [true true true])
 
-^{:refer hara.lang.model.spec-dart/dart-var :added "4.1"}
+^{:refer hara.model.spec-dart/dart-var :added "4.1"}
 (fact "transforms var destructuring for dart"
 
   (let [[op init a b] (spec-dart/dart-var '(var [a b] expr))]
@@ -260,14 +260,14 @@
   => [true true true])
 
 
-^{:refer hara.lang.model.spec-dart/tf-for-object :added "4.1"}
+^{:refer hara.model.spec-dart/tf-for-object :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model.spec-dart/tf-for-array :added "4.1"}
+^{:refer hara.model.spec-dart/tf-for-array :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model.spec-dart/tf-for-iter :added "4.1"}
+^{:refer hara.model.spec-dart/tf-for-iter :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.lang.model.spec-dart/dart-tf-ternary :added "4.1"}
+^{:refer hara.model.spec-dart/dart-tf-ternary :added "4.1"}
 (fact "TODO")

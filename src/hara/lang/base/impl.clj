@@ -1,16 +1,16 @@
 (ns hara.lang.base.impl
   (:require [clojure.string]
              [hara.lang.base.book-module :as book-module]
-             [hara.lang.base.emit :as emit]
-             [hara.lang.base.emit-common :as emit-common]
-             [hara.lang.base.emit-preprocess :as preprocess] [hara.lang.base.preprocess-base :as preprocess-base]
-             [hara.lang.base.grammar :as grammar]
+             [hara.common.emit :as emit]
+             [hara.common.emit-common :as emit-common]
+             [hara.common.emit-preprocess :as preprocess] [hara.common.preprocess-base :as preprocess-base]
+             [hara.common.grammar :as grammar]
              [hara.lang.base.impl-deps :as deps]
              [hara.lang.base.impl-entry :as entry]
              [hara.lang.base.library :as lib]
              [hara.lang.base.library-snapshot :as snap]
-             [hara.lang.base.provenance :as provenance]
-             [hara.lang.base.util :as ut]
+             [hara.common.provenance :as provenance]
+             [hara.common.util :as ut]
              [std.lib.component :as component]
              [std.lib.context.space :as space]
              [std.lib.deps]
@@ -143,17 +143,17 @@
   (or lang (f/error "Lang required." {:input (keys mopts)}))
   (let [mopts (provenance/with-provenance
                 mopts
-                {:hara.lang/phase :emit/direct
-                 :hara.lang/subsystem :hara.lang.base.impl/emit-direct
-                 :hara.lang/lang lang
-                 :hara.lang/module (ut/module-id (:module mopts))
-                 :hara.lang/namespace (ns-name (the-ns namespace))})]
+                {:hara/phase :emit/direct
+                 :hara/subsystem :hara.lang.base.impl/emit-direct
+                 :hara/lang lang
+                 :hara/module (ut/module-id (:module mopts))
+                 :hara/namespace (ns-name (the-ns namespace))})]
     (binding [preprocess-base/*macro-grammar* grammar
               preprocess-base/*macro-opts* mopts]
       (if (not (:suppress emit))
         (let [{:keys [trim transform]} emit
               form (cond-> form transform (transform mopts))
-              mopts (provenance/with-provenance mopts {:hara.lang/form form})
+              mopts (provenance/with-provenance mopts {:hara/form form})
               _    (if *print-form* (env/p :FORM form))
               body (try
                      (emit/emit form
@@ -163,7 +163,7 @@
                      (catch Throwable t
                        (ut/throw-with-context
                         "hara.lang direct emit failed"
-                        (:hara.lang/provenance mopts)
+                        (:hara/provenance mopts)
                         t)))
               body (cond-> body trim (trim))]
           body)))))

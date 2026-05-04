@@ -1,11 +1,11 @@
-(ns hara.rt.solidity.env-ganache-test
-  (:require [hara.rt.solidity.env-ganache :refer :all]
+(ns hara.runtime.solidity.env-ganache-test
+  (:require [hara.runtime.solidity.env-ganache :refer :all]
             [std.lib.future :as future]
             [std.lib.network :as network]
             [std.lib.os :as os])
   (:use code.test))
 
-^{:refer hara.rt.solidity.env-ganache/start-ganache-server :added "4.0"}
+^{:refer hara.runtime.solidity.env-ganache/start-ganache-server :added "4.0"}
 (fact "starts the ganache service"
   (with-redefs [os/sh (fn [& _] {})
                 network/wait-for-port (fn [& _] nil)
@@ -15,7 +15,7 @@
     (start-ganache-server))
   => map?)
 
-^{:refer hara.rt.solidity.env-ganache/stop-ganache-server :added "4.0"}
+^{:refer hara.runtime.solidity.env-ganache/stop-ganache-server :added "4.0"}
 (fact "stops the ganache service"
   (with-redefs [os/sh-close (fn [_] nil)
                 os/sh-exit (fn [_] nil)

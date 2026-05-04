@@ -1,7 +1,7 @@
 (ns js.lib.eth-bench-test
-  (:require [hara.rt.solidity :as solidity]
-            [hara.rt.solidity.compile-solc :as compile-solc]
-            [hara.rt.solidity.env-ganache :as env-ganache]
+  (:require [hara.runtime.solidity :as solidity]
+            [hara.runtime.solidity.compile-solc :as compile-solc]
+            [hara.runtime.solidity.env-ganache :as env-ganache]
             [hara.lang :as l]
             [web3.lib.example-counter :as example-counter])
   (:use code.test))

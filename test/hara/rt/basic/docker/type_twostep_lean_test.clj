@@ -1,10 +1,10 @@
-(ns hara.rt.basic.docker.type-twostep-lean-test
+(ns hara.runtime.basic.docker.type-twostep-lean-test
   (:use code.test)
-  (:require [hara.rt.basic.impl-annex.process-lean]
-            [hara.rt.basic.type-common :as common]
+  (:require [hara.runtime.basic.impl-annex.process-lean]
+            [hara.runtime.basic.type-common :as common]
             [hara.lang :as l]))
 
-(do hara.rt.basic.impl-annex.process-lean/+lean-twostep+)
+(do hara.runtime.basic.impl-annex.process-lean/+lean-twostep+)
 
 (l/script- :lean
   {:runtime :twostep

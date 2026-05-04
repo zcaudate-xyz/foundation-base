@@ -1,9 +1,9 @@
-(ns hara.rt.postgres.base.application-test
-  (:require [hara.rt.postgres.base.application :refer :all]
+(ns hara.runtime.postgres.base.application-test
+  (:require [hara.runtime.postgres.base.application :refer :all]
             [hara.lang :as l])
   (:use code.test))
 
-^{:refer hara.rt.postgres.base.application/application-string :added "4.1"}
+^{:refer hara.runtime.postgres.base.application/application-string :added "4.1"}
 (fact "generates a string representation of an application"
   (application-string {:tables {'users/User {} 'posts/Post {}}})
   => "#pg.app [2]\nposts/Post users/User\n"
@@ -11,7 +11,7 @@
   (application-string {:tables {}})
   => "#pg.app [0]\n\n")
 
-^{:refer hara.rt.postgres.base.application/app-list-entries :added "4.1"}
+^{:refer hara.runtime.postgres.base.application/app-list-entries :added "4.1"}
 (fact "returns all table entry keys from an application"
   (set (app-list-entries {:tables {'users/User {} 'posts/Post {}}}))
   => '#{users/User posts/Post}
@@ -19,7 +19,7 @@
   (app-list-entries {:tables {}})
   => nil)
 
-^{:refer hara.rt.postgres.base.application/app-get-entry :added "4.1"}
+^{:refer hara.runtime.postgres.base.application/app-get-entry :added "4.1"}
 (fact "retrieves a specific entry from the app schema tree"
   (let [app {:schema {:tree {"users/User" {:id 1} "posts/Post" {:id 2}}}}]
     (app-get-entry app "users/User"))
@@ -28,7 +28,7 @@
   (app-get-entry {:schema {:tree {}}} "nonexistent")
   => nil)
 
-^{:refer hara.rt.postgres.base.application/app-get-deps :added "4.1"}
+^{:refer hara.runtime.postgres.base.application/app-get-deps :added "4.1"}
 (fact "extracts dependency namespaces from a table entry"
   (let [app {:tables {'users/User [{:ref {:ns 'rt.postgres.base.grammar.types}}
                                    {:ref {:ns 'rt.postgres.base.grammar.shapes}}]}}]
@@ -38,14 +38,14 @@
   (app-get-deps {:tables {}} 'nonexistent)
   => #{})
 
-^{:refer hara.rt.postgres.base.application/app-modules :added "4.0"}
+^{:refer hara.runtime.postgres.base.application/app-modules :added "4.0"}
 (fact "checks for modules related to a given application"
 
   (with-redefs [l/get-book (fn [& _] {:modules {:m1 {:static {:application ["app"]}} :m2 {}}})]
     (app-modules "app"))
   => '({:static {:application ["app"]}}))
 
-^{:refer hara.rt.postgres.base.application/app-create-raw :added "4.0"}
+^{:refer hara.runtime.postgres.base.application/app-create-raw :added "4.0"}
 (fact "creates a schema from tables and links"
 
   (app-create-raw {} {})
@@ -53,7 +53,7 @@
   (app-create-raw {} {} {:tables {'User :table} :enums {} :functions {}})
   => (contains {:typed {:tables {'User :table} :enums {} :functions {}}}))
 
-^{:refer hara.rt.postgres.base.application/module-typed :added "4.1"}
+^{:refer hara.runtime.postgres.base.application/module-typed :added "4.1"}
 (fact "analyzes modules and returns merged typed information"
   (let [modules [{:id 'test.module
                   :code {:ns 'test.module
@@ -65,7 +65,7 @@
     (module-typed modules))
   => (contains {:tables map? :enums map? :functions map?}))
 
-^{:refer hara.rt.postgres.base.application/app-create-typed :added "4.1"}
+^{:refer hara.runtime.postgres.base.application/app-create-typed :added "4.1"}
 (fact "creates typed information from tables and modules"
   (let [tables {'users/User [{:type :text}]}
         modules [{:id 'test.module
@@ -78,7 +78,7 @@
     (app-create-typed tables modules))
   => (contains {:tables map? :enums map? :functions map?}))
 
-^{:refer hara.rt.postgres.base.application/app-create :added "4.0"}
+^{:refer hara.runtime.postgres.base.application/app-create :added "4.0"}
 (fact "makes the app graph schema"
 
   (with-redefs [app-modules (fn [_] [{:id 'test.module
@@ -92,7 +92,7 @@
            :typed)))
   => nil)
 
-^{:refer hara.rt.postgres.base.application/app-clear :added "4.0"}
+^{:refer hara.runtime.postgres.base.application/app-clear :added "4.0"}
 (fact "clears the entry for an app"
 
   (with-redefs [*applications* (atom {"test.postgres" {}})]
@@ -100,7 +100,7 @@
     => {}
     @*applications* => {}))
 
-^{:refer hara.rt.postgres.base.application/app-rebuild :added "4.0"}
+^{:refer hara.runtime.postgres.base.application/app-rebuild :added "4.0"}
 (fact "rebuilds the app schema"
 
   (with-redefs [*applications* (atom {"test.postgres" {:tables {} :pointers {}}})
@@ -110,7 +110,7 @@
       #(app-rebuild "test.postgres")))
   => {:rebuilt true})
 
-^{:refer hara.rt.postgres.base.application/app-rebuild-tables :added "4.0"}
+^{:refer hara.runtime.postgres.base.application/app-rebuild-tables :added "4.0"}
 (fact "initiate rebuild of app schema"
 
   (with-redefs [*applications* (atom {})
@@ -118,28 +118,28 @@
     (app-rebuild-tables "test")
     => {:created true}))
 
-^{:refer hara.rt.postgres.base.application/app-list :added "4.0"}
+^{:refer hara.runtime.postgres.base.application/app-list :added "4.0"}
 (fact "rebuilds the app schema"
 
   (with-redefs [*applications* (atom {"test.postgres" {}})]
     (app-list))
   => '("test.postgres"))
 
-^{:refer hara.rt.postgres.base.application/app :added "4.0"}
+^{:refer hara.runtime.postgres.base.application/app :added "4.0"}
 (fact "gets an app"
 
   (with-redefs [*applications* (atom {"test.postgres" {:data 1}})]
     (app "test.postgres")
     => {:data 1}))
 
-^{:refer hara.rt.postgres.base.application/app-schema :added "4.0"}
+^{:refer hara.runtime.postgres.base.application/app-schema :added "4.0"}
 (fact "gets the app schema"
 
   (with-redefs [*applications* (atom {"test.postgres" {:schema :schema}})]
     (app-schema "test.postgres")
     => :schema))
 
-^{:refer hara.rt.postgres.base.application/app-typed :added "4.1"}
+^{:refer hara.runtime.postgres.base.application/app-typed :added "4.1"}
 (fact "gets the app typed payload"
 
   (with-redefs [*applications* (atom {"test.postgres" {:typed :typed}})]

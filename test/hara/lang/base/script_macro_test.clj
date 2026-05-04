@@ -1,6 +1,6 @@
 (ns hara.lang.base.script-macro-test
   (:require [clojure.string]
-             [hara.rt.postgres.base.grammar :as pg]
+             [hara.runtime.postgres.base.grammar :as pg]
              [hara.lang.base.book :as book]
              [hara.lang.base.book-module :as module]
              [hara.lang.base.impl :as impl]
@@ -9,9 +9,9 @@
              [hara.lang.base.pointer :as ptr]
              [hara.lang.base.runtime :as rt]
              [hara.lang.base.script-macro :as macro]
-             [hara.lang.model.spec-js :as js]
-             [hara.lang.model.spec-lua :as lua]
-             [hara.lang.model.spec-xtalk :as xtalk]
+             [hara.model.spec-js :as js]
+             [hara.model.spec-lua :as lua]
+             [hara.model.spec-xtalk :as xtalk]
              [std.lib.collection :as collection])
   (:use code.test))
 

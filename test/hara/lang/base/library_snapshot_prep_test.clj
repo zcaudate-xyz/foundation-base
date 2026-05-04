@@ -1,11 +1,11 @@
 (ns hara.lang.base.library-snapshot-prep-test
   (:require [hara.lang.base.book :as b]
-            [hara.lang.base.emit-common :as common]
-            [hara.lang.base.emit-helper :as helper]
-            [hara.lang.base.emit-prep-lua-test :as prep]
-            [hara.lang.base.grammar :as grammar]
+            [hara.common.emit-common :as common]
+            [hara.common.emit-helper :as helper]
+            [hara.common.emit-prep-lua-test :as prep]
+            [hara.common.grammar :as grammar]
             [hara.lang.base.library-snapshot :as snap]
-            [hara.lang.base.util :as ut])
+            [hara.common.util :as ut])
   (:use code.test))
 
 (def +book-x-empty+

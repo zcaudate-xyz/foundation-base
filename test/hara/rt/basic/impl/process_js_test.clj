@@ -1,5 +1,5 @@
-(ns hara.rt.basic.impl.process-js-test
-  (:require [hara.rt.basic.impl.process-js :refer :all]
+(ns hara.runtime.basic.impl.process-js-test
+  (:require [hara.runtime.basic.impl.process-js :refer :all]
             [hara.lang :as l])
   (:use code.test))
 
@@ -7,7 +7,7 @@
   {:runtime :oneshot
    :config {:program :nodejs}})
 
-^{:refer hara.rt.basic.impl.process-js/CANARY :adopt true :added "4.0"}
+^{:refer hara.runtime.basic.impl.process-js/CANARY :adopt true :added "4.0"}
 (fact "EVALUATE js code"
 
   (!.js (+ 1 2 3 4))
@@ -17,5 +17,5 @@
   => string?)
 
 
-^{:refer hara.rt.basic.impl.process-js/node-path :added "4.1"}
+^{:refer hara.runtime.basic.impl.process-js/node-path :added "4.1"}
 (fact "TODO")

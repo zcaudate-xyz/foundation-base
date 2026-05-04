@@ -1,12 +1,12 @@
-(ns hara.rt.chromedriver.spec-test
+(ns hara.runtime.chromedriver.spec-test
   (:use code.test)
-  (:require [hara.rt.chromedriver.spec :as spec]
-            [hara.rt.chromedriver.util :as util]))
+  (:require [hara.runtime.chromedriver.spec :as spec]
+            [hara.runtime.chromedriver.util :as util]))
 
-^{:refer hara.rt.chromedriver.spec/spec-download :added "4.0"}
+^{:refer hara.runtime.chromedriver.spec/spec-download :added "4.0"}
 (fact "downloads the chrome devtools spec")
 
-^{:refer hara.rt.chromedriver.spec/list-domains :added "4.0"}
+^{:refer hara.runtime.chromedriver.spec/list-domains :added "4.0"}
 (fact "lists all domains"
 
   (count (spec/list-domains))
@@ -18,7 +18,7 @@
                   (domains "Target"))))
   => true)
 
-^{:refer hara.rt.chromedriver.spec/get-domain-raw :added "4.0"}
+^{:refer hara.runtime.chromedriver.spec/get-domain-raw :added "4.0"}
 (fact "gets the raw domain"
 
   (spec/get-domain-raw "Console")
@@ -26,7 +26,7 @@
                 "disable" map?
                 "enable" map?}))
 
-^{:refer hara.rt.chromedriver.spec/list-methods :added "4.0"}
+^{:refer hara.runtime.chromedriver.spec/list-methods :added "4.0"}
 (fact "lists all spec methods"
 
   (let [methods (set (spec/list-methods "Runtime"))]
@@ -41,7 +41,7 @@
                   (methods "reload"))))
   => true)
 
-^{:refer hara.rt.chromedriver.spec/get-method :added "4.0"}
+^{:refer hara.runtime.chromedriver.spec/get-method :added "4.0"}
 (fact "gets the method"
 
   (-> (spec/get-method "Page" "captureScreenshot")
@@ -61,8 +61,8 @@
   => (contains {"name" "evaluate"}))
 
 
-^{:refer hara.rt.chromedriver.spec/tmpl-connection :added "4.1"}
+^{:refer hara.runtime.chromedriver.spec/tmpl-connection :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.rt.chromedriver.spec/tmpl-browser :added "4.1"}
+^{:refer hara.runtime.chromedriver.spec/tmpl-browser :added "4.1"}
 (fact "TODO")

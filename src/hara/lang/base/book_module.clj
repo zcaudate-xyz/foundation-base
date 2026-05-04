@@ -1,7 +1,7 @@
 (ns hara.lang.base.book-module
   (:require [clojure.set :as set]
             [clojure.string :as string]
-            [hara.lang.base.impl-template :as impl-template]
+            [hara.common.emit-template :as impl-template]
             [std.lib.foundation :as f]
             [std.lib.collection :as collection]
             [std.lib.impl :as impl]))

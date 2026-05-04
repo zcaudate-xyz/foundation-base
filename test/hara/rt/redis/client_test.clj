@@ -1,11 +1,11 @@
-(ns hara.rt.redis.client-test
+(ns hara.runtime.redis.client-test
   (:require [lib.redis.bench :as bench]
             [lib.redis.event :as event]
             [net.resp.connection :as conn]
             [net.resp.wire :as wire]
-            [hara.rt.redis.client :as r]
-            [hara.rt.redis.eval-basic :as eval-basic]
-            [hara.rt.redis.eval-script :as eval-script]
+            [hara.runtime.redis.client :as r]
+            [hara.runtime.redis.eval-basic :as eval-basic]
+            [hara.runtime.redis.eval-script :as eval-script]
             [std.concurrent :as cc]
             [std.lib.component :as component]
             [std.lib.component.track :as track]
@@ -26,20 +26,20 @@
         ((comp event/events-string event/config:get))))
   => "h$tlgx")
 
-^{:refer hara.rt.redis.client/client-steps :added "3.0"}
+^{:refer hara.runtime.redis.client/client-steps :added "3.0"}
 (fact "clients steps for start up and shutdown")
 
-^{:refer hara.rt.redis.client/client-start :added "4.0"}
+^{:refer hara.runtime.redis.client/client-start :added "4.0"}
 (fact "starts the client")
 
-^{:refer hara.rt.redis.client/client:create :added "3.0"}
+^{:refer hara.runtime.redis.client/client:create :added "3.0"}
 (fact "creates a redis client"
 
   (r/client:create {:id "localhost"
                     :port 17001})
   => r/client?)
 
-^{:refer hara.rt.redis.client/client :added "3.0"}
+^{:refer hara.runtime.redis.client/client :added "3.0"}
 (fact "creates and starts a redis client"
 
   (component/with [|client| (r/client:create {:port 17001})]
@@ -51,7 +51,7 @@
            (map f/string))))
   => ["OK" "1" "2" "3"])
 
-^{:refer hara.rt.redis.client/test:client :added "3.0"}
+^{:refer hara.runtime.redis.client/test:client :added "3.0"}
 (fact "creates a test client on docker"
 
   (component/with [|client| (r/client:create {:port 17001})]
@@ -59,10 +59,10 @@
       (r/test:client)))
   => r/client?)
 
-^{:refer hara.rt.redis.client/invoke-ptr-redis :added "4.0"}
+^{:refer hara.runtime.redis.client/invoke-ptr-redis :added "4.0"}
 (fact "invokes the pointer in the redis context")
 
-^{:refer hara.rt.redis.client/client? :added "3.0"}
+^{:refer hara.runtime.redis.client/client? :added "3.0"}
 (fact "checks that instance is a client"
 
   (r/client? (r/client:create {}))

@@ -1,9 +1,9 @@
-(ns hara.lang.base.emit-assign-test
+(ns hara.common.emit-assign-test
   (:require [hara.lang.base.book :as b]
-            [hara.lang.base.emit-assign :as assign :refer :all]
-            [hara.lang.base.emit-common :as common]
-            [hara.lang.base.emit-helper :as helper]
-            [hara.lang.base.grammar :as grammar]
+            [hara.common.emit-assign :as assign :refer :all]
+            [hara.common.emit-common :as common]
+            [hara.common.emit-helper :as helper]
+            [hara.common.grammar :as grammar]
             [hara.lang.base.library-snapshot :as snap]
             [hara.lang.base.library-snapshot-prep-test :as prep])
   (:use code.test))
@@ -35,7 +35,7 @@
 (def +snap+
   (snap/add-book prep/+snap+ +book-x+))
 
-^{:refer hara.lang.base.emit-assign/emit-def-assign-inline :added "4.0"}
+^{:refer hara.common.emit-assign/emit-def-assign-inline :added "4.0"}
 (fact "assigns an inline form directly"
 
   (emit-def-assign-inline
@@ -44,7 +44,7 @@
   => '(do* (var j := 1)
            (:= j (+ j (1)))))
 
-^{:refer hara.lang.base.emit-assign/assign-options :added "4.1"}
+^{:refer hara.common.emit-assign/assign-options :added "4.1"}
 (fact "gets assignment options from reserved entries and metadata"
   (assign-options
    (with-meta '(hello 1)
@@ -60,7 +60,7 @@
    +grammar+)
   => {})
 
-^{:refer hara.lang.base.emit-assign/assign-value :added "4.1"}
+^{:refer hara.common.emit-assign/assign-value :added "4.1"}
 (fact "prepares assignment override payloads"
   (assign-value 'a
                 (with-meta '(sym :as [1 2 3])
@@ -88,7 +88,7 @@
                 {})
   => [:template '(a :as [1 2 3])])
 
-^{:refer hara.lang.base.emit-assign/emit-def-assign :added "3.0"}
+^{:refer hara.common.emit-assign/emit-def-assign :added "3.0"}
 (fact "emits a declare expression"
 
   (emit-def-assign :def-assign
@@ -119,7 +119,7 @@
                    {})
   => "var out = []")
 
-^{:refer hara.lang.base.emit-assign/test-assign-loop :adopt true :added "4.0"}
+^{:refer hara.common.emit-assign/test-assign-loop :adopt true :added "4.0"}
 (fact "emit do"
 
   (assign/test-assign-loop '(var a 1)
@@ -159,7 +159,7 @@
                            {})
   => "const a = b1 + 2")
 
-^{:refer hara.lang.base.emit-assign/test-assign-emit :added "4.0"}
+^{:refer hara.common.emit-assign/test-assign-emit :added "4.0"}
 (fact "emit assign forms"
 
   (assign/test-assign-loop (list 'var 'a := (with-meta ()

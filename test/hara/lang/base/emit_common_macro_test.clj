@@ -1,7 +1,7 @@
-(ns hara.lang.base.emit-common-macro-test
-  (:require [hara.lang.base.emit-common :as common :refer :all]
-            [hara.lang.base.emit-helper :as helper]
-            [hara.lang.base.grammar :as grammar])
+(ns hara.common.emit-common-macro-test
+  (:require [hara.common.emit-common :as common :refer :all]
+            [hara.common.emit-helper :as helper]
+            [hara.common.grammar :as grammar])
   (:use code.test))
 
 (def +reserved+
@@ -11,7 +11,7 @@
 (def +grammar+
   (grammar/grammar :test +reserved+ helper/+default+))
 
-^{:refer hara.lang.base.emit-common/emit-macro.-> :adopt true :added "4.0"}
+^{:refer hara.common.emit-common/emit-macro.-> :adopt true :added "4.0"}
 (fact "emit for macros structures"
 
   (emit-common-loop '(-> A
@@ -43,7 +43,7 @@
                {})
   => "G(F(1 + 2,3 + 4),5 + 6)")
 
-^{:refer hara.lang.base.emit-common/emit-macro.->> :adopt true :added "4.0"}
+^{:refer hara.common.emit-common/emit-macro.->> :adopt true :added "4.0"}
 (fact "emit for macros structures"
 
   (emit-common-loop '(->> A
@@ -75,7 +75,7 @@
   => "G(5 + 6,F(3 + 4,1 + 2))")
 
 
-^{:refer hara.lang.base.emit-common/emit-macro.xor :adopt true :added "4.0"}
+^{:refer hara.common.emit-common/emit-macro.xor :adopt true :added "4.0"}
 (fact "emit for macros structures"
 
   (emit-common-loop '(xor A B)

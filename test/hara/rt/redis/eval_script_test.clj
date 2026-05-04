@@ -1,9 +1,9 @@
-(ns hara.rt.redis.eval-script-test
+(ns hara.runtime.redis.eval-script-test
   (:require [kmi.redis :as redis]
             [lib.redis.bench :as bench]
             [lib.redis.script :as script]
-            [hara.rt.redis.client :as r]
-            [hara.rt.redis.eval-script :refer :all]
+            [hara.runtime.redis.client :as r]
+            [hara.runtime.redis.eval-script :refer :all]
             [std.concurrent :as cc]
             [hara.lang :as l]
             [hara.lang.base.impl :as impl]
@@ -16,13 +16,13 @@
  {:setup [(bench/start-redis-array [17001])]
   :teardown [(bench/stop-redis-array [17001])]})
 
-^{:refer hara.rt.redis.eval-script/raw-compile-form :added "4.0"}
+^{:refer hara.runtime.redis.eval-script/raw-compile-form :added "4.0"}
 (fact "converts a ptr into a form"
 
   (raw-compile-form redis/scan-sub)
   => '(return (kmi.redis/scan-sub (. KEYS [1]))))
 
-^{:refer hara.rt.redis.eval-script/raw-compile :added "4.0"}
+^{:refer hara.runtime.redis.eval-script/raw-compile :added "4.0"}
 (fact "compiles a function as body and sha"
 
   (raw-compile redis/scan-sub)
@@ -74,19 +74,19 @@
         "return scan_sub(KEYS[1])"]),
       :sha "a6878daff456b17437fc0192cce60dd4a7449e11"})
 
-^{:refer hara.rt.redis.eval-script/raw-prep-in-fn :added "4.0"}
+^{:refer hara.runtime.redis.eval-script/raw-prep-in-fn :added "4.0"}
 (fact "prepares the arguments for entry"
 
   (raw-prep-in-fn {:rt/redis {:nkeys 1}} [:key :arg])
   => [[:key] [:arg]])
 
-^{:refer hara.rt.redis.eval-script/raw-prep-out-fn :added "4.0"}
+^{:refer hara.runtime.redis.eval-script/raw-prep-out-fn :added "4.0"}
 (fact "prepares arguments out"
 
   (raw-prep-out-fn {:rt/redis {:encode {:out true}}} "{\"a\":1}")
   => {:a 1})
 
-^{:refer hara.rt.redis.eval-script/rt-install-fn :added "4.0"}
+^{:refer hara.runtime.redis.eval-script/rt-install-fn :added "4.0"}
 (fact "retries the function if not installed"
 
   (with-redefs [script/script:load (fn [& _] :load)
@@ -94,7 +94,7 @@
     ((rt-install-fn {} "sha" "body" [] []) (Exception. "NOSCRIPT")))
   => :eval)
 
-^{:refer hara.rt.redis.eval-script/redis-invoke-sha :added "4.0"
+^{:refer hara.runtime.redis.eval-script/redis-invoke-sha :added "4.0"
   :setup    [(def -client- (r/client {:port 17001}))
              (cc/req -client- ["FLUSHDB"])
              (cc/req -client- ["SCRIPT" "FLUSH"])]

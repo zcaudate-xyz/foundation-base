@@ -1,8 +1,8 @@
-(ns hara.lang.base.grammar-xtalk-system-test
+(ns hara.common.grammar-xtalk-system-test
   (:use code.test)
-  (:require [hara.lang.base.grammar-xtalk-system :refer :all]))
+  (:require [hara.common.grammar-xtalk-system :refer :all]))
 
-^{:refer hara.lang.base.grammar-xtalk-system/xtalk-entry? :added "4.1"}
+^{:refer hara.common.grammar-xtalk-system/xtalk-entry? :added "4.1"}
 (fact "detects xtalk grammar entries"
   (xtalk-entry? {:op :x-add})
   => true
@@ -10,7 +10,7 @@
   (xtalk-entry? [:x-add])
   => false)
 
-^{:refer hara.lang.base.grammar-xtalk-system/xtalk-profiles :added "4.1"}
+^{:refer hara.common.grammar-xtalk-system/xtalk-profiles :added "4.1"}
 (fact "returns xtalk profiles in grammar order"
   (xtalk-profiles)
   => [:xtalk-common
@@ -19,7 +19,7 @@
       :xtalk-hara.lang-link-specific
       :xtalk-runtime-specific])
 
-^{:refer hara.lang.base.grammar-xtalk-system/xtalk-areas :added "4.1"}
+^{:refer hara.common.grammar-xtalk-system/xtalk-areas :added "4.1"}
 (fact "returns xtalk implementation areas in order"
   (xtalk-areas)
   => [:common
@@ -28,7 +28,7 @@
       :hara.lang-link-specific
       :runtime-specific])
 
-^{:refer hara.lang.base.grammar-xtalk-system/xtalk-area-profiles :added "4.1"}
+^{:refer hara.common.grammar-xtalk-system/xtalk-area-profiles :added "4.1"}
 (fact "returns profiles for an xtalk area"
   (xtalk-area-profiles :common)
   => [:xtalk-common]
@@ -36,19 +36,19 @@
   (xtalk-area-profiles :unknown)
   => [])
 
-^{:refer hara.lang.base.grammar-xtalk-system/xtalk-profile-ops :added "4.1"}
+^{:refer hara.common.grammar-xtalk-system/xtalk-profile-ops :added "4.1"}
 (fact "returns ops for a profile"
   (let [ops (xtalk-profile-ops :xtalk-common)]
     [(contains? ops :x-add)
      (contains? ops :x-obj-keys)])
   => [true true])
 
-^{:refer hara.lang.base.grammar-xtalk-system/xtalk-op-profiles :added "4.1"}
+^{:refer hara.common.grammar-xtalk-system/xtalk-op-profiles :added "4.1"}
 (fact "returns profiles for an op"
   (xtalk-op-profiles :x-add)
   => #{:xtalk-common})
 
-^{:refer hara.lang.base.grammar-xtalk-system/xtalk-op-profiles :added "4.1"}
+^{:refer hara.common.grammar-xtalk-system/xtalk-op-profiles :added "4.1"}
 (fact "includes promise ops in the runtime-specific profile"
   (xtalk-op-profiles :x-promise)
   => #{:xtalk-runtime-specific}
@@ -56,26 +56,26 @@
   (xtalk-op-profiles :x-promise-native?)
   => #{:xtalk-runtime-specific})
 
-^{:refer hara.lang.base.grammar-xtalk-system/xtalk-op-entry :added "4.1"}
+^{:refer hara.common.grammar-xtalk-system/xtalk-op-entry :added "4.1"}
 (fact "returns the full xtalk entry for an op"
   (select-keys (xtalk-op-entry :x-add) [:op :symbol :emit])
   => '{:op :x-add
        :symbol #{x:add}
        :emit :macro})
 
-^{:refer hara.lang.base.grammar-xtalk-system/xtalk-symbol-op :added "4.1"}
+^{:refer hara.common.grammar-xtalk-system/xtalk-symbol-op :added "4.1"}
 (fact "maps symbols back to xtalk ops"
   (xtalk-symbol-op 'x:add)
   => :x-add)
 
-^{:refer hara.lang.base.grammar-xtalk-system/xtalk-symbol-entry :added "4.1"}
+^{:refer hara.common.grammar-xtalk-system/xtalk-symbol-entry :added "4.1"}
 (fact "maps symbols back to xtalk entries"
   (-> (xtalk-symbol-entry 'x:add)
       (select-keys [:op :emit]))
   => '{:op :x-add
         :emit :macro})
 
-^{:refer hara.lang.base.grammar-xtalk-system/xtalk-symbol-entry :added "4.1"}
+^{:refer hara.common.grammar-xtalk-system/xtalk-symbol-entry :added "4.1"}
 (fact "maps promise symbols back to xtalk entries"
   (-> (xtalk-symbol-entry 'x:promise)
       (select-keys [:op :emit :raw]))
@@ -83,23 +83,23 @@
        :emit :hard-link
        :raw xt.lang.common-promise/promise})
 
-^{:refer hara.lang.base.grammar-xtalk-system/xtalk-op-requires :added "4.1"}
+^{:refer hara.common.grammar-xtalk-system/xtalk-op-requires :added "4.1"}
 (fact "returns direct required xtalk ops"
   (xtalk-op-requires :x-arr-map)
   => #{})
 
-^{:refer hara.lang.base.grammar-xtalk-system/xtalk-op-closure :added "4.1"}
+^{:refer hara.common.grammar-xtalk-system/xtalk-op-closure :added "4.1"}
 (fact "returns transitive op requirements including the op"
   (xtalk-op-closure :x-arr-map)
   => #{:x-arr-map})
 
-^{:refer hara.lang.base.grammar-xtalk-system/xtalk-ops-profiles :added "4.1"}
+^{:refer hara.common.grammar-xtalk-system/xtalk-ops-profiles :added "4.1"}
 (fact "returns the combined profile set for ops"
   (xtalk-ops-profiles #{:x-add :x-arr-map})
   => #{:xtalk-common
        :xtalk-functional})
 
-^{:refer hara.lang.base.grammar-xtalk-system/scan-xtalk :added "4.1"}
+^{:refer hara.common.grammar-xtalk-system/scan-xtalk :added "4.1"}
 (fact "scans xtalk usage and linked polyfill modules"
   (scan-xtalk '(do (x:obj-keys data)
                    (x:arr-map items f)
@@ -123,7 +123,7 @@
        :polyfill-modules #{}
        :template? true})
 
-^{:refer hara.lang.base.grammar-xtalk-system/xtalk-grammar-supported-ops :added "4.1"}
+^{:refer hara.common.grammar-xtalk-system/xtalk-grammar-supported-ops :added "4.1"}
 (fact "returns supported ops from reserved grammar entries"
   (xtalk-grammar-supported-ops
    {:reserved {'x:add {:op :x-add}
@@ -132,7 +132,7 @@
   => #{:x-add
        :x-arr-map})
 
-^{:refer hara.lang.base.grammar-xtalk-system/xtalk-grammar-supported-profiles :added "4.1"}
+^{:refer hara.common.grammar-xtalk-system/xtalk-grammar-supported-profiles :added "4.1"}
 (fact "returns fully supported profiles for a grammar"
   (let [reserved (into {}
                        (map (fn [op]
@@ -142,7 +142,7 @@
     (xtalk-grammar-supported-profiles {:reserved reserved}))
   => [:xtalk-common])
 
-^{:refer hara.lang.base.grammar-xtalk-system/xtalk-grammar-missing-profiles :added "4.1"}
+^{:refer hara.common.grammar-xtalk-system/xtalk-grammar-missing-profiles :added "4.1"}
 (fact "returns required profiles not fully supported by a grammar"
   (let [reserved (into {}
                        (map (fn [op]
@@ -153,13 +153,13 @@
                                     [:xtalk-common :xtalk-functional]))
   => #{:xtalk-functional})
 
-^{:refer hara.lang.base.grammar-xtalk-system/xtalk-library-profiles :added "4.1"}
+^{:refer hara.common.grammar-xtalk-system/xtalk-library-profiles :added "4.1"}
 (fact "returns required profiles for new xtalk library namespaces"
   (xtalk-library-profiles 'xtalk.lib.db.sql)
   => #{:xtalk-common
        :xtalk-runtime-specific})
 
-^{:refer hara.lang.base.grammar-xtalk-system/xtalk-unclassified-ops :added "4.1"}
+^{:refer hara.common.grammar-xtalk-system/xtalk-unclassified-ops :added "4.1"}
 (fact "returns xtalk ops not assigned to any profile"
   (xtalk-unclassified-ops)
   => [])

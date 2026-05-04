@@ -1,30 +1,30 @@
-(ns hara.rt.basic.impl-annex.process-r-test
-  (:require [hara.rt.basic.impl-annex.process-r :refer :all]
+(ns hara.runtime.basic.impl-annex.process-r-test
+  (:require [hara.runtime.basic.impl-annex.process-r :refer :all]
             [hara.lang :as l])
   (:use code.test))
 
 (l/script- :r
   {:runtime :oneshot})
 
-^{:refer hara.rt.basic.impl-annex.process-r/CANARY :adopt true :added "4.0"}
+^{:refer hara.runtime.basic.impl-annex.process-r/CANARY :adopt true :added "4.0"}
 (fact "EVALUATE r code"
   
   (!.R (+ 1 2 3 4))
   => 10)
 
-^{:refer hara.rt.basic.impl-annex.process-r/default-oneshot-wrap  :adopt true :added "4.0"}
+^{:refer hara.runtime.basic.impl-annex.process-r/default-oneshot-wrap  :adopt true :added "4.0"}
 (fact "creates the oneshot form"
 
   (default-oneshot-wrap 1)
   => string?)
 
-^{:refer hara.rt.basic.impl-annex.process-r/default-basic-client  :adopt true :added "4.0"}
+^{:refer hara.runtime.basic.impl-annex.process-r/default-basic-client  :adopt true :added "4.0"}
 (fact "creates the oneshot form"
 
   (default-basic-client 19000)
   => string?)
 
-^{:refer hara.rt.basic.impl-annex.process-r/default-oneshot-trim :added "4.0"}
+^{:refer hara.runtime.basic.impl-annex.process-r/default-oneshot-trim :added "4.0"}
 (fact "trim for oneshot"
 
   (default-oneshot-trim "[1] \"1\"")

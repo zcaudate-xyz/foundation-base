@@ -1,21 +1,21 @@
-(ns hara.rt.basic.type-oneshot-test
-  (:require [hara.rt.basic.impl.process-js :as js]
-             [hara.rt.basic.impl.process-lua :as lua]
-             [hara.rt.basic.impl.process-python :as py]
-             [hara.rt.basic.impl-annex.process-r :as r]
-             [hara.rt.basic.type-oneshot :as p]
+(ns hara.runtime.basic.type-oneshot-test
+  (:require [hara.runtime.basic.impl.process-js :as js]
+             [hara.runtime.basic.impl.process-lua :as lua]
+             [hara.runtime.basic.impl.process-python :as py]
+             [hara.runtime.basic.impl-annex.process-r :as r]
+             [hara.runtime.basic.type-oneshot :as p]
              [std.json :as json]
              [hara.lang.base.book :as book]
-            [hara.lang.base.emit-prep-lua-test :as prep]
+            [hara.common.emit-prep-lua-test :as prep]
             [hara.lang.base.impl-entry :as entry]
             [hara.lang.base.library :as lib]
             [hara.lang.base.library-snapshot :as snap]
             [hara.lang.base.pointer :as ptr]
-             [hara.lang.base.util :as ut]
-             [hara.lang.model.spec-js :as spec-js]
-             [hara.lang.model.spec-lua :as spec-lua]
-             [hara.lang.model.spec-python :as spec-py]
-             [hara.lang.model-annex.spec-r :as spec-r]
+             [hara.common.util :as ut]
+             [hara.model.spec-js :as spec-js]
+             [hara.model.spec-lua :as spec-lua]
+             [hara.model.spec-python :as spec-py]
+             [hara.model.annex.spec-r :as spec-r]
              [std.lib.env :as env]
              [std.string.prose :as prose])
   (:use code.test))
@@ -66,7 +66,7 @@
                     :section :code
                     :library +library-ext+}))
 
-^{:refer hara.rt.basic.type-oneshot/invoke-ptr-oneshot.compile :adopt true :added "4.0"}
+^{:refer hara.runtime.basic.type-oneshot/invoke-ptr-oneshot.compile :adopt true :added "4.0"}
 (fact "compiles the pointer body"
 
   (ptr/with:input []
@@ -99,7 +99,7 @@
          (p/invoke-ptr-oneshot +ptr-identity+ [1]))))
   => string?)
 
-^{:refer hara.rt.basic.type-oneshot/sh-exec :added "4.0"}
+^{:refer hara.runtime.basic.type-oneshot/sh-exec :added "4.0"}
 (fact "basic function for executing a shell process"
 
   (p/sh-exec ["python" "-c"] "print(1 + 1)" {})
@@ -111,7 +111,7 @@
   (p/sh-exec ["r" "-s" "-e"] "1 + 1" {})
   => "[1] 2")
 
-^{:refer hara.rt.basic.type-oneshot/raw-eval-oneshot :added "4.0"}
+^{:refer hara.runtime.basic.type-oneshot/raw-eval-oneshot :added "4.0"}
 (fact "evaluates a raw statement with oneshot"
 
   (-> (p/rt-oneshot {:lang :lua})
@@ -122,7 +122,7 @@
       (p/raw-eval-oneshot "1 + 1"))
   => "[1] 2")
 
-^{:refer hara.rt.basic.type-oneshot/invoke-ptr-oneshot :added "4.0"}
+^{:refer hara.runtime.basic.type-oneshot/invoke-ptr-oneshot :added "4.0"}
 (fact "gets the oneshow invoke working"
 
   (-> (p/rt-oneshot {:lang :lua})
@@ -153,13 +153,13 @@
       (json/read))
   => {"value" 30, "type" "data"})
 
-^{:refer hara.rt.basic.type-oneshot/rt-oneshot-setup :added "4.0"}
+^{:refer hara.runtime.basic.type-oneshot/rt-oneshot-setup :added "4.0"}
 (fact "helper function for preparing oneshot params"
 
   (p/rt-oneshot-setup :lua :resty {} nil)
   => vector?)
 
-^{:refer hara.rt.basic.type-oneshot/rt-oneshot:create :added "4.0"}
+^{:refer hara.runtime.basic.type-oneshot/rt-oneshot:create :added "4.0"}
 (fact "creates a oneshot runtime"
 
   (->> (p/rt-oneshot:create {:lang :lua
@@ -167,7 +167,7 @@
        (into {}))
   => map?)
 
-^{:refer hara.rt.basic.type-oneshot/rt-oneshot :added "4.0"
+^{:refer hara.runtime.basic.type-oneshot/rt-oneshot :added "4.0"
   :setup [(defn rt-oneshot
             [lang & [opts]]
             [(-> (p/rt-oneshot (merge {:lang lang} opts))

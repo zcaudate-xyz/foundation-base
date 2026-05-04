@@ -1,14 +1,14 @@
-(ns hara.rt.postgres.runtime.graph-base-test
-  (:require [hara.rt.postgres.base.application :as app]
-            [hara.rt.postgres.runtime.graph-base :as base]
-            [hara.rt.postgres.runtime.impl-base :as impl]
-            [hara.rt.postgres.test.scratch-v1 :as scratch]
+(ns hara.runtime.postgres.runtime.graph-base-test
+  (:require [hara.runtime.postgres.base.application :as app]
+            [hara.runtime.postgres.runtime.graph-base :as base]
+            [hara.runtime.postgres.runtime.impl-base :as impl]
+            [hara.runtime.postgres.test.scratch-v1 :as scratch]
             [hara.lang :as l]
             [std.lib.schema :as schema])
   (:use code.test))
 
 (l/script- :postgres
-  {:require [[hara.rt.postgres.test.scratch-v1 :as scratch]]
+  {:require [[hara.runtime.postgres.test.scratch-v1 :as scratch]]
    :static {:application ["scratch"]
             :seed        ["scratch"]
             :all    {:schema   ["scratch"]}}})
@@ -17,7 +17,7 @@
                    [:schema
                     :tree]))
 
-^{:refer hara.rt.postgres.runtime.graph-base/where-pair-ref :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.graph-base/where-pair-ref :added "4.0"}
 (fact "constructs the where ref pair"
 
   ;; FORWARD
@@ -33,10 +33,10 @@
                        (first (get-in -sch- [:TaskCache :tasks]))
                        (last (impl/prep-table 'scratch/TaskCache true (l/rt:macro-opts :postgres))))
   => '[:id [:in [:select (--- [#{"cache_id"}])
-                 :from hara.rt.postgres.test.scratch-v1/Task
+                 :from hara.runtime.postgres.test.scratch-v1/Task
                  \\ :where {"id" [:eq "tasks-001"]}]]])
 
-^{:refer hara.rt.postgres.runtime.graph-base/where-pair-fn :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.graph-base/where-pair-fn :added "4.0"}
 (fact "constructs the where pair"
 
   (base/where-pair-fn [:id "hello"]
@@ -56,10 +56,10 @@
                       (get-in -sch- [:TaskCache])
                       (last (impl/prep-table 'scratch/TaskCache true (l/rt:macro-opts :postgres))))
   => '[:id [:in [:select (--- [#{"cache_id"}])
-                 :from hara.rt.postgres.test.scratch-v1/Task
+                 :from hara.runtime.postgres.test.scratch-v1/Task
                  \\ :where {"id" [:eq "tasks-001"]}]]])
 
-^{:refer hara.rt.postgres.runtime.graph-base/where-fn :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.graph-base/where-fn :added "4.0"}
 (fact "constructs where clause"
 
   (base/where-fn (get-in -sch- [:Task])
@@ -71,20 +71,20 @@
   (base/where-fn (get-in -sch- [:TaskCache])
                  {:tasks "tasks-001"}
                  (last (impl/prep-table 'scratch/TaskCache true (l/rt:macro-opts :postgres))))
-  => '{:id [:in [:select (--- [#{"cache_id"}]) :from hara.rt.postgres.test.scratch-v1/Task
+  => '{:id [:in [:select (--- [#{"cache_id"}]) :from hara.runtime.postgres.test.scratch-v1/Task
                  \\ :where {"id" [:eq "tasks-001"]}]]}
 
   (base/where-fn (get-in -sch- [:TaskCache])
                  #{[:tasks "tasks-001"]}
                  (last (impl/prep-table 'scratch/TaskCache true (l/rt:macro-opts :postgres))))
-  => '#{[:id [:in [:select (--- [#{"cache_id"}]) :from hara.rt.postgres.test.scratch-v1/Task
+  => '#{[:id [:in [:select (--- [#{"cache_id"}]) :from hara.runtime.postgres.test.scratch-v1/Task
                    \\ :where {"id" [:eq "tasks-001"]}]]]}
 
   (base/where-fn (get-in -sch- [:TaskCache])
                  {:tasks "tasks-001"
                   :id "hello"}
                  (last (impl/prep-table 'scratch/TaskCache true (l/rt:macro-opts :postgres))))
-  => '#{[:id [:in [:select (--- [#{"cache_id"}]) :from hara.rt.postgres.test.scratch-v1/Task
+  => '#{[:id [:in [:select (--- [#{"cache_id"}]) :from hara.runtime.postgres.test.scratch-v1/Task
                   \\ :where {"id" [:eq "tasks-001"]}]]
          :id [:eq "hello"]]}
 
@@ -92,7 +92,7 @@
                  #{[:tasks "tasks-001"
                     :id "hello"]}
                  (last (impl/prep-table 'scratch/TaskCache true (l/rt:macro-opts :postgres))))
-  => '#{[:id [:in [:select (--- [#{"cache_id"}]) :from hara.rt.postgres.test.scratch-v1/Task
+  => '#{[:id [:in [:select (--- [#{"cache_id"}]) :from hara.runtime.postgres.test.scratch-v1/Task
                    \\ :where {"id" [:eq "tasks-001"]}]]
          :and
          :id [:eq "hello"]]}
@@ -105,57 +105,57 @@
   (base/where-fn (get-in -sch- [:Task])
                  {:cache {:tasks {:cache "cache-001"}}}
                  (last (impl/prep-table 'scratch/Task true (l/rt:macro-opts :postgres))))
-  => '{:cache [:in [:select (--- [#{"id"}]) :from hara.rt.postgres.test.scratch-v1/TaskCache
+  => '{:cache [:in [:select (--- [#{"id"}]) :from hara.runtime.postgres.test.scratch-v1/TaskCache
                    \\ :where {"id" [:in [:select (--- [#{"cache_id"}])
-                                         :from hara.rt.postgres.test.scratch-v1/Task
+                                         :from hara.runtime.postgres.test.scratch-v1/Task
                                          \\ :where {"cache_id" [:eq "cache-001"]}]]}]]})
 
-^{:refer hara.rt.postgres.runtime.graph-base/id-where-fn :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.graph-base/id-where-fn :added "4.0"}
 (fact "constructs id-fn"
 
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (base/id-where-fn 'scratch/TaskCache
                 {:where {:tasks "tasks-001"}}))
-  => '[{:id [:in [:select (--- [#{"cache_id"}]) :from hara.rt.postgres.test.scratch-v1/Task \\ :where {"id" [:eq "tasks-001"]}]]}]
+  => '[{:id [:in [:select (--- [#{"cache_id"}]) :from hara.runtime.postgres.test.scratch-v1/Task \\ :where {"id" [:eq "tasks-001"]}]]}]
 
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (base/id-where-fn 'scratch/Task
                       {:where {:cache "tasks-001"}}))
   => [{:cache_id [:eq "tasks-001"]}])
 
-^{:refer hara.rt.postgres.runtime.graph-base/id-fn :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.graph-base/id-fn :added "4.0"}
 (fact "constructs id-fn"
 
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (base/id-fn 'scratch/TaskCache
                 {:where {:tasks "tasks-001"}}))
-  => '[:select (--- [#{"id"}]) :from hara.rt.postgres.test.scratch-v1/TaskCache
-       \\ :where {"id" [:in [:select (--- [#{"cache_id"}]) :from hara.rt.postgres.test.scratch-v1/Task
+  => '[:select (--- [#{"id"}]) :from hara.runtime.postgres.test.scratch-v1/TaskCache
+       \\ :where {"id" [:in [:select (--- [#{"cache_id"}]) :from hara.runtime.postgres.test.scratch-v1/Task
                              \\ :where {"id" [:eq "tasks-001"]}]]}
        \\ :limit 1])
 
-^{:refer hara.rt.postgres.runtime.graph-base/count-fn :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.graph-base/count-fn :added "4.0"}
 (fact "constructs count-fn"
 
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (base/count-fn 'scratch/TaskCache
                    {:where {:tasks "tasks-001"}}))
   => '[:select (count *) :from
-       hara.rt.postgres.test.scratch-v1/TaskCache
+       hara.runtime.postgres.test.scratch-v1/TaskCache
        \\ :where {"id" [:in [:select (--- [#{"cache_id"}])
                              :from
-                             hara.rt.postgres.test.scratch-v1/Task
+                             hara.runtime.postgres.test.scratch-v1/Task
                              \\ :where
                              {"id" [:eq "tasks-001"]}]]}])
 
-^{:refer hara.rt.postgres.runtime.graph-base/exists-fn :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.graph-base/exists-fn :added "4.0"}
 (fact "constructs exists-fn"
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (base/exists-fn 'scratch/TaskCache
                     {:where {:tasks "tasks-001"}}))
   => vector?)
 
-^{:refer hara.rt.postgres.runtime.graph-base/select-fn-raw :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.graph-base/select-fn-raw :added "4.0"}
 (fact "constructs a select fn with prep"
 
   (base/select-fn-raw
@@ -163,13 +163,13 @@
    {:where {:tasks "tasks-001"}})
   => '[:with j-ret
        :as [:select (--- [#{"id"} #{"time_created"} #{"time_updated"}])
-            :from hara.rt.postgres.test.scratch-v1/TaskCache
+            :from hara.runtime.postgres.test.scratch-v1/TaskCache
             \\ :where {"id" [:in [:select (--- [#{"cache_id"}])
-                                  :from hara.rt.postgres.test.scratch-v1/Task
+                                  :from hara.runtime.postgres.test.scratch-v1/Task
                                   \\ :where {"id" [:eq "tasks-001"]}]]}]
        \\ :select (jsonb-agg j-ret) :from j-ret])
 
-^{:refer hara.rt.postgres.runtime.graph-base/select-fn :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.graph-base/select-fn :added "4.0"}
 (fact "constructs a select fn"
 
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
@@ -177,26 +177,26 @@
                     {:where {:tasks "tasks-001"}}))
   => '[:with j-ret
        :as [:select (--- [#{"id"} #{"time_created"} #{"time_updated"}])
-            :from hara.rt.postgres.test.scratch-v1/TaskCache
+            :from hara.runtime.postgres.test.scratch-v1/TaskCache
             \\ :where {"id" [:in [:select (--- [#{"cache_id"}])
-                                  :from hara.rt.postgres.test.scratch-v1/Task
+                                  :from hara.runtime.postgres.test.scratch-v1/Task
                                   \\ :where {"id" [:eq "tasks-001"]}]]}]
        \\ :select (jsonb-agg j-ret) :from j-ret])
 
-^{:refer hara.rt.postgres.runtime.graph-base/delete-fn :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.graph-base/delete-fn :added "4.0"}
 (fact "constructs a delete fn"
 
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (base/delete-fn 'scratch/TaskCache
                     {:where {:tasks "tasks-001"}}))
-  => '[:with j-ret :as [:delete :from hara.rt.postgres.test.scratch-v1/TaskCache
+  => '[:with j-ret :as [:delete :from hara.runtime.postgres.test.scratch-v1/TaskCache
                         :where {"id" [:in [:select (--- [#{"cache_id"}])
-                                           :from hara.rt.postgres.test.scratch-v1/Task
+                                           :from hara.runtime.postgres.test.scratch-v1/Task
                                            \\ :where {"id" [:eq "tasks-001"]}]]}
                        \\ :returning (--- [#{"id"} #{"op_created"} #{"op_updated"} #{"time_created"} #{"time_updated"}])]
        \\ :select (jsonb-agg j-ret) :from j-ret])
 
-^{:refer hara.rt.postgres.runtime.graph-base/update-fn :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.graph-base/update-fn :added "4.0"}
 (fact "constructs an update fn"
 
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
@@ -205,17 +205,17 @@
                      :where {:tasks "tasks-001"}
                      :track 'o-op}))
   => '[:with j-ret :as
-       [:update hara.rt.postgres.test.scratch-v1/TaskCache
+       [:update hara.runtime.postgres.test.scratch-v1/TaskCache
         :set (--- [(== #{"op_updated"} (:uuid (:->> o-op "id")))
                      (== #{"time_created"} (:bigint 0))
                      (== #{"time_updated"} (:bigint (:->> o-op "time")))])
         :where {"id" [:in [:select (--- [#{"cache_id"}])
-                              :from hara.rt.postgres.test.scratch-v1/Task
+                              :from hara.runtime.postgres.test.scratch-v1/Task
                               \\ :where {"id" [:eq "tasks-001"]}]]}
         \\ :returning (--- [#{"id"} #{"time_created"} #{"time_updated"}])]
        \\ :select (jsonb-agg j-ret) :from j-ret])
 
-^{:refer hara.rt.postgres.runtime.graph-base/modify-fn :added "4.0"}
+^{:refer hara.runtime.postgres.runtime.graph-base/modify-fn :added "4.0"}
 (fact "constructs an modify fn"
 
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
@@ -223,13 +223,13 @@
                     {:set {:time-created 0}
                      :where {:tasks "tasks-001"}
                      :track 'o-op}))
-  => '(let [(++ u-ret hara.rt.postgres.test.scratch-v1/TaskCache)
-            [:update hara.rt.postgres.test.scratch-v1/TaskCache
+  => '(let [(++ u-ret hara.runtime.postgres.test.scratch-v1/TaskCache)
+            [:update hara.runtime.postgres.test.scratch-v1/TaskCache
              :set (--- [(== #{"op_updated"} (:uuid (:->> o-op "id")))
                           (== #{"time_created"} (:bigint 0))
                           (== #{"time_updated"} (:bigint (:->> o-op "time")))])
              :where {"id" [:in [:select (--- [#{"cache_id"}])
-                                   :from hara.rt.postgres.test.scratch-v1/Task
+                                   :from hara.runtime.postgres.test.scratch-v1/Task
                                 \\ :where {"id" [:eq "tasks-001"]}]]}
              \\ :returning * :into u-ret]
             _ (if [:not (exists [:select u-ret])]

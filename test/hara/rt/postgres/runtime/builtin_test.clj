@@ -1,8 +1,8 @@
-(ns hara.rt.postgres.runtime.builtin-test
+(ns hara.runtime.postgres.runtime.builtin-test
   (:use code.test)
-  (:require [hara.rt.postgres.runtime.builtin :as builtin]))
+  (:require [hara.runtime.postgres.runtime.builtin :as builtin]))
 
-^{:refer hara.rt.postgres.runtime.builtin/pg-tmpl :added "4.1"}
+^{:refer hara.runtime.postgres.runtime.builtin/pg-tmpl :added "4.1"}
 (fact "create a postgres template"
 
   (builtin/pg-tmpl 'hello)
