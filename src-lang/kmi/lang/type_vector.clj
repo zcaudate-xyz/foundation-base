@@ -6,6 +6,8 @@
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
              [xt.lang.common-data :as xtd]
+             [xt.lang.common-protocol :as proto]
+             [kmi.protocol.common :as kproto]
              [kmi.lang.interface-common :as interface-common]
              [kmi.lang.interface-spec :as spec]
              [kmi.lang.interface-collection :as interface-collection]
@@ -279,33 +281,33 @@
 ;;
 
 (def.xt VECTOR_SPEC
-  [[spec/IColl   {:_start_string  "["
-                  :_end_string    "]"
-                  :_sep_string    ", "
-                  :_is_ordered    true
-                  :to-iter  -/vector-to-iter
-                  :to-array -/vector-to-array}]
-   [spec/IEdit   {:is-mutable -/vector-is-editable
-                  :to-mutable -/vector-to-mutable!
-                  :is-persistent (fn:> [vector] (not (-/vector-is-editable vector)))
-                  :to-persistent -/vector-to-persistent!}]
-   [spec/IEmpty  {:empty  -/vector-empty}]
-   [spec/IEq     {:eq     interface-collection/coll-eq}]    
-   [spec/IHash   {:hash   (interface-common/wrap-with-cache
-                           interface-collection/coll-hash-ordered
-                           -/vector-is-editable)}]
-   [spec/IFind   {:find  -/vector-find-idx}]
-   [spec/IPush   {:push  -/vector-push-last}]
-   [spec/IPushMutable   {:push-mutable   -/vector-push-last!}]
-   [spec/IPop    {:pop    -/vector-pop-last}]
-   [spec/IPopMutable    {:pop-mutable    -/vector-pop-last!}]
-   [spec/INth    {:nth  -/vector-get-idx}]
-   [spec/ISize   {:size   interface-collection/coll-size}]
-   [spec/IShow   {:show   interface-collection/coll-show}]])
+   [[kproto/IColl   {:_start_string  "["
+                     :_end_string    "]"
+                     :_sep_string    ", "
+                     :_is_ordered    true
+                     :to-iter  -/vector-to-iter
+                     :to-array -/vector-to-array}]
+    [kproto/IEdit   {:is-mutable -/vector-is-editable
+                     :to-mutable -/vector-to-mutable!
+                     :is-persistent (fn:> [vector] (not (-/vector-is-editable vector)))
+                     :to-persistent -/vector-to-persistent!}]
+    [kproto/IEmpty  {:empty  -/vector-empty}]
+    [kproto/IEq     {:eq     interface-collection/coll-eq}]
+    [kproto/IHash   {:hash   (interface-common/wrap-with-cache
+                              interface-collection/coll-hash-ordered
+                              -/vector-is-editable)}]
+    [kproto/IFind   {:find  -/vector-find-idx}]
+    [kproto/IPush   {:push  -/vector-push-last}]
+    [kproto/IPushMutable   {:push-mutable   -/vector-push-last!}]
+    [kproto/IPop    {:pop    -/vector-pop-last}]
+    [kproto/IPopMutable    {:pop-mutable    -/vector-pop-last!}]
+    [kproto/INth    {:nth  -/vector-get-idx}]
+    [kproto/ISize   {:size   interface-collection/coll-size}]
+    [kproto/IShow   {:show   interface-collection/coll-show}]])
 
 (def.xt VECTOR_PROTOTYPE
   (-> -/VECTOR_SPEC
-      (spec/proto-spec)
+      (proto/proto-spec)
       (spec/proto-create)))
 
 (defn.xt vector-create

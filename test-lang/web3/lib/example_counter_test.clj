@@ -8,9 +8,9 @@
              [web3.lib.example-counter :as counter]]})
 
 (fact:global
- {:setup [(do (s/rt:stop-ganache-server)
+ {:setup [(do (s/rt:stop-hardhat-server)
               (Thread/sleep 1000)
-              (s/rt:start-ganache-server)
+              (s/rt:start-hardhat-server)
               (Thread/sleep 500)
               (l/rt:restart))]
   :teardown [(l/rt:stop)]})

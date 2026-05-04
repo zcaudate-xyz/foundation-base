@@ -47,7 +47,9 @@
   "gets the format string given entry"
   {:added "4.0"}
   [entry]
-  (let [return-type (:- (meta (second (:form entry))))]
+  (let [form (or (:form entry)
+                 (:form-input entry))
+        return-type (:- (meta (second form)))]
     (or (get FORMAT return-type)
         "\"%s\"")))
 

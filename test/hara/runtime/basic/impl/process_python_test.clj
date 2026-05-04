@@ -30,6 +30,16 @@
   (default-oneshot-wrap 1)
   => string?)
 
+^{:refer hara.runtime.basic.impl.process-python/default-basic-client :added "4.1"}
+(fact "buffers utf-8 bytes before decoding in the basic client loop"
+
+  (let [out (default-basic-client 19000)]
+    [(boolean (re-find #"buf = bytearray\(\)" out))
+     (boolean (re-find #"buf\.extend\(ch\)" out))
+     (boolean (re-find #"buf\.decode\(\"utf-8\"\)" out))
+     (boolean (re-find #"out\.encode\(\"utf-8\"\)" out))])
+  => [true true true true])
+
 ^{:refer hara.runtime.basic.impl.process-python/default-body-wrap :added "4.0"}
 (fact "creates the scaffolding for the runtime eval to work"
 
@@ -42,7 +52,13 @@
               (return (+ 1 2 3))
               (catch Exception (:= err (. traceback (format-exc)))))
             (throw (Exception err)))
-          (:= (. (globals) ["OUT"]) (OUT-FN))))
+           (:= (. (globals) ["OUT"]) (OUT-FN))))
+
+(fact "preserves utf-8 output across the basic runtime bridge"
+
+  (l/! [:py.0]
+    "Δ")
+  => "Δ")
 
 ^{:refer hara.runtime.basic.impl.process-python/default-body-transform :added "4.0"}
 (fact "standard python transforms"

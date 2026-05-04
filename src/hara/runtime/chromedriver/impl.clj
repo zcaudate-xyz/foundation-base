@@ -1,9 +1,11 @@
 (ns hara.runtime.chromedriver.impl
   (:require [std.protocol.context :as protocol.context]
+            [clojure.java.io :as io]
             [hara.lang.pointer :as ptr]
             [hara.lang.impl :as impl]
             [hara.lang.runtime :as default]
             [hara.lang.type-shared :as shared]
+            [hara.runtime.basic.type-common :as common]
             [std.lib.encode :as encode]
             [std.lib :as h :refer [defimpl]]
             [std.json :as json]
@@ -16,9 +18,37 @@
             [hara.runtime.chromedriver.util :as util]
             [xt.lang.common-lib :as lib]))
 
-(def ^:dynamic *chrome*
+(defn- playwright-browser-paths
+  []
+  (let [root (io/file (System/getProperty "user.home")
+                      ".cache"
+                      "ms-playwright")]
+    (if (.exists root)
+      (->> (file-seq root)
+           (filter #(.isFile ^java.io.File %))
+           (map #(.getAbsolutePath ^java.io.File %))
+           (filter (fn [path]
+                     (or (.endsWith path "/chrome")
+                         (.endsWith path "/chrome-headless-shell"))))
+           sort)
+      [])))
+
+(defn- resolve-chrome
+  []
   (or (System/getenv "CHROME")
+      (some (fn [cmd]
+              (when (common/program-exists? cmd)
+                cmd))
+            ["google-chrome-stable"
+             "google-chrome"
+             "chromium"
+             "chromium-browser"
+             "chrome-headless-shell"])
+      (first (playwright-browser-paths))
       "chromium"))
+
+(def ^:dynamic *chrome*
+  (resolve-chrome))
 
 (def +bootstrap+
   (impl/emit-entry-deps

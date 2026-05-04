@@ -65,16 +65,16 @@
 (defn ^String jep-bootstrap
   "returns the jep runtime
  
-   (jep-bootstrap)
-   => (any string?
-           throws)"
+    (jep-bootstrap)
+    => (any string?
+            throws)"
   {:added "3.0"}
   ([]
-   (jep-bootstrap {:install true}))
+   (jep-bootstrap {:install false}))
   ([opts]
    (let [path (fs/create-tmpfile (clojure.string/join "\n" (bootstrap-code opts)))
-          process  (os/sh *python* (str path) {:wait true :output false :inherit false})
-          {:keys [exit out err]} (os/sh-output process)]
+           process  (os/sh *python* (str path) {:wait true :output false :inherit false})
+           {:keys [exit out err]} (os/sh-output process)]
       (if (zero? exit)
         (last (clojure.string/split-lines (clojure.string/trim out)))
         (let [message (->> [out err]
@@ -101,11 +101,11 @@
   "sets the path of the jep interpreter"
   {:added "3.0"}
   ([]
-   (let [jep  (jep-bootstrap)
-         root (clojure.string/replace jep #"/jep/libjep.*" "")]
-     (MainInterpreter/setJepLibraryPath jep)
-     (SharedInterpreter/setConfig
-      (-> (jep.JepConfig.)
+    (let [jep  (jep-bootstrap {:install false})
+          root (clojure.string/replace jep #"/jep/libjep.*" "")]
+      (MainInterpreter/setJepLibraryPath jep)
+      (SharedInterpreter/setConfig
+       (-> (jep.JepConfig.)
           (.addIncludePaths (into-array [root])))))))
 
 (defonce +init+ (delay (init-paths)))

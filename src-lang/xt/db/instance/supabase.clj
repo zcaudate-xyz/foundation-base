@@ -110,11 +110,12 @@
                (not (xt/x:is-array? value)))
           (-/compile-filters-into path value out)
 
-          (and (xt/x:is-array? value)
-               (== "in" (xt/x:first value)))
-          (xt/x:arr-push out {"path" path
-                              "op" "in"
-                              "value" (xtd/get-in value [1 0])})
+           (and (xt/x:is-array? value)
+                (== "in" (xt/x:first value)))
+           (do (var in-values (xt/x:first (xt/x:second value)))
+               (xt/x:arr-push out {"path" path
+                                   "op" "in"
+                                   "value" in-values}))
 
           :else
           (xt/x:arr-push out {"path" path
@@ -128,16 +129,36 @@
   [query-plan]
   (var table (xt/x:first query-plan))
   (var second (xt/x:second query-plan))
-  (var third  (xt/x:get-idx query-plan 2))
+  (var third  (xt/x:last query-plan))
   (var where (:? (xt/x:is-object? second)
                  second
                  {}))
   (var returning (:? (xt/x:is-object? second)
                      third
                      second))
-   (return {"table" table
+  (return {"table" table
             "select" (-/compile-select returning)
             "filters" (-/compile-filters-into "" where [])}))
+
+(defn.xt invoke-method-1
+  "invokes a method by key with one argument"
+  {:added "4.1"}
+  [obj method arg]
+  (var f (xt/x:get-key obj method))
+  (when (not (xt/x:is-function? f))
+    (xt/x:err (xt/x:cat "supabase method not found - "
+                        method)))
+  (return (f arg)))
+
+(defn.xt invoke-method-2
+  "invokes a method by key with two arguments"
+  {:added "4.1"}
+  [obj method arg1 arg2]
+  (var f (xt/x:get-key obj method))
+  (when (not (xt/x:is-function? f))
+    (xt/x:err (xt/x:cat "supabase method not found - "
+                        method)))
+  (return (f arg1 arg2)))
 
 (defn.xt apply-filter
   "applies one compiled filter to a Supabase query builder"
@@ -147,43 +168,43 @@
   (var op    (xt/x:get-key filter "op"))
   (var value (xt/x:get-key filter "value"))
   (cond (== op "eq")
-        (return (. query (eq path value)))
+        (return (-/invoke-method-2 query "eq" path value))
 
         (== op "neq")
-        (return (. query (neq path value)))
+        (return (-/invoke-method-2 query "neq" path value))
 
         (== op "gt")
-        (return (. query (gt path value)))
+        (return (-/invoke-method-2 query "gt" path value))
 
         (== op "gte")
-        (return (. query (gte path value)))
+        (return (-/invoke-method-2 query "gte" path value))
 
         (== op "lt")
-        (return (. query (lt path value)))
+        (return (-/invoke-method-2 query "lt" path value))
 
         (== op "lte")
-        (return (. query (lte path value)))
+        (return (-/invoke-method-2 query "lte" path value))
 
         (== op "like")
-        (return (. query (like path value)))
+        (return (-/invoke-method-2 query "like" path value))
 
         (== op "ilike")
-        (return (. query (ilike path value)))
+        (return (-/invoke-method-2 query "ilike" path value))
 
         (== op "is")
-        (return (. query (is path value)))
+        (return (-/invoke-method-2 query "is" path value))
 
         (== op "in")
-        (return (. query (in path value)))
+        (return (-/invoke-method-2 query "in" path value))
 
         (== op "contains")
-        (return (. query (contains path value)))
+        (return (-/invoke-method-2 query "contains" path value))
 
         (== op "containedBy")
-        (return (. query (containedBy path value)))
+        (return (-/invoke-method-2 query "containedBy" path value))
 
         (== op "match")
-        (return (. query (match value)))
+        (return (-/invoke-method-1 query "match" value))
 
         :else
         (xt/x:err (xt/x:cat "unsupported supabase filter op - "
@@ -208,12 +229,14 @@
   (var schema-name (-/resolve-schema-name db opts))
   (var query (:? (and (xt/x:not-nil? schema-name)
                       (xt/x:is-function? (xt/x:get-key client "schema")))
-                  (. client (schema schema-name))
+                  (-/invoke-method-1 client "schema" schema-name)
                   client))
-  (:= query (. query (from (xt/x:get-key compiled "table"))))
-  (:= query (. query (select (:? (xtd/not-empty? (xt/x:get-key compiled "select"))
-                                 (xt/x:get-key compiled "select")
-                                 "*"))))
+  (:= query (-/invoke-method-1 query "from" (xt/x:get-key compiled "table")))
+  (:= query (-/invoke-method-1 query
+                               "select"
+                               (:? (xtd/not-empty? (xt/x:get-key compiled "select"))
+                                   (xt/x:get-key compiled "select")
+                                   "*")))
   (return (-/apply-filters query
                            (xt/x:get-key compiled "filters"))))
 
@@ -291,13 +314,15 @@
   (var output (-/execute-query db compiled opts))
   (if (-/thenable? output)
     (do (var chained
-             (. output
-                (then (fn [result]
-                        (return (-/unwrap-query-output db result opts))))))
+             (-/invoke-method-1 output
+                                "then"
+                                (fn [result]
+                                  (return (-/unwrap-query-output db result opts)))))
         (if (xt/x:is-function? (xt/x:get-key chained "catch"))
           (return
-           (. chained
-              (catch (fn [err]
-                       (return (-/map-supabase-error db err opts))))))
+           (-/invoke-method-1 chained
+                              "catch"
+                              (fn [err]
+                                (return (-/map-supabase-error db err opts)))))
           (return chained)))
     (return (-/unwrap-query-output db output opts))))

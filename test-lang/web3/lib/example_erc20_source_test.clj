@@ -1,5 +1,5 @@
 (ns web3.lib.example-erc20-source-test
-  (:require [hara.runtime.solidity.env-ganache :as env]
+  (:require [hara.runtime.solidity.env-hardhat :as env]
             [hara.lang :as l])
   (:use code.test))
 
@@ -10,10 +10,10 @@
              [web3.lib.example-erc20 :as erc20]]})
 
 (fact:global
- {:setup [(s/rt:stop-ganache-server)
-          (Thread/sleep 1000)
-          (s/rt:start-ganache-server)
-          (Thread/sleep 500)
+  {:setup [(s/rt:stop-hardhat-server)
+           (Thread/sleep 1000)
+           (s/rt:start-hardhat-server)
+           (Thread/sleep 500)
           (l/rt:restart)
           (s/with:params {:caller-address (second env/+default-addresses+)
                           :caller-private-key (second env/+default-private-keys+)}

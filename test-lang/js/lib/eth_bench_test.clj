@@ -1,7 +1,7 @@
 (ns js.lib.eth-bench-test
-  (:require [hara.runtime.solidity :as solidity]
+  (:require [solidity.core :as solidity]
             [hara.runtime.solidity.compile-solc :as compile-solc]
-            [hara.runtime.solidity.env-ganache :as env-ganache]
+            [hara.runtime.solidity.env-hardhat :as env-hardhat]
             [hara.lang :as l]
             [web3.lib.example-counter :as example-counter])
   (:use code.test))
@@ -16,9 +16,9 @@
                 [js.core :as j]]})
 
 (fact:global
- {:setup    [(solidity/rt:stop-ganache-server)
+ {:setup    [(solidity/rt:stop-hardhat-server)
              (Thread/sleep 1000)
-             (solidity/rt:start-ganache-server)
+             (solidity/rt:start-hardhat-server)
              (Thread/sleep 3000)
              (l/rt:restart)
               (l/rt:scaffold :js)]
@@ -36,7 +36,7 @@
 
   (j/<!
    (e/contract-deploy "http://127.0.0.1:8545"
-                      (@! (last env-ganache/+default-private-keys+))
+                      (@! (last env-hardhat/+default-private-keys+))
                       (@! (:abi +contract+))
                       (@! (:bytecode +contract+))
                       []
@@ -47,7 +47,7 @@
 
   (j/<!
    (e/contract-deploy "http://127.0.0.1:8545"
-                      (@! (last env-ganache/+default-private-keys+))
+                      (@! (last env-hardhat/+default-private-keys+))
                       (@! (:abi +contract+))
                       (@! (:bytecode +contract+))
                       [1 2 3]
@@ -63,7 +63,7 @@
           (def +address+
              (j/<!
               (e/contract-deploy "http://127.0.0.1:8545"
-                       (@! (last env-ganache/+default-private-keys+))
+                       (@! (last env-hardhat/+default-private-keys+))
                        (@! (:abi +contract+))
                        (@! (:bytecode +contract+))
                        []
@@ -73,7 +73,7 @@
 (fact "runs the contract given address and arguments"
 
   (j/<! (e/contract-run "http://127.0.0.1:8545"
-                        (@! (last env-ganache/+default-private-keys+))
+                        (@! (last env-hardhat/+default-private-keys+))
                         (@! +address+)
                         (@! (:abi +contract+))
                         "m__inc_both"
@@ -82,7 +82,7 @@
   => map?
 
   (j/<! (e/contract-run "http://127.0.0.1:8545"
-                        (@! (last env-ganache/+default-private-keys+))
+                        (@! (last env-hardhat/+default-private-keys+))
                         (@! +address+)
                         (@! (:abi +contract+))
                         "g__Counter0"
@@ -99,7 +99,7 @@
           (def +address+
              (j/<!
               (e/contract-deploy "http://127.0.0.1:8545"
-                        (@! (last env-ganache/+default-private-keys+))
+                        (@! (last env-hardhat/+default-private-keys+))
                         (@! (:abi +contract+))
                         (@! (:bytecode +contract+))
                         []
@@ -107,7 +107,7 @@
                (fn [m]
                  (return (xt/x:get-key m "contractAddress")))))
           (j/<! (e/contract-run "http://127.0.0.1:8545"
-                        (@! (last env-ganache/+default-private-keys+))
+                        (@! (last env-hardhat/+default-private-keys+))
                         (@! +address+)
                         (@! (:abi +contract+))
                         "m__inc_both"

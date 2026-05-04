@@ -25,7 +25,7 @@
     "ecpair": "^3.0.1",
     "ethers": "^6.16.0",
     "fastify": "^5.8.4",
-    "ganache": "^7.9.2",
+    "hardhat": "^2.22.19",
     "javascript-time-ago": "^2.6.4",
     "node-fetch": "^3.3.2",
     "node-localstorage": "^2.2.1",

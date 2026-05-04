@@ -60,7 +60,7 @@
 
   @(conn/send +conn+ "Target.closeTarget"
               {:targetId (:target-id +conn+)})
-  => nil?)
+  => {"success" true})
 
 ^{:refer hara.runtime.chromedriver.connection/ws-url :added "4.0"}
 (fact "gets the ws-url"

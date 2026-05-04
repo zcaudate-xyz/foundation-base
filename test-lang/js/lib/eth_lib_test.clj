@@ -1,7 +1,7 @@
 (ns js.lib.eth-lib-test
-  (:require [hara.runtime.solidity :as s]
+  (:require [solidity.core :as s]
             [hara.runtime.solidity.compile-solc :as compile-solc]
-            [hara.runtime.solidity.env-ganache :as env-ganache]
+            [hara.runtime.solidity.env-hardhat :as env-hardhat]
             [hara.lang :as l]
             [web3.lib.example-counter :as example-counter]
             [xt.lang.common-notify :as notify])
@@ -19,9 +19,9 @@
              [js.core :as j]]})
 
 (fact:global
-  {:setup    [(s/rt:stop-ganache-server)
+  {:setup    [(s/rt:stop-hardhat-server)
               (Thread/sleep 1000)
-              (s/rt:start-ganache-server)
+              (s/rt:start-hardhat-server)
               (Thread/sleep 3000)
               (do (l/rt:restart)
                   (l/rt:scaffold :js))]
@@ -112,7 +112,7 @@
   (j/<!
    (e/getAddress
     (e/new-wallet
-     (@! (last env-ganache/+default-private-keys+))
+     (@! (last env-hardhat/+default-private-keys+))
      (e/new-rpc-provider "http://127.0.0.1:8545"))))
   => "0x001Dc339B1E9B9D443bcd39F9d5114390Bc43aCD")
 
@@ -138,7 +138,7 @@
       (e/new-contract "0x94e3361495bD110114ac0b6e35Ed75E77E6a6cFA"
                       (@! (:abi +contract+))
                       (e/get-signer "http://127.0.0.1:8545"
-                                    (@! (last env-ganache/+default-private-keys+)))))))
+                                    (@! (last env-hardhat/+default-private-keys+)))))))
   => #{"interface" "filters" "runner" "fallback" "target"})
 
 ^{:refer js.lib.eth-lib/new-contract-factory :added "4.0" :unchecked true
@@ -154,7 +154,7 @@
      (@! (:abi +contract+))
      (@! (:bytecode +contract+))
      (e/get-signer "http://127.0.0.1:8545"
-                   (@! (last env-ganache/+default-private-keys+))))))
+                   (@! (last env-hardhat/+default-private-keys+))))))
   => ["interface" "bytecode" "runner"])
 
 ^{:refer js.lib.eth-lib/get-signer :added "4.0" :unchecked true}
@@ -163,7 +163,7 @@
   (j/<!
    (xtd/obj-keys
     (e/get-signer "http://127.0.0.1:8545"
-                  (@! (last env-ganache/+default-private-keys+)))))
+                  (@! (last env-hardhat/+default-private-keys+)))))
   => ["provider" "address"])
 
 ^{:refer js.lib.eth-lib/get-signer-address :added "4.0" :unchecked true}
@@ -171,16 +171,16 @@
 
   (j/<!
    (e/get-signer-address "http://127.0.0.1:8545"
-                         (@! (last env-ganache/+default-private-keys+))))
-  => (last env-ganache/+default-addresses-raw+))
+                         (@! (last env-hardhat/+default-private-keys+))))
+  => (last env-hardhat/+default-addresses-raw+))
 
 ^{:refer js.lib.eth-lib/send-wei :added "4.0" :unchecked true}
 (fact "gets wei to account"
 
   (j/<!
    (e/send-wei (e/get-signer "http://127.0.0.1:8545"
-                             (@! (last env-ganache/+default-private-keys+)))
-               (@! (first env-ganache/+default-addresses+))
+                             (@! (last env-hardhat/+default-private-keys+)))
+               (@! (first env-hardhat/+default-addresses+))
                1000000))
   => (contains-in
       {"gasLimit" any
@@ -191,14 +191,14 @@
   (bigint
    (j/<!
     (e/getBalance (e/new-rpc-provider "http://127.0.0.1:8545")
-                  (@! (first env-ganache/+default-addresses+)))
+                  (@! (first env-hardhat/+default-addresses+)))
     j/toString))
   => integer?
 
   (bigint
    (j/<!
     (e/getBalance (e/new-rpc-provider "http://127.0.0.1:8545")
-                  (@! (last env-ganache/+default-addresses+)))
+                  (@! (last env-hardhat/+default-addresses+)))
     j/toString))
   => integer?)
 
@@ -211,7 +211,7 @@
 
    (j/<!
     (e/contract-deploy (e/get-signer "http://127.0.0.1:8545"
-                                     (@! (last env-ganache/+default-private-keys+)))
+                                     (@! (last env-hardhat/+default-private-keys+)))
                        (@! (:abi +contract+))
                        (@! (:bytecode +contract+))
                        []
@@ -228,7 +228,7 @@
           (def +address+
              (j/<!
               (e/contract-deploy (e/get-signer "http://127.0.0.1:8545"
-                                               (@! (last env-ganache/+default-private-keys+)))
+                                               (@! (last env-hardhat/+default-private-keys+)))
                                  (@! (:abi +contract+))
                                  (@! (:bytecode +contract+))
                                  []
@@ -238,7 +238,7 @@
 (fact "runs the contract"
 
   (j/<! (e/contract-run (e/get-signer "http://127.0.0.1:8545"
-                                      (@! (last env-ganache/+default-private-keys+)))
+                                      (@! (last env-hardhat/+default-private-keys+)))
                         (@! +address+)
                         (@! (:abi +contract+))
                         "m__inc_both"
@@ -246,7 +246,7 @@
                         nil))
 
   (j/<! (e/contract-run (e/get-signer "http://127.0.0.1:8545"
-                                      (@! (last env-ganache/+default-private-keys+)))
+                                      (@! (last env-hardhat/+default-private-keys+)))
                         (@! +address+)
                         (@! (:abi +contract+))
                         "g__Counter0"
@@ -263,7 +263,7 @@
           (def +address+
              (j/<!
               (e/contract-deploy (e/get-signer "http://127.0.0.1:8545"
-                                               (@! (last env-ganache/+default-private-keys+)))
+                                               (@! (last env-hardhat/+default-private-keys+)))
                                  (@! (:abi +contract+))
                                  (@! (:bytecode +contract+))
                                  []
@@ -282,7 +282,7 @@
                                      (repl/notify [block b]))))))
        (then (fn:>
                (e/contract-run (e/get-signer "http://127.0.0.1:8545"
-                                             (@! (last env-ganache/+default-private-keys+)))
+                                             (@! (last env-hardhat/+default-private-keys+)))
                                (@! +address+)
                                (@! (:abi +contract+))
                                "m__inc_both"
@@ -290,7 +290,7 @@
                                nil)))
        (then (fn:>
                (e/contract-run (e/get-signer "http://127.0.0.1:8545"
-                                             (@! (last env-ganache/+default-private-keys+)))
+                                             (@! (last env-hardhat/+default-private-keys+)))
                                (@! +address+)
                                (@! (:abi +contract+))
                                "m__inc_both"
@@ -306,7 +306,7 @@
           (def +address+
              (j/<!
               (e/contract-deploy (e/get-signer "http://127.0.0.1:8545"
-                                               (@! (last env-ganache/+default-private-keys+)))
+                                               (@! (last env-hardhat/+default-private-keys+)))
                                  (@! (:abi +contract+))
                                  (@! (:bytecode +contract+))
                                  []

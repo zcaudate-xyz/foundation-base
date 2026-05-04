@@ -119,27 +119,28 @@
 
 (def +client-basic+
   '[(defn client-basic
-      [host port opts]
-      (:- :import json)
-      (:- :import socket)
-      (let [conn   (socket.socket)
-            _      (conn.connect '(host port))]
-        (while true
-          (let [l ""
-                ch (conn.recv 1)
-                _  (if (== ch (:% b ""))
-                     (break))
-                _  (while (not= ch (:% b "\n"))
-                     (:+= l (ch.decode))
-                     (:= ch (conn.recv 1)))]
-            (cond (== l "<PING>")
-                  (pass)
-                  
-                  :else
-                  (let [input (json.loads l)
-                        out   (return-eval input)]
-                    (conn.sendall (. out (encode)))
-                    (conn.sendall (:% b "\n"))))))))])
+       [host port opts]
+       (:- :import json)
+       (:- :import socket)
+       (let [conn   (socket.socket)
+             _      (conn.connect '(host port))]
+         (while true
+           (let [buf (bytearray)
+                 ch (conn.recv 1)
+                 _  (if (== ch (:% b ""))
+                      (break))
+                 _  (while (not= ch (:% b "\n"))
+                      (. buf (extend ch))
+                      (:= ch (conn.recv 1)))
+                 l  (. buf (decode "utf-8"))]
+             (cond (== l "<PING>")
+                   (pass)
+                   
+                   :else
+                   (let [input (json.loads l)
+                         out   (return-eval input)]
+                     (conn.sendall (. out (encode "utf-8")))
+                     (conn.sendall (:% b "\n"))))))))])
 
 (def ^{:arglists '([port & [{:keys [host]}]])}
   default-basic-client

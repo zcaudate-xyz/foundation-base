@@ -3,7 +3,7 @@
 
 (l/script :python
   {:require [[xt.lang.spec-base :as xt]
-             [python.core.system :as pysys]
+             [python.core :as py]
              [xt.protocol.impl.connection-sql :as sqlrt]]})
 
 (defn.py query-returns-rows?
@@ -56,7 +56,7 @@
   {:added "4.1"}
   [m]
   (var config (or m {}))
-  (var sqlite3 (pysys/pkg "sqlite3"))
+  (var sqlite3 (py/pkg "sqlite3"))
   (var filename (or (xt/x:get-key config "filename")
                     ":memory:"))
   (return (. sqlite3 (connect filename))))

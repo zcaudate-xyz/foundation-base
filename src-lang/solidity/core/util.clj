@@ -1,15 +1,14 @@
-(ns hara.runtime.solidity.script.util
+(ns solidity.core.util
   (:require [hara.lang :as l])
   (:refer-clojure :exclude [assert require bytes]))
 
 (l/script :solidity
-  hara.runtime.solidity
-  {:require [[hara.runtime.solidity.script.builtin :as s]]
-   })
+  solidity.core
+  {:require [[solidity.core.builtin :as s]]})
 
 (l/intern-macros :solidity
-                 'rt.solidity.script.builtin
-                 'rt.solidity)
+                 'solidity.core.builtin
+                 'solidity.core)
 
 (defn.sol ^{:- [:public :pure]
             :static/returns [:bool]}
@@ -27,6 +26,4 @@
 
 (comment
   (l/get-book (l/default-library)
-              :solidity)
-    )
-
+              :solidity))

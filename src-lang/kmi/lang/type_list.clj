@@ -5,6 +5,8 @@
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
+             [xt.lang.common-protocol :as proto]
+             [kmi.protocol.common :as kproto]
              [kmi.lang.interface-spec :as spec]
              [kmi.lang.interface-common :as interface-common]
              [kmi.lang.interface-collection :as interface-collection]]})
@@ -68,30 +70,30 @@
   (return (-/list-new -/EMPTY_MARKER nil (spec/runtime-protocol list))))
 
 (def.xt LIST_SPEC
-  [[spec/IColl   {:_start_string  "("
-                  :_end_string    ")"
-                  :_sep_string    ", "
-                  :_is_ordered    false
-                  :to-iter  -/list-to-iter
-                  :to-array -/list-to-array}]
-   [spec/IEdit   {:is-mutable (fn:> true)
-                  :to-mutable (fn [x] (return x))
-                  :is-persistent (fn:> true)
-                  :to-persistent (fn [x] (return x))}]
-   [spec/IEmpty  {:empty  -/list-empty}]
-   [spec/IEq     {:eq     interface-collection/coll-eq}]
-   [spec/IHash   {:hash   (interface-common/wrap-with-cache
-                           interface-collection/coll-hash-unordered)}]    
-   [spec/IPush   {:push   -/list-push}]
-   [spec/IPushMutable   {:push-mutable   -/list-push}]
-   [spec/IPop    {:pop    -/list-pop}]
-   [spec/IPopMutable    {:pop-mutable    -/list-pop}]
-   [spec/ISize   {:size   -/list-size}]
-   [spec/IShow   {:show   interface-collection/coll-show}]])
+   [[kproto/IColl   {:_start_string  "("
+                     :_end_string    ")"
+                     :_sep_string    ", "
+                     :_is_ordered    false
+                     :to-iter  -/list-to-iter
+                     :to-array -/list-to-array}]
+    [kproto/IEdit   {:is-mutable (fn:> true)
+                     :to-mutable (fn [x] (return x))
+                     :is-persistent (fn:> true)
+                     :to-persistent (fn [x] (return x))}]
+    [kproto/IEmpty  {:empty  -/list-empty}]
+    [kproto/IEq     {:eq     interface-collection/coll-eq}]
+    [kproto/IHash   {:hash   (interface-common/wrap-with-cache
+                              interface-collection/coll-hash-unordered)}]
+    [kproto/IPush   {:push   -/list-push}]
+    [kproto/IPushMutable   {:push-mutable   -/list-push}]
+    [kproto/IPop    {:pop    -/list-pop}]
+    [kproto/IPopMutable    {:pop-mutable    -/list-pop}]
+    [kproto/ISize   {:size   -/list-size}]
+    [kproto/IShow   {:show   interface-collection/coll-show}]])
 
 (def.xt LIST_PROTOTYPE
   (-> -/LIST_SPEC
-      (spec/proto-spec)
+      (proto/proto-spec)
       (spec/proto-create)))
 
 (defn.xt list-create

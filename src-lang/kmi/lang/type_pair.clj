@@ -4,6 +4,8 @@
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
+             [xt.lang.common-protocol :as proto]
+             [kmi.protocol.common :as kproto]
              [kmi.lang.interface-spec :as spec]
              [kmi.lang.interface-common :as interface-common]
              [kmi.lang.interface-collection :as interface-collection]
@@ -19,29 +21,29 @@
   (return (spec/runtime-attach pair protocol)))
 
 (def.xt PAIR_SPEC
-   [[spec/IColl   {:_start_string  "["
-                   :_end_string    "]"
-                   :_sep_string    ", "
-                   :_is_ordered    true
-                   :to-iter  (fn:> [e] (it/iter [(. e _key)
-                                                 (. e _val)]))
-                   :to-array (fn:> [e] [(. e _key)
-                                        (. e _val)])}]
-   [spec/IEq     {:eq     interface-collection/coll-eq}]    
-   [spec/IHash   {:hash   (interface-common/wrap-with-cache
-                           interface-collection/coll-hash-ordered)}]
-   [spec/INth    {:nth    (fn:> [e i]
-                            (:? (== i 0)
-                                (. e _key)
-                                (== i 1)
-                                (. e _val)
-                                :else nil))}]
-   [spec/ISize   {:size   (fn:> [e] 2)}]
-   [spec/IShow   {:show   interface-collection/coll-show}]])
+   [[kproto/IColl   {:_start_string  "["
+                     :_end_string    "]"
+                     :_sep_string    ", "
+                     :_is_ordered    true
+                     :to-iter  (fn:> [e] (it/iter [(. e _key)
+                                                   (. e _val)]))
+                     :to-array (fn:> [e] [(. e _key)
+                                          (. e _val)])}]
+   [kproto/IEq     {:eq     interface-collection/coll-eq}]
+   [kproto/IHash   {:hash   (interface-common/wrap-with-cache
+                             interface-collection/coll-hash-ordered)}]
+   [kproto/INth    {:nth    (fn:> [e i]
+                              (:? (== i 0)
+                                  (. e _key)
+                                  (== i 1)
+                                  (. e _val)
+                                  :else nil))}]
+   [kproto/ISize   {:size   (fn:> [e] 2)}]
+   [kproto/IShow   {:show   interface-collection/coll-show}]])
 
 (def.xt PAIR_PROTOTYPE
   (-> -/PAIR_SPEC
-      (spec/proto-spec)
+      (proto/proto-spec)
       (spec/proto-create)))
 
 (defn.xt pair

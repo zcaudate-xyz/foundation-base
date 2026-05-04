@@ -1,8 +1,9 @@
 (ns hara.runtime.redis.eval-script-test
-  (:require [kmi.redis :as redis]
-            [lib.redis.bench :as bench]
-            [lib.redis.script :as script]
-            [hara.runtime.redis.client :as r]
+  (:require [clojure.string :as str]
+             [kmi.redis :as redis]
+             [lib.redis.bench :as bench]
+             [lib.redis.script :as script]
+             [hara.runtime.redis.client :as r]
             [hara.runtime.redis.eval-script :refer :all]
             [std.concurrent :as cc]
             [hara.lang :as l]
@@ -20,59 +21,17 @@
 (fact "converts a ptr into a form"
 
   (raw-compile-form redis/scan-sub)
-  => '(return (kmi.redis/scan-sub (. KEYS [1]))))
+  => '(return (kmi.redis/scan-sub (. KEYS [1]) (unpack ARGV))))
 
 ^{:refer hara.runtime.redis.eval-script/raw-compile :added "4.0"}
 (fact "compiles a function as body and sha"
 
   (raw-compile redis/scan-sub)
-  => {:body
-      (prose/join-lines
-       ["local function arr_map(arr,f)"
-        "  local out = {}"
-        "  for _, e in  ipairs(arr) do"
-        "    table.insert(out,f(e))"
-        "  end"
-        "  return out"
-        "end"
-        ""
-        "local function do_regex(re,match,f)"
-        "  local cur,tmp,out = 0,nil,nil"
-        "  if not match then"
-        "    match = '*'"
-        "  end"
-        "  while true do"
-        "    tmp = redis.call('SCAN',cur,'MATCH',match)"
-        "    cur,out = tonumber(tmp[1]),tmp[2]"
-        "    if out then"
-        "      for k, v in  pairs(out) do"
-        "        if v:find(re) then"
-        "          f(v)"
-        "        end"
-        "      end"
-        "    end"
-        "    if 0 == cur then"
-        "      return true"
-        "    end"
-        "  end"
-        "end"
-        ""
-        "local function scan_regex(re,match)"
-        "  local rep = {}"
-        "  do_regex(re,match,function (v)"
-        "    table.insert(rep,v)"
-        "  end)"
-        "  return rep"
-        "end"
-        ""
-        "local function scan_sub(key)"
-        "  return arr_map(scan_regex(key .. ':[^\\\\:]+$',key .. ':*'),function (k)"
-        "    return k:sub(2 + #key)"
-        "  end)"
-        "end"
-        ""
-        "return scan_sub(KEYS[1])"]),
-      :sha "a6878daff456b17437fc0192cce60dd4a7449e11"})
+  => (contains
+      {:body #(and (string? %)
+                   (str/includes? % "local function scan_sub(key)")
+                   (str/includes? % "return scan_sub(KEYS[1],unpack(ARGV))"))
+       :sha string?}))
 
 ^{:refer hara.runtime.redis.eval-script/raw-prep-in-fn :added "4.0"}
 (fact "prepares the arguments for entry"

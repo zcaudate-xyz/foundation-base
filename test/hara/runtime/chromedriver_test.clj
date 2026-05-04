@@ -1,22 +1,14 @@
 (ns hara.runtime.chromedriver-test
   (:use code.test)
   (:require [hara.runtime.chromedriver :as chromedriver]
-            [hara.lang :as l]
-            [std.lib :as h]
-            [xt.lang.common-lib :as k]
-            [xt.lang.common-repl :as repl]
-            [js.cell.kernel :as cl]
-            [js.cell.kernel.base-link-local :as base-link-local]
-            [js.cell.runtime.link :as runtime-link]))
+             [hara.lang :as l]
+             [std.lib :as h]))
 
 (l/script :js
   {:runtime :chromedriver.instance
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-repl :as repl]
-             [xt.lang.common-resource :as rt]
-             [js.cell.kernel :as cl]
-             [js.cell.kernel.base-link-local :as base-link-local]
-             [js.cell.runtime.link :as runtime-link]]})
+             [xt.lang.common-resource :as rt]]})
 
 (fact:global
  {:setup [(l/rt:restart :js)

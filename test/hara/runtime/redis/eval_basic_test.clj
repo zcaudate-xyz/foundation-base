@@ -1,9 +1,10 @@
 (ns hara.runtime.redis.eval-basic-test
   (:require [lib.redis.bench :as bench]
-            [lib.redis.script :as script]
-            [hara.runtime.redis.eval-basic :refer :all]
-            [hara.lang :as l]
-            [xt.lang.common-lib :as k])
+             [lib.redis.script :as script]
+             [hara.runtime.redis.eval-basic :refer :all]
+             [hara.lang :as l]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-lib :as k])
   (:use code.test))
 
 (l/script- :lua

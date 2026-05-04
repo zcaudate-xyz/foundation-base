@@ -1,5 +1,5 @@
 (ns web3.lib.example-bookstore-test
-  (:require [hara.runtime.solidity]
+  (:require [solidity.core]
             [hara.lang :as l])
   (:use code.test))
 
@@ -9,9 +9,9 @@
              [web3.lib.example-bookstore :as book]]})
 
 (fact:global
- {:setup    [(s/rt:stop-ganache-server)
+ {:setup    [(s/rt:stop-hardhat-server)
              (Thread/sleep 1000)
-             (s/rt:start-ganache-server)
+             (s/rt:start-hardhat-server)
              (Thread/sleep 500)
              (l/rt:restart)]
   :teardown [(l/rt:stop)]})

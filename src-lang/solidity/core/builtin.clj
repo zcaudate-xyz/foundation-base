@@ -1,4 +1,4 @@
-(ns hara.runtime.solidity.script.builtin
+(ns solidity.core.builtin
   (:require [clojure.string]
             [hara.lang :as l]
             [std.lib.foundation :as f]

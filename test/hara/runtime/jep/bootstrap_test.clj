@@ -18,7 +18,15 @@
   => "path/to/jep")
 
 ^{:refer hara.runtime.jep.bootstrap/jep-available? :added "4.1"}
-(fact "TODO")
+(fact "checks if the jep python runtime is already available"
+  (with-redefs [jep-bootstrap (fn [_] "path/to/jep")]
+    (jep-available?))
+  => true
+
+  (with-redefs [jep-bootstrap (fn [_]
+                                (throw (ex-info "missing" {})))]
+    (jep-available?))
+  => false)
 
 ^{:refer hara.runtime.jep.bootstrap/init-paths :added "3.0"}
 (fact "sets the path of the jep interpreter"

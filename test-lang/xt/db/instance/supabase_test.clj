@@ -2,8 +2,18 @@
   (:require [hara.lang :as l])
   (:use code.test))
 
-^{:seedgen/root {:all true}}
+^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
+  {:runtime :basic
+   :require [[xt.lang.spec-base :as xt]
+             [xt.db.instance.supabase :as supabase]]})
+
+(l/script- :lua
+  {:runtime :basic
+   :require [[xt.lang.spec-base :as xt]
+             [xt.db.instance.supabase :as supabase]]})
+
+(l/script- :python
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.db.instance.supabase :as supabase]]})
@@ -19,10 +29,35 @@
                "op" "eq"
                "value" "acct-1"}]})
 
+(def +query-tree+
+  ["Order"
+   {"account" {"id" "acct-1"}
+    "id" ["in" [["ord-1" "ord-2"]]]}
+   ["status"
+    ["account" ["nickname"]]]])
+
+(def +query-tree-basic+
+  ["Order"
+   {"account" {"id" "acct-1"}}
+   ["status"
+    ["account" ["nickname"]]]])
+
 ^{:refer xt.db.instance.supabase/supabase-capable? :added "4.1"}
 (fact "checks whether a descriptor can execute compiled supabase queries"
 
   (!.js
+   [(supabase/supabase-capable? {"execute" (fn [_compiled _opts] (return [true true]))})
+    (supabase/supabase-capable? {"supabase" {"from" (fn [_table] (return {}))}})
+    (supabase/supabase-capable? {})])
+  => [true true false]
+
+  (!.lua
+   [(supabase/supabase-capable? {"execute" (fn [_compiled _opts] (return [true true]))})
+    (supabase/supabase-capable? {"supabase" {"from" (fn [_table] (return {}))}})
+    (supabase/supabase-capable? {})])
+  => [true true false]
+
+  (!.py
    [(supabase/supabase-capable? {"execute" (fn [_compiled _opts] (return [true true]))})
     (supabase/supabase-capable? {"supabase" {"from" (fn [_table] (return {}))}})
     (supabase/supabase-capable? {})])
@@ -63,9 +98,39 @@
        "value" "open"}])
 
 ^{:refer xt.db.instance.supabase/compile-query :added "4.1"}
-(fact "compiles a query plan into a PostgREST request"
+(fact "compiles the same PostgREST request across js lua and python"
 
   (!.js
+   (var compiled
+        (supabase/compile-query
+         (@! +query-tree-basic+)))
+   [(. compiled ["table"])
+    (. compiled ["select"])
+    (. (. (. compiled ["filters"]) [0]) ["path"])
+    (. (. (. compiled ["filters"]) [0]) ["value"])])
+  => ["Order"
+      "status,account(nickname)"
+      "account.id"
+      "acct-1"]
+
+  (!.lua
+   (var compiled
+        (supabase/compile-query
+         ["Order"
+          {"account" {"id" "acct-1"}}
+          ["status"
+           ["account" ["nickname"]]]]))
+   (var filter (xt/x:first (. compiled ["filters"])))
+   [(. compiled ["table"])
+    (. compiled ["select"])
+    (. filter ["path"])
+    (. filter ["value"])])
+  => ["Order"
+      "status,account(nickname)"
+      "account.id"
+      "acct-1"]
+
+  (!.py
    (var compiled
         (supabase/compile-query
          ["Order"
@@ -76,7 +141,10 @@
     (. compiled ["select"])
     (. (. (. compiled ["filters"]) [0]) ["path"])
     (. (. (. compiled ["filters"]) [0]) ["value"])])
-  => ["Order" "status,account(nickname)" "account.id" "acct-1"])
+  => ["Order"
+      "status,account(nickname)"
+      "account.id"
+      "acct-1"])
 
 ^{:refer xt.db.instance.supabase/execute-query :added "4.1"}
 (fact "dispatches compiled supabase queries through the injected executor"
@@ -131,9 +199,24 @@
                "tag" "supabase/fail"}}])
 
 ^{:refer xt.db.instance.supabase/supabase-pull-sync :added "4.1"}
-(fact "compiles query trees and unwraps the supabase execution result"
+(fact "unwraps injected execution results consistently across js lua and python"
 
   (!.js
+   (var out
+        (supabase/supabase-pull-sync
+         {"execute" (fn [compiled _opts]
+                      (return [true compiled]))}
+         nil
+         (@! +query-tree-basic+)
+         {}))
+   [(. out ["table"])
+    (. out ["select"])
+    (. (. (. out ["filters"]) [0]) ["path"])])
+  => ["Order"
+      "status,account(nickname)"
+      "account.id"]
+
+  (!.lua
    (var out
         (supabase/supabase-pull-sync
          {"execute" (fn [compiled _opts]
@@ -145,8 +228,29 @@
            ["account" ["nickname"]]]]
          {}))
    [(. out ["table"])
-    (. out ["select"])])
-  => ["Order" "status,account(nickname)"]
+    (. out ["select"])
+    (. (. (. out ["filters"]) [0]) ["path"])])
+  => ["Order"
+      "status,account(nickname)"
+      "account.id"]
+
+  (!.py
+   (var out
+        (supabase/supabase-pull-sync
+         {"execute" (fn [compiled _opts]
+                      (return [true compiled]))}
+         nil
+         ["Order"
+          {"account" {"id" "acct-1"}}
+          ["status"
+           ["account" ["nickname"]]]]
+         {}))
+   [(. out ["table"])
+    (. out ["select"])
+    (. (. (. out ["filters"]) [0]) ["path"])])
+  => ["Order"
+      "status,account(nickname)"
+      "account.id"]
 
   (!.js
    (supabase/supabase-pull-sync
@@ -154,15 +258,15 @@
                  (return [false {"status" "error"
                                  "tag" "supabase/fail"}]))}
     nil
-    ["Order"
-     {"account" {"id" "acct-1"}}
-     ["status"
-      ["account" ["nickname"]]]]
-     {}))
+    (@! +query-tree-basic+)
+    {}))
   => {"status" "error"
       "tag" "db/supabase-query-failed"
       "data" {"status" "error"
-              "tag" "supabase/fail"}}
+              "tag" "supabase/fail"}})
+
+^{:refer xt.db.instance.supabase/supabase-pull-sync :added "4.1"}
+(fact "uses the default client path in js"
 
   (!.js
    (var calls [])
@@ -194,11 +298,7 @@
          {"supabase" client
           "schema-name" "api"}
          nil
-         ["Order"
-          {"account" {"id" "acct-1"}
-           "id" ["in" [["ord-1" "ord-2"]]]}
-          ["status"
-           ["account" ["nickname"]]]]
+         (@! +query-tree+)
          {}))
    [out calls])
   => [[{"id" "ord-1"

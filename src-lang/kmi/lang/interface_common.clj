@@ -5,8 +5,7 @@
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
-             [kmi.lang.common-hash :as common-hash]
-             [kmi.lang.interface-spec :as spec]]})
+             [kmi.lang.common-hash :as common-hash]]})
 
 (def.xt NIL  {})
 

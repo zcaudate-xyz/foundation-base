@@ -1,6 +1,6 @@
 (ns js.lib.eth-solc-test
-  (:require [hara.runtime.solidity :as s]
-            [hara.runtime.solidity.env-ganache :as env-ganache]
+  (:require [solidity.core :as s]
+            [hara.runtime.solidity.env-hardhat :as env-hardhat]
             [hara.lang :as l]
             [std.string.prose :as prose])
   (:use code.test))
@@ -14,9 +14,9 @@
                [js.core :as j]]})
 
 (fact:global
- {:setup    [(s/rt:stop-ganache-server)
+ {:setup    [(s/rt:stop-hardhat-server)
              (Thread/sleep 1000)
-             (s/rt:start-ganache-server)
+             (s/rt:start-hardhat-server)
              (Thread/sleep 3000)
              (l/rt:restart)
              (l/rt:scaffold :js)]

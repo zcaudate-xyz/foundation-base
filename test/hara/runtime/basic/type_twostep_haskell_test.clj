@@ -18,9 +18,9 @@
        (+ 1 2 3))
 
      (!.hs
-       (let [x 1
-             y 2]
-         (+ x y)))]
-    :ghc-unavailable)
+       (letrec [x 1
+                y 2]
+          (+ x y)))]
+     :ghc-unavailable)
   => (any [6 3]
-          :ghc-unavailable))
+           :ghc-unavailable))

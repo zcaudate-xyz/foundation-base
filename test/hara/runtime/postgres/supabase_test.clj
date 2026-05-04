@@ -123,7 +123,7 @@
 (fact "executes a statement with role (single)"
 
   (macroexpand-1 `(s/with-role-single [anon :integer] (+ 1 2 3)))
-  => '(hara.runtime.postgres.runtime.supabase/process-return (!.pg (try [:set-local-role hara.runtime.postgres.runtime.supabase-test/anon] (let [(:integer out) (clojure.core/+ 1 2 3)] (return out)) (catch others (return {:code SQLSTATE, :message SQLERRM}))))))
+  => '(postgres.core.supabase/process-return (!.pg (try [:set-local-role postgres.core.supabase-test/anon] (let [(:integer out) (clojure.core/+ 1 2 3)] (return out)) (catch others (return {:code SQLSTATE, :message SQLERRM}))))))
 
 ^{:refer postgres.core.supabase/with-role :added "4.0"}
 (fact "executes a statement with role"
@@ -135,7 +135,7 @@
 (fact "executes a statement with auth (single)"
 
   (macroexpand-1 `(s/with-auth-single ["user" :integer] (+ 1 2 3)))
-  => '(hara.runtime.postgres.runtime.supabase/process-return (!.pg (try [:set-local-role authenticated] [:perform (set-config "request.jwt.claim.sub" (:text "user") true)] (let [(:integer out) (clojure.core/+ 1 2 3)] (return out)) (catch others (return {:code SQLSTATE, :message SQLERRM}))))))
+  => '(postgres.core.supabase/process-return (!.pg (try [:set-local-role authenticated] [:perform (set-config "request.jwt.claim.sub" (:text "user") true)] (let [(:integer out) (clojure.core/+ 1 2 3)] (return out)) (catch others (return {:code SQLSTATE, :message SQLERRM}))))))
 
 ^{:refer postgres.core.supabase/with-auth :added "4.0"}
 (fact "executes a statement with auth"
@@ -150,7 +150,7 @@
 (fact "executes a statement with super (single)"
 
   (macroexpand-1 `(s/with-super-single ["user" :integer] (+ 1 2 3)))
-  => '(hara.runtime.postgres.runtime.supabase/process-return (!.pg (try [:set-local-role authenticated] [:perform (set-config "request.jwt.claim.sub" "user" true)] [:perform (set-config "request.jwt.claims" (:text {:sub "user", :user_metadata {:super true}}) true)] (let [(:integer out) (clojure.core/+ 1 2 3)] (return out)) (catch others (return {:code SQLSTATE, :message SQLERRM}))))))
+  => '(postgres.core.supabase/process-return (!.pg (try [:set-local-role authenticated] [:perform (set-config "request.jwt.claim.sub" "user" true)] [:perform (set-config "request.jwt.claims" (:text {:sub "user", :user_metadata {:super true}}) true)] (let [(:integer out) (clojure.core/+ 1 2 3)] (return out)) (catch others (return {:code SQLSTATE, :message SQLERRM}))))))
 
 ^{:refer postgres.core.supabase/with-super :added "4.0"}
 (fact "executes a statement with super"

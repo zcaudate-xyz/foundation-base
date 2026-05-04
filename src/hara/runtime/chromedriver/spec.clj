@@ -98,4 +98,4 @@
         {:keys [arglists]} (meta src-var)
         sym-arglists (list (vec (cons 'browser (rest (first arglists)))))]
     (list 'def (with-meta sym {:arglists (list 'quote sym-arglists)})
-          (list 'rt.chromedriver.impl/wrap-browser-state src))))
+          (list 'hara.runtime.chromedriver.impl/wrap-browser-state src))))

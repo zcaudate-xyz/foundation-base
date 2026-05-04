@@ -71,14 +71,14 @@
    {:wrap-fn (fn [forms]
                `(~'return (~'return-wrap (~'fn [] ~@forms))))}))
 
-(def ^{:arglists '([body])}
-  redis-main-wrap
-  (let [bootstrap (impl/emit-entry-deps
-                   k/return-wrap
-                   {:lang :lua
-                    :layout :flat})]
-    (fn [body]
-      (str bootstrap "\n\n" body))))
+ (def ^{:arglists '([body])}
+   redis-main-wrap
+   (let [bootstrap (impl/emit-entry-deps
+                    lib/return-wrap
+                    {:lang :lua
+                     :layout :flat})]
+     (fn [body]
+       (str bootstrap "\n\n" body))))
 
 (defn redis-invoke-ptr-basic
   "invokes pointer for redis eval
@@ -98,5 +98,4 @@
             :body {:transform #'redis-body-transform}}
      :json :full
      :layout layout})))
-
 

@@ -105,13 +105,13 @@
 ^{:refer hara.runtime.basic.type-oneshot/sh-exec :added "4.0"}
 (fact "basic function for executing a shell process"
 
-  (p/sh-exec ["python" "-c"] "print(1 + 1)" {})
+  (p/sh-exec ["python3" "-c"] "print(1 + 1)" {})
   => "2"
 
   (p/sh-exec ["luajit" "-e"] "print(1 + 1)" {})
   => "2"
 
-  (p/sh-exec ["r" "-s" "-e"] "1 + 1" {})
+  (p/sh-exec ["R" "-s" "-e"] "1 + 1" {})
   => "[1] 2")
 
 ^{:refer hara.runtime.basic.type-oneshot/raw-eval-oneshot :added "4.0"}

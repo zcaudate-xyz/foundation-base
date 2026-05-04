@@ -5,7 +5,7 @@
 
 (l/script :solidity
   {:require [[hara.runtime.solidity.script.builtin :as s]]
-    :static  {:contract ["ExampleSample"]}})
+     :static  {:contract ["ExampleSample"]}})
 
 (definterface.sol IERC20
   [^{:- [:external]
