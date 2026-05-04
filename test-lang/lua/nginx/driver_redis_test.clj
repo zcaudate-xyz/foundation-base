@@ -27,3 +27,10 @@
         (then (fn [conn]
                 (return (redis/exec conn "ping" [])))))))
   => "PONG")
+
+
+^{:refer lua.nginx.driver-redis/wrap-connection :added "4.1"}
+(fact "TODO")
+
+^{:refer lua.nginx.driver-redis/driver :added "4.1"}
+(fact "TODO")

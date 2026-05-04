@@ -22,6 +22,12 @@
 ^{:refer js.lib.driver-postgres/default-env-set :added "4.0" :unchecked true}
 (fact "sets the default env")
 
+^{:refer js.lib.driver-postgres/normalise-query-output :added "4.1"}
+(fact "TODO")
+
+^{:refer js.lib.driver-postgres/wrap-connection :added "4.1"}
+(fact "TODO")
+
 ^{:refer js.lib.driver-postgres/connect-constructor :added "4.0" :unchecked true}
  (fact "constructs the postgres instance"
  
@@ -45,6 +51,9 @@
          (fn [out]
             (repl/notify out)))))
   => (any nil 1 [{"?column?" 1}]))
+
+^{:refer js.lib.driver-postgres/driver :added "4.1"}
+(fact "TODO")
 
 (comment
   (l/with:input

@@ -19,6 +19,9 @@
   :teardown [(l/rt:stop)
              (bench/stop-redis-array [17001])]})
 
+^{:refer js.lib.driver-redis/wrap-connection :added "4.1"}
+(fact "TODO")
+
 ^{:refer js.lib.driver-redis/connect-constructor :added "4.0" :unchecked true}
 (fact "creates a connection"
   (!.js
@@ -45,3 +48,6 @@
        (then (fn [out]
                (repl/notify out)))))
   => "hello")
+
+^{:refer js.lib.driver-redis/driver :added "4.1"}
+(fact "TODO")
