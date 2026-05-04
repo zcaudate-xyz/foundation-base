@@ -5,7 +5,7 @@
          [:postgres :jdbc]             'hara.runtime.postgres.base.client
          [:postgres :jdbc.client]      'hara.runtime.postgres.base.client
          
-         [:solidity :default]          'hara.runtime.solidity.grammar
+         [:solidity :default]          'hara.runtime.solidity
 	 
          [:bash   :oneshot]            'hara.runtime.basic.impl.process-bash
          [:bash   :basic]              'hara.runtime.shell
@@ -112,7 +112,7 @@
          [:js       :default]          {:ns 'hara.model.spec-js
                                         :book '+book+
                                         :parent :xtalk}
-         [:llvm     :default]          {:ns 'hara.model.spec-llvm
+         [:llvm     :default]          {:ns 'hara.model.annex.spec-llvm
                                         :book '+book+
                                         :parent :xtalk}
          [:lua      :default]          {:ns 'hara.model.spec-lua
@@ -136,7 +136,7 @@
          
          [:postgres :default]          {:ns 'hara.runtime.postgres.base.grammar
                                         :book '+book+}
-         [:solidity :default]          {:ns 'hara.runtime.solidity.grammar
+         [:solidity :default]          {:ns 'hara.model.spec-solidity
                                         :book '+book+}
 
          [:circom   :default]          {:ns 'hara.model.annex.spec-circom
@@ -172,7 +172,7 @@
          [:r        :default]          {:ns 'hara.model.annex.spec-r
                                         :book '+book+
                                         :parent :xtalk}
-         [:ruby     :default]          {:ns 'hara.model.annex.spec-ruby
+         [:ruby     :default]          {:ns 'hara.model.spec-ruby
                                         :book '+book+
                                         :parent :xtalk}
          [:rust     :default]          {:ns 'hara.model.annex.spec-rust

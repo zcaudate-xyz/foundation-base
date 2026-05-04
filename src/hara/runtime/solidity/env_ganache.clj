@@ -1,9 +1,6 @@
 (ns hara.runtime.solidity.env-ganache
   (:require [clojure.string :as string]
-            [hara.runtime.basic.impl.process-js :as process-js]
             [std.fs :as fs]
-            [std.json :as json]
-            [hara.lang :as l]
             [std.lib.env :as env]
             [std.lib.foundation :as f]
             [std.lib.future :as future]
@@ -18,7 +15,10 @@
 
 (def +default-port+ 8545)
 
-(def +default-dir+ "test-bench/ganache/default")
+(def +default-dir+ "test-bench/hardhat/default")
+
+(def +default-root+
+  (.getCanonicalPath (java.io.File. ".")))
 
 (def +default-mnemonic+
   "taxi dash nation raw first art ticket more useful mosquito include true")
@@ -73,6 +73,9 @@
 
 (defonce ^:dynamic *server* (atom nil))
 
+(declare start-hardhat-server
+         stop-hardhat-server)
+
 (defn- get-listener-pids
   []
   (->> (os/sh {:args ["/bin/bash" "-lc"
@@ -92,42 +95,56 @@
         (.destroyForcibly handle)))))
 
 (defn start-ganache-server
-  "starts the ganache service"
+  "compatibility wrapper for the Hardhat-backed local EVM service"
+  {:added "4.0"}
+  []
+  (start-hardhat-server))
+
+(defn start-hardhat-server
+  "starts the hardhat service"
   {:added "4.0"}
   []
   (or @*server*
       (when (not (f/suppress
                   (network/wait-for-port "127.0.0.1" +default-port+
-                                   {:timeout 1000})))
+                                    {:timeout 1000})))
         (let [_    (fs/create-directory +default-dir+)
               _    (clear-contracts)]
           (-> (if (not @*server*)
                 (swap! *server*
                        (fn [m]
-                           (let [process (os/sh {:args ["/bin/bash" "-c"
-                                                       "npx ganache --wallet.seed 'test' --host '0.0.0.0'"]
-                                                :wait false
-                                                :root +default-dir+})
-                                thread  (-> (future/future
-                                              (os/sh-wait process))
-                                            (future/on:complete
-                                            (fn [_ _]
-                                              (try (let [out (os/sh-output process)]
+                            (let [process (os/sh {:args ["/bin/bash" "-c"
+                                                        (str "npx hardhat node"
+                                                             " --hostname 0.0.0.0"
+                                                             " --port " +default-port+)]
+                                                 :wait false
+                                                 :root +default-root+})
+                                 thread  (-> (future/future
+                                               (os/sh-wait process))
+                                             (future/on:complete
+                                             (fn [_ _]
+                                               (try (let [out (os/sh-output process)]
                                                      (when (not= 0 (:exit out))
                                                        (env/prn out)))
                                                    (catch Throwable t))
-                                              (reset! *server* nil))))]
-                            (network/wait-for-port "127.0.0.1" +default-port+
-                                                   {:timeout 10000})
-                            {:type "ganache"
-                             :port +default-port+
-                             :root +default-port+
-                             :process process
-                            :thread thread})))
+                                               (reset! *server* nil))))]
+                             (network/wait-for-port "127.0.0.1" +default-port+
+                                                    {:timeout 10000})
+                             {:type "hardhat"
+                              :port +default-port+
+                              :root +default-root+
+                              :process process
+                             :thread thread})))
                 @*server*))))))
 
 (defn stop-ganache-server
-  "stops the ganache service"
+  "compatibility wrapper for the Hardhat-backed local EVM service"
+  {:added "4.0"}
+  []
+  (stop-hardhat-server))
+
+(defn stop-hardhat-server
+  "stops the hardhat service"
   {:added "4.0"}
   []
   (let [{:keys [type process] :as entry} @*server*]

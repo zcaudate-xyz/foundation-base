@@ -1,15 +1,15 @@
 (ns hara.runtime.solidity.compile-deploy
   (:require [js.core :as j]
-            [js.lib.eth-bench :as eth-bench]
-            [hara.runtime.basic :as basic]
-            [hara.runtime.solidity.compile-common :as common]
-            [hara.runtime.solidity.compile-solc :as solc]
-            [hara.runtime.solidity.env-ganache :as env]
-            [hara.lang :as l]
-            [std.lib.env]
-            [std.lib.foundation :as f]
-            [std.make.compile :as compile]
-            [xt.lang.common-notify :as notify]))
+             [js.lib.eth-bench :as eth-bench]
+             [hara.runtime.basic :as basic]
+             [hara.runtime.solidity.compile-common :as common]
+             [hara.runtime.solidity.compile-solc :as solc]
+             [hara.runtime.solidity.env-hardhat :as env]
+             [hara.lang :as l]
+             [std.lib.env :as env-lib]
+             [std.lib.foundation :as f]
+             [std.make.compile :as compile]
+             [xt.lang.common-notify :as notify]))
 
 ;;
 ;; Deploys the contract
@@ -40,13 +40,13 @@
                     (catch Throwable t t))
           {:strs [status
                   contractAddress]} result
-        _ (cond (not status)
-                (do (not common/*suppress-errors*)
-                    (std.lib.env/pl url)
-                    (std.lib.env/pl code)
-                    (std.lib.env/pl result)
-                    (f/error "Compilation Error"
-                             {:data result}))
+         _ (cond (not status)
+                 (do (not common/*suppress-errors*)
+                     (env-lib/p url)
+                     (env-lib/p code)
+                     (env-lib/prn result)
+                     (f/error "Compilation Error"
+                              {:data result}))
                 
                 :else
                 (do

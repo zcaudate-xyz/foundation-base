@@ -5,7 +5,7 @@
              [hara.runtime.basic.type-oneshot :as oneshot]
              [hara.lang.impl :as impl]
              [hara.lang.runtime :as rt]
-             [hara.model.annex.spec-ruby :as spec]
+             [hara.model.spec-ruby :as spec]
              [xt.lang.common-lib :as lib]))
 
 (def +ruby-init+

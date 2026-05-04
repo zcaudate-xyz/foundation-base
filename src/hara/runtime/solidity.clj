@@ -4,8 +4,7 @@
             [hara.runtime.solidity.compile-deploy :as compile-deploy]
             [hara.runtime.solidity.compile-node :as compile-node]
             [hara.runtime.solidity.compile-solc :as compile-solc]
-            [hara.runtime.solidity.env-ganache :as env-ganache]
-            [hara.runtime.solidity.grammar :as grammar]
+            [hara.runtime.solidity.env-hardhat :as env-hardhat]
             [hara.runtime.solidity.script.builtin :as builtin]
             [hara.runtime.solidity.script.util :as util]
             [hara.lang :as l]
@@ -15,8 +14,10 @@
 
 (f/intern-all hara.runtime.solidity.script.util)
 
-(f/intern-in [rt:start-ganache-server env-ganache/start-ganache-server]
-             [rt:stop-ganache-server env-ganache/stop-ganache-server]
+(f/intern-in [rt:start-hardhat-server env-hardhat/start-hardhat-server]
+             [rt:stop-hardhat-server env-hardhat/stop-hardhat-server]
+             [rt:start-ganache-server env-hardhat/start-ganache-server]
+             [rt:stop-ganache-server env-hardhat/stop-ganache-server]
 
              compile-common/with:caller-address
              compile-common/with:caller-payment
@@ -129,6 +130,4 @@
     (float (/ (count (:bytecode contract))
               2
               1024))))
-
-
 

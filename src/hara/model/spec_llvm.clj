@@ -3,7 +3,8 @@
             [hara.lang.book :as book]
             [hara.common.emit :as emit]
             [hara.common.emit-common :as common]
-            [hara.common.emit-preprocess :as preprocess] [hara.common.preprocess-base :as preprocess-base]
+            [hara.common.emit-preprocess :as preprocess]
+            [hara.common.preprocess-base :as preprocess-base]
             [hara.common.grammar :as grammar]
             [hara.lang.script :as script]
             [hara.common.util :as ut]
@@ -109,7 +110,7 @@
   {:added "4.0"}
   [[_ type & [count]]]
   (if count
-    (list :- "alloca" type "," (first count) (second count)) ;; assuming count is [type val]
+    (list :- "alloca" type "," (first count) (second count))
     (list :- "alloca" type)))
 
 (defn tf-store
@@ -132,22 +133,14 @@
         :label   {:op :label :symbol #{'label} :macro #'tf-label :emit :macro}
         :ret     {:op :ret :symbol #{'ret} :macro #'tf-ret :emit :macro}
         :assign  {:op :assign :symbol #{:=} :macro #'tf-assign :emit :macro}
-
-        ;; Arithmetic
         :add     {:op :add :symbol #{'add} :macro (tf-inst-bin "add") :emit :macro}
         :sub     {:op :sub :symbol #{'sub} :macro (tf-inst-bin "sub") :emit :macro}
         :mul     {:op :mul :symbol #{'mul} :macro (tf-inst-bin "mul") :emit :macro}
         :div     {:op :div :symbol #{'sdiv 'udiv 'fdiv} :macro (fn [[sym & args]] (apply (tf-inst-bin (name sym)) nil args)) :emit :macro}
         :rem     {:op :rem :symbol #{'srem 'urem 'frem} :macro (fn [[sym & args]] (apply (tf-inst-bin (name sym)) nil args)) :emit :macro}
-
-        ;; Logic/Compare
         :icmp    {:op :icmp :symbol #{'icmp} :macro #'tf-icmp :emit :macro}
-
-        ;; Control
         :br      {:op :br :symbol #{'br} :macro #'tf-br :emit :macro}
         :call    {:op :call :symbol #{'call} :macro #'tf-call :emit :macro}
-
-        ;; Memory
         :alloca  {:op :alloca :symbol #{'alloca} :macro #'tf-alloca :emit :macro}
         :store   {:op :store :symbol #{'store} :macro #'tf-store :emit :macro}
         :load    {:op :load :symbol #{'load} :macro #'tf-load :emit :macro}})))

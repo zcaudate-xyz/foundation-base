@@ -6,7 +6,7 @@
              [hara.runtime.solidity.compile-deploy :as deploy]
              [hara.runtime.solidity.compile-node :as compile-node]
              [hara.runtime.solidity.compile-solc :as solc]
-             [hara.runtime.solidity.env-ganache :as env]
+            [hara.runtime.solidity.env-hardhat :as env]
              [hara.lang :as l]
              [std.lib.template :as template]
              [std.lib.component :as component]
@@ -112,6 +112,6 @@
   => {:started true})
 
 (comment
-  (hara.runtime.solidity.env-ganache/stop-ganache-server)
-  (hara.runtime.solidity.env-ganache/rt:start-ganache-server)
+  (hara.runtime.solidity.env-hardhat/stop-hardhat-server)
+  (hara.runtime.solidity.env-hardhat/rt:start-hardhat-server)
   )

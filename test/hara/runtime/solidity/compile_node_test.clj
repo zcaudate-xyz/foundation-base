@@ -3,7 +3,7 @@
             [hara.runtime.solidity.client :as client]
             [hara.runtime.solidity.compile-common :as compile-common]
             [hara.runtime.solidity.compile-node :as compile-node]
-            [hara.runtime.solidity.env-ganache :as env]
+            [hara.runtime.solidity.env-hardhat :as env]
             [hara.lang :as l]
             [std.lib.context.pointer :as ptr])
   (:use code.test))
@@ -11,7 +11,7 @@
 (l/script- :solidity
   {:runtime :web3
    :config  {:mode :clean}
-   :require [[hara.runtime.solidity :as s]]})
+   :require [[hara.runtime.solidity :as sol]]})
 
 ;; Removed global setup
 
@@ -98,4 +98,4 @@
 ^{:refer hara.runtime.solidity.compile-node/with:measure :added "4.0"}
 (fact "measures balance change before and after call"
   (macroexpand-1 '(compile-node/with:measure (+ 1 1)))
-  => list?)
+  => seq?)

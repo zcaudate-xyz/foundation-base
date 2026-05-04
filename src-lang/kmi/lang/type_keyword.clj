@@ -5,7 +5,10 @@
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-protocol :as proto]
-             [kmi.protocol.common :as kproto]
+             [kmi.protocol.eq :as p-eq]
+             [kmi.protocol.hash :as p-hash]
+             [kmi.protocol.namespaced :as p-namespaced]
+             [kmi.protocol.show :as p-show]
              [kmi.lang.interface-common :as interface-common]
              [kmi.lang.interface-spec :as spec]
              [kmi.lang.common-hash :as common-hash]]})
@@ -47,12 +50,12 @@
                (== (. sym _name) (. o _name)))))
 
 (def.xt KEYWORD_SPEC
-  [[kproto/IEq         {:eq        -/keyword-eq}]
-   [kproto/IHash       {:hash      (interface-common/wrap-with-cache
+  [[p-eq/IEq         {:eq        -/keyword-eq}]
+   [p-hash/IHash       {:hash      (interface-common/wrap-with-cache
                                     -/keyword-hash)}]
-   [kproto/INamespaced {:name      interface-common/get-name
+   [p-namespaced/INamespaced {:name      interface-common/get-name
                         :namespace interface-common/get-namespace} ]
-   [kproto/IShow       {:show      -/keyword-show}]])
+   [p-show/IShow       {:show      -/keyword-show}]])
 
 (def.xt KEYWORD_PROTOTYPE
   (-> -/KEYWORD_SPEC

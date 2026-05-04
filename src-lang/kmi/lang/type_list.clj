@@ -6,7 +6,17 @@
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
              [xt.lang.common-protocol :as proto]
-             [kmi.protocol.common :as kproto]
+             [kmi.protocol.coll :as p-coll]
+             [kmi.protocol.edit :as p-edit]
+             [kmi.protocol.empty :as p-empty]
+             [kmi.protocol.eq :as p-eq]
+             [kmi.protocol.hash :as p-hash]
+             [kmi.protocol.push :as p-push]
+             [kmi.protocol.push-mutable :as p-push-mutable]
+             [kmi.protocol.pop :as p-pop]
+             [kmi.protocol.pop-mutable :as p-pop-mutable]
+             [kmi.protocol.size :as p-size]
+             [kmi.protocol.show :as p-show]
              [kmi.lang.interface-spec :as spec]
              [kmi.lang.interface-common :as interface-common]
              [kmi.lang.interface-collection :as interface-collection]]})
@@ -70,26 +80,26 @@
   (return (-/list-new -/EMPTY_MARKER nil (spec/runtime-protocol list))))
 
 (def.xt LIST_SPEC
-   [[kproto/IColl   {:_start_string  "("
+   [[p-coll/IColl   {:_start_string  "("
                      :_end_string    ")"
                      :_sep_string    ", "
                      :_is_ordered    false
                      :to-iter  -/list-to-iter
                      :to-array -/list-to-array}]
-    [kproto/IEdit   {:is-mutable (fn:> true)
+    [p-edit/IEdit   {:is-mutable (fn:> true)
                      :to-mutable (fn [x] (return x))
                      :is-persistent (fn:> true)
                      :to-persistent (fn [x] (return x))}]
-    [kproto/IEmpty  {:empty  -/list-empty}]
-    [kproto/IEq     {:eq     interface-collection/coll-eq}]
-    [kproto/IHash   {:hash   (interface-common/wrap-with-cache
+    [p-empty/IEmpty  {:empty  -/list-empty}]
+    [p-eq/IEq     {:eq     interface-collection/coll-eq}]
+    [p-hash/IHash   {:hash   (interface-common/wrap-with-cache
                               interface-collection/coll-hash-unordered)}]
-    [kproto/IPush   {:push   -/list-push}]
-    [kproto/IPushMutable   {:push-mutable   -/list-push}]
-    [kproto/IPop    {:pop    -/list-pop}]
-    [kproto/IPopMutable    {:pop-mutable    -/list-pop}]
-    [kproto/ISize   {:size   -/list-size}]
-    [kproto/IShow   {:show   interface-collection/coll-show}]])
+    [p-push/IPush   {:push   -/list-push}]
+    [p-push-mutable/IPushMutable   {:push-mutable   -/list-push}]
+    [p-pop/IPop    {:pop    -/list-pop}]
+    [p-pop-mutable/IPopMutable    {:pop-mutable    -/list-pop}]
+    [p-size/ISize   {:size   -/list-size}]
+    [p-show/IShow   {:show   interface-collection/coll-show}]])
 
 (def.xt LIST_PROTOTYPE
   (-> -/LIST_SPEC

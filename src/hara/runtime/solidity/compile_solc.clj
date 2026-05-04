@@ -5,7 +5,7 @@
             [js.lib.eth-solc :as eth-solc]
             [hara.runtime.basic :as basic]
             [hara.runtime.solidity.compile-common :as common]
-            [hara.runtime.solidity.env-ganache :as env]
+            [hara.runtime.solidity.env-hardhat :as env]
             [hara.lang :as l]
             [std.lib.component :as component]
             [std.lib.env]
@@ -23,16 +23,20 @@
   [entries interfaces]
   (let [grammar    (l/grammar :solidity)
 
-        emit-fn    (fn [entry]
-                     (binding [hara.lang.impl-entry/*cache-none* true]
-                       (l/emit-entry grammar entry {:layout :flat})))
-        body       (clojure.string/join
-                    "\n\n"
-                    (map emit-fn entries))
-        prefix     (clojure.string/join
-                    "\n\n"
-                    (map emit-fn interfaces))]
-    [body prefix]))
+         emit-fn    (fn [entry]
+                      (binding [hara.lang.impl-entry/*cache-none* true]
+                        (l/emit-entry grammar entry {:layout :flat})))
+         keep-code? (fn [s]
+                      (and (string? s)
+                           (not (clojure.string/blank? s))
+                           (not= "nil" s)))
+         body       (clojure.string/join
+                     "\n\n"
+                     (filter keep-code? (map emit-fn entries)))
+         prefix     (clojure.string/join
+                     "\n\n"
+                     (filter keep-code? (map emit-fn interfaces)))]
+     [body prefix]))
 
 (defn compile-base-code
   "compiles base code"
@@ -65,10 +69,11 @@
   "opens up a solidity method"
   {:added "4.0"}
   [entry]
-  (let [{:keys [form]} entry
-        [op sym & rest] form
-        meta-fn (fn [sym]
-                  (let [modifiers (:- (meta sym))
+  (let [form (or (:form entry)
+                 (:form-input entry))
+         [op sym & rest] form
+         meta-fn (fn [sym]
+                   (let [modifiers (:- (meta sym))
                         modifiers (if (some #{:private
                                               :public
                                               :internal
@@ -216,13 +221,13 @@
                                         (catch Throwable t))
                                       (ex-data ex))}))
                     (catch Throwable t t))
-        contracts (get-in result ["contracts" file])
-        _      (when (not contracts)
-                 (when (nil? common/*suppress-errors*)
-                   (std.lib.env/pl code))
-                 (f/error "Compilation Error"
-                          result))]
-    contracts))
+         contracts (get-in result ["contracts" file])
+         _      (when (not contracts)
+                  (when (nil? common/*suppress-errors*)
+                    (std.lib.env/p code))
+                  (f/error "Compilation Error"
+                           result))]
+     contracts))
 
 (defn compile-all-abi
   "compiles the abis"

@@ -5,7 +5,23 @@
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-protocol :as proto]
-             [kmi.protocol.common :as kproto]
+             [kmi.protocol.assoc :as p-assoc]
+             [kmi.protocol.assoc-mutable :as p-assoc-mutable]
+             [kmi.protocol.coll :as p-coll]
+             [kmi.protocol.dissoc :as p-dissoc]
+             [kmi.protocol.dissoc-mutable :as p-dissoc-mutable]
+             [kmi.protocol.empty :as p-empty]
+             [kmi.protocol.eq :as p-eq]
+             [kmi.protocol.find :as p-find]
+             [kmi.protocol.hash :as p-hash]
+             [kmi.protocol.nth :as p-nth]
+             [kmi.protocol.push :as p-push]
+             [kmi.protocol.push-mutable :as p-push-mutable]
+             [kmi.protocol.pop :as p-pop]
+             [kmi.protocol.pop-mutable :as p-pop-mutable]
+             [kmi.protocol.namespaced :as p-namespaced]
+             [kmi.protocol.size :as p-size]
+             [kmi.protocol.show :as p-show]
              [kmi.lang.interface-spec :as spec]
              [kmi.lang.interface-common :as interface-common]
              [kmi.lang.interface-collection :as interface-collection]
@@ -20,25 +36,25 @@
             (return (f value ...)))))  
 
 (def.xt SYNTAX_SPEC
-   [[kproto/IAssoc {:assoc interface-common/assoc}]
-    [kproto/IAssocMutable {:assoc-mutable interface-common/assoc-mutable}]
-    [kproto/IColl {:to-iter  interface-common/to-iter
+   [[p-assoc/IAssoc {:assoc interface-common/assoc}]
+    [p-assoc-mutable/IAssocMutable {:assoc-mutable interface-common/assoc-mutable}]
+    [p-coll/IColl {:to-iter  interface-common/to-iter
                    :to-array interface-common/to-array}]
-    [kproto/IDissoc {:dissoc interface-common/dissoc}]
-    [kproto/IDissocMutable {:dissoc-mutable interface-common/dissoc-mutable}]
-    [kproto/IEmpty {:empty interface-common/empty}]
-    [kproto/IEq    {:eq  interface-common/eq}]
-    [kproto/IFind {:find interface-common/find}]
-    [kproto/IHash {:hash interface-common/hash}]
-    [kproto/INth  {:nth  interface-common/nth}]
-    [kproto/IPush {:push interface-common/push}]
-    [kproto/IPushMutable {:push-mutable interface-common/push-mutable}]
-    [kproto/IPop {:pop interface-common/pop}]
-    [kproto/IPopMutable {:pop-mutable interface-common/pop-mutable}]
-    [kproto/INamespaced {:name interface-common/get-name
+    [p-dissoc/IDissoc {:dissoc interface-common/dissoc}]
+    [p-dissoc-mutable/IDissocMutable {:dissoc-mutable interface-common/dissoc-mutable}]
+    [p-empty/IEmpty {:empty interface-common/empty}]
+    [p-eq/IEq    {:eq  interface-common/eq}]
+    [p-find/IFind {:find interface-common/find}]
+    [p-hash/IHash {:hash interface-common/hash}]
+    [p-nth/INth  {:nth  interface-common/nth}]
+    [p-push/IPush {:push interface-common/push}]
+    [p-push-mutable/IPushMutable {:push-mutable interface-common/push-mutable}]
+    [p-pop/IPop {:pop interface-common/pop}]
+    [p-pop-mutable/IPopMutable {:pop-mutable interface-common/pop-mutable}]
+    [p-namespaced/INamespaced {:name interface-common/get-name
                          :namespace interface-common/get-namespace}]
-    [kproto/ISize {:size interface-common/count}]
-    [kproto/IShow {:show interface-common/show}]])
+    [p-size/ISize {:size interface-common/count}]
+    [p-show/IShow {:show interface-common/show}]])
 
 (def.xt SYNTAX_PROTOTYPE
   (-> -/SYNTAX_SPEC

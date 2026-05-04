@@ -1,5 +1,5 @@
 (ns hara.runtime.solidity.compile-common
-  (:require [hara.runtime.solidity.env-ganache :as env-ganache]
+  (:require [hara.runtime.solidity.env-hardhat :as env-hardhat]
             [hara.lang :as l]
             [std.lib.impl :as impl]
             [std.lib.network :as network]))
@@ -38,11 +38,11 @@
 ;; DEFAULTS
 ;;
 
-(def ^:dynamic *default-url* (str "http://" (network/local-ip) ":" env-ganache/+default-port+))
+(def ^:dynamic *default-url* (str "http://127.0.0.1:" env-hardhat/+default-port+))
 
-(def ^:dynamic *default-caller-private-key* (first env-ganache/+default-private-keys+))
+(def ^:dynamic *default-caller-private-key* (first env-hardhat/+default-private-keys+))
 
-(def ^:dynamic *default-caller-address* (first env-ganache/+default-addresses+))
+(def ^:dynamic *default-caller-address* (first env-hardhat/+default-addresses+))
 
 ;;
 ;; OVERRIDES

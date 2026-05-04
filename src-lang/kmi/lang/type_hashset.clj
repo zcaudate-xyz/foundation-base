@@ -7,7 +7,18 @@
              [xt.lang.common-iter :as it]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-protocol :as proto]
-             [kmi.protocol.common :as kproto]
+             [kmi.protocol.coll :as p-coll]
+             [kmi.protocol.edit :as p-edit]
+             [kmi.protocol.empty :as p-empty]
+             [kmi.protocol.eq :as p-eq]
+             [kmi.protocol.hash :as p-hash]
+             [kmi.protocol.find :as p-find]
+             [kmi.protocol.push :as p-push]
+             [kmi.protocol.push-mutable :as p-push-mutable]
+             [kmi.protocol.dissoc :as p-dissoc]
+             [kmi.protocol.dissoc-mutable :as p-dissoc-mutable]
+             [kmi.protocol.size :as p-size]
+             [kmi.protocol.show :as p-show]
              [kmi.lang.interface-spec :as spec]
              [kmi.lang.interface-common :as interface-common]
              [kmi.lang.interface-collection :as interface-collection]
@@ -153,28 +164,28 @@
                           "}")))))
 
 (def.xt HASHSET_SPEC
-   [[kproto/IColl {:_start_string "#{" 
+   [[p-coll/IColl {:_start_string "#{" 
                    :_end_string "}"
                    :_sep_string ", "
                    :_is_ordered false
                    :to-iter -/hashset-to-iter
                    :to-array -/hashset-to-array}]
-    [kproto/IEdit {:is-mutable -/hashset-is-editable
+    [p-edit/IEdit {:is-mutable -/hashset-is-editable
                    :to-mutable -/hashset-to-mutable!
                    :is-persistent (fn:> [hashset] (not (-/hashset-is-editable hashset)))
                    :to-persistent -/hashset-to-persistent!}]
-    [kproto/IEmpty {:empty -/hashset-empty}]
-    [kproto/IEq {:eq -/hashset-eq}]
-    [kproto/IHash {:hash (interface-common/wrap-with-cache
+    [p-empty/IEmpty {:empty -/hashset-empty}]
+    [p-eq/IEq {:eq -/hashset-eq}]
+    [p-hash/IHash {:hash (interface-common/wrap-with-cache
                           -/hashset-hash
                           -/hashset-is-editable)}]
-    [kproto/IFind {:find -/hashset-find}]
-    [kproto/IPush {:push -/hashset-push}]
-    [kproto/IPushMutable {:push-mutable -/hashset-push!}]
-    [kproto/IDissoc {:dissoc -/hashset-dissoc}]
-    [kproto/IDissocMutable {:dissoc-mutable -/hashset-dissoc!}]
-    [kproto/ISize {:size interface-collection/coll-size}]
-    [kproto/IShow {:show -/hashset-show}]])
+    [p-find/IFind {:find -/hashset-find}]
+    [p-push/IPush {:push -/hashset-push}]
+    [p-push-mutable/IPushMutable {:push-mutable -/hashset-push!}]
+    [p-dissoc/IDissoc {:dissoc -/hashset-dissoc}]
+    [p-dissoc-mutable/IDissocMutable {:dissoc-mutable -/hashset-dissoc!}]
+    [p-size/ISize {:size interface-collection/coll-size}]
+    [p-show/IShow {:show -/hashset-show}]])
 
 (def.xt HASHSET_PROTOTYPE
   (-> -/HASHSET_SPEC

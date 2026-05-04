@@ -1,27 +1,29 @@
 (ns hara.runtime.solidity.script.util-test
-  (:require [hara.runtime.solidity.env-ganache :as env]
-            [hara.lang :as l])
+  (:require [hara.runtime.solidity.env-hardhat :as env]
+            [hara.lang :as l]
+            [solidity.core.util :as util])
   (:use code.test))
 
 (l/script- :solidity
   {:runtime :web3
-   :require [[hara.runtime.solidity :as s]]})
+   :require [[hara.runtime.solidity :as s]
+              [solidity.core.util :as util]]})
 
 (fact:global
  {:setup    [(l/rt:restart)
-             (env/start-ganache-server)]
+             (env/start-hardhat-server)]
   :teardown [(l/rt:stop)
-             (env/stop-ganache-server)]})
+             (env/stop-hardhat-server)]})
 
 ^{:refer hara.runtime.solidity.script.util/ut:str-comp :added "4.0"}
 (fact "compares two strings together"
 
   (s/with:temp
-    (s/ut:str-comp "123"
-                   "456"))
+    (util/ut:str-comp "123"
+                      "456"))
   => false
 
   (s/with:temp
-    (s/ut:str-comp "123"
-                   "123"))
+    (util/ut:str-comp "123"
+                      "123"))
   => true)

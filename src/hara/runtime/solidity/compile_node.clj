@@ -1,10 +1,11 @@
 (ns hara.runtime.solidity.compile-node
   (:require [js.lib.eth-bench :as eth-bench]
-            [js.lib.eth-lib :as eth-lib]
-            [hara.runtime.solidity.compile-common :as compile-common]
-            [hara.runtime.solidity.compile-solc :as compile-solc]
-            [hara.lang :as l]
-            [std.lib.context.pointer :as ptr]))
+             [js.lib.eth-lib :as eth-lib]
+             [hara.runtime.solidity.compile-common :as compile-common]
+             [hara.runtime.solidity.env-hardhat :as env-hardhat]
+             [hara.runtime.solidity.compile-solc :as compile-solc]
+             [hara.lang :as l]
+             [std.lib.context.pointer :as ptr]))
 
 (defn rt-get-id
   "gets the rt node id"
@@ -24,7 +25,7 @@
   [& [address rt]]
   (let [address   (or address
                       (compile-common/get-contract-address (rt-get-id rt)))
-        [type id] (get @hara.runtime.solidity.env-ganache/+contracts+ address)]
+        [type id] (get @env-hardhat/+contracts+ address)]
     (assoc (get-in @compile-common/+compiled+
                    (cond-> [type id]
                      (= type :module) (conj (boolean compile-common/*open-methods*))))
@@ -36,7 +37,7 @@
   [address m & [rt]]
   (let [rt (:node (or rt (l/rt (.getName *ns*) :solidity)))
         _  (compile-solc/create-module-entry rt m)]
-    (swap! hara.runtime.solidity.env-ganache/+contracts+
+    (swap! env-hardhat/+contracts+
            assoc address
            (if (:ns m)
              [:module (:ns m)]))))

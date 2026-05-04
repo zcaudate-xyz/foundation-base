@@ -15,7 +15,25 @@
 ^{:refer hara.lang.registry/registry-book-ns :added "4.1"}
 (fact "gets the namespace for a registry entry"
   (registry-book-ns :js)
-  => 'hara.model.spec-js)
+  => 'hara.model.spec-js
+
+  (registry-book-ns :circom)
+  => 'hara.model.annex.spec-circom
+
+  (registry-book-ns :fortran)
+  => 'hara.model.annex.spec-fortran
+
+  (registry-book-ns :llvm)
+  => 'hara.model.annex.spec-llvm
+
+  (registry-book-ns :solidity)
+  => 'hara.model.spec-solidity
+
+  (registry-book-ns :ruby)
+  => 'hara.model.spec-ruby
+
+  (registry-book-ns :verilog)
+  => 'hara.model.annex.spec-verilog)
 
 ^{:refer hara.lang.registry/registry-book-info :added "4.1"}
 (fact "gets the full registry entry"

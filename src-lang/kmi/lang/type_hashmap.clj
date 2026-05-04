@@ -6,7 +6,19 @@
              [xt.lang.common-iter :as it]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-protocol :as proto]
-             [kmi.protocol.common :as kproto]
+             [kmi.protocol.coll :as p-coll]
+             [kmi.protocol.edit :as p-edit]
+             [kmi.protocol.empty :as p-empty]
+             [kmi.protocol.eq :as p-eq]
+             [kmi.protocol.hash :as p-hash]
+             [kmi.protocol.assoc :as p-assoc]
+             [kmi.protocol.assoc-mutable :as p-assoc-mutable]
+             [kmi.protocol.dissoc :as p-dissoc]
+             [kmi.protocol.dissoc-mutable :as p-dissoc-mutable]
+             [kmi.protocol.find :as p-find]
+             [kmi.protocol.lookup :as p-lookup]
+             [kmi.protocol.size :as p-size]
+             [kmi.protocol.show :as p-show]
              [kmi.lang.interface-spec :as spec]
              [kmi.lang.interface-common :as interface-common]
              [kmi.lang.interface-collection :as interface-collection]
@@ -242,31 +254,31 @@
                           "}")))))
 
 (def.xt HASHMAP_SPEC
-   [[kproto/IColl   {:_start_string "{"
+   [[p-coll/IColl   {:_start_string "{"
                      :_end_string   "}"
                      :_sep_string   ", "
                      :_is_ordered   false
                      :to-iter  -/hashmap-to-iter
                      :to-array -/hashmap-to-array}]
-    [kproto/IEdit   {:is-mutable    -/hashmap-is-editable
+    [p-edit/IEdit   {:is-mutable    -/hashmap-is-editable
                      :to-mutable    -/hashmap-to-mutable!
                      :is-persistent (fn:> [hashmap] (not (-/hashmap-is-editable hashmap)))
                      :to-persistent -/hashmap-to-persistent!}]
-    [kproto/IEmpty  {:empty         -/hashmap-empty}]
-    [kproto/IEq     {:eq            -/hashmap-eq}]
-    [kproto/IHash   {:hash          (interface-common/wrap-with-cache
+    [p-empty/IEmpty  {:empty         -/hashmap-empty}]
+    [p-eq/IEq     {:eq            -/hashmap-eq}]
+    [p-hash/IHash   {:hash          (interface-common/wrap-with-cache
                                      -/hashmap-hash
                                      -/hashmap-is-editable)}]
-    [kproto/IAssoc  {:assoc         -/hashmap-assoc}]
-    [kproto/IAssocMutable  {:assoc-mutable -/hashmap-assoc!}]
-    [kproto/IDissoc {:dissoc        -/hashmap-dissoc}]
-    [kproto/IDissocMutable {:dissoc-mutable -/hashmap-dissoc!}]
-    [kproto/IFind   {:find          -/hashmap-find-key}]
-    [kproto/ILookup {:keys          -/hashmap-keys
+    [p-assoc/IAssoc  {:assoc         -/hashmap-assoc}]
+    [p-assoc-mutable/IAssocMutable  {:assoc-mutable -/hashmap-assoc!}]
+    [p-dissoc/IDissoc {:dissoc        -/hashmap-dissoc}]
+    [p-dissoc-mutable/IDissocMutable {:dissoc-mutable -/hashmap-dissoc!}]
+    [p-find/IFind   {:find          -/hashmap-find-key}]
+    [p-lookup/ILookup {:keys          -/hashmap-keys
                      :vals          -/hashmap-vals
                      :lookup        -/hashmap-lookup-key}]
-    [kproto/ISize   {:size          interface-collection/coll-size}]
-    [kproto/IShow   {:show          -/hashmap-show}]])
+    [p-size/ISize   {:size          interface-collection/coll-size}]
+    [p-show/IShow   {:show          -/hashmap-show}]])
 
 (def.xt HASHMAP_PROTOTYPE
   (-> -/HASHMAP_SPEC

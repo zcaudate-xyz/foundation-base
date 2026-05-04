@@ -3,14 +3,14 @@
             [hara.runtime.solidity.client :as client]
             [hara.runtime.solidity.compile-common :as compile-common]
             [hara.runtime.solidity.compile-solc :as compile]
-            [hara.runtime.solidity.env-ganache :as env]
+            [hara.runtime.solidity.env-hardhat :as env]
             [hara.lang :as l]
             [std.make.compile :as make-compile])
   (:use code.test))
 
 (l/script- :solidity
   {:config  {:mode :clean}
-   :require [[hara.runtime.solidity :as s]]})
+   :require [[hara.runtime.solidity :as sol]]})
 
 (defn.sol ^{:- [:pure :internal]
             :static/returns [:string :memory]}
