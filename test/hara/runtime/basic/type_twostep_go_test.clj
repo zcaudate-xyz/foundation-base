@@ -32,8 +32,8 @@
      (!.go
        (-/add-20 10))
 
-     (!.go
-       (+ 3 (x-len "hello")))]
+      (!.go
+        (+ 3 (x:len "hello")))]
     :go-unavailable)
   => (any [6 16 36 30 8]
-          :go-unavailable))
+           :go-unavailable))

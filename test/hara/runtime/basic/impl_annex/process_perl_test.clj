@@ -35,12 +35,9 @@
 
 ^{:refer hara.runtime.basic.impl-annex.process-perl/default-basic-client :added "4.1"}
 (fact "builds perl basic client source from perl forms"
-  [(-> (default-basic-client 4567 {:host "127.0.0.1"})
-       (clojure.string/includes? "use IO::Socket::INET;"))
-   (-> (default-basic-client 4567 {:host "127.0.0.1"})
-       (clojure.string/includes? "sub debug_client_basic"))
-   (-> (default-basic-client 4567 {:host "127.0.0.1"})
-       (clojure.string/includes? "debug_client_basic(\"127.0.0.1\", 4567"))
-   (-> (default-basic-client 4567 {:host "127.0.0.1"})
-       (clojure.string/includes? "HOST_PLACEHOLDER"))]
+  (let [out (default-basic-client 4567 {:host "127.0.0.1"})]
+    [(boolean (re-find #"use IO::Socket::INET;" out))
+     (boolean (re-find #"sub client_basic" out))
+     (boolean (re-find #"client_basic\(\"127\.0\.0\.1\",\s*4567" out))
+     (boolean (re-find #"HOST_PLACEHOLDER" out))])
   => [true true true false])

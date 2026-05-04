@@ -44,19 +44,24 @@
   => seq?)
 
 ^{:refer hara.common.preprocess-staging/to-staging :added "4.1"}
-(fact "keeps standalone primitive operators in reserved form during ruby staging"
+ (fact "resolves standalone primitive operators during ruby staging"
   (let [book (l/get-book (l/default-library) :ruby)]
     (first
-     (staging/to-staging '(xt.lang.spec-primitive/+)
-                         (:grammar book)
-                         (:modules book)
-                         {:lang :ruby
-                          :module {:id 'user
-                                   :link {'xt.lang.spec-primitive 'xt.lang.spec-primitive}}})))
-  => '+)
+     (staging/to-staging 'xt.lang.spec-primitive/+
+                          (:grammar book)
+                          (:modules book)
+                          {:lang :ruby
+                           :module {:id 'user
+                                    :link {'xt.lang.spec-primitive 'xt.lang.spec-primitive}}})))
+  => '(fn [x & more] (return (+ x & more))))
 
 ^{:refer hara.runtime.basic.impl.process-ruby/default-body-wrap :added "4.1"}
-(fact "TODO")
+(fact "wraps forms in an OUT assignment"
+  (default-body-wrap '((defn add-10 [x] (return (+ x 10)))
+                       (return (add-10 5))))
+  => '(do
+        (defn add-10 [x] (return (+ x 10)))
+        (:= OUT (add-10 5))))
 
 ^{:refer hara.runtime.basic.impl.process-ruby/normalize-forms :added "4.1"}
 (fact "normalizes a top-level do body"
@@ -69,15 +74,13 @@
   (normalize-forms '[1 2 3] {:bulk true})
   => '[1 2 3])
 
-^{:refer hara.runtime.basic.impl.process-ruby/mark-inline-defs :added "4.1"}
-(fact "marks inline defs as inner"
-  (-> (mark-inline-defs '((defn add-10 [x] (return (+ x 10)))
-                          (add-10 5)))
-      first
-      second
-      meta
-      :inner)
-  => true)
+^{:refer hara.runtime.basic.impl.process-ruby/default-body-wrap :added "4.1"}
+(fact "assigns the final expression to OUT"
+  (default-body-wrap '((defn add-10 [x] (return (+ x 10)))
+                       (add-10 5)))
+  => '(do
+        (defn add-10 [x] (return (+ x 10)))
+        (:= OUT (add-10 5))))
 
 ^{:refer hara.runtime.basic.impl.process-ruby/default-body-transform :added "4.1"}
 (fact "applies ruby return transform"

@@ -85,12 +85,15 @@
    "end"
    ""
    "local function L_util___add_fn(a,b)"
-   "  return L_core___identity_fn(function (x,y)"
-   "    return x + y"
-   "  end)(a,L_util___sub_fn(b,0))"
-   "end"
-   ""
-   "return L_util___add_fn(1,2)")
+    "  return L_core___identity_fn(function (x,y)"
+    "    return x + y"
+    "  end)(a,L_util___sub_fn(b,0))"
+    "end"
+    ""
+    "local function OUT_FN()"
+    "  return L_util___add_fn(1,2)"
+    "end"
+    "return OUT_FN()")
 
   (ptr/with:raw
    (ptr/with:input []
@@ -129,7 +132,7 @@
       (p/invoke-ptr-oneshot +ptr-identity+ [123])
       (ptr/with:raw)
       (json/read))
-  => {"value" 123, "type" "data"}
+  => {"return" "number", "value" 123, "type" "data"}
 
   (-> (p/rt-oneshot {:lang :lua
                      :program :luajit})
@@ -142,7 +145,7 @@
       (p/invoke-ptr-oneshot +ptr-identity+ ['(error "Hello")])
       (ptr/with:raw)
       (json/read))
-  => {"value" "[string \"local function L_core___identity_fn(x)...\"]:5: Hello", "type" "error"}
+  => {"value" "[string \"local function L_core___identity_fn(x)...\"]:6: Hello", "type" "error"}
 
 
   (-> (p/rt-oneshot {:lang :lua
@@ -151,7 +154,7 @@
       (p/invoke-ptr-oneshot +ptr+ [10 20])
       (ptr/with:raw)
       (json/read))
-  => {"value" 30, "type" "data"})
+  => {"return" "number", "value" 30, "type" "data"})
 
 ^{:refer hara.runtime.basic.type-oneshot/rt-oneshot-setup :added "4.0"}
 (fact "helper function for preparing oneshot params"
@@ -186,11 +189,11 @@
 
   (rt-oneshot :r)
   => ["(function (){\n  return(1 + 2 + 3 + 4);\n})()"
-      {"key" nil, "id" nil, "value" 10, "type" "data"}
+      {"return" "number", "value" 10, "type" "data"}
       10]
 
   (rt-oneshot :lua)
-  => ["return 1 + 2 + 3 + 4"
+  => ["local function OUT_FN()\n  return 1 + 2 + 3 + 4\nend\nreturn OUT_FN()"
       {"value" 10, "type" "data", "return" "number"}
       10]
 
@@ -210,7 +213,7 @@
        "    err = traceback.format_exc()"
        "  raise Exception(err)"
        "globals()[\"OUT\"] = OUT_FN()")
-      {"key" nil, "id" nil, "value" 10, "type" "data"}
+      {"key" nil, "id" nil, "return" "number", "value" 10, "type" "data"}
       10])
 
 (comment

@@ -82,7 +82,7 @@
 
   (get-schema-seed (l/get-module (l/runtime-library)
                                  :postgres
-                                 'rt.postgres.base.grammar.meta-test))
+                                 'hara.runtime.postgres.base.grammar.meta-test))
   => ["test/meta"])
 
 ^{:refer hara.runtime.postgres.base.grammar.meta/has-schema :added "4.0"}

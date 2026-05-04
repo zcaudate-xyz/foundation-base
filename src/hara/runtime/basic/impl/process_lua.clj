@@ -171,22 +171,21 @@
   '[(defn client-basic
       [host port opts]
       (local '[conn ok err])
-      (if ngx
-        (do (:= conn (ngx.socket.tcp))
-            (. conn  (settimeout 1000000))
-            (:= '[ok err]  (conn:connect host port)))
-        (do (local socket (require "socket"))
-            (:= '[conn err] (socket.connect host port))))
-      (pcall (fn []
-               (while true
-                 (local '[raw err] (conn:receive "*l"))
-                 (cond err (break)
-                       
-                       (== raw "<PING>") (:-)
-                       
-                       :else
-                       (do (local input (cjson.decode raw))
-                           (conn:send (cat (return-eval input) "\n"))))))))])
+       (if ngx
+         (do (:= conn (ngx.socket.tcp))
+             (. conn  (settimeout 1000000))
+             (:= '[ok err]  (conn:connect host port)))
+         (do (local socket (require "socket"))
+             (:= '[conn err] (socket.connect host port))))
+       (while true
+         (local '[raw err] (conn:receive "*l"))
+         (cond err (break)
+               
+               (== raw "<PING>") (:-)
+               
+               :else
+               (do (local input (cjson.decode raw))
+                   (conn:send (cat (return-eval input) "\n"))))))])
 
 (def ^{:arglists '([port & [{:keys [host]}]])}
   default-basic-client

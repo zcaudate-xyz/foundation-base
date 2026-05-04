@@ -866,25 +866,36 @@
          ")")))
 
 (defn- update-root-script-string
-  [output extra-langs]
-  (let [root-entry  (get-in output [:globals :global-script :root])
+  ([output extra-langs]
+   (update-root-script-string output extra-langs nil))
+  ([output extra-langs known-langs-override]
+   (let [root-entry  (get-in output [:globals :global-script :root])
          root-form   (some-> root-entry item-value)
          current-str (item-string root-entry)
          root-meta   (some-> root-form meta :seedgen/root)
-         known-langs (root-script-declared-langs output extra-langs)]
-    (cond
-      (or (nil? root-meta)
-          (<= (count known-langs) 1))
-      current-str
-      
-      (= known-langs (vec (or (:langs root-meta) [])))
-      current-str
+         base-meta   (some-> root-meta (dissoc :langs))
+         known-langs (or known-langs-override
+                         (root-script-declared-langs output extra-langs))]
+     (cond
+       (nil? root-meta)
+       current-str
 
-      :else
-      (str "^{:seedgen/root "
-           (pr-str (assoc root-meta :langs known-langs))
-           "}\n"
-           (unwrap-meta-string current-str)))))
+       (<= (count known-langs) 1)
+       (if (= base-meta root-meta)
+         current-str
+         (str "^{:seedgen/root "
+              (pr-str base-meta)
+              "}\n"
+              (unwrap-meta-string current-str)))
+       
+       (= known-langs (vec (or (:langs root-meta) [])))
+       current-str
+
+       :else
+       (str "^{:seedgen/root "
+            (pr-str (assoc root-meta :langs known-langs))
+            "}\n"
+            (unwrap-meta-string current-str))))))
 
 (defn- script-string-map
   [output]
@@ -971,8 +982,8 @@
 (defn- render-top-level-remove
   [output text target-lang]
   (let [root-entry       (get-in output [:globals :global-script :root])
-        root-lang        (get-in output [:globals :lang :root])
-        purge-langs      (get-in output [:globals :lang :derived])
+         root-lang        (get-in output [:globals :lang :root])
+         purge-langs      (get-in output [:globals :lang :derived])
         target-lang      (if (= :all target-lang)
                            purge-langs
                            target-lang)
@@ -985,15 +996,18 @@
                                       [(symbol (str (:ns entry)) (str (:var entry))) entry]))
                                fact-entries)
         root-script-line (some-> root-entry item-line line-key)
-        derived-line->lang
-        (->> (get-in output [:globals :global-script :derived])
-             (keep (fn [item]
-                     (let [lang (some-> item item-value second common/seedgen-normalize-runtime-lang)]
-                       (when lang
-                         [(line-key (item-line item)) lang]))))
-             (into {}))
-        root            (nav/parse-root text)
-        top-navs        (form-common/nav-top-levels root)]
+         derived-line->lang
+         (->> (get-in output [:globals :global-script :derived])
+              (keep (fn [item]
+                      (let [lang (some-> item item-value second common/seedgen-normalize-runtime-lang)]
+                        (when lang
+                          [(line-key (item-line item)) lang]))))
+              (into {}))
+         remaining-langs (->> (root-script-declared-langs output nil)
+                              (remove target-set)
+                              vec)
+         root            (nav/parse-root text)
+         top-navs        (form-common/nav-top-levels root)]
     (str (str/join
           "\n\n"
           (mapcat (fn [zloc]
@@ -1004,9 +1018,9 @@
                           refer   (:refer (meta form))
                           head    (when (seq? (nav/value body))
                                     (first (nav/value body)))]
-                       (cond
-                         (= line root-script-line)
-                          [(update-root-script-string output nil)]
+                        (cond
+                          (= line root-script-line)
+                           [(update-root-script-string output nil remaining-langs)]
 
                         (contains? derived-line->lang line)
                         (if (contains? target-set (get derived-line->lang line))

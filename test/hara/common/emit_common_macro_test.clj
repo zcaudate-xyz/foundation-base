@@ -81,9 +81,9 @@
   (emit-common-loop '(xor A B)
                    +grammar+
                    {})
-  => "(:? A B (not B))"
+  => "(== (not (not A)) (not (not B)))"
   
   (emit-common '(xor A B)
                +grammar+
                {})
-  => "A ? B : !B")
+  => "!!A == !!B")

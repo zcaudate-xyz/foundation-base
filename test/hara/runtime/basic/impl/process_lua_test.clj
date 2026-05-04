@@ -24,9 +24,9 @@
   (default-basic-client 19000)
   => string?)
 
-^{:refer hara.runtime.basic.impl.process-lua/make-bootstrap :added "4.1"}
+^{:refer hara.runtime.basic.impl.process-lua/default-basic-client :added "4.1"}
 (fact "constructs shared bootstrap without swallowing client loop errors"
-  (let [out (make-bootstrap +client-basic+)]
+  (let [out (default-basic-client 19000)]
     [(boolean (re-find #"cjson = require" out))
      (boolean (re-find #"local function return_eval" out))
      (boolean (re-find #"local function client_basic" out))
@@ -54,11 +54,11 @@
   (normalize-forms '[1 2 3] {:bulk true})
   => '[1 2 3])
 
-^{:refer hara.runtime.basic.impl.process-lua/mark-inline-defs :added "4.1"}
-(fact "marks inline defs as inner"
-  (-> (mark-inline-defs '((defn add-10 [x] (return (+ x 10)))
-                          (add-10 5)))
-      first
+^{:refer hara.runtime.basic.impl.process-lua/default-body-wrap :added "4.1"}
+(fact "marks the wrapper fn as inner"
+  (-> (default-body-wrap '[(defn add-10 [x] (return (+ x 10)))
+                           (add-10 5)])
+      second
       second
       meta
       :inner)

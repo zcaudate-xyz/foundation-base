@@ -61,8 +61,8 @@
                   (first form))]
     (cond (and (symbol? sym)
                (namespace sym))
-          (let [s (get-format-string (book/get-entry book sym))]
-            (list 'printf s form))
+          (let [s (get-format-string (book/get-code-entry-view book sym))]
+             (list 'printf s form))
 
           (= 'printf sym)
           form

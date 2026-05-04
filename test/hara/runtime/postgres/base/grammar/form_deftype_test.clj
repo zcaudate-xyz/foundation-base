@@ -213,10 +213,10 @@
 
 ^{:refer hara.runtime.postgres.base.grammar.form-deftype/pg-deftype-format-fragment :added "4.1"}
 (fact "parses the fragment contained by the symbol"
-  (pg-deftype-format-fragment 'rt.postgres.base.grammar.form-deftype-test/+fragment-sample+)
+  (pg-deftype-format-fragment 'hara.runtime.postgres.base.grammar.form-deftype-test/+fragment-sample+)
   => '(:a {:type :int} :b {:type :text})
 
-  (pg-deftype-format-fragment ['rt.postgres.base.grammar.form-deftype-test/+fragment-sample+ :a {:c :d}])
+  (pg-deftype-format-fragment ['hara.runtime.postgres.base.grammar.form-deftype-test/+fragment-sample+ :a {:c :d}])
   => '(:a {:type :int, :c :d} :b {:type :text}))
 
 ^{:refer hara.runtime.postgres.base.grammar.form-deftype/pg-deftype-format-generated :added "4.1"}

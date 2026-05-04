@@ -246,7 +246,7 @@
   => '[:alias table]
 
   (emit-symbol-classify 't.n/hello {:module {:alias '{t table}}})
-  => '[:unknown t.n])
+  => '[:link t.n])
 
 ^{:refer hara.common.emit-common/emit-symbol-standard :adopt true :added "3.0"}
 (fact "emits a standard symbol"
@@ -523,4 +523,3 @@
   (emit-token :symbol 'try +grammar+
               {})
   => (throws))
-

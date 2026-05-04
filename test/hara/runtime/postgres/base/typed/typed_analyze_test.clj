@@ -331,15 +331,15 @@
 ^{:refer hara.runtime.postgres.base.typed.typed-analyze/cached-infer :added "4.1"}
 (fact "cached-infer memoizes function inference by namespace and name"
   (types/clear-registry!)
-  (let [analysis (-> 'rt.postgres.test.scratch-v2
-                     parse/analyze-namespace
-                     parse/register-types!)
+  (let [analysis (-> 'hara.runtime.postgres.test.scratch-v2
+                      parse/analyze-namespace
+                      parse/register-types!)
         fn-def (some #(when (= "insert-entry" (:name %)) %)
                      (:functions analysis))]
     (analyze/reset-cache!)
     (analyze/cached-infer fn-def)
     (keys @analyze/*infer-cache*))
-  => ['rt.postgres.test.scratch-v2/insert-entry])
+  => ['hara.runtime.postgres.test.scratch-v2/insert-entry])
 
 ^{:refer hara.runtime.postgres.base.typed.typed-analyze/normalize-table-name :added "4.1"}
 (fact "normalize-table-name extracts table name from expressions"
