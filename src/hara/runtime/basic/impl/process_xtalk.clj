@@ -2,8 +2,8 @@
   (:require [clojure.string]
             [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-oneshot :as oneshot]
-            [hara.lang.base.impl :as impl]
-            [hara.lang.base.runtime :as rt]
+            [hara.lang.impl :as impl]
+            [hara.lang.runtime :as rt]
             [hara.model.spec-xtalk :as spec]
             [std.lib.foundation :as f]))
 

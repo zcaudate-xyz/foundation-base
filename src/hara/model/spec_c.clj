@@ -1,11 +1,11 @@
 (ns hara.model.spec-c
   (:require [clojure.string]
-            [hara.lang.base.book :as book]
+            [hara.lang.book :as book]
             [hara.common.emit :as emit]
             [hara.common.emit-fn :as emit-fn]
             [hara.common.emit-helper :as helper]
             [hara.common.grammar :as grammar]
-            [hara.lang.base.script :as script]
+            [hara.lang.script :as script]
             [hara.common.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.template :as template]))

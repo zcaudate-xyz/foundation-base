@@ -9,7 +9,7 @@
 
   (vec 
    (sort
-    '(hara.lang.base.manage
+    '(hara.lang.manage
      std.image.base.display
      hara.common.emit-data
      std.pretty.protocol
@@ -17,7 +17,7 @@
      std.dispatch.hub
      std.concurrent.thread
      std.vm.llvm-interpreter
-     hara.lang.base.script-control
+     hara.lang.script-control
      std.dom.event
      std.make.project
      std.object.element
@@ -31,8 +31,8 @@
      hara.common.emit-fn
      std.lib.zip
      std.vm.forth-interpreter
-     hara.lang.base.script-annex
-     hara.lang.base.type-shared
+     hara.lang.script-annex
+     hara.lang.type-shared
      std.lib.system.scaffold
      std.protocol.state
      std.object.element.impl.type
@@ -50,26 +50,26 @@
      hara.lang
      hara.common.emit-block
      std.block.editor
-     hara.lang.base.runtime
+     hara.lang.runtime
      std.lib.signal
      std.concurrent.print
      std.block.heal.parse
-     hara.lang.base.type-notify
+     hara.lang.type-notify
      std.concurrent.relay
-     hara.lang.base.script-lint
+     hara.lang.script-lint
      std.make.bulk
      std.concurrent.bus
      hara.model.spec-scheme
      std.block.heal.indent
      std.lib.os
-     hara.lang.base.script
+     hara.lang.script
      std.lib.resource
-     hara.lang.base.workspace
+     hara.lang.workspace
      std.protocol.string
      hara.model.spec-rust
      std.log.match
      hara.common.grammar-xtalk
-     hara.lang.base.impl
+     hara.lang.impl
      std.lib.transform.base.type-check
      std.log.common
      hara.common.emit-common
@@ -77,7 +77,7 @@
      std.make.makefile
      std.object.query
      std.make.common
-     hara.lang.base.compile
+     hara.lang.compile
      std.task
      std.make.readme
      std.tailwind
@@ -86,10 +86,10 @@
      std.fs.api
      std.make.compile
      std.lib.trace
-     hara.lang.base.pointer
+     hara.lang.pointer
      std.pretty
-     hara.lang.base.library
-     hara.lang.base.impl-entry
+     hara.lang.library
+     hara.lang.impl-entry
      hara.common.emit-preprocess
      std.object.element.common
      std.object.element.impl.multi
@@ -100,7 +100,7 @@
      hara.model.spec-js.meta
      std.block.heal.filename
      hara.model.spec-js.qml
-     hara.lang.base.runtime-proxy
+     hara.lang.runtime-proxy
      std.object.framework.access
      std.object.framework.print
      std.lib.stream
@@ -123,12 +123,12 @@
      hara.model.spec-xtalk.fn-python
      std.vm.scheme-interpreter
      std.image
-     hara.lang.base.script-macro
+     hara.lang.script-macro
      std.protocol.log
      hara.model.spec-bash
      std.dom.react
      std.lib.memoize
-     hara.lang.base.library-snapshot
+     hara.lang.library-snapshot
      std.block.heal.core
      std.concurrent.atom
      hara.model.spec-xtalk.fn-js
@@ -149,7 +149,7 @@
      std.task.process
      std.math.markov
      std.lib.walk
-     hara.lang.base.impl-lifecycle
+     hara.lang.impl-lifecycle
      hara.model.spec-xtalk.fn-lua
      std.make.github)))
   

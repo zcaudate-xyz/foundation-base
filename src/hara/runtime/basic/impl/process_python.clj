@@ -7,8 +7,8 @@
             [hara.runtime.basic.type-remote-port :as remote-port]
             [hara.runtime.basic.type-websocket :as websocket]
             [std.json :as json]
-            [hara.lang.base.impl :as impl]
-            [hara.lang.base.runtime :as rt]
+            [hara.lang.impl :as impl]
+            [hara.lang.runtime :as rt]
             [hara.model.spec-python :as spec]
             [std.lib.os :as os]
             [xt.lang.common-lib :as lib]))

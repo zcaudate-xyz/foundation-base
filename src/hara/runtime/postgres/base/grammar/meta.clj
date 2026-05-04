@@ -1,5 +1,5 @@
 (ns hara.runtime.postgres.base.grammar.meta
-  (:require [hara.lang.base.pointer :as ptr]
+  (:require [hara.lang.pointer :as ptr]
             [hara.common.util :as ut]))
 
 (defn has-function

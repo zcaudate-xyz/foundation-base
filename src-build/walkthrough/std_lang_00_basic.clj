@@ -58,7 +58,7 @@
       :context/fn #'hara.common.util/lang-rt-default}
 
   (type @a)
-  => hara.lang.base.book_entry.BookEntry
+  => hara.lang.book_entry.BookEntry
   
   (into {} @a)
   => (contains-in

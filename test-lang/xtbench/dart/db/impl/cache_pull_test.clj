@@ -12,8 +12,8 @@
              [xt.lang.common-trace :as trace]
              [xt.db.impl.cache-util :as data]
              [xt.db.impl.cache-pull :as q]
-             [xt.db.schema.base-flatten :as f]
-             [xt.db.schema.sql-util :as ut]
+             [xt.db.text.base-flatten :as f]
+             [xt.db.text.sql-util :as ut]
              [xt.db.helpers.data-main-test :as sample]]})
 
 (fact:global

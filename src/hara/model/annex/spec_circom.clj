@@ -1,9 +1,9 @@
 (ns hara.model.annex.spec-circom
   (:require [clojure.string]
-            [hara.lang.base.book :as book]
+            [hara.lang.book :as book]
             [hara.common.emit :as emit]
             [hara.common.grammar :as grammar]
-            [hara.lang.base.script :as script]
+            [hara.lang.script :as script]
             [hara.common.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.template :as template]))

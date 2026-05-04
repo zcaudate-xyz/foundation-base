@@ -1,8 +1,8 @@
 (ns hara.runtime.postgres.base.grammar.form-deftype-hydrate
   (:require [hara.runtime.postgres.base.grammar.common :as common]
             [hara.runtime.postgres.base.application :as app]
-            [hara.lang.base.book :as book]
-            [hara.lang.base.library-snapshot :as snap]
+            [hara.lang.book :as book]
+            [hara.lang.library-snapshot :as snap]
             [hara.common.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]

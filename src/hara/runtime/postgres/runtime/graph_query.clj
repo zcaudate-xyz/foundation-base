@@ -5,8 +5,8 @@
             [hara.runtime.postgres.runtime.impl-base :as impl]
             [hara.runtime.postgres.runtime.impl-main :as main]
             [hara.lang :as l]
-            [hara.lang.base.book :as book]
-            [hara.lang.base.library-snapshot :as snap]
+            [hara.lang.book :as book]
+            [hara.lang.library-snapshot :as snap]
             [hara.common.util :as ut]
             [std.lib.foundation :as f]
             [std.lib.schema :as schema]))

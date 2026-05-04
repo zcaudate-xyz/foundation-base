@@ -2,7 +2,7 @@
   (:require [clojure.string]
             [hara.common.emit-helper :as helper]
             [hara.common.emit-preprocess :as preprocess]
-            [hara.lang.base.preprocess-base :as preprocess-base]
+            [hara.common.preprocess-base :as preprocess-base]
             [hara.common.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]

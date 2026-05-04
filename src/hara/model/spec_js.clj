@@ -1,7 +1,7 @@
 (ns hara.model.spec-js
   (:require [clojure.string]
             [std.html :as html]
-            [hara.lang.base.book :as book]
+            [hara.lang.book :as book]
             [hara.common.emit :as emit]
             [hara.common.emit-common :as common]
             [hara.common.emit-data :as data]
@@ -10,7 +10,7 @@
             [hara.common.emit-top-level :as top]
             [hara.common.grammar :as grammar]
             [hara.common.grammar-spec :as spec]
-            [hara.lang.base.script :as script]
+            [hara.lang.script :as script]
             [hara.common.util :as ut]
             [hara.model.spec-js.rewrite :as rewrite]
             [hara.model.spec-js.jsx :as jsx]

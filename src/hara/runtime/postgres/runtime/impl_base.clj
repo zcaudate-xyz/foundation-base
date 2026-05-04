@@ -5,7 +5,7 @@
             [hara.lang :as l]
             [hara.common.emit-common :as emit-common]
             [hara.common.emit-data :as emit-data]
-            [hara.lang.base.library-snapshot :as snap]
+            [hara.lang.library-snapshot :as snap]
             [hara.common.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]

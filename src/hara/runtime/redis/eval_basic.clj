@@ -5,9 +5,9 @@
             [std.json :as json]
             [hara.lang :as l]
             [hara.common.emit-common :as common]
-            [hara.lang.base.impl :as impl]
-            [hara.lang.base.pointer :as ptr]
-            [hara.lang.base.runtime :as default]
+            [hara.lang.impl :as impl]
+            [hara.lang.pointer :as ptr]
+            [hara.lang.runtime :as default]
             [std.lib.env :as env]
             [std.lib.foundation :as f]
             [xt.lang.common-lib :as lib]))

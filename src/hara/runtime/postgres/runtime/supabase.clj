@@ -5,7 +5,7 @@
             [hara.runtime.postgres.runtime.addon :as addon]
             [std.json :as json]
             [hara.lang :as l]
-            [hara.lang.base.impl :as impl]
+            [hara.lang.impl :as impl]
             [std.lib.context.pointer :as ptr]
             [std.lib.foundation :as f]
             [std.string.case :as case]))

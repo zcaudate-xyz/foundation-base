@@ -23,7 +23,7 @@
   (let [grammar    (l/grammar :solidity)
 
         emit-fn    (fn [entry]
-                     (binding [hara.lang.base.impl-entry/*cache-none* true]
+                     (binding [hara.lang.impl-entry/*cache-none* true]
                        (l/emit-entry grammar entry {:layout :flat})))
         body       (clojure.string/join
                     "\n\n"
@@ -90,7 +90,7 @@
   "exports a ptr"
   {:added "4.0"}
   [ptr]
-  (let [entries (hara.lang.base.impl/emit-entry-deps-collect
+  (let [entries (hara.lang.impl/emit-entry-deps-collect
                  ptr
                  {:lang :solidity})
         is-interface #(-> % :op-key (= :definterface))

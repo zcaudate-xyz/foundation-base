@@ -1,8 +1,38 @@
 (ns hara.runtime.postgres.base.typed.typed-parse
-  (:require [clojure.java.io :as io]
+  (:require [code.project :as project]
+            [clojure.java.io :as io]
             [clojure.string :as str]
             [hara.runtime.postgres.base.typed.typed-infer :as typed-infer]
             [hara.runtime.postgres.base.typed.typed-common :as types]))
+
+(defn- canonical-postgres-ns
+  [ns-sym]
+  (if (and (symbol? ns-sym)
+           (str/starts-with? (str ns-sym) "rt.postgres."))
+    (symbol (str/replace (str ns-sym)
+                         #"^rt\.postgres\."
+                         "hara.runtime.postgres."))
+    ns-sym))
+
+(defn- existing-file-path
+  [paths]
+  (some (fn [path]
+          (let [path-str (some-> path str)]
+            (when (and path-str (.exists (io/file path-str)))
+              path-str)))
+        paths))
+
+(defn- file-path-candidates
+  [file-path]
+  (distinct [file-path
+             (str/replace file-path
+                          "src/rt/postgres/"
+                          "src/hara/runtime/postgres/")]))
+
+(defn- resolve-file-path
+  [file-path]
+  (or (existing-file-path (file-path-candidates file-path))
+      (str file-path)))
 
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; Source file reading
@@ -11,7 +41,7 @@
 (defn read-forms
   "Reads all top-level forms from a Clojure source file."
   [file-path]
-  (with-open [r (java.io.PushbackReader. (io/reader file-path))]
+  (with-open [r (java.io.PushbackReader. (io/reader (resolve-file-path file-path)))]
     (let [eof (Object.)]
       (loop [forms []]
         (let [form (try
@@ -244,19 +274,8 @@
   analysis)
 
 (defn analyze-namespace [ns-sym]
-  (let [ns-str (str ns-sym)
-        rel-path (-> ns-str (str/replace #"\." "/") (str/replace #"-" "_") (str ".clj"))
-        source-roots ["src/"
-                      "clojure/src/"
-                      "backend/src/"
-                      "backend/clojure/src/"
-                      "main/src/"
-                      "main/clojure/src/"]
-        file-paths (mapv #(str % rel-path) source-roots)
-        target-file (some (fn [p]
-                            (when (.exists (io/file p))
-                              p))
-                          file-paths)]
+  (let [project-map (project/project)
+        target-file (project/get-path (canonical-postgres-ns ns-sym) project-map)]
     (if target-file
       (analyze-file target-file)
       {:enums [] :tables [] :functions []})))

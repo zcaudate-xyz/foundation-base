@@ -1,6 +1,6 @@
 (ns hara.model.spec-python
   (:require [clojure.string :as string]
-            [hara.lang.base.book :as book]
+            [hara.lang.book :as book]
  	    [hara.common.emit :as emit]
             [hara.common.emit-common :as common]
             [hara.common.emit-data :as data]
@@ -9,8 +9,8 @@
             [hara.common.emit-top-level :as top]
             [hara.common.grammar :as grammar]
             [hara.common.grammar-spec :as spec]
-            [hara.lang.base.script :as script]
-            [hara.lang.typed.xtalk-analysis :as xtalk-analysis]
+            [hara.lang.script :as script]
+            [hara.typed.xtalk-analysis :as xtalk-analysis]
             [hara.common.util :as ut]
             [hara.model.spec-xtalk]
             [hara.model.spec-python.rewrite :as rewrite]

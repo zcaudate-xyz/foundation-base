@@ -9,7 +9,7 @@
              [xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
              [xt.db.impl.cache-util :as data]
-             [xt.db.schema.base-flatten :as f]
+             [xt.db.text.base-flatten :as f]
              [xt.db.helpers.data-main-test :as sample]]})
 
 (fact:global

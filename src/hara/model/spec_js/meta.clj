@@ -1,8 +1,8 @@
 (ns hara.model.spec-js.meta
   (:require [clojure.string]
             [std.fs :as fs]
-            [hara.lang.base.book :as book]
-            [hara.lang.base.book-module :as module]
+            [hara.lang.book :as book]
+            [hara.lang.book-module :as module]
             [hara.common.util :as ut]))
 
 ;;

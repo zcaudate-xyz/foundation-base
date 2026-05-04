@@ -95,7 +95,15 @@
   => {:verbose true :other true}
 
   (process-ns-args [":timeout" "100"])
-  => {:timeout 100})
+  => {:timeout 100}
+
+  (process-ns-args [":files" "test/code/project_test.clj test/std/task_test.clj"])
+  => {:files ["test/code/project_test.clj"
+              "test/std/task_test.clj"]}
+
+  (process-ns-args [":files" "[\"test/code/project_test.clj\" \"test/std/task_test.clj\"]"])
+  => {:files ["test/code/project_test.clj"
+              "test/std/task_test.clj"]})
 
 
 (comment

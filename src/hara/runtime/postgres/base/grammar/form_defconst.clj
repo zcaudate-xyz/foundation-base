@@ -7,7 +7,7 @@
             [hara.runtime.postgres.runtime.impl-main :as main]
             [hara.lang :as l]
             [hara.common.emit-preprocess :as preprocess] [hara.common.preprocess-base :as preprocess-base]
-            [hara.lang.base.library-snapshot :as snap]
+            [hara.lang.library-snapshot :as snap]
             [hara.common.util :as ut]
             [std.lib.foundation :as f]))
 

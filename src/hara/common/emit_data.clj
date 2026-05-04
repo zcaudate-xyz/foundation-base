@@ -1,6 +1,6 @@
 (ns hara.common.emit-data
   (:require [clojure.string]
-            [hara.lang.base.book :as book]
+            [hara.lang.book :as book]
             [hara.common.emit-common :as common]
             [hara.common.emit-helper :as helper]
             [hara.common.util :as ut]

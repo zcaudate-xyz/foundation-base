@@ -1,14 +1,14 @@
-(ns hara.lang.typed.xtalk-analysis-test
+(ns hara.typed.xtalk-analysis-test
   (:use code.test)
-  (:require [hara.lang.typed.xtalk-analysis :refer :all]
-            [hara.lang.typed.xtalk-common :as types]))
+  (:require [hara.typed.xtalk-analysis :refer :all]
+            [hara.typed.xtalk-common :as types]))
 
-^{:refer hara.lang.typed.xtalk-analysis/analyze-file :added "4.1"}
+^{:refer hara.typed.xtalk-analysis/analyze-file :added "4.1"}
 (fact "analyzes files directly"
 (count (:specs (analyze-file "test/hara.lang/model/spec_xtalk_typed_fixture.clj")))
   => 3)
 
-^{:refer hara.lang.typed.xtalk-analysis/analyze-file-raw :added "4.1"}
+^{:refer hara.typed.xtalk-analysis/analyze-file-raw :added "4.1"}
 (fact "returns raw parsed analysis without spec attachment"
   (let [result (analyze-file-raw "test/hara.lang/model/spec_xtalk_typed_fixture.clj")]
     [(map? result)
@@ -16,7 +16,7 @@
      (= (:ns result) 'hara.model.spec-xtalk-typed-fixture)])
   => [true true true])
 
-^{:refer hara.lang.typed.xtalk-analysis/analyze-namespace :added "4.1"}
+^{:refer hara.typed.xtalk-analysis/analyze-namespace :added "4.1"}
 (fact "provides attached namespace analysis examples"
   (let [analysis (analyze-namespace 'hara.model.spec-xtalk-typed-fixture)]
     {:ns (:ns analysis)
@@ -44,7 +44,7 @@
                     :output {:kind :maybe
                              :item {:kind :named :name hara.model.spec-xtalk-typed-fixture/User}}}]})
 
-^{:refer hara.lang.typed.xtalk-analysis/analyze-namespace-raw :added "4.1"}
+^{:refer hara.typed.xtalk-analysis/analyze-namespace-raw :added "4.1"}
 (fact "exposes raw analysis without same-name spec attachment"
   (let [analysis (analyze-namespace-raw 'hara.model.spec-xtalk-typed-fixture)
         fn-def (some #(when (= "find-user" (:name %)) %)
@@ -55,7 +55,7 @@
                 {:kind :primitive :name :xt/unknown}]
        :output {:kind :primitive :name :xt/unknown}})
 
-^{:refer hara.lang.typed.xtalk-analysis/analyze-and-register! :added "4.1"}
+^{:refer hara.typed.xtalk-analysis/analyze-and-register! :added "4.1"}
 (fact "registers analysis results"
   (do
     (types/clear-registry!)
@@ -63,14 +63,14 @@
     (some? (types/get-function 'hara.model.spec-xtalk-typed-fixture/find-user)))
   => true)
 
-^{:refer hara.lang.typed.xtalk-analysis/resolve-function-def :added "4.1"}
+^{:refer hara.typed.xtalk-analysis/resolve-function-def :added "4.1"}
 (fact "resolves function defs from symbols"
   (do
     (types/clear-registry!)
     (:name (resolve-function-def 'hara.model.spec-xtalk-typed-fixture/find-user)))
   => "find-user")
 
-^{:refer hara.lang.typed.xtalk-analysis/get-function-report :added "4.1"}
+^{:refer hara.typed.xtalk-analysis/get-function-report :added "4.1"}
 (fact "provides function report examples"
   (do
     (types/clear-registry!)
@@ -99,21 +99,21 @@
                        :expected {:kind :named :name hara.model.spec-xtalk-typed-fixture/User}
                        :actual {:kind :primitive :name :xt/str}}]}})
 
-^{:refer hara.lang.typed.xtalk-analysis/get-function-input-type :added "4.1"}
+^{:refer hara.typed.xtalk-analysis/get-function-input-type :added "4.1"}
 (fact "returns named input types as data"
   (do
     (types/clear-registry!)
     (get-function-input-type 'hara.model.spec-xtalk-typed-fixture/find-user 'id))
   => '{:kind :primitive :name :xt/str})
 
-^{:refer hara.lang.typed.xtalk-analysis/get-function-output-type :added "4.1"}
+^{:refer hara.typed.xtalk-analysis/get-function-output-type :added "4.1"}
 (fact "returns function output types as data"
   (do
     (types/clear-registry!)
     (get-function-output-type 'hara.model.spec-xtalk-typed-fixture/find-user))
   => '{:kind :maybe :item {:kind :named :name hara.model.spec-xtalk-typed-fixture/User}})
 
-^{:refer hara.lang.typed.xtalk-analysis/check-namespace :added "4.1"}
+^{:refer hara.typed.xtalk-analysis/check-namespace :added "4.1"}
 (fact "provides namespace report examples"
   (do
     (types/clear-registry!)
@@ -137,7 +137,7 @@
                              :item {:kind :named :name hara.model.spec-xtalk-typed-fixture/User}}
                     :error-tags [:call-arg-type-mismatch]}]})
 
-^{:refer hara.lang.typed.xtalk-analysis/report-json :added "4.1"}
+^{:refer hara.typed.xtalk-analysis/report-json :added "4.1"}
 (fact "renders reports as json"
   [(report-json {:a 1})
    (boolean (re-find #"\n" (report-json {:a 1} true)))]

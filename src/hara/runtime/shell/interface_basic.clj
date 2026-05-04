@@ -3,7 +3,7 @@
   (:require [clojure.string]
             [hara.runtime.basic.impl.process-bash :as process]
             [std.concurrent :as cc]
-            [hara.lang.base.runtime :as default]
+            [hara.lang.runtime :as default]
             [std.lib.collection :as collection]
             [std.lib.component :as component]
             [std.lib.impl :as impl]

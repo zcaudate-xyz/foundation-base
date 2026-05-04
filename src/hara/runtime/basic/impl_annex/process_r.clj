@@ -4,8 +4,8 @@
             [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-oneshot :as oneshot]
             [std.json :as json]
-            [hara.lang.base.impl :as impl]
-            [hara.lang.base.runtime :as rt]
+            [hara.lang.impl :as impl]
+            [hara.lang.runtime :as rt]
             [hara.model.annex.spec-r :as spec]
             [xt.lang.common-lib :as lib]))
 

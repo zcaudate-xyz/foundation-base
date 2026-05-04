@@ -1,9 +1,9 @@
 (ns hara.runtime.postgres.base.grammar.form-defpartition
   (:require [hara.runtime.postgres.base.grammar.common :as common]
-            [hara.lang.base.book :as book]
+            [hara.lang.book :as book]
             [hara.common.emit-preprocess :as preprocess] [hara.common.preprocess-base :as preprocess-base]
             [hara.common.grammar-spec :as grammar-spec]
-            [hara.lang.base.library-snapshot :as snap]
+            [hara.lang.library-snapshot :as snap]
             [std.lib.foundation :as f]))
 
 (defn pg-partition-name

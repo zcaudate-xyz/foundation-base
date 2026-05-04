@@ -1,11 +1,11 @@
 (ns hara.model.annex.spec-erlang
   (:require [clojure.string]
-            [hara.lang.base.book :as book]
+            [hara.lang.book :as book]
             [hara.common.emit :as emit]
             [hara.common.emit-common :as common]
             [hara.common.emit-preprocess :as preprocess] [hara.common.preprocess-base :as preprocess-base]
             [hara.common.grammar :as grammar]
-            [hara.lang.base.script :as script]
+            [hara.lang.script :as script]
             [hara.common.util :as ut]
             [hara.model.spec-xtalk]
             [hara.model.annex.spec-xtalk.fn-erlang :as fn]

@@ -81,7 +81,7 @@
   (with-app-typed-registry
     app-name
     (fn [typed-payload]
-      (some-> (get-in typed-payload [:functions fn-sym])
+      (some-> (get-in typed-payload [:functions (typed-resolve/canonical-fn-sym fn-sym)])
               get-function-report))))
 
 (defn get-function-report-json
@@ -137,7 +137,8 @@
 (defn get-app-function-def
   "Retrieves a function definition from an app typed payload."
   [app-name fn-sym]
-  (let [fn-def (get-in (app/app-typed app-name) [:functions fn-sym])]
+  (let [fn-def (get-in (app/app-typed app-name)
+                       [:functions (typed-resolve/canonical-fn-sym fn-sym)])]
     (when (types/fn-def? fn-def)
       fn-def)))
 

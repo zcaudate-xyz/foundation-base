@@ -1,6 +1,6 @@
 (ns example.brain-test
-  (:require [hara.lang.base.impl :as impl]
-            [hara.lang.base.library :as lib])
+  (:require [hara.lang.impl :as impl]
+            [hara.lang.library :as lib])
   (:use code.test))
 
 (fact "stores contract metadata on backend modules"

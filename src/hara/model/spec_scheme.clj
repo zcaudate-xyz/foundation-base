@@ -1,8 +1,8 @@
 (ns hara.model.spec-scheme
   (:require [clojure.string :as str]
-            [hara.lang.base.book :as book]
+            [hara.lang.book :as book]
             [hara.common.grammar :as grammar]
-            [hara.lang.base.script :as script]
+            [hara.lang.script :as script]
             [hara.model.spec-lisp-common :as common]
             [hara.model.spec-xtalk]
             [hara.model.spec-xtalk.fn-scheme :as fn]

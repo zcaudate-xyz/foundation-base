@@ -11,7 +11,7 @@
 
 (def +eval-block+
   (str "cjson = require('cjson')\n\n"
-       (hara.lang.base.pointer/ptr-invoke-script
+       (hara.lang.pointer/ptr-invoke-script
         lua.nginx/http-debug-api []
         {:lang :lua.nginx})))
 

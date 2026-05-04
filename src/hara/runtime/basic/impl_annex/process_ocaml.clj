@@ -1,7 +1,7 @@
 (ns hara.runtime.basic.impl-annex.process-ocaml
   (:require [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-twostep :as twostep]
-            [hara.lang.base.runtime :as rt]
+            [hara.lang.runtime :as rt]
             [hara.model.annex.spec-ocaml :as spec]))
 
 (defn transform-form

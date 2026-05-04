@@ -3,7 +3,7 @@
              [hara.runtime.postgres.base.grammar.common :as common]
              [hara.runtime.postgres.base.application :as app]
              [hara.lang :as l]
-             [hara.lang.base.book :as book]
+             [hara.lang.book :as book]
              [hara.common.util :as ut]
              [std.lib.collection :as collection]
              [std.lib.deps :as deps]

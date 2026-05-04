@@ -1,7 +1,7 @@
 (ns hara.seedgen.common-util
   (:require [std.fs :as fs]
-              [hara.lang.base.impl :as lang.impl]
-              [hara.lang.base.library :as lang.lib]
+              [hara.lang.impl :as lang.impl]
+              [hara.lang.library :as lang.lib]
               [hara.seedgen.common-meta :as runtime]))
 
 ;; --------------------------------------------------

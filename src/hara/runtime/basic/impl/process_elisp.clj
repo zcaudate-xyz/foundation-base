@@ -3,7 +3,7 @@
             [hara.runtime.basic.type-basic :as basic]
             [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-oneshot :as oneshot]
-            [hara.lang.base.runtime :as rt]
+            [hara.lang.runtime :as rt]
             [hara.model.spec-elisp :as spec]))
 
 (defn elisp-root

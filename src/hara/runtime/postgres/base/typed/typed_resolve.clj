@@ -2,6 +2,17 @@
   (:require [clojure.string :as str]
             [hara.runtime.postgres.base.typed.typed-common :as types]))
 
+(defn canonical-fn-sym
+  [sym]
+  (if (and (symbol? sym)
+           (namespace sym)
+           (str/starts-with? (namespace sym) "rt.postgres."))
+    (symbol (str/replace (namespace sym)
+                         #"^rt\.postgres\."
+                         "hara.runtime.postgres.")
+            (name sym))
+    sym))
+
 (defn app-name-from-static
   [app]
   (cond
@@ -26,7 +37,7 @@
     (cond
       (symbol? fn-ref)
       (if (namespace fn-ref)
-        fn-ref
+        (canonical-fn-sym fn-ref)
         (symbol (str (ns-name *ns*)) (name fn-ref)))
 
       (var? fn-ref)
@@ -98,12 +109,14 @@
                            (symbol (str full-ns "/" fn-part))
                            op))
                        op)
-        qualified? (or (namespaced-symbol? op)
-                       (namespaced-symbol? resolved-op))
-        fn-def (or (types/get-type resolved-op)
-                   (types/get-type op)
-                   (when-not qualified?
-                     (resolve-by-name op-name)))]
+         resolved-op (canonical-fn-sym resolved-op)
+         op          (canonical-fn-sym op)
+         qualified?  (or (namespaced-symbol? op)
+                         (namespaced-symbol? resolved-op))
+         fn-def      (or (types/get-type resolved-op)
+                         (types/get-type op)
+                    (when-not qualified?
+                      (resolve-by-name op-name)))]
     [resolved-op fn-def]))
 
 (defn resolve-function-def

@@ -5,11 +5,11 @@
             [code.project :as project]
             [std.fs :as fs]
             [hara.common.grammar :as grammar]
-            [hara.lang.base.impl :as impl]
-            [hara.lang.base.library :as lib]
-            [hara.lang.base.registry :as reg]
+            [hara.lang.impl :as impl]
+            [hara.lang.library :as lib]
+            [hara.lang.registry :as reg]
             [hara.seedgen.common-meta :as runtime]
-            [hara.lang.typed.xtalk-ops :as typed]))
+            [hara.typed.xtalk-ops :as typed]))
 
 (def +status-mark+
   {:implemented "Y"

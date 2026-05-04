@@ -1,10 +1,10 @@
 (ns hara.runtime.basic.impl-annex.process-rust
   (:require [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-twostep :as twostep]
-            [hara.lang.base.book :as book]
-            [hara.lang.base.impl :as impl]
-            [hara.lang.base.pointer :as ptr]
-            [hara.lang.base.runtime :as rt]
+            [hara.lang.book :as book]
+            [hara.lang.impl :as impl]
+            [hara.lang.pointer :as ptr]
+            [hara.lang.runtime :as rt]
             [hara.common.util :as ut]
             [hara.model.spec-c :as spec]))
 

@@ -1,10 +1,10 @@
 (ns hara.model.spec-dart
-  (:require [hara.lang.base.book :as book]
+  (:require [hara.lang.book :as book]
              [hara.common.emit :as emit]
              [hara.common.emit-common :as common]
              [hara.common.emit-data :as data]
             [hara.common.grammar :as grammar]
-             [hara.lang.base.script :as script]
+             [hara.lang.script :as script]
              [hara.common.util :as ut]
              [hara.model.spec-xtalk]
              [hara.model.spec-dart.rewrite :as rewrite]

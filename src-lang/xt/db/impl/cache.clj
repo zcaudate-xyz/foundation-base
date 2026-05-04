@@ -2,9 +2,9 @@
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.db.schema.base-flatten :as f]
-             [xt.db.schema.base-schema :as base-schema]
-             [xt.db.schema.base-scope :as scope]
+  {:require [[xt.db.text.base-flatten :as f]
+             [xt.db.text.base-schema :as base-schema]
+             [xt.db.text.base-scope :as scope]
              [xt.db.impl.cache-pull :as cache-pull]
              [xt.db.impl.cache-util :as cache-util]
              [xt.lang.spec-base :as xt]

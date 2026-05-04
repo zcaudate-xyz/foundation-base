@@ -10,12 +10,12 @@
             [hara.runtime.postgres.base.grammar.form-vec :as form-vec]
             [hara.runtime.postgres.base.grammar.meta :as meta]
             [hara.runtime.postgres.base.grammar.tf :as tf]
-            [hara.lang.base.book :as book]
+            [hara.lang.book :as book]
             [hara.common.emit :as emit]
             [hara.common.emit-common :as emit-common]
             [hara.common.emit-fn :as emit-fn]
             [hara.common.grammar :as grammar]
-            [hara.lang.base.script :as script]
+            [hara.lang.script :as script]
             [hara.common.util :as ut]
             [std.lib.collection :as collection]))
 

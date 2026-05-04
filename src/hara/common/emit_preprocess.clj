@@ -1,10 +1,10 @@
 (ns hara.common.emit-preprocess
-  (:require [hara.lang.base.preprocess-input :as input]
-            [hara.lang.base.preprocess-base :as base]
-            [hara.lang.base.preprocess-assign :as assign]
-            [hara.lang.base.preprocess-staging :as staging]
-            [hara.lang.base.preprocess-resolve :as resolve]
-            [hara.lang.base.preprocess-value :as value]
+  (:require [hara.common.preprocess-input :as input]
+            [hara.common.preprocess-base :as base]
+            [hara.common.preprocess-assign :as assign]
+            [hara.common.preprocess-staging :as staging]
+            [hara.common.preprocess-resolve :as resolve]
+            [hara.common.preprocess-value :as value]
             [std.lib.foundation :as f]))
 
 (f/intern-in hara.common.emit-preprocess

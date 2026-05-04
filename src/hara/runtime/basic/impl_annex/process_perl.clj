@@ -3,8 +3,8 @@
             [hara.runtime.basic.type-basic :as basic]
             [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-oneshot :as oneshot]
-            [hara.lang.base.impl :as impl]
-            [hara.lang.base.runtime :as rt]
+            [hara.lang.impl :as impl]
+            [hara.lang.runtime :as rt]
             [hara.model.annex.spec-perl :as spec]
             [xt.lang.common-lib :as lib]))
 

@@ -2,13 +2,13 @@
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.db.schema.base-flatten :as f]
-             [xt.db.schema.base-schema :as base-schema]
-             [xt.db.schema.base-scope :as scope]
+  {:require [[xt.db.text.base-flatten :as f]
+             [xt.db.text.base-schema :as base-schema]
+             [xt.db.text.base-scope :as scope]
              [xt.protocol.impl.connection-sql :as sql]
-             [xt.db.schema.sql-graph :as sql-graph]
-             [xt.db.schema.sql-table :as sql-table]
-             [xt.db.schema.sql-raw :as raw]
+             [xt.db.text.sql-graph :as sql-graph]
+             [xt.db.text.sql-table :as sql-table]
+             [xt.db.text.sql-raw :as raw]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]]})
 

@@ -1,7 +1,7 @@
 (ns hara.runtime.basic.impl.process-go
   (:require [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-twostep :as twostep]
-            [hara.lang.base.runtime :as rt]
+            [hara.lang.runtime :as rt]
             [hara.model.spec-go]))
 
 (defn default-twostep-wrap

@@ -2,8 +2,8 @@
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.db.schema.base-schema :as base-schema]
-             [xt.db.schema.base-scope :as scope]
+  {:require [[xt.db.text.base-schema :as base-schema]
+             [xt.db.text.base-scope :as scope]
              [xt.db.impl.cache :as impl-cache]
              [xt.db.impl.sql :as impl-sql]
              [xt.protocol.impl.connection-sql :as sql]

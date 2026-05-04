@@ -4,9 +4,9 @@
             [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-oneshot :as oneshot]
             [hara.runtime.basic.type-websocket :as websocket]
-            [hara.lang.base.impl :as impl]
-            [hara.lang.base.runtime :as rt]
-            [hara.lang.base.type-notify :as notify]
+            [hara.lang.impl :as impl]
+            [hara.lang.runtime :as rt]
+            [hara.lang.type-notify :as notify]
             [xt.lang.common-lib :as lib]))
 
 (defn node-path

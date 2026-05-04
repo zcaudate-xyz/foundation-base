@@ -1,5 +1,5 @@
 (ns hara.runtime.basic.type-common
-  (:require [hara.lang.base.registry :as registry]
+  (:require [hara.lang.registry :as registry]
             [std.lib.atom :as atom]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]

@@ -1,6 +1,6 @@
 (ns hara.model.spec-dart.typed
   (:require [clojure.string :as str]
-            [hara.lang.typed.xtalk-parse :as xtalk-parse]))
+            [hara.typed.xtalk-parse :as xtalk-parse]))
 
 (declare emit-dart-type)
 (declare lossy-dart-type)

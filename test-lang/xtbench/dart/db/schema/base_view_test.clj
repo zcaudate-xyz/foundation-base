@@ -8,8 +8,8 @@
 (l/script- :dart
   {:runtime :twostep
    :require [[xt.lang.common-data :as xtd]
-             [xt.db.schema.base-view :as v]
-             [xt.db.schema.base-util :as ut]]})
+             [xt.db.text.base-view :as v]
+             [xt.db.text.base-util :as ut]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -22,7 +22,7 @@
                 (pg/list-view 'xt.db.helpers.seed-user-test :select)
                 (pg/list-view 'xt.db.helpers.seed-user-test :return))))
 
-^{:refer xt.db.schema.base-view/all-overview :added "4.0"
+^{:refer xt.db.text.base-view/all-overview :added "4.0"
   :setup [(def +all-overview-check+
             (just-in 
              {"RegionCity"
@@ -48,7 +48,7 @@
     (v/all-overview (ut/collect-views (@! +views+))))
   => +all-overview-check+)
 
-^{:refer xt.db.schema.base-view/all-keys :added "4.0"}
+^{:refer xt.db.text.base-view/all-keys :added "4.0"}
 (fact "gets all table keys for a view"
 
   (!.dt
@@ -57,7 +57,7 @@
                 "select"))
   => (just ["all" "all_fiat" "all_crypto" "by_type" "by_country"] :in-any-order))
 
-^{:refer xt.db.schema.base-view/all-methods :added "4.0"
+^{:refer xt.db.text.base-view/all-methods :added "4.0"
   :setup [(def +all-methods-check+
             (just 
              [["Currency" "return" "default"]
@@ -96,9 +96,9 @@
   => +all-methods-check+)
 
 (comment
-  (s/run ['xt.db.schema.base-view])
+  (s/run ['xt.db.text.base-view])
   (s/seedgen-benchadd '[xt.lang.spec] {:lang [:r] :write true})
-  (s/seedgen-benchadd '[xt.db.schema.base-view] {:lang [:julia :dart] :write true})
+  (s/seedgen-benchadd '[xt.db.text.base-view] {:lang [:julia :dart] :write true})
   
-  (s/seedgen-langadd 'xt.db.schema.base-view {:lang [:lua :python] :write true})
-  (s/seedgen-langremove 'xt.db.schema.base-view {:lang [:lua :python] :write true}))
+  (s/seedgen-langadd 'xt.db.text.base-view {:lang [:lua :python] :write true})
+  (s/seedgen-langremove 'xt.db.text.base-view {:lang [:lua :python] :write true}))

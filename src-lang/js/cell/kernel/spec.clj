@@ -1,5 +1,5 @@
 (ns js.cell.kernel.spec
-  (:require [hara.lang.typed.xtalk :refer [defspec.xt]]))
+  (:require [hara.typed.xtalk :refer [defspec.xt]]))
 
 (defspec.xt AnyMap
   [:xt/dict :xt/str :xt/any])

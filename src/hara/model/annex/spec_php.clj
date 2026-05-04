@@ -1,8 +1,8 @@
 (ns hara.model.annex.spec-php
-  (:require [hara.lang.base.book :as book]
+  (:require [hara.lang.book :as book]
             [hara.common.emit :as emit]
             [hara.common.grammar :as grammar]
-            [hara.lang.base.script :as script]
+            [hara.lang.script :as script]
             [hara.model.spec-xtalk]
             [hara.model.annex.spec-xtalk.fn-php :as fn]
             [std.lib.collection :as collection]))

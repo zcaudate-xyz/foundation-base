@@ -1,7 +1,7 @@
 (ns code.mcp.tool.hara-lang
   (:require [hara.lang :as l]
-            [hara.lang.base.book :as book]
-            [hara.lang.base.library :as lib]))
+            [hara.lang.book :as book]
+            [hara.lang.library :as lib]))
 
 (defn lang-emit-as-safe
   "Safely evaluate Clojure code, returning a result string or error"

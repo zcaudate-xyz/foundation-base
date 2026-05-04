@@ -5,7 +5,7 @@
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-tree :as xtt]
-             [xt.db.schema.base-scope :as base-scope]]})
+             [xt.db.text.base-scope :as base-scope]]})
 
 (defn.xt tree-base
   "creates a tree base"

@@ -1,0 +1,142 @@
+(ns hara.lang.script-annex-test
+  (:require [hara.lang.book :as book]
+            [hara.lang.library :as lib]
+             [hara.lang.script-annex :as annex]
+             [std.lib.context.registry :as reg]
+             [std.lib.context.space :as space]
+             [std.lib.env :as env]
+             [xt.lang.common-data]
+             [xt.lang.common-lib])
+  (:use code.test))
+
+^{:refer hara.lang.script-annex/rt-annex? :added "4.0"}
+(fact "checks that object is an annex"
+
+  (annex/rt-annex? (annex/rt-annex:create {}))
+  => true)
+
+^{:refer hara.lang.script-annex/rt-annex:create :added "4.0"}
+(fact "creates an annex object"
+
+
+  (annex/rt-annex:create {})
+  => annex/rt-annex?)
+
+^{:refer hara.lang.script-annex/annex-current :added "4.0"}
+(fact "gets the current annex. May not exist"
+
+  (annex/annex-current)
+  => any?)
+
+^{:refer hara.lang.script-annex/annex-reset :added "4.0"
+  :setup [(annex/get-annex)]}
+(fact "resets the current annex"
+
+  (annex/annex-reset)
+  => map?)
+
+^{:refer hara.lang.script-annex/get-annex :added "4.0"}
+(fact "gets the current annex in the namespace"
+
+  (annex/get-annex)
+  => map?)
+
+^{:refer hara.lang.script-annex/clear-annex :added "4.0"}
+(fact "clears all runtimes in the annex"
+
+  (annex/clear-annex)
+  => map?)
+
+^{:refer hara.lang.script-annex/get-annex-library :added "4.0"}
+(fact "gets the current annex library"
+
+  (annex/get-annex-library (env/ns-sym))
+  => lib/library?)
+
+^{:refer hara.lang.script-annex/get-annex-book :added "4.0"}
+(fact "gets the current book in the annex"
+
+  (annex/get-annex-book (env/ns-sym) :lua)
+  => book/book?)
+
+(fact "loads annex books through the registry when the language has not been preloaded"
+
+  (annex/get-annex-book (env/ns-sym) :rust)
+  => book/book?)
+
+^{:refer hara.lang.script-annex/add-annex-runtime :added "4.0"
+  :setup [(annex/clear-annex)]}
+(fact "adds a runtime to the annex"
+
+  (annex/add-annex-runtime (env/ns-sym)
+                           :hello
+                           :hello.rt)
+  => [nil :hello.rt]
+
+  (annex/get-annex-runtime (env/ns-sym)
+                           :hello)
+  => :hello.rt
+
+  (annex/remove-annex-runtime (env/ns-sym)
+                              :hello)
+  => :hello.rt)
+
+^{:refer hara.lang.script-annex/get-annex-runtime :added "4.0"}
+(fact "gets the annex rutime"
+  (annex/get-annex-runtime (env/ns-sym) :hello) => nil)
+
+^{:refer hara.lang.script-annex/remove-annex-runtime :added "4.0"}
+(fact "removes the annex runtime"
+  (annex/remove-annex-runtime (env/ns-sym) :hello) => nil)
+
+^{:refer hara.lang.script-annex/register-annex-tag :added "4.0"
+  :setup [(annex/deregister-annex-tag (env/ns-sym) :redis.0)]}
+(fact "registers a config for the tag"
+
+  (annex/register-annex-tag (env/ns-sym)
+                            :redis.0
+                            :lua
+                            :redis
+                            {})
+  => [nil :lua]
+
+  (annex/deregister-annex-tag (env/ns-sym) :redis.0)
+  => {:lang :lua, :runtime :redis, :config {}})
+
+^{:refer hara.lang.script-annex/deregister-annex-tag :added "4.0"}
+(fact "removes the config for the tag"
+  (annex/deregister-annex-tag (env/ns-sym) :redis.0) => nil)
+
+^{:refer hara.lang.script-annex/start-runtime :added "4.0"}
+(fact "starts the runtime in the annex"
+
+  (annex/start-runtime :lua :default {}) => map?)
+
+^{:refer hara.lang.script-annex/same-runtime? :added "4.0"}
+(fact "checks that one runtime is the same as another"
+
+  (annex/same-runtime? (annex/start-runtime :lua :default {})
+                       :lua
+                       :default
+                       {})
+  => true)
+
+(comment
+  (./create-tests)
+  (./import)
+  (reg/registry-list)
+
+
+
+  (reg/registry-get :lang.annex)
+
+  (space/space:context-list)
+  (space/space:context-get (space/space) :lang.annex)
+
+  (space/space:context-get (space/space) :lang/c)
+
+  (space/space:rt-start (space/space) :lang.annex)
+  (space/space:rt-start (space/space) :lang/lua)
+
+
+  )

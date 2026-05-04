@@ -8,15 +8,15 @@
 
 (l/script- :dart
   {:runtime :twostep
-   :require [[xt.db.schema.sql-view :as v]
-             [xt.db.schema.sql-util :as ut]
-             [xt.db.schema.sql-raw :as raw]
+   :require [[xt.db.text.sql-view :as v]
+             [xt.db.text.sql-util :as ut]
+             [xt.db.text.sql-raw :as raw]
              [xt.lang.common-lib :as k]
-             [xt.db.schema.base-schema :as sch]
-             [xt.db.schema.base-scope :as scope]
+             [xt.db.text.base-schema :as sch]
+             [xt.db.text.base-scope :as scope]
              [xt.db.helpers.data-main-test :as sample]]})
 
-^{:refer xt.db.schema.sql-view/tree-select.organisation-all-as-admin :added "4.0"
+^{:refer xt.db.text.sql-view/tree-select.organisation-all-as-admin :added "4.0"
   :setup [(def +input-organisation-all-as-admin+
             ;; (pg/bind-view user/organisation-all-as-admin)
             {:input [{:symbol "i_account_id", `:type "uuid"}], :return "jsonb",
@@ -37,7 +37,7 @@
                    {}))
   => +check-organisation-all-as-admin+)
 
-^{:refer xt.db.schema.sql-view/tree-return.organisation-view-default :added "4.0"
+^{:refer xt.db.text.sql-view/tree-return.organisation-view-default :added "4.0"
   :setup [(def +input-organisation-view-default+
             ;; (pg/bind-view user/organisation-view-default)
             {:input [{:symbol "i_organisation_id", :type "uuid"}],
@@ -66,7 +66,7 @@
                    {}))
   => +check-organisation-view-default+)
 
-^{:refer xt.db.schema.sql-view/query-select.organisation-all-as-admin :added "4.0"
+^{:refer xt.db.text.sql-view/query-select.organisation-all-as-admin :added "4.0"
   :setup [(def +input-organisation-all-as-admin+
             ;; (pg/bind-view user/organisation-all-as-admin)
             {:input [{:symbol "i_account_id", :type "uuid"}],
@@ -101,7 +101,7 @@
                      false)])
   => +check-organisation-all-as-admin+)
 
-^{:refer xt.db.schema.sql-view/tree-base.control :added "4.0"
+^{:refer xt.db.text.sql-view/tree-base.control :added "4.0"
   :setup [(def +check-tree-base-control+
             ["RegionCountry"
              {"custom"
@@ -129,7 +129,7 @@
                  {}))
   => +check-tree-base-control+)
 
-^{:refer xt.db.schema.sql-view/tree-control-array :added "4.0"
+^{:refer xt.db.text.sql-view/tree-control-array :added "4.0"
   :setup [(def +check-tree-control-array+
             [{"args"
               [{"args" [{"::" "sql/column", "name" "name"}],
@@ -146,7 +146,7 @@
                            :order-by ["name"]}))
   => +check-tree-control-array+)
 
-^{:refer xt.db.schema.sql-view/tree-base :added "4.0"
+^{:refer xt.db.text.sql-view/tree-base :added "4.0"
   :setup [(def +check-tree-base+
             ["Currency"
              {"custom" [],
@@ -174,7 +174,7 @@
                  {}))
   => +check-tree-base+)
 
-^{:refer xt.db.schema.sql-view/tree-count :added "4.0"
+^{:refer xt.db.text.sql-view/tree-count :added "4.0"
   :setup [(def +input-tree-count+
             ;;(pg/bind-view data/currency-by-type)
             {:input [{:symbol "i_type", :type "text"}],
@@ -216,7 +216,7 @@
                   {}))
   => +check-tree-count+)
 
-^{:refer xt.db.schema.sql-view/tree-select :added "4.0"
+^{:refer xt.db.text.sql-view/tree-select :added "4.0"
   :setup [(def +input-tree-select+
             ;;(pg/bind-view data/currency-by-type)
             {:input [{:symbol "i_type", :type "text"}],
@@ -258,7 +258,7 @@
                    {}))
   => +check-tree-select+)
 
-^{:refer xt.db.schema.sql-view/tree-return :added "4.0"
+^{:refer xt.db.text.sql-view/tree-return :added "4.0"
   :setup [(def +return+
             (pg/bind-view data/currency-default))
                    (def +out+
@@ -285,7 +285,7 @@
                    {}))
   => +out+)
 
-^{:refer xt.db.schema.sql-view/tree-combined :added "4.0"
+^{:refer xt.db.text.sql-view/tree-combined :added "4.0"
   :setup [(def +select+
             (pg/bind-view user/organisation-all-as-admin))
                    (def +return+
@@ -322,7 +322,7 @@
                      {}))
   => +out+)
 
-^{:refer xt.db.schema.sql-view/query-fill-input :added "4.0"
+^{:refer xt.db.text.sql-view/query-fill-input :added "4.0"
   :setup [(def +out+
             ["Organisation"
              {"custom" [],
@@ -337,7 +337,7 @@
     (v/query-fill-input tree ["<ORG-ID>"] (. entry ["input"]) false))
   => +out+)
 
-^{:refer xt.db.schema.sql-view/query-select :added "4.0"
+^{:refer xt.db.text.sql-view/query-select :added "4.0"
   :setup [(def +select+
             (pg/bind-view data/currency-all-crypto))
                    (def +out+
@@ -362,7 +362,7 @@
                      false)])
   => +out+)
 
-^{:refer xt.db.schema.sql-view/query-count :added "4.0"
+^{:refer xt.db.text.sql-view/query-count :added "4.0"
   :setup [(def +select+
             (pg/bind-view data/currency-all-crypto))
                    (def +out+
@@ -387,7 +387,7 @@
                     false)])
   => +out+)
 
-^{:refer xt.db.schema.sql-view/query-return :added "4.0"
+^{:refer xt.db.text.sql-view/query-return :added "4.0"
   :setup [(def +return+
             (pg/bind-view data/currency-info))
                    (def +out+
@@ -414,7 +414,7 @@
                      false)])
   => +out+)
 
-^{:refer xt.db.schema.sql-view/query-return-bulk :added "4.0"}
+^{:refer xt.db.text.sql-view/query-return-bulk :added "4.0"}
 (fact "creates a bulk return statement"
 
   (!.dt
@@ -426,7 +426,7 @@
                          false))
   => "SELECT id, description FROM Currency\n  WHERE id in ('STATS', 'USD')")
 
-^{:refer xt.db.schema.sql-view/query-combined :added "4.0"
+^{:refer xt.db.text.sql-view/query-combined :added "4.0"
   :setup [(def +select+
             (pg/bind-view data/currency-all-crypto))
                    (def +return+
@@ -460,10 +460,10 @@
   => +out+)
 
 (comment
-  (s/pedantic ['xt.db.schema.sql-view])
+  (s/pedantic ['xt.db.text.sql-view])
   
-  (s/run ['xt.db.schema.sql-view])
+  (s/run ['xt.db.text.sql-view])
   
-  (s/seedgen-benchadd   '[xt.db.schema.sql-view] {:lang [:dart :julia] :write true})
-  (s/seedgen-langadd    '[xt.db.schema.sql-view] {:lang [:lua :python] :write true})
-  (s/seedgen-langremove '[xt.db.schema.sql-view] {:lang [:lua :python] :write true}))
+  (s/seedgen-benchadd   '[xt.db.text.sql-view] {:lang [:dart :julia] :write true})
+  (s/seedgen-langadd    '[xt.db.text.sql-view] {:lang [:lua :python] :write true})
+  (s/seedgen-langremove '[xt.db.text.sql-view] {:lang [:lua :python] :write true}))

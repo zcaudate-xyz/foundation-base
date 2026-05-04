@@ -1,5 +1,6 @@
 (ns std.task
-  (:require [std.lib.collection :as collection]
+  (:require [clojure.string :as str]
+            [std.lib.collection :as collection]
             [std.lib.impl :as impl]
             [std.lib.invoke :as invoke]
             [std.protocol.invoke :as protocol.invoke]
@@ -96,20 +97,44 @@
   ([name config & body]
    (invoke-intern-task :task name config body)))
 
+(defn- parse-cli-value
+  [k raw]
+  (if (= k :files)
+    (let [raw (str/trim raw)]
+      (cond
+        (empty? raw)
+        []
+        
+        (re-find #"^(?:[\[\(\{]|#\{|\")" raw)
+        (try (read-string raw)
+             (catch Throwable _
+               raw))
+        
+        (re-find #"\s+" raw)
+        (vec (remove empty?
+                     (str/split raw #"\s+")))
+        
+        :else
+        raw))
+    (try (read-string raw)
+         (catch Throwable _
+           raw))))
+
 (defn process-ns-args
   "processes arguments for tasks"
   {:added "4.0"}
   [args]
   (loop [m     {}
          [k v :as args]  args]
-    (if (not k)
-      m
-      (let [k (try (read-string k)
-                   (catch Throwable t))
-            v (try (read-string v)
-                   (catch Throwable t))]
-        (cond (not (keyword? k))
-              (recur m (rest args))
+     (if (not k)
+       m
+       (let [k (try (read-string k)
+                    (catch Throwable _
+                      k))
+             v (when v
+                 (parse-cli-value k v))]
+         (cond (not (keyword? k))
+               (recur m (rest args))
 
 
               (or (keyword? v)

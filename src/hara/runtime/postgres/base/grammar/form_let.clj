@@ -5,7 +5,7 @@
             [hara.lang :as l]
             [hara.common.emit-common :as emit-common]
             [hara.common.emit-preprocess :as preprocess] [hara.common.preprocess-base :as preprocess-base]
-            [hara.lang.base.library-snapshot :as snap]
+            [hara.lang.library-snapshot :as snap]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
             [std.lib.walk :as walk]

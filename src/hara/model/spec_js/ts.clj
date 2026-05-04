@@ -1,7 +1,7 @@
 (ns hara.model.spec-js.ts
   (:require [clojure.string :as str]
-            [hara.lang.typed.xtalk-parse :as xtalk-parse]
-            [hara.lang.typed.xtalk-common :as types]))
+            [hara.typed.xtalk-parse :as xtalk-parse]
+            [hara.typed.xtalk-common :as types]))
 
 (declare emit-ts-type)
 

@@ -1,9 +1,9 @@
 (ns hara.common.emit-special
-  (:require [hara.lang.base.book :as book]
+  (:require [hara.lang.book :as book]
             [hara.common.emit-common :as common]
             [hara.common.emit-data :as data]
             [hara.common.emit-helper :as helper]
-            [hara.common.emit-preprocess :as preprocess] [hara.lang.base.preprocess-base :as preprocess-base]
+            [hara.common.emit-preprocess :as preprocess] [hara.common.preprocess-base :as preprocess-base]
             [std.lib.env :as env]
             [std.lib.foundation :as f]))
 

@@ -1,6 +1,6 @@
 (ns hara.runtime.solidity.grammar
   (:require [clojure.string]
-            [hara.lang.base.book :as book]
+            [hara.lang.book :as book]
             [hara.common.emit :as emit]
             [hara.common.emit-block :as emit-block]
             [hara.common.emit-common :as emit-common]
@@ -8,7 +8,7 @@
             [hara.common.emit-helper :as helper]
             [hara.common.grammar :as grammar]
             [hara.common.grammar-spec :as grammar-spec]
-            [hara.lang.base.script :as script]
+            [hara.lang.script :as script]
             [hara.common.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]

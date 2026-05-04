@@ -3,7 +3,7 @@
               [hara.lang.rewrite.hoist :as hoist]
               [hara.lang.rewrite.fn :as fnrw]
               [hara.lang.rewrite.statement :as stmt]
-              [hara.lang.typed.xtalk-analysis :as xtalk-analysis]
+              [hara.typed.xtalk-analysis :as xtalk-analysis]
               [hara.lang.rewrite.truthy :as truthy]
               [hara.lang.rewrite.unpack :as unpack]
               [hara.lang.rewrite.walk :as walk]

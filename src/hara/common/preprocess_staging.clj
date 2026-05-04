@@ -13,33 +13,33 @@
   {:added "4.0"}
   [form grammar modules mopts deps-fragment walk-fn]
   (let [fsym     (first form)
-        reserved (get-in grammar [:reserved (first form)])
-        mopts    (provenance/with-provenance
-                  mopts
-                  {:hara.lang/form form
-                   :hara.lang/symbol fsym})
-        template-assignment (assign/process-template-assignment form grammar modules mopts)]
+         reserved (get-in grammar [:reserved (first form)])
+         mopts    (provenance/with-provenance
+                   mopts
+                   {:hara/form form
+                    :hara/symbol fsym})
+         template-assignment (assign/process-template-assignment form grammar modules mopts)]
     (cond (= fsym '!:template)
           (walk-fn (eval (second form)))
 
           ('#{!:lang !:eval !:deref !:decorate} fsym)
           (volatile! form)
 
-          (= :template (:type reserved))
-          (let [mopts (provenance/with-provenance
-                        mopts
-                        {:hara.lang/phase :staging/reserved-template
-                         :hara.lang/subsystem :hara.lang/reserved-template
-                         :hara.lang/lang (:lang mopts)
-                         :hara.lang/module (ut/module-id (:module mopts))})]
-            (try
-              (binding [preprocess-base/*macro-opts* mopts]
-                (walk-fn ((:macro reserved) form)))
-              (catch Throwable t
-                (ut/throw-with-context
-                 "hara.lang staging template expansion failed"
-                 (:hara.lang/provenance mopts)
-                 t))))
+           (= :template (:type reserved))
+           (let [mopts (provenance/with-provenance
+                         mopts
+                        {:hara/phase :staging/reserved-template
+                         :hara/subsystem :hara/reserved-template
+                         :hara/lang (:lang mopts)
+                         :hara/module (ut/module-id (:module mopts))})]
+             (try
+               (binding [preprocess-base/*macro-opts* mopts]
+                 (walk-fn ((:macro reserved) form)))
+               (catch Throwable t
+                 (ut/throw-with-context
+                  "hara.lang staging template expansion failed"
+                  (:hara/provenance mopts)
+                  t))))
           
           (= :hard-link (:emit reserved))
           (walk-fn (cons (:raw reserved) (rest form)))
@@ -64,25 +64,25 @@
                                              modules
                                              mopts)]
                 (if (:template fe)
-                  (let [mopts (provenance/with-provenance
-                                mopts
-                                {:hara.lang/phase :staging/fragment-template
-                                 :hara.lang/subsystem :hara.lang/fragment-template
-                                 :hara.lang/lang (:lang mopts)
-                                 :hara.lang/module (ut/module-id (:module mopts))
-                                 :hara.lang/entry (ut/entry-summary fe)})]
-                    (do (if deps-fragment
-                          (vswap! deps-fragment conj (ut/sym-full fe)))
-                        (walk-fn (try
-                                   (binding [preprocess-base/*macro-form* form
-                                             preprocess-base/*macro-opts* mopts]
-                                     (apply (:template fe) (rest form)))
-                                   (catch Throwable t
-                                     (ut/throw-with-context
-                                      "hara.lang staging macro expansion failed"
-                                      (:hara.lang/provenance mopts)
-                                      t))))))
-                  form)))))))
+                   (let [mopts (provenance/with-provenance
+                                 mopts
+                                {:hara/phase :staging/fragment-template
+                                 :hara/subsystem :hara/fragment-template
+                                 :hara/lang (:lang mopts)
+                                 :hara/module (ut/module-id (:module mopts))
+                                 :hara/entry (ut/entry-summary fe)})]
+                     (do (if deps-fragment
+                           (vswap! deps-fragment conj (ut/sym-full fe)))
+                         (walk-fn (try
+                                    (binding [preprocess-base/*macro-form* form
+                                              preprocess-base/*macro-opts* mopts]
+                                      (apply (:template fe) (rest form)))
+                                    (catch Throwable t
+                                      (ut/throw-with-context
+                                       "hara.lang staging macro expansion failed"
+                                       (:hara/provenance mopts)
+                                       t))))))
+                   form)))))))
 
 (defn to-staging
   "converts the stage"
@@ -90,11 +90,11 @@
   [input grammar modules mopts]
   (let [mopts (provenance/with-provenance
                 mopts
-                {:hara.lang/phase :staging
-                 :hara.lang/subsystem :hara.lang/to-staging
-                 :hara.lang/lang (:lang mopts)
-                 :hara.lang/module (ut/module-id (:module mopts))
-                 :hara.lang/entry (some-> (:entry mopts) ut/entry-summary)})]
+                {:hara/phase :staging
+                 :hara/subsystem :hara/to-staging
+                 :hara/lang (:lang mopts)
+                 :hara/module (ut/module-id (:module mopts))
+                 :hara/entry (some-> (:entry mopts) ut/entry-summary)})]
     (binding [preprocess-base/*macro-skip-deps* false
               preprocess-base/*macro-grammar* grammar
               preprocess-base/*macro-opts* mopts]

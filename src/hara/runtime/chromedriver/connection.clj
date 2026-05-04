@@ -1,8 +1,8 @@
 (ns hara.runtime.chromedriver.connection
   (:require [std.protocol.context :as protocol.context]
-            [hara.lang.base.pointer :as ptr]
-            [hara.lang.base.impl :as impl]
-            [hara.lang.base.runtime :as default]
+            [hara.lang.pointer :as ptr]
+            [hara.lang.impl :as impl]
+            [hara.lang.runtime :as default]
             [std.lib.encode :as encode]
             [std.lib :as h :refer [defimpl]]
             [std.json :as json]

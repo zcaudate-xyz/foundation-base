@@ -6,11 +6,11 @@
 (l/script- :dart
   {:runtime :twostep
    :require [[xt.db.impl.cache-view :as v]
-             [xt.db.schema.sql-util :as ut]
-             [xt.db.schema.sql-raw :as raw]
+             [xt.db.text.sql-util :as ut]
+             [xt.db.text.sql-raw :as raw]
              [xt.lang.common-lib :as k]
-             [xt.db.schema.base-schema :as sch]
-             [xt.db.schema.base-scope :as scope]]})
+             [xt.db.text.base-schema :as sch]
+             [xt.db.text.base-scope :as scope]]})
 
 (fact:global
  {:setup [(l/rt:restart)

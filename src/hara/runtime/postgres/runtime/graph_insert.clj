@@ -6,7 +6,7 @@
              [hara.runtime.postgres.runtime.impl-base :as base]
              [hara.runtime.postgres.runtime.impl-insert :as insert]
             [hara.lang :as l]
-            [hara.lang.base.book :as book]
+            [hara.lang.book :as book]
             [hara.common.emit-preprocess :as preprocess] [hara.common.preprocess-base :as preprocess-base]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]

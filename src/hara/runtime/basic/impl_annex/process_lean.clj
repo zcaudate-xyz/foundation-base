@@ -3,7 +3,7 @@
             [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-twostep :as twostep]
             [std.fs :as fs]
-            [hara.lang.base.runtime :as rt]
+            [hara.lang.runtime :as rt]
             [hara.model.annex.spec-lean :as spec]
             [std.lib.foundation :as f]
             [std.lib.os :as os]))

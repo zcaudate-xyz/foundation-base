@@ -1,6 +1,6 @@
 (ns hara.model.spec-lua.variant-nginx
-  (:require [hara.lang.base.book :as book]
-            [hara.lang.base.script :as script]
+  (:require [hara.lang.book :as book]
+            [hara.lang.script :as script]
             [hara.model.spec-lua :as lua]
             [std.lib.foundation :as f]
             [std.lib.template :as template]))
