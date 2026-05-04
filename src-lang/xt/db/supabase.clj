@@ -5,12 +5,12 @@
 ;; Canonical Supabase Realtime `postgres_changes` -> xt.db sync adapter.
 ;;
 ;; - Input payload shape follows Supabase Realtime callback payload.
-;; - We translate to `xt.db` events and apply them to a local SQLite-backed xt.db instance.
+;; - We translate to `xt.db.instance` events and apply them to a local SQLite-backed db instance.
 ;;
 
 (l/script :js
   {:require [[xt.lang.spec-base :as xt]
-             [xt.db :as xdb]]})
+             [xt.db.instance :as xdb]]})
 
 (defn.js snake->kebab
   "Converts a snake_case key to kebab-case.
@@ -40,13 +40,13 @@
   (return out))
 
 (defn.js payload->xdb-events
-  "Translates a Supabase `postgres_changes` payload into one (or two) xt.db events.
+  "Translates a Supabase `postgres_changes` payload into one (or two) xt.db.instance events.
 
   Options:
   - `:id-key` (string, default \"id\")
 
   Returns:
-  - JS array of xt.db events: `[\"add\" {\"Table\" [row]}]` or `[\"remove\" {\"Table\" [{\"id\" ...}]}]`."
+  - JS array of xt.db.instance events: `[\"add\" {\"Table\" [row]}]` or `[\"remove\" {\"Table\" [{\"id\" ...}]}]`."
   {:added "4.1.3"}
   [payload opts]
   (:= opts (or opts {}))
@@ -93,7 +93,7 @@
         (xt/x:err (xt/x:cat "Unsupported supabase eventType: " (xt/x:to-string eventType)))))
 
 (defn.js apply-payload
-  "Applies a Supabase payload to a local xt.db instance using `xdb/sync-event`.
+  "Applies a Supabase payload to a local db instance using `xdb/sync-event`.
 
   Returns:
   - `{:table <string> :ids [..] :events [..]}` where ids are derived from `new/old`."
@@ -130,7 +130,7 @@
 
   Input:
   - `{:supabase <SupabaseClient>
-      :xdb <xt.db instance>
+      :xdb <xt.db.instance db>
       :schema <schema>
       :lookup <lookup>
       :opts <xt.db opts>

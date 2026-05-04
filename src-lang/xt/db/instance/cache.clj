@@ -1,12 +1,12 @@
-(ns xt.db.impl.cache
+(ns xt.db.instance.cache
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
   {:require [[xt.db.text.base-flatten :as f]
              [xt.db.text.base-schema :as base-schema]
              [xt.db.text.base-scope :as scope]
-             [xt.db.impl.cache-pull :as cache-pull]
-             [xt.db.impl.cache-util :as cache-util]
+             [xt.db.instance.cache-pull :as cache-pull]
+             [xt.db.instance.cache-util :as cache-util]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.event.util-throttle :as th]]})

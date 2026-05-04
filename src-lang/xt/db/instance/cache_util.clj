@@ -1,4 +1,4 @@
-(ns xt.db.impl.cache-util
+(ns xt.db.instance.cache-util
   (:require [hara.lang :as l]))
 
 (l/script :xtalk

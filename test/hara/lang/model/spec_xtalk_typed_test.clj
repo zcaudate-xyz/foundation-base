@@ -33,14 +33,14 @@
 (fact "registry entries expose explicit declaration kinds"
   (typed/clear-registry!)
   (typed/analyze-and-register! 'xt.lang.spec-base)
-  (typed/analyze-and-register! 'xt.db.schema.base-scope)
+  (typed/analyze-and-register! 'xt.db.text.base-scope)
   [(-> (typed/get-entry 'xt.lang.spec-base/x:add)
        types/entry-kinds
        set)
    (types/declaration-kind (typed/get-macro 'xt.lang.spec-base/x:add))
-   (types/declaration-kind (typed/get-value 'xt.db.schema.base-scope/Scopes))
+   (types/declaration-kind (typed/get-value 'xt.db.text.base-scope/Scopes))
    (nil? (typed/get-type 'xt.lang.spec-base/x:add))
-   (= :value (-> (typed/get-entry 'xt.db.schema.base-scope/Scopes)
+   (= :value (-> (typed/get-entry 'xt.db.text.base-scope/Scopes)
                   types/entry-primary-kind))]
   => '[#{:macro :spec}
         :macro
@@ -484,7 +484,7 @@
        :macros
        count
        pos?)
-   (-> (parse/analyze-namespace 'xt.db.schema.base-scope)
+   (-> (parse/analyze-namespace 'xt.db.text.base-scope)
        :values
        count
        pos?)]
@@ -493,12 +493,12 @@
 (fact "registers macros and values in the typed registry"
   (typed/clear-registry!)
   (typed/analyze-and-register! 'xt.lang.spec-base)
-  (typed/analyze-and-register! 'xt.db.schema.base-scope)
+  (typed/analyze-and-register! 'xt.db.text.base-scope)
   [(some? (typed/get-macro 'xt.lang.spec-base/x:add))
    (true? (get-in (typed/get-macro 'xt.lang.spec-base/x:add) [:body-meta :macro]))
-   (some? (typed/get-value 'xt.db.schema.base-scope/Scopes))
-   (true? (get-in (typed/get-value 'xt.db.schema.base-scope/Scopes) [:body-meta :def]))
-   (some? (typed/get-declaration 'xt.db.schema.base-scope/Scopes :value))
+   (some? (typed/get-value 'xt.db.text.base-scope/Scopes))
+   (true? (get-in (typed/get-value 'xt.db.text.base-scope/Scopes) [:body-meta :def]))
+   (some? (typed/get-declaration 'xt.db.text.base-scope/Scopes :value))
    (pos? (count (typed/list-entries)))]
   => '[true true true true true true])
 

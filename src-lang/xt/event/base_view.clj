@@ -534,7 +534,7 @@
   "sets the pipeline"
   {:added "4.0"}
   [context tag acc dest-key]
-  (var #{cell view} context)
+  (var #{view} context)
   (when (xt/x:nil? dest-key)
     (:= dest-key "output"))
   (var process (xtd/get-in view [dest-key

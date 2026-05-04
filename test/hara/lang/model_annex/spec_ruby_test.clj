@@ -72,9 +72,9 @@
 
 (fact "Ruby callable rewrite preserves namespaced constant values"
   (rewrite/rewrite-callable-form
-   '(xt/x:get-key xt.db.schema.base-scope/Scopes s)
+   '(xt/x:get-key xt.db.text.base-scope/Scopes s)
    #{})
-  => '(xt/x:get-key xt.db.schema.base-scope/Scopes s))
+  => '(xt/x:get-key xt.db.text.base-scope/Scopes s))
 
 (fact "Ruby destructuring normalizes xtalk keys to Ruby hash keys"
   (let [out (rewrite/rewrite-callable-form

@@ -588,11 +588,12 @@
        (xt/x:arr-push calls "b2"))
      nil
      (fn [e]
-       (return (xt/x:get-key e "ok"))))
+        (return (xt/x:get-key e "ok"))))
     [(event/trigger-listeners c {:ok true})
      calls])
-  => (just-in [(just ["a1" "b2"] :in-any-order) ["a1" "b2"]])
-
+  => (just-in [(just ["a1" "b2"] :in-any-order)
+               (just ["a1" "b2"] :in-any-order)])
+ 
   (!.py
     (var c (event/blank-container "custom.container" {}))
     (var calls [])
@@ -608,11 +609,11 @@
        (xt/x:arr-push calls "b2"))
      nil
      (fn [e]
-       (return (xt/x:get-key e "ok"))))
+        (return (xt/x:get-key e "ok"))))
     [(event/trigger-listeners c {:ok true})
      calls])
   => (just-in [(just ["a1" "b2"] :in-any-order)
-               ["a1" "b2"]]))
+               (just ["a1" "b2"] :in-any-order)]))
 
 ^{:refer xt.event.base-listener/add-keyed-listener :added "4.1"}
 (fact "adds a keyed listener entry"

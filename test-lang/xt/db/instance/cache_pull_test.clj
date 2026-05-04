@@ -1,8 +1,8 @@
-(ns xt.db.impl.cache-pull-test
+(ns xt.db.instance.cache-pull-test
+  (:use code.test)
   (:require [net.http :as http]
             [std.json :as json]
-            [hara.lang :as l])
-  (:use code.test))
+            [hara.lang :as l]))
 
 ^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
@@ -10,8 +10,8 @@
    :require [[xt.lang.common-repl :as repl]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-trace :as trace]
-             [xt.db.impl.cache-util :as data]
-             [xt.db.impl.cache-pull :as q]
+             [xt.db.instance.cache-util :as data]
+             [xt.db.instance.cache-pull :as q]
              [xt.db.text.base-flatten :as f]
              [xt.db.text.sql-util :as ut]
              [xt.db.helpers.data-main-test :as sample]]})
@@ -21,8 +21,8 @@
    :require [[xt.lang.common-repl :as repl]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-trace :as trace]
-             [xt.db.impl.cache-util :as data]
-             [xt.db.impl.cache-pull :as q]
+             [xt.db.instance.cache-util :as data]
+             [xt.db.instance.cache-pull :as q]
              [xt.db.text.base-flatten :as f]
              [xt.db.text.sql-util :as ut]
              [xt.db.helpers.data-main-test :as sample]]})
@@ -32,8 +32,8 @@
    :require [[xt.lang.common-repl :as repl]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-trace :as trace]
-             [xt.db.impl.cache-util :as data]
-             [xt.db.impl.cache-pull :as q]
+             [xt.db.instance.cache-util :as data]
+             [xt.db.instance.cache-pull :as q]
              [xt.db.text.base-flatten :as f]
              [xt.db.text.sql-util :as ut]
              [xt.db.helpers.data-main-test :as sample]]})
@@ -209,7 +209,7 @@
      {"assets" {"9e576e3e-c73e-4d18-92b4-f975c1bed3d4" true}},
      "data" {"id" "USD"}}}})
 
-^{:refer xt.db.impl.cache-pull/pull.control :added "4.0" :adopt true}
+^{:refer xt.db.instance.cache-pull/pull.control :added "4.0" :adopt true}
 (fact "gets a currency graph"
 
   (!.js
@@ -299,7 +299,7 @@
              :order-sort "desc"}))
   => [{"id" "XLM.T"} {"id" "XLM"}])
 
-^{:refer xt.db.impl.cache-pull/pull.currency :added "4.0"
+^{:refer xt.db.instance.cache-pull/pull.currency :added "4.0"
   :setup [(def +check-pull-currency+
             (contains-in
              [{"entries"
@@ -344,7 +344,7 @@
                                      ["currency"]]]]]]}))
   => +check-pull-currency+)
 
-^{:refer xt.db.impl.cache-pull/check-in-clause :added "4.0"}
+^{:refer xt.db.instance.cache-pull/check-in-clause :added "4.0"}
 (fact "emulates the sql `in` clause"
 
   (!.js
@@ -359,7 +359,7 @@
     (q/check-in-clause "a" [["a" "b"]]))
   => true)
 
-^{:refer xt.db.impl.cache-pull/like-char-at :added "4.1"}
+^{:refer xt.db.instance.cache-pull/like-char-at :added "4.1"}
 (fact "gets the single char from a string"
 
   (!.js
@@ -374,7 +374,7 @@
     (q/like-char-at "abc" 1))
   => "b")
 
-^{:refer xt.db.impl.cache-pull/check-like-clause :added "4.0"}
+^{:refer xt.db.instance.cache-pull/check-like-clause :added "4.0"}
 (fact "emulates the sql `like` clause"
 
   (!.js
@@ -419,7 +419,7 @@
      (q/check-like-clause "abc" nil)])
   => [true true true false true true true true true false false])
 
-^{:refer xt.db.impl.cache-pull/check-clause-value :added "4.0"}
+^{:refer xt.db.instance.cache-pull/check-clause-value :added "4.0"}
 (fact "checks the clause within a record"
 
   (!.js
@@ -443,7 +443,7 @@
                           "abc"))
   => true)
 
-^{:refer xt.db.impl.cache-pull/check-clause-function :added "4.0"}
+^{:refer xt.db.instance.cache-pull/check-clause-function :added "4.0"}
 (fact "checks the clause for a function within a record"
 
   (!.js
@@ -470,7 +470,7 @@
                              ["a%"]))
   => true)
 
-^{:refer xt.db.impl.cache-pull/pull-where-clause :added "4.0"}
+^{:refer xt.db.instance.cache-pull/pull-where-clause :added "4.0"}
 (fact "pull where clause"
 
   (!.js
@@ -512,7 +512,7 @@
                          "id"
                          (fn:> [x] true))))
 
-^{:refer xt.db.impl.cache-pull/pull-where :added "4.0"}
+^{:refer xt.db.instance.cache-pull/pull-where :added "4.0"}
 (fact "clause for where construct"
 
   (!.js
@@ -554,7 +554,7 @@
                    {:data {:nickname "hello"}})])
   => [true false true])
 
-^{:refer xt.db.impl.cache-pull/pull-return-clause :added "4.0"}
+^{:refer xt.db.instance.cache-pull/pull-return-clause :added "4.0"}
 (fact "pull return clause"
 
   (!.js
@@ -707,7 +707,7 @@
                           [{:id "missing"} ["*/data"]]))
   => ["profile" nil])
 
-^{:refer xt.db.impl.cache-pull/pull-return :added "4.0"}
+^{:refer xt.db.instance.cache-pull/pull-return :added "4.0"}
 (fact "return construct"
 
   (!.js
@@ -758,7 +758,7 @@
       "profile" [{"last_name" "User", "first_name" "Root"}],
       "id" "00000000-0000-0000-0000-000000000000"})
 
-^{:refer xt.db.impl.cache-pull/pull :added "4.0"}
+^{:refer xt.db.instance.cache-pull/pull :added "4.0"}
 (fact "pull data from database python profile full"
 
   (!.js
@@ -810,9 +810,9 @@
         "id" "00000000-0000-0000-0000-000000000000"}]))
 
 (comment
-  (s/pedantic '[xt.db.impl.cache-pull])
-  (s/run '[xt.db.impl.cache-pull])
+  (s/pedantic '[xt.db.instance.cache-pull])
+  (s/run '[xt.db.instance.cache-pull])
   
   (s/seedgen-benchadd '[xt.db] {:lang [:dart :julia] :write true})
-  (s/seedgen-langadd '[xt.db.impl.cache-pull] {:lang [:lua :python] :write true})
-  (s/seedgen-langremove '[xt.db.impl.cache-pull] {:lang [:lua :python] :write true}))
+  (s/seedgen-langadd '[xt.db.instance.cache-pull] {:lang [:lua :python] :write true})
+  (s/seedgen-langremove '[xt.db.instance.cache-pull] {:lang [:lua :python] :write true}))

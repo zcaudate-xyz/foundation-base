@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
-  {:export [MODULE] :require [[xt.cell.service.db-view :as db-view] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-tree :as xtt] [xt.db :as xdb] [xt.db.schema.base-check :as check] [xt.db.impl.cache-view :as cache-view]]})
+  {:export [MODULE] :require [[xt.cell.service.db-view :as db-view] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-tree :as xtt] [xt.db.instance :as xdb] [xt.db.text.base-check :as check] [xt.db.instance.cache-view :as cache-view]]})
 
 (defn.xt query-capable?
   "checks that the db descriptor can prepare queries"

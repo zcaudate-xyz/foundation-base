@@ -41,13 +41,13 @@
 
   (!.py
    [(route/interim-from-url "hello/world?id=1&type=name")
-    (route/interim-to-url {"params" {"[]" {"id" "1"}}
-                           "path" []})
-    (route/path-to-tree ["hello" "world"])
-    (route/path-from-tree {"[]" "hello"
-                           "[\"hello\"]" "world"})
-    (route/changed-params-raw {"id" "1" "type" "name"}
-                              {"type" "hello"})])
+     (route/interim-to-url {"params" {"[]" {"id" "1"}}
+                            "path" []})
+     (route/path-to-tree ["hello" "world"] nil)
+     (route/path-from-tree {"[]" "hello"
+                            "[\"hello\"]" "world"})
+     (route/changed-params-raw {"id" "1" "type" "name"}
+                               {"type" "hello"})])
   => [{"params" {"[\"hello\",\"world\"]" {"id" "1"
                                           "type" "name"}}
        "path" ["hello" "world"]}
@@ -293,15 +293,15 @@
    (var removed nil)
    (var missing nil)
    (var entry
-         (route/add-url-listener
-          r
-          "a1"
-          (fn [id data t meta]
-            (xt/x:arr-push calls (xt/x:get-key data "type")))
-          nil))
-   (route/set-url r "hello/world?auth=sign_out")
-   (:= removed (route/remove-listener r "a1"))
-   (:= missing (route/remove-listener r "missing"))
+   (route/add-url-listener
+           r
+           "a1"
+           (fn [id data t meta]
+             (xt/x:arr-push calls (xt/x:get-key data "type")))
+           nil))
+    (route/set-url r "hello/world?auth=sign_out" nil)
+    (:= removed (route/remove-listener r "a1"))
+    (:= missing (route/remove-listener r "missing"))
    [(. r ["::"])
     (route/get-url (route/make-route "hello?auth=sign_in"))
     (route/get-segment (route/make-route "hello?auth=sign_in") [])
@@ -336,7 +336,7 @@
           (fn [id data t meta]
             (xt/x:arr-push calls (xt/x:get-key data "type")))
           nil))
-   (route/set-url r "hello/world?auth=sign_out")
+   (route/set-url r "hello/world?auth=sign_out" nil)
    (:= removed (route/remove-listener r "a1"))
    (:= missing (route/remove-listener r "missing"))
    [(. r ["::"])
@@ -502,15 +502,15 @@
        (just ["route.url" "path" "param" "full"] :in-any-order)])
 
   (!.py
-   (var r (route/make-route "hello?auth=sign_in"))
-   (var calls [])
-   (route/add-url-listener r "url" (fn [id data t meta] (xt/x:arr-push calls (. data ["type"]))) nil)
-   (route/add-path-listener r ["hello"] "path" (fn [id data t meta] (xt/x:arr-push calls "path")) nil)
-   (route/add-param-listener r "auth" "param" (fn [id data t meta] (xt/x:arr-push calls "param")) nil)
-   (route/add-full-listener r ["hello"] "auth" "full" (fn [id data t meta] (xt/x:arr-push calls "full")) nil)
-   [(route/set-url r "hello/world?auth=sign_out")
-    (route/get-url r)
-    calls])
+    (var r (route/make-route "hello?auth=sign_in"))
+    (var calls [])
+    (route/add-url-listener r "url" (fn [id data t meta] (xt/x:arr-push calls (. data ["type"]))) nil)
+    (route/add-path-listener r ["hello"] "path" (fn [id data t meta] (xt/x:arr-push calls "path")) nil)
+    (route/add-param-listener r "auth" "param" (fn [id data t meta] (xt/x:arr-push calls "param")) nil)
+    (route/add-full-listener r ["hello"] "auth" "full" (fn [id data t meta] (xt/x:arr-push calls "full")) nil)
+    [(route/set-url r "hello/world?auth=sign_out" nil)
+     (route/get-url r)
+     calls])
   => (just-in
       [(just ["url" "path" "param" "full"] :in-any-order)
        "hello/world?auth=sign_out"

@@ -206,7 +206,7 @@
             nil))
     (view/add-listener v "a1" (fn:> [id data t meta] nil) nil nil)
     (view/add-listener v "b2" (fn:> [id data t meta] nil) nil nil)
-    [(view/get-output v)
+    [(view/get-output v nil)
      (view/list-listeners v)
      (. (view/remove-listener v "b2") ["meta"])
      (view/list-listeners v)])
@@ -372,7 +372,7 @@
   (!.py
     (var v (-/make-basic-view))
     (view/init-view v)
-    (view/get-output v))
+    (view/get-output v nil))
   => {"current" nil
       "elapsed" nil
       "type" "output"
@@ -396,7 +396,7 @@
   (!.py
     (var v (-/make-basic-view))
     (view/set-output v 1 nil nil nil nil)
-    (view/get-current v))
+    (view/get-current v nil))
   => 1)
 
 ^{:refer xt.event.base-view/is-disabled :added "4.1"}
@@ -444,7 +444,7 @@
   (!.py
     (var v (-/make-basic-view))
     (view/set-output v 1 true nil nil nil)
-    (view/is-errored v))
+    (view/is-errored v nil))
   => true)
 
 ^{:refer xt.event.base-view/is-pending :added "4.1"}
@@ -465,7 +465,7 @@
   (!.py
     (var v (-/make-basic-view))
     (view/set-pending v true nil)
-    (view/is-pending v))
+    (view/is-pending v nil))
   => true)
 
 ^{:refer xt.event.base-view/get-time-elapsed :added "4.1"}
@@ -486,7 +486,7 @@
   (!.py
     (var v (-/make-basic-view))
     (view/set-elapsed v 20 nil)
-    (view/get-time-elapsed v))
+    (view/get-time-elapsed v nil))
   => 20)
 
 ^{:refer xt.event.base-view/get-time-updated :added "4.1"}
@@ -507,7 +507,7 @@
   (!.py
     (var v (-/make-basic-view))
     (view/set-output v 1 nil nil nil nil)
-    (view/get-time-updated v))
+    (view/get-time-updated v nil))
   => integer?)
 
 ^{:refer xt.event.base-view/get-success :added "4.1"}
@@ -654,7 +654,7 @@
     (view/add-listener v "a1" (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil nil)
     (view/set-output v 1 nil nil nil nil)
     [out
-     (view/get-current v)])
+     (view/get-current v nil)])
   => (just-in
       [(contains-in
         {"id" "a1"
@@ -687,7 +687,7 @@
   (!.py
     (var v (-/make-basic-view))
     [(. (view/set-output-disabled v true nil) ["disabled"])
-     (. (view/get-output v) ["disabled"])])
+     (. (view/get-output v nil) ["disabled"])])
   => [true true])
 
 ^{:refer xt.event.base-view/set-pending :added "4.1"}
@@ -708,7 +708,7 @@
   (!.py
     (var v (-/make-basic-view))
     [(. (view/set-pending v true nil) ["pending"])
-     (view/is-pending v)])
+     (view/is-pending v nil)])
   => [true true])
 
 ^{:refer xt.event.base-view/set-elapsed :added "4.1"}
@@ -729,7 +729,7 @@
   (!.py
     (var v (-/make-basic-view))
     [(. (view/set-elapsed v 25 nil) ["elapsed"])
-     (view/get-time-elapsed v)])
+     (view/get-time-elapsed v nil)])
   => [25 25])
 
 ^{:refer xt.event.base-view/init-view :added "4.1"}
@@ -799,7 +799,7 @@
     (view/init-view v)
     (var [context disabled] (view/pipeline-prep v nil))
     (view/pipeline-set context "main" {"main" [true {"value" 3}]} nil)
-    (view/get-current v))
+    (view/get-current v nil))
   => {"value" 3})
 
 ^{:refer xt.event.base-view/pipeline-call :added "4.1"}
@@ -926,7 +926,7 @@
     (view/pipeline-run-force context true -/success-async nil nil "remote")
     [(. context ["acc"])
      (view/get-current v "remote")
-     (view/get-current v)])
+     (view/get-current v nil)])
   => [{"::" "view.run"
        "pre" [false]
        "remote" [true {"value" 3}]
