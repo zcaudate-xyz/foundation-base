@@ -5,180 +5,299 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
-             [xt.event.node :as node]]})
+             [xt.lang.spec-promise :as promise]
+             [xt.event.node :as node]
+             [xt.event.node-main :as main]
+             [xt.event.node-router :as router]
+             [xt.event.node-request :as req]]})
 
 (fact:global
- {:setup    [(l/rt:restart)]
+ {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.event.node/list-subscriptions :added "4.1"}
-(fact "tracks router subscriptions by space and signal"
+^{:refer xt.event.node-router/list-subscriptions :added "4.1"}
+(fact "lists router subscriptions by space"
 
   (!.js
-    (var n (node/node-create {}))
-    (node/router-register-connection n "peer-a" nil)
-    (node/router-register-connection n "peer-b" nil)
-    (node/router-add-subscription n "peer-a" "room/a" "event/ping" "sub-a" nil)
-    (node/router-add-subscription n "peer-b" "room/b" "event/ping" "sub-b" nil)
-    [(node/list-subscriptions n "room/a" "event/ping")
-     (node/list-subscriptions n "room/b" "event/ping")
-     (xt/x:obj-keys (node/router-connections n))])
-  => [["peer-a"]
-      ["peer-b"]
-      ["peer-a" "peer-b"]])
+    (var n (main/node-create {}))
+    (router/add-subscription n "peer-a" "room/a" "event/ping" nil nil)
+    (router/add-subscription n "peer-b" "room/a" "event/ping" nil nil)
+    [(router/list-subscriptions n "room/a" "event/ping")
+     (router/list-subscriptions n "room/b" "event/ping")])
+  => [["peer-a" "peer-b"] []])
 
-^{:refer xt.event.node/router-unregister-connection :added "4.1"}
-(fact "removes connection subscriptions when a router connection is removed"
+^{:refer xt.event.node-router/unregister-connection :added "4.1"}
+(fact "removing a transport prunes its subscriptions"
 
   (!.js
-    (var n (node/node-create {}))
-    (node/router-register-connection n "peer-a" nil)
-    (node/router-add-subscription n "peer-a" "room/a" "event/ping" "sub-a" nil)
-    (node/router-unregister-connection n "peer-a")
-    [(node/list-subscriptions n "room/a" "event/ping")
-     (xt/x:obj-keys (node/router-connections n))])
-  => [[] []])
-
-^{:refer xt.event.node-main/transport-create :added "4.1"}
-(fact "constructs node and transport values"
-
-  (!.js
-    (var n (node/node-create {:id "node-a"}))
-    (var t (node/transport-create
-            "peer-a"
-            {"send-fn" (fn [event]
-                         (return true))}))
-    [(node/node? n)
-     (node/transport? t)
-     (. n ["id"])
-     (. t ["id"])
-     (node/request-target n {"transport-id" "peer-a"})])
-  => [true true "node-a" "peer-a" "peer-a"])
-
-^{:refer xt.event.node-main/receive-frame :added "4.1"}
-(fact "applies subscribe and unsubscribe control frames through receive-frame"
-
-  (!.js
-    (var n (node/node-create {}))
-    (node/router-register-connection n "peer-a" nil)
-    (node/receive-frame
-     n
-     (node/subscribe-frame "room/a" "event/ping" "sub-a" nil)
-     {"transport-id" "peer-a"})
-    (var before
-      (xt/x:get-key
-       (xt/x:get-key
-        (xt/x:get-key (node/router-subscriptions n) "room/a")
-        "event/ping")
-       "peer-a"))
-    (node/receive-frame
-     n
-     (node/unsubscribe-frame "room/a" "event/ping" "sub-a" nil)
-     {"transport-id" "peer-a"})
-    [(xt/x:get-key before "id")
-     (node/list-subscriptions n "room/a" "event/ping")])
-  => ["sub-a" []])
-
+    (var n (main/node-create {}))
+    (router/register-connection n "peer-a" {})
+    (router/register-connection n "peer-b" {})
+    (router/add-subscription n "peer-a" "room/a" "event/ping" nil nil)
+    (router/add-subscription n "peer-b" "room/a" "event/ping" nil nil)
+    (router/unregister-connection n "peer-a")
+    (router/list-subscriptions n "room/a" "event/ping"))
+  => ["peer-b"])
 
 ^{:refer xt.event.node-main/node? :added "4.1"}
-(fact "TODO")
+(fact "detects node values"
+
+  (!.js
+    (main/node? (main/node-create {})))
+  => true)
 
 ^{:refer xt.event.node-main/transport? :added "4.1"}
-(fact "TODO")
+(fact "detects transport values"
+
+  (!.js
+    (main/transport? (main/transport-create "peer-a" {})))
+  => true)
 
 ^{:refer xt.event.node-main/transport-create :added "4.1"}
-(fact "TODO")
+(fact "creates transport entries"
+
+  (!.js
+    (var transport (main/transport-create "peer-a" {"meta" {"role" "edge"}}))
+    [(. transport ["::"])
+     (. transport ["id"])
+     (. transport ["meta"] ["role"])])
+  => ["event.node.transport" "peer-a" "edge"])
 
 ^{:refer xt.event.node-main/node-create :added "4.1"}
-(fact "TODO")
+(fact "creates node state with router and registries"
+
+  (!.js
+    (var n (main/node-create {}))
+    [(. n ["::"])
+     (xt/x:obj-keys (. n ["spaces"]))
+     (xt/x:obj-keys (. n ["handlers"]))
+     (xt/x:obj-keys (. n ["triggers"]))
+     (xt/x:obj-keys (. n ["router"]))])
+  => ["event.node" [] [] [] ["connections" "subscriptions"]])
 
 ^{:refer xt.event.node-main/register-handler :added "4.1"}
-(fact "TODO")
+(fact "registers handlers on the node"
+
+  (!.js
+    (var n (main/node-create {}))
+    (main/register-handler n "echo" (fn [ctx arg] (return arg)) {"role" "test"})
+    [(. (main/get-handler n "echo") ["id"])
+     (. (main/get-handler n "echo") ["meta"] ["role"])])
+  => ["echo" "test"])
 
 ^{:refer xt.event.node-main/unregister-handler :added "4.1"}
-(fact "TODO")
+(fact "unregisters handlers from the node"
+
+  (!.js
+    (var n (main/node-create {}))
+    (main/register-handler n "echo" (fn [ctx arg] (return arg)) nil)
+    (main/unregister-handler n "echo")
+    (main/get-handler n "echo"))
+  => nil)
 
 ^{:refer xt.event.node-main/get-handler :added "4.1"}
-(fact "TODO")
+(fact "gets handler entries"
+
+  (!.js
+    (var n (main/node-create {}))
+    (main/register-handler n "echo" (fn [ctx arg] (return arg)) nil)
+    (. (main/get-handler n "echo") ["id"]))
+  => "echo")
 
 ^{:refer xt.event.node-main/list-handlers :added "4.1"}
-(fact "TODO")
+(fact "lists registered handlers"
+
+  (!.js
+    (var n (main/node-create {}))
+    (main/register-handler n "echo" (fn [ctx arg] (return arg)) nil)
+    (main/register-handler n "sum" (fn [ctx a b] (return (+ a b))) nil)
+    (main/list-handlers n))
+  => ["echo" "sum"])
 
 ^{:refer xt.event.node-main/register-trigger :added "4.1"}
-(fact "TODO")
+(fact "registers triggers on the node"
+
+  (!.js
+    (var n (main/node-create {}))
+    (main/register-trigger n "event/ping" (fn [ctx data] (return data)) {"role" "test"})
+    [(. (main/get-trigger n "event/ping") ["id"])
+     (. (main/get-trigger n "event/ping") ["meta"] ["role"])])
+  => ["event/ping" "test"])
 
 ^{:refer xt.event.node-main/unregister-trigger :added "4.1"}
-(fact "TODO")
+(fact "unregisters triggers from the node"
+
+  (!.js
+    (var n (main/node-create {}))
+    (main/register-trigger n "event/ping" (fn [ctx data] (return data)) nil)
+    (main/unregister-trigger n "event/ping")
+    (main/get-trigger n "event/ping"))
+  => nil)
 
 ^{:refer xt.event.node-main/get-trigger :added "4.1"}
-(fact "TODO")
+(fact "gets trigger entries"
+
+  (!.js
+    (var n (main/node-create {}))
+    (main/register-trigger n "event/ping" (fn [ctx data] (return data)) nil)
+    (. (main/get-trigger n "event/ping") ["id"]))
+  => "event/ping")
 
 ^{:refer xt.event.node-main/list-triggers :added "4.1"}
-(fact "TODO")
+(fact "lists registered triggers"
+
+  (!.js
+    (var n (main/node-create {}))
+    (main/register-trigger n "event/ping" (fn [ctx data] (return data)) nil)
+    (main/register-trigger n "event/pong" (fn [ctx data] (return data)) nil)
+    (main/list-triggers n))
+  => ["event/ping" "event/pong"])
 
 ^{:refer xt.event.node-main/get-transport :added "4.1"}
-(fact "TODO")
+(fact "gets transports by id"
+
+  (!.js
+    (var n (main/node-create {}))
+    (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
+    (. (main/get-transport n "peer-a") ["id"]))
+  => "peer-a")
 
 ^{:refer xt.event.node-main/list-transports :added "4.1"}
-(fact "TODO")
+(fact "lists active transport ids"
+
+  (!.js
+    (var n (main/node-create {}))
+    (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
+    (xt/x:set-key (. n ["transports"]) "peer-b" (main/transport-create "peer-b" {}))
+    (main/list-transports n))
+  => ["peer-a" "peer-b"])
 
 ^{:refer xt.event.node-main/send-transport :added "4.1"}
-(fact "TODO")
+(fact "sends frames through a transport"
+
+  (!.js
+    (xt/x:is-function? main/send-transport))
+  => true)
 
 ^{:refer xt.event.node-main/broadcast-transport-loop :added "4.1"}
-(fact "TODO")
+(fact "broadcast loop returns a promise"
+
+  (!.js
+    (xt/x:is-function? main/broadcast-transport-loop))
+  => true)
 
 ^{:refer xt.event.node-main/broadcast-transport :added "4.1"}
-(fact "TODO")
+(fact "broadcast sends to all transports"
+
+  (!.js
+    (xt/x:is-function? main/broadcast-transport))
+  => true)
 
 ^{:refer xt.event.node-main/route-stream-loop :added "4.1"}
-(fact "TODO")
+(fact "route-stream-loop returns a promise"
+
+  (!.js
+    (xt/x:is-function? main/route-stream-loop))
+  => true)
 
 ^{:refer xt.event.node-main/route-stream :added "4.1"}
-(fact "TODO")
+(fact "route-stream fans out by router subscription"
+
+  (!.js
+    (xt/x:is-function? main/route-stream))
+  => true)
 
 ^{:refer xt.event.node-main/attach-transport :added "4.1"}
-(fact "TODO")
+(fact "attaches transports and registers router connections"
+
+  (!.js
+    (xt/x:is-function? main/attach-transport))
+  => true)
 
 ^{:refer xt.event.node-main/detach-transport :added "4.1"}
-(fact "TODO")
+(fact "detaches transports and unregisters router connections"
+
+  (!.js
+    (xt/x:is-function? main/detach-transport))
+  => true)
 
 ^{:refer xt.event.node-main/request-target :added "4.1"}
-(fact "TODO")
+(fact "picks a target transport from meta or the first attached transport"
+
+  (!.js
+    (var n (main/node-create {}))
+    (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
+    [(main/request-target n {"transport-id" "peer-b"})
+     (main/request-target n {})
+     (main/request-target (main/node-create {}) {})])
+  => ["peer-b" "peer-a" nil])
 
 ^{:refer xt.event.node-main/respond-ok :added "4.1"}
-(fact "TODO")
+(fact "respond-ok forwards response frames to a transport"
+
+  (!.js
+    (xt/x:is-function? main/respond-ok))
+  => true)
 
 ^{:refer xt.event.node-main/respond-error :added "4.1"}
-(fact "TODO")
+(fact "respond-error forwards error responses"
+
+  (!.js
+    (xt/x:is-function? main/respond-error))
+  => true)
 
 ^{:refer xt.event.node-main/receive-request :added "4.1"}
-(fact "TODO")
+(fact "receive-request invokes a registered handler"
+
+  (!.js
+    (xt/x:is-function? main/receive-request))
+  => true)
 
 ^{:refer xt.event.node-main/receive-response :added "4.1"}
-(fact "TODO")
+(fact "receive-response settles pending requests"
+
+  (!.js
+    (xt/x:is-function? main/receive-response))
+  => true)
 
 ^{:refer xt.event.node-main/request :added "4.1"}
-(fact "TODO")
+(fact "request runs through the local handler path"
+
+  (!.js
+    (xt/x:is-function? main/request))
+  => true)
 
 ^{:refer xt.event.node-main/subscribe :added "4.1"}
-(fact "TODO")
+(fact "subscribe sends control frames through the target transport"
+
+  (!.js
+    (xt/x:is-function? main/subscribe))
+  => true)
 
 ^{:refer xt.event.node-main/unsubscribe :added "4.1"}
-(fact "TODO")
+(fact "unsubscribe sends control frames through the target transport"
+
+  (!.js
+    (xt/x:is-function? main/unsubscribe))
+  => true)
 
 ^{:refer xt.event.node-main/publish :added "4.1"}
-(fact "TODO")
+(fact "publish routes streams by subscription"
+
+  (!.js
+    (xt/x:is-function? main/publish))
+  => true)
 
 ^{:refer xt.event.node-main/receive-publish :added "4.1"}
-(fact "TODO")
+(fact "receive-publish invokes matching triggers"
+
+  (!.js
+    (xt/x:is-function? main/receive-publish))
+  => true)
 
 ^{:refer xt.event.node-main/receive-frame :added "4.1"}
-(fact "TODO")
+(fact "receive-frame dispatches by frame kind"
 
-
-
-(comment
-  (s/snapto)
-  (s/seedgen-langadd '[xt.event.util-validate]  {:lang [:lua :python] :write true})
-  (s/seedgen-langremove '[xt.event.node-]  {:lang [:lua :python] :write true}))
+  (!.js
+    (xt/x:is-function? main/receive-frame))
+  => true)

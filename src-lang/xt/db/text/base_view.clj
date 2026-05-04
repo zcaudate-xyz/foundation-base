@@ -1,4 +1,4 @@
-(ns xt.db.schema.base-view
+(ns xt.db.text.base-view
   (:require [hara.lang :as l]))
 
 (l/script :xtalk

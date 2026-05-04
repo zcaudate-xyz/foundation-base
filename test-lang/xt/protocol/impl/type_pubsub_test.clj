@@ -5,47 +5,170 @@
 ^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.protocol.impl.type-pubsub :as pub]
-             [xt.event.node :as node]]})
+   :require [[xt.protocol.impl.type-pubsub :as pub]]})
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.protocol.impl.type-pubsub :as pub]
-             [xt.event.node :as node]]})
+   :require [[xt.protocol.impl.type-pubsub :as pub]]})
 
 (l/script- :python
   {:runtime :basic
-   :require [[xt.protocol.impl.type-pubsub :as pub]
-             [xt.event.node :as node]]})
+   :require [[xt.protocol.impl.type-pubsub :as pub]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.protocol.impl.type-pubsub/pubsub-runtime-create :added "4.1"}
-(fact "wraps node publish and subscribe functions behind the pubsub protocol"
-  
-  ^*(!.js
+(fact "creates wrapped pubsub runtimes"
+
+  (!.js
     (var runtime
          (pub/pubsub-runtime-create
-          {:publish node/publish
-           :receive_publish node/receive-publish
-           :subscribe node/subscribe
-           :unsubscribe node/unsubscribe
-           :list_subscriptions node/list-subscriptions}))
-    (var n (node/node-create {}))
-    (pub/subscribe runtime
-                   n
-                   "event/seen"
-                   "watcher"
-                   (fn [id data t meta]
-                     (return nil))
-                   nil
-                   nil)
+          {:publish (fn [node space signal data meta]
+                      (return signal))
+           :receive_publish (fn [node frame ctx]
+                              (return frame))
+           :subscribe (fn [node space signal subscription-id meta]
+                        (return subscription-id))
+           :unsubscribe (fn [node space signal subscription-id meta]
+                          (return subscription-id))
+           :list_subscriptions (fn [node space signal]
+                                 (return [signal]))}))
+    (. runtime ["::"]))
+  => "type.pubsub")
+
+^{:refer xt.protocol.impl.type-pubsub/pubsub-runtime? :added "4.1"}
+(fact "checks pubsub runtime wrappers"
+
+  (!.js
+    (var runtime
+         (pub/pubsub-runtime-create
+          {:publish (fn [node space signal data meta]
+                      (return signal))
+           :receive_publish (fn [node frame ctx]
+                              (return frame))
+           :subscribe (fn [node space signal subscription-id meta]
+                        (return subscription-id))
+           :unsubscribe (fn [node space signal subscription-id meta]
+                          (return subscription-id))
+           :list_subscriptions (fn [node space signal]
+                                 (return [signal]))}))
     [(pub/pubsub-runtime? runtime)
-     (pub/pubsub-runtime? nil)
-     (pub/list-subscriptions runtime n "event/seen")
-     #_#_
-     (. (pub/unsubscribe runtime n "event/seen" "watcher") ["meta"] ["listener/id"])
-     (pub/list-subscriptions runtime n "event/seen")])
-  => [true false ["watcher"] "watcher" []])
+     (pub/pubsub-runtime? nil)])
+  => [true false])
+
+^{:refer xt.protocol.impl.type-pubsub/require-pubsub-runtime :added "4.1"}
+(fact "returns validated pubsub runtimes"
+
+  (!.js
+    (var runtime
+         (pub/pubsub-runtime-create
+          {:publish (fn [node space signal data meta]
+                      (return signal))
+           :receive_publish (fn [node frame ctx]
+                              (return frame))
+           :subscribe (fn [node space signal subscription-id meta]
+                        (return subscription-id))
+           :unsubscribe (fn [node space signal subscription-id meta]
+                          (return subscription-id))
+           :list_subscriptions (fn [node space signal]
+                                 (return [signal]))}))
+    (. (pub/require-pubsub-runtime runtime) ["::"]))
+  => "type.pubsub")
+
+^{:refer xt.protocol.impl.type-pubsub/publish :added "4.1"}
+(fact "dispatches publish calls through the wrapped implementation"
+
+  (!.js
+    (var runtime
+         (pub/pubsub-runtime-create
+          {:publish (fn [node space signal data meta]
+                      (return [space signal (. data ["value"]) (. meta ["tag"])]))
+           :receive_publish (fn [node frame ctx]
+                              (return frame))
+           :subscribe (fn [node space signal subscription-id meta]
+                        (return subscription-id))
+           :unsubscribe (fn [node space signal subscription-id meta]
+                          (return subscription-id))
+           :list_subscriptions (fn [node space signal]
+                                 (return [signal]))}))
+    (pub/publish runtime {} "room/a" "event/ping" {"value" 1} {"tag" "v"}))
+  => ["room/a" "event/ping" 1 "v"])
+
+^{:refer xt.protocol.impl.type-pubsub/receive-publish :added "4.1"}
+(fact "dispatches receive-publish calls through the wrapped implementation"
+
+  (!.js
+    (var runtime
+         (pub/pubsub-runtime-create
+          {:publish (fn [node space signal data meta]
+                      (return signal))
+           :receive_publish (fn [node frame ctx]
+                              (return [(. frame ["signal"])
+                                       (. ctx ["transport-id"])]))
+           :subscribe (fn [node space signal subscription-id meta]
+                        (return subscription-id))
+           :unsubscribe (fn [node space signal subscription-id meta]
+                          (return subscription-id))
+           :list_subscriptions (fn [node space signal]
+                                 (return [signal]))}))
+    (pub/receive-publish runtime {} {"signal" "event/ping"} {"transport-id" "peer-a"}))
+  => ["event/ping" "peer-a"])
+
+^{:refer xt.protocol.impl.type-pubsub/subscribe :added "4.1"}
+(fact "dispatches subscribe calls through the wrapped implementation"
+
+  (!.js
+    (var runtime
+         (pub/pubsub-runtime-create
+          {:publish (fn [node space signal data meta]
+                      (return signal))
+           :receive_publish (fn [node frame ctx]
+                              (return frame))
+           :subscribe (fn [node space signal subscription-id meta]
+                        (return [space signal subscription-id (. meta ["via"])]))
+           :unsubscribe (fn [node space signal subscription-id meta]
+                          (return subscription-id))
+           :list_subscriptions (fn [node space signal]
+                                 (return [signal]))}))
+    (pub/subscribe runtime {} "room/a" "event/ping" "watcher" {"via" "tab"}))
+  => ["room/a" "event/ping" "watcher" "tab"])
+
+^{:refer xt.protocol.impl.type-pubsub/unsubscribe :added "4.1"}
+(fact "dispatches unsubscribe calls through the wrapped implementation"
+
+  (!.js
+    (var runtime
+         (pub/pubsub-runtime-create
+          {:publish (fn [node space signal data meta]
+                      (return signal))
+           :receive_publish (fn [node frame ctx]
+                              (return frame))
+           :subscribe (fn [node space signal subscription-id meta]
+                        (return subscription-id))
+           :unsubscribe (fn [node space signal subscription-id meta]
+                          (return [space signal subscription-id]))
+           :list_subscriptions (fn [node space signal]
+                                 (return [signal]))}))
+    (pub/unsubscribe runtime {} "room/a" "event/ping" "watcher" nil))
+  => ["room/a" "event/ping" "watcher"])
+
+^{:refer xt.protocol.impl.type-pubsub/list-subscriptions :added "4.1"}
+(fact "dispatches list-subscriptions calls through the wrapped implementation"
+
+  (!.js
+    (var runtime
+         (pub/pubsub-runtime-create
+          {:publish (fn [node space signal data meta]
+                      (return signal))
+           :receive_publish (fn [node frame ctx]
+                              (return frame))
+           :subscribe (fn [node space signal subscription-id meta]
+                        (return subscription-id))
+           :unsubscribe (fn [node space signal subscription-id meta]
+                          (return subscription-id))
+           :list_subscriptions (fn [node space signal]
+                                 (return [space signal]))}))
+    (pub/list-subscriptions runtime {} "room/a" "event/ping"))
+  => ["room/a" "event/ping"])

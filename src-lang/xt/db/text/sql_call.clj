@@ -1,12 +1,12 @@
-(ns xt.db.schema.sql-call
+(ns xt.db.text.sql-call
   (:require [hara.lang :as l]
             [std.lib.foundation :as f]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as spec-promise]
-             [xt.db.schema.sql-util :as ut]
-             [xt.db.schema.base-check :as check]
+             [xt.db.text.sql-util :as ut]
+             [xt.db.text.base-check :as check]
              [xt.protocol.impl.connection-sql :as sql]]})
 
 (defn.xt decode-return

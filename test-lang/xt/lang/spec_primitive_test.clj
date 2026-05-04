@@ -51,6 +51,9 @@
     out)
   => "alpha")
 
+^{:refer xt.lang.spec-primitive/$ :added "4.1"}
+(fact "TODO")
+
 ^{:refer xt.lang.spec-primitive/% :added "4.1"}
 (fact "emits internal expressions directly"
 
@@ -113,6 +116,9 @@
     [(- 10 3 2)
      (- 5)])
   => [5 -5])
+
+^{:refer xt.lang.spec-primitive/-%%- :added "4.1"}
+(fact "TODO")
 
 ^{:refer xt.lang.spec-primitive/. :added "4.1"}
 (fact "indexes values"
@@ -299,6 +305,9 @@
     (b:xor 6 3))
   => 5)
 
+^{:refer xt.lang.spec-primitive/block :added "4.1"}
+(fact "TODO")
+
 ^{:refer xt.lang.spec-primitive/br* :added "4.1"}
 (fact "branches across control clauses"
 
@@ -392,6 +401,9 @@
      (return (+ a b))))
   => 3)
 
+^{:refer xt.lang.spec-primitive/fn.inner :added "4.1"}
+(fact "TODO")
+
 ^{:refer xt.lang.spec-primitive/fn:> :added "4.1"}
 (fact "creates arrow functions"
 
@@ -412,6 +424,15 @@
            (return (+ x 1)))
      2))
   => 3)
+
+^{:refer xt.lang.spec-primitive/forange :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.spec-primitive/letrec :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.spec-primitive/match :added "4.1"}
+(fact "TODO")
 
 ^{:refer xt.lang.spec-primitive/mod :added "4.1"}
 (fact "calculates modulo"
@@ -469,6 +490,12 @@
   (!.lua
     (pow 2 5))
   => 32)
+
+^{:refer xt.lang.spec-primitive/return :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.spec-primitive/super :added "4.1"}
+(fact "TODO")
 
 ^{:refer xt.lang.spec-primitive/switch :added "4.1"}
 (fact "switches across explicit cases"
@@ -546,6 +573,12 @@
            (return err)))))
   => "boom")
 
+^{:refer xt.lang.spec-primitive/var :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.spec-primitive/var.inner :added "4.1"}
+(fact "TODO")
+
 ^{:refer xt.lang.spec-primitive/xor :added "4.1"}
 (fact "computes logical xor"
 
@@ -563,6 +596,9 @@
     [(xor true false)
      (xor true true)])
   => [false true])
+
+^{:refer xt.lang.spec-primitive/yield :added "4.1"}
+(fact "TODO")
 
 ^{:refer xt.lang.spec-primitive/-> :added "4.1"}
 (fact "threads the first argument"
@@ -620,6 +656,9 @@
     [(and true 1)
      (and true false)])
   => [1 false])
+
+^{:refer xt.lang.spec-primitive/case :added "4.1"}
+(fact "TODO")
 
 ^{:refer xt.lang.spec-primitive/comment :added "4.1"}
 (fact "discards commented forms"
@@ -696,6 +735,12 @@
       out))
   => [1 2])
 
+^{:refer xt.lang.spec-primitive/doto :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.spec-primitive/for :added "4.1"}
+(fact "TODO")
+
 ^{:refer xt.lang.spec-primitive/if :added "4.1"}
 (fact "selects between branches"
 
@@ -743,6 +788,9 @@
            b 3]
        (return (+ a b)))))
   => 5)
+
+^{:refer xt.lang.spec-primitive/letfn :added "4.1"}
+(fact "TODO")
 
 ^{:refer xt.lang.spec-primitive/not :added "4.1"}
 (fact "negates truthiness"

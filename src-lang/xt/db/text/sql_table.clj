@@ -1,12 +1,12 @@
-(ns xt.db.schema.sql-table
+(ns xt.db.text.sql-table
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-             [xt.db.schema.base-schema :as base-schema]
-             [xt.db.schema.base-flatten :as f]
-             [xt.db.schema.sql-raw :as raw]]})
+             [xt.db.text.base-schema :as base-schema]
+             [xt.db.text.base-flatten :as f]
+             [xt.db.text.sql-raw :as raw]]})
 
 (defn.xt table-update-single
   "generates single update statement"

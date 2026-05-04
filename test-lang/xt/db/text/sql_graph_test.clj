@@ -1,4 +1,4 @@
-(ns xt.db.schema.sql-graph-test
+(ns xt.db.text.sql-graph-test
   (:require [hara.lang :as l]
             [std.string.prose :as prose])
   (:use code.test))
@@ -6,39 +6,39 @@
 ^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.db.schema.sql-graph :as g]
-             [xt.db.schema.sql-util :as ut]
-             [xt.db.schema.sql-raw :as raw]
+   :require [[xt.db.text.sql-graph :as g]
+             [xt.db.text.sql-util :as ut]
+             [xt.db.text.sql-raw :as raw]
              [xt.lang.common-data :as xtd]
-             [xt.db.schema.base-schema :as sch]
-             [xt.db.schema.base-scope :as scope]
+             [xt.db.text.base-schema :as sch]
+             [xt.db.text.base-scope :as scope]
              [xt.db.helpers.data-main-test :as sample]]})
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.db.schema.sql-graph :as g]
-             [xt.db.schema.sql-util :as ut]
-             [xt.db.schema.sql-raw :as raw]
+   :require [[xt.db.text.sql-graph :as g]
+             [xt.db.text.sql-util :as ut]
+             [xt.db.text.sql-raw :as raw]
              [xt.lang.common-data :as xtd]
-             [xt.db.schema.base-schema :as sch]
-             [xt.db.schema.base-scope :as scope]
+             [xt.db.text.base-schema :as sch]
+             [xt.db.text.base-scope :as scope]
              [xt.db.helpers.data-main-test :as sample]]})
 
 (l/script- :python
   {:runtime :basic
-   :require [[xt.db.schema.sql-graph :as g]
-             [xt.db.schema.sql-util :as ut]
-             [xt.db.schema.sql-raw :as raw]
+   :require [[xt.db.text.sql-graph :as g]
+             [xt.db.text.sql-util :as ut]
+             [xt.db.text.sql-raw :as raw]
              [xt.lang.common-data :as xtd]
-             [xt.db.schema.base-schema :as sch]
-             [xt.db.schema.base-scope :as scope]
+             [xt.db.text.base-schema :as sch]
+             [xt.db.text.base-scope :as scope]
              [xt.db.helpers.data-main-test :as sample]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.schema.sql-graph/select-where.darr :added "4.0" :adopt true}
+^{:refer xt.db.text.sql-graph/select-where.darr :added "4.0" :adopt true}
 (fact "multi select"
 
   (!.js
@@ -98,7 +98,7 @@
                    {}))
   => "SELECT id FROM UserAccount\nWHERE nickname in ('hello', 'root', 'world')")
 
-^{:refer xt.db.schema.sql-graph/select-where.more :added "4.0" :adopt true}
+^{:refer xt.db.text.sql-graph/select-where.more :added "4.0" :adopt true}
 (fact "formats the query return"
 
   (!.js
@@ -221,7 +221,7 @@
       "  )"
       ")"))
 
-^{:refer xt.db.schema.sql-graph/base-query-inputs :added "4.0"}
+^{:refer xt.db.text.sql-graph/base-query-inputs :added "4.0"}
 (fact "formats the query inputs"
 
   (!.js
@@ -251,7 +251,7 @@
        ["first_name" "last_name"]]]]))
   => ["UserAccount" {} ["id" "nickname" ["profile" {"id" 1} ["first_name" "last_name"]]]])
 
-^{:refer xt.db.schema.sql-graph/base-format-return :added "4.0"}
+^{:refer xt.db.text.sql-graph/base-format-return :added "4.0"}
 (fact "formats the query return"
 
   (!.js
@@ -278,7 +278,7 @@
   => ["count(*)"
       "count(*) AS count"])
 
-^{:refer xt.db.schema.sql-graph/select-where-pair :added "4.0"}
+^{:refer xt.db.text.sql-graph/select-where-pair :added "4.0"}
 (fact "formats the query return"
 
   (!.js
@@ -323,7 +323,7 @@
       "  WHERE first_name = 'hello'"
       ")"))
 
-^{:refer xt.db.schema.sql-graph/select-where :added "4.0"}
+^{:refer xt.db.text.sql-graph/select-where :added "4.0"}
 (fact "formats the query return"
 
   (!.js
@@ -371,7 +371,7 @@
       "  WHERE first_name = 'hello' AND last_name = 'hello'"
       ")"))
 
-^{:refer xt.db.schema.sql-graph/select-return-str :added "4.0"
+^{:refer xt.db.text.sql-graph/select-return-str :added "4.0"
   :setup [(def +out+
             (prose/|
              "(SELECT id, nickname, password_updated, is_super, is_suspended, is_official FROM UserAccount"
@@ -414,7 +414,7 @@
                         {}))
   => +out+)
 
-^{:refer xt.db.schema.sql-graph/select-return :added "4.0"
+^{:refer xt.db.text.sql-graph/select-return :added "4.0"
   :setup [(def +out+
             (prose/|
              "SELECT (SELECT id, nickname, password_updated, is_super, is_suspended, is_official FROM UserAccount"
@@ -454,7 +454,7 @@
                     {}))
   => +out+)
 
-^{:refer xt.db.schema.sql-graph/select-tree :added "4.0"
+^{:refer xt.db.text.sql-graph/select-tree :added "4.0"
   :setup [(def +out+
             ["UserProfile"
              {"custom" [],
@@ -501,7 +501,7 @@
                    {}))
   => +out+)
 
-^{:refer xt.db.schema.sql-graph/select :added "4.0"}
+^{:refer xt.db.text.sql-graph/select :added "4.0"}
 (fact "encodes a select state given schema and graph"
 
   (!.js
@@ -673,10 +673,10 @@
       ") SELECT jsonb_agg(j_ret) FROM j_ret"))
 
 (comment
-  (s/pedantic ['xt.db.schema.sql-graph])
+  (s/pedantic ['xt.db.text.sql-graph])
   
-  (s/run ['xt.db.schema.sql-graph])
+  (s/run ['xt.db.text.sql-graph])
   
   (s/seedgen-benchadd   '[xt.db xt.lang xt.event] {:lang [:ruby :dart :elisp] :write true})
-  (s/seedgen-langadd    '[xt.db.schema.sql-graph] {:lang [:lua :python] :write true})
-  (s/seedgen-langremove '[xt.db.schema.sql-graph] {:lang [:lua :python] :write true}))
+  (s/seedgen-langadd    '[xt.db.text.sql-graph] {:lang [:lua :python] :write true})
+  (s/seedgen-langremove '[xt.db.text.sql-graph] {:lang [:lua :python] :write true}))

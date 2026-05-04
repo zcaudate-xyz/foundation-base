@@ -1,23 +1,23 @@
-(ns xt.db.schema.base-util-test
+(ns xt.db.text.base-util-test
   (:require [hara.lang :as l])
   (:use code.test))
 
 ^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.db.schema.base-util :as ut]
+   :require [[xt.db.text.base-util :as ut]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as k]]})
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.db.schema.base-util :as ut]
+   :require [[xt.db.text.base-util :as ut]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as k]]})
 
 (l/script- :python
   {:runtime :basic
-   :require [[xt.db.schema.base-util :as ut]
+   :require [[xt.db.text.base-util :as ut]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as k]]})
 
@@ -25,7 +25,7 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.schema.base-util/collect-routes :added "4.0"
+^{:refer xt.db.text.base-util/collect-routes :added "4.0"
   :setup [(def +routes+ [{:input [],
                           :return "text",
                           :schema "core/util",
@@ -68,7 +68,7 @@
     (ut/collect-routes (@! +routes+) "db"))
   => +result+)
 
-^{:refer xt.db.schema.base-util/collect-views :added "4.0"
+^{:refer xt.db.text.base-util/collect-views :added "4.0"
   :setup [(def +views+
             [{:input [{:symbol "i_currency_id", :type "citext"}],
               :return "jsonb",
@@ -132,7 +132,7 @@
                                          "by_type" map?}
                                "return" {"default" map?}}}))
 
-^{:refer xt.db.schema.base-util/merge-views :added "4.0"}
+^{:refer xt.db.text.base-util/merge-views :added "4.0"}
 (fact "merges multiple views together"
 
   (!.js
@@ -162,7 +162,7 @@
       "Wallet" {"return" {"default" {"id" "wallet_default"}}}
       "RegionCountry" {"select" {"all" {"id" "country_all"}}}})
 
-^{:refer xt.db.schema.base-util/keepf-limit :added "4.0"}
+^{:refer xt.db.text.base-util/keepf-limit :added "4.0"}
 (fact "keeps given limit"
 
   (!.js
@@ -186,7 +186,7 @@
                     3))
   => [1 3 5])
 
-^{:refer xt.db.schema.base-util/lu-nested :added "4.0"}
+^{:refer xt.db.text.base-util/lu-nested :added "4.0"}
 (fact "helper for lu-map"
 
   (!.js
@@ -204,7 +204,7 @@
                   (fn [e] (return (xt/x:get-key e "id")))))
   => {"1" {"id" "1"}})
 
-^{:refer xt.db.schema.base-util/lu-map :added "4.0"}
+^{:refer xt.db.text.base-util/lu-map :added "4.0"}
 (fact "constructs a nested lu map of ids"
 
   (!.js [(ut/lu-map
@@ -235,9 +235,9 @@
       {"a" {"b" {"sub" {"d" {"id" "d"}, "c" {"id" "c"}}, "id" "b"}}}])
 
 (comment
-  (s/run ['xt.db.schema.base-util])
+  (s/run ['xt.db.text.base-util])
   (s/seedgen-benchadd '[xt.lang.spec] {:lang [:r] :write true})
-  (s/seedgen-benchadd '[xt.db.schema.base-util] {:lang [:julia :dart] :write true})
+  (s/seedgen-benchadd '[xt.db.text.base-util] {:lang [:julia :dart] :write true})
   
-  (s/seedgen-langadd 'xt.db.schema.base-util {:lang [:lua :python] :write true})
-  (s/seedgen-langremove 'xt.db.schema.base-util {:lang [:lua :python] :write true}))
+  (s/seedgen-langadd 'xt.db.text.base-util {:lang [:lua :python] :write true})
+  (s/seedgen-langremove 'xt.db.text.base-util {:lang [:lua :python] :write true}))

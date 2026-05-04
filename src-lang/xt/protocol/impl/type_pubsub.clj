@@ -2,7 +2,8 @@
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.spec-base :as xt]]})
+  {:require [[xt.lang.spec-base :as xt]
+             [xt.protocol.type-pubsub :as pub-if]]})
 
 (defn.xt pubsub-runtime?
   "checks if a value is a wrapped pubsub runtime"
@@ -39,35 +40,35 @@
 (defn.xt receive-publish
   "dispatches receive_publish through the pubsub protocol"
   {:added "4.1"}
-  [runtime node frame]
+  [runtime node frame ctx]
   (:= runtime (-/require-pubsub-runtime runtime))
   (var impl (xt/x:get-key runtime "_impl"))
   (return ((xt/x:get-key impl "receive_publish")
-           node frame)))
+           node frame ctx)))
 
 (defn.xt subscribe
   "dispatches subscribe through the pubsub protocol"
   {:added "4.1"}
-  [runtime node signal subscription-id callback meta pred]
+  [runtime node space signal subscription-id meta]
   (:= runtime (-/require-pubsub-runtime runtime))
   (var impl (xt/x:get-key runtime "_impl"))
   (return ((xt/x:get-key impl "subscribe")
-           node signal subscription-id callback meta pred)))
+           node space signal subscription-id meta)))
 
 (defn.xt unsubscribe
   "dispatches unsubscribe through the pubsub protocol"
   {:added "4.1"}
-  [runtime node signal subscription-id]
+  [runtime node space signal subscription-id meta]
   (:= runtime (-/require-pubsub-runtime runtime))
   (var impl (xt/x:get-key runtime "_impl"))
   (return ((xt/x:get-key impl "unsubscribe")
-           node signal subscription-id)))
+           node space signal subscription-id meta)))
 
 (defn.xt list-subscriptions
   "dispatches list_subscriptions through the pubsub protocol"
   {:added "4.1"}
-  [runtime node signal]
+  [runtime node space signal]
   (:= runtime (-/require-pubsub-runtime runtime))
   (var impl (xt/x:get-key runtime "_impl"))
   (return ((xt/x:get-key impl "list_subscriptions")
-           node signal)))
+           node space signal)))

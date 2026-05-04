@@ -1,10 +1,10 @@
-(ns xt.db.schema.sql-manage
+(ns xt.db.text.sql-manage
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-             [xt.db.schema.base-schema :as base-schema]]})
+             [xt.db.text.base-schema :as base-schema]]})
 
 (defn.xt table-create-column
   "column creation function"

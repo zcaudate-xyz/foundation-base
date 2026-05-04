@@ -5,8 +5,8 @@
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-sort-by :as xtsb]
-             [xt.db.schema.base-util :as ut]
-             [xt.db.schema.base-scope :as scope]]})
+             [xt.db.text.base-util :as ut]
+             [xt.db.text.base-scope :as scope]]})
 
 (defn.xt check-in-clause
   "emulates the sql `in` clause"

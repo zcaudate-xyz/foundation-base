@@ -1,11 +1,11 @@
-(ns xt.db.schema.base-flatten
+(ns xt.db.text.base-flatten
   (:require [hara.lang :as l])
   (:refer-clojure :exclude [flatten]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-             [xt.db.schema.base-schema :as sch]]})
+             [xt.db.text.base-schema :as sch]]})
 
 (defn.xt flatten-get-links
   "flatten links"

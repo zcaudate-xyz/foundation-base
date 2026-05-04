@@ -1,4 +1,4 @@
-(ns xt.db.schema.base-scope
+(ns xt.db.text.base-scope
   (:require [hara.lang :as l]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]

@@ -1,4 +1,4 @@
-(ns xt.db.schema.sql-table-test
+(ns xt.db.text.sql-table-test
   (:require [hara.lang :as l]
             [std.string.prose :as prose])
   (:use code.test))
@@ -6,30 +6,30 @@
 ^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.db.schema.base-schema :as sch]
-             [xt.db.schema.sql-util :as ut]
-             [xt.db.schema.sql-table :as table]
+   :require [[xt.db.text.base-schema :as sch]
+             [xt.db.text.sql-util :as ut]
+             [xt.db.text.sql-table :as table]
              [xt.db.helpers.data-main-test :as sample]]})
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.db.schema.base-schema :as sch]
-             [xt.db.schema.sql-util :as ut]
-             [xt.db.schema.sql-table :as table]
+   :require [[xt.db.text.base-schema :as sch]
+             [xt.db.text.sql-util :as ut]
+             [xt.db.text.sql-table :as table]
              [xt.db.helpers.data-main-test :as sample]]})
 
 (l/script- :python
   {:runtime :basic
-   :require [[xt.db.schema.base-schema :as sch]
-             [xt.db.schema.sql-util :as ut]
-             [xt.db.schema.sql-table :as table]
+   :require [[xt.db.text.base-schema :as sch]
+             [xt.db.text.sql-util :as ut]
+             [xt.db.text.sql-table :as table]
              [xt.db.helpers.data-main-test :as sample]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.schema.sql-table/table-update-single :added "4.0"}
+^{:refer xt.db.text.sql-table/table-update-single :added "4.0"}
 (fact "generates single update statement"
 
   (!.js
@@ -56,7 +56,7 @@
                               {}))
   => "UPDATE UserAccount\n SET password_hash = 'HELLO'\n WHERE id = 'AAA';")
 
-^{:refer xt.db.schema.sql-table/table-insert-single :added "4.0"}
+^{:refer xt.db.text.sql-table/table-insert-single :added "4.0"}
 (fact "generates single insert statement"
 
   (!.js
@@ -80,7 +80,7 @@
                               {}))
   => "INSERT INTO UserAccount\n (id, password_hash)\n VALUES\n ('AAA','HELLO');")
 
-^{:refer xt.db.schema.sql-table/table-delete-single :added "4.0"}
+^{:refer xt.db.text.sql-table/table-delete-single :added "4.0"}
 (fact "generates single delete statement"
 
   (!.js
@@ -104,7 +104,7 @@
                               {}))
   => "DELETE FROM UserAccount WHERE id = 'AAA';")
 
-^{:refer xt.db.schema.sql-table/table-upsert-single :added "4.0"}
+^{:refer xt.db.text.sql-table/table-upsert-single :added "4.0"}
 (fact "generates single upsert statement"
 
   (!.js
@@ -146,16 +146,16 @@
       "ON CONFLICT (id) DO UPDATE SET"
       "password_hash=coalesce(\"excluded\".password_hash,password_hash);"))
 
-^{:refer xt.db.schema.sql-table/table-filter-id :added "4.0"}
+^{:refer xt.db.text.sql-table/table-filter-id :added "4.0"}
 (fact "predicate for flat entry")
 
-^{:refer xt.db.schema.sql-table/table-get-data :added "4.0"}
+^{:refer xt.db.text.sql-table/table-get-data :added "4.0"}
 (fact "gets data flat entry")
 
-^{:refer xt.db.schema.sql-table/table-emit-flat :added "4.0"}
+^{:refer xt.db.text.sql-table/table-emit-flat :added "4.0"}
 (fact "emit util for insert and upsert")
 
-^{:refer xt.db.schema.sql-table/table-insert :added "4.0"
+^{:refer xt.db.text.sql-table/table-insert :added "4.0"
   :setup [(def +inserts+
             [(prose/|
               "INSERT INTO UserAccount"
@@ -193,7 +193,7 @@
                        {}))
   => +inserts+)
 
-^{:refer xt.db.schema.sql-table/table-upsert :added "4.0"
+^{:refer xt.db.text.sql-table/table-upsert :added "4.0"
   :setup [(def +upserts+
             [(prose/|
               "INSERT INTO UserAccount"
@@ -250,10 +250,10 @@
   => +upserts+)
 
 (comment
-  (s/pedantic ['xt.db.schema.sql-table])
+  (s/pedantic ['xt.db.text.sql-table])
   
-  (s/run ['xt.db.schema.sql-table])
+  (s/run ['xt.db.text.sql-table])
   
-  (s/seedgen-benchadd   '[xt.db.schema.sql-table] {:lang [:dart :julia] :write true})
-  (s/seedgen-langadd    '[xt.db.schema.sql-table] {:lang [:lua :python] :write true})
-  (s/seedgen-langremove '[xt.db.schema.sql-table] {:lang [:lua :python] :write true}))
+  (s/seedgen-benchadd   '[xt.db.text.sql-table] {:lang [:dart :julia] :write true})
+  (s/seedgen-langadd    '[xt.db.text.sql-table] {:lang [:lua :python] :write true})
+  (s/seedgen-langremove '[xt.db.text.sql-table] {:lang [:lua :python] :write true}))

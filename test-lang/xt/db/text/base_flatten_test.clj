@@ -1,4 +1,4 @@
-(ns xt.db.schema.base-flatten-test
+(ns xt.db.text.base-flatten-test
   (:require [hara.lang :as l])
   (:use code.test))
 
@@ -7,31 +7,31 @@
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-             [xt.db.schema.base-flatten :as f]
-             [xt.db.schema.base-schema :as sch]
+             [xt.db.text.base-flatten :as f]
+             [xt.db.text.base-schema :as sch]
              [xt.db.helpers.data-main-test :as sample]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-             [xt.db.schema.base-flatten :as f]
-             [xt.db.schema.base-schema :as sch]
+             [xt.db.text.base-flatten :as f]
+             [xt.db.text.base-schema :as sch]
              [xt.db.helpers.data-main-test :as sample]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-             [xt.db.schema.base-flatten :as f]
-             [xt.db.schema.base-schema :as sch]
+             [xt.db.text.base-flatten :as f]
+             [xt.db.text.base-schema :as sch]
              [xt.db.helpers.data-main-test :as sample]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
  :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.schema.base-flatten/flatten-get-links :added "4.0"}
+^{:refer xt.db.text.base-flatten/flatten-get-links :added "4.0"}
 (fact "flatten links"
 
   (!.js
@@ -46,7 +46,7 @@
     (f/flatten-get-links {:currencies [{:id "hello"}]}))
   => {"currencies" {"hello" true}})
 
-^{:refer xt.db.schema.base-flatten/flatten-merge :added "4.0"}
+^{:refer xt.db.text.base-flatten/flatten-merge :added "4.0"}
 (fact "flatten data"
 
   (!.js
@@ -79,7 +79,7 @@
                "rev_links" {},
                "data" {"id" "hello"}}})
 
-^{:refer xt.db.schema.base-flatten/flatten-node :added "4.0"}
+^{:refer xt.db.text.base-flatten/flatten-node :added "4.0"}
 (fact "flatten node"
 
   (!.js
@@ -109,7 +109,7 @@
     (xtd/obj-keys out))
   => (just ["table_map" "data_obj" "ref_obj" "rev_obj"] :in-any-order))
 
-^{:refer xt.db.schema.base-flatten/flatten-node.account :added "4.0"
+^{:refer xt.db.text.base-flatten/flatten-node.account :added "4.0"
   :setup [(def +table-map-account+
 (contains-in {"00000000-0000-0000-0000-000000000000"
 {"ref_links" {},
@@ -155,7 +155,7 @@
         (xt/x:get-key "table_map")))
   => +table-map-account+)
 
-^{:refer xt.db.schema.base-flatten/flatten-node.profile :added "4.0"
+^{:refer xt.db.text.base-flatten/flatten-node.profile :added "4.0"
   :setup [(def +table-map-profile+
 {"table_map"
 {"c4643895-b0ce-44cc-b07b-2386bf18d43b"
@@ -210,7 +210,7 @@
                     {}))
   => +table-map-profile+)
 
-^{:refer xt.db.schema.base-flatten/flatten-linked :added "4.0"
+^{:refer xt.db.text.base-flatten/flatten-linked :added "4.0"
   :setup [(def +table-linked+
 {"UserProfile"
 {"c4643895-b0ce-44cc-b07b-2386bf18d43b"
@@ -274,7 +274,7 @@
                       f/flatten-obj))
   => +table-linked+)
 
-^{:refer xt.db.schema.base-flatten/flatten-obj :added "4.0"
+^{:refer xt.db.text.base-flatten/flatten-obj :added "4.0"
   :setup [(def +user-full+
 (contains-in
 {"UserProfile"
@@ -445,7 +445,7 @@
                    {}))
   => +user-full+)
 
-^{:refer xt.db.schema.base-flatten/flatten :added "4.0"}
+^{:refer xt.db.text.base-flatten/flatten :added "4.0"}
 (fact "flattens data schema"
 
   (!.js
@@ -469,7 +469,7 @@
                nil))
   => +user-full+)
 
-^{:refer xt.db.schema.base-flatten/flatten-bulk :added "4.0"}
+^{:refer xt.db.text.base-flatten/flatten-bulk :added "4.0"}
 (fact "flattens bulk data"
 
   (!.js
@@ -492,7 +492,7 @@
 
 (comment
 
-  (s/run ['xt.db.schema.base-flatten])
+  (s/run ['xt.db.text.base-flatten])
   
-  (s/seedgen-langadd 'xt.db.schema.base-flatten {:lang [:lua :python] :write true})
-  (s/seedgen-langremove 'xt.db.schema.base-flatten {:lang [:lua :python] :write true}))
+  (s/seedgen-langadd 'xt.db.text.base-flatten {:lang [:lua :python] :write true})
+  (s/seedgen-langremove 'xt.db.text.base-flatten {:lang [:lua :python] :write true}))

@@ -9,30 +9,30 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.db.schema.sql-graph :as g]
-             [xt.db.schema.sql-util :as ut]
-             [xt.db.schema.sql-raw :as raw]
+   :require [[xt.db.text.sql-graph :as g]
+             [xt.db.text.sql-util :as ut]
+             [xt.db.text.sql-raw :as raw]
              [xt.lang.common-lib :as k]
-             [xt.db.schema.base-schema :as sch]
-             [xt.db.schema.base-scope :as scope]
+             [xt.db.text.base-schema :as sch]
+             [xt.db.text.base-scope :as scope]
              [xt.db.helpers.data-main-test :as sample]]})
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.db.schema.sql-graph :as g]
+   :require [[xt.db.text.sql-graph :as g]
              [xt.lang.common-lib :as k]
-             [xt.db.schema.sql-util :as ut]
-             [xt.db.schema.base-schema :as sch]
-             [xt.db.schema.base-scope :as scope]
+             [xt.db.text.sql-util :as ut]
+             [xt.db.text.base-schema :as sch]
+             [xt.db.text.base-scope :as scope]
              [xt.db.helpers.data-main-test :as sample]]})
 
 (l/script- :python
   {:runtime :basic
-   :require [[xt.db.schema.sql-graph :as g]
+   :require [[xt.db.text.sql-graph :as g]
              [xt.lang.common-lib :as k]
-             [xt.db.schema.sql-util :as ut]
-             [xt.db.schema.base-schema :as sch]
-             [xt.db.schema.base-scope :as scope]
+             [xt.db.text.sql-util :as ut]
+             [xt.db.text.base-schema :as sch]
+             [xt.db.text.base-scope :as scope]
              [xt.db.helpers.data-main-test :as sample]]})
 
 (fact:global

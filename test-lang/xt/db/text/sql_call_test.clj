@@ -1,4 +1,4 @@
-(ns xt.db.schema.sql-call-test
+(ns xt.db.text.sql-call-test
   (:use code.test)
   (:require [hara.rt.postgres :as pg]
             [hara.lang :as l]
@@ -14,7 +14,7 @@
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
-             [xt.db.schema.sql-call :as call]
+             [xt.db.text.sql-call :as call]
              [xt.protocol.impl.connection-sql :as driver]
              [js.lib.driver-postgres :as js-postgres]]})
 
@@ -24,7 +24,7 @@
   :teardown [(l/rt:teardown :postgres)
              (l/rt:stop)]})
 
-^{:refer xt.db.schema.sql-call/decode-return :added "4.0"}
+^{:refer xt.db.text.sql-call/decode-return :added "4.0"}
 (fact "decodes the return value"
 
   (!.js
@@ -42,7 +42,7 @@
                        nil))
   => (throws))
 
-^{:refer xt.db.schema.sql-call/call-format-input :added "4.0"}
+^{:refer xt.db.text.sql-call/call-format-input :added "4.0"}
 (fact "formats the inputs"
 
   (!.js
@@ -52,7 +52,7 @@
                             ["hello"]]))
   => ["'1'" "'[\"hello\"]'"])
 
-^{:refer xt.db.schema.sql-call/call-format-query :added "4.0"}
+^{:refer xt.db.text.sql-call/call-format-query :added "4.0"}
 (fact "formats a query"
 
   (!.js
@@ -61,7 +61,7 @@
     [1 2]))
   => "SELECT \"scratch\".divf('1', '2');")
 
-^{:refer xt.db.schema.sql-call/call-raw
+^{:refer xt.db.text.sql-call/call-raw
   :added "4.0"
   :lang-exceptions {:lua {:skip true}
                     :python {:skip true}
@@ -80,7 +80,7 @@
              (then (repl/>notify)))))))
   => "30")
 
-^{:refer xt.db.schema.sql-call/call-api
+^{:refer xt.db.text.sql-call/call-api
   :added "4.0"
   :lang-exceptions {:lua {:skip true}
                     :python {:skip true}

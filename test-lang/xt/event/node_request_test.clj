@@ -84,6 +84,56 @@
       []
       []])
 
+^{:refer xt.event.node-request/remove-pending :added "4.1"}
+(fact "removes pending request entries by id"
+
+  (!.js
+    (var n (node/node-create {}))
+    (var request (frame/request-frame "room/a" "echo" [] nil))
+    (req/add-pending
+     n
+     request
+     (fn [value] (return value))
+     (fn [value] (return value))
+     {:transport-id "peer-a"})
+    (var removed (req/remove-pending n (. request ["id"])))
+    [(xt/x:is-string? (. (. removed ["request"]) ["id"]))
+     (xt/x:obj-keys (. n ["pending"]))])
+  => [true []])
+
+^{:refer xt.event.node-request/settle-pending :added "4.1"}
+(fact "settles pending requests using response reply ids"
+
+  (!.js
+    (var n (node/node-create {}))
+    (var resolved [])
+    (var request (frame/request-frame "room/a" "echo" [] nil))
+    (req/add-pending
+     n
+     request
+     (fn [value]
+       (xt/x:arr-push resolved (. value ["ok"])))
+     (fn [value]
+       (xt/x:arr-push resolved false))
+     nil)
+    (var entry
+      (req/settle-pending
+       n
+       (frame/response-ok-frame (. request ["id"]) "room/a" {:ok true} nil)))
+    [(xt/x:is-string? (. (. entry ["request"]) ["id"]))
+     resolved
+     (xt/x:obj-keys (. n ["pending"]))])
+  => [true [true] []])
+
+^{:refer xt.event.node-request/response-body :added "4.1"}
+(fact "normalises ok responses into promise results"
+
+  (!.js
+    [(promise/x:promise-native?
+      (req/response-body
+       (frame/response-ok-frame "req-1" "room/a" {:ok true} nil)))])
+  => [true])
+
 ^{:refer xt.event.node-request/ensure-promise :added "4.1"}
 (fact "normalises raw values to promises"
 

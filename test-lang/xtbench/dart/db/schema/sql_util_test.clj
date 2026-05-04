@@ -4,7 +4,7 @@
 
 (l/script- :dart
   {:runtime :twostep
-   :require [[xt.db.schema.sql-util :as ut]
+   :require [[xt.db.text.sql-util :as ut]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-lib :as k]]})
@@ -13,7 +13,7 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.schema.sql-util/encode-query-string.more :added "4.0" :adopt true}
+^{:refer xt.db.text.sql-util/encode-query-string.more :added "4.0" :adopt true}
 (fact "encodes a query segment"
 
   (!.dt
@@ -23,21 +23,21 @@
                             {:column-fn (fn:> [col] (xt/x:cat "\"SCHEMA\"." col))}))
   => "WHERE (\"SCHEMA\".name = 'hello') OR (\"SCHEMA\".name = 'world')")
 
-^{:refer xt.db.schema.sql-util/sqlite-json-values :added "4.0"}
+^{:refer xt.db.text.sql-util/sqlite-json-values :added "4.0"}
 (fact "select values from json"
 
   (!.dt
     (ut/sqlite-json-values "'[1,2,3,4]'"))
   => "(SELECT value from json_each('[1,2,3,4]'))")
 
-^{:refer xt.db.schema.sql-util/sqlite-json-keys :added "4.0"}
+^{:refer xt.db.text.sql-util/sqlite-json-keys :added "4.0"}
 (fact "select keys from json"
 
   (!.dt
     (ut/sqlite-json-keys "'{\"a\":1}'"))
   => "(SELECT key from json_each('{\"a\":1}'))")
 
-^{:refer xt.db.schema.sql-util/encode-bool :added "4.0"}
+^{:refer xt.db.text.sql-util/encode-bool :added "4.0"}
 (fact "encodes a boolean to sql"
 
   (!.dt
@@ -45,14 +45,14 @@
      (ut/encode-bool false)])
   => ["TRUE" "FALSE"])
 
-^{:refer xt.db.schema.sql-util/encode-number :added "4.0"}
+^{:refer xt.db.text.sql-util/encode-number :added "4.0"}
 (fact "encodes a number (for lua dates)"
 
   (!.dt
     [(ut/encode-number 100000000000)])
   => ["'100000000000'"])
 
-^{:refer xt.db.schema.sql-util/encode-operator :added "4.0"}
+^{:refer xt.db.text.sql-util/encode-operator :added "4.0"}
 (fact "encodes an operator to sql"
 
   (!.dt
@@ -61,7 +61,7 @@
      (ut/encode-operator "gte" {})])
   => ["=" "<=" ">="])
 
-^{:refer xt.db.schema.sql-util/encode-json :added "4.0"}
+^{:refer xt.db.text.sql-util/encode-json :added "4.0"}
 (fact "encodes a json value"
 
   (!.dt
@@ -70,7 +70,7 @@
        (= (std.json/read (std.json/read m))
           {"a" 1})))
 
-^{:refer xt.db.schema.sql-util/encode-value :added "4.0"}
+^{:refer xt.db.text.sql-util/encode-value :added "4.0"}
 (fact "encodes a value to sql"
 
   (!.dt
@@ -82,7 +82,7 @@
      (ut/encode-value {:a "he'llo"})])
   => ["NULL" "'1.235'" "'100000000000000000'" "'hel''lo'" "'{\"a\":1}'" "'{\"a\":\"he''llo\"}'"])
 
-^{:refer xt.db.schema.sql-util/encode-sql-arg :added "4.0"}
+^{:refer xt.db.text.sql-util/encode-sql-arg :added "4.0"}
 (fact "encodes an sql arg (for functions)"
 
   (!.dt
@@ -93,7 +93,7 @@
                        nil))
   => "'hello'")
 
-^{:refer xt.db.schema.sql-util/encode-sql-column :added "4.0"}
+^{:refer xt.db.text.sql-util/encode-sql-column :added "4.0"}
 (fact "encodes a sql column"
 
   (!.dt
@@ -104,7 +104,7 @@
                           nil))
   => "\"hello\"")
 
-^{:refer xt.db.schema.sql-util/encode-sql-tuple :added "4.0"}
+^{:refer xt.db.text.sql-util/encode-sql-tuple :added "4.0"}
 (fact "encodes a sql tuple"
 
   (!.dt
@@ -115,7 +115,7 @@
                          ut/encode-loop-fn))
   => "'1', '2', '3'")
 
-^{:refer xt.db.schema.sql-util/encode-sql-table :added "4.0"}
+^{:refer xt.db.text.sql-util/encode-sql-table :added "4.0"}
 (fact "encodes an sql table"
 
   (!.dt
@@ -127,7 +127,7 @@
                          nil))
   => "\"world\".\"hello\"")
 
-^{:refer xt.db.schema.sql-util/encode-sql-cast :added "4.0"}
+^{:refer xt.db.text.sql-util/encode-sql-cast :added "4.0"}
 (fact "encodes an sql cast"
 
   (!.dt
@@ -147,7 +147,7 @@
                          ut/encode-loop-fn)])
   => ["k::\"ENUM\".\"hello\"" "k"])
 
-^{:refer xt.db.schema.sql-util/encode-sql-keyword :added "4.0"}
+^{:refer xt.db.text.sql-util/encode-sql-keyword :added "4.0"}
 (fact "encodes an sql keyword"
 
   (!.dt
@@ -157,7 +157,7 @@
                            ut/encode-loop-fn))
   => "hello")
 
-^{:refer xt.db.schema.sql-util/encode-sql-fn :added "4.0"}
+^{:refer xt.db.text.sql-util/encode-sql-fn :added "4.0"}
 (fact "encodes an sql function"
 
   (!.dt
@@ -180,7 +180,7 @@
                       ut/encode-loop-fn))
   => "json_object(a, '{\"a\":1}')")
 
-^{:refer xt.db.schema.sql-util/encode-sql-select :added "4.0"}
+^{:refer xt.db.text.sql-util/encode-sql-select :added "4.0"}
 (fact "encodes an sql select statement"
 
   (!.dt
@@ -194,7 +194,7 @@
                           ut/encode-loop-fn))
   => "(SELECT * from jsonb_each('[1,2,3]', TRUE))")
 
-^{:refer xt.db.schema.sql-util/encode-sql :added "4.0"
+^{:refer xt.db.text.sql-util/encode-sql :added "4.0"
   :setup [(def +inputs+
             [{"::" "sql/column"
               :name "hello"}
@@ -227,7 +227,7 @@
       "(k + ('1' + '2' + '3'))"
       "(SELECT * from jsonb_each('[1,2,3]', TRUE))"])
 
-^{:refer xt.db.schema.sql-util/encode-loop-fn :added "4.0"}
+^{:refer xt.db.text.sql-util/encode-loop-fn :added "4.0"}
 (fact "loop function to encode"
 
   (!.dt
@@ -254,7 +254,7 @@
       "hello"
       "'{\"a\":1}'"])
 
-^{:refer xt.db.schema.sql-util/encode-query-value :added "4.1"}
+^{:refer xt.db.text.sql-util/encode-query-value :added "4.1"}
 (fact "encodes a query value recursively"
 
   (!.dt
@@ -291,7 +291,7 @@
       "or"
       "'{\"a\":1}'"])
 
-^{:refer xt.db.schema.sql-util/encode-query-segment :added "4.0"
+^{:refer xt.db.text.sql-util/encode-query-segment :added "4.0"
   :setup [(def +out+
             ["name = 'hello'"
              "name != 'hell''o'"
@@ -312,7 +312,7 @@
      (ut/encode-query-segment "data" {:a 1} k/identity {})])
   => +out+)
 
-^{:refer xt.db.schema.sql-util/encode-query-single-string :added "4.0"}
+^{:refer xt.db.text.sql-util/encode-query-single-string :added "4.0"}
 (fact "helper for encode-query-string"
 
   (!.dt
@@ -323,7 +323,7 @@
                                                       (xt/x:cat "\"T\"." col))})])
   => ["" "\"T\".data = '{\"a\":1}' AND \"T\".name != 'hello'"])
 
-^{:refer xt.db.schema.sql-util/encode-query-string :added "4.0"}
+^{:refer xt.db.text.sql-util/encode-query-string :added "4.0"}
 (fact "encodes a query string"
 
   (!.dt
@@ -341,7 +341,7 @@
        (any "WHERE data = '{\"a\":1}' AND name = 'hello'"
             "WHERE name = 'hello' AND data = '{\"a\":1}'")]))
 
-^{:refer xt.db.schema.sql-util/LIMIT :added "4.0"}
+^{:refer xt.db.text.sql-util/LIMIT :added "4.0"}
 (fact "creates a LIMIT keyword"
 
   (!.dt
@@ -352,7 +352,7 @@
                            ut/encode-loop-fn))
   => "LIMIT 10")
 
-^{:refer xt.db.schema.sql-util/OFFSET :added "4.0"}
+^{:refer xt.db.text.sql-util/OFFSET :added "4.0"}
 (fact "creates a OFFSET keyword"
 
   (!.dt
@@ -363,7 +363,7 @@
                            ut/encode-loop-fn))
   => "OFFSET 10")
 
-^{:refer xt.db.schema.sql-util/ORDER-BY :added "4.0"}
+^{:refer xt.db.text.sql-util/ORDER-BY :added "4.0"}
 (fact "creates an ORDER BY keyword"
 
   (!.dt
@@ -374,7 +374,7 @@
                            ut/encode-loop-fn))
   => "ORDER BY \"name\"")
 
-^{:refer xt.db.schema.sql-util/ORDER-SORT :added "4.0"}
+^{:refer xt.db.text.sql-util/ORDER-SORT :added "4.0"}
 (fact "creates an ORDER BY keyword"
 
   (!.dt
@@ -385,14 +385,14 @@
                            ut/encode-loop-fn))
   => "DESC")
 
-^{:refer xt.db.schema.sql-util/default-quote-fn :added "4.0"}
+^{:refer xt.db.text.sql-util/default-quote-fn :added "4.0"}
 (fact "wraps a column in double quotes"
 
   (!.dt
     (ut/default-quote-fn "hello"))
   => "\"hello\"")
 
-^{:refer xt.db.schema.sql-util/default-return-format-fn :added "4.0"}
+^{:refer xt.db.text.sql-util/default-return-format-fn :added "4.0"}
 (fact "default return format-fn"
 
   (!.dt
@@ -403,28 +403,28 @@
      {}))
   => "\"hello\"")
 
-^{:refer xt.db.schema.sql-util/default-table-fn :added "4.0"}
+^{:refer xt.db.text.sql-util/default-table-fn :added "4.0"}
 (fact "wraps a table in schema"
 
   (!.dt
     (ut/default-table-fn "hello" {:hello {:schema "test.schema"}}))
   => "\"test.schema\".\"hello\"")
 
-^{:refer xt.db.schema.sql-util/postgres-wrapper-fn :added "4.0"}
+^{:refer xt.db.text.sql-util/postgres-wrapper-fn :added "4.0"}
 (fact "wraps a call for postgres"
 
   (!.dt
     (ut/postgres-wrapper-fn "SELECT * FROM <TABLE>" 2))
   => "WITH j_ret AS (\n  SELECT * FROM <TABLE>\n) SELECT jsonb_agg(j_ret) FROM j_ret")
 
-^{:refer xt.db.schema.sql-util/postgres-opts :added "4.0"}
+^{:refer xt.db.text.sql-util/postgres-opts :added "4.0"}
 (fact "constructs postgres options"
 
   (!.dt
     (xt/x:is-object? (ut/postgres-opts {})))
   => true)
 
-^{:refer xt.db.schema.sql-util/sqlite-return-format-fn :added "4.0"}
+^{:refer xt.db.text.sql-util/sqlite-return-format-fn :added "4.0"}
 (fact "sqlite return format function"
 
   (!.dt
@@ -445,7 +445,7 @@
       "name|data"
       "'name', \"name\""])
 
-^{:refer xt.db.schema.sql-util/sqlite-to-boolean :added "4.0"}
+^{:refer xt.db.text.sql-util/sqlite-to-boolean :added "4.0"}
 (fact "coerces 1 to true and 0 to false"
 
   (!.dt
@@ -453,7 +453,7 @@
      (ut/sqlite-to-boolean 1)])
   => [false true])
 
-^{:refer xt.db.schema.sql-util/sqlite-opts :added "4.0"}
+^{:refer xt.db.text.sql-util/sqlite-opts :added "4.0"}
 (fact "constructs sqlite options"
 
   (!.dt
@@ -461,13 +461,13 @@
   => true)
 
 (comment
-  (s/pedantic ['xt.db.schema.sql-util])
+  (s/pedantic ['xt.db.text.sql-util])
   
-  (s/run ['xt.db.schema.sql-util])
+  (s/run ['xt.db.text.sql-util])
   (s/seedgen-benchadd '[xt.lang.spec] {:lang [:r] :write true})
-  (s/seedgen-benchadd '[xt.db.schema] {:lang [:julia :dart] :write true})
+  (s/seedgen-benchadd '[xt.db.text] {:lang [:julia :dart] :write true})
   
   
-  (s/seedgen-langadd '[xt.db.schema] {:lang [:lua :python] :write true})
-  (s/seedgen-langadd 'xt.db.schema.sql-util {:lang [:lua :python] :write true})
-  (s/seedgen-langremove 'xt.db.schema.sql-util {:lang [:lua :python] :write true}))
+  (s/seedgen-langadd '[xt.db.text] {:lang [:lua :python] :write true})
+  (s/seedgen-langadd 'xt.db.text.sql-util {:lang [:lua :python] :write true})
+  (s/seedgen-langremove 'xt.db.text.sql-util {:lang [:lua :python] :write true}))

@@ -1,13 +1,13 @@
-(ns xt.db.schema.sql-view
+(ns xt.db.text.sql-view
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-tree :as xtt]
-             [xt.db.schema.sql-graph :as sql-graph]
-             [xt.db.schema.sql-util :as sql-util]
-             [xt.db.schema.base-scope :as base-scope]]})
+             [xt.db.text.sql-graph :as sql-graph]
+             [xt.db.text.sql-util :as sql-util]
+             [xt.db.text.base-scope :as base-scope]]})
 
 (defn.xt tree-control-array
   "creates a control array"

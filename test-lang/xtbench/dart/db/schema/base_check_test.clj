@@ -6,14 +6,14 @@
 
 (l/script- :dart
   {:runtime :twostep
-   :require [[xt.db.schema.base-check :as chk]
+   :require [[xt.db.text.base-check :as chk]
              [xt.lang.common-lib :as k]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.schema.base-check/is-uuid? :added "4.0"}
+^{:refer xt.db.text.base-check/is-uuid? :added "4.0"}
 (fact "checks that a string input is a uuid"
 
   (!.dt
@@ -21,7 +21,7 @@
      (chk/is-uuid? "527a67de-a499-4c51-a435-953e2b00d")])
   => [true false])
 
-^{:refer xt.db.schema.base-check/check-arg-type :added "4.0"}
+^{:refer xt.db.text.base-check/check-arg-type :added "4.0"}
 (fact "checks the arg type of an input"
 
   (!.dt
@@ -32,7 +32,7 @@
      (chk/check-arg-type "text" "hello")])
   => [true true true true true])
 
-^{:refer xt.db.schema.base-check/check-args-type :added "4.0"}
+^{:refer xt.db.text.base-check/check-args-type :added "4.0"}
 (fact "checks the arg type of inputs"
 
   (!.dt
@@ -41,7 +41,7 @@
                           {:symbol "y", :type "numeric"}]))
   => [true])
 
-^{:refer xt.db.schema.base-check/check-args-length :added "4.0"}
+^{:refer xt.db.text.base-check/check-args-length :added "4.0"}
 (fact "checks that input and spec are of the same length"
 
   (!.dt
@@ -51,8 +51,8 @@
   => [true])
 
 (comment
-  (s/run ['xt.db.schema.base-check])
-  (s/seedgen-benchadd '[xt.db.schema.base-check] {:lang [:julia :dart] :write true})
+  (s/run ['xt.db.text.base-check])
+  (s/seedgen-benchadd '[xt.db.text.base-check] {:lang [:julia :dart] :write true})
   
-  (s/seedgen-langadd 'xt.db.schema.base-check {:lang [:lua :python] :write true})
-  (s/seedgen-langremove 'xt.db.schema.base-check {:lang [:lua :python] :write true}))
+  (s/seedgen-langadd 'xt.db.text.base-check {:lang [:lua :python] :write true})
+  (s/seedgen-langremove 'xt.db.text.base-check {:lang [:lua :python] :write true}))

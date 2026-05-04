@@ -1,4 +1,4 @@
-(ns xt.db.schema.sql-manage-test
+(ns xt.db.text.sql-manage-test
   (:require [hara.lang :as l]
             [std.string.prose :as prose])
   (:use code.test))
@@ -6,32 +6,32 @@
 ^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.db.schema.base-schema :as sch]
+   :require [[xt.db.text.base-schema :as sch]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-string :as str]
-             [xt.db.schema.sql-util :as ut]
-             [xt.db.schema.sql-manage :as manage]
+             [xt.db.text.sql-util :as ut]
+             [xt.db.text.sql-manage :as manage]
              [xt.db.helpers.data-main-test :as sample]]})
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.db.schema.base-schema :as sch]
+   :require [[xt.db.text.base-schema :as sch]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-string :as str]
-             [xt.db.schema.sql-util :as ut]
-             [xt.db.schema.sql-manage :as manage]
+             [xt.db.text.sql-util :as ut]
+             [xt.db.text.sql-manage :as manage]
              [xt.db.helpers.data-main-test :as sample]]})
 
 (l/script- :python
   {:runtime :basic
-   :require [[xt.db.schema.base-schema :as sch]
+   :require [[xt.db.text.base-schema :as sch]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-string :as str]
-             [xt.db.schema.sql-util :as ut]
-             [xt.db.schema.sql-manage :as manage]
+             [xt.db.text.sql-util :as ut]
+             [xt.db.text.sql-manage :as manage]
              [xt.db.helpers.data-main-test :as sample]]})
 
 (fact:global
@@ -152,7 +152,7 @@
           "  \"country_id\" text REFERENCES \"RegionCountry\""
           ");"]]))
 
-^{:refer xt.db.schema.sql-manage/table-create-column :added "4.0"}
+^{:refer xt.db.text.sql-manage/table-create-column :added "4.0"}
 (fact "column creation function"
 
   (!.js
@@ -227,7 +227,7 @@
   => ["\"account_id\" text REFERENCES \"UserAccount\""
       "\"account_id\" uuid REFERENCES \"scratch-sample-db\".\"UserAccount\""])
 
-^{:refer xt.db.schema.sql-manage/table-create :added "4.0"
+^{:refer xt.db.text.sql-manage/table-create :added "4.0"
   :setup [(def +currency-table+
             (prose/|
              "CREATE TABLE IF NOT EXISTS \"Currency\" ("
@@ -286,7 +286,7 @@
   => [+currency-table+
       +profile-table+])
 
-^{:refer xt.db.schema.sql-manage/table-create-all :added "4.0"}
+^{:refer xt.db.text.sql-manage/table-create-all :added "4.0"}
 (fact "creates all tables from schema"
 
   (!.js
@@ -307,7 +307,7 @@
                              (ut/sqlite-opts nil)))
   => +table-all+)
 
-^{:refer xt.db.schema.sql-manage/table-drop :added "4.0"}
+^{:refer xt.db.text.sql-manage/table-drop :added "4.0"}
 (fact "creates a table statement"
 
   (!.js
@@ -328,7 +328,7 @@
                       (ut/sqlite-opts nil)))
   => "DROP TABLE IF EXISTS \"Currency\";")
 
-^{:refer xt.db.schema.sql-manage/table-drop-all :added "4.0"
+^{:refer xt.db.text.sql-manage/table-drop-all :added "4.0"
   :setup [(def +drop-all+
             ["DROP TABLE IF EXISTS \"RegionCity\";"
              "DROP TABLE IF EXISTS \"RegionState\";"
@@ -364,10 +364,10 @@
   => +drop-all+)
 
 (comment
-  (s/pedantic ['xt.db.schema.sql-manage])
+  (s/pedantic ['xt.db.text.sql-manage])
   
-  (s/run ['xt.db.schema.sql-manage])
+  (s/run ['xt.db.text.sql-manage])
   
-  (s/seedgen-benchadd   '[xt.db.schema.sql-manage] {:lang [:dart :julia] :write true})
-  (s/seedgen-langadd    '[xt.db.schema.sql-manage] {:lang [:lua :python] :write true})
-  (s/seedgen-langremove '[xt.db.schema.sql-manage] {:lang [:lua :python] :write true}))
+  (s/seedgen-benchadd   '[xt.db.text.sql-manage] {:lang [:dart :julia] :write true})
+  (s/seedgen-langadd    '[xt.db.text.sql-manage] {:lang [:lua :python] :write true})
+  (s/seedgen-langremove '[xt.db.text.sql-manage] {:lang [:lua :python] :write true}))

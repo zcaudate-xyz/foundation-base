@@ -536,6 +536,33 @@
      (repl/>notify)))
   => ["a" "b" 3])
 
+^{:refer xt.lang.common-promise/with-delay :added "4.1"}
+(fact "delays thunk execution with ms first"
+
+  (notify/wait-on :js
+    (common-promise/promise-then
+     (common-promise/with-delay 10
+                                (fn []
+                                  (return "ms-first")))
+     (repl/>notify)))
+  => "ms-first"
+
+  (notify/wait-on :lua
+    (common-promise/promise-then
+     (common-promise/with-delay 10
+                                (fn []
+                                  (return "ms-first")))
+     (repl/>notify)))
+  => "ms-first"
+
+  (notify/wait-on :python
+    (common-promise/promise-then
+     (common-promise/with-delay 10
+                                (fn []
+                                  (return "ms-first")))
+     (repl/>notify)))
+  => "ms-first")
+
 ^{:refer xt.lang.common-promise/promise-finally :added "4.1"}
 (fact "common promise helpers preserve errors and cleanup order"
 
@@ -583,33 +610,6 @@
                      (xt/x:ex-native? err)
                      (xt/x:get-key (xt/x:ex-data err) "a")]))))
   => [["finally"] true 1])
-
-^{:refer xt.lang.common-promise/with-delay :added "4.1"}
-(fact "delays thunk execution with ms first"
-
-  (notify/wait-on :js
-    (common-promise/promise-then
-     (common-promise/with-delay 10
-                                (fn []
-                                  (return "ms-first")))
-     (repl/>notify)))
-  => "ms-first"
-
-  (notify/wait-on :lua
-    (common-promise/promise-then
-     (common-promise/with-delay 10
-                                (fn []
-                                  (return "ms-first")))
-     (repl/>notify)))
-  => "ms-first"
-
-  (notify/wait-on :python
-    (common-promise/promise-then
-     (common-promise/with-delay 10
-                                (fn []
-                                  (return "ms-first")))
-     (repl/>notify)))
-  => "ms-first")
 
 (comment
   (s/snapto '[xt.lang.common-promise])

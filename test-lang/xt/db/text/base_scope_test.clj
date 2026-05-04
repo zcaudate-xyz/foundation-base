@@ -1,4 +1,4 @@
-(ns xt.db.schema.base-scope-test
+(ns xt.db.text.base-scope-test
   (:require [hara.lang :as l])
   (:use code.test))
 
@@ -7,31 +7,31 @@
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-             [xt.db.schema.base-scope :as scope]
+             [xt.db.text.base-scope :as scope]
              [xt.db.helpers.data-main-test :as sample]
-             [xt.db.schema.sql-util :as ut]]})
+             [xt.db.text.sql-util :as ut]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-             [xt.db.schema.base-scope :as scope]
+             [xt.db.text.base-scope :as scope]
              [xt.db.helpers.data-main-test :as sample]
-             [xt.db.schema.sql-util :as ut]]})
+             [xt.db.text.sql-util :as ut]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-             [xt.db.schema.base-scope :as scope]
+             [xt.db.text.base-scope :as scope]
              [xt.db.helpers.data-main-test :as sample]
-             [xt.db.schema.sql-util :as ut]]})
+             [xt.db.text.sql-util :as ut]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.schema.base-scope/get-data-columns.more :added "4.0" :adopt true}
+^{:refer xt.db.text.base-scope/get-data-columns.more :added "4.0" :adopt true}
 (fact "classifies the link"
 
   (!.js
@@ -76,7 +76,7 @@
                  (fn:> [e] (. e ["ident"]))))
   => ["id" "country"])
 
-^{:refer xt.db.schema.base-scope/get-tree.more :added "4.0"
+^{:refer xt.db.text.base-scope/get-tree.more :added "4.0"
   :setup [(def +profile+
             ["UserProfile"
              {"custom" [],
@@ -176,7 +176,7 @@
                     {}))
   => +account+)
 
-^{:refer xt.db.schema.base-scope/get-link-standard.more :added "4.0" :adopt true}
+^{:refer xt.db.text.base-scope/get-link-standard.more :added "4.0" :adopt true}
 (fact "classifies the link"
 
   (!.js
@@ -221,7 +221,7 @@
                    (return [(. e ["ident"]) cols]))))
   => [["profile" [{"id" "1"} {"id" "2"} {"id" "3"} ["first_name" "last_name"]]]])
 
-^{:refer xt.db.schema.base-scope/get-link-standard.more :added "4.0" :adopt true}
+^{:refer xt.db.text.base-scope/get-link-standard.more :added "4.0" :adopt true}
 (fact "classifies the link"
 
   (!.js
@@ -266,7 +266,7 @@
                    (return [(. e ["ident"]) cols]))))
   => [["profile" [{"id" "1"} {"id" "2"} {"id" "3"} ["first_name" "last_name"]]]])
 
-^{:refer xt.db.schema.base-scope/merge-queries :added "4.0"}
+^{:refer xt.db.text.base-scope/merge-queries :added "4.0"}
 (fact "merges query with clause"
 
   ^{:seedgen/base {:lua {:transform {[] {}}}}}
@@ -306,7 +306,7 @@
       [{"a" 1, "b" 2} {"a" 1, "c" 3}]
       [{"a" 1, "b" 2} {"a" 1, "c" 3} {"b" 2, "c" 1} {"c" 3}]])
 
-^{:refer xt.db.schema.base-scope/filter-scope :added "4.0"}
+^{:refer xt.db.text.base-scope/filter-scope :added "4.0"}
 (fact "filter scopes from keys"
 
   (!.js  [(scope/filter-scope ["-/data"  "id"])
@@ -357,7 +357,7 @@
        "-/info" true,
        "-/id" true}])
 
-^{:refer xt.db.schema.base-scope/filter-plain-key :added "4.0"}
+^{:refer xt.db.text.base-scope/filter-plain-key :added "4.0"}
 (fact "converts _id tags to standard keys"
 
   (!.js
@@ -375,7 +375,7 @@
      (scope/filter-plain-key "hello_id")])
   => ["hello" "hello"])
 
-^{:refer xt.db.schema.base-scope/filter-plain :added "4.0"}
+^{:refer xt.db.text.base-scope/filter-plain :added "4.0"}
 (fact "filter ids keys from scope keys"
 
   (!.js
@@ -390,7 +390,7 @@
     (scope/filter-plain  ["-/data"  "id"]))
   => {"id" true})
 
-^{:refer xt.db.schema.base-scope/get-data-columns :added "4.0"}
+^{:refer xt.db.text.base-scope/get-data-columns :added "4.0"}
 (fact "get columns for given keys"
 
   (!.js
@@ -435,7 +435,7 @@
                  (fn:> [e] (. e ["ident"]))))
   => ["id" "account" "first_name" "last_name" "city" "state" "country" "about" "language" "detail"])
 
-^{:refer xt.db.schema.base-scope/get-link-standard :added "4.0"}
+^{:refer xt.db.text.base-scope/get-link-standard :added "4.0"}
 (fact "classifies the link"
 
   (!.js
@@ -450,7 +450,7 @@
     (scope/get-link-standard ["hello" ["hello"]]))
   => ["hello" [{} ["hello"]]])
 
-^{:refer xt.db.schema.base-scope/get-query-tables :added "4.0"}
+^{:refer xt.db.text.base-scope/get-query-tables :added "4.0"}
 (fact "get columns for given query"
 
   (!.js
@@ -474,7 +474,7 @@
                             {}))
   => {"UserProfile" true, "UserAccount" true})
 
-^{:refer xt.db.schema.base-scope/get-link-columns :added "4.0"}
+^{:refer xt.db.text.base-scope/get-link-columns :added "4.0"}
 (fact "get columns for given keys"
 
   ^{:seedgen/base {:lua {:transform {[] {}}}}}
@@ -508,10 +508,10 @@
                    (return [(. e ["ident"]) cols]))))
   => [["profile" [{} ["first_name" "last_name"]]]])
 
-^{:refer xt.db.schema.base-scope/get-linked-tables-loop :added "4.1"}
+^{:refer xt.db.text.base-scope/get-linked-tables-loop :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.db.schema.base-scope/get-linked-tables :added "4.0"}
+^{:refer xt.db.text.base-scope/get-linked-tables :added "4.0"}
 (fact "calculated linked tables given query"
 
   (!.js
@@ -541,7 +541,7 @@
                                  [["asset"]]]]]]))
   => {"UserProfile" true, "Asset" true, "UserAccount" true, "WalletAsset" true, "Wallet" true})
 
-^{:refer xt.db.schema.base-scope/as-where-input :added "4.0"}
+^{:refer xt.db.text.base-scope/as-where-input :added "4.0"}
 (fact "when empty, returns an empty array"
 
   ^{:seedgen/base {:lua {:transform {[] {}}}}}
@@ -566,7 +566,7 @@
      (scope/as-where-input {:id "zcaudate"})])
   => [[] [{"id" "zcaudate"} {"id" "z1"}] [{"id" "zcaudate"}]])
 
-^{:refer xt.db.schema.base-scope/get-tree :added "4.0"
+^{:refer xt.db.text.base-scope/get-tree :added "4.0"
   :setup [(def +account+
             ["UserAccount"
              {"custom" [],
@@ -674,10 +674,10 @@
   => +account+)
 
 (comment
-  (s/run ['xt.db.schema.base-scope])
-  (s/pedantic ['xt.db.schema.base])
+  (s/run ['xt.db.text.base-scope])
+  (s/pedantic ['xt.db.text.base])
   (s/seedgen-benchadd '[xt.lang.spec] {:lang [:r] :write true})
-  (s/seedgen-benchadd '[xt.db.schema.base-scope] {:lang [:julia :dart] :write true})
+  (s/seedgen-benchadd '[xt.db.text.base-scope] {:lang [:julia :dart] :write true})
   
-  (s/seedgen-langadd 'xt.db.schema.base-scope {:lang [:lua :python] :write true})
-  (s/seedgen-langremove 'xt.db.schema.base-scope {:lang [:lua :python] :write true}))
+  (s/seedgen-langadd 'xt.db.text.base-scope {:lang [:lua :python] :write true})
+  (s/seedgen-langremove 'xt.db.text.base-scope {:lang [:lua :python] :write true}))

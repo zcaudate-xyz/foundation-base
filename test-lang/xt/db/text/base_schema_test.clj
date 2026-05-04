@@ -1,4 +1,4 @@
-(ns xt.db.schema.base-schema-test
+(ns xt.db.text.base-schema-test
   (:use code.test)
   (:require [std.json :as json]
             [hara.lang :as l]))
@@ -6,27 +6,27 @@
 ^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.db.schema.base-schema :as sch]
-             [xt.db.schema.sql-util :as ut]
+   :require [[xt.db.text.base-schema :as sch]
+             [xt.db.text.sql-util :as ut]
              [xt.db.helpers.data-main-test :as sample]]})
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.db.schema.base-schema :as sch]
-             [xt.db.schema.sql-util :as ut]
+   :require [[xt.db.text.base-schema :as sch]
+             [xt.db.text.sql-util :as ut]
              [xt.db.helpers.data-main-test :as sample]]})
 
 (l/script- :python
   {:runtime :basic
-   :require [[xt.db.schema.base-schema :as sch]
-             [xt.db.schema.sql-util :as ut]
+   :require [[xt.db.text.base-schema :as sch]
+             [xt.db.text.sql-util :as ut]
              [xt.db.helpers.data-main-test :as sample]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.schema.base-schema/get-ident-id :added "4.0"}
+^{:refer xt.db.text.base-schema/get-ident-id :added "4.0"}
 (fact "gets the ident id for a schema entry"
 
   (!.js
@@ -59,7 +59,7 @@
                        "type" "ref"}))
   => "owner_id")
 
-^{:refer xt.db.schema.base-schema/list-tables :added "4.0"}
+^{:refer xt.db.text.base-schema/list-tables :added "4.0"}
 (fact "list schema tables"
 
   (!.js
@@ -113,7 +113,7 @@
             "WalletAsset"]
            :in-any-order))
 
-^{:refer xt.db.schema.base-schema/get-cached-schema :added "4.0"}
+^{:refer xt.db.text.base-schema/get-cached-schema :added "4.0"}
 (fact "get lookup"
 
   (!.js (sch/get-cached-schema sample/Schema))
@@ -125,7 +125,7 @@
   (!.py (sch/get-cached-schema sample/Schema))
   => map?)
 
-^{:refer xt.db.schema.base-schema/create-data-keys :added "4.0"}
+^{:refer xt.db.text.base-schema/create-data-keys :added "4.0"}
 (fact "creates data keys"
 
   (!.js
@@ -140,7 +140,7 @@
     (sch/create-data-keys sample/SchemaCurrency "Currency"))
   => ["id" "type" "symbol" "native" "decimal" "name" "plural" "description"])
 
-^{:refer xt.db.schema.base-schema/create-ref-keys :added "4.0"}
+^{:refer xt.db.text.base-schema/create-ref-keys :added "4.0"}
 (fact "creates ref keys"
 
   (!.js (sch/create-ref-keys sample/Schema "UserProfile"))
@@ -152,7 +152,7 @@
   (!.py (sch/create-ref-keys sample/Schema "UserProfile"))
   => (just ["account" "state" "country"]  :in-any-order))
 
-^{:refer xt.db.schema.base-schema/create-rev-keys :added "4.0"}
+^{:refer xt.db.text.base-schema/create-rev-keys :added "4.0"}
 (fact "creates rev keys"
 
   (!.js
@@ -170,7 +170,7 @@
   => (just ["organisations" "profile" "privileges" "organisation_accesses" "wallets" "notification"]
            :in-any-order))
 
-^{:refer xt.db.schema.base-schema/create-table-entries :added "4.0"}
+^{:refer xt.db.text.base-schema/create-table-entries :added "4.0"}
 (fact "creates the table keys"
 
   (!.js
@@ -275,7 +275,7 @@
         "val" "owner"},
        "cardinality" "one"}])
 
-^{:refer xt.db.schema.base-schema/create-defaults :added "4.0"}
+^{:refer xt.db.text.base-schema/create-defaults :added "4.0"}
 (fact "creates defaults from sql inputs"
 
   (!.js
@@ -290,7 +290,7 @@
     (sch/create-defaults sample/Schema "Wallet"))
   => {"slug" "default"})
 
-^{:refer xt.db.schema.base-schema/create-all-keys :added "4.0"
+^{:refer xt.db.text.base-schema/create-all-keys :added "4.0"
   :setup [(def +all-wallet+
             {"table"
              [{"ident" "id",
@@ -343,7 +343,7 @@
     (sch/create-all-keys sample/Schema "Wallet"))
   => +all-wallet+)
 
-^{:refer xt.db.schema.base-schema/get-all-keys :added "4.0"
+^{:refer xt.db.text.base-schema/get-all-keys :added "4.0"
   :setup [(def +all-org+
             {"table"
              [{"ident" "id",
@@ -409,7 +409,7 @@
   (!.py (sch/get-all-keys sample/Schema "Organisation"))
   => +all-org+)
 
-^{:refer xt.db.schema.base-schema/data-keys :added "4.0"}
+^{:refer xt.db.text.base-schema/data-keys :added "4.0"}
 (fact "gets data keys"
 
   (!.js (sch/data-keys sample/Schema "UserAccount"))
@@ -421,7 +421,7 @@
   (!.py (sch/data-keys sample/Schema "UserAccount"))
   => ["id" "nickname" "password_hash" "password_salt" "password_updated" "is_super" "is_suspended" "is_official"])
 
-^{:refer xt.db.schema.base-schema/ref-keys :added "4.0"}
+^{:refer xt.db.text.base-schema/ref-keys :added "4.0"}
 (fact "gets ref keys"
 
   (!.js (sch/ref-keys sample/Schema "UserProfile"))
@@ -433,7 +433,7 @@
   (!.py (sch/ref-keys sample/Schema "UserProfile"))
   => ["account" "state" "country"])
 
-^{:refer xt.db.schema.base-schema/ref-id-keys :added "4.0"}
+^{:refer xt.db.text.base-schema/ref-id-keys :added "4.0"}
 (fact "gets ref id keys"
 
   (!.js (sch/ref-id-keys sample/Schema "UserProfile"))
@@ -451,7 +451,7 @@
       "state_id" "state",
       "country_id" "country"})
 
-^{:refer xt.db.schema.base-schema/rev-keys :added "4.0"}
+^{:refer xt.db.text.base-schema/rev-keys :added "4.0"}
 (fact "gets rev keys"
 
   (set (!.js (sch/rev-keys sample/Schema "UserAccount")))
@@ -463,7 +463,7 @@
   (set (!.py (sch/rev-keys sample/Schema "UserAccount")))
   => #{"organisations" "profile" "privileges" "organisation_accesses" "wallets" "notification"})
 
-^{:refer xt.db.schema.base-schema/table-defaults :added "4.0"}
+^{:refer xt.db.text.base-schema/table-defaults :added "4.0"}
 (fact "gets the table defaults"
 
   (!.js
@@ -478,7 +478,7 @@
     (sch/table-defaults sample/Schema "Wallet"))
   => {"slug" "default"})
 
-^{:refer xt.db.schema.base-schema/table-entries :added "4.0"}
+^{:refer xt.db.text.base-schema/table-entries :added "4.0"}
 (fact "gets the table entries"
 
   (!.js
@@ -583,7 +583,7 @@
         "val" "owner"},
        "cardinality" "one"}])
 
-^{:refer xt.db.schema.base-schema/table-columns :added "4.0"
+^{:refer xt.db.text.base-schema/table-columns :added "4.0"
   :setup [(def +out+
             ["id" "account_id" "first_name" "last_name" "city"
              "state_id" "country_id" "about" "language" "detail"])]}
@@ -598,7 +598,7 @@
   (!.py (sch/table-columns sample/Schema "UserProfile"))
   => +out+)
 
-^{:refer xt.db.schema.base-schema/create-table-order :added "4.0"
+^{:refer xt.db.text.base-schema/create-table-order :added "4.0"
   :setup [(def +ordered+
             ["UserAccount"
              "UserProfile"
@@ -627,7 +627,7 @@
     (sch/create-table-order sample/SchemaLookup))
   => +ordered+)
 
-^{:refer xt.db.schema.base-schema/table-order :added "4.0"}
+^{:refer xt.db.text.base-schema/table-order :added "4.0"}
 (fact "table order with caching"
 
   (!.js
@@ -642,7 +642,7 @@
     (sch/table-order  sample/SchemaLookup))
   => +ordered+)
 
-^{:refer xt.db.schema.base-schema/table-coerce :added "4.0"}
+^{:refer xt.db.text.base-schema/table-coerce :added "4.0"}
 (fact "coerces output given schema and type functions"
 
   (!.js
@@ -686,7 +686,7 @@
 
 (comment
 
-  (s/run ['xt.db.schema.base-schema])
+  (s/run ['xt.db.text.base-schema])
   
-  (s/seedgen-langadd 'xt.db.schema.base-schema {:lang [:lua :python] :write true})
-  (s/seedgen-langremove 'xt.db.schema.base-schema {:lang [:lua :python] :write true}))
+  (s/seedgen-langadd 'xt.db.text.base-schema {:lang [:lua :python] :write true})
+  (s/seedgen-langremove 'xt.db.text.base-schema {:lang [:lua :python] :write true}))

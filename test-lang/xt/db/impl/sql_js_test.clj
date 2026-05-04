@@ -1,4 +1,4 @@
-(ns xt.db.impl.sql-test
+(ns xt.db.impl.sql-js-test
   (:require [hara.lang :as l]
              [std.string.prose :as prose]
              [xt.lang.common-notify :as notify]
@@ -12,9 +12,9 @@
                [xt.lang.common-repl :as repl]
                [xt.lang.spec-promise :as spec-promise]
                [xt.protocol.impl.connection-sql :as dbsql]
-               [xt.db.schema.sql-util :as ut]
-               [xt.db.schema.sql-raw :as raw]
-               [xt.db.schema.sql-manage :as manage]
+               [xt.db.text.sql-util :as ut]
+               [xt.db.text.sql-raw :as raw]
+               [xt.db.text.sql-manage :as manage]
                [xt.db.helpers.data-main-test :as sample]]})
 
   (defn.xt bootstrap-instance
@@ -48,9 +48,9 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as spec-promise]
              [xt.protocol.impl.connection-sql :as dbsql]
-             [xt.db.schema.sql-util :as ut]
-             [xt.db.schema.sql-raw :as raw]
-             [xt.db.schema.sql-manage :as manage]
+             [xt.db.text.sql-util :as ut]
+             [xt.db.text.sql-raw :as raw]
+             [xt.db.text.sql-manage :as manage]
              [xt.db.helpers.data-main-test :as sample]
              [js.lib.driver-sqlite :as js-sqlite]]})
 
@@ -65,9 +65,9 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as spec-promise]
              [xt.protocol.impl.connection-sql :as dbsql]
-             [xt.db.schema.sql-util :as ut]
-             [xt.db.schema.sql-raw :as raw]
-             [xt.db.schema.sql-manage :as manage]
+             [xt.db.text.sql-util :as ut]
+             [xt.db.text.sql-raw :as raw]
+             [xt.db.text.sql-manage :as manage]
              [xt.db.helpers.data-main-test :as sample]
              [lua.nginx.driver-sqlite :as lua-sqlite]]})
 
@@ -81,9 +81,9 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as spec-promise]
              [xt.protocol.impl.connection-sql :as dbsql]
-             [xt.db.schema.sql-util :as ut]
-             [xt.db.schema.sql-raw :as raw]
-             [xt.db.schema.sql-manage :as manage]
+             [xt.db.text.sql-util :as ut]
+             [xt.db.text.sql-raw :as raw]
+             [xt.db.text.sql-manage :as manage]
              [xt.db.helpers.data-main-test :as sample]
              [python.lib.driver-sqlite :as py-sqlite]]})
 

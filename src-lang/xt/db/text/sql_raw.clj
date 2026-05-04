@@ -1,9 +1,9 @@
-(ns xt.db.schema.sql-raw
+(ns xt.db.text.sql-raw
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
-             [xt.db.schema.sql-util :as ut]]})
+             [xt.db.text.sql-util :as ut]]})
 
 (defn.xt raw-delete
   "encodes a delete query"

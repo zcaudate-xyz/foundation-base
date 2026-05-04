@@ -1,11 +1,11 @@
-(ns xt.db.schema.sql-graph
+(ns xt.db.text.sql-graph
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-             [xt.db.schema.sql-util :as ut]
-             [xt.db.schema.base-scope :as scope]]})
+             [xt.db.text.sql-util :as ut]
+             [xt.db.text.base-scope :as scope]]})
 
 (defn.xt base-query-inputs
   "formats the query inputs"

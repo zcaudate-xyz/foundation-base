@@ -11,9 +11,9 @@
              [xt.lang.common-string :as str]
              [xt.lang.common-repl :as repl]
              [xt.protocol.impl.connection-sql :as dbsql]
-             [xt.db.schema.sql-util :as ut]
-             [xt.db.schema.sql-raw :as raw]
-             [xt.db.schema.sql-manage :as manage]
+             [xt.db.text.sql-util :as ut]
+             [xt.db.text.sql-raw :as raw]
+             [xt.db.text.sql-manage :as manage]
              [xt.db.helpers.data-main-test :as sample]
              [js.lib.driver-sqlite :as js-sqlite]]})
 
