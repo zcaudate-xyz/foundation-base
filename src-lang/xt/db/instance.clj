@@ -5,6 +5,7 @@
   {:require [[xt.db.text.base-schema :as base-schema]
              [xt.db.text.base-scope :as scope]
              [xt.db.instance.cache :as impl-cache]
+             [xt.db.instance.supabase :as impl-supabase]
              [xt.db.instance.sql :as impl-sql]
              [xt.protocol.impl.connection-sql :as sql]
              [xt.lang.spec-base :as xt]
@@ -27,13 +28,18 @@
                "pull-sync"   impl-cache/cache-pull-sync
                "delete-sync" impl-cache/cache-delete-sync
                "clear"       impl-cache/cache-clear}
+   "db.supabase" {"create"    (fn [m]
+                                (return m))
+                  "pull-sync" impl-supabase/supabase-pull-sync}
    "db.sql"   {"create"      (fn [m]
                                (return (xt/x:get-key m "instance")))
-               "add"         impl-sql/sql-process-event-sync
-               "remove"      impl-sql/sql-process-event-remove
-               "pull-sync"   impl-sql/sql-pull-sync
-               "delete-sync" impl-sql/sql-delete-sync
-               "clear"       impl-sql/sql-clear}})
+               "exec-sync"   (fn [instance raw-input _opts]
+                                (return (sql/query-sync instance raw-input)))
+                "add"         impl-sql/sql-process-event-sync
+                "remove"      impl-sql/sql-process-event-remove
+                "pull-sync"   impl-sql/sql-pull-sync
+                "delete-sync" impl-sql/sql-delete-sync
+                "clear"       impl-sql/sql-clear}})
 
 (defn.xt get-dbtype
   [db]
@@ -154,12 +160,11 @@
   {:added "4.0"}
   [db raw-input]
   (var dbtype (-/get-dbtype db))
-  (var #{instance} db)
-  (cond (== dbtype "db.sql")
-        (return (sql/query-sync instance raw-input))
-
-        :else
-        (return (-/unsupported-op "exec-sync" dbtype))))
+  (var #{instance opts} db)
+  (var exec-fn (xtd/get-in -/IMPL [dbtype "exec-sync"]))
+  (when (xt/x:nil? exec-fn)
+    (return (-/unsupported-op "exec-sync" dbtype)))
+  (return (exec-fn instance raw-input opts)))
 
 (defn.xt db-pull-sync
   "runs a pull statement"

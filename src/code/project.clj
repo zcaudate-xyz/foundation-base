@@ -141,21 +141,22 @@
 
 (defn get-path
   "gets the path given the `ns`
-    
-    (reset! code.project.common/*lookup* {})
-    (get-path (h/ns-sym))
-    => \"test/code/project_test.clj\""
+     
+     (reset! code.project.common/*lookup* {})
+     (get-path (h/ns-sym))
+     => \"test/code/project_test.clj\""
   {:added "4.0"}
   ([ns & [project]]
-   (let [project (or project (project))]
+   (let [project-map (or project (code.project/project))
+         roots       (concat
+                      (or (:source-paths project-map) ["src"])
+                      (or (:test-paths project-map)   ["test"]))]
      (or (get @common/*lookup* ns)
-        (some (fn [root]
-                (second 
-                 (lookup-ns
-                  (str root "/" (fs/ns->file ns) ".clj"))))
-              (concat
-               (or (:source-paths project) ["src"])
-               (or (:test-paths project)   ["test"])))))))
+         (some (fn [root]
+                 (let [candidate (str root "/" (fs/ns->file ns) ".clj")]
+                   (when (fs/exists? candidate)
+                     (second (lookup-ns candidate)))))
+               roots)))))
 
 (defn all-files
   "returns all the clojure files in a directory

@@ -34,7 +34,7 @@
         spec-meta (cond-> (merge (meta spec-sym) attr-map)
                     docstring (assoc :docstring docstring))]
     `(do
-        (hara.typed.xtalk/register-spec-form!
+       (hara.typed/register-spec-form!
          '~full-sym
          '~type-form
          '~spec-meta

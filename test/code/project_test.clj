@@ -56,9 +56,12 @@
 ^{:refer code.project/get-path :added "4.1"
   :setup [(reset! code.project.common/*lookup* {})]}
 (fact "uses configured project roots when resolving namespaces"
+ 
+  (get-path 'js.react-native.physical-addon)
+  => "src-lang/js/react_native/physical_addon.clj"
 
-  (get-path 'xt.cell.service.util-hello)
-  => "src-lang/xt/cell/service/util_hello.clj")
+  (get-path 'xt.db.helpers.seed-user-test)
+  => "test-lang/xt/db/helpers/seed_user_test.clj")
 
 ^{:refer code.project/all-files :added "3.0"}
 (fact "returns all the clojure files in a directory"
@@ -128,10 +131,11 @@
 
 ^{:refer code.project/code-files :added "3.0"}
 (fact "returns only the code files for the current project"
-
+ 
   (code-files)
   => (contains {'code.project any
-                'xt.cell.service.util-hello "src-lang/xt/cell/service/util_hello.clj"}))
+                'js.react-native.physical-addon "src-lang/js/react_native/physical_addon.clj"
+                'xt.db.helpers.seed-user-test "test-lang/xt/db/helpers/seed_user_test.clj"}))
 
 ^{:refer code.project/code-path :added "3.0"}
 (fact "returns the path of the code"

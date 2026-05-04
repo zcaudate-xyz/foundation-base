@@ -235,11 +235,12 @@
   "returns the sort rank for a script option"
   {:added "4.1"}
   ([entry]
-   (let [value (some-> entry :key entry-block block/value)
-         idx   (.indexOf *script-option-order* value)]
-     (if (neg? idx)
-       (+ 1000 (:index entry))
-       idx))))
+   (let [value        (some-> entry :key entry-block block/value)
+         ^java.util.List option-order *script-option-order*
+         idx          (.indexOf option-order value)]
+      (if (neg? idx)
+        (+ 1000 (:index entry))
+        idx))))
 
 (defn render-script-value
   "formats a script option value"

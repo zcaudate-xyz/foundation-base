@@ -24,7 +24,7 @@
 
 (fact "defspec.xt registers a spec declaration"
   (typed/clear-registry!)
-  (eval '(hara.typed.xtalk/defspec.xt LocalId :xt/str))
+  (eval '(hara.typed/defspec.xt LocalId :xt/str))
   (-> (typed/get-spec 'hara.model.spec-xtalk-typed-test/LocalId)
       :type
       types/type->data)
@@ -50,7 +50,7 @@
 
 (fact "defspec.xt resolves aliased type names during registration"
   (typed/clear-registry!)
-  (eval '(hara.typed.xtalk/defspec.xt AliasMaybeFixture
+  (eval '(hara.typed/defspec.xt AliasMaybeFixture
            [:xt/maybe types/User]))
   (-> (typed/get-spec 'hara.model.spec-xtalk-typed-test/AliasMaybeFixture)
       :type
