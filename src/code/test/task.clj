@@ -1,5 +1,6 @@
 (ns code.test.task
   (:require [clojure.set]
+            [clojure.string :as str]
             [code.project :as project]
             [code.test.base.context :as context]
             [code.test.base.executive :as executive]
@@ -84,6 +85,47 @@
   []
   (alter-var-root #'std.task.process/*interrupt*
                   (fn [_] true)))
+
+(defn- file-paths
+  [files]
+  (cond
+    (nil? files)
+    []
+    
+    (string? files)
+    (->> (str/split files #"\s+")
+         (remove empty?)
+         vec)
+    
+    (or (symbol? files)
+        (keyword? files))
+    [(str files)]
+    
+    (coll? files)
+    (->> files
+         (mapcat file-paths)
+         vec)
+    
+    :else
+    [(str files)]))
+
+(defn resolve-files
+  "resolves a file or file list to test namespaces"
+  {:added "4.1"}
+  ([files]
+   (resolve-files files (project/project)))
+  ([files project]
+   (->> (file-paths files)
+        (mapv (fn [path]
+                (let [[ns] (project/lookup-ns path)]
+                  (when-not ns
+                    (throw (ex-info "Cannot resolve namespace from file"
+                                    {:file path})))
+                  (if (= :test (project/file-type path))
+                    ns
+                    (project/test-ns ns)))))
+        (distinct)
+        vec)))
 
 (invoke/definvoke run
   "runs all tests
@@ -181,17 +223,23 @@
 
 (defn -main
   "main entry point for leiningen
- 
+  
    (task/-main)"
   {:added "3.0"}
   ([& args]
-   (let [opts (task/process-ns-args args)
-         {:keys [throw failed timeout] :as stats} (run (or (:ns opts) :all)
-                                                       (dissoc opts :ns))
+   (let [opts    (task/process-ns-args args)
+         project (project/project)
+         input   (cond
+                   (:files opts) (resolve-files (:files opts) project)
+                   (:ns opts)    (:ns opts)
+                   :else         :all)
+         {:keys [throw failed timeout] :as stats} (run input
+                                                       (dissoc opts :ns)
+                                                       project)
          res (+ (or throw 0) (or failed 0) (or timeout 0))]
-     (if (get opts :no-exit)
-       res
-       (System/exit res)))))
+      (if (get opts :no-exit)
+        res
+        (System/exit res)))))
 
 (comment
   (run '[platform])

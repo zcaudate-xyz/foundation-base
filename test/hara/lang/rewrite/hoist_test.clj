@@ -1,7 +1,7 @@
 (ns hara.lang.rewrite.hoist-test
   (:require [clojure.walk]
-            [hara.lang.base.emit-helper :as helper]
-            [hara.lang.base.grammar :as grammar]
+            [hara.common.emit-helper :as helper]
+            [hara.common.grammar :as grammar]
             [hara.lang.rewrite.hoist :as hoist])
   (:use code.test))
 

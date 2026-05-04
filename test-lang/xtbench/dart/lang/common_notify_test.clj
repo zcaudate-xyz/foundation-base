@@ -2,7 +2,7 @@
   (:require [net.http :as http]
             [std.json :as json]
             [hara.lang :as l]
-            [hara.lang.interface.type-notify :as interface]
+            [hara.lang.type-notify :as interface]
             [xt.lang.common-notify :as notify])
   (:use code.test))
 

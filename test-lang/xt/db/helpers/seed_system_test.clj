@@ -1,11 +1,11 @@
 (ns xt.db.helpers.seed-system-test
-  (:require [hara.rt.postgres :as pg
+  (:require [hara.runtime.postgres :as pg
                :refer [defsel.pg defret.pg]]
             [hara.lang :as l]
             [std.lib.foundation :as f]))
 
 (l/script :postgres
-  {:require [[hara.rt.postgres :as pg]]
+  {:require [[hara.runtime.postgres :as pg]]
    :static {:application ["test-db-helpers"]
             :seed        ["scratch-sample-db"]
             :all         {:schema   ["scratch-sample-db"]}}})
@@ -133,8 +133,8 @@
              :scope #{:public}
              :args [:citext i-iso]
              :api/view true}
-  currency-by-country {:id [:in (hara.rt.postgres/t:select xt.db.helpers.seed-system-test/RegionCountry
-                                  {:returning  (hara.rt.postgres/jsonb-object-keys #{"currencies"})
+  currency-by-country {:id [:in (hara.runtime.postgres/t:select xt.db.helpers.seed-system-test/RegionCountry
+                                  {:returning  (hara.runtime.postgres/jsonb-object-keys #{"currencies"})
                                    :where {:id i-iso}
                                    :as :raw})]})
 

@@ -1,0 +1,158 @@
+(ns hara.model.annex.spec-perl
+  (:require [clojure.string]
+            [hara.lang.book :as book]
+            [hara.common.emit :as emit]
+            [hara.common.emit-common :as common]
+            [hara.common.emit-data :as data]
+            [hara.common.emit-helper :as helper]
+            [hara.common.emit-preprocess :as preprocess] [hara.common.preprocess-base :as preprocess-base]
+            [hara.common.emit-top-level :as top]
+            [hara.common.grammar :as grammar]
+            [hara.lang.script :as script]
+            [hara.common.util :as ut]
+            [hara.model.spec-xtalk]
+            [hara.model.annex.spec-xtalk.fn-perl :as fn]
+            [std.lib.collection :as collection]
+            [std.lib.foundation :as f]))
+
+;;
+;; LANG
+;;
+
+(defn perl-var
+  "emit perl variable declaration"
+  [[_ sym & args]]
+  (let [val (last args)
+        sym-str (if (keyword? sym)
+                  (f/strn sym)
+                  (str "$" (f/strn sym)))]
+    (list :- (str "my " sym-str " = " (common/*emit-fn* val preprocess-base/*macro-grammar* preprocess-base/*macro-opts*)))))
+
+(defn perl-symbol
+  "emit perl symbol with $ prefix if it's a variable"
+  [sym grammar mopts]
+  (let [s0 (name sym)
+        s  (if (or (clojure.string/includes? s0 "::")
+                   (clojure.string/includes? s0 "->"))
+             s0
+             (clojure.string/replace s0 "-" "_"))]
+    (cond (:perl/func mopts)
+          s
+
+          (or (clojure.string/starts-with? s "$")
+              (clojure.string/starts-with? s "@")
+              (clojure.string/starts-with? s "%"))
+          s
+
+          :else
+          (str "$" s))))
+
+(defn perl-invoke-args
+  [args grammar mopts]
+  (clojure.string/join ", " (common/emit-invoke-args args grammar mopts)))
+
+(defn perl-invoke
+  "emit perl function call"
+  [[f & args] grammar mopts]
+  (let [f-str (common/*emit-fn* f grammar (assoc mopts :perl/func true))
+        args-str (perl-invoke-args args grammar (dissoc mopts :perl/func))]
+    (str f-str "(" args-str ")")))
+
+(defn perl-defn
+  "emit perl subroutine definition"
+  [[_ sym args & body]]
+  (let [grammar preprocess-base/*macro-grammar*
+        mopts   preprocess-base/*macro-opts*
+        sym-str (common/emit-symbol sym grammar (assoc mopts :perl/func true))
+        args-emit (map (fn [arg]
+                         (str "my " (perl-symbol arg grammar mopts) " = shift;"))
+                       args)
+        body-str (common/*emit-fn* (cons 'do body) grammar mopts)]
+    (list :- (str "sub " sym-str " {\n"
+                  (if (seq args-emit)
+                    (str (clojure.string/join "\n" args-emit) "\n")
+                    "")
+                  body-str "\n}"))))
+
+(defn perl-eval
+  "emit perl eval block"
+  [[_ & args] grammar mopts]
+  (let [body    (common/*emit-fn* (cons 'do args) grammar mopts)]
+    (str "eval {\n" body "\n}")))
+
+(defn perl-array
+  "emit perl array reference"
+  [arr grammar mopts]
+  (str "[" (clojure.string/join ", " (common/emit-array arr grammar mopts)) "]"))
+
+(defn perl-map
+  "emit perl hash reference"
+  [m grammar mopts]
+  (let [entries (map (fn [[k v]]
+                       (str (if (keyword? k)
+                              (common/*emit-fn* (f/strn k) grammar mopts)
+                              (common/*emit-fn* k grammar mopts))
+                            " => "
+                            (common/*emit-fn* v grammar mopts)))
+                     m)]
+    (str "{" (clojure.string/join ", " entries) "}")))
+
+(def +features+
+  (let [base (grammar/build :exclude [:pointer :block :data-range])
+        base-keys (set (keys base))
+        fn-override (select-keys fn/+perl+ base-keys)
+        fn-extend   (apply dissoc fn/+perl+ (keys fn-override))]
+    (-> base
+        (grammar/build:override
+         {:var        {:macro #'perl-var :emit :macro}
+          :defn       {:macro #'perl-defn :emit :macro}
+          :and        {:raw "&&"}
+          :or         {:raw "||"}
+          :not        {:raw "!"}
+          :pow        {:raw "**" :emit :infix :symbol #{'**}}
+          :eq         {:raw "=="}
+          :neq        {:raw "!="}
+          :gt         {:raw ">"}
+          :lt         {:raw "<"}
+          :gte        {:raw ">="}
+          :lte        {:raw "<="}})
+        (grammar/build:override fn-override)
+        (grammar/build:extend fn-extend)
+        (grammar/build:extend
+         {:concat     {:op :concat :symbol #{'concat} :raw "." :emit :infix :value true}
+          :eval       {:emit #'perl-eval :symbol #{'eval} :value true}
+          :die        {:op :die   :symbol #{'die}   :raw "die"   :emit :prefix}}))))
+
+(def +template+
+  (->> {:banned #{:keyword}
+        :allow   {:assign  #{:symbol}}
+        :default {:common    {:statement ";"
+                              :start  ""
+                              :end    ""}
+                  :block     {:parameter {:start "(" :end ")"}
+                              :body      {:start "{" :end "}"}}
+                  :invoke    {:custom #'perl-invoke}
+                  :function  {:raw "sub"}}
+        :token   {:nil       {:as "undef"}
+                  :boolean   {:as (fn [b] (if b "1" "0"))}
+                  :string    {:quote :double}
+                  :symbol    {:custom #'perl-symbol}}
+        :data    {:vector    {:custom #'perl-array}
+                  :map       {:custom #'perl-map}}
+        :define  {:def       {:raw ""}
+                  :defglobal {:raw ""}}}
+       (collection/merge-nested (emit/default-grammar))))
+
+(def +grammar+
+  (grammar/grammar :pl
+    (grammar/to-reserved +features+)
+    +template+))
+
+(def +book+
+  (book/book {:lang :perl
+              :parent :xtalk
+              :meta (book/book-meta {})
+              :grammar +grammar+}))
+
+(def +init+
+  (script/install +book+))

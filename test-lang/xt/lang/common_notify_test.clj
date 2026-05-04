@@ -2,7 +2,7 @@
   (:require [net.http :as http]
             [std.json :as json]
             [hara.lang :as l]
-            [hara.lang.interface.type-notify :as interface]
+            [hara.lang.type-notify :as interface]
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
@@ -75,7 +75,7 @@
 (fact "gets the rt for the current ceremony"
 
   (notify/notify-ceremony-rt :js)
-  => hara.rt.basic.type_basic.RuntimeBasic)
+  => hara.runtime.basic.type_basic.RuntimeBasic)
 
 ^{:refer xt.lang.common-notify/wait-on-call :added "4.0"}
 (fact "generic wait-on-helper for oneshots"

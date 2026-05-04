@@ -1,13 +1,13 @@
 (ns xtgen.gen-common-spec
   (:require [std.string.common :as str]
             [std.block.template :as gen]
-            [hara.lang.base.grammar-macro :as grammar-macro]
-            [hara.lang.base.grammar-spec :as grammar-spec]
-            [hara.lang.base.grammar-xtalk :as xtalk]))
+            [hara.common.grammar-macro :as grammar-macro]
+            [hara.common.grammar-spec :as grammar-spec]
+            [hara.common.grammar-xtalk :as xtalk]))
 
 (defn xtalk-entries
   []
-  (->> (the-ns 'hara.lang.base.grammar-xtalk)
+  (->> (the-ns 'hara.common.grammar-xtalk)
        (ns-publics)
        (keep (fn [[k ^clojure.lang.Var v]]
                (let [s (.sym v)]
@@ -51,8 +51,8 @@
            xtalk/+xt-runtime-shell+]))
 
 (def +primitive-source-namespaces+
-  '[hara.lang.base.grammar-spec
-    hara.lang.base.grammar-macro])
+  '[hara.common.grammar-spec
+    hara.common.grammar-macro])
 
 (defn op-table-vars
   ([ns-sym]

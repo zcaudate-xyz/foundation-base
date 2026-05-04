@@ -1,0 +1,583 @@
+(ns hara.lang.runtime
+  (:require [clojure.set]
+            [clojure.string]
+            [std.json :as json]
+            [hara.common.emit-common :as common]
+            [hara.common.emit-preprocess :as preprocess] 
+            [hara.common.preprocess-base :as preprocess-base]
+            [hara.lang.impl :as impl]
+            [hara.lang.impl-deps :as deps]
+            [hara.lang.impl-lifecycle :as lifecycle]
+            [hara.lang.book-module :as book-module]
+            [hara.lang.library :as lib]
+            [hara.lang.library-snapshot :as snap]
+            [hara.lang.pointer :as ptr]
+            [hara.lang.runtime-proxy :as proxy]
+            [hara.common.util :as ut]
+            [std.lib.collection :as collection]
+            [std.lib.context.pointer]
+            [std.lib.context.registry :as reg]
+            [std.lib.deps]
+            [std.lib.env :as env]
+            [std.lib.foundation :as f]
+            [std.lib.impl]
+            [std.lib.resource :as resource]
+            [std.lib.template :as template]
+            [std.protocol.component :as protocol.component]
+            [std.protocol.context :as protocol.context]))
+
+;;
+;; Default Runtime
+;;
+
+(defn default-tags-ptr
+  "runtime default args"
+  {:added "4.0"}
+  ([rt ptr]
+   (ptr/ptr-tag ptr (:runtime rt))))
+
+(defn default-deref-ptr
+  "runtime default deref"
+  {:added "4.0"}
+  ([{:keys [library] :as rt} ptr]
+   (ptr/ptr-deref (assoc ptr :library library))))
+
+(defn default-invoke-ptr
+  "runtime default invoke"
+  {:added "4.0"}
+  ([{:keys [id library layout emit] :as rt} ptr args]
+   (ptr/ptr-invoke-string ptr args
+                          {:library library ;; override default library
+                           :layout  layout  
+                           :emit    (merge emit
+                                           {:transform (fn [args {:keys [bulk] :as mopts}]
+                                                          (if bulk
+                                                            (if (vector? args)
+                                                              (apply list 'do args)
+                                                              args)
+                                                            args))
+                                             :runtime
+                                             (assoc rt
+                                                   :type (:runtime rt)
+                                                   :namespace (env/ns-sym))})})))
+
+(defn default-init-ptr
+  "will init pointer if there is a :rt/init key"
+  {:added "4.0"}
+  [{:keys [id lang library layout module emit] :as rt} entry]
+  (when (and (#{:defglobal :defrun} (:op-key entry))
+             (:rt/init entry))
+    (std.lib.context.pointer/rt-invoke-ptr rt
+                       (ut/lang-pointer lang
+                                        {:module module})
+                       [(:form-input entry)])))
+
+(defn default-display-ptr
+  "runtime default display"
+  {:added "4.0"}
+  ([{:keys [lang library module emit] :as rt} ptr]
+   (cond (#{:defglobal} (:op-key @ptr))
+         (let [body (impl/emit-as lang [(ut/sym-full ptr)] {:layout :full
+                                                            :emit emit})]
+           (ptr/ptr-invoke rt
+                           std.lib.context.pointer/rt-raw-eval
+                           body
+                           (:main emit)
+                           (or (:json emit) :full)))
+
+         (= :xtalk lang)
+         (env/pp-str (:form @ptr))
+         
+         :else
+         (ptr/ptr-display ptr {:library library
+                               :emit emit}))))
+
+(def default-raw-eval
+  (fn [_ string] string))
+
+(def default-transform-in-ptr
+  (fn [_ _ args] args))
+
+(def default-transform-out-ptr
+  (fn [_ _ return] return))
+
+(defn- rt-default-string [{:keys [lang]}]
+  (str "#rt:lang" [lang]))
+
+(std.lib.impl/defimpl RuntimeDefault [lang redirect]
+  :string rt-default-string
+  :protocols
+  [protocol.context/IContext
+   :body
+   {-raw-eval      (if redirect
+                     (proxy/proxy-raw-eval rt string)
+                     (default-raw-eval rt string))
+    -init-ptr      (if redirect
+                     (proxy/proxy-init-ptr rt ptr)
+                     (default-init-ptr rt ptr))
+    -tags-ptr      (if redirect
+                     (proxy/proxy-tags-ptr rt ptr)
+                     (default-tags-ptr rt ptr))
+    -deref-ptr     (if redirect
+                     (proxy/proxy-deref-ptr rt ptr)
+                     (default-deref-ptr rt ptr))
+    -display-ptr   (if redirect
+                     (proxy/proxy-display-ptr rt ptr)
+                     (default-display-ptr rt ptr))
+    -invoke-ptr    (if redirect
+                     (proxy/proxy-invoke-ptr rt ptr args)
+                     (default-invoke-ptr rt ptr args))
+    -transform-in-ptr   (if redirect
+                          (proxy/proxy-transform-in-ptr rt ptr args)
+                          (default-transform-in-ptr rt ptr args))
+    -transform-out-ptr  (if redirect
+                          (proxy/proxy-transform-out-ptr rt ptr return)
+                          (default-transform-out-ptr rt ptr return))}
+   protocol.component/IComponent
+   :body
+   {-start  (if redirect
+              (let [rt (proxy/proxy-get-rt redirect lang)
+                    _   (doseq [[module shortcut] (:module/internal rt)]
+                          (when (not= module redirect)
+                            (f/suppress (require [module :as shortcut]))))]
+                component)
+              component)
+    -stop    component
+    -kill    component}
+   
+   protocol.component/IComponentQuery
+   :body
+   {-started?      (if redirect
+                     (proxy/proxy-started? component)
+                     true)
+    -stopped?      (if redirect
+                     (proxy/proxy-stopped? component)
+                     true)
+    -info          (if redirect
+                     (proxy/proxy-info component level)
+                     {})
+    -remote?       (if redirect
+                     (proxy/proxy-remote? component)
+                     false)
+    -health        (if redirect
+                     (proxy/proxy-health component)
+                     true)}])
+
+(defn rt-default
+  "creates a lang runtime"
+  {:added "4.0"}
+  ([{:keys [lang runtime] :as m}]
+   (map->RuntimeDefault (merge  m {:runtime :default}))))
+
+(defn rt-default?
+  "checks if object is default runtime"
+  {:added "4.0"}
+  ([obj]
+   (instance? RuntimeDefault obj)))
+  
+(resource/res:spec-add
+ {:type :hara/lang.rt
+  :config {:bootstrap false}
+  :instance {:create rt-default}})
+
+(defn rt-null
+  "creates a default null runtime"
+  {:added "4.0"}
+  ([m]
+   (rt-default (assoc m :lang :null))))
+
+(resource/res:spec-add
+ {:type :hara/context.rt.null
+  :instance {:create rt-null}})
+
+(alter-var-root #'reg/+rt-null+
+                (fn [_]
+                  (rt-null reg/+null+)))
+
+;;
+;;
+;;
+
+(defn install-lang!
+  "installs a language within `std.lib.context`"
+  {:added "4.0"}
+  [lang & [options]]
+  (let [ctx   (ut/lang-context lang)]
+    (reg/registry-install
+     ctx
+     {:config {:context ctx :lang lang}
+      :scratch (rt-default {:context ctx :lang lang
+                            :options (or options
+                                         {})})
+      :rt  {:default {:resource :hara/lang.rt}}})))
+
+(defn install-type!
+  "installs a specific runtime type given `:lang`"
+  {:added "4.0"}
+  ([lang runtime {:keys [type config] :as spec}]
+   (let [ctx    (ut/lang-context lang)
+         spec   (dissoc spec :config)
+         r-spec (when (or (not (f/suppress (resource/res:spec-get type)))
+                          (seq (dissoc spec :type)))
+                  (resource/res:spec-add spec))
+         r-ctx  (reg/registry-rt-add ctx {:key runtime
+                                          :config config
+                                          :resource type})]
+      {:spec r-spec
+       :context r-ctx})))
+
+;;
+;;
+;;
+
+(defn return-format-simple
+  "format forms for return"
+  {:added "4.0"}
+  [forms]
+  (concat (butlast forms)
+          [(list 'return (last forms))]))
+
+(defn return-format
+  "standard format for return"
+  {:added "4.0"}
+  [forms & [opts]]
+  (let [v (last forms)
+        v (if (and (collection/form? v)
+                   ((clojure.set/union '#{:- := var return break throw}
+                             opts)
+                    (first v)))
+            v
+            (list 'return v))]
+    (concat (butlast forms) [v])))
+
+(defn return-wrap-invoke
+  "wraps forms to be invoked"
+  {:added "4.0"}
+  [forms]
+  (template/$ ('((fn [] ~@forms)))))
+
+(defn normalize-body-forms
+  "normalizes runtime eval input into a flat sequence of body forms"
+  {:added "4.1"}
+  [input {:keys [bulk] :as mopts}]
+  (if bulk
+    input
+    (ptr/free-form-body input)))
+
+(defn return-transform
+  "standard return transform"
+  {:added "4.0"}
+  [input {:keys [bulk] :as mopts} & [{:keys [wrap-fn
+                                             format-fn]}]]
+  (let [forms (normalize-body-forms input mopts)
+        wrap-fn   (or wrap-fn
+                      return-wrap-invoke)
+        format-fn (or format-fn
+                      return-format)]
+    (wrap-fn (format-fn forms))))
+
+(defn default-invoke-script
+  "default invoke script call used by most runtimes"
+  {:added "4.0"}
+  ([{:keys [id lang library layout] :as rt} ptr args f {:keys [json main emit]
+                                                        :or {json :full}
+                                                        :as params}]
+   (let [emit   (collection/merge-nested emit (:emit rt))
+         emit   (assoc emit
+                       :input   {:pointer ptr
+                                 :args args}
+                       :runtime (assoc rt
+                                       :type (:runtime rt)
+                                       :namespace (env/ns-sym)))
+          _      (if common/*trace* (env/prn emit params))
+          body   (ptr/ptr-invoke-script ptr args {:emit emit
+                                                  :library library
+                                                  :lang lang
+                                                  :layout (or (:layout params)
+                                                              layout)})]
+     (ptr/ptr-invoke rt
+                     f
+                     body
+                     main
+                     json))))
+
+;;
+;; LIFECYCLE
+;;
+
+(defn default-lifecycle-prep
+  "prepares mopts for lifecycle"
+  {:added "4.0"}
+  [{:keys [id layout lang module library lifecycle emit] :as rt}]
+  (let [library  (or library (impl/runtime-library))
+        module-id module
+        [snapshot book module]
+        (loop [snapshot (lib/get-snapshot library)
+               book     (snap/get-book snapshot lang)
+               module   (get-in book [:modules module-id])]
+          (let [missing (when module
+                          (->> (book-module/module-deps-code book module)
+                               (remove #(get-in book [:modules %]))
+                               seq))]
+            (if (seq missing)
+              (do (impl/with:library [library]
+                    (doseq [dep missing]
+                      (require dep)))
+                  (let [snapshot (lib/get-snapshot library)
+                        book     (snap/get-book snapshot lang)]
+                    (recur snapshot
+                           book
+                           (get-in book [:modules module-id]))))
+              [snapshot book module])))]
+    (merge {:layout layout
+            :book book
+            :lang lang
+            :snapshot snapshot
+            :module module
+            :emit (assoc emit
+                         :runtime
+                         {:id id
+                          :lang   (:lang rt)
+                          :type   (:runtime rt)
+                          :module (:module rt)
+                          :namespace (env/ns-sym)})}
+           lifecycle)))
+
+
+;;
+;; SCAFFOLD
+;;
+
+(defn- default-scaffold-array
+  [rt arr]
+  (reduce  (fn [acc [k body]]
+             (try
+               (conj acc [k (ptr/ptr-invoke rt
+                                            std.lib.context.pointer/rt-raw-eval
+                                            body
+                                            (:main meta)
+                                            (:json meta))])
+               (catch Throwable t
+                 (reduced (conj acc [k body (.getMessage t)])))))
+           []
+           arr))
+
+(defn default-scaffold-setup-for
+  "setup native modules, defglobals and defruns in the runtime"
+  {:added "4.0"}
+  [rt module-id]
+  (let [meta (default-lifecycle-prep rt)
+        body (impl/emit-scaffold-for module-id meta)]
+    (ptr/ptr-invoke rt
+                    std.lib.context.pointer/rt-raw-eval
+                    body
+                    (:main meta)
+                    (:json meta))))
+
+(defn default-scaffold-setup-to
+  "setup scaffold up to but not including the current module in the runtime"
+  {:added "4.0"}
+  [rt module-id]
+  (let [meta (default-lifecycle-prep rt)
+        body (impl/emit-scaffold-to module-id meta)]
+    (ptr/ptr-invoke rt
+                    std.lib.context.pointer/rt-raw-eval
+                    body
+                    (:main meta)
+                    (:json meta))))
+
+(defn default-scaffold-imports
+  "embed native imports to be globally accessible"
+  {:added "4.0"}
+  [rt module-id]
+  (let [meta (default-lifecycle-prep rt)
+        body (impl/emit-scaffold-imports module-id meta)]
+    (ptr/ptr-invoke rt
+                    std.lib.context.pointer/rt-raw-eval
+                    body
+                    (:main meta)
+                    (:json meta))))
+
+(defn default-lifecycle-fn
+  "constructs a lifecycle fn"
+  {:added "4.0"}
+  [f]
+  (fn [rt & args]
+    (let [{:keys [book] :as meta} (default-lifecycle-prep rt)
+          form (apply f book args)]
+      
+      (if form
+        (let [body (impl/emit-str form meta)]
+          (ptr/ptr-invoke rt
+                          std.lib.context.pointer/rt-raw-eval
+                          body
+                          (:main meta)
+                          (:json meta)))))))
+
+
+(def ^{:arglists '([rt module-id])}
+  default-has-module?
+  (default-lifecycle-fn deps/has-module-form))
+
+(def ^{:arglists '([rt ptr])}
+  default-has-ptr?
+  (default-lifecycle-fn deps/has-ptr-form))
+
+(def ^{:arglists '([rt ptr])}
+  default-setup-ptr
+  (default-lifecycle-fn deps/setup-ptr-form))
+
+(def ^{:arglists '([rt ptr])}
+  default-teardown-ptr
+  (default-lifecycle-fn deps/teardown-ptr-form))
+
+(defn default-setup-module-emit
+  "emits the string for the module"
+  {:added "4.0"}
+  [rt module-id]
+  (let [{:keys [book] :as meta
+         :rt/keys [setup]} (default-lifecycle-prep rt)]
+    (lifecycle/emit-module-setup module-id (update meta :emit collection/merge-nested-new setup))))
+
+(defn default-setup-module-basic
+  "basic setup module action"
+  {:added "4.0"}
+  [rt module-id]
+  (let [{:keys [book] :as meta
+         :rt/keys [setup]} (default-lifecycle-prep rt)
+        body (lifecycle/emit-module-setup module-id (update meta :emit collection/merge-nested-new setup))]
+    (ptr/ptr-invoke rt
+                    std.lib.context.pointer/rt-raw-eval
+                    body
+                    (:main meta)
+                    (:json meta))))
+
+(defn default-teardown-module-basic
+  "basic teardown module action"
+  {:added "4.0"}
+  [rt module-id]
+  (let [{:keys [teardown] :as meta
+         :rt/keys [teardown]} (default-lifecycle-prep rt)
+        body (lifecycle/emit-module-teardown module-id (update meta :emit collection/merge-nested-new teardown))]
+    (ptr/ptr-invoke rt
+                    std.lib.context.pointer/rt-raw-eval
+                    body
+                    (:main meta)
+                    (:json meta))))
+
+(defn default-setup-module
+  "default setup module (with error isolation)"
+  {:added "4.0"}
+  [rt module-id & [meta]]
+  (let [{:keys [book] :as meta
+         :rt/keys [setup]} (or meta (default-lifecycle-prep rt))
+        raw  (lifecycle/emit-module-setup-raw module-id (update meta :emit collection/merge-nested-new setup))
+        body (lifecycle/emit-module-setup-join raw)]
+    (if (not-empty body)
+      (try (ptr/ptr-invoke rt std.lib.context.pointer/rt-raw-eval
+                           body
+                           (:main meta)
+                           (:json meta))
+           (catch Throwable t
+             (let [arr (lifecycle/emit-module-setup-concat raw)]
+               (mapv (fn [part]
+                       (try
+                         (ptr/ptr-invoke rt std.lib.context.pointer/rt-raw-eval
+                                         part
+                                         (:main meta)
+                                         (:json meta))
+                         (catch Throwable t
+                           (throw (ex-info "Error at:" {:part (vec (clojure.string/split-lines part))
+                                                        :message (loop [t t
+                                                                        c (.getCause ^Throwable t)]
+                                                                   (if c
+                                                                     (recur c (.getCause ^Throwable c))
+                                                                     (.getMessage ^Throwable t)))})))))
+                     arr)))))))
+
+(defn default-teardown-module
+  "default teardown module (with error isolation)"
+  {:added "4.0"}
+  [rt module-id & [meta]]
+  (let [{:keys [book] :as meta
+         :rt/keys [teardown]} (or meta (default-lifecycle-prep rt))
+        raw  (lifecycle/emit-module-teardown-raw module-id (update meta :emit collection/merge-nested-new teardown))
+        body (lifecycle/emit-module-teardown-join raw)]
+    (if (not-empty body)
+      (try (ptr/ptr-invoke rt std.lib.context.pointer/rt-raw-eval
+                           body
+                           (:main meta)
+                           (:json meta))
+           (catch Throwable t
+             (let [arr (lifecycle/emit-module-teardown-concat raw)]
+               (mapv (fn [part]
+                       (try
+                         (ptr/ptr-invoke rt std.lib.context.pointer/rt-raw-eval
+                                         part
+                                         (:main meta)
+                                         (:json meta))
+                         (catch Throwable t
+                           (throw (ex-info "Error at:" {:part (vec (clojure.string/split-lines part))
+                                                        :message (loop [t t
+                                                                        c (.getCause ^Throwable t)]
+                                                                   (if c
+                                                                     (recur c (.getCause ^Throwable c))
+                                                                     (.getMessage ^Throwable t)))})))))
+                     arr)))))))
+
+(defn multistage-invoke
+  "invokes a multistage pipeline given deps function"
+  {:added "4.0"}
+  [rt module-id module-fn deps-fn]
+  (let [{:keys [book] :as meta} (default-lifecycle-prep rt)
+        module-ids (deps-fn book module-id)]
+    (mapv (fn [module-id]
+            [module-id (module-fn rt module-id meta)])
+          module-ids)))
+
+(defn multistage-setup-for
+  "setup for a given namespace"
+  {:added "4.0"}
+  [rt module-id]
+  (multistage-invoke rt module-id default-setup-module
+                     (fn [book module-id]
+                       (std.lib.deps/deps-ordered book [module-id]))))
+
+(defn multistage-setup-to
+  "setup to a given namespcase"
+  {:added "4.0"}
+  [rt module-id]
+  (multistage-invoke rt module-id default-setup-module
+                     (fn [book module-id]
+                       (butlast (std.lib.deps/deps-ordered book [module-id])))))
+
+(defn multistage-teardown-for
+  "teardown for a given namespace"
+  {:added "4.0"}
+  [rt module-id]
+  (multistage-invoke rt module-id default-teardown-module
+                     (fn [book module-id]
+                       (reverse (std.lib.deps/deps-ordered book [module-id])))))
+
+(defn multistage-teardown-at
+  "teardown all dependents including this"
+  {:added "4.0"}
+  [rt module-id]
+  (multistage-invoke rt module-id default-teardown-module
+                     (fn [book module-id]
+                       (binding [hara.lang.book/*dep-types* :module]
+                         (std.lib.deps/dependents-ordered book module-id)))))
+
+(defn multistage-teardown-to
+  "teardown all dependents upto this"
+  {:added "4.0"}
+  [rt module-id]
+  (multistage-invoke rt module-id default-teardown-module
+                     (fn [book module-id]
+                       (binding [hara.lang.book/*dep-types* :module]
+                         (butlast (std.lib.deps/dependents-ordered book module-id))))))
+
+
+(comment
+  (./import)
+  (./create-tests))

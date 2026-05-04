@@ -1,5 +1,5 @@
 (ns kmi.queue.list-test
-  (:require [hara.rt.redis]
+  (:require [hara.runtime.redis]
             [hara.lang :as l])
   (:use code.test))
 

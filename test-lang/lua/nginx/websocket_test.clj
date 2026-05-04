@@ -1,7 +1,7 @@
 (ns lua.nginx.websocket-test
   (:require [net.http :as http]
             [net.http.websocket :as client]
-            [hara.rt.nginx]
+            [hara.runtime.nginx]
             [std.json :as json]
             [hara.lang :as l])
   (:use code.test))

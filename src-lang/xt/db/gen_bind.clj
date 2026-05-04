@@ -1,5 +1,5 @@
 (ns xt.db.gen-bind
-  (:require [hara.rt.postgres :as pg]
+  (:require [hara.runtime.postgres :as pg]
             [hara.lang :as l]
             [std.lib.env :as env]
             [std.lib.foundation :as f]

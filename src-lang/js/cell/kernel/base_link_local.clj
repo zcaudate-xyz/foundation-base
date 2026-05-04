@@ -1,7 +1,7 @@
 (ns js.cell.kernel.base-link-local
   (:require [js.cell.kernel.worker-local :as worker-local]
             [hara.lang :as l]
-            [hara.lang.typed.xtalk :refer [defspec.xt]]
+            [hara.typed.xtalk :refer [defspec.xt]]
             [std.lib.foundation :as f]
             [std.string.wrap]))
 

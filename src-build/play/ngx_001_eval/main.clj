@@ -52,7 +52,7 @@
                                '(lua.nginx/http-echo-ws))]]]]))]]]])
 
 (comment
-  (hara.rt.nginx/error-logs))
+  (hara.runtime.nginx/error-logs))
 
 
 (comment

@@ -1,9 +1,9 @@
 (ns js.core
   (:require [clojure.string]
             [hara.lang :as l]
-            [hara.lang.base.impl-deps :as impl-deps]
-            [hara.lang.base.pointer :as pointer]
-            [hara.lang.base.util :as ut]
+            [hara.lang.impl-deps :as impl-deps]
+            [hara.lang.pointer :as pointer]
+            [hara.common.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.env :as env]
              [std.lib.foundation :as f]

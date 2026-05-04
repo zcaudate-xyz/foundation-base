@@ -1,0 +1,21 @@
+(ns hara.runtime.basic.impl.process-js-test
+  (:require [hara.runtime.basic.impl.process-js :refer :all]
+            [hara.lang :as l])
+  (:use code.test))
+
+(l/script- :js
+  {:runtime :oneshot
+   :config {:program :nodejs}})
+
+^{:refer hara.runtime.basic.impl.process-js/CANARY :adopt true :added "4.0"}
+(fact "EVALUATE js code"
+
+  (!.js (+ 1 2 3 4))
+  => 10
+
+  (default-oneshot-wrap "1")
+  => string?)
+
+
+^{:refer hara.runtime.basic.impl.process-js/node-path :added "4.1"}
+(fact "TODO")

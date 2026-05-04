@@ -2,10 +2,10 @@
   "Extracts complete formal specifications from hara.lang for training data.
    
    Sources:
-   - hara.lang.base.grammar-spec (+op-* definitions)
-   - hara.lang.base.grammar-macro (macro transformations)
-   - hara.lang.base.grammar-xtalk (xtalk transforms)
-   - hara.lang.model.spec-* (language-specific specs)
+   - hara.common.grammar-spec (+op-* definitions)
+   - hara.common.grammar-macro (macro transformations)
+   - hara.common.grammar-xtalk (xtalk transforms)
+   - hara.model.spec-* (language-specific specs)
    
    Usage: lein exec -p src-training/scripts/extract_formal_specs.clj"
   (:require [clojure.string :as str]
@@ -39,7 +39,7 @@
    ;; GRAMMAR-SPEC
    ;; =========================================================
    :grammar-spec
-   {:source "hara.lang.base.grammar-spec"
+   {:source "hara.common.grammar-spec"
     :categories
     {:builtin
      {:spec "+op-builtin+"
@@ -190,7 +190,7 @@
    ;; GRAMMAR-MACRO
    ;; =========================================================
    :grammar-macro
-   {:source "hara.lang.base.grammar-macro"
+   {:source "hara.common.grammar-macro"
     :macros
     [{:macro "if" :symbol "if" :emit :macro :fn "tf-if" :type :block
       :transform "(if cond then else) => (br* (if cond then) (else else))"}
@@ -221,7 +221,7 @@
    ;; GRAMMAR-XTALK
    ;; =========================================================
    :grammar-xtalk
-   {:source "hara.lang.base.grammar-xtalk"
+   {:source "hara.common.grammar-xtalk"
     :transforms
     [{:name "tf-throw" :form "(throw obj)" :expands-to "(throw obj)"}
      {:name "tf-eq-nil?" :form "(x:nil? obj)" :expands-to "(== nil obj)"}
@@ -249,7 +249,7 @@
    ;; XTALK PRIMITIVES (from spec-xtalk/fn-*.clj)
    ;; =========================================================
    :xtalk-primitives
-   {:source "hara.lang.model.spec-xtalk"
+   {:source "hara.model.spec-xtalk"
     :categories
     {:core
      {:primitives [:x-del :x-cat :x-len :x-err :x-eval :x-apply :x-unpack
@@ -352,19 +352,19 @@
    ;; LANGUAGE-SPECIFIC SPECS
    ;; =========================================================
    :language-specs
-   {:js {:source "hara.lang.model.spec-js"
+   {:js {:source "hara.model.spec-js"
          :file "src/hara.lang/model/spec_js.clj"
          :includes [:spec-js/jsx :spec-js/meta :spec-js/qml]
          :features [:js-core :js-proto :js-math :js-type :js-lu :js-obj :js-arr :js-str :js-json]}
-    :python {:source "hara.lang.model.spec-python"
+    :python {:source "hara.model.spec-python"
              :file "src/hara.lang/model/spec_python.clj"
              :features [:py-core :py-math :py-type :py-obj :py-arr :py-str]}
-    :lua {:source "hara.lang.model.spec-lua"
+    :lua {:source "hara.model.spec-lua"
           :file "src/hara.lang/model/spec_lua.clj"
           :features [:lua-core :lua-math :lua-type :lua-obj :lua-arr :lua-str]}
-    :xtalk {:source "hara.lang.model.spec-xtalk"
+    :xtalk {:source "hara.model.spec-xtalk"
             :file "src/hara.lang/model/spec_xtalk.clj"
-            :annex "hara.lang.model.spec-xtalk"
+            :annex "hara.model.spec-xtalk"
             :features [:+features+ :+grammar+ :+meta+ :+book+ :+init+]}}})
 
 ;; ============================================================
@@ -490,16 +490,16 @@
                              (group-by :emit_type)
                              (sort-by #(count (second %)) >))))
          "\n\nSource Files Referenced:\n"
-         "  - hara.lang.base.grammar-spec\n"
-         "  - hara.lang.base.grammar-macro\n"
-         "  - hara.lang.base.grammar-xtalk\n"
-         "  - hara.lang.model.spec-js\n"
-         "  - hara.lang.model.spec-python\n"
-         "  - hara.lang.model.spec-lua\n"
-         "  - hara.lang.model.spec-xtalk\n"
-         "  - hara.lang.model.spec-xtalk.fn-js\n"
-         "  - hara.lang.model.spec-xtalk.fn-python\n"
-         "  - hara.lang.model.spec-xtalk.fn-lua\n")))
+         "  - hara.common.grammar-spec\n"
+         "  - hara.common.grammar-macro\n"
+         "  - hara.common.grammar-xtalk\n"
+         "  - hara.model.spec-js\n"
+         "  - hara.model.spec-python\n"
+         "  - hara.model.spec-lua\n"
+         "  - hara.model.spec-xtalk\n"
+         "  - hara.model.spec-xtalk.fn-js\n"
+         "  - hara.model.spec-xtalk.fn-python\n"
+         "  - hara.model.spec-xtalk.fn-lua\n")))
 
 ;; ============================================================
 ;; MAIN

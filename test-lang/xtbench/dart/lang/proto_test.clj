@@ -1,6 +1,6 @@
 (ns xtbench.dart.lang.proto-test
   (:use code.test)
-  (:require [hara.rt.basic.type-common :as common]
+  (:require [hara.runtime.basic.type-common :as common]
             [hara.lang :as l]))
 
 (l/script- :dart

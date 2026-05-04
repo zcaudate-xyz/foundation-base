@@ -1,5 +1,5 @@
 (ns lua.nginx-test
-  (:require [hara.rt.nginx :as nginx]
+  (:require [hara.runtime.nginx :as nginx]
             [hara.lang :as l]
             [xt.lang.common-notify :as notify])
   (:use code.test))
@@ -160,5 +160,5 @@
 
 (comment
 
-  (hara.rt.nginx/nginx-conf)
+  (hara.runtime.nginx/nginx-conf)
   (./import))

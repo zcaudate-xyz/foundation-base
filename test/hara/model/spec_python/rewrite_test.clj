@@ -1,0 +1,204 @@
+(ns hara.model.spec-python.rewrite-test
+  (:require [clojure.walk]
+            [hara.model.spec-python :as py]
+            [hara.model.spec-python.rewrite :as rewrite])
+  (:use code.test))
+
+^{:refer hara.model.spec-python.rewrite/python-rewrite-stage :added "4.1"}
+(fact "lowers inline do returns after stage rewriting"
+  (rewrite/python-rewrite-stage
+   '(return (do (print "hello") (+ 1 2)))
+   nil)
+  => '(do*
+        (print "hello")
+        (return (+ 1 2))))
+
+^{:refer hara.model.spec-python.rewrite/python-rewrite-stage :added "4.1"}
+(fact "rewrites inline callback functions into prior bindings"
+  (rewrite/python-rewrite-stage
+   '(var f (xtd/memoize-key
+            (fn f-raw [x]
+              (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
+              (return (* x 10)))))
+   nil)
+  => '(do*
+       (var f-raw
+            (fn [x]
+              (do
+                (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
+                (return (* x 10)))))
+       (var f (xtd/memoize-key f-raw)))
+
+  (rewrite/python-rewrite-stage
+   '(var f-raw
+         (fn f-raw [x]
+           (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
+           (return (* x 10))))
+   nil)
+  => '(var f-raw
+           (fn [x]
+             (do
+               (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
+               (return (* x 10)))))
+
+  (rewrite/python-rewrite-stage
+   (with-meta
+     '[(var state {"n" 0})
+       (var f (xtd/memoize-key
+               (fn f-raw [x]
+                 (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
+                 (return (* x 10)))))
+       [(f 2) (f 2) (f 3) (xt/x:get-key state "n")]]
+     {:bulk true})
+   {:mopts {:emit {}}})
+  => '(do*
+       (var state {"n" 0})
+       (var f-raw
+            (fn [x]
+              (do
+                (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
+                (return (* x 10)))))
+       (var f (xtd/memoize-key f-raw))
+       [(f 2) (f 2) (f 3) (xt/x:get-key state "n")]))
+
+^{:refer hara.model.spec-python.rewrite/python-rewrite-stage :added "4.1"}
+(fact "hoists single-body block callbacks for python"
+  (let [out (rewrite/python-rewrite-stage
+             '(var f (xtd/arr-keep
+                      [1 2 3 4]
+                      (fn [x]
+                        (if (== 0 (mod x 2))
+                          (return (* x 10))
+                          (return nil)))))
+             {:grammar py/+grammar+})
+        [_ binding assign] out
+        callback          (second binding)]
+    [(= 'do* (first out))
+     (symbol? callback)
+     (.startsWith (name callback) "py_callback__")
+     (= '(fn [x]
+           (if (== 0 (mod x 2))
+             (return (* x 10))
+             (return nil)))
+        (nth binding 2))
+     (= '(var f (xtd/arr-keep [1 2 3 4] CALLBACK))
+         (clojure.walk/prewalk-replace {callback 'CALLBACK} assign))])
+   => [true true true true true])
+
+^{:refer hara.model.spec-python.rewrite/python-rewrite-stage :added "4.1"}
+(fact "keeps lambda-compatible empty callbacks inline"
+  (rewrite/python-rewrite-stage
+   '(var data
+         (xtd/tree-get-data
+          {:name "hello"
+           :job  {:patients [[1 "alice"] [1 "body"]]
+                  :name     "doctor"
+                  :heal     (fn [])}}))
+   {:grammar py/+grammar+})
+  => '(var data
+            (xtd/tree-get-data
+              {:name "hello"
+               :job  {:patients [[1 "alice"] [1 "body"]]
+                      :name     "doctor"
+                      :heal     (fn [])}})))
+
+^{:refer hara.model.spec-python.rewrite/python-rewrite-stage :added "4.1"}
+(fact "hoists single-body branch callbacks for python"
+  (let [out (rewrite/python-rewrite-stage
+             '(var data
+                   (xtd/tree-get-data
+                    {:heal (fn []
+                             (if test
+                               (return 1)
+                               (return 2)))}))
+             {:grammar py/+grammar+})
+        [_ binding assign] out
+        callback          (second binding)]
+    [(= 'do* (first out))
+     (symbol? callback)
+     (.startsWith (name callback) "py_callback__")
+     (= '(fn []
+           (if test
+             (return 1)
+             (return 2)))
+        (nth binding 2))
+     (= '(var data
+              (xtd/tree-get-data
+               {:heal CALLBACK}))
+        (clojure.walk/prewalk-replace {callback 'CALLBACK} assign))])
+  => [true true true true true])
+
+^{:refer hara.model.spec-python.rewrite/python-rewrite-stage :added "4.1"}
+(fact "hoists statement-like callbacks for python"
+  (let [out (rewrite/python-rewrite-stage
+             '(var data
+                   (xtd/tree-get-data
+                    {:heal (fn []
+                             (var tmp 1)
+                             (return tmp))}))
+             {:grammar py/+grammar+})
+        [_ binding assign] out
+        callback          (second binding)]
+    [(= 'do* (first out))
+     (symbol? callback)
+     (.startsWith (name callback) "py_callback__")
+     (= '(fn []
+           (do
+             (var tmp 1)
+             (return tmp)))
+        (nth binding 2))
+     (= '(var data
+              (xtd/tree-get-data
+               {:heal CALLBACK}))
+         (clojure.walk/prewalk-replace {callback 'CALLBACK} assign))])
+  => [true true true true true])
+
+^{:refer hara.model.spec-python.rewrite/python-rewrite-stage :added "4.1"}
+(fact "hoists callbacks whose macros lower to assignment statements"
+  (let [out (rewrite/python-rewrite-stage
+             '(var data
+                   {:set_props (fn [elem props]
+                                 (xt/x:set-key elem "props" props))})
+             {:grammar py/+grammar+})
+        [_ binding assign] out
+        callback          (second binding)]
+    [(= 'do* (first out))
+     (symbol? callback)
+     (.startsWith (name callback) "py_callback__")
+     (= '(fn [elem props]
+           (xt/x:set-key elem "props" props))
+        (nth binding 2))
+     (= '(var data
+              {:set_props CALLBACK})
+        (clojure.walk/prewalk-replace {callback 'CALLBACK} assign))])
+  => [true true true true true])
+
+^{:refer hara.model.spec-python.rewrite/python-rewrite-stage :added "4.1"}
+(fact "hoists throwing callbacks for python"
+  (let [out (rewrite/python-rewrite-stage
+             '(var p
+                   (spec-promise/x:promise
+                    (fn []
+                      (throw "boom"))))
+             {:grammar py/+grammar+})
+        [_ binding assign] out
+        callback          (second binding)]
+    [(= 'do* (first out))
+     (symbol? callback)
+     (.startsWith (name callback) "py_callback__")
+     (= '(fn []
+           (throw "boom"))
+        (nth binding 2))
+     (= '(var p
+              (spec-promise/x:promise CALLBACK))
+        (clojure.walk/prewalk-replace {callback 'CALLBACK} assign))])
+  => [true true true true true])
+
+^{:refer hara.model.spec-python.rewrite/python-rewrite-stage :added "4.1"}
+(fact "keeps top-level named functions intact"
+  (rewrite/python-rewrite-stage
+   '(fn f-raw [x]
+      (return (* x 10)))
+   nil)
+  => '(fn f-raw [x]
+        (return (* x 10))))

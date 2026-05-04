@@ -5,8 +5,8 @@
 
 (comment
   ;; PREVIOUS SETUP
-  [hara.rt.postgres.base.application :as app]
-  [hara.rt.postgres.test.scratch-v1 :as scratch]
+  [hara.runtime.postgres.base.application :as app]
+  [hara.runtime.postgres.test.scratch-v1 :as scratch]
   (def -tsch- (get-in (app/app "scratch")
                       [:schema
                        :tree
@@ -21,7 +21,7 @@
     [{:type :uuid,
       :cardinality :one,
       :primary true,
-      :sql {:default (hara.rt.postgres/uuid-generate-v4)},
+      :sql {:default (hara.runtime.postgres/uuid-generate-v4)},
       :web {:example "00000000-0000-0000-0000-000000000000"},
       :scope :-/id,
       :order 0,
@@ -40,7 +40,7 @@
        :rident :Task/cache,
        :link
        {:id Task,
-        :module hara.rt.postgres.test.scratch-v1,
+        :module hara.runtime.postgres.test.scratch-v1,
         :lang :postgres,
         :section :code}}}],
     :Task/name
@@ -81,7 +81,7 @@
       :cardinality :one,
       :required true,
       :scope :-/info,
-      :enum {:ns hara.rt.postgres.test.scratch-v1/EnumStatus},
+      :enum {:ns hara.runtime.postgres.test.scratch-v1/EnumStatus},
       :web {:example "success"},
       :order 1,
       :ident :Task/status}],
@@ -99,7 +99,7 @@
       {:ns :TaskCache,
        :link
        {:id TaskCache,
-        :module hara.rt.postgres.test.scratch-v1,
+        :module hara.runtime.postgres.test.scratch-v1,
         :lang :postgres,
         :section :code},
        :rval :tasks,
@@ -122,7 +122,7 @@
     [{:type :uuid,
       :cardinality :one,
       :primary true,
-      :sql {:default (hara.rt.postgres/uuid-generate-v4)},
+      :sql {:default (hara.runtime.postgres/uuid-generate-v4)},
       :web {:example "00000000-0000-0000-0000-000000000000"},
       :scope :-/id,
       :order 0,
@@ -156,7 +156,7 @@
       :cardinality :one,
       :primary true,
       :web {:example "AUD"},
-      :sql {:default (hara.rt.postgres/uuid-generate-v4)},
+      :sql {:default (hara.runtime.postgres/uuid-generate-v4)},
       :scope :-/id,
       :order 0,
       :ident :TaskCache/id}],
@@ -164,7 +164,7 @@
     [{:type :array,
       :cardinality :one,
       :required true,
-      :sql {:process hara.rt.postgres.test.scratch-v1/as-array},
+      :sql {:process hara.runtime.postgres.test.scratch-v1/as-array},
       :scope :-/data,
       :order 2,
       :ident :Entry/tags}],
@@ -213,7 +213,7 @@
      [{:type :uuid,
        :cardinality :one,
        :primary true,
-       :sql {:default (hara.rt.postgres/uuid-generate-v4)},
+       :sql {:default (hara.runtime.postgres/uuid-generate-v4)},
        :web {:example "00000000-0000-0000-0000-000000000000"},
        :scope :-/id,
        :order 0,
@@ -228,7 +228,7 @@
      [{:type :array,
        :cardinality :one,
        :required true,
-       :sql {:process hara.rt.postgres.test.scratch-v1/as-array},
+       :sql {:process hara.runtime.postgres.test.scratch-v1/as-array},
        :scope :-/data,
        :order 2,
        :ident :Entry/tags}],
@@ -280,7 +280,7 @@
         :rident :Task/cache,
         :link
         {:id Task,
-         :module hara.rt.postgres.test.scratch-v1,
+         :module hara.runtime.postgres.test.scratch-v1,
          :lang :postgres,
          :section :code}}}],
      :__deleted__
@@ -319,7 +319,7 @@
        :cardinality :one,
        :primary true,
        :web {:example "AUD"},
-       :sql {:default (hara.rt.postgres/uuid-generate-v4)},
+       :sql {:default (hara.runtime.postgres/uuid-generate-v4)},
        :scope :-/id,
        :order 0,
        :ident :TaskCache/id}]},
@@ -365,7 +365,7 @@
        {:ns :TaskCache,
         :link
         {:id TaskCache,
-         :module hara.rt.postgres.test.scratch-v1,
+         :module hara.runtime.postgres.test.scratch-v1,
          :lang :postgres,
          :section :code},
         :rval :tasks,
@@ -382,7 +382,7 @@
        :cardinality :one,
        :required true,
        :scope :-/info,
-       :enum {:ns hara.rt.postgres.test.scratch-v1/EnumStatus},
+       :enum {:ns hara.runtime.postgres.test.scratch-v1/EnumStatus},
        :web {:example "success"},
        :order 1,
        :ident :Task/status}],
@@ -390,7 +390,7 @@
      [{:type :uuid,
        :cardinality :one,
        :primary true,
-       :sql {:default (hara.rt.postgres/uuid-generate-v4)},
+       :sql {:default (hara.runtime.postgres/uuid-generate-v4)},
        :web {:example "00000000-0000-0000-0000-000000000000"},
        :scope :-/id,
        :order 0,
@@ -433,7 +433,7 @@
      {:type :uuid,
       :primary true,
       :web {:example "AUD"},
-      :sql {:default (hara.rt.postgres/uuid-generate-v4)},
+      :sql {:default (hara.runtime.postgres/uuid-generate-v4)},
       :scope :-/id}
      :op-created
      {:type :uuid, :scope :-/system}
@@ -449,14 +449,14 @@
     [:id
      {:type :uuid,
       :primary true,
-      :sql {:default (hara.rt.postgres/uuid-generate-v4)},
+      :sql {:default (hara.runtime.postgres/uuid-generate-v4)},
       :web {:example "00000000-0000-0000-0000-000000000000"},
       :scope :-/id}
      :status
      {:type :enum,
       :required true,
       :scope :-/info,
-      :enum {:ns hara.rt.postgres.test.scratch-v1/EnumStatus},
+      :enum {:ns hara.runtime.postgres.test.scratch-v1/EnumStatus},
       :web {:example "success"}}
      :name
      {:type :text,
@@ -470,7 +470,7 @@
       {:ns :TaskCache,
        :link
        {:id TaskCache,
-        :module hara.rt.postgres.test.scratch-v1,
+        :module hara.runtime.postgres.test.scratch-v1,
         :lang :postgres,
         :section :code}},
       :scope :-/ref}
@@ -488,7 +488,7 @@
     [:id
      {:type :uuid,
       :primary true,
-      :sql {:default (hara.rt.postgres/uuid-generate-v4)},
+      :sql {:default (hara.runtime.postgres/uuid-generate-v4)},
       :web {:example "00000000-0000-0000-0000-000000000000"},
       :scope :-/id}
      :name
@@ -499,7 +499,7 @@
      :tags
      {:type :array,
       :required true,
-      :sql {:process hara.rt.postgres.test.scratch-v1/as-array},
+      :sql {:process hara.runtime.postgres.test.scratch-v1/as-array},
       :scope :-/data}
      :op-created
      {:type :uuid, :scope :-/system}
@@ -554,7 +554,7 @@
       {:ns :TaskCache,
        :link
        {:id TaskCache,
-        :module hara.rt.postgres.test.scratch-v1,
+        :module hara.runtime.postgres.test.scratch-v1,
         :lang :postgres,
         :section :code},
        :rval :tasks,
@@ -571,7 +571,7 @@
       :cardinality :one,
       :required true,
       :scope :-/info,
-      :enum {:ns hara.rt.postgres.test.scratch-v1/EnumStatus},
+      :enum {:ns hara.runtime.postgres.test.scratch-v1/EnumStatus},
       :web {:example "success"},
       :order 1,
       :ident :Task/status}],
@@ -579,7 +579,7 @@
     [{:type :uuid,
       :cardinality :one,
       :primary true,
-      :sql {:default (hara.rt.postgres/uuid-generate-v4)},
+      :sql {:default (hara.runtime.postgres/uuid-generate-v4)},
       :web {:example "00000000-0000-0000-0000-000000000000"},
       :scope :-/id,
       :order 0,
@@ -608,7 +608,7 @@
                          +schema+)
   => '{:type :uuid, :cardinality :one, :primary true,
        :web {:example "AUD"},
-       :sql {:default (hara.rt.postgres/uuid-generate-v4)}, :scope :-/id, :order 0, :ident :TaskCache/id})
+       :sql {:default (hara.runtime.postgres/uuid-generate-v4)}, :scope :-/id, :order 0, :ident :TaskCache/id})
 
 ^{:refer std.lib.schema/order-keys :added "4.0"}
 (fact "order keys given schema"
@@ -624,7 +624,7 @@
 (fact "get defaults in the schema"
 
   (schema/get-defaults -tsch-)
-  => '{:__deleted__ false, :id (hara.rt.postgres/uuid-generate-v4)})
+  => '{:__deleted__ false, :id (hara.runtime.postgres/uuid-generate-v4)})
 
 ^{:refer std.lib.schema/check-valid-columns :added "4.0"}
 (fact "check if columns are valid"

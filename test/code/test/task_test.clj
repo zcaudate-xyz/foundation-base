@@ -1,5 +1,6 @@
 (ns code.test.task-test
-  (:require [code.test.task :as task])
+  (:require [code.project :as project]
+            [code.test.task :as task])
   (:use code.test))
 
 ^{:refer code.test.task/run:interrupt :added "4.0"}
@@ -13,6 +14,20 @@
   (task/run 'std.lib.foundation)
   ;; {:files 1, :thrown 0, :facts 8, :checks 18, :passed 18, :failed 0}
   => map?)
+
+^{:refer code.test.task/resolve-files :added "4.1"}
+(fact "resolves source and test file paths to test namespaces"
+
+  (task/resolve-files ["src/code/project.clj"
+                       "test/std/task_test.clj"]
+                      (project/project))
+  => ['code.project-test
+      'std.task-test]
+
+  (task/resolve-files "test/code/project_test.clj test/code/test/task_test.clj"
+                      (project/project))
+  => ['code.project-test
+      'code.test.task-test])
 
 ^{:refer code.test.task/run:current :added "4.0"}
 (fact "runs the current namespace")

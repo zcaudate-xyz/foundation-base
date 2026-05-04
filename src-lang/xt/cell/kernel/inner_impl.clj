@@ -1,6 +1,6 @@
 (ns xt.cell.kernel.inner-impl
   (:require [hara.lang :as l]
-            [hara.lang.typed.xtalk :refer [defspec.xt]]))
+            [hara.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]

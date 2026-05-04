@@ -1,6 +1,6 @@
 (ns xt.lang.common-resource
   (:require [hara.lang :as l]
-             [hara.lang.typed.xtalk :refer [defspec.xt]]
+             [hara.typed.xtalk :refer [defspec.xt]]
              [std.lib.env :as env]
              [std.lib.foundation]
              [std.lib.function :as f]

@@ -1,6 +1,6 @@
 (ns js.cell.kernel.base-util
   (:require [hara.lang :as l]
-            [hara.lang.typed.xtalk :refer [defspec.xt]]))
+            [hara.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :js
   {:require [[js.core :as j] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-tree :as xtt] [xt.lang.common-trace :as trace]]})

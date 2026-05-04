@@ -4,9 +4,9 @@
              [js.cell.playground :as play]
              [js.cell.runtime.browser :as runtime-browser]
              [js.cell.runtime.emit :as emit]
-             [hara.rt.basic.type-common :as common]
-             [hara.rt.chromedriver :as chromedriver]
-             [hara.rt.chromedriver.impl]
+             [hara.runtime.basic.type-common :as common]
+             [hara.runtime.chromedriver :as chromedriver]
+             [hara.runtime.chromedriver.impl]
              [hara.lang :as l]
              [std.lib.template :as template]
              [xt.lang.common-notify :as notify]))

@@ -1,0 +1,61 @@
+(ns hara.runtime.postgres.base.grammar.form-vec-test
+  (:require [hara.runtime.postgres.base.grammar :as g]
+            [hara.runtime.postgres.base.grammar.form-vec :refer :all]
+            [hara.lang :as l])
+  (:use code.test))
+
+^{:refer hara.runtime.postgres.base.grammar.form-vec/pg-section-query-pair :added "4.0"}
+(fact "converts to a pair expression"
+
+  (pg-section-query-pair '[a [:neq (+ 1 2)]])
+  => '(a (:- "!=") (+ 1 2)))
+
+^{:refer hara.runtime.postgres.base.grammar.form-vec/pg-section-query-set-and :added "4.0"}
+(fact "sets up the query string only for and"
+
+  (l/with:emit
+   (pg-section-query-set-and '[a 1 :and b 2]
+                             g/+grammar+ {}))
+  => "(a = 1 AND b = 2)")
+
+^{:refer hara.runtime.postgres.base.grammar.form-vec/pg-section-query-set :added "4.0"}
+(fact "sets up the query string"
+
+  (l/with:emit
+   (pg-section-query-set '[a 1 :or b 2]
+                         g/+grammar+ {}))
+  => "(a = 1) OR (b = 2)"
+
+
+  (l/with:emit
+   (pg-section-query-set '[a 1 :and b 2 :or c 3 d 4]
+                         g/+grammar+ {}))
+  => "(a = 1 AND b = 2)\nOR (  \n  c = 3\n  AND\n  d = 4)")
+
+^{:refer hara.runtime.postgres.base.grammar.form-vec/pg-section-query-map :added "4.0"}
+(fact "query string"
+
+  (l/with:emit
+   (pg-section-query-map {"a" 1} g/+grammar+ {}))
+  => "\"a\" = 1")
+
+^{:refer hara.runtime.postgres.base.grammar.form-vec/pg-section-fn :added "4.0"}
+(fact "rendering function for a section entry"
+
+  (l/with:emit
+   (pg-section-fn '#{[a 1 :and b 2 :or c 3 d 4]}
+                  g/+grammar+
+                  {}))
+  => "(a = 1 AND b = 2)\nOR (  \n  c = 3\n  AND\n  d = 4)")
+
+^{:refer hara.runtime.postgres.base.grammar.form-vec/pg-section :added "4.0"}
+(fact "rendering function for entire section"
+
+  (l/with:emit
+   (pg-section '[(js [1 2 3 4 5])]
+               g/+grammar+
+               {}))
+  => "jsonb_build_array(1,2,3,4,5)")
+
+(comment
+  (./import))

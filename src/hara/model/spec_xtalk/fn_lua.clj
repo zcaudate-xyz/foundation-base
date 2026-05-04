@@ -1,0 +1,660 @@
+(ns hara.model.spec-xtalk.fn-lua
+  (:require [std.lib.foundation :as f]
+            [std.lib.template :as template]))
+
+;;
+;; CORE
+;;
+
+(defn lua-tf-x-del
+  [[_ obj]]
+  (list := obj nil))
+
+(defn lua-tf-x-cat
+  [[_ & args]]
+  (apply list 'cat args))
+
+(defn lua-tf-x-eval
+  [[_ s]]
+  (list (list 'loadstring (list 'cat "return " s))))
+
+(defn lua-tf-x-apply
+  [[_ f args]]
+  (list f (list 'unpack args)))
+
+(defn lua-tf-x-err
+  [[_ s & [data]]]
+  (if data
+    (template/$ (error (cjson.encode ~[s data])))
+    (template/$ (error ~s))))
+
+(defn lua-tf-x-ex-native?
+  [[_ err]]
+  (template/$
+   (and (== "table" (type ~err))
+        (== "xt.exception" (. ~err ["__type__"])))))
+
+(defn lua-tf-x-ex-new
+  [[_ message & [data]]]
+  {"__type__" "xt.exception"
+   "message" message
+   "data" data})
+
+(defn lua-tf-x-ex-message
+  [[_ err]]
+  (template/$
+   (:? (x:ex-native? ~err)
+       (. ~err ["message"])
+       nil)))
+
+(defn lua-tf-x-ex-data
+  [[_ err]]
+  (template/$
+   (:? (x:ex-native? ~err)
+       (. ~err ["data"])
+       nil)))
+
+(defn lua-tf-x-hash-id
+  [[_ obj]]
+  (template/$ (return nil)))
+
+(defn lua-tf-x-type-native
+  [[_ obj]]
+  (template/$ (do (var t := (type ~obj))
+                  (if (== t "table")
+                    (if (== nil (. '(~obj) [1]))
+                      (return "object")
+                      (return "array"))
+                    (return t)))))
+
+(defn lua-tf-x-has-key?
+  [[_ obj key check]]
+  (if (some? check)
+    (list '== check (list 'x:get-key obj key nil))
+    (list 'not= nil (list '. obj [key]))))
+
+(def +lua-core+
+  {:x-del            {:macro #'lua-tf-x-del  :emit :macro}
+   :x-cat            {:macro #'lua-tf-x-cat  :emit :macro}
+   :x-len            {:emit :alias :raw 'len}
+    :x-err            {:macro #'lua-tf-x-err    :emit :macro}
+    :x-ex-native?     {:macro #'lua-tf-x-ex-native? :emit :macro}
+    :x-ex-new         {:macro #'lua-tf-x-ex-new     :emit :macro}
+    :x-ex-message     {:macro #'lua-tf-x-ex-message :emit :macro}
+    :x-ex-data        {:macro #'lua-tf-x-ex-data    :emit :macro}
+    :x-eval           {:macro #'lua-tf-x-eval   :emit :macro}
+    :x-apply          {:macro #'lua-tf-x-apply  :emit :macro}
+    :x-unpack         {:emit :alias :raw 'unpack}
+    :x-print          {:emit :alias :raw 'print}
+   
+   :x-random         {:emit :alias :raw 'math.random}
+   :x-now-ms         {:default '(math.floor (* 1000 (os.time)))   :emit :unit}
+   :x-type-native    {:macro #'lua-tf-x-type-native  :emit :macro}})
+
+
+;;
+;; GLOBAL
+;;
+
+(defn lua-tf-x-global-has?
+  [[_ sym]]
+  (list 'not= (symbol sym) nil))
+
+(defn lua-tf-x-global-set
+  [[_ sym val]]
+  (list ':= (symbol sym) val))
+
+(defn lua-tf-x-global-del
+  [[_ sym]]
+  (list ':= (symbol sym) nil))
+
+(def +lua-global+
+  {:x-global-has?   {:macro #'lua-tf-x-global-has?  :emit :macro}
+   :x-global-set    {:macro #'lua-tf-x-global-set   :emit :macro}
+   :x-global-del    {:macro #'lua-tf-x-global-del   :emit :macro}})
+
+;;
+;; CUSTOM
+;;
+
+(def +lua-custom+
+  {:x-has-key? {:macro #'lua-tf-x-has-key? :emit :macro}})
+
+;;
+;; MATH
+;;
+
+(defn lua-tf-x-m-mod
+  [[_ num denom]]
+  (list 'mod num denom))
+
+(defn lua-tf-x-m-quot
+  [[_ num denom]]
+  (list 'math.floor (list '/ num denom)))
+
+(def +lua-math+
+  {:x-m-abs           {:emit :alias :raw 'math.abs}
+   :x-m-acos          {:emit :alias :raw 'math.acos}
+   :x-m-asin          {:emit :alias :raw 'math.asin}
+   :x-m-atan          {:emit :alias :raw 'math.atan}
+   :x-m-ceil          {:emit :alias :raw 'math.ceil}
+   :x-m-cos           {:emit :alias :raw 'math.cos}
+   :x-m-cosh          {:emit :alias :raw 'math.cosh}
+   :x-m-exp           {:emit :alias :raw 'math.exp}
+   :x-m-floor         {:emit :alias :raw 'math.floor}
+   :x-m-loge          {:emit :alias :raw 'math.log}
+   :x-m-log10         {:emit :alias :raw 'math.log10}
+   :x-m-max           {:emit :alias :raw 'math.max}
+   :x-m-min           {:emit :alias :raw 'math.min}
+   :x-m-mod           {:macro #'lua-tf-x-m-mod,      :emit :macro}
+   :x-m-pow           {:emit :alias :raw 'math.pow}
+   :x-m-quot          {:macro #'lua-tf-x-m-quot,     :emit :macro}
+   :x-m-sin           {:emit :alias :raw 'math.sin}
+   :x-m-sinh          {:emit :alias :raw 'math.sinh}
+   :x-m-sqrt          {:emit :alias :raw 'math.sqrt}
+   :x-m-tan           {:emit :alias :raw 'math.tan}
+   :x-m-tanh          {:emit :alias :raw 'math.tanh}})
+
+
+;;
+;; TYPE
+;;
+
+(defn lua-tf-x-is-string?
+  [[_ e]]
+  (list '== "string" (list 'type e)))
+
+(defn lua-tf-x-is-number?
+  [[_ e]]
+  (list '== "number" (list 'type e)))
+
+(defn lua-tf-x-is-integer?
+  [[_ e]]
+  (list '== 0 (list 'mod e 1)))
+
+(defn lua-tf-x-is-boolean?
+  [[_ e]]
+  (list '== "boolean" (list 'type e)))
+
+(defn lua-tf-x-is-function?
+  [[_ e]]
+  (list '== "function" (list 'type e)))
+
+(defn lua-tf-x-is-object?
+  [[_ e]]
+  (template/$ (or (and (== "table" (type ~e))
+                       (== nil (. '(~e) [1])))
+                  (== "object" (type ~e)))))
+
+(defn lua-tf-x-is-array?
+  [[_ e]]
+  (template/$ (or (and (== "table" (type ~e))
+                       (not= nil (. '(~e) [1])))
+                  (== "array" (type ~e)))))
+
+(def +lua-type+
+  {:x-to-string      {:emit :alias :raw 'tostring}
+   :x-to-number      {:emit :alias :raw 'tonumber}
+   :x-is-string?     {:macro #'lua-tf-x-is-string? :emit :macro}
+   :x-is-number?     {:macro #'lua-tf-x-is-number? :emit :macro}
+   :x-is-integer?    {:macro #'lua-tf-x-is-integer? :emit :macro}
+   :x-is-boolean?    {:macro #'lua-tf-x-is-boolean? :emit :macro}
+   :x-is-function?   {:macro #'lua-tf-x-is-function? :emit :macro}
+   :x-is-object?     {:macro #'lua-tf-x-is-object? :emit :macro}
+   :x-is-array?      {:macro #'lua-tf-x-is-array? :emit :macro}})
+
+;;
+;; LU
+;;
+
+(defn lua-tf-x-lu-create
+  ([[_]]
+   (list 'setmetatable {} {"__mode" "k"})))
+
+(defn lua-tf-x-lu-get
+  ([[_ lu obj]]
+   (template/$ (. ~lu [(tostring ~obj)]))))
+
+(defn lua-tf-x-lu-set
+  ([[_ lu obj gid]]
+   (template/$ (:= (. ~lu [(tostring ~obj)]) ~gid))))
+
+(defn lua-tf-x-lu-del
+  ([[_ lu obj]]
+   (template/$ (:= (. ~lu [(tostring ~obj)]) nil))))
+
+(def +lua-lu+
+  {:x-lu-create      {:macro #'lua-tf-x-lu-create :emit :macro}
+   :x-lu-get         {:macro #'lua-tf-x-lu-get :emit :macro}
+   :x-lu-set         {:macro #'lua-tf-x-lu-set :emit :macro}
+   :x-lu-del         {:macro #'lua-tf-x-lu-del :emit :macro}})
+
+
+;;
+;; BIT
+;;
+
+(defn lua-tf-x-bit-and
+  "lookup equals transform"
+  {:added "4.0"}
+  [[_ i1 i2]]
+  (list 'bit.band i1 i2))
+
+(defn lua-tf-x-bit-or
+  "lookup equals transform"
+  {:added "4.0"}
+  [[_ i1 i2]]
+  (list 'bit.bor i1 i2))
+
+(defn lua-tf-x-bit-lshift
+  "lookup equals transform"
+  {:added "4.0"}
+  [[_ x n]]
+  (list 'bit.lshift x n))
+
+(defn lua-tf-x-bit-rshift
+  "lookup equals transform"
+  {:added "4.0"}
+  [[_ x n]]
+  (list 'bit.rshift x n))
+
+(defn lua-tf-x-bit-xor
+  "lookup equals transform"
+  {:added "4.0"}
+  [[_ x n]]
+  (list 'bit.bxor x n))
+
+(def +lua-bit+
+  {:x-bit-and         {:macro #'lua-tf-x-bit-and    :emit :macro}
+   :x-bit-or          {:macro #'lua-tf-x-bit-or     :emit :macro}
+   :x-bit-lshift      {:macro #'lua-tf-x-bit-lshift :emit :macro}
+   :x-bit-rshift      {:macro #'lua-tf-x-bit-rshift :emit :macro}
+   :x-bit-xor         {:macro #'lua-tf-x-bit-xor :emit :macro}})
+
+;;
+;; OBJ
+;;
+
+(def +lua-obj+
+  {})
+
+;;
+;; ARR
+;;
+
+(defn lua-tf-x-arr-clone
+  [[_ arr]]
+  [(list 'unpack arr)])
+
+(defn lua-tf-x-arr-slice
+  [[_ arr start end]]
+  [(list 'unpack arr (list 'x:offset start) end)])
+
+(defn lua-tf-x-arr-remove
+  [[_ arr i]]
+  (list 'table.remove arr (list 'x:offset i)))
+
+(defn lua-tf-x-arr-push-first
+  [[_ arr item]]
+  (list 'table.insert arr 1 item))
+
+(defn lua-tf-x-arr-pop-first
+  [[_ arr]]
+  (list 'table.remove arr 1))
+
+(defn lua-tf-x-arr-insert
+  [[_ arr idx item]]
+  (list 'table.insert arr idx item))
+
+(defn lua-tf-x-arr-sort
+  [[_ arr key-fn comp-fn]]
+  (list 'table.sort ()arr
+        (template/$ (fn [a b]
+                      (return (~comp-fn
+                               (~key-fn a)
+                               (~key-fn b)))))))
+
+(def +lua-arr+
+  {:x-arr-clone       {:macro #'lua-tf-x-arr-clone      :emit :macro  :type :template}
+   :x-arr-slice       {:macro #'lua-tf-x-arr-slice      :emit :macro  :type :template}
+   :x-arr-push        {:emit :alias :raw 'table.insert}
+   :x-arr-pop         {:emit :alias :raw 'table.remove}
+   :x-arr-remove      {:macro #'lua-tf-x-arr-remove     :emit :macro  :type :template}
+   :x-arr-find        {:macro #'lua-tf-x-arr-remove     :emit :macro  :type :template}
+   :x-arr-push-first  {:macro #'lua-tf-x-arr-push-first :emit :macro}
+   :x-arr-pop-first   {:macro #'lua-tf-x-arr-pop-first  :emit :macro}
+   :x-arr-insert      {:macro #'lua-tf-x-arr-insert     :emit :macro}
+   #_#_:x-arr-sort        {:macro #'lua-tf-x-arr-sort       :emit :macro}
+   :x-str-comp        {:emit :alias :raw '<}})
+
+;;
+;; STRING
+;;
+
+(defn lua-tf-x-str-split
+  ([[_ s tok]]
+   (template/$ ('((fn [s tok]
+                    (var out := {})
+                    (string.gsub s
+                                 (string.format "([^%s]+)" tok)
+                                 (fn [c]
+                                   (table.insert out c)))
+                    (return out)))
+                ~s ~tok))))
+
+(defn lua-tf-x-str-join
+  ([[_ s arr]]
+   (list 'table.concat arr s)))
+
+(defn lua-tf-x-str-index-of
+  ([[_ s tok]]
+   (list 'or (list 'string.find s tok) -1)))
+
+(defn lua-tf-x-str-to-fixed
+  ([[_ num digits]]
+   (list 'string.format (list 'cat "%." digits "f")  num)))
+
+(defn lua-tf-x-str-replace
+  ([[_ s tok replacement]]
+   (list 'string.gsub s tok replacement)))
+
+(defn lua-tf-x-str-trim
+  ([[_ s]]
+   (list 'string.gsub s "^%s*(.-)%s*$" "%1")))
+
+(defn lua-tf-x-str-trim-left
+  ([[_ s]]
+   (list 'string.gsub s "^%s*" "")))
+
+(defn lua-tf-x-str-trim-right
+  ([[_ s]]
+   (list 'string.gsub s "^(%s*.-)%s*$" "%1")))
+
+(def +lua-str+
+  {:x-str-char       {:emit :alias :raw 'string.byte}
+   :x-str-split      {:macro #'lua-tf-x-str-split      :emit :macro}
+   :x-str-join       {:macro #'lua-tf-x-str-join       :emit :macro}
+   :x-str-index-of   {:macro #'lua-tf-x-str-index-of   :emit :macro}
+   :x-str-substring  {:emit :alias :raw 'string.sub}
+   :x-str-to-upper   {:emit :alias :raw 'string.upper}
+   :x-str-to-lower   {:emit :alias :raw 'string.lower}
+   :x-str-to-fixed   {:macro #'lua-tf-x-str-to-fixed   :emit :macro}
+   :x-str-replace    {:macro #'lua-tf-x-str-replace    :emit :macro}
+   :x-str-trim       {:macro #'lua-tf-x-str-trim       :emit :macro}
+   :x-str-trim-left  {:macro #'lua-tf-x-str-trim-left  :emit :macro}
+   :x-str-trim-right {:macro #'lua-tf-x-str-trim-right :emit :macro}})
+
+;;
+;; JSON
+;;
+
+(def +lua-js+
+  {:x-json-encode      {:emit :alias :raw 'cjson.encode}
+   :x-json-decode      {:emit :alias :raw 'cjson.decode}})
+
+;;
+;; RETURN
+;;
+
+(defn lua-tf-x-return-encode
+  ([[_ out id key]]
+   (template/$
+    (do (var ret nil)
+        (var type-fn
+             (fn [obj]
+               (var t (type obj))
+               (if (== t "table")
+                 (if (== nil (. '(obj) [1]))
+                   (return "object")
+                   (return "array"))
+                 (return t))))
+        (var '[r-ok r-err]
+             (pcall (fn []
+                      (cond (== nil ~out)
+                            (:= ret (cjson.encode {:id  ~id
+                                                   :key ~key
+                                                   :return "nil"
+                                                   :type "data"
+                                                   :value (. cjson ["null"])}))
+                            
+                            :else
+                            (:= ret (cjson.encode {:id  ~id
+                                                   :key ~key
+                                                   :return (type-fn ~out)
+                                                   :type "data"
+                                                   :value ~out}))))))
+        (cond r-err
+              (return (cjson.encode {:id  ~id
+                                     :key ~key
+                                     :type "raw"
+                                     :return (type-fn ~out)
+                                     :error (tostring r-err)
+                                     :value (tostring ~out)}))
+              
+              :else
+              (return ret))))))
+
+(defn lua-tf-x-return-wrap
+  ([[_ f encode-fn]]
+   (template/$
+    (do (var out)
+        (var '[o-ok o-err] (pcall (fn [] (:= out (~f)))))
+        (cond o-err
+              (return (cjson.encode {:type "error"
+                                     :value o-err}))
+              
+              :else
+              (return (~encode-fn out)))))))
+
+(defn lua-tf-x-return-eval
+  ([[_ s wrap-fn]]
+   (template/$
+    (return (~wrap-fn
+             (fn []
+               (var load-fn (or loadstring load))
+               (var '[f err] (load-fn ~s))
+               (if err
+                 (error err)
+                 (return (f)))))))))
+
+(def +lua-return+
+  {:x-return-encode  {:macro #'lua-tf-x-return-encode   :emit :macro}
+   :x-return-wrap    {:macro #'lua-tf-x-return-wrap     :emit :macro}
+   :x-return-eval    {:macro #'lua-tf-x-return-eval     :emit :macro}})
+
+(defn lua-tf-x-socket-connect
+  ([[_ host port opts cb]]
+   (template/$
+    (do* (when (== ~host "host.docker.internal")
+           (var handle (io.popen
+                        (cat "ping host.docker.internal -c 1 -q 2>&1"
+                             " | "
+                             "grep -Po \"(\\d{1,3}\\.){3}\\d{1,3}\"")))
+           (:= ~host (handle:read "*a"))
+           (:= ~host (string.sub ~host 1 (- (len ~host) 1)))
+           (handle:close))
+         (var socket (require "socket"))
+         (var '[conn err] (socket.connect ~host ~port))
+         (if err
+           (return (~cb err nil))
+           (return (~cb nil conn)))))))
+
+(defn lua-tf-x-socket-send
+  ([[_ conn s]]
+   (template/$ (. ~conn (send ~s)))))
+
+(defn lua-tf-x-socket-close
+  ([[_ conn]]
+   (template/$ (. ~conn (close)))))
+
+(def +lua-socket+
+  {:x-socket-connect {:macro #'lua-tf-x-socket-connect :emit :macro
+                      :op-spec {:allow-blocks true}}
+   :x-socket-send    {:macro #'lua-tf-x-socket-send    :emit :macro}
+   :x-socket-close   {:macro #'lua-tf-x-socket-close   :emit :macro}})
+
+
+;;
+;; ITER
+;;
+
+(defn lua-tf-x-iter-from-obj
+  ([[_ obj]]
+   (template/$
+    (coroutine.wrap
+     (fn [] (for [k v :in (pairs ~obj)]
+              (coroutine.yield [k v])))))))
+
+(defn lua-tf-x-iter-from-arr
+  ([[_ arr]]
+   (template/$
+    (coroutine.wrap
+     (fn [] (for [_ v :in (ipairs ~arr)]
+              (coroutine.yield v)))))))
+
+(defn lua-tf-x-iter-from
+  ([[_ obj]]
+   (template/$
+    (coroutine.wrap
+     (fn [] (for [e :in (. ~obj ["iterator"])]
+              (coroutine.yield v)))))))
+
+(defn lua-tf-x-iter-eq
+  ([[_ it0 it1 eq-fn]]
+   (template/$
+    (do (for [x0 :in ~it0]
+          (var x1 (~it1))
+          (when (not (~eq-fn x0 x1))
+            (return false)))
+        (return (== nil (~it1)))))))
+
+(defn lua-tf-x-iter-next
+  ([[_ it]]
+   (list it)))
+
+(defn lua-tf-x-iter-has?
+  ([[_ obj]]
+   (template/$ (and (== "table" (type ~obj))
+                    (== "function" (. '(~obj) ["iterator"]))))))
+
+(defn lua-tf-x-iter-native?
+  ([[_ it]]
+   (list '== "function" (list 'type it))))
+
+(def +lua-iter+
+  {:x-iter-from-obj       {:macro #'lua-tf-x-iter-from-obj       :emit :macro}
+   :x-iter-from-arr       {:macro #'lua-tf-x-iter-from-arr       :emit :macro}
+   :x-iter-from           {:macro #'lua-tf-x-iter-from           :emit :macro}
+   :x-iter-eq             {:macro #'lua-tf-x-iter-eq             :emit :macro
+                           :op-spec {:allow-blocks true}}
+   :x-iter-null           {:default '(coroutine.wrap (fn [])) :emit :unit}
+    :x-iter-next           {:macro #'lua-tf-x-iter-next           :emit :macro}
+    :x-iter-has?           {:macro #'lua-tf-x-iter-has?           :emit :macro}
+    :x-iter-native?        {:macro #'lua-tf-x-iter-native?        :emit :macro}})
+
+(defn lua-tf-x-async-run
+  [[_ thunk]]
+  (template/$
+   (coroutine.resume
+    (coroutine.create ~thunk))))
+
+(defn lua-tf-x-with-delay
+  ([[_ ms thunk]]
+   (template/$
+    (do (var socket (require "socket"))
+        (socket.sleep (/ ~ms 1000.0))
+        (return (~thunk))))))
+
+(def +lua-promise+
+  {:x-async-run        {:macro #'lua-tf-x-async-run         :emit :macro}
+   :x-with-delay       {:emit :hard-link :raw 'xt.lang.common-promise/with-delay}})
+
+(defn lua-tf-x-pwd
+  [[_]]
+  (template/$
+   (os.getenv "PWD")))
+
+(defn lua-tf-x-shell
+  ([[_ s root cb]]
+   (template/$
+    (do* (var command (:? root
+                          (cat "cd " root " && " ~s)
+                          ~s))
+         (var '[ok handle] (pcall (fn [] (return (io.popen command)))))
+         (if (not ok)
+           (return (~cb handle nil))
+           (do* (var res (handle:read "*a"))
+                (var '[closed reason code] (handle:close))
+                (if closed
+                  (return (~cb nil res))
+                  (return (~cb {:err reason
+                                :code code
+                                :out res}
+                           nil)))))))))
+
+(def +lua-shell+
+  {:x-pwd            {:macro #'lua-tf-x-pwd           :emit :macro}
+   :x-shell          {:macro #'lua-tf-x-shell         :emit :macro
+                      :op-spec {:allow-blocks true}}})
+
+;;
+;; FILE
+;;
+
+(defn lua-tf-x-file-resolve
+  ([[_ root path]]
+   (template/$
+    (:? (or (== nil ~root)
+            (== "/" (string.sub ~path 1 1)))
+        ~path
+        (cat ~root "/" ~path)))))
+
+(defn lua-tf-x-file-slurp
+  ([[_ filename cb]]
+   (template/$
+    (do* (var '[handle err] (io.open ~filename "r"))
+         (if err
+           (return (~cb err nil))
+           (do* (var '[res read-err] (handle:read "*a"))
+                (handle:close)
+                (if read-err
+                  (return (~cb read-err nil))
+                  (return (~cb nil res)))))))))
+
+(defn lua-tf-x-file-spit
+  ([[_ filename content cb]]
+   (template/$
+    (do* (var '[handle err] (io.open ~filename "w"))
+         (if err
+           (return (~cb err nil))
+           (do* (var '[out write-err] (handle:write ~content))
+                (handle:close)
+                (if write-err
+                  (return (~cb write-err nil))
+                  (return (~cb nil ~filename)))))))))
+
+(def +lua-file+
+  {:x-file-resolve   {:macro #'lua-tf-x-file-resolve  :emit :macro}
+   :x-file-slurp     {:macro #'lua-tf-x-file-slurp    :emit :macro
+                      :op-spec {:allow-blocks true}}
+   :x-file-spit      {:macro #'lua-tf-x-file-spit     :emit :macro
+                      :op-spec {:allow-blocks true}}})
+
+(def +lua+
+  (merge +lua-core+
+         +lua-global+
+         +lua-custom+
+         +lua-math+
+         +lua-type+
+         +lua-bit+
+         +lua-lu+
+         +lua-obj+
+         +lua-arr+
+         +lua-str+
+         +lua-js+
+         +lua-return+
+         +lua-socket+
+         +lua-iter+
+         +lua-promise+
+         +lua-file+
+         +lua-shell+))

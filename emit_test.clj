@@ -1,11 +1,11 @@
 (ns emit-test
   (:require [hara.lang :as l]
             [std.lib :as h]
-            [hara.rt.basic :as rb]))
+            [hara.runtime.basic :as rb]))
 
 ;; Load all the required modules
 (require '[xt.event.base-view])
-(require '[hara.rt.basic])
+(require '[hara.runtime.basic])
 
 ;; Initialize the Ruby runtime
 (def rt (rb/rt :ruby))

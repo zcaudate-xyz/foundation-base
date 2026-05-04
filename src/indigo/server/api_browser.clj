@@ -8,7 +8,7 @@
             [std.block :as block]
             [std.block.layout :as layout]
             [hara.lang :as l]
-            [hara.lang.base.book :as book]
+            [hara.lang.book :as book]
             [std.lib.env :as env]))
 
 ;; Existing endpoints -------------------------------------------------------

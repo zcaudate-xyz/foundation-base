@@ -2,7 +2,7 @@
   (:require [code.mcp.tool.hara.lang :as hara.lang]
             [code.test :refer :all]
             [hara.lang :as l]
-            [hara.lang.base.library :as lib]))
+            [hara.lang.library :as lib]))
 
 ^{:refer code.mcp.tool.hara.lang/lang-emit-as-safe :added "4.0"}
 (fact "returns emitted code on success and an error string on failure"

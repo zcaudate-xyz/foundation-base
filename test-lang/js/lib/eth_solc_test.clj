@@ -1,6 +1,6 @@
 (ns js.lib.eth-solc-test
-  (:require [hara.rt.solidity :as s]
-            [hara.rt.solidity.env-ganache :as env-ganache]
+  (:require [hara.runtime.solidity :as s]
+            [hara.runtime.solidity.env-ganache :as env-ganache]
             [hara.lang :as l]
             [std.string.prose :as prose])
   (:use code.test))

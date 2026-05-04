@@ -40,6 +40,6 @@
                         (env/do:pp
                          (std.json/write
                           (hara.lang/emit-script
-                           (hara.rt.basic.impl.process-python/default-body-wrap
+                           (hara.runtime.basic.impl.process-python/default-body-wrap
                             ['(+ 1 2 3 4)])
                            {:lang :python})))))

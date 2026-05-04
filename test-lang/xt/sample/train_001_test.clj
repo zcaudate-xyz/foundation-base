@@ -26,19 +26,19 @@
 
 (comment
 
-  ;; need to test hara.lang.seedgen.common-infile functions
+  ;; need to test hara.seedgen.common-infile functions
 
   ;; seedgen-root
   ;; 
 
-  (hara.lang.seedgen.common-infile/seedgen-root)
+  (hara.seedgen.common-infile/seedgen-root)
   => :js
 
   
   ;; seedgen-list
   ;; 
 
-  (hara.lang.seedgen.common-infile/seedgen-list)
+  (hara.seedgen.common-infile/seedgen-list)
   => []
   
   

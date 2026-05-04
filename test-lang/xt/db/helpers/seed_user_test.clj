@@ -1,9 +1,9 @@
 (ns xt.db.helpers.seed-user-test
-  (:require [hara.rt.postgres :as pg :refer [defsel.pg defret.pg]]
+  (:require [hara.runtime.postgres :as pg :refer [defsel.pg defret.pg]]
             [hara.lang :as l]))
 
 (l/script :postgres
-  {:require [[hara.rt.postgres :as pg]
+  {:require [[hara.runtime.postgres :as pg]
              [xt.db.helpers.seed-system-test :as data]]
    :static {:application ["test-db-helpers"]
             :seed        ["scratch-sample-db"]
