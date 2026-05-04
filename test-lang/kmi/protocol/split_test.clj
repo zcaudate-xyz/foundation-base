@@ -5,26 +5,26 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-protocol :as proto]
-             [kmi.protocol.value :as p-value]
-             [kmi.protocol.counted :as p-counted]
-             [kmi.protocol.named :as p-named]
-             [kmi.protocol.lisp-scalar :as p-lisp-scalar]
-             [kmi.protocol.lisp-named :as p-lisp-named]
-             [kmi.protocol.lisp-sequential :as p-lisp-sequential]
-             [kmi.protocol.lisp-associative :as p-lisp-associative]
-             [kmi.protocol.lisp-persistent :as p-lisp-persistent]]})
+             [kmi.protocol.ivalue :as p-value]
+             [kmi.protocol.icounted :as p-counted]
+             [kmi.protocol.inamed :as p-named]
+             [kmi.protocol.ilisp-scalar :as p-lisp-scalar]
+             [kmi.protocol.ilisp-named :as p-lisp-named]
+             [kmi.protocol.ilisp-sequential :as p-lisp-sequential]
+             [kmi.protocol.ilisp-associative :as p-lisp-associative]
+             [kmi.protocol.ilisp-persistent :as p-lisp-persistent]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.common-protocol :as proto]
-             [kmi.protocol.value :as p-value]
-             [kmi.protocol.counted :as p-counted]
-             [kmi.protocol.named :as p-named]
-             [kmi.protocol.lisp-scalar :as p-lisp-scalar]
-             [kmi.protocol.lisp-named :as p-lisp-named]
-             [kmi.protocol.lisp-sequential :as p-lisp-sequential]
-             [kmi.protocol.lisp-associative :as p-lisp-associative]
-             [kmi.protocol.lisp-persistent :as p-lisp-persistent]]})
+             [kmi.protocol.ivalue :as p-value]
+             [kmi.protocol.icounted :as p-counted]
+             [kmi.protocol.inamed :as p-named]
+             [kmi.protocol.ilisp-scalar :as p-lisp-scalar]
+             [kmi.protocol.ilisp-named :as p-lisp-named]
+             [kmi.protocol.ilisp-sequential :as p-lisp-sequential]
+             [kmi.protocol.ilisp-associative :as p-lisp-associative]
+             [kmi.protocol.ilisp-persistent :as p-lisp-persistent]]})
 
 (fact:global
   {:setup [(l/rt:restart)]
@@ -72,7 +72,7 @@
       "name" "name"
       "namespace" "namespace"})
 
-^{:refer kmi.protocol.lisp-sequential/ILispSequential :added "4.1"}
+^{:refer kmi.protocol.ilisp-sequential/ILispSequential :added "4.1"}
 (fact "defines immutable Lisp-facing KMI protocol surfaces from split namespaces"
   (!.js
    [p-lisp-scalar/ILispScalar

@@ -112,7 +112,7 @@
          [:js       :default]          {:ns 'hara.model.spec-js
                                         :book '+book+
                                         :parent :xtalk}
-         [:llvm     :default]          {:ns 'hara.model.annex.spec-llvm
+         [:llvm     :default]          {:ns 'hara.model.spec-llvm
                                         :book '+book+
                                         :parent :xtalk}
          [:lua      :default]          {:ns 'hara.model.spec-lua

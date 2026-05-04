@@ -1,7 +1,7 @@
 (ns xt.db-test
+  (:use code.test)
   (:require [hara.lang :as l]
-            [xt.lang.common-notify :as notify])
-  (:use code.test))
+            [xt.lang.common-notify :as notify]))
 
 (l/script- :js
   {:runtime :basic

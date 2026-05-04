@@ -5,14 +5,10 @@
             [hara.runtime.solidity.compile-node :as compile-node]
             [hara.runtime.solidity.compile-solc :as compile-solc]
             [hara.runtime.solidity.env-hardhat :as env-hardhat]
-            [hara.runtime.solidity.script.builtin :as builtin]
-            [hara.runtime.solidity.script.util :as util]
             [hara.lang :as l]
             [std.lib.env :as env]
             [std.lib.foundation :as f])
   (:refer-clojure :exclude [assert require bytes]))
-
-(f/intern-all hara.runtime.solidity.script.util)
 
 (f/intern-in [rt:start-hardhat-server env-hardhat/start-hardhat-server]
              [rt:stop-hardhat-server env-hardhat/stop-hardhat-server]
@@ -130,4 +126,3 @@
     (float (/ (count (:bytecode contract))
               2
               1024))))
-

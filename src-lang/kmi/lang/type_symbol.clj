@@ -5,10 +5,10 @@
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-protocol :as proto]
-             [kmi.protocol.eq :as p-eq]
-             [kmi.protocol.hash :as p-hash]
-             [kmi.protocol.namespaced :as p-namespaced]
-             [kmi.protocol.show :as p-show]
+             [kmi.protocol.ieq :as p-eq]
+             [kmi.protocol.ihash :as p-hash]
+             [kmi.protocol.inamespaced :as p-namespaced]
+             [kmi.protocol.ishow :as p-show]
              [kmi.lang.interface-common :as interface-common]
              [kmi.lang.interface-spec :as spec]
              [kmi.lang.common-hash :as common-hash]]})

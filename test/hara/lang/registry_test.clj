@@ -24,7 +24,7 @@
   => 'hara.model.annex.spec-fortran
 
   (registry-book-ns :llvm)
-  => 'hara.model.annex.spec-llvm
+  => 'hara.model.spec-llvm
 
   (registry-book-ns :solidity)
   => 'hara.model.spec-solidity
