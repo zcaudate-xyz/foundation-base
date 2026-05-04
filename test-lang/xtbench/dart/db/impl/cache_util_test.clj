@@ -8,7 +8,7 @@
    :require [[xt.lang.common-repl :as repl]
              [xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
-             [xt.db.impl.cache-util :as data]
+             [xt.db.instance.cache-util :as data]
              [xt.db.text.base-flatten :as f]
              [xt.db.helpers.data-main-test :as sample]]})
 
@@ -16,7 +16,7 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.impl.cache-util/has-entry :added "4.0"}
+^{:refer xt.db.instance.cache-util/has-entry :added "4.0"}
 (fact "checks if entry exists"
 
   (!.dt
@@ -28,7 +28,7 @@
     (data/has-entry rows "UserAccount" "00000000-0000-0000-0000-000000000000"))
   => true)
 
-^{:refer xt.db.impl.cache-util/get-entry :added "4.0"
+^{:refer xt.db.instance.cache-util/get-entry :added "4.0"
   :setup [(def +account-get-entry-check+
             (just-in
              {"record"
@@ -56,7 +56,7 @@
     (data/get-entry rows "UserAccount" "00000000-0000-0000-0000-000000000000"))
   => +account-get-entry-check+)
 
-^{:refer xt.db.impl.cache-util/swap-if-entry :added "4.0"}
+^{:refer xt.db.instance.cache-util/swap-if-entry :added "4.0"}
 (fact "modifies entry if exists"
 
   (!.dt
@@ -73,7 +73,7 @@
         (xtd/get-in ["record" "data" "foo"])))
   => "hello")
 
-^{:refer xt.db.impl.cache-util/merge-single :added "4.0"}
+^{:refer xt.db.instance.cache-util/merge-single :added "4.0"}
 (fact "merges a single entry"
 
   (!.dt
@@ -88,7 +88,7 @@
   => (just {"record" {"ref_links" {}, "id" "00000000-0000-0000-0000-000000000001", "rev_links" {}, "data" {}},
             "t" number?}))
 
-^{:refer xt.db.impl.cache-util/merge-bulk :added "4.0"
+^{:refer xt.db.instance.cache-util/merge-bulk :added "4.0"
   :setup [(def +account-merge-bulk-check+
             (just-in
              [{"UserProfile"
@@ -135,7 +135,7 @@
      (data/get-ids rows "UserAccount")])
   => +account-merge-bulk-check+)
 
-^{:refer xt.db.impl.cache-util/merge-bulk.1 :added "4.0"
+^{:refer xt.db.instance.cache-util/merge-bulk.1 :added "4.0"
   :setup [(def +account-min-check+
             (just-in
              {"UserAccount"
@@ -247,7 +247,7 @@
                                      {}) nil))
   => +account-org-notification-check+)
 
-^{:refer xt.db.impl.cache-util/merge-bulk.2 :added "4.0"
+^{:refer xt.db.instance.cache-util/merge-bulk.2 :added "4.0"
   :setup [(def +account-merge-bulk-check+
             (just-in {"UserProfile"
                       {"c4643895-b0ce-44cc-b07b-2386bf18d43b"
@@ -437,7 +437,7 @@
                                      {}) nil))
   => +account-merge-bulk-check+)
 
-^{:refer xt.db.impl.cache-util/get-ids :added "4.0"}
+^{:refer xt.db.instance.cache-util/get-ids :added "4.0"}
 (fact "get ids for table-key"
 
   (!.dt
@@ -450,7 +450,7 @@
     (data/get-ids rows "UserAccount"))
   => ["00000000-0000-0000-0000-000000000000"])
 
-^{:refer xt.db.impl.cache-util/all-records :added "4.0"
+^{:refer xt.db.instance.cache-util/all-records :added "4.0"
   :setup [(def +account-all-records-check+
             (just-in 
              {"00000000-0000-0000-0000-000000000000"
@@ -477,7 +477,7 @@
     (data/all-records rows "UserAccount"))
   => +account-all-records-check+)
 
-^{:refer xt.db.impl.cache-util/get-changed-single :added "4.0"}
+^{:refer xt.db.instance.cache-util/get-changed-single :added "4.0"}
 (fact "gets changed record"
 
   (!.dt
@@ -497,7 +497,7 @@
                              changed))
   => {"data" {"nickname" "hello"}})
 
-^{:refer xt.db.impl.cache-util/has-changed-single :added "4.0"}
+^{:refer xt.db.instance.cache-util/has-changed-single :added "4.0"}
 (fact "checks if record has changed"
 
   (!.dt
@@ -515,7 +515,7 @@
                              changed))
   => true)
 
-^{:refer xt.db.impl.cache-util/get-link-attrs :added "4.0"
+^{:refer xt.db.instance.cache-util/get-link-attrs :added "4.0"
   :setup [(def +get-link-attrs-check+
             {"table_link" "rev_links",
              "inverse_link" "ref_links",
@@ -528,7 +528,7 @@
   (!.dt (data/get-link-attrs sample/Schema "UserAccount" "profile"))
   => +get-link-attrs-check+)
 
-^{:refer xt.db.impl.cache-util/remove-single-link-entry :added "4.0"}
+^{:refer xt.db.instance.cache-util/remove-single-link-entry :added "4.0"}
 (fact "removes single link for entry"
 
   (!.dt
@@ -551,7 +551,7 @@
      removed])
   => [{} "c4643895-b0ce-44cc-b07b-2386bf18d43b"])
 
-^{:refer xt.db.impl.cache-util/remove-single-link :added "4.0"}
+^{:refer xt.db.instance.cache-util/remove-single-link :added "4.0"}
 (fact "removes single link"
 
   (!.dt
@@ -569,7 +569,7 @@
                              "c4643895-b0ce-44cc-b07b-2386bf18d43b"))
   => [true true])
 
-^{:refer xt.db.impl.cache-util/remove-single :added "4.0"
+^{:refer xt.db.instance.cache-util/remove-single :added "4.0"
   :setup [(def +account-remove-single-check+
             (contains-in
              [{"record"
@@ -600,7 +600,7 @@
                         "00000000-0000-0000-0000-000000000000"))
   => +account-remove-single-check+)
 
-^{:refer xt.db.impl.cache-util/remove-bulk :added "4.0"}
+^{:refer xt.db.instance.cache-util/remove-bulk :added "4.0"}
 (fact "removes bulk data"
 
   (!.dt
@@ -619,7 +619,7 @@
   => (just ["00000000-0000-0000-0000-000000000000"
             empty?]))
 
-^{:refer xt.db.impl.cache-util/add-single-link-entry :added "4.0"}
+^{:refer xt.db.instance.cache-util/add-single-link-entry :added "4.0"}
 (fact "adds single link entry for one side"
 
   (!.dt
@@ -645,7 +645,7 @@
   => [{"c4643895-b0ce-44cc-b07b-2386bf18d43b" true}
       "c4643895-b0ce-44cc-b07b-2386bf18d43b"])
 
-^{:refer xt.db.impl.cache-util/add-single-link :added "4.0"}
+^{:refer xt.db.instance.cache-util/add-single-link :added "4.0"}
 (fact "adds single link"
 
   (!.dt
@@ -667,7 +667,7 @@
                           "c4643895-b0ce-44cc-b07b-2386bf18d43b"))
   => [true true])
 
-^{:refer xt.db.impl.cache-util/add-bulk-links :added "4.0"
+^{:refer xt.db.instance.cache-util/add-bulk-links :added "4.0"
   :setup [(def +account-add-bulk-links-check+
             (just
              [(just [{"table" "UserAccount",
@@ -706,13 +706,13 @@
   (./create-tests)
   (./import)
   
-  (s/pedantic '[xt.db.impl.cache-util])
-  (s/run '[xt.db.impl.cache-util])
+  (s/pedantic '[xt.db.instance.cache-util])
+  (s/run '[xt.db.instance.cache-util])
 
   (s/seedgen-benchadd '[xt.db] {:lang [:dart] :write true})
-  (s/seedgen-benchadd 'xt.db.impl.cache-util {:lang [:dart] :write true})
-  (s/seedgen-langadd 'xt.db.impl.cache-util {:lang [:lua :python] :write true})
-  (s/seedgen-langremove 'xt.db.impl.cache-util {:lang [:lua :python] :write true}))
+  (s/seedgen-benchadd 'xt.db.instance.cache-util {:lang [:dart] :write true})
+  (s/seedgen-langadd 'xt.db.instance.cache-util {:lang [:lua :python] :write true})
+  (s/seedgen-langremove 'xt.db.instance.cache-util {:lang [:lua :python] :write true}))
 
 (comment
 

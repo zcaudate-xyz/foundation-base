@@ -1,4 +1,4 @@
-(ns xt.db.impl.sql-js-test
+(ns xt.db.instance.sql-js-test
   (:require [hara.lang :as l]
              [std.string.prose :as prose]
              [xt.lang.common-notify :as notify]
@@ -41,7 +41,7 @@
 ^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.db.impl.sql :as impl-sql]
+   :require [[xt.db.instance.sql :as impl-sql]
              [xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-string :as str]
@@ -58,7 +58,7 @@
 (l/script- :lua.nginx
   {:runtime :basic
    :config {:program :resty}
-   :require [[xt.db.impl.sql :as impl-sql]
+   :require [[xt.db.instance.sql :as impl-sql]
              [xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-string :as str]
@@ -74,7 +74,7 @@
 ^{:seedgen/derived true}
 (l/script- :python
   {:runtime :basic
-   :require [[xt.db.impl.sql :as impl-sql]
+   :require [[xt.db.instance.sql :as impl-sql]
              [xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-string :as str]
@@ -109,7 +109,7 @@
                 {}))]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.impl.sql/sql-gen-delete :added "4.0"}
+^{:refer xt.db.instance.sql/sql-gen-delete :added "4.0"}
 (fact "generates delete statements"
 
   (!.js
@@ -119,7 +119,7 @@
   => ["DELETE FROM \"HELLO\" WHERE \"id\" = 'A';"
       "DELETE FROM \"HELLO\" WHERE \"id\" = 'B';"])
 
-^{:refer xt.db.impl.sql/sql-process-event-remove :added "4.0"}
+^{:refer xt.db.instance.sql/sql-process-event-remove :added "4.0"}
 (fact "syncs, removes, and pulls sql data"
 
   (!.js
