@@ -181,9 +181,11 @@
   [state remote-spec view-context]
   (return
    (xt/x:obj-assign
-    {}
-    (or (xt/x:get-key state "remote") {})
-    (or remote-spec {})
+    (xt/x:obj-assign
+     (xt/x:obj-assign
+      {}
+      (or (xt/x:get-key state "remote") {}))
+     (or remote-spec {}))
     (or (xt/x:get-key view-context "remote") {}))))
 
 (defn.xt request-remote

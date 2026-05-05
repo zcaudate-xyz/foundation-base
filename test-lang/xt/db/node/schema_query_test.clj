@@ -7,9 +7,10 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.node.schema-query :as schema-query]
-             [xt.db.node.schema-state :as schema-state]
-             [xt.lang.spec-base :as xt]
-             [xt.lang.common-data :as xtd]]})
+              [xt.db.node.schema-state :as schema-state]
+              [xt.db.helpers.data-main-test :as sample]
+              [xt.lang.spec-base :as xt]
+              [xt.lang.common-data :as xtd]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -28,9 +29,9 @@
               "type" "select"
               "tag" "by_organisation"
               "query" {"organisation_accesses"
-                       {"organisation" "{{i_organisation_id}}"}}}}
-     "return"
-     {"info"
+                       {"organisation" "{{i_organisation_id}}"}}}}}
+    "return"
+    {"info"
      {"input" [{"symbol" "i_account_id", "type" "uuid"}]
       "return" "jsonb"
       "schema" "scratch-sample-db"
@@ -42,9 +43,6 @@
               "query" [["profile" ["*/standard"]]
                        "nickname"
                        "id"]}}}}})
-
-(def +schema+
-  sample/Schema)
 
 ^{:refer xt.db.node.schema-query/view-query-return-entry :added "4.1"}
 (fact "creates a return entry from an inline return query"
@@ -79,7 +77,7 @@
 
   (!.js
      (schema-query/view-query-entries
-     (schema-state/base-state {"schema" (@! +schema+)
+     (schema-state/base-state {"schema" sample/Schema
                                 "views" (@! +views+)})
      "UserAccount"
      {:select-method "by_organisation"
@@ -96,7 +94,7 @@
 
   (!.js
      (schema-query/view-triggers
-     (schema-state/base-state {"schema" (@! +schema+)
+     (schema-state/base-state {"schema" sample/Schema
                                 "views" (@! +views+)})
      "UserAccount"
      {:select-method "by_organisation"
@@ -170,7 +168,7 @@
   (!.js
     (var [ok prepared]
          (schema-query/prepare-query
-          (schema-state/base-state {"schema" (@! +schema+)
+          (schema-state/base-state {"schema" sample/Schema
                                      "views" (@! +views+)})
           {:key "orders/main"
            :table "UserAccount"

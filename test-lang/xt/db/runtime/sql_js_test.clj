@@ -22,8 +22,8 @@
   (l/script- :js
     {:runtime :basic
      :require [[xt.lang.spec-base :as xt]
-               [xt.db.instance.sql :as impl-sql]
-               [xt.lang.common-lib :as k]
+                [xt.db.runtime.sql :as impl-sql]
+                [xt.lang.common-lib :as k]
                [xt.lang.common-data :as xtd]
                [xt.lang.common-string :as str]
                [xt.lang.common-repl :as repl]
@@ -40,8 +40,8 @@
     {:runtime :basic
      :config {:program :resty}
      :require [[xt.lang.spec-base :as xt]
-               [xt.db.instance.sql :as impl-sql]
-               [xt.lang.common-lib :as k]
+                [xt.db.runtime.sql :as impl-sql]
+                [xt.lang.common-lib :as k]
                [xt.lang.common-data :as xtd]
                [xt.lang.common-string :as str]
                [xt.lang.common-repl :as repl]
@@ -57,8 +57,8 @@
   (l/script- :python
     {:runtime :basic
      :require [[xt.lang.spec-base :as xt]
-               [xt.db.instance.sql :as impl-sql]
-               [xt.lang.common-lib :as k]
+                [xt.db.runtime.sql :as impl-sql]
+                [xt.lang.common-lib :as k]
                [xt.lang.common-data :as xtd]
                [xt.lang.common-string :as str]
                [xt.lang.common-repl :as repl]
@@ -445,7 +445,7 @@
                     (. row ["name"])]))))
    (xt/x:json-encode [nested flat]))
   
-  ^{:refer xt.db.instance.sql/sql-gen-delete :added "4.0"}
+  ^{:refer xt.db.runtime.sql/sql-gen-delete :added "4.0"}
   (fact "generates delete statements"
 
     (!.js
@@ -455,7 +455,7 @@
     => ["DELETE FROM \"HELLO\" WHERE \"id\" = 'A';"
         "DELETE FROM \"HELLO\" WHERE \"id\" = 'B';"])
 
-  ^{:refer xt.db.instance.sql/sql-process-event-remove :added "4.0"}
+  ^{:refer xt.db.runtime.sql/sql-process-event-remove :added "4.0"}
   (fact "syncs, removes, and pulls sql data"
 
     (!.js
@@ -519,7 +519,7 @@
     => empty?)
   )
 
-^{:refer xt.db.instance.sql/sql-pull-sync :added "4.1"}
+^{:refer xt.db.runtime.sql/sql-pull-sync :added "4.1"}
 (fact "returns the same nested sqlite output across js lua and python"
 
   (!.js

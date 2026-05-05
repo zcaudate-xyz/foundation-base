@@ -22,10 +22,12 @@
 (def +defs+
   '#{fn defn defmacro defrecord deftype
      defn-
-     defmacro.js defn.js def.js def$.js def-.js
-     defmacro.py defn.py def.py def$.py def-.py
-     defmacro.lua defn.lua def.lua def$.lua def-.lua
-     defmacro.pg defn.pg deftype.pg defenum.pg defindex.pg})
+      defmacro.js defn.js def.js def$.js def-.js
+      defmacro.py defn.py def.py def$.py def-.py
+      defmacro.lua defn.lua def.lua def$.lua def-.lua
+      defmacro.pg defn.pg deftype.pg defenum.pg defindex.pg
+      defn.sql deftype.sql defenum.sql
+      defn.oracle deftype.oracle defenum.oracle})
 
 (def +pairing+
   '#{case cond-> cond->> some-> some->>
@@ -269,6 +271,4 @@
   [form & [opts]]
   (binding [common/*layout-fn* layout-default-fn]
     (layout-default-fn form opts)))
-
-
 

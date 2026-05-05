@@ -130,12 +130,16 @@
          [:elisp    :default]          {:ns 'hara.model.spec-elisp
                                         :book '+book+
                                         :parent :xtalk}
-         [:scheme   :default]          {:ns 'hara.model.spec-scheme
-                                        :book '+book+
-                                        :parent :xtalk}
-         
-         [:postgres :default]          {:ns 'hara.model.spec-postgres
-                                        :book '+book+}
+          [:scheme   :default]          {:ns 'hara.model.spec-scheme
+                                         :book '+book+
+                                         :parent :xtalk}
+          [:sql      :default]          {:ns 'hara.model.spec-sql
+                                         :book '+book+}
+          [:oracle   :default]          {:ns 'hara.model.sql.spec-oracle
+                                         :book '+book+}
+          
+          [:postgres :default]          {:ns 'hara.model.spec-postgres
+                                         :book '+book+}
          [:solidity :default]          {:ns 'hara.model.spec-solidity
                                         :book '+book+}
 

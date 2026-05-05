@@ -36,6 +36,8 @@
             [hara.model.spec-elisp]
             [hara.model.spec-scheme]
             [hara.model.spec-python]
+            [hara.model.spec-sql]
+            [hara.model.sql.spec-oracle]
             [std.lib.context.pointer]
             [std.lib.deps :as deps]
             [std.lib.env :as env]

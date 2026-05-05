@@ -1,18 +1,18 @@
-(ns js.cell.runtime.env-sharedworker-test
+(ns js.worker.env-sharedworker-test
   (:require [hara.lang :as l])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
-              [js.cell.runtime.env-sharedworker :as env-sharedworker]]})
+             [js.worker.env-sharedworker :as env-sharedworker]]})
 
 (fact:global
  {:setup [(l/rt:restart)
           (l/rt:scaffold-imports :js)]
   :teardown [(l/rt:stop)]})
 
-^{:refer js.cell.runtime.env-sharedworker/init-port :added "4.1"}
+^{:refer js.worker.env-sharedworker/init-port :added "4.1"}
 (fact "boots a SharedWorker port"
   (!.js
    (var messages [])
@@ -28,7 +28,7 @@
                    "message" {"signal" "@cell/::INIT"
                               "body" {"done" true}}}))
 
-^{:refer js.cell.runtime.env-sharedworker/runtime-init :added "4.1"}
+^{:refer js.worker.env-sharedworker/runtime-init :added "4.1"}
 (fact "boots js.cell inside a SharedWorker"
   (!.js
    (var previous-self (!:G self))

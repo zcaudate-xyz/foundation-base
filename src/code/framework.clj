@@ -30,7 +30,13 @@
      defn.R
      defn.py
      defn.pg
+     defn.sql
+     defn.oracle
      deftype.pg
+     deftype.sql
+     deftype.oracle
+     defenum.sql
+     defenum.oracle
      defpolicy.pg
      defn.sh
      defn.sol

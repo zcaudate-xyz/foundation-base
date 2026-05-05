@@ -1,5 +1,5 @@
-(ns js.cell.runtime.env-node-test
-  (:require [js.cell.runtime.emit :as emit]
+(ns js.worker.env-node-test
+  (:require [js.worker.emit :as emit]
             [hara.lang :as l]
             [std.lib.template :as template]
             [xt.lang.common-notify :as notify])
@@ -8,10 +8,9 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
-              [xt.lang.common-repl :as repl]
-              [js.cell.kernel :as cl]
-              [js.cell.runtime.env-node :as env-node]
-             [js.cell.runtime.link :as runtime-link]]})
+             [xt.lang.common-repl :as repl]
+             [js.worker.env-node :as env-node]
+             [js.worker.link :as worker-link]]})
 
 (fact:global
  {:setup [(l/rt:restart)
@@ -22,19 +21,18 @@
   []
   (template/$
     (notify/wait-on :js
-      (var cell (cl/make-cell
-                 (runtime-link/make-node-link ~(emit/node-script) {})))
-      (. (. cell ["init"])
-         (then (fn []
-                 (repl/notify (cl/list-models cell))))))))
+      (var link (worker-link/make-node-link ~(emit/node-script) {}))
+      ((. link ["create_fn"])
+       (fn [data]
+         (repl/notify data))))))
 
-^{:refer js.cell.runtime.env-node/make-node-worker :added "4.1"}
+^{:refer js.worker.env-node/make-node-worker :added "4.1"}
 (fact "creates a Node worker adapter"
   (!.js
    (xt/x:obj-keys (env-node/make-node-worker)))
   => (contains ["postMessage" "addEventListener"]))
 
-^{:refer js.cell.runtime.env-node/init-worker :added "4.1"}
+^{:refer js.worker.env-node/init-worker :added "4.1"}
 (fact "boots a Node worker adapter"
   (!.js
    (var messages [])
@@ -49,7 +47,8 @@
                    "message" {"signal" "@cell/::INIT"
                               "body" {"done" true}}}))
 
-^{:refer js.cell.runtime.env-node/runtime-init :added "4.1"}
-(fact "boots js.cell inside a Node worker thread"
+^{:refer js.worker.env-node/runtime-init :added "4.1"}
+(fact "boots js.worker inside a Node worker thread"
   (node-runtime-init-check)
-  => [])
+  => (contains-in {"signal" "@cell/::INIT"
+                   "body" {"done" true}}))
