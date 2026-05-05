@@ -509,7 +509,37 @@
   => [["profile" [{} ["first_name" "last_name"]]]])
 
 ^{:refer xt.db.text.base-scope/get-linked-tables-loop :added "4.1"}
-(fact "TODO")
+(fact "accumulates linked tables into an existing map"
+
+  (!.js
+    (scope/get-linked-tables-loop sample/Schema
+                                  "UserAccount"
+                                  [["profile"]
+                                   ["wallets"
+                                    [["entries"
+                                      [["asset"]]]]]]
+                                  {"Seed" true}))
+  => {"Seed" true, "UserProfile" true, "Asset" true, "UserAccount" true, "WalletAsset" true, "Wallet" true}
+
+  (!.lua
+    (scope/get-linked-tables-loop sample/Schema
+                                  "UserAccount"
+                                  [["profile"]
+                                   ["wallets"
+                                    [["entries"
+                                      [["asset"]]]]]]
+                                  {"Seed" true}))
+  => {"Seed" true, "UserProfile" true, "Asset" true, "UserAccount" true, "WalletAsset" true, "Wallet" true}
+
+  (!.py
+    (scope/get-linked-tables-loop sample/Schema
+                                  "UserAccount"
+                                  [["profile"]
+                                   ["wallets"
+                                    [["entries"
+                                      [["asset"]]]]]]
+                                  {"Seed" true}))
+  => {"Seed" true, "UserProfile" true, "Asset" true, "UserAccount" true, "WalletAsset" true, "Wallet" true})
 
 ^{:refer xt.db.text.base-scope/get-linked-tables :added "4.0"}
 (fact "calculated linked tables given query"

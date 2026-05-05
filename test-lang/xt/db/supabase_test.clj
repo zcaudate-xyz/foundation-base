@@ -8,13 +8,13 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-string :as str]
              [xt.lang.common-repl :as repl]
-             [xt.protocol.impl.connection-sql :as dbsql]
-             [xt.db.text.sql-util :as ut]
-             [xt.db.text.sql-manage :as manage]
-             [xt.db.helpers.data-main-test :as sample]
-             [xt.db :as xdb]
-             [xt.db.supabase :as sup]
-             [js.lib.driver-sqlite :as js-sqlite]]})
+              [xt.protocol.impl.connection-sql :as dbsql]
+              [xt.db.text.sql-util :as ut]
+              [xt.db.text.sql-manage :as manage]
+              [xt.db.helpers.data-main-test :as sample]
+              [xt.db.instance :as xdb]
+              [xt.db.runtime.supabase :as sup]
+              [js.lib.driver-sqlite :as js-sqlite]]})
 
 (defn bootstrap-js
   []
@@ -54,13 +54,13 @@
              (bootstrap-js)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.supabase/snake->kebab :added "4.1"}
+^{:refer xt.db.runtime.supabase/snake->kebab :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.db.supabase/normalize-row :added "4.1"}
+^{:refer xt.db.runtime.supabase/normalize-row :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.db.supabase/payload->xdb-events :added "4.1.3"}
+^{:refer xt.db.runtime.supabase/payload->xdb-events :added "4.1.3"}
 (fact "translates canonical supabase payloads to xt.db events"
 
   (!.js
@@ -100,7 +100,7 @@
   => [["remove" {"Currency" [{"id" "USD"}]}]
       ["add" {"Currency" [{"id" "USD2" "name" "US Dollar 2"}]}]])
 
-^{:refer xt.db.supabase/apply-payload :added "4.1.3"}
+^{:refer xt.db.runtime.supabase/apply-payload :added "4.1.3"}
 (fact "applies supabase payload to local xt.db sqlite"
 
   (!.js
@@ -130,7 +130,7 @@
                      ["Currency" ["id"]]))
   => [])
 
-^{:refer xt.db.supabase/attach-events :added "4.1.3"}
+^{:refer xt.db.runtime.supabase/attach-events :added "4.1.3"}
 (fact "attaches a stubbed supabase realtime client and applies payloads"
 
   (!.js

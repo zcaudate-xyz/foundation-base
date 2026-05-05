@@ -3,9 +3,9 @@
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.db.node.main :as main]
-             [xt.db.node.spec :as spec]
-             [xt.db.node.state :as state]]})
+  {:require [[xt.db.node.instance-model :as model]
+             [xt.db.node.instance-util :as util]
+             [xt.db.node.schema-spec :as spec]]})
 
 (def.xt META_KEY spec/META_KEY)
 (def.xt STATE_TAG spec/STATE_TAG)
@@ -22,27 +22,27 @@
 (def.xt SIGNAL_QUERY_CHANGED spec/SIGNAL_QUERY_CHANGED)
 (def.xt SIGNAL_MODEL_CHANGED spec/SIGNAL_MODEL_CHANGED)
 
-(def.xt install main/install)
-(def.xt uninstall main/uninstall)
-(def.xt ensure-space-state main/ensure-space-state)
+(def.xt install model/install)
+(def.xt uninstall model/uninstall)
+(def.xt ensure-space-state model/ensure-space-state)
 
-(def.xt query main/query)
-(def.xt query-refresh main/query-refresh)
-(def.xt sync main/sync)
-(def.xt remove main/remove)
-(def.xt clear main/clear)
-(def.xt snapshot main/snapshot)
+(def.xt query model/query)
+(def.xt query-refresh model/query-refresh)
+(def.xt sync model/sync)
+(def.xt remove model/remove)
+(def.xt clear model/clear)
+(def.xt snapshot model/snapshot)
 
-(def.xt model-put main/model-put)
-(def.xt model-get main/model-get)
-(def.xt model-refresh main/model-refresh)
-(def.xt view-put main/view-put)
-(def.xt view-get main/view-get)
-(def.xt view-val main/view-val)
-(def.xt view-input main/view-input)
-(def.xt view-pending main/view-pending)
-(def.xt view-error main/view-error)
-(def.xt view-refresh main/view-refresh)
-(def.xt view-set-input main/view-set-input)
+(def.xt model-put model/model-put)
+(def.xt model-get model/model-get)
+(def.xt model-refresh model/model-refresh)
+(def.xt view-put model/view-put)
+(def.xt view-get model/view-get)
+(def.xt view-val model/view-val)
+(def.xt view-input model/view-input)
+(def.xt view-pending model/view-pending)
+(def.xt view-error model/view-error)
+(def.xt view-refresh model/view-refresh)
+(def.xt view-set-input model/view-set-input)
 
-(def.xt node-opts state/node-opts)
+(def.xt node-opts util/node-opts)

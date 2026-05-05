@@ -6,7 +6,7 @@
    :require [[xt.cell.service.db-query :as db-query]
               [xt.db.instance :as xdb]
               [xt.lang.spec-base :as xt]
-              [xt.db.instance.supabase :as supabase]
+              [xt.db.runtime.supabase :as supabase]
               [xt.db.text.pgrest :as pgrest]]})
 
 (def.xt supabase-capable? supabase/supabase-capable?)

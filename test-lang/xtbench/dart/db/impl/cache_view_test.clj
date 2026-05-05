@@ -5,7 +5,7 @@
 
 (l/script- :dart
   {:runtime :twostep
-   :require [[xt.db.instance.cache-view :as v]
+   :require [[xt.db.runtime.cache-view :as v]
              [xt.db.text.sql-util :as ut]
              [xt.db.text.sql-raw :as raw]
              [xt.lang.common-lib :as k]
@@ -60,7 +60,7 @@
 (def +app+ (pg/app "xt.db.helpers.sample"))
 (def +schema+ (pg/bind-schema (:schema +app+)))
 
-^{:refer xt.db.instance.cache-view/tree-base :added "4.0"}
+^{:refer xt.db.runtime.cache-view/tree-base :added "4.0"}
 (fact "creates a tree base"
 
   (!.dt
@@ -75,7 +75,7 @@
       {"id" "AUD"}
       ["*/data"]])
 
-^{:refer xt.db.instance.cache-view/tree-select :added "4.0"}
+^{:refer xt.db.runtime.cache-view/tree-select :added "4.0"}
 (fact "creates a select tree"
 
   (!.dt
@@ -83,7 +83,7 @@
                   (@! +select+)))
   => ["Currency" {"type" "fiat"} ["id"]])
 
-^{:refer xt.db.instance.cache-view/tree-return :added "4.0"}
+^{:refer xt.db.runtime.cache-view/tree-return :added "4.0"}
 (fact "creates a return tree"
 
   (!.dt
@@ -100,7 +100,7 @@
                      "nickname"
                      "id"]])
 
-^{:refer xt.db.instance.cache-view/tree-combined :added "4.0"}
+^{:refer xt.db.runtime.cache-view/tree-combined :added "4.0"}
 (fact "creates a combined tree"
 
   (!.dt
@@ -120,7 +120,7 @@
        {"organisation" "{{i_organisation_id}}"}}
       [["profile" ["*/standard"]] "nickname" "id"]])
 
-^{:refer xt.db.instance.cache-view/query-select :added "4.0"}
+^{:refer xt.db.runtime.cache-view/query-select :added "4.0"}
 (fact "tree for the query-select"
 
   (!.dt
@@ -131,7 +131,7 @@
                      {"organisation" "ORG-1"}}
       ["id"]])
 
-^{:refer xt.db.instance.cache-view/query-return :added "4.0"}
+^{:refer xt.db.runtime.cache-view/query-return :added "4.0"}
 (fact "tree for the query-return"
 
   (!.dt
@@ -141,7 +141,7 @@
                    []))
   => ["UserAccount" {"id" "USER-0"} [["profile" ["*/standard"]] "nickname" "id"]])
 
-^{:refer xt.db.instance.cache-view/query-return-bulk :added "4.0"}
+^{:refer xt.db.runtime.cache-view/query-return-bulk :added "4.0"}
 (fact "tree for query-return"
 
   (!.dt
@@ -152,7 +152,7 @@
     []))
   => ["UserAccount" {"id" ["in" [["USER-0"]]]} [["profile" ["*/standard"]] "nickname" "id"]])
 
-^{:refer xt.db.instance.cache-view/query-combined :added "4.0"}
+^{:refer xt.db.runtime.cache-view/query-combined :added "4.0"}
 (fact "tree for query combined"
 
   (!.dt

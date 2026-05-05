@@ -4,9 +4,9 @@
 (l/script :xtalk
   {:require [[xt.db.text.base-schema :as base-schema]
              [xt.db.text.base-scope :as scope]
-             [xt.db.instance.cache :as impl-cache]
-             [xt.db.instance.supabase :as impl-supabase]
-             [xt.db.instance.sql :as impl-sql]
+             [xt.db.runtime.cache :as impl-cache]
+             [xt.db.runtime.supabase :as impl-supabase]
+             [xt.db.runtime.sql :as impl-sql]
              [xt.protocol.impl.connection-sql :as sql]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
