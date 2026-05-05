@@ -1,7 +1,7 @@
 (ns postgres.core.impl-update
   (:require [clojure.set]
-            [hara.runtime.postgres.base.grammar.common :as common]
-            [hara.runtime.postgres.base.grammar.common-tracker :as tracker]
+            [hara.model.spec-postgres.common :as common]
+            [hara.model.spec-postgres.common-tracker :as tracker]
             [postgres.core.impl-base :as base]
             [hara.lang :as l]
             [hara.common.util :as ut]

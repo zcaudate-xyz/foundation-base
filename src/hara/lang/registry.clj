@@ -1,7 +1,7 @@
 (ns hara.lang.registry)
 
 (def +registry+
-  (atom {[:postgres :default]          'hara.runtime.postgres.base.grammar
+  (atom {[:postgres :default]          'hara.model.spec-postgres
          [:postgres :jdbc]             'hara.runtime.postgres.base.client
          [:postgres :jdbc.client]      'hara.runtime.postgres.base.client
          
@@ -134,7 +134,7 @@
                                         :book '+book+
                                         :parent :xtalk}
          
-         [:postgres :default]          {:ns 'hara.runtime.postgres.base.grammar
+         [:postgres :default]          {:ns 'hara.model.spec-postgres
                                         :book '+book+}
          [:solidity :default]          {:ns 'hara.model.spec-solidity
                                         :book '+book+}

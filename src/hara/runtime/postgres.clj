@@ -2,8 +2,8 @@
   (:require [hara.runtime.postgres.base.client :as client]
             [hara.runtime.postgres.base.client-impl :as client-impl]
             [hara.runtime.postgres.base.typed :as typed]
-            [hara.runtime.postgres.base.grammar.gen-bind]
-            [hara.runtime.postgres.base.grammar.entity :as entity]
+            [hara.model.spec-postgres.gen-bind]
+            [hara.model.spec-postgres.entity :as entity]
             [hara.runtime.postgres.base.application :as app]
             [postgres.core.addon]
             [postgres.core.builtin]
@@ -19,7 +19,7 @@
               postgres.core.addon
               postgres.core.impl
               postgres.core.graph
-              hara.runtime.postgres.base.grammar.gen-bind)
+              hara.model.spec-postgres.gen-bind)
 
 (f/intern-in client/rt-add-notify
              client/rt-remove-notify

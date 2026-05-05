@@ -1,6 +1,6 @@
 (ns postgres.core.graph-query
   (:require [clojure.set]
-            [hara.runtime.postgres.base.grammar.common :as common]
+            [hara.model.spec-postgres.common :as common]
             [postgres.core.graph-base :as base]
             [postgres.core.impl-base :as impl]
             [postgres.core.impl-main :as main]

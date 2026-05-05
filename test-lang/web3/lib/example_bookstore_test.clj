@@ -1,5 +1,5 @@
 (ns web3.lib.example-bookstore-test
-  (:require [solidity.core]
+  (:require [hara.runtime.solidity]
             [hara.lang :as l])
   (:use code.test))
 

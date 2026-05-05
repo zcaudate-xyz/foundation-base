@@ -1,5 +1,5 @@
 (ns postgres.core.graph-view
-  (:require [hara.runtime.postgres.base.grammar.common :as common]
+  (:require [hara.model.spec-postgres.common :as common]
             [postgres.core.graph-base :as base]
             [postgres.core.graph-query :as query]
             [hara.lang :as l]

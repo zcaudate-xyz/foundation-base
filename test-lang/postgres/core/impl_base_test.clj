@@ -32,7 +32,7 @@
 
 (fact "prep-entry prefers the live current-module entry"
   (with-redefs [hara.common.emit-common/emit-symbol-classify (fn [_ _] [:self '-])
-                hara.runtime.postgres.base.grammar.common/pg-resolve-entry
+                hara.model.spec-postgres.common/pg-resolve-entry
                 (fn [_ _]
                   [{:modules {}}
                    {:id 'Hello
@@ -56,7 +56,7 @@
 
 (fact "prep-table overlays module tables onto the application view"
   (with-redefs [hara.common.emit-common/emit-symbol-classify (fn [_ _] [:self '-])
-                hara.runtime.postgres.base.grammar.common/pg-resolve-entry
+                hara.model.spec-postgres.common/pg-resolve-entry
                 (fn [_ _]
                   [{:modules {}}
                    {:id 'Entry

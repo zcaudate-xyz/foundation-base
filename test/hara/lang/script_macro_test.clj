@@ -1,6 +1,6 @@
 (ns hara.lang.script-macro-test
   (:require [clojure.string]
-             [hara.runtime.postgres.base.grammar :as pg]
+             [hara.model.spec-postgres :as pg]
              [hara.lang.book :as book]
              [hara.lang.book-module :as module]
              [hara.lang.impl :as impl]

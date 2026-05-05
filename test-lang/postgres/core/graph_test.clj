@@ -64,7 +64,7 @@
 ^{:refer postgres.core.graph/g:modify :added "4.0"}
 (fact  "constructs the modify form"
 
-  (binding [hara.runtime.postgres.base.grammar.form-let/*input-syms* (volatile! #{'o-op})]
+  (binding [hara.model.spec-postgres.form-let/*input-syms* (volatile! #{'o-op})]
     (pg/g:modify scratch/Task
       {:set {:name "name"}
        :where {:id (str (f/uuid-nil))}
@@ -80,7 +80,7 @@
 ^{:refer postgres.core.graph/g:insert :added "4.0"}
 (fact "constructs an insert form"
 
-  (binding [hara.runtime.postgres.base.grammar.form-let/*input-syms* (volatile! #{'o-op})]
+  (binding [hara.model.spec-postgres.form-let/*input-syms* (volatile! #{'o-op})]
     (pg/g:insert scratch/Task
       {:name "name"
        :status "pending"

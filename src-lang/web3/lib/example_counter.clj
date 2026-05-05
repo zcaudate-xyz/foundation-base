@@ -3,7 +3,7 @@
             [std.lib.env :as env]))
 
 (l/script :solidity
-  {:require [[hara.runtime.solidity.script.builtin :as s]]})
+  {:require [[solidity.core.builtin :as s]]})
 
 (defenum.sol CounterLogType
   [:Inc :Dec])

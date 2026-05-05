@@ -1,5 +1,5 @@
 (ns postgres.core.impl-main
-  (:require [hara.runtime.postgres.base.grammar.common-tracker :as tracker]
+  (:require [hara.model.spec-postgres.common-tracker :as tracker]
             [postgres.core.impl-base :as base]
             [hara.lang :as l]
             [hara.common.util :as ut]

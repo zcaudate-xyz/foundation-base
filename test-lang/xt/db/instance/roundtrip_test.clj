@@ -3,15 +3,15 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-(l/script- :js
-  {:runtime :basic
-   :require [[js.cell.service.db-query :as db-query]
-             [xt.db.helpers.data-main-test :as sample]
-             [xt.db.instance :as xdb]
-             [xt.db.instance.supabase :as supabase]
-             [xt.lang.spec-base :as xt]
-             [xt.lang.common-data :as xtd]
-             [xt.lang.common-string :as str]
+  (l/script- :js
+    {:runtime :basic
+     :require [[js.cell.service.db-query :as db-query]
+               [xt.db.helpers.data-main-test :as sample]
+               [xt.db.instance :as xdb]
+               [xt.db.text.pgrest :as pgrest]
+               [xt.lang.spec-base :as xt]
+               [xt.lang.common-data :as xtd]
+               [xt.lang.common-string :as str]
              [xt.lang.common-repl :as repl]
              [xt.protocol.impl.connection-sql :as dbsql]
              [xt.db.text.sql-util :as ut]
@@ -146,7 +146,7 @@
   (var compiled-map {})
   (xt/for:array [tree trees]
     (xt/x:set-key compiled-map
-                  (JSON.stringify (supabase/compile-query tree))
+                  (JSON.stringify (pgrest/compile-query tree))
                   tree))
   (return {"::" "db.supabase"
            :instance {"execute"

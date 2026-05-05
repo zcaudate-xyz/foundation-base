@@ -4,7 +4,7 @@
   (:refer-clojure :exclude [name symbol]))
 
 (l/script :solidity
-  {:require [[hara.runtime.solidity.script.builtin :as s]]
+  {:require [[solidity.core.builtin :as s]]
     :static {:contract ["ERC20Basic"]}})
 
 (def.sol ^{:- [:string :public :constant]}

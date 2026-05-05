@@ -1,6 +1,6 @@
 (ns postgres.core.addon
-  (:require [hara.runtime.postgres.base.grammar.common :as common]
-            [hara.runtime.postgres.base.grammar.tf :as tf]
+  (:require [hara.model.spec-postgres.common :as common]
+            [hara.model.spec-postgres.tf :as tf]
             [std.json :as json]
             [hara.lang :as l]
             [std.lib.template :as template])

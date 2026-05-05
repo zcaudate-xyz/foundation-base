@@ -1,6 +1,6 @@
 (ns postgres.core.impl-insert-test
   (:require [hara.runtime.postgres.base.application :as app]
-            [hara.runtime.postgres.base.grammar.common-tracker :as tracker]
+            [hara.model.spec-postgres.common-tracker :as tracker]
             [postgres.core.impl-base :as base]
             [postgres.core.impl-insert :as insert]
             [hara.lang :as l]

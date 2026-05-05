@@ -1,6 +1,6 @@
 (ns postgres.core.impl-base
-  (:require [hara.runtime.postgres.base.grammar.common :as common]
-            [hara.runtime.postgres.base.grammar.form-deftype-hydrate :as form-deftype-hydrate]
+  (:require [hara.model.spec-postgres.common :as common]
+            [hara.model.spec-postgres.form-deftype-hydrate :as form-deftype-hydrate]
             [hara.runtime.postgres.base.application :as app]
             [hara.lang :as l]
             [hara.common.emit-common :as emit-common]

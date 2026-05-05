@@ -10,6 +10,10 @@
             [std.lib.foundation :as f])
   (:refer-clojure :exclude [assert require bytes]))
 
+(l/script :solidity
+  hara.runtime.solidity
+  {:require [[solidity.core.builtin :as s]]})
+
 (f/intern-in [rt:start-hardhat-server env-hardhat/start-hardhat-server]
              [rt:stop-hardhat-server env-hardhat/stop-hardhat-server]
              [rt:start-ganache-server env-hardhat/start-ganache-server]

@@ -1,5 +1,5 @@
 (ns postgres.core.builtin
-  (:require [hara.runtime.postgres.base.grammar]
+  (:require [hara.model.spec-postgres]
             [hara.lang :as l]
             [std.lib.foundation :as f]
             [std.lib.template :as template])

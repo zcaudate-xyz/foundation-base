@@ -1,5 +1,5 @@
 (ns js.lib.eth-bench-test
-  (:require [solidity.core :as solidity]
+  (:require [hara.runtime.solidity :as solidity]
             [hara.runtime.solidity.compile-solc :as compile-solc]
             [hara.runtime.solidity.env-hardhat :as env-hardhat]
             [hara.lang :as l]

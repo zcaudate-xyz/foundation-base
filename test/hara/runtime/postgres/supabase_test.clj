@@ -1,6 +1,6 @@
 (ns postgres.core.supabase-test
   (:require [net.http :as http]
-            [hara.runtime.postgres.base.grammar :as grammar]
+            [hara.model.spec-postgres :as grammar]
             [postgres.core.supabase :as s]
             [hara.lang :as l])
   (:use code.test))

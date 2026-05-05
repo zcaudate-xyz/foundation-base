@@ -4,23 +4,24 @@
 (l/script :xtalk
   {:export [MODULE]
    :require [[js.cell.service.db-query :as db-query]
-             [xt.db.instance :as xdb]
-             [xt.lang.spec-base :as xt]
-             [xt.db.instance.supabase :as supabase]]})
+              [xt.db.instance :as xdb]
+              [xt.lang.spec-base :as xt]
+              [xt.db.instance.supabase :as supabase]
+              [xt.db.text.pgrest :as pgrest]]})
 
 (def.xt supabase-capable? supabase/supabase-capable?)
 
-(def.xt compile-select-item supabase/compile-select-item)
+(def.xt compile-select-item pgrest/compile-select-item)
 
-(def.xt compile-select supabase/compile-select)
+(def.xt compile-select pgrest/compile-select)
 
-(def.xt compile-filters-into supabase/compile-filters-into)
+(def.xt compile-filters-into pgrest/compile-filters-into)
 
 (defn.xt compile-query
   "compiles a query plan into a Supabase request description"
   {:added "4.0"}
   [db query-plan view-context]
-  (return (supabase/compile-query query-plan)))
+  (return (pgrest/compile-query query-plan)))
 
 (defn.xt execute-query
   "executes a compiled Supabase query via an injected executor"

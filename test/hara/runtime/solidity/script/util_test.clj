@@ -15,7 +15,7 @@
   :teardown [(l/rt:stop)
              (env/stop-hardhat-server)]})
 
-^{:refer hara.runtime.solidity.script.util/ut:str-comp :added "4.0"}
+^{:refer solidity.core.util/ut:str-comp :added "4.0"}
 (fact "compares two strings together"
 
   (s/with:temp

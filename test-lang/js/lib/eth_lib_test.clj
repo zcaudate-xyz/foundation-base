@@ -1,5 +1,5 @@
 (ns js.lib.eth-lib-test
-  (:require [solidity.core :as s]
+  (:require [hara.runtime.solidity :as s]
             [hara.runtime.solidity.compile-solc :as compile-solc]
             [hara.runtime.solidity.env-hardhat :as env-hardhat]
             [hara.lang :as l]

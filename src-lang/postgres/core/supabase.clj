@@ -1,7 +1,7 @@
 (ns postgres.core.supabase
   (:require [clojure.string]
             [net.http :as http]
-            [hara.runtime.postgres.base.grammar.common :as common]
+            [hara.model.spec-postgres.common :as common]
             [postgres.core.addon :as addon]
             [std.json :as json]
             [hara.lang :as l]
