@@ -2,7 +2,12 @@
   (:require [hara.lang :as l]))
 
 (l/script :lua
-  {:require [[lua.aws.common :as common] [lua.nginx :as n] [xt.lang.common-lib :as k] [xt.lang.parser-xml :as xml] [xt.lang.spec-base :as xt]]})
+  {:require [[lua.aws.common :as common]
+             [lua.nginx :as n]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-lib :as k]
+             [xt.lang.parser-xml :as xml]
+             [xt.lang.spec-base :as xt]]})
 
 (defn.lua policy-public-read-only
   "creates bucket read only policy"
@@ -22,9 +27,9 @@
   [enforced aws opts]
   (return
    (common/make-request
-    (k/obj-assign (k/obj-clone aws) {:service "s3"})
+    (xtd/obj-assign (xtd/obj-clone aws) {:service "s3"})
     (:? opts
-        (k/obj-assign opts enforced)
+        (xtd/obj-assign opts enforced)
         enforced))))
 
 (defn.lua check-bucket
@@ -71,9 +76,9 @@
   (var #{status body} res)
   (when (== status 200)
     (var result (k/get-in body ["ListBucketResult"]))
-    (var arr (:? (k/is-array? result)
-                 (k/arr-keep result (k/key-fn "Contents"))
-                 (k/arrayify (k/get-in result ["Contents"]))))
+    (var arr (:? (xt/x:is-array? result)
+                 (xtd/arr-keep result (k/key-fn "Contents"))
+                 (xtd/arrayify (k/get-in result ["Contents"]))))
     (:= (. res body) (xtd/arr-map arr (k/key-fn "Key"))))
   (return res))
 

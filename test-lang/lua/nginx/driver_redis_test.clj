@@ -7,7 +7,7 @@
 (l/script- :lua.nginx
   {:runtime :basic
    :config  {:program :resty}
-   :require [[xt.protocol.impl.redis-connection :as redis]
+   :require [[xt.protocol.impl.connection-redis :as redis]
               [xt.lang.common-lib :as k]
               [lua.nginx.driver-redis :as lua-driver]]})
 

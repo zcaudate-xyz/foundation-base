@@ -28,19 +28,7 @@
 
   (!.lua
    (local ffi (require "ffi"))
-
-   (u/ffi-cdef
-    (\\ "[["
-     ^{:indent 2}
-     (\\
-      \\ (@.c
-          (do (fn ^{:- [:float]
-                    :header true}
-                powf [:float x :float y])
-              (fn ^{:- [:double]
-                    :header true}
-                exp [:double x]))))
-     \\ "]]"))
+   (u/ffi-cdef "float powf(float x, float y); double exp(double x);")
 
    (local math (u/ffi-load "m"))
    (local [n m] [2.5 3.5])
@@ -51,13 +39,7 @@
 
   (!.lua
    (local ffi (require "ffi"))
-   (u/ffi-cdef
-    (%.c (fn ^{:- [:float]
-               :header true}
-           powf [:float x :float y])
-         (fn ^{:- [:double]
-               :header true}
-           exp [:double x])))
+   (u/ffi-cdef "float powf(float x, float y); double exp(double x);")
 
    (local math (u/ffi-load "m"))
    (local [n m] [2.5 3.5])
