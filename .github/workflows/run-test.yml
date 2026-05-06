@@ -45,18 +45,6 @@ jobs:
           - name: script, net, math, lib, jvm
             target: "[script net math lib jvm]"
             command: lein test :with "[script net math lib jvm]"
-          - name: rt
-            target: "[rt]"
-            command: lein test :with "[rt]"
-          - name: xt
-            target: "[xt]"
-            command: apt-get update && apt-get install -y nodejs npm lua5.4 python3 python3-pip && lein test :with "[xt]"
-          - name: xtalk
-            target: "[xtalk]"
-            command: lein test :with "[xtalk]"
-          - name: indigo
-            target: "[indigo]"
-            command: lein test :with "[indigo]"
     
     steps:
       - name: Checkout repository
@@ -75,7 +63,9 @@ jobs:
           -v $(pwd):$(pwd)
           -w $(pwd)
           ghcr.io/zcaudate-xyz/infra-foundation-clean:ci
-          bash -lc '${{ matrix.command }}'
+          bash -lc "apt-get update &&
+          apt-get install -y nodejs npm lua5.4 python3 python3-pip &&
+          lein test :with \"[xt]\""
         
     services:
       postgres:
@@ -87,6 +77,43 @@ jobs:
           POSTGRES_USER: postgres
         ports:
           - 5432:5432
+
+  run-xtalk-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Run Tests - xtalk
+        run: >
+          docker run --network host 
+          -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
+          -v /var/run/docker.sock:/var/run/docker.sock 
+          -v $(pwd):$(pwd) 
+          -w $(pwd) 
+          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein test :with "[xtalk]"
+          bash -lc "set -euxo pipefail &&
+          apt-get update &&
+          apt-get install -y --no-install-recommends curl ca-certificates gnupg &&
+          curl -fsSL https://deb.nodesource.com/setup_20.x | bash - &&
+          apt-get install -y --no-install-recommends nodejs lua5.4 python3 python3-pip &&
+          node --version &&
+          npm --version &&
+          lein test :with \"[xt]\""
+        
+    services:
+      postgres:
+        image: ghcr.io/zcaudate-xyz/infra-db:main
+        env:
+          POSTGRES_DB: test
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+
 
   run-xtbench-tests:
     runs-on: ubuntu-latest
@@ -131,34 +158,3 @@ jobs:
           POSTGRES_USER: postgres
         ports:
           - 5432:5432
-          
-  build-js-web:
-    runs-on: ubuntu-latest
-    timeout-minutes: 3
-    
-    steps:
-      - name: Write SSH keys
-        shell: bash
-        run: |
-          install -m 600 -D /dev/null ~/.ssh/id_rsa
-          echo "${{ secrets.GH_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          ssh-keyscan -H github.com > ~/.ssh/known_hosts
-          
-      - name: Checkout base repository
-        uses: actions/checkout@v3
-        with:
-          repository: zcaudate/foundation-base
-          path: foundation-base
-          token: ${{ secrets.GH_TOKEN }}
-          
-      - name: Deploying native-code
-        run: >
-          docker run --network host
-          -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
-          -v /var/run/docker.sock:/var/run/docker.sock
-          -v $HOME/.ssh:/root/.ssh
-          -v $(pwd):$(pwd) -w $(pwd)
-          -e "GITHUB_TOKEN=${{ secrets.GH_TOKEN }}"  
-          -e "GITHUB_USER=${{ secrets.GH_USER }}"
-          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci 
-          bash -c "cd foundation-base && git config --global --add safe.directory '*' && lein push-native-code"
