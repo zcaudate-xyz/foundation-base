@@ -206,11 +206,12 @@
   "checks whether a binding should receive an event"
   {:added "4.1.3"}
   [binding event payload]
-  (var btype (xt/x:get-key binding "type"))
-  (when (not (== btype event))
+  (var btype (xt/x:str-to-lower (or (xt/x:get-key binding "type") "")))
+  (var event-name (xt/x:str-to-lower (or event "")))
+  (when (not (== btype event-name))
     (return false))
   (var filter (or (xt/x:get-key binding "filter") {}))
-  (cond (== event "postgres_changes")
+  (cond (== event-name "postgres_changes")
         (do (var current (-/enrich-postgres-payload payload))
             (var bind-id (xt/x:get-key binding "id"))
             (when (and (xt/x:not-nil? bind-id)
@@ -221,7 +222,8 @@
             (var filter-event (or (xt/x:get-key filter "event") "*"))
             (var payload-event (or (xt/x:get-key current "eventType") ""))
             (when (and (not (== filter-event "*"))
-                       (not (== filter-event payload-event)))
+                       (not (== (xt/x:str-to-upper filter-event)
+                                (xt/x:str-to-upper payload-event))))
               (return false))
             (when (and (xt/x:not-nil? (xt/x:get-key filter "schema"))
                        (not (== (xt/x:get-key filter "schema")
@@ -238,7 +240,8 @@
             (var payload-event (or (xt/x:get-key payload "event")
                                    event))
             (return (or (== filter-event "*")
-                        (== filter-event payload-event))))))
+                        (== (xt/x:str-to-lower filter-event)
+                            (xt/x:str-to-lower payload-event)))))))
 
 (defn.xt channel-trigger
   "dispatches one inbound event to a channel's bindings"
@@ -299,7 +302,7 @@
   (var index 0)
   (xt/for:array [binding bindings]
     (when (== (xt/x:get-key binding "type") "postgres_changes")
-      (var current (xt/x:get-idx changes (xt/x:offset index) nil))
+      (var current (xt/x:get-idx changes index nil))
       (when (xt/x:not-nil? current)
         (xt/x:set-key binding "id" (xt/x:get-key current "id")))
       (:= index (+ index 1))))
@@ -428,7 +431,7 @@
   (xt/x:set-key client "manual-disconnect" false)
   (var connect-fn (xt/x:get-key client "connect-fn"))
   (when (not (xt/x:is-function? connect-fn))
-    (xt/x:err "Supabase realtime client missing connect-fn"))
+    (xt/x:err "Supabase realtime client initialization failed: connect-fn is required but was not provided in options."))
   (return (connect-fn client)))
 
 (defn.xt disconnect
@@ -586,7 +589,7 @@
   (var transport (or (xt/x:get-key client "transport")
                      (!:G WebSocket)))
   (when (xt/x:nil? transport)
-    (throw (new Error "WebSocket transport not available")))
+    (throw (new Error "WebSocket transport not available. Provide :transport or run in an environment with global WebSocket support.")))
   (xt/x:set-key client "state" "connecting")
   (var ws (new transport (-/endpoint-url client)))
   (xt/x:set-key client "conn" ws)
