@@ -431,7 +431,7 @@
   (xt/x:set-key client "manual-disconnect" false)
   (var connect-fn (xt/x:get-key client "connect-fn"))
   (when (not (xt/x:is-function? connect-fn))
-    (xt/x:err "Supabase realtime client initialization failed: transport configuration is missing or invalid."))
+    (xt/x:err "Supabase realtime client connection failed: transport configuration is missing or invalid."))
   (return (connect-fn client)))
 
 (defn.xt disconnect
@@ -589,7 +589,7 @@
   (var transport (or (xt/x:get-key client "transport")
                      (!:G WebSocket)))
   (when (xt/x:nil? transport)
-    (throw (new Error "WebSocket transport not available. Provide a transport option or run in an environment with global WebSocket support.")))
+    (throw (new Error "WebSocket transport not available. Provide a custom transport via the transport option.")))
   (xt/x:set-key client "state" "connecting")
   (var ws (new transport (-/endpoint-url client)))
   (xt/x:set-key client "conn" ws)
