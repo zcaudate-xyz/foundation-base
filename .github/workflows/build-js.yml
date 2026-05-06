@@ -1,0 +1,38 @@
+name: Build JS
+
+on: [push, repository_dispatch, workflow_dispatch]
+
+env:
+  LEIN_JVM_OPTS: -Xms512m -Xmx3g -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp
+
+          
+  build-js-web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    
+    steps:
+      - name: Write SSH keys
+        shell: bash
+        run: |
+          install -m 600 -D /dev/null ~/.ssh/id_rsa
+          echo "${{ secrets.GH_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          ssh-keyscan -H github.com > ~/.ssh/known_hosts
+          
+      - name: Checkout base repository
+        uses: actions/checkout@v3
+        with:
+          repository: zcaudate/foundation-base
+          path: foundation-base
+          token: ${{ secrets.GH_TOKEN }}
+          
+      - name: Deploying native-code
+        run: >
+          docker run --network host
+          -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
+          -v /var/run/docker.sock:/var/run/docker.sock
+          -v $HOME/.ssh:/root/.ssh
+          -v $(pwd):$(pwd) -w $(pwd)
+          -e "GITHUB_TOKEN=${{ secrets.GH_TOKEN }}"  
+          -e "GITHUB_USER=${{ secrets.GH_USER }}"
+          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci 
+          bash -c "cd foundation-base && git config --global --add safe.directory '*' && lein push-native-code"
