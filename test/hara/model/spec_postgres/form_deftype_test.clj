@@ -3,7 +3,7 @@
             [hara.model.spec-postgres.common :as common]
             [hara.model.spec-postgres.form-deftype :refer :all]
             [hara.model.spec-postgres.form-deftype-hydrate :as hydrate]
-            [hara.runtime.postgres.test.scratch-v1 :as scratch]
+            [postgres.sample.scratch-v1 :as scratch]
             [hara.lang :as l]
             [hara.lang.book :as book]
             [hara.lang.library-snapshot :as snap])

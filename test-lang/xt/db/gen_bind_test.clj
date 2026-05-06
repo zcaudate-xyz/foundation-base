@@ -1,5 +1,5 @@
 (ns xt.db.gen-bind-test
-  (:require [hara.runtime.postgres.test.scratch-v1 :as scratch]
+  (:require [postgres.sample.scratch-v1 :as scratch]
             [xt.db.gen-bind :as bind]
             [xt.db.helpers.seed-system-test :as sample-data])
   (:use code.test))

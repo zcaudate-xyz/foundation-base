@@ -1,4 +1,4 @@
-(ns hara.runtime.postgres.test.scratch-v1
+(ns postgres.sample.scratch-v1
   (:require [hara.runtime.postgres :refer [defret.pg defsel.pg]]
             [hara.runtime.postgres.base.application :as app]
             [hara.lang :as l]))
@@ -189,5 +189,4 @@
                :tags i-tags}
               {:track o-op})]
     (return out)))
-
 

@@ -9,7 +9,7 @@
   (:use code.test))
 
 (l/script- :postgres
-  {:require [[hara.runtime.postgres.test.scratch-v1 :as scratch]]
+  {:require [[postgres.sample.scratch-v1 :as scratch]]
    :static {:application ["scratch"]
             :seed        ["scratch"]
             :all    {:schema   ["scratch"]}}})
@@ -33,7 +33,7 @@
               #{"time_created"}
               #{"time_updated"}])
         :from
-        hara.runtime.postgres.test.scratch-v1/Task]
+        postgres.sample.scratch-v1/Task]
        \\ :select (jsonb-agg j-ret) :from j-ret]
 
   (main/t-select-raw (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))
@@ -41,12 +41,12 @@
                                    {:expr '(count abc)}}})
   => '[:with j-ret :as [:select (--- [(count *)
                                       (count abc)])
-                        :from hara.runtime.postgres.test.scratch-v1/Task]
+                        :from postgres.sample.scratch-v1/Task]
        \\ :select (jsonb-agg j-ret) :from j-ret]
 
   (main/t-select-raw (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))
-                     {:join [[:inner-join 'hara.runtime.postgres.test.scratch-v1/Project
-                              {:on [:= 'hara.runtime.postgres.test.scratch-v1/Task.id 'hara.runtime.postgres.test.scratch-v1/Project.id]}]]})
+                     {:join [[:inner-join 'postgres.sample.scratch-v1/Project
+                              {:on [:= 'postgres.sample.scratch-v1/Task.id 'postgres.sample.scratch-v1/Project.id]}]]})
   => '[:with j-ret :as
        [:select
         (--- [#{"id"}
@@ -56,14 +56,14 @@
               #{"time_created"}
               #{"time_updated"}])
         :from
-        hara.runtime.postgres.test.scratch-v1/Task
+        postgres.sample.scratch-v1/Task
         \\
         [:inner-join
-         hara.runtime.postgres.test.scratch-v1/Project
+         postgres.sample.scratch-v1/Project
          {:on
           [:=
-           hara.runtime.postgres.test.scratch-v1/Task.id
-           hara.runtime.postgres.test.scratch-v1/Project.id]}]]
+           postgres.sample.scratch-v1/Task.id
+           postgres.sample.scratch-v1/Project.id]}]]
        \\
        :select
        (jsonb-agg j-ret)
@@ -81,7 +81,7 @@
               #{"time_created"}
               #{"time_updated"}])
         :from
-        hara.runtime.postgres.test.scratch-v1/Task
+        postgres.sample.scratch-v1/Task
         \\
         :having
         {"id" [:eq 1]}]
@@ -97,7 +97,7 @@
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (main/t-select 'scratch/Task
                    {:as :raw}))
-  => '[:select * :from hara.runtime.postgres.test.scratch-v1/Task]
+  => '[:select * :from postgres.sample.scratch-v1/Task]
 
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (main/t-select 'scratch/Task
@@ -110,14 +110,14 @@
              #{"time_created"}
              #{"time_updated"}])
        :from
-       hara.runtime.postgres.test.scratch-v1/Task])
+       postgres.sample.scratch-v1/Task])
 
 ^{:refer postgres.core.impl-main/t-id-raw :added "4.0"}
 (fact  "contructs an id form with prep"
 
   (main/t-id-raw (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))
                  {})
-  => '[:select (--- [#{"id"}]) :from hara.runtime.postgres.test.scratch-v1/Task
+  => '[:select (--- [#{"id"}]) :from postgres.sample.scratch-v1/Task
        \\ :limit 1])
 
 ^{:refer postgres.core.impl-main/t-id :added "4.0"}
@@ -126,7 +126,7 @@
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (main/t-id 'scratch/Task
                {}))
-  => '[:select (--- [#{"id"}]) :from hara.runtime.postgres.test.scratch-v1/Task
+  => '[:select (--- [#{"id"}]) :from postgres.sample.scratch-v1/Task
        \\ :limit 1])
 
 ^{:refer postgres.core.impl-main/t-count-raw :added "4.0"}
@@ -134,7 +134,7 @@
 
   (main/t-count-raw (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))
                     {})
-  => '[:select (count *) :from hara.runtime.postgres.test.scratch-v1/Task])
+  => '[:select (count *) :from postgres.sample.scratch-v1/Task])
 
 ^{:refer postgres.core.impl-main/t-count :added "4.0"}
 (fact "create count statement"
@@ -142,14 +142,14 @@
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (main/t-count 'scratch/Task
                   {}))
-  => '[:select (count *) :from hara.runtime.postgres.test.scratch-v1/Task])
+  => '[:select (count *) :from postgres.sample.scratch-v1/Task])
 
 ^{:refer postgres.core.impl-main/t-exists-raw :added "4.0"}
 (fact "constructs a exists form with prep"
 
   (main/t-exists-raw (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))
                     {})
-  => '[:select (exists [:select 1 :from hara.runtime.postgres.test.scratch-v1/Task])])
+  => '[:select (exists [:select 1 :from postgres.sample.scratch-v1/Task])])
 
 ^{:refer postgres.core.impl-main/t-exists :added "4.0"}
 (fact "create exists statement"
@@ -157,7 +157,7 @@
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (main/t-exists 'scratch/Task
                   {}))
-  => '[:select (exists [:select 1 :from hara.runtime.postgres.test.scratch-v1/Task])])
+  => '[:select (exists [:select 1 :from postgres.sample.scratch-v1/Task])])
 
 ^{:refer postgres.core.impl-main/t-delete-raw :added "4.0"}
 (fact  "contructs a delete form with prep"
@@ -165,7 +165,7 @@
   (main/t-delete-raw (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))
                      {})
   => '[:with j-ret :as
-       [:delete :from hara.runtime.postgres.test.scratch-v1/Task
+       [:delete :from postgres.sample.scratch-v1/Task
         \\ :returning (--- [#{"id"}
                             #{"status"}
                             #{"name"}
@@ -183,7 +183,7 @@
     (main/t-delete 'scratch/Task
                    {}))
   => '[:with j-ret :as
-       [:delete :from hara.runtime.postgres.test.scratch-v1/Task
+       [:delete :from postgres.sample.scratch-v1/Task
         \\ :returning (--- [#{"id"}
                              #{"status"}
                              #{"name"}

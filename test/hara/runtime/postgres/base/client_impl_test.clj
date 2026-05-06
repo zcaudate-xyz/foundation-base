@@ -6,7 +6,7 @@
             [hara.runtime.postgres.base.client-impl :as client-impl]
             [postgres.core.addon :as addon]
             [postgres.core.builtin :as builtin]
-            [hara.runtime.postgres.test.scratch-v1 :as scratch]
+            [postgres.sample.scratch-v1 :as scratch]
             [hara.common.util :as ut]
             [std.lib.component :as component])
   (:use code.test))

@@ -9,7 +9,7 @@
   (:use code.test))
 
 (l/script- :postgres
-  {:require [[hara.runtime.postgres.test.scratch-v1 :as scratch]]
+  {:require [[postgres.sample.scratch-v1 :as scratch]]
    :static {:application ["scratch"]
             :seed        ["scratch"]
             :all    {:schema   ["scratch"]}}})
@@ -28,12 +28,12 @@
                                                 :columns [:id :status :name :cache]
                                                 :track 'o-op}
                                                (:static/tracker @scratch/Task)
-                                               hara.runtime.postgres.test.scratch-v1/Task
+                                               postgres.sample.scratch-v1/Task
                                                :insert)
                           (last (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))))
   => '(--- [(== #{"id"} (coalesce (:uuid (:->> e "id")) #{"id"}))
             (== #{"status"} (coalesce (++ (:->> e "status")
-                                          hara.runtime.postgres.test.scratch-v1/EnumStatus)
+                                          postgres.sample.scratch-v1/EnumStatus)
                                       #{"status"}))
             (== #{"name"} (coalesce (:text (:->> e "name")) #{"name"}))
             (== #{"cache_id"} (coalesce (:uuid (coalesce (:->> e "cache_id")
@@ -48,11 +48,11 @@
                           (tracker/add-tracker {:set {:status "error"}
                                                 :track 'o-op}
                                                (:static/tracker @scratch/Task)
-                                               hara.runtime.postgres.test.scratch-v1/Task
+                                               postgres.sample.scratch-v1/Task
                                                :insert)
                           (last (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))))
   => '(--- [(== #{"status"} (coalesce (++ (:->> e "status")
-                                          hara.runtime.postgres.test.scratch-v1/EnumStatus)
+                                          postgres.sample.scratch-v1/EnumStatus)
                                       #{"status"}))
             (== #{"name"} (coalesce (:text (:->> e "name")) #{"name"}))
             (== #{"cache_id"} (coalesce (:uuid (coalesce (:->> e "cache_id")
@@ -73,10 +73,10 @@
                        {:status "error"}
                        (tracker/add-tracker {:track 'o-op}
                                             (:static/tracker @scratch/Task)
-                                            hara.runtime.postgres.test.scratch-v1/Task
+                                            postgres.sample.scratch-v1/Task
                                             :insert)
                        (last (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))))
-  => '(--- [(== #{"status"} (++ "error" hara.runtime.postgres.test.scratch-v1/EnumStatus))
+  => '(--- [(== #{"status"} (++ "error" postgres.sample.scratch-v1/EnumStatus))
              (== #{"op_updated"} (:uuid (:->> o-op "id")))
              (== #{"time_updated"} (:bigint (:->> o-op "time")))])
 
@@ -100,13 +100,13 @@
    (tracker/add-tracker {:set {:status "error"}
                          :track 'o-op}
                         (:static/tracker @scratch/Task)
-                        hara.runtime.postgres.test.scratch-v1/Task
+                        postgres.sample.scratch-v1/Task
                         :insert))
   => '[:with j-ret
        :as [:update
-            hara.runtime.postgres.test.scratch-v1/Task
+            postgres.sample.scratch-v1/Task
             :set
-            (--- [(== #{"status"} (++ "error" hara.runtime.postgres.test.scratch-v1/EnumStatus))
+            (--- [(== #{"status"} (++ "error" postgres.sample.scratch-v1/EnumStatus))
                    (== #{"op_updated"} (:uuid (:->> o-op "id")))
                    (== #{"time_updated"} (:bigint (:->> o-op "time")))])
             \\
@@ -128,9 +128,9 @@
                      {:set {:status "error"}
                       :track 'o-op}))
   => '[:with j-ret :as
-       [:update hara.runtime.postgres.test.scratch-v1/Task
+       [:update postgres.sample.scratch-v1/Task
         :set
-        (--- [(== #{"status"} (++ "error" hara.runtime.postgres.test.scratch-v1/EnumStatus))
+        (--- [(== #{"status"} (++ "error" postgres.sample.scratch-v1/EnumStatus))
               (== #{"op_updated"} (:uuid (:->> o-op "id")))
               (== #{"time_updated"} (:bigint (:->> o-op "time")))])
         \\ :returning (--- [#{"id"} #{"status"} #{"name"} #{"cache_id"}
@@ -145,10 +145,10 @@
                       :track 'o-op}))
 
   => '[:with j-ret :as
-       [:update hara.runtime.postgres.test.scratch-v1/Task
+       [:update postgres.sample.scratch-v1/Task
         :set
         (--- [(== #{"status"} (coalesce (++ (:->> e "status")
-                                            hara.runtime.postgres.test.scratch-v1/EnumStatus)
+                                            postgres.sample.scratch-v1/EnumStatus)
                                         #{"status"}))
               (== #{"name"} (coalesce (:text (:->> e "name")) #{"name"}))
               (== #{"cache_id"} (coalesce (:uuid (coalesce (:->> e "cache_id")
@@ -168,10 +168,10 @@
                       :columns [:status :name :cache]
                       :track 'o-op}))
   => '[:with j-ret :as
-       [:update hara.runtime.postgres.test.scratch-v1/Task
+       [:update postgres.sample.scratch-v1/Task
         :set
         (--- [(== #{"status"} (++ (:->> e "status")
-                                  hara.runtime.postgres.test.scratch-v1/EnumStatus))
+                                  postgres.sample.scratch-v1/EnumStatus))
               (== #{"name"} (:text (:->> e "name")))
               (== #{"cache_id"} (:uuid (coalesce (:->> e "cache_id")
                                                  (:->> (:-> e "cache") "id"))))
@@ -190,14 +190,14 @@
                          :where {:id "A"}
                          :track 'o-op}
                         (:static/tracker @scratch/Task)
-                        hara.runtime.postgres.test.scratch-v1/Task
+                        postgres.sample.scratch-v1/Task
                         :insert))
-  => '(let [(++ u-ret hara.runtime.postgres.test.scratch-v1/Task)
-            [:update hara.runtime.postgres.test.scratch-v1/Task
+  => '(let [(++ u-ret postgres.sample.scratch-v1/Task)
+            [:update postgres.sample.scratch-v1/Task
                                                         :set
              (--- [(==
                     #{"status"}
-                    (++ "error" hara.runtime.postgres.test.scratch-v1/EnumStatus))
+                    (++ "error" postgres.sample.scratch-v1/EnumStatus))
                    (== #{"op_updated"} (:uuid (:->> o-op "id")))
                    (== #{"time_updated"} (:bigint (:->> o-op "time")))])
                                                         :where {"id" [:eq "A"]}
@@ -213,14 +213,14 @@
                      {:set {:status "error"}
                       :where {:id "A"}
                       :track 'o-op}))
-  => '(let [(++ u-ret hara.runtime.postgres.test.scratch-v1/Task)
-            [:update hara.runtime.postgres.test.scratch-v1/Task
+  => '(let [(++ u-ret postgres.sample.scratch-v1/Task)
+            [:update postgres.sample.scratch-v1/Task
              :set
 
              (---
               [(==
                 #{"status"}
-                (++ "error" hara.runtime.postgres.test.scratch-v1/EnumStatus))
+                (++ "error" postgres.sample.scratch-v1/EnumStatus))
                (== #{"op_updated"} (:uuid (:->> o-op "id")))
                (== #{"time_updated"} (:bigint (:->> o-op "time")))])
              :where {"id" [:eq "A"]}
@@ -238,12 +238,12 @@
        meta
        :assign/fn)
    'o-task)
-  => '(let [(++ u-ret hara.runtime.postgres.test.scratch-v1/Task)
-            [:update hara.runtime.postgres.test.scratch-v1/Task
+  => '(let [(++ u-ret postgres.sample.scratch-v1/Task)
+            [:update postgres.sample.scratch-v1/Task
              :set
              (--- [(==
                      #{"status"}
-                     (++ "error" hara.runtime.postgres.test.scratch-v1/EnumStatus))
+                     (++ "error" postgres.sample.scratch-v1/EnumStatus))
                     (== #{"op_updated"} (:uuid (:->> o-op "id")))
                     (== #{"time_updated"} (:bigint (:->> o-op "time")))])
              :where {"id" [:eq "A"]}

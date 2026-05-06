@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [hara.runtime.postgres :as pg]
             [hara.model.spec-postgres :refer :all]
-            [hara.runtime.postgres.test.scratch-v1 :as scratch]
+            [postgres.sample.scratch-v1 :as scratch]
             [hara.lang :as l]))
 
 (l/script- :postgres
@@ -10,7 +10,7 @@
    :config  {:dbname "test-scratch"}
    :require [[hara.runtime.postgres :as pg]
              [postgres.core.system :as sys]
-             [hara.runtime.postgres.test.scratch-v1 :as scratch]]})
+             [postgres.sample.scratch-v1 :as scratch]]})
 
 (fact:global
  {:setup    [(l/rt:restart)

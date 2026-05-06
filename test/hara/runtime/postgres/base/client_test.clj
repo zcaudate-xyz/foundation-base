@@ -2,7 +2,7 @@
   (:require [lib.postgres :as base]
             [lib.postgres.connection :as conn]
             [hara.runtime.postgres.base.client :as client]
-            [hara.runtime.postgres.test.scratch-v1 :as scratch]
+            [postgres.sample.scratch-v1 :as scratch]
             [hara.lang :as l])
   (:use code.test))
 

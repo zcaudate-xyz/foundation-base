@@ -2,13 +2,13 @@
   (:require [hara.runtime.postgres.base.application :as app]
             [postgres.core.graph-view :as view]
             [postgres.core.impl-base :as impl]
-            [hara.runtime.postgres.test.scratch-v1 :as scratch]
+            [postgres.sample.scratch-v1 :as scratch]
             [hara.lang :as l]
             [std.lib.schema :as schema])
   (:use code.test))
 
 (l/script- :postgres
-  {:require [[hara.runtime.postgres.test.scratch-v1 :as scratch]]
+  {:require [[postgres.sample.scratch-v1 :as scratch]]
    :static {:application ["scratch"]
             :seed        ["scratch"]
             :all    {:schema   ["scratch"]}}})
@@ -50,7 +50,7 @@
 
   (:static/view @postgres.core.graph-view-test/task-by-name)
   => '{:args [:name i-name],
-      :table hara.runtime.postgres.test.scratch-v1/Task,
+      :table postgres.sample.scratch-v1/Task,
       :key :Task,
       :type :select,
       :scope #{:public},
@@ -74,7 +74,7 @@
 
   (:static/view @postgres.core.graph-view-test/task-basic)
   => '{:args [:uuid i-task-id],
-       :table hara.runtime.postgres.test.scratch-v1/Task,
+       :table postgres.sample.scratch-v1/Task,
        :key :Task,
        :type :return,
        :scope nil,
@@ -89,7 +89,7 @@
   (view/view-fn '[-/task-basic]
                 '[-/task-by-name "hello"]
                 {:limit 10})
-  => '[hara.runtime.postgres.test.scratch-v1/Task
+  => '[postgres.sample.scratch-v1/Task
        {:where {"name" [:eq "hello"]},
         :returning #{:*/data},
         :limit 10}])
@@ -103,7 +103,7 @@
      [-/task-by-name "hello"]
      {:limit 10}))
   => '[:with j-ret :as [:select (--- [#{"id"} #{"status"} #{"name"} #{"time_created"} #{"time_updated"}])
-                        :from hara.runtime.postgres.test.scratch-v1/Task \\ :where {"name" [:eq "hello"]}
+                        :from postgres.sample.scratch-v1/Task \\ :where {"name" [:eq "hello"]}
                         \\ :limit 10]
        \\ :select (jsonb-agg j-ret) :from j-ret])
 

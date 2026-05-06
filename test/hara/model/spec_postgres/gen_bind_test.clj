@@ -1,7 +1,7 @@
 (ns hara.model.spec-postgres.gen-bind-test
   (:require [hara.runtime.postgres :as pg]
             [hara.model.spec-postgres.gen-bind :as gen]
-            [hara.runtime.postgres.test.scratch-v1 :as scratch]
+            [postgres.sample.scratch-v1 :as scratch]
             [hara.lang :as l]
             [xt.db.helpers.seed-system-test :as data]
             [xt.db.helpers.seed-user-test :as user])
@@ -381,39 +381,39 @@
 ^{:refer hara.model.spec-postgres.gen-bind/list-api :added "4.0"}
 (fact "lists all apis"
 
-  (gen/list-api 'hara.runtime.postgres.test.scratch-v1)
-  => '[[ping hara.runtime.postgres.test.scratch-v1/ping]
-       [ping-ok hara.runtime.postgres.test.scratch-v1/ping-ok]
-       [echo hara.runtime.postgres.test.scratch-v1/echo]])
+  (gen/list-api 'postgres.sample.scratch-v1)
+  => '[[ping postgres.sample.scratch-v1/ping]
+       [ping-ok postgres.sample.scratch-v1/ping-ok]
+       [echo postgres.sample.scratch-v1/echo]])
 
 ^{:refer hara.model.spec-postgres.gen-bind/list-debug :added "4.0"}
 (fact  "lists all debug apis"
 
-  (gen/list-debug 'hara.runtime.postgres.test.scratch-v1)
-  => '[[as-array hara.runtime.postgres.test.scratch-v1/as-array]
-       [as-upper hara.runtime.postgres.test.scratch-v1/as-upper]
-       [addf hara.runtime.postgres.test.scratch-v1/addf]
-       [subf hara.runtime.postgres.test.scratch-v1/subf]
-       [mulf hara.runtime.postgres.test.scratch-v1/mulf]
-       [divf hara.runtime.postgres.test.scratch-v1/divf]
-       [insert-task hara.runtime.postgres.test.scratch-v1/insert-task]
-       [insert-entry hara.runtime.postgres.test.scratch-v1/insert-entry]])
+  (gen/list-debug 'postgres.sample.scratch-v1)
+  => '[[as-array postgres.sample.scratch-v1/as-array]
+       [as-upper postgres.sample.scratch-v1/as-upper]
+       [addf postgres.sample.scratch-v1/addf]
+       [subf postgres.sample.scratch-v1/subf]
+       [mulf postgres.sample.scratch-v1/mulf]
+       [divf postgres.sample.scratch-v1/divf]
+       [insert-task postgres.sample.scratch-v1/insert-task]
+       [insert-entry postgres.sample.scratch-v1/insert-entry]])
 
 ^{:refer hara.model.spec-postgres.gen-bind/list-all :added "4.0"}
 (fact "lists all function forms"
 
-  (gen/list-all 'hara.runtime.postgres.test.scratch-v1)
-  => '[[as-array hara.runtime.postgres.test.scratch-v1/as-array]
-       [entry-all hara.runtime.postgres.test.scratch-v1/entry-all]
-       [entry-by-name hara.runtime.postgres.test.scratch-v1/entry-by-name]
-       [entry-default hara.runtime.postgres.test.scratch-v1/entry-default]
-       [as-upper hara.runtime.postgres.test.scratch-v1/as-upper]
-       [ping hara.runtime.postgres.test.scratch-v1/ping]
-       [ping-ok hara.runtime.postgres.test.scratch-v1/ping-ok]
-       [echo hara.runtime.postgres.test.scratch-v1/echo]
-       [addf hara.runtime.postgres.test.scratch-v1/addf]
-       [subf hara.runtime.postgres.test.scratch-v1/subf]
-       [mulf hara.runtime.postgres.test.scratch-v1/mulf]
-       [divf hara.runtime.postgres.test.scratch-v1/divf]
-       [insert-task hara.runtime.postgres.test.scratch-v1/insert-task]
-       [insert-entry hara.runtime.postgres.test.scratch-v1/insert-entry]])
+  (gen/list-all 'postgres.sample.scratch-v1)
+  => '[[as-array postgres.sample.scratch-v1/as-array]
+       [entry-all postgres.sample.scratch-v1/entry-all]
+       [entry-by-name postgres.sample.scratch-v1/entry-by-name]
+       [entry-default postgres.sample.scratch-v1/entry-default]
+       [as-upper postgres.sample.scratch-v1/as-upper]
+       [ping postgres.sample.scratch-v1/ping]
+       [ping-ok postgres.sample.scratch-v1/ping-ok]
+       [echo postgres.sample.scratch-v1/echo]
+       [addf postgres.sample.scratch-v1/addf]
+       [subf postgres.sample.scratch-v1/subf]
+       [mulf postgres.sample.scratch-v1/mulf]
+       [divf postgres.sample.scratch-v1/divf]
+       [insert-task postgres.sample.scratch-v1/insert-task]
+       [insert-entry postgres.sample.scratch-v1/insert-entry]])

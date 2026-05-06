@@ -3,7 +3,7 @@
             [hara.runtime.postgres.base.typed.typed-common :as types]
             [hara.runtime.postgres.base.typed.typed-parse :as parse]
             [hara.runtime.postgres.base.typed.typed-common-test]
-            [hara.runtime.postgres.test.scratch-v2])
+            [postgres.sample.scratch-v2])
   (:use code.test))
 
 ^{:refer hara.runtime.postgres.base.compile.json-openapi/field->openapi :added "4.1"}
@@ -65,7 +65,7 @@
 
 ^{:refer hara.runtime.postgres.base.compile.json-openapi/generate-openapi :added "0.1"}
 (fact "generate-openapi response schemas are valid"
-  (let [spec (compile.openapi/generate-openapi 'rt.postgres.test.scratch-v2 (constantly true))
+  (let [spec (compile.openapi/generate-openapi 'postgres.sample.scratch-v2 (constantly true))
         paths (:paths spec)]
     (doseq [[_path methods] paths
             [_method op] methods]

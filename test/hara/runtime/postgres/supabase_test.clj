@@ -8,7 +8,7 @@
 (l/script- :postgres
   {:require [[hara.runtime.postgres :as pg]
              [postgres.core.supabase :as s]
-             [hara.runtime.postgres.test.scratch-v1 :as scratch]]})
+             [postgres.sample.scratch-v1 :as scratch]]})
 
 ^{:refer postgres.core.supabase/create-role :added "4.0"}
 (fact "creates a role"

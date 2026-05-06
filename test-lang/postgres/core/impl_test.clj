@@ -4,7 +4,7 @@
             [hara.model.spec-postgres.common-tracker :as tracker]
             [postgres.core.impl :as impl]
             [postgres.core.impl-main :as main]
-            [hara.runtime.postgres.test.scratch-v1 :as scratch]
+            [postgres.sample.scratch-v1 :as scratch]
             [hara.lang :as l]
             [hara.lang.book :as book]
             [std.lib.collection :as collection]
@@ -15,7 +15,7 @@
   {:runtime :jdbc.client
    :config  {:dbname "test-scratch"}
    :require [[hara.runtime.postgres :as pg]
-             [hara.runtime.postgres.test.scratch-v1 :as scratch]]})
+             [postgres.sample.scratch-v1 :as scratch]]})
 
 ^{:refer postgres.core.impl/t:select :added "4.0"
   :setup [(pg/t:delete scratch/Task)

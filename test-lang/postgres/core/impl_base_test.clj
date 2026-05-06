@@ -2,13 +2,13 @@
   (:require [hara.runtime.postgres]
             [hara.runtime.postgres.base.application :as app]
             [postgres.core.impl-base :refer :all]
-            [hara.runtime.postgres.test.scratch-v1 :as scratch]
+            [postgres.sample.scratch-v1 :as scratch]
             [hara.lang :as l]
             [hara.lang.book :as book])
   (:use code.test))
 
 (l/script- :postgres
-  {:require [[hara.runtime.postgres.test.scratch-v1 :as scratch]]
+  {:require [[postgres.sample.scratch-v1 :as scratch]]
    :static {:application ["scratch"]
             :all    {:schema   ["scratch"]}}})
 
@@ -128,7 +128,7 @@
 
   (t-val-fn -tsch-
             :status 'a {} {})
-  => '(++ a hara.runtime.postgres.test.scratch-v1/EnumStatus)
+  => '(++ a postgres.sample.scratch-v1/EnumStatus)
 
   (t-val-fn -tsch-
             :cache 'a {}
@@ -191,7 +191,7 @@
                   {:coalesce true}
                   (last (prep-table 'scratch/Task true (l/rt:macro-opts :postgres))))
   => '(jsonb-build-object "id" (hara.runtime.postgres/uuid-generate-v4)
-                          "status" (++ a hara.runtime.postgres.test.scratch-v1/EnumStatus)
+                          "status" (++ a postgres.sample.scratch-v1/EnumStatus)
                           "name" (:text "hello")
                           "cache_id" (:uuid hello)
                           "__deleted__" false))
@@ -205,7 +205,7 @@
                                  :cache hello}
                  {:coalesce true}))
   => '(jsonb-build-object "id" (hara.runtime.postgres/uuid-generate-v4)
-                          "status" (++ a hara.runtime.postgres.test.scratch-v1/EnumStatus)
+                          "status" (++ a postgres.sample.scratch-v1/EnumStatus)
                           "name" (:text "hello")
                           "cache_id" (:uuid hello)
                           "__deleted__" false))

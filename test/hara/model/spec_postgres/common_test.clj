@@ -2,7 +2,7 @@
   (:require [hara.model.spec-postgres :as g]
             [hara.model.spec-postgres.common :as common]
             [postgres.core.builtin :as builtin]
-            [hara.runtime.postgres.test.scratch-v1 :as scratch]
+            [postgres.sample.scratch-v1 :as scratch]
             [hara.lang :as l]
             [hara.common.emit-common :as emit-common])
   (:use code.test))

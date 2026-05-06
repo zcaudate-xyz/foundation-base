@@ -7,7 +7,7 @@
 (l/script- :postgres
   {:runtime :jdbc.client
    :config {:dbname "test-scratch"}
-   :require [[hara.runtime.postgres.test.scratch-v1 :as scratch]]})
+   :require [[postgres.sample.scratch-v1 :as scratch]]})
 
 ^{:xtalk/template true}
 (l/script- :js

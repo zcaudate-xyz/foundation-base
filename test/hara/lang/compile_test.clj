@@ -1,7 +1,7 @@
 (ns hara.lang.compile-test
   (:require [xt.lang.common-data]
              [xt.lang.common-lib]
-             [hara.runtime.postgres.test.scratch-v1 :as scratch]
+             [postgres.sample.scratch-v1 :as scratch]
              [std.fs :as fs]
              [hara.lang.compile :refer :all]
              [hara.lang.impl :as impl]
@@ -234,7 +234,7 @@
       :root   ".build"
       :target "src"
       :file   "pkg/schema.sql"
-      :main   'rt.postgres.test.scratch-v1
+      :main   'postgres.sample.scratch-v1
       :layout :flat
       :entry {:label true}}))
   => (contains-in [".build/src/pkg/schema.sql"

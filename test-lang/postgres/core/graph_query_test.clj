@@ -2,13 +2,13 @@
   (:require [hara.runtime.postgres.base.application :as app]
             [postgres.core.graph-query :as q]
             [postgres.core.impl-base :as impl]
-            [hara.runtime.postgres.test.scratch-v1 :as scratch]
+            [postgres.sample.scratch-v1 :as scratch]
             [hara.lang :as l]
             [std.lib.schema :as schema])
   (:use code.test))
 
 (l/script- :postgres
-  {:require [[hara.runtime.postgres.test.scratch-v1 :as scratch]]
+  {:require [[postgres.sample.scratch-v1 :as scratch]]
    :static {:application ["scratch"]
             :seed        ["scratch"]
             :all    {:schema   ["scratch"]}}})
@@ -21,13 +21,13 @@
 (fact "constructs a table ref token"
 
   (q/table-col-token `scratch/Task 'cache)
-  => '(. hara.runtime.postgres.test.scratch-v1/Task #{"cache_id"}))
+  => '(. postgres.sample.scratch-v1/Task #{"cache_id"}))
 
 ^{:refer postgres.core.graph-query/table-id-token :added "4.0"}
 (fact "constructs a table id token"
 
   (q/table-id-token `scratch/Task)
-  => '(. hara.runtime.postgres.test.scratch-v1/Task #{"id"}))
+  => '(. postgres.sample.scratch-v1/Task #{"id"}))
 
 ^{:refer postgres.core.graph-query/returning-block :added "4.0"}
 (fact "constructs a returning block"
@@ -39,8 +39,8 @@
                      {}
                      q/query-raw-fn
                      (last (impl/prep-table 'scratch/Task true (l/rt:macro-opts :postgres))))
-  => '(% [[:with j-ret :as [:select (--- [#{"id"}]) :from hara.runtime.postgres.test.scratch-v1/Task
-                            \\ :where #{["cache_id" [:eq (. hara.runtime.postgres.test.scratch-v1/TaskCache #{"id"})]]}]
+  => '(% [[:with j-ret :as [:select (--- [#{"id"}]) :from postgres.sample.scratch-v1/Task
+                            \\ :where #{["cache_id" [:eq (. postgres.sample.scratch-v1/TaskCache #{"id"})]]}]
            \\ :select (jsonb-agg j-ret) :from j-ret] :as #{"tasks"}]))
 
 ^{:refer postgres.core.graph-query/returning-map-markers :added "4.0"}
@@ -89,8 +89,8 @@
                            q/query-raw-fn
                            (last (impl/prep-table 'scratch/Task true (l/rt:macro-opts :postgres))))
   => '#{{:expr (% [[:with j-ret :as [:select (--- [#{"id"}])
-                                     :from hara.runtime.postgres.test.scratch-v1/TaskCache
-                                     \\ :where #{["id" [:eq (. hara.runtime.postgres.test.scratch-v1/Task #{"cache_id"})]]}
+                                     :from postgres.sample.scratch-v1/TaskCache
+                                     \\ :where #{["id" [:eq (. postgres.sample.scratch-v1/Task #{"cache_id"})]]}
                                      \\ :limit 1]
                  \\ :select (to-jsonb j-ret) :from j-ret] :as #{"cache"}])}}
 
@@ -102,8 +102,8 @@
                            (last (impl/prep-table 'scratch/TaskCache true (l/rt:macro-opts :postgres))))
   => '#{{:expr (% [[:with j-ret
                     :as [:select (--- [#{"id"} #{"status"}])
-                         :from hara.runtime.postgres.test.scratch-v1/Task \\
-                         :where #{["cache_id" [:eq (. hara.runtime.postgres.test.scratch-v1/TaskCache #{"id"})]]}]
+                         :from postgres.sample.scratch-v1/Task \\
+                         :where #{["cache_id" [:eq (. postgres.sample.scratch-v1/TaskCache #{"id"})]]}]
                     \\ :select (jsonb-agg j-ret) :from j-ret] :as #{"tasks"}])}})
 
 ^{:refer postgres.core.graph-query/query-raw-fn :added "4.0"}
@@ -127,27 +127,27 @@
                #{"cache_id"}
                #{"time_created"}
                #{"time_updated"}])
-        :from hara.runtime.postgres.test.scratch-v1/Task]
+        :from postgres.sample.scratch-v1/Task]
        \\ :select (jsonb-agg j-ret) :from j-ret]
 
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (q/query-fn 'scratch/Task
                 {:returning '#{cache-id}
                  :as :raw}))
-  => '[:select (--- [#{"cache_id"}]) :from hara.runtime.postgres.test.scratch-v1/Task]
+  => '[:select (--- [#{"cache_id"}]) :from postgres.sample.scratch-v1/Task]
 
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (q/query-fn 'scratch/Task
                 {:returning #{:id}
                  :as :raw}))
-  => '[:select (--- [#{"id"}]) :from hara.runtime.postgres.test.scratch-v1/Task]
+  => '[:select (--- [#{"id"}]) :from postgres.sample.scratch-v1/Task]
 
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (q/query-fn 'scratch/Task
                 {:returning '#{{:expr (count *)
                                 :as len}}
                  :as :raw}))
-  => '[:select (--- [[(count *) :as len]]) :from hara.runtime.postgres.test.scratch-v1/Task]
+  => '[:select (--- [[(count *) :as len]]) :from postgres.sample.scratch-v1/Task]
 
 
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
@@ -156,11 +156,11 @@
                  :as :raw}))
   => '[:select (--- [(% [(quote ([:with j-ret
                                    :as [:select (--- [#{"id"} #{"time_created"} #{"time_updated"}])
-                                        :from hara.runtime.postgres.test.scratch-v1/TaskCache
-                                        \\ :where #{["id" [:eq (. hara.runtime.postgres.test.scratch-v1/Task #{"cache_id"})]]}
+                                        :from postgres.sample.scratch-v1/TaskCache
+                                        \\ :where #{["id" [:eq (. postgres.sample.scratch-v1/Task #{"cache_id"})]]}
                                         \\ :limit 1]
                                    \\ :select (to-jsonb j-ret) :from j-ret])) :as #{"cache"}])])
-       :from hara.runtime.postgres.test.scratch-v1/Task]
+       :from postgres.sample.scratch-v1/Task]
 
 
 
@@ -176,12 +176,12 @@
                 #{"time_created"} #{"time_updated"}
                 (% [(quote ([:with j-ret
                              :as [:select (--- [#{"id"}])
-                                  :from hara.runtime.postgres.test.scratch-v1/TaskCache
-                                  \\ :where #{["id" [:eq (. hara.runtime.postgres.test.scratch-v1/Task #{"cache_id"})]
+                                  :from postgres.sample.scratch-v1/TaskCache
+                                  \\ :where #{["id" [:eq (. postgres.sample.scratch-v1/Task #{"cache_id"})]
                                                :and "id" [:eq "cache-id"]]}
                                   \\ :limit 1]
                              \\ :select (to-jsonb j-ret) :from j-ret])) :as #{"cache"}])])
-          :from hara.runtime.postgres.test.scratch-v1/Task]
+          :from postgres.sample.scratch-v1/Task]
 
 
 
@@ -194,7 +194,7 @@
   => '[:select (--- [#{"id"} #{"time_created"} #{"time_updated"}
                       (% [(quote ([:with j-ret
                                    :as [:select (--- [#{"id"} #{"status"}])
-                                        :from hara.runtime.postgres.test.scratch-v1/Task
-                                        \\ :where #{["cache_id" [:eq (. hara.runtime.postgres.test.scratch-v1/TaskCache #{"id"})]]}]
+                                        :from postgres.sample.scratch-v1/Task
+                                        \\ :where #{["cache_id" [:eq (. postgres.sample.scratch-v1/TaskCache #{"id"})]]}]
                                    \\ :select (jsonb-agg j-ret) :from j-ret])) :as #{"tasks"}])])
-       :from hara.runtime.postgres.test.scratch-v1/TaskCache])
+       :from postgres.sample.scratch-v1/TaskCache])

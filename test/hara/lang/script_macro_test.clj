@@ -272,7 +272,7 @@
   (let [plib (lib/library {:snapshot prep/+snap+})]
     (lib/add-book! plib (assoc pg/+book+ :modules {}))
     (lib/add-module! plib (module/book-module {:lang :postgres
-                                               :id 'rt.postgres.test.scratch-v1}))
+                                               :id 'postgres.sample.scratch-v1}))
     (impl/with:library [plib]
       (let [book     (lib/get-book plib :postgres)
             reserved ['defn (get-in book [:grammar :reserved 'defn])]
@@ -287,7 +287,7 @@
                            (when (== input "{}")
                              (return "[]"))
                            (return input))
-                        {:module 'rt.postgres.test.scratch-v1})
+                        {:module 'postgres.sample.scratch-v1})
                       {})]
         (string? (pr-str @fn-var)))))
   => true)

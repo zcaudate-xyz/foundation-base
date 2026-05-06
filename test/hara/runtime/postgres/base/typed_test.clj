@@ -1,7 +1,7 @@
 (ns hara.runtime.postgres.base.typed-test
   (:require [hara.runtime.postgres.base.typed.typed-common :as types]
             [hara.runtime.postgres.base.typed.typed-parse :as parse]
-            [hara.runtime.postgres.test.scratch-v2 :as scratch]
+            [postgres.sample.scratch-v2 :as scratch]
             [hara.runtime.postgres.typed :as typed]
             [hara.runtime.postgres.base.typed :as typed-analysis])
   (:use code.test))
@@ -31,7 +31,7 @@
 
 ^{:refer hara.runtime.postgres.base.typed/make-function-report :added "4.1"}
 (fact "make-function-report returns a function-level infer report"
-  (let [report (typed-analysis/make-function-report 'rt.postgres.test.scratch-v2
+  (let [report (typed-analysis/make-function-report 'postgres.sample.scratch-v2
                                            'insert-entry)]
     (get-in report [:function :name]) => "insert-entry"
     (get-in report [:analysis :mutating]) => true
@@ -40,13 +40,13 @@
 ^{:refer hara.runtime.postgres.base.typed/get-function-report :added "4.1"}
 (fact "get-function-report lazily retrieves and caches infer reports for registered functions"
   (typed/clear-registry!)
-  (let [analysis (-> 'rt.postgres.test.scratch-v2
+  (let [analysis (-> 'postgres.sample.scratch-v2
                      parse/analyze-namespace
                      parse/register-types!)
         fn-def   (some #(when (= "insert-entry" (:name %)) %)
                        (:functions analysis))]
-    (typed/register-type! 'rt.postgres.test.scratch-v2/insert-entry fn-def)
-    (let [report (typed-analysis/get-function-report 'rt.postgres.test.scratch-v2/insert-entry)]
+    (typed/register-type! 'postgres.sample.scratch-v2/insert-entry fn-def)
+    (let [report (typed-analysis/get-function-report 'postgres.sample.scratch-v2/insert-entry)]
       (get-in report [:function :name]) => "insert-entry"
       (get-in report [:analysis :mutating]) => true)))
 
@@ -127,20 +127,20 @@
 ^{:refer hara.runtime.postgres.base.typed/get-app-function-report :added "4.1"}
 (fact "get-app-function-report runs infer reporting against an app typed payload"
   (let [typed-payload (types/analysis->typed
-                       (parse/analyze-namespace 'rt.postgres.test.scratch-v2))]
+                       (parse/analyze-namespace 'postgres.sample.scratch-v2))]
     (with-redefs [hara.runtime.postgres.base.application/app-typed (fn [_] typed-payload)]
       (let [report (typed-analysis/get-app-function-report "demo"
-                                                  'rt.postgres.test.scratch-v2/insert-entry)]
+                                                  'postgres.sample.scratch-v2/insert-entry)]
         (get-in report [:function :name]) => "insert-entry"
         (get-in report [:analysis :mutating]) => true))))
 
 ^{:refer hara.runtime.postgres.base.typed/get-function-report-json :added "4.1"}
 (fact "get-function-report-json serializes reports for registered functions"
   (typed/clear-registry!)
-  (-> 'rt.postgres.test.scratch-v2
+  (-> 'postgres.sample.scratch-v2
       parse/analyze-namespace
       parse/register-types!)
-  (let [output (typed-analysis/get-function-report-json 'rt.postgres.test.scratch-v2/insert-entry
+  (let [output (typed-analysis/get-function-report-json 'postgres.sample.scratch-v2/insert-entry
                                                true)]
     (string? output) => true
     (clojure.string/includes? output "\"insert-entry\"") => true))
@@ -148,10 +148,10 @@
 ^{:refer hara.runtime.postgres.base.typed/get-app-function-report-json :added "4.1"}
 (fact "get-app-function-report-json serializes app-scoped reports"
   (let [typed-payload (types/analysis->typed
-                       (parse/analyze-namespace 'rt.postgres.test.scratch-v2))]
+                       (parse/analyze-namespace 'postgres.sample.scratch-v2))]
     (with-redefs [hara.runtime.postgres.base.application/app-typed (fn [_] typed-payload)]
       (let [output (typed-analysis/get-app-function-report-json "demo"
-                                                       'rt.postgres.test.scratch-v2/insert-entry
+                                                       'postgres.sample.scratch-v2/insert-entry
                                                        true)]
         (string? output) => true
         (clojure.string/includes? output "\"insert-entry\"") => true))))
@@ -533,7 +533,7 @@
 
 ^{:refer hara.runtime.postgres.base.typed/report-json :added "4.1"}
 (fact "report-json serializes reports"
-  (let [report (typed-analysis/make-function-report 'rt.postgres.test.scratch-v2
+  (let [report (typed-analysis/make-function-report 'postgres.sample.scratch-v2
                                            'insert-entry)
         output (typed-analysis/report-json report true)]
     (string? output) => true
@@ -541,7 +541,7 @@
 
 ^{:refer hara.runtime.postgres.base.typed/make-function-json :added "4.1"}
 (fact "make-function-json returns serialized analysis for a function"
-  (let [output (typed-analysis/make-function-json 'rt.postgres.test.scratch-v2
+  (let [output (typed-analysis/make-function-json 'postgres.sample.scratch-v2
                                          'insert-entry
                                          true)]
     (string? output) => true
@@ -550,7 +550,7 @@
 
 ^{:refer hara.runtime.postgres.base.typed/make-openapi :added "4.1"}
 (fact "make-openapi generates OpenAPI spec for a namespace"
-  (let [spec (typed-analysis/make-openapi 'rt.postgres.test.scratch-v2 (constantly true))]
+  (let [spec (typed-analysis/make-openapi 'postgres.sample.scratch-v2 (constantly true))]
     (contains? spec :openapi) => true
     (contains? spec :info) => true
     (contains? spec :paths) => true
@@ -559,14 +559,14 @@
 ^{:refer hara.runtime.postgres.base.typed/make-json-schema :added "4.1"}
 (fact "make-json-schema generates JSON Schema definitions"
   (typed/clear-registry!)
-  (typed-analysis/analyze-and-register! 'rt.postgres.test.scratch-v2)
+  (typed-analysis/analyze-and-register! 'postgres.sample.scratch-v2)
   (let [schema (typed-analysis/make-json-schema)]
     (map? schema) => true))
 
 ^{:refer hara.runtime.postgres.base.typed/make-typescript :added "4.1"}
 (fact "make-typescript generates TypeScript definitions"
   (typed/clear-registry!)
-  (typed-analysis/analyze-and-register! 'rt.postgres.test.scratch-v2)
+  (typed-analysis/analyze-and-register! 'postgres.sample.scratch-v2)
   (let [ts (typed-analysis/make-typescript)]
     (string? ts) => true
     (clojure.string/includes? ts "interface") => true))
@@ -646,7 +646,7 @@
 
 ^{:refer hara.runtime.postgres.base.typed/build-output-schema :added "4.1"}
 (fact "build-output-schema wraps the inferred output shape and schema"
-  (let [analysis (-> 'rt.postgres.test.scratch-v2
+  (let [analysis (-> 'postgres.sample.scratch-v2
                      parse/analyze-namespace
                      parse/register-types!)
         fn-def (some #(when (= "insert-entry" (:name %)) %) (:functions analysis))

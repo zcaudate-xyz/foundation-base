@@ -253,9 +253,13 @@
 (defn ruby-dot
   [[_ obj & props]]
   (let [grammar preprocess-base/*macro-grammar*
-        mopts   preprocess-base/*macro-opts*]
-    (list ':- (str (common/emit-wrapping obj grammar mopts)
-                   (apply str (map #(ruby-dot-entry % grammar mopts) props))))))
+        mopts   preprocess-base/*macro-opts*
+        target  (let [emitted (common/*emit-fn* obj grammar mopts)]
+                  (if (collection/form? obj)
+                    (str "(" emitted ")")
+                    emitted))]
+    (list ':- (str target
+                    (apply str (map #(ruby-dot-entry % grammar mopts) props))))))
 
 (defn ruby-emit-range
   [separator [_ start & more] grammar mopts]

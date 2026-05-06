@@ -8,7 +8,7 @@
   (:use code.test))
 
 (l/script- :postgres
-  {:require [[hara.runtime.postgres.test.scratch-v1 :as scratch]]
+  {:require [[postgres.sample.scratch-v1 :as scratch]]
    :static {:application ["scratch"]
             :seed        ["scratch"]
             :all    {:schema   ["scratch"]}}})
@@ -35,7 +35,7 @@
                           [:name :status :cache]
                           (tracker/add-tracker {:track 'o-op}
                                             (:static/tracker @scratch/Task)
-                                            hara.runtime.postgres.test.scratch-v1/Task
+                                            postgres.sample.scratch-v1/Task
                                             :insert)
                           (last (base/prep-table 'scratch/Task true (l/rt:macro-opts :postgres))))
   => '[(>-< [#{"status"}
@@ -46,7 +46,7 @@
               #{"time_created"}
               #{"time_updated"}])
        :values
-       (>-< [(++ (:->> sym "status") hara.runtime.postgres.test.scratch-v1/EnumStatus)
+       (>-< [(++ (:->> sym "status") postgres.sample.scratch-v1/EnumStatus)
               (:text (:->> sym "name"))
               (:uuid (coalesce (:->> sym "cache_id")
                                (:->> (:-> sym "cache") "id")))
@@ -64,7 +64,7 @@
                         :cache "cache-aaa"}
                        (tracker/add-tracker {:track 'o-op}
                                             (:static/tracker @scratch/Task)
-                                            hara.runtime.postgres.test.scratch-v1/Task
+                                            postgres.sample.scratch-v1/Task
                                             :insert)
                        (last (base/prep-table 'scratch/Task true (l/rt:macro-opts :postgres))))
   => '[(>-< [#{"status"}
@@ -74,7 +74,7 @@
               #{"op_updated"}
               #{"time_created"}
               #{"time_updated"}])
-       :values (>-< [(++ "pending" hara.runtime.postgres.test.scratch-v1/EnumStatus)
+       :values (>-< [(++ "pending" postgres.sample.scratch-v1/EnumStatus)
                       (:text "hello")
                       (:uuid "cache-aaa")
                       (:uuid (:->> o-op "id"))
@@ -86,17 +86,17 @@
 (fact "constructs a record insert form"
 
   (insert/t-insert-record
-   'hara.runtime.postgres.test.scratch-v1/Task
+   'postgres.sample.scratch-v1/Task
    'e
    (tracker/add-tracker {:track 'o-op}
 
                         (:static/tracker @scratch/Task)
-                        hara.runtime.postgres.test.scratch-v1/Task
+                        postgres.sample.scratch-v1/Task
                         :insert))
   => '[:select *
        :from
        (jsonb-populate-record
-        (++ nil hara.runtime.postgres.test.scratch-v1/Task)
+        (++ nil postgres.sample.scratch-v1/Task)
         (|| e
             {:op-created (:->> o-op "id"),
              :op-updated (:->> o-op "id"),
@@ -113,7 +113,7 @@
     :cache "id"}
    (tracker/add-tracker {:track 'o-op}
                         (:static/tracker @scratch/Task)
-                        hara.runtime.postgres.test.scratch-v1/Task
+                        postgres.sample.scratch-v1/Task
                         :insert))
   => vector?)
 
@@ -130,7 +130,7 @@
        j-ret
        :as
        [:insert-into
-        hara.runtime.postgres.test.scratch-v1/Task
+        postgres.sample.scratch-v1/Task
         (>-<
          [#{"status"}
           #{"name"}
@@ -141,7 +141,7 @@
           #{"time_updated"}])
         :values
         (>-<
-         [(++ "pending" hara.runtime.postgres.test.scratch-v1/EnumStatus)
+         [(++ "pending" postgres.sample.scratch-v1/EnumStatus)
           (:text "hello")
           (:uuid "id")
           (:uuid (:->> o-op "id"))
@@ -172,9 +172,9 @@
     :cache "id"}
    (tracker/add-tracker {:track 'o-op}
                         (:static/tracker @scratch/Task)
-                        hara.runtime.postgres.test.scratch-v1/Task
+                        postgres.sample.scratch-v1/Task
                         :insert))
-  => '[:with j-ret :as [:insert-into hara.runtime.postgres.test.scratch-v1/Task (>-< [#{"status"} #{"name"} #{"cache_id"} #{"op_created"} #{"op_updated"} #{"time_created"} #{"time_updated"}]) :values (>-< [(++ "pending" hara.runtime.postgres.test.scratch-v1/EnumStatus) (:text "hello") (:uuid "id") (:uuid (:->> o-op "id")) (:uuid (:->> o-op "id")) (:bigint (:->> o-op "time")) (:bigint (:->> o-op "time"))]) :on-conflict (quote (#{"id"})) :do-update :set (quote (#{"status"} #{"name"} #{"cache_id"} #{"op_updated"} #{"time_updated"})) := (row (. (:- "EXCLUDED") #{"status"}) (. (:- "EXCLUDED") #{"name"}) (. (:- "EXCLUDED") #{"cache_id"}) (. (:- "EXCLUDED") #{"op_updated"}) (. (:- "EXCLUDED") #{"time_updated"})) :returning (--- [#{"id"} #{"status"} #{"name"} #{"cache_id"} #{"time_created"} #{"time_updated"}])] \\ :select (to-jsonb j-ret) :from j-ret])
+  => '[:with j-ret :as [:insert-into postgres.sample.scratch-v1/Task (>-< [#{"status"} #{"name"} #{"cache_id"} #{"op_created"} #{"op_updated"} #{"time_created"} #{"time_updated"}]) :values (>-< [(++ "pending" postgres.sample.scratch-v1/EnumStatus) (:text "hello") (:uuid "id") (:uuid (:->> o-op "id")) (:uuid (:->> o-op "id")) (:bigint (:->> o-op "time")) (:bigint (:->> o-op "time"))]) :on-conflict (quote (#{"id"})) :do-update :set (quote (#{"status"} #{"name"} #{"cache_id"} #{"op_updated"} #{"time_updated"})) := (row (. (:- "EXCLUDED") #{"status"}) (. (:- "EXCLUDED") #{"name"}) (. (:- "EXCLUDED") #{"cache_id"}) (. (:- "EXCLUDED") #{"op_updated"}) (. (:- "EXCLUDED") #{"time_updated"})) :returning (--- [#{"id"} #{"status"} #{"name"} #{"cache_id"} #{"time_created"} #{"time_updated"}])] \\ :select (to-jsonb j-ret) :from j-ret])
 
 ^{:refer postgres.core.impl-insert/t-upsert :added "4.0"}
 (fact "constructs an upsert form"
@@ -185,4 +185,4 @@
                       :status "pending"
                       :cache "id"}
                      {:track 'o-op}))
-  => '[:with j-ret :as [:insert-into hara.runtime.postgres.test.scratch-v1/Task (>-< [#{"status"} #{"name"} #{"cache_id"} #{"op_created"} #{"op_updated"} #{"time_created"} #{"time_updated"}]) :values (>-< [(++ "pending" hara.runtime.postgres.test.scratch-v1/EnumStatus) (:text "hello") (:uuid "id") (:uuid (:->> o-op "id")) (:uuid (:->> o-op "id")) (:bigint (:->> o-op "time")) (:bigint (:->> o-op "time"))]) :on-conflict (quote (#{"id"})) :do-update :set (quote (#{"status"} #{"name"} #{"cache_id"} #{"op_updated"} #{"time_updated"})) := (row (. (:- "EXCLUDED") #{"status"}) (. (:- "EXCLUDED") #{"name"}) (. (:- "EXCLUDED") #{"cache_id"}) (. (:- "EXCLUDED") #{"op_updated"}) (. (:- "EXCLUDED") #{"time_updated"})) :returning (--- [#{"id"} #{"status"} #{"name"} #{"cache_id"} #{"time_created"} #{"time_updated"}])] \\ :select (to-jsonb j-ret) :from j-ret])
+  => '[:with j-ret :as [:insert-into postgres.sample.scratch-v1/Task (>-< [#{"status"} #{"name"} #{"cache_id"} #{"op_created"} #{"op_updated"} #{"time_created"} #{"time_updated"}]) :values (>-< [(++ "pending" postgres.sample.scratch-v1/EnumStatus) (:text "hello") (:uuid "id") (:uuid (:->> o-op "id")) (:uuid (:->> o-op "id")) (:bigint (:->> o-op "time")) (:bigint (:->> o-op "time"))]) :on-conflict (quote (#{"id"})) :do-update :set (quote (#{"status"} #{"name"} #{"cache_id"} #{"op_updated"} #{"time_updated"})) := (row (. (:- "EXCLUDED") #{"status"}) (. (:- "EXCLUDED") #{"name"}) (. (:- "EXCLUDED") #{"cache_id"}) (. (:- "EXCLUDED") #{"op_updated"}) (. (:- "EXCLUDED") #{"time_updated"})) :returning (--- [#{"id"} #{"status"} #{"name"} #{"cache_id"} #{"time_created"} #{"time_updated"}])] \\ :select (to-jsonb j-ret) :from j-ret])

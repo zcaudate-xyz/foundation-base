@@ -58,11 +58,11 @@
   {:added "4.0"}
   []
   (do (l/delete-module! (l/default-library) {:lang :postgres
-                                             :id 'rt.postgres.test.scratch-v1})
+                                             :id 'postgres.sample.scratch-v1})
       (l/delete-module! (l/runtime-library) {:lang :postgres
-                                             :id 'rt.postgres.test.scratch-v1})
+                                             :id 'postgres.sample.scratch-v1})
       (app/app-clear "scratch-v1")
       (require 'jvm.namespace)
-      (eval '(jvm.namespace/reset '[hara.runtime.postgres.test.scratch-v1]))))
+      (eval '(jvm.namespace/reset '[postgres.sample.scratch-v1]))))
 
 (comment)

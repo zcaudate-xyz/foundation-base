@@ -1,6 +1,6 @@
 (ns hara.model.spec-postgres.common-tracker-test
   (:require [hara.model.spec-postgres.common-tracker :as tracker]
-            [hara.runtime.postgres.test.scratch-v1 :as scratch])
+            [postgres.sample.scratch-v1 :as scratch])
   (:use code.test))
 
 ^{:refer hara.model.spec-postgres.common-tracker/tracker-string :added "4.1"}

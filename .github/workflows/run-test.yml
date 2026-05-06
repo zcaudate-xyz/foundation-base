@@ -38,6 +38,9 @@ jobs:
           - name: std
             target: "[std]"
             command: lein test :with "[std]"
+          - name: xt
+            target: "[xt.]"
+            command: lein test :with "[xt.]"
           - name: code
             target: "[code]"
             install_js_parser: true
@@ -79,30 +82,38 @@ jobs:
         ports:
           - 5432:5432
 
-  run-xtalk-tests:
+  run-lang-tests:
+    name: Run Tests - ${{ matrix.lang }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - lang: js
+            install_js_parser: true
+          - lang: lua
+          - lang: python
+          - lang: dart
     
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Install JS parser dependencies
+        if: matrix.install_js_parser == true
+        working-directory: src-training/scripts/js_parser
+        run: npm ci
         
-      - name: Run Tests - xtalk
+      - name: Run Tests - ${{ matrix.lang }}
         run: >
           docker run --network host 
           -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
           -v /var/run/docker.sock:/var/run/docker.sock 
           -v $(pwd):$(pwd) 
           -w $(pwd) 
-          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein test :with "[xt]"
-          bash -lc "set -euxo pipefail &&
-          apt-get update &&
-          apt-get install -y --no-install-recommends curl ca-certificates gnupg &&
-          curl -fsSL https://deb.nodesource.com/setup_20.x | bash - &&
-          apt-get install -y --no-install-recommends nodejs lua5.4 python3 python3-pip &&
-          node --version &&
-          npm --version &&
-          lein test :with \"[xt]\""
+          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci
+          lein test :with "${{ matrix.lang }}"
         
     services:
       postgres:

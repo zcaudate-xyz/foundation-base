@@ -7,7 +7,7 @@
 
 (defn- get-scratch-fn
   [sym]
-  (let [analysis (-> 'rt.postgres.test.scratch-v2
+  (let [analysis (-> 'postgres.sample.scratch-v2
                      parse/analyze-namespace
                      parse/register-types!)]
     (some #(when (= (name sym) (:name %)) %)
@@ -314,7 +314,7 @@
   (let [form '(defn.pg
                 call-insert
                 [:text i-name :jsonb i-tags :jsonb o-op]
-                (hara.runtime.postgres.test.scratch-v2/insert-entry i-name i-tags o-op))
+                (postgres.sample.scratch-v2/insert-entry i-name i-tags o-op))
         fn-def (parse/parse-defn form "test.ns" nil)]
     (types/register-type! 'test.ns/call-insert fn-def)
     (let [result (analyze/infer-return-type fn-def)]
@@ -331,7 +331,7 @@
 ^{:refer hara.runtime.postgres.base.typed.typed-analyze/cached-infer :added "4.1"}
 (fact "cached-infer memoizes function inference by namespace and name"
   (types/clear-registry!)
-  (let [analysis (-> 'hara.runtime.postgres.test.scratch-v2
+  (let [analysis (-> 'postgres.sample.scratch-v2
                       parse/analyze-namespace
                       parse/register-types!)
         fn-def (some #(when (= "insert-entry" (:name %)) %)
@@ -339,7 +339,7 @@
     (analyze/reset-cache!)
     (analyze/cached-infer fn-def)
     (keys @analyze/*infer-cache*))
-  => ['hara.runtime.postgres.test.scratch-v2/insert-entry])
+  => ['postgres.sample.scratch-v2/insert-entry])
 
 ^{:refer hara.runtime.postgres.base.typed.typed-analyze/normalize-table-name :added "4.1"}
 (fact "normalize-table-name extracts table name from expressions"

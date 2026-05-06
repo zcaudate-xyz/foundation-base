@@ -1,7 +1,7 @@
 (ns hara.model.spec-postgres.form-defconst-test
   (:require [hara.model.spec-postgres :as g]
             [hara.model.spec-postgres.form-defconst :as form]
-            [hara.runtime.postgres.test.scratch-v1 :as scratch]
+            [postgres.sample.scratch-v1 :as scratch]
             [hara.lang :as l])
   (:use code.test))
 
@@ -21,7 +21,7 @@
                                :module  (l/get-module
                                          (l/runtime-library)
                                          :postgres
-                                         'rt.postgres.test.scratch-v1)
+                                         'postgres.sample.scratch-v1)
                                :snapshot (l/get-snapshot (l/runtime-library))}))
   -out-
   => vector?)
@@ -35,7 +35,7 @@
        (let
            [o-track {}]
          [:insert-into
-          hara.runtime.postgres.test.scratch-v1/Task
+          postgres.sample.scratch-v1/Task
           (>-<
            [#{"id"}
             #{"status"}
@@ -48,7 +48,7 @@
           :values
           (>-<
            [(:uuid "hello-0")
-            (++ "ok" hara.runtime.postgres.test.scratch-v1/EnumStatus)
+            (++ "ok" postgres.sample.scratch-v1/EnumStatus)
             (:text "hello")
             (:uuid "cache-001")
             (:uuid (:->> o-track "id"))

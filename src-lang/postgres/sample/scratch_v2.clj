@@ -1,4 +1,4 @@
-(ns hara.runtime.postgres.test.scratch-v2
+(ns postgres.sample.scratch-v2
   (:require [hara.lang :as l]))
 
 (l/script :postgres
@@ -143,7 +143,6 @@
   [:jsonb m :jsonb o-op]
   (return
    (-/insert-task-raw m o-op)))
-
 
 
 

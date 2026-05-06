@@ -1,6 +1,6 @@
 (ns xt.db.text.base-check-test
   (:require [hara.runtime.postgres :as pg]
-            [hara.runtime.postgres.test.scratch-v1 :as scratch]
+            [postgres.sample.scratch-v1 :as scratch]
             [hara.lang :as l])
   (:use code.test))
 
@@ -40,7 +40,7 @@
     (chk/check-args-type [1 2]
                          [{:symbol "x", :type "numeric"}
                           {:symbol "y", :type "numeric"}]))
-  => [true])
+  => [true nil])
 
 ^{:refer xt.db.text.base-check/check-args-length :added "4.0"}
 (fact "checks that input and spec are of the same length"
@@ -49,7 +49,7 @@
     (chk/check-args-length [1 2]
                            [{:symbol "x", :type "numeric"}
                             {:symbol "y", :type "numeric"}]))
-  => [true])
+  => [true nil])
 
 (comment
   (s/run ['xt.db.text.base-check])

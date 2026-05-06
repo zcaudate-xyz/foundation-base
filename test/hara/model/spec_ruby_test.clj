@@ -108,37 +108,36 @@
             (re-find #"check_disabled = .*\[\"check_disabled\"\]" s)
             (re-find #"id_fn = .*\[\"id_fn\"\]" s))))
 
-(fact "Ruby x:has-key? guards nil receivers"
-  (fn-ruby/ruby-tf-x-has-key? '(x:has-key? obj "a"))
-  => '(and (not= nil obj)
-           (. obj (key? "a")))
+(fact "Ruby key helpers guard nil receivers"
+  (l/emit-as :ruby
+   '[(do
+       (x:get-key obj "a")
+       (x:get-key obj "a" nil)
+       (x:set-key obj "a" 1)
+       (x:has-key? obj "a"))])
+  => (fn [s]
+       (and (string? s)
+            (re-find #"obj__.* = obj" s)
+            (re-find #"if obj__.* == nil" s)
+            (re-find #"obj = \{\}" s))))
 
-  (fn-ruby/ruby-tf-x-has-key? '(x:has-key? obj "a" 1))
-  => '(and (not= nil obj)
-           (. obj (key? "a"))
-           (== (. obj ["a"]) 1)))
-
-(fact "Ruby x:get-key and x:set-key guard nil receivers"
-  (fn-ruby/ruby-tf-x-get-key '(x:get-key obj "a"))
-  => '(:? (== nil obj)
-          nil
-          (:? (== nil (. obj ["a"]))
-              nil
-              (. obj ["a"])))
-
-  (fn-ruby/ruby-tf-x-get-key '(x:get-key obj "a" nil))
-  => '(:? (== nil obj)
-          nil
-          (:? (== nil (. obj ["a"]))
-              nil
-              (. obj ["a"])))
-
-  (fn-ruby/ruby-tf-x-set-key '(x:set-key obj "a" 1))
-  => '(do
-        (when (== nil obj)
-          (:= obj {}))
-         (:= (. obj ["a"]) 1)
-         obj))
+(fact "Ruby key helpers treat arrays differently from hashes"
+  (l/emit-as :ruby
+   '[(do
+       (x:get-key arr "a" 1)
+       (x:get-key arr 0 nil)
+       (x:has-key? arr "a")
+       (x:has-key? arr 0)
+       (x:set-key arr "a" 1)
+       (x:set-key arr 0 1)
+       (x:del-key arr "a")
+       (x:del-key arr 0))])
+  => (fn [s]
+       (and (string? s)
+            (re-find #"is_a\?\(Array\)" s)
+            (re-find #"is_a\?\(Integer\)" s)
+            (re-find #"delete_at" s)
+            (not (re-find #"\.key\?" s)))))
 
 (fact "Ruby x:obj-clone avoids Marshal-based cloning"
   (l/emit-as :ruby

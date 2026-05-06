@@ -514,27 +514,41 @@
 (defn ruby-tf-x-get-key
   [form]
   (let [[_ obj key & [default]] form
-        val (list '. obj [key])
         fallback (if (> (count form) 3) default nil)]
-    (list :?
-          (list '== nil obj)
-          fallback
-          (list :?
-                (list '== nil val)
-                fallback
-                val))))
+    (template/$
+     (. (fn []
+          (var obj__ ~obj)
+          (var key__ ~key)
+          (if (== nil obj__)
+            (return ~fallback)
+            (if (. obj__ (is_a? Array))
+              (if (. key__ (is_a? Integer))
+                (do (var val__ (. obj__ [key__]))
+                    (if (== nil val__)
+                      (return ~fallback)
+                      (return val__)))
+                (return ~fallback))
+              (do (var val__ (. obj__ [key__]))
+                  (if (== nil val__)
+                    (return ~fallback)
+                    (return val__))))))
+        (call)))))
 
 (defn ruby-tf-x-set-key
   [[_ obj key value]]
   (if (symbol? obj)
-    (list 'do
-          (list 'when (list '== nil obj)
-                (list ':= obj {}))
-          (list ':= (list '. obj [key]) value)
-          obj)
-    (list 'do
-          (list ':= (list '. obj [key]) value)
-          obj)))
+    (template/$
+     (do (when (== nil ~obj)
+           (:= ~obj {}))
+         (when (or (not (. ~obj (is_a? Array)))
+                   (. ~key (is_a? Integer)))
+           (:= (. ~obj [~key]) ~value))
+         ~obj))
+    (template/$
+     (do (when (or (not (. ~obj (is_a? Array)))
+                   (. ~key (is_a? Integer)))
+           (:= (. ~obj [~key]) ~value))
+         ~obj))))
 
 (defn ruby-tf-x-lu-eq
   [[_ a b]]
@@ -566,10 +580,16 @@
         (:= clone-fn
             (fn [value]
               (cond (. value (is_a? Hash))
-                    (do (var out {})
-                        (for:object [[k v] value]
-                          (x:set-key out k (. clone-fn (call v))))
-                        (return out))
+                     (do (var out {})
+                        (var keys (. value keys))
+                        (var idx 0)
+                        (while (< idx (. keys length))
+                          (var k (. keys [idx]))
+                          (x:set-key out k
+                                     (. clone-fn
+                                        (call (. value [k]))))
+                          (:= idx (+ idx 1)))
+                         (return out))
 
                     (. value (is_a? Array))
                     (do (var out [])
@@ -584,25 +604,64 @@
 
 (defn ruby-tf-x-has-key?
   [[_ obj key check]]
-  (if (some? check)
-    (list 'and
-          (list 'not= nil obj)
-          (list '. obj (list 'key? key))
-          (list '== (list '. obj [key]) check))
-    (list 'and
-          (list 'not= nil obj)
-          (list '. obj (list 'key? key)))))
+  (let [array-success (if (some? check)
+                        (list 'return
+                              (list '== check
+                                    (list '. 'obj__ ['key__])))
+                        '(return true))
+        value-success (if (some? check)
+                        (list 'return
+                              (list '== check 'val__))
+                        '(return true))]
+    (template/$
+     (. (fn []
+          (var obj__ ~obj)
+          (var key__ ~key)
+          (if (== nil obj__)
+            (return false)
+            (if (. obj__ (is_a? Array))
+              (if (and (. key__ (is_a? Integer))
+                       (>= key__ 0)
+                       (< key__ (. obj__ length)))
+                ~array-success
+                (return false))
+              (do (var val__ (. obj__ [key__]))
+                  (if (== nil val__)
+                    (return false)
+                    ~value-success)))))
+        (call)))))
+
+(defn ruby-tf-x-del-key
+  [[_ obj key]]
+  (template/$
+   (. (fn []
+        (var obj__ ~obj)
+        (var key__ ~key)
+        (if (== nil obj__)
+          (return nil)
+          (if (. obj__ (is_a? Array))
+            (if (. key__ (is_a? Integer))
+              (return (. obj__ (delete_at key__)))
+              (return nil))
+            (return (. obj__ (delete key__))))))
+      (call))))
 
 (def +ruby-lu+
-  {:x-get-key          {:macro #'ruby-tf-x-get-key        :emit :macro}
-   :x-set-key          {:macro #'ruby-tf-x-set-key        :emit :macro}
+  {:x-get-key          {:macro #'ruby-tf-x-get-key        :emit :macro
+                        :value/template #'ruby-tf-x-get-key}
+   :x-set-key          {:macro #'ruby-tf-x-set-key        :emit :macro
+                        :value/template #'ruby-tf-x-set-key}
    :x-lu-create        {:macro #'ruby-tf-x-lu-create      :emit :macro}
    :x-lu-eq            {:macro #'ruby-tf-x-lu-eq          :emit :macro}
    :x-lu-get           {:macro #'ruby-tf-x-lu-get         :emit :macro}
    :x-lu-set           {:macro #'ruby-tf-x-lu-set         :emit :macro}
    :x-lu-del           {:macro #'ruby-tf-x-lu-del         :emit :macro}
-   :x-has-key?         {:macro #'ruby-tf-x-has-key?       :emit :macro}
-   :x-obj-clone        {:macro #'ruby-tf-x-obj-clone      :emit :macro}})
+   :x-has-key?         {:macro #'ruby-tf-x-has-key?       :emit :macro
+                        :value/template #'ruby-tf-x-has-key?}
+   :x-del-key          {:macro #'ruby-tf-x-del-key        :emit :macro
+                        :value/template #'ruby-tf-x-del-key}
+   :x-obj-clone        {:macro #'ruby-tf-x-obj-clone      :emit :macro
+                        :value/template #'ruby-tf-x-obj-clone}})
 
 ;;
 ;; JSON

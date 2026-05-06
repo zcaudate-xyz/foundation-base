@@ -2,13 +2,13 @@
   (:require [hara.runtime.postgres.base.application :as app]
             [postgres.core.graph-walk :as walk]
             [postgres.core.impl-base :as impl]
-            [hara.runtime.postgres.test.scratch-v1 :as scratch]
+            [postgres.sample.scratch-v1 :as scratch]
             [hara.lang :as l]
             [std.lib.schema :as schema])
   (:use code.test))
 
 (l/script- :postgres
-  {:require [[hara.runtime.postgres.test.scratch-v1 :as scratch]]
+  {:require [[postgres.sample.scratch-v1 :as scratch]]
    :static {:application ["scratch"]
             :seed        ["scratch"]
             :all    {:schema   ["scratch"]}}})

@@ -1,7 +1,7 @@
 (ns postgres.core.addon-test
   (:require [hara.runtime.postgres :as pg]
             [postgres.core.addon :as addon]
-            [hara.runtime.postgres.test.scratch-v1 :as scratch]
+            [postgres.sample.scratch-v1 :as scratch]
             [hara.lang :as l])
   (:use code.test))
 
@@ -9,7 +9,7 @@
   {:runtime :jdbc.client
    :config  {:dbname "test-scratch"}
    :require [[hara.runtime.postgres :as pg]
-             [hara.runtime.postgres.test.scratch-v1 :as scratch]]
+             [postgres.sample.scratch-v1 :as scratch]]
    :import [["pgcrypto"]]})
 
 (fact:global

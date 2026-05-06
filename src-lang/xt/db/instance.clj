@@ -22,25 +22,25 @@
                       :dbtype dbtype}}))
 
 (def.xt IMPL
-   {"db.cache" {"create"      (fn [m]
-                                (return {:rows {}}))
-                "add"         impl-cache/cache-process-event-sync
-                "remove"      impl-cache/cache-process-event-remove
-                "pull-sync"   impl-cache/cache-pull-sync
-                "delete-sync" impl-cache/cache-delete-sync
-               "clear"       impl-cache/cache-clear}
+  {"db.cache"    {"create"      (fn [m]
+                                  (return {:rows {}}))
+                  "add"         impl-cache/cache-process-event-sync
+                  "remove"      impl-cache/cache-process-event-remove
+                  "pull-sync"   impl-cache/cache-pull-sync
+                  "delete-sync" impl-cache/cache-delete-sync
+                  "clear"       impl-cache/cache-clear}
    "db.supabase" {"create"    (fn [m]
                                 (return m))
                   "pull-sync" impl-supabase/supabase-pull-sync}
-   "db.sql"   {"create"      (fn [m]
-                               (return (xt/x:get-key m "instance")))
-               "exec-sync"   (fn [instance raw-input _opts]
-                                (return (sql/query-sync instance raw-input)))
-                "add"         impl-sql/sql-process-event-sync
-                "remove"      impl-sql/sql-process-event-remove
-                "pull-sync"   impl-sql/sql-pull-sync
-                "delete-sync" impl-sql/sql-delete-sync
-                "clear"       impl-sql/sql-clear}})
+   "db.sql"      {"create"      (fn [m]
+                                  (return (xt/x:get-key m "instance")))
+                  "exec-sync"   (fn [instance raw-input _opts]
+                                  (return (sql/query-sync instance raw-input)))
+                  "add"         impl-sql/sql-process-event-sync
+                  "remove"      impl-sql/sql-process-event-remove
+                  "pull-sync"   impl-sql/sql-pull-sync
+                  "delete-sync" impl-sql/sql-delete-sync
+                  "clear"       impl-sql/sql-clear}})
 
 (defn.xt get-dbtype
   [db]
