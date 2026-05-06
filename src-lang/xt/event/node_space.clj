@@ -61,7 +61,7 @@
   "lists all current node spaces"
   {:added "4.1"}
   [node]
-  (return (xtd/arr-sort (xtd/obj-keys (xt/x:get-key node "spaces"))
+  (return (xtd/arr-sort (xt/x:obj-keys (xt/x:get-key node "spaces"))
                         (fn [x] (return x))
                         xt/x:str-lt)))
 

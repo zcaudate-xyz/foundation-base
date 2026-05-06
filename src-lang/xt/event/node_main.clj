@@ -92,7 +92,7 @@
   "lists registered request handlers"
   {:added "4.1"}
   [node]
-  (return (xtd/arr-sort (xtd/obj-keys (xt/x:get-key node "handlers"))
+  (return (xtd/arr-sort (xt/x:obj-keys (xt/x:get-key node "handlers"))
                         (fn [x] (return x))
                         xt/x:str-lt)))
 
@@ -128,7 +128,7 @@
   "lists registered stream triggers"
   {:added "4.1"}
   [node]
-  (return (xtd/arr-sort (xtd/obj-keys (xt/x:get-key node "triggers"))
+  (return (xtd/arr-sort (xt/x:obj-keys (xt/x:get-key node "triggers"))
                         (fn [x] (return x))
                         xt/x:str-lt)))
 
@@ -143,7 +143,7 @@
   "lists attached transports"
   {:added "4.1"}
   [node]
-  (return (xtd/arr-sort (xtd/obj-keys (xt/x:get-key node "transports"))
+  (return (xtd/arr-sort (xt/x:obj-keys (xt/x:get-key node "transports"))
                         (fn [x] (return x))
                         xt/x:str-lt)))
 
@@ -274,7 +274,34 @@
   (var target (xt/x:get-key meta "transport-id"))
   (when (xt/x:not-nil? target)
     (return target))
-  (return (xt/x:get-idx (-/list-transports node) 0)))
+  (var transports (-/list-transports node))
+  (when (== 0 (xt/x:len transports))
+    (return nil))
+  (return (xt/x:get-idx transports 0)))
+
+(defn.xt await-pending
+  "waits for a pending request state to settle"
+  {:added "4.1"}
+  [state]
+  (var status (xt/x:get-key state "status"))
+  (cond (== status "resolved")
+        (return (promise/x:promise-run
+                 (xt/x:get-key state "value")))
+
+        (== status "rejected")
+        (return
+         (promise/x:promise
+          (fn []
+            (xt/x:throw (xt/x:get-key state "error")))))
+
+        :else
+        (return
+         (promise/x:promise-then
+          (promise/x:with-delay 1
+            (fn []
+              (return nil)))
+          (fn [_]
+            (return (-/await-pending state)))))))
 
 (defn.xt respond-ok
   "constructs and optionally sends a successful response"
@@ -348,28 +375,38 @@
      (node-request/response-body
       (-/receive-request node request-frame nil)))
     (try
+      (var pending-state {"status" "pending"
+                          "value" nil
+                          "error" nil})
+      (node-request/add-pending node
+                                request-frame
+                                (fn [value]
+                                  (xt/x:set-key pending-state "status" "resolved")
+                                  (xt/x:set-key pending-state "value" value)
+                                  (return value))
+                                (fn [err]
+                                  (xt/x:set-key pending-state "status" "rejected")
+                                  (xt/x:set-key pending-state "error" err)
+                                  (return err))
+                                {:transport-id target})
       (return
-       (promise/x:promise
-        (fn [resolve reject]
-          (node-request/add-pending node
-                                    request-frame
-                                    resolve
-                                    reject
-                                    {:transport-id target})
-          (promise/x:promise-catch
-           (promise/x:promise-then
-            (-/send-transport node target request-frame)
-            (fn [_]
-              (return request-frame)))
-           (fn [err]
-             (node-request/remove-pending node
-                                          (xt/x:get-key request-frame "id"))
-             (reject err))))))
+       (promise/x:promise-then
+        (promise/x:promise-catch
+         (promise/x:promise-then
+          (-/send-transport node target request-frame)
+          (fn [_]
+            (return nil)))
+         (fn [err]
+           (node-request/remove-pending node
+                                        (xt/x:get-key request-frame "id"))
+           (xt/x:throw err)))
+        (fn [_]
+          (return (-/await-pending pending-state)))))
       (catch err
         (return
          (promise/x:promise
-           (fn [resolve reject]
-             (reject err))))))))
+          (fn []
+            (xt/x:throw err))))))))
 
 (defn.xt subscribe
   "constructs and optionally sends a subscribe control frame"

@@ -14,7 +14,7 @@
 (def$.xt STATUS_OK    "ok")
 (def$.xt STATUS_ERROR "error")
 
-(def$.xt SPACE_NODE "$node")
+(def$.xt SPACE_NODE "__NODE__")
 
 (defn.xt rand-id
   "creates a simple random id"

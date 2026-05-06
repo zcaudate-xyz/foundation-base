@@ -1,10 +1,12 @@
 (ns hara.lang.impl-deps-test
   (:require [hara.common.emit-prep-lua-test :as prep]
+            [hara.lang.impl :as impl]
             [hara.lang.impl-deps :as deps]
             [hara.lang.impl-entry :as entry]
             [hara.lang.library :as lib]
             [hara.lang.library-snapshot :as snap]
-            [hara.model.spec-lua :as lua])
+            [hara.model.spec-lua :as lua]
+            [xt.lang.common-data])
   (:use code.test))
 
 (def +library-ext+
@@ -162,7 +164,17 @@
       (deps/collect-script-summary))
   => '[(L.util/cjson-read "hello")
        (L.util/cjson-read)
-       {"cjson" {:as cjson}}])
+       {"cjson" {:as cjson}}]
+
+  (let [library (impl/clone-default-library)]
+    (-> (deps/collect-script (lib/get-book library :lua)
+                             '(x:obj-keys {:a 1})
+                             {:module {:id 'L.user
+                                       :link '{- L.user}}})
+        (deps/collect-script-summary)))
+  => '[(xt.lang.common-data/obj-keys {:a 1})
+       (xt.lang.common-data/obj-keys)
+       {}])
 
 ^{:refer hara.lang.impl-deps/collect-script-summary :added "4.0"}
 (fact "summaries the output of `collect-script`"

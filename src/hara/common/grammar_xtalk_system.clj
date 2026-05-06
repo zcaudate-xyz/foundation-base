@@ -212,6 +212,33 @@
        (map xtalk-op-profiles)
        (apply set/union #{})))
 
+(defn xtalk-op-polyfill-symbol
+  "returns the hard-link raw symbol for an xtalk op when it maps to a namespaced helper"
+  {:added "4.1"}
+  [op]
+  (let [{:keys [emit raw]} (xtalk-op-entry op)]
+    (when (and (= :hard-link emit)
+               (symbol? raw)
+               (namespace raw))
+      raw)))
+
+(defn xtalk-ops-polyfill-symbols
+  "returns all hard-link helper symbols referenced by a collection of xtalk ops"
+  {:added "4.1"}
+  [ops]
+  (->> ops
+       (keep xtalk-op-polyfill-symbol)
+       set))
+
+(defn xtalk-ops-polyfill-modules
+  "returns the helper module namespaces referenced by a collection of xtalk ops"
+  {:added "4.1"}
+  [ops]
+  (->> ops
+       xtalk-ops-polyfill-symbols
+       (keep (comp symbol namespace))
+       set))
+
 (defn scan-xtalk
   "scans a form for xtalk op usage, linked hard-link modules, and template restaging"
   {:added "4.1"}
@@ -234,19 +261,12 @@
             (vreset! template? true)))
         form)
       input)
-     (let [xtalk-ops @ops]
-       (cond-> {:ops xtalk-ops
-                :symbols @symbols
-                :profiles (xtalk-ops-profiles xtalk-ops)
-                :polyfill-modules (->> xtalk-ops
-                                       (keep (fn [op]
-                                               (let [{:keys [emit raw]} (xtalk-op-entry op)]
-                                                 (when (and (= :hard-link emit)
-                                                            (symbol? raw)
-                                                            (namespace raw))
-                                                   (symbol (namespace raw))))))
-                                       set)}
-         @template? (assoc :template? true))))))
+      (let [xtalk-ops @ops]
+        (cond-> {:ops xtalk-ops
+                 :symbols @symbols
+                 :profiles (xtalk-ops-profiles xtalk-ops)
+                 :polyfill-modules (xtalk-ops-polyfill-modules xtalk-ops)}
+          @template? (assoc :template? true))))))
 
 (defn xtalk-grammar-supported-ops
   "returns the xtalk ops supported by a grammar reserved map"

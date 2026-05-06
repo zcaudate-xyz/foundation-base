@@ -1,13 +1,14 @@
 (ns hara.lang.impl-deps
   (:require [clojure.set :as set]
-            [hara.lang.book :as b]
-            [hara.common.emit :as emit]
-            [hara.common.emit-preprocess :as preprocess] [hara.common.preprocess-base :as preprocess-base]
-            [hara.common.emit-rewrite :as rewrite]
-            [hara.lang.impl-deps-imports :as imports]
-            [hara.lang.impl-entry :as entry]
-            [hara.common.util :as ut]
-            [std.lib.collection :as collection]
+             [hara.lang.book :as b]
+             [hara.common.emit :as emit]
+             [hara.common.emit-preprocess :as preprocess] [hara.common.preprocess-base :as preprocess-base]
+             [hara.common.emit-rewrite :as rewrite]
+             [hara.common.grammar-xtalk-system :as xtalk-system]
+             [hara.lang.impl-deps-imports :as imports]
+             [hara.lang.impl-entry :as entry]
+             [hara.common.util :as ut]
+             [std.lib.collection :as collection]
             [std.lib.deps :as deps]
             [std.lib.foundation :as f]))
 
@@ -125,7 +126,13 @@
                                     form
                                     (:grammar book)
                                     (assoc mopts :book book))
-        [entries module-lu] (collect-script-entries book sym-ids)
+        polyfill-sym-ids (-> form
+                             xtalk-system/scan-xtalk
+                             :ops
+                             xtalk-system/xtalk-ops-polyfill-symbols)
+        [entries module-lu] (collect-script-entries book
+                                                    (concat sym-ids
+                                                            polyfill-sym-ids))
         natives (imports/script-imports book entries)]
     [form entries natives]))
 

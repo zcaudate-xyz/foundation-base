@@ -121,7 +121,14 @@
        :symbols #{}
        :profiles #{}
        :polyfill-modules #{}
-       :template? true})
+        :template? true})
+
+^{:refer hara.common.grammar-xtalk-system/xtalk-ops-polyfill-symbols :added "4.1"}
+(fact "returns hard-link helper symbols for xtalk ops"
+  (xtalk-ops-polyfill-symbols #{:x-obj-keys
+                                :x-promise})
+  => '#{xt.lang.common-data/obj-keys
+        xt.lang.common-promise/promise})
 
 ^{:refer hara.common.grammar-xtalk-system/xtalk-grammar-supported-ops :added "4.1"}
 (fact "returns supported ops from reserved grammar entries"
