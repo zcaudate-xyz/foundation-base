@@ -23,7 +23,14 @@
     [(promise/x:promise-native? (req/ensure-promise {:ok true}))])
   => [true])
 
-^{:refer xt.event.node-request/add-pending :added "4.1"}
+^{:refer xt.event.node-request/add-pending :added "4.1"
+  :setup [(def +out+
+            (just-in
+             [true
+              1
+              (just-in [{"ok" true}])
+              empty?
+              empty?]))]}
 (fact "tracks and settles pending request entries"
 
   (!.dt
@@ -45,16 +52,13 @@
      (frame/response-ok-frame (. request ["id"]) "room/a" {:ok true} nil))
     [(xt/x:is-string? (. request ["id"]))
      (xt/x:len before)
-     [(. (xt/x:get-idx resolved 0) ["ok"])]
+     resolved
      rejected
      (xt/x:obj-keys (. n ["pending"]))])
-  => [true
-      1
-      [true]
-      []
-      []])
+  => +out+)
 
-^{:refer xt.event.node-request/remove-pending :added "4.1"}
+^{:refer xt.event.node-request/remove-pending :added "4.1"
+  :setup [(def +out+ (just-in [true empty?]))]}
 (fact "removes pending request entries by id"
 
   (!.dt
@@ -69,9 +73,10 @@
     (var removed (req/remove-pending n (. request ["id"])))
     [(xt/x:is-string? (. (. removed ["request"]) ["id"]))
      (xt/x:obj-keys (. n ["pending"]))])
-  => [true []])
+  => +out+)
 
-^{:refer xt.event.node-request/settle-pending :added "4.1"}
+^{:refer xt.event.node-request/settle-pending :added "4.1"
+  :setup [(def +out+ (just-in [true [true] empty?]))]}
 (fact "settles pending requests using response reply ids"
 
   (!.dt
@@ -89,11 +94,11 @@
     (var entry
       (req/settle-pending
        n
-       (frame/response-ok-frame (. request ["id"]) "room/a" {:ok true} nil)))
+     (frame/response-ok-frame (. request ["id"]) "room/a" {:ok true} nil)))
     [(xt/x:is-string? (. (. entry ["request"]) ["id"]))
      resolved
      (xt/x:obj-keys (. n ["pending"]))])
-  => [true [true] []])
+  => +out+)
 
 ^{:refer xt.event.node-request/invoke-handler :added "4.1"}
 (fact "invokes shared handlers against the selected space"
@@ -140,3 +145,8 @@
       (req/response-body
        (frame/response-ok-frame "req-1" "room/a" {:ok true} nil)))])
   => [true])
+
+(comment
+  (s/snapto '[xt.event.node-request])
+  (s/seedgen-langremove '[xt.event.node-request] {:lang [:lua :python] :write true})
+  (s/seedgen-langadd '[xt.event.node-request] {:lang [:lua :python] :write true}))

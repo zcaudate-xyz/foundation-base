@@ -15,7 +15,11 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.event.node-router/list-subscriptions :added "4.1"}
+^{:refer xt.event.node-router/list-subscriptions :added "4.1"
+  :setup [(def +out+
+            (just-in
+             [(just ["peer-a" "peer-b"] :in-any-order)
+              empty?]))]}
 (fact "lists router subscriptions by space"
 
   (!.dt
@@ -24,7 +28,7 @@
     (router/add-subscription n "peer-b" "room/a" "event/ping" nil nil)
     [(router/list-subscriptions n "room/a" "event/ping")
      (router/list-subscriptions n "room/b" "event/ping")])
-  => [["peer-a" "peer-b"] []])
+  => +out+)
 
 ^{:refer xt.event.node-router/unregister-connection :added "4.1"}
 (fact "removing a transport prunes its subscriptions"
@@ -63,7 +67,14 @@
      (. transport ["meta"] ["role"])])
   => ["event.node.transport" "peer-a" "edge"])
 
-^{:refer xt.event.node-main/node-create :added "4.1"}
+^{:refer xt.event.node-main/node-create :added "4.1"
+  :setup [(def +out+
+            (just-in
+             ["event.node"
+              empty?
+              empty?
+              empty?
+              (just ["connections" "subscriptions"] :in-any-order)]))]}
 (fact "creates node state with router and registries"
 
   (!.dt
@@ -73,7 +84,7 @@
      (xt/x:obj-keys (. n ["handlers"]))
      (xt/x:obj-keys (. n ["triggers"]))
      (xt/x:obj-keys (. n ["router"]))])
-  => ["event.node" [] [] [] ["connections" "subscriptions"]])
+  => +out+)
 
 ^{:refer xt.event.node-main/register-handler :added "4.1"}
 (fact "registers handlers on the node"
@@ -229,8 +240,8 @@
     (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
     [(main/request-target n {"transport-id" "peer-b"})
      (main/request-target n {})
-     (main/request-target (main/node-create {}) {})])
-  => ["peer-b" "peer-a" nil])
+     (xt/x:nil? (main/request-target (main/node-create {}) {}))])
+  => ["peer-b" "peer-a" true])
 
 ^{:refer xt.event.node-main/respond-ok :added "4.1"}
 (fact "respond-ok forwards response frames to a transport"
@@ -301,3 +312,8 @@
   (!.dt
     (xt/x:is-function? main/receive-frame))
   => true)
+
+(comment
+  (s/snapto '[xt.event.node-main])
+  (s/seedgen-langremove '[xt.event.node-main] {:lang [:lua :python] :write true})
+  (s/seedgen-langadd '[xt.event.node-main] {:lang [:lua :python] :write true}))

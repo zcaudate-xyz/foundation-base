@@ -230,5 +230,10 @@
                          {:value 9}
                          nil
                          nil))
-    [(. (node/get-space-state n "room/a") ["value"])])
+     [(. (node/get-space-state n "room/a") ["value"])])
   => [9])
+
+(comment
+  (s/snapto '[xt.event.node-pubsub])
+  (s/seedgen-langremove '[xt.event.node-pubsub] {:lang [:lua :python] :write true})
+  (s/seedgen-langadd '[xt.event.node-pubsub] {:lang [:lua :python] :write true}))

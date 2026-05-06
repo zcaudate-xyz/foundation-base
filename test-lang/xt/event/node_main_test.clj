@@ -701,3 +701,8 @@
   (!.py
     (xt/x:is-function? main/receive-frame))
   => true)
+
+(comment
+  (s/snapto '[xt.event.node-main])
+  (s/seedgen-langremove '[xt.event.node-main] {:lang [:lua :python] :write true})
+  (s/seedgen-langadd '[xt.event.node-main] {:lang [:lua :python] :write true}))

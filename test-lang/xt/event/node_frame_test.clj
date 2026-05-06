@@ -20,7 +20,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.event.node-frame/rand-id :added "4.1"}
 (fact "creates ids with the requested prefix"
@@ -372,3 +372,8 @@
     [(frame/stream-frame? (frame/stream-frame "space/a" "event/ping" {} nil nil))
      (frame/stream-frame? (frame/request-frame "space/a" "echo" [] nil))])
   => [true false])
+
+(comment
+  (s/snapto '[xt.event.node-frame])
+  (s/seedgen-langremove '[xt.event.node-frame] {:lang [:lua :python] :write true})
+  (s/seedgen-langadd '[xt.event.node-frame] {:lang [:lua :python] :write true}))

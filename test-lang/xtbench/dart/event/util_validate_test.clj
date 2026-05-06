@@ -84,7 +84,7 @@
                          "data" "hello"
                          "message" "Must not be empty"}}})
 
-^{:refer xt.event.util-validate/validate-fields-loop :added "4.1"}
+^{:refer xt.event.util-validate/validate-fields-loop :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "walks fields through a single validation promise chain"
 
   (notify/wait-on :dart
@@ -128,7 +128,7 @@
                         "data" ""
                         "message" "Must not be empty"}}})
 
-^{:refer xt.event.util-validate/validate-all :added "4.1"}
+^{:refer xt.event.util-validate/validate-all :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "validates all fields through a single promise chain"
 
   (notify/wait-on :dart

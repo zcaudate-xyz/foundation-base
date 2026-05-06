@@ -370,3 +370,8 @@
       (req/response-body
        (frame/response-ok-frame "req-1" "room/a" {:ok true} nil)))])
   => [true])
+
+(comment
+  (s/snapto '[xt.event.node-request])
+  (s/seedgen-langremove '[xt.event.node-request] {:lang [:lua :python] :write true})
+  (s/seedgen-langadd '[xt.event.node-request] {:lang [:lua :python] :write true}))

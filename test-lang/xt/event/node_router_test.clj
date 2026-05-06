@@ -208,11 +208,12 @@
        (xt/x:get-key space-subs "event/a")
        "peer-b")
       "id")
-     (xt/x:get-key
-      (xt/x:get-key space-subs "event/a")
-      "peer-a")
-     (xt/x:get-key space-subs "event/b")])
-  => ["sub-b" nil nil]
+     (xt/x:nil?
+      (xt/x:get-key
+       (xt/x:get-key space-subs "event/a")
+       "peer-a"))
+     (xt/x:nil? (xt/x:get-key space-subs "event/b"))])
+  => ["sub-b" true true]
 
   (!.lua
     (var space-subs {"event/a" {"peer-a" {:id "sub-a"}
@@ -224,11 +225,12 @@
        (xt/x:get-key space-subs "event/a")
        "peer-b")
       "id")
-     (xt/x:get-key
-      (xt/x:get-key space-subs "event/a")
-      "peer-a")
-     (xt/x:get-key space-subs "event/b")])
-  => ["sub-b" nil nil]
+     (xt/x:nil?
+      (xt/x:get-key
+       (xt/x:get-key space-subs "event/a")
+       "peer-a"))
+     (xt/x:nil? (xt/x:get-key space-subs "event/b"))])
+  => ["sub-b" true true]
 
   (!.py
     (var space-subs {"event/a" {"peer-a" {:id "sub-a"}
@@ -240,11 +242,12 @@
        (xt/x:get-key space-subs "event/a")
        "peer-b")
       "id")
-     (xt/x:get-key
-      (xt/x:get-key space-subs "event/a")
-      "peer-a")
-     (xt/x:get-key space-subs "event/b")])
-  => ["sub-b" nil nil])
+     (xt/x:nil?
+      (xt/x:get-key
+       (xt/x:get-key space-subs "event/a")
+       "peer-a"))
+     (xt/x:nil? (xt/x:get-key space-subs "event/b"))])
+  => ["sub-b" true true])
 
 ^{:refer xt.event.node-router/prune-subscription-space-loop :added "4.1"}
 (fact "prunes one connection across all spaces"
@@ -565,3 +568,8 @@
      {"transport-id" "peer-a"})
     (router/list-subscriptions n "room/a" "event/ping"))
   => +out+)
+
+(comment
+  (s/snapto '[xt.event.node-router])
+  (s/seedgen-langremove '[xt.event.node-router] {:lang [:lua :python] :write true})
+  (s/seedgen-langadd '[xt.event.node-router] {:lang [:lua :python] :write true}))

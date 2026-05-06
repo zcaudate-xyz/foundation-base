@@ -1,9 +1,10 @@
 (ns hara.model.spec-ruby.rewrite
   (:require [clojure.set :as set]
-            [clojure.string :as string]
-            [hara.common.util :as ut]
-            [hara.lang.rewrite.common :as common]
-            [hara.lang.rewrite.destructure :as destruct]))
+             [clojure.string :as string]
+             [clojure.walk :as walk]
+             [hara.common.util :as ut]
+             [hara.lang.rewrite.common :as common]
+             [hara.lang.rewrite.destructure :as destruct]))
 
 (defn- callable-form?
   [form]
@@ -37,6 +38,21 @@
        (seq target)
        (every? symbol? target)))
 
+(defn- invalid-ruby-local-symbol?
+  [sym]
+  (and (symbol? sym)
+       (nil? (namespace sym))
+       (re-find #"[?!]" (name sym))))
+
+(defn- ruby-local-symbol
+  [sym]
+  (if-not (invalid-ruby-local-symbol? sym)
+    sym
+    (symbol (-> (name sym)
+                (string/replace "-" "_")
+                (string/replace "?" "_p")
+                (string/replace "!" "_bang")))))
+
 (defn- destructure-target?
   [target]
   (or (destruct/destructure-target? target)
@@ -61,8 +77,145 @@
     (vector-destructure-target? target)
     (vector-destructure-bindings target temp)
 
+     :else
+     []))
+
+(declare normalize-ruby-local-body)
+
+(defn- rename-destructure-target
+  [target]
+  (let [symbols (distinct (destruct/destructure-symbols target ut/sym-default-str))
+        renames (into {}
+                      (keep (fn [sym]
+                              (let [sym* (ruby-local-symbol sym)]
+                                (when (not= sym sym*)
+                                  [sym sym*]))))
+                      symbols)]
+    [(walk/postwalk (fn [x]
+                      (if (and (symbol? x)
+                               (contains? renames x))
+                        (get renames x)
+                        x))
+                    target)
+     renames]))
+
+(defn- rename-binding-target
+  [target]
+  (cond
+    (symbol? target)
+    (let [target* (ruby-local-symbol target)]
+      [target* (cond-> {} (not= target target*) (assoc target target*))])
+
+    (vector-destructure-target? target)
+    [(mapv ruby-local-symbol target)
+     (into {}
+           (keep (fn [sym]
+                   (when (not= '_ sym)
+                     (let [sym* (ruby-local-symbol sym)]
+                       (when (not= sym sym*)
+                         [sym sym*])))))
+           target)]
+
+    (destruct/destructure-target? target)
+    (rename-destructure-target target)
+
     :else
-    []))
+    [target {}]))
+
+(declare normalize-ruby-local-form)
+
+(defn- normalize-callable-args
+  [args]
+  (reduce (fn [[out env] arg]
+            (if (symbol? arg)
+              (let [arg* (ruby-local-symbol arg)]
+                [(conj out arg*)
+                 (cond-> env
+                   (not= arg arg*) (assoc arg arg*))])
+              [(conj out arg) env]))
+          [[] {}]
+          args))
+
+(defn- normalize-ruby-local-form*
+  [form env]
+  (cond
+    (symbol? form)
+    [(get env form form) env]
+
+    (seq? form)
+    (let [head (first form)]
+      (cond
+        (callable-form? form)
+        (let [[tag & more] form
+              [name args body] (if (symbol? (first more))
+                                 [(first more) (second more) (drop 2 more)]
+                                 [nil (first more) (rest more)])
+              name* (when name (ruby-local-symbol name))
+              [args* arg-env] (normalize-callable-args args)
+              env* (cond-> (merge env arg-env)
+                     (and name (not= name name*)) (assoc name name*))
+              body* (normalize-ruby-local-body body env*)]
+          [(apply list tag
+                  (concat (when name [name*])
+                          [args*]
+                          body*))
+           env])
+
+        (#{'defn 'defgen} head)
+        (let [[tag name args & body] form
+              [args* arg-env] (normalize-callable-args args)
+              body* (normalize-ruby-local-body body (merge env arg-env))]
+          [(apply list tag name args* body*) env])
+
+        (= 'var head)
+        (let [[target renames] (rename-binding-target (second form))
+              args (drop 2 form)
+              args* (map #(normalize-ruby-local-form % env) args)]
+          [(apply list 'var target args*)
+           (merge env renames)])
+
+        (#{'do 'do*} head)
+        [(apply list head (normalize-ruby-local-body (rest form) env))
+         env]
+
+        :else
+        [(apply list
+                (map #(normalize-ruby-local-form % env) form))
+         env]))
+
+    (vector? form)
+    [(mapv #(normalize-ruby-local-form % env) form) env]
+
+    (map? form)
+    [(into {} (map (fn [[k v]]
+                     [(normalize-ruby-local-form k env)
+                      (normalize-ruby-local-form v env)]))
+           form)
+     env]
+
+    (set? form)
+    [(set (map #(normalize-ruby-local-form % env) form)) env]
+
+    :else
+    [form env]))
+
+(defn- normalize-ruby-local-form
+  [form env]
+  (first (normalize-ruby-local-form* form env)))
+
+(defn- normalize-ruby-local-body
+  [forms env]
+  (loop [remaining (seq forms)
+         env env
+         out []]
+    (if-not remaining
+      out
+      (let [[form* env*] (normalize-ruby-local-form* (first remaining) env)]
+        (recur (next remaining) env* (conj out form*))))))
+
+(defn- normalize-ruby-local-forms
+  [forms]
+  (normalize-ruby-local-body forms {}))
 
 (defn- collect-callable-vars
   [form]
@@ -314,7 +467,8 @@
 
 (defn rewrite-callable-forms
   [forms]
-  (let [callables (collect-callable-vars forms)]
+  (let [forms     (normalize-ruby-local-forms forms)
+        callables (collect-callable-vars forms)]
     (mapv #(rewrite-runtime-form % callables) forms)))
 
 (defn- mark-inline-def

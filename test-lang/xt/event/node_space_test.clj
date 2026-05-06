@@ -119,22 +119,22 @@
     (var n (node/node-create {}))
     (space/create-space n "room/a" {:state {:count 1}})
     [(. (space/get-space n "room/a") ["id"])
-     (space/get-space n "missing")])
-  => ["room/a" nil]
+     (xt/x:nil? (space/get-space n "missing"))])
+  => ["room/a" true]
 
   (!.lua
     (var n (node/node-create {}))
     (space/create-space n "room/a" {:state {:count 1}})
     [(. (space/get-space n "room/a") ["id"])
-     (space/get-space n "missing")])
-  => ["room/a" nil]
+     (xt/x:nil? (space/get-space n "missing"))])
+  => ["room/a" true]
 
   (!.py
     (var n (node/node-create {}))
     (space/create-space n "room/a" {:state {:count 1}})
     [(. (space/get-space n "room/a") ["id"])
-     (space/get-space n "missing")])
-  => ["room/a" nil])
+     (xt/x:nil? (space/get-space n "missing"))])
+  => ["room/a" true])
 
 ^{:refer xt.event.node-space/ensure-space :added "4.1"}
 (fact "ensures a space exists without replacing existing entries"
@@ -175,8 +175,8 @@
     [(.
       (space/remove-space n "room/a")
       ["id"])
-     (space/get-space n "room/a")])
-  => ["room/a" nil]
+     (xt/x:nil? (space/get-space n "room/a"))])
+  => ["room/a" true]
 
   (!.lua
     (var n (node/node-create {}))
@@ -184,8 +184,8 @@
     [(.
       (space/remove-space n "room/a")
       ["id"])
-     (space/get-space n "room/a")])
-  => ["room/a" nil]
+     (xt/x:nil? (space/get-space n "room/a"))])
+  => ["room/a" true]
 
   (!.py
     (var n (node/node-create {}))
@@ -193,8 +193,8 @@
     [(.
       (space/remove-space n "room/a")
       ["id"])
-     (space/get-space n "room/a")])
-  => ["room/a" nil])
+     (xt/x:nil? (space/get-space n "room/a"))])
+  => ["room/a" true])
 
 ^{:refer xt.event.node-space/list-spaces :added "4.1"}
 (fact "lists active spaces"
@@ -309,3 +309,8 @@
     [(. (space/get-space-state n "room/a") ["count"])
      (. (space/get-space-state n "room/a") ["id"])])
   => [5 "room/a"])
+
+(comment
+  (s/snapto '[xt.event.node-space])
+  (s/seedgen-langremove '[xt.event.node-space] {:lang [:lua :python] :write true})
+  (s/seedgen-langadd '[xt.event.node-space] {:lang [:lua :python] :write true}))
