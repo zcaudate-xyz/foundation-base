@@ -77,7 +77,7 @@
   (when (== status 200)
     (var result (k/get-in body ["ListBucketResult"]))
     (var arr (:? (xt/x:is-array? result)
-                 (k/arr-keep result (k/key-fn "Contents"))
+                 (xtd/arr-keep result (k/key-fn "Contents"))
                  (xtd/arrayify (k/get-in result ["Contents"]))))
     (:= (. res body) (xtd/arr-map arr (k/key-fn "Key"))))
   (return res))
