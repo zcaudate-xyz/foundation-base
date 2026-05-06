@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[js.core :as j] [xt.lang.common-lib :as k] [xt.lang.common-math :as math] [xt.lang.spec-base :as xt]]})
+  {:require [[xt.lang.common-lib :as k] [xt.lang.common-math :as math] [xt.lang.spec-base :as xt]]})
 
 
 ;;
@@ -21,39 +21,39 @@
   (:= width  (or width  (- (. parent width)  (* 2 margin))))
   (var out #{width height})
   (cond (== position "centered")
-        (j/assign out {:top  (/ (- (. parent height) height) 2)
+        (xt/x:obj-assign out {:top  (/ (- (. parent height) height) 2)
                        :left (/ (- (. parent width) width) 2)})
         
         (== position "top")
-        (j/assign out {:top  margin
+        (xt/x:obj-assign out {:top  margin
                        :left (/ (- (. parent width) width) 2)})
         
         (== position "bottom")
-        (j/assign out {:top  (- (. parent height) height margin)
+        (xt/x:obj-assign out {:top  (- (. parent height) height margin)
                        :left (/ (- (. parent width) width) 2)})
         
         (== position "left")
-        (j/assign out {:top   (/ (- (. parent height) height) 2)
+        (xt/x:obj-assign out {:top   (/ (- (. parent height) height) 2)
                        :left  margin})
 
         (== position "right")
-        (j/assign out {:top   (/ (- (. parent height) height) 2)
+        (xt/x:obj-assign out {:top   (/ (- (. parent height) height) 2)
                        :left  (- (. parent width) width margin)})
 
         (== position "top_right")
-        (j/assign out {:top   margin
+        (xt/x:obj-assign out {:top   margin
                        :left  (- (. parent width) width margin)})
 
         (== position "bottom_right")
-        (j/assign out {:top   (- (. parent height) height margin)
+        (xt/x:obj-assign out {:top   (- (. parent height) height margin)
                        :left  (- (. parent width) width margin)})
         
         (== position "bottom_left")
-        (j/assign out {:top   (- (. parent height) height margin)
+        (xt/x:obj-assign out {:top   (- (. parent height) height margin)
                        :left  margin})
         
         (== position "top_left")
-        (j/assign out {:top   margin
+        (xt/x:obj-assign out {:top   margin
                        :left  margin}))
   (return out))
 
@@ -145,7 +145,7 @@
            marginCross
            host
            content})
-  (return (j/assign (-/contextCoordinateMain e)
+  (return (xt/x:obj-assign (-/contextCoordinateMain e)
                     (-/contextCoordinateCross e))))
 
 
@@ -212,18 +212,18 @@
                  :counter "from_left"}
    :flip-horizontal {:transform "rotateY"
                      :out (fn [progress]
-                             (+ (math/mix 0 j/PI progress)
+                             (+ (math/mix 0 Math.PI progress)
                                "rad"))
                      :in  (fn [progress]
-                             (+ (math/mix (- j/PI) 0 progress)
+                             (+ (math/mix (- Math.PI) 0 progress)
                                "rad"))
                      :counter "flip_vertical"}
    :flip-vertical   {:transform "rotateX"
                      :out (fn [progress]
-                             (+ (math/mix 0 j/PI progress)
+                             (+ (math/mix 0 Math.PI progress)
                                "rad"))
                      :in  (fn [progress]
-                             (+ (math/mix (- j/PI) 0 progress)
+                             (+ (math/mix (- Math.PI) 0 progress)
                                "rad"))
                      :counter "flip_horizontal"}})
 
@@ -334,10 +334,10 @@
                 {:style
                  (:? even
                      (-/transitionOut
-                      (j/assign #{progress}
+                      (xt/x:obj-assign #{progress}
                                 chord))
                      (-/transitionIn
-                      (j/assign #{progress}
+                      (xt/x:obj-assign #{progress}
                                 chord))
                      )})))
   
@@ -363,11 +363,11 @@
               ["translateX" (math/mix (- width) 0 progress)]
              
              (== transition "flip_horizontal")
-              ["rotateY" (+ (math/mix (- j/PI) 0 progress)
+              ["rotateY" (+ (math/mix (- Math.PI) 0 progress)
                            "rad")]
              
              (== transition "flip_vertical")
-              ["rotateX" (+ (math/mix (- j/PI) 0 progress)
+              ["rotateX" (+ (math/mix (- Math.PI) 0 progress)
                            "rad")]
              
              :else ["translateX" 0]))
@@ -386,7 +386,7 @@
     (:= opacity (:? (not= transition "fade")
                     (math/mix 1 fade progress)
                     
-                    :else (math/mix 1 0 (j/min 1 (* 2 progress)))))
+                    :else (math/mix 1 0 (Math.min 1 (* 2 progress)))))
     (var [direction amount]
          (:? (== transition "from_top")
               ["translateY" (math/mix 0 height progress)]
@@ -401,11 +401,11 @@
               ["translateX" (math/mix 0 width progress)]
              
              (== transition "flip_horizontal")
-              ["rotateY" (+ (math/mix 0 j/PI progress)
+              ["rotateY" (+ (math/mix 0 Math.PI progress)
                            "rad")]
 
              (== transition "flip_vertical")
-              ["rotateX" (+ (math/mix 0 j/PI progress)
+              ["rotateX" (+ (math/mix 0 Math.PI progress)
                            "rad")]
 
              :else

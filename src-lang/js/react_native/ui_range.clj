@@ -2,8 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[js.core :as j]
-             [js.react :as r]
+  {:require [[js.react :as r]
              [js.react-native :as n]
              [js.react-native.animate :as a]
              [js.react-native.physical-base :as physical-base]
@@ -22,8 +21,8 @@
    side
    layout
    length]
-  (var __theme (j/assign {} helper-theme-default/ButtonDefaultTheme theme))
-  (var __themePipeline (j/assign {}
+  (var __theme (xt/x:obj-assign {} helper-theme-default/ButtonDefaultTheme theme))
+  (var __themePipeline (xt/x:obj-assign {}
                                  helper-theme-default/PressDefaultPipeline
                                  themePipeline))
   (var [fgStyleStatic fgTransformFn]
@@ -36,8 +35,8 @@
                           (:= lower 0)
                           (:= upper 0)]} m)
                   (var limit (:? (== side "lower")
-                                 (j/max 0 (j/min position upper))
-                                 (j/min length (j/max position lower))))
+                                 (Math.max 0 (Math.min position upper))
+                                 (Math.min length (Math.max position lower))))
                   
                   (return {:style {:transform
                                    [(:? (== layout "horizontal")
@@ -73,7 +72,7 @@
                        #{[disabled
                           highlighted
                           outlined
-                          :chord (j/assign #{value} chord)
+                          :chord (xt/x:obj-assign #{value} chord)
                           indicators
                           onChord
                           indicatorParams
@@ -93,7 +92,7 @@
   (r/watch [value]
     (when (not pressing)
       (a/setValue position (forwardFn value))))
-  (return (j/assign touchable
+  (return (xt/x:obj-assign touchable
                     #{panHandlers
                       fgStyleStatic
                       fgTransformFn})))
@@ -183,14 +182,14 @@
    [:% physical-base/Box
     #{[:chord      {:lower touchableLower.chord
                     :upper touchableUpper.chord}
-       :inner [(j/assign
+       :inner [(xt/x:obj-assign
                 {:component n/View
                  :key "axis"
                  :style [(:? (== layout "horizontal") {:height size :width (+ length (* 2 size))} {:height (+ length (* 2 size)) :width size})
                          {:borderRadius 3}
-                         (:.. (j/arrayify axisStyle))]}
+                         (:.. (xtd/arrayify axisStyle))]}
                 axisProps)
-               (j/assign
+               (xt/x:obj-assign
                 {:component n/View
                  :key "knobLower"
                  :style [(:? (== layout "horizontal")
@@ -207,18 +206,18 @@
                                     {:cursor "ew-resize"}
                                     {:cursor "ns-resize"})})
                          touchableLower.fgStyleStatic
-                         (:.. (j/arrayify knobStyle))]
+                         (:.. (xtd/arrayify knobStyle))]
                  :transformations touchableLower.fgTransformFn}
                 touchableLower.panHandlers
                 (do:> (var #{[indicators
                               chord
                               (:.. rprops)]} touchableLower)
-                      (return (j/assign rprops
+                      (return (xt/x:obj-assign rprops
                                         {:indicators
-                                         (j/assign indicators
+                                         (xt/x:obj-assign indicators
                                                    {:upper touchableUpper.indicators.position})})))
                 knobProps)
-               (j/assign
+               (xt/x:obj-assign
                 {:component n/View
                  :key "knobUpper"
                  :style [(:? (== layout "horizontal")
@@ -235,17 +234,17 @@
                                     {:cursor "ew-resize"}
                                     {:cursor "ns-resize"})})
                          touchableUpper.fgStyleStatic
-                         (:.. (j/arrayify knobStyle))]
+                         (:.. (xtd/arrayify knobStyle))]
                  :transformations touchableUpper.fgTransformFn}
                 touchableUpper.panHandlers
                 (do:> (var #{[indicators
                               chord
                               (:.. rprops)]} touchableUpper)
-                      (return (j/assign rprops
+                      (return (xt/x:obj-assign rprops
                                         {:indicators
-                                         (j/assign indicators
+                                         (xt/x:obj-assign indicators
                                                    {:lower touchableLower.indicators.position})})))
                 knobProps)
-               (:.. (j/arrayify inner))]
+               (:.. (xtd/arrayify inner))]
        (:.. rprops)]}]))
 

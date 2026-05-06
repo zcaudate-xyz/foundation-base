@@ -11,7 +11,7 @@
              [xt.lang.common-notify]
              [xt.lang.common-repl]
              [xt.lang.common-trace]
-             [xt.module :as module])
+             [xt.lang.common-module :as module])
   (:refer-clojure :exclude [abs identity reduce map reverse sort eval find min read replace future concat pop name some keys filter max]))
 
 (l/script :js
@@ -386,4 +386,3 @@
   (./create-tests)
   (!.js
  (:- "hello" "world")))
-

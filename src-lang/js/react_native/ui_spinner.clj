@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.common-math :as math] [xt.lang.spec-base :as xt] [js.core :as j] [js.react :as r] [js.react-native :as n] [js.react-native.animate :as a] [js.react-native.physical-base :as physical-base] [js.react-native.physical-edit :as physical-edit] [js.react-native.helper-roller :as helper-roller] [js.react-native.helper-theme :as helper-theme] [js.react-native.helper-theme-default :as helper-theme-default]]})
+  {:require [[xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.common-math :as math] [xt.lang.spec-base :as xt] [js.react :as r] [js.react-native :as n] [js.react-native.animate :as a] [js.react-native.physical-base :as physical-base] [js.react-native.physical-edit :as physical-edit] [js.react-native.helper-roller :as helper-roller] [js.react-native.helper-theme :as helper-theme] [js.react-native.helper-theme-default :as helper-theme-default]]})
   
 (def.js ITEMS
   ["0" "1" "2" "3" "4" "5" "6" "7" "8" "9"])
@@ -28,8 +28,8 @@
   [#{[theme
       themePipeline
       (:.. rprops)]}]
-  (var __theme (j/assign {} helper-theme-default/ButtonDefaultTheme theme))
-  (var __themePipeline (j/assign {}
+  (var __theme (xt/x:obj-assign {} helper-theme-default/ButtonDefaultTheme theme))
+  (var __themePipeline (xt/x:obj-assign {}
                                  helper-theme-default/PressDefaultPipeline
                                  themePipeline))
   (var [styleStatic transformFn]
@@ -49,7 +49,7 @@
   (return
    [:% n/View
     {:style [-/styleDigit
-             (:.. (j/arrayify style))]}
+             (:.. (xtd/arrayify style))]}
     [:% n/Text
      {:style [-/styleDigitText
               (n/PlatformSelect
@@ -57,7 +57,7 @@
                       :cursor (:? editable
                                   "ns-resize"
                                   "default")}})
-              (:.. (j/arrayify styleText))]}
+              (:.. (xtd/arrayify styleText))]}
      text]]))
 
 (defn.js SpinnerDigit
@@ -77,8 +77,8 @@
   (return
    [:% n/View
     {:style [-/styleDigit
-             (:.. (j/arrayify style))]}
-     (j/map (xtd/arr-range divisions)
+             (:.. (xtd/arrayify style))]}
+     (xt/x:arr-map (xtd/arr-range divisions)
             (fn:> [index i]
              [:% physical-base/Text
               {:key i
@@ -90,7 +90,7 @@
                                :cursor (:? editable
                                            "ns-resize"
                                            "default")}})
-                       (:.. (j/arrayify styleText))]
+                       (:.. (xtd/arrayify styleText))]
                :transformations
                (fn [#{offset value}]
                  (var v (- offset index))
@@ -120,8 +120,8 @@
       styleDecimalText
       (:= decimal 0)]}]
   (var arrDigits [])
-  (var arrTotal  (j/ceil (j/log10 (+ max 0.0001))))
-  (xt/for:index [i [0 (j/max arrTotal
+  (var arrTotal  (Math.ceil (Math.log10 (+ max 0.0001))))
+  (xt/for:index [i [0 (Math.max arrTotal
                             (+ 1 decimal)) 1]]
     (when (and (== i decimal)
                (< 0 i))
@@ -131,7 +131,7 @@
   
   (var digitFn
        (fn [#{type order} i]
-         (var limit (j/pow 10 order))
+         (var limit (Math.pow 10 order))
          (var hideDigit
               (:? (== 0 decimal)
                   (< value limit)
@@ -142,7 +142,7 @@
                  {:key (+ "digit" i)
                   :style (:? hideDigit {:opacity 0})}
                  [:% -/SpinnerDigit
-                  {:index (j/floor (/ value (j/round (j/pow 10 order))))
+                  {:index (Math.floor (/ value (Math.round (Math.pow 10 order))))
                    :style styleDigit
                    :styleText styleDigitText
                    :editable editable}]])
@@ -158,7 +158,7 @@
                   :editable editable}]))))
   (return
    [:<>
-    (j/map arrDigits digitFn)]))
+    (xt/x:arr-map arrDigits digitFn)]))
 
 (defn.js useSpinnerPosition
   "helper function to connect spinner position"
@@ -173,7 +173,7 @@
                      (var nValue (math/clamp
                                    min max
                                    (- (r/curr valueRef)
-                                      (j/round (/ _value (or stride 8))))))
+                                      (Math.round (/ _value (or stride 8))))))
                      
                      (when (not= nValue (r/curr prevRef))
                        (setValue nValue)
@@ -211,7 +211,7 @@
   (var #{touchable
          panHandlers} (physical-edit/usePanTouchable
                        #{[disabled
-                          :chord (j/assign {:value __value} chord)
+                          :chord (xt/x:obj-assign {:value __value} chord)
                           (:.. rprops)]}
                        (or panDirection
                            "vertical")
@@ -260,9 +260,9 @@
                (n/PlatformSelect
                 {:web {:userSelect "none"
                        :cursor "default"}})
-               (:.. (j/arrayify style))]
+               (:.. (xtd/arrayify style))]
        :transformations transformFn
-       (:.. (j/assign touchable
+       (:.. (xt/x:obj-assign touchable
                       panHandlers))
        :children [[:% -/SpinnerValues
                    #{[:key "values"

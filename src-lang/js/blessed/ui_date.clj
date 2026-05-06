@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [js.core :as j] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style] [js.blessed.ui-core :as ui-core]]})
+  {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style] [js.blessed.ui-core :as ui-core]]})
 
 (defn.js TimePicker
   "Constructs a TimePicker"
@@ -16,14 +16,13 @@
            hourLabel
            hour  setHour} props
          tprops (ui-style/getTopProps props)
-         formatFn (fn:> [n]
-                    (+ " " (j/padEnd (j/padStart (+ "" n)
-                                                 2
-                                                 "0")
-                                     4)))
+          formatFn (fn:> [n]
+                     (+ " " (. (. (+ "" n)
+                                  (padStart 2 "0"))
+                               (padEnd 4))))
          _ (:= hourLabel   (or hourLabel "h"))
          _ (:= minuteLabel (or minuteLabel "m"))
-         minuteProps (j/assign {:key "0"
+         minuteProps (xt/x:obj-assign {:key "0"
                                 :left 10
                                 :format formatFn
                                 :value minute
@@ -67,7 +66,7 @@
            
            dayLabel
            day   setDay} props
-         tprops (j/assign
+         tprops (xt/x:obj-assign
                  {:bg "black"}
                  (ui-style/getTopProps props))
          _ (:= dayLabel    (or dayLabel ""))
@@ -78,8 +77,8 @@
        [:% ui-core/NumberGridBox
         {:left 0
          :start 1
-         :end (:? (j/some [1 3 5 7 8 10 12] (fn:> [x] (== x month))) 31 (:? (j/some [4 6 9 11] (fn:> [x] (== x month))) 30 (:? (== 0 (mod year 4)) 29 28)))
-         :format (fn:> [s] (+ " " (j/padStart (+ "" s) 3 " ")))
+         :end (:? (xt/x:arr-some [1 3 5 7 8 10 12] (fn:> [x] (== x month))) 31 (:? (xt/x:arr-some [4 6 9 11] (fn:> [x] (== x month))) 30 (:? (== 0 (mod year 4)) 29 28)))
+         :format (fn:> [s] (+ " " (. (+ "" s) (padStart 3 " "))))
          :value day
          :setValue setDay
          :colWidth 4
@@ -108,7 +107,7 @@
                                    "OCT"
                                    "NOV"
                                    "DEC"] [(- i 1)])
-                                (j/padStart 4))))
+                                 (padStart 4))))
          :left  10 #_(+ 2 (xt/x:len dayLabel))
          :value month
          :setValue setMonth
@@ -146,15 +145,14 @@
            day   setDay
            width} props
          tprops (ui-style/getTopProps props)
-         formatFn (fn:> [n]
-                    (+ " " (j/padEnd (j/padStart (+ "" n)
-                                                 2
-                                                 " ")
-                                     4)))
+          formatFn (fn:> [n]
+                     (+ " " (. (. (+ "" n)
+                                  (padStart 2 " "))
+                               (padEnd 4))))
          _ (:= dayLabel    (or dayLabel "d"))
          _ (:= hourLabel   (or hourLabel "h"))
          _ (:= minuteLabel (or minuteLabel "m"))
-         hprops (j/assign (ui-style/omitLayoutProps props)
+         hprops (xt/x:obj-assign (ui-style/omitLayoutProps props)
                           {:width (:? width (- width 10))}
                           #{minuteLabel
                              hourLabel})]

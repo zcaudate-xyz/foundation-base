@@ -2,8 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[js.core :as j]
-             [js.react :as r]
+  {:require [[js.react :as r]
              [js.react-native :as n]
              [js.react-native.animate :as a]
              [js.react-native.physical-base :as physical-base]
@@ -33,8 +32,8 @@
            (return {:style {:transform [{:translateX 0}]}})
 
            :else
-           (return {:style {:transform [{:translateX (j/max negFull
-                                                            (j/min position posFull))}]}})))))
+           (return {:style {:transform [{:translateX (Math.max negFull
+                                                            (Math.min position posFull))}]}})))))
 
 (defn.js swiperTheme
   "creates the swiper theme"
@@ -42,8 +41,8 @@
   [#{[theme
       themePipeline
       (:.. rprops)]}]
-  (var __theme (j/assign {} helper-theme-default/ButtonDefaultTheme theme))
-  (var __themePipeline (j/assign {}
+  (var __theme (xt/x:obj-assign {} helper-theme-default/ButtonDefaultTheme theme))
+  (var __themePipeline (xt/x:obj-assign {}
                                  helper-theme-default/PressDefaultPipeline
                                  themePipeline))
   (var [styleStatic transformFn]
@@ -152,7 +151,7 @@
   (var #{touchable
          panHandlers} (physical-edit/usePanTouchable
                        #{[disabled
-                          :chord (j/assign #{opened
+                          :chord (xt/x:obj-assign #{opened
                                              direction}
                                            chord)
                           :onPressOut (fn []
@@ -200,7 +199,7 @@
           setHovering}    touchable)
   (return
    [:% n/View
-    {:style [(:.. (j/arrayify styleContainer))]}
+    {:style [(:.. (xtd/arrayify styleContainer))]}
     [:% physical-base/Box
      #{[theme
         themePipeline
@@ -213,7 +212,7 @@
         :onMouseUp     (fn []
                          (setPressing false))
         :style   [styleStatic
-                  (:.. (j/arrayify style))]
+                  (:.. (xtd/arrayify style))]
         :addons  [{:component n/View
                    :key "neg"
                    :style {:position "absolute"
@@ -241,8 +240,8 @@
                                        posFull
                                        0)}
                    :children [posView]}
-                  (:.. (j/arrayify addons))]
+                  (:.. (xtd/arrayify addons))]
         :transformations transformFn
-        (:.. (j/assign touchable
+        (:.. (xt/x:obj-assign touchable
                        panHandlers))]}]]))
 

@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[js.core :as j] [xt.lang.common-color :as c] [xt.lang.common-lib :as k] [xt.lang.spec-base :as xt]] :runtime :websocket})
+  {:require [[xt.lang.common-color :as c] [xt.lang.common-lib :as k] [xt.lang.spec-base :as xt]] :runtime :websocket})
 
 ;;
 ;; hsl function
@@ -18,19 +18,19 @@
         (k/is-array? x)
         (do (var [h s l] x)
             (return (+ "hsl("
-                       (j/floor h) ","
-                       (j/toFixed s 2) "%,"
-                       (j/toFixed l 2) "%" ")")))))
+                       (Math.floor h) ","
+                       (. s (toFixed 2)) "%,"
+                       (. l (toFixed 2)) "%" ")")))))
 
 (defn.js hsl-parse-raw
   "converts string to hsl"
   {:added "4.0"}
   [s n parseFn]
-  (var curr (j/substring s n))
-  (var arr  (j/split curr #"[,\(\)\%\s]"))
-  (return (-> (j/filter arr (fn:> [s] (> (xt/x:len s) 0)))
-              (j/splice 0 3)
-              (j/map (fn:> [s] (parseFn s))))))
+  (var curr (. s (substring n)))
+  (var arr  (. curr (split #"[,\(\)\%\s]")))
+  (return (-> (xt/x:arr-filter arr (fn:> [s] (> (xt/x:len s) 0)))
+              (. (splice 0 3))
+              (xt/x:arr-map (fn:> [s] (parseFn s))))))
 
 (defn.js hsl-parse
   "parses hsl value from string"
@@ -38,22 +38,22 @@
   [s]
   (var parse-rgb
        (fn [str n]
-         (return (c/rgb->hsl (-/hsl-parse-raw str n j/parseInt)))))
+         (return (c/rgb->hsl (-/hsl-parse-raw str n parseInt)))))
   
-  (cond (j/startsWith s "#")
+  (cond (. s (startsWith "#"))
         (return (c/hex->hsl s))
         
-        (j/startsWith s "rgb(")
+        (. s (startsWith "rgb("))
         (return (parse-rgb s 3))
         
-        (j/startsWith s "rgba(")
+        (. s (startsWith "rgba("))
         (return (parse-rgb s 4))
         
-        (j/startsWith s "hsl(")
-        (return (-/hsl-parse-raw s 3 j/parseFloat))
+        (. s (startsWith "hsl("))
+        (return (-/hsl-parse-raw s 3 parseFloat))
         
-        (j/startsWith s "hsla(")
-        (return (-/hsl-parse-raw s 4 j/parseFloat))
+        (. s (startsWith "hsla("))
+        (return (-/hsl-parse-raw s 4 parseFloat))
         
         :else
         (try 
@@ -170,7 +170,7 @@
                         (-/hsl to)))
   
   (when fromArr
-    (return (j/map fromArr
+    (return (xt/x:arr-map fromArr
                    (fn:> [v i] (-/interpolateValue
                                 v
                                 (. toArr [i])
@@ -182,7 +182,7 @@
   "interpolates a range of values"
   {:added "4.0"}
   [arr num]
-  (var i (j/max 0 (j/ceil (- num 1))))
+  (var i (Math.max 0 (Math.ceil (- num 1))))
   (var fraction (- num i))
   (var from (. arr [i]))
   (var to   (. arr [(+ i 1)]))
@@ -239,8 +239,7 @@
   [s]
   (var arr (c/hsl->rgb (-/hsl-parse s)))
   (return arr (+ "#" (-> arr
-                         (j/map (fn:> [x]
-                                  (j/padStart (. x (toString 16))
-                                              "0"
-                                              2)))
-                         (j/join "")))))
+                         (xt/x:arr-map (fn:> [x]
+                                         (. (. x (toString 16))
+                                            (padStart 2 "0"))))
+                         (. (join ""))))))

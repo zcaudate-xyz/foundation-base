@@ -105,8 +105,10 @@
    '[(var #{check-disabled id-fn} pipeline)])
   => (fn [s]
        (and (string? s)
-            (re-find #"check_disabled = .*\[\"check_disabled\"\]" s)
-            (re-find #"id_fn = .*\[\"id_fn\"\]" s))))
+            (re-find #"check_disabled = " s)
+            (re-find #"key__ = \"check_disabled\"" s)
+            (re-find #"id_fn = " s)
+            (re-find #"key__ = \"id_fn\"" s))))
 
 (fact "Ruby key helpers guard nil receivers"
   (l/emit-as :ruby
@@ -118,7 +120,7 @@
   => (fn [s]
        (and (string? s)
             (re-find #"obj__.* = obj" s)
-            (re-find #"if obj__.* == nil" s)
+            (re-find #"if nil == obj__" s)
             (re-find #"obj = \{\}" s))))
 
 (fact "Ruby key helpers treat arrays differently from hashes"
@@ -139,15 +141,10 @@
             (re-find #"delete_at" s)
             (not (re-find #"\.key\?" s)))))
 
-(fact "Ruby x:obj-clone avoids Marshal-based cloning"
-  (l/emit-as :ruby
-   '[(x:obj-clone obj)])
-  => (fn [s]
-       (and (string? s)
-            (not (re-find #"Marshal" s))
-            (re-find #"clone_fn" s)
-            (re-find #"is_a\?\(Hash\)" s)
-            (re-find #"is_a\?\(Array\)" s))))
+(fact "Ruby x:obj-clone hard-links to common-data for stable value semantics"
+  (get-in fn-ruby/+ruby-lu+ [:x-obj-clone])
+  => {:raw 'xt.lang.common-data/obj-clone
+      :emit :hard-link})
 
 (fact "Ruby for:object guards nil receivers"
   (l/emit-as :ruby
@@ -195,10 +192,35 @@
                           :emit :hard-link}
       :x-promise-finally {:raw 'xt.lang.common-promise/promise-finally
                           :emit :hard-link}
-      :x-promise-native? {:raw 'xt.lang.common-promise/promise-native?
-                          :emit :hard-link}
-      :x-with-delay      {:raw 'xt.lang.common-promise/with-delay
-                          :emit :hard-link}})
+       :x-promise-native? {:raw 'xt.lang.common-promise/promise-native?
+                           :emit :hard-link}
+       :x-with-delay      {:raw 'xt.lang.common-promise/with-delay
+                           :emit :hard-link}})
+
+(fact "Ruby def forms with arglists emit wrapper methods for direct aliases"
+  (l/emit-as :ruby
+   '[(def ^{:arglists '([value])} forward other-fn)])
+  => (fn [s]
+       (and (string? s)
+            (re-find #"def forward\(value\)" s)
+            (re-find #"return other_fn\(value\)" s))))
+
+(fact "Ruby throw wraps payloads in raise(...)"
+  (l/emit-as :ruby
+   '[(x:throw {:status "error" :tag "db/op-not-available"})])
+  => "raise({\"status\" => \"error\", \"tag\" => \"db/op-not-available\"})")
+
+(fact "Ruby local normalization rewrites question-mark locals in bodies"
+  (l/emit-as :ruby
+   '[(defn process [flag]
+       (var update? flag)
+       (when update?
+         (return true))
+       (return false))])
+  => (fn [s]
+       (and (string? s)
+            (re-find #"update_p = " s)
+            (re-find #"if update_p" s))))
 
 (fact "Ruby x:global helpers write through !:G without assigning to the globals expression"
   (fn-ruby/ruby-tf-x-global-set '(x:global-set XT 1))
@@ -265,8 +287,10 @@
   (l/emit-as :ruby ['(var #{a-var b-var} opts)])
   => (fn [s]
        (and (string? s)
-            (re-find #"a_var = .*\[\"a_var\"\]" s)
-            (re-find #"b_var = .*\[\"b_var\"\]" s))))
+            (re-find #"a_var = " s)
+            (re-find #"key__ = \"a_var\"" s)
+            (re-find #"b_var = " s)
+            (re-find #"key__ = \"b_var\"" s))))
 
 ^{:refer hara.model.spec-ruby/ruby-map :added "4.1"}
 (fact "emit ruby hash"

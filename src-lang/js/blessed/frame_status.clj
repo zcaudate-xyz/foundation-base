@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [js.core :as j] [js.react :as r] [js.lib.chalk :as chalk] [xt.lang.spec-base :as xt]]})
+  {:require [[xt.lang.common-lib :as k] [js.react :as r] [js.lib.chalk :as chalk] [xt.lang.spec-base :as xt]]})
 
 (defn.js Status
   "displays status"
@@ -15,15 +15,17 @@
       autoClear
       (:.. rprops)]}]
   (let [#{content type} status
-        width  (j/min [(:? content (xt/x:len content) 0)
-                        50])
+        width  (Math.min (:? content (xt/x:len content) 0)
+                         50)
         clearFn (fn:> (setStatus {:content ""
                                 :type "info"}))]
     (r/init []
       (when autoClear
-        (let [id (j/delayed [2500]
-                   (setStatus {:content ""
-                               :type "info"}))]
+        (let [id (setTimeout
+                  (fn []
+                    (setStatus {:content ""
+                                :type "info"}))
+                  2500)]
           (return (fn:> (clearTimeout id))))))
     (return [:box #{[:height 1
                      :shrink true

@@ -4,7 +4,6 @@
 (l/script :js
   {:require [[xt.lang.common-lib :as k]
              [xt.lang.common-math :as math]
-             [js.core :as j]
              [js.react :as r]
              [js.react-native :as n]
              [js.react-native.animate :as a]
@@ -34,8 +33,8 @@
   [#{[theme
       themePipeline
       (:.. rprops)]}]
-  (var __theme (j/assign {} helper-theme-default/ButtonDefaultTheme theme))
-  (var __themePipeline (j/assign {}
+  (var __theme (xt/x:obj-assign {} helper-theme-default/ButtonDefaultTheme theme))
+  (var __themePipeline (xt/x:obj-assign {}
                                  helper-theme-default/PressDefaultPipeline
                                  themePipeline))
   (var [styleStatic transformFn]
@@ -58,7 +57,7 @@
                       (var nValue (math/clamp
                                    min max
                                    (- (r/curr valueRef)
-                                      (* (j/round (/ _value (or stride 8)))
+                                      (* (Math.round (/ _value (or stride 8)))
                                         (or step 1)))))
                      
                      (when (not= nValue (r/curr prevRef))
@@ -76,7 +75,7 @@
   (return
    [:% n/View
     {:style [-/styleDigit
-             (:.. (j/arrayify style))]}
+             (:.. (xtd/arrayify style))]}
     [:% n/Text
      {:style [-/styleDigitText
               (n/PlatformSelect
@@ -84,7 +83,7 @@
                       :cursor (:? editable
                                   "ns-resize"
                                   "default")}})
-              (:.. (j/arrayify styleText))]}
+              (:.. (xtd/arrayify styleText))]}
      text]]))
 
 (defn.js SpinnerBasicValues
@@ -103,11 +102,11 @@
       (:= decimal 0)]}]
   (return
    [:% -/SpinnerStatic
-    {:text (j/toFixed (/ value
-                         (j/pow 10 decimal))
-                      (j/max 0 decimal))
-     :styleText styleDigitText
-     :editable editable}]))
+    {:text (. (/ value
+                 (Math.pow 10 decimal))
+              (toFixed (Math.max 0 decimal)))
+      :styleText styleDigitText
+      :editable editable}]))
 
 (defn.js SpinnerBasic
   "creates a basic spinner"
@@ -143,7 +142,7 @@
   (var #{touchable
          panHandlers} (physical-edit/usePanTouchable
                        #{[disabled
-                          :chord (j/assign {:value __value} chord)
+                          :chord (xt/x:obj-assign {:value __value} chord)
                           (:.. rprops)]}
                        (or panDirection
                            "vertical")
@@ -193,9 +192,9 @@
                (n/PlatformSelect
                {:web {:userSelect "none"
                       :cursor "default"}})
-               (:.. (j/arrayify style))]
+               (:.. (xtd/arrayify style))]
        :transformations transformFn
-       (:.. (j/assign touchable
+       (:.. (xt/x:obj-assign touchable
                       panHandlers))
        :children [[:% -/SpinnerBasicValues
                    #{[:key "values"

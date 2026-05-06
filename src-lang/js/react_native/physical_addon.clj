@@ -8,8 +8,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-              [js.react-native :as n]
+   :require [[js.react-native :as n]
               [xt.lang.common-data :as xtd]
               [xt.lang.common-lib :as k]]})
 
@@ -27,7 +26,7 @@
               (n/PlatformSelect {:ios {:fontFamily "Courier"}
                                  :default {:fontFamily "monospace"}})
 	      (n/PlatformSelect {:web {:userSelect "none"}})
-              (:.. (j/arrayify style))]
+              (:.. (xtd/arrayify style))]
       (:.. rprops)]}))
 
 (defn.js tagSingle
@@ -36,10 +35,10 @@
   [#{[indicator
       transformations
       (:.. rprops)]}]
-  (return (j/assign (-/tagBase rprops)
+  (return (xt/x:obj-assign (-/tagBase rprops)
                     {:transformations
-                     (j/assign {indicator (fn [v]
-                                            (return {:value (j/toFixed v 4)}))}
+                     (xt/x:obj-assign {indicator (fn [v]
+                                            (return {:value (. v (toFixed 4))}))}
                                transformations)})))
 
 (defn.js tagAll
@@ -49,7 +48,7 @@
   (var #{[transformations
           keys
           (:.. rprops)]} (or props {}))
-  (return (j/assign (-/tagBase rprops)
+  (return (xt/x:obj-assign (-/tagBase rprops)
                     {:multiline true
                      :transformations
                      (fn [m]

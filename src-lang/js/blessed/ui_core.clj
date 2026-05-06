@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [js.core :as j] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style]]})
+  {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style]]})
 
 (defn.js Enclosed
   "constructs a box with label"
@@ -196,7 +196,7 @@
                         :style (:? display ui-style/styleInvertDisabled (ui-style/styleSmall "white"))
                         :content (+ " " textOff " ")
                         :onClick toggleFn}]
-              [:button {:left (+ 2 (j/length textOff))
+              [:button {:left (+ 2 (xt/x:len textOff))
                         :shrink true
                         :mouse true
                         :style (:? display (ui-style/styleSmall color) ui-style/styleInvertDisabled)
@@ -241,16 +241,18 @@
                   :style {:fg (or textColor "white")
                           :bg (or bgColor "black")
                           :bold true}
-                  :content (j/padStart (:? (k/not-nil? decimal) (j/toFixed internal decimal) (+ "" internal))
-                                       (or pad 0))}
+                  :content (. (:? (k/not-nil? decimal)
+                                  (. internal (toFixed decimal))
+                                  (+ "" internal))
+                              (padStart (or pad 0)))}
                  (ui-style/getLayout props))
-         decProps (j/assign {:shrink true
+         decProps (xt/x:obj-assign {:shrink true
                              :mouse true
                              :style (ui-style/styleSmall color)
                              :onClick decIdx
                              :content " - "}
                             (:? vertical {:right 1 :top 1} {:right 0 :top 0}))
-         incProps (j/assign {:shrink true
+         incProps (xt/x:obj-assign {:shrink true
                              :mouse true
                              :onClick incIdx
                              :style (ui-style/styleSmall color)
@@ -296,8 +298,8 @@
                          :bg "black"
                          :bold true}
                  :onClick incIdx
-                  :content (+ " " (j/padStart (. items [internal])
-                                              (or pad 0)))}
+                  :content (+ " " (. (. items [internal])
+                                     (padStart (or pad 0)))}
                 (ui-style/getLayout props))]
      (return [:button #{(:.. bprops)}
               [:button {:shrink true
@@ -385,7 +387,7 @@
 
          formatFn (fn [val]
                     (return
-                     (:? format (format val) (j/padStart val (or pad 0)))))
+                     (:? format (format val) (. val (padStart (or pad 0))))))
          
           modal (r/ref)
           ref   (r/ref)
@@ -493,12 +495,14 @@
                           :style style
                           :on-keypress (fn [e]
                                          (let [curr (r/curr ref)]
-                                           (j/delayed [5]
-                                             (when curr
-                                               (let [val (. curr ["value"])]
-                                                 (if setContent (setContent val))
-                                                 (if onChange (onChange val))
-                                                 (setInternal val))))))}]
+                                           (setTimeout
+                                            (fn []
+                                              (when curr
+                                                (let [val (. curr ["value"])]
+                                                  (if setContent (setContent val))
+                                                  (if onChange (onChange val))
+                                                  (setInternal val))))
+                                            5))}]
                [:box {:hidden (not disabled)
                       :shrink true
                       :style {:bg "black"
@@ -535,7 +539,7 @@
         _ (:= color (or color "yellow"))
         grid (b/box {:parent screen
                      :top lpos.yl
-                     :height (j/ceil (/ (xt/x:len numbers) colCount))
+                     :height (Math.ceil (/ (xt/x:len numbers) colCount))
                      :mouse true
                      :keys true
                      :inputOnFocus true
@@ -545,7 +549,7 @@
                              :selected {:bg color
                                         :fg "black"}}})
         gridItems (-> numbers
-                      (j/map (fn [n i]
+                      (xt/x:arr-map (fn [n i]
                                (let [button (b/box {:parent grid
                                                     :top    (Math.floor (/ i colCount))
                                                     :height 1

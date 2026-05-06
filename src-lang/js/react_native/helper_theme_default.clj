@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[js.core :as j]]})
+  {:require []})
 
 (def.js FontSize
   {:xxl  {:fontSize 40}
@@ -15,11 +15,11 @@
 
 (def.js defaultPressing
   (fn:> [pressing #{disabled}]
-    (j/max pressing disabled)))
+    (Math.max pressing disabled)))
 
 (def.js defaultHovering
   (fn:> [hovering #{focusing}]
-    (j/max hovering focusing)))
+    (Math.max hovering focusing)))
 
 (def.js PressDefaultPipeline
   {:fg {:initial "default"
@@ -93,7 +93,7 @@
    :fgActive        "white"})
 
 (def.js BaseTheme
-  (j/assign {}
+  (xt/x:obj-assign {}
             -/BaseBg
             -/BaseFg))
 
@@ -102,18 +102,18 @@
 ;;
 
 (def.js InputDefaultFgTheme
-  (j/assign {}
+  (xt/x:obj-assign {}
             -/BaseFg
             {:fgActive       "white"
              :bgActive       "#333"}))
 
 (def.js InputDefaultBgTheme
-  (j/assign {}
+  (xt/x:obj-assign {}
             -/BaseBg
             {:bgActive       "#333"}))
 
 (def.js InputDefaultTheme
-  (j/assign {}
+  (xt/x:obj-assign {}
             -/InputDefaultBgTheme
             -/InputDefaultFgTheme))
 
@@ -127,7 +127,7 @@
 ;;
 
 (def.js ButtonDefaultTheme
-  (j/assign {}
+  (xt/x:obj-assign {}
             -/BaseTheme))
 
 (def.js ButtonDefaultStyle
@@ -141,7 +141,7 @@
 ;;
 
 (def.js CheckBoxDefaultTheme
-  (j/assign {} -/BaseTheme))
+  (xt/x:obj-assign {} -/BaseTheme))
 
 (def.js CheckBoxDefaultStyle
   {:padding 0
@@ -152,10 +152,10 @@
 
 
 (def.js RadioBoxDefaultTheme
-  (j/assign {}
+  (xt/x:obj-assign {}
             -/BaseTheme))
 
 (def.js ToggleSwitchDefaultTheme
-  (j/assign {}
+  (xt/x:obj-assign {}
             -/BaseTheme))
 

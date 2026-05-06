@@ -2,8 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[js.core :as j]
-             [js.react :as r]
+  {:require [[js.react :as r]
              [js.react-native :as n]
              [js.react-native.animate :as a]
              [js.react-native.physical-base :as physical-base]]})
@@ -45,7 +44,7 @@
     {:chord #{visible}
      :indicators {:visible vindicator}
      :style [{aspect 0}
-             (:.. (j/arrayify style))]
+             (:.. (xtd/arrayify style))]
      :transformations
      {:visible (fn [visible]
                  (return {:style {:overflow (:? (< visible 0.95)

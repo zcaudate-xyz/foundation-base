@@ -2,7 +2,12 @@
   (:require [hara.lang :as l]))
 
 (l/script :lua.nginx
-  {:import [["pgmoon" :as ngxpg]] :require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-resource :as rt] [xt.protocol.impl.connection-sql :as sqlrt]]})
+  {:import [["pgmoon" :as ngxpg]]
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-resource :as rt]
+             [xt.protocol.impl.connection-sql :as sqlrt]]})
 
 (defn.lua default-env
   "gets the default env"

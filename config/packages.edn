@@ -627,9 +627,9 @@
   :include [[xt.evm :complete]]}
   
  xyz.zcaudate/xtalk.lang
- {:description "xtalk language"
-  :include [[xt.lang     :complete]
-            [xt.module   :complete]]}
+  {:description "xtalk language"
+   :include [[xt.lang               :complete]
+             [xt.lang.common-module :complete]]}
 
  xyz.zcaudate/xtalk.runtime
  {:description "xtalk language"

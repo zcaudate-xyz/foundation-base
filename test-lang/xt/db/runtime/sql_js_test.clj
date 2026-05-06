@@ -1,5 +1,6 @@
 (ns xt.db.runtime.sql-js-test
-  (:require [hara.lang :as l]
+  (:require [hara.runtime.basic.type-common :as common]
+            [hara.lang :as l]
             [std.string.prose :as prose]
             [xt.lang.common-notify :as notify]
             [xt.lang.spec-promise :as spec-promise])
@@ -22,8 +23,8 @@
   (l/script- :js
     {:runtime :basic
      :require [[xt.lang.spec-base :as xt]
-                [xt.db.runtime.sql :as impl-sql]
-                [xt.lang.common-lib :as k]
+               [xt.db.runtime.sql :as impl-sql]
+               [xt.lang.common-lib :as k]
                [xt.lang.common-data :as xtd]
                [xt.lang.common-string :as str]
                [xt.lang.common-repl :as repl]
@@ -40,8 +41,8 @@
     {:runtime :basic
      :config {:program :resty}
      :require [[xt.lang.spec-base :as xt]
-                [xt.db.runtime.sql :as impl-sql]
-                [xt.lang.common-lib :as k]
+               [xt.db.runtime.sql :as impl-sql]
+               [xt.lang.common-lib :as k]
                [xt.lang.common-data :as xtd]
                [xt.lang.common-string :as str]
                [xt.lang.common-repl :as repl]
@@ -57,8 +58,28 @@
   (l/script- :python
     {:runtime :basic
      :require [[xt.lang.spec-base :as xt]
-                [xt.db.runtime.sql :as impl-sql]
-                [xt.lang.common-lib :as k]
+               [xt.db.runtime.sql :as impl-sql]
+               [xt.lang.common-lib :as k]
+               [xt.lang.common-data :as xtd]
+               [xt.lang.common-string :as str]
+               [xt.lang.common-repl :as repl]
+               [xt.lang.spec-promise :as spec-promise]
+               [xt.protocol.impl.connection-sql :as dbsql]
+               [xt.db.text.base-flatten :as f]
+               [xt.db.text.sql-util :as ut]
+               [xt.db.text.sql-raw :as raw]
+               [xt.db.text.sql-table :as sql-table]
+               [xt.db.text.sql-manage :as manage]
+               [xt.db.helpers.data-main-test :as sample]
+               [python.core.system :as pysys]
+               [python.lib.driver-sqlite :as py-sqlite]]})
+
+  ^{:seedgen/derived true}
+  (l/script- :dart
+    {:runtime :twostep
+     :require [[xt.lang.spec-base :as xt]
+               [xt.db.runtime.sql :as impl-sql]
+               [xt.lang.common-lib :as k]
                [xt.lang.common-data :as xtd]
                [xt.lang.common-string :as str]
                [xt.lang.common-repl :as repl]
@@ -68,8 +89,10 @@
                [xt.db.text.sql-raw :as raw]
                [xt.db.text.sql-manage :as manage]
                [xt.db.helpers.data-main-test :as sample]
-               [python.core.system :as pysys]
-               [python.lib.driver-sqlite :as py-sqlite]]})
+               [dart.lib.driver-sqlite :as dart-sqlite]]})
+
+  (def CANARY-DART
+    (common/program-exists? "dart"))
 
   (defn bootstrap-js
     []
@@ -254,6 +277,66 @@
     []
     (var conn (py-sqlite/wrap-connection
                (py-sqlite/connect-constructor {})))
+    (xt/x:arr-each
+     (manage/table-create-all
+      sample/Schema
+      sample/SchemaLookup
+      (ut/sqlite-opts nil))
+     (fn [query]
+       (dbsql/query-sync conn query)))
+    (dbsql/query-sync conn
+                      (raw/raw-insert "Currency"
+                                      ["id" "type" "symbol" "native" "decimal"
+                                       "name" "plural" "description"]
+                                      (@! sample/+currency+)
+                                      (ut/sqlite-opts nil)))
+    (var flat-bulk (f/flatten-bulk sample/Schema
+                                   {"UserAccount" [sample/RootUser]}))
+    (xt/x:arr-each
+     (sql-table/table-emit-flat
+      sql-table/table-emit-upsert
+      sample/Schema
+      sample/SchemaLookup
+      flat-bulk
+      (ut/sqlite-opts nil))
+     (fn [query]
+       (dbsql/query-sync conn query)))
+    (var nested
+         (xt/x:arr-map
+          (impl-sql/sql-pull-sync conn
+                                  sample/Schema
+                                  (@! +user-profile-tree+)
+                                  (ut/sqlite-opts nil))
+          (fn [row]
+            (var profile (xt/x:first (. row ["profile"])))
+            (return [(. row ["nickname"])
+                     (. profile ["first_name"])]))))
+    (var flat
+         (xt/x:arr-map
+          (xtd/arr-sort
+           (impl-sql/sql-pull-sync conn
+                                   sample/Schema
+                                   (@! +currency-bulk-tree+)
+                                   (ut/sqlite-opts nil))
+           (fn [row]
+             (return (. row ["id"])))
+           xt/x:str-comp)
+          (fn [row]
+            (return [(. row ["id"])
+                     (. row ["name"])]))))
+    (return (xt/x:json-encode [nested flat])))
+
+  ^{:seedgen/derived true}
+  (defn.dt sqlite-parity-runtime-dt
+    []
+    (var conn nil)
+    (dart-sqlite/connect-constructor
+     {:memory true}
+     (fn [err raw]
+       (when (xt/x:not-nil? err)
+         (throw err))
+       (:= conn (dart-sqlite/wrap-connection raw))
+       (return conn)))
     (dbsql/query-sync conn
                       (str/join "\n\n"
                                 (manage/table-create-all
@@ -291,7 +374,7 @@
                                    (ut/sqlite-opts nil))
            (fn [row]
              (return (. row ["id"])))
-           k/lt)
+           xt/x:str-comp)
           (fn [row]
             (return [(. row ["id"])
                      (. row ["name"])]))))
@@ -449,9 +532,9 @@
   (fact "generates delete statements"
 
     (!.js
-      (impl-sql/sql-gen-delete "HELLO"
-                               ["A" "B"]
-                               (ut/sqlite-opts nil)))
+     (impl-sql/sql-gen-delete "HELLO"
+                              ["A" "B"]
+                              (ut/sqlite-opts nil)))
     => ["DELETE FROM \"HELLO\" WHERE \"id\" = 'A';"
         "DELETE FROM \"HELLO\" WHERE \"id\" = 'B';"])
 
@@ -459,73 +542,85 @@
   (fact "syncs, removes, and pulls sql data"
 
     (!.js
-      (xtd/arr-sort (impl-sql/sql-process-event-sync
-                     INSTANCE
-                     "add"
-                     {"UserAccount" [sample/RootUser]}
-                     sample/Schema
-                     sample/SchemaLookup
-                     (ut/sqlite-opts nil))
-                    k/identity
-                    k/lt))
+     (xtd/arr-sort (impl-sql/sql-process-event-sync
+                    INSTANCE
+                    "add"
+                    {"UserAccount" [sample/RootUser]}
+                    sample/Schema
+                    sample/SchemaLookup
+                    (ut/sqlite-opts nil))
+                   k/identity
+                   k/lt))
     => ["UserAccount" "UserProfile"]
 
     (!.js
-      (impl-sql/sql-pull-sync
-       INSTANCE
-       sample/Schema
-       ["UserAccount"
-        ["nickname"
-         ["profile"
-          ["first_name"]]]]
-       (ut/sqlite-opts nil)))
+     (impl-sql/sql-pull-sync
+      INSTANCE
+      sample/Schema
+      ["UserAccount"
+       ["nickname"
+        ["profile"
+         ["first_name"]]]]
+      (ut/sqlite-opts nil)))
     => [{"nickname" "root", "profile" [{"first_name" "Root"}]}]
 
     (!.js
-      (impl-sql/sql-process-event-remove
-       INSTANCE
-       "input"
-       {"UserAccount" [sample/RootUser]}
-       sample/Schema
-       sample/SchemaLookup
-       (ut/sqlite-opts nil)))
+     (impl-sql/sql-process-event-remove
+      INSTANCE
+      "input"
+      {"UserAccount" [sample/RootUser]}
+      sample/Schema
+      sample/SchemaLookup
+      (ut/sqlite-opts nil)))
     => (prose/|
         "DELETE FROM \"UserAccount\" WHERE \"id\" = '00000000-0000-0000-0000-000000000000';"
         ""
         "DELETE FROM \"UserProfile\" WHERE \"id\" = 'c4643895-b0ce-44cc-b07b-2386bf18d43b';")
 
     (!.js
-      (xtd/arr-sort
-       (impl-sql/sql-process-event-remove
-        INSTANCE
-        "remove"
-        {"UserAccount" [sample/RootUser]}
-        sample/Schema
-        sample/SchemaLookup
-        (ut/sqlite-opts nil))
-       k/identity
-       k/lt))
+     (xtd/arr-sort
+      (impl-sql/sql-process-event-remove
+       INSTANCE
+       "remove"
+       {"UserAccount" [sample/RootUser]}
+       sample/Schema
+       sample/SchemaLookup
+       (ut/sqlite-opts nil))
+      k/identity
+      k/lt))
     => ["UserAccount" "UserProfile"]
 
     (!.js
-      (impl-sql/sql-pull-sync
-       INSTANCE
-       sample/Schema
-       ["UserAccount"
-        ["nickname"
-         ["profile"
-          ["first_name"]]]]
-       (ut/sqlite-opts nil)))
+     (impl-sql/sql-pull-sync
+      INSTANCE
+      sample/Schema
+      ["UserAccount"
+       ["nickname"
+        ["profile"
+         ["first_name"]]]]
+      (ut/sqlite-opts nil)))
     => empty?)
   )
 
 ^{:refer xt.db.runtime.sql/sql-pull-sync :added "4.1"}
-(fact "returns the same nested sqlite output across js lua and python"
+(fact "returns the same nested sqlite output across js lua python and dart"
 
   (!.js
-    (-/sqlite-parity-runtime-js))
+   (-/sqlite-parity-runtime-js))
   => +sqlite-parity-output+
 
   (!.lua
    (-/sqlite-parity-runtime-lua))
-  => +sqlite-parity-output+)
+  => +sqlite-parity-output+
+
+  (!.py
+   (-/sqlite-parity-runtime-py))
+  => +sqlite-parity-output+
+
+  (if CANARY-DART
+    (!.dt
+     (-/sqlite-parity-runtime-dt))
+    :dart-unavailable)
+  => (if CANARY-DART
+       +sqlite-parity-output+
+       :dart-unavailable))

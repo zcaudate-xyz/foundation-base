@@ -3,7 +3,6 @@
 
 (l/script :js
   {:require [[xt.lang.common-lib :as k]
-             [js.core :as j]
              [js.react :as r]
              [js.react-native :as n]
              [js.react-native.animate :as a]
@@ -19,8 +18,8 @@
   [#{[theme
       themePipeline
       (:.. rprops)]}]
-  (var __theme (j/assign {} helper-theme-default/ButtonDefaultTheme theme))
-  (var __themePipeline (j/assign {}
+  (var __theme (xt/x:obj-assign {} helper-theme-default/ButtonDefaultTheme theme))
+  (var __themePipeline (xt/x:obj-assign {}
                                  helper-theme-default/PressDefaultPipeline
                                  themePipeline))
   (var [styleStatic transformFn]
@@ -41,7 +40,7 @@
                    (fn []
                      (var #{_value} position)
                      (var nIndex (+ (r/curr indexRef)
-                                    (j/round (/ _value 10))))
+                                    (Math.round (/ _value 10))))
                      (when (not= nIndex (r/curr prevRef))
                        (setIndex nIndex)
                        (r/curr:set prevRef nIndex)))))
@@ -76,7 +75,7 @@
   (var #{touchable
          panHandlers} (physical-edit/usePanTouchable
                        #{[disabled
-                          :chord (j/assign #{index} chord)
+                          :chord (xt/x:obj-assign #{index} chord)
                           (:.. rprops)]}
                        "vertical"
                        position
@@ -102,9 +101,9 @@
                 :padding 5
                 :height 30}
                styleStatic
-               (:.. (j/arrayify style))]
+               (:.. (xtd/arrayify style))]
        :transformations transformFn
-       (:.. (j/assign touchable
+       (:.. (xt/x:obj-assign touchable
                       panHandlers))]}
     [:% physical-base/Text
      {:indicators {:offset offset
@@ -117,7 +116,7 @@
                {:web {:cursor "ns-resize"
                       :userSelect "none"}})
               #_{:color fgActive}
-              (:.. (j/arrayify styleText))]
+              (:.. (xtd/arrayify styleText))]
       :transformations
       (fn [#{offset value}]
         (return

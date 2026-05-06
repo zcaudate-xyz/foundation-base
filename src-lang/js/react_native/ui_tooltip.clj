@@ -8,8 +8,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-    :require [[js.core :as j]
-              [js.react :as r]
+    :require [[js.react :as r]
               [js.react-native :as n]
               [js.react-native.animate :as a]
               [js.react-native.physical-base :as physical-base]
@@ -165,7 +164,7 @@
                     (return {:style {:opacity v}}))})}
             [:% n/View
              {:style [{:flex 1}
-                      (:.. (j/arrayify backdropStyle))]}]]]])
+                      (:.. (xtd/arrayify backdropStyle))]}]]]])
      [:% physical-base/Box
       {:style [{:position "absolute"}
                (:? (. arrow animate)
@@ -221,7 +220,7 @@
         setDelayed] (r/useFollowDelayed
                      visible delay isMounted))
   (var arrowPosition (model-geom/oppositePosition position))
-  (:= arrow (j/assign {:color "black"
+  (:= arrow (xt/x:obj-assign {:color "black"
                        :placement "content"
                        :baseLength 20
                        :point arrowPosition

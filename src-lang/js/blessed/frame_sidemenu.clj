@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [js.core :as j] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style] [js.blessed.ui-group :as ui-group] [js.blessed.ui-core :as ui-core] [js.lib.chalk :as chalk] [xt.lang.spec-base :as xt]]})
+  {:require [[xt.lang.common-lib :as k] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style] [js.blessed.ui-group :as ui-group] [js.blessed.ui-core :as ui-core] [js.lib.chalk :as chalk] [xt.lang.spec-base :as xt]]})
 
 (defn.js SideButton
   "creates a primary frame-sidebutton button"
@@ -48,10 +48,10 @@
        setIndex
        menuContent
        menuFooter]}]
-   (let [_ (:= items (:? (j/isArray items) items (j/keys items)))
-         entries (j/map items
+   (let [_ (:= items (:? (xt/x:is-array? items) items (xt/x:obj-keys items)))
+         entries (xt/x:arr-map items
                          (fn [e i]
-                           (return (j/assign
+                           (return (xt/x:obj-assign
                                     {:top   (+ 2 (* i 2))
                                      :index (+ i 1)}
                                     e))))
@@ -63,8 +63,8 @@
          (. (r/curr box)
             (onScreenEvent "keypress"
                            (fn [_ key]
-                             (let [i   (j/parseInt key.full)
-                                   sel (j/filter entries
+                             (let [i   (parseInt key.full)
+                                   sel (xt/x:arr-filter entries
                                                   (fn:> [e] (== e.index i)))]
                                
                                (when (and sel (< 0 (xt/x:len sel)))
@@ -81,7 +81,7 @@
              :scrollable true
              :style {:bold true
                      :bg "black"}}
-       (j/map entries (fn [e]
+       (xt/x:arr-map entries (fn [e]
                          (return
                           [:% -/SideButton
                            #{[:key e.index
@@ -97,7 +97,7 @@
               :height 1
               :shrink true
               :width "100%"
-              :content (chalk/inverse (chalk/yellow (+ " " (j/toUpperCase label) " ")))}]
+              :content (chalk/inverse (chalk/yellow (+ " " (. label (toUpperCase)) " ")))}]
        (:? MenuContent
            [:box {:left 1
                   :right 1

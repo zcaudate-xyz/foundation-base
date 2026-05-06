@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-string :as str] [js.core :as j] [js.react :as r] [js.lib.chalk :as chalk]]})
+  {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-string :as str] [js.react :as r] [js.lib.chalk :as chalk]]})
 
 (defn.js ToggleLabel
   "toggle label `red`/`green`"
@@ -88,8 +88,8 @@
                (:= f (or f k/identity))
                (var val (xt/x:get-key entry key))
                (var output (f val entry))
-               (return (+ (chalk/bold (j/padEnd (+ label "") start))
-                          (j/padStart (+ "" (or output "-")) end)))))
+               (return (+ (chalk/bold (. (+ label "") (padEnd start)))
+                          (. (+ "" (or output "-")) (padStart end))))))
            (str/join "\n")))
   (return
    [:box {:content content}]))

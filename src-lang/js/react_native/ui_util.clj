@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:config {:bench false :emit {:native {:suppress true} :lang/jsx false} :id :play/web-main :notify {:host "test.statstrade.io"}} :require [[js.core :as j] [js.react :as r] [js.react-native :as n] [js.react-native.animate :as a] [js.react-native.physical-base :as physical-base] [xt.lang.common-data :as xtd] [xt.lang.common-lib :as k] [xt.lang.spec-base :as xt]] :runtime :websocket})
+  {:config {:bench false :emit {:native {:suppress true} :lang/jsx false} :id :play/web-main :notify {:host "test.statstrade.io"}} :require [[js.react :as r] [js.react-native :as n] [js.react-native.animate :as a] [js.react-native.physical-base :as physical-base] [xt.lang.common-data :as xtd] [xt.lang.common-lib :as k] [xt.lang.spec-base :as xt]] :runtime :websocket})
 
 (defn.js Page
   "creates a Page"
@@ -28,33 +28,33 @@
   (return
    [:% n/View
     {:style [{:flex 1}
-             (:.. (j/arrayify styleContainer))]}
+             (:.. (xtd/arrayify styleContainer))]}
     (:? headerComponent
         (r/createElement headerComponent headerProps))
     [:% n/View
      {:style [{:flex 1}
-              (:.. (j/arrayify style))]}
+              (:.. (xtd/arrayify style))]}
      
      [:% n/Row
       {:style styleMenu}
       [:% n/View
        {:style [{:flex 1}
-                (:.. (j/arrayify styleLeft))]}
+                (:.. (xtd/arrayify styleLeft))]}
        (:? leftComponent
            (r/createElement leftComponent leftProps))]
       [:% n/View
        {:style [{:flex 4}
-                (:.. (j/arrayify styleTitle))]}
+                (:.. (xtd/arrayify styleTitle))]}
        (:? titleComponent
            (r/createElement titleComponent titleProps))]
       [:% n/View
        {:style [{:flex 1}
-                (:.. (j/arrayify styleRight))]}
+                (:.. (xtd/arrayify styleRight))]}
        (:? rightComponent
            (r/createElement rightComponent rightProps))]]
      [:% n/View
       {:style [{:flex 1}
-               (:.. (j/arrayify styleBody))]}
+               (:.. (xtd/arrayify styleBody))]}
       children]]
     (:? footerComponent
         (r/createElement footerComponent footerProps))]))
@@ -95,7 +95,7 @@
   (r/init []
     (setVisible true))
   (return
-   (r/% -/Fade (j/assignNew props #{visible}))))
+   (r/% -/Fade (Object.assign {} props #{visible}))))
 
 ;;
 ;; Fold
@@ -124,10 +124,12 @@
        (then (fn [layout]
                (r/curr:set layoutRef layout)))
        (then (fn []
-               (j/delayed [100]
-                 (var curr (. vindicator _value))
-                 (when (== curr 1)
-                   (a/setValue vindicator 1)))))))
+               (setTimeout
+                (fn []
+                  (var curr (. vindicator _value))
+                  (when (== curr 1)
+                    (a/setValue vindicator 1)))
+                100))))))
   (return #{contentRef
             layoutRef}))
 
@@ -151,7 +153,7 @@
      :indicators indicators
      :style [{aspect 0
               :overflow "hidden"}
-             (:.. (j/arrayify style))]
+             (:.. (xtd/arrayify style))]
      :transformations
      {:visible 
       (fn [visible]
@@ -182,9 +184,9 @@
               [:% -/FoldInner
                #{[visible
                   :chord
-                  (j/assign {:visible visible} chord)
+                  (xt/x:obj-assign {:visible visible} chord)
                   :indicators
-                  (j/assign
+                  (xt/x:obj-assign
                    {:visible vindicator}
                    indicators)
                   (:.. rprops)]}])))

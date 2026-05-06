@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [js.core :as j] [js.lib.valtio :as v] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style] [js.blessed.ui-group :as ui-group] [js.blessed.ui-core :as ui-core] [xt.lang.common-data :as xtd] [xt.lang.spec-base :as xt] [xt.lang.common-sort-by :as xtsb]]})
+  {:require [[xt.lang.common-lib :as k] [js.lib.valtio :as v] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style] [js.blessed.ui-group :as ui-group] [js.blessed.ui-core :as ui-core] [xt.lang.common-data :as xtd] [xt.lang.spec-base :as xt] [xt.lang.common-sort-by :as xtsb]]})
 
 (defn.js ConsoleMain
   "creates a primary frame-console button"
@@ -45,12 +45,12 @@
              {:top 0
               :content "+"
               :color "yellow"
-              :onClick (fn:> (setHeight (j/min 40 (+ height 5))))}]
+              :onClick (fn:> (setHeight (Math.min 40 (+ height 5))))}]
             [:% ui-core/SmallButton
              {:top 2
               :content "-"
               :color "yellow"
-              :onClick (fn:> (setHeight (j/max 10 (- height 5))))}]]]))
+              :onClick (fn:> (setHeight (Math.max 10 (- height 5))))}]]]))
 
 (defn.js Console
   "creates a primary frame-console button"

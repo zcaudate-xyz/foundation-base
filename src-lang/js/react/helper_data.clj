@@ -2,8 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[js.react :as r]
-             [js.core :as j]]})
+  {:require [[js.react :as r]]})
 
 (def.js __WRAPPED__ ((:- "Symbol") "__WRAPPED__"))
 
@@ -39,18 +38,19 @@
              {:value #{[(:.. top) (:.. $data)]}}
              (r/createElement component props))))
 
-  (var ntop (j/assignNew (and top (. top [(+ "$." $id)]))
-                         $data))
+  (var ntop (Object.assign {}
+                           (and top (. top [(+ "$." $id)]))
+                           $data))
   
-  (var nprops (j/fromEntries
-               (. (j/entries ntop)
-                  (filter (fn [[k]]
-                            (return
-                             (not (. k (startsWith "$")))))))))
+  (var nprops (Object.fromEntries
+               (. (Object.entries ntop)
+                   (filter (fn [[k]]
+                             (return
+                              (not (. k (startsWith "$")))))))))
   
   (var wrapped (r/createElement
                 component
-                (j/assignNew props nprops)))
+                (Object.assign {} props nprops)))
   
   (return
    (r/createElement (. -/WrappedContext Provider)
@@ -86,7 +86,6 @@
    (-/wrapData
     (r/forwardRef
      (fn ForwardInner [props ref]
-       (return
-        (r/createElement component (j/assign {:ref ref} props)))))
-    displayName)))
-
+        (return
+         (r/createElement component (Object.assign {:ref ref} props)))))
+     displayName)))

@@ -3,7 +3,6 @@
 
 (l/script :js
   {:require [[xt.lang.common-lib :suppress true :as k]
-             [js.core :as j]
              [js.react-native.animate :as a]]})
 
 ;;
@@ -51,10 +50,10 @@
   (-/LinearFn "opacity" 0.5 0.5))
 
 (def.js FlipHorizontal
-  (-/LinearFn "rotateY" (- j/PI) j/PI))
+  (-/LinearFn "rotateY" (- Math.PI) Math.PI))
 
 (def.js FlipVertical
-  (-/LinearFn "rotateX" (- j/PI) j/PI))
+  (-/LinearFn "rotateX" (- Math.PI) Math.PI))
 
 (def.js SlideLeft
   (-/LinearFn "translateX"

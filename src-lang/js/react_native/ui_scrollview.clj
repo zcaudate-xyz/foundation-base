@@ -8,8 +8,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:type :webpage :path "dev/notify"}}
-    :require [[js.core :as j]
-              [js.react :as r]
+    :require [[js.react :as r]
               [js.react-native :as n]
               [js.react-native.animate :as a]
               [xt.lang.common-lib :as k]
@@ -42,7 +41,7 @@
    [:% n/View
     {:style [{:flex 1
               :flexDirection "row-reverse"}
-             (:.. (j/arrayify styleContainer))]}
+             (:.. (xtd/arrayify styleContainer))]}
     (:? (not isTransition)
         [:% n/View
          {:style
@@ -52,7 +51,7 @@
             :position "absolute",
             :width (:? showScroll 7 0),
             :zIndex 10000}
-           (:.. (j/arrayify styleBackground))]}
+           (:.. (xtd/arrayify styleBackground))]}
          (:? showScroll
              [:% a/Box
               {:key "indicator",
@@ -62,10 +61,10 @@
                  :marginTop (* 2 contentMargin),
                  :transform [{:translateY contentOffset}],
                  :width 6}
-                (:.. (j/arrayify styleIndicator))]}])])
+                (:.. (xtd/arrayify styleIndicator))]}])])
     [:% n/ScrollView
      #{[:style [{:flex 1}
-                (:.. (j/arrayify style))]
+                (:.. (xtd/arrayify style))]
         :onContentSizeChange (fn [contentWidth contentHeight]
                                (when (isMounted)
                                  (setContentHeight contentHeight)))

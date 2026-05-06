@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.event.base-route :as event-route] [js.react :as r] [js.core :as j]]})
+  {:require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.event.base-route :as event-route] [js.react :as r]]})
 
 (defn.js makeRoute
   "makes a react compatible route"
@@ -17,7 +17,9 @@
   (var getFn (r/const (fn:> (xtd/clone-nested (. route ["tree"])))))
   (var [tree changeTree] (r/local getFn))
   (r/init []
-    (var listener-id (j/randomId 4))
+    (var listener-id (. (Math.random)
+                        (toString 36)
+                        (substr 2 4)))
     (event-route/add-url-listener
      route listener-id (fn:> [_ _ _ _] (changeTree getFn)))
     (return (fn:> (event-route/remove-listener route listener-id))))
@@ -30,7 +32,9 @@
   (var getFn (r/const (fn:> (event-route/get-url route))))
   (var [url changeUrl] (r/local getFn))
   (r/init []
-    (var listener-id (j/randomId 4))
+    (var listener-id (. (Math.random)
+                        (toString 36)
+                        (substr 2 4)))
     (event-route/add-url-listener
      route listener-id (fn:> [_ _ _ _] (changeUrl getFn)))
     (return (fn:> (event-route/remove-listener route listener-id))))
@@ -50,7 +54,9 @@
   "listens for changes on a route segment"
   {:added "4.0"}
   [route path defaultSegment]
-  (var listener-id (r/const (j/randomId 4)))
+  (var listener-id (r/const (. (Math.random)
+                               (toString 36)
+                               (substr 2 4))))
   (var [segment changeSegment] (r/local (or (event-route/get-segment route path)
                                             defaultSegment)))
   (r/watch [path]
@@ -82,7 +88,9 @@
   "listens for changes on a route param"
   {:added "4.0"}
   [route param defaultVal]
-  (var listener-id (r/const (j/randomId 4)))
+  (var listener-id (r/const (. (Math.random)
+                               (toString 36)
+                               (substr 2 4))))
   (var [value changeValue] (r/local (or (event-route/get-param route param)
                                         defaultVal)))
   (r/watch [param]

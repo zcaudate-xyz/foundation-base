@@ -188,6 +188,32 @@
             start
             more)))
 
+(defn ruby-throw
+  [[_ value] grammar mopts]
+  (str "raise("
+       (common/*emit-fn* value grammar mopts)
+       ")"))
+
+(defn- ruby-def-arglists
+  [sym]
+  (let [arglists (-> sym meta :arglists)]
+    (cond
+      (and (seq? arglists)
+           (= 'quote (first arglists)))
+      (second arglists)
+
+      :else
+      arglists)))
+
+(defn ruby-def
+  [[tag sym body :as form]]
+  (if-let [arglists (seq (ruby-def-arglists sym))]
+    (let [args (first arglists)]
+      (list 'defn- sym args
+            (list 'return
+                  (apply list body args))))
+    (list ':- (top/emit-top-level :def form preprocess-base/*macro-grammar* preprocess-base/*macro-opts*))))
+
 (defn- ruby-callable-form?
   [form]
   (cond
@@ -396,17 +422,18 @@
        {:var        {:macro #'ruby-var :emit :macro}
         :index      {:macro #'ruby-dot :emit :macro}
         :for-object {:macro #'tf-for-object :emit :macro}
-        :for-array  {:macro #'tf-for-array  :emit :macro}
-        :for-iter   {:macro #'tf-for-iter   :emit :macro}
-        :for-index  {:macro #'tf-for-index  :emit :macro}
-        :defn       {:symbol #{'defn}   :macro #'ruby-defn   :emit :macro}
-        :defgen     {:symbol #{'defgen} :macro #'ruby-defgen :emit :macro}
-        :spread     {:raw "*" :emit :pre}
-        :with-global {:value true :raw "($__globals__ ||= {})"}
-        :throw      {:raw "raise" :emit :prefix}
-        :and        {:raw "&&"}
-        :or         {:raw "||"}
-        :not        {:raw "!" :emit :prefix}
+         :for-array  {:macro #'tf-for-array  :emit :macro}
+         :for-iter   {:macro #'tf-for-iter   :emit :macro}
+         :for-index  {:macro #'tf-for-index  :emit :macro}
+         :def        {:macro #'ruby-def    :emit :macro}
+         :defn       {:symbol #{'defn}   :macro #'ruby-defn   :emit :macro}
+         :defgen     {:symbol #{'defgen} :macro #'ruby-defgen :emit :macro}
+         :spread     {:raw "*" :emit :pre}
+         :with-global {:value true :raw "($__globals__ ||= {})"}
+         :throw      {:emit #'ruby-throw}
+         :and        {:raw "&&"}
+         :or         {:raw "||"}
+         :not        {:raw "!" :emit :prefix}
         :eq         {:raw "=="}
         :pow        {:raw "**"}
         :fn         {:macro  #'ruby-fn   :emit :macro}
@@ -473,7 +500,7 @@
         :function {:defn      {:raw "def"
                                :body      {:start "" :end "end"}}}
         :define   {:def       {:raw "def"}
-                   :defglobal {:raw "def"}}}
+                   :defglobal {:raw ""}}}
        (collection/merge-nested (emit/default-grammar))))
 
 

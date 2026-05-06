@@ -8,7 +8,6 @@
   {:require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
-             [js.core :as j]
              [js.react :as r]
              [js.react-native :as n]
              [xt.event.base-animate :as event-animate]]
@@ -125,7 +124,7 @@
                                 :spring -/spring
                                 :decay  -/decay}
                                [type])
-                   params   (j/assign {:toValue (tf curr)
+                   params   (xt/x:obj-assign {:toValue (tf curr)
                                        :useNativeDriver false}
                                        fparams)
                    anim     (f indicator params)]
@@ -169,20 +168,20 @@
                         (-/addListener aval f))
    :get-value         (:? (n/isWeb)
                           (fn [aval]
-                            (cond (j/isInteger aval._value)
+                            (cond (Number.isInteger aval._value)
                                   (return aval._value)
                                   
                                   :else
                                   (return
-                                   (/ (j/round (* aval._value 10))
+                                   (/ (Math.round (* aval._value 10))
                                       10))))
                           (fn [aval]
-                            (cond (j/isInteger aval._value)
+                            (cond (Number.isInteger aval._value)
                                   (return aval._value)
                                   
                                   :else
                                   (return
-                                   (/ (j/round (* aval._value 20))
+                                   (/ (Math.round (* aval._value 20))
                                       20)))))
    :set-value         (fn:> [aval v] (-/setValue aval v))
    :set-props         -/setPropsAll
@@ -370,7 +369,7 @@
       flip]}]
   (var #{forwardFn
          reverseFn} (r/convertPosition
-                     (j/assign #{length step}
+                     (xt/x:obj-assign #{length step}
                                (:? flip
                                    {:max min
                                     :min max}
@@ -445,9 +444,11 @@
                          (when onComplete (onComplete 0))
                          (when (r/curr showingRef)
                            (r/curr:set showingRef false)
-                           (j/delayed [100]
-                             (when (isMounted)
-                               (setShowing false)))))
+                           (setTimeout
+                            (fn []
+                              (when (isMounted)
+                                (setShowing false)))
+                            100))))
                        (when (== vindicator._value 1)
                          (when onComplete (onComplete 1)))))))
   (return [(or visible showing)

@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [xt.lang.event-form :as base-form] [js.core :as j] [js.react :as r] [js.react.ext-form :as ext-form] [js.blessed.ui-style :as ui-style] [js.blessed.ui-core :as ui-core] [js.blessed.ui-group :as ui-group] [js.blessed.ui-date :as ui-date] [xt.lang.spec-base :as xt]]})
+  {:require [[xt.lang.common-lib :as k] [xt.lang.event-form :as base-form] [js.react :as r] [js.react.ext-form :as ext-form] [js.blessed.ui-style :as ui-style] [js.blessed.ui-core :as ui-core] [js.blessed.ui-group :as ui-group] [js.blessed.ui-date :as ui-date] [xt.lang.spec-base :as xt]]})
 
 (defn.js FormWrapper
   "addes `width`, `offset` and `label`"
@@ -35,9 +35,9 @@
                                        :setter "setValue"}))
    (var #{form field height meta} props)
    (var value     (ext-form/listenFieldValue form field meta))
-   (var fprops    (j/assign #{x y} props))
+   (var fprops    (xt/x:obj-assign #{x y} props))
    (var tprops    (ui-style/omitLayoutProps
-                   (j/assign {getter (base-form/get-field form field)
+                   (xt/x:obj-assign {getter (base-form/get-field form field)
                               setter (base-form/field-fn  form field)}
                              props
                              {:height (:? (and y height) (- height y) height)})))
@@ -121,7 +121,7 @@
    (var [minute setMinute]  [(base-form/get-field form minuteField)
                              (base-form/field-fn  form minuteField)])
    (var tprops     (ui-style/omitLayoutProps
-                    (j/assign #{hour setHour minute setMinute}
+                    (xt/x:obj-assign #{hour setHour minute setMinute}
                               props)))
    (return [:% -/FormWrapper #{...props}
             [:% ui-date/TimePicker #{...tprops}]])))
@@ -139,7 +139,7 @@
    (var [year setYear]   [(base-form/get-field form yearField)
                           (base-form/field-fn  form yearField)])
    (var tprops     (ui-style/omitLayoutProps
-                    (j/assign #{day setDay month setMonth year setYear}
+                    (xt/x:obj-assign #{day setDay month setMonth year setYear}
                               props)))
    (return [:% -/FormWrapper #{...props}
             [:% ui-date/DatePicker #{...tprops}]])))
@@ -157,7 +157,7 @@
    (var [minute setMinute]  [(base-form/get-field form minuteField)
                              (base-form/field-fn  form  minuteField)])
    (var tprops  (ui-style/omitLayoutProps
-                 (j/assign #{day setDay hour setHour minute setMinute}
+                 (xt/x:obj-assign #{day setDay hour setHour minute setMinute}
                            props)))
    (return [:% -/FormWrapper #{...props}
             [:%  ui-date/DurationPicker #{...tprops}]])))

@@ -39,19 +39,18 @@
   => [1 "alpha"])
 
 ^{:refer python.lib.driver-sqlite/wrap-connection :added "4.1"}
-(fact "wraps sqlite connections with the SQL runtime protocol"
+(fact "wraps sqlite connections with promise query and sync query-sync support"
 
   (!.py
     (var conn (py-sqlite/wrap-connection
                (py-sqlite/connect-constructor {})))
-    (var created (sql/query conn "CREATE TABLE test (id INTEGER, name TEXT);"))
-    (sql/query conn "INSERT INTO test (id, name) VALUES (1, 'alpha');")
-    (var name (sql/query-sync conn "SELECT name FROM test;"))
+    (sql/query-sync conn "CREATE TABLE test (id INTEGER, name TEXT);")
+    (sql/query-sync conn "INSERT INTO test (id, name) VALUES (1, 'alpha');")
     [(sql/connection? conn)
-     created
-     name
+     (spec-promise/x:promise-native? (sql/query conn "SELECT name FROM test;"))
+     (sql/query-sync conn "SELECT id FROM test;")
      (sql/disconnect conn)])
-  => [true [] "alpha" true])
+  => [true true 1 true])
 
 ^{:refer python.lib.driver-sqlite/connect-constructor :added "4.1"}
 (fact "constructs sqlite3 connections with an in-memory default"
@@ -62,18 +61,20 @@
   => 3)
 
 ^{:refer python.lib.driver-sqlite/driver :added "4.1"}
-(fact "connects through the driver wrapper"
+(fact "connects through the driver wrapper with async query and sync query-sync support"
 
-  (notify/wait-on :python
+  (notify/wait-on [:python 5000]
     (spec-promise/x:promise-then
      (sql/connect (py-sqlite/driver) {})
      (fn [conn]
-       (var created (sql/query conn "CREATE TABLE test (id INTEGER);"))
-       (sql/query conn "INSERT INTO test (id) VALUES (7);")
-       (var out (sql/query-sync conn "SELECT id FROM test;"))
-       (repl/notify
-        [(sql/connection? conn)
-         created
-         out
-         (sql/disconnect conn)]))))
-  => [true [] 7 true])
+       (sql/query-sync conn "CREATE TABLE test (id INTEGER);")
+       (sql/query-sync conn "INSERT INTO test (id) VALUES (7);")
+       (spec-promise/x:promise-then
+        (sql/query conn "SELECT id FROM test;")
+        (fn [out]
+          (repl/notify
+           [(sql/connection? conn)
+            out
+            (sql/query-sync conn "SELECT id FROM test;")
+            (sql/disconnect conn)]))))))
+  => [true 7 7 true])

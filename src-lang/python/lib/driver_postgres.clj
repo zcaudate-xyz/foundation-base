@@ -5,6 +5,7 @@
   {:require [[xt.lang.common-data :as xtd]
              [xt.lang.common-resource :as rt]
              [xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as promise]
              [python.core :as py]
              [xt.protocol.impl.connection-sql :as sqlrt]]})
 
@@ -54,7 +55,7 @@
   [conn query]
   (var cursor (. conn (cursor)))
   (. cursor (execute query))
-  (var rows (:? (. cursor ["description"])
+  (var rows (:? (. cursor description)
                 (. cursor (fetchall))
                 []))
   (. conn (commit))
@@ -66,13 +67,14 @@
   (return
    (sqlrt/connection-create
     conn
-    {"disconnect" (fn [raw]
-                    (. raw (close))
-                    (return true))
-     "query" (fn [raw query]
-               (return (-/raw-query raw query)))
-     "query_sync" (fn [raw query]
-                    (xt/x:err "Not Allowed"))})))
+     {"disconnect" (fn [raw]
+                     (. raw (close))
+                     (return true))
+      "query" (fn [raw query]
+                (return (promise/x:promise-run
+                         (-/raw-query raw query))))
+      "query_sync" (fn [raw query]
+                     (return (-/raw-query raw query)))})))
 
 (defn.py connect-constructor
   "Constructs a postgres connection through psycopg."
@@ -86,7 +88,7 @@
                      " port=" (xt/x:get-key env "port")))
   (var pg (-/load-module))
   (var conn (. pg (connect dsn)))
-  (:= (. conn ["autocommit"]) true)
+  (:= (. conn autocommit) true)
   (return conn))
 
 (defn.py driver

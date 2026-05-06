@@ -8,8 +8,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react-native :as n]
+   :require [[js.react-native :as n]
              [js.react-native.physical-base :as physical-base]
              [js.react-native.helper-theme-default :as helper-theme-default]
              [js.react-native.helper-theme :as helper-theme]]})
@@ -21,8 +20,8 @@
       themePipeline
       transformations
       (:.. rprops)]}]
-  (var __theme (j/assign {} helper-theme-default/RadioBoxDefaultTheme theme))
-  (var __themePipeline (j/assign {} helper-theme-default/BinaryDefaultPipeline themePipeline))
+  (var __theme (xt/x:obj-assign {} helper-theme-default/RadioBoxDefaultTheme theme))
+  (var __themePipeline (xt/x:obj-assign {} helper-theme-default/BinaryDefaultPipeline themePipeline))
   (var #{outside inside} transformations)
   (var [bgStyleStatic bgTransformFn]
        (helper-theme/prepThemeCombined
@@ -34,7 +33,7 @@
        (helper-theme/prepThemeSingle
         #{[:theme __theme
            :themePipeline __themePipeline
-           :transformations (j/assign
+           :transformations (xt/x:obj-assign
                              {:fg (fn:> [#{active}]
                                     {:style {:opacity   active
                                              :transform [{:scale (+ 0.2 (* 0.8 active))}]}})}
@@ -73,7 +72,7 @@
        :onPress (fn []
                   (when setSelected
                     (setSelected (not selected))))
-       :inner [(j/assign
+       :inner [(xt/x:obj-assign
                 {:component n/View
                  :key "outside"
                  :style [{:borderRadius (/ size 2)
@@ -82,10 +81,10 @@
                           :borderStyle "solid" 
                           :borderWidth 2}
                          bgStyleStatic
-                         (:.. (j/arrayify outsideStyle))]
+                         (:.. (xtd/arrayify outsideStyle))]
                  :transformations  bgTransformFn}
                 outsideProps)
-               (j/assign
+               (xt/x:obj-assign
                 {:component n/View
                  :key "inside"
                  :style [{:position "absolute"
@@ -95,7 +94,7 @@
                           :height sizeInside
                           :width sizeInside}
                          fgStyleStatic
-                         (:.. (j/arrayify insideStyle))]
+                         (:.. (xtd/arrayify insideStyle))]
                  :transformations fgTransformFn}
                 insideProps)
                (:.. inner)]

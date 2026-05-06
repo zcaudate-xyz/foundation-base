@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.common-math :as math] [js.core :as j] [js.react :as r] [js.react-native :as n] [js.react-native.animate :as a] [js.react-native.physical-base :as physical-base] [js.react-native.physical-edit :as physical-edit] [js.react-native.helper-roller :as helper-roller] [js.react-native.helper-theme :as helper-theme] [js.react-native.helper-theme-default :as helper-theme-default]]})
+  {:require [[xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.common-math :as math] [js.react :as r] [js.react-native :as n] [js.react-native.animate :as a] [js.react-native.physical-base :as physical-base] [js.react-native.physical-edit :as physical-edit] [js.react-native.helper-roller :as helper-roller] [js.react-native.helper-theme :as helper-theme] [js.react-native.helper-theme-default :as helper-theme-default]]})
 
 (defn.js pickerTheme
   "creates the picker theme"
@@ -10,8 +10,8 @@
   [#{[theme
       themePipeline
       (:.. rprops)]}]
-  (var __theme (j/assign {} helper-theme-default/ButtonDefaultTheme theme))
-  (var __themePipeline (j/assign {}
+  (var __theme (xt/x:obj-assign {} helper-theme-default/ButtonDefaultTheme theme))
+  (var __themePipeline (xt/x:obj-assign {}
                                  helper-theme-default/PressDefaultPipeline
                                  themePipeline))
   (var [styleStatic transformFn]
@@ -32,7 +32,7 @@
                    (fn []
                      (var #{_value} position)
                      (var nIndex (+ (r/curr indexRef)
-                                    (j/round (/ _value 10))))
+                                    (Math.round (/ _value 10))))
                      (when (not= nIndex (r/curr prevRef))
                        (setIndex nIndex)
                        (r/curr:set prevRef nIndex)))))
@@ -65,15 +65,15 @@
   (return
    [:% physical-base/Box
     #{[:indicators {:position position}
-       :chord      (j/assign {:index index}
+       :chord      (xt/x:obj-assign {:index index}
                              chord)
        :style [{:overflow "hidden"
                 :width 120
                 :padding 5
                 :height 30}
                styleStatic
-               (:.. (j/arrayify style))]]}
-     (j/map (xtd/arr-range divisions)
+               (:.. (xtd/arrayify style))]]}
+     (xt/x:arr-map (xtd/arr-range divisions)
             (fn:> [index i]
              [:% physical-base/Text
               {:key i
@@ -83,7 +83,7 @@
                         :padding 0
                         :fontSize 18
                         :fontWeight "400"}
-                       (:.. (j/arrayify styleText))]
+                       (:.. (xtd/arrayify styleText))]
                :transformations
                (fn [#{offset value}]
                  (var v (- offset index))
@@ -127,7 +127,7 @@
   (var #{touchable
          panHandlers} (physical-edit/usePanTouchable
                        #{[disabled
-                          :chord (j/assign #{index} chord)
+                          :chord (xt/x:obj-assign #{index} chord)
                           (:.. rprops)]}
                        "vertical"
                        position
@@ -153,11 +153,11 @@
                 :padding 5
                 :height 30}
                styleStatic
-               (:.. (j/arrayify style))]
+               (:.. (xtd/arrayify style))]
        :transformations transformFn
-       (:.. (j/assign touchable
+       (:.. (xt/x:obj-assign touchable
                       panHandlers))]}
-     (j/map (xtd/arr-range divisions)
+     (xt/x:arr-map (xtd/arr-range divisions)
             (fn:> [index i]
              [:% physical-base/Text
               {:key i
@@ -171,7 +171,7 @@
                         {:web {:cursor "ns-resize"
                                :userSelect "none"}})
                        #_{:color fgActive}
-                       (:.. (j/arrayify styleText))]
+                       (:.. (xtd/arrayify styleText))]
                :transformations
                (fn [#{offset value}]
                  (var v (- offset index))

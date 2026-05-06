@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [js.core :as j] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style]]})
+  {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style]]})
 
 (defn.js useTree
   "wrapper for `js.react/useTree`"
@@ -16,7 +16,7 @@
      targetFn
      formatFn
      displayFn}]
-  (:= formatFn  (or formatFn (fn:> [v] (j/inspect v {:colors true}))))
+  (:= formatFn  (or formatFn (fn:> [v] (JSON.stringify v nil 2))))
   (:= displayFn (or displayFn
                     (fn:> [target _branch _parents _root]
                       [:box {:content (formatFn target)}])))
@@ -36,24 +36,24 @@
   [items layout height format]
   (var lefts
        (:? (== layout "vertical")
-           (j/fill (Array (xt/x:len items))
-                   0)
+           (. (Array (xt/x:len items))
+              (fill 0))
            (-> items
-               (j/reduce (fn [acc item]
-                           (let [prev (xtd/last acc)
-                                 curr (+ prev
-                                         1
-                                         (. (format item) ["length"]))]
-                             (acc.push curr)
-                             (return acc)))
-                         [0]))))
+               (. (reduce (fn [acc item]
+                            (let [prev (xtd/last acc)
+                                  curr (+ prev
+                                          1
+                                          (. (format item) ["length"]))]
+                              (acc.push curr)
+                              (return acc)))
+                          [0])))))
   (var tops
        (:? (== layout "vertical")
-         (j/map items
+         (xt/x:arr-map items
                 (fn:> [e i]
                   (* i (or height 1))))
-         (j/fill (Array (xt/x:len items))
-                 0)))
+         (. (Array (xt/x:len items))
+            (fill 0))))
   (return [lefts tops]))
 
 (defn.js EnumMultiIndexed
@@ -70,7 +70,7 @@
    (var [lefts tops] (-/layoutTabs items layout height format))
    (var tprops (ui-style/getTopProps props))
    (return [:box #{[(:.. tprops)]}
-            (j/map items
+            (xt/x:arr-map items
                    (fn [item i]
                      (var text (format item))
                      (return
@@ -84,7 +84,7 @@
                                 :mouse true
                                 :onClick (fn []
                                            (setIndices
-                                            (j/map indices
+                                            (xt/x:arr-map indices
                                                    (fn:> [e ei] (:? (== ei i) (not e) e)))))
                                 :content text}])))])))
 
@@ -133,7 +133,7 @@
                       :scrollable true
                       :scrollbar ui-style/styleScrollBar
                       (:.. tprops)]}
-              (j/map items
+              (xt/x:arr-map items
                      (fn [item i]
                        (var text (format item))
                        (return
@@ -264,7 +264,7 @@
         :setValue (fn [k]
                     (setBranch k))
         :data branches
-        :format (fn:> [v] (j/padEnd (tabsFormat v) width " "))]}]
+        :format (fn:> [v] (. (tabsFormat v) (padEnd width " ")))}]
     [:box {:left width}
      [:box {:left 1}
       view]]]))
@@ -378,7 +378,7 @@
          :setValue (fn [k]
                      (setBranch k))
          :data branches
-         :format (fn:> [v] (j/padEnd (listFormat v) width " "))]}]]
+         :format (fn:> [v] (. (listFormat v) (padEnd width " ")))}]]
     [:box {:left width}
      [:box {:left 1}
       view]]]))

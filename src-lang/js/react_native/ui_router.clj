@@ -8,8 +8,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-    :require [[js.core :as j]
-              [js.react :as r]
+    :require [[js.react :as r]
               [js.react-native :as n]
               [js.react-native.animate :as a]
               [js.react-native.physical-base :as physical-base]
@@ -47,9 +46,9 @@
             setChanging
             even
             setEven
-            {:indicators (j/assign {:changing cindicator}
+            {:indicators (xt/x:obj-assign {:changing cindicator}
                                    indicators)
-             :chord (j/assign #{changing even} chord)}}))
+             :chord (xt/x:obj-assign #{changing even} chord)}}))
 
 (defn.js RouterImpl
   "creates the transitioning router"
@@ -102,7 +101,7 @@
        (model-context/animateIn chord))
   (var outFn
        (model-context/animateOut
-         (j/assign {} chord {:transition (xtd/get-in model-context/ANIMATE
+         (xt/x:obj-assign {} chord {:transition (xtd/get-in model-context/ANIMATE
                                                    [transition "counter"])})))
   (var evenFn
        (fn [progress chord]
@@ -111,9 +110,9 @@
          (return (:? changing
                      {:style
                       (:? even
-                          {;;:opacity 1 #_(k/mix 1 0 (j/min 1 (* 2 progress)))
-                           :transform (j/arrayify (outFn progress))}
-                          {:transform (j/arrayify (inFn progress))})}))))
+                          {;;:opacity 1 #_(k/mix 1 0 (Math.min 1 (* 2 progress)))
+                           :transform (xtd/arrayify (outFn progress))}
+                          {:transform (xtd/arrayify (inFn progress))})}))))
   (var oddFn
        (fn [progress chord]
          (var #{even
@@ -121,9 +120,9 @@
          (var out (:? changing
                       {:style
                        (:? (not even)
-                          {;;:opacity 1 #_(k/mix 1 0 (j/min 1 (* 2 progress)))
-                           :transform (j/arrayify (outFn progress))}
-                          {:transform (j/arrayify (inFn progress))})}))
+                          {;;:opacity 1 #_(k/mix 1 0 (Math.min 1 (* 2 progress)))
+                           :transform (xtd/arrayify (outFn progress))}
+                          {:transform (xtd/arrayify (inFn progress))})}))
          (return out)))
   (var evenRef (r/useFollowRef evenFn))
   (var oddRef  (r/useFollowRef oddFn))

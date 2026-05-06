@@ -8,8 +8,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-              [xt.lang.common-lib :as k]
+   :require [[xt.lang.common-lib :as k]
               [xt.lang.common-math :as math]
               [xt.lang.spec-base :as xt]]})
 
@@ -49,19 +48,19 @@
   "constructs a roller model"
   {:added "4.0"}
   [divisions radius]
-  (var UNIT     (* 2 (/ j/PI divisions)))
-  (var HALF_PI  (/ j/PI 2))
+  (var UNIT     (* 2 (/ Math.PI divisions)))
+  (var HALF_PI  (/ Math.PI 2))
   (return (fn [offset]
             (var raw     (math/mod-pos offset divisions))
             (var theta   (* raw UNIT))
-            (var visible (or (< (j/abs theta) HALF_PI)
-                             (> (j/abs theta) (* 3 HALF_PI))))
+            (var visible (or (< (Math.abs theta) HALF_PI)
+                             (> (Math.abs theta) (* 3 HALF_PI))))
             (return {:raw   raw
                      :visible visible
                      :offset offset
                      :theta theta
-                     :translate (* radius (j/sin theta))
-                     :scale     (j/abs (j/cos theta))}))))
+                     :translate (* radius (Math.sin theta))
+                     :scale     (Math.abs (Math.cos theta))}))))
 
 
 (defn.js roller-shifted-norm

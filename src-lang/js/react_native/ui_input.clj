@@ -8,8 +8,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react-native :as n]
+   :require [[js.react-native :as n]
              [js.react-native.physical-base :as physical-base]
              [js.react-native.helper-theme-default :as helper-theme-default]
              [js.react-native.helper-theme :as helper-theme]
@@ -21,8 +20,8 @@
   [#{[theme
       themePipeline
       (:.. rprops)]}]
-  (var __theme (j/assign {} helper-theme-default/InputDefaultTheme theme))
-  (var __themePipeline (j/assign {} helper-theme-default/InputDefaultPipeline themePipeline))
+  (var __theme (xt/x:obj-assign {} helper-theme-default/InputDefaultTheme theme))
+  (var __themePipeline (xt/x:obj-assign {} helper-theme-default/InputDefaultPipeline themePipeline))
   (var [fgStyleStatic fgTransformFn]
        (helper-theme/prepThemeSingle
         #{[:theme __theme
@@ -56,14 +55,14 @@
     [:% physical-base/TouchableInput
      #{[:styleContainer [helper-theme-default/InputDefaultStyle
                          (:.. bgStyleStatic)
-                         (:.. (j/arrayify styleContainer))]
+                         (:.. (xtd/arrayify styleContainer))]
         :containerProps
-        (j/assign
+        (xt/x:obj-assign
          {:transformations bgTransformFn}
          containerProps)
         :transformations fgTransformFn
         :onChangeText (fn [v]
-                        (return (j/map (j/arrayify onChangeText)
+                        (return (xt/x:arr-map (xtd/arrayify onChangeText)
                                        (fn:> [f] (f v)))))
         :size  "sm"
         :style [{:flex 1}
@@ -71,6 +70,6 @@
                 (n/PlatformSelect
                  {:web {:outlineWidth 0
                         :outline "none"}})
-                (:.. (j/arrayify style))]
+                (:.. (xtd/arrayify style))]
         (:..  rprops)]}])))
   

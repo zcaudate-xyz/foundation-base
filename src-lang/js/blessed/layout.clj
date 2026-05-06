@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [js.core :as j] [js.react :as r] [js.lib.chalk :as chalk]]})
+  {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [js.react :as r] [js.lib.chalk :as chalk]]})
 
 (def.js primaryNormal
   {:hover {:fg "black"
@@ -66,32 +66,32 @@
   "layout for menu entry"
   {:added "4.0"}
   ([items]
-   (let [entries (j/filter items (fn:> [e] (:? (k/is-array? e.hidden) (not (e.hidden)) (not e.hidden))))
-         lens     (j/map entries (fn:> [e] (xt/x:len e.label)))
-         lefts    (j/reduce lens
-                            (fn [acc l]
-                               (j/push acc (+ (xtd/last acc) l 8))
+   (let [entries (xt/x:arr-filter items (fn:> [e] (:? (k/is-array? e.hidden) (not (e.hidden)) (not e.hidden))))
+         lens     (xt/x:arr-map entries (fn:> [e] (xt/x:len e.label)))
+         lefts    (. lens
+                     (reduce (fn [acc l]
+                               (. acc (push (+ (xtd/last acc) l 8)))
                                (return acc))
-                             [0])]
-     (return (j/map entries (fn [e i]
-                               (let [name  (or e.route (j/toLowerCase e.label))
+                             [0]))]
+      (return (xt/x:arr-map entries (fn [e i]
+                               (let [name  (or e.route (. e.label (toLowerCase)))
                                      left  (. lefts [i])
                                      width (- (. lefts [(+ i 1)])
                                               left)]
-                                 (return #{...e name left width}))))))))
+                                  (return #{...e name left width}))))))))
 
 (defn.js layoutToggles
   "layout for toggle entry"
   {:added "4.0"}
   ([items]
-   (let [entries (j/filter items (fn:> [e] (:? (k/is-function? e.hidden) (not (e.hidden)) (not e.hidden))))
-         lens     (j/map entries (fn:> [e] (:? (== e.type "separator") 1 3)))
-         lefts    (j/reduce lens
-                             (fn [acc l]
-                               (j/push acc (+ (xtd/last acc) l))
+   (let [entries (xt/x:arr-filter items (fn:> [e] (:? (k/is-function? e.hidden) (not (e.hidden)) (not e.hidden))))
+         lens     (xt/x:arr-map entries (fn:> [e] (:? (== e.type "separator") 1 3)))
+         lefts    (. lens
+                     (reduce (fn [acc l]
+                               (. acc (push (+ (xtd/last acc) l)))
                                (return acc))
-                             [0])]
-     (return (j/map entries (fn [e i]
+                             [0]))]
+     (return (xt/x:arr-map entries (fn [e i]
                                (let [left  (. lefts [i])
                                      width (- (. lefts [(+ i 1)])
                                               left)]
@@ -110,7 +110,7 @@
         (onScreenEvent "keypress"
                        (fn [_ key]
                          (let [e (-> entries
-                                     (j/filter 
+                                     (xt/x:arr-filter 
                                       (fn [e]
                                         (return (== e.index key.name))))
                                       (xtd/first))]
@@ -123,7 +123,7 @@
              :shrink true
              :style {:bg "black"}
              (:.. rprops)]}
-     (j/map entries (fn [e] (return
+     (xt/x:arr-map entries (fn [e] (return
                              [:% -/PrimaryButton #{[:key e.route
                                                     :selected (== route e.route)
                                                     setRoute
@@ -153,13 +153,13 @@
   {:added "4.0"}
   [#{[entries
       (:.. rprops)]}]
-  (let [width (j/reduce entries (fn:> [acc e] (+ acc e.width)) 0)]
+  (let [width (. entries (reduce (fn:> [acc e] (+ acc e.width)) 0))]
     (return
      [:box #{[:shrink true
               :style {:bg "red"}
               :width width
               (:.. rprops)]}
-      (j/map entries (fn [e i]
+      (xt/x:arr-map entries (fn [e i]
                         (return
                          (:? (== e.type "separator") [:box #{[:key i :style {:bg "black"} (:.. e)]}] [:% -/PrimaryToggle #{[:key i (:.. e)]}]))))])))
 
@@ -202,10 +202,10 @@
        setIndex
        menuContent
        menuFooter]}]
-   (let [_ (:= items (:? (j/isArray items) items (j/keys items)))
-         entries (j/map items
+   (let [_ (:= items (:? (xt/x:is-array? items) items (xt/x:obj-keys items)))
+         entries (xt/x:arr-map items
                          (fn [e i]
-                           (return (j/assign
+                           (return (xt/x:obj-assign
                                     {:top   (+ 2 (* i 2))
                                      :index (+ i 1)}
                                     e))))
@@ -217,8 +217,8 @@
          (. (r/curr box)
             (onScreenEvent "keypress"
                            (fn [_ key]
-                             (let [i   (j/parseInt key.full)
-                                   sel (j/filter entries
+                             (let [i   (parseInt key.full)
+                                   sel (xt/x:arr-filter entries
                                                   (fn:> [e] (== e.index i)))]
                                
                                 (when (and sel (< 0 (xt/x:len sel)))
@@ -235,7 +235,7 @@
              :scrollable true
              :style {:bold true
                      :bg "black"}}
-       (j/map entries (fn [e]
+       (xt/x:arr-map entries (fn [e]
                          (return
                           [:% -/SecondaryButton
                            #{[:key e.index
@@ -251,7 +251,7 @@
               :height 1
               :shrink true
               :width "100%"
-              :content (chalk/inverse (chalk/yellow (+ " " (j/toUpperCase label) " ")))}]
+              :content (chalk/inverse (chalk/yellow (+ " " (. label (toUpperCase)) " ")))}]
         (:? MenuContent [:box {:left 1 :right 1 :style {:bg "black"} :top (+ 4 (* 2 (xt/x:len items)))} [:% MenuContent]])
        (:? MenuFooter [:box {:bottom 0 :height 2 :right 0 :style {:bg "black"}} [:% MenuFooter]])]))))
 
@@ -342,15 +342,17 @@
       autoClear
       (:.. rprops)]}]
   (let [#{content type} status
-        width  (j/min [(:? content (xt/x:len content) 0)
-                        50])
+        width  (Math.min (:? content (xt/x:len content) 0)
+                         50)
         clearFn (fn:> (setStatus {:content ""
                                 :type "info"}))]
     (r/init []
       (when autoClear
-        (let [id (j/delayed [2500]
-                   (setStatus {:content ""
-                               :type "info"}))]
+        (let [id (setTimeout
+                  (fn []
+                    (setStatus {:content ""
+                                :type "info"}))
+                  2500)]
           (return (fn:> (clearTimeout id))))))
     (return [:box #{[:height 1
                      :shrink true
@@ -442,12 +444,8 @@
         ientries (-/layoutMenu items)
         toggles  (or (. footer ["toggle"]) [])
         tentries (-/layoutToggles toggles)
-        ioffset  (j/reduce tentries
-                            (fn:> [acc e] (+ acc e.width))
-                            0)
-        soffset  (j/reduce ientries
-                            (fn:> [acc e] (+ acc e.width))
-                            ioffset)]
+        ioffset  (. tentries (reduce (fn:> [acc e] (+ acc e.width)) 0))
+        soffset  (. ientries (reduce (fn:> [acc e] (+ acc e.width)) ioffset))]
     (return
      [:% -/LayoutFooterBlock
       
@@ -497,7 +495,7 @@
           __setRoute]     (:? setRoute [route setRoute] (r/local init))
          [__index
           __setIndex]      (:? setIndex [index setIndex] (r/local 0))
-         section           (j/assign {}
+         section           (xt/x:obj-assign {}
                                      (. sections
                                         [(or __route init)])
                                      {:route (or __route init)

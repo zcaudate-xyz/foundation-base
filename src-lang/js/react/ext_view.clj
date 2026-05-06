@@ -2,7 +2,14 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [xt.event.base-view :as event-view] [js.react :as r] [js.core :as j] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-tree :as xtt] [xt.lang.common-trace :as trace]]})
+  {:require [[xt.lang.common-lib :as k]
+             [xt.event.base-view :as event-view]
+             [js.react :as r]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-tree :as xtt]
+             [xt.lang.common-trace :as trace]
+             [xt.lang.spec-promise :as promise]]})
 
 (defn.js throttled-setter
   "creates a throttled setter which only updates after a delay"
@@ -21,12 +28,13 @@
                 (do (xt/x:set-key throttle "val" result)
                     (setResult result)
                     (xt/x:set-key throttle "thread"
-                               (j/future-delayed [delay]
-                                 (when (and (not= (xt/x:get-key throttle "val")
-                                                  result)
-                                            (xt/x:get-key throttle "mounted"))
-                                   (setResult (xt/x:get-key throttle "val")))
-                                 (xt/x:del-key throttle "thread")))))))
+                               (promise/x:with-delay delay
+                                 (fn []
+                                  (when (and (not= (xt/x:get-key throttle "val")
+                                                   result)
+                                             (xt/x:get-key throttle "mounted"))
+                                    (setResult (xt/x:get-key throttle "val")))
+                                  (xt/x:del-key throttle "thread"))))))))
   (return [throttled-fn throttle]))
 
 (defn.js refresh-view
@@ -38,7 +46,12 @@
   (return (. (event-view/pipeline-run
               context
               disabled
-              (j/asyncFn)
+              (fn [handler-fn context #{success error}]
+                (return (. (promise/x:promise
+                            (fn []
+                              (return (handler-fn context))))
+                           (then success)
+                           (catch error))))
               nil
               k/identity)
              (then (fn []
@@ -63,7 +76,12 @@
     (return (. (event-view/pipeline-run-remote
                 context
                 save-output
-                (j/asyncFn)
+                (fn [handler-fn context #{success error}]
+                  (return (. (promise/x:promise
+                              (fn []
+                                (return (handler-fn context))))
+                             (then success)
+                             (catch error))))
                 nil
                 k/identity)
                (then (fn:> acc))))))
@@ -85,7 +103,12 @@
     (return (. (event-view/pipeline-run-sync
                 context
                 save-output
-                (j/asyncFn)
+                (fn [handler-fn context #{success error}]
+                  (return (. (promise/x:promise
+                              (fn []
+                                (return (handler-fn context))))
+                             (then success)
+                             (catch error))))
                 nil
                 k/identity)
                (then (fn:> acc))))))
@@ -171,7 +194,9 @@
   (var #{resultFn
          resultPrint} (or meta {}))
   (r/init []
-    (var listener-id (j/randomId 4))
+    (var listener-id (. (Math.random)
+                        (toString 36)
+                        (substr 2 4)))
      (event-view/add-listener
       view
       listener-id
@@ -260,7 +285,9 @@
   (var [result setResult] (r/local getResult))
   (var resultRef (r/useFollowRef result))
   (r/init []
-    (var listener-id (j/randomId 4))
+    (var listener-id (. (Math.random)
+                        (toString 36)
+                        (substr 2 4)))
     (var [setThrottled throttle] (-/throttled-setter setResult delay))
     (event-view/add-listener
      view
@@ -290,10 +317,12 @@
      (fn [view ...args]
        (event-view/set-pending view true)
        (return
-        (. (j/future (return (f view ...args)))
-           (then (fn [res]
-                   (event-view/set-pending view false)
-                   (return res)))))))))
+         (. (promise/x:promise
+             (fn []
+               (return (f view ...args))))
+            (then (fn [res]
+                    (event-view/set-pending view false)
+                    (return res)))))))))
 
 (defn.js refreshArgsFn
   "creates the refresh args function"

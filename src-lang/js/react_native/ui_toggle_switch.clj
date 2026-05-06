@@ -8,8 +8,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react-native :as n]
+   :require [[js.react-native :as n]
              [js.react-native.physical-base :as physical-base]
              [js.react-native.helper-theme-default :as helper-theme-default]
              [js.react-native.helper-theme :as helper-theme]]})
@@ -22,8 +21,8 @@
       (:= transformations {})
       (:.. rprops)]}
    size]
-  (var __theme (j/assign {} helper-theme-default/ToggleSwitchDefaultTheme theme))
-  (var __themePipeline (j/assign {} helper-theme-default/BinaryDefaultPipeline themePipeline))
+  (var __theme (xt/x:obj-assign {} helper-theme-default/ToggleSwitchDefaultTheme theme))
+  (var __themePipeline (xt/x:obj-assign {} helper-theme-default/BinaryDefaultPipeline themePipeline))
   (var #{knob axis} transformations)
   (var [bgStyleStatic bgTransformFn]
        (helper-theme/prepThemeCombined
@@ -35,7 +34,7 @@
        (helper-theme/prepThemeSingle
         #{[:theme __theme
            :themePipeline __themePipeline
-           :transformations (j/assign
+           :transformations (xt/x:obj-assign
                              {:fg (fn:> [#{active}]
                                     {:style {:transform [{:translateX (- (* active size) 1)}]}})}
                              knob)
@@ -75,7 +74,7 @@
        :onPress (fn []
                   (when setSelected
                     (setSelected (not selected))))
-       :inner [(j/assign
+       :inner [(xt/x:obj-assign
                 {:component n/View
                  :key "axis"
                  :style [{:marginVertical (/ size 4) 
@@ -83,10 +82,10 @@
                           :height (/ size 2) 
                           :width (* size 2)}
                          bgStyleStatic
-                         (:.. (j/arrayify axisStyle))]
+                         (:.. (xtd/arrayify axisStyle))]
                  :transformations bgTransformFn}
                 axisProps)
-               (j/assign
+               (xt/x:obj-assign
                 {:component n/View
                  :key "knob"
                  :style [{:borderRadius (/ size 2)
@@ -94,7 +93,7 @@
                           :position "absolute"
                           :width size}
                          fgStyleStatic
-                         (:.. (j/arrayify knobStyle))]
+                         (:.. (xtd/arrayify knobStyle))]
                  :transformations fgTransformFn}
                 knobProps)
                (:.. inner)]

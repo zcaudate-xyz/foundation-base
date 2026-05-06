@@ -2,16 +2,18 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[js.core :as j] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]]})
+  {:require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]]})
 
 (defn.js newRegistry
   "creates a new portal registry"
   {:added "4.0"}
   []
-  (return {:id (j/randomId 6)
-           :sinks {}
-           :sources  {}
-           :initial  {}}))
+  (return {:id (. (Math.random)
+                  (toString 36)
+                  (substr 2 6))
+            :sinks {}
+            :sources  {}
+            :initial  {}}))
 
 ;;
 ;; Usually, it's required for the portal to have a reference
@@ -52,8 +54,8 @@
   (var entry (. sinks [name]))
   (when entry
     (var #{setSource} entry)
-    (setSource (j/values (or (. sources [name])
-                             {})))))
+    (setSource (xt/x:obj-vals (or (. sources [name])
+                                  {})))))
 
 (defn.js addSink
   "adds a sink to the registry"

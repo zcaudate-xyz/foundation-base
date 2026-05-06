@@ -2,8 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[js.core :as j]
-             [js.react :as r]
+  {:require [[js.react :as r]
              [js.react-native :as n]
              [js.react-native.animate :as a]
              [js.react-native.physical-base :as physical-base]
@@ -21,8 +20,8 @@
       (:.. rprops)]}
    layout
    length]
-  (var __theme (j/assign {} helper-theme-default/ButtonDefaultTheme theme))
-  (var __themePipeline (j/assign {} helper-theme-default/PressDefaultPipeline themePipeline))
+  (var __theme (xt/x:obj-assign {} helper-theme-default/ButtonDefaultTheme theme))
+  (var __themePipeline (xt/x:obj-assign {} helper-theme-default/PressDefaultPipeline themePipeline))
   (var #{knob axis} transformations)
   (var [bgStyleStatic bgTransformFn]
        (helper-theme/prepThemeCombined
@@ -35,13 +34,13 @@
         #{[:theme __theme
            :themePipeline __themePipeline
            :transformations
-           (j/assign
+           (xt/x:obj-assign
             {:fg (fn [#{[(:= position 0)]}]
                    (return
                     {:style {:transform
                              [(:? (== layout "horizontal")
-                                  {:translateX (j/max 0 (j/min length position))}
-                                  {:translateY (j/max 0 (j/min length position))})]}}))}
+                                  {:translateX (Math.max 0 (Math.min length position))}
+                                  {:translateY (Math.max 0 (Math.min length position))})]}}))}
             knob)
            (:.. rprops)]}
         "fg"
@@ -96,7 +95,7 @@
                        #{[disabled
                           highlighted
                           outlined
-                          :chord (j/assign #{value} chord)
+                          :chord (xt/x:obj-assign #{value} chord)
                           indicators
                           onChord
                           indicatorParams
@@ -131,7 +130,7 @@
                         (setPressing false))
        :onMouseDown   (fn [e]
                         (. e preventDefault))
-       :inner [(j/assign
+       :inner [(xt/x:obj-assign
                 {:component n/View
                  :key "axis"
                  :style [(:? (== layout "horizontal")
@@ -140,10 +139,10 @@
                              {:height (+ length (* 2 size)) :width size})
                          {:borderRadius 3}
                          bgStyleStatic
-                         (:.. (j/arrayify axisStyle))]
+                         (:.. (xtd/arrayify axisStyle))]
                  :transformations bgTransformFn}
                 axisProps)
-               (j/assign
+               (xt/x:obj-assign
                 {:component n/View
                  :key "knob"
                  :style [(:? (== layout "horizontal")
@@ -160,10 +159,10 @@
                                     {:cursor "ew-resize"}
                                     {:cursor "ns-resize"})})
                          fgStyleStatic
-                         (:.. (j/arrayify knobStyle))]
+                         (:.. (xtd/arrayify knobStyle))]
                  :transformations fgTransformFn}
                 panHandlers
                 knobProps)
-               (:.. (j/arrayify inner))]
+               (:.. (xtd/arrayify inner))]
        (:.. rprops)]}]))
 

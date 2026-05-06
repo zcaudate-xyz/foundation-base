@@ -1,14 +1,22 @@
 ^{:no-test true}
 (ns js.react
   (:require [js.react.compile :as compile]
-            [hara.lang :as l]
-            [std.lib.foundation :as f]
-            [std.lib.walk :as walk]
-            [std.string.case :as case])
+             [hara.lang :as l]
+             [std.lib.foundation :as f]
+             [std.lib.walk :as walk]
+             [std.string.case :as case])
   (:refer-clojure :exclude [> ref derive sync get set]))
 
 (l/script :js
-  {:import [["react" :as React] ["react-dom/client" :as ReactDOM] ["react-nil" :as ReactNIL]] :require [[js.core :as j] [xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-tree :as xtt] [xt.lang.common-string :as str] [xt.lang.common-math :as math] [xt.lang.common-trace :as trace]]})
+  {:import [["react" :as React] ["react-dom/client" :as ReactDOM] ["react-nil" :as ReactNIL]]
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-tree :as xtt]
+             [xt.lang.common-string :as str]
+             [xt.lang.common-math :as math]
+             [xt.lang.common-trace :as trace]
+             [xt.lang.spec-promise :as promise]]})
 
 #_(defrun.js __init__
   (:# "eslint-disable react-hooks/rules-of-hooks"))
@@ -216,7 +224,9 @@
   {:added "4.0"}
   [n]
   (:# "eslint-disable-next-line react-hooks/rules-of-hooks")
-  (return (-/const (j/randomId (or n 6)))))
+  (return (-/const (. (Math.random)
+                      (toString 36)
+                      (substr 2 (or n 6))))))
 
 ;;
 ;; useStep
@@ -331,9 +341,10 @@
   (var [delayed setDelayed] (-/local value))
   (:# "eslint-disable-next-line react-hooks/rules-of-hooks")
   (-/watch [value]
-    (j/future-delayed [delay]
+    (promise/x:with-delay delay
+      (fn []
       (when (isMounted)
-        (setDelayed value))))
+        (setDelayed value)))))
   (return [delayed setDelayed]))
 
 (defn.js useStablized
@@ -358,7 +369,7 @@
   [intervalRef]
   (var interval (-/curr intervalRef))
   (when (xt/x:not-nil? interval)
-    (j/clearInterval interval)
+    (clearInterval interval)
     (-/curr:set intervalRef nil))
   (return interval))
 
@@ -368,8 +379,9 @@
   [fRef msRef intervalRef]
   (var prev (-/runIntervalStop intervalRef))
   (when (not= nil (-/curr msRef))
-    (var curr (j/repeating [(-/curr msRef)]
-                ((-/curr fRef))))
+    (var curr (setInterval (fn []
+                             ((-/curr fRef)))
+                           (-/curr msRef)))
     (-/curr:set intervalRef curr)
     (return [prev curr]))
   
@@ -404,7 +416,7 @@
   [timeoutRef]
   (var timeout (-/curr timeoutRef))
   (when (xt/x:not-nil? timeout)
-    (j/clearTimeout timeout)
+    (clearTimeout timeout)
     (-/curr:set timeoutRef nil))
   (return timeout))
 
@@ -413,9 +425,10 @@
   {:added "4.0"}
   [fRef msRef timeoutRef]
   (var prev (-/runTimeoutStop timeoutRef))
-  (var curr (j/delayed [(or (-/curr msRef)
-                            0)]
-              ((-/curr fRef))))
+  (var curr (setTimeout (fn []
+                          ((-/curr fRef)))
+                        (or (-/curr msRef)
+                            0)))
   (-/curr:set timeoutRef curr)
   (return [prev curr]))
 
@@ -501,21 +514,26 @@
   (var [waiting setWaiting] (-/local (fn:> false)))
   (var onAction (fn []
                   (setWaiting true)
-                  (. (j/future
-                       (when onSubmit
-                         (return (onSubmit))))
+                  (. (promise/x:promise
+                      (fn []
+                        (when onSubmit
+                          (return (onSubmit)))))
                      (then (fn [res]
                              (when (isMounted)
                                (setResult (onSuccess res)))
-                             (j/future-delayed [delay]
-                               (when (isMounted)
-                                 (setWaiting false)))))
+                              (setTimeout
+                               (fn []
+                                 (when (isMounted)
+                                   (setWaiting false)))
+                               delay)))
                      (catch (fn [err]
-                              (j/future-delayed [delay]
-                                (when (isMounted)
-                                  (setWaiting false)))
-                              (when (isMounted)
-                                (setResult (onError err))))))))
+                               (setTimeout
+                                (fn []
+                                  (when (isMounted)
+                                    (setWaiting false)))
+                                delay)
+                               (when (isMounted)
+                                 (setResult (onError err))))))))
   (var errored (and result (== "error" (. result ["status"]))))
   (return
    #{waiting setWaiting
@@ -567,17 +585,18 @@
       value
       setValue
       allowNotFound
-      (:= valueFn j/identity)]}]
+      (:= valueFn k/identity)]}]
   (var forwardFn (fn [idx]
                    (var out  (and data (. data [(or idx 0)])))
                    (return (:? out (valueFn out)))))
   (var reverseFn (fn [label]
-                   (var idx (j/indexOf (j/map data valueFn)
-                                       label))
-                   (return (:? allowNotFound idx (j/max 0 idx)))))
+                   (var idx (xtd/arr-find (xtd/arr-map data valueFn)
+                                          (fn:> [item]
+                                            (== item label))))
+                   (return (:? allowNotFound idx (math/max 0 idx)))))
   (var setIndex (fn [idx] (setValue (forwardFn idx))))
   (var index    (reverseFn value))
-  (var items    (j/map data valueFn))
+  (var items    (xtd/arr-map data valueFn))
   (return #{setIndex
             items
             index}))
@@ -595,21 +614,22 @@
   [#{[data
       value
       setValue
-      (:= valueFn j/identity)
+      (:= valueFn k/identity)
       indexFn]}]
   (var forwardFn (fn [idx]
                     (var out (and data (. data [(math/mod-pos (or idx 0)
-                                                           (xt/x:len data))])))
+                                                            (xt/x:len data))])))
                    (return (:? out (valueFn out)))))
   (var reverseFn (fn [label]
                    (var pval (indexFn))
-                   (var nval (j/max 0 (j/indexOf (j/map data valueFn)
-                                                 label)))
-                    (var offset (math/mod-offset pval nval (xt/x:len data)))
+                   (var nval (math/max 0 (xtd/arr-find (xtd/arr-map data valueFn)
+                                                       (fn:> [item]
+                                                         (== item label)))))
+                     (var offset (math/mod-offset pval nval (xt/x:len data)))
                    (return (+ pval offset))))
   (var setIndex (fn [idx] (setValue (forwardFn idx))))
   (var index    (reverseFn value))
-  (var items    (j/map data valueFn))
+  (var items    (xtd/arr-map data valueFn))
   (return #{setIndex
             items
             index}))
@@ -620,17 +640,22 @@
   [#{[data
       values
       setValues
-      (:= valueFn j/identity)]}]
+      (:= valueFn k/identity)]}]
   (var forwardFn (fn [indices]
                    (var out [])
-                    (xt/for:array [[i e] indices]
-                     (when e
-                       (x:arr-push out (. data [i]))))
-                   (return out)))
-  (var reverseFn  (fn:> [values] (j/map data (fn:> [e] (<= 0 (j/indexOf values e))))))
+                     (xt/for:array [[i e] indices]
+                      (when e
+                        (x:arr-push out (. data [i]))))
+                    (return out)))
+  (var reverseFn  (fn:> [values]
+                     (xtd/arr-map data
+                                  (fn:> [e]
+                                    (<= 0 (xtd/arr-find values
+                                                        (fn:> [item]
+                                                          (== item e))))))))
   (var setIndices (fn [indices] (setValues (forwardFn indices))))
   (var indices    (reverseFn values))
-  (var items      (j/map data valueFn))
+  (var items      (xtd/arr-map data valueFn))
   (return #{items
             setIndices
             indices}))
@@ -639,17 +664,17 @@
   "converts index to position"
   {:added "4.0"}
   [#{length max min step}]
-  (var divisions (j/floor (/ (- max min) step)))
+  (var divisions (math/floor (/ (- max min) step)))
   (var unit      (/ length divisions))
   (var forwardFn
        (fn [value]
-         (var n (j/floor (/ (- value min)
-                            step)))
+         (var n (math/floor (/ (- value min)
+                               step)))
          (return (* n unit))))
   (var reverseFn
        (fn [pos]
-         (var relative  (j/max 0 (j/min length pos)))
-         (var n         (j/round (/ relative unit)))
+         (var relative  (math/max 0 (math/min length pos)))
+         (var n         (math/round (/ relative unit)))
          (var out (+ min (* n step)))
          (return out)))
   (return #{forwardFn
@@ -666,7 +691,9 @@
   (-/watch [(xt/x:json-encode data)]
     (when (and (xtd/not-empty? data)
                (or (xt/x:nil? value)
-                   (> 0 (j/indexOf data value))))
+                   (> 0 (xtd/arr-find data
+                                      (fn:> [item]
+                                        (== item value))))))
       (setValue (f data))))
   (return [value setValue]))
 

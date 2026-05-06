@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [js.core :as j] [js.react :as r] [js.lib.chalk :as chalk] [xt.lang.common-data :as xtd] [xt.lang.spec-base :as xt]]})
+  {:require [[xt.lang.common-lib :as k] [js.react :as r] [js.lib.chalk :as chalk] [xt.lang.common-data :as xtd] [xt.lang.spec-base :as xt]]})
 
 (def.js lineNormal
   {:hover {:fg "black"
@@ -46,19 +46,19 @@
   "helper function for LineMenu"
   {:added "4.0"}
   ([items]
-   (let [entries (j/filter items (fn:> [e] (:? (k/is-array? e.hidden) (not (e.hidden)) (not e.hidden))))
-         lens     (j/map entries (fn:> [e] (xt/x:len e.label)))
-         lefts    (j/reduce lens
-                            (fn [acc l]
-                               (j/push acc (+ (xtd/last acc) l 8))
+   (let [entries (xt/x:arr-filter items (fn:> [e] (:? (k/is-array? e.hidden) (not (e.hidden)) (not e.hidden))))
+         lens     (xt/x:arr-map entries (fn:> [e] (xt/x:len e.label)))
+         lefts    (. lens
+                     (reduce (fn [acc l]
+                               (. acc (push (+ (xtd/last acc) l 8)))
                                (return acc))
-                             [0])]
-     (return (j/map entries (fn [e i]
-                               (let [name  (or e.route (j/toLowerCase e.label))
-                                     left  (. lefts [i])
-                                     width (- (. lefts [(+ i 1)])
-                                              left)]
-                                 (return #{...e name left width}))))))))
+                             [0]))]
+      (return (xt/x:arr-map entries (fn [e i]
+                                (let [name  (or e.route (. e.label (toLowerCase)))
+                                      left  (. lefts [i])
+                                      width (- (. lefts [(+ i 1)])
+                                               left)]
+                                  (return #{...e name left width}))))))))
 
 (defn.js LineMenu
   "creates a line menu"
@@ -73,7 +73,7 @@
         (onScreenEvent "keypress"
                        (fn [_ key]
                          (let [e (-> entries
-                                     (j/filter 
+                                     (xt/x:arr-filter 
                                       (fn [e]
                                         (return (== e.index key.name))))
                                      (xtd/first))]
@@ -86,7 +86,7 @@
              :shrink true
              :style {:bg "black"}
              (:.. rprops)]}
-     (j/map entries (fn [e]
+     (xt/x:arr-map entries (fn [e]
                       (return
                        [:% -/LineButton #{[:key e.route
                                            :selected (== route e.route)

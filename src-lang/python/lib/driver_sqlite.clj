@@ -3,6 +3,7 @@
 
 (l/script :python
   {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as promise]
              [python.core :as py]
              [xt.protocol.impl.connection-sql :as sqlrt]]})
 
@@ -43,13 +44,14 @@
   (return
    (sqlrt/connection-create
     conn
-    {"disconnect" (fn [raw]
-                    (. raw (close))
-                    (return true))
-     "query" (fn [raw query]
-               (return (-/raw-query raw query)))
-     "query_sync" (fn [raw query]
-                    (return (-/raw-query raw query)))})))
+     {"disconnect" (fn [raw]
+                     (. raw (close))
+                     (return true))
+      "query" (fn [raw query]
+                (return (promise/x:promise-run
+                         (-/raw-query raw query))))
+      "query_sync" (fn [raw query]
+                     (return (-/raw-query raw query)))})))
 
 (defn.py connect-constructor
   "Connects to a sqlite database through the Python stdlib sqlite3 module."
@@ -59,7 +61,8 @@
   (var sqlite3 (py/pkg "sqlite3"))
   (var filename (or (xt/x:get-key config "filename")
                     ":memory:"))
-  (return (. sqlite3 (connect filename))))
+  (return (. sqlite3 (connect filename
+                              :check_same_thread false))))
 
 (defn.py driver
   []

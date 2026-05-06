@@ -1,4 +1,4 @@
-(ns xt.module
+(ns xt.lang.common-module
   (:require [hara.lang :as l]
             [hara.lang.book :as book]
             [hara.lang.impl-deps :as deps]
@@ -24,7 +24,7 @@
         internal (-> emit :runtime :module/internal)
         curr   (or (if module-id (symbol (str module-id)))
                    (ffirst (collection/filter-vals (fn [v] (= v '-))
-                                          internal)))]
+                                                  internal)))]
     (book/get-module (snap/get-book snapshot lang)
                      curr)))
 
@@ -58,10 +58,10 @@
   [key module-id]
   (->> (get (current-module module-id) key)
        (walk/postwalk (fn [x]
-                     (if (or (symbol? x)
-                             (keyword? x))
-                       (f/strn x)
-                       x)))))
+                        (if (or (symbol? x)
+                                (keyword? x))
+                          (f/strn x)
+                          x)))))
 
 (defmacro.xt module-native
   "returns the native map"

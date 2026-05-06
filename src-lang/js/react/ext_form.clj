@@ -2,7 +2,13 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [xt.event.base-form :as event-form] [js.react :as r] [js.core :as j] [xt.lang.common-data :as xtd] [xt.lang.common-tree :as xtt] [xt.lang.spec-base :as xt]]})
+  {:require [[xt.lang.common-lib :as k]
+             [xt.event.base-form :as event-form]
+             [js.react :as r]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-tree :as xtt]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as promise]]})
 
 ;;
 ;; No Validation
@@ -51,8 +57,8 @@
         (xt/x:is-object? print)
         (do (xt/for:object [[key v] print]
               (var term (. meta [key]))
-              (when (xtd/is-empty? (xtd/arr-intersection (j/arrayify v)
-                                                        (j/arrayify term)))
+              (when (xtd/is-empty? (xtd/arr-intersection (xtd/arrayify v)
+                                                        (xtd/arrayify term)))
                 (return false)))
             (return true)))
   (return false))
@@ -81,7 +87,9 @@
   (var passedRef (r/ref))
   (var statusRef (r/ref))
   (r/init []
-    (var listener-id (j/randomId 4))
+    (var listener-id (. (Math.random)
+                        (toString 36)
+                        (substr 2 4)))
     (event-form/add-listener
      form
      listener-id
@@ -153,8 +161,8 @@
                            getStatus
                            getPassed
                            {:dataField "data"}}
-                         (j/assign {:fn/fields fields}
-                                   meta))))
+                         (xt/x:obj-assign {:fn/fields fields}
+                                          meta))))
 
 (defn.js listenFieldsData
   "uses data from multiple fields in form"
@@ -166,8 +174,8 @@
   (return (-/useListener form fields
                          #{getData
                            {:dataField "data"}}
-                         (j/assign {:fn/fields fields}
-                                   meta))))
+                         (xt/x:obj-assign {:fn/fields fields}
+                                          meta))))
 
 (defn.js listenField
   "gets value and result of a form field"
@@ -175,15 +183,15 @@
   [form field meta]
   (var getValue  (fn:> (event-form/get-field form field)))
   (var getResult (fn []
-                   (return (j/assign {} (event-form/get-field-result form field)))))
+                   (return (xt/x:obj-assign {} (event-form/get-field-result form field)))))
   (return (-/useListener form [field]
                          #{getResult
                            {:getData getValue
                             :getStatus -/getFieldStatus
                             :getPassed -/getFieldPassed
                             :dataField "value"}}
-                         (j/assign {:fn/fields [field]}
-                                   meta))))
+                         (xt/x:obj-assign {:fn/fields [field]}
+                                          meta))))
 
 (defn.js listenFieldValue
   "gets only a field value"
@@ -193,22 +201,22 @@
   (var #{value} (-/useListener form [field]
                                {:getData getValue
                                 :dataField "value"}
-                               (j/assign {:fn/fields [field]}
-                                         meta)))
+                               (xt/x:obj-assign {:fn/fields [field]}
+                                                meta)))
   (return value))
 
 (defn.js listenFieldResult
   "gets result of a form field"
   {:added "4.0"}
   [form field meta]
-  (var getResult (fn:> (j/assign {} (event-form/get-field-result form field))))
+  (var getResult (fn:> (xt/x:obj-assign {} (event-form/get-field-result form field))))
   (var #{result} (-/useListener form [field]
                           #{getResult
                             {:getStatus -/getFieldStatus
                              :getPassed -/getFieldPassed
                              :dataField "value"}}
-                          (j/assign {:fn/fields [field]}
-                                    meta)))
+                          (xt/x:obj-assign {:fn/fields [field]}
+                                           meta)))
   (return result))
 
 (defn.js listenForm
@@ -216,9 +224,9 @@
   {:added "4.0"}
   [form meta]
   (var #{validators} form)
-  (var fields (j/keys validators))
-  (var getData   (fn:> (j/assign {} (event-form/get-data form))))
-  (var getResult (fn:> (j/assign {} (event-form/get-result form))))
+  (var fields (xt/x:obj-keys validators))
+  (var getData   (fn:> (xt/x:obj-assign {} (event-form/get-data form))))
+  (var getResult (fn:> (xt/x:obj-assign {} (event-form/get-result form))))
   (var getStatus (fn [result]
                    (var #{fields} result)
                     (return (xtd/obj-map fields -/getFieldStatus))))
@@ -229,21 +237,21 @@
                            getStatus
                            getPassed
                            {:dataField "data"}}
-                         (j/assign {:fn/fields fields}
-                                   meta))))
+                         (xt/x:obj-assign {:fn/fields fields}
+                                          meta))))
 
 (defn.js listenFormData
   "gets all form data"
   {:added "4.0"}
   [form meta]
   (var #{validators} form)
-  (var fields (j/keys validators))
-  (var getData   (fn:> (j/assign {} (event-form/get-data form))))
+  (var fields (xt/x:obj-keys validators))
+  (var getData   (fn:> (xt/x:obj-assign {} (event-form/get-data form))))
   (return (. (-/useListener form fields
                             #{getData
                               {:dataField "data"}}
-                            (j/assign {:fn/fields fields}
-                                      meta))
+                            (xt/x:obj-assign {:fn/fields fields}
+                                             meta))
              ["data"])))
 
 (defn.js listenFormResult
@@ -251,8 +259,8 @@
   {:added "4.0"}
   [form meta]
   (var #{validators} form)
-  (var fields (j/keys validators))
-  (var getResult (fn:> (j/assign {} (event-form/get-result form))))
+  (var fields (xt/x:obj-keys validators))
+  (var getResult (fn:> (xt/x:obj-assign {} (event-form/get-result form))))
   (var getStatus (fn [result]
                    (var #{fields} result)
                     (return (xtd/obj-map fields -/getFieldStatus))))
@@ -262,8 +270,8 @@
                               getStatus
                               getPassed
                               {:dataField "data"}}
-                            (j/assign {:fn/fields fields}
-                                      meta))
+                            (xt/x:obj-assign {:fn/fields fields}
+                                             meta))
              ["result"])))
 
 (defn.js useSubmitField
@@ -277,7 +285,7 @@
       meta
       (:= onCheck (fn:> true))
       (:= isMounted (fn:> true))]}]
-  (var fields (j/arrayify field))
+  (var fields (xtd/arrayify field))
   (var [clearing setClearing] (r/local (fn:> false)))
   (var #{data} (-/listenFields form fields meta))
   (var validateFields
@@ -295,22 +303,25 @@
          (when (not keep)
             (xt/for:array [field fields]
               (event-form/reset-field-data form field)))
-          (j/future-delayed [100]
+          (promise/x:with-delay 100
+            (fn []
             (xt/for:array [field fields]
               (event-form/reset-field-validator form field))
             (when (isMounted)
               (setClearing true)))))
   (var onActionCheck
-       (fn:>
-        (and (onCheck)
-             (j/every fields (fn:> [field] (event-form/check-field-passed form field))))))
+        (fn:>
+         (and (onCheck)
+             (xt/x:arr-every fields (fn:> [field] (event-form/check-field-passed form field))))))
   (r/init []
     (validateFields))
   (r/watch [clearing]
     (when clearing
-      (j/delayed [100]
-        (when (isMounted)
-          (validateFields)))
+      (setTimeout
+       (fn []
+         (when (isMounted)
+           (validateFields)))
+       100)
       (setClearing false)))
   (return #{onActionReset
             onActionCheck}))
@@ -328,14 +339,15 @@
   (var [clearing setClearing] (r/local (fn:> false)))
   (var #{data} (-/listenForm form meta))
   (var onActionReset
-       (fn []
-         (setResult nil)
-         (when (not keep)
-           (event-form/reset-all-data form))
-         (j/future-delayed [100]
-           (event-form/reset-all-validators form)
-           (when (isMounted)
-             (setClearing true)))))
+        (fn []
+          (setResult nil)
+          (when (not keep)
+            (event-form/reset-all-data form))
+          (promise/x:with-delay 100
+            (fn []
+            (event-form/reset-all-validators form)
+            (when (isMounted)
+              (setClearing true)))))
   (var onActionCheck (fn []
                        (return (and (onCheck)
                                     (event-form/check-all-passed form)))))
@@ -355,10 +367,12 @@
       (validateFilled)))
   (r/watch [clearing]
     (when clearing
-      (j/delayed [100]
-        (if explicit
-          (event-form/validate-all form)
-          (validateFilled)))
+      (setTimeout
+       (fn []
+         (if explicit
+           (event-form/validate-all form)
+           (validateFilled)))
+       100)
       (setClearing false)))
   (return #{onActionReset
             onActionCheck}))

@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-data :as xtd] [js.core :as j] [js.lib.valtio :as v] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style] [xt.lang.spec-base :as xt]]})
+  {:require [[xt.lang.common-data :as xtd] [js.lib.valtio :as v] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style] [xt.lang.spec-base :as xt]]})
 
 ;;
 ;;
@@ -23,7 +23,7 @@
        (let [#{screen} (r/curr ref)]
          (. screen
             (on "mouse"
-                (fn [#{x y}] (j/assign -/Mouse #{x y}))))))
+                (fn [#{x y}] (xt/x:obj-assign -/Mouse #{x y}))))))
      (return [:box {:ref ref
                     :bg "yellow"
                     :height 0
@@ -38,7 +38,7 @@
      (var #{screen} (r/curr ref))
      (var measureFn (fn []
                       (var #{height width} screen)
-                      (j/assign -/Dimension #{height width})))
+                      (xt/x:obj-assign -/Dimension #{height width})))
      (. screen (on "resize" measureFn))
      (measureFn))
    (return [:box {:ref ref
@@ -53,14 +53,14 @@
    (let [#{bg color
            display items} props
          #{height width keyFn
-           viewFn center} (j/assign {:height 15
+           viewFn center} (xt/x:obj-assign {:height 15
                                      :width 40
                                      :keyFn  (fn:> [item i] i)
                                      :viewFn (fn:> [item] item)}
                                     display)
          _ (:= items (or items []))
          [full setFull] (r/local 0)
-         row-count (j/max 1 (Math.floor (/ full width)))
+         row-count (Math.max 1 (Math.floor (/ full width)))
          dims (v/val -/Dimension)
          grid (r/ref {})
          _    (r/run []
@@ -80,15 +80,15 @@
      (return [:box #{(:.. bprops)}
               #_[:box {:bottom 0
                      :height 1
-                     :content (j/inspect dims)}]
+                     :content (JSON.stringify dims nil 2)}]
               [:box {:ref grid
                      :style {:bg bg}
                      :height (-> (xt/x:len items)
                                  (/ row-count)
-                                 (j/ceil)
+                                 (Math.ceil)
                                  (* height))
                      :left 0 :right 1}
-               (j/map items
+               (xt/x:arr-map items
                       (fn [item i]
                         (var view (viewFn item))
                         (return

@@ -8,8 +8,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react :as r]
+   :require [[js.react :as r]
              [js.react-native :as n]
              [js.react-native.animate :as a]
              [js.react-native.physical-base :as physical-base]
@@ -34,7 +33,7 @@
          getLayouts}  (n/usePortalLayouts nil setLayouts))
   (var transitionFn
        (helper-transition/absoluteAnimateFn
-           (j/assign #{transition
+           (xt/x:obj-assign #{transition
                        position
                        margin}
                      (. layouts content))))
@@ -42,7 +41,7 @@
   (var absStyle
        (:? (. layouts content)
            (model-context/innerCoordinate
-            (j/assign
+            (xt/x:obj-assign
              #{position
                margin
                {:parent (. layouts sink)}}

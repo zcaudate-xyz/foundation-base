@@ -8,8 +8,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-    :require [[js.core :as j]
-              [js.react :as r]
+    :require [[js.react :as r]
               [js.react-native :as n]
               [js.react-native.animate :as a]
               [js.react-native.physical-base :as physical-base]
@@ -44,7 +43,7 @@
        {:indicators indicators
         :chord chord
         :style [{:flex 1}
-                (:.. (j/arrayify styleBackdrop))]
+                (:.. (xtd/arrayify styleBackdrop))]
         :transformations
         {:visible (fn [visible]
                     (return {:style {:opacity (* opacityBackdrop
@@ -103,7 +102,7 @@
    [:% physical-base/Box
     #{[indicators
        chord
-       :style (j/assign {:position "absolute"
+       :style (xt/x:obj-assign {:position "absolute"
                          :opacity 0}
                         absStyle)
        :onLayout getLayout
@@ -150,7 +149,7 @@
   
   (var absStyle
        (model-context/innerCoordinate
-        (j/assign #{position
+        (xt/x:obj-assign #{position
                     margin
                     {:parent dimensions}}
                   layout)))
@@ -162,7 +161,7 @@
    [:% physical-base/Box
     #{[indicators
        chord
-       :style (j/assign {:position "absolute"}
+       :style (xt/x:obj-assign {:position "absolute"}
                         absStyle)
        :transformations {:visible
                          (fn [progress #{visible}]

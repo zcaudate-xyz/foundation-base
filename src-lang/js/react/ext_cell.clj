@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [js.react :as r] [js.core :as j] [js.cell.kernel :as cl] [js.react.ext-view :as ext-view]]})
+  {:require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [js.react :as r] [js.cell.kernel :as cl] [js.react.ext-view :as ext-view]]})
 
 (def.js TYPES
   {:input    [cl/view-get-input  "current"]
@@ -20,10 +20,12 @@
      setResult
      getResult
      resultRef
-     meta,
-     pred}]
+      meta,
+      pred}]
   (r/init []
-    (var listener-id (j/randomId 4))
+    (var listener-id (. (Math.random)
+                        (toString 36)
+                        (substr 2 4)))
     (cl/add-listener
      path
      listener-id
@@ -92,7 +94,9 @@
   (var [result setResult] (r/local getResult))
   (var resultRef (r/useFollowRef result))
   (r/init []
-    (var listener-id (j/randomId 4))
+    (var listener-id (. (Math.random)
+                        (toString 36)
+                        (substr 2 4)))
     (var [setThrottled throttle] (ext-view/throttled-setter setResult delay))
     (var nresult (getResult))
     (cl/add-listener

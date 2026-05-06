@@ -25,6 +25,13 @@
   :teardown [(l/rt:teardown :postgres)
              (l/rt:stop)]})
 
+(def +scratch-env+
+  {"host"     "127.0.0.1"
+   "port"     "5432"
+   "user"     "postgres"
+   "password" "postgres"
+   "database" "test-scratch"})
+
 ^{:refer python.lib.driver-postgres/default-env :added "4.1"}
 (fact "returns the default postgres environment"
 
@@ -53,16 +60,11 @@
   => ["db.internal" "15432" "postgres" "sample"])
 
 ^{:refer python.lib.driver-postgres/load-module :added "4.1"}
-(fact "loads a postgres client module when available"
+(fact "loads a postgres client module"
 
   (!.py
-    (var out "python-postgres-unavailable")
-    (try
-      (:= out (py/hasattr (py-pg/load-module) "connect"))
-      (catch err
-        (:= out "python-postgres-unavailable")))
-    (return out))
-  => (any true "python-postgres-unavailable"))
+    (py/hasattr (py-pg/load-module) "connect"))
+  => true)
 
 ^{:refer python.lib.driver-postgres/normalise-query-output :added "4.1"}
 (fact "normalises postgres row output"
@@ -74,87 +76,50 @@
   => [[] 1 [[1 "a"] [2 "b"]]])
 
 ^{:refer python.lib.driver-postgres/raw-query :added "4.1"}
-(fact "runs raw postgres queries against the scratch sample app when available"
+(fact "runs raw postgres queries against the scratch sample app"
 
   (!.py
-    (var out "python-postgres-unavailable")
-    (try
-      (var conn (py-pg/connect-constructor {"database" "test-scratch"}))
-      (:= out (py-pg/raw-query conn "SELECT \"scratch\".addf(1,2);"))
-      (catch err
-        (:= out "python-postgres-unavailable")))
-    (return out))
-  => (any 3 "3" "python-postgres-unavailable"))
+    (var conn (py-pg/connect-constructor (@! +scratch-env+)))
+    (py-pg/raw-query conn "SELECT (\"scratch\".addf(1,2))::int;"))
+  => (any 3 "3"))
 
 ^{:refer python.lib.driver-postgres/wrap-connection :added "4.1"}
-(fact "wraps real postgres scratch connections and rejects sync queries"
+(fact "wraps real postgres scratch connections with promise query and sync query-sync support"
 
   (!.py
-    (var out "python-postgres-unavailable")
-    (try
-      (var conn (py-pg/wrap-connection
-                 (py-pg/connect-constructor {"database" "test-scratch"})))
-      (var query-out (sql/query conn "SELECT \"scratch\".ping();"))
-      (var sync-out "no-error")
-      (try
-        (sql/query-sync conn "SELECT \"scratch\".ping();")
-        (catch err
-          (:= sync-out (xt/x:ex-message err))))
-      (:= out [(sql/connection? conn)
-               query-out
-               sync-out
-               (sql/disconnect conn)])
-      (catch err
-        (:= out "python-postgres-unavailable")))
-    (return out))
-  => (any [true "pong" "Not Allowed" true]
-          "python-postgres-unavailable"))
+    (var conn (py-pg/wrap-connection
+               (py-pg/connect-constructor (@! +scratch-env+))))
+    [(sql/connection? conn)
+     (spec-promise/x:promise-native? (sql/query conn "SELECT \"scratch\".ping();"))
+     (sql/query-sync conn "SELECT (\"scratch\".addf(1,2))::int;")
+     (sql/disconnect conn)])
+  => (any [true true 3 true]
+          [true true "3" true]))
 
 ^{:refer python.lib.driver-postgres/connect-constructor :added "4.1"}
-(fact "constructs a real scratch postgres connection when available"
+(fact "constructs a real scratch postgres connection"
 
   (!.py
-    (var out "python-postgres-unavailable")
-    (try
-      (var conn (py-pg/connect-constructor {"database" "test-scratch"}))
-      (:= out [(. conn ["autocommit"])
-               (py-pg/raw-query conn "SELECT \"scratch\".ping();")])
-      (catch err
-        (:= out "python-postgres-unavailable")))
-    (return out))
-  => (any [true "pong"]
-          "python-postgres-unavailable"))
+    (var conn (py-pg/connect-constructor (@! +scratch-env+)))
+    [(. conn autocommit)
+     (py-pg/raw-query conn "SELECT \"scratch\".ping();")])
+  => [true "pong"])
 
 ^{:refer python.lib.driver-postgres/driver :added "4.1"}
-(fact "connects through the real driver wrapper to the scratch sample app"
+(fact "connects through the real driver wrapper with async query and sync query-sync support"
 
-  (if (!.py
-        (var available false)
-        (try
-          (:= available (py/hasattr (py-pg/load-module) "connect"))
-          (catch err
-            (:= available false)))
-        (return available))
-    (notify/wait-on :python
-      (spec-promise/x:promise-catch
+  (notify/wait-on [:python 5000]
+    (spec-promise/x:promise-then
+     (sql/connect (py-pg/driver)
+                  (@! +scratch-env+))
+     (fn [conn]
        (spec-promise/x:promise-then
-        (sql/connect (py-pg/driver)
-                     {"database" "test-scratch"})
-        (fn [conn]
-          (var query-out (sql/query conn "SELECT \"scratch\".addf(10,20);"))
-          (var sync-out "no-error")
-          (try
-            (sql/query-sync conn "SELECT \"scratch\".addf(10,20);")
-            (catch err
-              (:= sync-out (xt/x:ex-message err))))
+        (sql/query conn "SELECT \"scratch\".ping();")
+        (fn [out]
           (repl/notify
            [(sql/connection? conn)
-            query-out
-            sync-out
-             (sql/disconnect conn)])))
-       (fn [err]
-         (repl/notify "python-postgres-unavailable"))))
-    "python-postgres-unavailable")
-  => (any [true 30 "Not Allowed" true]
-          [true "30" "Not Allowed" true]
-          "python-postgres-unavailable"))
+            out
+            (sql/query-sync conn "SELECT (\"scratch\".addf(10,20))::int;")
+            (sql/disconnect conn)]))))))
+  => (any [true "pong" 30 true]
+          [true "pong" "30" true]))

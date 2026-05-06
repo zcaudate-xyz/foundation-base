@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-tree :as xtt] [xt.event.base-box :as event-box] [js.react :as r] [js.core :as j]]})
+  {:require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-tree :as xtt] [xt.event.base-box :as event-box] [js.react :as r] [xt.lang.spec-promise :as promise]]})
 
 (defn.js createBox
   "creates a box for react"
@@ -22,7 +22,9 @@
   (var [data setData] (r/local (dataFn)))
   (var path-str (xt/x:json-encode path))
   (r/watch [path-str]
-    (var listener-id (j/randomId 4))
+    (var listener-id (. (Math.random)
+                        (toString 36)
+                        (substr 2 4)))
     (event-box/add-listener box listener-id path
                              (fn [_ _ _ _]
                                (setData (dataFn)))
@@ -65,10 +67,11 @@
      box
      listener-id
      path
-      (fn [_ payload _ _]
-        (j/future
-          (. localStorage (setItem storage-key (JSON.stringify (. payload ["data"]))))))))
-  (return box))
+       (fn [_ payload _ _]
+         (promise/x:promise
+          (fn []
+           (. localStorage (setItem storage-key (JSON.stringify (. payload ["data"]))))))))
+   (return box))
 
 (def.js listenBox -/useListenBox)
 

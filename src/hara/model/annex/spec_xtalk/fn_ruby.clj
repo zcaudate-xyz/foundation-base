@@ -340,7 +340,7 @@
    :x-arr-clone       {:macro #'ruby-tf-x-arr-clone      :emit :macro}
    :x-arr-each        {:macro #'ruby-tf-x-arr-each       :emit :macro}
    :x-arr-every       {:macro #'ruby-tf-x-arr-every      :emit :macro}
-   :x-arr-sort        {:macro #'ruby-tf-x-arr-sort       :emit :macro}
+   :x-arr-sort        {:raw 'xt.lang.common-data/arr-sort :emit :hard-link}
    :x-str-comp        {:macro #'ruby-tf-x-str-comp       :emit :macro}})
 
 ;;
@@ -581,24 +581,24 @@
             (fn [value]
               (cond (. value (is_a? Hash))
                      (do (var out {})
-                        (var keys (. value keys))
-                        (var idx 0)
-                        (while (< idx (. keys length))
-                          (var k (. keys [idx]))
-                          (x:set-key out k
-                                     (. clone-fn
-                                        (call (. value [k]))))
-                          (:= idx (+ idx 1)))
-                         (return out))
+                         (var keys (. value keys))
+                         (var idx 0)
+                         (while (< idx (. keys length))
+                           (var k (. keys [idx]))
+                           (x:set-key out k
+                                      (. clone-fn
+                                         (call (. value [k]))))
+                           (:= idx (+ idx 1)))
+                         out)
 
-                    (. value (is_a? Array))
-                    (do (var out [])
-                        (for:array [entry value]
-                          (x:arr-push out (. clone-fn (call entry))))
-                        (return out))
+                     (. value (is_a? Array))
+                     (do (var out [])
+                         (for:array [entry value]
+                           (x:arr-push out (. clone-fn (call entry))))
+                         out)
 
-                    :else
-                    (return value))))
+                     :else
+                     value)))
         (return (. clone-fn (call ~obj))))
        (call))))
 
@@ -641,9 +641,11 @@
           (return nil)
           (if (. obj__ (is_a? Array))
             (if (. key__ (is_a? Integer))
-              (return (. obj__ (delete_at key__)))
+              (do (. obj__ (delete_at key__))
+                  (return obj__))
               (return nil))
-            (return (. obj__ (delete key__))))))
+            (do (. obj__ (delete key__))
+                (return obj__)))))
       (call))))
 
 (def +ruby-lu+
@@ -660,8 +662,8 @@
                         :value/template #'ruby-tf-x-has-key?}
    :x-del-key          {:macro #'ruby-tf-x-del-key        :emit :macro
                         :value/template #'ruby-tf-x-del-key}
-   :x-obj-clone        {:macro #'ruby-tf-x-obj-clone      :emit :macro
-                        :value/template #'ruby-tf-x-obj-clone}})
+   :x-obj-clone        {:raw 'xt.lang.common-data/obj-clone
+                        :emit :hard-link}})
 
 ;;
 ;; JSON

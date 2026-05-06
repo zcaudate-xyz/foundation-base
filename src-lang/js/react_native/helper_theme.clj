@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:config {:bench false :emit {:native {:suppress true} :lang/jsx false} :id :play/web-main :notify {:host "test.statstrade.io"}} :require [[js.core :as j] [js.react-native.helper-color :as c] [xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.spec-base :as xt]] :runtime :websocket})
+  {:config {:bench false :emit {:native {:suppress true} :lang/jsx false} :id :play/web-main :notify {:host "test.statstrade.io"}} :require [[js.react-native.helper-color :as c] [xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.spec-base :as xt]] :runtime :websocket})
 
 ;;
 ;; Pairs
@@ -31,7 +31,7 @@
    :focusing k/identity
    :active   k/identity
    :hovering (fn:> [hovering #{pressing}]
-               (j/max hovering pressing))
+               (Math.max hovering pressing))
    :disabled    k/identity
    :highlighted k/identity})
 
@@ -54,7 +54,7 @@
   (:= initial (or initial "default"))
   (var __fns  (:? (k/nil? stageMap)
                   -/StageMap
-                  (j/assign {} -/StageMap stageMap)))
+                  (xt/x:obj-assign {} -/StageMap stageMap)))
   (var lu (xt/x:get-key -/ThemeLookup type))
   (var colorInit (xt/x:get-key theme (xt/x:get-key lu initial)))
   (return (xtd/arr-foldl stages
@@ -76,9 +76,9 @@
   (xt/for:array [e arr]
     (var #{[style
             (:.. rprops)]} (or e {}))
-    (xt/for:array [s (j/arrayify style)]
+    (xt/for:array [s (xtd/arrayify style)]
       (xt/x:arr-push out.style s))
-    (j/assign out rprops))
+    (xt/x:obj-assign out rprops))
   (return out))
 
 (defn.js createCombinedTransformations
@@ -149,7 +149,7 @@
    more
    transformFn]
   (var indFn (fn:> [flag] (:? flag 1 0)))
-  (var chord (j/assign {}
+  (var chord (xt/x:obj-assign {}
                        -/StageStatics
                        #{disabled
                          highlighted}

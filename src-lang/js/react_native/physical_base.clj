@@ -2,14 +2,14 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:config {:bench false :emit {:native {:suppress true} :lang/jsx false} :id :play/web-main :notify {:host "test.statstrade.io"}} :require [[xt.lang.common-lib :as k] [js.core :as j] [js.react :as r] [js.react-native :as n] [js.react-native.animate :as a] [js.react-native.helper-theme-default :as helper-theme-default] [xt.lang.common-data :as xtd] [xt.lang.spec-base :as xt]] :runtime :websocket})
+  {:config {:bench false :emit {:native {:suppress true} :lang/jsx false} :id :play/web-main :notify {:host "test.statstrade.io"}} :require [[xt.lang.common-lib :as k] [js.react :as r] [js.react-native :as n] [js.react-native.animate :as a] [js.react-native.helper-theme-default :as helper-theme-default] [xt.lang.common-data :as xtd] [xt.lang.spec-base :as xt]] :runtime :websocket})
 
 (defn.js Tag
   "listens to a single indicator to set ref"
   {:added "4.0"}
   ([#{[indicator
        style
-       (:= format (fn:> [v] (j/toFixed v 4)))
+       (:= format (fn:> [v] (. v (toFixed 4))))
        (:.. rprops)]}]
    (var refLabel (a/useListenSingle indicator (fn:> [v] {:text (format v)})))
    (return [:% n/TextInput
@@ -21,7 +21,7 @@
                                           :default {:fontFamily "monospace"}})
 	               (n/PlatformSelect {:web {:userSelect "none"
                                                 :cursor "default"}})
-                       (:.. (j/arrayify style))]
+                       (:.. (xtd/arrayify style))]
                (:.. rprops)]}])))
 
 ;;
@@ -31,12 +31,12 @@
   "allow inner components access to chords and indicators"
   {:added "4.0"}
   ([indicators chord inner transformFn]
-   (return (j/map (j/filter inner k/identity)
+   (return (xt/x:arr-map (xt/x:arr-filter inner k/identity)
                   (fn [#{[component
                           (:.. iprops)]}
                        i]
                     (var tprops (transformFn
-                                 (j/assign {:key i
+                                 (xt/x:obj-assign {:key i
                                             :component  component
                                             :indicators indicators
                                             :chord      chord}
@@ -70,9 +70,9 @@
                                 indicators
                                 transformations
                                 getChord))
-     (var tchildren [(:.. (j/arrayify children))
+     (var tchildren [(:.. (xtd/arrayify children))
                      (:.. (-/transformInner indicators chord inner -/transformProps))])
-     (return (j/assign
+     (return (xt/x:obj-assign
               {(:? (or allowRef
                        (not (k/is-function? component)))
                    "ref"
@@ -219,10 +219,10 @@
     (var #{[indicators
             chord
             (:.. rprops)]} e)
-    (j/assign out rprops)
-    (j/assign allIndicators indicators)
-    (j/assign allChord chord))
-  (return (j/assign out
+    (xt/x:obj-assign out rprops)
+    (xt/x:obj-assign allIndicators indicators)
+    (xt/x:obj-assign allChord chord))
+  (return (xt/x:obj-assign out
                     {:indicators allIndicators
                      :chord   allChord})))
 
@@ -255,7 +255,7 @@
                                hoverable
                                #{indicators
                                  chord}]))
-  (var props (j/assign {} rprops merged))
+  (var props (xt/x:obj-assign {} rprops merged))
   (-/useIndicatorCapture props)
   (return props))
 
@@ -276,7 +276,7 @@
        (:= refLink  (r/ref))
        (:.. rprops)]}]
    (var hoverable   (-/useHoverable #{[disabled
-                                       :chord (j/assign #{outlined} chord)
+                                       :chord (xt/x:obj-assign #{outlined} chord)
                                        onChord
                                        indicators
                                        indicatorParams
@@ -284,7 +284,7 @@
    (var #{hovering
           setHovering}  hoverable)
    (var innerFn         (-/transformInnerFn hoverable))
-   (var tprops          (-/transformProps (j/assign rprops hoverable)))
+   (var tprops          (-/transformProps (xt/x:obj-assign rprops hoverable)))
    (return [:<>
             [:% n/View
              #{[:ref refLink
@@ -311,7 +311,7 @@
                                pressable
                                #{indicators
                                  chord}]))
-  (var props (j/assign {} rprops merged))
+  (var props (xt/x:obj-assign {} rprops merged))
   (-/useIndicatorCapture props)
   (return props))
 
@@ -341,7 +341,7 @@
    (var touchable   (-/useTouchable #{[disabled
                                         highlighted
                                         outlined
-                                        :chord (j/assign #{outlined} chord)
+                                        :chord (xt/x:obj-assign #{outlined} chord)
                                         onChord
                                         indicators
                                         indicatorParams
@@ -356,7 +356,7 @@
     [:<>
      [:% n/Pressable
       #{[:disabled disabled
-         :style (j/arrayify style)
+         :style (xtd/arrayify style)
          :onPressIn  (fn [e] (setPressing true)
                        (if onPressIn (onPressIn e)))
          :onPressOut (fn [e] (setPressing false)
@@ -395,8 +395,8 @@
                                             {:default {:duration 300}})))
   (return
    [:% -/TouchableBasePressing
-    #{[:chord      (j/assign {} chord #{active})
-       :indicators (j/assign {} indicators {:active aindicator})
+    #{[:chord      (xt/x:obj-assign {} chord #{active})
+       :indicators (xt/x:obj-assign {} indicators {:active aindicator})
        :indicatorParams indicatorParams
        (:.. rprops)]}]))
 
@@ -418,7 +418,7 @@
                                    emptyable
                                    #{indicators
                                  chord}]))
-  (var props (j/assign {} rprops merged))
+  (var props (xt/x:obj-assign {} rprops merged))
   (-/useIndicatorCapture props)
   (return props))
 
@@ -452,7 +452,7 @@
    (var inputable  (-/useInputable #{[disabled
                                        highlighted
                                        value
-                                       :chord (j/assign #{outlined} chord)
+                                       :chord (xt/x:obj-assign #{outlined} chord)
                                        onChord
                                        indicators
                                        indicatorParams
@@ -471,7 +471,7 @@
     [:% -/Box
      #{[:refLink refLink
         :style styleContainer
-        :inner [(j/assign
+        :inner [(xt/x:obj-assign
                  {:component n/TextInput
                   :refLink refInput
                   :editable      (not disabled)
@@ -491,4 +491,4 @@
                  rprops)
                 (:.. inner)]
         :addons addons
-        (:.. (j/assign inputable containerProps))]}])))
+        (:.. (xt/x:obj-assign inputable containerProps))]}])))

@@ -4,7 +4,7 @@
 
 (l/script :js
   {:import [["react-native" :as [* ReactNative]] ["react-native-video" :as RNVideo] ["react-native-gesture-handler" :as [* RNGestureHandler]] ["@react-navigation/bottom-tabs" :as [* RNNavTabs]] ["react-native" :as [* ReactNative]] ["react-native-localize" :as [* RNLocalize]] ["@react-navigation/drawer" :as [* RNNavDrawer]] ["expo-linear-gradient" :as [* ExpoLinearGradient]] ["react-native-svg" :as [* RNSvg]] ["@react-navigation/stack" :as [* RNNavStack]] ["react-native-error-boundary" :as RNErrorBoundary] ["react-native-safe-area-context" :as [* RNSafeArea]] ["@react-navigation/native" :as [* RNNav]] ["react-native-vector-icons/MaterialCommunityIcons" :as RNIcon]]
-   :require [[js.core :as j] [js.react :as r] [js.react.helper-portal :as helper-portal] [xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-string :as str] [xt.lang.common-trace :as trace]]})
+   :require [[js.react :as r] [js.react.helper-portal :as helper-portal] [xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-string :as str] [xt.lang.common-trace :as trace] [xt.lang.spec-promise :as promise]]})
 
 (comment
   :icon     {:material   []
@@ -521,7 +521,7 @@
 	        :borderWidth 1
 	        :borderColor "#aaa"
                 :maxWidth 600}
-               (:.. (j/arrayify style))]
+                (:.. (xtd/arrayify style))]
        (:.. rprops)]}
     [:% -/Text
      {:style [{:position "absolute"
@@ -532,7 +532,7 @@
                :backgroundColor "#fff"}
               (-/PlatformSelect
                {:web {:userSelect "none"}})
-              (:.. (j/arrayify styleLabel))]}
+               (:.. (xtd/arrayify styleLabel))]}
      label]
     children]))
 
@@ -576,11 +576,11 @@
       style
       (:.. rprops)]}]
   (return
-   (r/% -/View
-        (j/assign {:ref refLink
-                   :style [{:flexDirection "row"}
-                           (:.. (j/arrayify style))]}
-                  rprops))))
+    (r/% -/View
+         (xt/x:obj-assign {:ref refLink
+                           :style [{:flexDirection "row"}
+                                   (:.. (xtd/arrayify style))]}
+                          rprops))))
 
 (defn.js Fill
   "fills space"
@@ -590,7 +590,7 @@
   (return [:% -/View
            #{[:style [{:flex 1
                        :zIndex -10000}
-                      (:.. (j/arrayify style))]
+                       (:.. (xtd/arrayify style))]
               (:.. rprops)]}]))
 
 (defn.js H1
@@ -605,7 +605,7 @@
                        :margin 10
                        :fontSize 28
                        :fontWeight "800"}
-                      (:.. (j/arrayify style))]
+                       (:.. (xtd/arrayify style))]
               (:.. rprops)]}
            text]))
 
@@ -621,7 +621,7 @@
                        :margin 10
                        :fontSize 24
                        :fontWeight "800"}
-                      (:.. (j/arrayify style))]
+                       (:.. (xtd/arrayify style))]
               (:.. rprops)]}
            text]))
 
@@ -635,7 +635,7 @@
            #{[:style [{:color "#555"
                        :fontSize 20
                        :fontWeight "800"}
-                      (:.. (j/arrayify style))]
+                       (:.. (xtd/arrayify style))]
               (:.. rprops)]}
            text]))
 
@@ -649,7 +649,7 @@
            #{[:style [{:color "#555"
                        :fontSize 16
                        :fontWeight "400"}
-                      (:.. (j/arrayify style))]
+                       (:.. (xtd/arrayify style))]
               (:.. rprops)]}
            text]))
 
@@ -662,7 +662,7 @@
   (return [:% -/Text
            #{[:style [{:color "#555"
                       :fontSize 12}
-                      (:.. (j/arrayify style))]
+                (:.. (xtd/arrayify style))]
               (:.. rprops)]}
            text]))
 
@@ -675,17 +675,17 @@
       style
       (:.. rprops)]}]
   (return
-   [:% -/View
-    #{[:style [{:backgroundColor "#ddd"}
-               (:.. (j/arrayify style))]
-       (:.. rprops)]}
+    [:% -/View
+     #{[:style [{:backgroundColor "#ddd"}
+                (:.. (xtd/arrayify style))]
+        (:.. rprops)]}
     [:% -/Text
      #{[:style [{:fontSize 11
                  :padding 5
                  :color "#666"}
                 (-/PlatformSelect {:ios {:fontFamily "Courier"}
                                    :default {:fontFamily "monospace"}})
-                (:.. (j/arrayify styleText))]
+                 (:.. (xtd/arrayify styleText))]
         (:.. textProps)]}
      text]]))
 
@@ -738,32 +738,32 @@
               (not= internal index))
        (setInternal index)))
    (return
-    [:% -/View
-     {:style {:flexDirection "row"
-              :flexWrap "wrap"}}
-     (j/map items
-            (fn [item i]
-              (var text (format item))
-              (var selected (== i internal))
-              (return
-               [:% -/TouchableOpacity
-                {:key item
+     [:% -/View
+      {:style {:flexDirection "row"
+               :flexWrap "wrap"}}
+      (xtd/arr-map items
+                   (fn [item i]
+               (var text (format item))
+               (var selected (== i internal))
+               (return
+                [:% -/TouchableOpacity
+                 {:key item
                  :style {:transform [{:scale 0.8}]}
                  :onPress (fn []
                             (setInternal i)
                             (if setIndex (setIndex i))
                             (if onChange (onChange (. items [i]))))}
-                [:% -/Text {:key item
-                            :style [(j/assign {:color  "#888"
-                                               :padding 2}
-                                              styleText)
-                                    (:? selected
-                                        (j/assign {:backgroundColor "#888"
-                                                   :borderRadius 3
-                                                   :color "white"
-                                                   :padding 2}
-                                                  styleSelected))]}
-                 text]])))])))
+                 [:% -/Text {:key item
+                             :style [(xt/x:obj-assign {:color  "#888"
+                                                       :padding 2}
+                                                      styleText)
+                                     (:? selected
+                                         (xt/x:obj-assign {:backgroundColor "#888"
+                                                           :borderRadius 3
+                                                           :color "white"
+                                                           :padding 2}
+                                                          styleSelected))]}
+                  text]])))])))
 
 (defn.js Tabs
   "creates an enum data view"
@@ -870,15 +870,15 @@
                       [:% -/Text
                        {:style [(-/PlatformSelect {:ios {:fontFamily "Courier"}
                                                    :default {:fontFamily "monospace"}})
-                                (j/assign {:fontSize 10
-                                           :padding 2
-                                           :color "#888"}
-                                          styleText)
-                                (:? selected
-                                    (j/assign {:backgroundColor "#888"
-                                               :color "white"}
-                                              styleSelected))]}
-                       (format item)]]))}])))
+                                (xt/x:obj-assign {:fontSize 10
+                                                  :padding 2
+                                                  :color "#888"}
+                                                 styleText)
+                                 (:? selected
+                                     (xt/x:obj-assign {:backgroundColor "#888"
+                                                       :color "white"}
+                                                      styleSelected))]}
+                        (format item)]]))}])))
 
 (defn.js List
   "creates a list"
@@ -980,27 +980,27 @@
             {:key item
              :style {:transform [{:scale 0.8}]}
              :onPress (fn []
-                        (var changed
-                             (j/map indices
-                                    (fn [e ei]
-                                      (return (:? (== ei i) (not e) e)))))
-                        (setIndices changed)
-                        (if onChange (onChange changed)))}
-            [:% -/Text {:key item
-                        :style [(j/assign {:color  "#888"
-                                           :padding 2}
-                                          styleText)
-                                (:? selected
-                                    (j/assign {:backgroundColor "#888"
-                                               :borderRadius 3
-                                               :color "white"
-                                               :padding 2}
-                                              styleSelected))]}
-             text]])))
-   (return [:% -/View
-            {:style {:flexDirection "row"
-                     :flexWrap "wrap"}}
-            (j/map items itemFn)])))
+                         (var changed
+                              (xtd/arr-map indices
+                                           (fn [e ei]
+                                             (return (:? (== ei i) (not e) e)))))
+                         (setIndices changed)
+                         (if onChange (onChange changed)))}
+             [:% -/Text {:key item
+                         :style [(xt/x:obj-assign {:color  "#888"
+                                                   :padding 2}
+                                                  styleText)
+                                 (:? selected
+                                     (xt/x:obj-assign {:backgroundColor "#888"
+                                                       :borderRadius 3
+                                                       :color "white"
+                                                       :padding 2}
+                                                      styleSelected))]}
+              text]])))
+    (return [:% -/View
+             {:style {:flexDirection "row"
+                      :flexWrap "wrap"}}
+             (xtd/arr-map items itemFn)])))
 
 (defn.js TabsMulti
   "creates a multi tab select
@@ -1122,7 +1122,7 @@
                 :backgroundColor "rgb(112, 168, 195)"
                 :color "white"
                 #_#_:opacity 0.7}
-               (:.. (j/arrayify (or styleText [])))
+               (:.. (xtd/arrayify (or styleText [])))
                (:? waiting
                    {:textAlign "center"})]}
       (:? waiting [:% -/ActivityIndicator {:animating waiting :color "#aaa" :style {:height 5 :top 5 :transform [{:scale 0.7}]}}] content)]]]))
@@ -1152,13 +1152,13 @@
   {:added "4.0"}
   [#{entry columns}]
   (return
-   [:<>
-    (j/map columns
-           (fn [[label key f]]
-             (:= f (or f k/identity))
-             (var val (xt/x:get-key entry key))
-             (var output (f val entry))
-             (return
+    [:<>
+     (xtd/arr-map columns
+                  (fn [[label key f]]
+              (:= f (or f k/identity))
+              (var val (xt/x:get-key entry key))
+              (var output (f val entry))
+              (return
               [:% -/View
                {:key key
                 :style {:flexDirection "row"}}
@@ -1194,13 +1194,13 @@
                :padding 10
                :backgroundColor "#bbb"
                :overflow "auto"}
-              (:.. (j/arrayify style))]}
+               (:.. (xtd/arrayify style))]}
      [:% -/Text
       {:style [(-/PlatformSelect {:ios {:fontFamily "Courier"}
                                   :default {:fontFamily "monospace"}})
                {:color "#333"
                 :fontSize 10}
-               (:.. (j/arrayify styleText))]}
+                (:.. (xtd/arrayify styleText))]}
       text]]
     (:? clipboard
         [:% -/View
@@ -1236,10 +1236,10 @@
      children}]
   (var #{Provider} -/Global)
   (return
-   [:% Provider
-    {:value (j/assign (-/defaultGlobal)
-                      value)}
-    children]))
+    [:% Provider
+     {:value (xt/x:obj-assign (-/defaultGlobal)
+                              value)}
+     children]))
 
 ;;
 ;; Portal
@@ -1358,16 +1358,16 @@
                                           "_children"
                                           0])))
          
-         (when (and contentElem sinkRef)
-           (. (j/onAll
-               [(-/measureRef sinkRef)
-                (:? hostRef
-                    (-/measureRef hostRef)
-                    (j/future))
-                (-/measure contentElem)])
-              (then (fn [[sinkLayout
-                          hostLayout
-                          contentLayout]]
+          (when (and contentElem sinkRef)
+            (. (promise/x:promise-all
+                [(-/measureRef sinkRef)
+                 (:? hostRef
+                     (-/measureRef hostRef)
+                     (promise/x:promise-run nil))
+                 (-/measure contentElem)])
+               (then (fn [[sinkLayout
+                           hostLayout
+                           contentLayout]]
                       (setLayouts {:sink sinkLayout
                                    :host hostLayout
                                    :content contentLayout})))))))

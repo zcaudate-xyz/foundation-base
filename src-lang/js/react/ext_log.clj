@@ -3,8 +3,7 @@
 
 (l/script :js
   {:require [[xt.event.base-log :as event-log]
-              [js.react :as r]
-              [js.core :as j]]})
+              [js.react :as r]]})
 
 (defn.js makeLog
   "creates a log for react"
@@ -18,7 +17,9 @@
   [log meta]
   (var [latest setLatest] (r/local (event-log/get-last log)))
   (r/watch [log]
-    (var listener-id (j/randomId 4))
+    (var listener-id (. (Math.random)
+                        (toString 36)
+                        (substr 2 4)))
     (event-log/add-listener
      log
      listener-id

@@ -8,8 +8,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react-native :as n]
+   :require [[js.react-native :as n]
              [js.react-native.physical-base :as physical-base]
              [js.react-native.helper-theme-default :as helper-theme-default]
              [js.react-native.helper-theme :as helper-theme]]})
@@ -20,8 +19,8 @@
   [#{[theme
       themePipeline
       (:.. rprops)]}]
-  (var __theme (j/assign {} helper-theme-default/ButtonDefaultTheme theme))
-  (var __themePipeline (j/assign {}
+  (var __theme (xt/x:obj-assign {} helper-theme-default/ButtonDefaultTheme theme))
+  (var __themePipeline (xt/x:obj-assign {}
                                  helper-theme-default/PressDefaultPipeline
                                  themePipeline))
   (var [styleStatic transformFn]
@@ -47,14 +46,14 @@
                                                    (:.. rprops)]}))
   (return
    [:% physical-base/TouchableBasePressing
-    #{[:inner [(j/assign
+    #{[:inner [(xt/x:obj-assign
                 {:component n/Text
                  :key "text"
                  :numberOfLines 1
-                 :children (j/arrayify text)
+                 :children (xtd/arrayify text)
                  :style [helper-theme-default/ButtonDefaultStyle
                          (:.. styleStatic)
-                         (:.. (j/arrayify style))]
+                         (:.. (xtd/arrayify style))]
                  :transformations transformFn}
                 textProps)
                (:.. inner)]

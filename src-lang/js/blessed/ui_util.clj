@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-data :as xtd] [js.core :as j] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style] [xt.lang.spec-base :as xt]]})
+  {:require [[xt.lang.common-data :as xtd] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style] [xt.lang.spec-base :as xt]]})
 
 (defn.js ^{:static/lint-globals '#{process}}
   copyClipboard
@@ -35,13 +35,15 @@
                    :content (:? clicked "  OK  " " COPY ")
                    :mouse true
                   :disabled clicked
-                  :onClick (fn []
-                             (-/copyClipboard
-                              (j/inspect input {:colors false}))
-                             (setClicked true)
-                             (j/delayed [1000]
-                               (setClicked false))
-                             (if onClick (onClick)))
+                   :onClick (fn []
+                              (-/copyClipboard
+                               (JSON.stringify input nil 2))
+                              (setClicked true)
+                              (setTimeout
+                               (fn []
+                                 (setClicked false))
+                               1000)
+                              (if onClick (onClick)))
                   :style (ui-style/styleSmall (:? clicked "gray" color))}
                  props)]
      (return [:button #{(:.. bprops)}]))))
@@ -50,7 +52,7 @@
   "parses the error tag"
   {:added "4.0"}
   ([error]
-   (try  (return  (. (j/read error.detail)
+   (try  (return  (. (JSON.parse error.detail)
                      ["tag"]))
          (catch [err] (return nil)))))
 
@@ -63,7 +65,7 @@
       (:= setError (fn:>))
       (:.. rprops)]}]
   (var #{tag message detail} (or error {}))
-  (var bprops (j/assign
+  (var bprops (xt/x:obj-assign
                {:mouse true
                 :height 1
                 :onClick (fn []
@@ -82,7 +84,7 @@
                rprops))
   (return (:? (and (not show)
                    (or (not error)
-                       (== 0 (j/length (j/keys error))))) nil [:button #{...bprops}])))
+                       (== 0 (xt/x:len (xt/x:obj-keys error))))) nil [:button #{...bprops}])))
 
 (defn.js StatusLine
   "provides a status line"
@@ -94,7 +96,7 @@
       (:.. rprops)]}]
   (:= message (:? (or (not message)
                       (== 0 (xt/x:len message))) (or show "") message))
-  (var bprops (j/assign
+  (var bprops (xt/x:obj-assign
                {:mouse true
                 :height 1
                 :onClick (fn [] (setMessage ""))

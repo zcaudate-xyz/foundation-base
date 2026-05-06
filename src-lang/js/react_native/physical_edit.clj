@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:config {:bench false :emit {:native {:suppress true} :lang/jsx false} :id :play/web-main :notify {:host "test.statstrade.io"}} :require [[js.core :as j] [js.react :as r] [js.react-native :as n] [js.react-native.animate :as a] [js.react-native.physical-base :as physical-base] [xt.lang.common-lib :as k] [xt.lang.spec-base :as xt]] :runtime :websocket})
+  {:config {:bench false :emit {:native {:suppress true} :lang/jsx false} :id :play/web-main :notify {:host "test.statstrade.io"}} :require [[js.react :as r] [js.react-native :as n] [js.react-native.animate :as a] [js.react-native.physical-base :as physical-base] [xt.lang.common-lib :as k] [xt.lang.spec-base :as xt]] :runtime :websocket})
 
 (defn.js createPan
   "creates a PanResponder"
@@ -16,7 +16,7 @@
       (:.. rprops)]}]
   (return (. n/PanResponder
              (create
-              (j/assign {:onStartShouldSetPanResponderCapture
+              (xt/x:obj-assign {:onStartShouldSetPanResponderCapture
                          (fn []
                            (when (not (r/curr disabledRef))
                              (when setPressing (setPressing true)))
@@ -66,8 +66,8 @@
   (var disabledRef  (r/useFollowRef disabled))
   (var touchable    (physical-base/useTouchable
                      #{[disabled highlighted
-                        :indicators (j/assign #{position} indicators)
-                        :chord (j/assign #{outlined} chord)
+                        :indicators (xt/x:obj-assign #{position} indicators)
+                        :chord (xt/x:obj-assign #{outlined} chord)
                         (:.. rprops)]}))
   (var  #{pressing
           setPressing
