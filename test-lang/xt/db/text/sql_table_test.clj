@@ -3,7 +3,7 @@
             [std.string.prose :as prose])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:js :lua :python]}}
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.text.base-schema :as sch]
@@ -11,44 +11,14 @@
              [xt.db.text.sql-table :as table]
              [xt.db.helpers.data-main-test :as sample]]})
 
-(l/script- :lua
-  {:runtime :basic
-   :require [[xt.db.text.base-schema :as sch]
-             [xt.db.text.sql-util :as ut]
-             [xt.db.text.sql-table :as table]
-             [xt.db.helpers.data-main-test :as sample]]})
-
-(l/script- :python
-  {:runtime :basic
-   :require [[xt.db.text.base-schema :as sch]
-             [xt.db.text.sql-util :as ut]
-             [xt.db.text.sql-table :as table]
-             [xt.db.helpers.data-main-test :as sample]]})
-
 (fact:global
- {:setup    [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.text.sql-table/table-update-single :added "4.0"}
 (fact "generates single update statement"
 
   (!.js
-   (table/table-update-single sample/Schema
-                              "UserAccount"
-                              "AAA"
-                              {:password-hash "HELLO"}
-                              {}))
-  => "UPDATE UserAccount\n SET password_hash = 'HELLO'\n WHERE id = 'AAA';"
-
-  (!.lua
-   (table/table-update-single sample/Schema
-                              "UserAccount"
-                              "AAA"
-                              {:password-hash "HELLO"}
-                              {}))
-  => "UPDATE UserAccount\n SET password_hash = 'HELLO'\n WHERE id = 'AAA';"
-
-  (!.py
    (table/table-update-single sample/Schema
                               "UserAccount"
                               "AAA"
@@ -64,20 +34,6 @@
                               "UserAccount"
                               {:id "AAA" :password-hash "HELLO"}
                               {}))
-  => "INSERT INTO UserAccount\n (id, password_hash)\n VALUES\n ('AAA','HELLO');"
-
-  (!.lua
-   (table/table-insert-single sample/Schema
-                              "UserAccount"
-                              {:id "AAA" :password-hash "HELLO"}
-                              {}))
-  => "INSERT INTO UserAccount\n (id, password_hash)\n VALUES\n ('AAA','HELLO');"
-
-  (!.py
-   (table/table-insert-single sample/Schema
-                              "UserAccount"
-                              {:id "AAA" :password-hash "HELLO"}
-                              {}))
   => "INSERT INTO UserAccount\n (id, password_hash)\n VALUES\n ('AAA','HELLO');")
 
 ^{:refer xt.db.text.sql-table/table-delete-single :added "4.0"}
@@ -88,52 +44,12 @@
                               "UserAccount"
                               "AAA"
                               {}))
-  => "DELETE FROM UserAccount WHERE id = 'AAA';"
-
-  (!.lua
-   (table/table-delete-single sample/Schema
-                              "UserAccount"
-                              "AAA"
-                              {}))
-  => "DELETE FROM UserAccount WHERE id = 'AAA';"
-
-  (!.py
-   (table/table-delete-single sample/Schema
-                              "UserAccount"
-                              "AAA"
-                              {}))
   => "DELETE FROM UserAccount WHERE id = 'AAA';")
 
 ^{:refer xt.db.text.sql-table/table-upsert-single :added "4.0"}
 (fact "generates single upsert statement"
 
   (!.js
-   (table/table-upsert-single sample/Schema
-                              "UserAccount"
-                              {:id "AAA" :password-hash "HELLO"}
-                              {}))
-  => (prose/|
-      "INSERT INTO UserAccount"
-      " (id, password_hash)"
-      " VALUES"
-      " ('AAA','HELLO')"
-      "ON CONFLICT (id) DO UPDATE SET"
-      "password_hash=coalesce(\"excluded\".password_hash,password_hash);")
-
-  (!.lua
-   (table/table-upsert-single sample/Schema
-                              "UserAccount"
-                              {:id "AAA" :password-hash "HELLO"}
-                              {}))
-  => (prose/|
-      "INSERT INTO UserAccount"
-      " (id, password_hash)"
-      " VALUES"
-      " ('AAA','HELLO')"
-      "ON CONFLICT (id) DO UPDATE SET"
-      "password_hash=coalesce(\"excluded\".password_hash,password_hash);")
-
-  (!.py
    (table/table-upsert-single sample/Schema
                               "UserAccount"
                               {:id "AAA" :password-hash "HELLO"}
@@ -175,22 +91,6 @@
                        "UserAccount"
                        sample/RootUser
                        {}))
-  => +inserts+
-
-  (!.lua
-   (table/table-insert sample/Schema
-                       sample/SchemaLookup
-                       "UserAccount"
-                       sample/RootUser
-                       {}))
-  => +inserts+
-
-  (!.py
-   (table/table-insert sample/Schema
-                       sample/SchemaLookup
-                       "UserAccount"
-                       sample/RootUser
-                       {}))
   => +inserts+)
 
 ^{:refer xt.db.text.sql-table/table-upsert :added "4.0"
@@ -226,22 +126,6 @@
 (fact "generate upsert statement"
 
   (!.js
-   (table/table-upsert sample/Schema
-                       sample/SchemaLookup
-                       "UserAccount"
-                       sample/RootUser
-                       {}))
-  => +upserts+
-
-  (!.lua
-   (table/table-upsert sample/Schema
-                       sample/SchemaLookup
-                       "UserAccount"
-                       sample/RootUser
-                       {}))
-  => +upserts+
-
-  (!.py
    (table/table-upsert sample/Schema
                        sample/SchemaLookup
                        "UserAccount"

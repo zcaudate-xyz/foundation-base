@@ -23,7 +23,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.event.node/create-space :added "4.1"}
 (fact "manages per-space state independently from node-level handlers"
@@ -126,8 +126,8 @@
     (var n (node/node-create {}))
     (space/create-space n "room/a" {:state {:count 1}})
     [(. (space/get-space n "room/a") ["id"])
-     (xt/x:nil? (space/get-space n "missing"))])
-  => ["room/a" true]
+     (space/get-space n "missing")])
+  => ["room/a" nil]
 
   (!.py
     (var n (node/node-create {}))
@@ -184,8 +184,8 @@
     [(.
       (space/remove-space n "room/a")
       ["id"])
-     (xt/x:nil? (space/get-space n "room/a"))])
-  => ["room/a" true]
+     (space/get-space n "room/a")])
+  => ["room/a" nil]
 
   (!.py
     (var n (node/node-create {}))

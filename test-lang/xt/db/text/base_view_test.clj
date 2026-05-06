@@ -5,28 +5,16 @@
             [xt.db.helpers.seed-user-test :as user])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:js :lua :python]}}
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-data :as xtd]
              [xt.db.text.base-view :as v]
              [xt.db.text.base-util :as ut]]})
 
-(l/script- :lua
-  {:runtime :basic
-   :require [[xt.lang.common-data :as xtd]
-             [xt.db.text.base-view :as v]
-             [xt.db.text.base-util :as ut]]})
-
-(l/script- :python
-  {:runtime :basic
-   :require [[xt.lang.common-data :as xtd]
-             [xt.db.text.base-view :as v]
-             [xt.db.text.base-util :as ut]]})
-
 (fact:global
- {:setup    [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 (def +views+
   (mapv (comp pg/bind-view deref resolve second)
@@ -59,32 +47,12 @@
 
   (!.js
     (v/all-overview (ut/collect-views (@! +views+))))
-  => +all-overview-check+
-
-  (!.lua
-    (v/all-overview (ut/collect-views (@! +views+))))
-  => +all-overview-check+
-
-  (!.py
-    (v/all-overview (ut/collect-views (@! +views+))))
   => +all-overview-check+)
 
 ^{:refer xt.db.text.base-view/all-keys :added "4.0"}
 (fact "gets all table keys for a view"
 
   (!.js
-    (v/all-keys (ut/collect-views (@! +views+))
-                "Currency"
-                "select"))
-  => (just ["all" "all_fiat" "all_crypto" "by_type" "by_country"] :in-any-order)
-
-  (!.lua
-    (v/all-keys (ut/collect-views (@! +views+))
-                "Currency"
-                "select"))
-  => (just ["all" "all_fiat" "all_crypto" "by_type" "by_country"] :in-any-order)
-
-  (!.py
     (v/all-keys (ut/collect-views (@! +views+))
                 "Currency"
                 "select"))
@@ -125,14 +93,6 @@
 (fact "gets all methods for views"
 
   (!.js
-    (v/all-methods (ut/collect-views (@! +views+))))
-  => +all-methods-check+
-
-  (!.lua
-    (v/all-methods (ut/collect-views (@! +views+))))
-  => +all-methods-check+
-
-  (!.py
     (v/all-methods (ut/collect-views (@! +views+))))
   => +all-methods-check+)
 

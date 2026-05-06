@@ -3,7 +3,7 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:js]}}
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.node.instance-model :as model]
@@ -18,10 +18,11 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.node.instance-model/install :added "4.1"}
 (fact "installs and uninstalls xt.db.node handlers and triggers"
+
   (!.js
    (var node (event-node/node-create {"id" "node-a"}))
    (model/install node fixtures/InstallOpts)
@@ -46,6 +47,7 @@
 
 ^{:refer xt.db.node.instance-model/ensure-space-state :added "4.1"}
 (fact "creates space state and exposes model/view helpers"
+
   (!.js
    (var node (event-node/node-create {"id" "node-a"}))
    (model/install node fixtures/InstallOpts)
@@ -71,6 +73,7 @@
 
 ^{:refer xt.db.node.instance-model/normalize-remote :added "4.1"}
 (fact "merges state, remote-spec, and view-level remote settings"
+
   (!.js
    (model/normalize-remote
     {"remote" {"transport" "worker"
@@ -85,6 +88,7 @@
 
 ^{:refer xt.db.node.instance-model/request-remote :added "4.1"}
 (fact "routes remote requests through the target space"
+
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-a"}))
     (event-node/register-handler
@@ -114,6 +118,7 @@
 
 ^{:refer xt.db.node.instance-model/query :added "4.1"}
 (fact "handles local sync/remove/query/snapshot requests"
+
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-a"}))
     (model/install node fixtures/InstallOpts)
@@ -145,6 +150,7 @@
 
 ^{:refer xt.db.node.instance-model/clear :added "4.1"}
 (fact "clears cache rows through the public request wrapper"
+
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-a"}))
     (model/install node fixtures/InstallOpts)
@@ -170,6 +176,7 @@
 
 ^{:refer xt.db.node.instance-model/view-refresh :added "4.1"}
 (fact "refreshes models and views with explicit space state"
+
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-a"}))
     (model/install node fixtures/InstallOpts)
@@ -199,9 +206,9 @@
       "open-input" ["closed"]
       "refresh-count" 2})
 
-
 ^{:refer xt.db.node.instance-model/uninstall :added "4.1"}
 (fact "removes all installed xt.db.node handlers and triggers"
+
   (!.js
    (var node (event-node/node-create {"id" "node-b"}))
    (model/install node fixtures/InstallOpts)
@@ -215,6 +222,7 @@
 
 ^{:refer xt.db.node.instance-model/query-refresh :added "4.1"}
 (fact "refreshes an existing cached query by query-key"
+
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-c"}))
     (model/install node fixtures/InstallOpts)
@@ -241,6 +249,7 @@
 
 ^{:refer xt.db.node.instance-model/sync :added "4.1"}
 (fact "syncs rows into a node space through the request wrapper"
+
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-d"}))
     (model/install node fixtures/InstallOpts)
@@ -258,6 +267,7 @@
 
 ^{:refer xt.db.node.instance-model/remove :added "4.1"}
 (fact "removes rows from a node space through the request wrapper"
+
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-e"}))
     (model/install node fixtures/InstallOpts)
@@ -279,6 +289,7 @@
 
 ^{:refer xt.db.node.instance-model/snapshot :added "4.1"}
 (fact "returns the current models and rows for a node space"
+
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-f"}))
     (model/install node fixtures/InstallOpts)
@@ -296,6 +307,7 @@
 
 ^{:refer xt.db.node.instance-model/model-put :added "4.1"}
 (fact "registers a model and its declared views on the node space"
+
   (!.js
    (var node (event-node/node-create {"id" "node-g"}))
    (model/install node fixtures/InstallOpts)
@@ -307,6 +319,7 @@
 
 ^{:refer xt.db.node.instance-model/view-put :added "4.1"}
 (fact "registers a single additional view on an existing model"
+
   (!.js
    (var node (event-node/node-create {"id" "node-h"}))
    (model/install node fixtures/InstallOpts)
@@ -319,6 +332,7 @@
 
 ^{:refer xt.db.node.instance-model/model-get :added "4.1"}
 (fact "returns a registered model from the node space"
+
   (!.js
    (var node (event-node/node-create {"id" "node-i"}))
    (model/install node fixtures/InstallOpts)
@@ -330,6 +344,7 @@
 
 ^{:refer xt.db.node.instance-model/view-get :added "4.1"}
 (fact "returns a registered view from the node space"
+
   (!.js
    (var node (event-node/node-create {"id" "node-j"}))
    (model/install node fixtures/InstallOpts)
@@ -341,6 +356,7 @@
 
 ^{:refer xt.db.node.instance-model/view-val :added "4.1"}
 (fact "reads the current value for a refreshed view"
+
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-k"}))
     (model/install node fixtures/InstallOpts)
@@ -360,6 +376,7 @@
 
 ^{:refer xt.db.node.instance-model/view-input :added "4.1"}
 (fact "reads the configured input for a view"
+
   (!.js
    (var node (event-node/node-create {"id" "node-l"}))
    (model/install node fixtures/InstallOpts)
@@ -371,6 +388,7 @@
 
 ^{:refer xt.db.node.instance-model/view-pending :added "4.1"}
 (fact "tracks whether a view is waiting on a refresh"
+
   (!.js
    (var node (event-node/node-create {"id" "node-m"}))
    (model/install node fixtures/InstallOpts)
@@ -382,6 +400,7 @@
 
 ^{:refer xt.db.node.instance-model/view-error :added "4.1"}
 (fact "exposes the current view error state"
+
   (!.js
    (var node (event-node/node-create {"id" "node-n"}))
    (model/install node fixtures/InstallOpts)
@@ -391,6 +410,7 @@
 
 ^{:refer xt.db.node.instance-model/run-remote-query :added "4.1"}
 (fact "stores remote query results in the local state cache"
+
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-o"}))
     (model/install node fixtures/InstallOpts)
@@ -429,6 +449,7 @@
 
 ^{:refer xt.db.node.instance-model/run-remote-sync :added "4.1"}
 (fact "applies remote sync responses back into the local state"
+
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-p"}))
     (model/install node fixtures/InstallOpts)
@@ -455,6 +476,7 @@
 
 ^{:refer xt.db.node.instance-model/model-refresh :added "4.1"}
 (fact "refreshes every registered view for a model"
+
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-q"}))
     (model/install node fixtures/InstallOpts)
@@ -478,6 +500,7 @@
 
 ^{:refer xt.db.node.instance-model/view-set-input :added "4.1"}
 (fact "stores view input and refreshes the view"
+
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-r"}))
     (model/install node fixtures/InstallOpts)
@@ -500,6 +523,7 @@
 
 ^{:refer xt.db.node.instance-model/handle-query :added "4.1"}
 (fact "handles a local query payload directly"
+
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-s"}))
     (model/install node fixtures/InstallOpts)
@@ -530,6 +554,7 @@
 
 ^{:refer xt.db.node.instance-model/handle-query-refresh :added "4.1"}
 (fact "refreshes a cached query or falls back to a normal query"
+
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-t"}))
     (model/install node fixtures/InstallOpts)
@@ -567,12 +592,14 @@
 
 ^{:refer xt.db.node.instance-model/handle-sync :added "4.1"}
 (fact "handles a local sync payload and publishes cache updates"
+
   (!.js
    {"callable?" (xt/x:is-function? model/handle-sync)})
   => {"callable?" true})
 
 ^{:refer xt.db.node.instance-model/handle-remove :added "4.1"}
 (fact "normalizes db/remove payloads through the sync handler"
+
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-v"}))
     (model/install node fixtures/InstallOpts)
@@ -598,6 +625,7 @@
 
 ^{:refer xt.db.node.instance-model/handle-clear :added "4.1"}
 (fact "clears cache state and invalidates all tables"
+
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-w"}))
     (model/install node fixtures/InstallOpts)
@@ -622,6 +650,7 @@
 
 ^{:refer xt.db.node.instance-model/handle-snapshot :added "4.1"}
 (fact "returns snapshot data directly from the current space state"
+
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-x"}))
     (model/install node fixtures/InstallOpts)

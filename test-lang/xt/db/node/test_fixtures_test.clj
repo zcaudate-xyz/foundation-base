@@ -2,7 +2,7 @@
   (:require [hara.lang :as l])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:js]}}
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.node.test-fixtures :as fixtures]
@@ -11,10 +11,11 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.node.test-fixtures/InstallOpts :added "4.1"}
 (fact "provides reusable schema, model, and seed fixtures"
+
   (!.js
    {"schema-id" (xtd/get-in fixtures/InstallOpts ["schema" "Order" "id" "ident"])
     "views" (xt/x:obj-keys (. fixtures/ModelSpec ["views"]))

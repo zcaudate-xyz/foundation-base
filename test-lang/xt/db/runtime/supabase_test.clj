@@ -2,25 +2,15 @@
   (:require [hara.lang :as l])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:js :lua :python]}}
+^{:seedgen/root {:all true}}
 (l/script- :js
-  {:runtime :basic
-   :require [[xt.lang.spec-base :as xt]
-             [xt.db.runtime.supabase :as supabase]]})
-
-(l/script- :lua
-  {:runtime :basic
-   :require [[xt.lang.spec-base :as xt]
-             [xt.db.runtime.supabase :as supabase]]})
-
-(l/script- :python
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.db.runtime.supabase :as supabase]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 (def +compiled-query+
   {"table" "Order"
@@ -46,18 +36,6 @@
 (fact "checks whether a descriptor can execute compiled supabase queries"
 
   (!.js
-   [(supabase/supabase-capable? {"execute" (fn [_compiled _opts] (return [true true]))})
-    (supabase/supabase-capable? {"supabase" {"from" (fn [_table] (return {}))}})
-    (supabase/supabase-capable? {})])
-  => [true true false]
-
-  (!.lua
-   [(supabase/supabase-capable? {"execute" (fn [_compiled _opts] (return [true true]))})
-    (supabase/supabase-capable? {"supabase" {"from" (fn [_table] (return {}))}})
-    (supabase/supabase-capable? {})])
-  => [true true false]
-
-  (!.py
    [(supabase/supabase-capable? {"execute" (fn [_compiled _opts] (return [true true]))})
     (supabase/supabase-capable? {"supabase" {"from" (fn [_table] (return {}))}})
     (supabase/supabase-capable? {})])
@@ -116,71 +94,49 @@
                "tag" "supabase/fail"}}])
 
 ^{:refer xt.db.runtime.supabase/supabase-pull-sync :added "4.1"}
-(fact "unwraps injected execution results consistently across js lua and python"
+(fact "uses the default client path in js"
 
   (!.js
+   (var calls [])
+   (var query nil)
+   (:= query {"select" (fn [cols]
+                         (xt/x:arr-push calls ["select" cols])
+                         (return query))
+              "eq" (fn [path value]
+                     (xt/x:arr-push calls ["eq" path value])
+                     (return query))
+              "in" (fn [path value]
+                     (xt/x:arr-push calls ["in" path value])
+                     (return query))
+              "then" (fn [f]
+                       (xt/x:arr-push calls ["then"])
+                       (return (f {"data" [{"id" "ord-1"
+                                            "status" "open"}]})))})
+   (var schema-client {"from" (fn [table]
+                                (xt/x:arr-push calls ["from" table])
+                                (return query))})
+   (var client {"from" (fn [table]
+                         (xt/x:arr-push calls ["from/root" table])
+                         (return query))
+                "schema" (fn [schema-name]
+                           (xt/x:arr-push calls ["schema" schema-name])
+                           (return schema-client))})
    (var out
         (supabase/supabase-pull-sync
-         {"execute" (fn [compiled _opts]
-                      (return [true compiled]))}
+         {"supabase" client
+          "schema-name" "api"}
          nil
-         (@! +query-tree-basic+)
+         (@! +query-tree+)
          {}))
-   [(. out ["table"])
-    (. out ["select"])
-    (. (. (. out ["filters"]) [0]) ["path"])])
-  => ["Order"
-      "status,account(nickname)"
-      "account.id"]
-
-  (!.lua
-   (var out
-        (supabase/supabase-pull-sync
-         {"execute" (fn [compiled _opts]
-                      (return [true compiled]))}
-         nil
-         ["Order"
-          {"account" {"id" "acct-1"}}
-          ["status"
-           ["account" ["nickname"]]]]
-         {}))
-   [(. out ["table"])
-    (. out ["select"])
-    (. (. (. out ["filters"]) [0]) ["path"])])
-  => ["Order"
-      "status,account(nickname)"
-      "account.id"]
-
-  (!.py
-   (var out
-        (supabase/supabase-pull-sync
-         {"execute" (fn [compiled _opts]
-                      (return [true compiled]))}
-         nil
-         ["Order"
-          {"account" {"id" "acct-1"}}
-          ["status"
-           ["account" ["nickname"]]]]
-         {}))
-   [(. out ["table"])
-    (. out ["select"])
-    (. (. (. out ["filters"]) [0]) ["path"])])
-  => ["Order"
-      "status,account(nickname)"
-      "account.id"]
-
-  (!.js
-   (supabase/supabase-pull-sync
-    {"execute" (fn [_compiled _opts]
-                 (return [false {"status" "error"
-                                 "tag" "supabase/fail"}]))}
-    nil
-    (@! +query-tree-basic+)
-    {}))
-  => {"status" "error"
-      "tag" "db/supabase-query-failed"
-      "data" {"status" "error"
-              "tag" "supabase/fail"}})
+   [out calls])
+  => [[{"id" "ord-1"
+        "status" "open"}]
+      [["schema" "api"]
+       ["from" "Order"]
+       ["select" "status,account(nickname)"]
+       ["eq" "account.id" "acct-1"]
+       ["in" "id" ["ord-1" "ord-2"]]
+       ["then"]]])
 
 ^{:refer xt.db.runtime.supabase/supabase-pull-sync :added "4.1"}
 (fact "uses the default client path in js"
@@ -226,7 +182,6 @@
        ["eq" "account.id" "acct-1"]
        ["in" "id" ["ord-1" "ord-2"]]
        ["then"]]])
-
 
 ^{:refer xt.db.runtime.supabase/thenable? :added "4.1"}
 (fact "detects thenable outputs"

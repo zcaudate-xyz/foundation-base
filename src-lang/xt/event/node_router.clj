@@ -76,7 +76,7 @@
   [space-subs signal-ids transport-id index]
   (when (>= index (xt/x:len signal-ids))
     (return nil))
-  (var signal (xt/x:get-idx signal-ids index))
+  (var signal (xt/x:get-idx signal-ids (xt/x:offset index)))
   (var signal-subs (xt/x:get-key space-subs signal))
   (when (xt/x:not-nil? signal-subs)
     (xt/x:del-key signal-subs transport-id)
@@ -93,7 +93,7 @@
   [subscriptions space-ids transport-id index]
   (when (>= index (xt/x:len space-ids))
     (return nil))
-  (var space (xt/x:get-idx space-ids index))
+  (var space (xt/x:get-idx space-ids (xt/x:offset index)))
   (var space-subs (xt/x:get-key subscriptions space))
   (when (xt/x:not-nil? space-subs)
     (-/prune-subscription-signal-loop space-subs

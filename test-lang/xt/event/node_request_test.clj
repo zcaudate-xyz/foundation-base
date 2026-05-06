@@ -32,8 +32,8 @@
              [xt.event.node-request :as req]]})
 
 (fact:global
- {:setup    [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.event.node-request/ensure-promise :added "4.1"}
 (fact "normalises raw values to promises"
@@ -50,7 +50,14 @@
     [(promise/x:promise-native? (req/ensure-promise {:ok true}))])
   => [true])
 
-^{:refer xt.event.node-request/add-pending :added "4.1"}
+^{:refer xt.event.node-request/add-pending :added "4.1"
+  :setup [(def +out+
+            (just-in
+             [true
+              1
+              (just-in [{"ok" true}])
+              empty?
+              empty?]))]}
 (fact "tracks and settles pending request entries"
 
   (!.js
@@ -72,14 +79,10 @@
      (frame/response-ok-frame (. request ["id"]) "room/a" {:ok true} nil))
     [(xt/x:is-string? (. request ["id"]))
      (xt/x:len before)
-     [(. (xt/x:get-idx resolved 0) ["ok"])]
+     resolved
      rejected
      (xt/x:obj-keys (. n ["pending"]))])
-  => [true
-      1
-      [true]
-      []
-      []]
+  => +out+
 
   (!.lua
     (var n (node/node-create {}))
@@ -100,14 +103,10 @@
      (frame/response-ok-frame (. request ["id"]) "room/a" {:ok true} nil))
     [(xt/x:is-string? (. request ["id"]))
      (xt/x:len before)
-     [(. (xt/x:get-idx resolved 0) ["ok"])]
+     resolved
      rejected
      (xt/x:obj-keys (. n ["pending"]))])
-  => [true
-      1
-      [true]
-      []
-      []]
+  => +out+
 
   (!.py
     (var n (node/node-create {}))
@@ -128,16 +127,13 @@
      (frame/response-ok-frame (. request ["id"]) "room/a" {:ok true} nil))
     [(xt/x:is-string? (. request ["id"]))
      (xt/x:len before)
-     [(. (xt/x:get-idx resolved 0) ["ok"])]
+     resolved
      rejected
      (xt/x:obj-keys (. n ["pending"]))])
-  => [true
-      1
-      [true]
-      []
-      []])
+  => +out+)
 
-^{:refer xt.event.node-request/remove-pending :added "4.1"}
+^{:refer xt.event.node-request/remove-pending :added "4.1"
+  :setup [(def +out+ (just-in [true empty?]))]}
 (fact "removes pending request entries by id"
 
   (!.js
@@ -152,7 +148,7 @@
     (var removed (req/remove-pending n (. request ["id"])))
     [(xt/x:is-string? (. (. removed ["request"]) ["id"]))
      (xt/x:obj-keys (. n ["pending"]))])
-  => [true []]
+  => +out+
 
   (!.lua
     (var n (node/node-create {}))
@@ -166,7 +162,7 @@
     (var removed (req/remove-pending n (. request ["id"])))
     [(xt/x:is-string? (. (. removed ["request"]) ["id"]))
      (xt/x:obj-keys (. n ["pending"]))])
-  => [true []]
+  => +out+
 
   (!.py
     (var n (node/node-create {}))
@@ -180,9 +176,10 @@
     (var removed (req/remove-pending n (. request ["id"])))
     [(xt/x:is-string? (. (. removed ["request"]) ["id"]))
      (xt/x:obj-keys (. n ["pending"]))])
-  => [true []])
+  => +out+)
 
-^{:refer xt.event.node-request/settle-pending :added "4.1"}
+^{:refer xt.event.node-request/settle-pending :added "4.1"
+  :setup [(def +out+ (just-in [true [true] empty?]))]}
 (fact "settles pending requests using response reply ids"
 
   (!.js
@@ -200,11 +197,11 @@
     (var entry
       (req/settle-pending
        n
-       (frame/response-ok-frame (. request ["id"]) "room/a" {:ok true} nil)))
+     (frame/response-ok-frame (. request ["id"]) "room/a" {:ok true} nil)))
     [(xt/x:is-string? (. (. entry ["request"]) ["id"]))
      resolved
      (xt/x:obj-keys (. n ["pending"]))])
-  => [true [true] []]
+  => +out+
 
   (!.lua
     (var n (node/node-create {}))
@@ -221,11 +218,11 @@
     (var entry
       (req/settle-pending
        n
-       (frame/response-ok-frame (. request ["id"]) "room/a" {:ok true} nil)))
+     (frame/response-ok-frame (. request ["id"]) "room/a" {:ok true} nil)))
     [(xt/x:is-string? (. (. entry ["request"]) ["id"]))
      resolved
      (xt/x:obj-keys (. n ["pending"]))])
-  => [true [true] []]
+  => +out+
 
   (!.py
     (var n (node/node-create {}))
@@ -242,11 +239,11 @@
     (var entry
       (req/settle-pending
        n
-       (frame/response-ok-frame (. request ["id"]) "room/a" {:ok true} nil)))
+     (frame/response-ok-frame (. request ["id"]) "room/a" {:ok true} nil)))
     [(xt/x:is-string? (. (. entry ["request"]) ["id"]))
      resolved
      (xt/x:obj-keys (. n ["pending"]))])
-  => [true [true] []])
+  => +out+)
 
 ^{:refer xt.event.node-request/invoke-handler :added "4.1"}
 (fact "invokes shared handlers against the selected space"

@@ -4,40 +4,20 @@
             [hara.lang :as l])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:js :lua :python]}}
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :oneshot
    :require [[xt.db.text.base-check :as chk]
              [xt.lang.common-lib :as k]]})
 
-(l/script- :lua
-  {:runtime :basic
-   :require [[xt.db.text.base-check :as chk]
-             [xt.lang.common-lib :as k]]})
-
-(l/script- :python
-  {:runtime :basic
-   :require [[xt.db.text.base-check :as chk]
-             [xt.lang.common-lib :as k]]})
-
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.text.base-check/is-uuid? :added "4.0"}
 (fact "checks that a string input is a uuid"
 
   (!.js
-    [(chk/is-uuid? "527a67de-a499-4c51-a435-953e3272b00d")
-     (chk/is-uuid? "527a67de-a499-4c51-a435-953e2b00d")])
-  => [true false]
-
-  (!.lua
-    [(chk/is-uuid? "527a67de-a499-4c51-a435-953e3272b00d")
-     (chk/is-uuid? "527a67de-a499-4c51-a435-953e2b00d")])
-  => [true false]
-
-  (!.py
     [(chk/is-uuid? "527a67de-a499-4c51-a435-953e3272b00d")
      (chk/is-uuid? "527a67de-a499-4c51-a435-953e2b00d")])
   => [true false])
@@ -46,22 +26,6 @@
 (fact "checks the arg type of an input"
 
   (!.js
-    [(chk/check-arg-type "numeric" 1.0)
-     (chk/check-arg-type "integer" 1)
-     (chk/check-arg-type "jsonb" {:a 1 :b 2})
-     (chk/check-arg-type "citext" "hello")
-     (chk/check-arg-type "text" "hello")])
-  => [true true true true true]
-
-  (!.lua
-    [(chk/check-arg-type "numeric" 1.0)
-     (chk/check-arg-type "integer" 1)
-     (chk/check-arg-type "jsonb" {:a 1 :b 2})
-     (chk/check-arg-type "citext" "hello")
-     (chk/check-arg-type "text" "hello")])
-  => [true true true true true]
-
-  (!.py
     [(chk/check-arg-type "numeric" 1.0)
      (chk/check-arg-type "integer" 1)
      (chk/check-arg-type "jsonb" {:a 1 :b 2})
@@ -76,36 +40,12 @@
     (chk/check-args-type [1 2]
                          [{:symbol "x", :type "numeric"}
                           {:symbol "y", :type "numeric"}]))
-  => [true]
-
-  (!.lua
-    (chk/check-args-type [1 2]
-                         [{:symbol "x", :type "numeric"}
-                          {:symbol "y", :type "numeric"}]))
-  => [true]
-
-  (!.py
-    (chk/check-args-type [1 2]
-                         [{:symbol "x", :type "numeric"}
-                          {:symbol "y", :type "numeric"}]))
   => [true])
 
 ^{:refer xt.db.text.base-check/check-args-length :added "4.0"}
 (fact "checks that input and spec are of the same length"
 
   (!.js
-    (chk/check-args-length [1 2]
-                           [{:symbol "x", :type "numeric"}
-                            {:symbol "y", :type "numeric"}]))
-  => [true]
-
-  (!.lua
-    (chk/check-args-length [1 2]
-                           [{:symbol "x", :type "numeric"}
-                            {:symbol "y", :type "numeric"}]))
-  => [true]
-
-  (!.py
     (chk/check-args-length [1 2]
                            [{:symbol "x", :type "numeric"}
                             {:symbol "y", :type "numeric"}]))

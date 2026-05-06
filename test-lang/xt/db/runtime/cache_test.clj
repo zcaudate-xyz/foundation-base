@@ -12,7 +12,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.runtime.cache/cache-process-event-sync :added "4.1"}
 (fact "flattens input payloads and merges cache rows for add events"

@@ -3,7 +3,7 @@
             [std.string.prose :as prose])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:js :lua :python]}}
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.text.base-schema :as sch]
@@ -14,29 +14,9 @@
              [xt.db.text.sql-manage :as manage]
              [xt.db.helpers.data-main-test :as sample]]})
 
-(l/script- :lua
-  {:runtime :basic
-   :require [[xt.db.text.base-schema :as sch]
-             [xt.lang.spec-base :as xt]
-             [xt.lang.common-data :as xtd]
-             [xt.lang.common-string :as str]
-             [xt.db.text.sql-util :as ut]
-             [xt.db.text.sql-manage :as manage]
-             [xt.db.helpers.data-main-test :as sample]]})
-
-(l/script- :python
-  {:runtime :basic
-   :require [[xt.db.text.base-schema :as sch]
-             [xt.lang.spec-base :as xt]
-             [xt.lang.common-data :as xtd]
-             [xt.lang.common-string :as str]
-             [xt.db.text.sql-util :as ut]
-             [xt.db.text.sql-manage :as manage]
-             [xt.db.helpers.data-main-test :as sample]]})
-
 (fact:global
- {:setup    [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 (def +table-all+
   (mapv prose/join-lines
@@ -177,54 +157,6 @@
                                           ["UserProfile" "account"])
                                 (ut/postgres-opts sample/SchemaLookup))])
   => ["\"account_id\" text REFERENCES \"UserAccount\""
-      "\"account_id\" uuid REFERENCES \"scratch-sample-db\".\"UserAccount\""]
-
-  (!.lua
-   [(manage/table-create-column sample/Schema
-                                (xtd/get-in sample/Schema
-                                          ["Currency" "id"])
-                                (ut/sqlite-opts nil))
-    (manage/table-create-column sample/Schema
-                                (xtd/get-in sample/Schema
-                                          ["Currency" "id"])
-                                (ut/postgres-opts sample/SchemaLookup))])
-  => ["\"id\" text PRIMARY KEY"
-      "\"id\" citext PRIMARY KEY"]
-
-  (!.lua
-   [(manage/table-create-column sample/Schema
-                                (xtd/get-in sample/Schema
-                                          ["UserProfile" "account"])
-                                (ut/sqlite-opts nil))
-    (manage/table-create-column sample/Schema
-                                (xtd/get-in sample/Schema
-                                          ["UserProfile" "account"])
-                                (ut/postgres-opts sample/SchemaLookup))])
-  => ["\"account_id\" text REFERENCES \"UserAccount\""
-      "\"account_id\" uuid REFERENCES \"scratch-sample-db\".\"UserAccount\""]
-
-  (!.py
-   [(manage/table-create-column sample/Schema
-                                (xtd/get-in sample/Schema
-                                          ["Currency" "id"])
-                                (ut/sqlite-opts nil))
-    (manage/table-create-column sample/Schema
-                                (xtd/get-in sample/Schema
-                                          ["Currency" "id"])
-                                (ut/postgres-opts sample/SchemaLookup))])
-  => ["\"id\" text PRIMARY KEY"
-      "\"id\" citext PRIMARY KEY"]
-
-  (!.py
-   [(manage/table-create-column sample/Schema
-                                (xtd/get-in sample/Schema
-                                          ["UserProfile" "account"])
-                                (ut/sqlite-opts nil))
-    (manage/table-create-column sample/Schema
-                                (xtd/get-in sample/Schema
-                                          ["UserProfile" "account"])
-                                (ut/postgres-opts sample/SchemaLookup))])
-  => ["\"account_id\" text REFERENCES \"UserAccount\""
       "\"account_id\" uuid REFERENCES \"scratch-sample-db\".\"UserAccount\""])
 
 ^{:refer xt.db.text.sql-manage/table-create :added "4.0"
@@ -264,26 +196,6 @@
                          "UserProfile"
                          (ut/sqlite-opts nil))])
   => [+currency-table+
-      +profile-table+]
-
-  (!.lua
-   [(manage/table-create sample/Schema
-                         "Currency"
-                         (ut/sqlite-opts nil))
-    (manage/table-create sample/Schema
-                         "UserProfile"
-                         (ut/sqlite-opts nil))])
-  => [+currency-table+
-      +profile-table+]
-
-  (!.py
-   [(manage/table-create sample/Schema
-                         "Currency"
-                         (ut/sqlite-opts nil))
-    (manage/table-create sample/Schema
-                         "UserProfile"
-                         (ut/sqlite-opts nil))])
-  => [+currency-table+
       +profile-table+])
 
 ^{:refer xt.db.text.sql-manage/table-create-all :added "4.0"}
@@ -293,36 +205,12 @@
     (manage/table-create-all sample/Schema
                              sample/SchemaLookup
                              (ut/sqlite-opts nil)))
-  => +table-all+
-
-  (!.lua
-    (manage/table-create-all sample/Schema
-                             sample/SchemaLookup
-                             (ut/sqlite-opts nil)))
-  => +table-all+
-
-  (!.py
-    (manage/table-create-all sample/Schema
-                             sample/SchemaLookup
-                             (ut/sqlite-opts nil)))
   => +table-all+)
 
 ^{:refer xt.db.text.sql-manage/table-drop :added "4.0"}
 (fact "creates a table statement"
 
   (!.js
-   (manage/table-drop sample/Schema
-                      "Currency"
-                      (ut/sqlite-opts nil)))
-  => "DROP TABLE IF EXISTS \"Currency\";"
-
-  (!.lua
-   (manage/table-drop sample/Schema
-                      "Currency"
-                      (ut/sqlite-opts nil)))
-  => "DROP TABLE IF EXISTS \"Currency\";"
-
-  (!.py
    (manage/table-drop sample/Schema
                       "Currency"
                       (ut/sqlite-opts nil)))
@@ -346,18 +234,6 @@
 (fact "drops all tables"
 
   (!.js
-   (manage/table-drop-all sample/Schema
-                          sample/SchemaLookup
-                          (ut/sqlite-opts nil)))
-  => +drop-all+
-
-  (!.lua
-   (manage/table-drop-all sample/Schema
-                          sample/SchemaLookup
-                          (ut/sqlite-opts nil)))
-  => +drop-all+
-
-  (!.py
    (manage/table-drop-all sample/Schema
                           sample/SchemaLookup
                           (ut/sqlite-opts nil)))

@@ -14,7 +14,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.instance/unsupported-op :added "4.1"}
 (fact "signals unsupported backend operations"

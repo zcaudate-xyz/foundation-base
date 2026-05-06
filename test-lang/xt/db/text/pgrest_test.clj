@@ -2,25 +2,15 @@
   (:require [hara.lang :as l])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:js :lua :python]}}
+^{:seedgen/root {:all true}}
 (l/script- :js
-  {:runtime :basic
-   :require [[xt.lang.spec-base :as xt]
-             [xt.db.text.pgrest :as pgrest]]})
-
-(l/script- :lua
-  {:runtime :basic
-   :require [[xt.lang.spec-base :as xt]
-             [xt.db.text.pgrest :as pgrest]]})
-
-(l/script- :python
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.db.text.pgrest :as pgrest]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 (def +query-tree-basic+
   ["Order"
@@ -69,39 +59,6 @@
    (var compiled
         (pgrest/compile-query
          (@! +query-tree-basic+)))
-   [(. compiled ["table"])
-    (. compiled ["select"])
-    (. (. (. compiled ["filters"]) [0]) ["path"])
-    (. (. (. compiled ["filters"]) [0]) ["value"])])
-  => ["Order"
-      "status,account(nickname)"
-      "account.id"
-      "acct-1"]
-
-  (!.lua
-   (var compiled
-        (pgrest/compile-query
-         ["Order"
-          {"account" {"id" "acct-1"}}
-          ["status"
-           ["account" ["nickname"]]]]))
-   (var filter (xt/x:first (. compiled ["filters"])))
-   [(. compiled ["table"])
-    (. compiled ["select"])
-    (. filter ["path"])
-    (. filter ["value"])])
-  => ["Order"
-      "status,account(nickname)"
-      "account.id"
-      "acct-1"]
-
-  (!.py
-   (var compiled
-        (pgrest/compile-query
-         ["Order"
-          {"account" {"id" "acct-1"}}
-          ["status"
-           ["account" ["nickname"]]]]))
    [(. compiled ["table"])
     (. compiled ["select"])
     (. (. (. compiled ["filters"]) [0]) ["path"])

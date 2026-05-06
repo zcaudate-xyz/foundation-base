@@ -172,7 +172,7 @@
   [node ids frame exclude-id index]
   (when (>= index (xt/x:len ids))
     (return (promise/x:promise-run frame)))
-  (var transport-id (xt/x:get-idx ids index))
+  (var transport-id (xt/x:get-idx ids (xt/x:offset index)))
   (if (== transport-id exclude-id)
     (return (-/broadcast-transport-loop node ids frame exclude-id (+ index 1)))
     (return
@@ -197,7 +197,7 @@
   [node ids frame exclude-id index]
   (when (>= index (xt/x:len ids))
     (return (promise/x:promise-run frame)))
-  (var transport-id (xt/x:get-idx ids index))
+  (var transport-id (xt/x:get-idx ids (xt/x:offset index)))
   (if (== transport-id exclude-id)
     (return (-/route-stream-loop node ids frame exclude-id (+ index 1)))
     (return
@@ -277,7 +277,7 @@
   (var transports (-/list-transports node))
   (when (== 0 (xt/x:len transports))
     (return nil))
-  (return (xt/x:get-idx transports 0)))
+  (return (xt/x:get-idx transports (xt/x:offset 0))))
 
 (defn.xt await-pending
   "waits for a pending request state to settle"

@@ -3,7 +3,7 @@
             [xt.db.helpers.data-main-test :as sample])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:js]}}
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.node.schema-query :as schema-query]
@@ -14,7 +14,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 (def +views+
   {"UserAccount"

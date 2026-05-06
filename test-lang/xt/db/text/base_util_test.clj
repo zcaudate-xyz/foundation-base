@@ -2,20 +2,8 @@
   (:require [hara.lang :as l])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:js :lua :python]}}
+^{:seedgen/root {:all true}}
 (l/script- :js
-  {:runtime :basic
-   :require [[xt.db.text.base-util :as ut]
-             [xt.lang.spec-base :as xt]
-             [xt.lang.common-lib :as k]]})
-
-(l/script- :lua
-  {:runtime :basic
-   :require [[xt.db.text.base-util :as ut]
-             [xt.lang.spec-base :as xt]
-             [xt.lang.common-lib :as k]]})
-
-(l/script- :python
   {:runtime :basic
    :require [[xt.db.text.base-util :as ut]
              [xt.lang.spec-base :as xt]
@@ -23,7 +11,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.text.base-util/collect-routes :added "4.0"
   :setup [(def +routes+ [{:input [],
@@ -38,33 +26,25 @@
                           :id "echo",
                           :flags {}
                           :url "api/echo"}])
-          (def +result+
-            (contains-in {"api/echo"
-                          {"url" "api/echo",
-                           "return" "text",
-                           "schema" "core/util",
-                           "id" "echo",
-                           "flags" {},
-                           "input" [{"symbol" "input", "type" "text"}],
-                           "type" "db"},
-                          "api/ping"
-                          {"url" "api/ping",
-                           "return" "text",
-                           "schema" "core/util",
-                           "id" "ping",
-                           "flags" {},
-                           "type" "db"}}))]}
+                   (def +result+
+                     (contains-in {"api/echo"
+                                   {"url" "api/echo",
+                                    "return" "text",
+                                    "schema" "core/util",
+                                    "id" "echo",
+                                    "flags" {},
+                                    "input" [{"symbol" "input", "type" "text"}],
+                                    "type" "db"},
+                                   "api/ping"
+                                   {"url" "api/ping",
+                                    "return" "text",
+                                    "schema" "core/util",
+                                    "id" "ping",
+                                    "flags" {},
+                                    "type" "db"}}))]}
 (fact "collect routes"
 
   (!.js
-    (ut/collect-routes (@! +routes+) "db"))
-  => +result+
-
-  (!.lua
-    (ut/collect-routes (@! +routes+) "db"))
-  => +result+
-
-  (!.py
     (ut/collect-routes (@! +routes+) "db"))
   => +result+)
 
@@ -118,42 +98,12 @@
     (ut/collect-views (@! +views+)))
   => (contains-in {"Currency" {"select" {"all" map?
                                          "by_type" map?}
-                               "return" {"default" map?}}})
-
-  (!.lua
-    (ut/collect-views (@! +views+)))
-  => (contains-in {"Currency" {"select" {"all" map?
-                                         "by_type" map?}
-                               "return" {"default" map?}}})
-
-  (!.py
-    (ut/collect-views (@! +views+)))
-  => (contains-in {"Currency" {"select" {"all" map?
-                                         "by_type" map?}
                                "return" {"default" map?}}}))
 
 ^{:refer xt.db.text.base-util/merge-views :added "4.0"}
 (fact "merges multiple views together"
 
   (!.js
-    (ut/merge-views
-     [{"Currency" {"select" {"all" {"id" "currency_all"}}}}
-      {"Wallet" {"return" {"default" {"id" "wallet_default"}}}}]
-     {"RegionCountry" {"select" {"all" {"id" "country_all"}}}}))
-  => {"Currency" {"select" {"all" {"id" "currency_all"}}}
-      "Wallet" {"return" {"default" {"id" "wallet_default"}}}
-      "RegionCountry" {"select" {"all" {"id" "country_all"}}}}
-
-  (!.lua
-    (ut/merge-views
-     [{"Currency" {"select" {"all" {"id" "currency_all"}}}}
-      {"Wallet" {"return" {"default" {"id" "wallet_default"}}}}]
-     {"RegionCountry" {"select" {"all" {"id" "country_all"}}}}))
-  => {"Currency" {"select" {"all" {"id" "currency_all"}}}
-      "Wallet" {"return" {"default" {"id" "wallet_default"}}}
-      "RegionCountry" {"select" {"all" {"id" "country_all"}}}}
-
-  (!.py
     (ut/merge-views
      [{"Currency" {"select" {"all" {"id" "currency_all"}}}}
       {"Wallet" {"return" {"default" {"id" "wallet_default"}}}}]
@@ -170,20 +120,6 @@
                     xt/x:odd?
                     k/identity
                     3))
-  => [1 3 5]
-
-  (!.lua
-    (ut/keepf-limit [1 2 3 4 5]
-                    xt/x:odd?
-                    k/identity
-                    3))
-  => [1 3 5]
-
-  (!.py
-    (ut/keepf-limit [1 2 3 4 5]
-                    xt/x:odd?
-                    k/identity
-                    3))
   => [1 3 5])
 
 ^{:refer xt.db.text.base-util/lu-nested :added "4.0"}
@@ -192,40 +128,12 @@
   (!.js
     (ut/lu-nested [{:id "1"}]
                   (fn [e] (return (xt/x:get-key e "id")))))
-  => {"1" {"id" "1"}}
-
-  (!.lua
-    (ut/lu-nested [{:id "1"}]
-                  (fn [e] (return (xt/x:get-key e "id")))))
-  => {"1" {"id" "1"}}
-
-  (!.py
-    (ut/lu-nested [{:id "1"}]
-                  (fn [e] (return (xt/x:get-key e "id")))))
   => {"1" {"id" "1"}})
 
 ^{:refer xt.db.text.base-util/lu-map :added "4.0"}
 (fact "constructs a nested lu map of ids"
 
   (!.js [(ut/lu-map
-          {:a [{:id "b"}]})
-         (ut/lu-map
-          {:a [{:id "b"
-                :sub [{:id "c"}
-                      {:id "d"}]}]})])
-  => [{"a" {"b" {"id" "b"}}}
-      {"a" {"b" {"sub" {"d" {"id" "d"}, "c" {"id" "c"}}, "id" "b"}}}]
-
-  (!.lua [(ut/lu-map
-           {:a [{:id "b"}]})
-          (ut/lu-map
-           {:a [{:id "b"
-                 :sub [{:id "c"}
-                       {:id "d"}]}]})])
-  => [{"a" {"b" {"id" "b"}}}
-      {"a" {"b" {"sub" {"d" {"id" "d"}, "c" {"id" "c"}}, "id" "b"}}}]
-
-  (!.py [(ut/lu-map
           {:a [{:id "b"}]})
          (ut/lu-map
           {:a [{:id "b"

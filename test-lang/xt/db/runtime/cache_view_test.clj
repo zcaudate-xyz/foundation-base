@@ -5,7 +5,7 @@
             [xt.db.helpers.seed-user-test :as user])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:js :lua :python]}}
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.runtime.cache-view :as v]
@@ -17,8 +17,8 @@
              [xt.db.helpers.data-main-test :as sample]]})
 
 (fact:global
- {:setup    [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.runtime.cache-view/tree-base :added "4.0"}
 (fact "creates a tree base"

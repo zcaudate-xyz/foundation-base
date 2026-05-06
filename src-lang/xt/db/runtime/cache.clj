@@ -21,7 +21,7 @@
         (return flat)
 
         :else
-        (do (cache-util/merge-bulk rows flat)
+        (do (cache-util/merge-bulk rows flat nil)
             (cache-util/add-bulk-links rows schema flat)
             (return (xt/x:obj-keys flat)))))
 

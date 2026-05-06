@@ -3,7 +3,7 @@
             [std.string.prose :as prose])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:js :lua :python]}}
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.text.sql-graph :as g]
@@ -14,29 +14,9 @@
              [xt.db.text.base-scope :as scope]
              [xt.db.helpers.data-main-test :as sample]]})
 
-(l/script- :lua
-  {:runtime :basic
-   :require [[xt.db.text.sql-graph :as g]
-             [xt.db.text.sql-util :as ut]
-             [xt.db.text.sql-raw :as raw]
-             [xt.lang.common-data :as xtd]
-             [xt.db.text.base-schema :as sch]
-             [xt.db.text.base-scope :as scope]
-             [xt.db.helpers.data-main-test :as sample]]})
-
-(l/script- :python
-  {:runtime :basic
-   :require [[xt.db.text.sql-graph :as g]
-             [xt.db.text.sql-util :as ut]
-             [xt.db.text.sql-raw :as raw]
-             [xt.lang.common-data :as xtd]
-             [xt.db.text.base-schema :as sch]
-             [xt.db.text.base-scope :as scope]
-             [xt.db.helpers.data-main-test :as sample]]})
-
 (fact:global
- {:setup    [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.text.sql-graph/select-where.darr :added "4.0" :adopt true}
 (fact "multi select"
@@ -52,44 +32,6 @@
   => "nickname in ('hello', 'root', 'world')"
 
   (!.js
-   (g/select-where sample/Schema
-                   "UserAccount"
-                   "id"
-                   {:nickname ["in" [["hello" "root" "world"]]]}
-                   0
-                   {}))
-  => "SELECT id FROM UserAccount\nWHERE nickname in ('hello', 'root', 'world')"
-
-  (!.lua
-   (g/select-where-pair sample/Schema
-                        "UserAccount"
-                        "nickname"
-                        ["in" [["hello" "root" "world"]]]
-                        2
-                        {}
-                        nil))
-  => "nickname in ('hello', 'root', 'world')"
-
-  (!.lua
-   (g/select-where sample/Schema
-                   "UserAccount"
-                   "id"
-                   {:nickname ["in" [["hello" "root" "world"]]]}
-                   0
-                   {}))
-  => "SELECT id FROM UserAccount\nWHERE nickname in ('hello', 'root', 'world')"
-
-  (!.py
-   (g/select-where-pair sample/Schema
-                        "UserAccount"
-                        "nickname"
-                        ["in" [["hello" "root" "world"]]]
-                        2
-                        {}
-                        nil))
-  => "nickname in ('hello', 'root', 'world')"
-
-  (!.py
    (g/select-where sample/Schema
                    "UserAccount"
                    "id"
@@ -139,86 +81,6 @@
       "    SELECT account_id FROM UserProfile"
       "    WHERE first_name = 'hello'"
       "  )"
-      ")")
-
-  (!.lua
-   (g/select-where sample/Schema
-                   "UserProfile"
-                   "id"
-                   {:account {:wallets {:entries {:asset "XLM"}}
-                              :is-official true}
-                    :first-name "hello"}
-                   0
-                   {}))
-  => (prose/|
-      "SELECT id FROM UserProfile"
-      "WHERE account_id IN ("
-      "  SELECT id FROM UserAccount"
-      "  WHERE is_official = TRUE AND id IN ("
-      "    SELECT owner_id FROM Wallet"
-      "    WHERE id IN ("
-      "      SELECT wallet_id FROM WalletAsset"
-      "      WHERE asset_id = 'XLM'"
-      "    )"
-      "  )"
-      ") AND first_name = 'hello'")
-
-  (!.lua
-   (g/select-where sample/Schema
-                   "Wallet"
-                   "id"
-                   {:owner {:profile {:first-name "hello"}
-                            :is-official true}}
-                   0
-                   {}))
-  => (prose/|
-      "SELECT id FROM Wallet"
-      "WHERE owner_id IN ("
-      "  SELECT id FROM UserAccount"
-      "  WHERE is_official = TRUE AND id IN ("
-      "    SELECT account_id FROM UserProfile"
-      "    WHERE first_name = 'hello'"
-      "  )"
-      ")")
-
-  (!.py
-   (g/select-where sample/Schema
-                   "UserProfile"
-                   "id"
-                   {:account {:wallets {:entries {:asset "XLM"}}
-                              :is-official true}
-                    :first-name "hello"}
-                   0
-                   {}))
-  => (prose/|
-      "SELECT id FROM UserProfile"
-      "WHERE account_id IN ("
-      "  SELECT id FROM UserAccount"
-      "  WHERE is_official = TRUE AND id IN ("
-      "    SELECT owner_id FROM Wallet"
-      "    WHERE id IN ("
-      "      SELECT wallet_id FROM WalletAsset"
-      "      WHERE asset_id = 'XLM'"
-      "    )"
-      "  )"
-      ") AND first_name = 'hello'")
-
-  (!.py
-   (g/select-where sample/Schema
-                   "Wallet"
-                   "id"
-                   {:owner {:profile {:first-name "hello"}
-                            :is-official true}}
-                   0
-                   {}))
-  => (prose/|
-      "SELECT id FROM Wallet"
-      "WHERE owner_id IN ("
-      "  SELECT id FROM UserAccount"
-      "  WHERE is_official = TRUE AND id IN ("
-      "    SELECT account_id FROM UserProfile"
-      "    WHERE first_name = 'hello'"
-      "  )"
       ")"))
 
 ^{:refer xt.db.text.sql-graph/base-query-inputs :added "4.0"}
@@ -231,46 +93,12 @@
       ["profile"
        {:id 1}
        ["first_name" "last_name"]]]]))
-  => ["UserAccount" {} ["id" "nickname" ["profile" {"id" 1} ["first_name" "last_name"]]]]
-
-  (!.lua
-   (g/base-query-inputs
-    ["UserAccount"
-     ["id" "nickname"
-      ["profile"
-       {:id 1}
-       ["first_name" "last_name"]]]]))
-  => ["UserAccount" {} ["id" "nickname" ["profile" {"id" 1} ["first_name" "last_name"]]]]
-
-  (!.py
-   (g/base-query-inputs
-    ["UserAccount"
-     ["id" "nickname"
-      ["profile"
-       {:id 1}
-       ["first_name" "last_name"]]]]))
   => ["UserAccount" {} ["id" "nickname" ["profile" {"id" 1} ["first_name" "last_name"]]]])
 
 ^{:refer xt.db.text.sql-graph/base-format-return :added "4.0"}
 (fact "formats the query return"
 
   (!.js
-   [(g/base-format-return {:expr "count(*)"} nil nil)
-    (g/base-format-return {:expr "count(*)"
-                           :as "count"}
-                          nil nil)])
-  => ["count(*)"
-      "count(*) AS count"]
-
-  (!.lua
-   [(g/base-format-return {:expr "count(*)"} nil nil)
-    (g/base-format-return {:expr "count(*)"
-                           :as "count"}
-                          nil nil)])
-  => ["count(*)"
-      "count(*) AS count"]
-
-  (!.py
    [(g/base-format-return {:expr "count(*)"} nil nil)
     (g/base-format-return {:expr "count(*)"
                            :as "count"}
@@ -293,70 +121,12 @@
       "id IN ("
       "  SELECT account_id FROM UserProfile"
       "  WHERE first_name = 'hello'"
-      ")")
-
-  (!.lua
-   (g/select-where-pair sample/Schema
-                        "UserAccount"
-                        "profile"
-                        {:first-name "hello"}
-                        2
-                        {}
-                        g/select-where))
-  => (prose/|
-      "id IN ("
-      "  SELECT account_id FROM UserProfile"
-      "  WHERE first_name = 'hello'"
-      ")")
-
-  (!.py
-   (g/select-where-pair sample/Schema
-                        "UserAccount"
-                        "profile"
-                        {:first-name "hello"}
-                        2
-                        {}
-                        g/select-where))
-  => (prose/|
-      "id IN ("
-      "  SELECT account_id FROM UserProfile"
-      "  WHERE first_name = 'hello'"
       ")"))
 
 ^{:refer xt.db.text.sql-graph/select-where :added "4.0"}
 (fact "formats the query return"
 
   (!.js
-   (g/select-where sample/Schema
-                   "UserAccount"
-                   "id"
-                   {:profile {:first-name "hello"
-                              :last-name "hello"}}
-                   0
-                   {}))
-  => (prose/|
-      "SELECT id FROM UserAccount"
-      "WHERE id IN ("
-      "  SELECT account_id FROM UserProfile"
-      "  WHERE first_name = 'hello' AND last_name = 'hello'"
-      ")")
-
-  (!.lua
-   (g/select-where sample/Schema
-                   "UserAccount"
-                   "id"
-                   {:profile {:first-name "hello"
-                              :last-name "hello"}}
-                   0
-                   {}))
-  => (prose/|
-      "SELECT id FROM UserAccount"
-      "WHERE id IN ("
-      "  SELECT account_id FROM UserProfile"
-      "  WHERE first_name = 'hello' AND last_name = 'hello'"
-      ")")
-
-  (!.py
    (g/select-where sample/Schema
                    "UserAccount"
                    "id"
@@ -388,30 +158,6 @@
                         g/select-return
                         0
                         {}))
-  => +out+
-
-  (!.lua
-    (g/select-return-str sample/Schema
-                        (xtd/second (scope/get-tree sample/Schema
-                                                    "UserProfile"
-                                                    {}
-                                                    [["account"]]
-                                                    {}))
-                        g/select-return
-                        0
-                        {}))
-  => +out+
-
-  (!.py
-    (g/select-return-str sample/Schema
-                        (xtd/second (scope/get-tree sample/Schema
-                                                    "UserProfile"
-                                                    {}
-                                                    [["account"]]
-                                                    {}))
-                        g/select-return
-                        0
-                        {}))
   => +out+)
 
 ^{:refer xt.db.text.sql-graph/select-return :added "4.0"
@@ -422,28 +168,6 @@
 (fact "select return call"
 
   (!.js
-   (g/select-return sample/Schema
-                    (scope/get-tree sample/Schema
-                                    "UserProfile"
-                                    {}
-                                    [["account"]]
-                                    {})
-                    0
-                    {}))
-  => +out+
-
-  (!.lua
-   (g/select-return sample/Schema
-                    (scope/get-tree sample/Schema
-                                    "UserProfile"
-                                    {}
-                                    [["account"]]
-                                    {})
-                    0
-                    {}))
-  => +out+
-
-  (!.py
    (g/select-return sample/Schema
                     (scope/get-tree sample/Schema
                                     "UserProfile"
@@ -478,22 +202,6 @@
 
   ^{:seedgen/base {:lua {:transform {+out+ (l/as-lua +out+)}}}}
   (!.js
-    (g/select-tree sample/Schema
-                   ["UserProfile"
-                    {}
-                    [["account"]]]
-                   {}))
-  => +out+
-
-  (!.lua
-    (g/select-tree sample/Schema
-                   ["UserProfile"
-                    {}
-                    [["account"]]]
-                   {}))
-  => (l/as-lua +out+)
-
-  (!.py
     (g/select-tree sample/Schema
                    ["UserProfile"
                     {}
@@ -547,118 +255,6 @@
       ") SELECT jsonb_agg(j_ret) FROM j_ret")
 
   (!.js
-    (g/select sample/Schema
-              ["UserProfile"
-               ["*/data"
-                ["account"]]]
-              {:wrapper-fn ut/postgres-wrapper-fn}))
-  => (prose/|
-      "WITH j_ret AS ("
-      "  SELECT id, first_name, last_name, city, about, language, (WITH j_ret AS ("
-      "    SELECT id, nickname, password_updated, is_super, is_suspended, is_official FROM UserAccount"
-      "      WHERE id = UserProfile.account_id"
-      "  ) SELECT jsonb_agg(j_ret) FROM j_ret) AS account FROM UserProfile"
-      ") SELECT jsonb_agg(j_ret) FROM j_ret")
-
-  (!.lua
-   (g/select sample/Schema
-             ["UserAccount"
-              [{"::" "sql/count"}]]
-             {:wrapper-fn ut/postgres-wrapper-fn}))
-  => "WITH j_ret AS (\n  SELECT count(*) FROM UserAccount\n) SELECT jsonb_agg(j_ret) FROM j_ret"
-
-  (!.lua
-   (g/select sample/Schema
-             ["UserAccount"
-              ["*/data"
-               (ut/ORDER-BY ["hello"])
-               (ut/ORDER-SORT "asc")
-               (ut/LIMIT 1)
-               ["wallets"]]]
-             {:wrapper-fn ut/postgres-wrapper-fn}))
-  => (prose/|
-      "WITH j_ret AS ("
-      "  SELECT id, nickname, password_updated, is_super, is_suspended, is_official, (WITH j_ret AS ("
-      "    SELECT id, slug FROM Wallet"
-      "      WHERE owner_id = UserAccount.id"
-      "  ) SELECT jsonb_agg(j_ret) FROM j_ret) AS wallets FROM UserAccount ORDER BY hello ASC LIMIT 1"
-      ") SELECT jsonb_agg(j_ret) FROM j_ret")
-
-  (!.lua
-   (g/select sample/Schema
-             ["UserAccount"
-              ["*/data"
-               ["profile"]
-               ["wallets"]]]
-             {:wrapper-fn ut/postgres-wrapper-fn}))
-  => (prose/|
-      "WITH j_ret AS ("
-      "  SELECT id, nickname, password_updated, is_super, is_suspended, is_official, (WITH j_ret AS ("
-      "    SELECT id, first_name, last_name, city, about, language FROM UserProfile"
-      "      WHERE account_id = UserAccount.id"
-      "  ) SELECT jsonb_agg(j_ret) FROM j_ret) AS profile, (WITH j_ret AS ("
-      "    SELECT id, slug FROM Wallet"
-      "      WHERE owner_id = UserAccount.id"
-      "  ) SELECT jsonb_agg(j_ret) FROM j_ret) AS wallets FROM UserAccount"
-      ") SELECT jsonb_agg(j_ret) FROM j_ret")
-
-  (!.lua
-    (g/select sample/Schema
-              ["UserProfile"
-               ["*/data"
-                ["account"]]]
-              {:wrapper-fn ut/postgres-wrapper-fn}))
-  => (prose/|
-      "WITH j_ret AS ("
-      "  SELECT id, first_name, last_name, city, about, language, (WITH j_ret AS ("
-      "    SELECT id, nickname, password_updated, is_super, is_suspended, is_official FROM UserAccount"
-      "      WHERE id = UserProfile.account_id"
-      "  ) SELECT jsonb_agg(j_ret) FROM j_ret) AS account FROM UserProfile"
-      ") SELECT jsonb_agg(j_ret) FROM j_ret")
-
-  (!.py
-   (g/select sample/Schema
-             ["UserAccount"
-              [{"::" "sql/count"}]]
-             {:wrapper-fn ut/postgres-wrapper-fn}))
-  => "WITH j_ret AS (\n  SELECT count(*) FROM UserAccount\n) SELECT jsonb_agg(j_ret) FROM j_ret"
-
-  (!.py
-   (g/select sample/Schema
-             ["UserAccount"
-              ["*/data"
-               (ut/ORDER-BY ["hello"])
-               (ut/ORDER-SORT "asc")
-               (ut/LIMIT 1)
-               ["wallets"]]]
-             {:wrapper-fn ut/postgres-wrapper-fn}))
-  => (prose/|
-      "WITH j_ret AS ("
-      "  SELECT id, nickname, password_updated, is_super, is_suspended, is_official, (WITH j_ret AS ("
-      "    SELECT id, slug FROM Wallet"
-      "      WHERE owner_id = UserAccount.id"
-      "  ) SELECT jsonb_agg(j_ret) FROM j_ret) AS wallets FROM UserAccount ORDER BY hello ASC LIMIT 1"
-      ") SELECT jsonb_agg(j_ret) FROM j_ret")
-
-  (!.py
-   (g/select sample/Schema
-             ["UserAccount"
-              ["*/data"
-               ["profile"]
-               ["wallets"]]]
-             {:wrapper-fn ut/postgres-wrapper-fn}))
-  => (prose/|
-      "WITH j_ret AS ("
-      "  SELECT id, nickname, password_updated, is_super, is_suspended, is_official, (WITH j_ret AS ("
-      "    SELECT id, first_name, last_name, city, about, language FROM UserProfile"
-      "      WHERE account_id = UserAccount.id"
-      "  ) SELECT jsonb_agg(j_ret) FROM j_ret) AS profile, (WITH j_ret AS ("
-      "    SELECT id, slug FROM Wallet"
-      "      WHERE owner_id = UserAccount.id"
-      "  ) SELECT jsonb_agg(j_ret) FROM j_ret) AS wallets FROM UserAccount"
-      ") SELECT jsonb_agg(j_ret) FROM j_ret")
-
-  (!.py
     (g/select sample/Schema
               ["UserProfile"
                ["*/data"

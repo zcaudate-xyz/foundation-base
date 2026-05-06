@@ -19,8 +19,8 @@
              [xt.event.node-frame :as frame]]})
 
 (fact:global
- {:setup    [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.event.node-frame/rand-id :added "4.1"}
 (fact "creates ids with the requested prefix"
