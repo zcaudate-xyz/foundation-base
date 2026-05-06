@@ -53,6 +53,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Install repository JS dependencies
+        run: npm ci --legacy-peer-deps
+
       - name: Install JS parser dependencies
         if: matrix.install_js_parser == true
         working-directory: src-training/scripts/js_parser
@@ -68,7 +71,9 @@ jobs:
           ghcr.io/zcaudate-xyz/infra-foundation-clean:ci
           bash -lc "set -euxo pipefail &&
           apt-get update &&
-          apt-get install -y --no-install-recommends lua5.4 python3 python3-pip &&
+          apt-get install -y --no-install-recommends lua5.4 python3 python3-pip postgresql-client &&
+          PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -d test -tc \"SELECT 1 FROM pg_database WHERE datname = 'test-scratch'\" | grep -q 1 ||
+          PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -d test -c 'CREATE DATABASE \"test-scratch\"' &&
           ${{ matrix.command }}"
         
     services:
@@ -100,6 +105,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Install repository JS dependencies
+        run: npm ci --legacy-peer-deps
+
       - name: Install JS parser dependencies
         if: matrix.install_js_parser == true
         working-directory: src-training/scripts/js_parser
@@ -113,7 +121,12 @@ jobs:
           -v $(pwd):$(pwd) 
           -w $(pwd) 
           ghcr.io/zcaudate-xyz/infra-foundation-clean:ci
-          lein test :with "${{ matrix.lang }}"
+          bash -lc "set -euxo pipefail &&
+          apt-get update &&
+          apt-get install -y --no-install-recommends postgresql-client &&
+          PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -d test -tc \"SELECT 1 FROM pg_database WHERE datname = 'test-scratch'\" | grep -q 1 ||
+          PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -d test -c 'CREATE DATABASE \"test-scratch\"' &&
+          lein test :with \"${{ matrix.lang }}\""
         
     services:
       postgres:

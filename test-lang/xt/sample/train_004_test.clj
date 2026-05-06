@@ -216,14 +216,14 @@
     (xt/x:offset 10))
   => 11
 
-  (!.js    
+  (!.py    
     (xt/x:offset 10))
-  => python)
+  => 10)
 
 ^{:refer xt.lang.spec-base/example-fa :added "4.1"}
 (fact "expect can be customised"
 
-  ^{:seedgen/base    {:lua  {:input (xt/x:offest 9)}}}
+  ^{:seedgen/base    {:lua  {:input (xt/x:offset 9)}}}
   (!.js    
     (xt/x:offset 10))
   => 10)
@@ -231,8 +231,8 @@
 ^{:refer xt.lang.spec-base/example-fa :added "4.1"}
 (fact "expect can be customised"
 
-  ^{:seedgen/base    {:lua  {:input (xt/x:offest
-                                     9)}}}
+  ^{:seedgen/base    {:lua  {:input (xt/x:offset
+                                      9)}}}
   (!.js    
     (xt/x:offset 10))
   => 10
@@ -252,8 +252,8 @@
                                           (do (a)
                                               (b)
                                               (c)))}
-                                :lua   {:input
-                                        (setup-python)}}}
+                                 :python {:input
+                                         (setup-python)}}}
           (!.js
             (setup-js))]}
 (fact "any form is allowed with :seedgen/base meta"

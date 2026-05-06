@@ -65,7 +65,7 @@
   ;; ENCODING TRUE INTEGER
   (!.lua
    (local conn (lua-sqlite/connect-constructor {:memory true}))
-   (driver/query conn "select 1;"))
+   (driver/query (lua-sqlite/wrap-connection conn) "select 1;"))
   => 1)
 
 

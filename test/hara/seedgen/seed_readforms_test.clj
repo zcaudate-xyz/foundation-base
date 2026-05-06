@@ -60,10 +60,10 @@
 (fact "TODO")
 
 ^{:refer hara.seedgen.form-parse/seedgen-readforms :added "4.1"}
-(fact "returns globals and analyse entries in the train-002 seedgen shape"
+(fact "returns globals and analyse entries in the train-003 seedgen shape"
   (let [output (project/in-context
-                (seed-readforms/seedgen-readforms 'xt.sample.train-002-test {}))
-        entry  (get-in output '[:entries xt.lang.spec-base for:array])]
+                (seed-readforms/seedgen-readforms 'xt.sample.train-003-test {}))
+        entry  (get-in output '[:entries xt.lang.spec-base x:return-eval])]
     {:globals {:lang (get-in output [:globals :lang])
                :global-script {:root (some-> (get-in output [:globals :global-script :root])
                                              :form
@@ -78,28 +78,25 @@
              :fact-teardown (summarize-block-items (:fact-teardown entry))
              :checks (summarize-checks (:checks entry))}})
   => {:globals {:lang {:root :js
-                       :derived [:lua]}
-                :global-script {:root "^{:seedgen/root         {:all true}}\n(l/script- :js\n  {:runtime :basic\n   :require [[xt.lang.spec-base :as xt]]})"
-                                :derived ["(l/script- :lua\n  {:runtime :basic\n   :require [[xt.lang.spec-base :as xt]]})"]}
-                :global-fact-setup {:root ["(!.js (+ 3 4 5))"]
-                                    :derived ["(!.lua (+ 1 2 3))"]
-                                    :scaffold ["(l/rt:restart)"]}
-                :global-fact-teardown {:root []
+                       :derived []}
+                 :global-script {:root "^{:seedgen/root     {:all true}}\n(l/script- :js\n  {:runtime :basic\n   :require [[xt.lang.spec-base :as xt]]})"
+                                 :derived []}
+                 :global-fact-setup {:root []
+                                     :derived []
+                                     :scaffold ["(l/rt:restart)"]}
+                 :global-fact-teardown {:root []
                                         :derived []
                                         :scaffold ["(l/rt:stop)"]}
-                :global-top {:root []
-                             :derived []
-                             :scaffold ["^{:seedgen/scaffold         {:python  {:suppress true}}}\n(l/script+ [:db :postgres])"
-                                        "(def +a+ (inc 1))"
-                                        "(l/! :db (+ 1 2 3))"]}}
-      :entry {:fact-setup {:root ["(!.js (+ 1 2 3))"]
-                           :derived ["^{:seedgen/derived   {:lang :lua}} ;; this is derived the meta is optional\n             (!.lua (+ 1 2 3))"]
-                           :scaffold ["(def +a+ (+ 1 2 3))"]}
-              :fact-teardown {:root ["(!.js (+ 1 2 3))"]
+                 :global-top {:root []
+                              :derived []
+                              :scaffold []}}
+      :entry {:fact-setup {:root []
+                           :derived []
+                           :scaffold []}
+              :fact-teardown {:root []
                               :derived []
                               :scaffold []}
-              :checks {:root [["(!.js               ;; this is foundation\n    (var out [])\n    (xt/for:array [e [1 2 3 4]]\n      (when (> e 3)\n        (break))\n      (xt/x:arr-push out e))\n    out)"
-                               "[1 2 3]"]]
-                       :derived [["(!.lua              ;; this is derived and can be removed\n    (var out [])\n    (xt/for:array [e [1 2 3 4]]\n      (when (> e 3)\n        (break))\n      (xt/x:arr-push out e))\n    out)"
-                                  "[1 2 3]"]]
+              :checks {:root [["^{:seedgen/base   {:lua    {:transform {\"1 + 1\"   \"return 1 + 1\" }}\n                     :python {:suppress true}\n                     :dart   {:suppress true}}}\n   (!.js\n     (var encode-fn\n          (fn [value id key]\n            (return\n             (xt/x:return-encode value id key))))\n     (var wrap-fn\n          (fn [gen-fn wrap-fn]\n            (return\n             (xt/x:return-wrap gen-fn wrap-fn))))\n     (var eval-fn\n          (fn [s re-wrap-fn]\n            (return\n             (xt/x:return-eval s re-wrap-fn))))\n     (xt/x:json-decode\n      (eval-fn \"1 + 1\"\n               (fn [f]\n                 (return\n                  (wrap-fn f\n                           (fn [out]\n                             (return\n                              (encode-fn out \"id-A\" \"key-B\")))))))))"
+                               "(contains-in {\"key\" \"key-B\", \"id\" \"id-A\", \"value\" 2, \"type\" \"data\"})"]]
+                       :derived []
                        :scaffold []}}})
