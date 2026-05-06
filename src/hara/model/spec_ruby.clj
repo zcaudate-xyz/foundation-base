@@ -188,6 +188,10 @@
             start
             more)))
 
+(defn ruby-puts
+  [[_ & args] grammar mopts]
+  (str "puts" (ruby-emit-args args grammar mopts)))
+
 (defn- ruby-callable-form?
   [form]
   (cond
@@ -422,7 +426,7 @@
                            :symbol #{'x:iter-generator}
                            :macro #'fn/ruby-tf-x-iter-generator
                            :emit :macro}
-        :puts       {:op :puts :symbol #{'puts} :raw "puts" :emit :prefix}
+         :puts       {:op :puts :symbol #{'puts} :emit #'ruby-puts}
         :nil?       {:op :nil? :symbol #{'nil?} :raw "nil?" :emit :postfix}
         :attr       {:op :attr :symbol #{'attr_accessor} :raw "attr_accessor" :emit :prefix}
         :end        {:op :end  :symbol #{'end}  :raw "end"  :emit :token}})))

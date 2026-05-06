@@ -665,26 +665,32 @@
     1
     (let [[cb] args]
       (template/$
-       (try
-         (. File (write ~path ~content))
-         (. ~cb (call nil ~path))
-         (catch e
-           (. ~cb (call e nil))))))
+        (try
+          (require "fileutils")
+          (. FileUtils (mkdir_p (. File (dirname ~path))))
+          (. File (write ~path ~content))
+          (. ~cb (call nil ~path))
+          (catch e
+            (. ~cb (call e nil))))))
     2
     (let [[success-fn error-fn] args]
       (template/$
-       (try
-         (. File (write ~path ~content))
-         (. ~success-fn (call ~path))
-         (catch e
-           (. ~error-fn (call e))))))
+        (try
+          (require "fileutils")
+          (. FileUtils (mkdir_p (. File (dirname ~path))))
+          (. File (write ~path ~content))
+          (. ~success-fn (call ~path))
+          (catch e
+            (. ~error-fn (call e))))))
     (let [[_opts success-fn error-fn] args]
       (template/$
-       (try
-         (. File (write ~path ~content))
-         (. ~success-fn (call ~path))
-         (catch e
-           (. ~error-fn (call e))))))))
+        (try
+          (require "fileutils")
+          (. FileUtils (mkdir_p (. File (dirname ~path))))
+          (. File (write ~path ~content))
+          (. ~success-fn (call ~path))
+          (catch e
+            (. ~error-fn (call e))))))))
 
 (defn ruby-tf-x-shell
   [[_ s & args]]

@@ -13,6 +13,41 @@
 (declare vector-destructure-target?)
 (declare rewrite-callable-form)
 
+(def ^:dynamic *ruby-local-renames* {})
+
+(defn- ruby-safe-local-symbol
+  [sym]
+  (if-not (and (symbol? sym)
+               (nil? (namespace sym)))
+    sym
+    (let [sym-name (name sym)
+          replaced (-> sym-name
+                       (string/replace "-" "_")
+                       (string/replace "?" "p")
+                       (string/replace "!" "f")
+                       (string/replace "=" "_eq")
+                       (string/replace "<" "_lt")
+                       (string/replace ">" "_gt"))]
+      (if (= sym-name replaced)
+        sym
+        (with-meta (symbol replaced) (meta sym))))))
+
+(defn- ruby-local-renames
+  [symbols]
+  (reduce (fn [m sym]
+            (let [safe (ruby-safe-local-symbol sym)]
+              (if (= sym safe)
+                m
+                (assoc m sym safe))))
+          {}
+          symbols))
+
+(defn- rename-ruby-local
+  [form]
+  (if (symbol? form)
+    (or (get *ruby-local-renames* form) form)
+    form))
+
 (defn- callable-var-bindings
   [form]
   (when (and (seq? form)
@@ -91,10 +126,17 @@
   ([args body]
    (rewrite-callable-body #{} args body))
   ([inherited args body]
-    (let [callables (into (set inherited)
-                          (concat (filter symbol? args)
-                                  (collect-callable-vars body)))]
-      (mapv #(rewrite-callable-form % callables) body))))
+    (let [renames   (merge *ruby-local-renames*
+                           (ruby-local-renames
+                            (concat (filter symbol? args)
+                                    (collect-callable-vars body))))
+          args*     (mapv rename-ruby-local args)
+          callables (into (set inherited)
+                          (concat (filter symbol? args*)
+                                  (map #(or (get renames %) %)
+                                       (collect-callable-vars body))))]
+      (binding [*ruby-local-renames* renames]
+        (mapv #(rewrite-callable-form % callables) body)))))
 
 (declare rewrite-callable-value)
 
@@ -143,6 +185,9 @@
 (defn rewrite-callable-form
   [form callables]
   (cond
+    (symbol? form)
+    (rename-ruby-local form)
+
     (ruby-method-ref-form? form)
     form
 
@@ -152,11 +197,11 @@
     (destructuring-var-form? form)
     (rewrite-callable-form
      (expand-destructuring-var form
-                               (rewrite-callable-form (last form) callables))
+                                (rewrite-callable-form (last form) callables))
      callables)
 
     (seq? form)
-    (let [head (first form)]
+    (let [head (rename-ruby-local (first form))]
       (cond
         (callable-form? form)
         (let [[tag & more] form
@@ -164,9 +209,9 @@
                                  [(first more) (second more) (drop 2 more)]
                                  [nil (first more) (rest more)])]
           (apply list tag
-                 (concat (when name [name])
-                         [args]
-                         (rewrite-callable-body callables args body))))
+                 (concat (when name [(rename-ruby-local name)])
+                          [args]
+                          (rewrite-callable-body callables args body))))
 
         (and (symbol? head)
              (contains? callables head))
@@ -196,7 +241,7 @@
     (set (map #(rewrite-callable-value % callables) form))
 
     :else
-    form))
+    (rename-ruby-local form)))
 
 (defn rewrite-callable-value
   [form callables]
@@ -215,16 +260,26 @@
 
 (defn ruby-rewrite-generator-body
   [args body iterator]
-  (let [callables (into #{}
-                        (concat (filter symbol? args)
-                                (collect-callable-vars body)))]
-    (mapv #(rewrite-generator-form % iterator callables) body)))
+  (let [renames   (merge *ruby-local-renames*
+                         (ruby-local-renames
+                          (concat (filter symbol? args)
+                                  (collect-callable-vars body))))
+        args*     (mapv rename-ruby-local args)
+        callables (into #{}
+                        (concat (filter symbol? args*)
+                                (map #(or (get renames %) %)
+                                     (collect-callable-vars body))))]
+    (binding [*ruby-local-renames* renames]
+      (mapv #(rewrite-generator-form % iterator callables) body))))
 
 (declare rewrite-generator-value)
 
 (defn- rewrite-generator-form
   [form iterator callables]
   (cond
+    (symbol? form)
+    (rename-ruby-local form)
+
     (ruby-method-ref-form? form)
     form
 
@@ -234,12 +289,12 @@
     (destructuring-var-form? form)
     (rewrite-generator-form
      (expand-destructuring-var form
-                               (rewrite-generator-form (last form) iterator callables))
+                                (rewrite-generator-form (last form) iterator callables))
      iterator
      callables)
 
     (seq? form)
-    (let [head (first form)]
+    (let [head (rename-ruby-local (first form))]
       (cond
         (callable-form? form)
         (let [[tag & more] form
@@ -247,9 +302,9 @@
                                  [(first more) (second more) (drop 2 more)]
                                  [nil (first more) (rest more)])]
           (apply list tag
-                 (concat (when name [name])
-                         [args]
-                         (rewrite-callable-body callables args body))))
+                 (concat (when name [(rename-ruby-local name)])
+                          [args]
+                          (rewrite-callable-body callables args body))))
 
         (= 'yield head)
         (list '. iterator
@@ -283,7 +338,7 @@
     (set (map #(rewrite-generator-value % iterator callables) form))
 
     :else
-    form))
+    (rename-ruby-local form)))
 
 (defn- rewrite-generator-value
   [form iterator callables]
@@ -314,8 +369,13 @@
 
 (defn rewrite-callable-forms
   [forms]
-  (let [callables (collect-callable-vars forms)]
-    (mapv #(rewrite-runtime-form % callables) forms)))
+  (let [renames   (merge *ruby-local-renames*
+                         (ruby-local-renames (collect-callable-vars forms)))
+        callables (into #{}
+                        (map #(or (get renames %) %)
+                             (collect-callable-vars forms)))]
+    (binding [*ruby-local-renames* renames]
+      (mapv #(rewrite-runtime-form % callables) forms))))
 
 (defn- mark-inline-def
   [form]
