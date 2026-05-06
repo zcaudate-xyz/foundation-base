@@ -124,6 +124,15 @@
             (sort-by count >)
             first)))))
 
+(defn- relativize-lookup
+  ([lookup project]
+   (reduce-kv (fn [out ns path]
+                (assoc out ns
+                       (or (relative-root-path path project)
+                           (str path))))
+              {}
+              lookup)))
+
 (defn test-root
   "returns the preferred test root for a path within the project"
   {:added "4.1"}
@@ -319,7 +328,8 @@
     (code-files)"
   {:added "3.0"}
   ([]
-   (file-lookup (project))))
+   (let [project (project)]
+     (relativize-lookup (file-lookup project) project))))
 
 (defn code-path
   "returns the path of the code
@@ -328,8 +338,11 @@
    => \"test/code/project_test.clj\""
   {:added "3.0"}
   ([ns relative]
-   (let [path (or (get @common/*lookup* ns)
-                  (get (code-files) ns)
+   (let [project (project)
+         path (or (get @common/*lookup* ns)
+                  (get (file-lookup project) ns)
                   (throw (ex-info "Namespace does not exist" {:ns ns})))]
-     (cond->> path
-       relative (fs/relativize (fs/path "."))))))
+     (if relative
+       (or (relative-root-path path project)
+           (str (fs/relativize (fs/path ".") path)))
+       path))))

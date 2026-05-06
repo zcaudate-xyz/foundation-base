@@ -37,6 +37,32 @@
             (block/space)
             (block/block true)]))))
 
+(defn- gather-deftest-body*
+  ([nav]
+   (gather-deftest-body* nav [] true))
+  ([nav output stop-after-is?]
+   (cond (nil? (nav/block nav)) output
+
+         (and (= :meta (nav/tag nav))
+              (-> nav nav/down nav/position-right nav/value (= :hidden)))
+         output
+
+         (query/match nav string?)
+         (recur (nav/right* nav)
+                (conj output (common/gather-string nav))
+                stop-after-is?)
+
+         (query/match nav 'is)
+         (let [output (vec (concat output (gather-is-form nav)))]
+           (if stop-after-is?
+             output
+             (recur (nav/right* nav) output stop-after-is?)))
+
+         :else
+         (recur (nav/right* nav)
+                (conj output (nav/block nav))
+                stop-after-is?))))
+
 (defn gather-deftest-body
   "helper function for `gather-deftest`
  
@@ -48,23 +74,9 @@
    => \"\\n  1\\n  => 1\""
   {:added "3.0"}
   ([nav]
-   (gather-deftest-body nav []))
+   (gather-deftest-body* nav [] true))
   ([nav output]
-   (cond (nil? (nav/block nav)) output
-
-         (and (= :meta (nav/tag nav))
-              (-> nav nav/down nav/position-right nav/value (= :hidden)))
-         output
-
-         (query/match nav string?)
-         (recur (nav/right* nav)
-                (conj output (common/gather-string nav)))
-
-         (query/match nav 'is)
-         (recur (nav/right* nav) (vec (concat output (gather-is-form nav))))
-
-         :else
-         (recur (nav/right* nav) (conj output (nav/block nav))))))
+   (gather-deftest-body* nav output true)))
 
 (defn gather-deftest
   "Make docstring notation out of deftest form
@@ -84,9 +96,9 @@
   {:added "3.0"}
   ([nav]
    (if-let [mta (common/gather-meta nav)]
-     (assoc mta
-            :line (nav/line-info (nav/up nav))
-            :test (gather-deftest-body nav)))))
+      (assoc mta
+             :line (nav/line-info (nav/up nav))
+             :test (gather-deftest-body* nav [] false)))))
 
 (defmethod common/test-frameworks 'clojure.test
   ([_]
