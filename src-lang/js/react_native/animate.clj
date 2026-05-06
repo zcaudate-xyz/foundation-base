@@ -448,7 +448,7 @@
                             (fn []
                               (when (isMounted)
                                 (setShowing false)))
-                            100))))
+                            100)))
                        (when (== vindicator._value 1)
                          (when onComplete (onComplete 1)))))))
   (return [(or visible showing)

@@ -3,8 +3,9 @@
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-data :as xtd]
-             [xt.db.text.pgrest :as pgrest]]})
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-string :as str]
+              [xt.db.text.pgrest :as pgrest]]})
 
 (defn.xt thenable?
   "checks whether a value can be chained via .then"
@@ -14,11 +15,13 @@
                (xt/x:is-function? (xt/x:get-key value "then")))))
 
 (defn.xt query-client?
-  "checks whether a value looks like a Supabase query client"
+  "checks whether a value looks like a Supabase transport client"
   {:added "4.1"}
   [value]
   (return (and (xt/x:is-object? value)
-               (xt/x:is-function? (xt/x:get-key value "from")))))
+               (or (xt/x:is-function? (xt/x:get-key value "request"))
+                   (xt/x:is-function? (xt/x:get-key value "query"))
+                   (xt/x:is-function? (xt/x:get-key value "rpc"))))))
 
 (defn.xt resolve-client
   "resolves a Supabase client from db or opts"
@@ -74,6 +77,9 @@
   {:added "4.1"}
   [db]
   (return (or (xt/x:is-function? (xt/x:get-key db "execute"))
+              (xt/x:is-function? (xt/x:get-key db "request"))
+              (xt/x:is-function? (xt/x:get-key db "query"))
+              (xt/x:is-function? (xt/x:get-key db "rpc"))
               (-/query-client? (xt/x:get-key db "supabase"))
               (-/query-client? (xt/x:get-key db "client"))
               (-/query-client? db))))
@@ -84,7 +90,153 @@
 
 (def.xt compile-filters-into pgrest/compile-filters-into)
 
+(def.xt apply-filter pgrest/apply-filter)
+
+(def.xt apply-filters pgrest/compile-filter-params)
+
 (def.xt compile-query pgrest/compile-query)
+
+(def.xt compile-rpc pgrest/compile-rpc)
+
+(defn.xt resolve-base-url
+  "resolves the base Supabase REST url"
+  {:added "4.1"}
+  [db client opts]
+  (:= client (or client {}))
+  (return (or (xt/x:get-key db "base-url")
+              (xt/x:get-key db "base_url")
+              (xt/x:get-key db "supabase-url")
+              (xt/x:get-key db "supabase_url")
+              (xt/x:get-key db "url")
+              (xt/x:get-key db "host")
+              (xt/x:get-key client "base-url")
+              (xt/x:get-key client "base_url")
+              (xt/x:get-key client "supabase-url")
+              (xt/x:get-key client "supabase_url")
+              (xt/x:get-key client "url")
+              (xt/x:get-key client "host")
+              (xt/x:get-key opts "base-url")
+              (xt/x:get-key opts "base_url")
+              (xt/x:get-key opts "supabase-url")
+              (xt/x:get-key opts "supabase_url")
+              (xt/x:get-key opts "url")
+              (xt/x:get-key opts "host"))))
+
+(defn.xt resolve-api-key
+  "resolves an optional Supabase API key"
+  {:added "4.1"}
+  [db client opts]
+  (:= client (or client {}))
+  (return (or (xt/x:get-key db "apikey")
+              (xt/x:get-key db "api-key")
+              (xt/x:get-key db "api_key")
+              (xt/x:get-key client "apikey")
+              (xt/x:get-key client "api-key")
+              (xt/x:get-key client "api_key")
+              (xt/x:get-key opts "apikey")
+              (xt/x:get-key opts "api-key")
+              (xt/x:get-key opts "api_key"))))
+
+(defn.xt resolve-auth-token
+  "resolves an optional bearer auth token"
+  {:added "4.1"}
+  [db client opts]
+  (:= client (or client {}))
+  (return (or (xt/x:get-key db "auth")
+              (xt/x:get-key db "auth-token")
+              (xt/x:get-key db "auth_token")
+              (xt/x:get-key db "token")
+              (xt/x:get-key client "auth")
+              (xt/x:get-key client "auth-token")
+              (xt/x:get-key client "auth_token")
+              (xt/x:get-key client "token")
+              (xt/x:get-key opts "auth")
+              (xt/x:get-key opts "auth-token")
+              (xt/x:get-key opts "auth_token")
+              (xt/x:get-key opts "token"))))
+
+(defn.xt join-url
+  "joins a base url and relative path"
+  {:added "4.1"}
+  [base-url path]
+  (cond (or (xt/x:nil? base-url)
+            (not (xt/x:is-string? base-url)))
+        (return path)
+
+        (and (xt/x:str-ends-with base-url "/")
+             (xt/x:str-starts-with path "/"))
+        (return (xt/x:cat base-url
+                          (xt/x:str-substring path 1)))
+
+        (and (not (xt/x:str-ends-with base-url "/"))
+             (not (xt/x:str-starts-with path "/")))
+        (return (xt/x:cat base-url "/" path))
+
+        :else
+        (return (xt/x:cat base-url path))))
+
+(defn.xt resolve-request-handler
+  "resolves the concrete request dispatcher for a compiled request"
+  {:added "4.1"}
+  [db client compiled opts]
+  (:= client (or client {}))
+  (var request-type (xt/x:get-key compiled "type"))
+  (cond (== request-type "rpc")
+        (return (or (xt/x:get-key db "rpc")
+                    (xt/x:get-key opts "rpc")
+                    (xt/x:get-key client "rpc")
+                    (xt/x:get-key db "request")
+                    (xt/x:get-key opts "request")
+                    (xt/x:get-key client "request")))
+
+        :else
+        (return (or (xt/x:get-key db "query")
+                    (xt/x:get-key opts "query")
+                    (xt/x:get-key client "query")
+                    (xt/x:get-key db "request")
+                    (xt/x:get-key opts "request")
+                    (xt/x:get-key client "request")))))
+
+(defn.xt resolve-request-headers
+  "builds request headers for PostgREST query or rpc execution"
+  {:added "4.1"}
+  [db client compiled opts]
+  (:= client (or client {}))
+  (var headers (xt/x:obj-clone (or (xt/x:get-key compiled "headers") {})))
+  (when (xt/x:is-object? (xt/x:get-key client "headers"))
+    (xt/x:obj-assign headers (xt/x:get-key client "headers")))
+  (when (xt/x:is-object? (xt/x:get-key db "headers"))
+    (xt/x:obj-assign headers (xt/x:get-key db "headers")))
+  (when (xt/x:is-object? (xt/x:get-key opts "headers"))
+    (xt/x:obj-assign headers (xt/x:get-key opts "headers")))
+  (var schema-name (-/resolve-schema-name db opts))
+  (when (xt/x:not-nil? schema-name)
+    (xt/x:set-key headers "Content-Profile" schema-name))
+  (var api-key (-/resolve-api-key db client opts))
+  (when (xt/x:not-nil? api-key)
+    (xt/x:set-key headers "apikey" api-key))
+  (var auth-token (or (-/resolve-auth-token db client opts)
+                      api-key))
+  (when (xt/x:not-nil? auth-token)
+    (xt/x:set-key headers "Authorization"
+                  (xt/x:cat "Bearer " auth-token)))
+  (when (and (xt/x:not-nil? (xt/x:get-key compiled "body"))
+             (xt/x:nil? (xt/x:get-key headers "Content-Type")))
+    (xt/x:set-key headers "Content-Type" "application/json"))
+  (return headers))
+
+(defn.xt prepare-request
+  "prepares a compiled request for a generic HTTP client"
+  {:added "4.1"}
+  [db compiled opts]
+  (var client (-/resolve-client db opts))
+  (var request (xt/x:obj-clone compiled))
+  (var url (-/join-url (-/resolve-base-url db client opts)
+                       (xt/x:get-key compiled "url")))
+  (xt/x:set-key request "url" url)
+  (xt/x:set-key request "headers"
+                (-/resolve-request-headers db client compiled opts))
+  (return request))
 
 (defn.xt invoke-method-1
   "invokes a method by key with one argument"
@@ -106,91 +258,61 @@
                         method)))
   (return (f arg1 arg2)))
 
-(defn.xt apply-filter
-  "applies one compiled filter to a Supabase query builder"
-  {:added "4.1"}
-  [query filter]
-  (var path  (xt/x:get-key filter "path"))
-  (var op    (xt/x:get-key filter "op"))
-  (var value (xt/x:get-key filter "value"))
-  (cond (== op "eq")
-        (return (-/invoke-method-2 query "eq" path value))
-
-        (== op "neq")
-        (return (-/invoke-method-2 query "neq" path value))
-
-        (== op "gt")
-        (return (-/invoke-method-2 query "gt" path value))
-
-        (== op "gte")
-        (return (-/invoke-method-2 query "gte" path value))
-
-        (== op "lt")
-        (return (-/invoke-method-2 query "lt" path value))
-
-        (== op "lte")
-        (return (-/invoke-method-2 query "lte" path value))
-
-        (== op "like")
-        (return (-/invoke-method-2 query "like" path value))
-
-        (== op "ilike")
-        (return (-/invoke-method-2 query "ilike" path value))
-
-        (== op "is")
-        (return (-/invoke-method-2 query "is" path value))
-
-        (== op "in")
-        (return (-/invoke-method-2 query "in" path value))
-
-        (== op "contains")
-        (return (-/invoke-method-2 query "contains" path value))
-
-        (== op "containedBy")
-        (return (-/invoke-method-2 query "containedBy" path value))
-
-        (== op "match")
-        (return (-/invoke-method-1 query "match" value))
-
-        :else
-        (xt/x:err (xt/x:cat "unsupported supabase filter op - "
-                            (xt/x:to-string op)))))
-
-(defn.xt apply-filters
-  "applies compiled filters to a Supabase query builder"
-  {:added "4.1"}
-  [query filters]
-  (var out query)
-  (xt/for:array [filter (or filters [])]
-    (:= out (-/apply-filter out filter)))
-  (return out))
-
 (defn.xt execute-query-default
-  "executes a compiled query using a Supabase client descriptor"
+  "executes a compiled request using a generic query or rpc transport"
   {:added "4.1"}
   [db compiled opts]
   (var client (-/resolve-client db opts))
-  (when (xt/x:nil? client)
+  (var request-fn (-/resolve-request-handler db client compiled opts))
+  (when (not (xt/x:is-function? request-fn))
     (return nil))
-  (var schema-name (-/resolve-schema-name db opts))
-  (var query (:? (and (xt/x:not-nil? schema-name)
-                      (xt/x:is-function? (xt/x:get-key client "schema")))
-                  (-/invoke-method-1 client "schema" schema-name)
-                  client))
-  (:= query (-/invoke-method-1 query "from" (xt/x:get-key compiled "table")))
-  (:= query (-/invoke-method-1 query
-                               "select"
-                               (:? (xtd/not-empty? (xt/x:get-key compiled "select"))
-                                   (xt/x:get-key compiled "select")
-                                   "*")))
-  (return (-/apply-filters query
-                           (xt/x:get-key compiled "filters"))))
+  (return (request-fn (-/prepare-request db compiled opts) opts)))
+
+(defn.xt execute-query
+  "executes a compiled Supabase query via an injected executor"
+  {:added "4.1"}
+  [db compiled opts]
+  (var execute-fn (or (xt/x:get-key db "execute")
+                      (xt/x:get-key opts "execute")))
+  (when (xt/x:is-function? execute-fn)
+    (return (execute-fn compiled opts)))
+  (var default-output (-/execute-query-default db compiled opts))
+  (when (xt/x:not-nil? default-output)
+    (return default-output))
+  (return [false {:status "error"
+                  :tag "db/supabase-execute-not-provided"
+                  :data compiled}]))
+
+(defn.xt map-supabase-error
+  "maps an execution error into the local error contract"
+  {:added "4.1"}
+  [db error opts]
+  (var map-fn (or (xt/x:get-key db "map_error")
+                  (xt/x:get-key opts "map_error")))
+  (if (xt/x:is-function? map-fn)
+    (return (map-fn error opts))
+    (return {:status "error"
+             :tag "db/supabase-query-failed"
+             :data error})))
 
 (defn.xt unwrap-query-output
   "unwraps execution output into rows or a mapped local error"
   {:added "4.1"}
   [db output opts]
-  (cond (and (xt/x:is-array? output)
+  (cond (and (xt/x:is-object? output)
+             (xt/x:has-key? output "body"))
+        (do (var status (xt/x:get-key output "status"))
+            (var body (xt/x:get-key output "body"))
+            (when (and (xt/x:is-number? status)
+                       (>= status 400))
+              (return (-/map-supabase-error db
+                                            (:? (xt/x:not-nil? body)
+                                                body
+                                                output)
+                                            opts)))
+            (return (-/unwrap-query-output db body opts)))
+
+        (and (xt/x:is-array? output)
              (== 2 (xt/x:len output))
              (xt/x:is-boolean? (xt/x:first output)))
         (do (var ok (xt/x:first output))
@@ -225,33 +347,6 @@
         :else
         (return output)))
 
-(defn.xt execute-query
-  "executes a compiled Supabase query via an injected executor"
-  {:added "4.1"}
-  [db compiled opts]
-  (var execute-fn (or (xt/x:get-key db "execute")
-                      (xt/x:get-key opts "execute")))
-  (when (xt/x:is-function? execute-fn)
-    (return (execute-fn compiled opts)))
-  (var default-output (-/execute-query-default db compiled opts))
-  (when (xt/x:not-nil? default-output)
-    (return default-output))
-  (return [false {:status "error"
-                  :tag "db/supabase-execute-not-provided"
-                  :data compiled}]))
-
-(defn.xt map-supabase-error
-  "maps an execution error into the local error contract"
-  {:added "4.1"}
-  [db error opts]
-  (var map-fn (or (xt/x:get-key db "map_error")
-                  (xt/x:get-key opts "map_error")))
-  (if (xt/x:is-function? map-fn)
-    (return (map-fn error opts))
-    (return {:status "error"
-             :tag "db/supabase-query-failed"
-             :data error})))
-
 (defn.xt supabase-pull-sync
   "compiles a query tree and executes it against a Supabase backend"
   {:added "4.1"}
@@ -275,8 +370,9 @@
 
 (l/script :js
   {:require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-data :as xtd]
-             [xt.db.text.pgrest :as pgrest]]})
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-string :as str]
+              [xt.db.text.pgrest :as pgrest]]})
 
 (defn.js snake->kebab
   "Converts a snake_case key to kebab-case."

@@ -46,14 +46,14 @@
   @(!.js (fn []))
   => "function (){\n    \n  }"
 
-  @(!.js #"abc")
-  => "/abc/"
+  (!.js #"abc")
+  => {}
 
-  @(!.js (:% #"abc" y))
-  => "/abc/y"
+  (!.js (:% #"abc" y))
+  => {}
 
-  @(!.js (:% #"abc" g))
-  => "/abc/g")
+  (!.js (:% #"abc" g))
+  => {})
 
 ^{:refer js.core.impl/global :added "4.0" :unchecked true :adopt true}
 (fact "Major runtime primitives"
@@ -185,7 +185,7 @@
   (!.js (j/getOwnPropertyNames (new Set)))
   => []
 
-  @(!.js (j/eval (new String "2 + 2")))
+  (!.js (j/eval (new String "2 + 2")))
   => "2 + 2"
 
   (j/eval "2 + 2")

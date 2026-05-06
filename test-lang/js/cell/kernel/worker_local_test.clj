@@ -56,7 +56,12 @@
 
   ;; Test with a static function (no self parameter)
   (let [result (worker-local/tmpl-baseline-action
-                @js.cell.kernel.worker-state/fn-ping)]
+                {:module 'js.cell.kernel.worker-state
+                 :id 'fn-ping
+                 :meta {:cell/action "@cell/ping"
+                        :cell/static true
+                        :arglists '([])}
+                 :form '(defn.js fn-ping [] (return ["pong"]))})]
     (first result)
     => "@cell/ping"
 
@@ -68,7 +73,13 @@
 
   ;; Test with non-static function (has self parameter, needs fn-self wrapper)
   (let [result (worker-local/tmpl-baseline-action
-                @js.cell.kernel.worker-state/fn-trigger)]
+                {:module 'js.cell.kernel.worker-state
+                 :id 'fn-trigger
+                 :meta {:cell/action "@cell/trigger"
+                        :cell/static false
+                        :arglists '([worker op signal status body])}
+                 :form '(defn.js fn-trigger [worker op signal status body]
+                          (return nil))})]
     (first result)
     => "@cell/trigger"
 

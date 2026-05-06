@@ -303,12 +303,12 @@
          (when (not keep)
             (xt/for:array [field fields]
               (event-form/reset-field-data form field)))
-          (promise/x:with-delay 100
-            (fn []
-            (xt/for:array [field fields]
-              (event-form/reset-field-validator form field))
-            (when (isMounted)
-              (setClearing true)))))
+           (promise/x:with-delay 100
+             (fn []
+             (xt/for:array [field fields]
+               (event-form/reset-field-validator form field))
+             (when (isMounted)
+               (setClearing true))))))
   (var onActionCheck
         (fn:>
          (and (onCheck)
@@ -343,11 +343,11 @@
           (setResult nil)
           (when (not keep)
             (event-form/reset-all-data form))
-          (promise/x:with-delay 100
-            (fn []
-            (event-form/reset-all-validators form)
-            (when (isMounted)
-              (setClearing true)))))
+           (promise/x:with-delay 100
+             (fn []
+             (event-form/reset-all-validators form)
+             (when (isMounted)
+               (setClearing true))))))
   (var onActionCheck (fn []
                        (return (and (onCheck)
                                     (event-form/check-all-passed form)))))

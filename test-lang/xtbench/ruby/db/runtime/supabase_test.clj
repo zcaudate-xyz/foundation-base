@@ -1,6 +1,6 @@
 (ns xtbench.ruby.db.runtime.supabase-test
-  (:require [hara.lang :as l])
-  (:use code.test))
+  (:use code.test)
+  (:require [hara.lang :as l]))
 
 (l/script- :ruby
   {:runtime :basic
@@ -9,14 +9,22 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 (def +compiled-query+
-  {"table" "Order"
+  {"type" "query"
+   "table" "Order"
+   "method" "GET"
+   "path" "/rest/v1/Order"
    "select" "status,account(nickname)"
+   "params" ["select=status,account(nickname)"
+             "account.id=eq.acct-1"]
+   "query" "select=status,account(nickname)&account.id=eq.acct-1"
+   "url" "/rest/v1/Order?select=status,account(nickname)&account.id=eq.acct-1"
+   "headers" {}
    "filters" [{"path" "account.id"
-               "op" "eq"
-               "value" "acct-1"}]})
+                "op" "eq"
+                "value" "acct-1"}]})
 
 (def +query-tree+
   ["Order"
@@ -36,7 +44,7 @@
 
   (!.rb
    [(supabase/supabase-capable? {"execute" (fn [_compiled _opts] (return [true true]))})
-    (supabase/supabase-capable? {"supabase" {"from" (fn [_table] (return {}))}})
+    (supabase/supabase-capable? {"supabase" {"query" (fn [_request _opts] (return {}))}})
     (supabase/supabase-capable? {})])
   => [true true false])
 
@@ -93,94 +101,57 @@
                "tag" "supabase/fail"}}])
 
 ^{:refer xt.db.runtime.supabase/supabase-pull-sync :added "4.1"}
-(fact "uses the default client path in js"
+(fact "prepares query requests for a generic http client"
 
   (!.rb
-   (var calls [])
-   (var query nil)
-   (:= query {"select" (fn [cols]
-                         (xt/x:arr-push calls ["select" cols])
-                         (return query))
-              "eq" (fn [path value]
-                     (xt/x:arr-push calls ["eq" path value])
-                     (return query))
-              "in" (fn [path value]
-                     (xt/x:arr-push calls ["in" path value])
-                     (return query))
-              "then" (fn [f]
-                       (xt/x:arr-push calls ["then"])
-                       (return (f {"data" [{"id" "ord-1"
-                                            "status" "open"}]})))})
-   (var schema-client {"from" (fn [table]
-                                (xt/x:arr-push calls ["from" table])
-                                (return query))})
-   (var client {"from" (fn [table]
-                         (xt/x:arr-push calls ["from/root" table])
-                         (return query))
-                "schema" (fn [schema-name]
-                           (xt/x:arr-push calls ["schema" schema-name])
-                           (return schema-client))})
+   (var seen nil)
    (var out
         (supabase/supabase-pull-sync
-         {"supabase" client
-          "schema-name" "api"}
+         {"request" (fn [request _opts]
+                      (:= seen request)
+                      (return {"body" [{"id" "ord-1"
+                                        "status" "open"}]}))
+          "base-url" "https://db.test"
+          "schema-name" "api"
+          "apikey" "anon-key"}
          nil
          (@! +query-tree+)
          {}))
-   [out calls])
+   [out
+    (. seen ["url"])
+    (. (. seen ["headers"]) ["Content-Profile"])
+    (. (. seen ["headers"]) ["apikey"])
+    (. (. seen ["headers"]) ["Authorization"])])
   => [[{"id" "ord-1"
-        "status" "open"}]
-      [["schema" "api"]
-       ["from" "Order"]
-       ["select" "status,account(nickname)"]
-       ["eq" "account.id" "acct-1"]
-       ["in" "id" ["ord-1" "ord-2"]]
-       ["then"]]])
+         "status" "open"}]
+      "https://db.test/rest/v1/Order?select=status,account(nickname)&account.id=eq.acct-1&id=in.(ord-1,ord-2)"
+      "api"
+      "anon-key"
+      "Bearer anon-key"])
 
 ^{:refer xt.db.runtime.supabase/supabase-pull-sync :added "4.1"}
-(fact "uses the default client path in js"
+(fact "uses nested query handlers when no explicit executor is provided"
 
   (!.rb
-   (var calls [])
-   (var query nil)
-   (:= query {"select" (fn [cols]
-                         (xt/x:arr-push calls ["select" cols])
-                         (return query))
-              "eq" (fn [path value]
-                     (xt/x:arr-push calls ["eq" path value])
-                     (return query))
-              "in" (fn [path value]
-                     (xt/x:arr-push calls ["in" path value])
-                     (return query))
-              "then" (fn [f]
-                       (xt/x:arr-push calls ["then"])
-                       (return (f {"data" [{"id" "ord-1"
-                                            "status" "open"}]})))})
-   (var schema-client {"from" (fn [table]
-                                (xt/x:arr-push calls ["from" table])
-                                (return query))})
-   (var client {"from" (fn [table]
-                         (xt/x:arr-push calls ["from/root" table])
-                         (return query))
-                "schema" (fn [schema-name]
-                           (xt/x:arr-push calls ["schema" schema-name])
-                           (return schema-client))})
+   (var seen nil)
    (var out
         (supabase/supabase-pull-sync
-         {"supabase" client
-          "schema-name" "api"}
+         {"supabase" {"query" (fn [request _opts]
+                                (:= seen request)
+                                (return {"data" [{"id" "ord-1"
+                                                  "status" "open"}]}))
+                       "headers" {"x-client" "nested"}}
+          "base-url" "https://db.test"}
          nil
          (@! +query-tree+)
-         {}))
-   [out calls])
+         {"auth" "token-1"}))
+   [out
+    (. (. seen ["headers"]) ["x-client"])
+    (. (. seen ["headers"]) ["Authorization"])])
   => [[{"id" "ord-1"
-        "status" "open"}]
-      [["schema" "api"]
-       ["from" "Order"]
-       ["select" "status,account(nickname)"]
-       ["eq" "account.id" "acct-1"]
-       ["in" "id" ["ord-1" "ord-2"]]
-       ["then"]]])
+         "status" "open"}]
+      "nested"
+      "Bearer token-1"])
 
 ^{:refer xt.db.runtime.supabase/thenable? :added "4.1"}
 (fact "detects thenable outputs"
@@ -195,18 +166,18 @@
 (fact "detects supabase query clients"
 
   (!.rb
-   [(supabase/query-client? {"from" (fn [_] (return {}))})
-    (supabase/query-client? {"then" (fn [_] (return {}))})
-    (supabase/query-client? nil)])
+   [(supabase/query-client? {"query" (fn [_ _opts] (return {}))})
+     (supabase/query-client? {"then" (fn [_] (return {}))})
+     (supabase/query-client? nil)])
   => [true false false])
 
 ^{:refer xt.db.runtime.supabase/resolve-client :added "4.1"}
 (fact "resolves clients in priority order"
 
   (!.rb
-   (var db-sup {"tag" "db-sup" "from" (fn [_] (return {}))})
-   (var db-client {"tag" "db-client" "from" (fn [_] (return {}))})
-   (var opt-client {"tag" "opt-client" "from" (fn [_] (return {}))})
+   (var db-sup {"tag" "db-sup" "query" (fn [_ _opts] (return {}))})
+   (var db-client {"tag" "db-client" "query" (fn [_ _opts] (return {}))})
+   (var opt-client {"tag" "opt-client" "query" (fn [_ _opts] (return {}))})
    [(. (supabase/resolve-client {"supabase" db-sup
                                  "client" db-client}
                                 {"client" opt-client}) ["tag"])
@@ -252,94 +223,66 @@
   => ["hello" 1 2])
 
 ^{:refer xt.db.runtime.supabase/apply-filter :added "4.1"}
-(fact "applies compiled filters to a single query builder method"
+(fact "delegates filter compilation to PostgREST params"
 
   (!.rb
-   (var calls [])
-   (var query nil)
-   (:= query {"eq" (fn [path value]
-                     (xt/x:arr-push calls ["eq" path value])
-                     (return query))
-              "match" (fn [value]
-                        (xt/x:arr-push calls ["match" value])
-                        (return query))})
-   (supabase/apply-filter query {"path" "account.id"
-                                 "op" "eq"
-                                 "value" "acct-1"})
-   (supabase/apply-filter query {"path" "ignored"
-                                 "op" "match"
-                                 "value" {"status" "open"}})
-   calls)
-  => [["eq" "account.id" "acct-1"]
-      ["match" {"status" "open"}]])
+   [(supabase/apply-filter {"path" "account.id"
+                            "op" "eq"
+                            "value" "acct-1"})
+    (supabase/apply-filter {"path" "ignored"
+                            "op" "match"
+                            "value" {"status" "open"}})])
+  => [["account.id=eq.acct-1"]
+      ["status=eq.open"]])
 
 ^{:refer xt.db.runtime.supabase/apply-filters :added "4.1"}
-(fact "applies compiled filters in sequence"
+(fact "compiles filter params in sequence"
 
   (!.rb
-   (var calls [])
-   (var query nil)
-   (:= query {"eq" (fn [path value]
-                     (xt/x:arr-push calls ["eq" path value])
-                     (return query))
-              "in" (fn [path value]
-                     (xt/x:arr-push calls ["in" path value])
-                     (return query))})
-   (supabase/apply-filters query [{"path" "account.id"
-                                   "op" "eq"
-                                   "value" "acct-1"}
-                                  {"path" "id"
-                                   "op" "in"
-                                   "value" ["ord-1" "ord-2"]}])
-   calls)
-  => [["eq" "account.id" "acct-1"]
-      ["in" "id" ["ord-1" "ord-2"]]])
+   (supabase/apply-filters [{"path" "account.id"
+                             "op" "eq"
+                             "value" "acct-1"}
+                            {"path" "id"
+                             "op" "in"
+                             "value" ["ord-1" "ord-2"]}]))
+  => ["account.id=eq.acct-1"
+      "id=in.(ord-1,ord-2)"])
 
 ^{:refer xt.db.runtime.supabase/execute-query-default :added "4.1"}
-(fact "builds and filters default client queries"
+(fact "prepares and dispatches default transport requests"
 
   (!.rb
-   (var calls [])
-   (var query nil)
-   (:= query {"marker" "query"
-              "select" (fn [cols]
-                         (xt/x:arr-push calls ["select" cols])
-                         (return query))
-              "eq" (fn [path value]
-                     (xt/x:arr-push calls ["eq" path value])
-                     (return query))
-              "in" (fn [path value]
-                     (xt/x:arr-push calls ["in" path value])
-                     (return query))})
-   (var schema-client {"from" (fn [table]
-                                (xt/x:arr-push calls ["from" table])
-                                (return query))})
-   (var client {"schema" (fn [schema-name]
-                           (xt/x:arr-push calls ["schema" schema-name])
-                           (return schema-client))
-                "from" (fn [table]
-                         (xt/x:arr-push calls ["from/root" table])
-                         (return query))})
-   (var compiled {"table" "Order"
+   (var seen nil)
+   (var compiled {"type" "query"
+                  "table" "Order"
+                  "method" "GET"
+                  "path" "/rest/v1/Order"
                   "select" "status,account(nickname)"
                   "filters" [{"path" "account.id"
                               "op" "eq"
                               "value" "acct-1"}
                              {"path" "id"
                               "op" "in"
-                              "value" ["ord-1" "ord-2"]}]})
-   [(. (supabase/execute-query-default {"supabase" client
-                                        "schema-name" "api"}
-                                       compiled
-                                       {}) ["marker"])
-    calls
+                              "value" ["ord-1" "ord-2"]}]
+                  "params" ["select=status,account(nickname)"
+                            "account.id=eq.acct-1"
+                            "id=in.(ord-1,ord-2)"]
+                  "query" "select=status,account(nickname)&account.id=eq.acct-1&id=in.(ord-1,ord-2)"
+                  "url" "/rest/v1/Order?select=status,account(nickname)&account.id=eq.acct-1&id=in.(ord-1,ord-2)"
+                  "headers" {}})
+   [(supabase/execute-query-default {"supabase" {"query" (fn [request _opts]
+                                                           (:= seen request)
+                                                           (return {"marker" "query"}))}
+                                     "base-url" "https://db.test"
+                                     "schema-name" "api"}
+                                    compiled
+                                    {})
+    (. seen ["url"])
+    (. (. seen ["headers"]) ["Content-Profile"])
     (supabase/execute-query-default {} compiled {})])
-  => ["query"
-      [["schema" "api"]
-       ["from" "Order"]
-       ["select" "status,account(nickname)"]
-       ["eq" "account.id" "acct-1"]
-       ["in" "id" ["ord-1" "ord-2"]]]
+  => [{"marker" "query"}
+      "https://db.test/rest/v1/Order?select=status,account(nickname)&account.id=eq.acct-1&id=in.(ord-1,ord-2)"
+      "api"
       nil])
 
 ^{:refer xt.db.runtime.supabase/unwrap-query-output :added "4.1"}
@@ -349,28 +292,33 @@
    [(supabase/unwrap-query-output {}
                                   [true {"data" [{"id" "ord-1"}]}]
                                   {})
-    (supabase/unwrap-query-output {}
+     (supabase/unwrap-query-output {}
                                   [false {"status" "error"
                                           "tag" "supabase/fail"}]
                                   {})
-    (supabase/unwrap-query-output {}
-                                  {"error" {"tag" "supabase/fail"}}
-                                  {})
+     (supabase/unwrap-query-output {}
+                                   {"status" 200
+                                    "body" [{"id" "ord-http"}]}
+                                   {})
+     (supabase/unwrap-query-output {}
+                                   {"error" {"tag" "supabase/fail"}}
+                                   {})
     (supabase/unwrap-query-output {}
                                   {"data" [{"id" "ord-2"}]}
                                   {})
     (supabase/unwrap-query-output {}
-                                  {"status" "ok"}
-                                  {})])
-  => [[{"id" "ord-1"}]
-      {"status" "error"
-       "tag" "db/supabase-query-failed"
-       "data" {"status" "error"
-               "tag" "supabase/fail"}}
-      {"status" "error"
-       "tag" "db/supabase-query-failed"
-       "data" {"tag" "supabase/fail"}}
-      [{"id" "ord-2"}]
+                                   {"status" "ok"}
+                                   {})])
+   => [[{"id" "ord-1"}]
+       {"status" "error"
+        "tag" "db/supabase-query-failed"
+        "data" {"status" "error"
+                "tag" "supabase/fail"}}
+       [{"id" "ord-http"}]
+       {"status" "error"
+        "tag" "db/supabase-query-failed"
+        "data" {"tag" "supabase/fail"}}
+       [{"id" "ord-2"}]
       {"status" "ok"}])
 
 ^{:refer xt.db.runtime.supabase/snake->kebab :added "4.1"}

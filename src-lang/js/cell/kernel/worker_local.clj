@@ -102,18 +102,22 @@
   "templates a baseline function"
   {:added "4.0"}
   [entry]
-  (let [{:cell/keys [action static is-async]} (meta (second (:form entry)))
-        handler (cond->> (l/sym-full entry)
-                  (not static) (list `state/fn-self))
-        args    (nth (:form entry) 2)]
+  (let [mdata   (or (:meta entry)
+                    (meta entry)
+                    (meta (second (:form entry))))
+        {:cell/keys [action static is-async]} mdata
+         handler (cond->> (l/sym-full entry)
+                   (not static) (list `state/fn-self))
+         args    (or (first (:arglists mdata))
+                     (nth (:form entry) 2))]
     [action {:handler handler
              :is-async (true? is-async)
              :args  (mapv str (if static
-                                args
-                                (rest args)))}]))
+                                 args
+                                 (rest args)))}]))
 
 (def +baselines+
   (mapv tmpl-baseline-action
         (l/module-entries :js 'js.cell.kernel.worker-state
                           (fn [entry]
-                            (:cell/action (meta (second (:form entry))))))))
+                            (:cell/action (:meta entry))))))

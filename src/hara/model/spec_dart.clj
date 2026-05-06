@@ -26,6 +26,13 @@
     :else
     (emit/emit-main key grammar mopts)))
 
+(defn dart-string
+  "Escapes Dart string interpolation markers in emitted string literals."
+  {:added "4.1"}
+  [s]
+  (-> (pr-str s)
+      (clojure.string/replace "$" "\\$")))
+
 (defn- dart-symbol-global
   [key _grammar _mopts]
   (list '. '__globals__ [(ut/sym-default-str key)]))
@@ -166,12 +173,13 @@
           :block   {:for {:parameter {:sep ";"}}}
           :function {:defgen {:body {:start " sync* {" :end "}"}}}
           :define  {:def {:raw "var"}}
-          :rewrite {:staging [#'rewrite/dart-rewrite-stage]}
-          :token   {:symbol {:replace {\- "_"}
-                             :global #'dart-symbol-global}
-                    :nil {:as "null"}}
-           :data    {:vector {:start "[" :end "]" :space ""}
-                     :map    {:start "<dynamic, dynamic>{" :end "}" :space ""}
+           :rewrite {:staging [#'rewrite/dart-rewrite-stage]}
+           :token   {:symbol {:replace {\- "_"}
+                              :global #'dart-symbol-global}
+                     :string {:custom #'dart-string}
+                     :nil {:as "null"}}
+            :data    {:vector {:start "[" :end "]" :space ""}
+                      :map    {:start "<dynamic, dynamic>{" :end "}" :space ""}
                     :map-entry {:key-fn #'dart-map-key}}})))
 
 (def +grammar+

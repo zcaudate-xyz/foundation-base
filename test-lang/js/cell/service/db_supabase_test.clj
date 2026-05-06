@@ -99,63 +99,61 @@
 (fact "compiles a prepared query plan into a Supabase request"
 
   (!.js
-   (db-supabase/compile-query
-    (@! +db+)
-    ["Order"
-     {"account" {"id" "acct-1"}}
-     ["status"
-      ["account" ["nickname"]]]]
-    {}))
-  => {"table" "Order"
-      "select" "status,account(nickname)"
-      "filters" [{"path" "account.id"
-                  "op" "eq"
-                  "value" "acct-1"}]})
+   (var compiled
+        (db-supabase/compile-query
+         (@! +db+)
+         ["Order"
+          {"account" {"id" "acct-1"}}
+          ["status"
+           ["account" ["nickname"]]]]
+         {}))
+   [(. compiled ["type"])
+    (. compiled ["table"])
+    (. compiled ["select"])
+    (. compiled ["url"])])
+  => ["query"
+      "Order"
+      "status,account(nickname)"
+      "/rest/v1/Order?select=status,account(nickname)&account.id=eq.acct-1"])
 
 ^{:refer js.cell.service.db-supabase/execute-query :added "4.1"}
 (fact "executes a compiled query via the injected executor"
 
   (!.js
-   (db-supabase/execute-query
-     {"execute" (fn [compiled _]
-                  (return [true compiled]))}
-    ["Order"
-     {"account" {"id" "acct-1"}}
-     ["status"
-       ["account" ["nickname"]]]]
-     {}))
+   (var [ok compiled]
+        (db-supabase/execute-query
+         {"execute" (fn [compiled _]
+                      (return [true compiled]))}
+         ["Order"
+          {"account" {"id" "acct-1"}}
+          ["status"
+           ["account" ["nickname"]]]]
+         {}))
+   [ok
+    (. compiled ["table"])
+    (. compiled ["url"])])
   => [true
-      {"table" "Order"
-       "select" "status,account(nickname)"
-       "filters" [{"path" "account.id"
-                    "op" "eq"
-                    "value" "acct-1"}]}]
+      "Order"
+      "/rest/v1/Order?select=status,account(nickname)&account.id=eq.acct-1"]
 
   (!.js
-   (var calls [])
-   (var query nil)
-   (:= query {"select" (fn [cols]
-                         (xt/x:arr-push calls ["select" cols])
-                         (return query))
-              "eq" (fn [path value]
-                     (xt/x:arr-push calls ["eq" path value])
-                     (return query))
-              "then" (fn [f]
-                       (xt/x:arr-push calls ["then"])
-                       (return (f {"data" [{"id" "ord-1"
-                                            "status" "open"}]})))})
-   (var client {"from" (fn [table]
-                         (xt/x:arr-push calls ["from" table])
-                         (return query))})
-   (db-supabase/execute-query
-    (xtd/obj-assign (@! +db+) {"supabase" client})
-    ["Order"
-     {"account" {"id" "acct-1"}}
-     ["status"
-      ["account" ["nickname"]]]]
-    {}))
-  => [true [{"id" "ord-1"
-             "status" "open"}]])
+   (var seen nil)
+   [(db-supabase/execute-query
+     (xtd/obj-assign (@! +db+)
+                     {"request" (fn [request _]
+                                  (:= seen request)
+                                  (return {"body" [{"id" "ord-1"
+                                                    "status" "open"}]}))
+                      "base-url" "https://db.test"})
+      ["Order"
+       {"account" {"id" "acct-1"}}
+       ["status"
+        ["account" ["nickname"]]]]
+      {})
+    (. seen ["url"])])
+  => [[true [{"id" "ord-1"
+              "status" "open"}]]
+      "https://db.test/rest/v1/Order?select=status,account(nickname)&account.id=eq.acct-1"] )
 
 ^{:refer js.cell.service.db-supabase/map-supabase-error :added "4.1"}
 (fact "maps execution errors into the local error contract"
@@ -190,15 +188,16 @@
    (var db (xtd/obj-assign (@! +db+)
                           {"execute" (fn [compiled _]
                                        (return [true compiled]))}))
-   (db-supabase/run-supabase-query
-    db
-    {:table "Order"
-     :select-method "by_account"
-     :return-method "default"}
-    {"args" ["acct-1"]}))
+   (var [ok compiled]
+        (db-supabase/run-supabase-query
+         db
+         {:table "Order"
+          :select-method "by_account"
+          :return-method "default"}
+         {"args" ["acct-1"]}))
+   [ok
+    (. compiled ["table"])
+    (. compiled ["url"])])
   => [true
-      {"table" "Order"
-       "select" "status,account(nickname)"
-       "filters" [{"path" "account.id"
-                   "op" "eq"
-                   "value" "acct-1"}]}])
+      "Order"
+      "/rest/v1/Order?select=status,account(nickname)&account.id=eq.acct-1"])

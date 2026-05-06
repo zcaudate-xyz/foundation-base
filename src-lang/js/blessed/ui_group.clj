@@ -2,7 +2,13 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style]]})
+  {:require [[xt.lang.common-lib :as k]
+             [xt.lang.common-string :as str]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
+             [js.react :as r]
+             [js.blessed :as b]
+             [js.blessed.ui-style :as ui-style]]})
 
 (defn.js useTree
   "wrapper for `js.react/useTree`"
@@ -257,14 +263,14 @@
    [:box #{[:height height
             (:.. tprops)]}
     [:% -/Tabs
-     #{[:width width
-        :layout "vertical"
-        :color color
-        :value branch
-        :setValue (fn [k]
-                    (setBranch k))
-        :data branches
-        :format (fn:> [v] (. (tabsFormat v) (padEnd width " ")))}]
+     {:width width
+      :layout "vertical"
+      :color color
+      :value branch
+      :setValue (fn [k]
+                  (setBranch k))
+      :data branches
+      :format (fn:> [v] (str/pad-right (tabsFormat v) width " "))}]
     [:box {:left width}
      [:box {:left 1}
       view]]]))
@@ -371,14 +377,14 @@
            :height height
            :style {:bg "black"}}
      [:% -/List
-      #{[:width width
-         :layout "vertical"
-         :color color
-         :value (or branch (xtd/first branches))
-         :setValue (fn [k]
-                     (setBranch k))
-         :data branches
-         :format (fn:> [v] (. (listFormat v) (padEnd width " ")))}]]
+       {:width width
+        :layout "vertical"
+        :color color
+        :value (or branch (xtd/first branches))
+        :setValue (fn [k]
+                    (setBranch k))
+        :data branches
+        :format (fn:> [v] (str/pad-right (listFormat v) width " "))}]]
     [:box {:left width}
      [:box {:left 1}
       view]]]))

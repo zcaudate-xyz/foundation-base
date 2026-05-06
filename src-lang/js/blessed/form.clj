@@ -2,7 +2,15 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [xt.lang.event-form :as base-form] [js.react :as r] [js.react.ext-form :as ext-form] [js.blessed.ui-style :as ui-style] [js.blessed.ui-core :as ui-core] [js.blessed.ui-group :as ui-group] [js.blessed.ui-date :as ui-date] [xt.lang.spec-base :as xt]]})
+  {:require [[xt.lang.common-lib :as k]
+             [xt.event.base-form :as base-form]
+             [js.react :as r]
+             [js.react.ext-form :as ext-form]
+             [js.blessed.ui-style :as ui-style]
+             [js.blessed.ui-core :as ui-core]
+             [js.blessed.ui-group :as ui-group]
+             [js.blessed.ui-date :as ui-date]
+             [xt.lang.spec-base :as xt]]})
 
 (defn.js FormWrapper
   "addes `width`, `offset` and `label`"
@@ -37,10 +45,11 @@
    (var value     (ext-form/listenFieldValue form field meta))
    (var fprops    (xt/x:obj-assign #{x y} props))
    (var tprops    (ui-style/omitLayoutProps
-                   (xt/x:obj-assign {getter (base-form/get-field form field)
-                              setter (base-form/field-fn  form field)}
-                             props
-                             {:height (:? (and y height) (- height y) height)})))
+                   (xt/x:obj-assign
+                    (xt/x:obj-assign {getter (base-form/get-field form field)
+                                      setter (base-form/field-fn  form field)}
+                                     props)
+                    {:height (:? (and y height) (- height y) height)})))
    (return [:% -/FormWrapper #{...fprops}
             [:% Component #{...tprops}]])))
 

@@ -2,7 +2,14 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-runtime :as rt :with [defvar.js]] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.event-view :as event-view] [js.cell.kernel.base-link :as raw] [js.cell.kernel.base-impl :as impl-common] [js.cell.kernel.base-model :as impl-model] [js.core :as j]]})
+  {:require [[xt.lang.common-resource :as rt :with [defsingleton.js]]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.event.base-view :as event-view]
+             [js.cell.kernel.base-link :as raw]
+             [js.cell.kernel.base-impl :as impl-common]
+             [js.cell.kernel.base-model :as impl-model]
+             [js.core :as j]]})
 
 (defn.js make-cell
   "makes a current cell"

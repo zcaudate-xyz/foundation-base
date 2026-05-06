@@ -129,7 +129,7 @@
                   (var curr (. vindicator _value))
                   (when (== curr 1)
                     (a/setValue vindicator 1)))
-                100))))))
+                100)))))
   (return #{contentRef
             layoutRef}))
 

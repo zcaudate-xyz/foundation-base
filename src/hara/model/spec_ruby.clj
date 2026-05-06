@@ -205,13 +205,47 @@
       :else
       arglists)))
 
+(defn- ruby-def-alias-wrapper
+  [sym target]
+  (let [grammar    preprocess-base/*macro-grammar*
+        mopts      preprocess-base/*macro-opts*
+        sym*       (ruby-qualified-symbol sym)
+        target-str (common/*emit-fn* target grammar mopts)
+        sym-str    (common/*emit-fn* sym* grammar mopts)]
+    (list ':- (str "def " sym-str "(*args)\n"
+                   "  return " target-str "(*args)\n"
+                   "end"))))
+
+(defn- ruby-alias-constant-symbol?
+  [sym]
+  (and (symbol? sym)
+       (namespace sym)
+       (re-matches #"[A-Z][A-Za-z0-9_]*" (name sym))))
+
+(defn- ruby-def-alias-target?
+  [form]
+  (or (and (symbol? form)
+           (namespace form)
+           (not (ruby-alias-constant-symbol? form)))
+      (and (seq? form)
+           (= '. (first form))
+           (symbol? (second form))
+           (not (vector? (nth form 2 nil))))))
+
 (defn ruby-def
   [[tag sym body :as form]]
-  (if-let [arglists (seq (ruby-def-arglists sym))]
-    (let [args (first arglists)]
+  (cond
+    (seq (ruby-def-arglists sym))
+    (let [arglists (ruby-def-arglists sym)
+          args (first arglists)]
       (list 'defn- sym args
             (list 'return
                   (apply list body args))))
+
+    (ruby-def-alias-target? body)
+    (ruby-def-alias-wrapper sym body)
+
+    :else
     (list ':- (top/emit-top-level :def form preprocess-base/*macro-grammar* preprocess-base/*macro-opts*))))
 
 (defn- ruby-callable-form?

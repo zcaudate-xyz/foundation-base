@@ -3,19 +3,18 @@
 
 (l/script :js
   {:require [[js.react :as r]
-             [js.react-native :as n]
-             [xt.lang.common-client :as client]]})
+             [js.react-native :as n]]})
 
 (defn.js create-client
   "creates the debug client ws"
   {:added "4.0"}
   [host port path]
   (return
-   (client/client-ws (or host window.location.hostname)
-                     (or port window.location.port)
-                     {:secured (== window.location.protocol
-                                   "https:")
-                      :path (or path "dev/ws")})))
+   (client-ws (or host window.location.hostname)
+              (or port window.location.port)
+              {:secured (== window.location.protocol
+                            "https:")
+               :path (or path "dev/ws")})))
 
 (defn.js DebugClient
   "creates the debug client ui"
@@ -46,4 +45,3 @@
                [:% n/Button
                 {:title "CONNECT"
                  :onPress connFn}]])))
-

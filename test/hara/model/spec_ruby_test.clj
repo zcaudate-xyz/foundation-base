@@ -106,9 +106,9 @@
   => (fn [s]
        (and (string? s)
             (re-find #"check_disabled = " s)
-            (re-find #"key__ = \"check_disabled\"" s)
+            (re-find #"\[\"check_disabled\"\]" s)
             (re-find #"id_fn = " s)
-            (re-find #"key__ = \"id_fn\"" s))))
+            (re-find #"\[\"id_fn\"\]" s))))
 
 (fact "Ruby key helpers guard nil receivers"
   (l/emit-as :ruby
@@ -288,9 +288,9 @@
   => (fn [s]
        (and (string? s)
             (re-find #"a_var = " s)
-            (re-find #"key__ = \"a_var\"" s)
+            (re-find #"\[\"a_var\"\]" s)
             (re-find #"b_var = " s)
-            (re-find #"key__ = \"b_var\"" s))))
+            (re-find #"\[\"b_var\"\]" s))))
 
 ^{:refer hara.model.spec-ruby/ruby-map :added "4.1"}
 (fact "emit ruby hash"

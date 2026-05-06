@@ -299,7 +299,7 @@
                          :bold true}
                  :onClick incIdx
                   :content (+ " " (. (. items [internal])
-                                     (padStart (or pad 0)))}
+                                     (padStart (or pad 0))))}
                 (ui-style/getLayout props))]
      (return [:button #{(:.. bprops)}
               [:button {:shrink true
@@ -502,7 +502,7 @@
                                                   (if setContent (setContent val))
                                                   (if onChange (onChange val))
                                                   (setInternal val))))
-                                            5))}]
+                                             5)))}]
                [:box {:hidden (not disabled)
                       :shrink true
                       :style {:bg "black"

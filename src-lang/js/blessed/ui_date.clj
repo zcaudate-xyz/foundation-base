@@ -2,7 +2,14 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style] [js.blessed.ui-core :as ui-core]]})
+  {:require [[xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-string :as str]
+             [xt.lang.spec-base :as xt]
+             [js.react :as r]
+             [js.blessed :as b]
+             [js.blessed.ui-style :as ui-style]
+             [js.blessed.ui-core :as ui-core]]})
 
 (defn.js TimePicker
   "Constructs a TimePicker"
@@ -15,11 +22,12 @@
            minute setMinute
            hourLabel
            hour  setHour} props
-         tprops (ui-style/getTopProps props)
+          tprops (ui-style/getTopProps props)
           formatFn (fn:> [n]
-                     (+ " " (. (. (+ "" n)
-                                  (padStart 2 "0"))
-                               (padEnd 4))))
+                     (+ " " (str/pad-right
+                             (str/pad-left (+ "" n) 2 "0")
+                             4
+                             " ")))
          _ (:= hourLabel   (or hourLabel "h"))
          _ (:= minuteLabel (or minuteLabel "m"))
          minuteProps (xt/x:obj-assign {:key "0"
@@ -78,7 +86,7 @@
         {:left 0
          :start 1
          :end (:? (xt/x:arr-some [1 3 5 7 8 10 12] (fn:> [x] (== x month))) 31 (:? (xt/x:arr-some [4 6 9 11] (fn:> [x] (== x month))) 30 (:? (== 0 (mod year 4)) 29 28)))
-         :format (fn:> [s] (+ " " (. (+ "" s) (padStart 3 " "))))
+          :format (fn:> [s] (+ " " (str/pad-left (+ "" s) 3 " ")))
          :value day
          :setValue setDay
          :colWidth 4
@@ -94,20 +102,22 @@
        [:% ui-core/NumberGridBox
         {:start 1
          :end 12
-         :format (fn [i]
-                   (return (-> (. ["JAN"
-                                   "FEB"
-                                   "MAR"
-                                   "APR"
-                                   "MAY"
-                                   "JUN"
-                                   "JUL"
-                                   "AUG"
-                                   "SEP"
-                                   "OCT"
-                                   "NOV"
-                                   "DEC"] [(- i 1)])
-                                 (padStart 4))))
+          :format (fn [i]
+                    (return (str/pad-left
+                             (. ["JAN"
+                                 "FEB"
+                                 "MAR"
+                                 "APR"
+                                 "MAY"
+                                 "JUN"
+                                 "JUL"
+                                 "AUG"
+                                 "SEP"
+                                 "OCT"
+                                 "NOV"
+                                 "DEC"] [(- i 1)])
+                             4
+                             " ")))
          :left  10 #_(+ 2 (xt/x:len dayLabel))
          :value month
          :setValue setMonth
@@ -144,18 +154,21 @@
            minuteLabel
            day   setDay
            width} props
-         tprops (ui-style/getTopProps props)
+          tprops (ui-style/getTopProps props)
           formatFn (fn:> [n]
-                     (+ " " (. (. (+ "" n)
-                                  (padStart 2 " "))
-                               (padEnd 4))))
+                     (+ " " (str/pad-right
+                             (str/pad-left (+ "" n) 2 " ")
+                             4
+                             " ")))
          _ (:= dayLabel    (or dayLabel "d"))
          _ (:= hourLabel   (or hourLabel "h"))
          _ (:= minuteLabel (or minuteLabel "m"))
-         hprops (xt/x:obj-assign (ui-style/omitLayoutProps props)
-                          {:width (:? width (- width 10))}
-                          #{minuteLabel
-                             hourLabel})]
+         hprops (xtd/obj-assign
+                 (xtd/obj-assign
+                  (ui-style/omitLayoutProps props)
+                  {:width (:? width (- width 10))})
+                 #{minuteLabel
+                   hourLabel})]
      (return [:box #{(:.. tprops)}
               [:% ui-core/NumberGridBox
                {:left 0

@@ -4,6 +4,7 @@
             [std.lib.template :as template]))
 
 (declare ruby-tf-x-return-encode)
+(declare ruby-tv-x-get-key)
 
 (def ^:private ruby-concurrent-promise-sym
   (symbol "Concurrent::Promise"))
@@ -513,26 +514,24 @@
 
 (defn ruby-tf-x-get-key
   [form]
+  (ruby-tv-x-get-key form))
+
+(defn ruby-tv-x-get-key
+  [form]
   (let [[_ obj key & [default]] form
-        fallback (if (> (count form) 3) default nil)]
+        fallback (if (> (count form) 3) default nil)
+        value    (list '. obj [key])]
     (template/$
-     (. (fn []
-          (var obj__ ~obj)
-          (var key__ ~key)
-          (if (== nil obj__)
-            (return ~fallback)
-            (if (. obj__ (is_a? Array))
-              (if (. key__ (is_a? Integer))
-                (do (var val__ (. obj__ [key__]))
-                    (if (== nil val__)
-                      (return ~fallback)
-                      (return val__)))
-                (return ~fallback))
-              (do (var val__ (. obj__ [key__]))
-                  (if (== nil val__)
-                    (return ~fallback)
-                    (return val__))))))
-        (call)))))
+     (:?
+      (== nil ~obj)
+      ~fallback
+      (:?
+       (. ~obj (is_a? Array))
+       (:?
+        (. ~key (is_a? Integer))
+        (:? (== nil ~value) ~fallback ~value)
+        ~fallback)
+       (:? (== nil ~value) ~fallback ~value))))))
 
 (defn ruby-tf-x-set-key
   [[_ obj key value]]
@@ -650,7 +649,7 @@
 
 (def +ruby-lu+
   {:x-get-key          {:macro #'ruby-tf-x-get-key        :emit :macro
-                        :value/template #'ruby-tf-x-get-key}
+                        :value/template #'ruby-tv-x-get-key}
    :x-set-key          {:macro #'ruby-tf-x-set-key        :emit :macro
                         :value/template #'ruby-tf-x-set-key}
    :x-lu-create        {:macro #'ruby-tf-x-lu-create      :emit :macro}

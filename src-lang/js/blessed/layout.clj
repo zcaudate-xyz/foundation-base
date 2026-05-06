@@ -68,11 +68,11 @@
   ([items]
    (let [entries (xt/x:arr-filter items (fn:> [e] (:? (k/is-array? e.hidden) (not (e.hidden)) (not e.hidden))))
          lens     (xt/x:arr-map entries (fn:> [e] (xt/x:len e.label)))
-         lefts    (. lens
-                     (reduce (fn [acc l]
-                               (. acc (push (+ (xtd/last acc) l 8)))
-                               (return acc))
-                             [0]))]
+         lefts    (xtd/arr-foldl lens
+                                 (fn [acc l]
+                                   (. acc (push (+ (xtd/last acc) l 8)))
+                                   (return acc))
+                                 [0])]
       (return (xt/x:arr-map entries (fn [e i]
                                (let [name  (or e.route (. e.label (toLowerCase)))
                                      left  (. lefts [i])
@@ -86,11 +86,11 @@
   ([items]
    (let [entries (xt/x:arr-filter items (fn:> [e] (:? (k/is-function? e.hidden) (not (e.hidden)) (not e.hidden))))
          lens     (xt/x:arr-map entries (fn:> [e] (:? (== e.type "separator") 1 3)))
-         lefts    (. lens
-                     (reduce (fn [acc l]
-                               (. acc (push (+ (xtd/last acc) l)))
-                               (return acc))
-                             [0]))]
+         lefts    (xtd/arr-foldl lens
+                                 (fn [acc l]
+                                   (. acc (push (+ (xtd/last acc) l)))
+                                   (return acc))
+                                 [0])]
      (return (xt/x:arr-map entries (fn [e i]
                                (let [left  (. lefts [i])
                                      width (- (. lefts [(+ i 1)])
@@ -153,7 +153,9 @@
   {:added "4.0"}
   [#{[entries
       (:.. rprops)]}]
-  (let [width (. entries (reduce (fn:> [acc e] (+ acc e.width)) 0))]
+  (let [width (xtd/arr-foldl entries
+                             (fn:> [acc e] (+ acc e.width))
+                             0)]
     (return
      [:box #{[:shrink true
               :style {:bg "red"}
@@ -444,8 +446,8 @@
         ientries (-/layoutMenu items)
         toggles  (or (. footer ["toggle"]) [])
         tentries (-/layoutToggles toggles)
-        ioffset  (. tentries (reduce (fn:> [acc e] (+ acc e.width)) 0))
-        soffset  (. ientries (reduce (fn:> [acc e] (+ acc e.width)) ioffset))]
+        ioffset  (xtd/arr-foldl tentries (fn:> [acc e] (+ acc e.width)) 0)
+        soffset  (xtd/arr-foldl ientries (fn:> [acc e] (+ acc e.width)) ioffset)]
     (return
      [:% -/LayoutFooterBlock
       
@@ -495,12 +497,13 @@
           __setRoute]     (:? setRoute [route setRoute] (r/local init))
          [__index
           __setIndex]      (:? setIndex [index setIndex] (r/local 0))
-         section           (xt/x:obj-assign {}
-                                     (. sections
-                                        [(or __route init)])
-                                     {:route (or __route init)
-                                      :index (or __index 1)
-                                      :setIndex __setIndex})
+         section           (xtd/obj-assign
+                            (xtd/obj-assign {}
+                                             (. sections
+                                                [(or __route init)]))
+                            {:route (or __route init)
+                             :index (or __index 1)
+                             :setIndex __setIndex})
          [__status
           __setStatus]      (:? setStatus [status setStatus] (r/local (or status {})))
          [__busy

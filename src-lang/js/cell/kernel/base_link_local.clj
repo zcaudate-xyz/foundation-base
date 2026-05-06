@@ -183,8 +183,12 @@
   {:added "4.0"}
   [[sym src]]
   (let [entry @@(resolve src)
-        {:cell/keys [action static]} (meta (second (:form entry)))
-        args   (cond-> (nth (:form entry) 2)
+        mdata  (or (:meta entry)
+                   (meta entry)
+                   (meta (second (:form entry))))
+        {:cell/keys [action static]} mdata
+        args   (cond-> (or (first (:arglists mdata))
+                           (nth (:form entry) 2))
                  (not static) rest)]
     (list 'defn.js (with-meta sym (f/template-meta))
           (vec (cons 'link args)) 
@@ -200,7 +204,7 @@
               l/sym-full)
         (l/module-entries :js 'js.cell.kernel.worker-state
                           (fn [entry]
-                            (:cell/action (meta (second (:form entry))))))))
+                            (:cell/action (:meta entry))))))
 
 (def +tmpl-forms+
   (comment
@@ -221,4 +225,3 @@
         [echo-async js.cell.kernel.worker-state/fn-echo-async]
         [error js.cell.kernel.worker-state/fn-error]
         [error-async js.cell.kernel.worker-state/fn-error-async]]))))
-

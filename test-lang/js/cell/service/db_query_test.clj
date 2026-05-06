@@ -5,9 +5,9 @@
 (l/script- :js
   {:runtime :basic
    :require [[js.cell.service.db-query :as db-query]
-              [xt.db :as xdb]
-              [xt.lang.spec-base :as xt]
-              [xt.lang.common-data :as xtd]]})
+             [xt.db.instance :as xdb]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]

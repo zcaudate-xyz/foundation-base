@@ -54,7 +54,9 @@
   (:= initial (or initial "default"))
   (var __fns  (:? (k/nil? stageMap)
                   -/StageMap
-                  (xt/x:obj-assign {} -/StageMap stageMap)))
+                  (xtd/obj-assign
+                   (xtd/obj-assign {} -/StageMap)
+                   stageMap)))
   (var lu (xt/x:get-key -/ThemeLookup type))
   (var colorInit (xt/x:get-key theme (xt/x:get-key lu initial)))
   (return (xtd/arr-foldl stages
@@ -149,11 +151,12 @@
    more
    transformFn]
   (var indFn (fn:> [flag] (:? flag 1 0)))
-  (var chord (xt/x:obj-assign {}
-                       -/StageStatics
-                       #{disabled
-                         highlighted}
-                       more))
+  (var chord (xtd/obj-assign
+              (xtd/obj-assign
+               (xtd/obj-assign {} -/StageStatics)
+               #{disabled
+                 highlighted})
+              more))
   (var indValues (xtd/obj-map chord indFn))
   (return (. (transformFn indValues chord)
              ["style"])))

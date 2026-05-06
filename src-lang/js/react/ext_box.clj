@@ -69,9 +69,10 @@
      path
        (fn [_ payload _ _]
          (promise/x:promise
-          (fn []
-           (. localStorage (setItem storage-key (JSON.stringify (. payload ["data"]))))))))
-   (return box))
+           (fn []
+             (. localStorage (setItem storage-key
+                                      (JSON.stringify (. payload ["data"])))))))))
+  (return box))
 
 (def.js listenBox -/useListenBox)
 

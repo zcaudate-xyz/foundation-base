@@ -14,7 +14,8 @@
                [js.lib.chalk :as chk]
                [xt.lang.spec-base :as xt]
                [xt.lang.common-lib :as k]
-               [xt.lang.common-data :as xtd]]
+               [xt.lang.common-data :as xtd]
+               [xt.lang.common-tree :as xtt]]
     :export  [MODULE]})
 
 (fact:global
@@ -24,15 +25,15 @@
 
 (defn.js nest-tree
   [obj prefix]
-  (return (xtd/tree-walk obj
-                  k/identity
-                  (fn [x]
-                    (when  (xt/x:is-object? x)
-                      (var out {})
-                      (xt/for:object [[k v] x]
-                        (xt/x:set-key out (+ prefix k) v))
-                      (return out))
-                    (return x)))))
+  (return (xtt/tree-walk obj
+                         k/identity
+                         (fn [x]
+                           (when  (xt/x:is-object? x)
+                             (var out {})
+                             (xt/for:object [[k v] x]
+                               (xt/x:set-key out (+ prefix k) v))
+                             (return out))
+                           (return x)))))
 
 (def.js TREEDATA
   {:a {:aa {:aaa "1"

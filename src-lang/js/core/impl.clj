@@ -16,9 +16,10 @@
    => 1"
   {:added "4.0"}
   [[ms] & body]
-  (template/$ (setTimeout (fn [] (new Promise (fn []
-                                         ~@body)))
-                   ~ms)))
+  (template/$ (do (setTimeout (fn [] (new Promise (fn []
+                                           ~@body)))
+                      ~ms)
+                  nil)))
 
 (defmacro.js  ^{:style/indent 1}
   repeating

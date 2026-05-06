@@ -5,7 +5,7 @@
 (l/script- :js
   {:runtime :basic
    :require [[js.cell.service.db-sync :as db-sync]
-              [xt.db :as xdb]
+              [xt.db.instance :as xdb]
               [xt.lang.spec-base :as xt]
               [xt.lang.common-lib :as k]]})
 

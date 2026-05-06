@@ -21,6 +21,10 @@
   (l/emit-as :dart ['{:name "hello" :count 2}])
   => "<dynamic, dynamic>{\"name\":\"hello\",\"count\":2}")
 
+(fact "dart escapes string interpolation markers in literals"
+  (l/emit-as :dart ['{"$order" "age.desc"}])
+  => "<dynamic, dynamic>{\"\\$order\":\"age.desc\"}")
+
 (fact "xtalk helper rewrites for dart"
   (l/emit-as :dart ['(x:print "hello")])
   => "(() {\n  print(\"hello\");\n  return null;\n})()"
