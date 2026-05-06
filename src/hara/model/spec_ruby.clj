@@ -314,26 +314,29 @@
   (let [arr*  (gensym "arr__")
         bound (if (vector? e) e [e])
         bound (vec (remove #{'_} bound))
-        body  (rewrite/rewrite-callable-body bound body)
-        call-body (fn [args]
-                    (if (seq bound)
-                      [(list '. (apply list 'fn bound body)
-                             (apply list 'call args))]
-                      body))]
+        captures (into (array-map)
+                       (map (fn [sym]
+                              [sym (gensym (str (name sym) "__capture__"))]))
+                       bound)
+        body  (rewrite/rewrite-callable-body
+               bound
+               (rewrite/rewrite-captured-callables body captures))]
     (if (vector? e)
       (let [[i v] e]
         (template/$
          (do (var ~arr* ~arr)
               (var ~i 0)
               (while (< ~i (. ~arr* length))
-                ~@(call-body [i (list '. arr* [i])])
+                (var ~v (. ~arr* [~i]))
+                ~@body
                 (:= ~i (+ ~i 1))))))
       (let [idx (gensym "idx__")]
         (template/$
          (do (var ~arr* ~arr)
               (var ~idx 0)
               (while (< ~idx (. ~arr* length))
-                ~@(call-body [(list '. arr* [idx])])
+                (var ~e (. ~arr* [~idx]))
+                ~@body
                 (:= ~idx (+ ~idx 1)))))))))
 
 (defn tf-for-object

@@ -229,13 +229,14 @@
                    (xt/x:set-key lrec link-id true))
                
                (== table-link "rev_links")
-               (xt/x:set-key lrec link-id true)
-
-               :else
-                (do (xt/for:object [[prev-id _] lrec]
-                      (-/remove-single-link-entry
-                       rows
-                       inverse-key
+                (xt/x:set-key lrec link-id true)
+ 
+                :else
+                 (do (var prev-ids (xt/x:obj-keys lrec))
+                     (xt/for:array [prev-id prev-ids]
+                       (-/remove-single-link-entry
+                        rows
+                        inverse-key
                        prev-id
                       "rev_links"
                       inverse-field
@@ -285,19 +286,23 @@
   {:added "4.0"}
   [rows schema flat]
   (var out [])
-  (xt/for:object [[table-key bulk] flat]
-    (xt/for:object [[row-id record] bulk]
+  (xt/for:array [table-key (xt/x:obj-keys flat)]
+    (var bulk (xt/x:get-key flat table-key))
+    (xt/for:array [row-id (xt/x:obj-keys bulk)]
+      (var record (xt/x:get-key bulk row-id))
       (var #{ref-links
              rev-links} record)
-      (xt/for:object [[field links] ref-links]
-        (xt/for:object [[link-id _] links]
+      (xt/for:array [field (xt/x:obj-keys ref-links)]
+        (var links (xt/x:get-key ref-links field))
+        (xt/for:array [link-id (xt/x:obj-keys links)]
           (-/add-single-link rows schema table-key row-id field link-id)
           (xt/x:arr-push out {:table table-key
                               :id row-id
                               :field field
                               :link-id link-id})))
-      (xt/for:object [[field links] rev-links]
-        (xt/for:object [[link-id _] links]
+      (xt/for:array [field (xt/x:obj-keys rev-links)]
+        (var links (xt/x:get-key rev-links field))
+        (xt/for:array [link-id (xt/x:obj-keys links)]
           (-/add-single-link rows schema table-key row-id field link-id)
           (xt/x:arr-push out {:table table-key
                               :id row-id

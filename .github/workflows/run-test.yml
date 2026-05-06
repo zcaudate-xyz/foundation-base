@@ -63,9 +63,10 @@ jobs:
           -v $(pwd):$(pwd)
           -w $(pwd)
           ghcr.io/zcaudate-xyz/infra-foundation-clean:ci
-          bash -lc "apt-get update &&
-          apt-get install -y nodejs npm lua5.4 python3 python3-pip &&
-          lein test :with \"[xt]\""
+          bash -lc "set -euxo pipefail &&
+          apt-get update &&
+          apt-get install -y --no-install-recommends lua5.4 python3 python3-pip &&
+          ${{ matrix.command }}"
         
     services:
       postgres:
@@ -93,7 +94,7 @@ jobs:
           -v /var/run/docker.sock:/var/run/docker.sock 
           -v $(pwd):$(pwd) 
           -w $(pwd) 
-          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein test :with "[xtalk]"
+          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein test :with "[xt]"
           bash -lc "set -euxo pipefail &&
           apt-get update &&
           apt-get install -y --no-install-recommends curl ca-certificates gnupg &&

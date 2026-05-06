@@ -217,6 +217,185 @@
   [forms]
   (normalize-ruby-local-body forms {}))
 
+(defn- binding-target-symbols
+  [target]
+  (cond
+    (symbol? target)
+    #{target}
+
+    (destruct/destructure-target? target)
+    (into #{} (destruct/destructure-symbols target ut/sym-default-str))
+
+    (vector-destructure-target? target)
+    (into #{} (remove #{'_} target))
+
+    :else
+    #{}))
+
+(defn- drop-aliases
+  [aliases syms]
+  (apply dissoc aliases (remove nil? syms)))
+
+(defn- wrap-captured-callable
+  [callable aliases]
+  (if (empty? aliases)
+    callable
+    (let [pairs (seq aliases)]
+      (list '.
+            (list 'fn
+                  (mapv second pairs)
+                  (list 'return callable))
+            (apply list 'call (map first pairs))))))
+
+(declare rewrite-captured-callables-body)
+(declare rewrite-captured-callables)
+(declare rewrite-captured-callables-value)
+
+(defn- rewrite-captured-callable-body-form
+  [form aliases]
+  (cond
+    (symbol? form)
+    (get aliases form form)
+
+    (seq? form)
+    (let [head (first form)]
+      (cond
+        (callable-form? form)
+        (let [[tag & more] form
+              [name args body] (if (symbol? (first more))
+                                 [(first more) (second more) (drop 2 more)]
+                                 [nil (first more) (rest more)])
+              aliases* (drop-aliases aliases
+                                     (concat (when name [name])
+                                             (filter symbol? args)))
+              callable (apply list tag
+                              (concat (when name [name])
+                                      [args]
+                                      (rewrite-captured-callables-body body aliases*)))]
+          (wrap-captured-callable callable aliases*))
+
+        (= 'var head)
+        (let [[tag target & args] form]
+          (apply list tag
+                 target
+                 (map #(rewrite-captured-callable-body-form % aliases) args)))
+
+        (#{'do 'do*} head)
+        (apply list head
+               (rewrite-captured-callables-body (rest form) aliases))
+
+        :else
+        (apply list
+               (map #(rewrite-captured-callable-body-form % aliases) form))))
+
+    (vector? form)
+    (mapv #(rewrite-captured-callable-body-form % aliases) form)
+
+    (map? form)
+    (into {}
+          (map (fn [[k v]]
+                 [(rewrite-captured-callable-body-form k aliases)
+                  (rewrite-captured-callable-body-form v aliases)]))
+          form)
+
+    (set? form)
+    (set (map #(rewrite-captured-callable-body-form % aliases) form))
+
+    :else
+    form))
+
+(defn- rewrite-captured-callables-body
+  [forms aliases]
+  (loop [remaining (seq forms)
+         aliases aliases
+         out []]
+    (if-not remaining
+      out
+      (let [form    (first remaining)
+            form*   (rewrite-captured-callable-body-form form aliases)
+            aliases* (if (and (seq? form)
+                              (= 'var (first form)))
+                       (drop-aliases aliases
+                                     (binding-target-symbols (second form)))
+                       aliases)]
+        (recur (next remaining)
+               aliases*
+               (conj out form*))))))
+
+(defn- rewrite-captured-callables-form
+  [form aliases]
+  (cond
+    (callable-form? form)
+    (let [[tag & more] form
+          [name args body] (if (symbol? (first more))
+                             [(first more) (second more) (drop 2 more)]
+                             [nil (first more) (rest more)])
+          aliases* (drop-aliases aliases
+                                 (concat (when name [name])
+                                         (filter symbol? args)))
+          callable (apply list tag
+                          (concat (when name [name])
+                                  [args]
+                                  (rewrite-captured-callables-body body aliases*)))]
+      (wrap-captured-callable callable aliases*))
+
+    (seq? form)
+    (let [head (first form)]
+      (cond
+        (#{'do 'do*} head)
+        (apply list head
+               (rewrite-captured-callables (rest form) aliases))
+
+        (= 'var head)
+        (let [[tag target & args] form]
+          (apply list tag
+                 target
+                 (map #(rewrite-captured-callables-value % aliases) args)))
+
+        :else
+        (apply list
+               (map #(rewrite-captured-callables-value % aliases) form))))
+
+    (vector? form)
+    (mapv #(rewrite-captured-callables-value % aliases) form)
+
+    (map? form)
+    (into {}
+          (map (fn [[k v]]
+                 [(rewrite-captured-callables-value k aliases)
+                  (rewrite-captured-callables-value v aliases)]))
+          form)
+
+    (set? form)
+    (set (map #(rewrite-captured-callables-value % aliases) form))
+
+    :else
+    form))
+
+(defn- rewrite-captured-callables-value
+  [form aliases]
+  (if (symbol? form)
+    form
+    (rewrite-captured-callables-form form aliases)))
+
+(defn rewrite-captured-callables
+  [forms aliases]
+  (loop [remaining (seq forms)
+         aliases aliases
+         out []]
+    (if-not remaining
+      out
+      (let [form    (first remaining)
+            form*   (rewrite-captured-callables-value form aliases)
+            aliases* (if (and (seq? form)
+                              (= 'var (first form)))
+                       (drop-aliases aliases
+                                     (binding-target-symbols (second form)))
+                       aliases)]
+        (recur (next remaining)
+               aliases*
+               (conj out form*))))))
+
 (defn- collect-callable-vars
   [form]
   (cond

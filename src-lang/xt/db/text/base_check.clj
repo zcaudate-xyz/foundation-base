@@ -66,15 +66,17 @@
   ;;
   ;; CHECK TYPE
   ;;
-  (xt/for:array [[i spec] targs]
-    (var arg (xt/x:get-idx args i))
+  (var i 0)
+  (xt/for:array [spec targs]
+    (var arg (xt/x:get-idx args (xt/x:offset i)))
     (if (not (-/check-arg-type (xt/x:get-key spec "type") arg))
       (return [false {:status "error"
                       :tag "net/arg-typecheck-failed"
                       :data {:input arg
-                             :spec spec}}])))
+                             :spec spec}}]))
+    (:= i (+ i 1)))
     
-  (return [true]))
+  (return [true nil]))
 
 (defn.xt check-args-length
   "checks that input and spec are of the same length"
@@ -87,4 +89,4 @@
                     :data {:expected (xt/x:len targs)
                            :actual (xt/x:len args)
                            :input args}}]))
-  (return [true]))
+  (return [true nil]))

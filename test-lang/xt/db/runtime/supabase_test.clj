@@ -1,6 +1,6 @@
 (ns xt.db.runtime.supabase-test
-  (:require [hara.lang :as l])
-  (:use code.test))
+  (:use code.test)
+  (:require [hara.lang :as l]))
 
 ^{:seedgen/root {:all true}}
 (l/script- :js

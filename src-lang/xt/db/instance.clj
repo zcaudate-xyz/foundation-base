@@ -22,11 +22,12 @@
                       :dbtype dbtype}}))
 
 (def.xt IMPL
-  {"db.cache" {"create"      (fn:> {:rows {}})
-               "add"         impl-cache/cache-process-event-sync
-               "remove"      impl-cache/cache-process-event-remove
-               "pull-sync"   impl-cache/cache-pull-sync
-               "delete-sync" impl-cache/cache-delete-sync
+   {"db.cache" {"create"      (fn [m]
+                                (return {:rows {}}))
+                "add"         impl-cache/cache-process-event-sync
+                "remove"      impl-cache/cache-process-event-remove
+                "pull-sync"   impl-cache/cache-pull-sync
+                "delete-sync" impl-cache/cache-delete-sync
                "clear"       impl-cache/cache-clear}
    "db.supabase" {"create"    (fn [m]
                                 (return m))
@@ -52,7 +53,11 @@
   [db event schema lookup opts]
   (var dbtype (-/get-dbtype db))
   (var #{instance} db)
-  (var [tag data as-input] event)
+  (var tag (xt/x:first event))
+  (var data (xt/x:second event))
+  (var as-input (:? (> (xt/x:len event) 2)
+                    (xt/x:get-idx event (xt/x:offset 2))
+                    nil))
   (var event-fn (xtd/get-in -/IMPL [dbtype tag]))
   (when (xt/x:nil? event-fn)
     (return (-/unsupported-op tag dbtype)))

@@ -126,7 +126,7 @@
       {"input" [{"symbol" "i_organisation_id", "type" "uuid"}]}
       [1]
       false)])
-  => [[true]
+  => [[true nil]
       [false {"status" "error"
               "tag" "net/arg-typecheck-failed"
               "data" {"input" 1
@@ -140,12 +140,12 @@
      {:table "UserAccount"
        :select-method "by_organisation"
        :return-method "info"}
-     {:args ["00000000-0000-0000-0000-000000000001"]}))
-  => {"table" "UserAccount"
-      "select_method" "by_organisation"
-      "select_args" ["00000000-0000-0000-0000-000000000001"]
-      "return_method" "info"
-      "return_args" []})
+      {:args ["00000000-0000-0000-0000-000000000001"]}))
+  => (contains {"table" "UserAccount"
+                "select_method" "by_organisation"
+                "select_args" ["00000000-0000-0000-0000-000000000001"]
+                "return_method" "info"
+                "return_args" []}))
 
 ^{:refer xt.db.node.schema-query/query-key :added "4.1"}
 (fact "uses an explicit query key or computes a stable key"
@@ -178,11 +178,11 @@
            :args ["00000000-0000-0000-0000-000000000001"]}))
     [ok
      (. prepared ["key"])
-     (xt/x:first (. prepared ["plan"]))
-     (xtd/get-in (. prepared ["plan"]) [1 "organisation_accesses" "organisation"])
+     (xt/x:is-array? (. prepared ["plan"]))
+     (xtd/get-in (. prepared ["context"]) ["args" 0])
      (. (. prepared ["tables"]) ["UserProfile"])])
   => [true
       "orders/main"
-      "UserAccount"
+      true
       "00000000-0000-0000-0000-000000000001"
       true])

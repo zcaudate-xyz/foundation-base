@@ -19,8 +19,16 @@
 (fact "signals unsupported backend operations"
 
   (!.dt
-   (instance/unsupported-op "clear" "db.void"))
-  => (throws))
+   (do:>
+    (try
+      (instance/unsupported-op "clear" "db.void")
+      (return "no-error")
+      (catch err
+        (return [(xtd/get-in err ["status"])
+                 (xtd/get-in err ["tag"])
+                 (xtd/get-in err ["data" "op"])
+                 (xtd/get-in err ["data" "backend"])])))))
+  => ["error" "db/op-not-available" "clear" nil])
 
 ^{:refer xt.db.instance/get-dbtype :added "4.1"}
 (fact "gets the backend type with a sql default"
@@ -184,11 +192,19 @@
   => "SELECT 1;"
 
   (!.dt
-   (instance/db-exec-sync
-    {"::" "db.cache"
-     :instance {}}
-    "SELECT 1;"))
-  => (throws))
+   (do:>
+    (try
+      (instance/db-exec-sync
+       {"::" "db.cache"
+       :instance {}}
+       "SELECT 1;")
+      (return "no-error")
+      (catch err
+        (return [(xtd/get-in err ["status"])
+                 (xtd/get-in err ["tag"])
+                 (xtd/get-in err ["data" "op"])
+                 (xtd/get-in err ["data" "backend"])])))))
+  => ["error" "db/op-not-available" "exec-sync" nil])
 
 ^{:refer xt.db.instance/db-pull-sync :added "4.1"}
 (fact "dispatches pull requests through the configured backend"
@@ -207,13 +223,21 @@
   => ["pull-1" ["UserAccount" ["nickname"]] "cache"]
 
   (!.dt
-   (instance/db-pull-sync
-    {"::" "db.void"
-     :instance {}
-     :opts {}}
-    sample/Schema
-    ["UserAccount" ["nickname"]]))
-  => (throws))
+   (do:>
+    (try
+      (instance/db-pull-sync
+       {"::" "db.void"
+        :instance {}
+       :opts {}}
+       sample/Schema
+       ["UserAccount" ["nickname"]])
+      (return "no-error")
+      (catch err
+        (return [(xtd/get-in err ["status"])
+                 (xtd/get-in err ["tag"])
+                 (xtd/get-in err ["data" "op"])
+                 (xtd/get-in err ["data" "backend"])])))))
+  => ["error" "db/op-not-available" "pull-sync" nil])
 
 ^{:refer xt.db.instance/db-delete-sync :added "4.1"}
 (fact "dispatches deletions through the configured backend"
@@ -246,10 +270,18 @@
   => "clear-1"
 
   (!.dt
-   (instance/db-clear
-    {"::" "db.void"
-     :instance {}}))
-  => (throws))
+   (do:>
+    (try
+      (instance/db-clear
+       {"::" "db.void"
+        :instance {}})
+      (return "no-error")
+      (catch err
+        (return [(xtd/get-in err ["status"])
+                 (xtd/get-in err ["tag"])
+                 (xtd/get-in err ["data" "op"])
+                 (xtd/get-in err ["data" "backend"])])))))
+  => ["error" "db/op-not-available" "clear" nil])
 
 ^{:refer xt.db.instance/add-view-trigger :added "4.1"}
 (fact "creates view triggers that watch linked tables and pull the view tree"

@@ -112,15 +112,22 @@
   [entry args drop-first]
   (var targs (xt/x:get-key entry "input"))
   (when drop-first
-    (:= targs [(xt/x:unpack targs)])
-    (x:arr-pop-first targs))
+    (if (> (xt/x:len targs) 1)
+      (do (var rest [])
+          (var idx 0)
+          (xt/for:array [spec targs]
+            (when (> idx 0)
+              (xt/x:arr-push rest spec))
+            (:= idx (+ idx 1)))
+          (:= targs rest))
+      (:= targs [])))
   (var [l-ok l-err] (check/check-args-length args targs))
   (when (not l-ok)
     (return [l-ok l-err]))
   (var [t-ok t-err] (check/check-args-type args targs))
   (when (not t-ok)
     (return [t-ok t-err]))
-  (return [true]))
+  (return [true nil]))
 
 (defn.xt normalize-query
   "normalizes a query spec against a view context"
@@ -220,7 +227,9 @@
                       select-args)))
 
         (xt/x:not-nil? return-id)
-        (do (var rargs [return-id (xt/x:unpack return-args)])
+        (do (var rargs [return-id])
+            (when (xtd/not-empty? return-args)
+              (xt/x:arr-assign rargs return-args))
             (var [r-ok r-err] (-/query-check return-entry rargs false))
             (when (not r-ok)
               (return [r-ok r-err]))

@@ -43,9 +43,24 @@
 (fact "Ruby XTalk Support"
   (l/emit-as :ruby
    '[(do
-      (x:print "hello")
-      (x:cat "a" "b"))])
-  => "puts \"hello\"\n\"a\" + \"b\"")
+       (x:print "hello")
+       (x:cat "a" "b"))])
+  => (fn [s]
+       (and (string? s)
+            (re-find #"puts \"hello\"" s)
+            (re-find #"return nil" s)
+            (re-find #"\.call\(\)" s)
+            (re-find #"\"a\" \+ \"b\"" s))))
+
+(fact "Ruby x:print emits multi-arg output without relying on variadic puts prefix emission"
+  (l/emit-as :ruby
+   '[(x:print "hello" "world")])
+  => (fn [s]
+       (and (string? s)
+            (re-find #"puts \"hello\"" s)
+            (re-find #"puts \"world\"" s)
+            (re-find #"return nil" s)
+            (re-find #"\.call\(\)" s))))
 
 (fact "Ruby invoke, spread, and range forms stay structural"
   (l/emit-as :ruby
@@ -138,9 +153,53 @@
 (fact "Ruby for:object guards nil receivers"
   (l/emit-as :ruby
    '[(for:object [[k v] obj]
-       (puts k)
-       (puts v))])
+        (puts k)
+        (puts v))])
   => #"obj__.* = \(obj \|\| \{\}\)\nkeys__.* = obj__.*\.keys")
+
+(fact "Ruby for:array captures nested callable values without wrapping the loop body"
+  (l/emit-as :ruby
+   '[(for:array [value values]
+       (when flag
+         (return value))
+       (. out
+          (push
+           (fn [_]
+             (return value)))))])
+  => (fn [s]
+       (and (string? s)
+            (re-find #"value = arr__.*\[idx__.*\]" s)
+            (re-find #"return value__capture__" s)
+            (re-find #"\.call\(value\)" s)
+            (re-find #"return value" s)
+            (not (re-find #"->\(value\)\s*\{" s)))))
+
+(fact "Ruby promise overrides hard-link spec-promise forms to common-promise"
+  (select-keys fn-ruby/+ruby-promise+
+               [:x-async-run
+                :x-promise
+                :x-promise-all
+                :x-promise-then
+                :x-promise-catch
+                :x-promise-finally
+                :x-promise-native?
+                :x-with-delay])
+  => {:x-async-run       {:macro #'hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-async-run
+                          :emit :macro}
+      :x-promise         {:raw 'xt.lang.common-promise/promise
+                          :emit :hard-link}
+      :x-promise-all     {:raw 'xt.lang.common-promise/promise-all
+                          :emit :hard-link}
+      :x-promise-then    {:raw 'xt.lang.common-promise/promise-then
+                          :emit :hard-link}
+      :x-promise-catch   {:raw 'xt.lang.common-promise/promise-catch
+                          :emit :hard-link}
+      :x-promise-finally {:raw 'xt.lang.common-promise/promise-finally
+                          :emit :hard-link}
+      :x-promise-native? {:raw 'xt.lang.common-promise/promise-native?
+                          :emit :hard-link}
+      :x-with-delay      {:raw 'xt.lang.common-promise/with-delay
+                          :emit :hard-link}})
 
 (fact "Ruby x:global helpers write through !:G without assigning to the globals expression"
   (fn-ruby/ruby-tf-x-global-set '(x:global-set XT 1))

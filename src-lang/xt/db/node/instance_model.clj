@@ -207,8 +207,8 @@
   [node space-id state query-spec view-context remote-spec model-id view-id]
   (var [ok prepared] (schema-query/prepare-query state query-spec view-context))
   (when (not ok)
-    (return (promise/x:promise (fn [_ reject]
-                                 (reject prepared)))))
+    (return (promise/x:promise (fn []
+                                 (xt/x:throw prepared)))))
   (var remote (-/normalize-remote state remote-spec view-context))
   (return
    (promise/x:promise-then
@@ -242,8 +242,8 @@
   [node space-id state sync-spec view-context remote-spec]
   (var [ok request] (instance-sync/prepare-sync sync-spec view-context))
   (when (not ok)
-    (return (promise/x:promise (fn [_ reject]
-                                 (reject request)))))
+    (return (promise/x:promise (fn []
+                                 (xt/x:throw request)))))
   (var remote (-/normalize-remote state remote-spec view-context))
   (return
    (promise/x:promise-then
@@ -309,7 +309,7 @@
   (var state (-/ensure-space-state node space-id))
   (var model (schema-state/ensure-model state model-id))
   (var running [])
-  (xt/for:object [[view-id _] (or (xt/x:get-key model "views") {})]
+  (xt/for:array [view-id (xt/x:obj-keys (or (xt/x:get-key model "views") {}))]
     (xt/x:arr-push running
                    (node-request/ensure-promise
                     (-/view-refresh node space-id model-id view-id))))

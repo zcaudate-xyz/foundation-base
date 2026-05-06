@@ -34,7 +34,18 @@
 
 (defn ruby-tf-x-print
   [[_ & args]]
-  (apply list 'puts args))
+  (cond
+    (empty? args)
+    nil
+
+    :else
+    (list '.
+          (apply list 'fn []
+                 (concat (map (fn [arg]
+                                (list 'puts arg))
+                              args)
+                         [(list 'return nil)]))
+          (list 'call))))
 
 (defn ruby-tf-x-random
   [_]
@@ -768,117 +779,41 @@
 
 (defn ruby-tf-x-promise
   [[_ thunk]]
-  (let [promise (gensym "promise__")
-        result  (gensym "result__")]
-    (template/$
-     (. (fn []
-          (var ~promise {"__type__" "xt.promise"
-                         "value" nil
-                         "reason" nil})
-          (try
-            (var ~result (. ~thunk (call)))
-            (if (x:promise-native? ~result)
-              (return ~result))
-            (:= (. ~promise ["value"]) ~result)
-            (catch e
-              (:= (. ~promise ["reason"]) e)))
-          (return ~promise))
-        (call)))))
+  (list 'xt.lang.common-promise/promise thunk))
 
 (defn ruby-tf-x-promise-all
   [[_ promises]]
-  (let [items   (gensym "items__")
-        total   (gensym "total__")
-        idx     (gensym "idx__")
-        current (gensym "current__")
-        out     (gensym "out__")]
-    (template/$
-     (. (fn [~items]
-          (var ~total (. ~items length))
-          (var ~idx 0)
-          (var ~out [])
-          (while (< ~idx ~total)
-            (var ~current (. ~items [~idx]))
-            (if (not (x:promise-native? ~current))
-              (:= ~current (x:promise (fn [] (return ~current)))))
-            (if (not (. (. ~current ["reason"]) nil?))
-              (return ~current))
-            (. ~out (push (. ~current ["value"])))
-            (:= ~idx (+ ~idx 1)))
-          (return (x:promise (fn [] (return ~out)))))
-         (call ~promises)))))
+  (list 'xt.lang.common-promise/promise-all promises))
 
 (defn ruby-tf-x-promise-then
   [[_ promise thunk]]
-  (let [current      (gensym "current__")
-        next-thunk   (list 'fn []
-                           (list '. thunk
-                                 (list 'call
-                                       (list '. current ["value"]))))
-        next-promise (list 'x:promise next-thunk)]
-    (list '.
-          (list 'fn []
-                (list 'var current promise)
-                (list 'if (list 'not (list '. (list '. current ["reason"]) 'nil?))
-                      (list 'return current)
-                      (list 'return next-promise)))
-          (list 'call))))
+  (list 'xt.lang.common-promise/promise-then promise thunk))
 
 (defn ruby-tf-x-promise-catch
   [[_ promise thunk]]
-  (let [current      (gensym "current__")
-        next-thunk   (list 'fn []
-                           (list '. thunk
-                                 (list 'call
-                                       (list '. current ["reason"]))))
-        next-promise (list 'x:promise next-thunk)]
-    (list '.
-          (list 'fn []
-                (list 'var current promise)
-                (list 'if (list '. (list '. current ["reason"]) 'nil?)
-                      (list 'return current)
-                      (list 'return next-promise)))
-          (list 'call))))
+  (list 'xt.lang.common-promise/promise-catch promise thunk))
 
 (defn ruby-tf-x-promise-finally
   [[_ promise thunk]]
-  (let [current         (gensym "current__")
-        cleanup         (gensym "cleanup__")
-        cleanup-thunk   (list 'fn []
-                              (list '. thunk 'call))
-        cleanup-promise (list 'x:promise cleanup-thunk)]
-    (list '.
-          (list 'fn []
-                (list 'var current promise)
-                (list 'var cleanup cleanup-promise)
-                (list 'if (list 'not (list '. (list '. cleanup ["reason"]) 'nil?))
-                      (list 'return cleanup)
-                      (list 'return current)))
-          (list 'call))))
+  (list 'xt.lang.common-promise/promise-finally promise thunk))
 
 (defn ruby-tf-x-promise-native?
   [[_ value]]
-  (template/$
-   (and (== "object" (x:type-native ~value))
-        (== "xt.promise" (. ~value ["__type__"])))))
+  (list 'xt.lang.common-promise/promise-native? value))
 
 (defn ruby-tf-x-with-delay
   [[_ ms thunk]]
-  (template/$
-   (x:promise
-    (fn []
-      (sleep (/ ~ms 1000.0))
-      (. ~thunk (call))))))
+  (list 'xt.lang.common-promise/with-delay ms thunk))
 
 (def +ruby-promise+
   {:x-async-run        {:macro #'ruby-tf-x-async-run       :emit :macro}
-   :x-promise          {:macro #'ruby-tf-x-promise         :emit :macro}
-   :x-promise-all      {:macro #'ruby-tf-x-promise-all     :emit :macro}
-   :x-promise-then     {:macro #'ruby-tf-x-promise-then    :emit :macro}
-   :x-promise-catch    {:macro #'ruby-tf-x-promise-catch   :emit :macro}
-   :x-promise-finally  {:macro #'ruby-tf-x-promise-finally :emit :macro}
-   :x-promise-native?  {:macro #'ruby-tf-x-promise-native? :emit :macro}
-   :x-with-delay       {:macro #'ruby-tf-x-with-delay      :emit :macro}})
+   :x-promise          {:raw 'xt.lang.common-promise/promise         :emit :hard-link}
+   :x-promise-all      {:raw 'xt.lang.common-promise/promise-all     :emit :hard-link}
+   :x-promise-then     {:raw 'xt.lang.common-promise/promise-then    :emit :hard-link}
+   :x-promise-catch    {:raw 'xt.lang.common-promise/promise-catch   :emit :hard-link}
+   :x-promise-finally  {:raw 'xt.lang.common-promise/promise-finally :emit :hard-link}
+   :x-promise-native?  {:raw 'xt.lang.common-promise/promise-native? :emit :hard-link}
+   :x-with-delay       {:raw 'xt.lang.common-promise/with-delay      :emit :hard-link}})
 
 
 ;; ITER

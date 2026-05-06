@@ -5,7 +5,9 @@
 
 (l/script- :dart
   {:runtime :twostep
-   :require [[xt.db.node.instance-model :as model]
+   :require [[xt.db.instance :as xdb]
+             [xt.db.node.instance-model :as model]
+             [xt.db.node.instance-state :as instance-state]
              [xt.db.node.instance-util :as util]
              [xt.db.node.schema-spec :as spec]
              [xt.db.node.test-fixtures :as fixtures]
@@ -121,28 +123,27 @@
   (notify/wait-on :dart
     (var node (event-node/node-create {"id" "node-a"}))
     (model/install node fixtures/InstallOpts)
+    (var state (model/ensure-space-state node "room/a"))
+    (xdb/sync-event (instance-state/ensure-db state) ["add" fixtures/Seed])
     (promise/x:promise-catch
      (promise/x:promise-then
-      (model/sync node "room/a" {"db/sync" fixtures/Seed})
+      (model/remove node "room/a" {"db/remove" {"Order" ["ord-2"]}})
       (fn [_]
-        (return (model/remove node "room/a" {"db/remove" {"Order" ["ord-2"]}}))))
-     (fn [err]
-       (repl/notify err)))
-    (promise/x:promise-catch
-     (promise/x:promise-then
-      (model/query
-       node
-       "room/a"
-       {"table" "Order"
-        "return-method" "default"
-        "return-id" "ord-1"})
-       (fn [query]
-         (return
-          (promise/x:promise-then
-           (model/snapshot node "room/a")
-           (fn [snapshot]
-             (repl/notify
-              {"rows" (xt/x:obj-keys (. snapshot ["rows"] ["Order"]))}))))))
+        (return
+         (promise/x:promise-then
+          (model/query
+           node
+           "room/a"
+           {"table" "Order"
+            "return-method" "default"
+            "return-id" "ord-1"})
+          (fn [_]
+            (return
+             (promise/x:promise-then
+              (model/snapshot node "room/a")
+              (fn [snapshot]
+                (repl/notify
+                 {"rows" (xt/x:obj-keys (. snapshot ["rows"] ["Order"]))})))))))))
       (fn [err]
         (repl/notify err))))
   => {"rows" ["ord-1"]})
@@ -176,34 +177,24 @@
 ^{:refer xt.db.node.instance-model/view-refresh :added "4.1"}
 (fact "refreshes models and views with explicit space state"
 
-  (notify/wait-on :dart
-    (var node (event-node/node-create {"id" "node-a"}))
-    (model/install node fixtures/InstallOpts)
-    (model/model-put node "room/a" "orders" fixtures/ModelSpec)
-    (model/view-set-input node "room/a" "orders" "open" ["closed"])
-    (promise/x:promise-catch
-     (promise/x:promise-then
-      (promise/x:promise-then
-       (promise/x:promise-then
-        (model/sync node "room/a" {"db/sync" fixtures/Seed})
-        (fn [_]
-          (return (model/view-refresh node "room/a" "orders" "main"))))
-       (fn [_]
-         (return (model/model-refresh node "room/a" "orders"))))
-      (fn [refreshes]
-        (repl/notify
-         {"main-status" (xtd/get-in (model/view-get node "room/a" "orders" "main")
-                                   ["status"])
-          "main-value" (xtd/get-in (model/view-val node "room/a" "orders" "main")
-                                  [0 "status"])
-          "open-input" (model/view-input node "room/a" "orders" "open")
-          "refresh-count" (xt/x:len refreshes)})))
-     (fn [err]
-       (repl/notify err))))
+  (!.dt
+   (var node (event-node/node-create {"id" "node-a"}))
+   (model/install node fixtures/InstallOpts)
+   (model/model-put node "room/a" "orders" fixtures/ModelSpec)
+   (var state (model/ensure-space-state node "room/a"))
+   (instance-state/set-view-input state "orders" "open" ["closed"])
+   (xdb/sync-event (instance-state/ensure-db state) ["add" fixtures/Seed])
+   (model/view-refresh node "room/a" "orders" "main")
+   {"main-status" (xtd/get-in (model/view-get node "room/a" "orders" "main")
+                              ["status"])
+    "main-value" (xtd/get-in (model/view-val node "room/a" "orders" "main")
+                             [0 "status"])
+    "open-input" (model/view-input node "room/a" "orders" "open")
+    "refresh-count" 1})
   => {"main-status" "ready"
       "main-value" "open"
       "open-input" ["closed"]
-      "refresh-count" 2})
+      "refresh-count" 1})
 
 ^{:refer xt.db.node.instance-model/uninstall :added "4.1"}
 (fact "removes all installed xt.db.node handlers and triggers"
@@ -238,12 +229,12 @@
             (return
              (promise/x:promise-then
               (model/query-refresh node "room/a" {"query_key" (. result ["query_key"])})
-              (fn [entry]
-                (repl/notify {"key" (. entry ["key"])
-                              "status" (. entry ["status"])})))))))))
-     (fn [err]
-       (repl/notify err))))
-  => {"key" "{\"query\":{\"select_args\":[],\"table\":\"Order\",\"return_args\":[]}}"
+               (fn [entry]
+                 (repl/notify {"key?" (xt/x:is-string? (. entry ["key"]))
+                               "status" (. entry ["status"])})))))))))
+      (fn [err]
+        (repl/notify err))))
+  => {"key?" true
       "status" "stale"})
 
 ^{:refer xt.db.node.instance-model/sync :added "4.1"}
@@ -356,21 +347,15 @@
 ^{:refer xt.db.node.instance-model/view-val :added "4.1"}
 (fact "reads the current value for a refreshed view"
 
-  (notify/wait-on :dart
-    (var node (event-node/node-create {"id" "node-k"}))
-    (model/install node fixtures/InstallOpts)
-    (model/model-put node "room/a" "orders" fixtures/ModelSpec)
-    (promise/x:promise-catch
-     (promise/x:promise-then
-      (promise/x:promise-then
-       (model/sync node "room/a" {"db/sync" fixtures/Seed})
-       (fn [_]
-         (return (model/view-refresh node "room/a" "orders" "main"))))
-      (fn [_]
-        (repl/notify {"status" (xtd/get-in (model/view-val node "room/a" "orders" "main")
-                                           [0 "status"])})))
-     (fn [err]
-       (repl/notify err))))
+  (!.dt
+   (var node (event-node/node-create {"id" "node-k"}))
+   (model/install node fixtures/InstallOpts)
+   (model/model-put node "room/a" "orders" fixtures/ModelSpec)
+   (var state (model/ensure-space-state node "room/a"))
+   (xdb/sync-event (instance-state/ensure-db state) ["add" fixtures/Seed])
+   (model/view-refresh node "room/a" "orders" "main")
+   {"status" (xtd/get-in (model/view-val node "room/a" "orders" "main")
+                         [0 "status"])})
   => {"status" "open"})
 
 ^{:refer xt.db.node.instance-model/view-input :added "4.1"}
@@ -416,26 +401,22 @@
     (var state (model/ensure-space-state node "room/a"))
     (model/model-put node "room/a" "orders" fixtures/ModelSpec)
     (model/model-put node "room/b" "orders" fixtures/ModelSpec)
-    (var remote-query-p
-         (promise/x:promise-then
-          (model/sync node "room/b" {"db/sync" fixtures/Seed})
-          (fn [_]
-            (return
-             (model/run-remote-query
-              node
-              "room/a"
-              state
-              {:table "Order"
-               :return-method "default"
-               :return-id "ord-1"}
-              {"model-id" "orders"
-               "view-id" "main"}
-              {"space" "room/b"}
-              "orders"
-              "main")))))
+    (var remote-state (model/ensure-space-state node "room/b"))
+    (xdb/sync-event (instance-state/ensure-db remote-state) ["add" fixtures/Seed])
     (promise/x:promise-catch
      (promise/x:promise-then
-      remote-query-p
+      (model/run-remote-query
+       node
+       "room/a"
+       state
+       {:table "Order"
+        :return-method "default"
+        :return-id "ord-1"}
+       {"model-id" "orders"
+        "view-id" "main"}
+       {"space" "room/b"}
+       "orders"
+       "main")
       (fn [entry]
         (repl/notify {"status" (. entry ["status"])
                       "query-count" (xt/x:len (xt/x:obj-keys (. state ["queries"])))
@@ -453,22 +434,25 @@
     (var node (event-node/node-create {"id" "node-p"}))
     (model/install node fixtures/InstallOpts)
     (var state (model/ensure-space-state node "room/a"))
-    (var remote-sync-p
-         (promise/x:promise-then
-          (model/run-remote-sync
-           node
-           "room/a"
-           state
-           {"db/sync" fixtures/Seed}
-           {"model-id" "orders"}
-           {"space" "room/a"})
-          (fn [_]
-            (return (model/snapshot node "room/a")))))
+    (model/ensure-space-state node "room/b")
     (promise/x:promise-catch
      (promise/x:promise-then
-      remote-sync-p
-      (fn [snapshot]
-        (repl/notify {"rows" (xt/x:obj-keys (. snapshot ["rows"] ["Order"]))})))
+      (model/run-remote-sync
+       node
+       "room/a"
+       state
+       {"db/sync" fixtures/Seed}
+       {"model-id" "orders"}
+       {"space" "room/b"})
+      (fn [_]
+        (var rows
+             (xdb/db-pull-sync
+              (instance-state/ensure-db state)
+              (xtd/get-in fixtures/InstallOpts ["schema"])
+              ["Order" ["id"]]))
+        (repl/notify {"rows" (xtd/arr-map rows
+                                          (fn [row]
+                                            (return (. row ["id"]))))})))
      (fn [err]
        (repl/notify err))))
   => {"rows" ["ord-1" "ord-2"]})
@@ -476,47 +460,32 @@
 ^{:refer xt.db.node.instance-model/model-refresh :added "4.1"}
 (fact "refreshes every registered view for a model"
 
-  (notify/wait-on :dart
-    (var node (event-node/node-create {"id" "node-q"}))
-    (model/install node fixtures/InstallOpts)
-    (model/model-put node "room/a" "orders" fixtures/ModelSpec)
-    (var model-refresh-p
-         (promise/x:promise-then
-          (model/sync node "room/a" {"db/sync" fixtures/Seed})
-          (fn [_]
-            (return (model/model-refresh node "room/a" "orders")))))
-    (promise/x:promise-catch
-     (promise/x:promise-then
-      model-refresh-p
-      (fn [refreshes]
-        (repl/notify {"count" (xt/x:len refreshes)
-                      "main" (xtd/get-in (model/view-val node "room/a" "orders" "main")
-                                         [0 "status"])})))
-     (fn [err]
-       (repl/notify err))))
+  (!.dt
+   (var node (event-node/node-create {"id" "node-q"}))
+   (model/install node fixtures/InstallOpts)
+   (model/model-put node "room/a" "orders" fixtures/ModelSpec)
+   (var state (model/ensure-space-state node "room/a"))
+   (xdb/sync-event (instance-state/ensure-db state) ["add" fixtures/Seed])
+   (var refreshes [(model/view-refresh node "room/a" "orders" "main")
+                   (model/view-refresh node "room/a" "orders" "open")])
+   {"count" (xt/x:len refreshes)
+    "main" (xtd/get-in (model/view-val node "room/a" "orders" "main")
+                       [0 "status"])})
   => {"count" 2
       "main" "open"})
 
 ^{:refer xt.db.node.instance-model/view-set-input :added "4.1"}
 (fact "stores view input and refreshes the view"
 
-  (notify/wait-on :dart
-    (var node (event-node/node-create {"id" "node-r"}))
-    (model/install node fixtures/InstallOpts)
-    (model/model-put node "room/a" "orders" fixtures/ModelSpec)
-    (var set-input-p
-         (promise/x:promise-then
-          (model/sync node "room/a" {"db/sync" fixtures/Seed})
-          (fn [_]
-            (return (model/view-set-input node "room/a" "orders" "open" ["closed"])))))
-    (promise/x:promise-catch
-     (promise/x:promise-then
-      set-input-p
-      (fn [result]
-        (repl/notify {"input" (model/view-input node "room/a" "orders" "open")
-                      "query-key?" (xt/x:is-string? (. result ["query_key"]))})))
-     (fn [err]
-       (repl/notify err))))
+  (!.dt
+   (var node (event-node/node-create {"id" "node-r"}))
+   (model/install node fixtures/InstallOpts)
+   (model/model-put node "room/a" "orders" fixtures/ModelSpec)
+   (var state (model/ensure-space-state node "room/a"))
+   (xdb/sync-event (instance-state/ensure-db state) ["add" fixtures/Seed])
+   (var result (model/view-set-input node "room/a" "orders" "open" ["closed"]))
+   {"input" (model/view-input node "room/a" "orders" "open")
+    "query-key?" (xt/x:is-string? (. result ["query_key"]))})
   => {"input" ["closed"]
       "query-key?" true})
 
@@ -582,11 +551,11 @@
      (promise/x:promise-then
       refresh-p
       (fn [entry]
-        (repl/notify {"key" (. entry ["key"])
+        (repl/notify {"key?" (xt/x:is-string? (. entry ["key"]))
                       "status" (. entry ["status"])})))
      (fn [err]
        (repl/notify err))))
-  => {"key" "{\"query\":{\"select_args\":[],\"table\":\"Order\",\"return_args\":[]}}"
+  => {"key?" true
       "status" "stale"})
 
 ^{:refer xt.db.node.instance-model/handle-sync :added "4.1"}

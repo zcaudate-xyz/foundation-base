@@ -5,7 +5,7 @@
   {:require [[xt.lang.common-data :as xtd]
              [xt.lang.common-resource :as rt]
              [xt.lang.spec-base :as xt]
-             [python.core.system :as pysys]
+             [python.core :as py]
              [xt.protocol.impl.connection-sql :as sqlrt]]})
 
 (defn.py default-env
@@ -32,9 +32,9 @@
   {:added "4.1"}
   []
   (try
-    (return (pysys/__import__ "psycopg"))
+    (return (py/__import__ "psycopg"))
     (catch e
-      (return (pysys/__import__ "psycopg2")))))
+      (return (py/__import__ "psycopg2")))))
 
 (defn.py normalise-query-output
   [rows]

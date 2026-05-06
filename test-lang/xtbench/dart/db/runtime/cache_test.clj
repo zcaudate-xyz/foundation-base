@@ -144,15 +144,15 @@
          "UserProfile"
          ["c4643895-b0ce-44cc-b07b-2386bf18d43b"]
          nil))
-   [(. removed ["length"])
-    (util/has-entry (. cache ["rows"]) "UserProfile" "c4643895-b0ce-44cc-b07b-2386bf18d43b")
-    (xtd/get-in cache ["rows"
-                       "UserAccount"
+   [(xtd/get-in removed [0 "record" "data" "id"])
+     (util/has-entry (. cache ["rows"]) "UserProfile" "c4643895-b0ce-44cc-b07b-2386bf18d43b")
+     (xtd/get-in cache ["rows"
+                        "UserAccount"
                        "00000000-0000-0000-0000-000000000000"
                        "record"
                        "rev_links"
                        "profile"])])
-  => [1 false nil])
+   => ["c4643895-b0ce-44cc-b07b-2386bf18d43b" false nil])
 
 ^{:refer xt.db.runtime.cache/cache-clear :added "4.1"}
 (fact "clears cache rows in place"

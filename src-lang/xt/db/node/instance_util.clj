@@ -32,7 +32,10 @@
   "gets the first request payload"
   {:added "4.1"}
   [args]
-  (return (or (xt/x:get-idx args 0)
+  (return (or (:? (and (xt/x:is-array? args)
+                       (> (xt/x:len args) 0))
+                    (xt/x:first args)
+                    nil)
               {})))
 
 (defn.xt response-value

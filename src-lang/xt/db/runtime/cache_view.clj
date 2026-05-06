@@ -60,15 +60,26 @@
   [tree args input-spec drop-first]
   (var arg-map {})
   (when drop-first
-    (xt/x:arr-pop-first input-spec))
+    (if (> (xt/x:len input-spec) 1)
+      (do (var rest [])
+          (var idx 0)
+          (xt/for:array [spec input-spec]
+            (when (> idx 0)
+              (xt/x:arr-push rest spec))
+            (:= idx (+ idx 1)))
+          (:= input-spec rest))
+      (:= input-spec [])))
   (when (== 0 (xt/x:len input-spec))
     (return tree))
-  (xt/for:array [[i e] input-spec]
-    (:= (. arg-map [(xt/x:cat "{{" (. e ["symbol"]) "}}")])
-        (. args [i])))
+  (var idx 0)
+  (xt/for:array [e input-spec]
+    (xt/x:set-key arg-map
+                  (xt/x:cat "{{" (. e ["symbol"]) "}}")
+                  (xt/x:get-idx args (xt/x:offset idx)))
+    (:= idx (+ idx 1)))
   (var out (xtt/tree-walk tree
-                   (fn [x] (return x))
-                   (fn [x]
+                    (fn [x] (return x))
+                    (fn [x]
                      (return (:? (and (xt/x:is-string? x)
                                       (xt/x:has-key? arg-map x))
                                  (xt/x:get-key arg-map x)
