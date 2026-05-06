@@ -162,8 +162,13 @@ jobs:
           -v $(pwd):$(pwd)
           -w $(pwd)
           ghcr.io/zcaudate-xyz/infra-foundation-clean:ci
-          bash -lc "apt-get update &&
-          apt-get install -y nodejs npm lua5.4 python3 python3-pip &&
+          bash -lc "set -euxo pipefail &&
+          apt-get update &&
+          apt-get install -y --no-install-recommends curl ca-certificates gnupg &&
+          curl -fsSL https://deb.nodesource.com/setup_20.x | bash - &&
+          apt-get install -y --no-install-recommends nodejs lua5.4 python3 python3-pip &&
+          node --version &&
+          npm --version &&
           lein test :with \"[xt]\""
         
     services:
