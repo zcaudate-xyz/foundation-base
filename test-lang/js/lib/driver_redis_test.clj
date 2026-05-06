@@ -8,9 +8,9 @@
   {:runtime :basic
    :require [[xt.protocol.impl.connection-redis :as redis]
               [xt.lang.spec-base :as xt]
-                [xt.lang.common-lib :as k]
-                [xt.lang.common-repl :as repl]
-                [js.lib.driver-redis :as js-driver]]})
+              [xt.lang.common-lib :as k]
+              [xt.lang.common-repl :as repl]
+              [js.lib.driver-redis :as js-driver]]})
 
 (fact:global
  {:setup    [(bench/start-redis-array [17001])
