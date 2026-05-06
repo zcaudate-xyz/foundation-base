@@ -505,7 +505,7 @@
    (clojure.string/split-lines
     (slurp "test-data/std.block.heal/cases/005_example.block"))
    [2 5] 3)
-  => ["  (:require [hara.lang :as l]))"
+  => ["  (:require [std.lang :as l]))"
       ""
       "(l/script :js"
       "  {:require [[js.react :as r]"]
@@ -514,7 +514,7 @@
    (clojure.string/split-lines
     (slurp "test-data/std.block.heal/cases/005_example.block"))
    [2 5] 4)
-  => ["   :require [hara.lang :as l]))"
+  => ["   :require [std.lang :as l]))"
       ""
       "(l/script :js"
       "  {:require [[js.react :as r]"])
