@@ -24,137 +24,50 @@ jobs:
           -w $(pwd) 
           ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein incomplete
           
-  run-hara-tests:
+  run-group-tests:
+    name: Run Tests - ${{ matrix.name }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        
-      - name: Run Tests - hara
-        run: >
-          docker run --network host 
-          -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
-          -v /var/run/docker.sock:/var/run/docker.sock 
-          -v $(pwd):$(pwd) 
-          -w $(pwd) 
-          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein test :with "[hara]" 
-          
-  run-std-tests:
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        
-      - name: Run Tests - std
-        run: >
-          docker run --network host 
-          -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
-          -v /var/run/docker.sock:/var/run/docker.sock 
-          -v $(pwd):$(pwd) 
-          -w $(pwd) 
-          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein test :with "[std]" 
-          
-  run-code-tests:
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: hara
+            target: "[hara]"
+            command: lein test :with "[hara]"
+          - name: std
+            target: "[std]"
+            command: lein test :with "[std]"
+          - name: code
+            target: "[code]"
+            install_js_parser: true
+            command: lein test :with "[code]"
+          - name: script, net, math, lib, jvm
+            target: "[script net math lib jvm]"
+            command: lein test :with "[script net math lib jvm]"
+          - name: rt
+            target: "[rt]"
+            command: lein test :with "[rt]"
+          - name: xt
+            target: "[xt]"
+            command: apt-get update && apt-get install -y nodejs npm lua5.4 python3 python3-pip && lein test :with "[xt]"
+          - name: xtalk
+            target: "[xtalk]"
+            command: lein test :with "[xtalk]"
+          - name: indigo
+            target: "[indigo]"
+            command: lein test :with "[indigo]"
     
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Install JS parser dependencies
+        if: matrix.install_js_parser == true
         working-directory: src-training/scripts/js_parser
         run: npm ci
         
-      - name: Run Tests - code
-        run: >
-          docker run --network host 
-          -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
-          -v /var/run/docker.sock:/var/run/docker.sock 
-          -v $(pwd):$(pwd) 
-          -w $(pwd) 
-          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein test :with "[code]"
-        
-    services:
-      postgres:
-        image: ghcr.io/zcaudate-xyz/infra-db:main
-        env:
-          POSTGRES_DB: test
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_PORT: 5432
-          POSTGRES_USER: postgres
-        ports:
-          - 5432:5432
-          
-  run-script-net-math-lib-jvm-tests:
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        
-      - name: Run Tests - script, net, math, lib, jvm
-        run: >
-          docker run --network host 
-          -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
-          -v /var/run/docker.sock:/var/run/docker.sock 
-          -v $(pwd):$(pwd) 
-          -w $(pwd) 
-          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein test :with "[script net math lib jvm]"
-        
-    services:
-      postgres:
-        image: ghcr.io/zcaudate-xyz/infra-db:main
-        env:
-          POSTGRES_DB: test
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_PORT: 5432
-          POSTGRES_USER: postgres
-        ports:
-          - 5432:5432
-          
-  run-rt-tests:
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        
-      - name: Run Tests - rt
-        run: >
-          docker run --network host 
-          -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
-          -v /var/run/docker.sock:/var/run/docker.sock 
-          -v $(pwd):$(pwd) 
-          -w $(pwd) 
-          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein test :with "[rt]"
-        
-    services:
-      postgres:
-        image: ghcr.io/zcaudate-xyz/infra-db:main
-        env:
-          POSTGRES_DB: test
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_PORT: 5432
-          POSTGRES_USER: postgres
-        ports:
-          - 5432:5432
-
-  run-xt-tests:
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        
-      - name: Run Tests - xt
+      - name: Run Tests - ${{ matrix.name }}
         run: >
           docker run --network host
           -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
@@ -162,37 +75,7 @@ jobs:
           -v $(pwd):$(pwd)
           -w $(pwd)
           ghcr.io/zcaudate-xyz/infra-foundation-clean:ci
-          bash -lc "apt-get update &&
-          apt-get install -y nodejs npm lua5.4 python3 python3-pip &&
-          lein test :with \"[xt]\""
-        
-    services:
-      postgres:
-        image: ghcr.io/zcaudate-xyz/infra-db:main
-        env:
-          POSTGRES_DB: test
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_PORT: 5432
-          POSTGRES_USER: postgres
-        ports:
-          - 5432:5432
-
-  run-xtalk-tests:
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        
-      - name: Run Tests - xtalk
-        run: >
-          docker run --network host 
-          -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
-          -v /var/run/docker.sock:/var/run/docker.sock 
-          -v $(pwd):$(pwd) 
-          -w $(pwd) 
-          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein test :with "[xtalk]"
+          bash -lc '${{ matrix.command }}'
         
     services:
       postgres:
@@ -248,23 +131,6 @@ jobs:
           POSTGRES_USER: postgres
         ports:
           - 5432:5432
-          
-  run-indigo-tests:
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        
-      - name: Run Tests - indigo
-        run: >
-          docker run --network host 
-          -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
-          -v /var/run/docker.sock:/var/run/docker.sock 
-          -v $(pwd):$(pwd) 
-          -w $(pwd) 
-          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein test :with "[indigo]" 
           
   build-js-web:
     runs-on: ubuntu-latest
