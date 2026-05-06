@@ -99,6 +99,47 @@
       [true true true]])
 
 ^{:refer hara.seedgen.form-bench/seedgen-benchadd :added "4.1"}
+(fact "writes bench files to the same test root as the source test namespace"
+  (let [root     (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-test-root"
+                                                                   (make-array java.nio.file.attribute.FileAttribute 0)))
+        test-dir (doto (java.io.File. root "test-lang/xt/sample")
+                   (.mkdirs))
+        path     (.getAbsolutePath (java.io.File. test-dir "multi_test.clj"))
+        lookup   {'xt.sample.multi-test path}
+        project  {:root (.getAbsolutePath root)
+                  :test-paths ["test" "test-lang"]}]
+    (try
+      (spit path (str "(ns xt.sample.multi-test\n"
+                      "  (:use code.test)\n"
+                      "  (:require [hara.lang :as l]))\n\n"
+                      "^{:seedgen/root {:all true}}\n"
+                      "(l/script- :js {:runtime :basic})\n\n"
+                      "(l/script- :dart {:runtime :twostep})\n\n"
+                      "^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n"
+                      "(fact \"runtime branches\"\n"
+                      "  (!.js (+ 1 2 3))\n"
+                      "  => 6\n\n"
+                      "  (!.dart (+ 1 2 3))\n"
+                      "  => 6)\n"))
+      (let [output        (form-bench/seedgen-benchadd 'xt.sample.multi-test
+                                                       {:lang [:dart]
+                                                        :write true}
+                                                       lookup
+                                                       project)
+            bench-path    (str (fs/path root "test-lang/xtbench/dart/sample/multi_test.clj"))
+            fallback-path (str (fs/path root "test/xtbench/dart/sample/multi_test.clj"))]
+        [(-> output :outputs first (select-keys [:lang :path :updated]))
+         (fs/exists? bench-path)
+         (fs/exists? fallback-path)])
+      (finally
+        (fs/delete root {:recursive true}))))
+  => [{:lang :dart
+       :path "test-lang/xtbench/dart/sample/multi_test.clj"
+       :updated true}
+      true
+      false])
+
+^{:refer hara.seedgen.form-bench/seedgen-benchadd :added "4.1"}
 (fact "preserves fact layout when generating bench files"
   (let [root    (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-format"
                                                                   (make-array java.nio.file.attribute.FileAttribute 0)))

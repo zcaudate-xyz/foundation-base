@@ -1,12 +1,15 @@
 (ns hara.lang.impl-entry-test
   (:require [hara.lang.book :as b]
-              [hara.lang.book-entry :as e]
-             [hara.common.emit :as emit]
-             [hara.common.emit-prep-lua-test :as prep]
-             [hara.lang.impl-entry :as entry]
-             [hara.lang.library-snapshot :as snap]
-             [hara.lang.library-snapshot-prep-test :as lprep]
-              [std.lib.env :as env])
+               [hara.lang.book-entry :as e]
+              [hara.common.emit :as emit]
+              [hara.common.emit-prep-lua-test :as prep]
+              [hara.lang.impl :as impl]
+              [hara.lang.impl-entry :as entry]
+              [hara.lang.library :as lib]
+              [hara.lang.library-snapshot :as snap]
+              [xt.event.node-frame]
+              [hara.lang.library-snapshot-prep-test :as lprep]
+               [std.lib.env :as env])
   (:use code.test))
 
 (defn make-entry
@@ -47,10 +50,17 @@
          '{:id L.core
            :alias {}
            :link  {- L.core}})
-        (select-keys [:xtalk-ops :xtalk-profiles :polyfill-modules])))
+         (select-keys [:xtalk-ops :xtalk-profiles :polyfill-modules])))
   => '{:xtalk-ops #{:x-nil?}
        :xtalk-profiles #{:xtalk-common}
        :polyfill-modules #{}})
+
+(fact "hard-link xtalk helpers are added to entry deps"
+
+  (let [library (impl/clone-default-library)
+        book    (lib/get-book library :lua)]
+    (b/get-code-deps book 'xt.event.node-frame/frame))
+  => '#{xt.lang.common-data/obj-assign})
 
 (fact "entry emit failures include entry context"
 

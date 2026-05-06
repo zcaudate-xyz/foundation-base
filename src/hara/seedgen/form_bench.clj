@@ -47,10 +47,9 @@
          symbol)))
 
 (defn- bench-target-path
-  [project target-ns]
+  [project test-file target-ns]
   (str (fs/path (:root project)
-                (or (first (:test-paths project))
-                    "test")
+                (project/test-root test-file project)
                 (str (fs/ns->file target-ns) ".clj"))))
 
 (defn- bench-resolve-targets
@@ -86,13 +85,15 @@
                  target-langs    (form-common/target-normalize-langs (:lang params)
                                                                      default-langs)
                  target-entries  (mapv (fn [lang]
-                                         (let [target-ns (bench-target-ns test-ns
-                                                                          lang
-                                                                          (:rename params))]
-                                           {:lang lang
-                                            :ns target-ns
-                                             :path (bench-target-path proj target-ns)}))
-                                       target-langs)]
+                                          (let [target-ns (bench-target-ns test-ns
+                                                                           lang
+                                                                           (:rename params))]
+                                            {:lang lang
+                                             :ns target-ns
+                                             :path (bench-target-path proj
+                                                                      test-file
+                                                                      target-ns)}))
+                                        target-langs)]
             {:project proj
              :params params
              :test-ns test-ns

@@ -1,7 +1,7 @@
 (ns hara.common.emit-template
   (:require [hara.common.emit-preprocess :as preprocess]
-             [hara.common.emit-rewrite :as rewrite]
-             [hara.common.grammar-xtalk-system :as xtalk-system]))
+              [hara.common.emit-rewrite :as rewrite]
+              [hara.common.grammar-xtalk-system :as xtalk-system]))
 
 (def +code-state-keys+
   [:form
@@ -45,10 +45,12 @@
                                             grammar
                                             context)
         {:keys [ops profiles polyfill-modules]}
-        (xtalk-system/scan-xtalk form-rewrite)]
+        (xtalk-system/scan-xtalk form-rewrite)
+        deps (into (or deps #{})
+                   (xtalk-system/xtalk-ops-polyfill-symbols ops))]
     {:hmeta hmeta
-     :form form-rewrite
-     :deps deps
+      :form form-rewrite
+      :deps deps
      :deps-fragment deps-fragment
      :deps-native deps-native
      :xtalk-ops ops
