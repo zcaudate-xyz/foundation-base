@@ -130,7 +130,7 @@
                            (ruby-local-renames
                             (concat (filter symbol? args)
                                     (collect-callable-vars body))))
-          args*     (mapv rename-ruby-local args)
+          args*     (mapv #(or (get renames %) %) args)
           callables (into (set inherited)
                           (concat (filter symbol? args*)
                                   (map #(or (get renames %) %)
@@ -264,7 +264,7 @@
                          (ruby-local-renames
                           (concat (filter symbol? args)
                                   (collect-callable-vars body))))
-        args*     (mapv rename-ruby-local args)
+        args*     (mapv #(or (get renames %) %) args)
         callables (into #{}
                         (concat (filter symbol? args*)
                                 (map #(or (get renames %) %)

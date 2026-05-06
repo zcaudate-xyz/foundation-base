@@ -174,8 +174,14 @@
   [args grammar mopts]
   (str "("
        (clojure.string/join ", "
-                            (common/emit-array args grammar mopts))
+                             (common/emit-array args grammar mopts))
        ")"))
+
+(defn- ruby-indent-block
+  [s]
+  (->> (clojure.string/split-lines s)
+       (map #(str "  " %))
+       (clojure.string/join "\n")))
 
 (defn ruby-div
   [[_ a b & more] grammar mopts]
@@ -190,7 +196,16 @@
 
 (defn ruby-puts
   [[_ & args] grammar mopts]
-  (str "puts" (ruby-emit-args args grammar mopts)))
+  (let [statement-args (clojure.string/join ", "
+                                            (map #(common/emit-wrapping % grammar mopts)
+                                                 args))
+        wrapped-args   (clojure.string/join ", "
+                                            (common/emit-array args grammar mopts))]
+    (if (:wrapped mopts)
+      (str "puts(" wrapped-args ")")
+      (str "puts"
+           (when (seq args)
+             (str " " statement-args))))))
 
 (defn- ruby-callable-form?
   [form]
@@ -315,27 +330,33 @@
   "transform for `for:array`"
   {:added "4.1"}
   [[_ [e arr] & body]]
-  (let [arr*  (gensym "arr__")
-        bound (if (vector? e) e [e])
-        bound (vec (remove #{'_} bound))
-        body  (rewrite/rewrite-callable-body bound body)]
+  (let [grammar preprocess-base/*macro-grammar*
+        mopts   preprocess-base/*macro-opts*
+        emit-sym (fn [sym]
+                   (common/emit-symbol sym grammar mopts))
+        emit-body (fn [bound]
+                    (->> (rewrite/rewrite-callable-body (vec (remove #{'_} bound)) body)
+                         (cons 'do)
+                         (#(common/*emit-fn* % grammar mopts))
+                         (ruby-indent-block)))]
     (if (vector? e)
       (let [[i v] e]
-        (template/$
-         (do (var ~arr* ~arr)
-             (var ~i 0)
-             (while (< ~i (. ~arr* length))
-               (var ~v (. ~arr* [~i]))
-               ~@body
-               (:= ~i (+ ~i 1))))))
-      (let [idx (gensym "idx__")]
-        (template/$
-         (do (var ~arr* ~arr)
-             (var ~idx 0)
-             (while (< ~idx (. ~arr* length))
-               (var ~e (. ~arr* [~idx]))
-               ~@body
-               (:= ~idx (+ ~idx 1)))))))))
+        (list ':-
+              (str (common/*emit-fn* arr grammar mopts)
+                   ".each_with_index do |"
+                   (emit-sym v)
+                   ", "
+                   (emit-sym i)
+                   "|\n"
+                   (emit-body [i v])
+                   "\nend")))
+      (list ':-
+            (str (common/*emit-fn* arr grammar mopts)
+                 ".each do |"
+                 (emit-sym e)
+                 "|\n"
+                 (emit-body [e])
+                 "\nend")))))
 
 (defn tf-for-object
   "transform for `for:object`"
@@ -426,7 +447,7 @@
                            :symbol #{'x:iter-generator}
                            :macro #'fn/ruby-tf-x-iter-generator
                            :emit :macro}
-         :puts       {:op :puts :symbol #{'puts} :emit #'ruby-puts}
+         :puts       {:op :puts :symbol #{'puts} :emit #'ruby-puts :wrappable true}
         :nil?       {:op :nil? :symbol #{'nil?} :raw "nil?" :emit :postfix}
         :attr       {:op :attr :symbol #{'attr_accessor} :raw "attr_accessor" :emit :prefix}
         :end        {:op :end  :symbol #{'end}  :raw "end"  :emit :token}})))
