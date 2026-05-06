@@ -11,7 +11,7 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.event.base-route/interim-from-url :added "4.1"}
+^{:refer xt.event.base-route/interim-from-url :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "converts between url and tree forms"
 
   (!.dt
@@ -33,46 +33,6 @@
       {"id" true
        "type" true}])
 
-^{:refer xt.event.base-route/make-route :added "4.1"}
-(fact "tracks route state and listeners"
-
-  (!.dt
-   (var r (route/make-route "hello?auth=sign_in"))
-   (var calls [])
-   (var removed nil)
-   (var missing nil)
-   (var entry
-         (route/add-url-listener
-          r
-          "a1"
-          (fn [id data t meta]
-            (xt/x:arr-push calls (xt/x:get-key data "type")))
-          nil))
-   (route/set-url r "hello/world?auth=sign_out")
-   (:= removed (route/remove-listener r "a1"))
-   (:= missing (route/remove-listener r "missing"))
-   [(. r ["::"])
-    (route/get-url (route/make-route "hello?auth=sign_in"))
-    (route/get-segment (route/make-route "hello?auth=sign_in") [])
-    (route/get-param (route/make-route "hello?auth=sign_in") "auth" nil)
-    (route/get-all-params (route/make-route "hello?auth=sign_in") [])
-    [(. entry ["meta"] ["listener/id"])
-     (. entry ["meta"] ["listener/type"])]
-    ["a1"]
-    calls
-    [(. removed ["meta"] ["listener/id"])
-     missing]])
-  => (just-in
-      ["event.route"
-       "hello?auth=sign_in"
-       "hello"
-       "sign_in"
-       {}
-       ["a1" "route.url"]
-       (just ["a1"] :in-any-order)
-       ["route.url"]
-       ["a1" nil]]))
-
 ^{:refer xt.event.base-route/interim-to-url :added "4.1"}
 (fact "converts interim to url"
 
@@ -82,7 +42,7 @@
      "path" ["hello"]}))
   => "hello?id=1")
 
-^{:refer xt.event.base-route/path-to-tree :added "4.1"}
+^{:refer xt.event.base-route/path-to-tree :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "converts a path to a tree"
 
   (!.dt
@@ -91,7 +51,7 @@
       "[\"hello\"]" "world"
       "[\"hello\",\"world\"]" nil})
 
-^{:refer xt.event.base-route/interim-to-tree :added "4.1"}
+^{:refer xt.event.base-route/interim-to-tree :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "converts interim data to a tree"
 
   (!.dt
@@ -103,7 +63,7 @@
       "[\"hello\"]" nil
       "params" {"[\"hello\"]" {"id" "1"}}})
 
-^{:refer xt.event.base-route/path-from-tree :added "4.1"}
+^{:refer xt.event.base-route/path-from-tree :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "extracts a path from a tree"
 
   (!.dt
@@ -121,7 +81,7 @@
     ["hello"]))
   => {"id" "1"})
 
-^{:refer xt.event.base-route/interim-from-tree :added "4.1"}
+^{:refer xt.event.base-route/interim-from-tree :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "converts a tree back to interim form"
 
   (!.dt
@@ -161,7 +121,7 @@
     ["hello" "world"]))
   => {"[\"hello\"]" true})
 
-^{:refer xt.event.base-route/changed-path :added "4.1"}
+^{:refer xt.event.base-route/changed-path :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "diffs route paths from trees"
 
   (!.dt
@@ -206,6 +166,46 @@
     (route/make-route "hello?auth=sign_in")
     nil))
   => {"auth" "sign_in"})
+
+^{:refer xt.event.base-route/make-route :added "4.1" :seedgen/base {:lua {:suppress true}}}
+(fact "tracks route state and listeners"
+
+  (!.dt
+   (var r (route/make-route "hello?auth=sign_in"))
+   (var calls [])
+   (var removed nil)
+   (var missing nil)
+   (var entry
+   (route/add-url-listener
+           r
+           "a1"
+           (fn [id data t meta]
+             (xt/x:arr-push calls (xt/x:get-key data "type")))
+           nil))
+    (route/set-url r "hello/world?auth=sign_out" nil)
+    (:= removed (route/remove-listener r "a1"))
+    (:= missing (route/remove-listener r "missing"))
+   [(. r ["::"])
+    (route/get-url (route/make-route "hello?auth=sign_in"))
+    (route/get-segment (route/make-route "hello?auth=sign_in") [])
+    (route/get-param (route/make-route "hello?auth=sign_in") "auth" nil)
+    (route/get-all-params (route/make-route "hello?auth=sign_in") [])
+    [(. entry ["meta"] ["listener/id"])
+     (. entry ["meta"] ["listener/type"])]
+    ["a1"]
+    calls
+    [(. removed ["meta"] ["listener/id"])
+     missing]])
+  => (just-in
+      ["event.route"
+       "hello?auth=sign_in"
+       "hello"
+       "sign_in"
+       {}
+       ["a1" "route.url"]
+       (just ["a1"] :in-any-order)
+       ["route.url"]
+       ["a1" nil]]))
 
 ^{:refer xt.event.base-route/add-url-listener :added "4.1"}
 (fact "adds a url listener entry"

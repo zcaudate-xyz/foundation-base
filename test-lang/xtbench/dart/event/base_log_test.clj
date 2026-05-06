@@ -12,62 +12,6 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.event.base-log/queue-entry :added "4.1"}
-(fact "queues and slices log entries"
-
-  (!.dt
-   (var l (log/new-log {}))
-   (log/queue-entry l {:id "id-0"}
-                    (fn [x _]
-                      (return (xt/x:get-key x "id")))
-                    k/identity
-                    1)
-   (log/queue-entry l {:id "id-1"}
-                    (fn [x _]
-                      (return (xt/x:get-key x "id")))
-                    k/identity
-                    1)
-   (log/queue-entry l {:id "id-2"}
-                    (fn [x _]
-                      (return (xt/x:get-key x "id")))
-                    k/identity
-                    1)
-   [(log/get-count l)
-    (log/get-last l)
-    (log/get-head l 2)
-    (log/get-tail l 2)
-    (log/get-slice l 1 3)
-    (log/clear l)
-    (log/get-count l)])
-  => [3
-      {"id" "id-2"}
-      [{"id" "id-0"}
-       {"id" "id-1"}]
-      [{"id" "id-1"}
-       {"id" "id-2"}]
-      [{"id" "id-1"}
-       {"id" "id-2"}]
-      [{"id" "id-0"}
-       {"id" "id-1"}
-       {"id" "id-2"}]
-      0])
-
-^{:refer xt.event.base-log/add-listener :added "4.1"}
-(fact "adds and removes log listeners"
-
-  (!.dt
-   (var l (log/new-log {}))
-   (log/add-listener l "a1" (fn:> [id data t meta] nil) nil)
-   (log/add-listener l "b2" (fn:> [id data t meta] nil) nil)
-   [(log/list-listeners l)
-    (. (log/remove-listener l "b2") ["meta"])
-    (log/list-listeners l)])
-  => (just-in
-      [(just ["a1" "b2"] :in-any-order)
-       {"listener/id" "b2"
-        "listener/type" "log"}
-       ["a1"]]))
-
 ^{:refer xt.event.base-log/new-log :added "4.1"}
 (fact "creates a new log container"
 
@@ -174,6 +118,62 @@
   => [["a"]
       ["b"]
       20])
+
+^{:refer xt.event.base-log/queue-entry :added "4.1"}
+(fact "queues and slices log entries"
+
+  (!.dt
+   (var l (log/new-log {}))
+   (log/queue-entry l {:id "id-0"}
+                    (fn [x _]
+                      (return (xt/x:get-key x "id")))
+                    k/identity
+                    1)
+   (log/queue-entry l {:id "id-1"}
+                    (fn [x _]
+                      (return (xt/x:get-key x "id")))
+                    k/identity
+                    1)
+   (log/queue-entry l {:id "id-2"}
+                    (fn [x _]
+                      (return (xt/x:get-key x "id")))
+                    k/identity
+                    1)
+   [(log/get-count l)
+    (log/get-last l)
+    (log/get-head l 2)
+    (log/get-tail l 2)
+    (log/get-slice l 1 3)
+    (log/clear l)
+    (log/get-count l)])
+  => [3
+      {"id" "id-2"}
+      [{"id" "id-0"}
+       {"id" "id-1"}]
+      [{"id" "id-1"}
+       {"id" "id-2"}]
+      [{"id" "id-1"}
+       {"id" "id-2"}]
+      [{"id" "id-0"}
+       {"id" "id-1"}
+       {"id" "id-2"}]
+      0])
+
+^{:refer xt.event.base-log/add-listener :added "4.1"}
+(fact "adds and removes log listeners"
+
+  (!.dt
+   (var l (log/new-log {}))
+   (log/add-listener l "a1" (fn:> [id data t meta] nil) nil)
+   (log/add-listener l "b2" (fn:> [id data t meta] nil) nil)
+   [(log/list-listeners l)
+    (. (log/remove-listener l "b2") ["meta"])
+    (log/list-listeners l)])
+  => (just-in
+      [(just ["a1" "b2"] :in-any-order)
+       {"listener/id" "b2"
+        "listener/type" "log"}
+       ["a1"]]))
 
 (comment
   (s/snapto '[xt.event.base-log])

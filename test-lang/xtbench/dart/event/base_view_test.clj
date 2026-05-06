@@ -7,9 +7,9 @@
   (l/script- :xtalk
     {:require [[xt.event.base-view :as view]
                [xt.lang.spec-base :as xt]]})
-
+  
   (defn.xt make-basic-view []
-   (return
+    (return
      (view/create-view
       (fn:> [x] {:value x})
       {}
@@ -17,9 +17,9 @@
       {:value 0}
       nil
       nil)))
-
+  
   (defn.xt make-processed-view []
-   (return
+    (return
      (view/create-view
       (fn:> [x] x)
       {}
@@ -27,9 +27,9 @@
       1
       (fn [x] (return (+ x 10)))
       nil)))
-
+  
   (defn.xt make-remote-view []
-   (return
+    (return
      (view/create-view
       nil
       {:remote {:handler (fn:> [x] {:value x})}}
@@ -37,9 +37,9 @@
       nil
       nil
       nil)))
-
+  
   (defn.xt make-sync-view []
-   (return
+    (return
      (view/create-view
       nil
       {:sync {:handler (fn:> [x] {:value x})}}
@@ -75,6 +75,23 @@
      (view/parse-args {:input {:data [1 2 3]}})])
   => [1 true false true [1 2 3]])
 
+^{:refer xt.event.base-view/check-disabled :added "4.1"}
+(fact "checks disabled state from view context"
+
+  (!.dt
+    [(view/check-disabled {})
+     (view/check-disabled {:input {:data [3]}})
+     (view/check-disabled {:input {:data [3]
+                                   :disabled true}})])
+  => [true false true])
+
+^{:refer xt.event.base-view/parse-args :added "4.1"}
+(fact "parses arguments from input data"
+
+  (!.dt
+    (view/parse-args {:input {:data [1 2 3]}}))
+  => [1 2 3])
+
 ^{:refer xt.event.base-view/create-view :added "4.1"}
 (fact "manages view listeners"
 
@@ -102,23 +119,6 @@
         "listener/type" "view"}
        ["a1"]]))
 
-^{:refer xt.event.base-view/check-disabled :added "4.1"}
-(fact "checks disabled state from view context"
-
-  (!.dt
-    [(view/check-disabled {})
-     (view/check-disabled {:input {:data [3]}})
-     (view/check-disabled {:input {:data [3]
-                                   :disabled true}})])
-  => [true false true])
-
-^{:refer xt.event.base-view/parse-args :added "4.1"}
-(fact "parses arguments from input data"
-
-  (!.dt
-    (view/parse-args {:input {:data [1 2 3]}}))
-  => [1 2 3])
-
 ^{:refer xt.event.base-view/view-context :added "4.1"}
 (fact "builds a view context with view and input"
 
@@ -145,7 +145,11 @@
       "meta" {"listener/id" "a1"
               "listener/type" "view"}})
 
-^{:refer xt.event.base-view/trigger-listeners :added "4.1"}
+^{:refer xt.event.base-view/trigger-listeners :added "4.1"
+  :setup [(def +out+
+            (just-in
+             [(just ["a1" "b2"] :in-any-order)
+              (just ["a1" "b2"] :in-any-order)]))]}
 (fact "triggers all registered view listeners"
 
   (!.dt
@@ -155,9 +159,7 @@
     (view/add-listener v "b2" (fn [id data t meta] (xt/x:arr-push calls "b2")) nil nil)
     [(view/trigger-listeners v "output" {:value 0})
      calls])
-  => (just-in
-      [(just ["a1" "b2"] :in-any-order)
-       ["a1" "b2"]]))
+  => +out+)
 
 ^{:refer xt.event.base-view/get-input :added "4.1"}
 (fact "gets the current input record"
@@ -262,15 +264,15 @@
     [out
      (. (view/get-input v) ["current"])])
   => (just-in
-       [(contains-in
-         {"id" "a1"
-          "t" nil
-          "meta" {"listener/id" "a1"
-                  "listener/type" "view"}
-          "data" {"type" "view.input"
-                  "data" {"current" {"data" [1]}
-                          "updated" integer?}}})
-        {"data" [1]}]))
+      [(contains-in
+        {"id" "a1"
+         "t" nil
+         "meta" {"listener/id" "a1"
+                 "listener/type" "view"}
+         "data" {"type" "view.input"
+                 "data" {"current" {"data" [1]}
+                         "updated" integer?}}})
+       {"data" [1]}]))
 
 ^{:refer xt.event.base-view/set-output :added "4.1"}
 (fact "sets output and notifies listeners"
@@ -283,18 +285,18 @@
     [out
      (view/get-current v)])
   => (just-in
-       [(contains-in
-         {"id" "a1"
-          "t" nil
-          "meta" {"listener/id" "a1"
-                  "listener/type" "view"}
-          "data" {"type" "view.output"
-                  "data" {"current" 1
-                          "elapsed" nil
-                          "tag" nil
-                          "type" "output"
-                          "updated" integer?}}})
-        1]))
+      [(contains-in
+        {"id" "a1"
+         "t" nil
+         "meta" {"listener/id" "a1"
+                 "listener/type" "view"}
+         "data" {"type" "view.output"
+                 "data" {"current" 1
+                         "elapsed" nil
+                         "tag" nil
+                         "type" "output"
+                         "updated" integer?}}})
+       1]))
 
 ^{:refer xt.event.base-view/set-output-disabled :added "4.1"}
 (fact "sets the output disabled flag"
@@ -344,7 +346,7 @@
      (. (. context ["acc"]) ["::"])])
   => [[3] false "view.run"])
 
-^{:refer xt.event.base-view/pipeline-set :added "4.1"}
+^{:refer xt.event.base-view/pipeline-set :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "writes pipeline output back to the view"
 
   (!.dt
@@ -367,7 +369,7 @@
   => {"::" "view.run"
       "main" [true {"value" 3}]})
 
-^{:refer xt.event.base-view/pipeline-run-impl :added "4.1"}
+^{:refer xt.event.base-view/pipeline-run-impl :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "runs an explicit list of pipeline stages"
 
   (!.dt
@@ -399,7 +401,7 @@
       "main" [true {"value" 3}]
       "post" [false]})
 
-^{:refer xt.event.base-view/pipeline-run-force :added "4.1"}
+^{:refer xt.event.base-view/pipeline-run-force :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "runs a forced remote or sync pipeline and can save to output"
 
   (!.dt

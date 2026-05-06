@@ -66,27 +66,6 @@
                    "listeners" []}]])])
   => +out+)
 
-^{:refer xt.event.base-animate/make-binary-transitions :added "4.1"
-  :setup [(def +out+
-            [0 nil 1 nil 0 {"running" false, "queued" [], "animation" nil}])]}
-(fact "provides animation transition helpers"
-
-  (!.dt
-    (var t (base-animate/make-binary-transitions
-            mock/MOCK
-            false
-            {}))
-    (var #{indicator
-           zero-fn
-           one-fn} t)
-    [(mock/get-value indicator)
-     (one-fn nil)
-     (mock/get-value indicator)
-     (zero-fn nil)
-     (mock/get-value indicator)
-     (base-animate/new-progressing)])
-  => +out+)
-
 ^{:refer xt.event.base-animate/listen-single :added "4.1"}
 (fact "listens to a single observed value"
 
@@ -356,6 +335,27 @@
   => (contains-in {"animation" "anim"
                    "queued" empty?
                    "running" false}))
+
+^{:refer xt.event.base-animate/make-binary-transitions :added "4.1"
+  :setup [(def +out+
+            [0 nil 1 nil 0 {"running" false, "queued" [], "animation" nil}])]}
+(fact "provides animation transition helpers"
+
+  (!.dt
+    (var t (base-animate/make-binary-transitions
+            mock/MOCK
+            false
+            {}))
+    (var #{indicator
+           zero-fn
+           one-fn} t)
+    [(mock/get-value indicator)
+     (one-fn nil)
+     (mock/get-value indicator)
+     (zero-fn nil)
+     (mock/get-value indicator)
+     (base-animate/new-progressing)])
+  => +out+)
 
 ^{:refer xt.event.base-animate/make-binary-indicator :added "4.1"}
 (fact "creates a binary indicator trigger"

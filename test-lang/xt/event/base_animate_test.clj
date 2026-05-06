@@ -40,7 +40,6 @@
               {"a" 1, "b" {"c" 2}}]))]}
 (fact "derives, observes, and maps animation values"
 
-  ^{:seedgen/base {:lua {:expect (l/as-lua +out+)}}}
   (!.js
     (var ref {:current {}})
     (var obs (mock/new-observed 0.5))
@@ -79,7 +78,7 @@
                    "::" "observed"
                    "listeners" []}]])])
   => +out+
-
+  
   (!.lua
     (var ref {:current {}})
     (var obs (mock/new-observed 0.5))
@@ -117,7 +116,7 @@
        [["b"] "c" {"value" 2
                    "::" "observed"
                    "listeners" []}]])])
-  => (l/as-lua +out+)
+  => +out+
 
   (!.py
     (var ref {:current {}})

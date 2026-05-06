@@ -8,7 +8,7 @@
             [code.mcp.tool.code-test :as code-test]
             [code.mcp.tool.form-heal :as form-heal]
             [code.mcp.tool.jvm-namespace :as jvm-namespace]
-            [code.mcp.tool.hara.lang :as hara.lang]))
+            [code.mcp.tool.hara-lang :as hara.lang]))
 
 (defonce *server* (atom nil))
 

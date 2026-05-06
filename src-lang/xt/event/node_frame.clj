@@ -3,6 +3,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.lang.common-string :as str]]})
 
 (defspec.xt NodeFrame :xt/any)

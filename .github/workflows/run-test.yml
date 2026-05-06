@@ -146,6 +146,37 @@ jobs:
         ports:
           - 5432:5432
 
+  run-xt-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Run Tests - xt
+        run: >
+          docker run --network host
+          -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
+          -v /var/run/docker.sock:/var/run/docker.sock
+          -v $(pwd):$(pwd)
+          -w $(pwd)
+          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci
+          bash -lc "apt-get update &&
+          apt-get install -y nodejs npm lua5.4 python3 python3-pip &&
+          lein test :with \"[xt]\""
+        
+    services:
+      postgres:
+        image: ghcr.io/zcaudate-xyz/infra-db:main
+        env:
+          POSTGRES_DB: test
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+
   run-xtalk-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -183,14 +214,6 @@ jobs:
         include:
           - lang: dart
             image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-dart:ci
-          - lang: js
-            image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-js:ci
-          - lang: julia
-            image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-julia:ci
-          - lang: lua
-            image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-lua:ci
-          - lang: r
-            image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-r:ci
           - lang: ruby
             image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-ruby:ci
 

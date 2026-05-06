@@ -18,10 +18,7 @@
               (.printStackTrace e))))))
     (catch Throwable e
       (str "Error: " (.getMessage e) "\n"
-           "ex-data : " (pr-str (ex-data e)) "\n"
-           (with-out-str
-             (binding [*err* *out*]
-               (.printStackTrace ^Throwable (ex-info "err" {}))))))))
+           "ex-data : " (pr-str (ex-data e))))))
 
 (defn lang-emit-as-fn
   [_ {:keys [type

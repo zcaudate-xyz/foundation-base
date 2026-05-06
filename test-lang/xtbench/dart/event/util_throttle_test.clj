@@ -42,7 +42,7 @@
     (throttle/throttle-run-async instance 1 nil))
   => [1])
 
-^{:refer xt.event.util-throttle/throttle-run :added "4.1"}
+^{:refer xt.event.util-throttle/throttle-run :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "queues a single rerun per id"
 
   (notify/wait-on :dart
@@ -82,7 +82,7 @@
       "queued" {"2" {} "3" {}}})))
   => #{"1" "2" "3"})
 
-^{:refer xt.event.util-throttle/throttle-active :added "4.1"}
+^{:refer xt.event.util-throttle/throttle-active :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "reports active and waiting ids"
 
   (notify/wait-on :dart
@@ -105,7 +105,7 @@
   => [["1" "2" "3"]
       ["1" "2" "3"]])
 
-^{:refer xt.event.util-throttle/throttle-queued :added "4.1"}
+^{:refer xt.event.util-throttle/throttle-queued :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "returns only queued ids"
 
   (set

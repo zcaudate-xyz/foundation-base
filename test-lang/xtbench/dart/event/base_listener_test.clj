@@ -11,80 +11,6 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.event.base-listener/arrayify-path :added "4.1"}
-(fact "normalizes listener paths"
-
-  (!.dt
-    [(event/arrayify-path nil)
-     (event/arrayify-path {})
-     (event/arrayify-path "a")
-     (event/arrayify-path ["a"])])
-  => [[] [] ["a"] ["a"]])
-
-^{:refer xt.event.base-listener/add-listener :added "4.1"}
-(fact "manages listeners and keyed listeners"
-
-  (!.dt
-    (var c (event/make-container
-            (fn:> {:hello "world"})
-            "custom.container"
-            {:info {:name "hello"}}))
-    (var calls [])
-    (event/add-listener c
-                        "a1"
-                        "custom"
-                        (fn [id data t meta]
-                          (xt/x:arr-push calls "a1"))
-                        {:label "one"}
-                        nil)
-    (event/add-listener c
-                        "b2"
-                        "custom"
-                        (fn [id data t meta]
-                          (xt/x:arr-push calls "b2"))
-                        nil
-                        (fn [e]
-                          (return (xt/x:get-key e "ok"))))
-    (event/add-keyed-listener c
-                              "group"
-                              "k1"
-                              "custom"
-                              (fn [id data t meta]
-                                (xt/x:arr-push calls "k1"))
-                              {:label "group"}
-                              nil)
-    [(. c ["::"])
-     (. c ["data"])
-     (event/list-listeners c)
-     (event/list-listener-types c)
-     (event/list-keyed-listeners c "group")
-     (event/all-keyed-listeners c)
-     (event/trigger-listeners c {:ok true :data "hello"})
-     (event/trigger-keyed-listeners c "group" {:data "world"})
-     calls
-     (. (event/remove-listener c "a1") ["meta"])
-     (. (event/remove-keyed-listener c "group" "k1") ["meta"])
-     (xt/x:obj-keys (event/clear-listeners c))
-     (event/list-listeners c)])
-  => (just-in
-      ["custom.container"
-       {"hello" "world"}
-       (just ["a1" "b2"] :in-any-order)
-       {"custom" (just ["a1" "b2"] :in-any-order)}
-       ["k1"]
-       {"group" ["k1"]}
-       (just ["a1" "b2"] :in-any-order)
-       ["k1"]
-       ["a1" "b2" "k1"]
-       {"listener/id" "a1"
-        "listener/type" "custom"
-        "label" "one"}
-       {"listener/id" "k1"
-        "listener/type" "custom"
-        "label" "group"}
-       ["b2"]
-       []]))
-
 ^{:refer xt.event.base-listener/blank-container :added "4.1"}
 (fact "creates a blank listener container"
 
@@ -135,6 +61,16 @@
        "listener/id" "a1"
        "listener/type" "custom"}])
 
+^{:refer xt.event.base-listener/arrayify-path :added "4.1"}
+(fact "normalizes listener paths"
+
+  (!.dt
+    [(event/arrayify-path nil)
+     (event/arrayify-path {})
+     (event/arrayify-path "a")
+     (event/arrayify-path ["a"])])
+  => [[] [] ["a"] ["a"]])
+
 ^{:refer xt.event.base-listener/clear-listeners :added "4.1"}
 (fact "clears non-keyed listeners"
 
@@ -146,6 +82,72 @@
      (event/list-listeners c)])
   => (just-in [(just ["a1" "b2"] :in-any-order)
                []]))
+
+^{:refer xt.event.base-listener/add-listener :added "4.1"
+  :setup [(def +out+
+            (just-in
+             ["custom.container"
+              {"hello" "world"}
+              (just ["a1" "b2"] :in-any-order)
+              {"custom" (just ["a1" "b2"] :in-any-order)}
+              ["k1"]
+              {"group" ["k1"]}
+              (just ["a1" "b2"] :in-any-order)
+              ["k1"]
+              ["a1" "b2" "k1"]
+              {"listener/id" "a1"
+               "listener/type" "custom"
+               "label" "one"}
+              {"listener/id" "k1"
+               "listener/type" "custom"
+               "label" "group"}
+              ["b2"]
+              empty?]))]}
+(fact "manages listeners and keyed listeners"
+
+  (!.dt
+    (var c (event/make-container
+            (fn:> {:hello "world"})
+            "custom.container"
+            {:info {:name "hello"}}))
+    (var calls [])
+    (event/add-listener c
+                        "a1"
+                        "custom"
+                        (fn [id data t meta]
+                          (xt/x:arr-push calls "a1"))
+                        {:label "one"}
+                        nil)
+    (event/add-listener c
+                        "b2"
+                        "custom"
+                        (fn [id data t meta]
+                          (xt/x:arr-push calls "b2"))
+                        nil
+                        (fn [e]
+                          (return (xt/x:get-key e "ok"))))
+    (event/add-keyed-listener c
+                              "group"
+                              "k1"
+                              "custom"
+                              (fn [id data t meta]
+                                (xt/x:arr-push calls "k1"))
+                              {:label "group"}
+                              nil)
+    [(. c ["::"])
+     (. c ["data"])
+     (event/list-listeners c)
+     (event/list-listener-types c)
+     (event/list-keyed-listeners c "group")
+     (event/all-keyed-listeners c)
+     (event/trigger-listeners c {:ok true :data "hello"})
+     (event/trigger-keyed-listeners c "group" {:data "world"})
+     calls
+     (. (event/remove-listener c "a1") ["meta"])
+     (. (event/remove-keyed-listener c "group" "k1") ["meta"])
+     (xt/x:obj-keys (event/clear-listeners c))
+     (event/list-listeners c)])
+  => +out+)
 
 ^{:refer xt.event.base-listener/remove-listener :added "4.1"}
 (fact "removes a listener by id"
@@ -215,13 +217,13 @@
     (event/add-listener
      c "a1" "custom"
      (fn [id data t meta]
-        (xt/x:arr-push calls "a1"))
+       (xt/x:arr-push calls "a1"))
      nil
      nil)
     (event/add-listener
      c "b2" "custom"
      (fn [id data t meta]
-        (xt/x:arr-push calls "b2"))
+       (xt/x:arr-push calls "b2"))
      nil
      (fn [e]
        (return (xt/x:get-key e "ok"))))
@@ -292,23 +294,23 @@
     (var calls [])
     (event/add-keyed-listener
      c "group-a" "k1" "custom"
-      (fn [id data t meta]
-        (xt/x:arr-push calls "k1"))
+     (fn [id data t meta]
+       (xt/x:arr-push calls "k1"))
      nil nil)
     (event/add-keyed-listener
      c "group-a" "k2" "custom"
-      (fn [id data t meta]
-        (xt/x:arr-push calls "k2"))
+     (fn [id data t meta]
+       (xt/x:arr-push calls "k2"))
      nil nil)
     (event/add-keyed-listener
      c "group-b" "k3" "custom"
-      (fn [id data t meta]
-        (xt/x:arr-push calls "k3"))
+     (fn [id data t meta]
+       (xt/x:arr-push calls "k3"))
      nil nil)
     [(event/trigger-keyed-listeners c "group-a" {:ok true})
      calls])
   => (just-in [(just ["k1" "k2"] :in-any-order)
-               ["k1" "k2"]]))
+               (just ["k1" "k2"] :in-any-order)]))
 
 (comment
   (s/snapto '[xt.event.base-listener])

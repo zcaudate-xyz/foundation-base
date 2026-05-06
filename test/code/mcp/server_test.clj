@@ -2,7 +2,7 @@
   (:require [code.mcp.base.server :as base-server]
             [code.mcp.server :as server]
             [code.mcp.tool.basic :as basic]
-            [code.mcp.tool.hara.lang :as hara.lang])
+            [code.mcp.tool.hara-lang :as hara.lang])
   (:use code.test))
 
 ^{:refer code.mcp.tool.basic/echo-fn :added "4.0"}
@@ -17,7 +17,7 @@
   => {:content [{:type "text" :text "ping"}]
       :isError false})
 
-^{:refer code.mcp.tool.hara.lang/lang-emit-as-safe :added "4.0"}
+^{:refer code.mcp.tool.hara-lang/lang-emit-as-safe :added "4.0"}
 (fact "safely emits code"
   (hara.lang/lang-emit-as-safe :lua "(+ 1 2)")
   => "1 + 2"
@@ -25,7 +25,7 @@
   (hara.lang/lang-emit-as-safe :js "(+ 1 2)")
   => "1 + 2")
 
-^{:refer code.mcp.tool.hara.lang/lang-emit-as-fn :added "4.0"}
+^{:refer code.mcp.tool.hara-lang/lang-emit-as-fn :added "4.0"}
 (fact "tool wrapper for emit"
   (hara.lang/lang-emit-as-fn nil {:type "lua" :code "(+ 1 2)"})
   => {:content [{:type "text" :text "1 + 2"}]

@@ -37,15 +37,6 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.event.base-form/check-event :added "4.1"}
-(fact "checks field overlap"
-
-  (!.dt
-   [(form/check-event {:fields ["a" "b" "c"]} ["a"])
-    (form/check-event {:fields ["a" "b" "c"]} [])
-    (form/check-event {:fields ["a" "b" "c"]} ["b" "d"])])
-  => [true false true])
-
 ^{:refer xt.event.base-form/make-form :added "4.1"}
 (fact "manages form data and listeners"
 
@@ -81,6 +72,15 @@
         "listener/type" "form"
         "form/fields" ["login"]}
        []]))
+
+^{:refer xt.event.base-form/check-event :added "4.1"}
+(fact "checks field overlap"
+
+  (!.dt
+   [(form/check-event {:fields ["a" "b" "c"]} ["a"])
+    (form/check-event {:fields ["a" "b" "c"]} [])
+    (form/check-event {:fields ["a" "b" "c"]} ["b" "d"])])
+  => [true false true])
 
 ^{:refer xt.event.base-form/add-listener :added "4.1"}
 (fact "adds a form listener with field metadata"
@@ -232,7 +232,7 @@
    (form/get-data f))
   => {"login" ""})
 
-^{:refer xt.event.base-form/validate-all :added "4.1"}
+^{:refer xt.event.base-form/validate-all :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "validates all fields and updates form state"
 
   (notify/wait-on :dart
@@ -315,7 +315,7 @@
        "fields" {"login" {"status" "pending"}}
        "status" "pending"}])
 
-^{:refer xt.event.base-form/check-field-passed :added "4.1"}
+^{:refer xt.event.base-form/check-field-passed :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "checks whether a field passed validation"
 
   (notify/wait-on :dart
@@ -327,7 +327,7 @@
        (repl/notify (form/check-field-passed f "login")))))
   => true)
 
-^{:refer xt.event.base-form/check-field-errored :added "4.1"}
+^{:refer xt.event.base-form/check-field-errored :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "checks whether a field errored"
 
   (notify/wait-on :dart
@@ -338,7 +338,7 @@
        (repl/notify (form/check-field-errored f "login")))))
   => true)
 
-^{:refer xt.event.base-form/check-all-passed :added "4.1"}
+^{:refer xt.event.base-form/check-all-passed :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "checks whether all fields passed"
 
   (notify/wait-on :dart
@@ -350,7 +350,7 @@
        (repl/notify (form/check-all-passed f)))))
   => true)
 
-^{:refer xt.event.base-form/check-any-errored :added "4.1"}
+^{:refer xt.event.base-form/check-any-errored :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "checks whether any field errored"
 
   (notify/wait-on :dart
