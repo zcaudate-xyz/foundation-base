@@ -14,7 +14,7 @@
 ^{:refer xt.lang.spec-base/x:return-eval :added "4.1"}
 (fact "evaluates code through wrapped return handlers"
 
-  ^{:seedgen/base   {:lua    {:transform {"1 + 1" "return 1 + 1" }}
+  ^{:seedgen/base   {:lua    {:transform {"1 + 1" "return 1 + 1"}}
                      :python {:suppress true}
                      :dart   {:suppress true}}}
    (!.js
