@@ -3,6 +3,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.lang.spec-promise :as promise]
              [xt.event.node-frame :as frame]]})
 
@@ -79,7 +80,7 @@
   (var signal-subs (xt/x:get-key space-subs signal))
   (when (xt/x:not-nil? signal-subs)
     (xt/x:del-key signal-subs transport-id)
-    (when (== 0 (xt/x:len (xt/x:obj-keys signal-subs)))
+    (when (== 0 (xt/x:len (xtd/obj-keys signal-subs)))
       (xt/x:del-key space-subs signal)))
   (return (-/prune-subscription-signal-loop space-subs
                                             signal-ids
@@ -96,10 +97,10 @@
   (var space-subs (xt/x:get-key subscriptions space))
   (when (xt/x:not-nil? space-subs)
     (-/prune-subscription-signal-loop space-subs
-                                      (xt/x:obj-keys space-subs)
+                                      (xtd/obj-keys space-subs)
                                       transport-id
                                       0)
-    (when (== 0 (xt/x:len (xt/x:obj-keys space-subs)))
+    (when (== 0 (xt/x:len (xtd/obj-keys space-subs)))
       (xt/x:del-key subscriptions space)))
   (return (-/prune-subscription-space-loop subscriptions
                                            space-ids
@@ -115,7 +116,7 @@
   (xt/x:del-key connections transport-id)
   (var subscriptions (-/get-subscriptions node))
   (-/prune-subscription-space-loop subscriptions
-                                   (xt/x:obj-keys subscriptions)
+                                   (xtd/obj-keys subscriptions)
                                    transport-id
                                    0)
   (return prev))
@@ -167,9 +168,9 @@
     (return nil))
   (var prev (xt/x:get-key signal-subs transport-id))
   (xt/x:del-key signal-subs transport-id)
-  (when (== 0 (xt/x:len (xt/x:obj-keys signal-subs)))
+  (when (== 0 (xt/x:len (xtd/obj-keys signal-subs)))
     (xt/x:del-key space-subs signal))
-  (when (== 0 (xt/x:len (xt/x:obj-keys space-subs)))
+  (when (== 0 (xt/x:len (xtd/obj-keys space-subs)))
     (xt/x:del-key subscriptions (or space frame/SPACE_NODE)))
   (return prev))
 
@@ -186,8 +187,10 @@
         (return (or space-subs {}))
         (if (xt/x:nil? space-subs)
           (return [])
-          (return (xt/x:obj-keys (or (xt/x:get-key space-subs signal)
-                                     {}))))))))
+          (return (xtd/arr-sort (xtd/obj-keys (or (xt/x:get-key space-subs signal)
+                                                  {}))
+                                (fn [x] (return x))
+                                xt/x:str-lt)))))))
 
 (defn.xt target-ids
   "lists transport ids subscribed for a stream"

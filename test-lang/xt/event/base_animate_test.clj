@@ -2,7 +2,7 @@
   (:require [hara.lang :as l])
   (:use code.test))
 
-^{:seedgen/root {:all true}}
+^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]
@@ -42,6 +42,84 @@
 
   ^{:seedgen/base {:lua {:expect (l/as-lua +out+)}}}
   (!.js
+    (var ref {:current {}})
+    (var obs (mock/new-observed 0.5))
+    (var get-style (fn:> [e]
+                         (. e
+                            ["current"]
+                            ["props"]
+                            ["style"])))
+    (base-animate/listen-single
+     mock/MOCK
+     ref
+     obs
+     (fn:> [v]
+           {:style {:opacity (+ 0.2 v)}}))
+    [(mock/get-value
+      (base-animate/new-derived
+       mock/MOCK
+       (fn:> [a b c] (+ a b c))
+       [(mock/new-observed 1)
+        (mock/new-observed 2)
+        (mock/new-observed 3)]))
+     (get-style ref)
+     (mock/set-value obs 0.4)
+     (get-style ref)
+     (base-animate/get-map-paths
+      mock/MOCK
+      {:a (mock/new-observed 1)
+       :b {:c (mock/new-observed 2)}})
+     (base-animate/get-map-input
+      mock/MOCK
+      [[[] "a" {"value" 1
+                "::" "observed"
+                "listeners" []}]
+       [[] "b" false]
+       [["b"] "c" {"value" 2
+                   "::" "observed"
+                   "listeners" []}]])])
+  => +out+
+
+  (!.lua
+    (var ref {:current {}})
+    (var obs (mock/new-observed 0.5))
+    (var get-style (fn:> [e]
+                         (. e
+                            ["current"]
+                            ["props"]
+                            ["style"])))
+    (base-animate/listen-single
+     mock/MOCK
+     ref
+     obs
+     (fn:> [v]
+           {:style {:opacity (+ 0.2 v)}}))
+    [(mock/get-value
+      (base-animate/new-derived
+       mock/MOCK
+       (fn:> [a b c] (+ a b c))
+       [(mock/new-observed 1)
+        (mock/new-observed 2)
+        (mock/new-observed 3)]))
+     (get-style ref)
+     (mock/set-value obs 0.4)
+     (get-style ref)
+     (base-animate/get-map-paths
+      mock/MOCK
+      {:a (mock/new-observed 1)
+       :b {:c (mock/new-observed 2)}})
+     (base-animate/get-map-input
+      mock/MOCK
+      [[[] "a" {"value" 1
+                "::" "observed"
+                "listeners" []}]
+       [[] "b" false]
+       [["b"] "c" {"value" 2
+                   "::" "observed"
+                   "listeners" []}]])])
+  => (l/as-lua +out+)
+
+  (!.py
     (var ref {:current {}})
     (var obs (mock/new-observed 0.5))
     (var get-style (fn:> [e]
@@ -227,7 +305,7 @@
                           [empty? "b" false]
                           [["b"] "c" {"::" "observed", "value" 2, "listeners" empty?}]]))]}
 (fact "collects animated map paths recursively"
-  
+
   ^{:seedgen/base {:lua {:expect (l/as-lua +out+)}}}
   (!.js
     (xtd/arr-sort
@@ -240,7 +318,7 @@
      xtd/second
      xt/x:str-lt))
   => +out+
-  
+
   (!.lua
     (xtd/arr-sort
      (base-animate/get-map-paths-inner
@@ -280,7 +358,6 @@
        :b {:c (mock/new-observed 2)}})
      xtd/second
      xt/x:str-gt))
-  
   => +out+
 
   (!.lua

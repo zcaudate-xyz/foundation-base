@@ -3,6 +3,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.lang.spec-promise :as promise]
              [xt.event.base-listener :as event-common]
              [xt.event.node-frame :as frame]
@@ -91,7 +92,9 @@
   "lists registered request handlers"
   {:added "4.1"}
   [node]
-  (return (xt/x:obj-keys (xt/x:get-key node "handlers"))))
+  (return (xtd/arr-sort (xtd/obj-keys (xt/x:get-key node "handlers"))
+                        (fn [x] (return x))
+                        xt/x:str-lt)))
 
 (defn.xt register-trigger
   "registers a shared stream trigger"
@@ -125,7 +128,9 @@
   "lists registered stream triggers"
   {:added "4.1"}
   [node]
-  (return (xt/x:obj-keys (xt/x:get-key node "triggers"))))
+  (return (xtd/arr-sort (xtd/obj-keys (xt/x:get-key node "triggers"))
+                        (fn [x] (return x))
+                        xt/x:str-lt)))
 
 (defn.xt get-transport
   "gets an attached transport"
@@ -138,7 +143,9 @@
   "lists attached transports"
   {:added "4.1"}
   [node]
-  (return (xt/x:obj-keys (xt/x:get-key node "transports"))))
+  (return (xtd/arr-sort (xtd/obj-keys (xt/x:get-key node "transports"))
+                        (fn [x] (return x))
+                        xt/x:str-lt)))
 
 (defn.xt list-subscriptions
   "lists router subscriptions"

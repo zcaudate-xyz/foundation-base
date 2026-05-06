@@ -3,6 +3,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.event.node-frame :as frame]]})
 
 (defspec.xt NodeSpace :xt/any)
@@ -60,7 +61,9 @@
   "lists all current node spaces"
   {:added "4.1"}
   [node]
-  (return (xt/x:obj-keys (xt/x:get-key node "spaces"))))
+  (return (xtd/arr-sort (xtd/obj-keys (xt/x:get-key node "spaces"))
+                        (fn [x] (return x))
+                        xt/x:str-lt)))
 
 (defn.xt get-space-state
   "gets state for a node space"
