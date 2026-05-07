@@ -76,6 +76,7 @@
 
 (declare multiline-indent-prefix)
 (declare render-map-entry)
+(declare render-script-config-string)
 
 (defn- unwrap-meta-string
   [s]
@@ -159,14 +160,59 @@
     (nil? requires)
     []
 
-    :else
-    [requires]))
+     :else
+     [requires]))
+
+(defn- strip-meta-keys
+  [form keys]
+  (if (instance? clojure.lang.IObj form)
+    (let [m      (meta form)
+          next-m (some-> m (apply dissoc keys))]
+      (cond
+        (nil? m)
+        form
+
+        (= m next-m)
+        form
+
+        :else
+        (with-meta form next-m)))
+    form))
 
 (defn- require-target
   [require-spec]
   (if (vector? require-spec)
     (first require-spec)
     require-spec))
+
+(defn- consume-script-extra-requires
+  [script-str target-lang]
+  (let [root       (nav/parse-root script-str)
+        script-nav (nav/down root)
+        script-form (some-> script-nav nav/value)
+        script-lang (some-> script-form second common/seedgen-normalize-runtime-lang)
+        config-nav  (some-> script-nav nav/down nav/right nav/right)
+        config      (when (and config-nav
+                               (map? (nav/value config-nav)))
+                      (nav/value config-nav))
+        requires    (some-> config :require normalize-script-requires)]
+    (if (and config (seq requires))
+      (let [target-lang  (common/seedgen-normalize-runtime-lang target-lang)
+            drop-extra?  (not= target-lang script-lang)
+            tagged?      (some #(-> % meta :seedgen/extra) requires)
+            next-requires (->> requires
+                               (remove #(and drop-extra?
+                                             (-> % meta :seedgen/extra)))
+                               (mapv #(strip-meta-keys % [:seedgen/extra])))
+            current-config-str (some-> config-nav nav/block block/block-string)]
+        (if tagged?
+          (-> config-nav
+              (nav/replace (parse-first-block
+                            (render-script-config-string current-config-str
+                                                         (assoc config :require next-requires))))
+              nav/root-string)
+          script-str))
+      script-str)))
 
 (defn- merge-script-requires
   [current-requires extra-requires]
@@ -244,7 +290,8 @@
 
 (defn- augment-script-string
   [script-str output lang]
-  (let [extra-requires (root-script-extra-requires output lang)]
+  (let [script-str      (consume-script-extra-requires script-str lang)
+        extra-requires (root-script-extra-requires output lang)]
     (if (empty? extra-requires)
       script-str
       (let [root       (nav/parse-root script-str)

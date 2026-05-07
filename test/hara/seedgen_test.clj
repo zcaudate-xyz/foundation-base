@@ -63,6 +63,24 @@
 (def ^:private +seedgen-extra-require-format+
   #"(?ms):require \[\[xt\.lang\.spec-base :as xt\]\n\s+\[xt\.lang\.common-repl :as repl\]\n\s+\[python\.core\.common-promise :as p\]\]")
 
+(def ^:private +seedgen-script-extra-source+
+  (str "(ns xt.sample.script-extra-test\n"
+       "  (:use code.test)\n"
+       "  (:require [hara.lang :as l]))\n\n"
+       "^{:seedgen/root {:all true\n"
+       "                 :langs [:python]\n"
+       "                 :python {:extra [[python.lib.driver-sqlite :as py-sqlite]]}}}\n"
+       "(l/script- :js\n"
+       "  {:runtime :basic\n"
+       "   :require [[xt.lang.spec-base :as xt]\n"
+       "             [xt.lang.common-repl :as repl]\n"
+       "             ^{:seedgen/extra true}\n"
+       "             [js.lib.driver-sqlite :as js-sqlite]]})\n\n"
+       "^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n"
+       "(fact \"drops inline script extras for other languages\"\n"
+       "  (!.js (+ 1 2 3))\n"
+       "  => 6)\n"))
+
 (def ^:private +seedgen-meta-shorthand-source+
   (str "(ns xt.sample.meta-test\n"
        "  (:use code.test)\n"
@@ -155,6 +173,23 @@
     {:root root
      :path path
      :bench-path (.getAbsolutePath (java.io.File. root "test/xtbench/python/sample/extra_test.clj"))
+     :lookup lookup
+     :project project}))
+
+(defn- seedgen-script-extra-context
+  [prefix]
+  (let [root     (.toFile (java.nio.file.Files/createTempDirectory prefix
+                                                                   (make-array java.nio.file.attribute.FileAttribute 0)))
+        test-dir (doto (java.io.File. root "test/xt/sample")
+                   (.mkdirs))
+        path     (.getAbsolutePath (java.io.File. test-dir "script_extra_test.clj"))
+        lookup   {'xt.sample.script-extra-test path}
+        project  {:root (.getAbsolutePath root)
+                  :test-paths ["test"]}]
+    (spit path +seedgen-script-extra-source+)
+    {:root root
+     :path path
+     :bench-path (.getAbsolutePath (java.io.File. root "test/xtbench/python/sample/script_extra_test.clj"))
      :lookup lookup
      :project project}))
 
@@ -291,6 +326,22 @@
   => [true true true])
 
 ^{:refer hara.seedgen/seedgen-langadd :added "4.1"}
+(fact "langadd drops inline script extras from non-target runtimes"
+  (let [{:keys [root path lookup project]} (seedgen-script-extra-context "seedgen-langadd-script-extra")]
+    (try
+      (form-infile/seedgen-langadd 'xt.sample.script-extra
+                                   {:lang [:python] :write true}
+                                   lookup
+                                   project)
+      (let [content (slurp path)]
+        [(count (re-seq #"\(l/script- :python" content))
+         (count (re-seq #"\[python\.lib\.driver-sqlite :as py-sqlite\]" content))
+         (count (re-seq #"\[js\.lib\.driver-sqlite :as js-sqlite\]" content))])
+      (finally
+         (fs/delete root {:recursive true}))))
+  => [1 1 1])
+
+^{:refer hara.seedgen/seedgen-langadd :added "4.1"}
 (fact "bulk seedgen tasks only return test namespaces"
   (let [{:keys [root lookup project]} (seedgen-selector-context "seedgen-task-selector")]
     (try
@@ -416,6 +467,22 @@
       (finally
          (fs/delete root {:recursive true}))))
   => [true true true])
+
+^{:refer hara.seedgen/seedgen-benchadd :added "4.1"}
+(fact "benchadd drops inline script extras from non-target runtimes"
+  (let [{:keys [root bench-path lookup project]} (seedgen-script-extra-context "seedgen-benchadd-script-extra")]
+    (try
+      (form-bench/seedgen-benchadd 'xt.sample.script-extra
+                                   {:lang [:python] :write true}
+                                   lookup
+                                   project)
+      (let [content (slurp bench-path)]
+        [(count (re-seq #"\(l/script- :python" content))
+         (count (re-seq #"\[python\.lib\.driver-sqlite :as py-sqlite\]" content))
+         (count (re-seq #"\[js\.lib\.driver-sqlite :as js-sqlite\]" content))])
+      (finally
+         (fs/delete root {:recursive true}))))
+  => [1 1 0])
 
 ^{:refer hara.seedgen/seedgen-benchadd :added "4.1"}
 (fact "benchadd skips suppressed setup items when generating bench files"
