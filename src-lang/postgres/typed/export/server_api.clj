@@ -1,6 +1,6 @@
-(ns hara.runtime.postgres.base.compile.server-api
+(ns postgres.typed.export.server-api
   (:require [std.block.template :as gen]
-            [hara.runtime.postgres.base.compile.server-db :as server-db]
+            [postgres.typed.export.server-db :as server-db]
             [postgres.typed.typed-common :as types]))
 
 (def ^:private +default-targets+
@@ -8,7 +8,7 @@
 
 (def ^:private XTALK_CONTRACT_TEMPLATE
   "
-(def.xt ^{:rt.postgres.base.compile/target :xtalk-contract}
+(def.xt ^{:postgres.typed.export/target :xtalk-contract}
   ~contract-sym
   {:id ~id
    :task \"supabase.rpc\"

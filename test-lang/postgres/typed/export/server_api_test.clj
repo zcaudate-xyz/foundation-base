@@ -1,12 +1,12 @@
-(ns hara.runtime.postgres.base.compile.server-api-test
-  (:require [hara.runtime.postgres.base.compile-test :as fixtures]
-            [hara.runtime.postgres.base.compile.server-api :refer :all]
-            [hara.runtime.postgres.base.compile.server-db :as server-db])
+(ns postgres.typed.export.server-api-test
+  (:require [postgres.typed.export-test :as fixtures]
+            [postgres.typed.export.server-api :refer :all]
+            [postgres.typed.export.server-db :as server-db])
   (:use code.test))
 
 (fixtures/ensure-fixtures!)
 
-^{:refer hara.runtime.postgres.base.compile.server-api/xtalk-contract-input :added "4.1"}
+^{:refer postgres.typed.export.server-api/xtalk-contract-input :added "4.1"}
 (fact "xtalk-contract-input normalizes the template payload"
   (xtalk-contract-input
    {:contract-sym 'create-user-contract
@@ -20,7 +20,7 @@
       'tables ["UserAccount" "UserProfile"]
       'handler-sym 'create-user-sync})
 
-^{:refer hara.runtime.postgres.base.compile.server-api/target-entry :added "4.1"}
+^{:refer postgres.typed.export.server-api/target-entry :added "4.1"}
 (fact "target-entry creates the emitted symbol for api targets"
   (select-keys (target-entry fixtures/+shape-fn+ :xtalk-contracts)
                [:target :emitted-sym :fn-def])
@@ -28,14 +28,14 @@
       :emitted-sym 'create-user-contract
       :fn-def fixtures/+shape-fn+})
 
-^{:refer hara.runtime.postgres.base.compile.server-api/emit-target :added "4.1"}
+^{:refer postgres.typed.export.server-api/emit-target :added "4.1"}
 (fact "emit-target renders an xtalk contract when sync is enabled"
   (clojure.string/includes?
    (emit-target fixtures/+manual-sync-fn+ :xtalk-contracts)
    "create-user-manual-contract")
   => true)
 
-^{:refer hara.runtime.postgres.base.compile.server-api/emit-targets :added "4.1"}
+^{:refer postgres.typed.export.server-api/emit-targets :added "4.1"}
 (fact "emit-targets renders the configured api targets"
   (keys (emit-targets fixtures/+manual-sync-fn+))
   => '(:xtalk-contracts)
@@ -43,7 +43,7 @@
   (emit-targets fixtures/+manual-sync-fn+ [:xtalk-contracts])
   => (contains {:xtalk-contracts string?}))
 
-^{:refer hara.runtime.postgres.base.compile.server-api/list-targets :added "4.1"}
+^{:refer postgres.typed.export.server-api/list-targets :added "4.1"}
 (fact "list-targets exposes the supported api targets"
   (list-targets)
   => '(:xtalk-contracts))

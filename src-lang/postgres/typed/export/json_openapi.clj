@@ -1,10 +1,10 @@
-(ns hara.runtime.postgres.base.compile.json-openapi
+(ns postgres.typed.export.json-openapi
   (:require [clojure.string :as str]
             [postgres.typed.typed-analyze :as analyze]
             [postgres.typed.typed-common :as types]
             [postgres.typed.typed-infer :as typed-infer]
             [postgres.typed.typed-shape :as shape]
-            [hara.runtime.postgres.base.compile.json-schema :as json-schema]))
+            [postgres.typed.export.json-schema :as json-schema]))
 
 (declare shape->openapi)
 

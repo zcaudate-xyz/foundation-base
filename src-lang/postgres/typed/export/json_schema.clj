@@ -1,4 +1,4 @@
-(ns hara.runtime.postgres.base.compile.json-schema
+(ns postgres.typed.export.json-schema
   (:require [postgres.typed.typed-common :as types]
             [postgres.typed.typed-shape :as shape]))
 

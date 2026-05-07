@@ -156,7 +156,7 @@
       "id" "worker-e2e"
       "has-query-handler" true
       "transports" ["host"]
-      "listener-count" 1
+      "listener-count" 2
       "revoked-count" 1})
 
 ^{:refer js.worker.link/make-sharedworker-link :added "4.1"}

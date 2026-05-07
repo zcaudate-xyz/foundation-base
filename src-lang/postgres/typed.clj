@@ -1,8 +1,8 @@
 (ns postgres.typed
   (:require [clojure.string :as str]
-            [hara.runtime.postgres.base.compile.json-openapi :as compile.json-openapi]
-            [hara.runtime.postgres.base.compile.json-schema :as compile.json-schema]
-            [hara.runtime.postgres.base.compile.ts-schema :as compile.ts-schema]
+            [postgres.typed.export.json-openapi :as compile.json-openapi]
+            [postgres.typed.export.json-schema :as compile.json-schema]
+            [postgres.typed.export.ts-schema :as compile.ts-schema]
             [hara.runtime.postgres.base.application :as app]
             [postgres.typed.typed-analyze :as analyze]
             [postgres.typed.typed-common :as types]

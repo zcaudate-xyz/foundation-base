@@ -1,4 +1,4 @@
-(ns hara.runtime.postgres.base.compile.server-db
+(ns postgres.typed.export.server-db
   (:require [clojure.walk :as walk]
             [std.block.template :as gen]
             [postgres.typed.typed-analyze :as analyze]
@@ -8,7 +8,7 @@
   [:supabase-db])
 
 (def ^:private +default-sync-fn+
-  'rt.postgres.base.compile.server-db/db-sync-merge)
+  'postgres.typed.export.server-db/db-sync-merge)
 
 (def ^:private +mutation-ops+
   #{:insert :update :delete :upsert})

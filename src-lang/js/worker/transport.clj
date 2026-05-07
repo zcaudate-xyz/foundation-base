@@ -20,79 +20,93 @@
   [worker-source]
   (var current-worker nil)
   (var current-callback nil)
+  (var send-fn
+       (fn [frame]
+         (var worker (or current-worker
+                         (:? (xt/x:has-key? worker-source "create_fn")
+                             nil
+                             worker-source)))
+         (when (xt/x:nil? worker)
+           (xt/x:err "worker endpoint not started"))
+         (var post-request (xt/x:get-key worker "postRequest"))
+         (if (xt/x:is-function? post-request)
+           (return (post-request frame))
+           (return (. worker (postMessage frame))))))
+  (var start-fn
+       (fn [listener]
+         (if (xt/x:has-key? worker-source "create_fn")
+           (do (:= current-worker
+                   ((xt/x:get-key worker-source "create_fn")
+                    listener))
+               (return current-worker))
+           (do (:= current-worker worker-source)
+               (:= current-callback
+                   (fn [event]
+                     (return (listener (-/event-data event) nil))))
+               (. current-worker (addEventListener
+                                  "message"
+                                  current-callback
+                                  false))
+               (return current-worker)))))
+  (var stop-fn
+       (fn [_]
+         (when (and (xt/x:not-nil? current-worker)
+                    (xt/x:not-nil? current-callback)
+                    (xt/x:is-function? (xt/x:get-key current-worker "removeEventListener")))
+           (. current-worker (removeEventListener
+                              "message"
+                              current-callback
+                              false)))
+         (when (and (xt/x:not-nil? current-worker)
+                    (xt/x:is-function? (xt/x:get-key current-worker "terminate")))
+           (. current-worker (terminate)))
+         (:= current-worker nil)
+         (:= current-callback nil)
+         (return true)))
   (return
-   {:meta {"kind" "webworker"}
-    :send-fn
-    (fn [frame]
-      (var worker (or current-worker
-                      (:? (xt/x:has-key? worker-source "create_fn")
-                          nil
-                          worker-source)))
-      (when (xt/x:nil? worker)
-        (xt/x:err "worker endpoint not started"))
-      (var post-request (xt/x:get-key worker "postRequest"))
-      (if (xt/x:is-function? post-request)
-        (return (post-request frame))
-        (return (. worker (postMessage frame)))))
-    :start-fn
-    (fn [listener]
-      (if (xt/x:has-key? worker-source "create_fn")
-        (do (:= current-worker
-                ((xt/x:get-key worker-source "create_fn")
-                 listener))
-            (return current-worker))
-        (do (:= current-worker worker-source)
-            (:= current-callback
-                (fn [event]
-                  (return (listener (-/event-data event) nil))))
-            (. current-worker (addEventListener
-                               "message"
-                               current-callback
-                               false))
-            (return current-worker))))
-    :stop-fn
-    (fn [_]
-      (when (and (xt/x:not-nil? current-worker)
-                 (xt/x:not-nil? current-callback)
-                 (xt/x:is-function? (xt/x:get-key current-worker "removeEventListener")))
-        (. current-worker (removeEventListener
-                           "message"
-                           current-callback
-                           false)))
-      (when (and (xt/x:not-nil? current-worker)
-                 (xt/x:is-function? (xt/x:get-key current-worker "terminate")))
-        (. current-worker (terminate)))
-      (:= current-worker nil)
-      (:= current-callback nil)
-      (return true))}))
+   (xt/x:obj-assign
+    {:meta {"kind" "webworker"}
+     :send-fn send-fn
+     :start-fn start-fn
+     :stop-fn stop-fn}
+    {"send-fn" send-fn
+     "start-fn" start-fn
+     "stop-fn" stop-fn})))
 
 (defn.xt self-endpoint
   "adapts worker self to the node transport contract"
   {:added "4.1"}
   [worker-self]
   (var current-callback nil)
+  (var send-fn
+       (fn [frame]
+         (return (. worker-self (postMessage frame)))))
+  (var start-fn
+       (fn [listener]
+         (:= current-callback
+             (fn [event]
+               (return (listener (-/event-data event) nil))))
+         (. worker-self (addEventListener
+                         "message"
+                         current-callback
+                         false))
+         (return worker-self)))
+  (var stop-fn
+       (fn [_]
+         (when (and (xt/x:not-nil? current-callback)
+                    (xt/x:is-function? (xt/x:get-key worker-self "removeEventListener")))
+           (. worker-self (removeEventListener
+                           "message"
+                           current-callback
+                           false)))
+         (:= current-callback nil)
+         (return true)))
   (return
-   {:meta {"kind" "webworker.self"}
-    :send-fn
-    (fn [frame]
-      (return (. worker-self (postMessage frame))))
-    :start-fn
-    (fn [listener]
-      (:= current-callback
-          (fn [event]
-            (return (listener (-/event-data event) nil))))
-      (. worker-self (addEventListener
-                      "message"
-                      current-callback
-                      false))
-      (return worker-self))
-    :stop-fn
-    (fn [_]
-      (when (and (xt/x:not-nil? current-callback)
-                 (xt/x:is-function? (xt/x:get-key worker-self "removeEventListener")))
-        (. worker-self (removeEventListener
-                        "message"
-                        current-callback
-                        false)))
-      (:= current-callback nil)
-      (return true))}))
+   (xt/x:obj-assign
+    {:meta {"kind" "webworker.self"}
+     :send-fn send-fn
+     :start-fn start-fn
+     :stop-fn stop-fn}
+    {"send-fn" send-fn
+     "start-fn" start-fn
+     "stop-fn" stop-fn})))
