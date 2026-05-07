@@ -1,6 +1,6 @@
 (ns xtbench.lua.db.runtime.supabase-test
-  (:require [hara.lang :as l])
-  (:use code.test))
+  (:use code.test)
+  (:require [hara.lang :as l]))
 
 (l/script- :lua
   {:runtime :basic
@@ -23,13 +23,19 @@
    "url" "/rest/v1/Order?select=status,account(nickname)&account.id=eq.acct-1"
    "headers" {}
    "filters" [{"path" "account.id"
-               "op" "eq"
-               "value" "acct-1"}]})
+                "op" "eq"
+                "value" "acct-1"}]})
 
 (def +query-tree+
   ["Order"
    {"account" {"id" "acct-1"}
     "id" ["in" [["ord-1" "ord-2"]]]}
+   ["status"
+    ["account" ["nickname"]]]])
+
+(def +query-tree-basic+
+  ["Order"
+   {"account" {"id" "acct-1"}}
    ["status"
     ["account" ["nickname"]]]])
 
@@ -52,9 +58,9 @@
                       (return [true compiled]))}
          (@! +compiled-query+)
          {}))
-   [(xt/x:first out)
-    (. (xt/x:second out) ["table"])
-    (. (xt/x:second out) ["select"])])
+   [(. out [0])
+    (. (. out [1]) ["table"])
+    (. (. out [1]) ["select"])])
   => [true "Order" "status,account(nickname)"]
 
   (!.lua
@@ -63,9 +69,9 @@
          {}
          (@! +compiled-query+)
          {}))
-   [(xt/x:first out)
-    (. (xt/x:second out) ["tag"])
-    (. (. (xt/x:second out) ["data"]) ["table"])])
+   [(. out [0])
+    (. (. out [1]) ["tag"])
+    (. (. (. out [1]) ["data"]) ["table"])])
   => [false "db/supabase-execute-not-provided" "Order"])
 
 ^{:refer xt.db.runtime.supabase/map-supabase-error :added "4.1"}
@@ -95,43 +101,69 @@
                "tag" "supabase/fail"}}])
 
 ^{:refer xt.db.runtime.supabase/supabase-pull-sync :added "4.1"}
-(fact "prepares query requests for a generic http client"
+(fact "uses nested query handlers when no explicit executor is provided"
 
   (!.lua
    (var seen nil)
    (var out
         (supabase/supabase-pull-sync
-         {"request" (fn [request _opts]
-                      (:= seen request)
-                      (return {"body" [{"id" "ord-1"
-                                        "status" "open"}]}))
-          "base-url" "https://db.test"
-          "schema-name" "api"
-          "apikey" "anon-key"}
+         {"supabase" {"query" (fn [request _opts]
+                                (:= seen request)
+                                (return {"data" [{"id" "ord-1"
+                                                  "status" "open"}]}))
+                       "headers" {"x-client" "nested"}}
+          "base-url" "https://db.test"}
          nil
          (@! +query-tree+)
-         {}))
+         {"auth" "token-1"}))
    [out
-    (. seen ["url"])
-    (. (. seen ["headers"]) ["Content-Profile"])
-    (. (. seen ["headers"]) ["apikey"])
+    (. (. seen ["headers"]) ["x-client"])
     (. (. seen ["headers"]) ["Authorization"])])
   => [[{"id" "ord-1"
-        "status" "open"}]
-      "https://db.test/rest/v1/Order?select=status,account(nickname)&account.id=eq.acct-1&id=in.(ord-1,ord-2)"
-      "api"
-      "anon-key"
-      "Bearer anon-key"])
+         "status" "open"}]
+      "nested"
+      "Bearer token-1"])
 
-^{:refer xt.db.runtime.supabase/query-client? :added "4.1"}
-(fact "detects supabase query clients without relying on js-only syntax"
+^{:refer xt.db.runtime.supabase/supabase-pull-sync :added "4.1"}
+(fact "uses nested query handlers when no explicit executor is provided"
 
   (!.lua
-   (var thenable {})
-   (xt/x:set-key thenable "then" (fn [_] (return nil)))
+   (var seen nil)
+   (var out
+        (supabase/supabase-pull-sync
+         {"supabase" {"query" (fn [request _opts]
+                                (:= seen request)
+                                (return {"data" [{"id" "ord-1"
+                                                  "status" "open"}]}))
+                       "headers" {"x-client" "nested"}}
+          "base-url" "https://db.test"}
+         nil
+         (@! +query-tree+)
+         {"auth" "token-1"}))
+   [out
+    (. (. seen ["headers"]) ["x-client"])
+    (. (. seen ["headers"]) ["Authorization"])])
+  => [[{"id" "ord-1"
+         "status" "open"}]
+      "nested"
+      "Bearer token-1"])
+
+^{:refer xt.db.runtime.supabase/thenable? :added "4.1"}
+(fact "detects thenable outputs"
+
+  (!.lua
+   [(supabase/thenable? {"then" (fn [_] (return nil))})
+    (supabase/thenable? {"from" (fn [_] (return nil))})
+    (supabase/thenable? nil)])
+  => [true false false])
+
+^{:refer xt.db.runtime.supabase/query-client? :added "4.1"}
+(fact "detects supabase query clients"
+
+  (!.lua
    [(supabase/query-client? {"query" (fn [_ _opts] (return {}))})
-    (supabase/query-client? thenable)
-    (supabase/query-client? nil)])
+     (supabase/query-client? {"then" (fn [_] (return {}))})
+     (supabase/query-client? nil)])
   => [true false false])
 
 ^{:refer xt.db.runtime.supabase/resolve-client :added "4.1"}
@@ -147,8 +179,9 @@
     (. (supabase/resolve-client {"client" db-client}
                                 {"supabase" opt-client}) ["tag"])
     (. (supabase/resolve-client {}
-                                {"client" opt-client}) ["tag"])])
-  => ["db-sup" "db-client" "opt-client"])
+                                {"client" opt-client}) ["tag"])
+    (supabase/resolve-client {} {})])
+  => ["db-sup" "db-client" "opt-client" nil])
 
 ^{:refer xt.db.runtime.supabase/resolve-schema-name :added "4.1"}
 (fact "resolves schema names in priority order"
@@ -159,8 +192,30 @@
     (supabase/resolve-schema-name {"schema" "public"}
                                   {"schema-name" "ignored"})
     (supabase/resolve-schema-name {}
-                                  {"schema_name" "alt"})])
-  => ["api" "public" "alt"])
+                                  {"schema_name" "alt"})
+    (supabase/resolve-schema-name {} {})])
+  => ["api" "public" "alt" nil])
+
+^{:refer xt.db.runtime.supabase/invoke-method-1 :added "4.1"}
+(fact "invokes single-argument methods by key"
+
+  (!.lua
+   (supabase/invoke-method-1 {"hello" (fn [x]
+                                        (return ["hello" x]))}
+                             "hello"
+                             1))
+  => ["hello" 1])
+
+^{:refer xt.db.runtime.supabase/invoke-method-2 :added "4.1"}
+(fact "invokes two-argument methods by key"
+
+  (!.lua
+   (supabase/invoke-method-2 {"hello" (fn [x y]
+                                        (return ["hello" x y]))}
+                             "hello"
+                             1
+                             2))
+  => ["hello" 1 2])
 
 ^{:refer xt.db.runtime.supabase/apply-filter :added "4.1"}
 (fact "delegates filter compilation to PostgREST params"
@@ -218,27 +273,191 @@
                                     compiled
                                     {})
     (. seen ["url"])
-    (. (. seen ["headers"]) ["Content-Profile"])])
+    (. (. seen ["headers"]) ["Content-Profile"])
+    (supabase/execute-query-default {} compiled {})])
   => [{"marker" "query"}
       "https://db.test/rest/v1/Order?select=status,account(nickname)&account.id=eq.acct-1&id=in.(ord-1,ord-2)"
-      "api"])
+      "api"
+      nil])
 
 ^{:refer xt.db.runtime.supabase/unwrap-query-output :added "4.1"}
-(fact "unwraps tuples, data wrappers, and http bodies"
+(fact "unwraps tuples, data wrappers, and errors"
 
   (!.lua
    [(supabase/unwrap-query-output {}
                                   [true {"data" [{"id" "ord-1"}]}]
                                   {})
+     (supabase/unwrap-query-output {}
+                                  [false {"status" "error"
+                                          "tag" "supabase/fail"}]
+                                  {})
+     (supabase/unwrap-query-output {}
+                                   {"status" 200
+                                    "body" [{"id" "ord-http"}]}
+                                   {})
+     (supabase/unwrap-query-output {}
+                                   {"error" {"tag" "supabase/fail"}}
+                                   {})
     (supabase/unwrap-query-output {}
-                                  {"status" 200
-                                   "body" [{"id" "ord-http"}]}
+                                  {"data" [{"id" "ord-2"}]}
                                   {})
     (supabase/unwrap-query-output {}
-                                  {"error" {"tag" "supabase/fail"}}
-                                  {})])
+                                   {"status" "ok"}
+                                   {})])
   => [[{"id" "ord-1"}]
+      {"status" "error"
+       "tag" "db/supabase-query-failed"
+       "data" {"status" "error"
+               "tag" "supabase/fail"}}
       [{"id" "ord-http"}]
       {"status" "error"
        "tag" "db/supabase-query-failed"
-       "data" {"tag" "supabase/fail"}}])
+       "data" {"tag" "supabase/fail"}}
+      [{"id" "ord-2"}]
+     {"status" "ok"}])
+
+^{:refer xt.db.runtime.supabase/snake->kebab :added "4.1"}
+(fact "converts snake keys to kebab keys"
+
+  (!.lua
+   [(supabase/snake->kebab "time_updated")
+    (supabase/snake->kebab "id")
+    (supabase/snake->kebab 1)])
+  => ["time-updated" "id" 1])
+
+^{:refer xt.db.runtime.supabase/normalize-row :added "4.1"}
+(fact "normalizes row keys while keeping values intact"
+
+  (!.lua
+   [(supabase/normalize-row {"time_updated" 1
+                             "user_id" "U1"})
+    (supabase/normalize-row nil)])
+  => [{"time-updated" 1
+       "user-id" "U1"}
+      nil])
+
+^{:refer xt.db.runtime.supabase/payload->xdb-events :added "4.1"}
+(fact "translates insert delete and primary-key update payloads"
+
+  (!.lua
+   [(supabase/payload->xdb-events
+     {"type" "postgres_changes"
+      "eventType" "INSERT"
+      "table" "Currency"
+      "new" {"id" "USD"
+             "time_updated" 1}})
+    (supabase/payload->xdb-events
+     {"type" "postgres_changes"
+      "eventType" "DELETE"
+      "table" "Currency"
+      "old" {"id" "USD"}})
+    (supabase/payload->xdb-events
+     {"type" "postgres_changes"
+      "eventType" "UPDATE"
+      "table" "Currency"
+      "old" {"id" "USD"}
+      "new" {"id" "USD2"
+             "time_updated" 2}})])
+  => [[["add" {"Currency" [{"id" "USD"
+                            "time-updated" 1}]}]]
+      [["remove" {"Currency" [{"id" "USD"}]}]]
+      [["remove" {"Currency" [{"id" "USD"}]}]
+       ["add" {"Currency" [{"id" "USD2"
+                            "time-updated" 2}]}]]])
+
+^{:refer xt.db.runtime.supabase/process-triggers-local :added "4.1"}
+(fact "runs triggers whose listen tables were touched"
+
+  (!.lua
+   (var calls [])
+   (var out
+        (supabase/process-triggers-local
+         {"triggers" {"currency" {"listen" ["Currency"]
+                                  "callback" (fn [_db _trigger]
+                                               (xt/x:arr-push calls "currency"))}
+                      "wallet" {"listen" ["Wallet"]
+                                "callback" (fn [_db _trigger]
+                                             (xt/x:arr-push calls "wallet"))}}}
+         {"Currency" true}))
+   [out calls])
+  => [["currency"]
+      ["currency"]])
+
+^{:refer xt.db.runtime.supabase/sync-event-local :added "4.1"}
+(fact "passes sync handler outputs through local trigger processing"
+
+  (!.lua
+   (supabase/sync-event-local
+    {"sync_handler" (fn [_event]
+                      (return ["Currency" "Wallet"]))
+     "triggers" {"wallet" {"listen" ["Wallet"]
+                           "callback" (fn [_db _trigger]
+                                        (return true))}}}
+    ["add" {}]))
+  => [["wallet"]
+      {"Currency" true
+       "Wallet" true}])
+
+^{:refer xt.db.runtime.supabase/apply-payload :added "4.1"}
+(fact "applies payloads through local sync handlers"
+
+  (!.lua
+   (var seen [])
+   (var db {"sync_handler" (fn [event]
+                             (xt/x:arr-push seen event)
+                             (var [_tag body] event)
+                             (return (xt/x:obj-keys body)))
+            "triggers" {}})
+   (var res
+        (supabase/apply-payload
+         db
+         {"type" "postgres_changes"
+          "eventType" "INSERT"
+          "table" "Currency"
+          "new" {"id" "USD"
+                 "time_updated" 1}}
+         nil nil nil {}))
+   [seen res])
+  => [[["add" {"Currency" [{"id" "USD"
+                            "time-updated" 1}]}]]
+      {"table" "Currency"
+       "ids" ["USD"]
+       "events" [["add" {"Currency" [{"id" "USD"
+                                      "time-updated" 1}]}]]}])
+
+^{:refer xt.db.runtime.supabase/attach-events :added "4.1"}
+(fact "attaches realtime handlers and applies payloads through them"
+
+  (!.lua
+   (var seen [])
+   (var handlers [])
+   (var channel nil)
+   (:= channel {"on" (fn [_type _binding handler]
+                       (xt/x:arr-push handlers handler)
+                       (return channel))
+                "subscribe" (fn [] (return channel))
+                "unsubscribe" (fn [] (return true))})
+   (var db {"sync_handler" (fn [event]
+                             (xt/x:arr-push seen event)
+                             (return ["Currency"]))
+            "triggers" {}})
+   (var res
+        (supabase/attach-events
+         {"supabase" {"channel" (fn [_name]
+                                  (return channel))}
+          "xdb" db
+          "channel-name" "test"
+          "bindings" [{"event" "*"
+                       "schema" "public"
+                       "table" "Currency"}]}))
+   ((xt/x:first handlers)
+    {"type" "postgres_changes"
+     "eventType" "INSERT"
+     "table" "Currency"
+     "new" {"id" "USD"}})
+   [(xt/x:len handlers)
+    seen
+    ((xt/x:get-key res "detach-fn"))])
+  => [1
+      [["add" {"Currency" [{"id" "USD"}]}]]
+      true])

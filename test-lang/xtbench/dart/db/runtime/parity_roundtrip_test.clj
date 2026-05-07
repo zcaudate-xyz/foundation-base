@@ -1,53 +1,28 @@
-(ns xt.db.runtime.roundtrip-test
+(ns xtbench.dart.db.runtime.parity-roundtrip-test
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-  (l/script- :js
-    {:runtime :basic
-     :require [[js.cell.service.db-query :as db-query]
-               [xt.db.helpers.data-main-test :as sample]
-               [xt.db.instance :as xdb]
-               [xt.db.text.pgrest :as pgrest]
-               [xt.lang.spec-base :as xt]
-               [xt.lang.common-data :as xtd]
-               [xt.lang.common-string :as str]
-             [xt.lang.common-repl :as repl]
-             [xt.protocol.impl.connection-sql :as dbsql]
-             [xt.db.text.sql-util :as ut]
-             [xt.db.text.sql-manage :as manage]
-             [js.lib.driver-sqlite :as js-sqlite]]})
-
-(defn bootstrap-js
-  []
-  (notify/wait-on [:js 2000]
-    (. (dbsql/connect (js-sqlite/driver) {})
-       (then (fn [conn]
-               (try
-                 (:= (!:G DBCACHE)
-                     (xdb/db-create {"::" "db.cache"}
-                                    sample/Schema
-                                    sample/SchemaLookup
-                                    nil))
-                 (:= (!:G DBSQL)
-                     (xdb/db-create {"::" "db.sql"
-                                     :instance conn}
-                                    sample/Schema
-                                    sample/SchemaLookup
-                                    (ut/sqlite-opts nil)))
-                 (dbsql/query-sync (xt/x:get-key DBSQL "instance")
-                                   (str/join "\n\n"
-                                             (manage/table-create-all
-                                              sample/Schema
-                                              sample/SchemaLookup
-                                              (ut/sqlite-opts nil))))
-                 (repl/notify true)
-                 (catch e (repl/notify e))))))))
+(l/script- :dart
+  {:require [[js.cell.service.db-query :as db-query]
+          [xt.db.helpers.data-main-test :as sample]
+          [xt.db.instance :as xdb]
+          [xt.db.text.pgrest :as pgrest]
+          [xt.lang.spec-base :as xt]
+          [xt.lang.common-data :as xtd]
+          [xt.lang.common-string :as str]
+          [xt.lang.common-repl :as repl]
+          [xt.protocol.impl.connection-sql :as dbsql]
+          [xt.db.text.sql-util :as ut]
+          [xt.db.text.sql-manage :as manage]
+          [js.lib.driver-sqlite :as js-sqlite]
+          [dart.lib.driver-sqlite :as dart-sqlite]]
+   :runtime :twostep})
 
 (fact:global
  {:setup [(l/rt:restart)
-          (do (l/rt:scaffold :js) true)
-          (bootstrap-js)]
+                  (do (l/rt:scaffold :js) true)
+                  (bootstrap-js)]
   :teardown [(l/rt:stop)]})
 
 ^{:seedgen/root {:all true}}
@@ -181,33 +156,33 @@
 ^{:refer xt.db.instance/db-pull-sync :added "4.1"}
 (fact "prepared view queries roundtrip to the same nested datastructure"
 
-  (!.js
-   (-/seed-roundtrip-fixture)
-   (-/run-roundtrip (-/get-prepared-user-tree)))
+  (!.dt
+    (-/seed-roundtrip-fixture)
+    (-/run-roundtrip (-/get-prepared-user-tree)))
   => [[{"nickname" "root"
-         "profile" [{"first_name" "Root"}]}]
-       [{"nickname" "root"
-         "profile" [{"first_name" "Root"}]}]
-       [{"nickname" "root"
-         "profile" [{"first_name" "Root"}]}]])
+        "profile" [{"first_name" "Root"}]}]
+      [{"nickname" "root"
+        "profile" [{"first_name" "Root"}]}]
+      [{"nickname" "root"
+        "profile" [{"first_name" "Root"}]}]])
 
 (fact "direct flat trees roundtrip to the same datastructure"
 
   (!.js
-   (-/seed-roundtrip-fixture)
-   (-/run-roundtrip (-/get-user-nickname-tree)))
+    (-/seed-roundtrip-fixture)
+    (-/run-roundtrip (-/get-user-nickname-tree)))
   => [[{"nickname" "root"}]
-       [{"nickname" "root"}]
-       [{"nickname" "root"}]])
+      [{"nickname" "root"}]
+      [{"nickname" "root"}]])
 
 (fact "bulk `in` filters roundtrip to the same flat row datastructure"
 
   (!.js
-   (-/seed-roundtrip-fixture)
-   (-/sort-roundtrip (-/run-roundtrip (-/get-currency-tree)) "id"))
+    (-/seed-roundtrip-fixture)
+    (-/sort-roundtrip (-/run-roundtrip (-/get-currency-tree)) "id"))
   => [[{"id" "USD" "name" "US Dollar"}
-        {"id" "XLM" "name" "Stellar Coin"}]
-       [{"id" "USD" "name" "US Dollar"}
-        {"id" "XLM" "name" "Stellar Coin"}]
-       [{"id" "USD" "name" "US Dollar"}
-        {"id" "XLM" "name" "Stellar Coin"}]])
+       {"id" "XLM" "name" "Stellar Coin"}]
+      [{"id" "USD" "name" "US Dollar"}
+       {"id" "XLM" "name" "Stellar Coin"}]
+      [{"id" "USD" "name" "US Dollar"}
+       {"id" "XLM" "name" "Stellar Coin"}]])

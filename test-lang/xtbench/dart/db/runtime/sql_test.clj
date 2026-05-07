@@ -1,14 +1,21 @@
 (ns xtbench.dart.db.runtime.sql-test
-  (:require [hara.lang :as l])
+  (:require [hara.lang :as l]
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :dart
   {:runtime :twostep
    :require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
-             [xt.protocol.impl.connection-sql :as conn-sql]
-             [xt.db.runtime.sql :as impl]
+             [xt.lang.common-string :as str]
+             [xt.lang.common-repl :as repl]
+             [xt.lang.spec-promise :as spec-promise]
+             [xt.protocol.impl.connection-sql :as dbsql]
+             [xt.db.runtime.sql :as impl-sql]
              [xt.db.text.sql-util :as ut]
+             [xt.db.text.sql-raw :as raw]
+             [xt.db.text.sql-manage :as manage]
              [xt.db.helpers.data-main-test :as sample]]})
 
 (fact:global
@@ -19,9 +26,9 @@
 (fact "generates delete statements"
 
   (!.dt
-   (impl/sql-gen-delete "HELLO"
-                        ["A" "B"]
-                        (ut/sqlite-opts nil)))
+   (impl-sql/sql-gen-delete "HELLO"
+                            ["A" "B"]
+                            (ut/sqlite-opts nil)))
   => ["DELETE FROM \"HELLO\" WHERE \"id\" = 'A';"
       "DELETE FROM \"HELLO\" WHERE \"id\" = 'B';"])
 
@@ -29,8 +36,8 @@
 (fact "emits or executes upsert statements"
 
   (!.dt
-   (impl/sql-process-event-sync
-    (conn-sql/connection-create
+   (impl-sql/sql-process-event-sync
+    (dbsql/connection-create
      {"queries" []}
      {"query_sync" (fn [state input]
                      (xt/x:arr-push (. state ["queries"]) input)
@@ -46,13 +53,13 @@
    (var state {"raw" {"queries" []}})
    (xt/x:set-key state
                  "conn"
-                 (conn-sql/connection-create
+                 (dbsql/connection-create
                   (. state ["raw"])
                   {"query_sync" (fn [input-state input]
                                   (xt/x:arr-push (. input-state ["queries"]) input)
                                   (return input))}))
    (var touched
-        (impl/sql-process-event-sync
+        (impl-sql/sql-process-event-sync
          (. state ["conn"])
          "add"
          {"UserAccount" [sample/RootUser]}
@@ -67,8 +74,8 @@
 (fact "emits or executes delete statements"
 
   (!.dt
-   (impl/sql-process-event-remove
-    (conn-sql/connection-create
+   (impl-sql/sql-process-event-remove
+    (dbsql/connection-create
      {"queries" []}
      {"query_sync" (fn [state input]
                      (xt/x:arr-push (. state ["queries"]) input)
@@ -84,13 +91,13 @@
    (var state {"raw" {"queries" []}})
    (xt/x:set-key state
                  "conn"
-                 (conn-sql/connection-create
+                 (dbsql/connection-create
                   (. state ["raw"])
                   {"query_sync" (fn [input-state input]
                                   (xt/x:arr-push (. input-state ["queries"]) input)
                                   (return input))}))
    (var touched
-        (impl/sql-process-event-remove
+        (impl-sql/sql-process-event-remove
          (. state ["conn"])
          "remove"
          {"UserAccount" [sample/RootUser]}
@@ -105,8 +112,8 @@
 (fact "decodes pull query results from json"
 
   (!.dt
-   (impl/sql-pull-sync
-    (conn-sql/connection-create
+   (impl-sql/sql-pull-sync
+    (dbsql/connection-create
      {}
      {"query_sync" (fn [_conn _input]
                      (return "[{\"id\":\"USER-0\"}]"))})
@@ -119,8 +126,8 @@
 (fact "runs delete statements through query-sync"
 
   (!.dt
-   (impl/sql-delete-sync
-    (conn-sql/connection-create
+   (impl-sql/sql-delete-sync
+    (dbsql/connection-create
      {"queries" []}
      {"query_sync" (fn [state input]
                      (xt/x:arr-push (. state ["queries"]) input)
@@ -135,5 +142,5 @@
 (fact "treats clear as a no-op success"
 
   (!.dt
-   (impl/sql-clear {}))
+   (impl-sql/sql-clear {}))
   => true)

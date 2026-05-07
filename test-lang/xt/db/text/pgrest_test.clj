@@ -120,9 +120,11 @@
       "account.id=eq.acct-1"])
 
 (comment
-  (s/run ['xt.db.text.base-view])
+  (s/run ['xt.db.text.pgrest])
   (s/seedgen-benchadd '[xt.lang.spec] {:lang [:r] :write true})
-  (s/seedgen-benchadd '[xt.db.text.base-view] {:lang [:julia :dart] :write true})
+  (s/seedgen-benchadd '[xt.db.text.pgrest] {:lang [:julia :dart] :write true})
   
-  (s/seedgen-langadd 'xt.db.text.base-view {:lang [:lua :python] :write true})
-  (s/seedgen-langremove 'xt.db.text.base-view {:lang [:lua :python] :write true}))
+  (s/seedgen-benchadd '[xt.db] {:lang [:lua :python :ruby :dart] :write true})
+  
+  (s/seedgen-langadd 'xt.db.text.pgrest {:lang [:lua :python] :write true})
+  (s/seedgen-langremove 'xt.db.text.pgrest {:lang [:lua :python] :write true}))

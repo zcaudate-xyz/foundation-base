@@ -126,7 +126,7 @@
       {"input" [{"symbol" "i_organisation_id", "type" "uuid"}]}
       [1]
       false)])
-  => [[true]
+  => [[true nil]
       [false {"status" "error"
               "tag" "net/arg-typecheck-failed"
               "data" {"input" 1

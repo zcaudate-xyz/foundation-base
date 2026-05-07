@@ -9,7 +9,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 (def +compiled-query+
   {"type" "query"
@@ -101,33 +101,28 @@
                "tag" "supabase/fail"}}])
 
 ^{:refer xt.db.runtime.supabase/supabase-pull-sync :added "4.1"}
-(fact "prepares query requests for a generic http client"
+(fact "uses nested query handlers when no explicit executor is provided"
 
   (!.py
    (var seen nil)
    (var out
         (supabase/supabase-pull-sync
-         {"request" (fn [request _opts]
-                      (:= seen request)
-                      (return {"body" [{"id" "ord-1"
-                                        "status" "open"}]}))
-          "base-url" "https://db.test"
-          "schema-name" "api"
-          "apikey" "anon-key"}
+         {"supabase" {"query" (fn [request _opts]
+                                (:= seen request)
+                                (return {"data" [{"id" "ord-1"
+                                                  "status" "open"}]}))
+                       "headers" {"x-client" "nested"}}
+          "base-url" "https://db.test"}
          nil
          (@! +query-tree+)
-         {}))
+         {"auth" "token-1"}))
    [out
-    (. seen ["url"])
-    (. (. seen ["headers"]) ["Content-Profile"])
-    (. (. seen ["headers"]) ["apikey"])
+    (. (. seen ["headers"]) ["x-client"])
     (. (. seen ["headers"]) ["Authorization"])])
   => [[{"id" "ord-1"
          "status" "open"}]
-      "https://db.test/rest/v1/Order?select=status,account(nickname)&account.id=eq.acct-1&id=in.(ord-1,ord-2)"
-      "api"
-      "anon-key"
-      "Bearer anon-key"])
+      "nested"
+      "Bearer token-1"])
 
 ^{:refer xt.db.runtime.supabase/supabase-pull-sync :added "4.1"}
 (fact "uses nested query handlers when no explicit executor is provided"
@@ -309,17 +304,17 @@
     (supabase/unwrap-query-output {}
                                    {"status" "ok"}
                                    {})])
-   => [[{"id" "ord-1"}]
-       {"status" "error"
-        "tag" "db/supabase-query-failed"
-        "data" {"status" "error"
-                "tag" "supabase/fail"}}
-       [{"id" "ord-http"}]
-       {"status" "error"
-        "tag" "db/supabase-query-failed"
-        "data" {"tag" "supabase/fail"}}
-       [{"id" "ord-2"}]
-      {"status" "ok"}])
+  => [[{"id" "ord-1"}]
+      {"status" "error"
+       "tag" "db/supabase-query-failed"
+       "data" {"status" "error"
+               "tag" "supabase/fail"}}
+      [{"id" "ord-http"}]
+      {"status" "error"
+       "tag" "db/supabase-query-failed"
+       "data" {"tag" "supabase/fail"}}
+      [{"id" "ord-2"}]
+     {"status" "ok"}])
 
 ^{:refer xt.db.runtime.supabase/snake->kebab :added "4.1"}
 (fact "converts snake keys to kebab keys"

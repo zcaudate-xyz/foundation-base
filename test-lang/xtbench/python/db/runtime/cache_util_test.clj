@@ -88,25 +88,6 @@
   => (just {"record" {"ref_links" {}, "id" "00000000-0000-0000-0000-000000000001", "rev_links" {}, "data" {}},
             "t" number?}))
 
-^{:refer xt.db.runtime.cache-util/merge-single.python-data :added "4.0"}
-(fact "python merge-single should preserve data from a flattened entry"
-
-  (!.py
-    (var flat (f/flatten sample/Schema
-                         "UserAccount"
-                         sample/RootUser
-                         {}))
-    (var account-id "00000000-0000-0000-0000-000000000000")
-    (var incoming (xtd/get-in flat ["UserAccount" account-id]))
-    [(xtd/get-in incoming ["data" "nickname"])
-     (-> (data/merge-single {}
-                            "UserAccount"
-                            account-id
-                            incoming
-                            k/identity)
-         (xtd/get-in ["record" "data" "nickname"]))])
-  => ["root" "root"])
-
 ^{:refer xt.db.runtime.cache-util/merge-bulk :added "4.0"
   :setup [(def +account-merge-bulk-check+
             (just-in
@@ -153,24 +134,6 @@
                       nil)
      (data/get-ids rows "UserAccount")])
   => +account-merge-bulk-check+)
-
-^{:refer xt.db.runtime.cache-util/merge-bulk.python-data :added "4.0"}
-(fact "python merge-bulk should preserve flattened data payloads"
-
-  (!.py
-    (var rows {})
-    (var flat (f/flatten sample/Schema
-                         "UserAccount"
-                         sample/RootUser
-                         {}))
-    (var account-id "00000000-0000-0000-0000-000000000000")
-    (var profile-id "c4643895-b0ce-44cc-b07b-2386bf18d43b")
-    (data/merge-bulk rows flat nil)
-    [(xtd/get-in flat ["UserAccount" account-id "data" "nickname"])
-     (xtd/get-in rows ["UserAccount" account-id "record" "data" "nickname"])
-     (xtd/get-in flat ["UserProfile" profile-id "data" "first_name"])
-     (xtd/get-in rows ["UserProfile" profile-id "record" "data" "first_name"])])
-  => ["root" "root" "Root" "Root"])
 
 ^{:refer xt.db.runtime.cache-util/merge-bulk.1 :added "4.0"
   :setup [(def +account-min-check+

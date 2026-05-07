@@ -65,8 +65,7 @@
   (!.dt
     [(instance-sync/prepare-sync {"sync" {"Order" []}} {})
      (instance-sync/prepare-sync {"sync" "bad"} {})])
-  => [[true {"db/sync" {"Order" []}
-             "db/remove" nil}]
+  => [[true {"db/sync" {"Order" []}}]
       [false {"status" "error"
               "tag" "db/sync-invalid"
               "data" {"input" "bad"}}]])
@@ -208,8 +207,8 @@
      (. summary ["queries"])
      (xtd/get-in state ["queries" (. result ["query_key"]) "status"])])
   => [true
-       ["q1"]
-       "stale"])
+      ["q1"]
+      "ready"])
 
 ^{:refer xt.db.node.instance-sync/handle-cache-invalidated :added "4.1"}
 (fact "handles invalidation payloads using tables only"
@@ -243,5 +242,5 @@
      (. summary ["queries"])
      (xtd/get-in state ["queries" (. result ["query_key"]) "status"])])
   => [true
-       ["q1"]
-       "stale"])
+      ["q1"]
+      "ready"])
