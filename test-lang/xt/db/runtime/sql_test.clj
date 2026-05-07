@@ -3,11 +3,7 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-^{:seedgen/root {:all true
-                 :langs [:lua.nginx :python :dart]
-                 :lua.nginx {:extra [[lua.nginx.driver-sqlite :as sqlite]]}
-                 :python {:extra [[python.lib.driver-sqlite :as sqlite]]}
-                 :dart {:extra [[dart.lib.driver-sqlite :as sqlite]]}}}
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -20,9 +16,8 @@
              [xt.db.runtime.sql :as impl-sql]
              [xt.db.text.sql-util :as ut]
              [xt.db.text.sql-raw :as raw]
-              [xt.db.text.sql-manage :as manage]
-              [xt.db.helpers.data-main-test :as sample]
-              [js.lib.driver-sqlite :as js-sqlite]]})
+             [xt.db.text.sql-manage :as manage]
+             [xt.db.helpers.data-main-test :as sample]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -33,8 +28,8 @@
 
   (!.js
    (impl-sql/sql-gen-delete "HELLO"
-                        ["A" "B"]
-                        (ut/sqlite-opts nil)))
+                            ["A" "B"]
+                            (ut/sqlite-opts nil)))
   => ["DELETE FROM \"HELLO\" WHERE \"id\" = 'A';"
       "DELETE FROM \"HELLO\" WHERE \"id\" = 'B';"])
 

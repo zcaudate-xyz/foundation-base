@@ -1,4 +1,4 @@
-(ns xt.db.helpers.sqlite-runtime-parity-test
+(ns xt.db.runtime.parity-sqlite-test
   (:require [hara.runtime.basic.type-common :as common]
             [hara.lang :as l]
             [xt.lang.common-notify :as notify]
