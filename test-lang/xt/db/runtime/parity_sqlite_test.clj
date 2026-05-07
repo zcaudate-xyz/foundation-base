@@ -10,7 +10,8 @@
                  :js           {:extra [[js.lib.driver-sqlite :as js-sqlite]]}
                  :lua.nginx    {:extra [[lua.nginx.driver-sqlite :as lua-sqlite]]}
                  :python       {:extra [[python.lib.driver-sqlite :as py-sqlite]]}
-                 :dart         {:extra [[dart.lib.driver-sqlite :as dart-sqlite]]}}}
+                 :dart         {:extra [[dart.lib.driver-sqlite :as dart-sqlite]]}
+                 :ruby         {:extra [[ruby.lib.driver-sqlite :as ruby-sqlite]]}}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]

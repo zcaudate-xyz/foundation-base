@@ -123,5 +123,7 @@
   (s/seedgen-benchadd '[xt.lang.spec] {:lang [:r] :write true})
   (s/seedgen-benchadd '[xt.db.text.pgrest] {:lang [:julia :dart] :write true})
   
+  (s/seedgen-benchadd '[xt.db] {:lang [:lua :python :ruby :dart] :write true})
+  
   (s/seedgen-langadd 'xt.db.text.pgrest {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.db.text.pgrest {:lang [:lua :python] :write true}))

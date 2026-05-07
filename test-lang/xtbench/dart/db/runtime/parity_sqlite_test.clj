@@ -20,7 +20,7 @@
           [xt.db.helpers.data-main-test :as sample]
           [js.lib.driver-sqlite :as js-sqlite]
           [dart.lib.driver-sqlite :as dart-sqlite]]
-   :runtime :twostep})
+          :runtime :twostep})
 
 (fact:global
  {:setup [(l/rt:restart)]

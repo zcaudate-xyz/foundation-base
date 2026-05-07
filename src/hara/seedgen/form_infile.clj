@@ -167,7 +167,8 @@
   [form keys]
   (if (instance? clojure.lang.IObj form)
     (let [m      (meta form)
-          next-m (some-> m (apply dissoc keys))]
+          next-m (when m
+                   (apply dissoc m keys))]
       (cond
         (nil? m)
         form
@@ -184,6 +185,14 @@
   (if (vector? require-spec)
     (first require-spec)
     require-spec))
+
+(defn- remove-script-requires
+  [current-requires drop-targets]
+  (let [drop-targets (set drop-targets)]
+    (->> (normalize-script-requires current-requires)
+         (remove (fn [require-spec]
+                   (contains? drop-targets (require-target require-spec))))
+         (mapv #(strip-meta-keys % [:seedgen/extra])))))
 
 (defn- consume-script-extra-requires
   [script-str target-lang]
@@ -216,8 +225,10 @@
 
 (defn- merge-script-requires
   [current-requires extra-requires]
-  (let [current-requires (normalize-script-requires current-requires)
-        extra-requires   (normalize-script-requires extra-requires)
+  (let [current-requires (->> (normalize-script-requires current-requires)
+                              (mapv #(strip-meta-keys % [:seedgen/extra])))
+        extra-requires   (->> (normalize-script-requires extra-requires)
+                              (mapv #(strip-meta-keys % [:seedgen/extra])))
         extra-by-target  (->> extra-requires
                               (map (fn [require-spec]
                                      [(require-target require-spec) require-spec]))
@@ -290,8 +301,14 @@
 
 (defn- augment-script-string
   [script-str output lang]
-  (let [script-str      (consume-script-extra-requires script-str lang)
-        extra-requires (root-script-extra-requires output lang)]
+  (let [root-lang       (get-in output [:globals :lang :root])
+        script-str      (consume-script-extra-requires script-str lang)
+        extra-requires  (root-script-extra-requires output lang)
+        drop-targets    (when (not= (common/seedgen-normalize-runtime-lang lang)
+                                    root-lang)
+                          (->> (root-script-extra-requires output root-lang)
+                               (map require-target)
+                               set))]
     (if (empty? extra-requires)
       script-str
       (let [root       (nav/parse-root script-str)
@@ -301,12 +318,18 @@
              current-config-str (some-> config-nav nav/block block/block-string)
              next-config (-> (if (and config-nav
                                       (map? (nav/value config-nav)))
-                               (nav/value config-nav)
-                               {})
-                             (update :require merge-script-requires extra-requires))]
+                              (nav/value config-nav)
+                              {})
+                              (update :require (fn [current-requires]
+                                                 (cond-> current-requires
+                                                   (seq drop-targets)
+                                                   (remove-script-requires drop-targets)
+
+                                                   :always
+                                                   (merge-script-requires extra-requires)))))]
          (cond
-            (nil? script-nav)
-            script-str
+             (nil? script-nav)
+             script-str
 
             (and config-nav
                  (map? (nav/value config-nav)))

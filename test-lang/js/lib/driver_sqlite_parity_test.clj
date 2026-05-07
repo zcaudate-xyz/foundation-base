@@ -123,39 +123,213 @@
       "query" "beta",
       "connection" true})
 
+^{:ref xt.db.runtime.sql/sql-process-event-sync
+  :setup [(def +sqlite-touched-output+
+            ["UserAccount" "UserProfile"])]}
+(fact "native and wasm drivers report the touched sqlite tables"
 
-(comment
-  (fact "native and wasm drivers can explore the shared sqlite sample dataset"
+  (notify/wait-on [:js 5000]
+    (-> (sql/connect (js-sqlite/driver) {})
+        (spec-promise/x:promise-then
+         (fn [conn]
+           (sql/query-sync conn
+                           (str/join "\n\n"
+                                     (manage/table-create-all
+                                      sample/Schema
+                                      sample/SchemaLookup
+                                      (ut/sqlite-opts nil))))
+           (sql/query-sync conn
+                           (raw/raw-insert "Currency"
+                                           ["id" "type" "symbol" "native" "decimal"
+                                            "name" "plural" "description"]
+                                           (@! sample/+currency+)
+                                           (ut/sqlite-opts nil)))
+           (var out
+                (xtd/arr-sort
+                 (impl-sql/sql-process-event-sync conn
+                                                  "add"
+                                                  {"UserAccount" [sample/RootUser]}
+                                                  sample/Schema
+                                                  sample/SchemaLookup
+                                                  (ut/sqlite-opts nil))
+                 k/identity
+                 k/lt))
+           (sql/disconnect conn)
+           (repl/notify out)))))
+  => +sqlite-touched-output+
 
-    (notify/wait-on [:js 5000]
-      (-> (sample-exploration-output (js-sqlite/driver))
-          (spec-promise/x:promise-then repl/notify)))
-    => {"add" ["UserAccount" "UserProfile"]
-        "nested" [["root" "Root"]]
-        "currencies" [["USD" "US Dollar"]
-                      ["XLM" "Stellar Coin"]]}
+  (notify/wait-on [:js 5000]
+    (-> (sql/connect (js-sqlite-wasm/driver) {})
+        (spec-promise/x:promise-then
+         (fn [conn]
+           (sql/query-sync conn
+                           (str/join "\n\n"
+                                     (manage/table-create-all
+                                      sample/Schema
+                                      sample/SchemaLookup
+                                      (ut/sqlite-opts nil))))
+           (sql/query-sync conn
+                           (raw/raw-insert "Currency"
+                                           ["id" "type" "symbol" "native" "decimal"
+                                            "name" "plural" "description"]
+                                           (@! sample/+currency+)
+                                           (ut/sqlite-opts nil)))
+           (var out
+                (xtd/arr-sort
+                 (impl-sql/sql-process-event-sync conn
+                                                  "add"
+                                                  {"UserAccount" [sample/RootUser]}
+                                                  sample/Schema
+                                                  sample/SchemaLookup
+                                                  (ut/sqlite-opts nil))
+                 k/identity
+                 k/lt))
+           (sql/disconnect conn)
+           (repl/notify out)))))
+  => +sqlite-touched-output+)
 
-    (notify/wait-on [:js 5000]
-      (-> (sample-exploration-output (js-sqlite-wasm/driver))
-          (spec-promise/x:promise-then repl/notify)))
-    => {"add" ["UserAccount" "UserProfile"]
-        "nested" [["root" "Root"]]
-        "currencies" [["USD" "US Dollar"]
-                      ["XLM" "Stellar Coin"]]})
+^{:ref xt.db.runtime.sql/sql-pull-sync
+  :setup [(def +user-profile-tree+
+            ["UserAccount"
+             ["nickname"
+              ["profile"
+               ["first_name"]]]])
+          (def +sqlite-nested-output+
+            [["root" "Root"]])]}
+(fact "native and wasm drivers pull nested sqlite sample data"
 
-  (fact "native and wasm drivers can remove seeded sample data in parity"
+  (notify/wait-on [:js 5000]
+    (-> (sql/connect (js-sqlite/driver) {})
+        (spec-promise/x:promise-then
+         (fn [conn]
+           (sql/query-sync conn
+                           (str/join "\n\n"
+                                     (manage/table-create-all
+                                      sample/Schema
+                                      sample/SchemaLookup
+                                      (ut/sqlite-opts nil))))
+           (impl-sql/sql-process-event-sync conn
+                                            "add"
+                                            {"UserAccount" [sample/RootUser]}
+                                            sample/Schema
+                                            sample/SchemaLookup
+                                            (ut/sqlite-opts nil))
+           (var out
+                (xt/x:arr-map
+                 (impl-sql/sql-pull-sync conn
+                                         sample/Schema
+                                         (@! js.lib.driver-sqlite-parity-test/+user-profile-tree+)
+                                         (ut/sqlite-opts nil))
+                 (fn [row]
+                   (var profile (xt/x:first (. row ["profile"])))
+                   (return [(. row ["nickname"])
+                            (. profile ["first_name"])]))))
+           (sql/disconnect conn)
+           (repl/notify out)))))
+  => +sqlite-nested-output+
 
-    (notify/wait-on [:js 5000]
-      (-> (sample-removal-output (js-sqlite/driver))
-          (spec-promise/x:promise-then repl/notify)))
-    => {"add" ["UserAccount" "UserProfile"]
-        "remove" ["UserAccount" "UserProfile"]
-        "after-remove" []}
+  (notify/wait-on [:js 5000]
+    (-> (sql/connect (js-sqlite-wasm/driver) {})
+        (spec-promise/x:promise-then
+         (fn [conn]
+           (sql/query-sync conn
+                           (str/join "\n\n"
+                                     (manage/table-create-all
+                                      sample/Schema
+                                      sample/SchemaLookup
+                                      (ut/sqlite-opts nil))))
+           (impl-sql/sql-process-event-sync conn
+                                            "add"
+                                            {"UserAccount" [sample/RootUser]}
+                                            sample/Schema
+                                            sample/SchemaLookup
+                                            (ut/sqlite-opts nil))
+           (var out
+                (xt/x:arr-map
+                 (impl-sql/sql-pull-sync conn
+                                         sample/Schema
+                                         (@! js.lib.driver-sqlite-parity-test/+user-profile-tree+)
+                                         (ut/sqlite-opts nil))
+                 (fn [row]
+                   (var profile (xt/x:first (. row ["profile"])))
+                   (return [(. row ["nickname"])
+                            (. profile ["first_name"])]))))
+           (sql/disconnect conn)
+           (repl/notify out)))))
+  => +sqlite-nested-output+)
 
-    (notify/wait-on [:js 5000]
-      (-> (sample-removal-output (js-sqlite-wasm/driver))
-          (spec-promise/x:promise-then repl/notify)))
-    => {"add" ["UserAccount" "UserProfile"]
-        "remove" ["UserAccount" "UserProfile"]
-        "after-remove" []})
-  )
+^{:ref xt.db.runtime.sql/sql-pull-sync.currencies
+  :setup [(def +currency-bulk-tree+
+            ["Currency"
+             {"id" ["in" [["USD" "XLM"]]]}
+             ["id" "name"]])
+          (def +sqlite-currencies-output+
+            [["USD" "US Dollar"]
+             ["XLM" "Stellar Coin"]])]}
+(fact "native and wasm drivers pull sorted sqlite currencies"
+
+  (notify/wait-on [:js 5000]
+    (-> (sql/connect (js-sqlite/driver) {})
+        (spec-promise/x:promise-then
+         (fn [conn]
+           (sql/query-sync conn
+                           (str/join "\n\n"
+                                     (manage/table-create-all
+                                      sample/Schema
+                                      sample/SchemaLookup
+                                      (ut/sqlite-opts nil))))
+           (sql/query-sync conn
+                           (raw/raw-insert "Currency"
+                                           ["id" "type" "symbol" "native" "decimal"
+                                            "name" "plural" "description"]
+                                           (@! sample/+currency+)
+                                           (ut/sqlite-opts nil)))
+           (var out
+                (xt/x:arr-map
+                 (xtd/arr-sort
+                  (impl-sql/sql-pull-sync conn
+                                          sample/Schema
+                                          (@! js.lib.driver-sqlite-parity-test/+currency-bulk-tree+)
+                                          (ut/sqlite-opts nil))
+                  (fn [row]
+                    (return (. row ["id"])))
+                  k/lt)
+                 (fn [row]
+                   (return [(. row ["id"])
+                            (. row ["name"])]))))
+           (sql/disconnect conn)
+           (repl/notify out)))))
+  => +sqlite-currencies-output+
+
+  (notify/wait-on [:js 5000]
+    (-> (sql/connect (js-sqlite-wasm/driver) {})
+        (spec-promise/x:promise-then
+         (fn [conn]
+           (sql/query-sync conn
+                           (str/join "\n\n"
+                                     (manage/table-create-all
+                                      sample/Schema
+                                      sample/SchemaLookup
+                                      (ut/sqlite-opts nil))))
+           (sql/query-sync conn
+                           (raw/raw-insert "Currency"
+                                           ["id" "type" "symbol" "native" "decimal"
+                                            "name" "plural" "description"]
+                                           (@! sample/+currency+)
+                                           (ut/sqlite-opts nil)))
+           (var out
+                (xt/x:arr-map
+                 (xtd/arr-sort
+                  (impl-sql/sql-pull-sync conn
+                                          sample/Schema
+                                          (@! js.lib.driver-sqlite-parity-test/+currency-bulk-tree+)
+                                          (ut/sqlite-opts nil))
+                  (fn [row]
+                    (return (. row ["id"])))
+                  k/lt)
+                 (fn [row]
+                   (return [(. row ["id"])
+                            (. row ["name"])]))))
+           (sql/disconnect conn)
+           (repl/notify out)))))
+  => +sqlite-currencies-output+)
