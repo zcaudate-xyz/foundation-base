@@ -50,6 +50,15 @@
   (str (lookup-path (env/ns-sym)))
   => string?)
 
+^{:refer code.project/parse-ns-name :added "4.1"}
+(fact "parses namespace declarations from forms with an optional file fallback"
+
+  (parse-ns-name '[(comment x) (ns sample.core) (def x 1)])
+  => 'sample.core
+
+  (parse-ns-name '[(comment x)] "src/code/project.clj")
+  => 'code.project)
+
 ^{:refer code.project/test-root :added "4.1"}
 (fact "TODO")
 

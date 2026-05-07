@@ -407,7 +407,7 @@
   "gets the view after update"
   {:added "4.0"}
   [path ctx]
-   (return (. (xt/x:first (-/view-update path ctx))
+   (return (. (-/view-update path ctx)
               (then (fn []
                       (return (-/view-val path ctx)))))))
 
@@ -415,7 +415,7 @@
   "gets the view after setting input"
   {:added "4.0"}
   [path input ctx]
-   (return (. (xt/x:first (-/view-set-input path input ctx))
+   (return (. (-/view-set-input path input ctx)
               (then (fn []
                       (return (-/view-val path ctx)))))))
 
@@ -432,9 +432,9 @@
   "gets the subview after update"
   {:added "4.0"}
   [path subpath ctx]
-  (return (. (xt/x:first (-/view-update path ctx))
-             (then (fn []
-                     (return (-/get-val path subpath ctx)))))))
+   (return (. (-/view-update path ctx)
+              (then (fn []
+                      (return (-/get-val path subpath ctx)))))))
 
 (defn.js nil-view
   "sets view input to nil"

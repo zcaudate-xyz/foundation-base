@@ -198,7 +198,10 @@
   (var view-key (xt/x:json-encode path))
   (return
    (event-common/add-keyed-listener
-    cell view-key listener-id "cell" f meta pred)))
+    cell view-key listener-id "cell"
+    (fn [_id data _t nmeta]
+      (return (f (j/assign {} data {:meta nmeta}))))
+    meta pred)))
 
 (defn.js remove-listener
   "remove listeners from cell"

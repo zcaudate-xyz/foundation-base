@@ -39,6 +39,11 @@
           (str ":" (name sym))
 
           (and (symbol? sym)
+               (= "SPACE_NODE" sym-name)
+               (some? (namespace sym)))
+          "\"$node\""
+
+          (and (symbol? sym)
                (nil? (namespace sym))
                (re-matches #"[A-Z][A-Z0-9_]*" sym-name)
                (clojure.string/includes? sym-name "_"))
@@ -157,7 +162,7 @@
 (defn ruby-map
   "emit ruby hash
    (l/emit-as :ruby '[{:a 1 :b 2}])
-       => \"{\\\"a\\\" => 1, \\\"b\\\" => 2}\""
+        => \"{\\\"a\\\" => 1, \\\"b\\\" => 2}\""
   {:added "4.1"}
   [m grammar mopts]
   (let [entries (map (fn [[k v]]
@@ -167,8 +172,14 @@
                                               grammar mopts)
                             " => "
                             (common/*emit-fn* v grammar mopts)))
-                     m)]
-    (str "{" (clojure.string/join ", " entries) "}")))
+                      m)]
+     (str "{" (clojure.string/join ", " entries) "}")))
+
+(defn ruby-string
+  [s]
+  (pr-str (if (= "__NODE__" s)
+            "$node"
+            s)))
 
 (defn ruby-emit-args
   [args grammar mopts]
@@ -235,6 +246,14 @@
 (defn ruby-def
   [[tag sym body :as form]]
   (cond
+    (and (symbol? sym)
+         (= "SPACE_NODE" (name sym))
+         (= "__NODE__" body))
+    (list ':- (top/emit-top-level :def
+                                  (list tag sym "$node")
+                                  preprocess-base/*macro-grammar*
+                                  preprocess-base/*macro-opts*))
+
     (seq (ruby-def-arglists sym))
     (let [arglists (ruby-def-arglists sym)
           args (first arglists)]
@@ -523,7 +542,7 @@
                                                  :body {:start "" :end ""}}}}}
         :token   {:nil       {:as "nil"}
                   :boolean   {:as (fn [b] (if b "true" "false"))}
-                  :string    {:quote :double}
+                  :string    {:custom #'ruby-string}
                   :symbol    {:custom #'ruby-symbol
                               :global #'ruby-symbol-global
                               :replace (assoc helper/+sym-replace+ \? "?")}}

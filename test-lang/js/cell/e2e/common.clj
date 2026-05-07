@@ -324,16 +324,30 @@
 
 (defn.js connect-sqlite
   [callback]
-  (return
-   (dbsql/connect (sqlite-wasm/driver) {})))
+  (var promise (dbsql/connect (sqlite-wasm/driver) {}))
+  (when callback
+    (. promise
+       (then (fn [conn]
+               (var success (xt/x:get-key callback "success"))
+               (when success
+                 (return (success conn)))
+               (return conn))
+             (fn [err]
+               (var error (xt/x:get-key callback "error"))
+               (when error
+                 (return (error err)))
+               (throw err)))))
+  (return promise))
 
 (defn.js sqlite-exec
   [conn raw]
+  (var db (or (xt/x:get-key conn "_raw")
+              conn))
   (var columns [])
-  (var values (. conn (exec {:sql         raw
-                             :rowMode     "array"
-                             :columnNames columns
-                             :returnValue "resultRows"})))
+  (var values (. db (exec {:sql         raw
+                           :rowMode     "array"
+                           :columnNames columns
+                           :returnValue "resultRows"})))
   (return (:? (xt/x:len columns)
               [{"columns" columns
                 "values" values}]

@@ -437,7 +437,8 @@
   (var #{throttle views} model)
   (var out [])
   (xt/for:object [[view-id _] views]
-    (xt/x:arr-push out [view-id (xt/x:first (th/throttle-run throttle view-id [(or ?event {})]))]))
+    (var entry (th/throttle-run throttle view-id [(or ?event {})]))
+    (xt/x:arr-push out [view-id (xt/x:get-key entry "promise")]))
   (return (. (j/onAll (xt/x:arr-map out xt/x:second))
              (then (fn [arr]
                      (return (xtd/arr-zip (xt/x:arr-map out xt/x:first)
@@ -449,7 +450,8 @@
   [cell model-id view-id ?event]
   (var [model view] (impl/view-ensure cell model-id view-id))
   (var #{throttle} model)
-  (return (th/throttle-run throttle view-id [(or ?event {})])))
+  (var entry (th/throttle-run throttle view-id [(or ?event {})]))
+  (return (xt/x:get-key entry "promise")))
 
 (defn.js view-set-input
   "sets the view input"
@@ -498,11 +500,12 @@
   (var #{options} view)
   (var #{trigger} options)
   (when (util/check-event trigger signal event {:view view
-                                               :model model
-                                               :cell cell})
-    (return (th/throttle-run (xt/x:get-key model "throttle")
-                             view-id
-                             [event])))
+                                                :model model
+                                                :cell cell})
+    (var entry (th/throttle-run (xt/x:get-key model "throttle")
+                                view-id
+                                [event]))
+    (return (xt/x:get-key entry "promise")))
   (return nil))
 
 (defn.js trigger-all

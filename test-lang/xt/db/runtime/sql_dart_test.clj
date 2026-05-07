@@ -20,7 +20,6 @@
                [xt.db.text.sql-raw :as raw]
                [xt.db.text.sql-manage :as manage]
                [xt.db.helpers.data-main-test :as sample]
-               [xt.db.helpers.sqlite-runtime-parity-test :as parity]
                [dart.lib.driver-sqlite :as dart-sqlite]]})
 
   (def CANARY-DART
@@ -34,12 +33,4 @@
                  true)]
     :teardown [(l/rt:stop)]})
 
-  ^{:refer xt.db.runtime.sql/sql-pull-sync :added "4.1"}
-  (fact "returns the expected nested sqlite output in dart"
-
-    (if CANARY-DART
-      (parity/sqlite-parity-dart)
-      :dart-unavailable)
-    => (if CANARY-DART
-         parity/+sqlite-parity-output+
-         :dart-unavailable)))
+  )

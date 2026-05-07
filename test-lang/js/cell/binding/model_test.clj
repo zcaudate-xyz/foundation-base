@@ -122,15 +122,17 @@
                                   "select_method" "by_status"
                                   "return_method" "summary"
                                   "target" "supabase"}}))
-   (var handler (binding-model/compile-remote-handler prepared))
-   [ok
-    (handler {"id" "link-1"} "open")])
-  => [true
-      {"table" "Order"
-       "select" "id,status"
-       "filters" [{"path" "status"
-                   "op" "eq"
-                   "value" "open"}]}])
+    (var handler (binding-model/compile-remote-handler prepared))
+    [ok
+     (handler {"id" "link-1"} "open")])
+  => (fn [[ok out]]
+       (and ok
+            (= "Order" (xt/x:get-key out "table"))
+            (= "id,status" (xt/x:get-key out "select"))
+            (= [{"path" "status"
+                 "op" "eq"
+                 "value" "open"}]
+               (xt/x:get-key out "filters")))))
 
 ^{:refer js.cell.binding.model/compile-sync-pipeline :added "4.1"}
 (fact "compiles the sync pipeline handler"

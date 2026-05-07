@@ -596,11 +596,10 @@
 (fact "updates a view"
 
   (j/<!
-   (xtd/first
-    (base-model/view-update
-     (-/CELL)
-     "hello"
-     "ping")))
+   (base-model/view-update
+    (-/CELL)
+    "hello"
+    "ping"))
   => (contains-in
       {"path" ["hello" "ping"],
        "post" [false],
@@ -621,9 +620,8 @@
 (fact "sets view input"
 
   (j/<!
-   (xtd/first
-    (base-model/view-set-input
-     (-/CELL) "hello" "ping" {:data ["bar"]})))
+   (base-model/view-set-input
+    (-/CELL) "hello" "ping" {:data ["bar"]}))
   => (contains-in
       {"path" ["hello" "ping"],
        "post" [false],
@@ -692,7 +690,6 @@
                                 "ping"
                                 "hello"
                                 {})
-       [0]
        (then (repl/>notify))))
   => (contains-in
       {"path" ["hello" "ping"],

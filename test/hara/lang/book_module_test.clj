@@ -113,40 +113,31 @@
       +library+
       :js
       'js.react)))
-  => '#{js.core/floor
-         js.core/map
-         js.react/ref
+  => '#{js.react/ref
          js.react/curr:set
-         xt.lang.spec-base/x:json-encode
-         xt.lang.spec-base/x:now-ms
-         xt.lang.spec-base/for:array
          js.react/lazy
+         xt.lang.spec-base/for:array
+         xt.lang.spec-base/x:json-encode
          js.react/watch
-         js.core/delayed
-         xt.lang.spec-base/x:nil?
-         js.react/Component
-         js.react/init
-         js.react/createDOMRoot
-         xt.lang.spec-base/x:get-key
-         js.core/min
-         js.react/local
-         js.core/identity
-         js.core/repeating
-         js.core/round
+         xt.lang.spec-promise/x:promise
          xt.lang.spec-base/x:len
+         js.react/Component
+         xt.lang.spec-base/x:is-function?
+         js.react/init
+         xt.lang.spec-base/x:not-nil?
+         js.react/createDOMRoot
+         js.react/local
+         xt.lang.spec-base/x:nil?
          js.react/run
          js.react/curr
-         js.core/randomId
-         js.core/future
-         js.core/indexOf
-         xt.lang.spec-base/x:not-nil?
-         xt.lang.spec-base/x:is-function?
+         xt.lang.common-math/min
+         xt.lang.common-math/max
+         xt.lang.spec-base/x:now-ms
+         xt.lang.common-math/floor
+         xt.lang.spec-base/x:get-key
+         xt.lang.spec-promise/x:with-delay
          xt.lang.common-trace/LOG!
-         js.core/clearTimeout
-         js.core/clearInterval
-         js.core/future-delayed
-        js.core/max
-        js.react/const})
+         js.react/const})
 
 ^{:refer hara.lang.book-module/module-entries :added "4.0"}
 (fact "creates an export entry for a module"

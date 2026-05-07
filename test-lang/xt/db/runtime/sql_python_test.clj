@@ -21,7 +21,6 @@
                [xt.db.text.sql-table :as sql-table]
                [xt.db.text.sql-manage :as manage]
                [xt.db.helpers.data-main-test :as sample]
-               [xt.db.helpers.sqlite-runtime-parity-test :as parity]
                [python.lib.driver-sqlite :as py-sqlite]]})
 
   (fact:global
@@ -30,8 +29,4 @@
                    true)]
     :teardown [(l/rt:stop)]})
 
-  ^{:refer xt.db.runtime.sql/sql-pull-sync :added "4.1"}
-  (fact "returns the expected nested sqlite output in python"
-
-    (parity/sqlite-parity-python)
-    => parity/+sqlite-parity-output+))
+  )

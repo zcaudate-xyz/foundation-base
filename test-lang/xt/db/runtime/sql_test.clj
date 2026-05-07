@@ -20,10 +20,9 @@
              [xt.db.runtime.sql :as impl-sql]
              [xt.db.text.sql-util :as ut]
              [xt.db.text.sql-raw :as raw]
-             [xt.db.text.sql-manage :as manage]
-             [xt.db.helpers.data-main-test :as sample]
-             [xt.db.helpers.sqlite-runtime-parity-test :as parity]
-             [js.lib.driver-sqlite :as js-sqlite]]})
+              [xt.db.text.sql-manage :as manage]
+              [xt.db.helpers.data-main-test :as sample]
+              [js.lib.driver-sqlite :as js-sqlite]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -151,9 +150,3 @@
   (!.js
    (impl-sql/sql-clear {}))
   => true)
-
-^{:refer xt.db.runtime.sql/sql-pull-sync :added "4.1"}
-(fact "returns the expected nested sqlite output in js"
-
-  (parity/sqlite-parity-js)
-  => parity/+sqlite-parity-output+)

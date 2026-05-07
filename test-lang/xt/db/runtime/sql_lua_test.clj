@@ -20,7 +20,6 @@
                [xt.db.text.sql-raw :as raw]
                [xt.db.text.sql-manage :as manage]
                [xt.db.helpers.data-main-test :as sample]
-               [xt.db.helpers.sqlite-runtime-parity-test :as parity]
                [lua.nginx.driver-sqlite :as lua-sqlite]]})
 
   (fact:global
@@ -29,8 +28,4 @@
                    true)]
     :teardown [(l/rt:stop)]})
 
-  ^{:refer xt.db.runtime.sql/sql-pull-sync :added "4.1"}
-  (fact "returns the expected nested sqlite output in lua"
-
-    (parity/sqlite-parity-lua)
-    => parity/+sqlite-parity-output+))
+  )

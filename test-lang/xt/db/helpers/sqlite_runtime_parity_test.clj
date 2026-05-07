@@ -1,5 +1,6 @@
 (ns xt.db.helpers.sqlite-runtime-parity-test
-  (:require [hara.lang :as l]
+  (:require [hara.runtime.basic.type-common :as common]
+            [hara.lang :as l]
             [xt.lang.common-notify :as notify]
             [xt.lang.spec-promise :as spec-promise])
   (:use code.test))
@@ -33,8 +34,15 @@
      {"id" ["in" [["USD" "XLM"]]]}
      ["id" "name"]])
 
-  (def +sqlite-parity-output+
-    "[[[\"root\",\"Root\"]],[[\"USD\",\"US Dollar\"],[\"XLM\",\"Stellar Coin\"]]]")
+  (def +sqlite-touched-output+
+    ["UserAccount" "UserProfile"])
+
+  (def +sqlite-nested-output+
+    [["root" "Root"]])
+
+  (def +sqlite-currencies-output+
+    [["USD" "US Dollar"]
+     ["XLM" "Stellar Coin"]])
 
   ^{:seedgen/root {:all true
                    :langs [:lua.nginx :python :dart]
@@ -111,13 +119,116 @@
                [xt.db.helpers.data-main-test :as sample]
                [dart.lib.driver-sqlite :as dart-sqlite]]})
 
-  (defn sqlite-parity-js
-    []
-    (notify/wait-on [:js 2000]
-      (spec-promise/x:promise-then
-       (dbsql/connect (js-sqlite/driver) {})
-       (fn [conn]
-         (try
+  (def CANARY-DART
+    (common/program-exists? "dart"))
+
+  (fact:global
+   {:setup    [(l/rt:restart)
+               (do (l/rt:scaffold :js)
+                   (l/rt:scaffold :lua.nginx)
+                   (l/rt:scaffold :python)
+                   (when CANARY-DART
+                     (l/rt:scaffold :dart))
+                   true)]
+    :teardown [(l/rt:stop)]})
+
+  (fact "js runtime reports the touched sqlite tables"
+
+    (notify/wait-on [:js 5000]
+      (-> (dbsql/connect (js-sqlite/driver) {})
+          (spec-promise/x:promise-then
+           (fn [conn]
+             (dbsql/query-sync conn
+                               (str/join "\n\n"
+                                         (manage/table-create-all
+                                          sample/Schema
+                                          sample/SchemaLookup
+                                          (ut/sqlite-opts nil))))
+             (dbsql/query-sync conn
+                               (raw/raw-insert "Currency"
+                                               ["id" "type" "symbol" "native" "decimal"
+                                                "name" "plural" "description"]
+                                               (@! sample/+currency+)
+                                               (ut/sqlite-opts nil)))
+             (var out
+                  (xtd/arr-sort
+                   (impl-sql/sql-process-event-sync conn
+                                                    "add"
+                                                    {"UserAccount" [sample/RootUser]}
+                                                    sample/Schema
+                                                    sample/SchemaLookup
+                                                    (ut/sqlite-opts nil))
+                   k/identity
+                   k/lt))
+             (repl/notify out)))))
+    => +sqlite-touched-output+
+
+    (notify/wait-on [:lua.nginx 5000]
+      (-> (dbsql/connect (lua-sqlite/driver) {:memory true})
+          (spec-promise/x:promise-then
+           (fn [conn]
+             (dbsql/query-sync conn
+                               (str/join "\n\n"
+                                         (manage/table-create-all
+                                          sample/Schema
+                                          sample/SchemaLookup
+                                          (ut/sqlite-opts nil))))
+             (dbsql/query-sync conn
+                               (raw/raw-insert "Currency"
+                                               ["id" "type" "symbol" "native" "decimal"
+                                                "name" "plural" "description"]
+                                               (@! sample/+currency+)
+                                               (ut/sqlite-opts nil)))
+             (var out
+                  (xtd/arr-sort
+                   (impl-sql/sql-process-event-sync conn
+                                                    "add"
+                                                    {"UserAccount" [sample/RootUser]}
+                                                    sample/Schema
+                                                    sample/SchemaLookup
+                                                    (ut/sqlite-opts nil))
+                   k/identity
+                   k/lt))
+             (repl/notify out)))))
+    => +sqlite-touched-output+
+
+    (notify/wait-on [:python 5000]
+      (-> (dbsql/connect (py-sqlite/driver) {})
+          (spec-promise/x:promise-then
+           (fn [conn]
+             (xt/x:arr-each
+              (manage/table-create-all
+               sample/Schema
+               sample/SchemaLookup
+               (ut/sqlite-opts nil))
+              (fn [query]
+                (dbsql/query-sync conn query)))
+             (dbsql/query-sync conn
+                               (raw/raw-insert "Currency"
+                                               ["id" "type" "symbol" "native" "decimal"
+                                                "name" "plural" "description"]
+                                               (@! sample/+currency+)
+                                               (ut/sqlite-opts nil)))
+             (var flat-bulk
+                  (f/flatten-bulk sample/Schema
+                                  {"UserAccount" [sample/RootUser]}))
+             (xt/x:arr-each
+              (sql-table/table-emit-flat
+               sql-table/table-emit-upsert
+               sample/Schema
+               sample/SchemaLookup
+               flat-bulk
+               (ut/sqlite-opts nil))
+              (fn [query]
+                (dbsql/query-sync conn query)))
+             (repl/notify ["UserAccount" "UserProfile"])))))
+    => +sqlite-touched-output+
+
+    (if CANARY-DART
+      (notify/wait-on :dart
+        (spec-promise/x:promise-then
+         (dbsql/connect (dart-sqlite/driver) {:memory true})
+         (fn [conn]
            (dbsql/query-sync conn
                              (str/join "\n\n"
                                        (manage/table-create-all
@@ -130,13 +241,136 @@
                                               "name" "plural" "description"]
                                              (@! sample/+currency+)
                                              (ut/sqlite-opts nil)))
+           (var out
+                (xtd/arr-sort
+                 (impl-sql/sql-process-event-sync conn
+                                                  "add"
+                                                  {"UserAccount" [sample/RootUser]}
+                                                  sample/Schema
+                                                  sample/SchemaLookup
+                                                  (ut/sqlite-opts nil))
+                 k/identity
+                 k/lt))
+           (repl/notify out))))
+      :dart-unavailable)
+    => (if CANARY-DART
+         +sqlite-touched-output+
+         :dart-unavailable))
+
+  (fact "js runtime pulls nested sqlite sample data"
+
+    (notify/wait-on [:js 5000]
+      (-> (dbsql/connect (js-sqlite/driver) {})
+          (spec-promise/x:promise-then
+           (fn [conn]
+             (dbsql/query-sync conn
+                               (str/join "\n\n"
+                                         (manage/table-create-all
+                                          sample/Schema
+                                          sample/SchemaLookup
+                                          (ut/sqlite-opts nil))))
+             (impl-sql/sql-process-event-sync conn
+                                              "add"
+                                              {"UserAccount" [sample/RootUser]}
+                                              sample/Schema
+                                              sample/SchemaLookup
+                                              (ut/sqlite-opts nil))
+             (var out
+                  (xt/x:arr-map
+                   (impl-sql/sql-pull-sync conn
+                                           sample/Schema
+                                           (@! xt.db.helpers.sqlite-runtime-parity-test/+user-profile-tree+)
+                                           (ut/sqlite-opts nil))
+                   (fn [row]
+                     (var profile (xt/x:first (. row ["profile"])))
+                     (return [(. row ["nickname"])
+                              (. profile ["first_name"])]))))
+             (repl/notify out)))))
+    => +sqlite-nested-output+
+
+    (notify/wait-on [:lua.nginx 5000]
+      (-> (dbsql/connect (lua-sqlite/driver) {:memory true})
+          (spec-promise/x:promise-then
+           (fn [conn]
+             (dbsql/query-sync conn
+                               (str/join "\n\n"
+                                         (manage/table-create-all
+                                          sample/Schema
+                                          sample/SchemaLookup
+                                          (ut/sqlite-opts nil))))
+             (impl-sql/sql-process-event-sync conn
+                                              "add"
+                                              {"UserAccount" [sample/RootUser]}
+                                              sample/Schema
+                                              sample/SchemaLookup
+                                              (ut/sqlite-opts nil))
+             (var out
+                  (xt/x:arr-map
+                   (impl-sql/sql-pull-sync conn
+                                           sample/Schema
+                                           (@! xt.db.helpers.sqlite-runtime-parity-test/+user-profile-tree+)
+                                           (ut/sqlite-opts nil))
+                   (fn [row]
+                     (var profile (xt/x:first (. row ["profile"])))
+                     (return [(. row ["nickname"])
+                              (. profile ["first_name"])]))))
+             (repl/notify out)))))
+    => +sqlite-nested-output+
+
+    (notify/wait-on [:python 5000]
+      (-> (dbsql/connect (py-sqlite/driver) {})
+          (spec-promise/x:promise-then
+           (fn [conn]
+             (xt/x:arr-each
+              (manage/table-create-all
+               sample/Schema
+               sample/SchemaLookup
+               (ut/sqlite-opts nil))
+              (fn [query]
+                (dbsql/query-sync conn query)))
+             (var flat-bulk
+                  (f/flatten-bulk sample/Schema
+                                  {"UserAccount" [sample/RootUser]}))
+             (xt/x:arr-each
+              (sql-table/table-emit-flat
+               sql-table/table-emit-upsert
+               sample/Schema
+               sample/SchemaLookup
+               flat-bulk
+               (ut/sqlite-opts nil))
+              (fn [query]
+                (dbsql/query-sync conn query)))
+             (var out
+                  (xt/x:arr-map
+                   (impl-sql/sql-pull-sync conn
+                                           sample/Schema
+                                           (@! xt.db.helpers.sqlite-runtime-parity-test/+user-profile-tree+)
+                                           (ut/sqlite-opts nil))
+                   (fn [row]
+                     (var profile (xt/x:first (. row ["profile"])))
+                     (return [(. row ["nickname"])
+                              (. profile ["first_name"])]))))
+             (repl/notify out)))))
+    => +sqlite-nested-output+
+
+    (if CANARY-DART
+      (notify/wait-on :dart
+        (spec-promise/x:promise-then
+         (dbsql/connect (dart-sqlite/driver) {:memory true})
+         (fn [conn]
+           (dbsql/query-sync conn
+                             (str/join "\n\n"
+                                       (manage/table-create-all
+                                        sample/Schema
+                                        sample/SchemaLookup
+                                        (ut/sqlite-opts nil))))
            (impl-sql/sql-process-event-sync conn
                                             "add"
                                             {"UserAccount" [sample/RootUser]}
                                             sample/Schema
                                             sample/SchemaLookup
                                             (ut/sqlite-opts nil))
-           (var nested
+           (var out
                 (xt/x:arr-map
                  (impl-sql/sql-pull-sync conn
                                          sample/Schema
@@ -146,31 +380,116 @@
                    (var profile (xt/x:first (. row ["profile"])))
                    (return [(. row ["nickname"])
                             (. profile ["first_name"])]))))
-           (var flat
-                (xt/x:arr-map
-                 (xtd/arr-sort
-                  (impl-sql/sql-pull-sync conn
-                                          sample/Schema
-                                          (@! xt.db.helpers.sqlite-runtime-parity-test/+currency-bulk-tree+)
-                                          (ut/sqlite-opts nil))
-                  (fn [row]
-                    (return (. row ["id"])))
-                  k/lt)
-                 (fn [row]
-                   (return [(. row ["id"])
-                            (. row ["name"])]))))
-           (repl/notify
-            (xt/x:json-encode [nested flat]))
-           (catch e
-             (repl/notify e)))))))
+           (repl/notify out))))
+      :dart-unavailable)
+    => (if CANARY-DART
+         +sqlite-nested-output+
+         :dart-unavailable))
 
-  (defn sqlite-parity-lua
-    []
-    (notify/wait-on [:lua.nginx 2000]
-      (spec-promise/x:promise-then
-       (dbsql/connect (lua-sqlite/driver) {:memory true})
-       (fn [conn]
-         (try
+  (fact "js runtime pulls sorted sqlite currencies"
+
+    (notify/wait-on [:js 5000]
+      (-> (dbsql/connect (js-sqlite/driver) {})
+          (spec-promise/x:promise-then
+           (fn [conn]
+             (dbsql/query-sync conn
+                               (str/join "\n\n"
+                                         (manage/table-create-all
+                                          sample/Schema
+                                          sample/SchemaLookup
+                                          (ut/sqlite-opts nil))))
+             (dbsql/query-sync conn
+                               (raw/raw-insert "Currency"
+                                               ["id" "type" "symbol" "native" "decimal"
+                                                "name" "plural" "description"]
+                                               (@! sample/+currency+)
+                                               (ut/sqlite-opts nil)))
+             (var out
+                  (xt/x:arr-map
+                   (xtd/arr-sort
+                    (impl-sql/sql-pull-sync conn
+                                            sample/Schema
+                                            (@! xt.db.helpers.sqlite-runtime-parity-test/+currency-bulk-tree+)
+                                            (ut/sqlite-opts nil))
+                    (fn [row]
+                      (return (. row ["id"])))
+                    k/lt)
+                   (fn [row]
+                     (return [(. row ["id"])
+                              (. row ["name"])]))))
+             (repl/notify out)))))
+    => +sqlite-currencies-output+
+
+    (notify/wait-on [:lua.nginx 5000]
+      (-> (dbsql/connect (lua-sqlite/driver) {:memory true})
+          (spec-promise/x:promise-then
+           (fn [conn]
+             (dbsql/query-sync conn
+                               (str/join "\n\n"
+                                         (manage/table-create-all
+                                          sample/Schema
+                                          sample/SchemaLookup
+                                          (ut/sqlite-opts nil))))
+             (dbsql/query-sync conn
+                               (raw/raw-insert "Currency"
+                                               ["id" "type" "symbol" "native" "decimal"
+                                                "name" "plural" "description"]
+                                               (@! sample/+currency+)
+                                               (ut/sqlite-opts nil)))
+             (var out
+                  (xt/x:arr-map
+                   (xtd/arr-sort
+                    (impl-sql/sql-pull-sync conn
+                                            sample/Schema
+                                            (@! xt.db.helpers.sqlite-runtime-parity-test/+currency-bulk-tree+)
+                                            (ut/sqlite-opts nil))
+                    (fn [row]
+                      (return (. row ["id"])))
+                    k/lt)
+                   (fn [row]
+                     (return [(. row ["id"])
+                              (. row ["name"])]))))
+             (repl/notify out)))))
+    => +sqlite-currencies-output+
+
+    (notify/wait-on [:python 5000]
+      (-> (dbsql/connect (py-sqlite/driver) {})
+          (spec-promise/x:promise-then
+           (fn [conn]
+             (xt/x:arr-each
+              (manage/table-create-all
+               sample/Schema
+               sample/SchemaLookup
+               (ut/sqlite-opts nil))
+              (fn [query]
+                (dbsql/query-sync conn query)))
+             (dbsql/query-sync conn
+                               (raw/raw-insert "Currency"
+                                               ["id" "type" "symbol" "native" "decimal"
+                                                "name" "plural" "description"]
+                                               (@! sample/+currency+)
+                                               (ut/sqlite-opts nil)))
+             (var out
+                  (xt/x:arr-map
+                   (xtd/arr-sort
+                    (impl-sql/sql-pull-sync conn
+                                            sample/Schema
+                                            (@! xt.db.helpers.sqlite-runtime-parity-test/+currency-bulk-tree+)
+                                            (ut/sqlite-opts nil))
+                    (fn [row]
+                      (return (. row ["id"])))
+                    k/lt)
+                   (fn [row]
+                     (return [(. row ["id"])
+                              (. row ["name"])]))))
+             (repl/notify out)))))
+    => +sqlite-currencies-output+
+
+    (if CANARY-DART
+      (notify/wait-on :dart
+        (spec-promise/x:promise-then
+         (dbsql/connect (dart-sqlite/driver) {:memory true})
+         (fn [conn]
            (dbsql/query-sync conn
                              (str/join "\n\n"
                                        (manage/table-create-all
@@ -183,23 +502,7 @@
                                               "name" "plural" "description"]
                                              (@! sample/+currency+)
                                              (ut/sqlite-opts nil)))
-           (impl-sql/sql-process-event-sync conn
-                                            "add"
-                                            {"UserAccount" [sample/RootUser]}
-                                            sample/Schema
-                                            sample/SchemaLookup
-                                            (ut/sqlite-opts nil))
-           (var nested
-                (xt/x:arr-map
-                 (impl-sql/sql-pull-sync conn
-                                         sample/Schema
-                                         (@! xt.db.helpers.sqlite-runtime-parity-test/+user-profile-tree+)
-                                         (ut/sqlite-opts nil))
-                 (fn [row]
-                   (var profile (xt/x:first (. row ["profile"])))
-                   (return [(. row ["nickname"])
-                            (. profile ["first_name"])]))))
-           (var flat
+           (var out
                 (xt/x:arr-map
                  (xtd/arr-sort
                   (impl-sql/sql-pull-sync conn
@@ -208,124 +511,14 @@
                                           (ut/sqlite-opts nil))
                   (fn [row]
                     (return (. row ["id"])))
-                  k/lt)
+                  xt/x:str-comp)
                  (fn [row]
                    (return [(. row ["id"])
                             (. row ["name"])]))))
-           (repl/notify
-            (xt/x:json-encode [nested flat]))
-           (catch e
-             (repl/notify e)))))))
+           (repl/notify out))))
+      :dart-unavailable)
+    => (if CANARY-DART
+         +sqlite-currencies-output+
+         :dart-unavailable))
 
-  (defn sqlite-parity-python
-    []
-    (notify/wait-on [:python 2000]
-      (spec-promise/x:promise-then
-       (dbsql/connect (py-sqlite/driver) {})
-       (fn [conn]
-         (try
-           (xt/x:arr-each
-            (manage/table-create-all
-             sample/Schema
-             sample/SchemaLookup
-             (ut/sqlite-opts nil))
-            (fn [query]
-              (dbsql/query-sync conn query)))
-           (dbsql/query-sync conn
-                             (raw/raw-insert "Currency"
-                                             ["id" "type" "symbol" "native" "decimal"
-                                              "name" "plural" "description"]
-                                             (@! sample/+currency+)
-                                             (ut/sqlite-opts nil)))
-           (var flat-bulk (f/flatten-bulk sample/Schema
-                                          {"UserAccount" [sample/RootUser]}))
-           (xt/x:arr-each
-            (sql-table/table-emit-flat
-             sql-table/table-emit-upsert
-             sample/Schema
-             sample/SchemaLookup
-             flat-bulk
-             (ut/sqlite-opts nil))
-            (fn [query]
-              (dbsql/query-sync conn query)))
-           (var nested
-                (xt/x:arr-map
-                 (impl-sql/sql-pull-sync conn
-                                         sample/Schema
-                                         (@! xt.db.helpers.sqlite-runtime-parity-test/+user-profile-tree+)
-                                         (ut/sqlite-opts nil))
-                 (fn [row]
-                   (var profile (xt/x:first (. row ["profile"])))
-                   (return [(. row ["nickname"])
-                            (. profile ["first_name"])]))))
-           (var flat
-                (xt/x:arr-map
-                 (xtd/arr-sort
-                  (impl-sql/sql-pull-sync conn
-                                          sample/Schema
-                                          (@! xt.db.helpers.sqlite-runtime-parity-test/+currency-bulk-tree+)
-                                          (ut/sqlite-opts nil))
-                  (fn [row]
-                    (return (. row ["id"])))
-                  k/lt)
-                 (fn [row]
-                   (return [(. row ["id"])
-                            (. row ["name"])]))))
-           (repl/notify
-            (xt/x:json-encode [nested flat]))
-           (catch e
-             (repl/notify e)))))))
-
-  (defn sqlite-parity-dart
-    []
-    (!.dt
-      (var conn nil)
-      (dart-sqlite/connect-constructor
-       {:memory true}
-       (fn [err raw]
-         (when (xt/x:not-nil? err)
-           (throw err))
-         (:= conn (dart-sqlite/wrap-connection raw))
-         (return conn)))
-      (dbsql/query-sync conn
-                        (str/join "\n\n"
-                                  (manage/table-create-all
-                                   sample/Schema
-                                   sample/SchemaLookup
-                                   (ut/sqlite-opts nil))))
-      (dbsql/query-sync conn
-                        (raw/raw-insert "Currency"
-                                        ["id" "type" "symbol" "native" "decimal"
-                                         "name" "plural" "description"]
-                                        (@! sample/+currency+)
-                                        (ut/sqlite-opts nil)))
-      (impl-sql/sql-process-event-sync conn
-                                       "add"
-                                       {"UserAccount" [sample/RootUser]}
-                                       sample/Schema
-                                       sample/SchemaLookup
-                                       (ut/sqlite-opts nil))
-      (var nested
-           (xt/x:arr-map
-            (impl-sql/sql-pull-sync conn
-                                    sample/Schema
-                                    (@! xt.db.helpers.sqlite-runtime-parity-test/+user-profile-tree+)
-                                    (ut/sqlite-opts nil))
-            (fn [row]
-              (var profile (xt/x:first (. row ["profile"])))
-              (return [(. row ["nickname"])
-                       (. profile ["first_name"])]))))
-      (var flat
-           (xt/x:arr-map
-            (xtd/arr-sort
-             (impl-sql/sql-pull-sync conn
-                                     sample/Schema
-                                     (@! xt.db.helpers.sqlite-runtime-parity-test/+currency-bulk-tree+)
-                                     (ut/sqlite-opts nil))
-             (fn [row]
-               (return (. row ["id"])))
-             xt/x:str-comp)
-            (fn [row]
-              (return [(. row ["id"])
-                       (. row ["name"])]))))
-      (xt/x:json-encode [nested flat]))))
+  )

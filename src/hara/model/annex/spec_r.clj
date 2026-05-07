@@ -173,19 +173,23 @@
                                       :macro-let
                                       :macro-xor])
               (grammar/build-xtalk))
-      (grammar/build:override
-        {:seteq       {:op :seteq :symbol '#{:=} :raw "<-"}
-         :mod         {:raw "%%"}
-         :defn        {:op :defn  :symbol '#{defn}     :macro  #'tf-defn :type :macro}
-         :inif        {:macro #'tf-infix-if   :emit :macro}
-         :for-object  {:macro #'tf-for-object :emit :macro}
-         :for-array   {:macro #'tf-for-array  :emit :macro}
-         :for-iter    {:macro #'tf-for-iter   :emit :macro}
-         :for-index   {:macro #'tf-for-index  :emit :macro}})
-      (grammar/build:override fn/+r+)
-      (grammar/build:extend
-        {;;:na     {:op :na    :symbol '#{NA}    :raw "NA"    :value true :emit :throw}
-         :next   {:op :next  :symbol '#{:next} :raw "next"  :emit :return}
+       (grammar/build:override
+         {:seteq       {:op :seteq :symbol '#{:=} :raw "<-"}
+          :mod         {:raw "%%"}
+          :defn        {:op :defn  :symbol '#{defn}     :macro  #'tf-defn :type :macro}
+          :inif        {:macro #'tf-infix-if   :emit :macro}
+          :for-object  {:macro #'tf-for-object :emit :macro}
+          :for-array   {:macro #'tf-for-array  :emit :macro}
+          :for-iter    {:macro #'tf-for-iter   :emit :macro}
+          :for-index   {:macro #'tf-for-index  :emit :macro}})
+       (grammar/build:override fn/+r+)
+       (grammar/build:override
+         {:x-obj-keys  {:macro #'fn/r-tf-x-obj-keys  :emit :macro}
+          :x-obj-vals  {:macro #'fn/r-tf-x-obj-vals  :emit :macro}
+          :x-obj-pairs {:macro #'fn/r-tf-x-obj-pairs :emit :macro}})
+       (grammar/build:extend
+         {;;:na     {:op :na    :symbol '#{NA}    :raw "NA"    :value true :emit :throw}
+          :next   {:op :next  :symbol '#{:next} :raw "next"  :emit :return}
          :throw  {:op :next  :symbol '#{throw} :raw 'stop :emit :alias}
          :repeat {:op :repeat
                   :symbol '#{repeat}

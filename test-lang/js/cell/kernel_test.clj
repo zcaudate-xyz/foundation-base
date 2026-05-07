@@ -237,9 +237,9 @@
   => nil
 
   (notify/wait-on :js
-    (. (xt/x:first (cl/view-trigger ["hello" "echo"]
-                                    "@/::EVENT"
-                                    {}))
+    (. (cl/view-trigger ["hello" "echo"]
+                        "@/::EVENT"
+                        {})
        (then (fn [_]
                (repl/notify (cl/view-val ["hello" "echo"]))))))
   => (contains-in ["HELLO" integer?]))
@@ -394,7 +394,7 @@
 
   (set (!.js
         (xt/x:obj-keys (cl/view-get-output ["hello" "echo"]))))
-  =>  #{"current" "default" "elapsed" "process" "tag" "type" "updated"}
+  =>  #{"current" "elapsed" "tag" "type" "updated"}
 
   (cl/view-get-output ["hello" "WRONG"])
   => nil)
@@ -444,8 +444,8 @@
 (fact "sets the view input"
 
   (notify/wait-on :js
-    (. (xt/x:first (cl/view-set-input ["hello" "echo"]
-                                      {:data ["WORLD"]}))
+    (. (cl/view-set-input ["hello" "echo"]
+                          {:data ["WORLD"]})
        (then (repl/>notify))))
   => (contains-in
       {"::" "view.run"
@@ -481,7 +481,7 @@
 (fact "updates the view"
 
   (notify/wait-on :js
-    (. (xt/x:first (cl/view-update ["hello" "echo"]))
+    (. (cl/view-update ["hello" "echo"])
        (then (repl/>notify))))
   => (contains-in
       {"::" "view.run"
@@ -526,9 +526,9 @@
 (fact "triggers the view with an event"
 
   (notify/wait-on :js
-    (. (xt/x:first (cl/view-trigger ["hello" "echo"]
-                                    "@/::HELLO"
-                                    {}))
+    (. (cl/view-trigger ["hello" "echo"]
+                        "@/::HELLO"
+                        {})
        (then (repl/>notify))))
   => (contains-in
       {"path" ["hello" "echo"],

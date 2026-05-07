@@ -507,6 +507,12 @@
                      (map #(rewrite-callable-value % callables)
                           (rest form))))
 
+        (and (= 'def head)
+             (= 3 (count form))
+             (symbol? (nth form 2))
+             (namespace (nth form 2)))
+        form
+
         :else
         (let [head* (if (seq? head)
                       (rewrite-callable-form head callables)
@@ -593,6 +599,12 @@
                (apply list 'call
                       (map #(rewrite-generator-value % iterator callables)
                            (rest form))))
+
+        (and (= 'def head)
+             (= 3 (count form))
+             (symbol? (nth form 2))
+             (namespace (nth form 2)))
+        form
 
         :else
         (let [head* (if (seq? head)

@@ -1,16 +1,17 @@
 (ns hara.model.annex.spec-xtalk.fn-r-test
   (:use code.test)
   (:require [hara.lang :as l]
-            [hara.model.annex.spec-xtalk.fn-r :refer :all]
-            [xt.lang.common-lib :as k]
-            [xt.lang.common-string :as xts]
-            [xt.lang.spec-base :as xt]))
+             [hara.model.annex.spec-xtalk.fn-r :refer :all]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-string :as xts]
+             [xt.lang.spec-base :as xt]))
 
 (l/script- :r
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
-             [xt.lang.common-string :as xts]
-             [xt.lang.spec-base :as xt]]})
+              [xt.lang.common-string :as xts]
+              [xt.lang.spec-base :as xt]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -145,8 +146,14 @@
      (xt/x:iter-has? {:a 1})])
   => [true false]
 
-  (!.R
-    [(xt/x:obj-keys {:a 1})
-     (xt/x:obj-vals {:a 1})
-     (xt/x:obj-pairs {:a 1})])
-  => [["a"] [1] [["a" 1]]])
+  [(r-tf-x-obj-keys '(_ obj))
+   (r-tf-x-obj-vals '(_ obj))
+   (r-tf-x-obj-pairs '(_ obj))]
+  => '[(:? (x:nil? obj) [] (as.list (names obj)))
+       (:? (x:nil? obj) [] (unname (as.list obj)))
+       (:? (x:nil? obj)
+           []
+           (unname (Map list
+                        (as.list (names obj))
+                        (unname (as.list obj)))))]
+  )

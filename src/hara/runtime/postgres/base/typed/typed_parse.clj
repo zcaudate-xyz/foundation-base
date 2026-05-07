@@ -48,9 +48,9 @@
                      (read {:eof eof :read-cond :allow} r)
                      (catch Exception e
                        eof))]
-          (if (identical? form eof)
-            forms
-            (recur (conj forms form))))))))
+           (if (identical? form eof)
+              forms
+              (recur (conj forms form))))))))
 
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; Form identification
@@ -244,7 +244,7 @@
 
 (defn analyze-file [file-path]
   (let [forms (read-forms file-path)
-        ns-name (-> (str file-path) (str/replace #"^.*src/" "") (str/replace #"\.clj$" "") (str/replace #"/" ".") (str/replace #"_" "-"))
+        ns-name (str (project/parse-ns-name forms file-path))
         script-form (some #(when (script? %) %) forms)
         dbschema (when script-form (parse-schema script-form))
         aliases (cond-> (or (when script-form (parse-aliases script-form))

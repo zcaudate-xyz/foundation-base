@@ -5,21 +5,21 @@
             [hara.model.annex.spec-xtalk.fn-ruby :refer :all]))
 
 ^{:refer hara.model.annex.spec-xtalk.fn-ruby/+ruby-promise+ :added "4.1"}
-(fact "promise helpers stay wired to local concurrent-ruby macros"
+(fact "promise helpers hard-link through the shared xt promise module"
   [(get-in +ruby-promise+ [:x-promise :emit])
-   (get-in +ruby-promise+ [:x-promise :macro])
-   (get-in +ruby-promise+ [:x-promise-then :macro])
-   (get-in +ruby-promise+ [:x-promise-catch :macro])
-   (get-in +ruby-promise+ [:x-promise-finally :macro])
-   (get-in +ruby-promise+ [:x-promise-native? :macro])
-   (get-in +ruby-promise+ [:x-with-delay :macro])]
-  => [:macro
-      #'ruby-tf-x-promise
-      #'ruby-tf-x-promise-then
-      #'ruby-tf-x-promise-catch
-      #'ruby-tf-x-promise-finally
-      #'ruby-tf-x-promise-native?
-      #'ruby-tf-x-with-delay])
+   (get-in +ruby-promise+ [:x-promise :raw])
+   (get-in +ruby-promise+ [:x-promise-then :raw])
+   (get-in +ruby-promise+ [:x-promise-catch :raw])
+   (get-in +ruby-promise+ [:x-promise-finally :raw])
+   (get-in +ruby-promise+ [:x-promise-native? :raw])
+   (get-in +ruby-promise+ [:x-with-delay :raw])]
+  => [:hard-link
+      'xt.lang.common-promise/promise
+      'xt.lang.common-promise/promise-then
+      'xt.lang.common-promise/promise-catch
+      'xt.lang.common-promise/promise-finally
+      'xt.lang.common-promise/promise-native?
+      'xt.lang.common-promise/with-delay])
 
 (fact "simple helper rewrites stay structural and avoid the old raw helper"
   [(ruby-tf-x-is-function? '(:x-is-function? e))
@@ -59,7 +59,10 @@
   => '(+ "a" "b")
 
   (ruby-tf-x-print '(:x-print "hello"))
-  => '(puts "hello")
+  => '(. (fn []
+           (puts "hello")
+           (return nil))
+         (call))
 
   (ruby-tf-x-random '(:x-random))
   => '(rand)

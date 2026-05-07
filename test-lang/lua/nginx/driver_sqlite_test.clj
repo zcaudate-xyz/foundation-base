@@ -1,14 +1,19 @@
 (ns lua.nginx.driver-sqlite-test
   (:require [std.json :as json]
-            [hara.lang :as l])
+            [hara.lang :as l]
+            [xt.lang.common-notify :as notify]
+            [xt.lang.spec-promise :as spec-promise])
   (:use code.test))
 
 (l/script- :lua.nginx
   {:runtime :basic
    :config {:program :resty}
-   :require [[xt.lang.common-lib :as k]
-             [lua.nginx.driver-sqlite :as lua-sqlite]
-             [xt.protocol.impl.connection-sql :as driver]]})
+   :require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-repl :as repl]
+             [xt.lang.spec-promise :as spec-promise]
+              [lua.nginx.driver-sqlite :as lua-sqlite]
+              [xt.protocol.impl.connection-sql :as driver]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -62,15 +67,34 @@
 ^{:refer lua.nginx.driver-sqlite/connect-constructor :added "4.0"}
 (fact "create db connection"
 
-  ;; ENCODING TRUE INTEGER
   (!.lua
    (local conn (lua-sqlite/connect-constructor {:memory true}))
-   (driver/query conn "select 1;"))
-  => 1)
+   [(not (xt/x:nil? (. conn ["raw"])))
+    ((xt/x:get-key conn "::query") "select 1;")
+    ((xt/x:get-key conn "::query_sync") "select 2;")])
+  => [true 1 2])
 
 
 ^{:refer lua.nginx.driver-sqlite/wrap-connection :added "4.1"}
-(fact "TODO")
+(fact "wraps the raw sqlite connection with the SQL protocol"
+
+  (!.lua
+   (local raw (lua-sqlite/connect-constructor {:memory true}))
+   (local conn (lua-sqlite/wrap-connection raw))
+   [(driver/connection? conn)
+    (driver/query conn "select 3;")
+    (driver/query-sync conn "select 4;")])
+  => [true 3 4])
 
 ^{:refer lua.nginx.driver-sqlite/driver :added "4.1"}
-(fact "TODO")
+(fact "connects through the sqlite driver wrapper"
+
+  (notify/wait-on [:lua.nginx 2000]
+    (spec-promise/x:promise-then
+     (driver/connect (lua-sqlite/driver) {:memory true})
+     (fn [conn]
+       (repl/notify
+        [(driver/connection? conn)
+         (driver/query conn "select 5;")
+         (driver/query-sync conn "select 6;")]))))
+  => [true 5 6])

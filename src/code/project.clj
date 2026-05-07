@@ -101,11 +101,36 @@
 
 (defn lookup-path
   "looks up the path given the `ns`
-  
-   (lookup-path (h/ns-sym))"
+   
+    (lookup-path (h/ns-sym))"
   {:added "3.0"}
   ([ns]
-   (get @common/*lookup* ns)))
+    (get @common/*lookup* ns)))
+
+(defn parse-ns-name
+  "returns the declared namespace from read forms, with an optional file-path fallback
+  
+    (parse-ns-name '[(comment x) (ns sample.core) (def x 1)])
+    => 'sample.core"
+  {:added "4.1"}
+  ([forms]
+   (parse-ns-name forms nil))
+  ([forms file-path]
+   (or (some (fn [form]
+               (when (and (seq? form)
+                          (= 'ns (first form))
+                          (symbol? (second form)))
+                 (second form)))
+             forms)
+       (some-> file-path
+               fs/file-namespace)
+       (some-> file-path
+               str
+               (str/replace #"^.*(?:src|test)/" "")
+               (str/replace #"\.clj[csx]?$" "")
+               (str/replace #"/" ".")
+               (str/replace #"_" "-")
+               symbol))))
 
 (defn- relative-root-path
   ([path project]
