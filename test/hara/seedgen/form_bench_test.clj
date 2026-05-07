@@ -308,7 +308,7 @@
                       "             ^{:seedgen/extra true}\n"
                       "             [js.lib.driver-sqlite :as js-sqlite]]})\n"))
       (let [output (form-bench/seedgen-benchadd 'xt.db.runtime.parity-sqlite-test
-                                                {:lang [:lua.nginx :dart]
+                                                {:lang [:lua :dart]
                                                  :write true}
                                                 lookup
                                                 project)
@@ -317,11 +317,11 @@
                  (map (fn [{:keys [lang path]}]
                         [lang (slurp (str (fs/path root path)))]))
                  (into {}))]
-        [(:lua.nginx content-by-lang)
+        [(:lua content-by-lang)
          (:dart content-by-lang)])
       (finally
         (fs/delete root {:recursive true}))))
-  => [#"(?s)\(l/script- :lua\.nginx .*?\[lua\.nginx\.driver-sqlite :as lua-sqlite\].*"
+  => [#"(?s)\(l/script- :(lua|lua\.nginx) .*?\[lua\.nginx\.driver-sqlite :as lua-sqlite\].*"
       #"(?s)\(l/script- :dart .*?\[dart\.lib\.driver-sqlite :as dart-sqlite\].*"])
 
 ^{:refer hara.seedgen.form-bench/seedgen-benchadd :added "4.1"}
@@ -348,7 +348,7 @@
                       "             ^{:seedgen/extra true}\n"
                       "             [js.lib.driver-sqlite :as js-sqlite]]})\n"))
       (let [output (form-bench/seedgen-benchadd 'xt.db.runtime.parity-roundtrip-test
-                                                {:lang [:lua.nginx]
+                                                {:lang [:lua]
                                                  :write true}
                                                 lookup
                                                 project)
@@ -358,6 +358,39 @@
         (fs/delete root {:recursive true}))))
   => #(and (re-find #"\[lua\.nginx\.driver-sqlite :as lua-sqlite\]" %)
            (not (re-find #"\[js\.lib\.driver-sqlite :as js-sqlite\]" %))))
+
+^{:refer hara.seedgen.form-bench/seedgen-benchadd :added "4.1"}
+(fact "drops root-only extra requires even when the target runtime does not define a replacement"
+  (let [root    (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-extra-drop"
+                                                                  (make-array java.nio.file.attribute.FileAttribute 0)))
+        test-dir (doto (java.io.File. root "test-lang/xt/db/runtime")
+                   (.mkdirs))
+        path    (.getAbsolutePath (java.io.File. test-dir "parity_roundtrip_test.clj"))
+        lookup  {'xt.db.runtime.parity-roundtrip-test path}
+        project {:root (.getAbsolutePath root)
+                 :test-paths ["test-lang"]}]
+    (try
+      (spit path (str "(ns xt.db.runtime.parity-roundtrip-test\n"
+                      "  (:use code.test)\n"
+                      "  (:require [hara.lang :as l]))\n\n"
+                      "^{:seedgen/root {:all true\n"
+                      "                 :langs [:ruby]\n"
+                      "                 :js {:extra [[js.lib.driver-sqlite :as js-sqlite]]}}}\n"
+                      "(l/script- :js\n"
+                      "  {:runtime :basic\n"
+                      "   :require [[xt.lang.spec-base :as xt]\n"
+                      "             ^{:seedgen/extra true}\n"
+                      "             [js.lib.driver-sqlite :as js-sqlite]]})\n"))
+      (let [output (form-bench/seedgen-benchadd 'xt.db.runtime.parity-roundtrip-test
+                                                {:lang [:ruby]
+                                                 :write true}
+                                                lookup
+                                                project)
+            path   (-> output :outputs first :path)]
+        (slurp (str (fs/path root path))))
+      (finally
+        (fs/delete root {:recursive true}))))
+  => #(not (re-find #"\[js\.lib\.driver-sqlite :as js-sqlite\]" %)))
 
 ^{:refer hara.seedgen.form-bench/seedgen-benchremove :added "4.1"}
 (fact "removes selected bench files while preserving other runtimes"

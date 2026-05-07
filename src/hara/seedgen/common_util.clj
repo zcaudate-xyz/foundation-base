@@ -1,8 +1,8 @@
 (ns hara.seedgen.common-util
   (:require [std.fs :as fs]
-              [hara.lang.impl :as lang.impl]
-              [hara.lang.library :as lang.lib]
-              [hara.seedgen.common-meta :as runtime]))
+            [hara.lang.impl :as lang.impl]
+            [hara.lang.library :as lang.lib]
+            [hara.seedgen.common-meta :as runtime]))
 
 ;; --------------------------------------------------
 ;; script form discovery
@@ -140,6 +140,20 @@
   (let [tag-map (seedgen-dispatch-tag-map)
         lang    (seedgen-normalize-runtime-lang lang)]
     (or (get tag-map lang)
+        lang)))
+
+(defn seedgen-display-lang
+  [lang]
+  (let [lang  (-> lang
+                  runtime/normalize-runtime-lang
+                  seedgen-normalize-runtime-lang)
+        n     (name lang)
+        idx   (.indexOf ^String n ".")
+        base  (when (pos? idx)
+                (keyword (subs n 0 idx)))]
+    (or (runtime/runtime-script-lang lang)
+        base
+        (seedgen-dispatch-tag lang)
         lang)))
 
 (defn seedgen-default-runtime
@@ -317,12 +331,32 @@
   [form]
   (seedgen-base-config form))
 
+(defn- seedgen-config-entry-lang
+  [config lang]
+  (let [lang           (-> lang
+                           runtime/normalize-runtime-lang
+                           seedgen-normalize-runtime-lang)
+        lang-display   (seedgen-display-lang lang)]
+    (or (when (contains? config lang)
+          lang)
+        (some (fn [candidate]
+                (when (not= :all candidate)
+                  (let [candidate-display (seedgen-display-lang candidate)
+                        candidate-tag     (seedgen-dispatch-tag candidate)]
+                    (when (or (= candidate lang)
+                              (= candidate-display lang)
+                              (= candidate-display lang-display)
+                              (= candidate-tag lang)
+                              (= candidate-tag lang-display))
+                      candidate))))
+              (keys config)))))
+
 (defn seedgen-lang-entry
   [form lang]
   (let [config (seedgen-base-config form)
-        lang   (seedgen-normalize-runtime-lang lang)]
+        lang   (seedgen-config-entry-lang config lang)]
     (merge (get config :all)
-           (get config lang))))
+            (get config lang))))
 
 (defn seedgen-root-entry
   [form lang]
@@ -330,9 +364,9 @@
                        meta
                        :seedgen/root
                        normalize-seedgen-root-config)
-        lang   (seedgen-normalize-runtime-lang lang)]
+        lang   (seedgen-config-entry-lang config lang)]
     (merge (get config :all)
-           (get config lang))))
+            (get config lang))))
 
 (defn seedgen-suppressed-langs
   [form]

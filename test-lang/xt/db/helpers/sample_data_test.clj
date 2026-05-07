@@ -6,6 +6,8 @@
 
 (l/script :postgres
   {:require [[hara.runtime.postgres :as pg]]
+   :import [["citext"]
+            ["uuid-ossp"]]
    :static {:application ["xt.db.helpers.sample"]
             :seed        ["scratch-sample-db"]
             :all         {:schema   ["scratch-sample-db"]}}})

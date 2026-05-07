@@ -3,6 +3,8 @@
              [code.framework :as base]
              [code.project :as project]
              [std.fs :as fs]
+             [hara.seedgen.common-meta :as runtime]
+             [hara.seedgen.common-util :as common]
              [hara.seedgen.form-common :as form-common]
              [hara.seedgen.form-infile :as form-infile]
              [hara.seedgen.form-parse :as readforms]
@@ -30,8 +32,34 @@
     (vector? part)
     (mapcat #(bench-rename-part->segments % lang) part)
 
-    :else
-    [(str part)]))
+     :else
+     [(str part)]))
+
+(defn- bench-requested-runtime-lang
+  [lang]
+  (-> lang
+      runtime/normalize-runtime-lang
+      common/seedgen-normalize-runtime-lang))
+
+(defn- bench-display-lang
+  [lang]
+  (common/seedgen-display-lang (bench-requested-runtime-lang lang)))
+
+(defn- bench-resolve-runtime-lang
+  [requested-lang available-langs]
+  (let [requested-runtime (bench-requested-runtime-lang requested-lang)
+        requested-display (bench-display-lang requested-lang)]
+    (or (some (fn [candidate]
+                (let [candidate-display (bench-display-lang candidate)
+                      candidate-tag     (common/seedgen-dispatch-tag candidate)]
+                  (when (or (= candidate requested-runtime)
+                            (= candidate-display requested-runtime)
+                            (= candidate-display requested-display)
+                            (= candidate-tag requested-runtime)
+                            (= candidate-tag requested-display))
+                    candidate)))
+              available-langs)
+        requested-runtime)))
 
 (defn- bench-target-ns
   [test-ns lang rename]
@@ -64,10 +92,10 @@
                    :data :no-test-file})
 
        :else
-       (let [output        (readforms/seedgen-readforms ns {} lookup proj)
-             root-lang     (get-in output [:globals :lang :root])
-             stored-langs  (or (form-infile/root-script-meta-langs output) [])
-             derived-langs (get-in output [:globals :lang :derived])]
+        (let [output        (readforms/seedgen-readforms ns {} lookup proj)
+              root-lang     (get-in output [:globals :lang :root])
+              stored-langs  (or (form-infile/root-script-meta-langs output) [])
+              derived-langs (get-in output [:globals :lang :derived])]
          (cond
            (res/result? output)
            output
@@ -76,24 +104,34 @@
           (res/result {:status :error
                        :data :no-seedgen-root})
 
-           :else
-           (let [default-langs   (->> (concat [root-lang]
-                                              stored-langs
-                                              derived-langs)
-                                      distinct
-                                      vec)
-                 target-langs    (form-common/target-normalize-langs (:lang params)
-                                                                     default-langs)
-                 target-entries  (mapv (fn [lang]
-                                          (let [target-ns (bench-target-ns test-ns
-                                                                           lang
-                                                                           (:rename params))]
-                                            {:lang lang
-                                             :ns target-ns
-                                             :path (bench-target-path proj
-                                                                      test-file
-                                                                      target-ns)}))
-                                        target-langs)]
+            :else
+            (let [default-langs   (->> (concat [root-lang]
+                                               stored-langs
+                                               derived-langs)
+                                       distinct
+                                       vec)
+                  default-targets (->> default-langs
+                                       (map bench-display-lang)
+                                       distinct
+                                       vec)
+                  target-langs    (if (nil? (:lang params))
+                                    default-targets
+                                    (form-common/target-normalize-langs (:lang params)
+                                                                        default-targets))
+                  target-entries  (mapv (fn [lang]
+                                           (let [runtime-lang (bench-resolve-runtime-lang lang
+                                                                                           default-langs)
+                                                 display-lang (bench-display-lang lang)
+                                                 target-ns (bench-target-ns test-ns
+                                                                            display-lang
+                                                                            (:rename params))]
+                                             {:lang display-lang
+                                              :runtime-lang runtime-lang
+                                              :ns target-ns
+                                              :path (bench-target-path proj
+                                                                       test-file
+                                                                       target-ns)}))
+                                         target-langs)]
             {:project proj
              :params params
              :test-ns test-ns
@@ -105,12 +143,12 @@
 (defn- bench-render-targets
   [output test-file targets]
   (let [text (slurp test-file)]
-    (mapv (fn [{:keys [lang ns] :as target}]
+    (mapv (fn [{:keys [runtime-lang ns] :as target}]
             (assoc target
                    :content (form-infile/render-top-level-target output
-                                                                 text
-                                                                 lang
-                                                                 ns)))
+                                                                  text
+                                                                  runtime-lang
+                                                                  ns)))
           targets)))
 
 (defn- bench-output-functions

@@ -19,9 +19,8 @@
           [xt.protocol.impl.connection-sql :as dbsql]
           [xt.db.text.sql-util :as ut]
           [xt.db.text.sql-raw :as raw]
-          [xt.db.text.sql-manage :as manage]
-          [js.lib.driver-sqlite :as js-sqlite]]
-   :runtime :basic})
+          [xt.db.text.sql-manage :as manage]]
+          :runtime :basic})
 
 (fact:global
  {:setup [(l/rt:restart)]

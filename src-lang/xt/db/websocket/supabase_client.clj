@@ -1,9 +1,10 @@
-(ns xt.db.runtime.supabase-realtime
+(ns xt.db.websocket.supabase-client
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-string :as str]]})
+             [xt.lang.common-string :as str]
+             [xt.protocol.impl.client-websocket :as ws]]})
 
 (defn.xt client?
   "checks if a value is a supabase realtime client"
@@ -113,7 +114,9 @@
   (var payload (:? (xt/x:is-function? encode-fn)
                    (encode-fn msg)
                    msg))
-  ((xt/x:get-key conn "send") payload)
+  (if (ws/client? conn)
+    (ws/send conn payload)
+    ((xt/x:get-key conn "send") payload))
   (return msg))
 
 (defn.xt flush-send-buffer
@@ -396,9 +399,13 @@
   {:added "4.1.3"}
   [client channel]
   (var channels (or (xt/x:get-key client "channels") []))
-  (var idx (xt/x:arr-find channels
-                          (fn [current]
-                            (return (== current channel)))))
+  (var idx -1)
+  (var i 0)
+  (xt/for:array [current channels]
+    (when (and (< idx 0)
+               (== current channel))
+      (:= idx i))
+    (:= i (+ i 1)))
   (when (<= 0 idx)
     (xt/x:arr-remove channels idx))
   (return channel))
@@ -512,12 +519,13 @@
                "pending" {}
                "pending-heartbeat-ref" nil
                "send-buffer" []
-               "connect-fn" (xt/x:get-key opts "connect-fn")
-               "disconnect-fn" (xt/x:get-key opts "disconnect-fn")
-               "encode" (xt/x:get-key opts "encode")
-               "decode" (xt/x:get-key opts "decode")
-               "schedule-interval" (xt/x:get-key opts "schedule-interval")
-               "clear-interval" (xt/x:get-key opts "clear-interval")})
+                "connect-fn" (xt/x:get-key opts "connect-fn")
+                "disconnect-fn" (xt/x:get-key opts "disconnect-fn")
+                "transport-driver" (xt/x:get-key opts "transport-driver")
+                "encode" (xt/x:get-key opts "encode")
+                "decode" (xt/x:get-key opts "decode")
+                "schedule-interval" (xt/x:get-key opts "schedule-interval")
+                "clear-interval" (xt/x:get-key opts "clear-interval")})
   (xt/x:set-key client "connect"
                 (fn []
                   (return (-/connect client))))
@@ -547,9 +555,18 @@
                   (return (-/endpoint-url client))))
   (return client))
 
+(defabstract.xt default-encode [msg])
+(defabstract.xt default-decode [raw])
+(defabstract.xt create-client [endpoint opts])
+
+;;
+;; JS
+;;
+
 (l/script :js
   {:require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-string :as str]]})
+             [xt.lang.common-string :as str]
+             [xt.protocol.impl.client-websocket :as ws]]})
 
 (defn.js default-encode
   "encodes a realtime message to JSON"
@@ -571,35 +588,38 @@
         :else
         (return raw)))
 
-(defn.js bind-listener
-  "attaches a websocket event listener"
+(defn.js transport->driver
+  "normalizes a transport constructor or driver into the websocket protocol"
   {:added "4.1.3"}
-  [ws event handler]
-  (if (xt/x:is-function? (xt/x:get-key ws "addEventListener"))
-    (. ws (addEventListener event handler))
-    (xt/x:set-key ws (xt/x:cat "on" event) handler))
-  (return ws))
+  [transport]
+  (when (ws/driver? transport)
+    (return transport))
+  (when (xt/x:nil? transport)
+    (return nil))
+  (return
+   (ws/driver-create
+    {"connect" (fn [url]
+                 (return (new transport url)))})))
 
 (defn.js default-connect-fn
-  "connects a client using the native JS websocket transport"
+  "connects a client using the configured websocket transport"
   {:added "4.1.3"}
   [client]
   (when (xt/x:not-nil? (xt/x:get-key client "conn"))
     (return (xt/x:get-key client "conn")))
-  (var transport (or (xt/x:get-key client "transport")
-                     (!:G WebSocket)))
-  (when (xt/x:nil? transport)
-    (throw (new Error "WebSocket transport not available. Provide a custom transport via the transport option.")))
+  (var driver (xt/x:get-key client "transport-driver"))
+  (when (xt/x:nil? driver)
+    (throw (new Error "WebSocket transport not available. Provide a custom transport or transport-driver option.")))
   (xt/x:set-key client "state" "connecting")
-  (var ws (new transport (-/endpoint-url client)))
-  (xt/x:set-key client "conn" ws)
-  (-/bind-listener ws "open"
+  (var socket (ws/connect driver (-/endpoint-url client)))
+  (xt/x:set-key client "conn" socket)
+  (ws/add-listener socket "open"
                    (fn [_]
                      (xt/x:set-key client "state" "open")
                      (xt/x:set-key client "pending-heartbeat-ref" nil)
                      (-/flush-send-buffer client)
                      (-/start-heartbeat client)))
-  (-/bind-listener ws "close"
+  (ws/add-listener socket "close"
                    (fn [event]
                      (-/stop-heartbeat client)
                      (xt/x:set-key client "conn" nil)
@@ -610,24 +630,27 @@
                        (var callback (xt/x:get-key channel "subscribe-callback"))
                        (when (xt/x:is-function? callback)
                          (callback "CLOSED" event)))))
-  (-/bind-listener ws "error"
+  (ws/add-listener socket "error"
                    (fn [event]
                      (xt/x:set-key client "last-error" event)))
-  (-/bind-listener ws "message"
+  (ws/add-listener socket "message"
                    (fn [event]
                      (return (-/receive-raw client event))))
-  (return ws))
+  (return socket))
 
 (defn.js default-disconnect-fn
-  "disconnects a client using the native JS websocket transport"
+  "disconnects a client using the configured websocket transport"
   {:added "4.1.3"}
   [client code reason]
   (var conn (xt/x:get-key client "conn"))
-  (when (and (xt/x:not-nil? conn)
-             (xt/x:is-function? (xt/x:get-key conn "close")))
-    (if (xt/x:not-nil? code)
-      (conn.close code (or reason ""))
-      (conn.close)))
+  (when (xt/x:not-nil? conn)
+    (if (ws/client? conn)
+      (ws/disconnect conn code reason)
+      (if (and (xt/x:not-nil? conn)
+               (xt/x:is-function? (xt/x:get-key conn "close")))
+        (if (xt/x:not-nil? code)
+          (conn.close code (or reason ""))
+          (conn.close)))))
   (return nil))
 
 (defn.js create-client
@@ -647,8 +670,285 @@
     (xt/x:set-key opts "connect-fn" -/default-connect-fn))
   (when (xt/x:nil? (xt/x:get-key opts "disconnect-fn"))
     (xt/x:set-key opts "disconnect-fn" -/default-disconnect-fn))
+  (when (xt/x:nil? (xt/x:get-key opts "transport-driver"))
+    (xt/x:set-key opts "transport-driver"
+                  (-/transport->driver
+                   (or (xt/x:get-key opts "transport")
+                       (!:G WebSocket)))))
   (when (xt/x:nil? (xt/x:get-key opts "transport"))
     (xt/x:set-key opts "transport" (!:G WebSocket)))
   (var client (-/client-create-base endpoint opts))
   (xt/x:set-key client "transport" (xt/x:get-key opts "transport"))
+  (xt/x:set-key client "transport-driver" (xt/x:get-key opts "transport-driver"))
+  (return client))
+
+;;
+;; LUA NGINX
+;;
+
+(l/script :lua.nginx
+  {:import [["cjson" :as cjson]]
+   :require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-string :as str]
+             [xt.protocol.impl.client-websocket :as ws]
+             [xt.db.websocket.nginx-client :as ngx-client]]})
+
+(defn.lua default-encode
+  "encodes a realtime message to JSON"
+  {:added "4.1.3"}
+  [msg]
+  (return (cjson.encode msg)))
+
+(defn.lua default-decode
+  "decodes a realtime message from JSON"
+  {:added "4.1.3"}
+  [raw]
+  (cond (xt/x:is-string? raw)
+        (return (cjson.decode raw))
+
+        (and (xt/x:is-object? raw)
+             (xt/x:not-nil? (xt/x:get-key raw "data")))
+        (return (cjson.decode (xt/x:get-key raw "data")))
+
+        :else
+        (return raw)))
+
+(defn.lua transport->driver
+  "normalizes a callable transport or driver into the websocket protocol"
+  {:added "4.1.3"}
+  [transport]
+  (when (ws/driver? transport)
+    (return transport))
+  (when (xt/x:nil? transport)
+    (return nil))
+  (return
+   (ws/driver-create
+    {"connect" (fn [url]
+                 (return (transport url)))})))
+
+(defn.lua normalize-endpoint
+  "normalizes a realtime websocket endpoint for Lua clients"
+  {:added "4.1.3"}
+  [endpoint]
+  (:= endpoint (or endpoint ""))
+  (when (== 1 (xt/x:str-index-of endpoint "https://"))
+    (:= endpoint (xt/x:cat "wss://"
+                           (xt/x:str-substring endpoint 9))))
+  (when (== 1 (xt/x:str-index-of endpoint "http://"))
+    (:= endpoint (xt/x:cat "ws://"
+                           (xt/x:str-substring endpoint 8))))
+  (var websocket-suffix "/websocket")
+  (var endpoint-len (xt/x:len endpoint))
+  (var suffix-len (xt/x:len websocket-suffix))
+  (when (or (< endpoint-len suffix-len)
+            (not (== websocket-suffix
+                     (xt/x:str-substring endpoint
+                                         (+ (- endpoint-len suffix-len) 1)
+                                         endpoint-len))))
+    (:= endpoint
+        (xt/x:cat endpoint
+                  (:? (and (< 0 endpoint-len)
+                           (== "/" (xt/x:str-substring endpoint
+                                                       endpoint-len
+                                                       endpoint-len)))
+                      "websocket"
+                      "/websocket"))))
+  (return endpoint))
+
+(defn.lua default-connect-fn
+  "connects a client using the configured websocket transport"
+  {:added "4.1.3"}
+  [client]
+  (when (xt/x:not-nil? (xt/x:get-key client "conn"))
+    (return (xt/x:get-key client "conn")))
+  (var driver (xt/x:get-key client "transport-driver"))
+  (when (xt/x:nil? driver)
+    (xt/x:err "WebSocket transport not available. Provide a custom transport or transport-driver option."))
+  (xt/x:set-key client "state" "connecting")
+  (var socket (ws/connect driver (-/endpoint-url client)))
+  (xt/x:set-key client "conn" socket)
+  (ws/add-listener socket "open"
+                   (fn [_]
+                     (xt/x:set-key client "state" "open")
+                     (xt/x:set-key client "pending-heartbeat-ref" nil)
+                     (-/flush-send-buffer client)
+                     (-/start-heartbeat client)))
+  (ws/add-listener socket "close"
+                   (fn [event]
+                     (-/stop-heartbeat client)
+                     (xt/x:set-key client "conn" nil)
+                     (xt/x:set-key client "state" "closed")
+                     (xt/x:set-key client "pending-heartbeat-ref" nil)
+                     (xt/for:array [channel (or (xt/x:get-key client "channels") [])]
+                       (xt/x:set-key channel "state" "closed")
+                       (var callback (xt/x:get-key channel "subscribe-callback"))
+                       (when (xt/x:is-function? callback)
+                         (callback "CLOSED" event)))))
+  (ws/add-listener socket "error"
+                   (fn [event]
+                     (xt/x:set-key client "last-error" event)))
+  (ws/add-listener socket "message"
+                   (fn [event]
+                     (return (-/receive-raw client event))))
+  (return socket))
+
+(defn.lua default-disconnect-fn
+  "disconnects a client using the configured websocket transport"
+  {:added "4.1.3"}
+  [client code reason]
+  (var conn (xt/x:get-key client "conn"))
+  (when (xt/x:not-nil? conn)
+    (if (ws/client? conn)
+      (ws/disconnect conn code reason)
+      (if (xt/x:is-function? (xt/x:get-key conn "close"))
+        (if (xt/x:not-nil? code)
+          ((xt/x:get-key conn "close") code (or reason ""))
+          ((xt/x:get-key conn "close"))))))
+  (return nil))
+
+(defn.lua create-client
+  "creates a Lua realtime client compatible with Supabase channel APIs"
+  {:added "4.1.3"}
+  [endpoint opts]
+  (:= opts (xt/x:obj-clone (or opts {})))
+  (var params (xt/x:obj-clone (or (xt/x:get-key opts "params") {})))
+  (when (and (xt/x:not-nil? (xt/x:get-key opts "apikey"))
+             (xt/x:nil? (xt/x:get-key params "apikey")))
+    (xt/x:set-key params "apikey" (xt/x:get-key opts "apikey")))
+  (xt/x:set-key opts "params" params)
+  (when (xt/x:nil? (xt/x:get-key opts "encode"))
+    (xt/x:set-key opts "encode" -/default-encode))
+  (when (xt/x:nil? (xt/x:get-key opts "decode"))
+    (xt/x:set-key opts "decode" -/default-decode))
+  (when (xt/x:nil? (xt/x:get-key opts "connect-fn"))
+    (xt/x:set-key opts "connect-fn" -/default-connect-fn))
+  (when (xt/x:nil? (xt/x:get-key opts "disconnect-fn"))
+    (xt/x:set-key opts "disconnect-fn" -/default-disconnect-fn))
+  (when (xt/x:nil? (xt/x:get-key opts "transport-driver"))
+    (xt/x:set-key opts "transport-driver"
+                  (or (-/transport->driver
+                       (xt/x:get-key opts "transport"))
+                      (ngx-client/create-driver opts))))
+  (var client (-/client-create-base (-/normalize-endpoint endpoint) opts))
+  (xt/x:set-key client "params" params)
+  (xt/x:set-key client "apikey" (or (xt/x:get-key opts "apikey")
+                                    (xt/x:get-key params "apikey")))
+  (xt/x:set-key client "transport" (xt/x:get-key opts "transport"))
+  (xt/x:set-key client "transport-driver" (xt/x:get-key opts "transport-driver"))
+  (return client))
+
+;;
+;; PYTHON
+;;
+
+(l/script :python
+  {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-string :as str]
+             [python.core :as py]
+             [xt.protocol.impl.client-websocket :as ws]]})
+
+(defn.py default-encode
+  "encodes a realtime message to JSON"
+  {:added "4.1.3"}
+  [msg]
+  (return (py/js:dumps msg)))
+
+(defn.py default-decode
+  "decodes a realtime message from JSON"
+  {:added "4.1.3"}
+  [raw]
+  (cond (xt/x:is-string? raw)
+        (return (py/js:loads raw))
+
+        (and (xt/x:is-object? raw)
+             (xt/x:not-nil? (xt/x:get-key raw "data")))
+        (return (py/js:loads (xt/x:get-key raw "data")))
+
+        :else
+        (return raw)))
+
+(defn.py transport->driver
+  "normalizes a callable transport or driver into the websocket protocol"
+  {:added "4.1.3"}
+  [transport]
+  (when (ws/driver? transport)
+    (return transport))
+  (when (xt/x:nil? transport)
+    (return nil))
+  (return
+   (ws/driver-create
+    {"connect" (fn [url]
+                 (return (transport url)))})))
+
+(defn.py default-connect-fn
+  "connects a client using the configured websocket transport"
+  {:added "4.1.3"}
+  [client]
+  (when (xt/x:not-nil? (xt/x:get-key client "conn"))
+    (return (xt/x:get-key client "conn")))
+  (var driver (xt/x:get-key client "transport-driver"))
+  (when (xt/x:nil? driver)
+    (xt/x:err "WebSocket transport not available. Provide a custom transport or transport-driver option."))
+  (xt/x:set-key client "state" "connecting")
+  (var socket (ws/connect driver (-/endpoint-url client)))
+  (xt/x:set-key client "conn" socket)
+  (ws/add-listener socket "open"
+                   (fn [_]
+                     (xt/x:set-key client "state" "open")
+                     (xt/x:set-key client "pending-heartbeat-ref" nil)
+                     (-/flush-send-buffer client)
+                     (-/start-heartbeat client)))
+  (ws/add-listener socket "close"
+                   (fn [event]
+                     (-/stop-heartbeat client)
+                     (xt/x:set-key client "conn" nil)
+                     (xt/x:set-key client "state" "closed")
+                     (xt/x:set-key client "pending-heartbeat-ref" nil)
+                     (xt/for:array [channel (or (xt/x:get-key client "channels") [])]
+                       (xt/x:set-key channel "state" "closed")
+                       (var callback (xt/x:get-key channel "subscribe-callback"))
+                       (when (xt/x:is-function? callback)
+                         (callback "CLOSED" event)))))
+  (ws/add-listener socket "error"
+                   (fn [event]
+                     (xt/x:set-key client "last-error" event)))
+  (ws/add-listener socket "message"
+                   (fn [event]
+                     (return (-/receive-raw client event))))
+  (return socket))
+
+(defn.py default-disconnect-fn
+  "disconnects a client using the configured websocket transport"
+  {:added "4.1.3"}
+  [client code reason]
+  (var conn (xt/x:get-key client "conn"))
+  (when (xt/x:not-nil? conn)
+    (if (ws/client? conn)
+      (ws/disconnect conn code reason)
+      (if (xt/x:is-function? (xt/x:get-key conn "close"))
+        (if (xt/x:not-nil? code)
+          ((xt/x:get-key conn "close") code (or reason ""))
+          ((xt/x:get-key conn "close"))))))
+  (return nil))
+
+(defn.py create-client
+  "creates a Python realtime client compatible with Supabase channel APIs"
+  {:added "4.1.3"}
+  [endpoint opts]
+  (:= opts (xt/x:obj-clone (or opts {})))
+  (when (xt/x:nil? (xt/x:get-key opts "encode"))
+    (xt/x:set-key opts "encode" -/default-encode))
+  (when (xt/x:nil? (xt/x:get-key opts "decode"))
+    (xt/x:set-key opts "decode" -/default-decode))
+  (when (xt/x:nil? (xt/x:get-key opts "connect-fn"))
+    (xt/x:set-key opts "connect-fn" -/default-connect-fn))
+  (when (xt/x:nil? (xt/x:get-key opts "disconnect-fn"))
+    (xt/x:set-key opts "disconnect-fn" -/default-disconnect-fn))
+  (when (xt/x:nil? (xt/x:get-key opts "transport-driver"))
+    (xt/x:set-key opts "transport-driver"
+                  (-/transport->driver
+                   (xt/x:get-key opts "transport"))))
+  (var client (-/client-create-base endpoint opts))
+  (xt/x:set-key client "transport" (xt/x:get-key opts "transport"))
+  (xt/x:set-key client "transport-driver" (xt/x:get-key opts "transport-driver"))
   (return client))

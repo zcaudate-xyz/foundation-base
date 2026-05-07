@@ -153,38 +153,7 @@
       0])
 
 ^{:refer xt.db.instance/db-pull-sync :added "4.1"
-  :setup [(def +db-desc+
-            {"schema" sample/Schema
-             "views"
-             {"UserAccount"
-              {"select"
-               {"by_id"
-                {"input" [{"symbol" "i_account_id", "type" "text"}]
-                 "return" "jsonb"
-                 "view" {"table" "UserAccount"
-                         "type" "select"
-                         "tag" "by_id"
-                         "access" {"roles" {}}
-                         "guards" []
-                         "query" {"id" "{{i_account_id}}"}}}}
-               "return"
-               {"profile_emails"
-                {"input" [{"symbol" "i_order_id", "type" "text"}]
-                 "return" "jsonb"
-                 "view" {"table" "UserAccount"
-                         "type" "return"
-                         "tag" "profile_emails"
-                         "access" {"roles" {}}
-                         "guards" []
-                         "query" ["nickname"
-                                  ["profile" ["first_name"]]]}}}}}})
-          (def +prepared-query+
-            {:table "UserAccount"
-             :select-method "by_id"
-             :return-method "profile_emails"})
-          (def +prepared-query-args+
-            ["00000000-0000-0000-0000-000000000000"])
-          (def +prepared-output+
+  :setup [(def +prepared-output+
             [{"nickname" "root"
               "profile" [{"first_name" "Root"}]}])]}
 (fact "prepared view queries roundtrip to the same nested datastructure"
@@ -211,10 +180,36 @@
            (var payload {"UserAccount" [sample/RootUser]})
            (xdb/sync-event cache-db ["add" payload])
            (xdb/sync-event sql-db ["add" payload])
-           (var desc (@! +db-desc+))
+           (var desc
+                {"schema" sample/Schema
+                 "views"
+                 {"UserAccount"
+                  {"select"
+                   {"by_id"
+                    {"input" [{"symbol" "i_account_id", "type" "text"}]
+                     "return" "jsonb"
+                     "view" {"table" "UserAccount"
+                             "type" "select"
+                             "tag" "by_id"
+                             "access" {"roles" {}}
+                             "guards" []
+                             "query" {"id" "{{i_account_id}}"}}}}
+                   "return"
+                   {"profile_emails"
+                    {"input" [{"symbol" "i_order_id", "type" "text"}]
+                     "return" "jsonb"
+                     "view" {"table" "UserAccount"
+                             "type" "return"
+                             "tag" "profile_emails"
+                             "access" {"roles" {}}
+                             "guards" []
+                             "query" ["nickname"
+                                      ["profile" ["first_name"]]]}}}}}})
            (var [ok tree] (db-query/prepare-query desc
-                                                  (@! +prepared-query+)
-                                                  {"args" (@! +prepared-query-args+)}))
+                                                  {:table "UserAccount"
+                                                   :select-method "by_id"
+                                                   :return-method "profile_emails"}
+                                                  {"args" ["00000000-0000-0000-0000-000000000000"]}))
            (when (not ok)
              (xt/x:throw tree))
            (var schema (xt/x:get-key desc "schema"))

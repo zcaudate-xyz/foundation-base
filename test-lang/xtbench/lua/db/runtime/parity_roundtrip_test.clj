@@ -4,7 +4,7 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-(l/script- :lua
+(l/script- :lua.nginx
   {:require [[js.cell.service.db-query :as db-query]
           [xt.db.helpers.data-main-test :as sample]
           [xt.db.instance :as xdb]
@@ -20,8 +20,8 @@
           [xt.db.text.sql-util :as ut]
           [xt.db.text.sql-raw :as raw]
           [xt.db.text.sql-manage :as manage]
-          [js.lib.driver-sqlite :as js-sqlite]]
-   :runtime :basic})
+          [lua.nginx.driver-sqlite :as lua-sqlite]]
+          :runtime :basic})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -30,7 +30,7 @@
 ^{:refer xt.db.runtime.sql/sql-gen-delete :added "4.0"}
 (fact "generates delete statements"
 
-  (!.lua
+  (!.lua.nginx
     (impl-sql/sql-gen-delete "HELLO"
                              ["A" "B"]
                              (ut/sqlite-opts nil)))
@@ -50,7 +50,7 @@
                        "profile" [{"first_name" "Root"}]}])]}
 (fact "syncs and pulls sql data"
 
-  (notify/wait-on [:lua 5000]
+  (notify/wait-on [:lua.nginx 5000]
     (-> (dbsql/connect (js-sqlite/driver) {})
         (spec-promise/x:promise-then
          (fn [conn]
@@ -98,7 +98,7 @@
                       "DELETE FROM \"UserProfile\" WHERE \"id\" = 'c4643895-b0ce-44cc-b07b-2386bf18d43b';"))]}
 (fact "emits remove sql and deletes synced rows"
 
-  (notify/wait-on [:lua 5000]
+  (notify/wait-on [:lua.nginx 5000]
     (-> (dbsql/connect (js-sqlite/driver) {})
         (spec-promise/x:promise-then
          (fn [conn]
@@ -155,7 +155,7 @@
                       {"id" "XLM" "name" "Stellar Coin"}])]}
 (fact "bulk `in` filters roundtrip to the same flat row datastructure"
 
-  (notify/wait-on [:lua 5000]
+  (notify/wait-on [:lua.nginx 5000]
     (-> (dbsql/connect (js-sqlite/driver) {})
         (spec-promise/x:promise-then
          (fn [conn]
@@ -221,7 +221,7 @@
                       {"id" "XLM" "name" "Stellar Coin"}])]}
 (fact "bulk `in` filters roundtrip to the same flat row datastructure"
 
-  (notify/wait-on [:lua 5000]
+  (notify/wait-on [:lua.nginx 5000]
     (-> (dbsql/connect (js-sqlite/driver) {})
         (spec-promise/x:promise-then
          (fn [conn]
@@ -287,7 +287,7 @@
                       {"id" "XLM" "name" "Stellar Coin"}])]}
 (fact "bulk `in` filters roundtrip to the same flat row datastructure"
 
-  (notify/wait-on [:lua 5000]
+  (notify/wait-on [:lua.nginx 5000]
     (-> (dbsql/connect (js-sqlite/driver) {})
         (spec-promise/x:promise-then
          (fn [conn]

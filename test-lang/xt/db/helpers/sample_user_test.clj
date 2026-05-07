@@ -1,10 +1,13 @@
 (ns xt.db.helpers.sample-user-test
   (:require [hara.runtime.postgres :as pg :refer [defsel.pg defret.pg]]
-            [hara.lang :as l]))
+            [hara.lang :as l]
+            [xt.db.helpers.sample-data-test :as data]))
 
 (l/script :postgres
   {:require [[hara.runtime.postgres :as pg]
-             [xt.db.helpers.sample-data-test :as data]]
+              [xt.db.helpers.sample-data-test :as data]]
+   :import [["citext"]
+            ["uuid-ossp"]]
    :static {:application ["xt.db.helpers.sample"]
             :seed        ["scratch-sample-db"]
             :all         {:schema   ["scratch-sample-db"]}}})
@@ -46,9 +49,9 @@
    :city         {:type :text
                   :web {:example "This is the test user account"}}
    :state        {:type :ref
-                  :ref {:ns data/RegionState}}
+                  :ref {:ns xt.db.helpers.sample-data-test/RegionState}}
    :country      {:type :ref
-                  :ref {:ns data/RegionCountry}}
+                  :ref {:ns xt.db.helpers.sample-data-test/RegionCountry}}
    :about        {:type :text
                   :web {:example "This is the test user account"}}
    :language     {:type :citext  :required true
@@ -82,10 +85,10 @@
 
 (deftype.pg ^{:public true}
   Asset
-  [:id          {:type :uuid :primary true
-                 :sql {:default (pg/uuid-generate-v4)}}
-   :currency     {:type :ref :required true
-                  :ref {:ns data/Currency}
+   [:id          {:type :uuid :primary true
+                  :sql {:default (pg/uuid-generate-v4)}}
+    :currency    {:type :ref :required true
+                  :ref {:ns xt.db.helpers.sample-data-test/Currency}
                   :web {:example "STATS"}}])
 
 (deftype.pg ^{:public true}

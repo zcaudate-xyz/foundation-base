@@ -309,7 +309,8 @@
                           (->> (root-script-extra-requires output root-lang)
                                (map require-target)
                                set))]
-    (if (empty? extra-requires)
+    (if (and (empty? extra-requires)
+             (empty? drop-targets))
       script-str
       (let [root       (nav/parse-root script-str)
              script-nav (nav/down root)

@@ -20,7 +20,6 @@
           [xt.db.text.sql-util :as ut]
           [xt.db.text.sql-raw :as raw]
           [xt.db.text.sql-manage :as manage]
-          [js.lib.driver-sqlite :as js-sqlite]
           [python.lib.driver-sqlite :as py-sqlite]]
           :runtime :basic})
 

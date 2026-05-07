@@ -18,10 +18,45 @@
   "checks whether a value looks like a Supabase transport client"
   {:added "4.1"}
   [value]
+  (return (or (-/fetch-client? value)
+              (and (xt/x:is-object? value)
+                   (or (xt/x:is-function? (xt/x:get-key value "request"))
+                       (xt/x:is-function? (xt/x:get-key value "query"))
+                       (xt/x:is-function? (xt/x:get-key value "rpc")))))))
+
+(defn.xt fetch-client?
+  "checks if a value is a wrapped fetch client"
+  {:added "4.1.3"}
+  [value]
   (return (and (xt/x:is-object? value)
-               (or (xt/x:is-function? (xt/x:get-key value "request"))
-                   (xt/x:is-function? (xt/x:get-key value "query"))
-                   (xt/x:is-function? (xt/x:get-key value "rpc"))))))
+               (== "fetch.client"
+                   (xt/x:get-key value "::")))))
+
+(defn.xt fetch-query
+  "dispatches a query call through a wrapped fetch client"
+  {:added "4.1.3"}
+  [client request opts]
+  (var query-fn (xt/proto:method client "query"))
+  (when (xt/x:nil? query-fn)
+    (xt/x:err "Fetch client missing query method"))
+  (return (query-fn client request opts)))
+
+(defn.xt fetch-rpc
+  "dispatches an rpc call through a wrapped fetch client"
+  {:added "4.1.3"}
+  [client request opts]
+  (var rpc-fn (xt/proto:method client "rpc"))
+  (when (xt/x:nil? rpc-fn)
+    (xt/x:err "Fetch client missing rpc method"))
+  (return (rpc-fn client request opts)))
+
+(defn.xt unwrap-client
+  "returns the raw client map for wrapped fetch clients"
+  {:added "4.1.3"}
+  [client]
+  (if (-/fetch-client? client)
+    (return (or (xt/x:get-key client "_raw") {}))
+    (return (or client {}))))
 
 (defn.xt resolve-client
   "resolves a Supabase client from db or opts"
@@ -102,7 +137,7 @@
   "resolves the base Supabase REST url"
   {:added "4.1"}
   [db client opts]
-  (:= client (or client {}))
+  (:= client (-/unwrap-client client))
   (return (or (xt/x:get-key db "base-url")
               (xt/x:get-key db "base_url")
               (xt/x:get-key db "supabase-url")
@@ -126,7 +161,7 @@
   "resolves an optional Supabase API key"
   {:added "4.1"}
   [db client opts]
-  (:= client (or client {}))
+  (:= client (-/unwrap-client client))
   (return (or (xt/x:get-key db "apikey")
               (xt/x:get-key db "api-key")
               (xt/x:get-key db "api_key")
@@ -141,7 +176,7 @@
   "resolves an optional bearer auth token"
   {:added "4.1"}
   [db client opts]
-  (:= client (or client {}))
+  (:= client (-/unwrap-client client))
   (return (or (xt/x:get-key db "auth")
               (xt/x:get-key db "auth-token")
               (xt/x:get-key db "auth_token")
@@ -179,6 +214,12 @@
   "resolves the concrete request dispatcher for a compiled request"
   {:added "4.1"}
   [db client compiled opts]
+  (when (-/fetch-client? client)
+    (if (== (xt/x:get-key compiled "type") "rpc")
+      (return (fn [request request-opts]
+                (return (-/fetch-rpc client request request-opts))))
+      (return (fn [request request-opts]
+                (return (-/fetch-query client request request-opts))))))
   (:= client (or client {}))
   (var request-type (xt/x:get-key compiled "type"))
   (cond (== request-type "rpc")
@@ -201,7 +242,7 @@
   "builds request headers for PostgREST query or rpc execution"
   {:added "4.1"}
   [db client compiled opts]
-  (:= client (or client {}))
+  (:= client (-/unwrap-client client))
   (var headers (xt/x:obj-clone (or (xt/x:get-key compiled "headers") {})))
   (when (xt/x:is-object? (xt/x:get-key client "headers"))
     (xt/x:obj-assign headers (xt/x:get-key client "headers")))

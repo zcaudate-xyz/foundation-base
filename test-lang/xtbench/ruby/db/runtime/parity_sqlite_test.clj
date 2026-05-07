@@ -18,7 +18,6 @@
           [xt.db.text.sql-raw :as raw]
           [xt.db.text.sql-manage :as manage]
           [xt.db.helpers.data-main-test :as sample]
-          [js.lib.driver-sqlite :as js-sqlite]
           [ruby.lib.driver-sqlite :as ruby-sqlite]]
           :runtime :basic})
 
