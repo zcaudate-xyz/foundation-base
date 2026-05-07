@@ -1,6 +1,6 @@
 (ns hara.runtime.postgres.base.compile.ts-schema-test
   (:require [hara.runtime.postgres.base.compile.ts-schema :as compile.ts]
-            [hara.runtime.postgres.base.typed.typed-common :as types])
+            [postgres.typed.typed-common :as types])
   (:use code.test))
 
 ^{:refer hara.runtime.postgres.base.compile.ts-schema/field->ts :added "4.1"}

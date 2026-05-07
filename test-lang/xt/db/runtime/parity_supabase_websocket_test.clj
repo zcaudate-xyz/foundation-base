@@ -1,12 +1,9 @@
 (ns xt.db.runtime.parity-supabase-websocket-test
   (:use code.test)
   (:require [clojure.string :as str]
-            [hara.lang :as l]
+  	        [hara.lang :as l]
+            [std.config.global :as config.global]
             [xt.lang.common-notify :as notify]))
-
-(l/script- :postgres
-  {:runtime :jdbc.client
-   :require [[xt.db.helpers.sample-user-test :as sample-user]]})
 
 ^{:seedgen/root {:all true
                  :langs [:lua.nginx :python]}}
@@ -42,30 +39,52 @@
   (vec (concat +live-supabase-api-env+
                +live-supabase-postgres-env+)))
 
-(def +live-supabase-endpoint+
-  (System/getenv "DEFAULT_SUPABASE_API_ENDPOINT"))
-
-(def +live-supabase-service-key+
-  (System/getenv "DEFAULT_SUPABASE_API_KEY_SERVICE"))
-
 (def +live-supabase-schema+
   "scratch-sample-db")
 
 (def +live-supabase-table+
   "UserAccount")
 
-(defn env-present?
-  [k]
-  (some? (System/getenv k)))
+(defn live-config
+  []
+  (config.global/global :all {:cached false}))
 
-(def LIVE-SUPABASE?
-  (every? env-present? +live-supabase-required-env+))
+(defn config-key-path
+  [k]
+  (->> (str/split (str/lower-case k) #"_")
+       (mapv keyword)))
+
+(defn live-config-value
+  [k]
+  (let [config (live-config)]
+    (or (get config k)
+        (get config (keyword k))
+        (get config (keyword (str/lower-case k)))
+        (get-in config (config-key-path k))
+        (System/getProperty k)
+        (System/getenv k))))
+
+(defn live-config-present?
+  [k]
+  (some? (live-config-value k)))
+
+(defn live-supabase?
+  []
+  (every? live-config-present? +live-supabase-required-env+))
+
+(defn live-supabase-endpoint
+  []
+  (live-config-value "DEFAULT_SUPABASE_API_ENDPOINT"))
+
+(defn live-supabase-service-key
+  []
+  (live-config-value "DEFAULT_SUPABASE_API_KEY_SERVICE"))
 
 (defn live-postgres-jdbc-url
   []
-  (let [host   (System/getenv "DEFAULT_RT_POSTGRES_HOST")
-        port   (System/getenv "DEFAULT_RT_POSTGRES_PORT")
-        dbname (System/getenv "DEFAULT_RT_POSTGRES_DBNAME")
+  (let [host   (live-config-value "DEFAULT_RT_POSTGRES_HOST")
+        port   (live-config-value "DEFAULT_RT_POSTGRES_PORT")
+        dbname (live-config-value "DEFAULT_RT_POSTGRES_DBNAME")
         ssl?   (not (contains? #{"127.0.0.1" "localhost"} host))]
     (str "jdbc:pgsql://" host ":" port "/" dbname
          "?sslmode=" (if ssl? "require" "disable"))))
@@ -75,8 +94,8 @@
   (Class/forName "com.impossibl.postgres.jdbc.PGDriver")
   (java.sql.DriverManager/getConnection
    (live-postgres-jdbc-url)
-   (System/getenv "DEFAULT_RT_POSTGRES_USER")
-   (System/getenv "DEFAULT_RT_POSTGRES_PASS")))
+   (live-config-value "DEFAULT_RT_POSTGRES_USER")
+   (live-config-value "DEFAULT_RT_POSTGRES_PASS")))
 
 (defn jdbc-exec!
   [sql]
@@ -130,12 +149,9 @@
 
 (fact:global
  {:setup [(l/rt:restart)
-          (when LIVE-SUPABASE?
-            (l/rt:setup :postgres)
-            (ensure-live-realtime-table!))]
-  :teardown [(when LIVE-SUPABASE?
-               (l/rt:teardown :postgres))
-             (l/rt:stop)]})
+           (when (live-supabase?)
+             (ensure-live-realtime-table!))]
+   :teardown [(l/rt:stop)]})
 
 (fact "js lua and python clients build equivalent websocket endpoints"
 
@@ -506,7 +522,7 @@
 
 (fact "js client can consume live Supabase postgres_changes for sample-user tables"
 
-  (if LIVE-SUPABASE?
+  (if (live-supabase?)
     (let [nickname (str "live-parity-" (subs (str (java.util.UUID/randomUUID)) 0 8))
           runner   (future
                      (Thread/sleep 1500)
@@ -518,9 +534,9 @@
                         (var complete false)
                         (var client
                              (realtime/create-client
-                              (@! +live-supabase-endpoint+)
-                              {"apikey" (@! +live-supabase-service-key+)
-                               "access-token" (@! +live-supabase-service-key+)}))
+                              (@! (live-supabase-endpoint))
+                              {"apikey" (@! (live-supabase-service-key))
+                               "access-token" (@! (live-supabase-service-key))}))
                        (var channel
                             ((xt/x:get-key client "channel")
                              "xt.db.live.supabase"

@@ -1,6 +1,6 @@
 (ns hara.runtime.postgres.base.compile.json-schema-test
   (:require [hara.runtime.postgres.base.compile.json-schema :as compile.json-schema]
-            [hara.runtime.postgres.base.typed.typed-common :as types])
+            [postgres.typed.typed-common :as types])
   (:use code.test))
 
 ^{:refer hara.runtime.postgres.base.compile.json-schema/resolve-type :added "4.1"}

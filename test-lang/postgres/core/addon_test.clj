@@ -1,5 +1,5 @@
 (ns postgres.core.addon-test
-  (:require [hara.runtime.postgres :as pg]
+  (:require [postgres.core :as pg]
             [postgres.core.addon :as addon]
             [postgres.sample.scratch-v1 :as scratch]
             [hara.lang :as l])
@@ -8,14 +8,14 @@
 (l/script- :postgres
   {:runtime :jdbc.client
    :config  {:dbname "test-scratch"}
-   :require [[hara.runtime.postgres :as pg]
+   :require [[postgres.core :as pg]
              [postgres.sample.scratch-v1 :as scratch]]
    :import [["pgcrypto"]]})
 
 (fact:global
  {:setup    [(l/rt:restart)
              (l/rt:setup :postgres)
-             (hara.runtime.postgres/exec [:create-schema :if-not-exists :scratch])]
+             (postgres.core/exec [:create-schema :if-not-exists :scratch])]
   :teardown [(l/rt:stop)]})
 
 ^{:refer postgres.core.addon/exec :added "4.0"}
@@ -83,13 +83,13 @@
 ^{:refer postgres.core.addon/time-ms :added "4.0"}
 (fact "returns the time in ms"
 
-  (l/emit-as :postgres '[(hara.runtime.postgres/time-ms)])
+  (l/emit-as :postgres '[(postgres.core/time-ms)])
   => string?)
 
 ^{:refer postgres.core.addon/time-us :added "4.0"}
 (fact "returns the time in us"
 
-  (l/emit-as :postgres '[(hara.runtime.postgres/time-us)])
+  (l/emit-as :postgres '[(postgres.core/time-us)])
   => string?)
 
 ^{:refer postgres.core.addon/throw :added "4.0"
@@ -125,37 +125,37 @@
 ^{:refer postgres.core.addon/get-stack-diagnostics :added "4.0"}
 (fact "gets the stack diagnostics"
 
-  (l/emit-as :postgres '[(hara.runtime.postgres/get-stack-diagnostics)])
+  (l/emit-as :postgres '[(postgres.core/get-stack-diagnostics)])
   => string?)
 
 ^{:refer postgres.core.addon/field-id :added "4.0"}
 (fact "shorthand for getting the field-id for a linked map"
 
-  (l/emit-as :postgres '[(hara.runtime.postgres/field-id m :field)])
+  (l/emit-as :postgres '[(postgres.core/field-id m :field)])
   => "coalesce(m ->> ':field_id',(m -> :field) ->> 'id')")
 
 ^{:refer postgres.core.addon/map:rel :added "4.0"}
 (fact "basic map across relation"
 
-  (l/emit-as :postgres '[(hara.runtime.postgres/map:rel f rel)])
+  (l/emit-as :postgres '[(postgres.core/map:rel f rel)])
   => "jsonb_agg(f(o_ret)) FROM rel AS o_ret")
 
 ^{:refer postgres.core.addon/map:js-text :added "4.0"}
 (fact "maps across json"
 
-  (l/emit-as :postgres '[(hara.runtime.postgres/map:js-text f arr)])
+  (l/emit-as :postgres '[(postgres.core/map:js-text f arr)])
   => "coalesce(jsonb_agg(f(o_ret)),jsonb_build_array())\nFROM jsonb_array_elements_text(arr) AS o_ret")
 
 ^{:refer postgres.core.addon/map:js :added "4.0"}
 (fact "basic map across json"
 
-  (l/emit-as :postgres '[(hara.runtime.postgres/map:js f arr)])
+  (l/emit-as :postgres '[(postgres.core/map:js f arr)])
   => "coalesce(jsonb_agg(f(o_ret)),jsonb_build_array())\nFROM jsonb_array_elements(arr) AS o_ret")
 
 ^{:refer postgres.core.addon/do:reduce :added "4.0"}
 (fact "basic reduce macro"
 
-  (l/emit-as :postgres '[(hara.runtime.postgres/do:reduce out f :type arr)])
+  (l/emit-as :postgres '[(postgres.core/do:reduce out f :type arr)])
   => string?)
 
 ^{:refer postgres.core.addon/b:select :added "4.0"
@@ -174,25 +174,25 @@
 ^{:refer postgres.core.addon/b:update :added "4.0"}
 (fact "update macro"
 
-  (l/emit-as :postgres '[(hara.runtime.postgres/b:update t {:a 1})])
+  (l/emit-as :postgres '[(postgres.core/b:update t {:a 1})])
   => "UPDATE t \"a\" = 1")
 
 ^{:refer postgres.core.addon/b:insert :added "4.0"}
 (fact "insert macro"
 
-  (l/emit-as :postgres '[(hara.runtime.postgres/b:insert t {:a 1})])
+  (l/emit-as :postgres '[(postgres.core/b:insert t {:a 1})])
   => "INSERT t \"a\" = 1")
 
 ^{:refer postgres.core.addon/b:delete :added "4.0"}
 (fact "delete macro"
 
-  (l/emit-as :postgres '[(hara.runtime.postgres/b:delete t)])
+  (l/emit-as :postgres '[(postgres.core/b:delete t)])
   => "DELETE t")
 
 ^{:refer postgres.core.addon/perform :added "4.0"}
 (fact "perform macro"
 
-  (l/emit-as :postgres '[(hara.runtime.postgres/perform 1)])
+  (l/emit-as :postgres '[(postgres.core/perform 1)])
   => "PERFORM 1")
 
 ^{:refer postgres.core.addon/random-enum :added "4.0"}

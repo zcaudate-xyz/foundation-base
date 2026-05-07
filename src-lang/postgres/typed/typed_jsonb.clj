@@ -1,6 +1,6 @@
-(ns hara.runtime.postgres.base.typed.typed-jsonb
+(ns postgres.typed.typed-jsonb
   (:require [clojure.string :as str]
-            [hara.runtime.postgres.base.typed.typed-common :as types]))
+            [postgres.typed.typed-common :as types]))
 
 (defn symbol->field-key
   [sym]
@@ -187,7 +187,7 @@
                       tail (next remaining)]
                   (types/make-jsonb-shape
                    {segment (if tail
-                              (hara.runtime.postgres.base.typed.typed-jsonb/field-info
+                              (postgres.typed.typed-jsonb/field-info
                                :jsonb
                                {:shape (build tail)})
                               field-info)})))]

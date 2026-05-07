@@ -268,9 +268,9 @@
           :main    {:fn  #'lib-module-purge-fn}}])
 
 (comment (comment
-           (lib-module-purge '[hara.runtime.postgres])
-           (do (./reset '[hara.runtime.postgres])
-               (require '[hara.runtime.postgres])
+           (lib-module-purge '[postgres.core])
+           (do (./reset '[postgres.core])
+               (require '[postgres.core])
                (lib-overview '[:postgres]))
            (lib-module-entries '[statsdb])
            (lib-module-purge '[statsdb])

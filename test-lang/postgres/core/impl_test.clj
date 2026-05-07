@@ -1,5 +1,5 @@
 (ns postgres.core.impl-test
-  (:require [hara.runtime.postgres :as pg]
+  (:require [postgres.core :as pg]
             [hara.runtime.postgres.base.application :as app]
             [hara.model.spec-postgres.common-tracker :as tracker]
             [postgres.core.impl :as impl]
@@ -14,7 +14,7 @@
 (l/script- :postgres
   {:runtime :jdbc.client
    :config  {:dbname "test-scratch"}
-   :require [[hara.runtime.postgres :as pg]
+   :require [[postgres.core :as pg]
              [postgres.sample.scratch-v1 :as scratch]]})
 
 ^{:refer postgres.core.impl/t:select :added "4.0"

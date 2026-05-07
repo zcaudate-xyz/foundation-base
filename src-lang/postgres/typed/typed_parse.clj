@@ -1,9 +1,9 @@
-(ns hara.runtime.postgres.base.typed.typed-parse
+(ns postgres.typed.typed-parse
   (:require [code.project :as project]
             [clojure.java.io :as io]
             [clojure.string :as str]
-            [hara.runtime.postgres.base.typed.typed-infer :as typed-infer]
-            [hara.runtime.postgres.base.typed.typed-common :as types]))
+            [postgres.typed.typed-infer :as typed-infer]
+            [postgres.typed.typed-common :as types]))
 
 (defn- canonical-postgres-ns
   [ns-sym]

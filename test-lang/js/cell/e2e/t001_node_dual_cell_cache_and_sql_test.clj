@@ -14,33 +14,8 @@
              [js.cell.runtime.link :as runtime-link]]})
 
 (fact:global
- {:setup [(l/rt:restart)
-          (l/rt:scaffold-imports :js)]
+ {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
-
-(defmacro node-dual-cell-scenario
-  []
-  )
-
-
-(comment
-
-  #_(. (. (. remote-cell ["init"])
-            (then
-             (fn []
-               (common/connect-sqlite
-                {:success
-                 (fn [sqlite-conn]
-                   (. (. (common/run-scenario remote-cell sqlite-conn)
-                         (then (fn [result]
-                                 (repl/notify result))))
-                      (catch (fn [err]
-                               (repl/notify {"error" err})))))
-                 :error
-                 (fn [err]
-                   (repl/notify {"error" err}))}))))
-         (catch (fn [err]
-                  (repl/notify {"error" err})))))
 
 ^{:refer js.cell.e2e.common/run-scenario :added "4.1"}
 (fact "runs a Node dual-cell cache/sqlite-wasm scenario"

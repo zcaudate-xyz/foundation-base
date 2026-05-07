@@ -159,7 +159,7 @@
                                         "POSTGRES_USER" "postgres"}
                           :cmd    ["postgres"]}}
      :import  [["redis"]]
-     :require [[hara.runtime.postgres :as pg]
+     :require [[postgres.core :as pg]
                [statsdb.core.account-base :as account-base]
                [statsdb.core.application :as app]
                [statsdb.core.infra-mq :as infra-mq]

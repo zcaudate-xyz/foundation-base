@@ -9,7 +9,6 @@
      :config {:dbname "test-scratch"}
      :require [[xt.db.helpers.sample-user-test :as sample-user]]}))
 
-
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -47,7 +46,7 @@
 ^{:refer xt.db.runtime.sql/sql-process-event-sync
   :added "4.1"}
 (fact "postgres and sqlite report the same touched sample tables"
-
+  
   (notify/wait-on [:js 15000]
     (do
       (var run-queries nil)

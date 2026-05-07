@@ -1,8 +1,8 @@
 (ns hara.runtime.postgres.base.compile.server-db
   (:require [clojure.walk :as walk]
             [std.block.template :as gen]
-            [hara.runtime.postgres.base.typed.typed-analyze :as analyze]
-            [hara.runtime.postgres.base.typed.typed-common :as types]))
+            [postgres.typed.typed-analyze :as analyze]
+            [postgres.typed.typed-common :as types]))
 
 (def ^:private +default-targets+
   [:supabase-db])

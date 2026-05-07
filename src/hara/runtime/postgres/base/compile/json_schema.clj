@@ -1,6 +1,6 @@
 (ns hara.runtime.postgres.base.compile.json-schema
-  (:require [hara.runtime.postgres.base.typed.typed-common :as types]
-            [hara.runtime.postgres.base.typed.typed-shape :as shape]))
+  (:require [postgres.typed.typed-common :as types]
+            [postgres.typed.typed-shape :as shape]))
 
 (declare shape->json-schema)
 

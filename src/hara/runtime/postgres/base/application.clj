@@ -1,6 +1,6 @@
 (ns hara.runtime.postgres.base.application
-  (:require [hara.runtime.postgres.base.typed.typed-common :as typed]
-            [hara.runtime.postgres.base.typed.typed-parse :as tparse]
+  (:require [postgres.typed.typed-common :as typed]
+            [postgres.typed.typed-parse :as tparse]
             [hara.lang :as l]
             [std.lib.collection :as collection]
             [std.lib.context.pointer :as ptr]

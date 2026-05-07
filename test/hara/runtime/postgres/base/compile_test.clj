@@ -1,6 +1,6 @@
 (ns hara.runtime.postgres.base.compile-test
   (:require [hara.runtime.postgres.base.compile :as compile]
-            [hara.runtime.postgres.base.typed.typed-common :as types])
+            [postgres.typed.typed-common :as types])
   (:use code.test))
 
 (def +shape-fn+

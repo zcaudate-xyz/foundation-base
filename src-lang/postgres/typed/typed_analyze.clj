@@ -1,12 +1,12 @@
-(ns hara.runtime.postgres.base.typed.typed-analyze
+(ns postgres.typed.typed-analyze
   (:require [clojure.string :as str]
             [clojure.walk :as walk]
-            [hara.runtime.postgres.base.typed.typed-common :as types]
-            [hara.runtime.postgres.base.typed.typed-infer :as typed-infer]
-            [hara.runtime.postgres.base.typed.typed-resolve :as typed-resolve]
-            [hara.runtime.postgres.base.typed.typed-jsonb :as typed-jsonb]
-            [hara.runtime.postgres.base.typed.typed-parse :as parse]
-            [hara.runtime.postgres.base.typed.typed-shape :as shape]
+            [postgres.typed.typed-common :as types]
+            [postgres.typed.typed-infer :as typed-infer]
+            [postgres.typed.typed-resolve :as typed-resolve]
+            [postgres.typed.typed-jsonb :as typed-jsonb]
+            [postgres.typed.typed-parse :as parse]
+            [postgres.typed.typed-shape :as shape]
             [std.json :as json]))
 
 ;; ─────────────────────────────────────────────────────────────────────────────

@@ -1,26 +1,25 @@
-(ns hara.runtime.postgres.base.typed-test
-  (:require [hara.runtime.postgres.base.typed.typed-common :as types]
-            [hara.runtime.postgres.base.typed.typed-parse :as parse]
+(ns postgres.typed-test
+  (:require [postgres.typed.typed-common :as types]
+            [postgres.typed.typed-parse :as parse]
             [postgres.sample.scratch-v2 :as scratch]
-            [hara.runtime.postgres.typed :as typed]
-            [hara.runtime.postgres.base.typed :as typed-analysis])
+            [postgres.typed :as typed-analysis])
   (:use code.test))
 
-^{:refer hara.runtime.postgres.base.typed/analyze-file :added "4.1"}
+^{:refer postgres.typed/analyze-file :added "4.1"}
 (fact "analyze-file returns structure with tables, enums, and functions"
   (let [result (typed-analysis/analyze-file "src/rt/postgres/base/typed/typed_common.clj")]
     (contains? result :tables) => true
     (contains? result :enums) => true
     (contains? result :functions) => true))
 
-^{:refer hara.runtime.postgres.base.typed/analyze-namespace :added "4.1"}
+^{:refer postgres.typed/analyze-namespace :added "4.1"}
 (fact "analyze-namespace analyzes a namespace and returns type definitions"
   (let [result (typed-analysis/analyze-namespace 'rt.postgres.base.typed.typed-common)]
     (contains? result :tables) => true
     (contains? result :enums) => true
     (contains? result :functions) => true))
 
-^{:refer hara.runtime.postgres.base.typed/analyze-and-register! :added "4.1"}
+^{:refer postgres.typed/analyze-and-register! :added "4.1"}
 (fact "analyze-and-register! analyzes and registers types from a namespace"
   (typed/clear-registry!)
   (let [result (typed-analysis/analyze-and-register! 'rt.postgres.base.typed.typed-common)]
@@ -29,7 +28,7 @@
     (contains? result :enums) => true
     (contains? result :functions) => true))
 
-^{:refer hara.runtime.postgres.base.typed/make-function-report :added "4.1"}
+^{:refer postgres.typed/make-function-report :added "4.1"}
 (fact "make-function-report returns a function-level infer report"
   (let [report (typed-analysis/make-function-report 'postgres.sample.scratch-v2
                                            'insert-entry)]
@@ -37,7 +36,7 @@
     (get-in report [:analysis :mutating]) => true
     (get-in report [:analysis :source-tables]) => ["Entry"]))
 
-^{:refer hara.runtime.postgres.base.typed/get-function-report :added "4.1"}
+^{:refer postgres.typed/get-function-report :added "4.1"}
 (fact "get-function-report lazily retrieves and caches infer reports for registered functions"
   (typed/clear-registry!)
   (let [analysis (-> 'postgres.sample.scratch-v2
@@ -50,7 +49,7 @@
       (get-in report [:function :name]) => "insert-entry"
       (get-in report [:analysis :mutating]) => true)))
 
-^{:refer hara.runtime.postgres.base.typed/Type :added "4.1"}
+^{:refer postgres.typed/Type :added "4.1"}
 (fact "Type includes grouped nested operations"
   (typed/clear-registry!)
   (let [user-table (types/make-table-def "test" "User"
@@ -108,14 +107,14 @@
       (get-in report [:analysis :operations-by-type "insert" 0 :operation 0]) => "pg/t:insert"
       (get-in report [:analysis :operations-by-type "insert" 0 :operation 1]) => "User")))
 
-^{:refer hara.runtime.postgres.base.typed/inferred->shape :added "4.1"}
+^{:refer postgres.typed/inferred->shape :added "4.1"}
 (fact "inferred->shape unwraps shaped inference results"
   (let [shape (types/make-jsonb-shape {:id {:type :uuid}} "Entry")]
     (typed-analysis/inferred->shape shape) => shape
     (typed-analysis/inferred->shape {:kind :shaped :shape shape}) => shape
     (typed-analysis/inferred->shape {:kind :primitive}) => nil))
 
-^{:refer hara.runtime.postgres.base.typed/format-shape :added "4.1"}
+^{:refer postgres.typed/format-shape :added "4.1"}
 (fact "format-shape dispatches by output format"
   (let [shape (types/make-jsonb-shape {:id {:type :uuid}} "Entry")]
     (typed-analysis/format-shape shape :shape) => shape
@@ -124,7 +123,7 @@
                                                                 :format "uuid"}}
                                             :required ["id"]}))
 
-^{:refer hara.runtime.postgres.base.typed/get-app-function-report :added "4.1"}
+^{:refer postgres.typed/get-app-function-report :added "4.1"}
 (fact "get-app-function-report runs infer reporting against an app typed payload"
   (let [typed-payload (types/analysis->typed
                        (parse/analyze-namespace 'postgres.sample.scratch-v2))]
@@ -134,7 +133,7 @@
         (get-in report [:function :name]) => "insert-entry"
         (get-in report [:analysis :mutating]) => true))))
 
-^{:refer hara.runtime.postgres.base.typed/get-function-report-json :added "4.1"}
+^{:refer postgres.typed/get-function-report-json :added "4.1"}
 (fact "get-function-report-json serializes reports for registered functions"
   (typed/clear-registry!)
   (-> 'postgres.sample.scratch-v2
@@ -145,7 +144,7 @@
     (string? output) => true
     (clojure.string/includes? output "\"insert-entry\"") => true))
 
-^{:refer hara.runtime.postgres.base.typed/get-app-function-report-json :added "4.1"}
+^{:refer postgres.typed/get-app-function-report-json :added "4.1"}
 (fact "get-app-function-report-json serializes app-scoped reports"
   (let [typed-payload (types/analysis->typed
                        (parse/analyze-namespace 'postgres.sample.scratch-v2))]
@@ -156,25 +155,25 @@
         (string? output) => true
         (clojure.string/includes? output "\"insert-entry\"") => true))))
 
-^{:refer hara.runtime.postgres.base.typed/get-function-def :added "4.1"}
+^{:refer postgres.typed/get-function-def :added "4.1"}
 (fact "get-function-def returns a registered function definition"
   (typed/clear-registry!)
   (let [fn-def (types/make-fn-def "test" "get-user" [] [:jsonb] {} nil)]
     (typed/register-type! 'test/get-user fn-def)
     (typed-analysis/get-function-def 'test/get-user) => fn-def))
 
-^{:refer hara.runtime.postgres.base.typed/fn-ref->fn-sym :added "4.1"}
+^{:refer postgres.typed/fn-ref->fn-sym :added "4.1"}
 (fact "fn-ref->fn-sym delegates to the resolve layer"
   (typed-analysis/fn-ref->fn-sym #'clojure.string/blank?) => 'clojure.string/blank?)
 
-^{:refer hara.runtime.postgres.base.typed/resolve-function-def :added "4.1"}
+^{:refer postgres.typed/resolve-function-def :added "4.1"}
 (fact "resolve-function-def returns registered function defs"
   (typed/clear-registry!)
   (let [fn-def (types/make-fn-def "demo" "inner" [] [:jsonb] {} nil)]
     (typed/register-type! 'demo/inner fn-def)
     (typed-analysis/resolve-function-def 'demo/inner) => fn-def))
 
-^{:refer hara.runtime.postgres.base.typed/get-app-function-def :added "4.1"}
+^{:refer postgres.typed/get-app-function-def :added "4.1"}
 (fact "get-app-function-def reads function defs directly from an app typed payload"
   (let [fn-def (types/make-fn-def "test.ns" "insert-task" [] :jsonb {} nil)
         typed-payload {:tables {}
@@ -183,7 +182,7 @@
     (with-redefs [hara.runtime.postgres.base.application/app-typed (fn [_] typed-payload)]
       (typed-analysis/get-app-function-def "demo" 'test.ns/insert-task) => fn-def)))
 
-^{:refer hara.runtime.postgres.base.typed/with-app-typed-registry :added "4.1"}
+^{:refer postgres.typed/with-app-typed-registry :added "4.1"}
 (fact "with-app-typed-registry temporarily merges app types into the registry"
   (typed/clear-registry!)
   (let [table (types/make-table-def "demo" "Entry" [] :id)]
@@ -198,7 +197,7 @@
         seen => true))
     (contains? @types/*type-registry* 'demo/Entry) => false))
 
-^{:refer hara.runtime.postgres.base.typed/get-function-input-shape :added "4.1"}
+^{:refer postgres.typed/get-function-input-shape :added "4.1"}
 (fact "get-function-input-shape projects update columns and keeps helper-chain narrowing intact"
   (typed/clear-registry!)
   (let [user-columns [(types/make-column-def :id
@@ -338,7 +337,7 @@
       (get-in public-shape [:fields :location :type]) => :jsonb
       (get-in public-shape [:fields :bio :type]) => :text)))
 
-^{:refer hara.runtime.postgres.base.typed/get-app-function-input-shape :added "4.1"}
+^{:refer postgres.typed/get-app-function-input-shape :added "4.1"}
 (fact "get-app-function-input-shape infers jsonb input shape from an app typed payload"
   (typed/clear-registry!)
   (let [task-columns [(types/make-column-def :id
@@ -362,7 +361,7 @@
         (types/jsonb-shape? shape) => true
         (-> shape :fields keys set) => #{:id :status}))))
 
-^{:refer hara.runtime.postgres.base.typed/get-function-input-schema :added "4.1"}
+^{:refer postgres.typed/get-function-input-schema :added "4.1"}
 (fact "get-function-input-schema formats inferred input shapes"
   (typed/clear-registry!)
   (let [task-columns [(types/make-column-def :id
@@ -386,7 +385,7 @@
             [:properties "status" :type]) => "string"
     (string? (typed-analysis/get-function-input-schema 'test.ns/insert-task-raw 'm :typescript)) => true))
 
-^{:refer hara.runtime.postgres.base.typed/get-app-function-input-schema :added "4.1"}
+^{:refer postgres.typed/get-app-function-input-schema :added "4.1"}
 (fact "get-app-function-input-schema formats inferred app input shapes"
   (let [task-columns [(types/make-column-def :id
                                              (types/make-type-ref :primitive nil :uuid)
@@ -425,7 +424,7 @@
                                                     :typescript))
       => true)))
 
-^{:refer hara.runtime.postgres.base.typed/get-function-output-shape :added "4.1"}
+^{:refer postgres.typed/get-function-output-shape :added "4.1"}
 (fact "get-function-output-shape preserves nested jsonb refinement from plain child bindings"
   (typed/clear-registry!)
   (let [form '(defn.pg
@@ -447,7 +446,7 @@
       (get-in shape [:fields :security :shape :fields :password-salt :type]) => :text
       (get-in shape [:fields :profile :type]) => :jsonb)))
 
-^{:refer hara.runtime.postgres.base.typed/get-app-function-output-shape :added "4.1"}
+^{:refer postgres.typed/get-app-function-output-shape :added "4.1"}
 (fact "get-app-function-output-shape infers output shapes from an app typed payload"
   (let [form '(defn.pg
                 prepare-topic
@@ -474,7 +473,7 @@
                                          :code-full
                                          :organisation-id}))))
 
-^{:refer hara.runtime.postgres.base.typed/get-function-output-schema :added "4.1"}
+^{:refer postgres.typed/get-function-output-schema :added "4.1"}
 (fact "get-function-output-schema formats inferred output shapes"
   (typed/clear-registry!)
   (let [form '(defn.pg
@@ -496,7 +495,7 @@
             [:properties "publish" :type]) => "string"
     (string? (typed-analysis/get-function-output-schema 'test.ns/prepare-topic :typescript)) => true))
 
-^{:refer hara.runtime.postgres.base.typed/get-app-function-output-schema :added "4.1"}
+^{:refer postgres.typed/get-app-function-output-schema :added "4.1"}
 (fact "get-app-function-output-schema formats inferred app output shapes"
   (let [form '(defn.pg
                 prepare-topic
@@ -531,7 +530,7 @@
                                                      :typescript))
       => true)))
 
-^{:refer hara.runtime.postgres.base.typed/report-json :added "4.1"}
+^{:refer postgres.typed/report-json :added "4.1"}
 (fact "report-json serializes reports"
   (let [report (typed-analysis/make-function-report 'postgres.sample.scratch-v2
                                            'insert-entry)
@@ -539,7 +538,7 @@
     (string? output) => true
     (clojure.string/includes? output "\"insert-entry\"") => true))
 
-^{:refer hara.runtime.postgres.base.typed/make-function-json :added "4.1"}
+^{:refer postgres.typed/make-function-json :added "4.1"}
 (fact "make-function-json returns serialized analysis for a function"
   (let [output (typed-analysis/make-function-json 'postgres.sample.scratch-v2
                                          'insert-entry
@@ -548,7 +547,7 @@
     (clojure.string/includes? output "\"function\"") => true
     (clojure.string/includes? output "\"Entry\"") => true))
 
-^{:refer hara.runtime.postgres.base.typed/make-openapi :added "4.1"}
+^{:refer postgres.typed/make-openapi :added "4.1"}
 (fact "make-openapi generates OpenAPI spec for a namespace"
   (let [spec (typed-analysis/make-openapi 'postgres.sample.scratch-v2 (constantly true))]
     (contains? spec :openapi) => true
@@ -556,14 +555,14 @@
     (contains? spec :paths) => true
     (contains? spec :components) => true))
 
-^{:refer hara.runtime.postgres.base.typed/make-json-schema :added "4.1"}
+^{:refer postgres.typed/make-json-schema :added "4.1"}
 (fact "make-json-schema generates JSON Schema definitions"
   (typed/clear-registry!)
   (typed-analysis/analyze-and-register! 'postgres.sample.scratch-v2)
   (let [schema (typed-analysis/make-json-schema)]
     (map? schema) => true))
 
-^{:refer hara.runtime.postgres.base.typed/make-typescript :added "4.1"}
+^{:refer postgres.typed/make-typescript :added "4.1"}
 (fact "make-typescript generates TypeScript definitions"
   (typed/clear-registry!)
   (typed-analysis/analyze-and-register! 'postgres.sample.scratch-v2)
@@ -571,29 +570,29 @@
     (string? ts) => true
     (clojure.string/includes? ts "interface") => true))
 
-^{:refer hara.runtime.postgres.base.typed/app-name-from-static :added "4.1"}
+^{:refer postgres.typed/app-name-from-static :added "4.1"}
 (fact "app-name-from-static normalizes app metadata"
   (typed-analysis/app-name-from-static ["demo"]) => "demo"
   (typed-analysis/app-name-from-static "demo") => "demo")
 
-^{:refer hara.runtime.postgres.base.typed/fn-ref->app-name :added "4.1"}
+^{:refer postgres.typed/fn-ref->app-name :added "4.1"}
 (fact "fn-ref->app-name reads application names from function defs"
   (typed-analysis/fn-ref->app-name
    nil
    {:body-meta {:static/application ["demo"]}})
   => "demo")
 
-^{:refer hara.runtime.postgres.base.typed/arg-type :added "4.1"}
+^{:refer postgres.typed/arg-type :added "4.1"}
 (fact "arg-type returns the normalized type of an argument"
   (typed-analysis/arg-type {:type :uuid}) => :uuid
   (typed-analysis/arg-type {:type {:name :text}}) => :text
   (typed-analysis/arg-type {:type nil}) => nil)
 
-^{:refer hara.runtime.postgres.base.typed/arg-type-name :added "4.1"}
+^{:refer postgres.typed/arg-type-name :added "4.1"}
 (fact "arg-type-name returns the string name of the argument type"
   (typed-analysis/arg-type-name {:type :uuid}) => "uuid")
 
-^{:refer hara.runtime.postgres.base.typed/track-arg-role? :added "4.1"}
+^{:refer postgres.typed/track-arg-role? :added "4.1"}
 (fact "track-arg-role? recognizes tracked jsonb arguments"
   (let [fn-def (types/make-fn-def
                 "demo"
@@ -604,7 +603,7 @@
                 nil)]
     (typed-analysis/track-arg-role? fn-def 'o-op) => true))
 
-^{:refer hara.runtime.postgres.base.typed/enrich-function-arg-roles :added "4.1"}
+^{:refer postgres.typed/enrich-function-arg-roles :added "4.1"}
 (fact "enrich-function-arg-roles annotates jsonb inputs with roles"
   (let [fn-def (types/make-fn-def
                 "demo"
@@ -617,19 +616,19 @@
     (map :role (:inputs (typed-analysis/enrich-function-arg-roles fn-def)))
     => [:track :payload]))
 
-^{:refer hara.runtime.postgres.base.typed/jsonb-arg? :added "4.1"}
+^{:refer postgres.typed/jsonb-arg? :added "4.1"}
 (fact "jsonb-arg? checks the argument type and modifiers"
   (typed-analysis/jsonb-arg? {:type :jsonb}) => true
   (typed-analysis/jsonb-arg? {:type :text}) => nil
   (typed-analysis/jsonb-arg? {:type :text :modifiers #{:jsonb}}) => :jsonb)
 
-^{:refer hara.runtime.postgres.base.typed/format-primitive :added "4.1"}
+^{:refer postgres.typed/format-primitive :added "4.1"}
 (fact "format-primitive maps primitive types to schema fragments"
   (typed-analysis/format-primitive :shape :uuid) => {:type :uuid}
   (typed-analysis/format-primitive :openapi :uuid) => {:type "string" :format "uuid"}
   (typed-analysis/format-primitive :typescript :text) => "string")
 
-^{:refer hara.runtime.postgres.base.typed/build-input-schemas :added "4.1"}
+^{:refer postgres.typed/build-input-schemas :added "4.1"}
 (fact "build-input-schemas formats inputs and inferred jsonb shapes"
   (let [fn-def (types/make-fn-def
                 "demo"
@@ -644,7 +643,7 @@
     => :jsonb
     (get-in (typed-analysis/build-input-schemas fn-def :shape) [:name :schema]) => {:type :text}))
 
-^{:refer hara.runtime.postgres.base.typed/build-output-schema :added "4.1"}
+^{:refer postgres.typed/build-output-schema :added "4.1"}
 (fact "build-output-schema wraps the inferred output shape and schema"
   (let [analysis (-> 'postgres.sample.scratch-v2
                      parse/analyze-namespace
@@ -655,7 +654,7 @@
     (contains? (:shape out) :fields) => true
     (contains? (:schema out) :fields) => true))
 
-^{:refer hara.runtime.postgres.base.typed/Type :added "4.1"}
+^{:refer postgres.typed/Type :added "4.1"}
 (fact "Type uses app typed registry when available"
   (types/clear-registry!)
   (let [table (types/make-table-def "test" "Foo"

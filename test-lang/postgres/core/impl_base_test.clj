@@ -1,5 +1,5 @@
 (ns postgres.core.impl-base-test
-  (:require [hara.runtime.postgres]
+  (:require [postgres.core]
             [hara.runtime.postgres.base.application :as app]
             [postgres.core.impl-base :refer :all]
             [postgres.sample.scratch-v1 :as scratch]
@@ -190,7 +190,7 @@
                                      :cache hello})
                   {:coalesce true}
                   (last (prep-table 'scratch/Task true (l/rt:macro-opts :postgres))))
-  => '(jsonb-build-object "id" (hara.runtime.postgres/uuid-generate-v4)
+  => '(jsonb-build-object "id" (postgres.core/uuid-generate-v4)
                           "status" (++ a postgres.sample.scratch-v1/EnumStatus)
                           "name" (:text "hello")
                           "cache_id" (:uuid hello)
@@ -204,7 +204,7 @@
                                  :name "hello"
                                  :cache hello}
                  {:coalesce true}))
-  => '(jsonb-build-object "id" (hara.runtime.postgres/uuid-generate-v4)
+  => '(jsonb-build-object "id" (postgres.core/uuid-generate-v4)
                           "status" (++ a postgres.sample.scratch-v1/EnumStatus)
                           "name" (:text "hello")
                           "cache_id" (:uuid hello)

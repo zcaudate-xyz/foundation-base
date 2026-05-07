@@ -1,6 +1,6 @@
 (ns xt.db.text.sql-call-test
   (:use code.test)
-  (:require [hara.runtime.postgres :as pg]
+  (:require [postgres.core :as pg]
             [hara.lang :as l]
             [xt.lang.common-notify :as notify]))
 

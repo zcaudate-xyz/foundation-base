@@ -1,9 +1,9 @@
 (ns hara.runtime.postgres.base.compile.json-openapi
   (:require [clojure.string :as str]
-            [hara.runtime.postgres.base.typed.typed-analyze :as analyze]
-            [hara.runtime.postgres.base.typed.typed-common :as types]
-            [hara.runtime.postgres.base.typed.typed-infer :as typed-infer]
-            [hara.runtime.postgres.base.typed.typed-shape :as shape]
+            [postgres.typed.typed-analyze :as analyze]
+            [postgres.typed.typed-common :as types]
+            [postgres.typed.typed-infer :as typed-infer]
+            [postgres.typed.typed-shape :as shape]
             [hara.runtime.postgres.base.compile.json-schema :as json-schema]))
 
 (declare shape->openapi)

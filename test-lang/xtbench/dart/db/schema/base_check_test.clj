@@ -1,5 +1,5 @@
 (ns xtbench.dart.db.schema.base-check-test
-  (:require [hara.runtime.postgres :as pg]
+  (:require [postgres.core :as pg]
             [postgres.sample.scratch-v1 :as scratch]
             [hara.lang :as l])
   (:use code.test))

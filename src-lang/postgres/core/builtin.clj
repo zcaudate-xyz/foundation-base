@@ -6,7 +6,7 @@
   (:refer-clojure :exclude [abs concat format replace repeat reverse mod bit-and bit-or count max min]))
 
 (l/script :postgres
-  hara.runtime.postgres
+  postgres.core
   {:macro-only true})
 
 (def +functions+

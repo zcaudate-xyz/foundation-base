@@ -1,7 +1,7 @@
 (ns hara.runtime.postgres.base.compile.ts-schema
   (:require [clojure.string :as str]
-            [hara.runtime.postgres.base.typed.typed-common :as types]
-            [hara.runtime.postgres.base.typed.typed-shape :as shape]
+            [postgres.typed.typed-common :as types]
+            [postgres.typed.typed-shape :as shape]
             [hara.runtime.postgres.base.compile.json-schema :as json-schema]))
 
 (declare type->ts)

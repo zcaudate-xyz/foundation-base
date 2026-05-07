@@ -21,7 +21,7 @@
     [{:type :uuid,
       :cardinality :one,
       :primary true,
-      :sql {:default (hara.runtime.postgres/uuid-generate-v4)},
+      :sql {:default (postgres.core/uuid-generate-v4)},
       :web {:example "00000000-0000-0000-0000-000000000000"},
       :scope :-/id,
       :order 0,
@@ -122,7 +122,7 @@
     [{:type :uuid,
       :cardinality :one,
       :primary true,
-      :sql {:default (hara.runtime.postgres/uuid-generate-v4)},
+      :sql {:default (postgres.core/uuid-generate-v4)},
       :web {:example "00000000-0000-0000-0000-000000000000"},
       :scope :-/id,
       :order 0,
@@ -156,7 +156,7 @@
       :cardinality :one,
       :primary true,
       :web {:example "AUD"},
-      :sql {:default (hara.runtime.postgres/uuid-generate-v4)},
+      :sql {:default (postgres.core/uuid-generate-v4)},
       :scope :-/id,
       :order 0,
       :ident :TaskCache/id}],
@@ -213,7 +213,7 @@
      [{:type :uuid,
        :cardinality :one,
        :primary true,
-       :sql {:default (hara.runtime.postgres/uuid-generate-v4)},
+       :sql {:default (postgres.core/uuid-generate-v4)},
        :web {:example "00000000-0000-0000-0000-000000000000"},
        :scope :-/id,
        :order 0,
@@ -319,7 +319,7 @@
        :cardinality :one,
        :primary true,
        :web {:example "AUD"},
-       :sql {:default (hara.runtime.postgres/uuid-generate-v4)},
+       :sql {:default (postgres.core/uuid-generate-v4)},
        :scope :-/id,
        :order 0,
        :ident :TaskCache/id}]},
@@ -390,7 +390,7 @@
      [{:type :uuid,
        :cardinality :one,
        :primary true,
-       :sql {:default (hara.runtime.postgres/uuid-generate-v4)},
+       :sql {:default (postgres.core/uuid-generate-v4)},
        :web {:example "00000000-0000-0000-0000-000000000000"},
        :scope :-/id,
        :order 0,
@@ -433,7 +433,7 @@
      {:type :uuid,
       :primary true,
       :web {:example "AUD"},
-      :sql {:default (hara.runtime.postgres/uuid-generate-v4)},
+      :sql {:default (postgres.core/uuid-generate-v4)},
       :scope :-/id}
      :op-created
      {:type :uuid, :scope :-/system}
@@ -449,7 +449,7 @@
     [:id
      {:type :uuid,
       :primary true,
-      :sql {:default (hara.runtime.postgres/uuid-generate-v4)},
+      :sql {:default (postgres.core/uuid-generate-v4)},
       :web {:example "00000000-0000-0000-0000-000000000000"},
       :scope :-/id}
      :status
@@ -488,7 +488,7 @@
     [:id
      {:type :uuid,
       :primary true,
-      :sql {:default (hara.runtime.postgres/uuid-generate-v4)},
+      :sql {:default (postgres.core/uuid-generate-v4)},
       :web {:example "00000000-0000-0000-0000-000000000000"},
       :scope :-/id}
      :name
@@ -579,7 +579,7 @@
     [{:type :uuid,
       :cardinality :one,
       :primary true,
-      :sql {:default (hara.runtime.postgres/uuid-generate-v4)},
+      :sql {:default (postgres.core/uuid-generate-v4)},
       :web {:example "00000000-0000-0000-0000-000000000000"},
       :scope :-/id,
       :order 0,
@@ -608,7 +608,7 @@
                          +schema+)
   => '{:type :uuid, :cardinality :one, :primary true,
        :web {:example "AUD"},
-       :sql {:default (hara.runtime.postgres/uuid-generate-v4)}, :scope :-/id, :order 0, :ident :TaskCache/id})
+       :sql {:default (postgres.core/uuid-generate-v4)}, :scope :-/id, :order 0, :ident :TaskCache/id})
 
 ^{:refer std.lib.schema/order-keys :added "4.0"}
 (fact "order keys given schema"
@@ -624,7 +624,7 @@
 (fact "get defaults in the schema"
 
   (schema/get-defaults -tsch-)
-  => '{:__deleted__ false, :id (hara.runtime.postgres/uuid-generate-v4)})
+  => '{:__deleted__ false, :id (postgres.core/uuid-generate-v4)})
 
 ^{:refer std.lib.schema/check-valid-columns :added "4.0"}
 (fact "check if columns are valid"

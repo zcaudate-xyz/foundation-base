@@ -1,5 +1,5 @@
 (ns hara.model.spec-postgres.gen-bind-test
-  (:require [hara.runtime.postgres :as pg]
+  (:require [postgres.core :as pg]
             [hara.model.spec-postgres.gen-bind :as gen]
             [postgres.sample.scratch-v1 :as scratch]
             [hara.lang :as l]

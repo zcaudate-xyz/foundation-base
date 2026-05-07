@@ -1,5 +1,5 @@
 (ns postgres.sample.scratch-v2-test
-  (:require [hara.runtime.postgres.base.typed.typed-parse :as parse]
+  (:require [postgres.typed.typed-parse :as parse]
             [postgres.sample.scratch-v2 :refer :all])
   (:use code.test))
 

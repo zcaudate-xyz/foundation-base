@@ -1,6 +1,6 @@
-(ns hara.runtime.postgres.base.typed.typed-resolve
+(ns postgres.typed.typed-resolve
   (:require [clojure.string :as str]
-            [hara.runtime.postgres.base.typed.typed-common :as types]))
+            [postgres.typed.typed-common :as types]))
 
 (defn canonical-fn-sym
   [sym]

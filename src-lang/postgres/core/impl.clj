@@ -7,7 +7,7 @@
             [std.lib.foundation :as f]))
 
 (l/script :postgres
-  hara.runtime.postgres
+  postgres.core
   {:macro-only true})
 
 (defmacro.pg ^{:- [:block]

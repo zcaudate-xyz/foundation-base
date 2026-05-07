@@ -13,8 +13,7 @@
              [js.worker.env-webworker :as env-webworker]]})
 
 (fact:global
- {:setup [(l/rt:restart)
-          (l/rt:scaffold-imports :js)]
+ {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
 ^{:refer js.worker.env-webworker/create-node :added "4.1"}

@@ -1,10 +1,10 @@
 (ns xt.db.helpers.sample-user-test
-  (:require [hara.runtime.postgres :as pg :refer [defsel.pg defret.pg]]
+  (:require [postgres.core :as pg :refer [defsel.pg defret.pg]]
             [hara.lang :as l]
             [xt.db.helpers.sample-data-test :as data]))
 
 (l/script :postgres
-  {:require [[hara.runtime.postgres :as pg]
+  {:require [[postgres.core :as pg]
               [xt.db.helpers.sample-data-test :as data]]
    :import [["citext"]
             ["uuid-ossp"]]

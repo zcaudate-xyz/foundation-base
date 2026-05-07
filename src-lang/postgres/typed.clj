@@ -1,15 +1,15 @@
-(ns hara.runtime.postgres.base.typed
+(ns postgres.typed
   (:require [clojure.string :as str]
             [hara.runtime.postgres.base.compile.json-openapi :as compile.json-openapi]
             [hara.runtime.postgres.base.compile.json-schema :as compile.json-schema]
             [hara.runtime.postgres.base.compile.ts-schema :as compile.ts-schema]
             [hara.runtime.postgres.base.application :as app]
-            [hara.runtime.postgres.base.typed.typed-analyze :as analyze]
-            [hara.runtime.postgres.base.typed.typed-common :as types]
-            [hara.runtime.postgres.base.typed.typed-infer :as typed-infer]
-            [hara.runtime.postgres.base.typed.typed-resolve :as typed-resolve]
-            [hara.runtime.postgres.base.typed.typed-parse :as parse]
-            [hara.runtime.postgres.base.typed.typed-shape :as shape]))
+            [postgres.typed.typed-analyze :as analyze]
+            [postgres.typed.typed-common :as types]
+            [postgres.typed.typed-infer :as typed-infer]
+            [postgres.typed.typed-resolve :as typed-resolve]
+            [postgres.typed.typed-parse :as parse]
+            [postgres.typed.typed-shape :as shape]))
 (declare get-function-def with-app-typed-registry report-json resolve-function-def
          enrich-function-arg-roles)
 ;; ─────────────────────────────────────────────────────────────────────────────

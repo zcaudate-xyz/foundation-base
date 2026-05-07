@@ -1,7 +1,7 @@
 (ns hara.runtime.postgres.base.compile.server-api
   (:require [std.block.template :as gen]
             [hara.runtime.postgres.base.compile.server-db :as server-db]
-            [hara.runtime.postgres.base.typed.typed-common :as types]))
+            [postgres.typed.typed-common :as types]))
 
 (def ^:private +default-targets+
   [:xtalk-contracts])

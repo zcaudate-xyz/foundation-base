@@ -1,9 +1,9 @@
-(ns hara.runtime.postgres.base.typed.typed-infer
+(ns postgres.typed.typed-infer
   (:require [clojure.string :as str]
-            [hara.runtime.postgres.base.typed.typed-common :as types]
-            [hara.runtime.postgres.base.typed.typed-jsonb :as typed-jsonb]
-            [hara.runtime.postgres.base.typed.typed-resolve :as typed-resolve]
-            [hara.runtime.postgres.base.typed.typed-shape :as shape]))
+            [postgres.typed.typed-common :as types]
+            [postgres.typed.typed-jsonb :as typed-jsonb]
+            [postgres.typed.typed-resolve :as typed-resolve]
+            [postgres.typed.typed-shape :as shape]))
 
 (defn select-shape-columns
   "Restricts a JsonbShape to the selected columns, preserving shape metadata."

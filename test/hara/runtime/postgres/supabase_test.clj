@@ -6,7 +6,7 @@
   (:use code.test))
 
 (l/script- :postgres
-  {:require [[hara.runtime.postgres :as pg]
+  {:require [[postgres.core :as pg]
              [postgres.core.supabase :as s]
              [postgres.sample.scratch-v1 :as scratch]]})
 

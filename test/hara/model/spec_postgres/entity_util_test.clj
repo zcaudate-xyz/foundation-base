@@ -36,7 +36,7 @@
   => {:type :uuid
       :primary "default"
       :priority 0
-      :sql {:default '(hara.runtime.postgres/uuid-generate-v1)}})
+      :sql {:default '(postgres.core/uuid-generate-v1)}})
 
 ^{:refer hara.model.spec-postgres.entity-util/type-id-v4 :added "4.1"}
 (fact "type-id-v4 uses a generated v4 uuid default"
@@ -44,7 +44,7 @@
   => {:type :uuid
       :primary "default"
       :priority 0
-      :sql {:default '(hara.runtime.postgres/uuid-generate-v4)}})
+      :sql {:default '(postgres.core/uuid-generate-v4)}})
 
 ^{:refer hara.model.spec-postgres.entity-util/type-id-text :added "4.1"}
 (fact "type-id-text uppercases and limits citext ids"

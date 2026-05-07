@@ -1,5 +1,5 @@
 (ns xtbench.dart.db.text.sql-view-test
-  (:require [hara.runtime.postgres :as pg]
+  (:require [postgres.core :as pg]
             [hara.lang :as l]
             [std.string.prose :as prose]
             [xt.db.helpers.seed-system-test :as data]

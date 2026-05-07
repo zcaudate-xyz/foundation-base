@@ -1,4 +1,4 @@
-(ns hara.runtime.postgres.base.typed.typed-common
+(ns postgres.typed.typed-common
   (:require [clojure.string :as str]
             [std.string.case :as case]))
 

@@ -1,6 +1,6 @@
 (ns hara.model.spec-postgres-test
   (:use code.test)
-  (:require [hara.runtime.postgres :as pg]
+  (:require [postgres.core :as pg]
             [hara.model.spec-postgres :refer :all]
             [postgres.sample.scratch-v1 :as scratch]
             [hara.lang :as l]))
@@ -8,13 +8,13 @@
 (l/script- :postgres
   {:runtime :jdbc.client
    :config  {:dbname "test-scratch"}
-   :require [[hara.runtime.postgres :as pg]
+   :require [[postgres.core :as pg]
              [postgres.core.system :as sys]
              [postgres.sample.scratch-v1 :as scratch]]})
 
 (fact:global
  {:setup    [(l/rt:restart)
-             (hara.runtime.postgres/exec [:create-schema :if-not-exists :scratch])
+             (postgres.core/exec [:create-schema :if-not-exists :scratch])
              (l/rt:setup :postgres)]
   :teardown [(l/rt:stop)]})
 

@@ -1,10 +1,10 @@
 (ns postgres.sample.scratch-v1
-  (:require [hara.runtime.postgres :refer [defret.pg defsel.pg]]
+  (:require [postgres.core :refer [defret.pg defsel.pg]]
             [hara.runtime.postgres.base.application :as app]
             [hara.lang :as l]))
 
 (l/script :postgres
-  {:require [[hara.runtime.postgres :as pg]]
+  {:require [[postgres.core :as pg]]
    :import  [["citext"]
              ["uuid-ossp"]]
    :config {:dbname "test-scratch"}
@@ -34,7 +34,7 @@
 
 (def Id
   [:id  {:type :uuid :primary true
-         :sql {:default '(hara.runtime.postgres/uuid-generate-v4)}}])
+         :sql {:default '(postgres.core/uuid-generate-v4)}}])
 
 (def RecordType
   [:op-created     {:type :uuid    :scope :-/system}
@@ -62,7 +62,7 @@
   {:added "4.0"}
   [:id        {:type :uuid :primary true 
                :web {:example "AUD"}
-               :sql {:default (hara.runtime.postgres/uuid-generate-v4)}}])
+               :sql {:default (postgres.core/uuid-generate-v4)}}])
 
 (deftype.pg ^{:track   [-/TrackingMin]
               :prepend [[-/Id :id {:web {:example "00000000-0000-0000-0000-000000000000"}}]]

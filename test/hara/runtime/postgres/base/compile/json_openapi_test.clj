@@ -1,8 +1,8 @@
 (ns hara.runtime.postgres.base.compile.json-openapi-test
   (:require [hara.runtime.postgres.base.compile.json-openapi :as compile.openapi]
-            [hara.runtime.postgres.base.typed.typed-common :as types]
-            [hara.runtime.postgres.base.typed.typed-parse :as parse]
-            [hara.runtime.postgres.base.typed.typed-common-test]
+            [postgres.typed.typed-common :as types]
+            [postgres.typed.typed-parse :as parse]
+            [postgres.typed.typed-common-test]
             [postgres.sample.scratch-v2])
   (:use code.test))
 

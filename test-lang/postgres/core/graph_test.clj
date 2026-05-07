@@ -11,7 +11,7 @@
 
 (l/script- :postgres
   {:require [[postgres.sample.scratch-v1 :as scratch]
-             [hara.runtime.postgres :as pg]]
+             [postgres.core :as pg]]
    :static {:application ["scratch"]
             :seed        ["scratch"]
             :all    {:schema   ["scratch"]}}})

@@ -1,5 +1,5 @@
 (ns xt.db.helpers.sample-test
-  (:require [hara.runtime.postgres :as pg]
+  (:require [postgres.core :as pg]
             [hara.lang :as l]
             [std.lib.collection :as collection]
             [xt.db.helpers.sample-data-test :as data]

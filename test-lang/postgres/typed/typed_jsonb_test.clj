@@ -1,9 +1,9 @@
-(ns hara.runtime.postgres.base.typed.typed-jsonb-test
-  (:require [hara.runtime.postgres.base.typed.typed-common :as types]
-            [hara.runtime.postgres.base.typed.typed-jsonb :as jsonb])
+(ns postgres.typed.typed-jsonb-test
+  (:require [postgres.typed.typed-common :as types]
+            [postgres.typed.typed-jsonb :as jsonb])
   (:use code.test))
 
-^{:refer hara.runtime.postgres.base.typed.typed-jsonb/symbol->field-key :added "4.1"}
+^{:refer postgres.typed.typed-jsonb/symbol->field-key :added "4.1"}
 (fact "symbol->field-key converts symbols to field keywords"
   ;; Simple symbol
   (jsonb/symbol->field-key 'm-name) => :name
@@ -17,7 +17,7 @@
   (jsonb/symbol->field-key :keyword) => nil
   (jsonb/symbol->field-key nil) => nil)
 
-^{:refer hara.runtime.postgres.base.typed.typed-jsonb/field-info :added "4.1"}
+^{:refer postgres.typed.typed-jsonb/field-info :added "4.1"}
 (fact "field-info creates field info maps"
   ;; With just type
   (jsonb/field-info :uuid)
@@ -31,7 +31,7 @@
   (jsonb/field-info nil)
   => {:type :jsonb :nullable? true})
 
-^{:refer hara.runtime.postgres.base.typed.typed-jsonb/typed-binding-form? :added "4.1"}
+^{:refer postgres.typed.typed-jsonb/typed-binding-form? :added "4.1"}
 (fact "typed-binding-form? checks for typed destructuring forms"
   ;; Valid typed form [type symbol]
   (jsonb/typed-binding-form? '(:uuid v-id)) => true
@@ -44,7 +44,7 @@
   (jsonb/typed-binding-form? nil) => false
   (jsonb/typed-binding-form? ['vector]) => false)
 
-^{:refer hara.runtime.postgres.base.typed.typed-jsonb/accessor-expr? :added "4.1"}
+^{:refer postgres.typed.typed-jsonb/accessor-expr? :added "4.1"}
 (fact "accessor-expr? identifies JSONB accessor expressions"
   ;; :-> operator
   (jsonb/accessor-expr? '(:-> m "data")) => true
@@ -60,7 +60,7 @@
   (jsonb/accessor-expr? :keyword) => false
   (jsonb/accessor-expr? nil) => false)
 
-^{:refer hara.runtime.postgres.base.typed.typed-jsonb/append-path :added "4.1"}
+^{:refer postgres.typed.typed-jsonb/append-path :added "4.1"}
 (fact "append-path adds segment to JSONB path"
   (let [path (types/make-jsonb-path [:a :b] 'm)]
     ;; Appends segment
@@ -74,7 +74,7 @@
     ;; Nil segment handled
     (jsonb/append-path path nil) => nil))
 
-^{:refer hara.runtime.postgres.base.typed.typed-jsonb/access-descriptors :added "4.1"}
+^{:refer postgres.typed.typed-jsonb/access-descriptors :added "4.1"}
 (fact "access-descriptors generates descriptors for accessor expressions"
   (let [ctx (types/make-context {'m :jsonb}
                                 {}
@@ -89,7 +89,7 @@
       (some? descriptors) => true
       (:field-info (first descriptors)) => {:type :text :nullable? true})))
 
-^{:refer hara.runtime.postgres.base.typed.typed-jsonb/access-descriptor :added "4.1"}
+^{:refer postgres.typed.typed-jsonb/access-descriptor :added "4.1"}
 (fact "access-descriptor returns single descriptor for expression"
   (let [ctx (types/make-context {'m :jsonb}
                                 {}
@@ -102,7 +102,7 @@
     ;; Nil for non-accessor
     (jsonb/access-descriptor ctx '(other-fn x)) => nil))
 
-^{:refer hara.runtime.postgres.base.typed.typed-jsonb/source-root-shape :added "4.1"}
+^{:refer postgres.typed.typed-jsonb/source-root-shape :added "4.1"}
 (fact "source-root-shape returns the root jsonb shape for a path"
   (let [shape (types/make-jsonb-shape
                {:id {:type :uuid :nullable? false}}
@@ -112,7 +112,7 @@
                                 {'m (types/make-jsonb-path [] 'm)})]
     (types/jsonb-shape? (jsonb/source-root-shape ctx (types/make-jsonb-path [:id] 'm))) => true))
 
-^{:refer hara.runtime.postgres.base.typed.typed-jsonb/source-field-info :added "4.1"}
+^{:refer postgres.typed.typed-jsonb/source-field-info :added "4.1"}
 (fact "source-field-info uses source shapes when available"
   (let [shape (types/make-jsonb-shape
                {:id {:type :uuid :nullable? false}}
@@ -124,7 +124,7 @@
     (jsonb/source-field-info ctx path :id :->) => {:type :uuid :nullable? false}
     (jsonb/source-field-info ctx path :missing :->>) => {:type :text :nullable? true}))
 
-^{:refer hara.runtime.postgres.base.typed.typed-jsonb/js-select-shape :added "4.1"}
+^{:refer postgres.typed.typed-jsonb/js-select-shape :added "4.1"}
 (fact "js-select-shape projects selected fields from source shapes"
   (let [shape (types/make-jsonb-shape
                {:id {:type :uuid :nullable? false}
@@ -139,7 +139,7 @@
     (get-in (jsonb/js-select-shape ctx '(js-select m (js ["id" "name"])))
             [:fields :name :type]) => :text))
 
-^{:refer hara.runtime.postgres.base.typed.typed-jsonb/expr-jsonb-path :added "4.1"}
+^{:refer postgres.typed.typed-jsonb/expr-jsonb-path :added "4.1"}
 (fact "expr-jsonb-path extracts JSONB path from expression"
   (let [path (types/make-jsonb-path [:a] 'm)]
     ;; Returns path directly
@@ -153,7 +153,7 @@
     (let [ctx (types/make-context {'m :jsonb} {} {'m (types/make-jsonb-path [] 'm)})]
       (:segments (jsonb/expr-jsonb-path ctx '(:-> m "data"))) => [:data])))
 
-^{:refer hara.runtime.postgres.base.typed.typed-jsonb/set-binding-descriptors :added "4.1"}
+^{:refer postgres.typed.typed-jsonb/set-binding-descriptors :added "4.1"}
 (fact "set-binding-descriptors generates descriptors for set destructuring"
   (let [source-path (types/make-jsonb-path [:data] 'm)]
     ;; Symbol binding
@@ -167,7 +167,7 @@
       (:var (first descriptors)) => 'v-id
       (get-in (first descriptors) [:field-info :type]) => :uuid)))
 
-^{:refer hara.runtime.postgres.base.typed.typed-jsonb/binding-descriptors :added "4.1"}
+^{:refer postgres.typed.typed-jsonb/binding-descriptors :added "4.1"}
 (fact "binding-descriptors generates descriptors for binding forms"
   (let [ctx (types/make-context {'m :jsonb} {} {'m (types/make-jsonb-path [] 'm)})]
     ;; Symbol binding to accessor
@@ -184,7 +184,7 @@
       (some? descriptors) => true
       (:var (first descriptors)) => 'v-id)))
 
-^{:refer hara.runtime.postgres.base.typed.typed-jsonb/descriptor-shape :added "4.1"}
+^{:refer postgres.typed.typed-jsonb/descriptor-shape :added "4.1"}
 (fact "descriptor-shape creates shape from descriptor path"
   ;; Single segment path
   (let [path (types/make-jsonb-path [:id] 'm)
@@ -203,7 +203,7 @@
   ;; Empty path returns nil
   (jsonb/descriptor-shape {:path (types/make-jsonb-path [] 'm) :field-info {}}) => nil)
 
-^{:refer hara.runtime.postgres.base.typed.typed-jsonb/update-root-shape :added "4.1"}
+^{:refer postgres.typed.typed-jsonb/update-root-shape :added "4.1"}
 (fact "update-root-shape adds descriptor shape to context"
   (let [ctx (types/make-context {'m :jsonb} {} {'m (types/make-jsonb-path [] 'm)})
         path (types/make-jsonb-path [:id] 'm)
@@ -216,7 +216,7 @@
   (let [ctx (types/make-context {})]
     (jsonb/update-root-shape ctx nil) => ctx))
 
-^{:refer hara.runtime.postgres.base.typed.typed-jsonb/apply-descriptor :added "4.1"}
+^{:refer postgres.typed.typed-jsonb/apply-descriptor :added "4.1"}
 (fact "apply-descriptor adds descriptor info to context"
   (let [ctx (types/make-context {'m :jsonb} {} {'m (types/make-jsonb-path [] 'm)})
         path (types/make-jsonb-path [:id] 'm)
@@ -228,7 +228,7 @@
     (let [updated (jsonb/apply-descriptor ctx descriptor)]
       (get-in updated [:bindings 'v-id]) => {:kind :cast :type :uuid})))
 
-^{:refer hara.runtime.postgres.base.typed.typed-jsonb/apply-descriptors :added "4.1"}
+^{:refer postgres.typed.typed-jsonb/apply-descriptors :added "4.1"}
 (fact "apply-descriptors applies multiple descriptors"
   (let [ctx (types/make-context {'m :jsonb} {} {'m (types/make-jsonb-path [] 'm)})
         path1 (types/make-jsonb-path [:id] 'm)
@@ -249,7 +249,7 @@
     ;; Empty descriptors returns unchanged
     (jsonb/apply-descriptors ctx []) => ctx))
 
-^{:refer hara.runtime.postgres.base.typed.typed-jsonb/js-keys-form->keywords :added "4.1"}
+^{:refer postgres.typed.typed-jsonb/js-keys-form->keywords :added "4.1"}
 (fact "js-keys-form->keywords extracts keywords from js forms"
   ;; From vector
   (jsonb/js-keys-form->keywords '["id" "name" "email"])
@@ -267,7 +267,7 @@
   (jsonb/js-keys-form->keywords "string") => nil
   (jsonb/js-keys-form->keywords nil) => nil)
 
-^{:refer hara.runtime.postgres.base.typed.typed-jsonb/js-select-descriptors :added "4.1"}
+^{:refer postgres.typed.typed-jsonb/js-select-descriptors :added "4.1"}
 (fact "js-select-descriptors generates descriptors for js-select calls"
   (let [ctx (types/make-context {'m :jsonb} {} {'m (types/make-jsonb-path [] 'm)})]
     ;; Valid js-select form
@@ -293,14 +293,14 @@
     ;; Non-js-select returns nil
     (jsonb/js-select-descriptors ctx '(other-fn m ["id"])) => nil))
 
-^{:refer hara.runtime.postgres.base.typed.typed-jsonb/analyze-binding :added "4.1"}
+^{:refer postgres.typed.typed-jsonb/analyze-binding :added "4.1"}
 (fact "analyze-binding processes a single binding pair"
   (let [ctx (types/make-context {'m :jsonb} {} {'m (types/make-jsonb-path [] 'm)})]
     ;; Simple binding
     (let [result (jsonb/analyze-binding ctx '[n (:-> m "id")])]
       (contains? (:bindings result) 'n) => true)))
 
-^{:refer hara.runtime.postgres.base.typed.typed-jsonb/scan-form :added "4.1"}
+^{:refer postgres.typed.typed-jsonb/scan-form :added "4.1"}
 (fact "scan-form accumulates binding info from form traversal"
   (let [ctx (types/make-context {'m :jsonb} {} {'m (types/make-jsonb-path [] 'm)})]
     ;; Scans accessor expression
@@ -315,7 +315,7 @@
     (let [ctx (types/make-context {})]
       (jsonb/scan-form ctx 'symbol) => ctx)))
 
-^{:refer hara.runtime.postgres.base.typed.typed-jsonb/infer-jsonb-arg-access-shape :added "4.1"}
+^{:refer postgres.typed.typed-jsonb/infer-jsonb-arg-access-shape :added "4.1"}
 (fact "infer-jsonb-arg-access-shape infers keys from js-select"
   (let [fn-def {:body-meta
                 {:raw-body '((fu/js-select m (js ["a" "b" "c"])))}} ; close maps

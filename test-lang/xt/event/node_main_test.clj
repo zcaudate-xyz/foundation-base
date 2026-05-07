@@ -4,35 +4,35 @@
 
 ^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
-           {:runtime :basic
-            :require [[xt.lang.spec-base :as xt]
-                      [xt.lang.spec-promise :as promise]
-                      [xt.event.node :as node]
-                      [xt.event.node-main :as main]
-                      [xt.event.node-router :as router]
-                      [xt.event.node-request :as req]]})
+  {:runtime :basic
+   :require [[xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as promise]
+             [xt.event.node :as node]
+             [xt.event.node-main :as main]
+             [xt.event.node-router :as router]
+             [xt.event.node-request :as req]]})
 
 (l/script- :lua
-           {:runtime :basic
-            :require [[xt.lang.spec-base :as xt]
-                      [xt.lang.spec-promise :as promise]
-                      [xt.event.node :as node]
-                      [xt.event.node-main :as main]
-                      [xt.event.node-router :as router]
-                      [xt.event.node-request :as req]]})
+  {:runtime :basic
+   :require [[xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as promise]
+             [xt.event.node :as node]
+             [xt.event.node-main :as main]
+             [xt.event.node-router :as router]
+             [xt.event.node-request :as req]]})
 
 (l/script- :python
-           {:runtime :basic
-            :require [[xt.lang.spec-base :as xt]
-                      [xt.lang.spec-promise :as promise]
-                      [xt.event.node :as node]
-                      [xt.event.node-main :as main]
-                      [xt.event.node-router :as router]
-                      [xt.event.node-request :as req]]})
+  {:runtime :basic
+   :require [[xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as promise]
+             [xt.event.node :as node]
+             [xt.event.node-main :as main]
+             [xt.event.node-router :as router]
+             [xt.event.node-request :as req]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.event.node-router/list-subscriptions :added "4.1"
   :setup [(def +out+

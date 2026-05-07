@@ -1,5 +1,5 @@
-(ns hara.runtime.postgres.base.typed.typed-shape
-  (:require [hara.runtime.postgres.base.typed.typed-common :as types]))
+(ns postgres.typed.typed-shape
+  (:require [postgres.typed.typed-common :as types]))
 
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; Column Type Mapping (internal use only)

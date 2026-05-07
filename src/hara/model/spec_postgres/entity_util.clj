@@ -41,12 +41,12 @@
 (defn type-id-v1
   []
   {:type :uuid :primary "default" :priority 0
-   :sql {:default '(hara.runtime.postgres/uuid-generate-v1)}})
+   :sql {:default '(postgres.core/uuid-generate-v1)}})
 
 (defn type-id-v4
   []
   {:type :uuid :primary "default" :priority 0
-   :sql {:default '(hara.runtime.postgres/uuid-generate-v4)}})
+   :sql {:default '(postgres.core/uuid-generate-v4)}})
 
 (defn type-id-text
   [ns-str]

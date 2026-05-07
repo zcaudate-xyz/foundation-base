@@ -1,5 +1,5 @@
 (ns postgres.core.impl-main-test
-  (:require [hara.runtime.postgres]
+  (:require [postgres.core]
             [hara.runtime.postgres.base.application :as app]
             [hara.model.spec-postgres.common-tracker :as tracker]
             [postgres.core.impl-base :as base]

@@ -1,7 +1,7 @@
 (ns hara.runtime.postgres
   (:require [hara.runtime.postgres.base.client :as client]
             [hara.runtime.postgres.base.client-impl :as client-impl]
-            [hara.runtime.postgres.base.typed :as typed]
+            [postgres.typed :as typed]
             [hara.model.spec-postgres.gen-bind]
             [hara.model.spec-postgres.entity :as entity]
             [hara.runtime.postgres.base.application :as app]
@@ -45,16 +45,16 @@
              typed/Type)
 
 (defn purge-postgres
-  "purges the hara.runtime.postgres library. Used for debugging"
+  "purges the postgres.core library. Used for debugging"
   {:added "4.0"}
   []
   (do (l/purge-book! (l/default-library) :postgres)
       (l/purge-book! (l/runtime-library) :postgres)
       (require 'jvm.namespace)
-      (eval '(jvm.namespace/reset '[hara.runtime.postgres]))))
+      (eval '(jvm.namespace/reset '[postgres.core]))))
 
 (defn purge-scratch
-  "purges the hara.runtime.postgres scratch library. Used for debugging"
+  "purges the postgres.core scratch library. Used for debugging"
   {:added "4.0"}
   []
   (do (l/delete-module! (l/default-library) {:lang :postgres

@@ -1,5 +1,5 @@
 (ns postgres.sample.scratch-v1-test
-  (:require [hara.runtime.postgres]
+  (:require [postgres.core]
             [postgres.sample.scratch-v1 :as scratch]
             [hara.lang :as l])
   (:use code.test))
@@ -7,7 +7,7 @@
 (l/script- :postgres
   {:runtime :jdbc.client
    :require [[postgres.sample.scratch-v1 :as scratch]
-             [hara.runtime.postgres :as pg]]})
+             [postgres.core :as pg]]})
 
 (fact:global
  {:setup    [(l/rt:restart)

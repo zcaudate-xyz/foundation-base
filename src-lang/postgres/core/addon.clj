@@ -7,7 +7,7 @@
   (:refer-clojure :exclude [case update assert throw name]))
 
 (l/script :postgres
-  hara.runtime.postgres
+  postgres.core
   {:macro-only true})
 
 (defn- resolved-entry
