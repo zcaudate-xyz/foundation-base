@@ -2,8 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :lua.nginx
-  {:require [[xt.lang.common-lib :as k]
-             [lua.nginx.common-cache :as cache]
+  {:require [[lua.nginx.common-cache :as cache]
              [lua.nginx :as n]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]]})
@@ -37,9 +36,9 @@
     (do
       (n/log n/ALERT (cat "\nREGISTERED TASK [" gid "]"))
       (cache/meta-assoc "task" gid
-                        (k/obj-assign {:id gid
-                                       :instances {}}
-                                      metadata))
+                        (xtd/obj-assign {:id gid
+                                         :instances {}}
+                                        metadata))
       (if setup (setup))
       (return true))))
 
@@ -70,17 +69,17 @@
   (if (not (xt/x:get-key meta gid))
     (error "NO META FOUND"))
 
-  (if (. meta [gid] ["instances"] [uid])
-    (error "INSTANCE ALREADY ADDED"))
-
-  (:= (. meta
-         [gid]
-         ["instances"]
-         [uid])
-      (k/obj-assign {:id uid
-                     :group gid
-                     :started (os.time)}
-                    instdata))
+   (if (. meta [gid] ["instances"] [uid])
+     (error "INSTANCE ALREADY ADDED"))
+ 
+   (:= (. meta
+          [gid]
+          ["instances"]
+          [uid])
+       (xtd/obj-assign {:id uid
+                        :group gid
+                        :started (os.time)}
+                       instdata))
   
   (cache/meta-assoc "task"
                     gid
@@ -181,7 +180,7 @@
    instdata]
   (var uid (n/uuid))
   (var meta (-/task-meta gid))
-  (when (or (k/nil? (. meta max))
+  (when (or (xt/x:nil? (. meta max))
             (< (xt/x:len (xtd/obj-keys (or (. meta instances) {})))
                (. meta max)))
     (n/start-task (fn []

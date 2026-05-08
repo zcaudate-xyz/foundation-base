@@ -4,9 +4,12 @@
             [hara.lang :as l])
   (:use code.test))
 
+(def +resty-http-conf+
+  (config/create-resty-params))
+
 (l/script- :lua.nginx
   {:runtime :basic
-    :config  {:exec ["resty" "--http-conf" (config/create-resty-params) "-e"]}
+    :config  {:exec ["resty" "--http-conf" +resty-http-conf+ "-e"]}
     :require [[lua.nginx :as n]
               [lua.nginx.task :as t]
               [lua.nginx.common-cache :as cache]]})
