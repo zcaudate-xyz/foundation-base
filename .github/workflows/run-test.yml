@@ -53,6 +53,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Ensure Postgres scratch database exists
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends postgresql-client
+          export PGPASSWORD=postgres
+          until pg_isready -h 127.0.0.1 -p 5432 -U postgres; do
+            sleep 1
+          done
+          if ! psql -h 127.0.0.1 -p 5432 -U postgres -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname = 'test-scratch'" | grep -q 1; then
+            psql -h 127.0.0.1 -p 5432 -U postgres -d postgres -c 'CREATE DATABASE "test-scratch"'
+          fi
+
       - name: Install JS parser dependencies
         if: matrix.install_js_parser == true
         working-directory: src-training/scripts/js_parser
@@ -100,6 +112,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Ensure Postgres scratch database exists
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends postgresql-client
+          export PGPASSWORD=postgres
+          until pg_isready -h 127.0.0.1 -p 5432 -U postgres; do
+            sleep 1
+          done
+          if ! psql -h 127.0.0.1 -p 5432 -U postgres -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname = 'test-scratch'" | grep -q 1; then
+            psql -h 127.0.0.1 -p 5432 -U postgres -d postgres -c 'CREATE DATABASE "test-scratch"'
+          fi
+
       - name: Install JS parser dependencies
         if: matrix.install_js_parser == true
         working-directory: src-training/scripts/js_parser
@@ -142,6 +166,18 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Ensure Postgres scratch database exists
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends postgresql-client
+          export PGPASSWORD=postgres
+          until pg_isready -h 127.0.0.1 -p 5432 -U postgres; do
+            sleep 1
+          done
+          if ! psql -h 127.0.0.1 -p 5432 -U postgres -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname = 'test-scratch'" | grep -q 1; then
+            psql -h 127.0.0.1 -p 5432 -U postgres -d postgres -c 'CREATE DATABASE "test-scratch"'
+          fi
 
       - name: Log into GHCR
         uses: docker/login-action@v2
