@@ -1,6 +1,6 @@
 (ns xt.db.runtime.cache-view-test
-  (:require [postgres.core :as pg]
-            [hara.lang :as l]
+  (:require [hara.lang :as l]
+            [hara.model.spec-postgres.gen-bind :as gen]
             [xt.db.helpers.seed-system-test :as data]
             [xt.db.helpers.seed-user-test :as user])
   (:use code.test))
@@ -37,7 +37,7 @@
 
 ^{:refer xt.db.runtime.cache-view/tree-select :added "4.0"
   :setup [(def +select+
-            (pg/bind-view data/currency-all-fiat))]}
+            (gen/bind-view data/currency-all-fiat))]}
 (fact "creates a select tree"
 
   (!.js
@@ -47,7 +47,7 @@
 
 ^{:refer xt.db.runtime.cache-view/tree-return :added "4.0"
   :setup [(def +return+
-            (pg/bind-view data/currency-default))]}
+            (gen/bind-view data/currency-default))]}
 (fact "creates a return tree"
 
   (!.js
@@ -58,7 +58,7 @@
 
   (!.js
    (v/tree-return sample/Schema
-                  (@! (pg/bind-view user/user-account-info))
+                  (@! (gen/bind-view user/user-account-info))
                   {}))
   => ["UserAccount" [["profile" ["*/standard"]]
                      "nickname"
@@ -76,8 +76,8 @@
 
   (!.js
    (v/tree-combined sample/Schema
-                    (@! (pg/bind-view user/user-account-by-organisation))
-                    (@! (pg/bind-view user/user-account-info))
+                    (@! (gen/bind-view user/user-account-by-organisation))
+                    (@! (gen/bind-view user/user-account-info))
                     []))
   => ["UserAccount"
       {"organisation_accesses"
@@ -92,7 +92,7 @@
 
   (!.js
    (v/query-select sample/Schema
-                   (@! (pg/bind-view user/user-account-by-organisation))
+                   (@! (gen/bind-view user/user-account-by-organisation))
                    ["ORG-1"]))
   => ["UserAccount" {"organisation_accesses"
                      {"organisation" "ORG-1"}}
@@ -103,7 +103,7 @@
 
   (!.js
    (v/query-return sample/Schema
-                   (@! (pg/bind-view user/user-account-info))
+                   (@! (gen/bind-view user/user-account-info))
                    "USER-0"
                    []))
   => ["UserAccount" {"id" "USER-0"} [["profile" ["*/standard"]] "nickname" "id"]])
@@ -114,7 +114,7 @@
   (!.js
    (v/query-return-bulk
     sample/Schema
-    (@! (pg/bind-view user/user-account-info))
+    (@! (gen/bind-view user/user-account-info))
     ["USER-0"]
     []))
   => ["UserAccount" {"id" ["in" [["USER-0"]]]} [["profile" ["*/standard"]] "nickname" "id"]])
@@ -125,9 +125,9 @@
   (!.js
    (v/query-combined
     sample/Schema
-    (@! (pg/bind-view user/user-account-by-organisation))
+    (@! (gen/bind-view user/user-account-by-organisation))
     ["ORG-1"]
-    (@! (pg/bind-view user/user-account-info))
+    (@! (gen/bind-view user/user-account-info))
     []
     []))
   => ["UserAccount"

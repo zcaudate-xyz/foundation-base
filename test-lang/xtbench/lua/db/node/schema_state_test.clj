@@ -5,9 +5,10 @@
 (l/script- :lua
   {:runtime :basic
    :require [[xt.db.node.schema-state :as schema-state]
-             [xt.db.node.schema-spec :as spec]
-             [xt.lang.spec-base :as xt]
-             [xt.lang.common-data :as xtd]]})
+              [xt.db.node.schema-spec :as spec]
+              [xt.event.base-view :as event-view]
+              [xt.lang.spec-base :as xt]
+              [xt.lang.common-data :as xtd]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -84,11 +85,14 @@
           {"default_input" ["ord-1"]
            "value" [{"status" "open"}]}))
     [(. view ["id"])
-     (. view ["input"])
+     (. view ["::"])
+     (xt/x:get-path (event-view/get-input view)
+                    ["current" "data"])
      (. view ["status"])
      (. view ["pending"])
      (. view ["value"])])
   => ["main"
+      "event.view"
       ["ord-1"]
       "idle"
       false

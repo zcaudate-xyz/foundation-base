@@ -1,7 +1,7 @@
 (ns xt.db.text.sql-call-test
   (:use code.test)
-  (:require [postgres.core :as pg]
-            [hara.lang :as l]
+  (:require [hara.lang :as l]
+            [hara.model.spec-postgres.gen-bind :as gen]
             [xt.lang.common-notify :as notify]))
 
 (l/script- :postgres
@@ -57,7 +57,7 @@
 
   (!.js
    (call/call-format-query
-    (@! (pg/bind-function scratch/divf))
+    (@! (gen/bind-function scratch/divf))
     [1 2]))
   => "SELECT \"scratch\".divf('1', '2');")
 
@@ -72,12 +72,12 @@
     (. (driver/connect (js-postgres/driver)
                        {:database "test-scratch"})
        (then
-        (fn [conn]
-          (. (call/call-raw
-              conn
-              (@! (pg/bind-function scratch/addf))
-              [10 20])
-             (then (repl/>notify)))))))
+         (fn [conn]
+           (. (call/call-raw
+               conn
+               (@! (gen/bind-function scratch/addf))
+               [10 20])
+              (then (repl/>notify)))))))
   => "30")
 
 ^{:refer xt.db.text.sql-call/call-api
@@ -91,9 +91,9 @@
     (. (driver/connect (js-postgres/driver)
                        {:database "test-scratch"})
        (then
-        (fn [conn]
-           (. (call/call-api conn
-                             (@! (pg/bind-function scratch/addf))
-                             [10 20])
-             (then (repl/>notify)))))))
+         (fn [conn]
+            (. (call/call-api conn
+                              (@! (gen/bind-function scratch/addf))
+                              [10 20])
+              (then (repl/>notify)))))))
   => "{\"status\": \"ok\", \"data\":\"30\"}")

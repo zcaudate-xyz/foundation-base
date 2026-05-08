@@ -14,6 +14,7 @@
              [xt.event.node :as event-node]
              [xt.event.node-request :as node-request]
              [xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.lang.spec-promise :as promise]]})
 
 (defn.xt install
@@ -258,8 +259,65 @@
     (fn [response]
       (var mirrored (or (xt/x:get-key response "result")
                         request))
-      (instance-sync/apply-sync-request state mirrored)
-      (return response)))))
+       (instance-sync/apply-sync-request state mirrored)
+       (return response)))))
+
+(defn.xt view-refresh-result
+  "returns the public refresh result from the updated view state"
+  {:added "4.1"}
+  [view]
+  (return {:query_key (xt/x:get-key view "query_key")
+           :value (event-view/get-current view nil)
+           :tables (or (xt/x:get-key view "tables")
+                       {})}))
+
+(defn.xt run-view-main
+  "runs the local query stage for a db view"
+  {:added "4.1"}
+  [context]
+  (var #{state model-id view-id args view} context)
+  (var query-spec (xt/x:get-key view "query"))
+  (var view-context {:model-id model-id
+                     :view-id view-id
+                     :args (or args [])})
+  (var [ok result] (instance-query/run-local-query
+                    state
+                    query-spec
+                    view-context
+                    model-id
+                    view-id))
+  (when (not ok)
+    (xt/x:throw result))
+  (return result))
+
+(defn.xt run-view-remote
+  "runs the remote query stage for a db view"
+  {:added "4.1"}
+  [context]
+  (var #{node space-id state model-id view-id args view} context)
+  (var query-spec (xt/x:get-key view "query"))
+  (var remote-spec (xt/x:get-key view "remote"))
+  (var view-context {:model-id model-id
+                     :view-id view-id
+                     :args (or args [])})
+  (return
+   (-/run-remote-query
+    node
+    space-id
+    state
+    query-spec
+    view-context
+    remote-spec
+    model-id
+    view-id)))
+
+(defn.xt configure-view-pipeline
+  "installs the db-node pipeline handlers onto a base view"
+  {:added "4.1"}
+  [view]
+  (xtd/set-in view ["pipeline" "main" "handler"] -/run-view-main)
+  (xtd/set-in view ["pipeline" "remote" "handler"] -/run-view-remote)
+  (return view))
 
 (defn.xt view-refresh
   "refreshes a single registered view"
@@ -272,39 +330,34 @@
   (when (xt/x:nil? query-spec)
     (xt/x:err (xt/x:cat "query not configured for view - "
                         (xt/x:json-encode [model-id view-id]))))
-  (instance-state/set-view-pending state model-id view-id)
-  (var view-context {:model-id model-id
-                     :view-id view-id
-                     :args (or (xt/x:get-path (event-view/get-input view)
-                                              ["current" "data"])
-                               [])})
+  (-/configure-view-pipeline view)
+  (var [context disabled] (event-view/pipeline-prep
+                           view
+                           {:node node
+                            :state state
+                            :space-id space-id
+                            :model-id model-id
+                            :view-id view-id}))
   (var remote-spec (xt/x:get-key view "remote"))
-  (if (xt/x:not-nil? remote-spec)
-    (return
-     (promise/x:promise-catch
-      (-/run-remote-query
-       node
-       space-id
-       state
-       query-spec
-       view-context
-       remote-spec
-       model-id
-       view-id)
-      (fn [err]
-        (instance-state/set-view-error state model-id view-id err)
-        (xt/x:throw err))))
+  (var stage-key (:? (xt/x:not-nil? remote-spec)
+                     "remote"
+                     "main"))
+  (var handler (xtd/get-in view ["pipeline" stage-key "handler"]))
+  (if disabled
     (do
-      (var [ok result] (instance-query/run-local-query
-                        state
-                        query-spec
-                        view-context
-                        model-id
-                        view-id))
-      (when (not ok)
-        (instance-state/set-view-error state model-id view-id result)
-        (xt/x:throw result))
-      (return result))))
+      (event-view/set-output-disabled view true nil)
+      (return (promise/x:promise-run (-/view-refresh-result view))))
+    (do
+      (instance-state/set-view-pending state model-id view-id)
+      (return
+       (promise/x:promise-catch
+        (promise/x:promise-then
+         (node-request/ensure-promise (handler context))
+         (fn [_]
+           (return (-/view-refresh-result view))))
+        (fn [err]
+          (instance-state/set-view-error state model-id view-id err)
+          (xt/x:throw err)))))))
 
 (defn.xt model-refresh
   "refreshes all views in a registered model"

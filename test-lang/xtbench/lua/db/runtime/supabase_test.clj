@@ -5,6 +5,7 @@
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
+             [xt.protocol.impl.client-fetch :as fetch]
              [xt.db.runtime.supabase :as supabase]]})
 
 (fact:global
@@ -100,53 +101,89 @@
        "data" {"status" "error"
                "tag" "supabase/fail"}}])
 
-^{:refer xt.db.runtime.supabase/supabase-pull-sync :added "4.1"}
-(fact "uses nested query handlers when no explicit executor is provided"
+^{:refer xt.db.runtime.supabase/supabase-pull-sync :added "4.1.3"}
+(fact "dispatches through wrapped fetch clients"
 
   (!.lua
    (var seen nil)
+   (var client
+        (fetch/client-create
+         {"query" (fn [request _opts]
+                    (:= seen request)
+                    (return {"data" [{"id" "ord-2"
+                                      "status" "closed"}]}))
+          "headers" {"x-client" "fetch-proto"}}
+         {}))
    (var out
         (supabase/supabase-pull-sync
-         {"supabase" {"query" (fn [request _opts]
-                                (:= seen request)
-                                (return {"data" [{"id" "ord-1"
-                                                  "status" "open"}]}))
-                       "headers" {"x-client" "nested"}}
+         {"supabase" client
           "base-url" "https://db.test"}
          nil
          (@! +query-tree+)
-         {"auth" "token-1"}))
+         {"auth" "token-2"}))
    [out
     (. (. seen ["headers"]) ["x-client"])
     (. (. seen ["headers"]) ["Authorization"])])
-  => [[{"id" "ord-1"
-         "status" "open"}]
-      "nested"
-      "Bearer token-1"])
+  => [[{"id" "ord-2"
+         "status" "closed"}]
+      "fetch-proto"
+      "Bearer token-2"])
 
-^{:refer xt.db.runtime.supabase/supabase-pull-sync :added "4.1"}
-(fact "uses nested query handlers when no explicit executor is provided"
+^{:refer xt.db.runtime.supabase/supabase-pull-sync :added "4.1.3"}
+(fact "dispatches through wrapped fetch clients"
 
   (!.lua
    (var seen nil)
+   (var client
+        (fetch/client-create
+         {"query" (fn [request _opts]
+                    (:= seen request)
+                    (return {"data" [{"id" "ord-2"
+                                      "status" "closed"}]}))
+          "headers" {"x-client" "fetch-proto"}}
+         {}))
    (var out
         (supabase/supabase-pull-sync
-         {"supabase" {"query" (fn [request _opts]
-                                (:= seen request)
-                                (return {"data" [{"id" "ord-1"
-                                                  "status" "open"}]}))
-                       "headers" {"x-client" "nested"}}
+         {"supabase" client
           "base-url" "https://db.test"}
          nil
          (@! +query-tree+)
-         {"auth" "token-1"}))
+         {"auth" "token-2"}))
    [out
     (. (. seen ["headers"]) ["x-client"])
     (. (. seen ["headers"]) ["Authorization"])])
-  => [[{"id" "ord-1"
-         "status" "open"}]
-      "nested"
-      "Bearer token-1"])
+  => [[{"id" "ord-2"
+         "status" "closed"}]
+      "fetch-proto"
+      "Bearer token-2"])
+
+^{:refer xt.db.runtime.supabase/supabase-pull-sync :added "4.1.3"}
+(fact "dispatches through wrapped fetch clients"
+
+  (!.lua
+   (var seen nil)
+   (var client
+        (fetch/client-create
+         {"query" (fn [request _opts]
+                    (:= seen request)
+                    (return {"data" [{"id" "ord-2"
+                                      "status" "closed"}]}))
+          "headers" {"x-client" "fetch-proto"}}
+         {}))
+   (var out
+        (supabase/supabase-pull-sync
+         {"supabase" client
+          "base-url" "https://db.test"}
+         nil
+         (@! +query-tree+)
+         {"auth" "token-2"}))
+   [out
+    (. (. seen ["headers"]) ["x-client"])
+    (. (. seen ["headers"]) ["Authorization"])])
+  => [[{"id" "ord-2"
+         "status" "closed"}]
+      "fetch-proto"
+      "Bearer token-2"])
 
 ^{:refer xt.db.runtime.supabase/thenable? :added "4.1"}
 (fact "detects thenable outputs"

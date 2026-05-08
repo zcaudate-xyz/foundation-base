@@ -160,7 +160,7 @@
                 (xt/x:arr-map
                  (impl-sql/sql-pull-sync conn
                                          sample/Schema
-                                         (@! xt.db.helpers.sqlite-runtime-parity-test/+user-profile-tree+)
+                                         (@! +user-profile-tree+)
                                          (ut/sqlite-opts nil))
                  (fn [row]
                    (var profile (xt/x:first (. row ["profile"])))
@@ -189,7 +189,7 @@
                 (xt/x:arr-map
                  (impl-sql/sql-pull-sync conn
                                          sample/Schema
-                                         (@! xt.db.helpers.sqlite-runtime-parity-test/+user-profile-tree+)
+                                         (@! +user-profile-tree+)
                                          (ut/sqlite-opts nil))
                  (fn [row]
                    (var profile (xt/x:first (. row ["profile"])))
@@ -225,7 +225,7 @@
                 (xt/x:arr-map
                  (impl-sql/sql-pull-sync conn
                                          sample/Schema
-                                         (@! xt.db.helpers.sqlite-runtime-parity-test/+user-profile-tree+)
+                                         (@! +user-profile-tree+)
                                          (ut/sqlite-opts nil))
                  (fn [row]
                    (var profile (xt/x:first (. row ["profile"])))
@@ -269,7 +269,7 @@
                  (xtd/arr-sort
                   (impl-sql/sql-pull-sync conn
                                           sample/Schema
-                                          (@! xt.db.helpers.sqlite-runtime-parity-test/+currency-bulk-tree+)
+                                          (@! +currency-bulk-tree+)
                                           (ut/sqlite-opts nil))
                   (fn [row]
                     (return (. row ["id"])))
@@ -301,7 +301,7 @@
                  (xtd/arr-sort
                   (impl-sql/sql-pull-sync conn
                                           sample/Schema
-                                          (@! xt.db.helpers.sqlite-runtime-parity-test/+currency-bulk-tree+)
+                                          (@! +currency-bulk-tree+)
                                           (ut/sqlite-opts nil))
                   (fn [row]
                     (return (. row ["id"])))
@@ -334,7 +334,7 @@
                  (xtd/arr-sort
                   (impl-sql/sql-pull-sync conn
                                           sample/Schema
-                                          (@! xt.db.helpers.sqlite-runtime-parity-test/+currency-bulk-tree+)
+                                          (@! +currency-bulk-tree+)
                                           (ut/sqlite-opts nil))
                   (fn [row]
                     (return (. row ["id"])))

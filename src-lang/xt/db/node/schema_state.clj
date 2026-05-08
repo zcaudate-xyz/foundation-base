@@ -7,6 +7,21 @@
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]]})
 
+(defn.xt identity-wrapper
+  "passes through a context-aware handler"
+  {:added "4.1"}
+  [handler]
+  (return handler))
+
+(defn.xt output-process
+  "extracts the public view value from a db node result payload"
+  {:added "4.1"}
+  [value]
+  (if (and (xt/x:is-object? value)
+           (xt/x:has-key? value "value"))
+    (return (xt/x:get-key value "value"))
+    (return value)))
+
 (defn.xt base-state
   "creates the base xt.db state"
   {:added "4.1"}
@@ -63,10 +78,12 @@
   (xt/x:del-key carry "value")
   (var runtime (event-view/create-view
                 nil
-                {}
+                {:main {:wrapper -/identity-wrapper}
+                 :remote {:wrapper -/identity-wrapper}
+                 :sync {:wrapper -/identity-wrapper}}
                 default-input
                 default-value
-                nil
+                -/output-process
                 nil))
   (event-view/init-view runtime)
   (when (xt/x:not-nil? default-value)

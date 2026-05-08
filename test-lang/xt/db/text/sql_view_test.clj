@@ -1,6 +1,6 @@
 (ns xt.db.text.sql-view-test
-  (:require [postgres.core :as pg]
-            [hara.lang :as l]
+  (:require [hara.lang :as l]
+            [hara.model.spec-postgres.gen-bind :as gen]
             [std.string.prose :as prose]
             [xt.db.helpers.seed-system-test :as data]
             [xt.db.helpers.seed-user-test :as user])
@@ -274,7 +274,7 @@
 
 ^{:refer xt.db.text.sql-view/tree-return :added "4.0"
   :setup [(def +return+
-            (pg/bind-view data/currency-default))
+            (gen/bind-view data/currency-default))
                    (def +out+
                      ["Currency"
                       {"custom" [],
@@ -302,9 +302,9 @@
 
 ^{:refer xt.db.text.sql-view/tree-combined :added "4.0"
   :setup [(def +select+
-            (pg/bind-view user/organisation-all-as-admin))
+            (gen/bind-view user/organisation-all-as-admin))
                    (def +return+
-                     (pg/bind-view user/organisation-view-membership))
+                     (gen/bind-view user/organisation-view-membership))
                    (def +out+
                      ["Organisation"
                       {"custom" [],
@@ -349,14 +349,14 @@
 
   ^{:seedgen/base {:lua {:transform {+out+ (l/as-lua +out+)}}}}
   (!.js
-    (var entry (@! (pg/bind-view user/organisation-all-as-member)))
+    (var entry (@! (gen/bind-view user/organisation-all-as-member)))
     (var tree  (v/tree-select sample/Schema entry {} {}))
     (v/query-fill-input tree ["<ORG-ID>"] (. entry ["input"]) false))
   => +out+)
 
 ^{:refer xt.db.text.sql-view/query-select :added "4.0"
   :setup [(def +select+
-            (pg/bind-view data/currency-all-crypto))
+            (gen/bind-view data/currency-all-crypto))
                    (def +out+
                      [["Currency"
                        {"custom" [],
@@ -382,7 +382,7 @@
 
 ^{:refer xt.db.text.sql-view/query-count :added "4.0"
   :setup [(def +select+
-            (pg/bind-view data/currency-all-crypto))
+            (gen/bind-view data/currency-all-crypto))
                    (def +out+
                      [["Currency"
                        {"custom" [{"::" "sql/count"}],
@@ -408,7 +408,7 @@
 
 ^{:refer xt.db.text.sql-view/query-return :added "4.0"
   :setup [(def +return+
-            (pg/bind-view data/currency-info))
+            (gen/bind-view data/currency-info))
                    (def +out+
                      [["Currency"
                        {"custom" [],
@@ -448,9 +448,9 @@
 
 ^{:refer xt.db.text.sql-view/query-combined :added "4.0"
   :setup [(def +select+
-            (pg/bind-view data/currency-all-crypto))
+            (gen/bind-view data/currency-all-crypto))
                    (def +return+
-                     (pg/bind-view data/currency-info))
+                     (gen/bind-view data/currency-info))
                    (def +out+
                      [["Currency"
                        {"custom" [],

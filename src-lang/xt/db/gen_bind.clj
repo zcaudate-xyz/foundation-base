@@ -1,6 +1,6 @@
 (ns xt.db.gen-bind
-  (:require [postgres.core :as pg]
-            [hara.lang :as l]
+  (:require [hara.lang :as l]
+            [hara.model.spec-postgres.gen-bind :as gen]
             [std.lib.env :as env]
             [std.lib.foundation :as f]
             [std.string.case :as case]))
@@ -15,7 +15,7 @@
     (with-meta
       (list 'def.xt (with-meta sym {:api/type :route
                                     :api/url url})
-            (assoc (pg/bind-function @(resolve src))
+            (assoc (gen/bind-function @(resolve src))
                    :url url))
       tmeta)))
 
@@ -27,7 +27,7 @@
                                         (f/template-meta))]
     (with-meta
       (list 'def.xt (with-meta sym {:api/type :view})
-            (pg/bind-view @(resolve src) view))
+            (gen/bind-view @(resolve src) view))
       tmeta)))
 
 (defn route-map
