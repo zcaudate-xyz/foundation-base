@@ -12,7 +12,7 @@
               [lua.nginx.websocket :as ws]
               [xt.lang.common-lib :as k]
               [xt.lang.common-data :as xtd]
-              [xt.sys.cache-common :as cache]]})
+              [lua.nginx.common-cache :as cache]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]

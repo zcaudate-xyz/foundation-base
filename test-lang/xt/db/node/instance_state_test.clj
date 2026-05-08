@@ -5,10 +5,11 @@
 ^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.db.node.instance-state :as instance-state]
-             [xt.db.node.schema-state :as schema-state]
-             [xt.lang.spec-base :as xt]
-             [xt.lang.common-data :as xtd]]})
+  :require [[xt.db.node.instance-state :as instance-state]
+              [xt.db.node.schema-state :as schema-state]
+              [xt.event.base-view :as event-view]
+              [xt.lang.spec-base :as xt]
+              [xt.lang.common-data :as xtd]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -59,9 +60,14 @@
     (var state (schema-state/base-state {}))
     (var model (instance-state/put-model state "orders" (@! +model-spec+)))
     [(. model ["id"])
-     (xtd/get-in state ["models" "orders" "views" "main" "input"])
+     (xtd/get-in state ["models" "orders" "views" "main" "::"])
+     (xt/x:get-path
+      (event-view/get-input
+       (xtd/get-in state ["models" "orders" "views" "main"]))
+      ["current" "data"])
      (xtd/get-in state ["models" "orders" "views" "main" "status"])])
   => ["orders"
+      "event.view"
       ["ord-1"]
       "idle"])
 
@@ -72,14 +78,17 @@
     (var state (schema-state/base-state {}))
     (instance-state/put-model state "orders" {"views" {}})
     (var view
-         (instance-state/put-view
+     (instance-state/put-view
           state
           "orders"
           "secondary"
           {"default_input" ["ord-2"]}))
-    [(. view ["id"])
-     (. view ["input"])])
+     [(. view ["id"])
+      (. view ["::"])
+      (xt/x:get-path (event-view/get-input view)
+                     ["current" "data"])])
   => ["secondary"
+      "event.view"
       ["ord-2"]])
 
 ^{:refer xt.db.node.instance-state/set-view-input :added "4.1"}
@@ -88,7 +97,10 @@
   (!.js
     (var state (schema-state/base-state {}))
     (instance-state/put-model state "orders" (@! +model-spec+))
-    (. (instance-state/set-view-input state "orders" "main" ["ord-2"]) ["input"]))
+    (xt/x:get-path
+     (event-view/get-input
+      (instance-state/set-view-input state "orders" "main" ["ord-2"]))
+     ["current" "data"]))
   => ["ord-2"])
 
 ^{:refer xt.db.node.instance-state/set-view-pending :added "4.1"}

@@ -10,6 +10,7 @@
              [xt.db.node.instance-state :as instance-state]
              [xt.db.node.instance-sync :as instance-sync]
              [xt.db.node.instance-util :as util]
+             [xt.event.base-view :as event-view]
              [xt.event.node :as event-node]
              [xt.event.node-request :as node-request]
              [xt.lang.spec-base :as xt]
@@ -145,7 +146,7 @@
   [node space-id model-id view-id]
   (var view (-/view-get node space-id model-id view-id))
   (return (:? view
-              (xt/x:get-key view "value")
+              (event-view/get-current view nil)
               nil)))
 
 (defn.xt view-input
@@ -154,7 +155,8 @@
   [node space-id model-id view-id]
   (var view (-/view-get node space-id model-id view-id))
   (return (:? view
-              (xt/x:get-key view "input")
+              (xt/x:get-path (event-view/get-input view)
+                             ["current" "data"])
               nil)))
 
 (defn.xt view-pending
@@ -163,7 +165,7 @@
   [node space-id model-id view-id]
   (var view (-/view-get node space-id model-id view-id))
   (return (:? view
-              (xt/x:get-key view "pending")
+              (event-view/is-pending view nil)
               false)))
 
 (defn.xt view-error
@@ -273,7 +275,9 @@
   (instance-state/set-view-pending state model-id view-id)
   (var view-context {:model-id model-id
                      :view-id view-id
-                     :args (or (xt/x:get-key view "input") [])})
+                     :args (or (xt/x:get-path (event-view/get-input view)
+                                              ["current" "data"])
+                               [])})
   (var remote-spec (xt/x:get-key view "remote"))
   (if (xt/x:not-nil? remote-spec)
     (return

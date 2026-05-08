@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :postgres
-  {:require [[hara.runtime.postgres :as pg]]
+  {:require [[postgres.core :as pg]]
    :import [["citext"]
             ["uuid-ossp"]]
    :config {:dbname "test-scratch"}
@@ -143,4 +143,3 @@
   [:jsonb m :jsonb o-op]
   (return
    (-/insert-task-raw m o-op)))
-

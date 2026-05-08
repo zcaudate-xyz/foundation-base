@@ -20,6 +20,15 @@
 
 (f/intern-in graph-view/defret.pg
              graph-view/defsel.pg
+             hara.model.spec-postgres.gen-bind/bind-app
+             hara.model.spec-postgres.gen-bind/bind-schema
+             app/app-create
+             app/app-list
+             app/app
+             app/app-schema
+             app/app-typed
+             app/app-rebuild
+             app/app-clear
 
              entity/E
              typed/Type)

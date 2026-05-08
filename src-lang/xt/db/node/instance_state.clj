@@ -6,6 +6,7 @@
              [xt.db.node.schema-spec :as spec]
              [xt.db.node.schema-state :as schema-state]
              [xt.db.node.instance-util :as util]
+             [xt.event.base-view :as event-view]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]]})
 
@@ -58,12 +59,34 @@
   (xtd/set-in model ["views" view-id] view)
   (return view))
 
+(defn.xt sync-view-state
+  "mirrors base-view output state onto compatibility keys"
+  {:added "4.1"}
+  [view status error]
+  (var output (event-view/get-output view nil))
+  (xt/x:set-key view "value" (xt/x:get-key output "current"))
+  (xt/x:set-key view "pending" (or (xt/x:get-key output "pending") false))
+  (xt/x:set-key view "status" status)
+  (xt/x:set-key view "error" error)
+  (xt/x:set-key view "updated_at" (xt/x:get-key output "updated"))
+  (return view))
+
+(defn.xt clear-view-errored
+  "clears any errored flag from the base-view output"
+  {:added "4.1"}
+  [view]
+  (var output (xt/x:get-key view "output"))
+  (when (and (xt/x:is-object? output)
+             (xt/x:has-key? output "errored"))
+    (xt/x:del-key output "errored"))
+  (return view))
+
 (defn.xt set-view-input
   "sets input on a view"
   {:added "4.1"}
   [state model-id view-id input]
   (var view (schema-state/ensure-view state model-id view-id))
-  (xt/x:set-key view "input" input)
+  (event-view/set-input view {:data input})
   (return view))
 
 (defn.xt set-view-pending
@@ -71,45 +94,38 @@
   {:added "4.1"}
   [state model-id view-id]
   (var view (schema-state/ensure-view state model-id view-id))
-  (xt/x:set-key view "pending" true)
-  (xt/x:set-key view "status" spec/STATUS_PENDING)
-  (xt/x:set-key view "error" nil)
-  (return view))
+  (event-view/set-pending view true nil)
+  (return (-/sync-view-state view spec/STATUS_PENDING nil)))
 
 (defn.xt set-view-success
   "stores the current view output"
   {:added "4.1"}
   [state model-id view-id query-key value tables]
   (var view (schema-state/ensure-view state model-id view-id))
-  (xt/x:set-key view "pending" false)
-  (xt/x:set-key view "status" spec/STATUS_READY)
-  (xt/x:set-key view "error" nil)
+  (event-view/set-pending view false nil)
+  (event-view/set-output view value false "main" nil nil)
   (xt/x:set-key view "query_key" query-key)
-  (xt/x:set-key view "value" value)
   (xt/x:set-key view "tables" (or tables {}))
-  (xt/x:set-key view "updated_at" (xt/x:now-ms))
-  (return view))
+  (return (-/sync-view-state view spec/STATUS_READY nil)))
 
 (defn.xt set-view-error
   "stores a view error"
   {:added "4.1"}
   [state model-id view-id error]
   (var view (schema-state/ensure-view state model-id view-id))
-  (xt/x:set-key view "pending" false)
-  (xt/x:set-key view "status" spec/STATUS_ERROR)
-  (xt/x:set-key view "error" error)
-  (xt/x:set-key view "updated_at" (xt/x:now-ms))
-  (return view))
+  (var current (event-view/get-current view nil))
+  (event-view/set-pending view false nil)
+  (event-view/set-output view current true "main" nil nil)
+  (return (-/sync-view-state view spec/STATUS_ERROR error)))
 
 (defn.xt set-view-stale
   "marks a view as stale"
   {:added "4.1"}
   [state model-id view-id reason]
   (var view (schema-state/ensure-view state model-id view-id))
-  (xt/x:set-key view "pending" false)
-  (xt/x:set-key view "status" spec/STATUS_STALE)
-  (xt/x:set-key view "error" reason)
-  (return view))
+  (event-view/set-pending view false nil)
+  (-/clear-view-errored view)
+  (return (-/sync-view-state view spec/STATUS_STALE reason)))
 
 (defn.xt remove-query-watch
   "removes a query from the table watch index"

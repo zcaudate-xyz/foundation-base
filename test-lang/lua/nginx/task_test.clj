@@ -6,10 +6,10 @@
 
 (l/script- :lua.nginx
   {:runtime :basic
-   :config  {:exec ["resty" "--http-conf" (config/create-resty-params) "-e"]}
-   :require [[lua.nginx :as n]
-             [lua.nginx.task :as t]
-             [xt.sys.cache-common :as cache]]})
+    :config  {:exec ["resty" "--http-conf" (config/create-resty-params) "-e"]}
+    :require [[lua.nginx :as n]
+              [lua.nginx.task :as t]
+              [lua.nginx.common-cache :as cache]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]

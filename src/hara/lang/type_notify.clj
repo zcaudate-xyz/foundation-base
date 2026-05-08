@@ -137,7 +137,8 @@
   {:added "4.0"}
   [^HttpExchange tx app]
   (let [bytes (.readAllBytes (.getRequestBody tx))]
-    (process-message app (String. bytes))))
+    (when (< 0 (alength bytes))
+      (process-message app (String. bytes)))))
 
 (defn start-notify-http
   "starts http server"

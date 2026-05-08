@@ -1,8 +1,9 @@
 (ns lib.postgres-test
   (:require [lib.jdbc :as jdbc]
-            [lib.jdbc.protocol :as protocol]
-            [lib.postgres :as base]
-            [lib.postgres.connection :as conn])
+	    [lib.jdbc.protocol :as protocol]
+             [lib.postgres :as base]
+             [lib.postgres.connection :as conn]
+             [std.lib.os :as os])
   (:use code.test)
   (:import (javax.sql PooledConnection)))
 
@@ -58,3 +59,53 @@
   (with-redefs [conn/conn-close (constantly nil)]
     (base/stop-pg-raw {:instance (atom (mock-pooled-conn)) :notifications (atom {})}))
   => map?)
+
+^{:refer lib.postgres/run-pg-lifecycle :added "4.1"}
+(fact "executes lifecycle commands using std.lib.os/sh arguments"
+  (let [calls (atom [])]
+    (with-redefs [os/sh (fn [args]
+                          (swap! calls conj args)
+                          "ok")]
+      (base/run-pg-lifecycle {:dbname "test"} {:args ["supabase" "start"]
+                                              :root "docker/supbase"}))
+    @calls)
+  => [{:args ["supabase" "start"]
+       :root "docker/supbase"}])
+
+^{:refer lib.postgres/start-pg :added "4.1"}
+(fact "runs startup shell hooks before opening the postgres connection"
+  (let [calls (atom [])]
+    (with-redefs [os/sh (fn [args]
+                          (swap! calls conj [:sh args])
+                          "ok")
+                  conn/conn-create (fn [_]
+                                     (swap! calls conj [:conn])
+                                     (mock-pooled-conn))]
+      (base/start-pg {:instance (atom nil)
+                      :notifications (atom {})
+                      :startup {:args ["supabase" "start"]
+                                :root "docker/supbase"}}))
+    @calls)
+  => [[:sh {:args ["supabase" "start"]
+            :root "docker/supbase"}]
+      [:conn]])
+
+^{:refer lib.postgres/stop-pg :added "4.1"}
+(fact "runs teardown shell hooks after closing the postgres connection"
+  (let [calls (atom [])]
+    (with-redefs [conn/conn-close (fn [_]
+                                    (swap! calls conj [:conn-close])
+                                    nil)
+                  os/sh (fn [args]
+                          (swap! calls conj [:sh args])
+                          "ok")]
+      (base/stop-pg {:instance (atom (mock-pooled-conn))
+                     :notifications (atom {})
+                     :teardown {:args ["supabase" "stop"]
+                                :root "docker/supbase"
+                                :ignore-errors true}}))
+    @calls)
+  => [[:conn-close]
+      [:sh {:args ["supabase" "stop"]
+            :root "docker/supbase"
+            :ignore-errors true}]])

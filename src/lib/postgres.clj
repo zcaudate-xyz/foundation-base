@@ -1,14 +1,22 @@
 (ns lib.postgres
   (:require [lib.docker :as docker]
-            [lib.jdbc :as jdbc]
-            [lib.postgres.connection :as conn]
-            [std.json :as json]
-            [std.lib.atom :as atom]
-            [std.lib.collection :as collection]
-            [std.lib.component :as component]
-            [std.lib.env :as env]
-            [std.lib.foundation :as f]
-            [std.lib.network :as network]))
+             [lib.jdbc :as jdbc]
+             [lib.postgres.connection :as conn]
+             [std.json :as json]
+             [std.lib.atom :as atom]
+             [std.lib.collection :as collection]
+             [std.lib.component :as component]
+             [std.lib.env :as env]
+             [std.lib.foundation :as f]
+             [std.lib.network :as network]
+             [std.lib.os :as os]))
+
+(defn run-pg-lifecycle
+  "executes a postgres runtime lifecycle hook using `std.lib.os/sh` arguments"
+  {:added "4.1"}
+  [rt command]
+  (os/sh command)
+  rt)
 
 (defn start-pg-temp-init
   "initialises a temp database"
@@ -46,10 +54,16 @@
      (reset! instance (conn/conn-create pg)))
    pg))
 
-(def ^{:arglists '([pg])} start-pg (component/wrap-start start-pg-raw
-                                                    [{:key :container
-                                                      :setup     docker/start-runtime
-                                                      :teardown  docker/stop-runtime}]))
+(def ^{:arglists '([pg])} start-pg
+  (component/wrap-start
+   start-pg-raw
+   [{:key :startup
+     :setup run-pg-lifecycle}
+    {:key :container
+     :setup docker/start-runtime
+     :teardown docker/stop-runtime}
+    {:key :teardown
+     :teardown run-pg-lifecycle}]))
 
 (defn stop-pg-temp-teardown
   "tears down a temp database"
@@ -79,7 +93,12 @@
 
 (def ^{:arglists '([pg])}
   stop-pg
-  (component/wrap-stop stop-pg-raw
-               [{:key :container
-                 :setup     docker/start-runtime
-                 :teardown  docker/stop-runtime}]))
+  (component/wrap-stop
+   stop-pg-raw
+   [{:key :startup
+     :setup run-pg-lifecycle}
+    {:key :container
+     :setup docker/start-runtime
+     :teardown docker/stop-runtime}
+    {:key :teardown
+     :teardown run-pg-lifecycle}]))

@@ -2,7 +2,11 @@
   (:require [hara.lang :as l]))
 
 (l/script :lua.nginx
-  {:require [[xt.lang.common-lib :as k] [xt.sys.cache-common :as cache] [lua.nginx :as n] [xt.lang.common-data :as xtd] [xt.lang.spec-base :as xt]]})
+  {:require [[xt.lang.common-lib :as k]
+             [lua.nginx.common-cache :as cache]
+             [lua.nginx :as n]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.spec-base :as xt]]})
 
 ;;
 ;; tasks are instantiated via a loop

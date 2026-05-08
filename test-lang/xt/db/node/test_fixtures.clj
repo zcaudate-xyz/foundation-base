@@ -6,8 +6,8 @@
 
 (def.xt Schema
   {"Order"
-   {"id" {"ident" "id", "type" "text", "order" 0}
-    "status" {"ident" "status", "type" "text", "order" 1}}})
+   {"id" {"ident" "id", "type" "text", "order" 0, "primary" true}
+     "status" {"ident" "status", "type" "text", "order" 1}}})
 
 (def.xt Lookup
   {"Order" {"position" 0}})

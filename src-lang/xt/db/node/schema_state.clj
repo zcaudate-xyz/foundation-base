@@ -3,6 +3,7 @@
 
 (l/script :xtalk
   {:require [[xt.db.node.schema-spec :as spec]
+             [xt.event.base-view :as event-view]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]]})
 
@@ -56,18 +57,30 @@
                          (xt/x:get-key view "defaultArgs")
                          (xt/x:get-key view "default_args")
                          []))
-  (return
-   (xt/x:obj-assign
-    {:id view-id
-     :input default-input
-     :value (xt/x:get-key view "value")
-     :status spec/STATUS_IDLE
-     :pending false
-     :error nil
-     :tables {}
-     :query_key nil
-     :updated_at nil}
-    view)))
+  (var default-value (xt/x:get-key view "value"))
+  (var carry (xtd/obj-clone view))
+  (xt/x:del-key carry "input")
+  (xt/x:del-key carry "value")
+  (var runtime (event-view/create-view
+                nil
+                {}
+                default-input
+                default-value
+                nil
+                nil))
+  (event-view/init-view runtime)
+  (when (xt/x:not-nil? default-value)
+    (xtd/set-in runtime ["output" "current"] default-value))
+  (xt/x:obj-assign runtime carry)
+  (xt/x:set-key runtime "id" view-id)
+  (xt/x:set-key runtime "value" default-value)
+  (xt/x:set-key runtime "status" spec/STATUS_IDLE)
+  (xt/x:set-key runtime "pending" false)
+  (xt/x:set-key runtime "error" nil)
+  (xt/x:set-key runtime "tables" {})
+  (xt/x:set-key runtime "query_key" nil)
+  (xt/x:set-key runtime "updated_at" nil)
+  (return runtime))
 
 (defn.xt get-model
   "gets a registered model"

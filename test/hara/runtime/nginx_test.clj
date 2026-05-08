@@ -15,7 +15,7 @@
 (l/script- :lua
   {:runtime :nginx.instance
    :require [[xt.lang.common-lib :as k]
-             [xt.sys.cache-common :as cache]
+             [lua.nginx.common-cache :as cache]
              [lua.nginx :as n]]})
 
 (fact:global
