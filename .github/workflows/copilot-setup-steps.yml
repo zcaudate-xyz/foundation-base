@@ -68,6 +68,9 @@ jobs:
             psql -h 127.0.0.1 -p 5432 -U postgres -d postgres -c 'CREATE DATABASE "test-scratch"'
           fi
 
+      - name: Install Python Postgres client
+        run: python3 -m pip install psycopg2-binary
+
       # ── Ruby (Ruby runtime support) ───────────────────────────────────────
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
