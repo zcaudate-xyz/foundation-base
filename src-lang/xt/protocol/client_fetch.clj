@@ -5,9 +5,7 @@
   {:require [[xt.lang.common-protocol :as proto]]})
 
 (def.xt IFetchClient
-  ["request"
-   "query"
-   "rpc"])
+  ["request"])
 
 (def.xt IFetchRuntimeClient
   (proto/iface-combine [-/IFetchClient]))
