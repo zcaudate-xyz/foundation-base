@@ -499,34 +499,194 @@
 
 
 ^{:refer xt.db.runtime.supabase/fetch-client? :added "4.1"}
-(fact "TODO")
+(fact "detects wrapped fetch clients"
+
+  (!.js
+   [(supabase/fetch-client? {"::" "fetch.client"})
+    (supabase/fetch-client? {"::" "other"})
+    (supabase/fetch-client? nil)])
+  => [true false false])
 
 ^{:refer xt.db.runtime.supabase/fetch-query :added "4.1"}
-(fact "TODO")
+(fact "dispatches wrapped fetch query calls"
+
+  (!.js
+   (var client
+        (fetch/client-create
+         {"query" (fn [request _opts]
+                    (return {"kind" "query"
+                             "url" (. request ["url"])}))}
+         {}))
+   (supabase/fetch-query client {"url" "/rest/v1/Order"} {}))
+  => {"kind" "query"
+      "url" "/rest/v1/Order"})
 
 ^{:refer xt.db.runtime.supabase/fetch-rpc :added "4.1"}
-(fact "TODO")
+(fact "dispatches wrapped fetch rpc calls"
+
+  (!.js
+   (var client
+        (fetch/client-create
+         {"rpc" (fn [request _opts]
+                  (return {"kind" "rpc"
+                           "fn" (. request ["fn"])}))}
+         {}))
+   (supabase/fetch-rpc client {"fn" "ping"} {}))
+  => {"kind" "rpc"
+      "fn" "ping"})
 
 ^{:refer xt.db.runtime.supabase/unwrap-client :added "4.1"}
-(fact "TODO")
+(fact "returns raw client maps for wrapped fetch clients"
+
+  (!.js
+   (var client
+        (fetch/client-create
+         {"base-url" "https://client.test"}
+         {}))
+   [(. (supabase/unwrap-client client) ["base-url"])
+    (. (supabase/unwrap-client {"base-url" "https://plain.test"}) ["base-url"])
+    (supabase/unwrap-client nil)])
+  => ["https://client.test"
+      "https://plain.test"
+      {}])
 
 ^{:refer xt.db.runtime.supabase/resolve-base-url :added "4.1"}
-(fact "TODO")
+(fact "resolves base urls from db then client then opts"
+
+  (!.js
+   [(supabase/resolve-base-url {"base-url" "https://db.test"}
+                               {"base-url" "https://client.test"}
+                               {"base-url" "https://opt.test"})
+    (supabase/resolve-base-url {}
+                               {"host" "https://client.test"}
+                               {"base-url" "https://opt.test"})
+    (supabase/resolve-base-url {}
+                               nil
+                               {"url" "https://opt.test"})])
+  => ["https://db.test"
+      "https://client.test"
+      "https://opt.test"])
 
 ^{:refer xt.db.runtime.supabase/resolve-api-key :added "4.1"}
-(fact "TODO")
+(fact "resolves api keys from db then client then opts"
+
+  (!.js
+   [(supabase/resolve-api-key {"apikey" "db-key"}
+                              {"apikey" "client-key"}
+                              {"apikey" "opt-key"})
+    (supabase/resolve-api-key {}
+                              {"api-key" "client-key"}
+                              {"apikey" "opt-key"})
+    (supabase/resolve-api-key {}
+                              nil
+                              {"api_key" "opt-key"})])
+  => ["db-key"
+      "client-key"
+      "opt-key"])
 
 ^{:refer xt.db.runtime.supabase/resolve-auth-token :added "4.1"}
-(fact "TODO")
+(fact "resolves auth tokens from db then client then opts"
+
+  (!.js
+   [(supabase/resolve-auth-token {"auth" "db-token"}
+                                 {"token" "client-token"}
+                                 {"auth" "opt-token"})
+    (supabase/resolve-auth-token {}
+                                 {"auth-token" "client-token"}
+                                 {"auth" "opt-token"})
+    (supabase/resolve-auth-token {}
+                                 nil
+                                 {"auth_token" "opt-token"})])
+  => ["db-token"
+      "client-token"
+      "opt-token"])
 
 ^{:refer xt.db.runtime.supabase/join-url :added "4.1"}
-(fact "TODO")
+(fact "joins base urls and relative request paths"
+
+  (!.js
+   [(supabase/join-url "https://db.test/" "/rest/v1/Order")
+    (supabase/join-url "https://db.test" "rest/v1/Order")
+    (supabase/join-url nil "/rest/v1/Order")])
+  => ["https://db.test/rest/v1/Order"
+      "https://db.test/rest/v1/Order"
+      "/rest/v1/Order"])
 
 ^{:refer xt.db.runtime.supabase/resolve-request-handler :added "4.1"}
-(fact "TODO")
+(fact "picks query and rpc handlers from fetch clients and plain maps"
+
+  (!.js
+   (var fetch-client
+        (fetch/client-create
+         {"query" (fn [request _opts]
+                    (return {"kind" "query"
+                             "url" (. request ["url"])}))
+          "rpc" (fn [request _opts]
+                  (return {"kind" "rpc"
+                           "fn" (. request ["fn"])}))}
+         {}))
+   (var query-handler
+        (supabase/resolve-request-handler
+         {}
+         fetch-client
+         {"type" "query"}
+         {}))
+   (var rpc-handler
+        (supabase/resolve-request-handler
+         {"rpc" (fn [request _opts]
+                  (return {"kind" "db-rpc"
+                           "fn" (. request ["fn"])}))}
+         nil
+         {"type" "rpc"}
+         {}))
+   [(query-handler {"url" "/rest/v1/Order"} {})
+    (rpc-handler {"fn" "ping"} {})])
+  => [{"kind" "query"
+       "url" "/rest/v1/Order"}
+      {"kind" "db-rpc"
+       "fn" "ping"}])
 
 ^{:refer xt.db.runtime.supabase/resolve-request-headers :added "4.1"}
-(fact "TODO")
+(fact "merges compiled client db and opts headers with auth defaults"
+
+  (!.js
+   (var client
+        (fetch/client-create
+         {"headers" {"x-client" "1"}
+          "apikey" "client-key"}
+         {}))
+   (supabase/resolve-request-headers
+    {"headers" {"x-db" "1"}
+     "schema-name" "api"}
+    client
+    {"headers" {"x-compiled" "1"}
+     "body" {"id" "ord-1"}}
+    {"headers" {"x-opt" "1"}
+     "auth" "token-1"}))
+  => {"x-compiled" "1"
+      "x-client" "1"
+      "x-db" "1"
+      "x-opt" "1"
+      "Content-Profile" "api"
+      "apikey" "client-key"
+      "Authorization" "Bearer token-1"
+      "Content-Type" "application/json"})
 
 ^{:refer xt.db.runtime.supabase/prepare-request :added "4.1"}
-(fact "TODO")
+(fact "combines base urls and resolved headers into request maps"
+
+  (!.js
+   (supabase/prepare-request
+    {"base-url" "https://db.test"
+     "schema-name" "api"
+     "apikey" "anon-key"}
+    {"type" "query"
+     "url" "/rest/v1/Order?select=status"
+     "headers" {"x-compiled" "1"}}
+    {"auth" "token-1"}))
+  => {"type" "query"
+      "url" "https://db.test/rest/v1/Order?select=status"
+      "headers" {"x-compiled" "1"
+                 "Content-Profile" "api"
+                 "apikey" "anon-key"
+                 "Authorization" "Bearer token-1"}})

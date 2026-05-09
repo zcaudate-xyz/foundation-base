@@ -424,7 +424,8 @@
   {:added "4.1.3"}
   [client]
   (var out [])
-  (xt/for:array [channel (xt/x:arr-slice (or (xt/x:get-key client "channels") []) 0)]
+  (var channels (or (xt/x:get-key client "channels") []))
+  (xt/for:array [channel (xt/x:arr-slice channels 0 (xt/x:len channels))]
     (xt/x:arr-push out (-/remove-channel client channel)))
   (return out))
 
@@ -691,7 +692,7 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-string :as str]
              [xt.protocol.impl.client-websocket :as ws]
-             [xt.db.websocket.nginx-client :as ngx-client]]})
+             [xt.db.websocket.nchan-client :as nchan-client]]})
 
 (defn.lua default-encode
   "encodes a realtime message to JSON"
@@ -828,7 +829,7 @@
     (xt/x:set-key opts "transport-driver"
                   (or (-/transport->driver
                        (xt/x:get-key opts "transport"))
-                      (ngx-client/create-driver opts))))
+                       (nchan-client/create-driver opts))))
   (var client (-/client-create-base (-/normalize-endpoint endpoint) opts))
   (xt/x:set-key client "params" params)
   (xt/x:set-key client "apikey" (or (xt/x:get-key opts "apikey")

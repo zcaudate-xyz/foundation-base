@@ -707,3 +707,212 @@
        (repl/notify err))))
   => {"rows" ["ord-1" "ord-2"]
       "models" []})
+
+^{:refer xt.db.node.instance-model/model-dependents :added "4.1"}
+(fact "tracks dependent models for a source model"
+
+  (!.py
+   (var node (event-node/node-create {"id" "node-z"}))
+   (model/install node fixtures/InstallOpts)
+   (model/model-put node "room/a" "orders" fixtures/ModelSpec)
+   (model/model-put node "room/a" "stats"
+                    {"views"
+                     {"summary"
+                      {"deps" [["orders" "main"]]}}})
+   (model/model-dependents node "room/a" "orders"))
+  => {"stats" true})
+
+^{:refer xt.db.node.instance-model/view-remote-spec :added "4.1"}
+(fact "returns only meaningful remote view configs"
+
+  (!.py
+   [(model/view-remote-spec {"remote" {"space" "room/b"}})
+    (model/view-remote-spec {"remote" {"meta" {"trace" true}}})
+    (model/view-remote-spec {"remote" {"channel" "ignored"}})])
+  => [{"space" "room/b"}
+      {"meta" {"trace" true}}
+      nil])
+
+^{:refer xt.db.node.instance-model/refresh-seen? :added "4.1"}
+(fact "checks whether a refresh chain has visited a view"
+
+  (!.py
+   [(model/refresh-seen? {} "orders" "main")
+    (model/refresh-seen? {"orders" {"main" true}} "orders" "main")])
+  => [false true])
+
+^{:refer xt.db.node.instance-model/mark-refresh-seen :added "4.1"}
+(fact "marks a view as visited in a refresh chain"
+
+  (!.py
+   (model/mark-refresh-seen {} "orders" "main"))
+  => {"orders" {"main" true}})
+
+^{:refer xt.db.node.instance-model/view-refresh-result :added "4.1"}
+(fact "returns public refresh fields from the current view state"
+
+  (notify/wait-on :python
+    (var node (event-node/node-create {"id" "node-aa"}))
+    (model/install node fixtures/InstallOpts)
+    (model/model-put node "room/a" "orders" fixtures/ModelSpec)
+    (promise/x:promise-catch
+     (promise/x:promise-then
+      (promise/x:promise-then
+       (model/sync node "room/a" {"db/sync" fixtures/Seed})
+       (fn [_]
+         (return (model/view-refresh node "room/a" "orders" "main"))))
+       (fn [_]
+         (var result
+              (model/view-refresh-result
+               (model/view-get node "room/a" "orders" "main")))
+         (repl/notify [(xt/x:is-string? (. result ["query_key"]))
+                       (xtd/get-in result ["value" 0 "status"])
+                       (xt/x:obj-keys (. result ["tables"]))])))
+     (fn [err]
+       (repl/notify err))))
+  => [true
+      "open"
+      ["Order"]])
+
+^{:refer xt.db.node.instance-model/run-view-main :added "4.1"}
+(fact "runs the local query stage for a view context"
+
+  (notify/wait-on :python
+    (var node (event-node/node-create {"id" "node-ab"}))
+    (model/install node fixtures/InstallOpts)
+    (model/model-put node "room/a" "orders" fixtures/ModelSpec)
+    (var state (model/ensure-space-state node "room/a"))
+    (promise/x:promise-catch
+     (promise/x:promise-then
+      (model/sync node "room/a" {"db/sync" fixtures/Seed})
+      (fn [_]
+        (var result
+             (model/run-view-main
+              {"state" state
+               "model-id" "orders"
+               "view-id" "main"
+               "args" []
+               "view" (model/view-get node "room/a" "orders" "main")}))
+        (repl/notify [(. result ["key"])
+                      (xtd/get-in result ["value" 0 "status"])
+                      (xt/x:obj-keys (. result ["tables"]))])))
+     (fn [err]
+       (repl/notify err))))
+  => [nil
+      "open"
+      ["Order"]])
+
+^{:refer xt.db.node.instance-model/run-view-remote :added "4.1"}
+(fact "runs the remote query stage when a view has remote settings"
+
+  (notify/wait-on :python
+    (var node (event-node/node-create {"id" "node-ac"}))
+    (model/install node fixtures/InstallOpts)
+    (model/model-put node "room/a" "orders"
+                     {"views"
+                      {"main"
+                       {"query" {:table "Order"
+                                 :return-method "default"
+                                 :return-id "ord-1"}
+                        "input" []
+                        "remote" {"space" "room/b"}}}})
+    (model/model-put node "room/b" "orders" fixtures/ModelSpec)
+    (var state (model/ensure-space-state node "room/a"))
+    (promise/x:promise-catch
+     (promise/x:promise-then
+      (promise/x:promise-then
+       (model/sync node "room/b" {"db/sync" fixtures/Seed})
+       (fn [_]
+         (return
+          (model/run-view-remote
+           {"node" node
+            "space-id" "room/a"
+            "state" state
+            "model-id" "orders"
+            "view-id" "main"
+            "args" []
+            "view" (model/view-get node "room/a" "orders" "main")}))))
+      (fn [entry]
+        (repl/notify {"status" (. entry ["status"])
+                      "value?" (xt/x:not-nil? (. entry ["value"]))})))
+     (fn [err]
+       (repl/notify err))))
+  => {"status" "ready"
+      "value?" true})
+
+^{:refer xt.db.node.instance-model/configure-view-pipeline :added "4.1"}
+(fact "installs local and remote pipeline handlers on a view"
+
+  (!.py
+   (var view {})
+   (model/configure-view-pipeline view)
+   [(xt/x:is-function? (. (. (. view ["pipeline"]) ["main"]) ["handler"]))
+    (xt/x:is-function? (. (. (. view ["pipeline"]) ["remote"]) ["handler"]))])
+  => [true true])
+
+^{:refer xt.db.node.instance-model/refresh-view-dependents :added "4.1"}
+(fact "refreshes dependent views through the per-model throttle"
+
+  (notify/wait-on :python
+    (var node (event-node/node-create {"id" "node-ad"}))
+    (model/install node fixtures/InstallOpts)
+    (model/model-put node "room/a" "orders" (@! +deps-model-spec+))
+    (var state (model/ensure-space-state node "room/a"))
+    (promise/x:promise-catch
+     (promise/x:promise-then
+      (promise/x:promise-then
+       (model/sync node "room/a" {"db/sync" fixtures/Seed})
+       (fn [_]
+         (return
+          (model/refresh-view-dependents
+           node
+           "room/a"
+           state
+           "orders"
+           "main"
+           {"visited" {"orders" {"main" true}}}))))
+      (fn [refreshes]
+        (repl/notify {"count" (xt/x:len refreshes)
+                      "open-status" (xtd/get-in (model/view-get node "room/a" "orders" "open")
+                                                ["status"])})))
+     (fn [err]
+       (repl/notify err))))
+  => {"count" 1
+      "open-status" "ready"})
+
+^{:refer xt.db.node.instance-model/view-refresh-impl :added "4.1"}
+(fact "refreshes one view and returns its public result"
+
+  (notify/wait-on :python
+    (var node (event-node/node-create {"id" "node-ae"}))
+    (model/install node fixtures/InstallOpts)
+    (model/model-put node "room/a" "orders" fixtures/ModelSpec)
+    (promise/x:promise-catch
+     (promise/x:promise-then
+      (promise/x:promise-then
+       (model/sync node "room/a" {"db/sync" fixtures/Seed})
+       (fn [_]
+         (return (model/view-refresh-impl node "room/a" "orders" "main" nil))))
+      (fn [result]
+        (repl/notify {"query-key?" (xt/x:is-string? (. result ["query_key"]))
+                      "value" (xtd/get-in result ["value" 0 "status"])
+                      "tables" (xt/x:obj-keys (. result ["tables"]))})))
+     (fn [err]
+       (repl/notify err))))
+  => {"query-key?" true
+      "value" "open"
+      "tables" ["Order"]})
+
+^{:refer xt.db.node.instance-model/ensure-model-throttle :added "4.1"}
+(fact "creates and reuses one throttle per model"
+
+  (!.py
+   (var node (event-node/node-create {"id" "node-af"}))
+   (model/install node fixtures/InstallOpts)
+   (model/model-put node "room/a" "orders" fixtures/ModelSpec)
+   (var state (model/ensure-space-state node "room/a"))
+   (var first (model/ensure-model-throttle node "room/a" state "orders"))
+   (var second (model/ensure-model-throttle node "room/a" state "orders"))
+   [(== first second)
+    (== first (xtd/get-in state ["models" "orders" "throttle"]))])
+  => [true true])

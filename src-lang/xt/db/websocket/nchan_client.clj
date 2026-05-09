@@ -1,4 +1,4 @@
-(ns xt.db.websocket.nginx-client
+(ns xt.db.websocket.nchan-client
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
@@ -36,7 +36,7 @@
         (return (xt/x:cat base-url path))))
 
 (defn.xt host-url
-  "builds a websocket host url from an nginx-style options map"
+  "builds a websocket host url from an nchan-style options map"
   {:added "4.1.3"}
   [opts]
   (:= opts (or opts {}))
@@ -83,13 +83,13 @@
              [xt.protocol.impl.client-websocket :as ws]]})
 
 (defn.lua default-connect-raw
-  "opens an nginx websocket client using resty.websocket.client"
+  "opens an nchan websocket client using resty.websocket.client"
   {:added "4.1.3"}
   [url connect-opts]
   (var client (ngxws/new))
   (local '[ok err] (. client (connect url (or connect-opts {}))))
   (when (not ok)
-    (xt/x:err (xt/x:cat "Failed to connect nginx websocket client - "
+    (xt/x:err (xt/x:cat "Failed to connect nchan websocket client - "
                         (xt/x:to-string err))))
   (return client))
 
@@ -106,7 +106,7 @@
                  (return (-/default-connect-raw url connect-opts)))})))
 
 (defn.lua connect
-  "connects to an nginx websocket endpoint using the websocket protocol"
+  "connects to an nchan websocket endpoint using the websocket protocol"
   {:added "4.1.3"}
   [path params opts]
   (:= opts (xt/x:obj-clone (or opts {})))

@@ -160,8 +160,9 @@
     (instance-sync/clear-state-cache state)
     [(xt/x:obj-keys (. state ["queries"]))
      (xt/x:obj-keys (. state ["watch"]))
+     (xt/x:obj-keys (. state ["view_watch"]))
      (xtd/get-in state ["models" "orders" "views" "main" "status"])])
-  => [[] [] "stale"])
+  => [[] [] [] "stale"])
 
 ^{:refer xt.db.node.instance-sync/process-cache-payload :added "4.1"}
 (fact "refreshes dependent views when auto-refreshing affected queries"

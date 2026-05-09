@@ -136,18 +136,20 @@
           state
           "orders"
           "main"
-          "q1"
-          [{"status" "open"}]
-          {"Order" true}))
+           "q1"
+           [{"status" "open"}]
+           {"Order" true}))
     [(. view ["status"])
      (. view ["query_key"])
      (. view ["value"])
      (. view ["tables"])
+     (. (. (. state ["view_watch"]) ["Order"] ["orders"]) ["main"])
      (xt/x:is-number? (. view ["updated_at"]))])
   => ["ready"
       "q1"
       [{"status" "open"}]
       {"Order" true}
+      true
       true])
 
 ^{:refer xt.db.node.instance-state/set-view-error :added "4.1"}
@@ -201,6 +203,18 @@
   => [nil
       ["q1"]])
 
+^{:refer xt.db.node.instance-state/remove-view-watch :added "4.1"}
+(fact "removes watched view ids from selected tables"
+
+  (!.py
+    (var state (schema-state/base-state {}))
+    (instance-state/watch-view state "orders" "main" {"Order" true "Audit" true})
+    (instance-state/remove-view-watch state "orders" "main" {"Order" true})
+    [(. (. state ["view_watch"]) ["Order"])
+     (xt/x:obj-keys (. (. state ["view_watch"]) ["Audit"]))])
+  => [nil
+      ["orders"]])
+
 ^{:refer xt.db.node.instance-state/watch-query :added "4.1"}
 (fact "indexes watched queries by table"
 
@@ -209,6 +223,17 @@
     (instance-state/watch-query state "q1" {"Order" true "Audit" true})
     [(xt/x:obj-keys (. state ["watch"]))
      (. (. (. state ["watch"]) ["Order"]) ["q1"])])
+  => [["Order" "Audit"]
+      true])
+
+^{:refer xt.db.node.instance-state/watch-view :added "4.1"}
+(fact "indexes watched views by table and model"
+
+  (!.py
+    (var state (schema-state/base-state {}))
+    (instance-state/watch-view state "orders" "main" {"Order" true "Audit" true})
+    [(xt/x:obj-keys (. state ["view_watch"]))
+     (. (. (. state ["view_watch"]) ["Order"] ["orders"]) ["main"])])
   => [["Order" "Audit"]
       true])
 
@@ -224,6 +249,21 @@
      (xtd/arr-lookup (instance-state/affected-query-ids state {"Audit" true}))])
   => [{"q1" true "q3" true}
       {"q2" true "q3" true}])
+
+^{:refer xt.db.node.instance-state/affected-view-bindings :added "4.1"}
+(fact "collects affected bound views from watched tables"
+
+  (!.py
+    (var state (schema-state/base-state {}))
+    (instance-state/watch-view state "orders" "main" {"Order" true})
+    (instance-state/watch-view state "stats" "summary" {"Audit" true})
+    (instance-state/watch-view state "stats" "totals" {"Order" true "Audit" true})
+    [(instance-state/affected-view-bindings state ["Order"])
+     (instance-state/affected-view-bindings state {"Audit" true})])
+  => [{"orders" {"main" true}
+       "stats" {"totals" true}}
+      {"stats" {"summary" true
+                "totals" true}}])
 
 ^{:refer xt.db.node.instance-state/remove-query :added "4.1"}
 (fact "removes cached queries and their watch entries"
@@ -267,3 +307,44 @@
     [before after])
   => [[["orders" "main"]]
       []])
+
+^{:refer xt.db.node.instance-state/get-model-dependents :added "4.1"}
+(fact "collects dependent models for a source model"
+
+  (!.py
+   (var state (schema-state/base-state {}))
+   (instance-state/put-model state "orders" (@! +model-spec+))
+   (instance-state/put-model state "stats" (@! +dependent-model-spec+))
+   (instance-state/get-model-dependents state "orders"))
+  => {"stats" true})
+
+^{:refer xt.db.node.instance-state/sync-view-state :added "4.1"}
+(fact "mirrors base-view output fields onto compatibility keys"
+
+  (!.py
+   (var view {"output" {"current" {"id" "ord-1"}
+                        "pending" true
+                        "updated" 123}})
+   (instance-state/sync-view-state view "pending" {"tag" "waiting"})
+   [(. (. view ["value"]) ["id"])
+    (. view ["pending"])
+    (. view ["status"])
+    (. (. view ["error"]) ["tag"])
+    (. view ["updated_at"])])
+  => ["ord-1"
+      true
+      "pending"
+      "waiting"
+      123])
+
+^{:refer xt.db.node.instance-state/clear-view-errored :added "4.1"}
+(fact "removes the errored marker from view output"
+
+  (!.py
+   (var view {"output" {"errored" true
+                        "current" {"id" "ord-1"}}})
+   (instance-state/clear-view-errored view)
+   [(xt/x:has-key? (. view ["output"]) "errored")
+    (. (. (. view ["output"]) ["current"]) ["id"])])
+  => [false
+      "ord-1"])

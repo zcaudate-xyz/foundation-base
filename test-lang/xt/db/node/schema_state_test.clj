@@ -180,10 +180,37 @@
 
 
 ^{:refer xt.db.node.schema-state/identity-wrapper :added "4.1"}
-(fact "TODO")
+(fact "passes handlers through unchanged"
+
+  (!.js
+   ((schema-state/identity-wrapper
+     (fn [x]
+       (return (+ x 1))))
+    1))
+  => 2)
 
 ^{:refer xt.db.node.schema-state/output-process :added "4.1"}
-(fact "TODO")
+(fact "unwraps db node result payloads that carry a value key"
+
+  (!.js
+   [(schema-state/output-process {"value" {"id" "ord-1"}})
+    (schema-state/output-process {"id" "ord-2"})])
+  => [{"id" "ord-1"}
+      {"id" "ord-2"}])
 
 ^{:refer xt.db.node.schema-state/normalize-dep :added "4.1"}
-(fact "TODO")
+(fact "normalizes string vector and map dependency declarations"
+
+  (!.js
+   [(schema-state/normalize-dep "orders" "main")
+    (schema-state/normalize-dep "orders" ["main"])
+    (schema-state/normalize-dep "orders" ["stats" "summary"])
+    (schema-state/normalize-dep "orders" {"model" "stats" "view" "summary"})
+    (schema-state/normalize-dep "orders" {"id" "main"})
+    (schema-state/normalize-dep "orders" 1)])
+  => [["orders" "main"]
+      ["orders" "main"]
+      ["stats" "summary"]
+      ["stats" "summary"]
+      ["orders" "main"]
+      nil])

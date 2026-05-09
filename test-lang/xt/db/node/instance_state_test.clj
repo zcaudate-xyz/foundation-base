@@ -311,10 +311,42 @@
 
 
 ^{:refer xt.db.node.instance-state/get-model-dependents :added "4.1"}
-(fact "TODO")
+(fact "collects dependent models for a source model"
+
+  (!.js
+   (var state (schema-state/base-state {}))
+   (instance-state/put-model state "orders" (@! +model-spec+))
+   (instance-state/put-model state "stats" (@! +dependent-model-spec+))
+   (instance-state/get-model-dependents state "orders"))
+  => {"stats" true})
 
 ^{:refer xt.db.node.instance-state/sync-view-state :added "4.1"}
-(fact "TODO")
+(fact "mirrors base-view output fields onto compatibility keys"
+
+  (!.js
+   (var view {"output" {"current" {"id" "ord-1"}
+                        "pending" true
+                        "updated" 123}})
+   (instance-state/sync-view-state view "pending" {"tag" "waiting"})
+   [(. (. view ["value"]) ["id"])
+    (. view ["pending"])
+    (. view ["status"])
+    (. (. view ["error"]) ["tag"])
+    (. view ["updated_at"])])
+  => ["ord-1"
+      true
+      "pending"
+      "waiting"
+      123])
 
 ^{:refer xt.db.node.instance-state/clear-view-errored :added "4.1"}
-(fact "TODO")
+(fact "removes the errored marker from view output"
+
+  (!.js
+   (var view {"output" {"errored" true
+                        "current" {"id" "ord-1"}}})
+   (instance-state/clear-view-errored view)
+   [(xt/x:has-key? (. view ["output"]) "errored")
+    (. (. (. view ["output"]) ["current"]) ["id"])])
+  => [false
+      "ord-1"])
