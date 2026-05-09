@@ -128,3 +128,46 @@
   
   (s/seedgen-langadd 'xt.db.text.pgrest {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.db.text.pgrest {:lang [:lua :python] :write true}))
+
+
+^{:refer xt.db.text.pgrest/filter-operator? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.text.pgrest/top-level-control? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.text.pgrest/value->query-text :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.text.pgrest/normalise-in-values :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.text.pgrest/compile-filter-value :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.text.pgrest/compile-filter-fragment :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.text.pgrest/compile-order-value :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.text.pgrest/compile-or-clause :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.text.pgrest/compile-filter-params :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.text.pgrest/compile-control-params :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.text.pgrest/compile-query-string :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.text.pgrest/compile-url :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.text.pgrest/compile-rpc :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.text.pgrest/compile-request :added "4.1"}
+(fact "TODO")

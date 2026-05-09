@@ -7,8 +7,136 @@
              [xt.db.node.schema-state :as schema-state]
              [xt.db.node.schema-query :as schema-query]
              [xt.db.node.instance-state :as instance-state]
+             [xt.event.base-view :as event-view]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]]})
+
+(defn.xt seen-view?
+  "checks whether a view has already been visited in a local graph walk"
+  {:added "4.1"}
+  [visited model-id view-id]
+  (return (== true (xtd/get-in visited [model-id view-id]))))
+
+(defn.xt mark-view-seen
+  "marks a view as visited in a local graph walk"
+  {:added "4.1"}
+  [visited model-id view-id]
+  (xtd/set-in visited [model-id view-id] true)
+  (return visited))
+
+(defn.xt view-context
+  "gets the current local view context from state"
+  {:added "4.1"}
+  [state model-id view-id]
+  (var view (schema-state/ensure-view state model-id view-id))
+  (return {:model-id model-id
+           :view-id view-id
+           :args (or (xt/x:get-path (event-view/get-input view)
+                                    ["current" "data"])
+                     [])}))
+
+(defn.xt view-remote-spec
+  "gets the configured remote spec for a view, if present"
+  {:added "4.1"}
+  [view]
+  (var remote (xt/x:get-key view "remote"))
+  (if (and (xt/x:is-object? remote)
+           (or (xt/x:has-key? remote "space")
+               (xt/x:has-key? remote "target")
+               (xt/x:has-key? remote "transport")
+               (xt/x:has-key? remote "meta")))
+    (return remote)
+    (return nil)))
+
+(defn.xt mark-view-dependents-stale
+  "marks dependent views stale through the local dependency graph"
+  {:added "4.1"}
+  [state model-id view-id reason visited]
+  (when (xt/x:nil? visited)
+    (:= visited {}))
+  (-/mark-view-seen visited model-id view-id)
+  (xt/for:object [[dmodel-id dview-ids] (instance-state/get-view-dependents state model-id view-id)]
+    (xt/for:array [dview-id dview-ids]
+      (when (not (-/seen-view? visited dmodel-id dview-id))
+        (instance-state/set-view-stale state dmodel-id dview-id reason)
+        (-/mark-view-dependents-stale state dmodel-id dview-id reason visited))))
+  (return visited))
+
+(defn.xt refresh-view-local
+  "refreshes a single local view and then its dependents"
+  {:added "4.1"}
+  [state model-id view-id visited]
+  (when (xt/x:nil? visited)
+    (:= visited {}))
+  (when (-/seen-view? visited model-id view-id)
+    (return visited))
+  (-/mark-view-seen visited model-id view-id)
+  (var dview (schema-state/ensure-view state model-id view-id))
+  (if (xt/x:not-nil? (-/view-remote-spec dview))
+    (-/mark-view-dependents-stale
+     state
+     model-id
+     view-id
+     {:status "stale"
+      :tag "db.node/dependent-remote-refresh-required"}
+     visited)
+    (do (var view-context (-/view-context state model-id view-id))
+        (var [ok prepared] (schema-query/prepare-query
+                            state
+                            (xt/x:get-key dview "query")
+                            view-context))
+        (if (not ok)
+          (instance-state/set-view-error state model-id view-id prepared)
+          (do (var plan (xt/x:get-key prepared "plan"))
+              (var value (:? (xt/x:not-nil? plan)
+                             (instance/db-pull-sync
+                              (instance-state/ensure-db state)
+                              (schema-state/get-schema state)
+                              plan)
+                             nil))
+              (-/attach-query-entry
+               state
+               prepared
+               value
+               (xt/x:get-key prepared "tables")
+               model-id
+               view-id)
+              (-/refresh-view-dependents-local state model-id view-id visited)))))
+  (return visited))
+
+(defn.xt refresh-view-dependents-local
+  "refreshes dependent views through the local dependency graph"
+  {:added "4.1"}
+  [state model-id view-id visited]
+  (when (xt/x:nil? visited)
+    (:= visited {}))
+  (-/mark-view-seen visited model-id view-id)
+  (xt/for:object [[dmodel-id dview-ids] (instance-state/get-view-dependents state model-id view-id)]
+    (xt/for:array [dview-id dview-ids]
+      (when (not (-/seen-view? visited dmodel-id dview-id))
+        (-/refresh-view-local state dmodel-id dview-id visited))))
+  (return visited))
+
+(defn.xt mark-view-bindings-stale
+  "marks bound views and their dependents stale"
+  {:added "4.1"}
+  [state bindings reason]
+  (var visited {})
+  (xt/for:object [[model-id views] (or bindings {})]
+    (xt/for:object [[view-id _] views]
+      (instance-state/set-view-stale state model-id view-id reason)
+      (-/mark-view-dependents-stale state model-id view-id reason visited)))
+  (return visited))
+
+(defn.xt refresh-view-bindings-local
+  "refreshes bound views and their dependents locally"
+  {:added "4.1"}
+  [state bindings]
+  (var visited {})
+  (xt/for:object [[model-id views] (or bindings {})]
+    (xt/for:object [[view-id _] views]
+      (-/refresh-view-local state model-id view-id visited)))
+  (return visited))
 
 (defn.xt attach-query-entry
   "stores a query result in cache state"
@@ -58,9 +186,7 @@
     (return nil))
   (xt/x:set-key entry "status" spec/STATUS_STALE)
   (xt/x:set-key entry "error" reason)
-  (xt/for:object [[model-id views] (or (xt/x:get-key entry "bindings") {})]
-    (xt/for:object [[view-id _] views]
-      (instance-state/set-view-stale state model-id view-id reason)))
+  (-/mark-view-bindings-stale state (xt/x:get-key entry "bindings") reason)
   (return entry))
 
 (defn.xt mark-query-stale-many
@@ -100,6 +226,7 @@
                                        query-key
                                        value
                                        (xt/x:get-key entry "tables"))))
+  (-/refresh-view-bindings-local state (xt/x:get-key entry "bindings"))
   (return entry))
 
 (defn.xt refresh-query-keys

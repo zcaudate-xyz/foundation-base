@@ -26,9 +26,14 @@
   {"views"
    {"main"
     {"default_input" ["ord-1"]
-     "query" {:table "Order"
-              :return-method "default"
-              :return-id "ord-1"}}}})
+      "query" {:table "Order"
+               :return-method "default"
+               :return-id "ord-1"}}}})
+
+(def +dependent-model-spec+
+  {"views"
+   {"summary"
+    {"deps" [["orders" "main"]]}}})
 
 ^{:refer xt.db.node.instance-state/ensure-state :added "4.1"}
 (fact "attaches node state to a space when missing"
@@ -64,11 +69,15 @@
       (event-view/get-input
        (xtd/get-in state ["models" "orders" "views" "main"]))
       ["current" "data"])
-     (xtd/get-in state ["models" "orders" "views" "main" "status"])])
+      (xtd/get-in state ["models" "orders" "views" "main" "status"])
+      (xtd/get-in state ["models" "orders" "deps"])
+      (xtd/get-in state ["models" "orders" "unknown_deps"])])
   => ["orders"
       "event.view"
       ["ord-1"]
-      "idle"])
+      "idle"
+      {}
+      []])
 
 ^{:refer xt.db.node.instance-state/put-view :added "4.1"}
 (fact "stores a single view on an existing model"
@@ -231,3 +240,30 @@
   => ["q1"
       []
       nil])
+
+^{:refer xt.db.node.instance-state/get-view-dependents :added "4.1"}
+(fact "indexes dependent views across models"
+
+  (!.dt
+    (var state (schema-state/base-state {}))
+    (instance-state/put-model state "orders" (@! +model-spec+))
+    (instance-state/put-model state "stats" (@! +dependent-model-spec+))
+    [(instance-state/get-view-dependents state "orders" "main")
+     (instance-state/get-model-dependents state "orders")
+     (xtd/get-in state ["models" "stats" "unknown_deps"])])
+  => [{"stats" ["summary"]}
+      {"stats" true}
+      []])
+
+^{:refer xt.db.node.instance-state/rebuild-model-deps :added "4.1"}
+(fact "rebuilds unknown deps when source models appear later"
+
+  (!.dt
+    (var state (schema-state/base-state {}))
+    (instance-state/put-model state "stats" (@! +dependent-model-spec+))
+    (var before (xtd/get-in state ["models" "stats" "unknown_deps"]))
+    (instance-state/put-model state "orders" (@! +model-spec+))
+    (var after (xtd/get-in state ["models" "stats" "unknown_deps"]))
+    [before after])
+  => [[["orders" "main"]]
+      []])

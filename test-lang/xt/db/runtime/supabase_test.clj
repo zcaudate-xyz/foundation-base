@@ -496,3 +496,37 @@
   => [1
       [["add" {"Currency" [{"id" "USD"}]}]]
       true])
+
+
+^{:refer xt.db.runtime.supabase/fetch-client? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.runtime.supabase/fetch-query :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.runtime.supabase/fetch-rpc :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.runtime.supabase/unwrap-client :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.runtime.supabase/resolve-base-url :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.runtime.supabase/resolve-api-key :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.runtime.supabase/resolve-auth-token :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.runtime.supabase/join-url :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.runtime.supabase/resolve-request-handler :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.runtime.supabase/resolve-request-headers :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.runtime.supabase/prepare-request :added "4.1"}
+(fact "TODO")

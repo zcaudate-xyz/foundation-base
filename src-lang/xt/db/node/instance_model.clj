@@ -11,6 +11,7 @@
              [xt.db.node.instance-sync :as instance-sync]
              [xt.db.node.instance-util :as util]
              [xt.event.base-view :as event-view]
+             [xt.event.util-throttle :as throttle]
              [xt.event.node :as event-node]
              [xt.event.node-request :as node-request]
              [xt.lang.spec-base :as xt]
@@ -178,6 +179,61 @@
               (xt/x:get-key view "error")
               nil)))
 
+(defn.xt view-dependents
+  "gets dependent views for the given source view"
+  {:added "4.1"}
+  [node space-id model-id view-id]
+  (var state (-/ensure-space-state node space-id))
+  (return (instance-state/get-view-dependents state model-id view-id)))
+
+(defn.xt model-dependents
+  "gets dependent models for the given source model"
+  {:added "4.1"}
+  [node space-id model-id]
+  (var state (-/ensure-space-state node space-id))
+  (return (instance-state/get-model-dependents state model-id)))
+
+(defn.xt view-remote-spec
+  "gets the configured remote spec for a view, if present"
+  {:added "4.1"}
+  [view]
+  (var remote (xt/x:get-key view "remote"))
+  (if (and (xt/x:is-object? remote)
+           (or (xt/x:has-key? remote "space")
+               (xt/x:has-key? remote "target")
+               (xt/x:has-key? remote "transport")
+               (xt/x:has-key? remote "meta")))
+    (return remote)
+    (return nil)))
+
+(defn.xt refresh-seen?
+  "checks whether a view has already been visited in a refresh chain"
+  {:added "4.1"}
+  [visited model-id view-id]
+  (return (== true (xtd/get-in visited [model-id view-id]))))
+
+(defn.xt mark-refresh-seen
+  "marks a view as visited in a refresh chain"
+  {:added "4.1"}
+  [visited model-id view-id]
+  (xtd/set-in visited [model-id view-id] true)
+  (return visited))
+
+(defn.xt ensure-model-throttle
+  "ensures a per-model dependent refresh throttle exists"
+  {:added "4.1"}
+  [node space-id state model-id]
+  (var model (schema-state/ensure-model state model-id))
+  (var model-throttle (xt/x:get-key model "throttle"))
+  (when (xt/x:nil? model-throttle)
+    (:= model-throttle
+        (throttle/throttle-create
+         (fn [view-id opts]
+           (return (-/view-refresh-impl node space-id model-id view-id opts)))
+         xt/x:now-ms))
+    (xt/x:set-key model "throttle" model-throttle))
+  (return model-throttle))
+
 (defn.xt normalize-remote
   "normalizes remote settings"
   {:added "4.1"}
@@ -296,7 +352,7 @@
   [context]
   (var #{node space-id state model-id view-id args view} context)
   (var query-spec (xt/x:get-key view "query"))
-  (var remote-spec (xt/x:get-key view "remote"))
+  (var remote-spec (-/view-remote-spec view))
   (var view-context {:model-id model-id
                      :view-id view-id
                      :args (or args [])})
@@ -319,13 +375,60 @@
   (xtd/set-in view ["pipeline" "remote" "handler"] -/run-view-remote)
   (return view))
 
-(defn.xt view-refresh
-  "refreshes a single registered view"
+(defn.xt pipeline-run-async
+  "adapts xt.db.node handlers to the base-view async callback contract"
   {:added "4.1"}
-  [node space-id model-id view-id]
+  [handler-fn context callbacks]
+  (return
+   (promise/x:promise-catch
+    (promise/x:promise-then
+     (node-request/ensure-promise (handler-fn context))
+     (fn [result]
+       (return (xt/x:apply (xt/x:get-key callbacks "success")
+                           [result]))))
+    (fn [err]
+      (return (xt/x:apply (xt/x:get-key callbacks "error")
+                          [err]))))))
+
+(defn.xt refresh-view-dependents
+  "refreshes dependent views for a source view"
+  {:added "4.1"}
+  [node space-id state model-id view-id opts]
+  (when (xt/x:nil? opts)
+    (:= opts {}))
+  (var visited (or (xt/x:get-key opts "visited") {}))
+  (var dependents (instance-state/get-view-dependents state model-id view-id))
+  (var running [])
+  (xt/for:object [[dmodel-id dview-ids] dependents]
+    (xt/for:array [dview-id dview-ids]
+      (when (not (-/refresh-seen? visited dmodel-id dview-id))
+        (var entry (throttle/throttle-run
+                    (-/ensure-model-throttle node space-id state dmodel-id)
+                    dview-id
+                    [{"visited" (xtd/clone-nested visited)
+                      "refresh_deps" true}]))
+        (xt/x:arr-push running
+                       (node-request/ensure-promise
+                        (xt/x:get-key entry "promise")))))) 
+  (return (promise/x:promise-all running)))
+
+(defn.xt view-refresh-impl
+  "refreshes a single registered view with internal refresh-chain options"
+  {:added "4.1"}
+  [node space-id model-id view-id opts]
+  (when (xt/x:nil? opts)
+    (:= opts {}))
   (var state (-/ensure-space-state node space-id))
   (instance-state/ensure-db state)
   (var view (schema-state/ensure-view state model-id view-id))
+  (var visited (or (xt/x:get-key opts "visited") {}))
+  (when (-/refresh-seen? visited model-id view-id)
+    (return (promise/x:promise-run (-/view-refresh-result view))))
+  (-/mark-refresh-seen visited model-id view-id)
+  (var refresh-deps (:? (and (xt/x:not-nil? opts)
+                             (xt/x:has-key? opts "refresh_deps"))
+                         (xt/x:get-key opts "refresh_deps")
+                         true))
   (var query-spec (xt/x:get-key view "query"))
   (when (xt/x:nil? query-spec)
     (xt/x:err (xt/x:cat "query not configured for view - "
@@ -338,26 +441,55 @@
                             :space-id space-id
                             :model-id model-id
                             :view-id view-id}))
-  (var remote-spec (xt/x:get-key view "remote"))
-  (var stage-key (:? (xt/x:not-nil? remote-spec)
-                     "remote"
-                     "main"))
-  (var handler (xtd/get-in view ["pipeline" stage-key "handler"]))
   (if disabled
     (do
-      (event-view/set-output-disabled view true nil)
       (return (promise/x:promise-run (-/view-refresh-result view))))
     (do
-      (instance-state/set-view-pending state model-id view-id)
+      (var remote-spec (-/view-remote-spec view))
+      (var refresh-p (:? (xt/x:not-nil? remote-spec)
+                         (event-view/pipeline-run-remote
+                          context
+                          false
+                          -/pipeline-run-async
+                          nil
+                          (fn [_]
+                            (return (-/view-refresh-result view))))
+                         (event-view/pipeline-run
+                          context
+                          false
+                          -/pipeline-run-async
+                          nil
+                          (fn [_]
+                            (return (-/view-refresh-result view)))
+                          nil)))
       (return
        (promise/x:promise-catch
         (promise/x:promise-then
-         (node-request/ensure-promise (handler context))
+         refresh-p
          (fn [_]
-           (return (-/view-refresh-result view))))
+            (var result (-/view-refresh-result view))
+            (if refresh-deps
+             (return
+              (promise/x:promise-then
+               (-/refresh-view-dependents
+                node
+                space-id
+                state
+                model-id
+                view-id
+                {"visited" visited})
+               (fn [_]
+                 (return result))))
+             (return result))))
         (fn [err]
           (instance-state/set-view-error state model-id view-id err)
           (xt/x:throw err)))))))
+
+(defn.xt view-refresh
+  "refreshes a single registered view"
+  {:added "4.1"}
+  [node space-id model-id view-id]
+  (return (-/view-refresh-impl node space-id model-id view-id nil)))
 
 (defn.xt model-refresh
   "refreshes all views in a registered model"
@@ -369,7 +501,13 @@
   (xt/for:array [view-id (xt/x:obj-keys (or (xt/x:get-key model "views") {}))]
     (xt/x:arr-push running
                    (node-request/ensure-promise
-                    (-/view-refresh node space-id model-id view-id))))
+                    (-/view-refresh-impl
+                     node
+                     space-id
+                     model-id
+                     view-id
+                     {"visited" {}
+                      "refresh_deps" false}))))
   (return (promise/x:promise-all running)))
 
 (defn.xt view-set-input

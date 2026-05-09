@@ -22,6 +22,76 @@
     (return (xt/x:get-key value "value"))
     (return value)))
 
+(defn.xt normalize-dep
+  "normalizes a dependency path into [model-id view-id]"
+  {:added "4.1"}
+  [model-id dep]
+  (cond (xt/x:is-array? dep)
+        (if (== 1 (xt/x:len dep))
+          (return [model-id
+                   (xt/x:get-idx dep 0)])
+          (return [(xt/x:get-idx dep 0)
+                   (xt/x:get-idx dep 1)]))
+
+        (xt/x:is-string? dep)
+        (return [model-id dep])
+
+        (xt/x:is-object? dep)
+        (return [(or (xt/x:get-key dep "model")
+                     model-id)
+                 (or (xt/x:get-key dep "view")
+                     (xt/x:get-key dep "id")
+                     (xt/x:get-key dep "name"))])
+
+        :else
+        (return nil)))
+
+(defn.xt get-view-deps
+  "gets normalized dependencies for a single view"
+  {:added "4.1"}
+  [model-id view]
+  (var out [])
+  (xt/for:array [dep (or (xt/x:get-key view "deps") [])]
+    (var path (-/normalize-dep model-id dep))
+    (when (and (xt/x:not-nil? path)
+               (xt/x:not-nil? (xt/x:first path))
+               (xt/x:not-nil? (xt/x:second path)))
+      (xt/x:arr-push out path)))
+  (return out))
+
+(defn.xt get-model-deps
+  "gets view dependency indexes for a model"
+  {:added "4.1"}
+  [model-id views]
+  (var all-deps {})
+  (xt/for:object [[view-id view-entry] views]
+    (xt/for:array [path (-/get-view-deps model-id view-entry)]
+      (xtd/set-in all-deps
+                  [(xt/x:first path)
+                   (xt/x:second path)
+                   view-id]
+                  true)))
+  (return all-deps))
+
+(defn.xt get-unknown-deps
+  "gets unresolved dependency paths for a model"
+  {:added "4.1"}
+  [state model-id views model-deps]
+  (var out [])
+  (xt/for:object [[linked-model-id linked-views] model-deps]
+    (cond (== model-id linked-model-id)
+          (xt/for:object [[linked-view-id _] linked-views]
+            (when (xt/x:nil? (. views [linked-view-id]))
+              (xt/x:arr-push out [linked-model-id linked-view-id])))
+
+          :else
+          (do (var linked-model (xtd/get-in state ["models" linked-model-id]))
+              (xt/for:object [[linked-view-id _] linked-views]
+                (when (or (xt/x:nil? linked-model)
+                          (xt/x:nil? (. linked-model ["views"] [linked-view-id])))
+                  (xt/x:arr-push out [linked-model-id linked-view-id]))))))
+  (return out))
+
 (defn.xt base-state
   "creates the base xt.db state"
   {:added "4.1"}
@@ -35,6 +105,7 @@
            :queries  {}
            :models   {}
            :watch    {}
+           :view_watch {}
            :pending  {}
            :remote   (or (xt/x:get-key opts "remote") {})
            :opts     opts

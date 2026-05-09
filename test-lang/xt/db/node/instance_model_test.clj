@@ -18,7 +18,20 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
+
+(def +deps-model-spec+
+  {"views"
+   {"main"
+    {"query" {:table "Order"
+              :return-method "default"
+              :return-id "ord-1"}
+     "input" []}
+    "open"
+    {"query" {:table "Order"
+              :select-method "by_status"}
+     "default_input" ["open"]
+     "deps" ["main"]}}})
 
 ^{:refer xt.db.node.instance-model/install :added "4.1"}
 (fact "installs and uninstalls xt.db.node handlers and triggers"
@@ -203,8 +216,35 @@
        (repl/notify err))))
   => {"main-status" "ready"
       "main-value" "open"
-      "open-input" ["closed"]
-      "refresh-count" 2})
+       "open-input" ["closed"]
+       "refresh-count" 2})
+
+^{:refer xt.db.node.instance-model/view-dependents :added "4.1"}
+(fact "tracks dependent views and refreshes them after a root view update"
+
+  (notify/wait-on :js
+    (var node (event-node/node-create {"id" "node-a-deps"}))
+    (model/install node fixtures/InstallOpts)
+    (model/model-put node "room/a" "orders" (@! +deps-model-spec+))
+    (promise/x:promise-catch
+     (promise/x:promise-then
+      (promise/x:promise-then
+       (model/sync node "room/a" {"db/sync" fixtures/Seed})
+       (fn [_]
+         (return (model/view-refresh node "room/a" "orders" "main"))))
+       (fn [_]
+        (repl/notify
+         {"dependents" (model/view-dependents node "room/a" "orders" "main")
+          "open-status" (xtd/get-in (model/view-get node "room/a" "orders" "open")
+                                    ["status"])
+          "open-query?" (xt/x:is-string?
+                         (xtd/get-in (model/view-get node "room/a" "orders" "open")
+                                     ["query_key"]))})))
+     (fn [err]
+       (repl/notify err))))
+  => {"dependents" {"orders" ["open"]}
+      "open-status" "ready"
+      "open-query?" true})
 
 ^{:refer xt.db.node.instance-model/uninstall :added "4.1"}
 (fact "removes all installed xt.db.node handlers and triggers"
@@ -668,3 +708,40 @@
        (repl/notify err))))
   => {"rows" ["ord-1" "ord-2"]
       "models" []})
+
+
+^{:refer xt.db.node.instance-model/model-dependents :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.instance-model/view-remote-spec :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.instance-model/refresh-seen? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.instance-model/mark-refresh-seen :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.instance-model/view-refresh-result :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.instance-model/run-view-main :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.instance-model/run-view-remote :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.instance-model/configure-view-pipeline :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.instance-model/refresh-view-dependents :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.instance-model/view-refresh-impl :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.instance-model/ensure-model-throttle :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.instance-model/pipeline-run-async :added "4.1"}
+(fact "TODO")

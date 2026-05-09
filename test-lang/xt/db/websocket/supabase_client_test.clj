@@ -166,3 +166,109 @@
       "token-2"
       "phx_leave"
       0])
+
+
+^{:refer xt.db.websocket.supabase-client/client? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/channel? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/normalize-topic :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/endpoint-base-url :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/next-ref :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/make-message :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/find-channel :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/send-now :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/flush-send-buffer :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/push :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/stop-heartbeat :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/heartbeat :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/start-heartbeat :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/enrich-postgres-payload :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/binding-matches? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/channel-trigger :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/route-message :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/receive-raw :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/bind-channel-ids :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/channel-join-payload :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/subscribe-channel :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/unsubscribe-channel :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/remove-channel-local :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/remove-channel :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/remove-all-channels :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/connect :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/disconnect :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/create-channel :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/client-create-base :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/normalize-endpoint :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/default-encode :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/default-decode :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/transport->driver :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/default-connect-fn :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.supabase-client/default-disconnect-fn :added "4.1"}
+(fact "TODO")

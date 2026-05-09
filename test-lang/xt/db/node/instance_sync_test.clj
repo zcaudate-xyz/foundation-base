@@ -27,7 +27,17 @@
 
 (def +views+
   {"Order"
-   {"return"
+   {"select"
+    {"by_status"
+     {"input" [{"symbol" "i_status", "type" "text"}]
+      "return" "jsonb"
+      "view" {"table" "Order"
+              "type" "select"
+              "tag" "by_status"
+              "access" {"roles" {}}
+              "guards" []
+              "query" {"status" "{{i_status}}"}}}}
+    "return"
     {"default"
      {"input" [{"symbol" "i_order_id", "type" "text"}]
       "return" "jsonb"
@@ -44,7 +54,20 @@
     {"query" {:table "Order"
               :return-method "default"
               :return-id "ord-1"}
-     "input" []}}})
+      "input" []}}})
+
+(def +dependent-model-spec+
+  {"views"
+   {"main"
+    {"query" {:table "Order"
+              :return-method "default"
+              :return-id "ord-1"}
+     "input" []}
+    "open"
+    {"query" {:table "Order"
+              :select-method "by_status"}
+     "default_input" ["open"]
+     "deps" ["main"]}}})
 
 (def +seed+
   {"Order"
@@ -138,8 +161,9 @@
     (instance-sync/clear-state-cache state)
     [(xt/x:obj-keys (. state ["queries"]))
      (xt/x:obj-keys (. state ["watch"]))
+     (xt/x:obj-keys (. state ["view_watch"]))
      (xtd/get-in state ["models" "orders" "views" "main" "status"])])
-  => [[] [] "stale"])
+  => [[] [] [] "stale"])
 
 ^{:refer xt.db.node.instance-sync/process-cache-payload :added "4.1"}
 (fact "applies payloads and refreshes affected cached queries"
@@ -170,10 +194,43 @@
           false))
     [(. (. summary ["tables"]) ["Order"])
      (. summary ["queries"])
+     (xtd/get-in summary ["views" "orders" "main"])
      (xtd/get-in state ["queries" (. result ["query_key"]) "value" 0 "status"])])
+    => [true
+        ["q1"]
+        true
+        "closed"])
+
+^{:refer xt.db.node.instance-sync/process-cache-payload :added "4.1"}
+(fact "refreshes dependent views when auto-refreshing affected queries"
+
+  (!.js
+    (var state
+         (schema-state/base-state {"schema" (@! +schema+)
+                                   "views" (@! +views+)
+                                   "lookup" (@! +lookup+)}))
+    (instance-state/put-model state "orders" (@! +dependent-model-spec+))
+    (xdb/sync-event (instance-state/ensure-db state) ["add" (@! +seed+)])
+    (var [_ result]
+         (instance-query/run-local-query
+          state
+          {:key "q1"
+           :table "Order"
+           :return-method "default"
+           :return-id "ord-1"}
+          {:model-id "orders"
+           :view-id "main"
+           :args []}
+          "orders"
+          "main"))
+    (instance-sync/process-cache-payload
+     state
+     {"db/sync" {"Order" [{"id" "ord-1" "status" "closed"}]}}
+     false)
+    [(xt/x:is-string? (xtd/get-in state ["models" "orders" "views" "open" "query_key"]))
+     (xtd/get-in state ["models" "orders" "views" "open" "status"])])
   => [true
-      ["q1"]
-      "closed"])
+      "ready"])
 
 ^{:refer xt.db.node.instance-sync/handle-cache-changed :added "4.1"}
 (fact "ignores local-origin payload application and marks affected queries stale"
@@ -208,8 +265,8 @@
      (. summary ["queries"])
      (xtd/get-in state ["queries" (. result ["query_key"]) "status"])])
   => [true
-      ["q1"]
-      "ready"])
+       ["q1"]
+       "stale"])
 
 ^{:refer xt.db.node.instance-sync/handle-cache-invalidated :added "4.1"}
 (fact "handles invalidation payloads using tables only"
@@ -243,5 +300,37 @@
      (. summary ["queries"])
      (xtd/get-in state ["queries" (. result ["query_key"]) "status"])])
   => [true
-      ["q1"]
-      "ready"])
+       ["q1"]
+       "stale"])
+
+^{:refer xt.db.node.instance-sync/handle-cache-invalidated :added "4.1"}
+(fact "marks dependent views stale when auto-refresh is disabled"
+
+  (!.js
+    (var state
+         (schema-state/base-state {"schema" (@! +schema+)
+                                   "views" (@! +views+)
+                                   "lookup" (@! +lookup+)
+                                   "auto_refresh" false}))
+    (instance-state/put-model state "orders" (@! +dependent-model-spec+))
+    (xdb/sync-event (instance-state/ensure-db state) ["add" (@! +seed+)])
+    (var [_ result]
+         (instance-query/run-local-query
+          state
+          {:key "q1"
+           :table "Order"
+           :return-method "default"
+           :return-id "ord-1"}
+          {:model-id "orders"
+           :view-id "main"
+           :args []}
+          "orders"
+          "main"))
+    (instance-sync/handle-cache-invalidated
+     {"state" state}
+     {"data" {"db/sync" {"Order" [{"id" "ord-1"}]}}}
+     {"id" "node-1"})
+    [(xtd/get-in state ["queries" (. result ["query_key"]) "status"])
+     (xtd/get-in state ["models" "orders" "views" "open" "status"])])
+  => ["stale"
+      "stale"])

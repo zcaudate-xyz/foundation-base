@@ -114,6 +114,7 @@
   (instance/db-clear (instance-state/ensure-db state))
   (xt/x:set-key state "queries" {})
   (xt/x:set-key state "watch" {})
+  (xt/x:set-key state "view_watch" {})
   (xt/for:object [[model-id model] (or (xt/x:get-key state "models") {})]
     (xt/for:object [[view-id _] (or (xt/x:get-key model "views") {})]
       (instance-state/set-view-stale state model-id view-id "cleared")))
@@ -127,14 +128,21 @@
     (-/apply-sync-request state payload))
   (var tables (-/payload-tables payload))
   (var query-keys (instance-state/affected-query-ids state tables))
-  (var auto-refresh (or (xtd/get-in state ["opts" "auto_refresh"])
+  (var view-bindings (instance-state/affected-view-bindings state tables))
+  (var opts (or (xt/x:get-key state "opts") {}))
+  (var auto-refresh (:? (xt/x:has-key? opts "auto_refresh")
+                        (xt/x:get-key opts "auto_refresh")
                         true))
-  (var refreshed (:? auto-refresh
-                     (instance-query/refresh-query-keys state query-keys)
-                     (instance-query/mark-query-stale-many state query-keys payload)))
+  (var refreshed nil)
+  (if auto-refresh
+    (do (instance-query/mark-query-stale-many state query-keys payload)
+        (:= refreshed (instance-query/refresh-view-bindings-local state view-bindings)))
+    (do (:= refreshed (instance-query/mark-view-bindings-stale state view-bindings payload))
+        (instance-query/mark-query-stale-many state query-keys payload)))
   (return {:tables tables
-           :queries query-keys
-           :refreshed refreshed}))
+            :queries query-keys
+            :views view-bindings
+            :refreshed refreshed}))
 
 (defn.xt handle-cache-changed
   "handles an inbound cache.changed stream"

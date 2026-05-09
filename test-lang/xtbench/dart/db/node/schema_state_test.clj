@@ -94,9 +94,48 @@
   => ["main"
       "event.view"
       ["ord-1"]
-      "idle"
-      false
-      [{"status" "open"}]])
+       "idle"
+       false
+       [{"status" "open"}]])
+
+^{:refer xt.db.node.schema-state/get-view-deps :added "4.1"}
+(fact "normalizes dependency shorthands on a single view"
+
+  (!.dt
+    (schema-state/get-view-deps
+     "orders"
+     {"deps" ["main"
+               ["audit" "latest"]
+               {"model" "stats" "view" "summary"}]}))
+  => [["orders" "main"]
+      ["audit" "latest"]
+      ["stats" "summary"]])
+
+^{:refer xt.db.node.schema-state/get-model-deps :added "4.1"}
+(fact "indexes dependent views by source model and view"
+
+  (!.dt
+    (schema-state/get-model-deps
+     "orders"
+     {"summary" {"deps" ["main"
+                          ["stats" "daily"]]}}))
+  => {"orders" {"main" {"summary" true}}
+      "stats" {"daily" {"summary" true}}})
+
+^{:refer xt.db.node.schema-state/get-unknown-deps :added "4.1"}
+(fact "reports dependency paths that are not currently registered"
+
+  (!.dt
+    (var views {"summary" {"deps" ["main"
+                                    ["stats" "daily"]
+                                    ["stats" "missing"]]}})
+    (schema-state/get-unknown-deps
+     {"models" {"stats" {"views" {"daily" {}}}}}
+     "orders"
+     views
+     (schema-state/get-model-deps "orders" views)))
+  => [["orders" "main"]
+      ["stats" "missing"]])
 
 ^{:refer xt.db.node.schema-state/get-model :added "4.1"}
 (fact "gets a registered model"

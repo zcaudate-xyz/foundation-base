@@ -29,3 +29,22 @@
                                                       s)))} )])
   => ["wss://demo.test:9443"
       "wss://demo.test:9443/stream/user?id=user-1&token=abc%20123"])
+
+
+^{:refer xt.db.websocket.nginx-client/join-url :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.nginx-client/host-url :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.nginx-client/query-string :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.nginx-client/default-connect-raw :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.nginx-client/create-driver :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.websocket.nginx-client/connect :added "4.1"}
+(fact "TODO")

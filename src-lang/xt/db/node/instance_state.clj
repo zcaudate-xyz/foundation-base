@@ -33,8 +33,43 @@
             (schema-state/get-schema state)
             (or (xt/x:get-key state "lookup") {})
             (or (xt/x:get-key opts "db_opts") {})))
-    (xt/x:set-key state "db" db))
+     (xt/x:set-key state "db" db))
   (return db))
+
+(defn.xt rebuild-model-deps
+  "recomputes dependency indexes for all registered models"
+  {:added "4.1"}
+  [state]
+  (xt/for:object [[model-id model] (or (xt/x:get-key state "models") {})]
+    (var views (or (xt/x:get-key model "views") {}))
+    (var deps (schema-state/get-model-deps model-id views))
+    (xt/x:set-key model "deps" deps)
+    (xt/x:set-key model
+                  "unknown_deps"
+                  (schema-state/get-unknown-deps state model-id views deps)))
+  (return state))
+
+(defn.xt get-view-dependents
+  "gets all dependent views for a source view"
+  {:added "4.1"}
+  [state model-id view-id]
+  (var out {})
+  (xt/for:object [[dmodel-id model] (or (xt/x:get-key state "models") {})]
+    (var view-lu (xtd/get-in model ["deps" model-id view-id]))
+    (when (xt/x:not-nil? view-lu)
+      (xt/x:set-key out dmodel-id (xt/x:obj-keys view-lu))))
+  (return out))
+
+(defn.xt get-model-dependents
+  "gets all dependent models for a source model"
+  {:added "4.1"}
+  [state model-id]
+  (var out {})
+  (xt/for:object [[dmodel-id model] (or (xt/x:get-key state "models") {})]
+    (var model-lu (xtd/get-in model ["deps" model-id]))
+    (when (xt/x:not-nil? model-lu)
+      (xt/x:set-key out dmodel-id true)))
+  (return out))
 
 (defn.xt put-model
   "stores a model and normalizes its views"
@@ -43,11 +78,14 @@
   (var views (schema-state/model-views model-spec))
   (var model {:id model-id
               :meta (or (xt/x:get-key model-spec "meta") {})
-              :views {}})
+              :views {}
+              :deps {}
+              :unknown_deps []})
   (xt/for:object [[view-id view] views]
     (xtd/set-in model ["views" view-id]
                 (schema-state/normalize-view view-id view)))
   (xtd/set-in state ["models" model-id] model)
+  (-/rebuild-model-deps state)
   (return model))
 
 (defn.xt put-view
@@ -57,6 +95,7 @@
   (var model (schema-state/ensure-model state model-id))
   (var view (schema-state/normalize-view view-id view-spec))
   (xtd/set-in model ["views" view-id] view)
+  (-/rebuild-model-deps state)
   (return view))
 
 (defn.xt sync-view-state
@@ -102,10 +141,13 @@
   {:added "4.1"}
   [state model-id view-id query-key value tables]
   (var view (schema-state/ensure-view state model-id view-id))
+  (var prev-tables (or (xt/x:get-key view "tables") {}))
   (event-view/set-pending view false nil)
   (event-view/set-output view value false "main" nil nil)
+  (-/remove-view-watch state model-id view-id prev-tables)
   (xt/x:set-key view "query_key" query-key)
   (xt/x:set-key view "tables" (or tables {}))
+  (-/watch-view state model-id view-id (xt/x:get-key view "tables"))
   (return (-/sync-view-state view spec/STATUS_READY nil)))
 
 (defn.xt set-view-error
@@ -138,7 +180,25 @@
       (when (xt/x:not-nil? queries)
         (xt/x:del-key queries query-key)
         (when (== 0 (xt/x:len (xt/x:obj-keys queries)))
-          (xt/x:del-key watch table)))))
+           (xt/x:del-key watch table)))))
+  (return true))
+
+(defn.xt remove-view-watch
+  "removes a view binding from the table watch index"
+  {:added "4.1"}
+  [state model-id view-id tables]
+  (var view-watch (xt/x:get-key state "view_watch"))
+  (when (xt/x:is-object? tables)
+    (xt/for:object [[table _] tables]
+      (var models (xt/x:get-key view-watch table))
+      (when (xt/x:not-nil? models)
+        (var views (xt/x:get-key models model-id))
+        (when (xt/x:not-nil? views)
+          (xt/x:del-key views view-id)
+          (when (== 0 (xt/x:len (xt/x:obj-keys views)))
+            (xt/x:del-key models model-id))
+          (when (== 0 (xt/x:len (xt/x:obj-keys models)))
+            (xt/x:del-key view-watch table))))))
   (return true))
 
 (defn.xt watch-query
@@ -152,7 +212,25 @@
       (when (xt/x:nil? queries)
         (:= queries {})
         (xt/x:set-key watch table queries))
-      (xt/x:set-key queries query-key true)))
+       (xt/x:set-key queries query-key true)))
+  (return tables))
+
+(defn.xt watch-view
+  "indexes a view by each table it touches"
+  {:added "4.1"}
+  [state model-id view-id tables]
+  (var view-watch (xt/x:get-key state "view_watch"))
+  (when (xt/x:is-object? tables)
+    (xt/for:object [[table _] tables]
+      (var models (xt/x:get-key view-watch table))
+      (when (xt/x:nil? models)
+        (:= models {})
+        (xt/x:set-key view-watch table models))
+      (var views (xt/x:get-key models model-id))
+      (when (xt/x:nil? views)
+        (:= views {})
+        (xt/x:set-key models model-id views))
+      (xt/x:set-key views view-id true)))
   (return tables))
 
 (defn.xt affected-query-ids
@@ -171,6 +249,25 @@
           (xt/for:object [[query-key _] (or (xt/x:get-key watch table) {})]
             (xt/x:set-key out query-key true))))
   (return (xt/x:obj-keys out)))
+
+(defn.xt affected-view-bindings
+  "gets bound view ids affected by a set of tables"
+  {:added "4.1"}
+  [state tables]
+  (var out {})
+  (var view-watch (xt/x:get-key state "view_watch"))
+  (cond (xt/x:is-array? tables)
+        (xt/for:array [table tables]
+          (xt/for:object [[model-id views] (or (xt/x:get-key view-watch table) {})]
+            (xt/for:object [[view-id _] views]
+              (xtd/set-in out [model-id view-id] true))))
+
+        (xt/x:is-object? tables)
+        (xt/for:object [[table _] tables]
+          (xt/for:object [[model-id views] (or (xt/x:get-key view-watch table) {})]
+            (xt/for:object [[view-id _] views]
+              (xtd/set-in out [model-id view-id] true)))))
+  (return out))
 
 (defn.xt remove-query
   "removes a cached query and its watch entries"

@@ -35,9 +35,11 @@
 
 (def.xt model-put model/model-put)
 (def.xt model-get model/model-get)
+(def.xt model-dependents model/model-dependents)
 (def.xt model-refresh model/model-refresh)
 (def.xt view-put model/view-put)
 (def.xt view-get model/view-get)
+(def.xt view-dependents model/view-dependents)
 (def.xt view-val model/view-val)
 (def.xt view-input model/view-input)
 (def.xt view-pending model/view-pending)
