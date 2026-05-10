@@ -579,34 +579,59 @@
                       (list 'var out-sym
                             (list 'await
                                   (list 'Future.sync thunk-sym)))])
+         main-forms (concat (map await-form (butlast forms))
+                            last-body
+                            ['(var __task_idx 0)
+                             '(while (< __task_idx (. __tasks__ length))
+                                (var __pending := (. __tasks__ (sublist __task_idx)))
+                                (:= __task_idx (. __tasks__ length))
+                                (await (Future.wait __pending)))
+                             (list 'var out-json-sym nil)
+                              (list 'try
+                                    (list ':= out-json-sym
+                                          (list 'jsonEncode
+                                                (list '__json_compact out-sym)))
+                                    (list 'catch 'err
+                                          (list ':= out-json-sym
+                                                (list 'jsonEncode
+                                                      (list ':?
+                                                            (list '== nil out-sym)
+                                                           nil
+                                                           (list '. out-sym '(toString)))))))
+                             (list 'print out-json-sym)])
          body  (concat '[do]
                        '[(var __tasks__ (:- "<Future>[]"))
-                          (var __track (fn [task]
-                                         (. __tasks__ (add task))
-                                         (return task)))]
-                        (map await-form (butlast forms))
-                        last-body
-                        ['(var __task_idx 0)
-                         '(while (< __task_idx (. __tasks__ length))
-                            (var __pending := (. __tasks__ (sublist __task_idx)))
-                            (:= __task_idx (. __tasks__ length))
-                           (await (Future.wait __pending)))
-                         (list 'var out-json-sym nil)
-                         (list 'try
-                               (list ':= out-json-sym
-                                     (list 'jsonEncode out-sym))
-                               (list 'catch 'err
-                                     (list ':= out-json-sym
-                                           (list 'jsonEncode
-                                                 (list ':?
-                                                       (list '== nil out-sym)
-                                                       nil
-                                                       (list '. out-sym '(toString)))))))
-                         (list 'print out-json-sym)])]
+                         (var __track (fn [task]
+                                        (. __tasks__ (add task))
+                                        (return task)))]
+                       [(apply list 'try
+                               (concat main-forms
+                                       [(list 'catch 'err
+                                              (list 'print
+                                                    (list 'jsonEncode
+                                                          {:type "error"
+                                                           :value {:message (list '. 'err '(toString))}})))]))])]
     `(:- "final __globals__ = <dynamic, dynamic>{};\n\n"
-          "Future<void> main() async {\n "
-           ~body
-            "\n}")))
+           "final __json_compact_omit_nil_keys = <String>{\"db/remove\", \"select_method\", \"select_control\", \"return_method\", \"return_query\", \"return_count\", \"return_id\", \"return_bulk\", \"return_omit\", \"data_only\", \"model_id\", \"view_id\"};\n"
+           "dynamic __json_compact(dynamic value) {\n"
+           "  if (value is Map) {\n"
+           "    final out = <dynamic, dynamic>{};\n"
+           "    value.forEach((key, entry) {\n"
+           "      final next = __json_compact(entry);\n"
+           "      if (next != null || !(key is String && __json_compact_omit_nil_keys.contains(key))) {\n"
+           "        out[key] = next;\n"
+           "      }\n"
+           "    });\n"
+           "    return out;\n"
+           "  }\n"
+           "  if (value is List) {\n"
+           "    return List<dynamic>.from(value.map((entry) => __json_compact(entry)));\n"
+           "  }\n"
+           "  return value;\n"
+           "}\n\n"
+           "Future<void> main() async {\n "
+            ~body
+             "\n}")))
 
 (defn- dart-exec
   "Resolves a user-local Dart SDK binary before falling back to PATH."
@@ -639,7 +664,7 @@
   (common/set-context-options
    [:dart :twostep :default]
    {:emit {:body {:transform #'transform-form}}
-    :json :string}))
+    :json :full}))
 
 (def +dart-twostep+
   [(rt/install-type!

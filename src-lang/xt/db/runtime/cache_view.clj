@@ -74,7 +74,7 @@
   (var idx 0)
   (xt/for:array [e input-spec]
     (xt/x:set-key arg-map
-                  (xt/x:cat "{{" (. e ["symbol"]) "}}")
+                  (xt/x:cat "{{" (xt/x:get-key e "symbol") "}}")
                   (xt/x:get-idx args (xt/x:offset idx)))
     (:= idx (+ idx 1)))
   (var out (xtt/tree-walk tree

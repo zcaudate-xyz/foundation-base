@@ -196,7 +196,7 @@
   (!.lua
    (xt/x:set-key instance/IMPL
                  "db.pull"
-                 {"pull-sync" (fn [instance schema tree opts]
+                 {"pull_sync" (fn [instance schema tree opts]
                                 (return [(. instance ["id"]) tree (. opts ["mode"])]))})
    (instance/db-pull-sync
     {"::" "db.pull"
@@ -221,8 +221,8 @@
   (!.lua
    (xt/x:set-key instance/IMPL
                  "db.delete"
-                 {"delete-sync" (fn [instance schema table-name ids opts]
-                                  (return [(. instance ["id"]) table-name ids (. opts ["mode"])]))})
+                 {"delete_sync" (fn [instance schema table-name ids opts]
+                                   (return [(. instance ["id"]) table-name ids (. opts ["mode"])]))})
    (instance/db-delete-sync
     {"::" "db.delete"
      :instance {"id" "delete-1"}
@@ -257,7 +257,7 @@
   (!.lua
    (xt/x:set-key instance/IMPL
                  "db.view"
-                 {"pull-sync" (fn [_instance _schema tree _opts]
+                 {"pull_sync" (fn [_instance _schema tree _opts]
                                 (return tree))})
    (var db {"::" "db.view"
             :instance {"id" "view-1"}

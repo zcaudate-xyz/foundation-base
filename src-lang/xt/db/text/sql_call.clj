@@ -109,10 +109,10 @@
                                 (xt/x:json-encode val))
                             "}"))))
   (var error-fn (fn [err]
-                  (if (. err ["status"])
-                    (return (xt/x:json-encode err))
-                    (return (xt/x:json-encode {:status "error"
-                                           :data err})))))
+                  (if (xt/x:get-key err "status")
+                     (return (xt/x:json-encode err))
+                     (return (xt/x:json-encode {:status "error"
+                                            :data err})))))
   (try
     (var out (sql/query conn q))
     (if (spec-promise/x:promise-native? out)

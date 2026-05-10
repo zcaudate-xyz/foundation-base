@@ -81,13 +81,19 @@
   => [true true false]
 
   (let [out (l/emit-as :dart [(transform-form '[[(do (var b 1)
-                                                      b)
-                                                     (+ 1 2)]]
-                                                {})])]
+                                                       b)
+                                                      (+ 1 2)]]
+                                                 {})])]
     [(boolean (re-find #"var b = 1;" out))
      (boolean (re-find #"var expr_\d+ = b;" out))
      (boolean (re-find #"return \[\(do" out))])
-  => [true true false])
+  => [true true false]
+
+  (let [out (l/emit-as :dart [(transform-form ['(throw "boom")] {:bulk true})])]
+    [(boolean (re-find #"catch\(err\)" out))
+     (boolean (re-find #"\"type\":\"error\"" out))
+     (boolean (re-find #"err\.toString\(\)" out))])
+  => [true true true])
 
 
 ^{:refer hara.runtime.basic.impl.process-dart/dart-package-imports :added "4.1"}

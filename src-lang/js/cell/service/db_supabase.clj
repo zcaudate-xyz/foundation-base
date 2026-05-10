@@ -6,10 +6,43 @@
    :require [[js.cell.service.db-query :as db-query]
               [xt.db.instance :as xdb]
               [xt.lang.spec-base :as xt]
-              [xt.db.runtime.supabase :as supabase]
               [xt.db.text.pgrest :as pgrest]]})
 
-(def.xt supabase-capable? supabase/supabase-capable?)
+(defn.xt normalize-db
+  [db]
+  (var out (xt/x:obj-assign {} db))
+  (when (and (xt/x:nil? (xt/x:get-key out "base_url"))
+             (xt/x:not-nil? (xt/x:get-key out "base-url")))
+    (xt/x:set-key out "base_url" (xt/x:get-key out "base-url")))
+  (when (and (xt/x:nil? (xt/x:get-key out "schema_name"))
+             (xt/x:not-nil? (xt/x:get-key out "schema-name")))
+    (xt/x:set-key out "schema_name" (xt/x:get-key out "schema-name")))
+  (when (and (xt/x:nil? (xt/x:get-key out "schema_name"))
+             (xt/x:not-nil? (xt/x:get-key out "schema")))
+    (xt/x:set-key out "schema_name" (xt/x:get-key out "schema")))
+  (when (and (xt/x:nil? (xt/x:get-key out "api_key"))
+             (xt/x:not-nil? (xt/x:get-key out "api-key")))
+    (xt/x:set-key out "api_key" (xt/x:get-key out "api-key")))
+  (when (and (xt/x:nil? (xt/x:get-key out "auth_token"))
+             (xt/x:not-nil? (xt/x:get-key out "auth-token")))
+    (xt/x:set-key out "auth_token" (xt/x:get-key out "auth-token")))
+  (when (xt/x:nil? (xt/x:get-key out "client"))
+    (var request_sync (xt/x:get-key out "request_sync"))
+    (var request (xt/x:get-key out "request"))
+    (when (or (xt/x:is-function? request_sync)
+              (xt/x:is-function? request))
+      (xt/x:set-key out
+                    "client"
+                    {"request_sync" (or request_sync request)
+                     "headers" (or (xt/x:get-key out "headers") {})})))
+  (return out))
+
+(defn.xt supabase-capable?
+  [db]
+  (var db_input (-/normalize-db db))
+  (return (or (xt/x:is-function? (xt/x:get-key db_input "execute"))
+              (xt/x:not-nil? (xt/x:get-key db_input "client"))
+              (xt/x:not-nil? (xt/x:get-key db_input "supabase")))))
 
 (def.xt compile-select-item pgrest/compile-select-item)
 
@@ -27,16 +60,28 @@
   "executes a compiled Supabase query via an injected executor"
   {:added "4.0"}
   [db query-plan view-context]
+  (var compiled (-/compile-query db query-plan view-context))
+  (var execute_fn (xt/x:get-key db "execute"))
+  (when (xt/x:is-function? execute_fn)
+    (return (execute_fn compiled view-context)))
+  (var db_input (-/normalize-db db))
   (var result (xdb/db-pull-sync {"::" "db.supabase"
-                                 :instance db
+                                 :instance db_input
                                  :opts view-context}
-                                (xt/x:get-key db "schema")
+                                (xt/x:get-key db_input "schema_name")
                                 query-plan))
   (if (== "error" (xt/x:get-key result "status"))
     (return [false result])
     (return [true result])))
 
-(def.xt map-supabase-error supabase/map-supabase-error)
+(defn.xt map-supabase-error
+  [db error opts]
+  (var map_error (xt/x:get-key db "map_error"))
+  (if (xt/x:is-function? map_error)
+    (return (map_error error opts))
+    (return {"status" "error"
+             "tag" "db/supabase-query-failed"
+             "data" error})))
 
 (defn.xt run-supabase-query
   "prepares, compiles, and executes a Supabase query"

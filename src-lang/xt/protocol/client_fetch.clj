@@ -5,7 +5,8 @@
   {:require [[xt.lang.common-protocol :as proto]]})
 
 (def.xt IFetchClient
-  ["request"])
+  ["request"
+   "request_sync"])
 
 (def.xt IFetchRuntimeClient
   (proto/iface-combine [-/IFetchClient]))

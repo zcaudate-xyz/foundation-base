@@ -81,14 +81,15 @@
   (xt/for:object [[linked-model-id linked-views] model-deps]
     (cond (== model-id linked-model-id)
           (xt/for:object [[linked-view-id _] linked-views]
-            (when (xt/x:nil? (. views [linked-view-id]))
+            (when (xt/x:nil? (xt/x:get-key views linked-view-id))
               (xt/x:arr-push out [linked-model-id linked-view-id])))
 
           :else
           (do (var linked-model (xtd/get-in state ["models" linked-model-id]))
               (xt/for:object [[linked-view-id _] linked-views]
                 (when (or (xt/x:nil? linked-model)
-                          (xt/x:nil? (. linked-model ["views"] [linked-view-id])))
+                          (xt/x:nil? (xt/x:get-key (xt/x:get-key linked-model "views")
+                                                   linked-view-id)))
                   (xt/x:arr-push out [linked-model-id linked-view-id]))))))
   (return out))
 

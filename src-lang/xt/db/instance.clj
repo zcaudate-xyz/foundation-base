@@ -5,7 +5,7 @@
   {:require [[xt.db.text.base-schema :as base-schema]
              [xt.db.text.base-scope :as scope]
              [xt.db.runtime.cache :as impl-cache]
-             [xt.db.runtime.supabase :as impl-supabase]
+             [xt.db.runtime.supabase-pull :as impl-supabase-pull]
              [xt.db.runtime.sql :as impl-sql]
              [xt.protocol.impl.connection-sql :as sql]
              [xt.lang.spec-base :as xt]
@@ -26,25 +26,25 @@
                                   (return {:rows {}}))
                   "add"         impl-cache/cache-process-event-sync
                   "remove"      impl-cache/cache-process-event-remove
-                  "pull-sync"   impl-cache/cache-pull-sync
-                  "delete-sync" impl-cache/cache-delete-sync
+                  "pull_sync"   impl-cache/cache-pull-sync
+                  "delete_sync" impl-cache/cache-delete-sync
                   "clear"       impl-cache/cache-clear}
-   "db.supabase" {"create"    (fn [m]
-                                (return m))
-                  "pull-sync" impl-supabase/supabase-pull-sync}
-   "db.sql"      {"create"      (fn [m]
-                                  (return (xt/x:get-key m "instance")))
-                  "exec-sync"   (fn [instance raw-input _opts]
-                                  (return (sql/query-sync instance raw-input)))
+    "db.supabase" {"create"    (fn [m]
+                                 (return m))
+                   "pull_sync" impl-supabase-pull/supabase-pull-sync}
+    "db.sql"      {"create"      (fn [m]
+                                   (return (xt/x:get-key m "instance")))
+                  "exec_sync"   (fn [instance raw-input _opts]
+                                   (return (sql/query-sync instance raw-input)))
                   "add"         impl-sql/sql-process-event-sync
                   "remove"      impl-sql/sql-process-event-remove
-                  "pull-sync"   impl-sql/sql-pull-sync
-                  "delete-sync" impl-sql/sql-delete-sync
+                  "pull_sync"   impl-sql/sql-pull-sync
+                  "delete_sync" impl-sql/sql-delete-sync
                   "clear"       impl-sql/sql-clear}})
 
 (defn.xt get-dbtype
   [db]
-  (return (or (. db ["::"])
+  (return (or (xt/x:get-key db "::")
               "db.sql")))
 
 (defn.xt process-event
@@ -166,9 +166,9 @@
   [db raw-input]
   (var dbtype (-/get-dbtype db))
   (var #{instance opts} db)
-  (var exec-fn (xtd/get-in -/IMPL [dbtype "exec-sync"]))
+  (var exec-fn (xtd/get-in -/IMPL [dbtype "exec_sync"]))
   (when (xt/x:nil? exec-fn)
-    (return (-/unsupported-op "exec-sync" dbtype)))
+    (return (-/unsupported-op "exec_sync" dbtype)))
   (return (exec-fn instance raw-input opts)))
 
 (defn.xt db-pull-sync
@@ -177,9 +177,9 @@
   [db schema tree]
   (var dbtype (-/get-dbtype db))
   (var #{instance opts} db)
-  (var pull-fn (xtd/get-in -/IMPL [dbtype "pull-sync"]))
+  (var pull-fn (xtd/get-in -/IMPL [dbtype "pull_sync"]))
   (when (xt/x:nil? pull-fn)
-    (return (-/unsupported-op "pull-sync" dbtype)))
+    (return (-/unsupported-op "pull_sync" dbtype)))
   (return (pull-fn instance schema tree opts)))
 
 (defn.xt db-delete-sync
@@ -188,9 +188,9 @@
   [db schema table-name ids]
   (var dbtype (-/get-dbtype db))
   (var #{instance opts} db)
-  (var delete-fn (xtd/get-in -/IMPL [dbtype "delete-sync"]))
+  (var delete-fn (xtd/get-in -/IMPL [dbtype "delete_sync"]))
   (when (xt/x:nil? delete-fn)
-    (return (-/unsupported-op "delete-sync" dbtype)))
+    (return (-/unsupported-op "delete_sync" dbtype)))
   (return (delete-fn instance schema table-name ids opts)))
 
 (defn.xt db-clear

@@ -36,7 +36,20 @@
   => "[1,2,3].length"
 
   (l/emit-as :dart ['(x:arr-push items 1)])
-  => "items.add(1)")
+  => "items.add(1)"
+
+  (let [out (l/emit-as :dart ['(x:obj-keys records)])]
+    [(boolean (re-find #"List<String>\.from" out))
+     (boolean (re-find #"\.keys\.map" out))])
+  => [true true]
+
+  (let [out (l/emit-as :dart ['(x:json-encode {:query {:table "Order"
+                                                       :return-method nil}
+                                               :view-id nil})])]
+    [(boolean (re-find #"jsonEncode" out))
+     (boolean (re-find #"dynamic compact" out))
+     (boolean (re-find #"omitNilKeys\.contains" out))])
+  => [true true true])
 
 (fact "dart pads omitted trailing xt maybe args at call sites"
   (let [out (l/emit-as :dart ['(xt.event.base-route/path-to-tree ["hello" "world"])])]

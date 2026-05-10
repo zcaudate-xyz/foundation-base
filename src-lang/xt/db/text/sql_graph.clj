@@ -198,8 +198,7 @@
 
   (when (and (== 1 (xt/x:len custom-params))
              (== "sql/count"
-                 (. (xt/x:first custom-params)
-                    ["::"])))
+                 (xt/x:get-key (xt/x:first custom-params) "::")))
     (return (return-count-fn)))  
   
   (var return-data   (xt/x:arr-map data-params format-fn))
@@ -225,7 +224,7 @@
   (var custom-params (xt/x:arr-filter (:? (xt/x:is-array? custom-input)
                                           custom-input
                                           [])
-                                     (fn:> [e] (== (. e ["::"])
+                                     (fn:> [e] (== (xt/x:get-key e "::")
                                                    "sql/keyword"))))
   (var return-str   (-/select-return-str schema
                                          params

@@ -208,6 +208,6 @@
               (var val (:? (xt/x:nil? f)
                            v
                            (f v)))
-              #_(xt/x:LOG! [table key (. rec ["type"]) v val])
+              #_(xt/x:LOG! [table key (xt/x:get-key rec "type") v val])
               (xt/x:set-key out key val))))
   (return out))

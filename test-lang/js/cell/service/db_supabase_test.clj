@@ -139,16 +139,16 @@
   (!.js
    (var seen nil)
    [(db-supabase/execute-query
-     (xtd/obj-assign (@! +db+)
-                     {"request" (fn [request _]
-                                  (:= seen request)
-                                  (return {"body" [{"id" "ord-1"
-                                                    "status" "open"}]}))
-                      "base-url" "https://db.test"})
-      ["Order"
-       {"account" {"id" "acct-1"}}
-       ["status"
-        ["account" ["nickname"]]]]
+      (xtd/obj-assign (@! +db+)
+                      {"request_sync" (fn [request _]
+                                        (:= seen request)
+                                        (return {"body" [{"id" "ord-1"
+                                                          "status" "open"}]}))
+                       "base_url" "https://db.test"})
+       ["Order"
+        {"account" {"id" "acct-1"}}
+        ["status"
+         ["account" ["nickname"]]]]
       {})
     (. seen ["url"])])
   => [[true [{"id" "ord-1"

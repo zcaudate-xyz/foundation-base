@@ -564,18 +564,42 @@
   (cond (xt/x:nil? obj)
         (return nil)
 
+        (xt/x:nil? arr)
+        (return obj)
+
         (== 0 (xt/x:len arr))
         (return obj)
 
         (== 1 (xt/x:len arr))
-        (return (xt/x:get-key obj (xt/x:first arr))))
+        (do (var k (xt/x:first arr))
+            (cond (xt/x:is-array? obj)
+                  (return (:? (xt/x:is-number? k)
+                              (xt/x:get-idx obj k)
+                              nil))
+
+                  (xt/x:is-object? obj)
+                  (return (xt/x:get-key obj k))
+
+                  :else
+                  (return nil))))
 
   (var total (xt/x:len arr))
   (var i 0)
   (var curr obj)
   (while (< i total)
+    (when (xt/x:nil? curr)
+      (return nil))
     (var k (xt/x:get-idx arr (xt/x:offset i)))
-    (:= curr (xt/x:get-key curr k))
+    (cond (xt/x:is-array? curr)
+          (if (xt/x:is-number? k)
+            (:= curr (xt/x:get-idx curr k))
+            (return nil))
+
+          (xt/x:is-object? curr)
+          (:= curr (xt/x:get-key curr k))
+
+          :else
+          (return nil))
     (if (xt/x:nil? curr)
       (return nil)
       (:= i (+ i 1))))

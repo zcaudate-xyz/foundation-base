@@ -163,7 +163,7 @@
   (:= acc (:? (xt/x:is-object? acc) acc {}))
   (var table (xt/x:get-key schema table-key))
   (when table
-    (:= (. acc [table-key]) true)
+    (xt/x:set-key acc table-key true)
     (xt/for:object [[k v] query]
       (var e (xt/x:get-key table k))
       (when (==  "ref" (xt/x:get-key e "type"))
@@ -172,7 +172,7 @@
               (-/get-query-tables schema link-key v acc)
               
               :else
-              (:= (. acc [link-key]) true)))))
+              (xt/x:set-key acc link-key true)))))
   (return acc))
 
 (defn.xt get-link-columns

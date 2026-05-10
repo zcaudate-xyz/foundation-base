@@ -126,7 +126,7 @@
                       (xt/x:unpack exprs)))
         
         (== ktype "forward")
-        (cond (== pred (. -/PULL_CHECK ["is_null"]))
+        (cond (== pred (xt/x:get-key -/PULL_CHECK "is_null"))
               (return (pred (xtd/get-in record ["ref_links" key])))
               
               :else

@@ -133,30 +133,23 @@
                     "value" "acct-1"}]}]
 
   (!.js
-   (var calls [])
-   (var query nil)
-   (:= query {"select" (fn [cols]
-                         (xt/x:arr-push calls ["select" cols])
-                         (return query))
-              "eq" (fn [path value]
-                     (xt/x:arr-push calls ["eq" path value])
-                     (return query))
-              "then" (fn [f]
-                       (xt/x:arr-push calls ["then"])
-                       (return (f {"data" [{"id" "ord-1"
-                                            "status" "open"}]})))})
-   (var client {"from" (fn [table]
-                         (xt/x:arr-push calls ["from" table])
-                         (return query))})
-   (db-supabase/execute-query
-    (xtd/obj-assign (@! +db+) {"supabase" client})
-    ["Order"
-     {"account" {"id" "acct-1"}}
-     ["status"
-      ["account" ["nickname"]]]]
-    {}))
-  => [true [{"id" "ord-1"
-             "status" "open"}]])
+   (var seen nil)
+   [(db-supabase/execute-query
+     (xtd/obj-assign (@! +db+)
+                     {"request_sync" (fn [request _]
+                                       (:= seen request)
+                                       (return {"body" [{"id" "ord-1"
+                                                         "status" "open"}]}))
+                      "base_url" "https://db.test"})
+     ["Order"
+      {"account" {"id" "acct-1"}}
+      ["status"
+       ["account" ["nickname"]]]]
+     {})
+    (. seen ["url"])])
+  => [[true [{"id" "ord-1"
+              "status" "open"}]]
+      "https://db.test/rest/v1/Order?select=status,account(nickname)&account.id=eq.acct-1"])
 
 ^{:refer xt.cell.service.db-supabase/map-supabase-error :added "4.1"}
 (fact "maps execution errors into the local error contract"

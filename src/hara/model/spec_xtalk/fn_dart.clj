@@ -290,8 +290,62 @@
    :x-lu-set         {:macro #'dart-tf-x-lu-set :emit :macro}
    :x-lu-del         {:macro #'dart-tf-x-lu-del :emit :macro}})
 
+(defn dart-json-compact-expr
+  [value]
+  (template/$
+   (:- "(() {\n"
+       "  final omitNilKeys = <String>{\"db/remove\", \"select_method\", \"select_control\", \"return_method\", \"return_query\", \"return_count\", \"return_id\", \"return_bulk\", \"return_omit\", \"data_only\", \"model_id\", \"view_id\"};\n"
+       "  dynamic compact(dynamic value) {\n"
+       "    if (value is Map) {\n"
+       "      final out = <dynamic, dynamic>{};\n"
+       "      value.forEach((key, entry) {\n"
+       "        final next = compact(entry);\n"
+       "        if (next != null || !(key is String && omitNilKeys.contains(key))) {\n"
+       "          out[key] = next;\n"
+       "        }\n"
+       "      });\n"
+       "      return out;\n"
+       "    }\n"
+       "    if (value is List) {\n"
+       "      return List<dynamic>.from(value.map((entry) => compact(entry)));\n"
+       "    }\n"
+       "    return value;\n"
+       "  }\n"
+       "  return compact("
+       ~value
+       ");\n"
+       "})()")))
+
+(defn dart-tf-x-obj-keys
+  [[_ obj]]
+  (template/$
+   (:- "List<String>.from(("
+       ~obj
+       ").keys.map((key) => key.toString()))")))
+
+(defn dart-tf-x-obj-vals
+  [[_ obj]]
+  (template/$
+   (:- "List<dynamic>.from(("
+       ~obj
+       ").values)")))
+
+(defn dart-tf-x-obj-pairs
+  [[_ obj]]
+  (template/$
+   (:- "List<List<dynamic>>.from(("
+       ~obj
+       ").entries.map((entry) => [entry.key, entry.value]))")))
+
+(def +dart-obj+
+  {:x-obj-keys   {:macro #'dart-tf-x-obj-keys   :emit :macro}
+   :x-obj-vals   {:macro #'dart-tf-x-obj-vals   :emit :macro}
+   :x-obj-pairs  {:macro #'dart-tf-x-obj-pairs  :emit :macro}})
+
 (def +dart-json+
-  {:x-json-encode {:emit :alias :raw 'jsonEncode}
+  {:x-json-encode {:macro (fn [[_ value]]
+                            (list 'jsonEncode (dart-json-compact-expr value)))
+                   :emit :macro}
    :x-json-decode {:emit :alias :raw 'jsonDecode}})
 
 (def +dart-math+
@@ -428,32 +482,35 @@
   [[_ out id key]]
   (let [outtype (gensym "outtype")
         outstr  (gensym "outstr")
+        compact (gensym "compact")
+        compact-expr (dart-json-compact-expr out)
         rtype-expr (dart-runtime-type-string out)
         outstr-expr  (dart-method0 out 'toString)]
     (template/$
      (do (if (== ~out nil)
            (return (json.encode {"id" ~id "key" ~key "type" "data" "return" "nil" "value" nil})))
-         (var ~outtype ~rtype-expr)
-         (var ~outstr ~outstr-expr)
-         (if (== "String" ~outtype)
-           (return (json.encode {"id" ~id "key" ~key "type" "data" "return" "string" "value" ~out})))
-         (if (or (== "int" ~outtype)
-                 (== "double" ~outtype)
-                 (== "num" ~outtype))
-           (return (json.encode {"id" ~id "key" ~key "type" "data" "return" "number" "value" ~out})))
-         (if (== "bool" ~outtype)
-           (return (json.encode {"id" ~id "key" ~key "type" "data" "return" "boolean" "value" ~out})))
-          (if (or (== "List" ~outtype)
-                  (. ~outtype (contains "List")))
-            (return (json.encode {"id" ~id "key" ~key "type" "data" "return" "array" "value" ~out})))
-          (if (or (== "Map" ~outtype)
-                  (. ~outtype (contains "Map")))
-            (return (json.encode {"id" ~id "key" ~key "type" "data" "return" "object" "value" ~out})))
-          (if (or (. ~outtype (contains "Function"))
-                  (. ~outtype (contains "=>"))
-                  (. ~outstr (startsWith "Closure")))
-            (return (json.encode {"id" ~id "key" ~key "type" "raw" "return" "function" "value" ~outstr})))
-          (return (json.encode {"id" ~id "key" ~key "type" "raw" "return" (. ~outtype (toLowerCase)) "value" ~outstr}))))))
+          (var ~outtype ~rtype-expr)
+          (var ~outstr ~outstr-expr)
+          (var ~compact ~compact-expr)
+          (if (== "String" ~outtype)
+            (return (json.encode {"id" ~id "key" ~key "type" "data" "return" "string" "value" ~out})))
+          (if (or (== "int" ~outtype)
+                  (== "double" ~outtype)
+                  (== "num" ~outtype))
+            (return (json.encode {"id" ~id "key" ~key "type" "data" "return" "number" "value" ~out})))
+          (if (== "bool" ~outtype)
+            (return (json.encode {"id" ~id "key" ~key "type" "data" "return" "boolean" "value" ~out})))
+           (if (or (== "List" ~outtype)
+                   (. ~outtype (contains "List")))
+             (return (json.encode {"id" ~id "key" ~key "type" "data" "return" "array" "value" ~compact})))
+           (if (or (== "Map" ~outtype)
+                   (. ~outtype (contains "Map")))
+             (return (json.encode {"id" ~id "key" ~key "type" "data" "return" "object" "value" ~compact})))
+           (if (or (. ~outtype (contains "Function"))
+                   (. ~outtype (contains "=>"))
+                   (. ~outstr (startsWith "Closure")))
+             (return (json.encode {"id" ~id "key" ~key "type" "raw" "return" "function" "value" ~outstr})))
+           (return (json.encode {"id" ~id "key" ~key "type" "raw" "return" (. ~outtype (toLowerCase)) "value" ~outstr}))))))
 
 (defn dart-tf-x-return-wrap
   [[_ f encode-fn]]
@@ -498,12 +555,15 @@
 (defn dart-tf-x-promise-all
   [[_ promises]]
   (template/$
-   (Future.wait ~promises)))
+   (:- "Future.wait(List<Future<dynamic>>.from(("
+       ~promises
+       ").map((entry) => Future.sync(() => entry))))")))
 
 (defn dart-tf-x-promise-then
   [[_ promise thunk]]
   (template/$
-   (. ~promise
+   (. (Future.sync (fn []
+                     (return ~promise)))
       (then (fn [value]
               (return (Future.sync (fn []
                                      (return (~thunk value))))))))))
@@ -511,17 +571,21 @@
 (defn dart-tf-x-promise-catch
   [[_ promise thunk]]
   (template/$
-   (. (. ~promise
-          (then (fn [value]
-                  (var out value)
-                  (return out))))
-      (catchError (fn [err]
-                    (return (Future.sync (fn []
-                                           (return (~thunk err))))))))))
+   (. (. (Future.sync (fn []
+                        (return ~promise)))
+           (then (fn [value]
+                   (var out value)
+                   (return out))))
+       (catchError (fn [err]
+                     (return (Future.sync (fn []
+                                            (return (~thunk err))))))))))
 
 (defn dart-tf-x-promise-finally
   [[_ promise thunk]]
-  (list '. promise (list 'whenComplete thunk)))
+  (template/$
+   (. (Future.sync (fn []
+                     (return ~promise)))
+      (whenComplete ~thunk))))
 
 (defn dart-tf-x-promise-native?
   [[_ value]]
@@ -661,6 +725,7 @@
          +dart-type+
          +dart-str+
          +dart-lu+
+         +dart-obj+
          +dart-json+
          +dart-arr+
          +dart-iter+

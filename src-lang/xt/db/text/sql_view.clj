@@ -106,8 +106,9 @@
   (when (== 0 (xt/x:len input-spec))
     (return tree))
   (xt/for:array [[i e] input-spec]
-    (:= (. arg-map [(xt/x:cat "{{" (. e ["symbol"]) "}}")])
-        (. args [i])))
+    (xt/x:set-key arg-map
+                  (xt/x:cat "{{" (xt/x:get-key e "symbol") "}}")
+                  (xt/x:get-idx args i)))
   (var out (xtt/tree-walk tree
                    (fn [x] (return x))
                    (fn [x]
