@@ -241,7 +241,28 @@
                   (concat (if (not-empty args)
                               [(list 'quote args) ":"]
                               [":"])
-                           [(python-lambda-body body)])))))))
+                            [(python-lambda-body body)])))))))
+
+(defn- python-dot-length?
+  [prop]
+  (and (vector? prop)
+       (= 1 (count prop))
+       (= "length" (first prop))))
+
+(defn python-dot
+  [[_ obj & props]]
+  (let [grammar preprocess-base/*macro-grammar*
+        mopts   preprocess-base/*macro-opts*]
+    (if (and (= 1 (count props))
+             (python-dot-length? (first props)))
+      (list 'len obj)
+      (let [target (let [emitted (common/*emit-fn* obj grammar mopts)]
+                     (if (collection/form? obj)
+                       (str "(" emitted ")")
+                       emitted))]
+        (list ':- (str target
+                       (apply str (map #(common/emit-index-entry % grammar mopts)
+                                       props))))))))
 
 (defn python-defclass
   "emits a defclass template for python"
@@ -354,14 +375,15 @@
 (def +features+
   (-> (grammar/build :exclude [:pointer
                                :block])
-      (grammar/build:override
-       {:pow         {:raw "**"}
-        :and         {:raw "and"}
-        :or          {:raw "or"}
-        :not         {:raw "not" :emit :prefix}
-        :throw       {:raw "raise"  :emit :prefix}
-        :fn          {:macro  #'python-fn   :emit :macro}
-        :var         {:symbol #{'var*}}
+       (grammar/build:override
+        {:pow         {:raw "**"}
+         :and         {:raw "and"}
+         :or          {:raw "or"}
+         :not         {:raw "not" :emit :prefix}
+         :throw       {:raw "raise"  :emit :prefix}
+         :index       {:macro #'python-dot :emit :macro}
+         :fn          {:macro  #'python-fn   :emit :macro}
+         :var         {:symbol #{'var*}}
         :defn        {:symbol #{'defn}   :macro #'python-defn :emit :macro}
         :defgen      {:symbol #{'defgen} :macro #'python-defn :emit :macro}
         :fn.inner    {:macro #'python-defn :emit :macro}

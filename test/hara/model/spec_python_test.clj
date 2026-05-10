@@ -44,6 +44,39 @@
      (not (boolean (re-find #"lambda elem,props : elem\[\"props\"\] = props" out)))])
   => [true true true true])
 
+^{:refer hara.model.spec-python/python-fn :added "4.1"}
+(fact "lifts callbacks that use direct assignment"
+
+  (let [out (l/emit-as
+             :python '[(var removed nil)
+                       (var data
+                            {:callback (fn [link-id]
+                                         (:= removed link-id))})])]
+    [(boolean (re-find #"def py_callback__.*\(link_id\):" out))
+     (boolean (re-find #"removed = link_id" out))
+     (boolean (re-find #"data = \{\"callback\":py_callback__" out))
+     (not (boolean (re-find #"lambda link_id : removed = link_id" out)))])
+  => [true true true true])
+
+^{:refer hara.model.spec-python/python-fn :added "4.1"}
+(fact "lifts callbacks passed directly as invoke arguments"
+  (let [out (l/emit-as
+             :python '[(var removed nil)
+                       (use_callback
+                        (fn [link-id]
+                          (:= removed link-id)))])]
+    [(boolean (re-find #"def py_callback__.*\(link_id\):" out))
+     (boolean (re-find #"removed = link_id" out))
+     (boolean (re-find #"use_callback\(py_callback__" out))
+     (not (boolean (re-find #"use_callback\(lambda link_id : removed = link_id\)" out)))])
+  => [true true true true])
+
+^{:refer hara.model.spec-python/python-dot :added "4.1"}
+(fact "rewrites JS-style array length lookups to len"
+  (l/emit-as
+   :python '[(. xs ["length"])])
+  => "len(xs)")
+
 ^{:refer hara.model.spec-python/python-defclass :added "4.0"}
 (fact "emits a defclass template for python"
 

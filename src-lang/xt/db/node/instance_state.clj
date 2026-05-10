@@ -176,12 +176,12 @@
   (var watch (xt/x:get-key state "watch"))
   (when (xt/x:is-object? tables)
     (xt/for:object [[table _] tables]
-      (var queries (xt/x:get-key watch table))
-      (when (xt/x:not-nil? queries)
-        (xt/x:del-key queries query-key)
-        (when (== 0 (xt/x:len (xt/x:obj-keys queries)))
-           (xt/x:del-key watch table)))))
-  (return true))
+       (var queries (xt/x:get-key watch table))
+       (when (xt/x:not-nil? queries)
+         (xt/x:del-key queries query-key)
+         (when (== 0 (xt/x:len (xt/x:obj-keys queries)))
+            (xt/x:set-key watch table nil)))))
+   (return true))
 
 (defn.xt remove-view-watch
   "removes a view binding from the table watch index"
@@ -190,16 +190,16 @@
   (var view-watch (xt/x:get-key state "view_watch"))
   (when (xt/x:is-object? tables)
     (xt/for:object [[table _] tables]
-      (var models (xt/x:get-key view-watch table))
-      (when (xt/x:not-nil? models)
-        (var views (xt/x:get-key models model-id))
-        (when (xt/x:not-nil? views)
-          (xt/x:del-key views view-id)
-          (when (== 0 (xt/x:len (xt/x:obj-keys views)))
-            (xt/x:del-key models model-id))
-          (when (== 0 (xt/x:len (xt/x:obj-keys models)))
-            (xt/x:del-key view-watch table))))))
-  (return true))
+       (var models (xt/x:get-key view-watch table))
+       (when (xt/x:not-nil? models)
+         (var views (xt/x:get-key models model-id))
+         (when (xt/x:not-nil? views)
+           (xt/x:del-key views view-id)
+           (when (== 0 (xt/x:len (xt/x:obj-keys views)))
+             (xt/x:del-key models model-id))
+           (when (== 0 (xt/x:len (xt/x:obj-keys models)))
+             (xt/x:set-key view-watch table nil))))))
+   (return true))
 
 (defn.xt watch-query
   "indexes a query by each table it touches"

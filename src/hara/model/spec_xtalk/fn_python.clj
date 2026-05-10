@@ -5,6 +5,10 @@
   [[_ obj]]
   (list 'del obj))
 
+(defn python-tf-x-del-key
+  [[_ obj key]]
+  (list '. obj (list 'pop key nil)))
+
 (defn python-tf-x-cat
   [[_ & args]]
   (apply list '+ args))
@@ -103,6 +107,7 @@
 
 (def +python-core+
   {:x-del            {:macro #'python-tf-x-del    :emit :macro}
+   :x-del-key        {:macro #'python-tf-x-del-key :emit :macro}
    :x-cat            {:macro #'python-tf-x-cat    :emit :macro}
    :x-len            {:macro #'python-tf-x-len    :emit :macro}
     :x-err            {:macro #'python-tf-x-err     :emit :macro}

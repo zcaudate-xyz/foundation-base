@@ -147,18 +147,21 @@
          return-omit
          data-only} query-spec)
   (:= args (or args []))
-  (return {:table table
-           :select-method select-method
-           :select-args (or select-args args)
-           :select-control select-control
-           :return-method return-method
-           :return-query return-query
-           :return-count return-count
-           :return-id return-id
-           :return-bulk return-bulk
-           :return-args (or return-args [])
-           :return-omit return-omit
-           :data-only data-only}))
+  (return
+   (xtd/obj-filter
+    {:table table
+     :select-method select-method
+     :select-args (or select-args args)
+     :select-control select-control
+     :return-method return-method
+     :return-query return-query
+     :return-count return-count
+     :return-id return-id
+     :return-bulk return-bulk
+     :return-args (or return-args [])
+     :return-omit return-omit
+     :data-only data-only}
+    xt/x:not-nil?)))
 
 (defn.xt query-key
   "builds a stable cache key for a query"
@@ -168,11 +171,14 @@
                     (xt/x:get-key query-spec "key")))
   (when (xt/x:not-nil? explicit)
     (return explicit))
-  (return
-   (xt/x:json-encode
-    {:query (-/normalize-query query-spec view-context)
-     :model-id (xt/x:get-key view-context "model-id")
-     :view-id (xt/x:get-key view-context "view-id")})))
+  (var out {:query (-/normalize-query query-spec view-context)})
+  (var model-id (xt/x:get-key view-context "model-id"))
+  (var view-id (xt/x:get-key view-context "view-id"))
+  (when (xt/x:not-nil? model-id)
+    (xt/x:set-key out "model_id" model-id))
+  (when (xt/x:not-nil? view-id)
+    (xt/x:set-key out "view_id" view-id))
+  (return (xt/x:json-encode out)))
 
 (defn.xt prepare-query
   "prepares a local query plan"

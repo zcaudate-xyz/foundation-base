@@ -29,11 +29,17 @@
   {:added "4.1"}
   [state model-id view-id]
   (var view (schema-state/ensure-view state model-id view-id))
+  (var current (xt/x:get-key (event-view/get-input view) "current"))
+  (var args [])
+  (cond (xt/x:is-object? current)
+        (:= args (or (xt/x:get-key current "data")
+                     []))
+
+        (xt/x:is-array? current)
+        (:= args current))
   (return {:model-id model-id
            :view-id view-id
-           :args (or (xt/x:get-path (event-view/get-input view)
-                                    ["current" "data"])
-                     [])}))
+           :args args}))
 
 (defn.xt view-remote-spec
   "gets the configured remote spec for a view, if present"

@@ -47,10 +47,17 @@
 
            (rewrite-fn-body
              [form grammar]
-             (fnrw/rewrite-fn-body form #(rewrite-statements % grammar)))
+              (fnrw/rewrite-fn-body form #(rewrite-statements % grammar)))
 
-           (rewrite-expression
+           (rewrite-entry
              [form grammar]
+             (if (collection/form? form)
+               (rewrite-statement form grammar)
+               (let [[prefix out] (rewrite-expression form grammar)]
+                 (wrap-prefix form prefix out))))
+
+            (rewrite-expression
+              [form grammar]
              (cond (function-form? form)
                     (if (lambda-compatible-form? form grammar)
                       [[] form]
@@ -175,17 +182,17 @@
             [forms grammar]
             (map #(rewrite-statement % grammar) forms))
 
-          (rewrite-stage
-            [form {:keys [mopts grammar]}]
-            (cond (collection/form? form)
-                  (rewrite-statement form grammar)
+                   (rewrite-stage
+                     [form {:keys [mopts grammar]}]
+                     (cond (collection/form? form)
+                           (rewrite-statement form grammar)
 
-                  (vector? form)
-                   (let [rewritten (mapv #(rewrite-statement % grammar) form)]
-                     (if (bulk-do*? form mopts)
-                       (common/with-form-meta form
-                         (apply list 'do*
-                                (fnrw/splice-do* rewritten)))
+                           (vector? form)
+                    (let [rewritten (mapv #(rewrite-entry % grammar) form)]
+                      (if (bulk-do*? form mopts)
+                        (common/with-form-meta form
+                          (apply list 'do*
+                                 (fnrw/splice-do* rewritten)))
                        (common/with-form-meta form rewritten)))
 
                   :else

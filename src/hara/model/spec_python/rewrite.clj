@@ -77,6 +77,10 @@
              (= 'fn (first form)))
         (python-lambda-compatible? form grammar)
 
+        (and (collection/form? form)
+             (contains? '#{:= :+= :-= :*=} (first form)))
+        false
+
         (collection/form? form)
         (let [entry (python-lambda-entry form grammar)]
           (if-let [macro-fn (:macro entry)]

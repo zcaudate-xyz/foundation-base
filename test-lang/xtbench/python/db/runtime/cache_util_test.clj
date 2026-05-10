@@ -534,6 +534,9 @@
   (!.py
     (var rows {})
     (var removed nil)
+    (var on-remove
+         (fn [link-id]
+           (:= removed link-id)))
     (data/merge-bulk rows (f/flatten sample/Schema
                                      "UserAccount"
                                      sample/RootUser
@@ -545,8 +548,7 @@
                                         "rev_links"
                                         "profile"
                                         "c4643895-b0ce-44cc-b07b-2386bf18d43b"
-                                        (fn [link-id]
-                                          (:= removed link-id)))
+                                        on-remove)
          (xtd/get-in ["record" "rev_links"]))
      removed])
   => [{} "c4643895-b0ce-44cc-b07b-2386bf18d43b"])
@@ -625,6 +627,9 @@
   (!.py
     (var rows {})
     (var added nil)
+    (var on-add
+         (fn [link-id]
+           (:= added link-id)))
     (data/merge-bulk rows (f/flatten sample/Schema
                                      "UserAccount"
                                      (xtd/obj-omit sample/RootUser ["profile"])
@@ -632,14 +637,13 @@
                      nil)
     [(-> (data/add-single-link-entry rows
                                      "UserAccount"
-                                     "00000000-0000-0000-0000-000000000000"
-                                     "rev_links"
-                                     "profile"
-                                     "c4643895-b0ce-44cc-b07b-2386bf18d43b"
-                                     (fn [link-id]
-                                       (:= added link-id))
-                                     "UserProfile"
-                                     "account")
+                                      "00000000-0000-0000-0000-000000000000"
+                                      "rev_links"
+                                      "profile"
+                                      "c4643895-b0ce-44cc-b07b-2386bf18d43b"
+                                      on-add
+                                      "UserProfile"
+                                      "account")
          (xtd/get-in ["record" "rev_links" "profile"]))
      added])
   => [{"c4643895-b0ce-44cc-b07b-2386bf18d43b" true}

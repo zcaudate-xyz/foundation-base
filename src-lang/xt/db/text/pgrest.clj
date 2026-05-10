@@ -90,11 +90,11 @@
         (xt/x:is-string? value)
         (return value)
 
-        (xt/x:is-number? value)
-        (return (xt/x:to-string value))
-
         (xt/x:is-boolean? value)
         (return (:? value "true" "false"))
+
+        (xt/x:is-number? value)
+        (return (xt/x:to-string value))
 
         :else
         (return (xt/x:to-string value))))

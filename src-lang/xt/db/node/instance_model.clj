@@ -156,10 +156,18 @@
   {:added "4.1"}
   [node space-id model-id view-id]
   (var view (-/view-get node space-id model-id view-id))
-  (return (:? view
-              (xt/x:get-path (event-view/get-input view)
-                             ["current" "data"])
-              nil)))
+  (when (xt/x:nil? view)
+    (return nil))
+  (var current (xt/x:get-key (event-view/get-input view) "current"))
+  (cond (xt/x:is-object? current)
+        (return (or (xt/x:get-key current "data")
+                    []))
+
+        (xt/x:is-array? current)
+        (return current)
+
+        :else
+        (return [])))
 
 (defn.xt view-pending
   "gets the pending flag for a view"
@@ -344,7 +352,8 @@
                     view-id))
   (when (not ok)
     (xt/x:throw result))
-  (return result))
+  (return (xt/x:obj-assign {"key" nil}
+                           result)))
 
 (defn.xt run-view-remote
   "runs the remote query stage for a db view"
