@@ -26,23 +26,13 @@
   (when (and (xt/x:nil? (xt/x:get-key out "auth_token"))
              (xt/x:not-nil? (xt/x:get-key out "auth-token")))
     (xt/x:set-key out "auth_token" (xt/x:get-key out "auth-token")))
-  (when (xt/x:nil? (xt/x:get-key out "client"))
-    (var request_sync (xt/x:get-key out "request_sync"))
-    (var request (xt/x:get-key out "request"))
-    (when (or (xt/x:is-function? request_sync)
-              (xt/x:is-function? request))
-      (xt/x:set-key out
-                    "client"
-                    {"request_sync" (or request_sync request)
-                     "headers" (or (xt/x:get-key out "headers") {})})))
   (return out))
 
 (defn.xt supabase-capable?
   [db]
   (var db_input (-/normalize-db db))
   (return (or (xt/x:is-function? (xt/x:get-key db_input "execute"))
-              (xt/x:not-nil? (xt/x:get-key db_input "client"))
-              (xt/x:not-nil? (xt/x:get-key db_input "supabase")))))
+              (xt/x:not-nil? (xt/x:get-key db_input "client")))))
 
 (def.xt compile-select-item pgrest/compile-select-item)
 

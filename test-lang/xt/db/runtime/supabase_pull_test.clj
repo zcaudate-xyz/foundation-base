@@ -49,30 +49,25 @@
          {}))
    (var scaffold
         (supabase-pull/create-scaffold
-         {"base_url" "https://db.test"
-          "schema_name" "api"
-          "headers" {"x-db" "db"
-                     "x-shared" "db"}}
+         {}
          client
          {"auth_token" "token-1"
-          "headers" {"x-opt" "opt-1"
-                     "x-shared" "opt"}}))
+           "headers" {"x-opt" "opt-1"
+                      "x-shared" "opt"}}))
    [(fetch/client? (. scaffold ["client"]))
-    (. scaffold ["base_url"])
-    (. scaffold ["schema_name"])
-    (. scaffold ["api_key"])
-    (. scaffold ["auth_token"])
-    (. (. scaffold ["headers"]) ["x-client"])
-    (. (. scaffold ["headers"]) ["x-db"])
-    (. (. scaffold ["headers"]) ["x-opt"])
-    (. (. scaffold ["headers"]) ["x-shared"])])
+     (. scaffold ["base_url"])
+     (. scaffold ["schema_name"])
+     (. scaffold ["api_key"])
+     (. scaffold ["auth_token"])
+     (. (. scaffold ["headers"]) ["x-client"])
+     (. (. scaffold ["headers"]) ["x-opt"])
+     (. (. scaffold ["headers"]) ["x-shared"])])
   => [true
-      "https://db.test"
-      "api"
+      "https://client.test"
+      "client_api"
       "key-client"
       "token-1"
       "nested"
-      "db"
       "opt-1"
       "opt"])
 
@@ -84,29 +79,30 @@
         (supabase-pull/resolve-client
          {"client" {"request_sync" (fn [request _opts]
                                      (return request))
-                    "headers" {"x-client" "nested"}}}
+                    "headers" {"x-client" "nested"}
+                    "base_url" "https://client.test"
+                    "schema_name" "client_api"
+                    "api_key" "key-client"}}
          {}))
    (var compiled (pgrest/compile-query (@! +query-tree+)))
    (var request
         (supabase-pull/prepare-request
-         {"base_url" "https://db.test"
-          "schema_name" "api"
-          "api_key" "key-1"}
+         {}
          client
          compiled
          {"auth_token" "token-1"
-          "headers" {"x-opt" "opt-1"}}))
+           "headers" {"x-opt" "opt-1"}}))
    [(. request ["url"])
     (. (. request ["headers"]) ["x-client"])
     (. (. request ["headers"]) ["x-opt"])
     (. (. request ["headers"]) ["Content-Profile"])
     (. (. request ["headers"]) ["apikey"])
     (. (. request ["headers"]) ["Authorization"])])
-  => ["https://db.test/rest/v1/Order?select=status,account(nickname)&account.id=eq.acct-1&id=in.(ord-1,ord-2)"
+  => ["https://client.test/rest/v1/Order?select=status,account(nickname)&account.id=eq.acct-1&id=in.(ord-1,ord-2)"
       "nested"
       "opt-1"
-      "api"
-      "key-1"
+      "client_api"
+      "key-client"
       "Bearer token-1"])
 
 ^{:refer xt.db.runtime.supabase-pull/supabase-pull-sync :added "4.1.3"}
@@ -120,13 +116,13 @@
                                      (:= seen request)
                                      (return {"status" 200
                                               "body" {"data" [{"id" "ord-1"
-                                                               "status" "open"}]}}))
-                    "headers" {"x-client" "fetch-sync"}}
-          "base_url" "https://db.test"
-          "schema_name" "api"}
-         nil
-         (@! +query-tree+)
-         {"auth_token" "token-2"}))
+                                                                "status" "open"}]}}))
+                    "headers" {"x-client" "fetch-sync"}
+                    "base_url" "https://db.test"
+                    "schema_name" "api"}}
+          nil
+          (@! +query-tree+)
+          {"auth_token" "token-2"}))
    [out
     (. seen ["url"])
     (. (. seen ["headers"]) ["x-client"])

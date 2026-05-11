@@ -57,6 +57,9 @@
               "profile" [{"first_name" "Root"}]}])]}
 (fact "syncs and pulls sql data"
 
+  ^{:seedgen/base {:lua.nginx    {:transform '{(js-sqlite/driver) (lua-sqlite/driver)}}
+                   :python       {:transform '{(js-sqlite/driver) (py-sqlite/driver)}}
+                   :dart         {:transform '{(js-sqlite/driver) (dart-sqlite/driver)}}}}
   (notify/wait-on [:js 5000]
     (-> (dbsql/connect (js-sqlite/driver) {})
         (spec-promise/x:promise-then
@@ -105,6 +108,9 @@
              "DELETE FROM \"UserProfile\" WHERE \"id\" = 'c4643895-b0ce-44cc-b07b-2386bf18d43b';"))]}
 (fact "emits remove sql and deletes synced rows"
 
+  ^{:seedgen/base {:lua.nginx    {:transform '{(js-sqlite/driver) (lua-sqlite/driver)}}
+                   :python       {:transform '{(js-sqlite/driver) (py-sqlite/driver)}}
+                   :dart         {:transform '{(js-sqlite/driver) (dart-sqlite/driver)}}}}
   (notify/wait-on [:js 5000]
     (-> (dbsql/connect (js-sqlite/driver) {})
         (spec-promise/x:promise-then
@@ -158,6 +164,9 @@
               "profile" [{"first_name" "Root"}]}])]}
 (fact "prepared view queries roundtrip to the same nested datastructure"
 
+  ^{:seedgen/base {:lua.nginx    {:transform '{(js-sqlite/driver) (lua-sqlite/driver)}}
+                   :python       {:transform '{(js-sqlite/driver) (py-sqlite/driver)}}
+                   :dart         {:transform '{(js-sqlite/driver) (dart-sqlite/driver)}}}}
   (notify/wait-on [:js 5000]
     (-> (dbsql/connect (js-sqlite/driver) {})
         (spec-promise/x:promise-then
@@ -215,22 +224,21 @@
            (var schema (xt/x:get-key desc "schema"))
            (var compiled-map {})
            (xt/x:set-key compiled-map
-                         (JSON.stringify (pgrest/compile-query tree))
+                         (. (pgrest/compile-query tree) ["url"])
                          tree)
            (var supa-db {"::" "db.supabase"
-                         :instance {"execute"
-                                    (fn [compiled _opts]
-                                      (var key (JSON.stringify compiled))
-                                      (var planned (xt/x:get-key compiled-map key))
-                                      (when (xt/x:nil? planned)
-                                        (return [false
-                                                 {:status "error"
-                                                  :tag "db/supabase-plan-not-found"
-                                                  :data {"compiled" compiled}}]))
-                                      (return [true
-                                               (xdb/db-pull-sync sql-db
-                                                                 schema
-                                                                 planned)]))}})
+                         :instance {"client"
+                                    {"request_sync"
+                                     (fn [request _opts]
+                                       (var planned (xt/x:get-key compiled-map (. request ["url"])))
+                                       (when (xt/x:nil? planned)
+                                         (xt/x:throw {:status "error"
+                                                      :tag "db/supabase-plan-not-found"
+                                                      :data {"request" request}}))
+                                       (return {"body"
+                                                {"data" (xdb/db-pull-sync sql-db
+                                                                          schema
+                                                                          planned)}}))}}})
            (repl/notify
             [(xdb/db-pull-sync cache-db schema tree)
              (xdb/db-pull-sync sql-db schema tree)
@@ -248,6 +256,9 @@
             [{"nickname" "root"}])]}
 (fact "direct flat trees roundtrip to the same datastructure"
 
+  ^{:seedgen/base {:lua.nginx    {:transform '{(js-sqlite/driver) (lua-sqlite/driver)}}
+                   :python       {:transform '{(js-sqlite/driver) (py-sqlite/driver)}}
+                   :dart         {:transform '{(js-sqlite/driver) (dart-sqlite/driver)}}}}
   (notify/wait-on [:js 5000]
     (-> (dbsql/connect (js-sqlite/driver) {})
         (spec-promise/x:promise-then
@@ -273,22 +284,21 @@
            (xdb/sync-event sql-db ["add" payload])
            (var compiled-map {})
            (xt/x:set-key compiled-map
-                         (JSON.stringify (pgrest/compile-query tree))
+                         (. (pgrest/compile-query tree) ["url"])
                          tree)
            (var supa-db {"::" "db.supabase"
-                         :instance {"execute"
-                                    (fn [compiled _opts]
-                                      (var key (JSON.stringify compiled))
-                                      (var planned (xt/x:get-key compiled-map key))
-                                      (when (xt/x:nil? planned)
-                                        (return [false
-                                                 {:status "error"
-                                                  :tag "db/supabase-plan-not-found"
-                                                  :data {"compiled" compiled}}]))
-                                      (return [true
-                                               (xdb/db-pull-sync sql-db
-                                                                 sample/Schema
-                                                                 planned)]))}})
+                         :instance {"client"
+                                    {"request_sync"
+                                     (fn [request _opts]
+                                       (var planned (xt/x:get-key compiled-map (. request ["url"])))
+                                       (when (xt/x:nil? planned)
+                                         (xt/x:throw {:status "error"
+                                                      :tag "db/supabase-plan-not-found"
+                                                      :data {"request" request}}))
+                                       (return {"body"
+                                                {"data" (xdb/db-pull-sync sql-db
+                                                                          sample/Schema
+                                                                          planned)}}))}}})
            (repl/notify
             [(xdb/db-pull-sync cache-db sample/Schema tree)
              (xdb/db-pull-sync sql-db sample/Schema tree)
@@ -307,6 +317,9 @@
              {"id" "XLM" "name" "Stellar Coin"}])]}
 (fact "bulk `in` filters roundtrip to the same flat row datastructure"
 
+  ^{:seedgen/base {:lua.nginx    {:transform '{(js-sqlite/driver) (lua-sqlite/driver)}}
+                   :python       {:transform '{(js-sqlite/driver) (py-sqlite/driver)}}
+                   :dart         {:transform '{(js-sqlite/driver) (dart-sqlite/driver)}}}}
   (notify/wait-on [:js 5000]
     (-> (dbsql/connect (js-sqlite/driver) {})
         (spec-promise/x:promise-then
@@ -332,22 +345,21 @@
            (xdb/sync-event sql-db ["add" payload])
            (var compiled-map {})
            (xt/x:set-key compiled-map
-                         (JSON.stringify (pgrest/compile-query tree))
+                         (. (pgrest/compile-query tree) ["url"])
                          tree)
            (var supa-db {"::" "db.supabase"
-                         :instance {"execute"
-                                    (fn [compiled _opts]
-                                      (var key (JSON.stringify compiled))
-                                      (var planned (xt/x:get-key compiled-map key))
-                                      (when (xt/x:nil? planned)
-                                        (return [false
-                                                 {:status "error"
-                                                  :tag "db/supabase-plan-not-found"
-                                                  :data {"compiled" compiled}}]))
-                                      (return [true
-                                               (xdb/db-pull-sync sql-db
-                                                                 sample/Schema
-                                                                 planned)]))}})
+                         :instance {"client"
+                                    {"request_sync"
+                                     (fn [request _opts]
+                                       (var planned (xt/x:get-key compiled-map (. request ["url"])))
+                                       (when (xt/x:nil? planned)
+                                         (xt/x:throw {:status "error"
+                                                      :tag "db/supabase-plan-not-found"
+                                                      :data {"request" request}}))
+                                       (return {"body"
+                                                {"data" (xdb/db-pull-sync sql-db
+                                                                          sample/Schema
+                                                                          planned)}}))}}})
            (repl/notify
             (xt/x:arr-map
              [(xdb/db-pull-sync cache-db sample/Schema tree)

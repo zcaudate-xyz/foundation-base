@@ -177,24 +177,23 @@
            (var tree (@! +currency-bulk-tree+))
            (xdb/sync-event cache-db ["add" payload])
            (xdb/sync-event sql-db ["add" payload])
-           (var compiled-map {})
-           (xt/x:set-key compiled-map
-                         (JSON.stringify (pgrest/compile-query tree))
-                         tree)
-           (var supa-db {"::" "db.supabase"
-                         :instance {"execute"
-                                    (fn [compiled _opts]
-                                      (var key (JSON.stringify compiled))
-                                      (var planned (xt/x:get-key compiled-map key))
-                                      (when (xt/x:nil? planned)
-                                        (return [false
-                                                 {:status "error"
-                                                  :tag "db/supabase-plan-not-found"
-                                                  :data {"compiled" compiled}}]))
-                                      (return [true
-                                               (xdb/db-pull-sync sql-db
-                                                                 sample/Schema
-                                                                 planned)]))}})
+            (var compiled-map {})
+            (xt/x:set-key compiled-map
+                          (. (pgrest/compile-query tree) ["url"])
+                          tree)
+            (var supa-db {"::" "db.supabase"
+                          :instance {"client"
+                                     {"request_sync"
+                                      (fn [request _opts]
+                                       (var planned (xt/x:get-key compiled-map (. request ["url"])))
+                                       (when (xt/x:nil? planned)
+                                         (xt/x:throw {:status "error"
+                                                      :tag "db/supabase-plan-not-found"
+                                                      :data {"request" request}}))
+                                       (return {"body"
+                                                {"data" (xdb/db-pull-sync sql-db
+                                                                          sample/Schema
+                                                                          planned)}}))}}})
            (repl/notify
             (xt/x:arr-map
              [(xdb/db-pull-sync cache-db sample/Schema tree)
@@ -243,24 +242,23 @@
            (var tree (@! +currency-bulk-tree+))
            (xdb/sync-event cache-db ["add" payload])
            (xdb/sync-event sql-db ["add" payload])
-           (var compiled-map {})
-           (xt/x:set-key compiled-map
-                         (JSON.stringify (pgrest/compile-query tree))
-                         tree)
-           (var supa-db {"::" "db.supabase"
-                         :instance {"execute"
-                                    (fn [compiled _opts]
-                                      (var key (JSON.stringify compiled))
-                                      (var planned (xt/x:get-key compiled-map key))
-                                      (when (xt/x:nil? planned)
-                                        (return [false
-                                                 {:status "error"
-                                                  :tag "db/supabase-plan-not-found"
-                                                  :data {"compiled" compiled}}]))
-                                      (return [true
-                                               (xdb/db-pull-sync sql-db
-                                                                 sample/Schema
-                                                                 planned)]))}})
+            (var compiled-map {})
+            (xt/x:set-key compiled-map
+                          (. (pgrest/compile-query tree) ["url"])
+                          tree)
+            (var supa-db {"::" "db.supabase"
+                          :instance {"client"
+                                     {"request_sync"
+                                      (fn [request _opts]
+                                       (var planned (xt/x:get-key compiled-map (. request ["url"])))
+                                       (when (xt/x:nil? planned)
+                                         (xt/x:throw {:status "error"
+                                                      :tag "db/supabase-plan-not-found"
+                                                      :data {"request" request}}))
+                                       (return {"body"
+                                                {"data" (xdb/db-pull-sync sql-db
+                                                                          sample/Schema
+                                                                          planned)}}))}}})
            (repl/notify
             (xt/x:arr-map
              [(xdb/db-pull-sync cache-db sample/Schema tree)
@@ -309,24 +307,23 @@
            (var tree (@! +currency-bulk-tree+))
            (xdb/sync-event cache-db ["add" payload])
            (xdb/sync-event sql-db ["add" payload])
-           (var compiled-map {})
-           (xt/x:set-key compiled-map
-                         (JSON.stringify (pgrest/compile-query tree))
-                         tree)
-           (var supa-db {"::" "db.supabase"
-                         :instance {"execute"
-                                    (fn [compiled _opts]
-                                      (var key (JSON.stringify compiled))
-                                      (var planned (xt/x:get-key compiled-map key))
-                                      (when (xt/x:nil? planned)
-                                        (return [false
-                                                 {:status "error"
-                                                  :tag "db/supabase-plan-not-found"
-                                                  :data {"compiled" compiled}}]))
-                                      (return [true
-                                               (xdb/db-pull-sync sql-db
-                                                                 sample/Schema
-                                                                 planned)]))}})
+            (var compiled-map {})
+            (xt/x:set-key compiled-map
+                          (. (pgrest/compile-query tree) ["url"])
+                          tree)
+            (var supa-db {"::" "db.supabase"
+                          :instance {"client"
+                                     {"request_sync"
+                                      (fn [request _opts]
+                                       (var planned (xt/x:get-key compiled-map (. request ["url"])))
+                                       (when (xt/x:nil? planned)
+                                         (xt/x:throw {:status "error"
+                                                      :tag "db/supabase-plan-not-found"
+                                                      :data {"request" request}}))
+                                       (return {"body"
+                                                {"data" (xdb/db-pull-sync sql-db
+                                                                          sample/Schema
+                                                                          planned)}}))}}})
            (repl/notify
             (xt/x:arr-map
              [(xdb/db-pull-sync cache-db sample/Schema tree)

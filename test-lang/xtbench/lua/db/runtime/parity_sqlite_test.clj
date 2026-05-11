@@ -1,11 +1,11 @@
-(ns xtbench.dart.db.runtime.parity-sqlite-test
+(ns xtbench.lua.db.runtime.parity-sqlite-test
   (:require [hara.runtime.basic.type-common :as common]
             [hara.lang :as l]
             [xt.lang.common-notify :as notify]
             [xt.lang.spec-promise :as spec-promise])
   (:use code.test))
 
-(l/script- :dart
+(l/script- :lua.nginx
   {:require [[xt.lang.spec-base :as xt]
           [xt.lang.common-lib :as k]
           [xt.lang.common-data :as xtd]
@@ -18,8 +18,8 @@
           [xt.db.text.sql-raw :as raw]
           [xt.db.text.sql-manage :as manage]
           [xt.db.helpers.data-main-test :as sample]
-          [dart.lib.driver-sqlite :as dart-sqlite]]
-          :runtime :twostep})
+          [lua.nginx.driver-sqlite :as lua-sqlite]]
+          :runtime :basic})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -30,8 +30,8 @@
             ["UserAccount" "UserProfile"])]}
 (fact "js runtime reports the touched sqlite tables"
 
-  (notify/wait-on [:dart 5000]
-    (-> (dbsql/connect (dart-sqlite/driver) {})
+  (notify/wait-on [:lua.nginx 5000]
+    (-> (dbsql/connect (lua-sqlite/driver) {})
         (spec-promise/x:promise-then
          (fn [conn]
            (dbsql/query-sync conn
@@ -69,8 +69,8 @@
                      [["root" "Root"]])]}
 (fact "js runtime pulls nested sqlite sample data"
 
-  (notify/wait-on [:dart 5000]
-    (-> (dbsql/connect (dart-sqlite/driver) {})
+  (notify/wait-on [:lua.nginx 5000]
+    (-> (dbsql/connect (lua-sqlite/driver) {})
         (spec-promise/x:promise-then
          (fn [conn]
            (dbsql/query-sync conn
@@ -108,8 +108,8 @@
                       ["XLM" "Stellar Coin"]])]}
 (fact "js runtime pulls sorted sqlite currencies"
 
-  (notify/wait-on [:dart 5000]
-    (-> (dbsql/connect (dart-sqlite/driver) {})
+  (notify/wait-on [:lua.nginx 5000]
+    (-> (dbsql/connect (lua-sqlite/driver) {})
         (spec-promise/x:promise-then
          (fn [conn]
            (dbsql/query-sync conn

@@ -73,7 +73,7 @@
    [{"id" "ord-1" "status" "open"}]})
 
 ^{:refer xt.db.node.instance-sync/normalize-sync :added "4.1"}
- (fact "normalizes db/sync and db/remove keys"
+(fact "normalizes db/sync and db/remove keys"
 
   (!.dt
     (instance-sync/normalize-sync
@@ -134,10 +134,10 @@
          (schema-state/base-state {"schema" (@! +schema+)
                                    "lookup" (@! +lookup+)}))
     (var [ok result]
-         (instance-sync/run-sync-local
-          state
-          {"db/sync" {"Order" [{"id" "ord-1" "status" "open"}]}}
-          {}))
+           (instance-sync/run-sync-local
+            state
+            {"db/sync" {"Order" [{"id" "ord-1" "status" "open"}]}}
+            {}))
     [ok
      (. (. result ["tables"]) ["Order"])])
   => [true

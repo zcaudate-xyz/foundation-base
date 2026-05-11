@@ -113,9 +113,9 @@
 
 (defn default-body-transform
   "transform code for return
- 
-   (default-body-transform [1 2 3] {})
-   => '(do (return [1 2 3]))
+  
+    (default-body-transform [1 2 3] {})
+    => '(do (return [1 2 3]))
  
    (default-body-transform [1 2 3] {:bulk true})
    => '(do 1 2 (return 3))"
@@ -123,6 +123,18 @@
   [input mopts]
   (-> (normalize-forms input mopts)
       (default-body-wrap)))
+
+(defn lua-basic-script-globalize-entry
+  "avoids Lua's local-variable cap by emitting basic runtime script deps as globals."
+  {:added "4.1"}
+  [body {:keys [entry]}]
+  (case (:op-key entry)
+    :defn (clojure.string/replace body #"^local function " "function ")
+    :def  (clojure.string/replace body #"^local " "")
+    body))
+
+(def +lua-basic-script-emit+
+  {:code {:transforms {:entry [#'lua-basic-script-globalize-entry]}}})
 
 (def ^{:arglists '([body])}
   default-oneshot-wrap
@@ -193,10 +205,11 @@
                         (impl/emit-entry-deps
                          lib/return-eval
                          {:lang :lua
-                          :layout :flat})
+                          :layout :flat
+                          :emit +lua-basic-script-emit+})
                         (impl/emit-as
-                         :lua +client-basic+)]
-                       (clojure.string/join "\n\n"))]
+                          :lua +client-basic+)]
+                        (clojure.string/join "\n\n"))]
     (fn [port & [{:keys [host]}]]
       (str bootstrap
            "\n\n"
@@ -209,21 +222,23 @@
   (common/set-context-options
    [:lua :basic :default]
    {:bootstrap #'default-basic-client
-    :main  {}
-    :emit  {:body  {:transform #'default-body-transform}}
-    :json :full
-    :encode :json
-    :timeout 2000}))
+     :main  {}
+     :emit  {:body  {:transform #'default-body-transform}
+             :code  (:code +lua-basic-script-emit+)}
+     :json :full
+     :encode :json
+     :timeout 2000}))
 
 (def +lua-nginx-basic-config+
   (common/set-context-options
    [:lua.nginx :basic :default]
    {:bootstrap #'default-basic-client
-    :main  {}
-    :emit  {:body  {:transform #'default-body-transform}}
-    :json :full
-    :encode :json
-    :timeout 2000}))
+     :main  {}
+     :emit  {:body  {:transform #'default-body-transform}
+             :code  (:code +lua-basic-script-emit+)}
+     :json :full
+     :encode :json
+     :timeout 2000}))
 
 (def +lua-basic+
   [(rt/install-type!

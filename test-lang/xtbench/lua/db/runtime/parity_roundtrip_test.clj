@@ -51,7 +51,7 @@
 (fact "syncs and pulls sql data"
 
   (notify/wait-on [:lua.nginx 5000]
-    (-> (dbsql/connect (js-sqlite/driver) {})
+    (-> (dbsql/connect (lua-sqlite/driver) {})
         (spec-promise/x:promise-then
          (fn [conn]
            (dbsql/query-sync conn
@@ -99,7 +99,7 @@
 (fact "emits remove sql and deletes synced rows"
 
   (notify/wait-on [:lua.nginx 5000]
-    (-> (dbsql/connect (js-sqlite/driver) {})
+    (-> (dbsql/connect (lua-sqlite/driver) {})
         (spec-promise/x:promise-then
          (fn [conn]
            (dbsql/query-sync conn
@@ -156,7 +156,7 @@
 (fact "bulk `in` filters roundtrip to the same flat row datastructure"
 
   (notify/wait-on [:lua.nginx 5000]
-    (-> (dbsql/connect (js-sqlite/driver) {})
+    (-> (dbsql/connect (lua-sqlite/driver) {})
         (spec-promise/x:promise-then
          (fn [conn]
            (dbsql/query-sync conn
@@ -180,22 +180,21 @@
            (xdb/sync-event sql-db ["add" payload])
            (var compiled-map {})
            (xt/x:set-key compiled-map
-                         (JSON.stringify (pgrest/compile-query tree))
+                         (. (pgrest/compile-query tree) ["url"])
                          tree)
            (var supa-db {"::" "db.supabase"
-                         :instance {"execute"
-                                    (fn [compiled _opts]
-                                      (var key (JSON.stringify compiled))
-                                      (var planned (xt/x:get-key compiled-map key))
-                                      (when (xt/x:nil? planned)
-                                        (return [false
-                                                 {:status "error"
-                                                  :tag "db/supabase-plan-not-found"
-                                                  :data {"compiled" compiled}}]))
-                                      (return [true
-                                               (xdb/db-pull-sync sql-db
-                                                                 sample/Schema
-                                                                 planned)]))}})
+                         :instance {"client"
+                                    {"request_sync"
+                                     (fn [request _opts]
+                                       (var planned (xt/x:get-key compiled-map (. request ["url"])))
+                                       (when (xt/x:nil? planned)
+                                         (xt/x:throw {:status "error"
+                                                      :tag "db/supabase-plan-not-found"
+                                                      :data {"request" request}}))
+                                       (return {"body"
+                                                {"data" (xdb/db-pull-sync sql-db
+                                                                          sample/Schema
+                                                                          planned)}}))}}})
            (repl/notify
             (xt/x:arr-map
              [(xdb/db-pull-sync cache-db sample/Schema tree)
@@ -222,7 +221,7 @@
 (fact "bulk `in` filters roundtrip to the same flat row datastructure"
 
   (notify/wait-on [:lua.nginx 5000]
-    (-> (dbsql/connect (js-sqlite/driver) {})
+    (-> (dbsql/connect (lua-sqlite/driver) {})
         (spec-promise/x:promise-then
          (fn [conn]
            (dbsql/query-sync conn
@@ -246,22 +245,21 @@
            (xdb/sync-event sql-db ["add" payload])
            (var compiled-map {})
            (xt/x:set-key compiled-map
-                         (JSON.stringify (pgrest/compile-query tree))
+                         (. (pgrest/compile-query tree) ["url"])
                          tree)
            (var supa-db {"::" "db.supabase"
-                         :instance {"execute"
-                                    (fn [compiled _opts]
-                                      (var key (JSON.stringify compiled))
-                                      (var planned (xt/x:get-key compiled-map key))
-                                      (when (xt/x:nil? planned)
-                                        (return [false
-                                                 {:status "error"
-                                                  :tag "db/supabase-plan-not-found"
-                                                  :data {"compiled" compiled}}]))
-                                      (return [true
-                                               (xdb/db-pull-sync sql-db
-                                                                 sample/Schema
-                                                                 planned)]))}})
+                         :instance {"client"
+                                    {"request_sync"
+                                     (fn [request _opts]
+                                       (var planned (xt/x:get-key compiled-map (. request ["url"])))
+                                       (when (xt/x:nil? planned)
+                                         (xt/x:throw {:status "error"
+                                                      :tag "db/supabase-plan-not-found"
+                                                      :data {"request" request}}))
+                                       (return {"body"
+                                                {"data" (xdb/db-pull-sync sql-db
+                                                                          sample/Schema
+                                                                          planned)}}))}}})
            (repl/notify
             (xt/x:arr-map
              [(xdb/db-pull-sync cache-db sample/Schema tree)
@@ -288,7 +286,7 @@
 (fact "bulk `in` filters roundtrip to the same flat row datastructure"
 
   (notify/wait-on [:lua.nginx 5000]
-    (-> (dbsql/connect (js-sqlite/driver) {})
+    (-> (dbsql/connect (lua-sqlite/driver) {})
         (spec-promise/x:promise-then
          (fn [conn]
            (dbsql/query-sync conn
@@ -312,22 +310,21 @@
            (xdb/sync-event sql-db ["add" payload])
            (var compiled-map {})
            (xt/x:set-key compiled-map
-                         (JSON.stringify (pgrest/compile-query tree))
+                         (. (pgrest/compile-query tree) ["url"])
                          tree)
            (var supa-db {"::" "db.supabase"
-                         :instance {"execute"
-                                    (fn [compiled _opts]
-                                      (var key (JSON.stringify compiled))
-                                      (var planned (xt/x:get-key compiled-map key))
-                                      (when (xt/x:nil? planned)
-                                        (return [false
-                                                 {:status "error"
-                                                  :tag "db/supabase-plan-not-found"
-                                                  :data {"compiled" compiled}}]))
-                                      (return [true
-                                               (xdb/db-pull-sync sql-db
-                                                                 sample/Schema
-                                                                 planned)]))}})
+                         :instance {"client"
+                                    {"request_sync"
+                                     (fn [request _opts]
+                                       (var planned (xt/x:get-key compiled-map (. request ["url"])))
+                                       (when (xt/x:nil? planned)
+                                         (xt/x:throw {:status "error"
+                                                      :tag "db/supabase-plan-not-found"
+                                                      :data {"request" request}}))
+                                       (return {"body"
+                                                {"data" (xdb/db-pull-sync sql-db
+                                                                          sample/Schema
+                                                                          planned)}}))}}})
            (repl/notify
             (xt/x:arr-map
              [(xdb/db-pull-sync cache-db sample/Schema tree)

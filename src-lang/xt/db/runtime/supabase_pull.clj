@@ -17,9 +17,7 @@
 (defn.xt resolve-client
   {:added "4.1.3"}
   [db opts]
-  (var source (or (xt/x:get-key db "supabase")
-                  (xt/x:get-key db "client")
-                  (xt/x:get-key opts "supabase")
+  (var source (or (xt/x:get-key db "client")
                   (xt/x:get-key opts "client")
                   nil))
   (when (xt/x:nil? source)
@@ -32,8 +30,7 @@
   {:added "4.1.3"}
   [db client opts]
   (var raw_client (-/raw-client client))
-  (return (or (xt/x:get-key db "base_url")
-              (xt/x:get-key raw_client "base_url")
+  (return (or (xt/x:get-key raw_client "base_url")
               (xt/x:get-key opts "base_url")
               nil)))
 
@@ -41,8 +38,7 @@
   {:added "4.1.3"}
   [db client opts]
   (var raw_client (-/raw-client client))
-  (return (or (xt/x:get-key db "schema_name")
-              (xt/x:get-key raw_client "schema_name")
+  (return (or (xt/x:get-key raw_client "schema_name")
               (xt/x:get-key opts "schema_name")
               nil)))
 
@@ -50,8 +46,7 @@
   {:added "4.1.3"}
   [db client opts]
   (var raw_client (-/raw-client client))
-  (return (or (xt/x:get-key db "api_key")
-              (xt/x:get-key raw_client "api_key")
+  (return (or (xt/x:get-key raw_client "api_key")
               (xt/x:get-key opts "api_key")
               nil)))
 
@@ -59,8 +54,7 @@
   {:added "4.1.3"}
   [db client opts]
   (var raw_client (-/raw-client client))
-  (return (or (xt/x:get-key db "auth_token")
-              (xt/x:get-key raw_client "auth_token")
+  (return (or (xt/x:get-key raw_client "auth_token")
               (xt/x:get-key opts "auth_token")
               nil)))
 
@@ -70,7 +64,6 @@
   (var raw_client (-/raw-client client))
   (var headers {})
   (xt/x:obj-assign headers (or (xt/x:get-key raw_client "headers") {}))
-  (xt/x:obj-assign headers (or (xt/x:get-key db "headers") {}))
   (xt/x:obj-assign headers (or (xt/x:get-key opts "headers") {}))
   (return {"client" client
            "base_url" (-/resolve-base-url db client opts)

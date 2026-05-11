@@ -73,21 +73,21 @@
    [{"id" "ord-1" "status" "open"}]})
 
 ^{:refer xt.db.node.instance-sync/normalize-sync :added "4.1"}
- (fact "normalizes db/sync and db/remove keys"
+(fact "normalizes db/sync and db/remove keys"
 
-   (!.lua
-     (instance-sync/normalize-sync
-      {"db/sync" {"Order" []}}
-      {"db/remove" {"Order" ["ord-1"]}}))
+  (!.lua
+    (instance-sync/normalize-sync
+     {"db/sync" {"Order" []}}
+     {"db/remove" {"Order" ["ord-1"]}}))
   => {"db/sync" {"Order" []}
       "db/remove" {"Order" ["ord-1"]}})
 
 ^{:refer xt.db.node.instance-sync/prepare-sync :added "4.1"}
 (fact "validates sync request shapes"
 
-   (!.lua
-     [(instance-sync/prepare-sync {"db/sync" {"Order" []}} {})
-      (instance-sync/prepare-sync {"db/sync" "bad"} {})])
+  (!.lua
+    [(instance-sync/prepare-sync {"db/sync" {"Order" []}} {})
+     (instance-sync/prepare-sync {"db/sync" "bad"} {})])
   => [[true {"db/sync" {"Order" []}}]
       [false {"status" "error"
               "tag" "db/sync-invalid"

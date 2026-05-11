@@ -104,10 +104,10 @@
 
 (def +live-supabase-config+
   {"::" "db.supabase"
-   "base_url" (live-supabase-endpoint)
-   "schema_name" +live-supabase-schema+
-   "api_key" (live-supabase-service-key)
-   "auth_token" (live-supabase-service-key)})
+   "client" {"base_url" (live-supabase-endpoint)
+             "schema_name" +live-supabase-schema+
+             "api_key" (live-supabase-service-key)
+             "auth_token" (live-supabase-service-key)}})
 
 (defn live-postgres-runtime-config
   []
@@ -174,12 +174,12 @@
   (if CANARY-SUPABASE-LIVE
     (!.py
      (var instance (xt/x:obj-clone (@! +live-supabase-config+)))
-     (var client (py-fetch/client (xt/x:obj-clone (@! +live-supabase-config+))))
+     (var client (py-fetch/client (xt/x:obj-clone (. instance ["client"]))))
      (xt/x:set-key instance "client" client)
      (var db (xdb/db-create instance nil nil {}))
      [(. db ["::"])
       (fetch/client? (. (. db ["instance"]) ["client"]))
-      (. (. db ["instance"]) ["schema_name"])])
+      (. (. (. (. db ["instance"]) ["client"]) ["_raw"]) ["schema_name"])])
     :supabase-live-unavailable)
   => (any ["db.supabase" true "scratch-sample-db"]
           :supabase-live-unavailable))
@@ -193,7 +193,7 @@
       (try
         (!.py
          (var instance (xt/x:obj-clone (@! +live-supabase-config+)))
-         (var client (py-fetch/client (xt/x:obj-clone (@! +live-supabase-config+))))
+         (var client (py-fetch/client (xt/x:obj-clone (. instance ["client"]))))
          (xt/x:set-key instance "client" client)
          (var db (xdb/db-create instance nil nil {}))
          (xdb/db-pull-sync db nil (@! +live-user-query+)))
