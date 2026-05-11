@@ -426,11 +426,13 @@
   => true)
 
 ^{:refer xt.db.text.sql-util/sqlite-return-format-fn :added "4.0"}
-(fact "sqlite return format function"
+  (fact "sqlite return format function"
 
   (!.js
-    [(ut/sqlite-return-format-fn {:expr "\"name\""
-                                  :as "n"}
+    (var alias-input {})
+    (xtd/set-in alias-input ["expr"] (ut/default-quote-fn "name"))
+    (xtd/set-in alias-input ["as"] "n")
+    [(ut/sqlite-return-format-fn alias-input
                                  (fn:> [arr] (xt/x:str-join "|" arr))
                                  ut/default-quote-fn
                                  {})

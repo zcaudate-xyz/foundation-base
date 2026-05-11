@@ -284,6 +284,52 @@
       [true true true]])
 
 ^{:refer hara.seedgen.form-bench/seedgen-benchadd :added "4.1"}
+(fact "preserves the concrete runtime variant when a bench target is requested by family name"
+  (let [root    (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-variant"
+                                                                  (make-array java.nio.file.attribute.FileAttribute 0)))
+        test-dir (doto (java.io.File. root "test-lang/xt/db/runtime")
+                   (.mkdirs))
+        path    (.getAbsolutePath (java.io.File. test-dir "parity_roundtrip_test.clj"))
+        lookup  {'xt.db.runtime.parity-roundtrip-test path}
+        project {:root (.getAbsolutePath root)
+                 :test-paths ["test-lang"]}]
+    (try
+      (spit path (str "(ns xt.db.runtime.parity-roundtrip-test\n"
+                      "  (:use code.test)\n"
+                      "  (:require [hara.lang :as l]))\n\n"
+                      "^{:seedgen/root {:all true\n"
+                      "                 :langs [:lua.nginx]\n"
+                      "                 :js        {:extra [[js.lib.driver-sqlite :as js-sqlite]]}\n"
+                      "                 :lua.nginx {:extra [[lua.nginx.driver-sqlite :as lua-sqlite]]}}}\n"
+                      "(l/script- :js\n"
+                      "  {:runtime :basic\n"
+                      "   :require [[xt.lang.spec-base :as xt]\n"
+                      "             ^{:seedgen/extra true}\n"
+                      "             [js.lib.driver-sqlite :as js-sqlite]]})\n\n"
+                      "^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n"
+                      "(fact \"variant dispatch\"\n"
+                      "  (!.js (+ 1 2 3))\n"
+                      "  => 6)\n"))
+      (let [output    (form-bench/seedgen-benchadd 'xt.db.runtime.parity-roundtrip-test
+                                                   {:lang [:lua]
+                                                    :write true}
+                                                   lookup
+                                                   project)
+            entry     (-> output :outputs first)
+            content   (slurp (str (fs/path root (:path entry))))]
+        [(select-keys entry [:lang :runtime-lang :ns :updated])
+         [(boolean (re-find #"\(l/script- :lua\.nginx" content))
+          (boolean (re-find #"\(!\.lua \(\+ 1 2 3\)\)" content))
+          (not (re-find #"\(!\.lua\.nginx" content))]])
+      (finally
+        (fs/delete root {:recursive true}))))
+  => [{:lang :lua
+       :runtime-lang :lua.nginx
+       :ns 'xtbench.lua.db.runtime.parity-roundtrip-test
+       :updated true}
+      [true true true]])
+
+^{:refer hara.seedgen.form-bench/seedgen-benchadd :added "4.1"}
 (fact "replaces root-only extra requires with runtime-specific bench requires"
   (let [root    (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-extra"
                                                                   (make-array java.nio.file.attribute.FileAttribute 0)))

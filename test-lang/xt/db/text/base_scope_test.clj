@@ -134,7 +134,6 @@
 ^{:refer xt.db.text.base-scope/merge-queries :added "4.0"}
 (fact "merges query with clause"
 
-  ^{:seedgen/base {:lua {:transform {[] {}}}}}
   (!.js
     [(scope/merge-queries [] [])
      (scope/merge-queries [{:a 1}] [{:a 2}])
@@ -218,7 +217,6 @@
 ^{:refer xt.db.text.base-scope/get-link-columns :added "4.0"}
 (fact "get columns for given keys"
 
-  ^{:seedgen/base {:lua {:transform {[] {}}}}}
   (!.js
     (xtd/arr-map (scope/get-link-columns sample/Schema
                                          "UserAccount"
@@ -257,7 +255,6 @@
 ^{:refer xt.db.text.base-scope/as-where-input :added "4.0"}
 (fact "when empty, returns an empty array"
 
-  ^{:seedgen/base {:lua {:transform {[] {}}}}}
   (!.js
     [(scope/as-where-input [])
      (scope/as-where-input [{:id "zcaudate"}

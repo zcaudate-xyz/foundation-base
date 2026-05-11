@@ -1,15 +1,16 @@
 (ns hara.model.spec-lua
   (:require [clojure.string]
-            [std.fs :as fs]
-            [hara.lang.book :as book]
-            [hara.lang.book-module :as module]
-            [hara.common.emit :as emit]
-            [hara.common.emit-common :as common]
-            [hara.common.grammar :as grammar]
-            [hara.common.grammar-spec :as spec]
-            [hara.lang.impl :as impl]
-            [hara.lang.script :as script]
-            [hara.common.util :as ut]
+             [std.fs :as fs]
+             [hara.lang.book :as book]
+             [hara.lang.book-module :as module]
+             [hara.common.emit :as emit]
+             [hara.common.emit-common :as common]
+             [hara.common.emit-data :as data]
+             [hara.common.grammar :as grammar]
+             [hara.common.grammar-spec :as spec]
+             [hara.lang.impl :as impl]
+             [hara.lang.script :as script]
+             [hara.common.util :as ut]
             [hara.model.spec-lua.rewrite :as rewrite]
             [hara.model.spec-xtalk]
             [hara.model.spec-xtalk.fn-lua :as fn]
@@ -94,8 +95,16 @@
                              (str "['" key-str "']"))]
            key-str)
 
-         :else
-         (str  "[" (common/*emit-fn* key grammar mopts) "]"))))
+          :else
+          (str  "[" (common/*emit-fn* key grammar mopts) "]"))))
+
+(defn lua-vector
+  "emits a lua vector using cjson's array metatable"
+  {:added "4.1"}
+  [arr grammar mopts]
+  (str "setmetatable("
+       (data/emit-coll :vector arr grammar mopts)
+       ", cjson.array_mt)"))
 
 (defn lua-tf-for-object
   "for object transform"
@@ -266,10 +275,10 @@
                   :global    {:reference nil}}
         :token  {:nil       {:as "nil"}
                  :string    {:quote :single}}
-        :data   {:map-entry {:start ""  :end ""  :space "" :assign "=" :keyword :symbol
+         :data   {:map-entry {:start ""  :end ""  :space "" :assign "=" :keyword :symbol
                              :key-fn #'lua-map-key}
-                 :vector    {:start "{" :end "}" :space ""}}
-        :rewrite {:staging [#'rewrite/lua-rewrite-stage]}
+                  :vector    {:start "{" :end "}" :space "" :custom #'lua-vector}}
+         :rewrite {:staging [#'rewrite/lua-rewrite-stage]}
         :block  {:for       {:body    {:start "do" :end "end"}}
                  :while     {:body    {:start "do" :end "end"}}
                  :branch    {:wrap    {:start "" :end "end"}

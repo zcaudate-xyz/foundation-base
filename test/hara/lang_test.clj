@@ -72,9 +72,10 @@
 
 ^{:refer hara.lang/as-lua :added "4.1"}
 (fact "as-lua"
-  (l/as-lua []) => {}
-  (l/as-lua [1 2 [] 4]) => [1 2 {} 4]
-  (l/as-lua {:a []}) => {:a {}})
+  (l/as-lua []) => []
+  (l/as-lua [1 2 [] 4]) => [1 2 [] 4]
+  (l/as-lua [1 nil 2 nil]) => [1 nil 2]
+  (l/as-lua {:a [] :b nil}) => {:a []})
 
 ^{:refer hara.lang/rt:invoke :added "4.0"}
 (fact "rt:invoke"

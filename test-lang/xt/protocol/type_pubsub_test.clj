@@ -35,7 +35,7 @@
        "subscribe"
        "unsubscribe"
        "list_subscriptions"]]
-  
+
   (!.lua
     [pubp/ITypePubSub
      pubp/ITypeRuntimePubSub])

@@ -291,7 +291,6 @@
                         "description"]}])]}
 (fact "provides a view return query"
 
-  ^{:seedgen/base {:lua {:transform {+out+ (l/as-lua +out+)}}}}
   (!.js
     (v/tree-return sample/Schema
                    (@! +return+)
@@ -328,7 +327,6 @@
                        "data" ["id" "name" "title" "description" "tags"]}])]}
 (fact "provides a view return query"
 
-  ^{:seedgen/base {:lua {:transform {+out+ (l/as-lua +out+)}}}}
   (!.js
     (v/tree-combined sample/Schema
                      (@! +select+)
@@ -347,7 +345,6 @@
               "data" ["id"]}])]}
 (fact "fills out the tree for a given input"
 
-  ^{:seedgen/base {:lua {:transform {+out+ (l/as-lua +out+)}}}}
   (!.js
     (var entry (@! (gen/bind-view user/organisation-all-as-member)))
     (var tree  (v/tree-select sample/Schema entry {} {}))
@@ -366,7 +363,6 @@
                       "SELECT id FROM Currency\n  WHERE type = 'crypto'"])]}
 (fact "provides a view select query"
 
-  ^{:seedgen/base {:lua {:transform {+out+ (l/as-lua +out+)}}}}
   (!.js
     [(v/query-select sample/Schema
                      (@! +select+)
@@ -392,7 +388,6 @@
                       "SELECT count(*) FROM Currency\n  WHERE type = 'crypto'"])]}
 (fact "provides the count statement"
 
-  ^{:seedgen/base {:lua {:transform {+out+ (l/as-lua +out+)}}}}
   (!.js
     [(v/query-count sample/Schema
                     (@! +select+)
@@ -418,7 +413,6 @@
                       "SELECT id, description FROM Currency\n  WHERE id = 'STATS'"])]}
 (fact "provides a view return query"
 
-  ^{:seedgen/base {:lua {:transform {+out+ (l/as-lua +out+)}}}}
   (!.js
     [(v/query-return sample/Schema
                      (@! +return+)
@@ -460,7 +454,6 @@
                       "SELECT id, description FROM Currency\n  WHERE type = 'crypto'"])]}
 (fact "provides a view combine query"
 
-  ^{:seedgen/base {:lua {:transform {+out+ (l/as-lua +out+)}}}}
   (!.js
     [(v/query-combined sample/Schema
                        (@! +select+)

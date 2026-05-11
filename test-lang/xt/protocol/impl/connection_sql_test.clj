@@ -565,7 +565,7 @@
                           (return true))}))
     (sql/query-sync conn "SELECT 2;"))
   => ["SELECT 2;" "raw"]
-  
+
   (!.py
     (var conn
          (sql/connection-create

@@ -22,7 +22,6 @@
 ^{:refer xt.lang.common-sort-topo/sort-edges-build :added "4.1"}
 (fact "builds an edge with links"
 
-  ^{:seedgen/base       {:lua   {:transform  {[] {}}}}}
   (!.js
     (var out {})
     (topo/sort-edges-build out ["a" "b"])
@@ -35,7 +34,7 @@
     (topo/sort-edges-build out ["a" "b"])
     out)
   => {"a" {"id" "a", "links" ["b"]}
-      "b" {"id" "b", "links" {}}}
+      "b" {"id" "b", "links" []}}
 
   (!.py
     (var out {})

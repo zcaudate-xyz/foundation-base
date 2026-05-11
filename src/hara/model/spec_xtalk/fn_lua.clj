@@ -62,9 +62,11 @@
   [[_ obj]]
   (template/$ (do (var t := (type ~obj))
                   (if (== t "table")
-                    (if (== nil (. '(~obj) [1]))
-                      (return "object")
-                      (return "array"))
+                    (if (or (and (not= nil (. cjson ["array_mt"]))
+                                 (== (getmetatable ~obj) (. cjson ["array_mt"])))
+                            (not= nil (. '(~obj) [1])))
+                      (return "array")
+                      (return "object"))
                     (return t)))))
 
 (defn lua-tf-x-has-key?
@@ -183,14 +185,18 @@
 (defn lua-tf-x-is-object?
   [[_ e]]
   (template/$ (or (and (== "table" (type ~e))
+                       (or (== nil (. cjson ["array_mt"]))
+                           (not= (getmetatable ~e) (. cjson ["array_mt"])))
                        (== nil (. '(~e) [1])))
-                  (== "object" (type ~e)))))
+                   (== "object" (type ~e)))))
 
 (defn lua-tf-x-is-array?
   [[_ e]]
   (template/$ (or (and (== "table" (type ~e))
-                       (not= nil (. '(~e) [1])))
-                  (== "array" (type ~e)))))
+                       (or (and (not= nil (. cjson ["array_mt"]))
+                                (== (getmetatable ~e) (. cjson ["array_mt"])))
+                           (not= nil (. '(~e) [1]))))
+                   (== "array" (type ~e)))))
 
 (def +lua-type+
   {:x-to-string      {:emit :alias :raw 'tostring}

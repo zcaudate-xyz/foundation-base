@@ -120,7 +120,7 @@
     (form/get-data f)
     (. (form/remove-listener f "a1") ["meta"])
     (form/list-listeners f)])
-  => (just-in [["a1"] ["a1"] "user" {"login" "user"} {"listener/id" "a1", "form/fields" ["login"], "listener/type" "form"} {}])
+  => (just-in [["a1"] ["a1"] "user" {"login" "user"} {"listener/id" "a1", "form/fields" ["login"], "listener/type" "form"} []])
 
   (!.py
    (var f (form/make-form
@@ -503,7 +503,6 @@
 ^{:refer xt.event.base-form/reset-all-data :added "4.1"}
 (fact "resets all form data to the initial state"
 
-  ^{:seedgen/base {:lua {:transform {[] {}}}}}
   (!.js
    (var f (-/make-login-form))
    (form/set-data f {:login "world"})
@@ -516,7 +515,7 @@
    (form/set-data f {:login "world"})
    [(form/reset-all-data f)
     (form/get-data f)])
-  => [{} {"login" ""}]
+  => [[] {"login" ""}]
 
   (!.py
    (var f (-/make-login-form))

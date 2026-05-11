@@ -200,7 +200,6 @@
               "data" []}])]}
 (fact "gets the selection tree structure"
 
-  ^{:seedgen/base {:lua {:transform {+out+ (l/as-lua +out+)}}}}
   (!.js
     (g/select-tree sample/Schema
                    ["UserProfile"

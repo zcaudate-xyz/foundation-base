@@ -48,13 +48,14 @@
 (fact "resolves async requests through the promise-returning request method"
 
   (notify/wait-on [:js 2000]
+    (var client
+         (fetch/client-create
+          {"request_sync" (fn [request _opts]
+                            (return {"status" 200
+                                     "body" (. request ["url"])}))}
+          {}))
     (promise/x:promise-then
-     (let [client (fetch/client-create
-                   {"request_sync" (fn [request _opts]
-                                     (return {"status" 200
-                                              "body" (. request ["url"])}))}
-                   {})]
-       (fetch/request client {"url" "/health"} nil))
+     (fetch/request client {"url" "/health"} nil)
      (fn [result]
        (repl/notify result))))
   => {"status" 200

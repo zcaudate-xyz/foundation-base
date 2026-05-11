@@ -724,11 +724,11 @@
 ^{:refer xt.lang.spec-base/x:type-native :added "4.1"}
 (fact "expands and emits the lua type helper"
 
-  ^{:seedgen/base    {:lua  {:expect ["object" "object" "array"]}}}
+  ^{:seedgen/base    {:lua  {:expect ["object" "array" "array"]}}}
   (!.js
     (var type-fn (fn [obj]
                    (return
-                    (xt/x:type-native obj))))
+                     (xt/x:type-native obj))))
     [(type-fn {})
      (type-fn [])
      (type-fn [1])])
@@ -746,11 +746,11 @@
   (!.lua
     (var type-fn (fn [obj]
                    (return
-                    (xt/x:type-native obj))))
+                     (xt/x:type-native obj))))
     [(type-fn {})
      (type-fn [])
      (type-fn [1])])
-  => ["object" "object" "array"])
+  => ["object" "array" "array"])
 
 ^{:refer xt.lang.spec-base/x:offset :added "4.1"}
 (fact "uses the grammar base offset"
@@ -1815,16 +1815,19 @@
 (fact "recognises arrays"
 
   (!.js
-    (xt/x:is-array? [1 2]))
-  => true
+    [(xt/x:is-array? [])
+     (xt/x:is-array? [1 2])])
+  => [true true]
 
   (!.py
-    (xt/x:is-array? [1 2]))
-  => true
+    [(xt/x:is-array? [])
+     (xt/x:is-array? [1 2])])
+  => [true true]
 
   (!.lua
-    (xt/x:is-array? [1 2]))
-  => true)
+    [(xt/x:is-array? [])
+     (xt/x:is-array? [1 2])])
+  => [true true])
 
 ^{:refer xt.lang.spec-base/x:print :added "4.1"}
 (fact "expands and emits a lua print form"

@@ -363,30 +363,7 @@
  xyz.zcaudate/python
  {:description "python libs and helpers"
   :include [[python :complete]]} 
- 
- xyz.zcaudate/rt.graal
-  {:description "runtime for graal contexts"
-   :include [[rt.graal :complete]
-             [hara.runtime.graal :complete]]
-   :bundle [{:path "target/classes" 
-             :include ["hara/lib/graal"]}]
-   :dependencies [org.graalvm.sdk/graal-sdk
-                  org.graalvm.js/js
-                 org.graalvm.js/js-scriptengine
-		             commons-io/commons-io]}
- 
- xyz.zcaudate/rt.jep
-  {:description "runtime for jep" 
-   :include [[rt.jep :complete]
-             [hara.runtime.jep :complete]]
-   :dependencies [black.ninia/jep]}
- 
- xyz.zcaudate/rt.redis
-  {:description "runtime for redis" 
-   :include [[rt.redis :complete]
-             [hara.runtime.redis :complete]]
-   :bundle [{:path "resources" :include ["assets/rt.redis"]}]}
- 
+
  xyz.zcaudate/script.css
  {:description "read and write css using clojure"
   :include [[script.css :complete]]
@@ -475,16 +452,42 @@
    :include [[hara :exclude [hara.runtime.postgres
                              hara.runtime.graal
                              hara.runtime.jep
+                             hara.runtime.libpython
                              hara.runtime.redis
                              hara.runtime.solidity
                              hara.runtime.nginx
-                             hara.model.spec-postgres]]
+                             hara.model.spec-postgres
+                             hara.model.spec-solidity]]
              [xt.lang :complete]]}
 
+ xyz.zcaudate/hara.runtime.libpython
+ {:description "nginx runtime support"
+  :include [[hara.runtime.libpython :complete]]}
+ 
  xyz.zcaudate/hara.runtime.nginx
  {:description "nginx runtime support"
   :include [[hara.runtime.nginx :complete]]}
-
+ 
+ xyz.zcaudate/hara.runtime.redis
+  {:description "runtime for redis" 
+   :include [[hara.runtime.redis :complete]]
+   :bundle [{:path "resources" :include ["assets/rt.redis"]}]}
+  
+ xyz.zcaudate/hara.runtime.graal
+  {:description "runtime for graal contexts"
+   :include [[hara.runtime.graal :complete]]
+   :bundle [{:path "target/classes" 
+             :include ["hara/lib/graal"]}]
+   :dependencies [org.graalvm.sdk/graal-sdk
+                  org.graalvm.js/js
+                 org.graalvm.js/js-scriptengine
+		             commons-io/commons-io]}
+ 
+ xyz.zcaudate/hara.runtime.jep
+  {:description "runtime for jep" 
+   :include [[hara.runtime.jep :complete]]
+   :dependencies [black.ninia/jep]}
+ 
  xyz.zcaudate/postgres
  {:description "postgres language and runtime support"
   :include [[postgres :complete]
@@ -494,6 +497,7 @@
  xyz.zcaudate/solidity
  {:description "solidity language and runtime support"
   :include [[solidity.core :complete]
+            [hara.model.spec-solidity :complete]
             [hara.runtime.solidity :complete]]}
     
  xyz.zcaudate/std.lib

@@ -206,15 +206,12 @@
        vec))
 
 (defn as-lua
-  "change `[]` to `{}` and trim trailing nils from vectors"
+  "strip nils for lua expectations without changing collection shape"
   {:added "4.0"}
   [input]
   (walk/prewalk (fn [form]
                   (cond (vector? form)
-                        (let [form (trim-trailing-nils form)]
-                          (if (empty? form)
-                            {}
-                            form))
+                        (trim-trailing-nils form)
 
                         (map? form)
                         (coll/filter-vals (comp not nil?) form)

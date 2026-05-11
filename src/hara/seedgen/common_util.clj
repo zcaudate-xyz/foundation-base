@@ -138,8 +138,15 @@
 (defn seedgen-dispatch-tag
   [lang]
   (let [tag-map (seedgen-dispatch-tag-map)
-        lang    (seedgen-normalize-runtime-lang lang)]
+        lang    (seedgen-normalize-runtime-lang lang)
+        script  (runtime/runtime-script-lang lang)
+        n       (name lang)
+        idx     (.indexOf ^String n ".")
+        base    (when (pos? idx)
+                  (keyword (subs n 0 idx)))]
     (or (get tag-map lang)
+        script
+        base
         lang)))
 
 (defn seedgen-display-lang

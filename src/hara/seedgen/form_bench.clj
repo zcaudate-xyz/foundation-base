@@ -48,17 +48,31 @@
 (defn- bench-resolve-runtime-lang
   [requested-lang available-langs]
   (let [requested-runtime (bench-requested-runtime-lang requested-lang)
-        requested-display (bench-display-lang requested-lang)]
-    (or (some (fn [candidate]
-                (let [candidate-display (bench-display-lang candidate)
-                      candidate-tag     (common/seedgen-dispatch-tag candidate)]
-                  (when (or (= candidate requested-runtime)
-                            (= candidate-display requested-runtime)
-                            (= candidate-display requested-display)
-                            (= candidate-tag requested-runtime)
-                            (= candidate-tag requested-display))
-                    candidate)))
-              available-langs)
+        requested-display (bench-display-lang requested-lang)
+        candidate-score   (fn [candidate]
+                            (let [candidate-display (bench-display-lang candidate)
+                                  candidate-tag     (common/seedgen-dispatch-tag candidate)]
+                              (cond
+                                (= candidate requested-runtime)
+                                [0]
+
+                                (or (= candidate-display requested-runtime)
+                                    (= candidate-display requested-display))
+                                [1]
+
+                                (or (= candidate-tag requested-runtime)
+                                    (= candidate-tag requested-display))
+                                [2]
+
+                                :else
+                                nil)))]
+    (or (->> available-langs
+             (keep (fn [candidate]
+                     (when-let [score (candidate-score candidate)]
+                       [score candidate])))
+             (sort-by first)
+             first
+             second)
         requested-runtime)))
 
 (defn- bench-target-ns
@@ -209,19 +223,20 @@
                                rendered)]
           {:functions (bench-output-functions output)
            :outputs
-           (mapv (fn [{:keys [lang ns path content]}]
-                   (when write?
-                     (fs/create-directory (fs/parent path)))
-                   (let [result (base/transform-code ns
-                                                     (assoc params
+            (mapv (fn [{:keys [lang runtime-lang ns path content]}]
+                    (when write?
+                      (fs/create-directory (fs/parent path)))
+                    (let [result (base/transform-code ns
+                                                      (assoc params
                                                            :transform (constantly content)
                                                            :no-analysis true)
                                                     lookup'
                                                     project)]
-                    (assoc (select-keys result [:path :updated :verified :inserts :deletes :count :changed])
-                           :lang lang
-                           :ns ns)))
-                rendered)})))))
+                     (assoc (select-keys result [:path :updated :verified :inserts :deletes :count :changed])
+                            :lang lang
+                            :runtime-lang runtime-lang
+                            :ns ns)))
+                 rendered)})))))
 
 
 (comment

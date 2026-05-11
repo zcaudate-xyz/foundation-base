@@ -329,7 +329,6 @@
                           [["b"] "c" {"::" "observed", "value" 2, "listeners" empty?}]]))]}
 (fact "collects animated map paths recursively"
 
-  ^{:seedgen/base {:lua {:expect (l/as-lua +out+)}}}
   (!.js
     (xtd/arr-sort
      (base-animate/get-map-paths-inner
@@ -372,7 +371,6 @@
              [[["b"] "c" {"::" "observed", "value" 2, "listeners" empty?}] [empty? "b" false] [empty? "a" {"::" "observed", "value" 1, "listeners" empty?}]]))]}
 (fact "collects animated map paths"
 
-  ^{:seedgen/base {:lua {:expect (l/as-lua +out+)}}}
   (!.js
     (xt/x:arr-sort 
      (base-animate/get-map-paths
@@ -535,7 +533,6 @@
 ^{:refer xt.event.base-animate/new-progressing :added "4.1"}
 (fact "creates a fresh progressing record"
 
-  ^{:seedgen/base {:lua {:expect {"running" false, "queued" {}}}}}
   (!.js
     (base-animate/new-progressing))
   => {"animation" nil
@@ -544,7 +541,7 @@
 
   (!.lua
     (base-animate/new-progressing))
-  => {"running" false, "queued" {}}
+  => {"running" false, "queued" []}
 
   (!.py
     (base-animate/new-progressing))
@@ -899,7 +896,6 @@
             [0 nil 1 nil 0 {"running" false, "queued" [], "animation" nil}])]}
 (fact "provides animation transition helpers"
 
-  ^{:seedgen/base  {:lua {:transform {+out+ (l/as-lua +out+)}}}}
   (!.js
     (var t (base-animate/make-binary-transitions
             mock/MOCK
@@ -930,7 +926,7 @@
      (zero-fn nil)
      (mock/get-value indicator)
      (base-animate/new-progressing)])
-  => (l/as-lua +out+)
+  => [0 nil 1 nil 0 {"running" false, "queued" []}]
 
   (!.py
     (var t (base-animate/make-binary-transitions

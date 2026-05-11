@@ -428,8 +428,10 @@
 (fact "sqlite return format function"
 
   (!.py
-    [(ut/sqlite-return-format-fn {:expr "\"name\""
-                                  :as "n"}
+    (var alias-input {})
+    (xtd/set-in alias-input ["expr"] (ut/default-quote-fn "name"))
+    (xtd/set-in alias-input ["as"] "n")
+    [(ut/sqlite-return-format-fn alias-input
                                  (fn:> [arr] (xt/x:str-join "|" arr))
                                  ut/default-quote-fn
                                  {})

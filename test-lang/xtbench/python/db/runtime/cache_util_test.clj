@@ -533,7 +533,7 @@
 
   (!.py
     (var rows {})
-    (var removed nil)
+    (var removed {"id" nil})
     (data/merge-bulk rows (f/flatten sample/Schema
                                      "UserAccount"
                                      sample/RootUser
@@ -542,13 +542,13 @@
     [(-> (data/remove-single-link-entry rows
                                         "UserAccount"
                                         "00000000-0000-0000-0000-000000000000"
-                                        "rev_links"
-                                        "profile"
-                                        "c4643895-b0ce-44cc-b07b-2386bf18d43b"
-                                        (fn [link-id]
-                                          (:= removed link-id)))
-         (xtd/get-in ["record" "rev_links"]))
-     removed])
+                                         "rev_links"
+                                         "profile"
+                                         "c4643895-b0ce-44cc-b07b-2386bf18d43b"
+                                         (fn [link-id]
+                                           (xtd/set-in removed ["id"] link-id)))
+          (xtd/get-in ["record" "rev_links"]))
+     (. removed ["id"])])
   => [{} "c4643895-b0ce-44cc-b07b-2386bf18d43b"])
 
 ^{:refer xt.db.runtime.cache-util/remove-single-link :added "4.0"}
@@ -624,7 +624,7 @@
 
   (!.py
     (var rows {})
-    (var added nil)
+    (var added {"id" nil})
     (data/merge-bulk rows (f/flatten sample/Schema
                                      "UserAccount"
                                      (xtd/obj-omit sample/RootUser ["profile"])
@@ -633,15 +633,15 @@
     [(-> (data/add-single-link-entry rows
                                      "UserAccount"
                                      "00000000-0000-0000-0000-000000000000"
-                                     "rev_links"
-                                     "profile"
-                                     "c4643895-b0ce-44cc-b07b-2386bf18d43b"
-                                     (fn [link-id]
-                                       (:= added link-id))
-                                     "UserProfile"
-                                     "account")
-         (xtd/get-in ["record" "rev_links" "profile"]))
-     added])
+                                      "rev_links"
+                                      "profile"
+                                      "c4643895-b0ce-44cc-b07b-2386bf18d43b"
+                                      (fn [link-id]
+                                        (xtd/set-in added ["id"] link-id))
+                                      "UserProfile"
+                                      "account")
+          (xtd/get-in ["record" "rev_links" "profile"]))
+     (. added ["id"])])
   => [{"c4643895-b0ce-44cc-b07b-2386bf18d43b" true}
       "c4643895-b0ce-44cc-b07b-2386bf18d43b"])
 
