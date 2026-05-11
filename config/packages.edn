@@ -1,18 +1,8 @@
-{xyz.zcaudate/code.ai
- {:description "ai client and server"
-  :include [[code.ai.heal :complete]
-            [code.ai.server :complete]]
-  :dependencies [org.hugoduncan/mcp-clj-server]}
-
- xyz.zcaudate/code.mcp
+{xyz.zcaudate/code.mcp
  {:description "java-sdk MCP wrappers and RAG scaffolding"
   :include [[code.mcp :complete]]
   :dependencies [io.modelcontextprotocol.sdk/mcp]}
 
- xyz.zcaudate/code.dev
- {:description "generate documentation from code"
-  :include [[code.dev :complete]]}
- 
  xyz.zcaudate/code.doc
  {:description "generate documentation from code"
   :include [[code.doc :complete]]
@@ -23,23 +13,10 @@
  {:description "source and test management"
   :include [[code.framework :complete]]}
  
- xyz.zcaudate/code.java
- {:description "source and test management"
-  :include [[code.java :complete]]
-  :dependencies [org.ow2.asm/asm]}
- 
- xyz.zcaudate/code.link
- {:description "code packaging and distribution"
-  :include [[code.link :complete]]}
- 
  xyz.zcaudate/code.manage
  {:description "source code utils and workflow"
   :include [[code.manage :complete]]
   :bundle [{:path "resources" :include ["assets/code.manage"]}]}
-
- xyz.zcaudate/code.maven
- {:description "code packaging and distribution"
-  :include [[code.maven :complete]]}
 
  xyz.zcaudate/code.project
  {:description "working with projects"
@@ -387,75 +364,28 @@
  {:description "python libs and helpers"
   :include [[python :complete]]} 
  
- xyz.zcaudate/rt.base
- {:description "base runtimes"
-  :include [[rt.base :complete]]}
-
- xyz.zcaudate/rt.basic
- {:description "wrapper for nginx" 
-  :include [[rt.basic :complete]]
-  :dependencies [http-kit]}
-
- xyz.zcaudate/rt.circom
- {:description "runtime for circom"
-  :include [[rt.circom :complete]]}
-
- xyz.zcaudate/rt.fortran
- {:description "runtime for fortran"
-  :include [[rt.fortran :complete]]}
- 
  xyz.zcaudate/rt.graal
- {:description "runtime for graal contexts"
-  :include [[rt.graal :complete]]
-  :bundle [{:path "target/classes" 
-            :include ["hara/lib/graal"]}]
-  :dependencies [org.graalvm.sdk/graal-sdk
-                 org.graalvm.js/js
+  {:description "runtime for graal contexts"
+   :include [[rt.graal :complete]
+             [hara.runtime.graal :complete]]
+   :bundle [{:path "target/classes" 
+             :include ["hara/lib/graal"]}]
+   :dependencies [org.graalvm.sdk/graal-sdk
+                  org.graalvm.js/js
                  org.graalvm.js/js-scriptengine
 		             commons-io/commons-io]}
  
  xyz.zcaudate/rt.jep
- {:description "runtime for jep" 
-  :include [[rt.jep :complete]]
-  :dependencies [black.ninia/jep]}
+  {:description "runtime for jep" 
+   :include [[rt.jep :complete]
+             [hara.runtime.jep :complete]]
+   :dependencies [black.ninia/jep]}
  
- xyz.zcaudate/rt.libpython
- {:description "runtime for libpython" 
-  :include [[rt.libpython :complete]]
-  :dependencies [clj-python/libpython-clj]} 
-
- xyz.zcaudate/rt.llvm
- {:description "runtime for llvm"
-  :include [[rt.llvm :complete]]}
- 
- xyz.zcaudate/rt.nginx
- {:description "runtime for nginx" 
-  :include [[rt.nginx :complete]]}
-
- xyz.zcaudate/rt.nix
- {:description "runtime for nix"
-  :include [[rt.nix :complete]]}
-  
- xyz.zcaudate/rt.postgres
- {:description "runtime for postgres" 
-  :include [[rt.postgres :complete]]}
-  
  xyz.zcaudate/rt.redis
- {:description "runtime for redis" 
-  :include [[rt.redis :complete]]
-  :bundle [{:path "resources" :include ["assets/rt.redis"]}]}
-  
- xyz.zcaudate/rt.shell
- {:description "shell runtime"
-  :include [[rt.shell :complete]]}
- 
- xyz.zcaudate/rt.solidity
- {:description "shell runtime"
-  :include [[rt.solidity :complete]]}
-
- xyz.zcaudate/rt.verilog
- {:description "runtime for verilog"
-  :include [[rt.verilog :complete]]}
+  {:description "runtime for redis" 
+   :include [[rt.redis :complete]
+             [hara.runtime.redis :complete]]
+   :bundle [{:path "resources" :include ["assets/rt.redis"]}]}
  
  xyz.zcaudate/script.css
  {:description "read and write css using clojure"
@@ -540,10 +470,32 @@
    com.fasterxml.jackson.datatype/jackson-datatype-jsr310]
   :bundle [{:path "target/classes" :include ["hara/lib/json"]}]}
  
- xyz.zcaudate/hara
- {:description "working with other languages"
-  :include [[hara :complete]]}
-  
+  xyz.zcaudate/hara
+  {:description "working with other languages"
+   :include [[hara :exclude [hara.runtime.postgres
+                             hara.runtime.graal
+                             hara.runtime.jep
+                             hara.runtime.redis
+                             hara.runtime.solidity
+                             hara.runtime.nginx
+                             hara.model.spec-postgres]]
+             [xt.lang :complete]]}
+
+ xyz.zcaudate/hara.runtime.nginx
+ {:description "nginx runtime support"
+  :include [[hara.runtime.nginx :complete]]}
+
+ xyz.zcaudate/postgres
+ {:description "postgres language and runtime support"
+  :include [[postgres :complete]
+            [hara.model.spec-postgres :complete]
+            [hara.runtime.postgres :complete]]}
+
+ xyz.zcaudate/solidity
+ {:description "solidity language and runtime support"
+  :include [[solidity.core :complete]
+            [hara.runtime.solidity :complete]]}
+    
  xyz.zcaudate/std.lib
  {:description "simple string methods for searching"
   :bundle [{:path "target/classes" 
@@ -621,20 +573,8 @@
  xyz.zcaudate/xtalk.db
  {:description "xtalk language"
   :include [[xt.db     :complete]]}
-
- xyz.zcaudate/xtalk.evm
- {:description "xtalk evm"
-  :include [[xt.evm :complete]]}
   
- xyz.zcaudate/xtalk.lang
-  {:description "xtalk language"
-   :include [[xt.lang               :complete]
-             [xt.lang.common-module :complete]]}
-
  xyz.zcaudate/xtalk.runtime
  {:description "xtalk language"
   :include [[kmi.lang     :complete]]}
- 
- xyz.zcaudate/xtalk.system
- {:description "xtalk language"
-  :include [[xt.sys     :complete]]}}
+ }

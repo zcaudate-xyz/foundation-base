@@ -36,6 +36,7 @@
 ^{:refer xt.db.text.base-check/check-args-type :added "4.0"}
 (fact "checks the arg type of inputs"
 
+  ^{:seedgen/base {:lua {:expect (l/as-lua [true nil])}}}
   (!.js
     (chk/check-args-type [1 2]
                          [{:symbol "x", :type "numeric"}
@@ -45,6 +46,7 @@
 ^{:refer xt.db.text.base-check/check-args-length :added "4.0"}
 (fact "checks that input and spec are of the same length"
 
+  ^{:seedgen/base {:lua {:expect (l/as-lua [true nil])}}}
   (!.js
     (chk/check-args-length [1 2]
                            [{:symbol "x", :type "numeric"}

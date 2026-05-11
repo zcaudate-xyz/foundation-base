@@ -212,7 +212,7 @@
 (invoke/definvoke seedgen-benchadd
   [:task {:template :code.transform
           :params {:title "SEEDGEN BENCHADD"
-                   :parallel true
+                   :parallel false
                    :print {:function true}}
           :main {:fn #'seedgen-benchadd-summary}
           :item {:list seedgen-test-namespaces

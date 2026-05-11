@@ -45,7 +45,7 @@
      (. state ["meta"] ["label"])
      (. state ["remote"] ["space"])
      (xt/x:obj-keys (. state ["queries"]))])
-  => ["xt.db.state" "db-node" "remote" []])
+  => (l/as-lua ["xt.db.state" "db-node" "remote" []]))
 
 ^{:refer xt.db.node.schema-state/get-schema :added "4.1"}
 (fact "gets the configured schema"

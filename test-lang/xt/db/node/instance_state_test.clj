@@ -61,6 +61,12 @@
 ^{:refer xt.db.node.instance-state/put-model :added "4.1"}
 (fact "stores a model and normalizes its views"
 
+  ^{:seedgen/base {:lua {:expect (l/as-lua ["orders"
+                                            "event.view"
+                                            ["ord-1"]
+                                            "idle"
+                                            {}
+                                            []])}}}
   (!.js
     (var state (schema-state/base-state {}))
     (var model (instance-state/put-model state "orders" (@! +model-spec+)))
@@ -115,6 +121,9 @@
 ^{:refer xt.db.node.instance-state/set-view-pending :added "4.1"}
 (fact "marks a view as pending"
 
+  ^{:seedgen/base {:lua {:expect (l/as-lua [true
+                                            "pending"
+                                            nil])}}}
   (!.js
     (var state (schema-state/base-state {}))
     (instance-state/put-model state "orders" (@! +model-spec+))
@@ -269,6 +278,9 @@
 ^{:refer xt.db.node.instance-state/remove-query :added "4.1"}
 (fact "removes cached queries and their watch entries"
 
+  ^{:seedgen/base {:lua {:expect (l/as-lua ["q1"
+                                            []
+                                            nil])}}}
   (!.js
     (var state (schema-state/base-state {}))
     (instance-state/watch-query state "q1" {"Order" true})

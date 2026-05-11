@@ -321,9 +321,7 @@
    [(instance-query/view-remote-spec {"remote" {"space" "room/b"}})
     (instance-query/view-remote-spec {"remote" {"meta" {"trace" true}}})
     (instance-query/view-remote-spec {"remote" {"channel" "ignored"}})])
-  => [{"space" "room/b"}
-      {"meta" {"trace" true}}
-      nil])
+  => (l/as-lua [{"space" "room/b"} {"meta" {"trace" true}} nil]))
 
 ^{:refer xt.db.node.instance-query/mark-view-dependents-stale :added "4.1"}
 (fact "marks dependent views stale and records the traversal"

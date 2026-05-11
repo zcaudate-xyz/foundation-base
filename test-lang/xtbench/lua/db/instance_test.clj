@@ -89,7 +89,7 @@
    (var db {:triggers {"watch" {:id "watch"}}})
    [(instance/remove-trigger db "watch")
     (xtd/get-in db ["triggers" "watch"])])
-  => [{"id" "watch"} nil])
+  => (l/as-lua [{"id" "watch"} nil]))
 
 ^{:refer xt.db.instance/db-trigger :added "4.1"}
 (fact "delegates trigger execution through the stored listeners"
@@ -123,7 +123,7 @@
     (xt/x:is-function? (. db ["sync_handler"]))
     (xt/x:is-object? (. db ["throttle"]))
     (xtd/get-in db ["opts" "mode"])])
-  => ["db.create" "instance-a" [] {} true true true "test"])
+  => (l/as-lua ["db.create" "instance-a" [] {} true true true "test"]))
 
 ^{:refer xt.db.instance/queue-event :added "4.1"}
 (fact "queues events and hands them to the throttle"
@@ -139,7 +139,7 @@
    [(xt/x:len (. db ["events"]))
     (. entry ["started"])
     (. entry ["args"])])
-  => [1 42 []])
+  => (l/as-lua [1 42 []]))
 
 ^{:refer xt.db.instance/sync-event :added "4.1"}
 (fact "returns passthrough values or trigger/table pairs for sync events"

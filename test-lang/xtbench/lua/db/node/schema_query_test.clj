@@ -51,14 +51,7 @@
      "UserAccount"
      ["nickname" ["profile" ["first_name"]]]
      true))
-  => {"input" [],
-      "return" "jsonb",
-      "flags" {},
-      "view" {"table" "UserAccount",
-              "type" "return",
-              "query" ["nickname"],
-              "access" {"roles" {}},
-              "guards" []}})
+  => (l/as-lua {"return" "jsonb", "flags" {}, "input" [], "view" {"table" "UserAccount", "access" {"roles" {}}, "query" ["nickname"], "guards" [], "type" "return"}}))
 
 ^{:refer xt.db.node.schema-query/view-query-return-combined :added "4.1"}
 (fact "merges inline return-query fragments into an existing return entry"
@@ -111,8 +104,7 @@
      {"view" {"query" {"status" "open"
                         "__deleted__" true}}
       "input" []}))
-  => {"view" {"query" {"status" "open"}}
-      "input" []})
+  => (l/as-lua {"input" [], "view" {"query" {"status" "open"}}}))
 
 ^{:refer xt.db.node.schema-query/query-check :added "4.1"}
 (fact "checks argument length and type against a view entry"
@@ -126,11 +118,7 @@
       {"input" [{"symbol" "i_organisation_id", "type" "uuid"}]}
       [1]
       false)])
-  => [[true nil]
-      [false {"status" "error"
-              "tag" "net/arg-typecheck-failed"
-              "data" {"input" 1
-                      "spec" {"symbol" "i_organisation_id", "type" "uuid"}}}]])
+  => (l/as-lua [[true nil] [false {"tag" "net/arg-typecheck-failed", "status" "error", "data" {"spec" {"symbol" "i_organisation_id", "type" "uuid"}, "input" 1}}]]))
 
 ^{:refer xt.db.node.schema-query/normalize-query :added "4.1"}
 (fact "normalizes query specs using the view args by default"
@@ -138,14 +126,10 @@
   (!.lua
     (schema-query/normalize-query
      {:table "UserAccount"
-       :select-method "by_organisation"
+        :select-method "by_organisation"
        :return-method "info"}
      {:args ["00000000-0000-0000-0000-000000000001"]}))
-  => {"table" "UserAccount"
-      "select_method" "by_organisation"
-      "select_args" ["00000000-0000-0000-0000-000000000001"]
-      "return_method" "info"
-      "return_args" []})
+  => (l/as-lua {"table" "UserAccount", "return_method" "info", "return_args" [], "select_args" ["00000000-0000-0000-0000-000000000001"], "select_method" "by_organisation"}))
 
 ^{:refer xt.db.node.schema-query/query-key :added "4.1"}
 (fact "uses an explicit query key or computes a stable key"

@@ -74,14 +74,7 @@
    "secondary-input" (model/view-input node "room/a" "orders" "secondary")
    "pending?" (model/view-pending node "room/a" "orders" "main")
     "error" (model/view-error node "room/a" "orders" "main")})
-  => {"state-tag" "xt.db.state"
-      "schema-id" "id"
-      "model-id" "orders"
-      "main-input" []
-      "secondary-id" "secondary"
-      "secondary-input" ["ord-2"]
-      "pending?" false
-      "error" nil})
+  => (l/as-lua {"state-tag" "xt.db.state", "secondary-id" "secondary", "model-id" "orders", "pending?" false, "error" nil, "schema-id" "id", "main-input" [], "secondary-input" ["ord-2"]}))
 
 ^{:refer xt.db.node.instance-model/normalize-remote :added "4.1"}
 (fact "merges state, remote-spec, and view-level remote settings"
@@ -183,8 +176,7 @@
                   "rows" (xt/x:obj-keys (. snapshot ["rows"]))})))))))))
      (fn [err]
        (repl/notify err))))
-  => {"cleared" true
-      "rows" []})
+  => (l/as-lua {"cleared" true, "rows" []}))
 
 ^{:refer xt.db.node.instance-model/view-refresh :added "4.1"}
 (fact "refreshes models and views with explicit space state"
@@ -341,8 +333,7 @@
                       "rows" (xt/x:obj-keys (. snapshot ["rows"]))})))
      (fn [err]
        (repl/notify err))))
-  => {"models" ["orders"]
-      "rows" []})
+  => (l/as-lua {"rows" [], "models" ["orders"]}))
 
 ^{:refer xt.db.node.instance-model/model-put :added "4.1"}
 (fact "registers a model and its declared views on the node space"
@@ -390,8 +381,7 @@
    (model/model-put node "room/a" "orders" fixtures/ModelSpec)
    {"id" (. (model/view-get node "room/a" "orders" "main") ["id"])
     "input" (model/view-input node "room/a" "orders" "main")})
-  => {"id" "main"
-      "input" []})
+  => (l/as-lua {"id" "main", "input" []}))
 
 ^{:refer xt.db.node.instance-model/view-val :added "4.1"}
 (fact "reads the current value for a refreshed view"
@@ -422,8 +412,7 @@
    (model/model-put node "room/a" "orders" fixtures/ModelSpec)
    {"main" (model/view-input node "room/a" "orders" "main")
     "open" (model/view-input node "room/a" "orders" "open")})
-  => {"main" []
-      "open" ["open"]})
+  => (l/as-lua {"main" [], "open" ["open"]}))
 
 ^{:refer xt.db.node.instance-model/view-pending :added "4.1"}
 (fact "tracks whether a view is waiting on a refresh"
@@ -445,7 +434,7 @@
    (model/install node fixtures/InstallOpts)
    (model/model-put node "room/a" "orders" fixtures/ModelSpec)
    {"error" (model/view-error node "room/a" "orders" "main")})
-  => {"error" nil})
+  => (l/as-lua {"error" nil}))
 
 ^{:refer xt.db.node.instance-model/run-remote-query :added "4.1"}
 (fact "stores remote query results in the local state cache"
@@ -587,9 +576,7 @@
                       "tables" (xt/x:obj-keys (. result ["tables"]))})))
      (fn [err]
        (repl/notify err))))
-  => {"query-key?" true
-      "value?" false
-      "tables" []})
+  => (l/as-lua {"value?" false, "tables" [], "query-key?" true}))
 
 ^{:refer xt.db.node.instance-model/handle-query-refresh :added "4.1"}
 (fact "refreshes a cached query or falls back to a normal query"
@@ -684,8 +671,7 @@
                           "rows" (xt/x:obj-keys (. snapshot ["rows"]))}))))))
      (fn [err]
        (repl/notify err))))
-  => {"cleared" true
-      "rows" []})
+  => (l/as-lua {"cleared" true, "rows" []}))
 
 ^{:refer xt.db.node.instance-model/handle-snapshot :added "4.1"}
 (fact "returns snapshot data directly from the current space state"
@@ -729,9 +715,7 @@
    [(model/view-remote-spec {"remote" {"space" "room/b"}})
     (model/view-remote-spec {"remote" {"meta" {"trace" true}}})
     (model/view-remote-spec {"remote" {"channel" "ignored"}})])
-  => [{"space" "room/b"}
-      {"meta" {"trace" true}}
-      nil])
+  => (l/as-lua [{"space" "room/b"} {"meta" {"trace" true}} nil]))
 
 ^{:refer xt.db.node.instance-model/refresh-seen? :added "4.1"}
 (fact "checks whether a refresh chain has visited a view"

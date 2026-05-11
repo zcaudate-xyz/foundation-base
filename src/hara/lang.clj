@@ -197,14 +197,24 @@
     m
     (ptr/get-entry m)))
 
+(defn- trim-trailing-nils
+  [v]
+  (->> v
+       reverse
+       (drop-while nil?)
+       reverse
+       vec))
+
 (defn as-lua
-  "change `[]` to `{}`"
+  "change `[]` to `{}` and trim trailing nils from vectors"
   {:added "4.0"}
   [input]
   (walk/prewalk (fn [form]
-                  (cond (and (vector? form)
-                             (empty? form))
-                        {}
+                  (cond (vector? form)
+                        (let [form (trim-trailing-nils form)]
+                          (if (empty? form)
+                            {}
+                            form))
 
                         (map? form)
                         (coll/filter-vals (comp not nil?) form)

@@ -1,5 +1,6 @@
 (ns hara.seedgen-test
-  (:require [std.fs :as fs]
+  (:require [code.project :as project]
+            [std.fs :as fs]
             [hara.seedgen.form-bench :as form-bench]
             [hara.seedgen.form-infile :as form-infile]
             [hara.seedgen :refer :all])
@@ -229,6 +230,36 @@
     {:root root
      :src-path src-path
      :test-path test-path
+     :lookup lookup
+     :project project}))
+
+(defn- seedgen-transform-context
+  [prefix]
+  (let [root      (.toFile (java.nio.file.Files/createTempDirectory prefix
+                                                                    (make-array java.nio.file.attribute.FileAttribute 0)))
+        test-dir  (doto (java.io.File. root "test/xt/sample")
+                    (.mkdirs))
+        path      (.getAbsolutePath (java.io.File. test-dir "transform_test.clj"))
+        bench-path (.getAbsolutePath (java.io.File. root "test/xtbench/lua/sample/transform_test.clj"))
+        lookup    {'xt.sample.transform-test path}
+        project   {:root (.getAbsolutePath root)
+                   :test-paths ["test"]}]
+    (spit path (str "(ns xt.sample.transform-test\n"
+                    "  (:use code.test)\n"
+                    "  (:require [hara.lang :as l]))\n\n"
+                    "^{:seedgen/root {:all true :langs [:lua]}}\n"
+                    "(l/script- :js {:runtime :basic})\n\n"
+                    "^{:refer xt.lang.spec-base/example.A :added \"4.1\"\n"
+                    "  :setup [(def +out+\n"
+                    "            {:value 1\n"
+                    "             :nested [1 2 3]})]}\n"
+                    "(fact \"applies self-referential transforms once\"\n"
+                    "  ^{:seedgen/base {:lua {:transform {+out+ (l/as-lua +out+)}}}}\n"
+                    "  (!.js +out+)\n"
+                    "  => +out+)\n"))
+    {:root root
+     :path path
+     :bench-path bench-path
      :lookup lookup
      :project project}))
 
@@ -562,6 +593,52 @@
       (finally
         (fs/delete root {:recursive true}))))
   => #"(?ms)\^\*\(!\.dt \(\+ 1 2 3\)\)")
+
+^{:refer hara.seedgen.form-infile/apply-item-transform-form :added "4.1"}
+(fact "form transforms rewrite each original match once while preserving layout"
+  (#'hara.seedgen.form-infile/apply-item-transform-form
+   "(fact \"single-pass\"\n  (!.js\n    +out+)\n  => +out+)"
+   (symbol "+out+")
+   '(l/as-lua +out+))
+  => "(fact \"single-pass\"\n  (!.js\n    (l/as-lua +out+))\n  => (l/as-lua +out+))")
+
+^{:refer hara.seedgen/seedgen-benchadd :added "4.1"}
+(fact "benchadd applies self-referential transforms once"
+  (let [{:keys [root bench-path lookup project]} (seedgen-transform-context "seedgen-benchadd-transform")]
+    (try
+      (form-bench/seedgen-benchadd 'xt.sample.transform
+                                   {:lang [:lua] :write true}
+                                   lookup
+                                   project)
+      (let [content (slurp bench-path)]
+        [(boolean (re-find #":setup \[\(def \+out\+\n\s+\{:value 1\n\s+:nested \[1 2 3\]\}\)\]" content))
+         (boolean (re-find #"=> \(l/as-lua \+out\+\)" content))
+         (boolean (re-find #"\(l/as-lua \(l/as-lua \+out\+\)\)" content))])
+      (finally
+        (fs/delete root {:recursive true}))))
+  => [true true false])
+
+^{:refer hara.seedgen/seedgen-benchadd :added "4.1"}
+(fact "benchadd keeps all xt.db.text.sql-call call facts"
+  (let [proj   (project/project)
+        lookup (project/file-lookup proj)
+        output (seedgen-benchadd '[xt.db.text.sql-call]
+                                 {:lang [:lua :python :dart]
+                                  :return :results
+                                  :print +seedgen-quiet-print+}
+                                 lookup
+                                 proj)
+        result (get output 'xt.db.text.sql-call-test)]
+    [(:functions result)
+     (mapv :lang (:outputs result))
+     (mapv :ns (:outputs result))
+     (count (:outputs result))])
+  => '[[call-api call-format-input call-format-query call-raw decode-return]
+       [:lua :python :dart]
+       [xtbench.lua.db.text.sql-call-test
+        xtbench.python.db.text.sql-call-test
+        xtbench.dart.db.text.sql-call-test]
+       3])
 
 ^{:refer hara.seedgen/seedgen-benchremove :added "4.1"}
 (fact "TODO")

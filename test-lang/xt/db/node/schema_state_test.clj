@@ -36,6 +36,7 @@
 ^{:refer xt.db.node.schema-state/base-state :added "4.1"}
 (fact "creates the base node state"
 
+  ^{:seedgen/base {:lua {:expect (l/as-lua ["xt.db.state" "db-node" "remote" []])}}}
   (!.js
     (var state
          (schema-state/base-state {"schema" (@! +schema+)

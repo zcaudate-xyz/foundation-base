@@ -324,6 +324,9 @@
 ^{:refer xt.db.node.instance-query/view-remote-spec :added "4.1"}
 (fact "returns only remote configs that can drive transport refreshes"
 
+  ^{:seedgen/base {:lua {:expect (l/as-lua [{"space" "room/b"}
+                                            {"meta" {"trace" true}}
+                                            nil])}}}
   (!.js
    [(instance-query/view-remote-spec {"remote" {"space" "room/b"}})
     (instance-query/view-remote-spec {"remote" {"meta" {"trace" true}}})

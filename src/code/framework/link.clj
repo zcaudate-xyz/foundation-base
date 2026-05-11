@@ -88,27 +88,31 @@
   {:added "3.0"}
   ([package lookup]
    (let [nsps (keys lookup)]
-     (mapcat (fn [[ns type select]]
-               (case type
-                 :base      (filter (fn [sym] (or (= sym ns)
-                                                  (.startsWith (str sym)
-                                                               (str ns ".base."))))
-                                    nsps)
-                 :complete  (filter (fn [sym] (or (= sym ns)
-                                                  (.startsWith (str sym)
-                                                               (str ns "."))))
-                                    nsps)
-                 :exclude   (filter (fn [sym]
-                                      (and (or (= sym ns)
-                                               (.startsWith (str sym)
-                                                            (str ns ".")))
-                                           (not ((set select) ns))))
-                                    nsps)
-                 (throw (ex-info "Not supported." {:type type
-                                                   :options [:base
-                                                             :complete
-                                                             :exclude]}))))
-             (:include package)))))
+      (mapcat (fn [[ns type select]]
+                (case type
+                  :base      (filter (fn [sym] (or (= sym ns)
+                                                   (.startsWith (str sym)
+                                                                (str ns ".base."))))
+                                     nsps)
+                  :complete  (filter (fn [sym] (or (= sym ns)
+                                                   (.startsWith (str sym)
+                                                                (str ns "."))))
+                                     nsps)
+                  :exclude   (filter (fn [sym]
+                                       (and (or (= sym ns)
+                                                (.startsWith (str sym)
+                                                             (str ns ".")))
+                                            (not-any? (fn [excluded]
+                                                        (or (= sym excluded)
+                                                            (.startsWith (str sym)
+                                                                         (str excluded "."))))
+                                                      select)))
+                                     nsps)
+                  (throw (ex-info "Not supported." {:type type
+                                                    :options [:base
+                                                              :complete
+                                                              :exclude]}))))
+              (:include package)))))
 
 (defn collect-entries
   "collects all entries given packages and lookups

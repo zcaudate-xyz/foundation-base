@@ -77,8 +77,11 @@
      sample/SchemaLookup
      nil))
   => [["UserAccount" ["00000000-0000-0000-0000-000000000000"]]
-      ["UserProfile" ["c4643895-b0ce-44cc-b07b-2386bf18d43b"]]]
+       ["UserProfile" ["c4643895-b0ce-44cc-b07b-2386bf18d43b"]]]
 
+  ^{:seedgen/base {:lua {:expect (l/as-lua [{"UserAccount" true "UserProfile" true}
+                                            nil
+                                            nil])}}}
   (!.js
     (var cache {:rows {}})
     (cache/cache-process-event-sync

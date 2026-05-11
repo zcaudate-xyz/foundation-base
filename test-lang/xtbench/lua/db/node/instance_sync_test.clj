@@ -76,11 +76,10 @@
 (fact "normalizes db/sync and db/remove keys"
 
   (!.lua
-    (instance-sync/normalize-sync
-     {"db/sync" {"Order" []}}
-     {"db/remove" {"Order" ["ord-1"]}}))
-  => {"db/sync" {"Order" []}
-      "db/remove" {"Order" ["ord-1"]}})
+     (instance-sync/normalize-sync
+      {"db/sync" {"Order" []}}
+      {"db/remove" {"Order" ["ord-1"]}}))
+  => (l/as-lua {"db/remove" {"Order" ["ord-1"]}, "db/sync" {"Order" []}}))
 
 ^{:refer xt.db.node.instance-sync/prepare-sync :added "4.1"}
 (fact "validates sync request shapes"
@@ -162,7 +161,7 @@
      (xt/x:obj-keys (. state ["watch"]))
      (xt/x:obj-keys (. state ["view_watch"]))
      (xtd/get-in state ["models" "orders" "views" "main" "status"])])
-  => [[] [] [] "stale"])
+  => (l/as-lua [[] [] [] "stale"]))
 
 ^{:refer xt.db.node.instance-sync/process-cache-payload :added "4.1"}
 (fact "refreshes dependent views when auto-refreshing affected queries"

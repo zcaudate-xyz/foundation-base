@@ -86,6 +86,7 @@
 ^{:refer xt.db.instance/remove-trigger :added "4.1"}
 (fact "removes triggers from the db map"
 
+  ^{:seedgen/base {:lua {:expect (l/as-lua [{"id" "watch"} nil])}}}
   (!.js
    (var db {:triggers {"watch" {:id "watch"}}})
    [(instance/remove-trigger db "watch")
@@ -106,6 +107,7 @@
 ^{:refer xt.db.instance/db-create :added "4.1"}
 (fact "creates db wrappers with handlers and throttle state"
 
+  ^{:seedgen/base {:lua {:expect (l/as-lua ["db.create" "instance-a" [] {} true true true "test"])}}}
   (!.js
    (xt/x:set-key instance/IMPL
                  "db.create"
@@ -129,6 +131,7 @@
 ^{:refer xt.db.instance/queue-event :added "4.1"}
 (fact "queues events and hands them to the throttle"
 
+  ^{:seedgen/base {:lua {:expect (l/as-lua [1 42 []])}}}
   (!.js
    (var db {:events []
             :throttle (th/throttle-create

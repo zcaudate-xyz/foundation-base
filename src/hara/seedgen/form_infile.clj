@@ -649,43 +649,28 @@
   [s from to]
   (if (= from to)
     s
-    (letfn [(next-after-subtree [zloc]
-              (loop [current zloc]
-                (or (nav/right current)
-                    (let [parent (nav/up current)]
-                      (when (and parent
-                                 (not= parent current))
-                        (recur parent))))))
-            (next-preorder [zloc]
-              (or (nav/down zloc)
-                  (next-after-subtree zloc)))
-            (replace-once [expr-str]
-              (let [root     (nav/parse-root expr-str)
-                    expr-nav (nav/down root)
-                    body-nav (some-> expr-nav form-common/nav-body)]
-                (if body-nav
-                  (loop [current body-nav]
-                    (cond
-                      (nil? current)
-                      [expr-str false]
-
-                      (= from (nav/value current))
-                      [(-> current
-                           (nav/replace to)
-                           nav/root-string)
-                       true]
-
-                      :else
-                      (if-let [next (next-preorder current)]
-                        (recur next)
-                        [expr-str false])))
-                  [expr-str false])))]
-      (loop [out s]
-        (let [[next-out replaced?] (replace-once out)]
-          (if (and replaced?
-                   (not= out next-out))
-            (recur next-out)
-            next-out))))))
+    (letfn [(rewrite-postwalk [zloc]
+              (let [zloc (if-let [child (nav/down zloc)]
+                           (loop [parent zloc
+                                  child child]
+                             (if child
+                               (let [child'  (rewrite-postwalk child)
+                                     next    (nav/right child')
+                                     parent' (nav/up child')]
+                                 (recur parent' next))
+                               parent))
+                           zloc)]
+                (if (= from (nav/value zloc))
+                  (nav/replace zloc to)
+                  zloc)))]
+      (let [root     (nav/parse-root s)
+            expr-nav (nav/down root)
+            body-nav (some-> expr-nav form-common/nav-body)]
+        (if body-nav
+          (-> body-nav
+              rewrite-postwalk
+              nav/root-string)
+          s)))))
 
 (defn- apply-item-transform-string
   [s entry item lang]

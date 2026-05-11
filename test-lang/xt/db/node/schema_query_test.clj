@@ -47,6 +47,18 @@
 ^{:refer xt.db.node.schema-query/view-query-return-entry :added "4.1"}
 (fact "creates a return entry from an inline return query"
 
+  ^{:seedgen/base
+    {:lua
+     {:expect
+      (l/as-lua
+       {"input" []
+        "return" "jsonb"
+        "flags" {}
+        "view" {"table" "UserAccount",
+                "type" "return",
+                "query" ["nickname"],
+                "access" {"roles" {}},
+                "guards" []}})}}}
   (!.js
     (schema-query/view-query-return-entry
      "UserAccount"
@@ -107,6 +119,8 @@
 ^{:refer xt.db.node.schema-query/view-local-transform :added "4.1"}
 (fact "removes __deleted__ markers from local view entries"
 
+  ^{:seedgen/base {:lua {:expect (l/as-lua {"view" {"query" {"status" "open"}}
+                                            "input" []})}}}
   (!.js
     (schema-query/view-local-transform
      {"view" {"query" {"status" "open"
@@ -118,6 +132,15 @@
 ^{:refer xt.db.node.schema-query/query-check :added "4.1"}
 (fact "checks argument length and type against a view entry"
 
+  ^{:seedgen/base
+    {:lua
+     {:expect
+      (l/as-lua
+       [[true nil]
+        [false {"status" "error"
+                "tag" "net/arg-typecheck-failed"
+                "data" {"input" 1
+                        "spec" {"symbol" "i_organisation_id", "type" "uuid"}}}]])}}}
   (!.js
     [(schema-query/query-check
       {"input" [{"symbol" "i_organisation_id", "type" "uuid"}]}
@@ -136,10 +159,19 @@
 ^{:refer xt.db.node.schema-query/normalize-query :added "4.1"}
 (fact "normalizes query specs using the view args by default"
 
+  ^{:seedgen/base
+    {:lua
+     {:expect
+      (l/as-lua
+       {"table" "UserAccount"
+        "select_method" "by_organisation"
+        "select_args" ["00000000-0000-0000-0000-000000000001"]
+        "return_method" "info"
+        "return_args" []})}}}
   (!.js
     (schema-query/normalize-query
      {:table "UserAccount"
-       :select-method "by_organisation"
+        :select-method "by_organisation"
        :return-method "info"}
      {:args ["00000000-0000-0000-0000-000000000001"]}))
   => {"table" "UserAccount"

@@ -72,12 +72,7 @@
       (xtd/get-in state ["models" "orders" "views" "main" "status"])
       (xtd/get-in state ["models" "orders" "deps"])
       (xtd/get-in state ["models" "orders" "unknown_deps"])])
-  => ["orders"
-      "event.view"
-      ["ord-1"]
-      "idle"
-      {}
-      []])
+  => (l/as-lua ["orders" "event.view" ["ord-1"] "idle" {} []]))
 
 ^{:refer xt.db.node.instance-state/put-view :added "4.1"}
 (fact "stores a single view on an existing model"
@@ -121,9 +116,7 @@
     [(. view ["pending"])
      (. view ["status"])
      (. view ["error"])])
-  => [true
-      "pending"
-      nil])
+  => (l/as-lua [true "pending" nil]))
 
 ^{:refer xt.db.node.instance-state/set-view-success :added "4.1"}
 (fact "stores a successful view value"
@@ -277,9 +270,7 @@
     [(. prev ["key"])
      (xt/x:obj-keys (. state ["queries"]))
      (. (. state ["watch"]) ["Order"])])
-  => ["q1"
-      []
-      nil])
+  => (l/as-lua ["q1" [] nil]))
 
 ^{:refer xt.db.node.instance-state/get-view-dependents :added "4.1"}
 (fact "indexes dependent views across models"

@@ -61,6 +61,18 @@
 ^{:refer xt.db.node.instance-model/ensure-space-state :added "4.1"}
 (fact "creates space state and exposes model/view helpers"
 
+  ^{:seedgen/base
+    {:lua
+     {:expect
+      (l/as-lua
+       {"state-tag" "xt.db.state"
+        "schema-id" "id"
+        "model-id" "orders"
+        "main-input" []
+        "secondary-id" "secondary"
+        "secondary-input" ["ord-2"]
+        "pending?" false
+        "error" nil})}}}
   (!.js
    (var node (event-node/node-create {"id" "node-a"}))
    (model/install node fixtures/InstallOpts)
@@ -164,6 +176,8 @@
 ^{:refer xt.db.node.instance-model/clear :added "4.1"}
 (fact "clears cache rows through the public request wrapper"
 
+  ^{:seedgen/base {:lua {:expect (l/as-lua {"cleared" true
+                                            "rows" []})}}}
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-a"}))
     (model/install node fixtures/InstallOpts)
@@ -330,6 +344,8 @@
 ^{:refer xt.db.node.instance-model/snapshot :added "4.1"}
 (fact "returns the current models and rows for a node space"
 
+  ^{:seedgen/base {:lua {:expect (l/as-lua {"models" ["orders"]
+                                            "rows" []})}}}
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-f"}))
     (model/install node fixtures/InstallOpts)
@@ -385,6 +401,8 @@
 ^{:refer xt.db.node.instance-model/view-get :added "4.1"}
 (fact "returns a registered view from the node space"
 
+  ^{:seedgen/base {:lua {:expect (l/as-lua {"id" "main"
+                                            "input" []})}}}
   (!.js
    (var node (event-node/node-create {"id" "node-j"}))
    (model/install node fixtures/InstallOpts)
@@ -417,6 +435,8 @@
 ^{:refer xt.db.node.instance-model/view-input :added "4.1"}
 (fact "reads the configured input for a view"
 
+  ^{:seedgen/base {:lua {:expect (l/as-lua {"main" []
+                                            "open" ["open"]})}}}
   (!.js
    (var node (event-node/node-create {"id" "node-l"}))
    (model/install node fixtures/InstallOpts)
@@ -441,6 +461,7 @@
 ^{:refer xt.db.node.instance-model/view-error :added "4.1"}
 (fact "exposes the current view error state"
 
+  ^{:seedgen/base {:lua {:expect (l/as-lua {"error" nil})}}}
   (!.js
    (var node (event-node/node-create {"id" "node-n"}))
    (model/install node fixtures/InstallOpts)
@@ -564,6 +585,9 @@
 ^{:refer xt.db.node.instance-model/handle-query :added "4.1"}
 (fact "handles a local query payload directly"
 
+  ^{:seedgen/base {:lua {:expect (l/as-lua {"query-key?" true
+                                            "value?" false
+                                            "tables" []})}}}
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-s"}))
     (model/install node fixtures/InstallOpts)
@@ -666,6 +690,8 @@
 ^{:refer xt.db.node.instance-model/handle-clear :added "4.1"}
 (fact "clears cache state and invalidates all tables"
 
+  ^{:seedgen/base {:lua {:expect (l/as-lua {"cleared" true
+                                            "rows" []})}}}
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-w"}))
     (model/install node fixtures/InstallOpts)
@@ -727,6 +753,9 @@
 ^{:refer xt.db.node.instance-model/view-remote-spec :added "4.1"}
 (fact "returns only meaningful remote view configs"
 
+  ^{:seedgen/base {:lua {:expect (l/as-lua [{"space" "room/b"}
+                                            {"meta" {"trace" true}}
+                                            nil])}}}
   (!.js
    [(model/view-remote-spec {"remote" {"space" "room/b"}})
     (model/view-remote-spec {"remote" {"meta" {"trace" true}}})

@@ -76,7 +76,7 @@
      sample/SchemaLookup
      nil))
   => [["UserAccount" ["00000000-0000-0000-0000-000000000000"]]
-      ["UserProfile" ["c4643895-b0ce-44cc-b07b-2386bf18d43b"]]]
+       ["UserProfile" ["c4643895-b0ce-44cc-b07b-2386bf18d43b"]]]
 
   (!.lua
     (var cache {:rows {}})
@@ -98,9 +98,7 @@
     [(xtd/arr-lookup touched)
      (xtd/get-in cache ["rows" "UserAccount" "00000000-0000-0000-0000-000000000000"])
      (xtd/get-in cache ["rows" "UserProfile" "c4643895-b0ce-44cc-b07b-2386bf18d43b"])])
-  => [{"UserAccount" true "UserProfile" true}
-      nil
-      nil])
+  => (l/as-lua [{"UserProfile" true, "UserAccount" true} nil nil]))
 
 ^{:refer xt.db.runtime.cache/cache-pull-sync :added "4.1"}
 (fact "pulls linked data back out of the cache rows"

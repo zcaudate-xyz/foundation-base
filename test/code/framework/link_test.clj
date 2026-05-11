@@ -35,17 +35,61 @@
 
 ^{:refer code.framework.link/collect-entries-single :added "3.0"}
 (fact "collects all namespaces for given lookup and package"
-
+ 
   (collect-entries-single (get -packages- 'xyz.zcaudate/std.lib)
                           (:clj -lookups-))
   => coll?)
 
+^{:refer code.framework.link/collect-entries-single :added "4.0"}
+(fact "supports subtree exclusions when collecting package entries"
+  (->> (collect-entries-single {:include [[foo :exclude [foo.bar]]]}
+                               '{foo ""
+                                 foo.alpha ""
+                                 foo.bar ""
+                                 foo.bar.baz ""
+                                 foo.baz ""})
+       (set))
+  => '#{foo foo.alpha foo.baz})
+
 ^{:refer code.framework.link/collect-entries :added "3.0"}
 (fact "collects all entries given packages and lookups"
-
+ 
   (-> (collect-entries -packages- -lookups-)
       (get-in '[xyz.zcaudate/std.lib :entries]))
   => coll?)
+
+^{:refer code.framework.link/collect-entries :added "4.0"}
+(fact "splits runtime namespaces into dedicated packages"
+  (let [entries          (collect-entries -packages- -lookups-)
+        hara-entries     (set (get-in entries '[xyz.zcaudate/hara :entries]))
+        postgres-entries (set (get-in entries '[xyz.zcaudate/postgres :entries]))
+        solidity-entries (set (get-in entries '[xyz.zcaudate/solidity :entries]))
+        nginx-entries    (set (get-in entries '[xyz.zcaudate/hara.runtime.nginx :entries]))
+        graal-entries    (set (get-in entries '[xyz.zcaudate/rt.graal :entries]))
+        jep-entries      (set (get-in entries '[xyz.zcaudate/rt.jep :entries]))
+        redis-entries    (set (get-in entries '[xyz.zcaudate/rt.redis :entries]))]
+    [(boolean (hara-entries [:clj 'hara.runtime.postgres]))
+     (boolean (hara-entries [:clj 'hara.runtime.solidity]))
+     (boolean (hara-entries [:clj 'hara.runtime.solidity.client]))
+     (boolean (hara-entries [:clj 'hara.runtime.graal]))
+     (boolean (hara-entries [:clj 'hara.runtime.jep]))
+     (boolean (hara-entries [:clj 'hara.runtime.redis]))
+     (boolean (hara-entries [:clj 'hara.runtime.nginx]))
+     (boolean (hara-entries [:clj 'hara.runtime.nginx.config]))
+     (boolean (hara-entries [:clj 'xt.lang.common-lib]))
+     (boolean (postgres-entries [:clj 'postgres.core]))
+     (boolean (postgres-entries [:clj 'hara.runtime.postgres]))
+     (boolean (solidity-entries [:clj 'solidity.core]))
+     (boolean (solidity-entries [:clj 'hara.runtime.solidity]))
+     (boolean (solidity-entries [:clj 'hara.runtime.solidity.client]))
+     (boolean (nginx-entries [:clj 'hara.runtime.nginx]))
+     (boolean (nginx-entries [:clj 'hara.runtime.nginx.config]))
+     (boolean (graal-entries [:clj 'hara.runtime.graal]))
+     (boolean (jep-entries [:clj 'hara.runtime.jep]))
+     (boolean (redis-entries [:clj 'hara.runtime.redis]))
+     (contains? entries 'xyz.zcaudate/xtalk.lang)
+     (contains? entries 'xyz.zcaudate/hara.runtime.solidity)])
+  => [false false false false false false false false true true true true true true true true true true true false false])
 
 ^{:refer code.framework.link/overlapped-entries-single :added "3.0"}
 (fact "finds any overlaps between entries"

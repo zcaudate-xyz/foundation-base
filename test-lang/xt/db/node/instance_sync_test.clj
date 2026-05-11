@@ -76,6 +76,8 @@
 ^{:refer xt.db.node.instance-sync/normalize-sync :added "4.1"}
  (fact "normalizes db/sync and db/remove keys"
 
+  ^{:seedgen/base {:lua {:expect (l/as-lua {"db/sync" {"Order" []}
+                                            "db/remove" {"Order" ["ord-1"]}})}}}
    (!.js
      (instance-sync/normalize-sync
       {"db/sync" {"Order" []}}
@@ -147,6 +149,7 @@
 ^{:refer xt.db.node.instance-sync/clear-state-cache :added "4.1"}
 (fact "clears cache rows and marks bound views stale"
 
+  ^{:seedgen/base {:lua {:expect (l/as-lua [[] [] [] "stale"])}}}
   (!.js
     (var state
          (schema-state/base-state {"schema" (@! +schema+)
