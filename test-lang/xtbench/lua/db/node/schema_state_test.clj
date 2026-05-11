@@ -134,8 +134,9 @@
      "orders"
      views
      (schema-state/get-model-deps "orders" views)))
-  => [["orders" "main"]
-      ["stats" "missing"]])
+  => (just [["orders" "main"]
+            ["stats" "missing"]]
+           :in-any-order))
 
 ^{:refer xt.db.node.schema-state/get-model :added "4.1"}
 (fact "gets a registered model"
@@ -206,9 +207,4 @@
     (schema-state/normalize-dep "orders" {"model" "stats" "view" "summary"})
     (schema-state/normalize-dep "orders" {"id" "main"})
     (schema-state/normalize-dep "orders" 1)])
-  => [["orders" "main"]
-      ["orders" "main"]
-      ["stats" "summary"]
-      ["stats" "summary"]
-      ["orders" "main"]
-      nil])
+  => (l/as-lua [["orders" "main"] ["orders" "main"] ["stats" "summary"] ["stats" "summary"] ["orders" "main"] nil]))

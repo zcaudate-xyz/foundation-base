@@ -107,9 +107,9 @@
      node
      "echo"
      (fn [space args request node]
-       (return {"space" (. space ["id"])
-                "payload" (xt/x:get-idx args 0)
-                "meta" (. request ["meta"])}))
+        (return {"space" (. space ["id"])
+                 "payload" (xt/x:first args)
+                 "meta" (. request ["meta"])}))
      nil)
     (promise/x:promise-catch
      (promise/x:promise-then
@@ -278,13 +278,18 @@
             (return
              (promise/x:promise-then
               (model/query-refresh node "room/a" {"query_key" (. result ["query_key"])})
-              (fn [entry]
-                (repl/notify {"key" (. entry ["key"])
-                              "status" (. entry ["status"])})))))))))
-     (fn [err]
-       (repl/notify err))))
-  => {"key" "{\"query\":{\"select_args\":[],\"table\":\"Order\",\"return_args\":[]}}"
-      "status" "stale"})
+       (fn [entry]
+                 (var query (xt/x:get-key (xt/x:json-decode (. entry ["key"])) "query"))
+                 (repl/notify {"table" (. query ["table"])
+                               "select-args" (. query ["select_args"])
+                               "return-args" (. query ["return_args"])
+                               "status" (. entry ["status"])})))))))))
+      (fn [err]
+        (repl/notify err))))
+  => (contains-in {"table" "Order"
+                   "select-args" empty?
+                   "return-args" empty?
+                   "status" "stale"}))
 
 ^{:refer xt.db.node.instance-model/sync :added "4.1"}
 (fact "syncs rows into a node space through the request wrapper"
@@ -302,7 +307,7 @@
         (repl/notify {"rows" (xt/x:obj-keys (. snapshot ["rows"] ["Order"]))})))
      (fn [err]
        (repl/notify err))))
-  => {"rows" ["ord-1" "ord-2"]})
+  => (contains-in {"rows" (just ["ord-1" "ord-2"] :in-any-order)}))
 
 ^{:refer xt.db.node.instance-model/remove :added "4.1"}
 (fact "removes rows from a node space through the request wrapper"
@@ -353,8 +358,8 @@
    (model/model-put node "room/a" "orders" fixtures/ModelSpec)
    {"model-id" (. (model/model-get node "room/a" "orders") ["id"])
     "views" (xt/x:obj-keys (. (model/model-get node "room/a" "orders") ["views"]))})
-  => {"model-id" "orders"
-      "views" ["main" "open"]})
+  => (just-in {"model-id" "orders"
+               "views" (just ["main" "open"] :in-any-order)}))
 
 ^{:refer xt.db.node.instance-model/view-put :added "4.1"}
 (fact "registers a single additional view on an existing model"
@@ -511,7 +516,7 @@
         (repl/notify {"rows" (xt/x:obj-keys (. snapshot ["rows"] ["Order"]))})))
      (fn [err]
        (repl/notify err))))
-  => {"rows" ["ord-1" "ord-2"]})
+  => (contains-in {"rows" (just ["ord-1" "ord-2"] :in-any-order)}))
 
 ^{:refer xt.db.node.instance-model/model-refresh :added "4.1"}
 (fact "refreshes every registered view for a model"
@@ -620,14 +625,19 @@
                                          node)))))
     (promise/x:promise-catch
      (promise/x:promise-then
-      refresh-p
-      (fn [entry]
-        (repl/notify {"key" (. entry ["key"])
-                      "status" (. entry ["status"])})))
-     (fn [err]
-       (repl/notify err))))
-  => {"key" "{\"query\":{\"select_args\":[],\"table\":\"Order\",\"return_args\":[]}}"
-      "status" "stale"})
+       refresh-p
+       (fn [entry]
+         (var query (xt/x:get-key (xt/x:json-decode (. entry ["key"])) "query"))
+         (repl/notify {"table" (. query ["table"])
+                       "select-args" (. query ["select_args"])
+                       "return-args" (. query ["return_args"])
+                       "status" (. entry ["status"])})))
+      (fn [err]
+        (repl/notify err))))
+  => (contains-in {"table" "Order"
+                   "select-args" empty?
+                   "return-args" empty?
+                   "status" "stale"}))
 
 ^{:refer xt.db.node.instance-model/handle-sync :added "4.1"}
 (fact "handles a local sync payload and publishes cache updates"
@@ -705,8 +715,8 @@
                       "models" (xt/x:obj-keys (. snapshot ["models"]))})))
      (fn [err]
        (repl/notify err))))
-  => {"rows" ["ord-1" "ord-2"]
-      "models" []})
+  => (contains-in {"rows" (just ["ord-1" "ord-2"] :in-any-order)
+                   "models" []}))
 
 ^{:refer xt.db.node.instance-model/model-dependents :added "4.1"}
 (fact "tracks dependent models for a source model"

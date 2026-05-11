@@ -574,7 +574,7 @@
         (do (var k (xt/x:first arr))
             (cond (xt/x:is-array? obj)
                   (return (:? (xt/x:is-number? k)
-                              (xt/x:get-idx obj k)
+                              (xt/x:get-idx obj (xt/x:offset k))
                               nil))
 
                   (xt/x:is-object? obj)
@@ -592,7 +592,7 @@
     (var k (xt/x:get-idx arr (xt/x:offset i)))
     (cond (xt/x:is-array? curr)
           (if (xt/x:is-number? k)
-            (:= curr (xt/x:get-idx curr k))
+            (:= curr (xt/x:get-idx curr (xt/x:offset k)))
             (return nil))
 
           (xt/x:is-object? curr)

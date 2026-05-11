@@ -76,9 +76,9 @@
 (fact "normalizes db/sync and db/remove keys"
 
   (!.py
-    (instance-sync/normalize-sync
-     {"db/sync" {"Order" []}}
-     {"db/remove" {"Order" ["ord-1"]}}))
+     (instance-sync/normalize-sync
+      {"db/sync" {"Order" []}}
+      {"db/remove" {"Order" ["ord-1"]}}))
   => {"db/sync" {"Order" []}
       "db/remove" {"Order" ["ord-1"]}})
 

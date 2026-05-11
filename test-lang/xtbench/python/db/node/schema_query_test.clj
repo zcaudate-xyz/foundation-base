@@ -138,7 +138,7 @@
   (!.py
     (schema-query/normalize-query
      {:table "UserAccount"
-       :select-method "by_organisation"
+        :select-method "by_organisation"
        :return-method "info"}
      {:args ["00000000-0000-0000-0000-000000000001"]}))
   => {"table" "UserAccount"

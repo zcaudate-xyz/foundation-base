@@ -5,7 +5,8 @@
 ^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.common-data :as xtd]
+   :require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.db.runtime.cache :as cache]
              [xt.db.runtime.cache-util :as util]
              [xt.db.helpers.data-main-test :as sample]]})
@@ -132,6 +133,7 @@
 ^{:refer xt.db.runtime.cache/cache-delete-sync :added "4.1"}
 (fact "deletes rows directly from the cache db"
 
+  ^{:seedgen/base {:lua {:expect (l/as-lua [1 false nil])}}}
   (!.js
     (var cache {:rows {}})
     (cache/cache-process-event-sync
@@ -142,13 +144,13 @@
      sample/SchemaLookup
      nil)
     (var removed
-         (cache/cache-delete-sync
+     (cache/cache-delete-sync
           cache
           sample/Schema
           "UserProfile"
           ["c4643895-b0ce-44cc-b07b-2386bf18d43b"]
           nil))
-    [(. removed ["length"])
+    [(xt/x:len removed)
      (util/has-entry (. cache ["rows"]) "UserProfile" "c4643895-b0ce-44cc-b07b-2386bf18d43b")
      (xtd/get-in cache ["rows"
                         "UserAccount"

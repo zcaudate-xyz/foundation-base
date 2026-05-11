@@ -283,7 +283,7 @@
                    {"id" "{{RETURN}}"}
                    {}
                    {}))
-  => (l/as-lua +out+))
+  => +out+)
 
 ^{:refer xt.db.text.sql-view/tree-combined :added "4.0"
   :setup [(def +select+
@@ -320,7 +320,7 @@
                      nil
                      {}
                      {}))
-  => (l/as-lua +out+))
+  => +out+)
 
 ^{:refer xt.db.text.sql-view/query-fill-input :added "4.0"
   :setup [(def +out+
@@ -335,7 +335,7 @@
     (var entry (@! (gen/bind-view user/organisation-all-as-member)))
     (var tree  (v/tree-select sample/Schema entry {} {}))
     (v/query-fill-input tree ["<ORG-ID>"] (. entry ["input"]) false))
-  => (l/as-lua +out+))
+  => +out+)
 
 ^{:refer xt.db.text.sql-view/query-select :added "4.0"
   :setup [(def +select+
@@ -360,7 +360,7 @@
                      []
                      {}
                      false)])
-  => (l/as-lua +out+))
+  => +out+)
 
 ^{:refer xt.db.text.sql-view/query-count :added "4.0"
   :setup [(def +select+
@@ -385,7 +385,7 @@
                     []
                     {}
                     false)])
-  => (l/as-lua +out+))
+  => +out+)
 
 ^{:refer xt.db.text.sql-view/query-return :added "4.0"
   :setup [(def +return+
@@ -412,7 +412,7 @@
                      []
                      {}
                      false)])
-  => (l/as-lua +out+))
+  => +out+)
 
 ^{:refer xt.db.text.sql-view/query-return-bulk :added "4.0"}
 (fact "creates a bulk return statement"
@@ -457,7 +457,7 @@
                        nil
                        {}
                        false)])
-  => (l/as-lua +out+))
+  => +out+)
 
 (comment
   (s/pedantic ['xt.db.text.sql-view])

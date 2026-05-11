@@ -62,7 +62,8 @@
   [[_ obj]]
   (template/$ (do (var t := (type ~obj))
                   (if (== t "table")
-                    (if (or (and (not= nil (. cjson ["array_mt"]))
+                    (if (or (and (not= nil cjson)
+                                 (not= nil (. cjson ["array_mt"]))
                                  (== (getmetatable ~obj) (. cjson ["array_mt"])))
                             (not= nil (. '(~obj) [1])))
                       (return "array")
@@ -185,7 +186,8 @@
 (defn lua-tf-x-is-object?
   [[_ e]]
   (template/$ (or (and (== "table" (type ~e))
-                       (or (== nil (. cjson ["array_mt"]))
+                       (or (== nil cjson)
+                           (== nil (. cjson ["array_mt"]))
                            (not= (getmetatable ~e) (. cjson ["array_mt"])))
                        (== nil (. '(~e) [1])))
                    (== "object" (type ~e)))))
@@ -193,8 +195,9 @@
 (defn lua-tf-x-is-array?
   [[_ e]]
   (template/$ (or (and (== "table" (type ~e))
-                       (or (and (not= nil (. cjson ["array_mt"]))
-                                (== (getmetatable ~e) (. cjson ["array_mt"])))
+                       (or (and (not= nil cjson)
+                                (not= nil (. cjson ["array_mt"]))
+                                 (== (getmetatable ~e) (. cjson ["array_mt"])))
                            (not= nil (. '(~e) [1]))))
                    (== "array" (type ~e)))))
 
@@ -321,11 +324,11 @@
                                (~key-fn b)))))))
 
 (def +lua-arr+
-  {:x-arr-clone       {:macro #'lua-tf-x-arr-clone      :emit :macro  :type :template}
-   :x-arr-slice       {:macro #'lua-tf-x-arr-slice      :emit :macro  :type :template}
-   :x-arr-push        {:emit :alias :raw 'table.insert}
-   :x-arr-pop         {:emit :alias :raw 'table.remove}
-   :x-arr-remove      {:macro #'lua-tf-x-arr-remove     :emit :macro  :type :template}
+   {:x-arr-clone       {:macro #'lua-tf-x-arr-clone      :emit :macro  :type :template}
+     :x-arr-slice       {:macro #'lua-tf-x-arr-slice      :emit :macro  :type :template}
+     :x-arr-push        {:emit :alias :raw 'table.insert}
+     :x-arr-pop         {:emit :alias :raw 'table.remove}
+    :x-arr-remove      {:macro #'lua-tf-x-arr-remove     :emit :macro  :type :template}
    :x-arr-find        {:macro #'lua-tf-x-arr-remove     :emit :macro  :type :template}
    :x-arr-push-first  {:macro #'lua-tf-x-arr-push-first :emit :macro}
    :x-arr-pop-first   {:macro #'lua-tf-x-arr-pop-first  :emit :macro}

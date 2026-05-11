@@ -98,8 +98,9 @@
    (instance/db-trigger
     {:triggers {"watch" {:id "watch"
                          :listen ["UserAccount"]
-                         :callback (fn [_db _trigger] nil)}}}
-    {"UserAccount" true}))
+                         :callback (fn [_db _trigger]
+                                     (return nil))}}}
+     {"UserAccount" true}))
   => ["watch"])
 
 ^{:refer xt.db.instance/db-create :added "4.1"}

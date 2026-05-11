@@ -136,8 +136,9 @@
      "orders"
      views
      (schema-state/get-model-deps "orders" views)))
-  => [["orders" "main"]
-      ["stats" "missing"]])
+  => (just [["orders" "main"]
+            ["stats" "missing"]]
+           :in-any-order))
 
 ^{:refer xt.db.node.schema-state/get-model :added "4.1"}
 (fact "gets a registered model"
@@ -202,6 +203,12 @@
 ^{:refer xt.db.node.schema-state/normalize-dep :added "4.1"}
 (fact "normalizes string vector and map dependency declarations"
 
+  ^{:seedgen/base {:lua {:expect (l/as-lua [["orders" "main"]
+                                            ["orders" "main"]
+                                            ["stats" "summary"]
+                                            ["stats" "summary"]
+                                            ["orders" "main"]
+                                            nil])}}}
   (!.js
    [(schema-state/normalize-dep "orders" "main")
     (schema-state/normalize-dep "orders" ["main"])

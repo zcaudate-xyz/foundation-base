@@ -132,9 +132,9 @@
   (var query-keys (instance-state/affected-query-ids state tables))
   (var view-bindings (instance-state/affected-view-bindings state tables))
   (var opts (or (xt/x:get-key state "opts") {}))
-  (var auto-refresh (:? (xt/x:has-key? opts "auto_refresh")
-                        (xt/x:get-key opts "auto_refresh")
-                        true))
+  (var auto-refresh true)
+  (when (xt/x:has-key? opts "auto_refresh")
+    (:= auto-refresh (xt/x:get-key opts "auto_refresh")))
   (var refreshed nil)
   (if auto-refresh
     (do (instance-query/mark-query-stale-many state query-keys payload)

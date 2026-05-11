@@ -5,6 +5,7 @@
 (l/script- :python
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.db.text.pgrest :as pgrest]]})
 
 (fact:global
@@ -105,9 +106,9 @@
      (. compiled ["path"])
      (. compiled ["query"])
      (. compiled ["url"])
-     (. (. (. compiled ["filters"]) [0]) ["path"])
-     (. (. (. compiled ["filters"]) [1]) ["op"])
-     (. (. compiled ["params"]) [2])])
+     (xtd/get-in compiled ["filters" 0 "path"])
+     (xtd/get-in compiled ["filters" 1 "op"])
+     (xtd/get-in compiled ["params" 2])])
   => ["query"
       "Order"
       "status,name:first_name,account(nickname)"

@@ -132,12 +132,12 @@
 (fact "merges query with clause"
 
   (!.lua
-    [(scope/merge-queries {} {})
+    [(scope/merge-queries [] [])
      (scope/merge-queries [{:a 1}] [{:a 2}])
      (scope/merge-queries [{:a 1}] [{:b 2}])
      (scope/merge-queries [{:a 1}] [{:b 2} {:c 3}])
      (scope/merge-queries [{:a 1} {:c 1}] [{:b 2} {:c 3}])])
-  => [{}
+  => [[]
       [{"a" 2}]
       [{"a" 1, "b" 2}]
       [{"a" 1, "b" 2} {"a" 1, "c" 3}]
@@ -253,11 +253,11 @@
 (fact "when empty, returns an empty array"
 
   (!.lua
-    [(scope/as-where-input {})
+    [(scope/as-where-input [])
      (scope/as-where-input [{:id "zcaudate"}
                             {:id "z1"}])
      (scope/as-where-input {:id "zcaudate"})])
-  => [{} [{"id" "zcaudate"} {"id" "z1"}] [{"id" "zcaudate"}]])
+  => [[] [{"id" "zcaudate"} {"id" "z1"}] [{"id" "zcaudate"}]])
 
 ^{:refer xt.db.text.base-scope/get-tree :added "4.0"
   :setup [(def +account+

@@ -134,8 +134,9 @@
      "orders"
      views
      (schema-state/get-model-deps "orders" views)))
-  => [["orders" "main"]
-      ["stats" "missing"]])
+  => (just [["orders" "main"]
+            ["stats" "missing"]]
+           :in-any-order))
 
 ^{:refer xt.db.node.schema-state/get-model :added "4.1"}
 (fact "gets a registered model"

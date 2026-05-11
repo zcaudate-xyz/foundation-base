@@ -30,7 +30,7 @@
 ^{:refer xt.db.runtime.sql/sql-gen-delete :added "4.0"}
 (fact "generates delete statements"
 
-  (!.lua.nginx
+  (!.lua
     (impl-sql/sql-gen-delete "HELLO"
                              ["A" "B"]
                              (ut/sqlite-opts nil)))

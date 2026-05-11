@@ -205,7 +205,7 @@
                     {}
                     [["account"]]]
                    {}))
-  => (l/as-lua +out+))
+  => +out+)
 
 ^{:refer xt.db.text.sql-graph/select :added "4.0"}
 (fact "encodes a select state given schema and graph"

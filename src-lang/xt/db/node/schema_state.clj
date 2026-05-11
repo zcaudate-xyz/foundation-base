@@ -29,9 +29,9 @@
   (cond (xt/x:is-array? dep)
         (if (== 1 (xt/x:len dep))
           (return [model-id
-                   (xt/x:get-idx dep 0)])
-          (return [(xt/x:get-idx dep 0)
-                   (xt/x:get-idx dep 1)]))
+                   (xt/x:first dep)])
+          (return [(xt/x:first dep)
+                   (xt/x:second dep)]))
 
         (xt/x:is-string? dep)
         (return [model-id dep])
