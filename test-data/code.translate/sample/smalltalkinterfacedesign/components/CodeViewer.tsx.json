@@ -6065,10 +6065,10 @@
                                   }
                                 },
                                 "extra": {
-                                  "rawValue": ";; Generated std.lang UI Component\n",
-                                  "raw": "';; Generated std.lang UI Component\\n'"
+                                  "rawValue": ";; Generated hara.lang UI Component\n",
+                                  "raw": "';; Generated hara.lang UI Component\\n'"
                                 },
-                                "value": ";; Generated std.lang UI Component\n"
+                                "value": ";; Generated hara.lang UI Component\n"
                               }
                             },
                             "leadingComments": [
@@ -6353,10 +6353,10 @@
                                   }
                                 },
                                 "extra": {
-                                  "rawValue": "  (:require [std.lang :as l]\n",
-                                  "raw": "'  (:require [std.lang :as l]\\n'"
+                                  "rawValue": "  (:require [hara.lang :as l]\n",
+                                  "raw": "'  (:require [hara.lang :as l]\\n'"
                                 },
-                                "value": "  (:require [std.lang :as l]\n"
+                                "value": "  (:require [hara.lang :as l]\n"
                               }
                             }
                           },
@@ -9622,10 +9622,10 @@
                                           }
                                         },
                                         "extra": {
-                                          "rawValue": "std.lang code copied to clipboard!",
-                                          "raw": "'std.lang code copied to clipboard!'"
+                                          "rawValue": "hara.lang code copied to clipboard!",
+                                          "raw": "'hara.lang code copied to clipboard!'"
                                         },
-                                        "value": "std.lang code copied to clipboard!"
+                                        "value": "hara.lang code copied to clipboard!"
                                       }
                                     ]
                                   }
@@ -11001,10 +11001,10 @@
                                                   }
                                                 },
                                                 "extra": {
-                                                  "rawValue": "std.lang code copied to clipboard!",
-                                                  "raw": "'std.lang code copied to clipboard!'"
+                                                  "rawValue": "hara.lang code copied to clipboard!",
+                                                  "raw": "'hara.lang code copied to clipboard!'"
                                                 },
-                                                "value": "std.lang code copied to clipboard!"
+                                                "value": "hara.lang code copied to clipboard!"
                                               }
                                             ]
                                           }
@@ -11940,10 +11940,10 @@
                                 }
                               },
                               "extra": {
-                                "rawValue": "Generated std.lang Code",
-                                "raw": "Generated std.lang Code"
+                                "rawValue": "Generated hara.lang Code",
+                                "raw": "Generated hara.lang Code"
                               },
-                              "value": "Generated std.lang Code"
+                              "value": "Generated hara.lang Code"
                             }
                           ]
                         },

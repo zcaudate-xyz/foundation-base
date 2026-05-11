@@ -1,4 +1,4 @@
-# Main Translation Guidelines for JS DSL (std.lang)
+# Main Translation Guidelines for JS DSL (hara.lang)
 
 This document consolidates the essential guidelines for translating JavaScript/TypeScript code into the Clojure-based Javascript DSL (JS DSL) using `std.lang`. It incorporates rules from `translate_dsl.md` and further clarifications based on practical application.
 
@@ -98,4 +98,4 @@ This document consolidates the essential guidelines for translating JavaScript/T
     *   `:import` for string-based external package imports (`"react-dnd"`).
 *   **Long interop method calls**: For readability, place method calls and arguments on a new line.
 
-This summary aims to guide future translations for accuracy and consistency with the std.lang JS DSL.
+This summary aims to guide future translations for accuracy and consistency with the hara.lang JS DSL.

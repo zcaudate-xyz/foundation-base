@@ -1,14 +1,14 @@
 
 
-# **std.lang (JS) DSL Specification**
+# **hara.lang (JS) DSL Specification**
 
 **Objective:** This document defines the syntax, conventions, and
  constraints for writing code using the Clojure-based Javascript DSL (JS DSL),
- based on the std.lang transpiler
+ based on the hara.lang transpiler
 
 The dsl format is given as <DESC>\n %JS ^: <E1> ^: <E2> %DSL ^: <T1> ^: <T2>
 where ^: is the start of a new line with a colon. This gives the spec for how to translate
-JS code to std.lang DSL. please follow the patterns, including precidence of 
+JS code to hara.lang DSL. please follow the patterns, including precidence of 
 
 For each of the code patterns in the JS section, translate to the DSL pattern, if
 there are multiple variations of DSL code, pick the DSL first over the rest.
@@ -633,16 +633,16 @@ All JS DSL code must be written in .clj files and wrapped in an (l/script ...) b
   * **(def.js ...)**: Defines a top-level Javascript variable.  
   * **Comments**: Use standard Lisp comments (;).  
   * match delimiters and indentation
-  * **IGNORE** everything you know about clojure/clojurescript forms. It is only applicable in the first `ns` call. **FOLLOW THE std.lang SPEC**
-  * **DO NOT** be smart about replacement or take liberties with replacements. DO NOT try to replace with clojure idioms. **FOLLOW THE std.lang SPEC**
+  * **IGNORE** everything you know about clojure/clojurescript forms. It is only applicable in the first `ns` call. **FOLLOW THE hara.lang SPEC**
+  * **DO NOT** be smart about replacement or take liberties with replacements. DO NOT try to replace with clojure idioms. **FOLLOW THE hara.lang SPEC**
   * String templating is not supported in the DSL. Use standard `+` notation for string concatentation.
-  * **ALL** clojure.core and cljs.core functions and macro are not valid. do not use them. stick to the javascript interop and **FOLLOW THE std.lang SPEC**
+  * **ALL** clojure.core and cljs.core functions and macro are not valid. do not use them. stick to the javascript interop and **FOLLOW THE hara.lang SPEC**
   * **Example:**
   
 ```
 (ns example-project.webapp.index-page   ;; namespace, in clojure convention
   (:require [std.lib :as h]
-            [std.lang :as l]))
+            [hara.lang :as l]))
 
 ;; AFTER THIS IS DSL
 (l/script :js
@@ -670,12 +670,12 @@ All JS DSL code must be written in .clj files and wrapped in an (l/script ...) b
 
 
 
-** (ns ..) and (l/script ...) forms serve different purposes. ns loads std.lang
+** (ns ..) and (l/script ...) forms serve different purposes. ns loads hara.lang
 whilst l/script is responsible for setting up the js dependencies. Top level forms go OUTSIDE of the l/script form.
 
 %FROM
 : (ns smalltalkinterfacedesign.components.ui.toggle
-    (:require [std.lang :as l]
+    (:require [hara.lang :as l]
               [js.react :as r]
               [smalltalkinterfacedesign.components.ui.utils :as u])
     (:import  [["@radix-ui/react-toggle@1.1.2" :as [* TogglePrimitive]]
@@ -689,7 +689,7 @@ whilst l/script is responsible for setting up the js dependencies. Top level for
      ...)
 %TO
 : (ns smalltalkinterfacedesign.components.ui.toggle
-    (:require [std.lang :as l]))
+    (:require [hara.lang :as l]))
     
   
   (l/script :js
@@ -957,7 +957,7 @@ import { Input } from './ui/input';
 
 Given the spec in @translate_dsl.md, can you please translate src/App.jsx as well as all files in src/components/** to output files with the same directory structure in the /src-translated folder. 
   
-** Please follow the spec and ignore any previous assumptions you have about std.lang. 
+** Please follow the spec and ignore any previous assumptions you have about hara.lang. 
 
 ** DO NOT use the j/<> helper functions or import js.core. 
 ** use JSON.stringify an JSON.parse for functions as well!. 
@@ -1258,7 +1258,7 @@ This document outlines specific corrections and clarifications for translating J
 *   **`:require`**: Use for internal project file dependencies (paths starting with `./` or referring to other project namespaces, e.g., `smalltalkinterfacedesign.components.ui.utils`).
 *   **`:import`**: Use for external library dependencies (paths that do **not** start with `./`, e.g., `@radix-ui/react-accordion`, `react-dnd`).
 *   This is done in the `l/script` form, NOT the `ns` form
-**Rationale:** This distinction is crucial for the `std.lang` transpiler to correctly resolve module paths and dependencies.
+**Rationale:** This distinction is crucial for the `hara.lang` transpiler to correctly resolve module paths and dependencies.
 
 **Example:**
 
@@ -1643,7 +1643,7 @@ When merging or updating objects, use `Object.assign({}, target, source1, source
 ## Incorrect `name` Function Usage
 
 **Error Description:**
-The Clojure `name` function was used to convert keywords to strings for object keys. This function is not available in the `std.lang` JS DSL.
+The Clojure `name` function was used to convert keywords to strings for object keys. This function is not available in the `hara.lang` JS DSL.
 
 **Correction Rule:**
 If a variable `key` is intended to be a string for property access, use it directly. Do not use `(name key)`.
@@ -1670,7 +1670,7 @@ If a variable `key` is intended to be a string for property access, use it direc
 The spec shows `#{...}` for object destructuring and `{:a a :b b}` for object literals. However, the use of `#js {}` was a recurring error.
 
 **Amendment Proposal:**
-Explicitly state that **only `{}` should be used for JavaScript object literals**. Add a clear warning against using `#js {}` for this purpose, as it is a ClojureScript-specific literal not applicable to the `std.lang` JS DSL.
+Explicitly state that **only `{}` should be used for JavaScript object literals**. Add a clear warning against using `#js {}` for this purpose, as it is a ClojureScript-specific literal not applicable to the `hara.lang` JS DSL.
 
 **Reasoning:**
 This was a frequent source of error, indicating a need for stronger emphasis and explicit prohibition of `#js {}` for object literals.
@@ -1955,7 +1955,7 @@ The DSL handles string variables as keys directly within object literals. Using 
 In the `l/script` form, all symbolic library references (e.g., `js.lib.figma`, `js.tamagui`, `js.react`, `js.lib.lucide`) must be placed in the `:require` section. The `:import` section is exclusively for string-based external package imports (e.g., `"@radix-ui/react-accordion"`, `"react-dnd"`).
 
 **Reasoning:**
-To ensure consistent and correct module resolution by the `std.lang` transpiler, distinguishing between directly managed symbolic dependencies and string-based package imports.
+To ensure consistent and correct module resolution by the `hara.lang` transpiler, distinguishing between directly managed symbolic dependencies and string-based package imports.
 
 **Example to Add to Spec:**
 

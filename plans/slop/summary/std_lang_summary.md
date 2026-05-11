@@ -1,30 +1,30 @@
-## std.lang: A Comprehensive Summary (including submodules)
+## hara.lang: A Comprehensive Summary (including submodules)
 
 The `std.lang` module is the core of the `foundation-base` ecosystem, providing a powerful and extensible framework for defining, transpiling, and managing multiple programming languages. It enables developers to write code in a Clojure-like DSL and then generate equivalent code in various target languages (JavaScript, Lua, Python, C, Rust, GLSL, Bash, Scheme, JQ, PostgreSQL, etc.). This module is central to the project's goal of creating a polyglot development environment with unified tooling and runtime management.
 
-### `std.lang` (Main Namespace)
+### `hara.lang` (Main Namespace)
 
 This namespace orchestrates the functionality of its submodules, providing a high-level interface for language definition, code generation, and runtime interaction. It re-exports key functions from its sub-namespaces, making it a convenient entry point for language-oriented programming.
 
 **Key Re-exported Functions:**
 
-*   From `std.lang.base.util`: `sym-full`, `sym-id`, `sym-module`, `sym-pair`, `sym-default-str`, `ptr`.
-*   From `std.lang.base.emit-common`: `with:explode`, `with-trace`.
-*   From `std.lang.base.emit`: `with:emit`, `emit*`.
-*   From `std.lang.base.emit-helper`: `basic-typed-args`, `emit-type-record`.
-*   From `std.lang.base.emit-preprocess`: `macro-form`, `macro-opts`, `macro-grammar`, `with:macro-opts`.
-*   From `std.lang.base.impl`: `emit-script`, `emit-str`, `emit-as`, `emit-symbol`, `default-library`, `default-library:reset`, `runtime-library`, `with:library`, `grammar`.
-*   From `std.lang.base.impl-entry`: `emit-entry`, `with:cache-none`, `with:cache-force`.
-*   From `std.lang.base.impl-deps`: `emit-entry-deps`.
-*   From `std.lang.base.pointer`: `with:print`, `with:print-all`, `with:clip`, `with:input`, `with:raw`, `with:rt`, `with:rt-wrap`, `rt:macro-opts`.
-*   From `std.lang.base.script`: `script`, `script-`, `script+`, `!`, `annex:get`, `annex:start`, `annex:stop`, `annex:restart-all`, `annex:start-all`, `annex:stop-all`, `annex:list`.
-*   From `std.lang.base.script-def`: `tmpl-entry`, `tmpl-macro`.
-*   From `std.lang.base.library`: `get-book-raw`, `get-book`, `get-module`, `get-snapshot`, `delete-module!`, `delete-modules!`, `delete-entry!`, `purge-book!`.
-*   From `std.lang.base.script-lint`: `lint-set`, `lint-clear`.
-*   From `std.lang.base.util`: `rt`, `rt:list`, `rt:default`.
-*   From `std.lang.base.script-control`: `rt:restart`, `rt:stop`.
+*   From `hara.lang.base.util`: `sym-full`, `sym-id`, `sym-module`, `sym-pair`, `sym-default-str`, `ptr`.
+*   From `hara.lang.base.emit-common`: `with:explode`, `with-trace`.
+*   From `hara.lang.base.emit`: `with:emit`, `emit*`.
+*   From `hara.lang.base.emit-helper`: `basic-typed-args`, `emit-type-record`.
+*   From `hara.lang.base.emit-preprocess`: `macro-form`, `macro-opts`, `macro-grammar`, `with:macro-opts`.
+*   From `hara.lang.base.impl`: `emit-script`, `emit-str`, `emit-as`, `emit-symbol`, `default-library`, `default-library:reset`, `runtime-library`, `with:library`, `grammar`.
+*   From `hara.lang.base.impl-entry`: `emit-entry`, `with:cache-none`, `with:cache-force`.
+*   From `hara.lang.base.impl-deps`: `emit-entry-deps`.
+*   From `hara.lang.base.pointer`: `with:print`, `with:print-all`, `with:clip`, `with:input`, `with:raw`, `with:rt`, `with:rt-wrap`, `rt:macro-opts`.
+*   From `hara.lang.base.script`: `script`, `script-`, `script+`, `!`, `annex:get`, `annex:start`, `annex:stop`, `annex:restart-all`, `annex:start-all`, `annex:stop-all`, `annex:list`.
+*   From `hara.lang.base.script-def`: `tmpl-entry`, `tmpl-macro`.
+*   From `hara.lang.base.library`: `get-book-raw`, `get-book`, `get-module`, `get-snapshot`, `delete-module!`, `delete-modules!`, `delete-entry!`, `purge-book!`.
+*   From `hara.lang.base.script-lint`: `lint-set`, `lint-clear`.
+*   From `hara.lang.base.util`: `rt`, `rt:list`, `rt:default`.
+*   From `hara.lang.base.script-control`: `rt:restart`, `rt:stop`.
 *   From `std.lang.base.workspace`: `sym-entry`, `module-entries`, `emit-ptr`, `emit-module`, `print-module`, `ptr-clip`, `ptr-print`, `ptr-setup`, `ptr-teardown`, `ptr-setup-deps`, `ptr-teardown-deps`, `rt:module`, `rt:module-purge`, `rt:inner`, `rt:restart`, `rt:setup`, `rt:setup-to`, `rt:setup-single`, `rt:scaffold`, `rt:scaffold-to`, `rt:scaffold-imports`, `rt:teardown`, `rt:teardown-at`, `rt:teardown-single`, `rt:teardown-to`, `intern-macros`.
-*   From `std.lang.base.manage`: `lib:overview`, `lib:module`, `lib:entries`, `lib:purge`, `lib:unused`.
+*   From `hara.lang.base.manage`: `lib:overview`, `lib:module`, `lib:entries`, `lib:purge`, `lib:unused`.
 
 **Key Functions:**
 
@@ -34,7 +34,7 @@ This namespace orchestrates the functionality of its submodules, providing a hig
 *   **`rt:invoke`**: Invokes code in a specified runtime.
 *   **`force-reload`**: Forces reloading of a namespace and its dependents.
 
-### `std.lang.base.book` (Language Book Management)
+### `hara.lang.base.book` (Language Book Management)
 
 This sub-namespace defines the core data structures for storing and managing language definitions, including books, modules, and entries. It provides functions for accessing and manipulating these structures.
 
@@ -63,7 +63,7 @@ This sub-namespace defines the core data structures for storing and managing lan
 *   **`module-create`**: Creates a `BookModule` record.
 *   **`module-deps`**: Gets dependencies for a module.
 
-### `std.lang.base.compile` (Code Compilation and Output)
+### `hara.lang.base.compile` (Code Compilation and Output)
 
 This sub-namespace provides functions for compiling and writing generated code to files, supporting various output formats and module structures.
 
@@ -78,7 +78,7 @@ This sub-namespace provides functions for compiling and writing generated code t
 *   **`compile-module-directory`**: Compiles modules from a directory structure.
 *   **`compile-module-schema`**: Compiles all modules into a single schema file (e.g., for SQL).
 
-### `std.lang.base.emit` (Code Emission Pipeline)
+### `hara.lang.base.emit` (Code Emission Pipeline)
 
 This sub-namespace defines the core code emission pipeline, responsible for transforming Clojure forms into target language strings based on a grammar.
 
@@ -92,7 +92,7 @@ This sub-namespace defines the core code emission pipeline, responsible for tran
 *   **`prep-options`**: Prepares options for the emit pipeline.
 *   **`prep-form`**: Preprocesses a form through different stages (raw, input, staging).
 
-### `std.lang.base.emit-assign` (Assignment Emission)
+### `hara.lang.base.emit-assign` (Assignment Emission)
 
 This sub-namespace handles the emission of assignment-related forms, including inline function assignments and variable declarations.
 
@@ -102,7 +102,7 @@ This sub-namespace handles the emission of assignment-related forms, including i
 *   **`emit-def-assign`**: Emits a variable declaration or assignment.
 *   **`test-assign-loop`, `test-assign-emit`**: Test functions for assignment emission.
 
-### `std.lang.base.emit-block` (Block Emission)
+### `hara.lang.base.emit-block` (Block Emission)
 
 This sub-namespace handles the emission of control flow blocks (do, if, for, while, try, switch) and their associated parameters and bodies.
 
@@ -121,7 +121,7 @@ This sub-namespace handles the emission of control flow blocks (do, if, for, whi
 *   **`emit-block`**: The main function for emitting block expressions.
 *   **`test-block-loop`, `test-block-emit`**: Test functions for block emission.
 
-### `std.lang.base.emit-common` (Common Emission Utilities)
+### `hara.lang.base.emit-common` (Common Emission Utilities)
 
 This sub-namespace provides fundamental utilities and dynamic variables used across the entire emission pipeline, such as indentation, tracing, and generic emission functions.
 
@@ -169,7 +169,7 @@ This sub-namespace provides fundamental utilities and dynamic variables used acr
 *   **`emit-common-loop`**: The core emission loop.
 *   **`emit-common`**: Emits a string based on grammar.
 
-### `std.lang.base.emit-data` (Data Structure Emission)
+### `hara.lang.base.emit-data` (Data Structure Emission)
 
 This sub-namespace handles the emission of various Clojure data structures (maps, vectors, sets, tuples) into their target language equivalents.
 
@@ -189,7 +189,7 @@ This sub-namespace handles the emission of various Clojure data structures (maps
 *   **`emit-table`**: Emits a table.
 *   **`test-data-loop`, `test-data-emit`**: Test functions for data emission.
 
-### `std.lang.base.emit-fn` (Function Emission)
+### `hara.lang.base.emit-fn` (Function Emission)
 
 This sub-namespace handles the emission of function definitions and related constructs, including argument lists, type hints, and function bodies.
 
@@ -205,7 +205,7 @@ This sub-namespace handles the emission of function definitions and related cons
 *   **`emit-fn`**: The main function for emitting function templates.
 *   **`test-fn-loop`, `test-fn-emit`**: Test functions for function emission.
 
-### `std.lang.base.emit-helper` (Emission Helper Functions)
+### `hara.lang.base.emit-helper` (Emission Helper Functions)
 
 This sub-namespace provides various helper functions and constants used throughout the emission pipeline, such as default grammar settings, symbol replacement rules, and argument parsing.
 
@@ -223,7 +223,7 @@ This sub-namespace provides various helper functions and constants used througho
 *   **`emit-symbol-full`**: Emits a full symbol.
 *   **`emit-type-record`**: Formats a type record.
 
-### `std.lang.base.emit-preprocess` (Emission Preprocessing)
+### `hara.lang.base.emit-preprocess` (Emission Preprocessing)
 
 This sub-namespace handles the preprocessing of Clojure forms before they are emitted, including macro expansion, symbol resolution, and dependency collection.
 
@@ -246,7 +246,7 @@ This sub-namespace handles the preprocessing of Clojure forms before they are em
 *   **`to-staging`**: Converts an input form to a staged form, collecting dependencies.
 *   **`to-resolve`**: Resolves code symbols without macroexpansion.
 
-### `std.lang.base.emit-special` (Special Form Emission)
+### `hara.lang.base.emit-special` (Special Form Emission)
 
 This sub-namespace handles the emission of special forms, such as `!:module` (for emitting module contents), `!:eval` (for evaluating Clojure code at emit time), and `!:lang` (for embedding code from another language).
 
@@ -260,7 +260,7 @@ This sub-namespace handles the emission of special forms, such as `!:module` (fo
 *   **`emit-with-lang`**: Emits an embedded language form.
 *   **`test-special-loop`, `test-special-emit`**: Test functions for special form emission.
 
-### `std.lang.base.emit-top-level` (Top-Level Form Emission)
+### `hara.lang.base.emit-top-level` (Top-Level Form Emission)
 
 This sub-namespace handles the emission of top-level forms like `defn`, `def`, `defglobal`, `defrun`, and `defclass`.
 
@@ -272,7 +272,7 @@ This sub-namespace handles the emission of top-level forms like `defn`, `def`, `
 *   **`emit-top-level`**: The main function for emitting top-level forms.
 *   **`emit-form`**: Emits a customisable form.
 
-### `std.lang.base.grammar` (Language Grammar Definition)
+### `hara.lang.base.grammar` (Language Grammar Definition)
 
 This sub-namespace defines the structure and semantics of a target language's grammar, including its reserved words, operators, and emission rules.
 
@@ -294,7 +294,7 @@ This sub-namespace defines the structure and semantics of a target language's gr
 *   **`grammar-structure`, `grammar-sections`, `grammar-macros`**: Extracts structural information from a grammar.
 *   **`grammar?`, `grammar`**: Predicate and constructor for `Grammer` records.
 
-### `std.lang.base.grammar-macro` (Macro Transformations)
+### `hara.lang.base.grammar-macro` (Macro Transformations)
 
 This sub-namespace provides macro transformations for common Clojure forms (e.g., `->`, `->>`, `when`, `if`, `cond`, `let`, `case`, `doto`, `fn:>`) into more basic forms suitable for emission.
 
@@ -314,7 +314,7 @@ This sub-namespace provides macro transformations for common Clojure forms (e.g.
 *   **`tf-forange`**: Transforms `forange` to a `for` loop.
 *   **`+op-macro+`, `+op-macro-arrow+`, `+op-macro-let+`, `+op-macro-xor+`, `+op-macro-case+`, `+op-macro-forange+`**: Collections of macro operators.
 
-### `std.lang.base.grammar-spec` (Grammar Specification)
+### `hara.lang.base.grammar-spec` (Grammar Specification)
 
 This sub-namespace defines the core set of operators and their properties that form the basis of most language grammars. It includes operators for built-in functions, math, comparisons, logic, control flow, and top-level definitions.
 
@@ -336,7 +336,7 @@ This sub-namespace defines the core set of operators and their properties that f
 *   **`+op-class+`**: Class-related operators.
 *   **`+op-for+`, `+op-coroutine+`**: For loop and coroutine operators.
 
-### `std.lang.base.grammar-xtalk` (Cross-Language Operators)
+### `hara.lang.base.grammar-xtalk` (Cross-Language Operators)
 
 This sub-namespace defines a set of "cross-talk" (xtalk) operators that provide a common interface for language-agnostic operations, such as object manipulation, type checking, and I/O. These operators are designed to be implemented differently in each target language.
 
@@ -356,7 +356,7 @@ This sub-namespace defines a set of "cross-talk" (xtalk) operators that provide 
 *   **`tf-bit-and`, `tf-bit-or`, `tf-bit-lshift`, `tf-bit-rshift`, `tf-bit-xor`**: Transforms bitwise operations.
 *   **`+op-xtalk-core+`, `+op-xtalk-proto+`, `+op-xtalk-global+`, `+op-xtalk-custom+`, `+op-xtalk-math+`, `+op-xtalk-type+`, `+op-xtalk-bit+`, `+op-xtalk-lu+`, `+op-xtalk-obj+`, `+op-xtalk-arr+`, `+op-xtalk-str+`, `+op-xtalk-js+`, `+op-xtalk-return+`, `+op-xtalk-socket+`, `+op-xtalk-iter+`, `+op-xtalk-cache+`, `+op-xtalk-thread+`, `+op-xtalk-file+`, `+op-xtalk-b64+`, `+op-xtalk-uri+`, `+op-xtalk-special+`**: Collections of cross-language operators.
 
-### `std.lang.base.impl` (Core Implementation Utilities)
+### `hara.lang.base.impl` (Core Implementation Utilities)
 
 This sub-namespace provides core implementation details and helper functions for the language system, including managing the global library, emit options, and direct code emission.
 
@@ -389,7 +389,7 @@ This sub-namespace provides core implementation details and helper functions for
 *   **`emit-scaffold-to`**: Creates scaffold up to a module.
 *   **`emit-scaffold-imports`**: Creates scaffold to expose native imports.
 
-### `std.lang.base.impl-deps` (Dependency Management Implementation)
+### `hara.lang.base.impl-deps` (Dependency Management Implementation)
 
 This sub-namespace provides the implementation details for managing dependencies between modules and entries, including collecting native imports and resolving module links.
 
@@ -407,7 +407,7 @@ This sub-namespace provides the implementation details for managing dependencies
 *   **`collect-module-directory-form`**: Collects module directory forms.
 *   **`collect-module`**: Collects information for an entire module.
 
-### `std.lang.base.impl-entry` (Entry Implementation)
+### `hara.lang.base.impl-entry` (Entry Implementation)
 
 This sub-namespace provides the implementation details for creating and emitting book entries, including handling metadata, preprocessing, and caching.
 
@@ -427,7 +427,7 @@ This sub-namespace provides the implementation details for creating and emitting
 *   **`emit-entry-label`**: Emits an entry label.
 *   **`emit-entry`**: Emits a given entry.
 
-### `std.lang.base.impl-lifecycle` (Lifecycle Implementation)
+### `hara.lang.base.impl-lifecycle` (Lifecycle Implementation)
 
 This sub-namespace provides the implementation details for managing the lifecycle of modules, including emitting setup and teardown scripts.
 
@@ -437,7 +437,7 @@ This sub-namespace provides the implementation details for managing the lifecycl
 *   **`emit-module-setup-concat`, `emit-module-setup-join`, `emit-module-setup-native-arr`, `emit-module-setup-link-arr`, `emit-module-setup-raw`, `emit-module-setup`**: Functions for emitting module setup code.
 *   **`emit-module-teardown-concat`, `emit-module-teardown-join`, `emit-module-teardown-raw`, `emit-module-teardown`**: Functions for emitting module teardown code.
 
-### `std.lang.base.library` (Library Management)
+### `hara.lang.base.library` (Library Management)
 
 This sub-namespace defines the core `Library` record and provides functions for managing a collection of language books and their modules/entries. It handles snapshot management and bulk operations.
 
@@ -458,7 +458,7 @@ This sub-namespace defines the core `Library` record and provides functions for 
 *   **`add-entry!`, `add-entry-single!`, `delete-entry!`**: Adds or deletes entries.
 *   **`install-module!`, `install-book!`, `purge-book!`**: Installs modules or books.
 
-### `std.lang.base.library-snapshot` (Library Snapshot Management)
+### `hara.lang.base.library-snapshot` (Library Snapshot Management)
 
 This sub-namespace defines the `Snapshot` record and provides functions for managing immutable snapshots of the library's state, enabling efficient versioning and merging of language definitions.
 
@@ -478,7 +478,7 @@ This sub-namespace defines the `Snapshot` record and provides functions for mana
 *   **`install-module-update`, `install-module`**: Updates or installs a module.
 *   **`install-book-update`, `install-book`**: Updates or installs a book.
 
-### `std.lang.base.manage` (Language Management Tasks)
+### `hara.lang.base.manage` (Language Management Tasks)
 
 This sub-namespace provides high-level tasks for managing language definitions, modules, and entries, including overviews, purging, and linting.
 
@@ -494,7 +494,7 @@ This sub-namespace provides high-level tasks for managing language definitions, 
 *   **`lib-module-missing-line-number-fn`, `lib-module-missing-line-number`**: Lists modules with missing line numbers.
 *   **`lib-module-incorrect-alias-fn`, `lib-module-incorrect-alias`**: Lists modules with incorrect aliases.
 
-### `std.lang.base.pointer` (Language Pointers)
+### `hara.lang.base.pointer` (Language Pointers)
 
 This sub-namespace defines the `Pointer` record, which acts as a reference to a code entry within a specific language runtime. Pointers enable dynamic invocation and introspection of code across different languages.
 
@@ -513,7 +513,7 @@ This sub-namespace defines the `Pointer` record, which acts as a reference to a 
 *   **`ptr-output-json`, `ptr-output`**: Handles pointer output.
 *   **`ptr-invoke`**: Invokes a pointer.
 
-### `std.lang.base.registry` (Language Registry)
+### `hara.lang.base.registry` (Language Registry)
 
 This sub-namespace defines a global registry (`+registry+`) that maps language contexts and runtime keys to their corresponding Clojure namespaces, enabling dynamic loading and instantiation of language runtimes.
 
@@ -521,7 +521,7 @@ This sub-namespace defines a global registry (`+registry+`) that maps language c
 
 *   **`+registry+`**: An atom storing a map of `[lang runtime-key]` to Clojure namespace symbols.
 
-### `std.lang.base.runtime` (Language Runtimes)
+### `hara.lang.base.runtime` (Language Runtimes)
 
 This sub-namespace defines the `RuntimeDefault` record, which serves as a base implementation for language runtimes. It provides default behaviors for code evaluation, pointer handling, and lifecycle management.
 
@@ -546,7 +546,7 @@ This sub-namespace defines the `RuntimeDefault` record, which serves as a base i
 *   **`default-setup-module-emit`, `default-setup-module-basic`, `default-teardown-module-basic`, `default-setup-module`, `default-teardown-module`**: Default module setup/teardown functions.
 *   **`multistage-invoke`, `multistage-setup-for`, `multistage-setup-to`, `multistage-teardown-for`, `multistage-teardown-at`, `multistage-teardown-to`**: Multistage lifecycle functions.
 
-### `std.lang.base.runtime-proxy` (Runtime Proxy)
+### `hara.lang.base.runtime-proxy` (Runtime Proxy)
 
 This sub-namespace defines a proxy mechanism for language runtimes, allowing one runtime to delegate its operations to another. This is useful for creating aliases or for adding layers of functionality.
 
@@ -557,7 +557,7 @@ This sub-namespace defines a proxy mechanism for language runtimes, allowing one
 *   **`proxy-raw-eval`, `proxy-init-ptr`, `proxy-tags-ptr`, `proxy-deref-ptr`, `proxy-display-ptr`, `proxy-invoke-ptr`, `proxy-transform-in-ptr`, `proxy-transform-out-ptr`**: Proxy implementations for `IContext` methods.
 *   **`proxy-started?`, `proxy-stopped?`, `proxy-remote?`, `proxy-info`, `proxy-health`**: Proxy implementations for `IComponent` methods.
 
-### `std.lang.base.script` (Scripting and Runtime Control)
+### `hara.lang.base.script` (Scripting and Runtime Control)
 
 This sub-namespace provides high-level macros and functions for defining and controlling language scripts and their associated runtimes. It includes mechanisms for installing languages, managing annexes, and executing code in different contexts.
 
@@ -581,7 +581,7 @@ This sub-namespace provides high-level macros and functions for defining and con
 *   **`!` (macro)**: Executes code in a specified annex runtime.
 *   **`annex:start`, `annex:get`, `annex:stop`, `annex:start-all`, `annex:stop-all`, `annex:restart-all`, `annex:list`**: Functions for managing annexes.
 
-### `std.lang.base.script-annex` (Script Annex Management)
+### `hara.lang.base.script-annex` (Script Annex Management)
 
 This sub-namespace provides the implementation for managing "annexes," which are extensions to language scripts that allow for dynamic runtime switching and configuration.
 
@@ -598,7 +598,7 @@ This sub-namespace provides the implementation for managing "annexes," which are
 *   **`start-runtime`**: Starts a runtime in an annex.
 *   **`same-runtime?`**: Checks if two runtimes are the same.
 
-### `std.lang.base.script-control` (Script Runtime Control)
+### `hara.lang.base.script-control` (Script Runtime Control)
 
 This sub-namespace provides functions for controlling language runtimes, including getting, stopping, and restarting them, as well as executing one-shot evaluations.
 
@@ -608,7 +608,7 @@ This sub-namespace provides functions for controlling language runtimes, includi
 *   **`script-rt-stop`, `script-rt-restart`**: Stops or restarts a runtime.
 *   **`script-rt-oneshot-eval`, `script-rt-oneshot`**: Executes one-shot evaluations.
 
-### `std.lang.base.script-def` (Script Definition Helpers)
+### `hara.lang.base.script-def` (Script Definition Helpers)
 
 This sub-namespace provides helper functions for defining script-related templates and macros.
 
@@ -617,7 +617,7 @@ This sub-namespace provides helper functions for defining script-related templat
 *   **`tmpl-entry`**: Creates templates for various argument types.
 *   **`tmpl-macro`**: Creates templates for macros.
 
-### `std.lang.base.script-lint` (Script Linting)
+### `hara.lang.base.script-lint` (Script Linting)
 
 This sub-namespace provides a basic linter for language scripts, checking for unused variables, unknown symbols, and other potential issues.
 
@@ -631,7 +631,7 @@ This sub-namespace provides a basic linter for language scripts, checking for un
 *   **`lint-set`, `lint-clear`, `lint-needed?`**: Manages linting settings.
 *   **`lint-entry`**: Lints a single entry.
 
-### `std.lang.base.script-macro` (Script Macro Interning)
+### `hara.lang.base.script-macro` (Script Macro Interning)
 
 This sub-namespace provides functions for interning language-specific macros and top-level forms into the Clojure environment, making them available for use in scripts.
 
@@ -651,7 +651,7 @@ This sub-namespace provides functions for interning language-specific macros and
 *   **`intern-grammar`**: Interns a grammar's macros into the namespace.
 *   **`intern-defmacro-rt-fn`, `defmacro.!` (macro)**: Defines runtime language macros.
 
-### `std.lang.base.util` (Language Utilities)
+### `hara.lang.base.util` (Language Utilities)
 
 This sub-namespace provides various utility functions for working with language-related symbols, contexts, and pointers.
 
@@ -664,7 +664,7 @@ This sub-namespace provides various utility functions for working with language-
 *   **`lang-rt-default`**: Retrieves the default runtime function.
 *   **`lang-pointer`**: Creates a language pointer.
 
-### `std.lang.base.workspace` (Workspace Management)
+### `hara.lang.base.workspace` (Workspace Management)
 
 This sub-namespace provides functions for managing the language workspace, including emitting modules, printing module contents, and controlling runtime lifecycles.
 
@@ -685,7 +685,7 @@ This sub-namespace provides functions for managing the language workspace, inclu
 *   **`multistage-tmpl`**: Template for multistage functions.
 *   **`intern-macros`**: Interns macros from one namespace to another.
 
-### `std.lang.interface.type-notify` (Notification Server)
+### `hara.lang.interface.type-notify` (Notification Server)
 
 This sub-namespace implements a notification server that allows language runtimes to send messages back to the Clojure host, enabling real-time feedback and event handling.
 
@@ -704,7 +704,7 @@ This sub-namespace implements a notification server that allows language runtime
 *   **`default-notify`, `default-notify:reset`**: Manages the default notification server.
 *   **`watch-oneshot`**: Watches for a one-shot notification.
 
-### `std.lang.interface.type-shared` (Shared Runtime Management)
+### `hara.lang.interface.type-shared` (Shared Runtime Management)
 
 This sub-namespace provides mechanisms for managing shared language runtimes, allowing multiple clients to share a single runtime instance.
 
@@ -723,13 +723,13 @@ This sub-namespace provides mechanisms for managing shared language runtimes, al
 *   **`rt-is-shared?`**: Checks if a runtime is shared.
 *   **`rt-get-inner`**: Retrieves the inner runtime.
 
-### `std.lang.model.*` (Language Specifications)
+### `hara.lang.model.*` (Language Specifications)
 
 These sub-namespaces define the specific grammars and templates for various target languages, including Bash, C, GLSL, JQ, JavaScript, Lua, Python, R, Rust, and Scheme. They extend the base grammar with language-specific syntax, operators, and emission rules.
 
 **Core Concepts:**
 
-*   **Language-Specific Grammars:** Each `spec_<lang>.clj` file defines a `+grammar+` for its respective language, built upon `std.lang.base.grammar`.
+*   **Language-Specific Grammars:** Each `spec_<lang>.clj` file defines a `+grammar+` for its respective language, built upon `hara.lang.base.grammar`.
 *   **Language-Specific Templates:** Each `spec_<lang>.clj` file defines a `+template+` for its respective language, customizing emission rules for data structures, blocks, and tokens.
 *   **Cross-Talk (XTalk) Operators:** The `spec_xtalk.clj` and `spec_xtalk/fn_<lang>.clj` files define cross-language operators that provide a common interface for operations that are implemented differently in each target language.
 
@@ -743,17 +743,17 @@ These sub-namespaces define the specific grammars and templates for various targ
 *   **`+init+`**: Installs the language into the system.
 *   **Language-specific transformation functions (e.g., `js-regex`, `lua-map-key`, `python-defn`, `r-token-boolean`, `rst-typesystem`, `bash-quote-item`)**: Implement custom emission logic for various forms and data types.
 
-### `std.lang.strict.base_state` (Strict Mode State)
+### `hara.lang.strict.base_state` (Strict Mode State)
 
 This sub-namespace likely provides state management for a "strict mode" within the language system, though its contents are minimal in the provided files.
 
 ### Usage Pattern:
 
-The `std.lang` module is the cornerstone of the `foundation-base` project, enabling:
+The `hara.lang` module is the cornerstone of the `foundation-base` project, enabling:
 *   **Polyglot Development:** Write code once in Clojure and deploy it to multiple target languages.
 *   **Unified Tooling:** Use a single set of tools for code generation, testing, and runtime management across different languages.
 *   **Metaprogramming:** Programmatically generate and transform code for various platforms.
 *   **Language Experimentation:** Easily define and experiment with new DSLs and language features.
 *   **Runtime Agnosticism:** Abstract away the complexities of interacting with different execution environments.
 
-By providing a powerful and extensible framework for language definition and code generation, `std.lang` empowers developers to build highly flexible and adaptable software systems.
+By providing a powerful and extensible framework for language definition and code generation, `hara.lang` empowers developers to build highly flexible and adaptable software systems.

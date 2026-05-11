@@ -158,7 +158,7 @@ Robust error handling is crucial. The `h/error` function is the standard way to 
    `(throw (ex-info ~message ~data))))
 ```
 
-**Example: `std.lang.base.book/assert-module`**
+**Example: `hara.lang.base.book/assert-module`**
 
 ```clojure
 (defn assert-module
@@ -263,9 +263,9 @@ Functions are often designed to be extensible, allowing new behaviors to be adde
                      -stop  impl/stop-lucene}])
 ```
 
-### 7. `std.lang` DSL Integration
+### 7. `hara.lang` DSL Integration
 
-Functions designed for the `std.lang` DSL have specific patterns for cross-platform compatibility and code generation.
+Functions designed for the `hara.lang` DSL have specific patterns for cross-platform compatibility and code generation.
 
 *   **`defn.<lang>` and `defmacro.<lang>`:** Functions and macros are defined with a language-specific tag (e.g., `defn.js`, `defmacro.lua`).
 *   **Cross-Platform Utilities (`xt.lang.base-lib`):** The `k/` alias is commonly used for `xt.lang.base-lib` functions, which provide platform-agnostic operations.

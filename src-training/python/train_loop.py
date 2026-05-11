@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Interactive training loop for std.lang translation.
+Interactive training loop for hara.lang translation.
 
 Features:
 - Loads pre-generated patterns from file
@@ -453,7 +453,7 @@ def evaluate(
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Continuous training loop for std.lang"
+        description="Continuous training loop for hara.lang"
     )
     parser.add_argument(
         "--model",

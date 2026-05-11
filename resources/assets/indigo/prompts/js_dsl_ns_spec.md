@@ -11,16 +11,16 @@ All JS DSL code must be written in .clj files and wrapped in an (l/script ...) b
   * **(def.js ...)**: Defines a top-level Javascript variable.  
   * **Comments**: Use standard Lisp comments (;).  
   * match delimiters and indentation
-  * **IGNORE** everything you know about clojure/clojurescript forms. It is only applicable in the first `ns` call. **FOLLOW THE std.lang SPEC**
-  * **DO NOT** be smart about replacement or take liberties with replacements. DO NOT try to replace with clojure idioms. **FOLLOW THE std.lang SPEC**
+  * **IGNORE** everything you know about clojure/clojurescript forms. It is only applicable in the first `ns` call. **FOLLOW THE hara.lang SPEC**
+  * **DO NOT** be smart about replacement or take liberties with replacements. DO NOT try to replace with clojure idioms. **FOLLOW THE hara.lang SPEC**
   * String templating is not supported in the DSL. Use standard `+` notation for string concatentation.
-  * **ALL** clojure.core and cljs.core functions and macro are not valid. do not use them. stick to the javascript interop and **FOLLOW THE std.lang SPEC**
+  * **ALL** clojure.core and cljs.core functions and macro are not valid. do not use them. stick to the javascript interop and **FOLLOW THE hara.lang SPEC**
   * **Example:**
   
 ```
 (ns example-project.webapp.index-page   ;; namespace, in clojure convention
   (:require [std.lib :as h]
-            [std.lang :as l]))
+            [hara.lang :as l]))
 
 ;; AFTER THIS IS DSL
 (l/script :js
@@ -48,12 +48,12 @@ All JS DSL code must be written in .clj files and wrapped in an (l/script ...) b
 
 
 
-** (ns ..) and (l/script ...) forms serve different purposes. ns loads std.lang
+** (ns ..) and (l/script ...) forms serve different purposes. ns loads hara.lang
 whilst l/script is responsible for setting up the js dependencies. Top level forms go OUTSIDE of the l/script form.
 
 %FROM
 : (ns smalltalkinterfacedesign.components.ui.toggle
-    (:require [std.lang :as l]
+    (:require [hara.lang :as l]
               [js.react :as r]
               [smalltalkinterfacedesign.components.ui.utils :as u])
     (:import  [["@radix-ui/react-toggle@1.1.2" :as [* TogglePrimitive]]
@@ -67,7 +67,7 @@ whilst l/script is responsible for setting up the js dependencies. Top level for
      ...)
 %TO
 : (ns smalltalkinterfacedesign.components.ui.toggle
-    (:require [std.lang :as l]))
+    (:require [hara.lang :as l]))
     
   
   (l/script :js

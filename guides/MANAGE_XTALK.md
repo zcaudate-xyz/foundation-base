@@ -139,9 +139,9 @@ From REPL:
 ;; The result includes:
 ;; {:op :x:if
 ;;  :category :xtalk-conditional
-;;  :canonical-symbol std.lang.base.grammar-xtalk/x:if
+;;  :canonical-symbol hara.lang.base.grammar-xtalk/x:if
 ;;  :symbols [x:if]
-;;  :macro std.lang.base.grammar-xtalk/x:if
+;;  :macro hara.lang.base.grammar-xtalk/x:if
 ;;  :doc "Conditional expression"
 ;;  :cases [...]}
 ```
@@ -258,7 +258,7 @@ When you have missing features (`:spec-missing > 0`):
 
 4. **Add tests**
    - Create appropriate test cases in language-specific test file
-   - Run: `lein test :only std.lang.model.spec-xtalk.<lang>-test`
+   - Run: `lein test :only hara.lang.model.spec-xtalk.<lang>-test`
 
 ### Workflow 3: Audit Test Coverage
 
@@ -433,7 +433,7 @@ test/std/lang/
          (println "Coverage gap for" lang))))
    ```
 2. Create corresponding test files in `test/std/lang/model/spec_xtalk/`
-3. Run: `lein test :only std.lang.model.spec_xtalk.<lang>-test`
+3. Run: `lein test :only hara.lang.model.spec_xtalk.<lang>-test`
 
 ### Issue 4: Support Matrix Shows Incomplete Data
 
@@ -513,4 +513,4 @@ test/std/lang/
 - [code.manage](code.manage.md) - General code management and maintenance tasks
 - [code.test](code.test.md) - Testing framework used for xtalk tests
 - [std.task](std.task.md) - Task execution engine underlying management operations
-- [README.md](../README.md) - Overview of `std.lang` and xtalk system
+- [README.md](../README.md) - Overview of `hara.lang` and xtalk system

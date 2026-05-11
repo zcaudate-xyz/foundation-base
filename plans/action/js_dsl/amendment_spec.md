@@ -1,4 +1,4 @@
-# **std.lang (JS) DSL Specification - Amendments**
+# **hara.lang (JS) DSL Specification - Amendments**
 
 This document outlines specific corrections and clarifications for translating JavaScript/TypeScript code to the Clojure-based Javascript DSL (JS DSL), based on common patterns and errors encountered during recent translation tasks. Adhering to these rules is critical for accurate and idiomatic translations, complementing the existing `translate_dsl.md` specification.
 
@@ -69,7 +69,7 @@ This document outlines specific corrections and clarifications for translating J
 *   **`:import`**: Use for external library dependencies (paths that do **not** start with `./`, e.g., `@radix-ui/react-accordion`, `react-dnd`).
 *   This is done in the `l/script` form, NOT the `ns` form.
 
-**Rationale:** This distinction is crucial for the `std.lang` transpiler to correctly resolve module paths and dependencies.
+**Rationale:** This distinction is crucial for the `hara.lang` transpiler to correctly resolve module paths and dependencies.
 
 **Example:**
 

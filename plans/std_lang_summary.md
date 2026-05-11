@@ -1,4 +1,4 @@
-# std.lang Summary
+# hara.lang Summary
 
 `std.lang` is the core transpilation and multi-language support engine of the `foundation-base` project. It allows writing code in a Lisp-like DSL (Clojure-based) and transpiling it to various target languages such as JavaScript, Lua, Python, R, and Solidity.
 
@@ -7,26 +7,26 @@
 The architecture revolves around a few key concepts:
 
 ### 1.1. Book
-A "Book" (`std.lang.base.book`) is the central data structure that holds the definition of a language environment. It contains:
+A "Book" (`hara.lang.base.book`) is the central data structure that holds the definition of a language environment. It contains:
 *   **`:lang`**: The target language identifier (e.g., `:js`, `:lua`).
 *   **`:grammar`**: The grammar specification used for emission.
 *   **`:modules`**: A collection of modules, which in turn contain entries (functions, variables).
 *   **`:parent`**: Inheritance from other languages (e.g., `:js` inherits from `:xtalk`).
 
 ### 1.2. Grammar
-The grammar (`std.lang.base.grammar`) defines how Lisp forms are translated into the target language's syntax. It includes:
+The grammar (`hara.lang.base.grammar`) defines how Lisp forms are translated into the target language's syntax. It includes:
 *   **Reserved words**: Mappings for operators (`+`, `-`, `===`), control flow (`if`, `for`), and declarations.
 *   **Emission rules**: Custom functions to handle specific data structures (vectors, maps) or constructs (regex).
 *   **Templates**: Configuration for code formatting (indentation, separators).
 
 ### 1.3. Emission
-The emission process (`std.lang.base.emit`) takes a Lisp form and converts it to a string string based on the grammar.
+The emission process (`hara.lang.base.emit`) takes a Lisp form and converts it to a string string based on the grammar.
 *   **`emit/emit`**: Top-level function.
 *   **`emit-main-loop`**: Recursively processes forms.
 *   **Pre-processing**: Macros and syntactic sugar are expanded before emission.
 
 ### 1.4. Scripting
-The `std.lang` DSL allows defining code within Clojure namespaces using `l/script`.
+The `hara.lang` DSL allows defining code within Clojure namespaces using `l/script`.
 *   **`l/script`**: Defines a module for a specific language.
 *   **`defn.<lang>` / `def.<lang>`**: Defines functions and variables for that language.
 *   **Interoperability**: Code can import dependencies from other modules within the "Book".
@@ -35,7 +35,7 @@ The `std.lang` DSL allows defining code within Clojure namespaces using `l/scrip
 
 Languages are defined in `src/std/lang/model/`. Key implementations include:
 
-*   **JavaScript (`:js`)**: Defined in `spec_js.clj`. Supports JSX (via `std.lang.model.spec-js.jsx`), QML, and standard JS constructs.
+*   **JavaScript (`:js`)**: Defined in `spec_js.clj`. Supports JSX (via `hara.lang.model.spec-js.jsx`), QML, and standard JS constructs.
 *   **Lua (`:lua`)**: Defined in `spec_lua.clj`.
 *   **Python (`:python`)**: Defined in `spec_python.clj`.
 *   **Solidity (`:solidity`)**: Used for Web3 development.
@@ -70,7 +70,7 @@ These files act as "headers" or "standard libraries" for the transpiler. When yo
 ## 4. Workflow
 
 1.  **Definition**: Code is written in `.clj` files using `l/script` blocks.
-2.  **Loading**: The `std.lang` runtime loads these definitions into the global registry (or a specific Book).
+2.  **Loading**: The `hara.lang` runtime loads these definitions into the global registry (or a specific Book).
 3.  **Transpilation**: When needed (e.g., for deployment or hot-reloading), the code is transpiled to the target language string.
 4.  **Execution**:
     *   **Static**: Transpiled files are saved to disk.
@@ -86,7 +86,7 @@ These files act as "headers" or "standard libraries" for the transpiler. When yo
 
 ## 6. Usage for Jules
 
-When working with `std.lang`:
+When working with `hara.lang`:
 *   **Read the Spec**: Check `spec_<lang>.clj` to understand available macros and custom syntax (e.g., how `#{}` or `[]` are handled).
 *   **Use `l/script`**: Isolate DSL code in `l/script` blocks.
 *   **Debug Emission**: Use `(emit/emit form grammar ...)` to verify how a form is transpiled if unsure.

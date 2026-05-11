@@ -2,18 +2,18 @@ Here is the content recreated in Markdown format:
 
 ---
 
-# **Introduction to std.lang**
+# **Introduction to hara.lang**
 
-## What is `std.lang`?
+## What is `hara.lang`?
 
 `std.lang` is a Domain-Specific Language (DSL) designed to simplify the process of defining database operations and structures programmatically. It bridges the gap between high-level programming concepts (e.g., functions and data structures) and database-specific logic like SQL/PLpgSQL.
 
-With `std.lang`, developers can:
+With `hara.lang`, developers can:
 - Write database functions, types, and procedures in a declarative, high-level syntax.
 - Automatically generate PostgreSQL-compatible SQL scripts for execution.
 - Leverage features like validations, inline helper calls, and error handling seamlessly.
 
-### Why Use `std.lang`?
+### Why Use `hara.lang`?
 
 - **Consistency**: Define database operations in a structured, reusable way.
 - **Ease of Use**: Abstracts SQL intricacies while giving access to advanced features.
@@ -22,10 +22,10 @@ With `std.lang`, developers can:
 
 ---
 
-## Key Features of `std.lang`
+## Key Features of `hara.lang`
 
 ### 1. **Function Definitions**
-`std.lang` allows you to define database functions easily:
+`hara.lang` allows you to define database functions easily:
 
 ```clojure
 (defn.pg example-function
@@ -98,21 +98,21 @@ SELECT * FROM app.UserAccount WHERE email = i_email;
 
 ### Tutorial 1: **Setting Up Your Environment**
 
-**Goal**: Install and configure `std.lang` in your project.
+**Goal**: Install and configure `hara.lang` in your project.
 
 1. **Prerequisites**:
    - PostgreSQL installed locally or accessible via a database connection.
    - Familiarity with SQL and basic programming concepts.
 
 2. **Setup**:
-   - Install `std.lang` dependencies in your project.
+   - Install `hara.lang` dependencies in your project.
    - Connect to your PostgreSQL database.
 
 3. **Example Setup Script**:
 
 ```clojure
 (ns myproject.core
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [rt.postgres :as pg]))
 
 ;; Example database connection
@@ -128,7 +128,7 @@ SELECT * FROM app.UserAccount WHERE email = i_email;
 
 **Goal**: Create a simple function to greet users.
 
-1. **Write Your Function in `std.lang`**:
+1. **Write Your Function in `hara.lang`**:
 
 ```clojure
 (defn.pg greet-user

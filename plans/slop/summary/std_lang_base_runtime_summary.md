@@ -1,4 +1,4 @@
-# `std.lang.base.runtime` Summary
+# `hara.lang.base.runtime` Summary
 
 The `std.lang.base.runtime*` and `std.lang.base.impl*` namespaces, along with `rt.basic`, are responsible for defining, managing, and interacting with language runtimes in the `foundation-base` ecosystem. A runtime is an environment where code can be executed. The system is designed to be extensible, allowing new runtimes to be defined and integrated.
 
@@ -6,9 +6,9 @@ The `std.lang.base.runtime*` and `std.lang.base.impl*` namespaces, along with `r
 
 *   **Runtime:** A runtime is a component that provides an execution environment for a specific language. It implements the `std.protocol.context/IContext` and `std.protocol.component/IComponent` protocols, which define the interface for interacting with the runtime.
 *   **`defimpl`:** The `defimpl` macro from `std.lib.impl` is the primary tool for creating new runtime types. It simplifies the process of defining a `defrecord` that implements one or more protocols.
-*   **Runtime Proxy:** A runtime proxy (`std.lang.base.runtime-proxy`) is a runtime that forwards calls to another runtime. This is useful for creating aliases or for providing a different interface to an existing runtime.
-*   **Book:** A `book` (`std.lang.base.book`) is a data structure that contains all the code and metadata for a specific language. Each runtime is associated with a book.
-*   **Pointer:** A `pointer` (`std.lang.base.pointer`) is a reference to a piece of code in a book. Runtimes use pointers to execute code.
+*   **Runtime Proxy:** A runtime proxy (`hara.lang.base.runtime-proxy`) is a runtime that forwards calls to another runtime. This is useful for creating aliases or for providing a different interface to an existing runtime.
+*   **Book:** A `book` (`hara.lang.base.book`) is a data structure that contains all the code and metadata for a specific language. Each runtime is associated with a book.
+*   **Pointer:** A `pointer` (`hara.lang.base.pointer`) is a reference to a piece of code in a book. Runtimes use pointers to execute code.
 *   **Lifecycle:** Runtimes have a lifecycle that is managed by the `std.protocol.component/IComponent` protocol. This includes `start`, `stop`, and `kill` functions.
 
 **Runtime Generation and Customization:**
@@ -46,17 +46,17 @@ A new runtime is typically defined using the `defimpl` macro. This macro takes a
 
 **2. The `RuntimeDefault` Record:**
 
-The `std.lang.base.runtime` namespace defines a `RuntimeDefault` record using `defimpl`. This record provides a default implementation for the `IContext` and `IComponent` protocols.
+The `hara.lang.base.runtime` namespace defines a `RuntimeDefault` record using `defimpl`. This record provides a default implementation for the `IContext` and `IComponent` protocols.
 
 *   It serves as a base for many of the language-specific runtimes in `rt.basic`.
 *   It includes logic for proxying calls to another runtime via the `redirect` field.
-*   The `default-*` functions in `std.lang.base.runtime` provide the actual implementations for the protocol functions. For example, `default-invoke-ptr` handles the logic for invoking a function pointer.
+*   The `default-*` functions in `hara.lang.base.runtime` provide the actual implementations for the protocol functions. For example, `default-invoke-ptr` handles the logic for invoking a function pointer.
 
 **3. Customization:**
 
 *   **Extending `RuntimeDefault`:** The easiest way to create a new runtime is to extend `RuntimeDefault` and override the functions that need to be customized.
 *   **Creating a New Runtime from Scratch:** For more advanced use cases, you can create a new runtime from scratch by implementing the `IContext` and `IComponent` protocols yourself.
-*   **Runtime Proxies:** The `std.lang.base.runtime-proxy` namespace allows you to create a proxy for an existing runtime. This is useful for adding functionality or for creating a different interface to a runtime.
+*   **Runtime Proxies:** The `hara.lang.base.runtime-proxy` namespace allows you to create a proxy for an existing runtime. This is useful for adding functionality or for creating a different interface to a runtime.
 
 **Example: A Simple Runtime Definition**
 

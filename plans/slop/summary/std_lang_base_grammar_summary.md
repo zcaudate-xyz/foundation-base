@@ -1,4 +1,4 @@
-# `std.lang.base.grammar` Summary
+# `hara.lang.base.grammar` Summary
 
 The `std.lang.base.grammar*` namespaces are responsible for defining the structure and semantics of a language that can be emitted by the `foundation-base` transpiler. The grammar is a key component of the emit pipeline, providing the necessary information to translate a Clojure-like form into a string of code in the target language.
 
@@ -31,9 +31,9 @@ The grammar provides a powerful mechanism for customizing the emit pipeline:
 *   **Overriding Default Behavior:** You can override the default behavior of the emitter by providing your own emit functions in the grammar.
 *   **Controlling Formatting:** The grammar allows you to control the formatting and layout of the generated code by specifying options for indentation, spacing, and newlines.
 
-**Language-Specific Grammars in `std.lang.model`:**
+**Language-Specific Grammars in `hara.lang.model`:**
 
-The `std.lang.model.*` files provide concrete examples of how to define grammars for different languages. These files demonstrate how to:
+The `hara.lang.model.*` files provide concrete examples of how to define grammars for different languages. These files demonstrate how to:
 
 *   **Select a set of features:** Each language-specific grammar starts by selecting a set of features (operators) from the `+op-*` definitions using `grammar/build`. For example, `spec_c.clj` excludes `:data-shortcuts`, `:control-try-catch`, and `:class`, which are not relevant for the C language.
 *   **Override and extend features:** The grammars then use `grammar/build:override` and `grammar/build:extend` to customize the selected features. For example, `spec_lua.clj` overrides the `:seteq` operator to emit `<-` instead of `=`, and it extends the grammar with Lua-specific operators like `:cat` (for string concatenation) and `:len` (for getting the length of a table).
@@ -49,4 +49,4 @@ The Lua grammar provides a good example of how to customize the emit pipeline fo
 *   **Custom map key emission:** The `lua-map-key` function provides custom logic for emitting map keys, taking into account Lua's syntax for table keys.
 *   **C FFI support:** The `tf-c-ffi` macro allows you to embed C code in your Lua code.
 
-By studying the language-specific grammars in `std.lang.model`, you can get a good understanding of how to create your own grammars and customize the emit pipeline to support new languages or extend existing ones.
+By studying the language-specific grammars in `hara.lang.model`, you can get a good understanding of how to create your own grammars and customize the emit pipeline to support new languages or extend existing ones.

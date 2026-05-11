@@ -65,7 +65,7 @@ When merging or updating objects, use `Object.assign({}, target, source1, source
 ## Incorrect `name` Function Usage
 
 **Error Description:**
-The Clojure `name` function was used to convert keywords to strings for object keys. This function is not available in the `std.lang` JS DSL.
+The Clojure `name` function was used to convert keywords to strings for object keys. This function is not available in the `hara.lang` JS DSL.
 
 **Correction Rule:**
 If a variable `key` is intended to be a string for property access, use it directly. Do not use `(name key)`.

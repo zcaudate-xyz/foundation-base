@@ -1,4 +1,4 @@
-# `std.lang.base.emit` Summary
+# `hara.lang.base.emit` Summary
 
 The `std.lang.base.emit*` namespaces form the core of the `foundation-base` code generation and transpilation engine. Their primary responsibility is to take a Clojure-like data structure, referred to as a "form," and translate it into a string of code in a target language. This entire process is orchestrated by a `grammar` that specifies the syntax, semantics, and customization points for the target language.
 
@@ -11,7 +11,7 @@ The `std.lang.base.emit*` namespaces form the core of the `foundation-base` code
 
 **The Emit Pipeline in Detail:**
 
-1.  **Preprocessing (`std.lang.base.emit-preprocess`):**
+1.  **Preprocessing (`hara.lang.base.emit-preprocess`):**
     *   **`to-input`:** This is the first step, where the raw Clojure form is converted into an "input form." This involves expanding special reader macros and other syntactic sugar into a more canonical representation. For example, `@` is expanded to a `!:deref` form.
     *   **`to-staging`:** This is the second and more complex preprocessing step. It takes the input form and prepares it for emission by:
         *   Resolving symbols and namespaces.
@@ -19,13 +19,13 @@ The `std.lang.base.emit*` namespaces form the core of the `foundation-base` code
         *   Handling dependencies between different code modules.
         *   Processing inline function assignments.
 
-2.  **Emission (`std.lang.base.emit`):**
+2.  **Emission (`hara.lang.base.emit`):**
     *   **`emit-main`:** The main entry point for the emission process. It sets up the dynamic environment and calls `emit-main-loop`.
     *   **`emit-main-loop`:** This is the core recursive function that traverses the preprocessed form. For each node in the form, it calls `emit-form`.
     *   **`emit-form`:** This function is the central dispatcher. It calls `form-key` to determine the type of the current form and then dispatches to the appropriate emit function (e.g., `emit-def`, `emit-fn`, `emit-block`).
 
 3.  **Form-Specific Emitters:**
-    *   The `std.lang.base.emit-*` namespaces provide the actual implementation for emitting different types of forms.
+    *   The `hara.lang.base.emit-*` namespaces provide the actual implementation for emitting different types of forms.
     *   **`emit-top-level`:** Handles top-level forms like `def`, `defn`, and `defclass`.
     *   **`emit-fn`:** Handles function definitions and calls, including argument lists and type hints.
     *   **`emit-block`:** Handles block-level constructs like `do`, `if`, `for`, and `while`.

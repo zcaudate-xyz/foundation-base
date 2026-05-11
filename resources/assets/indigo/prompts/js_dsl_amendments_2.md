@@ -68,7 +68,7 @@ This document outlines specific corrections and clarifications for translating J
 *   **`:require`**: Use for internal project file dependencies (paths starting with `./` or referring to other project namespaces, e.g., `smalltalkinterfacedesign.components.ui.utils`).
 *   **`:import`**: Use for external library dependencies (paths that do **not** start with `./`, e.g., `@radix-ui/react-accordion`, `react-dnd`).
 *   This is done in the `l/script` form, NOT the `ns` form
-**Rationale:** This distinction is crucial for the `std.lang` transpiler to correctly resolve module paths and dependencies.
+**Rationale:** This distinction is crucial for the `hara.lang` transpiler to correctly resolve module paths and dependencies.
 
 **Example:**
 

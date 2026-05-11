@@ -15,10 +15,10 @@
 - **Testing Spawns**: Tests often require a runtime `|rt|` to be initialized.
 - **Clear Operation**: The `clear` function needed to be updated to also remove spawns from the `:running` map, not just `:programs` and `:past`.
 
-## `std.lang` Tests
+## `hara.lang` Tests
 
-- **Macro Expansion**: `defstruct.rs` and other macros in `std.lang.model.spec-rust` work correctly in isolation, suggesting previous "Syntax error macroexpanding" issues might have been context-dependent or transient.
-- **R Integration**: `std.lang.model.spec-r-test` uses a guard `std.lang.spec.r/CANARY`. If this guard fails (returns false), the tests in that fact are skipped or fail with "Guard failed".
+- **Macro Expansion**: `defstruct.rs` and other macros in `hara.lang.model.spec-rust` work correctly in isolation, suggesting previous "Syntax error macroexpanding" issues might have been context-dependent or transient.
+- **R Integration**: `hara.lang.model.spec-r-test` uses a guard `hara.lang.spec.r/CANARY`. If this guard fails (returns false), the tests in that fact are skipped or fail with "Guard failed".
 
 ## Foundation MCP Server
 
@@ -27,7 +27,7 @@
 - **Tools**:
     - `echo`, `ping`: Basic connectivity tests.
     - `lang-emit-as`: Transpiles Clojure DSL code to target languages (e.g., JS, Lua).
-    - `std-lang-list`, `std-lang-modules`: Introspection for `std.lang` languages and modules.
+    - `std-lang-list`, `std-lang-modules`: Introspection for `hara.lang` languages and modules.
     - `clj-eval`: Evaluates arbitrary Clojure code.
     - `code-test`: Runs tests using `code.test.task/run`.
     - `code-doc-init`, `code-doc-deploy`, `code-doc-publish`: Manages documentation sites.
@@ -36,7 +36,7 @@
 
 # Exported Memories
 
-- **Grammar Retrieval**: To programmatically retrieve the grammar for a `std.lang` language, use `(:grammar (l/get-book (l/default-library) :<lang-keyword>))`. The grammar is not exposed as a public var.
+- **Grammar Retrieval**: To programmatically retrieve the grammar for a `hara.lang` language, use `(:grammar (l/get-book (l/default-library) :<lang-keyword>))`. The grammar is not exposed as a public var.
 - **Test Timeouts**: When executing facts with timeouts in `code.test`, `java.util.concurrent.ExecutionException` is caught and unwrapped to re-throw the underlying cause (unless it is a `TimeoutException`), ensuring consistent error reporting between synchronous and asynchronous execution.
 - **Context Documentation**: Documentation for `std.lib.context` is located in `plans/std_lib_context/`, including architectural analysis (`analysis.md`), general usage proposals (`proposals.md`), 3D virtual world mappings (`3d_virtual_worlds.md`), the applicative model (`applicative_model.md`), the invoke-as pattern (`invoke_as_patterns.md`), AI agent architecture (`ai_agents.md`), and async evaluation analysis (`async_evaluation.md`).
 - **JavaScript Wrappers**: The `src/js` directory contains Clojure files defining standard JavaScript library wrappers (e.g., `js.react`, `js.tamagui`, `js.blessed`) using the `l/script` DSL, rather than raw JavaScript files.
@@ -74,23 +74,23 @@
 - **Indigo Layout**: The `indigo` web application structure separates UI layouts into `src/indigo/webapp/` (e.g., `layout_library_browser.clj`) and client integration logic into `src/indigo/client/` (e.g., `browser_main.clj`).
 - **HubDispatch**: `HubDispatch` (`std.dispatch.hub`) acts as a centralized router, grouping events and using a debouncer to trigger batch processing for each group.
 - **Code Test Wildcard**: The `code.test` framework treats the symbol `any` (and `'any`) within checker structures (like `contains`) as a wildcard by resolving it to `(satisfies anything)`, preventing equality check failures against the symbol itself.
-- **Perl Spec**: `std.lang.model.spec-perl` implements Perl 5 support, handling variable sigils, subroutine argument unpacking via `shift`, and mapping the `concat` operator to `.`.
+- **Perl Spec**: `hara.lang.model.spec-perl` implements Perl 5 support, handling variable sigils, subroutine argument unpacking via `shift`, and mapping the `concat` operator to `.`.
 - **Dispatch Strategies**: The `std.concurrent.dispatch` library provides multiple, composable dispatching strategies built upon a foundational `CoreDispatch` (`std.dispatch.core`) for basic asynchronous execution.
 - **Integration Test Data**: Integration test data, such as JSON AST files, is stored in the `test-data` directory, structured to mirror the namespace hierarchy (e.g., `test-data/code.translate` for `code.translate`).
 - **Doc Generation**: The `code.doc` library is used for generating documentation websites, configured primarily via `config/publish.edn` and executed through `init-template`, `deploy-template`, and `publish` tasks.
 - **Future Exception Handling**: Throwing exceptions directly within a `std.lib.future/on:complete` callback is an anti-pattern as it can crash the underlying executor thread. Errors should be propagated through the future chain or managed within a state atom.
-- **JS Map Shorthand**: In `std.lang` JS maps, the `:#` shorthand supports both vectors and single symbols for key shorthand, while explicitly preventing `nil` values from generating "null" keys.
+- **JS Map Shorthand**: In `hara.lang` JS maps, the `:#` shorthand supports both vectors and single symbols for key shorthand, while explicitly preventing `nil` values from generating "null" keys.
 - **Text Index Async**: The `std.text.index` library uses an agent for its in-memory search index, making its operations asynchronous. Tests must use `(await <index-agent>)` to ensure state changes are complete before making assertions.
 - **Literate Clojure**: The `code.doc` library implements a 'Literate Clojure' approach by directly parsing the Clojure AST (via `code.doc.parse`) to extract documentation structure and custom directives (e.g., `[[:chapter ...]]`), rather than relying solely on docstrings.
 - **Relay Config**: `std.concurrent.relay/relay` configuration maps require a `:type` key (e.g., `{:type :process}`) to function correctly in tests.
 - **Build Namespace Mapping**: Namespaces under `code.dev.build` (e.g., `code.dev.build.build-umd`, `code.dev.build.build-ast`) map to individual files within the `src/code/dev/build/` directory (e.g., `build_umd.clj`, `build_ast.clj`) rather than a single `build.clj` file.
-- **Std Lang Transpiler**: The `std.lang` framework functions as a transpiler converting a Lisp-like DSL into target languages (JS, Lua, Python, etc.) using a central 'Book' structure (`std.lang.base.book`) for language definitions.
+- **Std Lang Transpiler**: The `hara.lang` framework functions as a transpiler converting a Lisp-like DSL into target languages (JS, Lua, Python, etc.) using a central 'Book' structure (`hara.lang.base.book`) for language definitions.
 - **UI Vision**: The user's vision for the UI tool is a 'System Explorer' with a 'Limited Interaction Philosophy'. The tool should be for viewing, browsing, and composing functionalities, not a general-purpose code editor.
 - **Collection Library**: The project should use `std.lib.collection` instead of `clojure.data` for collection operations and diffing.
-- **Pointer Wrapper**: The `with:rt-wrap` macro in `std.lang.base.pointer` unquotes its function argument (`~f`) within the generated `binding` form to ensure correct variable resolution.
+- **Pointer Wrapper**: The `with:rt-wrap` macro in `hara.lang.base.pointer` unquotes its function argument (`~f`) within the generated `binding` form to ensure correct variable resolution.
 - **Stream Model**: The `std.lib.stream` library should use an iterator/lazy-sequence model for processing, not a transducer-based model.
 - **JS DSL Translation**: The `code.translate.js-dsl` namespace translates JavaScript `SpreadElement` and `RestElement` AST nodes into `...` and `&` symbols respectively, and `UpdateExpression` nodes to `(++ ...)` or `(-- ...)` forms.
-- **Module Globals**: The `std.lang.base.script-lint/collect-module-globals` function ensures `h/union` operations receive and return sets (using `or ... #{}`) to prevent `NullPointerException`s when processing empty modules.
+- **Module Globals**: The `hara.lang.base.script-lint/collect-module-globals` function ensures `h/union` operations receive and return sets (using `or ... #{}`) to prevent `NullPointerException`s when processing empty modules.
 - **Tempfile Path**: The `std.fs.api/create-tmpfile` function returns a `java.io.File`, while many functions in `std.fs.path` (like `set-executable`) expect a `java.nio.file.Path`, requiring explicit conversion in tests (e.g., `(path/path ...)` or `.toPath`).
 - **Board Dispatch Tests**: Tests for `std.dispatch.board/new-board` must dereference the returned atom to verify its content, as the function returns an atom containing the board state.
 - **Java Version**: The development environment requires Java 21.
@@ -104,7 +104,7 @@
 - **Resource Lifecycle**: The `std.lib.resource` library provides lifecycle management for components via specifications that define `:type`, `:mode` (`:global`, `:namespace`, `:shared`), and instance functions (`:create`, `:setup`, `:teardown`).
 - **Test Checkers**: The `=>` operator in `code.test` generates checkers with the `:satisfies` tag; `code.test.diff` extracts the expected value from these checkers to support diffing.
 - **Postwalk Intern**: The `std.lib.walk` namespace provides `postwalk`, which is interned into `std.lib`, allowing `std.lib/postwalk` to be used for traversing code forms.
-- **JS Imports**: When using `std.lang`'s `l/script` macro, external JavaScript libraries (e.g., Monaco, React Live) should be included via the `:import` directive, not `:require`.
+- **JS Imports**: When using `hara.lang`'s `l/script` macro, external JavaScript libraries (e.g., Monaco, React Live) should be included via the `:import` directive, not `:require`.
 - **Resource Idempotency**: In `std.lib.resource`, the `res` function idempotently retrieves an active resource or creates a new one based on a given ID, while functions like `res:start` and `res:stop` manage its lifecycle.
 - **Protocol Testing**: When testing protocol methods (e.g., `std.protocol.component/-info`) in `code.test`, `with-redefs` may be ineffective; using `reify` to implement the protocol on the test subject is recommended.
 - **Rewrite Metadata**: The `code.test.compile.rewrite` namespace preserves form metadata during AST rewriting by applying `with-meta` to rewritten lists, ensuring macros dependent on `&form` (like `code-line`) function correctly within tests.
@@ -126,9 +126,9 @@
 - **Layout Estimate**: Functions in `std.block.layout.estimate` (e.g., `estimate-multiline-basic`) return a boolean indicating whether a form requires multiline layout, determined by checking if its width exceeds a `:readable-len` (defaulting to `*readable-len*` or metadata).
 - **MCP Tool Definitions**: MCP tool definitions in `mcp-clj` require detailed strings for the `:description` key and argument descriptions in `:inputSchema` to effectively guide the LLM client.
 - **CI Environment**: The CI environment (defined in `.github/workflows/run-test.yml`) uses the `ghcr.io/zcaudate-xyz/infra-foundation-clean:ci` image, where `lein` is available on the system PATH (invoked as `lein`), unlike the local dev environment which uses `./lein`.
-- **Script Macro Intern**: The `std.lang.base.script-macro/intern-in` function handles non-keyword tags by using `str` instead of `name` to prevent `NullPointerException`s.
+- **Script Macro Intern**: The `hara.lang.base.script-macro/intern-in` function handles non-keyword tags by using `str` instead of `name` to prevent `NullPointerException`s.
 - **String Namespace**: The `std.string` namespace defines its own string utilities (e.g., `includes?`) and does not automatically refer `clojure.string`; consumers should alias it (e.g., `[std.string :as str]`) to use these functions.
-- **Grammar Override**: In `std.lang` grammar definition, `grammar/build:override` requires the key to exist in the base map; if a key is absent (e.g., explicitly excluded), `grammar/build:extend` must be used instead.
+- **Grammar Override**: In `hara.lang` grammar definition, `grammar/build:override` requires the key to exist in the base map; if a key is absent (e.g., explicitly excluded), `grammar/build:extend` must be used instead.
 - **Test Use Keyword**: The `code.test` framework does not support the `:use` keyword for component injection within `fact` forms; `component/with` or standard `let` bindings should be used instead.
 - **Naming Convention**: Clojure files use spinal-case naming, and namespaces strictly follow the directory structure (e.g., `std.lib.collection`).
 - **Memoize Test**: The `std.lib.memoize/registered-memoizes` test requires its check to be flexible, using `(any nil? coll?)` instead of `seq?` to handle different collection types (like maps) that may be returned during test reporting.
@@ -150,15 +150,15 @@
 - **DOM Library**: The `std.dom` library (located in `src/std/dom`) is a generic Virtual DOM implementation capable of diffing and patching arbitrary data trees, making it suitable for infrastructure-as-code state management.
 - **Task Defaults**: `std.task` defaults missing `:construct` keys (`:input`, `:env`, `:lookup`) to safe no-ops (e.g., `(constantly nil)`) to prevent runtime errors during execution.
 - **Standalone Scripts**: Standalone Clojure scripts can be executed within the project's classpath using `./lein exec -p <script-path>`. This is useful for creating minimal reproductions of bugs outside the main test framework.
-- **Book Entry Types**: The `std.lang` book model distinguishes between entry types, such as `:code` for functions and `:fragment` for macros, which are created with different helper functions (e.g., `create-code-base` vs. `create-macro`).
+- **Book Entry Types**: The `hara.lang` book model distinguishes between entry types, such as `:code` for functions and `:fragment` for macros, which are created with different helper functions (e.g., `create-code-base` vs. `create-macro`).
 - **Language Book Tests**: Tests in `std.lang` that retrieve specific language books (e.g., `l/get-book ... :xtalk`) must explicitly require the namespace defining that book (e.g., `std.lang.model.spec-xtalk`) to ensure it is registered in the default library.
 - **Definvoke Macro**: The `definvoke` macro from `std.lib.invoke` must be explicitly referred from `std.lib`. It requires a type-and-config vector (e.g., `[:fn {}]`) as an argument to define a standard function; otherwise, a `ClassCastException` may occur during macroexpansion.
 - **Bulk Task Keys**: The `std.task.bulk` library (specifically `std.task.bulk`) automatically maps result columns to keys in the output data if explicit `:keys` mappings are omitted, simplifying task definition.
-- **RT Space**: The `std.lang/rt:space` function retrieves the runtime object (verifiable with `rt/rt-default?`) for a language within a specific namespace, not the space object itself.
+- **RT Space**: The `hara.lang/rt:space` function retrieves the runtime object (verifiable with `rt/rt-default?`) for a language within a specific namespace, not the space object itself.
 - **Bus Status Tests**: Tests for `std.concurrent.bus` status (e.g., `info-bus`) must wait for the bus thread to start (e.g., polling `started?-bus`) after initialization via `bus:with-temp` or `start-bus` to avoid race conditions.
-- **Lib Module Alias**: In `std.lang`, the function `manage/lib-module-overview` is exposed via the alias `lib:module`.
-- **Pointer Map Tests**: To create a valid pointer map for unit tests in `std.lang`, use `std.lang.base.util/lang-pointer` (or `ut/lang-pointer`), as the `l/ptr` macro returns a function (macro expansion result) rather than the map itself.
-- **Indigo App**: The `indigo` namespace contains a web application built with a ClojureScript-like DSL (`std.lang` for JS/React) and served by an `http-kit` server located at `src/indigo/server.clj`.
+- **Lib Module Alias**: In `hara.lang`, the function `manage/lib-module-overview` is exposed via the alias `lib:module`.
+- **Pointer Map Tests**: To create a valid pointer map for unit tests in `hara.lang`, use `hara.lang.base.util/lang-pointer` (or `ut/lang-pointer`), as the `l/ptr` macro returns a function (macro expansion result) rather than the map itself.
+- **Indigo App**: The `indigo` namespace contains a web application built with a ClojureScript-like DSL (`hara.lang` for JS/React) and served by an `http-kit` server located at `src/indigo/server.clj`.
 - **Require File Task**: The `require-file` task, defined in `code.manage` and implemented in `code.manage.unit.require`, loads a namespace using `clojure.core/require` and returns a sorted vector of its public var symbols.
 - **Src Extra**: The `src-extra` directory acts as a source root for namespaces like `mcp-clj`, despite being listed under `:resource-paths` in `project.clj`.
 - **Code Manage API**: The `code.ai.server` namespace exposes `code.manage` tasks via HTTP endpoints `/manage/tasks` (GET) and `/manage/:task` (POST), allowing execution of maintenance tasks.
@@ -167,7 +167,7 @@
 - **Virtual Executor**: The `std.concurrent.executor/executor:virtual` function uses reflection to create a `newVirtualThreadPerTaskExecutor`, ensuring compatibility with JDKs older than 21 while enabling Virtual Threads on JDK 21+.
 - **Build Utilities**: The project utilizes `std.make` (via `make/build`, `make/run`) for build automation and `code.dev` for development utilities, including grouped test runners like `test:base`, `test:infra`, `test:app`, and helper functions like `tests-in-wrong-file`.
 - **Clone Default Library**: The `std.lang.base.impl/clone-default-library` function returns a new library instance initialized with the snapshot of the current default library, enabling isolated testing of scripts that depend on existing language definitions.
-- **JS Var to Let**: In `std.lang` to JavaScript compilation, `var` declarations typically default to `let` in the output, which means roundtrip translation (DSL -> JS -> AST -> DSL) will result in `(let ...)` forms instead of `(var ...)`.
+- **JS Var to Let**: In `hara.lang` to JavaScript compilation, `var` declarations typically default to `let` in the output, which means roundtrip translation (DSL -> JS -> AST -> DSL) will result in `(let ...)` forms instead of `(var ...)`.
 - **Applicable Protocol**: The `std.lib.apply` library implements the `IApplicable` protocol to decouple execution logic from the environment, allowing operations to be executed within a specific `Runtime` (context) via `apply-in` or with an auto-resolved context via `apply-as`.
 - **Tailwind Lib**: The `std.tailwind` library (namespace `std.tailwind`, file `src/std/tailwind.clj`) implements a Tailwind CSS class parser and an ASCII wireframe renderer for Hiccup forms, supporting layout primitives like flexbox, grid, and sizing.
 - **Context Macro**: The `code.test.base.context/with-context` macro is the primary mechanism for running code within a temporary, isolated test context, which is essential for testing the framework itself.
@@ -184,7 +184,7 @@
 - **MCP Implementation**: The `mcp-clj` (Model Context Protocol) implementation resides in `src-extra/mcp_clj`.
 - **Dynamic Var Access**: In Clojure, dynamic vars should be accessed directly by their symbol (e.g., `*context*`). Incorrectly using the dereference reader macro (`@*context*`) can lead to `ClassCastException`s if the var holds a non-dereferenceable object.
 - **Executor Introspection**: `std.concurrent.executor` introspection functions (`executor:info`, `executor:type`) support generic `ExecutorService` instances (such as Virtual Thread executors) by falling back to basic information when `ThreadPoolExecutor` casting fails.
-- **Lang MCP Server**: The `std.lang` MCP server can be started using `lein run -m mcp-clj.std-lang-server`.
+- **Lang MCP Server**: The `hara.lang` MCP server can be started using `lein run -m mcp-clj.std-lang-server`.
 - **Stream Implementation**: The stream processing implementation in `std.lib.stream` is iterator-based, using lazy sequences. The core transformation functions are defined in `src/std/lib/stream/iter.clj` and mapped to keywords in the `*transforms*` atom in `src/std/lib/stream.clj`.
 - **Config Exceptions**: `std.config.resolve/ex-config` constructs and returns a `clojure.lang.ExceptionInfo` object, while `std.config.resolve/resolve-directive-error` throws it.
 - **AI Server Tools**: The `code.ai.server` namespace uses a modular tool architecture, aggregating functionality from `code.ai.server.tool.*` namespaces including `basic` (echo/ping), `std-lang` (transpilation/introspection), `code-heal`, `code-test`, `code-doc`, and `code-manage`.
@@ -209,18 +209,18 @@
 - **Spawn Form Tests**: Tests for `std.scheduler.common` functions that use `resolve` (like `spawn-form`) require dummy target functions to be defined at the top level of the test namespace to be resolvable.
 - **Async Stream Lib**: The `std.lib.stream.async` library provides a reactive programming model with `Mono` (a stream of at most one item) and `Flux` (a stream of many items) for building asynchronous, stream-based data processing pipelines.
 - **CI Scripts**: The user prefers using Bash scripts (e.g., `src-training/scripts/test_changed.sh`) for CI/CD workflow orchestration logic (like file change detection) rather than embedding it entirely within Clojure code.
-- **Repo Purpose**: The repository `foundation-base` is a Clojure-based project focusing on `std.lang` for multi-language integration.
+- **Repo Purpose**: The repository `foundation-base` is a Clojure-based project focusing on `hara.lang` for multi-language integration.
 - **Logger Component**: `BasicLogger` in `std.log.core` does not implement `std.protocol.component/IComponent`, rendering `std.lib/start` effectively a no-op; tests must explicitly call `logger-start` to initialize the executor and `logger-stop` to prevent thread leaks.
 - **Dispatch Hooks**: The `std.concurrent.dispatch` library provides a system of lifecycle hooks (e.g., `:on-submit`, `:on-queued`, `:on-skip`, `:on-error`) that can be configured under the `:hooks` key to monitor and extend dispatcher behavior.
 - **Layout Cond**: The `cond` form is explicitly handled in `std.block.layout/layout-spec-fn` with `{:columns 2 :col-from 0}` rather than using the generic `+pairing+` set, ensuring correct indentation for test/expression pairs.
 - **Wait Ready Args**: The `rt.basic.server-basic/wait-ready` function accepts arguments in the order `[lang id]`, distinct from other functions that might take `[id lang]`.
 - **Rewrite Seq Check**: The `code.test.compile.rewrite` namespace uses `seq?` to detect list-like forms during AST rewriting but explicitly returns `quote` forms as-is to prevent rewriting nested checks within literals.
-- **Library Reset**: The `std.lang.base.impl/default-library:reset` function stops the library instance bound to `*library*` or a provided override argument; if neither is present, it stops the global `:hara/lang.library` resource.
+- **Library Reset**: The `hara.lang.base.impl/default-library:reset` function stops the library instance bound to `*library*` or a provided override argument; if neither is present, it stops the global `:hara/lang.library` resource.
 - **JS Graphics Libs**: The `src/js/lib` directory contains wrappers for 3D graphics libraries, including `three.clj` (Three.js) and `r3_*.clj` (React Three Fiber ecosystem).
 - **Jules Client**: The namespace `code.ai.jules` provides a client for the Google Jules API (`https://jules.googleapis.com`), utilizing `net.http.client` for requests and `X-Goog-Api-Key` for authentication.
 - **Figma Lib**: The `js.lib.figma` namespace provides a rich set of pre-built UI components based on the Figma UI library, suitable for creating mockups and production UIs.
-- **JS DSL Translation**: The `code.translate.js-dsl` namespace translates Babel/ESTree AST nodes into `std.lang` JavaScript DSL forms.
-- **JSX Self-Closing**: The `emit-jsx-inner` function in `std.lang.model.spec-js.jsx` generates self-closing tags (e.g., `<div />`) when the element has no children.
+- **JS DSL Translation**: The `code.translate.js-dsl` namespace translates Babel/ESTree AST nodes into `hara.lang` JavaScript DSL forms.
+- **JSX Self-Closing**: The `emit-jsx-inner` function in `hara.lang.model.spec-js.jsx` generates self-closing tags (e.g., `<div />`) when the element has no children.
 - **ASCII Box Model**: The `std.tailwind` ASCII renderer implements a simplified box model that respects `box-sizing: border-box`, where border width reduces the available width for children.
 - **Block Classification**: The `std.block.base` namespace defines block classification via `*block-types*` (e.g., `:token`, `:container`) and grouping via `*container-tags*` (e.g., `:collection`, `:macro`), which inform validity checks.
 - **Unit Doc Tools**: The `code.manage.unit` namespace implements functions like `import` (imports unit tests as docstrings) and `purge` (removes docstrings and metadata) to manage inline test documentation.
@@ -230,7 +230,7 @@
 - **Dispatch Docs**: Comprehensive documentation on `std.dispatch` strategies (`Core`, `Queue`, `Debounce`, `Hub`, `Board`), including code examples and executor combinations, is located in `DISPATCH_STRATEGIES.md`.
 - **Tailwind Analysis**: The `std.tailwind.analysis` namespace provides functionality (`estimate-layout`) to parse `std.lang` React DSL code (e.g., `defn.js` forms), converting component calls into Hiccup structures for visualization via `std.tailwind`.
 - **Test Files Arg**: The `code.test` runner supports a `:files` argument (space-separated string) to execute tests for specific files. `code.test.task/resolve-files` handles the mapping: test files are run directly, and source files are mapped to their corresponding test namespaces using `code.project`.
-- **For Async Transformer**: The `tf-for-async` transformer in `std.lang.model.spec-js` transpiles `for:async` loops into `Promise` chains (`.then`), distinct from native `async/await` syntax.
+- **For Async Transformer**: The `tf-for-async` transformer in `hara.lang.model.spec-js` transpiles `for:async` loops into `Promise` chains (`.then`), distinct from native `async/await` syntax.
 - **Doc Assets**: `code.doc` theme resources (e.g., CSS, JS) are stored in `resources/assets/code.doc/theme/`, and theme definitions in `src/code/doc/theme/` must reference these paths.
 - **JSON Read Keyword**: The `std.json/read` function requires `std.json/+keyword-mapper+` as the second argument to parse JSON objects with keyword keys; otherwise, it defaults to string keys.
 - **Refactoring Lib**: Common Clojure refactorings (e.g., `if-not`, `when-not`, `if-to-when`) are implemented in `code.refactor.base.expression`, which utilizes `code.query/modify` for AST transformations.
@@ -252,7 +252,7 @@
 - **DOM Sync Testing**: `std.dom.sync` logic (e.g., `sync-step`) can be tested using standard Clojure maps to represent DOM nodes instead of `std.dom.common.Dom` records to avoid `ClassCastException` or protocol resolution issues in isolated test environments.
 - **Test Framework Mandate**: The user explicitly mandates using `code.test` instead of `clojure.test` for all testing.
 - **Build Config**: Project build configurations are defined using the `def.make` macro (found in `std.make`), which specifies project tags, output directories, and build sections.
-- **C Spec**: The `std.lang.model.spec-c` namespace implements C language generation, including support for pointers (`*`, `&`, `->`), structs, enums, typedefs, and typed function definitions.
+- **C Spec**: The `hara.lang.model.spec-c` namespace implements C language generation, including support for pointers (`*`, `&`, `->`), structs, enums, typedefs, and typed function definitions.
 - **Nix DSL**: The `rt.nix.script` DSL generates Nix configuration by mapping Clojure maps/vectors to attribute sets/lists and supports tagged vectors for special constructs: `[:fn args body]` for functions (e.g., `[:fn [:pkgs :...] ...]`), `[:with scope body]` for `with` expressions, and `[:path "./..."]` for paths.
 - **Modify Zipper**: The `code.query/modify` function operates on a zipper, accepting a selector vector and a handler function; the handler receives the matched zipper location (`zloc`) and must return a modified zipper, often using `std.block.navigate/replace`.
 - **Line Number Meta**: Line number resolution for assertions in `code.test` prioritizes the input form's metadata but uses the arrow symbol's (`=>`) metadata as a fallback to correctly support simple values (like numbers or symbols).
@@ -267,12 +267,12 @@
 - **Log State Tests**: Tests modifying global state in `std.log.common` (e.g., `set-level!`) must utilize `try/finally` blocks to restore original values, ensuring test isolation.
 - **Hub Cache**: `HubDispatch` (`std.dispatch.hub`) uses a Guava `Cache` for managing active groups, enabling automatic eviction of unused groups to prevent memory leaks.
 - **Fact Helper**: Defining helper functions that wrap `code.test/fact` macros often results in compilation syntax errors; checking logic involving facts should generally be inlined.
-- **Perl Strings**: Perl language tests in `std.lang` use `{:string {:quote :double}}` for string emission.
+- **Perl Strings**: Perl language tests in `hara.lang` use `{:string {:quote :double}}` for string emission.
 - **Executor Shutdown**: Tests creating `std.concurrent.executor` instances must ensure explicit shutdown (e.g., via `try/finally` or `component/stop`) to prevent thread leaks in the test environment.
 - **Tailwind Hiccup**: The `std.tailwind.analysis/to-hiccup` function processes vector inputs by mapping itself over the elements, treating the vector as a sequence of forms rather than a single Hiccup node, and does not normalize the output (e.g., by inserting missing attribute maps).
 - **Test Print Alignment**: Test output in `code.test.base.print` uses right-aligned, padded labels (e.g., "Info", "Form", "Diff") for consistent visual alignment.
 - **Lang Module Dependencies**: Tests for `std.lang` modules that depend on other modules (e.g., `js.react`) within an isolated library (via `with:library`) must explicitly load those dependencies using `(require '[namespace] :reload)` within the `with:library` scope to ensure they register into the isolated instance.
-- **Book Config**: Instantiating a `std.lang.base.book/book` requires providing both `:meta` and `:grammar` keys in its configuration map.
+- **Book Config**: Instantiating a `hara.lang.base.book/book` requires providing both `:meta` and `:grammar` keys in its configuration map.
 - **Result Record Assertions**: When using `code.test` to assert on functions that return `std.lib.result/Result` records, direct comparison with map literals or matchers like `contains` can fail. A reliable method is to destructure the result record and assert on its individual keys and values (e.g., `(let [[k v] @output] (and (= k 5) (= (:status v) :return) ...))` ).
 - **Pipeline Architecture**: An architectural overview illustrating how to compose `Relay`, `Bus`, `Dispatcher`, and `async` streams into a visual data pipeline is documented in `CONCURRENT_PIPELINES.md`.
 - **Running Tests**: Running the full test suite (`lein test`) frequently times out. To run a specific test namespace, use `lein test :only <ns>` (e.g., `lein test :only std.lib.foundation`). When running a group of namespaces, use `lein test :in std.lib`
@@ -310,7 +310,7 @@
 - **Test Bindings**: Defining global vars using `def` within `code.test` `fact` blocks causes scope and binding issues; use `let` or `component/with` for local bindings instead.
 - **Lein Aliases**: Tests are executed using `lein` with aliases defined in `project.clj` (e.g., `test`, `test-unit`).
 - **Match Records**: Functions in `code.query.match.impl`, such as `actual-pattern` and `eval-pattern`, return a record. Tests must access the `:expression` key of the returned record to retrieve the value for comparison.
-- **React DSL**: React components in `std.lang` are defined using macros like `defn.js` and explicit `(return ...)` forms, with component instantiation represented as list forms (e.g., `(T/Stack ...)` or `div ...)`).
+- **React DSL**: React components in `hara.lang` are defined using macros like `defn.js` and explicit `(return ...)` forms, with component instantiation represented as list forms (e.g., `(T/Stack ...)` or `div ...)`).
 - **Indigo API**: Backend endpoints for the `indigo` System Explorer are located in `indigo.server.api-browser` and exposed via `/api/translate/browser/` routes (e.g., `namespaces`, `components`).
 - **MCP Args**: MCP tools within `code.ai.server` (such as `code-heal`, `code-test`, `code-manage`) typically require arguments (like `params`, `args`, `site`) to be provided as EDN-encoded strings to support Clojure data structures.
 - **Reify Methods**: When implementing `clojure.lang.IDeref` or `clojure.lang.IFn` via `reify`, the method names must be `deref` and `invoke` respectively, not `_deref` or `-invoke`.

@@ -14,21 +14,21 @@ The `rt.postgres` module within the `foundation-base` ecosystem provides a robus
 *   **`rt.postgres.system`**: Provides macros for interacting with PostgreSQL system functions.
 *   **`rt.postgres.gen_bind`**: Facilitates the binding of Clojure-defined functions and database entities into a structured interface for external consumption (e.g., APIs).
 
-### Integration with `std.lang`
+### Integration with `hara.lang`
 
-`rt.postgres` extensively leverages the `std.lang` framework's capabilities for code generation and runtime management.
+`rt.postgres` extensively leverages the `hara.lang` framework's capabilities for code generation and runtime management.
 
 *   **`std.lang.base.book` and `std.lang.base.library`**: `rt.postgres` defines its own `+book+` (in `rt.postgres.grammar.clj`) which holds the PostgreSQL-specific grammar and metadata. This book is installed into the global `std.lang` library, making the PostgreSQL language available for transpilation.
-*   **`std.lang.base.emit`**: The emit pipeline uses the `rt.postgres` grammar (`+grammar+`) to translate Clojure forms into SQL strings.
-*   **`std.lang.base.grammar`**: The `+grammar+` in `rt.postgres.grammar.clj` is built upon `std.lang.base.grammar/build`, incorporating various operators and customizing them for PostgreSQL's syntax and semantics.
-*   **`std.lang.base.runtime`**: The `rt.postgres.client/RuntimePostgres` implements the `IContext` and `IComponent` protocols, allowing `std.lang` to manage PostgreSQL connections and execute code within that context.
-*   **`std.lang.base.script`**: The high-level `l/script :postgres` macro enables the seamless execution model, making PostgreSQL functions and macros available directly within Clojure namespaces.
+*   **`hara.lang.base.emit`**: The emit pipeline uses the `rt.postgres` grammar (`+grammar+`) to translate Clojure forms into SQL strings.
+*   **`hara.lang.base.grammar`**: The `+grammar+` in `rt.postgres.grammar.clj` is built upon `hara.lang.base.grammar/build`, incorporating various operators and customizing them for PostgreSQL's syntax and semantics.
+*   **`hara.lang.base.runtime`**: The `rt.postgres.client/RuntimePostgres` implements the `IContext` and `IComponent` protocols, allowing `hara.lang` to manage PostgreSQL connections and execute code within that context.
+*   **`hara.lang.base.script`**: The high-level `l/script :postgres` macro enables the seamless execution model, making PostgreSQL functions and macros available directly within Clojure namespaces.
 
 ### Grammar and Schema Definition (`rt.postgres.grammar.*`)
 
 The heart of `rt.postgres` lies in its grammar definition, which dictates how Clojure code is transformed into PostgreSQL.
 
-*   **`+features+` (in `rt.postgres.grammar.clj`):** This defines the operators and keywords available in the PostgreSQL DSL. It extends standard `std.lang` features with PostgreSQL-specific constructs. Notable extensions include:
+*   **`+features+` (in `rt.postgres.grammar.clj`):** This defines the operators and keywords available in the PostgreSQL DSL. It extends standard `hara.lang` features with PostgreSQL-specific constructs. Notable extensions include:
     *   **SQL Operators:** Custom definitions for operators like `seteq` (`:=`), and `concat` (`||`).
     *   **JSONB Operators:** Operators for JSONB manipulation like `idxe` (`#>>`), `idxt` (`->>`), `idxj` (`->`).
     *   **Type Casting:** The `cast` (`++`) operator for explicit type casting.

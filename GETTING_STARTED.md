@@ -42,10 +42,10 @@ To try it out immediately within the repo:
     (h/pl "Hello Foundation!")
     ```
 
-3.  Explore `std.lang` (the core feature):
+3.  Explore `hara.lang` (the core feature):
     ```clojure
-    (require '[std.lang :as l]
-             '[std.lang.model.spec-js :as js])
+    (require '[hara.lang :as l]
+             '[hara.lang.model.spec-js :as js])
 
     ;; Transpile a simple Clojure form to JavaScript
     (l/emit-as :js '(+ 1 2 3))

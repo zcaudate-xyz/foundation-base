@@ -43,7 +43,7 @@ The project uses a custom or specialized testing framework `code.test`, which ap
 *   Mocking/Context: Uses `reset!` on dynamic vars (e.g., `*lookup*`) in `:setup` to isolate tests.
 
 ### 3.3. Multi-Language/DSL Tests (`std/lang/*`, `web3/*`)
-*   **`l/script`**: Uses `std.lang` macros (`l/script`, `l/script-`) to define test contexts for specific target languages (e.g., Solidity, JS).
+*   **`l/script`**: Uses `hara.lang` macros (`l/script`, `l/script-`) to define test contexts for specific target languages (e.g., Solidity, JS).
 *   **Runtime Integration**: Tests interact with actual runtimes.
     *   `web3` tests start/stop a Ganache server using `fact:global`.
     *   `s/rt:deploy` is used to deploy contracts before running tests.

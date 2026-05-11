@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Inference script for trained std.lang model
+Inference script for trained hara.lang model
 
 Test the trained model on xtalk translation tasks.
 
@@ -80,7 +80,7 @@ def interactive_mode(model, tokenizer):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Test trained std.lang model")
+    parser = argparse.ArgumentParser(description="Test trained hara.lang model")
     parser.add_argument(
         "--model", type=str, required=True, help="Path to trained model"
     )

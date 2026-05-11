@@ -7,7 +7,7 @@
 The spec shows `#{...}` for object destructuring and `{:a a :b b}` for object literals. However, the use of `#js {}` was a recurring error.
 
 **Amendment Proposal:**
-Explicitly state that **only `{}` should be used for JavaScript object literals**. Add a clear warning against using `#js {}` for this purpose, as it is a ClojureScript-specific literal not applicable to the `std.lang` JS DSL.
+Explicitly state that **only `{}` should be used for JavaScript object literals**. Add a clear warning against using `#js {}` for this purpose, as it is a ClojureScript-specific literal not applicable to the `hara.lang` JS DSL.
 
 **Reasoning:**
 This was a frequent source of error, indicating a need for stronger emphasis and explicit prohibition of `#js {}` for object literals.
@@ -292,7 +292,7 @@ The DSL handles string variables as keys directly within object literals. Using 
 In the `l/script` form, all symbolic library references (e.g., `js.lib.figma`, `js.tamagui`, `js.react`, `js.lib.lucide`) must be placed in the `:require` section. The `:import` section is exclusively for string-based external package imports (e.g., `"@radix-ui/react-accordion"`, `"react-dnd"`).
 
 **Reasoning:**
-To ensure consistent and correct module resolution by the `std.lang` transpiler, distinguishing between directly managed symbolic dependencies and string-based package imports.
+To ensure consistent and correct module resolution by the `hara.lang` transpiler, distinguishing between directly managed symbolic dependencies and string-based package imports.
 
 **Example to Add to Spec:**
 

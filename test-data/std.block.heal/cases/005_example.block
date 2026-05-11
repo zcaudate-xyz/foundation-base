@@ -1,5 +1,5 @@
 (ns smalltalkinterfacedesign.components.library-browser
-  (:require [std.lang :as l]))
+  (:require [hara.lang :as l]))
 
 (l/script :js
   {:require [[js.react :as r]

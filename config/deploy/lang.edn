@@ -1,7 +1,7 @@
 {:type       :maven
  :repository "clojars"
  :manifest   [;; library
-              xyz.zcaudate/std.lang
+              xyz.zcaudate/hara.lang
               xyz.zcaudate/std.lib
               xyz.zcaudate/std.json
               xyz.zcaudate/std.html

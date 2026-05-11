@@ -1,4 +1,4 @@
-# `std.lang.base.script` Summary
+# `hara.lang.base.script` Summary
 
 The `std.lang.base.script*` namespaces provide a high-level interface for interacting with the `foundation-base` language ecosystem. They tie together the `grammar`, `emit`, `book`, and `runtime` components to provide a seamless experience for defining, compiling, and executing code in different languages.
 
@@ -6,10 +6,10 @@ The `std.lang.base.script*` namespaces provide a high-level interface for intera
 
 *   **Script:** A "script" is a self-contained unit of code that can be executed in a specific language runtime.
 *   **`script` macro:** The `script` macro is the main entry point for defining a script. It takes a language keyword, a module name, and a configuration map as arguments.
-*   **Runtime Management:** The `std.lang.base.script-control` namespace provides functions for managing the lifecycle of language runtimes, including `script-rt-get`, `script-rt-stop`, and `script-rt-restart`.
-*   **Annex:** An "annex" (`std.lang.base.script-annex`) is a way to extend an existing language with new functionality. It allows you to define new macros and functions that can be used in the extended language.
+*   **Runtime Management:** The `hara.lang.base.script-control` namespace provides functions for managing the lifecycle of language runtimes, including `script-rt-get`, `script-rt-stop`, and `script-rt-restart`.
+*   **Annex:** An "annex" (`hara.lang.base.script-annex`) is a way to extend an existing language with new functionality. It allows you to define new macros and functions that can be used in the extended language.
 
-**How `std.lang.base.script` Ties Everything Together:**
+**How `hara.lang.base.script` Ties Everything Together:**
 
 The `script` macro is the glue that holds the `foundation-base` language ecosystem together. When you use the `script` macro, it performs the following steps:
 
@@ -23,7 +23,7 @@ The `script` macro is the glue that holds the `foundation-base` language ecosyst
 The `!` macro provides a convenient way to switch between different language runtimes within the same namespace. This is especially useful for testing and for writing polyglot scripts.
 
 ```clojure
-(require '[std.lang.base.script :as script])
+(require '[hara.lang.base.script :as script])
 
 (script/script :lua my-lua-module)
 (script/script+ [:py :python] {})

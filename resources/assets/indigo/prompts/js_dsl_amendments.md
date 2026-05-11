@@ -1,6 +1,6 @@
 Given the spec in @translate_dsl.md, can you please translate src/App.jsx as well as all files in src/components/** to output files with the same directory structure in the /src-translated folder. 
   
-** Please follow the spec and ignore any previous assumptions you have about std.lang. 
+** Please follow the spec and ignore any previous assumptions you have about hara.lang. 
 
 ** DO NOT use the j/<> helper functions or import js.core. 
 ** use JSON.stringify an JSON.parse for functions as well!. 

@@ -1,6 +1,6 @@
 # Step 4: LLM Training Pipeline
 
-Complete training infrastructure for fine-tuning LLMs on std.lang data.
+Complete training infrastructure for fine-tuning LLMs on hara.lang data.
 
 ## Overview
 

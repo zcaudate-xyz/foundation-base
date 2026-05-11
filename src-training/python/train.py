@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-LLM Training Pipeline for std.lang
+LLM Training Pipeline for hara.lang
 
 Step 4: Train a model to translate between xtalk DSL and Python/JavaScript
 
@@ -344,7 +344,7 @@ def train_model(
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Train LLM on std.lang data")
+    parser = argparse.ArgumentParser(description="Train LLM on hara.lang data")
     parser.add_argument(
         "--data-dir",
         type=str,
@@ -374,7 +374,7 @@ def main():
 
     print("╔════════════════════════════════════════════════════════════════╗")
     print("║     LLM TRAINING PIPELINE                                     ║")
-    print("║     Step 4: Training std.lang Translator                      ║")
+    print("║     Step 4: Training hara.lang Translator                      ║")
     print("╚════════════════════════════════════════════════════════════════╝")
 
     # Check for GPU

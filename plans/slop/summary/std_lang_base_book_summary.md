@@ -1,14 +1,14 @@
-# `std.lang.base.book` and `std.lang.base.library` Summary
+# `hara.lang.base.book` and `hara.lang.base.library` Summary
 
 The `std.lang.base.book*` and `std.lang.base.library*` namespaces define the data structures for storing, managing, and accessing code within the `foundation-base` ecosystem. A "library" is a collection of "books," each of which represents a language and contains the code and grammar for that language.
 
 **Core Concepts:**
 
-*   **Library (`std.lang.base.library`):** A `Library` is the top-level container for all language definitions. It holds a "snapshot" of the current state of all books.
-*   **Snapshot (`std.lang.base.library-snapshot`):** A `Snapshot` is an immutable map of language IDs to book definitions. It represents a specific version of the library's content.
-*   **Book (`std.lang.base.book`):** A `Book` holds all the code for a particular language. It contains a map of modules, a grammar, and metadata about the language.
+*   **Library (`hara.lang.base.library`):** A `Library` is the top-level container for all language definitions. It holds a "snapshot" of the current state of all books.
+*   **Snapshot (`hara.lang.base.library-snapshot`):** A `Snapshot` is an immutable map of language IDs to book definitions. It represents a specific version of the library's content.
+*   **Book (`hara.lang.base.book`):** A `Book` holds all the code for a particular language. It contains a map of modules, a grammar, and metadata about the language.
 *   **Module (`std.lang.base.book-module`):** A `Module` represents a single source file or a collection of related code. It contains a map of code entries, as well as information about the module's dependencies, exports, and other properties.
-*   **Entry (`std.lang.base.book-entry`):** An `Entry` represents a single piece of code, such as a function, a variable, or a macro. It contains the code itself (as a Clojure form), as well as metadata about the code.
+*   **Entry (`hara.lang.base.book-entry`):** An `Entry` represents a single piece of code, such as a function, a variable, or a macro. It contains the code itself (as a Clojure form), as well as metadata about the code.
 
 **How Forms are Stored as Code:**
 
@@ -43,10 +43,10 @@ The `library` and `book` are essential for the emit pipeline.
 **Example: Creating and Using a Library**
 
 ```clojure
-(require '[std.lang.base.library :as lib])
-(require '[std.lang.base.book :as book])
-(require '[std.lang.base.book-module :as module])
-(require '[std.lang.base.book-entry :as entry])
+(require '[hara.lang.base.library :as lib])
+(require '[hara.lang.base.book :as book])
+(require '[hara.lang.base.book-module :as module])
+(require '[hara.lang.base.book-entry :as entry])
 
 ;; 1. Define a code entry
 (def my-entry
@@ -74,4 +74,4 @@ The `library` and `book` are essential for the emit pipeline.
 
 This example shows how to create a library, add a book to it, and then use the library to emit code. The library provides the necessary context (grammar and modules) for the emit pipeline to do its work.
 
-By providing a structured way to store and manage code, the `std.lang.base.book*` and `std.lang.base.library*` namespaces play a crucial role in the `foundation-base` transpiler.
+By providing a structured way to store and manage code, the `hara.lang.base.book*` and `hara.lang.base.library*` namespaces play a crucial role in the `foundation-base` transpiler.

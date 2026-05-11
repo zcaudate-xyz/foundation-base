@@ -31,11 +31,11 @@ lein install
 2.  **Setup**: `git clone ...` then `lein deps`.
 3.  **Run Tests**: `./lein test :only std.lib.collection-test` (Do not run full suite initially).
 
-### std.lang - A Playground for Languages
+### hara.lang - A Playground for Languages
 
 There are so many languages currently out there is the world. Every single one of them has their own quirks but each are inspired by one another. 
 
-`std.lang` creates an environment where multiple languages and multiple runtimes can be mixed, matched and integrated to get the basic minimum piece of code working. 
+`hara.lang` creates an environment where multiple languages and multiple runtimes can be mixed, matched and integrated to get the basic minimum piece of code working. 
 
 When the benefits of repl driven development can be made available
 to any language, programming then becomes about the code itself and not everything around making the code work.
@@ -66,7 +66,7 @@ There are a number of programs needing to be preinstalled for the java environme
 
 Please see [GETTING_STARTED.md](GETTING_STARTED.md) for detailed development instructions.
 
-### std.lang - overview
+### hara.lang - overview
 
 [std.lang](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src/std/lang.clj) started off as an experimental snippet generator to run bits of lua code on openresty. I was looking around for a lightweight alternative to clojure servers and made the decision because of [this epic rant](https://www.github.com/zcaudate-xyz/foundation-base/discussions/4) on Quora. 
 
@@ -97,7 +97,7 @@ As features crept into the library, it slowly evolved into what it is now. More 
 - various helpers across different environments
 - [js](https://www.github.com/zcaudate-xyz/foundation-base/tree/main/src/js), [lua](https://www.github.com/zcaudate-xyz/foundation-base/tree/main/src/lua) and [xtalk](https://www.github.com/zcaudate-xyz/foundation-base/tree/main/src/xt) utility libaries.
 
-### std.lang - walkthroughs
+### hara.lang - walkthroughs
 
 Guided walkthroughs are provided for 
 - [00 basics](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src-build/walkthrough/std_lang_00_basic.clj)
@@ -107,7 +107,7 @@ Guided walkthroughs are provided for
 - 04 creating a language
 - 05 creating a runtime
 
-### std.lang - examples
+### hara.lang - examples
 
 - [react native components](https://github.com/zcaudate/foundation.react-native), generated from [build namespace](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src-build/component/build_native_index.clj) and [index namespace](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src-build/component/web_native_index.clj).
 - [c pthreads](https://github.com/zcaudate/play.c-000-pthreads-hello), generated from [build namespace](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/c_000_pthreads_hello/build.clj) and [main namespace](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/c_000_pthreads_hello/main.clj)

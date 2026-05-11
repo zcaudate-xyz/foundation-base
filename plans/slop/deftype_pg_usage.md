@@ -1,6 +1,6 @@
 # Comprehensive Usage Guide for `deftype.pg`
 
-This guide provides a detailed overview of `deftype.pg`, the macro used within the `std.lang` ecosystem to define PostgreSQL table schemas. It covers basic syntax, column configuration, relationships, and advanced settings.
+This guide provides a detailed overview of `deftype.pg`, the macro used within the `hara.lang` ecosystem to define PostgreSQL table schemas. It covers basic syntax, column configuration, relationships, and advanced settings.
 
 ## 1. Introduction
 

@@ -540,9 +540,9 @@
    com.fasterxml.jackson.datatype/jackson-datatype-jsr310]
   :bundle [{:path "target/classes" :include ["hara/lib/json"]}]}
  
- xyz.zcaudate/std.lang
+ xyz.zcaudate/hara
  {:description "working with other languages"
-  :include [[std.lang :complete]]}
+  :include [[hara :complete]]}
   
  xyz.zcaudate/std.lib
  {:description "simple string methods for searching"

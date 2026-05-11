@@ -98,9 +98,9 @@ All tests in the `foundation-base` project are written using the `code.test` fra
 *   **`print/print-failure`:** Prints a detailed report of a test failure.
 *   **`print/print-thrown`:** Prints a detailed report of an exception that was thrown during a test.
 
-### 3. Cross-Platform Testing with `std.lang`
+### 3. Cross-Platform Testing with `hara.lang`
 
-The `foundation-base` project uses a custom DSL provided by `std.lang` for writing code that can be compiled to multiple platforms (e.g., JavaScript, Lua). This DSL is also used for writing cross-platform tests.
+The `foundation-base` project uses a custom DSL provided by `hara.lang` for writing code that can be compiled to multiple platforms (e.g., JavaScript, Lua). This DSL is also used for writing cross-platform tests.
 
 *   **`l/script-`:** Use the `l/script-` macro to define platform-specific code and dependencies for your tests. You can have multiple `l/script-` blocks in a single test file, one for each platform you want to test against.
 
@@ -109,7 +109,7 @@ The `foundation-base` project uses a custom DSL provided by `std.lang` for writi
 ```clojure
 (ns xt.lang.base-lib-test
   (:use code.test)
-  (:require [std.lang :as l]
+  (:require [hara.lang :as l]
             [std.lib :as h]))
 
 (l/script- :js

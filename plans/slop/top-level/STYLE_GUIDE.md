@@ -11,8 +11,8 @@ Naming is a crucial part of writing clean, understandable code. The following co
 *   **File Names:** File names use `spinal-case`.
     *   *Example:* `collection.clj`, `future.clj`, `emit_common.clj`
 
-*   **Namespaces:** Namespaces follow the directory structure and use dots to separate components. The general pattern is `std.lib.<file-name>` or `std.lang.base.<sub-directory>.<file-name>`.
-    *   *Example:* `std.lib.collection`, `std.lang.base.emit-common`
+*   **Namespaces:** Namespaces follow the directory structure and use dots to separate components. The general pattern is `std.lib.<file-name>` or `hara.lang.base.<sub-directory>.<file-name>`.
+    *   *Example:* `std.lib.collection`, `hara.lang.base.emit-common`
 
 #### 1.2. Functions
 
@@ -89,8 +89,8 @@ Metadata is used extensively to provide additional information about functions, 
 *   `{:added "version"}`: Indicates when the function/macro was added.
 *   `{:refer ...}`: Used in tests to link to the function being tested.
 *   `{:style/indent N}`: Specifies indentation for macros.
-*   `{:macro-only true}`: For `std.lang` scripts, indicates the file contains only macros.
-*   `{:static ...}`: Used in `std.lang` for static analysis or configuration.
+*   `{:macro-only true}`: For `hara.lang` scripts, indicates the file contains only macros.
+*   `{:static ...}`: Used in `hara.lang` for static analysis or configuration.
 *   `{:rt/redis ...}`: Specific to Redis runtime configurations.
 
 #### 2.4. Polymorphism
@@ -119,7 +119,7 @@ Metadata is used extensively to provide additional information about functions, 
    (SecretKeySpec. (to-bytes encoded) type)))
 ```
 
-### 3. `std.lang` DSL for Multi-Platform Development
+### 3. `hara.lang` DSL for Multi-Platform Development
 
 The `foundation-base` project heavily leverages a custom DSL provided by `std.lang` for writing code that can be compiled to multiple target languages (e.g., JavaScript, Lua, Python, R, SQL, Solidity). This DSL has its own conventions that differ significantly from standard Clojure.
 
@@ -285,7 +285,7 @@ The project defines several internal DSLs for specific domains.
 
 *   **SQL Generation (`script.sql.table.select`):** Functions like `build-query-select`, `build-query-from`, `build-query-where` are used to construct SQL queries programmatically.
 *   **Redis Commands (`kmi.redis`):** Macros like `flushdb`, `zscoremin`, `zscoremax` provide a Clojure-like interface to Redis commands.
-*   **QML (`std.lang.model.spec-js.qml`):** Functions like `emit-qml`, `classify-container` are used to generate QML code.
+*   **QML (`hara.lang.model.spec-js.qml`):** Functions like `emit-qml`, `classify-container` are used to generate QML code.
 
 ```clojure
 (defn sql:query

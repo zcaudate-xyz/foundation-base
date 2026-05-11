@@ -179,7 +179,7 @@ cmd_symbol() {
     if [[ -z "$qualified_name" ]]; then
         log_error "Qualified name required"
         echo "Usage: $0 symbol <qualified-name>"
-        echo "Example: $0 symbol std.lang/emit"
+        echo "Example: $0 symbol hara.lang/emit"
         exit 1
     fi
     
@@ -292,11 +292,11 @@ Examples:
   # Search for 'emit' functions
   ./bin/foundation-index search emit function
 
-  # Search in std.lang namespace
-  ./bin/foundation-index search emit "" std.lang
+  # Search in hara.lang namespace
+  ./bin/foundation-index search emit "" hara.lang
 
   # Get symbol details
-  ./bin/foundation-index symbol std.lang/emit
+  ./bin/foundation-index symbol hara.lang/emit
 
   # Show file outline
   ./bin/foundation-index outline src/std/lang.clj

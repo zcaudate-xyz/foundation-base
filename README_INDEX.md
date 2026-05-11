@@ -36,10 +36,10 @@ make index-force
 # Search for symbols
 make search QUERY=emit
 make search QUERY=emit KIND=function
-make search QUERY=emit KIND=function NAMESPACE=std.lang
+make search QUERY=emit KIND=function NAMESPACE=hara.lang
 
 # Get symbol details
-make symbol NAME=std.lang/emit
+make symbol NAME=hara.lang/emit
 
 # Show statistics
 make index-stats
@@ -83,8 +83,8 @@ The main CLI tool for index operations:
 # Find all "emit" functions
 ./bin/foundation-index search emit function
 
-# Find "compile" in std.lang namespace
-./bin/foundation-index search compile function std.lang
+# Find "compile" in hara.lang namespace
+./bin/foundation-index search compile function hara.lang
 
 # Search with limit
 ./bin/foundation-index search book function bb.lang 10
@@ -94,7 +94,7 @@ The main CLI tool for index operations:
 
 ```bash
 # Get details about a specific function
-./bin/foundation-index get std.lang/emit
+./bin/foundation-index get hara.lang/emit
 ./bin/foundation-index get bb.lang.base.emit-assign/emit-def-assign
 ```
 
@@ -143,10 +143,10 @@ This script automatically finds and uses the foundation index database.
 
 | Namespace | Purpose |
 |-----------|---------|
-| `std.lang` | Main transpilation API |
-| `std.lang.base.emit` | Code emission |
-| `std.lang.base.compile` | Compilation |
-| `std.lang.base.book` | Book management |
+| `hara.lang` | Main transpilation API |
+| `hara.lang.base.emit` | Code emission |
+| `hara.lang.base.compile` | Compilation |
+| `hara.lang.base.book` | Book management |
 | `rt.postgres` | PostgreSQL DSL |
 | `rt.postgres.entity` | Entity framework |
 | `bb.lang.*` | Book compilation |
