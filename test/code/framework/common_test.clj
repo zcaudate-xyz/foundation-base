@@ -70,6 +70,15 @@
       gather-meta)
   => '{:added "1.1", :ns clojure.core, :var +, :refer clojure.core/+})
 
+(fact "normalizes `:ref` metadata aliases used by generated parity tests"
+  (-> (nav/parse-string "^{:ref xt.db.runtime.sql/sql-process-event-sync}\n(fact ...)")
+      nav/down nav/right nav/down
+      gather-meta)
+  => '{:ref xt.db.runtime.sql/sql-process-event-sync
+       :ns xt.db.runtime.sql
+       :var sql-process-event-sync
+       :refer xt.db.runtime.sql/sql-process-event-sync})
+
 ^{:refer code.framework.common/gather-string :added "3.0"}
 (fact "creates correctly spaced code string from normal docstring"
 

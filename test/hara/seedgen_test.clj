@@ -469,6 +469,47 @@
   => [true true true])
 
 ^{:refer hara.seedgen/seedgen-benchadd :added "4.1"}
+(fact "benchadd recognizes `:ref` metadata and applies target transforms"
+  (let [root      (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-ref"
+                                                                    (make-array java.nio.file.attribute.FileAttribute 0)))
+        test-dir  (doto (java.io.File. root "test/xt/sample")
+                    (.mkdirs))
+        path      (.getAbsolutePath (java.io.File. test-dir "ref_test.clj"))
+        bench-path (.getAbsolutePath (java.io.File. root "test/xtbench/python/sample/ref_test.clj"))
+        lookup    {'xt.sample.ref-test path}
+        project   {:root (.getAbsolutePath root)
+                   :test-paths ["test"]}]
+    (try
+      (spit path (str "(ns xt.sample.ref-test\n"
+                      "  (:use code.test)\n"
+                      "  (:require [hara.lang :as l]))\n\n"
+                      "^{:seedgen/root {:all true\n"
+                      "                 :langs [:python]\n"
+                      "                 :js {:extra [[js.lib.driver-sqlite :as js-sqlite]]}\n"
+                      "                 :python {:extra [[python.lib.driver-sqlite :as py-sqlite]]}}}\n"
+                      "(l/script- :js\n"
+                      "  {:runtime :basic\n"
+                      "   :require [[xt.protocol.impl.connection-sql :as dbsql]\n"
+                      "             ^{:seedgen/extra true}\n"
+                      "             [js.lib.driver-sqlite :as js-sqlite]]})\n\n"
+                      "^{:ref xt.sample.ref/driver :added \"4.1\"}\n"
+                      "(fact \"applies transforms for :ref metadata\"\n"
+                      "  ^{:seedgen/base {:python {:transform '{(js-sqlite/driver) (py-sqlite/driver)}}}}\n"
+                      "  (dbsql/connect (js-sqlite/driver) {})\n"
+                      "  => nil)\n"))
+      (form-bench/seedgen-benchadd 'xt.sample.ref
+                                   {:lang [:python] :write true}
+                                   lookup
+                                   project)
+      (let [content (slurp bench-path)]
+        [(boolean (re-find #"\^\{:ref xt\.sample\.ref/driver :added \"4\.1\"\}" content))
+         (boolean (re-find #"\(dbsql/connect \(py-sqlite/driver\) \{\}\)" content))
+         (boolean (re-find #"\(js-sqlite/driver\)" content))])
+      (finally
+        (fs/delete root {:recursive true}))))
+  => [true true false])
+
+^{:refer hara.seedgen/seedgen-benchadd :added "4.1"}
 (fact "benchadd drops inline script extras from non-target runtimes"
   (let [{:keys [root bench-path lookup project]} (seedgen-script-extra-context "seedgen-benchadd-script-extra")]
     (try

@@ -1,8 +1,9 @@
 (ns code.framework.test.fact-test
-  (:require [code.framework.docstring :as docstring]
-            [code.framework.test.fact :refer :all]
-            [std.block.navigate :as nav]
-            [std.lib.collection :as collection])
+  (:require [code.framework :as framework]
+            [code.framework.docstring :as docstring]
+             [code.framework.test.fact :refer :all]
+             [std.block.navigate :as nav]
+             [std.lib.collection :as collection])
   (:use code.test))
 
 ^{:refer code.framework.test.fact/gather-fact-body :added "3.0"}
@@ -31,3 +32,25 @@
                :intro "Sample test program",
                :sexp collection/form?
                :test  "\n  (+ 1 1) => 2\n  (long? 3) => true"}))
+
+(fact "analyses metadata-wrapped facts after seedgen scaffolding"
+  (let [code (str "(ns sample.generated-test\n"
+                  "  (:require [hara.lang :as l])\n"
+                  "  (:use code.test))\n\n"
+                  "^{:seedgen/root {:all true}}\n"
+                  "(l/script- :js {:runtime :basic})\n\n"
+                  "(fact:global\n"
+                  "  {:setup [(l/rt:restart)]\n"
+                  "   :teardown [(l/rt:stop)]})\n\n"
+                  "^{:refer sample.generated/foo :added \"1.0\"}\n"
+                  "(fact \"keeps generated facts\"\n"
+                  "  ^{:seedgen/base {:python {:transform '{(js-sqlite/driver) (py-sqlite/driver)}}}}\n"
+                  "  (!.js 1)\n"
+                  "  => 1)\n")]
+    (-> (framework/analyse-test-code code)
+        (get-in '[sample.generated foo])))
+  => (contains {:ns 'sample.generated
+                :var 'foo
+                :meta {:added "1.0"}
+                :intro "keeps generated facts"
+                :test map?}))

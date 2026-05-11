@@ -83,14 +83,35 @@
   ([_]
    :fact))
 
+(defn top-level-fact-navs
+  [zloc]
+  (loop [current (cond
+                   (nil? zloc)
+                   nil
+
+                   (= :root (nav/tag zloc))
+                   (nav/down zloc)
+
+                   :else
+                   zloc)
+         out     []]
+    (if (nil? current)
+      out
+      (let [form     (nav/value current)
+            fact-nav (when (and (seq? form)
+                                (#{'fact 'comment} (first form)))
+                       (if (= :meta (nav/tag current))
+                         (or (some-> current nav/down nav/right)
+                             current)
+                         current))
+            out      (cond-> out
+                       fact-nav
+                       (conj fact-nav))]
+        (recur (nav/right current) out)))))
+
 (defmethod common/analyse-test :fact
   ([type nav]
-   (let [root (if (= :root (nav/tag nav))
-                (nav/down nav)
-                nav)
-         fns  (if root
-                (query/$* root ['(#{fact comment} | & _)] {:return :zipper :walk :top})
-                [])]
+   (let [fns  (top-level-fact-navs nav)]
      (->> (keep gather-fact fns)
           (reduce (fn [m {:keys [ns var class sexp test intro line form] :as meta}]
                     (-> m

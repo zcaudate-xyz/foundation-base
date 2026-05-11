@@ -652,7 +652,7 @@
          (return
           (promise/x:promise-then
            (model/handle-remove current-space
-                                [{"remove" {"Order" ["ord-2"]}}]
+                                [{"db/remove" {"Order" ["ord-2"]}}]
                                 {}
                                 node)
            (fn [_]

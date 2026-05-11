@@ -318,11 +318,11 @@
                       space-id
                       remote
                       spec/ACTION_SYNC
-                      {:sync request
-                       :view view-context})
-    (fn [response]
-      (var mirrored (or (xt/x:get-key response "result")
-                        request))
+                      (xt/x:obj-assign request
+                                       {:view view-context}))
+     (fn [response]
+       (var mirrored (or (xt/x:get-key response "result")
+                         request))
        (instance-sync/apply-sync-request state mirrored)
        (return response)))))
 
@@ -568,8 +568,7 @@
   (var payload (util/request-payload args))
   (var state (instance-state/ensure-state current-space node))
   (instance-state/ensure-db state)
-  (var sync-spec (or (xt/x:get-key payload "sync")
-                     payload))
+  (var sync-spec payload)
   (var view-context (or (xt/x:get-key payload "view")
                         {}))
   (var [ok result] (instance-sync/run-sync-local state sync-spec view-context))
@@ -599,7 +598,6 @@
   (return (-/handle-sync
            current-space
            [{"db/remove" (or (xt/x:get-key payload "db/remove")
-                             (xt/x:get-key payload "remove")
                              payload)}]
            request
            node)))

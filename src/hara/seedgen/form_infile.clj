@@ -62,6 +62,15 @@
   [item]
   (some-> item item-form block/block-value))
 
+(defn- item-config-form
+  [item]
+  (or (some-> item
+              item-string
+              nav/parse-root
+              nav/down
+              nav/value)
+      (item-value item)))
+
 (defn- item-lang
   [item]
   (some-> item item-value common/seedgen-form-lang))
@@ -517,7 +526,7 @@
 
 (defn- render-meta-string
   [m vector-values]
-  (let [preferred-order [:refer :added :setup :teardown]
+  (let [preferred-order [:refer :ref :added :setup :teardown]
         ordered-keys    (concat (filter #(contains? m %) preferred-order)
                                 (remove (set preferred-order) (keys m)))
         entries         (reduce (fn [out k]
@@ -584,8 +593,11 @@
 
 (defn- entry-meta
   [entry]
-  (assoc (:meta entry)
-         :refer (symbol (str (:ns entry)) (str (:var entry)))))
+  (let [refer-sym (symbol (str (:ns entry)) (str (:var entry)))
+        m         (:meta entry)]
+    (if (contains? m :ref)
+      (assoc m :ref refer-sym)
+      (assoc m :refer refer-sym))))
 
 (defn- classify-lang-items
   [classification]
@@ -605,10 +617,10 @@
 (defn- item-suppressed?
   [entry item lang]
   (true? (:suppress (merge (some-> entry
-                                   :meta
-                                   not-empty
-                                   (#(common/seedgen-lang-entry (with-meta [] %) lang)))
-                           (common/seedgen-lang-entry (item-value item) lang)))))
+                                    :meta
+                                    not-empty
+                                    (#(common/seedgen-lang-entry (with-meta [] %) lang)))
+                            (common/seedgen-lang-entry (item-config-form item) lang)))))
 
 (defn- item-base-override
   [entry item lang key]
@@ -616,8 +628,8 @@
                       :meta
                       not-empty
                       (#(common/seedgen-lang-entry (with-meta [] %) lang)))
-              (common/seedgen-lang-entry (item-value item) lang))
-        key))
+               (common/seedgen-lang-entry (item-config-form item) lang))
+         key))
 
 (defn- transform-string-match?
   [match]
@@ -635,35 +647,50 @@
 
 (defn- apply-item-transform-form
   [s from to]
-  (let [root     (nav/parse-root s)
-         expr-nav (nav/down root)
-         body-nav (some-> expr-nav form-common/nav-body)]
-    (if body-nav
-      (letfn [(next-after-subtree [zloc]
-                (loop [current zloc]
-                  (or (nav/right current)
-                      (let [parent (nav/up current)]
-                        (when (and parent
-                                   (not= parent current))
-                          (recur parent))))))
-              (next-preorder [zloc]
-                (or (nav/down zloc)
-                    (next-after-subtree zloc)))]
-        (loop [current body-nav]
-          (let [matched? (= from (nav/value current))
-                current  (if matched?
-                           (nav/replace current to)
-                           current)]
-            (if-let [next (if matched?
-                            (next-after-subtree current)
-                            (next-preorder current))]
-              (recur next)
-              (nav/root-string current)))))
-      s)))
+  (if (= from to)
+    s
+    (letfn [(next-after-subtree [zloc]
+              (loop [current zloc]
+                (or (nav/right current)
+                    (let [parent (nav/up current)]
+                      (when (and parent
+                                 (not= parent current))
+                        (recur parent))))))
+            (next-preorder [zloc]
+              (or (nav/down zloc)
+                  (next-after-subtree zloc)))
+            (replace-once [expr-str]
+              (let [root     (nav/parse-root expr-str)
+                    expr-nav (nav/down root)
+                    body-nav (some-> expr-nav form-common/nav-body)]
+                (if body-nav
+                  (loop [current body-nav]
+                    (cond
+                      (nil? current)
+                      [expr-str false]
+
+                      (= from (nav/value current))
+                      [(-> current
+                           (nav/replace to)
+                           nav/root-string)
+                       true]
+
+                      :else
+                      (if-let [next (next-preorder current)]
+                        (recur next)
+                        [expr-str false])))
+                  [expr-str false])))]
+      (loop [out s]
+        (let [[next-out replaced?] (replace-once out)]
+          (if (and replaced?
+                   (not= out next-out))
+            (recur next-out)
+            next-out))))))
 
 (defn- apply-item-transform-string
   [s entry item lang]
-  (let [transform-override (item-base-override entry item lang :transform)]
+  (let [transform-override (some-> (item-base-override entry item lang :transform)
+                                   transform-literal)]
     (if (and s (map? transform-override))
       (reduce-kv (fn [out from to]
                    (let [from (transform-literal from)
@@ -1026,7 +1053,8 @@
                     (let [line     (line-key (nav/line-info zloc))
                           current  (block/block-string (nav/block zloc))
                           form     (nav/value zloc)
-                          refer    (:refer (meta form))]
+                          refer    (or (:refer (meta form))
+                                       (:ref (meta form)))]
                        (cond
                          (= line root-script-line)
                          (into [(update-root-script-string output ordered-scripts)]
@@ -1086,7 +1114,8 @@
                           current (block/block-string (nav/block zloc))
                           body    (form-common/nav-body zloc)
                           form    (nav/value zloc)
-                          refer   (:refer (meta form))
+                          refer   (or (:refer (meta form))
+                                      (:ref (meta form)))
                           head    (when (seq? (nav/value body))
                                     (first (nav/value body)))]
                         (cond
@@ -1265,7 +1294,8 @@
                         form    (nav/value zloc)
                         head    (when (seq? (nav/value body))
                                   (first (nav/value body)))
-                        refer   (:refer (meta form))]
+                        refer   (or (:refer (meta form))
+                                    (:ref (meta form)))]
                     (cond
                       (and (seq? form)
                            (= 'ns (first form)))

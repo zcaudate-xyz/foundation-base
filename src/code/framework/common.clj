@@ -93,13 +93,18 @@
    => '{:added \"1.1\", :ns clojure.core, :var +, :refer clojure.core/+}"
   {:added "3.0"}
   ([nav]
-   (if (-> nav nav/up nav/up nav/tag (= :meta))
-     (let [mta (-> nav nav/up nav/left nav/value)
-           sym (:refer mta)]
-       (if sym
-         (assoc mta
-                :ns   (symbol (str (.getNamespace ^clojure.lang.Symbol sym)))
-                :var  (symbol (name sym))))))))
+   (let [mta (cond
+               (-> nav nav/up nav/up nav/tag (= :meta))
+               (-> nav nav/up nav/left nav/value)
+
+               (-> nav nav/up nav/tag (= :meta))
+               (-> nav nav/left nav/value))]
+     (when-let [sym (or (:refer mta)
+                        (:ref mta))]
+       (assoc mta
+              :refer sym
+              :ns   (symbol (str (.getNamespace ^clojure.lang.Symbol sym)))
+              :var  (symbol (name sym)))))))
 
 (defn gather-string
   "creates correctly spaced code string from normal docstring

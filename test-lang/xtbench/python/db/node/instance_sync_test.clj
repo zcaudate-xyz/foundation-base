@@ -73,21 +73,21 @@
    [{"id" "ord-1" "status" "open"}]})
 
 ^{:refer xt.db.node.instance-sync/normalize-sync :added "4.1"}
-(fact "normalizes sync aliases into db/sync and db/remove keys"
+ (fact "normalizes db/sync and db/remove keys"
 
-  (!.py
-    (instance-sync/normalize-sync
-     {"sync" {"Order" []}}
-     {"remove" {"Order" ["ord-1"]}}))
+   (!.py
+     (instance-sync/normalize-sync
+      {"db/sync" {"Order" []}}
+      {"db/remove" {"Order" ["ord-1"]}}))
   => {"db/sync" {"Order" []}
       "db/remove" {"Order" ["ord-1"]}})
 
 ^{:refer xt.db.node.instance-sync/prepare-sync :added "4.1"}
 (fact "validates sync request shapes"
 
-  (!.py
-    [(instance-sync/prepare-sync {"sync" {"Order" []}} {})
-     (instance-sync/prepare-sync {"sync" "bad"} {})])
+   (!.py
+     [(instance-sync/prepare-sync {"db/sync" {"Order" []}} {})
+      (instance-sync/prepare-sync {"db/sync" "bad"} {})])
   => [[true {"db/sync" {"Order" []}}]
       [false {"status" "error"
               "tag" "db/sync-invalid"
@@ -134,10 +134,10 @@
          (schema-state/base-state {"schema" (@! +schema+)
                                    "lookup" (@! +lookup+)}))
     (var [ok result]
-         (instance-sync/run-sync-local
-          state
-          {"sync" {"Order" [{"id" "ord-1" "status" "open"}]}}
-          {}))
+           (instance-sync/run-sync-local
+            state
+            {"db/sync" {"Order" [{"id" "ord-1" "status" "open"}]}}
+            {}))
     [ok
      (. (. result ["tables"]) ["Order"])])
   => [true

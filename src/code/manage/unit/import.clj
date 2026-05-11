@@ -174,15 +174,10 @@
 (defn analyse-fact-tests
   {:added "4.1"}
   ([nav]
-   (let [root (if (= :root (nav/tag nav))
-                (nav/down nav)
-                nav)
-         fns  (if root
-                (query/$* root ['(#{fact comment} | & _)] {:return :zipper :walk :top})
-                [])]
-     (->> (keep gather-fact fns)
-          (reduce (fn [m {:keys [ns var class sexp test intro line form] :as meta}]
-                    (-> m
+   (let [fns  (code.framework.test.fact/top-level-fact-navs nav)]
+      (->> (keep gather-fact fns)
+           (reduce (fn [m {:keys [ns var class sexp test intro line form] :as meta}]
+                     (-> m
                         (update-in [ns var]
                                    assoc
                                    :ns ns

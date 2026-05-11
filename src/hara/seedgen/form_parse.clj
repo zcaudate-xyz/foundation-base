@@ -190,14 +190,15 @@
                   globals   (global-context forms top-navs)
                   root-lang (get-in globals [:lang :root])
                   script-heads (common/seedgen-script-heads (first forms))
-                  fact-navs (->> top-navs
-                                 (keep (fn [zloc]
-                                         (let [form (nav/value zloc)
-                                               refer (:refer (meta form))]
-                                           (when (and refer
-                                                      (= 'fact (first (nav/value (form-common/nav-body zloc)))))
-                                             [refer zloc]))))
-                                 (into {}))
+                   fact-navs (->> top-navs
+                                  (keep (fn [zloc]
+                                          (let [form (nav/value zloc)
+                                                refer (or (:refer (meta form))
+                                                          (:ref (meta form)))]
+                                            (when (and refer
+                                                       (= 'fact (first (nav/value (form-common/nav-body zloc)))))
+                                              [refer zloc]))))
+                                  (into {}))
                   entries   (framework.common/entry
                             (reduce-kv (fn [out nsp vars]
                                          (assoc out

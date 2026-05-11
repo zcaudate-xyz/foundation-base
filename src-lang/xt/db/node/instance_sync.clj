@@ -12,14 +12,16 @@
   "normalizes a sync spec into db/sync and db/remove keys"
   {:added "4.1"}
   [sync-spec view-context]
-  (return {"db/sync" (or (xt/x:get-key sync-spec "db/sync")
-                         (xt/x:get-key sync-spec "sync")
-                         (xt/x:get-key view-context "db/sync")
-                         (xt/x:get-key view-context "sync"))
-           "db/remove" (or (xt/x:get-key sync-spec "db/remove")
-                           (xt/x:get-key sync-spec "remove")
-                           (xt/x:get-key view-context "db/remove")
-                           (xt/x:get-key view-context "remove"))}))
+  (var db-sync (or (xt/x:get-key sync-spec "db/sync")
+                   (xt/x:get-key view-context "db/sync")))
+  (var db-remove (or (xt/x:get-key sync-spec "db/remove")
+                     (xt/x:get-key view-context "db/remove")))
+  (var out {})
+  (when (xt/x:not-nil? db-sync)
+    (xt/x:set-key out "db/sync" db-sync))
+  (when (xt/x:not-nil? db-remove)
+    (xt/x:set-key out "db/remove" db-remove))
+  (return out))
 
 (defn.xt prepare-sync
   "prepares a sync request"
