@@ -154,11 +154,14 @@
   >notify
   "creates a callback function"
   {:added "4.0"}
-  [& [f]]
-  (std.lib.template/$ (fn [val]
-                        (return (xt.lang.common-repl/notify ~(if f
-                                                             (list f 'val)
-                                                             'val))))))
+  ([] '(fn [val]
+         (return (xt.lang.common-repl/notify val))))
+  ([f]
+   (list 'fn
+         '[val]
+         (list 'return
+               (list 'xt.lang.common-repl/notify
+                     (list f 'val))))))
 
 (defmacro.xt ^{:standalone true}
   <!

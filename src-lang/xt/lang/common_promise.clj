@@ -53,7 +53,7 @@
     (var children (xt/x:get-key p "children"))
     (xt/x:set-key p "children" [])
     (xt/for:array [entry children]
-      (drive-fn p entry drive-fn)))
+      (xt/x:apply drive-fn [p entry drive-fn])))
   (return p))
 
 (defn.xt internal-link-action
@@ -68,12 +68,13 @@
            "resolve" on-resolve
            "reject" on-reject})
         (return child))
-    (return (drive-fn
-             promise
-             {"child" child
-              "resolve" on-resolve
-              "reject" on-reject}
-             drive-fn))))
+    (return (xt/x:apply
+             drive-fn
+             [promise
+              {"child" child
+               "resolve" on-resolve
+               "reject" on-reject}
+              drive-fn]))))
 
 (defn.xt internal-adopt-action
   "adopts either a raw value or another common promise"
@@ -115,7 +116,9 @@
              payload
              drive-fn))
     (try
-      (return (-/internal-adopt-action child (thunk payload) drive-fn))
+      (return (-/internal-adopt-action child
+                                       (xt/x:apply thunk [payload])
+                                       drive-fn))
       (catch err
         (return (-/internal-settle-action child "rejected" err drive-fn))))))
 
@@ -133,9 +136,11 @@
      (xt/x:async-run
       (fn []
         (try
-          (return (-/internal-adopt-action out (thunk) -/internal-drive-action))
-          (catch err
-            (return (-/internal-settle-action out "rejected" err -/internal-drive-action)))))))
+         (return (-/internal-adopt-action out
+                                          (xt/x:apply thunk [])
+                                          -/internal-drive-action))
+         (catch err
+           (return (-/internal-settle-action out "rejected" err -/internal-drive-action)))))))
     (return out)
     (catch err
         (return (-/make-rejected-state err)))))
@@ -208,7 +213,7 @@
       (var start (xt/x:now-ms))
       (while (< (- (xt/x:now-ms) start) ms)
         (:= start start))
-      (return (thunk))))))
+      (return (xt/x:apply thunk []))))))
 
 (defspec.xt promise-finally [:fn [:xt/promise [:xt/fn]] :xt/promise])
 

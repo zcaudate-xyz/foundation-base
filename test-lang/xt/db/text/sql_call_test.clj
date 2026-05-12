@@ -77,7 +77,7 @@
                    :dart         {:transform '{(js-postgres/driver) (dart-postgres/driver)}}}}      
   (notify/wait-on :js
     (spec-promise/x:promise-then
-     (driver/connect (lua-postgres/driver)
+     (driver/connect (js-postgres/driver)
                      {:database "test-scratch"})
      (fn [conn]
        (spec-promise/x:promise-then
@@ -89,7 +89,7 @@
                         :id "addf"
                         :flags {}}
                        [10 20])
-        repl/>notify))))
+        (repl/>notify)))))
   => "30")
 
 ^{:refer xt.db.text.sql-call/call-api
@@ -101,7 +101,7 @@
                    :dart         {:transform '{(js-postgres/driver) (dart-postgres/driver)}}}}
   (notify/wait-on :js
     (spec-promise/x:promise-then
-     (driver/connect (lua-postgres/driver)
+     (driver/connect (js-postgres/driver)
                      {:database "test-scratch"})
      (fn [conn]
        (spec-promise/x:promise-then
@@ -113,9 +113,8 @@
                         :id "addf"
                         :flags {}}
                        [10 20])
-        repl/>notify))))
+        (repl/>notify)))))
   => "{\"status\": \"ok\", \"data\":\"30\"}")
-
 
 (comment
   (s/seedgen-benchadd '[xt.db.text.sql-call] {:lang [:python :lua.nginx] :write true})

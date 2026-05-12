@@ -372,8 +372,7 @@
   (var target (-/request-target node meta))
   (if (xt/x:nil? target)
     (return
-     (node-request/response-body
-      (-/receive-request node request-frame nil)))
+     (node-request/invoke-handler node request-frame))
     (try
       (var pending-state {"status" "pending"
                           "value" nil

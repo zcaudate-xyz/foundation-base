@@ -231,7 +231,37 @@
   => 1)
 
 ^{:refer xt.lang.common-repl/>notify :added "4.0"}
-(fact "creates a callback function")
+(fact "creates a callback function"
+
+  (notify/wait-on :js
+    ((repl/>notify) 1))
+  => 1
+
+  (notify/wait-on :js
+    ((repl/>notify (fn [x]
+                     (return (+ x 1))))
+     1))
+  => 2
+
+  (notify/wait-on :lua
+    ((repl/>notify) 1))
+  => 1
+
+  (notify/wait-on :lua
+    ((repl/>notify (fn [x]
+                     (return (+ x 1))))
+     1))
+  => 2
+
+  (notify/wait-on :python
+    ((repl/>notify) 1))
+  => 1
+
+  (notify/wait-on :python
+    ((repl/>notify (fn [x]
+                     (return (+ x 1))))
+     1))
+  => 2)
 
 ^{:refer xt.lang.common-repl/<! :added "4.0"}
 (fact "creates a callback map"
