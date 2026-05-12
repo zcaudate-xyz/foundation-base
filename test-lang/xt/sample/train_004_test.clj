@@ -150,20 +150,20 @@
   [(!.js 1)
    (inc 0)
    (notify/wait-on :js
-     (repl/notify 1))]
-  => [1 1]
+      (repl/notify 1))]
+  => [1 1 1]
 
   [(!.lua 1)
    (inc 0)
    (notify/wait-on :lua
-     (repl/notify 1))]
-  => [1 1]
+      (repl/notify 1))]
+  => [1 1 1]
 
   [(!.py 1)
    (inc 0)
    (notify/wait-on :python
-     (repl/notify 1))]
-  => [1 1])
+      (repl/notify 1))]
+  => [1 1 1])
 
 ^{:refer xt.lang.spec-base/example-e :added "4.1"}
 (fact "seed meta can be mixed and matched"
@@ -218,12 +218,12 @@
 
   (!.js    
     (xt/x:offset 10))
-  => python)
+  => 10)
 
 ^{:refer xt.lang.spec-base/example-fa :added "4.1"}
 (fact "expect can be customised"
 
-  ^{:seedgen/base    {:lua  {:input (xt/x:offest 9)}}}
+  ^{:seedgen/base    {:lua  {:input (xt/x:offset 9)}}}
   (!.js    
     (xt/x:offset 10))
   => 10)
@@ -231,8 +231,8 @@
 ^{:refer xt.lang.spec-base/example-fa :added "4.1"}
 (fact "expect can be customised"
 
-  ^{:seedgen/base    {:lua  {:input (xt/x:offest
-                                     9)}}}
+  ^{:seedgen/base    {:lua  {:input (xt/x:offset
+                                      9)}}}
   (!.js    
     (xt/x:offset 10))
   => 10
@@ -248,14 +248,15 @@
 
 ^{:refer xt.lang.spec-base/example-g :added "4.1"
   :setup [^{:seedgen/base      {:lua   {:input
-                                        (!.lua
-                                          (do (a)
-                                              (b)
-                                              (c)))}
-                                :lua   {:input
-                                        (setup-python)}}}
-          (!.js
-            (setup-js))]}
+                                         (!.lua
+                                           (do (a)
+                                               (b)
+                                               (c)))}
+                                 :python {:input
+                                         (!.py
+                                           (setup-python))}}}
+           (!.js
+             (setup-js))]}
 (fact "any form is allowed with :seedgen/base meta"
 
   ^{:seedgen/base         {:lua   {:suppress true}}}  ;; can be a map or keyword
@@ -272,17 +273,17 @@
   [(!.js 1)
    (inc 0)
    (notify/wait-on :js
-     (repl/notify 1))]
-  => [1 1]
+      (repl/notify 1))]
+  => [1 1 1]
 
   [(!.lua 1)
    (inc 0)
    (notify/wait-on :lua
-     (repl/notify 1))]
-  => [1 1]
+      (repl/notify 1))]
+  => [1 1 1]
 
   [(!.py 1)
    (inc 0)
    (notify/wait-on :python
-     (repl/notify 1))]
-  => [1 1])
+      (repl/notify 1))]
+  => [1 1 1])

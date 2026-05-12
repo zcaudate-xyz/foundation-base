@@ -149,28 +149,29 @@
     (model/install node fixtures/InstallOpts)
     (promise/x:promise-catch
      (promise/x:promise-then
-      (model/sync node "room/a" {"db/sync" fixtures/Seed})
-      (fn [_]
-        (return (model/remove node "room/a" {"db/remove" {"Order" ["ord-2"]}}))))
-     (fn [err]
-       (repl/notify err)))
-    (promise/x:promise-catch
-     (promise/x:promise-then
-      (model/query
-       node
-       "room/a"
-       {"table" "Order"
-        "return-method" "default"
-        "return-id" "ord-1"})
-       (fn [query]
+      (promise/x:promise-then
+       (model/sync node "room/a" {"db/sync" fixtures/Seed})
+       (fn [_]
          (return
           (promise/x:promise-then
-           (model/snapshot node "room/a")
-           (fn [snapshot]
-             (repl/notify
-              {"rows" (xt/x:obj-keys (. snapshot ["rows"] ["Order"]))}))))))
-      (fn [err]
-        (repl/notify err))))
+           (model/remove node "room/a" {"db/remove" {"Order" ["ord-2"]}})
+           (fn [_]
+             (return
+              (model/query
+               node
+               "room/a"
+               {"table" "Order"
+                "return-method" "default"
+                "return-id" "ord-1"})))))))
+      (fn [_query]
+        (return
+         (promise/x:promise-then
+          (model/snapshot node "room/a")
+          (fn [snapshot]
+            (repl/notify
+             {"rows" (xt/x:obj-keys (. snapshot ["rows"] ["Order"]))}))))))
+     (fn [err]
+       (repl/notify err))))
   => {"rows" ["ord-1"]})
 
 ^{:refer xt.db.node.instance-model/clear :added "4.1"}

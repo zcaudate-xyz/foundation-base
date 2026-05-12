@@ -656,11 +656,7 @@
     (template/$
      (. (Socket.connect ~host ~port)
         (then (fn [conn]
-                (return (. (Future.sync (fn []
-                                          (return ~call-ok)))
-                           (whenComplete (fn []
-                                           (. conn (destroy))
-                                           (return nil)))))))
+               (return ~call-ok)))
         (catchError (fn [err]
                       (return ~call-err)))))))
 
@@ -672,10 +668,14 @@
 (defn dart-tf-x-socket-close
   [[_ conn]]
   (template/$
-   (. ~conn (close))))
+   (. (. ~conn (flush))
+      (then (fn [_]
+              (. ~conn (destroy))
+              (return nil))))))
 
 (def +dart-socket+
-  {:x-socket-connect {:macro #'dart-tf-x-socket-connect :emit :macro}
+  {:x-socket-connect {:macro #'dart-tf-x-socket-connect :emit :macro
+                      :op-spec {:allow-blocks true}}
    :x-socket-send    {:macro #'dart-tf-x-socket-send    :emit :macro}
    :x-socket-close   {:macro #'dart-tf-x-socket-close   :emit :macro}})
 

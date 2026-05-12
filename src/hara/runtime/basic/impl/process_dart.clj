@@ -121,6 +121,7 @@
   (let [convert-needed? (or (str/includes? source "jsonEncode(")
                             (str/includes? source "jsonDecode("))
         io-needed?      (or (str/includes? source "Socket.")
+                            (str/includes? source "HttpClient")
                             (str/includes? source "Directory.")
                             (str/includes? source "File(")
                             (str/includes? source "Process.")

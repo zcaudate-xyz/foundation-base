@@ -18,17 +18,20 @@
    (!.js
      (var encode-fn
           (fn [value id key]
-            (xt/x:return-encode value id key)))
-     (var wrap-fn
-          (fn [gen-fn wrap-fn]
-            (xt/x:return-wrap gen-fn wrap-fn)))
-     (var eval-fn
-          (fn [s re-wrap-fn]
-            (xt/x:return-eval s re-wrap-fn)))
-     (xt/x:json-decode
-      (eval-fn "1 + 1"
-               (fn [f]
-                 (return
+            (return
+             (xt/x:return-encode value id key))))
+      (var wrap-fn
+           (fn [gen-fn wrap-fn]
+             (return
+              (xt/x:return-wrap gen-fn wrap-fn))))
+      (var eval-fn
+           (fn [s re-wrap-fn]
+             (return
+              (xt/x:return-eval s re-wrap-fn))))
+      (xt/x:json-decode
+       (eval-fn "1 + 1"
+                (fn [f]
+                  (return
                   (wrap-fn f
                            (fn [out]
                              (return

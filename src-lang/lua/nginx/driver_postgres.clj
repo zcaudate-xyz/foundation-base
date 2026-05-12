@@ -64,16 +64,25 @@
 
 (def$.lua KEEPALIVE 120000)
 
+(defn.lua coerce-number-string
+  [value]
+  (if (xt/x:is-string? value)
+    (return (or (tonumber value)
+                value))
+    (return value)))
+
 (defn.lua normalise-scalar-output
   [value]
   (cond (or (xt/x:nil? value)
-            (xt/x:is-string? value)
             (k/is-boolean? value)
             (xt/x:is-object? value))
         (return value)
 
+        (xt/x:is-string? value)
+        (return (-/coerce-number-string value))
+
         :else
-        (return (xt/x:to-string value))))
+        (return value)))
 
 (defn.lua normalise-query-output
   [ret]

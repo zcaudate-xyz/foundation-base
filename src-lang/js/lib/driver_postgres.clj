@@ -34,17 +34,30 @@
 
 (def$.js Client Postgres.Client)
 
+(defn.js coerce-number-string
+  [value]
+  (if (not (xt/x:is-string? value))
+    (return value))
+  (var trimmed (. value (trim)))
+  (if (== trimmed "")
+    (return value))
+  (if (. trimmed (match "^[+-]?(?:\\d+(?:\\.\\d+)?|\\.\\d+)(?:[eE][+-]?\\d+)?$"))
+    (return (xt/x:to-number trimmed))
+    (return value)))
+
 (defn.js normalise-scalar-output
   [value]
   (cond (or (xt/x:nil? value)
-            (xt/x:is-string? value)
             (xt/x:is-boolean? value)
             (xt/x:is-array? value)
             (xt/x:is-object? value))
         (return value)
 
+        (xt/x:is-string? value)
+        (return (-/coerce-number-string value))
+
         :else
-        (return (xt/x:to-string value))))
+        (return value)))
 
 (defn.js normalise-query-output
   [res]

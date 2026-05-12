@@ -37,17 +37,40 @@
     (catch e
       (return (py/__import__ "psycopg2")))))
 
+(defn.py coerce-number-string
+  [value]
+  (if (not (xt/x:is-string? value))
+    (return value))
+  (var trimmed (. value (strip)))
+  (if (== trimmed "")
+    (return value))
+  (try
+    (return (int trimmed))
+    (catch e
+      (try
+        (return (float trimmed))
+        (catch e
+          (return value))))))
+
 (defn.py normalise-scalar-output
   [value]
   (cond (or (xt/x:nil? value)
-            (xt/x:is-string? value)
             (xt/x:is-boolean? value)
-            (xt/x:is-array? value)
-            (xt/x:is-object? value))
+            (xt/x:is-array? value))
+        (return value)
+
+        (xt/x:is-string? value)
+        (return (-/coerce-number-string value))
+
+        (py/hasattr value "as_tuple")
+        (return (-/coerce-number-string
+                 (xt/x:to-string value)))
+
+        (xt/x:is-object? value)
         (return value)
 
         :else
-        (return (xt/x:to-string value))))
+        (return value)))
 
 (defn.py normalise-query-output
   [rows]

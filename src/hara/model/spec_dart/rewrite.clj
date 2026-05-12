@@ -349,9 +349,9 @@
       (list :%
             (list :- "(() async { var value = await ")
             promise*
-            (list :- "; return await Future.sync(() => ")
+            (list :- "; return await ")
             call*
-            (list :- "); })()")))))
+            (list :- "; })()")))))
 
 (defn- rewrite-promise-catch-expression
   [form grammar]
@@ -364,9 +364,9 @@
       (list :%
             (list :- "(() async { try { return await ")
             promise*
-            (list :- "; } catch (err) { return await Future.sync(() => ")
+            (list :- "; } catch (err) { return await ")
             call*
-            (list :- "); } })()")))))
+            (list :- "; } })()")))))
 
 (defn- rewrite-promise-finally-expression
   [form grammar]
@@ -379,9 +379,9 @@
       (list :%
             (list :- "(() async { try { return await ")
             promise*
-            (list :- "; } finally { await Future.sync(() => ")
+            (list :- "; } finally { await ")
             call*
-            (list :- "); } })()")))))
+            (list :- "; } })()")))))
 
 (defn- rewrite-invoke-expression
   [form grammar]
