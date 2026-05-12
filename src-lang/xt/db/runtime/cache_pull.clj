@@ -146,7 +146,7 @@
   (var ktype (or (xtd/get-in schema [table-key key "ref" "type"])
                  "data"))
   (cond (xt/x:is-array? clause)
-        (do (var [tag] clause)
+        (do (var tag (xt/x:first clause))
             (var exprs [(xt/x:unpack clause)])
             (xt/x:arr-pop-first exprs)
             (return

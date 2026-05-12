@@ -282,48 +282,58 @@
 (defn ptr-output-json
   "extracetd function from ptr-output"
   {:added "4.0"}
-  [out]
-  (let [{:strs [type value return]} out
-        type (collection/unseqify type)
-        out (case type
-              "data"    value
-              "raw"     (f/wrapped value identity return)
-              "error"   (throw (if (map? value)
-                                 (ex-info "" value)
-                                 (ex-info "" {:err (vec (filter not-empty
-                                                                (clojure.string/split-lines (str value))))})))
-              out)
-        _    (when (:output *print*)
-               (env/pl out))]
-    out))
+  ([out]
+   (ptr-output-json out nil))
+  ([out {:keys [preserve-errors preserve-payload]}]
+   (let [{:strs [type value return]} out
+         type (collection/unseqify type)
+         out (case type
+               "data"  (if preserve-payload
+                         out
+                         value)
+               "raw"   (if preserve-payload
+                         out
+                         (f/wrapped value identity return))
+               "error" (if preserve-errors
+                         out
+                         (throw (if (map? value)
+                                  (ex-info "" value)
+                                  (ex-info "" {:err (vec (filter not-empty
+                                                                 (clojure.string/split-lines (str value))))}))))
+               out)
+         _    (when (:output *print*)
+                (env/pl out))]
+     out)))
 
 (defn ptr-output
   "output types for embedded return values"
   {:added "4.0"}
-  [out json]
-  (cond (:raw *output*) out
+  ([out json]
+   (ptr-output out json nil))
+  ([out json {:keys [preserve-errors preserve-payload] :as opts}]
+   (cond (:raw *output*) out
 
-        (or (var? json)
-            (fn? json)) (json out)
-        
-        :else
-        (let [out (if (= json :string)
-                    (str out)
-                    out)]
-          (if (and (string? out)
-                   json)
-            
-            (let [out (try (json/read out)
-                           (catch Throwable t
-                             (f/wrapped out)))]
-              (if (:json *output*)
-                out
-                (if (and (= json :full)
-                         (not (f/wrapped? out)))
-                  (ptr-output-json out)
-                  out)))
-            
-            out))))
+         (or (var? json)
+             (fn? json)) (json out)
+         
+         :else
+         (let [out (if (= json :string)
+                     (str out)
+                     out)]
+           (if (and (string? out)
+                    json)
+             
+             (let [out (try (json/read out)
+                            (catch Throwable t
+                              (f/wrapped out)))]
+               (if (:json *output*)
+                 out
+                 (if (and (= json :full)
+                          (not (f/wrapped? out)))
+                   (ptr-output-json out opts)
+                   out)))
+             
+             out)))))
 
 (defn ptr-invoke
   "invokes the pointer"
@@ -364,5 +374,10 @@
                                       (env/pl (str k ":\n" v)))))
                             (catch Throwable t
                               (env/pl raw))))
-                output (ptr-output raw json)]
+                output (ptr-output raw
+                                   json
+                                   {:preserve-payload (or (:output/preserve-payload rt)
+                                                          (get-in rt [:process :output/preserve-payload]))
+                                    :preserve-errors  (or (:output/preserve-errors rt)
+                                                          (get-in rt [:process :output/preserve-errors]))})]
             output))))

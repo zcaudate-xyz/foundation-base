@@ -98,7 +98,7 @@
   (var [t-ok t-err] (check/check-args-type args targs))
   (when (not t-ok)
     (return (xt/x:json-encode {:status "error"
-                          :data t-err})))
+                           :data t-err})))
   (var q  (-/call-format-query spec args))
   
   (var success-fn (fn [val]

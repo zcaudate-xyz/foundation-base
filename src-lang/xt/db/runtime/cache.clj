@@ -55,11 +55,17 @@
   (var where-params  (xt/x:arr-filter linked (fn:> [x]
                                                (and (xt/x:is-object? x)
                                                     (xtd/not-empty? x)))))
+  (var where where-params)
+  (cond (== 0 (xt/x:len where-params))
+        (:= where nil)
+
+        (== 1 (xt/x:len where-params))
+        (:= where (xt/x:first where-params)))
   (var #{rows} cache)
   (var output (cache-pull/pull
                rows schema table-name
-               {:where where-params
-                :returning return-params}))
+               {:where where
+                 :returning return-params}))
   (return output))
 
 (defn.xt cache-delete-sync

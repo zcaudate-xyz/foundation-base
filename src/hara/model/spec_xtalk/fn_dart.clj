@@ -12,6 +12,21 @@
   [obj]
   (dart-method0 (list '. obj 'runtimeType) 'toString))
 
+(defn dart-string-compare-expr
+  [a b]
+  (list '. (dart-method0 a 'toString)
+        (list 'compareTo (dart-method0 b 'toString))))
+
+(defn dart-comparison-form
+  [a b numeric-op string-op]
+  (let [string-side? (fn [x]
+                       (list '== "String" (dart-runtime-type-string x)))]
+    (list ':?
+          (list 'or (string-side? a)
+                (string-side? b))
+          (list string-op (dart-string-compare-expr a b) 0)
+          (list numeric-op a b))))
+
 (defn dart-is-map
   [obj]
   (list :% (list :- "(") obj (list :- " is Map)")))
@@ -142,6 +157,22 @@
   [[_ obj key]]
   (list '. obj (list 'remove key)))
 
+(defn dart-tf-x-lt
+  [[_ a b]]
+  (dart-comparison-form a b '< '<))
+
+(defn dart-tf-x-lte
+  [[_ a b]]
+  (dart-comparison-form a b '<= '<=))
+
+(defn dart-tf-x-gt
+  [[_ a b]]
+  (dart-comparison-form a b '> '>))
+
+(defn dart-tf-x-gte
+  [[_ a b]]
+  (dart-comparison-form a b '>= '>=))
+
 (def +dart-core+
   {:x-print    {:macro #'dart-tf-x-print    :emit :macro :value true}
    :x-len      {:macro #'dart-tf-x-len      :emit :macro :value true}
@@ -159,6 +190,10 @@
    :x-eval     {:macro #'dart-tf-x-eval     :emit :macro}
    :x-has-key? {:macro #'dart-tf-x-has-key? :emit :macro}
    :x-del-key  {:macro #'dart-tf-x-del-key  :emit :macro}
+   :x-lt       {:macro #'dart-tf-x-lt       :emit :macro}
+   :x-lte      {:macro #'dart-tf-x-lte      :emit :macro}
+   :x-gt       {:macro #'dart-tf-x-gt       :emit :macro}
+   :x-gte      {:macro #'dart-tf-x-gte      :emit :macro}
    :x-unpack   {:emit :alias :raw '...}})
 
 
@@ -343,9 +378,7 @@
    :x-obj-pairs  {:macro #'dart-tf-x-obj-pairs  :emit :macro}})
 
 (def +dart-json+
-  {:x-json-encode {:macro (fn [[_ value]]
-                            (list 'jsonEncode (dart-json-compact-expr value)))
-                   :emit :macro}
+  {:x-json-encode {:emit :alias :raw 'jsonEncode}
    :x-json-decode {:emit :alias :raw 'jsonDecode}})
 
 (def +dart-math+
@@ -388,8 +421,7 @@
                                              -1
                                              1))))))
 (defn dart-tf-x-str-comp [[_ a b]]
-  (list '< (list '. (dart-method0 a 'toString) (list 'compareTo (dart-method0 b 'toString)))
-        0))
+  (list '< (dart-string-compare-expr a b) 0))
 
 (def +dart-arr+
   {:x-arr-slice       {:macro #'dart-tf-x-arr-slice      :emit :macro :type :template}

@@ -224,7 +224,7 @@
     (var err-fn (fn []
                   (xt/x:err "ERR")))
     (err-fn))
-  => (fn [out] (re-find #"ERR" (deref out))))
+  => (throws))
 
 ^{:refer xt.lang.spec-base/x:ex-native? :added "4.1"}
 (fact "check is exception is native"
@@ -1232,7 +1232,7 @@
   (!.dt
     (do:>
      (x:throw "THROW")))
-  => (fn [out] (re-find #"THROW" (deref out))))
+  => (throws))
 
 ^{:refer xt.lang.spec-base/x:now-ms :added "4.1"}
 (fact "expands and emits a millisecond time expression"

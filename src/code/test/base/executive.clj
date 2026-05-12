@@ -18,6 +18,12 @@
 (def ^:private +run-dir+
   ".hara/runs")
 
+(def ^:private +run-history-file+
+  "run-history.csv")
+
+(def ^:private +run-history-columns+
+  ["time" "command" "failures" "report"])
+
 (defn report-edn-safe?
   "checks if a value can be written as EDN without coercion"
   {:added "4.1"}
@@ -96,6 +102,21 @@
           save-run
           (report->run-path (or report-path (report-file-path))))))
 
+(defn history-file-path
+  "returns the output path for saved run history"
+  {:added "4.1"}
+  [{:keys [run-path]} params]
+  (let [save-run (:save-run params)]
+    (cond
+      (map? save-run)
+      (if-let [path (:history save-run)]
+        (str (fs/path context/*root* path))
+        (when run-path
+          (str (fs/path (fs/parent run-path) +run-history-file+))))
+
+      run-path
+      (str (fs/path (fs/parent run-path) +run-history-file+)))))
+
 (defn run-file-params
   "removes internal/default params from the saved repl run helper"
   {:added "4.1"}
@@ -133,6 +154,46 @@
             (seq params)
             (concat [params])))))
 
+(defn- csv-cell
+  [value]
+  (let [s (str (or value ""))]
+    (if (re-find #"[\",\n\r]" s)
+      (str "\"" (str/replace s #"\"" "\"\"") "\"")
+      s)))
+
+(defn- csv-row
+  [values]
+  (str (str/join "," (map csv-cell values)) "\n"))
+
+(defn- failure-count
+  [items]
+  (+ (count (:failed items))
+     (count (:throw items))
+     (count (:timeout items))))
+
+(defn save-run-history
+  "appends the saved run metadata to csv history"
+  {:added "4.1"}
+  [items selector params artifacts]
+  (let [history-path (history-file-path artifacts params)]
+    (when history-path
+      (let [history-file (fs/path history-path)
+           header?      (not (fs/exists? history-file))
+           timestamp    (str (java.time.Instant/ofEpochMilli (t/system-ms)))
+           command      (when selector
+                          (pr-str (run-file-form selector params)))
+           report-path  (:report-path artifacts)]
+        (fs/create-directory (fs/parent history-file))
+        (spit history-path
+             (str (when header?
+                    (csv-row +run-history-columns+))
+                  (csv-row [timestamp
+                            command
+                            (failure-count items)
+                            report-path]))
+             :append true)
+        history-path))))
+
 (defn save-artifact
   "saves a generated test artifact"
   {:added "4.1"}
@@ -145,13 +206,16 @@
 (defn artifact-notices
   "returns any save notices for written artifacts"
   {:added "4.1"}
-  [{:keys [report-path run-path]}]
+  [{:keys [report-path run-path history-path]}]
   (cond-> []
     report-path
     (conj (str "Report saved to " report-path))
 
     run-path
-    (conj (str "Run helper saved to " run-path))))
+    (conj (str "Run helper saved to " run-path))
+
+    history-path
+    (conj (str "Run history saved to " history-path))))
 
 (defn save-report-paths
   "writes report artifacts and returns the written paths"
@@ -184,8 +248,10 @@
                      run-path
                      (with-out-str
                        (clojure.pprint/pprint (run-file-form selector params)))))
-    {:report-path report-path
-     :run-path run-path}))
+    (let [artifacts {:report-path report-path
+                     :run-path run-path}
+          history-path (save-run-history items selector params artifacts)]
+      (assoc artifacts :history-path history-path))))
 
 (defn announce-artifacts
   "prints save notices for written artifacts"

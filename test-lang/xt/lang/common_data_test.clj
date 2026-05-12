@@ -1418,6 +1418,45 @@
    out)
   => [1 2 3])
 
+^{:refer xt.lang.common-data/arr-sort.map-keys :added "4.1"}
+(fact "arr-sort handles string keys from map rows"
+
+  (!.js
+   (var out [{"id" "XLM"}
+             {"id" "USD"}])
+   (xtd/arr-sort
+    out
+    (fn [row]
+      (return (xt/x:get-key row "id")))
+    xt/x:str-comp)
+   out)
+  => [{"id" "USD"}
+      {"id" "XLM"}]
+
+  (!.lua
+   (var out [{"id" "XLM"}
+             {"id" "USD"}])
+   (xtd/arr-sort
+    out
+    (fn [row]
+      (return (xt/x:get-key row "id")))
+    xt/x:str-comp)
+   out)
+  => [{"id" "USD"}
+      {"id" "XLM"}]
+
+  (!.py
+   (var out [{"id" "XLM"}
+             {"id" "USD"}])
+   (xtd/arr-sort
+    out
+    (fn [row]
+      (return (xt/x:get-key row "id")))
+    xt/x:str-comp)
+   out)
+  => [{"id" "USD"}
+      {"id" "XLM"}])
+
 ^{:refer xt.lang.common-data/arr-sorted-merge :added "4.1"}
 (fact "performs a merge on two sorted arrays"
 

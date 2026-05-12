@@ -62,10 +62,22 @@
   (!.lua
    (local conn (lua-sqlite/connect-constructor {:memory true}))
    (lua-sqlite/raw-query (. conn ["raw"]) "select value from json_each('[1,2,3,4]')"))
-  => [1 2 3 4])
+  => [1 2 3 4]
+
+  (!.lua
+   (local conn (lua-sqlite/connect-constructor {:memory true}))
+   (lua-sqlite/raw-query (. conn ["raw"])
+                         "create table hello (id integer); insert into hello values (1);"))
+  => [])
 
 ^{:refer lua.nginx.driver-sqlite/connect-constructor :added "4.0"}
 (fact "create db connection"
+
+  (!.lua
+   (local conn (lua-sqlite/connect-constructor {}))
+   [ (not (xt/x:nil? (. conn ["raw"])))
+     ((xt/x:get-key conn "::query_sync") "select 1;")])
+  => [true 1]
 
   (!.lua
    (local conn (lua-sqlite/connect-constructor {:memory true}))

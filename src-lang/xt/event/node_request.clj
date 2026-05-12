@@ -70,10 +70,11 @@
                                          nil))
   (return
    (-/ensure-promise
-    (handler current-space
-             (xt/x:get-key request "args")
-             request
-             node))))
+    (xt/x:apply handler
+                [current-space
+                 (xt/x:get-key request "args")
+                 request
+                 node]))))
 
 (defn.xt response-body
   "normalises a response frame into request output"

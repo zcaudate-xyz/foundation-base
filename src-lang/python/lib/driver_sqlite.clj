@@ -18,13 +18,29 @@
               (. sql (startswith "values"))
               (. sql (startswith "explain")))))
 
+(defn.py query-multi-statement?
+  "Checks whether a query string contains multiple statements."
+  {:added "4.1"}
+  [query]
+  (var statements
+       (xt/x:arr-filter
+        (. query (split ";"))
+        (fn [part]
+          (return (> (xt/x:len (. part (strip))) 0)))))
+  (return (> (xt/x:len statements) 1)))
+
 (defn.py raw-query
   "Runs a raw sqlite query and normalises the result shape."
   {:added "4.1"}
   [db query]
   (var cursor (. db (cursor)))
-  (. cursor (execute query))
-  (var rows (:? (-/query-returns-rows? query)
+  (var returns-rows? (-/query-returns-rows? query))
+  (var multi-statement? (and (not returns-rows?)
+                             (-/query-multi-statement? query)))
+  (if multi-statement?
+    (. cursor (executescript query))
+    (. cursor (execute query)))
+  (var rows (:? returns-rows?
                 (. cursor (fetchall))
                 []))
   (. db (commit))

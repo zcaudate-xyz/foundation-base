@@ -106,8 +106,9 @@
       (:= m {}))
     (var memory (xt/x:get-key m "memory"))
     (var filename (xt/x:get-key m "filename"))
-    (when (xt/x:nil? filename)
-      (:= filename "sqlite.db"))
+    (when (and (xt/x:nil? memory)
+               (xt/x:nil? filename))
+      (:= memory true))
     (var db nil)
     (if memory
       (:= db (sqlite.sqlite3.openInMemory))
@@ -131,8 +132,9 @@
                    (:= m {}))
                  (var memory (xt/x:get-key m "memory"))
                  (var filename (xt/x:get-key m "filename"))
-                 (when (xt/x:nil? filename)
-                   (:= filename "sqlite.db"))
+                 (when (and (xt/x:nil? memory)
+                            (xt/x:nil? filename))
+                   (:= memory true))
                  (return
                   (Future.sync
                    (fn []

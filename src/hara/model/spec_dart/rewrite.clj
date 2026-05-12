@@ -71,6 +71,8 @@
      for:iter
      br*
      throw
+     x:throw
+     x:err
      break
      continue
      defn
@@ -98,6 +100,28 @@
 (defn- dart-optional-input?
   [input]
   (= :maybe (get-in input [:type :kind])))
+
+(defn- dart-function-var-symbol?
+  [sym]
+  (and (symbol? sym)
+       (let [n (name sym)]
+         (or (.startsWith n "dart_callback__")
+             (.endsWith n "-fn")
+             (.endsWith n "_fn")
+             (#{"handler"
+                "resolve"
+                "reject"
+                "process"
+                "guard"
+                "wrapper"}
+              n)))))
+
+(defn- dart-cast-function
+  [form]
+  (list :%
+        (list :- "(")
+        form
+        (list :- " as Function)")))
 
 (defn- dart-pad-optional-args
   [head args]
@@ -305,6 +329,9 @@
                       head)
         args        (rest form)
         unpack?     (unpack/any-unpack? args)
+        apply?      (or unpack?
+                        (dart-function-var-symbol? head*)
+                        (dart-function-var-symbol? head))
         args        (if unpack?
                       args
                       (dart-pad-optional-args head args))
@@ -314,8 +341,13 @@
                                          #(list :.. %))]
     (with-form-meta
       form
-      (if unpack?
-        (list 'Function.apply head* (vec args*))
+      (if apply?
+        (list 'Function.apply
+              (if (or (dart-function-var-symbol? head*)
+                      (dart-function-var-symbol? head))
+                (dart-cast-function head*)
+                head*)
+              (vec args*))
         (apply list head* args*)))))
 
 (defn- rewrite-expression-list

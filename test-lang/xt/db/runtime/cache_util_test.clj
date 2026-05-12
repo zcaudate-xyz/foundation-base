@@ -3,8 +3,17 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-^{:seedgen/root {:all true}}
+^{:seedgen/root {:all true, :langs [:js :python]}}
 (l/script- :js
+  {:runtime :basic
+   :require [[xt.lang.common-repl :as repl]
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+             [xt.db.runtime.cache-util :as data]
+             [xt.db.text.base-flatten :as f]
+             [xt.db.helpers.data-main-test :as sample]]})
+
+(l/script- :python
   {:runtime :basic
    :require [[xt.lang.common-repl :as repl]
              [xt.lang.common-lib :as k]
@@ -21,6 +30,15 @@
 (fact "checks if entry exists"
 
   (!.js
+    (var rows {})
+    (data/merge-bulk rows (f/flatten sample/Schema
+                                     "UserAccount"
+                                     sample/RootUser
+                                     {}) nil)
+    (data/has-entry rows "UserAccount" "00000000-0000-0000-0000-000000000000"))
+  => true
+
+  (!.py
     (var rows {})
     (data/merge-bulk rows (f/flatten sample/Schema
                                      "UserAccount"
@@ -55,6 +73,16 @@
                                      {})
                      nil)
     (data/get-entry rows "UserAccount" "00000000-0000-0000-0000-000000000000"))
+  => +account-get-entry-check+
+
+  (!.py
+    (var rows {})
+    (data/merge-bulk rows (f/flatten sample/Schema
+                                     "UserAccount"
+                                     sample/RootUser
+                                     {})
+                     nil)
+    (data/get-entry rows "UserAccount" "00000000-0000-0000-0000-000000000000"))
   => +account-get-entry-check+)
 
 ^{:refer xt.db.runtime.cache-util/swap-if-entry :added "4.0"}
@@ -72,12 +100,38 @@
                             (fn [record]
                               (return (xtd/set-in record ["data" "foo"] "hello"))))
         (xtd/get-in ["record" "data" "foo"])))
+  => "hello"
+
+  (!.py
+    (var rows {})
+    (data/merge-bulk rows (f/flatten sample/Schema
+                                     "UserAccount"
+                                     sample/RootUser
+                                     {})
+                     nil)
+    (-> (data/swap-if-entry rows
+                            "UserAccount" "00000000-0000-0000-0000-000000000000"
+                            (fn [record]
+                              (return (xtd/set-in record ["data" "foo"] "hello"))))
+        (xtd/get-in ["record" "data" "foo"])))
   => "hello")
 
 ^{:refer xt.db.runtime.cache-util/merge-single :added "4.0"}
 (fact "merges a single entry"
 
   (!.js
+    (data/merge-single {}
+                       "UserAccount"
+                       "00000000-0000-0000-0000-000000000001"
+                       {:id "00000000-0000-0000-0000-000000000001"
+                        :data {}
+                        :ref-links {}
+                        :rev-links {}}
+                       k/identity))
+  => (just {"record" {"ref_links" {}, "id" "00000000-0000-0000-0000-000000000001", "rev_links" {}, "data" {}},
+            "t" number?})
+
+  (!.py
     (data/merge-single {}
                        "UserAccount"
                        "00000000-0000-0000-0000-000000000001"
@@ -125,8 +179,18 @@
                  "t" number?}}}
               ["00000000-0000-0000-0000-000000000000"]]))]}
 (fact "merges flattened data into the database"
-  
+
   (!.js
+    (var rows {})
+    [(data/merge-bulk rows (f/flatten sample/Schema
+                                      "UserAccount"
+                                      sample/RootUser
+                                      {})
+                      nil)
+     (data/get-ids rows "UserAccount")])
+  => +account-merge-bulk-check+
+
+  (!.py
     (var rows {})
     [(data/merge-bulk rows (f/flatten sample/Schema
                                       "UserAccount"
@@ -240,6 +304,33 @@
   => +account-profile-check+
 
   (!.js
+    (var rows {})
+    (data/merge-bulk rows (f/flatten sample/Schema
+                                     "UserAccount"
+                                     (xtd/obj-pick sample/RootUserFull
+                                                   ["id" "nickname" "is_active" "organisations" "notification"])
+                                     {}) nil))
+  => +account-org-notification-check+
+
+  (!.py
+    (var rows {})
+    (data/merge-bulk rows (f/flatten sample/Schema
+                                     "UserAccount"
+                                     (xtd/obj-pick sample/RootUserFull
+                                                   ["id" "nickname" "is_active"])
+                                     {}) nil))
+  => +account-min-check+
+
+  (!.py
+    (var rows {})
+    (data/merge-bulk rows (f/flatten sample/Schema
+                                     "UserAccount"
+                                     (xtd/obj-pick sample/RootUserFull
+                                                   ["id" "nickname" "is_active" "profile"])
+                                     {}) nil))
+  => +account-profile-check+
+
+  (!.py
     (var rows {})
     (data/merge-bulk rows (f/flatten sample/Schema
                                      "UserAccount"
@@ -436,12 +527,30 @@
                                      "UserAccount"
                                      sample/RootUserFull
                                      {}) nil))
+  => +account-merge-bulk-check+
+
+  (!.py
+    (var rows {})
+    (data/merge-bulk rows (f/flatten sample/Schema
+                                     "UserAccount"
+                                     sample/RootUserFull
+                                     {}) nil))
   => +account-merge-bulk-check+)
 
 ^{:refer xt.db.runtime.cache-util/get-ids :added "4.0"}
 (fact "get ids for table-key"
 
   (!.js
+    (var rows {})
+    (data/merge-bulk rows (f/flatten sample/Schema
+                                     "UserAccount"
+                                     sample/RootUser
+                                     {})
+                     nil)
+    (data/get-ids rows "UserAccount"))
+  => ["00000000-0000-0000-0000-000000000000"]
+
+  (!.py
     (var rows {})
     (data/merge-bulk rows (f/flatten sample/Schema
                                      "UserAccount"
@@ -476,6 +585,15 @@
                                      sample/RootUser
                                      {}) nil)
     (data/all-records rows "UserAccount"))
+  => +account-all-records-check+
+
+  (!.py
+    (var rows {})
+    (data/merge-bulk rows (f/flatten sample/Schema
+                                     "UserAccount"
+                                     sample/RootUser
+                                     {}) nil)
+    (data/all-records rows "UserAccount"))
   => +account-all-records-check+)
 
 ^{:refer xt.db.runtime.cache-util/get-changed-single :added "4.0"}
@@ -492,7 +610,24 @@
                      (. ["record"])
                      (xtd/clone-nested)
                      (xtd/set-in ["data" "nickname"] "hello")))
-          
+            
+    (data/get-changed-single rows
+                             "UserAccount" "00000000-0000-0000-0000-000000000000"
+                             changed))
+  => {"data" {"nickname" "hello"}}
+
+  (!.py
+    (var rows {})
+    (data/merge-bulk rows (f/flatten sample/Schema
+                                     "UserAccount"
+                                     sample/RootUser
+                                     {})
+                     nil)
+    (var changed (-> (data/get-entry rows  "UserAccount" "00000000-0000-0000-0000-000000000000")
+                     (. ["record"])
+                     (xtd/clone-nested)
+                     (xtd/set-in ["data" "nickname"] "hello")))
+            
     (data/get-changed-single rows
                              "UserAccount" "00000000-0000-0000-0000-000000000000"
                              changed))
@@ -502,6 +637,21 @@
 (fact "checks if record has changed"
 
   (!.js
+    (var rows {})
+    (data/merge-bulk rows (f/flatten sample/Schema
+                                     "UserAccount"
+                                     sample/RootUser
+                                     {})
+                     nil)
+    (var changed (-> (data/get-entry rows  "UserAccount" "00000000-0000-0000-0000-000000000000")
+                     (. ["record"])
+                     (xtd/clone-nested)
+                     (xtd/set-in ["data" "nickname"] "hello")))
+    (data/has-changed-single rows "UserAccount" "00000000-0000-0000-0000-000000000000"
+                             changed))
+  => true
+
+  (!.py
     (var rows {})
     (data/merge-bulk rows (f/flatten sample/Schema
                                      "UserAccount"
@@ -527,6 +677,9 @@
 (fact "find link attributes"
 
   (!.js (data/get-link-attrs sample/Schema "UserAccount" "profile"))
+  => +get-link-attrs-check+
+
+  (!.py (data/get-link-attrs sample/Schema "UserAccount" "profile"))
   => +get-link-attrs-check+)
 
 ^{:refer xt.db.runtime.cache-util/remove-single-link-entry :added "4.0"}
@@ -550,12 +703,47 @@
                                            (xtd/set-in removed ["id"] link-id)))
           (xtd/get-in ["record" "rev_links"]))
      (. removed ["id"])])
+  => [{} "c4643895-b0ce-44cc-b07b-2386bf18d43b"]
+
+  (!.py
+    (var rows {})
+    (var removed {"id" nil})
+    (data/merge-bulk rows (f/flatten sample/Schema
+                                     "UserAccount"
+                                     sample/RootUser
+                                     {})
+                     nil)
+    [(-> (data/remove-single-link-entry rows
+                                        "UserAccount"
+                                        "00000000-0000-0000-0000-000000000000"
+                                         "rev_links"
+                                         "profile"
+                                         "c4643895-b0ce-44cc-b07b-2386bf18d43b"
+                                         (fn [link-id]
+                                           (xtd/set-in removed ["id"] link-id)))
+          (xtd/get-in ["record" "rev_links"]))
+     (. removed ["id"])])
   => [{} "c4643895-b0ce-44cc-b07b-2386bf18d43b"])
 
 ^{:refer xt.db.runtime.cache-util/remove-single-link :added "4.0"}
 (fact "removes single link"
 
   (!.js
+    (var rows {})
+    (data/merge-bulk rows (f/flatten sample/Schema
+                                     "UserAccount"
+                                     sample/RootUser
+                                     {})
+                     nil)
+    (data/remove-single-link rows
+                             sample/Schema
+                             "UserAccount"
+                             "00000000-0000-0000-0000-000000000000"
+                             "profile"
+                             "c4643895-b0ce-44cc-b07b-2386bf18d43b"))
+  => [true true]
+
+  (!.py
     (var rows {})
     (data/merge-bulk rows (f/flatten sample/Schema
                                      "UserAccount"
@@ -599,6 +787,19 @@
                         sample/Schema
                         "UserAccount"
                         "00000000-0000-0000-0000-000000000000"))
+  => +account-remove-single-check+
+
+  (!.py
+    (var rows {})
+    (data/merge-bulk rows (f/flatten sample/Schema
+                                     "UserAccount"
+                                     sample/RootUser
+                                     {})
+                     nil)
+    (data/remove-single rows
+                        sample/Schema
+                        "UserAccount"
+                        "00000000-0000-0000-0000-000000000000"))
   => +account-remove-single-check+)
 
 ^{:refer xt.db.runtime.cache-util/remove-bulk :added "4.0"}
@@ -618,12 +819,51 @@
     [(xtd/get-in (xtd/first removed) ["record" "id"])
      (data/get-ids rows "UserAccount")])
   => (just ["00000000-0000-0000-0000-000000000000"
+            empty?])
+
+  (!.py
+    (var rows {})
+    (data/merge-bulk rows (f/flatten sample/Schema
+                                     "UserAccount"
+                                     sample/RootUser
+                                     {})
+                     nil)
+    (var removed (data/remove-bulk rows
+                                   sample/Schema
+                                   "UserAccount"
+                                   ["00000000-0000-0000-0000-000000000000"]))
+    [(xtd/get-in (xtd/first removed) ["record" "id"])
+     (data/get-ids rows "UserAccount")])
+  => (just ["00000000-0000-0000-0000-000000000000"
             empty?]))
 
 ^{:refer xt.db.runtime.cache-util/add-single-link-entry :added "4.0"}
 (fact "adds single link entry for one side"
 
   (!.js
+    (var rows {})
+    (var added {"id" nil})
+    (data/merge-bulk rows (f/flatten sample/Schema
+                                     "UserAccount"
+                                     (xtd/obj-omit sample/RootUser ["profile"])
+                                     {})
+                     nil)
+    [(-> (data/add-single-link-entry rows
+                                     "UserAccount"
+                                     "00000000-0000-0000-0000-000000000000"
+                                      "rev_links"
+                                      "profile"
+                                      "c4643895-b0ce-44cc-b07b-2386bf18d43b"
+                                      (fn [link-id]
+                                        (xtd/set-in added ["id"] link-id))
+                                      "UserProfile"
+                                      "account")
+          (xtd/get-in ["record" "rev_links" "profile"]))
+     (. added ["id"])])
+  => [{"c4643895-b0ce-44cc-b07b-2386bf18d43b" true}
+      "c4643895-b0ce-44cc-b07b-2386bf18d43b"]
+
+  (!.py
     (var rows {})
     (var added {"id" nil})
     (data/merge-bulk rows (f/flatten sample/Schema
@@ -666,6 +906,25 @@
                           "00000000-0000-0000-0000-000000000000"
                           "profile"
                           "c4643895-b0ce-44cc-b07b-2386bf18d43b"))
+  => [true true]
+
+  (!.py
+    (var rows {})
+    (data/merge-bulk rows (f/flatten sample/Schema
+                                     "UserAccount"
+                                     (xtd/obj-omit sample/RootUser ["emails" "profile"])
+                                     {})
+                     nil)
+    (data/merge-bulk rows (f/flatten sample/Schema
+                                     "UserAccount"
+                                     sample/RootUser
+                                     {}) nil)
+    (data/add-single-link rows
+                          sample/Schema
+                          "UserAccount"
+                          "00000000-0000-0000-0000-000000000000"
+                          "profile"
+                          "c4643895-b0ce-44cc-b07b-2386bf18d43b"))
   => [true true])
 
 ^{:refer xt.db.runtime.cache-util/add-bulk-links :added "4.0"
@@ -684,6 +943,26 @@
 (fact "adding bulk links from external data (to be doubly sure)"
 
   (!.js
+    (var flat (f/flatten sample/Schema
+                         "UserAccount"
+                         sample/RootUser
+                         {}))
+    (var rows {})
+    (data/merge-bulk rows (f/flatten sample/Schema
+                                     "UserAccount"
+                                     (xtd/obj-omit sample/RootUser ["emails" "profile"])
+                                     {})
+                     nil)
+    (data/merge-bulk rows (xtd/obj-omit flat ["UserAccount"]) nil)
+    [(data/add-bulk-links rows sample/Schema flat)
+     (xtd/get-in rows ["UserAccount"
+                       "00000000-0000-0000-0000-000000000000"
+                       "record"
+                       "rev_links"
+                       "profile"])])
+  => +account-add-bulk-links-check+
+
+  (!.py
     (var flat (f/flatten sample/Schema
                          "UserAccount"
                          sample/RootUser

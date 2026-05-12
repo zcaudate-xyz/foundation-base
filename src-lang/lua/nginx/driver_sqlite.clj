@@ -26,6 +26,18 @@
   (return (or (tonumber n)
               n)))
 
+(defn.lua query-returns-rows?
+  "Checks whether a query should return row data."
+  {:added "4.1"}
+  [query]
+  (var sql (. (. query (gsub "^%s+" ""))
+              (lower)))
+  (return (or (. sql (find "^select"))
+              (. sql (find "^pragma"))
+              (. sql (find "^with"))
+              (. sql (find "^values"))
+              (. sql (find "^explain")))))
+
 (defn.lua raw-exec
   "performs a raw execution"
   {:added "4.0"}
@@ -45,6 +57,9 @@
   "Performs a raw query"
   {:added "4.0"}
   [db query]
+  (when (not (-/query-returns-rows? query))
+    (. db (exec query))
+    (return []))
   (var out [])
   (. db (exec query
               (fn [udata cols values names]
@@ -63,10 +78,10 @@
   {:added "4.0"}
   [m]
   (local #{filename memory} m)
-  (local instance (:? memory
+  (local instance (:? (or memory
+                          (xt/x:nil? filename))
                       (-/open-memory)
-                      (-/open (or filename
-                                  "sqlite.db"))))
+                      (-/open filename)))
   (local conn {:raw instance})
   (:= (. conn ["::disconnect"])
       (fn []

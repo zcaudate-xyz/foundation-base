@@ -158,7 +158,7 @@
       +sql-touched-output+
       0])
 
-^{:refer xt.db.instance/db-pull-sync :added "4.1"
+^{:refer xt.db.instance/db-pull-sync.prepared :added "4.1"
   :setup [(def +prepared-output+
             [{"nickname" "root"
               "profile" [{"first_name" "Root"}]}])]}
@@ -247,7 +247,7 @@
       +prepared-output+
       +prepared-output+])
 
-^{:refer xt.db.instance/db-pull-sync :added "4.1"
+^{:refer xt.db.instance/db-pull-sync.flat :added "4.1"
   :setup [(def +user-nickname-tree+
             ["UserAccount"
              {"id" "00000000-0000-0000-0000-000000000000"}
@@ -307,7 +307,7 @@
       +user-nickname-output+
       +user-nickname-output+])
 
-^{:refer xt.db.instance/db-pull-sync :added "4.1"
+^{:refer xt.db.instance/db-pull-sync.bulk-in :added "4.1"
   :setup [(def +currency-bulk-tree+
             ["Currency"
              {"id" ["in" [["USD" "XLM"]]]}

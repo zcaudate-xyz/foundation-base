@@ -664,6 +664,7 @@
   (common/set-context-options
    [:dart :twostep :default]
    {:emit {:body {:transform #'transform-form}}
+    :output/preserve-payload true
     :json :full}))
 
 (def +dart-twostep+

@@ -1,5 +1,6 @@
 (ns code.test.base.executive-run-file-test
   (:require [clojure.edn :as edn]
+            [clojure.string :as str]
             [code.test.base.context :as context]
             [code.test.base.executive :as executive]
             [code.test.base.runtime :as rt]
@@ -43,6 +44,20 @@
    {:save-run "tmp/demo.run.edn"})
   => #".*/tmp/demo\.run\.edn$")
 
+^{:refer code.test.base.executive/history-file-path :added "4.1"}
+(fact "places run history next to the saved helper by default or at a custom path"
+  (executive/history-file-path
+   {:run-path "/tmp/demo/.hara/runs/run-10.run.edn"}
+   {:save-run true})
+  => "/tmp/demo/.hara/runs/run-history.csv"
+
+  (binding [context/*root* "/tmp/demo"]
+    (executive/history-file-path
+     {:run-path "/tmp/demo/tmp/demo.run.edn"}
+     {:save-run {:path "tmp/demo.run.edn"
+                 :history "tmp/history.csv"}}))
+  => "/tmp/demo/tmp/history.csv")
+
 ^{:refer code.test.base.executive/save-report :added "4.1"}
 (fact "writes the repl helper through the report save flow"
   (let [root (str (fs/create-tmpdir "executive-run-file"))]
@@ -72,6 +87,43 @@
       'require
       'code.test/run
       {:test {:order :random}}])
+
+^{:refer code.test.base.executive/save-report :added "4.1"}
+(fact "appends saved run metadata to csv history"
+  (let [root    (str (fs/create-tmpdir "executive-run-history"))
+       params   {:save-run {:path "tmp/demo.run.edn"
+                            :history "tmp/history.csv"}
+                 :run-command 'code.test/run}
+       history  (str (fs/path root "tmp/history.csv"))]
+    (try
+      (binding [context/*root* root]
+       (executive/save-report
+        {:passed []
+         :failed [{:meta {:ns 'demo.core-test}}]
+         :throw []
+         :timeout []}
+        'demo.core
+        params)
+       (executive/save-report
+        {:passed []
+         :failed []
+         :throw []
+         :timeout []}
+        'demo.core
+        params)
+       (let [lines (str/split-lines (slurp history))]
+         [(count lines)
+          (first lines)
+          (every? #(re-find #"code\.test/run" %) (rest lines))
+          (boolean (re-find #",1,.*run-\d+\.edn" (second lines)))
+          (boolean (re-find #",0,$" (last lines)))]))
+      (finally
+       (fs/delete root))))
+  => [3
+      "time,command,failures,report"
+      true
+      true
+      true])
 
 ^{:refer code.test.base.executive/test-namespace :added "4.1"}
 (fact "routes single namespace helper saving through save-report"
@@ -145,7 +197,8 @@
                                 :run-command 'code.test/run}]
     (with-redefs [executive/save-report-paths (fn [& _]
                                                 {:report-path "tmp/report.edn"
-                                                 :run-path "tmp/report.run.edn"})]
+                                                 :run-path "tmp/report.run.edn"
+                                                 :history-path "tmp/run-history.csv"})]
       (-> (executive/summarise-bulk nil
                                     {'demo.alpha-test {:data {:passed []
                                                               :failed []
@@ -155,4 +208,5 @@
           meta
           :std.task/after-summary)))
   => ["Report saved to tmp/report.edn"
-      "Run helper saved to tmp/report.run.edn"])
+      "Run helper saved to tmp/report.run.edn"
+      "Run history saved to tmp/run-history.csv"])

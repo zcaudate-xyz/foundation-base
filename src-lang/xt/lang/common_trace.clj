@@ -35,11 +35,15 @@
   [& args]
   (let [{:keys [label]} (meta (l/macro-form))
         {:meta/keys [fn line]} (meta:info-fn)]
-    (clojure.core/apply list 'x:print (clojure.core/str
-                                       label
-                                       " "
-                                       fn)
-                        line "\n\n" args)))
+    (clojure.core/apply list 'x:print
+                        (clojure.core/str
+                         label
+                         " "
+                         fn
+                         " "
+                         line
+                         "\n\n")
+                        args)))
 
 ;;
 ;; TRACE

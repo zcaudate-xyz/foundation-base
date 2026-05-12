@@ -171,7 +171,10 @@
 
 ^{:refer hara.lang.pointer/ptr-output-json :added "4.0"}
 (fact "extracetd function from ptr-output"
-  (ptr-output-json {"type" "data" "value" 1}) => 1)
+  (ptr-output-json {"type" "data" "value" 1}) => 1
+  (ptr-output-json {"type" "data" "value" 1}
+                   {:preserve-payload true})
+  => {"type" "data" "value" 1})
 
 ^{:refer hara.lang.pointer/ptr-output :added "4.0"}
 (fact "output types for embedded return values"
@@ -193,10 +196,22 @@
               :full)
   => [1 2 3]
 
+  (ptr-output (json/write {:type "data"
+                           :value [1 2 3]})
+              :full
+              {:preserve-payload true})
+  => {"type" "data" "value" [1 2 3]}
+
   (ptr-output (json/write {:type "error"
                            :value "Errored"})
               :full)
   => (throws)
+
+  (ptr-output (json/write {:type "error"
+                           :value "Errored"})
+              :full
+              {:preserve-errors true})
+  => {"type" "error" "value" "Errored"}
 
   (ptr-output (json/write {:type "error"
                            :value {:a 1}})
@@ -212,7 +227,15 @@
 
 ^{:refer hara.lang.pointer/ptr-invoke :added "4.0"}
 (fact "invokes the pointer"
-  (ptr-invoke nil (fn [_ x] x) 1 {} nil) => 1)
+  (ptr-invoke nil (fn [_ x] x) 1 {} nil) => 1
+
+  (ptr-invoke {:output/preserve-payload true}
+              (fn [_ _] (json/write {:type "data"
+                                     :value [1 2 3]}))
+              "ignored"
+              {}
+              :full)
+  => {"type" "data" "value" [1 2 3]})
 
 (comment
   (./import)

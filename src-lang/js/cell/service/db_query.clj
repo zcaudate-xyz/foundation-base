@@ -56,7 +56,7 @@
   (var [t-ok t-err] (check/check-args-type args targs))
   (when (not t-ok)
     (return [t-ok t-err]))
-  (return [true]))
+  (return [true nil]))
 
 (defn.xt normalize-query
   "normalizes a query spec using the view context"

@@ -2,7 +2,8 @@
   (:use code.test)
   (:require [hara.lang :as l]
             [hara.model.spec-postgres.gen-bind :as gen]
-            [xt.lang.common-notify :as notify]))
+            [xt.lang.common-notify :as notify]
+            [xt.lang.spec-promise :as spec-promise]))
 
 ^{:seedgen/scaffold true}
 (do 
@@ -13,11 +14,11 @@
 
 (l/script- :python
   {:require [[xt.lang.spec-base :as xt]
+          [xt.lang.spec-promise :as spec-promise]
           [xt.lang.common-repl :as repl]
           [xt.db.text.sql-call :as call]
           [xt.protocol.impl.connection-sql :as driver]
-          [js.lib.driver-postgres :as js-postgres]
-          [python.lib.driver-sqlite :as py-sqlite]]
+          [python.lib.driver-postgres :as py-postgres]]
           :runtime :basic})
 
 (fact:global
@@ -66,27 +67,42 @@
 (fact "calls a database function"
 
   (notify/wait-on :python
-    (. (driver/connect (js-postgres/driver)
-                       {:database "test-scratch"})
-       (then
-        (fn [conn]
-          (. (call/call-raw
-              conn
-              (@! (gen/bind-function scratch/addf))
-                                [10 20])
-             (then (repl/>notify)))))))
+    (spec-promise/x:promise-then
+     (driver/connect (lua-postgres/driver)
+                     {:database "test-scratch"})
+     (fn [conn]
+       (spec-promise/x:promise-then
+        (call/call-raw conn
+                       {:input [{:symbol "x" :type "numeric"}
+                                {:symbol "y" :type "numeric"}]
+                        :return "numeric"
+                        :schema "scratch"
+                        :id "addf"
+                        :flags {}}
+                       [10 20])
+        repl/>notify))))
   => "30")
 
 ^{:refer xt.db.text.sql-call/call-api :added "4.0"}
 (fact "results an api style result"
 
   (notify/wait-on :python
-    (. (driver/connect (js-postgres/driver)
-                       {:database "test-scratch"})
-       (then
-        (fn [conn]
-          (. (call/call-api conn
-                            (@! (gen/bind-function scratch/addf))
-                            [10 20])
-             (then (repl/>notify)))))))
+    (spec-promise/x:promise-then
+     (driver/connect (lua-postgres/driver)
+                     {:database "test-scratch"})
+     (fn [conn]
+       (spec-promise/x:promise-then
+        (call/call-api conn
+                       {:input [{:symbol "x" :type "numeric"}
+                                {:symbol "y" :type "numeric"}]
+                        :return "numeric"
+                        :schema "scratch"
+                        :id "addf"
+                        :flags {}}
+                       [10 20])
+        repl/>notify))))
   => "{\"status\": \"ok\", \"data\":\"30\"}")
+
+(comment
+  (s/seedgen-benchadd '[xt.db.text.sql-call] {:lang [:python :lua.nginx] :write true})
+  )

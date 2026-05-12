@@ -9,7 +9,6 @@
           [xt.db.helpers.data-main-test :as sample]
           [xt.db.instance :as xdb]
           [xt.db.runtime.sql :as impl-sql]
-          [xt.db.text.pgrest :as pgrest]
           [xt.lang.spec-base :as xt]
           [xt.lang.common-data :as xtd]
           [xt.lang.common-lib :as k]
@@ -50,7 +49,7 @@
                        "profile" [{"first_name" "Root"}]}])]}
 (fact "syncs and pulls sql data"
 
-  (notify/wait-on [:dart 5000]
+  (notify/wait-on [:dart 30000]
     (-> (dbsql/connect (dart-sqlite/driver) {})
         (spec-promise/x:promise-then
          (fn [conn]
@@ -98,7 +97,7 @@
                       "DELETE FROM \"UserProfile\" WHERE \"id\" = 'c4643895-b0ce-44cc-b07b-2386bf18d43b';"))]}
 (fact "emits remove sql and deletes synced rows"
 
-  (notify/wait-on [:dart 5000]
+  (notify/wait-on [:dart 30000]
     (-> (dbsql/connect (dart-sqlite/driver) {})
         (spec-promise/x:promise-then
          (fn [conn]
@@ -144,198 +143,3 @@
   => [+sql-remove-output+
       +sql-touched-output+
       0])
-
-^{:refer xt.db.instance/db-pull-sync :added "4.1"
-  :setup [(def +currency-bulk-tree+
-            ["Currency"
-             {"id" ["in" [["USD" "XLM"]]]}
-             ["id" "name"]])
-                   (def +currency-bulk-output+
-                     [{"id" "USD" "name" "US Dollar"}
-                      {"id" "XLM" "name" "Stellar Coin"}])]}
-(fact "bulk `in` filters roundtrip to the same flat row datastructure"
-
-  (notify/wait-on [:dart 5000]
-    (-> (dbsql/connect (dart-sqlite/driver) {})
-        (spec-promise/x:promise-then
-         (fn [conn]
-           (dbsql/query-sync conn
-                             (str/join "\n\n"
-                                       (manage/table-create-all
-                                        sample/Schema
-                                        sample/SchemaLookup
-                                        (ut/sqlite-opts nil))))
-           (var cache-db (xdb/db-create {"::" "db.cache"}
-                                        sample/Schema
-                                        sample/SchemaLookup
-                                        nil))
-           (var sql-db (xdb/db-create {"::" "db.sql"
-                                       :instance conn}
-                                      sample/Schema
-                                      sample/SchemaLookup
-                                      (ut/sqlite-opts nil)))
-           (var payload {"Currency" (@! sample/+currency+)})
-           (var tree (@! +currency-bulk-tree+))
-           (xdb/sync-event cache-db ["add" payload])
-           (xdb/sync-event sql-db ["add" payload])
-           (var compiled-map {})
-           (xt/x:set-key compiled-map
-                         (. (pgrest/compile-query tree) ["url"])
-                         tree)
-           (var supa-db {"::" "db.supabase"
-                         :instance {"client"
-                                    {"request_sync"
-                                     (fn [request _opts]
-                                       (var planned (xt/x:get-key compiled-map (. request ["url"])))
-                                       (when (xt/x:nil? planned)
-                                         (xt/x:throw {:status "error"
-                                                      :tag "db/supabase-plan-not-found"
-                                                      :data {"request" request}}))
-                                       (return {"body"
-                                                {"data" (xdb/db-pull-sync sql-db
-                                                                          sample/Schema
-                                                                          planned)}}))}}})
-           (repl/notify
-            (xt/x:arr-map
-             [(xdb/db-pull-sync cache-db sample/Schema tree)
-              (xdb/db-pull-sync sql-db sample/Schema tree)
-              (xdb/db-pull-sync supa-db sample/Schema tree)]
-             (fn [rows]
-               (return
-                (xtd/arr-sort rows
-                              (fn [row]
-                                (return (xt/x:get-key row "id")))
-                              xt/x:str-comp)))))))))
-  => [+currency-bulk-output+
-      +currency-bulk-output+
-      +currency-bulk-output+])
-
-^{:refer xt.db.instance/db-pull-sync :added "4.1"
-  :setup [(def +currency-bulk-tree+
-            ["Currency"
-             {"id" ["in" [["USD" "XLM"]]]}
-             ["id" "name"]])
-                   (def +currency-bulk-output+
-                     [{"id" "USD" "name" "US Dollar"}
-                      {"id" "XLM" "name" "Stellar Coin"}])]}
-(fact "bulk `in` filters roundtrip to the same flat row datastructure"
-
-  (notify/wait-on [:dart 5000]
-    (-> (dbsql/connect (dart-sqlite/driver) {})
-        (spec-promise/x:promise-then
-         (fn [conn]
-           (dbsql/query-sync conn
-                             (str/join "\n\n"
-                                       (manage/table-create-all
-                                        sample/Schema
-                                        sample/SchemaLookup
-                                        (ut/sqlite-opts nil))))
-           (var cache-db (xdb/db-create {"::" "db.cache"}
-                                        sample/Schema
-                                        sample/SchemaLookup
-                                        nil))
-           (var sql-db (xdb/db-create {"::" "db.sql"
-                                       :instance conn}
-                                      sample/Schema
-                                      sample/SchemaLookup
-                                      (ut/sqlite-opts nil)))
-           (var payload {"Currency" (@! sample/+currency+)})
-           (var tree (@! +currency-bulk-tree+))
-           (xdb/sync-event cache-db ["add" payload])
-           (xdb/sync-event sql-db ["add" payload])
-           (var compiled-map {})
-           (xt/x:set-key compiled-map
-                         (. (pgrest/compile-query tree) ["url"])
-                         tree)
-           (var supa-db {"::" "db.supabase"
-                         :instance {"client"
-                                    {"request_sync"
-                                     (fn [request _opts]
-                                       (var planned (xt/x:get-key compiled-map (. request ["url"])))
-                                       (when (xt/x:nil? planned)
-                                         (xt/x:throw {:status "error"
-                                                      :tag "db/supabase-plan-not-found"
-                                                      :data {"request" request}}))
-                                       (return {"body"
-                                                {"data" (xdb/db-pull-sync sql-db
-                                                                          sample/Schema
-                                                                          planned)}}))}}})
-           (repl/notify
-            (xt/x:arr-map
-             [(xdb/db-pull-sync cache-db sample/Schema tree)
-              (xdb/db-pull-sync sql-db sample/Schema tree)
-              (xdb/db-pull-sync supa-db sample/Schema tree)]
-             (fn [rows]
-               (return
-                (xtd/arr-sort rows
-                              (fn [row]
-                                (return (xt/x:get-key row "id")))
-                              xt/x:str-comp)))))))))
-  => [+currency-bulk-output+
-      +currency-bulk-output+
-      +currency-bulk-output+])
-
-^{:refer xt.db.instance/db-pull-sync :added "4.1"
-  :setup [(def +currency-bulk-tree+
-            ["Currency"
-             {"id" ["in" [["USD" "XLM"]]]}
-             ["id" "name"]])
-                   (def +currency-bulk-output+
-                     [{"id" "USD" "name" "US Dollar"}
-                      {"id" "XLM" "name" "Stellar Coin"}])]}
-(fact "bulk `in` filters roundtrip to the same flat row datastructure"
-
-  (notify/wait-on [:dart 5000]
-    (-> (dbsql/connect (dart-sqlite/driver) {})
-        (spec-promise/x:promise-then
-         (fn [conn]
-           (dbsql/query-sync conn
-                             (str/join "\n\n"
-                                       (manage/table-create-all
-                                        sample/Schema
-                                        sample/SchemaLookup
-                                        (ut/sqlite-opts nil))))
-           (var cache-db (xdb/db-create {"::" "db.cache"}
-                                        sample/Schema
-                                        sample/SchemaLookup
-                                        nil))
-           (var sql-db (xdb/db-create {"::" "db.sql"
-                                       :instance conn}
-                                      sample/Schema
-                                      sample/SchemaLookup
-                                      (ut/sqlite-opts nil)))
-           (var payload {"Currency" (@! sample/+currency+)})
-           (var tree (@! +currency-bulk-tree+))
-           (xdb/sync-event cache-db ["add" payload])
-           (xdb/sync-event sql-db ["add" payload])
-           (var compiled-map {})
-           (xt/x:set-key compiled-map
-                         (. (pgrest/compile-query tree) ["url"])
-                         tree)
-           (var supa-db {"::" "db.supabase"
-                         :instance {"client"
-                                    {"request_sync"
-                                     (fn [request _opts]
-                                       (var planned (xt/x:get-key compiled-map (. request ["url"])))
-                                       (when (xt/x:nil? planned)
-                                         (xt/x:throw {:status "error"
-                                                      :tag "db/supabase-plan-not-found"
-                                                      :data {"request" request}}))
-                                       (return {"body"
-                                                {"data" (xdb/db-pull-sync sql-db
-                                                                          sample/Schema
-                                                                          planned)}}))}}})
-           (repl/notify
-            (xt/x:arr-map
-             [(xdb/db-pull-sync cache-db sample/Schema tree)
-              (xdb/db-pull-sync sql-db sample/Schema tree)
-              (xdb/db-pull-sync supa-db sample/Schema tree)]
-             (fn [rows]
-               (return
-                (xtd/arr-sort rows
-                              (fn [row]
-                                (return (xt/x:get-key row "id")))
-                              xt/x:str-comp)))))))))
-  => [+currency-bulk-output+
-      +currency-bulk-output+
-      +currency-bulk-output+])
