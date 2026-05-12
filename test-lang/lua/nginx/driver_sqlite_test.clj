@@ -103,9 +103,19 @@
 
   (notify/wait-on [:lua.nginx 2000]
     (spec-promise/x:promise-then
-     (driver/connect (lua-sqlite/driver) {:memory true})
+     (driver/connect (lua-sqlite/driver) {})
      (fn [conn]
        (repl/notify
+        [(driver/connection? conn)
+         (driver/query conn "select 5;")
+         (driver/query-sync conn "select 6;")]))))
+  => [true 5 6]
+
+  (notify/wait-on [:lua.nginx 2000]
+    (spec-promise/x:promise-then
+     (driver/connect (lua-sqlite/driver) {:memory true})
+     (fn [conn]
+        (repl/notify
         [(driver/connection? conn)
          (driver/query conn "select 5;")
          (driver/query-sync conn "select 6;")]))))

@@ -51,7 +51,7 @@
 (fact "syncs and pulls sql data"
 
   (notify/wait-on [:lua.nginx 5000]
-    (-> (dbsql/connect (lua-sqlite/driver) {})
+    (-> (dbsql/connect (lua-sqlite/driver) {:memory true})
         (spec-promise/x:promise-then
          (fn [conn]
            (dbsql/query-sync conn
@@ -99,7 +99,7 @@
 (fact "emits remove sql and deletes synced rows"
 
   (notify/wait-on [:lua.nginx 5000]
-    (-> (dbsql/connect (lua-sqlite/driver) {})
+    (-> (dbsql/connect (lua-sqlite/driver) {:memory true})
         (spec-promise/x:promise-then
          (fn [conn]
            (dbsql/query-sync conn
@@ -152,7 +152,7 @@
 (fact "prepared view queries roundtrip to the same nested datastructure"
 
   (notify/wait-on [:lua.nginx 5000]
-    (-> (dbsql/connect (lua-sqlite/driver) {})
+    (-> (dbsql/connect (lua-sqlite/driver) {:memory true})
         (spec-promise/x:promise-then
          (fn [conn]
            (dbsql/query-sync conn
@@ -241,7 +241,7 @@
 (fact "direct flat trees roundtrip to the same datastructure"
 
   (notify/wait-on [:lua.nginx 5000]
-    (-> (dbsql/connect (lua-sqlite/driver) {})
+    (-> (dbsql/connect (lua-sqlite/driver) {:memory true})
         (spec-promise/x:promise-then
          (fn [conn]
            (dbsql/query-sync conn
@@ -299,7 +299,7 @@
 (fact "bulk `in` filters roundtrip to the same flat row datastructure"
 
   (notify/wait-on [:lua.nginx 5000]
-    (-> (dbsql/connect (lua-sqlite/driver) {})
+    (-> (dbsql/connect (lua-sqlite/driver) {:memory true})
         (spec-promise/x:promise-then
          (fn [conn]
            (dbsql/query-sync conn

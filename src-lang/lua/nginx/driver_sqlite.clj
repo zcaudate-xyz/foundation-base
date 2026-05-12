@@ -71,7 +71,17 @@
                 (return 0))))
   (if (< 2 (len out))
     (return out)
-    (return (xtd/first out))))
+   (return (xtd/first out))))
+
+(defn.lua normalize-connect-opts
+  "defaults to an in-memory database when no sqlite target is provided"
+  {:added "4.1"}
+  [m]
+  (var out (xtd/obj-assign {} m))
+  (when (and (not (xt/x:has-key? out "memory"))
+             (not (xt/x:has-key? out "filename")))
+    (xt/x:set-key out "memory" true))
+  (return out))
 
 (defn.lua connect-constructor
   "create db connection"
@@ -113,6 +123,7 @@
   []
   (return
    (sqlrt/driver-create
-    {"connect" (fn [m]
-                 (return (-/wrap-connection
-                          (-/connect-constructor m))))})))
+     {"connect" (fn [m]
+                  (return (-/wrap-connection
+                           (-/connect-constructor
+                            (-/normalize-connect-opts m)))))})))

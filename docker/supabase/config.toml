@@ -1,0 +1,21 @@
+project_id = "foundation-base-local"
+
+[api]
+enabled = true
+port = 55121
+schemas = ["public", "storage", "graphql_public", "scratch"]
+extra_search_path = ["public", "extensions", "scratch"]
+max_rows = 1000
+
+[db]
+port = 55122
+shadow_port = 55120
+major_version = 15
+
+[studio]
+enabled = true
+port = 55123
+
+[inbucket]
+enabled = true
+port = 55124

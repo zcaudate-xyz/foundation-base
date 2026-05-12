@@ -133,11 +133,12 @@
   "sets up a code context and waits for oneshot notification"
   {:added "4.0"}
   [lang & code]
-  (let [[lang timeout] (cond (vector? lang)
+  (let [default-timeout (if (= lang :dart) 10000 2000)
+        [lang timeout] (cond (vector? lang)
                              lang
 
                              :ele
-                             [lang 2000])]
+                             [lang default-timeout])]
     `(wait-on-fn ~lang (quote ~code)
                  ~timeout
                  ~(meta &form))))

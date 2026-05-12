@@ -321,68 +321,6 @@
             then*
             else*))))
 
-(defn- dart-function-ref
-  [f]
-  (if (symbol? f)
-    (dart-cast-function f)
-    f))
-
-(defn- dart-apply-form
-  [f args]
-  (list 'Function.apply (dart-function-ref f) (vec args)))
-
-(defn- rewrite-promise-callback
-  [thunk grammar]
-  (if (and (collection/form? thunk)
-           (= 'fn (first thunk)))
-    (rewrite-fn thunk grammar)
-    (dart-rewrite-expression thunk grammar)))
-
-(defn- rewrite-promise-then-expression
-  [form grammar]
-  (let [[_ promise thunk] form
-        promise* (dart-rewrite-expression promise grammar)
-        thunk*   (rewrite-promise-callback thunk grammar)
-        call*    (dart-apply-form thunk* ['value])]
-    (with-form-meta
-      form
-      (list :%
-            (list :- "(() async { var value = await ")
-            promise*
-            (list :- "; return await ")
-            call*
-            (list :- "; })()")))))
-
-(defn- rewrite-promise-catch-expression
-  [form grammar]
-  (let [[_ promise thunk] form
-        promise* (dart-rewrite-expression promise grammar)
-        thunk*   (rewrite-promise-callback thunk grammar)
-        call*    (dart-apply-form thunk* ['err])]
-    (with-form-meta
-      form
-      (list :%
-            (list :- "(() async { try { return await ")
-            promise*
-            (list :- "; } catch (err) { return await ")
-            call*
-            (list :- "; } })()")))))
-
-(defn- rewrite-promise-finally-expression
-  [form grammar]
-  (let [[_ promise thunk] form
-        promise* (dart-rewrite-expression promise grammar)
-        thunk*   (rewrite-promise-callback thunk grammar)
-        call*    (dart-apply-form thunk* [])]
-    (with-form-meta
-      form
-      (list :%
-            (list :- "(() async { try { return await ")
-            promise*
-            (list :- "; } finally { await ")
-            call*
-            (list :- "; } })()")))))
-
 (defn- rewrite-invoke-expression
   [form grammar]
   (let [head        (first form)
@@ -434,15 +372,6 @@
 
     or
     (rewrite-or-expression form grammar)
-
-    x:promise-then
-    (rewrite-promise-then-expression form grammar)
-
-    x:promise-catch
-    (rewrite-promise-catch-expression form grammar)
-
-    x:promise-finally
-    (rewrite-promise-finally-expression form grammar)
 
     :?
     (rewrite-ternary-expression form grammar)

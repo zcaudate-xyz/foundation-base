@@ -1,12 +1,16 @@
 (ns xt.event.node-main-test
   (:use code.test)
-  (:require [hara.lang :as l]))
+  (:require [hara.lang :as l]
+            [xt.lang.common-notify :as notify]))
 
 ^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
+             [xt.db.node.instance-model :as model]
+             [xt.db.node.test-fixtures :as fixtures]
              [xt.event.node :as node]
              [xt.event.node-main :as main]
              [xt.event.node-router :as router]
@@ -15,7 +19,10 @@
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
+             [xt.db.node.instance-model :as model]
+             [xt.db.node.test-fixtures :as fixtures]
              [xt.event.node :as node]
              [xt.event.node-main :as main]
              [xt.event.node-router :as router]
@@ -24,7 +31,10 @@
 (l/script- :python
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
+             [xt.db.node.instance-model :as model]
+             [xt.db.node.test-fixtures :as fixtures]
              [xt.event.node :as node]
              [xt.event.node-main :as main]
              [xt.event.node-router :as router]
@@ -672,6 +682,24 @@
     (xt/x:is-function? main/publish))
   => true)
 
+^{:refer xt.event.node-main/publish :added "4.1"}
+(fact "publish can chain a second async callback after local trigger handling"
+
+  (notify/wait-on :js
+    (var n (main/node-create {"id" "node-a"}))
+    (model/install n fixtures/InstallOpts)
+    (promise/x:promise-catch
+     (promise/x:promise-then
+      (main/publish n "room/a" "xt.db/cache.changed" {"tables" {"Order" true}}
+                    {"origin_node" "node-a"})
+      (fn [_]
+        (repl/notify {"ok" true
+                      "space" "room/a"})))
+     (fn [err]
+       (repl/notify {"error" err}))))
+  => {"ok" true
+      "space" "room/a"})
+
 ^{:refer xt.event.node-main/receive-publish :added "4.1"}
 (fact "receive-publish invokes matching triggers"
 
@@ -704,5 +732,6 @@
 
 (comment
   (s/snapto '[xt.event.node-main])
+  (s/seedgen-benchadd '[xt.event.node-main] {:lang :dart :write true})
   (s/seedgen-langremove '[xt.event.node-main] {:lang [:lua :python] :write true})
   (s/seedgen-langadd '[xt.event.node-main] {:lang [:lua :python] :write true}))

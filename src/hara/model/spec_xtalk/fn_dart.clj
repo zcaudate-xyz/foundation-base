@@ -599,34 +599,32 @@
 (defn dart-tf-x-promise-then
   [[_ promise thunk]]
   (let [call (dart-call thunk 'value)]
-    (template/$
-     (. (Future.sync (fn []
-                       (return ~promise)))
-        (then (fn [value]
-                (return (Future.sync (fn []
-                                       (return ~call))))))))))
+    (list :%
+          (list :- "((Future.sync(() => ")
+          promise
+          (list :- ")) as Future<dynamic>).then((value) async { return await ")
+          call
+          (list :- "; })"))))
 
 (defn dart-tf-x-promise-catch
   [[_ promise thunk]]
   (let [call (dart-call thunk 'err)]
-    (template/$
-     (. (. (Future.sync (fn []
-                          (return ~promise)))
-             (then (fn [value]
-                     (var out value)
-                     (return out))))
-         (catchError (fn [err]
-                       (return (Future.sync (fn []
-                                              (return ~call))))))))))
+    (list :%
+          (list :- "(() async { try { return await ((Future.sync(() => ")
+          promise
+          (list :- ")) as Future<dynamic>); } catch (err) { return await Future.sync(() => ")
+          call
+          (list :- "); } })()"))))
 
 (defn dart-tf-x-promise-finally
   [[_ promise thunk]]
   (let [call (dart-call thunk)]
-    (template/$
-     (. (Future.sync (fn []
-                       (return ~promise)))
-        (whenComplete (fn []
-                        (return ~call)))))))
+    (list :%
+          (list :- "((Future.sync(() => ")
+          promise
+          (list :- ")) as Future<dynamic>).whenComplete(() async { await ")
+          call
+          (list :- "; })"))))
 
 (defn dart-tf-x-promise-native?
   [[_ value]]
