@@ -8,6 +8,10 @@
   ;; rather than `-1.2.ceil()`, which Dart parses with unary-minus precedence.
   (list :% (list :- "(") obj (list :- ").") method (list :- "()")))
 
+(defn dart-call
+  [f & args]
+  (list 'Function.apply f (vec args)))
+
 (defn dart-runtime-type-string
   [obj]
   (dart-method0 (list '. obj 'runtimeType) 'toString))
@@ -569,12 +573,13 @@
 
 (defn dart-tf-x-with-delay
   [[_ ms thunk]]
-  (template/$
-   (. (Future.delayed
-       (:- "Duration(milliseconds: " ~ms ")"))
-      (then (fn [_]
-              (return (Future.sync (fn []
-                                     (return (~thunk))))))))))
+  (let [call (dart-call thunk)]
+    (template/$
+     (. (Future.delayed
+         (:- "Duration(milliseconds: " ~ms ")"))
+        (then (fn [_]
+                (return (Future.sync (fn []
+                                       (return ~call))))))))))
 
 (defn dart-tf-x-async-run
   [[_ thunk]]
@@ -593,31 +598,35 @@
 
 (defn dart-tf-x-promise-then
   [[_ promise thunk]]
-  (template/$
-   (. (Future.sync (fn []
-                     (return ~promise)))
-      (then (fn [value]
-              (return (Future.sync (fn []
-                                     (return (~thunk value))))))))))
+  (let [call (dart-call thunk 'value)]
+    (template/$
+     (. (Future.sync (fn []
+                       (return ~promise)))
+        (then (fn [value]
+                (return (Future.sync (fn []
+                                       (return ~call))))))))))
 
 (defn dart-tf-x-promise-catch
   [[_ promise thunk]]
-  (template/$
-   (. (. (Future.sync (fn []
-                        (return ~promise)))
-           (then (fn [value]
-                   (var out value)
-                   (return out))))
-       (catchError (fn [err]
-                     (return (Future.sync (fn []
-                                            (return (~thunk err))))))))))
+  (let [call (dart-call thunk 'err)]
+    (template/$
+     (. (. (Future.sync (fn []
+                          (return ~promise)))
+             (then (fn [value]
+                     (var out value)
+                     (return out))))
+         (catchError (fn [err]
+                       (return (Future.sync (fn []
+                                              (return ~call))))))))))
 
 (defn dart-tf-x-promise-finally
   [[_ promise thunk]]
-  (template/$
-   (. (Future.sync (fn []
-                     (return ~promise)))
-      (whenComplete ~thunk))))
+  (let [call (dart-call thunk)]
+    (template/$
+     (. (Future.sync (fn []
+                       (return ~promise)))
+        (whenComplete (fn []
+                        (return ~call)))))))
 
 (defn dart-tf-x-promise-native?
   [[_ value]]
@@ -642,16 +651,18 @@
 
 (defn dart-tf-x-socket-connect
   [[_ host port opts cb]]
-  (template/$
-   (. (Socket.connect ~host ~port)
-      (then (fn [conn]
-              (return (. (Future.sync (fn []
-                                        (return (~cb nil conn))))
-                         (whenComplete (fn []
-                                         (. conn (destroy))
-                                         (return nil)))))))
-      (catchError (fn [err]
-                    (return (~cb err nil)))))))
+  (let [call-ok  (dart-call cb nil 'conn)
+        call-err (dart-call cb 'err nil)]
+    (template/$
+     (. (Socket.connect ~host ~port)
+        (then (fn [conn]
+                (return (. (Future.sync (fn []
+                                          (return ~call-ok)))
+                           (whenComplete (fn []
+                                           (. conn (destroy))
+                                           (return nil)))))))
+        (catchError (fn [err]
+                      (return ~call-err)))))))
 
 (defn dart-tf-x-socket-send
   [[_ conn s]]
@@ -703,21 +714,25 @@
 
 (defn dart-tf-x-file-slurp
   [[_ filename cb]]
-  (template/$
-   (. (. (File ~filename) (readAsString))
-      (then (fn [out]
-              (return (~cb nil out))))
-      (catchError (fn [err]
-                    (return (~cb err nil)))))))
+  (let [call-ok  (dart-call cb nil 'out)
+        call-err (dart-call cb 'err nil)]
+    (template/$
+     (. (. (File ~filename) (readAsString))
+        (then (fn [out]
+                (return ~call-ok)))
+        (catchError (fn [err]
+                      (return ~call-err)))))))
 
 (defn dart-tf-x-file-spit
   [[_ filename s cb]]
-  (template/$
-   (. (. (File ~filename) (writeAsString ~s))
-      (then (fn [_]
-              (return (~cb nil ~filename))))
-      (catchError (fn [err]
-                    (return (~cb err nil)))))))
+  (let [call-ok  (dart-call cb nil filename)
+        call-err (dart-call cb 'err nil)]
+    (template/$
+     (. (. (File ~filename) (writeAsString ~s))
+        (then (fn [_]
+                (return ~call-ok)))
+        (catchError (fn [err]
+                      (return ~call-err)))))))
 
 (def +dart-file+
   {:x-file-resolve   {:macro #'dart-tf-x-file-resolve    :emit :macro}

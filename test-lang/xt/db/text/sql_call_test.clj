@@ -80,17 +80,19 @@
      (driver/connect (js-postgres/driver)
                      {:database "test-scratch"})
      (fn [conn]
-       (spec-promise/x:promise-then
-        (call/call-raw conn
-                       {:input [{:symbol "x" :type "numeric"}
-                                {:symbol "y" :type "numeric"}]
-                        :return "numeric"
-                        :schema "scratch"
-                        :id "addf"
-                        :flags {}}
-                       [10 20])
-        (repl/>notify)))))
-  => "30")
+       (return
+        (spec-promise/x:promise-then
+         (call/call-raw conn
+                        {:input [{:symbol "x" :type "numeric"}
+                                 {:symbol "y" :type "numeric"}]
+                         :return "numeric"
+                         :schema "scratch"
+                         :id "addf"
+                         :flags {}}
+                        [10 20])
+         (fn [x]
+           (repl/notify x)))))))
+  => 30)
 
 ^{:refer xt.db.text.sql-call/call-api
   :added "4.0"}
@@ -104,17 +106,19 @@
      (driver/connect (js-postgres/driver)
                      {:database "test-scratch"})
      (fn [conn]
-       (spec-promise/x:promise-then
-        (call/call-api conn
-                       {:input [{:symbol "x" :type "numeric"}
-                                {:symbol "y" :type "numeric"}]
-                        :return "numeric"
-                        :schema "scratch"
-                        :id "addf"
-                        :flags {}}
-                       [10 20])
-        (repl/>notify)))))
-  => "{\"status\": \"ok\", \"data\":\"30\"}")
+        (return
+         (spec-promise/x:promise-then
+          (call/call-api conn
+                         {:input [{:symbol "x" :type "numeric"}
+                                  {:symbol "y" :type "numeric"}]
+                          :return "numeric"
+                          :schema "scratch"
+                          :id "addf"
+                          :flags {}}
+                         [10 20])
+          (fn [x]
+            (repl/notify (xt/x:json-decode x))))))))
+  => {"status" "ok", "data" 30})
 
 (comment
   (s/seedgen-benchadd '[xt.db.text.sql-call] {:lang [:python :lua.nginx] :write true})

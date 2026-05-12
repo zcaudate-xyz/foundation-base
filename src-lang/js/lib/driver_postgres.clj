@@ -34,12 +34,25 @@
 
 (def$.js Client Postgres.Client)
 
+(defn.js normalise-scalar-output
+  [value]
+  (cond (or (xt/x:nil? value)
+            (xt/x:is-string? value)
+            (xt/x:is-boolean? value)
+            (xt/x:is-array? value)
+            (xt/x:is-object? value))
+        (return value)
+
+        :else
+        (return (xt/x:to-string value))))
+
 (defn.js normalise-query-output
   [res]
   (var #{rows} res)
   (if (and (== 1 rows.length)
            (== 1 (xt/x:len (xtd/obj-keys (xtd/first rows)))))
-    (return (xtd/obj-first-val (xtd/first rows)))
+    (return (-/normalise-scalar-output
+             (xtd/obj-first-val (xtd/first rows))))
     (return rows)))
 
 (defn.js wrap-connection

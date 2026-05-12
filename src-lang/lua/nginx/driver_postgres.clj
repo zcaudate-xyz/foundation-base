@@ -64,6 +64,37 @@
 
 (def$.lua KEEPALIVE 120000)
 
+(defn.lua normalise-scalar-output
+  [value]
+  (cond (or (xt/x:nil? value)
+            (xt/x:is-string? value)
+            (k/is-boolean? value)
+            (xt/x:is-object? value))
+        (return value)
+
+        :else
+        (return (xt/x:to-string value))))
+
+(defn.lua normalise-query-output
+  [ret]
+  (cond (k/is-array? ret)
+        (do
+          (when (== 0 (xt/x:len ret))
+            (return []))
+          (local row (xtd/first ret))
+          (if (and (== 1 (xt/x:len ret))
+                   (xt/x:is-object? row)
+                   (== 1 (xt/x:len (xtd/obj-keys row))))
+            (return (-/normalise-scalar-output
+                     (xtd/obj-first-val row)))
+            (return ret)))
+
+        (k/is-boolean? ret)
+        (return [])
+
+        :else
+        (return (-/normalise-scalar-output ret))))
+
 (defn.lua db-error
   "gets the db error"
   {:added "4.0"}
@@ -99,11 +130,7 @@
   
   (when (not= 1 err)
     (return false err))
-  (:= ret (:? (k/is-array? ret) (xtd/first ret) ret))
-  (local val (:? (k/is-boolean? ret)
-                 ret
-                 (xtd/obj-first-val (or ret {}))))
-  (return val))
+  (return (-/normalise-query-output ret)))
 
 (defn.lua connect-constructor
   "connects to postgres"

@@ -37,6 +37,18 @@
     (catch e
       (return (py/__import__ "psycopg2")))))
 
+(defn.py normalise-scalar-output
+  [value]
+  (cond (or (xt/x:nil? value)
+            (xt/x:is-string? value)
+            (xt/x:is-boolean? value)
+            (xt/x:is-array? value)
+            (xt/x:is-object? value))
+        (return value)
+
+        :else
+        (return (xt/x:to-string value))))
+
 (defn.py normalise-query-output
   [rows]
   (cond (== 0 (xt/x:len rows))
@@ -44,7 +56,8 @@
 
         (and (== 1 (xt/x:len rows))
              (== 1 (xt/x:len (. rows [0]))))
-        (return (. rows [0] [0]))
+        (return (-/normalise-scalar-output
+                 (. rows [0] [0])))
 
         :else
         (return rows)))

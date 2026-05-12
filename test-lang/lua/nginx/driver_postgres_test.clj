@@ -33,13 +33,26 @@
 ^{:refer lua.nginx.driver-postgres/db-error :added "4.0"}
 (fact "gets the db error")
 
+^{:refer lua.nginx.driver-postgres/normalise-query-output :added "4.1"}
+(fact "normalises postgres query output"
+
+  (!.lua
+    [(lua-pg/normalise-query-output [])
+     (lua-pg/normalise-query-output [{"value" 1}])
+     (lua-pg/normalise-query-output [{"value" 1}
+                                     {"value" 2}])
+     (lua-pg/normalise-query-output true)])
+  => [[] "1" [{"value" 1}
+              {"value" 2}]
+      []])
+
 ^{:refer lua.nginx.driver-postgres/raw-query :added "4.0"}
 (fact "runs live queries against the scratch sample app"
 
   (!.lua
     (local conn (lua-pg/connect-constructor {:database "test-scratch"}))
     (lua-pg/raw-query conn "SELECT \"scratch\".addf(1,2);"))
-  => (any 3 "3"))
+  => "3")
 
 ^{:refer lua.nginx.driver-postgres/connect-constructor :added "4.0"}
 (fact "connects to postgres and can call scratch functions"
@@ -58,18 +71,16 @@
     (local conn (lua-pg/wrap-connection raw))
     [(sql/connection? conn)
      (sql/query conn "SELECT \"scratch\".addf(3,4);")])
-  => (any [true 7]
-          [true "7"]))
+   => [true "7"])
 
 ^{:refer lua.nginx.driver-postgres/driver :added "4.1"}
 (fact "connects through the driver wrapper to the scratch sample app"
 
   (notify/wait-on [:lua.nginx 2000]
     (spec-promise/x:promise-then
-     (sql/connect (lua-pg/driver) {:database "test-scratch"})
-     (fn [conn]
-       (repl/notify
-        [(sql/connection? conn)
-         (sql/query conn "SELECT \"scratch\".addf(10,20);")]))))
-  => (any [true 30]
-          [true "30"]))
+      (sql/connect (lua-pg/driver) {:database "test-scratch"})
+      (fn [conn]
+        (repl/notify
+         [(sql/connection? conn)
+          (sql/query conn "SELECT \"scratch\".addf(10,20);")]))))
+  => [true "30"])

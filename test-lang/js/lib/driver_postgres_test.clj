@@ -37,8 +37,8 @@
      (js-postgres/normalise-query-output {"rows" [{"value" 1}]})
      (js-postgres/normalise-query-output {"rows" [{"value" 1}
                                                    {"value" 2}]})])
-  => [[] 1 [{"value" 1}
-            {"value" 2}]])
+  => [[] "1" [{"value" 1}
+              {"value" 2}]])
 
 ^{:refer js.lib.driver-postgres/wrap-connection :added "4.1"}
 (fact "wraps a live postgres connection"

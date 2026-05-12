@@ -73,7 +73,7 @@
     [(py-pg/normalise-query-output [])
      (py-pg/normalise-query-output [[1]])
      (py-pg/normalise-query-output [[1 "a"] [2 "b"]])])
-  => [[] 1 [[1 "a"] [2 "b"]]])
+  => [[] "1" [[1 "a"] [2 "b"]]])
 
 ^{:refer python.lib.driver-postgres/raw-query :added "4.1"}
 (fact "runs raw postgres queries against the scratch sample app"
@@ -81,7 +81,7 @@
   (!.py
     (var conn (py-pg/connect-constructor (@! +scratch-env+)))
     (py-pg/raw-query conn "SELECT (\"scratch\".addf(1,2))::int;"))
-  => (any 3 "3"))
+  => "3")
 
 ^{:refer python.lib.driver-postgres/wrap-connection :added "4.1"}
 (fact "wraps real postgres scratch connections with promise query and sync query-sync support"
@@ -93,8 +93,7 @@
      (spec-promise/x:promise-native? (sql/query conn "SELECT \"scratch\".ping();"))
      (sql/query-sync conn "SELECT (\"scratch\".addf(1,2))::int;")
      (sql/disconnect conn)])
-  => (any [true true 3 true]
-          [true true "3" true]))
+   => [true true "3" true])
 
 ^{:refer python.lib.driver-postgres/connect-constructor :added "4.1"}
 (fact "constructs a real scratch postgres connection"
@@ -121,5 +120,4 @@
             out
             (sql/query-sync conn "SELECT (\"scratch\".addf(10,20))::int;")
             (sql/disconnect conn)]))))))
-  => (any [true "pong" 30 true]
-          [true "pong" "30" true]))
+  => [true "pong" "30" true])
