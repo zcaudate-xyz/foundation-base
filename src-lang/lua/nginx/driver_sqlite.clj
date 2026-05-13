@@ -58,7 +58,7 @@
   {:added "4.0"}
   [db query]
   (when (not (-/query-returns-rows? query))
-    (. db (exec query))
+    (-/raw-exec db query)
     (return []))
   (var out [])
   (. db (exec query

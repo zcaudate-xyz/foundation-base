@@ -1,5 +1,5 @@
 (ns xt.protocol.impl.connection-sql
-  (:require [hara.lang :as l]))
+  (:require [hara.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
@@ -107,42 +107,45 @@
   (xt/proto:set driver protocol)
   (return driver))
 
-(defn.xt connect
+(defspec.xt connect [:fn [:xt/any :xt/any] :xt/promise])
+
+(defmacro.xt ^{:standalone true}
+  connect
   "connects through the runtime sql driver protocol"
   {:added "4.1"}
   [driver opts]
-  (:= driver (-/require-driver driver))
-  (var connect-fn (xt/proto:method driver "connect"))
-  (when (xt/x:nil? connect-fn)
-    (xt/x:err "SQL runtime driver missing connect method"))
-  (return (connect-fn driver opts)))
+  (list (list 'xt.lang.spec-base/proto:method driver "connect")
+        driver
+        opts))
 
-(defn.xt disconnect
+(defspec.xt disconnect [:fn [:xt/any] :xt/any])
+
+(defmacro.xt ^{:standalone true}
+  disconnect
   "disconnects through the runtime sql connection protocol"
   {:added "4.1"}
   [conn]
-  (:= conn (-/require-connection conn))
-  (var disconnect-fn (xt/proto:method conn "disconnect"))
-  (when (xt/x:nil? disconnect-fn)
-    (xt/x:err "SQL runtime connection missing disconnect method"))
-  (return (disconnect-fn conn)))
+  (list (list 'xt.lang.spec-base/proto:method conn "disconnect")
+        conn))
 
-(defn.xt query
+(defspec.xt query [:fn [:xt/any :xt/any] :xt/any])
+
+(defmacro.xt ^{:standalone true}
+  query
   "queries through the runtime sql connection protocol"
   {:added "4.1"}
   [conn input]
-  (:= conn (-/require-connection conn))
-  (var query-fn (xt/proto:method conn "query"))
-  (when (xt/x:nil? query-fn)
-    (xt/x:err "SQL runtime connection missing query method"))
-  (return (query-fn conn input)))
+  (list (list 'xt.lang.spec-base/proto:method conn "query")
+        conn
+        input))
 
-(defn.xt query-sync
+(defspec.xt query-sync [:fn [:xt/any :xt/any] :xt/any])
+
+(defmacro.xt ^{:standalone true}
+  query-sync
   "runs sync queries through the runtime sql connection protocol"
   {:added "4.1"}
   [conn input]
-  (:= conn (-/require-connection conn))
-  (var query-sync-fn (xt/proto:method conn "query_sync"))
-  (when (xt/x:nil? query-sync-fn)
-    (xt/x:err "SQL runtime connection missing query_sync method"))
-  (return (query-sync-fn conn input)))
+  (list (list 'xt.lang.spec-base/proto:method conn "query_sync")
+        conn
+        input))

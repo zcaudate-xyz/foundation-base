@@ -1,5 +1,5 @@
 (ns xt.db.text.sql-util
-  (:require [hara.lang :as l]))
+  (:require [hara.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
@@ -491,32 +491,73 @@
     (return (== 1 v)))
   (return v))
 
-(defn.xt sqlite-opts
+(defspec.xt sqlite-opts [:fn [:xt/any] :xt/obj])
+
+(defmacro.xt ^{:standalone true}
+  sqlite-opts
   "constructs sqlite options"
   {:added "4.0"}
   [lookup]
-  (return {:types -/SQLITE
-           :values {:cast false
-                    :replace -/SQLITE_FN}
-           :strict false
-           :querystr-fn -/encode-query-string
-           :wrapper-fn (fn [s indent]
-                         (return (:? (< indent 2) s (xt/x:cat "(\n" (xts/pad-lines s 2 " ") ")"))))
-           :operators        {:ilike "LIKE"}
-           :coerce           {:boolean -/sqlite-to-boolean
-                              :jsonb   xt/x:json-decode
-                              :map     xt/x:json-decode
-                              :array   xt/x:json-decode}
-           :column-fn        -/default-quote-fn
-           :table-fn         -/default-quote-fn
-           :return-format-fn -/sqlite-return-format-fn
-           :return-count-fn  (fn []
-                               (return (xt/x:cat "json_array(json_object('count',count" "(*)))")))
+  {:types 'xt.db.text.sql-util/SQLITE
+   :values {:cast false
+            :replace 'xt.db.text.sql-util/SQLITE_FN}
+   :strict false
+   :querystr-fn 'xt.db.text.sql-util/encode-query-string
+   :wrapper-fn '(fn [s indent]
+                  (return (:? (< indent 2)
+                              s
+                              (xt.lang.spec-base/x:cat
+                               "(\n"
+                               (xt.lang.common-string/pad-lines s 2 " ")
+                               ")"))))
+   :operators {:ilike "LIKE"}
+   :coerce {:boolean '(fn [v]
+                        (when (xt.lang.spec-base/x:is-number? v)
+                          (return (== 1 v)))
+                        (return v))
+            :jsonb 'xt.lang.spec-base/x:json-decode
+            :map 'xt.lang.spec-base/x:json-decode
+            :array 'xt.lang.spec-base/x:json-decode}
+   :column-fn 'xt.db.text.sql-util/default-quote-fn
+   :table-fn 'xt.db.text.sql-util/default-quote-fn
+   :return-format-fn '(fn [input nest-fn column-fn opts]
+                        (cond (xt.lang.spec-base/x:is-object? input)
+                              (return (xt.lang.spec-base/x:cat
+                                       "'"
+                                       (xt.lang.spec-base/x:get-key input "as")
+                                       "', "
+                                       (xt.lang.spec-base/x:get-key input "expr")))
 
-           :return-join-fn   (fn [arr]
-                               (return (xt/x:cat "json_group_array(json_object(" (xt/x:str-join ", " arr) "))")))
-           :return-link-fn   (fn [s link-name]
-                               (return (xt/x:cat "'" link-name "', " s)))}))
+                              (xt.lang.spec-base/x:is-array? input)
+                              (return (nest-fn input))
+
+                              (xt.lang.spec-base/x:is-string? input)
+                              (return (xt.lang.spec-base/x:cat
+                                       "'"
+                                       input
+                                       "', "
+                                       (column-fn input)))
+
+                              :else
+                              (xt.lang.spec-base/x:err
+                               (xt.lang.spec-base/x:cat
+                                "Invalid input - "
+                                (xt.lang.spec-base/x:to-string input)))))
+   :return-count-fn '(fn []
+                       (return (xt.lang.spec-base/x:cat
+                                "json_array(json_object('count',count"
+                                "(*)))")))
+   :return-join-fn '(fn [arr]
+                      (return (xt.lang.spec-base/x:cat
+                               "json_group_array(json_object("
+                               (xt.lang.spec-base/x:str-join ", " arr)
+                               "))")))
+   :return-link-fn '(fn [s link-name]
+                      (return (xt.lang.spec-base/x:cat
+                               "'"
+                               link-name
+                               "', "
+                               s)))})
 
 (comment
   (./create-tests))
