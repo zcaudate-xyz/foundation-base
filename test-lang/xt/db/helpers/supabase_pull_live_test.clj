@@ -11,8 +11,17 @@
 (def +supabase-cli-root+
   "docker")
 
+(def +shell+
+  "/bin/bash")
+
 (def +supabase-config-path+
   "docker/supabase/config.toml")
+
+(def +postgres-host+
+  "127.0.0.1")
+
+(def +postgres-port+
+  55122)
 
 (def +scratch-schema+
   "scratch")
@@ -35,36 +44,77 @@
 (def +live-supabase-config+
   nil)
 
+(def +postgres-runtime+
+  nil)
+
+(def +postgres-module+
+  'postgres.sample.scratch-v1)
+
+(defn shell-program-exists?
+  [program]
+  (let [out @(os/sh {:args [+shell+ "-lc"
+                            (str "command -v " program " >/dev/null 2>&1 && echo ok || true")]
+                     :inherit false})]
+    (= "ok" out)))
+
+(defn shell-command
+  [& parts]
+  (str/join " " parts))
+
+(def +supabase-command+
+  ["npx" "supabase"])
+
+(defn supabase-shell-command
+  [& parts]
+  (apply shell-command (concat +supabase-command+ parts)))
+
+(defn startup-shell-command
+  []
+  (str
+   "set -e\n"
+   (supabase-shell-command "stop" "--no-backup" "--yes") " >/dev/null 2>&1 || true\n"
+   (supabase-shell-command "start") "\n"
+   "for i in $(seq 1 120); do\n"
+   "  if (echo > /dev/tcp/" +postgres-host+ "/" (str +postgres-port+) ") >/dev/null 2>&1; then\n"
+   "    exit 0\n"
+   "  fi\n"
+   "  sleep 1\n"
+   "done\n"
+   "echo 'Timed out waiting for postgres on " +postgres-host+ ":" (str +postgres-port+) "' >&2\n"
+   "exit 1"))
+
 (def CANARY-SUPABASE-LIVE
-  (and (common/program-exists? "supabase")
-       (common/program-exists? "docker")
-       (.exists (java.io.File. +supabase-config-path+))))
+  (and (shell-program-exists? "npx")
+       (shell-program-exists? "docker")
+       (.exists (java.io.File. ^String +supabase-config-path+))))
 
 (defn init-live-postgres-runtime!
   []
-  (script/script-test
-   :postgres
-   {:runtime :jdbc.client
-    :require '[[postgres.sample.scratch-v1 :as scratch]]
-    :config {:host "127.0.0.1"
-             :port 55122
-             :user "postgres"
-             :pass "postgres"
-             :dbname "postgres"
-             :startup {:args ["supabase" "start"]
-                       :root "docker"
-                       :ignore-errors true}
-             :teardown {:args ["supabase" "stop"]
-                        :root "docker"
-                        :ignore-errors true}}}))
+  (let [rt (script/script-test
+            :postgres
+            {:runtime :jdbc.client
+             :require '[[postgres.sample.scratch-v1 :as scratch]]
+             :config {:host +postgres-host+
+                      :port +postgres-port+
+                      :user "postgres"
+                      :pass "postgres"
+                      :dbname "postgres"
+                      :startup {:args [+shell+ "-lc" (startup-shell-command)]
+                                :root "docker"
+                                :ignore-errors false}
+                      :teardown {:args [+shell+ "-lc" (supabase-shell-command "stop" "--no-backup" "--yes")]
+                                 :root "docker"
+                                 :ignore-errors true}}})]
+    (alter-var-root #'+postgres-runtime+ (constantly rt))
+    rt))
 
 (defn pg-rt
   []
-  (l/rt:space :postgres))
+  +postgres-runtime+)
 
 (defn supabase-status-env
   []
-  @(os/sh {:args ["supabase" "status" "-o" "env"]
+  @(os/sh {:args [+shell+ "-lc" (supabase-shell-command "status" "-o" "env")]
            :root +supabase-cli-root+}))
 
 (defn parse-shell-env
@@ -113,6 +163,10 @@
                     +scratch-schema+
                     "\" GRANT ALL ON TABLES TO anon, authenticated, service_role")]]
     (pg-exec-best-effort! sql)))
+
+(defn reload-postgrest!
+  []
+  (pg-exec-best-effort! "NOTIFY pgrst, 'reload schema'"))
 
 (defn cleanup-scratch-entry!
   [name]
