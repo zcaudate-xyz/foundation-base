@@ -142,25 +142,49 @@
 (fact "creates transport entries"
 
   (!.js
-    (var transport (main/transport-create "peer-a" {"meta" {"role" "edge"}}))
+    (var transport (main/transport-create
+                    "peer-a"
+                    {"meta" {"role" "edge"}
+                     "send_fn" (fn [frame] (return frame))
+                     "start_fn" (fn [listener] (return listener))
+                     "stop_fn" (fn [listener] (return listener))}))
     [(. transport ["::"])
      (. transport ["id"])
-     (. transport ["meta"] ["role"])])
-  => ["event.node.transport" "peer-a" "edge"]
+     (. transport ["meta"] ["role"])
+     (xt/x:is-function? (. transport ["send_fn"]))
+     (xt/x:is-function? (. transport ["start_fn"]))
+     (xt/x:is-function? (. transport ["stop_fn"]))])
+  => ["event.node.transport" "peer-a" "edge" true true true]
 
   (!.lua
-    (var transport (main/transport-create "peer-a" {"meta" {"role" "edge"}}))
+    (var transport (main/transport-create
+                    "peer-a"
+                    {"meta" {"role" "edge"}
+                     "send_fn" (fn [frame] (return frame))
+                     "start_fn" (fn [listener] (return listener))
+                     "stop_fn" (fn [listener] (return listener))}))
     [(. transport ["::"])
      (. transport ["id"])
-     (. transport ["meta"] ["role"])])
-  => ["event.node.transport" "peer-a" "edge"]
+     (. transport ["meta"] ["role"])
+     (xt/x:is-function? (. transport ["send_fn"]))
+     (xt/x:is-function? (. transport ["start_fn"]))
+     (xt/x:is-function? (. transport ["stop_fn"]))])
+  => ["event.node.transport" "peer-a" "edge" true true true]
 
   (!.py
-    (var transport (main/transport-create "peer-a" {"meta" {"role" "edge"}}))
+    (var transport (main/transport-create
+                    "peer-a"
+                    {"meta" {"role" "edge"}
+                     "send_fn" (fn [frame] (return frame))
+                     "start_fn" (fn [listener] (return listener))
+                     "stop_fn" (fn [listener] (return listener))}))
     [(. transport ["::"])
      (. transport ["id"])
-     (. transport ["meta"] ["role"])])
-  => ["event.node.transport" "peer-a" "edge"])
+     (. transport ["meta"] ["role"])
+     (xt/x:is-function? (. transport ["send_fn"]))
+     (xt/x:is-function? (. transport ["start_fn"]))
+     (xt/x:is-function? (. transport ["stop_fn"]))])
+  => ["event.node.transport" "peer-a" "edge" true true true])
 
 ^{:refer xt.event.node-main/node-create :added "4.1"
   :setup [(def +out+
@@ -688,7 +712,7 @@
   (!.js
     (var n (main/node-create {}))
     (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
-    [(main/request-target n {"transport-id" "peer-b"})
+    [(main/request-target n {"transport_id" "peer-b"})
      (main/request-target n {})
      (xt/x:nil? (main/request-target (main/node-create {}) {}))])
   => ["peer-b" "peer-a" true]
@@ -696,7 +720,7 @@
   (!.lua
     (var n (main/node-create {}))
     (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
-    [(main/request-target n {"transport-id" "peer-b"})
+    [(main/request-target n {"transport_id" "peer-b"})
      (main/request-target n {})
      (xt/x:nil? (main/request-target (main/node-create {}) {}))])
   => ["peer-b" "peer-a" true]
@@ -704,7 +728,7 @@
   (!.py
     (var n (main/node-create {}))
     (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
-    [(main/request-target n {"transport-id" "peer-b"})
+    [(main/request-target n {"transport_id" "peer-b"})
      (main/request-target n {})
      (xt/x:nil? (main/request-target (main/node-create {}) {}))])
   => ["peer-b" "peer-a" true])

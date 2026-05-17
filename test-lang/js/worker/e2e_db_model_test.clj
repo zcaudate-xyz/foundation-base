@@ -17,6 +17,7 @@
               [xt.db.text.sql-manage :as sql-manage]
               [xt.db.text.sql-util :as sql-util]
               [xt.event.node :as event-node]
+              [xt.event.node-frame :as event-frame]
               [js.worker.link :as worker-link]
               [js.worker.transport :as worker-transport]]})
 
@@ -134,7 +135,7 @@
                         50
                         (fn []
                           ((. endpoint ["send_fn"])
-                           (event-node/request-frame
+                           (event-frame/request-frame
                             "room/a"
                             db-node/ACTION_SYNC
                             [{"db/sync" {"Order" [{"id" "ord-1"
@@ -144,7 +145,7 @@
                             {"id" sync-id})))))))
                  nil)
 
-              (event-node/response-frame? frame)
+              (event-frame/response-frame? frame)
                (cond (== (. frame ["status"]) "error")
                      (do ((. endpoint ["stop_fn"]) nil)
                         (repl/notify {"stage" "error"
@@ -159,7 +160,7 @@
                           (then
                            (fn [_]
                              ((. endpoint ["send_fn"])
-                              (event-node/request-frame
+                              (event-frame/request-frame
                                 "room/a"
                                 db-node/ACTION_QUERY
                                 [{"query" {"table" "Order"
@@ -172,7 +173,7 @@
                     (do
                       (xt/x:set-key state "query-one" (. frame ["data"]))
                       ((. endpoint ["send_fn"])
-                       (event-node/request-frame
+                       (event-frame/request-frame
                          "room/a"
                          db-node/ACTION_QUERY
                          [{"query" {"table" "Order"

@@ -84,9 +84,8 @@
   "settles a pending request using a response frame"
   {:added "4.1"}
   [node response]
-  (var reply-to (or (xt/x:get-key response "reply-to")
-                    (xt/x:get-key response "reply_to")))
-  (var entry (-/remove-pending node reply-to))
+  (var reply_to (xt/x:get-key response "reply_to"))
+  (var entry (-/remove-pending node reply_to))
   (when (xt/x:nil? entry)
     (return nil))
   (var resolve (xt/x:get-key entry "resolve"))

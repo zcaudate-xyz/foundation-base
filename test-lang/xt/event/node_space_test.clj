@@ -34,7 +34,7 @@
   (!.js
     (var n (node/node-create {}))
     (node/create-space n "alpha" {:state {:count 1}})
-    (node/ensure-space n "beta" nil)
+    (space/ensure-space n "beta" nil)
     (node/set-space-state n "beta" {:count 2})
     (node/update-space-state
      n
@@ -54,7 +54,7 @@
   (!.lua
     (var n (node/node-create {}))
     (node/create-space n "alpha" {:state {:count 1}})
-    (node/ensure-space n "beta" nil)
+    (space/ensure-space n "beta" nil)
     (node/set-space-state n "beta" {:count 2})
     (node/update-space-state
      n
@@ -74,7 +74,7 @@
   (!.py
     (var n (node/node-create {}))
     (node/create-space n "alpha" {:state {:count 1}})
-    (node/ensure-space n "beta" nil)
+    (space/ensure-space n "beta" nil)
     (node/set-space-state n "beta" {:count 2})
     (node/update-space-state
      n

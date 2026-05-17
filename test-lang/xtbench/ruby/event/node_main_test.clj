@@ -227,7 +227,7 @@
   (!.rb
     (var n (main/node-create {}))
     (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
-    [(main/request-target n {"transport-id" "peer-b"})
+    [(main/request-target n {"transport_id" "peer-b"})
      (main/request-target n {})
      (main/request-target (main/node-create {}) {})])
   => ["peer-b" "peer-a" nil])

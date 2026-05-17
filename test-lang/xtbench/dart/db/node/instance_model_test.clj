@@ -10,6 +10,7 @@
              [xt.db.node.schema-spec :as spec]
              [xt.db.node.test-fixtures :as fixtures]
              [xt.event.node :as event-node]
+             [xt.event.node-space :as node-space]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
@@ -566,7 +567,7 @@
   (notify/wait-on :dart
     (var node (event-node/node-create {"id" "node-s"}))
     (model/install node fixtures/InstallOpts)
-    (var current-space (event-node/ensure-space node "room/a" nil))
+    (var current-space (node-space/ensure-space node "room/a" nil))
     (var query-p
          (promise/x:promise-then
           (model/sync node "room/a" {"db/sync" fixtures/Seed})
@@ -597,7 +598,7 @@
   (notify/wait-on :dart
     (var node (event-node/node-create {"id" "node-t"}))
     (model/install node fixtures/InstallOpts)
-    (var current-space (event-node/ensure-space node "room/a" nil))
+    (var current-space (node-space/ensure-space node "room/a" nil))
     (var initial-p
          (promise/x:promise-then
           (model/sync node "room/a" {"db/sync" fixtures/Seed})
@@ -642,7 +643,7 @@
   (notify/wait-on :dart
     (var node (event-node/node-create {"id" "node-v"}))
     (model/install node fixtures/InstallOpts)
-    (var current-space (event-node/ensure-space node "room/a" nil))
+    (var current-space (node-space/ensure-space node "room/a" nil))
     (promise/x:promise-catch
      (promise/x:promise-then
       (promise/x:promise-then
@@ -668,7 +669,7 @@
   (notify/wait-on :dart
     (var node (event-node/node-create {"id" "node-w"}))
     (model/install node fixtures/InstallOpts)
-    (var current-space (event-node/ensure-space node "room/a" nil))
+    (var current-space (node-space/ensure-space node "room/a" nil))
     (promise/x:promise-catch
      (promise/x:promise-then
       (promise/x:promise-then
@@ -693,7 +694,7 @@
   (notify/wait-on :dart
     (var node (event-node/node-create {"id" "node-x"}))
     (model/install node fixtures/InstallOpts)
-    (var current-space (event-node/ensure-space node "room/a" nil))
+    (var current-space (node-space/ensure-space node "room/a" nil))
     (promise/x:promise-catch
      (promise/x:promise-then
       (promise/x:promise-then

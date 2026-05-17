@@ -47,9 +47,9 @@
    ["id" :xt/str]
    ["listener" [:xt/maybe :xt/any]]
    ["meta" [:xt/maybe [:xt/dict :xt/str :xt/any]]]
-   ["send-fn" [:xt/maybe NodeTransportSendFn]]
-   ["start-fn" [:xt/maybe NodeTransportStartFn]]
-   ["stop-fn" [:xt/maybe NodeTransportStopFn]]])
+   ["send_fn" [:xt/maybe NodeTransportSendFn]]
+   ["start_fn" [:xt/maybe NodeTransportStartFn]]
+   ["stop_fn" [:xt/maybe NodeTransportStopFn]]])
 
 (defspec.xt EventNode
   [:xt/record
@@ -515,9 +515,9 @@
   (var transport (-/get-transport node transport-id))
   (when (xt/x:nil? transport)
     (xt/x:err (xt/x:cat "transport not found - " transport-id)))
-  (var send-fn (xt/x:get-key transport "send-fn"))
+  (var send-fn (xt/x:get-key transport "send_fn"))
   (when (xt/x:nil? send-fn)
-    (xt/x:err (xt/x:cat "transport missing send-fn - " transport-id)))
+    (xt/x:err (xt/x:cat "transport missing send_fn - " transport-id)))
   (return (node-request/ensure-promise
            (send-fn frame))))
 
@@ -586,7 +586,7 @@
   (router/register-connection node
                               transport-id
                               {:meta (xt/x:get-key transport "meta")})
-  (var start-fn (xt/x:get-key transport "start-fn"))
+  (var start-fn (xt/x:get-key transport "start_fn"))
   (when (xt/x:nil? start-fn)
     (return (promise/x:promise-run transport)))
   (return
@@ -595,8 +595,8 @@
      (start-fn
       (fn [event ctx]
         (:= ctx (or ctx {}))
-        (when (xt/x:nil? (xt/x:get-key ctx "transport-id"))
-          (xt/x:set-key ctx "transport-id" transport-id))
+        (when (xt/x:nil? (xt/x:get-key ctx "transport_id"))
+          (xt/x:set-key ctx "transport_id" transport-id))
         (return (-/receive-frame node event ctx)))))
     (fn [listener]
       (xt/x:set-key transport "listener" listener)
@@ -612,7 +612,7 @@
     (return (promise/x:promise-run nil)))
   (xt/x:del-key transports transport-id)
   (router/unregister-connection node transport-id)
-  (var stop-fn (xt/x:get-key transport "stop-fn"))
+  (var stop-fn (xt/x:get-key transport "stop_fn"))
   (when (xt/x:nil? stop-fn)
     (return (promise/x:promise-run transport)))
   (return
@@ -626,7 +626,7 @@
   "resolves the outbound request target transport"
   {:added "4.1"}
   [node meta]
-  (var target (xt/x:get-key meta "transport-id"))
+  (var target (xt/x:get-key meta "transport_id"))
   (when (xt/x:not-nil? target)
     (return target))
   (var transports (-/list-transports node))
@@ -667,7 +667,7 @@
                  (xt/x:get-key request "space")
                  data
                  meta))
-  (var transport-id (xt/x:get-key ctx "transport-id"))
+  (var transport-id (xt/x:get-key ctx "transport_id"))
   (if (xt/x:nil? transport-id)
     (return (promise/x:promise-run response))
     (return
@@ -685,7 +685,7 @@
                  (xt/x:get-key request "space")
                  error
                  meta))
-  (var transport-id (xt/x:get-key ctx "transport-id"))
+  (var transport-id (xt/x:get-key ctx "transport_id"))
   (if (xt/x:nil? transport-id)
     (return (promise/x:promise-run response))
     (return
@@ -742,7 +742,7 @@
                                   (xt/x:set-key pending-state "status" "rejected")
                                   (xt/x:set-key pending-state "error" err)
                                   (return err))
-                                {:transport-id target})
+                                {:transport_id target})
       (return
        (promise/x:promise-then
         (promise/x:promise-catch
@@ -805,7 +805,7 @@
   (return
    (-/receive-publish node
                       stream
-                      {:transport-id (xt/x:get-key meta "transport-id")})))
+                      {:transport_id (xt/x:get-key meta "transport_id")})))
 
 (defn.xt receive-publish
   "receives an inbound stream frame"
@@ -818,7 +818,7 @@
     (fn [_]
       (return (-/route-stream node
                               stream
-                              (xt/x:get-key ctx "transport-id")))))))
+                              (xt/x:get-key ctx "transport_id")))))))
 
 (defn.xt receive-frame
   "demultiplexes node frames"

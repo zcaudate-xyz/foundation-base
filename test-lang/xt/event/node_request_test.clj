@@ -72,7 +72,7 @@
        (xt/x:arr-push resolved value))
      (fn [value]
        (xt/x:arr-push rejected value))
-     {:transport-id "peer-a"})
+     {:transport_id "peer-a"})
     (var before (xt/x:obj-keys (. n ["pending"])))
     (req/settle-pending
      n
@@ -96,7 +96,7 @@
        (xt/x:arr-push resolved value))
      (fn [value]
        (xt/x:arr-push rejected value))
-     {:transport-id "peer-a"})
+     {:transport_id "peer-a"})
     (var before (xt/x:obj-keys (. n ["pending"])))
     (req/settle-pending
      n
@@ -120,7 +120,7 @@
        (xt/x:arr-push resolved value))
      (fn [value]
        (xt/x:arr-push rejected value))
-     {:transport-id "peer-a"})
+     {:transport_id "peer-a"})
     (var before (xt/x:obj-keys (. n ["pending"])))
     (req/settle-pending
      n
@@ -144,7 +144,7 @@
      request
      (fn [value] (return value))
      (fn [value] (return value))
-     {:transport-id "peer-a"})
+     {:transport_id "peer-a"})
     (var removed (req/remove-pending n (. request ["id"])))
     [(xt/x:is-string? (. (. removed ["request"]) ["id"]))
      (xt/x:obj-keys (. n ["pending"]))])
@@ -158,7 +158,7 @@
      request
      (fn [value] (return value))
      (fn [value] (return value))
-     {:transport-id "peer-a"})
+     {:transport_id "peer-a"})
     (var removed (req/remove-pending n (. request ["id"])))
     [(xt/x:is-string? (. (. removed ["request"]) ["id"]))
      (xt/x:obj-keys (. n ["pending"]))])
@@ -172,7 +172,7 @@
      request
      (fn [value] (return value))
      (fn [value] (return value))
-     {:transport-id "peer-a"})
+     {:transport_id "peer-a"})
     (var removed (req/remove-pending n (. request ["id"])))
     [(xt/x:is-string? (. (. removed ["request"]) ["id"]))
      (xt/x:obj-keys (. n ["pending"]))])

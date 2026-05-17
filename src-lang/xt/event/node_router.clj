@@ -325,7 +325,7 @@
   "processes an inbound subscribe control frame"
   {:added "4.1"}
   [node event ctx]
-  (var transport-id (xt/x:get-key ctx "transport-id"))
+  (var transport-id (xt/x:get-key ctx "transport_id"))
   (when (xt/x:not-nil? transport-id)
     (-/add-subscription node
                         transport-id
@@ -339,7 +339,7 @@
   "processes an inbound unsubscribe control frame"
   {:added "4.1"}
   [node event ctx]
-  (var transport-id (xt/x:get-key ctx "transport-id"))
+  (var transport-id (xt/x:get-key ctx "transport_id"))
   (when (xt/x:not-nil? transport-id)
     (-/remove-subscription node
                            transport-id

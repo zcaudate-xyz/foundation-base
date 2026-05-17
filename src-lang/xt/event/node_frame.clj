@@ -14,7 +14,7 @@
    ["meta" [:xt/maybe [:xt/dict :xt/str :xt/any]]]
    ["action" [:xt/maybe :xt/str]]
    ["args" [:xt/maybe [:xt/array :xt/any]]]
-   ["reply-to" [:xt/maybe :xt/str]]
+   ["reply_to" [:xt/maybe :xt/str]]
    ["status" [:xt/maybe :xt/str]]
    ["data" [:xt/maybe :xt/any]]
    ["error" [:xt/maybe :xt/any]]
@@ -124,7 +124,7 @@
 (defn.xt response-frame
   "constructs a response frame"
   {:added "4.1"}
-  [reply-to space status data error meta]
+  [reply_to space status data error meta]
   (:= meta (or meta {}))
   (return
     (-/frame -/KIND_RESPONSE
@@ -132,7 +132,7 @@
                  (-/rand-id "res-" 6))
             space
             meta
-            {:reply-to reply-to
+            {:reply_to reply_to
              :status status
              :data data
              :error error})))
@@ -140,14 +140,14 @@
 (defn.xt response-ok-frame
   "constructs a successful response frame"
   {:added "4.1"}
-  [reply-to space data meta]
-  (return (-/response-frame reply-to space -/STATUS_OK data nil meta)))
+  [reply_to space data meta]
+  (return (-/response-frame reply_to space -/STATUS_OK data nil meta)))
 
 (defn.xt response-error-frame
   "constructs an errored response frame"
   {:added "4.1"}
-  [reply-to space error meta]
-  (return (-/response-frame reply-to space -/STATUS_ERROR nil error meta)))
+  [reply_to space error meta]
+  (return (-/response-frame reply_to space -/STATUS_ERROR nil error meta)))
 
 (defn.xt stream-frame
   "constructs a publish frame"

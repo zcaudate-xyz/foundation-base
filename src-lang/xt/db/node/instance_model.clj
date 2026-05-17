@@ -13,6 +13,7 @@
              [xt.event.base-view :as event-view]
              [xt.event.util-throttle :as throttle]
              [xt.event.node :as event-node]
+             [xt.event.node-space :as node-space]
              [xt.event.node-request :as node-request]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
@@ -51,7 +52,7 @@
   "ensures the target node space has db.node state"
   {:added "4.1"}
   [node space-id]
-  (var space (event-node/ensure-space node space-id nil))
+  (var space (node-space/ensure-space node space-id nil))
   (return (instance-state/ensure-state space node)))
 
 (defn.xt query

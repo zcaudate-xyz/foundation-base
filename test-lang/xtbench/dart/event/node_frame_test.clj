@@ -50,7 +50,7 @@
                  "event/updated"
                  {:value 9}
                  {:label "evt"}
-                 {:request-id (. request ["id"])}))
+                 {:request_id (. request ["id"])}))
     [(xt/x:is-string? (frame/rand-id "x-" 4))
      (. request ["kind"])
      (. request ["space"])
@@ -116,7 +116,7 @@
 (fact "constructs stream frames with optional causes"
 
   (!.dt
-    (var stream (frame/stream-frame "space/a" "event/ping" {:value 1} {:tag "v"} {:request-id "req-1"}))
+    (var stream (frame/stream-frame "space/a" "event/ping" {:value 1} {:tag "v"} {:request_id "req-1"}))
     [(. stream ["kind"])
      (. stream ["signal"])
      (. stream ["data"] ["value"])

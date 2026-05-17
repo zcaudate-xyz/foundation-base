@@ -10,6 +10,7 @@
    :require [[js.worker.link :as worker-link]
               [js.worker.transport :as worker-transport]
               [xt.event.node :as event-node]
+              [xt.event.node-frame :as event-frame]
               [xt.lang.common-repl :as repl]
               [xt.lang.spec-promise :as promise]]})
 
@@ -110,14 +111,14 @@
                  50
                  (fn []
                    ((. endpoint ["send_fn"])
-                    (event-node/request-frame
+                    (event-frame/request-frame
                      "room/a"
                      "demo/echo"
                      ["single"]
                      nil))))
                 nil)
 
-            (event-node/response-frame? frame)
+            (event-frame/response-frame? frame)
             (repl/notify (. frame ["data"])))))
    true)
   => {"space" "room/a"
@@ -136,14 +137,14 @@
                  50
                  (fn []
                    ((. endpoint ["send_fn"])
-                    (event-node/request-frame
+                    (event-frame/request-frame
                      "room/a"
                      "demo/echo"
                      ["single"]
                      nil))))
                 nil)
 
-            (event-node/response-frame? frame)
+            (event-frame/response-frame? frame)
             (repl/notify (. frame ["data"])))))
    true)
   => {"space" "room/a"

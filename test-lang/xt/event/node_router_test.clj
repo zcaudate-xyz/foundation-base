@@ -513,7 +513,7 @@
     (router/receive-subscribe
      n
      (router/subscribe-frame "room/a" "event/ping" "sub-a" {:via "tab"})
-     {"transport-id" "peer-a"})
+     {"transport_id" "peer-a"})
     (router/list-subscriptions n "room/a" "event/ping"))
   => ["peer-a"]
 
@@ -522,7 +522,7 @@
     (router/receive-subscribe
      n
      (router/subscribe-frame "room/a" "event/ping" "sub-a" {:via "tab"})
-     {"transport-id" "peer-a"})
+     {"transport_id" "peer-a"})
     (router/list-subscriptions n "room/a" "event/ping"))
   => ["peer-a"]
 
@@ -531,7 +531,7 @@
     (router/receive-subscribe
      n
      (router/subscribe-frame "room/a" "event/ping" "sub-a" {:via "tab"})
-     {"transport-id" "peer-a"})
+     {"transport_id" "peer-a"})
     (router/list-subscriptions n "room/a" "event/ping"))
   => ["peer-a"])
 
@@ -545,7 +545,7 @@
     (router/receive-unsubscribe
      n
      (router/unsubscribe-frame "room/a" "event/ping" "sub-a" nil)
-     {"transport-id" "peer-a"})
+     {"transport_id" "peer-a"})
     (router/list-subscriptions n "room/a" "event/ping"))
   => +out+
 
@@ -555,7 +555,7 @@
     (router/receive-unsubscribe
      n
      (router/unsubscribe-frame "room/a" "event/ping" "sub-a" nil)
-     {"transport-id" "peer-a"})
+     {"transport_id" "peer-a"})
     (router/list-subscriptions n "room/a" "event/ping"))
   => +out+
 
@@ -565,7 +565,7 @@
     (router/receive-unsubscribe
      n
      (router/unsubscribe-frame "room/a" "event/ping" "sub-a" nil)
-     {"transport-id" "peer-a"})
+     {"transport_id" "peer-a"})
     (router/list-subscriptions n "room/a" "event/ping"))
   => +out+)
 
