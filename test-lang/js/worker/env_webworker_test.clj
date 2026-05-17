@@ -5,7 +5,7 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.event.node :as event-node]
+   :require [[xt.substrate :as event-node]
              [xt.db.node :as db-node]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]

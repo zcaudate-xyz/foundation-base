@@ -3,15 +3,15 @@
   (:require [hara.lang :as l]
             [js.worker.env-node]
             [js.worker.link]
-            [xt.event.node]
-            [xt.event.node-transport-browser]
+            [xt.substrate]
+            [xt.substrate.transport-browser]
             [xt.lang.common-notify :as notify]))
 
 (l/script- :js
   {:runtime :basic
    :require [[js.worker.env-node :as env-node]
              [js.worker.link :as worker-link]
-             [xt.event.node :as event-node]
+             [xt.substrate :as event-node]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]]})
@@ -20,8 +20,8 @@
   (l/emit-script
    '(do
       (var worker (js.worker.env-node/make-node-worker))
-      (var node (xt.event.node/node-create {"id" "worker-node"}))
-      (xt.event.node/register-handler
+      (var node (xt.substrate/node-create {"id" "worker-node"}))
+      (xt.substrate/register-handler
        node
        "demo/echo"
        (fn [space args request worker-node]
@@ -30,10 +30,10 @@
                   "args" args
                   "worker" (. worker-node ["id"])}))
        nil)
-      (. (xt.event.node/attach-transport
+      (. (xt.substrate/attach-transport
           node
           "host"
-          (xt.event.node-transport-browser/self-endpoint worker))
+          (xt.substrate.transport-browser/self-endpoint worker))
          (then
           (fn [_]
             (. worker (postMessage {"signal" "ready"
@@ -48,7 +48,7 @@
            (l/rt:scaffold-imports :js)]
    :teardown [(l/rt:stop)]})
 
-(fact "creates a live Node worker and talks to it through xt.event.node"
+(fact "creates a live Node worker and talks to it through xt.substrate"
   (notify/wait-on [:js 10000]
     (var host-node (event-node/node-create {"id" "host-node"}))
     (var state {"ready" nil})

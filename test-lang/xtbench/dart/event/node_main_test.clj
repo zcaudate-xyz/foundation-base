@@ -10,16 +10,15 @@
              [xt.lang.spec-promise :as promise]
              [xt.db.node.instance-model :as model]
              [xt.db.node.test-fixtures :as fixtures]
-             [xt.event.node :as node]
-             [xt.event.node-main :as main]
-             [xt.event.node-router :as router]
-             [xt.event.node-request :as req]]})
+             [xt.substrate :as main]
+             [xt.substrate.base-router :as router]
+             [xt.substrate.base-request :as req]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.event.node-router/list-subscriptions :added "4.1"
+^{:refer xt.substrate.base-router/list-subscriptions :added "4.1"
   :setup [(def +out+
             (just-in
              [(just ["peer-a" "peer-b"] :in-any-order)
@@ -34,7 +33,7 @@
      (router/list-subscriptions n "room/b" "event/ping")])
   => +out+)
 
-^{:refer xt.event.node-router/unregister-connection :added "4.1"}
+^{:refer xt.substrate.base-router/unregister-connection :added "4.1"}
 (fact "removing a transport prunes its subscriptions"
 
   (!.dt
@@ -47,21 +46,21 @@
     (router/list-subscriptions n "room/a" "event/ping"))
   => ["peer-b"])
 
-^{:refer xt.event.node-main/node? :added "4.1"}
+^{:refer xt.substrate/node? :added "4.1"}
 (fact "detects node values"
 
   (!.dt
     (main/node? (main/node-create {})))
   => true)
 
-^{:refer xt.event.node-main/transport? :added "4.1"}
+^{:refer xt.substrate/transport? :added "4.1"}
 (fact "detects transport values"
 
   (!.dt
     (main/transport? (main/transport-create "peer-a" {})))
   => true)
 
-^{:refer xt.event.node-main/transport-create :added "4.1"}
+^{:refer xt.substrate/transport-create :added "4.1"}
 (fact "creates transport entries"
 
   (!.dt
@@ -69,12 +68,12 @@
     [(. transport ["::"])
      (. transport ["id"])
      (. transport ["meta"] ["role"])])
-  => ["event.node.transport" "peer-a" "edge"])
+  => ["substrate.transport" "peer-a" "edge"])
 
-^{:refer xt.event.node-main/node-create :added "4.1"
+^{:refer xt.substrate/node-create :added "4.1"
   :setup [(def +out+
             (just-in
-             ["event.node"
+             ["substrate"
               empty?
               empty?
               empty?
@@ -90,7 +89,7 @@
      (xt/x:obj-keys (. n ["router"]))])
   => +out+)
 
-^{:refer xt.event.node-main/register-handler :added "4.1"}
+^{:refer xt.substrate/register-handler :added "4.1"}
 (fact "registers handlers on the node"
 
   (!.dt
@@ -100,7 +99,7 @@
      (. (main/get-handler n "echo") ["meta"] ["role"])])
   => ["echo" "test"])
 
-^{:refer xt.event.node-main/unregister-handler :added "4.1"}
+^{:refer xt.substrate/unregister-handler :added "4.1"}
 (fact "unregisters handlers from the node"
 
   (!.dt
@@ -110,7 +109,7 @@
     (main/get-handler n "echo"))
   => nil)
 
-^{:refer xt.event.node-main/get-handler :added "4.1"}
+^{:refer xt.substrate/get-handler :added "4.1"}
 (fact "gets handler entries"
 
   (!.dt
@@ -119,7 +118,7 @@
     (. (main/get-handler n "echo") ["id"]))
   => "echo")
 
-^{:refer xt.event.node-main/list-handlers :added "4.1"}
+^{:refer xt.substrate/list-handlers :added "4.1"}
 (fact "lists registered handlers"
 
   (!.dt
@@ -129,7 +128,7 @@
     (main/list-handlers n))
   => ["echo" "sum"])
 
-^{:refer xt.event.node-main/register-trigger :added "4.1"}
+^{:refer xt.substrate/register-trigger :added "4.1"}
 (fact "registers triggers on the node"
 
   (!.dt
@@ -139,7 +138,7 @@
      (. (main/get-trigger n "event/ping") ["meta"] ["role"])])
   => ["event/ping" "test"])
 
-^{:refer xt.event.node-main/unregister-trigger :added "4.1"}
+^{:refer xt.substrate/unregister-trigger :added "4.1"}
 (fact "unregisters triggers from the node"
 
   (!.dt
@@ -149,7 +148,7 @@
     (main/get-trigger n "event/ping"))
   => nil)
 
-^{:refer xt.event.node-main/get-trigger :added "4.1"}
+^{:refer xt.substrate/get-trigger :added "4.1"}
 (fact "gets trigger entries"
 
   (!.dt
@@ -158,7 +157,7 @@
     (. (main/get-trigger n "event/ping") ["id"]))
   => "event/ping")
 
-^{:refer xt.event.node-main/list-triggers :added "4.1"}
+^{:refer xt.substrate/list-triggers :added "4.1"}
 (fact "lists registered triggers"
 
   (!.dt
@@ -168,7 +167,7 @@
     (main/list-triggers n))
   => ["event/ping" "event/pong"])
 
-^{:refer xt.event.node-main/get-transport :added "4.1"}
+^{:refer xt.substrate/get-transport :added "4.1"}
 (fact "gets transports by id"
 
   (!.dt
@@ -177,7 +176,7 @@
     (. (main/get-transport n "peer-a") ["id"]))
   => "peer-a")
 
-^{:refer xt.event.node-main/list-transports :added "4.1"}
+^{:refer xt.substrate/list-transports :added "4.1"}
 (fact "lists active transport ids"
 
   (!.dt
@@ -187,56 +186,56 @@
     (main/list-transports n))
   => ["peer-a" "peer-b"])
 
-^{:refer xt.event.node-main/send-transport :added "4.1"}
+^{:refer xt.substrate/send-transport :added "4.1"}
 (fact "sends frames through a transport"
 
   (!.dt
     (xt/x:is-function? main/send-transport))
   => true)
 
-^{:refer xt.event.node-main/broadcast-transport-loop :added "4.1"}
+^{:refer xt.substrate/broadcast-transport-loop :added "4.1"}
 (fact "broadcast loop returns a promise"
 
   (!.dt
     (xt/x:is-function? main/broadcast-transport-loop))
   => true)
 
-^{:refer xt.event.node-main/broadcast-transport :added "4.1"}
+^{:refer xt.substrate/broadcast-transport :added "4.1"}
 (fact "broadcast sends to all transports"
 
   (!.dt
     (xt/x:is-function? main/broadcast-transport))
   => true)
 
-^{:refer xt.event.node-main/route-stream-loop :added "4.1"}
+^{:refer xt.substrate/route-stream-loop :added "4.1"}
 (fact "route-stream-loop returns a promise"
 
   (!.dt
     (xt/x:is-function? main/route-stream-loop))
   => true)
 
-^{:refer xt.event.node-main/route-stream :added "4.1"}
+^{:refer xt.substrate/route-stream :added "4.1"}
 (fact "route-stream fans out by router subscription"
 
   (!.dt
     (xt/x:is-function? main/route-stream))
   => true)
 
-^{:refer xt.event.node-main/attach-transport :added "4.1"}
+^{:refer xt.substrate/attach-transport :added "4.1"}
 (fact "attaches transports and registers router connections"
 
   (!.dt
     (xt/x:is-function? main/attach-transport))
   => true)
 
-^{:refer xt.event.node-main/detach-transport :added "4.1"}
+^{:refer xt.substrate/detach-transport :added "4.1"}
 (fact "detaches transports and unregisters router connections"
 
   (!.dt
     (xt/x:is-function? main/detach-transport))
   => true)
 
-^{:refer xt.event.node-main/request-target :added "4.1"}
+^{:refer xt.substrate/request-target :added "4.1"}
 (fact "picks a target transport from meta or the first attached transport"
 
   (!.dt
@@ -247,56 +246,56 @@
      (xt/x:nil? (main/request-target (main/node-create {}) {}))])
   => ["peer-b" "peer-a" true])
 
-^{:refer xt.event.node-main/respond-ok :added "4.1"}
+^{:refer xt.substrate/respond-ok :added "4.1"}
 (fact "respond-ok forwards response frames to a transport"
 
   (!.dt
     (xt/x:is-function? main/respond-ok))
   => true)
 
-^{:refer xt.event.node-main/respond-error :added "4.1"}
+^{:refer xt.substrate/respond-error :added "4.1"}
 (fact "respond-error forwards error responses"
 
   (!.dt
     (xt/x:is-function? main/respond-error))
   => true)
 
-^{:refer xt.event.node-main/receive-request :added "4.1"}
+^{:refer xt.substrate/receive-request :added "4.1"}
 (fact "receive-request invokes a registered handler"
 
   (!.dt
     (xt/x:is-function? main/receive-request))
   => true)
 
-^{:refer xt.event.node-main/receive-response :added "4.1"}
+^{:refer xt.substrate/receive-response :added "4.1"}
 (fact "receive-response settles pending requests"
 
   (!.dt
     (xt/x:is-function? main/receive-response))
   => true)
 
-^{:refer xt.event.node-main/request :added "4.1"}
+^{:refer xt.substrate/request :added "4.1"}
 (fact "request runs through the local handler path"
 
   (!.dt
     (xt/x:is-function? main/request))
   => true)
 
-^{:refer xt.event.node-main/subscribe :added "4.1"}
+^{:refer xt.substrate/subscribe :added "4.1"}
 (fact "subscribe sends control frames through the target transport"
 
   (!.dt
     (xt/x:is-function? main/subscribe))
   => true)
 
-^{:refer xt.event.node-main/unsubscribe :added "4.1"}
+^{:refer xt.substrate/unsubscribe :added "4.1"}
 (fact "unsubscribe sends control frames through the target transport"
 
   (!.dt
     (xt/x:is-function? main/unsubscribe))
   => true)
 
-^{:refer xt.event.node-main/publish :added "4.1"}
+^{:refer xt.substrate/publish :added "4.1"}
 (fact "publish can chain a second async callback after local trigger handling"
 
   (notify/wait-on :dart
@@ -314,14 +313,14 @@
   => {"ok" true
       "space" "room/a"})
 
-^{:refer xt.event.node-main/receive-publish :added "4.1"}
+^{:refer xt.substrate/receive-publish :added "4.1"}
 (fact "receive-publish invokes matching triggers"
 
   (!.dt
     (xt/x:is-function? main/receive-publish))
   => true)
 
-^{:refer xt.event.node-main/receive-frame :added "4.1"}
+^{:refer xt.substrate/receive-frame :added "4.1"}
 (fact "receive-frame dispatches by frame kind"
 
   (!.dt
@@ -329,7 +328,7 @@
   => true)
 
 (comment
-  (s/snapto '[xt.event.node-main])
-  (s/seedgen-benchadd '[xt.event.node-main] {:lang :dart :write true})
-  (s/seedgen-langremove '[xt.event.node-main] {:lang [:lua :python] :write true})
-  (s/seedgen-langadd '[xt.event.node-main] {:lang [:lua :python] :write true}))
+  (s/snapto '[xt.substrate])
+  (s/seedgen-benchadd '[xt.substrate] {:lang :dart :write true})
+  (s/seedgen-langremove '[xt.substrate] {:lang [:lua :python] :write true})
+  (s/seedgen-langadd '[xt.substrate] {:lang [:lua :python] :write true}))

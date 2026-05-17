@@ -16,10 +16,10 @@
               [xt.db.node.test-fixtures :as fixtures]
               [xt.db.text.sql-manage :as sql-manage]
               [xt.db.text.sql-util :as sql-util]
-              [xt.event.node :as event-node]
-              [xt.event.node-frame :as event-frame]
+              [xt.substrate :as event-node]
+              [xt.substrate.base-frame :as event-frame]
               [js.worker.link :as worker-link]
-              [xt.event.node-transport-browser :as worker-transport]]})
+              [xt.substrate.transport-browser :as worker-transport]]})
 
 (def ^:private +nodeworker-script+
   (l/emit-script
@@ -47,7 +47,7 @@
                          [{"columns" columns
                            "values" values}]
                          values))))
-      (var node (xt.event.node/node-create {"id" "worker-db-node"}))
+      (var node (xt.substrate/node-create {"id" "worker-db-node"}))
       (var sqlite3-module (require "@sqlite.org/sqlite-wasm"))
       (var init-module (or (. sqlite3-module ["default"])
                            sqlite3-module))
@@ -86,10 +86,10 @@
               "views" xt.db.node.test-fixtures/Views
               "db" db
               "db_opts" db-opts})
-            (. (xt.event.node/attach-transport
+            (. (xt.substrate/attach-transport
                 node
                 "host"
-                (xt.event.node-transport-browser/self-endpoint worker))
+                (xt.substrate.transport-browser/self-endpoint worker))
                (then
                 (fn [_]
                   (. worker (postMessage {"signal" "ready"

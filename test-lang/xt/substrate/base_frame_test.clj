@@ -1,4 +1,4 @@
-(ns xt.event.node-frame-test
+(ns xt.substrate.base-frame-test
   (:use code.test)
   (:require [hara.lang :as l]))
 
@@ -6,23 +6,23 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
-             [xt.event.node-frame :as frame]]})
+             [xt.substrate.base-frame :as frame]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
-             [xt.event.node-frame :as frame]]})
+             [xt.substrate.base-frame :as frame]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
-             [xt.event.node-frame :as frame]]})
+             [xt.substrate.base-frame :as frame]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.event.node-frame/rand-id :added "4.1"}
+^{:refer xt.substrate.base-frame/rand-id :added "4.1"}
 (fact "creates ids with the requested prefix"
 
   (!.js
@@ -43,7 +43,7 @@
      (xt/x:is-string? id)])
   => [8 true])
 
-^{:refer xt.event.node-frame/frame :added "4.1"}
+^{:refer xt.substrate.base-frame/frame :added "4.1"}
 (fact "defaults meta and space when building frames directly"
 
   (!.js
@@ -73,7 +73,7 @@
      (. err ["error"] ["message"])])
   => ["__NODE__" {} "error" "boom"])
 
-^{:refer xt.event.node-frame/request-frame :added "4.1"}
+^{:refer xt.substrate.base-frame/request-frame :added "4.1"}
 (fact "constructs request, response, and stream frames"
 
   (!.js
@@ -211,7 +211,7 @@
       true
       true])
 
-^{:refer xt.event.node-frame/response-frame :added "4.1"}
+^{:refer xt.substrate.base-frame/response-frame :added "4.1"}
 (fact "constructs raw response frames with reply ids"
 
   (!.js
@@ -241,7 +241,7 @@
      (. response ["meta"] ["tag"])])
   => ["response" "req-1" "ok" true "v"])
 
-^{:refer xt.event.node-frame/response-ok-frame :added "4.1"}
+^{:refer xt.substrate.base-frame/response-ok-frame :added "4.1"}
 (fact "constructs successful response frames"
 
   (!.js
@@ -265,7 +265,7 @@
      (xt/x:nil? (. response ["error"]))])
   => ["ok" true true])
 
-^{:refer xt.event.node-frame/response-error-frame :added "4.1"}
+^{:refer xt.substrate.base-frame/response-error-frame :added "4.1"}
 (fact "constructs errored response frames"
 
   (!.js
@@ -289,7 +289,7 @@
      (. response ["error"] ["message"])])
   => ["error" true "boom"])
 
-^{:refer xt.event.node-frame/stream-frame :added "4.1"}
+^{:refer xt.substrate.base-frame/stream-frame :added "4.1"}
 (fact "constructs stream frames with optional causes"
 
   (!.js
@@ -319,7 +319,7 @@
      (. stream ["cause"] ["request_id"])])
   => ["stream" "event/ping" 1 "v" "req-1"])
 
-^{:refer xt.event.node-frame/request-frame? :added "4.1"}
+^{:refer xt.substrate.base-frame/request-frame? :added "4.1"}
 (fact "detects request frames"
 
   (!.js
@@ -337,7 +337,7 @@
      (frame/request-frame? (frame/stream-frame "space/a" "event/ping" {} nil nil))])
   => [true false])
 
-^{:refer xt.event.node-frame/response-frame? :added "4.1"}
+^{:refer xt.substrate.base-frame/response-frame? :added "4.1"}
 (fact "detects response frames"
 
   (!.js
@@ -355,7 +355,7 @@
      (frame/response-frame? (frame/request-frame "space/a" "echo" [] nil))])
   => [true false])
 
-^{:refer xt.event.node-frame/stream-frame? :added "4.1"}
+^{:refer xt.substrate.base-frame/stream-frame? :added "4.1"}
 (fact "detects stream frames"
 
   (!.js
@@ -374,6 +374,6 @@
   => [true false])
 
 (comment
-  (s/snapto '[xt.event.node-frame])
-  (s/seedgen-langremove '[xt.event.node-frame] {:lang [:lua :python] :write true})
-  (s/seedgen-langadd '[xt.event.node-frame] {:lang [:lua :python] :write true}))
+  (s/snapto '[xt.substrate.base-frame])
+  (s/seedgen-langremove '[xt.substrate.base-frame] {:lang [:lua :python] :write true})
+  (s/seedgen-langadd '[xt.substrate.base-frame] {:lang [:lua :python] :write true}))

@@ -1,11 +1,12 @@
-(ns xt.event.node-transport-websocket-node-e2e-test
+(ns xt.substrate.transport-websocket-e2e-test
   (:use code.test)
   (:require [cheshire.core :as json]
             [hara.lang :as l]
+            [hara.runtime.chromedriver :as chromedriver]
             [org.httpkit.server :as server]
             [xt.lang.common-notify :as notify]))
 
-(def ^:private +ws-port+ 29632)
+(def ^:private +ws-port+ 29631)
 (def ^:private +ws-url+ (str "ws://127.0.0.1:" +ws-port+ "/"))
 (defonce ^:private +ws-server+ (atom nil))
 
@@ -37,33 +38,30 @@
      :stop stop-fn}))
 
 (l/script- :js
-  {:runtime :websocket
-   :config {:bench true}
-   :require [[xt.event.node :as event-node]
-             [xt.event.node-transport-websocket :as ws-transport]
+  {:runtime :chromedriver.instance
+   :require [[xt.substrate :as event-node]
+             [xt.substrate.transport-websocket :as ws-transport]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]]})
 
 (fact:global
-  {:setup [(reset! +ws-server+ (start-test-ws-server +ws-port+ "node"))
-           (l/rt:restart :js)]
+  {:setup [(reset! +ws-server+ (start-test-ws-server +ws-port+ "chromedriver"))
+           (l/rt:restart :js)
+           (chromedriver/goto (str "http://127.0.0.1:" (:http-port (l/default-notify)) "/")
+                              4000)]
    :teardown [(when-let [stop-fn (:stop @+ws-server+)]
                 (stop-fn))
               (reset! +ws-server+ nil)
               (l/rt:stop)]})
 
-(fact "a node websocket runtime can attach a live websocket transport and request over it"
+(fact "a chromedriver runtime can attach a live websocket transport and request over it"
   (notify/wait-on [:js 5000]
-    (var ws-module (require "ws"))
-    (var WebSocket (or (. ws-module ["WebSocket"])
-                       ws-module))
-    (var node (event-node/node-create {"id" "node-client"}))
+    (var node (event-node/node-create {"id" "browser-client"}))
     (-> (event-node/attach-transport
          node
          "server"
          (ws-transport/websocket-endpoint
-          {"url" "ws://127.0.0.1:29632/"
-           "WebSocket" WebSocket}))
+          "ws://127.0.0.1:29631/"))
         (promise/x:promise-then
          (fn [_]
            (return
@@ -71,7 +69,7 @@
              node
              "room/a"
              "demo/echo"
-             ["node"]
+             ["browser"]
              {"transport_id" "server"}))))
         (promise/x:promise-then
          (fn [response]
@@ -86,6 +84,6 @@
     true)
   => (contains-in
       {"transport" "websocket"
-       "runtime" "node"
+       "runtime" "chromedriver"
        "action" "demo/echo"
-       "args" ["node"]}))
+       "args" ["browser"]}))

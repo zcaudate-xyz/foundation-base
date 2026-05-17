@@ -5,14 +5,14 @@
 (l/script- :ruby
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
-             [xt.event.node :as node]
-             [xt.event.node-space :as space]]})
+             [xt.substrate :as node]
+             [xt.substrate.base-space :as space]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.event.node/create-space :added "4.1"}
+^{:refer xt.substrate/create-space :added "4.1"}
 (fact "manages per-space state independently from node-level handlers"
 
   (!.rb
@@ -35,7 +35,7 @@
      (space/list-spaces n)])
   => [2 "alpha" 1 3 "beta" "alpha" ["beta"]])
 
-^{:refer xt.event.node-space/space :added "4.1"}
+^{:refer xt.substrate.base-space/space :added "4.1"}
 (fact "constructs a space entry with defaults"
 
   (!.rb
@@ -45,7 +45,7 @@
      (. entry ["meta"])])
   => ["room/a" 1 {}])
 
-^{:refer xt.event.node-space/get-space :added "4.1"}
+^{:refer xt.substrate.base-space/get-space :added "4.1"}
 (fact "gets spaces by id"
 
   (!.rb
@@ -55,7 +55,7 @@
      (space/get-space n "missing")])
   => ["room/a" nil])
 
-^{:refer xt.event.node-space/ensure-space :added "4.1"}
+^{:refer xt.substrate.base-space/ensure-space :added "4.1"}
 (fact "ensures a space exists without replacing existing entries"
 
   (!.rb
@@ -67,7 +67,7 @@
      (xt/x:len (space/list-spaces n))])
   => [1 1 1])
 
-^{:refer xt.event.node-space/remove-space :added "4.1"}
+^{:refer xt.substrate.base-space/remove-space :added "4.1"}
 (fact "removes a space entry and returns it"
 
   (!.rb
@@ -79,7 +79,7 @@
      (space/get-space n "room/a")])
   => ["room/a" nil])
 
-^{:refer xt.event.node-space/list-spaces :added "4.1"}
+^{:refer xt.substrate.base-space/list-spaces :added "4.1"}
 (fact "lists active spaces"
 
   (!.rb
@@ -90,7 +90,7 @@
      (space/list-spaces n)])
   => [2 ["a" "b"]])
 
-^{:refer xt.event.node-space/get-space-state :added "4.1"}
+^{:refer xt.substrate.base-space/get-space-state :added "4.1"}
 (fact "gets space state and creates default space state on demand"
 
   (!.rb
@@ -100,7 +100,7 @@
      (space/get-space-state n "room/b")])
   => [2 {}])
 
-^{:refer xt.event.node-space/set-space-state :added "4.1"}
+^{:refer xt.substrate.base-space/set-space-state :added "4.1"}
 (fact "sets a space state value"
 
   (!.rb
@@ -109,7 +109,7 @@
     [(. (space/get-space-state n "room/a") ["count"])])
   => [5])
 
-^{:refer xt.event.node-space/update-space-state :added "4.1"}
+^{:refer xt.substrate.base-space/update-space-state :added "4.1"}
 (fact "updates a space state value with the current entry"
 
   (!.rb

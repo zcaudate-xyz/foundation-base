@@ -8,17 +8,17 @@
 (l/script- :js
   {:runtime :chromedriver.instance
    :require [[js.worker.link :as worker-link]
-              [xt.event.node-transport-browser :as worker-transport]
-              [xt.event.node :as event-node]
-              [xt.event.node-frame :as event-frame]
+              [xt.substrate.transport-browser :as worker-transport]
+              [xt.substrate :as event-node]
+              [xt.substrate.base-frame :as event-frame]
               [xt.lang.common-repl :as repl]
               [xt.lang.spec-promise :as promise]]})
 
 (def ^:private +webworker-script+
   (l/emit-script
    '(do
-      (var node (xt.event.node/node-create {"id" "worker-web"}))
-      (xt.event.node/register-handler
+      (var node (xt.substrate/node-create {"id" "worker-web"}))
+      (xt.substrate/register-handler
        node
        "demo/echo"
        (fn [space args request worker-node]
@@ -27,14 +27,14 @@
                   "args" args
                   "worker" (. worker-node ["id"])}))
        nil)
-      (. (xt.event.node/attach-transport
+      (. (xt.substrate/attach-transport
           node
           "host"
-          (xt.event.node-transport-browser/self-endpoint self))
+          (xt.substrate.transport-browser/self-endpoint self))
          (then
           (fn [_]
             (. self (postMessage {"signal" "ready"
-                                  "runtime" "xt.event.node"
+                                  "runtime" "xt.substrate"
                                   "worker" "worker-web"}))
             (return node))))
       node)
@@ -46,10 +46,10 @@
    '(do
       (:= (. globalThis ["onconnect"])
           (fn [e]
-            (var node (xt.event.node/node-create {"id" "worker-shared"}))
+            (var node (xt.substrate/node-create {"id" "worker-shared"}))
             (var port (. e ["ports"] [0]))
             (. port (start))
-            (xt.event.node/register-handler
+            (xt.substrate/register-handler
              node
              "demo/echo"
              (fn [space args request worker-node]
@@ -58,12 +58,12 @@
                         "args" args
                         "worker" (. worker-node ["id"])}))
              nil)
-            (xt.event.node/attach-transport
+            (xt.substrate/attach-transport
              node
              "host"
-             (xt.event.node-transport-browser/self-endpoint port))
+             (xt.substrate.transport-browser/self-endpoint port))
             (. port (postMessage {"signal" "ready"
-                                  "runtime" "xt.event.node"
+                                  "runtime" "xt.substrate"
                                   "worker" "worker-shared"}))
             (return node))))
    {:lang :js
@@ -76,7 +76,7 @@
                               4000)]
    :teardown [(l/rt:stop)]})
 
-(fact "make-webworker-link creates a live xt.event.node runtime and adapter"
+(fact "make-webworker-link creates a live xt.substrate runtime and adapter"
   (notify/wait-on [:js 4000]
     (var link (worker-link/make-webworker-link (@! +webworker-script+)))
     (var endpoint (worker-transport/worker-endpoint link))
@@ -85,10 +85,10 @@
        (repl/notify frame)))
     true)
   => {"signal" "ready"
-      "runtime" "xt.event.node"
+      "runtime" "xt.substrate"
       "worker" "worker-web"})
 
-(fact "make-sharedworker-link creates a live xt.event.node runtime and adapter"
+(fact "make-sharedworker-link creates a live xt.substrate runtime and adapter"
   (notify/wait-on [:js 4000]
     (var link (worker-link/make-sharedworker-link (@! +sharedworker-script+)))
     (var endpoint (worker-transport/worker-endpoint link))
@@ -97,7 +97,7 @@
        (repl/notify frame)))
     true)
   => {"signal" "ready"
-      "runtime" "xt.event.node"
+      "runtime" "xt.substrate"
       "worker" "worker-shared"})
 
 (fact "demo/echo can be called from outside a live WebWorker"

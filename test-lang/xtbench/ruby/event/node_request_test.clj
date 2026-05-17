@@ -8,22 +8,22 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
-             [xt.event.node-frame :as frame]
-             [xt.event.node :as node]
-             [xt.event.node-request :as req]]})
+             [xt.substrate.base-frame :as frame]
+             [xt.substrate :as node]
+             [xt.substrate.base-request :as req]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.event.node-request/ensure-promise :added "4.1"}
+^{:refer xt.substrate.base-request/ensure-promise :added "4.1"}
 (fact "normalises raw values to promises"
 
   (!.rb
     [(promise/x:promise-native? (req/ensure-promise {:ok true}))])
   => [true])
 
-^{:refer xt.event.node-request/add-pending :added "4.1"}
+^{:refer xt.substrate.base-request/add-pending :added "4.1"}
 (fact "tracks and settles pending request entries"
 
   (!.rb
@@ -54,7 +54,7 @@
       []
       []])
 
-^{:refer xt.event.node-request/remove-pending :added "4.1"}
+^{:refer xt.substrate.base-request/remove-pending :added "4.1"}
 (fact "removes pending request entries by id"
 
   (!.rb
@@ -71,7 +71,7 @@
      (xt/x:obj-keys (. n ["pending"]))])
   => [true []])
 
-^{:refer xt.event.node-request/settle-pending :added "4.1"}
+^{:refer xt.substrate.base-request/settle-pending :added "4.1"}
 (fact "settles pending requests using response reply ids"
 
   (!.rb
@@ -95,7 +95,7 @@
      (xt/x:obj-keys (. n ["pending"]))])
   => [true [true] []])
 
-^{:refer xt.event.node-request/invoke-handler :added "4.1"}
+^{:refer xt.substrate.base-request/invoke-handler :added "4.1"}
 (fact "invokes shared handlers against the selected space"
 
   (!.rb
@@ -132,7 +132,7 @@
     [(promise/x:promise-native? out)])
   => [true])
 
-^{:refer xt.event.node-request/response-body :added "4.1"}
+^{:refer xt.substrate.base-request/response-body :added "4.1"}
 (fact "normalises ok responses into promise results"
 
   (!.rb

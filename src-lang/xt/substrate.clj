@@ -1,4 +1,4 @@
-(ns xt.event.node-main
+(ns xt.substrate
   (:require [hara.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
@@ -6,11 +6,18 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-promise :as promise]
              [xt.event.base-listener :as event-common]
-             [xt.event.node-frame :as frame]
-             [xt.event.node-router :as router]
-             [xt.event.node-space :as node-space]
-             [xt.event.node-request :as node-request]
-             [xt.event.node-pubsub :as node-pubsub]]})
+             [xt.substrate.base-frame :as frame]
+             [xt.substrate.base-router :as router]
+             [xt.substrate.base-space :as node-space]
+             [xt.substrate.base-request :as node-request]
+             [xt.substrate.base-pubsub :as node-pubsub]]})
+
+(def.xt create-space node-space/create-space)
+(def.xt get-space node-space/get-space)
+(def.xt list-spaces node-space/list-spaces)
+(def.xt get-space-state node-space/get-space-state)
+(def.xt set-space-state node-space/set-space-state)
+(def.xt update-space-state node-space/update-space-state)
 
 (defspec.xt NodeTriggerHandler
   [:fn [node-space/NodeSpace frame/NodeFrame :xt/any] :xt/any])
@@ -278,7 +285,7 @@
   {:added "4.1"}
   [obj]
   (return (and (xt/x:is-object? obj)
-               (== "event.node"
+               (== "substrate"
                    (xt/x:get-key obj "::")))))
 
 (defn.xt transport?
@@ -286,7 +293,7 @@
   {:added "4.1"}
   [obj]
   (return (and (xt/x:is-object? obj)
-               (== "event.node.transport"
+               (== "substrate.transport"
                    (xt/x:get-key obj "::")))))
 
 (defn.xt transport-create
@@ -295,7 +302,7 @@
   [transport-id impl]
   (return
    (xt/x:obj-assign
-    {"::" "event.node.transport"
+    {"::" "substrate.transport"
      :id transport-id
      :listener nil}
     (or impl {}))))
@@ -404,7 +411,7 @@
   (:= opts (or opts {}))
   (var node
    (event-common/blank-container
-    "event.node"
+    "substrate"
     (xt/x:obj-assign
      {:id (or (xt/x:get-key opts "id")
               (frame/rand-id "node-" 6))

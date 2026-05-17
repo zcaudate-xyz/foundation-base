@@ -12,9 +12,9 @@
              [xt.db.node.instance-util :as util]
              [xt.event.base-view :as event-view]
              [xt.event.util-throttle :as throttle]
-             [xt.event.node :as event-node]
-             [xt.event.node-space :as node-space]
-             [xt.event.node-request :as node-request]
+             [xt.substrate :as event-node]
+             [xt.substrate.base-space :as node-space]
+             [xt.substrate.base-request :as node-request]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-promise :as promise]]})

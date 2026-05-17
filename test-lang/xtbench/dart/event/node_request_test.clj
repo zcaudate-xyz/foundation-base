@@ -8,22 +8,22 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
-             [xt.event.node-frame :as frame]
-             [xt.event.node :as node]
-             [xt.event.node-request :as req]]})
+             [xt.substrate.base-frame :as frame]
+             [xt.substrate :as node]
+             [xt.substrate.base-request :as req]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.event.node-request/ensure-promise :added "4.1"}
+^{:refer xt.substrate.base-request/ensure-promise :added "4.1"}
 (fact "normalises raw values to promises"
 
   (!.dt
     [(promise/x:promise-native? (req/ensure-promise {:ok true}))])
   => [true])
 
-^{:refer xt.event.node-request/add-pending :added "4.1"
+^{:refer xt.substrate.base-request/add-pending :added "4.1"
   :setup [(def +out+
             (just-in
              [true
@@ -57,7 +57,7 @@
      (xt/x:obj-keys (. n ["pending"]))])
   => +out+)
 
-^{:refer xt.event.node-request/remove-pending :added "4.1"
+^{:refer xt.substrate.base-request/remove-pending :added "4.1"
   :setup [(def +out+ (just-in [true empty?]))]}
 (fact "removes pending request entries by id"
 
@@ -75,7 +75,7 @@
      (xt/x:obj-keys (. n ["pending"]))])
   => +out+)
 
-^{:refer xt.event.node-request/settle-pending :added "4.1"
+^{:refer xt.substrate.base-request/settle-pending :added "4.1"
   :setup [(def +out+ (just-in [true [true] empty?]))]}
 (fact "settles pending requests using response reply ids"
 
@@ -100,7 +100,7 @@
      (xt/x:obj-keys (. n ["pending"]))])
   => +out+)
 
-^{:refer xt.event.node-request/invoke-handler :added "4.1"}
+^{:refer xt.substrate.base-request/invoke-handler :added "4.1"}
 (fact "invokes shared handlers against the selected space"
 
   (!.dt
@@ -137,7 +137,7 @@
     [(promise/x:promise-native? out)])
   => [true])
 
-^{:refer xt.event.node-request/response-body :added "4.1"}
+^{:refer xt.substrate.base-request/response-body :added "4.1"}
 (fact "normalises ok responses into promise results"
 
   (!.dt
@@ -147,6 +147,6 @@
   => [true])
 
 (comment
-  (s/snapto '[xt.event.node-request])
-  (s/seedgen-langremove '[xt.event.node-request] {:lang [:lua :python] :write true})
-  (s/seedgen-langadd '[xt.event.node-request] {:lang [:lua :python] :write true}))
+  (s/snapto '[xt.substrate.base-request])
+  (s/seedgen-langremove '[xt.substrate.base-request] {:lang [:lua :python] :write true})
+  (s/seedgen-langadd '[xt.substrate.base-request] {:lang [:lua :python] :write true}))

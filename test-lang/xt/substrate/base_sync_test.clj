@@ -1,4 +1,4 @@
-(ns xt.event.node-sync-test
+(ns xt.substrate.base-sync-test
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]))
@@ -9,42 +9,39 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
-             [xt.event.node :as event-node]
-             [xt.event.node-main :as node-main]
-             [xt.event.node-frame :as frame]
-             [xt.event.node-router :as router]
-             [xt.event.node-space :as node-space]
-             [xt.event.node-sync :as sync]]})
+             [xt.substrate :as event-node]
+             [xt.substrate.base-frame :as frame]
+             [xt.substrate.base-router :as router]
+             [xt.substrate.base-space :as node-space]
+             [xt.substrate.base-sync :as sync]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
-             [xt.event.node :as event-node]
-             [xt.event.node-main :as node-main]
-             [xt.event.node-frame :as frame]
-             [xt.event.node-router :as router]
-             [xt.event.node-space :as node-space]
-             [xt.event.node-sync :as sync]]})
+             [xt.substrate :as event-node]
+             [xt.substrate.base-frame :as frame]
+             [xt.substrate.base-router :as router]
+             [xt.substrate.base-space :as node-space]
+             [xt.substrate.base-sync :as sync]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
-             [xt.event.node :as event-node]
-             [xt.event.node-main :as node-main]
-             [xt.event.node-frame :as frame]
-             [xt.event.node-router :as router]
-             [xt.event.node-space :as node-space]
-             [xt.event.node-sync :as sync]]})
+             [xt.substrate :as event-node]
+             [xt.substrate.base-frame :as frame]
+             [xt.substrate.base-router :as router]
+             [xt.substrate.base-space :as node-space]
+             [xt.substrate.base-sync :as sync]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.event.node-sync/handle-open :added "4.1"}
+^{:refer xt.substrate.base-sync/handle-open :added "4.1"}
 (fact "open requests capture the caller transport and subscribe sync signals"
 
   (notify/wait-on :js
@@ -59,7 +56,7 @@
         (promise/x:promise-then
          (fn [_]
            (return
-            (node-main/receive-frame
+            (event-node/receive-frame
              n
              (frame/request-frame
               "room/a"
@@ -99,7 +96,7 @@
         (promise/x:promise-then
          (fn [_]
            (return
-            (node-main/receive-frame
+            (event-node/receive-frame
              n
              (frame/request-frame
               "room/a"
@@ -139,7 +136,7 @@
         (promise/x:promise-then
          (fn [_]
            (return
-            (node-main/receive-frame
+            (event-node/receive-frame
              n
              (frame/request-frame
               "room/a"
@@ -167,7 +164,7 @@
       "reset" ["peer-a"]
       "error" ["peer-a"]})
 
-^{:refer xt.event.node-sync/handle-resume :added "4.1"}
+^{:refer xt.substrate.base-sync/handle-resume :added "4.1"}
 (fact "resume requests return either reset snapshots or live resume acknowledgements"
 
   (notify/wait-on :js
@@ -251,7 +248,7 @@
        "subscribed" false
        "subscription_id" "resume-live"}])
 
-^{:refer xt.event.node-sync/apply-stream :added "4.1"}
+^{:refer xt.substrate.base-sync/apply-stream :added "4.1"}
 (fact "sync triggers apply delta and reset payloads to local space state"
 
   (notify/wait-on :js

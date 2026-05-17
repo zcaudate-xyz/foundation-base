@@ -5,14 +5,14 @@
 (l/script- :dart
   {:runtime :twostep
    :require [[xt.lang.spec-base :as xt]
-             [xt.event.node :as node]
-             [xt.event.node-space :as space]]})
+             [xt.substrate :as node]
+             [xt.substrate.base-space :as space]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.event.node/create-space :added "4.1"}
+^{:refer xt.substrate/create-space :added "4.1"}
 (fact "manages per-space state independently from node-level handlers"
 
   (!.dt
@@ -35,7 +35,7 @@
      (space/list-spaces n)])
   => [2 "alpha" 1 3 "beta" "alpha" ["beta"]])
 
-^{:refer xt.event.node-space/space :added "4.1"}
+^{:refer xt.substrate.base-space/space :added "4.1"}
 (fact "constructs a space entry with defaults"
 
   (!.dt
@@ -45,7 +45,7 @@
      (. entry ["meta"])])
   => ["room/a" 1 {}])
 
-^{:refer xt.event.node-space/get-space :added "4.1"}
+^{:refer xt.substrate.base-space/get-space :added "4.1"}
 (fact "gets spaces by id"
 
   (!.dt
@@ -55,7 +55,7 @@
      (xt/x:nil? (space/get-space n "missing"))])
   => ["room/a" true])
 
-^{:refer xt.event.node-space/ensure-space :added "4.1"}
+^{:refer xt.substrate.base-space/ensure-space :added "4.1"}
 (fact "ensures a space exists without replacing existing entries"
 
   (!.dt
@@ -67,7 +67,7 @@
      (xt/x:len (space/list-spaces n))])
   => [1 1 1])
 
-^{:refer xt.event.node-space/remove-space :added "4.1"}
+^{:refer xt.substrate.base-space/remove-space :added "4.1"}
 (fact "removes a space entry and returns it"
 
   (!.dt
@@ -79,7 +79,7 @@
      (xt/x:nil? (space/get-space n "room/a"))])
   => ["room/a" true])
 
-^{:refer xt.event.node-space/list-spaces :added "4.1"}
+^{:refer xt.substrate.base-space/list-spaces :added "4.1"}
 (fact "lists active spaces"
 
   (!.dt
@@ -90,7 +90,7 @@
      (space/list-spaces n)])
   => [2 ["a" "b"]])
 
-^{:refer xt.event.node-space/get-space-state :added "4.1"}
+^{:refer xt.substrate.base-space/get-space-state :added "4.1"}
 (fact "gets space state and creates default space state on demand"
 
   (!.dt
@@ -100,7 +100,7 @@
      (space/get-space-state n "room/b")])
   => [2 {}])
 
-^{:refer xt.event.node-space/set-space-state :added "4.1"}
+^{:refer xt.substrate.base-space/set-space-state :added "4.1"}
 (fact "sets a space state value"
 
   (!.dt
@@ -109,7 +109,7 @@
     [(. (space/get-space-state n "room/a") ["count"])])
   => [5])
 
-^{:refer xt.event.node-space/update-space-state :added "4.1"}
+^{:refer xt.substrate.base-space/update-space-state :added "4.1"}
 (fact "updates a space state value with the current entry"
 
   (!.dt
@@ -126,6 +126,6 @@
   => [5 "room/a"])
 
 (comment
-  (s/snapto '[xt.event.node-space])
-  (s/seedgen-langremove '[xt.event.node-space] {:lang [:lua :python] :write true})
-  (s/seedgen-langadd '[xt.event.node-space] {:lang [:lua :python] :write true}))
+  (s/snapto '[xt.substrate.base-space])
+  (s/seedgen-langremove '[xt.substrate.base-space] {:lang [:lua :python] :write true})
+  (s/seedgen-langadd '[xt.substrate.base-space] {:lang [:lua :python] :write true}))

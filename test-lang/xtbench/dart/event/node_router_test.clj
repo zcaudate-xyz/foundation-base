@@ -5,14 +5,14 @@
 (l/script- :dart
   {:runtime :twostep
    :require [[xt.lang.spec-base :as xt]
-             [xt.event.node :as node]
-             [xt.event.node-router :as router]]})
+             [xt.substrate :as node]
+             [xt.substrate.base-router :as router]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.event.node-router/subscribe-frame :added "4.1"}
+^{:refer xt.substrate.base-router/subscribe-frame :added "4.1"}
 (fact "constructs router control frames with space and signal metadata"
 
   (!.dt
@@ -26,7 +26,7 @@
      (. unsub ["id"])])
   => ["subscribe" "room/a" "event/ping" "tab" "unsubscribe" "sub-a"])
 
-^{:refer xt.event.node-router/unsubscribe-frame :added "4.1"}
+^{:refer xt.substrate.base-router/unsubscribe-frame :added "4.1"}
 (fact "constructs unsubscribe control frames"
 
   (!.dt
@@ -38,7 +38,7 @@
      (xt/x:is-string? (. frame ["id"]))])
   => ["unsubscribe" "__NODE__" "event/ping" "tab" true])
 
-^{:refer xt.event.node-router/ensure-router :added "4.1"
+^{:refer xt.substrate.base-router/ensure-router :added "4.1"
   :setup [(def +out+
             (just-in
              [(just ["connections" "subscriptions"] :in-any-order)
@@ -55,7 +55,7 @@
      signal-subs])
   => +out+)
 
-^{:refer xt.event.node-router/get-connections :added "4.1"}
+^{:refer xt.substrate.base-router/get-connections :added "4.1"}
 (fact "exposes router connection state"
 
   (!.dt
@@ -64,7 +64,7 @@
     (. (router/get-connections n) ["peer-a"] ["meta"] ["role"]))
   => "edge")
 
-^{:refer xt.event.node-router/get-subscriptions :added "4.1"}
+^{:refer xt.substrate.base-router/get-subscriptions :added "4.1"}
 (fact "exposes router subscription state"
 
   (!.dt
@@ -73,7 +73,7 @@
     (. (router/get-subscriptions n) ["room/a"] ["event/ping"] ["peer-a"] ["id"]))
   => "sub-a")
 
-^{:refer xt.event.node-router/register-connection :added "4.1"}
+^{:refer xt.substrate.base-router/register-connection :added "4.1"}
 (fact "registers connection entries"
 
   (!.dt
@@ -84,7 +84,7 @@
      (. (router/get-connections n) ["peer-a"] ["id"])])
   => ["peer-a" "edge" "peer-a"])
 
-^{:refer xt.event.node-router/prune-subscription-signal-loop :added "4.1"}
+^{:refer xt.substrate.base-router/prune-subscription-signal-loop :added "4.1"}
 (fact "prunes one connection across all signals in a space"
 
   (!.dt
@@ -104,7 +104,7 @@
      (xt/x:nil? (xt/x:get-key space-subs "event/b"))])
   => ["sub-b" true true])
 
-^{:refer xt.event.node-router/prune-subscription-space-loop :added "4.1"}
+^{:refer xt.substrate.base-router/prune-subscription-space-loop :added "4.1"}
 (fact "prunes one connection across all spaces"
 
   (!.dt
@@ -121,7 +121,7 @@
      (xt/x:obj-keys subs)])
   => ["sub-b" nil ["room/a"]])
 
-^{:refer xt.event.node-router/unregister-connection :added "4.1"
+^{:refer xt.substrate.base-router/unregister-connection :added "4.1"
   :setup [(def +out+ (just-in ["peer-a" nil empty?]))]}
 (fact "unregisters connections and removes their subscriptions"
 
@@ -135,7 +135,7 @@
      (router/list-subscriptions n "room/a" "event/ping")])
   => +out+)
 
-^{:refer xt.event.node-router/ensure-space-subscriptions :added "4.1"
+^{:refer xt.substrate.base-router/ensure-space-subscriptions :added "4.1"
   :setup [(def +out+ (just-in [["__NODE__"] empty?]))]}
 (fact "creates per-space subscription maps"
 
@@ -146,7 +146,7 @@
      space-subs])
   => +out+)
 
-^{:refer xt.event.node-router/ensure-signal-subscriptions :added "4.1"}
+^{:refer xt.substrate.base-router/ensure-signal-subscriptions :added "4.1"}
 (fact "creates per-signal subscription maps"
 
   (!.dt
@@ -156,7 +156,7 @@
      signal-subs])
   => [{} {}])
 
-^{:refer xt.event.node-router/add-subscription :added "4.1"
+^{:refer xt.substrate.base-router/add-subscription :added "4.1"
   :setup [(def +out+ (just-in ["sub-a" "tab" empty?]))]}
 (fact "stores and removes raw router subscription entries"
 
@@ -176,7 +176,7 @@
      (router/list-subscriptions n "room/a" "event/ping")])
   => +out+)
 
-^{:refer xt.event.node-router/remove-subscription :added "4.1"
+^{:refer xt.substrate.base-router/remove-subscription :added "4.1"
   :setup [(def +out+ (just-in ["sub-a" empty?]))]}
 (fact "removes router subscription entries"
 
@@ -188,7 +188,7 @@
      (router/list-subscriptions n "room/a" "event/ping")])
   => +out+)
 
-^{:refer xt.event.node-router/list-subscriptions :added "4.1"}
+^{:refer xt.substrate.base-router/list-subscriptions :added "4.1"}
 (fact "lists router subscriptions at each level"
 
   (!.dt
@@ -199,7 +199,7 @@
      (router/list-subscriptions n "room/a" "event/ping")])
   => [["room/a"] ["event/ping"] ["peer-a"]])
 
-^{:refer xt.event.node-router/target-ids :added "4.1"}
+^{:refer xt.substrate.base-router/target-ids :added "4.1"}
 (fact "lists target connection ids for a stream route"
 
   (!.dt
@@ -208,7 +208,7 @@
     (router/target-ids n "room/a" "event/ping"))
   => ["peer-a"])
 
-^{:refer xt.event.node-router/receive-subscribe :added "4.1"}
+^{:refer xt.substrate.base-router/receive-subscribe :added "4.1"}
 (fact "processes inbound subscribe frames using ctx transport ids"
 
   (!.dt
@@ -220,7 +220,7 @@
     (router/list-subscriptions n "room/a" "event/ping"))
   => ["peer-a"])
 
-^{:refer xt.event.node-router/receive-unsubscribe :added "4.1"
+^{:refer xt.substrate.base-router/receive-unsubscribe :added "4.1"
   :setup [(def +out+ empty?)]}
 (fact "processes inbound unsubscribe frames using ctx transport ids"
 
@@ -235,6 +235,6 @@
   => +out+)
 
 (comment
-  (s/snapto '[xt.event.node-router])
-  (s/seedgen-langremove '[xt.event.node-router] {:lang [:lua :python] :write true})
-  (s/seedgen-langadd '[xt.event.node-router] {:lang [:lua :python] :write true}))
+  (s/snapto '[xt.substrate.base-router])
+  (s/seedgen-langremove '[xt.substrate.base-router] {:lang [:lua :python] :write true})
+  (s/seedgen-langadd '[xt.substrate.base-router] {:lang [:lua :python] :write true}))

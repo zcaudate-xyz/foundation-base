@@ -1,4 +1,4 @@
-(ns xt.event.node-transport-json-test
+(ns xt.substrate.transport-memory-test
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]))
@@ -8,34 +8,31 @@
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
-             [xt.event.node-frame :as frame]
-             [xt.event.node-json :as node-json]
-             [xt.event.node-wire :as node-wire]
-             [xt.event.node-transport-json :as json-transport]]})
+             [xt.substrate.base-frame :as frame]
+             [xt.substrate.base-json :as node-json]
+             [xt.substrate.transport-memory :as transport-memory]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
-             [xt.event.node-frame :as frame]
-             [xt.event.node-json :as node-json]
-             [xt.event.node-wire :as node-wire]
-             [xt.event.node-transport-json :as json-transport]]})
+             [xt.substrate.base-frame :as frame]
+             [xt.substrate.base-json :as node-json]
+             [xt.substrate.transport-memory :as transport-memory]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
-             [xt.event.node-frame :as frame]
-             [xt.event.node-json :as node-json]
-             [xt.event.node-wire :as node-wire]
-             [xt.event.node-transport-json :as json-transport]]})
+             [xt.substrate.base-frame :as frame]
+             [xt.substrate.base-json :as node-json]
+             [xt.substrate.transport-memory :as transport-memory]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.event.node-json/encode-frame :added "4.1"}
+^{:refer xt.substrate.base-json/encode-frame :added "4.1"}
 (fact "encodes and decodes node frames with normalized JSON-safe errors"
 
   (!.js
@@ -83,20 +80,20 @@
      (. out ["error"] ["message"])])
   => [true "response" "req-1" "error" "boom"])
 
-^{:refer xt.event.node-transport-json/text-endpoint :added "4.1"}
+^{:refer xt.substrate.transport-memory/text-endpoint :added "4.1"}
 (fact "json endpoints emit encoded text and decode inbound frames over a wire"
 
   (notify/wait-on :js
-    (var wire (node-wire/memory-pair {"left_id" "host"
+    (var wire (transport-memory/memory-pair {"left_id" "host"
                                       "right_id" "peer"}))
     (var outbound [])
     (var inbound [])
     ((. (. wire ["left"]) ["start_fn"])
      (fn [event ctx]
-       (xt/x:arr-push outbound {"text" (json-transport/event-text event)
+       (xt/x:arr-push outbound {"text" (transport-memory/event-text event)
                                 "ctx" ctx})
        (return true)))
-    (var endpoint (json-transport/text-endpoint (. wire ["right"])))
+    (var endpoint (transport-memory/text-endpoint (. wire ["right"])))
     ((. endpoint ["start_fn"])
      (fn [frame ctx]
        (xt/x:arr-push inbound {"frame" frame
@@ -122,16 +119,16 @@
                    "id" "req-echo"}})
 
   (notify/wait-on :lua
-    (var wire (node-wire/memory-pair {"left_id" "host"
+    (var wire (transport-memory/memory-pair {"left_id" "host"
                                       "right_id" "peer"}))
     (var outbound [])
     (var inbound [])
     ((. (. wire ["left"]) ["start_fn"])
      (fn [event ctx]
-       (xt/x:arr-push outbound {"text" (json-transport/event-text event)
+       (xt/x:arr-push outbound {"text" (transport-memory/event-text event)
                                 "ctx" ctx})
        (return true)))
-    (var endpoint (json-transport/text-endpoint (. wire ["right"])))
+    (var endpoint (transport-memory/text-endpoint (. wire ["right"])))
     ((. endpoint ["start_fn"])
      (fn [frame ctx]
        (xt/x:arr-push inbound {"frame" frame
@@ -157,16 +154,16 @@
                    "id" "req-echo"}})
 
   (notify/wait-on :python
-    (var wire (node-wire/memory-pair {"left_id" "host"
+    (var wire (transport-memory/memory-pair {"left_id" "host"
                                       "right_id" "peer"}))
     (var outbound [])
     (var inbound [])
     ((. (. wire ["left"]) ["start_fn"])
      (fn [event ctx]
-       (xt/x:arr-push outbound {"text" (json-transport/event-text event)
+       (xt/x:arr-push outbound {"text" (transport-memory/event-text event)
                                 "ctx" ctx})
        (return true)))
-    (var endpoint (json-transport/text-endpoint (. wire ["right"])))
+    (var endpoint (transport-memory/text-endpoint (. wire ["right"])))
     ((. endpoint ["start_fn"])
      (fn [frame ctx]
        (xt/x:arr-push inbound {"frame" frame

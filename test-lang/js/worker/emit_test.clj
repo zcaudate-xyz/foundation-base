@@ -19,12 +19,12 @@
                        {}))
        (var transportId (or (. config ["transport_id"])
                             "host"))
-       (var node (xt.event.node/node-create nodeOpts))
+       (var node (xt.substrate/node-create nodeOpts))
        (xt.db.node/install node dbOpts)
-       (xt.event.node/attach-transport
+       (xt.substrate/attach-transport
         node
         transportId
-        (xt.event.node-transport-browser/self-endpoint self))
+        (xt.substrate.transport-browser/self-endpoint self))
        node])
 
 ^{:refer js.worker.emit/webworker-script :added "4.1"}

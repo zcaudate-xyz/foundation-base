@@ -1,9 +1,9 @@
-(ns xt.event.node-transport-websocket
+(ns xt.substrate.transport-websocket
   (:require [hara.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
-  {:require [[xt.event.node-main :as main]
-             [xt.event.node-transport-json :as json-transport]
+  {:require [[xt.substrate :as main]
+             [xt.substrate.transport-memory :as json-transport]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.protocol.impl.client-websocket :as wsrt]]})

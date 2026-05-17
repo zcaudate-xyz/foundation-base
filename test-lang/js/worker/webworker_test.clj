@@ -10,7 +10,7 @@
              [js.worker.link :as worker-link]
              [xt.db.node :as db-node]
              [xt.db.node.test-fixtures :as fixtures]
-             [xt.event.node :as event-node]
+             [xt.substrate :as event-node]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
              [xt.lang.spec-base :as xt]]})

@@ -8,15 +8,15 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
-             [xt.event.node-frame :as frame]
-             [xt.event.node :as node]
-             [xt.event.node-pubsub :as pubsub]]})
+             [xt.substrate.base-frame :as frame]
+             [xt.substrate :as node]
+             [xt.substrate.base-pubsub :as pubsub]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.event.node-pubsub/subscribe :added "4.1"}
+^{:refer xt.substrate.base-pubsub/subscribe :added "4.1"}
 (fact "constructs a subscription frame for the transport"
 
   (!.dt
@@ -28,7 +28,7 @@
      (. frame ["id"])])
   => ["subscribe" "room/a" "event/updated" "sub-1"])
 
-^{:refer xt.event.node-pubsub/unsubscribe :added "4.1"}
+^{:refer xt.substrate.base-pubsub/unsubscribe :added "4.1"}
 (fact "constructs an unsubscribe frame for the transport"
 
   (!.dt
@@ -40,7 +40,7 @@
      (. frame ["id"])])
   => ["unsubscribe" "room/a" "event/updated" "sub-1"])
 
-^{:refer xt.event.node-pubsub/invoke-trigger :added "4.1"}
+^{:refer xt.substrate.base-pubsub/invoke-trigger :added "4.1"}
 (fact "invokes a shared trigger against the selected space"
 
   (!.dt
@@ -66,7 +66,7 @@
     calls)
   => [["room/a" 3]])
 
-^{:refer xt.event.node-pubsub/receive-publish :added "4.1"}
+^{:refer xt.substrate.base-pubsub/receive-publish :added "4.1"}
 (fact "dispatches stream frames to shared triggers"
 
   (!.dt
@@ -91,6 +91,6 @@
   => [9])
 
 (comment
-  (s/snapto '[xt.event.node-pubsub])
-  (s/seedgen-langremove '[xt.event.node-pubsub] {:lang [:lua :python] :write true})
-  (s/seedgen-langadd '[xt.event.node-pubsub] {:lang [:lua :python] :write true}))
+  (s/snapto '[xt.substrate.base-pubsub])
+  (s/seedgen-langremove '[xt.substrate.base-pubsub] {:lang [:lua :python] :write true})
+  (s/seedgen-langadd '[xt.substrate.base-pubsub] {:lang [:lua :python] :write true}))

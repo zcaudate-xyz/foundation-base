@@ -3,9 +3,9 @@
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.event.node-transport-browser :as node-transport]
+  {:require [[xt.substrate.transport-browser :as node-transport]
              [xt.db.node :as db-node]
-             [xt.event.node :as event-node]
+             [xt.substrate :as event-node]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]]})
 

@@ -1,4 +1,4 @@
-(ns xt.event.node-transport-websocket-test
+(ns xt.substrate.transport-websocket-test
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]))
@@ -6,17 +6,17 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
-             [xt.event.node-frame :as frame]
-             [xt.event.node-json :as node-json]
+             [xt.substrate.base-frame :as frame]
+             [xt.substrate.base-json :as node-json]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
-             [xt.event.node-transport-websocket :as ws-transport]]})
+             [xt.substrate.transport-websocket :as ws-transport]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.event.node-transport-websocket/event-text :added "4.1"}
+^{:refer xt.substrate.transport-websocket/event-text :added "4.1"}
 (fact "unwraps websocket message events and passes raw payloads through"
   (!.js
    [(ws-transport/event-text {"data" "ping"})
@@ -24,7 +24,7 @@
     (ws-transport/event-text "echo")])
   => ["ping" "pong" "echo"])
 
-^{:refer xt.event.node-transport-websocket/websocket-endpoint :added "4.1"}
+^{:refer xt.substrate.transport-websocket/websocket-endpoint :added "4.1"}
 (fact "adapts websocket-like sockets to the JSON node transport contract"
   (notify/wait-on :js
    (var handlers {})

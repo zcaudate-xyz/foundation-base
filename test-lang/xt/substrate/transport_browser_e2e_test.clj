@@ -1,26 +1,26 @@
-(ns xt.event.node-transport-browser-e2e-test
+(ns xt.substrate.transport-browser-e2e-test
   (:use code.test)
   (:require [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]
             [js.worker.link]
-            [xt.event.node-transport-browser]
+            [xt.substrate.transport-browser]
             [xt.lang.common-notify :as notify]))
 
 (l/script- :js
   {:runtime :chromedriver.instance
    :require [[js.worker.link :as worker-link]
              [xt.lang.spec-base :as xt]
-             [xt.event.node :as event-node]
-             [xt.event.node-frame :as event-frame]
-             [xt.event.node-transport-browser :as browser-transport]
+             [xt.substrate :as event-node]
+             [xt.substrate.base-frame :as event-frame]
+             [xt.substrate.transport-browser :as browser-transport]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]]})
 
 (def ^:private +webworker-script+
   (l/emit-script
    '(do
-      (var node (xt.event.node/node-create {"id" "worker-web"}))
-      (xt.event.node/register-handler
+      (var node (xt.substrate/node-create {"id" "worker-web"}))
+      (xt.substrate/register-handler
        node
        "demo/echo"
        (fn [space args request worker-node]
@@ -29,7 +29,7 @@
                   "args" args
                   "worker" (. worker-node ["id"])}))
        nil)
-      (. (xt.event.node-transport-browser/boot-self
+      (. (xt.substrate.transport-browser/boot-self
           node
          {"transport_id" "host"
           "target" self
@@ -48,10 +48,10 @@
    '(do
       (:= (. globalThis ["onconnect"])
           (fn [e]
-            (var node (xt.event.node/node-create {"id" "worker-shared"}))
+            (var node (xt.substrate/node-create {"id" "worker-shared"}))
             (var port (. e ["ports"] [0]))
             (. port (start))
-            (xt.event.node/register-handler
+            (xt.substrate/register-handler
              node
              "demo/echo"
              (fn [space args request worker-node]
@@ -60,7 +60,7 @@
                         "args" args
                         "worker" (. worker-node ["id"])}))
              nil)
-            (xt.event.node-transport-browser/boot-self
+            (xt.substrate.transport-browser/boot-self
              node
              {"transport_id" "host"
               "target" port

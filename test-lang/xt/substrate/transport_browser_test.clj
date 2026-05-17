@@ -1,4 +1,4 @@
-(ns xt.event.node-transport-browser-test
+(ns xt.substrate.transport-browser-test
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify])
   (:use code.test))
@@ -8,15 +8,15 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
-             [xt.event.node :as event-node]
-             [xt.event.node-transport-browser :as browser-transport]]})
+             [xt.substrate :as event-node]
+             [xt.substrate.transport-browser :as browser-transport]]})
 
 (fact:global
   {:setup [(l/rt:restart)
            (l/rt:scaffold-imports :js)]
    :teardown [(l/rt:stop)]})
 
-^{:refer xt.event.node-transport-browser/worker-endpoint :added "4.1"}
+^{:refer xt.substrate.transport-browser/worker-endpoint :added "4.1"}
 (fact "adapts a host-side Worker endpoint to the node transport contract"
   (!.js
    (var posted [])
@@ -46,7 +46,7 @@
                    "removed" 1
                    "terminated" 1}))
 
-^{:refer xt.event.node-transport-browser/messageport-endpoint :added "4.1"}
+^{:refer xt.substrate.transport-browser/messageport-endpoint :added "4.1"}
 (fact "adapts a MessagePort-like endpoint to the node transport contract"
   (!.js
    (var posted [])
@@ -77,7 +77,7 @@
                    "started" 1
                    "closed" 1}))
 
-^{:refer xt.event.node-transport-browser/sharedworker-endpoint :added "4.1"}
+^{:refer xt.substrate.transport-browser/sharedworker-endpoint :added "4.1"}
 (fact "adapts a SharedWorker by using its port"
   (!.js
    (var posted [])
@@ -104,7 +104,7 @@
                    "received" [{"kind" "response" "id" "res-4"}]
                    "started" 1}))
 
-^{:refer xt.event.node-transport-browser/self-endpoint :added "4.1"}
+^{:refer xt.substrate.transport-browser/self-endpoint :added "4.1"}
 (fact "adapts worker self to the node transport contract"
   (!.js
    (var posted [])
@@ -131,7 +131,7 @@
                    "received" [{"kind" "request" "id" "req-3"}]
                    "removed" 1}))
 
-^{:refer xt.event.node-transport-browser/event-data :added "4.1"}
+^{:refer xt.substrate.transport-browser/event-data :added "4.1"}
 (fact "unwraps browser worker message envelopes and passes raw payloads through"
   (!.js
    [(browser-transport/event-data {"data" {"id" "evt-1"}})
@@ -139,7 +139,7 @@
   => [{"id" "evt-1"}
      {"id" "evt-2"}])
 
-^{:refer xt.event.node-transport-browser/connect-worker :added "4.1"}
+^{:refer xt.substrate.transport-browser/connect-worker :added "4.1"}
 (fact "connect-worker resolves after the ready signal and disconnect stops the worker"
   (notify/wait-on :js
     (var created 0)

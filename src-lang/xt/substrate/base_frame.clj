@@ -1,4 +1,4 @@
-(ns xt.event.node-frame
+(ns xt.substrate.base-frame
   (:require [hara.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk

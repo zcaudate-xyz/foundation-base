@@ -1,11 +1,11 @@
-(ns xt.event.node-router
+(ns xt.substrate.base-router
   (:require [hara.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-promise :as promise]
-             [xt.event.node-frame :as frame]]})
+             [xt.substrate.base-frame :as frame]]})
 
 (defspec.xt RouterConnectionEntry
   [:xt/record

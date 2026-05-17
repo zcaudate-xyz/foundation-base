@@ -1,4 +1,4 @@
-(ns xt.event.node-test
+(ns xt.substrate-api-test
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]))
@@ -11,7 +11,7 @@
              [xt.lang.spec-promise :as promise]
              [xt.db.node.instance-model :as model]
              [xt.db.node.test-fixtures :as fixtures]
-             [xt.event.node :as event-node]]})
+             [xt.substrate :as event-node]]})
 
 (l/script- :lua
   {:runtime :basic
@@ -20,7 +20,7 @@
              [xt.lang.spec-promise :as promise]
              [xt.db.node.instance-model :as model]
              [xt.db.node.test-fixtures :as fixtures]
-             [xt.event.node :as event-node]]})
+             [xt.substrate :as event-node]]})
 
 (l/script- :python
   {:runtime :basic
@@ -29,13 +29,13 @@
              [xt.lang.spec-promise :as promise]
              [xt.db.node.instance-model :as model]
              [xt.db.node.test-fixtures :as fixtures]
-             [xt.event.node :as event-node]]})
+             [xt.substrate :as event-node]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.event.node/CANARY.00-create-node :added "4.1" :adopt true}
+^{:refer xt.substrate/CANARY.00-create-node :added "4.1" :adopt true}
 (fact "registers a handler"
 
   (!.js
@@ -44,7 +44,7 @@
       {"handlers" {},
        "id" string?
        "spaces" {},
-       "::" "event.node",
+       "::" "substrate",
        "transports" {},
        "triggers" {},
        "meta" {},
@@ -58,7 +58,7 @@
       {"handlers" {},
        "id" string?
        "spaces" {},
-       "::" "event.node",
+       "::" "substrate",
        "transports" {},
        "triggers" {},
        "meta" {},
@@ -72,7 +72,7 @@
       {"handlers" {},
        "id" string?
        "spaces" {},
-       "::" "event.node",
+       "::" "substrate",
        "transports" {},
        "triggers" {},
        "meta" {},
@@ -80,7 +80,7 @@
        "pending" {},
        "listeners" {}}))
 
-^{:refer xt.event.node/CANARY.00-create-space :added "4.1" :adopt true}
+^{:refer xt.substrate/CANARY.00-create-space :added "4.1" :adopt true}
 (fact "creates a space in the node"
 
   (!.js
@@ -98,7 +98,7 @@
                              "room/a"))
   => {"id" "room/a", "state" {}, "meta" {}})
 
-^{:refer xt.event.node/CANARY.00-create-space-map :added "4.1" :adopt true}
+^{:refer xt.substrate/CANARY.00-create-space-map :added "4.1" :adopt true}
 (fact "creates a space in the node"
 
   (!.js
@@ -137,7 +137,7 @@
      "room/a"))
   => {"count" 0})
 
-^{:refer xt.event.node/CANARY.00-create-space-handler :added "4.1" :adopt true}
+^{:refer xt.substrate/CANARY.00-create-space-handler :added "4.1" :adopt true}
 (fact "creates a node with a declarative map"
 
   (notify/wait-on :js
@@ -251,7 +251,7 @@
            (repl/notify res)))))
   => "ping user-a - 3")
 
-^{:refer xt.event.node/CANARY.01-register-handler :added "4.1" :adopt true}
+^{:refer xt.substrate/CANARY.01-register-handler :added "4.1" :adopt true}
 (fact "registers a handler"
 
   (notify/wait-on :js
@@ -299,7 +299,7 @@
            (repl/notify res)))))
   => {"space" "room/a", "reply" "pong", "ok" true})
 
-^{:refer xt.event.node/CANARY.01-register-trigger :added "4.1" :adopt true}
+^{:refer xt.substrate/CANARY.01-register-trigger :added "4.1" :adopt true}
 (fact "registers a trigger"
 
   (notify/wait-on :js
@@ -416,7 +416,7 @@
       "count" 3,
       "last_data" {"source" "publish-3"}})
 
-^{:refer xt.event.node/CANARY.02-request-publish-trigger-workflow :added "4.1" :adopt true}
+^{:refer xt.substrate/CANARY.02-request-publish-trigger-workflow :added "4.1" :adopt true}
 (fact "request handlers can publish events and wait for trigger side effects"
 
   (notify/wait-on :js
@@ -641,7 +641,7 @@
                "last_ping" 3
                "role" "user-a"}})
 
-^{:refer xt.event.node/CANARY.03-trigger-chain-workflow :added "4.1" :adopt true}
+^{:refer xt.substrate/CANARY.03-trigger-chain-workflow :added "4.1" :adopt true}
 (fact "triggers can publish follow-on events into another trigger"
 
   (notify/wait-on :js
@@ -801,6 +801,6 @@
                     "label" "first"}})
 
 (comment
-  (s/snapto '[xt.event.node-space])
-  (s/seedgen-langremove '[xt.event.node-space] {:lang [:lua :python] :write true})
-  (s/seedgen-langadd '[xt.event.node-space] {:lang [:lua :python] :write true}))
+  (s/snapto '[xt.substrate.base-space])
+  (s/seedgen-langremove '[xt.substrate.base-space] {:lang [:lua :python] :write true})
+  (s/seedgen-langadd '[xt.substrate.base-space] {:lang [:lua :python] :write true}))

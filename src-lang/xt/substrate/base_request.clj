@@ -1,11 +1,11 @@
-(ns xt.event.node-request
+(ns xt.substrate.base-request
   (:require [hara.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.event.node-frame :as frame]
-             [xt.event.node-space :as space]]})
+             [xt.substrate.base-frame :as frame]
+             [xt.substrate.base-space :as space]]})
 
 (defspec.xt RequestResolve
   [:fn [:xt/any] :xt/any])

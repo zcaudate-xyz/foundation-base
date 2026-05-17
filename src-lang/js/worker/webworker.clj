@@ -6,9 +6,9 @@
 
 (l/script :xtalk
   {:require [[js.worker.link :as worker-link]
-             [xt.event.node-transport-browser :as node-transport]
+             [xt.substrate.transport-browser :as node-transport]
              [xt.db.node :as db-node]
-             [xt.event.node :as event-node]
+             [xt.substrate :as event-node]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]]})
 

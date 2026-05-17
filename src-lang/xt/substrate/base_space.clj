@@ -1,10 +1,10 @@
-(ns xt.event.node-space
+(ns xt.substrate.base-space
   (:require [hara.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-             [xt.event.node-frame :as frame]]})
+             [xt.substrate.base-frame :as frame]]})
 
 (defspec.xt NodeSpace
   [:xt/record

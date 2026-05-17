@@ -4,8 +4,8 @@
              [js.worker.env-sharedworker]
              [hara.lang :as l]
              [xt.db.node]
-             [xt.event.node]
-             [xt.event.node-transport-browser]))
+             [xt.substrate]
+             [xt.substrate.transport-browser]))
 
 (defn emit-worker-script
   "emits a worker bootstrap script"
@@ -29,12 +29,12 @@
                      {}))
     '(var transportId (or (. config ["transport_id"])
                           "host"))
-    '(var node (xt.event.node/node-create nodeOpts))
+    '(var node (xt.substrate/node-create nodeOpts))
     '(xt.db.node/install node dbOpts)
-    '(xt.event.node/attach-transport
+    '(xt.substrate/attach-transport
       node
       transportId
-      (xt.event.node-transport-browser/self-endpoint self))
+      (xt.substrate.transport-browser/self-endpoint self))
     'node]))
 
 (defn webworker-script

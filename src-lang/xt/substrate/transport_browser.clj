@@ -1,9 +1,8 @@
-(ns xt.event.node-transport-browser
+(ns xt.substrate.transport-browser
   (:require [hara.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
-  {:require [[xt.event.node :as event-node]
-             [xt.event.node-main :as main]
+  {:require [[xt.substrate :as main]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]]})
 
@@ -91,7 +90,7 @@
   "creates a connection record from an attached transport"
   {:added "4.1"}
   [node transport-id ready]
-  (var transport (event-node/get-transport node transport-id))
+  (var transport (main/get-transport node transport-id))
   (return
    {"node" node
     "transport_id" transport-id
@@ -102,7 +101,7 @@
     "ready" ready
     "disconnect_fn" (fn []
                       (return
-                       (event-node/detach-transport node transport-id)))}))
+                       (main/detach-transport node transport-id)))}))
 
 (defn.xt wrap-ready-endpoint
   "suppresses the ready event from node routing and captures it in state"
@@ -174,7 +173,7 @@
                       true))
   (return
    (promise/x:promise-then
-    (event-node/attach-transport
+    (main/attach-transport
      node
      transport-id
      (-/wrap-ready-endpoint endpoint state config))
@@ -403,7 +402,7 @@
     (xt/x:err "boot-self requires `target`"))
   (return
    (promise/x:promise-then
-    (event-node/attach-transport
+    (main/attach-transport
      node
      transport-id
      (-/self-endpoint target))
@@ -412,7 +411,7 @@
        (return (-/connection-record node transport-id nil))
        (return
         (promise/x:promise-then
-         ((xt/x:get-key (event-node/get-transport node transport-id)
+         ((xt/x:get-key (main/get-transport node transport-id)
                         "send_fn")
           ready)
          (fn [_]
@@ -423,6 +422,6 @@
   {:added "4.1"}
   [connection]
   (return
-   (event-node/detach-transport
+   (main/detach-transport
     (xt/x:get-key connection "node")
     (xt/x:get-key connection "transport_id"))))

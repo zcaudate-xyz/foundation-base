@@ -1,10 +1,10 @@
-(ns xt.event.node-json
+(ns xt.substrate.base-json
   (:require [hara.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
-             [xt.event.node-frame :as frame]
-             [xt.event.node-router :as router]]})
+             [xt.substrate.base-frame :as frame]
+             [xt.substrate.base-router :as router]]})
 
 (defspec.xt frame-kind?
   [:fn [[:xt/maybe :xt/str]] :xt/bool])

@@ -1,13 +1,13 @@
-(ns xt.event.node-sync
+(ns xt.substrate.base-sync
   (:require [hara.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-promise :as promise]
-             [xt.event.node :as event-node]
-             [xt.event.node-router :as router]
-             [xt.event.node-space :as node-space]]})
+             [xt.substrate :as event-node]
+             [xt.substrate.base-router :as router]
+             [xt.substrate.base-space :as node-space]]})
 
 (def$.xt META_KEY  "node.sync")
 (def$.xt STATE_TAG "node.sync.state")
