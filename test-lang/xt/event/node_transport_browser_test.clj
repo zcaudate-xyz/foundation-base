@@ -1,10 +1,14 @@
 (ns xt.event.node-transport-browser-test
-  (:require [hara.lang :as l])
+  (:require [hara.lang :as l]
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-repl :as repl]
+             [xt.lang.spec-promise :as promise]
+             [xt.event.node :as event-node]
              [xt.event.node-transport-browser :as browser-transport]]})
 
 (fact:global
@@ -133,4 +137,40 @@
    [(browser-transport/event-data {"data" {"id" "evt-1"}})
     (browser-transport/event-data {"id" "evt-2"})])
   => [{"id" "evt-1"}
-      {"id" "evt-2"}])
+     {"id" "evt-2"}])
+
+^{:refer xt.event.node-transport-browser/connect-worker :added "4.1"}
+(fact "connect-worker resolves after the ready signal and disconnect stops the worker"
+  (notify/wait-on :js
+    (var created 0)
+    (var terminated 0)
+    (var node (event-node/node-create {"id" "browser-node"}))
+    (promise/x:promise-catch
+     (promise/x:promise-then
+     (browser-transport/connect-worker
+      node
+      {"transport_id" "worker"
+       "source"
+       {"create_fn"
+        (fn [listener]
+          (:= created (+ created 1))
+          (listener {"signal" "ready"
+                     "worker" "unit-worker"} nil)
+          (return {"postMessage" (fn [frame] frame)
+                   "terminate" (fn [] (:= terminated (+ terminated 1)))}))}})
+     (fn [conn]
+       (return
+        (promise/x:promise-then
+         (browser-transport/disconnect conn)
+         (fn [_]
+           (repl/notify {"created" created
+                         "terminated" terminated
+                         "ready" (. conn ["ready"])
+                         "transport_id" (. conn ["transport_id"])}))))))
+     (fn [err]
+      (repl/notify {"error" err}))))
+  => {"created" 1
+     "terminated" 1
+     "ready" {"signal" "ready"
+              "worker" "unit-worker"}
+     "transport_id" "worker"})

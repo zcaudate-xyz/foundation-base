@@ -2,8 +2,19 @@
   (:require [hara.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
-  {:require [[xt.event.node-main :as main]
-             [xt.lang.spec-base :as xt]]})
+  {:require [[xt.event.node :as event-node]
+             [xt.event.node-main :as main]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as promise]]})
+
+(defspec.xt NodeTransportConnection
+  [:xt/record
+   ["node" main/EventNode]
+   ["transport_id" :xt/str]
+   ["transport" main/NodeTransport]
+   ["target" [:xt/maybe :xt/any]]
+   ["ready" [:xt/maybe :xt/any]]
+   ["disconnect_fn" [:xt/maybe [:fn [] :xt/promise]]]])
 
 (defspec.xt event-data
   [:fn [:xt/any] :xt/any])
@@ -19,6 +30,162 @@
 
 (defspec.xt self-endpoint
   [:fn [:xt/any] main/NodeTransport])
+
+(defspec.xt connect-port
+  [:fn [main/EventNode
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+   :xt/promise])
+
+(defspec.xt connect-sharedworker
+  [:fn [main/EventNode
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+   :xt/promise])
+
+(defspec.xt connect-worker
+  [:fn [main/EventNode
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+   :xt/promise])
+
+(defspec.xt boot-self
+  [:fn [main/EventNode
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+   :xt/promise])
+
+(defspec.xt disconnect
+  [:fn [NodeTransportConnection] :xt/promise])
+
+(defn.xt ready-event?
+  "checks if an inbound event should resolve connection readiness"
+  {:added "4.1"}
+  [event opts]
+  (var ready-pred (xt/x:get-key opts "ready_pred"))
+  (cond (xt/x:is-function? ready-pred)
+        (return (ready-pred event))
+
+        :else
+        (do (var ready-signal (:? (xt/x:has-key? opts "ready_signal")
+                                  (xt/x:get-key opts "ready_signal")
+                                  "ready"))
+            (if (xt/x:nil? ready-signal)
+              (return false)
+              (return (and (xt/x:is-object? event)
+                           (== (xt/x:get-key event "signal")
+                               ready-signal)))))))
+
+(defn.xt await-ready
+  "waits until a connection state records its ready event"
+  {:added "4.1"}
+  [state]
+  (var ready (xt/x:get-key state "ready"))
+  (if (xt/x:not-nil? ready)
+    (return (promise/x:promise-run ready))
+    (return
+     (promise/x:promise-then
+      (promise/x:with-delay 10
+        (fn []
+          (return nil)))
+      (fn [_]
+        (return (-/await-ready state)))))))
+
+(defn.xt connection-record
+  "creates a connection record from an attached transport"
+  {:added "4.1"}
+  [node transport-id ready]
+  (var transport (event-node/get-transport node transport-id))
+  (return
+   {"node" node
+    "transport_id" transport-id
+    "transport" transport
+    "target" (:? (xt/x:nil? transport)
+                 nil
+                 (xt/x:get-key transport "listener"))
+    "ready" ready
+    "disconnect_fn" (fn []
+                      (return
+                       (event-node/detach-transport node transport-id)))}))
+
+(defn.xt wrap-ready-endpoint
+  "suppresses the ready event from node routing and captures it in state"
+  {:added "4.1"}
+  [endpoint state opts]
+  (var wait-ready (:? (xt/x:has-key? opts "wait_ready")
+                      (xt/x:get-key opts "wait_ready")
+                      true))
+  (if (not wait-ready)
+    (return endpoint)
+    (do
+      (var start-fn (xt/x:get-key endpoint "start_fn"))
+      (if (xt/x:nil? start-fn)
+        (return endpoint)
+        (return
+         (xt/x:obj-assign
+          (xt/x:obj-assign {} endpoint)
+          {"start_fn"
+           (fn [listener]
+             (return
+              (start-fn
+               (fn [event ctx]
+                 (if (-/ready-event? event opts)
+                   (do
+                     (xt/x:set-key state "ready" event)
+                     (return event))
+                   (return (listener event ctx)))))))}))))))
+
+(defn.xt source-endpoint
+  "creates a transport endpoint around a create_fn source"
+  {:added "4.1"}
+  [source kind]
+  (var current-target nil)
+  (var send-fn
+       (fn [frame]
+         (when (xt/x:nil? current-target)
+           (xt/x:err "source endpoint not started"))
+         (return (. current-target (postMessage frame)))))
+  (var start-fn
+       (fn [listener]
+         (:= current-target
+             ((xt/x:get-key source "create_fn")
+              listener))
+         (return current-target)))
+  (var stop-fn
+       (fn [_]
+         (when (and (xt/x:not-nil? current-target)
+                    (xt/x:is-function? (xt/x:get-key current-target "close")))
+           (. current-target (close)))
+         (when (and (xt/x:not-nil? current-target)
+                    (xt/x:is-function? (xt/x:get-key current-target "terminate")))
+           (. current-target (terminate)))
+         (:= current-target nil)
+         (return true)))
+  (return
+   {"meta" {"kind" kind}
+    "send_fn" send-fn
+    "start_fn" start-fn
+    "stop_fn" stop-fn}))
+
+(defn.xt connect-endpoint
+  "attaches an endpoint and resolves when its ready event arrives"
+  {:added "4.1"}
+  [node transport-id endpoint opts]
+  (var config (or opts {}))
+  (var state {"ready" nil})
+  (var wait-ready (:? (xt/x:has-key? config "wait_ready")
+                      (xt/x:get-key config "wait_ready")
+                      true))
+  (return
+   (promise/x:promise-then
+    (event-node/attach-transport
+     node
+     transport-id
+     (-/wrap-ready-endpoint endpoint state config))
+    (fn [_]
+      (if wait-ready
+        (return
+         (promise/x:promise-then
+          (-/await-ready state)
+          (fn [ready]
+            (return (-/connection-record node transport-id ready)))))
+        (return (-/connection-record node transport-id nil)))))))
 
 (defn.xt event-data
   "normalizes a browser worker message event into its payload"
@@ -161,6 +328,101 @@
          (return true)))
   (return
    {"meta" {"kind" "webworker.self"}
-     "send_fn" send-fn
-     "start_fn" start-fn
-     "stop_fn" stop-fn}))
+    "send_fn" send-fn
+    "start_fn" start-fn
+    "stop_fn" stop-fn}))
+
+(defn.xt connect-port
+  "attaches a MessagePort-like endpoint and waits for readiness"
+  {:added "4.1"}
+  [node opts]
+  (var config (or opts {}))
+  (var port (or (xt/x:get-key config "port")
+               (xt/x:get-key config "source")))
+  (var transport-id (or (xt/x:get-key config "transport_id")
+                       "port"))
+  (when (xt/x:nil? port)
+    (xt/x:err "connect-port requires `port` or `source`"))
+  (return
+   (-/connect-endpoint
+    node
+    transport-id
+    (-/messageport-endpoint port)
+    config)))
+
+(defn.xt connect-sharedworker
+  "attaches a SharedWorker endpoint and waits for readiness"
+  {:added "4.1"}
+  [node opts]
+  (var config (or opts {}))
+  (var source (or (xt/x:get-key config "source")
+                 (xt/x:get-key config "sharedworker")))
+  (var transport-id (or (xt/x:get-key config "transport_id")
+                       "worker"))
+  (when (xt/x:nil? source)
+    (xt/x:err "connect-sharedworker requires `source` or `sharedworker`"))
+  (return
+   (-/connect-endpoint
+    node
+    transport-id
+    (:? (xt/x:has-key? source "create_fn")
+       (-/source-endpoint source "sharedworker")
+       (-/sharedworker-endpoint source))
+    config)))
+
+(defn.xt connect-worker
+  "attaches a Worker endpoint and waits for readiness"
+  {:added "4.1"}
+  [node opts]
+  (var config (or opts {}))
+  (var source (or (xt/x:get-key config "source")
+                 (xt/x:get-key config "worker")))
+  (var transport-id (or (xt/x:get-key config "transport_id")
+                       "worker"))
+  (when (xt/x:nil? source)
+    (xt/x:err "connect-worker requires `source` or `worker`"))
+  (return
+   (-/connect-endpoint
+    node
+    transport-id
+    (:? (xt/x:has-key? source "create_fn")
+       (-/source-endpoint source "webworker")
+       (-/worker-endpoint source))
+    config)))
+
+(defn.xt boot-self
+  "attaches worker self/port and optionally emits a ready payload"
+  {:added "4.1"}
+  [node opts]
+  (var config (or opts {}))
+  (var target (xt/x:get-key config "target"))
+  (var transport-id (or (xt/x:get-key config "transport_id")
+                       "host"))
+  (var ready (xt/x:get-key config "ready"))
+  (when (xt/x:nil? target)
+    (xt/x:err "boot-self requires `target`"))
+  (return
+   (promise/x:promise-then
+    (event-node/attach-transport
+     node
+     transport-id
+     (-/self-endpoint target))
+    (fn [_]
+     (if (xt/x:nil? ready)
+       (return (-/connection-record node transport-id nil))
+       (return
+        (promise/x:promise-then
+         ((xt/x:get-key (event-node/get-transport node transport-id)
+                        "send_fn")
+          ready)
+         (fn [_]
+           (return (-/connection-record node transport-id ready))))))))))
+
+(defn.xt disconnect
+  "disconnects a browser transport connection"
+  {:added "4.1"}
+  [connection]
+  (return
+   (event-node/detach-transport
+    (xt/x:get-key connection "node")
+    (xt/x:get-key connection "transport_id"))))
