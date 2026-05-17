@@ -52,6 +52,7 @@
 (def.xt node? main/node?)
 (def.xt transport? main/transport?)
 (def.xt transport-create main/transport-create)
+(def.xt configure-node main/configure-node)
 (def.xt node-create main/node-create)
 (def.xt register-handler main/register-handler)
 (def.xt unregister-handler main/unregister-handler)

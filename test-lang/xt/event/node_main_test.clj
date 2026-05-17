@@ -199,11 +199,158 @@
      (xt/x:obj-keys (. n ["router"]))])
   => +out+)
 
+^{:refer xt.event.node-main/node-create :added "4.1"}
+(fact "node-create accepts declarative spaces, handlers, and triggers"
+
+  (!.js
+   (var n (main/node-create {"id" "node-a"
+                             "meta" {"cluster" "local"}
+                             "spaces" {"room/a" {"state" {"count" 1}
+                                                 "meta" {"role" "alpha"}}
+                                      "room/b" {"state" {"count" 2}}}
+                             "handlers" {"ping" {"fn" (fn [space args request node]
+                                                        (return args))
+                                                 "meta" {"kind" "request"}}}
+                             "triggers" {"event/updated" {"fn" (fn [space stream node]
+                                                                 (return stream))
+                                                          "meta" {"kind" "stream"}}}}))
+   [(. n ["id"])
+    (. n ["meta"] ["cluster"])
+    (node/list-spaces n)
+    (. (node/get-space n "room/a") ["meta"] ["role"])
+    (. (node/get-space-state n "room/b") ["count"])
+    (. (main/get-handler n "ping") ["meta"] ["kind"])
+    (. (main/get-trigger n "event/updated") ["meta"] ["kind"])])
+  => ["node-a" "local" ["room/a" "room/b"] "alpha" 2 "request" "stream"]
+
+  (!.lua
+   (var n (main/node-create {"id" "node-a"
+                             "meta" {"cluster" "local"}
+                             "spaces" {"room/a" {"state" {"count" 1}
+                                                 "meta" {"role" "alpha"}}
+                                      "room/b" {"state" {"count" 2}}}
+                             "handlers" {"ping" {"fn" (fn [space args request node]
+                                                        (return args))
+                                                 "meta" {"kind" "request"}}}
+                             "triggers" {"event/updated" {"fn" (fn [space stream node]
+                                                                 (return stream))
+                                                          "meta" {"kind" "stream"}}}}))
+   [(. n ["id"])
+    (. n ["meta"] ["cluster"])
+    (node/list-spaces n)
+    (. (node/get-space n "room/a") ["meta"] ["role"])
+    (. (node/get-space-state n "room/b") ["count"])
+    (. (main/get-handler n "ping") ["meta"] ["kind"])
+    (. (main/get-trigger n "event/updated") ["meta"] ["kind"])])
+  => ["node-a" "local" ["room/a" "room/b"] "alpha" 2 "request" "stream"]
+
+  (!.py
+   (var n (main/node-create {"id" "node-a"
+                             "meta" {"cluster" "local"}
+                             "spaces" {"room/a" {"state" {"count" 1}
+                                                 "meta" {"role" "alpha"}}
+                                      "room/b" {"state" {"count" 2}}}
+                             "handlers" {"ping" {"fn" (fn [space args request node]
+                                                        (return args))
+                                                 "meta" {"kind" "request"}}}
+                             "triggers" {"event/updated" {"fn" (fn [space stream node]
+                                                                 (return stream))
+                                                          "meta" {"kind" "stream"}}}}))
+   [(. n ["id"])
+    (. n ["meta"] ["cluster"])
+    (node/list-spaces n)
+    (. (node/get-space n "room/a") ["meta"] ["role"])
+    (. (node/get-space-state n "room/b") ["count"])
+    (. (main/get-handler n "ping") ["meta"] ["kind"])
+    (. (main/get-trigger n "event/updated") ["meta"] ["kind"])])
+  => ["node-a" "local" ["room/a" "room/b"] "alpha" 2 "request" "stream"])
+
+^{:refer xt.event.node-main/node-create :added "4.1"}
+(fact "node-create rejects space configs without explicit state or meta keys"
+
+  (!.js
+   (try
+     (main/node-create {"spaces" {"room/a" {"count" 2}}})
+     (return :not-thrown)
+     (catch err
+       (return :thrown))))
+  => :thrown
+
+  (!.lua
+   (try
+     (main/node-create {"spaces" {"room/a" {"count" 2}}})
+     (return :not-thrown)
+     (catch err
+       (return :thrown))))
+  => :thrown
+
+  (!.py
+   (try
+     (main/node-create {"spaces" {"room/a" {"count" 2}}})
+     (return :not-thrown)
+     (catch err
+       (return :thrown))))
+  => :thrown)
+
+^{:refer xt.event.node-main/configure-node :added "4.1"}
+(fact "configure-node applies declarative config to an existing node"
+
+  (!.js
+   (var n (main/node-create {"id" "node-b"}))
+   (main/configure-node
+    n
+    {"spaces" {"room/c" {"state" {"count" 4}}}
+     "handlers" {"echo" (fn [space args request node]
+                          (return (. space ["id"])))}
+     "triggers" {"event/tick" (fn [space stream node]
+                                (node/set-space-state node
+                                                      (. space ["id"])
+                                                      (. stream ["data"]))
+                                (return true))}})
+   [(node/list-spaces n)
+    (main/list-handlers n)
+    (main/list-triggers n)])
+  => [["room/c"] ["echo"] ["event/tick"]]
+
+  (!.lua
+   (var n (main/node-create {"id" "node-b"}))
+   (main/configure-node
+    n
+    {"spaces" {"room/c" {"state" {"count" 4}}}
+     "handlers" {"echo" (fn [space args request node]
+                          (return (. space ["id"])))}
+     "triggers" {"event/tick" (fn [space stream node]
+                                (node/set-space-state node
+                                                      (. space ["id"])
+                                                      (. stream ["data"]))
+                                (return true))}})
+   [(node/list-spaces n)
+    (main/list-handlers n)
+    (main/list-triggers n)])
+  => [["room/c"] ["echo"] ["event/tick"]]
+
+  (!.py
+   (var n (main/node-create {"id" "node-b"}))
+   (main/configure-node
+    n
+    {"spaces" {"room/c" {"state" {"count" 4}}}
+     "handlers" {"echo" (fn [space args request node]
+                          (return (. space ["id"])))}
+     "triggers" {"event/tick" (fn [space stream node]
+                                (node/set-space-state node
+                                                      (. space ["id"])
+                                                      (. stream ["data"]))
+                                (return true))}})
+   [(node/list-spaces n)
+    (main/list-handlers n)
+    (main/list-triggers n)])
+  => [["room/c"] ["echo"] ["event/tick"]])
+
 ^{:refer xt.event.node-main/register-handler :added "4.1"}
 (fact "registers handlers on the node"
 
   (!.js
-    (var n (main/node-create {}))
+   (var n (main/node-create {}))
     (main/register-handler n "echo" (fn [ctx arg] (return arg)) {"role" "test"})
     [(. (main/get-handler n "echo") ["id"])
      (. (main/get-handler n "echo") ["meta"] ["role"])])
@@ -681,6 +828,32 @@
   (!.py
     (xt/x:is-function? main/publish))
   => true)
+
+^{:refer xt.event.node-main/node-create :added "4.1"}
+(fact "declarative node config participates in local publish and request flows"
+
+  (notify/wait-on :js
+    (var n (main/node-create {"spaces" {"room/a" {"state" {"count" 1}}}
+                              "handlers" {"ping" (fn [space args request node]
+                                                   (return {"space" (. space ["id"])
+                                                            "count" (. (. space ["state"]) ["count"])
+                                                            "payload" (xt/x:get-idx args 0)}))}
+                              "triggers" {"event/updated" (fn [space stream node]
+                                                            (node/set-space-state node
+                                                                                  (. space ["id"])
+                                                                                  (. stream ["data"]))
+                                                            (return true))}}))
+    (promise/x:promise-then
+     (main/publish n "room/a" "event/updated" {"count" 3} nil)
+     (fn [_]
+       (return
+        (promise/x:promise-then
+         (main/request n "room/a" "ping" ["hello"] nil)
+         (fn [out]
+           (repl/notify out)))))))
+  => {"space" "room/a"
+      "count" 3
+      "payload" "hello"})
 
 ^{:refer xt.event.node-main/publish :added "4.1"}
 (fact "publish can chain a second async callback after local trigger handling"

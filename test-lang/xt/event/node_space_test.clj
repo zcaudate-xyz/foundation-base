@@ -25,6 +25,10 @@
  {:setup [(l/rt:restart)]
  :teardown [(l/rt:stop)]})
 
+^{:refer xt.event.node/CANARY :adopt true :added "4.1"}
+(fact "checking for specific workings")
+
+
 ^{:refer xt.event.node/create-space :added "4.1"}
 (fact "manages per-space state independently from node-level handlers"
 
