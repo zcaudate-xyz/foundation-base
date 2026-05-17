@@ -6,7 +6,78 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.common-string :as str]]})
 
-(defspec.xt NodeFrame :xt/any)
+(defspec.xt NodeFrame
+  [:xt/record
+   ["kind" :xt/str]
+   ["id" :xt/str]
+   ["space" :xt/str]
+   ["meta" [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+   ["action" [:xt/maybe :xt/str]]
+   ["args" [:xt/maybe [:xt/array :xt/any]]]
+   ["reply-to" [:xt/maybe :xt/str]]
+   ["status" [:xt/maybe :xt/str]]
+   ["data" [:xt/maybe :xt/any]]
+   ["error" [:xt/maybe :xt/any]]
+   ["signal" [:xt/maybe :xt/str]]
+   ["cause" [:xt/maybe :xt/any]]])
+
+(defspec.xt rand-id
+  [:fn [[:xt/maybe :xt/str] :xt/int] :xt/str])
+
+(defspec.xt frame
+  [:fn [:xt/str
+        :xt/str
+        [:xt/maybe :xt/str]
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       NodeFrame])
+
+(defspec.xt request-frame
+  [:fn [[:xt/maybe :xt/str]
+        :xt/str
+        [:xt/maybe [:xt/array :xt/any]]
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       NodeFrame])
+
+(defspec.xt response-frame
+  [:fn [:xt/str
+        [:xt/maybe :xt/str]
+        :xt/str
+        :xt/any
+        [:xt/maybe :xt/any]
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       NodeFrame])
+
+(defspec.xt response-ok-frame
+  [:fn [:xt/str
+        [:xt/maybe :xt/str]
+        :xt/any
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       NodeFrame])
+
+(defspec.xt response-error-frame
+  [:fn [:xt/str
+        [:xt/maybe :xt/str]
+        :xt/any
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       NodeFrame])
+
+(defspec.xt stream-frame
+  [:fn [[:xt/maybe :xt/str]
+        :xt/str
+        :xt/any
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]
+        [:xt/maybe :xt/any]]
+       NodeFrame])
+
+(defspec.xt request-frame?
+  [:fn [NodeFrame] :xt/bool])
+
+(defspec.xt response-frame?
+  [:fn [NodeFrame] :xt/bool])
+
+(defspec.xt stream-frame?
+  [:fn [NodeFrame] :xt/bool])
 
 (def$.xt KIND_REQUEST  "request")
 (def$.xt KIND_RESPONSE "response")

@@ -1,5 +1,5 @@
 (ns xt.event.node-main
-  (:require [hara.lang :as l]))
+  (:require [hara.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
@@ -11,6 +11,262 @@
              [xt.event.node-space :as node-space]
              [xt.event.node-request :as node-request]
              [xt.event.node-pubsub :as node-pubsub]]})
+
+(defspec.xt NodeTriggerHandler
+  [:fn [node-space/NodeSpace frame/NodeFrame :xt/any] :xt/any])
+
+(defspec.xt NodeHandlerEntry
+  [:xt/record
+   ["id" :xt/str]
+   ["fn" node-request/RequestHandler]
+   ["meta" [:xt/maybe [:xt/dict :xt/str :xt/any]]]])
+
+(defspec.xt NodeTriggerEntry
+  [:xt/record
+   ["id" :xt/str]
+   ["fn" NodeTriggerHandler]
+   ["meta" [:xt/maybe [:xt/dict :xt/str :xt/any]]]])
+
+(defspec.xt NodeTransportListener
+  [:fn [frame/NodeFrame
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       :xt/promise])
+
+(defspec.xt NodeTransportSendFn
+  [:fn [frame/NodeFrame] :xt/any])
+
+(defspec.xt NodeTransportStartFn
+  [:fn [NodeTransportListener] :xt/any])
+
+(defspec.xt NodeTransportStopFn
+  [:fn [:xt/any] :xt/any])
+
+(defspec.xt NodeTransport
+  [:xt/record
+   ["::" :xt/str]
+   ["id" :xt/str]
+   ["listener" [:xt/maybe :xt/any]]
+   ["meta" [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+   ["send-fn" [:xt/maybe NodeTransportSendFn]]
+   ["start-fn" [:xt/maybe NodeTransportStartFn]]
+   ["stop-fn" [:xt/maybe NodeTransportStopFn]]])
+
+(defspec.xt EventNode
+  [:xt/record
+   ["::" :xt/str]
+   ["id" :xt/str]
+   ["listeners" event-common/EventListenerMap]
+   ["spaces" [:xt/dict :xt/str node-space/NodeSpace]]
+   ["handlers" [:xt/dict :xt/str NodeHandlerEntry]]
+   ["triggers" [:xt/dict :xt/str NodeTriggerEntry]]
+   ["pending" [:xt/dict :xt/str node-request/PendingEntry]]
+   ["router" router/RouterState]
+   ["transports" [:xt/dict :xt/str NodeTransport]]
+   ["meta" [:xt/maybe [:xt/dict :xt/str :xt/any]]]])
+
+(defspec.xt node?
+  [:fn [:xt/any] :xt/bool])
+
+(defspec.xt transport?
+  [:fn [:xt/any] :xt/bool])
+
+(defspec.xt transport-create
+  [:fn [:xt/str
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       NodeTransport])
+
+(defspec.xt config-space-opts
+  [:fn [:xt/str
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       [:xt/maybe [:xt/dict :xt/str :xt/any]]])
+
+(defspec.xt config-handler-entry
+  [:fn [:xt/str
+        [:or node-request/RequestHandler
+             [:xt/dict :xt/str :xt/any]]]
+       NodeHandlerEntry])
+
+(defspec.xt config-trigger-entry
+  [:fn [:xt/str
+        [:or NodeTriggerHandler
+             [:xt/dict :xt/str :xt/any]]]
+       NodeTriggerEntry])
+
+(defspec.xt configure-node
+  [:fn [EventNode
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       EventNode])
+
+(defspec.xt node-base-opts
+  [:fn [[:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       [:xt/dict :xt/str :xt/any]])
+
+(defspec.xt node-create
+  [:fn [[:xt/maybe [:xt/dict :xt/str :xt/any]]] EventNode])
+
+(defspec.xt register-handler
+  [:fn [EventNode
+        :xt/str
+        node-request/RequestHandler
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       NodeHandlerEntry])
+
+(defspec.xt unregister-handler
+  [:fn [EventNode :xt/str] [:xt/maybe NodeHandlerEntry]])
+
+(defspec.xt get-handler
+  [:fn [EventNode :xt/str] [:xt/maybe NodeHandlerEntry]])
+
+(defspec.xt list-handlers
+  [:fn [EventNode] [:xt/array :xt/str]])
+
+(defspec.xt register-trigger
+  [:fn [EventNode
+        :xt/str
+        NodeTriggerHandler
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       NodeTriggerEntry])
+
+(defspec.xt unregister-trigger
+  [:fn [EventNode :xt/str] [:xt/maybe NodeTriggerEntry]])
+
+(defspec.xt get-trigger
+  [:fn [EventNode :xt/str] [:xt/maybe NodeTriggerEntry]])
+
+(defspec.xt list-triggers
+  [:fn [EventNode] [:xt/array :xt/str]])
+
+(defspec.xt get-transport
+  [:fn [EventNode :xt/str] [:xt/maybe NodeTransport]])
+
+(defspec.xt list-transports
+  [:fn [EventNode] [:xt/array :xt/str]])
+
+(defspec.xt list-subscriptions
+  [:fn [EventNode
+        [:xt/maybe :xt/str]
+        [:xt/maybe :xt/str]]
+       [:or router/RouterSubscriptions
+            router/RouterSpaceSubscriptions
+            [:xt/array :xt/str]]])
+
+(defspec.xt send-transport
+  [:fn [EventNode :xt/str frame/NodeFrame] :xt/promise])
+
+(defspec.xt broadcast-transport-loop
+  [:fn [EventNode
+        [:xt/array :xt/str]
+        frame/NodeFrame
+        [:xt/maybe :xt/str]
+        :xt/int]
+       :xt/promise])
+
+(defspec.xt broadcast-transport
+  [:fn [EventNode
+        frame/NodeFrame
+        [:xt/maybe :xt/str]]
+       :xt/promise])
+
+(defspec.xt route-stream-loop
+  [:fn [EventNode
+        [:xt/array :xt/str]
+        frame/NodeFrame
+        [:xt/maybe :xt/str]
+        :xt/int]
+       :xt/promise])
+
+(defspec.xt route-stream
+  [:fn [EventNode
+        frame/NodeFrame
+        [:xt/maybe :xt/str]]
+       :xt/promise])
+
+(defspec.xt attach-transport
+  [:fn [EventNode
+        :xt/str
+        [:or NodeTransport
+             [:xt/dict :xt/str :xt/any]]]
+       :xt/promise])
+
+(defspec.xt detach-transport
+  [:fn [EventNode :xt/str] :xt/promise])
+
+(defspec.xt request-target
+  [:fn [EventNode
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       [:xt/maybe :xt/str]])
+
+(defspec.xt await-pending
+  [:fn [[:xt/dict :xt/str :xt/any]] :xt/promise])
+
+(defspec.xt respond-ok
+  [:fn [EventNode
+        frame/NodeFrame
+        :xt/any
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       :xt/promise])
+
+(defspec.xt respond-error
+  [:fn [EventNode
+        frame/NodeFrame
+        :xt/any
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       :xt/promise])
+
+(defspec.xt receive-request
+  [:fn [EventNode
+        frame/NodeFrame
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       :xt/promise])
+
+(defspec.xt receive-response
+  [:fn [EventNode frame/NodeFrame] :xt/promise])
+
+(defspec.xt request
+  [:fn [EventNode
+        [:xt/maybe :xt/str]
+        :xt/str
+        [:xt/maybe [:xt/array :xt/any]]
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       :xt/promise])
+
+(defspec.xt subscribe
+  [:fn [EventNode
+        [:xt/maybe :xt/str]
+        :xt/str
+        [:xt/maybe :xt/str]
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       :xt/promise])
+
+(defspec.xt unsubscribe
+  [:fn [EventNode
+        [:xt/maybe :xt/str]
+        :xt/str
+        [:xt/maybe :xt/str]
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       :xt/promise])
+
+(defspec.xt publish
+  [:fn [EventNode
+        [:xt/maybe :xt/str]
+        :xt/str
+        :xt/any
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       :xt/promise])
+
+(defspec.xt receive-publish
+  [:fn [EventNode
+        frame/NodeFrame
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       :xt/promise])
+
+(defspec.xt receive-frame
+  [:fn [EventNode
+        frame/NodeFrame
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       :xt/promise])
 
 (defn.xt node?
   "checks if a value is a node runtime"

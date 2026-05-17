@@ -1,11 +1,33 @@
 (ns xt.event.node-pubsub
-  (:require [hara.lang :as l]))
+  (:require [hara.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.event.node-router :as router]
              [xt.event.node-space :as space]]})
+
+(defspec.xt subscribe
+  [:fn [:xt/any
+        [:xt/maybe :xt/str]
+        :xt/str
+        [:xt/maybe :xt/str]
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       xt.event.node-frame/NodeFrame])
+
+(defspec.xt unsubscribe
+  [:fn [:xt/any
+        [:xt/maybe :xt/str]
+        :xt/str
+        [:xt/maybe :xt/str]
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       xt.event.node-frame/NodeFrame])
+
+(defspec.xt invoke-trigger
+  [:fn [:xt/any xt.event.node-frame/NodeFrame] :xt/promise])
+
+(defspec.xt receive-publish
+  [:fn [:xt/any xt.event.node-frame/NodeFrame] :xt/promise])
 
 (defn.xt subscribe
   "constructs a subscription control frame"

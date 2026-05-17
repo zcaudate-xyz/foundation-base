@@ -1,11 +1,134 @@
 (ns xt.event.node-router
-  (:require [hara.lang :as l]))
+  (:require [hara.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-promise :as promise]
              [xt.event.node-frame :as frame]]})
+
+(defspec.xt RouterConnectionEntry
+  [:xt/record
+   ["id" :xt/str]
+   ["meta" [:xt/maybe [:xt/dict :xt/str :xt/any]]]])
+
+(defspec.xt RouterSubscriptionEntry
+  [:xt/record
+   ["id" :xt/str]
+   ["meta" [:xt/maybe [:xt/dict :xt/str :xt/any]]]])
+
+(defspec.xt RouterSignalSubscriptions
+  [:xt/dict :xt/str RouterSubscriptionEntry])
+
+(defspec.xt RouterSpaceSubscriptions
+  [:xt/dict :xt/str RouterSignalSubscriptions])
+
+(defspec.xt RouterSubscriptions
+  [:xt/dict :xt/str RouterSpaceSubscriptions])
+
+(defspec.xt RouterState
+  [:xt/record
+   ["connections" [:xt/dict :xt/str RouterConnectionEntry]]
+   ["subscriptions" RouterSubscriptions]])
+
+(defspec.xt subscribe-frame
+  [:fn [[:xt/maybe :xt/str]
+        :xt/str
+        [:xt/maybe :xt/str]
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       frame/NodeFrame])
+
+(defspec.xt unsubscribe-frame
+  [:fn [[:xt/maybe :xt/str]
+        :xt/str
+        [:xt/maybe :xt/str]
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       frame/NodeFrame])
+
+(defspec.xt ensure-router
+  [:fn [:xt/any] RouterState])
+
+(defspec.xt get-connections
+  [:fn [:xt/any] [:xt/dict :xt/str RouterConnectionEntry]])
+
+(defspec.xt get-subscriptions
+  [:fn [:xt/any] RouterSubscriptions])
+
+(defspec.xt register-connection
+  [:fn [:xt/any
+        :xt/str
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       RouterConnectionEntry])
+
+(defspec.xt prune-subscription-signal-loop
+  [:fn [RouterSpaceSubscriptions
+        [:xt/array :xt/str]
+        :xt/str
+        :xt/int]
+       :xt/nil])
+
+(defspec.xt prune-subscription-space-loop
+  [:fn [RouterSubscriptions
+        [:xt/array :xt/str]
+        :xt/str
+        :xt/int]
+       :xt/nil])
+
+(defspec.xt unregister-connection
+  [:fn [:xt/any :xt/str] [:xt/maybe RouterConnectionEntry]])
+
+(defspec.xt ensure-space-subscriptions
+  [:fn [:xt/any
+        [:xt/maybe :xt/str]]
+       RouterSpaceSubscriptions])
+
+(defspec.xt ensure-signal-subscriptions
+  [:fn [:xt/any
+        [:xt/maybe :xt/str]
+        :xt/str]
+       RouterSignalSubscriptions])
+
+(defspec.xt add-subscription
+  [:fn [:xt/any
+        :xt/str
+        [:xt/maybe :xt/str]
+        :xt/str
+        [:xt/maybe :xt/str]
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       RouterSubscriptionEntry])
+
+(defspec.xt remove-subscription
+  [:fn [:xt/any
+        :xt/str
+        [:xt/maybe :xt/str]
+        :xt/str]
+       [:xt/maybe RouterSubscriptionEntry]])
+
+(defspec.xt list-subscriptions
+  [:fn [:xt/any
+        [:xt/maybe :xt/str]
+        [:xt/maybe :xt/str]]
+       [:or RouterSubscriptions
+            RouterSpaceSubscriptions
+            [:xt/array :xt/str]]])
+
+(defspec.xt target-ids
+  [:fn [:xt/any
+        [:xt/maybe :xt/str]
+        :xt/str]
+       [:xt/array :xt/str]])
+
+(defspec.xt receive-subscribe
+  [:fn [:xt/any
+        frame/NodeFrame
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       :xt/promise])
+
+(defspec.xt receive-unsubscribe
+  [:fn [:xt/any
+        frame/NodeFrame
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       :xt/promise])
 
 (def$.xt KIND_SUBSCRIBE   "subscribe")
 (def$.xt KIND_UNSUBSCRIBE "unsubscribe")

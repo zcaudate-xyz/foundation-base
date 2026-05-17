@@ -6,7 +6,61 @@
              [xt.lang.common-data :as xtd]
              [xt.event.node-frame :as frame]]})
 
-(defspec.xt NodeSpace :xt/any)
+(defspec.xt NodeSpace
+  [:xt/record
+   ["id" :xt/str]
+   ["state" :xt/any]
+   ["meta" [:xt/maybe [:xt/dict :xt/str :xt/any]]]])
+
+(defspec.xt NodeSpaceUpdater
+  [:fn [:xt/any NodeSpace :xt/any] :xt/any])
+
+(defspec.xt space
+  [:fn [:xt/str
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       NodeSpace])
+
+(defspec.xt get-space
+  [:fn [:xt/any
+        [:xt/maybe :xt/str]]
+       [:xt/maybe NodeSpace]])
+
+(defspec.xt create-space
+  [:fn [:xt/any
+        [:xt/maybe :xt/str]
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       NodeSpace])
+
+(defspec.xt ensure-space
+  [:fn [:xt/any
+        [:xt/maybe :xt/str]
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       NodeSpace])
+
+(defspec.xt remove-space
+  [:fn [:xt/any
+        [:xt/maybe :xt/str]]
+       [:xt/maybe NodeSpace]])
+
+(defspec.xt list-spaces
+  [:fn [:xt/any] [:xt/array :xt/str]])
+
+(defspec.xt get-space-state
+  [:fn [:xt/any
+        [:xt/maybe :xt/str]]
+       :xt/any])
+
+(defspec.xt set-space-state
+  [:fn [:xt/any
+        [:xt/maybe :xt/str]
+        :xt/any]
+       :xt/any])
+
+(defspec.xt update-space-state
+  [:fn [:xt/any
+        [:xt/maybe :xt/str]
+        NodeSpaceUpdater]
+       :xt/any])
 
 (defn.xt space
   "constructs a node space record"

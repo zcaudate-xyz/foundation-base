@@ -7,7 +7,48 @@
              [xt.event.node-frame :as frame]
              [xt.event.node-space :as space]]})
 
-(defspec.xt RequestHandler :xt/any)
+(defspec.xt RequestResolve
+  [:fn [:xt/any] :xt/any])
+
+(defspec.xt RequestReject
+  [:fn [:xt/any] :xt/any])
+
+(defspec.xt RequestHandler
+  [:fn [space/NodeSpace
+        [:xt/maybe [:xt/array :xt/any]]
+        frame/NodeFrame
+        :xt/any]
+       :xt/any])
+
+(defspec.xt PendingEntry
+  [:xt/record
+   ["resolve" RequestResolve]
+   ["reject" RequestReject]
+   ["request" frame/NodeFrame]
+   ["meta" [:xt/maybe [:xt/dict :xt/str :xt/any]]]])
+
+(defspec.xt ensure-promise
+  [:fn [:xt/any] :xt/promise])
+
+(defspec.xt add-pending
+  [:fn [:xt/any
+        frame/NodeFrame
+        RequestResolve
+        RequestReject
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+       PendingEntry])
+
+(defspec.xt remove-pending
+  [:fn [:xt/any :xt/str] [:xt/maybe PendingEntry]])
+
+(defspec.xt settle-pending
+  [:fn [:xt/any frame/NodeFrame] [:xt/maybe PendingEntry]])
+
+(defspec.xt invoke-handler
+  [:fn [:xt/any frame/NodeFrame] :xt/promise])
+
+(defspec.xt response-body
+  [:fn [:xt/any] :xt/promise])
 
 (defn.xt ensure-promise
   "wraps sync values in a native host promise"
