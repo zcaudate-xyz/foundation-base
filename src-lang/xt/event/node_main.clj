@@ -199,6 +199,11 @@
 (defspec.xt await-pending
   [:fn [[:xt/dict :xt/str :xt/any]] :xt/promise])
 
+(defspec.xt request-context
+  [:fn [frame/NodeFrame
+        [:xt/maybe [:xt/dict :xt/str :xt/any]]]
+   frame/NodeFrame])
+
 (defspec.xt respond-ok
   [:fn [EventNode
         frame/NodeFrame
@@ -658,6 +663,21 @@
           (fn [_]
             (return (-/await-pending state)))))))
 
+(defn.xt request-context
+  "merges transport context into a request frame before handler invocation"
+  {:added "4.1"}
+  [request ctx]
+  (:= ctx (or ctx {}))
+  (var meta (xt/x:get-key request "meta"))
+  (when (xt/x:nil? meta)
+    (:= meta {})
+    (xt/x:set-key request "meta" meta))
+  (when (xt/x:not-nil? (xt/x:get-key ctx "transport_id"))
+    (xt/x:set-key meta
+                 "transport_id"
+                 (xt/x:get-key ctx "transport_id")))
+  (return request))
+
 (defn.xt respond-ok
   "constructs and optionally sends a successful response"
   {:added "4.1"}
@@ -699,6 +719,7 @@
   {:added "4.1"}
   [node request ctx]
   (:= ctx (or ctx {}))
+  (-/request-context request ctx)
   (try
     (return
      (promise/x:promise-catch

@@ -150,10 +150,10 @@
                            (return
                             {"count" (+ 1 (. state ["count"]))})))
                         (return (xt/x:cat "ping "
-                                   (. space ["meta"] ["role"])
-                                   " - "
-                                   (. space ["state"] ["count"])))))
-      
+                                          (. space ["meta"] ["role"])
+                                          " - "
+                                          (xt/x:to-string (. space ["state"] ["count"]))))))
+    
     (var n (event-node/node-create
             {"id" "node-a"
              "meta" {"cluster" "local"}
@@ -161,7 +161,7 @@
                                  "meta"  {"role" "user-a"}}}
              "handlers" {"ping" {"fn" ping-handler
                                  "meta" {"kind" "request"}}}}))
-      
+    
     (-> (event-node/request n "room/a" "ping" [] nil)
         (promise/x:promise-then
          (fn [res]
@@ -173,7 +173,7 @@
             (event-node/request n "room/a" "ping" [] nil))))
         (promise/x:promise-then
          (fn [res]
-             
+           
            (repl/notify res)))))
   => "ping user-a - 3"
 
@@ -187,10 +187,10 @@
                            (return
                             {"count" (+ 1 (. state ["count"]))})))
                         (return (xt/x:cat "ping "
-                                   (. space ["meta"] ["role"])
-                                   " - "
-                                   (. space ["state"] ["count"])))))
-      
+                                          (. space ["meta"] ["role"])
+                                          " - "
+                                          (xt/x:to-string (. space ["state"] ["count"]))))))
+    
     (var n (event-node/node-create
             {"id" "node-a"
              "meta" {"cluster" "local"}
@@ -198,7 +198,7 @@
                                  "meta"  {"role" "user-a"}}}
              "handlers" {"ping" {"fn" ping-handler
                                  "meta" {"kind" "request"}}}}))
-      
+    
     (-> (event-node/request n "room/a" "ping" [] nil)
         (promise/x:promise-then
          (fn [res]
@@ -210,7 +210,7 @@
             (event-node/request n "room/a" "ping" [] nil))))
         (promise/x:promise-then
          (fn [res]
-             
+           
            (repl/notify res)))))
   => "ping user-a - 3"
 
@@ -224,10 +224,10 @@
                            (return
                             {"count" (+ 1 (. state ["count"]))})))
                         (return (xt/x:cat "ping "
-                                   (. space ["meta"] ["role"])
-                                   " - "
-                                   (. space ["state"] ["count"])))))
-      
+                                          (. space ["meta"] ["role"])
+                                          " - "
+                                          (xt/x:to-string (. space ["state"] ["count"]))))))
+    
     (var n (event-node/node-create
             {"id" "node-a"
              "meta" {"cluster" "local"}
@@ -235,7 +235,7 @@
                                  "meta"  {"role" "user-a"}}}
              "handlers" {"ping" {"fn" ping-handler
                                  "meta" {"kind" "request"}}}}))
-      
+    
     (-> (event-node/request n "room/a" "ping" [] nil)
         (promise/x:promise-then
          (fn [res]
@@ -247,7 +247,7 @@
             (event-node/request n "room/a" "ping" [] nil))))
         (promise/x:promise-then
          (fn [res]
-             
+           
            (repl/notify res)))))
   => "ping user-a - 3")
 
@@ -261,8 +261,7 @@
           "handlers" {"ping" {"fn" (fn [space args request node]
                                      (return {"ok" true
                                               "reply" "pong"
-                                              "space"   (. space ["id"])
-                                              "payload" (xt/x:get-idx args 0)}))
+                                              "space"   (. space ["id"])}))
                               "meta" {"kind" "request"}}}})
         (event-node/request "room/a" "ping" [] nil)
         (promise/x:promise-then
@@ -277,8 +276,7 @@
           "handlers" {"ping" {"fn" (fn [space args request node]
                                      (return {"ok" true
                                               "reply" "pong"
-                                              "space"   (. space ["id"])
-                                              "payload" (xt/x:get-idx args 0)}))
+                                              "space"   (. space ["id"])}))
                               "meta" {"kind" "request"}}}})
         (event-node/request "room/a" "ping" [] nil)
         (promise/x:promise-then
@@ -293,8 +291,7 @@
           "handlers" {"ping" {"fn" (fn [space args request node]
                                      (return {"ok" true
                                               "reply" "pong"
-                                              "space"   (. space ["id"])
-                                              "payload" (xt/x:get-idx args 0)}))
+                                              "space"   (. space ["id"])}))
                               "meta" {"kind" "request"}}}})
         (event-node/request "room/a" "ping" [] nil)
         (promise/x:promise-then
@@ -435,7 +432,7 @@
                 "last_ping"  (. stream ["data"] ["count"])
                 "role"       (. stream ["data"] ["role"])})))
            (return true)))
-  
+    
     (var ping-handler
          (fn [space args request node]
            (var next-state
@@ -457,10 +454,10 @@
              (fn [_]
                (return
                 (xt/x:cat "ping "
-                   (. space ["meta"] ["role"])
-                   " - "
-                   (. next-state ["count"]))))))))
-  
+                          (. space ["meta"] ["role"])
+                          " - "
+                          (xt/x:to-string (. next-state ["count"])))))))))
+    
     (var n (event-node/node-create
             {"id" "node-a"
              "meta" {"cluster" "local"}
@@ -470,7 +467,7 @@
                                  "meta" {"kind" "request"}}}
              "triggers" {"event/pinged" {"fn" ping-trigger
                                          "meta" {"kind" "stream"}}}}))
-      
+    
     (-> (event-node/request n "room/a" "ping" [] nil)
         (promise/x:promise-then
          (fn [res1]
@@ -509,7 +506,7 @@
                 "last_ping"  (. stream ["data"] ["count"])
                 "role"       (. stream ["data"] ["role"])})))
            (return true)))
-  
+    
     (var ping-handler
          (fn [space args request node]
            (var next-state
@@ -531,10 +528,10 @@
              (fn [_]
                (return
                 (xt/x:cat "ping "
-                   (. space ["meta"] ["role"])
-                   " - "
-                   (. next-state ["count"]))))))))
-  
+                          (. space ["meta"] ["role"])
+                          " - "
+                          (xt/x:to-string (. next-state ["count"])))))))))
+    
     (var n (event-node/node-create
             {"id" "node-a"
              "meta" {"cluster" "local"}
@@ -544,7 +541,7 @@
                                  "meta" {"kind" "request"}}}
              "triggers" {"event/pinged" {"fn" ping-trigger
                                          "meta" {"kind" "stream"}}}}))
-      
+    
     (-> (event-node/request n "room/a" "ping" [] nil)
         (promise/x:promise-then
          (fn [res1]
@@ -583,7 +580,7 @@
                 "last_ping"  (. stream ["data"] ["count"])
                 "role"       (. stream ["data"] ["role"])})))
            (return true)))
-  
+    
     (var ping-handler
          (fn [space args request node]
            (var next-state
@@ -605,10 +602,10 @@
              (fn [_]
                (return
                 (xt/x:cat "ping "
-                   (. space ["meta"] ["role"])
-                   " - "
-                   (. next-state ["count"]))))))))
-  
+                          (. space ["meta"] ["role"])
+                          " - "
+                          (xt/x:to-string (. next-state ["count"])))))))))
+    
     (var n (event-node/node-create
             {"id" "node-a"
              "meta" {"cluster" "local"}
@@ -618,7 +615,7 @@
                                  "meta" {"kind" "request"}}}
              "triggers" {"event/pinged" {"fn" ping-trigger
                                          "meta" {"kind" "stream"}}}}))
-      
+    
     (-> (event-node/request n "room/a" "ping" [] nil)
         (promise/x:promise-then
          (fn [res1]
@@ -660,7 +657,7 @@
                 "audit_event" (. stream ["signal"])
                 "audit_data"  (. stream ["data"])})))
            (return true)))
-  
+    
     (var ping-trigger
          (fn [space stream node]
            (event-node/update-space-state
@@ -678,7 +675,7 @@
              {"source" (. stream ["signal"])
               "label"  (. stream ["data"] ["label"])}
              nil))))
-      
+    
     (var n (event-node/node-create
             {"id" "node-a"
              "spaces" {"room/a" {"state" {"count" 0}
@@ -687,7 +684,7 @@
                                          "meta" {"kind" "stream"}}
                          "event/pinged.audit" {"fn" audit-trigger
                                                "meta" {"kind" "stream"}}}}))
-  
+    
     (-> (event-node/publish n "room/a" "event/pinged" {"label" "first"} nil)
         (promise/x:promise-then
          (fn [_]
@@ -712,7 +709,7 @@
                 "audit_event" (. stream ["signal"])
                 "audit_data"  (. stream ["data"])})))
            (return true)))
-  
+    
     (var ping-trigger
          (fn [space stream node]
            (event-node/update-space-state
@@ -730,7 +727,7 @@
              {"source" (. stream ["signal"])
               "label"  (. stream ["data"] ["label"])}
              nil))))
-      
+    
     (var n (event-node/node-create
             {"id" "node-a"
              "spaces" {"room/a" {"state" {"count" 0}
@@ -739,7 +736,7 @@
                                          "meta" {"kind" "stream"}}
                          "event/pinged.audit" {"fn" audit-trigger
                                                "meta" {"kind" "stream"}}}}))
-  
+    
     (-> (event-node/publish n "room/a" "event/pinged" {"label" "first"} nil)
         (promise/x:promise-then
          (fn [_]
@@ -764,7 +761,7 @@
                 "audit_event" (. stream ["signal"])
                 "audit_data"  (. stream ["data"])})))
            (return true)))
-  
+    
     (var ping-trigger
          (fn [space stream node]
            (event-node/update-space-state
@@ -782,7 +779,7 @@
              {"source" (. stream ["signal"])
               "label"  (. stream ["data"] ["label"])}
              nil))))
-      
+    
     (var n (event-node/node-create
             {"id" "node-a"
              "spaces" {"room/a" {"state" {"count" 0}
@@ -791,7 +788,7 @@
                                          "meta" {"kind" "stream"}}
                          "event/pinged.audit" {"fn" audit-trigger
                                                "meta" {"kind" "stream"}}}}))
-  
+    
     (-> (event-node/publish n "room/a" "event/pinged" {"label" "first"} nil)
         (promise/x:promise-then
          (fn [_]

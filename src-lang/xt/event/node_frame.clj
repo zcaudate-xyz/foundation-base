@@ -124,7 +124,7 @@
 (defn.xt response-frame
   "constructs a response frame"
   {:added "4.1"}
-  [reply_to space status data error meta]
+  [reply-to space status data error meta]
   (:= meta (or meta {}))
   (return
     (-/frame -/KIND_RESPONSE
@@ -132,7 +132,7 @@
                  (-/rand-id "res-" 6))
             space
             meta
-            {:reply_to reply_to
+            {:reply_to reply-to
              :status status
              :data data
              :error error})))
@@ -140,14 +140,14 @@
 (defn.xt response-ok-frame
   "constructs a successful response frame"
   {:added "4.1"}
-  [reply_to space data meta]
-  (return (-/response-frame reply_to space -/STATUS_OK data nil meta)))
+  [reply-to space data meta]
+  (return (-/response-frame reply-to space -/STATUS_OK data nil meta)))
 
 (defn.xt response-error-frame
   "constructs an errored response frame"
   {:added "4.1"}
-  [reply_to space error meta]
-  (return (-/response-frame reply_to space -/STATUS_ERROR nil error meta)))
+  [reply-to space error meta]
+  (return (-/response-frame reply-to space -/STATUS_ERROR nil error meta)))
 
 (defn.xt stream-frame
   "constructs a publish frame"

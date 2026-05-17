@@ -3,7 +3,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
-  {:require [[js.worker.transport :as worker-transport]
+  {:require [[xt.event.node-transport-browser :as node-transport]
              [xt.db.node :as db-node]
              [xt.event.node :as event-node]
              [xt.lang.spec-base :as xt]
@@ -57,15 +57,14 @@
   {:added "4.1"}
   [node worker opts]
   (var config (or opts {}))
-  (var transport-id (or (xt/x:get-key config "transport-id")
-                        (xt/x:get-key config "transport_id")
+  (var transport-id (or (xt/x:get-key config "transport_id")
                         "host"))
   (return
    (promise/x:promise-then
     (event-node/attach-transport
      node
      transport-id
-     (worker-transport/self-endpoint worker))
+     (node-transport/self-endpoint worker))
     (fn [_]
       (return node)))))
 
@@ -85,15 +84,14 @@
   (var db-opts (or (. config ["db-node"])
                    (. config ["db_node"])
                    {}))
-  (var transport-id (or (. config ["transport-id"])
-                        (. config ["transport_id"])
-                        "host"))
+  (var transportId (or (. config ["transport_id"])
+                       "host"))
   (var node (event-node/node-create node-opts))
   (db-node/install node db-opts)
   (event-node/attach-transport
    node
-   transport-id
-   (worker-transport/self-endpoint self))
+   transportId
+   (node-transport/self-endpoint self))
   (return node))
 
 (defn.xt runtime-init

@@ -5,14 +5,14 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
-             [js.worker.transport :as worker-transport]]})
+             [xt.event.node-transport-browser :as worker-transport]]})
 
 (fact:global
  {:setup [(l/rt:restart)
           (l/rt:scaffold-imports :js)]
   :teardown [(l/rt:stop)]})
 
-^{:refer js.worker.transport/worker-endpoint :added "4.1"}
+^{:refer xt.event.node-transport-browser/worker-endpoint :added "4.1"}
 (fact "adapts a host-side Worker endpoint to the node transport contract"
   (!.js
    (var posted [])
@@ -42,7 +42,7 @@
                    "removed" 1
                    "terminated" 1}))
 
-^{:refer js.worker.transport/worker-endpoint :added "4.1"}
+^{:refer xt.event.node-transport-browser/worker-endpoint :added "4.1"}
 (fact "uses create-fn worker sources without re-attaching listeners"
   (!.js
    (var posted [])
@@ -68,7 +68,7 @@
                    "posted" [{"kind" "request" "id" "req-2"}]
                    "received" [{"kind" "response" "id" "res-2"}]}))
 
-^{:refer js.worker.transport/self-endpoint :added "4.1"}
+^{:refer xt.event.node-transport-browser/self-endpoint :added "4.1"}
 (fact "adapts worker self to the node transport contract"
   (!.js
    (var posted [])
@@ -96,7 +96,7 @@
                    "removed" 1}))
 
 
-^{:refer js.worker.transport/event-data :added "4.1"}
+^{:refer xt.event.node-transport-browser/event-data :added "4.1"}
 (fact "unwraps worker message envelopes and passes raw payloads through"
   (!.js
    [(worker-transport/event-data {"data" {"id" "evt-1"}})

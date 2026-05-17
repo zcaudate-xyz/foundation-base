@@ -6,7 +6,7 @@
 
 (l/script :xtalk
   {:require [[js.worker.link :as worker-link]
-             [js.worker.transport :as worker-transport]
+             [xt.event.node-transport-browser :as node-transport]
              [xt.db.node :as db-node]
              [xt.event.node :as event-node]
              [xt.lang.spec-base :as xt]
@@ -84,8 +84,7 @@
   (var config (or opts {}))
   (var host-node (event-node/node-create (or (xt/x:get-key config "node") {})))
   (var worker-opts (or (xt/x:get-key config "worker") {}))
-  (var transport-id (or (xt/x:get-key worker-opts "transport-id")
-                        (xt/x:get-key worker-opts "transport_id")
+  (var transport-id (or (xt/x:get-key worker-opts "transport_id")
                         "worker"))
   (var source (-/worker-source config))
   (var explicit-script (xt/x:get-key worker-opts "script"))
@@ -100,19 +99,19 @@
     (event-node/attach-transport
      host-node
      transport-id
-     (worker-transport/worker-endpoint source))
+     (node-transport/worker-endpoint source))
     (fn [_]
       (var transport (event-node/get-transport host-node transport-id))
       (return {"node" host-node
                "worker" (xt/x:get-key transport "listener")
-               "transport-id" transport-id
+               "transport_id" transport-id
                "script" script})))))
 
 (defn.xt stop
   "detaches the transport and stops the worker"
   {:added "4.1"}
   [runtime]
-  (var transport-id (or (xt/x:get-key runtime "transport-id")
+  (var transport-id (or (xt/x:get-key runtime "transport_id")
                         "worker"))
   (return
    (promise/x:promise-then

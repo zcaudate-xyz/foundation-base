@@ -19,7 +19,7 @@
              [xt.event.node :as event-node]
              [xt.event.node-frame :as event-frame]
              [js.worker.link :as worker-link]
-             [js.worker.transport :as worker-transport]]})
+             [xt.event.node-transport-browser :as worker-transport]]})
 
 (def ^:private +nodeworker-script+
   (l/emit-script
@@ -92,7 +92,7 @@
             (. (xt.event.node/attach-transport
                 node
                 "host"
-                (js.worker.transport/self-endpoint worker))
+                (xt.event.node-transport-browser/self-endpoint worker))
                (then
                 (fn [_]
                   (. worker (postMessage {"signal" "ready"

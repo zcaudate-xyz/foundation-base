@@ -48,16 +48,16 @@
                    "views" fixtures/Views}})
       (fn [runtime]
         (var transport (event-node/get-transport (. runtime ["node"])
-                                                 (. runtime ["transport-id"])))
+                                                 (. runtime ["transport_id"])))
         (var out {"node?" (event-node/node? (. runtime ["node"]))
-                  "transport-id" (. runtime ["transport-id"])
+                  "transport_id" (. runtime ["transport_id"])
                   "transport?" (xt/x:is-object? transport)
                   "script?" (xt/x:is-string? (. runtime ["script"]))})
         (repl/notify out)))
      (fn [err]
        (repl/notify err))))
   => (contains-in {"node?" true
-                   "transport-id" "worker"
+                   "transport_id" "worker"
                    "transport?" true
                    "script?" true}))
 

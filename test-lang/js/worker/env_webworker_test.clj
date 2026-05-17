@@ -132,7 +132,7 @@
     (var node (event-node/node-create {"id" "worker-e"}))
     (promise/x:promise-catch
      (promise/x:promise-then
-      (env-webworker/attach-self node worker {"transport-id" "loopback"})
+      (env-webworker/attach-self node worker {"transport_id" "loopback"})
       (fn [attached]
         (repl/notify {"id" (. attached ["id"])
                       "transports" (event-node/list-transports attached)
@@ -141,7 +141,7 @@
        (repl/notify err))))
   => {"id" "worker-e"
       "transports" ["loopback"]
-      "listener-count" 0})
+      "listener-count" 1})
 
 ^{:refer js.worker.env-webworker/init-worker :added "4.1"}
 (fact "creates the node and immediately attaches worker self"
@@ -157,7 +157,7 @@
        {"node" {"id" "worker-f"}
         "db-node" {"schema" {}
                    "lookup" {}}
-        "transport-id" "bridge"})
+        "transport_id" "bridge"})
       (fn [node]
         (repl/notify {"id" (. node ["id"])
                       "has-query-handler" (xt/x:has-key? (. node ["handlers"]) db-node/ACTION_QUERY)
@@ -168,7 +168,7 @@
   => {"id" "worker-f"
       "has-query-handler" true
       "transports" ["bridge"]
-      "listener-count" 0})
+      "listener-count" 1})
 
 ^{:refer js.worker.env-webworker/runtime-bootstrap :added "4.1"}
 (fact "boots from the emitted WebWorker global config"

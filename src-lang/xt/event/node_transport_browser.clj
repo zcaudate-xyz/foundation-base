@@ -1,18 +1,80 @@
-(ns js.worker.transport
-  "Worker transport adaptors for xt.event.node."
-  (:require [hara.lang :as l]))
+(ns xt.event.node-transport-browser
+  (:require [hara.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
-  {:require [[xt.lang.spec-base :as xt]]})
+  {:require [[xt.event.node-main :as main]
+             [xt.lang.spec-base :as xt]]})
+
+(defspec.xt event-data
+  [:fn [:xt/any] :xt/any])
+
+(defspec.xt messageport-endpoint
+  [:fn [:xt/any] main/NodeTransport])
+
+(defspec.xt sharedworker-endpoint
+  [:fn [:xt/any] main/NodeTransport])
+
+(defspec.xt worker-endpoint
+  [:fn [:xt/any] main/NodeTransport])
+
+(defspec.xt self-endpoint
+  [:fn [:xt/any] main/NodeTransport])
 
 (defn.xt event-data
-  "normalizes a worker message event into its payload"
+  "normalizes a browser worker message event into its payload"
   {:added "4.1"}
   [event]
   (return (:? (and (xt/x:is-object? event)
                    (xt/x:has-key? event "data"))
               (xt/x:get-key event "data")
               event)))
+
+(defn.xt messageport-endpoint
+  "adapts a MessagePort-like endpoint to the node transport contract"
+  {:added "4.1"}
+  [port]
+  (var current-callback nil)
+  (var send-fn
+       (fn [frame]
+         (return (. port (postMessage frame)))))
+  (var start-fn
+       (fn [listener]
+         (:= current-callback
+             (fn [event]
+               (return (listener (-/event-data event) nil))))
+         (when (xt/x:is-function? (xt/x:get-key port "start"))
+           (. port (start)))
+         (. port (addEventListener
+                  "message"
+                  current-callback
+                  false))
+         (return port)))
+  (var stop-fn
+       (fn [_]
+         (when (and (xt/x:not-nil? current-callback)
+                    (xt/x:is-function? (xt/x:get-key port "removeEventListener")))
+           (. port (removeEventListener
+                    "message"
+                    current-callback
+                    false)))
+         (when (xt/x:is-function? (xt/x:get-key port "close"))
+           (. port (close)))
+         (:= current-callback nil)
+         (return true)))
+  (return
+   {"meta" {"kind" "messageport"}
+    "send_fn" send-fn
+    "start_fn" start-fn
+    "stop_fn" stop-fn}))
+
+(defn.xt sharedworker-endpoint
+  "adapts a SharedWorker or SharedWorker port to the node transport contract"
+  {:added "4.1"}
+  [shared-or-port]
+  (var port (:? (xt/x:has-key? shared-or-port "port")
+                (xt/x:get-key shared-or-port "port")
+                shared-or-port))
+  (return (-/messageport-endpoint port)))
 
 (defn.xt worker-endpoint
   "adapts a host-side Worker or create-fn source to the node transport contract"
@@ -64,14 +126,10 @@
          (:= current-callback nil)
          (return true)))
   (return
-   (xt/x:obj-assign
-    {:meta {"kind" "webworker"}
-     :send-fn send-fn
-     :start-fn start-fn
-     :stop-fn stop-fn}
-    {"send-fn" send-fn
-     "start-fn" start-fn
-     "stop-fn" stop-fn})))
+   {"meta" {"kind" "webworker"}
+    "send_fn" send-fn
+    "start_fn" start-fn
+    "stop_fn" stop-fn}))
 
 (defn.xt self-endpoint
   "adapts worker self to the node transport contract"
@@ -102,11 +160,7 @@
          (:= current-callback nil)
          (return true)))
   (return
-   (xt/x:obj-assign
-    {:meta {"kind" "webworker.self"}
-     :send-fn send-fn
-     :start-fn start-fn
-     :stop-fn stop-fn}
-    {"send-fn" send-fn
-     "start-fn" start-fn
-     "stop-fn" stop-fn})))
+   {"meta" {"kind" "webworker.self"}
+     "send_fn" send-fn
+     "start_fn" start-fn
+     "stop_fn" stop-fn}))

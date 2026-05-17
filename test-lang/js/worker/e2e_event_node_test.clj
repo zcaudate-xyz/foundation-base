@@ -8,7 +8,7 @@
 (l/script- :js
   {:runtime :chromedriver.instance
    :require [[js.worker.link :as worker-link]
-              [js.worker.transport :as worker-transport]
+              [xt.event.node-transport-browser :as worker-transport]
               [xt.event.node :as event-node]
               [xt.event.node-frame :as event-frame]
               [xt.lang.common-repl :as repl]
@@ -30,7 +30,7 @@
       (. (xt.event.node/attach-transport
           node
           "host"
-          (js.worker.transport/self-endpoint self))
+          (xt.event.node-transport-browser/self-endpoint self))
          (then
           (fn [_]
             (. self (postMessage {"signal" "ready"
@@ -61,7 +61,7 @@
             (xt.event.node/attach-transport
              node
              "host"
-             (js.worker.transport/self-endpoint port))
+             (xt.event.node-transport-browser/self-endpoint port))
             (. port (postMessage {"signal" "ready"
                                   "runtime" "xt.event.node"
                                   "worker" "worker-shared"}))

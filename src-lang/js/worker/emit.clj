@@ -2,10 +2,10 @@
   "Host-side worker script emitters for js.worker."
   (:require [js.worker.env-node]
              [js.worker.env-sharedworker]
-             [js.worker.transport]
              [hara.lang :as l]
              [xt.db.node]
-             [xt.event.node]))
+             [xt.event.node]
+             [xt.event.node-transport-browser]))
 
 (defn emit-worker-script
   "emits a worker bootstrap script"
@@ -27,15 +27,14 @@
     '(var dbOpts (or (. config ["db-node"])
                      (. config ["db_node"])
                      {}))
-    '(var transportId (or (. config ["transport-id"])
-                          (. config ["transport_id"])
+    '(var transportId (or (. config ["transport_id"])
                           "host"))
     '(var node (xt.event.node/node-create nodeOpts))
     '(xt.db.node/install node dbOpts)
     '(xt.event.node/attach-transport
       node
       transportId
-      (js.worker.transport/self-endpoint self))
+      (xt.event.node-transport-browser/self-endpoint self))
     'node]))
 
 (defn webworker-script

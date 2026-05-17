@@ -17,15 +17,14 @@
        (var dbOpts (or (. config ["db-node"])
                        (. config ["db_node"])
                        {}))
-       (var transportId (or (. config ["transport-id"])
-                            (. config ["transport_id"])
+       (var transportId (or (. config ["transport_id"])
                             "host"))
        (var node (xt.event.node/node-create nodeOpts))
        (xt.db.node/install node dbOpts)
        (xt.event.node/attach-transport
         node
         transportId
-        (js.worker.transport/self-endpoint self))
+        (xt.event.node-transport-browser/self-endpoint self))
        node])
 
 ^{:refer js.worker.emit/webworker-script :added "4.1"}
