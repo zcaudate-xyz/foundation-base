@@ -7,7 +7,7 @@
 (l/script- :python
   {:require [[js.cell.service.db-query :as db-query]
           [xt.db.helpers.data-main-test :as sample]
-          [xt.db.instance :as xdb]
+          [xt.db.runtime :as xdb]
           [xt.db.runtime.sql :as impl-sql]
           [xt.db.text.pgrest :as pgrest]
           [xt.lang.spec-base :as xt]
@@ -145,7 +145,7 @@
       +sql-touched-output+
       0])
 
-^{:refer xt.db.instance/db-pull-sync.prepared :added "4.1"
+^{:refer xt.db.runtime/db-pull-sync.prepared :added "4.1"
   :setup [(def +prepared-output+
             [{"nickname" "root"
               "profile" [{"first_name" "Root"}]}])]}
@@ -231,7 +231,7 @@
       +prepared-output+
       +prepared-output+])
 
-^{:refer xt.db.instance/db-pull-sync.flat :added "4.1"
+^{:refer xt.db.runtime/db-pull-sync.flat :added "4.1"
   :setup [(def +user-nickname-tree+
             ["UserAccount"
              {"id" "00000000-0000-0000-0000-000000000000"}
@@ -288,7 +288,7 @@
       +user-nickname-output+
       +user-nickname-output+])
 
-^{:refer xt.db.instance/db-pull-sync.bulk-in :added "4.1"
+^{:refer xt.db.runtime/db-pull-sync.bulk-in :added "4.1"
   :setup [(def +currency-bulk-tree+
             ["Currency"
              {"id" ["in" [["USD" "XLM"]]]}

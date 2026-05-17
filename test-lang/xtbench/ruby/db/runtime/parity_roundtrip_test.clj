@@ -7,7 +7,7 @@
 (l/script- :ruby
   {:require [[js.cell.service.db-query :as db-query]
           [xt.db.helpers.data-main-test :as sample]
-          [xt.db.instance :as xdb]
+          [xt.db.runtime :as xdb]
           [xt.db.runtime.sql :as impl-sql]
           [xt.db.text.pgrest :as pgrest]
           [xt.lang.spec-base :as xt]
@@ -144,7 +144,7 @@
       +sql-touched-output+
       0])
 
-^{:refer xt.db.instance/db-pull-sync :added "4.1"
+^{:refer xt.db.runtime/db-pull-sync :added "4.1"
   :setup [(def +currency-bulk-tree+
             ["Currency"
              {"id" ["in" [["USD" "XLM"]]]}
@@ -209,7 +209,7 @@
       +currency-bulk-output+
       +currency-bulk-output+])
 
-^{:refer xt.db.instance/db-pull-sync :added "4.1"
+^{:refer xt.db.runtime/db-pull-sync :added "4.1"
   :setup [(def +currency-bulk-tree+
             ["Currency"
              {"id" ["in" [["USD" "XLM"]]]}
@@ -274,7 +274,7 @@
       +currency-bulk-output+
       +currency-bulk-output+])
 
-^{:refer xt.db.instance/db-pull-sync :added "4.1"
+^{:refer xt.db.runtime/db-pull-sync :added "4.1"
   :setup [(def +currency-bulk-tree+
             ["Currency"
              {"id" ["in" [["USD" "XLM"]]]}

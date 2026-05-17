@@ -85,7 +85,7 @@
 
   (notify/wait-on :js
     (var wire (transport-memory/memory-pair {"left_id" "host"
-                                      "right_id" "peer"}))
+                                             "right_id" "peer"}))
     (var outbound [])
     (var inbound [])
     ((. (. wire ["left"]) ["start_fn"])
@@ -117,10 +117,10 @@
                    "action" "demo/echo"
                    "args" [{"ping" 1}]
                    "id" "req-echo"}})
-
+  
   (notify/wait-on :lua
     (var wire (transport-memory/memory-pair {"left_id" "host"
-                                      "right_id" "peer"}))
+                                             "right_id" "peer"}))
     (var outbound [])
     (var inbound [])
     ((. (. wire ["left"]) ["start_fn"])
@@ -155,7 +155,7 @@
 
   (notify/wait-on :python
     (var wire (transport-memory/memory-pair {"left_id" "host"
-                                      "right_id" "peer"}))
+                                             "right_id" "peer"}))
     (var outbound [])
     (var inbound [])
     ((. (. wire ["left"]) ["start_fn"])

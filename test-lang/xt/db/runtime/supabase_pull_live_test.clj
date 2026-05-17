@@ -8,7 +8,7 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.helpers.supabase-pull-live-xtalk-test :as live-xt]
-             [xt.db.instance :as xdb]
+             [xt.db.runtime :as xdb]
              [xt.lang.spec-base :as xt]
              [xt.protocol.impl.client-fetch :as fetch]]})
 
@@ -30,7 +30,7 @@
                  true)
               (l/rt:stop)]})
 
-^{:refer xt.db.instance/db-create :added "4.1.3"}
+^{:refer xt.db.runtime/db-create :added "4.1.3"}
 (fact "creates a live db.supabase instance backed by a js fetch client for scratch-v1"
 
   (if live/CANARY-SUPABASE-LIVE
@@ -47,7 +47,7 @@
   => (any ["db.supabase" true "scratch"]
           :supabase-live-unavailable))
 
-^{:refer xt.db.instance/db-pull-sync :added "4.1.3"}
+^{:refer xt.db.runtime/db-pull-sync :added "4.1.3"}
 (fact "pulls scratch-v1 data through a live supabase instance"
 
   (if live/CANARY-SUPABASE-LIVE

@@ -8,7 +8,7 @@
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-             [xt.db.instance :as xdb]
+             [xt.db.runtime :as xdb]
              [postgres.sample.scratch-v3 :as scratch]
              [postgres.sample.scratch-v3.view-currency :as view-currency]
              [postgres.sample.scratch-v3.view-all :as view-all]

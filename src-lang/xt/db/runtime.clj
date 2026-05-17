@@ -1,4 +1,4 @@
-(ns xt.db.instance
+(ns xt.db.runtime
   (:require [hara.lang :as l]))
 
 (l/script :xtalk

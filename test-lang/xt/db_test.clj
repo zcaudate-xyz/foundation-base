@@ -5,7 +5,7 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.db.instance :as impl]
+   :require [[xt.db.runtime :as impl]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-string :as str]
@@ -45,14 +45,14 @@
              (bootstrap-js)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.instance/db-exec-sync :added "4.1"}
+^{:refer xt.db.runtime/db-exec-sync :added "4.1"}
 (fact "executes raw sql through xt.db"
 
   (!.js
    (impl/db-exec-sync DBSQL "SELECT 1;"))
   => 1)
 
-^{:refer xt.db.instance/db-pull-sync :added "4.1"}
+^{:refer xt.db.runtime/db-pull-sync :added "4.1"}
 (fact "syncs rows and pulls them back"
 
   [(set (!.js

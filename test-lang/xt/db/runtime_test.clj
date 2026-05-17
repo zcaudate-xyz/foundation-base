@@ -1,39 +1,40 @@
-(ns xtbench.ruby.db.instance-test
+(ns xt.db.runtime-test
   (:require [hara.lang :as l])
   (:use code.test))
 
-(l/script- :ruby
+^{:seedgen/root {:all true}}
+(l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.event.util-throttle :as th]
              [xt.protocol.impl.connection-sql :as sql]
-             [xt.db.instance :as instance]
+             [xt.db.runtime :as instance]
              [xt.db.helpers.data-main-test :as sample]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.instance/unsupported-op :added "4.1"}
+^{:refer xt.db.runtime/unsupported-op :added "4.1"}
 (fact "signals unsupported backend operations"
 
-  (!.rb
+  (!.js
    (instance/unsupported-op "clear" "db.void"))
   => (throws))
 
-^{:refer xt.db.instance/get-dbtype :added "4.1"}
+^{:refer xt.db.runtime/get-dbtype :added "4.1"}
 (fact "gets the backend type with a sql default"
 
-  (!.rb
+  (!.js
    [(instance/get-dbtype {})
     (instance/get-dbtype {"::" "db.cache"})])
   => ["db.sql" "db.cache"])
 
-^{:refer xt.db.instance/process-event :added "4.1"}
+^{:refer xt.db.runtime/process-event :added "4.1"}
 (fact "dispatches events through the backend implementation map"
 
-  (!.rb
+  (!.js
    (xt/x:set-key instance/IMPL
                  "db.dispatch"
                  {"add" (fn [instance input-tag data schema lookup opts]
@@ -53,10 +54,10 @@
   => [["db-1" "add" 1 "schema-a" "lookup-a" true]
       ["db-1" "input" 2 "schema-b" "lookup-b" false]])
 
-^{:refer xt.db.instance/process-triggers :added "4.1"}
+^{:refer xt.db.runtime/process-triggers :added "4.1"}
 (fact "runs only the listeners that match changed tables"
 
-  (!.rb
+  (!.js
    (var fired [])
    (var ids
         (instance/process-triggers
@@ -73,39 +74,42 @@
    [ids fired])
   => [["account"] ["account"]])
 
-^{:refer xt.db.instance/add-trigger :added "4.1"}
+^{:refer xt.db.runtime/add-trigger :added "4.1"}
 (fact "adds triggers to the db map"
 
-  (!.rb
+  (!.js
    (var db {:triggers {}})
    [(instance/add-trigger db "watch" {:id "watch"})
     (xtd/get-in db ["triggers" "watch" "id"])])
   => ["watch" "watch"])
 
-^{:refer xt.db.instance/remove-trigger :added "4.1"}
+^{:refer xt.db.runtime/remove-trigger :added "4.1"}
 (fact "removes triggers from the db map"
 
-  (!.rb
+  ^{:seedgen/base {:lua {:expect (l/as-lua [{"id" "watch"} nil])}}}
+  (!.js
    (var db {:triggers {"watch" {:id "watch"}}})
    [(instance/remove-trigger db "watch")
     (xtd/get-in db ["triggers" "watch"])])
   => [{"id" "watch"} nil])
 
-^{:refer xt.db.instance/db-trigger :added "4.1"}
+^{:refer xt.db.runtime/db-trigger :added "4.1"}
 (fact "delegates trigger execution through the stored listeners"
 
-  (!.rb
+  (!.js
    (instance/db-trigger
     {:triggers {"watch" {:id "watch"
                          :listen ["UserAccount"]
-                         :callback (fn [_db _trigger] nil)}}}
-    {"UserAccount" true}))
+                         :callback (fn [_db _trigger]
+                                     (return nil))}}}
+     {"UserAccount" true}))
   => ["watch"])
 
-^{:refer xt.db.instance/db-create :added "4.1"}
+^{:refer xt.db.runtime/db-create :added "4.1"}
 (fact "creates db wrappers with handlers and throttle state"
 
-  (!.rb
+  ^{:seedgen/base {:lua {:expect (l/as-lua ["db.create" "instance-a" [] {} true true true "test"])}}}
+  (!.js
    (xt/x:set-key instance/IMPL
                  "db.create"
                  {"create" (fn [m]
@@ -125,10 +129,11 @@
     (xtd/get-in db ["opts" "mode"])])
   => ["db.create" "instance-a" [] {} true true true "test"])
 
-^{:refer xt.db.instance/queue-event :added "4.1"}
+^{:refer xt.db.runtime/queue-event :added "4.1"}
 (fact "queues events and hands them to the throttle"
 
-  (!.rb
+  ^{:seedgen/base {:lua {:expect (l/as-lua [1 42 []])}}}
+  (!.js
    (var db {:events []
             :throttle (th/throttle-create
                        (fn [id]
@@ -141,17 +146,17 @@
     (. entry ["args"])])
   => [1 42 []])
 
-^{:refer xt.db.instance/sync-event :added "4.1"}
+^{:refer xt.db.runtime/sync-event :added "4.1"}
 (fact "returns passthrough values or trigger/table pairs for sync events"
 
-  (!.rb
+  (!.js
    (instance/sync-event
     {:sync_handler (fn [_]
                      (return "blocked"))}
     ["add" {"id" "evt-1"}]))
   => "blocked"
 
-  (!.rb
+  (!.js
    (var fired [])
    (var out
         (instance/sync-event
@@ -169,10 +174,10 @@
     fired])
   => ["watch" true true ["watch"]])
 
-^{:refer xt.db.instance/db-exec-sync :added "4.1"}
+^{:refer xt.db.runtime/db-exec-sync :added "4.1"}
 (fact "executes raw sql only for sql backends"
 
-  (!.rb
+  (!.js
    (instance/db-exec-sync
     {"::" "db.sql"
      :instance (sql/connection-create
@@ -183,17 +188,17 @@
     "SELECT 1;"))
   => "SELECT 1;"
 
-  (!.rb
+  (!.js
    (instance/db-exec-sync
     {"::" "db.cache"
      :instance {}}
     "SELECT 1;"))
   => (throws))
 
-^{:refer xt.db.instance/db-pull-sync :added "4.1"}
+^{:refer xt.db.runtime/db-pull-sync :added "4.1"}
 (fact "dispatches pull requests through the configured backend"
 
-  (!.rb
+  (!.js
    (xt/x:set-key instance/IMPL
                  "db.pull"
                  {"pull_sync" (fn [instance schema tree opts]
@@ -206,7 +211,7 @@
     ["UserAccount" ["nickname"]]))
   => ["pull-1" ["UserAccount" ["nickname"]] "cache"]
 
-  (!.rb
+  (!.js
    (instance/db-pull-sync
     {"::" "db.void"
      :instance {}
@@ -215,10 +220,10 @@
     ["UserAccount" ["nickname"]]))
   => (throws))
 
-^{:refer xt.db.instance/db-delete-sync :added "4.1"}
+^{:refer xt.db.runtime/db-delete-sync :added "4.1"}
 (fact "dispatches deletions through the configured backend"
 
-  (!.rb
+  (!.js
    (xt/x:set-key instance/IMPL
                  "db.delete"
                  {"delete_sync" (fn [instance schema table-name ids opts]
@@ -232,10 +237,10 @@
     ["user-1"]))
   => ["delete-1" "UserAccount" ["user-1"] "cache"])
 
-^{:refer xt.db.instance/db-clear :added "4.1"}
+^{:refer xt.db.runtime/db-clear :added "4.1"}
 (fact "clears supported backends and throws for unsupported ones"
 
-  (!.rb
+  (!.js
    (xt/x:set-key instance/IMPL
                  "db.clear"
                  {"clear" (fn [instance]
@@ -245,16 +250,16 @@
      :instance {"id" "clear-1"}}))
   => "clear-1"
 
-  (!.rb
+  (!.js
    (instance/db-clear
     {"::" "db.void"
      :instance {}}))
   => (throws))
 
-^{:refer xt.db.instance/add-view-trigger :added "4.1"}
+^{:refer xt.db.runtime/add-view-trigger :added "4.1"}
 (fact "creates view triggers that watch linked tables and pull the view tree"
 
-  (!.rb
+  (!.js
    (xt/x:set-key instance/IMPL
                  "db.view"
                  {"pull_sync" (fn [_instance _schema tree _opts]

@@ -7,7 +7,7 @@
 (l/script- :dart
   {:require [[js.cell.service.db-query :as db-query]
           [xt.db.helpers.data-main-test :as sample]
-          [xt.db.instance :as xdb]
+          [xt.db.runtime :as xdb]
           [xt.db.runtime.sql :as impl-sql]
           [xt.lang.spec-base :as xt]
           [xt.lang.common-data :as xtd]

@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.db.instance :as instance]
+  {:require [[xt.db.runtime :as instance]
              [xt.db.node.schema-spec :as spec]
              [xt.db.node.schema-state :as schema-state]
              [xt.db.node.instance-util :as util]

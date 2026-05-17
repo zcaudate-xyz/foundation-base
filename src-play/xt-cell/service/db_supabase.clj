@@ -4,7 +4,7 @@
 (l/script :xtalk
   {:export [MODULE]
    :require [[xt.cell.service.db-query :as db-query]
-              [xt.db.instance :as xdb]
+              [xt.db.runtime :as xdb]
               [xt.lang.spec-base :as xt]
               [xt.db.text.pgrest :as pgrest]]})
 

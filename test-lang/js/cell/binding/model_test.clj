@@ -6,7 +6,7 @@
   {:runtime :basic
    :require [[js.cell.binding :as binding]
               [js.cell.binding.model :as binding-model]
-              [xt.db.instance :as xdb]
+              [xt.db.runtime :as xdb]
               [xt.lang.spec-base :as xt]
               [xt.lang.common-data :as xtd]]})
 

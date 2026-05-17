@@ -4,7 +4,7 @@
 
 (l/script- :ruby
   {:runtime :basic
-   :require [[xt.db.instance :as xdb]
+   :require [[xt.db.runtime :as xdb]
              [xt.db.node.instance-query :as instance-query]
              [xt.db.node.instance-state :as instance-state]
              [xt.db.node.schema-state :as schema-state]

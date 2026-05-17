@@ -1,4 +1,4 @@
-(ns xtbench.lua.db.instance-test
+(ns xtbench.lua.db.runtime-test
   (:require [hara.lang :as l])
   (:use code.test))
 
@@ -8,21 +8,21 @@
              [xt.lang.common-data :as xtd]
              [xt.event.util-throttle :as th]
              [xt.protocol.impl.connection-sql :as sql]
-             [xt.db.instance :as instance]
+             [xt.db.runtime :as instance]
              [xt.db.helpers.data-main-test :as sample]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.instance/unsupported-op :added "4.1"}
+^{:refer xt.db.runtime/unsupported-op :added "4.1"}
 (fact "signals unsupported backend operations"
 
   (!.lua
    (instance/unsupported-op "clear" "db.void"))
   => (throws))
 
-^{:refer xt.db.instance/get-dbtype :added "4.1"}
+^{:refer xt.db.runtime/get-dbtype :added "4.1"}
 (fact "gets the backend type with a sql default"
 
   (!.lua
@@ -30,7 +30,7 @@
     (instance/get-dbtype {"::" "db.cache"})])
   => ["db.sql" "db.cache"])
 
-^{:refer xt.db.instance/process-event :added "4.1"}
+^{:refer xt.db.runtime/process-event :added "4.1"}
 (fact "dispatches events through the backend implementation map"
 
   (!.lua
@@ -53,7 +53,7 @@
   => [["db-1" "add" 1 "schema-a" "lookup-a" true]
       ["db-1" "input" 2 "schema-b" "lookup-b" false]])
 
-^{:refer xt.db.instance/process-triggers :added "4.1"}
+^{:refer xt.db.runtime/process-triggers :added "4.1"}
 (fact "runs only the listeners that match changed tables"
 
   (!.lua
@@ -73,7 +73,7 @@
    [ids fired])
   => [["account"] ["account"]])
 
-^{:refer xt.db.instance/add-trigger :added "4.1"}
+^{:refer xt.db.runtime/add-trigger :added "4.1"}
 (fact "adds triggers to the db map"
 
   (!.lua
@@ -82,7 +82,7 @@
     (xtd/get-in db ["triggers" "watch" "id"])])
   => ["watch" "watch"])
 
-^{:refer xt.db.instance/remove-trigger :added "4.1"}
+^{:refer xt.db.runtime/remove-trigger :added "4.1"}
 (fact "removes triggers from the db map"
 
   (!.lua
@@ -91,7 +91,7 @@
     (xtd/get-in db ["triggers" "watch"])])
   => (l/as-lua [{"id" "watch"} nil]))
 
-^{:refer xt.db.instance/db-trigger :added "4.1"}
+^{:refer xt.db.runtime/db-trigger :added "4.1"}
 (fact "delegates trigger execution through the stored listeners"
 
   (!.lua
@@ -103,7 +103,7 @@
      {"UserAccount" true}))
   => ["watch"])
 
-^{:refer xt.db.instance/db-create :added "4.1"}
+^{:refer xt.db.runtime/db-create :added "4.1"}
 (fact "creates db wrappers with handlers and throttle state"
 
   (!.lua
@@ -126,7 +126,7 @@
     (xtd/get-in db ["opts" "mode"])])
   => (l/as-lua ["db.create" "instance-a" [] {} true true true "test"]))
 
-^{:refer xt.db.instance/queue-event :added "4.1"}
+^{:refer xt.db.runtime/queue-event :added "4.1"}
 (fact "queues events and hands them to the throttle"
 
   (!.lua
@@ -142,7 +142,7 @@
     (. entry ["args"])])
   => (l/as-lua [1 42 []]))
 
-^{:refer xt.db.instance/sync-event :added "4.1"}
+^{:refer xt.db.runtime/sync-event :added "4.1"}
 (fact "returns passthrough values or trigger/table pairs for sync events"
 
   (!.lua
@@ -170,7 +170,7 @@
     fired])
   => ["watch" true true ["watch"]])
 
-^{:refer xt.db.instance/db-exec-sync :added "4.1"}
+^{:refer xt.db.runtime/db-exec-sync :added "4.1"}
 (fact "executes raw sql only for sql backends"
 
   (!.lua
@@ -191,7 +191,7 @@
     "SELECT 1;"))
   => (throws))
 
-^{:refer xt.db.instance/db-pull-sync :added "4.1"}
+^{:refer xt.db.runtime/db-pull-sync :added "4.1"}
 (fact "dispatches pull requests through the configured backend"
 
   (!.lua
@@ -216,7 +216,7 @@
     ["UserAccount" ["nickname"]]))
   => (throws))
 
-^{:refer xt.db.instance/db-delete-sync :added "4.1"}
+^{:refer xt.db.runtime/db-delete-sync :added "4.1"}
 (fact "dispatches deletions through the configured backend"
 
   (!.lua
@@ -233,7 +233,7 @@
     ["user-1"]))
   => ["delete-1" "UserAccount" ["user-1"] "cache"])
 
-^{:refer xt.db.instance/db-clear :added "4.1"}
+^{:refer xt.db.runtime/db-clear :added "4.1"}
 (fact "clears supported backends and throws for unsupported ones"
 
   (!.lua
@@ -252,7 +252,7 @@
      :instance {}}))
   => (throws))
 
-^{:refer xt.db.instance/add-view-trigger :added "4.1"}
+^{:refer xt.db.runtime/add-view-trigger :added "4.1"}
 (fact "creates view triggers that watch linked tables and pull the view tree"
 
   (!.lua
