@@ -44,6 +44,37 @@
                        "nickname"
                        "id"]}}}}})
 
+(def +inline-query+
+  {:table "UserAccount"
+   :select-entry {"input" [{"symbol" "i_organisation_id", "type" "uuid"}]
+                 "return" "jsonb"
+                 "view" {"query" {"organisation_accesses"
+                                  {"organisation" "{{i_organisation_id}}"}}}}
+   :return-entry {"input" [{"symbol" "i_account_id", "type" "uuid"}]
+                 "return" "jsonb"
+                 "view" {"query" [["profile" ["*/standard"]]
+                                  "nickname"
+                                  "id"]}}
+   :select-args ["00000000-0000-0000-0000-000000000001"]})
+
+^{:refer xt.db.node.schema-query/view-query-entry :added "4.1"}
+(fact "normalizes inline query entries without a registry"
+
+  (!.js
+    (schema-query/view-query-entry
+     "UserAccount"
+     {"input" [{"symbol" "i_organisation_id", "type" "uuid"}]
+      "view" {"query" {"nickname" "root"}}}
+     "select"))
+  => {"input" [{"symbol" "i_organisation_id", "type" "uuid"}]
+      "return" "jsonb"
+      "flags" {}
+      "view" {"table" "UserAccount"
+              "type" "select"
+              "access" {"roles" {}}
+              "guards" []
+              "query" {"nickname" "root"}}})
+
 ^{:refer xt.db.node.schema-query/view-query-return-entry :added "4.1"}
 (fact "creates a return entry from an inline return query"
 
@@ -95,6 +126,21 @@
      {:select-method "by_organisation"
       :return-method "info"}
      false))
+  => (contains-in
+      {"select_entry" {"view" {"table" "UserAccount"
+                               "type" "select"}}
+       "return_entry" {"view" {"table" "UserAccount"
+                               "type" "return"}}}))
+
+^{:refer xt.db.node.schema-query/view-query-entries.inline :added "4.1"}
+(fact "gets inline select and return entries without state views"
+
+  (!.js
+     (schema-query/view-query-entries
+      (schema-state/base-state {"schema" sample/Schema})
+      "UserAccount"
+      (@! +inline-query+)
+      false))
   => (contains-in
       {"select_entry" {"view" {"table" "UserAccount"
                                "type" "select"}}
@@ -216,6 +262,26 @@
      (. (. prepared ["tables"]) ["UserProfile"])])
   => [true
       "orders/main"
+      "UserAccount"
+      "00000000-0000-0000-0000-000000000001"
+      true])
+
+^{:refer xt.db.node.schema-query/prepare-query.inline :added "4.1"}
+(fact "prepares a cache query plan from inline entries"
+
+  (!.js
+    (var [ok prepared]
+         (schema-query/prepare-query
+          (schema-state/base-state {"schema" sample/Schema})
+          (@! +inline-query+)
+          {:model-id "orders"
+           :view-id "main"
+           :args []}))
+    [ok
+     (xt/x:first (. prepared ["plan"]))
+     (xtd/get-in (. prepared ["plan"]) [1 "organisation_accesses" "organisation"])
+     (. (. prepared ["tables"]) ["UserProfile"])])
+  => [true
       "UserAccount"
       "00000000-0000-0000-0000-000000000001"
       true])

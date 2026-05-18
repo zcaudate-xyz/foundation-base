@@ -1,4 +1,4 @@
-(ns xt.substrate.transport-browser-e2e-test
+(ns xt.substrate.e2e-browser-basic-test
   (:use code.test)
   (:require [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]

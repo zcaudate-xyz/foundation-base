@@ -17,17 +17,8 @@
 (defspec.xt WebSocketConnectFn
   [:fn [:xt/str] :xt/any])
 
-(defspec.xt create-fn
-  [:fn [:xt/any] [:xt/maybe WebSocketCreateFn]])
-
-(defspec.xt connect-fn
-  [:fn [:xt/any] [:xt/maybe WebSocketConnectFn]])
-
 (defspec.xt websocket-url
   [:fn [:xt/any] [:xt/maybe :xt/str]])
-
-(defspec.xt websocket-ctor
-  [:fn [:xt/any] [:xt/maybe :xt/any]])
 
 (defspec.xt websocket-source
   [:fn [:xt/any] [:xt/dict :xt/str :xt/any]])
@@ -93,10 +84,10 @@
 
 (defn.xt connect-socket
   [socket-source]
-  (var connect-fn (-/connect-fn socket-source))
+  (var connect-fn (xt/x:get-key socket-source "connect_fn"))
   (if (xt/x:is-function? connect-fn)
     (return (connect-fn (-/websocket-url socket-source)))
-    (do (var ctor (or (-/websocket-ctor socket-source)
+    (do (var ctor (or (xt/x:get-key socket-source "WebSocket")
                       WebSocket))
         (when (not (xt/x:is-function? ctor))
           (xt/x:err "websocket source missing connect implementation"))
@@ -110,7 +101,7 @@
         (return (-/connect-socket {"url" socket-source}))
 
         (xt/x:is-object? socket-source)
-        (do (var create-fn (-/create-fn socket-source))
+        (do (var create-fn (xt/x:get-key socket-source "create_fn"))
             (cond (xt/x:is-function? create-fn)
                   (return (create-fn))
 
@@ -137,18 +128,6 @@
                   (xt/x:get-key event "text")
                   event))))
 
-(defn.xt create-fn
-  "gets the create_fn for a websocket source"
-  {:added "4.1"}
-  [source]
-  (return (xt/x:get-key source "create_fn")))
-
-(defn.xt connect-fn
-  "gets the connect_fn for a websocket source"
-  {:added "4.1"}
-  [source]
-  (return (xt/x:get-key source "connect_fn")))
-
 (defn.xt websocket-url
   "gets the websocket url for a source"
   {:added "4.1"}
@@ -156,12 +135,6 @@
   (if (xt/x:is-string? source)
     (return source)
     (return (xt/x:get-key source "url"))))
-
-(defn.xt websocket-ctor
-  "gets the websocket constructor for a source"
-  {:added "4.1"}
-  [source]
-  (return (xt/x:get-key source "WebSocket")))
 
 (defn.xt websocket-source
   "creates a websocket-backed text endpoint source"

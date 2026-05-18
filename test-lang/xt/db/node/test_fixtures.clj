@@ -44,12 +44,26 @@
   {"views"
    {"main"
     {"query" {:table "Order"
-              :return-method "default"
-              :return-id "ord-1"}
-     "input" []}
+             :return-entry {"input" [{"symbol" "i_order_id", "type" "text"}]
+                            "return" "jsonb"
+                            "view" {"table" "Order"
+                                    "type" "return"
+                                    "tag" "default"
+                                    "access" {"roles" {}}
+                                    "guards" []
+                                    "query" ["status"]}}
+             :return-id "ord-1"}
+    "input" []}
     "open"
     {"query" {:table "Order"
-              :select-method "by_status"}
+              :select-entry {"input" [{"symbol" "i_status", "type" "text"}]
+                             "return" "jsonb"
+                             "view" {"table" "Order"
+                                     "type" "select"
+                                     "tag" "by_status"
+                                     "access" {"roles" {}}
+                                     "guards" []
+                                     "query" {"status" "{{i_status}}"}}}}
      "default_input" ["open"]}}})
 
 (def.xt Seed

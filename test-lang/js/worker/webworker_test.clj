@@ -299,16 +299,18 @@
      (promise/x:promise-then
       (webworker/sync client {"db/sync" fixtures/Seed})
       (fn [_]
-        (var result (webworker/view-refresh client "orders" "main"))
-        (repl/notify {"result?" (xt/x:not-nil? result)
-                      "pending" (db-node/view-pending node "gd" "orders" "main")})))
+        (promise/x:promise-then
+         (webworker/view-refresh client "orders" "main")
+         (fn [result]
+           (repl/notify {"result?" (xt/x:not-nil? result)
+                         "pending" (db-node/view-pending node "gd" "orders" "main")})))))
      (fn [err]
        (repl/notify err))))
   => {"result?" true
       "pending" false})
 
 ^{:refer js.worker.webworker/view-val :added "4.1"}
-(fact "reads back the current view value from the client space"
+(fact "returns the refreshed view value from the client facade"
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "ui"}))
     (db-node/install node fixtures/InstallOpts)
@@ -316,13 +318,13 @@
     (webworker/model-put client "orders" fixtures/ModelSpec)
     (promise/x:promise-catch
      (promise/x:promise-then
-      (promise/x:promise-then
-       (webworker/sync client {"db/sync" fixtures/Seed})
-       (fn [_]
-         (webworker/view-refresh client "orders" "main")))
+      (webworker/sync client {"db/sync" fixtures/Seed})
       (fn [_]
-        (repl/notify {"status" (. (xt/x:first (webworker/view-val client "orders" "main")) ["status"])
-                      "pending" (db-node/view-pending node "gd" "orders" "main")})))
+        (promise/x:promise-then
+         (webworker/view-refresh client "orders" "main")
+         (fn [result]
+           (repl/notify {"status" (. (xt/x:first (. result ["value"])) ["status"])
+                         "pending" (db-node/view-pending node "gd" "orders" "main")})))))
      (fn [err]
        (repl/notify err))))
   => {"status" "open"

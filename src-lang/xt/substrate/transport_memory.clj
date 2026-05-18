@@ -3,6 +3,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as promise]
              [xt.substrate :as main]
              [xt.substrate.base-json :as node-json]]})
 
@@ -26,18 +27,6 @@
 (defspec.xt TextEndpointCreateFn
   [:fn [TextEndpointListener] :xt/any])
 
-(defspec.xt write-fn
-  [:fn [:xt/any] [:xt/maybe TextEndpointWriteFn]])
-
-(defspec.xt start-fn
-  [:fn [:xt/any] [:xt/maybe TextEndpointStartFn]])
-
-(defspec.xt stop-fn
-  [:fn [:xt/any] [:xt/maybe TextEndpointStopFn]])
-
-(defspec.xt create-fn
-  [:fn [:xt/any] [:xt/maybe TextEndpointCreateFn]])
-
 (defspec.xt text-endpoint
   [:fn [:xt/any] main/NodeTransport])
 
@@ -59,6 +48,12 @@
 (defspec.xt memory-pair
   [:fn [[:xt/maybe [:xt/dict :xt/str :xt/any]]] MemoryWirePair])
 
+(defspec.xt MemoryWireNetwork
+  [:xt/dict :xt/str MemoryWireEndpoint])
+
+(defspec.xt memory-network
+  [:fn [[:xt/maybe [:xt/dict :xt/str :xt/any]]] MemoryWireNetwork])
+
 (defn.xt event-text
   "normalizes inbound endpoint events into text payloads"
   {:added "4.1"}
@@ -71,29 +66,106 @@
                    (xt/x:get-key event "text")
                    event))))
 
-(defn.xt write-fn
-  "gets the write_fn for a raw text endpoint"
+(defn.xt network-targets
+  "normalizes network link config to an array of peer ids"
   {:added "4.1"}
-  [endpoint]
-  (return (xt/x:get-key endpoint "write_fn")))
+  [value]
+  (cond (xt/x:nil? value)
+        (return [])
 
-(defn.xt start-fn
-  "gets the start_fn for a raw text endpoint"
-  {:added "4.1"}
-  [endpoint]
-  (return (xt/x:get-key endpoint "start_fn")))
+        (xt/x:is-array? value)
+        (return value)
 
-(defn.xt stop-fn
-  "gets the stop_fn for a raw text endpoint"
-  {:added "4.1"}
-  [endpoint]
-  (return (xt/x:get-key endpoint "stop_fn")))
+        :else
+        (return [value])))
 
-(defn.xt create-fn
-  "gets the create_fn for a raw text endpoint source"
+(defn.xt ensure-network-state
+  "ensures shared network state exists for an endpoint id"
   {:added "4.1"}
-  [endpoint]
-  (return (xt/x:get-key endpoint "create_fn")))
+  [network endpoint-id]
+  (var states (xt/x:get-key network "states"))
+  (var state (xt/x:get-key states endpoint-id))
+  (when (xt/x:nil? state)
+    (:= state {"id" endpoint-id
+               "listener" nil
+               "peers" []
+               "network" network})
+    (xt/x:set-key states endpoint-id state))
+  (return state))
+
+(defn.xt ensure-network-targets-loop
+  "ensures shared network state exists for each configured peer"
+  {:added "4.1"}
+  [network peer-ids index]
+  (when (>= index (xt/x:len peer-ids))
+    (return nil))
+  (-/ensure-network-state network
+                          (xt/x:get-idx peer-ids (xt/x:offset index)))
+  (return (-/ensure-network-targets-loop network
+                                         peer-ids
+                                         (+ index 1))))
+
+(defn.xt configure-network-links-loop
+  "configures endpoint links on a shared memory network"
+  {:added "4.1"}
+  [network links endpoint-ids index]
+  (when (>= index (xt/x:len endpoint-ids))
+    (return network))
+  (var endpoint-id (xt/x:get-idx endpoint-ids (xt/x:offset index)))
+  (var peer-ids (-/network-targets (xt/x:get-key links endpoint-id)))
+  (var state (-/ensure-network-state network endpoint-id))
+  (xt/x:set-key state "peers" peer-ids)
+  (-/ensure-network-targets-loop network peer-ids 0)
+  (return (-/configure-network-links-loop network
+                                          links
+                                          endpoint-ids
+                                          (+ index 1))))
+
+(defn.xt create-network-endpoints-loop
+  "materializes transport endpoints for a shared network"
+  {:added "4.1"}
+  [network endpoint-ids out index]
+  (when (>= index (xt/x:len endpoint-ids))
+    (return out))
+  (var endpoint-id (xt/x:get-idx endpoint-ids (xt/x:offset index)))
+  (xt/x:set-key out
+                endpoint-id
+                (-/memory-endpoint (-/ensure-network-state network endpoint-id)))
+  (return (-/create-network-endpoints-loop network
+                                           endpoint-ids
+                                           out
+                                           (+ index 1))))
+
+(defn.xt deliver-network-loop
+  "delivers text to each configured peer in order"
+  {:added "4.1"}
+  [network state peer-ids text index]
+  (when (>= index (xt/x:len peer-ids))
+    (return (promise/x:promise-run true)))
+  (var peer-id (xt/x:get-idx peer-ids (xt/x:offset index)))
+  (var peer (xt/x:get-key (xt/x:get-key network "states")
+                          peer-id))
+  (when (xt/x:nil? peer)
+    (xt/x:err (xt/x:cat "wire peer not found - " peer-id)))
+  (var listener (xt/x:get-key peer "listener"))
+  (when (xt/x:nil? listener)
+    (xt/x:err (xt/x:cat "wire peer not started - " peer-id)))
+  (var output
+       (listener
+        {"text" text}
+        {"wire" (xt/x:get-key state "id")
+         "peer" peer-id}))
+  (return
+   (promise/x:promise-then
+    (:? (promise/x:promise-native? output)
+        output
+        (promise/x:promise-run output))
+    (fn [_]
+      (return (-/deliver-network-loop network
+                                      state
+                                      peer-ids
+                                      text
+                                      (+ index 1)))))))
 
 (defn.xt text-endpoint
   "adapts a line-oriented text endpoint to the node transport contract"
@@ -102,7 +174,7 @@
   (var current-endpoint nil)
   (var current-listener nil)
   (var current-callback nil)
-  (var source-create-fn (-/create-fn endpoint-source))
+  (var source-create-fn (xt/x:get-key endpoint-source "create_fn"))
   (var send-fn
        (fn [frame]
          (var endpoint current-endpoint)
@@ -111,7 +183,7 @@
             (:= endpoint endpoint-source)))
          (when (xt/x:nil? endpoint)
            (xt/x:err "json endpoint not started"))
-         (var raw-write-fn (-/write-fn endpoint))
+         (var raw-write-fn (xt/x:get-key endpoint "write_fn"))
          (when (not (xt/x:is-function? raw-write-fn))
            (xt/x:err "json endpoint missing write implementation"))
          (return (raw-write-fn (node-json/encode-frame frame)))))
@@ -131,7 +203,7 @@
               (:= current-listener current-endpoint)
               (return current-endpoint))
            (do (:= current-endpoint endpoint-source)
-              (var raw-start-fn (-/start-fn current-endpoint))
+              (var raw-start-fn (xt/x:get-key current-endpoint "start_fn"))
               (when (xt/x:nil? raw-start-fn)
                 (:= current-listener current-endpoint)
                 (return current-endpoint))
@@ -146,7 +218,7 @@
           (:= endpoint endpoint-source))
          (var raw-stop-fn nil)
          (when (xt/x:is-object? endpoint)
-          (:= raw-stop-fn (-/stop-fn endpoint)))
+          (:= raw-stop-fn (xt/x:get-key endpoint "stop_fn")))
          (when (xt/x:is-function? raw-stop-fn)
           (raw-stop-fn current-listener))
          (:= current-endpoint nil)
@@ -165,6 +237,16 @@
   [state]
   (var write-fn
        (fn [text]
+         (var network (xt/x:get-key state "network"))
+         (var peer-ids (xt/x:get-key state "peers"))
+         (when (xt/x:not-nil? network)
+          (when (== 0 (xt/x:len peer-ids))
+            (xt/x:err "wire endpoint missing peers"))
+          (return (-/deliver-network-loop network
+                                          state
+                                          peer-ids
+                                          text
+                                          0)))
          (var peer (xt/x:get-key state "peer"))
          (when (xt/x:nil? peer)
            (xt/x:err "wire endpoint missing peer"))
@@ -209,3 +291,21 @@
   (return
    {"left" (-/memory-endpoint left-state)
     "right" (-/memory-endpoint right-state)}))
+
+(defn.xt memory-network
+  "creates named in-memory endpoints for arbitrary routing topologies"
+  {:added "4.1"}
+  [opts]
+  (var config (or opts {}))
+  (var links (:? (xt/x:has-key? config "links")
+                (xt/x:get-key config "links")
+                config))
+  (var network {"states" {}})
+  (-/configure-network-links-loop network
+                                 links
+                                 (xt/x:obj-keys links)
+                                 0)
+  (return (-/create-network-endpoints-loop network
+                                          (xt/x:obj-keys (xt/x:get-key network "states"))
+                                          {}
+                                          0)))

@@ -8,6 +8,7 @@
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
+             [xt.lang.spec-promise :as promise]
              [xt.substrate.base-frame :as frame]
              [xt.substrate.base-json :as node-json]
              [xt.substrate.transport-memory :as transport-memory]]})
@@ -16,6 +17,7 @@
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
+             [xt.lang.spec-promise :as promise]
              [xt.substrate.base-frame :as frame]
              [xt.substrate.base-json :as node-json]
              [xt.substrate.transport-memory :as transport-memory]]})
@@ -24,6 +26,7 @@
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
+             [xt.lang.spec-promise :as promise]
              [xt.substrate.base-frame :as frame]
              [xt.substrate.base-json :as node-json]
              [xt.substrate.transport-memory :as transport-memory]]})
@@ -187,3 +190,105 @@
                    "action" "demo/echo"
                    "args" [{"ping" 1}]
                    "id" "req-echo"}}))
+
+^{:refer xt.substrate.transport-memory/memory-network :added "4.1"}
+(fact "memory networks deliver outbound text to all configured peers"
+
+  (notify/wait-on :js
+    (var network (transport-memory/memory-network
+                  {"hub" ["peer-a" "peer-b"]
+                   "peer-a" ["hub"]
+                   "peer-b" ["hub"]}))
+    (var seen [])
+    ((. (. network ["peer-a"]) ["start_fn"])
+     (fn [event ctx]
+       (xt/x:arr-push seen {"id" "peer-a"
+                            "text" (transport-memory/event-text event)
+                            "wire" (. ctx ["wire"])
+                            "peer" (. ctx ["peer"])})
+       (return true)))
+    ((. (. network ["peer-b"]) ["start_fn"])
+     (fn [event ctx]
+       (xt/x:arr-push seen {"id" "peer-b"
+                            "text" (transport-memory/event-text event)
+                            "wire" (. ctx ["wire"])
+                            "peer" (. ctx ["peer"])})
+       (return true)))
+    (-> ((. (. network ["hub"]) ["write_fn"]) "ping")
+        (promise/x:promise-then
+         (fn [_]
+           (repl/notify seen)))))
+  => [{"id" "peer-a"
+       "text" "ping"
+       "wire" "hub"
+       "peer" "peer-a"}
+      {"id" "peer-b"
+       "text" "ping"
+       "wire" "hub"
+       "peer" "peer-b"}]
+
+  (notify/wait-on :lua
+    (var network (transport-memory/memory-network
+                  {"hub" ["peer-a" "peer-b"]
+                   "peer-a" ["hub"]
+                   "peer-b" ["hub"]}))
+    (var seen [])
+    ((. (. network ["peer-a"]) ["start_fn"])
+     (fn [event ctx]
+       (xt/x:arr-push seen {"id" "peer-a"
+                            "text" (transport-memory/event-text event)
+                            "wire" (. ctx ["wire"])
+                            "peer" (. ctx ["peer"])})
+       (return true)))
+    ((. (. network ["peer-b"]) ["start_fn"])
+     (fn [event ctx]
+       (xt/x:arr-push seen {"id" "peer-b"
+                            "text" (transport-memory/event-text event)
+                            "wire" (. ctx ["wire"])
+                            "peer" (. ctx ["peer"])})
+       (return true)))
+    (-> ((. (. network ["hub"]) ["write_fn"]) "ping")
+        (promise/x:promise-then
+         (fn [_]
+           (repl/notify seen)))))
+  => [{"id" "peer-a"
+       "text" "ping"
+       "wire" "hub"
+       "peer" "peer-a"}
+      {"id" "peer-b"
+       "text" "ping"
+       "wire" "hub"
+       "peer" "peer-b"}]
+
+  (notify/wait-on :python
+    (var network (transport-memory/memory-network
+                  {"hub" ["peer-a" "peer-b"]
+                   "peer-a" ["hub"]
+                   "peer-b" ["hub"]}))
+    (var seen [])
+    ((. (. network ["peer-a"]) ["start_fn"])
+     (fn [event ctx]
+       (xt/x:arr-push seen {"id" "peer-a"
+                            "text" (transport-memory/event-text event)
+                            "wire" (. ctx ["wire"])
+                            "peer" (. ctx ["peer"])})
+       (return true)))
+    ((. (. network ["peer-b"]) ["start_fn"])
+     (fn [event ctx]
+       (xt/x:arr-push seen {"id" "peer-b"
+                            "text" (transport-memory/event-text event)
+                            "wire" (. ctx ["wire"])
+                            "peer" (. ctx ["peer"])})
+       (return true)))
+    (-> ((. (. network ["hub"]) ["write_fn"]) "ping")
+        (promise/x:promise-then
+         (fn [_]
+           (repl/notify seen)))))
+  => [{"id" "peer-a"
+       "text" "ping"
+       "wire" "hub"
+       "peer" "peer-a"}
+      {"id" "peer-b"
+       "text" "ping"
+       "wire" "hub"
+       "peer" "peer-b"}])
