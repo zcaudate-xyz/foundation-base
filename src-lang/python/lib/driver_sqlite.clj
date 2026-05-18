@@ -29,6 +29,19 @@
           (return (> (xt/x:len (. part (strip))) 0)))))
   (return (> (xt/x:len statements) 1)))
 
+(defn.py decode-json-scalar
+  [value]
+  (cond (and (xt/x:is-string? value)
+            (or (. value (startswith "["))
+                (. value (startswith "{"))
+                (== value "true")
+                (== value "false")
+                (== value "null")))
+        (return (xt/x:json-decode value))
+
+        :else
+        (return value)))
+
 (defn.py raw-query
   "Runs a raw sqlite query and normalises the result shape."
   {:added "4.1"}
@@ -50,7 +63,8 @@
 
         (and (== 1 (xt/x:len rows))
              (== 1 (xt/x:len (. rows [0]))))
-        (return (. rows [0] [0]))
+        (return (-/decode-json-scalar
+                 (. rows [0] [0])))
 
         :else
         (return rows)))

@@ -44,8 +44,9 @@
     (py-sqlite/raw-query db "CREATE TABLE test (id INTEGER, name TEXT);")
      (py-sqlite/raw-query db "INSERT INTO test (id, name) VALUES (1, 'alpha');")
      (var name (py-sqlite/raw-query db "SELECT name FROM test;"))
-     [one name])
-  => [1 "alpha"])
+    (var json-array (py-sqlite/raw-query db "SELECT json_array(1, 2, 3);"))
+    [one name json-array])
+  => [1 "alpha" [1 2 3]])
 
 ^{:refer python.lib.driver-sqlite/raw-query.multi :added "4.1"}
 (fact "runs multi-statement sqlite scripts through executescript"

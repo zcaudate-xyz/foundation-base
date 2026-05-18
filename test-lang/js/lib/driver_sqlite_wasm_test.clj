@@ -25,13 +25,16 @@
        (var create-out (js-sqlite-wasm/raw-query db "CREATE TABLE test (id INTEGER, name TEXT);"))
        (js-sqlite-wasm/raw-query db "INSERT INTO test (id, name) VALUES (1, 'alpha'), (2, 'beta');")
        (var scalar (js-sqlite-wasm/raw-query db "SELECT name FROM test WHERE id = 1;"))
+       (var json-array (js-sqlite-wasm/raw-query db "SELECT json_array(1, 2, 3);"))
        (var table (js-sqlite-wasm/raw-query db "SELECT id, name FROM test ORDER BY id;"))
        (. db (close))
        (repl/notify {"create" create-out
                      "scalar" scalar
+                     "json" json-array
                      "table"  table}))))
   => {"create" []
       "scalar" "alpha"
+      "json" [1 2 3]
       "table" [{"columns" ["id" "name"]
                 "values"  [[1 "alpha"]
                            [2 "beta"]]}]})

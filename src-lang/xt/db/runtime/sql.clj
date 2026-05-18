@@ -65,9 +65,9 @@
   (var output (sql/query-sync
                instance
                (sql-graph/select schema tree opts)))
-  (return (xt/x:json-decode (:? (xt/x:is-string? output)
-                                output
-                                "null"))))
+  (when (xt/x:is-string? output)
+    (xt/x:err "SQL pull expected decoded structured data"))
+  (return output))
 
 (defn.xt sql-delete-sync
   "deletes sync data from sql db"

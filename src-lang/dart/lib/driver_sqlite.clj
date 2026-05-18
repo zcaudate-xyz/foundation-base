@@ -35,6 +35,19 @@
     (throw err))
   (return result))
 
+(defn.dt decode-json-scalar
+  [value]
+  (cond (and (xt/x:is-string? value)
+             (or (. value (startsWith "["))
+                 (. value (startsWith "{"))
+                 (== value "true")
+                 (== value "false")
+                 (== value "null")))
+        (return (xt/x:json-decode value))
+
+        :else
+        (return value)))
+
 (defn.dt raw-query
   "Runs a raw sqlite query and normalises the result shape."
   {:added "4.1"}
@@ -52,7 +65,8 @@
           (xt/x:arr-push values row-values))
         (when (and (== 1 (xt/x:len values))
                    (== 1 (xt/x:len (. values [0]))))
-          (return (. values [0] [0])))
+          (return (-/decode-json-scalar
+                   (. values [0] [0]))))
         (if (> (xt/x:len columns) 0)
           (return [{"columns" columns
                     "values" values}]))
@@ -142,35 +156,6 @@
                      (if memory
                        (:= db (sqlite.sqlite3.openInMemory))
                        (:= db (sqlite.sqlite3.open filename)))
-                     (var run-query
-                          (fn [query]
-                            (if (-/query-returns-rows? query)
-                              (do (var result (. db (select query)))
-                                  (var columns (. result columnNames))
-                                  (var values nil)
-                                  (:= values [])
-                                  (xt/for:iter [row (xt/x:iter-from result)]
-                                    (var row-values nil)
-                                    (:= row-values [])
-                                    (xt/for:array [[i _] columns]
-                                      (xt/x:arr-push row-values (. row [i])))
-                                    (xt/x:arr-push values row-values))
-                                  (when (and (== 1 (xt/x:len values))
-                                             (== 1 (xt/x:len (. values [0]))))
-                                    (return (. values [0] [0])))
-                                  (if (> (xt/x:len columns) 0)
-                                    (return [{"columns" columns
-                                              "values" values}]))
-                                  (return values))
-                              (do (. db (execute query))
-                                  (return [])))))
                      (return
-                      (sqlrt/connection-create
-                       db
-                       {"disconnect" (fn [raw]
-                                       (. raw (dispose))
-                                       (return true))
-                        "query" (fn [raw query]
-                                  (return (run-query query)))
-                        "query_sync" (fn [raw query]
-                                       (return (run-query query)))}))))))})))
+                      (-/wrap-connection
+                       (-/set-methods db)))))))})))

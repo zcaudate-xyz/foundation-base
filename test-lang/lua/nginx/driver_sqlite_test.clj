@@ -66,6 +66,11 @@
 
   (!.lua
    (local conn (lua-sqlite/connect-constructor {:memory true}))
+   (lua-sqlite/raw-query (. conn ["raw"]) "select json_array(1,2,3);"))
+  => [1 2 3]
+
+  (!.lua
+   (local conn (lua-sqlite/connect-constructor {:memory true}))
    (lua-sqlite/raw-query (. conn ["raw"])
                          "create table hello (id integer); insert into hello values (1);"))
   => [])

@@ -7,6 +7,19 @@
              [xt.protocol.impl.connection-sql :as sqlrt]]
    :import [["@sqlite.org/sqlite-wasm" :as sqlite3InitModule]]})
 
+(defn.js decode-json-scalar
+  [value]
+  (cond (and (xt/x:is-string? value)
+             (or (. value (startsWith "["))
+                 (. value (startsWith "{"))
+                 (== value "true")
+                 (== value "false")
+                 (== value "null")))
+        (return (xt/x:json-decode value))
+
+        :else
+        (return value)))
+
 (defn.js raw-query
   "raw query for sqlite-wasm results"
   {:added "4.1"}
@@ -18,7 +31,8 @@
                            :returnValue "resultRows"})))
   (when (and (== 1 (xt/x:len values))
              (== 1 (xt/x:len (. values [0]))))
-    (return (. values [0] [0])))
+    (return (-/decode-json-scalar
+             (. values [0] [0]))))
   (return (:? (xt/x:len columns)
               [{"columns" columns
                 "values"  values}]

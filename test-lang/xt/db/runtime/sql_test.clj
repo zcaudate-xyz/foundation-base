@@ -110,7 +110,21 @@
   => [{"UserAccount" true "UserProfile" true} 1])
 
 ^{:refer xt.db.runtime.sql/sql-pull-sync :added "4.1"}
-(fact "decodes pull query results from json"
+(fact "returns decoded pull query results"
+
+  (!.js
+   (impl-sql/sql-pull-sync
+    (dbsql/connection-create
+     {}
+     {"query_sync" (fn [_conn _input]
+                     (return [{"id" "USER-0"}]))})
+    sample/Schema
+    ["UserAccount" ["id"]]
+    (ut/sqlite-opts nil)))
+  => [{"id" "USER-0"}])
+
+^{:refer xt.db.runtime.sql/sql-pull-sync.string :added "4.1"}
+(fact "rejects string pull query results"
 
   (!.js
    (impl-sql/sql-pull-sync
@@ -121,7 +135,7 @@
     sample/Schema
     ["UserAccount" ["id"]]
     (ut/sqlite-opts nil)))
-  => [{"id" "USER-0"}])
+  => (throws))
 
 ^{:refer xt.db.runtime.sql/sql-delete-sync :added "4.1"}
 (fact "runs delete statements through query-sync"

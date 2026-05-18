@@ -109,14 +109,14 @@
   => [{"UserAccount" true "UserProfile" true} 1])
 
 ^{:refer xt.db.runtime.sql/sql-pull-sync :added "4.1"}
-(fact "decodes pull query results from json"
+(fact "returns decoded pull query results"
 
   (!.lua
    (impl-sql/sql-pull-sync
     (dbsql/connection-create
      {}
      {"query_sync" (fn [_conn _input]
-                     (return "[{\"id\":\"USER-0\"}]"))})
+                     (return [{"id" "USER-0"}]))})
     sample/Schema
     ["UserAccount" ["id"]]
     (ut/sqlite-opts nil)))

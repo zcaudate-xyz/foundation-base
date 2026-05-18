@@ -26,6 +26,19 @@
   (return (or (tonumber n)
               n)))
 
+(defn.lua decode-json-scalar
+  [value]
+  (cond (and (xt/x:is-string? value)
+             (or (. value (find "^%["))
+                 (. value (find "^%{"))
+                 (== value "true")
+                 (== value "false")
+                 (== value "null")))
+        (return (xt/x:json-decode value))
+
+        :else
+        (return value)))
+
 (defn.lua query-returns-rows?
   "Checks whether a query should return row data."
   {:added "4.1"}
@@ -64,8 +77,11 @@
   (. db (exec query
               (fn [udata cols values names]
                 (cond (== cols 1)
-                      (table.insert out (-/coerce-number (xtd/first values)))
-                       
+                      (table.insert out
+                                    (-/decode-json-scalar
+                                     (-/coerce-number
+                                      (xtd/first values))))
+                        
                        :else
                        (table.insert out (xtd/arr-map values -/coerce-number)))
                 (return 0))))
