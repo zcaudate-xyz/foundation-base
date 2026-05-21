@@ -10,6 +10,7 @@
              [xt.db.text.sql-table :as sql-table]
              [xt.db.text.sql-raw :as raw]
              [xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as promise]
              [xt.lang.common-data :as xtd]]})
 
 (defn.xt sql-gen-delete
@@ -69,6 +70,21 @@
     (xt/x:err "SQL pull expected decoded structured data"))
   (return output))
 
+(defn.xt sql-pull
+  "runs a pull statement with async query semantics"
+  {:added "4.1"}
+  [instance schema tree opts]
+  (return
+   (promise/x:promise-then
+    (sql/ensure-promise
+     (sql/query
+      instance
+      (sql-graph/select schema tree opts)))
+    (fn [output]
+      (when (xt/x:is-string? output)
+       (xt/x:err "SQL pull expected decoded structured data"))
+      (return output)))))
+
 (defn.xt sql-delete-sync
   "deletes sync data from sql db"
   {:added "4.0"}
@@ -76,6 +92,16 @@
   (return (sql/query-sync
            instance
            (xt/x:str-join "\n\n" (-/sql-gen-delete table-name ids opts)))))
+
+(defn.xt sql-delete
+  "deletes data from sql db with async query semantics"
+  {:added "4.1"}
+  [instance schema table-name ids opts]
+  (return
+   (sql/ensure-promise
+    (sql/query
+     instance
+     (xt/x:str-join "\n\n" (-/sql-gen-delete table-name ids opts))))))
 
 (defn.xt sql-clear
   "clears the sql db"

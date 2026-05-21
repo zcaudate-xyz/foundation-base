@@ -1,5 +1,7 @@
 (ns xt.db.runtime.sql-postgres-test
   (:require [hara.lang :as l]
+            [xt.lang.common-notify :as notify]
+            [xt.lang.spec-promise :as spec-promise]
             [xt.db.walkthrough.fixture-00-postgres :as fixtures]
             [postgres.core :as pg]
             [postgres.sample.scratch-v1 :as scratch])
@@ -12,16 +14,18 @@
              [postgres.sample.scratch-v1 :as scratch]]})
 
 ^{:seedgen/root {:all true}}
-(l/script- :python
+(l/script- :js
   {:runtime :basic
    :require [[xt.db.node.schema-query :as schema-query]
              [xt.db.node.schema-state :as schema-state]
              [xt.db.runtime.sql :as impl-sql]
-             [xt.dbs.text.sql-util :as ut]
+             [xt.db.text.sql-util :as ut]
              [xt.protocol.impl.connection-sql :as sql]
              [xt.lang.common-data :as xtd]
+             [xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
-             [python.lib.driver-postgres :as py-pg]]})
+             [xt.lang.spec-promise :as spec-promise]
+             [js.lib.driver-postgres :as js-pg]]})
 
 (fact:global
  {:setup [(l/rt:restart)
@@ -29,7 +33,8 @@
   :teardown [(l/rt:teardown :postgres)
              (l/rt:stop)]})
 
-^{:refer xt.db.runtime.sql/sql-pull-sync :added "4.1"
+
+^{:refer xt.db.runtime.sql/sql-pull :added "4.1"
   :setup [(fixtures/seed-entry-rows)]}
 (fact "pulls decoded rows from the live scratch postgres runtime"
 
@@ -46,98 +51,111 @@
         :time-created nil,
         :id string?}])
 
-  (!.py
-    (var conn (py-pg/wrap-connection
-               (py-pg/connect-constructor (@! fixtures/+scratch-env+))))
-    (var db-opts (ut/postgres-opts (@! fixtures/+lookup+)))
-    (var state (schema-state/base-state
-                {"schema" (@! fixtures/+schema+)
-                 "lookup" (@! fixtures/+lookup+)
-                 "views" {}}))
-    (var [ok prepared]
-         (schema-query/prepare-query
-          state
-          {:table "Entry",
-           :select-entry
-           {"input"
-            [{"symbol" "i_name",
-              "type" "text"}],
-            "view"
-            {"query"
-             {"name" "{{i_name}}",
-              "__deleted__" false}}},
-           :select-args ["alpha"],
-           :return-entry
-           {"input"
-            [{"symbol" "i_entry_id",
-              "type" "text"}],
-            "view"
-            {"query" ["name" "tags"]}}}
-          {"args" []}))
-    (var out
-         (impl-sql/sql-pull-sync
-          conn
-          (@! fixtures/+schema+)
-          (xt/x:get-key prepared "plan")
-          db-opts))
-    (sql/disconnect conn)
-    {"ok" ok
-     "value" out})
+  (notify/wait-on [:js 10000]
+    (spec-promise/x:promise-then
+     (sql/connect (js-pg/driver) (@! fixtures/+scratch-env+))
+     (fn [conn]
+       (var db-opts (ut/postgres-opts (@! fixtures/+lookup+)))
+       (var state (schema-state/base-state
+                   {"schema" (@! fixtures/+schema+)
+                    "lookup" (@! fixtures/+lookup+)
+                    "views" {}}))
+       (var [ok prepared]
+            (schema-query/prepare-query
+             state
+             {:table "Entry",
+              :select-entry
+              {"input"
+               [{"symbol" "i_name",
+                 "type" "text"}],
+               "view"
+               {"query"
+                {"name" "{{i_name}}",
+                 "__deleted__" false}}},
+              :select-args ["alpha"],
+              :return-entry
+              {"input"
+               [{"symbol" "i_entry_id",
+                 "type" "text"}],
+               "view"
+               {"query" ["name" "tags"]}}}
+             {"args" []}))
+       (spec-promise/x:promise-then
+        (impl-sql/sql-pull
+         conn
+         (@! fixtures/+schema+)
+         (xt/x:get-key prepared "plan")
+         db-opts)
+        (fn [out]
+          (spec-promise/x:promise-then
+           (sql/ensure-promise (sql/disconnect conn))
+           (fn [_]
+             (repl/notify {"ok" ok
+                           "value" out}))))))))
   => {"ok" true
       "value" [{"name" "alpha"
                 "tags" ["guide" "sql"]}]})
 
-^{:refer xt.db.runtime.sql/sql-pull-sync.string :added "4.1"}
+^{:refer xt.db.runtime.sql/sql-pull.string :added "4.1"}
 (fact "rejects string pull query results"
 
-  (!.py
-    (impl-sql/sql-pull-sync
-     (sql/connection-create
-      {}
-      {"query_sync" (fn [_conn _input]
-                      (return "[{\"id\":\"ENTRY-0\"}]"))})
-     (@! fixtures/+schema+)
-     ["Entry" ["id"]]
-     (ut/postgres-opts (@! fixtures/+lookup+))))
-  => (throws))
+  (notify/wait-on [:js 10000]
+    (spec-promise/x:promise-catch
+     (impl-sql/sql-pull
+      (sql/connection-create
+       {}
+       {"query" (fn [_conn _input]
+                  (return "[{\"id\":\"ENTRY-0\"}]"))})
+      (@! fixtures/+schema+)
+      ["Entry" ["id"]]
+      (ut/postgres-opts (@! fixtures/+lookup+)))
+     (fn [_]
+       (repl/notify true))))
+  => true)
 
-^{:refer xt.db.runtime.sql/sql-delete-sync :added "4.1"
+^{:refer xt.db.runtime.sql/sql-delete :added "4.1"
   :setup [(fixtures/seed-entry-rows)]}
-(fact "deletes live scratch rows through query-sync"
+(fact "deletes live scratch rows through async query semantics"
 
-  (!.py
-    (var conn (py-pg/wrap-connection
-               (py-pg/connect-constructor (@! fixtures/+scratch-env+))))
-    (var db-opts (ut/postgres-opts (@! fixtures/+lookup+)))
-    (var state (schema-state/base-state
-                {"schema" (@! fixtures/+schema+)
-                 "lookup" (@! fixtures/+lookup+)
-                 "views" {}}))
-    (var alpha-id
-         (sql/query-sync
-          conn
-          "SELECT \"id\" FROM \"scratch\".\"Entry\" WHERE \"name\" = 'alpha';"))
-    (impl-sql/sql-delete-sync
-     conn
-     (@! fixtures/+schema+)
-     "Entry"
-     [alpha-id]
-     db-opts)
-    (var [ok prepared]
-         (schema-query/prepare-query
-          state
-          (@! fixtures/+model-query+)
-          {"args" []}))
-    (var out
-         (impl-sql/sql-pull-sync
-          conn
-          (@! fixtures/+schema+)
-          (xt/x:get-key prepared "plan")
-          db-opts))
-    (sql/disconnect conn)
-    {"ok" ok
-     "count" (xt/x:len out)
-     "name" (xtd/get-in out [0 "name"])})
+  (notify/wait-on [:js 10000]
+    (spec-promise/x:promise-then
+     (sql/connect (js-pg/driver) (@! fixtures/+scratch-env+))
+     (fn [conn]
+       (var db-opts (ut/postgres-opts (@! fixtures/+lookup+)))
+       (var state (schema-state/base-state
+                   {"schema" (@! fixtures/+schema+)
+                    "lookup" (@! fixtures/+lookup+)
+                    "views" {}}))
+       (var [ok prepared]
+            (schema-query/prepare-query
+             state
+             (@! fixtures/+model-query+)
+             {"args" []}))
+       (spec-promise/x:promise-then
+        (sql/query conn "SELECT \"id\" FROM \"scratch\".\"Entry\" WHERE \"name\" = 'alpha';")
+        (fn [alpha-id]
+          (spec-promise/x:promise-then
+           (impl-sql/sql-delete
+            conn
+            (@! fixtures/+schema+)
+            "Entry"
+            [alpha-id]
+            db-opts)
+           (fn [_]
+             (spec-promise/x:promise-then
+              (impl-sql/sql-pull
+               conn
+               (@! fixtures/+schema+)
+               (xt/x:get-key prepared "plan")
+               db-opts)
+              (fn [out]
+                (spec-promise/x:promise-then
+                 (sql/ensure-promise (sql/disconnect conn))
+                 (fn [_]
+                   (repl/notify
+                    {"ok" ok
+                     "count" (xt/x:len out)
+                     "name" (xtd/get-in out [0 "name"])}))))))))))))
   => {"ok" true
       "count" 1
       "name" "beta"})
@@ -146,14 +164,16 @@
   :setup [(fixtures/seed-entry-rows)]}
 (fact "treats clear as a live no-op success"
 
-  (!.py
-    (var conn (py-pg/wrap-connection
-               (py-pg/connect-constructor (@! fixtures/+scratch-env+))))
-    (var cleared (impl-sql/sql-clear conn))
-    (var count
-         (sql/query-sync
-          conn
-          "SELECT COUNT(*)::int FROM \"scratch\".\"Entry\";"))
-    (sql/disconnect conn)
-    [cleared count])
+  (notify/wait-on [:js 10000]
+    (spec-promise/x:promise-then
+     (sql/connect (js-pg/driver) (@! fixtures/+scratch-env+))
+     (fn [conn]
+       (var cleared (impl-sql/sql-clear conn))
+       (spec-promise/x:promise-then
+        (sql/query conn "SELECT COUNT(*)::int FROM \"scratch\".\"Entry\";")
+        (fn [count]
+          (spec-promise/x:promise-then
+           (sql/ensure-promise (sql/disconnect conn))
+           (fn [_]
+            (repl/notify [cleared count]))))))))
   => [true 2])
