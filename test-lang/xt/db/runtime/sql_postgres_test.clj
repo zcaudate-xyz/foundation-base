@@ -33,6 +33,19 @@
   :teardown [(l/rt:teardown :postgres)
              (l/rt:stop)]})
 
+^{:refer xt.db.runtime.sql/CANARY.setup :added "4.1"}
+(fact "creating a driver"
+
+  (notify/wait-on [:js 10000]
+    (spec-promise/x:promise-then
+     (sql/connect (js-pg/driver) (@! fixtures/+scratch-env+))
+     (fn [conn]
+       (repl/notify conn))))
+  => (contains-in
+      {"::" "sql.connection"
+       "_impl" {}
+       "_raw" map?}))
+
 
 ^{:refer xt.db.runtime.sql/sql-pull :added "4.1"
   :setup [(fixtures/seed-entry-rows)]}
@@ -52,49 +65,49 @@
         :id string?}])
 
   (notify/wait-on [:js 10000]
-    (spec-promise/x:promise-then
-     (sql/connect (js-pg/driver) (@! fixtures/+scratch-env+))
-     (fn [conn]
-       (var db-opts (ut/postgres-opts (@! fixtures/+lookup+)))
-       (var state (schema-state/base-state
-                   {"schema" (@! fixtures/+schema+)
-                    "lookup" (@! fixtures/+lookup+)
-                    "views" {}}))
-       (var [ok prepared]
-            (schema-query/prepare-query
-             state
-             {:table "Entry",
-              :select-entry
-              {"input"
-               [{"symbol" "i_name",
-                 "type" "text"}],
-               "view"
-               {"query"
-                {"name" "{{i_name}}",
-                 "__deleted__" false}}},
-              :select-args ["alpha"],
-              :return-entry
-              {"input"
-               [{"symbol" "i_entry_id",
-                 "type" "text"}],
-               "view"
-               {"query" ["name" "tags"]}}}
-             {"args" []}))
-       (spec-promise/x:promise-then
-        (impl-sql/sql-pull
-         conn
-         (@! fixtures/+schema+)
-         (xt/x:get-key prepared "plan")
-         db-opts)
-        (fn [out]
-          (spec-promise/x:promise-then
-           (sql/ensure-promise (sql/disconnect conn))
-           (fn [_]
-             (repl/notify {"ok" ok
-                           "value" out}))))))))
-  => {"ok" true
-      "value" [{"name" "alpha"
-                "tags" ["guide" "sql"]}]})
+    (-> (sql/connect (js-pg/driver) (@! fixtures/+scratch-env+))
+        (spec-promise/x:promise-then
+         (fn [conn]
+           (var db-opts (ut/postgres-opts (@! fixtures/+lookup+)))
+           (var state (schema-state/base-state
+                       {"schema" (@! fixtures/+schema+)
+                        "lookup" (@! fixtures/+lookup+)
+                        "views" {}}))
+           (var [ok prepared]
+                (schema-query/prepare-query
+                 state
+                 {:table "Entry",
+                  :select-entry
+                  {"input"
+                   [{"symbol" "i_name",
+                     "type" "text"}],
+                   "view"
+                   {"query"
+                    {"name" "{{i_name}}",
+                     "__deleted__" false}}},
+                  :select-args ["alpha"],
+                  :return-entry
+                  {"input"
+                   [{"symbol" "i_entry_id",
+                     "type" "text"}],
+                   "view"
+                   {"query" ["name" "tags"]}}}
+                 {"args" []}))
+           (return #{conn ok prepared db-opts})))
+        (spec-promise/x:promise-then
+         (fn [interim]
+           (var #{conn prepared db-opts} interim)
+           (return
+            (impl-sql/sql-pull
+             conn
+             (@! fixtures/+schema+)
+             (xt/x:get-key prepared "plan")
+             db-opts))))
+        (spec-promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))))
+  => [{"name" "alpha"
+       "tags" ["guide" "sql"]}])
 
 ^{:refer xt.db.runtime.sql/sql-pull.string :added "4.1"}
 (fact "rejects string pull query results"
