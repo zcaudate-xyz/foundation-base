@@ -33,11 +33,22 @@
    :return-entry {"input" [{"symbol" "i_entry_id" "type" "text"}]
                   "view" {"query" ["name" "tags"]}}})
 
+(def +model-query+
+  {:table "Entry"
+   :select-entry {"input" []
+                  "view" {"query" {"__deleted__" false}}}
+   :return-entry {"input" [{"symbol" "i_entry_id" "type" "text"}]
+                  "view" {"query" ["id"
+                                  "name"
+                                  "tags"
+                                  "time_created"
+                                  "time_updated"]}}})
+
 (def +model-spec+
   {"views"
-   {"alpha"
-    {"query" +inline-query+
-     "input" ["alpha"]}}})
+   {"entries"
+    {"query" +model-query+
+     "input" []}}})
 
 (defn seed-entry-rows
   []
