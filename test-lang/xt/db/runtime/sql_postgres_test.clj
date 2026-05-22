@@ -37,10 +37,10 @@
 (fact "creating a driver"
 
   (notify/wait-on [:js 10000]
-    (spec-promise/x:promise-then
-     (sql/connect (js-pg/driver) (@! fixtures/+scratch-env+))
-     (fn [conn]
-       (repl/notify conn))))
+    (-> (sql/connect (js-pg/driver) (@! fixtures/+scratch-env+))
+        (spec-promise/x:promise-then
+         (fn [conn]
+           (repl/notify conn)))))
   => (contains-in
       {"::" "sql.connection"
        "_impl" {}
@@ -113,17 +113,17 @@
 (fact "rejects string pull query results"
 
   (notify/wait-on [:js 10000]
-    (spec-promise/x:promise-catch
-     (impl-sql/sql-pull
-      (sql/connection-create
-       {}
-       {"query" (fn [_conn _input]
-                  (return "[{\"id\":\"ENTRY-0\"}]"))})
-      (@! fixtures/+schema+)
-      ["Entry" ["id"]]
-      (ut/postgres-opts (@! fixtures/+lookup+)))
-     (fn [_]
-       (repl/notify true))))
+    (-> (impl-sql/sql-pull
+         (sql/connection-create
+          {}
+          {"query" (fn [_conn _input]
+                     (return "[{\"id\":\"ENTRY-0\"}]"))})
+         (@! fixtures/+schema+)
+         ["Entry" ["id"]]
+         (ut/postgres-opts (@! fixtures/+lookup+)))
+        (spec-promise/x:promise-catch
+         (fn [_]
+           (repl/notify true)))))
   => true)
 
 ^{:refer xt.db.runtime.sql/sql-delete :added "4.1"
@@ -131,44 +131,64 @@
 (fact "deletes live scratch rows through async query semantics"
 
   (notify/wait-on [:js 10000]
-    (spec-promise/x:promise-then
-     (sql/connect (js-pg/driver) (@! fixtures/+scratch-env+))
-     (fn [conn]
-       (var db-opts (ut/postgres-opts (@! fixtures/+lookup+)))
-       (var state (schema-state/base-state
-                   {"schema" (@! fixtures/+schema+)
-                    "lookup" (@! fixtures/+lookup+)
-                    "views" {}}))
-       (var [ok prepared]
-            (schema-query/prepare-query
-             state
-             (@! fixtures/+model-query+)
-             {"args" []}))
-       (spec-promise/x:promise-then
-        (sql/query conn "SELECT \"id\" FROM \"scratch\".\"Entry\" WHERE \"name\" = 'alpha';")
-        (fn [alpha-id]
-          (spec-promise/x:promise-then
-           (impl-sql/sql-delete
-            conn
-            (@! fixtures/+schema+)
-            "Entry"
-            [alpha-id]
-            db-opts)
-           (fn [_]
-             (spec-promise/x:promise-then
-              (impl-sql/sql-pull
-               conn
-               (@! fixtures/+schema+)
-               (xt/x:get-key prepared "plan")
-               db-opts)
-              (fn [out]
+    (-> (sql/connect (js-pg/driver) (@! fixtures/+scratch-env+))
+        (spec-promise/x:promise-then
+         (fn [conn]
+           (var db-opts (ut/postgres-opts (@! fixtures/+lookup+)))
+           (var state (schema-state/base-state
+                       {"schema" (@! fixtures/+schema+)
+                        "lookup" (@! fixtures/+lookup+)
+                        "views" {}}))
+           (var [ok prepared]
+                (schema-query/prepare-query
+                 state
+                 (@! fixtures/+model-query+)
+                 {"args" []}))
+           (return #{conn ok prepared db-opts})))
+        (spec-promise/x:promise-then
+         (fn [interim]
+           (var #{conn ok prepared db-opts} interim)
+           (return
+            (-> (sql/query conn "SELECT \"id\" FROM \"scratch\".\"Entry\" WHERE \"name\" = 'alpha';")
                 (spec-promise/x:promise-then
-                 (sql/ensure-promise (sql/disconnect conn))
+                 (fn [alpha-id]
+                   (return #{conn ok prepared db-opts alpha-id})))))))
+        (spec-promise/x:promise-then
+         (fn [interim]
+           (var #{conn ok prepared db-opts alpha-id} interim)
+           (return
+            (-> (impl-sql/sql-delete
+                 conn
+                 (@! fixtures/+schema+)
+                 "Entry"
+                 [alpha-id]
+                 db-opts)
+                (spec-promise/x:promise-then
+                 (fn [_]
+                   (return #{conn ok prepared db-opts})))))))
+        (spec-promise/x:promise-then
+         (fn [interim]
+           (var #{conn ok prepared db-opts} interim)
+           (return
+            (-> (impl-sql/sql-pull
+                 conn
+                 (@! fixtures/+schema+)
+                 (xt/x:get-key prepared "plan")
+                 db-opts)
+                (spec-promise/x:promise-then
+                 (fn [out]
+                   (return #{conn ok out})))))))
+        (spec-promise/x:promise-then
+         (fn [interim]
+           (var #{conn ok out} interim)
+           (return
+            (-> (sql/ensure-promise (sql/disconnect conn))
+                (spec-promise/x:promise-then
                  (fn [_]
                    (repl/notify
                     {"ok" ok
                      "count" (xt/x:len out)
-                     "name" (xtd/get-in out [0 "name"])}))))))))))))
+                     "name" (xtd/get-in out [0 "name"])})))))))))
   => {"ok" true
       "count" 1
       "name" "beta"})
@@ -178,15 +198,25 @@
 (fact "treats clear as a live no-op success"
 
   (notify/wait-on [:js 10000]
-    (spec-promise/x:promise-then
-     (sql/connect (js-pg/driver) (@! fixtures/+scratch-env+))
-     (fn [conn]
-       (var cleared (impl-sql/sql-clear conn))
-       (spec-promise/x:promise-then
-        (sql/query conn "SELECT COUNT(*)::int FROM \"scratch\".\"Entry\";")
-        (fn [count]
-          (spec-promise/x:promise-then
-           (sql/ensure-promise (sql/disconnect conn))
-           (fn [_]
-            (repl/notify [cleared count]))))))))
+    (-> (sql/connect (js-pg/driver) (@! fixtures/+scratch-env+))
+        (spec-promise/x:promise-then
+         (fn [conn]
+           (var cleared (impl-sql/sql-clear conn))
+           (return #{conn cleared})))
+        (spec-promise/x:promise-then
+         (fn [interim]
+           (var #{conn cleared} interim)
+           (return
+            (-> (sql/query conn "SELECT COUNT(*)::int FROM \"scratch\".\"Entry\";")
+                (spec-promise/x:promise-then
+                 (fn [count]
+                   (return #{conn cleared count})))))))        
+        (spec-promise/x:promise-then
+         (fn [interim]
+           (var #{conn cleared count} interim)
+           (return
+            (-> (sql/ensure-promise (sql/disconnect conn))
+                (spec-promise/x:promise-then
+                 (fn [_]
+                   (repl/notify [cleared count])))))))))
   => [true 2])

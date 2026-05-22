@@ -497,8 +497,8 @@
               {:table "Order"
                :return-method "default"
                :return-id "ord-1"}
-              {"model-id" "orders"
-               "view-id" "main"}
+              {"model_id" "orders"
+               "view_id" "main"}
               {"space" "room/b"}
               "orders"
               "main")))))
@@ -529,7 +529,7 @@
            "room/a"
            state
            {"db/sync" fixtures/Seed}
-           {"model-id" "orders"}
+           {"model_id" "orders"}
            {"space" "room/a"})
           (fn [_]
             (return (model/snapshot node "room/a")))))

@@ -215,8 +215,8 @@
   (when (xt/x:not-nil? explicit)
     (return explicit))
   (var out {:query (-/normalize-query query-spec view-context)})
-  (var model-id (xt/x:get-key view-context "model-id"))
-  (var view-id (xt/x:get-key view-context "view-id"))
+  (var model-id (xt/x:get-key view-context "model_id"))
+  (var view-id (xt/x:get-key view-context "view_id"))
   (when (xt/x:not-nil? model-id)
     (xt/x:set-key out "model_id" model-id))
   (when (xt/x:not-nil? view-id)
@@ -308,8 +308,8 @@
                       return-args))))
   (return [true {:key (-/query-key query-spec view-context)
                  :query query-spec
-                 :context {:model-id (xt/x:get-key view-context "model-id")
-                           :view-id (xt/x:get-key view-context "view-id")
+                 :context {:model-id (xt/x:get-key view-context "model_id")
+                           :view-id (xt/x:get-key view-context "view_id")
                            :args (or (xt/x:get-key view-context "args") [])}
                  :plan tree
                  :tables (-/view-triggers state table qm)}]))

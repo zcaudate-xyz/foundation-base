@@ -53,5 +53,5 @@
 (defn seed-entry-rows
   []
   (pg/t:delete scratch/Entry)
-  (scratch/insert-entry "alpha" ^:js ["guide" "sql"] {})
-  (scratch/insert-entry "beta" ^:js ["guide"] {}))
+  [(scratch/insert-entry "alpha" ^:js ["guide" "sql"] {})
+   (scratch/insert-entry "beta" ^:js ["guide"] {})])

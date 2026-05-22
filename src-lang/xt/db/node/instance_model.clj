@@ -539,8 +539,8 @@
                       payload))
   (var view-context (or (xt/x:get-key payload "view")
                         {}))
-  (var model-id (xt/x:get-key view-context "model-id"))
-  (var view-id (xt/x:get-key view-context "view-id"))
+  (var model-id (xt/x:get-key view-context "model_id"))
+  (var view-id (xt/x:get-key view-context "view_id"))
   (var [ok result] (instance-query/run-local-query
                     state
                     query-spec
