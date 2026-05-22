@@ -205,9 +205,10 @@
   (!.lua
     (var state (schema-state/base-state {}))
     (instance-state/watch-query state "q1" {"Task" true "Audit" true})
-    [(xt/x:obj-keys (. state ["watch"]))
+    [(xtd/arr-lookup (xt/x:obj-keys (. state ["watch"])))
      (. (. (. state ["watch"]) ["Task"]) ["q1"])])
-  => [["Task" "Audit"]
+  => [{"Task" true
+       "Audit" true}
       true])
 
 ^{:refer xt.db.node.instance-state/watch-view :added "4.1"}
@@ -216,9 +217,10 @@
   (!.lua
     (var state (schema-state/base-state {}))
     (instance-state/watch-view state "orders" "main" {"Task" true "Audit" true})
-    [(xt/x:obj-keys (. state ["view_watch"]))
+    [(xtd/arr-lookup (xt/x:obj-keys (. state ["view_watch"])))
      (. (. (. state ["view_watch"]) ["Task"] ["orders"]) ["main"])])
-  => [["Task" "Audit"]
+  => [{"Task" true
+       "Audit" true}
       true])
 
 ^{:refer xt.db.node.instance-state/affected-query-ids :added "4.1"}
