@@ -7,6 +7,7 @@
    :require [[xt.db.runtime :as xdb]
              [xt.db.node.instance-query :as instance-query]
              [xt.db.node.instance-state :as instance-state]
+             [xt.db.helpers.test-fixtures :as fixtures]
              [xt.db.node.schema-state :as schema-state]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]]})
@@ -15,86 +16,41 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-(def +schema+
-  {"Order"
-   {"id" {"ident" "id", "type" "text", "order" 0}
-    "status" {"ident" "status", "type" "text", "order" 1}}})
+(def +schema+ fixtures/Schema)
 
-(def +lookup+
-  {"Order" {"position" 0}})
+(def +lookup+ fixtures/Lookup)
 
-(def +views+
-  {"Order"
-   {"select"
-    {"by_status"
-     {"input" [{"symbol" "i_status", "type" "text"}]
-      "return" "jsonb"
-      "view" {"table" "Order"
-              "type" "select"
-              "tag" "by_status"
-              "access" {"roles" {}}
-              "guards" []
-              "query" {"status" "{{i_status}}"}}}}
-    "return"
-    {"default"
-     {"input" [{"symbol" "i_order_id", "type" "text"}]
-      "return" "jsonb"
-      "view" {"table" "Order"
-              "type" "return"
-              "tag" "default"
-              "access" {"roles" {}}
-              "guards" []
-              "query" ["status"]}}}}})
+(def +views+ fixtures/Views)
 
-(def +model-spec+
-  {"views"
-   {"main"
-    {"query" {:table "Order"
-              :return-method "default"
-              :return-id "ord-1"}
-      "input" []}}})
+(def +model-spec+ fixtures/ModelSpec)
 
-(def +dependent-model-spec+
-  {"views"
-   {"main"
-    {"query" {:table "Order"
-              :return-method "default"
-              :return-id "ord-1"}
-     "input" []}
-    "open"
-    {"query" {:table "Order"
-              :select-method "by_status"}
-     "default_input" ["open"]
-     "deps" ["main"]}}})
+(def +dependent-model-spec+ fixtures/DependentModelSpec)
 
-(def +seed+
-  {"Order"
-   [{"id" "ord-1" "status" "open"}
-    {"id" "ord-2" "status" "closed"}]})
+(def +seed+ fixtures/Seed)
 
 ^{:refer xt.db.node.instance-query/attach-query-entry :added "4.1"}
 (fact "stores cached query results and updates bound views"
 
   (!.lua
     (var state
-         (schema-state/base-state {"schema" (@! +schema+)
-                                   "views" (@! +views+)
-                                   "lookup" (@! +lookup+)}))
-    (instance-state/put-model state "orders" (@! +model-spec+))
+         (schema-state/base-state {"schema" fixtures/Schema
+                                   "views" fixtures/Views
+                                   "lookup" fixtures/Lookup}))
+    (instance-state/put-model state "orders" fixtures/ModelSpec)
     (var entry
          (instance-query/attach-query-entry
           state
           {"key" "q1"
-           "query" {"table" "Order"}
+           "query" {"table" "Task"}
            "context" {"model_id" "orders" "view_id" "main"}
-           "plan" ["Order" {"id" "ord-1"} ["status"]]
-           "tables" {"Order" true}}
+           "plan" ["Task" {"id" "00000000-0000-0000-0000-0000000000a1"} ["status"]]
+           "tables" {"Task" true}}
           [{"status" "open"}]
           nil
           "orders"
           "main"))
     [(. entry ["key"])
-     (. (. state ["watch"]) ["Order"] ["q1"])
+     (. (. state ["watch"]) ["Task"] ["q1"])
      (xtd/get-in state ["models" "orders" "views" "main" "query_key"])
      (xtd/get-in state ["models" "orders" "views" "main" "value" 0 "status"])])
   => ["q1"
@@ -107,17 +63,17 @@
 
   (!.lua
     (var state
-         (schema-state/base-state {"schema" (@! +schema+)
-                                   "views" (@! +views+)
-                                   "lookup" (@! +lookup+)}))
-    (instance-state/put-model state "orders" (@! +dependent-model-spec+))
+         (schema-state/base-state {"schema" fixtures/Schema
+                                   "views" fixtures/Views
+                                   "lookup" fixtures/Lookup}))
+    (instance-state/put-model state "orders" fixtures/DependentModelSpec)
     (instance-query/attach-query-entry
      state
      {"key" "q1"
-      "query" {"table" "Order"}
+      "query" {"table" "Task"}
       "context" {}
-      "plan" ["Order" {"id" "ord-1"} ["status"]]
-      "tables" {"Order" true}}
+      "plan" ["Task" {"id" "00000000-0000-0000-0000-0000000000a1"} ["status"]]
+      "tables" {"Task" true}}
      [{"status" "open"}]
      nil
      "orders"
@@ -133,17 +89,17 @@
 
   (!.lua
     (var state
-         (schema-state/base-state {"schema" (@! +schema+)
-                                   "views" (@! +views+)
-                                   "lookup" (@! +lookup+)}))
-    (instance-state/put-model state "orders" (@! +dependent-model-spec+))
+         (schema-state/base-state {"schema" fixtures/Schema
+                                   "views" fixtures/Views
+                                   "lookup" fixtures/Lookup}))
+    (instance-state/put-model state "orders" fixtures/DependentModelSpec)
     (instance-query/attach-query-entry
      state
      {"key" "q1"
-      "query" {"table" "Order"}
+      "query" {"table" "Task"}
       "context" {}
-      "plan" ["Order" {"id" "ord-1"} ["status"]]
-      "tables" {"Order" true}}
+      "plan" ["Task" {"id" "00000000-0000-0000-0000-0000000000a1"} ["status"]]
+      "tables" {"Task" true}}
      [{"status" "open"}]
      nil
      "orders"
@@ -172,19 +128,19 @@
 
   (!.lua
     (var state
-         (schema-state/base-state {"schema" (@! +schema+)
-                                   "views" (@! +views+)
-                                   "lookup" (@! +lookup+)}))
-    (instance-state/put-model state "orders" (@! +dependent-model-spec+))
+         (schema-state/base-state {"schema" fixtures/Schema
+                                   "views" fixtures/Views
+                                   "lookup" fixtures/Lookup}))
+    (instance-state/put-model state "orders" fixtures/DependentModelSpec)
     (var db (instance-state/ensure-db state))
-    (xdb/sync-event db ["add" (@! +seed+)])
+    (xdb/sync-event db ["add" fixtures/Seed])
     (var [_ result]
          (instance-query/run-local-query
           state
           {:key "q1"
-           :table "Order"
+           :table "Task"
            :return-method "default"
-           :return-id "ord-1"}
+           :return-id "00000000-0000-0000-0000-0000000000a1"}
           {:model-id "orders"
            :view-id "main"
            :args []}
@@ -201,19 +157,19 @@
 
   (!.lua
     (var state
-         (schema-state/base-state {"schema" (@! +schema+)
-                                   "views" (@! +views+)
-                                   "lookup" (@! +lookup+)}))
-    (instance-state/put-model state "orders" (@! +dependent-model-spec+))
+         (schema-state/base-state {"schema" fixtures/Schema
+                                   "views" fixtures/Views
+                                   "lookup" fixtures/Lookup}))
+    (instance-state/put-model state "orders" fixtures/DependentModelSpec)
     (var db (instance-state/ensure-db state))
-    (xdb/sync-event db ["add" (@! +seed+)])
+    (xdb/sync-event db ["add" fixtures/Seed])
     (var [_ result]
          (instance-query/run-local-query
           state
           {:key "q1"
-           :table "Order"
+           :table "Task"
            :return-method "default"
-           :return-id "ord-1"}
+           :return-id "00000000-0000-0000-0000-0000000000a1"}
           {:model-id "orders"
            :view-id "main"
            :args []}
@@ -230,25 +186,25 @@
 
   (!.lua
     (var state
-         (schema-state/base-state {"schema" (@! +schema+)
-                                   "views" (@! +views+)
-                                   "lookup" (@! +lookup+)}))
-    (instance-state/put-model state "orders" (@! +model-spec+))
+         (schema-state/base-state {"schema" fixtures/Schema
+                                   "views" fixtures/Views
+                                   "lookup" fixtures/Lookup}))
+    (instance-state/put-model state "orders" fixtures/ModelSpec)
     (var db (instance-state/ensure-db state))
-    (xdb/sync-event db ["add" (@! +seed+)])
+    (xdb/sync-event db ["add" fixtures/Seed])
     (var [_ result]
          (instance-query/run-local-query
           state
           {:key "q1"
-           :table "Order"
+           :table "Task"
            :return-method "default"
-           :return-id "ord-1"}
+           :return-id "00000000-0000-0000-0000-0000000000a1"}
           {:model-id "orders"
            :view-id "main"
            :args []}
           "orders"
           "main"))
-    (xdb/sync-event db ["add" {"Order" [{"id" "ord-1" "status" "closed"}]}])
+    (xdb/sync-event db ["add" {"Task" [{"id" "00000000-0000-0000-0000-0000000000a1" "status" "closed"}]}])
     (var refreshed
          (instance-query/refresh-query-keys state [(. result ["query_key"])]))
     [(xt/x:len refreshed)
@@ -261,18 +217,18 @@
 
   (!.lua
     (var state
-         (schema-state/base-state {"schema" (@! +schema+)
-                                   "views" (@! +views+)
-                                   "lookup" (@! +lookup+)}))
-    (instance-state/put-model state "orders" (@! +model-spec+))
-    (xdb/sync-event (instance-state/ensure-db state) ["add" (@! +seed+)])
+         (schema-state/base-state {"schema" fixtures/Schema
+                                   "views" fixtures/Views
+                                   "lookup" fixtures/Lookup}))
+    (instance-state/put-model state "orders" fixtures/ModelSpec)
+    (xdb/sync-event (instance-state/ensure-db state) ["add" fixtures/Seed])
     (var [ok result]
          (instance-query/run-local-query
           state
           {:key "q1"
-           :table "Order"
+           :table "Task"
            :return-method "default"
-           :return-id "ord-1"}
+           :return-id "00000000-0000-0000-0000-0000000000a1"}
           {:model-id "orders"
            :view-id "main"
            :args []}
@@ -280,7 +236,7 @@
           "main"))
     [ok
      (xtd/get-in result ["value" 0 "status"])
-     (. (. result ["tables"]) ["Order"])
+     (. (. result ["tables"]) ["Task"])
      (xtd/get-in state ["models" "orders" "views" "main" "status"])])
   => [true
       "open"
@@ -307,12 +263,12 @@
 
   (!.lua
    (var state (schema-state/base-state {}))
-   (instance-state/put-model state "orders" (@! +model-spec+))
-   (instance-state/set-view-input state "orders" "main" ["ord-2"])
+   (instance-state/put-model state "orders" fixtures/ModelSpec)
+   (instance-state/set-view-input state "orders" "main" ["00000000-0000-0000-0000-0000000000a2"])
    (instance-query/view-context state "orders" "main"))
   => {"model_id" "orders"
       "view_id" "main"
-      "args" ["ord-2"]})
+      "args" ["00000000-0000-0000-0000-0000000000a2"]})
 
 ^{:refer xt.db.node.instance-query/view-remote-spec :added "4.1"}
 (fact "returns only remote configs that can drive transport refreshes"
@@ -328,10 +284,10 @@
 
   (!.lua
    (var state
-        (schema-state/base-state {"schema" (@! +schema+)
-                                  "views" (@! +views+)
-                                  "lookup" (@! +lookup+)}))
-   (instance-state/put-model state "orders" (@! +dependent-model-spec+))
+        (schema-state/base-state {"schema" fixtures/Schema
+                                  "views" fixtures/Views
+                                  "lookup" fixtures/Lookup}))
+   (instance-state/put-model state "orders" fixtures/DependentModelSpec)
    (var visited
         (instance-query/mark-view-dependents-stale
          state
@@ -352,11 +308,11 @@
 
   (!.lua
    (var state
-        (schema-state/base-state {"schema" (@! +schema+)
-                                  "views" (@! +views+)
-                                  "lookup" (@! +lookup+)}))
-   (instance-state/put-model state "orders" (@! +dependent-model-spec+))
-   (xdb/sync-event (instance-state/ensure-db state) ["add" (@! +seed+)])
+        (schema-state/base-state {"schema" fixtures/Schema
+                                  "views" fixtures/Views
+                                  "lookup" fixtures/Lookup}))
+   (instance-state/put-model state "orders" fixtures/DependentModelSpec)
+   (xdb/sync-event (instance-state/ensure-db state) ["add" fixtures/Seed])
    (var visited
         (instance-query/refresh-view-dependents-local
          state
@@ -377,11 +333,11 @@
 
   (!.lua
    (var state
-        (schema-state/base-state {"schema" (@! +schema+)
-                                  "views" (@! +views+)
-                                  "lookup" (@! +lookup+)}))
-   (instance-state/put-model state "orders" (@! +dependent-model-spec+))
-   (xdb/sync-event (instance-state/ensure-db state) ["add" (@! +seed+)])
+        (schema-state/base-state {"schema" fixtures/Schema
+                                  "views" fixtures/Views
+                                  "lookup" fixtures/Lookup}))
+   (instance-state/put-model state "orders" fixtures/DependentModelSpec)
+   (xdb/sync-event (instance-state/ensure-db state) ["add" fixtures/Seed])
    (var visited
         (instance-query/refresh-view-local
          state
@@ -401,10 +357,10 @@
 
   (!.lua
    (var state
-        (schema-state/base-state {"schema" (@! +schema+)
-                                  "views" (@! +views+)
-                                  "lookup" (@! +lookup+)}))
-   (instance-state/put-model state "orders" (@! +dependent-model-spec+))
+        (schema-state/base-state {"schema" fixtures/Schema
+                                  "views" fixtures/Views
+                                  "lookup" fixtures/Lookup}))
+   (instance-state/put-model state "orders" fixtures/DependentModelSpec)
    (var visited
         (instance-query/mark-view-bindings-stale
          state
@@ -423,11 +379,11 @@
 
   (!.lua
    (var state
-        (schema-state/base-state {"schema" (@! +schema+)
-                                  "views" (@! +views+)
-                                  "lookup" (@! +lookup+)}))
-   (instance-state/put-model state "orders" (@! +dependent-model-spec+))
-   (xdb/sync-event (instance-state/ensure-db state) ["add" (@! +seed+)])
+        (schema-state/base-state {"schema" fixtures/Schema
+                                  "views" fixtures/Views
+                                  "lookup" fixtures/Lookup}))
+   (instance-state/put-model state "orders" fixtures/DependentModelSpec)
+   (xdb/sync-event (instance-state/ensure-db state) ["add" fixtures/Seed])
    (var visited
         (instance-query/refresh-view-bindings-local
          state

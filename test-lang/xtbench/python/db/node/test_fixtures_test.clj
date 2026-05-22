@@ -16,9 +16,9 @@
 (fact "provides reusable schema, model, and seed fixtures"
 
   (!.py
-   {"schema-id" (xtd/get-in fixtures/InstallOpts ["schema" "Order" "id" "ident"])
+   {"schema-id" (xtd/get-in fixtures/InstallOpts ["schema" "Task" "id" "ident"])
     "views" (xt/x:obj-keys (. fixtures/ModelSpec ["views"]))
-    "seed-status" (xtd/get-in fixtures/Seed ["Order" 0 "status"])})
+    "seed-status" (xtd/get-in fixtures/Seed ["Task" 0 "status"])})
   => (just-in {"schema-id" "id"
                "views" (just ["main" "open"] :in-any-order)
                "seed-status" "open"}))

@@ -6,8 +6,7 @@
 (do 
   (l/script- :postgres
     {:runtime :jdbc.client
-     :config {:dbname "test-scratch"}
-     :require [[xt.db.helpers.sample-user-test :as sample-user]]}))
+     :config {:dbname "test-scratch"}}))
 
 (l/script- :js
   {:runtime :basic
@@ -19,16 +18,16 @@
              [xt.protocol.impl.connection-sql :as dbsql]
              [xt.db.runtime.sql :as impl-sql]
              [xt.db.text.base-flatten :as f]
+             [xt.db.helpers.test-fixtures :as fixtures]
              [xt.db.text.sql-manage :as manage]
              [xt.db.text.sql-raw :as raw]
              [xt.db.text.sql-table :as sql-table]
              [xt.db.text.sql-util :as ut]
-             [xt.db.helpers.data-main-test :as sample]
              [js.lib.driver-postgres :as js-postgres]
              [js.lib.driver-sqlite :as js-sqlite]]})
 
 (def +touched-output+
-  ["UserAccount" "UserProfile"])
+  ["Task"])
 
 (def +postgres-env+
   {"host"     "127.0.0.1"
@@ -45,7 +44,7 @@
 
 ^{:refer xt.db.runtime.sql/sql-process-event-sync
   :added "4.1"}
-(fact "postgres and sqlite report the same touched sample tables"
+(fact "postgres and sqlite report the same touched fixture tables"
   
   (notify/wait-on [:js 15000]
     (do
@@ -64,30 +63,23 @@
       (spec-promise/x:promise-then
        (dbsql/connect (js-sqlite/driver) {})
        (fn [sqlite-conn]
-         (var root-user (xtd/obj-clone sample/RootUser))
-         (xt/x:set-key root-user "password_hash" "root-hash")
-         (xt/x:set-key root-user "password_salt" "root-salt")
+         (var payload fixtures/Seed)
          (var sqlite-flat
-              (f/flatten-bulk sample/Schema
-                              {"UserAccount" [root-user]}))
+              (f/flatten-bulk fixtures/Schema
+                              payload))
+         (var sqlite-opts (ut/sqlite-opts nil))
          (var sqlite-queries
               (manage/table-create-all
-               sample/Schema
-               sample/SchemaLookup
-               (ut/sqlite-opts nil)))
-         (xt/x:arr-push sqlite-queries
-                        (raw/raw-insert "Currency"
-                                        ["id" "type" "symbol" "native" "decimal"
-                                         "name" "plural" "description"]
-                                        (@! sample/+currency+)
-                                        (ut/sqlite-opts nil)))
+               fixtures/Schema
+               fixtures/Lookup
+               sqlite-opts))
          (xtd/arr-assign sqlite-queries
                          (sql-table/table-emit-flat
                           sql-table/table-emit-insert
-                          sample/Schema
-                          sample/SchemaLookup
+                          fixtures/Schema
+                          fixtures/Lookup
                           sqlite-flat
-                          (ut/sqlite-opts nil)))
+                          sqlite-opts))
          (spec-promise/x:promise-then
           (run-queries sqlite-conn sqlite-queries)
           (fn [_]
@@ -100,30 +92,27 @@
              (dbsql/connect (js-postgres/driver) (@! +postgres-env+))
              (fn [pg-conn]
                (var pg-flat
-                    (f/flatten-bulk sample/Schema
-                                    {"UserAccount" [root-user]}))
+                    (f/flatten-bulk fixtures/Schema
+                                    payload))
+               (var pg-lookup {"Task" {"position" 0
+                                       "schema" "public"}})
+               (var pg-opts (ut/postgres-opts pg-lookup))
                (var pg-queries
-                    [(raw/raw-delete "Currency"
-                                     nil
-                                     (ut/postgres-opts sample/SchemaLookup))
-                     (raw/raw-delete "UserProfile"
-                                     {:id "c4643895-b0ce-44cc-b07b-2386bf18d43b"}
-                                     (ut/postgres-opts sample/SchemaLookup))
-                     (raw/raw-delete "UserAccount"
-                                     {:id "00000000-0000-0000-0000-000000000000"}
-                                     (ut/postgres-opts sample/SchemaLookup))
-                     (raw/raw-insert "Currency"
-                                     ["id" "type" "symbol" "native" "decimal"
-                                      "name" "plural" "description"]
-                                     (@! sample/+currency+)
-                                     (ut/postgres-opts sample/SchemaLookup))])
+                    (manage/table-create-all
+                     fixtures/Schema
+                     pg-lookup
+                     pg-opts))
+               (xt/x:arr-push pg-queries
+                              (raw/raw-delete "Task"
+                                              nil
+                                              pg-opts))
                (xtd/arr-assign pg-queries
                                (sql-table/table-emit-flat
                                 sql-table/table-emit-insert
-                                sample/Schema
-                                sample/SchemaLookup
+                                fixtures/Schema
+                                pg-lookup
                                 pg-flat
-                                (ut/postgres-opts sample/SchemaLookup)))
+                                pg-opts))
                (spec-promise/x:promise-then
                 (run-queries pg-conn pg-queries)
                 (fn [_]

@@ -6,22 +6,22 @@
 
 (l/script- :lua.nginx
   {:require [[js.cell.service.db-query :as db-query]
-           [xt.db.helpers.data-main-test :as sample]
-           [xt.db.runtime :as xdb]
-           [xt.db.runtime.sql :as impl-sql]
-           [xt.db.text.pgrest :as pgrest]
-           [xt.lang.spec-base :as xt]
-           [xt.lang.common-data :as xtd]
-           [xt.lang.common-lib :as k]
-           [xt.lang.common-string :as str]
-           [xt.lang.common-repl :as repl]
-           [xt.lang.spec-promise :as spec-promise]
-           [xt.protocol.impl.connection-sql :as dbsql]
-           [xt.db.text.sql-util :as ut]
-           [xt.db.text.sql-raw :as raw]
-           [xt.db.text.sql-manage :as manage]
-           [lua.nginx.driver-sqlite :as lua-sqlite]]
-           :runtime :basic})
+          [xt.db.helpers.data-main-test :as sample]
+          [xt.db.runtime :as xdb]
+          [xt.db.runtime.sql :as impl-sql]
+          [xt.db.text.pgrest :as pgrest]
+          [xt.lang.spec-base :as xt]
+          [xt.lang.common-data :as xtd]
+          [xt.lang.common-lib :as k]
+          [xt.lang.common-string :as str]
+          [xt.lang.common-repl :as repl]
+          [xt.lang.spec-promise :as spec-promise]
+          [xt.protocol.impl.connection-sql :as dbsql]
+          [xt.db.text.sql-util :as ut]
+          [xt.db.text.sql-raw :as raw]
+          [xt.db.text.sql-manage :as manage]
+          [lua.nginx.driver-sqlite :as lua-sqlite]]
+          :runtime :basic})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -51,7 +51,7 @@
 (fact "syncs and pulls sql data"
 
   (notify/wait-on [:lua.nginx 5000]
-    (-> (dbsql/connect (lua-sqlite/driver) {:memory true})
+    (-> (dbsql/connect (lua-sqlite/driver) {})
         (spec-promise/x:promise-then
          (fn [conn]
            (dbsql/query-sync conn
@@ -99,7 +99,7 @@
 (fact "emits remove sql and deletes synced rows"
 
   (notify/wait-on [:lua.nginx 5000]
-    (-> (dbsql/connect (lua-sqlite/driver) {:memory true})
+    (-> (dbsql/connect (lua-sqlite/driver) {})
         (spec-promise/x:promise-then
          (fn [conn]
            (dbsql/query-sync conn
@@ -152,7 +152,7 @@
 (fact "prepared view queries roundtrip to the same nested datastructure"
 
   (notify/wait-on [:lua.nginx 5000]
-    (-> (dbsql/connect (lua-sqlite/driver) {:memory true})
+    (-> (dbsql/connect (lua-sqlite/driver) {})
         (spec-promise/x:promise-then
          (fn [conn]
            (dbsql/query-sync conn
@@ -241,7 +241,7 @@
 (fact "direct flat trees roundtrip to the same datastructure"
 
   (notify/wait-on [:lua.nginx 5000]
-    (-> (dbsql/connect (lua-sqlite/driver) {:memory true})
+    (-> (dbsql/connect (lua-sqlite/driver) {})
         (spec-promise/x:promise-then
          (fn [conn]
            (dbsql/query-sync conn
@@ -299,7 +299,7 @@
 (fact "bulk `in` filters roundtrip to the same flat row datastructure"
 
   (notify/wait-on [:lua.nginx 5000]
-    (-> (dbsql/connect (lua-sqlite/driver) {:memory true})
+    (-> (dbsql/connect (lua-sqlite/driver) {})
         (spec-promise/x:promise-then
          (fn [conn]
            (dbsql/query-sync conn

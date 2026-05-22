@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
             [xt.lang.spec-promise :as spec-promise]
-            [xt.db.helpers.fixture-00-postgres :as fixtures]
+            [xt.db.helpers.test-fixtures :as fixtures]
             [postgres.core :as pg]
             [postgres.sample.scratch-v1 :as scratch])
   (:use code.test))

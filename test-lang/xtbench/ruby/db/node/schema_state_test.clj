@@ -5,39 +5,27 @@
 (l/script- :ruby
   {:runtime :basic
    :require [[xt.db.node.schema-state :as schema-state]
-             [xt.db.node.schema-spec :as spec]
-             [xt.lang.spec-base :as xt]
-             [xt.lang.common-data :as xtd]]})
+              [xt.db.helpers.test-fixtures :as fixtures]
+              [xt.db.node.schema-spec :as spec]
+              [xt.event.base-view :as event-view]
+              [xt.lang.spec-base :as xt]
+              [xt.lang.common-data :as xtd]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-(def +schema+
-  {"Order"
-   {"id" {"ident" "id", "type" "text", "order" 0}
-    "status" {"ident" "status", "type" "text", "order" 1}}})
+(def +schema+ fixtures/Schema)
 
-(def +views+
-  {"Order"
-   {"return"
-    {"default"
-     {"input" [{"symbol" "i_order_id", "type" "text"}]
-      "return" "jsonb"
-      "view" {"table" "Order"
-              "type" "return"
-              "tag" "default"
-              "access" {"roles" {}}
-              "guards" []
-              "query" ["status"]}}}}})
+(def +views+ fixtures/Views)
 
 ^{:refer xt.db.node.schema-state/base-state :added "4.1"}
 (fact "creates the base node state"
 
   (!.rb
     (var state
-         (schema-state/base-state {"schema" (@! +schema+)
-                                   "views" (@! +views+)
+         (schema-state/base-state {"schema" fixtures/Schema
+                                   "views" fixtures/Views
                                    "remote" {"space" "remote"}
                                    "meta" {"label" "db-node"}}))
     [(. state ["::"])
@@ -52,8 +40,8 @@
   (!.rb
     (xt/x:obj-keys
      (schema-state/get-schema
-      (schema-state/base-state {"schema" (@! +schema+)}))))
-  => ["Order"])
+      (schema-state/base-state {"schema" fixtures/Schema}))))
+  => ["Task"])
 
 ^{:refer xt.db.node.schema-state/get-views :added "4.1"}
 (fact "gets the configured view map"
@@ -61,17 +49,17 @@
   (!.rb
     (xt/x:obj-keys
      (schema-state/get-views
-      (schema-state/base-state {"views" (@! +views+)}))))
-  => ["Order"])
+      (schema-state/base-state {"views" fixtures/Views}))))
+  => ["Task"])
 
 ^{:refer xt.db.node.schema-state/model-views :added "4.1"}
 (fact "normalizes models with or without an explicit views key"
 
   (!.rb
     [(xt/x:obj-keys
-      (schema-state/model-views {"views" {"main" {"query" {"table" "Order"}}}}))
+      (schema-state/model-views {"views" {"main" {"query" {"table" "Task"}}}}))
      (xt/x:obj-keys
-      (schema-state/model-views {"main" {"query" {"table" "Order"}}}))])
+      (schema-state/model-views {"main" {"query" {"table" "Task"}}}))])
   => [["main"] ["main"]])
 
 ^{:refer xt.db.node.schema-state/normalize-view :added "4.1"}
@@ -81,18 +69,61 @@
     (var view
          (schema-state/normalize-view
           "main"
-          {"default_input" ["ord-1"]
+          {"default_input" ["00000000-0000-0000-0000-0000000000a1"]
            "value" [{"status" "open"}]}))
     [(. view ["id"])
-     (. view ["input"])
+     (. view ["::"])
+     (xt/x:get-path (event-view/get-input view)
+                    ["current" "data"])
      (. view ["status"])
      (. view ["pending"])
      (. view ["value"])])
   => ["main"
-      ["ord-1"]
-      "idle"
-      false
-      [{"status" "open"}]])
+      "event.view"
+      ["00000000-0000-0000-0000-0000000000a1"]
+       "idle"
+       false
+       [{"status" "open"}]])
+
+^{:refer xt.db.node.schema-state/get-view-deps :added "4.1"}
+(fact "normalizes dependency shorthands on a single view"
+
+  (!.rb
+    (schema-state/get-view-deps
+     "orders"
+     {"deps" ["main"
+               ["audit" "latest"]
+               {"model" "stats" "view" "summary"}]}))
+  => [["orders" "main"]
+      ["audit" "latest"]
+      ["stats" "summary"]])
+
+^{:refer xt.db.node.schema-state/get-model-deps :added "4.1"}
+(fact "indexes dependent views by source model and view"
+
+  (!.rb
+    (schema-state/get-model-deps
+     "orders"
+     {"summary" {"deps" ["main"
+                          ["stats" "daily"]]}}))
+  => {"orders" {"main" {"summary" true}}
+      "stats" {"daily" {"summary" true}}})
+
+^{:refer xt.db.node.schema-state/get-unknown-deps :added "4.1"}
+(fact "reports dependency paths that are not currently registered"
+
+  (!.rb
+    (var views {"summary" {"deps" ["main"
+                                    ["stats" "daily"]
+                                    ["stats" "missing"]]}})
+    (schema-state/get-unknown-deps
+     {"models" {"stats" {"views" {"daily" {}}}}}
+     "orders"
+     views
+     (schema-state/get-model-deps "orders" views)))
+  => (just [["orders" "main"]
+            ["stats" "missing"]]
+           :in-any-order))
 
 ^{:refer xt.db.node.schema-state/get-model :added "4.1"}
 (fact "gets a registered model"
@@ -133,3 +164,39 @@
         "main")
        ["id"]))
   => "main")
+
+^{:refer xt.db.node.schema-state/identity-wrapper :added "4.1"}
+(fact "passes handlers through unchanged"
+
+  (!.rb
+   ((schema-state/identity-wrapper
+     (fn [x]
+       (return (+ x 1))))
+    1))
+  => 2)
+
+^{:refer xt.db.node.schema-state/output-process :added "4.1"}
+(fact "unwraps db node result payloads that carry a value key"
+
+  (!.rb
+   [(schema-state/output-process {"value" {"id" "00000000-0000-0000-0000-0000000000a1"}})
+    (schema-state/output-process {"id" "00000000-0000-0000-0000-0000000000a2"})])
+  => [{"id" "00000000-0000-0000-0000-0000000000a1"}
+      {"id" "00000000-0000-0000-0000-0000000000a2"}])
+
+^{:refer xt.db.node.schema-state/normalize-dep :added "4.1"}
+(fact "normalizes string vector and map dependency declarations"
+
+  (!.rb
+   [(schema-state/normalize-dep "orders" "main")
+    (schema-state/normalize-dep "orders" ["main"])
+    (schema-state/normalize-dep "orders" ["stats" "summary"])
+    (schema-state/normalize-dep "orders" {"model" "stats" "view" "summary"})
+    (schema-state/normalize-dep "orders" {"id" "main"})
+    (schema-state/normalize-dep "orders" 1)])
+  => [["orders" "main"]
+      ["orders" "main"]
+      ["stats" "summary"]
+      ["stats" "summary"]
+      ["orders" "main"]
+      nil])

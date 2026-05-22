@@ -23,12 +23,12 @@
 (def +deps-model-spec+
   {"views"
    {"main"
-    {"query" {:table "Order"
+    {"query" {:table "Task"
               :return-method "default"
-              :return-id "ord-1"}
+              :return-id "00000000-0000-0000-0000-0000000000a1"}
      "input" []}
     "open"
-    {"query" {:table "Order"
+    {"query" {:table "Task"
               :select-method "by_status"}
      "default_input" ["open"]
      "deps" ["main"]}}})
@@ -41,7 +41,7 @@
    (model/install node fixtures/InstallOpts)
    (var installed
         {"schema-id" (xtd/get-in (util/node-opts node)
-                                 ["schema" "Order" "id" "ident"])
+                                 ["schema" "Task" "id" "ident"])
          "has-query" (xt/x:has-key? (. node ["handlers"]) spec/ACTION_QUERY)
          "has-sync" (xt/x:has-key? (. node ["handlers"]) spec/ACTION_SYNC)
          "has-cache-changed" (xt/x:has-key? (. node ["triggers"])
@@ -66,9 +66,9 @@
    (model/install node fixtures/InstallOpts)
    (var state (model/ensure-space-state node "room/a"))
    (model/model-put node "room/a" "orders" fixtures/ModelSpec)
-   (model/view-put node "room/a" "orders" "secondary" {"default_input" ["ord-2"]})
+   (model/view-put node "room/a" "orders" "secondary" {"default_input" ["00000000-0000-0000-0000-0000000000a2"]})
    {"state-tag" (. state ["::"])
-    "schema-id" (xtd/get-in state ["schema" "Order" "id" "ident"])
+    "schema-id" (xtd/get-in state ["schema" "Task" "id" "ident"])
    "model-id" (. (model/model-get node "room/a" "orders") ["id"])
    "main-input" (model/view-input node "room/a" "orders" "main")
    "secondary-id" (. (model/view-get node "room/a" "orders" "secondary") ["id"])
@@ -80,7 +80,7 @@
       "model-id" "orders"
       "main-input" []
       "secondary-id" "secondary"
-      "secondary-input" ["ord-2"]
+      "secondary-input" ["00000000-0000-0000-0000-0000000000a2"]
       "pending?" false
       "error" nil})
 
@@ -108,9 +108,9 @@
      node
      "echo"
      (fn [space args request node]
-       (return {"space" (. space ["id"])
-                "payload" (xt/x:get-idx args 0)
-                "meta" (. request ["meta"])}))
+        (return {"space" (. space ["id"])
+                 "payload" (xt/x:first args)
+                 "meta" (. request ["meta"])}))
      nil)
     (promise/x:promise-catch
      (promise/x:promise-then
@@ -137,29 +137,30 @@
     (model/install node fixtures/InstallOpts)
     (promise/x:promise-catch
      (promise/x:promise-then
-      (model/sync node "room/a" {"db/sync" fixtures/Seed})
-      (fn [_]
-        (return (model/remove node "room/a" {"db/remove" {"Order" ["ord-2"]}}))))
-     (fn [err]
-       (repl/notify err)))
-    (promise/x:promise-catch
-     (promise/x:promise-then
-      (model/query
-       node
-       "room/a"
-       {"table" "Order"
-        "return-method" "default"
-        "return-id" "ord-1"})
-       (fn [query]
+      (promise/x:promise-then
+       (model/sync node "room/a" {"db/sync" fixtures/Seed})
+       (fn [_]
          (return
           (promise/x:promise-then
-           (model/snapshot node "room/a")
-           (fn [snapshot]
-             (repl/notify
-              {"rows" (xt/x:obj-keys (. snapshot ["rows"] ["Order"]))}))))))
-      (fn [err]
-        (repl/notify err))))
-  => {"rows" ["ord-1"]})
+           (model/remove node "room/a" {"db/remove" {"Task" ["00000000-0000-0000-0000-0000000000a2"]}})
+           (fn [_]
+             (return
+              (model/query
+               node
+               "room/a"
+               {"table" "Task"
+                "return-method" "default"
+                "return-id" "00000000-0000-0000-0000-0000000000a1"})))))))
+      (fn [_query]
+        (return
+         (promise/x:promise-then
+          (model/snapshot node "room/a")
+          (fn [snapshot]
+            (repl/notify
+             {"rows" (xt/x:obj-keys (. snapshot ["rows"] ["Task"]))}))))))
+     (fn [err]
+       (repl/notify err))))
+  => {"rows" ["00000000-0000-0000-0000-0000000000a1"]})
 
 ^{:refer xt.db.node.instance-model/clear :added "4.1"}
 (fact "clears cache rows through the public request wrapper"
@@ -272,20 +273,25 @@
       (fn [_]
         (return
          (promise/x:promise-then
-          (model/query node "room/a" {"table" "Order"
+          (model/query node "room/a" {"table" "Task"
                                       "return-method" "default"
-                                      "return-id" "ord-1"})
+                                      "return-id" "00000000-0000-0000-0000-0000000000a1"})
           (fn [result]
             (return
              (promise/x:promise-then
               (model/query-refresh node "room/a" {"query_key" (. result ["query_key"])})
-              (fn [entry]
-                (repl/notify {"key" (. entry ["key"])
-                              "status" (. entry ["status"])})))))))))
-     (fn [err]
-       (repl/notify err))))
-  => {"key" "{\"query\":{\"select_args\":[],\"table\":\"Order\",\"return_args\":[]}}"
-      "status" "stale"})
+       (fn [entry]
+                 (var query (xt/x:get-key (xt/x:json-decode (. entry ["key"])) "query"))
+                 (repl/notify {"table" (. query ["table"])
+                               "select-args" (. query ["select_args"])
+                               "return-args" (. query ["return_args"])
+                               "status" (. entry ["status"])})))))))))
+      (fn [err]
+        (repl/notify err))))
+  => (contains-in {"table" "Task"
+                   "select-args" empty?
+                   "return-args" empty?
+                   "status" "stale"}))
 
 ^{:refer xt.db.node.instance-model/sync :added "4.1"}
 (fact "syncs rows into a node space through the request wrapper"
@@ -300,10 +306,10 @@
        (fn [_]
          (return (model/snapshot node "room/a"))))
       (fn [snapshot]
-        (repl/notify {"rows" (xt/x:obj-keys (. snapshot ["rows"] ["Order"]))})))
+        (repl/notify {"rows" (xt/x:obj-keys (. snapshot ["rows"] ["Task"]))})))
      (fn [err]
        (repl/notify err))))
-  => {"rows" ["ord-1" "ord-2"]})
+  => (contains-in {"rows" (just ["00000000-0000-0000-0000-0000000000a1" "00000000-0000-0000-0000-0000000000a2"] :in-any-order)}))
 
 ^{:refer xt.db.node.instance-model/remove :added "4.1"}
 (fact "removes rows from a node space through the request wrapper"
@@ -318,14 +324,14 @@
        (fn [_]
          (return
           (promise/x:promise-then
-           (model/remove node "room/a" {"db/remove" {"Order" ["ord-2"]}})
+           (model/remove node "room/a" {"db/remove" {"Task" ["00000000-0000-0000-0000-0000000000a2"]}})
            (fn [_]
              (return (model/snapshot node "room/a")))))))
       (fn [snapshot]
-        (repl/notify {"rows" (xt/x:obj-keys (. snapshot ["rows"] ["Order"]))})))
+        (repl/notify {"rows" (xt/x:obj-keys (. snapshot ["rows"] ["Task"]))})))
      (fn [err]
        (repl/notify err))))
-  => {"rows" ["ord-1"]})
+  => {"rows" ["00000000-0000-0000-0000-0000000000a1"]})
 
 ^{:refer xt.db.node.instance-model/snapshot :added "4.1"}
 (fact "returns the current models and rows for a node space"
@@ -354,8 +360,8 @@
    (model/model-put node "room/a" "orders" fixtures/ModelSpec)
    {"model-id" (. (model/model-get node "room/a" "orders") ["id"])
     "views" (xt/x:obj-keys (. (model/model-get node "room/a" "orders") ["views"]))})
-  => {"model-id" "orders"
-      "views" ["main" "open"]})
+  => (just-in {"model-id" "orders"
+               "views" (just ["main" "open"] :in-any-order)}))
 
 ^{:refer xt.db.node.instance-model/view-put :added "4.1"}
 (fact "registers a single additional view on an existing model"
@@ -364,11 +370,11 @@
    (var node (event-node/node-create {"id" "node-h"}))
    (model/install node fixtures/InstallOpts)
    (model/model-put node "room/a" "orders" fixtures/ModelSpec)
-   (model/view-put node "room/a" "orders" "secondary" {"default_input" ["ord-2"]})
+   (model/view-put node "room/a" "orders" "secondary" {"default_input" ["00000000-0000-0000-0000-0000000000a2"]})
    {"view-id" (. (model/view-get node "room/a" "orders" "secondary") ["id"])
     "input" (model/view-input node "room/a" "orders" "secondary")})
   => {"view-id" "secondary"
-      "input" ["ord-2"]})
+      "input" ["00000000-0000-0000-0000-0000000000a2"]})
 
 ^{:refer xt.db.node.instance-model/model-get :added "4.1"}
 (fact "returns a registered model from the node space"
@@ -466,11 +472,11 @@
               node
               "room/a"
               state
-              {:table "Order"
+              {:table "Task"
                :return-method "default"
-               :return-id "ord-1"}
-              {"model-id" "orders"
-               "view-id" "main"}
+               :return-id "00000000-0000-0000-0000-0000000000a1"}
+              {"model_id" "orders"
+               "view_id" "main"}
               {"space" "room/b"}
               "orders"
               "main")))))
@@ -501,7 +507,7 @@
            "room/a"
            state
            {"db/sync" fixtures/Seed}
-           {"model-id" "orders"}
+           {"model_id" "orders"}
            {"space" "room/a"})
           (fn [_]
             (return (model/snapshot node "room/a")))))
@@ -509,10 +515,10 @@
      (promise/x:promise-then
       remote-sync-p
       (fn [snapshot]
-        (repl/notify {"rows" (xt/x:obj-keys (. snapshot ["rows"] ["Order"]))})))
+        (repl/notify {"rows" (xt/x:obj-keys (. snapshot ["rows"] ["Task"]))})))
      (fn [err]
        (repl/notify err))))
-  => {"rows" ["ord-1" "ord-2"]})
+  => (contains-in {"rows" (just ["00000000-0000-0000-0000-0000000000a1" "00000000-0000-0000-0000-0000000000a2"] :in-any-order)}))
 
 ^{:refer xt.db.node.instance-model/model-refresh :added "4.1"}
 (fact "refreshes every registered view for a model"
@@ -574,9 +580,9 @@
           (fn [_]
             (return
              (model/handle-query current-space
-                                 [{"query" {"table" "Order"
+                                 [{"query" {"table" "Task"
                                             "return-method" "default"
-                                            "return-id" "ord-1"}}]
+                                            "return-id" "00000000-0000-0000-0000-0000000000a1"}}]
                                  {}
                                  node)))))
     (promise/x:promise-catch
@@ -605,9 +611,9 @@
           (fn [_]
             (return
              (model/handle-query current-space
-                                 [{"query" {"table" "Order"
+                                 [{"query" {"table" "Task"
                                             "return-method" "default"
-                                            "return-id" "ord-1"}}]
+                                            "return-id" "00000000-0000-0000-0000-0000000000a1"}}]
                                  {}
                                  node)))))
     (var refresh-p
@@ -621,14 +627,19 @@
                                          node)))))
     (promise/x:promise-catch
      (promise/x:promise-then
-      refresh-p
-      (fn [entry]
-        (repl/notify {"key" (. entry ["key"])
-                      "status" (. entry ["status"])})))
-     (fn [err]
-       (repl/notify err))))
-  => {"key" "{\"query\":{\"select_args\":[],\"table\":\"Order\",\"return_args\":[]}}"
-      "status" "stale"})
+       refresh-p
+       (fn [entry]
+         (var query (xt/x:get-key (xt/x:json-decode (. entry ["key"])) "query"))
+         (repl/notify {"table" (. query ["table"])
+                       "select-args" (. query ["select_args"])
+                       "return-args" (. query ["return_args"])
+                       "status" (. entry ["status"])})))
+      (fn [err]
+        (repl/notify err))))
+  => (contains-in {"table" "Task"
+                   "select-args" empty?
+                   "return-args" empty?
+                   "status" "stale"}))
 
 ^{:refer xt.db.node.instance-model/handle-sync :added "4.1"}
 (fact "handles a local sync payload and publishes cache updates"
@@ -652,16 +663,16 @@
          (return
           (promise/x:promise-then
            (model/handle-remove current-space
-                                [{"db/remove" {"Order" ["ord-2"]}}]
+                                [{"db/remove" {"Task" ["00000000-0000-0000-0000-0000000000a2"]}}]
                                 {}
                                 node)
            (fn [_]
              (return (model/snapshot node "room/a")))))))
       (fn [snapshot]
-        (repl/notify {"rows" (xt/x:obj-keys (. snapshot ["rows"] ["Order"]))})))
+        (repl/notify {"rows" (xt/x:obj-keys (. snapshot ["rows"] ["Task"]))})))
      (fn [err]
        (repl/notify err))))
-  => {"rows" ["ord-1"]})
+  => {"rows" ["00000000-0000-0000-0000-0000000000a1"]})
 
 ^{:refer xt.db.node.instance-model/handle-clear :added "4.1"}
 (fact "clears cache state and invalidates all tables"
@@ -702,12 +713,12 @@
        (fn [_]
          (return (model/handle-snapshot current-space [] {} node))))
       (fn [snapshot]
-        (repl/notify {"rows" (xt/x:obj-keys (. snapshot ["rows"] ["Order"]))
+        (repl/notify {"rows" (xt/x:obj-keys (. snapshot ["rows"] ["Task"]))
                       "models" (xt/x:obj-keys (. snapshot ["models"]))})))
      (fn [err]
        (repl/notify err))))
-  => {"rows" ["ord-1" "ord-2"]
-      "models" []})
+  => (contains-in {"rows" (just ["00000000-0000-0000-0000-0000000000a1" "00000000-0000-0000-0000-0000000000a2"] :in-any-order)
+                   "models" []}))
 
 ^{:refer xt.db.node.instance-model/model-dependents :added "4.1"}
 (fact "tracks dependent models for a source model"
@@ -773,7 +784,7 @@
        (repl/notify err))))
   => [true
       "open"
-      ["Order"]])
+      ["Task"]])
 
 ^{:refer xt.db.node.instance-model/run-view-main :added "4.1"}
 (fact "runs the local query stage for a view context"
@@ -801,7 +812,7 @@
        (repl/notify err))))
   => [nil
       "open"
-      ["Order"]])
+      ["Task"]])
 
 ^{:refer xt.db.node.instance-model/run-view-remote :added "4.1"}
 (fact "runs the remote query stage when a view has remote settings"
@@ -812,9 +823,9 @@
     (model/model-put node "room/a" "orders"
                      {"views"
                       {"main"
-                       {"query" {:table "Order"
+                       {"query" {:table "Task"
                                  :return-method "default"
-                                 :return-id "ord-1"}
+                                 :return-id "00000000-0000-0000-0000-0000000000a1"}
                         "input" []
                         "remote" {"space" "room/b"}}}})
     (model/model-put node "room/b" "orders" fixtures/ModelSpec)
@@ -902,7 +913,7 @@
        (repl/notify err))))
   => {"query-key?" true
       "value" "open"
-      "tables" ["Order"]})
+      "tables" ["Task"]})
 
 ^{:refer xt.db.node.instance-model/ensure-model-throttle :added "4.1"}
 (fact "creates and reuses one throttle per model"

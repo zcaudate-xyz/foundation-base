@@ -7,19 +7,19 @@
 
 (l/script- :lua.nginx
   {:require [[xt.lang.spec-base :as xt]
-           [xt.lang.common-lib :as k]
-           [xt.lang.common-data :as xtd]
-           [xt.lang.common-string :as str]
-           [xt.lang.common-repl :as repl]
-           [xt.lang.spec-promise :as spec-promise]
-           [xt.protocol.impl.connection-sql :as dbsql]
-           [xt.db.runtime.sql :as impl-sql]
-           [xt.db.text.sql-util :as ut]
-           [xt.db.text.sql-raw :as raw]
-           [xt.db.text.sql-manage :as manage]
-           [xt.db.helpers.data-main-test :as sample]
-           [lua.nginx.driver-sqlite :as lua-sqlite]]
-           :runtime :basic})
+          [xt.lang.common-lib :as k]
+          [xt.lang.common-data :as xtd]
+          [xt.lang.common-string :as str]
+          [xt.lang.common-repl :as repl]
+          [xt.lang.spec-promise :as spec-promise]
+          [xt.protocol.impl.connection-sql :as dbsql]
+          [xt.db.runtime.sql :as impl-sql]
+          [xt.db.text.sql-util :as ut]
+          [xt.db.text.sql-raw :as raw]
+          [xt.db.text.sql-manage :as manage]
+          [xt.db.helpers.data-main-test :as sample]
+          [lua.nginx.driver-sqlite :as lua-sqlite]]
+          :runtime :basic})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -31,7 +31,7 @@
 (fact "js runtime reports the touched sqlite tables"
 
   (notify/wait-on [:lua.nginx 5000]
-    (-> (dbsql/connect (lua-sqlite/driver) {:memory true})
+    (-> (dbsql/connect (lua-sqlite/driver) {})
         (spec-promise/x:promise-then
          (fn [conn]
            (dbsql/query-sync conn
@@ -70,7 +70,7 @@
 (fact "js runtime pulls nested sqlite sample data"
 
   (notify/wait-on [:lua.nginx 5000]
-    (-> (dbsql/connect (lua-sqlite/driver) {:memory true})
+    (-> (dbsql/connect (lua-sqlite/driver) {})
         (spec-promise/x:promise-then
          (fn [conn]
            (dbsql/query-sync conn
@@ -109,7 +109,7 @@
 (fact "js runtime pulls sorted sqlite currencies"
 
   (notify/wait-on [:lua.nginx 5000]
-    (-> (dbsql/connect (lua-sqlite/driver) {:memory true})
+    (-> (dbsql/connect (lua-sqlite/driver) {})
         (spec-promise/x:promise-then
          (fn [conn]
            (dbsql/query-sync conn
@@ -139,17 +139,3 @@
                             (. row ["name"])]))))
            (repl/notify out)))))
   => +sqlite-currencies-output+)
-
-
-(comment
-   (defn test-column-id []
-     (notify/wait-on [:lua.nginx 5000]
-       (manage/table-create-column
-        sample/Schema
-        (xtd/get-in sample/Schema ["Currency" "id"])
-        (ut/sqlite-opts nil))
-       (-> (dbsql/connect (lua-sqlite/driver) {})
-           (spec-promise/x:promise-then
-            (fn [_]
-              (repl/notify "ok"))))))
-  [:lua 200])

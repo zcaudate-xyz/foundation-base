@@ -1,6 +1,6 @@
 (ns xt.db.runtime.sql-postgres-python-test
   (:require [hara.lang :as l]
-            [xt.db.helpers.fixture-00-postgres :as fixtures]
+            [xt.db.helpers.test-fixtures :as fixtures]
             [postgres.core :as pg]
             [postgres.sample.scratch-v1 :as scratch])
   (:use code.test))

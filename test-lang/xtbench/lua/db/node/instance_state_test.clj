@@ -5,6 +5,7 @@
 (l/script- :lua
   {:runtime :basic
   :require [[xt.db.node.instance-state :as instance-state]
+              [xt.db.helpers.test-fixtures :as fixtures]
               [xt.db.node.schema-state :as schema-state]
               [xt.event.base-view :as event-view]
               [xt.lang.spec-base :as xt]
@@ -14,21 +15,11 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-(def +schema+
-  {"Order"
-   {"id" {"ident" "id", "type" "text", "order" 0}
-    "status" {"ident" "status", "type" "text", "order" 1}}})
+(def +schema+ fixtures/Schema)
 
-(def +lookup+
-  {"Order" {"position" 0}})
+(def +lookup+ fixtures/Lookup)
 
-(def +model-spec+
-  {"views"
-   {"main"
-    {"default_input" ["ord-1"]
-      "query" {:table "Order"
-               :return-method "default"
-               :return-id "ord-1"}}}})
+(def +model-spec+ fixtures/ModelSpec)
 
 (def +dependent-model-spec+
   {"views"
@@ -40,8 +31,8 @@
 
   (!.lua
     (var space {})
-    (var node {"meta" {"xt.db" {"schema" (@! +schema+)
-                                "lookup" (@! +lookup+)}}})
+    (var node {"meta" {"xt.db" {"schema" fixtures/Schema
+                                "lookup" fixtures/Lookup}}})
     (var state (instance-state/ensure-state space node))
     [(. state ["::"])
      (. (. space ["state"]) ["::"])])
@@ -52,8 +43,8 @@
 
   (!.lua
     (var state
-         (schema-state/base-state {"schema" (@! +schema+)
-                                   "lookup" (@! +lookup+)}))
+         (schema-state/base-state {"schema" fixtures/Schema
+                                   "lookup" fixtures/Lookup}))
     (. (instance-state/ensure-db state) ["::"]))
   => "db.cache")
 
@@ -62,7 +53,7 @@
 
   (!.lua
     (var state (schema-state/base-state {}))
-    (var model (instance-state/put-model state "orders" (@! +model-spec+)))
+    (var model (instance-state/put-model state "orders" fixtures/ModelSpec))
     [(. model ["id"])
      (xtd/get-in state ["models" "orders" "views" "main" "::"])
      (xt/x:get-path
@@ -72,7 +63,7 @@
       (xtd/get-in state ["models" "orders" "views" "main" "status"])
       (xtd/get-in state ["models" "orders" "deps"])
       (xtd/get-in state ["models" "orders" "unknown_deps"])])
-  => (l/as-lua ["orders" "event.view" ["ord-1"] "idle" {} []]))
+  => (l/as-lua ["orders" "event.view" [] "idle" {} []]))
 
 ^{:refer xt.db.node.instance-state/put-view :added "4.1"}
 (fact "stores a single view on an existing model"
@@ -85,33 +76,33 @@
           state
           "orders"
           "secondary"
-          {"default_input" ["ord-2"]}))
+          {"default_input" ["00000000-0000-0000-0000-0000000000a2"]}))
      [(. view ["id"])
       (. view ["::"])
       (xt/x:get-path (event-view/get-input view)
                      ["current" "data"])])
   => ["secondary"
       "event.view"
-      ["ord-2"]])
+      ["00000000-0000-0000-0000-0000000000a2"]])
 
 ^{:refer xt.db.node.instance-state/set-view-input :added "4.1"}
 (fact "updates a view input"
 
   (!.lua
     (var state (schema-state/base-state {}))
-    (instance-state/put-model state "orders" (@! +model-spec+))
+    (instance-state/put-model state "orders" fixtures/ModelSpec)
     (xt/x:get-path
      (event-view/get-input
-      (instance-state/set-view-input state "orders" "main" ["ord-2"]))
+      (instance-state/set-view-input state "orders" "main" ["00000000-0000-0000-0000-0000000000a2"]))
      ["current" "data"]))
-  => ["ord-2"])
+  => ["00000000-0000-0000-0000-0000000000a2"])
 
 ^{:refer xt.db.node.instance-state/set-view-pending :added "4.1"}
 (fact "marks a view as pending"
 
   (!.lua
     (var state (schema-state/base-state {}))
-    (instance-state/put-model state "orders" (@! +model-spec+))
+    (instance-state/put-model state "orders" fixtures/ModelSpec)
     (var view (instance-state/set-view-pending state "orders" "main"))
     [(. view ["pending"])
      (. view ["status"])
@@ -123,7 +114,7 @@
 
   (!.lua
     (var state (schema-state/base-state {}))
-    (instance-state/put-model state "orders" (@! +model-spec+))
+    (instance-state/put-model state "orders" fixtures/ModelSpec)
     (var view
          (instance-state/set-view-success
           state
@@ -131,17 +122,17 @@
           "main"
            "q1"
            [{"status" "open"}]
-           {"Order" true}))
+           {"Task" true}))
     [(. view ["status"])
      (. view ["query_key"])
      (. view ["value"])
      (. view ["tables"])
-     (. (. (. state ["view_watch"]) ["Order"] ["orders"]) ["main"])
+     (. (. (. state ["view_watch"]) ["Task"] ["orders"]) ["main"])
      (xt/x:is-number? (. view ["updated_at"]))])
   => ["ready"
       "q1"
       [{"status" "open"}]
-      {"Order" true}
+      {"Task" true}
       true
       true])
 
@@ -150,7 +141,7 @@
 
   (!.lua
     (var state (schema-state/base-state {}))
-    (instance-state/put-model state "orders" (@! +model-spec+))
+    (instance-state/put-model state "orders" fixtures/ModelSpec)
     (var view
          (instance-state/set-view-error
           state
@@ -170,7 +161,7 @@
 
   (!.lua
     (var state (schema-state/base-state {}))
-    (instance-state/put-model state "orders" (@! +model-spec+))
+    (instance-state/put-model state "orders" fixtures/ModelSpec)
     (var view
          (instance-state/set-view-stale
           state
@@ -189,9 +180,9 @@
 
   (!.lua
     (var state (schema-state/base-state {}))
-    (instance-state/watch-query state "q1" {"Order" true "Audit" true})
-    (instance-state/remove-query-watch state "q1" {"Order" true})
-    [(. (. state ["watch"]) ["Order"])
+    (instance-state/watch-query state "q1" {"Task" true "Audit" true})
+    (instance-state/remove-query-watch state "q1" {"Task" true})
+    [(. (. state ["watch"]) ["Task"])
      (xt/x:obj-keys (. (. state ["watch"]) ["Audit"]))])
   => [nil
       ["q1"]])
@@ -201,9 +192,9 @@
 
   (!.lua
     (var state (schema-state/base-state {}))
-    (instance-state/watch-view state "orders" "main" {"Order" true "Audit" true})
-    (instance-state/remove-view-watch state "orders" "main" {"Order" true})
-    [(. (. state ["view_watch"]) ["Order"])
+    (instance-state/watch-view state "orders" "main" {"Task" true "Audit" true})
+    (instance-state/remove-view-watch state "orders" "main" {"Task" true})
+    [(. (. state ["view_watch"]) ["Task"])
      (xt/x:obj-keys (. (. state ["view_watch"]) ["Audit"]))])
   => [nil
       ["orders"]])
@@ -213,10 +204,10 @@
 
   (!.lua
     (var state (schema-state/base-state {}))
-    (instance-state/watch-query state "q1" {"Order" true "Audit" true})
+    (instance-state/watch-query state "q1" {"Task" true "Audit" true})
     [(xt/x:obj-keys (. state ["watch"]))
-     (. (. (. state ["watch"]) ["Order"]) ["q1"])])
-  => [["Order" "Audit"]
+     (. (. (. state ["watch"]) ["Task"]) ["q1"])])
+  => [["Task" "Audit"]
       true])
 
 ^{:refer xt.db.node.instance-state/watch-view :added "4.1"}
@@ -224,10 +215,10 @@
 
   (!.lua
     (var state (schema-state/base-state {}))
-    (instance-state/watch-view state "orders" "main" {"Order" true "Audit" true})
+    (instance-state/watch-view state "orders" "main" {"Task" true "Audit" true})
     [(xt/x:obj-keys (. state ["view_watch"]))
-     (. (. (. state ["view_watch"]) ["Order"] ["orders"]) ["main"])])
-  => [["Order" "Audit"]
+     (. (. (. state ["view_watch"]) ["Task"] ["orders"]) ["main"])])
+  => [["Task" "Audit"]
       true])
 
 ^{:refer xt.db.node.instance-state/affected-query-ids :added "4.1"}
@@ -235,10 +226,10 @@
 
   (!.lua
     (var state (schema-state/base-state {}))
-    (instance-state/watch-query state "q1" {"Order" true})
+    (instance-state/watch-query state "q1" {"Task" true})
     (instance-state/watch-query state "q2" {"Audit" true})
-    (instance-state/watch-query state "q3" {"Order" true "Audit" true})
-    [(xtd/arr-lookup (instance-state/affected-query-ids state ["Order"]))
+    (instance-state/watch-query state "q3" {"Task" true "Audit" true})
+    [(xtd/arr-lookup (instance-state/affected-query-ids state ["Task"]))
      (xtd/arr-lookup (instance-state/affected-query-ids state {"Audit" true}))])
   => [{"q1" true "q3" true}
       {"q2" true "q3" true}])
@@ -248,10 +239,10 @@
 
   (!.lua
     (var state (schema-state/base-state {}))
-    (instance-state/watch-view state "orders" "main" {"Order" true})
+    (instance-state/watch-view state "orders" "main" {"Task" true})
     (instance-state/watch-view state "stats" "summary" {"Audit" true})
-    (instance-state/watch-view state "stats" "totals" {"Order" true "Audit" true})
-    [(instance-state/affected-view-bindings state ["Order"])
+    (instance-state/watch-view state "stats" "totals" {"Task" true "Audit" true})
+    [(instance-state/affected-view-bindings state ["Task"])
      (instance-state/affected-view-bindings state {"Audit" true})])
   => [{"orders" {"main" true}
        "stats" {"totals" true}}
@@ -263,13 +254,13 @@
 
   (!.lua
     (var state (schema-state/base-state {}))
-    (instance-state/watch-query state "q1" {"Order" true})
+    (instance-state/watch-query state "q1" {"Task" true})
     (xt/x:set-key (. state ["queries"]) "q1" {"key" "q1"
-                                               "tables" {"Order" true}})
+                                               "tables" {"Task" true}})
     (var prev (instance-state/remove-query state "q1"))
     [(. prev ["key"])
      (xt/x:obj-keys (. state ["queries"]))
-     (. (. state ["watch"]) ["Order"])])
+     (. (. state ["watch"]) ["Task"])])
   => (l/as-lua ["q1" [] nil]))
 
 ^{:refer xt.db.node.instance-state/get-view-dependents :added "4.1"}
@@ -277,7 +268,7 @@
 
   (!.lua
     (var state (schema-state/base-state {}))
-    (instance-state/put-model state "orders" (@! +model-spec+))
+    (instance-state/put-model state "orders" fixtures/ModelSpec)
     (instance-state/put-model state "stats" (@! +dependent-model-spec+))
     [(instance-state/get-view-dependents state "orders" "main")
      (instance-state/get-model-dependents state "orders")
@@ -293,7 +284,7 @@
     (var state (schema-state/base-state {}))
     (instance-state/put-model state "stats" (@! +dependent-model-spec+))
     (var before (xtd/get-in state ["models" "stats" "unknown_deps"]))
-    (instance-state/put-model state "orders" (@! +model-spec+))
+    (instance-state/put-model state "orders" fixtures/ModelSpec)
     (var after (xtd/get-in state ["models" "stats" "unknown_deps"]))
     [before after])
   => [[["orders" "main"]]
@@ -304,7 +295,7 @@
 
   (!.lua
    (var state (schema-state/base-state {}))
-   (instance-state/put-model state "orders" (@! +model-spec+))
+   (instance-state/put-model state "orders" fixtures/ModelSpec)
    (instance-state/put-model state "stats" (@! +dependent-model-spec+))
    (instance-state/get-model-dependents state "orders"))
   => {"stats" true})
@@ -313,7 +304,7 @@
 (fact "mirrors base-view output fields onto compatibility keys"
 
   (!.lua
-   (var view {"output" {"current" {"id" "ord-1"}
+   (var view {"output" {"current" {"id" "00000000-0000-0000-0000-0000000000a1"}
                         "pending" true
                         "updated" 123}})
    (instance-state/sync-view-state view "pending" {"tag" "waiting"})
@@ -322,7 +313,7 @@
     (. view ["status"])
     (. (. view ["error"]) ["tag"])
     (. view ["updated_at"])])
-  => ["ord-1"
+  => ["00000000-0000-0000-0000-0000000000a1"
       true
       "pending"
       "waiting"
@@ -333,9 +324,9 @@
 
   (!.lua
    (var view {"output" {"errored" true
-                        "current" {"id" "ord-1"}}})
+                        "current" {"id" "00000000-0000-0000-0000-0000000000a1"}}})
    (instance-state/clear-view-errored view)
    [(xt/x:has-key? (. view ["output"]) "errored")
     (. (. (. view ["output"]) ["current"]) ["id"])])
   => [false
-      "ord-1"])
+      "00000000-0000-0000-0000-0000000000a1"])
