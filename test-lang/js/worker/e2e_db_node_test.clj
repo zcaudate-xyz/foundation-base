@@ -13,7 +13,7 @@
              [xt.protocol.impl.connection-sql :as sql]
              [xt.db.runtime :as db-instance]
              [xt.db.node :as db-node]
-             [xt.db.node.test-fixtures :as fixtures]
+             [xt.db.helpers.test-fixtures :as fixtures]
              [xt.db.text.sql-manage :as sql-manage]
              [xt.db.text.sql-util :as sql-util]
              [xt.substrate :as event-node]
@@ -68,25 +68,25 @@
             (var db (xt.db.runtime/db-create
                      {"::" "db.sql"
                       :instance conn}
-                     xt.db.node.test-fixtures/Schema
-                     xt.db.node.test-fixtures/Lookup
+                     xt.db.helpers.test-fixtures/Schema
+                     xt.db.helpers.test-fixtures/Lookup
                      db-opts))
             (xt.db.runtime/db-exec-sync
              db
              (xt.lang.common-string/join
               "\n\n"
               (xt.db.text.sql-manage/table-create-all
-               xt.db.node.test-fixtures/Schema
-               xt.db.node.test-fixtures/Lookup
+               xt.db.helpers.test-fixtures/Schema
+               xt.db.helpers.test-fixtures/Lookup
                db-opts)))
             (xt.db.runtime/db-exec-sync
              db
              "INSERT INTO \"Order\" (\"id\", \"status\") VALUES ('ord-1', 'open');")
             (xt.db.node/install
              node
-             {"schema" xt.db.node.test-fixtures/Schema
-               "lookup" xt.db.node.test-fixtures/Lookup
-               "views" xt.db.node.test-fixtures/Views
+             {"schema" xt.db.helpers.test-fixtures/Schema
+               "lookup" xt.db.helpers.test-fixtures/Lookup
+               "views" xt.db.helpers.test-fixtures/Views
                "db" db
                "db_opts" db-opts})
             (. (xt.substrate/attach-transport

@@ -7,7 +7,7 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.node.instance-model :as model]
-             [xt.db.node.test-fixtures :as fixtures]
+             [xt.db.helpers.test-fixtures :as fixtures]
              [xt.substrate :as event-node]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]
@@ -27,7 +27,7 @@
    {"installed?" (xt/x:not-nil? node)
     "schema-tables" (xt/x:obj-keys (. fixtures/InstallOpts ["schema"]))})
   => {"installed?" true
-      "schema-tables" ["Order"]})
+      "schema-tables" ["Task"]})
 
 ^{:refer xt.db.walkthrough.guide-00-model-basic/STEP.01-model-put :added "4.1"}
 (fact "step 01: register a self-contained model with two query views"
@@ -42,7 +42,7 @@
     "open-default-input" (model/view-input node "room/a" "orders" "open")})
   => {"model-id" "orders"
       "view-ids" ["main" "open"]
-      "main-query" "Order"
+      "main-query" "Task"
       "open-default-input" ["open"]})
 
 ^{:refer xt.db.walkthrough.guide-00-model-basic/STEP.02-sync :added "4.1"}
@@ -59,8 +59,9 @@
         (promise/x:promise-then
          (fn [snapshot]
            (repl/notify
-            {"rows" (xt/x:obj-keys (. snapshot ["rows"] ["Order"]))})))))
-  => {"rows" ["ord-1" "ord-2"]})
+            {"rows" (xt/x:obj-keys (. snapshot ["rows"] ["Task"]))})))))
+  => {"rows" ["00000000-0000-0000-0000-0000000000a1"
+              "00000000-0000-0000-0000-0000000000a2"]})
 
 ^{:refer xt.db.walkthrough.guide-00-model-basic/STEP.03-view-refresh :added "4.1"}
 (fact "step 03: refresh the main view and read back its cached value"
@@ -120,19 +121,19 @@
             (model/query
              node
              "room/a"
-             {:table "Order"
-              :return-entry {"input" [{"symbol" "i_order_id" "type" "text"}]
+             {:table "Task"
+              :return-entry {"input" [{"symbol" "i_task_id" "type" "uuid"}]
                              "return" "jsonb"
-                             "view" {"table" "Order"
+                             "view" {"table" "Task"
                                      "type" "return"
                                      "query" ["status"]}}
-              :return-id "ord-1"}))))
+              :return-id "00000000-0000-0000-0000-0000000000a1"}))))
         (promise/x:promise-then
          (fn [result]
            (repl/notify
             {"query-key?" (xt/x:is-string? (. result ["query_key"]))
              "value" (xtd/get-in (. result ["value"]) [0 "status"])
-             "tables" (. (. result ["tables"]) ["Order"])})))))
+             "tables" (. (. result ["tables"]) ["Task"])})))))
   => {"query-key?" true
       "value" "open"
       "tables" true})

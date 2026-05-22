@@ -1,7 +1,7 @@
 (ns xt.db.walkthrough.guide-01-postgres-runtime-test
   (:use code.test)
   (:require [hara.lang :as l]
-            [xt.db.walkthrough.fixture-00-postgres :as fixtures]
+            [xt.db.helpers.fixture-00-postgres :as fixtures]
             [postgres.core :as pg]
             [postgres.sample.scratch-v1 :as scratch]))
 

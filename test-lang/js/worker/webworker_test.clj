@@ -9,7 +9,7 @@
    :require [[js.worker.webworker :as webworker]
              [js.worker.link :as worker-link]
              [xt.db.node :as db-node]
-             [xt.db.node.test-fixtures :as fixtures]
+             [xt.db.helpers.test-fixtures :as fixtures]
              [xt.substrate :as event-node]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]

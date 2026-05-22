@@ -4,7 +4,7 @@
 
 (l/script- :ruby
   {:runtime :basic
-   :require [[xt.db.node.test-fixtures :as fixtures]
+   :require [[xt.db.helpers.test-fixtures :as fixtures]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]]})
 
@@ -12,7 +12,7 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.node.test-fixtures/InstallOpts :added "4.1"}
+^{:refer xt.db.helpers.test-fixtures/InstallOpts :added "4.1"}
 (fact "provides reusable schema, model, and seed fixtures"
 
   (!.rb

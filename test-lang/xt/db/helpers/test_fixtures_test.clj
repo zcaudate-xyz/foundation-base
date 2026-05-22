@@ -1,11 +1,11 @@
-(ns xt.db.node.test-fixtures-test
+(ns xt.db.helpers.test-fixtures-test
   (:require [hara.lang :as l])
   (:use code.test))
 
 ^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.db.node.test-fixtures :as fixtures]
+   :require [[xt.db.helpers.test-fixtures :as fixtures]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]]})
 
@@ -13,13 +13,13 @@
  {:setup [(l/rt:restart)]
  :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.node.test-fixtures/InstallOpts :added "4.1"}
+^{:refer xt.db.helpers.test-fixtures/InstallOpts :added "4.1"}
 (fact "provides reusable schema, model, and seed fixtures"
 
   (!.js
-   {"schema-id" (xtd/get-in fixtures/InstallOpts ["schema" "Order" "id" "ident"])
+   {"schema-id" (xtd/get-in fixtures/InstallOpts ["schema" "Task" "id" "ident"])
     "views" (xt/x:obj-keys (. fixtures/ModelSpec ["views"]))
-    "seed-status" (xtd/get-in fixtures/Seed ["Order" 0 "status"])})
+    "seed-status" (xtd/get-in fixtures/Seed ["Task" 0 "status"])})
   => (just-in {"schema-id" "id"
                "views" (just ["main" "open"] :in-any-order)
                "seed-status" "open"}))

@@ -8,7 +8,7 @@
    :require [[xt.db.node.instance-model :as model]
              [xt.db.node.instance-util :as util]
              [xt.db.node.schema-spec :as spec]
-             [xt.db.node.test-fixtures :as fixtures]
+             [xt.db.helpers.test-fixtures :as fixtures]
              [xt.substrate :as event-node]
              [xt.substrate.base-space :as node-space]
              [xt.lang.common-data :as xtd]

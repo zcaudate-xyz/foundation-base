@@ -9,7 +9,7 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
              [xt.db.node.instance-model :as model]
-             [xt.db.node.test-fixtures :as fixtures]
+             [xt.db.helpers.test-fixtures :as fixtures]
              [xt.substrate :as main]
              [xt.substrate.base-router :as router]
              [xt.substrate.base-request :as req]]})

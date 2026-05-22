@@ -1,4 +1,4 @@
-(ns xt.db.walkthrough.fixture-00-postgres
+(ns xt.db.helpers.fixture-00-postgres
   (:require [postgres.core :as pg]
             [postgres.sample.scratch-v1 :as scratch]))
 

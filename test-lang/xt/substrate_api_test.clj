@@ -10,7 +10,7 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
              [xt.db.node.instance-model :as model]
-             [xt.db.node.test-fixtures :as fixtures]
+             [xt.db.helpers.test-fixtures :as fixtures]
              [xt.substrate :as event-node]]})
 
 (l/script- :lua
@@ -19,7 +19,7 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
              [xt.db.node.instance-model :as model]
-             [xt.db.node.test-fixtures :as fixtures]
+             [xt.db.helpers.test-fixtures :as fixtures]
              [xt.substrate :as event-node]]})
 
 (l/script- :python
@@ -28,7 +28,7 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
              [xt.db.node.instance-model :as model]
-             [xt.db.node.test-fixtures :as fixtures]
+             [xt.db.helpers.test-fixtures :as fixtures]
              [xt.substrate :as event-node]]})
 
 (fact:global

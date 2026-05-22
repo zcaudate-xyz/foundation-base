@@ -6,6 +6,7 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.node.schema-state :as schema-state]
+              [xt.db.helpers.test-fixtures :as fixtures]
               [xt.db.node.schema-spec :as spec]
               [xt.event.base-view :as event-view]
               [xt.lang.spec-base :as xt]
@@ -15,23 +16,9 @@
  {:setup [(l/rt:restart)]
  :teardown [(l/rt:stop)]})
 
-(def +schema+
-  {"Order"
-   {"id" {"ident" "id", "type" "text", "order" 0}
-    "status" {"ident" "status", "type" "text", "order" 1}}})
+(def +schema+ fixtures/Schema)
 
-(def +views+
-  {"Order"
-   {"return"
-    {"default"
-     {"input" [{"symbol" "i_order_id", "type" "text"}]
-      "return" "jsonb"
-      "view" {"table" "Order"
-              "type" "return"
-              "tag" "default"
-              "access" {"roles" {}}
-              "guards" []
-              "query" ["status"]}}}}})
+(def +views+ fixtures/Views)
 
 ^{:refer xt.db.node.schema-state/base-state :added "4.1"}
 (fact "creates the base node state"
@@ -39,8 +26,8 @@
   ^{:seedgen/base {:lua {:expect (l/as-lua ["xt.db.state" "db-node" "remote" []])}}}
   (!.js
     (var state
-         (schema-state/base-state {"schema" (@! +schema+)
-                                   "views" (@! +views+)
+         (schema-state/base-state {"schema" fixtures/Schema
+                                   "views" fixtures/Views
                                    "remote" {"space" "remote"}
                                    "meta" {"label" "db-node"}}))
     [(. state ["::"])
@@ -55,8 +42,8 @@
   (!.js
     (xt/x:obj-keys
      (schema-state/get-schema
-      (schema-state/base-state {"schema" (@! +schema+)}))))
-  => ["Order"])
+      (schema-state/base-state {"schema" fixtures/Schema}))))
+  => ["Task"])
 
 ^{:refer xt.db.node.schema-state/get-views :added "4.1"}
 (fact "gets the configured view map"
@@ -64,17 +51,17 @@
   (!.js
     (xt/x:obj-keys
      (schema-state/get-views
-      (schema-state/base-state {"views" (@! +views+)}))))
-  => ["Order"])
+      (schema-state/base-state {"views" fixtures/Views}))))
+  => ["Task"])
 
 ^{:refer xt.db.node.schema-state/model-views :added "4.1"}
 (fact "normalizes models with or without an explicit views key"
 
   (!.js
     [(xt/x:obj-keys
-      (schema-state/model-views {"views" {"main" {"query" {"table" "Order"}}}}))
+      (schema-state/model-views {"views" {"main" {"query" {"table" "Task"}}}}))
      (xt/x:obj-keys
-      (schema-state/model-views {"main" {"query" {"table" "Order"}}}))])
+      (schema-state/model-views {"main" {"query" {"table" "Task"}}}))])
   => [["main"] ["main"]])
 
 ^{:refer xt.db.node.schema-state/normalize-view :added "4.1"}
@@ -84,7 +71,7 @@
     (var view
          (schema-state/normalize-view
           "main"
-          {"default_input" ["ord-1"]
+          {"default_input" ["00000000-0000-0000-0000-0000000000a1"]
            "value" [{"status" "open"}]}))
     [(. view ["id"])
      (. view ["::"])
@@ -95,7 +82,7 @@
      (. view ["value"])])
   => ["main"
       "event.view"
-      ["ord-1"]
+      ["00000000-0000-0000-0000-0000000000a1"]
        "idle"
        false
        [{"status" "open"}]])
@@ -195,10 +182,10 @@
 (fact "unwraps db node result payloads that carry a value key"
 
   (!.js
-   [(schema-state/output-process {"value" {"id" "ord-1"}})
-    (schema-state/output-process {"id" "ord-2"})])
-  => [{"id" "ord-1"}
-      {"id" "ord-2"}])
+   [(schema-state/output-process {"value" {"id" "00000000-0000-0000-0000-0000000000a1"}})
+    (schema-state/output-process {"id" "00000000-0000-0000-0000-0000000000a2"})])
+  => [{"id" "00000000-0000-0000-0000-0000000000a1"}
+      {"id" "00000000-0000-0000-0000-0000000000a2"}])
 
 ^{:refer xt.db.node.schema-state/normalize-dep :added "4.1"}
 (fact "normalizes string vector and map dependency declarations"

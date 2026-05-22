@@ -44,9 +44,10 @@
 (fact "gets the first request payload or an empty object"
 
   (!.js
-    [(util/request-payload [{"id" "ord-1"} {"id" "ord-2"}])
+    [(util/request-payload [{"id" "00000000-0000-0000-0000-0000000000a1"}
+                            {"id" "00000000-0000-0000-0000-0000000000a2"}])
      (util/request-payload [])])
-  => [{"id" "ord-1"} {}])
+  => [{"id" "00000000-0000-0000-0000-0000000000a1"} {}])
 
 ^{:refer xt.db.node.instance-util/response-value :added "4.1"}
 (fact "unwraps remote response values when present"
