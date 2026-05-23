@@ -19,7 +19,7 @@
   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.walkthrough.guide-06-invalidation/STEP.00-mark-stale :added "4.1"}
-(fact "step 00: cache invalidation marks affected cached queries and bound views stale"
+(fact "step 00: when the shared task table changes, both the admin detail view and list view become stale"
 
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-a"}))
@@ -46,10 +46,10 @@
             {"id" "node-1"})
            (repl/notify
             {"query-status" (xtd/get-in state ["queries" query-key "status"])
-             "main-status" (xtd/get-in (model/view-get node "room/a" "orders" "main")
-                                       ["status"])
-             "open-status" (xtd/get-in (model/view-get node "room/a" "orders" "open")
+             "detail-status" (xtd/get-in (model/view-get node "room/a" "orders" "main")
+                                         ["status"])
+             "list-status" (xtd/get-in (model/view-get node "room/a" "orders" "open")
                                        ["status"])})))))
   => {"query-status" "stale"
-      "main-status" "stale"
-      "open-status" "stale"})
+      "detail-status" "stale"
+      "list-status" "stale"})

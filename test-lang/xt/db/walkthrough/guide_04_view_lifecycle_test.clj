@@ -18,8 +18,8 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.walkthrough.guide-04-view-lifecycle/STEP.00-lifecycle :added "4.1"}
-(fact "step 00: a local view moves through idle, pending, ready, stale, and error"
+^{:refer xt.db.walkthrough.guide-04-view-lifecycle/STEP.00-detail-lifecycle :added "4.1"}
+(fact "step 00: the selected detail view in an admin screen moves through idle, pending, ready, stale, and error"
 
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-a"}))
@@ -41,24 +41,26 @@
          (fn [_]
            (var ready (xtd/get-in (model/view-get node "room/a" "orders" "main")
                                   ["status"]))
-           (instance-state/set-view-stale state "orders" "main" {"tag" "demo/stale"})
+           (instance-state/set-view-stale state "orders" "main" {"tag" "screen/detail-stale"})
            (var stale (xtd/get-in (model/view-get node "room/a" "orders" "main")
                                   ["status"]))
-           (instance-state/set-view-error state "orders" "main" {"tag" "demo/error"})
+           (instance-state/set-view-error state "orders" "main" {"tag" "screen/detail-error"})
            (repl/notify
-            {"lifecycle" [initial
-                          pending
-                          ready
-                          stale
-                          (xtd/get-in (model/view-get node "room/a" "orders" "main")
-                                      ["status"])]
+            {"detail-lifecycle" [initial
+                                 pending
+                                 ready
+                                 stale
+                                 (xtd/get-in (model/view-get node "room/a" "orders" "main")
+                                             ["status"])]
+             "list-filter" (model/view-input node "room/a" "orders" "open")
              "error-tag" (xtd/get-in (model/view-error node "room/a" "orders" "main")
                                      ["tag"])})))))
-  => {"lifecycle" ["idle" "pending" "ready" "stale" "error"]
-      "error-tag" "demo/error"})
+  => {"detail-lifecycle" ["idle" "pending" "ready" "stale" "error"]
+      "list-filter" ["open"]
+      "error-tag" "screen/detail-error"})
 
-^{:refer xt.db.walkthrough.guide-04-view-lifecycle/STEP.01-hook-render-state :added "4.1"}
-(fact "step 01: a hook-style adapter can derive render state from the local view lifecycle"
+^{:refer xt.db.walkthrough.guide-04-view-lifecycle/STEP.01-hook-screen-state :added "4.1"}
+(fact "step 01: a hook-style adapter can read the admin screen as a detail panel plus filtered list"
 
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-a"}))
@@ -66,81 +68,58 @@
     (model/install node fixtures/InstallOpts)
     (model/model-put node "room/a" "orders" fixtures/ModelSpec)
     (:= state (model/ensure-space-state node "room/a"))
-    (var use-orders-view
-         (fn [status value error]
+    (var use-admin-screen
+         (fn []
            (return
-            {"status" status
-            "show-skeleton?" (== status "idle")
-            "show-spinner?" (== status "pending")
-            "show-stale-badge?" (== status "stale")
-            "show-error?" (== status "error")
-            "rows" (:? value value [])
-            "error-tag" (xtd/get-in error ["tag"])})))
-    (var idle-ui (use-orders-view
-                 (xtd/get-in (model/view-get node "room/a" "orders" "main")
-                             ["status"])
-                 (model/view-val node "room/a" "orders" "main")
-                 (model/view-error node "room/a" "orders" "main")))
-    (instance-state/set-view-pending state "orders" "main")
-    (var pending-ui (use-orders-view
-                    (xtd/get-in (model/view-get node "room/a" "orders" "main")
-                                ["status"])
-                    (model/view-val node "room/a" "orders" "main")
-                    (model/view-error node "room/a" "orders" "main")))
+            {"detail" {"status" (xtd/get-in (model/view-get node "room/a" "orders" "main")
+                                            ["status"])
+                       "value" (model/view-val node "room/a" "orders" "main")
+                       "error-tag" (xtd/get-in (model/view-error node "room/a" "orders" "main")
+                                               ["tag"])}
+             "list" {"status" (xtd/get-in (model/view-get node "room/a" "orders" "open")
+                                          ["status"])
+                     "input" (model/view-input node "room/a" "orders" "open")
+                     "value" (model/view-val node "room/a" "orders" "open")
+                     "error-tag" (xtd/get-in (model/view-error node "room/a" "orders" "open")
+                                             ["tag"])}})))
+    (var idle-screen (use-admin-screen))
     (-> (model/sync node "room/a" {"db/sync" fixtures/Seed})
         (promise/x:promise-then
          (fn [_]
            (return
-            (model/view-refresh node "room/a" "orders" "main"))))
+            (model/model-refresh node "room/a" "orders"))))
         (promise/x:promise-then
          (fn [_]
-           (instance-state/set-view-stale state "orders" "main" {"tag" "demo/stale"})
-           (var stale-ui (use-orders-view
-                         (xtd/get-in (model/view-get node "room/a" "orders" "main")
-                                     ["status"])
-                         (model/view-val node "room/a" "orders" "main")
-                         (model/view-error node "room/a" "orders" "main")))
-           (instance-state/set-view-error state "orders" "main" {"tag" "demo/error"})
+           (var ready-screen (use-admin-screen))
+           (instance-state/set-view-stale state "orders" "main" {"tag" "screen/detail-stale"})
            (repl/notify
-            {"idle" idle-ui
-            "pending" pending-ui
-            "stale" stale-ui
-            "error" (use-orders-view
-                     (xtd/get-in (model/view-get node "room/a" "orders" "main")
-                                 ["status"])
-                     (model/view-val node "room/a" "orders" "main")
-                     (model/view-error node "room/a" "orders" "main"))})))))
-  => {"idle" {"status" "idle"
-             "show-skeleton?" true
-             "show-spinner?" false
-             "show-stale-badge?" false
-             "show-error?" false
-             "rows" []
-             "error-tag" nil}
-      "pending" {"status" "pending"
-                "show-skeleton?" false
-                "show-spinner?" true
-                "show-stale-badge?" false
-                "show-error?" false
-                "rows" []
-                "error-tag" nil}
-      "stale" {"status" "stale"
-              "show-skeleton?" false
-              "show-spinner?" false
-              "show-stale-badge?" true
-              "show-error?" false
-              "rows" [{"status" "open"}]
-              "error-tag" "demo/stale"}
-      "error" {"status" "error"
-              "show-skeleton?" false
-              "show-spinner?" false
-              "show-stale-badge?" false
-              "show-error?" true
-              "rows" [{"status" "open"}]
-              "error-tag" "demo/error"}})
+            {"idle" idle-screen
+             "ready" ready-screen
+             "detail-stale" (use-admin-screen)})))))
+  => {"idle" {"detail" {"status" "idle"
+                        "value" nil
+                        "error-tag" nil}
+              "list" {"status" "idle"
+                      "input" ["open"]
+                      "value" nil
+                      "error-tag" nil}}
+      "ready" {"detail" {"status" "ready"
+                         "value" [{"status" "open"}]
+                         "error-tag" nil}
+               "list" {"status" "ready"
+                       "input" ["open"]
+                       "value" [{"id" "00000000-0000-0000-0000-0000000000a1"}]
+                       "error-tag" nil}}
+      "detail-stale" {"detail" {"status" "stale"
+                                "value" [{"status" "open"}]
+                                "error-tag" "screen/detail-stale"}
+                       "list" {"status" "ready"
+                               "input" ["open"]
+                               "value" [{"id" "00000000-0000-0000-0000-0000000000a1"}]
+                               "error-tag" nil}}})
 
 ^{:refer xt.db.walkthrough.guide-04-view-lifecycle/STEP.02-hook-refresh-flow :added "4.1"}
-(fact "step 02: hook-style refresh calls can move a cached view from ready to stale to ready"
+(fact "step 02: hook-style refresh calls can move both the admin detail and list panes from stale back to ready"
 
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-a"}))
@@ -152,32 +131,48 @@
         (promise/x:promise-then
          (fn [_]
            (return
-            (model/view-refresh node "room/a" "orders" "main"))))
+            (model/model-refresh node "room/a" "orders"))))
         (promise/x:promise-then
          (fn [_]
-           (var ready-before {"status" (xtd/get-in
-                                       (model/view-get node "room/a" "orders" "main")
-                                       ["status"])
-                             "value" (model/view-val node "room/a" "orders" "main")})
-           ;; Simulate a hook receiving invalidation before requesting a fresh read.
-           (instance-state/set-view-stale state "orders" "main" {"tag" "hook/reload"})
+           (var ready-before {"detail" {"status" (xtd/get-in
+                                                  (model/view-get node "room/a" "orders" "main")
+                                                  ["status"])
+                                        "value" (model/view-val node "room/a" "orders" "main")}
+                              "list" {"status" (xtd/get-in
+                                                (model/view-get node "room/a" "orders" "open")
+                                                ["status"])
+                                      "value" (model/view-val node "room/a" "orders" "open")}})
+           (instance-state/set-view-stale state "orders" "main" {"tag" "hook/detail-reload"})
+           (instance-state/set-view-stale state "orders" "open" {"tag" "hook/list-reload"})
            (return
             (promise/x:promise-then
-            (model/view-refresh node "room/a" "orders" "main")
-            (fn [_]
-              (return {"before" ready-before
-                       "stale" {"status" "stale"
-                                "error-tag" "hook/reload"}
-                       "after" {"status" (xtd/get-in
-                                          (model/view-get node "room/a" "orders" "main")
-                                          ["status"])
-                                "value" (model/view-val node "room/a" "orders" "main")}}))))))
+             (model/model-refresh node "room/a" "orders")
+             (fn [_]
+               (return {"before" ready-before
+                        "stale" {"detail" {"status" "stale"
+                                           "error-tag" "hook/detail-reload"}
+                                 "list" {"status" "stale"
+                                         "error-tag" "hook/list-reload"}}
+                        "after" {"detail" {"status" (xtd/get-in
+                                                     (model/view-get node "room/a" "orders" "main")
+                                                     ["status"])
+                                           "value" (model/view-val node "room/a" "orders" "main")}
+                                 "list" {"status" (xtd/get-in
+                                                   (model/view-get node "room/a" "orders" "open")
+                                                   ["status"])
+                                         "value" (model/view-val node "room/a" "orders" "open")}}}))))))
         (promise/x:promise-then
          (fn [out]
            (repl/notify out)))))
-  => {"before" {"status" "ready"
-               "value" [{"status" "open"}]}
-      "stale" {"status" "stale"
-              "error-tag" "hook/reload"}
-      "after" {"status" "ready"
-              "value" [{"status" "open"}]}})
+  => {"before" {"detail" {"status" "ready"
+                          "value" [{"status" "open"}]}
+                "list" {"status" "ready"
+                    "value" [{"id" "00000000-0000-0000-0000-0000000000a1"}]}}
+      "stale" {"detail" {"status" "stale"
+                         "error-tag" "hook/detail-reload"}
+               "list" {"status" "stale"
+                       "error-tag" "hook/list-reload"}}
+      "after" {"detail" {"status" "ready"
+                         "value" [{"status" "open"}]}
+               "list" {"status" "ready"
+                   "value" [{"id" "00000000-0000-0000-0000-0000000000a1"}]}}})

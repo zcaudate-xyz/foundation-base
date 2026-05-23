@@ -5,7 +5,7 @@
             [xt.db.helpers.test-fixtures :as fixtures]))
 
 ^{:seedgen/root {:all true}}
-(l/script- :python
+(l/script- :js
   {:runtime :basic
    :require [[xt.db.node.instance-model :as model]
              [xt.substrate :as event-node]
@@ -19,10 +19,10 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.walkthrough.guide-07-projection-layer/STEP.00-local-projection :added "4.1"}
-(fact "step 00: the local space can project remote server state into a client-specific filtered view"
+^{:refer xt.db.walkthrough.guide-07-projection-layer/STEP.00-admin-screen-projection :added "4.1"}
+(fact "step 00: the local space can project remote server state into an admin screen with list and detail views on the same table"
 
-  (notify/wait-on :python
+  (notify/wait-on :js
     (var node (event-node/node-create {"id" "task-app"}))
     (var payload {"db/sync"
                   {"Entry" [{"id" "00000000-0000-0000-0000-0000000000c1"
@@ -33,45 +33,52 @@
                              "name" "beta"
                              "tags" ["guide"]
                              "__deleted__" false}]}})
-    (model/install node {"schema" (@! fixtures/+schema+)
-                         "lookup" (@! fixtures/+lookup+)
-                         "views" {}})
-    (model/model-put node
-                     "room/server"
-                     "entries"
-                     (@! fixtures/+model-spec+))
-    (model/model-put node
-                     "room/local"
-                     "entries"
-                     {"views"
-                      {"entries"
+    (var install-opts {"schema" (@! fixtures/+schema+)
+                       "lookup" (@! fixtures/+lookup+)
+                       "views" {}})
+    (var server-spec {"views"
+                      {"list"
+                       {"query" (@! fixtures/+model-query+)
+                        "input" []}
+                       "detail"
                        {"query" (@! fixtures/+inline-query+)
-                        "input" ["alpha"]
-                        "remote" {"space" "room/server"}}}})
+                        "default_input" ["alpha"]}}})
+    (var local-spec {"views"
+                     {"list"
+                      {"query" (@! fixtures/+model-query+)
+                       "input" []
+                       "remote" {"space" "room/server"}}
+                      "detail"
+                      {"query" (@! fixtures/+inline-query+)
+                       "default_input" ["alpha"]
+                       "remote" {"space" "room/server"}}}})
+    (model/install node install-opts)
+    (model/model-put node "room/server" "entries-screen" server-spec)
+    (model/model-put node "room/local" "entries-screen" local-spec)
     (promise/x:promise-catch
      (-> (model/sync node "room/server" payload)
          (promise/x:promise-then
           (fn [_]
             (return
-             (model/view-refresh node "room/local" "entries" "entries"))))
+             (model/model-refresh node "room/local" "entries-screen"))))
          (promise/x:promise-then
-          (fn [result]
+          (fn [_]
             (repl/notify
-             {"server-model" (. (model/model-get node "room/server" "entries")
-                                ["id"])
-              "local-model" (. (model/model-get node "room/local" "entries")
-                               ["id"])
-              "remote-space" (xtd/get-in
-                              (model/view-get node "room/local" "entries" "entries")
+             {"remote-space" (xtd/get-in
+                              (model/view-get node "room/local" "entries-screen" "list")
                               ["remote" "space"])
-              "local-input" (model/view-input node "room/local" "entries" "entries")
-              "count" (xt/x:len (. result ["value"]))
-              "first-name" (xtd/get-in (. result ["value"]) [0 "name"])}))))
+              "list-status" (xtd/get-in
+                             (model/view-get node "room/local" "entries-screen" "list")
+                             ["status"])
+              "list-count" (xt/x:len (model/view-val node "room/local" "entries-screen" "list"))
+              "detail-input" (model/view-input node "room/local" "entries-screen" "detail")
+              "detail-name" (xtd/get-in
+                             (model/view-val node "room/local" "entries-screen" "detail")
+                             [0 "name"])}))))
      (fn [err]
        (repl/notify err))))
-  => {"server-model" "entries"
-      "local-model" "entries"
-      "remote-space" "room/server"
-      "local-input" ["alpha"]
-      "count" 1
-      "first-name" "alpha"})
+  => {"remote-space" "room/server"
+      "list-status" "ready"
+      "list-count" 2
+      "detail-input" ["alpha"]
+      "detail-name" "alpha"})

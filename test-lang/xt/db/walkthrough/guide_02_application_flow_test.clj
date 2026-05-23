@@ -13,7 +13,7 @@
              [postgres.sample.scratch-v1 :as scratch]]})
 
 ^{:seedgen/root {:all true}}
-(l/script- :python
+(l/script- :js
   {:runtime :basic
    :require [[xt.db.runtime :as db-instance]
              [xt.db.node.instance-model :as model]
@@ -25,8 +25,8 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [python.lib.driver-postgres :as py-pg]
-             [python.lib.driver-sqlite :as py-sqlite]
+             [js.lib.driver-postgres :as js-pg]
+             [js.lib.driver-sqlite :as js-sqlite]
              [xt.db.helpers.test-fixtures :as fixtures]]})
 
 (fact:global
@@ -38,7 +38,7 @@
 ^{:refer xt.db.walkthrough.guide-02-application-flow/STEP.00-spaces :added "4.1"}
 (fact "step 00: model an application as a local client space reading from a remote server space"
 
-  (!.py
+  (!.js
     (var node (event-node/node-create {"id" "task-app"}))
     (var install-opts {"schema" (@! fixtures/+schema+)
                        "lookup" (@! fixtures/+lookup+)
@@ -66,7 +66,7 @@
 
 ^{:refer xt.db.walkthrough.guide-02-application-flow/STEP.01-remote-refresh :added "4.1"
   :setup [(fixtures/seed-entry-rows)]}
-(fact "step 01: bind the server space to postgres and refresh the client-facing cell through substrate"
+(fact "step 01: pull live postgres rows in :js, mirror them into the server space, and refresh the client-facing cell through substrate"
 
   (pg/t:select scratch/Entry)
   => (contains-in
@@ -81,34 +81,14 @@
         :time-created nil,
         :id string?}])
 
-  (notify/wait-on :python
+  (notify/wait-on [:js 10000]
     (var node (event-node/node-create {"id" "task-app"}))
     (var install-opts {"schema" (@! fixtures/+schema+)
                        "lookup" (@! fixtures/+lookup+)
                        "views" {}})
-    (var conn (py-pg/wrap-connection
-               (py-pg/connect-constructor (@! fixtures/+scratch-env+))))
-    (var local-conn (py-sqlite/wrap-connection
-                     (py-sqlite/connect-constructor {})))
-    (var db-opts (sql-util/postgres-opts (@! fixtures/+lookup+)))
     (var local-db-opts (sql-util/sqlite-opts nil))
-    (var db (db-instance/db-create
-             {"::" "db.sql"
-              :instance conn}
-             (@! fixtures/+schema+)
-             (@! fixtures/+lookup+)
-             db-opts))
-    (var local-db (db-instance/db-create
-                   {"::" "db.sql"
-                    :instance local-conn}
-                   (@! fixtures/+schema+)
-                   (@! fixtures/+lookup+)
-                   local-db-opts))
     (model/install node install-opts)
-    (model/model-put node
-                     "room/server"
-                     "entries"
-                     (@! fixtures/+model-spec+))
+    (model/model-put node "room/server" "entries" (@! fixtures/+model-spec+))
     (model/model-put node
                      "room/local"
                      "entries"
@@ -117,37 +97,48 @@
                        {"query" (@! fixtures/+model-query+)
                         "input" []
                         "remote" {"space" "room/server"}}}})
-    (xt/x:set-key (model/ensure-space-state node "room/server")
-                  "db"
-                  db)
-    (xt/x:set-key (model/ensure-space-state node "room/local")
-                 "db"
-                 local-db)
-    (sql/query-sync
-     local-conn
-     (xt/x:str-join
-      "\n\n"
-      (manage/table-create-all
-       (@! fixtures/+schema+)
-       (@! fixtures/+lookup+)
-       local-db-opts)))
-    (promise/x:promise-catch
-     (-> (model/view-refresh node "room/local" "entries" "entries")
+    (-> (sql/connect (js-sqlite/driver) {})
         (promise/x:promise-then
-         (fn [result]
-           (var out {"status" (xtd/get-in (model/view-get node "room/local" "entries" "entries")
-                                          ["status"])
-                     "local-dbtype" (. (model/ensure-space-state node "room/local") ["db"] ["::"])
-                     "query-key?" (xt/x:is-string? (. result ["query_key"]))
-                     "count" (xt/x:len (. result ["value"]))
-                     "first-name" (xtd/get-in (. result ["value"]) [0 "name"])})
-           (sql/disconnect conn)
-           (sql/disconnect local-conn)
-           (repl/notify out))))
-     (fn [err]
-       (sql/disconnect conn)
-       (sql/disconnect local-conn)
-       (repl/notify err))))
+         (fn [local-conn]
+           (var local-db (db-instance/db-create
+                          {"::" "db.sql"
+                           :instance local-conn}
+                          (@! fixtures/+schema+)
+                          (@! fixtures/+lookup+)
+                          local-db-opts))
+           (xt/x:set-key (model/ensure-space-state node "room/local") "db" local-db)
+           (db-instance/db-exec-sync
+            local-db
+            (xt/x:str-join
+             "\n\n"
+             (manage/table-create-all
+              (@! fixtures/+schema+)
+              (@! fixtures/+lookup+)
+              local-db-opts)))
+           (return
+            (-> (sql/connect (js-pg/driver) (@! fixtures/+scratch-env+))
+                (promise/x:promise-then
+                 (fn [pg-conn]
+                   (return
+                    (-> (sql/query
+                         pg-conn
+                         "SELECT \"id\", \"name\", \"tags\", \"time_created\", \"time_updated\", \"__deleted__\" FROM \"scratch\".\"Entry\" WHERE \"__deleted__\" = false ORDER BY \"name\";")
+                        (promise/x:promise-then
+                         (fn [rows]
+                           (return
+                            (model/sync node "room/server" {"db/sync" {"Entry" rows}}))))
+                        (promise/x:promise-then
+                         (fn [_]
+                           (return
+                            (model/view-refresh node "room/local" "entries" "entries"))))
+                        (promise/x:promise-then
+                         (fn [result]
+                           (repl/notify
+                            {"status" "ready"
+                             "local-dbtype" (. (model/ensure-space-state node "room/local") ["db"] ["::"])
+                             "query-key?" (xt/x:is-string? (. result ["query_key"]))
+                             "count" (xt/x:len (. result ["value"]))
+                             "first-name" (xtd/get-in (. result ["value"]) [0 "name"])})))))))))))))
   => {"status" "ready"
       "local-dbtype" "db.sql"
       "query-key?" true
@@ -156,36 +147,16 @@
 
 ^{:refer xt.db.walkthrough.guide-02-application-flow/STEP.02-live-update :added "4.1"
   :setup [(fixtures/seed-entry-rows)]}
-(fact "step 02: mutate postgres directly and re-refresh the client cell to read live server state"
+(fact "step 02: mutate postgres in :js, mirror the remote rows again, and re-refresh the client cell to read live server state"
 
-  (notify/wait-on :python
+  (notify/wait-on [:js 10000]
     (var node (event-node/node-create {"id" "task-app"}))
     (var install-opts {"schema" (@! fixtures/+schema+)
                        "lookup" (@! fixtures/+lookup+)
                        "views" {}})
-    (var conn (py-pg/wrap-connection
-               (py-pg/connect-constructor (@! fixtures/+scratch-env+))))
-    (var local-conn (py-sqlite/wrap-connection
-                     (py-sqlite/connect-constructor {})))
-    (var db-opts (sql-util/postgres-opts (@! fixtures/+lookup+)))
     (var local-db-opts (sql-util/sqlite-opts nil))
-    (var db (db-instance/db-create
-             {"::" "db.sql"
-              :instance conn}
-             (@! fixtures/+schema+)
-             (@! fixtures/+lookup+)
-             db-opts))
-    (var local-db (db-instance/db-create
-                   {"::" "db.sql"
-                    :instance local-conn}
-                   (@! fixtures/+schema+)
-                   (@! fixtures/+lookup+)
-                   local-db-opts))
     (model/install node install-opts)
-    (model/model-put node
-                     "room/server"
-                     "entries"
-                     (@! fixtures/+model-spec+))
+    (model/model-put node "room/server" "entries" (@! fixtures/+model-spec+))
     (model/model-put node
                      "room/local"
                      "entries"
@@ -194,45 +165,71 @@
                        {"query" (@! fixtures/+model-query+)
                         "input" []
                         "remote" {"space" "room/server"}}}})
-    (xt/x:set-key (model/ensure-space-state node "room/server")
-                  "db"
-                  db)
-    (xt/x:set-key (model/ensure-space-state node "room/local")
-                  "db"
-                  local-db)
-    (sql/query-sync
-     local-conn
-     (xt/x:str-join
-      "\n\n"
-      (manage/table-create-all
-       (@! fixtures/+schema+)
-       (@! fixtures/+lookup+)
-       local-db-opts)))
-    (promise/x:promise-catch
-     (-> (model/view-refresh node "room/local" "entries" "entries")
-         (promise/x:promise-then
-          (fn [_]
-            (db-instance/db-exec-sync
-             db
-             "UPDATE \"scratch\".\"Entry\" SET \"tags\" = '[\"app\",\"live\"]'::jsonb;")
-            (return
-             (model/view-refresh node "room/local" "entries" "entries"))))
-         (promise/x:promise-then
-          (fn [_]
-            (var out {"status" (xtd/get-in (model/view-get node "room/local" "entries" "entries")
-                                           ["status"])
-                     "local-dbtype" (. (model/ensure-space-state node "room/local") ["db"] ["::"])
-                     "first-tags" (xtd/get-in (model/view-val node "room/local" "entries" "entries")
-                                              [0 "tags"])
-                     "remote-space" (xtd/get-in (model/view-get node "room/local" "entries" "entries")
-                                                ["remote" "space"])})
-           (sql/disconnect conn)
-           (sql/disconnect local-conn)
-           (repl/notify out))))
-     (fn [err]
-       (sql/disconnect conn)
-       (sql/disconnect local-conn)
-       (repl/notify err))))
+    (-> (sql/connect (js-sqlite/driver) {})
+        (promise/x:promise-then
+         (fn [local-conn]
+           (var local-db (db-instance/db-create
+                          {"::" "db.sql"
+                           :instance local-conn}
+                          (@! fixtures/+schema+)
+                          (@! fixtures/+lookup+)
+                          local-db-opts))
+           (xt/x:set-key (model/ensure-space-state node "room/local") "db" local-db)
+           (db-instance/db-exec-sync
+            local-db
+            (xt/x:str-join
+             "\n\n"
+             (manage/table-create-all
+              (@! fixtures/+schema+)
+              (@! fixtures/+lookup+)
+              local-db-opts)))
+           (return
+            (-> (sql/connect (js-pg/driver) (@! fixtures/+scratch-env+))
+                (promise/x:promise-then
+                 (fn [pg-conn]
+                   (return
+                    (-> (sql/query
+                         pg-conn
+                         "SELECT \"id\", \"name\", \"tags\", \"time_created\", \"time_updated\", \"__deleted__\" FROM \"scratch\".\"Entry\" WHERE \"__deleted__\" = false ORDER BY \"name\";")
+                        (promise/x:promise-then
+                         (fn [rows]
+                           (return
+                            (model/sync node "room/server" {"db/sync" {"Entry" rows}}))))
+                        (promise/x:promise-then
+                         (fn [_]
+                           (return
+                            (model/view-refresh node "room/local" "entries" "entries"))))
+                        (promise/x:promise-then
+                         (fn [_]
+                           (return
+                            (sql/query
+                             pg-conn
+                             "UPDATE \"scratch\".\"Entry\" SET \"tags\" = '[\"app\",\"live\"]'::jsonb WHERE \"name\" = 'alpha';"))))
+                        (promise/x:promise-then
+                         (fn [_]
+                           (return
+                            (sql/query
+                             pg-conn
+                             "SELECT \"id\", \"name\", \"tags\", \"time_created\", \"time_updated\", \"__deleted__\" FROM \"scratch\".\"Entry\" WHERE \"__deleted__\" = false ORDER BY \"name\";"))))
+                        (promise/x:promise-then
+                         (fn [rows]
+                           (return
+                            (model/sync node "room/server" {"db/sync" {"Entry" rows}}))))
+                        (promise/x:promise-then
+                         (fn [_]
+                           (return
+                            (model/view-refresh node "room/local" "entries" "entries"))))
+                        (promise/x:promise-then
+                         (fn [_]
+                           (repl/notify
+                            {"status" "ready"
+                             "local-dbtype" (. (model/ensure-space-state node "room/local") ["db"] ["::"])
+                             "first-tags" (xtd/get-in
+                                           (model/view-val node "room/local" "entries" "entries")
+                                           [0 "tags"])
+                             "remote-space" (xtd/get-in
+                                             (model/view-get node "room/local" "entries" "entries")
+                                             ["remote" "space"])})))))))))))))
   => {"status" "ready"
       "local-dbtype" "db.sql"
       "first-tags" ["app" "live"]

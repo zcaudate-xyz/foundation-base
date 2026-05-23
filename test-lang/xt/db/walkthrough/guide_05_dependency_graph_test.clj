@@ -19,19 +19,19 @@
   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.walkthrough.guide-05-dependency-graph/STEP.00-dependency-index :added "4.1"}
-(fact "step 00: the local model records which views depend on other views"
+(fact "step 00: an admin screen can record how its detail and filtered list views are linked"
 
   (!.js
     (var node (event-node/node-create {"id" "node-a"}))
     (model/install node fixtures/InstallOpts)
     (model/model-put node "room/a" "orders" fixtures/DependentModelSpec)
-    {"dependents" (model/view-dependents node "room/a" "orders" "main")
-     "open-input" (model/view-input node "room/a" "orders" "open")})
-  => {"dependents" {"orders" ["open"]}
-      "open-input" ["open"]})
+    {"detail-dependents" (model/view-dependents node "room/a" "orders" "main")
+     "list-filter" (model/view-input node "room/a" "orders" "open")})
+  => {"detail-dependents" {"orders" ["open"]}
+      "list-filter" ["open"]})
 
 ^{:refer xt.db.walkthrough.guide-05-dependency-graph/STEP.01-dependent-refresh :added "4.1"}
-(fact "step 01: refreshing a source view also refreshes its local dependent view"
+(fact "step 01: refreshing the selected detail view can also refresh the admin list state that depends on it"
 
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-a"}))
@@ -45,16 +45,16 @@
         (promise/x:promise-then
          (fn [_]
            (repl/notify
-            {"main-status" (xtd/get-in (model/view-get node "room/a" "orders" "main")
+            {"detail-status" (xtd/get-in (model/view-get node "room/a" "orders" "main")
+                                         ["status"])
+             "list-status" (xtd/get-in (model/view-get node "room/a" "orders" "open")
                                        ["status"])
-             "open-status" (xtd/get-in (model/view-get node "room/a" "orders" "open")
-                                       ["status"])
-             "open-query-key?" (xt/x:is-string?
+             "list-query-key?" (xt/x:is-string?
                                 (xtd/get-in (model/view-get node "room/a" "orders" "open")
                                             ["query_key"]))
-             "open-count" (xt/x:len (or (model/view-val node "room/a" "orders" "open")
+             "list-count" (xt/x:len (or (model/view-val node "room/a" "orders" "open")
                                         []))})))))
-  => {"main-status" "ready"
-      "open-status" "ready"
-      "open-query-key?" true
-      "open-count" 1})
+  => {"detail-status" "ready"
+      "list-status" "ready"
+      "list-query-key?" true
+      "list-count" 1})
