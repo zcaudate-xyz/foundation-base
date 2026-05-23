@@ -1,5 +1,6 @@
 (ns xt.db.node.instance-query-test
-  (:require [hara.lang :as l])
+  (:require [hara.lang :as l]
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 ^{:seedgen/root {:all true}}
@@ -10,7 +11,9 @@
              [xt.db.node.instance-state :as instance-state]
              [xt.db.helpers.test-fixtures :as fixtures]
              [xt.db.node.schema-state :as schema-state]
+             [xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as promise]
              [xt.lang.common-data :as xtd]]})
 
 (fact:global
@@ -249,6 +252,52 @@
       true
       "ready"])
 
+^{:refer xt.db.node.instance-query/run-local-query-async :added "4.1"}
+(fact "prepares, executes, and caches a local query through the async db pull path"
+
+  (notify/wait-on :js
+    (var state
+         (schema-state/base-state {"schema" fixtures/Schema
+                                   "views" fixtures/Views
+                                   "lookup" fixtures/Lookup}))
+    (instance-state/put-model state "orders" fixtures/ModelSpec)
+    (xt/x:set-key xdb/IMPL
+                  "db.async"
+                  {"pull" (fn [instance schema tree opts]
+                            (return
+                             (promise/x:promise-run
+                              [{"status" (. opts ["status"])}])))})
+    (xt/x:set-key state
+                  "db"
+                  {"::" "db.async"
+                   :instance {"id" "async-db"}
+                   :opts {"status" "async-open"}})
+    (promise/x:promise-catch
+     (promise/x:promise-then
+      (instance-query/run-local-query-async
+       state
+       {:key "q-async"
+        :table "Task"
+        :return-method "default"
+        :return-id "00000000-0000-0000-0000-0000000000a1"}
+       {:model-id "orders"
+        :view-id "main"
+        :args []}
+       "orders"
+       "main")
+      (fn [out]
+        (var [ok result] out)
+        (repl/notify [ok
+                      (xtd/get-in result ["value" 0 "status"])
+                      (. (. result ["tables"]) ["Task"])
+                      (xtd/get-in state ["models" "orders" "views" "main" "status"])])))
+     (fn [err]
+       (repl/notify err))))
+  => [true
+      "async-open"
+      true
+      "ready"])
+
 
 ^{:refer xt.db.node.instance-query/seen-view? :added "4.1"}
 (fact "checks whether a view has already been visited"
@@ -408,3 +457,7 @@
                  "open" true}}
       "ready"
       true])
+
+
+^{:refer xt.db.node.instance-query/run-local-query-async :added "4.1"}
+(fact "TODO")

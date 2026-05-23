@@ -9,6 +9,7 @@
              [xt.db.node.instance-state :as instance-state]
              [xt.event.base-view :as event-view]
              [xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as promise]
              [xt.lang.common-data :as xtd]]})
 
 (defn.xt seen-view?
@@ -270,3 +271,33 @@
   (return [true {:query_key (xt/x:get-key entry "key")
                  :value value
                  :tables (xt/x:get-key entry "tables")}]))
+
+(defn.xt run-local-query-async
+  "prepares and executes a local query with async pull semantics"
+  {:added "4.1"}
+  [state query-spec view-context model-id view-id]
+  (var [ok prepared] (schema-query/prepare-query state query-spec view-context))
+  (when (not ok)
+   (when (and (xt/x:not-nil? model-id)
+              (xt/x:not-nil? view-id))
+     (instance-state/set-view-error state model-id view-id prepared))
+   (return (promise/x:promise-run [ok prepared])))
+  (var plan (xt/x:get-key prepared "plan"))
+  (return
+  (promise/x:promise-then
+   (:? (xt/x:not-nil? plan)
+       (instance/db-pull
+        (instance-state/ensure-db state)
+        (schema-state/get-schema state)
+        plan)
+       (promise/x:promise-run nil))
+   (fn [value]
+     (var entry (-/attach-query-entry state
+                                      prepared
+                                      value
+                                      (xt/x:get-key prepared "tables")
+                                      model-id
+                                      view-id))
+     (return [true {:query_key (xt/x:get-key entry "key")
+                    :value value
+                    :tables (xt/x:get-key entry "tables")}])))))

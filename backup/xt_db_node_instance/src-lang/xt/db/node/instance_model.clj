@@ -541,15 +541,19 @@
                         {}))
   (var model-id (xt/x:get-key view-context "model_id"))
   (var view-id (xt/x:get-key view-context "view_id"))
-  (var [ok result] (instance-query/run-local-query
-                    state
-                    query-spec
-                    view-context
-                    model-id
-                    view-id))
-  (when (not ok)
-    (xt/x:throw result))
-  (return result))
+  (return
+  (promise/x:promise-then
+   (instance-query/run-local-query-async
+    state
+    query-spec
+    view-context
+    model-id
+    view-id)
+   (fn [out]
+     (var [ok result] out)
+     (when (not ok)
+       (xt/x:throw result))
+     (return result)))))
 
 (defn.xt handle-query-refresh
   "handles a refresh request for a cached query"

@@ -1,19 +1,21 @@
 # `xt.db` + `xt.substrate` Walkthrough
 
 This is a GitHub-flavored explainer for how `xt.db` is used inside
-`xt.substrate` to build application state.
+`xt.substrate` to build application state for an admin-style SPA screen.
 
-It starts with the smallest possible model with **no database support**, then
-adds:
+The main target shape is:
 
-- a remote-backed client view
-- a server-side SQL source of truth
-- a local SQLite cache
+- a list view on a table
+- a filtered local input for that list
+- a detail view on the same table
+- a local cache that keeps the SPA coherent while server state changes
 
 The examples mirror these walkthrough tests:
 
 - `test-lang/xt/db/walkthrough/guide_00_model_basic_test.clj`
 - `test-lang/xt/db/walkthrough/guide_02_application_flow_test.clj`
+- `test-lang/xt/db/walkthrough/guide_09_local_sqlite_remote_postgres_test.clj`
+- `test-lang/xt/db/walkthrough/guide_10_remote_sqlite_postgres_pipeline_test.clj`
 
 
 ## The Short Version
@@ -28,15 +30,16 @@ The examples mirror these walkthrough tests:
 
 ## 1. Minimal Model: No DB Yet
 
-The smallest useful shape is a node with one space and one model.
+The smallest useful shape is a node with one space and one model representing
+an admin screen with two views on the same table.
 
 ```mermaid
 flowchart LR
     N[substrate node]
     S[space: room/a]
-    M[model: orders]
-    V1[view: main]
-    V2[view: open]
+    M[model: orders-screen]
+    V1[view: detail]
+    V2[view: list]
 
     N --> S
     S --> M
@@ -47,9 +50,9 @@ flowchart LR
 At this stage, think of `xt.db` as a **reactive model registry**:
 
 - install the schema + lookup rules on a node
-- put a model into a space
-- refresh a view
-- read the cached value from the view cell
+- put a screen model into a space
+- refresh the list and detail views
+- read cached SPA state from the local view cells
 
 The guide-00 walkthrough does exactly that.
 
@@ -71,15 +74,15 @@ The guide-00 walkthrough does exactly that.
                  "room/a"
                  "orders"
                  {"views"
-                  {"main" {"query" ... "input" []}
-                   "open" {"query" ... "input" ["open"]}}})
+                  {"detail" {"query" ... "input" [selected-id]}
+                   "list"   {"query" ... "input" ["open"]}}})
 ```
 
 That gives you:
 
 - a space: `"room/a"`
-- a model: `"orders"`
-- two view cells: `"main"` and `"open"`
+- a model: `"orders-screen"`
+- two view cells on the same table: `"detail"` and `"list"`
 
 ### What lives in a view cell
 
@@ -323,35 +326,70 @@ And if you only remember one sentence, use this:
 
 Use this when you want to understand:
 
-- install
-- model creation
-- view refresh
-- cached view state
-- direct local querying
+- how a same-table admin screen is modeled locally
+- detail + filtered list views on one table
+- local cache-backed screen refresh
+- local selection/filter changes
 
-This is the best place to learn the **minimal no-DB mental model**.
+This is the best place to learn the **local admin-screen mental model**.
 
 ### `guide_02_application_flow_test.clj`
 
 Use this when you want to understand:
 
-- local vs server spaces
-- remote-backed client views
+- local vs server spaces for the same admin screen
+- remote-backed list/detail views
 - Postgres on the server
 - SQLite on the client
-- refresh through substrate
+- local cache tracking server-backed refreshes
 
-This is the best place to learn the **application topology**.
+This is the best place to learn the **remote admin-screen topology**.
+
+### `guide_09_local_sqlite_remote_postgres_test.clj`
+
+Use this when you want to test the exact implementation split:
+
+- local admin screen state in SQLite
+- remote server execution in Postgres
+- same-table list/detail views
+- a remote update followed by a local selection change
+
+This is the best place to learn the **dedicated SQLite-local / Postgres-remote implementation path**.
+
+### `guide_10_remote_sqlite_postgres_pipeline_test.clj`
+
+Use this when you want to test the direct remote view pipeline:
+
+- local screen state attached to SQLite
+- server space attached directly to Postgres
+- `model/view-refresh` or `model/model-refresh` on the local space
+- remote query dispatch through `run-view-remote` / `run-remote-query`
+
+This is the best place to learn the **true SQLite-local / Postgres-remote query pipeline**.
+
+### `guide_04_view_lifecycle_test.clj` through `guide_08_local_db_options_test.clj`
+
+Use these when you want to understand the supporting behavior behind that same
+screen shape:
+
+- lifecycle of the selected detail panel and filtered list
+- hook-style screen state
+- dependency links between detail and list
+- stale/invalidation behavior when the shared table changes
+- remote projection into a local list/detail screen
+- `db.cache` vs SQLite for the local admin screen
 
 
 ## 9. Practical Reading Order
 
 1. Start with `guide_00_model_basic_test.clj`
-2. Ignore SQL entirely at first
-3. Understand that a model is just a bundle of live views in a space
-4. Then read `guide_02_application_flow_test.clj`
-5. Add the idea that views can refresh from another space
-6. Finally add DB attachments:
+2. Learn the same-table list/detail screen shape first
+3. Then read `guide_02_application_flow_test.clj`
+4. Add remote server execution + local cache tracking
+5. Then read `guide_09_local_sqlite_remote_postgres_test.clj` for the explicit local-sqlite / remote-postgres setup
+6. Then read `guide_10_remote_sqlite_postgres_pipeline_test.clj` for the direct remote query pipeline between SQLite-local and Postgres-backed spaces
+7. Then use `guide_04` through `guide_08` for the supporting screen mechanics
+8. Finally add DB attachments:
    - server -> Postgres
    - local -> SQLite
 

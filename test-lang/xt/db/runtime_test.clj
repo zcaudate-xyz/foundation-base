@@ -1,5 +1,6 @@
 (ns xt.db.runtime-test
-  (:require [hara.lang :as l])
+  (:require [hara.lang :as l]
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 ^{:seedgen/root {:all true}}
@@ -7,6 +8,8 @@
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
+             [xt.lang.common-repl :as repl]
+             [xt.lang.spec-promise :as promise]
              [xt.event.util-throttle :as th]
              [xt.protocol.impl.connection-sql :as sql]
              [xt.db.runtime :as instance]
@@ -220,6 +223,49 @@
     ["UserAccount" ["nickname"]]))
   => (throws))
 
+^{:refer xt.db.runtime/db-pull :added "4.1"}
+(fact "dispatches async pulls and falls back to sync backends"
+
+  (notify/wait-on :js
+    (xt/x:set-key instance/IMPL
+                 "db.pull.async"
+                 {"pull" (fn [instance schema tree opts]
+                           (return
+                            (promise/x:promise-run
+                             [(. instance ["id"]) tree (. opts ["mode"])])))})
+    (promise/x:promise-catch
+    (promise/x:promise-then
+     (instance/db-pull
+      {"::" "db.pull.async"
+       :instance {"id" "pull-async-1"}
+       :opts {"mode" "async"}}
+      sample/Schema
+      ["UserAccount" ["nickname"]])
+     (fn [result]
+       (repl/notify result)))
+    (fn [err]
+      (repl/notify err))))
+  => ["pull-async-1" ["UserAccount" ["nickname"]] "async"]
+
+  (notify/wait-on :js
+    (xt/x:set-key instance/IMPL
+                 "db.pull.fallback"
+                 {"pull_sync" (fn [instance schema tree opts]
+                                (return [(. instance ["id"]) tree (. opts ["mode"])]))})
+    (promise/x:promise-catch
+    (promise/x:promise-then
+     (instance/db-pull
+      {"::" "db.pull.fallback"
+       :instance {"id" "pull-sync-1"}
+       :opts {"mode" "sync"}}
+      sample/Schema
+      ["UserAccount" ["nickname"]])
+     (fn [result]
+       (repl/notify result)))
+    (fn [err]
+      (repl/notify err))))
+  => ["pull-sync-1" ["UserAccount" ["nickname"]] "sync"])
+
 ^{:refer xt.db.runtime/db-delete-sync :added "4.1"}
 (fact "dispatches deletions through the configured backend"
 
@@ -283,3 +329,7 @@
     (xtd/get-in listen ["UserProfile"])
     (xt/x:is-function? callback)])
   => [true true true])
+
+
+^{:refer xt.db.runtime/db-pull :added "4.1"}
+(fact "TODO")

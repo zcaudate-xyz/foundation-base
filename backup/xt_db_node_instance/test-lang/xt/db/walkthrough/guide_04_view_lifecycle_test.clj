@@ -61,7 +61,7 @@
 
 ^{:refer xt.db.walkthrough.guide-04-view-lifecycle/STEP.01-hook-screen-state :added "4.1"}
 (fact "step 01: a hook-style adapter can read the admin screen as a detail panel plus filtered list"
-
+  
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-a"}))
     (var state nil)
@@ -113,20 +113,33 @@
       "detail-stale" {"detail" {"status" "stale"
                                 "value" [{"status" "open"}]
                                 "error-tag" "screen/detail-stale"}
-                       "list" {"status" "ready"
-                               "input" ["open"]
-                               "value" [{"id" "00000000-0000-0000-0000-0000000000a1"}]
-                               "error-tag" nil}}})
+                      "list" {"status" "ready"
+                              "input" ["open"]
+                              "value" [{"id" "00000000-0000-0000-0000-0000000000a1"}]
+                              "error-tag" nil}}})
 
 ^{:refer xt.db.walkthrough.guide-04-view-lifecycle/STEP.02-hook-refresh-flow :added "4.1"}
 (fact "step 02: hook-style refresh calls can move both the admin detail and list panes from stale back to ready"
 
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-a"}))
-    (var state nil)
+    (var data-fn
+         (fn [node]
+           (return
+            {"detail" {"status" (xtd/get-in
+                                 (model/view-get node "room/a" "orders" "main")
+                                 ["status"])
+                       "value" (model/view-val node "room/a" "orders" "main")
+                       "error" (model/view-error node "room/a" "orders" "main")}
+             "list" {"status" (xtd/get-in
+                               (model/view-get node "room/a" "orders" "open")
+                               ["status"])
+                     "value" (model/view-val node "room/a" "orders" "open")
+                     "error" (model/view-error node "room/a" "orders" "open")}})))
     (model/install node fixtures/InstallOpts)
     (model/model-put node "room/a" "orders" fixtures/ModelSpec)
-    (:= state (model/ensure-space-state node "room/a"))
+    (var state (model/ensure-space-state node "room/a"))
+    (var stages [])
     (-> (model/sync node "room/a" {"db/sync" fixtures/Seed})
         (promise/x:promise-then
          (fn [_]
@@ -134,45 +147,34 @@
             (model/model-refresh node "room/a" "orders"))))
         (promise/x:promise-then
          (fn [_]
-           (var ready-before {"detail" {"status" (xtd/get-in
-                                                  (model/view-get node "room/a" "orders" "main")
-                                                  ["status"])
-                                        "value" (model/view-val node "room/a" "orders" "main")}
-                              "list" {"status" (xtd/get-in
-                                                (model/view-get node "room/a" "orders" "open")
-                                                ["status"])
-                                      "value" (model/view-val node "room/a" "orders" "open")}})
+           (xtd/arr-pushr stages (data-fn node))
            (instance-state/set-view-stale state "orders" "main" {"tag" "hook/detail-reload"})
            (instance-state/set-view-stale state "orders" "open" {"tag" "hook/list-reload"})
+           (xtd/arr-pushr stages (data-fn node))
            (return
-            (promise/x:promise-then
-             (model/model-refresh node "room/a" "orders")
-             (fn [_]
-               (return {"before" ready-before
-                        "stale" {"detail" {"status" "stale"
-                                           "error-tag" "hook/detail-reload"}
-                                 "list" {"status" "stale"
-                                         "error-tag" "hook/list-reload"}}
-                        "after" {"detail" {"status" (xtd/get-in
-                                                     (model/view-get node "room/a" "orders" "main")
-                                                     ["status"])
-                                           "value" (model/view-val node "room/a" "orders" "main")}
-                                 "list" {"status" (xtd/get-in
-                                                   (model/view-get node "room/a" "orders" "open")
-                                                   ["status"])
-                                         "value" (model/view-val node "room/a" "orders" "open")}}}))))))
+            (model/model-refresh node "room/a" "orders"))))
         (promise/x:promise-then
-         (fn [out]
-           (repl/notify out)))))
-  => {"before" {"detail" {"status" "ready"
-                          "value" [{"status" "open"}]}
-                "list" {"status" "ready"
-                    "value" [{"id" "00000000-0000-0000-0000-0000000000a1"}]}}
-      "stale" {"detail" {"status" "stale"
-                         "error-tag" "hook/detail-reload"}
-               "list" {"status" "stale"
-                       "error-tag" "hook/list-reload"}}
-      "after" {"detail" {"status" "ready"
-                         "value" [{"status" "open"}]}
-               "list" {"status" "ready"
-                   "value" [{"id" "00000000-0000-0000-0000-0000000000a1"}]}}})
+         (fn [_]
+           (xtd/arr-pushr stages (data-fn node))
+           (repl/notify stages)))))
+  => [{"list"
+       {"error" nil,
+        "value" [{"id" "00000000-0000-0000-0000-0000000000a1"}],
+        "status" "ready"},
+       "detail"
+       {"error" nil, "value" [{"status" "open"}], "status" "ready"}}
+      {"list"
+       {"error" {"tag" "hook/list-reload"},
+        "value" [{"id" "00000000-0000-0000-0000-0000000000a1"}],
+        "status" "stale"},
+       "detail"
+       {"error" {"tag" "hook/detail-reload"},
+        "value" [{"status" "open"}],
+        "status" "stale"}}
+      {"list"
+       {"error" nil,
+        "value" [{"id" "00000000-0000-0000-0000-0000000000a1"}],
+        "status" "ready"},
+       "detail"
+       {"error" nil, "value" [{"status" "open"}], "status" "ready"}}])
+  

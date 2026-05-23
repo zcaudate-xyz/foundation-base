@@ -3,8 +3,8 @@
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.db.node.instance-model :as model]
-             [xt.db.node.instance-util :as util]
+  {:require [[xt.db.node.view-model :as model]
+             [xt.db.node.view-util :as util]
              [xt.db.node.schema-spec :as spec]]})
 
 (def.xt META_KEY spec/META_KEY)

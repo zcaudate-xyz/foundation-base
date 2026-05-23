@@ -18,6 +18,58 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
+^{:refer xt.db.walkthrough.guide-03-last-known-value/CANARY :added "4.1"}
+(fact "creates a db/sync call"
+
+  (notify/wait-on :js
+    (var node (event-node/node-create {"id" "node-a"}))
+    (model/install node fixtures/InstallOpts)
+    (model/model-put node "room/a" "orders" fixtures/ModelSpec)
+    (-> (model/sync node "room/a" {"db/sync" fixtures/Seed})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))))
+  => {"queries" [],
+      "tables" {"Task" true},
+      "event"
+      {"db/sync"
+       {"Task"
+        [{"id" "00000000-0000-0000-0000-0000000000a1",
+          "name" "alpha-task",
+          "status" "open"}
+         {"id" "00000000-0000-0000-0000-0000000000a2",
+          "name" "beta-task",
+          "status" "closed"}]}},
+      "result"
+      {"db/sync"
+       {"Task"
+        [{"id" "00000000-0000-0000-0000-0000000000a1",
+          "name" "alpha-task",
+          "status" "open"}
+         {"id" "00000000-0000-0000-0000-0000000000a2",
+          "name" "beta-task",
+          "status" "closed"}]}}}
+
+  (notify/wait-on :js
+    (var node (event-node/node-create {"id" "node-a"}))
+    (model/install node fixtures/InstallOpts)
+    (model/model-put node "room/a" "orders" fixtures/ModelSpec)
+    (-> (model/sync node "room/a" {"db/sync" fixtures/Seed})
+        (promise/x:promise-then
+         (fn [_]
+           (return
+            (model/view-refresh node "room/a" "orders" "main"))))
+        (promise/x:promise-then
+         (fn [_]
+           (return
+            (model/view-refresh node "room/a" "orders" "open"))))
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify
+            [(model/view-val node "room/a" "orders" "main")
+             (model/view-val node "room/a" "orders" "open")])))))
+  => [[{"status" "open"}] [{"id" "00000000-0000-0000-0000-0000000000a1"}]])
+
 ^{:refer xt.db.walkthrough.guide-03-last-known-value/STEP.00-last-known-value :added "4.1"}
 (fact "step 00: the local view keeps its last value while the next refresh is pending"
 
@@ -117,62 +169,28 @@
         (promise/x:promise-then
          (fn [_]
            (var before {"input" (model/view-input node "room/a" "orders" "open-detailed")
-                       "value" (model/view-val node "room/a" "orders" "open-detailed")})
+                        "value" (model/view-val node "room/a" "orders" "open-detailed")})
            (return
             (promise/x:promise-then
-            (model/view-set-input node "room/a" "orders" "open-detailed" ["closed"])
-            (fn [_]
-              (return before))))))
+             (model/view-set-input node "room/a" "orders" "open-detailed" ["closed"])
+             (fn [_]
+               (return before))))))
         (promise/x:promise-then
          (fn [before]
            (repl/notify
             {"before" before
-            "after" {"status" (xtd/get-in
-                               (model/view-get node "room/a" "orders" "open-detailed")
-                               ["status"])
-                     "input" (model/view-input node "room/a" "orders" "open-detailed")
-                     "value" (model/view-val node "room/a" "orders" "open-detailed")}})))))
+             "after" {"status" (xtd/get-in
+                                (model/view-get node "room/a" "orders" "open-detailed")
+                                ["status"])
+                      "input" (model/view-input node "room/a" "orders" "open-detailed")
+                      "value" (model/view-val node "room/a" "orders" "open-detailed")}})))))
   => {"before" {"input" ["open"]
-               "value" [{"id" "00000000-0000-0000-0000-0000000000a1"
-                         "status" "open"
-                         "name" "alpha-task"}]}
+                "value" [{"id" "00000000-0000-0000-0000-0000000000a1"
+                          "status" "open"
+                          "name" "alpha-task"}]}
       "after" {"status" "ready"
-              "input" ["closed"]
-              "value" [{"id" "00000000-0000-0000-0000-0000000000a2"
-                        "status" "closed"
-                        "name" "beta-task"}]}})
+               "input" ["closed"]
+               "value" [{"id" "00000000-0000-0000-0000-0000000000a2"
+                         "status" "closed"
+                         "name" "beta-task"}]}})
 
-
-(comment
-
-  
-  (notify/wait-on :js
-    (var node (event-node/node-create {"id" "node-a"}))
-    (model/install node fixtures/InstallOpts)
-    (model/model-put node "room/a" "orders" fixtures/ModelSpec)
-    (-> (model/sync node "room/a" {"db/sync" fixtures/Seed})
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify out)))
-        ))
-
-  (notify/wait-on :js
-    (var node (event-node/node-create {"id" "node-a"}))
-    (model/install node fixtures/InstallOpts)
-    (model/model-put node "room/a" "orders" fixtures/ModelSpec)
-    (-> (model/sync node "room/a" {"db/sync" fixtures/Seed})
-        (promise/x:promise-then
-         (fn [_]
-           (return
-            (model/view-refresh node "room/a" "orders" "main"))))
-        (promise/x:promise-then
-         (fn [_]
-           (return
-            (model/view-refresh node "room/a" "orders" "open"))))
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify
-            [(model/view-val node "room/a" "orders" "main")
-             (model/view-val node "room/a" "orders" "open")])))
-        ))
-  => [[{"status" "open"}] nil])

@@ -9,6 +9,7 @@
              [xt.db.runtime.sql :as impl-sql]
              [xt.protocol.impl.connection-sql :as sql]
              [xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as promise]
              [xt.lang.common-data :as xtd]
              [xt.event.util-throttle :as th]]})
 
@@ -38,6 +39,7 @@
                                    (return (sql/query-sync instance raw-input)))
                   "add"         impl-sql/sql-process-event-sync
                   "remove"      impl-sql/sql-process-event-remove
+                  "pull"        impl-sql/sql-pull
                   "pull_sync"   impl-sql/sql-pull-sync
                   "delete_sync" impl-sql/sql-delete-sync
                   "clear"       impl-sql/sql-clear}})
@@ -181,6 +183,19 @@
   (when (xt/x:nil? pull-fn)
     (return (-/unsupported-op "pull_sync" dbtype)))
   (return (pull-fn instance schema tree opts)))
+
+(defn.xt db-pull
+  "runs a pull statement with async semantics"
+  {:added "4.1"}
+  [db schema tree]
+  (var dbtype (-/get-dbtype db))
+  (var #{instance opts} db)
+  (var pull-fn (xtd/get-in -/IMPL [dbtype "pull"]))
+  (if (xt/x:not-nil? pull-fn)
+    (return (pull-fn instance schema tree opts))
+    (return
+     (promise/x:promise-run
+      (-/db-pull-sync db schema tree)))))
 
 (defn.xt db-delete-sync
   "deletes rows from the db"

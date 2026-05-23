@@ -159,3 +159,61 @@
   (!.js
    (impl-sql/sql-clear {}))
   => true)
+
+
+^{:refer xt.db.runtime.sql/sql-pull :added "4.1"}
+(fact "runs pull statements through async query semantics"
+
+  (notify/wait-on :js
+    (var state {"queries" []})
+    (var conn
+         (dbsql/connection-create
+          state
+          {"query" (fn [input-state input]
+                     (xt/x:arr-push (. input-state ["queries"]) input)
+                     (return
+                      (spec-promise/x:promise-run
+                       [{"id" "USER-0"}])))}))
+    (spec-promise/x:promise-catch
+     (spec-promise/x:promise-then
+      (impl-sql/sql-pull
+       conn
+       sample/Schema
+       ["UserAccount" ["id"]]
+       (ut/sqlite-opts nil))
+      (fn [rows]
+        (repl/notify [(xt/x:len (. state ["queries"]))
+                      rows])))
+     (fn [err]
+       (repl/notify err))))
+  => [1
+      [{"id" "USER-0"}]])
+
+^{:refer xt.db.runtime.sql/sql-delete :added "4.1"}
+(fact "runs delete statements through async query semantics"
+
+  (notify/wait-on :js
+    (var state {"queries" []})
+    (var conn
+         (dbsql/connection-create
+          state
+          {"query" (fn [input-state input]
+                     (xt/x:arr-push (. input-state ["queries"]) input)
+                     (return
+                      (spec-promise/x:promise-run
+                       input)))}))
+    (spec-promise/x:promise-catch
+     (spec-promise/x:promise-then
+      (impl-sql/sql-delete
+       conn
+       sample/Schema
+       "UserAccount"
+       ["USER-0"]
+       (ut/sqlite-opts nil))
+      (fn [stmt]
+        (repl/notify [(xt/x:len (. state ["queries"]))
+                      stmt])))
+     (fn [err]
+       (repl/notify err))))
+  => [1
+      "DELETE FROM \"UserAccount\" WHERE \"id\" = 'USER-0';"])
