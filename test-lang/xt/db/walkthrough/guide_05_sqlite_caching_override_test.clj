@@ -32,22 +32,23 @@
                "lookup" (@! fixtures/+lookup+)
                "sources"
                {"primary" {"kind" "postgres"
-                           "database" "test-scratch"
-                           "db_opts" (sql-util/postgres-opts (@! fixtures/+lookup+))}
+                           "config" {"database" "test-scratch"
+                                     "db_opts" (sql-util/postgres-opts (@! fixtures/+lookup+))}}
                 "caching" {"kind" "sqlite"
-                           "constructor" js-sqlite/connect-constructor
-                           "wrapper" js-sqlite/wrap-connection
+                           "config" {"driver" (js-sqlite/driver)
+                                     "filename" ":memory:"
+                                     "db_opts" sqlite-opts}
+                           "setup" {"schema" true
+                                    "seed" (@! fixtures/+entry-seed+)}
                            "query_live" true
-                           "filename" ":memory:"
-                           "db_opts" sqlite-opts
-                           "setup_schema" true
-                           "seed" (@! fixtures/+entry-seed+)
                            "query" (@! fixtures/+model-query+)}}}
          "spaces"
          {"screen/admin"
           {"models"
            {"entries-screen"
-            {"sources" {"caching" {"filename" "admin-screen.sqlite"}}
+            {"sources" {"caching" {"config" {"driver" (js-sqlite/driver)
+                                             "filename" "admin-screen.sqlite"
+                                             "db_opts" sqlite-opts}}}
              "views"
              {"summary" {"query" (@! fixtures/+model-query+)}
               "detail" {"query" (@! fixtures/+inline-query+)
@@ -64,10 +65,10 @@
               (repl/notify
                {"primary-database" (xtd/get-in
                                     (node/source-get node "screen/admin" "entries-screen" "primary")
-                                    ["database"])
+                                   ["config" "database"])
                 "caching-file" (xtd/get-in
                                 (node/source-get node "screen/admin" "entries-screen" "caching")
-                                ["filename"])
+                                ["config" "filename"])
                 "node-id" (. node ["id"])
                 "sqlite-row-count" (db-instance/db-exec-sync sqlite-db "SELECT COUNT(*) FROM Entry;")
                 "sqlite-first" (xtd/get-in

@@ -80,7 +80,7 @@
       "list-source" "caching"})
 
 ^{:refer xt.db.node/create.wrapper :added "4.1"}
-(fact "creates a live wrapper-backed sqlite source and refreshes a real view from it"
+(fact "creates a live sqlite source through kind + config and refreshes a real view from it"
 
   (notify/wait-on [:js 10000]
     (-> (node/create
@@ -88,13 +88,14 @@
           "db" {"schema" (@! fixtures/+schema+)
                 "lookup" (@! fixtures/+lookup+)
                 "sources"
-                {"primary" {"constructor" js-sqlite/connect-constructor
-                            "wrapper" js-sqlite/wrap-connection
+                {"primary" {"kind" "sqlite"
+                            "config" {"driver" (js-sqlite/driver)
+                                      "filename" ":memory:"
+                                      "db_opts" (sql-util/sqlite-opts nil)}
+                            "setup" {"schema" true
+                                     "seed" (@! fixtures/+entry-seed+)}
                             "query_live" true
-                            "dbtype" "db.sql"
-                            "db_opts" (sql-util/sqlite-opts nil)
-                            "setup_schema" true
-                            "seed" (@! fixtures/+entry-seed+)}}}
+                            }}}
           "spaces"
           {"screen/admin"
            {"models"
@@ -129,19 +130,21 @@
           "db" {"schema" (@! fixtures/+schema+)
                 "lookup" (@! fixtures/+lookup+)
                 "sources"
-                {"primary" {"constructor" js-sqlite/connect-constructor
-                            "wrapper" js-sqlite/wrap-connection
+                {"primary" {"kind" "sqlite"
+                            "config" {"driver" (js-sqlite/driver)
+                                      "filename" ":memory:"
+                                      "db_opts" (sql-util/sqlite-opts nil)}
+                            "setup" {"schema" true
+                                     "seed" (@! fixtures/+entry-seed+)}
                             "query_live" true
-                            "dbtype" "db.sql"
-                            "db_opts" (sql-util/sqlite-opts nil)
-                            "setup_schema" true
-                            "seed" (@! fixtures/+entry-seed+)}
-                 "caching" {"constructor" js-sqlite/connect-constructor
-                            "wrapper" js-sqlite/wrap-connection
+                            }
+                 "caching" {"kind" "sqlite"
+                            "config" {"driver" (js-sqlite/driver)
+                                      "filename" ":memory:"
+                                      "db_opts" (sql-util/sqlite-opts nil)}
+                            "setup" {"schema" true}
                             "query_live" true
-                            "dbtype" "db.sql"
-                            "db_opts" (sql-util/sqlite-opts nil)
-                            "setup_schema" true}}}
+                            }}}
           "spaces"
           {"screen/admin"
            {"models"

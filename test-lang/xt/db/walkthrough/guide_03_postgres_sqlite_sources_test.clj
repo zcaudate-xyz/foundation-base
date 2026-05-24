@@ -29,13 +29,11 @@
                 "lookup" (@! fixtures/+lookup+)
                 "sources"
                 {"primary" {"kind" "postgres"
-                            "dbtype" "db.sql"
-                            "database" "test-scratch"
-                            "db_opts" (sql-util/postgres-opts (@! fixtures/+lookup+))}
+                            "config" {"database" "test-scratch"
+                                      "db_opts" (sql-util/postgres-opts (@! fixtures/+lookup+))}}
                  "caching" {"kind" "sqlite"
-                            "dbtype" "db.sql"
-                            "filename" ":memory:"
-                            "db_opts" (sql-util/sqlite-opts nil)}}}
+                            "config" {"filename" ":memory:"
+                                      "db_opts" (sql-util/sqlite-opts nil)}}}}
           "spaces"
           {"screen/admin"
            {"models"
@@ -53,13 +51,13 @@
                             ["kind"])
              "primary-strict" (xtd/get-in
                               (node/source-get node "screen/admin" "entries-screen" "primary")
-                              ["db_opts" "strict"])
+                              ["config" "db_opts" "strict"])
              "caching-kind" (xtd/get-in
                             (node/source-get node "screen/admin" "entries-screen" "caching")
                             ["kind"])
              "caching-strict" (xtd/get-in
                               (node/source-get node "screen/admin" "entries-screen" "caching")
-                              ["db_opts" "strict"])
+                              ["config" "db_opts" "strict"])
              "list-table" (xtd/get-in
                           (node/view-get node "screen/admin" "entries-screen" "list")
                           ["query" "table"])
