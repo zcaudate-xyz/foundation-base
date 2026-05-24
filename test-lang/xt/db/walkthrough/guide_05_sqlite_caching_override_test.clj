@@ -9,7 +9,6 @@
   {:runtime :basic
    :require [[xt.db.runtime :as db-instance]
              [xt.db.node :as node]
-             [xt.db.text.sql-util :as sql-util]
              [js.lib.driver-sqlite :as js-sqlite]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
@@ -25,30 +24,25 @@
 (fact "step 00: refresh a live sqlite caching source while overriding its filename at the model level"
 
  (notify/wait-on [:js 10000]
-   (var sqlite-opts (sql-util/sqlite-opts nil))
    (-> (node/create
         {"node_id" "admin-screen"
          "db" {"schema" (@! fixtures/+schema+)
                "lookup" (@! fixtures/+lookup+)
                "sources"
                {"primary" {"kind" "postgres"
-                           "config" {"database" "test-scratch"
-                                     "db_opts" (sql-util/postgres-opts (@! fixtures/+lookup+))}}
+                           "config" {"database" "test-scratch"}}
                 "caching" {"kind" "sqlite"
                            "config" {"driver" (js-sqlite/driver)
-                                     "filename" ":memory:"
-                                     "db_opts" sqlite-opts}
+                                     "filename" ":memory:"}
                            "setup" {"schema" true
                                     "seed" (@! fixtures/+entry-seed+)}
-                           "query_live" true
                            "query" (@! fixtures/+model-query+)}}}
          "spaces"
          {"screen/admin"
           {"models"
            {"entries-screen"
             {"sources" {"caching" {"config" {"driver" (js-sqlite/driver)
-                                             "filename" "admin-screen.sqlite"
-                                             "db_opts" sqlite-opts}}}
+                                             "filename" "admin-screen.sqlite"}}}
              "views"
              {"summary" {"query" (@! fixtures/+model-query+)}
               "detail" {"query" (@! fixtures/+inline-query+)

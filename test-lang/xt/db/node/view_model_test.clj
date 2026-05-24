@@ -10,7 +10,6 @@
    :require [[xt.db.node :as node]
              [xt.db.node.view-model :as model]
              [xt.db.helpers.test-fixtures :as fixtures]
-             [xt.db.text.sql-util :as sql-util]
              [js.lib.driver-sqlite :as js-sqlite]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]
@@ -90,12 +89,9 @@
                 "sources"
                 {"primary" {"kind" "sqlite"
                             "config" {"driver" (js-sqlite/driver)
-                                      "filename" ":memory:"
-                                      "db_opts" (sql-util/sqlite-opts nil)}
+                                      "filename" ":memory:"}
                             "setup" {"schema" true
-                                     "seed" (@! fixtures/+entry-seed+)}
-                            "query_live" true
-                            }}}
+                                     "seed" (@! fixtures/+entry-seed+)}}}}
           "spaces"
           {"screen/admin"
            {"models"
@@ -132,19 +128,13 @@
                 "sources"
                 {"primary" {"kind" "sqlite"
                             "config" {"driver" (js-sqlite/driver)
-                                      "filename" ":memory:"
-                                      "db_opts" (sql-util/sqlite-opts nil)}
+                                      "filename" ":memory:"}
                             "setup" {"schema" true
-                                     "seed" (@! fixtures/+entry-seed+)}
-                            "query_live" true
-                            }
+                                     "seed" (@! fixtures/+entry-seed+)}}
                  "caching" {"kind" "sqlite"
                             "config" {"driver" (js-sqlite/driver)
-                                      "filename" ":memory:"
-                                      "db_opts" (sql-util/sqlite-opts nil)}
-                            "setup" {"schema" true}
-                            "query_live" true
-                            }}}
+                                      "filename" ":memory:"}
+                            "setup" {"schema" true}}}}
           "spaces"
           {"screen/admin"
            {"models"

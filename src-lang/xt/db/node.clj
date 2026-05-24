@@ -8,6 +8,7 @@
              [xt.db.node.schema-spec :as spec]
              [xt.db.runtime :as db-runtime]
              [xt.db.text.sql-manage :as sql-manage]
+             [xt.db.text.sql-util :as sql-util]
              [xt.substrate :as event-node]
              [xt.protocol.impl.connection-sql :as sql]
              [xt.lang.common-data :as xtd]
@@ -32,14 +33,18 @@
 (def.xt SOURCE_KINDS
   {"postgres" {"dbtype" "db.sql"
                "requires_driver" true
-               "constructor" (fn [driver config]
-                               (when (xt/x:nil? driver)
-                                 (xt/x:err "driver not found"))
-                               (return (sql/connect driver config)))
+              "db_opts" (fn [config opts]
+                          (return (sql-util/postgres-opts (xt/x:get-key opts "lookup"))))
+              "constructor" (fn [driver config]
+                              (when (xt/x:nil? driver)
+                                (xt/x:err "driver not found"))
+                              (return (sql/connect driver config)))
                "setup" (fn [db config setup opts]
                          (return (promise/x:promise-run db)))}
    "sqlite" {"dbtype" "db.sql"
              "requires_driver" true
+             "db_opts" (fn [config opts]
+                         (return (sql-util/sqlite-opts nil)))
              "constructor" (fn [driver config]
                              (when (xt/x:nil? driver)
                                (xt/x:err "driver not found"))
@@ -59,20 +64,24 @@
                        (return (promise/x:promise-run db)))}
    "cache" {"dbtype" "db.cache"
             "requires_driver" false
+            "db_opts" (fn [config opts]
+                       (return nil))
             "constructor" (fn [driver config]
-                            (if (xt/x:not-nil? driver)
-                              (return (driver config))
-                              (return {"rows" {}})))
+                           (if (xt/x:not-nil? driver)
+                             (return (driver config))
+                             (return {"rows" {}})))
             "setup" (fn [db config setup opts]
                       (when (xt/x:not-nil? (xtd/get-in setup ["seed"]))
                         (db-runtime/sync-event db ["add" (xtd/get-in setup ["seed"])]))
                       (return (promise/x:promise-run db)))}
    "supabase" {"dbtype" "db.supabase"
                "requires_driver" false
+               "db_opts" (fn [config opts]
+                          (return nil))
                "constructor" (fn [driver config]
-                               (if (xt/x:not-nil? driver)
-                                 (return (driver config))
-                                 (return config)))
+                              (if (xt/x:not-nil? driver)
+                                (return (driver config))
+                                (return config)))
                "setup" (fn [db config setup opts]
                          (return (promise/x:promise-run db)))}})
 
@@ -114,6 +123,22 @@
            (xt/x:get-key source "driver")
            nil))))
 
+(defn.xt source-db-opts
+  "gets db options for a source from the kind registry or legacy config"
+  {:added "4.1"}
+  [source opts]
+  (var kind (xt/x:get-key source "kind"))
+  (var entry (xt/x:get-key -/SOURCE_KINDS kind))
+  (var config (-/source-config source))
+  (return
+   (or (:? (and (xt/x:not-nil? entry)
+                (xt/x:not-nil? (xt/x:get-key entry "db_opts")))
+           ((xt/x:get-key entry "db_opts") config opts)
+           nil)
+       (xt/x:get-key config "db_opts")
+       (xt/x:get-key source "db_opts")
+       nil)))
+
 (defn.xt source-live?
   "checks if a source spec should be materialized into a live runtime"
   {:added "4.1"}
@@ -122,22 +147,20 @@
   (var entry (xt/x:get-key -/SOURCE_KINDS kind))
   (var legacy? (xt/x:nil? entry))
   (var driver (-/source-driver source))
-  (var query-live? (xt/x:get-key source "query_live"))
   (var constructor (:? (xt/x:has-key? source "constructor")
                       (xt/x:get-key source "constructor")
                       nil))
   (var wrapper (:? (xt/x:has-key? source "wrapper")
                   (xt/x:get-key source "wrapper")
                   nil))
-  (return (and (== true query-live?)
-               (or (and (xt/x:not-nil? entry)
-                       (:? (xt/x:get-key entry "requires_driver")
-                           (xt/x:not-nil? driver)
-                           true))
-                  (and legacy?
-                       (or (xt/x:not-nil? driver)
-                           (xt/x:not-nil? constructor)
-                           (xt/x:not-nil? wrapper)))))))
+  (return (or (and (xt/x:not-nil? entry)
+                  (:? (xt/x:get-key entry "requires_driver")
+                      (xt/x:not-nil? driver)
+                      true))
+              (and legacy?
+                  (or (xt/x:not-nil? driver)
+                      (xt/x:not-nil? constructor)
+                      (xt/x:not-nil? wrapper))))))
 
 (defn.xt materialize-source
   "materializes a live source wrapper into a db runtime and stores it on the source"
@@ -164,8 +187,8 @@
                      (xt/x:get-key entry "dbtype")
                      nil)
                  "db.sql"))
-  (var db-opts (or (xt/x:get-key config "db_opts")
-                  (xt/x:get-key source "db_opts")))
+  (var db-opts (-/source-db-opts source {"schema" schema
+                                        "lookup" lookup}))
   (var driver (-/source-driver source))
   (var constructor (:? (xt/x:has-key? source "constructor")
                       (xt/x:get-key source "constructor")
@@ -219,6 +242,7 @@
           (xt/x:set-key source "instance" conn)
           (xt/x:set-key source "db" db)
           (xt/x:set-key source "dbtype" dbtype)
+          (xt/x:set-key source "db_opts" db-opts)
           (xt/x:set-key source "live" true)
           (return source))))))))
 
