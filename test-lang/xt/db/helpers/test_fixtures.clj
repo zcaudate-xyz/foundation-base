@@ -63,6 +63,17 @@
     {"query" +model-query+
      "input" []}}})
 
+(def +entry-seed+
+  {"Entry"
+   [{"id" "00000000-0000-0000-0000-0000000000c1"
+     "name" "alpha"
+     "tags" ["guide" "sql"]
+     "__deleted__" false}
+    {"id" "00000000-0000-0000-0000-0000000000c2"
+     "name" "beta"
+     "tags" ["guide"]
+     "__deleted__" false}]})
+
 (defn seed-entry-rows
   []
   (pg/t:delete scratch/Entry)
@@ -108,6 +119,9 @@
   {"schema" -/Schema
    "lookup" -/Lookup
    "views" -/Views})
+
+(def.xt EntrySeed
+  (@! +entry-seed+))
 
 (def.xt ModelSpec
   {"views"

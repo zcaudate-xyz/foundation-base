@@ -32,7 +32,7 @@
       []])
 
 ^{:refer xt.db.node.view-state/put-model :added "4.1"}
-(fact "normalizes model sources and per-view source usage"
+(fact "normalizes model sources once and lets views declare a stable source role"
 
   (!.js
     (var out (state/base-state {}))
@@ -42,11 +42,28 @@
                       "views" {"list" {"query" {"table" "Task"}}
                                "detail" {"query" {"table" "Task"}
                                          "default_input" ["alpha"]
-                                         "use" {"read-from" "caching"
-                                                "refresh-from" "primary"}}}})
+                                         "source" "primary"}}})
     [(xt/x:obj-keys (. (. out ["models"]) ["entries"] ["sources"]))
      (xtd/get-in out ["models" "entries" "views" "detail" "input"])
-     (xtd/get-in out ["models" "entries" "views" "detail" "use" "refresh-from"])])
+     (xtd/get-in out ["models" "entries" "views" "detail" "source"])])
   => [["primary" "caching"]
       ["alpha"]
       "primary"])
+
+^{:refer xt.db.node.view-state/sync-source :added "4.1"}
+(fact "syncs caching from primary through the stable model source binding"
+
+  (!.js
+    (var out (state/base-state {}))
+    (state/put-model out
+                     "entries"
+                     {"views" {"list" {"query" {"table" "Task"}}}})
+    (state/set-source-data out
+                           "entries"
+                           "primary"
+                           [{"id" "t1" "name" "alpha"}])
+    (state/sync-source out "entries" "caching")
+    [(xtd/get-in out ["models" "entries" "sources" "primary" "data" 0 "name"])
+     (xtd/get-in out ["models" "entries" "sources" "caching" "data" 0 "name"])
+     (xt/x:is-number? (xtd/get-in out ["models" "entries" "sources" "caching" "updated_at"]))])
+  => ["alpha" "alpha" true])

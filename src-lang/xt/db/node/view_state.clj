@@ -6,39 +6,67 @@
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]]})
 
+(defn.xt source-base
+  "creates the base structural definition for a source role"
+  {:added "4.1"}
+  [source-id]
+  (return {"id" source-id
+           "data" []
+           "updated_at" nil
+           "synced_at" nil
+           "sync_from" (:? (== source-id "caching")
+                          "primary"
+                          nil)}))
+
 (defn.xt normalize-source
   "normalizes a named model source"
   {:added "4.1"}
   [source-id source]
   (return
    (xt/x:obj-assign
-    {"id" source-id}
-    (or source {}))))
+    (-/source-base source-id)
+    (xt/x:obj-assign
+     {"id" source-id
+      "sync_from" (or (xt/x:get-key source "sync_from")
+                     (xt/x:get-key source "sync-from")
+                     (:? (== source-id "caching")
+                         "primary"
+                         nil))}
+     (or source {})))))
 
 (defn.xt normalize-sources
   "normalizes model sources with primary and caching defaults"
   {:added "4.1"}
-  [sources]
-  (var out {"primary" {"id" "primary"}
-            "caching" {"id" "caching"}})
+  [defaults sources]
+  (var out {"primary" (-/source-base "primary")
+            "caching" (-/source-base "caching")})
+  (xt/for:object [[source-id source] (or defaults {})]
+    (xt/x:set-key out
+                 source-id
+                 (-/normalize-source
+                  source-id
+                  (xt/x:obj-assign
+                   (or (xt/x:get-key out source-id) {})
+                   source))))
   (xt/for:object [[source-id source] (or sources {})]
-    (xt/x:set-key out source-id (-/normalize-source source-id source)))
+    (xt/x:set-key out
+                 source-id
+                 (-/normalize-source
+                  source-id
+                  (xt/x:obj-assign
+                   (or (xt/x:get-key out source-id) {})
+                   source))))
   (return out))
 
-(defn.xt normalize-use
-  "normalizes per-view source usage"
+(defn.xt normalize-view-source
+  "normalizes the source role declared by a view"
   {:added "4.1"}
-  [use-spec]
+  [view]
   (return
-   {"read-from" (or (xtd/get-in use-spec ["read-from"])
-                    (xtd/get-in use-spec ["read_from"])
-                    "caching")
-    "refresh-from" (or (xtd/get-in use-spec ["refresh-from"])
-                       (xtd/get-in use-spec ["refresh_from"])
-                       "primary")
-    "sync-to" (or (xtd/get-in use-spec ["sync-to"])
-                  (xtd/get-in use-spec ["sync_to"])
-                  "caching")}))
+   (or (xt/x:get-key view "source")
+       (xtd/get-in view ["use" "source"])
+       (xtd/get-in view ["use" "read-from"])
+       "caching")))
 
 (defn.xt normalize-dep
   "normalizes a dependency path into [model-id view-id]"
@@ -121,7 +149,7 @@
            :lookup (or (xt/x:get-key opts "lookup") {})
            :models {}
            :queries {}
-           :sources (-/normalize-sources (xt/x:get-key opts "sources"))
+           :sources (-/normalize-sources nil (xt/x:get-key opts "sources"))
            :meta (or (xt/x:get-key opts "meta") {})
            :opts opts}))
 
@@ -148,28 +176,30 @@
   (var out (xt/x:obj-assign
             view
             {"id" view-id
+             "source" (-/normalize-view-source view)
              "input" input
              "value" value
              "pending" false
              "status" spec/STATUS_IDLE
              "error" nil
-             "meta" meta
-             "use" (-/normalize-use (xt/x:get-key view "use"))}))
+             "meta" meta}))
   (xt/x:del-key out "default_input")
   (xt/x:del-key out "defaultArgs")
   (xt/x:del-key out "default_args")
+  (xt/x:del-key out "use")
   (return out))
 
 (defn.xt normalize-model
   "normalizes a single model record"
   {:added "4.1"}
-  [model-id model-spec]
+  [default-sources model-id model-spec]
   (var views {})
   (xt/for:object [[view-id view] (-/model-views model-spec)]
     (xt/x:set-key views view-id (-/normalize-view view-id view)))
   (return {"id" model-id
            "meta" (or (xt/x:get-key model-spec "meta") {})
-           "sources" (-/normalize-sources (xt/x:get-key model-spec "sources"))
+           "sources" (-/normalize-sources default-sources
+                                          (xt/x:get-key model-spec "sources"))
            "views" views
            "deps" {}
            "unknown_deps" []}))
@@ -221,7 +251,10 @@
   "stores a model and normalizes its views"
   {:added "4.1"}
   [state model-id model-spec]
-  (var model (-/normalize-model model-id model-spec))
+  (var model (-/normalize-model
+              (xt/x:get-key state "sources")
+              model-id
+              model-spec))
   (xtd/set-in state ["models" model-id] model)
   (-/rebuild-model state model-id)
   (return model))
@@ -264,6 +297,76 @@
   (xt/x:set-key view "updated_at" (xt/x:now-ms))
   (xt/x:set-key view "error" error)
   (return view))
+
+(defn.xt set-view-value
+  "stores a view value sourced from a structural role"
+  {:added "4.1"}
+  [state model-id view-id source-id value]
+  (var view (-/ensure-view state model-id view-id))
+  (xt/x:set-key view "value" value)
+  (xt/x:set-key view "source" source-id)
+  (xt/x:set-key view "pending" false)
+  (xt/x:set-key view "status" spec/STATUS_READY)
+  (xt/x:set-key view "updated_at" (xt/x:now-ms))
+  (xt/x:set-key view "error" nil)
+  (return view))
+
+(defn.xt get-source
+  "gets a source binding from a registered model"
+  {:added "4.1"}
+  [state model-id source-id]
+  (return (xtd/get-in state ["models" model-id "sources" source-id])))
+
+(defn.xt ensure-source
+  "gets a source binding from a registered model or throws"
+  {:added "4.1"}
+  [state model-id source-id]
+  (var source (-/get-source state model-id source-id))
+  (when (xt/x:nil? source)
+    (xt/x:err (xt/x:cat "source not found - "
+                        (xt/x:json-encode [model-id source-id]))))
+  (return source))
+
+(defn.xt set-source-data
+  "stores source data on a model source binding"
+  {:added "4.1"}
+  [state model-id source-id data]
+  (var source (-/ensure-source state model-id source-id))
+  (xt/x:set-key source "data" (xtd/clone-nested data))
+  (xt/x:set-key source "updated_at" (xt/x:now-ms))
+  (return source))
+
+(defn.xt sync-source
+  "synchronizes a target source from its configured upstream source"
+  {:added "4.1"}
+  [state model-id source-id]
+  (var source (-/ensure-source state model-id source-id))
+  (var upstream-id (or (xt/x:get-key source "sync_from")
+                       (xt/x:get-key source "sync-from")))
+  (when (or (xt/x:nil? upstream-id)
+            (== upstream-id source-id))
+    (return source))
+  (var upstream (-/ensure-source state model-id upstream-id))
+  (-/set-source-data state
+                     model-id
+                     source-id
+                     (xt/x:get-key upstream "data"))
+  (xt/x:set-key source "synced_at" (xt/x:now-ms))
+  (return source))
+
+(defn.xt sync-model-sources
+  "synchronizes all model sources that declare an upstream binding"
+  {:added "4.1"}
+  [state model-id]
+  (var model (-/ensure-model state model-id))
+  (var out {})
+  (xt/for:object [[source-id source] (or (xt/x:get-key model "sources") {})]
+    (when (xt/x:not-nil? (or (xt/x:get-key source "sync_from")
+                             (xt/x:get-key source "sync-from")))
+      (xt/x:set-key out
+                    source-id
+                    (-/sync-source state model-id source-id))))
+  (return out))
 
 (defn.xt clear-state
   "clears query caches and marks views idle"
