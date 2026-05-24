@@ -6,6 +6,7 @@
    :require [[js.cell.service.db-query :as db-query]
               [xt.db.runtime :as xdb]
               [xt.lang.spec-base :as xt]
+              [xt.lang.spec-promise :as promise]
               [xt.db.text.pgrest :as pgrest]]})
 
 (defn.xt normalize-db
@@ -55,14 +56,17 @@
   (when (xt/x:is-function? execute_fn)
     (return (execute_fn compiled view-context)))
   (var db_input (-/normalize-db db))
-  (var result (xdb/db-pull-sync {"::" "db.supabase"
-                                 :instance db_input
-                                 :opts view-context}
-                                (xt/x:get-key db_input "schema_name")
-                                query-plan))
-  (if (== "error" (xt/x:get-key result "status"))
-    (return [false result])
-    (return [true result])))
+  (return
+   (promise/x:promise-then
+    (xdb/db-pull {"::" "db.supabase"
+                  :instance db_input
+                  :opts view-context}
+                 (xt/x:get-key db_input "schema_name")
+                 query-plan)
+    (fn [result]
+      (if (== "error" (xt/x:get-key result "status"))
+        (return [false result])
+        (return [true result]))))))
 
 (defn.xt map-supabase-error
   [db error opts]
@@ -80,7 +84,13 @@
   (var [ok query-plan] (db-query/prepare-query db query-spec view-context))
   (when (not ok)
     (return [ok query-plan]))
-  (var [e-ok result] (-/execute-query db query-plan view-context))
-  (return [e-ok result]))
+  (var output (-/execute-query db query-plan view-context))
+  (if (promise/x:promise-native? output)
+    (return
+     (promise/x:promise-then
+      output
+      (fn [result]
+        (return result))))
+    (return output)))
 
 (def.xt MODULE (!:module))

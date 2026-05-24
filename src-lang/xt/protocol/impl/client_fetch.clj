@@ -39,7 +39,7 @@
         (return (xt/x:get-key value "_raw"))
 
         (xt/x:is-function? value)
-        (return {"request_sync" value})
+        (return {"request" value})
 
         (xt/x:is-object? value)
         (return value)
@@ -55,7 +55,7 @@
   {:added "4.1.3"}
   [value]
   (cond (xt/x:is-function? value)
-        (return {"request_sync" value})
+        (return {"request" value})
 
         (xt/x:is-object? value)
         (return value)
@@ -75,48 +75,34 @@
   (:= raw  (-/client-source raw))
   (:= impl (-/client-impl impl))
   (var impl-request-fn (xt/x:get-key impl "request"))
-  (var impl-request-sync-fn (xt/x:get-key impl "request_sync"))
   (var raw-request-fn (xt/x:get-key raw "request"))
-  (var raw-request-sync-fn (xt/x:get-key raw "request_sync"))
-  (var request-sync-fn
-       (or (:? (xt/x:is-function? impl-request-sync-fn)
-               (fn [raw input opts]
-                 (return (impl-request-sync-fn raw input opts))))
-           (:? (xt/x:is-function? raw-request-sync-fn)
-               (fn [_raw input opts]
-                 (return (raw-request-sync-fn input opts))))))
   (var request-fn
        (or (:? (xt/x:is-function? impl-request-fn)
-               (fn [raw input opts]
+              (fn [raw input opts]
                   (return (impl-request-fn raw input opts))))
              (:? (xt/x:is-function? raw-request-fn)
                  (fn [_raw input opts]
-                   (return (raw-request-fn input opts))))
-             (:? (xt/x:is-function? request-sync-fn)
-                 (fn [raw input opts]
-                   (return (request-sync-fn raw input opts))))))
+                   (return (raw-request-fn input opts))))))
   (var protocol
        (xt/proto:create
         (proto/proto-spec
          [[fetch-if/IFetchRuntimeClient
-            {"request" (fn [self input opts]
-                         (var raw (xt/x:get-key self "_raw"))
-                          (var request-fn (xt/x:get-key self "__request"))
-                          (when (not (xt/x:is-function? request-fn))
-                            (xt/x:err "Fetch client missing request implementation"))
-                          (return (-/ensure-promise
-                                   (request-fn raw input opts))))
-             "request_sync" (fn [self input opts]
-                              (var raw (xt/x:get-key self "_raw"))
-                              (var request-sync-fn (xt/x:get-key self "__request_sync"))
-                              (when (not (xt/x:is-function? request-sync-fn))
-                                (xt/x:err "Fetch client missing request_sync implementation"))
-                              (return (request-sync-fn raw input opts)))}]])))
+           {"request" (fn [self input opts]
+                        (var raw (xt/x:get-key self "_raw"))
+                        (var request-fn (xt/x:get-key self "__request"))
+                        (var request (fetch-if/request-prepare input))
+                        (when (not (xt/x:is-function? request-fn))
+                          (xt/x:err "Fetch client missing request implementation"))
+                        (var output (request-fn raw request opts))
+                        (return
+                         (promise/x:promise-then
+                          (-/ensure-promise output)
+                          (fn [result]
+                            (return (fetch-if/response-normalize result))))))}]])))
   (var client {"::" "fetch.client"
                "_raw" raw
                "_impl" impl
-               "__request" request-fn
-               "__request_sync" request-sync-fn})
+               "__request" request-fn})
   (xt/proto:set client protocol)
   (return client))
 
@@ -130,13 +116,3 @@
     (xt/x:err "Fetch client missing request method"))
   (return (-/ensure-promise
            (request-fn client input opts))))
-
-(defn.xt request-sync
-  "dispatches request_sync through the wrapped fetch client"
-  {:added "4.1.3"}
-  [client input opts]
-  (:= client (-/require-client client))
-  (var request-sync-fn (xt/proto:method client "request_sync"))
-  (when (xt/x:nil? request-sync-fn)
-    (xt/x:err "Fetch client missing request_sync method"))
-  (return (request-sync-fn client input opts)))

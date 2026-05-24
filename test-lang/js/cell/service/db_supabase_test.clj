@@ -1,10 +1,13 @@
 (ns js.cell.service.db-supabase-test
-  (:require [hara.lang :as l])
+  (:require [hara.lang :as l]
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
    :require [[js.cell.service.db-supabase :as db-supabase]
+             [xt.lang.common-repl :as repl]
+             [xt.lang.spec-promise :as promise]
              [xt.lang.spec-base :as xt]
               [xt.lang.common-data :as xtd]]})
 
@@ -136,21 +139,24 @@
       "Order"
       "/rest/v1/Order?select=status,account(nickname)&account.id=eq.acct-1"]
 
-  (!.js
-   (var seen nil)
-    [(db-supabase/execute-query
-       (xtd/obj-assign (@! +db+)
-                       {"client" {"request_sync" (fn [request _]
-                                                   (:= seen request)
-                                                   (return {"body" [{"id" "ord-1"
-                                                                     "status" "open"}]}))
-                                  "base_url" "https://db.test"}})
-        ["Order"
-         {"account" {"id" "acct-1"}}
-         ["status"
-          ["account" ["nickname"]]]]
-       {})
-    (. seen ["url"])])
+  (notify/wait-on [:js 2000]
+    (var seen nil)
+    (promise/x:promise-then
+     (db-supabase/execute-query
+      (xtd/obj-assign (@! +db+)
+                     {"client" {"request" (fn [request _]
+                                            (:= seen request)
+                                            (return {"body" [{"id" "ord-1"
+                                                              "status" "open"}]}))
+                                "base_url" "https://db.test"}})
+      ["Order"
+      {"account" {"id" "acct-1"}}
+      ["status"
+       ["account" ["nickname"]]]]
+      {})
+     (fn [result]
+      (repl/notify [result
+                    (. seen ["url"])]))))
   => [[true [{"id" "ord-1"
               "status" "open"}]]
       "https://db.test/rest/v1/Order?select=status,account(nickname)&account.id=eq.acct-1"] )

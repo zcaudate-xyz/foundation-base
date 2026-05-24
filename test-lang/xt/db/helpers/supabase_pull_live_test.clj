@@ -2,7 +2,6 @@
   (:require [clojure.string :as str]
             [hara.lang :as l]
             [hara.lang.script :as script]
-            [hara.runtime.basic.type-common :as common]
             [hara.runtime.postgres :as pg]
             [postgres.sample.scratch-v1]
             [std.json :as json]
@@ -50,13 +49,6 @@
 (def +postgres-module+
   'postgres.sample.scratch-v1)
 
-(defn shell-program-exists?
-  [program]
-  (let [out @(os/sh {:args [+shell+ "-lc"
-                            (str "command -v " program " >/dev/null 2>&1 && echo ok || true")]
-                     :inherit false})]
-    (= "ok" out)))
-
 (defn shell-command
   [& parts]
   (str/join " " parts))
@@ -82,11 +74,6 @@
    "done\n"
    "echo 'Timed out waiting for postgres on " +postgres-host+ ":" (str +postgres-port+) "' >&2\n"
    "exit 1"))
-
-(def CANARY-SUPABASE-LIVE
-  (and (shell-program-exists? "npx")
-       (shell-program-exists? "docker")
-       (.exists (java.io.File. ^String +supabase-config-path+))))
 
 (defn init-live-postgres-runtime!
   []

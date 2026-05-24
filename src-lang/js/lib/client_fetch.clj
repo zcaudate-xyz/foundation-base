@@ -3,67 +3,35 @@
 
 (l/script :js
   {:require [[xt.lang.spec-base :as xt]
+             [xt.protocol.client-fetch :as fetch-if]
              [xt.protocol.impl.client-fetch :as fetchrt]]})
 
 (defn.js request-body
   "encodes request bodies using json for structured values"
   {:added "4.1.3"}
   [body]
-  (cond (xt/x:nil? body)
-        (return nil)
-
-        (xt/x:is-string? body)
-        (return body)
-
-        :else
-        (return (xt/x:json-encode body))))
+  (return (fetch-if/request-body body)))
 
 (defn.js prepare-input
   "normalises request input for js fetch execution"
   {:added "4.1.3"}
   [input]
-  (var request (xt/x:obj-clone (or input {})))
-  (when (xt/x:nil? (xt/x:get-key request "method"))
-    (xt/x:set-key request "method" "GET"))
-  (when (xt/x:nil? (xt/x:get-key request "headers"))
-    (xt/x:set-key request "headers" {}))
-  (when (xt/x:not-nil? (xt/x:get-key request "body"))
-    (xt/x:set-key request
-                  "body"
-                  (-/request-body (xt/x:get-key request "body"))))
-  (return request))
+  (return (fetch-if/request-prepare input)))
 
 (defn.js decode-body
   "decodes json response bodies when possible"
   {:added "4.1.3"}
   [body]
-  (cond (not (xt/x:is-string? body))
-        (return body)
-
-        (== "" body)
-        (return nil)
-
-        :else
-        (try
-          (return (xt/x:json-decode body))
-          (catch err
-            (return body)))))
+  (return (fetch-if/decode-body body)))
 
 (defn.js normalise-response
   "decodes response body payloads when wrapped in a response map"
   {:added "4.1.3"}
   [response]
-  (if (and (xt/x:is-object? response)
-           (xt/x:has-key? response "body"))
-    (do (var out (xt/x:obj-clone response))
-        (xt/x:set-key out
-                      "body"
-                      (-/decode-body (xt/x:get-key out "body")))
-        (return out))
-    (return response)))
+  (return (fetch-if/response-normalize response)))
 
 (defn.js default-request
-  "dispatches a request using a raw request fn or the host fetch api"
+  "dispatches a request using a raw request fn, fetch api, or curl fallback"
   {:added "4.1.3"}
   [raw input opts]
   (:= raw (or raw {}))
@@ -79,20 +47,45 @@
       (return (-/normalise-response output))))
   (var fetch-fn (or (xt/x:get-key raw "fetch")
                     fetch))
-  (when (not (xt/x:is-function? fetch-fn))
-    (xt/x:err "JS client fetch missing request implementation"))
-  (var params {"method" (xt/x:get-key request "method")
-               "headers" (or (xt/x:get-key request "headers") {})})
-  (when (xt/x:not-nil? (xt/x:get-key request "body"))
-    (xt/x:set-key params "body" (xt/x:get-key request "body")))
-  (return (. (fetch-fn (xt/x:get-key request "url") params)
-             (then (fn [res]
-                     (return
-                      (. (. res (text))
-                         (then (fn [text]
-                                  (return {"status" (. res ["status"])
-                                           "headers" (. res ["headers"])
-                                           "body" (-/decode-body text)}))))))))))
+  (if (xt/x:is-function? fetch-fn)
+    (do (var params {"method" (xt/x:get-key request "method")
+                    "headers" (or (xt/x:get-key request "headers") {})})
+        (when (xt/x:not-nil? (xt/x:get-key request "body"))
+          (xt/x:set-key params "body" (xt/x:get-key request "body")))
+        (return (. (fetch-fn (xt/x:get-key request "url") params)
+                   (then (fn [res]
+                          (return
+                           (. (. res (text))
+                              (then (fn [text]
+                                       (return {"status" (. res ["status"])
+                                                "headers" (. res ["headers"])
+                                                "body" text}))))))))))
+    (do (var args ["-sS"
+                   "-X" (xt/x:get-key request "method")
+                   "-w" "\n%{http_code}"
+                   (xt/x:get-key request "url")])
+        (xt/for:object [[k v] (xt/x:get-key request "headers")]
+          (xt/x:arr-push args "-H")
+          (xt/x:arr-push args (xt/x:cat k ": " v)))
+        (when (xt/x:not-nil? (xt/x:get-key request "body"))
+          (xt/x:arr-push args "-H")
+          (xt/x:arr-push args "Content-Type: application/json")
+          (xt/x:arr-push args "-d")
+          (xt/x:arr-push args (xt/x:get-key request "body")))
+        (var proc (. (require "child_process")
+                     (spawnSync "curl" args {"encoding" "utf8"})))
+        (when (not= 0 (. proc ["status"]))
+          (xt/x:err (or (. proc ["stderr"]) "curl failed")))
+        (var stdout (or (. proc ["stdout"]) ""))
+        (var idx (. stdout (lastIndexOf "\n")))
+        (var body (:? (>= idx 0)
+                      (. stdout (substring 0 idx))
+                      stdout))
+        (var status-str (:? (>= idx 0)
+                            (. stdout (substring (+ idx 1)))
+                            "200"))
+        (return {"status" (parseInt status-str 10)
+                 "body" body}))))
 
 (defn.js client
   "wraps a js request source with the fetch client protocol"
@@ -101,12 +94,4 @@
   (var source (:? (xt/x:is-function? raw)
                   {"request" raw}
                   (xt/x:obj-clone (or raw {}))))
-  (var request-sync-fn (xt/x:get-key source "request_sync"))
-  (when (and (xt/x:nil? (xt/x:get-key source "request"))
-             (xt/x:is-function? request-sync-fn))
-    (xt/x:set-key source
-                  "request"
-                  (fn [input opts]
-                    (return (request-sync-fn input opts)))))
-  (xt/x:del-key source "request_sync")
   (return (fetchrt/client-create source {"request" -/default-request})))

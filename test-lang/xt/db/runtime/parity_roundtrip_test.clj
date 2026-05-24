@@ -228,7 +228,7 @@
                          tree)
            (var supa-db {"::" "db.supabase"
                          :instance {"client"
-                                    {"request_sync"
+                                    {"request"
                                      (fn [request _opts]
                                        (var planned (xt/x:get-key compiled-map (. request ["url"])))
                                        (when (xt/x:nil? planned)
@@ -239,10 +239,13 @@
                                                 {"data" (xdb/db-pull-sync sql-db
                                                                           schema
                                                                           planned)}}))}}})
-           (repl/notify
-            [(xdb/db-pull-sync cache-db schema tree)
-             (xdb/db-pull-sync sql-db schema tree)
-             (xdb/db-pull-sync supa-db schema tree)])))))
+           (promise/x:promise-then
+            (xdb/db-pull supa-db schema tree)
+            (fn [supa-output]
+              (repl/notify
+               [(xdb/db-pull-sync cache-db schema tree)
+                (xdb/db-pull-sync sql-db schema tree)
+                supa-output])))))))
   => [+prepared-output+
       +prepared-output+
       +prepared-output+])
@@ -288,7 +291,7 @@
                          tree)
            (var supa-db {"::" "db.supabase"
                          :instance {"client"
-                                    {"request_sync"
+                                    {"request"
                                      (fn [request _opts]
                                        (var planned (xt/x:get-key compiled-map (. request ["url"])))
                                        (when (xt/x:nil? planned)
@@ -299,10 +302,13 @@
                                                 {"data" (xdb/db-pull-sync sql-db
                                                                           sample/Schema
                                                                           planned)}}))}}})
-           (repl/notify
-            [(xdb/db-pull-sync cache-db sample/Schema tree)
-             (xdb/db-pull-sync sql-db sample/Schema tree)
-             (xdb/db-pull-sync supa-db sample/Schema tree)])))))
+           (promise/x:promise-then
+            (xdb/db-pull supa-db sample/Schema tree)
+            (fn [supa-output]
+              (repl/notify
+               [(xdb/db-pull-sync cache-db sample/Schema tree)
+                (xdb/db-pull-sync sql-db sample/Schema tree)
+                supa-output])))))))
   => [+user-nickname-output+
       +user-nickname-output+
       +user-nickname-output+])
@@ -349,7 +355,7 @@
                          tree)
            (var supa-db {"::" "db.supabase"
                          :instance {"client"
-                                    {"request_sync"
+                                    {"request"
                                      (fn [request _opts]
                                        (var planned (xt/x:get-key compiled-map (. request ["url"])))
                                        (when (xt/x:nil? planned)
@@ -360,17 +366,20 @@
                                                 {"data" (xdb/db-pull-sync sql-db
                                                                           sample/Schema
                                                                           planned)}}))}}})
-           (repl/notify
-            (xt/x:arr-map
-             [(xdb/db-pull-sync cache-db sample/Schema tree)
-              (xdb/db-pull-sync sql-db sample/Schema tree)
-              (xdb/db-pull-sync supa-db sample/Schema tree)]
-             (fn [rows]
-               (return
-                (xtd/arr-sort rows
-                              (fn [row]
-                                (return (xt/x:get-key row "id")))
-                              xt/x:str-comp)))))))))
+           (promise/x:promise-then
+            (xdb/db-pull supa-db sample/Schema tree)
+            (fn [supa-output]
+              (repl/notify
+               (xt/x:arr-map
+                [(xdb/db-pull-sync cache-db sample/Schema tree)
+                 (xdb/db-pull-sync sql-db sample/Schema tree)
+                 supa-output]
+                (fn [rows]
+                  (return
+                   (xtd/arr-sort rows
+                                 (fn [row]
+                                   (return (xt/x:get-key row "id")))
+                                 xt/x:str-comp)))))))))))
   => [+currency-bulk-output+
       +currency-bulk-output+
       +currency-bulk-output+])

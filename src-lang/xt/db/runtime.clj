@@ -5,7 +5,7 @@
   {:require [[xt.db.text.base-schema :as base-schema]
              [xt.db.text.base-scope :as scope]
              [xt.db.runtime.cache :as impl-cache]
-             [xt.db.runtime.supabase-pull :as impl-supabase-pull]
+             [xt.db.runtime.supabase-client :as impl-supabase]
              [xt.db.runtime.sql :as impl-sql]
              [xt.protocol.impl.connection-sql :as sql]
              [xt.lang.spec-base :as xt]
@@ -31,8 +31,14 @@
                   "delete_sync" impl-cache/cache-delete-sync
                   "clear"       impl-cache/cache-clear}
     "db.supabase" {"create"    (fn [m]
-                                 (return m))
-                   "pull_sync" impl-supabase-pull/supabase-pull-sync}
+                                 (var out (xt/x:obj-clone m))
+                                 (when (xt/x:not-nil? (xt/x:get-key out "client"))
+                                   (xt/x:set-key out
+                                                 "client"
+                                                 (impl-supabase/client
+                                                  (xt/x:get-key out "client"))))
+                                 (return out))
+                   "pull"      impl-supabase/pull}
     "db.sql"      {"create"      (fn [m]
                                    (return (xt/x:get-key m "instance")))
                   "exec_sync"   (fn [instance raw-input _opts]
