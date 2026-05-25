@@ -40,18 +40,41 @@
               "detail" {"resolver" (@! fixtures/+resolver-inline-query+)
                         "source" "primary"}}}}}}})
        (promise/x:promise-then
-        (fn [node]
-          (repl/notify
-           {"sources" (xt/x:obj-keys (. (node/model-get node "screen/admin" "entries-screen") ["sources"]))
-            "list_source" (. (node/view-get node "screen/admin" "entries-screen" "list") ["source"])
-            "detail_source" (. (node/view-get node "screen/admin" "entries-screen" "detail") ["source"])
-            "list_query_keys" (xt/x:obj-keys (. (node/view-get node "screen/admin" "entries-screen" "list") ["resolver"]))
-            "detail_query_keys" (xt/x:obj-keys (. (node/view-get node "screen/admin" "entries-screen" "detail") ["resolver"]))})))))
- => {"sources" ["primary" "caching"]
-     "list_source" "caching"
-     "detail_source" "primary"
-     "list_query_keys" ["type" "table" "select_entry" "return_entry"]
-     "detail_query_keys" ["type" "table" "select_entry" "select_args" "return_entry"]})
+        (fn [out] (repl/notify (node/summarise out)))))))
+
+^{:refer xt.db.walkthrough.guide-00-model-sources/STEP.01-empty-query :added "4.1"}
+(fact "step 01: querying the empty structural caching source returns a ready empty result"
+
+  (notify/wait-on [:js 10000]
+   (-> (node/create
+       {"node_id" "admin-screen"
+        "db" {"schema" (@! fixtures/+schema+)
+              "lookup" (@! fixtures/+lookup+)
+              "sources"
+              {"primary" {"kind" "postgres"}
+               "caching" {"kind" "sqlite"}}}
+        "spaces"
+        {"screen/admin"
+         {"models"
+          {"entries-screen"
+           {"views"
+            {"list" {"resolver" (@! fixtures/+resolver-model-query+)
+                     "source" "caching"}
+             "detail" {"resolver" (@! fixtures/+resolver-inline-query+)
+                       "source" "primary"}}}}}}})
+      (promise/x:promise-then
+       (fn [node]
+         (return
+          (node/query
+           node
+           "screen/admin"
+           {"view" {"model_id" "entries-screen"
+                    "view_id" "list"}}))))
+      (promise/x:promise-then
+       (fn [result]
+         (repl/notify
+          result)))))
+  => {"query_key" nil, "value" [], "status" "ready", "source" "caching"})
 
 (comment
   (notify/wait-on [:js 10000]
