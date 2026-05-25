@@ -256,6 +256,38 @@
      (cond-> (assoc config :require requires)
        (seq specialize) (assoc :specialize specialize))))
 
+(defn resolve-runtime-config
+  "resolves quoted vars, symbols, and forms contained in runtime config data"
+  {:added "4.1"}
+  [data]
+  (cond (var? data)
+        @data
+
+        (symbol? data)
+        (eval data)
+
+        (list? data)
+        (eval data)
+
+        (map? data)
+        (into (empty data)
+              (map (fn [[k v]]
+                     [(resolve-runtime-config k)
+                      (resolve-runtime-config v)]))
+              data)
+
+        (vector? data)
+        (mapv resolve-runtime-config data)
+
+        (set? data)
+        (set (map resolve-runtime-config data))
+
+        (seq? data)
+        (doall (map resolve-runtime-config data))
+
+        :else
+        data))
+
 
 ;; script-base
 ;; - installs a module to the library (book should be installed)
@@ -278,6 +310,7 @@
   {:added "4.0"}
   ([lang module-id config lib]
    (let [primary    (script-ns-import lang config)
+         config     (update config :config (fnil resolve-runtime-config {}))
          config     (update config :emit (fnil eval {}))
          config     (script-specialize-config lang module-id config lib)
          [snapshot] (lib/install-module! lib lang module-id (dissoc config

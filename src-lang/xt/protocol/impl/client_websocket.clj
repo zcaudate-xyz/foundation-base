@@ -55,8 +55,8 @@
   (when (not (xt/x:is-function? close-fn))
     (xt/x:err "Websocket client missing close implementation"))
   (if (xt/x:not-nil? code)
-    (return (close-fn code (or reason "")))
-    (return (close-fn))))
+    (return (. raw (close code (or reason ""))))
+    (return (. raw (close)))))
 
 (defn.xt default-send-sync
   "sends a payload through a raw websocket client"
@@ -65,7 +65,7 @@
   (var send-fn (xt/x:get-key raw "send"))
   (when (not (xt/x:is-function? send-fn))
     (xt/x:err "Websocket client missing send implementation"))
-  (return (send-fn payload)))
+  (return (. raw (send payload))))
 
 (defn.xt default-add-listener-sync
   "attaches an event listener to a raw websocket client"
@@ -73,7 +73,7 @@
   [raw event handler]
   (var add-fn (xt/x:get-key raw "addEventListener"))
   (if (xt/x:is-function? add-fn)
-    (add-fn event handler)
+    (. raw (addEventListener event handler))
     (xt/x:set-key raw (xt/x:cat "on" event) handler))
   (return raw))
 

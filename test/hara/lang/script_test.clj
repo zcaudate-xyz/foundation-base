@@ -17,6 +17,21 @@
 (def +library+
   (impl/clone-default-library))
 
+(def +runtime-config-key+
+  :port)
+
+(def +runtime-config-value+
+  17001)
+
+(def +runtime-config-form+
+  "ready")
+
+(def +runtime-config+
+  {:port +runtime-config-value+
+   :startup {:args ["/bin/sh"
+                    "-lc"
+                    +runtime-config-form+]}})
+
 (rt/install-lang! :lua)
 
 (l/script+ [:LUA.0 :lua]
@@ -104,6 +119,23 @@
 
   (script/script-test-prep :js {})
   => (contains {:module 'hara.lang.script-test}))
+
+^{:refer hara.lang.script/resolve-runtime-config :added "4.1"}
+(fact "resolves quoted vars, symbols, forms, and config keys"
+
+  (script/resolve-runtime-config '+runtime-config+)
+  => {:port 17001
+      :startup {:args ["/bin/sh" "-lc" "ready"]}}
+
+  (script/script-test-prep
+   :js
+   {:runtime :basic
+    :config {'+runtime-config-key+ '+runtime-config-value+
+             :startup {:args ["/bin/sh"
+                              "-lc"
+                              '(str "rea" "dy")]}}})
+  => (contains {:port 17001
+                :startup {:args ["/bin/sh" "-lc" "ready"]}}))
 
 ^{:refer hara.lang.script/script-test :added "4.0"}
 (fact "the `script-` function call"

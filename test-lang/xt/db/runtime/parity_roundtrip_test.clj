@@ -239,7 +239,7 @@
                                                 {"data" (xdb/db-pull-sync sql-db
                                                                           schema
                                                                           planned)}}))}}})
-           (promise/x:promise-then
+           (spec-promise/x:promise-then
             (xdb/db-pull supa-db schema tree)
             (fn [supa-output]
               (repl/notify
@@ -302,7 +302,7 @@
                                                 {"data" (xdb/db-pull-sync sql-db
                                                                           sample/Schema
                                                                           planned)}}))}}})
-           (promise/x:promise-then
+           (spec-promise/x:promise-then
             (xdb/db-pull supa-db sample/Schema tree)
             (fn [supa-output]
               (repl/notify
@@ -366,7 +366,7 @@
                                                 {"data" (xdb/db-pull-sync sql-db
                                                                           sample/Schema
                                                                           planned)}}))}}})
-           (promise/x:promise-then
+           (spec-promise/x:promise-then
             (xdb/db-pull supa-db sample/Schema tree)
             (fn [supa-output]
               (repl/notify

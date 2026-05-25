@@ -25,6 +25,9 @@
 (def +scratch-schema+
   "scratch")
 
+(def +public-schema+
+  "public")
+
 (def +scratch-entry-table+
   "Entry")
 
@@ -37,6 +40,18 @@
 (def +live-entry-query+
   ["Entry"
    {"name" +live-entry-name+}
+   ["name"
+    "tags"]])
+
+(def +live-realtime-entry-name+
+  "copilot_supabase_realtime_live")
+
+(def +live-realtime-entry-tags+
+  ["copilot" "supabase" "realtime"])
+
+(def +live-realtime-entry-query+
+  ["Entry"
+   {"name" +live-realtime-entry-name+}
    ["name"
     "tags"]])
 
@@ -65,6 +80,11 @@
   (str
    "set -e\n"
    (supabase-shell-command "stop" "--no-backup" "--yes") " >/dev/null 2>&1 || true\n"
+   "ids=$(docker ps -aq --filter 'name=foundation-base-local' || true)\n"
+   "if [ -n \"$ids\" ]; then\n"
+   "  docker rm -f $ids >/dev/null 2>&1 || true\n"
+   "fi\n"
+   "sleep 5\n"
    (supabase-shell-command "start") "\n"
    "for i in $(seq 1 120); do\n"
    "  if (echo > /dev/tcp/" +postgres-host+ "/" (str +postgres-port+) ") >/dev/null 2>&1; then\n"
@@ -151,6 +171,22 @@
                     "\" GRANT ALL ON TABLES TO anon, authenticated, service_role")]]
     (pg-exec-best-effort! sql)))
 
+(defn enable-scratch-entry-realtime!
+  []
+  (pg-exec!
+   (str "DO $$\n"
+        "BEGIN\n"
+        "  IF NOT EXISTS (\n"
+        "    SELECT 1\n"
+        "    FROM pg_publication_tables\n"
+        "    WHERE pubname = 'supabase_realtime'\n"
+        "      AND schemaname = '" +scratch-schema+ "'\n"
+        "      AND tablename = '" +scratch-entry-table+ "'\n"
+        "  ) THEN\n"
+        "    EXECUTE 'ALTER PUBLICATION supabase_realtime ADD TABLE \"" +scratch-schema+ "\".\"" +scratch-entry-table+ "\"';\n"
+        "  END IF;\n"
+        "END $$;")))
+
 (defn reload-postgrest!
   []
   (pg-exec-best-effort! "NOTIFY pgrst, 'reload schema'"))
@@ -166,6 +202,49 @@
   (cleanup-scratch-entry! name)
   (pg-exec!
    (str "INSERT INTO \"" +scratch-schema+ "\".\"" +scratch-entry-table+
+        "\" (name, tags)"
+        " VALUES (" (sql-literal name)
+        ", '" (str/replace (json/write tags) "'" "''") "'::jsonb)"))
+  (Thread/sleep 200))
+
+(defn ensure-public-entry-table!
+  []
+  (pg-exec!
+   (str "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";\n"
+        "CREATE TABLE IF NOT EXISTS \"" +public-schema+ "\".\"" +scratch-entry-table+ "\" (\n"
+        "  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),\n"
+        "  name text NOT NULL UNIQUE,\n"
+        "  tags jsonb NOT NULL DEFAULT '[]'::jsonb\n"
+        ");\n"
+        "GRANT ALL ON TABLE \"" +public-schema+ "\".\"" +scratch-entry-table+ "\" TO anon, authenticated, service_role;")))
+
+(defn enable-public-entry-realtime!
+  []
+  (pg-exec!
+   (str "DO $$\n"
+        "BEGIN\n"
+        "  IF NOT EXISTS (\n"
+        "    SELECT 1\n"
+        "    FROM pg_publication_tables\n"
+        "    WHERE pubname = 'supabase_realtime'\n"
+        "      AND schemaname = '" +public-schema+ "'\n"
+        "      AND tablename = '" +scratch-entry-table+ "'\n"
+        "  ) THEN\n"
+        "    EXECUTE 'ALTER PUBLICATION supabase_realtime ADD TABLE \"" +public-schema+ "\".\"" +scratch-entry-table+ "\"';\n"
+        "  END IF;\n"
+        "END $$;")))
+
+(defn cleanup-public-entry!
+  [name]
+  (pg-exec-best-effort!
+   (str "DELETE FROM \"" +public-schema+ "\".\"" +scratch-entry-table+
+        "\" WHERE name = " (sql-literal name))))
+
+(defn setup-public-entry!
+  [name tags]
+  (cleanup-public-entry! name)
+  (pg-exec!
+   (str "INSERT INTO \"" +public-schema+ "\".\"" +scratch-entry-table+
         "\" (name, tags)"
         " VALUES (" (sql-literal name)
         ", '" (str/replace (json/write tags) "'" "''") "'::jsonb)"))

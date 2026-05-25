@@ -16,7 +16,18 @@
                 WebSocket))
   (when (not (xt/x:is-function? ctor))
     (xt/x:err "JS websocket client missing connect implementation"))
-  (return (new ctor url)))
+  (var socket (new ctor url))
+  (return
+   (new Promise
+    (fn [resolve reject]
+      (. socket (addEventListener
+                 "open"
+                 (fn [_]
+                   (resolve socket))))
+      (. socket (addEventListener
+                 "error"
+                 (fn [err]
+                   (reject err))))))))
 
 (defn.js client
   "wraps a raw js websocket object with the websocket client protocol"
