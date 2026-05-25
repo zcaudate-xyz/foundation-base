@@ -517,9 +517,6 @@
          "args" (or (xt/x:get-key view "input") [])}})
   (when (xt/x:has-key? view "resolver")
     (xt/x:set-key payload "resolver" (xt/x:get-key view "resolver")))
-  (when (and (not (xt/x:has-key? payload "resolver"))
-             (xt/x:has-key? view "query"))
-    (xt/x:set-key payload "query" (xt/x:get-key view "query")))
   (return payload))
 
 (defn.xt find-view-by-query-key
@@ -573,8 +570,7 @@
     (xt/x:set-key tables table true)
     (xt/for:object [[model-id model] (or (xt/x:get-key state "models") {})]
       (xt/for:object [[source-id source] (or (xt/x:get-key model "sources") {})]
-        (var query (or (xt/x:get-key source "resolver")
-                       (xt/x:get-key source "query")))
+        (var query (xt/x:get-key source "resolver"))
         (var source-table (or (xt/x:get-key source "table")
                               (:? (xt/x:not-nil? query)
                                   (xt/x:get-key query "table")
@@ -784,8 +780,7 @@
   [node space-id model-id source-id]
   (var state (-/ensure-space-state node space-id))
   (var source (-/ensure-source state model-id source-id))
-  (var query (or (xt/x:get-key source "resolver")
-                 (xt/x:get-key source "query")))
+  (var query (xt/x:get-key source "resolver"))
   (var db (xt/x:get-key source "db"))
   (when (or (not (== true (xt/x:get-key source "live")))
             (xt/x:nil? db)
@@ -825,7 +820,7 @@
   (var upstream-refresh
        (:? (and (== true (xt/x:get-key upstream "live"))
                 (xt/x:not-nil? (xt/x:get-key upstream "db"))
-                (xt/x:not-nil? (xt/x:get-key upstream "query")))
+                (xt/x:not-nil? (xt/x:get-key upstream "resolver")))
            (-/source-refresh node space-id model-id upstream-id)
            (promise/x:promise-run upstream)))
   (return
@@ -839,7 +834,7 @@
                  (xt/x:not-nil? db))
         (db-runtime/db-clear db)
         (var data (or (xt/x:get-key synced "data") []))
-        (var query (xt/x:get-key synced "query"))
+        (var query (xt/x:get-key synced "resolver"))
         (var table (or (xt/x:get-key synced "table")
                        (:? (xt/x:not-nil? query)
                            (xt/x:get-key query "table")
@@ -927,8 +922,7 @@
         (do (var [ok prepared]
                  (model-query/prepare-resolver
                   state
-                  (or (xt/x:get-key view "resolver")
-                      (xt/x:get-key view "query"))
+                  (xt/x:get-key view "resolver")
                   {"model_id" model-id
                    "view_id" view-id
                    "args" (or (xt/x:get-key view "input") [])}))
@@ -992,11 +986,8 @@
        view-id
        (xt/x:get-key view-context "args")))
     (when (and (xt/x:not-nil? resolver)
-               (or (xt/x:has-key? payload "query")
-                   (xt/x:has-key? payload "resolver")))
-      (if (xt/x:has-key? payload "resolver")
-        (xt/x:set-key view "resolver" resolver)
-        (xt/x:set-key view "query" resolver)))
+               (xt/x:has-key? payload "resolver"))
+      (xt/x:set-key view "resolver" resolver))
     (return (-/view-refresh node
                             (xt/x:get-key current-space "id")
                             model-id

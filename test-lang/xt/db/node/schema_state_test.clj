@@ -59,9 +59,9 @@
 
   (!.js
     [(xt/x:obj-keys
-      (schema-state/model-views {"views" {"main" {"query" {"table" "Task"}}}}))
+      (schema-state/model-views {"views" {"main" {"resolver" {"type" "db/query" "table" "Task"}}}}))
      (xt/x:obj-keys
-      (schema-state/model-views {"main" {"query" {"table" "Task"}}}))])
+      (schema-state/model-views {"main" {"resolver" {"type" "db/query" "table" "Task"}}}))])
   => [["main"] ["main"]])
 
 ^{:refer xt.db.node.schema-state/normalize-view :added "4.1"}

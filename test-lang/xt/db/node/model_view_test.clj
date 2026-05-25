@@ -67,8 +67,8 @@
     (model/put-model out
                      "entries"
                      {"sources" {"primary" {"kind" "postgres"}}
-                      "views" {"list" {"query" {"table" "Task"}}
-                               "detail" {"query" {"table" "Task"}
+                      "views" {"list" {"resolver" {"type" "db/query" "table" "Task"}}
+                               "detail" {"resolver" {"type" "db/query" "table" "Task"}
                                          "default_input" ["alpha"]
                                          "source" "primary"}}})
     [(xt/x:obj-keys (. (. out ["models"]) ["entries"] ["sources"]))
@@ -85,7 +85,7 @@
     (var out (model/base-state {}))
     (model/put-model out
                      "entries"
-                     {"views" {"list" {"query" {"table" "Task"}}}})
+                     {"views" {"list" {"resolver" {"type" "db/query" "table" "Task"}}}})
     (model/set-source-data out
                            "entries"
                            "primary"
@@ -108,9 +108,9 @@
                      "entries-screen"
                      {"sources" {"primary" {"kind" "postgres"}
                                  "caching" {"kind" "sqlite"}}
-                      "views" {"list" {"query" {"table" "Task"}
+                      "views" {"list" {"resolver" {"type" "db/query" "table" "Task"}
                                        "source" "caching"}
-                               "detail" {"query" {"table" "Task"}
+                               "detail" {"resolver" {"type" "db/query" "table" "Task"}
                                          "source" "primary"
                                          "default_input" ["alpha"]}}})
     [(xt/x:obj-keys (. (model/model-get node "screen/admin" "entries-screen") ["sources"]))
@@ -136,22 +136,39 @@
            {"models"
             {"entries-screen"
              {"views"
-              {"list" {"query" (@! fixtures/+model-query+)
+              {"list" {"resolver" {"type" "db/query"
+                                   "table" "Entry"
+                                   "select_entry" {"input" []
+                                                   "view" {"query" {"__deleted__" false}}}
+                                   "return_entry" {"input" [{"symbol" "i_entry_id"
+                                                             "type" "text"}]
+                                                   "view" {"query" ["id"
+                                                                    "name"
+                                                                    "tags"
+                                                                    "time_created"
+                                                                    "time_updated"]}}}
                        "source" "caching"}
-               "detail" {"query" (@! fixtures/+inline-query+)
+               "detail" {"resolver" {"type" "db/query"
+                                     "table" "Entry"
+                                     "select_entry" {"input" [{"symbol" "i_name" "type" "text"}]
+                                                     "view" {"query" {"name" "{{i_name}}"
+                                                                      "__deleted__" false}}}
+                                     "select_args" ["alpha"]
+                                     "return_entry" {"input" [{"symbol" "i_entry_id" "type" "text"}]
+                                                     "view" {"query" ["name" "tags"]}}}
                          "source" "primary"}}}}}}})
         (promise/x:promise-then
          (fn [node]
            (repl/notify
-            {"node-id" (. node ["id"])
-             "space-ids" (xt/x:obj-keys (. node ["spaces"]))
-             "source-ids" (xt/x:obj-keys
+            {"node_id" (. node ["id"])
+             "space_ids" (xt/x:obj-keys (. node ["spaces"]))
+             "source_ids" (xt/x:obj-keys
                            (. (node/model-get node "screen/admin" "entries-screen") ["sources"]))
-             "list-source" (. (node/view-get node "screen/admin" "entries-screen" "list") ["source"])})))))
-  => {"node-id" "node-c"
-      "space-ids" ["screen/admin"]
-      "source-ids" ["primary" "caching"]
-      "list-source" "caching"})
+             "list_source" (. (node/view-get node "screen/admin" "entries-screen" "list") ["source"])})))))
+  => {"node_id" "node-c"
+      "space_ids" ["screen/admin"]
+      "source_ids" ["primary" "caching"]
+      "list_source" "caching"})
 
 ^{:refer xt.db.node/create.wrapper :added "4.1"}
 (fact "creates a live sqlite source through kind + config and refreshes a real view from it"
@@ -172,7 +189,17 @@
            {"models"
             {"entries-screen"
              {"views"
-              {"list" {"query" (@! fixtures/+model-query+)
+              {"list" {"resolver" {"type" "db/query"
+                                   "table" "Entry"
+                                   "select_entry" {"input" []
+                                                   "view" {"query" {"__deleted__" false}}}
+                                   "return_entry" {"input" [{"symbol" "i_entry_id"
+                                                             "type" "text"}]
+                                                   "view" {"query" ["id"
+                                                                    "name"
+                                                                    "tags"
+                                                                    "time_created"
+                                                                    "time_updated"]}}}
                        "source" "primary"}}}}}}})
         (promise/x:promise-then
          (fn [node]
@@ -181,16 +208,16 @@
              (node/view-refresh node "screen/admin" "entries-screen" "list")
              (fn [result]
                (repl/notify
-                {"node-id" (. node ["id"])
-                 "source-kind" (xtd/get-in
+                {"node_id" (. node ["id"])
+                 "source_kind" (xtd/get-in
                                 (node/source-get node "screen/admin" "entries-screen" "primary")
                                 ["dbtype"])
-                 "row-count" (xt/x:len (. result ["value"]))
-                 "first-name" (xtd/get-in (. result ["value"]) [0 "name"])}))))))))
-  => {"node-id" "node-live"
-      "source-kind" "db.sql"
-      "row-count" 2
-      "first-name" "alpha"})
+                 "row_count" (xt/x:len (. result ["value"]))
+                 "first_name" (xtd/get-in (. result ["value"]) [0 "name"])}))))))))
+  => {"node_id" "node-live"
+      "source_kind" "db.sql"
+      "row_count" 2
+      "first_name" "alpha"})
 
 ^{:refer xt.db.node.model-view/view-refresh.resolver :added "4.1"}
 (fact "refreshes a live sqlite view from a resolver with type db/query"
@@ -230,11 +257,11 @@
              (node/view-refresh node "screen/admin" "entries-screen" "list")
              (fn [result]
                (repl/notify
-                {"row-count" (xt/x:len (. result ["value"]))
-                 "first-name" (xtd/get-in (. result ["value"]) [0 "name"])
+                {"row_count" (xt/x:len (. result ["value"]))
+                 "first_name" (xtd/get-in (. result ["value"]) [0 "name"])
                  "status" (. result ["status"])}))))))))
-  => {"row-count" 2
-      "first-name" "alpha"
+  => {"row_count" 2
+      "first_name" "alpha"
       "status" "ready"})
 
 ^{:refer xt.db.node.model-view/query.wrapper :added "4.1"}
@@ -286,11 +313,11 @@
                   {"query_key" (. result ["query_key"])})
                  (fn [refresh]
                    (repl/notify
-                    {"row-count" (xt/x:len (. result ["value"]))
-                     "refresh-count" (xt/x:len (. refresh ["value"]))
+                    {"row_count" (xt/x:len (. result ["value"]))
+                     "refresh_count" (xt/x:len (. refresh ["value"]))
                      "status" (. refresh ["status"])})))))))))))
-  => {"row-count" 2
-      "refresh-count" 2
+  => {"row_count" 2
+      "refresh_count" 2
       "status" "ready"})
 
 ^{:refer xt.db.node.model-view/sync.wrapper :added "4.1"}
@@ -335,12 +362,12 @@
                  (node/view-refresh local-node "screen/admin" "entries-screen" "list")
                  (fn [result]
                    (repl/notify
-                    {"row-count" (xt/x:len (. result ["value"]))
+                    {"row_count" (xt/x:len (. result ["value"]))
                      "names" [(xtd/get-in (. result ["value"]) [0 "name"])
                               (xtd/get-in (. result ["value"]) [1 "name"])]
                      "status" (. (node/view-get local-node "screen/admin" "entries-screen" "list")
                                  ["status"])})))))))))))
-  => {"row-count" 2
+  => {"row_count" 2
       "names" ["alpha" "gamma"]
       "status" "ready"})
 
@@ -379,12 +406,12 @@
         (promise/x:promise-then
          (fn [result]
            (repl/notify
-            {"row-count" (xt/x:len (. result ["value"]))
-             "first-name" (xtd/get-in (. result ["value"]) [0 "name"])
+            {"row_count" (xt/x:len (. result ["value"]))
+             "first_name" (xtd/get-in (. result ["value"]) [0 "name"])
              "status" (. result ["status"])
              "source" (. result ["source"])})))))
-  => {"row-count" 2
-      "first-name" "alpha"
+  => {"row_count" 2
+      "first_name" "alpha"
       "status" "ready"
       "source" "primary"})
 
@@ -411,10 +438,40 @@
            {"models"
             {"entries-screen"
              {"sources"
-              {"primary" {"query" (@! fixtures/+model-query+)}
-               "caching" {"query" (@! fixtures/+model-query+)}}
+              {"primary" {"resolver" {"type" "db/query"
+                                      "table" "Entry"
+                                      "select_entry" {"input" []
+                                                      "view" {"query" {"__deleted__" false}}}
+                                      "return_entry" {"input" [{"symbol" "i_entry_id"
+                                                                "type" "text"}]
+                                                      "view" {"query" ["id"
+                                                                       "name"
+                                                                       "tags"
+                                                                       "time_created"
+                                                                       "time_updated"]}}}}
+               "caching" {"resolver" {"type" "db/query"
+                                      "table" "Entry"
+                                      "select_entry" {"input" []
+                                                      "view" {"query" {"__deleted__" false}}}
+                                      "return_entry" {"input" [{"symbol" "i_entry_id"
+                                                                "type" "text"}]
+                                                      "view" {"query" ["id"
+                                                                       "name"
+                                                                       "tags"
+                                                                       "time_created"
+                                                                       "time_updated"]}}}}}
               "views"
-              {"list" {"query" (@! fixtures/+model-query+)
+              {"list" {"resolver" {"type" "db/query"
+                                   "table" "Entry"
+                                   "select_entry" {"input" []
+                                                   "view" {"query" {"__deleted__" false}}}
+                                   "return_entry" {"input" [{"symbol" "i_entry_id"
+                                                             "type" "text"}]
+                                                   "view" {"query" ["id"
+                                                                    "name"
+                                                                    "tags"
+                                                                    "time_created"
+                                                                    "time_updated"]}}}
                        "source" "caching"}}}}}}})
         (promise/x:promise-then
          (fn [node]
@@ -427,14 +484,14 @@
                  (node/view-refresh node "screen/admin" "entries-screen" "list")
                  (fn [result]
                    (repl/notify
-                    {"row-count" (xt/x:len (. result ["value"]))
-                     "cached-first" (xtd/get-in
+                    {"row_count" (xt/x:len (. result ["value"]))
+                     "cached_first" (xtd/get-in
                                      (node/source-get node "screen/admin" "entries-screen" "caching")
                                      ["data" 0 "name"])
-                     "list-source" (. result ["source"])})))))))))))
-   => {"row-count" 2
-       "cached-first" "alpha"
-       "list-source" "caching"})
+                     "list_source" (. result ["source"])})))))))))))
+   => {"row_count" 2
+       "cached_first" "alpha"
+       "list_source" "caching"})
 
 ^{:refer xt.db.node.model-view/model-sync :added "4.1"}
 (fact "syncs caching from primary and refreshes views from their declared source roles"
@@ -445,9 +502,9 @@
     (model/model-put node
                      "screen/admin"
                      "entries-screen"
-                     {"views" {"list" {"query" {"table" "Task"}
+                     {"views" {"list" {"resolver" {"type" "db/query" "table" "Task"}
                                        "source" "caching"}
-                               "detail" {"query" {"table" "Task"}
+                               "detail" {"resolver" {"type" "db/query" "table" "Task"}
                                          "source" "primary"
                                          "default_input" ["alpha"]}}})
     (model/source-put node
@@ -465,13 +522,13 @@
          (promise/x:promise-then
           (fn [_]
             (repl/notify
-             {"caching-name" (xtd/get-in
+             {"caching_name" (xtd/get-in
                              (model/source-get node "screen/admin" "entries-screen" "caching")
                              ["data" 0 "name"])
-              "list-source" (. (model/view-get node "screen/admin" "entries-screen" "list") ["source"])
-              "detail-name" (xtd/get-in
+              "list_source" (. (model/view-get node "screen/admin" "entries-screen" "list") ["source"])
+              "detail_name" (xtd/get-in
                             (model/view-val node "screen/admin" "entries-screen" "detail")
                             [0 "name"])})))))
-  => {"caching-name" "alpha"
-      "list-source" "caching"
-      "detail-name" "alpha"})
+  => {"caching_name" "alpha"
+      "list_source" "caching"
+      "detail_name" "alpha"})

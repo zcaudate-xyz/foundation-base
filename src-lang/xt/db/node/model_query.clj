@@ -30,7 +30,6 @@
   {:added "4.1"}
   [payload]
   (return (or (xt/x:get-key payload "resolver")
-              (xt/x:get-key payload "query")
               payload)))
 
 (defn.xt prepare-resolver

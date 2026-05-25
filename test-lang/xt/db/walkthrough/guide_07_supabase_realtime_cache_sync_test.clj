@@ -116,15 +116,15 @@
                    (repl/notify
                     {"status" (xt/x:first statuses)
                      "topic" topic
-                     "request-name" (xtd/get-in request-out ["db/sync" table-name 0 "name"])
-                     "request-tags" (xtd/get-in request-out ["db/sync" table-name 0 "tags"])
-                     "cached-row" cached-row})))
+                     "request_name" (xtd/get-in request-out ["db/sync" table-name 0 "name"])
+                     "request_tags" (xtd/get-in request-out ["db/sync" table-name 0 "tags"])
+                     "cached_row" cached-row})))
                100))
          (return sub))))
   )
   => {"status" "SUBSCRIBED"
       "topic" "realtime:public:Entry"
-      "request-name" "copilot_supabase_realtime_live"
-      "request-tags" ["copilot" "supabase" "realtime"]
-      "cached-row" {"name" "copilot_supabase_realtime_live"
+      "request_name" "copilot_supabase_realtime_live"
+      "request_tags" ["copilot" "supabase" "realtime"]
+      "cached_row" {"name" "copilot_supabase_realtime_live"
                     "tags" ["copilot" "supabase" "realtime"]}})

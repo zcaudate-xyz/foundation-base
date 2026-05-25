@@ -34,9 +34,9 @@
           {"models"
            {"entries-screen"
             {"views"
-             {"list" {"query" (@! fixtures/+model-query+)
+             {"list" {"resolver" (@! fixtures/+resolver-model-query+)
                       "source" "caching"}
-              "detail" {"query" (@! fixtures/+inline-query+)
+              "detail" {"resolver" (@! fixtures/+resolver-inline-query+)
                         "source" "primary"}}}}}}})
        (promise/x:promise-then
         (fn [node]
@@ -60,17 +60,17 @@
                (promise/x:promise-then
                 (fn [result]
                   (repl/notify
-                   {"list-source" (. result ["source"])
-                    "list-count" (xt/x:len (node/view-val node "screen/admin" "entries-screen" "list"))
-                    "list-query-keys" (xt/x:obj-keys
+                  {"list_source" (. result ["source"])
+                   "list_count" (xt/x:len (node/view-val node "screen/admin" "entries-screen" "list"))
+                   "list_query_keys" (xt/x:obj-keys
                                        (. (node/view-get node "screen/admin" "entries-screen" "list")
-                                          ["query"]))
-                    "node-id" (. node ["id"])
-                    "first-cached" (xtd/get-in
+                                          ["resolver"]))
+                   "node_id" (. node ["id"])
+                   "first_cached" (xtd/get-in
                                     (node/source-get node "screen/admin" "entries-screen" "caching")
                                     ["data" 0 "name"])})))))))))
-  => {"list-source" "caching"
-     "list-count" 2
-     "list-query-keys" ["table" "select_entry" "return_entry"]
-     "node-id" "admin-screen"
-     "first-cached" "alpha"})
+  => {"list_source" "caching"
+     "list_count" 2
+     "list_query_keys" ["type" "table" "select_entry" "return_entry"]
+     "node_id" "admin-screen"
+     "first_cached" "alpha"})

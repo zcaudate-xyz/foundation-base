@@ -65,12 +65,12 @@
            {"models"
             {"entries-screen"
              {"sources"
-              {"primary" {"query" (@! fixtures/+model-query+)}
-               "caching" {"query" (@! fixtures/+model-query+)}}
+              {"primary" {"resolver" (@! fixtures/+resolver-model-query+)}
+               "caching" {"resolver" (@! fixtures/+resolver-model-query+)}} 
               "views"
-              {"list" {"query" (@! fixtures/+model-query+)
+              {"list" {"resolver" (@! fixtures/+resolver-model-query+)
                        "source" "caching"}
-               "detail" {"query" (@! fixtures/+inline-query+)
+               "detail" {"resolver" (@! fixtures/+resolver-inline-query+)
                          "source" "primary"}}}}}}})
         (promise/x:promise-then
          (fn [node]
@@ -85,25 +85,25 @@
                 (promise/x:promise-then
                  (fn [[list-refresh detail-refresh]]
                    (repl/notify
-                    {"primary-kind" (xtd/get-in
+                    {"primary_kind" (xtd/get-in
                                      (node/source-get node "screen/admin" "entries-screen" "primary")
                                      ["kind"])
-                     "caching-kind" (xtd/get-in
+                     "caching_kind" (xtd/get-in
                                      (node/source-get node "screen/admin" "entries-screen" "caching")
                                      ["kind"])
-                     "list-source" (xtd/get-in list-refresh ["source"])
-                     "detail-source" (xtd/get-in detail-refresh ["source"])
-                     "node-id" (. node ["id"])
-                     "cached-first" (xtd/get-in
+                     "list_source" (xtd/get-in list-refresh ["source"])
+                     "detail_source" (xtd/get-in detail-refresh ["source"])
+                     "node_id" (. node ["id"])
+                     "cached_first" (xtd/get-in
                                      (node/source-get node "screen/admin" "entries-screen" "caching")
                                      ["data" 0 "name"])
-                     "detail-default" (xtd/get-in
+                     "detail_default" (xtd/get-in
                                        (node/view-get node "screen/admin" "entries-screen" "detail")
-                                       ["query" "select_args" 0])})))))))))
-  => {"primary-kind" "postgres"
-      "caching-kind" "sqlite"
-      "list-source" "caching"
-      "detail-source" "primary"
-      "node-id" "admin-screen"
-      "cached-first" "alpha"
-      "detail-default" "alpha"})
+                                       ["resolver" "select_args" 0])})))))))))
+  => {"primary_kind" "postgres"
+      "caching_kind" "sqlite"
+      "list_source" "caching"
+      "detail_source" "primary"
+      "node_id" "admin-screen"
+      "cached_first" "alpha"
+      "detail_default" "alpha"})

@@ -36,7 +36,7 @@
                                      "filename" ":memory:"}
                            "setup" {"schema" true
                                     "seed" (@! fixtures/+entry-seed+)}
-                           "query" (@! fixtures/+model-query+)}}}
+                           "resolver" (@! fixtures/+resolver-model-query+)}}}
          "spaces"
          {"screen/admin"
           {"models"
@@ -44,8 +44,8 @@
             {"sources" {"caching" {"config" {"driver" (js-sqlite/driver)
                                              "filename" "admin-screen.sqlite"}}}
              "views"
-             {"summary" {"query" (@! fixtures/+model-query+)}
-              "detail" {"query" (@! fixtures/+inline-query+)
+             {"summary" {"resolver" (@! fixtures/+resolver-model-query+)}
+              "detail" {"resolver" (@! fixtures/+resolver-inline-query+)
                         "source" "primary"}}}}}}})
        (promise/x:promise-then
         (fn [node]
@@ -57,23 +57,23 @@
                               (node/source-get node "screen/admin" "entries-screen" "caching")
                               ["db"]))
               (repl/notify
-               {"primary-database" (xtd/get-in
+               {"primary_database" (xtd/get-in
                                     (node/source-get node "screen/admin" "entries-screen" "primary")
                                    ["config" "database"])
-                "caching-file" (xtd/get-in
+                "caching_file" (xtd/get-in
                                 (node/source-get node "screen/admin" "entries-screen" "caching")
                                 ["config" "filename"])
-                "node-id" (. node ["id"])
-                "sqlite-row-count" (db-instance/db-exec-sync sqlite-db "SELECT COUNT(*) FROM Entry;")
-                "sqlite-first" (xtd/get-in
+                "node_id" (. node ["id"])
+                "sqlite_row_count" (db-instance/db-exec-sync sqlite-db "SELECT COUNT(*) FROM Entry;")
+                "sqlite_first" (xtd/get-in
                                 (node/source-get node "screen/admin" "entries-screen" "caching")
                                 ["data" 0 "name"])
-                "summary-source" (xtd/get-in
+                "summary_source" (xtd/get-in
                                   (node/view-get node "screen/admin" "entries-screen" "summary")
                                   ["source"])}))))))))
-  => {"primary-database" "test-scratch"
-      "caching-file" "admin-screen.sqlite"
-      "node-id" "admin-screen"
-      "sqlite-row-count" 2
-      "sqlite-first" "alpha"
-      "summary-source" "caching"})
+  => {"primary_database" "test-scratch"
+      "caching_file" "admin-screen.sqlite"
+      "node_id" "admin-screen"
+      "sqlite_row_count" 2
+      "sqlite_first" "alpha"
+      "summary_source" "caching"})

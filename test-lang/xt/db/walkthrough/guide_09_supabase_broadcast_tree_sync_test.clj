@@ -181,25 +181,25 @@
                        (repl/notify
                         {"topic" "realtime:room:users-tree"
                          "status" (xt/x:first statuses)
-                         "primary-kind" "supabase"
-                         "local-kind" "sqlite"
-                         "initial-count" (xt/x:len initial-users)
-                         "updated-count" (xt/x:len cached-users)
-                         "request-profile-first" (xtd/get-in
+                         "primary_kind" "supabase"
+                         "local_kind" "sqlite"
+                         "initial_count" (xt/x:len initial-users)
+                         "updated_count" (xt/x:len cached-users)
+                         "request_profile_first" (xtd/get-in
                                                   request-out
                                                   ["db/sync" "UserAccount" 0 "profile" 0 "first_name"])
-                         "cached-nickname" (. cached-user ["nickname"])
-                         "cached-profile-first" (. cached-profile ["first_name"])
-                         "profile-row-first" (. profile-row ["first_name"])})))
+                         "cached_nickname" (. cached-user ["nickname"])
+                         "cached_profile_first" (. cached-profile ["first_name"])
+                         "profile_row_first" (. profile-row ["first_name"])})))
                    100))
              (return true)))))))
   => {"topic" "realtime:room:users-tree"
       "status" "SUBSCRIBED"
-      "primary-kind" "supabase"
-      "local-kind" "sqlite"
-      "initial-count" 0
-      "updated-count" 1
-      "request-profile-first" "Broadcast"
-      "cached-nickname" "broadcast-root"
-      "cached-profile-first" "Broadcast"
-      "profile-row-first" "Broadcast"})
+      "primary_kind" "supabase"
+      "local_kind" "sqlite"
+      "initial_count" 0
+      "updated_count" 1
+      "request_profile_first" "Broadcast"
+      "cached_nickname" "broadcast-root"
+      "cached_profile_first" "Broadcast"
+      "profile_row_first" "Broadcast"})

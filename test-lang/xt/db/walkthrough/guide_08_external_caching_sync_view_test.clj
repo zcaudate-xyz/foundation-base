@@ -67,12 +67,12 @@
            {"models"
             {"entries-screen"
              {"sources"
-              {"primary" {"query" (@! fixtures/+model-query+)}
-               "caching" {"query" (@! fixtures/+model-query+)}}
+              {"primary" {"resolver" (@! fixtures/+resolver-model-query+)}
+               "caching" {"resolver" (@! fixtures/+resolver-model-query+)}} 
               "views"
-              {"list" {"query" (@! fixtures/+model-query+)
+              {"list" {"resolver" (@! fixtures/+resolver-model-query+)
                        "source" "caching"}
-               "detail" {"query" (@! fixtures/+inline-query+)
+               "detail" {"resolver" (@! fixtures/+resolver-inline-query+)
                          "source" "primary"}}}}}}})
         (promise/x:promise-then
          (fn [node]
@@ -106,23 +106,23 @@
                              (fn [entry]
                                (return (== "gamma" (xt/x:get-key entry "name"))))))
                        (repl/notify
-                        {"initial-count" (xt/x:len (. initial ["value"]))
-                         "updated-count" (xt/x:len updated-value)
-                         "view-source" (. updated ["source"])
-                         "cached-count" (xt/x:len
+                        {"initial_count" (xt/x:len (. initial ["value"]))
+                         "updated_count" (xt/x:len updated-value)
+                         "view_source" (. updated ["source"])
+                         "cached_count" (xt/x:len
                                          (xtd/get-in
                                           (node/source-get node "screen/admin" "entries-screen" "caching")
                                           ["data"]))
-                         "has-gamma" (xt/x:arr-some
+                         "has_gamma" (xt/x:arr-some
                                       updated-value
                                       (fn [entry]
                                         (return (== "gamma" (xt/x:get-key entry "name")))))
-                         "gamma-tags" (xtd/get-in
+                         "gamma_tags" (xtd/get-in
                                       updated-value
                                       [gamma-idx "tags"])}))))))))))))
-  => {"initial-count" 2
-      "updated-count" 3
-      "view-source" "caching"
-      "cached-count" 3
-      "has-gamma" true
-      "gamma-tags" "[\"external\",\"sync\"]"})
+  => {"initial_count" 2
+      "updated_count" 3
+      "view_source" "caching"
+      "cached_count" 3
+      "has_gamma" true
+      "gamma_tags" "[\"external\",\"sync\"]"})

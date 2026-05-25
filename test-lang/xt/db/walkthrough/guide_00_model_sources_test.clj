@@ -22,7 +22,7 @@
 ^{:refer xt.db.walkthrough.guide-00-model-sources/STEP.00-structural-sources :added "4.1"}
 (fact "step 00: define primary and caching once at the model level while views keep the sql-pull query shape"
 
- (notify/wait-on [:js 10000]
+  (notify/wait-on [:js 10000]
    (-> (node/create
         {"node_id" "admin-screen"
          "db" {"schema" (@! fixtures/+schema+)
@@ -35,20 +35,49 @@
           {"models"
            {"entries-screen"
             {"views"
-             {"list" {"query" (@! fixtures/+model-query+)
+             {"list" {"resolver" (@! fixtures/+resolver-model-query+)
                       "source" "caching"}
-              "detail" {"query" (@! fixtures/+inline-query+)
+              "detail" {"resolver" (@! fixtures/+resolver-inline-query+)
                         "source" "primary"}}}}}}})
        (promise/x:promise-then
         (fn [node]
           (repl/notify
            {"sources" (xt/x:obj-keys (. (node/model-get node "screen/admin" "entries-screen") ["sources"]))
-            "list-source" (. (node/view-get node "screen/admin" "entries-screen" "list") ["source"])
-            "detail-source" (. (node/view-get node "screen/admin" "entries-screen" "detail") ["source"])
-            "list-query-keys" (xt/x:obj-keys (. (node/view-get node "screen/admin" "entries-screen" "list") ["query"]))
-            "detail-query-keys" (xt/x:obj-keys (. (node/view-get node "screen/admin" "entries-screen" "detail") ["query"]))})))))
+            "list_source" (. (node/view-get node "screen/admin" "entries-screen" "list") ["source"])
+            "detail_source" (. (node/view-get node "screen/admin" "entries-screen" "detail") ["source"])
+            "list_query_keys" (xt/x:obj-keys (. (node/view-get node "screen/admin" "entries-screen" "list") ["resolver"]))
+            "detail_query_keys" (xt/x:obj-keys (. (node/view-get node "screen/admin" "entries-screen" "detail") ["resolver"]))})))))
  => {"sources" ["primary" "caching"]
-     "list-source" "caching"
-     "detail-source" "primary"
-     "list-query-keys" ["table" "select_entry" "return_entry"]
-     "detail-query-keys" ["table" "select_entry" "select_args" "return_entry"]})
+     "list_source" "caching"
+     "detail_source" "primary"
+     "list_query_keys" ["type" "table" "select_entry" "return_entry"]
+     "detail_query_keys" ["type" "table" "select_entry" "select_args" "return_entry"]})
+
+(comment
+  (notify/wait-on [:js 10000]
+    (-> (node/create
+         {"node_id" "admin-screen"
+          "db" {"schema" (@! fixtures/+schema+)
+                "lookup" (@! fixtures/+lookup+)
+                "sources"
+                {"primary" {"kind" "postgres"}
+                 "caching" {"kind" "sqlite"}}}
+          "spaces"
+          {"screen/admin"
+           {"models"
+            {"entries-screen"
+             {"views"
+              {"list" {"resolver" (@! fixtures/+resolver-model-query+)
+                       "source" "caching"}
+               "detail" {"resolver" (@! fixtures/+resolver-inline-query+)
+                         "source" "primary"}}}}}}})
+        (promise/x:promise-then
+         (fn [node]
+           (repl/notify
+            node))))))
+
+
+(comment
+  ;; what I'd like to happen is that a shared worker is setup, and all browser 
+  ;;
+  )

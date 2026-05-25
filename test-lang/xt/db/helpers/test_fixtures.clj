@@ -38,20 +38,42 @@
     "schema"   (get-in +app-lookup+ ["Entry" :schema])}})
 
 (def +inline-query+
-  {:table "Entry"
-   :select-entry {"input" [{"symbol" "i_name" "type" "text"}]
-                  "view" {"query" {"name" "{{i_name}}"
-                                   "__deleted__" false}}}
-   :select-args ["alpha"]
-   :return-entry {"input" [{"symbol" "i_entry_id" "type" "text"}]
-                  "view" {"query" ["name" "tags"]}}})
+  {"table" "Entry"
+   "select_entry" {"input" [{"symbol" "i_name" "type" "text"}]
+                   "view" {"query" {"name" "{{i_name}}"
+                                    "__deleted__" false}}}
+   "select_args" ["alpha"]
+   "return_entry" {"input" [{"symbol" "i_entry_id" "type" "text"}]
+                   "view" {"query" ["name" "tags"]}}})
 
 (def +model-query+
-  {:table "Entry"
-   :select-entry {"input" []
-                  "view" {"query" {"__deleted__" false}}}
-   :return-entry {"input" [{"symbol" "i_entry_id" "type" "text"}]
-                  "view" {"query" ["id"
+  {"table" "Entry"
+   "select_entry" {"input" []
+                   "view" {"query" {"__deleted__" false}}}
+   "return_entry" {"input" [{"symbol" "i_entry_id" "type" "text"}]
+                   "view" {"query" ["id"
+                                    "name"
+                                    "tags"
+                                    "time_created"
+                                    "time_updated"]}}})
+
+(def +resolver-inline-query+
+  {"type" "db/query"
+   "table" "Entry"
+   "select_entry" {"input" [{"symbol" "i_name" "type" "text"}]
+                   "view" {"query" {"name" "{{i_name}}"
+                                   "__deleted__" false}}}
+   "select_args" ["alpha"]
+   "return_entry" {"input" [{"symbol" "i_entry_id" "type" "text"}]
+                   "view" {"query" ["name" "tags"]}}})
+
+(def +resolver-model-query+
+  {"type" "db/query"
+   "table" "Entry"
+   "select_entry" {"input" []
+                   "view" {"query" {"__deleted__" false}}}
+   "return_entry" {"input" [{"symbol" "i_entry_id" "type" "text"}]
+                   "view" {"query" ["id"
                                    "name"
                                    "tags"
                                    "time_created"
@@ -60,7 +82,7 @@
 (def +model-spec+
   {"views"
    {"entries"
-    {"query" +model-query+
+    {"resolver" +resolver-model-query+
      "input" []}}})
 
 (def +entry-seed+
@@ -126,39 +148,43 @@
 (def.xt ModelSpec
   {"views"
    {"main"
-    {"query" {:table "Task"
-             :return-entry {"input" [{"symbol" "i_task_id", "type" "uuid"}]
-                            "return" "jsonb"
-                            "view" {"table" "Task"
-                                    "type" "return"
-                                    "tag" "default"
-                                    "access" {"roles" {}}
-                                    "guards" []
-                                    "query" ["status"]}}
-             :return-id "00000000-0000-0000-0000-0000000000a1"}
+    {"resolver" {"type" "db/query"
+                "table" "Task"
+                "return_entry" {"input" [{"symbol" "i_task_id", "type" "uuid"}]
+                                "return" "jsonb"
+                                "view" {"table" "Task"
+                                        "type" "return"
+                                        "tag" "default"
+                                        "access" {"roles" {}}
+                                        "guards" []
+                                        "query" ["status"]}}
+                "return_id" "00000000-0000-0000-0000-0000000000a1"}
     "input" []}
     "open"
-    {"query" {:table "Task"
-              :select-entry {"input" [{"symbol" "i_status", "type" "text"}]
-                             "return" "jsonb"
-                             "view" {"table" "Task"
-                                     "type" "select"
-                                     "tag" "by_status"
-                                     "access" {"roles" {}}
-                                     "guards" []
-                                     "query" {"status" "{{i_status}}"}}}}
+    {"resolver" {"type" "db/query"
+                 "table" "Task"
+                 "select_entry" {"input" [{"symbol" "i_status", "type" "text"}]
+                                 "return" "jsonb"
+                                 "view" {"table" "Task"
+                                         "type" "select"
+                                         "tag" "by_status"
+                                         "access" {"roles" {}}
+                                         "guards" []
+                                         "query" {"status" "{{i_status}}"}}}}
      "default_input" ["open"]}}})
 
 (def.xt DependentModelSpec
   {"views"
    {"main"
-    {"query" {:table "Task"
-             :return-method "default"
-             :return-id "00000000-0000-0000-0000-0000000000a1"}
+    {"resolver" {"type" "db/query"
+                "table" "Task"
+                "return_method" "default"
+                "return_id" "00000000-0000-0000-0000-0000000000a1"}
     "input" []}
     "open"
-    {"query" {:table "Task"
-             :select-method "by_status"}
+    {"resolver" {"type" "db/query"
+                 "table" "Task"
+                 "select_method" "by_status"}
     "default_input" ["open"]
     "deps" ["main"]}}})
 

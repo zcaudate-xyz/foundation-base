@@ -36,32 +36,32 @@
            {"models"
             {"entries-screen"
              {"views"
-              {"list" {"query" (@! fixtures/+model-query+)
+              {"list" {"resolver" (@! fixtures/+resolver-model-query+)
                        "source" "caching"}
-               "detail" {"query" (@! fixtures/+inline-query+)
+               "detail" {"resolver" (@! fixtures/+resolver-inline-query+)
                          "source" "primary"}}}}}}})
         (promise/x:promise-then
          (fn [node]
            (repl/notify
-            {"primary-kind" (xtd/get-in
+            {"primary_kind" (xtd/get-in
                             (node/source-get node "screen/admin" "entries-screen" "primary")
                             ["kind"])
-             "caching-kind" (xtd/get-in
+             "caching_kind" (xtd/get-in
                             (node/source-get node "screen/admin" "entries-screen" "caching")
                             ["kind"])
-             "list-table" (xtd/get-in
+             "list_table" (xtd/get-in
                           (node/view-get node "screen/admin" "entries-screen" "list")
-                          ["query" "table"])
-             "detail-query-keys" (xt/x:obj-keys
+                          ["resolver" "table"])
+             "detail_query_keys" (xt/x:obj-keys
                                  (. (node/view-get node "screen/admin" "entries-screen" "detail")
-                                    ["query"]))
-             "node-id" (. node ["id"])
-             "caching-sync-from" (xtd/get-in
+                                    ["resolver"]))
+             "node_id" (. node ["id"])
+             "caching_sync_from" (xtd/get-in
                                  (node/source-get node "screen/admin" "entries-screen" "caching")
                                  ["sync_from"])})))))
-  => {"primary-kind" "postgres"
-      "caching-kind" "sqlite"
-      "list-table" "Entry"
-      "detail-query-keys" ["table" "select_entry" "select_args" "return_entry"]
-      "node-id" "admin-screen"
-      "caching-sync-from" "primary"})
+  => {"primary_kind" "postgres"
+      "caching_kind" "sqlite"
+      "list_table" "Entry"
+      "detail_query_keys" ["type" "table" "select_entry" "select_args" "return_entry"]
+      "node_id" "admin-screen"
+      "caching_sync_from" "primary"})
