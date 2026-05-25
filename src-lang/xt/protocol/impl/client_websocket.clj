@@ -47,33 +47,140 @@
     (return value)
     (return (promise/x:promise-run value))))
 
+(defn.xt default-disconnect-sync-lua-nginx
+  "disconnects a lua.nginx websocket client using send_close when available"
+  {:added "4.1.3"}
+  [raw code reason]
+  (var send-close-fn (xt/x:get-key raw "send_close"))
+  (when (xt/x:is-function? send-close-fn)
+    (if (xt/x:has-key? raw "send_close")
+      (return (send-close-fn (or code 1000) (or reason "")))
+      (return (. raw (send_close (or code 1000) (or reason ""))))))
+  (return nil))
+
+(defn.xt default-send-sync-dart
+  "sends a payload through a dart websocket using add when available"
+  {:added "4.1.3"}
+  [raw payload]
+  (var add-fn (xt/x:get-key raw "add"))
+  (when (xt/x:is-function? add-fn)
+    (if (xt/x:has-key? raw "add")
+      (return (add-fn payload))
+      (return (. raw (add payload)))))
+  (return nil))
+
+(defn.xt default-send-sync-lua-nginx
+  "sends a payload through a lua.nginx websocket using send_text when available"
+  {:added "4.1.3"}
+  [raw payload]
+  (var send-text-fn (xt/x:get-key raw "send_text"))
+  (when (xt/x:is-function? send-text-fn)
+    (if (xt/x:has-key? raw "send_text")
+      (return (send-text-fn payload))
+      (return (. raw (send_text payload)))))
+  (return nil))
+
+(defn.xt default-add-listener-sync-python
+  "attaches a listener using python-style add_listener handlers when available"
+  {:added "4.1.3"}
+  [raw event handler]
+  (var add-fn (or (xt/x:get-key raw "add_listener")
+                  (xt/x:get-key raw "addListener")))
+  (when (xt/x:is-function? add-fn)
+    (if (xt/x:has-key? raw "add_listener")
+      (do (add-fn event handler)
+          (return raw))
+      (if (xt/x:has-key? raw "addListener")
+        (do (add-fn event handler)
+            (return raw))
+        (do (. raw (addListener event handler))
+            (return raw)))))
+  (return nil))
+
+(defn.xt default-add-listener-sync-dart
+  "attaches a listener using dart stream listen handlers when available"
+  {:added "4.1.3"}
+  [raw event handler]
+  (var listen-fn (xt/x:get-key raw "listen"))
+  (when (xt/x:is-function? listen-fn)
+    (if (xt/x:has-key? raw "listen")
+      (do (listen-fn handler)
+          (return raw))
+      (do (. raw (listen handler))
+          (return raw))))
+  (return nil))
+
+(defn.xt default-add-listener-sync-lua-nginx
+  "attaches a listener using lua.nginx on handlers when available"
+  {:added "4.1.3"}
+  [raw event handler]
+  (var on-fn (xt/x:get-key raw "on"))
+  (when (xt/x:is-function? on-fn)
+    (if (xt/x:has-key? raw "on")
+      (do (on-fn event handler)
+          (return raw))
+      (do (. raw (on event handler))
+          (return raw))))
+  (return nil))
+
 (defn.xt default-disconnect-sync
   "disconnects a raw websocket client"
   {:added "4.1.3"}
   [raw code reason]
+  (var disconnect-fn (xt/x:get-key raw "disconnect"))
+  (when (xt/x:is-function? disconnect-fn)
+    (if (xt/x:has-key? raw "disconnect")
+      (return (disconnect-fn code reason))
+      (return (. raw (disconnect code reason)))))
+  (var lua-out (-/default-disconnect-sync-lua-nginx raw code reason))
+  (when (xt/x:not-nil? lua-out)
+    (return lua-out))
   (var close-fn (xt/x:get-key raw "close"))
   (when (not (xt/x:is-function? close-fn))
     (xt/x:err "Websocket client missing close implementation"))
   (if (xt/x:not-nil? code)
-    (return (. raw (close code (or reason ""))))
-    (return (. raw (close)))))
+    (if (xt/x:has-key? raw "close")
+      (return (close-fn code (or reason "")))
+      (return (. raw (close code (or reason "")))))
+    (if (xt/x:has-key? raw "close")
+      (return (close-fn))
+      (return (. raw (close))))))
 
 (defn.xt default-send-sync
   "sends a payload through a raw websocket client"
   {:added "4.1.3"}
   [raw payload]
+  (var dart-out (-/default-send-sync-dart raw payload))
+  (when (xt/x:not-nil? dart-out)
+    (return dart-out))
+  (var lua-out (-/default-send-sync-lua-nginx raw payload))
+  (when (xt/x:not-nil? lua-out)
+    (return lua-out))
   (var send-fn (xt/x:get-key raw "send"))
   (when (not (xt/x:is-function? send-fn))
     (xt/x:err "Websocket client missing send implementation"))
-  (return (. raw (send payload))))
+  (if (xt/x:has-key? raw "send")
+    (return (send-fn payload))
+    (return (. raw (send payload)))))
 
 (defn.xt default-add-listener-sync
   "attaches an event listener to a raw websocket client"
   {:added "4.1.3"}
   [raw event handler]
+  (var python-out (-/default-add-listener-sync-python raw event handler))
+  (when (xt/x:not-nil? python-out)
+    (return python-out))
+  (var dart-out (-/default-add-listener-sync-dart raw event handler))
+  (when (xt/x:not-nil? dart-out)
+    (return dart-out))
+  (var lua-out (-/default-add-listener-sync-lua-nginx raw event handler))
+  (when (xt/x:not-nil? lua-out)
+    (return lua-out))
   (var add-fn (xt/x:get-key raw "addEventListener"))
   (if (xt/x:is-function? add-fn)
-    (. raw (addEventListener event handler))
+    (if (xt/x:has-key? raw "addEventListener")
+      (add-fn event handler)
+      (. raw (addEventListener event handler)))
     (xt/x:set-key raw (xt/x:cat "on" event) handler))
   (return raw))
 

@@ -246,3 +246,88 @@
       "request-name" "zeta"
       "cached-name" "zeta"
       "closed" [1000 "supabase-realtime/unsubscribe"]})
+
+^{:refer xt.db.runtime.supabase-realtime/subscribe :added "4.1.4"}
+(fact "supports custom topics and custom inbound event names with request transforms"
+
+  (notify/wait-on [:js 2000]
+    (var cache
+         (xtd/obj-assign
+          (xdb/db-create {"::" "db.cache"}
+                         (@! fixtures/+schema+)
+                         (@! fixtures/+lookup+)
+                         nil)
+          {"schema" (@! fixtures/+schema+)}))
+    (var handlers {})
+    (var sent [])
+    (var statuses [])
+    (var requests [])
+    (var request-transform
+         (fn [payload _source _opts]
+           (return
+            {"db/sync"
+             {"Entry"
+              [{"id" (xt/x:get-key payload "id")
+                "name" (xt/x:get-key payload "name")
+                "tags" (xt/x:get-key payload "tags")
+                "__deleted__" false}]}})))
+    (var driver
+         (ws/driver-create
+          {"connect_sync"
+           (fn [_url]
+             (return {"send" (fn [payload]
+                               (xt/x:arr-push sent payload)
+                               (return true))
+                      "close" (fn [_code _reason]
+                                (return true))
+                      "addEventListener" (fn [event handler]
+                                           (xt/x:set-key handlers event handler)
+                                           (return true))}))}))
+    (promise/x:promise-then
+     (realtime/subscribe
+      {"client" {"transport" driver
+                 "base_url" "https://db.test"
+                 "api_key" "key-1"
+                 "topic" "room:entries"
+                 "message_event" "broadcast"
+                 "request_transform" request-transform}}
+      cache
+      {"on_status" (fn [status _frame]
+                     (xt/x:arr-push statuses status))
+       "on_request" (fn [request _payload _frame]
+                      (xt/x:arr-push requests request))})
+     (fn [sub]
+       ((xt/x:get-key handlers "message")
+        {"data"
+         (xt/x:json-encode
+          {"topic" "room:entries"
+           "event" "phx_reply"
+           "payload" {"status" "ok"}})})
+       ((xt/x:get-key handlers "message")
+        {"data"
+         (xt/x:json-encode
+          {"topic" "room:entries"
+           "event" "broadcast"
+           "payload" {"data" {"id" "00000000-0000-0000-0000-0000000000ea"
+                              "name" "custom"
+                              "tags" ["topic" "event"]}}})})
+       (return
+        (promise/x:promise-then
+         (realtime/unsubscribe sub)
+         (fn [_]
+           (repl/notify
+            {"join-topic" (xtd/get-in (xt/x:json-decode (xt/x:get-idx sent 0)) ["topic"])
+             "status" (xt/x:first statuses)
+             "request-name" (xtd/get-in requests [0 "db/sync" "Entry" 0 "name"])
+             "cached-name" (xtd/get-in
+                            (xdb/db-pull-sync
+                             cache
+                             (@! fixtures/+schema+)
+                             ["Entry"
+                              {"id" "00000000-0000-0000-0000-0000000000ea"}
+                              ["name"]])
+                            [0 "name"])})))))))
+  => {"join-topic" "room:entries"
+      "status" "SUBSCRIBED"
+      "request-name" "custom"
+      "cached-name" "custom"})

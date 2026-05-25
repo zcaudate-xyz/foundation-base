@@ -26,8 +26,8 @@
                    (return true))
           "close" (fn [_code _reason]
                     (return true))
-          "addEventListener" (fn [_event _handler]
-                               (return true))}))
+         "addEventListener" (fn [_event _handler]
+                              (return true))}))
    (var client
         (py-ws/client
          {"send" (fn [payload]
@@ -36,9 +36,9 @@
           "close" (fn [code reason]
                     (xt/x:arr-push closed [code reason])
                     (return true))
-           "addEventListener" (fn [event handler]
-                                (xt/x:set-key handlers event handler)
-                                (return true))}))
+          "addEventListener" (fn [event handler]
+                               (xt/x:set-key handlers event handler)
+                               (return true))}))
     [(ws/client? client)
      (promise/x:promise-native? (ws/send async-client "hello"))
      (ws/send-sync client "world")

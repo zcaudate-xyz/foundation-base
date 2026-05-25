@@ -242,7 +242,18 @@
     (return (xt/x:arr-map filters
                           (fn [filter]
                             (return (-/normalize-filter filter source opts))))))
-  (return [(-/normalize-filter {} source opts)]))
+  (when (or (xt/x:not-nil? (xt/x:get-key opts "filter"))
+            (xt/x:not-nil? (xt/x:get-key raw-client "filter")))
+    (return [(-/normalize-filter
+              (or (xt/x:get-key opts "filter")
+                  (xt/x:get-key raw-client "filter")
+                  {})
+              source
+              opts)]))
+  (when (or (xt/x:not-nil? (xt/x:get-key opts "table_name"))
+            (xt/x:not-nil? (xt/x:get-key raw-client "table_name")))
+    (return [(-/normalize-filter {} source opts)]))
+  (return nil))
 
 (defn.xt resolve-ref
   "resolves a string reference id for channel frames"
@@ -254,6 +265,24 @@
                (xt/x:get-key raw-client "ref")
                (xt/x:now-ms)))))
 
+(defn.xt resolve-message-event
+  "resolves the inbound event name to handle on the subscribed topic"
+  {:added "4.1.4"}
+  [source opts]
+  (var raw-client (-/raw-client source))
+  (return (or (xt/x:get-key opts "message_event")
+              (xt/x:get-key raw-client "message_event")
+              "postgres_changes")))
+
+(defn.xt resolve-request-transform
+  "resolves an optional payload->request transform for custom topic events"
+  {:added "4.1.4"}
+  [source opts]
+  (var raw-client (-/raw-client source))
+  (return (or (xt/x:get-key opts "request_transform")
+              (xt/x:get-key raw-client "request_transform")
+              nil)))
+
 (defn.xt join-payload
   "creates the phoenix join payload for a realtime subscription"
   {:added "4.1.4"}
@@ -263,8 +292,9 @@
   (var payload
        {"config" {"broadcast" {"ack" false
                                "self" false}
-                  "presence" {"key" ""}
-                  "postgres_changes" filters}})
+                  "presence" {"key" ""}}})
+  (when (xt/x:not-nil? filters)
+    (xtd/set-in payload ["config" "postgres_changes"] filters))
   (when (xt/x:not-nil? (xt/x:get-key scaffold "auth_token"))
     (xt/x:set-key payload
                   "access_token"
@@ -325,7 +355,9 @@
    - params
    - filters
    - topic
-   - ref"
+   - ref
+   - message_event
+   - request_transform"
   {:added "4.1.4"}
   [raw]
   (when (-/client? raw)
@@ -465,6 +497,32 @@
     (-/apply-sync-request local-db request source opts))
   (return [true request]))
 
+(defn.xt payload->request
+  "normalizes inbound realtime payloads into xt.db requests"
+  {:added "4.1.4"}
+  [payload source opts]
+  (cond (or (xt/x:not-nil? (xt/x:get-key payload "db/sync"))
+           (xt/x:not-nil? (xt/x:get-key payload "db/remove")))
+       (return payload)
+
+       (xt/x:is-function? (-/resolve-request-transform source opts))
+       (return ((-/resolve-request-transform source opts) payload source opts))
+
+       (== "postgres_changes" (-/resolve-message-event source opts))
+       (return (-/postgres-change->sync-request payload source opts))
+
+       :else
+       (return nil)))
+
+(defn.xt apply-request
+  "applies a normalized xt.db request to the local cache db"
+  {:added "4.1.4"}
+  [local-db payload source opts]
+  (var request (-/payload->request payload source opts))
+  (when request
+   (-/apply-sync-request local-db request source opts))
+  (return [true request]))
+
 (defn.xt handle-frame
   "handles inbound realtime websocket frames"
   {:added "4.1.4"}
@@ -475,6 +533,7 @@
   (var opts (or (xt/x:get-key subscription "opts") {}))
   (var on-status (xt/x:get-key subscription "on_status"))
   (var on-request (xt/x:get-key subscription "on_request"))
+  (var message-event (-/resolve-message-event source opts))
   (cond (and (== topic (xt/x:get-key frame "topic"))
              (== "phx_reply" (xt/x:get-key frame "event")))
         (do (when (xt/x:is-function? on-status)
@@ -487,11 +546,11 @@
             (return frame))
 
         (and (== topic (xt/x:get-key frame "topic"))
-             (== "postgres_changes" (xt/x:get-key frame "event")))
+            (== message-event (xt/x:get-key frame "event")))
         (do (var payload (or (xtd/get-in frame ["payload" "data"])
                              (xt/x:get-key frame "payload")))
             (var local-db (xt/x:get-key subscription "local_db"))
-            (var [ok request] (-/apply-postgres-change local-db payload source opts))
+            (var [ok request] (-/apply-request local-db payload source opts))
             (when (xt/x:is-function? on-request)
               (on-request request payload frame))
             (return request))
