@@ -3,7 +3,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.db.node.view-model :as model]
+  {:require [[xt.db.node.model-view :as model]
              [xt.db.node.view-util :as util]
              [xt.db.node.schema-spec :as spec]
              [xt.db.runtime :as db-runtime]

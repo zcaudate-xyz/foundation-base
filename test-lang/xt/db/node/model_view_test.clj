@@ -1,4 +1,4 @@
-(ns xt.db.node.view-model-test
+(ns xt.db.node.model-view-test
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
             [xt.db.helpers.test-fixtures :as fixtures])
@@ -8,7 +8,7 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.node :as node]
-             [xt.db.node.view-model :as model]
+             [xt.db.node.model-view :as model]
              [xt.db.helpers.test-fixtures :as fixtures]
              [js.lib.driver-sqlite :as js-sqlite]
              [xt.lang.common-data :as xtd]
@@ -21,7 +21,82 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.node.view-model/model-put :added "4.1"}
+^{:refer xt.db.node.model-view/normalize-sources :added "4.1"}
+(fact "normalizes shared primary and caching sources"
+
+  (!.js
+    (var out
+         (model/normalize-sources
+          {"primary" {"kind" "sqlite"}}
+          {"cache_alt" {"sync_from" "primary"}}))
+    [(. out ["primary"] ["kind"])
+     (. out ["caching"] ["sync_from"])
+     (. out ["cache_alt"] ["sync_from"])])
+  => ["sqlite" "primary" "primary"])
+
+^{:refer xt.db.node.model-view/normalize-view-source :added "4.1"}
+(fact "normalizes view source declarations"
+  (!.js
+    [(model/normalize-view-source {"source" "primary"})
+     (model/normalize-view-source {"use" {"source" "archive"}})
+     (model/normalize-view-source {})])
+  => ["primary" "archive" "caching"])
+
+^{:refer xt.db.node.model-view/base-state :added "4.1"}
+(fact "creates the base view state with primary and caching sources"
+
+  (!.js
+    (var out
+         (model/base-state {"schema" {"Task" {}}
+                            "sources" {"primary" {"kind" "postgres"}
+                                       "caching" {"kind" "sqlite"}}}))
+    [(. out ["::"])
+     (. (. out ["sources"]) ["primary"] ["kind"])
+     (. (. out ["sources"]) ["caching"] ["kind"])
+     (xt/x:obj-keys (. out ["models"]))])
+  => ["xt.db.state"
+      "postgres"
+      "sqlite"
+      []])
+
+^{:refer xt.db.node.model-view/put-model :added "4.1"}
+(fact "normalizes model sources once and lets views declare a stable source role"
+
+  (!.js
+    (var out (model/base-state {}))
+    (model/put-model out
+                     "entries"
+                     {"sources" {"primary" {"kind" "postgres"}}
+                      "views" {"list" {"query" {"table" "Task"}}
+                               "detail" {"query" {"table" "Task"}
+                                         "default_input" ["alpha"]
+                                         "source" "primary"}}})
+    [(xt/x:obj-keys (. (. out ["models"]) ["entries"] ["sources"]))
+     (xtd/get-in out ["models" "entries" "views" "detail" "input"])
+     (xtd/get-in out ["models" "entries" "views" "detail" "source"])])
+  => [["primary" "caching"]
+      ["alpha"]
+      "primary"])
+
+^{:refer xt.db.node.model-view/sync-source :added "4.1"}
+(fact "syncs caching from primary through the stable model source binding"
+
+  (!.js
+    (var out (model/base-state {}))
+    (model/put-model out
+                     "entries"
+                     {"views" {"list" {"query" {"table" "Task"}}}})
+    (model/set-source-data out
+                           "entries"
+                           "primary"
+                           [{"id" "t1" "name" "alpha"}])
+    (model/sync-source out "entries" "caching")
+    [(xtd/get-in out ["models" "entries" "sources" "primary" "data" 0 "name"])
+     (xtd/get-in out ["models" "entries" "sources" "caching" "data" 0 "name"])
+     (xt/x:is-number? (xtd/get-in out ["models" "entries" "sources" "caching" "updated_at"]))])
+  => ["alpha" "alpha" true])
+
+^{:refer xt.db.node.model-view/model-put :added "4.1"}
 (fact "stores a clean view model with structural primary and caching sources"
 
   (!.js
@@ -117,7 +192,7 @@
       "row-count" 2
       "first-name" "alpha"})
 
-^{:refer xt.db.node.view-model/view-refresh.resolver :added "4.1"}
+^{:refer xt.db.node.model-view/view-refresh.resolver :added "4.1"}
 (fact "refreshes a live sqlite view from a resolver with type db/query"
 
   (notify/wait-on [:js 10000]
@@ -162,7 +237,7 @@
       "first-name" "alpha"
       "status" "ready"})
 
-^{:refer xt.db.node.view-model/query.wrapper :added "4.1"}
+^{:refer xt.db.node.model-view/query.wrapper :added "4.1"}
 (fact "queries and refreshes a registered resolver-backed view through request handlers"
 
   (notify/wait-on [:js 10000]
@@ -218,7 +293,7 @@
       "refresh-count" 2
       "status" "ready"})
 
-^{:refer xt.db.node.view-model/sync.wrapper :added "4.1"}
+^{:refer xt.db.node.model-view/sync.wrapper :added "4.1"}
 (fact "applies db/sync and db/remove through request handlers on model sources"
 
   (notify/wait-on :js
@@ -269,7 +344,51 @@
       "names" ["alpha" "gamma"]
       "status" "ready"})
 
-^{:refer xt.db.node.view-model/source-refresh :added "4.1"}
+^{:refer xt.db.node.model-view/view-refresh.remote :added "4.1"}
+(fact "refreshes a local view from a remote registered view in another space"
+
+  (notify/wait-on :js
+    (var local-node (event-node/node-create {"id" "node-remote"}))
+    (model/install local-node nil)
+    (model/model-put
+     local-node
+     "screen/server"
+     "entries-server"
+     {"views"
+      {"list-remote" {"source" "primary"}}})
+    (model/source-put
+     local-node
+     "screen/server"
+     "entries-server"
+     "primary"
+     [{"id" "00000000-0000-0000-0000-0000000000d1"
+       "name" "alpha"}
+      {"id" "00000000-0000-0000-0000-0000000000d2"
+       "name" "beta"}])
+    (model/model-put
+     local-node
+     "screen/client"
+     "entries-client"
+     {"views"
+      {"list-local"
+       {"source" "primary"
+        "remote" {"space" "screen/server"
+                  "model_id" "entries-server"
+                  "view_id" "list-remote"}}}})
+    (-> (node/view-refresh local-node "screen/client" "entries-client" "list-local")
+        (promise/x:promise-then
+         (fn [result]
+           (repl/notify
+            {"row-count" (xt/x:len (. result ["value"]))
+             "first-name" (xtd/get-in (. result ["value"]) [0 "name"])
+             "status" (. result ["status"])
+             "source" (. result ["source"])})))))
+  => {"row-count" 2
+      "first-name" "alpha"
+      "status" "ready"
+      "source" "primary"})
+
+^{:refer xt.db.node.model-view/source-refresh :added "4.1"}
 (fact "syncs a live primary sqlite source into a live caching sqlite source"
 
   (notify/wait-on [:js 10000]
@@ -317,7 +436,7 @@
        "cached-first" "alpha"
        "list-source" "caching"})
 
-^{:refer xt.db.node.view-model/model-sync :added "4.1"}
+^{:refer xt.db.node.model-view/model-sync :added "4.1"}
 (fact "syncs caching from primary and refreshes views from their declared source roles"
 
   (notify/wait-on :js

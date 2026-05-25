@@ -4,8 +4,7 @@
 (l/script :xtalk
   {:require [[xt.db.node.schema-spec :as spec]
              [xt.substrate.page-state :as page-state]
-             [xt.lang.spec-base :as xt]
-             [xt.lang.common-data :as xtd]]})
+             [xt.lang.spec-base :as xt]]})
 
 (defn.xt identity-wrapper
   "passes through a context-aware handler"

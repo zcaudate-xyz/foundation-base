@@ -1,5 +1,6 @@
 (ns xt.substrate.page-model-test
-  (:require [hara.lang :as l])
+  (:require [hara.lang :as l]
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 ^{:seedgen/root {:all true}}
@@ -8,6 +9,8 @@
    :require [[xt.substrate.page-model :as page-model]
              [xt.substrate :as substrate]
              [xt.lang.common-data :as xtd]
+             [xt.lang.common-repl :as repl]
+             [xt.lang.spec-promise :as promise]
              [xt.lang.spec-base :as xt]]})
 
 (fact:global
@@ -65,5 +68,39 @@
                           (return {"wrapped" result}))}}}})
     (page-model/view-refresh node "screen/main" "orders" "detail"))
   => {"value" {"wrapped" {"id" "task-2"}}
+      "status" "ready"
+      "error" nil})
+
+^{:refer xt.substrate.page-model/view-refresh.api :added "4.1"}
+(fact "runs an fn/api resolver through substrate request"
+  (notify/wait-on :js
+    (var node
+         (substrate/node-create
+          {"id" "node-c"
+           "spaces" {"server" {"state" {}}}
+           "handlers"
+           {"entry/get"
+            {"fn"
+             (fn [space args request node]
+               (return {"id" (xtd/get-in (xt/x:first args) ["id"])
+                        "space_id" (. space ["id"])}))}}}))
+    (page-model/model-put
+     node
+     "screen/main"
+     "orders"
+     {"state" {"selected_id" "task-3"}
+      "views"
+      {"detail"
+       {"resolver"
+        {"type" "fn/api"
+         "target" "server"
+         "action" "entry/get"
+         "args_fn" (fn [ctx]
+                     (return [{"id" (xtd/get-in ctx ["model" "state" "selected_id"])}]))}}}})
+    (-> (page-model/view-refresh node "screen/main" "orders" "detail")
+        (promise/x:promise-then
+         (fn [result]
+           (repl/notify result)))))
+  => {"value" {"id" "task-3" "space_id" "server"}
       "status" "ready"
       "error" nil})

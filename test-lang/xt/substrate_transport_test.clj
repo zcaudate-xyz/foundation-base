@@ -9,7 +9,7 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
-             [xt.db.node.view-model :as model]
+             [xt.db.node.model-view :as model]
              [xt.db.helpers.test-fixtures :as fixtures]
              [xt.substrate :as event-node]]})
 
@@ -18,7 +18,7 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
-             [xt.db.node.view-model :as model]
+             [xt.db.node.model-view :as model]
              [xt.db.helpers.test-fixtures :as fixtures]
              [xt.substrate :as event-node]]})
 
@@ -27,7 +27,7 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
-             [xt.db.node.view-model :as model]
+             [xt.db.node.model-view :as model]
              [xt.db.helpers.test-fixtures :as fixtures]
              [xt.substrate :as event-node]]})
 

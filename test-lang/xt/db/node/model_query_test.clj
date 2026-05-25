@@ -1,4 +1,4 @@
-(ns xt.db.runtime.model-query-test
+(ns xt.db.node.model-query-test
   (:require [hara.lang :as l]
             [xt.db.helpers.data-main-test :as sample])
   (:use code.test))
@@ -6,7 +6,7 @@
 ^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.db.runtime.model-query :as model-query]
+   :require [[xt.db.node.model-query :as model-query]
              [xt.db.node.schema-state :as schema-state]
              [xt.db.helpers.data-main-test :as sample]
              [xt.lang.spec-base :as xt]]})
@@ -29,7 +29,7 @@
       "return" "jsonb"
       "view" {"query" ["id" "nickname"]}}}}})
 
-^{:refer xt.db.runtime.model-query/prepare-resolver :added "4.1"}
+^{:refer xt.db.node.model-query/prepare-resolver :added "4.1"}
 (fact "prepares a db/query resolver through schema-query"
   (!.js
     (var [ok prepared]

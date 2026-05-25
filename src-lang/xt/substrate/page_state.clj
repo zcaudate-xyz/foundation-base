@@ -3,10 +3,9 @@
 
 (l/script :xtalk
   {:require [[xt.event.base-view :as event-view]
+             [xt.substrate.page-spec :as page-spec]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]]})
-
-(def$.xt STATE_TAG "substrate.page.state")
 
 (defn.xt identity-wrapper
   "passes through a context-aware handler"
@@ -74,13 +73,9 @@
   [model-id view]
   (var out-views [])
   (var out-state [])
-  (var deps (or (xt/x:get-key view "deps") []))
-  (var raw-views (:? (xt/x:is-object? deps)
-                     (or (xt/x:get-key deps "views") [])
-                     deps))
-  (var raw-state (:? (xt/x:is-object? deps)
-                     (or (xt/x:get-key deps "state") [])
-                     []))
+  (var deps (page-spec/view-deps view))
+  (var raw-views (xt/x:get-key deps "views"))
+  (var raw-state (xt/x:get-key deps "state"))
   (xt/for:array [dep (or raw-views [])]
     (var path (-/normalize-view-dep model-id dep))
     (when (and (xt/x:not-nil? path)
@@ -152,7 +147,7 @@
   {:added "4.1"}
   [opts]
   (:= opts (or opts {}))
-  (return {"::" "substrate.page.state"
+  (return {"::" page-spec/STATE_TAG
            "models" {}
            "meta" (or (xt/x:get-key opts "meta") {})
            "opts" opts}))
@@ -161,18 +156,14 @@
   "normalizes a model input into a view map"
   {:added "4.1"}
   [model-spec]
-  (return (or (xt/x:get-key model-spec "views")
-              model-spec
-              {})))
+  (return (page-spec/model-views model-spec)))
 
 (defn.xt normalize-view
   "normalizes a single view record"
   {:added "4.1"}
   [view-id view]
   (:= view (xtd/clone-nested (or view {})))
-  (var default_input (or (xt/x:get-key view "input")
-                         (xt/x:get-key view "default_input")
-                         []))
+  (var default_input (page-spec/view-default-input view))
   (var default-value (xt/x:get-key view "value"))
   (var carry (xtd/obj-clone view))
   (xt/x:del-key carry "input")
@@ -195,7 +186,7 @@
   (xt/x:obj-assign runtime carry)
   (xt/x:set-key runtime "id" view-id)
   (xt/x:set-key runtime "value" default-value)
-  (xt/x:set-key runtime "status" "idle")
+  (xt/x:set-key runtime "status" page-spec/STATUS_IDLE)
   (xt/x:set-key runtime "pending" false)
   (xt/x:set-key runtime "error" nil)
   (xt/x:set-key runtime "updated_at" nil)
@@ -210,8 +201,8 @@
     (xt/x:set-key views view-id (-/normalize-view view-id view)))
   (var model {"id" model-id
               "meta" (or (xt/x:get-key model-spec "meta") {})
-              "state" (xtd/clone-nested (or (xt/x:get-key model-spec "state") {}))
-              "actions" (xtd/clone-nested (or (xt/x:get-key model-spec "actions") {}))
+              "state" (xtd/clone-nested (page-spec/model-state model-spec))
+              "actions" (xtd/clone-nested (page-spec/model-actions model-spec))
               "views" views
               "deps" {}
               "state_deps" {}
