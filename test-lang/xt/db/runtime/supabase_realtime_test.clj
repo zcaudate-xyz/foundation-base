@@ -1,13 +1,15 @@
 (ns xt.db.runtime.supabase-realtime-test
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
-            [xt.db.helpers.test-fixtures :as fixtures])
+            [xt.db.helpers.test-fixtures :as fixtures]
+            [xt.db.helpers.supabase-pull-live-test :as live])
   (:use code.test))
 
 ^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.db.runtime :as xdb]
+   :require [[js.lib.client-websocket :as js-ws]
+            [xt.db.runtime :as xdb]
              [xt.db.runtime.supabase-realtime :as realtime]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]
@@ -17,8 +19,21 @@
              [xt.db.helpers.test-fixtures :as fixtures]]})
 
 (fact:global
- {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)
+          (do (live/init-live-postgres-runtime!)
+              (l/rt:setup (live/pg-rt) live/+postgres-module+)
+              (live/ensure-public-entry-table!)
+              (live/enable-public-entry-realtime!)
+              (live/reload-postgrest! live/+public-schema+)
+              (live/refresh-live-supabase-config!)
+              (live/cleanup-public-entry! live/+live-realtime-entry-name+)
+              true)]
+  :teardown [(do (live/cleanup-public-entry! live/+live-realtime-entry-name+)
+                 (l/rt:teardown (live/pg-rt) live/+postgres-module+)
+                 (alter-var-root #'live/+postgres-runtime+ (constantly nil))
+                 (alter-var-root #'live/+live-supabase-config+ (constantly nil))
+                 true)
+             (l/rt:stop)]})
 
 ^{:refer xt.db.runtime.supabase-realtime/prepare-connect-url :added "4.1.4"}
 (fact "wraps websocket transports in a tagged supabase realtime client descriptor"
@@ -151,100 +166,113 @@
      ["id" "name"]]))
   => [])
 
-^{:refer xt.db.runtime.supabase-realtime/subscribe :added "4.1.4"}
-(fact "subscribes through the websocket client protocol and applies incoming changes"
+^{:refer xt.db.runtime.supabase-realtime/subscribe :added "4.1.4"
+  :setup [(live/cleanup-public-entry! live/+live-realtime-entry-name+)]}
+(fact "subscribes through a local supabase websocket and applies incoming changes"
 
-  (notify/wait-on [:js 2000]
-    (var cache
-         (xtd/obj-assign
-          (xdb/db-create {"::" "db.cache"}
-                         (@! fixtures/+schema+)
-                         (@! fixtures/+lookup+)
-                         nil)
-          {"schema" (@! fixtures/+schema+)}))
-    (var handlers {})
-    (var sent [])
-    (var connected [])
-    (var closed [])
-    (var statuses [])
-    (var requests [])
-    (var driver
-         (ws/driver-create
-          {"connect_sync"
-           (fn [url]
-             (xt/x:arr-push connected url)
-             (return {"send" (fn [payload]
-                               (xt/x:arr-push sent payload)
-                               (return true))
-                      "close" (fn [code reason]
-                                (xt/x:arr-push closed [code reason])
-                                (return true))
-                      "addEventListener" (fn [event handler]
-                                           (xt/x:set-key handlers event handler)
-                                           (return true))}))}))
-    (promise/x:promise-then
-     (realtime/subscribe
-      {"client" {"transport" driver
-                 "base_url" "https://db.test"
-                 "api_key" "key-1"
-                 "auth_token" "token-1"
-                 "schema_name" "public"
-                 "table_name" "Entry"}}
-      cache
-      {"on_status" (fn [status _frame]
-                     (xt/x:arr-push statuses status))
-       "on_request" (fn [request _payload _frame]
-                      (xt/x:arr-push requests request))})
-     (fn [sub]
-       ((xt/x:get-key handlers "message")
-        {"data"
-         (xt/x:json-encode
-          {"topic" "realtime:public:Entry"
-           "event" "phx_reply"
-           "payload" {"status" "ok"}})})
-       ((xt/x:get-key handlers "message")
-        {"data"
-         (xt/x:json-encode
-          {"topic" "realtime:public:Entry"
-           "event" "postgres_changes"
-           "payload" {"data" {"eventType" "INSERT"
-                              "table" "Entry"
-                              "new" {"id" "00000000-0000-0000-0000-0000000000d4"
-                                     "name" "zeta"
-                                     "tags" ["realtime"]}}}})})
-       (return
-        (promise/x:promise-then
-         (realtime/unsubscribe sub)
-         (fn [_]
-           (repl/notify
-            {"connected" (xt/x:first connected)
-             "join-event" (xtd/get-in (xt/x:json-decode (xt/x:get-idx sent 0)) ["event"])
-             "join-topic" (xtd/get-in (xt/x:json-decode (xt/x:get-idx sent 0)) ["topic"])
-             "join-table" (xtd/get-in (xt/x:json-decode (xt/x:get-idx sent 0))
-                                      ["payload" "config" "postgres_changes" 0 "table"])
-             "join-token" (xtd/get-in (xt/x:json-decode (xt/x:get-idx sent 0))
-                                      ["payload" "access_token"])
-             "leave-event" (xtd/get-in (xt/x:json-decode (xt/x:get-idx sent 1)) ["event"])
-             "status" (xt/x:first statuses)
-             "request-name" (xtd/get-in requests [0 "db/sync" "Entry" 0 "name"])
-             "cached-name" (xtd/get-in
-                            (xdb/db-pull-sync
-                             cache
-                             (@! fixtures/+schema+)
-                             ["Entry"
-                              {"id" "00000000-0000-0000-0000-0000000000d4"}
-                              ["name"]])
-                            [0 "name"])
-             "closed" (xt/x:get-idx closed 0)})))))))
-  => {"connected" "wss://db.test/realtime/v1/websocket?vsn=1.0.0&apikey=key-1"
-      "join-event" "phx_join"
-      "join-topic" "realtime:public:Entry"
-      "join-table" "Entry"
-      "join-token" "token-1"
-      "leave-event" "phx_leave"
+  (do
+    (future
+      (Thread/sleep 4000)
+      (live/setup-public-entry!
+       live/+live-realtime-entry-name+
+       live/+live-realtime-entry-tags+))
+    (notify/wait-on [:js 15000]
+      (var cache
+          (xtd/obj-assign
+           (xdb/db-create {"::" "db.cache"}
+                          (@! fixtures/+schema+)
+                          (@! fixtures/+lookup+)
+                          nil)
+           {"schema" (@! fixtures/+schema+)}))
+      (var instance (xt/x:obj-clone (@! live/+live-supabase-config+)))
+      (var client-config (xt/x:obj-clone (. instance ["client"])))
+      (var schema-name (@! live/+public-schema+))
+      (var table-name (@! live/+scratch-entry-table+))
+      (var connected [])
+      (var closed [])
+      (var statuses [])
+      (var requests [])
+      (var request-out nil)
+      (var transport-source {})
+      (xt/x:set-key transport-source
+                   "connect"
+                   (fn [url]
+                     (xt/x:arr-push connected url)
+                     (var socket (new WebSocket url))
+                     (return
+                      (new Promise
+                           (fn [resolve reject]
+                             (. socket (addEventListener
+                                        "open"
+                                        (fn [_]
+                                          (var wrapper {"url" url})
+                                          (xt/x:set-key wrapper "send"
+                                                        (fn [payload]
+                                                          (return (. socket (send payload)))))
+                                          (xt/x:set-key wrapper "close"
+                                                        (fn [code reason]
+                                                          (return (. socket (close code reason)))))
+                                          (xt/x:set-key wrapper "addEventListener"
+                                                        (fn [event handler]
+                                                          (return (. socket (addEventListener event handler)))))
+                                          (resolve wrapper)))
+                             (. socket (addEventListener
+                                        "error"
+                                        (fn [err]
+                                          (reject err))))))))))
+      (xt/x:set-key client-config "transport"
+                   (js-ws/driver transport-source))
+      (xt/x:set-key client-config "schema_name" schema-name)
+      (xt/x:set-key client-config "table_name" table-name)
+      (promise/x:promise-then
+       (realtime/subscribe
+       {"client" client-config}
+       cache
+       {"on_status" (fn [status _frame]
+                      (xt/x:arr-push statuses status))
+        "on_request" (fn [request _payload _frame]
+                       (xt/x:arr-push requests request)
+                       (when (and (xt/x:not-nil? request)
+                                  (== (@! live/+live-realtime-entry-name+)
+                                      (xtd/get-in request ["db/sync" table-name 0 "name"])))
+                         (:= request-out request)))})
+       (fn [sub]
+        (var poll-id
+             (setInterval
+              (fn []
+                (when (xt/x:not-nil? request-out)
+                  (clearInterval poll-id)
+                  (promise/x:promise-then
+                   (realtime/unsubscribe sub)
+                   (fn [_]
+                     (xt/x:arr-push closed [1000 "supabase-realtime/unsubscribe"])
+                     (var cached-row
+                          (xt/x:get-idx
+                           (xdb/db-pull-sync
+                            cache
+                            (@! fixtures/+schema+)
+                            (@! live/+live-realtime-entry-query+))
+                           0))
+                     (repl/notify
+                      {"connected" (xt/x:first connected)
+                       "topic" (realtime/resolve-topic {"client" client-config}
+                                                       {"schema_name" schema-name
+                                                        "table_name" table-name})
+                       "status" (xt/x:first statuses)
+                       "request-name" (xtd/get-in request-out ["db/sync" table-name 0 "name"])
+                       "request-tags" (xtd/get-in request-out ["db/sync" table-name 0 "tags"])
+                       "cached-row" cached-row
+                       "closed" (xt/x:get-idx closed 0)}))))
+              100))
+        (return sub)))))
+    )
+  => {"connected" string?
+      "topic" "realtime:public:Entry"
       "status" "SUBSCRIBED"
-      "request-name" "zeta"
-      "cached-name" "zeta"
+      "request-name" "copilot_supabase_realtime_live"
+      "request-tags" ["copilot" "supabase" "realtime"]
+      "cached-row" {"name" "copilot_supabase_realtime_live"
+                   "tags" ["copilot" "supabase" "realtime"]}
       "closed" [1000 "supabase-realtime/unsubscribe"]})
 
 ^{:refer xt.db.runtime.supabase-realtime/subscribe :added "4.1.4"}
@@ -300,13 +328,13 @@
        ((xt/x:get-key handlers "message")
         {"data"
          (xt/x:json-encode
-          {"topic" "room:entries"
+          {"topic" "realtime:room:entries"
            "event" "phx_reply"
            "payload" {"status" "ok"}})})
        ((xt/x:get-key handlers "message")
         {"data"
          (xt/x:json-encode
-          {"topic" "room:entries"
+          {"topic" "realtime:room:entries"
            "event" "broadcast"
            "payload" {"data" {"id" "00000000-0000-0000-0000-0000000000ea"
                               "name" "custom"
@@ -327,7 +355,88 @@
                               {"id" "00000000-0000-0000-0000-0000000000ea"}
                               ["name"]])
                             [0 "name"])})))))))
-  => {"join-topic" "room:entries"
+  => {"join-topic" "realtime:room:entries"
       "status" "SUBSCRIBED"
       "request-name" "custom"
       "cached-name" "custom"})
+
+^{:refer xt.db.runtime.supabase-realtime/subscribe :added "4.1.4"}
+(fact "unwraps native xt.db requests from live broadcast envelopes"
+
+  (notify/wait-on [:js 2000]
+    (var cache
+        (xtd/obj-assign
+         (xdb/db-create {"::" "db.cache"}
+                        (@! fixtures/+schema+)
+                        (@! fixtures/+lookup+)
+                        nil)
+         {"schema" (@! fixtures/+schema+)}))
+    (var handlers {})
+    (var sent [])
+    (var statuses [])
+    (var requests [])
+    (var driver
+        (ws/driver-create
+         {"connect_sync"
+          (fn [_url]
+            (return {"send" (fn [payload]
+                              (xt/x:arr-push sent payload)
+                              (return true))
+                     "close" (fn [_code _reason]
+                               (return true))
+                     "addEventListener" (fn [event handler]
+                                          (xt/x:set-key handlers event handler)
+                                          (return true))}))}))
+    (promise/x:promise-then
+     (realtime/subscribe
+      {"client" {"transport" driver
+                "base_url" "https://db.test"
+                "api_key" "key-1"
+                "topic" "room:entries"
+                "message_event" "broadcast"}}
+      cache
+      {"on_status" (fn [status _frame]
+                    (xt/x:arr-push statuses status))
+      "on_request" (fn [request _payload _frame]
+                     (xt/x:arr-push requests request))})
+     (fn [sub]
+      ((xt/x:get-key handlers "message")
+       {"data"
+        (xt/x:json-encode
+         {"topic" "realtime:room:entries"
+          "event" "phx_reply"
+          "payload" {"status" "ok"}})})
+      ((xt/x:get-key handlers "message")
+       {"data"
+        (xt/x:json-encode
+         {"topic" "realtime:room:entries"
+          "event" "broadcast"
+          "payload" {"event" "entry_sync"
+                     "meta" {"id" "msg-1"}
+                     "payload" {"db/sync"
+                                {"Entry"
+                                 [{"id" "00000000-0000-0000-0000-0000000000eb"
+                                   "name" "native"
+                                   "tags" ["broadcast"]
+                                   "__deleted__" false}]}}
+                     "type" "broadcast"}})})
+      (return
+       (promise/x:promise-then
+        (realtime/unsubscribe sub)
+        (fn [_]
+          (repl/notify
+           {"join-topic" (xtd/get-in (xt/x:json-decode (xt/x:get-idx sent 0)) ["topic"])
+            "status" (xt/x:first statuses)
+            "request-name" (xtd/get-in requests [0 "db/sync" "Entry" 0 "name"])
+            "cached-name" (xtd/get-in
+                           (xdb/db-pull-sync
+                            cache
+                            (@! fixtures/+schema+)
+                            ["Entry"
+                             {"id" "00000000-0000-0000-0000-0000000000eb"}
+                             ["name"]])
+                           [0 "name"])})))))))
+  => {"join-topic" "realtime:room:entries"
+      "status" "SUBSCRIBED"
+      "request-name" "native"
+      "cached-name" "native"})

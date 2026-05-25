@@ -138,13 +138,20 @@
   (var close-fn (xt/x:get-key raw "close"))
   (when (not (xt/x:is-function? close-fn))
     (xt/x:err "Websocket client missing close implementation"))
+  (var js-host-websocket?
+       (or (xt/x:is-function? (xt/x:get-key raw "addEventListener"))
+           (xt/x:not-nil? (xt/x:get-key raw "readyState"))))
   (if (xt/x:not-nil? code)
-    (if (xt/x:has-key? raw "close")
-      (return (close-fn code (or reason "")))
-      (return (. raw (close code (or reason "")))))
-    (if (xt/x:has-key? raw "close")
-      (return (close-fn))
-      (return (. raw (close))))))
+    (if js-host-websocket?
+      (return (. raw (close code (or reason ""))))
+      (if (xt/x:has-key? raw "close")
+        (return (close-fn code (or reason "")))
+        (return (. raw (close code (or reason ""))))))
+    (if js-host-websocket?
+      (return (. raw (close)))
+      (if (xt/x:has-key? raw "close")
+        (return (close-fn))
+        (return (. raw (close)))))))
 
 (defn.xt default-send-sync
   "sends a payload through a raw websocket client"
@@ -159,9 +166,14 @@
   (var send-fn (xt/x:get-key raw "send"))
   (when (not (xt/x:is-function? send-fn))
     (xt/x:err "Websocket client missing send implementation"))
-  (if (xt/x:has-key? raw "send")
-    (return (send-fn payload))
-    (return (. raw (send payload)))))
+  (var js-host-websocket?
+       (or (xt/x:is-function? (xt/x:get-key raw "addEventListener"))
+           (xt/x:not-nil? (xt/x:get-key raw "readyState"))))
+  (if js-host-websocket?
+    (return (. raw (send payload)))
+    (if (xt/x:has-key? raw "send")
+      (return (send-fn payload))
+      (return (. raw (send payload))))))
 
 (defn.xt default-add-listener-sync
   "attaches an event listener to a raw websocket client"
@@ -178,9 +190,7 @@
     (return lua-out))
   (var add-fn (xt/x:get-key raw "addEventListener"))
   (if (xt/x:is-function? add-fn)
-    (if (xt/x:has-key? raw "addEventListener")
-      (add-fn event handler)
-      (. raw (addEventListener event handler)))
+    (. raw (addEventListener event handler))
     (xt/x:set-key raw (xt/x:cat "on" event) handler))
   (return raw))
 

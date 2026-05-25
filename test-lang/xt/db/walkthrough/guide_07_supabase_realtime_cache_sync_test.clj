@@ -41,7 +41,7 @@
                (l/rt:setup (live/pg-rt) live/+postgres-module+)
                (live/ensure-public-entry-table!)
                (live/enable-public-entry-realtime!)
-               (live/reload-postgrest!)
+               (live/reload-postgrest! live/+public-schema+)
                (live/refresh-live-supabase-config!)
                (live/cleanup-public-entry! live/+live-realtime-entry-name+)
                true)]

@@ -213,7 +213,9 @@
                  (xt/x:get-key raw-client "topic")
                  nil))
   (when (xt/x:not-nil? topic)
-    (return topic))
+    (return (:? (str/starts-with? topic "realtime:")
+                topic
+                (xt/x:cat "realtime:" topic))))
   (return (xt/x:cat "realtime:"
                     (-/resolve-schema-name source opts)
                     ":"
@@ -504,6 +506,10 @@
   (cond (or (xt/x:not-nil? (xt/x:get-key payload "db/sync"))
            (xt/x:not-nil? (xt/x:get-key payload "db/remove")))
        (return payload)
+
+       (or (xtd/get-in payload ["payload" "db/sync"])
+           (xtd/get-in payload ["payload" "db/remove"]))
+       (return (xt/x:get-key payload "payload"))
 
        (xt/x:is-function? (-/resolve-request-transform source opts))
        (return ((-/resolve-request-transform source opts) payload source opts))

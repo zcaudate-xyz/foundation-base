@@ -5,7 +5,9 @@
             [hara.runtime.postgres :as pg]
             [postgres.sample.scratch-v1]
             [std.json :as json]
-            [std.lib.os :as os]))
+            [std.lib.os :as os])
+  (:import (java.net URI)
+           (java.net.http HttpClient HttpRequest HttpResponse$BodyHandlers)))
 
 (def +supabase-cli-root+
   "docker")
@@ -64,6 +66,9 @@
 (def +postgres-module+
   'postgres.sample.scratch-v1)
 
+(defonce +http-client+
+  (HttpClient/newHttpClient))
+
 (defn shell-command
   [& parts]
   (str/join " " parts))
@@ -79,19 +84,23 @@
   []
   (str
    "set -e\n"
-   (supabase-shell-command "stop" "--no-backup" "--yes") " >/dev/null 2>&1 || true\n"
-   "ids=$(docker ps -aq --filter 'name=foundation-base-local' || true)\n"
-   "if [ -n \"$ids\" ]; then\n"
-   "  docker rm -f $ids >/dev/null 2>&1 || true\n"
+   "if (echo > /dev/tcp/" +postgres-host+ "/" (str +postgres-port+) ") >/dev/null 2>&1; then\n"
+   "  exit 0\n"
    "fi\n"
-   "sleep 5\n"
-   (supabase-shell-command "start") "\n"
+   "start_output=$(" (supabase-shell-command "start") " 2>&1) || start_status=$?\n"
+   "if [ -n \"${start_status:-}\" ]; then\n"
+   "  if ! printf '%s\\n' \"$start_output\" | grep -q 'already running'; then\n"
+   "    printf '%s\\n' \"$start_output\" >&2\n"
+   "    exit \"$start_status\"\n"
+   "  fi\n"
+   "fi\n"
    "for i in $(seq 1 120); do\n"
    "  if (echo > /dev/tcp/" +postgres-host+ "/" (str +postgres-port+) ") >/dev/null 2>&1; then\n"
    "    exit 0\n"
    "  fi\n"
    "  sleep 1\n"
    "done\n"
+   "printf '%s\\n' \"$start_output\" >&2\n"
    "echo 'Timed out waiting for postgres on " +postgres-host+ ":" (str +postgres-port+) "' >&2\n"
    "exit 1"))
 
@@ -109,7 +118,7 @@
                       :startup {:args [+shell+ "-lc" (startup-shell-command)]
                                 :root "docker"
                                 :ignore-errors false}
-                      :teardown {:args [+shell+ "-lc" (supabase-shell-command "stop" "--no-backup" "--yes")]
+                      :teardown {:args [+shell+ "-lc" "true"]
                                  :root "docker"
                                  :ignore-errors true}}})]
     (alter-var-root #'+postgres-runtime+ (constantly rt))
@@ -133,6 +142,18 @@
                 (assoc m k (str/replace (or v "") #"^\"|\"$" "")))))
           {}
           (str/split-lines s)))
+
+(defn http-get
+  [url headers]
+  (let [builder (HttpRequest/newBuilder (URI/create url))]
+    (doseq [[k v] headers]
+      (.header builder k v))
+    (let [request (.build (.GET builder))
+          response (.send +http-client+
+                         request
+                         (HttpResponse$BodyHandlers/ofString))]
+      {:status (.statusCode response)
+       :body (.body response)})))
 
 (defn refresh-live-supabase-config!
   []
@@ -160,8 +181,25 @@
   [s]
   (str "'" (str/replace s "'" "''") "'"))
 
+(defn ensure-scratch-entry-table!
+  []
+  (pg-exec!
+   (str "CREATE SCHEMA IF NOT EXISTS \"" +scratch-schema+ "\";\n"
+        "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";\n"
+        "CREATE TABLE IF NOT EXISTS \"" +scratch-schema+ "\".\"" +scratch-entry-table+ "\" (\n"
+        "  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),\n"
+        "  name text NOT NULL UNIQUE,\n"
+        "  tags jsonb NOT NULL DEFAULT '[]'::jsonb,\n"
+        "  op_created uuid,\n"
+        "  op_updated uuid,\n"
+        "  time_created bigint,\n"
+        "  time_updated bigint,\n"
+        "  __deleted__ boolean NOT NULL DEFAULT false\n"
+        ");")))
+
 (defn grant-scratch-schema!
   []
+  (ensure-scratch-entry-table!)
   (doseq [sql [(str "GRANT USAGE ON SCHEMA \"" +scratch-schema+
                     "\" TO anon, authenticated, service_role")
                (str "GRANT ALL ON ALL TABLES IN SCHEMA \"" +scratch-schema+
@@ -187,9 +225,13 @@
         "  END IF;\n"
         "END $$;")))
 
+(declare wait-postgrest-schema!)
+
 (defn reload-postgrest!
-  []
-  (pg-exec-best-effort! "NOTIFY pgrst, 'reload schema'"))
+  ([] (reload-postgrest! +scratch-schema+))
+  ([schema-name]
+   (pg-exec-best-effort! "NOTIFY pgrst, 'reload schema'")
+   (wait-postgrest-schema! schema-name)))
 
 (defn cleanup-scratch-entry!
   [name]
@@ -234,6 +276,35 @@
         "  END IF;\n"
         "END $$;")))
 
+(defn wait-postgrest-schema!
+  [schema-name]
+  (let [status (parse-shell-env (supabase-status-env))
+        base-url (get status "API_URL")
+        api-key (get status "SERVICE_ROLE_KEY")
+        headers {"apikey" api-key
+                "Authorization" (str "Bearer " api-key)
+                "Accept-Profile" schema-name
+                "Content-Profile" schema-name}
+        url (str base-url "/rest/v1/" +scratch-entry-table+ "?select=name&limit=1")]
+    (loop [attempt 0]
+      (let [response (try
+                      (http-get url headers)
+                      (catch Throwable _
+                        nil))
+           ready? (and response
+                       (== 200 (:status response)))]
+        (cond ready?
+             true
+
+             (< attempt 29)
+             (do (Thread/sleep 1000)
+                 (recur (inc attempt)))
+
+             :else
+             (throw (ex-info "Timed out waiting for PostgREST schema cache"
+                             {:schema schema-name
+                              :response response})))))))
+
 (defn cleanup-public-entry!
   [name]
   (pg-exec-best-effort!
@@ -249,3 +320,14 @@
         " VALUES (" (sql-literal name)
         ", '" (str/replace (json/write tags) "'" "''") "'::jsonb)"))
   (Thread/sleep 200))
+
+(defn send-realtime-broadcast!
+  [topic event payload]
+  (pg-exec!
+   (str "SELECT realtime.send("
+        (sql-literal (json/write payload))
+        "::jsonb, "
+        (sql-literal event)
+        ", "
+        (sql-literal topic)
+        ", false);")))
