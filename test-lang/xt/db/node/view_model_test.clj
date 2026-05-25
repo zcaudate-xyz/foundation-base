@@ -117,6 +117,158 @@
       "row-count" 2
       "first-name" "alpha"})
 
+^{:refer xt.db.node.view-model/view-refresh.resolver :added "4.1"}
+(fact "refreshes a live sqlite view from a resolver with type db/query"
+
+  (notify/wait-on [:js 10000]
+    (-> (node/create
+         {"node_id" "node-live-resolver"
+          "db" {"schema" (@! fixtures/+schema+)
+                "lookup" (@! fixtures/+lookup+)
+                "sources"
+                {"primary" {"kind" "sqlite"
+                            "config" {"driver" (js-sqlite/driver)
+                                      "filename" ":memory:"}
+                            "setup" {"schema" true
+                                     "seed" (@! fixtures/+entry-seed+)}}}}
+          "spaces"
+          {"screen/admin"
+           {"models"
+            {"entries-screen"
+             {"views"
+              {"list" {"resolver" {"type" "db/query"
+                                   "table" "Entry"
+                                   "select_entry" {"input" []
+                                                   "view" {"query" {"__deleted__" false}}}
+                                   "return_entry" {"input" [{"symbol" "i_entry_id"
+                                                             "type" "text"}]
+                                                   "view" {"query" ["id"
+                                                                    "name"
+                                                                    "tags"
+                                                                    "time_created"
+                                                                    "time_updated"]}}}
+                       "source" "primary"}}}}}}})
+        (promise/x:promise-then
+         (fn [node]
+           (return
+            (promise/x:promise-then
+             (node/view-refresh node "screen/admin" "entries-screen" "list")
+             (fn [result]
+               (repl/notify
+                {"row-count" (xt/x:len (. result ["value"]))
+                 "first-name" (xtd/get-in (. result ["value"]) [0 "name"])
+                 "status" (. result ["status"])}))))))))
+  => {"row-count" 2
+      "first-name" "alpha"
+      "status" "ready"})
+
+^{:refer xt.db.node.view-model/query.wrapper :added "4.1"}
+(fact "queries and refreshes a registered resolver-backed view through request handlers"
+
+  (notify/wait-on [:js 10000]
+    (-> (node/create
+         {"node_id" "node-live-query"
+          "db" {"schema" (@! fixtures/+schema+)
+                "lookup" (@! fixtures/+lookup+)
+                "sources"
+                {"primary" {"kind" "sqlite"
+                            "config" {"driver" (js-sqlite/driver)
+                                      "filename" ":memory:"}
+                            "setup" {"schema" true
+                                     "seed" (@! fixtures/+entry-seed+)}}}}
+          "spaces"
+          {"screen/admin"
+           {"models"
+            {"entries-screen"
+             {"views"
+              {"list" {"resolver" {"type" "db/query"
+                                   "table" "Entry"
+                                   "select_entry" {"input" []
+                                                   "view" {"query" {"__deleted__" false}}}
+                                   "return_entry" {"input" [{"symbol" "i_entry_id"
+                                                             "type" "text"}]
+                                                   "view" {"query" ["id"
+                                                                    "name"
+                                                                    "tags"
+                                                                    "time_created"
+                                                                    "time_updated"]}}}
+                       "source" "primary"}}}}}}})
+        (promise/x:promise-then
+         (fn [node]
+           (return
+            (promise/x:promise-then
+             (node/query
+              node
+              "screen/admin"
+              {"view" {"model_id" "entries-screen"
+                       "view_id" "list"}})
+             (fn [result]
+               (return
+                (promise/x:promise-then
+                 (node/query-refresh
+                  node
+                  "screen/admin"
+                  {"query_key" (. result ["query_key"])})
+                 (fn [refresh]
+                   (repl/notify
+                    {"row-count" (xt/x:len (. result ["value"]))
+                     "refresh-count" (xt/x:len (. refresh ["value"]))
+                     "status" (. refresh ["status"])})))))))))))
+  => {"row-count" 2
+      "refresh-count" 2
+      "status" "ready"})
+
+^{:refer xt.db.node.view-model/sync.wrapper :added "4.1"}
+(fact "applies db/sync and db/remove through request handlers on model sources"
+
+  (notify/wait-on :js
+    (var local-node (event-node/node-create {"id" "node-live-events"}))
+    (model/install local-node nil)
+    (model/model-put
+     local-node
+     "screen/admin"
+     "entries-screen"
+     {"views"
+      {"list" {"source" "primary"}}})
+    (model/source-put
+     local-node
+     "screen/admin"
+     "entries-screen"
+     "primary"
+     [{"id" "00000000-0000-0000-0000-0000000000c1"
+       "name" "alpha"}
+      {"id" "00000000-0000-0000-0000-0000000000c2"
+       "name" "beta"}])
+    (-> (node/sync
+         local-node
+         "screen/admin"
+         {"db/sync"
+          {"Entry" [{"id" "00000000-0000-0000-0000-0000000000c3"
+                     "name" "gamma"}]}})
+        (promise/x:promise-then
+         (fn [_]
+           (return
+            (promise/x:promise-then
+             (node/remove
+              local-node
+              "screen/admin"
+              {"db/remove"
+               {"Entry" ["00000000-0000-0000-0000-0000000000c2"]}})
+             (fn [_]
+               (return
+                (promise/x:promise-then
+                 (node/view-refresh local-node "screen/admin" "entries-screen" "list")
+                 (fn [result]
+                   (repl/notify
+                    {"row-count" (xt/x:len (. result ["value"]))
+                     "names" [(xtd/get-in (. result ["value"]) [0 "name"])
+                              (xtd/get-in (. result ["value"]) [1 "name"])]
+                     "status" (. (node/view-get local-node "screen/admin" "entries-screen" "list")
+                                 ["status"])})))))))))))
+  => {"row-count" 2
+      "names" ["alpha" "gamma"]
+      "status" "ready"})
+
 ^{:refer xt.db.node.view-model/source-refresh :added "4.1"}
 (fact "syncs a live primary sqlite source into a live caching sqlite source"
 

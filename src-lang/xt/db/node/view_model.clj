@@ -4,7 +4,7 @@
 
 (l/script :xtalk
   {:require [[xt.db.node.schema-spec :as spec]
-             [xt.db.node.schema-query :as schema-query]
+             [xt.db.runtime.model-query :as model-query]
              [xt.db.node.view-state :as view-state]
              [xt.db.runtime :as db-runtime]
              [xt.db.node.view-util :as util]
@@ -30,6 +30,126 @@
            :source (xt/x:get-key view "source")
            :value (xt/x:get-key view "value")
            :status (xt/x:get-key view "status")}))
+
+(defn.xt payload-view-context
+  "normalizes payload view context"
+  {:added "4.1"}
+  [payload]
+  (var view-context (xtd/clone-nested (or (xt/x:get-key payload "view") {})))
+  (when (and (xt/x:nil? (xt/x:get-key view-context "model_id"))
+            (xt/x:not-nil? (xt/x:get-key payload "model_id")))
+    (xt/x:set-key view-context "model_id" (xt/x:get-key payload "model_id")))
+  (when (and (xt/x:nil? (xt/x:get-key view-context "view_id"))
+            (xt/x:not-nil? (xt/x:get-key payload "view_id")))
+    (xt/x:set-key view-context "view_id" (xt/x:get-key payload "view_id")))
+  (when (and (xt/x:nil? (xt/x:get-key view-context "args"))
+            (xt/x:not-nil? (xt/x:get-key payload "args")))
+    (xt/x:set-key view-context "args" (xt/x:get-key payload "args")))
+  (when (and (xt/x:nil? (xt/x:get-key view-context "args"))
+            (xt/x:not-nil? (xt/x:get-key payload "input")))
+    (xt/x:set-key view-context "args" (xt/x:get-key payload "input")))
+  (return view-context))
+
+(defn.xt query-resolver
+  "gets the resolver/query payload for a request"
+  {:added "4.1"}
+  [payload]
+  (return (or (xt/x:get-key payload "resolver")
+             (xt/x:get-key payload "query")
+             payload)))
+
+(defn.xt find-view-by-query-key
+  "locates a registered view by query key"
+  {:added "4.1"}
+  [state query-key]
+  (var out nil)
+  (xt/for:object [[model-id model] (or (xt/x:get-key state "models") {})]
+    (xt/for:object [[view-id view] (or (xt/x:get-key model "views") {})]
+      (when (and (xt/x:nil? out)
+                (== query-key (xt/x:get-key view "query_key")))
+        (:= out {"model_id" model-id
+                "view_id" view-id
+                "view" view}))))
+  (return out))
+
+(defn.xt mark-view-stale
+  "marks a single view as stale"
+  {:added "4.1"}
+  [view]
+  (xt/x:set-key view "pending" false)
+  (xt/x:set-key view "status" spec/STATUS_STALE)
+  (xt/x:set-key view "error" nil)
+  (xt/x:set-key view "updated_at" (xt/x:now-ms))
+  (return view))
+
+(defn.xt mark-stale-by-tables
+  "marks views stale when their recorded table dependencies intersect"
+  {:added "4.1"}
+  [state tables]
+  (xt/for:object [[_ model] (or (xt/x:get-key state "models") {})]
+    (xt/for:object [[_ view] (or (xt/x:get-key model "views") {})]
+      (var listen (or (xt/x:get-key view "tables") {}))
+      (var stale? false)
+      (if (> (xt/x:len (xt/x:obj-keys listen)) 0)
+        (xt/for:object [[table _] listen]
+          (when (xt/x:has-key? tables table)
+           (:= stale? true)))
+        (when (xt/x:not-nil? (xt/x:get-key view "query_key"))
+          (:= stale? true)))
+      (when stale?
+        (-/mark-view-stale view))))
+  (return tables))
+
+(defn.xt sync-state-event
+  "applies a db event across model sources"
+  {:added "4.1"}
+  [state event-tag data]
+  (var tables {})
+  (xt/for:object [[table rows] (or data {})]
+    (xt/x:set-key tables table true)
+    (xt/for:object [[model-id model] (or (xt/x:get-key state "models") {})]
+      (xt/for:object [[source-id source] (or (xt/x:get-key model "sources") {})]
+        (var query (or (xt/x:get-key source "resolver")
+                      (xt/x:get-key source "query")))
+        (var source-table (or (xt/x:get-key source "table")
+                             (:? (xt/x:not-nil? query)
+                                 (xt/x:get-key query "table")
+                                 nil)))
+        (when (or (xt/x:nil? source-table)
+                  (== source-table table))
+          (var existing (xtd/clone-nested (or (xt/x:get-key source "data") [])))
+          (var out [])
+          (cond (== event-tag "add")
+                (do (var lookup {})
+                   (xt/for:array [row existing]
+                     (when (xt/x:not-nil? (xt/x:get-key row "id"))
+                       (xt/x:set-key lookup (xt/x:get-key row "id") true))
+                     (xt/x:arr-push out row))
+                   (xt/for:array [row (or rows [])]
+                     (var row-id (xt/x:get-key row "id"))
+                     (if (and (xt/x:not-nil? row-id)
+                              (== true (xt/x:get-key lookup row-id)))
+                       (do (var replaced [])
+                           (xt/for:array [entry out]
+                             (if (== (xt/x:get-key entry "id") row-id)
+                               (xt/x:arr-push replaced row)
+                               (xt/x:arr-push replaced entry)))
+                           (:= out replaced))
+                       (xt/x:arr-push out row))))
+
+                (== event-tag "remove")
+                (do (var remove-lu {})
+                   (xt/for:array [row-id (or rows [])]
+                     (xt/x:set-key remove-lu row-id true))
+                   (xt/for:array [row existing]
+                     (when (not (== true (xt/x:get-key remove-lu (xt/x:get-key row "id"))))
+                       (xt/x:arr-push out row))))
+
+                :else
+                (:= out existing))
+          (view-state/set-source-data state model-id source-id out)))))
+  (-/mark-stale-by-tables state tables)
+  (return tables))
 
 (defn.xt ensure-space-state
   "ensures the target node space has xt.db view state"
@@ -200,14 +320,15 @@
   [node space-id model-id source-id]
   (var state (-/ensure-space-state node space-id))
   (var source (view-state/ensure-source state model-id source-id))
-  (var query (xt/x:get-key source "query"))
+  (var query (or (xt/x:get-key source "resolver")
+                 (xt/x:get-key source "query")))
   (var db (xt/x:get-key source "db"))
   (when (or (not (== true (xt/x:get-key source "live")))
             (xt/x:nil? db)
             (xt/x:nil? query))
     (return (promise/x:promise-run source)))
   (var [ok prepared]
-       (schema-query/prepare-query
+       (model-query/prepare-resolver
         state
         query
         {"model_id" model-id
@@ -232,8 +353,7 @@
   [node space-id model-id source-id]
   (var state (-/ensure-space-state node space-id))
   (var source (view-state/ensure-source state model-id source-id))
-  (var upstream-id (or (xt/x:get-key source "sync_from")
-                       (xt/x:get-key source "sync-from")))
+  (var upstream-id (xt/x:get-key source "sync_from"))
   (when (or (xt/x:nil? upstream-id)
             (== upstream-id source-id))
     (return (promise/x:promise-run source)))
@@ -278,8 +398,7 @@
   (var source-ids [])
   (var running [])
   (xt/for:object [[source-id source] (or (xt/x:get-key model "sources") {})]
-    (when (xt/x:not-nil? (or (xt/x:get-key source "sync_from")
-                             (xt/x:get-key source "sync-from")))
+    (when (xt/x:not-nil? (xt/x:get-key source "sync_from"))
       (xt/x:arr-push source-ids source-id)
       (xt/x:arr-push running (-/source-sync node space-id model-id source-id))))
   (if (> (xt/x:len running) 0)
@@ -308,16 +427,18 @@
   (cond (and (xt/x:is-boolean? live?)
             live?)
         (do (var [ok prepared]
-                 (schema-query/prepare-query
+                (model-query/prepare-resolver
                   state
-                  (xt/x:get-key view "query")
-                  {"model_id" model-id
-                   "view_id" view-id
-                   "args" (or (xt/x:get-key view "input") [])}))
+                 (or (xt/x:get-key view "resolver")
+                     (xt/x:get-key view "query"))
+                 {"model_id" model-id
+                  "view_id" view-id
+                  "args" (or (xt/x:get-key view "input") [])}))
             (when (not ok)
               (view-state/set-view-error state model-id view-id prepared)
               (return (promise/x:promise-run prepared)))
             (xt/x:set-key view "query_key" (xt/x:get-key prepared "key"))
+            (xt/x:set-key view "tables" (or (xt/x:get-key prepared "tables") {}))
             (return
              (promise/x:promise-then
               (db-runtime/db-pull
@@ -358,6 +479,30 @@
   {:added "4.1"}
   [current-space args request node]
   (var payload (util/request-payload args))
+  (var state (-/ensure-space-state node (xt/x:get-key current-space "id")))
+  (var view-context (-/payload-view-context payload))
+  (var model-id (xt/x:get-key view-context "model_id"))
+  (var view-id (xt/x:get-key view-context "view_id"))
+  (var resolver (-/query-resolver payload))
+  (when (and (xt/x:not-nil? model-id)
+             (xt/x:not-nil? view-id))
+    (var view (view-state/ensure-view state model-id view-id))
+    (when (xt/x:not-nil? (xt/x:get-key view-context "args"))
+      (view-state/set-view-input
+       state
+       model-id
+       view-id
+       (xt/x:get-key view-context "args")))
+    (when (and (xt/x:not-nil? resolver)
+               (or (xt/x:has-key? payload "query")
+                   (xt/x:has-key? payload "resolver")))
+      (if (xt/x:has-key? payload "resolver")
+        (xt/x:set-key view "resolver" resolver)
+        (xt/x:set-key view "query" resolver)))
+    (return (-/view-refresh node
+                            (xt/x:get-key current-space "id")
+                            model-id
+                            view-id)))
   (return (-/not-implemented
            "xt.db.node.view/query-not-implemented"
            payload)))
@@ -366,6 +511,17 @@
   "handles a cached query refresh request"
   {:added "4.1"}
   [current-space args request node]
+  (var payload (util/request-payload args))
+  (var state (-/ensure-space-state node (xt/x:get-key current-space "id")))
+  (var query-key (xt/x:get-key payload "query_key"))
+  (when (xt/x:not-nil? query-key)
+    (var found (-/find-view-by-query-key state query-key))
+    (when (xt/x:not-nil? found)
+      (-/mark-view-stale (xt/x:get-key found "view"))
+      (return (-/view-refresh node
+                              (xt/x:get-key current-space "id")
+                              (xt/x:get-key found "model_id")
+                              (xt/x:get-key found "view_id")))))
   (return (-/handle-query current-space args request node)))
 
 (defn.xt handle-sync
@@ -373,18 +529,24 @@
   {:added "4.1"}
   [current-space args request node]
   (var payload (util/request-payload args))
-  (return (-/not-implemented
-           "xt.db.node.view/sync-not-implemented"
-           payload)))
+  (var state (-/ensure-space-state node (xt/x:get-key current-space "id")))
+  (var sync-data (or (xt/x:get-key payload "db/sync")
+                     payload))
+  (var tables (-/sync-state-event state "add" sync-data))
+  (return {"db/sync" sync-data
+           "tables" tables}))
 
 (defn.xt handle-remove
   "handles a remove request for the clean view-based implementation"
   {:added "4.1"}
   [current-space args request node]
   (var payload (util/request-payload args))
-  (return (-/not-implemented
-           "xt.db.node.view/remove-not-implemented"
-           {"db/remove" payload})))
+  (var state (-/ensure-space-state node (xt/x:get-key current-space "id")))
+  (var remove-data (or (xt/x:get-key payload "db/remove")
+                       payload))
+  (var tables (-/sync-state-event state "remove" remove-data))
+  (return {"db/remove" remove-data
+           "tables" tables}))
 
 (defn.xt handle-clear
   "clears the local view state caches"

@@ -1,37 +1,29 @@
-(ns xt.db.node.view-state
+(ns xt.substrate.page-state
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.db.node.schema-spec :as spec]
-             [xt.db.runtime.model-view :as model-view]
+  {:require [[xt.event.base-view :as event-view]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]]})
 
-(defn.xt source-base
-  "creates the base structural definition for a source role"
-  {:added "4.1"}
-  [source-id]
-  (return (model-view/source-base source-id)))
+(def$.xt STATE_TAG "substrate.page.state")
 
-(defn.xt normalize-source
-  "normalizes a named model source"
+(defn.xt identity-wrapper
+  "passes through a context-aware handler"
   {:added "4.1"}
-  [source-id current source]
-  (return (model-view/normalize-source source-id current source)))
+  [handler]
+  (return handler))
 
-(defn.xt normalize-sources
-  "normalizes model sources with primary and caching defaults"
+(defn.xt output-process
+  "extracts the public value from a result payload"
   {:added "4.1"}
-  [defaults sources]
-  (return (model-view/normalize-sources defaults sources)))
+  [value]
+  (if (and (xt/x:is-object? value)
+           (xt/x:has-key? value "value"))
+    (return (xt/x:get-key value "value"))
+    (return value)))
 
-(defn.xt normalize-view-source
-  "normalizes the source role declared by a view"
-  {:added "4.1"}
-  [view]
-  (return (model-view/normalize-view-source view)))
-
-(defn.xt normalize-dep
+(defn.xt normalize-view-dep
   "normalizes a dependency path into [model-id view-id]"
   {:added "4.1"}
   [model-id dep]
@@ -55,18 +47,59 @@
         :else
         (return nil)))
 
+(defn.xt normalize-state-dep
+  "normalizes a state dependency into a path array"
+  {:added "4.1"}
+  [dep]
+  (cond (xt/x:is-array? dep)
+        (return dep)
+
+        (xt/x:is-string? dep)
+        (return [dep])
+
+        (xt/x:is-object? dep)
+        (return (or (xt/x:get-key dep "path")
+                    (:? (xt/x:not-nil? (xt/x:get-key dep "key"))
+                        [(xt/x:get-key dep "key")]
+                        (:? (xt/x:not-nil? (xt/x:get-key dep "id"))
+                            [(xt/x:get-key dep "id")]
+                            nil))))
+
+        :else
+        (return nil)))
+
 (defn.xt get-view-deps
   "gets normalized dependencies for a single view"
   {:added "4.1"}
   [model-id view]
-  (var out [])
-  (xt/for:array [dep (or (xt/x:get-key view "deps") [])]
-    (var path (-/normalize-dep model-id dep))
+  (var out-views [])
+  (var out-state [])
+  (var deps (or (xt/x:get-key view "deps") []))
+  (var raw-views (:? (xt/x:is-object? deps)
+                     (or (xt/x:get-key deps "views") [])
+                     deps))
+  (var raw-state (:? (xt/x:is-object? deps)
+                     (or (xt/x:get-key deps "state") [])
+                     []))
+  (xt/for:array [dep (or raw-views [])]
+    (var path (-/normalize-view-dep model-id dep))
     (when (and (xt/x:not-nil? path)
                (xt/x:not-nil? (xt/x:first path))
                (xt/x:not-nil? (xt/x:second path)))
-      (xt/x:arr-push out path)))
-  (return out))
+      (xt/x:arr-push out-views path)))
+  (xt/for:array [dep (or raw-state [])]
+    (var path (-/normalize-state-dep dep))
+    (when (and (xt/x:not-nil? path)
+               (> (xt/x:len path) 0))
+      (xt/x:arr-push out-state path)))
+  (return {"views" out-views
+           "state" out-state}))
+
+(defn.xt state-path-key
+  "builds a stable key for a state dependency path"
+  {:added "4.1"}
+  [path]
+  (return (xt/x:json-encode path)))
 
 (defn.xt get-model-deps
   "gets view dependency indexes for a model"
@@ -74,7 +107,7 @@
   [model-id views]
   (var all-deps {})
   (xt/for:object [[view-id view-entry] views]
-    (xt/for:array [path (-/get-view-deps model-id view-entry)]
+    (xt/for:array [path (xt/x:get-key (-/get-view-deps model-id view-entry) "views")]
       (xtd/set-in all-deps
                   [(xt/x:first path)
                    (xt/x:second path)
@@ -82,8 +115,20 @@
                   true)))
   (return all-deps))
 
+(defn.xt get-model-state-deps
+  "gets state dependency indexes for a model"
+  {:added "4.1"}
+  [views]
+  (var out {})
+  (xt/for:object [[view-id view-entry] views]
+    (xt/for:array [path (xt/x:get-key (-/get-view-deps nil view-entry) "state")]
+      (xtd/set-in out
+                  [(-/state-path-key path) view-id]
+                  true)))
+  (return out))
+
 (defn.xt get-unknown-deps
-  "gets unresolved dependency paths for a model"
+  "gets unresolved view dependency paths for a model"
   {:added "4.1"}
   [state model-id views model-deps]
   (var out [])
@@ -103,18 +148,14 @@
   (return out))
 
 (defn.xt base-state
-  "creates the base xt.db view state"
+  "creates the base page model state"
   {:added "4.1"}
   [opts]
   (:= opts (or opts {}))
-  (return {"::" spec/STATE_TAG
-           :schema (or (xt/x:get-key opts "schema") {})
-           :lookup (or (xt/x:get-key opts "lookup") {})
-           :models {}
-           :queries {}
-           :sources (-/normalize-sources nil (xt/x:get-key opts "sources"))
-           :meta (or (xt/x:get-key opts "meta") {})
-           :opts opts}))
+  (return {"::" "substrate.page.state"
+           "models" {}
+           "meta" (or (xt/x:get-key opts "meta") {})
+           "opts" opts}))
 
 (defn.xt model-views
   "normalizes a model input into a view map"
@@ -129,39 +170,59 @@
   {:added "4.1"}
   [view-id view]
   (:= view (xtd/clone-nested (or view {})))
-  (var input (or (xt/x:get-key view "input")
-                 (xt/x:get-key view "default_input")
-                 []))
-  (var value (xt/x:get-key view "value"))
-  (var meta (or (xt/x:get-key view "meta") {}))
-  (var out (xt/x:obj-assign
-            view
-            {"id" view-id
-             "source" (-/normalize-view-source view)
-             "input" input
-             "value" value
-             "pending" false
-             "status" spec/STATUS_IDLE
-             "error" nil
-             "meta" meta}))
-  (xt/x:del-key out "default_input")
-  (xt/x:del-key out "use")
-  (return out))
+  (var default_input (or (xt/x:get-key view "input")
+                         (xt/x:get-key view "default_input")
+                         []))
+  (var default-value (xt/x:get-key view "value"))
+  (var carry (xtd/obj-clone view))
+  (xt/x:del-key carry "input")
+  (xt/x:del-key carry "value")
+  (xt/x:del-key carry "default_input")
+  (var runtime (event-view/create-view
+                nil
+                {"main" {"wrapper" -/identity-wrapper}
+                 "remote" {"wrapper" -/identity-wrapper}
+                 "sync" {"wrapper" -/identity-wrapper}}
+                default_input
+                default-value
+                -/output-process
+                nil))
+  (event-view/init-view runtime)
+  (when (> (xt/x:len default_input) 0)
+    (event-view/set-input runtime {"data" default_input}))
+  (when (xt/x:not-nil? default-value)
+    (xtd/set-in runtime ["output" "current"] default-value))
+  (xt/x:obj-assign runtime carry)
+  (xt/x:set-key runtime "id" view-id)
+  (xt/x:set-key runtime "value" default-value)
+  (xt/x:set-key runtime "status" "idle")
+  (xt/x:set-key runtime "pending" false)
+  (xt/x:set-key runtime "error" nil)
+  (xt/x:set-key runtime "updated_at" nil)
+  (return runtime))
 
 (defn.xt normalize-model
   "normalizes a single model record"
   {:added "4.1"}
-  [default-sources model-id model-spec]
+  [model-id model-spec]
   (var views {})
   (xt/for:object [[view-id view] (-/model-views model-spec)]
     (xt/x:set-key views view-id (-/normalize-view view-id view)))
-  (return {"id" model-id
-           "meta" (or (xt/x:get-key model-spec "meta") {})
-           "sources" (-/normalize-sources default-sources
-                                          (xt/x:get-key model-spec "sources"))
-           "views" views
-           "deps" {}
-           "unknown_deps" []}))
+  (var model {"id" model-id
+              "meta" (or (xt/x:get-key model-spec "meta") {})
+              "state" (xtd/clone-nested (or (xt/x:get-key model-spec "state") {}))
+              "actions" (xtd/clone-nested (or (xt/x:get-key model-spec "actions") {}))
+              "views" views
+              "deps" {}
+              "state_deps" {}
+              "unknown_deps" []})
+  (xt/x:set-key model "deps" (-/get-model-deps model-id views))
+  (xt/x:set-key model "state_deps" (-/get-model-state-deps views))
+  (xt/x:set-key model "unknown_deps" (-/get-unknown-deps {"models" {model-id model}}
+                                                         model-id
+                                                         views
+                                                         (xt/x:get-key model "deps")))
+  (return model))
 
 (defn.xt get-model
   "gets a registered model"
@@ -201,6 +262,7 @@
   (var views (or (xt/x:get-key model "views") {}))
   (var deps (-/get-model-deps model-id views))
   (xt/x:set-key model "deps" deps)
+  (xt/x:set-key model "state_deps" (-/get-model-state-deps views))
   (xt/x:set-key model
                 "unknown_deps"
                 (-/get-unknown-deps state model-id views deps))
@@ -210,10 +272,7 @@
   "stores a model and normalizes its views"
   {:added "4.1"}
   [state model-id model-spec]
-  (var model (-/normalize-model
-              (xt/x:get-key state "sources")
-              model-id
-              model-spec))
+  (var model (-/normalize-model model-id model-spec))
   (xtd/set-in state ["models" model-id] model)
   (-/rebuild-model state model-id)
   (return model))
@@ -226,6 +285,29 @@
   (xtd/set-in model ["views" view-id] (-/normalize-view view-id view-spec))
   (-/rebuild-model state model-id)
   (return (xtd/get-in model ["views" view-id])))
+
+(defn.xt get-model-state
+  "gets model local state or a nested path"
+  {:added "4.1"}
+  [state model-id path]
+  (var model (-/ensure-model state model-id))
+  (if (xt/x:nil? path)
+    (return (xt/x:get-key model "state"))
+    (return (xtd/get-in model
+                        ["state" (or path [])]))))
+
+(defn.xt set-model-state
+  "sets model local state for a path"
+  {:added "4.1"}
+  [state model-id path value]
+  (var model (-/ensure-model state model-id))
+  (if (and (xt/x:is-array? path)
+           (> (xt/x:len path) 0))
+    (xtd/set-in model
+                ["state" path]
+                value)
+    (xt/x:set-key model "state" (or value {})))
+  (return model))
 
 (defn.xt set-view-input
   "sets input on a view"
@@ -241,7 +323,7 @@
   [state model-id view-id]
   (var view (-/ensure-view state model-id view-id))
   (xt/x:set-key view "pending" false)
-  (xt/x:set-key view "status" spec/STATUS_READY)
+  (xt/x:set-key view "status" "ready")
   (xt/x:set-key view "updated_at" (xt/x:now-ms))
   (xt/x:set-key view "error" nil)
   (return view))
@@ -252,94 +334,27 @@
   [state model-id view-id error]
   (var view (-/ensure-view state model-id view-id))
   (xt/x:set-key view "pending" false)
-  (xt/x:set-key view "status" spec/STATUS_ERROR)
+  (xt/x:set-key view "status" "error")
   (xt/x:set-key view "updated_at" (xt/x:now-ms))
   (xt/x:set-key view "error" error)
   (return view))
 
 (defn.xt set-view-value
-  "stores a view value sourced from a structural role"
+  "stores a view value"
   {:added "4.1"}
   [state model-id view-id source-id value]
   (var view (-/ensure-view state model-id view-id))
   (xt/x:set-key view "value" value)
-  (xt/x:set-key view "source" source-id)
+  (when (xt/x:not-nil? source-id)
+    (xt/x:set-key view "source" source-id))
   (xt/x:set-key view "pending" false)
-  (xt/x:set-key view "status" spec/STATUS_READY)
+  (xt/x:set-key view "status" "ready")
   (xt/x:set-key view "updated_at" (xt/x:now-ms))
   (xt/x:set-key view "error" nil)
   (return view))
 
-(defn.xt get-source
-  "gets a source binding from a registered model"
-  {:added "4.1"}
-  [state model-id source-id]
-  (return (xtd/get-in state ["models" model-id "sources" source-id])))
-
-(defn.xt ensure-source
-  "gets a source binding from a registered model or throws"
-  {:added "4.1"}
-  [state model-id source-id]
-  (var source (-/get-source state model-id source-id))
-  (when (xt/x:nil? source)
-    (xt/x:err (xt/x:cat "source not found - "
-                        (xt/x:json-encode [model-id source-id]))))
-  (return source))
-
-(defn.xt set-source-data
-  "stores source data on a model source binding"
-  {:added "4.1"}
-  [state model-id source-id data]
-  (var source (-/ensure-source state model-id source-id))
-  (xt/x:set-key source "data" (xtd/clone-nested data))
-  (xt/x:set-key source "updated_at" (xt/x:now-ms))
-  (return source))
-
-(defn.xt sync-source
-  "synchronizes a target source from its configured upstream source"
-  {:added "4.1"}
-  [state model-id source-id]
-  (var source (-/ensure-source state model-id source-id))
-  (var upstream-id (xt/x:get-key source "sync_from"))
-  (when (or (xt/x:nil? upstream-id)
-            (== upstream-id source-id))
-    (return source))
-  (var upstream (-/ensure-source state model-id upstream-id))
-  (-/set-source-data state
-                     model-id
-                     source-id
-                     (xt/x:get-key upstream "data"))
-  (xt/x:set-key source "synced_at" (xt/x:now-ms))
-  (return source))
-
-(defn.xt sync-model-sources
-  "synchronizes all model sources that declare an upstream binding"
-  {:added "4.1"}
-  [state model-id]
-  (var model (-/ensure-model state model-id))
-  (var out {})
-  (xt/for:object [[source-id source] (or (xt/x:get-key model "sources") {})]
-    (when (xt/x:not-nil? (xt/x:get-key source "sync_from"))
-      (xt/x:set-key out
-                    source-id
-                    (-/sync-source state model-id source-id))))
-  (return out))
-
-(defn.xt clear-state
-  "clears query caches and marks views idle"
-  {:added "4.1"}
-  [state]
-  (xt/x:set-key state "queries" {})
-  (xt/for:object [[model-id model] (or (xt/x:get-key state "models") {})]
-    (xt/for:object [[view-id _] (or (xt/x:get-key model "views") {})]
-      (var view (-/ensure-view state model-id view-id))
-      (xt/x:set-key view "pending" false)
-      (xt/x:set-key view "status" spec/STATUS_IDLE)
-      (xt/x:set-key view "error" nil)))
-  (return true))
-
 (defn.xt get-view-dependents
-  "gets all dependent views for a source view"
+  "gets dependent views for a source view"
   {:added "4.1"}
   [state model-id view-id]
   (var out {})
@@ -349,23 +364,17 @@
       (xt/x:set-key out dmodel-id (xt/x:obj-keys view-lu))))
   (return out))
 
-(defn.xt get-model-dependents
-  "gets dependent models for the given source model"
+(defn.xt get-state-dependents
+  "gets dependent views for a model state path"
   {:added "4.1"}
-  [state model-id]
-  (var out {})
-  (xt/for:object [[dmodel-id model] (or (xt/x:get-key state "models") {})]
-    (var model-lu (xtd/get-in model ["deps" model-id]))
-    (when (xt/x:not-nil? model-lu)
-      (xt/x:set-key out dmodel-id true)))
-  (return out))
+  [state model-id path]
+  (var model (-/ensure-model state model-id))
+  (return (xt/x:obj-keys (or (xtd/get-in model ["state_deps" (-/state-path-key path)])
+                             {}))))
 
 (defn.xt snapshot-state
-  "returns a snapshot of the current view state"
+  "returns a snapshot of the current page state"
   {:added "4.1"}
   [state]
-  (return {"schema" (xt/x:get-key state "schema")
-           "lookup" (xt/x:get-key state "lookup")
-           "sources" (xt/x:get-key state "sources")
-           "queries" (xt/x:get-key state "queries")
-           "models" (xt/x:get-key state "models")}))
+  (return {"models" (xt/x:get-key state "models")
+           "meta" (xt/x:get-key state "meta")}))
