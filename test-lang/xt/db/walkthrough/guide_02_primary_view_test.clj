@@ -63,17 +63,34 @@
                (promise/x:promise-then
                 (fn [_]
                   (repl/notify
-                   {"list_name" (xtd/get-in
+                   {"summary" (node/summarise node)
+                    "list_name" (xtd/get-in
                                  (node/view-val node "screen/admin" "entries-screen" "list")
                                  [0 "name"])
-                    "node_id" (. node ["id"])
-                    "detail_query_keys" (xt/x:obj-keys
-                                         (. (node/view-get node "screen/admin" "entries-screen" "detail")
-                                            ["resolver"]))
                     "detail_name" (xtd/get-in
                                    (node/view-val node "screen/admin" "entries-screen" "detail")
                                    [0 "name"])})))))))))
-  => {"list_name" "alpha-cached"
-     "node_id" "admin-screen"
-     "detail_query_keys" ["type" "table" "select_entry" "select_args" "return_entry"]
+  => {"summary"
+     {"id" "admin-screen"
+      "spaces"
+      {"screen/admin"
+       {"models"
+        {"entries-screen"
+         {"sources"
+          {"primary" {"kind" "postgres"
+                      "sync_from" nil
+                      "live" false
+                      "data_count" 1}
+           "caching" {"kind" "sqlite"
+                      "sync_from" "primary"
+                      "live" false
+                      "data_count" 1}}
+          "views"
+          {"list" {"source" "caching"
+                   "status" "ready"
+                   "resolver_keys" ["type" "table" "select_entry" "return_entry"]}
+           "detail" {"source" "primary"
+                     "status" "ready"
+                     "resolver_keys" ["type" "table" "select_entry" "select_args" "return_entry"]}}}}}}}
+     "list_name" "alpha-cached"
      "detail_name" "alpha"})

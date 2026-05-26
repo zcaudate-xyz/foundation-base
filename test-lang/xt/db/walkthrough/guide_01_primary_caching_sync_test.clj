@@ -60,17 +60,32 @@
                (promise/x:promise-then
                 (fn [result]
                   (repl/notify
-                  {"list_source" (. result ["source"])
+                  {"summary" (node/summarise node)
                    "list_count" (xt/x:len (node/view-val node "screen/admin" "entries-screen" "list"))
-                   "list_query_keys" (xt/x:obj-keys
-                                       (. (node/view-get node "screen/admin" "entries-screen" "list")
-                                          ["resolver"]))
-                   "node_id" (. node ["id"])
                    "first_cached" (xtd/get-in
                                     (node/source-get node "screen/admin" "entries-screen" "caching")
                                     ["data" 0 "name"])})))))))))
-  => {"list_source" "caching"
+  => {"summary"
+     {"id" "admin-screen"
+      "spaces"
+      {"screen/admin"
+       {"models"
+        {"entries-screen"
+         {"sources"
+          {"primary" {"kind" "postgres"
+                      "sync_from" nil
+                      "live" false
+                      "data_count" 2}
+           "caching" {"kind" "sqlite"
+                      "sync_from" "primary"
+                      "live" false
+                      "data_count" 2}}
+          "views"
+          {"list" {"source" "caching"
+                   "status" "ready"
+                   "resolver_keys" ["type" "table" "select_entry" "return_entry"]}
+           "detail" {"source" "primary"
+                     "status" "idle"
+                     "resolver_keys" ["type" "table" "select_entry" "select_args" "return_entry"]}}}}}}}
      "list_count" 2
-     "list_query_keys" ["type" "table" "select_entry" "return_entry"]
-     "node_id" "admin-screen"
      "first_cached" "alpha"})

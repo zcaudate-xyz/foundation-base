@@ -106,9 +106,9 @@
                              (fn [entry]
                                (return (== "gamma" (xt/x:get-key entry "name"))))))
                        (repl/notify
-                        {"initial_count" (xt/x:len (. initial ["value"]))
+                        {"summary" (node/summarise node)
+                         "initial_count" (xt/x:len (. initial ["value"]))
                          "updated_count" (xt/x:len updated-value)
-                         "view_source" (. updated ["source"])
                          "cached_count" (xt/x:len
                                          (xtd/get-in
                                           (node/source-get node "screen/admin" "entries-screen" "caching")
@@ -120,9 +120,30 @@
                          "gamma_tags" (xtd/get-in
                                       updated-value
                                       [gamma-idx "tags"])}))))))))))))
-  => {"initial_count" 2
+  => {"summary"
+      {"id" "admin-screen"
+       "spaces"
+       {"screen/admin"
+        {"models"
+         {"entries-screen"
+          {"sources"
+           {"primary" {"kind" "postgres"
+                       "sync_from" nil
+                       "live" true
+                       "data_count" 2}
+            "caching" {"kind" "sqlite"
+                       "sync_from" "primary"
+                       "live" true
+                       "data_count" 3}}
+           "views"
+           {"list" {"source" "caching"
+                    "status" "ready"
+                    "resolver_keys" ["type" "table" "select_entry" "return_entry"]}
+            "detail" {"source" "primary"
+                      "status" "idle"
+                      "resolver_keys" ["type" "table" "select_entry" "select_args" "return_entry"]}}}}}}}
+      "initial_count" 2
       "updated_count" 3
-      "view_source" "caching"
       "cached_count" 3
       "has_gamma" true
       "gamma_tags" "[\"external\",\"sync\"]"})

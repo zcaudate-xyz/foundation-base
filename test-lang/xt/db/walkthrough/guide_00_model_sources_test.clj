@@ -23,24 +23,46 @@
 (fact "step 00: define primary and caching once at the model level while views keep the sql-pull query shape"
 
   (notify/wait-on [:js 10000]
-   (-> (node/create
-        {"node_id" "admin-screen"
-         "db" {"schema" (@! fixtures/+schema+)
-               "lookup" (@! fixtures/+lookup+)
-               "sources"
-               {"primary" {"kind" "postgres"}
-                "caching" {"kind" "sqlite"}}}
-         "spaces"
-         {"screen/admin"
-          {"models"
-           {"entries-screen"
-            {"views"
-             {"list" {"resolver" (@! fixtures/+resolver-model-query+)
-                      "source" "caching"}
-              "detail" {"resolver" (@! fixtures/+resolver-inline-query+)
-                        "source" "primary"}}}}}}})
-       (promise/x:promise-then
-        (fn [out] (repl/notify (node/summarise out)))))))
+    (-> (node/create
+         {"node_id" "admin-screen"
+          "db" {"schema" (@! fixtures/+schema+)
+                "lookup" (@! fixtures/+lookup+)
+                "sources"
+                {"primary" {"kind" "postgres"}
+                 "caching" {"kind" "sqlite"}}}
+          "spaces"
+          {"screen/admin"
+           {"models"
+            {"entries-screen"
+             {"views"
+              {"list" {"resolver" (@! fixtures/+resolver-model-query+)
+                       "source" "caching"}
+               "detail" {"resolver" (@! fixtures/+resolver-inline-query+)
+                         "source" "primary"}}}}}}})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify (node/summarise out))))))
+  => {"id" "admin-screen"
+      "spaces"
+      {"screen/admin"
+       {"models"
+       {"entries-screen"
+        {"sources"
+         {"primary" {"kind" "postgres"
+                     "sync_from" nil
+                     "live" false
+                     "data_count" 0}
+          "caching" {"kind" "sqlite"
+                     "sync_from" "primary"
+                     "live" false
+                     "data_count" 0}}
+         "views"
+         {"list" {"source" "caching"
+                  "status" "idle"
+                  "resolver_keys" ["type" "table" "select_entry" "return_entry"]}
+          "detail" {"source" "primary"
+                    "status" "idle"
+                    "resolver_keys" ["type" "table" "select_entry" "select_args" "return_entry"]}}}}}}})
 
 ^{:refer xt.db.walkthrough.guide-00-model-sources/STEP.01-empty-query :added "4.1"}
 (fact "step 01: querying the empty structural caching source returns a ready empty result"
@@ -75,6 +97,7 @@
          (repl/notify
           result)))))
   => {"query_key" nil, "value" [], "status" "ready", "source" "caching"})
+
 
 (comment
   (notify/wait-on [:js 10000]

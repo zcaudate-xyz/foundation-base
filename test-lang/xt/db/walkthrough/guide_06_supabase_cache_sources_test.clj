@@ -113,24 +113,7 @@
                 (promise/x:promise-then
                  (fn [[list-refresh detail-refresh]]
                    (repl/notify
-                    {"primary_kind" (xtd/get-in
-                                     (node/source-get node "screen/admin" "entries-screen" "primary")
-                                     ["kind"])
-                     "caching_kind" (xtd/get-in
-                                     (node/source-get node "screen/admin" "entries-screen" "caching")
-                                     ["kind"])
-                     "list_source" (xtd/get-in list-refresh ["source"])
-                     "detail_source" (xtd/get-in detail-refresh ["source"])
-                     "list_table" (xtd/get-in
-                                   (node/view-get node "screen/admin" "entries-screen" "list")
-                                   ["resolver" "table"])
-                     "detail_query_keys" (xt/x:obj-keys
-                                          (. (node/view-get node "screen/admin" "entries-screen" "detail")
-                                             ["resolver"]))
-                     "node_id" (. node ["id"])
-                     "caching_sync_from" (xtd/get-in
-                                          (node/source-get node "screen/admin" "entries-screen" "caching")
-                                          ["sync_from"])
+                    {"summary" (node/summarise node)
                      "cached_first" (xtd/get-in
                                      (node/source-get node "screen/admin" "entries-screen" "caching")
                                      ["data" 0 "name"])
@@ -143,14 +126,28 @@
                      "detail_name" (xtd/get-in
                                     (node/view-val node "screen/admin" "entries-screen" "detail")
                                     [0 "name"])})))))))))
-  => {"primary_kind" "supabase"
-      "caching_kind" "cache"
-      "list_source" "caching"
-      "detail_source" "primary"
-      "list_table" "Entry"
-      "detail_query_keys" ["type" "table" "select_entry" "select_args" "return_entry"]
-      "node_id" "admin-screen"
-      "caching_sync_from" "primary"
+  => {"summary"
+      {"id" "admin-screen"
+       "spaces"
+       {"screen/admin"
+        {"models"
+         {"entries-screen"
+          {"sources"
+           {"primary" {"kind" "supabase"
+                      "sync_from" nil
+                      "live" true
+                      "data_count" 1}
+            "caching" {"kind" "cache"
+                      "sync_from" "primary"
+                      "live" true
+                      "data_count" 2}}
+           "views"
+           {"list" {"source" "caching"
+                    "status" "ready"
+                    "resolver_keys" ["type" "table" "select_entry" "return_entry"]}
+            "detail" {"source" "primary"
+                     "status" "ready"
+                     "resolver_keys" ["type" "table" "select_entry" "select_args" "return_entry"]}}}}}}}
       "cached_first" "alpha"
       "list_name" "alpha"
       "detail_default" "alpha"

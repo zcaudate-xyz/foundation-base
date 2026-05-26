@@ -85,25 +85,34 @@
                 (promise/x:promise-then
                  (fn [[list-refresh detail-refresh]]
                    (repl/notify
-                    {"primary_kind" (xtd/get-in
-                                     (node/source-get node "screen/admin" "entries-screen" "primary")
-                                     ["kind"])
-                     "caching_kind" (xtd/get-in
-                                     (node/source-get node "screen/admin" "entries-screen" "caching")
-                                     ["kind"])
-                     "list_source" (xtd/get-in list-refresh ["source"])
-                     "detail_source" (xtd/get-in detail-refresh ["source"])
-                     "node_id" (. node ["id"])
+                    {"summary" (node/summarise node)
                      "cached_first" (xtd/get-in
                                      (node/source-get node "screen/admin" "entries-screen" "caching")
                                      ["data" 0 "name"])
                      "detail_default" (xtd/get-in
                                        (node/view-get node "screen/admin" "entries-screen" "detail")
                                        ["resolver" "select_args" 0])})))))))))
-  => {"primary_kind" "postgres"
-      "caching_kind" "sqlite"
-      "list_source" "caching"
-      "detail_source" "primary"
-      "node_id" "admin-screen"
+  => {"summary"
+      {"id" "admin-screen"
+       "spaces"
+       {"screen/admin"
+        {"models"
+         {"entries-screen"
+          {"sources"
+           {"primary" {"kind" "postgres"
+                      "sync_from" nil
+                      "live" true
+                      "data_count" 1}
+            "caching" {"kind" "sqlite"
+                      "sync_from" "primary"
+                      "live" true
+                      "data_count" 2}}
+           "views"
+           {"list" {"source" "caching"
+                    "status" "ready"
+                    "resolver_keys" ["type" "table" "select_entry" "return_entry"]}
+            "detail" {"source" "primary"
+                     "status" "ready"
+                     "resolver_keys" ["type" "table" "select_entry" "select_args" "return_entry"]}}}}}}}
       "cached_first" "alpha"
       "detail_default" "alpha"})

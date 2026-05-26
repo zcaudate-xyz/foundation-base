@@ -43,25 +43,25 @@
         (promise/x:promise-then
          (fn [node]
            (repl/notify
-            {"primary_kind" (xtd/get-in
-                            (node/source-get node "screen/admin" "entries-screen" "primary")
-                            ["kind"])
-             "caching_kind" (xtd/get-in
-                            (node/source-get node "screen/admin" "entries-screen" "caching")
-                            ["kind"])
-             "list_table" (xtd/get-in
-                          (node/view-get node "screen/admin" "entries-screen" "list")
-                          ["resolver" "table"])
-             "detail_query_keys" (xt/x:obj-keys
-                                 (. (node/view-get node "screen/admin" "entries-screen" "detail")
-                                    ["resolver"]))
-             "node_id" (. node ["id"])
-             "caching_sync_from" (xtd/get-in
-                                 (node/source-get node "screen/admin" "entries-screen" "caching")
-                                 ["sync_from"])})))))
-  => {"primary_kind" "postgres"
-      "caching_kind" "sqlite"
-      "list_table" "Entry"
-      "detail_query_keys" ["type" "table" "select_entry" "select_args" "return_entry"]
-      "node_id" "admin-screen"
-      "caching_sync_from" "primary"})
+            (node/summarise node))))))
+  => {"id" "admin-screen"
+      "spaces"
+      {"screen/admin"
+       {"models"
+        {"entries-screen"
+         {"sources"
+          {"primary" {"kind" "postgres"
+                     "sync_from" nil
+                     "live" false
+                     "data_count" 0}
+           "caching" {"kind" "sqlite"
+                     "sync_from" "primary"
+                     "live" false
+                     "data_count" 0}}
+          "views"
+          {"list" {"source" "caching"
+                  "status" "idle"
+                  "resolver_keys" ["type" "table" "select_entry" "return_entry"]}
+           "detail" {"source" "primary"
+                    "status" "idle"
+                    "resolver_keys" ["type" "table" "select_entry" "select_args" "return_entry"]}}}}}}})

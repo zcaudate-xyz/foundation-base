@@ -57,13 +57,13 @@
                               (node/source-get node "screen/admin" "entries-screen" "caching")
                               ["db"]))
               (repl/notify
-               {"primary_database" (xtd/get-in
+               {"summary" (node/summarise node)
+                "primary_database" (xtd/get-in
                                     (node/source-get node "screen/admin" "entries-screen" "primary")
                                    ["config" "database"])
                 "caching_file" (xtd/get-in
                                 (node/source-get node "screen/admin" "entries-screen" "caching")
                                 ["config" "filename"])
-                "node_id" (. node ["id"])
                 "sqlite_row_count" (db-instance/db-exec-sync sqlite-db "SELECT COUNT(*) FROM Entry;")
                 "sqlite_first" (xtd/get-in
                                 (node/source-get node "screen/admin" "entries-screen" "caching")
@@ -71,9 +71,30 @@
                 "summary_source" (xtd/get-in
                                   (node/view-get node "screen/admin" "entries-screen" "summary")
                                   ["source"])}))))))))
-  => {"primary_database" "test-scratch"
+  => {"summary"
+      {"id" "admin-screen"
+       "spaces"
+       {"screen/admin"
+        {"models"
+         {"entries-screen"
+          {"sources"
+           {"primary" {"kind" "postgres"
+                      "sync_from" nil
+                      "live" false
+                      "data_count" 0}
+            "caching" {"kind" "sqlite"
+                      "sync_from" "primary"
+                      "live" true
+                      "data_count" 2}}
+           "views"
+           {"summary" {"source" "caching"
+                      "status" "ready"
+                      "resolver_keys" ["type" "table" "select_entry" "return_entry"]}
+            "detail" {"source" "primary"
+                     "status" "idle"
+                     "resolver_keys" ["type" "table" "select_entry" "select_args" "return_entry"]}}}}}}}
+      "primary_database" "test-scratch"
       "caching_file" "admin-screen.sqlite"
-      "node_id" "admin-screen"
       "sqlite_row_count" 2
       "sqlite_first" "alpha"
       "summary_source" "caching"})

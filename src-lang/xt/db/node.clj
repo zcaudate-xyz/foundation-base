@@ -24,6 +24,21 @@
 (def.xt ACTION_REMOVE spec/ACTION_REMOVE)
 (def.xt ACTION_CLEAR spec/ACTION_CLEAR)
 (def.xt ACTION_SNAPSHOT spec/ACTION_SNAPSHOT)
+(def.xt ACTION_MODEL_PUT "xt.db/model-put")
+(def.xt ACTION_MODEL_GET "xt.db/model-get")
+(def.xt ACTION_MODEL_MATERIALIZE "xt.db/model-materialize")
+(def.xt ACTION_MODEL_SYNC "xt.db/model-sync")
+(def.xt ACTION_MODEL_REFRESH "xt.db/model-refresh")
+(def.xt ACTION_SOURCE_GET "xt.db/source-get")
+(def.xt ACTION_SOURCE_PUT "xt.db/source-put")
+(def.xt ACTION_SOURCE_REFRESH "xt.db/source-refresh")
+(def.xt ACTION_SOURCE_SYNC "xt.db/source-sync")
+(def.xt ACTION_SOURCE_SHARE "xt.db/source-share")
+(def.xt ACTION_VIEW_PUT "xt.db/view-put")
+(def.xt ACTION_VIEW_GET "xt.db/view-get")
+(def.xt ACTION_VIEW_REFRESH "xt.db/view-refresh")
+(def.xt ACTION_VIEW_SET_INPUT "xt.db/view-set-input")
+(def.xt ACTION_NODE_SUMMARY "xt.db/node-summary")
 
 (def.xt SIGNAL_CACHE_CHANGED spec/SIGNAL_CACHE_CHANGED)
 (def.xt SIGNAL_CACHE_INVALIDATED spec/SIGNAL_CACHE_INVALIDATED)
@@ -259,8 +274,248 @@
                        (-/materialize-source node space-id model-id source-id)))))
   (return running))
 
+(defn.xt model-materialize
+  "materializes all live sources for a registered model"
+  {:added "4.1"}
+  [node space-id model-id]
+  (var state (model/ensure-space-state node space-id))
+  (var model-entry (model/ensure-model state model-id))
+  (var source-ids [])
+  (var running [])
+  (xt/for:object [[source-id source] (or (xt/x:get-key model-entry "sources") {})]
+    (when (-/source-live? source)
+      (xt/x:arr-push source-ids source-id)
+      (xt/x:arr-push running (-/materialize-source node space-id model-id source-id))))
+  (if (> (xt/x:len running) 0)
+    (return
+     (promise/x:promise-then
+      (promise/x:promise-all running)
+      (fn [results]
+        (var out {})
+        (xt/for:index [idx [0 (xt/x:len source-ids)]]
+          (xt/x:set-key out
+                        (xt/x:get-idx source-ids idx)
+                        (xt/x:get-idx results idx)))
+        (return out))))
+    (return (promise/x:promise-run {}))))
+
+(defn.xt source-share
+  "shares live source runtime fields from one space/model into another"
+  {:added "4.1"}
+  [node from-space to-space model-id source-ids]
+  (var state (model/ensure-space-state node to-space))
+  (var model-entry (model/ensure-model state model-id))
+  (var ids (:? (xt/x:is-array? source-ids)
+               source-ids
+               (:? (xt/x:is-string? source-ids)
+                   [source-ids]
+                   (xt/x:obj-keys (or (xt/x:get-key model-entry "sources") {})))))
+  (var out {})
+  (xt/for:array [source-id ids]
+    (var from-source (model/source-get node from-space model-id source-id))
+    (var to-source (model/source-get node to-space model-id source-id))
+    (when (xt/x:nil? from-source)
+      (xt/x:err (xt/x:cat "source not found - "
+                          (xt/x:json-encode [from-space model-id source-id]))))
+    (when (xt/x:nil? to-source)
+      (xt/x:err (xt/x:cat "source not found - "
+                          (xt/x:json-encode [to-space model-id source-id]))))
+    (xt/x:set-key to-source "instance" (xt/x:get-key from-source "instance"))
+    (xt/x:set-key to-source "db" (xt/x:get-key from-source "db"))
+    (xt/x:set-key to-source "dbtype" (xt/x:get-key from-source "dbtype"))
+    (xt/x:set-key to-source "db_opts" (xt/x:get-key from-source "db_opts"))
+    (xt/x:set-key to-source "live" (xt/x:get-key from-source "live"))
+    (xt/x:set-key out source-id to-source))
+  (return out))
+
+(defn.xt remote-payload
+  "gets the first payload object for a remote xt.db control request"
+  {:added "4.1"}
+  [args]
+  (return (or (xt/x:first args) {})))
+
+(defn.xt install-remote-handlers
+  "installs remote control handlers for dynamic xt.db model lifecycle"
+  {:added "4.1"}
+  [node]
+  (event-node/register-handler
+   node
+   -/ACTION_MODEL_PUT
+   (fn [current-space args _request worker-node]
+     (var payload (-/remote-payload args))
+    (model/model-put worker-node
+                     (xt/x:get-key current-space "id")
+                     (xt/x:get-key payload "model_id")
+                     (or (xt/x:get-key payload "model_spec")
+                         (xt/x:get-key payload "model")))
+    (return {"space_id" (xt/x:get-key current-space "id")
+             "model_id" (xt/x:get-key payload "model_id")}))
+   nil)
+  (event-node/register-handler
+   node
+   -/ACTION_MODEL_GET
+   (fn [current-space args _request worker-node]
+     (var payload (-/remote-payload args))
+     (return
+      (model/model-get worker-node
+                       (xt/x:get-key current-space "id")
+                       (xt/x:get-key payload "model_id"))))
+   nil)
+  (event-node/register-handler
+   node
+   -/ACTION_MODEL_MATERIALIZE
+   (fn [current-space args _request worker-node]
+    (var payload (-/remote-payload args))
+    (return
+     (promise/x:promise-then
+      (-/model-materialize worker-node
+                           (xt/x:get-key current-space "id")
+                           (xt/x:get-key payload "model_id"))
+      (fn [_]
+        (return {"space_id" (xt/x:get-key current-space "id")
+                 "model_id" (xt/x:get-key payload "model_id")})))))
+   nil)
+  (event-node/register-handler
+   node
+   -/ACTION_MODEL_SYNC
+   (fn [current-space args _request worker-node]
+     (var payload (-/remote-payload args))
+    (return
+     (promise/x:promise-then
+      (model/model-sync worker-node
+                        (xt/x:get-key current-space "id")
+                        (xt/x:get-key payload "model_id"))
+      (fn [_]
+        (return {"space_id" (xt/x:get-key current-space "id")
+                 "model_id" (xt/x:get-key payload "model_id")})))))
+   nil)
+  (event-node/register-handler
+   node
+   -/ACTION_MODEL_REFRESH
+   (fn [current-space args _request worker-node]
+     (var payload (-/remote-payload args))
+     (return
+      (model/model-refresh worker-node
+                           (xt/x:get-key current-space "id")
+                           (xt/x:get-key payload "model_id"))))
+   nil)
+  (event-node/register-handler
+   node
+   -/ACTION_SOURCE_GET
+   (fn [current-space args _request worker-node]
+     (var payload (-/remote-payload args))
+     (return
+      (model/source-get worker-node
+                        (xt/x:get-key current-space "id")
+                        (xt/x:get-key payload "model_id")
+                        (xt/x:get-key payload "source_id"))))
+   nil)
+  (event-node/register-handler
+   node
+   -/ACTION_SOURCE_PUT
+   (fn [current-space args _request worker-node]
+     (var payload (-/remote-payload args))
+     (return
+      (model/source-put worker-node
+                        (xt/x:get-key current-space "id")
+                        (xt/x:get-key payload "model_id")
+                        (xt/x:get-key payload "source_id")
+                        (xt/x:get-key payload "data"))))
+   nil)
+  (event-node/register-handler
+   node
+   -/ACTION_SOURCE_REFRESH
+   (fn [current-space args _request worker-node]
+     (var payload (-/remote-payload args))
+     (return
+      (model/source-refresh worker-node
+                            (xt/x:get-key current-space "id")
+                            (xt/x:get-key payload "model_id")
+                            (xt/x:get-key payload "source_id"))))
+   nil)
+  (event-node/register-handler
+   node
+   -/ACTION_SOURCE_SYNC
+   (fn [current-space args _request worker-node]
+     (var payload (-/remote-payload args))
+     (return
+      (model/source-sync worker-node
+                         (xt/x:get-key current-space "id")
+                         (xt/x:get-key payload "model_id")
+                         (xt/x:get-key payload "source_id"))))
+   nil)
+  (event-node/register-handler
+   node
+   -/ACTION_SOURCE_SHARE
+   (fn [current-space args _request worker-node]
+     (var payload (-/remote-payload args))
+    (-/source-share worker-node
+                    (xt/x:get-key payload "from_space")
+                    (xt/x:get-key current-space "id")
+                    (xt/x:get-key payload "model_id")
+                    (or (xt/x:get-key payload "source_ids")
+                        (xt/x:get-key payload "source_id")))
+    (return {"space_id" (xt/x:get-key current-space "id")
+             "from_space" (xt/x:get-key payload "from_space")
+             "model_id" (xt/x:get-key payload "model_id")}))
+   nil)
+  (event-node/register-handler
+   node
+   -/ACTION_VIEW_PUT
+   (fn [current-space args _request worker-node]
+     (var payload (-/remote-payload args))
+     (return
+      (model/view-put worker-node
+                      (xt/x:get-key current-space "id")
+                      (xt/x:get-key payload "model_id")
+                      (xt/x:get-key payload "view_id")
+                      (or (xt/x:get-key payload "view_spec")
+                          (xt/x:get-key payload "view")))))
+   nil)
+  (event-node/register-handler
+   node
+   -/ACTION_VIEW_GET
+   (fn [current-space args _request worker-node]
+     (var payload (-/remote-payload args))
+     (return
+      (model/view-get worker-node
+                      (xt/x:get-key current-space "id")
+                      (xt/x:get-key payload "model_id")
+                      (xt/x:get-key payload "view_id"))))
+   nil)
+  (event-node/register-handler
+   node
+   -/ACTION_VIEW_REFRESH
+   (fn [current-space args _request worker-node]
+     (var payload (-/remote-payload args))
+     (return
+      (model/view-refresh worker-node
+                          (xt/x:get-key current-space "id")
+                          (xt/x:get-key payload "model_id")
+                          (xt/x:get-key payload "view_id"))))
+   nil)
+  (event-node/register-handler
+   node
+   -/ACTION_VIEW_SET_INPUT
+   (fn [current-space args _request worker-node]
+     (var payload (-/remote-payload args))
+     (return
+      (model/view-set-input worker-node
+                            (xt/x:get-key current-space "id")
+                            (xt/x:get-key payload "model_id")
+                            (xt/x:get-key payload "view_id")
+                            (xt/x:get-key payload "input"))))
+   nil)
+  (event-node/register-handler
+   node
+   -/ACTION_NODE_SUMMARY
+   (fn [_current-space _args _request worker-node]
+     (return (-/summarise worker-node)))
+   nil)
+  (return node))
+
 (defn.xt create
-  "creates a node from a declarative xt.db manifest"
+  "creates a node from a declarative xt.db manifest and installs remote control handlers"
   {:added "4.1"}
   [spec]
   (:= spec (or spec {}))
@@ -270,6 +525,7 @@
     (xt/x:err "node_id not found"))
   (var node (event-node/node-create {"id" node-id}))
   (model/install node (or (xt/x:get-key spec "db") {}))
+  (-/install-remote-handlers node)
   (var running [])
   (xt/for:object [[space-id space-spec] (or (xt/x:get-key spec "spaces") {})]
     (-/create-space node space-id space-spec)
@@ -280,14 +536,43 @@
           (promise/x:promise-all running)
           (fn [_]
             (return node))))
-
+ 
         :else
         (return (promise/x:promise-run node))))
 
+(defn.xt summarise
+  "summarises node spaces, models, sources, and views for walkthrough inspection"
+  {:added "4.1"}
+  [node]
+  (var out {"id" (xt/x:get-key node "id")
+            "spaces" {}})
+  (xt/for:array [space-id (event-node/list-spaces node)]
+    (var state (model/ensure-space-state node space-id))
+    (var space-summary {"models" {}})
+    (xt/for:object [[model-id model-entry] (or (xt/x:get-key state "models") {})]
+      (var model-summary {"sources" {}
+                         "views" {}})
+      (xt/for:object [[source-id source-entry] (or (xt/x:get-key model-entry "sources") {})]
+        (xtd/set-in model-summary
+                   ["sources" source-id]
+                   {"kind" (xt/x:get-key source-entry "kind")
+                    "sync_from" (xt/x:get-key source-entry "sync_from")
+                    "live" (== true (xt/x:get-key source-entry "live"))
+                    "data_count" (xt/x:len (or (xt/x:get-key source-entry "data") []))}))
+      (xt/for:object [[view-id view-entry] (or (xt/x:get-key model-entry "views") {})]
+        (xtd/set-in model-summary
+                   ["views" view-id]
+                   {"source" (xt/x:get-key view-entry "source")
+                    "status" (xt/x:get-key view-entry "status")
+                    "resolver_keys" (xt/x:obj-keys (or (xt/x:get-key view-entry "resolver") {}))}))
+      (xtd/set-in space-summary ["models" model-id] model-summary))
+    (xtd/set-in out ["spaces" space-id] space-summary))
+  (return out))
+ 
 (def.xt install model/install)
 (def.xt uninstall model/uninstall)
 (def.xt ensure-space-state model/ensure-space-state)
-
+ 
 (def.xt query model/query)
 (def.xt query-refresh model/query-refresh)
 (def.xt sync model/sync)
@@ -313,5 +598,5 @@
 (def.xt view-error model/view-error)
 (def.xt view-refresh model/view-refresh)
 (def.xt view-set-input model/view-set-input)
-
+ 
 (def.xt node-opts util/node-opts)
