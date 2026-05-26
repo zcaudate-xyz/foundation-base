@@ -1,15 +1,18 @@
 (ns xt.db.walkthrough.guide-09-supabase-broadcast-tree-sync-test
   (:use code.test)
   (:require [hara.lang :as l]
+            [postgres.core :as pg]
+            [postgres.core.supabase :as supabase]
             [xt.lang.common-notify :as notify]
             [xt.db.helpers.data-main-test :as sample]
-            [xt.db.helpers.supabase-pull-live-test :as live]))
+            [xt.db.runtime.event-supabase :as event-supabase]
+            [xt.db.runtime.event-host-util :as live]))
 
 (def +live-broadcast-topic+
   "room:users-tree")
 
-(def +live-broadcast-event+
-  "user_sync")
+(def +live-broadcast-cache-topic+
+  "room:users-tree-cache")
 
 (def +live-broadcast-user-id+
   "00000000-0000-0000-0000-0000000000f1")
@@ -49,11 +52,30 @@
       "first_name"
       "detail"]]]])
 
+(def +supabase-pg-config+
+  {:host live/+postgres-host+
+   :port live/+postgres-port+
+   :user "postgres"
+   :pass "postgres"
+   :dbname "postgres"
+   :startup {:args [live/+shell+ "-lc" (live/startup-shell-command)]
+             :root live/+supabase-cli-root+
+             :ignore-errors false}
+   :teardown {:args [live/+shell+ "-lc" "true"]
+              :root live/+supabase-cli-root+
+              :ignore-errors true}})
+
+(l/script- :postgres
+  {:runtime :jdbc.client
+   :config +supabase-pg-config+
+   :require [[postgres.core :as pg]
+             [postgres.core.supabase :as supabase]]})
+
 ^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.runtime :as xdb]
-             [xt.db.runtime.supabase-realtime :as realtime]
+             [xt.db.runtime.event-supabase :as event-supabase]
              [js.lib.client-fetch :as js-fetch]
              [js.lib.client-websocket :as js-ws]
              [js.lib.driver-sqlite :as js-sqlite]
@@ -66,7 +88,7 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.common-data :as xtd]
              [xt.db.helpers.data-main-test :as sample]
-             [xt.db.helpers.supabase-pull-live-test :as live]]})
+             [xt.db.runtime.event-host-util :as live]]})
 
 (def.js UserTreeQuery
   (@! +user-tree-query+))
@@ -92,6 +114,16 @@
                        (ut/sqlite-opts nil))
         {"schema" sample/Schema}))))))
 
+(defn.js create-local-user-cache
+  []
+  (return
+   (xtd/obj-assign
+    (xdb/db-create {"::" "db.cache"}
+                   sample/Schema
+                   sample/SchemaLookup
+                   nil)
+    {"schema" sample/Schema})))
+
 (defn.js pull-user-tree
   [local-db]
   (return
@@ -110,7 +142,8 @@
 
 (fact:global
   {:setup [(l/rt:restart)
-           (do (live/init-live-postgres-runtime!)
+          (l/rt:setup :postgres)
+          (do (live/init-live-postgres-runtime!)
                (l/rt:setup (live/pg-rt) live/+postgres-module+)
                (live/refresh-live-supabase-config!)
                true)]
@@ -118,6 +151,7 @@
                   (alter-var-root #'live/+postgres-runtime+ (constantly nil))
                   (alter-var-root #'live/+live-supabase-config+ (constantly nil))
                   true)
+              (l/rt:teardown :postgres)
               (l/rt:stop)]})
 
 ^{:refer xt.db.walkthrough.guide-09-supabase-broadcast-tree-sync/STEP.00-broadcast-tree-into-sqlite-cache
@@ -126,10 +160,12 @@
 
   (future
     (Thread/sleep 4000)
-    (live/send-realtime-broadcast!
-     +live-broadcast-topic+
-     +live-broadcast-event+
-     +live-broadcast-request+))
+    (!.pg
+     [:select
+      (supabase/realtime-send-request
+       "room:users-tree"
+       +live-broadcast-request+
+       false)]))
 
   (notify/wait-on [:js 15000]
     (var primary-config (xt/x:obj-clone (@! live/+live-supabase-config+)))
@@ -137,12 +173,12 @@
     (xt/x:set-key primary-client "transport" (js-fetch/client {}))
     (xt/x:set-key primary-config "client" primary-client)
     (var sub-client
-         {"transport" (js-ws/driver {})
-          "base_url" (xt/x:get-key primary-client "base_url")
-          "api_key" (xt/x:get-key primary-client "api_key")
-          "auth_token" (xt/x:get-key primary-client "auth_token")
-          "topic" (@! +live-broadcast-topic+)
-          "message_event" "broadcast"})
+         (event-supabase/broadcast-client
+          {"transport" (js-ws/driver {})
+           "base_url" (xt/x:get-key primary-client "base_url")
+           "api_key" (xt/x:get-key primary-client "api_key")
+           "auth_token" (xt/x:get-key primary-client "auth_token")}
+          {"topic" (@! +live-broadcast-topic+)}))
     (-> (-/create-local-user-db)
         (promise/x:promise-then
          (fn [local-db]
@@ -151,7 +187,7 @@
            (var statuses [])
            (var request-out nil)
            (promise/x:promise-then
-           (realtime/subscribe
+           (event-supabase/subscribe-broadcast
              {"client" sub-client}
              local-db
             {"on_status"
@@ -169,7 +205,7 @@
                      (when (xt/x:not-nil? request-out)
                        (clearInterval poll-id)
                        (var cached-users
-                           (-/pull-user-tree local-db))
+                            (-/pull-user-tree local-db))
                        (var cached-user (xt/x:get-idx cached-users 0))
                        (var cached-profile (xt/x:get-idx (. cached-user ["profile"]) 0))
                        (var profile-row
@@ -185,21 +221,121 @@
                          "local_kind" "sqlite"
                          "initial_count" (xt/x:len initial-users)
                          "updated_count" (xt/x:len cached-users)
-                         "request_profile_first" (xtd/get-in
-                                                  request-out
-                                                  ["db/sync" "UserAccount" 0 "profile" 0 "first_name"])
+                         "request_out" request-out
                          "cached_nickname" (. cached-user ["nickname"])
                          "cached_profile_first" (. cached-profile ["first_name"])
                          "profile_row_first" (. profile-row ["first_name"])})))
                    100))
              (return true)))))))
-  => {"topic" "realtime:room:users-tree"
-      "status" "SUBSCRIBED"
-      "primary_kind" "supabase"
-      "local_kind" "sqlite"
-      "initial_count" 0
-      "updated_count" 1
-      "request_profile_first" "Broadcast"
-      "cached_nickname" "broadcast-root"
-      "cached_profile_first" "Broadcast"
-      "profile_row_first" "Broadcast"})
+  => (contains {"topic" "realtime:room:users-tree"
+                "status" "SUBSCRIBED"
+                "primary_kind" "supabase"
+                "local_kind" "sqlite"
+                "initial_count" 0
+                "updated_count" 1
+                "request_out" (contains {"id" string?
+                                         "db/sync"
+                                         (contains-in
+                                          (assoc-in (get +live-broadcast-request+
+                                                         "db/sync")
+                                                    ["UserAccount"
+                                                     0
+                                                     "profile"
+                                                     0
+                                                     "account"]
+                                                    [+live-broadcast-user-id+]))})
+                "cached_nickname" "broadcast-root"
+                "cached_profile_first" "Broadcast"
+                "profile_row_first" "Broadcast"}))
+
+^{:refer xt.db.walkthrough.guide-09-supabase-broadcast-tree-sync/STEP.01-broadcast-tree-into-cache-instance
+  :added "4.1"}
+(fact "step 01: live supabase broadcast sends a tree payload that xt.db flattens into an in-memory cache and reads back as nested data"
+
+  (future
+    (Thread/sleep 4000)
+    (!.pg
+     [:select
+      (supabase/realtime-send-request
+       "room:users-tree-cache"
+       +live-broadcast-request+
+       false)]))
+
+  (notify/wait-on [:js 15000]
+    (var primary-config (xt/x:obj-clone (@! live/+live-supabase-config+)))
+    (var primary-client (xt/x:obj-clone (. primary-config ["client"])))
+    (xt/x:set-key primary-client "transport" (js-fetch/client {}))
+    (xt/x:set-key primary-config "client" primary-client)
+    (var sub-client
+         (event-supabase/broadcast-client
+          {"transport" (js-ws/driver {})
+           "base_url" (xt/x:get-key primary-client "base_url")
+           "api_key" (xt/x:get-key primary-client "api_key")
+           "auth_token" (xt/x:get-key primary-client "auth_token")}
+          {"topic" (@! +live-broadcast-cache-topic+)}))
+    (var local-db (-/create-local-user-cache))
+    (var initial-users
+         (-/pull-user-tree local-db))
+    (var statuses [])
+    (var request-out nil)
+    (promise/x:promise-then
+     (event-supabase/subscribe-broadcast
+      {"client" sub-client}
+      local-db
+      {"on_status"
+       (fn [status _frame]
+         (xt/x:arr-push statuses status))
+       "on_request"
+       (fn [request _payload _frame]
+         (when (== (@! +live-broadcast-user-id+)
+                   (xtd/get-in request ["db/sync" "UserAccount" 0 "id"]))
+           (:= request-out request)))})
+     (fn [_sub]
+       (var poll-id
+            (setInterval
+             (fn []
+               (when (xt/x:not-nil? request-out)
+                 (clearInterval poll-id)
+                 (var cached-users
+                      (-/pull-user-tree local-db))
+                 (var cached-user (xt/x:get-idx cached-users 0))
+                 (var cached-profile (xt/x:get-idx (. cached-user ["profile"]) 0))
+                 (var profile-row
+                      (xt/x:get-idx
+                       (-/pull-user-profile
+                        local-db
+                        (@! +live-broadcast-profile-id+))
+                       0))
+                 (repl/notify
+                  {"topic" "realtime:room:users-tree-cache"
+                   "status" (xt/x:first statuses)
+                   "primary_kind" "supabase"
+                   "local_kind" "cache"
+                   "initial_count" (xt/x:len initial-users)
+                   "updated_count" (xt/x:len cached-users)
+                   "request_out" request-out
+                   "cached_nickname" (. cached-user ["nickname"])
+                   "cached_profile_first" (. cached-profile ["first_name"])
+                   "profile_row_first" (. profile-row ["first_name"])})))
+             100))
+       (return true))))
+  => (contains {"topic" "realtime:room:users-tree-cache"
+                "status" "SUBSCRIBED"
+                "primary_kind" "supabase"
+                "local_kind" "cache"
+                "initial_count" 0
+                "updated_count" 1
+                "request_out" (contains {"id" string?
+                                         "db/sync"
+                                         (contains-in
+                                          (assoc-in (get +live-broadcast-request+
+                                                         "db/sync")
+                                                    ["UserAccount"
+                                                     0
+                                                     "profile"
+                                                     0
+                                                     "account"]
+                                                    [+live-broadcast-user-id+]))})
+                "cached_nickname" "broadcast-root"
+                "cached_profile_first" "Broadcast"
+                "profile_row_first" "Broadcast"}))

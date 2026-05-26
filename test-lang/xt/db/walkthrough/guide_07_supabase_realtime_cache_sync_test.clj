@@ -3,7 +3,7 @@
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
             [xt.db.helpers.test-fixtures :as fixtures]
-            [xt.db.helpers.supabase-pull-live-test :as live]))
+            [xt.db.runtime.event-host-util :as live]))
 
 (def +supabase-pg-config+
   {:host live/+postgres-host+
@@ -29,7 +29,7 @@
   {:runtime :basic
    :require [[js.lib.client-websocket :as js-ws]
              [xt.db.runtime :as xdb]
-             [xt.db.runtime.supabase-realtime :as realtime]
+             [xt.db.runtime.event-supabase :as realtime]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]

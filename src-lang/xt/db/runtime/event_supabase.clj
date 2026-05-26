@@ -1,8 +1,8 @@
-(ns xt.db.runtime.supabase-realtime
+(ns xt.db.runtime.event-supabase
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.db.runtime :as db-runtime]
+  {:require [[xt.db.runtime.event-common :as event-common]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-string :as str]
              [xt.lang.spec-base :as xt]
@@ -13,40 +13,21 @@
   "checks if a value is a wrapped supabase realtime client descriptor"
   {:added "4.1.4"}
   [obj]
-  (return (and (xt/x:is-object? obj)
-               (== "supabase.realtime.client"
-                   (xt/x:get-key obj "::")))))
+  (return (event-common/client? obj "supabase.realtime.client")))
 
 (defn.xt raw-client
   "unwraps the tagged realtime client descriptor"
   {:added "4.1.4"}
   [client]
-  (if (-/client? client)
-    (return (or (xt/x:get-key client "_raw") {}))
-    (return (or client {}))))
+  (return (event-common/raw-client client "supabase.realtime.client")))
 
 (defn.xt resolve-transport
   "resolves a websocket transport as a standard websocket driver or client"
   {:added "4.1.4"}
   [client]
-  (var raw-client (-/raw-client client))
-  (var transport-source
-       (xt/x:get-key raw-client "transport"))
-  (cond (ws/client? transport-source)
-        (return transport-source)
-
-        (ws/driver? transport-source)
-        (return transport-source)
-
-        (xt/x:is-function? transport-source)
-        (return (ws/driver-create {"connect" transport-source}))
-
-        (or (xt/x:is-function? (xt/x:get-key transport-source "connect"))
-            (xt/x:is-function? (xt/x:get-key transport-source "connect_sync")))
-        (return (ws/driver-create transport-source))
-
-        :else
-        (xt/x:err "Supabase realtime missing websocket transport")))
+  (return (event-common/resolve-transport client
+                                          "supabase.realtime.client"
+                                          "Supabase realtime")))
 
 (defn.xt resolve-base-url
   "resolves the base Supabase http url"
@@ -152,10 +133,7 @@
   "trims a single trailing slash"
   {:added "4.1.4"}
   [s]
-  (if (and (xt/x:is-string? s)
-           (str/ends-with? s "/"))
-    (return (xt/x:str-substring s 0 (- (xt/x:str-len s) 1)))
-    (return s)))
+  (return (event-common/trim-trailing-slash s)))
 
 (defn.xt derive-websocket-url
   "derives the Supabase realtime websocket endpoint from the base api url"
@@ -164,7 +142,7 @@
   (when (or (xt/x:nil? base-url)
             (not (xt/x:is-string? base-url)))
     (return nil))
-  (:= base-url (-/trim-trailing-slash base-url))
+  (:= base-url (event-common/trim-trailing-slash base-url))
   (when (str/ends-with? base-url "/rest/v1")
     (:= base-url (xt/x:str-substring base-url 0 (- (xt/x:str-len base-url) 8))))
   (cond (str/starts-with? base-url "https://")
@@ -180,11 +158,7 @@
   "encodes a flat query param map"
   {:added "4.1.4"}
   [params]
-  (var out [])
-  (xt/for:object [[k v] (or params {})]
-    (when (xt/x:not-nil? v)
-      (xt/x:arr-push out (xt/x:cat k "=" (xt/x:to-string v)))))
-  (return (xt/x:str-join "&" out)))
+  (return (event-common/encode-query-params params)))
 
 (defn.xt prepare-connect-url
   "prepares the websocket url used to connect to realtime"
@@ -228,8 +202,8 @@
   (return
    (xt/x:obj-assign
     {"event" (-/resolve-event source opts)
-    "schema" (-/resolve-schema-name source opts)
-    "table" (-/resolve-table-name {} source opts)}
+     "schema" (-/resolve-schema-name source opts)
+     "table" (-/resolve-table-name {} source opts)}
     (or filter {}))))
 
 (defn.xt resolve-filters
@@ -280,10 +254,21 @@
   "resolves an optional payload->request transform for custom topic events"
   {:added "4.1.4"}
   [source opts]
-  (var raw-client (-/raw-client source))
-  (return (or (xt/x:get-key opts "request_transform")
-              (xt/x:get-key raw-client "request_transform")
-              nil)))
+  (return (event-common/resolve-request-transform
+           source
+           opts
+           "supabase.realtime.client")))
+
+(defn.xt broadcast-client
+  "Builds a broadcast-oriented realtime client descriptor."
+  {:added "4.1.4"}
+  [client opts]
+  (var config (xt/x:obj-assign {} (or client {})))
+  (var extra (or opts {}))
+  (return
+   (xt/x:obj-assign
+    (xt/x:obj-assign config extra)
+    {"message_event" "broadcast"})))
 
 (defn.xt join-payload
   "creates the phoenix join payload for a realtime subscription"
@@ -332,11 +317,7 @@
   "resolves the supabase realtime client descriptor from db or opts"
   {:added "4.1.4"}
   [db opts]
-  (var source (or (xt/x:get-key db "client")
-                  (xt/x:get-key opts "client")
-                  (xt/x:get-key db "transport")
-                  (xt/x:get-key opts "transport")
-                  nil))
+  (var source (event-common/resolve-client-source db opts))
   (when (xt/x:nil? source)
     (xt/x:err "Supabase realtime missing client"))
   (if (-/client? source)
@@ -362,20 +343,7 @@
    - request_transform"
   {:added "4.1.4"}
   [raw]
-  (when (-/client? raw)
-    (return raw))
-  (var source nil)
-  (cond (or (ws/client? raw)
-            (ws/driver? raw))
-        (:= source {"transport" raw})
-
-        (xt/x:nil? raw)
-        (:= source {})
-
-        :else
-        (:= source (xt/x:obj-clone raw)))
-  (return {"::" "supabase.realtime.client"
-           "_raw" source}))
+  (return (event-common/wrap-client raw "supabase.realtime.client")))
 
 (defn.xt connect
   "connects the realtime client through the websocket protocol"
@@ -391,26 +359,13 @@
   "extracts websocket message data from raw events or payload strings"
   {:added "4.1.4"}
   [message]
-  (cond (xt/x:is-string? message)
-        (return message)
-
-        (xt/x:not-nil? (xt/x:get-key message "data"))
-        (return (xt/x:get-key message "data"))
-
-        (xt/x:not-nil? (xt/x:get-key message "body"))
-        (return (xt/x:get-key message "body"))
-
-        :else
-        (return message)))
+  (return (event-common/extract-message-data message)))
 
 (defn.xt decode-message
   "decodes a websocket message into a realtime frame"
   {:added "4.1.4"}
   [message]
-  (var data (-/extract-message-data message))
-  (if (xt/x:is-string? data)
-    (return (xt/x:json-decode data))
-    (return data)))
+  (return (event-common/decode-message message {})))
 
 (defn.xt payload-event-type
   "normalizes the postgres_changes event type"
@@ -476,19 +431,7 @@
   "applies an xt.db sync request to a local db"
   {:added "4.1.4"}
   [local-db request source opts]
-  (when (xt/x:not-nil? (xt/x:get-key request "db/sync"))
-    (db-runtime/sync-event local-db
-                           ["add" (xt/x:get-key request "db/sync")]))
-  (when (xt/x:not-nil? (xt/x:get-key request "db/remove"))
-    (var schema (or (xt/x:get-key opts "schema")
-                    (xt/x:get-key local-db "schema")
-                    nil))
-    (if (xt/x:not-nil? schema)
-      (xt/for:object [[table ids] (xt/x:get-key request "db/remove")]
-        (db-runtime/db-delete-sync local-db schema table ids))
-      (db-runtime/sync-event local-db
-                             ["remove" (xt/x:get-key request "db/remove")])))
-  (return request))
+  (return (event-common/apply-request local-db request opts)))
 
 (defn.xt apply-postgres-change
   "converts and applies a realtime postgres_changes payload"
@@ -503,22 +446,17 @@
   "normalizes inbound realtime payloads into xt.db requests"
   {:added "4.1.4"}
   [payload source opts]
-  (cond (or (xt/x:not-nil? (xt/x:get-key payload "db/sync"))
-           (xt/x:not-nil? (xt/x:get-key payload "db/remove")))
-       (return payload)
+  (cond (event-common/request? payload)
+        (return (event-common/unwrap-request payload))
 
-       (or (xtd/get-in payload ["payload" "db/sync"])
-           (xtd/get-in payload ["payload" "db/remove"]))
-       (return (xt/x:get-key payload "payload"))
+        (xt/x:is-function? (-/resolve-request-transform source opts))
+        (return ((-/resolve-request-transform source opts) payload source opts))
 
-       (xt/x:is-function? (-/resolve-request-transform source opts))
-       (return ((-/resolve-request-transform source opts) payload source opts))
+        (== "postgres_changes" (-/resolve-message-event source opts))
+        (return (-/postgres-change->sync-request payload source opts))
 
-       (== "postgres_changes" (-/resolve-message-event source opts))
-       (return (-/postgres-change->sync-request payload source opts))
-
-       :else
-       (return nil)))
+        :else
+        (return nil)))
 
 (defn.xt apply-request
   "applies a normalized xt.db request to the local cache db"
@@ -526,7 +464,7 @@
   [local-db payload source opts]
   (var request (-/payload->request payload source opts))
   (when request
-   (-/apply-sync-request local-db request source opts))
+    (event-common/apply-request local-db request opts))
   (return [true request]))
 
 (defn.xt handle-frame
@@ -552,7 +490,7 @@
             (return frame))
 
         (and (== topic (xt/x:get-key frame "topic"))
-            (== message-event (xt/x:get-key frame "event")))
+             (== message-event (xt/x:get-key frame "event")))
         (do (var payload (or (xtd/get-in frame ["payload" "data"])
                              (xt/x:get-key frame "payload")))
             (var local-db (xt/x:get-key subscription "local_db"))
@@ -565,7 +503,7 @@
         (return frame)))
 
 (defn.xt subscribe
-  "subscribes a local xt.db cache to Supabase realtime postgres_changes"
+  "subscribes a local xt.db cache to Supabase realtime events"
   {:added "4.1.4"}
   [source local-db opts]
   (:= source (or source {}))
@@ -607,13 +545,26 @@
             (fn [_]
               (return subscription)))))))))))
 
+(defn.xt subscribe-broadcast
+  "Subscribes a local xt.db cache to a Supabase broadcast topic carrying native xt.db requests."
+  {:added "4.1.4"}
+  [source local-db opts]
+  (var input (or source {}))
+  (var config (or opts {}))
+  (var client (or (xt/x:get-key input "client")
+                  input))
+  (return
+   (-/subscribe
+    {"client" (-/broadcast-client client config)}
+    local-db
+    config)))
+
 (defn.xt subscription?
   "checks if the object is a realtime subscription handle"
   {:added "4.1.4"}
   [obj]
-  (return (and (xt/x:is-object? obj)
-               (== "db.supabase.realtime.subscription"
-                   (xt/x:get-key obj "::")))))
+  (return (event-common/subscription? obj
+                                      "db.supabase.realtime.subscription")))
 
 (defn.xt unsubscribe
   "tears down a realtime subscription handle"
@@ -622,10 +573,13 @@
   (when (not (-/subscription? subscription))
     (return (promise/x:promise-run nil)))
   (var socket (xt/x:get-key subscription "socket"))
+  (xt/x:set-key subscription "active" false)
   (return
    (promise/x:promise-then
     (ws/send socket
              (xt/x:json-encode
               (xt/x:get-key subscription "leave_frame")))
     (fn [_]
-      (return (ws/disconnect socket 1000 "supabase-realtime/unsubscribe"))))))
+      (return (event-common/unsubscribe subscription
+                                        "db.supabase.realtime.subscription"
+                                        "event-supabase/unsubscribe"))))))

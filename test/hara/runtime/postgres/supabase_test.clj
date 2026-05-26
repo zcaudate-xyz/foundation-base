@@ -1,5 +1,6 @@
 (ns postgres.core.supabase-test
-  (:require [net.http :as http]
+  (:require [clojure.string :as str]
+            [net.http :as http]
             [hara.model.spec-postgres :as grammar]
             [postgres.core.supabase :as s]
             [hara.lang :as l])
@@ -100,6 +101,42 @@
 
   (l/emit-as :postgres `[(s/show-roles)])
   => "SELECT rolname,rolsuper,rolbypassrls,rolcanlogin FROM pg_roles WHERE rolname IN ('authenticated','service_role','anon')")
+
+^{:refer postgres.core.supabase/request-event :added "4.1.4"}
+(fact "returns canonical xt.db request event names"
+  [(s/request-event {"db/sync" {"Entry" []}})
+   (s/request-event {"db/remove" {"Entry" ["id-1"]}})
+   (s/request-event {"db/query" {"Entry" []}})]
+  => ["db/sync" "db/remove" nil])
+
+^{:refer postgres.core.supabase/realtime-send :added "4.1.4"}
+(fact "emits a supabase realtime send helper"
+
+  (let [sql (l/emit-as :postgres
+                       `[(s/realtime-send
+                          "room:test"
+                          "db/sync"
+                          {"db/sync" {"Entry" []}}
+                          false)])]
+    [(str/includes? sql "realtime.send(")
+     (str/includes? sql "'db/sync'")
+     (str/includes? sql "'room:test'")
+     (str/includes? sql "jsonb_build_object")])
+  => [true true true true])
+
+^{:refer postgres.core.supabase/realtime-send-request :added "4.1.4"}
+(fact "emits an xt.db request as a supabase realtime send"
+
+  (let [sql (l/emit-as :postgres
+                       `[(s/realtime-send-request
+                          "room:test"
+                          {"db/sync" {"Entry" []}}
+                          false)])]
+    [(str/includes? sql "realtime.send(")
+     (str/includes? sql "'db/sync'")
+     (str/includes? sql "'room:test'")
+     (str/includes? sql "jsonb_build_object")])
+  => [true true true true])
 
 ^{:refer postgres.core.supabase/process-return :added "4.0"}
 (fact "processes the return value"

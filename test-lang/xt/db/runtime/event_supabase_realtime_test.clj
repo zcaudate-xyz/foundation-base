@@ -1,16 +1,16 @@
-(ns xt.db.runtime.supabase-realtime-test
+(ns xt.db.runtime.event-supabase-realtime-test
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
             [xt.db.helpers.test-fixtures :as fixtures]
-            [xt.db.helpers.supabase-pull-live-test :as live])
+            [xt.db.runtime.event-host-util :as live])
   (:use code.test))
 
 ^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[js.lib.client-websocket :as js-ws]
-            [xt.db.runtime :as xdb]
-             [xt.db.runtime.supabase-realtime :as realtime]
+             [xt.db.runtime :as xdb]
+             [xt.db.runtime.event-supabase :as realtime]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
@@ -35,7 +35,7 @@
                  true)
              (l/rt:stop)]})
 
-^{:refer xt.db.runtime.supabase-realtime/prepare-connect-url :added "4.1.4"}
+^{:refer xt.db.runtime.event-supabase/prepare-connect-url :added "4.1.4"}
 (fact "wraps websocket transports in a tagged supabase realtime client descriptor"
 
   (!.js
@@ -65,7 +65,7 @@
       "realtime:public:Entry"
       "wss://db.test/realtime/v1/websocket?vsn=1.0.0&apikey=key-1"])
 
-^{:refer xt.db.runtime.supabase-realtime/postgres-change->sync-request :added "4.1.4"}
+^{:refer xt.db.runtime.event-supabase/postgres-change->sync-request :added "4.1.4"}
 (fact "converts generic postgres_changes payloads into xt.db sync and remove requests"
 
   (!.js
@@ -106,7 +106,7 @@
      {"db/remove"
        {"Entry" ["00000000-0000-0000-0000-0000000000d1"]}}])
 
-^{:refer xt.db.runtime.supabase-realtime/apply-postgres-change :added "4.1.4"}
+^{:refer xt.db.runtime.event-supabase/apply-postgres-change :added "4.1.4"}
 (fact "applies postgres_changes payloads directly into a cache db"
 
   (!.js
@@ -166,7 +166,7 @@
      ["id" "name"]]))
   => [])
 
-^{:refer xt.db.runtime.supabase-realtime/subscribe :added "4.1.4"
+^{:refer xt.db.runtime.event-supabase/subscribe :added "4.1.4"
   :setup [(live/cleanup-public-entry! live/+live-realtime-entry-name+)]}
 (fact "subscribes through a local supabase websocket and applies incoming changes"
 
@@ -245,7 +245,7 @@
                   (promise/x:promise-then
                    (realtime/unsubscribe sub)
                    (fn [_]
-                     (xt/x:arr-push closed [1000 "supabase-realtime/unsubscribe"])
+                     (xt/x:arr-push closed [1000 "event-supabase/unsubscribe"])
                      (var cached-row
                           (xt/x:get-idx
                            (xdb/db-pull-sync
@@ -273,9 +273,9 @@
       "request-tags" ["copilot" "supabase" "realtime"]
       "cached-row" {"name" "copilot_supabase_realtime_live"
                    "tags" ["copilot" "supabase" "realtime"]}
-      "closed" [1000 "supabase-realtime/unsubscribe"]})
+      "closed" [1000 "event-supabase/unsubscribe"]})
 
-^{:refer xt.db.runtime.supabase-realtime/subscribe :added "4.1.4"}
+^{:refer xt.db.runtime.event-supabase/subscribe :added "4.1.4"}
 (fact "supports custom topics and custom inbound event names with request transforms"
 
   (notify/wait-on [:js 2000]
@@ -360,7 +360,7 @@
       "request-name" "custom"
       "cached-name" "custom"})
 
-^{:refer xt.db.runtime.supabase-realtime/subscribe :added "4.1.4"}
+^{:refer xt.db.runtime.event-supabase/subscribe :added "4.1.4"}
 (fact "unwraps native xt.db requests from live broadcast envelopes"
 
   (notify/wait-on [:js 2000]

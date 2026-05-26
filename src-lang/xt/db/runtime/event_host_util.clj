@@ -1,4 +1,4 @@
-(ns xt.db.helpers.supabase-pull-live-test
+(ns xt.db.runtime.event-host-util
   (:require [clojure.string :as str]
             [hara.lang :as l]
             [hara.lang.script :as script]
@@ -68,6 +68,19 @@
 
 (defonce +http-client+
   (HttpClient/newHttpClient))
+
+(defn request-event
+  "Returns the canonical xt.db event name for a host-side xt.db request."
+  {:added "4.1.4"}
+  [request]
+  (cond (contains? request "db/sync")
+        "db/sync"
+
+        (contains? request "db/remove")
+        "db/remove"
+
+        :else
+        nil))
 
 (defn shell-command
   [& parts]
@@ -282,28 +295,28 @@
         base-url (get status "API_URL")
         api-key (get status "SERVICE_ROLE_KEY")
         headers {"apikey" api-key
-                "Authorization" (str "Bearer " api-key)
-                "Accept-Profile" schema-name
-                "Content-Profile" schema-name}
+                 "Authorization" (str "Bearer " api-key)
+                 "Accept-Profile" schema-name
+                 "Content-Profile" schema-name}
         url (str base-url "/rest/v1/" +scratch-entry-table+ "?select=name&limit=1")]
     (loop [attempt 0]
       (let [response (try
-                      (http-get url headers)
-                      (catch Throwable _
-                        nil))
-           ready? (and response
-                       (== 200 (:status response)))]
+                       (http-get url headers)
+                       (catch Throwable _
+                         nil))
+            ready? (and response
+                        (== 200 (:status response)))]
         (cond ready?
-             true
+              true
 
-             (< attempt 29)
-             (do (Thread/sleep 1000)
-                 (recur (inc attempt)))
+              (< attempt 29)
+              (do (Thread/sleep 1000)
+                  (recur (inc attempt)))
 
-             :else
-             (throw (ex-info "Timed out waiting for PostgREST schema cache"
-                             {:schema schema-name
-                              :response response})))))))
+              :else
+              (throw (ex-info "Timed out waiting for PostgREST schema cache"
+                              {:schema schema-name
+                               :response response})))))))
 
 (defn cleanup-public-entry!
   [name]
@@ -331,3 +344,11 @@
         ", "
         (sql-literal topic)
         ", false);")))
+
+(defn send-realtime-request!
+  [topic request]
+  (let [event (request-event request)]
+    (when-not event
+      (throw (ex-info "Unsupported xt.db realtime request"
+                      {:request request})))
+    (send-realtime-broadcast! topic event request)))

@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
-            [xt.db.helpers.supabase-pull-live-test :as live]))
+            [xt.db.runtime.event-host-util :as live]))
 
 ^{:seedgen/root {:all true}}
 (l/script- :js
