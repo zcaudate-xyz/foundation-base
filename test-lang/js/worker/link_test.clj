@@ -1,7 +1,6 @@
 (ns js.worker.link-test
   (:require [js.worker.emit :as emit]
             [hara.lang :as l]
-            [std.lib.template :as template]
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
@@ -18,22 +17,10 @@
           (l/rt:scaffold-imports :js)]
   :teardown [(l/rt:stop)]})
 
-(defmacro node-link-init-check
-  []
-  (template/$
-    (notify/wait-on :js
-      (var link (worker-link/make-node-link ~(emit/node-script) {}))
-      ((. link ["create_fn"])
-       (fn [data]
-         (repl/notify data))))))
-
 (def ^:private +webworker-runtime-script+
   (emit/webworker-script {"node" {"id" "worker-e2e"}
                           "db-node" {"schema" {"Order" {}}}}
                          :flat))
-
-(def ^:private +sharedworker-runtime-script+
-  (emit/sharedworker-script :flat))
 
 ^{:refer js.worker.link/make-mock-link :added "4.1"}
 (fact "creates a mock worker link"
@@ -48,10 +35,15 @@
 
 ^{:refer js.worker.link/make-node-link :added "4.1"}
 (fact "creates a Node worker link"
-
-  (node-link-init-check)
-  => (contains-in {"signal" "@cell/::INIT"
-                   "body" {"done" true}}))
+  (notify/wait-on :js
+    (var link
+         (worker-link/make-node-link
+          "const { parentPort } = require('worker_threads'); parentPort.postMessage({ ping: true });"
+          {}))
+    ((. link ["create_fn"])
+     (fn [data]
+       (repl/notify data))))
+  => {"ping" true})
 
 ^{:refer js.worker.link/resolve-script :added "4.1"}
 (fact "resolves script values or thunks"
@@ -190,76 +182,6 @@
   => (contains-in {"messages" ["world"]
                    "revoked" ["blob:shared"]
                    "starts" 1}))
-
-^{:refer js.worker.link/make-sharedworker-link :added "4.1"}
-(fact "boots an emitted SharedWorker runtime script end-to-end"
-  (notify/wait-on :js
-    (var previous-blob (!:G Blob))
-    (var previous-url (!:G URL))
-    (var previous-shared (!:G SharedWorker))
-    (var revoked [])
-    (:= (!:G Blob)
-        (fn [parts opts]
-          (return {"parts" parts
-                   "opts" opts})))
-    (:= (!:G URL)
-        {"createObjectURL" (fn [blob]
-                             (return (xt/x:first (. blob ["parts"]))))
-         "revokeObjectURL" (fn [url]
-                             (revoked.push url))})
-    (:= (!:G SharedWorker)
-        (fn [script]
-          (var starts [])
-          (var listeners [])
-          (var messages [])
-          (var port {"starts" starts
-                     "listeners" listeners
-                     "messages" messages
-                     "connected" false})
-          (xt/x:set-key port
-                        "start"
-                        (fn []
-                          (starts.push true)))
-          (xt/x:set-key port
-                        "postMessage"
-                        (fn [msg]
-                          (messages.push msg)
-                          (xt/for:array [listener listeners]
-                            (listener {"data" msg}))))
-          (xt/x:set-key port
-                        "addEventListener"
-                        (fn [event listener capture]
-                          (listeners.push listener)
-                          (when (and (== event "message")
-                                     (not (. port ["connected"])))
-                            (:= (. port ["connected"]) true)
-                            (var onconnect (. (. shared ["worker"]) ["onconnect"]))
-                            (onconnect {"ports" [port]}))))
-          (var previous-self (!:G self))
-          (var shared {"port" port})
-          (var worker {})
-          (:= (!:G self) worker)
-          (eval script)
-          (:= (!:G self) previous-self)
-          (xt/x:set-key shared "worker" worker)
-          (return shared)))
-    (var link
-         (worker-link/make-sharedworker-link
-          (@! +sharedworker-runtime-script+)))
-    ((. link ["create_fn"])
-     (fn [data]
-       (var out {"signal" (. data ["signal"])
-                 "done" (. data ["body"] ["done"])
-                 "starts" 2
-                 "revoked-count" (xt/x:len revoked)})
-       (:= (!:G SharedWorker) previous-shared)
-       (:= (!:G URL) previous-url)
-       (:= (!:G Blob) previous-blob)
-       (repl/notify out))))
-  => {"signal" "@cell/::INIT"
-      "done" true
-      "starts" 2
-      "revoked-count" 0})
 
 ^{:refer js.worker.link/make-link :added "4.1"}
 (fact "dispatches to a runtime-specific worker link helper"

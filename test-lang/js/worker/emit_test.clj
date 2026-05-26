@@ -37,26 +37,3 @@
   (str/includes? (emit/webworker-script {"node" {"id" "worker-a"}})
                  "attach_transport")
   => true)
-
-^{:refer js.worker.emit/sharedworker-forms :added "4.1"}
-(fact "returns the SharedWorker runtime entry form"
-  (emit/sharedworker-forms)
-  => '[(js.worker.env-sharedworker/runtime-init)])
-
-^{:refer js.worker.emit/sharedworker-script :added "4.1"}
-(fact "emits the SharedWorker bootstrap script"
-  (str/includes? (emit/sharedworker-script) "onconnect")
-  => true)
-
-^{:refer js.worker.emit/node-forms :added "4.1"}
-(fact "returns the Node runtime entry form"
-  (emit/node-forms)
-  => '[(js.worker.env-node/runtime-init)])
-
-^{:refer js.worker.emit/node-script :added "4.1"}
-(fact "emits the Node bootstrap script"
-  (str/includes? (emit/node-script) "worker_threads")
-  => true
-
-  (str/includes? (emit/node-script) "parentPort")
-  => true)

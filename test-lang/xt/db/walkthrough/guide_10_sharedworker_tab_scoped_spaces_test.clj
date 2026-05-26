@@ -4,6 +4,7 @@
             [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]
             [js.worker.link]
+            [js.worker.sharedworker :as worker-shared]
             [xt.db.helpers.supabase-pull-live-test :as live]
             [xt.db.helpers.test-fixtures :as fixtures]
             [xt.lang.common-notify :as notify]))
@@ -12,189 +13,46 @@
 (l/script :js
   {:runtime :chromedriver.instance
    :require [[js.worker.link :as worker-link]
-             [js.lib.client-fetch :as js-fetch]
-             [xt.db.node :as db-node]
-             [xt.substrate :as event-node]
-             [xt.substrate.transport-browser :as browser-transport]
-             [xt.lang.common-data :as xtd]
-             [xt.lang.common-repl :as repl]
+            [js.worker.sharedworker :as worker-shared]
+            [xt.db.node :as db-node]
+            [xt.substrate :as event-node]
+            [xt.lang.common-data :as xtd]
+            [xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]]})
-
-(defn.js remote-request
-  [browser-node transport-id space action payload]
-  (return
-   (promise/x:promise-catch
-    (promise/x:promise-then
-     (event-node/request browser-node
-                         space
-                         action
-                         [payload]
-                         {"transport_id" transport-id})
-     (fn [response]
-        (var kind (xt/x:get-key response "kind"))
-        (var status (xt/x:get-key response "status"))
-        (cond (not (== kind "response"))
-              (return response)
-
-              (== "ok" status)
-              (return (xt/x:get-key response "data"))
-
-              :else
-              (xt/x:throw (or (xt/x:get-key response "error")
-                              response)))))
-    (fn [err]
-      (xt/x:throw (or (xt/x:get-key err "error")
-                      err))))))
-
-(defn.js ensure-shared-remote-model
-  [browser-node transport-id shared-space model-id model-spec]
-  (return
-   (-> (-/remote-request browser-node
-                         transport-id
-                         shared-space
-                         db-node/ACTION_MODEL_PUT
-                         {"model_id" model-id
-                          "model_spec" model-spec})
-       (promise/x:promise-then
-        (fn [_]
-          (return
-           (-/remote-request browser-node
-                             transport-id
-                             shared-space
-                             db-node/ACTION_MODEL_MATERIALIZE
-                             {"model_id" model-id}))))
-       (promise/x:promise-then
-        (fn [_]
-          (return
-           (-/remote-request browser-node
-                             transport-id
-                             shared-space
-                             db-node/ACTION_MODEL_SYNC
-                             {"model_id" model-id})))))))
-
-(defn.js open-remote-tab
-  [browser-node transport-id shared-space tab-space model-id model-spec detail-name]
-  (return
-   (-> (-/remote-request browser-node
-                         transport-id
-                         tab-space
-                         db-node/ACTION_MODEL_PUT
-                         {"model_id" model-id
-                          "model_spec" model-spec})
-       (promise/x:promise-then
-        (fn [_]
-          (return
-           (-/remote-request browser-node
-                             transport-id
-                             tab-space
-                             db-node/ACTION_SOURCE_SHARE
-                             {"model_id" model-id
-                              "from_space" shared-space
-                              "source_ids" ["primary" "caching"]}))))
-       (promise/x:promise-then
-        (fn [_]
-          (return
-           (-/remote-request browser-node
-                             transport-id
-                             tab-space
-                             db-node/ACTION_MODEL_SYNC
-                             {"model_id" model-id}))))
-       (promise/x:promise-then
-        (fn [_]
-          (return
-           (promise/x:promise-all
-            [(-/remote-request browser-node
-                               transport-id
-                               tab-space
-                               db-node/ACTION_QUERY
-                               {"view" {"model_id" model-id
-                                        "view_id" "list"}})
-             (-/remote-request browser-node
-                               transport-id
-                               tab-space
-                               db-node/ACTION_QUERY
-                               {"view" {"model_id" model-id
-                                        "view_id" "detail"
-                                        "args" [detail-name]}})]))))
-       (promise/x:promise-then
-        (fn [[list-view detail-view]]
-          (return
-           {"space_id" tab-space
-            "list_count" (xt/x:len (xt/x:get-key list-view "value"))
-            "list_source" (xt/x:get-key list-view "source")
-            "detail_name" (xtd/get-in (xt/x:get-key detail-view "value") [0 "name"])
-            "cached_first" (xtd/get-in (xt/x:get-key list-view "value") [0 "name"])}))))))
-
-(defn.js remote-node-summary
-  [browser-node transport-id shared-space]
-  (return
-   (-/remote-request browser-node
-                     transport-id
-                     shared-space
-                     db-node/ACTION_NODE_SUMMARY
-                     {})))
 
 (defn make-sharedworker-script
   []
   (let [primary-config (-> (live/refresh-live-supabase-config!)
-                           (assoc-in ["client" "schema_name"] live/+public-schema+))
-        template
-        '(do
-           (var shared (. globalThis ["__guide_tab_worker__"]))
-           (if (xt.lang.spec-base/x:nil? shared)
-             (do
-               (:= shared {"counter" 0})
-               (xt.lang.spec-base/x:set-key
-                shared
-                "ready"
-                (xt.lang.spec-promise/x:promise-then
-                 (xt.db.node/create
-                  {"node_id" "xtdb-shared-worker"
-                  "db" {"schema" __SCHEMA__
-                        "lookup" __LOOKUP__
-                         "sources"
-                         {"primary" {"kind" "supabase"
-                                    "config" ((fn []
-                                                (var primary-config (xt.lang.spec-base/x:obj-clone __PRIMARY_CONFIG__))
-                                                (var client-config (xt.lang.spec-base/x:obj-clone (. primary-config ["client"])))
-                                                (xt.lang.spec-base/x:set-key client-config
-                                                                             "transport"
-                                                                            (js.lib.client-fetch/client {}))
-                                                (xt.lang.spec-base/x:set-key primary-config "client" client-config)
-                                                (return primary-config)))}
-                          "caching" {"kind" "cache"
-                                     "sync_from" "primary"
-                                     "config" {}}}}
-                   "spaces" {}})
-                 (fn [node]
-                  (xt.lang.spec-base/x:set-key shared "node" node)
-                  (return node))))
-               (xt.lang.spec-base/x:set-key globalThis "__guide_tab_worker__" shared)))
-
-           (:= (. globalThis ["onconnect"])
-               (fn [e]
-                 (var port (. e ["ports"] [0]))
-                 (. port (start))
-                 (xt.lang.spec-promise/x:promise-then
-                  (. shared ["ready"])
-                  (fn [node]
-                   (var idx (+ 1 (or (. shared ["counter"]) 0)))
-                   (xt.lang.spec-base/x:set-key shared "counter" idx)
-                   (return
-                     (xt.substrate.transport-browser/boot-self
-                     node
-                     {"transport_id" (xt.lang.spec-base/x:cat "host-" idx)
-                      "target" port
-                       "ready" {"signal" "ready"
-                                "worker" "xtdb-shared-worker"}})))))))
-        form (walk/postwalk-replace {'__SCHEMA__ fixtures/+schema+
-                                    '__LOOKUP__ fixtures/+lookup+
-                                    '__PRIMARY_CONFIG__ primary-config}
-                                   template)
-        opts {:lang :js
-              :layout :full}]
-    (l/emit-script form opts)))
+                          (assoc-in ["client" "schema_name"] live/+public-schema+))
+        node-init-template
+        '(xt.db.node/create
+         {"node_id" "xtdb-shared-worker"
+          "db" {"schema" __SCHEMA__
+                "lookup" __LOOKUP__
+                "sources"
+                {"primary" {"kind" "supabase"
+                            "config" ((fn []
+                                        (var primary-config (xt.lang.spec-base/x:obj-clone __PRIMARY_CONFIG__))
+                                        (var client-config (xt.lang.spec-base/x:obj-clone (. primary-config ["client"])))
+                                        (xt.lang.spec-base/x:set-key client-config
+                                                                     "transport"
+                                                                     (js.lib.client-fetch/client {}))
+                                        (xt.lang.spec-base/x:set-key primary-config "client" client-config)
+                                        (return primary-config)))}
+                 "caching" {"kind" "cache"
+                            "sync_from" "primary"
+                            "config" {}}}}
+          "spaces" {}})
+        node-init (walk/postwalk-replace {'__SCHEMA__ fixtures/+schema+
+                                         '__LOOKUP__ fixtures/+lookup+
+                                         '__PRIMARY_CONFIG__ primary-config}
+                                        node-init-template)]
+    (worker-shared/script {"shared_key" "__guide_tab_worker__"
+                          "transport_prefix" "host-"
+                          "ready" {"signal" "ready"
+                                   "worker" "xtdb-shared-worker"}
+                          "node_init" node-init})))
 
 (def +sharedworker-script+ nil)
 
@@ -283,48 +141,40 @@
                        "source" "primary"}}})
     (promise/x:promise-catch
      (promise/x:promise-then
-      (browser-transport/connect-sharedworker
+      (worker-shared/connect
        browser-node
        {"transport_id" "worker"
+        "shared_space" shared-space
         "source" (worker-link/make-sharedworker-link (@! +sharedworker-script+))})
-        (fn [conn]
-          (var transport-id (. conn ["transport_id"]))
-          (return
-           (-> (-/ensure-shared-remote-model browser-node
-                                            transport-id
-                                            shared-space
-                                            model-id
-                                            model-spec)
+       (fn [session]
+         (return
+          (-> (worker-shared/ensure-model session
+                                          model-id
+                                          model-spec)
                (promise/x:promise-then
                 (fn [_]
                   (return
                    (promise/x:promise-all
-                    [(-/open-remote-tab browser-node
-                                        transport-id
-                                        shared-space
-                                        tab-a-space
-                                        model-id
-                                        model-spec
-                                        "alpha")
-                     (-/open-remote-tab browser-node
-                                        transport-id
-                                        shared-space
-                                        tab-b-space
-                                        model-id
-                                        model-spec
-                                        "beta")
-                     (-/remote-node-summary browser-node
-                                            transport-id
-                                            shared-space)]))))
+                    [(worker-shared/open-tab session
+                                             tab-a-space
+                                             model-id
+                                             model-spec
+                                             "alpha")
+                     (worker-shared/open-tab session
+                                             tab-b-space
+                                             model-id
+                                             model-spec
+                                             "beta")
+                     (worker-shared/node-summary session)]))))
                (promise/x:promise-then
                 (fn [[tab-a tab-b summary]]
                   (return
                    (promise/x:promise-then
-                    (browser-transport/disconnect conn)
+                    (worker-shared/disconnect session)
                     (fn [_]
                       (var spaces (xt/x:get-key summary "spaces"))
                       (repl/notify
-                       {"ready_worker" (xtd/get-in (. conn ["ready"]) ["worker"])
+                       {"ready_worker" (xtd/get-in (. session ["ready"]) ["worker"])
                         "tab_a_space" (xt/x:get-key tab-a "space_id")
                         "tab_b_space" (xt/x:get-key tab-b "space_id")
                         "tab_a_list_count" (xt/x:get-key tab-a "list_count")

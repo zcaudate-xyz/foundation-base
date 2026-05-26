@@ -1,8 +1,6 @@
 (ns js.worker.emit
   "Host-side worker script emitters for js.worker."
-  (:require [js.worker.env-node]
-             [js.worker.env-sharedworker]
-             [hara.lang :as l]
+  (:require [hara.lang :as l]
              [xt.db.node]
              [xt.substrate]
              [xt.substrate.transport-browser]))
@@ -45,27 +43,3 @@
    (webworker-script opts :full))
   ([opts layout]
    (emit-worker-script (webworker-forms opts) layout)))
-
-(defn sharedworker-forms
-  "returns the SharedWorker bootstrap forms"
-  []
-  '[(js.worker.env-sharedworker/runtime-init)])
-
-(defn sharedworker-script
-  "emits the SharedWorker bootstrap script"
-  ([]
-   (sharedworker-script :full))
-  ([layout]
-   (emit-worker-script (sharedworker-forms) layout)))
-
-(defn node-forms
-  "returns the Node worker bootstrap forms"
-  []
-  '[(js.worker.env-node/runtime-init)])
-
-(defn node-script
-  "emits the Node worker bootstrap script"
-  ([]
-   (node-script :full))
-  ([layout]
-   (emit-worker-script (node-forms) layout)))
