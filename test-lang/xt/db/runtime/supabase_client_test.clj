@@ -231,3 +231,115 @@
       {"message" "ok"}
       [{"id" "ord-2"}]
       {"status" 204}])
+
+
+^{:refer xt.db.runtime.supabase-client/client? :added "4.1"}
+(fact "detects wrapped supabase fetch clients"
+  (!.js
+   [(supabase/client? (supabase/client {"base_url" "https://client.test"}))
+    (supabase/client? (js-fetch/client {}))
+    (supabase/client? nil)])
+  => [true false false])
+
+^{:refer xt.db.runtime.supabase-client/raw-client :added "4.1"}
+(fact "unwraps wrapped clients and passes plain configs through"
+  (!.js
+   [(supabase/raw-client (supabase/client {"base_url" "https://client.test"}))
+    (supabase/raw-client {"base_url" "https://plain.test"})])
+  => [{"base_url" "https://client.test"
+       "::supabase" "supabase.client"}
+      {"base_url" "https://plain.test"}])
+
+^{:refer xt.db.runtime.supabase-client/resolve-transport :added "4.1"}
+(fact "resolves fetch transports from wrapped clients or raw request impls"
+  (!.js
+   [(fetch/client? (supabase/resolve-transport
+                    (supabase/client
+                     {"transport"
+                      (js-fetch/client
+                       {"request" (fn [request _opts]
+                                    (return request))})})))
+    (fetch/client? (supabase/resolve-transport
+                    {"request" (fn [request _opts]
+                                 (return request))}))])
+  => [true true])
+
+^{:refer xt.db.runtime.supabase-client/resolve-base-url :added "4.1"}
+(fact "resolves base urls from client config or opts"
+  (!.js
+   [(supabase/resolve-base-url
+     {}
+     (supabase/client {"base_url" "https://client.test"})
+     {})
+    (supabase/resolve-base-url
+     {}
+     (supabase/client {})
+     {"base_url" "https://opts.test"})])
+  => ["https://client.test" "https://opts.test"])
+
+^{:refer xt.db.runtime.supabase-client/resolve-schema-name :added "4.1"}
+(fact "resolves schema names from client config or opts"
+  (!.js
+   [(supabase/resolve-schema-name
+     {}
+     (supabase/client {"schema_name" "client_api"})
+     {})
+    (supabase/resolve-schema-name
+     {}
+     (supabase/client {})
+     {"schema_name" "opts_api"})])
+  => ["client_api" "opts_api"])
+
+^{:refer xt.db.runtime.supabase-client/resolve-api-key :added "4.1"}
+(fact "resolves api keys from client config or opts"
+  (!.js
+   [(supabase/resolve-api-key
+     {}
+     (supabase/client {"api_key" "key-client"})
+     {})
+    (supabase/resolve-api-key
+     {}
+     (supabase/client {})
+     {"api_key" "key-opts"})])
+  => ["key-client" "key-opts"])
+
+^{:refer xt.db.runtime.supabase-client/resolve-auth-token :added "4.1"}
+(fact "resolves auth tokens from client config or opts"
+  (!.js
+   [(supabase/resolve-auth-token
+     {}
+     (supabase/client {"auth_token" "token-client"})
+     {})
+    (supabase/resolve-auth-token
+     {}
+     (supabase/client {})
+     {"auth_token" "token-opts"})])
+  => ["token-client" "token-opts"])
+
+^{:refer xt.db.runtime.supabase-client/dispatch-request :added "4.1"}
+(fact "dispatches prepared requests through the resolved transport"
+  (notify/wait-on [:js 2000]
+    (promise/x:promise-then
+     (supabase/dispatch-request
+      {"transport"
+       (js-fetch/client
+        {"request" (fn [request _opts]
+                     (return {"status" 200
+                              "body" request}))})
+       "base_url" "https://client.test"
+       "schema_name" "client_api"
+       "api_key" "key-client"}
+      {"url" "/rest/v1/Order"
+       "headers" {"x-opt" "opt-1"}}
+      {"auth_token" "token-1"})
+     (fn [result]
+       (repl/notify result))))
+  => {"status" 200
+      "headers" {}
+      "body" {"method" "GET"
+              "url" "https://client.test/rest/v1/Order"
+              "headers" {"x-opt" "opt-1"
+                         "Content-Profile" "client_api"
+                         "Accept-Profile" "client_api"
+                         "apikey" "key-client"
+                         "Authorization" "Bearer token-1"}}})

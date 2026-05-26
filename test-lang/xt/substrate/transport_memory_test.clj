@@ -292,3 +292,155 @@
        "text" "ping"
        "wire" "hub"
        "peer" "peer-b"}])
+
+
+^{:refer xt.substrate.transport-memory/event-text :added "4.1"}
+(fact "unwraps memory endpoint events and passes raw text through"
+  (!.js
+   [(transport-memory/event-text {"data" "ping"})
+    (transport-memory/event-text {"text" "pong"})
+    (transport-memory/event-text "echo")])
+  => ["ping" "pong" "echo"])
+
+^{:refer xt.substrate.transport-memory/network-targets :added "4.1"}
+(fact "normalizes link config into peer id arrays"
+  (!.js
+   [(transport-memory/network-targets nil)
+    (transport-memory/network-targets ["a" "b"])
+    (transport-memory/network-targets "hub")])
+  => [[] ["a" "b"] ["hub"]])
+
+^{:refer xt.substrate.transport-memory/ensure-network-state :added "4.1"}
+(fact "creates and reuses shared network state for endpoint ids"
+  (!.js
+   (var network {"states" {}})
+   (var state-a (transport-memory/ensure-network-state network "peer-a"))
+   (var state-b (transport-memory/ensure-network-state network "peer-a"))
+   [(. state-a ["id"])
+    (== nil (. state-a ["listener"]))
+    (. state-a ["peers"])
+    (== state-a state-b)
+    (xt/x:obj-keys (. network ["states"]))])
+  => ["peer-a" true [] true ["peer-a"]])
+
+^{:refer xt.substrate.transport-memory/ensure-network-targets-loop :added "4.1"}
+(fact "materializes peer states for each configured target"
+  (!.js
+   (var network {"states" {}})
+   (transport-memory/ensure-network-targets-loop network ["peer-a" "peer-b"] 0)
+   (xt/x:obj-keys (. network ["states"])))
+  => ["peer-a" "peer-b"])
+
+^{:refer xt.substrate.transport-memory/configure-network-links-loop :added "4.1"}
+(fact "applies link config and populates peer relationships"
+  (!.js
+   (var network {"states" {}})
+   (transport-memory/configure-network-links-loop
+    network
+    {"hub" ["peer-a" "peer-b"]}
+    ["hub"]
+    0)
+   {"keys" (xt/x:obj-keys (. network ["states"]))
+    "hub-peers" (. (. (. network ["states"]) ["hub"]) ["peers"])})
+  => {"keys" ["hub" "peer-a" "peer-b"]
+      "hub-peers" ["peer-a" "peer-b"]})
+
+^{:refer xt.substrate.transport-memory/create-network-endpoints-loop :added "4.1"}
+(fact "builds memory endpoints from configured network state"
+  (!.js
+   (var network {"states" {}})
+   (transport-memory/configure-network-links-loop
+    network
+    {"hub" ["peer-a"]}
+    ["hub"]
+    0)
+   (var out (transport-memory/create-network-endpoints-loop
+             network
+             ["hub" "peer-a"]
+             {}
+             0))
+   [(xt/x:obj-keys out)
+    (. (. out ["hub"]) ["meta"] ["kind"])
+    (. (. out ["peer-a"]) ["meta"] ["id"])])
+  => [["hub" "peer-a"] "wire.memory" "peer-a"])
+
+^{:refer xt.substrate.transport-memory/deliver-network-loop :added "4.1"}
+(fact "delivers text to configured peers in order with wire context"
+  (notify/wait-on :js
+    (var seen [])
+    (var network {"states" {"hub" {"id" "hub"}
+                            "peer-a" {"id" "peer-a"
+                                      "listener" (fn [event ctx]
+                                                   (xt/x:arr-push seen {"peer" "peer-a"
+                                                                        "text" (transport-memory/event-text event)
+                                                                        "ctx" ctx})
+                                                   (return true))}
+                            "peer-b" {"id" "peer-b"
+                                      "listener" (fn [event ctx]
+                                                   (xt/x:arr-push seen {"peer" "peer-b"
+                                                                        "text" (transport-memory/event-text event)
+                                                                        "ctx" ctx})
+                                                   (return true))}}})
+    (promise/x:promise-then
+     (transport-memory/deliver-network-loop
+      network
+      {"id" "hub"}
+      ["peer-a" "peer-b"]
+      "ping"
+      0)
+     (fn [_]
+       (repl/notify seen))))
+  => [{"peer" "peer-a"
+       "text" "ping"
+       "ctx" {"wire" "hub"
+              "peer" "peer-a"}}
+      {"peer" "peer-b"
+       "text" "ping"
+       "ctx" {"wire" "hub"
+              "peer" "peer-b"}}])
+
+^{:refer xt.substrate.transport-memory/memory-endpoint :added "4.1"}
+(fact "writes to its peer listener and clears the listener on stop"
+  (notify/wait-on :js
+    (var seen [])
+    (var peer {"id" "peer"
+               "listener" (fn [event ctx]
+                            (xt/x:arr-push seen {"text" (transport-memory/event-text event)
+                                                 "ctx" ctx})
+                            (return true))})
+    (var state {"id" "host"
+                "listener" nil
+                "peer" peer})
+    (var endpoint (transport-memory/memory-endpoint state))
+    ((. endpoint ["start_fn"]) (fn [event ctx] event))
+    ((. endpoint ["write_fn"]) "pong")
+    ((. endpoint ["stop_fn"]) nil)
+    (repl/notify
+     {"seen" seen
+      "listener" (. state ["listener"])}))
+  => {"seen" [{"text" "pong"
+               "ctx" {"wire" "host"
+                      "peer" "peer"}}]
+      "listener" nil})
+
+^{:refer xt.substrate.transport-memory/memory-pair :added "4.1"}
+(fact "creates a bidirectional in-memory pair with configured ids"
+  (notify/wait-on :js
+    (var pair (transport-memory/memory-pair {"left_id" "host"
+                                             "right_id" "peer"}))
+    (var seen [])
+    ((. (. pair ["right"]) ["start_fn"])
+     (fn [event ctx]
+       (xt/x:arr-push seen {"text" (transport-memory/event-text event)
+                            "ctx" ctx})
+       (return true)))
+    ((. (. pair ["left"]) ["write_fn"]) "hello")
+    (repl/notify
+     {"left" (. (. pair ["left"]) ["meta"] ["id"])
+      "right" (. (. pair ["right"]) ["meta"] ["id"])
+      "seen" seen}))
+  => {"left" "host"
+      "right" "peer"
+      "seen" [{"text" "hello"
+               "ctx" {"wire" "host"
+                      "peer" "peer"}}]})

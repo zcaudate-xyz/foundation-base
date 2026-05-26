@@ -156,6 +156,81 @@
                           "service_role"
                           "anon")])
 
+(defn request-event
+  "Returns the canonical xt.db event name for an xt.db request."
+  {:added "4.1.4"}
+  [request]
+  (cond (contains? request "db/sync")
+        "db/sync"
+
+        (contains? request "db/remove")
+        "db/remove"
+
+        :else
+        nil))
+
+(defn resolve-literal
+  "Resolves literal data carried directly or via a bound var."
+  {:added "4.1.4"}
+  [form]
+  (cond (or (map? form)
+            (vector? form)
+            (string? form)
+            (number? form)
+            (boolean? form)
+            (nil? form))
+        form
+
+        (symbol? form)
+        (let [v (resolve form)]
+          (if (and v
+                   (bound? v))
+            @v
+            form))
+
+        :else
+        form))
+
+(defn normalize-realtime-payload
+  "Normalizes literal map payloads into postgres jsonb forms."
+  {:added "4.1.4"}
+  [payload]
+  (let [payload (resolve-literal payload)]
+    (if (map? payload)
+      (with-meta payload (assoc (meta payload) :js true))
+      payload)))
+
+(defmacro.pg
+  realtime-send
+  "calls Supabase realtime.send with payload, event, topic, and privacy flag"
+  {:added "4.1.4"}
+  ([topic event payload]
+   `(s/realtime-send ~topic ~event ~payload false))
+  ([topic event payload private?]
+   (list 'realtime.send
+         (normalize-realtime-payload payload)
+         event
+         topic
+         private?)))
+
+(defmacro.pg
+  realtime-send-request
+  "broadcasts a native xt.db request through Supabase realtime.send"
+  {:added "4.1.4"}
+  ([topic request]
+   `(s/realtime-send-request ~topic ~request false))
+  ([topic request private?]
+   (let [request (resolve-literal request)
+         event (request-event request)]
+     (when-not event
+       (f/error "Unsupported xt.db realtime request"
+                {:request request}))
+     (list 'realtime.send
+           (normalize-realtime-payload request)
+           event
+           topic
+           private?))))
+
 (defn process-return
   "processes the return value"
   {:added "4.0"}

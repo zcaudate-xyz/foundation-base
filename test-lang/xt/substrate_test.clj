@@ -929,3 +929,119 @@
   (s/seedgen-benchadd '[xt.substrate] {:lang :dart :write true})
   (s/seedgen-langremove '[xt.substrate] {:lang [:lua :python] :write true})
   (s/seedgen-langadd '[xt.substrate] {:lang [:lua :python] :write true}))
+
+
+^{:refer xt.substrate/config-space-opts :added "4.1"}
+(fact "normalizes declarative space config and rejects mismatched ids"
+  (!.js
+   (do:>
+    (var thrown false)
+    (try
+      (main/config-space-opts "room/a" {"id" "room/b"})
+      (catch err
+        (:= thrown true)))
+    (return
+     [(main/config-space-opts "room/a" nil)
+      (main/config-space-opts "room/a" {"id" "room/a"
+                                        "state" {"count" 1}
+                                        "meta" {"role" "alpha"}})
+      thrown])))
+  => [nil
+      {"state" {"count" 1}
+       "meta" {"role" "alpha"}}
+      true])
+
+^{:refer xt.substrate/config-handler-entry :added "4.1"}
+(fact "normalizes handler config from fn or declarative entry"
+  (!.js
+   (do:>
+    (var handler-fn (fn [space args request node]
+                     (return args)))
+    (var thrown false)
+    (try
+     (main/config-handler-entry "ping" {"id" "pong"
+                                        "fn" handler-fn})
+     (catch err
+       (:= thrown true)))
+    (return
+     [(xt/x:is-function? (:? true (xt/x:get-key (main/config-handler-entry "ping" handler-fn) "fn")))
+     (. (main/config-handler-entry "ping" {"fn" handler-fn
+                                           "meta" {"kind" "request"}}) ["meta"])
+     thrown])))
+  => [true
+     {"kind" "request"}
+     true])
+
+^{:refer xt.substrate/config-trigger-entry :added "4.1"}
+(fact "normalizes trigger config from fn or declarative entry"
+  (!.js
+   (do:>
+    (var trigger-fn (fn [space stream node]
+                     (return stream)))
+    (var thrown false)
+    (try
+     (main/config-trigger-entry "event/ping" {"id" "event/pong"
+                                              "fn" trigger-fn})
+     (catch err
+       (:= thrown true)))
+    (return
+     [(xt/x:is-function? (:? true (xt/x:get-key (main/config-trigger-entry "event/ping" trigger-fn) "fn")))
+     (. (main/config-trigger-entry "event/ping" {"fn" trigger-fn
+                                                 "meta" {"kind" "stream"}}) ["meta"])
+     thrown])))
+  => [true
+     {"kind" "stream"}
+     true])
+
+^{:refer xt.substrate/node-base-opts :added "4.1"}
+(fact "strips declarative config keys before node construction"
+  (!.js
+   (main/node-base-opts {"id" "node-a"
+                         "meta" {"cluster" "local"}
+                         "spaces" {"room/a" {}}
+                         "handlers" {"ping" true}
+                         "triggers" {"event/ping" true}
+                         "custom" 42}))
+  => {"id" "node-a"
+      "meta" {"cluster" "local"}
+      "custom" 42})
+
+^{:refer xt.substrate/await-pending :added "4.1"}
+(fact "waits for pending states to resolve or reject"
+  (notify/wait-on :js
+    (var state {"status" "pending"
+                "value" nil
+                "error" nil})
+    (setTimeout
+     (fn []
+       (xt/x:set-key state "status" "resolved")
+       (xt/x:set-key state "value" {"ok" true}))
+     20)
+    (promise/x:promise-then
+     (main/await-pending state)
+     (fn [value]
+       (return
+        (promise/x:promise-catch
+         (main/await-pending {"status" "rejected"
+                              "error" "denied"})
+         (fn [err]
+           (repl/notify {"value" value
+                         "error" err})))))))
+  => {"value" {"ok" true}
+      "error" "denied"})
+
+^{:refer xt.substrate/request-context :added "4.1"}
+(fact "merges transport context into request meta"
+  (!.js
+   [(main/request-context
+     {"kind" "request"
+      "meta" {"trace" "a"}}
+     {"transport_id" "peer-a"})
+    (main/request-context
+     {"kind" "request"}
+     {"transport_id" "peer-b"})])
+  => [{"kind" "request"
+       "meta" {"trace" "a"
+               "transport_id" "peer-a"}}
+      {"kind" "request"
+       "meta" {"transport_id" "peer-b"}}])
