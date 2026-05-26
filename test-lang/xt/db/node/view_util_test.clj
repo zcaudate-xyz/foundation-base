@@ -29,3 +29,31 @@
     (util/set-node-opts node {"auto_refresh" false})
     (xtd/get-in node ["meta" "xt.db"]))
   => {"auto_refresh" false})
+
+
+^{:refer xt.db.node.view-util/state? :added "4.1"}
+(fact "checks for xt.db state records"
+
+  (!.js
+    [(util/state? {"::" "xt.db.state"})
+     (util/state? {"::" "other.state"})
+     (util/state? nil)])
+  => [true false false])
+
+^{:refer xt.db.node.view-util/request-payload :added "4.1"}
+(fact "returns the first request payload or an empty map"
+
+  (!.js
+    [(util/request-payload [{"action" "query"} {"action" "other"}])
+     (util/request-payload [])
+     (util/request-payload nil)])
+  => [{"action" "query"} {} {}])
+
+^{:refer xt.db.node.view-util/response-value :added "4.1"}
+(fact "extracts response values when wrapped"
+
+  (!.js
+    [(util/response-value {"value" {"rows" [1 2]}})
+     (util/response-value {"status" "ok"})
+     (util/response-value nil)])
+  => [{"rows" [1 2]} {"status" "ok"} nil])

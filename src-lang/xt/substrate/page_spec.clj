@@ -104,6 +104,12 @@
   (return (or (xt/x:get-key resolver "meta")
               {})))
 
+(defn.xt resolver-api-template
+  "gets the api template reference or inline template for an api resolver"
+  {:added "4.1"}
+  [resolver]
+  (return (xt/x:get-key resolver "api_template")))
+
 (defn.xt resolver-args
   "gets args for a resolver using snake_case keys"
   {:added "4.1"}

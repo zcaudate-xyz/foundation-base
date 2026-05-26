@@ -90,6 +90,62 @@
   [resolver]
   (return (page-spec/resolver-fn resolver)))
 
+(defn.xt node-api-templates
+  "gets named api templates registered on the node"
+  {:added "4.1"}
+  [node]
+  (return (or (xtd/get-in node ["meta" "api_templates"])
+              {})))
+
+(defn.xt default-api-template
+  "gets the default api template registered on the node"
+  {:added "4.1"}
+  [node]
+  (var raw (xtd/get-in node ["meta" "api_template"]))
+  (cond (xt/x:nil? raw)
+        (return (or (xtd/get-in node ["meta" "api_templates" "default"])
+                    {}))
+
+        (xt/x:is-object? raw)
+        (return raw)
+
+        (xt/x:is-string? raw)
+        (return (or (xt/x:get-key (-/node-api-templates node) raw)
+                    {}))
+
+        :else
+        (return {})))
+
+(defn.xt merge-api-template
+  "merges a resolver with its configured or default api template"
+  {:added "4.1"}
+  [resolver ctx]
+  (var raw (page-spec/resolver-api-template resolver))
+  (var node (xt/x:get-key ctx "node"))
+  (var template nil)
+  (cond (xt/x:nil? raw)
+        (:= template (-/default-api-template node))
+
+        (xt/x:is-object? raw)
+        (:= template raw)
+
+        (xt/x:is-string? raw)
+        (do
+          (:= template (xt/x:get-key (-/node-api-templates node) raw))
+          (when (xt/x:nil? template)
+            (return {"status" "error"
+                     "tag" "substrate.page/api-template-not-found"
+                     "data" {"api_template" raw}})))
+
+        :else
+        (return {"status" "error"
+                 "tag" "substrate.page/api-template-invalid"
+                 "data" {"api_template" raw}}))
+  (var merged (xtd/clone-nested (or template {})))
+  (xtd/obj-assign-nested merged resolver)
+  (xt/x:del-key merged "api_template")
+  (return merged))
+
 (defn.xt apply-pre-trigger
   "applies a resolver pre trigger to a context"
   {:added "4.1"}
@@ -130,6 +186,10 @@
   "runs an api resolver through substrate request"
   {:added "4.1"}
   [resolver ctx]
+  (:= resolver (-/merge-api-template resolver ctx))
+  (when (and (xt/x:is-object? resolver)
+             (== (xt/x:get-key resolver "status") "error"))
+    (return resolver))
   (var action (page-spec/resolver-action resolver))
   (when (xt/x:nil? action)
     (return {"status" "error"

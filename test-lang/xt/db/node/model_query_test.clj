@@ -47,3 +47,52 @@
      (. prepared ["context"] ["model_id"])
      (xt/x:is-object? (. prepared ["tables"]))])
   => [true "orders" true])
+
+
+^{:refer xt.db.node.model-query/payload-view-context :added "4.1"}
+(fact "merges top-level payload view context into the nested view payload"
+  (!.js
+    [(model-query/payload-view-context
+      {"view" {"model_id" "orders"}
+       "view_id" "detail"
+       "args" ["a"]})
+     (model-query/payload-view-context
+      {"model_id" "orders"
+       "view_id" "detail"
+       "input" ["a" "b"]})
+     (model-query/payload-view-context {})])
+  => [{"model_id" "orders"
+       "view_id" "detail"
+       "args" ["a"]}
+      {"model_id" "orders"
+       "view_id" "detail"
+       "args" ["a" "b"]}
+      {}])
+
+^{:refer xt.db.node.model-query/query-resolver :added "4.1"}
+(fact "prefers the nested resolver entry when present"
+  (!.js
+    [(model-query/query-resolver
+      {"resolver" {"type" "db/query"
+                   "table" "UserAccount"}})
+     (model-query/query-resolver
+      {"type" "db/query"
+       "table" "UserAccount"})])
+  => [{"type" "db/query"
+       "table" "UserAccount"}
+      {"type" "db/query"
+       "table" "UserAccount"}])
+
+^{:refer xt.db.node.model-query/resolver-triggers :added "4.1"}
+(fact "collects dependent tables for a db/query resolver"
+  (!.js
+    (var out
+         (model-query/resolver-triggers
+          (schema-state/base-state {"schema" sample/Schema
+                                    "views" (@! +views+)})
+          {"table" "UserAccount"
+           "select_method" "by_organisation"
+           "return_method" "info"}))
+    [(. out ["OrganisationAccess"])
+     (. out ["UserAccount"])])
+  => [true true])

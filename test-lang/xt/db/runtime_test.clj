@@ -332,4 +332,19 @@
 
 
 ^{:refer xt.db.runtime/db-pull :added "4.1"}
-(fact "TODO")
+(fact "propagates unsupported pull backends through the async wrapper"
+
+  (notify/wait-on :js
+    (promise/x:promise-catch
+     (instance/db-pull
+      {"::" "db.void"
+       :instance {}
+       :opts {}}
+      sample/Schema
+      ["UserAccount" ["nickname"]])
+     (fn [err]
+       (repl/notify
+        [(xtd/get-in err ["tag"])
+         (xtd/get-in err ["data" "op"])
+         (xtd/get-in err ["data" "dbtype"])]))))
+  => ["db/op-not-available" "pull_sync" "db.void"])
