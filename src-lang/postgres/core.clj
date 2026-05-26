@@ -1,6 +1,6 @@
 (ns postgres.core
   (:require [hara.model.spec-postgres.gen-bind]
-            [hara.model.spec-postgres.entity :as entity]
+            [postgres.entity :as entity]
             [hara.runtime.postgres.base.application :as app]
             [postgres.core.addon]
             [postgres.core.builtin]

@@ -1,4 +1,4 @@
-(ns hara.model.spec-postgres.entity
+(ns postgres.entity
   (:require [clojure.set :as set]
             [clojure.string :as str]
             [hara.model.spec-postgres.entity-util :as ut]
