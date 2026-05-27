@@ -1,14 +1,13 @@
 (ns postgres.core.supabase
   (:require [clojure.string]
-            [net.http :as http]
             [hara.model.spec-postgres.common :as common]
+            [lib.supabase :as supabase]
             [postgres.core.addon :as addon]
-            [std.json :as json]
             [hara.lang :as l]
             [hara.lang.impl :as impl]
             [std.lib.context.pointer :as ptr]
             [std.lib.foundation :as f]
-            [std.string.case :as case]))
+            [std.json :as json]))
 
 (l/script :postgres
   {:macro-only true})
@@ -501,144 +500,11 @@
 ;; api calls
 ;;
 
-(defn api-call
-  "calls an api"
-  {:added "4.0"}
-  [{:keys [key
-           host
-           route
-           method
-           type
-           headers
-           auth]
-    :or {host (System/getenv "DEFAULT_SUPABASE_API_ENDPOINT")
-         method :post
-         type :anon}}
-   body]
-  (let [key (or key
-                (case type
-                  :anon (System/getenv "DEFAULT_SUPABASE_API_KEY_ANON")
-                  :service (System/getenv "DEFAULT_SUPABASE_API_KEY_SERVICE")
-                  :public ""))
-        headers-default (case type
-          :public {"Content-Type" "application/json"}
-                          {"apikey" key
-                           "Authorization" (str "Bearer " (or auth key))
-                           "Content-Type" "application/json"})
-         headers (merge
-                  headers-default
-                  headers)
-         call-fn (case method
-                   :delete http/delete
-                   :get http/get
-                   :post http/post)
-         request {:host host
-                  :route route
-                  :method method
-                  :type type}]
-    (when (and (not= type :public)
-               (not (get headers "apikey")))
-      (f/error "Supabase API key not configured"
-               (assoc request
-                      :env (case type
-                             :anon "DEFAULT_SUPABASE_API_KEY_ANON"
-                             :service "DEFAULT_SUPABASE_API_KEY_SERVICE"
-                             nil))))
-    (let [response (-> (call-fn (str host route)
-                                {:headers headers
-                                 :body   (std.json/write body)})
-                       (update :body #(if (string? %)
-                                        (json/read %)
-                                        %))
-                       (select-keys [:status :body]))]
-      (when (and (:status response)
-                 (<= 400 (:status response)))
-        (f/error "Supabase API request failed"
-                 (merge request response)))
-      response)))
-
-(defn api-rpc
-  "calls the rpc"
-  {:added "4.0"}
-  [{:keys [fn
-           args]
-    :as opts}]
-  (let [{:keys [id]
-         :static/keys [schema]} (deref fn)
-        headers (if schema
-                  {"Content-Profile" schema})
-        route  (str "/rest/v1/rpc/" (case/snake-case (str id)))
-        opts (merge opts
-                    {:headers headers
-                     :route route})]
-    (api-call opts args)))
-
-(defn api-select-all
-  "does a select all call"
-  {:added "4.0"}
-  [table & [opts]]
-  (let [{:keys [id]
-         :static/keys [schema]} (deref table)
-        headers (if schema
-                  {"Content-Profile" schema})
-        route  (str "/rest/v1/" id "?select=*")
-        opts (merge opts
-                    {:method :get
-                     :headers headers
-                     :route route})]
-    (api-call opts {})))
-
-(defn api-signup
-  "sign up via supabase api"
-  {:added "4.0"}
-  [{:keys [email
-           password]
-    :as body}
-   & [opts]]
-  (api-call (merge opts
-                   {:route "/auth/v1/signup"})
-            body))
-
-(defn api-signin
-  "sign in via supabase api"
-  {:added "4.0"}
-  [{:keys [email
-           password]
-    :as body}
-   & [opts]]
-  (api-call (merge opts
-                   {:route "/auth/v1/token?grant_type=password"})
-            body))
-
-(defn api-signup-create
-  "create user via supabase api"
-  {:added "4.0"}
-  [{:keys [email
-           password
-           user-metadata]
-    :as body}
-   & [opts]]
-  (api-call (merge opts
-                   {:route "/auth/v1/admin/users"
-                    :type :service})
-            body))
-
-(defn api-signup-delete
-  "remove user via supabase api"
-  {:added "4.0"}
-  [uid & [opts]]
-  (api-call (merge opts
-                   {:method :delete
-                    :type :service
-                    :route (str "/auth/v1/admin/users/" uid)})
-            {}))
-
-(defn api-impersonate
-  "inpersonates a user"
-  {:added "4.0"}
-  [uid
-   & [opts]]
-  (api-call (merge opts
-                   {:route "/auth/v1/token?grant_type=impersonate"
-                    :type :service})
-            {:user-id uid}))
+(def ^{:added "4.0"} api-call supabase/api-call)
+(def ^{:added "4.0"} api-rpc supabase/api-rpc)
+(def ^{:added "4.0"} api-select-all supabase/api-select-all)
+(def ^{:added "4.0"} api-signup supabase/api-signup)
+(def ^{:added "4.0"} api-signin supabase/api-signin)
+(def ^{:added "4.0"} api-signup-create supabase/api-signup-create)
+(def ^{:added "4.0"} api-signup-delete supabase/api-signup-delete)
+(def ^{:added "4.0"} api-impersonate supabase/api-impersonate)

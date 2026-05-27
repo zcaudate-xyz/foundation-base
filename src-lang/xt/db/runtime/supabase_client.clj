@@ -3,7 +3,7 @@
 
 (l/script :xtalk
   {:require [[xt.db.text.pgrest :as pgrest]
-             [xt.lang.common-string :as str]
+             [xt.lib.supabase :as supabase]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.protocol.client-fetch :as fetch-if]
@@ -12,40 +12,22 @@
 (defn.xt client?
   {:added "4.1.3"}
   [obj]
-  (return (and (fetch/client? obj)
-               (== "supabase.client"
-                   (xt/x:get-key (xt/x:get-key obj "_raw")
-                                 "::supabase")))))
+  (return (supabase/client? obj)))
 
 (defn.xt raw-client
   {:added "4.1.3"}
   [client]
-  (if (fetch/client? client)
-    (return (or (xt/x:get-key client "_raw") {}))
-    (return (or client {}))))
+  (return (supabase/raw-client client)))
 
 (defn.xt resolve-transport
   {:added "4.1.3"}
   [client]
-  (var raw_client (-/raw-client client))
-  (var transport-source (xt/x:get-key raw_client "transport"))
-  (when (and (xt/x:nil? transport-source)
-             (or (xt/x:is-function? (xt/x:get-key raw_client "request"))
-                 (xt/x:is-function? (xt/x:get-key raw_client "fetch"))))
-    (:= transport-source raw_client))
-  (when (xt/x:nil? transport-source)
-    (xt/x:err "Supabase client missing transport"))
-  (if (fetch/client? transport-source)
-    (return transport-source)
-    (return (fetch/client-create transport-source nil))))
+  (return (supabase/resolve-transport client)))
 
 (defn.xt resolve-base-url
   {:added "4.1.3"}
   [db client opts]
-  (var raw_client (-/raw-client client))
-  (return (or (xt/x:get-key raw_client "base_url")
-              (xt/x:get-key opts "base_url")
-              nil)))
+  (return (supabase/resolve-base-url db client opts)))
 
 (defn.xt resolve-schema-name
   {:added "4.1.3"}
@@ -58,51 +40,24 @@
 (defn.xt resolve-api-key
   {:added "4.1.3"}
   [db client opts]
-  (var raw_client (-/raw-client client))
-  (return (or (xt/x:get-key raw_client "api_key")
-              (xt/x:get-key opts "api_key")
-              nil)))
+  (return (supabase/resolve-api-key db client opts)))
 
 (defn.xt resolve-auth-token
   {:added "4.1.3"}
   [db client opts]
-  (var raw_client (-/raw-client client))
-  (return (or (xt/x:get-key raw_client "auth_token")
-              (xt/x:get-key opts "auth_token")
-              nil)))
+  (return (supabase/resolve-auth-token db client opts)))
 
 (defn.xt create-scaffold
   {:added "4.1.3"}
   [db client opts]
-  (var raw_client (-/raw-client client))
-  (var headers (fetch-if/merge-headers
-                (xt/x:get-key raw_client "headers")
-                (xt/x:get-key opts "headers")))
-  (return {"client" client
-           "base_url" (-/resolve-base-url db client opts)
-           "schema_name" (-/resolve-schema-name db client opts)
-           "api_key" (-/resolve-api-key db client opts)
-           "auth_token" (-/resolve-auth-token db client opts)
-           "headers" headers}))
+  (var scaffold (supabase/create-scaffold db client opts))
+  (xt/x:set-key scaffold "schema_name" (-/resolve-schema-name db client opts))
+  (return scaffold))
 
 (defn.xt join-url
   {:added "4.1.3"}
   [base_url path]
-  (cond (or (xt/x:nil? base_url)
-            (not (xt/x:is-string? base_url)))
-        (return path)
-
-        (and (str/ends-with? base_url "/")
-             (str/starts-with? path "/"))
-        (return (xt/x:cat base_url
-                          (xt/x:str-substring path 1)))
-
-        (and (not (str/ends-with? base_url "/"))
-             (not (str/starts-with? path "/")))
-        (return (xt/x:cat base_url "/" path))
-
-        :else
-        (return (xt/x:cat base_url path))))
+  (return (supabase/join-url base_url path)))
 
 (defn.xt resolve-request-headers
   {:added "4.1.3"}
@@ -197,7 +152,7 @@
                   nil))
   (when (xt/x:nil? source)
     (xt/x:err "Supabase pull missing client"))
-  (if (-/client? source)
+  (if (supabase/client? source)
     (return source)
     (return (-/client source))))
 
